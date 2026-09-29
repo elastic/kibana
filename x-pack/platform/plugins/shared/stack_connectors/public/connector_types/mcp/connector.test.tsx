@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,8 +15,8 @@ import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { useSecretHeaders } from '../../common/auth/use_secret_headers';
 
-jest.mock('../../common/auth/use_secret_headers');
-const useSecretHeadersMock = useSecretHeaders as jest.Mock;
+vi.mock('../../common/auth/use_secret_headers');
+const useSecretHeadersMock = useSecretHeaders as Mock;
 
 const baseConnector = {
   actionTypeId: '.mcp',
@@ -28,7 +31,7 @@ const baseConnector = {
 
 describe('MCP ConnectorFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
   });
 
@@ -90,10 +93,10 @@ describe('MCP ConnectorFields', () => {
   });
 
   describe('validation', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should fail when serverUrl is empty', async () => {

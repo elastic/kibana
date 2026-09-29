@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 import type { Dispatch } from 'redux-v4';
@@ -34,35 +37,44 @@ import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 
-jest.mock('../../../../containers', () => ({
-  useTimelineEvents: jest.fn(),
-}));
-jest.mock('../../../../containers/details', () => ({
-  useTimelineEventsDetails: jest.fn(),
-}));
-jest.mock('../../../fields_browser', () => ({
-  useFieldBrowserOptions: jest.fn(),
-}));
+vi.mock('../../../../containers', () => {
+      const mocked = {
+      useTimelineEvents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../containers/details', () => {
+      const mocked = {
+      useTimelineEventsDetails: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../fields_browser', () => {
+      const mocked = {
+      useFieldBrowserOptions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/components/user_privileges');
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../../../../flyout_v2/use_flyout_api');
+vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
 
-jest.mock('../../../../../common/hooks/use_experimental_features');
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+vi.mock('../../../../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as Mock;
 
-const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer/polyfilled');
+const mockUseResizeObserver: Mock = useResizeObserver as Mock;
+vi.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
-jest.mock('../../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana', async () => {
+  const originalModule = (await vi.importActual('../../../../../common/lib/kibana'));
   return {
     ...originalModule,
-    useKibana: jest.fn(),
-    useGetUserSavedObjectPermissions: jest.fn(),
+    useKibana: vi.fn(),
+    useGetUserSavedObjectPermissions: vi.fn(),
   };
 });
 
@@ -70,7 +82,7 @@ const kibanaMockResult = {
   services: createStartServicesMock(),
 };
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
 describe('PinnedTabContent', () => {
   let props = {} as PinnedTabContentComponentProps;
@@ -93,9 +105,9 @@ describe('PinnedTabContent', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
+    HTMLElement.prototype.getBoundingClientRect = vi.fn(() => {
       return {
         width: 1000,
         height: 1000,
@@ -104,7 +116,7 @@ describe('PinnedTabContent', () => {
       } as DOMRect;
     });
 
-    (useTimelineEvents as jest.Mock).mockReturnValue([
+    (useTimelineEvents as Mock).mockReturnValue([
       false,
       {
         events: mockTimelineData.slice(0, 1),
@@ -118,23 +130,23 @@ describe('PinnedTabContent', () => {
         timedOut: false,
       },
     ]);
-    (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
+    (useTimelineEventsDetails as Mock).mockReturnValue([false, {}]);
 
-    (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
+    (useIsExperimentalFeatureEnabledMock as Mock).mockImplementation(
       (feature: keyof ExperimentalFeatures) => {
         return allowedExperimentalValues[feature];
       }
     );
 
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       notesPrivileges: { read: true },
       timelinePrivileges: { crud: true, read: true },
     });
 
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(createExpandableFlyoutApiMock());
-    jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(createExpandableFlyoutApiMock());
+    vi.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
 
     useKibanaMock.mockReturnValue(kibanaMockResult);
 

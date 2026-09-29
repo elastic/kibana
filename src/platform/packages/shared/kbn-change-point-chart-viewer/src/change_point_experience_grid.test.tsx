@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import {
@@ -17,35 +19,50 @@ import { ChangePointExperienceGrid } from './change_point_experience_grid';
 import type { UnifiedChangePointGridProps } from './types';
 
 // The APM client is pulled in transitively by the error boundary package.
-jest.mock('@elastic/apm-rum');
+vi.mock('@elastic/apm-rum');
 
-jest.mock('@kbn/unified-histogram', () => ({
-  // Render children directly so we can test the grid content in isolation.
-  ChartSectionTemplate: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('@kbn/unified-histogram', () => {
+      const mocked = {
+      // Render children directly so we can test the grid content in isolation.
+      ChartSectionTemplate: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-utils', () => ({
-  getChangePointSeriesColumns: jest.fn().mockReturnValue(undefined),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getChangePointSeriesColumns: vi.fn().mockReturnValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./utils/derive_change_point_cards', () => ({
-  buildChangePointCards: jest.fn().mockReturnValue([]),
-}));
+vi.mock('./utils/derive_change_point_cards', () => {
+      const mocked = {
+      buildChangePointCards: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./utils/get_esql_query', () => ({
-  getEsqlQuery: jest.fn().mockReturnValue('FROM logs-* | CHANGE_POINT count ON @timestamp'),
-}));
+vi.mock('./utils/get_esql_query', () => {
+      const mocked = {
+      getEsqlQuery: vi.fn().mockReturnValue('FROM logs-* | CHANGE_POINT count ON @timestamp'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Stub out ChangePointExperienceGridContent so happy-path tests don't need Lens.
-jest.mock('./change_point_experience_grid_content', () => ({
-  ChangePointExperienceGridContent: () => (
-    <div data-test-subj="changePointExperienceGridContent">grid content stub</div>
-  ),
-}));
+vi.mock('./change_point_experience_grid_content', () => {
+      const mocked = {
+      ChangePointExperienceGridContent: () => (
+        <div data-test-subj="changePointExperienceGridContent">grid content stub</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Render EuiDelayRender children immediately to avoid timer flakiness in loading tests.
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiDelayRender: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
@@ -102,12 +119,12 @@ const renderWithBoundary = (props = minimalProps) =>
 describe('ChangePointExperienceGrid error boundary integration', () => {
   beforeEach(() => {
     // Suppress the expected React error-boundary console output so test output stays clean.
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
-  afterEach(() => {
-    jest.restoreAllMocks();
-    jest.requireMock('./utils/derive_change_point_cards').buildChangePointCards.mockReturnValue([]);
+  afterEach(async () => {
+    vi.restoreAllMocks();
+    (await vi.importMock('./utils/derive_change_point_cards')).buildChangePointCards.mockReturnValue([]);
   });
 
   it('renders the grid without errors under normal conditions', () => {
@@ -119,11 +136,10 @@ describe('ChangePointExperienceGrid error boundary integration', () => {
     expect(container.firstChild).not.toBeNull();
   });
 
-  it('shows the section error boundary UI instead of crashing when buildChangePointCards throws', () => {
+  it('shows the section error boundary UI instead of crashing when buildChangePointCards throws', async () => {
     // Simulate the kind of synchronous render-time crash the error boundary is there to catch
     // (e.g. malformed data, unexpected null reference inside a memoised helper).
-    jest
-      .requireMock('./utils/derive_change_point_cards')
+    (await vi.importMock('./utils/derive_change_point_cards'))
       .buildChangePointCards.mockImplementation(() => {
         throw new Error('Simulated crash in buildChangePointCards');
       });
@@ -139,10 +155,10 @@ describe('ChangePointExperienceGrid error boundary integration', () => {
 
 describe('ChangePointExperienceGrid UI states', () => {
   const { buildChangePointCards, getChangePointSeriesColumns } = {
-    buildChangePointCards: () =>
-      jest.requireMock('./utils/derive_change_point_cards').buildChangePointCards,
-    getChangePointSeriesColumns: () =>
-      jest.requireMock('@kbn/esql-utils').getChangePointSeriesColumns,
+    buildChangePointCards: async () =>
+      (await vi.importMock('./utils/derive_change_point_cards')).buildChangePointCards,
+    getChangePointSeriesColumns: async () =>
+      (await vi.importMock('@kbn/esql-utils')).getChangePointSeriesColumns,
   };
 
   afterEach(() => {

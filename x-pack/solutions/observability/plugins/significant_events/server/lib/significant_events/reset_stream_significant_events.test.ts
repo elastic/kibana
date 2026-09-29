@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -19,21 +22,21 @@ describe('resetSignificantEvents', () => {
   const logger = loggerMock.create();
   const request = httpServerMock.createKibanaRequest();
   let esClient: ElasticsearchClient;
-  let deleteLegacyRules: jest.MockedFunction<(ruleIds: string[]) => Promise<void>>;
+  let deleteLegacyRules: MockedFunction<(ruleIds: string[]) => Promise<void>>;
 
   beforeEach(() => {
     esClient = {
-      deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+      deleteByQuery: vi.fn().mockResolvedValue({ deleted: 0 }),
     } as unknown as ElasticsearchClient;
-    deleteLegacyRules = jest.fn().mockResolvedValue(undefined);
+    deleteLegacyRules = vi.fn().mockResolvedValue(undefined);
   });
 
   it('cancels onboarding, deletes KIs and rules per stream, then wipes v1 alerts', async () => {
     const kiClient = {
-      getStreamNamesWithKnowledgeIndicators: jest
+      getStreamNamesWithKnowledgeIndicators: vi
         .fn()
         .mockResolvedValue(['logs.nginx', 'logs.apache']),
-      getStreamToQueryLinksMap: jest.fn().mockImplementation(async (names: string[]) => {
+      getStreamToQueryLinksMap: vi.fn().mockImplementation(async (names: string[]) => {
         const streamName = names[0];
         if (streamName === 'logs.nginx') {
           return {
@@ -49,16 +52,16 @@ describe('resetSignificantEvents', () => {
         }
         return { [streamName]: [] };
       }),
-      getFeatures: jest.fn().mockResolvedValue({ hits: [{ id: 'f-1' }] }),
-      deleteAllQueries: jest.fn().mockResolvedValue(undefined),
-      deleteIndicators: jest.fn().mockResolvedValue(undefined),
+      getFeatures: vi.fn().mockResolvedValue({ hits: [{ id: 'f-1' }] }),
+      deleteAllQueries: vi.fn().mockResolvedValue(undefined),
+      deleteIndicators: vi.fn().mockResolvedValue(undefined),
     } as unknown as KnowledgeIndicatorClient;
 
     const streamsKIsOnboardingClient = {
-      cancelAllRunning: jest.fn().mockResolvedValue(2),
+      cancelAllRunning: vi.fn().mockResolvedValue(2),
     } as unknown as SignificantEventsKIsOnboardingClient;
 
-    (esClient.deleteByQuery as jest.Mock).mockResolvedValueOnce({ deleted: 9 });
+    (esClient.deleteByQuery as Mock).mockResolvedValueOnce({ deleted: 9 });
 
     const result = await resetSignificantEvents({
       kiClient,
@@ -119,8 +122,8 @@ describe('resetSignificantEvents', () => {
 
   it('preserves KI links when legacy rule cleanup fails so the reset can be retried', async () => {
     const kiClient = {
-      getStreamNamesWithKnowledgeIndicators: jest.fn().mockResolvedValue(['logs.nginx']),
-      getStreamToQueryLinksMap: jest.fn().mockResolvedValue({
+      getStreamNamesWithKnowledgeIndicators: vi.fn().mockResolvedValue(['logs.nginx']),
+      getStreamToQueryLinksMap: vi.fn().mockResolvedValue({
         'logs.nginx': [
           {
             stream_name: 'logs.nginx',
@@ -130,12 +133,12 @@ describe('resetSignificantEvents', () => {
           },
         ],
       }),
-      getFeatures: jest.fn().mockResolvedValue({ hits: [] }),
-      deleteAllQueries: jest.fn(),
-      deleteIndicators: jest.fn(),
+      getFeatures: vi.fn().mockResolvedValue({ hits: [] }),
+      deleteAllQueries: vi.fn(),
+      deleteIndicators: vi.fn(),
     } as unknown as KnowledgeIndicatorClient;
     const streamsKIsOnboardingClient = {
-      cancelAllRunning: jest.fn().mockResolvedValue(0),
+      cancelAllRunning: vi.fn().mockResolvedValue(0),
     } as unknown as SignificantEventsKIsOnboardingClient;
     deleteLegacyRules.mockRejectedValue(new Error('legacy cleanup failed'));
 
@@ -157,11 +160,11 @@ describe('resetSignificantEvents', () => {
 
   it('still wipes v1 alerts when no knowledge indicators exist', async () => {
     const kiClient = {
-      getStreamNamesWithKnowledgeIndicators: jest.fn().mockResolvedValue([]),
+      getStreamNamesWithKnowledgeIndicators: vi.fn().mockResolvedValue([]),
     } as unknown as KnowledgeIndicatorClient;
 
     const streamsKIsOnboardingClient = {
-      cancelAllRunning: jest.fn().mockResolvedValue(0),
+      cancelAllRunning: vi.fn().mockResolvedValue(0),
     } as unknown as SignificantEventsKIsOnboardingClient;
 
     const result = await resetSignificantEvents({
@@ -181,11 +184,11 @@ describe('resetSignificantEvents', () => {
 
   it('wipes v1 alerts cluster-wide (all spaces, no kibana.space_ids filter) by design', async () => {
     const kiClient = {
-      getStreamNamesWithKnowledgeIndicators: jest.fn().mockResolvedValue([]),
+      getStreamNamesWithKnowledgeIndicators: vi.fn().mockResolvedValue([]),
     } as unknown as KnowledgeIndicatorClient;
 
     const streamsKIsOnboardingClient = {
-      cancelAllRunning: jest.fn().mockResolvedValue(0),
+      cancelAllRunning: vi.fn().mockResolvedValue(0),
     } as unknown as SignificantEventsKIsOnboardingClient;
 
     await resetSignificantEvents({
@@ -199,21 +202,21 @@ describe('resetSignificantEvents', () => {
 
     // The reset is a cluster-level v1 orphan cleanup tool: it must delete alerts
     // across every space, so the query is match_all with no `kibana.space_ids` scoping.
-    const [deleteArgs] = (esClient.deleteByQuery as jest.Mock).mock.calls[0];
+    const [deleteArgs] = (esClient.deleteByQuery as Mock).mock.calls[0];
     expect(deleteArgs.query).toEqual({ match_all: {} });
     expect(JSON.stringify(deleteArgs)).not.toContain('kibana.space_ids');
   });
 
   it('reports zero v1 alerts deleted when the alerts index is missing', async () => {
     const kiClient = {
-      getStreamNamesWithKnowledgeIndicators: jest.fn().mockResolvedValue([]),
+      getStreamNamesWithKnowledgeIndicators: vi.fn().mockResolvedValue([]),
     } as unknown as KnowledgeIndicatorClient;
 
     const streamsKIsOnboardingClient = {
-      cancelAllRunning: jest.fn().mockResolvedValue(0),
+      cancelAllRunning: vi.fn().mockResolvedValue(0),
     } as unknown as SignificantEventsKIsOnboardingClient;
 
-    (esClient.deleteByQuery as jest.Mock).mockResolvedValueOnce({});
+    (esClient.deleteByQuery as Mock).mockResolvedValueOnce({});
 
     const result = await resetSignificantEvents({
       kiClient,

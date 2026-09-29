@@ -7,17 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { ActionsMenu } from '.';
 import type { ActionGroups } from './types';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: jest.fn(),
-  useGeneratedHtmlId: jest.fn(),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiTheme: vi.fn(),
+      useGeneratedHtmlId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockActions: ActionGroups = [
   {
@@ -27,7 +33,7 @@ const mockActions: ActionGroups = [
         id: 'openInDiscover',
         name: 'Open in Discover',
         icon: 'discoverApp',
-        onClick: jest.fn(),
+        onClick: vi.fn(),
         ebt: { action: 'openInDiscover', element: 'menu' },
       },
     ],
@@ -45,7 +51,7 @@ const mockActions: ActionGroups = [
           {
             id: 'createLatencyRule',
             name: 'Latency',
-            onClick: jest.fn(),
+            onClick: vi.fn(),
             ebt: { action: 'createLatencyRule', element: 'menu' },
           },
         ],
@@ -53,7 +59,7 @@ const mockActions: ActionGroups = [
       {
         id: 'createAnomalyRule',
         name: 'Create anomaly rule',
-        onClick: jest.fn(),
+        onClick: vi.fn(),
         ebt: { action: 'createAnomalyRule', element: 'menu' },
       },
     ],
@@ -62,18 +68,18 @@ const mockActions: ActionGroups = [
 
 describe('ActionsMenu', () => {
   beforeEach(() => {
-    (useEuiTheme as jest.Mock).mockReturnValue({
+    (useEuiTheme as Mock).mockReturnValue({
       euiTheme: {
         colors: { textParagraph: '#333' },
         border: { thin: '1px solid #eee' },
         size: { m: '16px' },
       },
     });
-    (useGeneratedHtmlId as jest.Mock).mockReturnValue('test-menu-id');
+    (useGeneratedHtmlId as Mock).mockReturnValue('test-menu-id');
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderMenu = (props: Partial<React.ComponentProps<typeof ActionsMenu>> = {}) =>
@@ -112,7 +118,7 @@ describe('ActionsMenu', () => {
   });
 
   it('calls onClick and closes the popover when a direct action is clicked', async () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     const actions: ActionGroups = [
       {
         id: 'g1',
@@ -141,7 +147,7 @@ describe('ActionsMenu', () => {
   });
 
   it('calls sub-item onClick and closes the popover when a sub-item is clicked', async () => {
-    const subItemClick = jest.fn();
+    const subItemClick = vi.fn();
     const actions: ActionGroups = [
       {
         id: 'g1',

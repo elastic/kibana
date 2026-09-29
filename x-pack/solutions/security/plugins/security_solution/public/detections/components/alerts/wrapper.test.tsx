@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import {
@@ -18,16 +20,19 @@ import { TestProviders } from '../../../common/mock';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
-jest.mock('../../../common/hooks/use_experimental_features');
-jest.mock('./content', () => ({
-  AlertsPageContent: () => <div data-test-subj={'alerts-page-content'} />,
-}));
+vi.mock('../../../common/hooks/use_experimental_features');
+vi.mock('./content', () => {
+      const mocked = {
+      AlertsPageContent: () => <div data-test-subj={'alerts-page-content'} />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const dataView: DataView = createStubDataView({ spec: {} });
 
 describe('<Wrapper />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render a loading skeleton if the dataView status is pristine', async () => {
@@ -73,9 +78,9 @@ describe('<Wrapper />', () => {
   it('should render the content with a warning when the dataView is ready but has no indices', async () => {
     const degradedDataView = {
       ...dataView,
-      getIndexPattern: jest.fn().mockReturnValue('.alerts-security.alerts-default'),
-      getRuntimeMappings: jest.fn(),
-      hasMatchedIndices: jest.fn().mockReturnValue(false),
+      getIndexPattern: vi.fn().mockReturnValue('.alerts-security.alerts-default'),
+      getRuntimeMappings: vi.fn(),
+      hasMatchedIndices: vi.fn().mockReturnValue(false),
     } as unknown as DataView;
 
     render(
@@ -101,9 +106,9 @@ describe('<Wrapper />', () => {
     const validDataView = {
       ...dataView,
       id: 'id',
-      getIndexPattern: jest.fn().mockReturnValue('title'),
-      getRuntimeMappings: jest.fn(),
-      hasMatchedIndices: jest.fn().mockReturnValue(true),
+      getIndexPattern: vi.fn().mockReturnValue('title'),
+      getRuntimeMappings: vi.fn(),
+      hasMatchedIndices: vi.fn().mockReturnValue(true),
     } as unknown as DataView;
 
     render(

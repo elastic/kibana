@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -14,12 +16,12 @@ import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import type { RelationshipsProps } from './relationships';
 import { RelationshipsClass as Relationships } from './relationships';
 
-jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
-  fetchExportByTypeAndSearch: jest.fn(),
+vi.mock('../../../lib/fetch_export_by_type_and_search', () => ({
+  fetchExportByTypeAndSearch: vi.fn(),
 }));
 
-jest.mock('../../../lib/fetch_export_objects', () => ({
-  fetchExportObjects: jest.fn(),
+vi.mock('../../../lib/fetch_export_objects', () => ({
+  fetchExportObjects: vi.fn(),
 }));
 
 const baseProps = {
@@ -45,7 +47,7 @@ describe('Relationships', () => {
       goInspectObject: () => {},
       canGoInApp: () => true,
       basePath: httpServiceMock.createSetupContract().basePath,
-      getRelationships: jest.fn().mockImplementation(() => ({
+      getRelationships: vi.fn().mockImplementation(() => ({
         relations: [
           {
             type: 'search',
@@ -92,7 +94,7 @@ describe('Relationships', () => {
         },
       },
       allowedTypes,
-      close: jest.fn(),
+      close: vi.fn(),
     };
 
     const component = shallowWithI18nProvider(<Relationships {...baseProps} {...props} />);
@@ -114,7 +116,7 @@ describe('Relationships', () => {
       goInspectObject: () => {},
       canGoInApp: () => true,
       basePath: httpServiceMock.createSetupContract().basePath,
-      getRelationships: jest.fn().mockImplementation(() => ({
+      getRelationships: vi.fn().mockImplementation(() => ({
         relations: [
           {
             type: 'index-pattern',
@@ -161,7 +163,7 @@ describe('Relationships', () => {
         },
       },
       allowedTypes,
-      close: jest.fn(),
+      close: vi.fn(),
     };
 
     const component = shallowWithI18nProvider(<Relationships {...baseProps} {...props} />);
@@ -183,7 +185,7 @@ describe('Relationships', () => {
       goInspectObject: () => {},
       canGoInApp: () => true,
       basePath: httpServiceMock.createSetupContract().basePath,
-      getRelationships: jest.fn().mockImplementation(() => ({
+      getRelationships: vi.fn().mockImplementation(() => ({
         relations: [
           {
             type: 'dashboard',
@@ -229,7 +231,7 @@ describe('Relationships', () => {
         },
       },
       allowedTypes,
-      close: jest.fn(),
+      close: vi.fn(),
     };
 
     const component = shallowWithI18nProvider(<Relationships {...baseProps} {...props} />);
@@ -251,7 +253,7 @@ describe('Relationships', () => {
       goInspectObject: () => {},
       canGoInApp: () => true,
       basePath: httpServiceMock.createSetupContract().basePath,
-      getRelationships: jest.fn().mockImplementation(() => ({
+      getRelationships: vi.fn().mockImplementation(() => ({
         relations: [
           {
             type: 'visualization',
@@ -297,7 +299,7 @@ describe('Relationships', () => {
         },
       },
       allowedTypes,
-      close: jest.fn(),
+      close: vi.fn(),
       showPlainSpinner: true,
     };
 
@@ -320,7 +322,7 @@ describe('Relationships', () => {
       goInspectObject: () => {},
       canGoInApp: () => true,
       basePath: httpServiceMock.createSetupContract().basePath,
-      getRelationships: jest.fn().mockImplementation(() => {
+      getRelationships: vi.fn().mockImplementation(() => {
         throw new Error('foo');
       }),
       savedObject: {
@@ -338,7 +340,7 @@ describe('Relationships', () => {
         },
       },
       allowedTypes,
-      close: jest.fn(),
+      close: vi.fn(),
     };
 
     const component = shallowWithI18nProvider(<Relationships {...baseProps} {...props} />);
@@ -357,7 +359,7 @@ describe('Relationships', () => {
       goInspectObject: () => {},
       canGoInApp: () => true,
       basePath: httpServiceMock.createSetupContract().basePath,
-      getRelationships: jest.fn().mockImplementation(() => ({
+      getRelationships: vi.fn().mockImplementation(() => ({
         relations: [],
         invalidRelations: [
           {
@@ -384,7 +386,7 @@ describe('Relationships', () => {
         },
       },
       allowedTypes,
-      close: jest.fn(),
+      close: vi.fn(),
     };
 
     const component = shallowWithI18nProvider(<Relationships {...baseProps} {...props} />);

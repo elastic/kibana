@@ -5,51 +5,68 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { createRuleAttachmentDefinition } from './rule_attachment_definition';
 
-const mockUpsertRule = jest.fn().mockResolvedValue({});
-const mockNavigateToUrl = jest.fn();
-const mockAddSuccess = jest.fn();
+const mockUpsertRule = vi.fn().mockResolvedValue({});
+const mockNavigateToUrl = vi.fn();
+const mockAddSuccess = vi.fn();
 const mockPrepend = (path: string) => `/base${path}`;
 
-jest.mock('@kbn/core-di-browser', () => ({
-  Context: {
-    Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  },
-  CoreStart: (key: string) => key,
-  useService: (token: unknown) => {
-    if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl };
-    }
-    if (token === 'http') {
-      return { basePath: { prepend: mockPrepend } };
-    }
-    if (token === 'notifications') {
-      return { toasts: { addSuccess: mockAddSuccess } };
-    }
-    return { upsertRule: mockUpsertRule };
-  },
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      Context: {
+        Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      },
+      CoreStart: (key: string) => key,
+      useService: (token: unknown) => {
+        if (token === 'application') {
+          return { navigateToUrl: mockNavigateToUrl };
+        }
+        if (token === 'http') {
+          return { basePath: { prepend: mockPrepend } };
+        }
+        if (token === 'notifications') {
+          return { toasts: { addSuccess: mockAddSuccess } };
+        }
+        return { upsertRule: mockUpsertRule };
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/rules_api', () => ({
-  RulesApi: Symbol('RulesApi'),
-}));
+vi.mock('../../services/rules_api', () => {
+      const mocked = {
+      RulesApi: Symbol('RulesApi'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/rule_details/rule_context', () => ({
-  RuleProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../components/rule_details/rule_context', () => {
+      const mocked = {
+      RuleProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/rule_details/rule_summary_header', () => ({
-  RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
-  RuleTagsList: () => <div data-test-subj="mockRuleTagsList" />,
-}));
+vi.mock('../../components/rule_details/rule_summary_header', () => {
+      const mocked = {
+      RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
+      RuleTagsList: () => <div data-test-subj="mockRuleTagsList" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/rule_details/sidebar/rule_sidebar', () => ({
-  RuleSidebar: () => <div data-test-subj="mockRuleSidebar" />,
-}));
+vi.mock('../../components/rule_details/sidebar/rule_sidebar', () => {
+      const mocked = {
+      RuleSidebar: () => <div data-test-subj="mockRuleSidebar" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockServices = () => ({
   container: {} as any,
@@ -101,8 +118,8 @@ describe('createRuleAttachmentDefinition', () => {
         attachment,
         isSidebar: false,
         isCanvas: false,
-        updateOrigin: jest.fn(),
-        openCanvas: jest.fn(),
+        updateOrigin: vi.fn(),
+        openCanvas: vi.fn(),
       });
 
       expect(buttons.find((b) => b.label === 'Preview')).toBeDefined();
@@ -117,7 +134,7 @@ describe('createRuleAttachmentDefinition', () => {
         attachment,
         isSidebar: false,
         isCanvas: true,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
       });
 
       expect(buttons).toHaveLength(0);
@@ -185,9 +202,9 @@ describe('createRuleAttachmentDefinition', () => {
           {definition.renderCanvasContent!(
             { attachment, isSidebar: false },
             {
-              registerActionButtons: jest.fn(),
-              updateOrigin: jest.fn(),
-              closeCanvas: jest.fn(),
+              registerActionButtons: vi.fn(),
+              updateOrigin: vi.fn(),
+              closeCanvas: vi.fn(),
             }
           )}
         </>
@@ -201,7 +218,7 @@ describe('createRuleAttachmentDefinition', () => {
       const services = createMockServices();
       const definition = createRuleAttachmentDefinition(services);
       const attachment = createAttachment();
-      const registerActionButtons = jest.fn();
+      const registerActionButtons = vi.fn();
 
       render(
         <>
@@ -209,8 +226,8 @@ describe('createRuleAttachmentDefinition', () => {
             { attachment, isSidebar: false },
             {
               registerActionButtons,
-              updateOrigin: jest.fn(),
-              closeCanvas: jest.fn(),
+              updateOrigin: vi.fn(),
+              closeCanvas: vi.fn(),
             }
           )}
         </>
@@ -226,7 +243,7 @@ describe('createRuleAttachmentDefinition', () => {
       const services = createMockServices();
       const definition = createRuleAttachmentDefinition(services);
       const attachment = createAttachment({ origin: 'rule-123' });
-      const registerActionButtons = jest.fn();
+      const registerActionButtons = vi.fn();
 
       render(
         <>
@@ -234,8 +251,8 @@ describe('createRuleAttachmentDefinition', () => {
             { attachment, isSidebar: false },
             {
               registerActionButtons,
-              updateOrigin: jest.fn(),
-              closeCanvas: jest.fn(),
+              updateOrigin: vi.fn(),
+              closeCanvas: vi.fn(),
             }
           )}
         </>
@@ -254,8 +271,8 @@ describe('createRuleAttachmentDefinition', () => {
         const definition = createRuleAttachmentDefinition(services);
         const attachment = createAttachment();
         attachment.data.id = 'pre-assigned-id';
-        const registerActionButtons = jest.fn();
-        const updateOrigin = jest.fn().mockResolvedValue(undefined);
+        const registerActionButtons = vi.fn();
+        const updateOrigin = vi.fn().mockResolvedValue(undefined);
 
         render(
           <>
@@ -264,7 +281,7 @@ describe('createRuleAttachmentDefinition', () => {
               {
                 registerActionButtons,
                 updateOrigin,
-                closeCanvas: jest.fn(),
+                closeCanvas: vi.fn(),
               }
             )}
           </>
@@ -288,7 +305,7 @@ describe('createRuleAttachmentDefinition', () => {
         const services = createMockServices();
         const definition = createRuleAttachmentDefinition(services);
         const attachment = createAttachment({ origin: 'rule-123' });
-        const registerActionButtons = jest.fn();
+        const registerActionButtons = vi.fn();
 
         render(
           <>
@@ -296,8 +313,8 @@ describe('createRuleAttachmentDefinition', () => {
               { attachment, isSidebar: false },
               {
                 registerActionButtons,
-                updateOrigin: jest.fn(),
-                closeCanvas: jest.fn(),
+                updateOrigin: vi.fn(),
+                closeCanvas: vi.fn(),
               }
             )}
           </>
@@ -320,7 +337,7 @@ describe('createRuleAttachmentDefinition', () => {
         const services = createMockServices();
         const definition = createRuleAttachmentDefinition(services);
         const attachment = createAttachment({ origin: 'rule-123' });
-        const registerActionButtons = jest.fn();
+        const registerActionButtons = vi.fn();
 
         render(
           <>
@@ -328,8 +345,8 @@ describe('createRuleAttachmentDefinition', () => {
               { attachment, isSidebar: false },
               {
                 registerActionButtons,
-                updateOrigin: jest.fn(),
-                closeCanvas: jest.fn(),
+                updateOrigin: vi.fn(),
+                closeCanvas: vi.fn(),
               }
             )}
           </>

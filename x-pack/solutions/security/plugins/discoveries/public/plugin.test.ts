@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -14,7 +17,7 @@ import type { DiscoveriesPublicPluginSetupDeps, DiscoveriesPublicPluginStartDeps
 
 const createSetupDeps = (): DiscoveriesPublicPluginSetupDeps => ({
   workflowsExtensions: {
-    registerStepDefinition: jest.fn(),
+    registerStepDefinition: vi.fn(),
   } as unknown as DiscoveriesPublicPluginSetupDeps['workflowsExtensions'],
 });
 
@@ -25,7 +28,7 @@ const createStartDeps = ({
     ? {
         agentBuilder: {
           attachments: {
-            addAttachmentType: jest.fn(),
+            addAttachmentType: vi.fn(),
           },
         } as unknown as NonNullable<DiscoveriesPublicPluginStartDeps['agentBuilder']>,
       }
@@ -41,13 +44,13 @@ describe('DiscoveriesPublicPlugin', () => {
       const plugin = new DiscoveriesPublicPlugin(context);
       const coreSetup = coreMock.createSetup();
       const coreStart = coreMock.createStart();
-      (coreStart.featureFlags.getBooleanValue$ as jest.Mock).mockReturnValue(of(enabled));
-      coreSetup.getStartServices = jest.fn().mockResolvedValue([coreStart, {}, {}]);
+      (coreStart.featureFlags.getBooleanValue$ as Mock).mockReturnValue(of(enabled));
+      coreSetup.getStartServices = vi.fn().mockResolvedValue([coreStart, {}, {}]);
       const setupDeps = createSetupDeps();
 
       plugin.setup(coreSetup, setupDeps);
 
-      return (setupDeps.workflowsExtensions.registerStepDefinition as jest.Mock).mock.calls.map(
+      return (setupDeps.workflowsExtensions.registerStepDefinition as Mock).mock.calls.map(
         ([loader]) => loader as () => Promise<{ id: string } | undefined>
       );
     };
@@ -118,7 +121,7 @@ describe('DiscoveriesPublicPlugin', () => {
       plugin.setup(coreSetup, setupDeps);
       plugin.start(coreStart, startDeps);
 
-      const { getIcon } = (startDeps.agentBuilder?.attachments.addAttachmentType as jest.Mock).mock
+      const { getIcon } = (startDeps.agentBuilder?.attachments.addAttachmentType as Mock).mock
         .calls[0][1] as Record<string, () => string>;
 
       expect(getIcon()).toBe('document');
@@ -135,7 +138,7 @@ describe('DiscoveriesPublicPlugin', () => {
       plugin.setup(coreSetup, setupDeps);
       plugin.start(coreStart, startDeps);
 
-      const { getLabel } = (startDeps.agentBuilder?.attachments.addAttachmentType as jest.Mock).mock
+      const { getLabel } = (startDeps.agentBuilder?.attachments.addAttachmentType as Mock).mock
         .calls[0][1] as Record<string, () => string>;
 
       expect(getLabel()).toBe('Diagnostic report');

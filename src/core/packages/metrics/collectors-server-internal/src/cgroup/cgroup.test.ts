@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('./v1', () => {
-  const actual = jest.requireActual('./v1');
+import { vi } from 'vitest';
+
+vi.mock('./v1', async () => {
+  const actual = (await vi.importActual('./v1'));
   return {
     ...actual,
-    gatherV1CgroupMetrics: jest.fn(actual.gatherV1CgroupMetrics),
+    gatherV1CgroupMetrics: vi.fn(actual.gatherV1CgroupMetrics),
   };
 });
 
-jest.mock('./v2', () => {
-  const actual = jest.requireActual('./v2');
+vi.mock('./v2', async () => {
+  const actual = (await vi.importActual('./v2'));
   return {
     ...actual,
-    gatherV2CgroupMetrics: jest.fn(actual.gatherV2CgroupMetrics),
+    gatherV2CgroupMetrics: vi.fn(actual.gatherV2CgroupMetrics),
   };
 });
 
@@ -39,7 +41,7 @@ describe('OsCgroupMetricsCollector', () => {
   });
   afterEach(() => {
     mockFs.restore();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty object when no cgroup file present', async () => {

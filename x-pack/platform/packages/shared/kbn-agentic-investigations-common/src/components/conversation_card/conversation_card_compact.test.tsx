@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -28,16 +30,16 @@ const investigation: Investigation = {
 };
 
 const renderRow = (props: Partial<React.ComponentProps<typeof ConversationCardCompact>> = {}) => {
-  const onClickCard = jest.fn();
+  const onClickCard = vi.fn();
   renderWithKibanaRenderContext(
     <ConversationCardCompact
       investigation={investigation}
       hasBorder={false}
       outcome="Approved by Maya Chen"
       onClickCard={onClickCard}
-      onClickAction={jest.fn()}
-      onOpenChat={jest.fn()}
-      onClickRecommendedAction={jest.fn()}
+      onClickAction={vi.fn()}
+      onOpenChat={vi.fn()}
+      onClickRecommendedAction={vi.fn()}
       {...props}
     />
   );

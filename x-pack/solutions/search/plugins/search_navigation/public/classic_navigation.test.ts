@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
 import { classicNavigationFactory } from './classic_navigation';
 import type { ClassicNavItem } from './types';
 
-jest.mock('./solution_navigation_footer', () => ({
-  getSolutionNavFooter: () => undefined,
-}));
+vi.mock('./solution_navigation_footer', () => {
+      const mocked = {
+      getSolutionNavFooter: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('classicNavigationFactory', function () {
   const mockedNavLinks: Array<Partial<ChromeNavLink>> = [
@@ -45,12 +50,12 @@ describe('classicNavigationFactory', function () {
     location: {
       pathname: '/',
     },
-    createHref: jest.fn(),
+    createHref: vi.fn(),
   };
   const history = mockHistory as unknown as ScopedHistory;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockHistory.location.pathname = '/';
     mockHistory.createHref.mockReturnValue('/');
   });

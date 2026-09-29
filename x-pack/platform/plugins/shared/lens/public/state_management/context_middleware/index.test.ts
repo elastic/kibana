@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { PayloadAction } from 'redux-toolkit-v1';
 import moment from 'moment';
 
@@ -24,16 +27,16 @@ const createMiddleware = (data: DataPublicPluginStart, state?: Partial<LensAppSt
     },
   });
   const store = {
-    getState: jest.fn(() => ({
+    getState: vi.fn(() => ({
       lens: state || {
         ...initialState,
         activeDatasourceId: 'formBased',
         datasourceStates: { formBased: { state: {} } },
       },
     })),
-    dispatch: jest.fn(),
+    dispatch: vi.fn(),
   };
-  const next = jest.fn();
+  const next = vi.fn();
 
   const invoke = (action: PayloadAction<Partial<LensAppState> | void>) =>
     middleware(store)(next)(action);
@@ -46,12 +49,12 @@ describe('contextMiddleware', () => {
     it('does update the searchSessionId when the state changes and too much time passed', () => {
       const data = mockDataPlugin();
       storeDeps.datasourceMap.formBased.isTimeBased = () => true;
-      (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
-      (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+      (data.nowProvider.get as Mock).mockReturnValue(new Date(Date.now() - 30000));
+      (data.query.timefilter.timefilter.getTime as Mock).mockReturnValue({
         from: 'now-2m',
         to: 'now',
       });
-      (data.query.timefilter.timefilter.getBounds as jest.Mock).mockReturnValue({
+      (data.query.timefilter.timefilter.getBounds as Mock).mockReturnValue({
         min: moment(Date.now() - 100000),
         max: moment(Date.now() - 30000),
       });
@@ -82,12 +85,12 @@ describe('contextMiddleware', () => {
     it('does not update the searchSessionId when current state is not time based', () => {
       const data = mockDataPlugin();
       storeDeps.datasourceMap.formBased.isTimeBased = () => false;
-      (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
-      (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+      (data.nowProvider.get as Mock).mockReturnValue(new Date(Date.now() - 30000));
+      (data.query.timefilter.timefilter.getTime as Mock).mockReturnValue({
         from: 'now-2m',
         to: 'now',
       });
-      (data.query.timefilter.timefilter.getBounds as jest.Mock).mockReturnValue({
+      (data.query.timefilter.timefilter.getBounds as Mock).mockReturnValue({
         min: moment(Date.now() - 100000),
         max: moment(Date.now() - 30000),
       });
@@ -120,12 +123,12 @@ describe('contextMiddleware', () => {
         // setup
         const data = mockDataPlugin();
         storeDeps.datasourceMap.formBased.isTimeBased = () => true;
-        (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
-        (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        (data.nowProvider.get as Mock).mockReturnValue(new Date(Date.now() - 30000));
+        (data.query.timefilter.timefilter.getTime as Mock).mockReturnValue({
           from: 'now-2m',
           to: 'now',
         });
-        (data.query.timefilter.timefilter.getBounds as jest.Mock).mockReturnValue({
+        (data.query.timefilter.timefilter.getBounds as Mock).mockReturnValue({
           min: moment(Date.now() - 100000),
           max: moment(Date.now() - 30000),
         });
@@ -163,12 +166,12 @@ describe('contextMiddleware', () => {
     it('does not update the searchSessionId when the state changes and too little time has passed', () => {
       const data = mockDataPlugin();
       // time range is 100,000ms ago to 300ms ago (that's a lag of .3 percent, not enough to trigger a session update)
-      (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 300));
-      (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+      (data.nowProvider.get as Mock).mockReturnValue(new Date(Date.now() - 300));
+      (data.query.timefilter.timefilter.getTime as Mock).mockReturnValue({
         from: 'now-2m',
         to: 'now',
       });
-      (data.query.timefilter.timefilter.getBounds as jest.Mock).mockReturnValue({
+      (data.query.timefilter.timefilter.getBounds as Mock).mockReturnValue({
         min: moment(Date.now() - 100000),
         max: moment(Date.now() - 300),
       });
@@ -189,12 +192,12 @@ describe('contextMiddleware', () => {
     });
     it('does not trigger another update when the update already contains searchSessionId', () => {
       const data = mockDataPlugin();
-      (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
-      (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+      (data.nowProvider.get as Mock).mockReturnValue(new Date(Date.now() - 30000));
+      (data.query.timefilter.timefilter.getTime as Mock).mockReturnValue({
         from: 'now-2m',
         to: 'now',
       });
-      (data.query.timefilter.timefilter.getBounds as jest.Mock).mockReturnValue({
+      (data.query.timefilter.timefilter.getBounds as Mock).mockReturnValue({
         min: moment(Date.now() - 100000),
         max: moment(Date.now() - 30000),
       });
@@ -217,12 +220,12 @@ describe('contextMiddleware', () => {
 
     it('does not trigger another update on active data update', () => {
       const data = mockDataPlugin();
-      (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
-      (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+      (data.nowProvider.get as Mock).mockReturnValue(new Date(Date.now() - 30000));
+      (data.query.timefilter.timefilter.getTime as Mock).mockReturnValue({
         from: 'now-2m',
         to: 'now',
       });
-      (data.query.timefilter.timefilter.getBounds as jest.Mock).mockReturnValue({
+      (data.query.timefilter.timefilter.getBounds as Mock).mockReturnValue({
         min: moment(Date.now() - 100000),
         max: moment(Date.now() - 30000),
       });

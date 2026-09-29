@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, within, waitFor, fireEvent } from '@testing-library/react';
 import { getRandomString } from '@kbn/test-jest-helpers';
 
@@ -28,10 +30,10 @@ describe('Index Templates tab', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let setDelayResponse: ReturnType<typeof setupEnvironment>['setDelayResponse'];
-  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
+  vi.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const env = setupEnvironment();
     httpSetup = env.httpSetup;
     httpRequestsMockHelpers = env.httpRequestsMockHelpers;

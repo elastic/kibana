@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useShowEisPromotionalContent } from './use_show_eis_promotional_content';
 
@@ -16,7 +18,7 @@ describe('useShowEisPromotionalContent', () => {
 
   beforeEach(() => {
     localStorage.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should not show the promo if it was skipped previously', () => {

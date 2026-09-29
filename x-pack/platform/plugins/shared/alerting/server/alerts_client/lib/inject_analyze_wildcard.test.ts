@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { injectAnalyzeWildcard } from './inject_analyze_wildcard';
 
-jest.mock('./constants', () => ({
-  MAX_QUERIES: 25,
-}));
+vi.mock('./constants', () => {
+      const mocked = {
+      MAX_QUERIES: 25,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getQuery = (query?: string) => {
   return {

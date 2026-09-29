@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createHash } from 'node:crypto';
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -37,20 +39,23 @@ import type { WorkflowProperties } from '../storage/workflow_storage';
 
 let mockManagedWorkflowDefinitions: ManagedWorkflowDefinition[] = [];
 
-jest.mock('@kbn/workflows/managed', () => ({
-  getManagedWorkflowDefinition: (id: string) =>
-    mockManagedWorkflowDefinitions.find((definition) => definition.id === id),
-  getManagedWorkflowDefinitions: () => [...mockManagedWorkflowDefinitions],
-  getManagedWorkflowSelectorVisibilityContext: (selector: string) => `selector:${selector}`,
-  getManagedWorkflowSolutionVisibilityContext: (solution: string) => `solution:${solution}`,
-  getManagedWorkflowVisibilityContexts: (visibility?: {
-    selectors?: string[];
-    solutions?: string[];
-  }) => [
-    ...(visibility?.selectors ?? []).map((selector) => `selector:${selector}`),
-    ...(visibility?.solutions ?? []).map((solution) => `solution:${solution}`),
-  ],
-}));
+vi.mock('@kbn/workflows/managed', () => {
+      const mocked = {
+      getManagedWorkflowDefinition: (id: string) =>
+        mockManagedWorkflowDefinitions.find((definition) => definition.id === id),
+      getManagedWorkflowDefinitions: () => [...mockManagedWorkflowDefinitions],
+      getManagedWorkflowSelectorVisibilityContext: (selector: string) => `selector:${selector}`,
+      getManagedWorkflowSolutionVisibilityContext: (solution: string) => `solution:${solution}`,
+      getManagedWorkflowVisibilityContexts: (visibility?: {
+        selectors?: string[];
+        solutions?: string[];
+      }) => [
+        ...(visibility?.selectors ?? []).map((selector) => `selector:${selector}`),
+        ...(visibility?.solutions ?? []).map((solution) => `solution:${solution}`),
+      ],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const PLUGIN_ID = 'testPlugin';
 const WORKFLOW_ID = 'system-test-workflow' as ManagedWorkflowId;
@@ -216,23 +221,23 @@ const mockPrepareReturnsInitialVersion = (
 
 const createCrudServiceMock = () => {
   const crudService = {
-    getWorkflowDocumentWithVersion: jest.fn(),
-    getWorkflowDocumentSource: jest.fn(),
-    getManagedWorkflowDocumentsAllSpaces: jest.fn().mockResolvedValue([]),
-    indexWorkflowDocument: jest.fn().mockResolvedValue({ seqNo: 1, primaryTerm: 1 }),
-    createWorkflowDocument: jest.fn(
+    getWorkflowDocumentWithVersion: vi.fn(),
+    getWorkflowDocumentSource: vi.fn(),
+    getManagedWorkflowDocumentsAllSpaces: vi.fn().mockResolvedValue([]),
+    indexWorkflowDocument: vi.fn().mockResolvedValue({ seqNo: 1, primaryTerm: 1 }),
+    createWorkflowDocument: vi.fn(
       async (_id, _spaceId, document: WorkflowProperties) => document
     ),
-    writeWorkflowDocumentWithOcc: jest.fn(
+    writeWorkflowDocumentWithOcc: vi.fn(
       async (_id, _spaceId, params: WriteWorkflowDocumentWithOccParams) => params.document
     ),
-    readModifyWriteWorkflowDocument: jest.fn(
+    readModifyWriteWorkflowDocument: vi.fn(
       async (_id, _spaceId, params: ReadModifyWriteWorkflowDocumentParams) =>
         params.mutate(createWorkflowSource({}))
     ),
-    deleteWorkflows: jest.fn().mockResolvedValue(undefined),
-    logWorkflowChangesAfterWrite: jest.fn().mockResolvedValue(undefined),
-    prepareWorkflowDocumentForStorage: jest.fn(
+    deleteWorkflows: vi.fn().mockResolvedValue(undefined),
+    logWorkflowChangesAfterWrite: vi.fn().mockResolvedValue(undefined),
+    prepareWorkflowDocumentForStorage: vi.fn(
       async ({
         id,
         yaml,
@@ -365,16 +370,16 @@ const getLastIndexedDocument = (
 
 const createExecutionEngineMock = () =>
   ({
-    executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'execution-1' }),
+    executeWorkflow: vi.fn().mockResolvedValue({ workflowExecutionId: 'execution-1' }),
   } as unknown as WorkflowsExecutionEnginePluginStart);
 
 const createService = (crudService = createCrudServiceMock()) => {
   const workflowsExecutionEngine = createExecutionEngineMock();
   const logger = loggerMock.create();
   const audit = {
-    logWorkflowCreated: jest.fn(),
-    logWorkflowUpdated: jest.fn(),
-    logWorkflowDeleted: jest.fn(),
+    logWorkflowCreated: vi.fn(),
+    logWorkflowUpdated: vi.fn(),
+    logWorkflowDeleted: vi.fn(),
   };
   const service = new ManagedWorkflowsService({
     crudService: crudService as unknown as WorkflowCrudService,
@@ -422,7 +427,7 @@ const expectNoOccWrites = (crudService: ReturnType<typeof createCrudServiceMock>
 
 describe('ManagedWorkflowsService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockManagedWorkflowDefinitions = [createDefinition()];
   });
 

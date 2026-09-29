@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
@@ -13,12 +15,15 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { snoozeAlertRoute } from './snooze_alert_route';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('snoozeAlertRoute', () => {

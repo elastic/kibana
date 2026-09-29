@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -17,7 +20,7 @@ import { ConnectorUsageCollector } from '../usage';
 describe('CaseConnector', () => {
   let logger: MockedLogger;
   let services: ReturnType<typeof actionsMock.createServices>;
-  let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
+  let mockedActionsConfig: Mocked<ActionsConfigurationUtilities>;
   let service: TestCaseConnector;
   let connectorUsageCollector: ConnectorUsageCollector;
   const pushToServiceIncidentParamsSchema = {
@@ -39,8 +42,8 @@ describe('CaseConnector', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
 
     logger = loggingSystemMock.createLogger();
     services = actionsMock.createServices();
@@ -343,8 +346,8 @@ describe('CaseConnector', () => {
   describe('PushParamsSchema', () => {
     let newService: TestCaseConnector;
     beforeEach(() => {
-      jest.resetAllMocks();
-      jest.clearAllMocks();
+      vi.resetAllMocks();
+      vi.clearAllMocks();
 
       const newPushToServiceSchema = {
         name: z.string(),

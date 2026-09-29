@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { SyncStatus } from '../types';
 import { fetchSyncJobs } from './fetch_sync_jobs';
 
 describe('fetchSyncJobs lib', () => {
   const mockClient = {
     transport: {
-      request: jest.fn(),
+      request: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('fetch sync jobs', () => {
     it('should fetch sync jobs', async () => {

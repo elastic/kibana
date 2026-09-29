@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useEmailConfig } from './use_email_config';
@@ -22,7 +24,7 @@ describe('useEmailConfig', () => {
     ? R
     : never;
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('should return the correct result when requesting the config of a service', async () => {
     http.get.mockResolvedValueOnce({

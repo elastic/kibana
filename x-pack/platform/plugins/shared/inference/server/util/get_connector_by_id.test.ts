@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { InferenceConnectorType, type InferenceConnector } from '@kbn/inference-common';
 import { getConnectorById, getConnectorByIdWithoutClientRequest } from './get_connector_by_id';
@@ -13,9 +16,9 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-jest.mock('./get_connector_list');
+vi.mock('./get_connector_list');
 
-const getConnectorListMock = getConnectorList as jest.MockedFn<typeof getConnectorList>;
+const getConnectorListMock = getConnectorList as MockedFunction<typeof getConnectorList>;
 
 describe('getConnectorById', () => {
   let actions: ReturnType<typeof actionsMock.createStart>;
@@ -45,7 +48,7 @@ describe('getConnectorById', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the matching connector from the list', async () => {
@@ -98,7 +101,7 @@ describe('getConnectorById', () => {
     getConnectorListMock.mockResolvedValue([inferenceEndpoint]);
 
     const actionsClient = await actions.getActionsClientWithRequest(request);
-    (actionsClient.getAll as jest.Mock).mockResolvedValue([
+    (actionsClient.getAll as Mock).mockResolvedValue([
       {
         id: connectorId,
         actionTypeId: InferenceConnectorType.Inference,
@@ -118,7 +121,7 @@ describe('getConnectorById', () => {
       createMockInferenceConnector({ connectorId: 'other' }),
     ]);
     const actionsClient = await actions.getActionsClientWithRequest(request);
-    (actionsClient.getAll as jest.Mock).mockResolvedValue([]);
+    (actionsClient.getAll as Mock).mockResolvedValue([]);
 
     await expect(
       getConnectorById({ actions, request, connectorId, esClient, logger })
@@ -128,7 +131,7 @@ describe('getConnectorById', () => {
   it('throws if the connector list is empty', async () => {
     getConnectorListMock.mockResolvedValue([]);
     const actionsClient = await actions.getActionsClientWithRequest(request);
-    (actionsClient.getAll as jest.Mock).mockResolvedValue([]);
+    (actionsClient.getAll as Mock).mockResolvedValue([]);
 
     await expect(
       getConnectorById({ actions, request, connectorId, esClient, logger })
@@ -139,7 +142,7 @@ describe('getConnectorById', () => {
     const expected = createMockInferenceConnector({ connectorId });
     getConnectorListMock.mockResolvedValue([expected]);
     const actionsClient = await actions.getActionsClientWithRequest(request);
-    (actions.getActionsClientWithRequest as jest.Mock).mockClear();
+    (actions.getActionsClientWithRequest as Mock).mockClear();
 
     const result = await getConnectorById({ actions, request, connectorId, esClient, logger });
 
@@ -156,7 +159,7 @@ describe('getConnectorById', () => {
     });
     getConnectorListMock.mockResolvedValue([inferenceEndpoint]);
     const actionsClient = await actions.getActionsClientWithRequest(request);
-    (actionsClient.getAll as jest.Mock).mockRejectedValue(
+    (actionsClient.getAll as Mock).mockRejectedValue(
       Boom.forbidden('Unauthorized to get actions')
     );
 
@@ -174,7 +177,7 @@ describe('getConnectorById', () => {
   it('throws not found instead of the authorization error when alias lookup is forbidden', async () => {
     getConnectorListMock.mockResolvedValue([]);
     const actionsClient = await actions.getActionsClientWithRequest(request);
-    (actionsClient.getAll as jest.Mock).mockRejectedValue(
+    (actionsClient.getAll as Mock).mockRejectedValue(
       Boom.forbidden('Unauthorized to get actions')
     );
 
@@ -186,7 +189,7 @@ describe('getConnectorById', () => {
   it('propagates non-authorization errors from the alias lookup', async () => {
     getConnectorListMock.mockResolvedValue([]);
     const actionsClient = await actions.getActionsClientWithRequest(request);
-    (actionsClient.getAll as jest.Mock).mockRejectedValue(new Error('saved objects unavailable'));
+    (actionsClient.getAll as Mock).mockRejectedValue(new Error('saved objects unavailable'));
 
     await expect(
       getConnectorById({ actions, request, connectorId, esClient, logger })
@@ -195,7 +198,7 @@ describe('getConnectorById', () => {
 
   it('throws not found when the actions client cannot be created during the alias lookup', async () => {
     getConnectorListMock.mockResolvedValue([]);
-    (actions.getActionsClientWithRequest as jest.Mock).mockRejectedValue(
+    (actions.getActionsClientWithRequest as Mock).mockRejectedValue(
       new Error('missing encryption key')
     );
 
@@ -213,7 +216,7 @@ describe('getConnectorById', () => {
       });
       getConnectorListMock.mockResolvedValue([inferenceEndpoint]);
       const actionsClient = await actions.getActionsClientWithRequest(request);
-      (actionsClient.getAll as jest.Mock).mockResolvedValue([
+      (actionsClient.getAll as Mock).mockResolvedValue([
         {
           id: connectorId,
           actionTypeId: InferenceConnectorType.Inference,
@@ -241,7 +244,7 @@ describe('getConnectorById', () => {
       });
       getConnectorListMock.mockResolvedValue([inferenceEndpoint]);
       const actionsClient = await actions.getActionsClientWithRequest(request);
-      (actionsClient.getAll as jest.Mock).mockRejectedValue(
+      (actionsClient.getAll as Mock).mockRejectedValue(
         Boom.forbidden('Unauthorized to get actions')
       );
 

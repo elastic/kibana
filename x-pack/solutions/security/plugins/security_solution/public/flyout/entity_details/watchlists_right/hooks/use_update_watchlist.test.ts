@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -12,25 +14,28 @@ import { useUpdateWatchlist } from './use_update_watchlist';
 import type { UseUpdateWatchlistOptions } from './use_update_watchlist';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
 
-const mockUpdateWatchlist = jest.fn().mockResolvedValue({ id: 'wl-1', name: 'Updated' });
-const mockUpdateWatchlistEntitySource = jest.fn().mockResolvedValue({});
-const mockCreateWatchlistEntitySource = jest.fn().mockResolvedValue({});
-const mockDeleteWatchlistEntitySource = jest.fn().mockResolvedValue({});
+const mockUpdateWatchlist = vi.fn().mockResolvedValue({ id: 'wl-1', name: 'Updated' });
+const mockUpdateWatchlistEntitySource = vi.fn().mockResolvedValue({});
+const mockCreateWatchlistEntitySource = vi.fn().mockResolvedValue({});
+const mockDeleteWatchlistEntitySource = vi.fn().mockResolvedValue({});
 
-jest.mock('../../../../entity_analytics/api/api', () => ({
-  useEntityAnalyticsRoutes: () => ({
-    updateWatchlist: mockUpdateWatchlist,
-    updateWatchlistEntitySource: mockUpdateWatchlistEntitySource,
-    createWatchlistEntitySource: mockCreateWatchlistEntitySource,
-    deleteWatchlistEntitySource: mockDeleteWatchlistEntitySource,
-  }),
-}));
+vi.mock('../../../../entity_analytics/api/api', () => {
+      const mocked = {
+      useEntityAnalyticsRoutes: () => ({
+        updateWatchlist: mockUpdateWatchlist,
+        updateWatchlistEntitySource: mockUpdateWatchlistEntitySource,
+        createWatchlistEntitySource: mockCreateWatchlistEntitySource,
+        deleteWatchlistEntitySource: mockDeleteWatchlistEntitySource,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...original,
     useKibana: () => ({
@@ -67,12 +72,12 @@ const baseOpts: UseUpdateWatchlistOptions = {
   ruleBasedSourceIds: {},
   watchlist: makeWatchlist(),
   spaceId: 'default',
-  onSuccess: jest.fn(),
+  onSuccess: vi.fn(),
 };
 
 describe('useUpdateWatchlist', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('throws when watchlistId is missing', async () => {
@@ -273,7 +278,7 @@ describe('useUpdateWatchlist', () => {
 
   describe('callbacks', () => {
     it('shows success toast on success', async () => {
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const { result } = renderHook(() => useUpdateWatchlist({ ...baseOpts, onSuccess }), {
         wrapper: createWrapper(),
       });

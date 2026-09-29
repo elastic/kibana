@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { SearchSessionStatus } from '../../../../../../../common';
 import { getSearchSessionSavedObjectMock } from '../../../__mocks__';
 import type { LocatorsStart } from '../../../types';
@@ -19,8 +21,8 @@ describe('mapToUISession', () => {
       // Given
       const mockSearchSession = getSearchSessionSavedObjectMock();
       const mockLocators = {
-        get: jest.fn().mockReturnValue({
-          getRedirectUrl: jest
+        get: vi.fn().mockReturnValue({
+          getRedirectUrl: vi
             .fn()
             .mockReturnValueOnce('reload-url')
             .mockReturnValueOnce('restore-url'),
@@ -66,8 +68,8 @@ describe('mapToUISession', () => {
       // Given
       const mockSearchSession = getSearchSessionSavedObjectMock();
       const mockLocators = {
-        get: jest.fn().mockReturnValue({
-          getRedirectUrl: jest
+        get: vi.fn().mockReturnValue({
+          getRedirectUrl: vi
             .fn()
             .mockReturnValueOnce('reload-url')
             .mockReturnValueOnce('restore-url'),

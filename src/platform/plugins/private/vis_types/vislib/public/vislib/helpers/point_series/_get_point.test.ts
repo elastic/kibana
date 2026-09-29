@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 
 import { getPoint } from './_get_point';
@@ -18,8 +20,8 @@ describe('getPoint', function () {
   let deserialize: IFieldFormatsRegistry['deserialize'];
 
   beforeAll(() => {
-    deserialize = jest.fn(() => ({
-      convertToText: jest.fn((v) => v),
+    deserialize = vi.fn(() => ({
+      convertToText: vi.fn((v) => v),
     })) as any;
 
     setFormatService({

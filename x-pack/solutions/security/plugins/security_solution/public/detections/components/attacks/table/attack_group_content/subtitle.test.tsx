@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,49 +17,64 @@ import { getSummaryPlainText, Subtitle } from './subtitle';
 import { getMockAttackDiscoveryAlerts } from '../../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
 import { getFormattedDate } from '../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time';
 
-jest.mock(
+vi.mock(
   '../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time',
-  () => ({
-    getFormattedDate: jest.fn(() => '2023-10-27 10:00:00'),
-  })
+  () => {
+      const mocked = {
+        getFormattedDate: vi.fn(() => '2023-10-27 10:00:00'),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useDateFormat: jest.fn(() => jest.fn()),
-}));
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useDateFormat: vi.fn(() => vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
-  () => ({
-    AttackDiscoveryMarkdownFormatter: jest.fn(
-      ({
-        markdown,
-        alertIds,
-        disableActions,
-      }: {
-        markdown: string;
-        alertIds?: string[];
-        disableActions?: boolean;
-      }) => (
-        <div
-          data-test-subj="mock-markdown-formatter"
-          data-alert-ids={JSON.stringify(alertIds)}
-          data-disable-actions={String(disableActions)}
-        >
-          {markdown}
-        </div>
-      )
-    ),
-  })
+  () => {
+      const mocked = {
+        AttackDiscoveryMarkdownFormatter: vi.fn(
+          ({
+            markdown,
+            alertIds,
+            disableActions,
+          }: {
+            markdown: string;
+            alertIds?: string[];
+            disableActions?: boolean;
+          }) => (
+            <div
+              data-test-subj="mock-markdown-formatter"
+              data-alert-ids={JSON.stringify(alertIds)}
+              data-disable-actions={String(disableActions)}
+            >
+              {markdown}
+            </div>
+          )
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => ({
-  useBulkGetUserProfiles: jest.fn(),
-}));
+vi.mock('../../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => {
+      const mocked = {
+      useBulkGetUserProfiles: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../attack_discovery/helpers', () => ({
-  getOriginalAlertIds: jest.fn((alertIds: string[]) => alertIds),
-}));
+vi.mock('../../../../../attack_discovery/helpers', () => {
+      const mocked = {
+      getOriginalAlertIds: vi.fn((alertIds: string[]) => alertIds),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAttack = getMockAttackDiscoveryAlerts()[0];
 
@@ -78,9 +96,9 @@ describe('getSummaryPlainText', () => {
 
 describe('Subtitle', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getFormattedDate as jest.Mock).mockReturnValue('2023-10-27 10:00:00');
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({ data: [] });
+    vi.clearAllMocks();
+    (getFormattedDate as Mock).mockReturnValue('2023-10-27 10:00:00');
+    (useBulkGetUserProfiles as Mock).mockReturnValue({ data: [] });
   });
 
   it('should render with formatted date and summary for scheduled attacks', () => {
@@ -128,7 +146,7 @@ describe('Subtitle', () => {
   });
 
   it('should render only summary if formatted date is missing', () => {
-    (getFormattedDate as jest.Mock).mockReturnValue(null);
+    (getFormattedDate as Mock).mockReturnValue(null);
     const scheduledAttack = { ...mockAttack, alertRuleUuid: 'some_other_rule_id' };
     const { getByTestId } = render(<Subtitle attack={scheduledAttack} />);
 
@@ -168,7 +186,7 @@ describe('Subtitle', () => {
   });
 
   it('should render avatar image if profile is available for manually generated attacks with userId', () => {
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+    (useBulkGetUserProfiles as Mock).mockReturnValue({
       data: [
         {
           user: { uid: 'test-user-id', full_name: 'test_user' },
@@ -191,7 +209,7 @@ describe('Subtitle', () => {
   });
 
   it('should render avatar initials if profile is not yet loaded for manually generated attacks with userId', () => {
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+    (useBulkGetUserProfiles as Mock).mockReturnValue({
       data: undefined,
     });
     const manualAttack = {
@@ -207,7 +225,7 @@ describe('Subtitle', () => {
   });
 
   it('should render avatar placeholder if profile and userName are unavailable', () => {
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+    (useBulkGetUserProfiles as Mock).mockReturnValue({
       data: undefined,
     });
     const manualAttack = {

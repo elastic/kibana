@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { UserActionActions } from '../../../common/types/domain';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
@@ -12,7 +14,7 @@ import { UserActionAuditLogger } from './audit_logger';
 import type { EventDetails } from './types';
 
 describe('UserActionAuditLogger', () => {
-  let mockLogger: jest.Mocked<AuditLogger>;
+  let mockLogger: Mocked<AuditLogger>;
 
   beforeEach(() => {
     mockLogger = auditLoggerMock.create();

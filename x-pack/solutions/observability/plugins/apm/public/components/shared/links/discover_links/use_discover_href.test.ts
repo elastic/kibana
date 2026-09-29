@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useDiscoverHref } from './use_discover_href';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
@@ -15,18 +18,18 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 const MOCK_TRACES_INDEX = 'traces-apm-*';
 const MOCK_ERROR_INDEX = 'logs-apm.error-*';
 
-jest.mock('../../../../context/apm_index_settings/use_apm_index_settings_context');
-jest.mock('../../../../context/apm_plugin/use_apm_plugin_context');
+vi.mock('../../../../context/apm_index_settings/use_apm_index_settings_context');
+vi.mock('../../../../context/apm_plugin/use_apm_plugin_context');
 
-const mockUseApmIndexSettingsContext = useApmIndexSettingsContext as jest.MockedFunction<
+const mockUseApmIndexSettingsContext = useApmIndexSettingsContext as MockedFunction<
   typeof useApmIndexSettingsContext
 >;
-const mockUseApmPluginContext = useApmPluginContext as jest.MockedFunction<
+const mockUseApmPluginContext = useApmPluginContext as MockedFunction<
   typeof useApmPluginContext
 >;
 
-const mockGetRedirectUrl = jest.fn();
-const mockLocatorGet = jest.fn().mockReturnValue({
+const mockGetRedirectUrl = vi.fn();
+const mockLocatorGet = vi.fn().mockReturnValue({
   getRedirectUrl: mockGetRedirectUrl,
 });
 
@@ -66,7 +69,7 @@ describe('useDiscoverHref', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the redirect URL when index settings are loaded', () => {

@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpStart } from '@kbn/core/public';
 import { JOIN_INDICES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
 import { getJoinIndices } from './lookup_indices';
 
 const mockResult = { indices: [{ name: 'my_lookup', mode: 'lookup', aliases: [] }] };
 
-const createHttp = () => ({ get: jest.fn().mockResolvedValue(mockResult) } as unknown as HttpStart);
+const createHttp = () => ({ get: vi.fn().mockResolvedValue(mockResult) } as unknown as HttpStart);
 
 describe('getJoinIndices', () => {
   it('calls the correct route', async () => {
@@ -25,14 +28,14 @@ describe('getJoinIndices', () => {
   it('does not include remoteClusters when query has no remote clusters', async () => {
     const http = createHttp();
     await getJoinIndices('FROM logs', http);
-    const { query } = (http.get as jest.Mock).mock.calls[0][1];
+    const { query } = (http.get as Mock).mock.calls[0][1];
     expect(query).not.toHaveProperty('remoteClusters');
   });
 
   it('extracts remoteClusters from query and includes them', async () => {
     const http = createHttp();
     await getJoinIndices('FROM cluster1:logs, cluster2:metrics', http);
-    const { query } = (http.get as jest.Mock).mock.calls[0][1];
+    const { query } = (http.get as Mock).mock.calls[0][1];
     expect(query.remoteClusters).toContain('cluster1');
     expect(query.remoteClusters).toContain('cluster2');
   });
@@ -40,14 +43,14 @@ describe('getJoinIndices', () => {
   it('includes projectRouting when provided', async () => {
     const http = createHttp();
     await getJoinIndices('FROM logs', http, '_alias:*');
-    const { query } = (http.get as jest.Mock).mock.calls[0][1];
+    const { query } = (http.get as Mock).mock.calls[0][1];
     expect(query.projectRouting).toBe('_alias:*');
   });
 
   it('does not include projectRouting when not provided', async () => {
     const http = createHttp();
     await getJoinIndices('FROM logs', http);
-    const { query } = (http.get as jest.Mock).mock.calls[0][1];
+    const { query } = (http.get as Mock).mock.calls[0][1];
     expect(query).not.toHaveProperty('projectRouting');
   });
 

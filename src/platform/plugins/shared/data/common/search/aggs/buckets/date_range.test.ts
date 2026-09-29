@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { AggConfigs } from '../agg_configs';
 import type { AggTypesDependencies } from '../agg_types';
 import { mockAggTypesRegistry, mockAggTypesDependencies } from '../test_helpers';
@@ -18,7 +20,7 @@ describe('date_range params', () => {
   beforeEach(() => {
     aggTypesDependencies = {
       ...mockAggTypesDependencies,
-      getConfig: jest.fn().mockReturnValue('kibanaTimeZone'),
+      getConfig: vi.fn().mockReturnValue('kibanaTimeZone'),
     };
   });
 
@@ -60,7 +62,7 @@ describe('date_range params', () => {
       {
         typesRegistry: mockAggTypesRegistry(aggTypesDependencies),
       },
-      jest.fn()
+      vi.fn()
     );
   };
 

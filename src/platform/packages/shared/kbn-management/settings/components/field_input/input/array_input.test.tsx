@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
@@ -19,7 +21,7 @@ const name = 'Some array field';
 const id = 'some:array:field';
 
 describe('ArrayInput', () => {
-  const onInputChange = jest.fn();
+  const onInputChange = vi.fn();
   const defaultProps: InputProps<'array'> = {
     onInputChange,
     field: {

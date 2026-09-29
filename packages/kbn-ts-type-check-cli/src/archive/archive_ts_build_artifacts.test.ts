@@ -7,55 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, MockedFunction } from 'vitest';
+
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { globby } from 'globby';
 import { archiveTSBuildArtifacts } from './archive_ts_build_artifacts';
 import { LocalFileSystem } from './file_system/local_file_system';
 import { getPullRequestNumber, isCiEnvironment, resolveCurrentCommitSha } from './utils';
 
-jest.mock('globby', () => ({ globby: jest.fn() }));
+vi.mock('globby', () => {
+      const mocked = { globby: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./utils', () => ({
-  getPullRequestNumber: jest.fn(),
-  isCiEnvironment: jest.fn(),
-  resolveCurrentCommitSha: jest.fn(),
-  withGcsAuth: jest.fn((_, action: () => Promise<unknown>) => action()),
-}));
+vi.mock('./utils', () => {
+      const mocked = {
+      getPullRequestNumber: vi.fn(),
+      isCiEnvironment: vi.fn(),
+      resolveCurrentCommitSha: vi.fn(),
+      withGcsAuth: vi.fn((_, action: () => Promise<unknown>) => action()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./file_system/gcs_file_system', () => ({
-  GcsFileSystem: jest.fn().mockImplementation(() => ({
-    updateArchive: jest.fn(),
-  })),
-}));
+vi.mock('./file_system/gcs_file_system', () => {
+      const mocked = {
+      GcsFileSystem: vi.fn().mockImplementation(() => ({
+        updateArchive: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedGlobby = globby as jest.MockedFunction<typeof globby>;
-const mockedGetPullRequestNumber = getPullRequestNumber as jest.MockedFunction<
+const mockedGlobby = globby as MockedFunction<typeof globby>;
+const mockedGetPullRequestNumber = getPullRequestNumber as MockedFunction<
   typeof getPullRequestNumber
 >;
-const mockedIsCiEnvironment = isCiEnvironment as jest.MockedFunction<typeof isCiEnvironment>;
-const mockedResolveCurrentCommitSha = resolveCurrentCommitSha as jest.MockedFunction<
+const mockedIsCiEnvironment = isCiEnvironment as MockedFunction<typeof isCiEnvironment>;
+const mockedResolveCurrentCommitSha = resolveCurrentCommitSha as MockedFunction<
   typeof resolveCurrentCommitSha
 >;
 
 const createLog = (): SomeDevLog => {
   return {
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   } as unknown as SomeDevLog;
 };
 
 describe('archiveTSBuildArtifacts', () => {
-  let updateSpy: jest.SpyInstance;
+  let updateSpy: MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedIsCiEnvironment.mockReturnValue(false);
     mockedGetPullRequestNumber.mockReturnValue(undefined);
     mockedResolveCurrentCommitSha.mockResolvedValue('');
     mockedGlobby.mockResolvedValue([]);
-    updateSpy = jest
+    updateSpy = vi
       .spyOn(LocalFileSystem.prototype, 'updateArchive')
       .mockResolvedValue(Promise.resolve() as unknown as void);
   });

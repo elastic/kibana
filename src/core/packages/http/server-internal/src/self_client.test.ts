@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { NEVER } from 'rxjs';
 import type { IAuthHeadersStorage, KibanaRequest } from '@kbn/core-http-server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
@@ -48,7 +51,7 @@ const createClient = ({
   authHeaders = { authorization: 'test-auth-token' },
   authRequestHeaders: suppliedAuthRequestHeaders,
   target = 'auto',
-  getHttpConfig = jest.fn().mockReturnValue({
+  getHttpConfig = vi.fn().mockReturnValue({
     ssl: { enabled: false, requestCert: false },
     selfHttp: { ssl: { verificationMode: 'full' } },
   } as HttpConfig),
@@ -59,16 +62,16 @@ const createClient = ({
   authHeaders?: Record<string, string>;
   authRequestHeaders?: IAuthHeadersStorage;
   target?: 'auto' | 'local';
-  getHttpConfig?: jest.MockedFunction<() => HttpConfig>;
+  getHttpConfig?: MockedFunction<() => HttpConfig>;
   serverProtocol?: 'http' | 'https';
   getUiamAttestationGetter?: () => SelfClientUiamAttestationGetter | undefined;
 } = {}) => {
   const authRequestHeaders =
     suppliedAuthRequestHeaders ??
     ({
-      get: jest.fn().mockReturnValue(authHeaders),
-      set: jest.fn(),
-    } as jest.Mocked<IAuthHeadersStorage>);
+      get: vi.fn().mockReturnValue(authHeaders),
+      set: vi.fn(),
+    } as Mocked<IAuthHeadersStorage>);
   const log = loggingSystemMock.createLogger();
 
   const self = createInternalHttpSelfClient({
@@ -76,11 +79,11 @@ const createClient = ({
     basePath: {
       publicBaseUrl: publicBaseUrl ?? undefined,
       serverBasePath: '/base',
-      get: jest.fn(),
-      prepend: jest.fn(),
-      remove: jest.fn(),
+      get: vi.fn(),
+      prepend: vi.fn(),
+      remove: vi.fn(),
     },
-    getServerInfo: jest.fn().mockReturnValue({
+    getServerInfo: vi.fn().mockReturnValue({
       name: 'kibana',
       hostname: '0.0.0.0',
       port: 5601,
@@ -98,7 +101,7 @@ const createClient = ({
 
 describe('InternalHttpSelfScopedClient', () => {
   beforeEach(() => {
-    global.fetch = jest.fn().mockImplementation(() =>
+    global.fetch = vi.fn().mockImplementation(() =>
       Promise.resolve(
         new Response(JSON.stringify({ ok: true }), {
           headers: { 'content-type': 'application/json' },
@@ -109,12 +112,12 @@ describe('InternalHttpSelfScopedClient', () => {
 
   afterEach(() => {
     global.fetch = originalFetch;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls publicBaseUrl with request base path, query, auth headers, and self markers', async () => {
     const { authRequestHeaders, self } = createClient();
-    const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+    const setTimeoutSpy = vi.spyOn(global, 'setTimeout');
 
     const result = await self.asScoped(createRequest()).fetch('/api/status', {
       query: { foo: 'bar', multi: ['one', 'two'] },
@@ -123,7 +126,7 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(result).toEqual({ ok: true });
     expect(authRequestHeaders.get).toHaveBeenCalled();
 
-    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const request = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(request.url).toBe(
       'https://kibana.example.com/base/s/my-space/api/status?foo=bar&multi=one&multi=two'
     );
@@ -154,9 +157,9 @@ describe('InternalHttpSelfScopedClient', () => {
         self_http_target_mode: 'public',
       },
     });
-    const [[message]] = (log.debug as jest.Mock).mock.calls;
+    const [[message]] = (log.debug as Mock).mock.calls;
     expect(message()).toBe('Kibana scoped self HTTP call attempted');
-    const serializedLog = JSON.stringify((log.debug as jest.Mock).mock.calls);
+    const serializedLog = JSON.stringify((log.debug as Mock).mock.calls);
     expect(serializedLog).not.toContain('private-source-id');
     expect(serializedLog).not.toContain('private-target');
     expect(serializedLog).not.toContain('private-query-value');
@@ -179,7 +182,7 @@ describe('InternalHttpSelfScopedClient', () => {
         self_http_target_mode: 'public',
       },
     });
-    const serializedLog = JSON.stringify((log.debug as jest.Mock).mock.calls);
+    const serializedLog = JSON.stringify((log.debug as Mock).mock.calls);
     expect(serializedLog).not.toContain('private-target');
     expect(serializedLog).not.toContain('fake-request');
   });
@@ -189,7 +192,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(createRequest({ basePath: '' })).fetch('/api/status');
 
-    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const request = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(request.url).toBe('http://localhost:5601/api/status');
   });
 
@@ -198,7 +201,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(createRequest()).fetch('/api/status');
 
-    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const request = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(request.url).toBe('http://localhost:5601/base/s/my-space/api/status');
   });
 
@@ -233,11 +236,11 @@ describe('InternalHttpSelfScopedClient', () => {
     const scoped = self.asScoped(createRequest());
 
     await scoped.fetch('/api/status');
-    let request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    let request = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(request.headers.has(X_ELASTIC_INTERNAL_ORIGIN_REQUEST)).toBe(false);
 
     await scoped.fetch('/internal/search', { access: 'internal' });
-    request = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
+    request = (global.fetch as Mock).mock.calls[1][0] as Request;
     expect(request.headers.get(X_ELASTIC_INTERNAL_ORIGIN_REQUEST)).toBe('Kibana');
   });
 
@@ -252,7 +255,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
   it('rejects self calls when server mTLS is optional or required, including after reload', async () => {
     let requestCert = false;
-    const getHttpConfig = jest.fn(
+    const getHttpConfig = vi.fn(
       () =>
         ({
           ssl: { enabled: requestCert, requestCert },
@@ -282,7 +285,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
   it('uses and reloads verified custom TLS trust for local and public HTTPS targets', async () => {
     let localCertificate = 'local server certificate';
-    const localConfig = jest.fn(
+    const localConfig = vi.fn(
       () =>
         ({
           ssl: { enabled: true, requestCert: false, certificate: localCertificate },
@@ -297,22 +300,22 @@ describe('InternalHttpSelfScopedClient', () => {
 
     const localScoped = local.self.asScoped(createFakeRequest());
     await localScoped.fetch('/api/status');
-    const firstLocalDispatcher = (global.fetch as jest.Mock).mock.calls[0][1].dispatcher;
+    const firstLocalDispatcher = (global.fetch as Mock).mock.calls[0][1].dispatcher;
     expect(firstLocalDispatcher).toBeDefined();
 
     localCertificate = 'reloaded local server certificate';
     await localScoped.fetch('/api/status');
-    expect((global.fetch as jest.Mock).mock.calls[1][1].dispatcher).not.toBe(firstLocalDispatcher);
+    expect((global.fetch as Mock).mock.calls[1][1].dispatcher).not.toBe(firstLocalDispatcher);
     await local.self.close();
 
-    const publicConfig = jest.fn().mockReturnValue({
+    const publicConfig = vi.fn().mockReturnValue({
       ssl: { enabled: true, requestCert: false },
       selfHttp: { ssl: { verificationMode: 'full', certificateAuthorities: ['public CA'] } },
     } as HttpConfig);
     const publicTarget = createClient({ getHttpConfig: publicConfig });
 
     await publicTarget.self.asScoped(createFakeRequest()).fetch('/api/status');
-    expect((global.fetch as jest.Mock).mock.calls[2][1].dispatcher).toBeDefined();
+    expect((global.fetch as Mock).mock.calls[2][1].dispatcher).toBeDefined();
     await publicTarget.self.close();
   });
 
@@ -338,7 +341,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(request).fetch('/api/status');
 
-    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(outboundRequest.headers.get('authorization')).toBe('ApiKey fake-request-api-key');
     expect(outboundRequest.headers.get('cookie')).toBeNull();
     expect(outboundRequest.headers.get('x-elastic-internal-origin')).toBeNull();
@@ -352,7 +355,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(request).fetch('/api/status', { forwardRequestHeaders: true });
 
-    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(outboundRequest.headers.has('authorization')).toBe(false);
   });
 
@@ -364,7 +367,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(request).fetch('/api/status');
 
-    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(outboundRequest.headers.get('authorization')).toBe('ApiKey essu_credential_123');
   });
 
@@ -373,7 +376,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(createFakeRequest()).fetch('/api/status');
 
-    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(outboundRequest.url).toBe('https://kibana.example.com/base/api/status');
   });
 
@@ -382,7 +385,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(createFakeRequest({}, 'marketing')).fetch('/api/status');
 
-    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(outboundRequest.url).toBe('https://kibana.example.com/base/s/marketing/api/status');
   });
 
@@ -393,7 +396,7 @@ describe('InternalHttpSelfScopedClient', () => {
       .asScoped(createFakeRequest({}, 'marketing'))
       .fetch('/base/api/status', { prependBasePath: false });
 
-    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(outboundRequest.url).toBe('https://kibana.example.com/base/api/status');
   });
 
@@ -416,7 +419,7 @@ describe('InternalHttpSelfScopedClient', () => {
 
     await self.asScoped(request).fetch('/api/status', { forwardRequestHeaders: true });
 
-    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
     expect(outboundRequest.headers.get('accept')).toBe('application/json');
     expect(outboundRequest.headers.get('origin')).toBe('https://origin.example');
     expect(outboundRequest.headers.get('referer')).toBe('https://origin.example/app/home');
@@ -432,42 +435,42 @@ describe('InternalHttpSelfScopedClient', () => {
 
   describe('UIAM attestation getter', () => {
     it('sets the attestation header from the string the getter returns', async () => {
-      const getter = jest.fn().mockReturnValue('sig-123');
+      const getter = vi.fn().mockReturnValue('sig-123');
       const { self } = createClient({ getUiamAttestationGetter: () => getter });
       const request = createRequest();
 
       await self.asScoped(request).fetch('/api/status');
 
-      const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+      const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
       expect(outboundRequest.headers.get('x-kbn-uiam-internal-caller-attestation')).toBe('sig-123');
       expect(outboundRequest.headers.get('x-kbn-self-call')).toBe('true');
       expect(getter).toHaveBeenCalledWith(request, 'test-auth-token');
     });
 
     it('leaves headers unchanged when the getter returns nothing', async () => {
-      const getter = jest.fn().mockReturnValue(undefined);
+      const getter = vi.fn().mockReturnValue(undefined);
       const { self } = createClient({ getUiamAttestationGetter: () => getter });
 
       await self.asScoped(createRequest()).fetch('/api/status');
 
       expect(getter).toHaveBeenCalledTimes(1);
-      const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+      const outboundRequest = (global.fetch as Mock).mock.calls[0][0] as Request;
       expect(outboundRequest.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
       expect(outboundRequest.headers.get('x-kbn-self-call')).toBe('true');
       expect(outboundRequest.headers.get('authorization')).toBe('test-auth-token');
     });
 
     it('does not set the attestation header when no getter is available', async () => {
-      const getUiamAttestationGetter = jest.fn().mockReturnValue(undefined);
+      const getUiamAttestationGetter = vi.fn().mockReturnValue(undefined);
       const withGetter = createClient({ getUiamAttestationGetter });
       await withGetter.self.asScoped(createRequest()).fetch('/api/status');
       expect(getUiamAttestationGetter).toHaveBeenCalledTimes(1);
-      const requestWithGetter = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+      const requestWithGetter = (global.fetch as Mock).mock.calls[0][0] as Request;
       expect(requestWithGetter.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
 
       const withoutGetter = createClient();
       await withoutGetter.self.asScoped(createRequest()).fetch('/api/status');
-      const requestWithoutGetter = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
+      const requestWithoutGetter = (global.fetch as Mock).mock.calls[1][0] as Request;
       expect(requestWithoutGetter.headers.get('x-kbn-uiam-internal-caller-attestation')).toBeNull();
     });
   });

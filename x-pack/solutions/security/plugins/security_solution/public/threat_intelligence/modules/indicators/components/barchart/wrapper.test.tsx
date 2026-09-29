@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { TimeRange } from '@kbn/es-query';
@@ -19,7 +21,7 @@ import {
 import moment from 'moment';
 import { ScreenReaderAnnouncementsProvider } from '../../containers/screen_reader_a11y';
 
-jest.mock('../../../query_bar/hooks/use_filters');
+vi.mock('../../../query_bar/hooks/use_filters');
 
 const mockTimeRange: TimeRange = { from: '', to: '' };
 const mockField = { label: 'host.name', value: 'string' };
@@ -34,7 +36,7 @@ describe('<IndicatorsBarChartWrapper />', () => {
               dateRange={{ max: moment(), min: moment() }}
               series={[]}
               field={mockField}
-              onFieldChange={jest.fn()}
+              onFieldChange={vi.fn()}
               timeRange={mockTimeRange}
               isFetching={false}
               isLoading={false}
@@ -58,7 +60,7 @@ describe('<IndicatorsBarChartWrapper />', () => {
               dateRange={{ max: moment(), min: moment() }}
               series={[]}
               field={mockField}
-              onFieldChange={jest.fn()}
+              onFieldChange={vi.fn()}
               timeRange={mockTimeRange}
               isFetching={false}
               isLoading={true}
@@ -81,7 +83,7 @@ describe('<IndicatorsBarChartWrapper />', () => {
               dateRange={{ max: moment(), min: moment() }}
               series={[]}
               field={mockField}
-              onFieldChange={jest.fn()}
+              onFieldChange={vi.fn()}
               timeRange={mockTimeRange}
               isFetching={true}
               isLoading={false}

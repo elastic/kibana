@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { RulePageShowRequestModal } from './rule_page_show_request_modal';
 import type { RuleFormData } from '../types';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../hooks', () => ({
-  useRuleFormState: jest.fn(),
-  useRuleFormScreenContext: jest.fn(),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useRuleFormState: vi.fn(),
+      useRuleFormScreenContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useRuleFormState, useRuleFormScreenContext } = jest.requireMock('../hooks');
+const { useRuleFormState, useRuleFormScreenContext } = (await vi.importMock('../hooks'));
 
 const formData: RuleFormData = {
   params: {
@@ -43,7 +48,7 @@ const formData: RuleFormData = {
   name: 'test',
 };
 
-const onCloseMock = jest.fn();
+const onCloseMock = vi.fn();
 
 describe('rulePageShowRequestModal', () => {
   beforeEach(() => {
@@ -54,7 +59,7 @@ describe('rulePageShowRequestModal', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders create request correctly', async () => {

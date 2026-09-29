@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockDelete = jest.fn();
-const mockDeleteSuccess = jest.fn();
-const mockDeleteError = jest.fn();
+const mockUseKibana = useKibana as Mock;
+const mockDelete = vi.fn();
+const mockDeleteSuccess = vi.fn();
+const mockDeleteError = vi.fn();
 
 describe('useDeleteRulesetRule hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         http: {
@@ -43,7 +46,7 @@ describe('useDeleteRulesetRule hook', () => {
   };
 
   it('should delete the ruleset', async () => {
-    const { useDeleteRulesetRule } = jest.requireActual('./use_delete_query_rules_rule');
+    const { useDeleteRulesetRule } = (await vi.importActual('./use_delete_query_rules_rule'));
 
     const { result } = renderHook(() => useDeleteRulesetRule(), { wrapper });
 
@@ -58,7 +61,7 @@ describe('useDeleteRulesetRule hook', () => {
       body: { message: 'An error occurred' },
     };
     mockDelete.mockRejectedValue(error);
-    const { useDeleteRulesetRule } = jest.requireActual('./use_delete_query_rules_rule');
+    const { useDeleteRulesetRule } = (await vi.importActual('./use_delete_query_rules_rule'));
 
     const { result } = renderHook(() => useDeleteRulesetRule(), { wrapper });
 

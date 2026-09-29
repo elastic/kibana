@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import moment from 'moment';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -12,17 +15,17 @@ import { BulkFillRuleGapsModal } from '.';
 import { MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 const convertToDatePickerFormat = (date: moment.Moment) => {
   return `${date.format('L')} ${date.format('LT')}`;
 };
 
 describe('BulkFillRuleGapsModal', () => {
-  const onCancelMock = jest.fn();
-  const onConfirmMock = jest.fn();
+  const onCancelMock = vi.fn();
+  const onConfirmMock = vi.fn();
 
   let startDatePicker: Element;
   let endDatePicker: Element;
@@ -39,7 +42,7 @@ describe('BulkFillRuleGapsModal', () => {
     mockUseKibana.mockReturnValue({
       services: {
         uiSettings: {
-          get: jest.fn().mockReturnValue([]),
+          get: vi.fn().mockReturnValue([]),
         },
       },
     });

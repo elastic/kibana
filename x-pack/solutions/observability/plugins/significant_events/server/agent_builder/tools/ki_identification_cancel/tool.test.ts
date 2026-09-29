@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
@@ -14,14 +16,14 @@ import { createMockToolContext } from '../../utils/test_helpers';
 describe('createKiIdentificationCancelTool', () => {
   const setup = () => {
     const managementApi = {
-      getWorkflowExecutions: jest.fn().mockResolvedValue({
+      getWorkflowExecutions: vi.fn().mockResolvedValue({
         results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }],
       }),
-      cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+      cancelWorkflowExecution: vi.fn().mockResolvedValue(undefined),
     };
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
-      managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
-      telemetry: { trackOnboardingScheduled: jest.fn() } as never,
+      managementApi: { ...managementApi, getClient: vi.fn(() => managementApi) } as never,
+      telemetry: { trackOnboardingScheduled: vi.fn() } as never,
     });
 
     const tool = createKiIdentificationCancelTool({

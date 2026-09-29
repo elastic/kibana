@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { Statement } from './statement';
 import { PluginStatement } from '../models/pipeline/plugin_statement';
@@ -23,9 +25,9 @@ describe('Statement component', () => {
   let onShowVertexDetails;
 
   beforeEach(() => {
-    collapse = jest.fn();
-    expand = jest.fn();
-    onShowVertexDetails = jest.fn();
+    collapse = vi.fn();
+    expand = vi.fn();
+    onShowVertexDetails = vi.fn();
     props = {
       collapse,
       element: {

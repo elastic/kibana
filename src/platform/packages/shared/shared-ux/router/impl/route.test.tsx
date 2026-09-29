@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FC } from 'react';
 import React, { Component } from 'react';
 import { shallow } from 'enzyme';
@@ -14,15 +17,18 @@ import { useSharedUXRoutesContext } from './routes_context';
 import { Route } from './route';
 import { createMemoryHistory } from 'history';
 
-jest.mock('./routes_context', () => ({
-  useSharedUXRoutesContext: jest.fn().mockImplementation(() => ({
-    enableExecutionContextTracking: true,
-  })),
-}));
+vi.mock('./routes_context', () => {
+      const mocked = {
+      useSharedUXRoutesContext: vi.fn().mockImplementation(() => ({
+        enableExecutionContextTracking: true,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Route', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('renders', () => {
@@ -31,7 +37,7 @@ describe('Route', () => {
   });
 
   test('renders with enableExecutionContextTracking as false', () => {
-    (useSharedUXRoutesContext as jest.Mock).mockImplementationOnce(() => ({
+    (useSharedUXRoutesContext as Mock).mockImplementationOnce(() => ({
       enableExecutionContextTracking: false,
     }));
     const example = shallow(<Route />);

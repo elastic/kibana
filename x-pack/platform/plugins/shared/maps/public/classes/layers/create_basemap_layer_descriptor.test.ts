@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-jest.mock('../../util', () => {
+import { vi } from 'vitest';
+
+vi.mock('../../util', () => {
   return {};
 });
-jest.mock('../../kibana_services', () => {
+vi.mock('../../kibana_services', () => {
   return {
     getEMSSettings() {
       return {
@@ -22,9 +24,12 @@ jest.mock('../../kibana_services', () => {
     },
   };
 });
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('12345'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('12345'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   DEFAULT_EMS_DARKMAP_ID,

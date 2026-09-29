@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type {
   SavedObjectsClientContract,
   KibanaRequest,
@@ -36,10 +38,10 @@ describe('ML - data recognizer', () => {
     mlClusterClient,
     mlClient,
     {
-      find: jest.fn(),
-      bulkCreate: jest.fn(),
+      find: vi.fn(),
+      bulkCreate: vi.fn(),
     } as unknown as SavedObjectsClientContract,
-    { find: jest.fn() } as unknown as DataViewsService,
+    { find: vi.fn() } as unknown as DataViewsService,
     {} as MLSavedObjectService,
     { headers: { authorization: '' } } as unknown as KibanaRequest,
     null,

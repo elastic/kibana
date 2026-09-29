@@ -5,27 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleApiResponse } from '../../../services/rules_api';
 import { RuleSummaryActionPoliciesSection } from './rule_summary_action_policies_section';
 
-jest.mock('../../rule_details/overview/artifacts/action_policies_artifacts_subsection', () => ({
-  ActionPoliciesArtifactsSubsection: ({
-    flyoutSession,
-    showTitle,
-  }: {
-    flyoutSession?: string;
-    showTitle?: boolean;
-  }) => (
-    <div
-      data-test-subj="mockActionPoliciesArtifacts"
-      data-session={flyoutSession}
-      data-show-title={String(showTitle)}
-    />
-  ),
-}));
+vi.mock('../../rule_details/overview/artifacts/action_policies_artifacts_subsection', () => {
+      const mocked = {
+      ActionPoliciesArtifactsSubsection: ({
+        flyoutSession,
+        showTitle,
+      }: {
+        flyoutSession?: string;
+        showTitle?: boolean;
+      }) => (
+        <div
+          data-test-subj="mockActionPoliciesArtifacts"
+          data-session={flyoutSession}
+          data-show-title={String(showTitle)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const rule = { id: 'rule-1' } as RuleApiResponse;
 

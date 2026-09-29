@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useTimedDismissal } from './use_timed_dismissal';
 
 const STORAGE_KEY = 'test.dismissal';
 
 describe('useTimedDismissal', () => {
-  let getItemSpy: jest.SpyInstance;
+  let getItemSpy: MockInstance;
 
   beforeEach(() => {
     localStorage.clear();
-    getItemSpy = jest.spyOn(Storage.prototype, 'getItem');
-    jest.useFakeTimers();
+    getItemSpy = vi.spyOn(Storage.prototype, 'getItem');
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.restoreAllMocks();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('returns not dismissed when nothing is in localStorage', () => {

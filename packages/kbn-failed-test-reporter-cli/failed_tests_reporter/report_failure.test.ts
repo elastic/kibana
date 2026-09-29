@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import dedent from 'dedent';
 
 import {
@@ -16,8 +18,8 @@ import {
   updateFailureIssue,
 } from './report_failure';
 
-jest.mock('./github_api');
-const { GithubApi } = jest.requireMock('./github_api');
+vi.mock('./github_api');
+const { GithubApi } = (await vi.importMock('./github_api'));
 
 function createGithubApi(comments: Array<{ body: string }> = []) {
   const api = new GithubApi();
@@ -26,7 +28,7 @@ function createGithubApi(comments: Array<{ body: string }> = []) {
 }
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('redactSensitiveGithubFailureText()', () => {

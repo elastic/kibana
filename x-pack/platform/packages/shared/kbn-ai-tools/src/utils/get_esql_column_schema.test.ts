@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getEsqlColumnSchema } from './get_esql_column_schema';
 
 const signal = new AbortController().signal;
 
 const createEsClient = () => {
-  const query = jest.fn();
+  const query = vi.fn();
   return {
     esClient: { esql: { query } } as unknown as ElasticsearchClient,
     query,
@@ -20,7 +22,7 @@ const createEsClient = () => {
 
 describe('getEsqlColumnSchema', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('queries a single index with LIMIT 0', async () => {

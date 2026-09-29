@@ -5,32 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 
 import { appContextService } from '../../../app_context';
 
 import { getSpaceAwareSaveobjectsClients } from './saved_objects';
 
-jest.mock('../../../app_context');
+vi.mock('../../../app_context');
 
 describe('getSpaceAwareSaveobjectsClients', () => {
   it('return space scopped clients', () => {
     const soStartMock = savedObjectsServiceMock.createStartContract();
     const mockedSavedObjectTagging = {
-      createInternalAssignmentService: jest.fn(),
-      createTagClient: jest.fn(),
-      getTagsFromReferences: jest.fn(),
-      convertTagNameToId: jest.fn(),
-      replaceTagReferences: jest.fn(),
+      createInternalAssignmentService: vi.fn(),
+      createTagClient: vi.fn(),
+      getTagsFromReferences: vi.fn(),
+      convertTagNameToId: vi.fn(),
+      replaceTagReferences: vi.fn(),
     };
 
     const scoppedSoClient = savedObjectsClientMock.create();
-    jest
+    vi
       .mocked(appContextService.getInternalUserSOClientForSpaceId)
       .mockReturnValue(scoppedSoClient);
 
-    jest.mocked(appContextService.getSavedObjects).mockReturnValue(soStartMock);
-    jest.mocked(appContextService.getSavedObjectsTagging).mockReturnValue(mockedSavedObjectTagging);
+    vi.mocked(appContextService.getSavedObjects).mockReturnValue(soStartMock);
+    vi.mocked(appContextService.getSavedObjectsTagging).mockReturnValue(mockedSavedObjectTagging);
 
     getSpaceAwareSaveobjectsClients('test1');
 

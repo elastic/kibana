@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
@@ -58,8 +60,8 @@ const services = createDiscoverServicesMock();
 
 services.profilesManager = profilesManagerMock;
 
-const getProfilesSpy = jest.spyOn(scopedProfilesManager, 'getProfiles');
-const getProfiles$Spy = jest.spyOn(scopedProfilesManager, 'getProfiles$');
+const getProfilesSpy = vi.spyOn(scopedProfilesManager, 'getProfiles');
+const getProfiles$Spy = vi.spyOn(scopedProfilesManager, 'getProfiles$');
 
 const render = () => {
   return renderHook((props) => useProfiles(props), {
@@ -74,7 +76,7 @@ const render = () => {
 
 describe('useProfiles', () => {
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     await profilesManagerMock.resolveRootProfile({});
     await scopedProfilesManager.resolveDataSourceProfile({});
   });

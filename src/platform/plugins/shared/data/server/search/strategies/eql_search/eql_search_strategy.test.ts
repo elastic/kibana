@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { eqlSearchStrategyProvider } from './eql_search_strategy';
 import type { SearchStrategyDependencies } from '../../types';
@@ -38,7 +41,7 @@ describe('EQL search strategy', () => {
   const mockSearchConfig = getMockSearchConfig({});
 
   beforeEach(() => {
-    mockLogger = { debug: jest.fn() } as unknown as Logger;
+    mockLogger = { debug: vi.fn() } as unknown as Logger;
   });
 
   describe('strategy interface', () => {
@@ -54,21 +57,21 @@ describe('EQL search strategy', () => {
   });
 
   describe('search()', () => {
-    let mockEqlSearch: jest.Mock;
-    let mockEqlGet: jest.Mock;
-    let mockEqlDelete: jest.Mock;
+    let mockEqlSearch: Mock;
+    let mockEqlGet: Mock;
+    let mockEqlDelete: Mock;
     let mockDeps: SearchStrategyDependencies;
     let params: Required<EqlSearchStrategyRequest>['params'];
     let options: Required<EqlSearchStrategyRequest>['options'];
 
     beforeEach(() => {
-      mockEqlSearch = jest.fn().mockResolvedValueOnce(getMockEqlResponse());
-      mockEqlGet = jest.fn().mockResolvedValueOnce(getMockEqlResponse());
-      mockEqlDelete = jest.fn();
+      mockEqlSearch = vi.fn().mockResolvedValueOnce(getMockEqlResponse());
+      mockEqlGet = vi.fn().mockResolvedValueOnce(getMockEqlResponse());
+      mockEqlDelete = vi.fn();
 
       mockDeps = {
         uiSettingsClient: {
-          get: jest.fn(),
+          get: vi.fn(),
         },
         esClient: {
           asCurrentUser: {

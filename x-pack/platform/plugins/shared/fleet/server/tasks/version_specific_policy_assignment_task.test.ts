@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { CoreSetup } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -35,12 +38,12 @@ import {
   VERSION,
 } from './version_specific_policy_assignment_task';
 
-jest.mock('../services');
-jest.mock('../services/agents');
-jest.mock('../services/agents/reassign');
-jest.mock('../services/epm/packages');
-jest.mock('../services/epm/packages/get');
-jest.mock('../services/utils/version_specific_policies');
+vi.mock('../services');
+vi.mock('../services/agents');
+vi.mock('../services/agents/reassign');
+vi.mock('../services/epm/packages');
+vi.mock('../services/epm/packages/get');
+vi.mock('../services/utils/version_specific_policies');
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -56,40 +59,40 @@ const MOCK_TASK_INSTANCE = {
   taskType: TYPE,
 };
 
-const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
-const mockedFetchAllAgentsByKuery = fetchAllAgentsByKuery as jest.MockedFunction<
+const mockAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
+const mockPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
+const mockedFetchAllAgentsByKuery = fetchAllAgentsByKuery as MockedFunction<
   typeof fetchAllAgentsByKuery
 >;
-const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
-const mockedGetPackageInfo = getPackageInfo as jest.MockedFunction<typeof getPackageInfo>;
-const mockedGetAgentTemplateAssetsMap = getAgentTemplateAssetsMap as jest.MockedFunction<
+const mockedGetAgentsByKuery = getAgentsByKuery as MockedFunction<typeof getAgentsByKuery>;
+const mockedGetPackageInfo = getPackageInfo as MockedFunction<typeof getPackageInfo>;
+const mockedGetAgentTemplateAssetsMap = getAgentTemplateAssetsMap as MockedFunction<
   typeof getAgentTemplateAssetsMap
 >;
 const mockedHasAgentVersionConditionInInputTemplate =
-  hasAgentVersionConditionInInputTemplate as jest.MockedFunction<
+  hasAgentVersionConditionInInputTemplate as MockedFunction<
     typeof hasAgentVersionConditionInInputTemplate
   >;
-const mockedReassignAgents = reassignAgents as jest.MockedFunction<typeof reassignAgents>;
+const mockedReassignAgents = reassignAgents as MockedFunction<typeof reassignAgents>;
 const mockedDeleteVersionSpecificFleetServerPolicies =
-  deleteVersionSpecificFleetServerPolicies as jest.MockedFunction<
+  deleteVersionSpecificFleetServerPolicies as MockedFunction<
     typeof deleteVersionSpecificFleetServerPolicies
   >;
 const mockedDeleteVersionSpecificFleetServerPoliciesForVersions =
-  deleteVersionSpecificFleetServerPoliciesForVersions as jest.MockedFunction<
+  deleteVersionSpecificFleetServerPoliciesForVersions as MockedFunction<
     typeof deleteVersionSpecificFleetServerPoliciesForVersions
   >;
 const mockedGetAgentCountsForVariantPolicyIds =
-  getAgentCountsForVariantPolicyIds as jest.MockedFunction<
+  getAgentCountsForVariantPolicyIds as MockedFunction<
     typeof getAgentCountsForVariantPolicyIds
   >;
 const mockedGetAgentVersionsForVersionSpecificPolicies =
-  getAgentVersionsForVersionSpecificPolicies as jest.MockedFunction<
+  getAgentVersionsForVersionSpecificPolicies as MockedFunction<
     typeof getAgentVersionsForVersionSpecificPolicies
   >;
 
 const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
-  jest.fn().mockResolvedValue(
+  vi.fn().mockResolvedValue(
     (async function* () {
       yield items;
     })()
@@ -124,7 +127,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   let mockTask: VersionSpecificPolicyAssignmentTask;
   let mockCore: CoreSetup;
-  let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
+  let mockTaskManagerSetup: Mocked<TaskManagerSetupContract>;
 
   beforeEach(() => {
     mockContract = createAppContextStartContractMock();
@@ -146,7 +149,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const runTask = async (taskInstance = MOCK_TASK_INSTANCE) => {
@@ -200,16 +203,16 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
   describe('Task execution', () => {
     beforeEach(() => {
-      jest
+      vi
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
-      jest
+      vi
         .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
         .mockReturnValue({} as any);
 
       // Default mocks for package policy compilation
-      mockPackagePolicyService.findAllForAgentPolicy = jest.fn().mockResolvedValue([]);
-      mockPackagePolicyService.compilePackagePolicyForVersions = jest
+      mockPackagePolicyService.findAllForAgentPolicy = vi.fn().mockResolvedValue([]);
+      mockPackagePolicyService.compilePackagePolicyForVersions = vi
         .fn()
         .mockResolvedValue(undefined);
       mockedGetPackageInfo.mockResolvedValue({
@@ -221,11 +224,11 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('Should not run if feature is disabled', async () => {
-      jest
+      vi
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableVersionSpecificPolicies: false } as any);
 
@@ -306,7 +309,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
       mockAgentPolicyService.fetchAllAgentPolicies =
         getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
-      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockAgentPolicyService.deployPolicies = vi.fn().mockResolvedValue(undefined);
 
       mockedGetAgentsByKuery.mockResolvedValue({
         total: 3,
@@ -345,7 +348,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
       mockAgentPolicyService.fetchAllAgentPolicies =
         getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
-      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockAgentPolicyService.deployPolicies = vi.fn().mockResolvedValue(undefined);
 
       mockedGetAgentsByKuery.mockResolvedValue({
         total: 3,
@@ -390,7 +393,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
       mockAgentPolicyService.fetchAllAgentPolicies =
         getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
-      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockAgentPolicyService.deployPolicies = vi.fn().mockResolvedValue(undefined);
 
       mockedGetAgentsByKuery.mockResolvedValue({
         total: 1,
@@ -428,7 +431,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
       mockAgentPolicyService.fetchAllAgentPolicies =
         getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
-      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockAgentPolicyService.deployPolicies = vi.fn().mockResolvedValue(undefined);
 
       mockedGetAgentsByKuery.mockResolvedValue({
         total: 1,
@@ -501,9 +504,9 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
       mockAgentPolicyService.fetchAllAgentPolicies =
         getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
-      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockAgentPolicyService.deployPolicies = vi.fn().mockResolvedValue(undefined);
 
-      mockPackagePolicyService.findAllForAgentPolicy = jest
+      mockPackagePolicyService.findAllForAgentPolicy = vi
         .fn()
         .mockResolvedValue([mockPackagePolicy]);
       mockedHasAgentVersionConditionInInputTemplate.mockReturnValue(true);
@@ -556,9 +559,9 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
       mockAgentPolicyService.fetchAllAgentPolicies =
         getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
-      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockAgentPolicyService.deployPolicies = vi.fn().mockResolvedValue(undefined);
 
-      mockPackagePolicyService.findAllForAgentPolicy = jest
+      mockPackagePolicyService.findAllForAgentPolicy = vi
         .fn()
         .mockResolvedValue([mockPackagePolicy]);
       mockedHasAgentVersionConditionInInputTemplate.mockReturnValue(false);
@@ -587,16 +590,16 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
   describe('Version extraction', () => {
     beforeEach(() => {
-      jest
+      vi
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
-      jest
+      vi
         .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
         .mockReturnValue({} as any);
 
       // Default mocks for package policy compilation
-      mockPackagePolicyService.findAllForAgentPolicy = jest.fn().mockResolvedValue([]);
-      mockPackagePolicyService.compilePackagePolicyForVersions = jest
+      mockPackagePolicyService.findAllForAgentPolicy = vi.fn().mockResolvedValue([]);
+      mockPackagePolicyService.compilePackagePolicyForVersions = vi
         .fn()
         .mockResolvedValue(undefined);
       mockedGetPackageInfo.mockResolvedValue({
@@ -608,7 +611,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('Should extract minor version correctly', async () => {
@@ -626,7 +629,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
       mockAgentPolicyService.fetchAllAgentPolicies =
         getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
-      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockAgentPolicyService.deployPolicies = vi.fn().mockResolvedValue(undefined);
 
       mockedGetAgentsByKuery.mockResolvedValue({
         total: 1,
@@ -650,10 +653,10 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
   describe('Orphaned version-specific policy sweep', () => {
     beforeEach(() => {
-      jest
+      vi
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
-      jest
+      vi
         .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
         .mockReturnValue({} as any);
       // No agent policies with version conditions, so the main processing is a no-op and only the
@@ -667,12 +670,12 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('reassigns orphaned agents and deletes stale variant docs when the parent no longer has version conditions', async () => {
       await mockVariantPoliciesInIndex(['policy-1#9.4', 'policy-1#9.3']);
-      mockAgentPolicyService.getByIds = jest
+      mockAgentPolicyService.getByIds = vi
         .fn()
         .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: false }]);
       const variantAgents = [
@@ -720,7 +723,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       // count check sees 1 remaining agent and must skip deleteVersionSpecificFleetServerPolicies
       // so the next sweep run can retry rather than stranding the agent on a missing policy.
       await mockVariantPoliciesInIndex(['policy-1#9.4']);
-      mockAgentPolicyService.getByIds = jest
+      mockAgentPolicyService.getByIds = vi
         .fn()
         .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: false }]);
       mockedFetchAllAgentsByKuery.mockResolvedValue(
@@ -738,7 +741,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
     it('does not reassign when the parent policy still has version conditions and the variant is in the bounded set', async () => {
       await mockVariantPoliciesInIndex(['policy-1#9.4']);
-      mockAgentPolicyService.getByIds = jest
+      mockAgentPolicyService.getByIds = vi
         .fn()
         .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: true }]);
       // 9.4 is in the bounded set → not a stale-variant candidate → no deletion.
@@ -757,7 +760,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
     it('does not reassign when the parent policy no longer exists', async () => {
       await mockVariantPoliciesInIndex(['policy-1#9.4']);
       // getByIds with ignoreMissing filters out deleted policies.
-      mockAgentPolicyService.getByIds = jest.fn().mockResolvedValue([]);
+      mockAgentPolicyService.getByIds = vi.fn().mockResolvedValue([]);
 
       await runTask();
 
@@ -767,7 +770,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
     it('does nothing when no version-specific policies exist', async () => {
       await mockVariantPoliciesInIndex([]);
-      mockAgentPolicyService.getByIds = jest.fn();
+      mockAgentPolicyService.getByIds = vi.fn();
 
       await runTask();
 
@@ -778,7 +781,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
     it('ignores non-versioned policy ids when scanning .fleet-policies', async () => {
       // The whole-index aggregation returns base ids too; only variant ids should be acted on.
       await mockVariantPoliciesInIndex(['policy-1', 'policy-2']);
-      mockAgentPolicyService.getByIds = jest.fn();
+      mockAgentPolicyService.getByIds = vi.fn();
 
       await runTask();
 
@@ -814,7 +817,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
     it('deletes variant docs even when the orphaned parent currently has no assigned agents', async () => {
       await mockVariantPoliciesInIndex(['policy-1#9.4']);
-      mockAgentPolicyService.getByIds = jest
+      mockAgentPolicyService.getByIds = vi
         .fn()
         .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: false }]);
       // No agents remain on the variant policies (e.g. already reassigned by the inline path).
@@ -835,7 +838,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       // Variant #9.2 is outside the bounded set [9.5, 9.4, 8.19] and has zero agents.
       // It should be deleted via the per-version helper, NOT the whole-parent helper.
       await mockVariantPoliciesInIndex(['policy-1#9.2']);
-      mockAgentPolicyService.getByIds = jest
+      mockAgentPolicyService.getByIds = vi
         .fn()
         .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: true }]);
       // Override bounded set to exclude 9.2 explicitly.
@@ -857,7 +860,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
     it('keeps an in-set variant with zero agents even when the parent still has version conditions', async () => {
       // Variant #9.4 IS in the bounded set → not a stale-variant candidate.
       await mockVariantPoliciesInIndex(['policy-1#9.4']);
-      mockAgentPolicyService.getByIds = jest
+      mockAgentPolicyService.getByIds = vi
         .fn()
         .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: true }]);
       mockedGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.4']);
@@ -871,7 +874,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
     it('keeps an out-of-set variant that still has enrolled agents', async () => {
       // #9.2 is out-of-set, but 3 agents are still assigned to it. Must not delete.
       await mockVariantPoliciesInIndex(['policy-1#9.2']);
-      mockAgentPolicyService.getByIds = jest
+      mockAgentPolicyService.getByIds = vi
         .fn()
         .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: true }]);
       mockedGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.5', '9.4', '8.19']);
@@ -885,7 +888,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
     it('keeps an out-of-set variant written within the GRACE window (racing deploy protection)', async () => {
       // lastWrittenMs ≈ now → within the 1-hour GRACE → not a candidate for deletion.
       await mockVariantPoliciesInIndex(['policy-1#9.2'], { lastWrittenMs: Date.now() });
-      mockAgentPolicyService.getByIds = jest
+      mockAgentPolicyService.getByIds = vi
         .fn()
         .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: true }]);
       mockedGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.5', '9.4', '8.19']);
@@ -899,7 +902,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       // #9.2 has zero agents before deletion but gains one right after (deployment race).
       // The post-delete re-check must trigger a redeploy to prevent the agent being stranded.
       await mockVariantPoliciesInIndex(['policy-1#9.2']);
-      mockAgentPolicyService.getByIds = jest
+      mockAgentPolicyService.getByIds = vi
         .fn()
         .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: true }]);
       mockedGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.5', '9.4', '8.19']);
@@ -908,7 +911,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       mockedGetAgentCountsForVariantPolicyIds
         .mockResolvedValueOnce(new Map())
         .mockResolvedValueOnce(new Map([['policy-1#9.2', 1]]));
-      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockAgentPolicyService.deployPolicies = vi.fn().mockResolvedValue(undefined);
 
       await runTask();
 

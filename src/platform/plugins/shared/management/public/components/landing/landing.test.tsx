@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
@@ -18,11 +20,11 @@ import { ManagementLandingPage } from './landing';
 import type { AppDependencies } from '../../types';
 
 beforeAll(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 });
 
 afterAll(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 const sectionsMock = [
@@ -58,7 +60,7 @@ const renderLandingPage = async (overrides: Partial<AppDependencies> = {}) => {
     <I18nProvider>
       <MemoryRouter initialEntries={['/management_landing']}>
         <AppContextProvider value={contextDependencies}>
-          <ManagementLandingPage setBreadcrumbs={jest.fn()} onAppMounted={jest.fn()} />
+          <ManagementLandingPage setBreadcrumbs={vi.fn()} onAppMounted={vi.fn()} />
         </AppContextProvider>
       </MemoryRouter>
     </I18nProvider>
@@ -66,7 +68,7 @@ const renderLandingPage = async (overrides: Partial<AppDependencies> = {}) => {
 
   // Wait for async rendering
   await act(async () => {
-    await jest.runAllTimersAsync();
+    await vi.runAllTimersAsync();
   });
 
   // Component is rendered when either cards-navigation-page, managementHome (classic) or managementHomeSolution (project) is present

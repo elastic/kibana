@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type {
   GeometryValue,
@@ -96,12 +98,12 @@ const data: Datatable = {
 
 const mockState = new Map();
 const uiState = {
-  get: jest
+  get: vi
     .fn()
     .mockImplementation((key, fallback) => (mockState.has(key) ? mockState.get(key) : fallback)),
-  set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
-  emit: jest.fn(),
-  setSilent: jest.fn(),
+  set: vi.fn().mockImplementation((key, value) => mockState.set(key, value)),
+  emit: vi.fn(),
+  setSilent: vi.fn(),
 } as any;
 
 describe('HeatmapComponent', function () {
@@ -114,16 +116,16 @@ describe('HeatmapComponent', function () {
       chartsActiveCursorService,
       args,
       uiState,
-      onClickValue: jest.fn(),
-      onSelectRange: jest.fn(),
-      onClickMultiValue: jest.fn(),
+      onClickValue: vi.fn(),
+      onSelectRange: vi.fn(),
+      onClickMultiValue: vi.fn(),
       datatableUtilities: createDatatableUtilitiesMock(),
       paletteService: palettesRegistry,
       formatFactory: formatService.deserialize,
       interactive: true,
       syncTooltips: false,
       syncCursor: true,
-      renderComplete: jest.fn(),
+      renderComplete: vi.fn(),
     };
   });
 
@@ -832,8 +834,8 @@ describe('HeatmapComponent', function () {
     });
 
     it('brushes a time range filter even when no bucket metadata is available', async () => {
-      const onSelectRange = jest.fn();
-      const onClickValue = jest.fn();
+      const onSelectRange = vi.fn();
+      const onClickValue = vi.fn();
       const component = mountWithIntl(
         <HeatmapComponent
           {...wrapperProps}
@@ -888,7 +890,7 @@ describe('HeatmapComponent', function () {
 
     it('returns undefined when intervalMs is not provided', () => {
       const mockUISettings = {
-        get: jest.fn(),
+        get: vi.fn(),
       } as any;
 
       expect(getDateFormatPattern(undefined, mockUISettings)).toBeUndefined();

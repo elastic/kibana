@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
@@ -115,7 +117,7 @@ describe('indexpattern_datasource utils', () => {
         framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError = true;
         (state.layers.id.columns.col1 as TermsIndexPatternColumn).params.accuracyMode = false;
 
-        const setStateMock = jest.fn();
+        const setStateMock = vi.fn();
 
         const warningMessages = getPrecisionErrorWarningMessages(
           datatableUtilitites,
@@ -199,7 +201,7 @@ describe('indexpattern_datasource utils', () => {
           operationType: 'count',
         } as unknown as GenericIndexPatternColumn,
       };
-      const setState = jest.fn();
+      const setState = vi.fn();
       const warningMessages = getPrecisionErrorWarningMessages(
         datatableUtilitites,
         state,

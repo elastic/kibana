@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import type {
   FullConfig,
   FullResult,
@@ -18,11 +21,14 @@ import { BROWSER_CONSOLE_ERRORS_ATTACHMENT } from '@kbn/scout-info';
 import { ScoutReportEventAction } from '../../report';
 import { ScoutPlaywrightReporter } from './playwright_reporter';
 
-jest.mock('@kbn/code-owners', () => ({
-  getCodeOwnersEntries: jest.fn(() => []),
-  getOwningTeamsForPath: jest.fn(() => []),
-  findAreaForCodeOwner: jest.fn(() => undefined),
-}));
+vi.mock('@kbn/code-owners', () => {
+      const mocked = {
+      getCodeOwnersEntries: vi.fn(() => []),
+      getOwningTeamsForPath: vi.fn(() => []),
+      findAreaForCodeOwner: vi.fn(() => undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockConfig = (): FullConfig =>
   ({ configFile: undefined, fullyParallel: false } as unknown as FullConfig);
@@ -90,14 +96,14 @@ const createMockResult = (
 
 describe('ScoutPlaywrightReporter', () => {
   let reporter: ScoutPlaywrightReporter;
-  let logEventSpy: jest.SpyInstance;
+  let logEventSpy: MockInstance;
 
   beforeEach(() => {
     reporter = new ScoutPlaywrightReporter({ runId: 'test-run-id' });
-    logEventSpy = jest.spyOn((reporter as any).report, 'logEvent').mockImplementation(() => {});
+    logEventSpy = vi.spyOn((reporter as any).report, 'logEvent').mockImplementation(() => {});
     // `onEnd` also calls save()/conclude(), which otherwise touch the filesystem for real.
-    jest.spyOn((reporter as any).report, 'save').mockImplementation(() => {});
-    jest.spyOn((reporter as any).report, 'conclude').mockImplementation(() => {});
+    vi.spyOn((reporter as any).report, 'save').mockImplementation(() => {});
+    vi.spyOn((reporter as any).report, 'conclude').mockImplementation(() => {});
     reporter.onBegin(createMockConfig(), createMockSuite());
   });
 
@@ -278,11 +284,11 @@ describe('ScoutPlaywrightReporter', () => {
     it('produces empty stats when the suite was never captured (no onBegin)', async () => {
       // Reporter constructed but onBegin never called — should not throw.
       const freshReporter = new ScoutPlaywrightReporter({ runId: 'no-begin' });
-      const freshLogEventSpy: jest.SpyInstance = jest
+      const freshLogEventSpy: MockInstance = vi
         .spyOn((freshReporter as any).report, 'logEvent')
         .mockImplementation(() => {});
-      jest.spyOn((freshReporter as any).report, 'save').mockImplementation(() => {});
-      jest.spyOn((freshReporter as any).report, 'conclude').mockImplementation(() => {});
+      vi.spyOn((freshReporter as any).report, 'save').mockImplementation(() => {});
+      vi.spyOn((freshReporter as any).report, 'conclude').mockImplementation(() => {});
 
       await freshReporter.onEnd(createMockFullResult('passed'));
 

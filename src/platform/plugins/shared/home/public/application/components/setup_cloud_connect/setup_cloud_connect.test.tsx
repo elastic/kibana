@@ -7,26 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { SetupCloudConnect } from './setup_cloud_connect';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
-jest.mock('../../kibana_services', () => ({
-  getServices: () => ({
-    trackUiMetric: jest.fn(),
-  }),
-}));
+vi.mock('../../kibana_services', () => {
+      const mocked = {
+      getServices: () => ({
+        trackUiMetric: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
+const addBasePathMock = vi.fn((path: string) => (path ? path : 'path'));
 const applicationMock = {
-  getUrlForApp: jest.fn(() => '/app/cloud_connect'),
-  navigateToApp: jest.fn(),
+  getUrlForApp: vi.fn(() => '/app/cloud_connect'),
+  navigateToApp: vi.fn(),
   capabilities: {},
 } as any;
 
 describe('SetupCloudConnect', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders as expected', () => {
@@ -44,7 +49,7 @@ describe('SetupCloudConnect', () => {
     );
 
     const $button = component.find('EuiButton');
-    const mockEvent = { preventDefault: jest.fn() } as any;
+    const mockEvent = { preventDefault: vi.fn() } as any;
 
     // Simulate button click
     $button.props().onClick!(mockEvent);

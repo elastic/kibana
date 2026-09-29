@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadRulesWithKueryFilter } from './rules_kuery_filter';
 
 const http = httpServiceMock.createStartContract();
 
 describe('loadRulesWithKueryFilter', () => {
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   test('should call find API with base parameters', async () => {
     const resolvedValue = {

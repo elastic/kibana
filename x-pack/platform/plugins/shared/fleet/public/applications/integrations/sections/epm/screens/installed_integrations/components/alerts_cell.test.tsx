@@ -5,24 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
 
-const mockHttpGet = jest.fn();
+const mockHttpGet = vi.fn();
 
-jest.mock('../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../hooks'),
-  useStartServices: jest.fn().mockReturnValue({
-    http: {
-      get: (...args: any[]) => mockHttpGet(...args),
-      basePath: {
-        prepend: (path: string) => `/mock${path}`,
-      },
-    },
-  }),
-}));
+vi.mock('../../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../hooks')),
+      useStartServices: vi.fn().mockReturnValue({
+        http: {
+          get: (...args: any[]) => mockHttpGet(...args),
+          basePath: {
+            prepend: (path: string) => `/mock${path}`,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { AlertsCell } from './alerts_cell';
 
@@ -44,7 +49,7 @@ describe('AlertsCell', () => {
   } as unknown as InstalledPackageUIPackageListItem;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders "-" when rules count is 0', async () => {

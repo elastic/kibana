@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useTargetIdField } from './hooks/use_target_id_field';
 import { ProfileForm } from './profile_form';
 
-jest.mock('./hooks/use_target_id_field', () => ({
-  useTargetIdField: jest.fn(),
-}));
+vi.mock('./hooks/use_target_id_field', () => {
+      const mocked = {
+      useTargetIdField: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseTargetIdField = {
   targetIdOptions: [],
@@ -23,15 +28,15 @@ const baseTargetIdField = {
   targetIdAsyncError: undefined,
   isTargetIdValidating: false,
   isTargetIdLoading: false,
-  onTargetIdSearchChange: jest.fn(),
-  onTargetIdFocus: jest.fn(),
-  onTargetIdSelectChange: jest.fn(),
+  onTargetIdSearchChange: vi.fn(),
+  onTargetIdFocus: vi.fn(),
+  onTargetIdSelectChange: vi.fn(),
   onTargetIdCreateOption: undefined,
-  validateAndHydrateTargetId: jest.fn().mockResolvedValue(true),
+  validateAndHydrateTargetId: vi.fn().mockResolvedValue(true),
 };
 
 const renderForm = (overrides: Partial<React.ComponentProps<typeof ProfileForm>> = {}) => {
-  const onSubmit = jest.fn().mockResolvedValue(undefined);
+  const onSubmit = vi.fn().mockResolvedValue(undefined);
 
   render(
     <I18nProvider>
@@ -46,15 +51,15 @@ const renderForm = (overrides: Partial<React.ComponentProps<typeof ProfileForm>>
         regexRules={[]}
         nerRules={[]}
         isSubmitting={false}
-        onNameChange={jest.fn()}
-        onDescriptionChange={jest.fn()}
-        onTargetTypeChange={jest.fn()}
-        onTargetIdChange={jest.fn()}
-        onFieldRulesChange={jest.fn()}
-        onRegexRulesChange={jest.fn()}
-        onNerRulesChange={jest.fn()}
-        fetch={jest.fn()}
-        onCancel={jest.fn()}
+        onNameChange={vi.fn()}
+        onDescriptionChange={vi.fn()}
+        onTargetTypeChange={vi.fn()}
+        onTargetIdChange={vi.fn()}
+        onFieldRulesChange={vi.fn()}
+        onRegexRulesChange={vi.fn()}
+        onNerRulesChange={vi.fn()}
+        fetch={vi.fn()}
+        onCancel={vi.fn()}
         onSubmit={onSubmit}
         {...overrides}
       />
@@ -66,13 +71,13 @@ const renderForm = (overrides: Partial<React.ComponentProps<typeof ProfileForm>>
 
 describe('ProfileForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useTargetIdField).mockReturnValue(baseTargetIdField);
+    vi.clearAllMocks();
+    vi.mocked(useTargetIdField).mockReturnValue(baseTargetIdField);
   });
 
   it('validates current target before submit', async () => {
-    const validateAndHydrateTargetId = jest.fn().mockResolvedValue(true);
-    jest.mocked(useTargetIdField).mockReturnValue({
+    const validateAndHydrateTargetId = vi.fn().mockResolvedValue(true);
+    vi.mocked(useTargetIdField).mockReturnValue({
       ...baseTargetIdField,
       validateAndHydrateTargetId,
     });
@@ -110,7 +115,7 @@ describe('ProfileForm', () => {
     fireEvent.click(screen.getByRole('switch'));
 
     await waitFor(() => {
-      expect(jest.mocked(useTargetIdField).mock.calls.at(-1)?.[0]).toEqual(
+      expect(vi.mocked(useTargetIdField).mock.calls.at(-1)?.[0]).toEqual(
         expect.objectContaining({
           includeHiddenAndSystemIndices: true,
         })

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mount } from 'enzyme';
 import { render, screen, within } from '@testing-library/react';
 import React from 'react';
@@ -16,10 +18,13 @@ import { EntryItem } from './entry_item';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import type { DataViewBase } from '@kbn/es-query';
 
-jest.mock('../../lib/kibana');
-jest.mock('../../hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
+vi.mock('../../lib/kibana');
+vi.mock('../../hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EntryItem', () => {
   test('it renders field labels if "showLabel" is "true"', () => {
@@ -40,7 +45,7 @@ describe('EntryItem', () => {
           } as DataViewBase
         }
         showLabel={true}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         threatIndexPatterns={
           {
             id: '1234',
@@ -55,7 +60,7 @@ describe('EntryItem', () => {
   });
 
   test('it invokes "onChange" when new field is selected and resets value fields', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const wrapper = mount(
       <EntryItem
         entry={{
@@ -103,7 +108,7 @@ describe('EntryItem', () => {
   });
 
   test('it invokes "onChange" when new value is selected', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const wrapper = mount(
       <EntryItem
         entry={{
@@ -145,7 +150,7 @@ describe('EntryItem', () => {
   });
 
   test('displays field values and MATCHES select', async () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
 
     render(
       <EntryItem
@@ -188,7 +193,7 @@ describe('EntryItem', () => {
   });
 
   test('displays field values and DOES NOT MATCH select', async () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
 
     render(
       <EntryItem
@@ -227,7 +232,7 @@ describe('EntryItem', () => {
   });
 
   test('displays DOES NOT MATCH select option as disabled if doesNotMatchDisabled=true', async () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
 
     render(
       <EntryItem
@@ -270,7 +275,7 @@ describe('EntryItem', () => {
   });
 
   test('invokes onChange when MATCHES clause changed to DOES NOT MATCH', async () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
 
     render(
       <EntryItem

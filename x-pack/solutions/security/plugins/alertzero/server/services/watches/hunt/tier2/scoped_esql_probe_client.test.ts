@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { scopedEsqlProbeClient } from './scoped_esql_probe_client';
 
 const ALLOWED = ['logs-aws.*'];
 
 const buildEsClient = () => {
-  const query = jest.fn().mockResolvedValue({ columns: [], values: [] });
-  const asyncQuery = jest.fn().mockResolvedValue({ id: 'q1' });
-  const ping = jest.fn().mockResolvedValue(true);
+  const query = vi.fn().mockResolvedValue({ columns: [], values: [] });
+  const asyncQuery = vi.fn().mockResolvedValue({ id: 'q1' });
+  const ping = vi.fn().mockResolvedValue(true);
   const esClient = {
     esql: { query, asyncQuery },
     ping,

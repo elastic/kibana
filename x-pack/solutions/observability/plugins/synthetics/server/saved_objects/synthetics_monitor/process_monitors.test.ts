@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { processMonitors } from './process_monitors';
 import * as getLocations from '../../synthetics_service/get_all_locations';
 
@@ -86,7 +88,7 @@ describe('processMonitors', () => {
   it('should return a processed data where location label is missing but it get resolved', async () => {
     testMonitors[0].attributes.locations[0].label = undefined;
 
-    jest.spyOn(getLocations, 'getAllLocations').mockResolvedValue(
+    vi.spyOn(getLocations, 'getAllLocations').mockResolvedValue(
       new Promise((r) =>
         r({
           publicLocations: [

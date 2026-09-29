@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { CaseStatuses } from '@kbn/cases-components';
 import { fireEvent, render } from '@testing-library/react';
 import { caseStatuses, statuses, StatusFilter } from './status_filter';
-const onStatusChanged = jest.fn();
+const onStatusChanged = vi.fn();
 const defaultProps = {
   selectedStatus: CaseStatuses.open,
   onStatusChanged,
 };
 describe('StatusFilter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should render EuiSuperSelect with correct options and selected value', () => {
     const { getByTestId, getAllByRole } = render(<StatusFilter {...defaultProps} />);

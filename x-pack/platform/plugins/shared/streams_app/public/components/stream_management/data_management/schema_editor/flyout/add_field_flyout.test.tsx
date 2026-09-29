@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,44 +18,53 @@ import {
 } from '../../shared/mocks';
 import { SchemaEditorContextProvider } from '../schema_editor_context';
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    core: {
-      docLinks: {
-        links: {
-          elasticsearch: {
-            mappingParameters: 'https://elastic.co/docs/mapping-parameters',
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        core: {
+          docLinks: {
+            links: {
+              elasticsearch: {
+                mappingParameters: 'https://elastic.co/docs/mapping-parameters',
+              },
+            },
           },
         },
-      },
-    },
-    dependencies: {
-      start: {
-        streams: {
-          streamsRepositoryClient: {
-            fetch: jest.fn(),
+        dependencies: {
+          start: {
+            streams: {
+              streamsRepositoryClient: {
+                fetch: vi.fn(),
+              },
+            },
+            fieldsMetadata: {
+              useFieldsMetadata: () => ({
+                fieldsMetadata: {},
+                loading: false,
+              }),
+            },
           },
         },
-        fieldsMetadata: {
-          useFieldsMetadata: () => ({
-            fieldsMetadata: {},
-            loading: false,
-          }),
-        },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_streams_app_router', () => ({
-  useStreamsAppRouter: () => ({
-    link: jest.fn(() => '/mock-link'),
-  }),
-}));
+vi.mock('../../../../../hooks/use_streams_app_router', () => {
+      const mocked = {
+      useStreamsAppRouter: () => ({
+        link: vi.fn(() => '/mock-link'),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: () => <div data-testid="mock-code-editor">CodeEditor</div>,
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: () => <div data-testid="mock-code-editor">CodeEditor</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderAddFieldFlyout = (
   streamType: 'wired' | 'classic',
@@ -83,8 +94,8 @@ const renderAddFieldFlyout = (
     status: 'mapped' as const,
   }));
 
-  const onClose = jest.fn();
-  const onAddField = jest.fn();
+  const onClose = vi.fn();
+  const onAddField = vi.fn();
 
   return {
     onClose,
@@ -96,8 +107,8 @@ const renderAddFieldFlyout = (
           fields={fields}
           isLoading={false}
           withFieldSimulation={false}
-          onFieldUpdate={jest.fn()}
-          onFieldSelection={jest.fn()}
+          onFieldUpdate={vi.fn()}
+          onFieldSelection={vi.fn()}
           fieldSelection={[]}
         >
           <AddFieldFlyout onClose={onClose} onAddField={onAddField} />

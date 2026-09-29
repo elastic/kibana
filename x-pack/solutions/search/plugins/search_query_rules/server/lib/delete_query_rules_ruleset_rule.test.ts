@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { deleteRulesetRule } from './delete_query_rules_ruleset_rule';
 
 describe('delete ruleset rule lib function', () => {
   const mockClient = {
     queryRules: {
-      deleteRule: jest.fn(),
+      deleteRule: vi.fn(),
     },
   };
 

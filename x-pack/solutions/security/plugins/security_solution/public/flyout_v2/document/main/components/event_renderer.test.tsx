@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -13,9 +16,9 @@ import { EventRenderer } from './event_renderer';
 import { EVENT_RENDERER_TEST_ID } from './test_ids';
 import { TestProviders } from '../../../../common/mock';
 
-jest.mock('../../../../flyout/document_details/shared/hooks/use_event_details');
+vi.mock('../../../../flyout/document_details/shared/hooks/use_event_details');
 
-const mockUseEventDetails = useEventDetails as jest.Mock;
+const mockUseEventDetails = useEventDetails as Mock;
 
 const createMockHit = (): DataTableRecord =>
   ({
@@ -41,7 +44,7 @@ const renderEventRenderer = (props: React.ComponentProps<typeof EventRenderer>) 
 
 describe('<EventRenderer />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when dataAsNestedObject is not provided (new flyout)', () => {

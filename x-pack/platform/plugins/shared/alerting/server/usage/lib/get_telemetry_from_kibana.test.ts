@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { errors } from '@elastic/elasticsearch';
@@ -105,7 +107,7 @@ const mockedResponse = {
 
 describe('kibana index telemetry', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     logger = loggerMock.create();
   });
 
@@ -672,9 +674,9 @@ describe('kibana index telemetry', () => {
 
   describe('getMWTelemetry', () => {
     test('should return MW telemetry', async () => {
-      savedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue({
-        close: jest.fn(),
-        find: jest.fn().mockImplementation(async function* () {
+      savedObjectsClient.createPointInTimeFinder = vi.fn().mockReturnValue({
+        close: vi.fn(),
+        find: vi.fn().mockImplementation(async function* () {
           yield mockedResponse;
         }),
       });
@@ -699,9 +701,9 @@ describe('kibana index telemetry', () => {
     });
 
     test('should return empty results and log warning if query throws error', async () => {
-      savedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue({
-        close: jest.fn(),
-        find: jest.fn().mockImplementation(async function* () {
+      savedObjectsClient.createPointInTimeFinder = vi.fn().mockReturnValue({
+        close: vi.fn(),
+        find: vi.fn().mockImplementation(async function* () {
           throw thrownError;
         }),
       });
@@ -738,9 +740,9 @@ describe('kibana index telemetry', () => {
     });
 
     test('should stop on MW max limit count', async () => {
-      savedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue({
-        close: jest.fn(),
-        find: jest.fn().mockImplementation(async function* () {
+      savedObjectsClient.createPointInTimeFinder = vi.fn().mockReturnValue({
+        close: vi.fn(),
+        find: vi.fn().mockImplementation(async function* () {
           yield mockedResponse;
         }),
       });
@@ -766,7 +768,7 @@ describe('kibana index telemetry', () => {
     });
 
     test('should return empty results without querying when maintenance windows are disabled', async () => {
-      savedObjectsClient.createPointInTimeFinder = jest.fn();
+      savedObjectsClient.createPointInTimeFinder = vi.fn();
 
       const telemetry = await getMWTelemetry({
         savedObjectsClient,

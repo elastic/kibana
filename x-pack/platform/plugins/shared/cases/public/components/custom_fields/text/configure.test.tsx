@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,10 +16,10 @@ import { Configure } from './configure';
 
 // Failing: See https://github.com/elastic/kibana/issues/205987
 describe('Configure ', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

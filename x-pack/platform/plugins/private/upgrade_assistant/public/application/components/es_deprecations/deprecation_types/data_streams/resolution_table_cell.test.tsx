@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { screen } from '@testing-library/react';
@@ -16,11 +18,14 @@ import type { MigrationStateContext } from './context';
 import { DataStreamReindexResolutionCell } from './resolution_table_cell';
 import { LoadingState } from '../../../types';
 
-const mockUseDataStreamMigrationContext = jest.fn<MigrationStateContext, []>();
+const mockUseDataStreamMigrationContext = vi.fn<MigrationStateContext, []>();
 
-jest.mock('./context', () => ({
-  useDataStreamMigrationContext: () => mockUseDataStreamMigrationContext(),
-}));
+vi.mock('./context', () => {
+      const mocked = {
+      useDataStreamMigrationContext: () => mockUseDataStreamMigrationContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseCorrectiveAction: DataStreamsAction = {
   type: 'dataStream',
@@ -40,12 +45,12 @@ describe('DataStreamReindexResolutionCell', () => {
   });
 
   const makeDefaultMigrationContextMock = (): MigrationStateContext => ({
-    loadDataStreamMetadata: jest.fn<Promise<void>, []>(),
-    initMigration: jest.fn<void, [resolutionType: 'reindex' | 'readonly']>(),
-    startReindex: jest.fn<Promise<void>, []>(),
-    cancelReindex: jest.fn<Promise<void>, []>(),
-    startReadonly: jest.fn<Promise<void>, []>(),
-    cancelReadonly: jest.fn<Promise<void>, []>(),
+    loadDataStreamMetadata: vi.fn<Promise<void>, []>(),
+    initMigration: vi.fn<void, [resolutionType: 'reindex' | 'readonly']>(),
+    startReindex: vi.fn<Promise<void>, []>(),
+    cancelReindex: vi.fn<Promise<void>, []>(),
+    startReadonly: vi.fn<Promise<void>, []>(),
+    cancelReadonly: vi.fn<Promise<void>, []>(),
     migrationState: {
       loadingState: LoadingState.Success,
       status: DataStreamMigrationStatus.notStarted,

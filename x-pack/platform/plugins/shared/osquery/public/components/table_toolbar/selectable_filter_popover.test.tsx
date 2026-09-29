@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SelectableFilterPopover } from './selectable_filter_popover';
@@ -20,14 +23,14 @@ const renderComponent = (
   props: Partial<{
     options: FilterOption[];
     selectedKeys: string[];
-    onSelectionChange: jest.Mock;
+    onSelectionChange: Mock;
   }> = {}
 ) => {
   const defaultProps = {
     label: 'Test filter',
     options: OPTIONS,
     selectedKeys: [] as string[],
-    onSelectionChange: jest.fn(),
+    onSelectionChange: vi.fn(),
     'data-test-subj': 'test-filter',
     ...props,
   };

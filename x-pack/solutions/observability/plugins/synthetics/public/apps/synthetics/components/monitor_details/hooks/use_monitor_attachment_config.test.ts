@@ -5,25 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useMonitorAttachmentConfig } from './use_monitor_attachment_config';
 import { OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 
-const mockSetChatConfig = jest.fn();
-const mockClearChatConfig = jest.fn();
+const mockSetChatConfig = vi.fn();
+const mockClearChatConfig = vi.fn();
 
 const mockAgentBuilder = {
   setChatConfig: mockSetChatConfig,
   clearChatConfig: mockClearChatConfig,
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_selected_monitor', () => ({
-  useSelectedMonitor: jest.fn(),
-}));
+vi.mock('./use_selected_monitor', () => {
+      const mocked = {
+      useSelectedMonitor: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelectedMonitor } from './use_selected_monitor';
@@ -47,11 +56,11 @@ const setupMockDefaults: Required<SetupMocksOptions> = {
 const setupMocks = (overrides: SetupMocksOptions = {}) => {
   const opts = { ...setupMockDefaults, ...overrides };
 
-  (useKibana as jest.Mock).mockReturnValue({
+  (useKibana as Mock).mockReturnValue({
     services: { agentBuilder: opts.agentBuilder },
   });
 
-  (useSelectedMonitor as jest.Mock).mockReturnValue({
+  (useSelectedMonitor as Mock).mockReturnValue({
     monitor: opts.monitor,
     loading: opts.loading,
   });
@@ -59,7 +68,7 @@ const setupMocks = (overrides: SetupMocksOptions = {}) => {
 
 describe('useMonitorAttachmentConfig', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not configure attachment when agentBuilder is not available', () => {

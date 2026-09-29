@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 
@@ -34,55 +37,67 @@ const DefaultEditorAggParams = (props: DefaultEditorAggParamsProps) => (
   </KibanaContextProvider>
 );
 
-jest.mock('./utils', () => ({
-  getEditorConfig: jest.fn(() => mockEditorConfig),
-}));
-jest.mock('./agg_params_helper', () => ({
-  getAggParamsToRender: jest.fn(() => ({
-    basic: [
-      {
-        aggParam: {
-          displayName: 'Custom label',
-          name: 'customLabel',
-          type: 'string',
-        },
-      },
-    ],
-    advanced: [
-      {
-        aggParam: {
-          advanced: true,
-          name: 'json',
-          type: 'json',
-        },
-      },
-    ],
-  })),
-  getAggTypeOptions: jest.fn(() => []),
-  getError: jest.fn((agg, aggIsTooLow) => (aggIsTooLow ? ['error'] : [])),
-  isInvalidParamsTouched: jest.fn(() => false),
-}));
-jest.mock('./agg_select', () => ({
-  DefaultEditorAggSelect: () => null,
-}));
-jest.mock('./agg_param', () => ({
-  DefaultEditorAggParam: () => null,
-}));
+vi.mock('./utils', () => {
+      const mocked = {
+      getEditorConfig: vi.fn(() => mockEditorConfig),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./agg_params_helper', () => {
+      const mocked = {
+      getAggParamsToRender: vi.fn(() => ({
+        basic: [
+          {
+            aggParam: {
+              displayName: 'Custom label',
+              name: 'customLabel',
+              type: 'string',
+            },
+          },
+        ],
+        advanced: [
+          {
+            aggParam: {
+              advanced: true,
+              name: 'json',
+              type: 'json',
+            },
+          },
+        ],
+      })),
+      getAggTypeOptions: vi.fn(() => []),
+      getError: vi.fn((agg, aggIsTooLow) => (aggIsTooLow ? ['error'] : [])),
+      isInvalidParamsTouched: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./agg_select', () => {
+      const mocked = {
+      DefaultEditorAggSelect: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./agg_param', () => {
+      const mocked = {
+      DefaultEditorAggParam: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DefaultEditorAggParams component', () => {
-  let setAggParamValue: jest.Mock;
-  let onAggTypeChange: jest.Mock;
-  let setTouched: jest.Mock;
-  let setValidity: jest.Mock;
-  let intervalDeserialize: jest.Mock;
+  let setAggParamValue: Mock;
+  let onAggTypeChange: Mock;
+  let setTouched: Mock;
+  let setValidity: Mock;
+  let intervalDeserialize: Mock;
   let defaultProps: DefaultEditorAggParamsProps;
 
   beforeEach(() => {
-    setAggParamValue = jest.fn();
-    onAggTypeChange = jest.fn();
-    setTouched = jest.fn();
-    setValidity = jest.fn();
-    intervalDeserialize = jest.fn(() => 'deserialized');
+    setAggParamValue = vi.fn();
+    onAggTypeChange = vi.fn();
+    setTouched = vi.fn();
+    setValidity = vi.fn();
+    intervalDeserialize = vi.fn(() => 'deserialized');
 
     defaultProps = {
       agg: {

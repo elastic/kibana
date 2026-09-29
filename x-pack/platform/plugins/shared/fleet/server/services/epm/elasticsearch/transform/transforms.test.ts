@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -26,15 +29,15 @@ import type { PackageInstallContext } from '../../../../../common/types';
 
 import { installTransforms } from './install';
 
-jest.mock('../../packages/get', () => {
-  return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };
+vi.mock('../../packages/get', () => {
+  return { getInstallation: vi.fn(), getInstallationObject: vi.fn() };
 });
 
 const meta = getESAssetMetadata({ packageName: 'endpoint' });
 
 describe('test transform install', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
   // Tracks the "persisted" epm-packages SO attributes that savedObjectsClient.get/.update mocks
   // read from and write to below, so repeated get/update cycles within a test see each other's
   // writes the same way they would against a real saved objects index. Tests seed this with
@@ -181,8 +184,8 @@ _meta:
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
     esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
-    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReset();
-    (getInstallationObject as jest.MockedFunction<typeof getInstallationObject>).mockReset();
+    (getInstallation as MockedFunction<typeof getInstallation>).mockReset();
+    (getInstallationObject as MockedFunction<typeof getInstallationObject>).mockReset();
     savedObjectsClient = savedObjectsClientMock.create();
     currentAttributes = {};
     savedObjectsClient.get.mockImplementation(
@@ -206,7 +209,7 @@ _meta:
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('can install new versions and removes older version when fleet_transform_version increased', async () => {
@@ -243,7 +246,7 @@ _meta:
         },
       ],
     } as unknown as Installation;
-    (getInstallation as jest.MockedFunction<typeof getInstallation>)
+    (getInstallation as MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
     currentAttributes = { installed_es: previousInstallation.installed_es };
@@ -539,7 +542,7 @@ _meta:
       ],
     } as unknown as Installation;
 
-    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReturnValueOnce(
+    (getInstallation as MockedFunction<typeof getInstallation>).mockReturnValueOnce(
       Promise.resolve(previousInstallation)
     );
     currentAttributes = { installed_es: previousInstallation.installed_es };
@@ -617,7 +620,7 @@ _meta:
       ],
     } as unknown as Installation;
 
-    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReturnValueOnce(
+    (getInstallation as MockedFunction<typeof getInstallation>).mockReturnValueOnce(
       Promise.resolve(previousInstallation)
     );
     currentAttributes = { installed_es: previousInstallation.installed_es };
@@ -707,7 +710,7 @@ _meta:
       ],
     } as unknown as Installation;
 
-    (getInstallation as jest.MockedFunction<typeof getInstallation>)
+    (getInstallation as MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
     currentAttributes = { installed_es: previousInstallation.installed_es };
@@ -995,7 +998,7 @@ _meta:
         },
       ],
     } as unknown as Installation;
-    (getInstallation as jest.MockedFunction<typeof getInstallation>)
+    (getInstallation as MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
     currentAttributes = { installed_es: previousInstallation.installed_es };
@@ -1243,7 +1246,7 @@ _meta:
       ],
     } as unknown as Installation;
 
-    (getInstallation as jest.MockedFunction<typeof getInstallation>)
+    (getInstallation as MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
     currentAttributes = { installed_es: [] };
@@ -1331,7 +1334,7 @@ _meta:
       ],
     } as unknown as Installation;
 
-    (getInstallation as jest.MockedFunction<typeof getInstallation>)
+    (getInstallation as MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
     currentAttributes = { installed_es: [] };
@@ -1431,7 +1434,7 @@ _meta:
       ],
     } as unknown as Installation;
 
-    (getInstallation as jest.MockedFunction<typeof getInstallation>)
+    (getInstallation as MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
     currentAttributes = { installed_es: currentInstallation.installed_es };
@@ -1496,7 +1499,7 @@ _meta:
       installed_es: [{ id: unchangedId, type: ElasticsearchAssetType.transform }],
     } as unknown as Installation;
 
-    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReturnValueOnce(
+    (getInstallation as MockedFunction<typeof getInstallation>).mockReturnValueOnce(
       Promise.resolve(previousInstallation)
     );
     currentAttributes = { installed_es: previousInstallation.installed_es };
@@ -1554,7 +1557,7 @@ _meta:
 
 describe('installTransforms - cross-cluster source indices', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
 
   const sourceWithRemote = [
     'metrics-endpoint.metadata_current_default*',
@@ -1609,12 +1612,12 @@ describe('installTransforms - cross-cluster source indices', () => {
         references: [],
       };
     });
-    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReset();
-    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockResolvedValue(undefined);
+    (getInstallation as MockedFunction<typeof getInstallation>).mockReset();
+    (getInstallation as MockedFunction<typeof getInstallation>).mockResolvedValue(undefined);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('strips the `*:` source before putTransform on serverless (legacy json path)', async () => {

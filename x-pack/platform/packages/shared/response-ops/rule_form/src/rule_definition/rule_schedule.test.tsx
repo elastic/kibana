@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RuleSchedule } from './rule_schedule';
 
-const mockOnChange = jest.fn();
+const mockOnChange = vi.fn();
 
-jest.mock('../hooks', () => ({
-  useRuleFormState: jest.fn(),
-  useRuleFormDispatch: jest.fn(),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useRuleFormState: vi.fn(),
+      useRuleFormDispatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
+const { useRuleFormState, useRuleFormDispatch } = (await vi.importMock('../hooks'));
 
 describe('RuleSchedule', () => {
   beforeEach(() => {
@@ -25,7 +30,7 @@ describe('RuleSchedule', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('Renders correctly', () => {

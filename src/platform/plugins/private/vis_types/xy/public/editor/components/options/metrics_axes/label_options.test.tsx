@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -20,11 +23,11 @@ const ROTATE = 'rotate';
 const DISABLED = 'disabled';
 
 describe('LabelOptions component', () => {
-  let setAxisLabel: jest.Mock;
+  let setAxisLabel: Mock;
   let defaultProps: LabelOptionsProps;
 
   beforeEach(() => {
-    setAxisLabel = jest.fn();
+    setAxisLabel = vi.fn();
 
     defaultProps = {
       axisLabels: { ...valueAxis.labels },

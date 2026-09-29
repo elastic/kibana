@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { IEventLogService } from '@kbn/event-log-plugin/server';
 import { eventLogServiceMock } from '@kbn/event-log-plugin/server/mocks';
 
@@ -12,7 +14,7 @@ import { createEventLogger } from '.';
 import { ATTACK_DISCOVERY_EVENT_PROVIDER } from '../../common/constants';
 
 describe('createEventLogger', () => {
-  let mockEventLogService: jest.Mocked<IEventLogService>;
+  let mockEventLogService: Mocked<IEventLogService>;
 
   beforeEach(() => {
     mockEventLogService = eventLogServiceMock.create();

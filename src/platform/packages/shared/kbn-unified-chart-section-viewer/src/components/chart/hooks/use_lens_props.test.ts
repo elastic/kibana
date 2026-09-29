@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedClass, MockedFunction } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLensProps } from './use_lens_props';
@@ -23,15 +26,18 @@ import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mock
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 
-jest.mock('./use_chart_layers');
-jest.mock('@kbn/lens-embeddable-utils');
-const mockReportError = jest.fn();
-jest.mock('./use_report_chart_section_error', () => ({
-  useReportChartSectionError: jest.fn(() => mockReportError),
-}));
+vi.mock('./use_chart_layers');
+vi.mock('@kbn/lens-embeddable-utils');
+const mockReportError = vi.fn();
+vi.mock('./use_report_chart_section_error', () => {
+      const mocked = {
+      useReportChartSectionError: vi.fn(() => mockReportError),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const LensConfigBuilderMock = LensConfigBuilder as jest.MockedClass<typeof LensConfigBuilder>;
-const useChartLayersMock = useChartLayers as jest.MockedFunction<typeof useChartLayers>;
+const LensConfigBuilderMock = LensConfigBuilder as MockedClass<typeof LensConfigBuilder>;
+const useChartLayersMock = useChartLayers as MockedFunction<typeof useChartLayers>;
 const servicesMock: Partial<UnifiedHistogramServices> = {
   dataViews: dataViewPluginMocks.createStartContract(),
 };
@@ -59,18 +65,18 @@ describe('useLensProps', () => {
   };
 
   const createIntersectionObserverMock = () => {
-    const mockObserve = jest.fn();
-    const mockDisconnect = jest.fn();
-    const mockUnobserve = jest.fn();
+    const mockObserve = vi.fn();
+    const mockDisconnect = vi.fn();
+    const mockUnobserve = vi.fn();
 
-    const MockIntersectionObserver = jest.fn().mockImplementation(() => ({
+    const MockIntersectionObserver = vi.fn().mockImplementation(() => ({
       observe: mockObserve,
       disconnect: mockDisconnect,
       unobserve: mockUnobserve,
       root: null,
       rootMargin: '0px',
       thresholds: [0],
-      takeRecords: jest.fn(() => []),
+      takeRecords: vi.fn(() => []),
     }));
 
     return {
@@ -82,7 +88,7 @@ describe('useLensProps', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     discoverFetch$ = getFetch$Mock();
 
@@ -519,7 +525,7 @@ describe('useLensProps', () => {
         expect(result.current).toBeDefined();
       });
 
-      expect((LensConfigBuilder.prototype.build as jest.Mock).mock.calls.length).toBeGreaterThan(1);
+      expect((LensConfigBuilder.prototype.build as Mock).mock.calls.length).toBeGreaterThan(1);
     });
 
     it('clears a latched builder error after a successful rebuild', async () => {

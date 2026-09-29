@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ConversationInput } from './conversation_input';
@@ -28,155 +30,215 @@ import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_servic
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useInputDraft } from '../../../hooks/use_input_draft';
 
-jest.mock('../../../hooks/use_conversation_stream', () => ({
-  useConversationStream: jest.fn(),
-}));
-jest.mock('../../../hooks/agents/use_agents', () => ({
-  useAgentBuilderAgents: jest.fn(),
-}));
-jest.mock('../../../hooks/agents/use_validate_agent_id', () => ({
-  useValidateAgentId: jest.fn(),
-}));
-jest.mock('../../../hooks/use_conversation', () => ({
-  useAgentId: jest.fn(),
-  useConversationReadOnly: jest.fn(),
-  useConversationTitle: jest.fn(),
-  useHasActiveConversation: jest.fn(),
-}));
-jest.mock('../../../hooks/use_is_awaiting_prompt', () => ({
-  useIsAwaitingPrompt: jest.fn(),
-}));
-jest.mock('../../../context/conversation/use_conversation_id', () => ({
-  useConversationId: jest.fn(),
-}));
-jest.mock('../../../context/conversation/conversation_context', () => ({
-  useConversationContext: jest.fn(),
-}));
-jest.mock('../../../hooks/use_submit_message', () => ({
-  useSubmitMessage: jest.fn(),
-}));
-jest.mock('../../../hooks/use_send_user_message', () => ({
-  useSendUserMessage: jest.fn(),
-}));
-jest.mock('../../../hooks/use_toasts', () => ({
-  useToasts: jest.fn(),
-}));
-jest.mock('./message_editor', () => ({
-  useMessageEditor: jest.fn(),
-  MessageEditor: ({ onSubmit }: { onSubmit: () => void }) => (
-    <button data-test-subj="mock-message-editor-submit" type="button" onClick={onSubmit}>
-      submit
-    </button>
-  ),
-  CommandBadgeSerializationError: class extends Error {},
-}));
-jest.mock('./input_actions', () => ({
-  InputActions: ({
-    showTriggerModeToggle,
-    triggerMode,
-    onTriggerModeChange,
-  }: {
-    showTriggerModeToggle: boolean;
-    triggerMode: string;
-    onTriggerModeChange: (mode: string) => void;
-  }) =>
-    showTriggerModeToggle ? (
-      <input
-        data-test-subj="mock-agent-toggle"
-        type="checkbox"
-        checked={triggerMode === 'always'}
-        onChange={(event) => onTriggerModeChange(event.target.checked ? 'always' : 'never')}
-      />
-    ) : null,
-}));
-jest.mock('./attachment_pill', () => ({
-  AttachmentPill: ({
-    attachment,
-    onRemoveAttachment,
-  }: {
-    attachment: { id: string };
-    onRemoveAttachment?: () => void;
-  }) => (
-    <button
-      data-test-subj={`mock-remove-attachment-${attachment.id}`}
-      type="button"
-      onClick={onRemoveAttachment}
-    />
-  ),
-}));
-jest.mock('./attachment_group_pill', () => ({
-  AttachmentGroupPill: () => null,
-}));
-jest.mock('../../../hooks/use_agent_builder_service', () => ({
-  useAgentBuilderServices: jest.fn(),
-}));
-jest.mock('../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: jest.fn(),
-}));
-jest.mock('../../../hooks/use_current_user', () => ({
-  useCurrentUser: jest
-    .fn()
-    .mockReturnValue({ currentUser: { user: { username: 'test-user' } }, isLoading: false }),
-}));
-jest.mock('../../../hooks/use_input_draft', () => ({
-  useInputDraft: jest
-    .fn()
-    .mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft: jest.fn() }),
-}));
-jest.mock('../../../context/active_space_context', () => ({
-  useActiveSpaceId: jest.fn().mockReturnValue('default'),
-}));
-jest.mock('@kbn/agent-builder-browser', () => ({
-  ConversationInputShell: ({
-    children,
-    isDisabled,
-    'data-test-subj': testSubj,
-  }: {
-    children: React.ReactNode;
-    isDisabled?: boolean;
-    'data-test-subj'?: string;
-  }) => (
-    <div data-test-subj={testSubj} aria-disabled={isDisabled}>
-      {children}
-    </div>
-  ),
-  formatAgentBuilderErrorMessage: (error: Error) => error.message,
-}));
+vi.mock('../../../hooks/use_conversation_stream', () => {
+      const mocked = {
+      useConversationStream: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/agents/use_agents', () => {
+      const mocked = {
+      useAgentBuilderAgents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/agents/use_validate_agent_id', () => {
+      const mocked = {
+      useValidateAgentId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_conversation', () => {
+      const mocked = {
+      useAgentId: vi.fn(),
+      useConversationReadOnly: vi.fn(),
+      useConversationTitle: vi.fn(),
+      useHasActiveConversation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_is_awaiting_prompt', () => {
+      const mocked = {
+      useIsAwaitingPrompt: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../context/conversation/use_conversation_id', () => {
+      const mocked = {
+      useConversationId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../context/conversation/conversation_context', () => {
+      const mocked = {
+      useConversationContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_submit_message', () => {
+      const mocked = {
+      useSubmitMessage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_send_user_message', () => {
+      const mocked = {
+      useSendUserMessage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_toasts', () => {
+      const mocked = {
+      useToasts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./message_editor', () => {
+      const mocked = {
+      useMessageEditor: vi.fn(),
+      MessageEditor: ({ onSubmit }: { onSubmit: () => void }) => (
+        <button data-test-subj="mock-message-editor-submit" type="button" onClick={onSubmit}>
+          submit
+        </button>
+      ),
+      CommandBadgeSerializationError: class extends Error {},
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./input_actions', () => {
+      const mocked = {
+      InputActions: ({
+        showTriggerModeToggle,
+        triggerMode,
+        onTriggerModeChange,
+      }: {
+        showTriggerModeToggle: boolean;
+        triggerMode: string;
+        onTriggerModeChange: (mode: string) => void;
+      }) =>
+        showTriggerModeToggle ? (
+          <input
+            data-test-subj="mock-agent-toggle"
+            type="checkbox"
+            checked={triggerMode === 'always'}
+            onChange={(event) => onTriggerModeChange(event.target.checked ? 'always' : 'never')}
+          />
+        ) : null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./attachment_pill', () => {
+      const mocked = {
+      AttachmentPill: ({
+        attachment,
+        onRemoveAttachment,
+      }: {
+        attachment: { id: string };
+        onRemoveAttachment?: () => void;
+      }) => (
+        <button
+          data-test-subj={`mock-remove-attachment-${attachment.id}`}
+          type="button"
+          onClick={onRemoveAttachment}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./attachment_group_pill', () => {
+      const mocked = {
+      AttachmentGroupPill: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_experimental_features', () => {
+      const mocked = {
+      useExperimentalFeatures: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_current_user', () => {
+      const mocked = {
+      useCurrentUser: vi
+        .fn()
+        .mockReturnValue({ currentUser: { user: { username: 'test-user' } }, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_input_draft', () => {
+      const mocked = {
+      useInputDraft: vi
+        .fn()
+        .mockReturnValue({ draft: null, saveDraft: vi.fn(), clearDraft: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../context/active_space_context', () => {
+      const mocked = {
+      useActiveSpaceId: vi.fn().mockReturnValue('default'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/agent-builder-browser', () => {
+      const mocked = {
+      ConversationInputShell: ({
+        children,
+        isDisabled,
+        'data-test-subj': testSubj,
+      }: {
+        children: React.ReactNode;
+        isDisabled?: boolean;
+        'data-test-subj'?: string;
+      }) => (
+        <div data-test-subj={testSubj} aria-disabled={isDisabled}>
+          {children}
+        </div>
+      ),
+      formatAgentBuilderErrorMessage: (error: Error) => error.message,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseConversationStream = jest.mocked(useConversationStream);
-const mockedUseAgentBuilderAgents = jest.mocked(useAgentBuilderAgents);
-const mockedUseValidateAgentId = jest.mocked(useValidateAgentId);
-const mockedUseAgentId = jest.mocked(useAgentId);
-const mockedUseConversationReadOnly = jest.mocked(useConversationReadOnly);
-const mockedUseConversationTitle = jest.mocked(useConversationTitle);
-const mockedUseHasActiveConversation = jest.mocked(useHasActiveConversation);
-const mockedUseIsAwaitingPrompt = jest.mocked(useIsAwaitingPrompt);
-const mockedUseConversationId = jest.mocked(useConversationId);
-const mockedUseConversationContext = jest.mocked(useConversationContext);
-const mockedUseSubmitMessage = jest.mocked(useSubmitMessage);
-const mockedUseSendUserMessage = jest.mocked(useSendUserMessage);
-const mockedUseToasts = jest.mocked(useToasts);
-const mockedUseMessageEditor = jest.mocked(useMessageEditor);
-const mockedUseAgentBuilderServices = jest.mocked(useAgentBuilderServices);
-const mockedUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
-const mockedUseInputDraft = jest.mocked(useInputDraft);
+const mockedUseConversationStream = vi.mocked(useConversationStream);
+const mockedUseAgentBuilderAgents = vi.mocked(useAgentBuilderAgents);
+const mockedUseValidateAgentId = vi.mocked(useValidateAgentId);
+const mockedUseAgentId = vi.mocked(useAgentId);
+const mockedUseConversationReadOnly = vi.mocked(useConversationReadOnly);
+const mockedUseConversationTitle = vi.mocked(useConversationTitle);
+const mockedUseHasActiveConversation = vi.mocked(useHasActiveConversation);
+const mockedUseIsAwaitingPrompt = vi.mocked(useIsAwaitingPrompt);
+const mockedUseConversationId = vi.mocked(useConversationId);
+const mockedUseConversationContext = vi.mocked(useConversationContext);
+const mockedUseSubmitMessage = vi.mocked(useSubmitMessage);
+const mockedUseSendUserMessage = vi.mocked(useSendUserMessage);
+const mockedUseToasts = vi.mocked(useToasts);
+const mockedUseMessageEditor = vi.mocked(useMessageEditor);
+const mockedUseAgentBuilderServices = vi.mocked(useAgentBuilderServices);
+const mockedUseExperimentalFeatures = vi.mocked(useExperimentalFeatures);
+const mockedUseInputDraft = vi.mocked(useInputDraft);
 
-const submitMessage = jest.fn();
-const sendUserMessage = jest.fn();
-const addErrorToast = jest.fn();
+const submitMessage = vi.fn();
+const sendUserMessage = vi.fn();
+const addErrorToast = vi.fn();
 const editorController = {
-  focus: jest.fn(),
-  getContent: jest.fn().mockReturnValue('hello agent'),
-  setContent: jest.fn(),
-  clear: jest.fn(),
+  focus: vi.fn(),
+  getContent: vi.fn().mockReturnValue('hello agent'),
+  setContent: vi.fn(),
+  clear: vi.fn(),
   isEmpty: false,
-  getPlaceholderNames: jest.fn(() => []),
-  removePlaceholderByName: jest.fn(),
+  getPlaceholderNames: vi.fn(() => []),
+  removePlaceholderByName: vi.fn(),
 };
 
 describe('ConversationInput', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     editorController.getContent.mockReturnValue('hello agent');
     editorController.isEmpty = false;
 
@@ -196,16 +258,16 @@ describe('ConversationInput', () => {
     mockedUseConversationId.mockReturnValue(undefined);
     mockedUseConversationContext.mockReturnValue({
       attachments: [],
-      upsertAttachments: jest.fn(),
-      removeAttachment: jest.fn(),
-      resetAttachments: jest.fn(),
+      upsertAttachments: vi.fn(),
+      removeAttachment: vi.fn(),
+      resetAttachments: vi.fn(),
       isEmbeddedContext: false,
       conversationActions: {} as never,
     });
     mockedUseAgentBuilderServices.mockReturnValue({
       filesClient: {
-        create: jest.fn().mockResolvedValue({ file: { id: 'test-file-id' } }),
-        upload: jest.fn().mockResolvedValue(undefined),
+        create: vi.fn().mockResolvedValue({ file: { id: 'test-file-id' } }),
+        upload: vi.fn().mockResolvedValue(undefined),
       },
     } as never);
     mockedUseExperimentalFeatures.mockReturnValue(true);
@@ -217,7 +279,7 @@ describe('ConversationInput', () => {
     } as never);
     mockedUseToasts.mockReturnValue({
       addErrorToast,
-      addSuccessToast: jest.fn(),
+      addSuccessToast: vi.fn(),
     } as never);
     mockedUseMessageEditor.mockReturnValue({
       messageEditor: {} as never,
@@ -226,7 +288,7 @@ describe('ConversationInput', () => {
   });
 
   it('calls onSubmitOverride with editor content and skips submitMessage when override is provided', () => {
-    const onSubmitOverride = jest.fn();
+    const onSubmitOverride = vi.fn();
 
     render(<ConversationInput onSubmitOverride={onSubmitOverride} />);
 
@@ -266,7 +328,7 @@ describe('ConversationInput', () => {
 
     it('sends without running the agent when switched off and clears the editor on success', async () => {
       mockedUseConversationId.mockReturnValue('conv-1');
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
 
       render(<ConversationInput onSubmit={onSubmit} />);
 
@@ -322,22 +384,22 @@ describe('ConversationInput', () => {
 
   describe('auto-focus', () => {
     it('focuses the editor shortly after mount', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       render(<ConversationInput />);
 
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
       expect(editorController.focus).toHaveBeenCalled();
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('does not steal focus from an open HITL prompt', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       mockedUseIsAwaitingPrompt.mockReturnValue(true);
       render(<ConversationInput />);
 
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
       expect(editorController.focus).not.toHaveBeenCalled();
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 
@@ -362,12 +424,12 @@ describe('ConversationInput', () => {
     const attachment = { id: 'a1', type: 'text', data: {} };
 
     it('removes a normal attachment via context', () => {
-      const removeAttachment = jest.fn();
+      const removeAttachment = vi.fn();
       mockedUseConversationContext.mockReturnValue({
         attachments: [attachment],
-        upsertAttachments: jest.fn(),
+        upsertAttachments: vi.fn(),
         removeAttachment,
-        resetAttachments: jest.fn(),
+        resetAttachments: vi.fn(),
         isEmbeddedContext: false,
         conversationActions: {} as never,
       } as never);
@@ -383,8 +445,8 @@ describe('ConversationInput', () => {
     it('hydrates the editor with a saved draft on mount', () => {
       mockedUseInputDraft.mockReturnValue({
         draft: 'saved draft text',
-        saveDraft: jest.fn(),
-        clearDraft: jest.fn(),
+        saveDraft: vi.fn(),
+        clearDraft: vi.fn(),
       });
 
       render(<ConversationInput />);
@@ -395,14 +457,14 @@ describe('ConversationInput', () => {
     it('does not hydrate draft when initialMessage is present', () => {
       mockedUseInputDraft.mockReturnValue({
         draft: 'stale draft',
-        saveDraft: jest.fn(),
-        clearDraft: jest.fn(),
+        saveDraft: vi.fn(),
+        clearDraft: vi.fn(),
       });
       mockedUseConversationContext.mockReturnValue({
         attachments: [],
-        upsertAttachments: jest.fn(),
-        removeAttachment: jest.fn(),
-        resetAttachments: jest.fn(),
+        upsertAttachments: vi.fn(),
+        removeAttachment: vi.fn(),
+        resetAttachments: vi.fn(),
         isEmbeddedContext: false,
         conversationActions: {} as never,
         initialMessage: 'pre-filled message',
@@ -415,8 +477,8 @@ describe('ConversationInput', () => {
     });
 
     it('clears the draft on submit via the default path', () => {
-      const clearDraft = jest.fn();
-      mockedUseInputDraft.mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft });
+      const clearDraft = vi.fn();
+      mockedUseInputDraft.mockReturnValue({ draft: null, saveDraft: vi.fn(), clearDraft });
 
       render(<ConversationInput />);
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
@@ -425,9 +487,9 @@ describe('ConversationInput', () => {
     });
 
     it('clears the draft on submit with trigger mode Never', async () => {
-      const clearDraft = jest.fn();
+      const clearDraft = vi.fn();
       mockedUseConversationId.mockReturnValue('conv-1');
-      mockedUseInputDraft.mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft });
+      mockedUseInputDraft.mockReturnValue({ draft: null, saveDraft: vi.fn(), clearDraft });
 
       render(<ConversationInput />);
       fireEvent.click(screen.getByTestId('mock-agent-toggle'));
@@ -439,8 +501,8 @@ describe('ConversationInput', () => {
     it('clears the editor when switching to a conversation with no saved draft', () => {
       mockedUseInputDraft.mockReturnValue({
         draft: null,
-        saveDraft: jest.fn(),
-        clearDraft: jest.fn(),
+        saveDraft: vi.fn(),
+        clearDraft: vi.fn(),
       });
 
       const { rerender } = render(<ConversationInput />);

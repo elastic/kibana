@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SearchResponseWarningsBadgePopoverContent } from './badge_popover_content';
@@ -15,8 +17,8 @@ import type { SearchResponseWarning } from '../../types';
 describe('SearchResponseWarningsBadgePopoverContent', () => {
   describe('single warning', () => {
     test('Clicking "view details" should open warning details', () => {
-      const mockOpenInInspector = jest.fn();
-      const mockOnViewDetailsClick = jest.fn();
+      const mockOpenInInspector = vi.fn();
+      const mockOnViewDetailsClick = vi.fn();
       const warnings = [
         {
           type: 'incomplete',
@@ -45,8 +47,8 @@ describe('SearchResponseWarningsBadgePopoverContent', () => {
   });
 
   describe('multiple warnings', () => {
-    const request1MockOpenInInspector = jest.fn();
-    const request2MockOpenInInspector = jest.fn();
+    const request1MockOpenInInspector = vi.fn();
+    const request2MockOpenInInspector = vi.fn();
     const warnings = [
       {
         type: 'incomplete',
@@ -80,7 +82,7 @@ describe('SearchResponseWarningsBadgePopoverContent', () => {
     });
 
     test('Clicking "view details" should open content panel with button to view details for each warning', () => {
-      const mockOnViewDetailsClick = jest.fn();
+      const mockOnViewDetailsClick = vi.fn();
       render(
         <SearchResponseWarningsBadgePopoverContent
           onViewDetailsClick={mockOnViewDetailsClick}

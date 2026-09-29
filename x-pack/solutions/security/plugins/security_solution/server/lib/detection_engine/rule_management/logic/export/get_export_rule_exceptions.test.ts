@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
@@ -90,7 +92,7 @@ describe('get_export_rule_exceptions', () => {
 
     test('it throws error if error occurs in getting exceptions', async () => {
       const exceptionsClient = getExceptionListClientMock();
-      exceptionsClient.exportExceptionListAndItems = jest.fn().mockRejectedValue(new Error('oops'));
+      exceptionsClient.exportExceptionListAndItems = vi.fn().mockRejectedValue(new Error('oops'));
       // This rule has 2 exception lists tied to it
       await expect(async () => {
         await getExportableExceptions([getListMock()], exceptionsClient);

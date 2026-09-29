@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance, Mocked } from 'vitest';
+
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -62,52 +65,58 @@ import { useBulkGetAgentPolicies } from '../../../services/policies/hooks';
 import type { PartialEndpointPolicyData } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 
-const mockUserPrivileges = useUserPrivileges as jest.Mock;
+const mockUserPrivileges = useUserPrivileges as Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough, it needs to be inline in this one file
-jest.mock('@kbn/i18n-react', () => {
-  const { i18n } = jest.requireActual('@kbn/i18n');
+vi.mock('@kbn/i18n-react', async () => {
+  const { i18n } = (await vi.importActual('@kbn/i18n'));
   i18n.init({ locale: 'en' });
-  const originalModule = jest.requireActual('@kbn/i18n-react');
-  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
+  const originalModule = (await vi.importActual('@kbn/i18n-react'));
+  const FormattedRelative = vi.fn().mockImplementation(() => '20 hours ago');
 
   return {
     ...originalModule,
     FormattedRelative,
   };
 });
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../common/components/link_to');
-jest.mock('../../../services/policies/ingest', () => {
-  const originalModule = jest.requireActual('../../../services/policies/ingest');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/components/link_to');
+vi.mock('../../../services/policies/ingest', async () => {
+  const originalModule = (await vi.importActual('../../../services/policies/ingest'));
   return {
     ...originalModule,
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),
   };
 });
 
-jest.mock('../../../hooks/agents/use_get_agent_status');
-const useGetAgentStatusMock = _useGetAgentStatus as jest.Mock;
+vi.mock('../../../hooks/agents/use_get_agent_status');
+const useGetAgentStatusMock = _useGetAgentStatus as Mock;
 
-jest.mock('../../../services/policies/hooks', () => ({
-  ...jest.requireActual('../../../services/policies/hooks'),
-  useBulkGetAgentPolicies: jest.fn().mockReturnValue({}),
-}));
-jest.mock(
+vi.mock('../../../services/policies/hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../services/policies/hooks')),
+      useBulkGetAgentPolicies: vi.fn().mockReturnValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields',
-  () => ({
-    useFetchAnonymizationFields: jest.fn().mockReturnValue({
-      data: { data: [], total: 0, page: 1, perPage: 10 },
-      isLoading: false,
-      refetch: jest.fn(),
-    }),
-  })
+  () => {
+      const mocked = {
+        useFetchAnonymizationFields: vi.fn().mockReturnValue({
+          data: { data: [], total: 0, page: 1, perPage: 10 },
+          isLoading: false,
+          refetch: vi.fn(),
+        }),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-const useBulkGetAgentPoliciesMock = useBulkGetAgentPolicies as unknown as jest.Mock<
+const useBulkGetAgentPoliciesMock = useBulkGetAgentPolicies as unknown as Mock<
   DeepPartial<ReturnType<typeof useBulkGetAgentPolicies>>
 >;
 
-const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
+const mockUseUiSetting$ = useUiSetting$ as Mock;
 const timepickerRanges = [
   {
     from: 'now/d',
@@ -161,13 +170,16 @@ const timepickerRanges = [
   },
 ];
 
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn().mockReturnValue({ isLoading: false, data: [] }),
-}));
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/use_license');
-jest.mock('../../../hooks/endpoint/use_get_endpoint_details');
-const mockUseGetEndpointDetails = useGetEndpointDetails as jest.Mock;
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn().mockReturnValue({ isLoading: false, data: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/hooks/use_license');
+vi.mock('../../../hooks/endpoint/use_get_endpoint_details');
+const mockUseGetEndpointDetails = useGetEndpointDetails as Mock;
 
 describe('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
@@ -179,14 +191,14 @@ describe('when on the endpoint list page', () => {
   let store: AppContextTestRender['store'];
   let coreStart: AppContextTestRender['coreStart'];
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
-  let abortSpy: jest.SpyInstance;
+  let abortSpy: MockInstance;
 
-  (licenseService as jest.Mocked<typeof licenseService>).isPlatinumPlus.mockReturnValue(true);
+  (licenseService as Mocked<typeof licenseService>).isPlatinumPlus.mockReturnValue(true);
 
   beforeAll(() => {
     const mockAbort = new AbortController();
     mockAbort.abort();
-    abortSpy = jest.spyOn(window, 'AbortController').mockImplementation(() => mockAbort);
+    abortSpy = vi.spyOn(window, 'AbortController').mockImplementation(() => mockAbort);
   });
 
   afterAll(() => {
@@ -203,8 +215,8 @@ describe('when on the endpoint list page', () => {
 
     // Because `.../common/lib/kibana` was mocked, we need to alter these hooks (which are jest.MockFunctions)
     // to use services that we have in our test `mockedContext`
-    (useToasts as jest.Mock).mockReturnValue(coreStart.notifications.toasts);
-    (useKibana as jest.Mock).mockReturnValue({ services: mockedContext.startServices });
+    (useToasts as Mock).mockReturnValue(coreStart.notifications.toasts);
+    (useKibana as Mock).mockReturnValue({ services: mockedContext.startServices });
 
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
@@ -277,7 +289,7 @@ describe('when on the endpoint list page', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should show loading spinner while Agent Policies are loading', async () => {
@@ -529,7 +541,7 @@ describe('when on the endpoint list page', () => {
         });
       });
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('should display rows in the table', async () => {
@@ -681,7 +693,7 @@ describe('when on the endpoint list page', () => {
       });
     });
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should update data after some time', async () => {
@@ -779,7 +791,7 @@ describe('when on the endpoint list page', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockUserPrivileges.mockReset();
     });
 
@@ -878,7 +890,7 @@ describe('when on the endpoint list page', () => {
           const useUiSetting$Mock = createUseUiSetting$Mock();
 
           return key === DEFAULT_TIMEPICKER_QUICK_RANGES
-            ? [timepickerRanges, jest.fn()]
+            ? [timepickerRanges, vi.fn()]
             : useUiSetting$Mock(key, defaultValue);
         });
       });
@@ -1022,7 +1034,7 @@ describe('when on the endpoint list page', () => {
     });
 
     describe('when showing the Host Isolate panel', () => {
-      const getKibanaServicesMock = KibanaServices.get as jest.Mock;
+      const getKibanaServicesMock = KibanaServices.get as Mock;
       const confirmIsolateAndWaitForApiResponse = async (
         typeOfResponse: 'success' | 'failure' = 'success'
       ) => {
@@ -1269,7 +1281,7 @@ describe('when on the endpoint list page', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockUserPrivileges.mockReset();
     });
 
@@ -1352,7 +1364,7 @@ describe('when on the endpoint list page', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockUserPrivileges.mockReset();
     });
     it('is not displayed when transform state is not failed', () => {
@@ -1582,7 +1594,7 @@ describe('when on the endpoint list page', () => {
       });
     });
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockUserPrivileges.mockReset();
     });
     it('shows Isolate host option if canHostIsolate is READ/ALL', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { type DoneNotification } from '@kbn/shared-ux-file-upload';
 import { renderHook } from '@testing-library/react';
 import { type UploadFinishedState, type UploadIdleState, UploadPhase, ActionType } from './types';
@@ -25,8 +27,8 @@ describe('useUploadComplete', () => {
       placeholder,
     };
 
-    const replacePlaceholder = jest.fn();
-    const dispatch = jest.fn();
+    const replacePlaceholder = vi.fn();
+    const dispatch = vi.fn();
 
     renderHook(() => useUploadComplete(state, replacePlaceholder, dispatch));
 
@@ -36,8 +38,8 @@ describe('useUploadComplete', () => {
 
   it('does nothing when phase is not FINISHED', () => {
     const state: UploadIdleState = { phase: UploadPhase.IDLE };
-    const replacePlaceholder = jest.fn();
-    const dispatch = jest.fn();
+    const replacePlaceholder = vi.fn();
+    const dispatch = vi.fn();
 
     renderHook(() => useUploadComplete(state, replacePlaceholder, dispatch));
 

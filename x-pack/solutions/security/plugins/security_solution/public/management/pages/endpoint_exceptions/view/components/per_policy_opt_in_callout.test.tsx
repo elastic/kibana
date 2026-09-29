@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { EndpointExceptionsPerPolicyOptInCalloutProps } from './per_policy_opt_in_callout';
 import { EndpointExceptionsPerPolicyOptInCallout } from './per_policy_opt_in_callout';
@@ -20,8 +22,8 @@ describe('EndpointExceptionsPerPolicyOptInCallout', () => {
 
   beforeEach(() => {
     props = {
-      onDismiss: jest.fn(),
-      onClickUpdateDetails: jest.fn(),
+      onDismiss: vi.fn(),
+      onClickUpdateDetails: vi.fn(),
       canOptIn: true,
     };
 

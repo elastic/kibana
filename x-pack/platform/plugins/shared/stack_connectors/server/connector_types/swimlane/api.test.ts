@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { api } from './api';
 import type { ExternalService } from './types';
 import {
@@ -18,7 +21,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 const mockedLogger = loggerMock.create();
 
 describe('api', () => {
-  let externalService: jest.Mocked<ExternalService>;
+  let externalService: Mocked<ExternalService>;
 
   beforeEach(() => {
     externalService = externalServiceMock.create();
@@ -111,7 +114,7 @@ describe('api', () => {
     });
 
     test('it calls createComment correctly', async () => {
-      const mockedToISOString = jest
+      const mockedToISOString = vi
         .spyOn(Date.prototype, 'toISOString')
         .mockReturnValue('2021-06-15T18:02:29.404Z');
 

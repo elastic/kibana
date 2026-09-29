@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getModifiedILMs } from './modified_ilms';
 
-jest.mock('../services/epm/elasticsearch/template/default_settings', () => {
+vi.mock('../services/epm/elasticsearch/template/default_settings', () => {
   return {
-    getILMPolicies: jest.fn().mockResolvedValue(
+    getILMPolicies: vi.fn().mockResolvedValue(
       new Map([
         ['logs', { deprecatedILMPolicy: { version: 2 }, newILMPolicy: { version: 1 } }],
         ['metrics', { deprecatedILMPolicy: { version: 1 }, newILMPolicy: { version: 3 } }],

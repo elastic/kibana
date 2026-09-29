@@ -5,27 +5,38 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ServiceFlyoutService } from '.';
 import { ServiceFlyout } from '.';
 
-jest.mock('../../../plugin', () => ({
-  getApmInternalServices: () => ({ callApmApi: jest.fn() }),
-}));
+vi.mock('../../../plugin', () => {
+      const mocked = {
+      getApmInternalServices: () => ({ callApmApi: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_apm_indices', () => ({
-  useApmIndices: () => ({ indices: undefined, loading: false }),
-}));
+vi.mock('./hooks/use_apm_indices', () => {
+      const mocked = {
+      useApmIndices: () => ({ indices: undefined, loading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../context/time_range_metadata/time_range_metadata_context', () => ({
-  TimeRangeMetadataContextProvider: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
-}));
+vi.mock('../../../context/time_range_metadata/time_range_metadata_context', () => {
+      const mocked = {
+      TimeRangeMetadataContextProvider: ({ children }: { children: React.ReactNode }) => (
+        <>{children}</>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -33,59 +44,71 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../responsive_flyout', () => ({
-  ResponsiveFlyout: ({
-    children,
-    onClose,
-    historyKey,
-  }: {
-    children: React.ReactNode;
-    onClose: () => void;
-    historyKey?: symbol;
-  }) => (
-    <section data-test-subj="responsiveFlyoutMock" data-history-key={historyKey?.toString()}>
-      <button data-test-subj="responsiveFlyoutCloseButton" onClick={onClose}>
-        close
-      </button>
-      {children}
-    </section>
-  ),
-}));
+vi.mock('../responsive_flyout', () => {
+      const mocked = {
+      ResponsiveFlyout: ({
+        children,
+        onClose,
+        historyKey,
+      }: {
+        children: React.ReactNode;
+        onClose: () => void;
+        historyKey?: symbol;
+      }) => (
+        <section data-test-subj="responsiveFlyoutMock" data-history-key={historyKey?.toString()}>
+          <button data-test-subj="responsiveFlyoutCloseButton" onClick={onClose}>
+            close
+          </button>
+          {children}
+        </section>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_service_flyout_capabilities', () => ({
-  useServiceFlyoutCapabilities: () => ({
-    loading: false,
-    error: undefined,
-    schema: 'ecs',
-    header: { serviceNameLink: true, badges: true },
-    overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
-    footer: { alerts: true, slos: true },
-  }),
-}));
-jest.mock('../../../hooks/use_time_range', () => ({
-  useTimeRange: () => ({ start: '2024-01-01T00:00:00.000Z', end: '2024-01-01T01:00:00.000Z' }),
-}));
+vi.mock('./hooks/use_service_flyout_capabilities', () => {
+      const mocked = {
+      useServiceFlyoutCapabilities: () => ({
+        loading: false,
+        error: undefined,
+        schema: 'ecs',
+        header: { serviceNameLink: true, badges: true },
+        overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
+        footer: { alerts: true, slos: true },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => ({ start: '2024-01-01T00:00:00.000Z', end: '2024-01-01T01:00:00.000Z' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./header', () => ({
-  ServiceFlyoutHeader: ({
-    title,
-    onSelectedTabIdChange,
-  }: {
-    title: string;
-    onSelectedTabIdChange: (tabId: string) => void;
-  }) => (
-    <div>
-      <h2>{title}</h2>
-      <button data-test-subj="mockTabChange" onClick={() => onSelectedTabIdChange('alerts')}>
-        change tab
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./header', () => {
+      const mocked = {
+      ServiceFlyoutHeader: ({
+        title,
+        onSelectedTabIdChange,
+      }: {
+        title: string;
+        onSelectedTabIdChange: (tabId: string) => void;
+      }) => (
+        <div>
+          <h2>{title}</h2>
+          <button data-test-subj="mockTabChange" onClick={() => onSelectedTabIdChange('alerts')}>
+            change tab
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The overview reads environment/transactionType from context and calls the context setters.
-jest.mock('./overview', () => {
-  const { useServiceFlyoutContext } = jest.requireActual('./service_flyout_context');
+vi.mock('./overview', async () => {
+  const { useServiceFlyoutContext } = (await vi.importActual('./service_flyout_context'));
   return {
     ServiceFlyoutOverview: () => {
       const {
@@ -115,8 +138,8 @@ jest.mock('./overview', () => {
 });
 
 // The footer reads environment/transactionType from context to display them.
-jest.mock('./footer', () => {
-  const { useServiceFlyoutContext } = jest.requireActual('./service_flyout_context');
+vi.mock('./footer', async () => {
+  const { useServiceFlyoutContext } = (await vi.importActual('./service_flyout_context'));
   return {
     ServiceFlyoutFooter: () => {
       const {
@@ -136,7 +159,7 @@ const service: ServiceFlyoutService = {
   agentName: 'java',
 };
 
-const mockReportServiceFlyoutViewed = jest.fn();
+const mockReportServiceFlyoutViewed = vi.fn();
 
 const contextProps = {
   deps: {
@@ -152,7 +175,7 @@ const contextProps = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('ServiceFlyout telemetry', () => {
@@ -162,7 +185,7 @@ describe('ServiceFlyout telemetry', () => {
         {...contextProps}
         service={service}
         filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -179,7 +202,7 @@ describe('ServiceFlyout telemetry', () => {
         {...contextProps}
         service={service}
         filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -199,7 +222,7 @@ describe('ServiceFlyout initial state', () => {
         {...contextProps}
         service={service}
         filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -209,7 +232,7 @@ describe('ServiceFlyout initial state', () => {
 
 describe('ServiceFlyout local filter state', () => {
   it('keeps filter changes local to the flyout and does not close it', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
 
     render(
       <ServiceFlyout
@@ -231,7 +254,7 @@ describe('ServiceFlyout local filter state', () => {
   });
 
   it('still closes when the flyout close handler is used', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
 
     render(
       <ServiceFlyout
@@ -253,7 +276,7 @@ describe('ServiceFlyout local filter state', () => {
         {...contextProps}
         service={service}
         filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -266,7 +289,7 @@ describe('ServiceFlyout local filter state', () => {
         {...contextProps}
         service={service}
         filters={{ environment: 'staging', rangeFrom: 'now-15m', rangeTo: 'now' }}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -280,7 +303,7 @@ describe('ServiceFlyout local filter state', () => {
         key={service.name}
         service={service}
         filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -298,7 +321,7 @@ describe('ServiceFlyout local filter state', () => {
         key={otherService.name}
         service={otherService}
         filters={{ environment: 'staging', rangeFrom: 'now-15m', rangeTo: 'now' }}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -315,7 +338,7 @@ describe('ServiceFlyout historyKey', () => {
         {...contextProps}
         service={service}
         filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
         historyKey={historyKey}
       />
     );
@@ -334,7 +357,7 @@ describe('ServiceFlyout historyKey', () => {
         {...contextProps}
         service={service}
         filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 

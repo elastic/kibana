@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mockIndexPattern } from '../../../../../../common/mock';
@@ -21,17 +24,23 @@ import { CALLOUT_TEST_ID } from './migration_message_callout';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
-jest.mock('../../../../../../common/lib/kibana');
-jest.mock('../hooks/use_show_alerts_only_migration_message');
+vi.mock('../../../../../../common/lib/kibana');
+vi.mock('../hooks/use_show_alerts_only_migration_message');
 
 // Stub the heavy search-bar and data-provider subtrees; mounting the real
 // unified-search + DataProviders trees intermittently blew the 5s Jest budget.
-jest.mock('../../../search_or_filter', () => ({
-  StatefulSearchOrFilter: () => <div data-test-subj="mockStatefulSearchOrFilter" />,
-}));
-jest.mock('../../../data_providers', () => ({
-  DataProviders: () => <div data-test-subj="dataProviders" />,
-}));
+vi.mock('../../../search_or_filter', () => {
+      const mocked = {
+      StatefulSearchOrFilter: () => <div data-test-subj="mockStatefulSearchOrFilter" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../data_providers', () => {
+      const mocked = {
+      DataProviders: () => <div data-test-subj="dataProviders" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Header', () => {
   const indexPattern = mockIndexPattern;
@@ -54,11 +63,11 @@ describe('Header', () => {
     dataProviders: mockDataProviders,
     filterManager: new FilterManager(mockUiSettingsForFilterManager),
     indexPattern,
-    onDataProviderEdited: jest.fn(),
-    onDataProviderRemoved: jest.fn(),
-    onToggleDataProviderEnabled: jest.fn(),
-    onToggleDataProviderExcluded: jest.fn(),
-    onToggleDataProviderType: jest.fn(),
+    onDataProviderEdited: vi.fn(),
+    onDataProviderRemoved: vi.fn(),
+    onToggleDataProviderEnabled: vi.fn(),
+    onToggleDataProviderExcluded: vi.fn(),
+    onToggleDataProviderType: vi.fn(),
     show: true,
     showCallOutUnauthorizedMsg: false,
     status: TimelineStatusEnum.active,
@@ -191,7 +200,7 @@ describe('Header', () => {
   });
 
   test('should render the migration callout', async () => {
-    (useShouldShowAlertsOnlyMigrationMessage as jest.Mock).mockReturnValue(true);
+    (useShouldShowAlertsOnlyMigrationMessage as Mock).mockReturnValue(true);
 
     const wrapper = await getWrapper(
       <TestProviders>

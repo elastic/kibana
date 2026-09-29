@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { Alert } from '@kbn/alerting-types';
@@ -12,9 +15,9 @@ import type { SnoozedInstance } from '@kbn/response-ops-alerts-apis/types';
 import { useAlertSnoozedState } from './use_alert_snoozed_state';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
-jest.mock('../contexts/alerts_table_context');
+vi.mock('../contexts/alerts_table_context');
 
-const mockUseAlertsTableContext = useAlertsTableContext as jest.MockedFunction<
+const mockUseAlertsTableContext = useAlertsTableContext as MockedFunction<
   typeof useAlertsTableContext
 >;
 
@@ -36,7 +39,7 @@ const makeAlert = (ruleId: string, instanceId: string): Alert =>
 
 describe('useAlertSnoozedState', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns isSnoozed: false when snoozedAlerts is empty', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -16,11 +18,11 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { createMockSpaces } from './test_utils';
 
-jest.mock('@kbn/discover-utils');
-jest.mock('@kbn/esql-utils');
+vi.mock('@kbn/discover-utils');
+vi.mock('@kbn/esql-utils');
 
-const mockGetEsqlDataView = jest.mocked(getEsqlDataView);
-const mockGetESQLAdHocDataview = jest.mocked(getESQLAdHocDataview);
+const mockGetEsqlDataView = vi.mocked(getEsqlDataView);
+const mockGetESQLAdHocDataview = vi.mocked(getESQLAdHocDataview);
 
 const http = httpServiceMock.createSetupContract();
 const { dataViews } = dataPluginMock.createStartContract();
@@ -28,11 +30,14 @@ const mockSpaces = createMockSpaces();
 
 const mockDefaultQuery = 'FROM .rule-events | WHERE type == "alert"';
 
-jest.mock('@kbn/alerting-v2-common-queries', () => ({
-  buildEpisodesBaseQuery: jest.fn().mockReturnValue({
-    print: jest.fn().mockReturnValue('FROM .rule-events | WHERE type == "alert"'),
-  }),
-}));
+vi.mock('@kbn/alerting-v2-common-queries', () => {
+      const mocked = {
+      buildEpisodesBaseQuery: vi.fn().mockReturnValue({
+        print: vi.fn().mockReturnValue('FROM .rule-events | WHERE type == "alert"'),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDataView = {
   fields: [
@@ -41,16 +46,16 @@ const mockDataView = {
     { name: '@timestamp' },
     { name: 'other.field' },
   ],
-  setFieldCustomLabel: jest.fn(),
-  setFieldFormat: jest.fn(),
-  addRuntimeField: jest.fn(),
+  setFieldCustomLabel: vi.fn(),
+  setFieldFormat: vi.fn(),
+  addRuntimeField: vi.fn(),
 } as unknown as DataView;
 
 mockGetEsqlDataView.mockResolvedValue(mockDataView);
 
 describe('useAlertingEpisodesDataView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call getEsqlDataView with space-scoped episodes query', async () => {
@@ -150,11 +155,11 @@ describe('useAlertingEpisodesDataView', () => {
     const fields: Array<{ name: string }> = [];
     const fallbackDataView = {
       fields: Object.assign(fields, {
-        add: jest.fn((spec: { name: string }) => fields.push(spec)),
+        add: vi.fn((spec: { name: string }) => fields.push(spec)),
       }),
-      setFieldCustomLabel: jest.fn(),
-      setFieldFormat: jest.fn(),
-      addRuntimeField: jest.fn(),
+      setFieldCustomLabel: vi.fn(),
+      setFieldFormat: vi.fn(),
+      addRuntimeField: vi.fn(),
     } as unknown as DataView;
     const services = { dataViews, http, spaces: mockSpaces };
     const wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -199,9 +204,7 @@ describe('useAlertingEpisodesDataView', () => {
     });
 
     it('only declares fields returned by the episodes query', async () => {
-      const { ALERT_EPISODE_FIELDS } = jest.requireActual<
-        typeof import('@kbn/alerting-v2-common-queries')
-      >('@kbn/alerting-v2-common-queries');
+      const { ALERT_EPISODE_FIELDS } = (await vi.importActual<typeof import('@kbn/alerting-v2-common-queries')>('@kbn/alerting-v2-common-queries'));
 
       const { result } = renderHook(() => useAlertingEpisodesDataView({ services }), { wrapper });
 

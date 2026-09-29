@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import type { EnterpriseSearchApplicationDetails } from '../../../../../common/types/search_applications';
@@ -55,8 +57,8 @@ describe('SearchApplicationViewLogic', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
 
     mountFetchSearchApplicationApiLogic();
     mount(
@@ -85,7 +87,7 @@ describe('SearchApplicationViewLogic', () => {
 
     describe('searchApplicationUpdated', () => {
       it('fetches new search application details', () => {
-        jest.spyOn(SearchApplicationIndicesLogic.actions, 'fetchSearchApplication');
+        vi.spyOn(SearchApplicationIndicesLogic.actions, 'fetchSearchApplication');
 
         SearchApplicationIndicesLogic.actions.searchApplicationUpdated({
           ...mockSearchApplicationData,
@@ -102,7 +104,7 @@ describe('SearchApplicationViewLogic', () => {
     });
     describe('removeIndexFromSearchApplication', () => {
       it('updated search application removing the given index', () => {
-        jest.spyOn(SearchApplicationIndicesLogic.actions, 'updateSearchApplicationRequest');
+        vi.spyOn(SearchApplicationIndicesLogic.actions, 'updateSearchApplicationRequest');
 
         SearchApplicationIndicesLogic.actions.removeIndexFromSearchApplication(
           mockSearchApplicationData.indices[0].name
@@ -122,7 +124,7 @@ describe('SearchApplicationViewLogic', () => {
     });
     describe('addIndicesToSearchApplication', () => {
       it('updated search application removing the given index', () => {
-        jest.spyOn(SearchApplicationIndicesLogic.actions, 'updateSearchApplicationRequest');
+        vi.spyOn(SearchApplicationIndicesLogic.actions, 'updateSearchApplicationRequest');
 
         SearchApplicationIndicesLogic.actions.addIndicesToSearchApplication(['search-003']);
 

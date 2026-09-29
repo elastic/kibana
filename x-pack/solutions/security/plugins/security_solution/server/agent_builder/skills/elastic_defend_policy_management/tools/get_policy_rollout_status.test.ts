@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolType } from '@kbn/agent-builder-common';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
@@ -16,18 +18,18 @@ import {
   getPolicyRolloutStatusSchema,
 } from './get_policy_rollout_status';
 
-jest.mock('./create_policy_tool', () => {
-  const actual = jest.requireActual('./create_policy_tool');
+vi.mock('./create_policy_tool', async () => {
+  const actual = (await vi.importActual('./create_policy_tool'));
   return {
     ...actual,
-    createPolicyTool: jest.fn((options) => actual.createPolicyTool(options)),
+    createPolicyTool: vi.fn((options) => actual.createPolicyTool(options)),
   };
 });
 
-const mockedCreatePolicyTool = jest.mocked(createPolicyTool);
+const mockedCreatePolicyTool = vi.mocked(createPolicyTool);
 
-const getStartServices = jest.fn(async () => [
-  { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
+const getStartServices = vi.fn(async () => [
+  { savedObjects: { getScopedClient: vi.fn().mockReturnValue({}) } },
 ]) as unknown as StartServicesAccessor;
 
 const createAuthorizedService = () => {

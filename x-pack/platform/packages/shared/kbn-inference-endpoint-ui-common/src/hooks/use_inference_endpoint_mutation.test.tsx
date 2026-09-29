@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { useInferenceEndpointMutation } from './use_inference_endpoint_mutation';
 import { act, renderHook } from '@testing-library/react';
@@ -13,16 +15,19 @@ import React from 'react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
-jest.mock('./use_inference_endpoint_mutation', () => ({
-  ...jest.requireActual('./use_inference_endpoint_mutation'),
-  addInferenceEndpoint: jest.fn(),
-  updateInferenceEndpoint: jest.fn(),
-}));
+vi.mock('./use_inference_endpoint_mutation', async () => {
+      const mocked = {
+      ...(await vi.importActual('./use_inference_endpoint_mutation')),
+      addInferenceEndpoint: vi.fn(),
+      updateInferenceEndpoint: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const httpMock = httpServiceMock.createStartContract();
 const mockToasts = notificationServiceMock.createStartContract().toasts;
 
-const mockOnSuccessCallback = jest.fn();
+const mockOnSuccessCallback = vi.fn();
 
 const mockConfig: any = {
   provider: 'test-provider',
@@ -60,7 +65,7 @@ describe('useInferenceEndpointMutation', () => {
 
   describe('Add Endpoint', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should handle successful endpoint creation', async () => {
@@ -110,7 +115,7 @@ describe('useInferenceEndpointMutation', () => {
 
   describe('Update Endpoint', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should handle successful endpoint update', async () => {

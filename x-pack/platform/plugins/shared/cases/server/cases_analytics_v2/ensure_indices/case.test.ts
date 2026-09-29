@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { CASE_INDEX_NAME } from '../constants';
@@ -17,18 +20,18 @@ const buildDeps = () => ({
 
 describe('ensureCaseIndex', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('creates the index with the correct settings when it does not exist', async () => {
     const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
-    (esClient.indices.create as unknown as jest.Mock).mockResolvedValue({});
+    (esClient.indices.exists as unknown as Mock).mockResolvedValue(false);
+    (esClient.indices.create as unknown as Mock).mockResolvedValue({});
 
     await ensureCaseIndex({ esClient, logger });
 
     expect(esClient.indices.create).toHaveBeenCalledTimes(1);
-    const call = (esClient.indices.create as unknown as jest.Mock).mock.calls[0][0];
+    const call = (esClient.indices.create as unknown as Mock).mock.calls[0][0];
     expect(call.index).toBe(CASE_INDEX_NAME);
     expect(call.settings).toMatchObject({
       'index.hidden': true,
@@ -47,25 +50,25 @@ describe('ensureCaseIndex', () => {
    */
   it('sets auto_expand_replicas to prevent max_shards_open failures on single-node clusters', async () => {
     const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
-    (esClient.indices.create as unknown as jest.Mock).mockResolvedValue({});
+    (esClient.indices.exists as unknown as Mock).mockResolvedValue(false);
+    (esClient.indices.create as unknown as Mock).mockResolvedValue({});
 
     await ensureCaseIndex({ esClient, logger });
 
-    const call = (esClient.indices.create as unknown as jest.Mock).mock.calls[0][0];
+    const call = (esClient.indices.create as unknown as Mock).mock.calls[0][0];
     expect(call.settings['index.auto_expand_replicas']).toBe('0-1');
   });
 
   it('applies an additive mapping sync (no create) when the index already exists', async () => {
     const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(true);
-    (esClient.indices.putMapping as unknown as jest.Mock).mockResolvedValue({});
+    (esClient.indices.exists as unknown as Mock).mockResolvedValue(true);
+    (esClient.indices.putMapping as unknown as Mock).mockResolvedValue({});
 
     await ensureCaseIndex({ esClient, logger });
 
     expect(esClient.indices.create).not.toHaveBeenCalled();
     expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
-    const call = (esClient.indices.putMapping as unknown as jest.Mock).mock.calls[0][0];
+    const call = (esClient.indices.putMapping as unknown as Mock).mock.calls[0][0];
     expect(call.index).toBe(CASE_INDEX_NAME);
     expect(call.properties).toBeDefined();
     expect(logger.debug).toHaveBeenCalledWith(
@@ -75,11 +78,11 @@ describe('ensureCaseIndex', () => {
 
   it('swallows resource_already_exists_exception from a concurrent bootstrap race', async () => {
     const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
+    (esClient.indices.exists as unknown as Mock).mockResolvedValue(false);
     const err = Object.assign(new Error('already exists'), {
       meta: { body: { error: { type: 'resource_already_exists_exception' } } },
     });
-    (esClient.indices.create as unknown as jest.Mock).mockRejectedValue(err);
+    (esClient.indices.create as unknown as Mock).mockRejectedValue(err);
 
     await expect(ensureCaseIndex({ esClient, logger })).resolves.toBeUndefined();
     expect(logger.error).not.toHaveBeenCalled();
@@ -87,7 +90,7 @@ describe('ensureCaseIndex', () => {
 
   it('throws an actionable message when the cluster shard limit is reached', async () => {
     const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
+    (esClient.indices.exists as unknown as Mock).mockResolvedValue(false);
     const err = Object.assign(new Error('Validation Failed: 1: this action would add [2] shards'), {
       meta: {
         body: {
@@ -99,7 +102,7 @@ describe('ensureCaseIndex', () => {
         },
       },
     });
-    (esClient.indices.create as unknown as jest.Mock).mockRejectedValue(err);
+    (esClient.indices.create as unknown as Mock).mockRejectedValue(err);
 
     await expect(ensureCaseIndex({ esClient, logger })).rejects.toThrow(
       'cluster.max_shards_per_node'
@@ -108,9 +111,9 @@ describe('ensureCaseIndex', () => {
 
   it('throws on unexpected ES failure so the caller can handle it', async () => {
     const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
+    (esClient.indices.exists as unknown as Mock).mockResolvedValue(false);
     const err = new Error('cluster_block_exception');
-    (esClient.indices.create as unknown as jest.Mock).mockRejectedValue(err);
+    (esClient.indices.create as unknown as Mock).mockRejectedValue(err);
 
     await expect(ensureCaseIndex({ esClient, logger })).rejects.toThrow('cluster_block_exception');
     expect(logger.error).not.toHaveBeenCalled();

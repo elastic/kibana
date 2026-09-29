@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getScheduleNotificationResponseActionsService } from './schedule_notification_response_actions';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine';
 import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine';
@@ -31,16 +34,16 @@ describe('ScheduleNotificationResponseActions', () => {
   ];
 
   const osqueryActionMock = {
-    create: jest.fn().mockResolvedValue({}),
-    stop: jest.fn(),
+    create: vi.fn().mockResolvedValue({}),
+    stop: vi.fn(),
     logger: {
-      error: jest.fn(),
+      error: vi.fn(),
     } as unknown as Logger,
   };
 
   let mockedResponseActionsClient = responseActionsClientMock.create();
   const endpointServiceMock = createMockEndpointAppContextService();
-  (endpointServiceMock.getInternalResponseActionsClient as jest.Mock).mockImplementation(() => {
+  (endpointServiceMock.getInternalResponseActionsClient as Mock).mockImplementation(() => {
     return mockedResponseActionsClient;
   });
 
@@ -51,7 +54,7 @@ describe('ScheduleNotificationResponseActions', () => {
 
   describe('Osquery', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     const simpleQuery = 'select * from uptime';
     const defaultQueryParams = {
@@ -245,7 +248,7 @@ describe('ScheduleNotificationResponseActions', () => {
 
   describe('Endpoint', () => {
     beforeEach(() => {
-      (endpointServiceMock.getInternalResponseActionsClient as jest.Mock).mockClear();
+      (endpointServiceMock.getInternalResponseActionsClient as Mock).mockClear();
       mockedResponseActionsClient = responseActionsClientMock.create();
     });
 
@@ -346,7 +349,7 @@ describe('ScheduleNotificationResponseActions', () => {
       });
 
       const getKillProcessParameters = (): Array<Record<string, unknown>> =>
-        (mockedResponseActionsClient.killProcess as jest.Mock).mock.calls.map(
+        (mockedResponseActionsClient.killProcess as Mock).mock.calls.map(
           ([requestBody]) => requestBody.parameters
         );
 

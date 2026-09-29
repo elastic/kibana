@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Gap } from '../../../../lib/rule_gaps/gap';
 import { processAllRuleGaps } from '../../../../lib/rule_gaps/process_all_rule_gaps';
 import { batchBackfillRuleGaps } from './batch_backfill_rule_gaps';
@@ -13,32 +16,32 @@ import type { BulkGapFillError } from './utils';
 import { BulkFillGapsScheduleResult, BulkGapsFillStep } from './types';
 import { processGapsBatch } from './process_gaps_batch';
 
-jest.mock('./process_gaps_batch', () => {
+vi.mock('./process_gaps_batch', () => {
   return {
-    processGapsBatch: jest.fn(),
+    processGapsBatch: vi.fn(),
   };
 });
 
-const processGapsBatchMock = processGapsBatch as jest.Mock;
+const processGapsBatchMock = processGapsBatch as Mock;
 
-jest.mock('../../../../lib/rule_gaps/process_all_rule_gaps', () => {
+vi.mock('../../../../lib/rule_gaps/process_all_rule_gaps', () => {
   return {
-    processAllRuleGaps: jest.fn(),
+    processAllRuleGaps: vi.fn(),
   };
 });
 
-const processAllRuleGapsMock = processAllRuleGaps as jest.Mock;
+const processAllRuleGapsMock = processAllRuleGaps as Mock;
 
-jest.mock('../../../backfill/methods/schedule', () => {
+vi.mock('../../../backfill/methods/schedule', () => {
   return {
-    scheduleBackfill: jest.fn(),
+    scheduleBackfill: vi.fn(),
   };
 });
 
 describe('batchBackfillRuleGaps', () => {
   const context = rulesClientContextMock.create();
   const currentLogger = context.logger;
-  (context.logger.get as jest.Mock).mockImplementation(() => currentLogger);
+  (context.logger.get as Mock).mockImplementation(() => currentLogger);
   const rule = { id: 'some-rule-id', name: 'some-rule-name' };
   const backfillingDateRange = {
     start: '2025-05-09T09:15:09.457Z',
@@ -62,7 +65,7 @@ describe('batchBackfillRuleGaps', () => {
   let result: Awaited<ReturnType<typeof batchBackfillRuleGaps>>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const callBatchBackfillRuleGaps = async () => {

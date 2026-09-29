@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { gapReasonType } from '@kbn/alerting-plugin/common';
@@ -22,30 +25,33 @@ import {
   useUpdateGapAutoFillScheduler,
 } from '../../api/hooks/use_gap_auto_fill_scheduler';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../context/gap_auto_fill_scheduler_context');
-jest.mock('../../api/hooks/use_gap_auto_fill_scheduler');
-jest.mock('../gap_auto_fill_logs', () => ({
-  GapAutoFillLogsFlyout: jest.fn(() => null),
-}));
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('../../context/gap_auto_fill_scheduler_context');
+vi.mock('../../api/hooks/use_gap_auto_fill_scheduler');
+vi.mock('../gap_auto_fill_logs', () => {
+      const mocked = {
+      GapAutoFillLogsFlyout: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseAppToasts = useAppToasts as jest.Mock;
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-const mockUseGapAutoFillSchedulerContext = useGapAutoFillSchedulerContext as jest.Mock;
-const mockUseCreateGapAutoFillScheduler = useCreateGapAutoFillScheduler as jest.Mock;
-const mockUseUpdateGapAutoFillScheduler = useUpdateGapAutoFillScheduler as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseAppToasts = useAppToasts as Mock;
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as Mock;
+const mockUseGapAutoFillSchedulerContext = useGapAutoFillSchedulerContext as Mock;
+const mockUseCreateGapAutoFillScheduler = useCreateGapAutoFillScheduler as Mock;
+const mockUseUpdateGapAutoFillScheduler = useUpdateGapAutoFillScheduler as Mock;
 
 describe('RuleSettingsModal', () => {
-  const onClose = jest.fn();
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
-  const createMutateAsync = jest.fn();
-  const updateMutateAsync = jest.fn();
-  const uiSettingsGet = jest.fn();
-  const uiSettingsSet = jest.fn();
+  const onClose = vi.fn();
+  const addSuccess = vi.fn();
+  const addError = vi.fn();
+  const createMutateAsync = vi.fn();
+  const updateMutateAsync = vi.fn();
+  const uiSettingsGet = vi.fn();
+  const uiSettingsSet = vi.fn();
 
   const scheduler: GapAutoFillSchedulerResponse = {
     id: 'scheduler-1',
@@ -65,7 +71,7 @@ describe('RuleSettingsModal', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseAppToasts.mockReturnValue({ addSuccess, addError });
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);

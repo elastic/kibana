@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IKibanaResponse } from '@kbn/core/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -21,7 +23,7 @@ describe('dashboard api telemetry handler', () => {
   const actualPath = '/api/dashboards/123';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('telemetryHandler', () => {

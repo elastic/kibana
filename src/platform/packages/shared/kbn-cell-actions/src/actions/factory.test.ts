@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { makeActionContext } from '../mocks/helpers';
 import { createCellActionFactory } from './factory';
 
 const mockContext = makeActionContext();
 
-const mockActionIsCompatible = jest.fn(async () => true);
-const mockActionExecute = jest.fn(async () => {});
+const mockActionIsCompatible = vi.fn(async () => true);
+const mockActionExecute = vi.fn(async () => {});
 
 const testAction = {
   id: 'genericTestId',
@@ -36,7 +38,7 @@ describe('createCellActionFactory', () => {
   const actionFactory = createActionFactory(type);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should create action factory executes the action creation', () => {
@@ -60,8 +62,8 @@ describe('createCellActionFactory', () => {
   });
 
   it('should create action with custom execute and isCompatible', async () => {
-    const customExecute = jest.fn();
-    const customIsCompatible = jest.fn();
+    const customExecute = vi.fn();
+    const customIsCompatible = vi.fn();
     const action = actionFactory({
       id,
       execute: customExecute,
@@ -78,7 +80,7 @@ describe('createCellActionFactory', () => {
   });
 
   it('should create action with custom execute', async () => {
-    const customExecute = jest.fn();
+    const customExecute = vi.fn();
     const action = actionFactory({ id, execute: customExecute });
 
     await action.isCompatible(mockContext);
@@ -90,7 +92,7 @@ describe('createCellActionFactory', () => {
   });
 
   it('should create action with custom isCompatible', async () => {
-    const customIsCompatible = jest.fn(async () => true);
+    const customIsCompatible = vi.fn(async () => true);
     const action = actionFactory({ id, isCompatible: customIsCompatible });
 
     await action.isCompatible(mockContext);
@@ -112,8 +114,8 @@ describe('createCellActionFactory', () => {
     });
 
     it('should combine factory with isCompatible function', async () => {
-      const combinedIsCompatible = jest.fn(async () => true);
-      const customIsCompatible = jest.fn(async () => true);
+      const combinedIsCompatible = vi.fn(async () => true);
+      const customIsCompatible = vi.fn(async () => true);
       const combinedFactory = actionFactory.combine({ isCompatible: combinedIsCompatible });
       const action = combinedFactory({ id, isCompatible: customIsCompatible });
 
@@ -127,8 +129,8 @@ describe('createCellActionFactory', () => {
     });
 
     it('should combine factory with custom execute and isCompatible', async () => {
-      const combinedExecute = jest.fn();
-      const combinedIsCompatible = jest.fn();
+      const combinedExecute = vi.fn();
+      const combinedIsCompatible = vi.fn();
       const combinedFactory = actionFactory.combine({
         execute: combinedExecute,
         isCompatible: combinedIsCompatible,

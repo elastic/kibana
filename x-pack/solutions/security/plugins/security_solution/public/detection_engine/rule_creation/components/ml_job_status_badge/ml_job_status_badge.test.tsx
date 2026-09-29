@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -12,9 +15,9 @@ import { mockOpenedJob } from '../../../../common/components/ml_popover/api.mock
 
 import { MlJobStatusBadge } from './ml_job_status_badge';
 
-jest.mock('../../../../../common/machine_learning/helpers');
+vi.mock('../../../../../common/machine_learning/helpers');
 
-const isJobStartedMock = isJobStarted as jest.Mock;
+const isJobStartedMock = isJobStarted as Mock;
 
 describe('MlJobStatusBadge', () => {
   it('should call isJobStarted helper', () => {

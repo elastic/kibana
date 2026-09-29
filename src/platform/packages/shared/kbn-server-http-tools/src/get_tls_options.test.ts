@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { IHttpConfig } from './types';
 import { getServerTLSOptions } from './get_tls_options';
 
-jest.mock('fs', () => {
-  const original = jest.requireActual('fs');
+vi.mock('fs', () => {
+  const original = require('fs');
   return {
     // Hapi Inert patches native methods
     ...original,
-    readFileSync: jest.fn(),
+    readFileSync: vi.fn(),
   };
 });
 
@@ -45,12 +47,12 @@ const createConfig = (parts: Partial<IHttpConfig>): IHttpConfig => ({
 });
 
 describe('getServerTLSOptions', () => {
-  beforeEach(() =>
-    jest.requireMock('fs').readFileSync.mockImplementation((path: string) => `content-${path}`)
+  beforeEach(async () =>
+    (await vi.importMock('fs')).readFileSync.mockImplementation((path: string) => `content-${path}`)
   );
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('properly configures TLS with default options', () => {

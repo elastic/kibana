@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import { convertModelVersionBackwardConversionSchema } from './backward_conversion_schema';
 import type {
@@ -26,8 +29,8 @@ describe('convertModelVersionBackwardConversionSchema', () => {
 
   describe('using functions', () => {
     it('converts the schema', () => {
-      const conversionSchema: jest.MockedFunction<SavedObjectModelVersionForwardCompatibilityFn> =
-        jest.fn();
+      const conversionSchema: MockedFunction<SavedObjectModelVersionForwardCompatibilityFn> =
+        vi.fn();
       conversionSchema.mockImplementation((attrs) => attrs);
 
       const doc = createDoc({ attributes: { foo: 'bar' } });
@@ -41,9 +44,9 @@ describe('convertModelVersionBackwardConversionSchema', () => {
     });
 
     it('returns the document with the updated properties', () => {
-      const conversionSchema: jest.MockedFunction<
+      const conversionSchema: MockedFunction<
         SavedObjectModelVersionForwardCompatibilityFn<any, any>
-      > = jest.fn();
+      > = vi.fn();
       conversionSchema.mockImplementation((attrs) => ({ foo: attrs.foo }));
 
       const doc = createDoc({ attributes: { foo: 'bar', hello: 'dolly' } });
@@ -58,9 +61,9 @@ describe('convertModelVersionBackwardConversionSchema', () => {
     });
 
     it('throws if the function throws', () => {
-      const conversionSchema: jest.MockedFunction<
+      const conversionSchema: MockedFunction<
         SavedObjectModelVersionForwardCompatibilityFn<any, any>
-      > = jest.fn();
+      > = vi.fn();
       conversionSchema.mockImplementation(() => {
         throw new Error('dang');
       });
@@ -80,7 +83,7 @@ describe('convertModelVersionBackwardConversionSchema', () => {
         },
         { unknowns: 'ignore' }
       );
-      const validateSpy = jest.spyOn(conversionSchema, 'validate');
+      const validateSpy = vi.spyOn(conversionSchema, 'validate');
 
       const doc = createDoc({ attributes: { foo: 'bar' } });
       const converted = convertModelVersionBackwardConversionSchema(conversionSchema);

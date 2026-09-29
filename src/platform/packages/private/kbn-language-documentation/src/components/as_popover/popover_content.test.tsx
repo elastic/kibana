@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
@@ -58,7 +60,7 @@ describe('###Documentation popover content', () => {
   });
 
   test('Documentation component should list all sections that match the search input when title matches', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const component = mountWithIntl(
       <LanguageDocumentationPopoverContent language="test" sections={sections} />
     );
@@ -71,7 +73,7 @@ describe('###Documentation popover content', () => {
 
     // Fast-forward time to let the debounce complete
     act(() => {
-      jest.advanceTimersByTime(250);
+      vi.advanceTimersByTime(250);
     });
 
     component.update();
@@ -79,11 +81,11 @@ describe('###Documentation popover content', () => {
     expect(sectionsLabels.length).toBe(1);
     expect(sectionsLabels.text()).toEqual('Section one');
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('Documentation component should list all sections that match the search input when description matches', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const component = mountWithIntl(
       <LanguageDocumentationPopoverContent
         language="test"
@@ -100,7 +102,7 @@ describe('###Documentation popover content', () => {
 
     // Fast-forward time to let the debounce complete
     act(() => {
-      jest.advanceTimersByTime(250);
+      vi.advanceTimersByTime(250);
     });
 
     component.update();
@@ -108,6 +110,6 @@ describe('###Documentation popover content', () => {
     const sectionsLabels = findTestSubject(component, 'language-documentation-navigation-title');
     expect(sectionsLabels.length).toBe(1);
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });

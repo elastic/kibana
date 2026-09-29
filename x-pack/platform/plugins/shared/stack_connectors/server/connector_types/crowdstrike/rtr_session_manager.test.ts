@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { CrowdStrikeSessionManager } from './rtr_session_manager';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { CrowdstrikeInitRTRResponseSchema } from '@kbn/connector-schemas/crowdstrike';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
-jest.useFakeTimers();
+vi.useFakeTimers();
 
 describe('CrowdstrikeSessionManager', () => {
   const mockUrls = {
@@ -18,16 +21,16 @@ describe('CrowdstrikeSessionManager', () => {
     batchRefreshRTRSession: 'https://api.example.com/refresh',
   };
 
-  let mockApiRequest: jest.Mock;
+  let mockApiRequest: Mock;
   let mockConnectorUsageCollector: ConnectorUsageCollector;
   let sessionManager: CrowdStrikeSessionManager;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.clearAllTimers();
+    vi.clearAllMocks();
+    vi.clearAllTimers();
 
-    mockApiRequest = jest.fn();
+    mockApiRequest = vi.fn();
     mockConnectorUsageCollector = {} as ConnectorUsageCollector;
     logger = loggingSystemMock.createLogger();
 
@@ -35,7 +38,7 @@ describe('CrowdstrikeSessionManager', () => {
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   describe('initializeSession', () => {
@@ -160,8 +163,8 @@ describe('CrowdstrikeSessionManager', () => {
       mockApiRequest.mockResolvedValue(refreshResponse);
 
       // Advance time to trigger first refresh (5 minutes)
-      jest.advanceTimersByTime(5 * 60 * 1000);
-      await jest.runOnlyPendingTimers();
+      vi.advanceTimersByTime(5 * 60 * 1000);
+      await vi.runOnlyPendingTimers();
 
       expect(mockApiRequest).toHaveBeenCalledWith(
         {
@@ -174,8 +177,8 @@ describe('CrowdstrikeSessionManager', () => {
       );
 
       // Advance time for second refresh
-      jest.advanceTimersByTime(5 * 60 * 1000);
-      await jest.runOnlyPendingTimers();
+      vi.advanceTimersByTime(5 * 60 * 1000);
+      await vi.runOnlyPendingTimers();
 
       expect(mockApiRequest).toHaveBeenCalledTimes(2);
     });
@@ -192,8 +195,8 @@ describe('CrowdstrikeSessionManager', () => {
       mockApiRequest.mockRejectedValueOnce(new Error('Refresh failed'));
 
       // Trigger refresh interval - this should clear the session on failure
-      jest.advanceTimersByTime(5 * 60 * 1000);
-      await jest.runOnlyPendingTimers();
+      vi.advanceTimersByTime(5 * 60 * 1000);
+      await vi.runOnlyPendingTimers();
 
       // Should be able to initialize a new session after refresh failure
       const newInitResponse = { batch_id: 'new-batch-id' };
@@ -227,8 +230,8 @@ describe('CrowdstrikeSessionManager', () => {
       mockApiRequest.mockResolvedValueOnce({ batch_id: 'wrong-batch-id' });
 
       // Trigger refresh interval
-      jest.advanceTimersByTime(5 * 60 * 1000);
-      await jest.runOnlyPendingTimers();
+      vi.advanceTimersByTime(5 * 60 * 1000);
+      await vi.runOnlyPendingTimers();
 
       // Should be able to recover by initializing new session
       const recoveryResponse = { batch_id: 'recovery-batch-id' };
@@ -257,8 +260,8 @@ describe('CrowdstrikeSessionManager', () => {
       // Note: This will also trigger refresh intervals (at 5 minutes), so we need to mock them
       mockApiRequest.mockResolvedValue({ batch_id: 'timeout-batch-id' }); // For refresh calls
 
-      jest.advanceTimersByTime(10 * 60 * 1000);
-      await jest.runOnlyPendingTimers();
+      vi.advanceTimersByTime(10 * 60 * 1000);
+      await vi.runOnlyPendingTimers();
 
       // Session should be terminated - new initialization should create new session
       const newSessionResponse = { batch_id: 'new-session-after-timeout' };
@@ -289,22 +292,22 @@ describe('CrowdstrikeSessionManager', () => {
       expect(mockApiRequest).toHaveBeenCalledTimes(1);
 
       // Access session after 9 minutes (before timeout) - this should reset the timeout
-      jest.advanceTimersByTime(9 * 60 * 1000);
-      await jest.runOnlyPendingTimers(); // Process any refresh intervals
+      vi.advanceTimersByTime(9 * 60 * 1000);
+      await vi.runOnlyPendingTimers(); // Process any refresh intervals
 
       let result = await sessionManager.initializeSession(payload, mockConnectorUsageCollector);
       expect(result).toBe('reset-timeout-batch-id');
 
       // Wait another 9 minutes (timeout should be reset) - session should still be active
-      jest.advanceTimersByTime(9 * 60 * 1000);
-      await jest.runOnlyPendingTimers(); // Process any refresh intervals
+      vi.advanceTimersByTime(9 * 60 * 1000);
+      await vi.runOnlyPendingTimers(); // Process any refresh intervals
 
       result = await sessionManager.initializeSession(payload, mockConnectorUsageCollector);
       expect(result).toBe('reset-timeout-batch-id');
 
       // Finally wait full 10 minutes to trigger timeout
-      jest.advanceTimersByTime(10 * 60 * 1000);
-      await jest.runOnlyPendingTimers();
+      vi.advanceTimersByTime(10 * 60 * 1000);
+      await vi.runOnlyPendingTimers();
 
       // Now session should be terminated - next call should create new session
       const newSessionResponse = { batch_id: 'after-final-timeout' };
@@ -342,8 +345,8 @@ describe('CrowdstrikeSessionManager', () => {
       expect(mockApiRequest).toHaveBeenCalledTimes(1);
 
       // 2. Verify refresh happens after 5 minutes
-      jest.advanceTimersByTime(5 * 60 * 1000); // 5 minutes
-      await jest.runOnlyPendingTimers();
+      vi.advanceTimersByTime(5 * 60 * 1000); // 5 minutes
+      await vi.runOnlyPendingTimers();
 
       expect(mockApiRequest).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -361,8 +364,8 @@ describe('CrowdstrikeSessionManager', () => {
       expect(reuseResult).toBe('lifecycle-batch-id');
 
       // 4. Timeout should terminate session after 10 minutes
-      jest.advanceTimersByTime(10 * 60 * 1000); // 10 minutes
-      await jest.runOnlyPendingTimers();
+      vi.advanceTimersByTime(10 * 60 * 1000); // 10 minutes
+      await vi.runOnlyPendingTimers();
 
       // 5. New session should be created after timeout
       const newSessionResponse = { batch_id: 'new-after-timeout' };
@@ -406,8 +409,8 @@ describe('CrowdstrikeSessionManager', () => {
       mockApiRequest.mockClear();
       mockApiRequest.mockRejectedValueOnce(new Error('Refresh failed'));
 
-      jest.advanceTimersByTime(5 * 60 * 1000);
-      await jest.runOnlyPendingTimers();
+      vi.advanceTimersByTime(5 * 60 * 1000);
+      await vi.runOnlyPendingTimers();
 
       // Should be able to create new session after refresh failure
       const afterRefreshFailure = { batch_id: 'after-refresh-failure' };

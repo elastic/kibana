@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@kbn/code-editor-mock/jest_helper';
 
 import React from 'react';
@@ -20,80 +22,89 @@ import { textService } from '../../services/text';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { RepositoryAdd } from './repository_add';
 
-const mockUseDefaultRepository = jest.fn();
-const mockUseCanSetDefaultRepository = jest.fn();
+const mockUseDefaultRepository = vi.fn();
+const mockUseCanSetDefaultRepository = vi.fn();
 const mockToastNotifications = {
-  addSuccess: jest.fn(),
-  addDanger: jest.fn(),
+  addSuccess: vi.fn(),
+  addDanger: vi.fn(),
 };
 
-jest.mock('../../components/repository_form', () => ({
-  ...jest.requireActual('../../components/repository_form'),
-  RepositoryForm: ({
-    onSave,
-    saveError,
-    onToggleDefault,
-    isDefaultRepository,
-    isDefaultRepositoryFeatureAvailable = true,
-  }: {
-    onSave: (repository: unknown) => void;
-    saveError?: React.ReactNode;
-    onToggleDefault?: (isDefault: boolean) => void;
-    isDefaultRepository?: boolean;
-    isDefaultRepositoryFeatureAvailable?: boolean;
-  }) => (
-    <div>
-      <div data-test-subj="repositoryFormIsDefault">{String(Boolean(isDefaultRepository))}</div>
-      {onToggleDefault && (
-        <button
-          data-test-subj="repositoryFormToggleDefault"
-          onClick={() => onToggleDefault(!isDefaultRepository)}
-          disabled={!isDefaultRepositoryFeatureAvailable}
-        >
-          toggle default
-        </button>
-      )}
-      <button
-        data-test-subj="repositoryFormSave"
-        onClick={() => onSave({ name: 'my-repo', type: 'fs', settings: { location: '/tmp' } })}
-      >
-        save
-      </button>
-      <div data-test-subj="repositoryFormSaveError">{saveError}</div>
-    </div>
-  ),
-}));
+vi.mock('../../components/repository_form', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../components/repository_form')),
+      RepositoryForm: ({
+        onSave,
+        saveError,
+        onToggleDefault,
+        isDefaultRepository,
+        isDefaultRepositoryFeatureAvailable = true,
+      }: {
+        onSave: (repository: unknown) => void;
+        saveError?: React.ReactNode;
+        onToggleDefault?: (isDefault: boolean) => void;
+        isDefaultRepository?: boolean;
+        isDefaultRepositoryFeatureAvailable?: boolean;
+      }) => (
+        <div>
+          <div data-test-subj="repositoryFormIsDefault">{String(Boolean(isDefaultRepository))}</div>
+          {onToggleDefault && (
+            <button
+              data-test-subj="repositoryFormToggleDefault"
+              onClick={() => onToggleDefault(!isDefaultRepository)}
+              disabled={!isDefaultRepositoryFeatureAvailable}
+            >
+              toggle default
+            </button>
+          )}
+          <button
+            data-test-subj="repositoryFormSave"
+            onClick={() => onSave({ name: 'my-repo', type: 'fs', settings: { location: '/tmp' } })}
+          >
+            save
+          </button>
+          <div data-test-subj="repositoryFormSaveError">{saveError}</div>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/http', () => {
-  const actual = jest.requireActual<typeof import('../../services/http')>('../../services/http');
+vi.mock('../../services/http', async () => {
+  const actual = (await vi.importActual<typeof import('../../services/http')>('../../services/http'));
 
   return {
     ...actual,
-    useLoadRepositoryTypes: jest.fn().mockReturnValue({
+    useLoadRepositoryTypes: vi.fn().mockReturnValue({
       isLoading: false,
       error: null,
       data: ['fs'],
     }),
-    addRepository: jest.fn(),
-    useLoadRepositories: jest.fn().mockReturnValue({
+    addRepository: vi.fn(),
+    useLoadRepositories: vi.fn().mockReturnValue({
       isLoading: false,
       error: null,
       data: { repositories: [] },
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     }),
   };
 });
 
-jest.mock('../../services/use_default_repository', () => ({
-  useDefaultRepository: (...args: unknown[]) => mockUseDefaultRepository(...args),
-}));
+vi.mock('../../services/use_default_repository', () => {
+      const mocked = {
+      useDefaultRepository: (...args: unknown[]) => mockUseDefaultRepository(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/authorization', () => ({
-  useCanSetDefaultRepository: (...args: unknown[]) => mockUseCanSetDefaultRepository(...args),
-}));
+vi.mock('../../services/authorization', () => {
+      const mocked = {
+      useCanSetDefaultRepository: (...args: unknown[]) => mockUseCanSetDefaultRepository(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../app_context', () => {
-  const actual = jest.requireActual<typeof import('../../app_context')>('../../app_context');
+vi.mock('../../app_context', async () => {
+  const actual = (await vi.importActual<typeof import('../../app_context')>('../../app_context'));
 
   return {
     ...actual,
@@ -131,13 +142,13 @@ docTitleService.setup(() => undefined);
 
 describe('<RepositoryAdd />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCanSetDefaultRepository.mockReturnValue(true);
     mockUseDefaultRepository.mockReturnValue({
       defaultRepository: null,
       isLoadingDefaultRepository: false,
       defaultRepositoryStatus: 'loaded',
-      setDefaultRepository: jest.fn().mockResolvedValue({ data: null, error: null }),
+      setDefaultRepository: vi.fn().mockResolvedValue({ data: null, error: null }),
     });
   });
 
@@ -166,7 +177,7 @@ describe('<RepositoryAdd />', () => {
 
   it('SHOULD surface API error when save fails', async () => {
     const { addRepository } = await import('../../services/http');
-    jest.mocked(addRepository).mockResolvedValueOnce({
+    vi.mocked(addRepository).mockResolvedValueOnce({
       data: null,
       error: {
         statusCode: 400,
@@ -200,7 +211,7 @@ describe('<RepositoryAdd />', () => {
 
   it('SHOULD redirect to the repository details page when save succeeds', async () => {
     const { addRepository } = await import('../../services/http');
-    jest.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
+    vi.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
 
     const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
 
@@ -227,7 +238,7 @@ describe('<RepositoryAdd />', () => {
 
   it('SHOULD honor the redirect query param when save succeeds', async () => {
     const { addRepository } = await import('../../services/http');
-    jest.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
+    vi.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
 
     const history = createMemoryHistory({
       initialEntries: ['/add_repository?redirect=%2Fsomewhere%2Felse'],
@@ -256,15 +267,15 @@ describe('<RepositoryAdd />', () => {
 
   it('SHOULD default the switch on for the first repository but allow toggling it off', async () => {
     const { addRepository, useLoadRepositories } = await import('../../services/http');
-    jest.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
-    jest.mocked(useLoadRepositories).mockReturnValue({
+    vi.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
+    vi.mocked(useLoadRepositories).mockReturnValue({
       isLoading: false,
       error: null,
       data: { repositories: [] },
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as any);
 
-    const setDefaultRepository = jest.fn().mockResolvedValue({ data: null, error: null });
+    const setDefaultRepository = vi.fn().mockResolvedValue({ data: null, error: null });
     mockUseDefaultRepository.mockReturnValue({
       defaultRepository: null,
       isLoadingDefaultRepository: false,
@@ -304,15 +315,15 @@ describe('<RepositoryAdd />', () => {
 
   it('SHOULD set the first created repository as default', async () => {
     const { addRepository, useLoadRepositories } = await import('../../services/http');
-    jest.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
-    jest.mocked(useLoadRepositories).mockReturnValue({
+    vi.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
+    vi.mocked(useLoadRepositories).mockReturnValue({
       isLoading: false,
       error: null,
       data: { repositories: [] },
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as any);
 
-    const setDefaultRepository = jest.fn().mockResolvedValue({ data: null, error: null });
+    const setDefaultRepository = vi.fn().mockResolvedValue({ data: null, error: null });
     mockUseDefaultRepository.mockReturnValue({
       defaultRepository: null,
       isLoadingDefaultRepository: false,
@@ -350,15 +361,15 @@ describe('<RepositoryAdd />', () => {
     mockUseCanSetDefaultRepository.mockReturnValue(false);
 
     const { addRepository, useLoadRepositories } = await import('../../services/http');
-    jest.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
-    jest.mocked(useLoadRepositories).mockReturnValue({
+    vi.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
+    vi.mocked(useLoadRepositories).mockReturnValue({
       isLoading: false,
       error: null,
       data: { repositories: [] },
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as any);
 
-    const setDefaultRepository = jest.fn().mockResolvedValue({ data: null, error: null });
+    const setDefaultRepository = vi.fn().mockResolvedValue({ data: null, error: null });
     mockUseDefaultRepository.mockReturnValue({
       defaultRepository: null,
       isLoadingDefaultRepository: false,
@@ -393,15 +404,15 @@ describe('<RepositoryAdd />', () => {
 
   it('SHOULD disable default toggle and not attempt setting default when default repository feature is unavailable', async () => {
     const { addRepository, useLoadRepositories } = await import('../../services/http');
-    jest.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
-    jest.mocked(useLoadRepositories).mockReturnValue({
+    vi.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
+    vi.mocked(useLoadRepositories).mockReturnValue({
       isLoading: false,
       error: null,
       data: { repositories: [] },
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as any);
 
-    const setDefaultRepository = jest.fn().mockResolvedValue({ data: null, error: null });
+    const setDefaultRepository = vi.fn().mockResolvedValue({ data: null, error: null });
     mockUseDefaultRepository.mockReturnValue({
       defaultRepository: null,
       isLoadingDefaultRepository: false,
@@ -436,15 +447,15 @@ describe('<RepositoryAdd />', () => {
 
   it('SHOULD confirm before changing an existing default repository', async () => {
     const { addRepository, useLoadRepositories } = await import('../../services/http');
-    jest.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
-    jest.mocked(useLoadRepositories).mockReturnValue({
+    vi.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
+    vi.mocked(useLoadRepositories).mockReturnValue({
       isLoading: false,
       error: null,
       data: { repositories: [{ name: 'existing', type: 'fs', settings: {} }] },
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as any);
 
-    const setDefaultRepository = jest.fn().mockResolvedValue({ data: null, error: null });
+    const setDefaultRepository = vi.fn().mockResolvedValue({ data: null, error: null });
     mockUseDefaultRepository.mockReturnValue({
       defaultRepository: 'old-default',
       isLoadingDefaultRepository: false,
@@ -471,30 +482,30 @@ describe('<RepositoryAdd />', () => {
     fireEvent.click(screen.getByTestId('repositoryFormSave'));
 
     expect(await screen.findByTestId('confirmDefaultRepositoryModal')).toBeInTheDocument();
-    expect(jest.mocked(addRepository)).not.toHaveBeenCalled();
+    expect(vi.mocked(addRepository)).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByText('Cancel'));
     await waitFor(() => {
       expect(screen.queryByTestId('confirmDefaultRepositoryModal')).not.toBeInTheDocument();
     });
-    expect(jest.mocked(addRepository)).not.toHaveBeenCalled();
+    expect(vi.mocked(addRepository)).not.toHaveBeenCalled();
     expect(setDefaultRepository).not.toHaveBeenCalled();
   });
 
   it('SHOULD default the switch off when a default repository is already assigned', async () => {
     const { useLoadRepositories } = await import('../../services/http');
-    jest.mocked(useLoadRepositories).mockReturnValue({
+    vi.mocked(useLoadRepositories).mockReturnValue({
       isLoading: false,
       error: null,
       data: { repositories: [{ name: 'existing', type: 'fs', settings: {} }] },
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as any);
 
     mockUseDefaultRepository.mockReturnValue({
       defaultRepository: 'old-default',
       isLoadingDefaultRepository: false,
       defaultRepositoryStatus: 'loaded',
-      setDefaultRepository: jest.fn().mockResolvedValue({ data: null, error: null }),
+      setDefaultRepository: vi.fn().mockResolvedValue({ data: null, error: null }),
     });
 
     const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
@@ -517,15 +528,15 @@ describe('<RepositoryAdd />', () => {
 
   it('SHOULD not confirm when default repository is an empty string', async () => {
     const { addRepository, useLoadRepositories } = await import('../../services/http');
-    jest.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
-    jest.mocked(useLoadRepositories).mockReturnValue({
+    vi.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
+    vi.mocked(useLoadRepositories).mockReturnValue({
       isLoading: false,
       error: null,
       data: { repositories: [{ name: 'existing', type: 'fs', settings: {} }] },
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as any);
 
-    const setDefaultRepository = jest.fn().mockResolvedValue({ data: null, error: null });
+    const setDefaultRepository = vi.fn().mockResolvedValue({ data: null, error: null });
     mockUseDefaultRepository.mockReturnValue({
       defaultRepository: '',
       isLoadingDefaultRepository: false,
@@ -553,7 +564,7 @@ describe('<RepositoryAdd />', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('confirmDefaultRepositoryModal')).not.toBeInTheDocument();
-      expect(jest.mocked(addRepository)).toHaveBeenCalled();
+      expect(vi.mocked(addRepository)).toHaveBeenCalled();
       expect(setDefaultRepository).toHaveBeenCalledWith('my-repo');
       expect(history.location.pathname).toBe('/repositories');
     });
@@ -561,15 +572,15 @@ describe('<RepositoryAdd />', () => {
 
   it('SHOULD save and set default after confirming default repository change', async () => {
     const { addRepository, useLoadRepositories } = await import('../../services/http');
-    jest.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
-    jest.mocked(useLoadRepositories).mockReturnValue({
+    vi.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
+    vi.mocked(useLoadRepositories).mockReturnValue({
       isLoading: false,
       error: null,
       data: { repositories: [{ name: 'existing', type: 'fs', settings: {} }] },
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as any);
 
-    const setDefaultRepository = jest.fn().mockResolvedValue({ data: null, error: null });
+    const setDefaultRepository = vi.fn().mockResolvedValue({ data: null, error: null });
     mockUseDefaultRepository.mockReturnValue({
       defaultRepository: 'old-default',
       isLoadingDefaultRepository: false,
@@ -599,7 +610,7 @@ describe('<RepositoryAdd />', () => {
     fireEvent.click(screen.getByText('Change default'));
 
     await waitFor(() => {
-      expect(jest.mocked(addRepository)).toHaveBeenCalled();
+      expect(vi.mocked(addRepository)).toHaveBeenCalled();
       expect(setDefaultRepository).toHaveBeenCalledWith('my-repo');
       expect(history.location.pathname).toBe('/repositories');
     });
@@ -607,15 +618,15 @@ describe('<RepositoryAdd />', () => {
 
   it('SHOULD show danger toast when setting default fails, but still register repository', async () => {
     const { addRepository, useLoadRepositories } = await import('../../services/http');
-    jest.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
-    jest.mocked(useLoadRepositories).mockReturnValue({
+    vi.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
+    vi.mocked(useLoadRepositories).mockReturnValue({
       isLoading: false,
       error: null,
       data: { repositories: [] },
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as any);
 
-    const setDefaultRepository = jest.fn().mockResolvedValue({
+    const setDefaultRepository = vi.fn().mockResolvedValue({
       data: null,
       error: { statusCode: 500, error: 'Internal Server Error', message: 'fail' },
     });

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { render, waitFor, act } from '@testing-library/react';
 import React from 'react';
 import type { History } from 'history';
@@ -14,19 +17,19 @@ import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useNavigateTo } from '../../common/lib/kibana';
 import { HashDashboardLinkRedirect } from './hash_dashboard_link_redirect';
 
-jest.mock('../../common/components/link_to', () => {
-  const actual = jest.requireActual('../../common/components/link_to');
+vi.mock('../../common/components/link_to', async () => {
+  const actual = (await vi.importActual('../../common/components/link_to'));
   return {
     ...actual,
-    useGetSecuritySolutionUrl: jest.fn(),
+    useGetSecuritySolutionUrl: vi.fn(),
   };
 });
 
-jest.mock('../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../common/lib/kibana'));
   return {
     ...actual,
-    useNavigateTo: jest.fn(),
+    useNavigateTo: vi.fn(),
   };
 });
 
@@ -42,14 +45,14 @@ const renderWithScopedHistory = (routerBasename: string, initialPath: string) =>
 };
 
 describe('HashDashboardLinkRedirect', () => {
-  const mockNavigateTo = jest.fn();
+  const mockNavigateTo = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGetSecuritySolutionUrl as jest.Mock).mockReturnValue(
+    vi.clearAllMocks();
+    (useGetSecuritySolutionUrl as Mock).mockReturnValue(
       ({ path }: { path?: string }) => `/app/security/dashboards/${path}`
     );
-    (useNavigateTo as jest.Mock).mockReturnValue({ navigateTo: mockNavigateTo });
+    (useNavigateTo as Mock).mockReturnValue({ navigateTo: mockNavigateTo });
   });
 
   afterEach(() => {
@@ -134,7 +137,7 @@ describe('HashDashboardLinkRedirect', () => {
   });
 
   it('does not navigate for a <script> payload split across both capture groups', () => {
-    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
     renderWithScopedHistory(
       '/app/security',
       '/dashboards/current-id#/dashboard/%3Cscript%3Ealert(1)%3C/script%3E'

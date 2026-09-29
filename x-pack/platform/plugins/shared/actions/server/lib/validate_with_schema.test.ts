@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import {
   validateParams,
@@ -390,7 +392,7 @@ test('should validate when custom validator is defined', () => {
   const schemaValidator = {
     parse: (value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets) => value,
   };
-  const customValidator = jest.fn();
+  const customValidator = vi.fn();
 
   const actionType: ActionType = {
     id: 'foo',

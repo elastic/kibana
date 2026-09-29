@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import {
   useTemplatesUrlSearchState,
@@ -12,31 +14,37 @@ import {
   SLO_TEMPLATES_SEARCH_URL_STORAGE_KEY,
 } from './use_templates_url_search_state';
 
-const mockUrlGet = jest.fn();
-const mockUrlSet = jest.fn();
-const mockUrlChange$ = jest.fn(() => ({ subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })) }));
+const mockUrlGet = vi.fn();
+const mockUrlSet = vi.fn();
+const mockUrlChange$ = vi.fn(() => ({ subscribe: vi.fn(() => ({ unsubscribe: vi.fn() })) }));
 
-jest.mock('@kbn/kibana-utils-plugin/public', () => ({
-  createKbnUrlStateStorage: jest.fn(() => ({
-    get: mockUrlGet,
-    set: mockUrlSet,
-    change$: mockUrlChange$,
-  })),
-}));
+vi.mock('@kbn/kibana-utils-plugin/public', () => {
+      const mocked = {
+      createKbnUrlStateStorage: vi.fn(() => ({
+        get: mockUrlGet,
+        set: mockUrlSet,
+        change$: mockUrlChange$,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    push: jest.fn(),
-    location: { pathname: '/management/templates', search: '', hash: '' },
-    listen: jest.fn(),
-    replace: jest.fn(),
-  }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => ({
+        push: vi.fn(),
+        location: { pathname: '/management/templates', search: '', hash: '' },
+        listen: vi.fn(),
+        replace: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useTemplatesUrlSearchState', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUrlGet.mockReturnValue(null);
   });
 

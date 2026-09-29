@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject, take } from 'rxjs';
 
 import type { ViewMode } from '@kbn/presentation-publishing';
@@ -18,10 +20,10 @@ const controlApi = {
   uuid: '1',
   isPinnable: true,
   parentApi: {
-    pinPanel: jest.fn(),
-    unpinPanel: jest.fn(),
-    panelIsPinned: jest.fn(),
-    addPinnedPanel: jest.fn(),
+    pinPanel: vi.fn(),
+    unpinPanel: vi.fn(),
+    panelIsPinned: vi.fn(),
+    addPinnedPanel: vi.fn(),
     viewMode$: new BehaviorSubject<ViewMode>('edit'),
   },
 };
@@ -35,21 +37,26 @@ describe('PinControlAction', () => {
     }).rejects.toThrow(Error);
   });
 
-  test('should call become compatible when view mode changes', (done) => {
-    const subject = pinControlAction.getCompatibilityChangesSubject({
-      embeddable: {
-        ...controlApi,
-        parentApi: {
-          ...controlApi.parentApi,
-          viewMode$: new BehaviorSubject<ViewMode>('view'),
+  test('should call become compatible when view mode changes', () =>
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
+
+      const subject = pinControlAction.getCompatibilityChangesSubject({
+        embeddable: {
+          ...controlApi,
+          parentApi: {
+            ...controlApi.parentApi,
+            viewMode$: new BehaviorSubject<ViewMode>('view'),
+          },
         },
-      },
-    });
-    subject?.pipe(take(1)).subscribe(() => {
-      done();
-    });
-    controlApi.parentApi.viewMode$.next('edit');
-  });
+      });
+      subject?.pipe(take(1)).subscribe(() => {
+        done();
+      });
+      controlApi.parentApi.viewMode$.next('edit');
+    }));
 
   test('calls appropriate function depennding on if panel is pinned or not', async () => {
     expect(controlApi.parentApi.pinPanel).toHaveBeenCalledTimes(0);

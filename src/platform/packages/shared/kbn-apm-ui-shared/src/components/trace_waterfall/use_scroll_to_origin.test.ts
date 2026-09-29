@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { List } from 'react-virtualized';
 import { useScrollToOrigin } from './use_scroll_to_origin';
@@ -34,7 +36,7 @@ const itemB = makeItem('b');
 const itemC = makeItem('c');
 const visibleList = [itemA, itemB, itemC];
 
-const makeListRef = (scrollToRow = jest.fn()) =>
+const makeListRef = (scrollToRow = vi.fn()) =>
   ({ current: { scrollToRow } } as unknown as React.MutableRefObject<List>);
 
 const makeScrollToOriginRef = () => ({ current: () => {} } as React.MutableRefObject<() => void>);
@@ -42,7 +44,7 @@ const makeScrollToOriginRef = () => ({ current: () => {} } as React.MutableRefOb
 describe('useScrollToOrigin', () => {
   describe('onScrolled', () => {
     it('calls setIsContextSpanVisible(true) when context span index is within the rendered range', () => {
-      const setIsContextSpanVisible = jest.fn();
+      const setIsContextSpanVisible = vi.fn();
       const { result } = renderHook(() =>
         useScrollToOrigin({
           contextSpanId: 'b',
@@ -59,7 +61,7 @@ describe('useScrollToOrigin', () => {
     });
 
     it('calls setIsContextSpanVisible(false) when context span index is outside the rendered range', () => {
-      const setIsContextSpanVisible = jest.fn();
+      const setIsContextSpanVisible = vi.fn();
       const { result } = renderHook(() =>
         useScrollToOrigin({
           contextSpanId: 'c',
@@ -77,7 +79,7 @@ describe('useScrollToOrigin', () => {
     });
 
     it('does not call setIsContextSpanVisible when contextSpanId is not set', () => {
-      const setIsContextSpanVisible = jest.fn();
+      const setIsContextSpanVisible = vi.fn();
       const { result } = renderHook(() =>
         useScrollToOrigin({
           contextSpanId: undefined,
@@ -94,7 +96,7 @@ describe('useScrollToOrigin', () => {
     });
 
     it('does not call setIsContextSpanVisible when context span is not in the visible list', () => {
-      const setIsContextSpanVisible = jest.fn();
+      const setIsContextSpanVisible = vi.fn();
       const { result } = renderHook(() =>
         useScrollToOrigin({
           contextSpanId: 'nonexistent',
@@ -113,7 +115,7 @@ describe('useScrollToOrigin', () => {
 
   describe('scrollToOriginRef', () => {
     it('calls listRef.current.scrollToRow with the correct index', () => {
-      const scrollToRow = jest.fn();
+      const scrollToRow = vi.fn();
       const scrollToOriginRef = makeScrollToOriginRef();
 
       renderHook(() =>
@@ -122,7 +124,7 @@ describe('useScrollToOrigin', () => {
           visibleList,
           listRef: makeListRef(scrollToRow),
           scrollToOriginRef,
-          setIsContextSpanVisible: jest.fn(),
+          setIsContextSpanVisible: vi.fn(),
         })
       );
 
@@ -133,7 +135,7 @@ describe('useScrollToOrigin', () => {
     });
 
     it('does not call scrollToRow when context span is not in the visible list', () => {
-      const scrollToRow = jest.fn();
+      const scrollToRow = vi.fn();
       const scrollToOriginRef = makeScrollToOriginRef();
 
       renderHook(() =>
@@ -142,7 +144,7 @@ describe('useScrollToOrigin', () => {
           visibleList,
           listRef: makeListRef(scrollToRow),
           scrollToOriginRef,
-          setIsContextSpanVisible: jest.fn(),
+          setIsContextSpanVisible: vi.fn(),
         })
       );
 
@@ -152,7 +154,7 @@ describe('useScrollToOrigin', () => {
     });
 
     it('updates scrollToOriginRef.current when visibleList changes', () => {
-      const scrollToRow = jest.fn();
+      const scrollToRow = vi.fn();
       const scrollToOriginRef = makeScrollToOriginRef();
       const extendedList = [makeItem('x'), itemA, itemB, itemC];
 
@@ -163,7 +165,7 @@ describe('useScrollToOrigin', () => {
             visibleList: list,
             listRef: makeListRef(scrollToRow),
             scrollToOriginRef,
-            setIsContextSpanVisible: jest.fn(),
+            setIsContextSpanVisible: vi.fn(),
           }),
         { initialProps: { list: visibleList } }
       );

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useQueryClient } from '@kbn/react-query';
 import { createTargetLookupClient } from '../../common/services/target_lookup/client';
@@ -18,61 +20,73 @@ import {
 } from '../../common/target_types';
 import { useTargetIdField } from './use_target_id_field';
 
-jest.mock('@kbn/react-query', () => ({
-  useQueryClient: jest.fn(),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQueryClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/services/target_lookup/client', () => ({
-  createTargetLookupClient: jest.fn(),
-}));
+vi.mock('../../common/services/target_lookup/client', () => {
+      const mocked = {
+      createTargetLookupClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/services/target_lookup/hooks/use_data_views_list', () => ({
-  useDataViewsList: jest.fn(),
-}));
-jest.mock('../../common/services/target_lookup/hooks/use_resolve_index', () => ({
-  useResolveIndex: jest.fn(),
-}));
+vi.mock('../../common/services/target_lookup/hooks/use_data_views_list', () => {
+      const mocked = {
+      useDataViewsList: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/services/target_lookup/hooks/use_resolve_index', () => {
+      const mocked = {
+      useResolveIndex: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const targetLookupClient = {
-  getDataViews: jest.fn(),
-  getDataViewById: jest.fn(),
-  resolveIndex: jest.fn(),
-  getFieldsForWildcard: jest.fn(),
+  getDataViews: vi.fn(),
+  getDataViewById: vi.fn(),
+  resolveIndex: vi.fn(),
+  getFieldsForWildcard: vi.fn(),
 };
 
-const fetchQuery = jest.fn();
+const fetchQuery = vi.fn();
 
 describe('useTargetIdField', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
 
-    jest.mocked(useQueryClient).mockReturnValue({
+    vi.mocked(useQueryClient).mockReturnValue({
       fetchQuery,
     } as unknown as ReturnType<typeof useQueryClient>);
 
-    jest.mocked(createTargetLookupClient).mockReturnValue(targetLookupClient);
-    jest.mocked(useDataViewsList).mockReturnValue({
+    vi.mocked(createTargetLookupClient).mockReturnValue(targetLookupClient);
+    vi.mocked(useDataViewsList).mockReturnValue({
       data: undefined,
       isFetching: false,
     } as unknown as ReturnType<typeof useDataViewsList>);
-    jest.mocked(useResolveIndex).mockReturnValue({
+    vi.mocked(useResolveIndex).mockReturnValue({
       data: undefined,
       isFetching: false,
     } as unknown as ReturnType<typeof useResolveIndex>);
   });
 
   it('debounces resolve-index queries while keeping suggestions enabled', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const { result } = renderHook(() =>
       useTargetIdField({
         targetType: TARGET_TYPE_INDEX_PATTERN,
         targetId: '',
         includeHiddenAndSystemIndices: false,
-        fetch: jest.fn(),
-        onFieldRulesChange: jest.fn(),
-        onTargetIdChange: jest.fn(),
+        fetch: vi.fn(),
+        onFieldRulesChange: vi.fn(),
+        onTargetIdChange: vi.fn(),
       })
     );
 
@@ -80,7 +94,7 @@ describe('useTargetIdField', () => {
       result.current.onTargetIdSearchChange('ab');
     });
 
-    expect(jest.mocked(useResolveIndex).mock.calls.at(-1)?.[0]).toEqual(
+    expect(vi.mocked(useResolveIndex).mock.calls.at(-1)?.[0]).toEqual(
       expect.objectContaining({
         query: '',
         enabled: false,
@@ -88,10 +102,10 @@ describe('useTargetIdField', () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(TARGET_LOOKUP_DEBOUNCE_MS);
+      vi.advanceTimersByTime(TARGET_LOOKUP_DEBOUNCE_MS);
     });
 
-    expect(jest.mocked(useResolveIndex).mock.calls.at(-1)?.[0]).toEqual(
+    expect(vi.mocked(useResolveIndex).mock.calls.at(-1)?.[0]).toEqual(
       expect.objectContaining({
         query: 'ab',
         enabled: true,
@@ -100,16 +114,16 @@ describe('useTargetIdField', () => {
   });
 
   it('uses wildcard-suffixed resolve query for index targets', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const { result } = renderHook(() =>
       useTargetIdField({
         targetType: TARGET_TYPE_INDEX,
         targetId: '',
         includeHiddenAndSystemIndices: false,
-        fetch: jest.fn(),
-        onFieldRulesChange: jest.fn(),
-        onTargetIdChange: jest.fn(),
+        fetch: vi.fn(),
+        onFieldRulesChange: vi.fn(),
+        onTargetIdChange: vi.fn(),
       })
     );
 
@@ -118,10 +132,10 @@ describe('useTargetIdField', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(TARGET_LOOKUP_DEBOUNCE_MS);
+      vi.advanceTimersByTime(TARGET_LOOKUP_DEBOUNCE_MS);
     });
 
-    expect(jest.mocked(useResolveIndex).mock.calls.at(-1)?.[0]).toEqual(
+    expect(vi.mocked(useResolveIndex).mock.calls.at(-1)?.[0]).toEqual(
       expect.objectContaining({
         query: 'kibana*',
         targetType: TARGET_TYPE_INDEX,
@@ -132,15 +146,15 @@ describe('useTargetIdField', () => {
 
   it('validates concrete index target on selection and returns async error when unresolved', async () => {
     fetchQuery.mockResolvedValue({ indices: [{ name: 'other-index' }] });
-    const onFieldRulesChange = jest.fn();
-    const onTargetIdChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
+    const onTargetIdChange = vi.fn();
 
     const { result } = renderHook(() =>
       useTargetIdField({
         targetType: TARGET_TYPE_INDEX,
         targetId: '',
         includeHiddenAndSystemIndices: false,
-        fetch: jest.fn(),
+        fetch: vi.fn(),
         onFieldRulesChange,
         onTargetIdChange,
       })
@@ -172,15 +186,15 @@ describe('useTargetIdField', () => {
       return { indices: [] };
     });
 
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
     const { result } = renderHook(() =>
       useTargetIdField({
         targetType: TARGET_TYPE_DATA_VIEW,
         targetId: '',
         includeHiddenAndSystemIndices: false,
-        fetch: jest.fn(),
+        fetch: vi.fn(),
         onFieldRulesChange,
-        onTargetIdChange: jest.fn(),
+        onTargetIdChange: vi.fn(),
       })
     );
 
@@ -221,15 +235,15 @@ describe('useTargetIdField', () => {
       return { indices: [] };
     });
 
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
     const { result } = renderHook(() =>
       useTargetIdField({
         targetType: TARGET_TYPE_DATA_VIEW,
         targetId: '',
         includeHiddenAndSystemIndices: false,
-        fetch: jest.fn(),
+        fetch: vi.fn(),
         onFieldRulesChange,
-        onTargetIdChange: jest.fn(),
+        onTargetIdChange: vi.fn(),
       })
     );
 
@@ -251,7 +265,7 @@ describe('useTargetIdField', () => {
   });
 
   it('maps data view results to combo box options', () => {
-    jest.mocked(useDataViewsList).mockReturnValue({
+    vi.mocked(useDataViewsList).mockReturnValue({
       data: {
         data_view: [{ id: 'dv-1', title: 'logs-*', name: 'Logs' }],
       },
@@ -263,9 +277,9 @@ describe('useTargetIdField', () => {
         targetType: TARGET_TYPE_DATA_VIEW,
         targetId: 'dv-1',
         includeHiddenAndSystemIndices: false,
-        fetch: jest.fn(),
-        onFieldRulesChange: jest.fn(),
-        onTargetIdChange: jest.fn(),
+        fetch: vi.fn(),
+        onFieldRulesChange: vi.fn(),
+        onTargetIdChange: vi.fn(),
       })
     );
 
@@ -278,9 +292,9 @@ describe('useTargetIdField', () => {
         targetType: TARGET_TYPE_INDEX_PATTERN,
         targetId: 'logs-*',
         includeHiddenAndSystemIndices: false,
-        fetch: jest.fn(),
-        onFieldRulesChange: jest.fn(),
-        onTargetIdChange: jest.fn(),
+        fetch: vi.fn(),
+        onFieldRulesChange: vi.fn(),
+        onTargetIdChange: vi.fn(),
       })
     );
 
@@ -288,8 +302,8 @@ describe('useTargetIdField', () => {
   });
 
   it('maps resolve-index results to target options and keeps custom value', () => {
-    jest.useFakeTimers();
-    jest.mocked(useResolveIndex).mockReturnValue({
+    vi.useFakeTimers();
+    vi.mocked(useResolveIndex).mockReturnValue({
       data: {
         data_streams: [{ name: 'logs-stream' }],
         aliases: [{ name: 'logs-alias' }],
@@ -303,15 +317,15 @@ describe('useTargetIdField', () => {
         targetType: TARGET_TYPE_INDEX_PATTERN,
         targetId: '',
         includeHiddenAndSystemIndices: false,
-        fetch: jest.fn(),
-        onFieldRulesChange: jest.fn(),
-        onTargetIdChange: jest.fn(),
+        fetch: vi.fn(),
+        onFieldRulesChange: vi.fn(),
+        onTargetIdChange: vi.fn(),
       })
     );
 
     act(() => {
       result.current.onTargetIdSearchChange('logs');
-      jest.advanceTimersByTime(TARGET_LOOKUP_DEBOUNCE_MS);
+      vi.advanceTimersByTime(TARGET_LOOKUP_DEBOUNCE_MS);
     });
 
     expect(result.current.targetIdOptions).toEqual(
@@ -323,14 +337,14 @@ describe('useTargetIdField', () => {
   });
 
   it('blocks selecting a target that already has a profile', () => {
-    const onTargetIdChange = jest.fn();
+    const onTargetIdChange = vi.fn();
     const { result } = renderHook(() =>
       useTargetIdField({
         targetType: TARGET_TYPE_INDEX_PATTERN,
         targetId: '',
         includeHiddenAndSystemIndices: false,
-        fetch: jest.fn(),
-        onFieldRulesChange: jest.fn(),
+        fetch: vi.fn(),
+        onFieldRulesChange: vi.fn(),
         onTargetIdChange,
         unavailableTargetIds: ['logs-index'],
       })

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { trackFlyoutOpen, useFlyoutTelemetry } from './use_flyout_telemetry';
@@ -18,14 +21,14 @@ import {
   FLYOUT_SESSION_KIND,
 } from '../../../common/lib/telemetry';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
-const mockReportEvent = jest.fn();
+const mockReportEvent = vi.fn();
 
 describe('useFlyoutTelemetry', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: { telemetry: { reportEvent: mockReportEvent } },
     });
   });

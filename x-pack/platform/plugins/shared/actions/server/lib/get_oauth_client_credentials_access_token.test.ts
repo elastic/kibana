@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -12,11 +15,14 @@ import { connectorTokenClientMock } from './connector_token_client.mock';
 import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 
-jest.mock('./request_oauth_client_credentials_token', () => ({
-  requestOAuthClientCredentialsToken: jest.fn(),
-}));
+vi.mock('./request_oauth_client_credentials_token', () => {
+      const mocked = {
+      requestOAuthClientCredentialsToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const configurationUtilities = actionsConfigMock.create();
 const connectorTokenClient = connectorTokenClientMock.create();
 
@@ -50,8 +56,8 @@ describe('getOAuthClientCredentialsAccessToken', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
 
   test('uses stored access token if it exists', async () => {
@@ -71,7 +77,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     );
 
     expect(accessToken).toEqual('testtokenvalue');
-    expect(requestOAuthClientCredentialsToken as jest.Mock).not.toHaveBeenCalled();
+    expect(requestOAuthClientCredentialsToken as Mock).not.toHaveBeenCalled();
   });
 
   test('creates new assertion if stored access token does not exist', async () => {
@@ -79,7 +85,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
       hasErrors: false,
       connectorToken: null,
     });
-    (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
+    (requestOAuthClientCredentialsToken as Mock).mockResolvedValueOnce({
       tokenType: 'access_token',
       accessToken: 'brandnewaccesstoken',
       expiresIn: 1000,
@@ -90,7 +96,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     );
 
     expect(accessToken).toEqual('access_token brandnewaccesstoken');
-    expect(requestOAuthClientCredentialsToken as jest.Mock).toHaveBeenCalledWith(
+    expect(requestOAuthClientCredentialsToken as Mock).toHaveBeenCalledWith(
       'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
       logger,
       {
@@ -127,7 +133,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         expiresAt,
       },
     });
-    (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
+    (requestOAuthClientCredentialsToken as Mock).mockResolvedValueOnce({
       tokenType: 'access_token',
       accessToken: 'brandnewaccesstoken',
       expiresIn: 1000,
@@ -138,7 +144,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     );
 
     expect(accessToken).toEqual('access_token brandnewaccesstoken');
-    expect(requestOAuthClientCredentialsToken as jest.Mock).toHaveBeenCalledWith(
+    expect(requestOAuthClientCredentialsToken as Mock).toHaveBeenCalledWith(
       'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
       logger,
       {
@@ -173,7 +179,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
       hasErrors: false,
       connectorToken: null,
     });
-    (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
+    (requestOAuthClientCredentialsToken as Mock).mockResolvedValueOnce({
       tokenType: 'access_token',
       accessToken: 'tokenwithfields',
       expiresIn: 500,
@@ -193,7 +199,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
 
     await getOAuthClientCredentialsAccessToken(optsWithSpecificFields);
 
-    expect(requestOAuthClientCredentialsToken as jest.Mock).toHaveBeenCalledWith(
+    expect(requestOAuthClientCredentialsToken as Mock).toHaveBeenCalledWith(
       expect.any(String), // tokenUrl
       expect.any(Object), // logger
       // Use objectContaining with spread properties
@@ -241,7 +247,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       `Missing required fields for requesting OAuth Client Credentials access token`
     );
-    expect(requestOAuthClientCredentialsToken as jest.Mock).not.toHaveBeenCalled();
+    expect(requestOAuthClientCredentialsToken as Mock).not.toHaveBeenCalled();
   });
 
   test('requests new token in client_assertion mode using buildAdditionalFields lazily', async () => {
@@ -249,13 +255,13 @@ describe('getOAuthClientCredentialsAccessToken', () => {
       hasErrors: false,
       connectorToken: null,
     });
-    (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
+    (requestOAuthClientCredentialsToken as Mock).mockResolvedValueOnce({
       tokenType: 'Bearer',
       accessToken: 'assertion-token',
       expiresIn: 1000,
     });
 
-    const buildAdditionalFields = jest.fn().mockReturnValue({
+    const buildAdditionalFields = vi.fn().mockReturnValue({
       client_assertion: 'signed.jwt.assertion',
       client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
     });
@@ -274,7 +280,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     expect(accessToken).toEqual('Bearer assertion-token');
     expect(buildAdditionalFields).toHaveBeenCalledTimes(1);
     expect(logger.warn).not.toHaveBeenCalled();
-    expect(requestOAuthClientCredentialsToken as jest.Mock).toHaveBeenCalledWith(
+    expect(requestOAuthClientCredentialsToken as Mock).toHaveBeenCalledWith(
       'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
       logger,
       {
@@ -302,7 +308,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
       },
     });
 
-    const buildAdditionalFields = jest.fn();
+    const buildAdditionalFields = vi.fn();
 
     const accessToken = await getOAuthClientCredentialsAccessToken({
       ...getOAuthClientCredentialsAccessTokenOpts,
@@ -314,7 +320,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
 
     expect(accessToken).toEqual('Bearer cached');
     expect(buildAdditionalFields).not.toHaveBeenCalled();
-    expect(requestOAuthClientCredentialsToken as jest.Mock).not.toHaveBeenCalled();
+    expect(requestOAuthClientCredentialsToken as Mock).not.toHaveBeenCalled();
   });
 
   test('throws error if requestOAuthClientCredentialsToken throws error', async () => {
@@ -322,7 +328,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
       hasErrors: false,
       connectorToken: null,
     });
-    (requestOAuthClientCredentialsToken as jest.Mock).mockRejectedValueOnce(
+    (requestOAuthClientCredentialsToken as Mock).mockRejectedValueOnce(
       new Error('requestOAuthClientCredentialsToken error!!')
     );
 
@@ -336,7 +342,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
       hasErrors: false,
       connectorToken: null,
     });
-    (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
+    (requestOAuthClientCredentialsToken as Mock).mockResolvedValueOnce({
       tokenType: 'access_token',
       accessToken: 'brandnewaccesstoken',
       tokenRequestDate: 1609502400000,
@@ -355,7 +361,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
   });
 
   test('gets access token if connectorId is not provided', async () => {
-    (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
+    (requestOAuthClientCredentialsToken as Mock).mockResolvedValueOnce({
       tokenType: 'access_token',
       accessToken: 'brandnewaccesstoken',
       expiresIn: 1000,
@@ -382,7 +388,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     expect(connectorTokenClient.get).not.toHaveBeenCalled();
     expect(connectorTokenClient.updateOrReplace).not.toHaveBeenCalled();
     expect(accessToken).toEqual('access_token brandnewaccesstoken');
-    expect(requestOAuthClientCredentialsToken as jest.Mock).toHaveBeenCalledWith(
+    expect(requestOAuthClientCredentialsToken as Mock).toHaveBeenCalledWith(
       'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
       logger,
       {
@@ -398,7 +404,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
   });
 
   test('gets access token if connectorTokenClient is not provided', async () => {
-    (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
+    (requestOAuthClientCredentialsToken as Mock).mockResolvedValueOnce({
       tokenType: 'access_token',
       accessToken: 'brandnewaccesstoken',
       tokenRequestDate: 1609502400000,
@@ -426,7 +432,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     expect(connectorTokenClient.get).not.toHaveBeenCalled();
     expect(connectorTokenClient.updateOrReplace).not.toHaveBeenCalled();
     expect(accessToken).toEqual('access_token brandnewaccesstoken');
-    expect(requestOAuthClientCredentialsToken as jest.Mock).toHaveBeenCalledWith(
+    expect(requestOAuthClientCredentialsToken as Mock).toHaveBeenCalledWith(
       'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
       logger,
       {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { MAX_IMPROVEMENTS_PER_RUN } from '../../common/constants';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import type { ImprovementsServiceApi } from '../improvements/service';
@@ -23,7 +26,7 @@ const buildProposal = (overrides: Record<string, unknown> = {}) => ({
 });
 
 describe('recordImprovements', () => {
-  let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'write'>>;
+  let improvementsService: Mocked<Pick<ImprovementsServiceApi, 'write'>>;
 
   const run = (overrides: Partial<Parameters<typeof recordImprovements>[0]> = {}) =>
     recordImprovements({
@@ -40,7 +43,7 @@ describe('recordImprovements', () => {
 
   beforeEach(() => {
     improvementsService = {
-      write: jest.fn(async (inputs) => inputs.map((input) => ({ ...input } as never))),
+      write: vi.fn(async (inputs) => inputs.map((input) => ({ ...input } as never))),
     };
   });
 

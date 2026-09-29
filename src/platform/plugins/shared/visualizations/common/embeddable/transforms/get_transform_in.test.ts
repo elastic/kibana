@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { SerializedVis } from '../../types';
 import { getTransformIn } from './get_transform_in';
 
@@ -17,7 +19,7 @@ describe('getTransformIn', () => {
     label: 'Go to dashboard',
     trigger: 'some_action',
   };
-  const transformDrilldownsIn = jest.fn((state) => {
+  const transformDrilldownsIn = vi.fn((state) => {
     const { dashboard_id, ...restOfDrilldown } = drilldown;
     return {
       state: {

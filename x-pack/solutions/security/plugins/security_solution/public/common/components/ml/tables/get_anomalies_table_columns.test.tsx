@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as i18n from './translations';
 import type { AnomaliesBy, Anomaly } from '../types';
 import type { Columns } from '../../../../explore/components/paginated_table';
@@ -13,7 +15,7 @@ import { TestProviders } from '../../../mock';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 import { getAnomaliesDefaultTableColumns } from './get_anomalies_table_columns';
 
-jest.mock('../../../lib/kibana');
+vi.mock('../../../lib/kibana');
 
 const startDate = new Date(2001).toISOString();
 const endDate = new Date(3000).toISOString();

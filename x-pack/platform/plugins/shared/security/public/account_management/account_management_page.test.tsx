@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -20,7 +22,7 @@ import { Breadcrumb } from '../components/breadcrumb';
 import { UserAPIClient } from '../management';
 import { securityMock } from '../mocks';
 
-const UserProfileMock = jest
+const UserProfileMock = vi
   .spyOn(UserProfileImports, 'UserProfile')
   .mockImplementation(({ user }) => (
     <Breadcrumb text={user.username}>

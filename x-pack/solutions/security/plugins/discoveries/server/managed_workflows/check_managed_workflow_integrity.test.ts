@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { ManagedWorkflowStatus, ManagedWorkflowStatusReport } from '@kbn/workflows/server';
 import {
@@ -18,10 +21,10 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 
 import { checkManagedWorkflowIntegrity } from './check_managed_workflow_integrity';
 
-const createMockAnalytics = (): jest.Mocked<AnalyticsServiceSetup> =>
+const createMockAnalytics = (): Mocked<AnalyticsServiceSetup> =>
   ({
-    reportEvent: jest.fn(),
-  } as unknown as jest.Mocked<AnalyticsServiceSetup>);
+    reportEvent: vi.fn(),
+  } as unknown as Mocked<AnalyticsServiceSetup>);
 
 const createIntactReport = (id: string): ManagedWorkflowStatusReport => ({
   definitionId: id as ManagedWorkflowStatusReport['definitionId'],
@@ -49,13 +52,13 @@ const createReport = (
 });
 
 interface MockManagedClient {
-  getWorkflowStatus: jest.Mock;
+  getWorkflowStatus: Mock;
 }
 
 const createMockManagedClient = (
   overrides: Partial<Record<string, ManagedWorkflowStatusReport>> = {}
 ): MockManagedClient => ({
-  getWorkflowStatus: jest.fn().mockImplementation((id: string) => {
+  getWorkflowStatus: vi.fn().mockImplementation((id: string) => {
     if (id in overrides) {
       return Promise.resolve(overrides[id]);
     }
@@ -69,11 +72,11 @@ const createMockWorkflowsExtensions = ({
 }: {
   managedClient: MockManagedClient;
   registeredStepTypes?: string[];
-}): jest.Mocked<WorkflowsExtensionsServerPluginStart> =>
+}): Mocked<WorkflowsExtensionsServerPluginStart> =>
   ({
-    hasStepDefinition: jest.fn((stepTypeId: string) => registeredStepTypes.includes(stepTypeId)),
-    initManagedWorkflowsClient: jest.fn().mockResolvedValue(managedClient),
-  } as unknown as jest.Mocked<WorkflowsExtensionsServerPluginStart>);
+    hasStepDefinition: vi.fn((stepTypeId: string) => registeredStepTypes.includes(stepTypeId)),
+    initManagedWorkflowsClient: vi.fn().mockResolvedValue(managedClient),
+  } as unknown as Mocked<WorkflowsExtensionsServerPluginStart>);
 
 const AD_STEP_TYPES = [
   'security.attack-discovery.defaultAlertRetrieval',
@@ -85,10 +88,10 @@ const AD_STEP_TYPES = [
 
 const createMockLogger = (): Logger =>
   ({
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 describe('checkManagedWorkflowIntegrity', () => {

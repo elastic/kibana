@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { WaterfallAccordionButtonProps } from './waterfall_accordion_button';
@@ -18,7 +20,7 @@ describe('WaterfallAccordionButton', () => {
   };
 
   it('renders with fold icon when isOpen is true', () => {
-    renderButton({ isOpen: true, onClick: jest.fn() });
+    renderButton({ isOpen: true, onClick: vi.fn() });
 
     const button = screen.getByTestId('traceWaterfallAccordionButton');
 
@@ -26,7 +28,7 @@ describe('WaterfallAccordionButton', () => {
     expect(button).toHaveAttribute('aria-label', 'Click to fold the waterfall');
   });
   it('renders with unfold icon when isOpen is false', () => {
-    renderButton({ isOpen: false, onClick: jest.fn() });
+    renderButton({ isOpen: false, onClick: vi.fn() });
 
     const button = screen.getByTestId('traceWaterfallAccordionButton');
 
@@ -34,7 +36,7 @@ describe('WaterfallAccordionButton', () => {
     expect(button).toHaveAttribute('aria-label', 'Click to unfold the waterfall');
   });
   it('calls onClick when clicked', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
 
     renderButton({ isOpen: true, onClick });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -18,20 +20,23 @@ import type { Version } from '@kbn/upgrade-assistant-pkg-common';
 import { REINDEX_SERVICE_BASE_PATH } from '../../../common';
 
 const mockReindexService = {
-  hasRequiredPrivileges: jest.fn(),
-  detectReindexWarnings: jest.fn(),
-  getIndexGroup: jest.fn(),
-  createReindexOperation: jest.fn(),
-  findAllInProgressOperations: jest.fn(),
-  findReindexOperation: jest.fn(),
-  processNextStep: jest.fn(),
-  resumeReindexOperation: jest.fn(),
-  cancelReindexing: jest.fn(),
+  hasRequiredPrivileges: vi.fn(),
+  detectReindexWarnings: vi.fn(),
+  getIndexGroup: vi.fn(),
+  createReindexOperation: vi.fn(),
+  findAllInProgressOperations: vi.fn(),
+  findReindexOperation: vi.fn(),
+  processNextStep: vi.fn(),
+  resumeReindexOperation: vi.fn(),
+  cancelReindexing: vi.fn(),
 };
 
-jest.mock('../lib/reindex_service', () => ({
-  reindexServiceFactory: () => mockReindexService,
-}));
+vi.mock('../lib/reindex_service', () => {
+      const mocked = {
+      reindexServiceFactory: () => mockReindexService,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { credentialStoreFactory } from '../lib/credential_store';
 import { registerBatchReindexIndicesRoutes } from './batch_reindex_indices';
@@ -49,8 +54,8 @@ describe('reindex API', () => {
 
   const credentialStore = credentialStoreFactory(logMock);
   const worker = {
-    includes: jest.fn(),
-    forceRefresh: jest.fn(),
+    includes: vi.fn(),
+    forceRefresh: vi.fn(),
   } as any;
 
   beforeEach(() => {
@@ -68,9 +73,9 @@ describe('reindex API', () => {
             credentialStore,
             clusterClient: {} as any,
             logger: {
-              debug: jest.fn(),
+              debug: vi.fn(),
               get: () => ({
-                debug: jest.fn(),
+                debug: vi.fn(),
               }),
             } as any,
             licensing: licensingMock.createStart(),
@@ -100,7 +105,7 @@ describe('reindex API', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe(`POST ${REINDEX_SERVICE_BASE_PATH}/batch`, () => {

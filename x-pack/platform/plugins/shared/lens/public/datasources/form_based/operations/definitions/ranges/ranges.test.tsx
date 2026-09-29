@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
@@ -29,8 +31,8 @@ import { DragDropBuckets } from '@kbn/visualization-ui-components';
 import { getFieldByNameFactory } from '../../../pure_helpers';
 
 // mocking random id generator function
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   return {
     ...original,
@@ -41,10 +43,10 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());
+vi.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
+vi.mock('lodash', () => {
+  const original = require('lodash');
 
   return {
     ...original,
@@ -57,7 +59,7 @@ const kqlPluginMockValue = kqlPluginMock.createStartContract();
 const fieldFormatsPluginMockValue = fieldFormatsServiceMock.createStartContract();
 const dataViewsPluginMockValue = dataViewPluginMocks.createStartContract();
 // need to overwrite the formatter field first
-dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ id, params }) => {
+dataPluginMockValue.fieldFormats.deserialize = vi.fn().mockImplementation(({ id, params }) => {
   return {
     convertToText: ({ gte, lt }: { gte: string; lt: string }) => {
       if (params?.id === 'custom') {
@@ -76,7 +78,7 @@ dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ i
 
 // need this for MAX_HISTOGRAM value
 const uiSettingsMock = {
-  get: jest.fn().mockReturnValue(100),
+  get: vi.fn().mockReturnValue(100),
 } as unknown as IUiSettingsClient;
 
 const sourceField = 'MyField';
@@ -120,8 +122,8 @@ const defaultOptions = {
   },
   operationDefinitionMap: {},
   isFullscreen: false,
-  toggleFullscreen: jest.fn(),
-  setIsCloseable: jest.fn(),
+  toggleFullscreen: vi.fn(),
+  setIsCloseable: vi.fn(),
   layerId: '1',
 };
 
@@ -174,7 +176,7 @@ describe('ranges', () => {
   }
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
 
   beforeEach(() => {
@@ -370,7 +372,7 @@ describe('ranges', () => {
       });
 
       it('should start update the state with the default maxBars value', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
         const instance = mountWithProviders(
           <InlineOptions
             {...defaultOptions}
@@ -385,7 +387,7 @@ describe('ranges', () => {
       });
 
       it('should update state when changing Max bars number', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
 
         const instance = mountWithProviders(
           <InlineOptions
@@ -398,7 +400,7 @@ describe('ranges', () => {
         );
 
         act(() => {
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+          vi.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
           instance.find(EuiRange).prop('onChange')!(
             {
@@ -409,7 +411,7 @@ describe('ranges', () => {
             true
           );
 
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+          vi.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
         });
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -428,7 +430,7 @@ describe('ranges', () => {
       });
 
       it('should update the state using the plus or minus buttons by the step amount', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
 
         const instance = mountWithProviders(
           <InlineOptions
@@ -441,13 +443,13 @@ describe('ranges', () => {
         );
 
         act(() => {
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+          vi.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
           // minus button
           instance
             .find('[data-test-subj="lns-indexPattern-range-maxBars-minus"]')
             .find('button')
             .simulate('click');
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+          vi.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
           instance.update();
         });
 
@@ -471,7 +473,7 @@ describe('ranges', () => {
             .find('[data-test-subj="lns-indexPattern-range-maxBars-plus"]')
             .find('button')
             .simulate('click');
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+          vi.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
           instance.update();
         });
 
@@ -498,7 +500,7 @@ describe('ranges', () => {
       beforeEach(() => setToRangeMode());
 
       it('should show one range interval to start with', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
 
         const instance = mountWithProviders(
           <InlineOptions
@@ -514,7 +516,7 @@ describe('ranges', () => {
       });
 
       it('should use the parentFormat to create the trigger label', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
 
         const instance = mountWithProviders(
           <InlineOptions
@@ -534,7 +536,7 @@ describe('ranges', () => {
       it('should not print error if the parentFormat is not provided', () => {
         // while in the actual React implementation will print an error, here
         // we intercept the formatter without an id assigned an print "Error"
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
 
         const instance = mountWithProviders(
           <InlineOptions
@@ -560,7 +562,7 @@ describe('ranges', () => {
       });
 
       it('should add a new range', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
 
         const instance = mountWithProviders(
           <InlineOptions
@@ -589,7 +591,7 @@ describe('ranges', () => {
               value: '50',
             },
           });
-        jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+        vi.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
         act(() => {
           instance.update();
@@ -614,7 +616,7 @@ describe('ranges', () => {
       });
 
       it('should add a new range with custom label', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
 
         const instance = mountWithProviders(
           <InlineOptions
@@ -642,7 +644,7 @@ describe('ranges', () => {
             },
           });
 
-        jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+        vi.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
         act(() => {
           instance.update();
@@ -667,7 +669,7 @@ describe('ranges', () => {
       });
 
       it('should open a popover to edit an existing range', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
 
         const instance = mountWithProviders(
           <InlineOptions
@@ -692,7 +694,7 @@ describe('ranges', () => {
               value: '50',
             },
           });
-        jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+        vi.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
         act(() => {
           instance.update();
@@ -714,7 +716,7 @@ describe('ranges', () => {
       });
 
       it('should not accept invalid ranges', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
 
         const instance = mountWithProviders(
           <InlineOptions
@@ -757,7 +759,7 @@ describe('ranges', () => {
       });
 
       it('should be possible to remove a range if multiple', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
 
         // Add an extra range
         (layer.columns.col1 as RangeIndexPatternColumn).params.ranges.push({
@@ -795,7 +797,7 @@ describe('ranges', () => {
       });
 
       it('should handle correctly open ranges when saved', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
 
         // Add an extra open range:
         (layer.columns.col1 as RangeIndexPatternColumn).params.ranges.push({
@@ -834,7 +836,7 @@ describe('ranges', () => {
       });
 
       it('should correctly handle the default formatter for the field', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
 
         const instance = mountWithProviders(
           <InlineOptions
@@ -858,7 +860,7 @@ describe('ranges', () => {
       });
 
       it('should correctly pick the dimension formatter for the field', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
 
         // now set a format on the range operation
         (layer.columns.col1 as RangeIndexPatternColumn).params.format = {
@@ -888,7 +890,7 @@ describe('ranges', () => {
       });
 
       it('should not update the state on mount', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
 
         mountWithProviders(
           <InlineOptions
@@ -903,7 +905,7 @@ describe('ranges', () => {
       });
 
       it('should not reset formatters when switching between custom ranges and auto histogram', () => {
-        const updateLayerSpy = jest.fn();
+        const updateLayerSpy = vi.fn();
         // now set a format on the range operation
         (layer.columns.col1 as RangeIndexPatternColumn).params.format = {
           id: 'bytes',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,7 +18,7 @@ import { CasesListOnboarding } from './cases_list_onboarding';
 // state logic rather than the tour popover itself.
 describe('CasesListOnboarding', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows the welcome banner with start-tour and dismiss actions', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CasesClient } from '../../client';
 import { getCasesByAlertIdStepDefinition } from './get_cases_by_alert_id';
 import { createStepHandlerContext } from './test_utils';
@@ -23,7 +25,7 @@ const relatedCaseFixture = {
 
 describe('getCasesByAlertIdStepDefinition', () => {
   it('creates expected step definition structure', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     const definition = getCasesByAlertIdStepDefinition(getCasesClient);
 
     expect(definition.id).toBe('cases.getCasesByAlertId');
@@ -36,8 +38,8 @@ describe('getCasesByAlertIdStepDefinition', () => {
   });
 
   it('calls getCasesByAlertID with correct params and returns cases', async () => {
-    const getCasesByAlertID = jest.fn().mockResolvedValue([relatedCaseFixture]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesByAlertID = vi.fn().mockResolvedValue([relatedCaseFixture]);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { getCasesByAlertID },
     } as unknown as CasesClient);
     const definition = getCasesByAlertIdStepDefinition(getCasesClient);
@@ -56,8 +58,8 @@ describe('getCasesByAlertIdStepDefinition', () => {
   });
 
   it('calls getCasesByAlertID without owner when not provided', async () => {
-    const getCasesByAlertID = jest.fn().mockResolvedValue([]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesByAlertID = vi.fn().mockResolvedValue([]);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { getCasesByAlertID },
     } as unknown as CasesClient);
     const definition = getCasesByAlertIdStepDefinition(getCasesClient);
@@ -71,8 +73,8 @@ describe('getCasesByAlertIdStepDefinition', () => {
   });
 
   it('returns error when getCasesByAlertID throws', async () => {
-    const getCasesByAlertID = jest.fn().mockRejectedValue(new Error('unauthorized'));
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesByAlertID = vi.fn().mockRejectedValue(new Error('unauthorized'));
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { getCasesByAlertID },
     } as unknown as CasesClient);
     const definition = getCasesByAlertIdStepDefinition(getCasesClient);

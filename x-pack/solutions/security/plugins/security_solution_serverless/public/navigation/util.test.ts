@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { getProjectFeaturesUrl } from './util';
 
 describe('util', () => {
   describe('getProductFeaturesUrl', () => {
-    let cloud: jest.Mocked<CloudStart>;
+    let cloud: Mocked<CloudStart>;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       cloud = cloudMock.createStart();
       cloud.serverless = {
         projectId: '1234',
@@ -32,7 +35,7 @@ describe('util', () => {
     });
 
     it('should return the correct url', () => {
-      cloud.getUrls = jest.fn().mockReturnValue({
+      cloud.getUrls = vi.fn().mockReturnValue({
         projectsUrl: 'https://cloud.elastic.co/projects/',
       });
       expect(getProjectFeaturesUrl(cloud)).toBe(

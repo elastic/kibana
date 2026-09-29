@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   mockElasticsearchService,
   mockHttpService,
@@ -85,7 +87,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockEnsureValidConfiguration.mockReset();
 });
 
@@ -492,7 +494,7 @@ describe('self client UIAM attestation getter', () => {
 
     const { setSelfClientUiamAttestationGetter } = mockHttpService.getStartContract();
     expect(setSelfClientUiamAttestationGetter).toHaveBeenCalledTimes(1);
-    return jest.mocked(setSelfClientUiamAttestationGetter).mock.calls[0][0];
+    return vi.mocked(setSelfClientUiamAttestationGetter).mock.calls[0][0];
   };
 
   const getUiamMock = () => mockSecurityService.start().authc.apiKeys.uiam!;

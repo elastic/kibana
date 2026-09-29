@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ChatEventType,
   ConversationRoundStepType,
@@ -119,7 +121,7 @@ const emptyPromptState: PromptStorageState = { responses: {} };
 const build = (
   turn: ConversationTurn,
   promptState: PromptStorageState = emptyPromptState,
-  eventEmitter: (event: unknown) => void = jest.fn()
+  eventEmitter: (event: unknown) => void = vi.fn()
 ) =>
   buildResumeInitialization({
     turn,
@@ -207,7 +209,7 @@ describe('buildResumeInitialization', () => {
     const promptState: PromptStorageState = {
       responses: { s1: { type: AgentPromptType.ask_user_question, response: { answers } } },
     };
-    const eventEmitter = jest.fn();
+    const eventEmitter = vi.fn();
 
     const init = build(turn, promptState, eventEmitter);
 

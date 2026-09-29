@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
@@ -65,7 +67,7 @@ const createMockSavedSearch = (): SavedSearch => ({
 
 const buildSearchEmbeddable = () => ({
   api: { savedSearch$: new BehaviorSubject(createMockSavedSearch()) },
-  reinitializeState: jest.fn().mockResolvedValue(undefined),
+  reinitializeState: vi.fn().mockResolvedValue(undefined),
   stateManager: createSearchEmbeddableStateManager(),
 });
 

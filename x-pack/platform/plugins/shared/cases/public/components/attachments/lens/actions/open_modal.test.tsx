@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { unmountComponentAtNode } from 'react-dom';
 import { useCasesAddToExistingCaseModal } from '../../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { PropsWithChildren } from 'react';
@@ -30,57 +33,63 @@ document.body.appendChild(element);
 
 const mockDescription = mockLensAttributes.description as string;
 
-jest.mock('../../../all_cases/selector_modal/use_cases_add_to_existing_case_modal', () => ({
-  useCasesAddToExistingCaseModal: jest.fn(),
-}));
+vi.mock('../../../all_cases/selector_modal/use_cases_add_to_existing_case_modal', () => {
+      const mocked = {
+      useCasesAddToExistingCaseModal: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  KibanaThemeProvider: jest
-    .fn()
-    .mockImplementation(({ children }: PropsWithChildren<unknown>) => <>{children}</>),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      KibanaThemeProvider: vi
+        .fn()
+        .mockImplementation(({ children }: PropsWithChildren<unknown>) => <>{children}</>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kibana', () => {
+vi.mock('../../../../common/lib/kibana', () => {
   return {
-    useKibana: jest.fn(),
-    useCasesConfig: jest.fn(() => ({ attachmentsEnabled: false })),
-    KibanaContextProvider: jest
+    useKibana: vi.fn(),
+    useCasesConfig: vi.fn(() => ({ attachmentsEnabled: false })),
+    KibanaContextProvider: vi
       .fn()
       .mockImplementation(({ children, ...props }) => <div {...props}>{children}</div>),
   };
 });
 
-jest.mock('react-dom', () => {
-  const original = jest.requireActual('react-dom');
-  return { ...original, unmountComponentAtNode: jest.fn() };
+vi.mock('react-dom', () => {
+  const original = require('react-dom');
+  return { ...original, unmountComponentAtNode: vi.fn() };
 });
 
-jest.mock('./action_wrapper');
+vi.mock('./action_wrapper');
 
 describe('openModal', () => {
-  const mockUseCasesAddToExistingCaseModal = useCasesAddToExistingCaseModal as jest.Mock;
-  const mockOpenModal = jest.fn();
+  const mockUseCasesAddToExistingCaseModal = useCasesAddToExistingCaseModal as Mock;
+  const mockOpenModal = vi.fn();
 
   beforeAll(() => {
-    jest.useFakeTimers({ now: new Date('2024-01-01T00:00:00.000Z') });
+    vi.useFakeTimers({ now: new Date('2024-01-01T00:00:00.000Z') });
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useCasesConfig as jest.Mock).mockReturnValue({ attachmentsEnabled: false });
+    vi.clearAllMocks();
+    (useCasesConfig as Mock).mockReturnValue({ attachmentsEnabled: false });
     mockUseCasesAddToExistingCaseModal.mockReturnValue({
       open: mockOpenModal,
     });
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           currentAppId$: getMockCurrentAppId$(),
@@ -132,7 +141,7 @@ describe('openModal', () => {
     await waitFor(() => {
       const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
       onClose();
-      expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+      expect(unmountComponentAtNode as Mock).toHaveBeenCalled();
     });
   });
 
@@ -147,7 +156,7 @@ describe('openModal', () => {
     await waitFor(() => {
       const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
       onClose({ id: 'case-id', title: 'case-title' });
-      expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+      expect(unmountComponentAtNode as Mock).toHaveBeenCalled();
     });
   });
 
@@ -162,7 +171,7 @@ describe('openModal', () => {
     await waitFor(() => {
       const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
       onClose(null, true);
-      expect(unmountComponentAtNode as jest.Mock).not.toHaveBeenCalled();
+      expect(unmountComponentAtNode as Mock).not.toHaveBeenCalled();
     });
   });
 
@@ -177,7 +186,7 @@ describe('openModal', () => {
     await waitFor(() => {
       const onSuccess = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess;
       onSuccess();
-      expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+      expect(unmountComponentAtNode as Mock).toHaveBeenCalled();
     });
   });
 
@@ -281,7 +290,7 @@ describe('openModal', () => {
 
     it('merges the click-added filter and the search bar query into the attachment', async () => {
       const services = getMockServices();
-      (services.plugins.data.query.filterManager.extract as jest.Mock).mockReturnValue({
+      (services.plugins.data.query.filterManager.extract as Mock).mockReturnValue({
         state: [extractedFilter],
         references: [extractedReference],
       });
@@ -434,7 +443,7 @@ describe('openModal', () => {
     };
 
     it('stays by-value when attachments are disabled even if savedObjectId is present', async () => {
-      (useCasesConfig as jest.Mock).mockReturnValue({ attachmentsEnabled: false });
+      (useCasesConfig as Mock).mockReturnValue({ attachmentsEnabled: false });
 
       openModal(
         libraryLensApi(),
@@ -461,7 +470,7 @@ describe('openModal', () => {
     });
 
     it('stays by-value when attachments are enabled but the panel is ad-hoc', async () => {
-      (useCasesConfig as jest.Mock).mockReturnValue({ attachmentsEnabled: true });
+      (useCasesConfig as Mock).mockReturnValue({ attachmentsEnabled: true });
 
       openModal(
         getMockLensApi(),
@@ -488,7 +497,7 @@ describe('openModal', () => {
     });
 
     it('emits a by-ref payload when serializeState.ref_id is set and savedObjectId$ is empty', async () => {
-      (useCasesConfig as jest.Mock).mockReturnValue({ attachmentsEnabled: true });
+      (useCasesConfig as Mock).mockReturnValue({ attachmentsEnabled: true });
 
       openModal(
         getMockLensApi(undefined, {
@@ -516,7 +525,7 @@ describe('openModal', () => {
     });
 
     it('emits a by-ref payload when attachments are enabled and savedObjectId is present', async () => {
-      (useCasesConfig as jest.Mock).mockReturnValue({ attachmentsEnabled: true });
+      (useCasesConfig as Mock).mockReturnValue({ attachmentsEnabled: true });
 
       openModal(
         libraryLensApi(),

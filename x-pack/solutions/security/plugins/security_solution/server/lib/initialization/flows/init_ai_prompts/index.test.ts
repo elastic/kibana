@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { INITIALIZATION_FLOW_STATUS_READY } from '../../../../../common/api/initialization';
 import type { InitializationFlowContext } from '../../types';
 import { initAiPromptsFlow } from '.';
 import { installSecurityAiPromptsPackage } from '../../../detection_engine/prebuilt_rules/logic/integrations/install_ai_prompts';
 
-jest.mock('../../../detection_engine/prebuilt_rules/logic/integrations/install_ai_prompts');
+vi.mock('../../../detection_engine/prebuilt_rules/logic/integrations/install_ai_prompts');
 
-const installSecurityAiPromptsPackageMock = installSecurityAiPromptsPackage as jest.MockedFunction<
+const installSecurityAiPromptsPackageMock = installSecurityAiPromptsPackage as MockedFunction<
   typeof installSecurityAiPromptsPackage
 >;
 
 const createMockSecurityContext = () =>
   ({
-    getInternalFleetServices: jest.fn(),
-    getAppClient: jest.fn(),
+    getInternalFleetServices: vi.fn(),
+    getAppClient: vi.fn(),
   } as unknown);
 
 const createMockInitializationFlowContext = (): InitializationFlowContext =>
@@ -33,7 +36,7 @@ const createMockInitializationFlowContext = (): InitializationFlowContext =>
 
 describe('initAiPromptsFlow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be configured to run in parallel', () => {

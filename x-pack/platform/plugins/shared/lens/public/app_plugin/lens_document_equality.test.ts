@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { isLensEqual } from './lens_document_equality';
@@ -53,7 +56,7 @@ const defaultDoc: LensDocument = {
 };
 
 describe('lens document equality', () => {
-  const mockInjectFilterReferences = jest.fn((filters: Filter[]) =>
+  const mockInjectFilterReferences = vi.fn((filters: Filter[]) =>
     filters.map((filter) => ({
       ...filter,
       meta: {
@@ -69,12 +72,12 @@ describe('lens document equality', () => {
 
   beforeEach(() => {
     mockDatasourceMap = {
-      indexpattern: { isEqual: jest.fn(() => true) } as Partial<Datasource> as Datasource,
+      indexpattern: { isEqual: vi.fn(() => true) } as Partial<Datasource> as Datasource,
     };
 
     mockVisualizationMap = {
       [visualizationType]: {
-        isEqual: jest.fn(() => true),
+        isEqual: vi.fn(() => true),
       } as Partial<Visualization> as Visualization,
     };
 
@@ -260,7 +263,7 @@ describe('lens document equality', () => {
 
     it('delegates internal datasource comparison', () => {
       // datasource's isEqual returns false
-      (mockDatasourceMap.indexpattern.isEqual as jest.Mock).mockReturnValue(false);
+      (mockDatasourceMap.indexpattern.isEqual as Mock).mockReturnValue(false);
       expect(
         isLensEqual(
           defaultDoc,
@@ -289,7 +292,7 @@ describe('lens document equality', () => {
 
       expect(mockVisualizationMap[visualizationType].isEqual).toHaveBeenCalled();
 
-      (mockVisualizationMap[visualizationType].isEqual as jest.Mock).mockReturnValue(false);
+      (mockVisualizationMap[visualizationType].isEqual as Mock).mockReturnValue(false);
 
       expect(
         isLensEqual(

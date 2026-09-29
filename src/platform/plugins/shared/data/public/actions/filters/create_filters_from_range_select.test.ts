@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 
 import {
@@ -55,7 +57,7 @@ describe('brushEvent', () => {
   beforeEach(() => {
     const dataStart = dataPluginMock.createStartContract();
     const dataViews = dataViewPluginMocks.createStartContract();
-    dataViews.get = jest.fn().mockResolvedValue(indexPattern);
+    dataViews.get = vi.fn().mockResolvedValue(indexPattern);
     setSearchService(dataStart.search);
     setIndexPatterns(dataViews);
 

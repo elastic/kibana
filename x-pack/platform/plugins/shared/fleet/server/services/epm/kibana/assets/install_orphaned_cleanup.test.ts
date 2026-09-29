@@ -5,21 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
 
-jest.mock('timers/promises', () => ({ setTimeout: jest.fn() }));
+vi.mock('timers/promises', () => {
+      const mocked = { setTimeout: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 // appContextService.getSavedObjects() is configured per-test in beforeEach via jest.mocked().
-jest.mock('../../..', () => ({
-  appContextService: {
-    getExperimentalFeatures: jest.fn().mockReturnValue({
-      enableAgentStatusAlerting: true,
-      enableSloTemplates: false,
-    }),
-    getSavedObjects: jest.fn(),
-  },
-}));
+vi.mock('../../..', () => {
+      const mocked = {
+      appContextService: {
+        getExperimentalFeatures: vi.fn().mockReturnValue({
+          enableAgentStatusAlerting: true,
+          enableSloTemplates: false,
+        }),
+        getSavedObjects: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { appContextService } from '../../..';
 import { KibanaSavedObjectType } from '../../../../../common/types/models/epm';
@@ -118,15 +127,15 @@ const makeFindResult = (
 // ---------------------------------------------------------------------------
 
 describe('deleteOrphanedMultipleIsolatedAssets', () => {
-  let mockFind: jest.Mock;
-  let mockBulkDelete: jest.Mock;
+  let mockFind: Mock;
+  let mockBulkDelete: Mock;
 
   beforeEach(() => {
-    mockFind = jest.fn().mockResolvedValue(makeFindResult([]));
-    mockBulkDelete = jest.fn().mockResolvedValue({});
+    mockFind = vi.fn().mockResolvedValue(makeFindResult([]));
+    mockBulkDelete = vi.fn().mockResolvedValue({});
 
-    jest.mocked(appContextService.getSavedObjects).mockReturnValue({
-      getUnsafeInternalClient: jest.fn().mockReturnValue({
+    vi.mocked(appContextService.getSavedObjects).mockReturnValue({
+      getUnsafeInternalClient: vi.fn().mockReturnValue({
         find: mockFind,
         bulkDelete: mockBulkDelete,
       }),

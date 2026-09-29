@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, Mocked } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -19,13 +22,13 @@ import { createAlertActionsClient } from './alert_actions_client.mock';
 import { getAlertEventESQLResponse, getEmptyESQLResponse } from './fixtures/query_responses';
 
 describe('AlertActionsClient', () => {
-  jest.useFakeTimers().setSystemTime(new Date('2025-01-01T11:12:13.000Z'));
+  vi.useFakeTimers().setSystemTime(new Date('2025-01-01T11:12:13.000Z'));
   let client: AlertActionsClient;
   let queryServiceEsClient: DeeplyMockedApi<ElasticsearchClient>;
-  let storageServiceEsClient: jest.Mocked<ElasticsearchClient>;
-  let userProfileService: jest.Mocked<UserProfileServiceStart>;
+  let storageServiceEsClient: Mocked<ElasticsearchClient>;
+  let userProfileService: Mocked<UserProfileServiceStart>;
   let alertActionEventPublisher: AlertActionEventPublisher;
-  let emitEpisodeActionsSpy: jest.SpyInstance;
+  let emitEpisodeActionsSpy: MockInstance;
 
   beforeEach(() => {
     ({
@@ -35,12 +38,12 @@ describe('AlertActionsClient', () => {
       userProfileService,
       alertActionEventPublisher,
     } = createAlertActionsClient());
-    emitEpisodeActionsSpy = jest.spyOn(alertActionEventPublisher, 'emitEpisodeActions');
+    emitEpisodeActionsSpy = vi.spyOn(alertActionEventPublisher, 'emitEpisodeActions');
     storageServiceEsClient.bulk.mockResolvedValueOnce({ items: [], errors: false, took: 1 });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('createSeriesAction', () => {

@@ -5,30 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Comparator } from '@kbn/alerting-v2-rule-form';
 import { i18n } from '@kbn/i18n';
 import type { EpisodeTrendRow } from '../../queries/episode_trend_query';
 import { mapEventDataToSeries, deriveTrendThresholds } from './trend_data';
 
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    translate: jest.fn(
-      (
-        id: string,
-        {
-          defaultMessage,
-          values = {},
-        }: { defaultMessage: string; values?: Record<string, number | string> }
-      ) =>
-        Object.entries(values).reduce(
-          (message, [key, value]) => message.replace(`{${key}}`, String(value)),
-          defaultMessage
-        )
-    ),
-  },
-}));
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: {
+        translate: vi.fn(
+          (
+            id: string,
+            {
+              defaultMessage,
+              values = {},
+            }: { defaultMessage: string; values?: Record<string, number | string> }
+          ) =>
+            Object.entries(values).reduce(
+              (message, [key, value]) => message.replace(`{${key}}`, String(value)),
+              defaultMessage
+            )
+        ),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockTranslate = jest.mocked(i18n.translate);
+const mockTranslate = vi.mocked(i18n.translate);
 
 describe('mapEventDataToSeries', () => {
   it('builds one series per label, reading values from each event metrics', () => {

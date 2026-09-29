@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { PaletteOutput, PaletteDefinition } from '@kbn/coloring';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { SimplifiedArrayNode } from './get_color';
@@ -115,20 +118,20 @@ describe('get color', () => {
     const dataLength = { columnsLength: buckets.length, rowsLength: visData.rows.length };
 
     dataMock.fieldFormats = {
-      deserialize: jest.fn(() => ({
-        convertToText: jest.fn((s: RangeProps) => {
+      deserialize: vi.fn(() => ({
+        convertToText: vi.fn((s: RangeProps) => {
           return `≥ ${s.gte} and < ${s.lt}`;
         }),
       })),
     } as unknown as DataPublicPluginStart['fieldFormats'];
 
     const getPaletteRegistry = () => {
-      const mockPalette1: jest.Mocked<PaletteDefinition> = {
+      const mockPalette1: Mocked<PaletteDefinition> = {
         id: 'default',
         title: 'My Palette',
-        getCategoricalColor: jest.fn((layer: SeriesLayer[]) => colors[layer[0].rankAtDepth]),
-        getCategoricalColors: jest.fn((num: number) => colors),
-        toExpression: jest.fn(() => ({
+        getCategoricalColor: vi.fn((layer: SeriesLayer[]) => colors[layer[0].rankAtDepth]),
+        getCategoricalColors: vi.fn((num: number) => colors),
+        toExpression: vi.fn(() => ({
           type: 'expression',
           chain: [
             {

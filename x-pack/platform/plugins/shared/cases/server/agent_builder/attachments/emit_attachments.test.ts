@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { emitFromStepResult, injectAttachmentIds, toCaseAttachmentData } from './emit_attachments';
 import {
   CASE_ATTACHMENT_TYPE,
@@ -44,7 +46,7 @@ const buildCase = (id = 'case-1'): Case =>
   } as unknown as Case);
 
 const buildAttachments = () => ({
-  add: jest.fn().mockResolvedValue({ id: 'att-1' }),
+  add: vi.fn().mockResolvedValue({ id: 'att-1' }),
 });
 
 // ---------------------------------------------------------------------------

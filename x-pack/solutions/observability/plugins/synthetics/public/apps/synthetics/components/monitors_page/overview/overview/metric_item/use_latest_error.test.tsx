@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { useLatestError } from './use_latest_error';
@@ -16,18 +19,24 @@ import {
   selectLastErrorRunMetadata,
 } from '../../../../../state';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useEsSearch: jest.fn().mockReturnValue({ data: undefined, loading: false, error: undefined }),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useEsSearch: vi.fn().mockReturnValue({ data: undefined, loading: false, error: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../contexts', () => ({
-  useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
-}));
+vi.mock('../../../../../contexts', () => {
+      const mocked = {
+      useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDispatch = jest.fn();
+const mockDispatch = vi.fn();
 const mockSelectorReturns = new Map<unknown, unknown>();
-jest.mock('react-redux-v7', () => {
-  const actual = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const actual = require('react-redux-v7');
   return {
     ...actual,
     useDispatch: () => mockDispatch,
@@ -37,7 +46,7 @@ jest.mock('react-redux-v7', () => {
   };
 });
 
-const useEsSearchMock = observabilitySharedPublic.useEsSearch as jest.Mock;
+const useEsSearchMock = observabilitySharedPublic.useEsSearch as Mock;
 
 const baseMonitor = {
   configId: 'cfg-1',
@@ -75,7 +84,7 @@ describe('useLatestError', () => {
     useEsSearchMock.mockReturnValue({ data: undefined, loading: false, error: undefined });
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   describe('local monitors', () => {
     it('dispatches getMonitorLastErrorRunAction when the popover is open for this monitor', () => {

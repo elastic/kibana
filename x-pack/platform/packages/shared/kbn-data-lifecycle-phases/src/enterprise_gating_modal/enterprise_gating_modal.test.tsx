@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -15,7 +17,7 @@ const SUBSCRIPTION_FEATURES_URL = 'https://www.elastic.co/subscriptions/cloud';
 
 describe('EnterpriseGatingModal', () => {
   it('renders the start trial primary action for cloud users that can manage subscriptions', () => {
-    const onPrimaryAction = jest.fn();
+    const onPrimaryAction = vi.fn();
 
     renderWithI18n(
       <EnterpriseGatingModal
@@ -37,7 +39,7 @@ describe('EnterpriseGatingModal', () => {
   });
 
   it('renders the upgrade primary action for cloud users with an expired trial', () => {
-    const onPrimaryAction = jest.fn();
+    const onPrimaryAction = vi.fn();
 
     renderWithI18n(
       <EnterpriseGatingModal
@@ -74,7 +76,7 @@ describe('EnterpriseGatingModal', () => {
   });
 
   it('renders the contact primary action for self-managed deployments', () => {
-    const onPrimaryAction = jest.fn();
+    const onPrimaryAction = vi.fn();
 
     renderWithI18n(
       <EnterpriseGatingModal
@@ -94,7 +96,7 @@ describe('EnterpriseGatingModal', () => {
   });
 
   it('renders the contact primary action for self-managed deployments regardless of subscription permissions', () => {
-    const onPrimaryAction = jest.fn();
+    const onPrimaryAction = vi.fn();
 
     renderWithI18n(
       <EnterpriseGatingModal
@@ -158,7 +160,7 @@ describe('EnterpriseGatingModal', () => {
   });
 
   it('calls onCancel when cancel is clicked', () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
 
     renderWithI18n(
       <EnterpriseGatingModal
@@ -175,7 +177,7 @@ describe('EnterpriseGatingModal', () => {
   });
 
   it('calls onCancel when the modal is closed via the close button', () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
 
     renderWithI18n(
       <EnterpriseGatingModal

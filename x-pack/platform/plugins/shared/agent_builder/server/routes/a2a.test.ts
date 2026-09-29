@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerA2ARoutes, A2A_SERVER_PATH } from './a2a';
@@ -22,22 +25,22 @@ describe('A2A routes - socket timeout', () => {
   beforeEach(() => {
     postRouteConfig = undefined as unknown as typeof postRouteConfig;
 
-    const versionedPost = jest.fn().mockImplementation((config) => {
+    const versionedPost = vi.fn().mockImplementation((config) => {
       postRouteConfig = config;
-      return { addVersion: jest.fn() };
+      return { addVersion: vi.fn() };
     });
 
     const mockRouter = {
       versioned: {
-        get: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
+        get: vi.fn().mockReturnValue({ addVersion: vi.fn() }),
         post: versionedPost,
       },
-    } as unknown as jest.Mocked<IRouter>;
+    } as unknown as Mocked<IRouter>;
 
     registerA2ARoutes({
       router: mockRouter,
       logger: loggingSystemMock.createLogger(),
-      getInternalServices: jest.fn(),
+      getInternalServices: vi.fn(),
       coreSetup: {} as RouteDependencies['coreSetup'],
       pluginsSetup: {} as RouteDependencies['pluginsSetup'],
     } as unknown as RouteDependencies);

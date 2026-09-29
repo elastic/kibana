@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import moment from 'moment';
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
@@ -45,8 +48,8 @@ const setup = async () => {
 
   const sessionsClient = new SessionsClient({
     http: mockCoreSetup.http,
-  }) as jest.Mocked<SessionsClient>;
-  sessionsClient.find = jest.fn().mockResolvedValue({
+  }) as Mocked<SessionsClient>;
+  sessionsClient.find = vi.fn().mockResolvedValue({
     saved_objects: [],
     statuses: {},
   });

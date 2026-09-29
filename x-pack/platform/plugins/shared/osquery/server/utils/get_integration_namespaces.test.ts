@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
@@ -16,19 +19,19 @@ describe('getIntegrationNamespaces', () => {
   const mockLogger = loggingSystemMock.createLogger();
   const mockSoClient = {} as SavedObjectsClientContract;
 
-  let mockPackagePolicyService: jest.Mocked<PackagePolicyClient>;
-  let mockAgentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;
+  let mockPackagePolicyService: Mocked<PackagePolicyClient>;
+  let mockAgentPolicyService: Mocked<AgentPolicyServiceInterface>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockPackagePolicyService = {
-      list: jest.fn(),
-    } as unknown as jest.Mocked<PackagePolicyClient>;
+      list: vi.fn(),
+    } as unknown as Mocked<PackagePolicyClient>;
 
     mockAgentPolicyService = {
-      getByIds: jest.fn(),
-    } as unknown as jest.Mocked<AgentPolicyServiceInterface>;
+      getByIds: vi.fn(),
+    } as unknown as Mocked<AgentPolicyServiceInterface>;
   });
 
   it('returns empty map when no integration names provided', async () => {

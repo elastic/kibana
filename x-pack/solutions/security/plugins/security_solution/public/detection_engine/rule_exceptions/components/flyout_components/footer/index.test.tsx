@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -15,7 +17,7 @@ import * as i18n from './translations';
 
 describe('Exception flyout footer', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render button disabled if "isSubmitButtonDisabled" is "true"', () => {
@@ -26,8 +28,8 @@ describe('Exception flyout footer', () => {
           isSubmitButtonDisabled
           cancelButtonDataTestSubjId={'cancelExceptionAddButton'}
           submitButtonDataTestSubjId={'addExceptionConfirmButton'}
-          handleOnSubmit={jest.fn()}
-          handleCloseFlyout={jest.fn()}
+          handleOnSubmit={vi.fn()}
+          handleCloseFlyout={vi.fn()}
         />
       </TestProviders>
     );
@@ -44,8 +46,8 @@ describe('Exception flyout footer', () => {
             isSubmitButtonDisabled={false}
             cancelButtonDataTestSubjId={'cancelExceptionAddButton'}
             submitButtonDataTestSubjId={'addExceptionConfirmButton'}
-            handleOnSubmit={jest.fn()}
-            handleCloseFlyout={jest.fn()}
+            handleOnSubmit={vi.fn()}
+            handleCloseFlyout={vi.fn()}
           />
         </TestProviders>
       );
@@ -63,8 +65,8 @@ describe('Exception flyout footer', () => {
             isSubmitButtonDisabled={false}
             cancelButtonDataTestSubjId={'cancelExceptionAddButton'}
             submitButtonDataTestSubjId={'addExceptionConfirmButton'}
-            handleOnSubmit={jest.fn()}
-            handleCloseFlyout={jest.fn()}
+            handleOnSubmit={vi.fn()}
+            handleCloseFlyout={vi.fn()}
           />
         </TestProviders>
       );
@@ -82,8 +84,8 @@ describe('Exception flyout footer', () => {
             isSubmitButtonDisabled={false}
             cancelButtonDataTestSubjId={'cancelExceptionAddButton'}
             submitButtonDataTestSubjId={'addExceptionConfirmButton'}
-            handleOnSubmit={jest.fn()}
-            handleCloseFlyout={jest.fn()}
+            handleOnSubmit={vi.fn()}
+            handleCloseFlyout={vi.fn()}
           />
         </TestProviders>
       );
@@ -104,8 +106,8 @@ describe('Exception flyout footer', () => {
             isSubmitButtonDisabled={false}
             cancelButtonDataTestSubjId={'cancelExceptionAddButton'}
             submitButtonDataTestSubjId={'addExceptionConfirmButton'}
-            handleOnSubmit={jest.fn()}
-            handleCloseFlyout={jest.fn()}
+            handleOnSubmit={vi.fn()}
+            handleCloseFlyout={vi.fn()}
           />
         </TestProviders>
       );
@@ -124,8 +126,8 @@ describe('Exception flyout footer', () => {
             isSubmitButtonDisabled={false}
             cancelButtonDataTestSubjId={'cancelExceptionAddButton'}
             submitButtonDataTestSubjId={'addExceptionConfirmButton'}
-            handleOnSubmit={jest.fn()}
-            handleCloseFlyout={jest.fn()}
+            handleOnSubmit={vi.fn()}
+            handleCloseFlyout={vi.fn()}
           />
         </TestProviders>
       );
@@ -144,8 +146,8 @@ describe('Exception flyout footer', () => {
             isSubmitButtonDisabled={false}
             cancelButtonDataTestSubjId={'cancelExceptionAddButton'}
             submitButtonDataTestSubjId={'addExceptionConfirmButton'}
-            handleOnSubmit={jest.fn()}
-            handleCloseFlyout={jest.fn()}
+            handleOnSubmit={vi.fn()}
+            handleCloseFlyout={vi.fn()}
           />
         </TestProviders>
       );

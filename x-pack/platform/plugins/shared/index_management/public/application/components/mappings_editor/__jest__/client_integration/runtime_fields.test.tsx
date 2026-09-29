@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ComponentProps } from 'react';
 import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
@@ -12,21 +14,24 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { MappingsEditor } from '../../mappings_editor';
 import { WithAppDependencies } from './helpers/setup_environment';
 
-jest.mock('@kbn/code-editor');
+vi.mock('@kbn/code-editor');
 
-jest.mock('../../../component_templates/component_templates_context', () => ({
-  useComponentTemplatesContext: jest.fn().mockReturnValue({
-    toasts: {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    },
-  }),
-}));
+vi.mock('../../../component_templates/component_templates_context', () => {
+      const mocked = {
+      useComponentTemplatesContext: vi.fn().mockReturnValue({
+        toasts: {
+          addError: vi.fn(),
+          addSuccess: vi.fn(),
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const onChangeHandler = jest.fn();
+const onChangeHandler = vi.fn();
 describe('Mappings editor: runtime fields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   type MappingsEditorProps = ComponentProps<typeof MappingsEditor>;

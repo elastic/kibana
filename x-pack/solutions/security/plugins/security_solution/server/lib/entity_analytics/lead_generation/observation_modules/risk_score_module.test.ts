@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import { createRiskScoreModule } from './risk_score_module';
@@ -33,20 +36,20 @@ const createEntityWithRisk = (
   name,
 });
 
-const createRiskScoreDataClientMock = (): jest.Mocked<
+const createRiskScoreDataClientMock = (): Mocked<
   Pick<RiskScoreDataClient, 'getDailyAverageRiskScoreNormSeries'>
 > => ({
-  getDailyAverageRiskScoreNormSeries: jest.fn().mockResolvedValue(new Map()),
+  getDailyAverageRiskScoreNormSeries: vi.fn().mockResolvedValue(new Map()),
 });
 
 describe('RiskScoreModule', () => {
   const logger = loggingSystemMock.createLogger();
-  let riskScoreDataClient: jest.Mocked<
+  let riskScoreDataClient: Mocked<
     Pick<RiskScoreDataClient, 'getDailyAverageRiskScoreNormSeries'>
   >;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     riskScoreDataClient = createRiskScoreDataClientMock();
   });
 

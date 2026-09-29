@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { Agent, AgentPolicy } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../services';
 import type { LicenseService } from '../../../../../../common/services';
@@ -15,27 +18,27 @@ import { createFleetTestRendererMock } from '../../../../../mock';
 import { useSingleAgentMenuItems } from './use_single_agent_menu_items';
 import type { SingleAgentMenuCallbacks } from './use_single_agent_menu_items';
 
-jest.mock('../../../../../services/experimental_features');
-jest.mock('../../../../../hooks/use_authz');
-jest.mock('../../../../../hooks/use_license');
+vi.mock('../../../../../services/experimental_features');
+vi.mock('../../../../../hooks/use_authz');
+vi.mock('../../../../../hooks/use_license');
 
-const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
-const mockedUseAuthz = jest.mocked(useAuthz);
-const mockedUseLicense = useLicense as jest.MockedFunction<typeof useLicense>;
+const mockedExperimentalFeaturesService = vi.mocked(ExperimentalFeaturesService);
+const mockedUseAuthz = vi.mocked(useAuthz);
+const mockedUseLicense = useLicense as MockedFunction<typeof useLicense>;
 
 const mockCallbacks: SingleAgentMenuCallbacks = {
-  onViewAgentClick: jest.fn(),
-  onAddRemoveTagsClick: jest.fn(),
-  onReassignClick: jest.fn(),
-  onUpgradeClick: jest.fn(),
-  onViewAgentJsonClick: jest.fn(),
-  onMigrateAgentClick: jest.fn(),
-  onRequestDiagnosticsClick: jest.fn(),
-  onChangeAgentPrivilegeLevelClick: jest.fn(),
-  onUnenrollClick: jest.fn(),
-  onUninstallClick: jest.fn(),
-  onRollbackClick: jest.fn(),
-  onViewAgentPolicyClick: jest.fn(),
+  onViewAgentClick: vi.fn(),
+  onAddRemoveTagsClick: vi.fn(),
+  onReassignClick: vi.fn(),
+  onUpgradeClick: vi.fn(),
+  onViewAgentJsonClick: vi.fn(),
+  onMigrateAgentClick: vi.fn(),
+  onRequestDiagnosticsClick: vi.fn(),
+  onChangeAgentPrivilegeLevelClick: vi.fn(),
+  onUnenrollClick: vi.fn(),
+  onUninstallClick: vi.fn(),
+  onRollbackClick: vi.fn(),
+  onViewAgentPolicyClick: vi.fn(),
 };
 
 function createMockAgent(overrides: Partial<Agent> = {}): Agent {
@@ -60,7 +63,7 @@ describe('useSingleAgentMenuItems', () => {
   const renderer = createFleetTestRendererMock();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedExperimentalFeaturesService.get.mockReturnValue({
       enableAgentPrivilegeLevelChange: true,
     } as any);

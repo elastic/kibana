@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { TopNavMenuItemProps } from './top_nav_menu_item';
 import { TopNavMenuItem } from './top_nav_menu_item';
@@ -27,8 +29,8 @@ describe('TopNavMenu', () => {
     const data: TopNavMenuItemProps = {
       id: 'test',
       label: 'test',
-      run: jest.fn(),
-      closePopover: jest.fn(),
+      run: vi.fn(),
+      closePopover: vi.fn(),
     };
 
     const component = shallowWithIntl(<TopNavMenuItem {...data} />);
@@ -50,8 +52,8 @@ describe('TopNavMenu', () => {
       description: 'description',
       testId: 'test-class-name',
       disableButton: false,
-      run: jest.fn(),
-      closePopover: jest.fn(),
+      run: vi.fn(),
+      closePopover: vi.fn(),
     };
 
     const component = shallowWithIntl(<TopNavMenuItem {...data} />);
@@ -69,8 +71,8 @@ describe('TopNavMenu', () => {
       iconType: 'flask',
       iconSide: 'right',
       emphasize: true,
-      run: jest.fn(),
-      closePopover: jest.fn(),
+      run: vi.fn(),
+      closePopover: vi.fn(),
     };
 
     const component = shallowWithIntl(<TopNavMenuItem {...data} />);
@@ -86,8 +88,8 @@ describe('TopNavMenu', () => {
       label: 'test',
       iconType: 'share',
       iconOnly: true,
-      run: jest.fn(),
-      closePopover: jest.fn(),
+      run: vi.fn(),
+      closePopover: vi.fn(),
     };
 
     const component = shallowWithIntl(<TopNavMenuItem {...data} />);
@@ -103,8 +105,8 @@ describe('TopNavMenu', () => {
       id: 'test',
       label: 'test',
       disableButton: true,
-      run: jest.fn(),
-      closePopover: jest.fn(),
+      run: vi.fn(),
+      closePopover: vi.fn(),
     });
   });
 
@@ -113,8 +115,8 @@ describe('TopNavMenu', () => {
       id: 'test',
       label: 'test',
       disableButton: () => true,
-      run: jest.fn(),
-      closePopover: jest.fn(),
+      run: vi.fn(),
+      closePopover: vi.fn(),
     });
   });
 
@@ -126,8 +128,8 @@ describe('TopNavMenu', () => {
       iconSide: 'right',
       emphasize: true,
       disableButton: true,
-      run: jest.fn(),
-      closePopover: jest.fn(),
+      run: vi.fn(),
+      closePopover: vi.fn(),
     });
   });
 
@@ -139,8 +141,8 @@ describe('TopNavMenu', () => {
       iconSide: 'right',
       emphasize: true,
       disableButton: () => true,
-      run: jest.fn(),
-      closePopover: jest.fn(),
+      run: vi.fn(),
+      closePopover: vi.fn(),
     });
   });
 
@@ -152,8 +154,8 @@ describe('TopNavMenu', () => {
       iconSide: 'right',
       emphasize: true,
       isMobileMenu: true,
-      run: jest.fn(),
-      closePopover: jest.fn(),
+      run: vi.fn(),
+      closePopover: vi.fn(),
     };
 
     const component = shallowWithIntl(<TopNavMenuItem {...data} />);

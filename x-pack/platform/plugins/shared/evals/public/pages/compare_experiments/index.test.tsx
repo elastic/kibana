@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import type {
@@ -19,16 +21,19 @@ import {
 } from '../../hooks/use_evals_api';
 import { ExampleDrilldownFlyout } from '.';
 
-jest.mock('../../hooks/use_evals_api');
-jest.mock('@kbn/llm-trace-waterfall', () => ({
-  TraceWaterfall: ({ traceId }: { traceId: string }) => <div>Trace {traceId}</div>,
-  useTraceSpans: jest.fn(),
-}));
+vi.mock('../../hooks/use_evals_api');
+vi.mock('@kbn/llm-trace-waterfall', () => {
+      const mocked = {
+      TraceWaterfall: ({ traceId }: { traceId: string }) => <div>Trace {traceId}</div>,
+      useTraceSpans: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseExperimentDatasetExamples = jest.mocked(useExperimentDatasetExamples);
-const mockUseExperimentExampleDetails = jest.mocked(useExperimentExampleDetails);
-const mockUseEvalsTraceFetcher = jest.mocked(useEvalsTraceFetcher);
-const mockUseTraceSpans = jest.mocked(useTraceSpans);
+const mockUseExperimentDatasetExamples = vi.mocked(useExperimentDatasetExamples);
+const mockUseExperimentExampleDetails = vi.mocked(useExperimentExampleDetails);
+const mockUseEvalsTraceFetcher = vi.mocked(useEvalsTraceFetcher);
+const mockUseTraceSpans = vi.mocked(useTraceSpans);
 
 const buildScore = (
   score: number,
@@ -90,13 +95,13 @@ const renderFlyout = () =>
       datasetName="Dataset 1"
       evaluatorName="quality"
       direction="maximize"
-      onClose={jest.fn()}
+      onClose={vi.fn()}
     />
   );
 
 describe('ExampleDrilldownFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseExperimentDatasetExamples.mockImplementation(
       (experimentId) =>
         ({
@@ -104,7 +109,7 @@ describe('ExampleDrilldownFlyout', () => {
           isLoading: false,
         } as ReturnType<typeof useExperimentDatasetExamples>)
     );
-    mockUseEvalsTraceFetcher.mockReturnValue(jest.fn());
+    mockUseEvalsTraceFetcher.mockReturnValue(vi.fn());
     mockUseTraceSpans.mockReturnValue({
       spans: [],
       durationMs: 0,

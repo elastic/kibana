@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
@@ -56,7 +58,7 @@ const createRootMock = () => {
 
 describe('Settings application', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders without errors', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
@@ -33,45 +35,51 @@ import { euiThemeVars } from '@kbn/ui-theme';
 
 import * as secondaryMetricInfoModule from './secondary_metric_info';
 
-const mockDeserialize = jest.fn(({ id }: { id: string }) => {
+const mockDeserialize = vi.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v === null ? NaN : v}`;
   return { convertToText: convertFn };
 });
 
-const mockGetColorForValue = jest.fn<undefined | string, any>(() => undefined);
+const mockGetColorForValue = vi.fn<undefined | string, any>(() => undefined);
 
 const CURRENCY_DEFAULT_FORMAT = '$0.0';
 
-const mockFormatSettingLookup = jest.fn(() => CURRENCY_DEFAULT_FORMAT);
-const mockIsOverridden = jest.fn();
+const mockFormatSettingLookup = vi.fn(() => CURRENCY_DEFAULT_FORMAT);
+const mockIsOverridden = vi.fn();
 
-jest.mock('../services', () => ({
-  getFormatService: () => {
-    return {
-      deserialize: mockDeserialize,
+vi.mock('../services', () => {
+      const mocked = {
+      getFormatService: () => {
+        return {
+          deserialize: mockDeserialize,
+        };
+      },
+      getPaletteService: () => ({
+        get: vi.fn(() => ({ getColorForValue: mockGetColorForValue })),
+      }),
+      getThemeService: async () => {
+        const { chartPluginMock } = (await vi.importActual('@kbn/charts-plugin/public/mocks'));
+        const { theme: themeServiceMock } = chartPluginMock.createSetupContract();
+        return themeServiceMock;
+      },
+      getUiSettingsService: () => {
+        return {
+          get: mockFormatSettingLookup,
+          isOverridden: mockIsOverridden,
+        };
+      },
     };
-  },
-  getPaletteService: () => ({
-    get: jest.fn(() => ({ getColorForValue: mockGetColorForValue })),
-  }),
-  getThemeService: () => {
-    const { chartPluginMock } = jest.requireActual('@kbn/charts-plugin/public/mocks');
-    const { theme: themeServiceMock } = chartPluginMock.createSetupContract();
-    return themeServiceMock;
-  },
-  getUiSettingsService: () => {
-    return {
-      get: mockFormatSettingLookup,
-      isOverridden: mockIsOverridden,
-    };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/field-formats-plugin/common', () => ({
-  FORMATS_UI_SETTINGS: {
-    FORMAT_NUMBER_DEFAULT_LOCALE: 'format_number_default_locale',
-  },
-}));
+vi.mock('@kbn/field-formats-plugin/common', () => {
+      const mocked = {
+      FORMATS_UI_SETTINGS: {
+        FORMAT_NUMBER_DEFAULT_LOCALE: 'format_number_default_locale',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type Props = MetricVisComponentProps;
 
@@ -228,8 +236,8 @@ const table: Datatable = {
 
 function getDefaultProps() {
   return {
-    renderComplete: jest.fn(),
-    fireEvent: jest.fn(),
+    renderComplete: vi.fn(),
+    fireEvent: vi.fn(),
     filterable: true,
   } as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable'>;
 }
@@ -240,12 +248,12 @@ type RenderChartPropsType = Partial<Omit<MetricVisComponentProps, 'config'>> &
 describe('MetricVisComponent', function () {
   beforeAll(() => {
     setupResizeObserverMock();
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
     cleanResizeObserverMock();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   afterEach(() => {
@@ -304,14 +312,14 @@ describe('MetricVisComponent', function () {
     });
 
     it('should not call getSecondaryMetricInfo if no secondaryMetric', async () => {
-      const spy = jest.spyOn(secondaryMetricInfoModule, 'getSecondaryMetricInfo');
+      const spy = vi.spyOn(secondaryMetricInfoModule, 'getSecondaryMetricInfo');
       await renderMetricChart({ config });
       expect(spy).not.toHaveBeenCalled();
       spy.mockRestore();
     });
 
     it('should call getSecondaryMetricInfo and should display secondary metric', async () => {
-      const spy = jest.spyOn(secondaryMetricInfoModule, 'getSecondaryMetricInfo');
+      const spy = vi.spyOn(secondaryMetricInfoModule, 'getSecondaryMetricInfo');
       const { rerender } = await renderMetricChart({
         config: {
           ...config,
@@ -341,7 +349,7 @@ describe('MetricVisComponent', function () {
     });
 
     it('should show the secondary metric name on hover when the name is displayed as a tooltip', async () => {
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       await renderMetricChart({
         config: {
           ...config,
@@ -869,7 +877,7 @@ describe('MetricVisComponent', function () {
       breakdown?: boolean;
     }) => {
       // make it work with Jest fake timers
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       const { props } = await renderMetricChart({
         config: {
           metric: {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import semverGte from 'semver/functions/gte';
 import { makeLensEmbeddableFactory } from './make_lens_embeddable_factory';
 import { getAllMigrations } from '../migrations/saved_object_migrations';
@@ -154,7 +156,7 @@ describe('embeddable migrations', () => {
       },
     };
 
-    const migrationFn = jest.fn((oldState: { oldState: boolean }) => ({
+    const migrationFn = vi.fn((oldState: { oldState: boolean }) => ({
       newState: oldState.oldState,
     }));
 

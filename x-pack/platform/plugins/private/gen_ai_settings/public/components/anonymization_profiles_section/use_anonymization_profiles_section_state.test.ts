@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAnonymizationProfilesSectionState } from './use_anonymization_profiles_section_state';
 
 const setupServices = () => {
-  const addSuccess = jest.fn();
-  const addWarning = jest.fn();
-  const addError = jest.fn();
-  const fetch = jest.fn();
-  const post = jest.fn();
+  const addSuccess = vi.fn();
+  const addWarning = vi.fn();
+  const addError = vi.fn();
+  const fetch = vi.fn();
+  const post = vi.fn();
 
   return {
     services: {
@@ -28,7 +30,7 @@ const setupServices = () => {
       http: {
         spaceId: 'space-a',
         basePath: {
-          get: jest.fn().mockReturnValue('/s/space-a/app/management'),
+          get: vi.fn().mockReturnValue('/s/space-a/app/management'),
           serverBasePath: '/s/space-a',
         },
         fetch,
@@ -52,7 +54,7 @@ const setupServices = () => {
 
 describe('useAnonymizationProfilesSectionState', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('derives active space id and capabilities', () => {

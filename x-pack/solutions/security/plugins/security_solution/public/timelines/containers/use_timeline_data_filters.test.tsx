@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { useTimelineDataFilters } from './use_timeline_data_filters';
 import React from 'react';
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname }) };
 });
 
 const pathname = '/alerts';

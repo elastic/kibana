@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useQuery } from '@kbn/react-query';
 import type { UseQueryOptions } from '@kbn/react-query';
@@ -12,19 +15,19 @@ import { useGetCustomScripts } from './use_get_custom_scripts';
 import { useHttp } from '../../../common/lib/kibana';
 import type { HttpSetup } from '@kbn/core/public';
 
-jest.mock('@kbn/react-query');
-jest.mock('../../../common/lib/kibana');
+vi.mock('@kbn/react-query');
+vi.mock('../../../common/lib/kibana');
 
 describe('useGetCustomScripts', () => {
-  const mockUseQuery = useQuery as jest.MockedFunction<typeof useQuery>;
-  const mockUseHttp = useHttp as jest.MockedFunction<typeof useHttp>;
-  let mockHttpGet = jest.fn();
+  const mockUseQuery = useQuery as MockedFunction<typeof useQuery>;
+  const mockUseHttp = useHttp as MockedFunction<typeof useHttp>;
+  let mockHttpGet = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock HTTP get to return successful response
-    mockHttpGet = jest.fn(async () => {
+    mockHttpGet = vi.fn(async () => {
       return {
         data: [{ id: 'script1', name: 'Script 1', description: 'Test script 1' }],
       };
@@ -49,7 +52,7 @@ describe('useGetCustomScripts', () => {
       isStale: false,
       status: 'success',
       fetchStatus: 'idle',
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useQuery>);
   });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
@@ -118,7 +120,7 @@ describe('switch', () => {
           const case1 = cold('--a-b', { a, b });
           const case2 = cold('c', { c });
           const expected = '  --a-b';
-          const args = { case: [() => case1, jest.fn(() => case2)] };
+          const args = { case: [() => case1, vi.fn(() => case2)] };
           expectObservable(fn(context, args)).toBe(expected);
           expect(args.case[1]).not.toHaveBeenCalled();
         });

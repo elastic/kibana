@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createAgentBuilderClient, type AgentBuilderClient } from './agent_builder_client';
@@ -16,7 +18,7 @@ describe('createAgentBuilderClient', () => {
 
   beforeEach(() => {
     http = httpServiceMock.createStartContract();
-    log = { warning: jest.fn() } as unknown as ToolingLog;
+    log = { warning: vi.fn() } as unknown as ToolingLog;
     client = createAgentBuilderClient({ fetch: http.fetch, log, connectorId: 'my-connector' });
   });
 

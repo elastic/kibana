@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -25,29 +28,35 @@ import { INVALID_STACK_ARN_MESSAGE } from '../utils';
 
 import { AwsIdentityFederationSetup } from './aws_identity_federation_setup';
 
-jest.mock('@kbn/kibana-react-plugin/public');
-jest.mock('../hooks/use_get_cloud_connectors');
-jest.mock('../hooks/use_create_cloud_connector');
-jest.mock('../hooks/use_cloud_connector_template');
-jest.mock('../../../hooks', () => ({
-  useIacProvisioner: jest.fn(),
-  useStartServices: jest.fn(),
-}));
-jest.mock('../components/iac_key_check', () => ({ IacKeyCheck: jest.fn() }));
+vi.mock('@kbn/kibana-react-plugin/public');
+vi.mock('../hooks/use_get_cloud_connectors');
+vi.mock('../hooks/use_create_cloud_connector');
+vi.mock('../hooks/use_cloud_connector_template');
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useIacProvisioner: vi.fn(),
+      useStartServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../components/iac_key_check', () => {
+      const mocked = { IacKeyCheck: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseGetCloudConnectors = useGetCloudConnectors as jest.MockedFunction<
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseGetCloudConnectors = useGetCloudConnectors as MockedFunction<
   typeof useGetCloudConnectors
 >;
-const mockUseCreateCloudConnector = useCreateCloudConnector as jest.MockedFunction<
+const mockUseCreateCloudConnector = useCreateCloudConnector as MockedFunction<
   typeof useCreateCloudConnector
 >;
-const mockUseCloudConnectorTemplate = useCloudConnectorTemplate as jest.MockedFunction<
+const mockUseCloudConnectorTemplate = useCloudConnectorTemplate as MockedFunction<
   typeof useCloudConnectorTemplate
 >;
-const mockIacKeyCheck = IacKeyCheck as jest.MockedFunction<typeof IacKeyCheck>;
-const { useIacProvisioner: mockUseIacProvisioner } = jest.requireMock('../../../hooks') as {
-  useIacProvisioner: jest.MockedFunction<() => { isIacProvisionerEnabled: boolean }>;
+const mockIacKeyCheck = IacKeyCheck as MockedFunction<typeof IacKeyCheck>;
+const { useIacProvisioner: mockUseIacProvisioner } = (await vi.importMock('../../../hooks')) as {
+  useIacProvisioner: MockedFunction<() => { isIacProvisionerEnabled: boolean }>;
 };
 
 const STATIC_TEMPLATE_URL = 'https://console.aws.amazon.com/cloudformation/static';
@@ -70,7 +79,7 @@ const staticTemplateHookResult: ReturnType<typeof useCloudConnectorTemplate> = {
   launchButtonProps: { href: STATIC_TEMPLATE_URL, target: '_blank' },
   isDisabled: false,
   isGeneratingTemplate: false,
-  clearIacConfirm: jest.fn(),
+  clearIacConfirm: vi.fn(),
   isIacProvisionerEnabled: false,
 };
 // Provisioner on: the hook launches through onClick and owns the render outcome
@@ -86,7 +95,7 @@ const provisionerHookResult = (
   },
   isDisabled: false,
   isGeneratingTemplate: false,
-  clearIacConfirm: jest.fn(),
+  clearIacConfirm: vi.fn(),
   isIacProvisionerEnabled: true,
   ...overrides,
 });
@@ -132,15 +141,15 @@ const lastIacKeyCheckProps = () => {
   return lastCall?.[0] as React.ComponentProps<typeof IacKeyCheck> | undefined;
 };
 
-const lastReadyValue = (onReadyChange: jest.Mock) =>
+const lastReadyValue = (onReadyChange: Mock) =>
   onReadyChange.mock.calls[onReadyChange.mock.calls.length - 1]?.[0];
 
 describe('AwsIdentityFederationSetup', () => {
   let queryClient: QueryClient;
-  const onConnectorIdChange = jest.fn();
-  const onReadyChange = jest.fn();
-  const mockMutate = jest.fn();
-  const mockLaunchOnClick = jest.fn();
+  const onConnectorIdChange = vi.fn();
+  const onReadyChange = vi.fn();
+  const mockMutate = vi.fn();
+  const mockLaunchOnClick = vi.fn();
 
   const mockGetConnectors = (overrides: Partial<ReturnType<typeof useGetCloudConnectors>> = {}) => {
     mockUseGetCloudConnectors.mockReturnValue({
@@ -175,11 +184,11 @@ describe('AwsIdentityFederationSetup', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
     mockUseKibana.mockReturnValue({
-      services: { application: { navigateToApp: jest.fn() } },
+      services: { application: { navigateToApp: vi.fn() } },
     } as unknown as ReturnType<typeof useKibana>);
 
     mockUseCreateCloudConnector.mockReturnValue({
@@ -244,7 +253,7 @@ describe('AwsIdentityFederationSetup', () => {
       let onSuccess: ((connector: { id: string; name: string }) => void) | undefined;
       mockUseCreateCloudConnector.mockImplementation((cb) => {
         onSuccess = cb as typeof onSuccess;
-        return { mutate: jest.fn(), isLoading: false } as unknown as ReturnType<
+        return { mutate: vi.fn(), isLoading: false } as unknown as ReturnType<
           typeof useCreateCloudConnector
         >;
       });
@@ -408,7 +417,7 @@ describe('AwsIdentityFederationSetup', () => {
       // Stateful stub of the hook's confirm-once contract: the template details stays until the
       // component clears it, after which the hook reports nothing to post.
       let iacConfirm: CloudConnectorIacState | undefined = RENDERED_IAC_CONFIRM;
-      const clearIacConfirm = jest.fn(() => {
+      const clearIacConfirm = vi.fn(() => {
         iacConfirm = undefined;
       });
       mockUseCloudConnectorTemplate.mockImplementation(() =>
@@ -501,7 +510,7 @@ describe('AwsIdentityFederationSetup', () => {
     it('turns off the click-time write and forwards the template details when onIacTemplateRecorded is given', () => {
       // The onboarding stores the key after Deploy succeeds, so a launch the user never applies
       // leaves the connector untouched.
-      const onIacTemplateRecorded = jest.fn();
+      const onIacTemplateRecorded = vi.fn();
       renderSetup({
         cloud,
         integrations,
@@ -517,7 +526,7 @@ describe('AwsIdentityFederationSetup', () => {
     it('becomes ready once the check reports the launch, while its verdict is still key_mismatch', async () => {
       // IacKeyCheck reports validity, not the raw verdict: after the user launches the update it
       // reports true even though the deployed template has not been re-checked ("let them finish").
-      const onIacTemplateRecorded = jest.fn();
+      const onIacTemplateRecorded = vi.fn();
       renderSetup({
         cloud,
         integrations,

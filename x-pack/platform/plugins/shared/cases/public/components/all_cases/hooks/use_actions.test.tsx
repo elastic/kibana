@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { waitFor, renderHook, screen } from '@testing-library/react';
 import {
@@ -30,13 +33,13 @@ import React from 'react';
 import * as i18n from '../translations';
 import { KibanaServices } from '../../../common/lib/kibana';
 
-jest.mock('../../../containers/api');
-jest.mock('../../../containers/user_profiles/api');
+vi.mock('../../../containers/api');
+vi.mock('../../../containers/user_profiles/api');
 
-const mockCanExecuteWorkflow = jest.fn(() => false);
+const mockCanExecuteWorkflow = vi.fn(() => false);
 
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
+vi.mock('@kbn/workflows-ui', async () => {
+  const actual = (await vi.importActual('@kbn/workflows-ui'));
   return {
     ...actual,
     useWorkflowsCapabilities: () => ({
@@ -46,26 +49,29 @@ jest.mock('@kbn/workflows-ui', () => {
   };
 });
 
-jest.mock('../../workflows/run_case_workflow_modal', () => ({
-  RunCaseWorkflowModal: () => <div data-test-subj="cases-run-workflow-modal" />,
-}));
+vi.mock('../../workflows/run_case_workflow_modal', () => {
+      const mocked = {
+      RunCaseWorkflowModal: () => <div data-test-subj="cases-run-workflow-modal" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useActions', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders column actions', async () => {
@@ -129,7 +135,7 @@ describe('useActions', () => {
   });
 
   it('change the status of the case', async () => {
-    const updateCasesSpy = jest.spyOn(api, 'updateCases');
+    const updateCasesSpy = vi.spyOn(api, 'updateCases');
 
     const { result } = renderHook(() => useActions({ disableActions: false }), {
       wrapper: TestProviders,
@@ -163,7 +169,7 @@ describe('useActions', () => {
   });
 
   it('changes the status of the case to closed with closing reason', async () => {
-    const updateCasesSpy = jest.spyOn(api, 'updateCases');
+    const updateCasesSpy = vi.spyOn(api, 'updateCases');
 
     const { result } = renderHook(() => useActions({ disableActions: false }), {
       wrapper: TestProviders,
@@ -211,7 +217,7 @@ describe('useActions', () => {
   });
 
   it('changes the status to closed without syncing close reason to alerts', async () => {
-    const updateCasesSpy = jest.spyOn(api, 'updateCases');
+    const updateCasesSpy = vi.spyOn(api, 'updateCases');
 
     const { result } = renderHook(() => useActions({ disableActions: false }), {
       wrapper: TestProviders,
@@ -254,7 +260,7 @@ describe('useActions', () => {
   });
 
   it('changes the status to closed and syncs close reason to alerts', async () => {
-    const updateCasesSpy = jest.spyOn(api, 'updateCases');
+    const updateCasesSpy = vi.spyOn(api, 'updateCases');
 
     const { result } = renderHook(() => useActions({ disableActions: false }), {
       wrapper: TestProviders,
@@ -301,7 +307,7 @@ describe('useActions', () => {
   });
 
   it('does not show close reason modal when selecting closed for an already closed case', async () => {
-    const updateCasesSpy = jest.spyOn(api, 'updateCases');
+    const updateCasesSpy = vi.spyOn(api, 'updateCases');
 
     const { result } = renderHook(() => useActions({ disableActions: false }), {
       wrapper: TestProviders,
@@ -333,7 +339,7 @@ describe('useActions', () => {
   });
 
   it('change the severity of the case', async () => {
-    const updateCasesSpy = jest.spyOn(api, 'updateCases');
+    const updateCasesSpy = vi.spyOn(api, 'updateCases');
 
     const { result } = renderHook(() => useActions({ disableActions: false }), {
       wrapper: TestProviders,
@@ -365,7 +371,7 @@ describe('useActions', () => {
 
     Object.defineProperty(navigator, 'clipboard', {
       value: {
-        writeText: jest.fn().mockImplementation(() => Promise.resolve()),
+        writeText: vi.fn().mockImplementation(() => Promise.resolve()),
       },
       writable: true,
     });
@@ -391,7 +397,7 @@ describe('useActions', () => {
 
   describe('Modals', () => {
     it('delete a case', async () => {
-      const deleteSpy = jest.spyOn(api, 'deleteCases');
+      const deleteSpy = vi.spyOn(api, 'deleteCases');
 
       const { result } = renderHook(() => useActions({ disableActions: false }), {
         wrapper: TestProviders,
@@ -441,7 +447,7 @@ describe('useActions', () => {
 
   describe('Flyouts', () => {
     it('change the tags of the case', async () => {
-      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+      const updateCasesSpy = vi.spyOn(api, 'updateCases');
 
       const { result } = renderHook(() => useActions({ disableActions: false }), {
         wrapper: TestProviders,
@@ -476,7 +482,7 @@ describe('useActions', () => {
     });
 
     it('change the assignees of the case', async () => {
-      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+      const updateCasesSpy = vi.spyOn(api, 'updateCases');
 
       const { result } = renderHook(() => useActions({ disableActions: false }), {
         wrapper: TestProviders,
@@ -700,10 +706,10 @@ describe('useActions', () => {
   });
 
   describe('Run workflow', () => {
-    let getConfigSpy: jest.SpyInstance;
+    let getConfigSpy: MockInstance;
 
     beforeEach(() => {
-      getConfigSpy = jest
+      getConfigSpy = vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ runWorkflows: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig

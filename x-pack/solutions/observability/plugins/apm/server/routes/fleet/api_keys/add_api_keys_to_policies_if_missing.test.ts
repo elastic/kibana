@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { get } from 'lodash';
 import {
@@ -16,15 +18,18 @@ import {
   SOURCE_MAP_API_KEY_PATH,
 } from '../get_package_policy_decorators';
 
-jest.mock('./create_apm_api_keys', () => ({
-  createApmAgentConfigApiKey: jest.fn().mockResolvedValue('agent-key-id:agent-key-secret'),
-  createApmSourceMapApiKey: jest.fn().mockResolvedValue('sourcemap-key-id:sourcemap-key-secret'),
-}));
+vi.mock('./create_apm_api_keys', () => {
+      const mocked = {
+      createApmAgentConfigApiKey: vi.fn().mockResolvedValue('agent-key-id:agent-key-secret'),
+      createApmSourceMapApiKey: vi.fn().mockResolvedValue('sourcemap-key-id:sourcemap-key-secret'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { createApmAgentConfigApiKey, createApmSourceMapApiKey } from './create_apm_api_keys';
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 const basePolicy = {
@@ -86,10 +91,10 @@ const basePolicyWithKeys = {
 function buildMocks() {
   const coreStart = coreMock.createStart();
   const soClient = savedObjectsClientMock.create();
-  const logger = { debug: jest.fn(), error: jest.fn(), warn: jest.fn() } as any;
+  const logger = { debug: vi.fn(), error: vi.fn(), warn: vi.fn() } as any;
   const fleet = {
     packagePolicyService: {
-      update: jest.fn().mockResolvedValue(basePolicy),
+      update: vi.fn().mockResolvedValue(basePolicy),
     },
   } as any;
 

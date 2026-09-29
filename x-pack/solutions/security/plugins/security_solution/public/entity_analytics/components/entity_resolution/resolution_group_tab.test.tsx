@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -17,35 +20,47 @@ import { useSearchEntities } from './hooks/use_search_entities';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-jest.mock('./hooks/use_resolution_group');
-jest.mock('./hooks/use_link_entities');
-jest.mock('./hooks/use_unlink_entities');
-jest.mock('./hooks/use_search_entities');
-jest.mock('../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(),
-}));
-jest.mock('../../../common/hooks/use_app_toasts');
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: jest.fn(), closeFlyout: jest.fn() }),
-}));
-jest.mock('../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => false,
-}));
-jest.mock('../../../flyout_v2/use_flyout_api', () => ({
-  useFlyoutApi: () => ({
-    openEntityFlyout: jest.fn(),
-  }),
-}));
+vi.mock('./hooks/use_resolution_group');
+vi.mock('./hooks/use_link_entities');
+vi.mock('./hooks/use_unlink_entities');
+vi.mock('./hooks/use_search_entities');
+vi.mock('../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/hooks/use_app_toasts');
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: () => ({ openFlyout: vi.fn(), closeFlyout: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/hooks/use_is_new_flyout_enabled', () => {
+      const mocked = {
+      useIsNewFlyoutEnabled: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../flyout_v2/use_flyout_api', () => {
+      const mocked = {
+      useFlyoutApi: () => ({
+        openEntityFlyout: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseResolutionGroup = useResolutionGroup as jest.Mock;
-const mockUseLinkEntities = useLinkEntities as jest.Mock;
-const mockUseUnlinkEntities = useUnlinkEntities as jest.Mock;
-const mockUseSearchEntities = useSearchEntities as jest.Mock;
+const mockUseResolutionGroup = useResolutionGroup as Mock;
+const mockUseLinkEntities = useLinkEntities as Mock;
+const mockUseUnlinkEntities = useUnlinkEntities as Mock;
+const mockUseSearchEntities = useSearchEntities as Mock;
 
-const mockFetch = jest.fn();
-const mockAddError = jest.fn();
-const mockLinkMutate = jest.fn();
-const mockUnlinkMutate = jest.fn();
+const mockFetch = vi.fn();
+const mockAddError = vi.fn();
+const mockLinkMutate = vi.fn();
+const mockUnlinkMutate = vi.fn();
 
 const existingGroup = {
   target: { 'entity.name': 'alice', 'entity.id': 'alice-id' },
@@ -59,9 +74,9 @@ const searchResults = [
 
 describe('ResolutionGroupTab', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({ services: { http: { fetch: mockFetch } } });
-    (useAppToasts as jest.Mock).mockReturnValue({ addError: mockAddError });
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({ services: { http: { fetch: mockFetch } } });
+    (useAppToasts as Mock).mockReturnValue({ addError: mockAddError });
     mockUseLinkEntities.mockReturnValue({ mutate: mockLinkMutate, isLoading: false });
     mockUseUnlinkEntities.mockReturnValue({ mutate: mockUnlinkMutate, isLoading: false });
     mockUseSearchEntities.mockReturnValue({

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, waitFor } from '@testing-library/react';
 import sinon from 'sinon';
 
@@ -40,7 +42,7 @@ describe('useRequest hook', () => {
       });
 
       it('sends another request after the specified time has elapsed', async () => {
-        jest.useRealTimers(); // Use real timers to avoid fake timer + act() state batching issues
+        vi.useRealTimers(); // Use real timers to avoid fake timer + act() state batching issues
         const { setupSuccessRequest, getSendRequestSpy } = helpers;
 
         setupSuccessRequest({ pollIntervalMs: REQUEST_TIME });
@@ -245,7 +247,7 @@ describe('useRequest hook', () => {
 
         await act(async () => {
           // Advance time enough for the initial request to complete
-          await jest.advanceTimersByTimeAsync(DOUBLE_REQUEST_TIME + REQUEST_TIME);
+          await vi.advanceTimersByTimeAsync(DOUBLE_REQUEST_TIME + REQUEST_TIME);
         });
 
         // Wait for initial request to complete, then send a manual one
@@ -256,7 +258,7 @@ describe('useRequest hook', () => {
 
         await act(async () => {
           // Advance time enough for the manual request to complete
-          await jest.advanceTimersByTimeAsync(DOUBLE_REQUEST_TIME + REQUEST_TIME);
+          await vi.advanceTimersByTimeAsync(DOUBLE_REQUEST_TIME + REQUEST_TIME);
         });
 
         // Wait for manual request to complete, then send another manual one
@@ -267,7 +269,7 @@ describe('useRequest hook', () => {
 
         await act(async () => {
           // Advance time enough for the second manual request to complete
-          await jest.advanceTimersByTimeAsync(DOUBLE_REQUEST_TIME + REQUEST_TIME);
+          await vi.advanceTimersByTimeAsync(DOUBLE_REQUEST_TIME + REQUEST_TIME);
         });
 
         // Wait for the second manual request to complete
@@ -315,7 +317,7 @@ describe('useRequest hook', () => {
 
       // Wait half the request time - the initial request hasn't completed yet
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(REQUEST_TIME * 0.5);
+        await vi.advanceTimersByTimeAsync(REQUEST_TIME * 0.5);
       });
       expect(getSendRequestSpy().callCount).toBe(0);
 
@@ -328,7 +330,7 @@ describe('useRequest hook', () => {
       // Original started at T=0, will complete at T=REQUEST_TIME
       // We're now at T=REQUEST_TIME*0.5, so wait REQUEST_TIME*0.6 more
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(REQUEST_TIME * 0.5);
+        await vi.advanceTimersByTimeAsync(REQUEST_TIME * 0.5);
       });
 
       // The spy should have been called once (original request completed)

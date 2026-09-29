@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -18,9 +21,9 @@ import {
 } from './test_ids';
 import { useSearchEntities } from './hooks/use_search_entities';
 
-jest.mock('./hooks/use_search_entities');
+vi.mock('./hooks/use_search_entities');
 
-const mockUseSearchEntities = useSearchEntities as jest.Mock;
+const mockUseSearchEntities = useSearchEntities as Mock;
 
 const mockRecords = [
   {
@@ -42,12 +45,12 @@ describe('AddEntitiesSection', () => {
   const defaultProps = {
     entityType: 'user' as const,
     excludeEntityIds: ['alice-id'],
-    onAddEntity: jest.fn(),
-    onEntityNameClick: jest.fn(),
+    onAddEntity: vi.fn(),
+    onEntityNameClick: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseSearchEntities.mockReturnValue({
       data: { records: mockRecords, total: 2 },
       isLoading: false,
@@ -143,7 +146,7 @@ describe('AddEntitiesSection', () => {
   });
 
   it('debounces search input', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const { getByTestId, getByRole } = render(
       <TestProviders>
         <AddEntitiesSection {...defaultProps} />
@@ -159,7 +162,7 @@ describe('AddEntitiesSection', () => {
       expect.objectContaining({ searchQuery: '' })
     );
 
-    jest.advanceTimersByTime(300);
+    vi.advanceTimersByTime(300);
 
     await waitFor(() => {
       expect(mockUseSearchEntities).toHaveBeenLastCalledWith(
@@ -167,7 +170,7 @@ describe('AddEntitiesSection', () => {
       );
     });
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('shows empty table when no results', () => {

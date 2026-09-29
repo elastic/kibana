@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ESQL_ROW_LIMIT } from './esql';
 import {
   buildBranchStatsQuery,
@@ -38,9 +40,9 @@ const scope: FlakyTestQueryScope = {
 };
 
 const mockEs = (records: unknown[]) => {
-  const toRecords = jest.fn().mockResolvedValue({ records });
-  const esql = jest.fn().mockReturnValue({ toRecords });
-  const search = jest.fn();
+  const toRecords = vi.fn().mockResolvedValue({ records });
+  const esql = vi.fn().mockReturnValue({ toRecords });
+  const search = vi.fn();
   return { client: { helpers: { esql }, search } as any, esql, search };
 };
 
@@ -216,8 +218,8 @@ describe('fetchBranchStats', () => {
       },
     ];
     esql
-      .mockReturnValueOnce({ toRecords: jest.fn().mockResolvedValue({ records: attemptRows }) })
-      .mockReturnValueOnce({ toRecords: jest.fn().mockResolvedValue({ records: outcomeRows }) });
+      .mockReturnValueOnce({ toRecords: vi.fn().mockResolvedValue({ records: attemptRows }) })
+      .mockReturnValueOnce({ toRecords: vi.fn().mockResolvedValue({ records: outcomeRows }) });
 
     const stats = await fetchBranchStats(client, scope, [
       { testId: 'j1', framework: 'jest' },
@@ -333,7 +335,7 @@ describe('fetchBranchCounts', () => {
     const { client, esql } = mockEs([]);
     esql
       .mockReturnValueOnce({
-        toRecords: jest.fn().mockResolvedValue({
+        toRecords: vi.fn().mockResolvedValue({
           records: [
             {
               test_id: 'j1',
@@ -352,7 +354,7 @@ describe('fetchBranchCounts', () => {
           ],
         }),
       })
-      .mockReturnValueOnce({ toRecords: jest.fn().mockResolvedValue({ records: [] }) });
+      .mockReturnValueOnce({ toRecords: vi.fn().mockResolvedValue({ records: [] }) });
 
     const counts = await fetchBranchCounts(client, scope, tests, countThresholds);
 
@@ -640,7 +642,7 @@ describe('fetchTargetStats', () => {
     const { client, esql } = mockEs([]);
     esql
       .mockReturnValueOnce({
-        toRecords: jest.fn().mockResolvedValue({
+        toRecords: vi.fn().mockResolvedValue({
           records: [
             {
               test_id: 'j1',
@@ -654,7 +656,7 @@ describe('fetchTargetStats', () => {
         }),
       })
       .mockReturnValueOnce({
-        toRecords: jest.fn().mockResolvedValue({
+        toRecords: vi.fn().mockResolvedValue({
           records: [
             {
               test_id: 'p1',
@@ -951,10 +953,10 @@ describe('fetchFilePipelineStats', () => {
     esql
       // jest and ftr share one query; each gets its own row for the path
       .mockReturnValueOnce({
-        toRecords: jest.fn().mockResolvedValue({ records: [row('jest', 5), row('ftr', 7)] }),
+        toRecords: vi.fn().mockResolvedValue({ records: [row('jest', 5), row('ftr', 7)] }),
       })
       .mockReturnValueOnce({
-        toRecords: jest.fn().mockResolvedValue({ records: [row('playwright', 9)] }),
+        toRecords: vi.fn().mockResolvedValue({ records: [row('playwright', 9)] }),
       });
 
     const stats = await fetchFilePipelineStats(client, scope, [

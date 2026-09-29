@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { createMemoryHistory, type MemoryHistory } from 'history';
@@ -22,23 +25,23 @@ const CUSTOM_RANGE = { from: 'now-7d', to: 'now' };
 
 const createMockStorage = (initialValue: unknown = null): Storage =>
   ({
-    get: jest.fn().mockReturnValue(initialValue),
-    set: jest.fn(),
-    remove: jest.fn(),
-    clear: jest.fn(),
+    get: vi.fn().mockReturnValue(initialValue),
+    set: vi.fn(),
+    remove: vi.fn(),
+    clear: vi.fn(),
   } as unknown as Storage);
 
 const createStatefulStorage = (initialValue: unknown = null): Storage => {
   let stored: unknown = initialValue;
   return {
-    get: jest.fn(() => stored),
-    set: jest.fn((_, value: unknown) => {
+    get: vi.fn(() => stored),
+    set: vi.fn((_, value: unknown) => {
       stored = value;
     }),
-    remove: jest.fn(() => {
+    remove: vi.fn(() => {
       stored = null;
     }),
-    clear: jest.fn(),
+    clear: vi.fn(),
   } as unknown as Storage;
 };
 
@@ -248,12 +251,12 @@ describe('useAlertTimelineUrlState', () => {
 
     /* Back past the first change restores the default in the view, but navigation
      * is not an explicit choice so localStorage keeps the last picked range. */
-    const storageWritesBeforeNavigation = (mockStorage.set as jest.Mock).mock.calls.length;
+    const storageWritesBeforeNavigation = (mockStorage.set as Mock).mock.calls.length;
     await act(async () => {
       history.goBack();
     });
     expect(result.current[0]).toEqual(DEFAULT_ACTIVITY_TIME_RANGE);
-    expect((mockStorage.set as jest.Mock).mock.calls).toHaveLength(storageWritesBeforeNavigation);
+    expect((mockStorage.set as Mock).mock.calls).toHaveLength(storageWritesBeforeNavigation);
     expect(mockStorage.get(ACTIVITY_TIME_RANGE_STORAGE_KEY)).toEqual(secondRange);
 
     await act(async () => {

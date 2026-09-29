@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { getIndexPatterns } from './utils';
 
 const indexPatternContractMock = {
-  getIdsWithTitle: jest.fn().mockReturnValue(
+  getIdsWithTitle: vi.fn().mockReturnValue(
     Promise.resolve([
       {
         id: 'test',
@@ -24,9 +27,9 @@ const indexPatternContractMock = {
       },
     ])
   ),
-  get: jest.fn().mockReturnValue(Promise.resolve({})),
-  getRollupsEnabled: jest.fn().mockReturnValue(true),
-} as unknown as jest.Mocked<DataViewsContract>;
+  get: vi.fn().mockReturnValue(Promise.resolve({})),
+  getRollupsEnabled: vi.fn().mockReturnValue(true),
+} as unknown as Mocked<DataViewsContract>;
 
 test('getting index patterns', async () => {
   const indexPatterns = await getIndexPatterns('test', indexPatternContractMock);

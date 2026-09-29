@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Readable } from 'stream';
 import type { File } from '@kbn/files-plugin/common';
 
@@ -15,9 +18,9 @@ import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { addFile } from './add_file';
 import { buildAttachmentRequestFromFileJSON } from '../utils';
 
-jest.mock('../utils');
+vi.mock('../utils');
 
-const buildAttachmentRequestFromFileJSONMock = buildAttachmentRequestFromFileJSON as jest.Mock;
+const buildAttachmentRequestFromFileJSONMock = buildAttachmentRequestFromFileJSON as Mock;
 
 describe('addFile', () => {
   const caseId = 'test-case';
@@ -33,7 +36,7 @@ describe('addFile', () => {
   clientArgs.services.userActionService = userActionService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({});
     casesClient.cases.get.mockResolvedValue({ id: caseId, owner } as unknown as Case);
   });
@@ -72,7 +75,7 @@ describe('addFile', () => {
 
     clientArgs.fileService.create.mockResolvedValue({
       id,
-      uploadContent: jest.fn(),
+      uploadContent: vi.fn(),
       toJSON: () => {
         throw new Error(); // ensures an error is thrown after file creation
       },
@@ -104,7 +107,7 @@ describe('addFile', () => {
 
     clientArgs.fileService.create.mockResolvedValue({
       id: fileMetadata.id,
-      uploadContent: jest.fn(),
+      uploadContent: vi.fn(),
       toJSON: () => fileMetadata,
     } as unknown as File);
 

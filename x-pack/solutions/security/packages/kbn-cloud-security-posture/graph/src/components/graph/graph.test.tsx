@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import React, { type RefAttributes } from 'react';
 import { Graph, type GraphProps } from './graph';
@@ -13,44 +15,50 @@ import type { NodeViewModel, EdgeViewModel } from '../types';
 import type { Edge, Node, ReactFlowInstance, ReactFlowProps } from '@xyflow/react';
 
 // Turn off the optimization that hides elements that are not visible in the viewport
-jest.mock('../constants', () => ({
-  ...jest.requireActual('../constants'),
-  ONLY_RENDER_VISIBLE_ELEMENTS: false,
-}));
+vi.mock('../constants', async () => {
+      const mocked = {
+      ...(await vi.importActual('../constants')),
+      ONLY_RENDER_VISIBLE_ELEMENTS: false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock ReactFlow's fitView function
-let mockFitView = jest.fn();
+let mockFitView = vi.fn();
 
-jest.mock('@xyflow/react', () => ({
-  ...jest.requireActual('@xyflow/react'),
-  ReactFlow: (props: ReactFlowProps & RefAttributes<HTMLDivElement>) => {
-    const OriginalReactFlow = jest.requireActual('@xyflow/react').ReactFlow;
-    const OriginalReact = jest.requireActual('react');
+vi.mock('@xyflow/react', () => {
+      const mocked = {
+      ...require('@xyflow/react'),
+      ReactFlow: (props: ReactFlowProps & RefAttributes<HTMLDivElement>) => {
+        const OriginalReactFlow = require('@xyflow/react').ReactFlow;
+        const OriginalReact = require('react');
 
-    function onInitMocked(xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) {
-      // Store the original fitView function
-      const mockOriginalFitView = xyflow.fitView;
+        function onInitMocked(xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) {
+          // Store the original fitView function
+          const mockOriginalFitView = xyflow.fitView;
 
-      // Create a wrapper that tracks calls but still calls the original
-      xyflow.fitView = (options?) => {
-        // Only track calls with specific options (from our centering logic)
-        if (options && typeof options === 'object' && options !== null) {
-          const opts = options as Record<string, unknown>;
-          if (opts.nodes || opts.duration === 200) {
-            mockFitView(options);
-          }
+          // Create a wrapper that tracks calls but still calls the original
+          xyflow.fitView = (options?) => {
+            // Only track calls with specific options (from our centering logic)
+            if (options && typeof options === 'object' && options !== null) {
+              const opts = options as Record<string, unknown>;
+              if (opts.nodes || opts.duration === 200) {
+                mockFitView(options);
+              }
+            }
+            // Always call the original for actual ReactFlow functionality
+            return mockOriginalFitView(options);
+          };
+
+          // @ts-ignore
+          props.onInit?.(xyflow);
         }
-        // Always call the original for actual ReactFlow functionality
-        return mockOriginalFitView(options);
-      };
 
-      // @ts-ignore
-      props.onInit?.(xyflow);
-    }
-
-    return OriginalReact.createElement(OriginalReactFlow, { ...props, onInit: onInitMocked });
-  },
-}));
+        return OriginalReact.createElement(OriginalReactFlow, { ...props, onInit: onInitMocked });
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderGraphPreview = (props: GraphProps) =>
   render(
@@ -221,15 +229,15 @@ describe('<Graph />', () => {
     ];
 
     beforeEach(() => {
-      mockFitView = jest.fn();
+      mockFitView = vi.fn();
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should not center graph when no new nodes are added', async () => {
-      const onCenterGraphAfterRefresh = jest.fn();
+      const onCenterGraphAfterRefresh = vi.fn();
 
       const props = {
         nodes: initialNodes,
@@ -330,7 +338,7 @@ describe('<Graph />', () => {
     });
 
     it('should center on new nodes when callback returns undefined', async () => {
-      const onCenterGraphAfterRefresh = jest.fn().mockReturnValue(undefined);
+      const onCenterGraphAfterRefresh = vi.fn().mockReturnValue(undefined);
 
       const props = {
         nodes: initialNodes,
@@ -387,7 +395,7 @@ describe('<Graph />', () => {
     });
 
     it('should fit entire graph into view when callback returns "fit-view"', async () => {
-      const onCenterGraphAfterRefresh = jest.fn().mockReturnValue('fit-view');
+      const onCenterGraphAfterRefresh = vi.fn().mockReturnValue('fit-view');
 
       const props = {
         nodes: initialNodes,
@@ -443,7 +451,7 @@ describe('<Graph />', () => {
     });
 
     it('should do nothing when callback returns empty array', async () => {
-      const onCenterGraphAfterRefresh = jest.fn().mockReturnValue([]);
+      const onCenterGraphAfterRefresh = vi.fn().mockReturnValue([]);
 
       const props = {
         nodes: initialNodes,
@@ -497,7 +505,7 @@ describe('<Graph />', () => {
     });
 
     it('should center on specified nodes when callback returns valid node IDs', async () => {
-      const onCenterGraphAfterRefresh = jest.fn().mockReturnValue(['entity1', 'entity2']);
+      const onCenterGraphAfterRefresh = vi.fn().mockReturnValue(['entity1', 'entity2']);
 
       const props = {
         nodes: initialNodes,
@@ -548,7 +556,7 @@ describe('<Graph />', () => {
     });
 
     it('should handle invalid/non-existent node IDs gracefully', async () => {
-      const onCenterGraphAfterRefresh = jest.fn().mockReturnValue(['non-existent-id', '', '   ']);
+      const onCenterGraphAfterRefresh = vi.fn().mockReturnValue(['non-existent-id', '', '   ']);
 
       const props = {
         nodes: initialNodes,
@@ -653,7 +661,7 @@ describe('<Graph />', () => {
     });
 
     it('should handle mixed valid and invalid node IDs', async () => {
-      const onCenterGraphAfterRefresh = jest
+      const onCenterGraphAfterRefresh = vi
         .fn()
         .mockReturnValue(['entity1', 'non-existent-id', '', '   ']);
 

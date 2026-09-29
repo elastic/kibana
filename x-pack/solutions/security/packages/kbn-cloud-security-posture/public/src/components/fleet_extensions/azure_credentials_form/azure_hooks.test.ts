@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type {
   NewPackagePolicy,
@@ -15,71 +17,80 @@ import { useAzureCredentialsForm } from './azure_hooks';
 import { AZURE_SETUP_FORMAT, AZURE_CREDENTIALS_TYPE } from '../constants';
 
 // Mock the dependencies
-jest.mock('../utils', () => ({
-  updatePolicyWithInputs: jest.fn((policy, policyType, inputs) => ({
-    ...policy,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    inputs: policy.inputs.map((input: any) =>
-      input.type === policyType
-        ? {
-            ...input,
-            streams: [
-              {
-                ...input.streams[0],
-                vars: { ...input.streams[0].vars, ...inputs },
-              },
-            ],
-          }
-        : input
-    ),
-  })),
-  getArmTemplateUrlFromPackage: jest.fn(),
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      updatePolicyWithInputs: vi.fn((policy, policyType, inputs) => ({
+        ...policy,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        inputs: policy.inputs.map((input: any) =>
+          input.type === policyType
+            ? {
+                ...input,
+                streams: [
+                  {
+                    ...input.streams[0],
+                    vars: { ...input.streams[0].vars, ...inputs },
+                  },
+                ],
+              }
+            : input
+        ),
+      })),
+      getArmTemplateUrlFromPackage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./get_azure_credentials_form_options', () => ({
-  getAzureCredentialsFormOptions: jest.fn(() => ({
-    managed_identity: {
-      label: 'Managed Identity',
-      fields: {
-        'azure.credentials.managed_identity_id': { label: 'Managed Identity ID' },
-      },
-    },
-    service_principal_with_client_secret: {
-      label: 'Service Principal',
-      fields: {
-        'azure.credentials.client_id': { label: 'Client ID' },
-        'azure.credentials.client_secret': { label: 'Client Secret' },
-        'azure.credentials.tenant_id': { label: 'Tenant ID' },
-      },
-    },
-    arm_template: {
-      label: 'ARM Template',
-      fields: {},
-    },
-  })),
-  getInputVarsFields: jest.fn((input, fields) =>
-    Object.keys(fields).map((fieldId) => ({
-      id: fieldId,
-      label: fields[fieldId].label,
-      value: input.streams[0].vars?.[fieldId]?.value || '',
-    }))
-  ),
-}));
+vi.mock('./get_azure_credentials_form_options', () => {
+      const mocked = {
+      getAzureCredentialsFormOptions: vi.fn(() => ({
+        managed_identity: {
+          label: 'Managed Identity',
+          fields: {
+            'azure.credentials.managed_identity_id': { label: 'Managed Identity ID' },
+          },
+        },
+        service_principal_with_client_secret: {
+          label: 'Service Principal',
+          fields: {
+            'azure.credentials.client_id': { label: 'Client ID' },
+            'azure.credentials.client_secret': { label: 'Client Secret' },
+            'azure.credentials.tenant_id': { label: 'Tenant ID' },
+          },
+        },
+        arm_template: {
+          label: 'ARM Template',
+          fields: {},
+        },
+      })),
+      getInputVarsFields: vi.fn((input, fields) =>
+        Object.keys(fields).map((fieldId) => ({
+          id: fieldId,
+          label: fields[fieldId].label,
+          value: input.streams[0].vars?.[fieldId]?.value || '',
+        }))
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_cloud_setup_context', () => ({
-  useCloudSetup: jest.fn(() => ({
-    azurePolicyType: 'azure',
-    templateName: 'azure-template',
-    azureOverviewPath: 'https://docs.elastic.co/azure-overview',
-  })),
-}));
+vi.mock('../hooks/use_cloud_setup_context', () => {
+      const mocked = {
+      useCloudSetup: vi.fn(() => ({
+        azurePolicyType: 'azure',
+        templateName: 'azure-template',
+        azureOverviewPath: 'https://docs.elastic.co/azure-overview',
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useCloudSetup: mockUseCloudSetup } = jest.requireMock('../hooks/use_cloud_setup_context');
+const { useCloudSetup: mockUseCloudSetup } = (await vi.importMock('../hooks/use_cloud_setup_context'));
 const { getArmTemplateUrlFromPackage: mockGetArmTemplateUrlFromPackage } =
-  jest.requireMock('../utils');
+  (await vi.importMock('../utils'));
 
 describe('Azure Hooks', () => {
-  const mockUpdatePolicy = jest.fn();
+  const mockUpdatePolicy = vi.fn();
   const mockPackageInfo = {
     name: 'cloud_security_posture',
     version: '1.0.0',
@@ -115,7 +126,7 @@ describe('Azure Hooks', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCloudSetup.mockReturnValue({
       azurePolicyType: 'azure',
       templateName: 'azure-template',

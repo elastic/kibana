@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CapacityEstimationParams } from './capacity_estimation';
 import { estimateCapacity } from './capacity_estimation';
 import type { RawMonitoringStats } from './monitoring_stats_stream';
@@ -16,7 +18,7 @@ describe('estimateCapacity', () => {
   const logger = mockLogger();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('estimates the max throughput per minute based on the workload and the assumed kibana instances', async () => {

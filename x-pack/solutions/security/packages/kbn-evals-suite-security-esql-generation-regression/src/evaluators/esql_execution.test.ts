@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Example } from '@kbn/evals';
 import { createEsqlExecutionEvaluator, ESQL_EXECUTION_EVALUATOR_NAME } from './esql_execution';
@@ -24,7 +27,7 @@ const createEsClient = (
 ): ElasticsearchClient =>
   ({
     esql: {
-      query: jest.fn(async ({ query }: { query: string }) => {
+      query: vi.fn(async ({ query }: { query: string }) => {
         const response = responses[query];
         if (response?.error) {
           throw response.error;
@@ -193,7 +196,7 @@ describe('createEsqlExecutionEvaluator', () => {
 
       const esClient = {
         esql: {
-          query: jest.fn(async ({ query }: { query: string }) => {
+          query: vi.fn(async ({ query }: { query: string }) => {
             inFlight.add(query);
             maxConcurrent = Math.max(maxConcurrent, inFlight.size);
             await new Promise((resolve) => setTimeout(resolve, 10));
@@ -217,7 +220,7 @@ describe('createEsqlExecutionEvaluator', () => {
   describe('logger config', () => {
     it('logs warnings when execution fails', async () => {
       const query = 'FROM logs-* | WHERE missing.field == "x"';
-      const warn = jest.fn();
+      const warn = vi.fn();
       const logger = { warn } as unknown as Logger;
 
       const evaluator = createEsqlExecutionEvaluator({
@@ -291,7 +294,7 @@ describe('createEsqlExecutionEvaluator', () => {
 
     it('treats empty / whitespace queries as syntax errors without calling ES', async () => {
       const esql = createEsClient({});
-      const queryFn = (esql.esql as unknown as { query: jest.Mock }).query;
+      const queryFn = (esql.esql as unknown as { query: Mock }).query;
       const evaluator = createEsqlExecutionEvaluator({
         esClient: esql,
         queryExtractor: identityExtractor,
@@ -355,7 +358,7 @@ describe('createEsqlExecutionEvaluator', () => {
         'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | LIMIT 10';
       const executableQuery = `FROM logs-* | WHERE @timestamp >= "${DEFAULT_TSTART}" AND @timestamp < "${DEFAULT_TEND}" | LIMIT 10`;
 
-      const queryFn = jest.fn(async ({ query: _q }: { query: string }) => ({ values: [[1]] }));
+      const queryFn = vi.fn(async ({ query: _q }: { query: string }) => ({ values: [[1]] }));
       const esClient = {
         esql: { query: queryFn },
       } as unknown as ElasticsearchClient;
@@ -379,7 +382,7 @@ describe('createEsqlExecutionEvaluator', () => {
       const originalQuery = 'FROM logs-* | WHERE @timestamp >= ?_tstart';
       const esClient = {
         esql: {
-          query: jest.fn(async ({ query: _q }: { query: string }) => ({ values: [[1]] })),
+          query: vi.fn(async ({ query: _q }: { query: string }) => ({ values: [[1]] })),
         },
       } as unknown as ElasticsearchClient;
 
@@ -399,7 +402,7 @@ describe('createEsqlExecutionEvaluator', () => {
 
     it('passes through queries without bind tokens unchanged', async () => {
       const originalQuery = 'FROM logs-* | LIMIT 10';
-      const queryFn = jest.fn(async ({ query: _q }: { query: string }) => ({ values: [[1]] }));
+      const queryFn = vi.fn(async ({ query: _q }: { query: string }) => ({ values: [[1]] }));
       const esClient = {
         esql: { query: queryFn },
       } as unknown as ElasticsearchClient;

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
@@ -14,11 +17,11 @@ import { registerSolutionNavigation } from './navigation';
 import { createNavigationTree } from './navigation_tree';
 import { createAiNavigationTree } from './ai_navigation/ai_navigation_tree';
 
-jest.mock('./navigation_tree');
-jest.mock('./ai_navigation/ai_navigation_tree');
+vi.mock('./navigation_tree');
+vi.mock('./ai_navigation/ai_navigation_tree');
 
-const mockedCreateNavigationTree = createNavigationTree as jest.Mock;
-const mockedCreateAiNavigationTree = createAiNavigationTree as jest.Mock;
+const mockedCreateNavigationTree = createNavigationTree as Mock;
+const mockedCreateAiNavigationTree = createAiNavigationTree as Mock;
 
 const mockedNavTree = {};
 mockedCreateNavigationTree.mockResolvedValue(mockedNavTree);
@@ -27,12 +30,12 @@ mockedCreateAiNavigationTree.mockReturnValue(mockedAiNavTree);
 
 describe('Security Side Nav', () => {
   const services = mockServices;
-  const initNavigationSpy = jest.spyOn(services.navigation, 'initNavigation');
+  const initNavigationSpy = vi.spyOn(services.navigation, 'initNavigation');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     initNavigationSpy.mockReset();
-    services.settings.client.get$ = jest.fn().mockImplementation((key: string) => {
+    services.settings.client.get$ = vi.fn().mockImplementation((key: string) => {
       if (key === WORKFLOWS_UI_SETTING_ID) {
         return of(false);
       }
@@ -88,7 +91,7 @@ describe('Security Side Nav', () => {
   });
 
   it('passes Agent chat experience when settings return Agent', async () => {
-    services.settings.client.get$ = jest.fn().mockImplementation((key: string) => {
+    services.settings.client.get$ = vi.fn().mockImplementation((key: string) => {
       if (key === WORKFLOWS_UI_SETTING_ID) {
         return of(false);
       }
@@ -102,7 +105,7 @@ describe('Security Side Nav', () => {
   });
 
   it('passes workflows UI enabled true when settings return true', async () => {
-    services.settings.client.get$ = jest.fn().mockImplementation((key: string) => {
+    services.settings.client.get$ = vi.fn().mockImplementation((key: string) => {
       if (key === WORKFLOWS_UI_SETTING_ID) {
         return of(true);
       }

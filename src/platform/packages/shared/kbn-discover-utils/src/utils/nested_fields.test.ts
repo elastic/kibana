@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isNestedFieldParent } from './nested_fields';
 describe('isNestedFieldParent', () => {
@@ -28,8 +30,8 @@ describe('isNestedFieldParent', () => {
 
     const dataView = {
       fields: {
-        getByName: jest.fn((fieldName) => list.find((field) => field.name === fieldName)),
-        getAll: jest.fn(() => list),
+        getByName: vi.fn((fieldName) => list.find((field) => field.name === fieldName)),
+        getAll: vi.fn(() => list),
       },
     } as unknown as DataView;
 

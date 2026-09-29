@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useCreateMigration } from './use_create_migration';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { MigrationSource } from '../../../common/types';
 
-jest.mock('../../../../common/lib/kibana/kibana_react');
+vi.mock('../../../../common/lib/kibana/kibana_react');
 
-const mockedUseKibana = useKibana as jest.Mock;
-const mockCreateDashboardMigration = jest.fn();
-const mockGetDashboardMigrationStats = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
+const mockedUseKibana = useKibana as Mock;
+const mockCreateDashboardMigration = vi.fn();
+const mockGetDashboardMigrationStats = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
 
 describe('useCreateMigration', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockedUseKibana.mockReturnValue({
       services: {
         siemMigrations: {
@@ -42,7 +45,7 @@ describe('useCreateMigration', () => {
   });
 
   describe('on success', () => {
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const mockDashboards = [
       {
         result: {

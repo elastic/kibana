@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MlAuthz } from '../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from './rule_assets/prebuilt_rule_assets_client';
@@ -14,14 +17,20 @@ import type { BasicRuleInfo } from './basic_rule_info';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 import { narrowRuleResponseFields } from '../api/narrow_rule_response_fields';
 
-jest.mock(
+vi.mock(
   '../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response',
-  () => ({ convertPrebuiltRuleAssetToRuleResponse: jest.fn() })
+  () => {
+      const mocked = { convertPrebuiltRuleAssetToRuleResponse: vi.fn() };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock('../api/narrow_rule_response_fields', () => ({ narrowRuleResponseFields: jest.fn() }));
+vi.mock('../api/narrow_rule_response_fields', () => {
+      const mocked = { narrowRuleResponseFields: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const mockConvert = jest.mocked(convertPrebuiltRuleAssetToRuleResponse);
-const mockNarrow = jest.mocked(narrowRuleResponseFields);
+const mockConvert = vi.mocked(convertPrebuiltRuleAssetToRuleResponse);
+const mockNarrow = vi.mocked(narrowRuleResponseFields);
 
 const permissiveMlAuthz: MlAuthz = {
   validateRuleType: async () => ({ valid: true, message: undefined }),
@@ -35,18 +44,18 @@ const version = (ruleId: string, type: BasicRuleInfo['type'] = 'query', v = 1) =
 
 const createRuleAssetsClient = () =>
   ({
-    fetchLatestAssets: jest.fn(),
-    fetchLatestVersions: jest.fn(),
-    fetchAssetsByVersion: jest.fn(),
-    fetchTagsByVersion: jest.fn(),
-    fetchDeprecatedRules: jest.fn(),
-  } as unknown as jest.Mocked<IPrebuiltRuleAssetsClient>);
+    fetchLatestAssets: vi.fn(),
+    fetchLatestVersions: vi.fn(),
+    fetchAssetsByVersion: vi.fn(),
+    fetchTagsByVersion: vi.fn(),
+    fetchDeprecatedRules: vi.fn(),
+  } as unknown as Mocked<IPrebuiltRuleAssetsClient>);
 
 describe('getInstallableRulesForReview', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Passthrough conversion + projection so the test focuses on orchestration.
     mockConvert.mockImplementation((asset) => asset as never);
     mockNarrow.mockImplementation((rule) => rule);

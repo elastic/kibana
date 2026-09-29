@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -13,8 +15,8 @@ import { getPolicySettingsFormTestSubjects } from '../mocks';
 import { AdvancedSection } from './advanced_section';
 import type { AdvancedSectionProps } from './advanced_section';
 
-jest.mock('../../../../../../common/hooks/use_license');
-jest.setTimeout(15_000);
+vi.mock('../../../../../../common/hooks/use_license');
+vi.setConfig({ testTimeout: 15_000 });
 
 describe('Policy Advanced Settings section chrome', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').advancedSection;
@@ -27,7 +29,7 @@ describe('Policy Advanced Settings section chrome', () => {
     return mockedContext.render(
       <AdvancedSection
         policy={policy}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         mode="edit"
         data-test-subj={testSubj.container}
         {...props}

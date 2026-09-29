@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -16,11 +19,11 @@ import { useListWorkflows } from '../hooks/use_list_workflows';
 import type { WorkflowConfiguration, WorkflowItem } from '../types';
 import * as i18n from '../translations';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../hooks/use_list_workflows');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../hooks/use_list_workflows');
 
 const MOCK_WORKFLOWS_URL = '/app/workflows';
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 const mockWorkflows: WorkflowItem[] = [
   {
@@ -87,11 +90,11 @@ const defaultConfig: WorkflowConfiguration = {
 
 const defaultProps = {
   connectorId: 'test-connector-id',
-  onChange: jest.fn(),
+  onChange: vi.fn(),
   value: defaultConfig,
 };
 
-const mockUseListWorkflows = useListWorkflows as jest.MockedFunction<typeof useListWorkflows>;
+const mockUseListWorkflows = useListWorkflows as MockedFunction<typeof useListWorkflows>;
 
 const mockSuccessResult = {
   data: mockWorkflows,
@@ -117,8 +120,8 @@ const mockSuccessResult = {
   isRefetching: false,
   isStale: false,
   isSuccess: true,
-  refetch: jest.fn(),
-  remove: jest.fn(),
+  refetch: vi.fn(),
+  remove: vi.fn(),
   status: 'success' as const,
 } as ReturnType<typeof useListWorkflows>;
 
@@ -146,8 +149,8 @@ const mockLoadingResult = {
   isRefetching: false,
   isStale: false,
   isSuccess: false,
-  refetch: jest.fn(),
-  remove: jest.fn(),
+  refetch: vi.fn(),
+  remove: vi.fn(),
   status: 'loading' as const,
 } as ReturnType<typeof useListWorkflows>;
 
@@ -163,14 +166,14 @@ const findOptionByName = (name: string): HTMLElement | null =>
 
 describe('WorkflowConfigurationPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {
         application: {
-          getUrlForApp: jest.fn().mockReturnValue(MOCK_WORKFLOWS_URL),
+          getUrlForApp: vi.fn().mockReturnValue(MOCK_WORKFLOWS_URL),
         },
-        telemetry: { reportEvent: jest.fn() },
+        telemetry: { reportEvent: vi.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
 
@@ -199,7 +202,7 @@ describe('WorkflowConfigurationPanel', () => {
   });
 
   it('calls onChange when alert retrieval workflow is selected', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <TestProviders>
         <WorkflowConfigurationPanel {...defaultProps} onChange={onChange} />

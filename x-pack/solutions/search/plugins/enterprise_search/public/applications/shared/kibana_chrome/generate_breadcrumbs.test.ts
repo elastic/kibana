@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 import { mockHistory } from '../../__mocks__/react_router';
 
-jest.mock('../react_router_helpers', () => ({
-  letBrowserHandleEvent: jest.fn(() => false),
-  createHref: jest.requireActual('../react_router_helpers').createHref,
-}));
+vi.mock('../react_router_helpers', async () => {
+      const mocked = {
+      letBrowserHandleEvent: vi.fn(() => false),
+      createHref: (await vi.importActual('../react_router_helpers')).createHref,
+    };
+      return { ...mocked, default: mocked };
+    });
 import { letBrowserHandleEvent } from '../react_router_helpers';
 
 import type { Breadcrumb } from './generate_breadcrumbs';
@@ -71,7 +77,7 @@ describe('useGenerateBreadcrumbs', () => {
 
 describe('useEuiBreadcrumbs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('accepts an array of breadcrumbs and to the array correctly injects SPA link navigation props', () => {
@@ -109,7 +115,7 @@ describe('useEuiBreadcrumbs', () => {
       expect(breadcrumb.href).toEqual('/app/enterprise_search/test');
       expect(mockHistory.createHref).toHaveBeenCalled();
 
-      const event = { preventDefault: jest.fn() };
+      const event = { preventDefault: vi.fn() };
       breadcrumb.onClick(event);
 
       expect(event.preventDefault).toHaveBeenCalled();
@@ -126,7 +132,7 @@ describe('useEuiBreadcrumbs', () => {
     it('does not prevent default browser behavior on new tab/window clicks', () => {
       const breadcrumb = useEuiBreadcrumb({ text: '', path: '/' });
 
-      (letBrowserHandleEvent as jest.Mock).mockImplementationOnce(() => true);
+      (letBrowserHandleEvent as Mock).mockImplementationOnce(() => true);
       breadcrumb.onClick();
 
       expect(mockKibanaValues.navigateToUrl).not.toHaveBeenCalled();
@@ -143,7 +149,7 @@ describe('useEuiBreadcrumbs', () => {
 
 describe('useSearchBreadcrumbs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('builds a chain of breadcrumbs with Search at the root', () => {
@@ -186,7 +192,7 @@ describe('useSearchBreadcrumbs', () => {
 
 describe('useEnterpriseSearchBreadcrumbs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('builds a chain of breadcrumbs with Enterprise Search at the root', () => {

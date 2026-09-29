@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { getAgentsPerOutput } from './agents_per_output';
 
-jest.mock('../services/agents', () => {
+vi.mock('../services/agents', () => {
   return {
-    getAgentsByKuery: jest
+    getAgentsByKuery: vi
       .fn()
       .mockImplementation(async (esClient, soClient, { kuery }: { kuery: string }) => {
         if (kuery.includes('policy_id:policy1')) {
@@ -27,10 +29,10 @@ jest.mock('../services/agents', () => {
   };
 });
 
-jest.mock('../services', () => {
+vi.mock('../services', () => {
   return {
     agentPolicyService: {
-      list: jest.fn().mockResolvedValue({
+      list: vi.fn().mockResolvedValue({
         items: [
           { id: 'policy1', agents: 0, data_output_id: 'logstash1', monitoring_output_id: 'kafka1' },
           { id: 'policy2', agents: 1 },
@@ -64,7 +66,7 @@ jest.mock('../services', () => {
       }),
     },
     outputService: {
-      list: jest.fn().mockResolvedValue({
+      list: vi.fn().mockResolvedValue({
         items: [
           {
             id: 'default-output',

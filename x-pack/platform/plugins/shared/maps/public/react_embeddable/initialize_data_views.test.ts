@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-plugin/common';
 import { createMapStore } from '../reducers/store';
 import { initializeDataViews } from './initialize_data_views';
@@ -12,7 +14,7 @@ import { createLayerDescriptor } from '../classes/sources/es_search_source';
 import { ES_GEO_FIELD_TYPE } from '../../common/constants';
 import { skip } from 'rxjs';
 
-jest.mock('../kibana_services', () => {
+vi.mock('../kibana_services', () => {
   return {
     getIsDarkMode() {
       return false;
@@ -32,7 +34,7 @@ jest.mock('../kibana_services', () => {
     },
   };
 });
-jest.mock('../index_pattern_util', () => {
+vi.mock('../index_pattern_util', () => {
   return {
     getIndexPatternsFromIds: async (ids: string[]) => {
       return ids.length
@@ -48,7 +50,7 @@ jest.mock('../index_pattern_util', () => {
 });
 
 describe('dataViews$', () => {
-  const onEmitMock = jest.fn();
+  const onEmitMock = vi.fn();
 
   beforeEach(() => {
     onEmitMock.mockReset();

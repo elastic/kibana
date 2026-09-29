@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
@@ -14,12 +17,12 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { SiemMigrationTelemetryClient } from './__mocks__/siem_migrations_telemetry_client';
 import { TELEMETRY_SIEM_MIGRATION_ID } from './util/constants';
 
-jest.mock('./siem_migrations_telemetry_client');
+vi.mock('./siem_migrations_telemetry_client');
 
 // Mock dependencies
 const mockLogger = loggerMock.create();
 
-const mockDependencies: jest.Mocked<SiemMigrationsClientDependencies> = {
+const mockDependencies: Mocked<SiemMigrationsClientDependencies> = {
   itemsClient: {},
   savedObjectsClient: {},
   inferenceClient: {},
@@ -31,19 +34,19 @@ const mockRequest = {} as unknown as KibanaRequest;
 const mockUser = {} as unknown as AuthenticatedUser;
 const itemId = 'test-item-id';
 
-jest.useFakeTimers();
-jest.spyOn(global, 'setTimeout');
-const mockTimeout = setTimeout as unknown as jest.Mock;
+vi.useFakeTimers();
+vi.spyOn(global, 'setTimeout');
+const mockTimeout = setTimeout as unknown as Mock;
 mockTimeout.mockImplementation((cb) => {
   // never actually wait, we'll check the calls manually
   cb();
 });
 
-const mockSetup = jest.fn().mockResolvedValue(undefined);
-const mockInvoke = jest.fn().mockResolvedValue(undefined);
-const mockPrepareTaskInput = jest.fn().mockResolvedValue({});
-const mockProcessTaskOutput = jest.fn().mockResolvedValue({});
-const mockInitialize = jest.fn().mockResolvedValue(undefined);
+const mockSetup = vi.fn().mockResolvedValue(undefined);
+const mockInvoke = vi.fn().mockResolvedValue(undefined);
+const mockPrepareTaskInput = vi.fn().mockResolvedValue({});
+const mockProcessTaskOutput = vi.fn().mockResolvedValue({});
+const mockInitialize = vi.fn().mockResolvedValue(undefined);
 
 class TestMigrationTaskRunner extends SiemMigrationTaskRunner {
   protected taskConcurrency = 10;
@@ -79,7 +82,7 @@ describe('SiemMigrationTaskRunner', () => {
     mockInitialize.mockResolvedValue(undefined); // Reset the mock
     mockInvoke.mockResolvedValue({}); // Reset the mock
     mockSiemMigrationsDataClient = createSiemMigrationsDataClientMock();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     abortController = new AbortController();
     taskRunner = new TestMigrationTaskRunner(

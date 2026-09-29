@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { FiltersExpressionsSelect } from './filters_expression_select';
@@ -24,8 +26,8 @@ describe('FiltersExpressionSelect', () => {
       <FiltersExpressionsSelect
         ruleParams={{}}
         newFilters={[]}
-        onRemoveFilter={jest.fn()}
-        setRuleParams={jest.fn()}
+        onRemoveFilter={vi.fn()}
+        setRuleParams={vi.fn()}
         shouldUpdateUrl={false}
       />
     );
@@ -55,8 +57,8 @@ describe('FiltersExpressionSelect', () => {
       <FiltersExpressionsSelect
         ruleParams={{}}
         newFilters={newFilters}
-        onRemoveFilter={jest.fn()}
-        setRuleParams={jest.fn()}
+        onRemoveFilter={vi.fn()}
+        setRuleParams={vi.fn()}
         shouldUpdateUrl={false}
       />
     );
@@ -72,8 +74,8 @@ describe('FiltersExpressionSelect', () => {
     ['Remove filter Port', PORT_FIELD_NAME],
     ['Remove filter Tag', TAG_FIELD_NAME],
   ])('fires remove filter handler', async (removeButtonLabel, expectedFieldName) => {
-    const onRemoveFilterMock = jest.fn();
-    const setAlertParamsMock = jest.fn();
+    const onRemoveFilterMock = vi.fn();
+    const setAlertParamsMock = vi.fn();
     const { getByLabelText } = render(
       <FiltersExpressionsSelect
         ruleParams={{}}
@@ -112,15 +114,15 @@ describe('FiltersExpressionSelect', () => {
      * @param expectedFilterItems the set of filter options the component should render
      */
     async (newFilters, expectedFilterButtonAriaLabel) => {
-      const spy = jest.spyOn(Hooks, 'useValuesList');
+      const spy = vi.spyOn(Hooks, 'useValuesList');
       spy.mockReturnValue({ loading: false, values: [{ label: 'test-label', count: 3 }] });
       const { getByLabelText, getByText } = render(
         <EuiThemeProvider>
           <FiltersExpressionsSelect
             ruleParams={{}}
             newFilters={newFilters}
-            onRemoveFilter={jest.fn()}
-            setRuleParams={jest.fn()}
+            onRemoveFilter={vi.fn()}
+            setRuleParams={vi.fn()}
             shouldUpdateUrl={false}
           />
         </EuiThemeProvider>

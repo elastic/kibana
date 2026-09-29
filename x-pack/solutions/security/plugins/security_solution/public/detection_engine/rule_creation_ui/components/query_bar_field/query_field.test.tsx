@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { QueryBarField } from '.';
@@ -20,33 +23,33 @@ import { resolveTimeline } from '../../../../timelines/containers/api';
 import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
 import type { ResolveTimelineResponse } from '../../../../../common/api/timeline';
 
-jest.mock('../../../../timelines/containers/api');
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../timelines/containers/api');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...actual,
     KibanaServices: {
-      get: jest.fn(() => ({
+      get: vi.fn(() => ({
         http: {
-          post: jest.fn().mockReturnValue({
+          post: vi.fn().mockReturnValue({
             success: true,
             success_count: 0,
             timelines_installed: 0,
             timelines_updated: 0,
             errors: [],
           }),
-          fetch: jest.fn(),
+          fetch: vi.fn(),
         },
       })),
     },
   };
 });
 
-jest.mock('../../../../timelines/containers/all', () => {
-  const originalModule = jest.requireActual('../../../../timelines/containers/all');
+vi.mock('../../../../timelines/containers/all', async () => {
+  const originalModule = (await vi.importActual('../../../../timelines/containers/all'));
   return {
     ...originalModule,
-    useGetAllTimeline: jest.fn(),
+    useGetAllTimeline: vi.fn(),
   };
 });
 
@@ -57,15 +60,15 @@ const resolvedTimeline: ResolveTimelineResponse = {
 
 describe('QueryBarDefineRule', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGetAllTimeline as unknown as jest.Mock).mockReturnValue({
-      fetchAllTimeline: jest.fn(),
+    vi.clearAllMocks();
+    (useGetAllTimeline as unknown as Mock).mockReturnValue({
+      fetchAllTimeline: vi.fn(),
       timelines: getAllTimeline('', mockOpenTimelineQueryResults.timeline ?? []),
       loading: false,
       totalCount: mockOpenTimelineQueryResults.totalCount,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
-    (resolveTimeline as jest.Mock).mockResolvedValue(resolvedTimeline);
+    (resolveTimeline as Mock).mockResolvedValue(resolvedTimeline);
   });
 
   it('renders correctly', () => {
@@ -77,7 +80,7 @@ describe('QueryBarDefineRule', () => {
           <QueryBarField
             isLoading={false}
             indexPattern={{ fields: [], title: 'title' }}
-            onCloseTimelineSearch={jest.fn()}
+            onCloseTimelineSearch={vi.fn()}
             openTimelineSearch={true}
             dataTestSubj="query-bar-define-rule"
             idAria="idAria"
@@ -99,7 +102,7 @@ describe('QueryBarDefineRule', () => {
             <QueryBarField
               isLoading={false}
               indexPattern={{ fields: [], title: 'title' }}
-              onCloseTimelineSearch={jest.fn()}
+              onCloseTimelineSearch={vi.fn()}
               openTimelineSearch={true}
               dataTestSubj="query-bar-define-rule"
               idAria="idAria"
@@ -116,7 +119,7 @@ describe('QueryBarDefineRule', () => {
 
   it('calls onOpenTimeline correctly', async () => {
     const field = useFormFieldMock();
-    const onOpenTimeline = jest.fn();
+    const onOpenTimeline = vi.fn();
 
     const { getByTestId } = render(
       <TestProviders>
@@ -124,7 +127,7 @@ describe('QueryBarDefineRule', () => {
           <QueryBarField
             isLoading={false}
             indexPattern={{ fields: [], title: 'title' }}
-            onCloseTimelineSearch={jest.fn()}
+            onCloseTimelineSearch={vi.fn()}
             openTimelineSearch={true}
             dataTestSubj="query-bar-define-rule"
             idAria="idAria"

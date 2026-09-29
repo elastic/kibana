@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { NewPackagePolicy } from '../../../../../../../common';
 import type { RegistryVarGroup } from '../../../../types';
 
@@ -452,7 +454,7 @@ describe('var_group_policy_effects', () => {
 
   describe('registerPolicyUpdateHandler', () => {
     it('should allow registering custom handlers', () => {
-      const customHandler = jest.fn().mockReturnValue({ custom_field: 'test' });
+      const customHandler = vi.fn().mockReturnValue({ custom_field: 'test' });
 
       registerPolicyUpdateHandler(customHandler);
 

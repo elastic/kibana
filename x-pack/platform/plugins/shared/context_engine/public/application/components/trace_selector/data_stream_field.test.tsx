@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -19,11 +21,14 @@ interface UseIndicesArgs {
   types: string[];
 }
 
-const mockUseIndices = jest.fn();
+const mockUseIndices = vi.fn();
 
-jest.mock('../../hooks/use_indices', () => ({
-  useIndices: (args: UseIndicesArgs) => mockUseIndices(args),
-}));
+vi.mock('../../hooks/use_indices', () => {
+      const mocked = {
+      useIndices: (args: UseIndicesArgs) => mockUseIndices(args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultHookResult = {
   indexNames: ['logs-genai-default'],
@@ -55,12 +60,12 @@ describe('DataStreamField', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   it('does not enable the search hook before first focus', () => {
-    renderField({ value: undefined, onChange: jest.fn() });
+    renderField({ value: undefined, onChange: vi.fn() });
 
     expect(mockUseIndices.mock.calls[0]?.[0]).toEqual({
       search: '',
@@ -70,7 +75,7 @@ describe('DataStreamField', () => {
   });
 
   it('enables the search hook with an empty search on first focus', () => {
-    renderField({ value: undefined, onChange: jest.fn() });
+    renderField({ value: undefined, onChange: vi.fn() });
 
     const input = screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input');
     if (!input) {
@@ -82,8 +87,8 @@ describe('DataStreamField', () => {
   });
 
   it('updates search passed to the hook only after the debounce delay', async () => {
-    jest.useFakeTimers();
-    renderField({ value: undefined, onChange: jest.fn() });
+    vi.useFakeTimers();
+    renderField({ value: undefined, onChange: vi.fn() });
 
     const input = screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input');
     if (!input) {
@@ -95,12 +100,12 @@ describe('DataStreamField', () => {
     expect(lastHookArgs()).toEqual({ search: '', enabled: true, types: ['data_stream'] });
 
     await act(() => {
-      jest.advanceTimersByTime(299);
+      vi.advanceTimersByTime(299);
     });
     expect(lastHookArgs()).toEqual({ search: '', enabled: true, types: ['data_stream'] });
 
     await act(() => {
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
     });
     expect(lastHookArgs()).toEqual({ search: 'lo', enabled: true, types: ['data_stream'] });
   });
@@ -110,7 +115,7 @@ describe('DataStreamField', () => {
       ...defaultHookResult,
       indexNames: ['logs-genai-default', 'logs-other'],
     });
-    renderField({ value: undefined, onChange: jest.fn() });
+    renderField({ value: undefined, onChange: vi.fn() });
 
     const input = screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input');
     if (!input) {
@@ -124,7 +129,7 @@ describe('DataStreamField', () => {
   });
 
   it('calls onChange when a data stream is selected', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderField({ value: undefined, onChange });
 
     const input = screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input');
@@ -139,7 +144,7 @@ describe('DataStreamField', () => {
   });
 
   it('does not call onChange when typing a name that matches no option and pressing Enter', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderField({ value: undefined, onChange });
 
     const input = screen.getByTestId('contextTraceDataStreamComboBox').querySelector('input');

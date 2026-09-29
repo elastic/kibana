@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { NewRelic } from './new_relic';
@@ -17,21 +19,21 @@ import {
 
 describe('NewRelic', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
   };
 
   const mockContext = {
     client: mockClient,
     config: { region: 'us', accountId: '123' },
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   const AI_ISSUES_HEADERS = { 'nerd-graph-unsafe-experimental-opt-in': 'AiIssues' };
   const US_ENDPOINT = 'https://api.newrelic.com/graphql';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -241,7 +243,7 @@ describe('NewRelic', () => {
       });
 
       const now = Date.parse('2024-01-02T00:00:00Z');
-      jest.useFakeTimers().setSystemTime(now);
+      vi.useFakeTimers().setSystemTime(now);
 
       const result = await NewRelic.actions.listIssues.handler(mockContext, {
         states: ['ACTIVATED'],
@@ -265,7 +267,7 @@ describe('NewRelic', () => {
         nextCursor: null,
       });
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should default a missing since to 24h before a provided until', async () => {

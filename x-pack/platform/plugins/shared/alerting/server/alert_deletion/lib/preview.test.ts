@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -17,11 +19,11 @@ import { activeAlertsQuery, inactiveAlertsQuery } from './test_utils';
 const auditService = securityServiceMock.createStart().audit;
 const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 const eventLogger = eventLoggerMock.create();
-const getAlertIndicesAliasMock = jest.fn();
+const getAlertIndicesAliasMock = vi.fn();
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const securityServiceStart = securityServiceMock.createStart();
-const getSpaceId = jest.fn();
+const getSpaceId = vi.fn();
 const spacesService = { getSpaceId } as unknown as SpacesServiceStart;
 const taskManagerSetup = taskManagerMock.createSetup();
 const taskManagerStart = taskManagerMock.createStart();
@@ -30,7 +32,7 @@ describe('previewTask', () => {
   let alertDeletionClient: AlertDeletionClient;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     logger.get.mockImplementation(() => logger);
     getAlertIndicesAliasMock.mockReturnValue(['index1', 'index2']);
     // @ts-ignore - incomplete return type

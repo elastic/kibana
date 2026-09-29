@@ -5,35 +5,41 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 
 import { useAddToCase } from '.';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      cases: {
-        hooks: {
-          useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({
-            open: jest.fn(),
-          }),
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          cases: {
+            hooks: {
+              useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({
+                open: vi.fn(),
+              }),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useAddToCase', () => {
-  const mockCanUserCreateAndReadCases = jest.fn();
+  const mockCanUserCreateAndReadCases = vi.fn();
   const mockTitle = 'Attack discovery title';
   const mockAlertIds = ['alert1', 'alert2'];
   const mockMarkdownComments = ['Comment 1', 'Comment 2'];
   const mockReplacements = { alert1: 'replacement1', alert2: 'replacement2' };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it.each([
@@ -56,12 +62,12 @@ describe('useAddToCase', () => {
 
   it('opens the case selector with the expected attachments', () => {
     mockCanUserCreateAndReadCases.mockReturnValue(true);
-    const mockOpenSelectCaseModal = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue({
+    const mockOpenSelectCaseModal = vi.fn();
+    (useKibana as Mock).mockReturnValue({
       services: {
         cases: {
           hooks: {
-            useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({
+            useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({
               open: mockOpenSelectCaseModal,
             }),
           },
@@ -110,11 +116,11 @@ describe('useAddToCase', () => {
   });
 
   it.each([true, false])('forwards the case path on success when isNewCase is %s', (isNewCase) => {
-    const onSuccess = jest.fn();
-    const useCasesAddToExistingCaseModal = jest.fn().mockReturnValue({
-      open: jest.fn(),
+    const onSuccess = vi.fn();
+    const useCasesAddToExistingCaseModal = vi.fn().mockReturnValue({
+      open: vi.fn(),
     });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         cases: {
           hooks: {
@@ -141,10 +147,10 @@ describe('useAddToCase', () => {
   });
 
   it('preserves the create-case prefill in the selector modal', () => {
-    const useCasesAddToExistingCaseModal = jest.fn().mockReturnValue({
-      open: jest.fn(),
+    const useCasesAddToExistingCaseModal = vi.fn().mockReturnValue({
+      open: vi.fn(),
     });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         cases: {
           hooks: {

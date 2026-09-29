@@ -5,30 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 
-const MockPrompt = jest.fn((_props: object) => null);
-jest.mock('react-router-dom', () => ({
-  Prompt: (props: object) => MockPrompt(props),
-}));
+const MockPrompt = vi.fn((_props: object) => null);
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      Prompt: (props: object) => MockPrompt(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { render } from '@testing-library/react';
 
 import { UnsavedChangesPrompt } from './unsaved_changes_prompt';
 
 describe('UnsavedChangesPrompt', () => {
-  let addEventListenerSpy: jest.SpyInstance;
-  let removeEventListenerSpy: jest.SpyInstance;
+  let addEventListenerSpy: MockInstance;
+  let removeEventListenerSpy: MockInstance;
 
   beforeAll(() => {
-    addEventListenerSpy = jest.spyOn(window, 'addEventListener').mockImplementation(() => true);
-    removeEventListenerSpy = jest
+    addEventListenerSpy = vi.spyOn(window, 'addEventListener').mockImplementation(() => true);
+    removeEventListenerSpy = vi
       .spyOn(window, 'removeEventListener')
       .mockImplementation(() => true);
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {
@@ -74,7 +80,7 @@ describe('UnsavedChangesPrompt', () => {
     it('that handler will show users a confirmation message when navigating outside the SPA if hasUnsavedChanges is true', () => {
       render(<UnsavedChangesPrompt hasUnsavedChanges />);
 
-      const event = { returnValue: null, preventDefault: jest.fn() };
+      const event = { returnValue: null, preventDefault: vi.fn() };
       getLastHandler()(event);
 
       expect(event.returnValue).toEqual('');
@@ -101,7 +107,7 @@ describe('UnsavedChangesPrompt', () => {
       expect(getAddBeforeUnloadCalls().length).toBe(2);
       const newHandler = getLastHandler();
 
-      const event = { returnValue: null, preventDefault: jest.fn() };
+      const event = { returnValue: null, preventDefault: vi.fn() };
       newHandler(event);
       expect(event.returnValue).toEqual(null);
       expect(event.preventDefault).not.toHaveBeenCalled();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { notificationServiceMock } from '@kbn/core/public/mocks';
@@ -31,7 +33,7 @@ describe('DeleteSpacesButton', () => {
       <DeleteSpacesButton
         space={space}
         spacesManager={spacesManager as unknown as SpacesManager}
-        onDelete={jest.fn()}
+        onDelete={vi.fn()}
         notifications={notifications}
       />
     );

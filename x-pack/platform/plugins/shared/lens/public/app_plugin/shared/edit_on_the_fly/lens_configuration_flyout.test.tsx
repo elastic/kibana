@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
@@ -26,7 +28,7 @@ import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
 
 const createAddContextMock = () => {
-  return jest
+  return vi
     .fn()
     .mockImplementation((element) => (
       <CoreEnvContextProvider value={coreContextMock.create().env}>
@@ -35,9 +37,9 @@ const createAddContextMock = () => {
     ));
 };
 
-jest.mock('@kbn/esql-utils', () => {
+vi.mock('@kbn/esql-utils', () => {
   return {
-    getESQLResults: jest.fn().mockResolvedValue({
+    getESQLResults: vi.fn().mockResolvedValue({
       response: {
         columns: [
           {
@@ -65,9 +67,9 @@ jest.mock('@kbn/esql-utils', () => {
         values: [],
       },
     }),
-    getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
-    getESQLAdHocDataview: jest.fn().mockResolvedValue({}),
-    formatESQLColumns: jest.fn().mockReturnValue([
+    getIndexPatternFromESQLQuery: vi.fn().mockReturnValue('index1'),
+    getESQLAdHocDataview: vi.fn().mockResolvedValue({}),
+    formatESQLColumns: vi.fn().mockReturnValue([
       {
         name: '@timestamp',
         id: '@timestamp',
@@ -145,7 +147,7 @@ const esqlLensAttributes = {
 const mockStartDependencies =
   createMockStartDependencies() as unknown as LensPluginStartDependencies;
 
-jest.spyOn(getApplicationUserMessagesModule, 'useApplicationUserMessages');
+vi.spyOn(getApplicationUserMessagesModule, 'useApplicationUserMessages');
 
 const data = {
   ...mockDataPlugin(),
@@ -155,11 +157,11 @@ const data = {
       ...mockDataPlugin().query.timefilter,
       timefilter: {
         ...mockDataPlugin().query.timefilter.timefilter,
-        getTime: jest.fn(() => ({
+        getTime: vi.fn(() => ({
           from: 'now-2m',
           to: 'now',
         })),
-        getAbsoluteTime: jest.fn(() => ({
+        getAbsoluteTime: vi.fn(() => ({
           from: '2021-01-10T04:00:00.000Z',
           to: '2021-01-10T04:00:00.000Z',
         })),
@@ -180,7 +182,7 @@ const expectToBeEUIAriaDisabledButton = (element: HTMLElement) => {
   expect(element).toHaveAttribute('aria-disabled', 'true');
 };
 
-jest.setTimeout(60_000);
+vi.setConfig({ testTimeout: 60_000 });
 
 describe('LensEditConfigurationFlyout', () => {
   async function renderConfigFlyout(
@@ -199,12 +201,12 @@ describe('LensEditConfigurationFlyout', () => {
         {mockCoreStart.rendering.addContext(
           <LensEditConfigurationFlyout
             attributes={lensAttributes}
-            updatePanelState={jest.fn()}
+            updatePanelState={vi.fn()}
             coreStart={mockCoreStart}
             startDependencies={startDependencies}
-            closeFlyout={jest.fn()}
-            onApply={jest.fn()}
-            onCancel={jest.fn()}
+            closeFlyout={vi.fn()}
+            onApply={vi.fn()}
+            onCancel={vi.fn()}
             {...propsOverrides}
           />
         )}
@@ -238,7 +240,7 @@ describe('LensEditConfigurationFlyout', () => {
   }
 
   it('should display the header and the link to editor if necessary props are given', async () => {
-    const navigateToLensEditorSpy = jest.fn();
+    const navigateToLensEditorSpy = vi.fn();
     await renderConfigFlyout({
       displayFlyoutHeader: true,
       navigateToLensEditor: navigateToLensEditorSpy,
@@ -257,7 +259,7 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('should call the closeFlyout callback if cancel button is clicked', async () => {
-    const closeFlyoutSpy = jest.fn();
+    const closeFlyoutSpy = vi.fn();
 
     await renderConfigFlyout({
       closeFlyout: closeFlyoutSpy,
@@ -268,8 +270,8 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('should cancel editing when the header close button is clicked', async () => {
-    const closeFlyoutSpy = jest.fn();
-    const onCancelSpy = jest.fn();
+    const closeFlyoutSpy = vi.fn();
+    const onCancelSpy = vi.fn();
 
     await renderConfigFlyout({
       closeFlyout: closeFlyoutSpy,
@@ -283,8 +285,8 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('should cancel editing when Escape is pressed', async () => {
-    const closeFlyoutSpy = jest.fn();
-    const onCancelSpy = jest.fn();
+    const closeFlyoutSpy = vi.fn();
+    const onCancelSpy = vi.fn();
 
     await renderConfigFlyout({
       closeFlyout: closeFlyoutSpy,
@@ -297,7 +299,7 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('should call the updatePanelState callback if cancel button is clicked', async () => {
-    const updatePanelStateSpy = jest.fn();
+    const updatePanelStateSpy = vi.fn();
     await renderConfigFlyout({
       updatePanelState: updatePanelStateSpy,
     });
@@ -307,7 +309,7 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('should restore all previous datasource states on cancel, not only the active one', async () => {
-    const updatePanelStateSpy = jest.fn();
+    const updatePanelStateSpy = vi.fn();
     const multiDatasourceAttributes = {
       ...lensAttributes,
       state: {
@@ -338,10 +340,10 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('should call the updateByRefInput callback with savedObjectId and previous attributes if cancel button is clicked and savedObjectId exists', async () => {
-    const updateByRefInputSpy = jest.fn();
+    const updateByRefInputSpy = vi.fn();
 
     await renderConfigFlyout({
-      closeFlyout: jest.fn(),
+      closeFlyout: vi.fn(),
       updateByRefInput: updateByRefInputSpy,
       savedObjectId: 'id',
     });
@@ -350,11 +352,11 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('should call the saveByRef and updateByRefInput with the current attributes when apply button is clicked and savedObjectId exists', async () => {
-    const updateByRefInputSpy = jest.fn();
-    const saveByRefSpy = jest.fn();
+    const updateByRefInputSpy = vi.fn();
+    const saveByRefSpy = vi.fn();
 
     await renderConfigFlyout({
-      closeFlyout: jest.fn(),
+      closeFlyout: vi.fn(),
       updateByRefInput: updateByRefInputSpy,
       savedObjectId: 'id',
       saveByRef: saveByRefSpy,
@@ -371,11 +373,11 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('should call the onApplyCb callback if apply button is clicked', async () => {
-    const onApplyCbSpy = jest.fn();
+    const onApplyCbSpy = vi.fn();
 
     await renderConfigFlyout(
       {
-        closeFlyout: jest.fn(),
+        closeFlyout: vi.fn(),
         onApply: onApplyCbSpy,
         attributes: esqlLensAttributes,
       },
@@ -468,10 +470,10 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('save button is disabled if no changes have been made', async () => {
-    const updateByRefInputSpy = jest.fn();
-    const saveByRefSpy = jest.fn();
+    const updateByRefInputSpy = vi.fn();
+    const saveByRefSpy = vi.fn();
     const newProps = {
-      closeFlyout: jest.fn(),
+      closeFlyout: vi.fn(),
       updateByRefInput: updateByRefInputSpy,
       savedObjectId: 'id',
       saveByRef: saveByRefSpy,
@@ -484,10 +486,10 @@ describe('LensEditConfigurationFlyout', () => {
   });
 
   it('save button should be disabled if expression cannot be generated', async () => {
-    const updateByRefInputSpy = jest.fn();
-    const saveByRefSpy = jest.fn();
+    const updateByRefInputSpy = vi.fn();
+    const saveByRefSpy = vi.fn();
     const newProps = {
-      closeFlyout: jest.fn(),
+      closeFlyout: vi.fn(),
       updateByRefInput: updateByRefInputSpy,
       savedObjectId: 'id',
       saveByRef: saveByRefSpy,
@@ -495,7 +497,7 @@ describe('LensEditConfigurationFlyout', () => {
         ...datasourceMap,
         formBased: {
           ...datasourceMap.formBased,
-          toExpression: jest.fn(() => null),
+          toExpression: vi.fn(() => null),
         },
       },
     };

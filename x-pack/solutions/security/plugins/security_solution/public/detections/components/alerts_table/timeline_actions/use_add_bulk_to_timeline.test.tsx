@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAddBulkToTimelineAction } from './use_add_bulk_to_timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -13,35 +16,56 @@ import { PageScope } from '../../../../data_view_manager/constants';
 import { TestProviders } from '../../../../common/mock';
 
 // Mock all dependencies
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: jest.fn().mockReturnValue({
-    dataView: { getRuntimeMappings: jest.fn().mockReturnValue({}) },
-  }),
-}));
-jest.mock('../../../../data_view_manager/hooks/use_browser_fields', () => ({
-  useBrowserFields: jest.fn().mockReturnValue({}),
-}));
-jest.mock('../../../../data_view_manager/hooks/use_selected_patterns', () => ({
-  useSelectedPatterns: jest.fn().mockReturnValue([]),
-}));
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
-jest.mock('../../../../timelines/containers', () => ({
-  useTimelineEventsHandler: jest.fn().mockReturnValue([null, null, jest.fn()]),
-}));
-jest.mock('../../../../common/lib/kuery', () => ({
-  combineQueries: jest.fn().mockReturnValue({ filterQuery: '' }),
-}));
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: vi.fn().mockReturnValue({
+        dataView: { getRuntimeMappings: vi.fn().mockReturnValue({}) },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../data_view_manager/hooks/use_browser_fields', () => {
+      const mocked = {
+      useBrowserFields: vi.fn().mockReturnValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../data_view_manager/hooks/use_selected_patterns', () => {
+      const mocked = {
+      useSelectedPatterns: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../timelines/containers', () => {
+      const mocked = {
+      useTimelineEventsHandler: vi.fn().mockReturnValue([null, null, vi.fn()]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/kuery', () => {
+      const mocked = {
+      combineQueries: vi.fn().mockReturnValue({ filterQuery: '' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_send_bulk_to_timeline', () => ({
-  useSendBulkToTimeline: jest.fn().mockReturnValue({
-    sendBulkEventsToTimelineHandler: jest.fn(),
-  }),
-}));
+vi.mock('./use_send_bulk_to_timeline', () => {
+      const mocked = {
+      useSendBulkToTimeline: vi.fn().mockReturnValue({
+        sendBulkEventsToTimelineHandler: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+const mockUseUserPrivileges = useUserPrivileges as Mock;
 
 const defaultProps = {
   localFilters: [],
@@ -53,7 +77,7 @@ const defaultProps = {
 
 describe('useAddBulkToTimelineAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when the user has timeline read privileges', () => {

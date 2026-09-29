@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -12,7 +14,7 @@ import { AdditionalFields } from './additional_fields';
 import userEvent from '@testing-library/user-event';
 
 describe('Credentials', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const value = JSON.stringify({ foo: 'test' });
   const props = { value, errors: [], onChange, helpText: 'help text' };
 

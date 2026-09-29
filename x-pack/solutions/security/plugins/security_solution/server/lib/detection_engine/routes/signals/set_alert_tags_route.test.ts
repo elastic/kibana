@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { getSetAlertTagsRequestMock } from '../../../../../common/api/detection_engine/alert_tags/mocks';
 import { DETECTION_ENGINE_ALERT_TAGS_URL } from '../../../../../common/constants';
@@ -21,15 +24,15 @@ describe('setAlertTagsRoute', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     setAlertTagsRoute(server.router);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('happy path', () => {
@@ -113,11 +116,11 @@ describe('setAlertTagsRoute', () => {
   });
 
   describe('workflow trigger emission', () => {
-    let mockEventBus: { emitAlertTagsChanged: jest.Mock };
+    let mockEventBus: { emitAlertTagsChanged: Mock };
 
     beforeEach(() => {
       server = serverMock.create();
-      mockEventBus = { emitAlertTagsChanged: jest.fn() };
+      mockEventBus = { emitAlertTagsChanged: vi.fn() };
       setAlertTagsRoute(server.router, mockEventBus as unknown as SecuritySolutionEventBus);
       // alert-1 already has 'tag-remove' but not 'tag-add', so the delta matches
       // the assertions in the main emission test below.

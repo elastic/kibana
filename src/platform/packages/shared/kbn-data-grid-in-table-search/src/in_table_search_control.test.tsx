@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import type { UseInTableSearchControlProps } from './in_table_search_control';
@@ -48,7 +50,7 @@ describe('InTableSearchControl', () => {
   const getColumnIndexFromId = (columnId: string) => parseInt(columnId.replace('column', ''), 10);
 
   const getRenderCellValueWrappedMock = (data: string[][]) =>
-    jest.fn(
+    vi.fn(
       wrapRenderCellValueWithInTableSearchSupport(getRenderCellValueMock(data), 'black', 'green')
     );
 
@@ -61,12 +63,12 @@ describe('InTableSearchControl', () => {
       visibleColumns,
       rows: testData,
       renderCellValue: getRenderCellValueWrappedMock(testData),
-      getColumnIndexFromId: jest.fn(getColumnIndexFromId),
-      scrollToCell: jest.fn(),
-      shouldOverrideCmdF: jest.fn(),
-      onChange: jest.fn(),
-      onChangeCss: jest.fn(),
-      onChangeToExpectedPage: jest.fn(),
+      getColumnIndexFromId: vi.fn(getColumnIndexFromId),
+      scrollToCell: vi.fn(),
+      shouldOverrideCmdF: vi.fn(),
+      onChange: vi.fn(),
+      onChangeCss: vi.fn(),
+      onChangeToExpectedPage: vi.fn(),
     };
 
     const { rerender } = render(<InTableSearchControl {...initialProps} />);
@@ -149,12 +151,12 @@ describe('InTableSearchControl', () => {
       visibleColumns,
       rows: testData,
       renderCellValue: getRenderCellValueWrappedMock(testData),
-      getColumnIndexFromId: jest.fn(getColumnIndexFromId),
-      scrollToCell: jest.fn(),
-      shouldOverrideCmdF: jest.fn(),
-      onChange: jest.fn(),
-      onChangeCss: jest.fn(),
-      onChangeToExpectedPage: jest.fn(),
+      getColumnIndexFromId: vi.fn(getColumnIndexFromId),
+      scrollToCell: vi.fn(),
+      shouldOverrideCmdF: vi.fn(),
+      onChange: vi.fn(),
+      onChangeCss: vi.fn(),
+      onChangeToExpectedPage: vi.fn(),
     };
 
     const { rerender } = render(<InTableSearchControl {...initialProps} />);
@@ -179,12 +181,12 @@ describe('InTableSearchControl', () => {
       visibleColumns,
       rows: testData,
       renderCellValue: getRenderCellValueWrappedMock(testData),
-      getColumnIndexFromId: jest.fn(getColumnIndexFromId),
-      scrollToCell: jest.fn(),
-      shouldOverrideCmdF: jest.fn(),
-      onChange: jest.fn(),
-      onChangeCss: jest.fn(),
-      onChangeToExpectedPage: jest.fn(),
+      getColumnIndexFromId: vi.fn(getColumnIndexFromId),
+      scrollToCell: vi.fn(),
+      shouldOverrideCmdF: vi.fn(),
+      onChange: vi.fn(),
+      onChangeCss: vi.fn(),
+      onChangeToExpectedPage: vi.fn(),
     };
 
     const { rerender } = render(<InTableSearchControl {...initialProps} />);
@@ -235,12 +237,12 @@ describe('InTableSearchControl', () => {
       visibleColumns,
       rows: testData,
       renderCellValue: getRenderCellValueWrappedMock(testData),
-      getColumnIndexFromId: jest.fn(getColumnIndexFromId),
-      scrollToCell: jest.fn(),
-      shouldOverrideCmdF: jest.fn(),
-      onChange: jest.fn(),
-      onChangeCss: jest.fn(),
-      onChangeToExpectedPage: jest.fn(),
+      getColumnIndexFromId: vi.fn(getColumnIndexFromId),
+      scrollToCell: vi.fn(),
+      shouldOverrideCmdF: vi.fn(),
+      onChange: vi.fn(),
+      onChangeCss: vi.fn(),
+      onChangeToExpectedPage: vi.fn(),
     };
 
     render(<InTableSearchControl {...initialProps} />);
@@ -347,12 +349,12 @@ describe('InTableSearchControl', () => {
       visibleColumns,
       rows: testData,
       renderCellValue: getRenderCellValueWrappedMock(testData),
-      getColumnIndexFromId: jest.fn(getColumnIndexFromId),
-      scrollToCell: jest.fn(),
-      shouldOverrideCmdF: jest.fn(),
-      onChange: jest.fn(),
-      onChangeCss: jest.fn(),
-      onChangeToExpectedPage: jest.fn(),
+      getColumnIndexFromId: vi.fn(getColumnIndexFromId),
+      scrollToCell: vi.fn(),
+      shouldOverrideCmdF: vi.fn(),
+      onChange: vi.fn(),
+      onChangeCss: vi.fn(),
+      onChangeToExpectedPage: vi.fn(),
     };
 
     const { rerender } = render(<InTableSearchControl {...initialProps} />);
@@ -361,7 +363,7 @@ describe('InTableSearchControl', () => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/3');
     });
 
-    rerender(<InTableSearchControl {...initialProps} renderCellValue={jest.fn()} />);
+    rerender(<InTableSearchControl {...initialProps} renderCellValue={vi.fn()} />);
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('0/0');
@@ -377,12 +379,12 @@ describe('InTableSearchControl', () => {
       visibleColumns: [visibleColumns[0]],
       rows: testData,
       renderCellValue: getRenderCellValueWrappedMock(testData),
-      getColumnIndexFromId: jest.fn(getColumnIndexFromId),
-      scrollToCell: jest.fn(),
-      shouldOverrideCmdF: jest.fn(),
-      onChange: jest.fn(),
-      onChangeCss: jest.fn(),
-      onChangeToExpectedPage: jest.fn(),
+      getColumnIndexFromId: vi.fn(getColumnIndexFromId),
+      scrollToCell: vi.fn(),
+      shouldOverrideCmdF: vi.fn(),
+      onChange: vi.fn(),
+      onChangeCss: vi.fn(),
+      onChangeToExpectedPage: vi.fn(),
     };
 
     const { rerender } = render(<InTableSearchControl {...initialProps} />);
@@ -411,18 +413,18 @@ describe('InTableSearchControl', () => {
           rowIndex: 1,
         },
       },
-      onInitialStateChange: jest.fn(),
+      onInitialStateChange: vi.fn(),
       inTableSearchTerm: 'b',
       pageSize: null,
       visibleColumns,
       rows: testData,
       renderCellValue: getRenderCellValueWrappedMock(testData),
-      getColumnIndexFromId: jest.fn(getColumnIndexFromId),
-      scrollToCell: jest.fn(),
-      shouldOverrideCmdF: jest.fn(),
-      onChange: jest.fn(),
-      onChangeCss: jest.fn(),
-      onChangeToExpectedPage: jest.fn(),
+      getColumnIndexFromId: vi.fn(getColumnIndexFromId),
+      scrollToCell: vi.fn(),
+      shouldOverrideCmdF: vi.fn(),
+      onChange: vi.fn(),
+      onChangeCss: vi.fn(),
+      onChangeToExpectedPage: vi.fn(),
     };
 
     const { rerender } = render(<InTableSearchControl {...initialProps} />);

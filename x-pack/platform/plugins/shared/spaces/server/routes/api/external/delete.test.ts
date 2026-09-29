@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import * as Rx from 'rxjs';
 
@@ -48,7 +51,7 @@ describe('Spaces Public API', () => {
 
     const coreStart = coreMock.createStart();
 
-    const clientService = new SpacesClientService(jest.fn(), 'traditional');
+    const clientService = new SpacesClientService(vi.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -92,17 +95,17 @@ describe('Spaces Public API', () => {
 
   const setupWithCps = async (options: { cpsEnabled: boolean; expression?: string }) => {
     const npreClient: INpreClient = {
-      getNpre: jest.fn().mockResolvedValue(options.expression),
-      canGetNpre: jest.fn().mockResolvedValue(false),
-      putNpre: jest.fn().mockResolvedValue(undefined),
-      deleteNpre: jest.fn().mockResolvedValue(undefined),
-      canPutNpre: jest.fn().mockResolvedValue(true),
+      getNpre: vi.fn().mockResolvedValue(options.expression),
+      canGetNpre: vi.fn().mockResolvedValue(false),
+      putNpre: vi.fn().mockResolvedValue(undefined),
+      deleteNpre: vi.fn().mockResolvedValue(undefined),
+      canPutNpre: vi.fn().mockResolvedValue(true),
     };
 
     const mockCpsStart = {
-      createNpreClient: jest.fn().mockReturnValue(options.cpsEnabled ? npreClient : undefined),
-      getLinkedProjects: jest.fn().mockResolvedValue([]),
-      isCpsActive: jest.fn().mockResolvedValue(false),
+      createNpreClient: vi.fn().mockReturnValue(options.cpsEnabled ? npreClient : undefined),
+      getLinkedProjects: vi.fn().mockResolvedValue([]),
+      isCpsActive: vi.fn().mockResolvedValue(false),
     };
 
     return {
@@ -244,7 +247,7 @@ describe('Spaces Public API', () => {
         cpsEnabled: true,
       });
 
-      (npreClient.deleteNpre as jest.Mock).mockRejectedValue(
+      (npreClient.deleteNpre as Mock).mockRejectedValue(
         new errors.ResponseError({
           statusCode: 404,
           body: {

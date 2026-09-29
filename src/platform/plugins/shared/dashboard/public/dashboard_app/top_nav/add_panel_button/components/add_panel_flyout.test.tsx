@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,18 +20,18 @@ import { EuiThemeProvider } from '@elastic/eui';
 import type { MenuItem } from '../types';
 import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '../../../../dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';
 
-jest.mock('../use_menu_item_groups', () => {
-  const actual = jest.requireActual('../use_menu_item_groups');
+vi.mock('../use_menu_item_groups', async () => {
+  const actual = (await vi.importActual('../use_menu_item_groups'));
   return { onAddPanelClick: actual.onAddPanelClick };
 });
 
-const mockHasAction = jest.fn();
-const mockExecuteAction = jest.fn();
+const mockHasAction = vi.fn();
+const mockExecuteAction = vi.fn();
 
-jest.mock('../../../../services/kibana_services', () => {
+vi.mock('../../../../services/kibana_services', () => {
   return {
     embeddableService: {
-      getAddFromLibraryContentComponent: jest
+      getAddFromLibraryContentComponent: vi
         .fn()
         .mockResolvedValue(() => <div data-test-subj="mockLibraryContent">Library content</div>),
     },
@@ -42,13 +45,16 @@ jest.mock('../../../../services/kibana_services', () => {
   };
 });
 
-const mockUseFeaturedItems = jest.fn((): { featuredItems: MenuItem[]; loading: boolean } => ({
+const mockUseFeaturedItems = vi.fn((): { featuredItems: MenuItem[]; loading: boolean } => ({
   featuredItems: [],
   loading: false,
 }));
-jest.mock('../use_featured_items', () => ({
-  useFeaturedItems: () => mockUseFeaturedItems(),
-}));
+vi.mock('../use_featured_items', () => {
+      const mocked = {
+      useFeaturedItems: () => mockUseFeaturedItems(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ContextWrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiThemeProvider>
@@ -57,7 +63,7 @@ const ContextWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 const mockDashboardApi = {
-  clearOverlays: jest.fn(),
+  clearOverlays: vi.fn(),
 } as unknown as DashboardApi;
 
 describe('AddPanelFlyout', () => {
@@ -68,7 +74,7 @@ describe('AddPanelFlyout', () => {
     });
     mockHasAction.mockReturnValue(false);
     mockExecuteAction.mockClear();
-    (mockDashboardApi.clearOverlays as jest.Mock).mockClear();
+    (mockDashboardApi.clearOverlays as Mock).mockClear();
   });
 
   describe('tabs', () => {
@@ -171,7 +177,7 @@ describe('AddPanelFlyout', () => {
   });
 
   describe('useMenuItemGroups returns results', () => {
-    const onClickMock = jest.fn();
+    const onClickMock = vi.fn();
     // define this outside mock so that the reference doesn't change between renders
     const groups = [
       {

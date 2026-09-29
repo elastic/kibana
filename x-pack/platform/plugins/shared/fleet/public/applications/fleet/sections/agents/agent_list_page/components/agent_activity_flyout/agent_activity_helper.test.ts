@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ActionStatus } from '../../../../../types';
 
 import { getOtherDaysActions, getTodayActions, isScheduledAction } from './agent_activity_helper';
@@ -19,11 +21,11 @@ describe('agent activity helper', () => {
   ] as ActionStatus[];
 
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2022-09-14'));
+    vi.useFakeTimers().setSystemTime(new Date('2022-09-14'));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should filter today actions', () => {

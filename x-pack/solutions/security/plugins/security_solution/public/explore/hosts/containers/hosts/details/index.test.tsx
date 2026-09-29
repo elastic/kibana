@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { ID, useHostDetails } from '.';
@@ -12,22 +15,28 @@ import { useSearchStrategy } from '../../../../../common/containers/use_search_s
 import { useUiSetting } from '../../../../../common/lib/kibana';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
-jest.mock('../../../../../common/containers/use_search_strategy', () => ({
-  useSearchStrategy: jest.fn(),
-}));
-jest.mock('../../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../../common/lib/kibana');
-  return { ...actual, useUiSetting: jest.fn(() => false) };
+vi.mock('../../../../../common/containers/use_search_strategy', () => {
+      const mocked = {
+      useSearchStrategy: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../../../common/lib/kibana'));
+  return { ...actual, useUiSetting: vi.fn(() => false) };
 });
-jest.mock('@kbn/entity-store/public', () => ({
-  FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
-  useEntityStoreEuidApi: jest.fn(() => undefined),
-}));
+vi.mock('@kbn/entity-store/public', () => {
+      const mocked = {
+      FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
+      useEntityStoreEuidApi: vi.fn(() => undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
-const mockUseUiSetting = useUiSetting as jest.Mock;
-const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as jest.Mock;
-const mockSearch = jest.fn();
+const mockUseSearchStrategy = useSearchStrategy as Mock;
+const mockUseUiSetting = useUiSetting as Mock;
+const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as Mock;
+const mockSearch = vi.fn();
 
 const defaultProps = {
   endDate: '2020-07-08T08:20:18.966Z',
@@ -40,7 +49,7 @@ const defaultProps = {
 
 describe('useHostDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseUiSetting.mockReturnValue(false);
     mockUseEntityStoreEuidApi.mockReturnValue(undefined);
     mockUseSearchStrategy.mockReturnValue({
@@ -49,7 +58,7 @@ describe('useHostDetails', () => {
         hostDetails: {},
       },
       search: mockSearch,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       inspect: {},
     });
   });
@@ -132,7 +141,7 @@ describe('useHostDetails', () => {
   it('uses the record-based EUID filter in filterQuery when entity store v2 is enabled', () => {
     mockUseUiSetting.mockReturnValue(true);
     const recordFilter = { bool: { filter: [{ term: { 'host.id': 'host-1' } }] } };
-    const getEuidFilterBasedOnEntityRecord = jest.fn().mockReturnValue(recordFilter);
+    const getEuidFilterBasedOnEntityRecord = vi.fn().mockReturnValue(recordFilter);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
     });
@@ -159,7 +168,7 @@ describe('useHostDetails', () => {
 
   it('falls back to host.name filter when the record-based EUID filter is undefined', () => {
     mockUseUiSetting.mockReturnValue(true);
-    const getEuidFilterBasedOnEntityRecord = jest.fn().mockReturnValue(undefined);
+    const getEuidFilterBasedOnEntityRecord = vi.fn().mockReturnValue(undefined);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
     });
@@ -209,7 +218,7 @@ describe('useHostDetails', () => {
   it('runs the scoped search when a record is present even while entityStoreInitialLoading is true', () => {
     mockUseUiSetting.mockReturnValue(true);
     const recordFilter = { bool: { filter: [{ term: { 'host.id': 'host-1' } }] } };
-    const getEuidFilterBasedOnEntityRecord = jest.fn().mockReturnValue(recordFilter);
+    const getEuidFilterBasedOnEntityRecord = vi.fn().mockReturnValue(recordFilter);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
     });
@@ -237,7 +246,7 @@ describe('useHostDetails', () => {
   it('runs the scoped record-based search once the entity-store record has resolved', () => {
     mockUseUiSetting.mockReturnValue(true);
     const recordFilter = { bool: { filter: [{ term: { 'host.id': 'host-1' } }] } };
-    const getEuidFilterBasedOnEntityRecord = jest.fn().mockReturnValue(recordFilter);
+    const getEuidFilterBasedOnEntityRecord = vi.fn().mockReturnValue(recordFilter);
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
     });

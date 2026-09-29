@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { unmuteRule, unmuteRules } from './unmute';
 
 const http = httpServiceMock.createStartContract();
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('unmuteRules', () => {
   test('should call unmute rule API per rule', async () => {

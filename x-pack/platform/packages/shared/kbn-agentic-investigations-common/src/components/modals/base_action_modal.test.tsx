@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -24,7 +26,7 @@ const renderModal = (onClick: (rationale: string) => void | Promise<void>) => {
       title="Close the investigation?"
       recordId="prop-1"
       rationalePlaceholder="Why?"
-      onClose={jest.fn()}
+      onClose={vi.fn()}
       primaryAction={{ color: 'danger', label: 'Dismiss', onClick }}
     />,
     { wrapper }
@@ -35,7 +37,7 @@ const renderModal = (onClick: (rationale: string) => void | Promise<void>) => {
 describe('BaseActionModal', () => {
   it('disables the button and shows a spinner while the primary action is in flight', async () => {
     let resolveClick: () => void = () => {};
-    const onClick = jest.fn(
+    const onClick = vi.fn(
       () =>
         new Promise<void>((resolve) => {
           resolveClick = resolve;
@@ -57,7 +59,7 @@ describe('BaseActionModal', () => {
   });
 
   it('re-enables the button so the analyst can retry when the primary action rejects', async () => {
-    const onClick = jest.fn().mockRejectedValue(new Error('boom'));
+    const onClick = vi.fn().mockRejectedValue(new Error('boom'));
     renderModal(onClick);
 
     const button = screen.getByRole('button', { name: 'Dismiss' });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
@@ -68,7 +70,7 @@ const SUTProvider = ({
           getRolesAPIClient: getRolesAPIClientMock,
           getPrivilegesAPIClient: getPrivilegeAPIClientMock,
           getSecurityLicense: getSecurityLicenseMock,
-          navigateToUrl: jest.fn(),
+          navigateToUrl: vi.fn(),
           capabilities,
           enableSecurityLink: '',
         }}

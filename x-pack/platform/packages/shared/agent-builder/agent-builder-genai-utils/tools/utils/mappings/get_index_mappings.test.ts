@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getIndexMappings } from './get_index_mappings';
 import { cleanupMapping } from './cleanup_mapping';
 
-jest.mock('./cleanup_mapping');
+vi.mock('./cleanup_mapping');
 
-const cleanupMappingMock = cleanupMapping as jest.MockedFunction<typeof cleanupMapping>;
+const cleanupMappingMock = cleanupMapping as MockedFunction<typeof cleanupMapping>;
 
 describe('getIndexMappings', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedClass } from 'vitest';
+
 import type { TreeOptions } from './fetch';
 import {
   Fetcher,
@@ -25,9 +28,9 @@ import type {
   ResolverSchema,
 } from '../../../../../../common/endpoint/types';
 
-jest.mock('../queries/descendants');
-jest.mock('../queries/lifecycle');
-jest.mock('../queries/stats');
+vi.mock('../queries/descendants');
+vi.mock('../queries/lifecycle');
+vi.mock('../queries/stats');
 
 function formatResponse(results: FieldsObject[], schema: ResolverSchema): ResolverNode[] {
   return results.map((node) => {
@@ -65,9 +68,9 @@ describe('fetcher test', () => {
     agentId: 'agent.id',
   };
 
-  let client: jest.Mocked<IScopedClusterClient>;
+  let client: Mocked<IScopedClusterClient>;
   beforeAll(() => {
-    StatsQuery.prototype.search = jest.fn().mockImplementation(async () => {
+    StatsQuery.prototype.search = vi.fn().mockImplementation(async () => {
       return {};
     });
   });
@@ -77,7 +80,7 @@ describe('fetcher test', () => {
 
   describe('descendants', () => {
     it('correctly exists loop when the search returns no results', async () => {
-      DescendantsQuery.prototype.search = jest.fn().mockImplementationOnce(async () => {
+      DescendantsQuery.prototype.search = vi.fn().mockImplementationOnce(async () => {
         return [];
       });
       const options: TreeOptions = {
@@ -159,7 +162,7 @@ describe('fetcher test', () => {
           parent: '3',
         },
       ];
-      DescendantsQuery.prototype.search = jest
+      DescendantsQuery.prototype.search = vi
         .fn()
         .mockImplementationOnce(async () => {
           return level1;
@@ -190,7 +193,7 @@ describe('fetcher test', () => {
 
   describe('ancestors', () => {
     it('correctly exits loop when the search returns no results', async () => {
-      LifecycleQuery.prototype.search = jest.fn().mockImplementationOnce(async () => {
+      LifecycleQuery.prototype.search = vi.fn().mockImplementationOnce(async () => {
         return [];
       });
       const options: TreeOptions = {
@@ -215,7 +218,7 @@ describe('fetcher test', () => {
     });
 
     it('correctly exits loop when the options specify no ancestors', async () => {
-      LifecycleQuery.prototype.search = jest.fn().mockImplementationOnce(async () => {
+      LifecycleQuery.prototype.search = vi.fn().mockImplementationOnce(async () => {
         throw new Error('should not have called this');
       });
       const options: TreeOptions = {
@@ -240,7 +243,7 @@ describe('fetcher test', () => {
     });
 
     it('correctly returns the ancestors when the number of levels has been reached', async () => {
-      LifecycleQuery.prototype.search = jest
+      LifecycleQuery.prototype.search = vi
         .fn()
         .mockImplementationOnce(async () => {
           return [
@@ -284,7 +287,7 @@ describe('fetcher test', () => {
     });
 
     it('correctly adds name field to response', async () => {
-      LifecycleQuery.prototype.search = jest
+      LifecycleQuery.prototype.search = vi
         .fn()
         .mockImplementationOnce(async () => {
           return [
@@ -345,7 +348,7 @@ describe('fetcher test', () => {
         id: '2',
         parent: '1',
       };
-      LifecycleQuery.prototype.search = jest
+      LifecycleQuery.prototype.search = vi
         .fn()
         .mockImplementationOnce(async () => {
           return [node3];
@@ -795,7 +798,7 @@ describe('fetcher test', () => {
         },
       ];
 
-      DescendantsQuery.prototype.search = jest
+      DescendantsQuery.prototype.search = vi
         .fn()
         .mockImplementationOnce(async () => {
           return level1Agent1;
@@ -850,8 +853,8 @@ describe('fetcher test', () => {
 
   describe('stats query options', () => {
     it('forwards timeRange and shouldExcludeColdAndFrozenTiers to the StatsQuery constructor', async () => {
-      LifecycleQuery.prototype.search = jest.fn().mockImplementationOnce(async () => []);
-      DescendantsQuery.prototype.search = jest.fn().mockImplementationOnce(async () => []);
+      LifecycleQuery.prototype.search = vi.fn().mockImplementationOnce(async () => []);
+      DescendantsQuery.prototype.search = vi.fn().mockImplementationOnce(async () => []);
 
       const timeRange = { from: 'now-1d', to: 'now' };
       const options: TreeOptions = {
@@ -869,7 +872,7 @@ describe('fetcher test', () => {
       const fetcher = new Fetcher(client);
       await fetcher.tree(options);
 
-      const StatsQueryMock = StatsQuery as jest.MockedClass<typeof StatsQuery>;
+      const StatsQueryMock = StatsQuery as MockedClass<typeof StatsQuery>;
       const lastCallArgs = StatsQueryMock.mock.calls[StatsQueryMock.mock.calls.length - 1][0];
       expect(lastCallArgs).toMatchObject({
         timeRange,

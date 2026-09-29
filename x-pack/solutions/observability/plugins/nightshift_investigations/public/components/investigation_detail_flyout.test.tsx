@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -39,7 +41,7 @@ const renderFlyout = ({
           investigation={inv}
           isLoading={false}
           error={null}
-          onClose={jest.fn()}
+          onClose={vi.fn()}
           progress={progress}
         />
       </I18nProvider>

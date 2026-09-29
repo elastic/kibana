@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,7 +14,7 @@ import { templatesConfigurationMock } from '../../containers/mock';
 import { TemplateSelector } from './templates';
 
 describe('TemplateSelector', () => {
-  const onTemplateChange = jest.fn();
+  const onTemplateChange = vi.fn();
 
   it('renders correctly', async () => {
     render(

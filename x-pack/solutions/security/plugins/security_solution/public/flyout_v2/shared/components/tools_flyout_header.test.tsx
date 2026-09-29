@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, renderHook, waitFor } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -12,11 +14,14 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ToolsFlyoutHeader } from './tools_flyout_header';
 import { TOOLS_FLYOUT_HEADER_TEST_ID, TOOLS_FLYOUT_HEADER_TIMESTAMP_TEST_ID } from './test_ids';
 
-jest.mock('./tools_flyout_title', () => ({
-  ToolsFlyoutTitle: ({ label }: { label: string }) => (
-    <div data-test-subj="mockToolsFlyoutTitle">{label}</div>
-  ),
-}));
+vi.mock('./tools_flyout_title', () => {
+      const mocked = {
+      ToolsFlyoutTitle: ({ label }: { label: string }) => (
+        <div data-test-subj="mockToolsFlyoutTitle">{label}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderHeader = (props: Partial<Parameters<typeof ToolsFlyoutHeader>[0]> = {}) =>
   render(
@@ -26,7 +31,7 @@ const renderHeader = (props: Partial<Parameters<typeof ToolsFlyoutHeader>[0]> = 
   );
 
 const sourceProps = {
-  onTitleClick: jest.fn(),
+  onTitleClick: vi.fn(),
   label: 'Test Rule',
   iconType: 'warning',
 };

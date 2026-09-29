@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
@@ -12,12 +14,12 @@ import { HeaderField, contentTypes } from './header_field';
 import { CodeEditorMode } from '../types';
 
 describe('<HeaderField />', () => {
-  const onChange = jest.fn();
-  const onBlur = jest.fn();
+  const onChange = vi.fn();
+  const onBlur = vi.fn();
   const defaultValue = {};
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('renders HeaderField', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { FeedbackPlugin } from './plugin';
@@ -14,12 +16,15 @@ import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 
 let lastMounted: React.ReactNode;
 
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: (node: React.ReactElement) => {
-    lastMounted = node;
-    return () => () => undefined;
-  },
-}));
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = {
+      toMountPoint: (node: React.ReactElement) => {
+        lastMounted = node;
+        return () => () => undefined;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const findGetAppDetails = (
   node: React.ReactNode
@@ -107,7 +112,7 @@ describe('Feedback Plugin', () => {
 
   it('unregisters the feedback handler when opt-in becomes false', () => {
     enableFeedback();
-    const unregister = jest.fn();
+    const unregister = vi.fn();
     coreStartMock.chrome.help.registerFeedbackHandler.mockReturnValue(unregister);
 
     startPlugin();

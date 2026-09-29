@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ShareModal } from './share_modal';
@@ -12,21 +14,24 @@ import { TestProviders } from '../../mock/test_providers/test_providers';
 import { welcomeConvo } from '../../mock/conversation';
 import type { IToasts } from '@kbn/core-notifications-browser';
 
-const mockRefetchCurrentConversation = jest.fn();
-const mockRefetchCurrentUserConversations = jest.fn();
-const mockSetIsModalOpen = jest.fn();
+const mockRefetchCurrentConversation = vi.fn();
+const mockRefetchCurrentUserConversations = vi.fn();
+const mockSetIsModalOpen = vi.fn();
 
-const mockCopyConversationUrl = jest.fn();
-const mockUpdateConversationUsers = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
+const mockCopyConversationUrl = vi.fn();
+const mockUpdateConversationUsers = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
 
-jest.mock('../use_conversation', () => ({
-  useConversation: () => ({
-    copyConversationUrl: mockCopyConversationUrl,
-    updateConversationUsers: mockUpdateConversationUsers,
-  }),
-}));
+vi.mock('../use_conversation', () => {
+      const mocked = {
+      useConversation: () => ({
+        copyConversationUrl: mockCopyConversationUrl,
+        updateConversationUsers: mockUpdateConversationUsers,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const toastsMock = { addSuccess: mockAddSuccess, addError: mockAddError } as unknown as IToasts;
 
@@ -38,7 +43,7 @@ const testProps = {
 };
 describe('ShareModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders modal with conversation title', () => {

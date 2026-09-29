@@ -7,37 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { WorkflowYamlPreview } from './workflow_yaml_preview';
 import { WorkflowsUiServicesProvider } from '../../../context';
 import { createMockWorkflowsUiServices } from '../../../context/__mocks__/mocks';
 
-jest.mock('../../../hooks/use_workflows_monaco_theme', () => ({
-  useWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
-}));
+vi.mock('../../../hooks/use_workflows_monaco_theme', () => {
+      const mocked = {
+      useWorkflowsMonacoTheme: vi.fn(),
+      WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/monaco', () => ({
-  monaco: {
-    editor: { TrackedRangeStickiness: { NeverGrowsWhenTypingAtEdges: 0 } },
-  },
-}));
+vi.mock('@kbn/monaco', () => {
+      const mocked = {
+      monaco: {
+        editor: { TrackedRangeStickiness: { NeverGrowsWhenTypingAtEdges: 0 } },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetTypeIconDataUrl = jest.fn(
+const mockGetTypeIconDataUrl = vi.fn(
   async (_params: { type: string; kind: string }) => 'data:image/svg+xml;base64,AAA'
 );
-jest.mock('./get_type_icon_data_url', () => ({
-  getTypeIconDataUrl: (params: { type: string; kind: string }) => mockGetTypeIconDataUrl(params),
-}));
+vi.mock('./get_type_icon_data_url', () => {
+      const mocked = {
+      getTypeIconDataUrl: (params: { type: string; kind: string }) => mockGetTypeIconDataUrl(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCreateDecorationsCollection = jest.fn((_decorations: unknown[]) => ({
-  clear: jest.fn(),
+const mockCreateDecorationsCollection = vi.fn((_decorations: unknown[]) => ({
+  clear: vi.fn(),
 }));
 
 // Mock CodeEditor: renders the value and invokes editorDidMount with a fake
 // editor whose model is derived from the value, so decoration logic runs.
-jest.mock('@kbn/code-editor', () => {
+vi.mock('@kbn/code-editor', () => {
   const createFakeModel = (text: string) => {
     const lines = text.split('\n');
     return {
@@ -57,7 +68,7 @@ jest.mock('@kbn/code-editor', () => {
   };
   return {
     CodeEditor: ({ value, editorDidMount, dataTestSubj }: any) => {
-      const { useEffect: useEffectImpl } = jest.requireActual('react');
+      const { useEffect: useEffectImpl } = require('react');
       useEffectImpl(() => {
         const model = createFakeModel(value);
         editorDidMount({
@@ -92,7 +103,7 @@ const renderPreview = (yaml = YAML) =>
 
 describe('WorkflowYamlPreview', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the read-only editor with the provided YAML', () => {

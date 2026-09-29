@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { render, fireEvent, screen } from '@testing-library/react';
@@ -15,10 +17,13 @@ import { MULTI_VALUE_CELL_FIRST_ITEM_VALUE, MULTI_VALUE_CELL_MORE_BUTTON } from 
 const RENDER_ITEM_TEST_ID = 'item-renderer-test-id';
 
 // Mock EUI theme hook
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: () => ({ euiTheme: { size: { s: '8px' } } }),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiTheme: () => ({ euiTheme: { size: { s: '8px' } } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MultiValueCellPopover', () => {
   const mockObject = { id: '1' };

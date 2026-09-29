@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import {
   ATTACK_DISCOVERY_GENERATIONS,
   ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
@@ -23,33 +26,42 @@ import React from 'react';
 import { useDismissAttackDiscoveryGeneration } from '.';
 import { TestProviders } from '../../../common/mock/test_providers';
 
-const mockAddSuccessToast = jest.fn();
-const mockAddError = jest.fn();
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: (): MockUseAppToasts => ({
-    addSuccessToast: (...args: unknown[]) => mockAddSuccessToast(...args),
-    addError: (...args: unknown[]) => mockAddError(...args),
-  }),
-}));
+const mockAddSuccessToast = vi.fn();
+const mockAddError = vi.fn();
+vi.mock('../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: (): MockUseAppToasts => ({
+        addSuccessToast: (...args: unknown[]) => mockAddSuccessToast(...args),
+        addError: (...args: unknown[]) => mockAddError(...args),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockInvalidateGenerations = jest.fn();
-jest.mock('../use_get_attack_discovery_generations', () => ({
-  useInvalidateGetAttackDiscoveryGenerations: () => mockInvalidateGenerations,
-}));
+const mockInvalidateGenerations = vi.fn();
+vi.mock('../use_get_attack_discovery_generations', () => {
+      const mocked = {
+      useInvalidateGetAttackDiscoveryGenerations: () => mockInvalidateGenerations,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    translate: jest.fn((key, { defaultMessage }) => defaultMessage),
-    getIsInitialized: jest.fn(() => true),
-    getTranslation: jest.fn(() => ({
-      messages: {},
-      formats: {},
-      locale: 'en',
-      defaultLocale: 'en',
-      defaultFormats: {},
-    })),
-  },
-}));
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: {
+        translate: vi.fn((key, { defaultMessage }) => defaultMessage),
+        getIsInitialized: vi.fn(() => true),
+        getTranslation: vi.fn(() => ({
+          messages: {},
+          formats: {},
+          locale: 'en',
+          defaultLocale: 'en',
+          defaultFormats: {},
+        })),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 interface MockHttp {
   post: (...args: unknown[]) => unknown;
@@ -57,7 +69,7 @@ interface MockHttp {
 }
 
 interface MockKibanaServices {
-  get: jest.Mock<
+  get: Mock<
     {
       http: MockHttp;
     },
@@ -72,31 +84,31 @@ interface MockUseKibanaReturn {
   };
 }
 
-const mockHttpFetch = jest.fn();
-jest.mock(
+const mockHttpFetch = vi.fn();
+vi.mock(
   '../../../common/lib/kibana',
-  (): {
-    KibanaServices: MockKibanaServices;
-    useKibana: jest.Mock<MockUseKibanaReturn, []>;
-  } => ({
-    KibanaServices: {
-      get: jest.fn().mockReturnValue({
-        http: {
-          post: (...args: unknown[]) => mockHttpFetch(...args),
-          fetch: (...args: unknown[]) => mockHttpFetch(...args),
+  () => {
+      const mocked = {
+        KibanaServices: {
+          get: vi.fn().mockReturnValue({
+            http: {
+              post: (...args: unknown[]) => mockHttpFetch(...args),
+              fetch: (...args: unknown[]) => mockHttpFetch(...args),
+            },
+          }),
         },
-      }),
-    },
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        http: {
-          post: (...args: unknown[]) => mockHttpFetch(...args),
-          fetch: (...args: unknown[]) => mockHttpFetch(...args),
-        },
-        upselling: {}, // Add any other required services here
-      },
-    }),
-  })
+        useKibana: vi.fn().mockReturnValue({
+          services: {
+            http: {
+              post: (...args: unknown[]) => mockHttpFetch(...args),
+              fetch: (...args: unknown[]) => mockHttpFetch(...args),
+            },
+            upselling: {}, // Add any other required services here
+          },
+        }),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 interface MockUseAppToasts {
@@ -104,16 +116,22 @@ interface MockUseAppToasts {
   addError: (...args: unknown[]) => unknown;
 }
 
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: (): MockUseAppToasts => ({
-    addSuccessToast: (...args: unknown[]) => mockAddSuccessToast(...args),
-    addError: (...args: unknown[]) => mockAddError(...args),
-  }),
-}));
+vi.mock('../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: (): MockUseAppToasts => ({
+        addSuccessToast: (...args: unknown[]) => mockAddSuccessToast(...args),
+        addError: (...args: unknown[]) => mockAddError(...args),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../use_get_attack_discovery_generations', () => ({
-  useInvalidateGetAttackDiscoveryGenerations: () => mockInvalidateGenerations,
-}));
+vi.mock('../use_get_attack_discovery_generations', () => {
+      const mocked = {
+      useInvalidateGetAttackDiscoveryGenerations: () => mockInvalidateGenerations,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useDismissAttackDiscoveryGeneration', () => {
   beforeEach(() => {
@@ -128,7 +146,7 @@ describe('useDismissAttackDiscoveryGeneration', () => {
   });
 
   describe('API calls', () => {
-    const spy = useMutation as unknown as jest.MockedFn<typeof useMutation>;
+    const spy = useMutation as unknown as MockedFunction<typeof useMutation>;
 
     beforeEach(() => {
       mockHttpFetch.mockResolvedValue({});

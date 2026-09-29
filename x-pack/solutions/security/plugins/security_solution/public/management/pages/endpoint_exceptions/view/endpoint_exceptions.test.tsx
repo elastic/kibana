@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ENDPOINT_EXCEPTIONS_PATH } from '../../../../../common/constants';
@@ -18,11 +21,11 @@ import { endpointExceptionsPerPolicyOptInAllHttpMocks } from '../../../mocks/end
 import userEvent from '@testing-library/user-event';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 
-jest.mock('../../../../common/components/user_privileges');
-const mockUserPrivileges = useUserPrivileges as jest.Mock;
+vi.mock('../../../../common/components/user_privileges');
+const mockUserPrivileges = useUserPrivileges as Mock;
 
-jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
-const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
+vi.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
+const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as Mock;
 
 describe('When on the endpoint exceptions page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -53,7 +56,7 @@ describe('When on the endpoint exceptions page', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('And no data exists', () => {

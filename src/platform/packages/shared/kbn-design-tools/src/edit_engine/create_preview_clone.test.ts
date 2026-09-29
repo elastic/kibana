@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createPreviewClone } from './create_preview_clone';
 import {
   DEVTOOL_HIDDEN_ATTR,
@@ -37,7 +39,7 @@ describe('createPreviewClone', () => {
 
     // Mock scrollWidth on any clone that gets appended to body during measurement
     const origAppendChild = document.body.appendChild.bind(document.body);
-    jest.spyOn(document.body, 'appendChild').mockImplementation((node: Node) => {
+    vi.spyOn(document.body, 'appendChild').mockImplementation((node: Node) => {
       const result = origAppendChild(node);
       if (node instanceof HTMLElement && node !== target) {
         Object.defineProperty(node, 'scrollWidth', { value: 250, configurable: true });
@@ -49,7 +51,7 @@ describe('createPreviewClone', () => {
 
     expect(clone.style.minWidth).toBe('250px');
 
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should return a wrapper with the clone inside', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,43 +17,58 @@ import {
   createMockQueryStreamDefinition,
 } from '../stream_management/data_management/shared/mocks';
 
-const mockUseStreamDetail = jest.fn();
-const mockUseStreamsPrivileges = jest.fn();
-const mockUpdateStream = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
-const mockRefresh = jest.fn();
+const mockUseStreamDetail = vi.fn();
+const mockUseStreamsPrivileges = vi.fn();
+const mockUpdateStream = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
+const mockRefresh = vi.fn();
 
-jest.mock('../../hooks/use_stream_detail', () => ({
-  useStreamDetail: () => mockUseStreamDetail(),
-}));
+vi.mock('../../hooks/use_stream_detail', () => {
+      const mocked = {
+      useStreamDetail: () => mockUseStreamDetail(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_streams_privileges', () => ({
-  useStreamsPrivileges: () => mockUseStreamsPrivileges(),
-}));
+vi.mock('../../hooks/use_streams_privileges', () => {
+      const mocked = {
+      useStreamsPrivileges: () => mockUseStreamsPrivileges(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    core: {
-      notifications: {
-        toasts: { addSuccess: mockAddSuccess, addError: mockAddError },
-      },
-    },
-  }),
-}));
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        core: {
+          notifications: {
+            toasts: { addSuccess: mockAddSuccess, addError: mockAddError },
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_update_streams', () => ({
-  useUpdateStreams: () => mockUpdateStream,
-}));
+vi.mock('../../hooks/use_update_streams', () => {
+      const mocked = {
+      useUpdateStreams: () => mockUpdateStream,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_generate_description', () => ({
-  useGenerateDescription: () => ({
-    generate: jest.fn().mockResolvedValue(null),
-    isLoading: false,
-    isAvailable: false,
-    hasConnector: false,
-  }),
-}));
+vi.mock('../../hooks/use_generate_description', () => {
+      const mocked = {
+      useGenerateDescription: () => ({
+        generate: vi.fn().mockResolvedValue(null),
+        isLoading: false,
+        isAvailable: false,
+        hasConnector: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
@@ -81,7 +98,7 @@ const draftDefinitionWithDescription = (description: string) => {
 
 describe('AboutPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseStreamsPrivileges.mockReturnValue({ ui: { manage: true } });
     mockUpdateStream.mockResolvedValue(undefined);
   });

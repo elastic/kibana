@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useLatestFindingsGrouping } from './use_latest_findings_grouping';
@@ -13,18 +16,21 @@ import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/sr
 import { getGroupingQuery } from '@kbn/grouping';
 import { useGroupedFindings } from './use_grouped_findings';
 
-jest.mock('../../../components/cloud_security_grouping');
-jest.mock('../../../common/contexts/data_view_context');
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api');
-jest.mock('@kbn/grouping', () => ({
-  getGroupingQuery: jest.fn().mockImplementation((params) => {
-    return {
-      query: { bool: {} },
+vi.mock('../../../components/cloud_security_grouping');
+vi.mock('../../../common/contexts/data_view_context');
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api');
+vi.mock('@kbn/grouping', () => {
+      const mocked = {
+      getGroupingQuery: vi.fn().mockImplementation((params) => {
+        return {
+          query: { bool: {} },
+        };
+      }),
+      parseGroupingQuery: vi.fn().mockReturnValue({}),
     };
-  }),
-  parseGroupingQuery: jest.fn().mockReturnValue({}),
-}));
-jest.mock('./use_grouped_findings');
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_grouped_findings');
 
 describe('useLatestFindingsGrouping', () => {
   const mockGroupPanelRenderer = (
@@ -33,15 +39,15 @@ describe('useLatestFindingsGrouping', () => {
     nullGroupMessage?: string,
     isLoading?: boolean
   ) => <div>Mock Group Panel Renderer</div>;
-  const mockGetGroupStats = jest.fn();
+  const mockGetGroupStats = vi.fn();
 
   beforeEach(() => {
-    (useCloudSecurityGrouping as jest.Mock).mockReturnValue({
+    (useCloudSecurityGrouping as Mock).mockReturnValue({
       grouping: { selectedGroups: ['cloud.account.id'] },
     });
-    (useDataViewContext as jest.Mock).mockReturnValue({ dataView: {} });
-    (useGetCspBenchmarkRulesStatesApi as jest.Mock).mockReturnValue({ data: {} });
-    (useGroupedFindings as jest.Mock).mockReturnValue({
+    (useDataViewContext as Mock).mockReturnValue({ dataView: {} });
+    (useGetCspBenchmarkRulesStatesApi as Mock).mockReturnValue({ data: {} });
+    (useGroupedFindings as Mock).mockReturnValue({
       data: {},
       isFetching: false,
     });

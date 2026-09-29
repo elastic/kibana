@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithReduxStore } from '../../../mocks';
@@ -12,7 +14,7 @@ import { FlyoutWrapper } from './flyout_wrapper';
 import type { FlyoutWrapperProps } from './types';
 
 function mountFlyoutWrapper(propsOverrides: Partial<FlyoutWrapperProps> = {}) {
-  const onCancel = propsOverrides.onCancel ?? jest.fn();
+  const onCancel = propsOverrides.onCancel ?? vi.fn();
   const result = renderWithReduxStore(
     <FlyoutWrapper
       isInlineFlyoutVisible
@@ -21,8 +23,8 @@ function mountFlyoutWrapper(propsOverrides: Partial<FlyoutWrapperProps> = {}) {
       isNewPanel
       isSaveable
       onCancel={onCancel}
-      navigateToLensEditor={jest.fn()}
-      onApply={jest.fn()}
+      navigateToLensEditor={vi.fn()}
+      onApply={vi.fn()}
       {...propsOverrides}
     >
       <div>Test</div>
@@ -41,8 +43,8 @@ function mountFlyoutWrapper(propsOverrides: Partial<FlyoutWrapperProps> = {}) {
           isNewPanel
           isSaveable
           onCancel={onCancel}
-          navigateToLensEditor={jest.fn()}
-          onApply={jest.fn()}
+          navigateToLensEditor={vi.fn()}
+          onApply={vi.fn()}
           {...propsOverrides}
           {...props}
         >

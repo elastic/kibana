@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
 import execa from 'execa';
 import type { Overwrite } from 'utility-types';
 import type { ChildProcess } from 'child_process';
@@ -17,8 +20,8 @@ import { getProcessId } from './get_process_id';
 const INSPECTOR_PORT = '9229';
 
 // Use the real execa, but spy on `command` to observe calls in tests
-jest.mock('execa', () => {
-  const actual: typeof execa = jest.requireActual('execa');
+vi.mock('execa', () => {
+  const actual: typeof execa = require('execa');
 
   const mocked = {
     ...actual,
@@ -32,7 +35,7 @@ jest.mock('execa', () => {
     default: actual,
   };
 
-  module.command = module.default.command = jest
+  module.command = module.default.command = vi
     .fn()
     .mockImplementation((...args: Parameters<ExecaMock['command']>) => {
       if (args[0].includes('speedscope')) {
@@ -44,20 +47,23 @@ jest.mock('execa', () => {
   return module;
 });
 
-jest.mock('fs', () => ({
-  promises: {
-    writeFile: jest.fn(),
-    mkdtemp: jest.fn().mockImplementation(() => '/foo'),
-    readFile: jest.fn(),
-  },
-}));
+vi.mock('fs', () => {
+      const mocked = {
+      promises: {
+        writeFile: vi.fn(),
+        mkdtemp: vi.fn().mockImplementation(() => '/foo'),
+        readFile: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Create a properly typed mock instance of fs/promises
-const mockFs = jest.mocked(fs);
+const mockFs = vi.mocked(fs);
 
 type ExecaMock = Overwrite<
   typeof execa,
-  { command: jest.MockedFunction<(typeof execa)['command']> }
+  { command: MockedFunction<(typeof execa)['command']> }
 >;
 
 const mockedExeca = execa as unknown as ExecaMock;
@@ -81,7 +87,7 @@ function runProfilerWithFlags(flags: Partial<ProfilerCliFlags>) {
       'inspector-port': INSPECTOR_PORT,
       ...flags,
     },
-    addCleanupTask: jest.fn(() => {}),
+    addCleanupTask: vi.fn(() => {}),
     log: new ToolingLog({
       level: 'verbose',
       writeTo: {

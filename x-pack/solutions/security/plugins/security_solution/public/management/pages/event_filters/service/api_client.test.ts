@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { EventFiltersApiClient } from './api_client';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -12,16 +15,16 @@ import { SUGGESTIONS_INTERNAL_ROUTE } from '../../../../../common/endpoint/const
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
 describe('EventFiltersApiClient', () => {
-  let fakeHttpServices: jest.Mocked<HttpSetup>;
+  let fakeHttpServices: Mocked<HttpSetup>;
   let eventFiltersApiClient: EventFiltersApiClient;
 
   beforeAll(() => {
-    fakeHttpServices = coreMock.createStart().http as jest.Mocked<HttpSetup>;
+    fakeHttpServices = coreMock.createStart().http as Mocked<HttpSetup>;
     eventFiltersApiClient = new EventFiltersApiClient(fakeHttpServices);
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call the SUGGESTIONS_INTERNAL_ROUTE with correct URL and body', async () => {

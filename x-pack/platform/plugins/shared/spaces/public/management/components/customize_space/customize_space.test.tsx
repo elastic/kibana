@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { asSpaceId } from '@kbn/core-spaces-common';
@@ -25,7 +27,7 @@ test('renders correctly', () => {
       }}
       editingExistingSpace={false}
       validator={validator}
-      onChange={jest.fn()}
+      onChange={vi.fn()}
     />
   );
   expect(wrapper).toMatchSnapshot();
@@ -40,7 +42,7 @@ test('allows title prop', () => {
     customAvatarInitials: true,
     customAvatarColor: true,
   };
-  const changeHandler = jest.fn();
+  const changeHandler = vi.fn();
 
   const wrapper = shallowWithIntl(
     <CustomizeSpace
@@ -61,7 +63,7 @@ test('updates identifier, initials and color when name is changed', () => {
     initials: 'S1',
     color: '#ABCDEF',
   };
-  const changeHandler = jest.fn();
+  const changeHandler = vi.fn();
 
   const wrapper = mountWithIntl(
     <CustomizeSpace
@@ -92,7 +94,7 @@ test('does not update custom identifier, initials or color name is changed', () 
     customAvatarInitials: true,
     customAvatarColor: true,
   };
-  const changeHandler = jest.fn();
+  const changeHandler = vi.fn();
 
   const wrapper = mountWithIntl(
     <CustomizeSpace

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { UnauthorizedError } from '@kbn/es-errors';
 import type { SetAuthHeaders } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -22,15 +25,15 @@ const createUnauthorizedError = (): UnauthorizedError => {
 };
 
 describe('createInternalErrorHandler', () => {
-  let setAuthHeaders: jest.MockedFunction<SetAuthHeaders>;
+  let setAuthHeaders: MockedFunction<SetAuthHeaders>;
 
   beforeEach(() => {
-    setAuthHeaders = jest.fn();
+    setAuthHeaders = vi.fn();
   });
 
   it('calls and returns the result from the provided handler', async () => {
     const handlerResponse = toolkit.retry({ authHeaders: { foo: 'bar' } });
-    const handler = jest.fn().mockReturnValue(handlerResponse);
+    const handler = vi.fn().mockReturnValue(handlerResponse);
     const request = httpServerMock.createKibanaRequest();
 
     const internalHandler = createInternalErrorHandler({
@@ -49,7 +52,7 @@ describe('createInternalErrorHandler', () => {
 
   it('calls `setAuthHeaders` when the handler returns `retry`', async () => {
     const handlerResponse = toolkit.retry({ authHeaders: { foo: 'bar' } });
-    const handler = jest.fn().mockReturnValue(handlerResponse);
+    const handler = vi.fn().mockReturnValue(handlerResponse);
     const request = httpServerMock.createKibanaRequest();
 
     const internalHandler = createInternalErrorHandler({
@@ -67,7 +70,7 @@ describe('createInternalErrorHandler', () => {
 
   it('does not call `setAuthHeaders` when the handler returns `notHandled`', async () => {
     const handlerResponse = toolkit.notHandled();
-    const handler = jest.fn().mockReturnValue(handlerResponse);
+    const handler = vi.fn().mockReturnValue(handlerResponse);
     const request = httpServerMock.createKibanaRequest();
 
     const internalHandler = createInternalErrorHandler({
@@ -83,7 +86,7 @@ describe('createInternalErrorHandler', () => {
   });
 
   it('returns `notHandled` if the handler throws', async () => {
-    const handler = jest.fn().mockImplementation(() => {
+    const handler = vi.fn().mockImplementation(() => {
       throw new Error('woups');
     });
     const request = httpServerMock.createKibanaRequest();
@@ -102,7 +105,7 @@ describe('createInternalErrorHandler', () => {
 
   it('handles asynchronous handlers', async () => {
     const handlerResponse = toolkit.retry({ authHeaders: { foo: 'bar' } });
-    const handler = jest.fn().mockResolvedValue(handlerResponse);
+    const handler = vi.fn().mockResolvedValue(handlerResponse);
     const request = httpServerMock.createKibanaRequest();
 
     const internalHandler = createInternalErrorHandler({
@@ -120,7 +123,7 @@ describe('createInternalErrorHandler', () => {
   });
 
   it('returns `notHandled` without calling the provided handler for bare `{ headers }` fake requests', async () => {
-    const handler = jest.fn();
+    const handler = vi.fn();
     const fakeRequest = {
       headers: {
         authorization: 'foobar',
@@ -141,7 +144,7 @@ describe('createInternalErrorHandler', () => {
 
   it('calls the provided handler for fake `CoreKibanaRequest`s', async () => {
     const handlerResponse = toolkit.retry({ authHeaders: { authorization: 'Bearer fresh' } });
-    const handler = jest.fn().mockReturnValue(handlerResponse);
+    const handler = vi.fn().mockReturnValue(handlerResponse);
     const request = httpServerMock.createFakeKibanaRequest({
       headers: { authorization: 'Bearer stale' },
     });
@@ -161,7 +164,7 @@ describe('createInternalErrorHandler', () => {
   });
 
   it('does not call `setAuthHeaders` when the handler returns `retry` for a fake `CoreKibanaRequest`', async () => {
-    const handler = jest
+    const handler = vi
       .fn()
       .mockReturnValue(toolkit.retry({ authHeaders: { authorization: 'Bearer fresh' } }));
     const request = httpServerMock.createFakeKibanaRequest({
@@ -181,11 +184,11 @@ describe('createInternalErrorHandler', () => {
 
   it('checks the presence of a registered handler for each error', async () => {
     const handlerResponse = toolkit.retry({ authHeaders: { foo: 'bar' } });
-    const handler = jest.fn().mockResolvedValue(handlerResponse);
+    const handler = vi.fn().mockResolvedValue(handlerResponse);
 
     const request = httpServerMock.createKibanaRequest();
 
-    const getHandler = jest.fn().mockReturnValueOnce(undefined).mockReturnValueOnce(handler);
+    const getHandler = vi.fn().mockReturnValueOnce(undefined).mockReturnValueOnce(handler);
 
     const internalHandler = createInternalErrorHandler({
       getHandler,

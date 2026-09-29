@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, waitFor, within } from '@testing-library/react';
 
@@ -13,22 +15,25 @@ import type { EnrollmentAPIKey } from '../../../../types';
 
 import { TokenActions } from './token_actions';
 
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
-const mockSendDeleteOneEnrollmentAPIKey = jest.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
+const mockSendDeleteOneEnrollmentAPIKey = vi.fn();
 
-jest.mock('../../../../hooks', () => ({
-  ...jest.requireActual('../../../../hooks'),
-  useStartServices: jest.fn().mockReturnValue({
-    notifications: {
-      toasts: {
-        addSuccess: (...args: unknown[]) => mockAddSuccess(...args),
-        addError: (...args: unknown[]) => mockAddError(...args),
-      },
-    },
-  }),
-  sendDeleteOneEnrollmentAPIKey: (...args: unknown[]) => mockSendDeleteOneEnrollmentAPIKey(...args),
-}));
+vi.mock('../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../hooks')),
+      useStartServices: vi.fn().mockReturnValue({
+        notifications: {
+          toasts: {
+            addSuccess: (...args: unknown[]) => mockAddSuccess(...args),
+            addError: (...args: unknown[]) => mockAddError(...args),
+          },
+        },
+      }),
+      sendDeleteOneEnrollmentAPIKey: (...args: unknown[]) => mockSendDeleteOneEnrollmentAPIKey(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const MOCK_API_KEY: EnrollmentAPIKey = {
   id: 'key-1',
@@ -61,12 +66,12 @@ async function clickConfirmButton(result: RenderResult) {
 
 describe('TokenActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows a success toast after revoking a token', async () => {
     mockSendDeleteOneEnrollmentAPIKey.mockResolvedValue({ data: {} });
-    const refresh = jest.fn();
+    const refresh = vi.fn();
     const testRenderer = createFleetTestRendererMock();
     const result = testRenderer.render(<TokenActions apiKey={MOCK_API_KEY} refresh={refresh} />);
 
@@ -85,7 +90,7 @@ describe('TokenActions', () => {
 
   it('shows a success toast after deleting a token', async () => {
     mockSendDeleteOneEnrollmentAPIKey.mockResolvedValue({ data: {} });
-    const refresh = jest.fn();
+    const refresh = vi.fn();
     const testRenderer = createFleetTestRendererMock();
     const result = testRenderer.render(<TokenActions apiKey={MOCK_API_KEY} refresh={refresh} />);
 
@@ -107,7 +112,7 @@ describe('TokenActions', () => {
   it('shows an error toast and no success toast when the API call fails', async () => {
     const apiError = new Error('API error');
     mockSendDeleteOneEnrollmentAPIKey.mockResolvedValue({ error: apiError });
-    const refresh = jest.fn();
+    const refresh = vi.fn();
     const testRenderer = createFleetTestRendererMock();
     const result = testRenderer.render(<TokenActions apiKey={MOCK_API_KEY} refresh={refresh} />);
 
@@ -124,7 +129,7 @@ describe('TokenActions', () => {
 
   it('calls refresh on the success path', async () => {
     mockSendDeleteOneEnrollmentAPIKey.mockResolvedValue({ data: {} });
-    const refresh = jest.fn();
+    const refresh = vi.fn();
     const testRenderer = createFleetTestRendererMock();
     const result = testRenderer.render(<TokenActions apiKey={MOCK_API_KEY} refresh={refresh} />);
     await openMenuAndClickItem(result, 'enrollmentTokenTable.revokeBtn');
@@ -134,7 +139,7 @@ describe('TokenActions', () => {
 
   it('calls refresh on the error path', async () => {
     mockSendDeleteOneEnrollmentAPIKey.mockResolvedValue({ error: new Error('fail') });
-    const refresh = jest.fn();
+    const refresh = vi.fn();
     const testRenderer = createFleetTestRendererMock();
     const result = testRenderer.render(<TokenActions apiKey={MOCK_API_KEY} refresh={refresh} />);
     await openMenuAndClickItem(result, 'enrollmentTokenTable.revokeBtn');

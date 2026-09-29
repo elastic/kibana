@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -17,7 +19,7 @@ function renderSection(
   props: Partial<React.ComponentProps<typeof NamespaceCustomizationSection>> = {}
 ) {
   const renderer = createIntegrationsTestRendererMock();
-  const onSave = jest.fn();
+  const onSave = vi.fn();
   return {
     onSave,
     ...renderer.render(
@@ -161,7 +163,7 @@ describe('NamespaceCustomizationSection', () => {
         <NamespaceCustomizationSection
           savedNamespaces={['prod']}
           allowedNamespacePrefixes={[]}
-          onSave={jest.fn()}
+          onSave={vi.fn()}
         />
       );
     });

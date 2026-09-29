@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DocumentDetailsContext } from '../../shared/context';
@@ -19,7 +21,7 @@ import {
   SEVERITY_VALUE_TEST_ID,
 } from '../../../../flyout_v2/document/main/components/test_ids';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
@@ -46,8 +48,8 @@ const createSearchHit = (fields: Record<string, unknown[]>) => ({
 
 describe('<EventHeaderTitle />', () => {
   beforeEach(() => {
-    jest.mocked(useDateFormat).mockImplementation(() => dateFormat);
-    jest.mocked(useTimeZone).mockImplementation(() => 'UTC');
+    vi.mocked(useDateFormat).mockImplementation(() => dateFormat);
+    vi.mocked(useTimeZone).mockImplementation(() => 'UTC');
   });
 
   it('should render component', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
@@ -21,7 +23,7 @@ import { performComputation } from '../../../../../entities/workflows/store/work
 import { findStepByLine } from '../../../../../entities/workflows/store/workflow_detail/utils/step_finder';
 import { triggerSchemas } from '../../../../../trigger_schemas';
 
-jest.mock('@kbn/workflows-yaml/common/validation/context/get_output_schema_for_step_type');
+vi.mock('@kbn/workflows-yaml/common/validation/context/get_output_schema_for_step_type');
 
 export function getFakeAutocompleteContextParams(
   yamlContent: string,
@@ -75,7 +77,7 @@ export function getFakeAutocompleteContextParams(
 
 describe('buildAutocompleteContext', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return null if the yaml is empty', () => {
@@ -206,7 +208,7 @@ steps: []
       description: 'Example trigger',
       eventSchema: z.object({ severity: z.string() }),
     };
-    const getDef = jest
+    const getDef = vi
       .spyOn(triggerSchemas, 'getTriggerDefinition')
       .mockReturnValue(mockDefinition);
 
@@ -236,7 +238,7 @@ steps:
   });
 
   it('detects on.condition field but leaves triggerConditionDefinition unset for unregistered type', () => {
-    const getDef = jest.spyOn(triggerSchemas, 'getTriggerDefinition').mockReturnValue(undefined);
+    const getDef = vi.spyOn(triggerSchemas, 'getTriggerDefinition').mockReturnValue(undefined);
 
     const result = buildAutocompleteContext(
       getFakeAutocompleteContextParams(`

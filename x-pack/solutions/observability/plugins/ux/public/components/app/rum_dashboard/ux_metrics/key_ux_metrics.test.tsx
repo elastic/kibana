@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { Matcher } from '@testing-library/react';
 import { render } from '@testing-library/react';
@@ -13,7 +15,7 @@ import { KeyUXMetrics } from './key_ux_metrics';
 
 describe('KeyUXMetrics', () => {
   it('renders metrics with correct formats', () => {
-    jest.spyOn(queryHook, 'useLongTaskMetricsQuery').mockReturnValue({
+    vi.spyOn(queryHook, 'useLongTaskMetricsQuery').mockReturnValue({
       data: {
         noOfLongTasks: 3.0009765625,
         sumOfLongTasks: 520.4375,

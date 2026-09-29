@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpHandler } from '@kbn/core/public';
 import { readAgentToolCallsFromTraces } from '@kbn/security-evals-workflow-traces';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -17,10 +20,13 @@ import type { FpTpSeededEvidence } from './world';
 import type { FpTpSeededIds } from './workflow_task';
 import { readAnalysisOutput, runFpTpAnalysisWorkflow, toOutcome } from './workflow_task';
 
-jest.mock('@kbn/security-evals-workflow-traces', () => ({
-  ...jest.requireActual('@kbn/security-evals-workflow-traces'),
-  readAgentToolCallsFromTraces: jest.fn().mockResolvedValue({ toolCallIds: [], unavailable: true }),
-}));
+vi.mock('@kbn/security-evals-workflow-traces', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/security-evals-workflow-traces')),
+      readAgentToolCallsFromTraces: vi.fn().mockResolvedValue({ toolCallIds: [], unavailable: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const output = {
   attack_discovery_id: 'ad-1',
@@ -58,7 +64,7 @@ const seededEvidence: FpTpSeededEvidence = {
 
 const mockFetch = (records: WorkflowExecutionDto[]): HttpHandler => {
   let poll = 0;
-  return jest.fn(async (path: string) => {
+  return vi.fn(async (path: string) => {
     if (path.endsWith('/run')) {
       return { workflowExecutionId: 'exec-1' };
     }
@@ -86,7 +92,7 @@ const run = (fetch: HttpHandler, maxWaitMs = 60_000) =>
   });
 
 const cancelCalls = (fetch: HttpHandler) =>
-  (fetch as unknown as jest.Mock).mock.calls.filter(([path]) => String(path).endsWith('/cancel'));
+  (fetch as unknown as Mock).mock.calls.filter(([path]) => String(path).endsWith('/cancel'));
 
 describe('readAnalysisOutput', () => {
   it('returns the output from the execution context', () => {
@@ -172,7 +178,7 @@ describe('runFpTpAnalysisWorkflow', () => {
 
   describe('when reading the execution fails', () => {
     const failingFetch = (): HttpHandler =>
-      jest.fn(async (path: string) => {
+      vi.fn(async (path: string) => {
         if (path.endsWith('/run')) {
           return { workflowExecutionId: 'exec-1' };
         }
@@ -188,7 +194,7 @@ describe('runFpTpAnalysisWorkflow', () => {
 
     it('returns the conversation ids from the record read after cancelling', async () => {
       let reads = 0;
-      const fetch = jest.fn(async (path: string) => {
+      const fetch = vi.fn(async (path: string) => {
         if (path.endsWith('/run')) {
           return { workflowExecutionId: 'exec-1' };
         }
@@ -210,7 +216,7 @@ describe('runFpTpAnalysisWorkflow', () => {
           ],
         });
       }) as unknown as HttpHandler;
-      const onFailedReadConversationIds = jest.fn();
+      const onFailedReadConversationIds = vi.fn();
 
       await runFpTpAnalysisWorkflow({
         fetch,

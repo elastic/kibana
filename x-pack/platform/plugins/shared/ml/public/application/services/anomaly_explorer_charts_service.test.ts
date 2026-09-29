@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { AnomalyExplorerChartsService } from './anomaly_explorer_charts_service';
 import { of } from 'rxjs';
 import type { MlApi } from './ml_api_service';
@@ -17,7 +20,7 @@ export const mlResultsServiceMock = {};
 describe('AnomalyExplorerChartsService', () => {
   const jobId = 'mock-job-id';
 
-  let anomalyExplorerService: jest.Mocked<AnomalyExplorerChartsService>;
+  let anomalyExplorerService: Mocked<AnomalyExplorerChartsService>;
 
   let timefilterMock;
 
@@ -28,15 +31,15 @@ describe('AnomalyExplorerChartsService', () => {
 
   const mlApiServicesMock = {
     jobs: {
-      jobForCloning: jest.fn(),
+      jobForCloning: vi.fn(),
     },
     results: {
-      getAnomalyCharts$: jest.fn(),
+      getAnomalyCharts$: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
 
     mlApiServicesMock.jobs.jobForCloning.mockImplementation(() => Promise.resolve({}));
 
@@ -56,12 +59,12 @@ describe('AnomalyExplorerChartsService', () => {
     anomalyExplorerService = new AnomalyExplorerChartsService(
       timefilterMock,
       mlApiServicesMock as unknown as MlApi
-    ) as jest.Mocked<AnomalyExplorerChartsService>;
+    ) as Mocked<AnomalyExplorerChartsService>;
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   test('fetches anomaly charts data', () => {

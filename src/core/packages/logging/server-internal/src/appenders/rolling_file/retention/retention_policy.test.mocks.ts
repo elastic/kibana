@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { listFilesOlderThan, listFilesExceedingSize } from './utils';
 import type { deleteFiles } from './fs';
 
-export const listFilesExceedingSizeMock: jest.MockedFn<typeof listFilesExceedingSize> = jest.fn();
-export const listFilesOlderThanMock: jest.MockedFn<typeof listFilesOlderThan> = jest.fn();
+export const listFilesExceedingSizeMock: MockedFunction<typeof listFilesExceedingSize> = vi.fn();
+export const listFilesOlderThanMock: MockedFunction<typeof listFilesOlderThan> = vi.fn();
 
-jest.doMock('./utils', () => {
-  const actual = jest.requireActual('./utils');
+vi.doMock('./utils', async () => {
+  const actual = (await vi.importActual('./utils'));
   return {
     ...actual,
     listFilesExceedingSize: listFilesExceedingSizeMock,
@@ -22,10 +25,10 @@ jest.doMock('./utils', () => {
   };
 });
 
-export const deleteFilesMock: jest.MockedFn<typeof deleteFiles> = jest.fn();
+export const deleteFilesMock: MockedFunction<typeof deleteFiles> = vi.fn();
 
-jest.doMock('./fs', () => {
-  const actual = jest.requireActual('./fs');
+vi.doMock('./fs', async () => {
+  const actual = (await vi.importActual('./fs'));
   return {
     ...actual,
     deleteFiles: deleteFilesMock,

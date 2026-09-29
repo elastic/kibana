@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { merge } from 'lodash';
@@ -26,7 +28,7 @@ import type { APIEndpoint } from '../../../../server';
 
 function wrapper({ children, error = false }: PropsWithChildren<{ error?: boolean }>) {
   const getHttpMethodMock = (method: 'GET' | 'POST') =>
-    jest.fn().mockImplementation(async (pathname) => {
+    vi.fn().mockImplementation(async (pathname) => {
       await delay(100);
       if (error) {
         throw new Error('Something went wrong');
@@ -68,8 +70,8 @@ function wrapper({ children, error = false }: PropsWithChildren<{ error?: boolea
     });
 
   const history = createMemoryHistory();
-  jest.spyOn(history, 'push');
-  jest.spyOn(history, 'replace');
+  vi.spyOn(history, 'push');
+  vi.spyOn(history, 'replace');
 
   history.replace({
     pathname: '/services/the-service-name/transactions/view',
@@ -95,12 +97,12 @@ function wrapper({ children, error = false }: PropsWithChildren<{ error?: boolea
 
 describe('useFailedTransactionsCorrelations', () => {
   beforeEach(async () => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
   // Running all pending timers and switching to real timers using Jest
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   describe('when successfully loading results', () => {
@@ -128,7 +130,7 @@ describe('useFailedTransactionsCorrelations', () => {
         wrapper,
       });
 
-      jest.advanceTimersByTime(50);
+      vi.advanceTimersByTime(50);
 
       await waitFor(() =>
         expect(result.current.progress).toEqual({
@@ -150,9 +152,9 @@ describe('useFailedTransactionsCorrelations', () => {
         // Each simulated request takes 100ms. After an initial 50ms
         // we track the internal requests the hook is running and
         // check the expected progress after these requests.
-        jest.advanceTimersByTime(50);
+        vi.advanceTimersByTime(50);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0));
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0.05));
 
         expect(result.current.progress).toEqual({
@@ -173,7 +175,7 @@ describe('useFailedTransactionsCorrelations', () => {
           percentileThresholdValue: 1.234,
         });
 
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0.1));
 
         expect(result.current.progress).toEqual({
@@ -199,7 +201,7 @@ describe('useFailedTransactionsCorrelations', () => {
           percentileThresholdValue: 1.234,
         });
 
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0.15));
 
         // field candidates are an implementation detail and
@@ -210,7 +212,7 @@ describe('useFailedTransactionsCorrelations', () => {
           loaded: 0.15,
         });
 
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(1));
 
         expect(result.current.progress).toEqual({
@@ -290,7 +292,7 @@ describe('useFailedTransactionsCorrelations', () => {
       });
 
       try {
-        jest.advanceTimersByTime(50);
+        vi.advanceTimersByTime(50);
 
         expect(result.current.progress).toEqual({
           isRunning: true,
@@ -315,7 +317,7 @@ describe('useFailedTransactionsCorrelations', () => {
       });
 
       try {
-        jest.advanceTimersByTime(150);
+        vi.advanceTimersByTime(150);
         await waitFor(() => expect(result.current.progress.error).toBeDefined());
 
         expect(result.current.progress).toEqual({
@@ -336,7 +338,7 @@ describe('useFailedTransactionsCorrelations', () => {
       });
 
       try {
-        jest.advanceTimersByTime(50);
+        vi.advanceTimersByTime(50);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0));
 
         expect(result.current.progress.isRunning).toBe(true);

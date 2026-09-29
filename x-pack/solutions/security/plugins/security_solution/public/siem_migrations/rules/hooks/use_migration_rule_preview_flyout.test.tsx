@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { SiemMigrationStatus } from '../../../../common/siem_migrations/constants';
@@ -12,24 +14,27 @@ import type { RuleMigrationRule } from '../../../../common/siem_migrations/model
 import { migrationRules } from '../__mocks__/migration_rules';
 import { useMigrationRuleDetailsFlyout } from './use_migration_rule_preview_flyout';
 
-jest.mock('../components/rule_details_flyout', () => ({
-  MigrationRuleDetailsFlyout: (props: { children: React.ReactNode }) => (
-    <div data-test-subj="migration-rule-details-flyout">{props.children}</div>
-  ),
-}));
+vi.mock('../components/rule_details_flyout', () => {
+      const mocked = {
+      MigrationRuleDetailsFlyout: (props: { children: React.ReactNode }) => (
+        <div data-test-subj="migration-rule-details-flyout">{props.children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useMigrationRuleDetailsFlyout', () => {
   const mockRule = migrationRules[0];
 
-  const mockGetMigrationRuleData = jest.fn(() => ({
+  const mockGetMigrationRuleData = vi.fn(() => ({
     migrationRule: mockRule,
     matchedPrebuiltRule: undefined,
   }));
-  const mockRuleActionsFactory = jest.fn(() => <div>{'Rule Actions'}</div>);
-  const mockExtraTabsFactory = jest.fn(() => []);
+  const mockRuleActionsFactory = vi.fn(() => <div>{'Rule Actions'}</div>);
+  const mockExtraTabsFactory = vi.fn(() => []);
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return undefined flyout initially', () => {

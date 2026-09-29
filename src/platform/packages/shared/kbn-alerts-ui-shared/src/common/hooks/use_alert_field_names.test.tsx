@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createContext } from 'react';
 import { renderHook } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -14,14 +17,14 @@ import type { QueryClient } from '@kbn/react-query';
 import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
 import { useAlertFieldNames } from './use_alert_field_names';
 
-jest.mock('./use_fetch_alerts_fields_query');
-const mockUseFetchAlertsFieldsQuery = useFetchAlertsFieldsQuery as jest.Mock;
+vi.mock('./use_fetch_alerts_fields_query');
+const mockUseFetchAlertsFieldsQuery = useFetchAlertsFieldsQuery as Mock;
 
 const http = httpServiceMock.createStartContract();
 
 describe('useAlertFieldNames', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('maps fetched fields to leaf scalar field names', () => {

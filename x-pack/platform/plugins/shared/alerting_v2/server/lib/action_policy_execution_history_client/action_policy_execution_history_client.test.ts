@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { EXECUTION_HISTORY_DEFAULT_PER_PAGE } from '@kbn/alerting-v2-schemas';
 import type { ActionPolicyClient } from '../action_policy_client/action_policy_client';
@@ -57,31 +60,31 @@ const buildFindRulesResponse = (rules: Array<{ id: string; metadata: { name: str
   ({ items: rules, total: rules.length, page: 1, perPage: rules.length } as any);
 
 const createMocks = () => {
-  const eventLogService: jest.Mocked<EventLogServiceContract> = {
-    logEvent: jest.fn(),
-    findActionPolicyExecutionEvents: jest.fn().mockResolvedValue({
+  const eventLogService: Mocked<EventLogServiceContract> = {
+    logEvent: vi.fn(),
+    findActionPolicyExecutionEvents: vi.fn().mockResolvedValue({
       events: [],
       page: 1,
       perPage: 100,
       total: 0,
     }),
-    findRuleExecutions: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 20 }),
+    findRuleExecutions: vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 20 }),
   };
   const actionPolicyClient = {
-    getActionPolicies: jest.fn().mockResolvedValue([]),
-    findActionPolicies: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 }),
-  } as unknown as jest.Mocked<ActionPolicyClient>;
+    getActionPolicies: vi.fn().mockResolvedValue([]),
+    findActionPolicies: vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 }),
+  } as unknown as Mocked<ActionPolicyClient>;
   const rulesClient = {
-    findRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 0 }),
-  } as unknown as jest.Mocked<RulesClient>;
-  const getWorkflowsByIds = jest.fn().mockResolvedValue([]);
+    findRules: vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 0 }),
+  } as unknown as Mocked<RulesClient>;
+  const getWorkflowsByIds = vi.fn().mockResolvedValue([]);
   const workflowsManagement = {
     getWorkflowsByIds,
-    getClient: jest.fn(() => ({ getWorkflowsByIds })),
+    getClient: vi.fn(() => ({ getWorkflowsByIds })),
   };
   const spaces = {
     spacesService: {
-      getSpaceId: jest.fn().mockReturnValue('default'),
+      getSpaceId: vi.fn().mockReturnValue('default'),
     },
   } as unknown as AlertingServerStartDependencies['spaces'];
   const { loggerService, mockLogger } = createLoggerService();
@@ -109,7 +112,7 @@ const createMocks = () => {
 describe('ActionPolicyExecutionHistoryClient', () => {
   describe('listExecutionHistory', () => {
     it('forwards page, perPage and a default 24h startDate to the event log service', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-10-11T11:00:00.000Z'));
+      vi.useFakeTimers().setSystemTime(new Date('2026-10-11T11:00:00.000Z'));
       const { client, eventLogService } = createMocks();
       const request = httpServerMock.createKibanaRequest();
 
@@ -127,7 +130,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         ruleIds: [],
       });
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('uses the provided `from` as the startDate lower bound', async () => {
@@ -178,7 +181,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
     it('passes the request-scoped spaceId to event log + workflows lookup', async () => {
       const { client, eventLogService, workflowsManagement, spaces } = createMocks();
-      (spaces.spacesService.getSpaceId as jest.Mock).mockReturnValue('my-space');
+      (spaces.spacesService.getSpaceId as Mock).mockReturnValue('my-space');
       eventLogService.findActionPolicyExecutionEvents.mockResolvedValue({
         events: [buildEvent({ policyId: 'p-1', ruleIds: ['r-1'], workflowIds: ['w-1'] })],
         page: 1,
@@ -241,7 +244,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         total: 1,
       } as any);
       actionPolicyClient.getActionPolicies.mockResolvedValue([buildPolicy('p-1', 'Policy 1')]);
-      (rulesClient.findRules as jest.Mock).mockResolvedValue(
+      (rulesClient.findRules as Mock).mockResolvedValue(
         buildFindRulesResponse([buildRule('r-1', 'Rule 1')])
       );
       workflowsManagement.getWorkflowsByIds.mockResolvedValue([buildWorkflow('w-1', 'WF 1')]);
@@ -342,7 +345,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       });
 
       it('falls back to the default 24h window when `from` is not provided', async () => {
-        jest.useFakeTimers().setSystemTime(new Date('2026-10-11T11:00:00.000Z'));
+        vi.useFakeTimers().setSystemTime(new Date('2026-10-11T11:00:00.000Z'));
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
@@ -352,7 +355,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
           expect.objectContaining({ startDate: '2026-10-10T11:00:00.000Z' })
         );
 
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
     });
 
@@ -372,13 +375,13 @@ describe('ActionPolicyExecutionHistoryClient', () => {
     describe('search', () => {
       it('queries policies and rules in parallel using the search text', async () => {
         const { client, actionPolicyClient, rulesClient } = createMocks();
-        (actionPolicyClient.findActionPolicies as jest.Mock).mockResolvedValue({
+        (actionPolicyClient.findActionPolicies as Mock).mockResolvedValue({
           items: [{ id: 'p-1' } as any],
           total: 1,
           page: 1,
           perPage: 500,
         });
-        (rulesClient.findRules as jest.Mock).mockResolvedValue({
+        (rulesClient.findRules as Mock).mockResolvedValue({
           items: [{ id: 'r-1' } as any],
           total: 1,
           page: 1,
@@ -397,13 +400,13 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       it('forwards the resolved policy/rule ids to the event log service', async () => {
         const { client, eventLogService, actionPolicyClient, rulesClient } = createMocks();
-        (actionPolicyClient.findActionPolicies as jest.Mock).mockResolvedValue({
+        (actionPolicyClient.findActionPolicies as Mock).mockResolvedValue({
           items: [{ id: 'p-1' } as any, { id: 'p-2' } as any],
           total: 2,
           page: 1,
           perPage: 500,
         });
-        (rulesClient.findRules as jest.Mock).mockResolvedValue({
+        (rulesClient.findRules as Mock).mockResolvedValue({
           items: [{ id: 'r-1' } as any],
           total: 1,
           page: 1,
@@ -432,7 +435,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       it('does not add the term as a candidate id when it is not a UUID', async () => {
         const { client, eventLogService, actionPolicyClient } = createMocks();
-        (actionPolicyClient.findActionPolicies as jest.Mock).mockResolvedValue({
+        (actionPolicyClient.findActionPolicies as Mock).mockResolvedValue({
           items: [{ id: 'p-1' } as any],
           total: 1,
           page: 1,
@@ -441,7 +444,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         const request = httpServerMock.createKibanaRequest();
 
         for (const term of ['rule', 'cpu', '2', 'p-abc', 'two words']) {
-          (eventLogService.findActionPolicyExecutionEvents as jest.Mock).mockClear();
+          (eventLogService.findActionPolicyExecutionEvents as Mock).mockClear();
           await client.listExecutionHistory({ request, search: term });
 
           const call = eventLogService.findActionPolicyExecutionEvents.mock.calls[0][0];
@@ -471,7 +474,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       it('flags truncation and reports the policy total when matches exceed the cap', async () => {
         const { client, actionPolicyClient } = createMocks();
-        (actionPolicyClient.findActionPolicies as jest.Mock).mockResolvedValue({
+        (actionPolicyClient.findActionPolicies as Mock).mockResolvedValue({
           items: [{ id: 'p-1' } as any],
           total: 823,
           page: 1,
@@ -486,7 +489,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       it('flags truncation and reports the rule total when matches exceed the cap', async () => {
         const { client, rulesClient } = createMocks();
-        (rulesClient.findRules as jest.Mock).mockResolvedValue({
+        (rulesClient.findRules as Mock).mockResolvedValue({
           items: [{ id: 'r-1' } as any],
           total: 612,
           page: 1,
@@ -501,13 +504,13 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       it('reports counts within the cap without flagging truncation', async () => {
         const { client, actionPolicyClient, rulesClient } = createMocks();
-        (actionPolicyClient.findActionPolicies as jest.Mock).mockResolvedValue({
+        (actionPolicyClient.findActionPolicies as Mock).mockResolvedValue({
           items: [{ id: 'p-1' } as any],
           total: 1,
           page: 1,
           perPage: 500,
         });
-        (rulesClient.findRules as jest.Mock).mockResolvedValue({
+        (rulesClient.findRules as Mock).mockResolvedValue({
           items: [{ id: 'r-1' } as any],
           total: 500,
           page: 1,
@@ -532,13 +535,13 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       it('only emits rows for rule ids that matched the search, not all rules sharing the event', async () => {
         const { client, eventLogService, actionPolicyClient, rulesClient } = createMocks();
 
-        (actionPolicyClient.findActionPolicies as jest.Mock).mockResolvedValue({
+        (actionPolicyClient.findActionPolicies as Mock).mockResolvedValue({
           items: [],
           total: 0,
           page: 1,
           perPage: 500,
         });
-        (rulesClient.findRules as jest.Mock)
+        (rulesClient.findRules as Mock)
           .mockResolvedValueOnce({
             items: [{ id: 'rule-A' } as any],
             total: 1,
@@ -576,7 +579,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         mocks.actionPolicyClient.getActionPolicies.mockResolvedValue([
           buildPolicy('p-1', 'Policy 1'),
         ]);
-        (mocks.rulesClient.findRules as jest.Mock).mockResolvedValue(
+        (mocks.rulesClient.findRules as Mock).mockResolvedValue(
           buildFindRulesResponse([buildRule('r-1', 'Rule 1')])
         );
         mocks.workflowsManagement.getWorkflowsByIds.mockResolvedValue([
@@ -623,7 +626,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       it('falls back to null rule names when rules lookup rejects', async () => {
         const mocks = setup();
-        (mocks.rulesClient.findRules as jest.Mock).mockRejectedValue(new Error('rules down'));
+        (mocks.rulesClient.findRules as Mock).mockRejectedValue(new Error('rules down'));
         const request = httpServerMock.createKibanaRequest();
 
         const result = await mocks.client.listExecutionHistory({ request });
@@ -651,7 +654,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
           perPage: 100,
           total: 3,
         } as any);
-        (rulesClient.findRules as jest.Mock).mockResolvedValue(
+        (rulesClient.findRules as Mock).mockResolvedValue(
           buildFindRulesResponse([buildRule('r-1', 'Rule 1'), buildRule('r-3', 'Rule 3')])
         );
 

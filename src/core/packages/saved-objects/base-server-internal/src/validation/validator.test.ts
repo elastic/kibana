@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type {
@@ -37,7 +40,7 @@ describe('Saved Objects type validator', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('validation behavior', () => {
@@ -132,15 +135,15 @@ describe('Saved Objects type validator', () => {
       validator = new SavedObjectsTypeValidator({ logger, type, validationMap, defaultVersion });
     });
 
-    const createStubSpec = (): jest.Mocked<SavedObjectsValidationSpec> => {
+    const createStubSpec = (): Mocked<SavedObjectsValidationSpec> => {
       const stub = schema.object({}, { unknowns: 'allow', defaultValue: {} });
-      jest.spyOn(stub as any, 'getSchema');
-      return stub as jest.Mocked<SavedObjectsValidationSpec>;
+      vi.spyOn(stub as any, 'getSchema');
+      return stub as Mocked<SavedObjectsValidationSpec>;
     };
 
     const getCalledVersion = () => {
       for (const [version, validation] of Object.entries(validationMap)) {
-        if (((validation as any).getSchema as jest.MockedFn<any>).mock.calls.length > 0) {
+        if (((validation as any).getSchema as MockedFunction<any>).mock.calls.length > 0) {
           return version;
         }
       }
@@ -185,7 +188,7 @@ describe('Saved Objects type validator', () => {
       validator.validate(data);
       expect(getCalledVersion()).toEqual('3.5.0');
 
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       data = createMockObject({ typeMigrationVersion: '10.3.0' });
       validator.validate(data);

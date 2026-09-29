@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import type { TelemetryCounter } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
@@ -16,12 +19,12 @@ describe('registerEbtCounters', () => {
   let core: ReturnType<typeof coreMock.createSetup>;
   let usageCollection: ReturnType<typeof usageCollectionPluginMock.createSetupContract>;
   let internalListener: (counter: TelemetryCounter) => void;
-  let telemetryCounter$Spy: jest.SpyInstance;
+  let telemetryCounter$Spy: MockInstance;
 
   beforeEach(() => {
     core = coreMock.createSetup();
     usageCollection = usageCollectionPluginMock.createSetupContract();
-    telemetryCounter$Spy = jest
+    telemetryCounter$Spy = vi
       .spyOn(core.analytics.telemetryCounter$, 'subscribe')
       .mockImplementation(((listener) => {
         internalListener = listener as (counter: TelemetryCounter) => void;

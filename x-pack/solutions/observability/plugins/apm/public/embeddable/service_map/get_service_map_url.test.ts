@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { encode as encodeRison } from '@kbn/rison';
 import { decode as decodeRison } from '@kbn/rison';
 import { SERVICE_NAME } from '@kbn/apm-types';
@@ -32,7 +34,7 @@ describe('getServiceMapUrl', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns global service map URL with query params', () => {

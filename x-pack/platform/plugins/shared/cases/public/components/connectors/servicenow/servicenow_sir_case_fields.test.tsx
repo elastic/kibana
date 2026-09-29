@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, render, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -16,9 +19,9 @@ import Fields from './servicenow_sir_case_fields';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { MockFormWrapperComponent } from '../test_utils';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('./use_get_choices');
-const useGetChoicesMock = useGetChoices as jest.Mock;
+vi.mock('../../../common/lib/kibana');
+vi.mock('./use_get_choices');
+const useGetChoicesMock = useGetChoices as Mock;
 
 describe('ServiceNowSIR Fields', () => {
   let user: UserEvent;
@@ -35,23 +38,23 @@ describe('ServiceNowSIR Fields', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
     useGetChoicesMock.mockReturnValue({
       isLoading: false,
       isFetching: false,
       data: { data: choices },
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('all params fields are rendered', () => {

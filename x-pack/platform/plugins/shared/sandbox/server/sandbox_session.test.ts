@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 import { SandboxApiClient } from './grpc_client';
 import { SandboxSessionImpl } from './sandbox_session';
 
-const mockClose = jest.fn();
+const mockClose = vi.fn();
 
 interface MockServiceClient {
   close: () => void;
 }
 
-jest.mock('@grpc/grpc-js', () => {
+vi.mock('@grpc/grpc-js', () => {
   function MockSandboxServiceClient(this: MockServiceClient): void {
     this.close = mockClose;
   }
@@ -61,17 +64,17 @@ const defer = <T>(): Deferred<T> => {
 const okResult = { stdout: '', stderr: '', exit_code: 0, timed_out: false };
 
 describe('SandboxSessionImpl', () => {
-  let logger: jest.Mocked<Logger>;
+  let logger: Mocked<Logger>;
   let apiClient: SandboxApiClient;
   let session: SandboxSessionImpl;
-  let runCommand: jest.SpyInstance;
+  let runCommand: MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggerMock.create();
     apiClient = new SandboxApiClient(sandboxConfig);
     session = new SandboxSessionImpl('space:conv-1', apiClient, logger);
-    runCommand = jest.spyOn(apiClient, 'runCommand');
+    runCommand = vi.spyOn(apiClient, 'runCommand');
   });
 
   const run = () => session.runCommand({ command: 'true' });
@@ -159,7 +162,7 @@ describe('SandboxApiClient', () => {
   let client: SandboxApiClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     client = new SandboxApiClient({
       host: 'sandbox-api',
       port: 50051,

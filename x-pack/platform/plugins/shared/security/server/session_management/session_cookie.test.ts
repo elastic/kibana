@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock, Mocked } from 'vitest';
+
 import type { SessionStorage } from '@kbn/core/server';
 import {
   httpServerMock,
@@ -21,7 +23,7 @@ describe('Session cookie', () => {
   let sessionCookieOptions: SessionCookieOptions;
   let sessionCookie: SessionCookie;
   let mockSessionStorageFactory: ReturnType<typeof sessionStorageMock.createFactory>;
-  let mockSessionStorage: jest.Mocked<SessionStorage<any>>;
+  let mockSessionStorage: Mocked<SessionStorage<any>>;
   beforeEach(() => {
     const config = {
       encryptionKey: 'ab'.repeat(16),
@@ -59,7 +61,7 @@ describe('Session cookie', () => {
     });
 
     it('cookie validator properly handles cookies with different base path', () => {
-      const [[{ validate }]] = (sessionCookieOptions.createCookieSessionStorageFactory as jest.Mock)
+      const [[{ validate }]] = (sessionCookieOptions.createCookieSessionStorageFactory as Mock)
         .mock.calls;
 
       expect(

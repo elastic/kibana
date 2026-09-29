@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useStartMigration } from './use_start_migration';
 import { useKibana } from '../../../common/lib/kibana';
@@ -14,12 +17,12 @@ import {
 } from '../../../../common/siem_migrations/constants';
 import { MigrationSource } from '../../common/types';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
-const mockedUseKibana = useKibana as jest.Mock;
-const mockStartDashboardMigration = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
+const mockedUseKibana = useKibana as Mock;
+const mockStartDashboardMigration = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
 const defaultMigrationStats = {
   id: '1',
   status: SiemMigrationTaskStatus.READY,
@@ -32,7 +35,7 @@ const defaultMigrationStats = {
 
 describe('useStartMigration', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockedUseKibana.mockReturnValue({
       services: {
         siemMigrations: {
@@ -51,7 +54,7 @@ describe('useStartMigration', () => {
   });
 
   describe('on success', () => {
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     it('starts migration and shows success toast', async () => {
       mockStartDashboardMigration.mockResolvedValue({ started: true });

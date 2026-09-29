@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
@@ -13,35 +16,41 @@ import { reconcileSmlIndex } from './sml_storage';
 import { SmlCrawlerImpl } from './sml_crawler';
 import type { SmlTypeDefinition, SmlListItem } from './types';
 
-jest.mock('./sml_crawler_state_storage', () => {
+vi.mock('./sml_crawler_state_storage', () => {
   const client = {
-    search: jest.fn(),
-    bulk: jest.fn().mockResolvedValue({ errors: false, items: [] }),
-    delete: jest.fn().mockResolvedValue({}),
-    index: jest.fn().mockResolvedValue({}),
+    search: vi.fn(),
+    bulk: vi.fn().mockResolvedValue({ errors: false, items: [] }),
+    delete: vi.fn().mockResolvedValue({}),
+    index: vi.fn().mockResolvedValue({}),
   };
   return {
     smlCrawlerStateIndexName: '.test-sml-crawler-state',
-    createSmlCrawlerStateStorage: jest.fn().mockReturnValue({
-      getClient: jest.fn().mockReturnValue(client),
+    createSmlCrawlerStateStorage: vi.fn().mockReturnValue({
+      getClient: vi.fn().mockReturnValue(client),
     }),
   };
 });
 
-jest.mock('./sml_storage', () => ({
-  smlIndexName: '.test-sml-data',
-  INGESTION_METHOD_FIELD: 'governance.provenance.updated_by.metadata.ingestion_method',
-  reconcileSmlIndex: jest.fn(),
-}));
+vi.mock('./sml_storage', () => {
+      const mocked = {
+      smlIndexName: '.test-sml-data',
+      INGESTION_METHOD_FIELD: 'governance.provenance.updated_by.metadata.ingestion_method',
+      reconcileSmlIndex: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/es-errors', () => ({
-  isResponseError: jest.fn(
-    (error: unknown) => typeof (error as { statusCode?: unknown })?.statusCode === 'number'
-  ),
-}));
+vi.mock('@kbn/es-errors', () => {
+      const mocked = {
+      isResponseError: vi.fn(
+        (error: unknown) => typeof (error as { statusCode?: unknown })?.statusCode === 'number'
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getMockStateClient = () =>
-  (createSmlCrawlerStateStorage as jest.Mock)({ logger: {}, esClient: {} }).getClient();
+  (createSmlCrawlerStateStorage as Mock)({ logger: {}, esClient: {} }).getClient();
 
 async function* yieldPages(...pages: SmlListItem[][]): AsyncIterable<SmlListItem[]> {
   for (const page of pages) {
@@ -51,59 +60,59 @@ async function* yieldPages(...pages: SmlListItem[][]): AsyncIterable<SmlListItem
 
 const createMockDefinition = (overrides: Partial<SmlTypeDefinition> = {}): SmlTypeDefinition => ({
   id: 'test-type',
-  list: jest.fn().mockReturnValue(yieldPages()),
-  getSmlEntry: jest.fn().mockResolvedValue(undefined),
-  toAttachment: jest.fn().mockResolvedValue(undefined),
+  list: vi.fn().mockReturnValue(yieldPages()),
+  getSmlEntry: vi.fn().mockResolvedValue(undefined),
+  toAttachment: vi.fn().mockResolvedValue(undefined),
   ...overrides,
 });
 
 const mockIndexer = {
-  indexAttachment: jest.fn().mockResolvedValue(undefined),
-  deleteAttachment: jest.fn().mockResolvedValue(undefined),
-  deleteEntry: jest.fn().mockResolvedValue(undefined),
+  indexAttachment: vi.fn().mockResolvedValue(undefined),
+  deleteAttachment: vi.fn().mockResolvedValue(undefined),
+  deleteEntry: vi.fn().mockResolvedValue(undefined),
 };
 
 const createMockLogger = () => {
   const log = loggerMock.create();
-  log.get = jest.fn().mockReturnValue(log);
+  log.get = vi.fn().mockReturnValue(log);
   return log;
 };
 
 // Index plumbing lives behind the mocked `reconcileSmlIndex`, so the crawler only touches
 // `count` and `search` on the SML data index directly.
-const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
+const createMockEsClient = (): Mocked<ElasticsearchClient> =>
   ({
-    count: jest.fn().mockResolvedValue({ count: 0 }),
+    count: vi.fn().mockResolvedValue({ count: 0 }),
     // findManualOriginIds (in sml_crawler.ts) calls search on the SML data index.
     // Default: no manual entries for any origin id.
-    search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
-  } as unknown as jest.Mocked<ElasticsearchClient>);
+    search: vi.fn().mockResolvedValue({ hits: { hits: [] } }),
+  } as unknown as Mocked<ElasticsearchClient>);
 
-const createMockSavedObjectsClient = (): jest.Mocked<ISavedObjectsRepository> =>
-  ({} as jest.Mocked<ISavedObjectsRepository>);
+const createMockSavedObjectsClient = (): Mocked<ISavedObjectsRepository> =>
+  ({} as Mocked<ISavedObjectsRepository>);
 
 describe('SmlCrawlerImpl', () => {
   let logger: ReturnType<typeof createMockLogger>;
-  let esClient: jest.Mocked<ElasticsearchClient>;
-  let savedObjectsClient: jest.Mocked<ISavedObjectsRepository>;
+  let esClient: Mocked<ElasticsearchClient>;
+  let savedObjectsClient: Mocked<ISavedObjectsRepository>;
   let mockStateClient: ReturnType<typeof getMockStateClient>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = createMockLogger();
     esClient = createMockEsClient();
     savedObjectsClient = createMockSavedObjectsClient();
     mockStateClient = getMockStateClient();
     mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
     mockStateClient.bulk.mockResolvedValue({ errors: false, items: [] });
-    (reconcileSmlIndex as jest.Mock).mockResolvedValue(undefined);
+    (reconcileSmlIndex as Mock).mockResolvedValue(undefined);
   });
 
   describe('new items detected', () => {
     it('when list yields items not in state, writes state docs with update_action create', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages(items)),
+        list: vi.fn().mockReturnValue(yieldPages(items)),
       });
       // countStateDocs returns 0 (no prior state)
       // batchLookupState returns empty (item is new)
@@ -144,7 +153,7 @@ describe('SmlCrawlerImpl', () => {
     it('when list yields item with newer updatedAt than state, creates update action', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-02', spaces: ['default'] }];
       const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages(items)),
+        list: vi.fn().mockReturnValue(yieldPages(items)),
       });
       // countStateDocs returns 1
       mockStateClient.search
@@ -169,7 +178,7 @@ describe('SmlCrawlerImpl', () => {
         })
         // sweepStaleState returns empty
         .mockResolvedValue({ hits: { hits: [] } });
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
+      (esClient.count as Mock).mockResolvedValue({ count: 1 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
@@ -189,7 +198,7 @@ describe('SmlCrawlerImpl', () => {
   describe('deleted items (mark-and-sweep)', () => {
     it('sweeps state docs with stale last_crawled_at and marks them for deletion', async () => {
       const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages()),
+        list: vi.fn().mockReturnValue(yieldPages()),
       });
       // countStateDocs returns 1
       mockStateClient.search
@@ -215,7 +224,7 @@ describe('SmlCrawlerImpl', () => {
           },
         })
         .mockResolvedValue({ hits: { hits: [] } });
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
+      (esClient.count as Mock).mockResolvedValue({ count: 1 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
@@ -248,7 +257,7 @@ describe('SmlCrawlerImpl', () => {
     it('when list matches state (same updatedAt, same spaces), stamps last_crawled_at but no action change', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages(items)),
+        list: vi.fn().mockReturnValue(yieldPages(items)),
       });
       // countStateDocs returns 1
       mockStateClient.search
@@ -273,7 +282,7 @@ describe('SmlCrawlerImpl', () => {
         })
         // sweepStaleState returns empty
         .mockResolvedValue({ hits: { hits: [] } });
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
+      (esClient.count as Mock).mockResolvedValue({ count: 1 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
@@ -295,7 +304,7 @@ describe('SmlCrawlerImpl', () => {
     it('when item.spaces differs from state.spaces, creates update action', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default', 'space-2'] }];
       const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages(items)),
+        list: vi.fn().mockReturnValue(yieldPages(items)),
       });
       // countStateDocs returns 1
       mockStateClient.search
@@ -320,7 +329,7 @@ describe('SmlCrawlerImpl', () => {
         })
         // sweepStaleState returns empty
         .mockResolvedValue({ hits: { hits: [] } });
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
+      (esClient.count as Mock).mockResolvedValue({ count: 1 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
@@ -340,7 +349,7 @@ describe('SmlCrawlerImpl', () => {
   describe('processQueue', () => {
     it('for create/update calls indexer.indexAttachment then bulk ACKs with update_action undefined', async () => {
       const definition = createMockDefinition({
-        list: jest
+        list: vi
           .fn()
           .mockReturnValue(yieldPages([{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }])),
       });
@@ -398,7 +407,7 @@ describe('SmlCrawlerImpl', () => {
 
     it('skips hits without _id and logs warning', async () => {
       const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages()),
+        list: vi.fn().mockReturnValue(yieldPages()),
       });
       // countStateDocs returns 0
       mockStateClient.search
@@ -434,7 +443,7 @@ describe('SmlCrawlerImpl', () => {
 
     it('skips create/update for origin_ids that already have a manual entry and ACKs them', async () => {
       const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(
+        list: vi.fn().mockReturnValue(
           yieldPages([
             { id: 'manual-origin', updatedAt: '2024-01-01', spaces: ['default'] },
             { id: 'normal-origin', updatedAt: '2024-01-01', spaces: ['default'] },
@@ -484,7 +493,7 @@ describe('SmlCrawlerImpl', () => {
         .mockResolvedValue({ hits: { hits: [] } });
 
       // findManualOriginUris returns one of the candidates as manual
-      (esClient.search as jest.Mock).mockResolvedValue({
+      (esClient.search as Mock).mockResolvedValue({
         hits: {
           hits: [{ _source: { id: 'test-type:manual-origin' } }],
         },
@@ -517,7 +526,7 @@ describe('SmlCrawlerImpl', () => {
 
     it('manual-origin protection does NOT apply to delete actions', async () => {
       const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages()),
+        list: vi.fn().mockReturnValue(yieldPages()),
       });
       mockStateClient.search
         // countStateDocs returns 1
@@ -564,7 +573,7 @@ describe('SmlCrawlerImpl', () => {
         })
         .mockResolvedValue({ hits: { hits: [] } });
 
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
+      (esClient.count as Mock).mockResolvedValue({ count: 1 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
@@ -581,7 +590,7 @@ describe('SmlCrawlerImpl', () => {
     it('when state has items but countSmlDocuments returns 0, forces re-index of all items', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages(items)),
+        list: vi.fn().mockReturnValue(yieldPages(items)),
       });
       // countStateDocs returns 1 (has prior state)
       mockStateClient.search
@@ -589,7 +598,7 @@ describe('SmlCrawlerImpl', () => {
         // sweepStaleState returns empty
         .mockResolvedValue({ hits: { hits: [] } });
       // SML data index is empty
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 0 });
+      (esClient.count as Mock).mockResolvedValue({ count: 0 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
@@ -609,7 +618,7 @@ describe('SmlCrawlerImpl', () => {
     it('reconciles the index once per crawl before listing items', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages(items)),
+        list: vi.fn().mockReturnValue(yieldPages(items)),
       });
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
@@ -621,7 +630,7 @@ describe('SmlCrawlerImpl', () => {
     });
 
     it('reconciliation failure propagates rather than crawling against a stale index', async () => {
-      (reconcileSmlIndex as jest.Mock).mockRejectedValue(new Error('connection refused'));
+      (reconcileSmlIndex as Mock).mockRejectedValue(new Error('connection refused'));
 
       const definition = createMockDefinition();
 
@@ -640,7 +649,7 @@ describe('SmlCrawlerImpl', () => {
         throw new Error('list failed');
       }
       const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(failingList()),
+        list: vi.fn().mockReturnValue(failingList()),
       });
       // countStateDocs returns 0
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
@@ -657,7 +666,7 @@ describe('SmlCrawlerImpl', () => {
     it('logs error and throws, preventing further processing', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages(items)),
+        list: vi.fn().mockReturnValue(yieldPages(items)),
       });
       // countStateDocs returns 0
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
@@ -678,7 +687,7 @@ describe('SmlCrawlerImpl', () => {
       const page1 = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
       const page2 = [{ id: 'b', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages(page1, page2)),
+        list: vi.fn().mockReturnValue(yieldPages(page1, page2)),
       });
       // countStateDocs returns 0
       // batchLookupState returns empty for both pages

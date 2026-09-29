@@ -5,25 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { createClient } from './create_client';
 import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
-jest.mock('./inference_client');
-jest.mock('../../common/inference_client/bind_client');
+vi.mock('./inference_client');
+vi.mock('../../common/inference_client/bind_client');
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
 import { createRegexWorkerServiceMock } from '../test_utils';
 
-const bindClientMock = bindClient as jest.MockedFn<typeof bindClient>;
-const createInferenceClientMock = createInferenceClient as jest.MockedFn<
+const bindClientMock = bindClient as MockedFunction<typeof bindClient>;
+const createInferenceClientMock = createInferenceClient as MockedFunction<
   typeof createInferenceClient
 >;
 const mockEsClient = {
   ml: {
-    inferTrainedModel: jest.fn(),
+    inferTrainedModel: vi.fn(),
   },
 } as any;
 describe('createClient', () => {
@@ -82,7 +85,7 @@ describe('createClient', () => {
 
     it('return a client with the expected type', async () => {
       createInferenceClientMock.mockReturnValue({
-        chatComplete: jest.fn(),
+        chatComplete: vi.fn(),
       } as any);
 
       const client = createClient({
@@ -151,7 +154,7 @@ describe('createClient', () => {
 
     it('return a client with the expected type', async () => {
       bindClientMock.mockReturnValue({
-        chatComplete: jest.fn(),
+        chatComplete: vi.fn(),
       } as any);
 
       const client = createClient({

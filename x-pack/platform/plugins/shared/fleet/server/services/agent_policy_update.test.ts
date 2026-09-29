@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../mocks';
@@ -14,21 +16,30 @@ import { appContextService } from './app_context';
 import { getAgentById, getAgentPolicyForAgent, getAgentsByKuery } from './agents';
 import * as apiKeys from './api_keys';
 
-jest.mock('./agents/crud', () => ({
-  ...jest.requireActual('./agents/crud'),
-  getAgentsByKuery: jest.fn(),
-  getAgentById: jest.fn(),
-  getAgentPolicyForAgent: jest.fn(),
-}));
-jest.mock('./api_keys');
-jest.mock('./agent_policy', () => ({
-  agentPolicyService: {
-    deployPolicy: jest.fn().mockResolvedValue(undefined),
-  },
-}));
-jest.mock('./secrets', () => ({
-  isActionSecretStorageEnabled: jest.fn(),
-}));
+vi.mock('./agents/crud', async () => {
+      const mocked = {
+      ...(await vi.importActual('./agents/crud')),
+      getAgentsByKuery: vi.fn(),
+      getAgentById: vi.fn(),
+      getAgentPolicyForAgent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./api_keys');
+vi.mock('./agent_policy', () => {
+      const mocked = {
+      agentPolicyService: {
+        deployPolicy: vi.fn().mockResolvedValue(undefined),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./secrets', () => {
+      const mocked = {
+      isActionSecretStorageEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('agentPolicyUpdateEventHandler', () => {
   describe('soClient selection', () => {
@@ -48,7 +59,7 @@ describe('agentPolicyUpdateEventHandler', () => {
         })
       );
 
-      jest.mocked(apiKeys.generateEnrollmentAPIKey).mockResolvedValue({} as any);
+      vi.mocked(apiKeys.generateEnrollmentAPIKey).mockResolvedValue({} as any);
     });
 
     afterEach(() => {
@@ -76,7 +87,7 @@ describe('agentPolicyUpdateEventHandler', () => {
       const scopedClient = savedObjectsClientMock.create();
       // getInternalUserSOClientForSpaceId('test') calls asScopedToNamespace — mock it via
       // getUnsafeInternalClient returning a client whose asScopedToNamespace returns scopedClient
-      withSpaceExtClient.asScopedToNamespace = jest.fn().mockReturnValue(scopedClient);
+      withSpaceExtClient.asScopedToNamespace = vi.fn().mockReturnValue(scopedClient);
 
       await agentPolicyUpdateEventHandler(esClient, 'created', 'policy-1', {
         spaceId: 'test',
@@ -95,9 +106,9 @@ describe('agentPolicyUpdateEventHandler', () => {
     it('should unenroll agentless agents', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       appContextService.start(createAppContextStartContractMock());
-      jest.mocked(apiKeys.generateEnrollmentAPIKey).mockResolvedValue({} as any);
+      vi.mocked(apiKeys.generateEnrollmentAPIKey).mockResolvedValue({} as any);
 
-      jest
+      vi
         .mocked(getAgentsByKuery)
         .mockResolvedValueOnce({
           agents: [{ id: 'agent1' }],
@@ -105,10 +116,10 @@ describe('agentPolicyUpdateEventHandler', () => {
         .mockResolvedValueOnce({
           agents: [],
         } as any);
-      jest.mocked(getAgentById).mockResolvedValue({
+      vi.mocked(getAgentById).mockResolvedValue({
         id: 'agent1',
       } as any);
-      jest.mocked(getAgentPolicyForAgent).mockResolvedValue({
+      vi.mocked(getAgentPolicyForAgent).mockResolvedValue({
         supports_agentless: true,
       } as any);
       await agentPolicyUpdateEventHandler(esClient, 'deleted', 'test1');

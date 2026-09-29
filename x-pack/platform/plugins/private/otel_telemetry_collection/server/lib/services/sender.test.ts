@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { OtelTelemetrySender } from './sender';
@@ -49,15 +52,15 @@ const makeResult = (serviceId: string): OtelPerServiceResult => ({
 
 describe('OtelTelemetrySender', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let analytics: jest.Mocked<AnalyticsServiceStart>;
+  let analytics: Mocked<AnalyticsServiceStart>;
   let sender: OtelTelemetrySender;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggingSystemMock.createLogger();
     analytics = {
-      reportEvent: jest.fn(),
-    } as unknown as jest.Mocked<AnalyticsServiceStart>;
+      reportEvent: vi.fn(),
+    } as unknown as Mocked<AnalyticsServiceStart>;
     sender = new OtelTelemetrySender(logger, analytics);
   });
 

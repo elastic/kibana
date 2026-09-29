@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { read } from './plugin_reader';
 
 export const mockPlugin = {
-  setup: jest.fn(),
-  start: jest.fn(),
-  stop: jest.fn(),
+  setup: vi.fn(),
+  start: vi.fn(),
+  stop: vi.fn(),
 };
-export const mockInitializer = jest.fn(() => mockPlugin);
+export const mockInitializer = vi.fn(() => mockPlugin);
 
-export const mockPluginReader = jest.fn((() => ({
+export const mockPluginReader = vi.fn((() => ({
   plugin: mockInitializer,
 })) as typeof read);
 
-jest.mock('./plugin_reader', () => ({
-  read: mockPluginReader,
-}));
+vi.mock('./plugin_reader', () => {
+      const mocked = {
+      read: mockPluginReader,
+    };
+      return { ...mocked, default: mocked };
+    });

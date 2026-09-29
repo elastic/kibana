@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useUpsertResources } from './use_upsert_resources';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { MigrationSource } from '../../../common/types';
 
-jest.mock('../../../../common/lib/kibana/kibana_react');
+vi.mock('../../../../common/lib/kibana/kibana_react');
 
-const mockedUseKibana = useKibana as jest.Mock;
-const mockUpsertMigrationResources = jest.fn();
-const mockAddError = jest.fn();
+const mockedUseKibana = useKibana as Mock;
+const mockUpsertMigrationResources = vi.fn();
+const mockAddError = vi.fn();
 
 describe('useUpsertResources', () => {
-  const mockOnSuccess = jest.fn();
+  const mockOnSuccess = vi.fn();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockedUseKibana.mockReturnValue({
       services: {
         siemMigrations: {

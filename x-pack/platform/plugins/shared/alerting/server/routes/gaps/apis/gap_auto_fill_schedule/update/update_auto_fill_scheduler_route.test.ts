@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../../lib/license_api_access';
@@ -15,13 +18,16 @@ import { updateAutoFillSchedulerRoute } from './update_auto_fill_scheduler_route
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('updateAutoFillSchedulerRoute', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const mockUpdateRequest = {
@@ -135,7 +141,7 @@ describe('updateAutoFillSchedulerRoute', () => {
 
     updateAutoFillSchedulerRoute(router, licenseState);
 
-    (licenseState.ensureLicenseForGapAutoFillScheduler as jest.Mock).mockImplementation(() => {
+    (licenseState.ensureLicenseForGapAutoFillScheduler as Mock).mockImplementation(() => {
       throw new Error('License check failed');
     });
     const [, handler] = router.put.mock.calls[0];

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { EvaluatorDefinitionClient } from '../storage/evaluators/evaluator_definition_client';
 import type { EvaluatorDefinitionDocument, LlmJudgeConfig } from './user_defined/types';
 import { createEvaluatorRegistry } from './registry';
@@ -32,12 +35,12 @@ const storedDefinition = (
 
 const createDefinitionClient = (documents: EvaluatorDefinitionDocument[]) =>
   ({
-    listLatest: jest.fn(async () => documents),
-    getLatest: jest.fn(async (name: string) => documents.find((doc) => doc.name === name)),
-    getVersion: jest.fn(async (name: string, version: string) =>
+    listLatest: vi.fn(async () => documents),
+    getLatest: vi.fn(async (name: string) => documents.find((doc) => doc.name === name)),
+    getVersion: vi.fn(async (name: string, version: string) =>
       documents.find((doc) => doc.name === name && doc.version === version)
     ),
-  } as unknown as jest.Mocked<EvaluatorDefinitionClient>);
+  } as unknown as Mocked<EvaluatorDefinitionClient>);
 
 const createRegistry = (documents: EvaluatorDefinitionDocument[] = []) => {
   const definitionClient = createDefinitionClient(documents);
@@ -162,7 +165,7 @@ describe('createEvaluatorRegistry', () => {
 
     it('reads the store for the space it was scoped to', async () => {
       const definitionClient = createDefinitionClient([]);
-      const getDefinitionClient = jest.fn(() => definitionClient);
+      const getDefinitionClient = vi.fn(() => definitionClient);
       const registry = createEvaluatorRegistry({ getDefinitionClient });
 
       await registry.asScoped({ spaceId: 'marketing' }).list();

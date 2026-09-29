@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
 
 import type { AnalyticsCollection } from '../../../../../common/types/analytics';
@@ -20,8 +22,8 @@ describe('fetchAnalyticsCollectionLogic', () => {
   const { mount } = new LogicMounter(FetchAnalyticsCollectionLogic);
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
     apiLogicMount();
     mount();
   });
@@ -52,7 +54,7 @@ describe('fetchAnalyticsCollectionLogic', () => {
     it('calls makeRequest on fetchAnalyticsCollections', async () => {
       const name = 'name';
 
-      FetchAnalyticsCollectionLogic.actions.makeRequest = jest.fn();
+      FetchAnalyticsCollectionLogic.actions.makeRequest = vi.fn();
       FetchAnalyticsCollectionLogic.actions.fetchAnalyticsCollection(name);
       expect(FetchAnalyticsCollectionLogic.actions.makeRequest).toHaveBeenCalledWith({
         name,

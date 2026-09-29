@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of, Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { httpServiceMock } from '@kbn/core/server/mocks';
@@ -35,7 +37,7 @@ describe('backgroundTaskUtilizationRoute', () => {
   const logger = loggingSystemMock.create().get();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('registers internal and public route', async () => {

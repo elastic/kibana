@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
@@ -34,10 +36,10 @@ describe('IP Overview Component', () => {
       ip: '10.10.10.10',
       isInDetailsSidePanel: false,
       isLoadingAnomaliesData: false,
-      narrowDateRange: jest.fn() as unknown as NarrowDateRange,
+      narrowDateRange: vi.fn() as unknown as NarrowDateRange,
       startDate: '2019-06-15T06:00:00.000Z',
       type: networkModel.NetworkType.details,
-      updateFlowTargetAction: jest.fn() as unknown as ActionCreator<{
+      updateFlowTargetAction: vi.fn() as unknown as ActionCreator<{
         flowTarget: FlowTargetSourceDest;
       }>,
       indexPatterns: [],

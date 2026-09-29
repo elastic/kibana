@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -20,7 +22,7 @@ type ServiceInstanceDetails =
 
 describe('InstanceDetails', () => {
   it('renders loading spinner when data is being fetched', () => {
-    jest
+    vi
       .spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher')
       .mockReturnValue({ data: undefined, status: FETCH_STATUS.LOADING });
     const { getByTestId } = renderWithTheme(
@@ -30,7 +32,7 @@ describe('InstanceDetails', () => {
   });
 
   it('renders all sections', () => {
-    jest.spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher').mockReturnValue({
+    vi.spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher').mockReturnValue({
       data: {
         service: { node: { name: 'foo' } },
         container: { id: 'baz' },
@@ -45,7 +47,7 @@ describe('InstanceDetails', () => {
   });
 
   it('hides service section', () => {
-    jest.spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher').mockReturnValue({
+    vi.spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher').mockReturnValue({
       data: {
         container: { id: 'baz' },
         cloud: { provider: 'bar' },
@@ -60,7 +62,7 @@ describe('InstanceDetails', () => {
   });
 
   it('hides container section', () => {
-    jest.spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher').mockReturnValue({
+    vi.spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher').mockReturnValue({
       data: {
         service: { node: { name: 'foo' } },
         cloud: { provider: 'bar' },
@@ -75,7 +77,7 @@ describe('InstanceDetails', () => {
   });
 
   it('hides cloud section', () => {
-    jest.spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher').mockReturnValue({
+    vi.spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher').mockReturnValue({
       data: {
         service: { node: { name: 'foo' } },
         container: { id: 'baz' },

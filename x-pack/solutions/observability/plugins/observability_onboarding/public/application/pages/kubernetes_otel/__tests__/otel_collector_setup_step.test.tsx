@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -15,59 +17,65 @@ import {
 } from '../../host/__tests__/test_helpers';
 import { OtelCollectorSetupStep } from '../otel_collector_setup_step';
 
-jest.mock('../../../quickstart_flows/otel_kubernetes/steps', () => ({
-  OtelKubernetesAddRepositoryStep: ({
-    addRepoCommand,
-    showTitle,
-    useInlineCopyOnly,
-  }: {
-    addRepoCommand: string;
-    showTitle?: boolean;
-    useInlineCopyOnly?: boolean;
-  }) => (
-    <div
-      data-test-subj="otelK8sAddRepoStep"
-      data-add-repo-command={addRepoCommand}
-      data-show-title={showTitle}
-      data-use-inline-copy-only={useInlineCopyOnly}
-    />
-  ),
-  OtelKubernetesInstallStep: ({
-    installStackCommand,
-    secretValues,
-    showTitle,
-    useInlineCopyOnly,
-  }: {
-    installStackCommand?: string;
-    secretValues?: string[];
-    showTitle?: boolean;
-    useInlineCopyOnly?: boolean;
-  }) => (
-    <div
-      data-test-subj="otelK8sInstallStep"
-      data-install-stack-command={installStackCommand}
-      data-secret-values={secretValues?.join('|')}
-      data-show-title={showTitle}
-      data-use-inline-copy-only={useInlineCopyOnly}
-    />
-  ),
-}));
+vi.mock('../../../quickstart_flows/otel_kubernetes/steps', () => {
+      const mocked = {
+      OtelKubernetesAddRepositoryStep: ({
+        addRepoCommand,
+        showTitle,
+        useInlineCopyOnly,
+      }: {
+        addRepoCommand: string;
+        showTitle?: boolean;
+        useInlineCopyOnly?: boolean;
+      }) => (
+        <div
+          data-test-subj="otelK8sAddRepoStep"
+          data-add-repo-command={addRepoCommand}
+          data-show-title={showTitle}
+          data-use-inline-copy-only={useInlineCopyOnly}
+        />
+      ),
+      OtelKubernetesInstallStep: ({
+        installStackCommand,
+        secretValues,
+        showTitle,
+        useInlineCopyOnly,
+      }: {
+        installStackCommand?: string;
+        secretValues?: string[];
+        showTitle?: boolean;
+        useInlineCopyOnly?: boolean;
+      }) => (
+        <div
+          data-test-subj="otelK8sInstallStep"
+          data-install-stack-command={installStackCommand}
+          data-secret-values={secretValues?.join('|')}
+          data-show-title={showTitle}
+          data-use-inline-copy-only={useInlineCopyOnly}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../quickstart_flows/shared/masked_code_block', () => ({
-  MaskedCodeBlock: ({
-    value,
-    secrets,
-    dataTestSubj,
-  }: {
-    value: string;
-    secrets: string[];
-    dataTestSubj: string;
-  }) => (
-    <div data-test-subj={dataTestSubj} data-value={value} data-secrets={secrets.join('|')}>
-      {value}
-    </div>
-  ),
-}));
+vi.mock('../../../quickstart_flows/shared/masked_code_block', () => {
+      const mocked = {
+      MaskedCodeBlock: ({
+        value,
+        secrets,
+        dataTestSubj,
+      }: {
+        value: string;
+        secrets: string[];
+        dataTestSubj: string;
+      }) => (
+        <div data-test-subj={dataTestSubj} data-value={value} data-secrets={secrets.join('|')}>
+          {value}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
   addRepoCommand: 'helm repo add elastic https://helm.elastic.co',
@@ -79,7 +87,7 @@ const defaultProps = {
   elasticsearchUrl: 'https://elasticsearch.example',
   apiKeyEncoded: 'encoded-api-key',
   selectedCollectorMethod: 'edot' as const,
-  onCollectorMethodChange: jest.fn(),
+  onCollectorMethodChange: vi.fn(),
 };
 
 describe('OtelCollectorSetupStep', () => {
@@ -114,7 +122,7 @@ describe('OtelCollectorSetupStep', () => {
 
   it('reports collector method telemetry when a collector tab is selected', async () => {
     const services = buildHostPageServices();
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
     services.analytics.reportEvent = reportEvent;
 
     renderWithHostPageProviders(<OtelCollectorSetupStep {...defaultProps} />, { services });

@@ -19,61 +19,77 @@ const subfieldName = 'composite.field.a';
 const appendParentName = (key: string) => `${parentName}.${key}`;
 
 describe('getFieldPreviewChanges', () => {
-  it('should return new keys', (done) => {
-    const subj = new BehaviorSubject<FieldPreview[] | undefined>(undefined);
-    const changes = getFieldPreviewChanges(subj, parentName);
-    changes.subscribe((change) => {
-      expect(change).toStrictEqual({
-        [subfieldName]: { changeType: ChangeType.UPSERT, type: 'keyword' },
-      });
-      done();
-    });
-    subj.next([]);
-    subj.next([{ key: appendParentName(subfieldName), value: 'world', type: 'keyword' }]);
-  });
+  it('should return new keys', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-  it('should return updated type', (done) => {
-    const subj = new BehaviorSubject<FieldPreview[] | undefined>(undefined);
-    const changes = getFieldPreviewChanges(subj, parentName);
-    changes.subscribe((change) => {
-      expect(change).toStrictEqual({
-        [subfieldName]: { changeType: ChangeType.UPSERT, type: 'long' },
-      });
-      done();
-    });
-    subj.next([{ key: appendParentName(subfieldName), value: 'world', type: 'keyword' }]);
-    subj.next([{ key: appendParentName(subfieldName), value: 1, type: 'long' }]);
-  });
+          const subj = new BehaviorSubject<FieldPreview[] | undefined>(undefined);
+          const changes = getFieldPreviewChanges(subj, parentName);
+          changes.subscribe((change) => {
+            expect(change).toStrictEqual({
+              [subfieldName]: { changeType: ChangeType.UPSERT, type: 'keyword' },
+            });
+            done();
+          });
+          subj.next([]);
+          subj.next([{ key: appendParentName(subfieldName), value: 'world', type: 'keyword' }]);
+        
+      }));
 
-  it('should remove keys', (done) => {
-    const subj = new BehaviorSubject<FieldPreview[] | undefined>(undefined);
-    const changes = getFieldPreviewChanges(subj, parentName);
-    changes.subscribe((change) => {
-      expect(change).toStrictEqual({ [subfieldName]: { changeType: ChangeType.DELETE } });
-      done();
-    });
-    subj.next([{ key: appendParentName(subfieldName), value: 'world', type: 'keyword' }]);
-    subj.next([]);
-  });
+  it('should return updated type', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-  it('should add, update, and remove keys in a single change', (done) => {
-    const subj = new BehaviorSubject<FieldPreview[] | undefined>(undefined);
-    const changes = getFieldPreviewChanges(subj, parentName);
-    changes.subscribe((change) => {
-      expect(change).toStrictEqual({
-        [subfieldName]: { changeType: ChangeType.UPSERT, type: 'long' },
-        hello2: { changeType: ChangeType.DELETE },
-        hello3: { changeType: ChangeType.UPSERT, type: 'keyword' },
-      });
-      done();
-    });
-    subj.next([
-      { key: appendParentName(subfieldName), value: 'world', type: 'keyword' },
-      { key: appendParentName('hello2'), value: 'world', type: 'keyword' },
-    ]);
-    subj.next([
-      { key: appendParentName(subfieldName), value: 1, type: 'long' },
-      { key: appendParentName('hello3'), value: 'world', type: 'keyword' },
-    ]);
-  });
+          const subj = new BehaviorSubject<FieldPreview[] | undefined>(undefined);
+          const changes = getFieldPreviewChanges(subj, parentName);
+          changes.subscribe((change) => {
+            expect(change).toStrictEqual({
+              [subfieldName]: { changeType: ChangeType.UPSERT, type: 'long' },
+            });
+            done();
+          });
+          subj.next([{ key: appendParentName(subfieldName), value: 'world', type: 'keyword' }]);
+          subj.next([{ key: appendParentName(subfieldName), value: 1, type: 'long' }]);
+        
+      }));
+
+  it('should remove keys', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+          const subj = new BehaviorSubject<FieldPreview[] | undefined>(undefined);
+          const changes = getFieldPreviewChanges(subj, parentName);
+          changes.subscribe((change) => {
+            expect(change).toStrictEqual({ [subfieldName]: { changeType: ChangeType.DELETE } });
+            done();
+          });
+          subj.next([{ key: appendParentName(subfieldName), value: 'world', type: 'keyword' }]);
+          subj.next([]);
+        
+      }));
+
+  it('should add, update, and remove keys in a single change', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+          const subj = new BehaviorSubject<FieldPreview[] | undefined>(undefined);
+          const changes = getFieldPreviewChanges(subj, parentName);
+          changes.subscribe((change) => {
+            expect(change).toStrictEqual({
+              [subfieldName]: { changeType: ChangeType.UPSERT, type: 'long' },
+              hello2: { changeType: ChangeType.DELETE },
+              hello3: { changeType: ChangeType.UPSERT, type: 'keyword' },
+            });
+            done();
+          });
+          subj.next([
+            { key: appendParentName(subfieldName), value: 'world', type: 'keyword' },
+            { key: appendParentName('hello2'), value: 'world', type: 'keyword' },
+          ]);
+          subj.next([
+            { key: appendParentName(subfieldName), value: 1, type: 'long' },
+            { key: appendParentName('hello3'), value: 'world', type: 'keyword' },
+          ]);
+        
+      }));
 });

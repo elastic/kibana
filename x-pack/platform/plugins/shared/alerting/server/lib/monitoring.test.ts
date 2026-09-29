@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RuleMonitoring, RuleMonitoringHistory } from '../types';
 import {
   getExecutionDurationPercentiles,
@@ -159,7 +161,7 @@ describe('convertMonitoringFromRawAndVerify', () => {
       },
     };
 
-    const mockLoggerDebug = jest.fn();
+    const mockLoggerDebug = vi.fn();
     const mockLogger = {
       debug: mockLoggerDebug,
     };

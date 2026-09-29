@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -120,7 +123,7 @@ const createEsClient = (
   agentRows: EsqlRow[],
   loadSkillRows: EsqlRow[] = []
 ): ElasticsearchClient => {
-  const query = jest.fn(async ({ query: q, params }: EsqlQueryArgs) => {
+  const query = vi.fn(async ({ query: q, params }: EsqlQueryArgs) => {
     if (q.includes('"load_skill"')) {
       const requested = new Set((params ?? []).map((param) => String(param)));
       return esqlResponse(
@@ -151,8 +154,8 @@ const createEsClient = (
 const createSignalsService = () => {
   const writes: Array<{ spaceId: string; signals: Signal[] }> = [];
   const service: SignalsServiceApi = {
-    ensureIndex: jest.fn(async () => {}),
-    write: jest.fn(async (spaceId: string, signals: Signal[]) => {
+    ensureIndex: vi.fn(async () => {}),
+    write: vi.fn(async (spaceId: string, signals: Signal[]) => {
       writes.push({ spaceId, signals });
     }),
   };
@@ -243,7 +246,7 @@ describe('signal generator task run()', () => {
     });
 
     expect(result.state).toEqual({ watermark: 'prev' });
-    expect((esClient.esql.query as jest.Mock).mock.calls).toHaveLength(0);
+    expect((esClient.esql.query as Mock).mock.calls).toHaveLength(0);
     expect(writes).toHaveLength(0);
   });
 
@@ -368,7 +371,7 @@ describe('signal generator task run()', () => {
     expect(signal.data.agent).toEqual({ id: 'agent-9', name: 'Support' });
     expect(signal.data.conversation_id).toBe('conv-a');
 
-    const invokeCall = (esClient.esql.query as jest.Mock).mock.calls.find(([arg]) =>
+    const invokeCall = (esClient.esql.query as Mock).mock.calls.find(([arg]) =>
       arg.query.includes('invoke_agent')
     );
     expect(invokeCall?.[0].params).toEqual(['trace-a']);
@@ -377,7 +380,7 @@ describe('signal generator task run()', () => {
   it('reads only execute_esql tool spans (filters non-ES|QL tools at read-time)', async () => {
     const { esClient } = await run({ toolRows: [toolRow()], agentRows: [] });
 
-    const toolCall = (esClient.esql.query as jest.Mock).mock.calls.find(([arg]) =>
+    const toolCall = (esClient.esql.query as Mock).mock.calls.find(([arg]) =>
       arg.query.includes('execute_tool')
     );
     expect(toolCall?.[0].query).toContain(
@@ -442,7 +445,7 @@ describe('signal generator task run()', () => {
       state: { watermark: '2026-07-08T12:00:00.000Z' },
     });
 
-    const loadSkillCall = (esClient.esql.query as jest.Mock).mock.calls.find(([arg]) =>
+    const loadSkillCall = (esClient.esql.query as Mock).mock.calls.find(([arg]) =>
       arg.query.includes('"load_skill"')
     );
     expect(loadSkillCall?.[0].params).toEqual(['trace-analysis']);
@@ -453,8 +456,8 @@ describe('signal generator task run()', () => {
     const controller = new AbortController();
     const writes: Array<{ spaceId: string; signals: Signal[] }> = [];
     const service: SignalsServiceApi = {
-      ensureIndex: jest.fn(async () => {}),
-      write: jest.fn(async (spaceId: string, signals: Signal[]) => {
+      ensureIndex: vi.fn(async () => {}),
+      write: vi.fn(async (spaceId: string, signals: Signal[]) => {
         writes.push({ spaceId, signals });
         controller.abort();
       }),
@@ -488,8 +491,8 @@ describe('signal generator task run()', () => {
   it('does not advance the watermark and still attempts other spaces when one space write rejects', async () => {
     const writes: Array<{ spaceId: string; signals: Signal[] }> = [];
     const service: SignalsServiceApi = {
-      ensureIndex: jest.fn(async () => {}),
-      write: jest.fn(async (spaceId: string, signals: Signal[]) => {
+      ensureIndex: vi.fn(async () => {}),
+      write: vi.fn(async (spaceId: string, signals: Signal[]) => {
         if (spaceId === 'default') {
           throw new Error('boom');
         }
@@ -536,8 +539,8 @@ describe('signal generator task run()', () => {
 describe('scheduling', () => {
   const createTaskManagerStart = () =>
     ({
-      ensureScheduled: jest.fn(async () => ({})),
-      removeIfExists: jest.fn(async () => ({})),
+      ensureScheduled: vi.fn(async () => ({})),
+      removeIfExists: vi.fn(async () => ({})),
     } as unknown as TaskManagerStartContract);
 
   it('schedules the task with the fixed id/type/interval', async () => {

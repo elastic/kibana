@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CoreSetup, CoreStart, HttpFetchOptions, HttpHandler } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -35,38 +38,41 @@ import { getMockSearchConfig } from '../../../config.mock';
 import type { ICPSManager } from '@kbn/cps-utils';
 import moment from 'moment';
 
-jest.mock('./create_request_hash', () => {
-  const originalModule = jest.requireActual('./create_request_hash');
+vi.mock('./create_request_hash', async () => {
+  const originalModule = (await vi.importActual('./create_request_hash'));
   return {
     ...originalModule,
-    createRequestHash: jest.fn().mockImplementation((input) => {
+    createRequestHash: vi.fn().mockImplementation((input) => {
       const { preference, ...params } = input;
       return JSON.stringify(params);
     }),
   };
 });
 
-jest.mock('./search_session_incomplete_warning', () => ({
-  SearchSessionIncompleteWarning: jest.fn(),
-}));
-const SearchSessionIncompleteWarningMock = jest.mocked(SearchSessionIncompleteWarning);
+vi.mock('./search_session_incomplete_warning', () => {
+      const mocked = {
+      SearchSessionIncompleteWarning: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const SearchSessionIncompleteWarningMock = vi.mocked(SearchSessionIncompleteWarning);
 
 let searchInterceptor: SearchInterceptor;
 
 const flushPromises = () =>
-  new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
+  new Promise((resolve) => require('timers').setImmediate(resolve));
 
-jest.useFakeTimers({ legacyFakeTimers: true });
+vi.useFakeTimers({ legacyFakeTimers: true });
 
 const timeTravel = async (msToRun = 0) => {
   await flushPromises();
-  jest.advanceTimersByTime(msToRun);
+  vi.advanceTimersByTime(msToRun);
   return flushPromises();
 };
 
-const next = jest.fn();
-const error = jest.fn();
-const complete = jest.fn();
+const next = vi.fn();
+const error = vi.fn();
+const complete = vi.fn();
 
 function getHttpMock(responses: any[]) {
   let i = 0;
@@ -127,7 +133,7 @@ function getMockSearchResponse(
 describe('SearchInterceptor', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
   let mockCoreStart: MockedKeys<CoreStart>;
-  let sessionService: jest.Mocked<ISessionService>;
+  let sessionService: Mocked<ISessionService>;
   let sessionState$: BehaviorSubject<SearchSessionState>;
 
   beforeEach(() => {
@@ -136,12 +142,12 @@ describe('SearchInterceptor', () => {
     sessionState$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
     const dataPluginMockStart = dataPluginMock.createStartContract();
     sessionService = {
-      ...(dataPluginMockStart.search.session as jest.Mocked<ISessionService>),
+      ...(dataPluginMockStart.search.session as Mocked<ISessionService>),
       state$: sessionState$,
     };
 
-    mockCoreSetup.http.post = jest.fn();
-    mockCoreSetup.http.delete = jest.fn().mockResolvedValue({});
+    mockCoreSetup.http.post = vi.fn();
+    mockCoreSetup.http.delete = vi.fn().mockResolvedValue({});
     mockCoreSetup.uiSettings.get.mockImplementation((name: string) => {
       switch (name) {
         case UI_SETTINGS.SEARCH_TIMEOUT:
@@ -154,8 +160,8 @@ describe('SearchInterceptor', () => {
     next.mockReset();
     error.mockReset();
     complete.mockReset();
-    jest.clearAllTimers();
-    jest.clearAllMocks();
+    vi.clearAllTimers();
+    vi.clearAllMocks();
 
     const inspectorServiceMock = {
       open: () => {},
@@ -1034,7 +1040,7 @@ describe('SearchInterceptor', () => {
           sessionId?: string;
         } | null
       ) => {
-        const sessionServiceMock = sessionService as jest.Mocked<ISessionService>;
+        const sessionServiceMock = sessionService as Mocked<ISessionService>;
         sessionServiceMock.getSearchOptions.mockImplementation(() =>
           opts && opts.sessionId
             ? {
@@ -1054,7 +1060,7 @@ describe('SearchInterceptor', () => {
       };
 
       afterEach(() => {
-        const sessionServiceMock = sessionService as jest.Mocked<ISessionService>;
+        const sessionServiceMock = sessionService as Mocked<ISessionService>;
         sessionServiceMock.getSearchOptions.mockReset();
       });
 
@@ -1086,7 +1092,7 @@ describe('SearchInterceptor', () => {
         );
 
         expect(
-          (sessionService as jest.Mocked<ISessionService>).getSearchOptions
+          (sessionService as Mocked<ISessionService>).getSearchOptions
         ).toHaveBeenCalledWith(sessionId);
       });
 
@@ -1105,7 +1111,7 @@ describe('SearchInterceptor', () => {
         );
 
         expect(
-          (sessionService as jest.Mocked<ISessionService>).getSearchOptions
+          (sessionService as Mocked<ISessionService>).getSearchOptions
         ).toHaveBeenCalledWith(sessionId);
       });
 
@@ -1332,7 +1338,7 @@ describe('SearchInterceptor', () => {
         );
         sessionService.getSessionId.mockImplementation(() => sessionId);
 
-        const trackSearchComplete = jest.fn();
+        const trackSearchComplete = vi.fn();
         sessionService.trackSearch.mockImplementation(() => ({
           complete: trackSearchComplete,
           error: () => {},
@@ -1513,12 +1519,12 @@ describe('SearchInterceptor', () => {
         );
         sessionService.getSessionId.mockImplementation(() => sessionId);
 
-        const completeSearch = jest.fn();
+        const completeSearch = vi.fn();
 
         sessionService.trackSearch.mockImplementation((params) => ({
           complete: completeSearch,
-          error: jest.fn(),
-          beforePoll: jest.fn(() => {
+          error: vi.fn(),
+          beforePoll: vi.fn(() => {
             return [{ isSearchStored: false }, () => {}];
           }),
         }));
@@ -1722,9 +1728,9 @@ describe('SearchInterceptor', () => {
         expect(error).toHaveBeenCalledTimes(1);
         expect(complete).toHaveBeenCalledTimes(0);
 
-        const error2 = jest.fn();
-        const next2 = jest.fn();
-        const complete2 = jest.fn();
+        const error2 = vi.fn();
+        const next2 = vi.fn();
+        const complete2 = vi.fn();
 
         // Search for the same thing again
         searchInterceptor
@@ -1746,12 +1752,12 @@ describe('SearchInterceptor', () => {
         );
         sessionService.getSessionId.mockImplementation(() => sessionId);
 
-        const completeSearch = jest.fn();
+        const completeSearch = vi.fn();
 
         sessionService.trackSearch.mockImplementation((params) => ({
           complete: completeSearch,
-          error: jest.fn(),
-          beforePoll: jest.fn(() => {
+          error: vi.fn(),
+          beforePoll: vi.fn(() => {
             return [{ isSearchStored: false }, () => {}];
           }),
         }));
@@ -1778,9 +1784,9 @@ describe('SearchInterceptor', () => {
         expect(complete).toHaveBeenCalledTimes(0);
         expect(sessionService.trackSearch).toHaveBeenCalledTimes(1);
 
-        const next2 = jest.fn();
-        const error2 = jest.fn();
-        const complete2 = jest.fn();
+        const next2 = vi.fn();
+        const error2 = vi.fn();
+        const complete2 = vi.fn();
         const response2 = searchInterceptor.search(req, { pollInterval: 1, sessionId });
         response2.subscribe({ next: next2, error: error2, complete: complete2 });
         await timeTravel(0);
@@ -1813,12 +1819,12 @@ describe('SearchInterceptor', () => {
         );
         sessionService.getSessionId.mockImplementation(() => sessionId);
 
-        const completeSearch = jest.fn();
+        const completeSearch = vi.fn();
 
         sessionService.trackSearch.mockImplementation((params) => ({
           complete: completeSearch,
-          error: jest.fn(),
-          beforePoll: jest.fn(() => {
+          error: vi.fn(),
+          beforePoll: vi.fn(() => {
             return [{ isSearchStored: false }, () => {}];
           }),
         }));
@@ -1842,9 +1848,9 @@ describe('SearchInterceptor', () => {
         expect(sessionService.trackSearch).toHaveBeenCalledTimes(1);
         expect(completeSearch).not.toHaveBeenCalled();
 
-        const next2 = jest.fn();
-        const error2 = jest.fn();
-        const complete2 = jest.fn();
+        const next2 = vi.fn();
+        const error2 = vi.fn();
+        const complete2 = vi.fn();
         const response2 = searchInterceptor.search(req, {
           pollInterval: 0,
           sessionId,
@@ -1915,12 +1921,12 @@ describe('SearchInterceptor', () => {
         );
         sessionService.getSessionId.mockImplementation(() => sessionId);
 
-        const completeSearch = jest.fn();
+        const completeSearch = vi.fn();
 
         sessionService.trackSearch.mockImplementation((params) => ({
           complete: completeSearch,
-          error: jest.fn(),
-          beforePoll: jest.fn(() => {
+          error: vi.fn(),
+          beforePoll: vi.fn(() => {
             return [{ isSearchStored: false }, () => {}];
           }),
         }));
@@ -2129,7 +2135,7 @@ describe('SearchInterceptor', () => {
 
         response.subscribe({ next, error });
         setTimeout(() => abortController.abort(), 200);
-        jest.advanceTimersByTime(5000);
+        vi.advanceTimersByTime(5000);
 
         await flushPromises();
       });
@@ -2434,7 +2440,7 @@ describe('SearchInterceptor', () => {
 
         window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: false }));
 
-        const calls = (mockCoreSetup.http.delete as jest.Mock).mock.calls as Array<[string]>;
+        const calls = (mockCoreSetup.http.delete as Mock).mock.calls as Array<[string]>;
         const callsForOurSearch = calls.filter(([path]) => path.includes('async-id-2'));
         expect(callsForOurSearch).toHaveLength(0);
       });
@@ -2468,7 +2474,7 @@ describe('SearchInterceptor', () => {
 
         window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: false }));
 
-        const calls = (mockCoreSetup.http.delete as jest.Mock).mock.calls as Array<[string]>;
+        const calls = (mockCoreSetup.http.delete as Mock).mock.calls as Array<[string]>;
         const callsForOurSearch = calls.filter(([path]) => path.includes('async-id-3'));
         expect(callsForOurSearch).toHaveLength(0);
       });
@@ -2516,7 +2522,7 @@ describe('SearchInterceptor', () => {
   describe('project_routing parameter handling', () => {
     const createMockCPSManager = (projectRouting: string | undefined): ICPSManager =>
       ({
-        getProjectRouting: jest
+        getProjectRouting: vi
           .fn()
           .mockImplementation(
             (passedProjectRouting?: string) => passedProjectRouting ?? projectRouting
@@ -2550,7 +2556,7 @@ describe('SearchInterceptor', () => {
     describe('ESQL_ASYNC_SEARCH_STRATEGY', () => {
       test('User passes "_alias:*" with global "_alias:_origin" - sends to ES', async () => {
         searchInterceptor = getSearchInterceptor({
-          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
+          getCPSManager: vi.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
         });
 
         await searchInterceptor
@@ -2569,7 +2575,7 @@ describe('SearchInterceptor', () => {
 
       test('User passes "_alias:*" with global "_alias:*" - sends to ES', async () => {
         searchInterceptor = getSearchInterceptor({
-          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:*')),
+          getCPSManager: vi.fn().mockReturnValue(createMockCPSManager('_alias:*')),
         });
 
         await searchInterceptor
@@ -2588,7 +2594,7 @@ describe('SearchInterceptor', () => {
 
       test('User passes "_alias:_origin" with global "_alias:_origin" - sends to ES', async () => {
         searchInterceptor = getSearchInterceptor({
-          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
+          getCPSManager: vi.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
         });
 
         await searchInterceptor
@@ -2607,7 +2613,7 @@ describe('SearchInterceptor', () => {
 
       test('User passes "_alias:_origin" with global "_alias:*" - sends to ES', async () => {
         searchInterceptor = getSearchInterceptor({
-          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:*')),
+          getCPSManager: vi.fn().mockReturnValue(createMockCPSManager('_alias:*')),
         });
 
         await searchInterceptor
@@ -2626,7 +2632,7 @@ describe('SearchInterceptor', () => {
 
       test('User passes nothing with global "_alias:_origin" - sends global to ES', async () => {
         searchInterceptor = getSearchInterceptor({
-          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
+          getCPSManager: vi.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
         });
 
         await searchInterceptor
@@ -2642,7 +2648,7 @@ describe('SearchInterceptor', () => {
 
       test('User passes nothing with global "_alias:*" - sends global to ES', async () => {
         searchInterceptor = getSearchInterceptor({
-          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:*')),
+          getCPSManager: vi.fn().mockReturnValue(createMockCPSManager('_alias:*')),
         });
 
         await searchInterceptor
@@ -2658,7 +2664,7 @@ describe('SearchInterceptor', () => {
 
       test('User passes nothing with global undefined - does not send to ES', async () => {
         searchInterceptor = getSearchInterceptor({
-          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager(undefined)),
+          getCPSManager: vi.fn().mockReturnValue(createMockCPSManager(undefined)),
         });
 
         await searchInterceptor
@@ -2693,7 +2699,7 @@ describe('SearchInterceptor', () => {
     describe('ENHANCED_ES_SEARCH_STRATEGY', () => {
       test('User passes "_alias:*" with global "_alias:_origin" - sends to ES', async () => {
         searchInterceptor = getSearchInterceptor({
-          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
+          getCPSManager: vi.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
         });
 
         await searchInterceptor
@@ -2712,7 +2718,7 @@ describe('SearchInterceptor', () => {
 
       test('User passes "_alias:_origin" with global "_alias:*" - sends to ES', async () => {
         searchInterceptor = getSearchInterceptor({
-          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:*')),
+          getCPSManager: vi.fn().mockReturnValue(createMockCPSManager('_alias:*')),
         });
 
         await searchInterceptor
@@ -2731,7 +2737,7 @@ describe('SearchInterceptor', () => {
 
       test('User passes nothing with global "_alias:_origin" - sends global to ES', async () => {
         searchInterceptor = getSearchInterceptor({
-          getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
+          getCPSManager: vi.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
         });
 
         await searchInterceptor

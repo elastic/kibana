@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { render, screen, within } from '@testing-library/react';
@@ -16,7 +18,7 @@ describe('ExceptionsTableUtilityBar', () => {
     render(
       <TestProviders>
         <ExceptionsTableUtilityBar
-          onRefresh={jest.fn()}
+          onRefresh={vi.fn()}
           totalExceptionLists={EXCEPTION_LISTS_NUMBER}
         />
       </TestProviders>
@@ -28,7 +30,7 @@ describe('ExceptionsTableUtilityBar', () => {
   });
 
   it('invokes refresh on refresh action click', () => {
-    const mockRefresh = jest.fn();
+    const mockRefresh = vi.fn();
     render(
       <TestProviders>
         <ExceptionsTableUtilityBar onRefresh={mockRefresh} totalExceptionLists={1} />

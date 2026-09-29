@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { IndicatorsPage } from './indicators';
@@ -16,20 +19,23 @@ import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { TABLE_TEST_ID } from '../components/table/test_ids';
 import { mockTimeRange } from '../../../mocks/mock_indicators_filters_context';
 
-jest.mock('../../query_bar/hooks/use_filters');
-jest.mock('../hooks/use_indicators');
-jest.mock('../hooks/use_aggregated_indicators');
+vi.mock('../../query_bar/hooks/use_filters');
+vi.mock('../hooks/use_indicators');
+vi.mock('../hooks/use_aggregated_indicators');
 
-jest.mock('../../../../common/components/filters_global', () => ({
-  FiltersGlobal: () => <div data-test-subj="SiemSearchBar" />,
-}));
+vi.mock('../../../../common/components/filters_global', () => {
+      const mocked = {
+      FiltersGlobal: () => <div data-test-subj="SiemSearchBar" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const stub = () => {};
 
 describe('<IndicatorsPage />', () => {
   beforeAll(() => {
     (
-      useAggregatedIndicators as jest.MockedFunction<typeof useAggregatedIndicators>
+      useAggregatedIndicators as MockedFunction<typeof useAggregatedIndicators>
     ).mockReturnValue({
       dateRange: { min: moment(), max: moment() },
       series: [],
@@ -42,7 +48,7 @@ describe('<IndicatorsPage />', () => {
       },
     });
 
-    (useIndicators as jest.MockedFunction<typeof useIndicators>).mockReturnValue({
+    (useIndicators as MockedFunction<typeof useIndicators>).mockReturnValue({
       indicators: [{ fields: {} }],
       indicatorCount: 1,
       isLoading: false,
@@ -58,7 +64,7 @@ describe('<IndicatorsPage />', () => {
       },
     });
 
-    (useFilters as jest.MockedFunction<typeof useFilters>).mockReturnValue({
+    (useFilters as MockedFunction<typeof useFilters>).mockReturnValue({
       filters: [],
       filterQuery: { language: 'kuery', query: '' },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

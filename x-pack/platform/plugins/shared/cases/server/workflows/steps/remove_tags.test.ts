@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import type { CasesClient } from '../../client';
 import { removeTagsStepDefinition } from './remove_tags';
@@ -18,11 +20,11 @@ describe('removeTagsStepDefinition', () => {
     const inputTags = ['triage', 'coke'];
     const remainingTags = ['pepsi'];
     const currentCase = { ...createCaseResponseFixture, tags: ['coke', 'pepsi', 'triage'] };
-    const get = jest.fn().mockResolvedValue(currentCase);
-    const bulkUpdate = jest
+    const get = vi.fn().mockResolvedValue(currentCase);
+    const bulkUpdate = vi
       .fn()
       .mockResolvedValue([{ ...createCaseResponseFixture, tags: remainingTags }]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
     const definition = removeTagsStepDefinition(getCasesClient);
@@ -49,9 +51,9 @@ describe('removeTagsStepDefinition', () => {
 
   it('leaves tags unchanged when none of the input tags are present', async () => {
     const currentCase = { ...createCaseResponseFixture, tags: ['coke', 'pepsi'] };
-    const get = jest.fn().mockResolvedValue(currentCase);
-    const bulkUpdate = jest.fn().mockResolvedValue([currentCase]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(currentCase);
+    const bulkUpdate = vi.fn().mockResolvedValue([currentCase]);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
     const definition = removeTagsStepDefinition(getCasesClient);

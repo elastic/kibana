@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import type {
@@ -53,7 +56,7 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
       return renderResult;
     };
 
-    jest.spyOn(appTestContext.coreStart.http.basePath, 'get').mockReturnValue('');
+    vi.spyOn(appTestContext.coreStart.http.basePath, 'get').mockReturnValue('');
   });
 
   it('should show download button if file is available', async () => {
@@ -76,7 +79,7 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
   });
 
   it('should show space aware download link when in a space other than `default`', async () => {
-    (appTestContext.coreStart.http.basePath.get as jest.Mock).mockReturnValue('/s/some_space');
+    (appTestContext.coreStart.http.basePath.get as Mock).mockReturnValue('/s/some_space');
     render();
     await waitFor(() => {
       expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CaseSeverity } from '../../../common/types/domain';
 import { render, screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -13,7 +15,7 @@ import { SeveritySelector } from './selector';
 import userEvent from '@testing-library/user-event';
 
 describe('Severity field selector', () => {
-  const onSeverityChange = jest.fn();
+  const onSeverityChange = vi.fn();
   it('renders a list of severity fields', () => {
     render(
       <SeveritySelector

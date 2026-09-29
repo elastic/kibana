@@ -7,22 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 
 import { useAutoRefresh } from './use_auto_refresh';
 
 describe('useAutoRefresh', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('shows full interval countdown when initially paused', () => {
     const { result } = renderHook(() =>
-      useAutoRefresh({ isPaused: true, intervalMs: 5000, onRefresh: jest.fn() })
+      useAutoRefresh({ isPaused: true, intervalMs: 5000, onRefresh: vi.fn() })
     );
 
     expect(result.current.secondsRemaining).toBe(5);
@@ -30,26 +32,26 @@ describe('useAutoRefresh', () => {
 
   it('returns null when interval is zero, negative, or non-finite', () => {
     const { result: zero } = renderHook(() =>
-      useAutoRefresh({ isPaused: false, intervalMs: 0, onRefresh: jest.fn() })
+      useAutoRefresh({ isPaused: false, intervalMs: 0, onRefresh: vi.fn() })
     );
 
     expect(zero.current.secondsRemaining).toBeNull();
 
     const { result: neg } = renderHook(() =>
-      useAutoRefresh({ isPaused: false, intervalMs: -1000, onRefresh: jest.fn() })
+      useAutoRefresh({ isPaused: false, intervalMs: -1000, onRefresh: vi.fn() })
     );
 
     expect(neg.current.secondsRemaining).toBeNull();
 
     const { result: nan } = renderHook(() =>
-      useAutoRefresh({ isPaused: false, intervalMs: Number.NaN, onRefresh: jest.fn() })
+      useAutoRefresh({ isPaused: false, intervalMs: Number.NaN, onRefresh: vi.fn() })
     );
 
     expect(nan.current.secondsRemaining).toBeNull();
   });
 
   it('counts down each second, calls onRefresh at zero, then resets the countdown', () => {
-    const onRefresh = jest.fn();
+    const onRefresh = vi.fn();
     const { result } = renderHook(() =>
       useAutoRefresh({ isPaused: false, intervalMs: 3000, onRefresh })
     );
@@ -57,19 +59,19 @@ describe('useAutoRefresh', () => {
     expect(result.current.secondsRemaining).toBe(3);
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     expect(result.current.secondsRemaining).toBe(2);
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     expect(result.current.secondsRemaining).toBe(1);
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     expect(onRefresh).toHaveBeenCalledTimes(1);
@@ -77,14 +79,14 @@ describe('useAutoRefresh', () => {
   });
 
   it('stops firing `onRefresh` after pause and preserves the countdown', () => {
-    const onRefresh = jest.fn();
+    const onRefresh = vi.fn();
     const { result, rerender } = renderHook(
       ({ paused }) => useAutoRefresh({ isPaused: paused, intervalMs: 2000, onRefresh }),
       { initialProps: { paused: false } }
     );
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     expect(result.current.secondsRemaining).toBe(1);
@@ -93,7 +95,7 @@ describe('useAutoRefresh', () => {
     expect(result.current.secondsRemaining).toBe(1);
 
     act(() => {
-      jest.advanceTimersByTime(10_000);
+      vi.advanceTimersByTime(10_000);
     });
 
     expect(onRefresh).not.toHaveBeenCalled();
@@ -101,14 +103,14 @@ describe('useAutoRefresh', () => {
   });
 
   it('resumes countdown from paused position on unpause', () => {
-    const onRefresh = jest.fn();
+    const onRefresh = vi.fn();
     const { result, rerender } = renderHook(
       ({ paused }) => useAutoRefresh({ isPaused: paused, intervalMs: 5000, onRefresh }),
       { initialProps: { paused: false } }
     );
 
     act(() => {
-      jest.advanceTimersByTime(3000);
+      vi.advanceTimersByTime(3000);
     });
 
     expect(result.current.secondsRemaining).toBe(2);
@@ -120,7 +122,7 @@ describe('useAutoRefresh', () => {
     expect(result.current.secondsRemaining).toBe(2);
 
     act(() => {
-      jest.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(2000);
     });
 
     expect(onRefresh).toHaveBeenCalledTimes(1);
@@ -128,7 +130,7 @@ describe('useAutoRefresh', () => {
   });
 
   it('does not leak: unmount clears the interval', () => {
-    const onRefresh = jest.fn();
+    const onRefresh = vi.fn();
     const { unmount } = renderHook(() =>
       useAutoRefresh({ isPaused: false, intervalMs: 1000, onRefresh })
     );
@@ -136,14 +138,14 @@ describe('useAutoRefresh', () => {
     unmount();
 
     act(() => {
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
     });
 
     expect(onRefresh).not.toHaveBeenCalled();
   });
 
   it('restarts the countdown when `intervalMs` changes', () => {
-    const onRefresh = jest.fn();
+    const onRefresh = vi.fn();
     const { result, rerender } = renderHook(
       ({ intervalMs }: { intervalMs: number }) =>
         useAutoRefresh({ isPaused: false, intervalMs, onRefresh }),
@@ -153,7 +155,7 @@ describe('useAutoRefresh', () => {
     expect(result.current.secondsRemaining).toBe(2);
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     expect(result.current.secondsRemaining).toBe(1);
@@ -164,15 +166,15 @@ describe('useAutoRefresh', () => {
     expect(onRefresh).not.toHaveBeenCalled();
 
     act(() => {
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
     });
 
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
   it('invokes the latest onRefresh callback without resetting the timer', () => {
-    const first = jest.fn();
-    const second = jest.fn();
+    const first = vi.fn();
+    const second = vi.fn();
     const { rerender } = renderHook(
       ({ cb }: { cb: () => void }) =>
         useAutoRefresh({ isPaused: false, intervalMs: 1000, onRefresh: cb }),
@@ -182,7 +184,7 @@ describe('useAutoRefresh', () => {
     rerender({ cb: second });
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     expect(second).toHaveBeenCalledTimes(1);
@@ -190,7 +192,7 @@ describe('useAutoRefresh', () => {
   });
 
   it('resets the countdown when refreshEpoch increments', () => {
-    const onRefresh = jest.fn();
+    const onRefresh = vi.fn();
     const { result, rerender } = renderHook(
       ({ epoch }: { epoch: number | undefined }) =>
         useAutoRefresh({ isPaused: false, intervalMs: 5000, onRefresh, refreshEpoch: epoch }),
@@ -200,7 +202,7 @@ describe('useAutoRefresh', () => {
     expect(result.current.secondsRemaining).toBe(5);
 
     act(() => {
-      jest.advanceTimersByTime(3000);
+      vi.advanceTimersByTime(3000);
     });
 
     expect(result.current.secondsRemaining).toBe(2);
@@ -212,7 +214,7 @@ describe('useAutoRefresh', () => {
     expect(onRefresh).not.toHaveBeenCalled();
 
     act(() => {
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
     });
 
     expect(onRefresh).toHaveBeenCalledTimes(1);
@@ -220,7 +222,7 @@ describe('useAutoRefresh', () => {
   });
 
   it('uses Math.ceil for sub-second intervals so refresh does not fire too eagerly', () => {
-    const onRefresh = jest.fn();
+    const onRefresh = vi.fn();
     const { result } = renderHook(() =>
       useAutoRefresh({ isPaused: false, intervalMs: 1500, onRefresh })
     );
@@ -228,14 +230,14 @@ describe('useAutoRefresh', () => {
     expect(result.current.secondsRemaining).toBe(2);
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     expect(result.current.secondsRemaining).toBe(1);
     expect(onRefresh).not.toHaveBeenCalled();
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     expect(onRefresh).toHaveBeenCalledTimes(1);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { StaleEntity } from './soft_delete';
 import { bulkRemoveSourceOperationsFactory, REMOVE_SOURCE_SCRIPT } from './soft_delete';
@@ -16,7 +18,7 @@ describe('bulkRemoveSourceOperationsFactory', () => {
   const targetIndex = '.entity_analytics.watchlists.test-watchlist-default';
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('generates update operations with the remove-source script', () => {

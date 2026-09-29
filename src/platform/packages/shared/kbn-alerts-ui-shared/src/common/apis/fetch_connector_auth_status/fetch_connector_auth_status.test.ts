@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { fetchConnectorAuthStatus } from './fetch_connector_auth_status';
 
 const http = httpServiceMock.createStartContract();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('fetchConnectorAuthStatus', () => {
   test('calls POST auth_status API and transforms the response', async () => {

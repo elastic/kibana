@@ -7,32 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loadWorkflowsThunk } from './load_workflows_thunk';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 import { initialWorkflowsState, setWorkflow } from '../slice';
 
-const mockGetWorkflows = jest.fn();
+const mockGetWorkflows = vi.fn();
 
 // Mock WorkflowApi class used by the thunk
-jest.mock('@kbn/workflows-ui', () => ({
-  WorkflowApi: jest.fn().mockImplementation(() => ({
-    getWorkflows: mockGetWorkflows,
-  })),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      WorkflowApi: vi.fn().mockImplementation(() => ({
+        getWorkflows: mockGetWorkflows,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock normalizeFieldsToJsonSchema; keep real getInputsFromDefinition for thunk behavior
-jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
-  ...jest.requireActual('@kbn/workflows/spec/lib/field_conversion'),
-  getInputsFromDefinition: jest.fn((fields) => (fields ? { type: 'object' } : undefined)),
-}));
+vi.mock('@kbn/workflows/spec/lib/field_conversion', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows/spec/lib/field_conversion')),
+      getInputsFromDefinition: vi.fn((fields) => (fields ? { type: 'object' } : undefined)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('loadWorkflowsThunk', () => {
   let store: MockStore;
   let mockServices: MockServices;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     store = createMockStore();
     mockServices = getMockServices(store);

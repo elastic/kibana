@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -17,19 +20,19 @@ import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { useKibana } from '../../../hooks/use_kibana';
 
-jest.mock('../../../hooks/use_kibana');
-jest.mock('../../../hooks/use_fetch_slo_details');
-jest.mock('../../../hooks/use_fetch_slo_list');
-jest.mock('../../../hooks/use_fetch_historical_summary');
+vi.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_fetch_slo_details');
+vi.mock('../../../hooks/use_fetch_slo_list');
+vi.mock('../../../hooks/use_fetch_historical_summary');
 
-const useKibanaMock = useKibana as jest.Mock;
-const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
-const useFetchSloListMock = useFetchSloList as jest.Mock;
-const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useFetchSloDetailsMock = useFetchSloDetails as Mock;
+const useFetchSloListMock = useFetchSloList as Mock;
+const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as Mock;
 
 describe('SloErrorBudget', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: {
         executionContext: {
@@ -60,7 +63,7 @@ describe('SloErrorBudget', () => {
       isLoading: false,
       isRefetching: false,
       data: slo,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(<SloErrorBudget sloId="test-slo-id" sloInstanceId={ALL_VALUE} />);
@@ -75,7 +78,7 @@ describe('SloErrorBudget', () => {
       isLoading: false,
       isRefetching: false,
       data: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(<SloErrorBudget sloId="non-existent-id" sloInstanceId={ALL_VALUE} />);
@@ -91,7 +94,7 @@ describe('SloErrorBudget', () => {
       isLoading: false,
       isRefetching: false,
       data: slo,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(<SloErrorBudget sloId="default-instance-slo" sloInstanceId={ALL_VALUE} />);
@@ -117,7 +120,7 @@ describe('SloErrorBudget', () => {
       isLoading: false,
       isRefetching: false,
       data: slo,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(<SloErrorBudget sloId="grouped-slo" sloInstanceId="instance-abc" />);
@@ -138,7 +141,7 @@ describe('SloErrorBudget', () => {
       isLoading: true,
       isRefetching: false,
       data: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(<SloErrorBudget sloId="test-slo-id" sloInstanceId={ALL_VALUE} />);

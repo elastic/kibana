@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { type RenderResult, fireEvent, waitFor } from '@testing-library/react';
 
@@ -17,13 +20,13 @@ import {
   type BidirectionalIntegrationsBannerProps,
 } from './bidirectional_integrations_callout';
 
-jest.mock('react-use/lib/useLocalStorage');
+vi.mock('react-use/lib/useLocalStorage');
 
 describe('BidirectionalIntegrationsBanner', () => {
   let componentProps: BidirectionalIntegrationsBannerProps;
   let renderResult: RenderResult;
   let render: () => RenderResult;
-  let storageMock: jest.Mocked<FleetStartServices['storage']>;
+  let storageMock: Mocked<FleetStartServices['storage']>;
 
   beforeEach(() => {
     componentProps = { integrationPackageName: 'sentinel_one' };
@@ -72,7 +75,7 @@ describe('BidirectionalIntegrationsBanner', () => {
   });
 
   it('should render nothing if user had dismissed the callout in the past', () => {
-    (storageMock.store.getItem as jest.Mock).mockReturnValue('false');
+    (storageMock.store.getItem as Mock).mockReturnValue('false');
     render();
 
     expect(renderResult.queryByTestId('bidirectionalIntegrationsCallout')).toBeFalsy();

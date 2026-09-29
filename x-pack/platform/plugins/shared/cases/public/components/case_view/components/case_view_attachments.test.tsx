@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { z } from '@kbn/zod/v4';
 import {
@@ -23,16 +26,22 @@ import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats
 import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../../containers/use_get_case_file_stats');
-jest.mock('../../../common/navigation/hooks');
-jest.mock('../use_case_observables', () => ({
-  useCaseObservables: jest.fn(() => ({ observables: [], isLoading: false })),
-}));
-jest.mock('./sidebar/sidebar_toggle_button', () => ({
-  SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
-}));
+vi.mock('../../../containers/use_get_case_file_stats');
+vi.mock('../../../common/navigation/hooks');
+vi.mock('../use_case_observables', () => {
+      const mocked = {
+      useCaseObservables: vi.fn(() => ({ observables: [], isLoading: false })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./sidebar/sidebar_toggle_button', () => {
+      const mocked = {
+      SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useGetCaseFileStatsMock = useGetCaseFileStats as jest.Mock;
+const useGetCaseFileStatsMock = useGetCaseFileStats as Mock;
 
 const caseData: CaseUI = basicCase;
 
@@ -89,8 +98,8 @@ const platinumLicense = licensingMock.createLicense({
 });
 
 const fileStatsData = { total: 3 };
-const onSearchMock = jest.fn();
-const onUpdateFieldMock = jest.fn();
+const onSearchMock = vi.fn();
+const onUpdateFieldMock = vi.fn();
 
 describe('Case View Attachments tab', () => {
   beforeEach(() => {
@@ -101,7 +110,7 @@ describe('Case View Attachments tab', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the search field', async () => {

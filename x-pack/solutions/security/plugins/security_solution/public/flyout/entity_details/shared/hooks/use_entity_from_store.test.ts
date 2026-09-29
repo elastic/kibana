@@ -5,31 +5,39 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useEntityFromStore } from './use_entity_from_store';
 
-const mockFetchEntitiesListV2 = jest.fn();
-const mockGetEuidFilterBasedOnDocument = jest.fn();
+const mockFetchEntitiesListV2 = vi.fn();
+const mockGetEuidFilterBasedOnDocument = vi.fn();
 
-jest.mock('@kbn/entity-store/public', () => ({
-  useEntityStoreEuidApi: () => ({
-    euid: {
-      dsl: {
-        getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument,
-      },
-    },
-  }),
-}));
+vi.mock('@kbn/entity-store/public', () => {
+      const mocked = {
+      useEntityStoreEuidApi: () => ({
+        euid: {
+          dsl: {
+            getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../entity_analytics/api/api', () => ({
-  useEntityAnalyticsRoutes: () => ({
-    fetchEntitiesListV2: mockFetchEntitiesListV2,
-  }),
-}));
+vi.mock('../../../../entity_analytics/api/api', () => {
+      const mocked = {
+      useEntityAnalyticsRoutes: () => ({
+        fetchEntitiesListV2: mockFetchEntitiesListV2,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // QueryClientProvider wrapper required by useQuery.
-const { QueryClient, QueryClientProvider } = jest.requireActual('@kbn/react-query');
-const React = jest.requireActual('react');
+const { QueryClient, QueryClientProvider } = (await vi.importActual('@kbn/react-query'));
+const React = require('react');
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -41,7 +49,7 @@ function createWrapper() {
 }
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockFetchEntitiesListV2.mockResolvedValue({ records: [] });
   // Return a simple term filter (no host.id exclusion) — same as the real partial-identity lookup.
   mockGetEuidFilterBasedOnDocument.mockReturnValue({

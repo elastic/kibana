@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -17,7 +19,7 @@ import { AddAnalyticsCollection } from './add_analytics_collection';
 
 describe('AddAnalyticsCollection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders', () => {

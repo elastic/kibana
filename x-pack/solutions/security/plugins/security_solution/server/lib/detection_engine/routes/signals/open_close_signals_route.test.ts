@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
@@ -31,7 +34,7 @@ describe('set signal status', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ context } = requestContextMock.createTools());
@@ -45,8 +48,8 @@ describe('set signal status', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('status on signal', () => {
@@ -380,11 +383,11 @@ describe('set signal status', () => {
   });
 
   describe('workflow trigger emission', () => {
-    let mockEventBus: { emitAlertStatusChanged: jest.Mock };
+    let mockEventBus: { emitAlertStatusChanged: Mock };
 
     beforeEach(() => {
       server = serverMock.create();
-      mockEventBus = { emitAlertStatusChanged: jest.fn() };
+      mockEventBus = { emitAlertStatusChanged: vi.fn() };
       setSignalsStatusRoute(
         server.router,
         logger,

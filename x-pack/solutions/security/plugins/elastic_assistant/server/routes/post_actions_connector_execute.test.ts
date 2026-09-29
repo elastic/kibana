@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 import { NEVER } from 'rxjs';
 import { mockActionResponse } from '../__mocks__/action_result_data';
@@ -31,43 +34,46 @@ import { createMockConnector } from '@kbn/actions-plugin/server/application/conn
 
 const license = licensingMock.createLicenseMock();
 const actionsClient = actionsClientMock.create();
-jest.mock('../lib/build_response', () => ({
-  buildResponse: jest.fn().mockImplementation((x) => x),
-}));
-jest.mock('../lib/prompt');
-const mockGetPrompt = getPrompt as jest.Mock;
-const mockGetInferenceConnectorById = getInferenceConnectorById as jest.Mock;
+vi.mock('../lib/build_response', () => {
+      const mocked = {
+      buildResponse: vi.fn().mockImplementation((x) => x),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/prompt');
+const mockGetPrompt = getPrompt as Mock;
+const mockGetInferenceConnectorById = getInferenceConnectorById as Mock;
 
-const mockStream = jest.fn().mockImplementation(() => new PassThrough());
-const mockLangChainExecute = langChainExecute as jest.Mock;
-const mockAppendAssistantMessageToConversation = appendAssistantMessageToConversation as jest.Mock;
-jest.mock('./helpers', () => {
-  const original = jest.requireActual('./helpers');
+const mockStream = vi.fn().mockImplementation(() => new PassThrough());
+const mockLangChainExecute = langChainExecute as Mock;
+const mockAppendAssistantMessageToConversation = appendAssistantMessageToConversation as Mock;
+vi.mock('./helpers', async () => {
+  const original = (await vi.importActual('./helpers'));
 
   return {
     ...original,
-    getIsKnowledgeBaseInstalled: jest.fn(),
-    appendAssistantMessageToConversation: jest.fn(),
-    langChainExecute: jest.fn(),
-    getPluginNameFromRequest: jest.fn(),
-    getSystemPromptFromUserConversation: jest.fn(),
+    getIsKnowledgeBaseInstalled: vi.fn(),
+    appendAssistantMessageToConversation: vi.fn(),
+    langChainExecute: vi.fn(),
+    getPluginNameFromRequest: vi.fn(),
+    getSystemPromptFromUserConversation: vi.fn(),
   };
 });
 const existingConversation = getConversationResponseMock();
-const reportEvent = jest.fn();
-const appendConversationMessages = jest.fn();
+const reportEvent = vi.fn();
+const appendConversationMessages = vi.fn();
 const mockContext = {
-  resolve: jest.fn().mockResolvedValue({
+  resolve: vi.fn().mockResolvedValue({
     elasticAssistant: {
       actions: {
-        getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
+        getActionsClientWithRequest: vi.fn().mockResolvedValue(actionsClient),
       },
       inference: {
-        getConnectorById: jest.fn().mockResolvedValue(undefined),
+        getConnectorById: vi.fn().mockResolvedValue(undefined),
       },
-      llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
-      getRegisteredTools: jest.fn(() => []),
-      getRegisteredFeatures: jest.fn(() => defaultAssistantFeatures),
+      llmTasks: { retrieveDocumentationAvailable: vi.fn(), retrieveDocumentation: vi.fn() },
+      getRegisteredTools: vi.fn(() => []),
+      getRegisteredFeatures: vi.fn(() => defaultAssistantFeatures),
       logger: loggingSystemMock.createLogger(),
       telemetry: { ...coreMock.createSetup().analytics, reportEvent },
       getCurrentUser: () => ({
@@ -83,20 +89,20 @@ const mockContext = {
         elastic_cloud_user: false,
         metadata: { _reserved: false },
       }),
-      getAIAssistantConversationsDataClient: jest.fn().mockResolvedValue({
-        getConversation: jest.fn().mockResolvedValue(existingConversation),
-        updateConversation: jest.fn().mockResolvedValue(existingConversation),
+      getAIAssistantConversationsDataClient: vi.fn().mockResolvedValue({
+        getConversation: vi.fn().mockResolvedValue(existingConversation),
+        updateConversation: vi.fn().mockResolvedValue(existingConversation),
         appendConversationMessages:
           appendConversationMessages.mockResolvedValue(existingConversation),
       }),
-      getAIAssistantPromptsDataClient: jest.fn().mockResolvedValue({
-        findDocuments: jest.fn(),
+      getAIAssistantPromptsDataClient: vi.fn().mockResolvedValue({
+        findDocuments: vi.fn(),
       }),
-      getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
-        findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
+      getAIAssistantAnonymizationFieldsDataClient: vi.fn().mockResolvedValue({
+        findDocuments: vi.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
       }),
-      getAIAssistantKnowledgeBaseDataClient: jest.fn().mockResolvedValue({
-        getKnowledgeBaseDocuments: jest.fn().mockResolvedValue([]),
+      getAIAssistantKnowledgeBaseDataClient: vi.fn().mockResolvedValue({
+        getKnowledgeBaseDocuments: vi.fn().mockResolvedValue([]),
         indexTemplateAndPattern: {
           alias: 'knowledge-base-alias',
         },
@@ -104,7 +110,7 @@ const mockContext = {
     },
     core: {
       featureFlags: {
-        getBooleanValue: jest.fn().mockResolvedValue(false),
+        getBooleanValue: vi.fn().mockResolvedValue(false),
       },
       elasticsearch: {
         client: elasticsearchServiceMock.createScopedClusterClient(),
@@ -134,8 +140,8 @@ const mockRequest = {
 };
 
 const mockResponse = {
-  ok: jest.fn().mockImplementation((x) => x),
-  error: jest.fn().mockImplementation((x) => x),
+  ok: vi.fn().mockImplementation((x) => x),
+  error: vi.fn().mockImplementation((x) => x),
 };
 const mockConfig = {
   elserInferenceId: defaultInferenceEndpoints.ELSER,
@@ -144,7 +150,7 @@ const mockConfig = {
 
 describe('postActionsConnectorExecuteRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     license.hasAtLeast.mockReturnValue(true);
     mockAppendAssistantMessageToConversation.mockResolvedValue(true);
     mockLangChainExecute.mockImplementation(
@@ -198,9 +204,9 @@ describe('postActionsConnectorExecuteRoute', () => {
   it('returns the expected response', async () => {
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               const result = await handler(mockContext, mockRequest, mockResponse);
 
               expect(result).toEqual({
@@ -225,11 +231,11 @@ describe('postActionsConnectorExecuteRoute', () => {
   test('returns 403 when updating a conversation that user does not own', async () => {
     const resolvedContext = await mockContext.resolve();
     const mockContextBadUser = {
-      resolve: jest.fn().mockResolvedValue({
+      resolve: vi.fn().mockResolvedValue({
         ...resolvedContext,
         elasticAssistant: {
           ...resolvedContext.elasticAssistant,
-          getCurrentUser: jest.fn().mockResolvedValue({
+          getCurrentUser: vi.fn().mockResolvedValue({
             username: 'noone',
             profile_uid: 'noone',
           }),
@@ -245,9 +251,9 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               const result = await handler(mockContextBadUser, mockRequestWithConvo, mockResponse);
 
               expect(result).toEqual({
@@ -272,9 +278,9 @@ describe('postActionsConnectorExecuteRoute', () => {
 
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               const result = await handler(mockContext, requestWithBadConnectorId, mockResponse);
 
               expect(result).toEqual({
@@ -309,9 +315,9 @@ describe('postActionsConnectorExecuteRoute', () => {
 
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               await handler(mockContext, badRequest, mockResponse);
 
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
@@ -345,9 +351,9 @@ describe('postActionsConnectorExecuteRoute', () => {
 
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               await handler(mockContext, badRequest, mockResponse);
               expect(mockAppendAssistantMessageToConversation).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -370,9 +376,9 @@ describe('postActionsConnectorExecuteRoute', () => {
   it('returns the expected response when subAction=invokeStream and actionTypeId=.gen-ai', async () => {
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               const result = await handler(
                 mockContext,
                 {
@@ -411,9 +417,9 @@ describe('postActionsConnectorExecuteRoute', () => {
   it('returns the expected response when subAction=invokeStream and actionTypeId=.bedrock', async () => {
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               const result = await handler(
                 mockContext,
                 {
@@ -451,9 +457,9 @@ describe('postActionsConnectorExecuteRoute', () => {
   it('returns the expected response when subAction=invokeAI and actionTypeId=.gen-ai', async () => {
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               const result = await handler(
                 mockContext,
                 {
@@ -488,9 +494,9 @@ describe('postActionsConnectorExecuteRoute', () => {
   it('returns the expected response when subAction=invokeAI and actionTypeId=.bedrock', async () => {
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               const result = await handler(
                 mockContext,
                 {
@@ -523,9 +529,9 @@ describe('postActionsConnectorExecuteRoute', () => {
   it('calls getPrompt with promptIds when passed in request.body', async () => {
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               await handler(
                 mockContext,
                 {

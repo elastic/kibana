@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   ConversationAccessControlMode,
@@ -69,12 +72,12 @@ describe('registerConversationRoutes', () => {
       ...conversation,
       permissions: { rename: true, delete: true, update_access_control: true },
     };
-    const get = jest.fn().mockResolvedValue(conversationWithPermissions);
+    const get = vi.fn().mockResolvedValue(conversationWithPermissions);
 
     const router = {
       versioned: {
-        get: jest.fn().mockImplementation((config: { path: string }) => ({
-          addVersion: jest
+        get: vi.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: vi
             .fn()
             .mockImplementation(
               (
@@ -87,43 +90,43 @@ describe('registerConversationRoutes', () => {
               }
             ),
         })),
-        delete: jest.fn().mockImplementation(() => ({
-          addVersion: jest.fn(),
+        delete: vi.fn().mockImplementation(() => ({
+          addVersion: vi.fn(),
         })),
-        post: jest.fn().mockImplementation(() => ({
-          addVersion: jest.fn(),
+        post: vi.fn().mockImplementation(() => ({
+          addVersion: vi.fn(),
         })),
-        put: jest.fn().mockImplementation(() => ({
-          addVersion: jest.fn(),
+        put: vi.fn().mockImplementation(() => ({
+          addVersion: vi.fn(),
         })),
       },
     };
 
     registerConversationRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({ get }),
+          getScopedClient: vi.fn().mockResolvedValue({ get }),
         },
         agents: {
-          getRegistry: jest.fn().mockResolvedValue({ get: jest.fn() }),
+          getRegistry: vi.fn().mockResolvedValue({ get: vi.fn() }),
         },
       }),
       logger: loggingSystemMock.createLogger(),
     } as never);
 
     const response = {
-      ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
-      forbidden: jest.fn(),
-      customError: jest.fn(),
-      notFound: jest.fn(),
+      ok: vi.fn(({ body }) => ({ status: 200, payload: body })),
+      forbidden: vi.fn(),
+      customError: vi.fn(),
+      notFound: vi.fn(),
     };
 
     const result = await getConversationHandler!(
       {
         core: Promise.resolve({}),
         licensing: Promise.resolve({
-          license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+          license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
         }),
       },
       {
@@ -171,12 +174,12 @@ describe('registerConversationRoutes', () => {
       ...conversation,
       permissions: { rename: true, delete: true, update_access_control: true },
     };
-    const list = jest.fn().mockResolvedValue({ results: [conversationWithPermissions], total: 1 });
+    const list = vi.fn().mockResolvedValue({ results: [conversationWithPermissions], total: 1 });
 
     const router = {
       versioned: {
-        get: jest.fn().mockImplementation((config: { path: string }) => ({
-          addVersion: jest
+        get: vi.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: vi
             .fn()
             .mockImplementation(
               (
@@ -189,43 +192,43 @@ describe('registerConversationRoutes', () => {
               }
             ),
         })),
-        delete: jest.fn().mockImplementation(() => ({
-          addVersion: jest.fn(),
+        delete: vi.fn().mockImplementation(() => ({
+          addVersion: vi.fn(),
         })),
-        post: jest.fn().mockImplementation(() => ({
-          addVersion: jest.fn(),
+        post: vi.fn().mockImplementation(() => ({
+          addVersion: vi.fn(),
         })),
-        put: jest.fn().mockImplementation(() => ({
-          addVersion: jest.fn(),
+        put: vi.fn().mockImplementation(() => ({
+          addVersion: vi.fn(),
         })),
       },
     };
 
     registerConversationRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({ list }),
+          getScopedClient: vi.fn().mockResolvedValue({ list }),
         },
         agents: {
-          getRegistry: jest.fn().mockResolvedValue({ get: jest.fn() }),
+          getRegistry: vi.fn().mockResolvedValue({ get: vi.fn() }),
         },
       }),
       logger: loggingSystemMock.createLogger(),
     } as never);
 
     const response = {
-      ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
-      forbidden: jest.fn(),
-      customError: jest.fn(),
-      notFound: jest.fn(),
+      ok: vi.fn(({ body }) => ({ status: 200, payload: body })),
+      forbidden: vi.fn(),
+      customError: vi.fn(),
+      notFound: vi.fn(),
     };
 
     const result = await listConversationsHandler!(
       {
         core: Promise.resolve({}),
         licensing: Promise.resolve({
-          license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+          license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
         }),
       },
       {
@@ -268,13 +271,13 @@ describe('registerConversationRoutes', () => {
       ...conversation,
       permissions: { rename: true, delete: true, update_access_control: false },
     };
-    const get = jest.fn().mockResolvedValue(conversationWithPermissions);
-    const list = jest.fn().mockResolvedValue({ results: [conversationWithPermissions], total: 1 });
+    const get = vi.fn().mockResolvedValue(conversationWithPermissions);
+    const list = vi.fn().mockResolvedValue({ results: [conversationWithPermissions], total: 1 });
 
     const router = {
       versioned: {
-        get: jest.fn().mockImplementation((config: { path: string }) => ({
-          addVersion: jest
+        get: vi.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: vi
             .fn()
             .mockImplementation(
               (
@@ -290,23 +293,23 @@ describe('registerConversationRoutes', () => {
               }
             ),
         })),
-        delete: jest.fn().mockImplementation(() => ({
-          addVersion: jest.fn(),
+        delete: vi.fn().mockImplementation(() => ({
+          addVersion: vi.fn(),
         })),
-        post: jest.fn().mockImplementation(() => ({
-          addVersion: jest.fn(),
+        post: vi.fn().mockImplementation(() => ({
+          addVersion: vi.fn(),
         })),
-        put: jest.fn().mockImplementation(() => ({
-          addVersion: jest.fn(),
+        put: vi.fn().mockImplementation(() => ({
+          addVersion: vi.fn(),
         })),
       },
     };
 
     registerConversationRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({
+          getScopedClient: vi.fn().mockResolvedValue({
             get,
             list,
           }),
@@ -318,14 +321,14 @@ describe('registerConversationRoutes', () => {
     const context = {
       core: Promise.resolve({}),
       licensing: Promise.resolve({
-        license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+        license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
       }),
     };
     const response = {
-      ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
-      forbidden: jest.fn(),
-      customError: jest.fn(),
-      notFound: jest.fn(),
+      ok: vi.fn(({ body }) => ({ status: 200, payload: body })),
+      forbidden: vi.fn(),
+      customError: vi.fn(),
+      notFound: vi.fn(),
     };
 
     const getResult = await getConversationHandler!(
@@ -355,13 +358,13 @@ describe('registerConversationRoutes', () => {
     }: {
       method: 'get' | 'put';
       path: string;
-      client: Record<string, jest.Mock>;
+      client: Record<string, Mock>;
     }) => {
       let capturedHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
 
       const captureFor = (routeMethod: 'get' | 'put' | 'delete' | 'post') =>
-        jest.fn().mockImplementation((config: { path: string }) => ({
-          addVersion: jest
+        vi.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: vi
             .fn()
             .mockImplementation(
               (
@@ -384,8 +387,8 @@ describe('registerConversationRoutes', () => {
             delete: captureFor('delete'),
           },
         },
-        getInternalServices: jest.fn().mockReturnValue({
-          conversations: { getScopedClient: jest.fn().mockResolvedValue(client) },
+        getInternalServices: vi.fn().mockReturnValue({
+          conversations: { getScopedClient: vi.fn().mockResolvedValue(client) },
         }),
         logger: loggingSystemMock.createLogger(),
       } as never);
@@ -396,15 +399,15 @@ describe('registerConversationRoutes', () => {
     const context = {
       core: Promise.resolve({}),
       licensing: Promise.resolve({
-        license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+        license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
       }),
     };
 
     const response = () => ({
-      ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
-      forbidden: jest.fn(),
-      customError: jest.fn(),
-      notFound: jest.fn(),
+      ok: vi.fn(({ body }) => ({ status: 200, payload: body })),
+      forbidden: vi.fn(),
+      customError: vi.fn(),
+      notFound: vi.fn(),
     });
 
     it('passes the requested mode and entries through when updating access control', async () => {
@@ -416,7 +419,7 @@ describe('registerConversationRoutes', () => {
         access_mode: 'private',
         entries: [{ ...body.entries[0], added_at: '2026-08-11T10:00:00.000Z' }],
       };
-      const updateAccessControl = jest.fn().mockResolvedValue(persisted);
+      const updateAccessControl = vi.fn().mockResolvedValue(persisted);
       const handler = registerAndCapture({
         method: 'put',
         path: `${publicApiPath}/conversations/{conversation_id}/access_control`,
@@ -443,11 +446,11 @@ describe('POST /conversations', () => {
     onSchema?: (versionConfig: any) => void
   ) => ({
     versioned: {
-      get: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
-      delete: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
-      put: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
-      post: jest.fn().mockImplementation((config: { path: string }) => ({
-        addVersion: jest.fn().mockImplementation((versionConfig: any, handler: any) => {
+      get: vi.fn().mockImplementation(() => ({ addVersion: vi.fn() })),
+      delete: vi.fn().mockImplementation(() => ({ addVersion: vi.fn() })),
+      put: vi.fn().mockImplementation(() => ({ addVersion: vi.fn() })),
+      post: vi.fn().mockImplementation((config: { path: string }) => ({
+        addVersion: vi.fn().mockImplementation((versionConfig: any, handler: any) => {
           if (config.path === CREATE_CONVERSATION_PATH) {
             onPost(handler);
             onSchema?.(versionConfig);
@@ -460,16 +463,16 @@ describe('POST /conversations', () => {
   const defaultCtx = {
     core: Promise.resolve({}),
     licensing: Promise.resolve({
-      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
     }),
   };
 
   const defaultResponse = {
-    ok: jest.fn(({ body }: any) => ({ status: 200, payload: body })),
-    notFound: jest.fn(({ body }: any) => ({ status: 404, payload: body })),
-    conflict: jest.fn(({ body }: any) => ({ status: 409, payload: body })),
-    forbidden: jest.fn(),
-    customError: jest.fn(({ statusCode, body }: any) => ({ status: statusCode, payload: body })),
+    ok: vi.fn(({ body }: any) => ({ status: 200, payload: body })),
+    notFound: vi.fn(({ body }: any) => ({ status: 404, payload: body })),
+    conflict: vi.fn(({ body }: any) => ({ status: 409, payload: body })),
+    forbidden: vi.fn(),
+    customError: vi.fn(({ statusCode, body }: any) => ({ status: statusCode, payload: body })),
   };
 
   const createdConversation = {
@@ -485,14 +488,14 @@ describe('POST /conversations', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('creates a conversation with defaults when no body fields are provided', async () => {
-    const mockCreate = jest.fn().mockResolvedValue(createdConversation);
-    const mockGet = jest.fn().mockResolvedValue(createdConversation);
-    const mockExists = jest.fn().mockResolvedValue(false);
-    const mockAgentGet = jest.fn().mockResolvedValue({ id: 'elastic-default-agent' });
+    const mockCreate = vi.fn().mockResolvedValue(createdConversation);
+    const mockGet = vi.fn().mockResolvedValue(createdConversation);
+    const mockExists = vi.fn().mockResolvedValue(false);
+    const mockAgentGet = vi.fn().mockResolvedValue({ id: 'elastic-default-agent' });
 
     let createHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
     const router = makeRouter((h) => {
@@ -501,19 +504,19 @@ describe('POST /conversations', () => {
 
     registerConversationRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({
+          getScopedClient: vi.fn().mockResolvedValue({
             get: mockGet,
-            list: jest.fn(),
-            search: jest.fn(),
-            bulkGet: jest.fn(),
+            list: vi.fn(),
+            search: vi.fn(),
+            bulkGet: vi.fn(),
             exists: mockExists,
             create: mockCreate,
           }),
         },
         agents: {
-          getRegistry: jest.fn().mockResolvedValue({ get: mockAgentGet }),
+          getRegistry: vi.fn().mockResolvedValue({ get: mockAgentGet }),
         },
       }),
       logger: loggingSystemMock.createLogger(),
@@ -530,10 +533,10 @@ describe('POST /conversations', () => {
   });
 
   it('creates a conversation with the provided title and access_control', async () => {
-    const mockCreate = jest.fn().mockResolvedValue({ ...createdConversation, title: 'My chat' });
-    const mockGet = jest.fn().mockResolvedValue({ ...createdConversation, title: 'My chat' });
-    const mockExists = jest.fn().mockResolvedValue(false);
-    const mockAgentGet = jest.fn().mockResolvedValue({ id: 'elastic-default-agent' });
+    const mockCreate = vi.fn().mockResolvedValue({ ...createdConversation, title: 'My chat' });
+    const mockGet = vi.fn().mockResolvedValue({ ...createdConversation, title: 'My chat' });
+    const mockExists = vi.fn().mockResolvedValue(false);
+    const mockAgentGet = vi.fn().mockResolvedValue({ id: 'elastic-default-agent' });
 
     let createHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
     const router = makeRouter((h) => {
@@ -542,19 +545,19 @@ describe('POST /conversations', () => {
 
     registerConversationRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({
+          getScopedClient: vi.fn().mockResolvedValue({
             get: mockGet,
-            list: jest.fn(),
-            search: jest.fn(),
-            bulkGet: jest.fn(),
+            list: vi.fn(),
+            search: vi.fn(),
+            bulkGet: vi.fn(),
             exists: mockExists,
             create: mockCreate,
           }),
         },
         agents: {
-          getRegistry: jest.fn().mockResolvedValue({ get: mockAgentGet }),
+          getRegistry: vi.fn().mockResolvedValue({ get: mockAgentGet }),
         },
       }),
       logger: loggingSystemMock.createLogger(),
@@ -575,7 +578,7 @@ describe('POST /conversations', () => {
   });
 
   it('returns 404 when the agent is not found', async () => {
-    const mockAgentGet = jest
+    const mockAgentGet = vi
       .fn()
       .mockRejectedValue(createAgentNotFoundError({ agentId: 'bad-agent' }));
 
@@ -586,19 +589,19 @@ describe('POST /conversations', () => {
 
     registerConversationRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({
-            get: jest.fn(),
-            list: jest.fn(),
-            search: jest.fn(),
-            bulkGet: jest.fn(),
-            exists: jest.fn(),
-            create: jest.fn(),
+          getScopedClient: vi.fn().mockResolvedValue({
+            get: vi.fn(),
+            list: vi.fn(),
+            search: vi.fn(),
+            bulkGet: vi.fn(),
+            exists: vi.fn(),
+            create: vi.fn(),
           }),
         },
         agents: {
-          getRegistry: jest.fn().mockResolvedValue({ get: mockAgentGet }),
+          getRegistry: vi.fn().mockResolvedValue({ get: mockAgentGet }),
         },
       }),
       logger: loggingSystemMock.createLogger(),
@@ -614,8 +617,8 @@ describe('POST /conversations', () => {
   });
 
   it('returns 409 when the conversation_id already exists', async () => {
-    const mockExists = jest.fn().mockResolvedValue(true);
-    const mockAgentGet = jest.fn().mockResolvedValue({ id: 'elastic-default-agent' });
+    const mockExists = vi.fn().mockResolvedValue(true);
+    const mockAgentGet = vi.fn().mockResolvedValue({ id: 'elastic-default-agent' });
 
     let createHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
     const router = makeRouter((h) => {
@@ -624,19 +627,19 @@ describe('POST /conversations', () => {
 
     registerConversationRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({
-            get: jest.fn(),
-            list: jest.fn(),
-            search: jest.fn(),
-            bulkGet: jest.fn(),
+          getScopedClient: vi.fn().mockResolvedValue({
+            get: vi.fn(),
+            list: vi.fn(),
+            search: vi.fn(),
+            bulkGet: vi.fn(),
             exists: mockExists,
-            create: jest.fn(),
+            create: vi.fn(),
           }),
         },
         agents: {
-          getRegistry: jest.fn().mockResolvedValue({ get: mockAgentGet }),
+          getRegistry: vi.fn().mockResolvedValue({ get: mockAgentGet }),
         },
       }),
       logger: loggingSystemMock.createLogger(),
@@ -652,9 +655,9 @@ describe('POST /conversations', () => {
   });
 
   it('forwards template_id and metadata to the public client', async () => {
-    const mockCreate = jest.fn().mockResolvedValue(createdConversation);
-    const mockExists = jest.fn().mockResolvedValue(false);
-    const mockAgentGet = jest.fn().mockResolvedValue({ id: 'elastic-default-agent' });
+    const mockCreate = vi.fn().mockResolvedValue(createdConversation);
+    const mockExists = vi.fn().mockResolvedValue(false);
+    const mockAgentGet = vi.fn().mockResolvedValue({ id: 'elastic-default-agent' });
 
     let createHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
     const router = makeRouter((h) => {
@@ -663,19 +666,19 @@ describe('POST /conversations', () => {
 
     registerConversationRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({
-            get: jest.fn(),
-            list: jest.fn(),
-            search: jest.fn(),
-            bulkGet: jest.fn(),
+          getScopedClient: vi.fn().mockResolvedValue({
+            get: vi.fn(),
+            list: vi.fn(),
+            search: vi.fn(),
+            bulkGet: vi.fn(),
             exists: mockExists,
             create: mockCreate,
           }),
         },
         agents: {
-          getRegistry: jest.fn().mockResolvedValue({ get: mockAgentGet }),
+          getRegistry: vi.fn().mockResolvedValue({ get: mockAgentGet }),
         },
       }),
       logger: loggingSystemMock.createLogger(),
@@ -711,7 +714,7 @@ describe('POST /conversations', () => {
       );
       registerConversationRoutes({
         router,
-        getInternalServices: jest.fn(),
+        getInternalServices: vi.fn(),
         logger: loggingSystemMock.createLogger(),
       } as never);
       return capturedConfig.validate.request.body;
@@ -750,11 +753,11 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
     onSchema?: (versionConfig: any) => void
   ) => ({
     versioned: {
-      get: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
-      delete: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
-      put: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
-      post: jest.fn().mockImplementation((config: { path: string }) => ({
-        addVersion: jest.fn().mockImplementation((versionConfig: any, handler: any) => {
+      get: vi.fn().mockImplementation(() => ({ addVersion: vi.fn() })),
+      delete: vi.fn().mockImplementation(() => ({ addVersion: vi.fn() })),
+      put: vi.fn().mockImplementation(() => ({ addVersion: vi.fn() })),
+      post: vi.fn().mockImplementation((config: { path: string }) => ({
+        addVersion: vi.fn().mockImplementation((versionConfig: any, handler: any) => {
           if (config.path === ADD_EVENTS_PATH) {
             onPost(handler);
             onSchema?.(versionConfig);
@@ -767,19 +770,19 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
   const defaultCtx = {
     core: Promise.resolve({}),
     licensing: Promise.resolve({
-      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
     }),
   };
 
   const defaultResponse = {
-    ok: jest.fn(({ body }: any) => ({ status: 200, payload: body })),
-    notFound: jest.fn(({ body }: any) => ({ status: 404, payload: body })),
-    forbidden: jest.fn(),
-    customError: jest.fn(({ statusCode, body }: any) => ({ status: statusCode, payload: body })),
+    ok: vi.fn(({ body }: any) => ({ status: 200, payload: body })),
+    notFound: vi.fn(({ body }: any) => ({ status: 404, payload: body })),
+    forbidden: vi.fn(),
+    customError: vi.fn(({ statusCode, body }: any) => ({ status: statusCode, payload: body })),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls addCustomEvents with the parsed body and returns the materialized events', async () => {
@@ -795,7 +798,7 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
         ...testEvent,
       },
     ];
-    const mockAddCustomEvents = jest.fn().mockResolvedValue(materializedEvents);
+    const mockAddCustomEvents = vi.fn().mockResolvedValue(materializedEvents);
     let handler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
 
     const router = makeRouter((h) => {
@@ -804,9 +807,9 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
 
     registerConversationRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({ addCustomEvents: mockAddCustomEvents }),
+          getScopedClient: vi.fn().mockResolvedValue({ addCustomEvents: mockAddCustomEvents }),
         },
       }),
       logger: loggingSystemMock.createLogger(),
@@ -835,7 +838,7 @@ describe('POST /conversations/{conversation_id}/_add_events', () => {
       );
       registerConversationRoutes({
         router,
-        getInternalServices: jest.fn(),
+        getInternalServices: vi.fn(),
         logger: loggingSystemMock.createLogger(),
       } as never);
       return capturedConfig.validate.request.body;

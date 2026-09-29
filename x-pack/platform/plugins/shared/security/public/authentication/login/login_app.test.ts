@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-jest.mock('./login_page');
+import { vi } from 'vitest';
+
+vi.mock('./login_page');
 
 import type { AppMount } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
@@ -50,14 +52,14 @@ describe('loginApp', () => {
     const appMountParams = {
       element: document.createElement('div'),
       appBasePath: '',
-      onAppLeave: jest.fn(),
-      setHeaderActionMenu: jest.fn(),
+      onAppLeave: vi.fn(),
+      setHeaderActionMenu: vi.fn(),
       history: scopedHistoryMock.create(),
       theme$: themeServiceMock.createTheme$(),
     };
     await (mount as AppMount)(appMountParams);
 
-    const mockRenderApp = jest.requireMock('./login_page').renderLoginPage;
+    const mockRenderApp = (await vi.importMock('./login_page')).renderLoginPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(
       coreStartMock,

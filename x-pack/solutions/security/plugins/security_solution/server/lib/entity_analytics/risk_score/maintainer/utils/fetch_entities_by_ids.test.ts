@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import type { ScopedLogger } from './with_log_context';
 import { fetchEntitiesByIds } from './fetch_entities_by_ids';
 
 const buildLogger = (): ScopedLogger =>
   ({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as unknown as ScopedLogger);
 
 const buildStoreEntity = (id: string) => ({
@@ -31,7 +34,7 @@ describe('fetchEntitiesByIds', () => {
   let logger: ScopedLogger;
 
   beforeEach(() => {
-    crudClient = { listEntities: jest.fn() } as unknown as EntityUpdateClient;
+    crudClient = { listEntities: vi.fn() } as unknown as EntityUpdateClient;
     logger = buildLogger();
   });
 
@@ -48,7 +51,7 @@ describe('fetchEntitiesByIds', () => {
   });
 
   it('paginates via searchAfter until nextSearchAfter is undefined', async () => {
-    (crudClient.listEntities as jest.Mock)
+    (crudClient.listEntities as Mock)
       .mockResolvedValueOnce({
         entities: [buildStoreEntity('host:1')],
         nextSearchAfter: ['a'],
@@ -67,12 +70,12 @@ describe('fetchEntitiesByIds', () => {
 
     expect(result.size).toBe(2);
     expect(crudClient.listEntities).toHaveBeenCalledTimes(2);
-    expect((crudClient.listEntities as jest.Mock).mock.calls[1][0].searchAfter).toEqual(['a']);
+    expect((crudClient.listEntities as Mock).mock.calls[1][0].searchAfter).toEqual(['a']);
   });
 
   describe('best-effort vs strict lookup failures', () => {
     it('swallows a lookup failure and logs a warning by default (strict: false)', async () => {
-      (crudClient.listEntities as jest.Mock).mockRejectedValue(new Error('es down'));
+      (crudClient.listEntities as Mock).mockRejectedValue(new Error('es down'));
 
       const result = await fetchEntitiesByIds({
         crudClient,
@@ -86,7 +89,7 @@ describe('fetchEntitiesByIds', () => {
     });
 
     it('propagates the error instead of swallowing it when strict is true', async () => {
-      (crudClient.listEntities as jest.Mock).mockRejectedValue(new Error('es down'));
+      (crudClient.listEntities as Mock).mockRejectedValue(new Error('es down'));
 
       await expect(
         fetchEntitiesByIds({

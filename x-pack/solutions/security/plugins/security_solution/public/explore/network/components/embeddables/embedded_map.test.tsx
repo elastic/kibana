@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
@@ -14,43 +17,49 @@ import { useIsFieldInIndexPattern } from '../../../containers/fields';
 
 import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 
-jest.mock('./map_config');
-jest.mock('../../../containers/fields');
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('./index_patterns_missing_prompt', () => ({
-  IndexPatternsMissingPrompt: jest.fn(() => <div data-test-subj="IndexPatternsMissingPrompt" />),
-}));
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      docLinks: {
-        ELASTIC_WEBSITE_URL: 'ELASTIC_WEBSITE_URL',
-        links: {
-          siem: { networkMap: '' },
+vi.mock('./map_config');
+vi.mock('../../../containers/fields');
+vi.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('./index_patterns_missing_prompt', () => {
+      const mocked = {
+      IndexPatternsMissingPrompt: vi.fn(() => <div data-test-subj="IndexPatternsMissingPrompt" />),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          docLinks: {
+            ELASTIC_WEBSITE_URL: 'ELASTIC_WEBSITE_URL',
+            links: {
+              siem: { networkMap: '' },
+            },
+          },
+          maps: {
+            Map: () => <div data-test-subj="MapPanel">{'mockMap'}</div>,
+          },
+          storage: {
+            get: mockGetStorage,
+            set: mockSetStorage,
+          },
         },
-      },
-      maps: {
-        Map: () => <div data-test-subj="MapPanel">{'mockMap'}</div>,
-      },
-      storage: {
-        get: mockGetStorage,
-        set: mockSetStorage,
-      },
-    },
-  }),
-  useToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    addInfo: jest.fn(),
-    remove: jest.fn(),
-  }),
-}));
+      }),
+      useToasts: vi.fn().mockReturnValue({
+        addError: vi.fn(),
+        addSuccess: vi.fn(),
+        addWarning: vi.fn(),
+        addInfo: vi.fn(),
+        remove: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseIsFieldInIndexPattern = useIsFieldInIndexPattern as jest.Mock;
-const mockGetStorage = jest.fn();
-const mockSetStorage = jest.fn();
-const setQuery: jest.Mock = jest.fn();
+const mockUseIsFieldInIndexPattern = useIsFieldInIndexPattern as Mock;
+const mockGetStorage = vi.fn();
+const mockSetStorage = vi.fn();
+const setQuery: Mock = vi.fn();
 const defaultMockStore = createMockStore(mockGlobalState);
 const testProps = {
   endDate: '2019-08-28T05:50:57.877Z',
@@ -70,7 +79,7 @@ describe('EmbeddedMapComponent', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders', async () => {

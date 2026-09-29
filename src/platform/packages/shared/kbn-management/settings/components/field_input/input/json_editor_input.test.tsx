@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 
@@ -20,23 +22,26 @@ const id = 'some:json:field';
 const initialValue = '{"foo":"bar"}';
 import { wrap } from '../mocks';
 
-jest.mock('../code_editor', () => ({
-  CodeEditor: ({ value, onChange }: CodeEditorProps) => (
-    <input
-      data-test-subj="management-settings-editField-some:json:field"
-      type="text"
-      value={String(value)}
-      onChange={(e) => {
-        if (onChange) {
-          onChange(e.target.value, e as any);
-        }
-      }}
-    />
-  ),
-}));
+vi.mock('../code_editor', () => {
+      const mocked = {
+      CodeEditor: ({ value, onChange }: CodeEditorProps) => (
+        <input
+          data-test-subj="management-settings-editField-some:json:field"
+          type="text"
+          value={String(value)}
+          onChange={(e) => {
+            if (onChange) {
+              onChange(e.target.value, e as any);
+            }
+          }}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('JsonEditorInput', () => {
-  const onInputChange = jest.fn();
+  const onInputChange = vi.fn();
   const defaultProps: CodeEditorInputProps = {
     onInputChange,
     type: 'json',

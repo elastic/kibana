@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -17,14 +19,12 @@ import {
   mockDataClientBundleInitStart,
 } from './test_utils/data_client_jest_mock';
 
-jest.mock('./repositories/data_access_layer', () => {
-  const actual = jest.requireActual('./repositories/data_access_layer');
-  const { createDataClientJestMock: createDataAccessMock } = jest.requireActual(
-    './test_utils/data_client_jest_mock'
-  );
+vi.mock('./repositories/data_access_layer', async () => {
+  const actual = (await vi.importActual('./repositories/data_access_layer'));
+  const { createDataClientJestMock: createDataAccessMock } = (await vi.importActual('./test_utils/data_client_jest_mock'));
   return {
     ...actual,
-    createDataClientBundle: jest.fn(() => createDataAccessMock()),
+    createDataClientBundle: vi.fn(() => createDataAccessMock()),
   };
 });
 
@@ -38,7 +38,7 @@ const createPlugin = (): WorkflowsExecutionEnginePlugin => {
 
 describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockDataClientBundleInitSetup.mockResolvedValue(undefined);
     mockDataClientBundleInitStart.mockResolvedValue(undefined);
   });
@@ -48,7 +48,7 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
     plugin.setup(coreMock.createSetup() as any, {
       taskManager: taskManagerMock.createSetup(),
       cloud: {} as any,
-      workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
+      workflowsExtensions: { registerConnectorAdapter: vi.fn() } as any,
     });
 
     expect(mockDataClientBundleInitSetup).toHaveBeenCalledTimes(1);
@@ -60,7 +60,7 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
     plugin.setup(coreMock.createSetup() as any, {
       taskManager: taskManagerMock.createSetup(),
       cloud: {} as any,
-      workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
+      workflowsExtensions: { registerConnectorAdapter: vi.fn() } as any,
     });
 
     const startContract = plugin.start(coreMock.createStart(), {

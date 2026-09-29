@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import dedent from 'dedent';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { renderMustacheString } from './mustache_renderer';
@@ -13,7 +15,7 @@ const logger = loggingSystemMock.create().get();
 
 describe('mustache lambdas', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('FormatDate', () => {

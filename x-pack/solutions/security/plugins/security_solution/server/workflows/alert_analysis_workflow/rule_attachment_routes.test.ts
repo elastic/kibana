@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
@@ -30,13 +33,16 @@ import {
   createWorkflowSystemAction as createWorkflowSystemActionFixture,
 } from './test_fixtures';
 
-jest.mock(
+vi.mock(
   '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
-  () => ({
-    createPrebuiltRuleAssetsClient: jest.fn(() => ({
-      fetchAssetsByVersion: jest.fn().mockResolvedValue({ assets: [] }),
-    })),
-  })
+  () => {
+      const mocked = {
+        createPrebuiltRuleAssetsClient: vi.fn(() => ({
+          fetchAssetsByVersion: vi.fn().mockResolvedValue({ assets: [] }),
+        })),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 // The workflow is installed once in the global space, so rule actions reference the bare id (no
@@ -50,9 +56,9 @@ const createWorkflowSystemAction = () => createWorkflowSystemActionFixture(WORKF
 describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
   let router: RouterMock;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
-  let rulesClient: jest.Mocked<RulesClient>;
-  let actionsClient: jest.Mocked<ActionsClient>;
-  let hasAtLeast: jest.Mock;
+  let rulesClient: Mocked<RulesClient>;
+  let actionsClient: Mocked<ActionsClient>;
+  let hasAtLeast: Mock;
   let context: SecuritySolutionRequestHandlerContext;
 
   // Mirrors the parts of rulesClient.find the service relies on: name search, the "has the workflow
@@ -126,34 +132,34 @@ describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
     router = httpServiceMock.createRouter() as unknown as RouterMock;
     mockResponse = httpServerMock.createResponseFactory();
     rulesClient = {
-      find: jest.fn(),
-      bulkEdit: jest.fn().mockResolvedValue({
+      find: vi.fn(),
+      bulkEdit: vi.fn().mockResolvedValue({
         rules: [createRule({ id: 'rule-2' })],
         skipped: [],
         errors: [],
         total: 1,
       }),
-    } as Partial<jest.Mocked<RulesClient>> as jest.Mocked<RulesClient>;
+    } as Partial<Mocked<RulesClient>> as Mocked<RulesClient>;
     actionsClient = {
-      isSystemAction: jest.fn((id: string) => id === ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID),
-    } as Partial<jest.Mocked<ActionsClient>> as jest.Mocked<ActionsClient>;
+      isSystemAction: vi.fn((id: string) => id === ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID),
+    } as Partial<Mocked<ActionsClient>> as Mocked<ActionsClient>;
 
     const securitySolutionContext = {
-      getSpaceId: jest.fn().mockReturnValue('space-1'),
-      getDetectionRulesClient: jest.fn().mockReturnValue({
-        getRuleCustomizationStatus: jest.fn().mockReturnValue({}),
+      getSpaceId: vi.fn().mockReturnValue('space-1'),
+      getDetectionRulesClient: vi.fn().mockReturnValue({
+        getRuleCustomizationStatus: vi.fn().mockReturnValue({}),
       }),
-      getMlAuthz: jest.fn().mockReturnValue({}),
-      getRulesAuthz: jest.fn().mockReturnValue({}),
+      getMlAuthz: vi.fn().mockReturnValue({}),
+      getRulesAuthz: vi.fn().mockReturnValue({}),
     } as Pick<
       SecuritySolutionApiRequestHandlerContext,
       'getSpaceId' | 'getDetectionRulesClient' | 'getMlAuthz' | 'getRulesAuthz'
     >;
 
-    hasAtLeast = jest.fn().mockReturnValue(true);
+    hasAtLeast = vi.fn().mockReturnValue(true);
     context = {
       licensing: Promise.resolve({ license: { hasAtLeast } }),
-      resolve: jest.fn().mockResolvedValue({
+      resolve: vi.fn().mockResolvedValue({
         core: {
           savedObjects: {
             client: {},
@@ -161,10 +167,10 @@ describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
         },
         securitySolution: securitySolutionContext,
         alerting: {
-          getRulesClient: jest.fn().mockResolvedValue(rulesClient),
+          getRulesClient: vi.fn().mockResolvedValue(rulesClient),
         },
         actions: {
-          getActionsClient: jest.fn().mockReturnValue(actionsClient),
+          getActionsClient: vi.fn().mockReturnValue(actionsClient),
         },
       }),
     } as unknown as SecuritySolutionRequestHandlerContext;

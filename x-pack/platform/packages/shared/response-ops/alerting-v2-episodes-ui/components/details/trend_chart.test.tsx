@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AlertEpisodeTrendChart } from './trend_chart';
 import type { TrendSeries, TrendThreshold } from './trend_types';
 
 // Render @elastic/charts primitives as inspectable stand-ins.
-jest.mock('@elastic/charts', () => {
-  const actual = jest.requireActual('@elastic/charts');
+vi.mock('@elastic/charts', () => {
+  const actual = require('@elastic/charts');
   return {
     ...actual,
     Chart: ({ children }: { children: React.ReactNode }) => (
@@ -46,11 +48,14 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: { charts: { theme: { useChartsBaseTheme: () => ({}) } } },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: { charts: { theme: { useChartsBaseTheme: () => ({}) } } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockSeries: TrendSeries = {
   id: 'count',

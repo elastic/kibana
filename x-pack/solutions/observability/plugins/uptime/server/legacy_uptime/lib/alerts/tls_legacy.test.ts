@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import moment from 'moment';
 import { getCertSummary } from './tls_legacy';
 import type { Cert } from '../../../../common/runtime_types';
@@ -12,10 +15,10 @@ import type { Cert } from '../../../../common/runtime_types';
 describe('tls alert', () => {
   describe('getCertSummary', () => {
     let mockCerts: Cert[];
-    let diffSpy: jest.SpyInstance<any, unknown[]>;
+    let diffSpy: MockInstance<any, unknown[]>;
 
     beforeEach(() => {
-      diffSpy = jest.spyOn(moment.prototype, 'diff');
+      diffSpy = vi.spyOn(moment.prototype, 'diff');
       mockCerts = [
         {
           not_after: '2020-07-16T03:15:39.000Z',
@@ -49,7 +52,7 @@ describe('tls alert', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('sorts expiring certs appropriately when creating summary', () => {

@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchIndexShardSize } from './fetch_index_shard_size';
 import type { estypes } from '@elastic/elasticsearch';
 
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      getKeyStoreValue: () => '*',
-      config: {
-        ui: {
-          ccs: { enabled: true },
+vi.mock('../../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          getKeyStoreValue: () => '*',
+          config: {
+            ui: {
+              ccs: { enabled: true },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 import { Globals } from '../../static_globals';
 
 describe('fetchIndexShardSize', () => {

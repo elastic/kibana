@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { decode } from '@kbn/rison';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ToolResultType } from '@kbn/agent-builder-common';
@@ -22,10 +24,10 @@ const SERVER_BASE_PATH = '/kbn';
 const SPACE_ID = 'space-a';
 const PREFIX = `${SERVER_BASE_PATH}/s/${SPACE_ID}`;
 
-const mockUiSettingsGet = jest.fn();
+const mockUiSettingsGet = vi.fn();
 
 const coreSetup = {
-  getStartServices: jest.fn().mockResolvedValue([
+  getStartServices: vi.fn().mockResolvedValue([
     {
       http: { basePath: { serverBasePath: SERVER_BASE_PATH } },
       uiSettings: { asScopedToClient: () => ({ get: mockUiSettingsGet }) },
@@ -58,7 +60,7 @@ const decodeFlyoutV2 = (url: string) => decodeQueryParam(url, 'flyoutV2') as unk
 
 describe('buildRedirectUrlTool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUiSettingsGet.mockResolvedValue(true);
   });
 

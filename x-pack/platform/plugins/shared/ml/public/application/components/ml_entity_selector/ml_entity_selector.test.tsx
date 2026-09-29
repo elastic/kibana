@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { MlEntitySelector } from './ml_entity_selector';
@@ -12,27 +15,27 @@ import { useMlApi } from '../../contexts/kibana';
 import type { MlApi } from '../../services/ml_api_service';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
-jest.mock('../../contexts/kibana');
-jest.mock('../../services/toast_notification_service');
-jest.mock('../../capabilities/check_capabilities');
+vi.mock('../../contexts/kibana');
+vi.mock('../../services/toast_notification_service');
+vi.mock('../../capabilities/check_capabilities');
 
 describe('MlEntitySelector', () => {
-  const getAllJobAndGroupIds = jest.fn(() => {
+  const getAllJobAndGroupIds = vi.fn(() => {
     return Promise.resolve({ jobIds: ['ad_01', 'ad_02'] });
   });
 
-  const getDataFrameAnalytics = jest.fn(() => {
+  const getDataFrameAnalytics = vi.fn(() => {
     return Promise.resolve({
       count: 2,
       data_frame_analytics: [{ id: 'dfa_01' }, { id: 'dfa_02' }],
     });
   });
 
-  const getTrainedModels = jest.fn(() => {
+  const getTrainedModels = vi.fn(() => {
     return Promise.resolve([{ model_id: 'model_01' }]);
   });
 
-  (useMlApi as jest.MockedFunction<typeof useMlApi>).mockImplementation(() => {
+  (useMlApi as MockedFunction<typeof useMlApi>).mockImplementation(() => {
     return {
       jobs: {
         getAllJobAndGroupIds,
@@ -43,13 +46,13 @@ describe('MlEntitySelector', () => {
       trainedModels: {
         getTrainedModels,
       },
-    } as unknown as jest.Mocked<MlApi>;
+    } as unknown as Mocked<MlApi>;
   });
 
   beforeEach(() => {});
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('fetches all available options on mount by default', async () => {
@@ -103,7 +106,7 @@ describe('MlEntitySelector', () => {
   });
 
   test('provide current selection update on change', async () => {
-    const onChangeSpy = jest.fn();
+    const onChangeSpy = vi.fn();
 
     const { getByTestId } = render(
       <MlEntitySelector
@@ -132,13 +135,13 @@ describe('MlEntitySelector', () => {
   });
 
   test('provide current selection update on change with duplicates handling', async () => {
-    (useMlApi as jest.MockedFunction<typeof useMlApi>).mockImplementationOnce(() => {
+    (useMlApi as MockedFunction<typeof useMlApi>).mockImplementationOnce(() => {
       return {
         jobs: {
           getAllJobAndGroupIds,
         },
         dataFrameAnalytics: {
-          getDataFrameAnalytics: jest.fn(() => {
+          getDataFrameAnalytics: vi.fn(() => {
             return Promise.resolve({
               count: 2,
               // same ID as the anomaly detection job
@@ -149,10 +152,10 @@ describe('MlEntitySelector', () => {
         trainedModels: {
           getTrainedModels,
         },
-      } as unknown as jest.Mocked<MlApi>;
+      } as unknown as Mocked<MlApi>;
     });
 
-    const onChangeSpy = jest.fn();
+    const onChangeSpy = vi.fn();
 
     const { getByTestId } = render(
       <MlEntitySelector
@@ -179,20 +182,20 @@ describe('MlEntitySelector', () => {
   });
 
   test('display a toast on error', async () => {
-    const displayErrorToast = jest.fn();
+    const displayErrorToast = vi.fn();
     const sampleError = new Error('try a bit later');
 
-    (useMlApi as jest.MockedFunction<typeof useMlApi>).mockImplementationOnce(() => {
+    (useMlApi as MockedFunction<typeof useMlApi>).mockImplementationOnce(() => {
       return {
         jobs: {
-          getAllJobAndGroupIds: jest.fn(() => {
+          getAllJobAndGroupIds: vi.fn(() => {
             throw sampleError;
           }),
         },
-      } as unknown as jest.Mocked<MlApi>;
+      } as unknown as Mocked<MlApi>;
     });
     (
-      useToastNotificationService as jest.MockedFunction<typeof useToastNotificationService>
+      useToastNotificationService as MockedFunction<typeof useToastNotificationService>
     ).mockImplementationOnce(() => {
       return { displayErrorToast } as unknown as ReturnType<typeof useToastNotificationService>;
     });

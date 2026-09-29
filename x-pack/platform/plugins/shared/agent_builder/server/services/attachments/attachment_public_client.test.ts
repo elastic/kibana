@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -37,21 +39,21 @@ const buildDeps = () => {
   const coreStart = coreMock.createStart() as unknown as CoreStart;
   const spaces = {
     spacesService: {
-      getSpaceId: jest.fn().mockReturnValue('default'),
+      getSpaceId: vi.fn().mockReturnValue('default'),
     },
   } as unknown as SpacesPluginStart;
 
   const conversationClient = {
-    getAuthor: jest.fn().mockReturnValue({ id: 'profile-1', username: 'jane' }),
-    get: jest.fn(),
-    update: jest.fn().mockResolvedValue(undefined),
-    appendEvents: jest.fn().mockResolvedValue(undefined),
+    getAuthor: vi.fn().mockReturnValue({ id: 'profile-1', username: 'jane' }),
+    get: vi.fn(),
+    update: vi.fn().mockResolvedValue(undefined),
+    appendEvents: vi.fn().mockResolvedValue(undefined),
   };
   const conversationsService = {
-    getScopedClient: jest.fn().mockResolvedValue(conversationClient),
+    getScopedClient: vi.fn().mockResolvedValue(conversationClient),
   };
   const attachmentsService = {
-    getTypeDefinition: jest.fn().mockReturnValue({
+    getTypeDefinition: vi.fn().mockReturnValue({
       id: 'text',
       validate: async (data: unknown) => ({ valid: true, data }),
       isReadonly: false,
@@ -268,7 +270,7 @@ describe('createAttachmentPublicClient', () => {
 
     it('throws AttachmentValidationError when the type validation fails', async () => {
       const deps = buildDeps();
-      deps.attachmentsService.getTypeDefinition = jest.fn().mockReturnValue({
+      deps.attachmentsService.getTypeDefinition = vi.fn().mockReturnValue({
         id: 'text',
         validate: async () => ({ valid: false, error: 'bad shape' }),
         isReadonly: false,

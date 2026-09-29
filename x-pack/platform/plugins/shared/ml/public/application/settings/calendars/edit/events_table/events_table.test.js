@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { fireEvent } from '@testing-library/react';
 
 import { EventsTable } from './events_table';
 
-jest.mock('../../../../capabilities/check_capabilities', () => ({
-  usePermissionCheck: () => [true, true],
-}));
+vi.mock('../../../../capabilities/check_capabilities', () => {
+      const mocked = {
+      usePermissionCheck: () => [true, true],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const testProps = {
   canCreateCalendar: true,
@@ -26,10 +31,10 @@ const testProps = {
       event_id: 'test-event-one',
     },
   ],
-  onDeleteClick: jest.fn(),
+  onDeleteClick: vi.fn(),
   showSearchBar: false,
-  showImportModal: jest.fn(),
-  showNewEventModal: jest.fn(),
+  showImportModal: vi.fn(),
+  showNewEventModal: vi.fn(),
 };
 
 describe('EventsTable', () => {
@@ -51,7 +56,7 @@ describe('EventsTable', () => {
   });
 
   test('Calls onDeleteClick when delete button is clicked', () => {
-    const onDeleteClick = jest.fn();
+    const onDeleteClick = vi.fn();
 
     const { getByTestId } = renderWithI18n(
       <EventsTable {...testProps} onDeleteClick={onDeleteClick} />

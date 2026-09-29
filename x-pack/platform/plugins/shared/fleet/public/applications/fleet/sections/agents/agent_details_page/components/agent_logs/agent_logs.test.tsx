@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { type ReactNode } from 'react';
 
 import { useAuthz, useStartServices } from '../../../../../hooks';
@@ -12,74 +15,80 @@ import { createFleetTestRendererMock } from '../../../../../../../mock';
 
 import { AgentLogsUI } from './agent_logs';
 
-jest.mock('@kbn/kibana-utils-plugin/public', () => {
+vi.mock('@kbn/kibana-utils-plugin/public', async () => {
   return {
-    ...jest.requireActual('@kbn/kibana-utils-plugin/public'),
-    createStateContainerReactHelpers: jest.fn().mockReturnValue({
-      useTransitions: jest.fn().mockReturnValue({ update: jest.fn() }),
+    ...(await vi.importActual('@kbn/kibana-utils-plugin/public')),
+    createStateContainerReactHelpers: vi.fn().mockReturnValue({
+      useTransitions: vi.fn().mockReturnValue({ update: vi.fn() }),
     }),
   };
 });
 
-jest.mock('@kbn/saved-search-component', () => ({
-  LazySavedSearchComponent: (props: any) => <div data-test-subj="lazySavedSearchComponent" />,
-}));
+vi.mock('@kbn/saved-search-component', () => {
+      const mocked = {
+      LazySavedSearchComponent: (props: any) => <div data-test-subj="lazySavedSearchComponent" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/embeddable-plugin/public', () => ({
-  ViewMode: {
-    VIEW: 'view',
-    EDIT: 'edit',
-  },
-}));
+vi.mock('@kbn/embeddable-plugin/public', () => {
+      const mocked = {
+      ViewMode: {
+        VIEW: 'view',
+        EDIT: 'edit',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/logs-shared-plugin/common', () => {
-  const originalModule = jest.requireActual('@kbn/logs-shared-plugin/common');
+vi.mock('@kbn/logs-shared-plugin/common', async () => {
+  const originalModule = (await vi.importActual('@kbn/logs-shared-plugin/common'));
   return {
     ...originalModule,
-    getLogsLocatorFromUrlService: jest
+    getLogsLocatorFromUrlService: vi
       .fn()
-      .mockReturnValue({ getRedirectUrl: jest.fn(() => 'https://discover-redirect-url') }),
+      .mockReturnValue({ getRedirectUrl: vi.fn(() => 'https://discover-redirect-url') }),
   };
 });
 
-jest.mock('@kbn/shared-ux-link-redirect-app', () => {
+vi.mock('@kbn/shared-ux-link-redirect-app', () => {
   return {
     RedirectAppLinks: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   };
 });
 
-jest.mock('./query_bar', () => {
+vi.mock('./query_bar', () => {
   return {
     LogQueryBar: () => <div />,
   };
 });
 
-jest.mock('./filter_dataset', () => {
+vi.mock('./filter_dataset', () => {
   return {
     DatasetFilter: () => <div />,
   };
 });
 
-jest.mock('../../../../../hooks', () => {
+vi.mock('../../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../../hooks'),
-    useLink: jest.fn(),
-    useStartServices: jest.fn(),
-    useAuthz: jest.fn(),
-    useDiscoverLocator: jest.fn().mockImplementation(() => {
+    ...(await vi.importActual('../../../../../hooks')),
+    useLink: vi.fn(),
+    useStartServices: vi.fn(),
+    useAuthz: vi.fn(),
+    useDiscoverLocator: vi.fn().mockImplementation(() => {
       return {
         id: 'DISCOVER_APP_LOCATOR',
-        getRedirectUrl: jest.fn().mockResolvedValue('app/discover/logs/someview'),
+        getRedirectUrl: vi.fn().mockResolvedValue('app/discover/logs/someview'),
       };
     }),
   };
 });
 
-const mockUseStartServices = useStartServices as jest.Mock;
+const mockUseStartServices = useStartServices as Mock;
 
 describe('AgentLogsUI', () => {
   beforeEach(() => {
-    jest.mocked(useAuthz).mockReturnValue({
+    vi.mocked(useAuthz).mockReturnValue({
       fleet: {
         allAgents: true,
         readAgents: true,
@@ -109,7 +118,7 @@ describe('AgentLogsUI', () => {
   const mockLogSources = {
     services: {
       logSourcesService: {
-        getFlattenedLogSources: jest.fn().mockResolvedValue({
+        getFlattenedLogSources: vi.fn().mockResolvedValue({
           id: 'logs-*',
           title: 'Logs',
         }),
@@ -121,7 +130,7 @@ describe('AgentLogsUI', () => {
     query: {
       timefilter: {
         timefilter: {
-          calculateBounds: jest.fn().mockReturnValue({
+          calculateBounds: vi.fn().mockReturnValue({
             min: new Date('2023-04-20T14:00:00.340Z'),
             max: new Date('2023-04-20T14:20:00.340Z'),
           }),
@@ -130,16 +139,16 @@ describe('AgentLogsUI', () => {
     },
     search: {
       searchSource: {
-        create: jest.fn(),
+        create: vi.fn(),
       },
     },
     dataViews: {
-      create: jest.fn(),
+      create: vi.fn(),
     },
   };
 
   const mockEmbeddable = {
-    EmbeddablePanel: jest.fn().mockImplementation(({ children }) => <div>{children}</div>),
+    EmbeddablePanel: vi.fn().mockImplementation(({ children }) => <div>{children}</div>),
   };
 
   const mockApplication = {
@@ -182,7 +191,7 @@ describe('AgentLogsUI', () => {
   });
 
   it('should not render Open in Logs button if privileges are not set', () => {
-    jest.mocked(useAuthz).mockReturnValue({
+    vi.mocked(useAuthz).mockReturnValue({
       fleet: {
         readAgents: false,
       },

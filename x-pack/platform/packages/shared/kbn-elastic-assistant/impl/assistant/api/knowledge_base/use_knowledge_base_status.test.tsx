@@ -5,32 +5,38 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import type { UseKnowledgeBaseStatusParams } from './use_knowledge_base_status';
 import { useKnowledgeBaseStatus } from './use_knowledge_base_status';
 import { getKnowledgeBaseStatus as _getKnowledgeBaseStatus } from './api';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
-const getKnowledgeBaseStatusMock = _getKnowledgeBaseStatus as jest.Mock;
+const getKnowledgeBaseStatusMock = _getKnowledgeBaseStatus as Mock;
 
-jest.mock('./api', () => {
-  const actual = jest.requireActual('./api');
+vi.mock('./api', async () => {
+  const actual = (await vi.importActual('./api'));
   return {
     ...actual,
-    getKnowledgeBaseStatus: jest.fn((...args) => actual.getKnowledgeBaseStatus(...args)),
+    getKnowledgeBaseStatus: vi.fn((...args) => actual.getKnowledgeBaseStatus(...args)),
   };
 });
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn().mockImplementation(async (queryKey, fn, opts) => {
-    try {
-      const res = await fn({});
-      return Promise.resolve(res);
-    } catch (e) {
-      opts.onError(e);
-    }
-  }),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: vi.fn().mockImplementation(async (queryKey, fn, opts) => {
+        try {
+          const res = await fn({});
+          return Promise.resolve(res);
+        } catch (e) {
+          opts.onError(e);
+        }
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const statusResponse = {
   elser_exists: true,
@@ -38,15 +44,15 @@ const statusResponse = {
 };
 
 const http = {
-  fetch: jest.fn().mockResolvedValue(statusResponse),
+  fetch: vi.fn().mockResolvedValue(statusResponse),
 };
 const toasts = {
-  addError: jest.fn(),
+  addError: vi.fn(),
 };
 const defaultProps = { http, toasts } as unknown as UseKnowledgeBaseStatusParams;
 describe('useKnowledgeBaseStatus', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should call api to get knowledge base status without resource arg', async () => {
     renderHook(() => useKnowledgeBaseStatus(defaultProps));

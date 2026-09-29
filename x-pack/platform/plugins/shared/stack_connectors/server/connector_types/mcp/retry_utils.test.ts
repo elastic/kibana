@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-jest.mock('timers/promises');
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('timers/promises');
 import { setTimeout } from 'timers/promises';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { retryWithRecovery } from './retry_utils';
 
-const setTimeoutMock = setTimeout as jest.Mock<
+const setTimeoutMock = setTimeout as Mock<
   ReturnType<typeof setTimeout>,
   Parameters<typeof setTimeout>
 >;
@@ -19,14 +22,14 @@ describe('retryWithRecovery', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setTimeoutMock.mockResolvedValue(undefined);
     logger = loggingSystemMock.createLogger();
   });
 
   describe('successful operations', () => {
     it('should return result immediately if operation succeeds on first attempt', async () => {
-      const operation = jest.fn().mockResolvedValue('success');
+      const operation = vi.fn().mockResolvedValue('success');
 
       const result = await retryWithRecovery(operation);
 
@@ -36,7 +39,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should not retry if operation succeeds', async () => {
-      const operation = jest.fn().mockResolvedValue({ data: 'test' });
+      const operation = vi.fn().mockResolvedValue({ data: 'test' });
 
       const result = await retryWithRecovery(operation, { maxAttempts: 3 });
 
@@ -47,7 +50,7 @@ describe('retryWithRecovery', () => {
 
   describe('retry attempts', () => {
     it('should retry on failure and succeed on second attempt', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('First attempt failed'))
         .mockResolvedValueOnce('success');
@@ -59,7 +62,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should retry multiple times until success', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Attempt 1 failed'))
         .mockRejectedValueOnce(new Error('Attempt 2 failed'))
@@ -73,7 +76,7 @@ describe('retryWithRecovery', () => {
 
     it('should throw error after max attempts are reached', async () => {
       const error = new Error('Operation failed');
-      const operation = jest.fn().mockRejectedValue(error);
+      const operation = vi.fn().mockRejectedValue(error);
 
       await expect(retryWithRecovery(operation, { maxAttempts: 2 })).rejects.toThrow(
         'Operation failed'
@@ -83,7 +86,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should use default maxAttempts of 1 (1 initial + 1 retry)', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('First attempt failed'))
         .mockResolvedValueOnce('success');
@@ -100,12 +103,12 @@ describe('retryWithRecovery', () => {
       const retryableError = new Error('Retryable error');
       const nonRetryableError = new Error('Non-retryable error');
 
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(retryableError)
         .mockRejectedValueOnce(nonRetryableError);
 
-      const isRetryableError = jest.fn((error: unknown) => {
+      const isRetryableError = vi.fn((error: unknown) => {
         return error === retryableError;
       });
 
@@ -123,9 +126,9 @@ describe('retryWithRecovery', () => {
 
     it('should log debug message for non-retryable errors', async () => {
       const nonRetryableError = new Error('Non-retryable error');
-      const operation = jest.fn().mockRejectedValue(nonRetryableError);
+      const operation = vi.fn().mockRejectedValue(nonRetryableError);
 
-      const isRetryableError = jest.fn().mockReturnValue(false);
+      const isRetryableError = vi.fn().mockReturnValue(false);
 
       await expect(
         retryWithRecovery(operation, {
@@ -141,7 +144,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should retry all errors by default', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
@@ -156,7 +159,7 @@ describe('retryWithRecovery', () => {
 
   describe('delays and backoff', () => {
     it('should not delay when initialDelayMs is 0', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error'))
         .mockResolvedValueOnce('success');
@@ -170,7 +173,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should delay before retry when initialDelayMs is set', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error'))
         .mockResolvedValueOnce('success');
@@ -184,7 +187,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should use constant delay when backoffMultiplier is 1', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
@@ -202,7 +205,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should use exponential backoff when backoffMultiplier is greater than 1', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
@@ -222,7 +225,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should cap delay at maxDelayMs', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
@@ -243,7 +246,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should not delay when backoffMultiplier is undefined', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error'))
         .mockResolvedValueOnce('success');
@@ -260,13 +263,13 @@ describe('retryWithRecovery', () => {
 
   describe('onRetry callback', () => {
     it('should call onRetry before each retry attempt', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockResolvedValueOnce('success');
 
-      const onRetry = jest.fn().mockResolvedValue(undefined);
+      const onRetry = vi.fn().mockResolvedValue(undefined);
 
       await retryWithRecovery(operation, {
         maxAttempts: 2,
@@ -279,12 +282,12 @@ describe('retryWithRecovery', () => {
     });
 
     it('should continue retry even if onRetry throws an error', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockResolvedValueOnce('success');
 
-      const onRetry = jest.fn().mockRejectedValue(new Error('Recovery failed'));
+      const onRetry = vi.fn().mockRejectedValue(new Error('Recovery failed'));
 
       const result = await retryWithRecovery(operation, {
         maxAttempts: 1,
@@ -300,13 +303,13 @@ describe('retryWithRecovery', () => {
     });
 
     it('should pass correct attempt number to onRetry', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockResolvedValueOnce('success');
 
-      const onRetry = jest.fn().mockResolvedValue(undefined);
+      const onRetry = vi.fn().mockResolvedValue(undefined);
 
       await retryWithRecovery(operation, {
         maxAttempts: 2,
@@ -320,7 +323,7 @@ describe('retryWithRecovery', () => {
 
   describe('logging', () => {
     it('should log retry attempts when logger is provided', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error'))
         .mockResolvedValueOnce('success');
@@ -334,7 +337,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should include operation name in log messages', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error'))
         .mockResolvedValueOnce('success');
@@ -349,7 +352,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should include delay in log message when delay is configured', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error'))
         .mockResolvedValueOnce('success');
@@ -365,7 +368,7 @@ describe('retryWithRecovery', () => {
 
     it('should log max attempts reached message', async () => {
       const error = new Error('Operation failed');
-      const operation = jest.fn().mockRejectedValue(error);
+      const operation = vi.fn().mockRejectedValue(error);
 
       await expect(
         retryWithRecovery(operation, {
@@ -380,7 +383,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should not log if logger is not provided', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error'))
         .mockResolvedValueOnce('success');
@@ -397,7 +400,7 @@ describe('retryWithRecovery', () => {
   describe('error handling', () => {
     it('should throw the last error when all attempts fail', async () => {
       const lastError = new Error('Last error');
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('First error'))
         .mockRejectedValueOnce(new Error('Second error'))
@@ -407,13 +410,13 @@ describe('retryWithRecovery', () => {
     });
 
     it('should handle non-Error objects', async () => {
-      const operation = jest.fn().mockRejectedValue('String error');
+      const operation = vi.fn().mockRejectedValue('String error');
 
       await expect(retryWithRecovery(operation, { maxAttempts: 1 })).rejects.toBe('String error');
     });
 
     it('should handle null errors', async () => {
-      const operation = jest.fn().mockRejectedValue(null);
+      const operation = vi.fn().mockRejectedValue(null);
 
       await expect(retryWithRecovery(operation, { maxAttempts: 1 })).rejects.toBe(null);
     });
@@ -422,7 +425,7 @@ describe('retryWithRecovery', () => {
   describe('edge cases', () => {
     it('should handle maxAttempts of 0 (no retries)', async () => {
       const error = new Error('Operation failed');
-      const operation = jest.fn().mockRejectedValue(error);
+      const operation = vi.fn().mockRejectedValue(error);
 
       await expect(retryWithRecovery(operation, { maxAttempts: 0 })).rejects.toThrow(
         'Operation failed'
@@ -432,7 +435,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should handle very large maxAttempts', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error'))
         .mockResolvedValueOnce('success');
@@ -444,7 +447,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should handle maxDelayMs of 0', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error'))
         .mockResolvedValueOnce('success');
@@ -462,7 +465,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should handle Infinity maxDelayMs', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
@@ -482,14 +485,14 @@ describe('retryWithRecovery', () => {
 
   describe('complex scenarios', () => {
     it('should handle retry with all options combined', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockResolvedValueOnce('success');
 
-      const onRetry = jest.fn().mockResolvedValue(undefined);
-      const isRetryableError = jest.fn().mockReturnValue(true);
+      const onRetry = vi.fn().mockResolvedValue(undefined);
+      const isRetryableError = vi.fn().mockReturnValue(true);
 
       const result = await retryWithRecovery(operation, {
         maxAttempts: 2,
@@ -511,7 +514,7 @@ describe('retryWithRecovery', () => {
     });
 
     it('should handle operation that returns different values on retries', async () => {
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValueOnce(new Error('Error'))
         .mockResolvedValueOnce('first success')

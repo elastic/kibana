@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import {
   TYPEWRITER_ERASE_MS,
@@ -17,14 +19,14 @@ import {
 const messages = ['ab', 'cd'] as const;
 
 const mockMatchMedia = (matches: boolean) => {
-  window.matchMedia = jest.fn().mockImplementation((query: string) => ({
+  window.matchMedia = vi.fn().mockImplementation((query: string) => ({
     matches,
     media: query,
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    dispatchEvent: jest.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    dispatchEvent: vi.fn(),
     onchange: null,
   }));
 };
@@ -34,13 +36,13 @@ describe('useTypewriterLoop', () => {
 
   beforeEach(() => {
     originalMatchMedia = window.matchMedia;
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockMatchMedia(false);
   });
 
   afterEach(() => {
     window.matchMedia = originalMatchMedia;
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns an empty string when disabled', () => {
@@ -49,7 +51,7 @@ describe('useTypewriterLoop', () => {
     expect(result.current).toBe('');
 
     act(() => {
-      jest.advanceTimersByTime(TYPEWRITER_GAP_MS + TYPEWRITER_TYPE_MS * 10);
+      vi.advanceTimersByTime(TYPEWRITER_GAP_MS + TYPEWRITER_TYPE_MS * 10);
     });
 
     expect(result.current).toBe('');
@@ -61,37 +63,37 @@ describe('useTypewriterLoop', () => {
     expect(result.current).toBe('');
 
     act(() => {
-      jest.advanceTimersByTime(TYPEWRITER_GAP_MS);
+      vi.advanceTimersByTime(TYPEWRITER_GAP_MS);
     });
     expect(result.current).toBe('a');
 
     act(() => {
-      jest.advanceTimersByTime(TYPEWRITER_TYPE_MS);
+      vi.advanceTimersByTime(TYPEWRITER_TYPE_MS);
     });
     expect(result.current).toBe('ab');
 
     act(() => {
-      jest.advanceTimersByTime(TYPEWRITER_HOLD_MS);
+      vi.advanceTimersByTime(TYPEWRITER_HOLD_MS);
     });
     expect(result.current).toBe('ab');
 
     act(() => {
-      jest.advanceTimersByTime(TYPEWRITER_ERASE_MS);
+      vi.advanceTimersByTime(TYPEWRITER_ERASE_MS);
     });
     expect(result.current).toBe('a');
 
     act(() => {
-      jest.advanceTimersByTime(TYPEWRITER_ERASE_MS);
+      vi.advanceTimersByTime(TYPEWRITER_ERASE_MS);
     });
     expect(result.current).toBe('');
 
     act(() => {
-      jest.advanceTimersByTime(TYPEWRITER_GAP_MS);
+      vi.advanceTimersByTime(TYPEWRITER_GAP_MS);
     });
     expect(result.current).toBe('c');
 
     act(() => {
-      jest.advanceTimersByTime(TYPEWRITER_TYPE_MS);
+      vi.advanceTimersByTime(TYPEWRITER_TYPE_MS);
     });
     expect(result.current).toBe('cd');
   });
@@ -104,7 +106,7 @@ describe('useTypewriterLoop', () => {
     expect(result.current).toBe('ab');
 
     act(() => {
-      jest.advanceTimersByTime(TYPEWRITER_GAP_MS + TYPEWRITER_TYPE_MS * 10);
+      vi.advanceTimersByTime(TYPEWRITER_GAP_MS + TYPEWRITER_TYPE_MS * 10);
     });
 
     expect(result.current).toBe('ab');

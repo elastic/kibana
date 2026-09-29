@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ComponentProps } from 'react';
 import { screen } from '@testing-library/react';
@@ -48,23 +50,29 @@ import { inventoryThresholdAlertEs } from '../../rules/fixtures/example_alerts';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
-jest.mock('../../utils/kibana_react', () => ({
+vi.mock('../../utils/kibana_react', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+  useKibana: vi.fn(() => mockUseKibanaReturnValue),
 }));
 
-jest.mock('react-router-dom', () => ({
-  useRouteMatch: jest.fn().mockReturnValue({}),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useRouteMatch: vi.fn().mockReturnValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetRuleTypesPermissions = jest.fn(() => ({
+const mockUseGetRuleTypesPermissions = vi.fn(() => ({
   authorizedToReadRuleType: (): boolean => true,
   authorizedToReadRuleForAlert: (): boolean => true,
 }));
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
-  ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
-  useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
+      useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const activeAlert = {
   [ALERT_STATUS]: ['active'],
@@ -128,11 +136,11 @@ const tabsData = [
 ];
 
 describe('AlertsTableExpandedAlertView', () => {
-  jest
+  vi
     .spyOn(useUiSettingHook, 'useUiSetting')
     .mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
   const observabilityRuleTypeRegistryMock = createObservabilityRuleTypeRegistryMock();
-  const onExpandedAlertIndexChangeMock = jest.fn();
+  const onExpandedAlertIndexChangeMock = vi.fn();
 
   beforeEach(() => {
     mockUseGetRuleTypesPermissions.mockReturnValue({

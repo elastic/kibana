@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders, createMockStore } from '../../../../common/mock';
 import { NetworkKpiComponent } from '.';
 
-jest.mock('../../../../common/components/visualization_actions/lens_embeddable', () => ({
-  LensEmbeddable: jest.fn(() => <div data-test-subj="mock-lens-embeddable" />),
-}));
+vi.mock('../../../../common/components/visualization_actions/lens_embeddable', () => {
+      const mocked = {
+      LensEmbeddable: vi.fn(() => <div data-test-subj="mock-lens-embeddable" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('NetworkKpiComponent', () => {
   const props = {
     filterQuery: '',
     from: '2019-06-15T06:00:00.000Z',
     indexNames: [],
-    updateDateRange: jest.fn(),
-    setQuery: jest.fn(),
+    updateDateRange: vi.fn(),
+    setQuery: vi.fn(),
     skip: true,
     to: '2019-06-18T06:00:00.000Z',
   };

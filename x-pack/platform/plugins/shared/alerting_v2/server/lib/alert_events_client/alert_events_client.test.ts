@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { createHash } from 'crypto';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { AlertEventsClient, getGroupHash, getValueByDottedPath } from './alert_events_client';
@@ -122,8 +125,8 @@ describe('AlertEventsClient.createAlertEvent episode lifecycle', () => {
       errors: [],
     }));
 
-    const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
-      executeQueryRows: jest.fn().mockResolvedValue(queryRows),
+    const queryService: Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
+      executeQueryRows: vi.fn().mockResolvedValue(queryRows),
     };
 
     const client = new AlertEventsClient(

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import {
   AgentExecutionMode,
@@ -36,9 +38,9 @@ describe('addUserMessageStepDefinition', () => {
     const execution = createWorkflowStepExecutionServiceMock({
       maybeExecuteAgent:
         executionOverrides.maybeExecuteAgent ??
-        jest.fn().mockResolvedValue({ conversationId, events$: of() }),
+        vi.fn().mockResolvedValue({ conversationId, events$: of() }),
     });
-    const isExperimentalEnabled = jest.fn().mockResolvedValue(experimental);
+    const isExperimentalEnabled = vi.fn().mockResolvedValue(experimental);
 
     const definition = addUserMessageStepDefinition({
       getConversationClient: conv.getConversationClient,
@@ -90,7 +92,7 @@ describe('addUserMessageStepDefinition', () => {
 
   it('propagates a not-found error for a missing conversation', async () => {
     const { definition } = buildDefinition({
-      maybeExecuteAgent: jest
+      maybeExecuteAgent: vi
         .fn()
         .mockRejectedValue(createConversationNotFoundError({ conversationId: 'missing' })),
     });

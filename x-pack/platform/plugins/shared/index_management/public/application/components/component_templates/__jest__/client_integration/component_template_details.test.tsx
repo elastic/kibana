@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ComponentProps } from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
@@ -67,7 +69,7 @@ describe('<ComponentTemplateDetails />', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const env = setupEnvironment();
     httpSetup = env.httpSetup;
     httpRequestsMockHelpers = env.httpRequestsMockHelpers;

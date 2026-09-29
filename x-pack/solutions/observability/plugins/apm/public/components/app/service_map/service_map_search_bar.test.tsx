@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, act, waitFor } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import { Subject } from 'rxjs';
 import { ServiceMapSearchBar } from './service_map_search_bar';
 
-let mockSetEsQuery: jest.Mock;
-let mockSetHighlightedServiceNames: jest.Mock;
+let mockSetEsQuery: Mock;
+let mockSetHighlightedServiceNames: Mock;
 let mockOnFiltersChange: (filters: Filter[]) => void;
-let mockHistoryReplace: jest.Mock;
+let mockHistoryReplace: Mock;
 let mockLocationSearch: string;
 let mockInitialAppFilters: Filter[];
 let mockRestoredControlSelections: Record<string, string[]> | undefined;
@@ -22,128 +25,164 @@ let mockRestoredControlSelections: Record<string, string[]> | undefined;
 let mockMissingFields: string[];
 const filterUpdates$ = new Subject<void>();
 
-jest.mock('../../../hooks/use_apm_params', () => ({
-  useApmParams: () => ({
-    query: {
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-      kuery: 'service.name:"opbeans-go"',
-      environment: 'production',
-    },
-  }),
-}));
+vi.mock('../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useApmParams: () => ({
+        query: {
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          kuery: 'service.name:"opbeans-go"',
+          environment: 'production',
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_service_name', () => ({
-  useServiceName: () => undefined,
-}));
+vi.mock('../../../hooks/use_service_name', () => {
+      const mocked = {
+      useServiceName: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_adhoc_apm_data_view', () => ({
-  useAdHocApmDataView: () => ({
-    dataView: {
-      id: 'apm-data-view',
-      title: 'apm-*',
-      fields: {
-        getByName: (name: string) => (mockMissingFields.includes(name) ? undefined : { name }),
-      },
-      getFieldByName: (name: string) => (mockMissingFields.includes(name) ? undefined : { name }),
-    },
-  }),
-}));
+vi.mock('../../../hooks/use_adhoc_apm_data_view', () => {
+      const mocked = {
+      useAdHocApmDataView: () => ({
+        dataView: {
+          id: 'apm-data-view',
+          title: 'apm-*',
+          fields: {
+            getByName: (name: string) => (mockMissingFields.includes(name) ? undefined : { name }),
+          },
+          getFieldByName: (name: string) => (mockMissingFields.includes(name) ? undefined : { name }),
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useKibanaQuerySettings: () => ({}),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useKibanaQuerySettings: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./service_map_search_context', () => ({
-  useServiceMapSearchContext: () => ({
-    setEsQuery: (...args: unknown[]) => mockSetEsQuery(...args),
-    setHighlightedServiceNames: (...args: unknown[]) => mockSetHighlightedServiceNames(...args),
-  }),
-}));
+vi.mock('./service_map_search_context', () => {
+      const mocked = {
+      useServiceMapSearchContext: () => ({
+        setEsQuery: (...args: unknown[]) => mockSetEsQuery(...args),
+        setHighlightedServiceNames: (...args: unknown[]) => mockSetHighlightedServiceNames(...args),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_filter_url_sync', () => ({
-  useFilterUrlSync: () => ({
-    initialAppFilters: mockInitialAppFilters,
-    persistControlSelections: jest.fn(),
-    getRestoredControlSelections: () => mockRestoredControlSelections,
-  }),
-}));
+vi.mock('./use_filter_url_sync', () => {
+      const mocked = {
+      useFilterUrlSync: () => ({
+        initialAppFilters: mockInitialAppFilters,
+        persistControlSelections: vi.fn(),
+        getRestoredControlSelections: () => mockRestoredControlSelections,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({ replace: mockHistoryReplace }),
-  useLocation: () => ({ search: mockLocationSearch, pathname: '/service-map' }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: () => ({ replace: mockHistoryReplace }),
+      useLocation: () => ({ search: mockLocationSearch, pathname: '/service-map' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockFilterManager = {
-  getAppFilters: jest.fn().mockReturnValue([]),
-  getGlobalFilters: jest.fn().mockReturnValue([]),
+  getAppFilters: vi.fn().mockReturnValue([]),
+  getGlobalFilters: vi.fn().mockReturnValue([]),
   getUpdates$: () => filterUpdates$.asObservable(),
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      data: { query: { filterManager: mockFilterManager } },
-    },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          data: { query: { filterManager: mockFilterManager } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../shared/search_bar/search_bar', () => ({
-  SearchBar: () => <div data-testid="search-bar" />,
-}));
+vi.mock('../../shared/search_bar/search_bar', () => {
+      const mocked = {
+      SearchBar: () => <div data-testid="search-bar" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../shared/time_comparison', () => ({
-  TimeComparison: () => <div data-testid="time-comparison" />,
-}));
+vi.mock('../../shared/time_comparison', () => {
+      const mocked = {
+      TimeComparison: () => <div data-testid="time-comparison" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./service_map_controls', () => ({
-  ServiceMapControls: ({
-    onFiltersChange,
-    controlsConfig,
-  }: {
-    onFiltersChange: (filters: Filter[]) => void;
-    controlsConfig: Array<{ field_name: string; width: string; grow: boolean }>;
-  }) => {
-    mockOnFiltersChange = onFiltersChange;
-    return (
-      <div
-        data-testid="service-map-controls"
-        data-fields={controlsConfig.map((c) => c.field_name).join(',')}
-        data-widths={controlsConfig.map((c) => c.width).join(',')}
-        data-grows={controlsConfig.map((c) => String(c.grow)).join(',')}
-      />
-    );
-  },
-}));
+vi.mock('./service_map_controls', () => {
+      const mocked = {
+      ServiceMapControls: ({
+        onFiltersChange,
+        controlsConfig,
+      }: {
+        onFiltersChange: (filters: Filter[]) => void;
+        controlsConfig: Array<{ field_name: string; width: string; grow: boolean }>;
+      }) => {
+        mockOnFiltersChange = onFiltersChange;
+        return (
+          <div
+            data-testid="service-map-controls"
+            data-fields={controlsConfig.map((c) => c.field_name).join(',')}
+            data-widths={controlsConfig.map((c) => c.width).join(',')}
+            data-grows={controlsConfig.map((c) => String(c.grow)).join(',')}
+          />
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock buildEsQuery to return a predictable structure based on filters
-jest.mock('@kbn/es-query', () => ({
-  buildEsQuery: (_dataView: unknown, _queries: unknown, filters: Filter[]) => ({
-    bool: {
-      must: [],
-      filter: filters.map((f: Filter) => ({
-        match_phrase: { [f.meta?.key ?? '']: 'value' },
-      })),
-      should: [],
-      must_not: [],
-    },
-  }),
-  isPhraseFilter: (f: Filter) =>
-    f.query && typeof f.query === 'object' && 'match_phrase' in f.query,
-  getPhraseFilterValue: (f: Filter) => {
-    const mp = (f as unknown as { query: { match_phrase: Record<string, string> } }).query
-      .match_phrase;
-    return Object.values(mp)[0];
-  },
-  isPhrasesFilter: (f: Filter) => f.meta?.type === 'phrases',
-}));
+vi.mock('@kbn/es-query', () => {
+      const mocked = {
+      buildEsQuery: (_dataView: unknown, _queries: unknown, filters: Filter[]) => ({
+        bool: {
+          must: [],
+          filter: filters.map((f: Filter) => ({
+            match_phrase: { [f.meta?.key ?? '']: 'value' },
+          })),
+          should: [],
+          must_not: [],
+        },
+      }),
+      isPhraseFilter: (f: Filter) =>
+        f.query && typeof f.query === 'object' && 'match_phrase' in f.query,
+      getPhraseFilterValue: (f: Filter) => {
+        const mp = (f as unknown as { query: { match_phrase: Record<string, string> } }).query
+          .match_phrase;
+        return Object.values(mp)[0];
+      },
+      isPhrasesFilter: (f: Filter) => f.meta?.type === 'phrases',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ServiceMapSearchBar', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockSetEsQuery = jest.fn();
-    mockSetHighlightedServiceNames = jest.fn();
-    mockHistoryReplace = jest.fn();
+    vi.clearAllMocks();
+    mockSetEsQuery = vi.fn();
+    mockSetHighlightedServiceNames = vi.fn();
+    mockHistoryReplace = vi.fn();
     mockLocationSearch = '?environment=production&kuery=service.name%3A%22opbeans-go%22';
     mockInitialAppFilters = [];
     mockRestoredControlSelections = undefined;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../../mocks';
@@ -13,15 +15,15 @@ import { rollbackInstallation } from '../../services/epm/packages/rollback';
 
 import { _runBulkRollbackTask } from './run_bulk_rollback';
 
-jest.mock('../../services/epm/packages/rollback');
+vi.mock('../../services/epm/packages/rollback');
 
 describe('Bulk rollback task', () => {
   beforeEach(() => {
     const mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
 
-    jest.mocked(rollbackInstallation).mockReset();
-    jest.mocked(rollbackInstallation).mockImplementation(async (params) => {
+    vi.mocked(rollbackInstallation).mockReset();
+    vi.mocked(rollbackInstallation).mockImplementation(async (params) => {
       if (!('pkgName' in params)) {
         throw new Error('Invalid call to rollbackInstallation');
       }

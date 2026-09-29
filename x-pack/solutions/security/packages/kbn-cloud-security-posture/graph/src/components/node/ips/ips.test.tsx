@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,7 +20,7 @@ import {
 import { Ips } from './ips';
 
 describe('Ips', () => {
-  const mockOnIpClick = jest.fn();
+  const mockOnIpClick = vi.fn();
 
   beforeEach(() => {
     mockOnIpClick.mockClear();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as buildQuery from './query.overview_host.dsl';
 import { hostOverview } from '.';
 import {
@@ -14,7 +16,7 @@ import {
 } from './__mocks__';
 
 describe('hostOverview search strategy', () => {
-  const buildOverviewHostQuery = jest.spyOn(buildQuery, 'buildOverviewHostQuery');
+  const buildOverviewHostQuery = vi.spyOn(buildQuery, 'buildOverviewHostQuery');
 
   afterEach(() => {
     buildOverviewHostQuery.mockClear();

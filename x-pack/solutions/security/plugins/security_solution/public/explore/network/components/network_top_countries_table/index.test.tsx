@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
@@ -18,10 +20,10 @@ import { networkModel } from '../../store';
 import { NetworkTopCountriesTable } from '.';
 import { mockData } from './mock';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('NetworkTopCountries Table Component', () => {
-  const loadPage = jest.fn();
+  const loadPage = vi.fn();
   const defaultProps = {
     data: mockData.NetworkTopCountries.edges,
     fakeTotalCount: getOr(50, 'fakeTotalCount', mockData.NetworkTopCountries.pageInfo),
@@ -31,7 +33,7 @@ describe('NetworkTopCountries Table Component', () => {
     isInspect: false,
     loading: false,
     loadPage,
-    setQuerySkip: jest.fn(),
+    setQuerySkip: vi.fn(),
     showMorePagesIndicator: getOr(
       false,
       'showMorePagesIndicator',

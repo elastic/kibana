@@ -5,45 +5,62 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { MAX_ID_LENGTH, type QueryLink } from '@kbn/significant-events-schema';
 import { DeepStrict } from '@kbn/zod-helpers';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import { internalKIQueriesRoutes } from './route';
 
-jest.mock('../../../utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../../utils/assert_significant_events_access', () => {
+      const mocked = {
+      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFetchQueryLinks = jest.fn();
-const mockComputeOccurrences = jest.fn();
-const mockGetQueryOccurrences = jest.fn();
-const mockGenerateKIQueries = jest.fn();
-const mockCleanupStaleEvents = jest.fn();
+const mockFetchQueryLinks = vi.fn();
+const mockComputeOccurrences = vi.fn();
+const mockGetQueryOccurrences = vi.fn();
+const mockGenerateKIQueries = vi.fn();
+const mockCleanupStaleEvents = vi.fn();
 
-jest.mock('../../../../lib/significant_events/fetch_query_occurrences_from_alerts', () => ({
-  fetchQueryLinks: (...args: unknown[]) => mockFetchQueryLinks(...args),
-  computeOccurrences: (...args: unknown[]) => mockComputeOccurrences(...args),
-  getQueryOccurrences: (...args: unknown[]) => mockGetQueryOccurrences(...args),
-  toQueryWithOccurrences: ({ queryLink }: { queryLink: QueryLink }) => ({
-    ...queryLink.query,
-    stream_name: queryLink.stream_name,
-    rule_backed: queryLink.rule_backed,
-    occurrences: [],
-    change_points: {},
-  }),
-}));
+vi.mock('../../../../lib/significant_events/fetch_query_occurrences_from_alerts', () => {
+      const mocked = {
+      fetchQueryLinks: (...args: unknown[]) => mockFetchQueryLinks(...args),
+      computeOccurrences: (...args: unknown[]) => mockComputeOccurrences(...args),
+      getQueryOccurrences: (...args: unknown[]) => mockGetQueryOccurrences(...args),
+      toQueryWithOccurrences: ({ queryLink }: { queryLink: QueryLink }) => ({
+        ...queryLink.query,
+        stream_name: queryLink.stream_name,
+        rule_backed: queryLink.rule_backed,
+        occurrences: [],
+        change_points: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../lib/significant_events/ki_queries_generation_service', () => ({
-  generateKIQueries: (...args: unknown[]) => mockGenerateKIQueries(...args),
-}));
+vi.mock('../../../../lib/significant_events/ki_queries_generation_service', () => {
+      const mocked = {
+      generateKIQueries: (...args: unknown[]) => mockGenerateKIQueries(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../lib/significant_events/events/cleanup_stale_events', () => ({
-  cleanupStaleEvents: (...args: unknown[]) => mockCleanupStaleEvents(...args),
-}));
+vi.mock('../../../../lib/significant_events/events/cleanup_stale_events', () => {
+      const mocked = {
+      cleanupStaleEvents: (...args: unknown[]) => mockCleanupStaleEvents(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../lib/significant_events/create_significant_events_traced_es_client', () => ({
-  createSignificantEventsTracedEsClient: jest.fn().mockReturnValue({}),
-}));
+vi.mock('../../../../lib/significant_events/create_significant_events_traced_es_client', () => {
+      const mocked = {
+      createSignificantEventsTracedEsClient: vi.fn().mockReturnValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const route = internalKIQueriesRoutes['POST /internal/streams/queries/_reconcile'];
 const discoveryQueriesRoute = internalKIQueriesRoutes['GET /internal/streams/_queries'];
@@ -61,7 +78,7 @@ type GenerateHandlerParams = Parameters<
 >[0];
 
 const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enabled') => ({
-  getState: jest.fn().mockResolvedValue(state),
+  getState: vi.fn().mockResolvedValue(state),
 });
 
 const makeQueryLink = (id: string, severityScore: number, streamName = 'logs.test'): QueryLink => ({
@@ -83,7 +100,7 @@ const makeServer = () =>
     core: {
       security: {
         authc: {
-          getCurrentUser: jest.fn().mockReturnValue({ authentication_type: 'basic' }),
+          getCurrentUser: vi.fn().mockReturnValue({ authentication_type: 'basic' }),
         },
       },
     },
@@ -113,7 +130,7 @@ describe('reconcileQueriesRoute', () => {
 
   it('replays current stream queries through replaceStreamQueries', async () => {
     const currentLinks = [makeQueryLink('critical', 80), makeQueryLink('default', 60)];
-    const replaceStreamQueries = jest
+    const replaceStreamQueries = vi
       .fn()
       .mockImplementation(async (_definition, getNextQueries) => {
         expect(getNextQueries(currentLinks)).toEqual(currentLinks.map((link) => link.query));
@@ -121,17 +138,17 @@ describe('reconcileQueriesRoute', () => {
     const handlerParams = {
       params: { body: { streamNames: ['logs.test'] } },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         streamsClient: {
-          getStream: jest.fn().mockResolvedValue({ name: 'logs.test' }),
+          getStream: vi.fn().mockResolvedValue({ name: 'logs.test' }),
         },
         licensing: {},
         uiSettingsClient: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceStreamQueries }),
+        getKnowledgeIndicatorClient: vi.fn().mockResolvedValue({ replaceStreamQueries }),
       }),
       server: makeServer(),
       maintenanceService: makeMaintenanceService(),
-      logger: { warn: jest.fn() },
+      logger: { warn: vi.fn() },
     } as unknown as HandlerParams;
 
     const result = await route.handler(handlerParams);
@@ -145,27 +162,27 @@ describe('reconcileQueriesRoute', () => {
   });
 
   it('continues when one stream fails to reconcile', async () => {
-    const replaceStreamQueries = jest
+    const replaceStreamQueries = vi
       .fn()
       .mockResolvedValueOnce(undefined)
       .mockRejectedValueOnce(new Error('rules unavailable'));
     const handlerParams = {
       params: { body: { streamNames: ['logs.a', 'logs.b'] } },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         streamsClient: {
-          getStream: jest
+          getStream: vi
             .fn()
             .mockResolvedValueOnce({ name: 'logs.a' })
             .mockResolvedValueOnce({ name: 'logs.b' }),
         },
         licensing: {},
         uiSettingsClient: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceStreamQueries }),
+        getKnowledgeIndicatorClient: vi.fn().mockResolvedValue({ replaceStreamQueries }),
       }),
       server: makeServer(),
       maintenanceService: makeMaintenanceService(),
-      logger: { warn: jest.fn() },
+      logger: { warn: vi.fn() },
     } as unknown as HandlerParams;
 
     const result = await route.handler(handlerParams);
@@ -198,19 +215,19 @@ describe('pause guard on rule-touching query routes', () => {
     handler: (params: P) => Promise<unknown>,
     params: Record<string, unknown>
   ) => {
-    const getKnowledgeIndicatorClient = jest.fn();
+    const getKnowledgeIndicatorClient = vi.fn();
     const handlerParams = {
       params,
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: { getStream: jest.fn(), listStreams: jest.fn() },
+      getScopedClients: vi.fn().mockResolvedValue({
+        streamsClient: { getStream: vi.fn(), listStreams: vi.fn() },
         licensing: {},
         uiSettingsClient: {},
         getKnowledgeIndicatorClient,
       }),
       server: makeServer(),
       maintenanceService: makeMaintenanceService('paused'),
-      logger: { warn: jest.fn(), get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
+      logger: { warn: vi.fn(), get: vi.fn().mockReturnValue({ warn: vi.fn() }) },
       telemetry: {},
     } as unknown as P;
 
@@ -250,23 +267,23 @@ describe('pause guard on rule-touching query routes', () => {
 
 describe('bulkDeleteQueriesRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('triggers stale event cleanup only for deleted backing rules', async () => {
     const eventClient = {};
     const rulesClient = {};
     const alertEventsClient = {};
-    const sigEventsLogger = { error: jest.fn() };
-    const deleteQueries = jest.fn().mockResolvedValue(undefined);
+    const sigEventsLogger = { error: vi.fn() };
+    const deleteQueries = vi.fn().mockResolvedValue(undefined);
     const handlerParams = {
       params: { body: { queryIds: ['q1', 'q2'] } },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: { getStream: jest.fn().mockResolvedValue({ name: 'logs.test' }) },
+      getScopedClients: vi.fn().mockResolvedValue({
+        streamsClient: { getStream: vi.fn().mockResolvedValue({ name: 'logs.test' }) },
         licensing: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
-          getQueryLinks: jest
+        getKnowledgeIndicatorClient: vi.fn().mockResolvedValue({
+          getQueryLinks: vi
             .fn()
             .mockResolvedValue([
               makeQueryLink('q1', 40),
@@ -275,13 +292,13 @@ describe('bulkDeleteQueriesRoute', () => {
           deleteQueries,
         }),
         getEventClient: () => eventClient,
-        getAlertEventsClient: jest.fn().mockResolvedValue(alertEventsClient),
-        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
+        getAlertEventsClient: vi.fn().mockResolvedValue(alertEventsClient),
+        getSignificantEventsAlertingContext: vi.fn().mockResolvedValue({ rulesClient }),
       }),
       server: makeServer(),
       logger: {
-        warn: jest.fn(),
-        get: jest.fn().mockReturnValue(sigEventsLogger),
+        warn: vi.fn(),
+        get: vi.fn().mockReturnValue(sigEventsLogger),
       },
     } as never;
 
@@ -304,21 +321,21 @@ describe('bulkDeleteQueriesRoute', () => {
     const eventClient = {};
     const rulesClient = {};
     const alertEventsClient = {};
-    const sigEventsLogger = { error: jest.fn() };
-    const deleteQueries = jest
+    const sigEventsLogger = { error: vi.fn() };
+    const deleteQueries = vi
       .fn()
       .mockResolvedValueOnce(undefined)
       .mockRejectedValueOnce(new Error('storage write failed'));
     const handlerParams = {
       params: { body: { queryIds: ['q1', 'q2'] } },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         streamsClient: {
-          getStream: jest.fn().mockImplementation((name: string) => Promise.resolve({ name })),
+          getStream: vi.fn().mockImplementation((name: string) => Promise.resolve({ name })),
         },
         licensing: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
-          getQueryLinks: jest
+        getKnowledgeIndicatorClient: vi.fn().mockResolvedValue({
+          getQueryLinks: vi
             .fn()
             .mockResolvedValue([
               makeQueryLink('q1', 40, 'logs.success'),
@@ -327,13 +344,13 @@ describe('bulkDeleteQueriesRoute', () => {
           deleteQueries,
         }),
         getEventClient: () => eventClient,
-        getAlertEventsClient: jest.fn().mockResolvedValue(alertEventsClient),
-        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
+        getAlertEventsClient: vi.fn().mockResolvedValue(alertEventsClient),
+        getSignificantEventsAlertingContext: vi.fn().mockResolvedValue({ rulesClient }),
       }),
       server: makeServer(),
       logger: {
-        warn: jest.fn(),
-        get: jest.fn().mockReturnValue(sigEventsLogger),
+        warn: vi.fn(),
+        get: vi.fn().mockReturnValue(sigEventsLogger),
       },
     } as never;
 
@@ -353,11 +370,11 @@ describe('bulkDeleteQueriesRoute', () => {
 });
 
 describe('getDiscoveryQueriesRoute stream resolution', () => {
-  const listStreams = jest.fn().mockResolvedValue([{ name: 'logs.a' }, { name: 'logs.b' }]);
+  const listStreams = vi.fn().mockResolvedValue([{ name: 'logs.a' }, { name: 'logs.b' }]);
   const kiClient = {};
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     listStreams.mockResolvedValue([{ name: 'logs.a' }, { name: 'logs.b' }]);
     mockFetchQueryLinks.mockResolvedValue([makeQueryLink('q1', 80)]);
     mockComputeOccurrences.mockResolvedValue({
@@ -371,16 +388,16 @@ describe('getDiscoveryQueriesRoute stream resolution', () => {
     ({
       params: { query },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         streamsClient: { listStreams },
         licensing: {},
         scopedClusterClient: { asCurrentUser: {} },
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
-        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ alertsReader: {} }),
+        getKnowledgeIndicatorClient: vi.fn().mockResolvedValue(kiClient),
+        getSignificantEventsAlertingContext: vi.fn().mockResolvedValue({ alertsReader: {} }),
       }),
-      getSpaceId: jest.fn().mockResolvedValue('default'),
+      getSpaceId: vi.fn().mockResolvedValue('default'),
       server: makeServer(),
-      logger: { warn: jest.fn() },
+      logger: { warn: vi.fn() },
     } as unknown as DiscoveryHandlerParams);
 
   it('lists streams then searches when query is set and streamNames is omitted', async () => {
@@ -432,11 +449,11 @@ describe('getDiscoveryQueriesRoute stream resolution', () => {
 });
 
 describe('getDiscoveryQueriesOccurrencesRoute stream resolution', () => {
-  const listStreams = jest.fn().mockResolvedValue([{ name: 'logs.a' }, { name: 'logs.b' }]);
+  const listStreams = vi.fn().mockResolvedValue([{ name: 'logs.a' }, { name: 'logs.b' }]);
   const kiClient = {};
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     listStreams.mockResolvedValue([{ name: 'logs.a' }, { name: 'logs.b' }]);
     mockGetQueryOccurrences.mockResolvedValue({
       queryLinks: [],
@@ -450,16 +467,16 @@ describe('getDiscoveryQueriesOccurrencesRoute stream resolution', () => {
     const handlerParams = {
       params: { query: { ...discoveryBaseQuery, query: 'checkout' } },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
+      getScopedClients: vi.fn().mockResolvedValue({
         streamsClient: { listStreams },
         licensing: {},
         scopedClusterClient: { asCurrentUser: {} },
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
-        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ alertsReader: {} }),
+        getKnowledgeIndicatorClient: vi.fn().mockResolvedValue(kiClient),
+        getSignificantEventsAlertingContext: vi.fn().mockResolvedValue({ alertsReader: {} }),
       }),
-      getSpaceId: jest.fn().mockResolvedValue('default'),
+      getSpaceId: vi.fn().mockResolvedValue('default'),
       server: makeServer(),
-      logger: { warn: jest.fn() },
+      logger: { warn: vi.fn() },
     } as unknown as Parameters<typeof discoveryOccurrencesRoute.handler>[0];
 
     await discoveryOccurrencesRoute.handler(handlerParams);
@@ -498,11 +515,11 @@ describe('generateQueriesRoute', () => {
   }) =>
     ({
       params: { path: { streamName: 'logs.test' }, body },
-      request: { events: { aborted$: { subscribe: jest.fn() } } },
-      getScopedClients: jest.fn().mockResolvedValue({
+      request: { events: { aborted$: { subscribe: vi.fn() } } },
+      getScopedClients: vi.fn().mockResolvedValue({
         streamsClient: {},
         licensing: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
+        getKnowledgeIndicatorClient: vi.fn().mockResolvedValue({}),
       }),
       server: {
         core: {
@@ -513,8 +530,8 @@ describe('generateQueriesRoute', () => {
       },
       maintenanceService: makeMaintenanceService(),
       logger: {
-        warn: jest.fn(),
-        get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn(), trace: jest.fn() }),
+        warn: vi.fn(),
+        get: vi.fn().mockReturnValue({ warn: vi.fn(), debug: vi.fn(), trace: vi.fn() }),
       },
       telemetry: {},
     } as unknown as GenerateHandlerParams);
@@ -591,15 +608,15 @@ describe('upsertQueryRoute', () => {
   };
 
   it('upserts against the provided target_name', async () => {
-    const upsertQuery = jest.fn().mockResolvedValue(undefined);
-    const getQueryLinks = jest.fn();
+    const upsertQuery = vi.fn().mockResolvedValue(undefined);
+    const getQueryLinks = vi.fn();
     const handlerParams = {
       params: { path: { queryId: 'q1' }, body: { ...upsertBody, target_name: 'logs.test' } },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: { getStream: jest.fn().mockResolvedValue(definition) },
+      getScopedClients: vi.fn().mockResolvedValue({
+        streamsClient: { getStream: vi.fn().mockResolvedValue(definition) },
         licensing: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ upsertQuery, getQueryLinks }),
+        getKnowledgeIndicatorClient: vi.fn().mockResolvedValue({ upsertQuery, getQueryLinks }),
       }),
       server: makeServer(),
       maintenanceService: makeMaintenanceService(),
@@ -619,16 +636,16 @@ describe('upsertQueryRoute', () => {
   });
 
   it('resolves the stream from an existing query when target_name is omitted', async () => {
-    const upsertQuery = jest.fn().mockResolvedValue(undefined);
+    const upsertQuery = vi.fn().mockResolvedValue(undefined);
     const handlerParams = {
       params: { path: { queryId: 'q1' }, body: upsertBody },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: { getStream: jest.fn().mockResolvedValue(definition) },
+      getScopedClients: vi.fn().mockResolvedValue({
+        streamsClient: { getStream: vi.fn().mockResolvedValue(definition) },
         licensing: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+        getKnowledgeIndicatorClient: vi.fn().mockResolvedValue({
           upsertQuery,
-          getQueryLinks: jest.fn().mockResolvedValue([makeQueryLink('q1', 40)]),
+          getQueryLinks: vi.fn().mockResolvedValue([makeQueryLink('q1', 40)]),
         }),
       }),
       server: makeServer(),
@@ -640,16 +657,16 @@ describe('upsertQueryRoute', () => {
   });
 
   it('throws 404 when the query is missing and no target_name is provided', async () => {
-    const upsertQuery = jest.fn();
+    const upsertQuery = vi.fn();
     const handlerParams = {
       params: { path: { queryId: 'missing' }, body: upsertBody },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: { getStream: jest.fn() },
+      getScopedClients: vi.fn().mockResolvedValue({
+        streamsClient: { getStream: vi.fn() },
         licensing: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+        getKnowledgeIndicatorClient: vi.fn().mockResolvedValue({
           upsertQuery,
-          getQueryLinks: jest.fn().mockResolvedValue([]),
+          getQueryLinks: vi.fn().mockResolvedValue([]),
         }),
       }),
       server: makeServer(),
@@ -663,17 +680,17 @@ describe('upsertQueryRoute', () => {
   });
 
   it('does not persist when ES|QL is invalid', async () => {
-    const upsertQuery = jest.fn();
+    const upsertQuery = vi.fn();
     const handlerParams = {
       params: {
         path: { queryId: 'q1' },
         body: { ...upsertBody, esql: { query: 'NOT VALID' }, target_name: 'logs.test' },
       },
       request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        streamsClient: { getStream: jest.fn().mockResolvedValue(definition) },
+      getScopedClients: vi.fn().mockResolvedValue({
+        streamsClient: { getStream: vi.fn().mockResolvedValue(definition) },
         licensing: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ upsertQuery }),
+        getKnowledgeIndicatorClient: vi.fn().mockResolvedValue({ upsertQuery }),
       }),
       server: makeServer(),
       maintenanceService: makeMaintenanceService(),

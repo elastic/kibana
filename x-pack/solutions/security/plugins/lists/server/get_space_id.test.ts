@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -16,11 +18,11 @@ describe('get_space_id', () => {
   let request = kibanaRequestFactory(httpServerMock.createRawRequest({}));
   beforeEach(() => {
     request = kibanaRequestFactory(httpServerMock.createRawRequest({}));
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it returns "default" as the space id given a space id of "default"', () => {

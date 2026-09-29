@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 
@@ -12,22 +15,25 @@ import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
 
 import { UpdateButton } from './update_button';
 
-const mockInstallPackage = jest.fn();
-const mockSendBulkUpgradeAgentlessPolicies = jest.fn();
-const mockUpgradePoliciesMutateAsync = jest.fn();
+const mockInstallPackage = vi.fn();
+const mockSendBulkUpgradeAgentlessPolicies = vi.fn();
+const mockUpgradePoliciesMutateAsync = vi.fn();
 
-jest.mock('../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../hooks'),
-  useConfirmForceInstall: jest.fn(),
-  useInstallPackage: () => mockInstallPackage,
-  useGetPackageInstallStatus: () => () => ({ status: 'installed', version: '1.0.0' }),
-  useAuthz: () => ({ integrations: { upgradePackages: true } }),
-  useLink: () => ({ getPath: (page: string) => `/mock/${page}` }),
-  useUpgradePackagePoliciesMutation: () => ({ mutateAsync: mockUpgradePoliciesMutateAsync }),
-  useBulkGetAgentPoliciesQuery: () => ({ data: undefined }),
-  sendBulkUpgradeAgentlessPolicies: (...args: unknown[]) =>
-    mockSendBulkUpgradeAgentlessPolicies(...args),
-}));
+vi.mock('../../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../hooks')),
+      useConfirmForceInstall: vi.fn(),
+      useInstallPackage: () => mockInstallPackage,
+      useGetPackageInstallStatus: () => () => ({ status: 'installed', version: '1.0.0' }),
+      useAuthz: () => ({ integrations: { upgradePackages: true } }),
+      useLink: () => ({ getPath: (page: string) => `/mock/${page}` }),
+      useUpgradePackagePoliciesMutation: () => ({ mutateAsync: mockUpgradePoliciesMutateAsync }),
+      useBulkGetAgentPoliciesQuery: () => ({ data: undefined }),
+      sendBulkUpgradeAgentlessPolicies: (...args: unknown[]) =>
+        mockSendBulkUpgradeAgentlessPolicies(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
   name: 'nginx',
@@ -54,7 +60,7 @@ const renderAndConfirmUpgrade = async (
 
 describe('UpdateButton agentless dry-run guard failures', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockInstallPackage.mockResolvedValue(true);
     mockSendBulkUpgradeAgentlessPolicies.mockResolvedValue([{ id: 'agentless-ok', success: true }]);
   });
@@ -154,7 +160,7 @@ describe('UpdateButton agentless dry-run guard failures', () => {
     expect(toasts.addWarning).toHaveBeenCalledWith(
       expect.objectContaining({ text: expect.stringContaining('mapping failed') })
     );
-    const warningText = (toasts.addWarning as jest.Mock).mock.calls[0][0].text;
+    const warningText = (toasts.addWarning as Mock).mock.calls[0][0].text;
     expect(warningText).not.toContain('ok-policy');
   });
 
@@ -169,7 +175,7 @@ describe('UpdateButton agentless dry-run guard failures', () => {
     });
 
     await waitFor(() => expect(toasts.addWarning).toHaveBeenCalled());
-    const warningText = (toasts.addWarning as jest.Mock).mock.calls[0][0].text;
+    const warningText = (toasts.addWarning as Mock).mock.calls[0][0].text;
     expect(warningText).toContain('agentless-broken');
     // No per-policy error message in the response — no dangling "Error:" suffix.
     expect(warningText).not.toContain('Error:');

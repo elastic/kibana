@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useValidateIndex } from './use_validate_index';
 import { useKibana } from './use_kibana';
 import * as i18n from './translations';
 
-jest.mock('./use_kibana');
-const mockUseKibana = useKibana as jest.Mock;
+vi.mock('./use_kibana');
+const mockUseKibana = useKibana as Mock;
 
 describe('useValidateIndex', () => {
-  const mockHttpGet = jest.fn();
+  const mockHttpGet = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         http: {

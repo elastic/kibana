@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -48,7 +50,7 @@ describe('BannersList', () => {
   });
 
   test('updates banners', async () => {
-    const unmount = jest.fn();
+    const unmount = vi.fn();
     const banners$ = new BehaviorSubject<OverlayBanner[]>([
       {
         id: '1',
@@ -100,11 +102,11 @@ describe('BannersList', () => {
 
   test('unsubscribe on unmount', () => {
     const banners$ = new BehaviorSubject([]);
-    const subscribe = jest.spyOn(banners$, 'subscribe');
+    const subscribe = vi.spyOn(banners$, 'subscribe');
     const { unmount } = render(<BannersList banners$={banners$} />);
     // Grab the returned subscription and spy its `unsubscribe` method
     const subscription = subscribe.mock.results[0].value;
-    const unsubscribe = jest.spyOn(subscription, 'unsubscribe');
+    const unsubscribe = vi.spyOn(subscription, 'unsubscribe');
 
     unmount();
     expect(unsubscribe).toHaveBeenCalled();

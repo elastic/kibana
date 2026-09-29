@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import {
   DEFAULT_TAB_STATE,
@@ -98,7 +100,7 @@ const clearActiveDataSourceProfileState = ({
   ).scopedProfilesManager$.getValue();
   const contexts = scopedProfilesManager.getContexts();
 
-  jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+  vi.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
     ...contexts,
     dataSourceContext: {
       ...contexts.dataSourceContext,
@@ -333,8 +335,8 @@ describe('tab_state actions', () => {
           urlValue: 'nextUrl',
         },
       };
-      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
-      const flushSpy = jest.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
+      const setUrlStateSpy = vi.spyOn(stateStorageContainer, 'set');
+      const flushSpy = vi.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
 
       internalState.dispatch(
         internalStateActions.setProfileState({
@@ -367,8 +369,8 @@ describe('tab_state actions', () => {
           urlValue: 'nextUrl',
         },
       };
-      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
-      const flushSpy = jest.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
+      const setUrlStateSpy = vi.spyOn(stateStorageContainer, 'set');
+      const flushSpy = vi.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
 
       internalState.dispatch(
         internalStateActions.setProfileState({
@@ -420,8 +422,8 @@ describe('tab_state actions', () => {
           urlValue: 'nextUrl',
         },
       };
-      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
-      const flushSpy = jest.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
+      const setUrlStateSpy = vi.spyOn(stateStorageContainer, 'set');
+      const flushSpy = vi.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
       const historyLength = services.history.length;
 
       internalState.dispatch(
@@ -456,8 +458,8 @@ describe('tab_state actions', () => {
         urlValue: 'nextUrl',
         persistentValue: 'persistent',
       };
-      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
-      const flushSpy = jest.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
+      const setUrlStateSpy = vi.spyOn(stateStorageContainer, 'set');
+      const flushSpy = vi.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
 
       internalState.dispatch(
         internalStateActions.setProfileState({
@@ -495,8 +497,8 @@ describe('tab_state actions', () => {
 
     it('does not dispatch or write URL state when profile state is unchanged', async () => {
       const { internalState, stateStorageContainer, tabId } = await setup();
-      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
-      const flushSpy = jest.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
+      const setUrlStateSpy = vi.spyOn(stateStorageContainer, 'set');
+      const flushSpy = vi.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
 
       internalState.dispatch(
         internalStateActions.setProfileState({
@@ -517,8 +519,8 @@ describe('tab_state actions', () => {
         ...TEST_PROFILE_STATE_DEF.defaultState,
         urlValue: 'nextUrl',
       };
-      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
-      const flushSpy = jest.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
+      const setUrlStateSpy = vi.spyOn(stateStorageContainer, 'set');
+      const flushSpy = vi.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
 
       clearActiveDataSourceProfileState({ runtimeStateManager, tabId });
       internalState.dispatch(
@@ -546,7 +548,7 @@ describe('tab_state actions', () => {
         ...createTabItem(allTabs),
         id: 'remaining-tab',
       };
-      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      const setUrlStateSpy = vi.spyOn(stateStorageContainer, 'set');
 
       internalState.dispatch(
         internalStateActions.setTabs({
@@ -667,7 +669,7 @@ describe('tab_state actions', () => {
     it('should write the current tab state to the URL even when state is unchanged', async () => {
       const { internalState, stateStorageContainer, tabId } = await setup();
       const currentTab = selectTab(internalState.getState(), tabId);
-      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      const setUrlStateSpy = vi.spyOn(stateStorageContainer, 'set');
 
       await internalState.dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId }));
 
@@ -703,8 +705,8 @@ describe('tab_state actions', () => {
       };
 
       await stateStorageContainer.set(PROFILE_STATE_URL_KEY, existingUrlState);
-      jest.spyOn(scopedProfilesManager, 'hasResolvedDataSourceProfile').mockReturnValue(false);
-      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      vi.spyOn(scopedProfilesManager, 'hasResolvedDataSourceProfile').mockReturnValue(false);
+      const setUrlStateSpy = vi.spyOn(stateStorageContainer, 'set');
 
       await internalState.dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId }));
 
@@ -728,7 +730,7 @@ describe('tab_state actions', () => {
 
       expect(scopedProfilesManager.hasResolvedDataSourceProfile()).toBe(true);
       await stateStorageContainer.set(PROFILE_STATE_URL_KEY, existingUrlState);
-      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      const setUrlStateSpy = vi.spyOn(stateStorageContainer, 'set');
 
       await internalState.dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId }));
 
@@ -768,7 +770,7 @@ describe('tab_state actions', () => {
           profileState: secondaryProfileState,
         })
       );
-      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      const setUrlStateSpy = vi.spyOn(stateStorageContainer, 'set');
 
       await internalState.dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId }));
 
@@ -784,7 +786,7 @@ describe('tab_state actions', () => {
       const { internalState, runtimeStateManager, tabId, services, getCurrentTab } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const dataView = dataViewMockWithTimeField;
-      const storageSetSpy = jest.spyOn(services.storage, 'set');
+      const storageSetSpy = vi.spyOn(services.storage, 'set');
       let tab = getCurrentTab();
       const prevProfileAppStateDefaults = tab.profileAppStateDefaults;
 
@@ -863,7 +865,7 @@ describe('tab_state actions', () => {
       const { internalState, runtimeStateManager, tabId, services, getCurrentTab } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const dataView = dataViewMockWithTimeField;
-      const storageSetSpy = jest.spyOn(services.storage, 'set');
+      const storageSetSpy = vi.spyOn(services.storage, 'set');
 
       const query = { query: "foo: 'bar'", language: 'kuery' };
       const filters = [{ meta: { index: 'the-data-view-id' }, query: { match_all: {} } }];

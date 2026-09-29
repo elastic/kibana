@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import React from 'react';
@@ -17,11 +19,11 @@ import { MapTypes } from '../../../../../../common/mobile/constants';
 describe('Embedded Map', () => {
   it('it renders', async () => {
     const mockMapsStartService = {
-      Map: jest.fn().mockImplementation(() => <div data-test-subj="mockMap" />),
+      Map: vi.fn().mockImplementation(() => <div data-test-subj="mockMap" />),
     };
 
     const mockSpaces = {
-      getActiveSpace: jest.fn().mockImplementation(() => ({ id: 'mockSpaceId' })),
+      getActiveSpace: vi.fn().mockImplementation(() => ({ id: 'mockSpaceId' })),
     };
 
     const mockDataView = {

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core/public';
 import React from 'react';
@@ -35,11 +37,11 @@ const fleetAgents = [
 describe('TutorialConfigAgent', () => {
   beforeAll(() => {
     // Mocks console.error so it won't polute tests output when testing the api throwing error
-    jest.spyOn(console, 'error').mockImplementation(() => null);
+    vi.spyOn(console, 'error').mockImplementation(() => null);
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('when fleet plugin is enabled', () => {
@@ -49,7 +51,7 @@ describe('TutorialConfigAgent', () => {
           variantId="java"
           http={
             {
-              get: jest.fn(),
+              get: vi.fn(),
             } as unknown as HttpStart
           }
           basePath="http://localhost:5601"
@@ -65,7 +67,7 @@ describe('TutorialConfigAgent', () => {
           variantId="java"
           http={
             {
-              get: jest.fn().mockReturnValue({
+              get: vi.fn().mockReturnValue({
                 cloudStandaloneSetup: undefined,
                 fleetAgents,
                 isFleetEnabled: true,
@@ -117,7 +119,7 @@ describe('TutorialConfigAgent', () => {
             variantId="java"
             http={
               {
-                get: jest.fn().mockReturnValue({
+                get: vi.fn().mockReturnValue({
                   cloudStandaloneSetup: undefined,
                   fleetAgents,
                   isFleetEnabled: true,
@@ -154,7 +156,7 @@ describe('TutorialConfigAgent', () => {
             variantId="java"
             http={
               {
-                get: jest.fn().mockReturnValue({
+                get: vi.fn().mockReturnValue({
                   cloudStandaloneSetup: undefined,
                   fleetAgents: [],
                   isFleetEnabled: true,
@@ -194,7 +196,7 @@ describe('TutorialConfigAgent', () => {
             variantId="java"
             http={
               {
-                get: jest.fn().mockReturnValue({
+                get: vi.fn().mockReturnValue({
                   cloudStandaloneSetup: {
                     apmServerUrl: 'cloud_url',
                     secretToken: 'cloud_token',
@@ -234,7 +236,7 @@ describe('TutorialConfigAgent', () => {
             variantId="java"
             http={
               {
-                get: jest.fn().mockReturnValue({
+                get: vi.fn().mockReturnValue({
                   cloudStandaloneSetup: {
                     apmServerUrl: 'cloud_url',
                     secretToken: 'cloud_token',
@@ -315,7 +317,7 @@ describe('TutorialConfigAgent', () => {
           variantId="java"
           http={
             {
-              get: jest.fn().mockReturnValue({
+              get: vi.fn().mockReturnValue({
                 cloudStandaloneSetup: undefined,
                 fleetAgents: [],
                 isFleetEnabled: false,
@@ -336,7 +338,7 @@ describe('TutorialConfigAgent', () => {
           variantId="java"
           http={
             {
-              get: jest.fn().mockReturnValue({
+              get: vi.fn().mockReturnValue({
                 cloudStandaloneSetup: undefined,
                 fleetAgents: [],
                 isFleetEnabled: false,
@@ -373,7 +375,7 @@ describe('TutorialConfigAgent', () => {
           variantId="java"
           http={
             {
-              get: jest.fn().mockReturnValue({
+              get: vi.fn().mockReturnValue({
                 cloudStandaloneSetup: {
                   apmServerUrl: 'cloud_url',
                   secretToken: 'cloud_token',

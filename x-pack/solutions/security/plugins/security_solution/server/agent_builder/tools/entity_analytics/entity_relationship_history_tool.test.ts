@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
@@ -24,17 +27,23 @@ import {
   SECURITY_ENTITY_RELATIONSHIP_HISTORY_TOOL_ID,
 } from './entity_relationship_history_tool';
 
-jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
-  getAgentBuilderResourceAvailability: jest.fn(),
-}));
+vi.mock('../../utils/get_agent_builder_resource_availability', () => {
+      const mocked = {
+      getAgentBuilderResourceAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./entity_resolution', () => ({
-  ...jest.requireActual('./entity_resolution'),
-  requireResolvedEntity: jest.fn(),
-}));
+vi.mock('./entity_resolution', async () => {
+      const mocked = {
+      ...(await vi.importActual('./entity_resolution')),
+      requireResolvedEntity: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
-const mockRequireResolvedEntity = requireResolvedEntity as jest.MockedFunction<
+const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as Mock;
+const mockRequireResolvedEntity = requireResolvedEntity as MockedFunction<
   typeof requireResolvedEntity
 >;
 
@@ -81,28 +90,28 @@ describe('entityRelationshipHistoryTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const tool = entityRelationshipHistoryTool(mockCore, mockLogger, mockExperimentalFeatures);
 
-  let mockListRelationshipMetadata: jest.Mock;
-  let mockCreateRelationshipsClient: jest.Mock;
+  let mockListRelationshipMetadata: Mock;
+  let mockCreateRelationshipsClient: Mock;
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
-  let mockCheckPrivileges: jest.Mock;
+  let mockCheckPrivileges: Mock;
 
   const handlerContext = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
   const mockSecurity = {
     authz: {
-      checkPrivilegesDynamicallyWithRequest: jest.fn(),
+      checkPrivilegesDynamicallyWithRequest: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockListRelationshipMetadata = jest.fn().mockResolvedValue({
+    vi.clearAllMocks();
+    mockListRelationshipMetadata = vi.fn().mockResolvedValue({
       records: [],
       total: 0,
       page: 1,
       perPage: 50,
     });
-    mockCreateRelationshipsClient = jest.fn().mockReturnValue({
+    mockCreateRelationshipsClient = vi.fn().mockReturnValue({
       listRelationshipMetadata: mockListRelationshipMetadata,
     });
     mockRequireResolvedEntity.mockImplementation(async ({ entityId }) => {
@@ -111,7 +120,7 @@ describe('entityRelationshipHistoryTool', () => {
       }
       return resolvedOk;
     });
-    mockCheckPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: true });
+    mockCheckPrivileges = vi.fn().mockResolvedValue({ hasAllRequested: true });
     mockSecurity.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(mockCheckPrivileges);
 
     mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
@@ -123,10 +132,10 @@ describe('entityRelationshipHistoryTool', () => {
       {
         entityStore: {
           createRelationshipsClient: mockCreateRelationshipsClient,
-          createCRUDClient: jest.fn(),
-          createEntityMetadataClient: jest.fn(),
-          createResolutionClient: jest.fn(),
-          getMaintainerStatus: jest.fn().mockResolvedValue([]),
+          createCRUDClient: vi.fn(),
+          createEntityMetadataClient: vi.fn(),
+          createResolutionClient: vi.fn(),
+          getMaintainerStatus: vi.fn().mockResolvedValue([]),
         },
         security: mockSecurity,
       },

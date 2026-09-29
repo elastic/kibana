@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MacrosDataInput } from './macros_data_input';
@@ -16,70 +19,79 @@ import { useAppToastsMock } from '../../../../../../common/hooks/use_app_toasts.
 import type { MigrationStepProps } from '../../../../../common/types';
 import { MigrationSource, SplunkDataInputStep } from '../../../../../common/types';
 
-const mockAddError = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockReportSetupMacrosQueryCopied = jest.fn();
+const mockAddError = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockReportSetupMacrosQueryCopied = vi.fn();
 
-jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: () => ({
-    services: {
-      siemMigrations: {
-        rules: {
-          api: {},
-          telemetry: {
-            reportSetupMacrosQueryCopied: mockReportSetupMacrosQueryCopied,
+vi.mock('../../../../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          siemMigrations: {
+            rules: {
+              api: {},
+              telemetry: {
+                reportSetupMacrosQueryCopied: mockReportSetupMacrosQueryCopied,
+              },
+            },
+          },
+          notifications: {
+            toasts: {
+              addError: mockAddError,
+              addSuccess: mockAddSuccess,
+            },
           },
         },
-      },
-      notifications: {
-        toasts: {
-          addError: mockAddError,
-          addSuccess: mockAddSuccess,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../../common/hooks/use_app_toasts');
+
+vi.mock('../../../../../common/hooks/use_missing_resources', () => {
+      const mocked = {
+      useMissingResources: vi.fn().mockReturnValue({
+        missingResourcesIndexed: {
+          macros: ['macro1', 'macro2'],
+          lookups: [],
         },
+        onMissingResourcesFetched: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../../../../common/experimental_features_service', () => {
+      const mocked = {
+      ExperimentalFeaturesService: {
+        get: () => ({
+          splunkV2DashboardsEnabled: false,
+        }),
       },
-    },
-  }),
-}));
-jest.mock('../../../../../../common/hooks/use_app_toasts');
-
-jest.mock('../../../../../common/hooks/use_missing_resources', () => ({
-  useMissingResources: jest.fn().mockReturnValue({
-    missingResourcesIndexed: {
-      macros: ['macro1', 'macro2'],
-      lookups: [],
-    },
-    onMissingResourcesFetched: jest.fn(),
-  }),
-}));
-
-jest.mock('../../../../../../common/experimental_features_service', () => ({
-  ExperimentalFeaturesService: {
-    get: () => ({
-      splunkV2DashboardsEnabled: false,
-    }),
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MacrosDataInput', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   const defaultProps: MigrationStepProps = {
     dataInputStep: SplunkDataInputStep.Macros,
     migrationSource: MigrationSource.SPLUNK,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
     missingResourcesIndexed: { macros: ['macro1', 'macro2'], lookups: [] },
-    onMigrationCreated: jest.fn(),
-    onMissingResourcesFetched: jest.fn(),
-    setDataInputStep: jest.fn(),
+    onMigrationCreated: vi.fn(),
+    onMissingResourcesFetched: vi.fn(),
+    setDataInputStep: vi.fn(),
   };
 
   beforeEach(() => {
     appToastsMock = useAppToastsMock.create();
-    jest.mocked(useAppToasts).mockReturnValue(appToastsMock);
+    vi.mocked(useAppToasts).mockReturnValue(appToastsMock);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders step number', () => {

@@ -5,18 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useMessageEditor } from './use_message_editor';
 import { CommandId } from './command_menu';
 import type { MessageEditorInstance } from './use_message_editor';
 import { stripZeroWidthSpaces } from './utils';
 
-jest.mock('../../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: () => true,
-}));
-jest.mock('./command_menu/use_command_menu_prefetch', () => ({
-  useCommandMenuPrefetch: () => jest.fn(),
-}));
+vi.mock('../../../../hooks/use_experimental_features', () => {
+      const mocked = {
+      useExperimentalFeatures: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./command_menu/use_command_menu_prefetch', () => {
+      const mocked = {
+      useCommandMenuPrefetch: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const NBSP = ' ';
 

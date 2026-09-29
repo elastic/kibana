@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KueryNode } from '@kbn/es-query';
@@ -27,7 +30,7 @@ describe('runReconciliation', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('reconciles cases updated since lastRunAt', async () => {
@@ -191,7 +194,7 @@ describe('runReconciliation', () => {
       expect.objectContaining({ namespaces: ['*'] })
     );
     // And every paged find must opt into the same scope.
-    for (const call of (client.find as jest.Mock).mock.calls) {
+    for (const call of (client.find as Mock).mock.calls) {
       const arg = call[0] as { namespaces?: string[] };
       expect(arg.namespaces).toEqual(['*']);
     }

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CoreStart } from '@kbn/core/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { PhaseEvent, PhaseEventType } from '@kbn/presentation-publishing';
@@ -19,13 +21,16 @@ import { DASHBOARD_DURATION_START_MARK } from './dashboard_duration_start_mark';
 import type { DashboardApi } from '../types';
 import { buildMockDashboardApi } from '../../mocks';
 
-const mockMetricEvent = jest.fn();
-jest.mock('@kbn/ebt-tools', () => ({
-  ...jest.requireActual('@kbn/ebt-tools'),
-  reportPerformanceMetricEvent: (_: CoreStart['analytics'], args: PerformanceMetricEvent) => {
-    mockMetricEvent(args);
-  },
-}));
+const mockMetricEvent = vi.fn();
+vi.mock('@kbn/ebt-tools', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/ebt-tools')),
+      reportPerformanceMetricEvent: (_: CoreStart['analytics'], args: PerformanceMetricEvent) => {
+        mockMetricEvent(args);
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDashboard = (
   children: {} = {}
@@ -52,8 +57,8 @@ const mockDashboard = (
 
 describe('startTrackingDashboardLoadTelemetry', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    window.performance.clearMarks = jest.fn();
+    vi.resetAllMocks();
+    window.performance.clearMarks = vi.fn();
   });
 
   const setChildrenStatus = (children: {}, status: PhaseEventType) => {

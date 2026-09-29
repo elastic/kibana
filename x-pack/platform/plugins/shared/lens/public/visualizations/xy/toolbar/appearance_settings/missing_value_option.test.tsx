@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl as shallow, mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { EuiSuperSelect } from '@elastic/eui';
@@ -14,10 +16,10 @@ describe('Missing values option', () => {
   it('should show currently selected fitting function', () => {
     const component = shallow(
       <MissingValuesOptions
-        onFittingFnChange={jest.fn()}
+        onFittingFnChange={vi.fn()}
         fittingFunction={'Carry'}
-        onEmphasizeFittingChange={jest.fn()}
-        onEndValueChange={jest.fn()}
+        onEmphasizeFittingChange={vi.fn()}
+        onEndValueChange={vi.fn()}
       />
     );
 
@@ -27,11 +29,11 @@ describe('Missing values option', () => {
   it('should show the fitting option when enabled', () => {
     const component = mount(
       <MissingValuesOptions
-        onFittingFnChange={jest.fn()}
+        onFittingFnChange={vi.fn()}
         fittingFunction={'Carry'}
         isFittingEnabled={true}
-        onEmphasizeFittingChange={jest.fn()}
-        onEndValueChange={jest.fn()}
+        onEmphasizeFittingChange={vi.fn()}
+        onEndValueChange={vi.fn()}
       />
     );
 
@@ -41,11 +43,11 @@ describe('Missing values option', () => {
   it('should hide the fitting option when disabled', () => {
     const component = mount(
       <MissingValuesOptions
-        onFittingFnChange={jest.fn()}
+        onFittingFnChange={vi.fn()}
         fittingFunction={'Carry'}
         isFittingEnabled={false}
-        onEmphasizeFittingChange={jest.fn()}
-        onEndValueChange={jest.fn()}
+        onEmphasizeFittingChange={vi.fn()}
+        onEndValueChange={vi.fn()}
       />
     );
 

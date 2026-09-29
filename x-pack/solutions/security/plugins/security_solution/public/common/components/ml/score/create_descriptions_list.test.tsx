@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { shallow, mount } from 'enzyme';
 import React from 'react';
 import { mockAnomalies } from '../mock';
@@ -13,16 +15,16 @@ import { EuiDescriptionList } from '@elastic/eui';
 import type { Anomaly } from '../types';
 import { waitFor } from '@testing-library/react';
 
-jest.mock('../../../lib/kibana');
+vi.mock('../../../lib/kibana');
 
 const startDate: string = '2020-07-07T08:20:18.966Z';
 const endDate: string = '3000-01-01T00:00:00.000Z';
 
 describe('create_description_list', () => {
-  let narrowDateRange = jest.fn();
+  let narrowDateRange = vi.fn();
 
   beforeEach(() => {
-    narrowDateRange = jest.fn();
+    narrowDateRange = vi.fn();
   });
 
   test('renders correctly against snapshot', () => {

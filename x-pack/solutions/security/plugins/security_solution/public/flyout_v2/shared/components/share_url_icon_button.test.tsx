@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ShareUrlIconButton } from './share_url_icon_button';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiCopy: jest.fn(({ children: functionAsChild }) => functionAsChild(jest.fn())),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiCopy: vi.fn(({ children: functionAsChild }) => functionAsChild(vi.fn())),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ShareUrlIconButton', () => {
   it('renders nothing when url is null', () => {

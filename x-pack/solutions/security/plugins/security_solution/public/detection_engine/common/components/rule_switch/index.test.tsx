@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { type ComponentType as EnzymeComponentType, mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
@@ -18,27 +21,27 @@ import { TestProviders } from '../../../../common/mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
-jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../rule_management/api/api');
-jest.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
-jest.mock('../../../../common/lib/apm/use_start_transaction');
+vi.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('../../../rule_management/api/api');
+vi.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
+vi.mock('../../../../common/lib/apm/use_start_transaction');
 
 const useAppToastsValueMock = useAppToastsMock.create();
 
 describe('RuleSwitch', () => {
   beforeEach(() => {
-    (useAppToasts as jest.Mock).mockReturnValue(useAppToastsValueMock);
-    (performBulkAction as jest.Mock).mockResolvedValue({
+    (useAppToasts as Mock).mockReturnValue(useAppToastsValueMock);
+    (performBulkAction as Mock).mockResolvedValue({
       attributes: {
         summary: { created: 0, updated: 1, deleted: 0 },
         results: { updated: [getRulesSchemaMock()] },
       },
     });
-    (useRulesTableContextOptional as jest.Mock).mockReturnValue(null);
+    (useRulesTableContextOptional as Mock).mockReturnValue(null);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it renders loader if "isLoading" is true', () => {
@@ -101,7 +104,7 @@ describe('RuleSwitch', () => {
 
   test('it dispatches error toaster if "enableRules" call rejects', async () => {
     const mockError = new Error('uh oh');
-    (performBulkAction as jest.Mock).mockRejectedValue(mockError);
+    (performBulkAction as Mock).mockRejectedValue(mockError);
 
     const wrapper = mount(<RuleSwitchComponent enabled={false} isDisabled={false} id={'7'} />, {
       wrappingComponent: TestProviders as EnzymeComponentType<{}>,
@@ -116,10 +119,10 @@ describe('RuleSwitch', () => {
 
   test('it calls "setLoadingRules" if in rules table context', () => {
     const rulesTableContext = useRulesTableContextMock.create();
-    (useRulesTableContextOptional as jest.Mock).mockReturnValue(rulesTableContext);
+    (useRulesTableContextOptional as Mock).mockReturnValue(rulesTableContext);
     // Keeps the bulk action in flight, so the component's loading state is not
     // reset after the assertion below, outside of `act(...)`.
-    (performBulkAction as jest.Mock).mockReturnValue(new Promise(() => {}));
+    (performBulkAction as Mock).mockReturnValue(new Promise(() => {}));
 
     const wrapper = mount(<RuleSwitchComponent enabled isDisabled={false} id={'7'} />, {
       wrappingComponent: TestProviders as EnzymeComponentType<{}>,

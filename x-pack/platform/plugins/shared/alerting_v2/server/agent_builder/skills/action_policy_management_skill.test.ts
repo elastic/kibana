@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ACTION_POLICY_MANAGEMENT_SKILL_ID,
   ALERTING_TOOL_IDS,
@@ -16,14 +18,14 @@ import { createActionPolicyManagementSkill } from './action_policy_management_sk
 
 const createDeps = (): ManageActionPolicyToolDeps => ({
   logger: {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    forSubsystem: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    forSubsystem: vi.fn(),
   } as unknown as LoggerServiceContract,
-  getWorkflowClient: jest.fn(() => ({ getWorkflow: jest.fn(async () => null) })),
-  getAvailableConnectors: jest.fn(async () => ({ connectorTypes: {} })),
+  getWorkflowClient: vi.fn(() => ({ getWorkflow: vi.fn(async () => null) })),
+  getAvailableConnectors: vi.fn(async () => ({ connectorTypes: {} })),
 });
 
 describe('createActionPolicyManagementSkill', () => {
@@ -53,7 +55,7 @@ describe('createActionPolicyManagementSkill', () => {
 
   it('is unavailable when the current space has not enabled Alerting V2 experimental features', async () => {
     const skill = createActionPolicyManagementSkill(createDeps());
-    const uiSettings = { get: jest.fn().mockResolvedValue(false) };
+    const uiSettings = { get: vi.fn().mockResolvedValue(false) };
 
     await expect(skill.availability?.handler({ uiSettings } as never)).resolves.toEqual({
       status: 'unavailable',

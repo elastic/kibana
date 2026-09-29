@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   convertSecurityApiMock,
   getDefaultSecurityImplementationMock,
@@ -110,7 +112,7 @@ describe('SecurityService', function () {
         const setup = service.setup();
         const enricher = setup.acquireFakeRequestEnricher();
 
-        const fakeRequestEnricher = jest.fn();
+        const fakeRequestEnricher = vi.fn();
         setup.registerSecurityDelegate({
           fakeRequestEnricher,
         } as unknown as CoreSecurityDelegateContract);
@@ -173,12 +175,12 @@ describe('SecurityService', function () {
         setup.serviceAccounts.registerWorkloadType('alerting', { type: 'rule', name: 'Rule' });
 
         const serviceAccounts = {
-          isEnabled: jest.fn(),
-          create: jest.fn(),
-          getWorkloadBinding: jest.fn().mockResolvedValue(null),
-          bindWorkload: jest.fn(),
-          unbindWorkload: jest.fn(),
-          withScopedRequestForWorkload: jest.fn(),
+          isEnabled: vi.fn(),
+          create: vi.fn(),
+          getWorkloadBinding: vi.fn().mockResolvedValue(null),
+          bindWorkload: vi.fn(),
+          unbindWorkload: vi.fn(),
+          withScopedRequestForWorkload: vi.fn(),
         };
         setup.registerSecurityDelegate({
           authc: { apiKeys: {} },

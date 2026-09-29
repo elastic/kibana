@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { monaco } from '@kbn/monaco';
 import { getRRuleSchedulingSuggestions } from './get_rrule_scheduling_suggestions';
 
 // Mock the dependencies
-jest.mock('../../../snippets/generate_trigger_snippet', () => ({
-  generateRRuleTriggerSnippet: jest.fn(),
-}));
+vi.mock('../../../snippets/generate_trigger_snippet', () => {
+      const mocked = {
+      generateRRuleTriggerSnippet: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { generateRRuleTriggerSnippet } from '../../../snippets/generate_trigger_snippet';
 
@@ -26,9 +32,9 @@ describe('getRRuleSchedulingSuggestions', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Mock the generateRRuleTriggerSnippet to return predictable snippets
-    (generateRRuleTriggerSnippet as jest.Mock).mockImplementation((pattern) => {
+    (generateRRuleTriggerSnippet as Mock).mockImplementation((pattern) => {
       return `rrule-snippet-${pattern}`;
     });
   });
@@ -240,7 +246,7 @@ describe('getRRuleSchedulingSuggestions', () => {
 
   describe('snippet generation', () => {
     it('should use snippet text from generateRRuleTriggerSnippet', () => {
-      (generateRRuleTriggerSnippet as jest.Mock).mockImplementation((pattern) => {
+      (generateRRuleTriggerSnippet as Mock).mockImplementation((pattern) => {
         return `custom-snippet-for-${pattern}`;
       });
 
@@ -253,7 +259,7 @@ describe('getRRuleSchedulingSuggestions', () => {
     });
 
     it('should handle multi-line snippets', () => {
-      (generateRRuleTriggerSnippet as jest.Mock).mockImplementation((pattern) => {
+      (generateRRuleTriggerSnippet as Mock).mockImplementation((pattern) => {
         return `rrule:\n  freq: ${pattern.toUpperCase()}\n  interval: 1`;
       });
 
@@ -282,7 +288,7 @@ describe('getRRuleSchedulingSuggestions', () => {
     });
 
     it('should handle generateRRuleTriggerSnippet returning empty string', () => {
-      (generateRRuleTriggerSnippet as jest.Mock).mockReturnValue('');
+      (generateRRuleTriggerSnippet as Mock).mockReturnValue('');
 
       const result = getRRuleSchedulingSuggestions(mockRange);
 
@@ -292,7 +298,7 @@ describe('getRRuleSchedulingSuggestions', () => {
     });
 
     it('should handle generateRRuleTriggerSnippet throwing error', () => {
-      (generateRRuleTriggerSnippet as jest.Mock).mockImplementation(() => {
+      (generateRRuleTriggerSnippet as Mock).mockImplementation(() => {
         throw new Error('Snippet generation failed');
       });
 

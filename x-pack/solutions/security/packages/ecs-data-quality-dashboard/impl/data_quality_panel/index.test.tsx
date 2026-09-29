@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DARK_THEME } from '@elastic/charts';
 import { render, screen } from '@testing-library/react';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -17,26 +19,32 @@ import * as useResultsRollup from './hooks/use_results_rollup';
 import * as useIndicesCheck from './hooks/use_indices_check';
 import { DataQualityPanel } from '.';
 
-jest.mock('./data_quality_details/indices_details/pattern/hooks/use_stats', () => ({
-  useStats: jest.fn(() => ({
-    stats: {},
-    error: null,
-    loading: false,
-  })),
-}));
+vi.mock('./data_quality_details/indices_details/pattern/hooks/use_stats', () => {
+      const mocked = {
+      useStats: vi.fn(() => ({
+        stats: {},
+        error: null,
+        loading: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./data_quality_details/indices_details/pattern/hooks/use_ilm_explain', () => ({
-  useIlmExplain: jest.fn(() => ({
-    error: null,
-    ilmExplain: {},
-    loading: false,
-  })),
-}));
+vi.mock('./data_quality_details/indices_details/pattern/hooks/use_ilm_explain', () => {
+      const mocked = {
+      useIlmExplain: vi.fn(() => ({
+        error: null,
+        ilmExplain: {},
+        loading: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.spyOn(useResultsRollup, 'useResultsRollup').mockImplementation(() => mockUseResultsRollup);
+vi.spyOn(useResultsRollup, 'useResultsRollup').mockImplementation(() => mockUseResultsRollup);
 
-jest.spyOn(useIndicesCheck, 'useIndicesCheck').mockImplementation(() => ({
-  checkIndex: jest.fn(),
+vi.spyOn(useIndicesCheck, 'useIndicesCheck').mockImplementation(() => ({
+  checkIndex: vi.fn(),
   checkState: {
     ...getCheckStateStub('auditbeat-*'),
   },
@@ -48,23 +56,23 @@ const patterns = ['auditbeat-*'];
 
 describe('DataQualityPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     render(
       <TestExternalProviders>
         <DataQualityPanel
-          canUserCreateAndReadCases={jest.fn()}
+          canUserCreateAndReadCases={vi.fn()}
           defaultBytesFormat={''}
           defaultNumberFormat={''}
-          httpFetch={jest.fn()}
+          httpFetch={vi.fn()}
           isAssistantEnabled={true}
           isILMAvailable={true}
           lastChecked={''}
-          openCreateCaseFlyout={jest.fn()}
+          openCreateCaseFlyout={vi.fn()}
           patterns={patterns}
-          reportDataQualityIndexChecked={jest.fn()}
-          reportDataQualityCheckAllCompleted={jest.fn()}
-          setLastChecked={jest.fn()}
+          reportDataQualityIndexChecked={vi.fn()}
+          reportDataQualityCheckAllCompleted={vi.fn()}
+          setLastChecked={vi.fn()}
           baseTheme={DARK_THEME}
           toasts={toasts}
           defaultStartTime={'now-7d'}

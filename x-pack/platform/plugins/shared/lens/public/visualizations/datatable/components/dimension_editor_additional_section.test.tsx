@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { render, screen } from '@testing-library/react';
@@ -67,11 +69,11 @@ describe('data table dimension editor additional section', () => {
       groupId: 'columns',
       layerId: 'first',
       state,
-      setState: jest.fn(),
+      setState: vi.fn(),
       paletteService: chartPluginMock.createPaletteRegistry(),
       panelRef: React.createRef(),
-      addLayer: jest.fn(),
-      removeLayer: jest.fn(),
+      addLayer: vi.fn(),
+      removeLayer: vi.fn(),
       datasource: {} as DatasourcePublicAPI,
     };
   });

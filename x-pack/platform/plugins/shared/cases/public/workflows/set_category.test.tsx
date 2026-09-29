@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SelectionOption } from '@kbn/workflows';
 import { setCategoryStepDefinition } from './set_category';
 import { getCategories } from '../containers/api';
 
-jest.mock('../containers/api', () => ({
-  getCategories: jest.fn(),
-}));
+vi.mock('../containers/api', () => {
+      const mocked = {
+      getCategories: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('setCategoryStepDefinition', () => {
-  const getCategoriesMock = jest.mocked(getCategories);
+  const getCategoriesMock = vi.mocked(getCategories);
 
   const createSelectionContext = (owner?: string) => ({
     stepType: 'cases.setCategory' as const,

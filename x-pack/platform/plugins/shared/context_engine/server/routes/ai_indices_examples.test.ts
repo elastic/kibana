@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import fs from 'node:fs';
 import { parse } from 'yaml';
 import type { Type } from '@kbn/config-schema';
@@ -61,14 +63,14 @@ registerAiIndexRoutes({
     },
   } as unknown as IRouter,
   logger: loggerMock.create(),
-  getAiIndexService: jest.fn(),
-  getAiIndexDataReadService: jest.fn(),
-  getImprovementsService: jest.fn(),
-  getScheduleService: jest.fn(),
-  getActions: jest.fn(),
-  getAgentBuilder: jest.fn(),
-  getWorkflowsManagementApi: jest.fn(),
-  getSpaces: jest.fn(),
+  getAiIndexService: vi.fn(),
+  getAiIndexDataReadService: vi.fn(),
+  getImprovementsService: vi.fn(),
+  getScheduleService: vi.fn(),
+  getActions: vi.fn(),
+  getAgentBuilder: vi.fn(),
+  getWorkflowsManagementApi: vi.fn(),
+  getSpaces: vi.fn(),
 });
 
 const routesWithExamples = registered.flatMap(({ route, opts, handler }) => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   mockTransform,
   mockGetUpgradeableConfig,
@@ -18,7 +20,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
 describe('uiSettings/createOrUpgradeSavedConfig', function () {
-  afterEach(() => jest.resetAllMocks());
+  afterEach(() => vi.resetAllMocks());
 
   const version = '4.0.1';
   const prevVersion = '4.0.0';

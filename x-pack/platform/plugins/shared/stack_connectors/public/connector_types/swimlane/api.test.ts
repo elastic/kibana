@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { getApplication } from './api';
 
 const getApplicationResponse = {
@@ -12,12 +15,12 @@ const getApplicationResponse = {
 };
 
 describe('Swimlane API', () => {
-  let fetchMock: jest.SpyInstance<Promise<unknown>>;
+  let fetchMock: MockInstance<Promise<unknown>>;
 
-  beforeAll(() => jest.spyOn(window, 'fetch'));
+  beforeAll(() => vi.spyOn(window, 'fetch'));
   beforeEach(() => {
-    jest.resetAllMocks();
-    fetchMock = jest.spyOn(window, 'fetch');
+    vi.resetAllMocks();
+    fetchMock = vi.spyOn(window, 'fetch');
   });
 
   describe('getApplication', () => {

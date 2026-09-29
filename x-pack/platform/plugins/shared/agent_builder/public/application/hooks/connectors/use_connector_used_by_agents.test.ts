@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useConnectorUsedByAgents } from './use_connector_used_by_agents';
 
-jest.mock('../agents/use_agents');
+vi.mock('../agents/use_agents');
 
-const { useAgentBuilderAgents } = jest.requireMock('../agents/use_agents');
+const { useAgentBuilderAgents } = (await vi.importMock('../agents/use_agents'));
 
 const agent = (id: string, connectorIds: string[] | undefined | null) => ({
   id,
@@ -20,7 +22,7 @@ const agent = (id: string, connectorIds: string[] | undefined | null) => ({
 
 describe('useConnectorUsedByAgents', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const setup = (

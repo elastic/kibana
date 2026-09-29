@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
@@ -62,7 +64,7 @@ describe('GridPanel', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders panel contents', () => {

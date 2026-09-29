@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiThemeProvider } from '@elastic/eui';
 import type { TraceItem } from '@kbn/apm-types';
@@ -18,8 +20,8 @@ import type { TraceWaterfallItem } from './use_trace_waterfall';
 let mockListProps: Record<string, any> = {};
 
 // Mock react-virtualized to avoid ResizeObserver issues in jsdom and to capture List props
-jest.mock('react-virtualized', () => {
-  const actual = jest.requireActual('react-virtualized');
+vi.mock('react-virtualized', () => {
+  const actual = require('react-virtualized');
 
   function MockList(props: any) {
     mockListProps = props;
@@ -41,7 +43,7 @@ jest.mock('react-virtualized', () => {
     AutoSizer: ({ children }: { children: (size: { width: number; height: number }) => any }) =>
       children({ width: 800, height: 600 }),
     WindowScroller: ({ children }: any) =>
-      children({ height: 600, onChildScroll: jest.fn(), scrollTop: 0, registerChild: jest.fn() }),
+      children({ height: 600, onChildScroll: vi.fn(), scrollTop: 0, registerChild: vi.fn() }),
     CellMeasurer: ({ children }: any) => children,
     List: MockList,
   };

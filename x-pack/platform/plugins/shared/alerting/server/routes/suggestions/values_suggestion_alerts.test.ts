@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { ConfigSchema } from '@kbn/kql/server/config';
 import { dataPluginMock } from '@kbn/kql/server/mocks';
@@ -15,17 +18,20 @@ import { rulesClientMock } from '../../rules_client.mock';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { registerAlertsValueSuggestionsRoute } from './values_suggestion_alerts';
 
-jest.mock('@kbn/kql/server/autocomplete/terms_agg', () => {
+vi.mock('@kbn/kql/server/autocomplete/terms_agg', () => {
   return {
-    termsAggSuggestions: jest.fn(),
+    termsAggSuggestions: vi.fn(),
   };
 });
 
-const termsAggSuggestionsMock = termsAggSuggestions as jest.Mock;
+const termsAggSuggestionsMock = termsAggSuggestions as Mock;
 
-jest.mock('../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('registerAlertsValueSuggestionsRoute', () => {
   const rulesClient = rulesClientMock.create();
@@ -43,7 +49,7 @@ describe('registerAlertsValueSuggestionsRoute', () => {
   test('happy path route registered', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    const getAlertIndicesAliasMock = jest.fn().mockReturnValue(['alert-index']);
+    const getAlertIndicesAliasMock = vi.fn().mockReturnValue(['alert-index']);
     registerAlertsValueSuggestionsRoute(router, licenseState, config$, getAlertIndicesAliasMock);
 
     const [config, handler] = router.post.mock.calls[0];

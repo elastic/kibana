@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 
@@ -12,9 +15,9 @@ import { RUN_WORKFLOW_BULK_PANEL_ID } from '../../../../components/alerts_table/
 import { useBulkAttackRunWorkflowItems } from '../bulk_action_items/use_bulk_attack_run_workflow_items';
 import { useAttackRunWorkflowContextMenuItems } from './use_attack_run_workflow_context_menu_items';
 
-jest.mock('../bulk_action_items/use_bulk_attack_run_workflow_items');
+vi.mock('../bulk_action_items/use_bulk_attack_run_workflow_items');
 
-const mockUseBulkAttackRunWorkflowItems = useBulkAttackRunWorkflowItems as jest.MockedFunction<
+const mockUseBulkAttackRunWorkflowItems = useBulkAttackRunWorkflowItems as MockedFunction<
   typeof useBulkAttackRunWorkflowItems
 >;
 
@@ -26,7 +29,7 @@ const defaultAttacks = [
   },
 ];
 
-const mockRenderContent = jest.fn((props) => React.createElement('div', null, 'Workflow Panel'));
+const mockRenderContent = vi.fn((props) => React.createElement('div', null, 'Workflow Panel'));
 
 const defaultBulkActionItems = {
   items: [
@@ -51,7 +54,7 @@ const defaultBulkActionItems = {
 
 describe('useAttackRunWorkflowContextMenuItems', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseBulkAttackRunWorkflowItems.mockReturnValue(defaultBulkActionItems);
   });
 
@@ -119,7 +122,7 @@ describe('useAttackRunWorkflowContextMenuItems', () => {
     });
 
     it('should call closePopoverMenu via closePopover when provided', () => {
-      const closePopover = jest.fn();
+      const closePopover = vi.fn();
 
       renderHook(() =>
         useAttackRunWorkflowContextMenuItems({

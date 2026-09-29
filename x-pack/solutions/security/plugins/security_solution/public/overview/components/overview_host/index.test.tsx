@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { screen, render } from '@testing-library/react';
 import React from 'react';
 
@@ -14,15 +17,15 @@ import { OverviewHost } from '.';
 import { useHostOverview } from '../../containers/overview_host';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
-jest.mock('../../../common/components/link_to');
-jest.mock('../../../common/containers/query_toggle');
+vi.mock('../../../common/components/link_to');
+vi.mock('../../../common/containers/query_toggle');
 
 const startDate = '2020-01-20T20:49:57.080Z';
 const endDate = '2020-01-21T20:49:57.080Z';
 const testProps = {
   endDate,
   indexNames: [],
-  setQuery: jest.fn(),
+  setQuery: vi.fn(),
   startDate,
   filterQuery: '',
 };
@@ -47,14 +50,14 @@ const MOCKED_RESPONSE = {
   },
 };
 
-jest.mock('../../containers/overview_host');
-const useHostOverviewMock = useHostOverview as jest.Mock;
-const mockUseQueryToggle = useQueryToggle as jest.Mock;
+vi.mock('../../containers/overview_host');
+const useHostOverviewMock = useHostOverview as Mock;
+const mockUseQueryToggle = useQueryToggle as Mock;
 
 describe('OverviewHost', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+    vi.clearAllMocks();
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: vi.fn() });
 
     useHostOverviewMock.mockReturnValue([false, MOCKED_RESPONSE]);
   });
@@ -100,7 +103,7 @@ describe('OverviewHost', () => {
     expect(screen.queryByTestId('overview-hosts-stats')).toBeInTheDocument();
   });
   test('toggleStatus=false, skip', () => {
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: vi.fn() });
     render(
       <TestProviders>
         <OverviewHost {...testProps} />

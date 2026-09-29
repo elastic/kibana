@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills/tools';
@@ -93,7 +96,7 @@ describe('investigateRuleSkill', () => {
     let tool: BuiltinSkillBoundedTool;
 
     beforeEach(async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const inlineTools = await investigateRuleSkill.getInlineTools?.();
       tool = inlineTools!.find(
         ({ id }) => id === 'investigate-rule.resolve_rule_attachment'
@@ -110,8 +113,8 @@ describe('investigateRuleSkill', () => {
 
     it('adds the attachment by reference and returns its ID on happy path', async () => {
       const ctx = makeCtx();
-      (ctx.attachments.get as jest.Mock).mockReturnValueOnce(undefined);
-      (ctx.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (ctx.attachments.get as Mock).mockReturnValueOnce(undefined);
+      (ctx.attachments.add as Mock).mockResolvedValueOnce({
         id: 'rule-investigate-rule-uuid-1',
         current_version: 1,
         type: 'security.rule',
@@ -130,7 +133,7 @@ describe('investigateRuleSkill', () => {
       expect(data.version).toBe(1);
 
       // By-reference: origin (not data) + a resolve context built from the tool context.
-      const [input, actor, resolveContext] = (ctx.attachments.add as jest.Mock).mock.calls[0];
+      const [input, actor, resolveContext] = (ctx.attachments.add as Mock).mock.calls[0];
       expect(input).toEqual(
         expect.objectContaining({
           id: 'rule-investigate-rule-uuid-1',
@@ -151,7 +154,7 @@ describe('investigateRuleSkill', () => {
 
     it('returns existing attachment ID when already resolved', async () => {
       const ctx = makeCtx();
-      (ctx.attachments.get as jest.Mock).mockReturnValueOnce({
+      (ctx.attachments.get as Mock).mockReturnValueOnce({
         id: 'rule-investigate-rule-uuid-1',
         version: 2,
         type: 'security.rule',
@@ -172,8 +175,8 @@ describe('investigateRuleSkill', () => {
 
     it('returns an error result when resolution throws', async () => {
       const ctx = makeCtx();
-      (ctx.attachments.get as jest.Mock).mockReturnValueOnce(undefined);
-      (ctx.attachments.add as jest.Mock).mockRejectedValueOnce(
+      (ctx.attachments.get as Mock).mockReturnValueOnce(undefined);
+      (ctx.attachments.add as Mock).mockRejectedValueOnce(
         new Error('Rules service unavailable')
       );
 
@@ -196,7 +199,7 @@ describe('investigateRuleSkill', () => {
     let tool: BuiltinSkillBoundedTool;
 
     beforeEach(async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const inlineTools = await investigateRuleSkill.getInlineTools?.();
       tool = inlineTools!.find(
         ({ id }) => id === 'investigate-rule.get_alerts_by_ids'

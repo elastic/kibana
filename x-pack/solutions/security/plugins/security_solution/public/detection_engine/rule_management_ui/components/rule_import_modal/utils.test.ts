@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { IToasts } from '@kbn/core/public';
 import { getFailedConnectorsCount, showToast } from './utils';
 import { mockImportResponse } from './test_utils';
 
 describe('showToast', () => {
   const toastsMock = {
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-  } as unknown as jest.Mocked<IToasts>;
+    addError: vi.fn(),
+    addSuccess: vi.fn(),
+  } as unknown as Mocked<IToasts>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('displays success toast if rule import is successful', () => {

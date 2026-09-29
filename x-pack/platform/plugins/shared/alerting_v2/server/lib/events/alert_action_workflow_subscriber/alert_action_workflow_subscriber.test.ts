@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerService } from '../../services/logger_service/logger_service';
@@ -31,11 +34,11 @@ const episodeAssignedEvent: EpisodeAssignedEvent = {
 };
 
 describe('AlertActionWorkflowSubscriber', () => {
-  let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
+  let bus: Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
   let workflowService: WorkflowService;
-  let mockEmitEvent: jest.Mock;
+  let mockEmitEvent: Mock;
   let loggerService: LoggerService;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
   let subscriber: AlertActionWorkflowSubscriber;
   let request: KibanaRequest;
 
@@ -109,9 +112,9 @@ describe('AlertActionWorkflowSubscriber', () => {
 
   describe('stop()', () => {
     it('unsubscribes every active subscription and clears internal state', () => {
-      const unsubscribers: jest.Mock[] = [];
+      const unsubscribers: Mock[] = [];
       bus.subscribe.mockImplementation(() => {
-        const unsubscribe = jest.fn();
+        const unsubscribe = vi.fn();
         unsubscribers.push(unsubscribe);
         return { unsubscribe } satisfies Subscription;
       });

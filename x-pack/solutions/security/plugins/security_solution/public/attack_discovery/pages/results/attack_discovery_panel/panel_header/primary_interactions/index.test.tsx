@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
@@ -12,48 +14,57 @@ import { PrimaryInteractions } from '.';
 import { getMockAttackDiscoveryAlerts } from '../../../../mock/mock_attack_discovery_alerts';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 
-jest.mock('../../../../../../common/lib/kibana', () => ({
-  useDateFormat: jest.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
-  useKibana: jest.fn(() => ({
-    services: {
-      application: { navigateToUrl: jest.fn() },
-    },
-  })),
-  useToasts: jest.fn(() => ({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    addInfo: jest.fn(),
-    remove: jest.fn(),
-  })),
-}));
+vi.mock('../../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useDateFormat: vi.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
+      useKibana: vi.fn(() => ({
+        services: {
+          application: { navigateToUrl: vi.fn() },
+        },
+      })),
+      useToasts: vi.fn(() => ({
+        addError: vi.fn(),
+        addSuccess: vi.fn(),
+        addWarning: vi.fn(),
+        addInfo: vi.fn(),
+        remove: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../use_attack_discovery_bulk', () => ({
-  useAttackDiscoveryBulk: jest.fn(() => ({
-    mutate: jest.fn(),
-    isLoading: false,
-  })),
-}));
+vi.mock('../../../../use_attack_discovery_bulk', () => {
+      const mocked = {
+      useAttackDiscoveryBulk: vi.fn(() => ({
+        mutate: vi.fn(),
+        isLoading: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../use_find_attack_discoveries', () => ({
-  useInvalidateFindAttackDiscoveries: jest.fn(() => jest.fn()),
-}));
+vi.mock('../../../../use_find_attack_discoveries', () => {
+      const mocked = {
+      useInvalidateFindAttackDiscoveries: vi.fn(() => vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
   attackDiscovery: getMockAttackDiscoveryAlerts()[0],
   isOpen: 'closed' as const,
   isSelected: false,
-  setIsOpen: jest.fn(),
-  onToggle: jest.fn(),
+  setIsOpen: vi.fn(),
+  onToggle: vi.fn(),
 };
 
 describe('PrimaryInteractions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls setIsOpen when toggled', () => {
-    const setIsOpenMock = jest.fn();
+    const setIsOpenMock = vi.fn();
 
     render(
       <TestProviders>
@@ -77,7 +88,7 @@ describe('PrimaryInteractions', () => {
   });
 
   it('calls onToggle when provided', () => {
-    const onToggleMock = jest.fn();
+    const onToggleMock = vi.fn();
 
     render(
       <TestProviders>

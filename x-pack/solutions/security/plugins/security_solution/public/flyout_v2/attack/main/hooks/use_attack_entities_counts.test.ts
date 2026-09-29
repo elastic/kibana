@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAttackEntitiesCounts } from './use_attack_entities_counts';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_query', () => ({
-  useQueryAlerts: jest.fn(),
-}));
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_query', () => {
+      const mocked = {
+      useQueryAlerts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useAttackEntitiesCounts', () => {
-  const mockUseQueryAlerts = jest.mocked(useQueryAlerts);
+  const mockUseQueryAlerts = vi.mocked(useQueryAlerts);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: null,
-      setQuery: jest.fn(),
+      setQuery: vi.fn(),
       response: '',
       request: '',
       refetch: null,
@@ -72,7 +77,7 @@ describe('useAttackEntitiesCounts', () => {
           unique_hosts: { value: 10 },
         },
       },
-      setQuery: jest.fn(),
+      setQuery: vi.fn(),
       response: '',
       request: '',
       refetch: null,
@@ -96,7 +101,7 @@ describe('useAttackEntitiesCounts', () => {
         timeout: false,
         aggregations: {},
       },
-      setQuery: jest.fn(),
+      setQuery: vi.fn(),
       response: '',
       request: '',
       refetch: null,
@@ -112,7 +117,7 @@ describe('useAttackEntitiesCounts', () => {
     mockUseQueryAlerts.mockReturnValue({
       loading: false,
       data: null,
-      setQuery: jest.fn(),
+      setQuery: vi.fn(),
       response: '',
       request: '',
       refetch: null,

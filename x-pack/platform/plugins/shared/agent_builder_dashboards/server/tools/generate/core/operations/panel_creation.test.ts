@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE, readEsqlQuery } from '@kbn/custom-content-common';
 import type { MaterializedPanelInput } from './panel_creation';
 import { applyCustomContentTemplates, mergeAndResolveCustomContentEdit } from './panel_creation';
@@ -19,7 +21,7 @@ const makeLensPanel = (): MaterializedPanelInput => ({
 
 describe('applyCustomContentTemplates', () => {
   it('calls resolveTemplate for panels that have a prompt but no template', async () => {
-    const resolveTemplate = jest
+    const resolveTemplate = vi
       .fn()
       .mockResolvedValue({ template: '<div>generated</div>', height: 320 });
     const panel = makeCustomContentPanel({ prompt: 'Show KPI' });
@@ -35,7 +37,7 @@ describe('applyCustomContentTemplates', () => {
   });
 
   it('passes esqlQuery through to resolveTemplate when present', async () => {
-    const resolveTemplate = jest
+    const resolveTemplate = vi
       .fn()
       .mockResolvedValue({ template: '<div>chart</div>', height: 320 });
     const panel = makeCustomContentPanel({
@@ -52,7 +54,7 @@ describe('applyCustomContentTemplates', () => {
   });
 
   it('skips panels that already have a template', async () => {
-    const resolveTemplate = jest.fn();
+    const resolveTemplate = vi.fn();
     const panel = makeCustomContentPanel({ prompt: 'Show KPI', template: '<div>existing</div>' });
 
     await applyCustomContentTemplates([{ panel }], resolveTemplate, []);
@@ -61,7 +63,7 @@ describe('applyCustomContentTemplates', () => {
   });
 
   it('skips non-custom_content panels', async () => {
-    const resolveTemplate = jest.fn();
+    const resolveTemplate = vi.fn();
     const panel = makeLensPanel();
 
     await applyCustomContentTemplates([{ panel }], resolveTemplate, []);
@@ -70,7 +72,7 @@ describe('applyCustomContentTemplates', () => {
   });
 
   it('skips undefined panel entries', async () => {
-    const resolveTemplate = jest.fn();
+    const resolveTemplate = vi.fn();
 
     await applyCustomContentTemplates([{ panel: undefined }], resolveTemplate, []);
 
@@ -78,7 +80,7 @@ describe('applyCustomContentTemplates', () => {
   });
 
   it('resolves multiple panels in parallel and writes each template back', async () => {
-    const resolveTemplate = jest
+    const resolveTemplate = vi
       .fn()
       .mockResolvedValueOnce({ template: '<div>first</div>', height: 320 })
       .mockResolvedValueOnce({ template: '<div>second</div>', height: 320 });
@@ -98,7 +100,7 @@ describe('applyCustomContentTemplates', () => {
   });
 
   it('records a per-panel failure and nulls the entry when resolveTemplate throws, leaving other panels intact', async () => {
-    const resolveTemplate = jest
+    const resolveTemplate = vi
       .fn()
       .mockRejectedValueOnce(new Error('Generated template was rejected: contains a <script> tag.'))
       .mockResolvedValueOnce({ template: '<div>second</div>', height: 320 });
@@ -120,7 +122,7 @@ describe('applyCustomContentTemplates', () => {
 });
 
 describe('mergeAndResolveCustomContentEdit', () => {
-  const resolveTemplate = jest
+  const resolveTemplate = vi
     .fn()
     .mockResolvedValue({ template: '<div>resolved</div>', height: 320 });
 

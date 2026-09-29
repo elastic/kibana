@@ -5,35 +5,43 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EsqlDashboardPanel, DEFAULT_PAGE_SIZE } from './esql_dashboard_panel';
 import { TestProviders } from '../../../../../common/mock';
 import { right, left } from 'fp-ts/Either';
 
-jest.mock(
+vi.mock(
   '../../../../../common/components/visualization_actions/visualization_embeddable',
-  () => ({
-    VisualizationEmbeddable: jest.fn(() => (
-      <div data-test-subj="mockVisualizationEmbeddable">{'Mock Visualization Embeddable'}</div>
-    )),
-  })
+  () => {
+      const mocked = {
+        VisualizationEmbeddable: vi.fn(() => (
+          <div data-test-subj="mockVisualizationEmbeddable">{'Mock Visualization Embeddable'}</div>
+        )),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../../../../common/hooks/use_error_toast', () => ({
-  useErrorToast: jest.fn(),
-}));
+vi.mock('../../../../../common/hooks/use_error_toast', () => {
+      const mocked = {
+      useErrorToast: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../../../common/lib/kibana'));
   return {
     ...actual,
-    useKibana: jest.fn(() => ({
+    useKibana: vi.fn(() => ({
       services: {
         ...actual.useKibana().services,
         data: {
           search: {
-            search: jest.fn(),
+            search: vi.fn(),
           },
         },
       },
@@ -48,7 +56,7 @@ const EMPTY_QUERY_RESPONSE = {
   },
 };
 
-const mockUseQuery = jest.fn(() => ({
+const mockUseQuery = vi.fn(() => ({
   isInitialLoading: false,
   isLoading: false,
   isError: false,
@@ -57,8 +65,8 @@ const mockUseQuery = jest.fn(() => ({
   error: null as unknown,
 }));
 
-jest.mock('@kbn/react-query', () => {
-  const actual = jest.requireActual('@kbn/react-query');
+vi.mock('@kbn/react-query', async () => {
+  const actual = (await vi.importActual('@kbn/react-query'));
   return {
     ...actual,
     useQuery: () => mockUseQuery(),
@@ -73,9 +81,9 @@ describe('EsqlDashboardPanel', () => {
       { text: 'Option 2', value: 'option2' },
     ],
     stackByField: 'option1',
-    generateVisualizationQuery: jest.fn().mockReturnValue(right('mockQuery')),
-    generateTableQuery: jest.fn().mockReturnValue(right('mockQuery')),
-    getLensAttributes: jest.fn(),
+    generateVisualizationQuery: vi.fn().mockReturnValue(right('mockQuery')),
+    generateTableQuery: vi.fn().mockReturnValue(right('mockQuery')),
+    getLensAttributes: vi.fn(),
     columns: [
       { field: 'field1', name: 'Field 1' },
       { field: 'field2', name: 'Field 2' },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -21,7 +23,7 @@ const tableRows = [
     '2': 'test',
   },
 ];
-const onUpdateSpy = jest.fn();
+const onUpdateSpy = vi.fn();
 
 describe('IncludeExcludeComponent', () => {
   const renderIncludeExcludeRow = (propsOverrides?: Partial<IncludeExcludeRowProps>) => {
@@ -40,7 +42,7 @@ describe('IncludeExcludeComponent', () => {
     return rtlRender;
   };
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should render 2 EuiComboBox component correctly', () => {
     renderIncludeExcludeRow();
@@ -250,7 +252,7 @@ describe('IncludeExcludeComponent', () => {
   });
 
   it('should prevent identical include value on exclude regex value change', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     renderIncludeExcludeRow({
       include: [''],
@@ -262,18 +264,18 @@ describe('IncludeExcludeComponent', () => {
 
     const includeRegexInput = screen.getByTestId('lens-include-terms-regex-input');
     const excludeRegexInput = screen.getByTestId('lens-exclude-terms-regex-input');
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
     await user.type(includeRegexInput, 'test.*');
     act(() => {
-      jest.advanceTimersByTime(256);
+      vi.advanceTimersByTime(256);
     });
     expect(includeRegexInput).toHaveValue('test.*');
     expect(onUpdateSpy).toHaveBeenCalledWith('include', ['test.*'], 'includeIsRegex', true);
 
     await user.type(excludeRegexInput, 'test.*');
     act(() => {
-      jest.advanceTimersByTime(256);
+      vi.advanceTimersByTime(256);
     });
     expect(excludeRegexInput).toHaveValue('test.*');
     expect(onUpdateSpy).toHaveBeenCalledWith('exclude', ['test.*'], 'excludeIsRegex', true);
@@ -283,11 +285,11 @@ describe('IncludeExcludeComponent', () => {
 
     expect(onUpdateSpy).toHaveBeenCalledTimes(3);
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should prevent identical exclude value on include regex value change', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     renderIncludeExcludeRow({
       include: [''],
@@ -299,18 +301,18 @@ describe('IncludeExcludeComponent', () => {
 
     const includeRegexInput = screen.getByTestId('lens-include-terms-regex-input');
     const excludeRegexInput = screen.getByTestId('lens-exclude-terms-regex-input');
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
     await user.type(excludeRegexInput, 'test.*');
     act(() => {
-      jest.advanceTimersByTime(256);
+      vi.advanceTimersByTime(256);
     });
     expect(excludeRegexInput).toHaveValue('test.*');
     expect(onUpdateSpy).toHaveBeenCalledWith('exclude', ['test.*'], 'excludeIsRegex', true);
 
     await user.type(includeRegexInput, 'test.*');
     act(() => {
-      jest.advanceTimersByTime(256);
+      vi.advanceTimersByTime(256);
     });
     expect(includeRegexInput).toHaveValue('test.*');
     expect(onUpdateSpy).toHaveBeenCalledWith('include', ['test.*'], 'includeIsRegex', true);
@@ -319,6 +321,6 @@ describe('IncludeExcludeComponent', () => {
     expect(onUpdateSpy).toHaveBeenCalledWith('exclude', [''], 'excludeIsRegex', true);
 
     expect(onUpdateSpy).toHaveBeenCalledTimes(3);
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });

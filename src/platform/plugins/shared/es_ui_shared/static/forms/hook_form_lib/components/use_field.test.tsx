@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useState, useCallback } from 'react';
 import { render, screen, act, fireEvent } from '@testing-library/react';
@@ -18,20 +20,20 @@ import { useBehaviorSubject } from '../hooks/utils/use_behavior_subject';
 import { Form } from './form';
 import { UseField } from './use_field';
 
-const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
 beforeAll(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 });
 
 afterAll(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 describe('<UseField />', () => {
   describe('defaultValue', () => {
     test('should read the default value from the prop and fallback to the config object', () => {
-      const onFormData = jest.fn();
+      const onFormData = vi.fn();
       const TestComp = ({ onData }: { onData: OnUpdateHandler }) => {
         const { form } = useForm();
         const { subscribe } = form;
@@ -164,7 +166,7 @@ describe('<UseField />', () => {
         );
       };
 
-      const onStateChangeSpy = jest.fn<void, [FieldState]>();
+      const onStateChangeSpy = vi.fn<void, [FieldState]>();
       const lastFieldState = (): FieldState =>
         onStateChangeSpy.mock.calls[onStateChangeSpy.mock.calls.length - 1][0];
       const toString = (value: unknown): string =>
@@ -371,7 +373,7 @@ describe('<UseField />', () => {
 
       await act(async () => {
         const validatePromise = formHook!.validate(); // ...until we validate the form
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
         await validatePromise;
       });
 
@@ -381,7 +383,7 @@ describe('<UseField />', () => {
       // Change to a non empty string to pass validation
       await act(async () => {
         const setInputValuePromise = setInputValue('myField', 'changedValue');
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
         await setInputValuePromise;
       });
 
@@ -391,7 +393,7 @@ describe('<UseField />', () => {
       // Change back to an empty string to fail validation
       await act(async () => {
         const setInputValuePromise = setInputValue('myField', '');
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
         await setInputValuePromise;
       });
 
@@ -424,14 +426,14 @@ describe('<UseField />', () => {
       // Trigger validation...
       await act(async () => {
         const setIinputValuePromise = setInputValue('myField', 'changedValue');
-        await jest.advanceTimersToNextTimerAsync(0);
+        await vi.advanceTimersToNextTimerAsync(0);
         await setIinputValuePromise;
       });
 
       expect(fieldHook?.isValidating).toBe(true);
 
       const originalConsoleError = console.error; // eslint-disable-line no-console
-      const spyConsoleError = jest.fn((message) => {
+      const spyConsoleError = vi.fn((message) => {
         originalConsoleError(message);
       });
       console.error = spyConsoleError; // eslint-disable-line no-console
@@ -451,7 +453,7 @@ describe('<UseField />', () => {
       // the remaining items are recalculated and thus changed for every <UseField path={...} /> inside
       // the array. We should not re-run the validation when adding/removing array items.
 
-      const validator = jest.fn();
+      const validator = vi.fn();
       const fieldConfig: FieldConfig<string> = {
         validations: [
           {
@@ -631,7 +633,7 @@ describe('<UseField />', () => {
 
         await act(async () => {
           const inputValuePromise = form.setInputValue('nameField', 'newValue');
-          await jest.runAllTimersAsync();
+          await vi.runAllTimersAsync();
           await inputValuePromise;
         });
         // If the field is validating this will prevent the form from being submitted as
@@ -641,7 +643,7 @@ describe('<UseField />', () => {
         // Let's wait 10 sec to make sure the validation does not complete
         // until the observable receives a value
         await act(async () => {
-          await jest.advanceTimersByTimeAsync(10000);
+          await vi.advanceTimersByTimeAsync(10000);
         });
         // The field is still validating as the validationDataProvider has not resolved yet
         // (no value has been sent to the observable)
@@ -656,7 +658,7 @@ describe('<UseField />', () => {
         // Let's change the input value to trigger the validation once more
         await act(async () => {
           const inputValuePromise = form.setInputValue('nameField', 'anotherValue');
-          await jest.runAllTimersAsync();
+          await vi.runAllTimersAsync();
           await inputValuePromise;
         });
         expect(nameFieldHook?.isValidating).toBe(true);
@@ -673,7 +675,7 @@ describe('<UseField />', () => {
 
         await act(async () => {
           const setInputValuePromise = result.form.setInputValue('lastNameField', 'newValue');
-          await jest.runAllTimersAsync();
+          await vi.runAllTimersAsync();
           await setInputValuePromise;
         });
         // As this is a sync validation it should not be validating anymore at this stage
@@ -687,7 +689,7 @@ describe('<UseField />', () => {
         result = setupDynamicData({ validationData: 'bad' });
         await act(async () => {
           const setInputValuePromise = result.form.setInputValue('lastNameField', 'newValue');
-          await jest.runAllTimersAsync();
+          await vi.runAllTimersAsync();
           await setInputValuePromise;
         });
         expect(lastNameFieldHook?.isValidating).toBe(false);
@@ -702,9 +704,9 @@ describe('<UseField />', () => {
       name: string;
     }
 
-    const serializer = jest.fn();
-    const deserializer = jest.fn();
-    const formatter = jest.fn();
+    const serializer = vi.fn();
+    const deserializer = vi.fn();
+    const formatter = vi.fn();
 
     const fieldConfig: FieldConfig = {
       defaultValue: '',
@@ -776,7 +778,7 @@ describe('<UseField />', () => {
 
       await act(async () => {
         // Wait for the form to reset
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
       });
 
       expect(serializer).not.toHaveBeenCalled();
@@ -836,11 +838,11 @@ describe('<UseField />', () => {
   });
 
   describe('change handlers', () => {
-    const onChange = jest.fn();
-    const onError = jest.fn();
+    const onChange = vi.fn();
+    const onError = vi.fn();
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     const getTestComp = (fieldConfig?: FieldConfig) => {
@@ -888,7 +890,7 @@ describe('<UseField />', () => {
 
       await act(async () => {
         const setInputValuePromise = setInputValue('myField', 'foo');
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
         await setInputValuePromise;
       });
 

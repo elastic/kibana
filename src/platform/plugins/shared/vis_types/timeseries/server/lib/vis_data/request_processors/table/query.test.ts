@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { query } from './query';
 
 import type { TableRequestProcessorsFunction, TableRequestProcessorsParams } from './types';
@@ -17,7 +19,7 @@ describe('query', () => {
   let seriesIndex: TableRequestProcessorsParams['seriesIndex'];
   let buildSeriesMetaParams: TableRequestProcessorsParams['buildSeriesMetaParams'];
 
-  const next = jest.fn((x) => x) as unknown as ReturnType<
+  const next = vi.fn((x) => x) as unknown as ReturnType<
     ReturnType<TableRequestProcessorsFunction>
   >;
 
@@ -36,7 +38,7 @@ describe('query', () => {
       indexPattern: undefined,
       indexPatternString: 'foo*',
     };
-    buildSeriesMetaParams = jest.fn().mockResolvedValue({ timeField: 'fooField' });
+    buildSeriesMetaParams = vi.fn().mockResolvedValue({ timeField: 'fooField' });
   });
 
   test('should set "size" to 0', async () => {

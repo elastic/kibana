@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as utils from './utils';
 
 describe('Search Notebooks Utils', () => {
   // Party Like It's
   const fakeNow = new Date('1999-12-31T23:59:59.999Z');
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(fakeNow);
+    vi.useFakeTimers();
+    vi.setSystemTime(fakeNow);
   });
 
   describe('dateWithinTTL', () => {

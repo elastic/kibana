@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createSingleFieldMatchEnrichment } from './create_single_field_match_enrichment';
 import { searchEnrichments } from './search_enrichments';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
@@ -13,10 +16,13 @@ import type { EnrichmentFunction } from './types';
 import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
-jest.mock('./search_enrichments', () => ({
-  searchEnrichments: jest.fn(),
-}));
-const mockSearchEnrichments = searchEnrichments as jest.Mock;
+vi.mock('./search_enrichments', () => {
+      const mocked = {
+      searchEnrichments: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockSearchEnrichments = searchEnrichments as Mock;
 
 describe('createSingleFieldMatchEnrichment', () => {
   let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { TrialCompanionUserNBAService } from './trial_companion_user_nba_service.types';
 import { TrialCompanionUserNBAServiceImpl } from './trial_companion_user_nba_service';
@@ -13,15 +16,15 @@ import type { TrialCompanionMilestoneRepository } from './trial_companion_milest
 import { lazyObject } from '@kbn/lazy-object';
 
 describe('TrialCompanionUserNBAServiceImpl', () => {
-  const repo: jest.Mocked<TrialCompanionMilestoneRepository> = lazyObject({
-    getCurrent: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
+  const repo: Mocked<TrialCompanionMilestoneRepository> = lazyObject({
+    getCurrent: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
   });
   let sut: TrialCompanionUserNBAService;
   beforeEach(() => {
     sut = new TrialCompanionUserNBAServiceImpl(loggingSystemMock.createLogger(), repo);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('openTODOs', () => {

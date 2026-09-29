@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { CorrelationsDetailsView } from './correlations_details_view';
@@ -33,23 +36,23 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import type { DataTableRecord } from '@kbn/discover-utils';
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
-jest.mock('../hooks/use_show_related_alerts_by_ancestry');
-jest.mock('../hooks/use_show_related_alerts_by_same_source_event');
-jest.mock('../hooks/use_show_related_alerts_by_session');
-jest.mock('../hooks/use_show_related_attacks');
-jest.mock('../hooks/use_show_related_cases');
-jest.mock('../hooks/use_show_suppressed_alerts');
-jest.mock('../../../main/hooks/use_fetch_related_alerts_by_session');
-jest.mock('../../../main/hooks/use_fetch_related_alerts_by_ancestry');
-jest.mock('../../../main/hooks/use_fetch_related_alerts_by_same_source_event');
-jest.mock('../../../main/hooks/use_fetch_related_cases');
-jest.mock('../../../../../data_view_manager/hooks/use_security_default_patterns');
-jest.mock('../../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../hooks/use_show_related_alerts_by_ancestry');
+vi.mock('../hooks/use_show_related_alerts_by_same_source_event');
+vi.mock('../hooks/use_show_related_alerts_by_session');
+vi.mock('../hooks/use_show_related_attacks');
+vi.mock('../hooks/use_show_related_cases');
+vi.mock('../hooks/use_show_suppressed_alerts');
+vi.mock('../../../main/hooks/use_fetch_related_alerts_by_session');
+vi.mock('../../../main/hooks/use_fetch_related_alerts_by_ancestry');
+vi.mock('../../../main/hooks/use_fetch_related_alerts_by_same_source_event');
+vi.mock('../../../main/hooks/use_fetch_related_cases');
+vi.mock('../../../../../data_view_manager/hooks/use_security_default_patterns');
+vi.mock('../../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
 const mockHit: DataTableRecord = {
   id: 'test-id',
@@ -58,7 +61,7 @@ const mockHit: DataTableRecord = {
   isAnchor: false,
 } as DataTableRecord;
 
-const mockOnShowAlert = jest.fn();
+const mockOnShowAlert = vi.fn();
 
 const renderCorrelationsDetailsView = () =>
   render(
@@ -79,51 +82,51 @@ const SUPPRESSED_ALERTS_TITLE_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_
 const NO_DATA_MESSAGE = 'No correlations data available.';
 
 const mockAllShowHooksTrue = () => {
-  jest
+  vi
     .mocked(useShowRelatedAlertsByAncestry)
     .mockReturnValue({ show: true, ancestryDocumentId: 'event-id' });
-  jest
+  vi
     .mocked(useShowRelatedAlertsBySameSourceEvent)
     .mockReturnValue({ show: true, originalEventId: 'originalEventId' });
-  jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true, entityId: 'entityId' });
-  jest.mocked(useShowRelatedAttacks).mockReturnValue({ show: true, attackIds: ['attack-id'] });
-  jest.mocked(useShowRelatedCases).mockReturnValue(true);
-  jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: true, alertSuppressionCount: 1 });
+  vi.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true, entityId: 'entityId' });
+  vi.mocked(useShowRelatedAttacks).mockReturnValue({ show: true, attackIds: ['attack-id'] });
+  vi.mocked(useShowRelatedCases).mockReturnValue(true);
+  vi.mocked(useShowSuppressedAlerts).mockReturnValue({ show: true, alertSuppressionCount: 1 });
 };
 
 const mockAllShowHooksFalse = () => {
-  jest
+  vi
     .mocked(useShowRelatedAlertsByAncestry)
     .mockReturnValue({ show: false, ancestryDocumentId: 'event-id' });
-  jest
+  vi
     .mocked(useShowRelatedAlertsBySameSourceEvent)
     .mockReturnValue({ show: false, originalEventId: 'originalEventId' });
-  jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false, entityId: 'entityId' });
-  jest.mocked(useShowRelatedAttacks).mockReturnValue({ show: false, attackIds: [] });
-  jest.mocked(useShowRelatedCases).mockReturnValue(false);
-  jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
+  vi.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false, entityId: 'entityId' });
+  vi.mocked(useShowRelatedAttacks).mockReturnValue({ show: false, attackIds: [] });
+  vi.mocked(useShowRelatedCases).mockReturnValue(false);
+  vi.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 };
 
 const mockFetchHooksEmpty = () => {
-  (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+  (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
     loading: false,
     error: false,
     data: [],
     dataCount: 1,
   });
-  (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
+  (useFetchRelatedAlertsBySameSourceEvent as Mock).mockReturnValue({
     loading: false,
     error: false,
     data: [],
     dataCount: 1,
   });
-  (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
+  (useFetchRelatedAlertsBySession as Mock).mockReturnValue({
     loading: false,
     error: false,
     data: [],
     dataCount: 1,
   });
-  (useFetchRelatedCases as jest.Mock).mockReturnValue({
+  (useFetchRelatedCases as Mock).mockReturnValue({
     loading: false,
     error: false,
     data: [],
@@ -133,10 +136,10 @@ const mockFetchHooksEmpty = () => {
 
 describe('CorrelationsDetailsView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({ indexPatterns: ['index'] });
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true });
+    vi.clearAllMocks();
+    (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(true);
+    (useSecurityDefaultPatterns as Mock).mockReturnValue({ indexPatterns: ['index'] });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: true });
   });
 
   it('renders all sections when all show flags are true', () => {
@@ -180,10 +183,10 @@ describe('CorrelationsDetailsView', () => {
 
   it('renders only the ancestry section when only that flag is true', () => {
     mockAllShowHooksFalse();
-    jest
+    vi
       .mocked(useShowRelatedAlertsByAncestry)
       .mockReturnValue({ show: true, ancestryDocumentId: 'event-id' });
-    (useFetchRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
@@ -204,8 +207,8 @@ describe('CorrelationsDetailsView', () => {
 
   it('renders only the cases section when only that flag is true', () => {
     mockAllShowHooksFalse();
-    jest.mocked(useShowRelatedCases).mockReturnValue(true);
-    (useFetchRelatedCases as jest.Mock).mockReturnValue({
+    vi.mocked(useShowRelatedCases).mockReturnValue(true);
+    (useFetchRelatedCases as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
@@ -223,7 +226,7 @@ describe('CorrelationsDetailsView', () => {
 
   it('does not render the session section when entityId is absent', () => {
     mockAllShowHooksFalse();
-    jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true, entityId: undefined });
+    vi.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true, entityId: undefined });
 
     const { queryByTestId } = renderCorrelationsDetailsView();
 

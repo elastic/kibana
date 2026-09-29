@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ResponseActionsClient, ProcessPendingActionsMethodOptions } from '../lib/types';
 import { responseActionsClientMock } from '../mocks';
 import { SentinelOneActionsClient } from './sentinel_one_actions_client';
@@ -61,16 +64,16 @@ import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../../../../common/endpo
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
-jest.mock('../../action_details_by_id', () => {
-  const originalMod = jest.requireActual('../../action_details_by_id');
+vi.mock('../../action_details_by_id', async () => {
+  const originalMod = (await vi.importActual('../../action_details_by_id'));
 
   return {
     ...originalMod,
-    getActionDetailsById: jest.fn(originalMod.getActionDetailsById),
+    getActionDetailsById: vi.fn(originalMod.getActionDetailsById),
   };
 });
 
-const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
+const getActionDetailsByIdMock = _getActionDetailsById as Mock;
 
 describe('SentinelOneActionsClient class', () => {
   let classConstructorOptions: SentinelOneActionsClientOptionsMock;
@@ -95,11 +98,11 @@ describe('SentinelOneActionsClient class', () => {
     );
 
     const fleetServices = classConstructorOptions.endpointService.getInternalFleetServices();
-    const ensureInCurrentSpaceMock = jest.spyOn(fleetServices, 'ensureInCurrentSpace');
+    const ensureInCurrentSpaceMock = vi.spyOn(fleetServices, 'ensureInCurrentSpace');
 
     ensureInCurrentSpaceMock.mockResolvedValue(undefined);
 
-    const getInternalFleetServicesMock = jest.spyOn(
+    const getInternalFleetServicesMock = vi.spyOn(
       classConstructorOptions.endpointService,
       'getInternalFleetServices'
     );
@@ -130,7 +133,7 @@ describe('SentinelOneActionsClient class', () => {
     it('should send action to sentinelone', async () => {
       await s1ActionsClient.isolate(createS1IsolationOptions());
 
-      expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
+      expect(connectorActionsMock.execute as Mock).toHaveBeenCalledWith({
         params: {
           subAction: 'isolateHost',
           subActionParams: {
@@ -230,7 +233,7 @@ describe('SentinelOneActionsClient class', () => {
     it('should send action to sentinelone', async () => {
       await s1ActionsClient.release(createS1IsolationOptions());
 
-      expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
+      expect(connectorActionsMock.execute as Mock).toHaveBeenCalledWith({
         params: {
           subAction: 'releaseHost',
           subActionParams: {
@@ -333,9 +336,9 @@ describe('SentinelOneActionsClient class', () => {
     const setGetRemoteScriptStatusConnectorResponse = (
       response: SentinelOneGetRemoteScriptStatusApiResponse
     ): void => {
-      const executeMockFn = (connectorActionsMock.execute as jest.Mock).getMockImplementation();
+      const executeMockFn = (connectorActionsMock.execute as Mock).getMockImplementation();
 
-      (connectorActionsMock.execute as jest.Mock).mockImplementation(async (options) => {
+      (connectorActionsMock.execute as Mock).mockImplementation(async (options) => {
         if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPT_STATUS) {
           return responseActionsClientMock.createConnectorActionExecuteResponse({
             data: response,
@@ -350,7 +353,7 @@ describe('SentinelOneActionsClient class', () => {
       abortController = new AbortController();
       processPendingActionsOptions = {
         abortSignal: abortController.signal,
-        addToQueue: jest.fn(),
+        addToQueue: vi.fn(),
       };
     });
 
@@ -395,7 +398,7 @@ describe('SentinelOneActionsClient class', () => {
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: jest
+          response: vi
             .fn(() => s1DataGenerator.toEsSearchResponse([]))
             .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
@@ -606,7 +609,7 @@ describe('SentinelOneActionsClient class', () => {
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: jest
+          response: vi
             .fn(() => s1DataGenerator.toEsSearchResponse([]))
             .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
@@ -753,7 +756,7 @@ describe('SentinelOneActionsClient class', () => {
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: jest
+          response: vi
             .fn(() => s1DataGenerator.toEsSearchResponse([]))
             .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
@@ -898,7 +901,7 @@ describe('SentinelOneActionsClient class', () => {
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: jest
+          response: vi
             .fn(() => s1DataGenerator.toEsSearchResponse([]))
             .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
@@ -1032,7 +1035,7 @@ describe('SentinelOneActionsClient class', () => {
           applyEsClientSearchMock({
             esClientMock: classConstructorOptions.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: jest
+            response: vi
               .fn(() => s1DataGenerator.toEsSearchResponse([]))
               .mockReturnValueOnce(actionRequestsSearchResponse),
             pitUsage: true,
@@ -1134,7 +1137,7 @@ describe('SentinelOneActionsClient class', () => {
           applyEsClientSearchMock({
             esClientMock: classConstructorOptions.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: jest
+            response: vi
               .fn(() => s1DataGenerator.toEsSearchResponse([]))
               .mockReturnValueOnce(actionRequestsSearchResponse),
             pitUsage: true,
@@ -1220,7 +1223,7 @@ describe('SentinelOneActionsClient class', () => {
           applyEsClientSearchMock({
             esClientMock: classConstructorOptions.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: jest
+            response: vi
               .fn(() => s1DataGenerator.toEsSearchResponse([]))
               .mockReturnValueOnce(actionRequestsSearchResponse),
             pitUsage: true,
@@ -1291,9 +1294,9 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     it('should throw if sentinelone api generated an error (manual mode)', async () => {
-      const executeMockFn = (connectorActionsMock.execute as jest.Mock).getMockImplementation();
+      const executeMockFn = (connectorActionsMock.execute as Mock).getMockImplementation();
       const err = new Error('oh oh');
-      (connectorActionsMock.execute as jest.Mock).mockImplementation(async (options) => {
+      (connectorActionsMock.execute as Mock).mockImplementation(async (options) => {
         if (options.params.subAction === SUB_ACTION.FETCH_AGENT_FILES) {
           throw err;
         }
@@ -1318,9 +1321,9 @@ describe('SentinelOneActionsClient class', () => {
         classConstructorOptions.connectorActions as DeeplyMockedKeys<NormalizedExternalConnectorClient>;
       s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
 
-      const executeMockFn = (subActionsClient.execute as jest.Mock).getMockImplementation();
+      const executeMockFn = (subActionsClient.execute as Mock).getMockImplementation();
       const err = new Error('oh oh');
-      (subActionsClient.execute as jest.Mock).mockImplementation(async (options) => {
+      (subActionsClient.execute as Mock).mockImplementation(async (options) => {
         if (options.params.subAction === SUB_ACTION.FETCH_AGENT_FILES) {
           throw err;
         }
@@ -1664,7 +1667,7 @@ describe('SentinelOneActionsClient class', () => {
         response: s1DataGenerator.toEsSearchResponse([esHit]),
       });
 
-      (connectorActionsMock.execute as jest.Mock).mockImplementation(
+      (connectorActionsMock.execute as Mock).mockImplementation(
         (options: NormalizedExternalConnectorClientExecuteOptions) => {
           if (options.params.subAction === SUB_ACTION.DOWNLOAD_AGENT_FILE) {
             return {
@@ -1736,7 +1739,7 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     it('should throw an error if call to SentinelOne did not return a Readable stream', async () => {
-      (connectorActionsMock.execute as jest.Mock).mockReturnValue({ data: undefined });
+      (connectorActionsMock.execute as Mock).mockReturnValue({ data: undefined });
 
       await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
         'Unable to establish a file download Readable stream with SentinelOne for response action [get-file] [abc]'
@@ -1989,7 +1992,7 @@ describe('SentinelOneActionsClient class', () => {
     it('should retrieve script execution information from S1 using host OS', async () => {
       await s1ActionsClient.killProcess(killProcessActionRequest);
 
-      expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
+      expect(connectorActionsMock.execute as Mock).toHaveBeenCalledWith({
         params: {
           subAction: SUB_ACTION.GET_REMOTE_SCRIPTS,
           subActionParams: {
@@ -2374,7 +2377,7 @@ describe('SentinelOneActionsClient class', () => {
 
       (
         classConstructorOptions.endpointService.getInternalFleetServices().packagePolicy
-          .list as jest.Mock
+          .list as Mock
       ).mockResolvedValue({
         items: [
           new FleetPackagePolicyGenerator('seed').generate({
@@ -2432,7 +2435,7 @@ describe('SentinelOneActionsClient class', () => {
     it('should error is unable to build sentinelone agent index names', async () => {
       (
         classConstructorOptions.endpointService.getInternalFleetServices().packagePolicy
-          .list as jest.Mock
+          .list as Mock
       ).mockResolvedValue({ items: [] });
 
       await expect(s1ActionsClient.isolate(createS1IsolationOptions())).rejects.toThrow(
@@ -2504,7 +2507,7 @@ describe('SentinelOneActionsClient class', () => {
       async (methodName) => {
         (
           classConstructorOptions.endpointService.getInternalFleetServices().agent
-            .getByIds as jest.Mock
+            .getByIds as Mock
         ).mockImplementation(async () => {
           throw new AgentNotFoundError('Agent some-id not found');
         });

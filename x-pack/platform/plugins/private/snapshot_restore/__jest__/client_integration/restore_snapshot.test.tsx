@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import './helpers/mocks';
 
 import React from 'react';
@@ -19,8 +21,8 @@ import { setupEnvironment, WithAppDependencies } from './helpers/setup_environme
 describe('<RestoreSnapshotForm />', () => {
   const setupPage = (snapshotDetails = fixtures.getSnapshot()) => {
     const { httpSetup } = setupEnvironment();
-    const onSave = jest.fn();
-    const clearSaveError = jest.fn();
+    const onSave = vi.fn();
+    const clearSaveError = vi.fn();
 
     const RestoreSnapshotFormWithDeps = WithAppDependencies(RestoreSnapshotForm, httpSetup);
     render(
@@ -36,7 +38,7 @@ describe('<RestoreSnapshotForm />', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('wizard navigation', () => {

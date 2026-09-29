@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { SyncStatus } from '../types/connectors';
@@ -14,23 +17,26 @@ import { SyncStatus } from '../types/connectors';
 import { cancelSyncs } from './cancel_syncs';
 import { fetchSyncJobs } from './fetch_sync_jobs';
 
-jest.mock('./fetch_sync_jobs', () => ({
-  fetchSyncJobs: jest.fn(),
-}));
+vi.mock('./fetch_sync_jobs', () => {
+      const mocked = {
+      fetchSyncJobs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('cancelSync lib function', () => {
   const mockClient = {
     transport: {
-      request: jest.fn(),
+      request: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call /_cancel endpoint to cancel syncs', async () => {
-    (fetchSyncJobs as jest.Mock)
+    (fetchSyncJobs as Mock)
       .mockResolvedValueOnce({
         data: [{ id: 'job_1' }, { id: 'job_2' }],
       })

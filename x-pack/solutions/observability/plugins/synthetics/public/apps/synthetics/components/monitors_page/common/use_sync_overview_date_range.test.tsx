@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -13,10 +16,13 @@ import { WrappedHelper } from '../../../utils/testing';
 import { setOverviewPageStateAction } from '../../../state';
 import { useSyncOverviewDateRange } from './use_sync_overview_date_range';
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useDispatch: jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useDispatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /**
  * The overview always scopes status by the page-level date picker, so the URL
@@ -25,11 +31,11 @@ jest.mock('react-redux-v7', () => ({
  * keeps working even when `<NoMonitorsFound />` replaces the toolbar.
  */
 describe('useSyncOverviewDateRange', () => {
-  const dispatch = jest.fn();
+  const dispatch = vi.fn();
 
   beforeEach(() => {
     dispatch.mockReset();
-    (useDispatch as jest.Mock).mockReturnValue(dispatch);
+    (useDispatch as Mock).mockReturnValue(dispatch);
   });
 
   const renderForUrl = (url: string) => {

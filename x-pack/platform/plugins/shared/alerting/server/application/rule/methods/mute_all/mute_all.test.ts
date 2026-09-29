@@ -5,24 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RulesClientContext } from '../../../../rules_client';
 import { muteAll } from './mute_all';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
-jest.mock('../../../../lib/retry_if_conflicts', () => ({
-  retryIfConflicts: (_: unknown, id: unknown, asyncFn: () => Promise<unknown>) => {
-    return asyncFn();
-  },
-}));
+vi.mock('../../../../lib/retry_if_conflicts', () => {
+      const mocked = {
+      retryIfConflicts: (_: unknown, id: unknown, asyncFn: () => Promise<unknown>) => {
+        return asyncFn();
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const loggerErrorMock = jest.fn();
-const getBulkMock = jest.fn();
-const muteAllAlertsMock = jest.fn();
+const loggerErrorMock = vi.fn();
+const getBulkMock = vi.fn();
+const muteAllAlertsMock = vi.fn();
 
 const savedObjectsMock = savedObjectsRepositoryMock.create();
-savedObjectsMock.get = jest.fn().mockResolvedValue({
+savedObjectsMock.get = vi.fn().mockResolvedValue({
   id: 'rule-123',
   type: RULE_SAVED_OBJECT_TYPE,
   references: [],
@@ -50,13 +56,13 @@ const context = {
   alertsService: {
     muteAllAlerts: muteAllAlertsMock,
   },
-  getAlertIndicesAlias: jest.fn().mockReturnValue(['.alerts-default']),
+  getAlertIndicesAlias: vi.fn().mockReturnValue(['.alerts-default']),
   spaceId: 'default',
 } as unknown as RulesClientContext;
 
 describe('muteAll', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should mute all alerts for a rule', async () => {
@@ -95,7 +101,7 @@ describe('muteAll', () => {
   });
 
   it('should not call alertsService when no alert indices exist', async () => {
-    (context.getAlertIndicesAlias as jest.Mock).mockReturnValue([]);
+    (context.getAlertIndicesAlias as Mock).mockReturnValue([]);
     const validParams = {
       id: 'rule-123',
     };
@@ -115,7 +121,7 @@ describe('muteAll', () => {
         super(isoDate);
       }
     };
-    jest.spyOn(context, 'getUserName').mockResolvedValue('test_user');
+    vi.spyOn(context, 'getUserName').mockResolvedValue('test_user');
     savedObjectsMock.get.mockResolvedValue({
       type: RULE_SAVED_OBJECT_TYPE,
       id: 'rule-123',
@@ -148,13 +154,13 @@ describe('muteAll', () => {
 
   it('throws error when alertsService fails but rule is still updated', async () => {
     const loggerMock = loggingSystemMock.create().get();
-    const muteAllAlertsErrorMock = jest
+    const muteAllAlertsErrorMock = vi
       .fn()
       .mockRejectedValueOnce(new Error('ES connection failed'));
     const contextWithLogger = {
       ...context,
       logger: loggerMock,
-      getAlertIndicesAlias: jest.fn().mockReturnValue(['.alerts-default']),
+      getAlertIndicesAlias: vi.fn().mockReturnValue(['.alerts-default']),
       alertsService: {
         muteAllAlerts: muteAllAlertsErrorMock,
       },

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import dedent from 'dedent';
 import { ChatFunctionClient } from '.';
 import type { Logger } from '@kbn/logging';
@@ -14,10 +17,10 @@ describe('chatFunctionClient', () => {
   describe('when executing a function with invalid arguments', () => {
     let client: ChatFunctionClient;
 
-    let respondFn: jest.Mock;
+    let respondFn: Mock;
 
     beforeEach(() => {
-      respondFn = jest.fn().mockImplementationOnce(async () => {
+      respondFn = vi.fn().mockImplementationOnce(async () => {
         return {};
       });
 
@@ -43,7 +46,7 @@ describe('chatFunctionClient', () => {
     it('throws an error', async () => {
       await expect(async () => {
         await client.executeFunction({
-          chat: jest.fn(),
+          chat: vi.fn(),
           name: 'myFunction',
           args: JSON.stringify({
             foo: 0,
@@ -62,7 +65,7 @@ describe('chatFunctionClient', () => {
 
   describe('when executing a function with valid arguments', () => {
     it('does not throw and calls the respond function', async () => {
-      const respondFn = jest.fn().mockResolvedValue({ content: 'ok' });
+      const respondFn = vi.fn().mockResolvedValue({ content: 'ok' });
       const client = new ChatFunctionClient([]);
 
       client.registerFunction(
@@ -80,7 +83,7 @@ describe('chatFunctionClient', () => {
       );
 
       const result = await client.executeFunction({
-        chat: jest.fn(),
+        chat: vi.fn(),
         name: 'myFunction',
         args: JSON.stringify({ foo: 'valid_string' }),
         messages: [],
@@ -97,7 +100,7 @@ describe('chatFunctionClient', () => {
 
   describe('when a required property is missing', () => {
     it('throws a validation error', async () => {
-      const respondFn = jest.fn().mockResolvedValue({});
+      const respondFn = vi.fn().mockResolvedValue({});
       const client = new ChatFunctionClient([]);
 
       client.registerFunction(
@@ -116,7 +119,7 @@ describe('chatFunctionClient', () => {
 
       await expect(async () => {
         await client.executeFunction({
-          chat: jest.fn(),
+          chat: vi.fn(),
           name: 'myFunction',
           args: JSON.stringify({}),
           messages: [],
@@ -133,7 +136,7 @@ describe('chatFunctionClient', () => {
 
   describe('when parameters schema has no explicit type field', () => {
     it('validates correctly via toZodSchema normalization', async () => {
-      const respondFn = jest.fn().mockResolvedValue({ content: 'ok' });
+      const respondFn = vi.fn().mockResolvedValue({ content: 'ok' });
       const client = new ChatFunctionClient([]);
 
       client.registerFunction(
@@ -152,7 +155,7 @@ describe('chatFunctionClient', () => {
 
       await expect(async () => {
         await client.executeFunction({
-          chat: jest.fn(),
+          chat: vi.fn(),
           name: 'noTypeFunction',
           args: JSON.stringify({ bar: 'not_a_number' }),
           messages: [],
@@ -164,7 +167,7 @@ describe('chatFunctionClient', () => {
       }).rejects.toThrow('Tool call arguments for noTypeFunction were invalid');
 
       const result = await client.executeFunction({
-        chat: jest.fn(),
+        chat: vi.fn(),
         name: 'noTypeFunction',
         args: JSON.stringify({ bar: 42 }),
         messages: [],
@@ -257,7 +260,7 @@ describe('chatFunctionClient', () => {
       );
 
       const result = await client.executeFunction({
-        chat: jest.fn(),
+        chat: vi.fn(),
         name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
         args: JSON.stringify({ data: ['my_dummy_data'] }),
         messages: [],
@@ -327,10 +330,10 @@ function getLoggerMock() {
   // const consoleOrPassThrough = console.log.bind(console);
   const consoleOrPassThrough = () => {};
   return {
-    log: jest.fn().mockImplementation(consoleOrPassThrough),
-    error: jest.fn().mockImplementation(consoleOrPassThrough),
-    debug: jest.fn().mockImplementation(consoleOrPassThrough),
-    trace: jest.fn().mockImplementation(consoleOrPassThrough),
-    isLevelEnabled: jest.fn().mockReturnValue(true),
+    log: vi.fn().mockImplementation(consoleOrPassThrough),
+    error: vi.fn().mockImplementation(consoleOrPassThrough),
+    debug: vi.fn().mockImplementation(consoleOrPassThrough),
+    trace: vi.fn().mockImplementation(consoleOrPassThrough),
+    isLevelEnabled: vi.fn().mockReturnValue(true),
   } as unknown as Logger;
 }

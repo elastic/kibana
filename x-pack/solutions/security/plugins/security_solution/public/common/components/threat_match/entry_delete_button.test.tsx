@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mount } from 'enzyme';
 import React from 'react';
 import type { ThreatMappingEntry } from '../../../../common/api/detection_engine/model/rule_schema';
@@ -27,7 +29,7 @@ describe('EntryDeleteButtonComponent', () => {
         itemIndex={0}
         isOnlyItem={false}
         entries={entries}
-        onDelete={jest.fn()}
+        onDelete={vi.fn()}
       />
     );
 
@@ -41,7 +43,7 @@ describe('EntryDeleteButtonComponent', () => {
         itemIndex={0}
         isOnlyItem={false}
         entries={entries}
-        onDelete={jest.fn()}
+        onDelete={vi.fn()}
       />
     );
 
@@ -56,7 +58,7 @@ describe('EntryDeleteButtonComponent', () => {
         itemIndex={1}
         isOnlyItem={false}
         entries={entries}
-        onDelete={jest.fn()}
+        onDelete={vi.fn()}
       />
     );
 
@@ -65,7 +67,7 @@ describe('EntryDeleteButtonComponent', () => {
   });
 
   test('it invokes "onDelete" when button is clicked', () => {
-    const onDelete = jest.fn();
+    const onDelete = vi.fn();
 
     const wrapper = mount(
       <EntryDeleteButtonComponent
@@ -97,7 +99,7 @@ describe('EntryDeleteButtonComponent', () => {
         itemIndex={0}
         isOnlyItem
         entries={emptyEntries}
-        onDelete={jest.fn()}
+        onDelete={vi.fn()}
       />
     );
 
@@ -113,7 +115,7 @@ describe('EntryDeleteButtonComponent', () => {
         itemIndex={0}
         isOnlyItem
         entries={entries}
-        onDelete={jest.fn()}
+        onDelete={vi.fn()}
       />
     );
 

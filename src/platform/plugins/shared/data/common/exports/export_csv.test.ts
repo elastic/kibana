@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { datatableToCSV } from './export_csv';
 
 function getDefaultOptions() {
-  const formatFactory = jest.fn();
+  const formatFactory = vi.fn();
   formatFactory.mockReturnValue({ convertToText: (v: unknown) => `Formatted_${v}` } as FieldFormat);
   return {
     csvSeparator: ',',

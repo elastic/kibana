@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AssistantNavLink } from './assistant_nav_link';
 import { useAssistantContext } from '.';
 
-const mockShowAssistantOverlay = jest.fn();
+const mockShowAssistantOverlay = vi.fn();
 
 const mockAssistantContext = {
   showAssistantOverlay: mockShowAssistantOverlay,
@@ -20,17 +23,17 @@ const mockAssistantContext = {
   isOverlayOpen: false,
 };
 
-jest.mock('.', () => {
+vi.mock('.', async () => {
   return {
-    ...jest.requireActual('.'),
-    useAssistantContext: jest.fn(),
+    ...(await vi.importActual('.')),
+    useAssistantContext: vi.fn(),
   };
 });
 
 describe('AssistantNavLink', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAssistantContext as Mock).mockReturnValue({
       ...mockAssistantContext,
     });
   });
@@ -46,7 +49,7 @@ describe('AssistantNavLink', () => {
   });
 
   it('should not render the header link if not authorized', () => {
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    (useAssistantContext as Mock).mockReturnValue({
       ...mockAssistantContext,
       assistantAvailability: {
         hasAssistantPrivilege: false,

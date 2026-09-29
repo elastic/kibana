@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import * as React from 'react';
 import type { AppMockRenderer } from '../lib/test_utils';
@@ -11,9 +13,9 @@ import { createAppMockRenderer } from '../lib/test_utils';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
 import { MaintenanceWindowStatus } from '../../common';
 
-jest.mock('../utils/kibana_react');
+vi.mock('../utils/kibana_react');
 
-const { useUiSetting } = jest.requireMock('../utils/kibana_react');
+const { useUiSetting } = (await vi.importMock('../utils/kibana_react'));
 
 useUiSetting.mockReturnValue('YYYY.MM.DD, h:mm:ss');
 
@@ -21,7 +23,7 @@ describe('rule_actions_popover', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
   });
 

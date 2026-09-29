@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getTopMetricsMetricAgg } from './top_metrics';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
@@ -71,7 +73,7 @@ describe('Top metrics metric', () => {
         },
       ],
       { typesRegistry },
-      jest.fn()
+      vi.fn()
     );
 
     // Grab the aggConfig off the vis (we don't actually use the vis for anything else)

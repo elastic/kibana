@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { of, isObservable, firstValueFrom, toArray } from 'rxjs';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -31,28 +34,26 @@ import { promptToMessageOptions } from '../../common/prompt/prompt_to_message_op
 import { createPromptApi } from './api';
 import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
-jest.mock('../chat_complete/callback_api');
-jest.mock('../../common/prompt/prompt_to_message_options', () => {
-  const actual = jest.requireActual<typeof import('../../common/prompt/prompt_to_message_options')>(
-    '../../common/prompt/prompt_to_message_options'
-  );
+vi.mock('../chat_complete/callback_api');
+vi.mock('../../common/prompt/prompt_to_message_options', async () => {
+  const actual = (await vi.importActual<typeof import('../../common/prompt/prompt_to_message_options')>('../../common/prompt/prompt_to_message_options'));
   return {
     __esModule: true,
     ...actual,
-    promptToMessageOptions: jest.fn(actual.promptToMessageOptions),
+    promptToMessageOptions: vi.fn(actual.promptToMessageOptions),
   };
 });
 const mockEsClient = {
   ml: {
-    inferTrainedModel: jest.fn(),
+    inferTrainedModel: vi.fn(),
   },
   inference: {
-    get: jest.fn().mockResolvedValue({ endpoints: [] }),
+    get: vi.fn().mockResolvedValue({ endpoints: [] }),
   },
 } as any;
 
-const mockCreateChatCompleteCallbackApi = jest.mocked(createChatCompleteCallbackApi);
-const mockPromptToMessageOptions = jest.mocked(promptToMessageOptions);
+const mockCreateChatCompleteCallbackApi = vi.mocked(createChatCompleteCallbackApi);
+const mockPromptToMessageOptions = vi.mocked(promptToMessageOptions);
 
 const mockPrompt = createPrompt({
   name: 'test-prompt',
@@ -69,7 +70,7 @@ describe('createPromptApi', () => {
   let logger: MockedLogger;
   let actions: ReturnType<typeof actionsMock.createStart>;
   let promptApi: PromptAPI;
-  let mockCallbackApi: jest.MockedFn<ChatCompleteApiWithCallback>;
+  let mockCallbackApi: MockedFunction<ChatCompleteApiWithCallback>;
   let regexWorker: ReturnType<typeof createRegexWorkerServiceMock>;
 
   const mockInput = { query: 'world' };
@@ -80,7 +81,7 @@ describe('createPromptApi', () => {
     actions = actionsMock.createStart();
     regexWorker = createRegexWorkerServiceMock();
 
-    mockCallbackApi = jest.fn();
+    mockCallbackApi = vi.fn();
     mockCreateChatCompleteCallbackApi.mockReturnValue(mockCallbackApi);
 
     const callbackApi = createChatCompleteCallbackApi({
@@ -99,7 +100,7 @@ describe('createPromptApi', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('initializes createChatCompleteCallbackApi with correct options', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockCreateAttackDiscoveryAlertsParams } from '../../../__mocks__/mock_create_attack_discovery_alerts_params';
 import { attackDiscoveryDataGeneratorExecutor } from './executor';
@@ -14,8 +16,8 @@ describe('attackDiscoveryDataGeneratorExecutor', () => {
 
   const createOptions = () => {
     const alertsClient = {
-      report: jest.fn(() => ({ uuid: 'alert-uuid-1', start: null })),
-      setAlertData: jest.fn(),
+      report: vi.fn(() => ({ uuid: 'alert-uuid-1', start: null })),
+      setAlertData: vi.fn(),
     };
 
     return {

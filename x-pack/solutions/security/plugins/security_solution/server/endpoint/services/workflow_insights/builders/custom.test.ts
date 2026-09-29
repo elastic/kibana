@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
 
@@ -21,11 +24,11 @@ import { buildCustomWorkflowInsights } from './custom';
 
 describe('buildCustomWorkflowInsights', () => {
   const mockEndpointAppContextService = createMockEndpointAppContext().service;
-  mockEndpointAppContextService.getEndpointMetadataService = jest.fn().mockReturnValue({
-    getMetadataForEndpoints: jest.fn(),
+  mockEndpointAppContextService.getEndpointMetadataService = vi.fn().mockReturnValue({
+    getMetadataForEndpoints: vi.fn(),
   });
   const endpointMetadataService =
-    mockEndpointAppContextService.getEndpointMetadataService() as jest.Mocked<EndpointMetadataService>;
+    mockEndpointAppContextService.getEndpointMetadataService() as Mocked<EndpointMetadataService>;
 
   const generateParams = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,7 +57,7 @@ describe('buildCustomWorkflowInsights', () => {
     },
     endpointMetadataService,
     esClient: {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         hits: {
           hits: [],
         },
@@ -104,7 +107,7 @@ describe('buildCustomWorkflowInsights', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should correctly build workflow insights with valid remediation', async () => {

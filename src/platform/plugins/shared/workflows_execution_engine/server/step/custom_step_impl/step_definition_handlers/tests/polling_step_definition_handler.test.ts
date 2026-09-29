@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   createHandlerTestMocks,
   DURABLE_STEP_STATE_KEY,
@@ -36,8 +39,8 @@ const buildPollHandler = (
 describe('PollPolicyStepHandler', () => {
   describe('start + poll lifecycle', () => {
     it('start + poll: { state } from start schedules first poll without invoking poll handler', async () => {
-      const start = jest.fn().mockResolvedValue({ state: { actionId: 'abc' } });
-      const pollHandler = jest.fn();
+      const start = vi.fn().mockResolvedValue({ state: { actionId: 'abc' } });
+      const pollHandler = vi.fn();
       const stepDefinition = {
         start,
         poll: pollHandler,
@@ -60,7 +63,7 @@ describe('PollPolicyStepHandler', () => {
     });
 
     it('poll-only: invokes poll handler on first execution and continues on { state }', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({ state: { progress: 1 } });
+      const pollHandler = vi.fn().mockResolvedValue({ state: { progress: 1 } });
       const stepDefinition = {
         poll: pollHandler,
         policy: { strategy: 'fixed' as const, intervalMs: 1_000 },
@@ -83,7 +86,7 @@ describe('PollPolicyStepHandler', () => {
     });
 
     it('start + poll resumed invocation: calls poll after start hand-off', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({ state: { ready: true } });
+      const pollHandler = vi.fn().mockResolvedValue({ state: { ready: true } });
       const startedAt = new Date(Date.now() - 5_000).toISOString();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
@@ -97,7 +100,7 @@ describe('PollPolicyStepHandler', () => {
       };
       const mocks = createHandlerTestMocks(initialState);
       const stepDefinition = {
-        start: jest.fn(),
+        start: vi.fn(),
         poll: pollHandler,
         policy: { strategy: 'fixed' as const, intervalMs: 5_000 },
         ceilings: { maxAttempts: 100, maxWaitMs: 60 * 60_000 },
@@ -115,7 +118,7 @@ describe('PollPolicyStepHandler', () => {
     });
 
     it('resumed invocation: hydrates author state, calls poll, schedules next on { state }', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({ state: { progress: 2 } });
+      const pollHandler = vi.fn().mockResolvedValue({ state: { progress: 2 } });
       const startedAt = new Date(Date.now() - 5_000).toISOString();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
@@ -147,7 +150,7 @@ describe('PollPolicyStepHandler', () => {
     });
 
     it('resumed invocation: { output } finalizes the step', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({ output: { rows: [1, 2, 3] } });
+      const pollHandler = vi.fn().mockResolvedValue({ output: { rows: [1, 2, 3] } });
       const startedAt = new Date(Date.now() - 10_000).toISOString();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
@@ -176,7 +179,7 @@ describe('PollPolicyStepHandler', () => {
     });
 
     it('keeps previous author state when poll handler returns undefined', async () => {
-      const pollHandler = jest.fn().mockResolvedValue(undefined);
+      const pollHandler = vi.fn().mockResolvedValue(undefined);
       const startedAt = new Date(Date.now() - 2_000).toISOString();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
@@ -199,7 +202,7 @@ describe('PollPolicyStepHandler', () => {
     });
 
     it('keeps previous author state when poll returns an empty continuation', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({});
+      const pollHandler = vi.fn().mockResolvedValue({});
       const startedAt = new Date(Date.now() - 2_000).toISOString();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
@@ -221,7 +224,7 @@ describe('PollPolicyStepHandler', () => {
     });
 
     it('fails the step when maxAttempts ceiling is reached', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({ state: {} });
+      const pollHandler = vi.fn().mockResolvedValue({ state: {} });
       const startedAt = new Date(Date.now() - 1_000).toISOString();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
@@ -250,7 +253,7 @@ describe('PollPolicyStepHandler', () => {
     });
 
     it('caps next wake-up when policy delay exceeds maxWaitMs', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({ state: {} });
+      const pollHandler = vi.fn().mockResolvedValue({ state: {} });
       const startedAt = new Date(Date.now() - 1_000).toISOString();
       const before = Date.now();
       const initialState = {
@@ -268,14 +271,14 @@ describe('PollPolicyStepHandler', () => {
 
       await handler.run({}, {}, pollNode.configuration);
 
-      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as jest.Mock).mock
+      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as Mock).mock
         .calls[0][0] as Date;
       expect(resumeAt.getTime()).toBeGreaterThanOrEqual(before + 3_000);
       expect(resumeAt.getTime()).toBeLessThanOrEqual(Date.now() + 3_000 + 50);
     });
 
     it('does not cap when policy delay is within maxWaitMs', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({ state: {} });
+      const pollHandler = vi.fn().mockResolvedValue({ state: {} });
       const startedAt = new Date(Date.now() - 1_000).toISOString();
       const before = Date.now();
       const initialState = {
@@ -293,14 +296,14 @@ describe('PollPolicyStepHandler', () => {
 
       await handler.run({}, {}, pollNode.configuration);
 
-      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as jest.Mock).mock
+      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as Mock).mock
         .calls[0][0] as Date;
       expect(resumeAt.getTime()).toBeGreaterThanOrEqual(before + 1_000);
       expect(resumeAt.getTime()).toBeLessThanOrEqual(Date.now() + 1_000 + 50);
     });
 
     it('caps nextPollDelayMs override when it exceeds maxWaitMs', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({ state: {}, nextPollDelayMs: 50_000 });
+      const pollHandler = vi.fn().mockResolvedValue({ state: {}, nextPollDelayMs: 50_000 });
       const startedAt = new Date(Date.now() - 1_000).toISOString();
       const before = Date.now();
       const initialState = {
@@ -318,14 +321,14 @@ describe('PollPolicyStepHandler', () => {
 
       await handler.run({}, {}, pollNode.configuration);
 
-      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as jest.Mock).mock
+      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as Mock).mock
         .calls[0][0] as Date;
       expect(resumeAt.getTime()).toBeGreaterThanOrEqual(before + 2_000);
       expect(resumeAt.getTime()).toBeLessThanOrEqual(Date.now() + 2_000 + 50);
     });
 
     it('uses nextPollDelayMs override for the next wake-up when provided', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({ state: {}, nextPollDelayMs: 123 });
+      const pollHandler = vi.fn().mockResolvedValue({ state: {}, nextPollDelayMs: 123 });
       const startedAt = new Date(Date.now() - 1_000).toISOString();
       const before = Date.now();
       const initialState = {
@@ -343,7 +346,7 @@ describe('PollPolicyStepHandler', () => {
 
       await handler.run({}, {}, pollNode.configuration);
 
-      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as jest.Mock).mock
+      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as Mock).mock
         .calls[0][0] as Date;
       expect(resumeAt.getTime()).toBeGreaterThanOrEqual(before + 123);
       expect(resumeAt.getTime()).toBeLessThanOrEqual(Date.now() + 123 + 50);
@@ -352,7 +355,7 @@ describe('PollPolicyStepHandler', () => {
 
   describe('task scheduling', () => {
     const stepDefinition = {
-      poll: jest.fn().mockResolvedValue({ state: {} }),
+      poll: vi.fn().mockResolvedValue({ state: {} }),
       policy: { strategy: 'fixed' as const, intervalMs: 1_000 },
       ceilings: { maxAttempts: 10, maxWaitMs: 60_000 },
     };
@@ -396,8 +399,8 @@ describe('PollPolicyStepHandler', () => {
 
   describe('onCancel', () => {
     it('invokes step definition onCancel with poll context when defined', async () => {
-      const onCancel = jest.fn();
-      const pollHandler = jest.fn().mockResolvedValue({ output: { done: true } });
+      const onCancel = vi.fn();
+      const pollHandler = vi.fn().mockResolvedValue({ output: { done: true } });
       const startedAt = new Date().toISOString();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {

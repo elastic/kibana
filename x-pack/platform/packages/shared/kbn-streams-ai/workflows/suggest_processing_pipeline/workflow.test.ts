@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { MessageRole } from '@kbn/inference-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -19,13 +22,16 @@ import {
   suggestProcessingPipeline,
 } from '.';
 
-jest.mock('@kbn/inference-prompt-utils', () => ({
-  executeAsReasoningAgent: jest.fn(),
-}));
+vi.mock('@kbn/inference-prompt-utils', () => {
+      const mocked = {
+      executeAsReasoningAgent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 
-const mockExecuteAsReasoningAgent = executeAsReasoningAgent as jest.MockedFunction<
+const mockExecuteAsReasoningAgent = executeAsReasoningAgent as MockedFunction<
   typeof executeAsReasoningAgent
 >;
 
@@ -89,11 +95,11 @@ async function invokeSimulateCallback(toolCallbacks: Record<string, Function>, p
 
 describe('suggestProcessingPipeline workflow', () => {
   const mockEsClient = {
-    fieldCaps: jest.fn().mockResolvedValue({ fields: {} }),
+    fieldCaps: vi.fn().mockResolvedValue({ fields: {} }),
   } as unknown as ElasticsearchClient;
 
   const mockFieldsMetadataClient = {
-    find: jest.fn().mockResolvedValue({
+    find: vi.fn().mockResolvedValue({
       getFields: () => ({}),
     }),
   } as unknown as IFieldsMetadataClient;
@@ -101,11 +107,11 @@ describe('suggestProcessingPipeline workflow', () => {
   const mockInferenceClient = {} as BoundInferenceClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not call simulatePipeline before the agent runs (overview JSON from caller)', async () => {
-    const simulatePipeline = jest
+    const simulatePipeline = vi
       .fn()
       .mockImplementation(() => Promise.resolve(createSuccessfulSimulation()));
 
@@ -142,7 +148,7 @@ describe('suggestProcessingPipeline workflow', () => {
   });
 
   it('passes upstream extraction context to the reasoning agent when provided', async () => {
-    const simulatePipeline = jest
+    const simulatePipeline = vi
       .fn()
       .mockImplementation(() => Promise.resolve(createSuccessfulSimulation()));
 
@@ -186,7 +192,7 @@ describe('suggestProcessingPipeline workflow', () => {
   });
 
   it('returns only agent-committed steps (orchestrator merges seed parsing separately)', async () => {
-    const simulatePipeline = jest
+    const simulatePipeline = vi
       .fn()
       .mockImplementation(() => Promise.resolve(createSuccessfulSimulation()));
 
@@ -233,7 +239,7 @@ describe('suggestProcessingPipeline workflow', () => {
   });
 
   it('uses full processor schema when agentPipelineSchema is the default', async () => {
-    const simulatePipeline = jest
+    const simulatePipeline = vi
       .fn()
       .mockImplementation(() => Promise.resolve(createSuccessfulSimulation()));
 
@@ -273,7 +279,7 @@ describe('suggestProcessingPipeline workflow', () => {
   it('simulate_pipeline callback returns processors and temporary_fields in response', async () => {
     let capturedToolResponse!: SimulationFeedback;
 
-    const simulatePipeline = jest.fn().mockImplementation(() =>
+    const simulatePipeline = vi.fn().mockImplementation(() =>
       Promise.resolve(
         createSuccessfulSimulation({
           documents: [
@@ -337,7 +343,7 @@ describe('suggestProcessingPipeline workflow', () => {
   it('no longer rejects pipelines based on aggregate 80% parse rate gate', async () => {
     let capturedToolResponse!: SimulationFeedback;
 
-    const simulatePipeline = jest.fn().mockImplementation(() =>
+    const simulatePipeline = vi.fn().mockImplementation(() =>
       Promise.resolve(
         createSuccessfulSimulation({
           documents_metrics: {
@@ -418,7 +424,7 @@ describe('suggestProcessingPipeline workflow', () => {
   it('simulate_pipeline callback returns formatted Zod errors for invalid pipeline', async () => {
     let capturedToolResponse!: SimulationFeedback;
 
-    const simulatePipeline = jest.fn();
+    const simulatePipeline = vi.fn();
 
     mockExecuteAsReasoningAgent.mockImplementation(async ({ toolCallbacks }) => {
       capturedToolResponse = await invokeSimulateCallback(toolCallbacks, {

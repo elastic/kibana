@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
@@ -29,8 +32,8 @@ import {
 } from './helpers';
 import { postDefendInsightsRoute } from './post_defend_insights';
 
-jest.mock('@kbn/security-ai-prompts');
-jest.mock('./helpers');
+vi.mock('@kbn/security-ai-prompts');
+vi.mock('./helpers');
 
 describe('postDefendInsightsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -53,9 +56,9 @@ describe('postDefendInsightsRoute', () => {
 
   function getDefaultDataClient(): DefendInsightsDataClient {
     return {
-      findDefendInsightsByParams: jest.fn().mockResolvedValueOnce(mockCurrentInsight),
-      updateDefendInsight: jest.fn(),
-      createDefendInsight: jest.fn(),
+      findDefendInsightsByParams: vi.fn().mockResolvedValueOnce(mockCurrentInsight),
+      updateDefendInsight: vi.fn(),
+      createDefendInsight: vi.fn(),
     } as unknown as DefendInsightsDataClient;
   }
 
@@ -98,11 +101,11 @@ describe('postDefendInsightsRoute', () => {
     mockDataClient = getDefaultDataClient();
     mockApiConfig = getDefaultApiConfig();
     mockRequestBody = getDefaultRequestBody();
-    (createDefendInsight as jest.Mock).mockResolvedValue({
+    (createDefendInsight as Mock).mockResolvedValue({
       currentInsight: mockCurrentInsight,
       defendInsightId: mockCurrentInsight.id,
     });
-    (invokeDefendInsightsGraph as jest.Mock).mockResolvedValue({
+    (invokeDefendInsightsGraph as Mock).mockResolvedValue({
       anonymizedEvents: [],
       insights: [mockCurrentInsight],
     });
@@ -115,14 +118,14 @@ describe('postDefendInsightsRoute', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Insufficient license', async () => {
     const insufficientLicense = licensingMock.createLicense({ license: { type: 'basic' } });
     const tools = requestContextMock.createTools();
     tools.context.licensing.license = insufficientLicense;
-    jest.spyOn(insufficientLicense, 'hasAtLeast').mockReturnValue(false);
+    vi.spyOn(insufficientLicense, 'hasAtLeast').mockReturnValue(false);
 
     const response = await server.inject(
       postDefendInsightsRequest(mockRequestBody),
@@ -173,7 +176,7 @@ describe('postDefendInsightsRoute', () => {
   });
 
   it('should handle createDefendInsight error', async () => {
-    (createDefendInsight as jest.Mock).mockRejectedValueOnce(new Error('Oh no!'));
+    (createDefendInsight as Mock).mockRejectedValueOnce(new Error('Oh no!'));
     const response = await server.inject(
       postDefendInsightsRequest(mockRequestBody),
       requestContextMock.convertContext(context)
@@ -190,7 +193,7 @@ describe('postDefendInsightsRoute', () => {
 
   describe('runExternalCallbacks', () => {
     it('should handle error thrown by runExternalCallbacks', async () => {
-      const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+      const runExternalCallbacks = (await vi.importMock('./helpers')).runExternalCallbacks as Mock;
       runExternalCallbacks.mockRejectedValueOnce(new Error('External callback failed'));
 
       const response = await server.inject(
@@ -213,7 +216,7 @@ describe('postDefendInsightsRoute', () => {
 
   describe('policy_response_failure feature flags', () => {
     it('should 500 if feature flag is disabled', async () => {
-      (isDefendInsightsPolicyResponseFailureEnabled as jest.Mock).mockReturnValueOnce(false);
+      (isDefendInsightsPolicyResponseFailureEnabled as Mock).mockReturnValueOnce(false);
       const response = await server.inject(
         postDefendInsightsRequest(
           getDefaultRequestBody({ insightType: DefendInsightType.enum.policy_response_failure })
@@ -231,7 +234,7 @@ describe('postDefendInsightsRoute', () => {
     });
 
     it('should 200 if feature flag is enabled', async () => {
-      (isDefendInsightsPolicyResponseFailureEnabled as jest.Mock).mockReturnValueOnce(true);
+      (isDefendInsightsPolicyResponseFailureEnabled as Mock).mockReturnValueOnce(true);
       const response = await server.inject(
         postDefendInsightsRequest(
           getDefaultRequestBody({ insightType: DefendInsightType.enum.policy_response_failure })

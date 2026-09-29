@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CoreSetup } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
@@ -56,10 +59,10 @@ const createSetupDependencies = () => {
   const managementSetup = managementPluginMock.createSetupContract();
   const registeredApp = {
     enabled: true,
-    disable: jest.fn(),
-    enable: jest.fn(),
+    disable: vi.fn(),
+    enable: vi.fn(),
   } as unknown as ManagementApp;
-  (managementSetup.sections.section.data.registerApp as jest.Mock).mockReturnValue(registeredApp);
+  (managementSetup.sections.section.data.registerApp as Mock).mockReturnValue(registeredApp);
   return { managementSetup, registeredApp };
 };
 
@@ -68,7 +71,7 @@ const createStartDependencies = (
 ): SearchConnectorsPluginStartDependencies => {
   const home = {
     featureCatalogue: {
-      getSolutions: jest.fn(() => solutions),
+      getSolutions: vi.fn(() => solutions),
     },
   };
   return { home } as unknown as SearchConnectorsPluginStartDependencies;
@@ -95,7 +98,7 @@ describe('SearchConnectorsPlugin (public)', () => {
       const plugin = createPlugin({ ui: { enabled: true } });
       const coreSetup = coreMock.createSetup() as unknown as PluginCoreSetup;
       const { managementSetup } = createSetupDependencies();
-      const getStartServices = jest.spyOn(coreSetup, 'getStartServices');
+      const getStartServices = vi.spyOn(coreSetup, 'getStartServices');
 
       plugin.setup(coreSetup, {
         management: managementSetup,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -12,25 +14,28 @@ import React from 'react';
 import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
 import { AutomationRow } from './automation_row';
 
-jest.mock('./workflow_yaml_preview_flyout', () => ({
-  WorkflowYamlPreviewFlyout: ({
-    workflowId,
-    workflowName,
-    onClose,
-  }: {
-    workflowId: string;
-    workflowName: string;
-    onClose: () => void;
-  }) => (
-    <div data-test-subj="contextWorkflowYamlPreviewFlyout">
-      <span>{workflowName}</span>
-      <span>{workflowId}</span>
-      <button type="button" onClick={onClose}>
-        Close preview
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./workflow_yaml_preview_flyout', () => {
+      const mocked = {
+      WorkflowYamlPreviewFlyout: ({
+        workflowId,
+        workflowName,
+        onClose,
+      }: {
+        workflowId: string;
+        workflowName: string;
+        onClose: () => void;
+      }) => (
+        <div data-test-subj="contextWorkflowYamlPreviewFlyout">
+          <span>{workflowName}</span>
+          <span>{workflowId}</span>
+          <button type="button" onClick={onClose}>
+            Close preview
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
@@ -53,7 +58,7 @@ const createDefaultProps = (
   editHref: '/app/workflows/workflow-1',
   isEditing: true,
   isRemoveDisabled: false,
-  onRemove: jest.fn(),
+  onRemove: vi.fn(),
   ...overrides,
 });
 

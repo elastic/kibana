@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { SignalArtifactsSection } from './signal_artifacts_section';
 
-jest.mock('./dashboard_artifacts_subsection', () => ({
-  DashboardArtifactsSubsection: () => (
-    <div data-test-subj="dashboardArtifactsSubsectionMock">dashboards</div>
-  ),
-}));
+vi.mock('./dashboard_artifacts_subsection', () => {
+      const mocked = {
+      DashboardArtifactsSubsection: () => (
+        <div data-test-subj="dashboardArtifactsSubsectionMock">dashboards</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const rule: RuleApiResponse = {
   id: 'rule-1',

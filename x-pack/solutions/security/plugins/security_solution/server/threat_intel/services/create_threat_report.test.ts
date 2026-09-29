@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createThreatReport } from './create_threat_report';
 
@@ -138,7 +140,7 @@ describe('createThreatReport', () => {
     const esMethodsCalled = Object.entries(esClient)
       .filter(
         ([, value]) =>
-          typeof value === 'function' && (value as unknown as jest.Mock).mock?.calls.length
+          typeof value === 'function' && (value as unknown as Mock).mock?.calls.length
       )
       .map(([name]) => name);
     expect(esMethodsCalled.sort()).toEqual(['create', 'search']);

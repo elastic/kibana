@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { MonitoringEntitySourceDataClient } from './monitoring_entity_source_data_client';
 import {
   savedObjectsClientMock,
@@ -21,7 +23,7 @@ describe('MonitoringEntitySourceDataClient', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const loggerMock = loggingSystemMock.createLogger();
-  loggerMock.debug = jest.fn();
+  loggerMock.debug = vi.fn();
 
   const defaultOpts = {
     logger: loggerMock,
@@ -48,7 +50,7 @@ describe('MonitoringEntitySourceDataClient', () => {
 
   let dataClient: MonitoringEntitySourceDataClient;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     dataClient = new MonitoringEntitySourceDataClient(defaultOpts);
   });
 

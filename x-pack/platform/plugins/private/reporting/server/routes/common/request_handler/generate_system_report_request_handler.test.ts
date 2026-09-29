@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-jest.mock('uuid', () => ({ v4: () => 'mock-system-report-id' }));
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
+vi.mock('uuid', () => {
+      const mocked = { v4: () => 'mock-system-report-id' };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   kibanaResponseFactory,
@@ -30,11 +36,14 @@ import {
   type InternalReportParams,
 } from './generate_system_report_request_handler';
 
-jest.mock('@kbn/reporting-server/crypto', () => ({
-  cryptoFactory: () => ({
-    encrypt: () => `hello mock system cypher text`,
-  }),
-}));
+vi.mock('@kbn/reporting-server/crypto', () => {
+      const mocked = {
+      cryptoFactory: () => ({
+        encrypt: () => `hello mock system cypher text`,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getMockContext = () =>
   ({
@@ -81,20 +90,20 @@ describe('GenerateSystemReportRequestHandler', () => {
     reportingCore = await createMockReportingCore(createMockConfigSchema({}));
     reportingCore.getStore = () =>
       Promise.resolve({
-        addReport: jest
+        addReport: vi
           .fn()
           .mockImplementation(
             (report) => new Report({ ...report, _index: '.reporting-system-index-234' })
           ),
       } as unknown as ReportingStore);
 
-    reportingCore.scheduleTaskWithInternalES = jest.fn().mockResolvedValue({ id: 'mock-task-id' });
+    reportingCore.scheduleTaskWithInternalES = vi.fn().mockResolvedValue({ id: 'mock-task-id' });
 
     mockRequest = httpServerMock.createKibanaRequest();
     mockResponseFactory = kibanaResponseFactory;
     mockContext = getMockContext();
 
-    mockHandleResponse = jest.fn().mockResolvedValue({ body: 'mock response' });
+    mockHandleResponse = vi.fn().mockResolvedValue({ body: 'mock response' });
 
     requestHandler = new GenerateSystemReportRequestHandler(
       {
@@ -113,7 +122,7 @@ describe('GenerateSystemReportRequestHandler', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Enqueue Job', () => {
@@ -216,7 +225,7 @@ describe('GenerateSystemReportRequestHandler', () => {
     });
 
     test('disallows unsupporting license', async () => {
-      (reportingCore.getLicenseInfo as jest.Mock) = jest.fn(() => ({
+      (reportingCore.getLicenseInfo as Mock) = vi.fn(() => ({
         csv_searchsource: {
           enableLinks: false,
           message: `seeing this means the license isn't supported`,
@@ -258,7 +267,7 @@ describe('GenerateSystemReportRequestHandler', () => {
 
     test('handles errors during job enqueuing', async () => {
       const mockError = new Error('System report enqueue error');
-      jest.spyOn(requestHandler, 'enqueueJob').mockRejectedValueOnce(mockError);
+      vi.spyOn(requestHandler, 'enqueueJob').mockRejectedValueOnce(mockError);
 
       await requestHandler.handleRequest(mockRequestParams);
 
@@ -271,7 +280,7 @@ describe('handleGenerateSystemReportRequest', () => {
   let reportingCore: ReportingCore;
   let mockContext: ReportingRequestHandlerContext;
   let mockRequest: KibanaRequest;
-  let mockResponseFactory: jest.Mocked<KibanaResponseFactory>;
+  let mockResponseFactory: Mocked<KibanaResponseFactory>;
   let mockHandleResponse: HandleResponseFunc;
   let requestParams: GenerateSystemReportRequestParams<any, any, any>;
 
@@ -281,7 +290,7 @@ describe('handleGenerateSystemReportRequest', () => {
       {
         securityService: {
           authc: {
-            getCurrentUser: jest.fn().mockReturnValue(mockUser),
+            getCurrentUser: vi.fn().mockReturnValue(mockUser),
           },
         },
       },
@@ -295,20 +304,20 @@ describe('handleGenerateSystemReportRequest', () => {
     );
     reportingCore.getStore = () =>
       Promise.resolve({
-        addReport: jest
+        addReport: vi
           .fn()
           .mockImplementation(
             (report) => new Report({ ...report, _index: '.reporting-system-index-234' })
           ),
       } as unknown as ReportingStore);
 
-    reportingCore.scheduleTaskWithInternalES = jest.fn().mockResolvedValue({ id: 'mock-task-id' });
+    reportingCore.scheduleTaskWithInternalES = vi.fn().mockResolvedValue({ id: 'mock-task-id' });
 
     mockRequest = httpServerMock.createKibanaRequest();
     mockResponseFactory = httpServerMock.createResponseFactory();
 
     mockContext = getMockContext();
-    mockHandleResponse = jest.fn().mockResolvedValue({ body: 'mock response' });
+    mockHandleResponse = vi.fn().mockResolvedValue({ body: 'mock response' });
 
     requestParams = {
       reportParams: mockReportParams,
@@ -321,10 +330,10 @@ describe('handleGenerateSystemReportRequest', () => {
   test('returns unauthorized when user is not authenticated', async () => {
     const mockSecurityService = {
       authc: {
-        getCurrentUser: jest.fn().mockReturnValue(null),
+        getCurrentUser: vi.fn().mockReturnValue(null),
       },
     };
-    reportingCore.getPluginStartDeps = jest.fn().mockResolvedValue({
+    reportingCore.getPluginStartDeps = vi.fn().mockResolvedValue({
       securityService: mockSecurityService,
     });
 
@@ -361,7 +370,7 @@ describe('handleGenerateSystemReportRequest', () => {
 
   test('handles errors during system report generation', async () => {
     const mockError = new Error('System generation error');
-    reportingCore.scheduleTaskWithInternalES = jest.fn().mockRejectedValueOnce(mockError);
+    reportingCore.scheduleTaskWithInternalES = vi.fn().mockRejectedValueOnce(mockError);
 
     await handleGenerateSystemReportRequest(
       reportingCore,

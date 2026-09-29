@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
@@ -100,7 +103,7 @@ const alertingEventLogger = alertingEventLoggerMock.create();
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
 
-const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
+const ruleType: Mocked<UntypedNormalizedRuleType> = {
   id: 'test.rule-type',
   name: 'My test rule',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -108,7 +111,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   minimumLicenseRequired: 'basic',
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
-  executor: jest.fn(),
+  executor: vi.fn(),
   category: 'test',
   producer: 'alerts',
   solution: 'stack',
@@ -128,20 +131,20 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
 };
 
 const mockLegacyAlertsClient = legacyAlertsClientMock.create();
-const mockReplaceState = jest.fn();
-const mockGetUuid = jest.fn().mockReturnValue('uuidabc');
-const mockGetStart = jest.fn().mockReturnValue(date);
-const mockScheduleActions = jest.fn().mockImplementation(() => ({
+const mockReplaceState = vi.fn();
+const mockGetUuid = vi.fn().mockReturnValue('uuidabc');
+const mockGetStart = vi.fn().mockReturnValue(date);
+const mockScheduleActions = vi.fn().mockImplementation(() => ({
   replaceState: mockReplaceState,
   getUuid: mockGetUuid,
   getStart: mockGetStart,
 }));
-const mockCreate = jest.fn().mockImplementation(() => ({
+const mockCreate = vi.fn().mockImplementation(() => ({
   scheduleActions: mockScheduleActions,
   getUuid: mockGetUuid,
   getStart: mockGetStart,
 }));
-const mockSetContext = jest.fn();
+const mockSetContext = vi.fn();
 
 const trackedAlert1Raw = {
   state: { foo: true, start: '2023-03-28T12:27:28.159Z', duration: '0' },
@@ -335,7 +338,7 @@ const fakeRequest = {
       url: '/',
     },
   },
-  getSavedObjectsClient: jest.fn(),
+  getSavedObjectsClient: vi.fn(),
 } as unknown as KibanaRequest;
 
 const ruleInfo = `for test.rule-type:1 'rule-name'`;
@@ -353,12 +356,12 @@ describe('Alerts Client', () => {
   let logAlertsOpts: LogAlertsOpts;
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date(date));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(date));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   for (const useDataStreamForAlerts of [false, true]) {
@@ -366,8 +369,8 @@ describe('Alerts Client', () => {
 
     describe(`using ${label} for alert indices`, () => {
       beforeEach(() => {
-        jest.clearAllMocks();
-        jest.restoreAllMocks();
+        vi.clearAllMocks();
+        vi.restoreAllMocks();
         logger = loggingSystemMock.createLogger();
         alertsClientParams = {
           alertingEventLogger,
@@ -441,7 +444,7 @@ describe('Alerts Client', () => {
 
       describe('initializeExecution()', () => {
         test('should initialize LegacyAlertsClient', async () => {
-          const spy = jest
+          const spy = vi
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
 
@@ -456,7 +459,7 @@ describe('Alerts Client', () => {
         });
 
         test('should skip track alerts ruleType shouldWrite is false', async () => {
-          const spy = jest
+          const spy = vi
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
 
@@ -495,7 +498,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
-          const spy = jest
+          const spy = vi
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
 
@@ -553,7 +556,7 @@ describe('Alerts Client', () => {
                 ],
               },
             });
-          const spy = jest
+          const spy = vi
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
 
@@ -604,7 +607,7 @@ describe('Alerts Client', () => {
             throw new Error('search failed!');
           });
 
-          const spy = jest
+          const spy = vi
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
 
@@ -630,7 +633,7 @@ describe('Alerts Client', () => {
         });
 
         test('should call retryTransientEsErrors when querying for tracked alerts', async () => {
-          const retrySpy = jest
+          const retrySpy = vi
             .spyOn(RetryTransientEsErrorsModule, 'retryTransientEsErrors')
             .mockImplementationOnce((esCall) => esCall());
 
@@ -974,7 +977,7 @@ describe('Alerts Client', () => {
 
           const activeAlertObj = new Alert<{}, {}, 'default'>('1', activeAlert);
           activeAlertObj.scheduleActions('default', {});
-          const spy = jest
+          const spy = vi
             .spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts')
             .mockReturnValueOnce({
               '1': activeAlertObj, // return only the first (tracked) alert
@@ -2658,7 +2661,7 @@ describe('Alerts Client', () => {
           const alert2 = new Alert('2', { meta: { maintenanceWindowIds: ['mw1', 'mw2'] } });
           const alert3 = new Alert('3', { meta: { maintenanceWindowIds: ['mw2', 'mw3'] } });
 
-          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+          vi.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
             '1': alert1,
             '2': alert2,
             '3': alert3,
@@ -2702,7 +2705,7 @@ describe('Alerts Client', () => {
 
           const alert1 = new Alert('1', { meta: { maintenanceWindowIds: ['mw1'] } });
 
-          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+          vi.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
             '1': alert1,
           });
 
@@ -3267,7 +3270,7 @@ describe('Alerts Client', () => {
           const alert1 = new Alert('1');
           const alert2 = new Alert('2');
 
-          const loggerSpy = jest
+          const loggerSpy = vi
             .spyOn(alertingEventLogger, 'setMaintenanceWindowIds')
             .mockImplementation();
 
@@ -3276,12 +3279,12 @@ describe('Alerts Client', () => {
             maintenanceWindowsWithoutScopedQueryIds: [],
           });
 
-          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+          vi.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
             '1': alert1,
             '2': alert2,
           });
 
-          jest
+          vi
             // @ts-ignore
             .spyOn(AlertsClient.prototype, 'getMaintenanceWindowScopedQueryAlerts')
             // @ts-ignore
@@ -3306,8 +3309,8 @@ describe('Alerts Client', () => {
         });
 
         test('should skip loading maintenance windows when there are no alerts', async () => {
-          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({});
-          const msearchSpy = jest.spyOn(AlertsClient.prototype, 'msearch');
+          vi.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({});
+          const msearchSpy = vi.spyOn(AlertsClient.prototype, 'msearch');
 
           const alertsClient = new AlertsClient(alertsClientParams);
           const result = await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
@@ -3333,14 +3336,14 @@ describe('Alerts Client', () => {
           const alert3 = new Alert('3');
           const alert4 = new Alert('4');
 
-          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+          vi.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
             '1': alert1,
             '2': alert2,
             '3': alert3,
             '4': alert4,
           });
 
-          jest
+          vi
             // @ts-ignore
             .spyOn(AlertsClient.prototype, 'getMaintenanceWindowScopedQueryAlerts')
             // @ts-ignore
@@ -3356,7 +3359,7 @@ describe('Alerts Client', () => {
         });
 
         test('should return alerts based on alert id with MW ids when provided with maintenance windows', async () => {
-          const loggerSpy = jest
+          const loggerSpy = vi
             .spyOn(alertingEventLogger, 'setMaintenanceWindowIds')
             .mockImplementation();
 
@@ -3374,14 +3377,14 @@ describe('Alerts Client', () => {
           const alert3 = new Alert('3');
           const alert4 = new Alert('4');
 
-          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+          vi.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
             '1': alert1,
             '2': alert2,
             '3': alert3,
             '4': alert4,
           });
 
-          jest
+          vi
             // @ts-ignore
             .spyOn(AlertsClient.prototype, 'getMaintenanceWindowScopedQueryAlerts')
             // @ts-ignore
@@ -3511,21 +3514,21 @@ describe('Alerts Client', () => {
 
       describe('report()', () => {
         test('should create legacy alert with id, action group', async () => {
-          const mockGetUuidCurrent = jest
+          const mockGetUuidCurrent = vi
             .fn()
             .mockReturnValueOnce('uuid1')
             .mockReturnValueOnce('uuid2');
-          const mockGetStartCurrent = jest.fn().mockReturnValue(null);
-          const mockScheduleActionsCurrent = jest.fn().mockImplementation(() => ({
+          const mockGetStartCurrent = vi.fn().mockReturnValue(null);
+          const mockScheduleActionsCurrent = vi.fn().mockImplementation(() => ({
             replaceState: mockReplaceState,
             getUuid: mockGetUuidCurrent,
             getStart: mockGetStartCurrent,
           }));
-          const mockCreateCurrent = jest.fn().mockImplementation(() => ({
+          const mockCreateCurrent = vi.fn().mockImplementation(() => ({
             scheduleActions: mockScheduleActionsCurrent,
           }));
           mockLegacyAlertsClient.factory.mockImplementation(() => ({ create: mockCreateCurrent }));
-          const spy = jest
+          const spy = vi
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
@@ -3565,21 +3568,21 @@ describe('Alerts Client', () => {
         });
 
         test('should use startedAt time if provided', async () => {
-          const mockGetUuidCurrent = jest
+          const mockGetUuidCurrent = vi
             .fn()
             .mockReturnValueOnce('uuid1')
             .mockReturnValueOnce('uuid2');
-          const mockGetStartCurrent = jest.fn().mockReturnValue(null);
-          const mockScheduleActionsCurrent = jest.fn().mockImplementation(() => ({
+          const mockGetStartCurrent = vi.fn().mockReturnValue(null);
+          const mockScheduleActionsCurrent = vi.fn().mockImplementation(() => ({
             replaceState: mockReplaceState,
             getUuid: mockGetUuidCurrent,
             getStart: mockGetStartCurrent,
           }));
-          const mockCreateCurrent = jest.fn().mockImplementation(() => ({
+          const mockCreateCurrent = vi.fn().mockImplementation(() => ({
             scheduleActions: mockScheduleActionsCurrent,
           }));
           mockLegacyAlertsClient.factory.mockImplementation(() => ({ create: mockCreateCurrent }));
-          const spy = jest
+          const spy = vi
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
@@ -3623,7 +3626,7 @@ describe('Alerts Client', () => {
 
         test('should set context if defined', async () => {
           mockLegacyAlertsClient.factory.mockImplementation(() => ({ create: mockCreate }));
-          const spy = jest
+          const spy = vi
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
           const alertsClient = new AlertsClient<{}, {}, { foo?: string }, 'default', 'recovered'>(
@@ -3654,7 +3657,7 @@ describe('Alerts Client', () => {
 
         test('should set state if defined', async () => {
           mockLegacyAlertsClient.factory.mockImplementation(() => ({ create: mockCreate }));
-          const spy = jest
+          const spy = vi
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
           const alertsClient = new AlertsClient<{}, { count: number }, {}, 'default', 'recovered'>(
@@ -3913,14 +3916,14 @@ describe('Alerts Client', () => {
       describe('setAlertData()', () => {
         test('should call setContext on legacy alert', async () => {
           mockLegacyAlertsClient.getAlert.mockReturnValueOnce({
-            getId: jest.fn().mockReturnValue('1'),
+            getId: vi.fn().mockReturnValue('1'),
             setContext: mockSetContext,
           });
           mockLegacyAlertsClient.getAlert.mockReturnValueOnce({
-            getId: jest.fn().mockReturnValue('1'),
+            getId: vi.fn().mockReturnValue('1'),
             setContext: mockSetContext,
           });
-          const spy = jest
+          const spy = vi
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
@@ -3947,7 +3950,7 @@ describe('Alerts Client', () => {
 
         test('should throw error if called on unknown alert id', async () => {
           mockLegacyAlertsClient.getAlert.mockReturnValueOnce(null);
-          const spy = jest
+          const spy = vi
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
           const alertsClient = new AlertsClient<{}, {}, { foo?: string }, 'default', 'recovered'>(

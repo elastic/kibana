@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AlertingServerSetup } from './plugin';
 import { AlertingPlugin } from './plugin';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -33,9 +35,12 @@ import { AlertsService } from './alerts_service/alerts_service';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 
 const mockAlertService = alertsServiceMock.create();
-jest.mock('./alerts_service/alerts_service', () => ({
-  AlertsService: jest.fn().mockImplementation(() => mockAlertService),
-}));
+vi.mock('./alerts_service/alerts_service', () => {
+      const mocked = {
+      AlertsService: vi.fn().mockImplementation(() => mockAlertService),
+    };
+      return { ...mocked, default: mocked };
+    });
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { generateAlertingConfig } from './test_utils';
@@ -84,7 +89,7 @@ describe('Alerting Plugin', () => {
 
         let plugin: AlertingPlugin;
 
-        beforeEach(() => jest.clearAllMocks());
+        beforeEach(() => vi.clearAllMocks());
 
         it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
           const context = coreMock.createPluginInitializerContext<AlertingConfig>(
@@ -404,7 +409,7 @@ describe('Alerting Plugin', () => {
             const adapter = {
               connectorTypeId: '.test',
               ruleActionParamsSchema: schema.object({}),
-              buildActionParams: jest.fn(),
+              buildActionParams: vi.fn(),
             };
 
             setup.registerConnectorAdapter(adapter);
@@ -451,10 +456,10 @@ describe('Alerting Plugin', () => {
               data: dataPluginMock.createStartContract(),
               share: {} as SharePluginStart,
               dataViews: {
-                dataViewsServiceFactory: jest
+                dataViewsServiceFactory: vi
                   .fn()
                   .mockResolvedValue(dataViewPluginMocks.createStartContract()),
-                getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
+                getScriptedFieldsEnabled: vi.fn().mockReturnValue(true),
               } as DataViewsServerPluginStart,
               maintenanceWindows: maintenanceWindowsMock.createStart(),
             });
@@ -504,10 +509,10 @@ describe('Alerting Plugin', () => {
               data: dataPluginMock.createStartContract(),
               share: {} as SharePluginStart,
               dataViews: {
-                dataViewsServiceFactory: jest
+                dataViewsServiceFactory: vi
                   .fn()
                   .mockResolvedValue(dataViewPluginMocks.createStartContract()),
-                getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
+                getScriptedFieldsEnabled: vi.fn().mockReturnValue(true),
               } as DataViewsServerPluginStart,
               maintenanceWindows: maintenanceWindowsMock.createStart(),
             });
@@ -525,7 +530,7 @@ describe('Alerting Plugin', () => {
                   url: '/',
                 },
               },
-              getSavedObjectsClient: jest.fn(),
+              getSavedObjectsClient: vi.fn(),
             } as unknown as KibanaRequest;
 
             await startContract.getRulesClientWithRequest(fakeRequest);
@@ -569,10 +574,10 @@ describe('Alerting Plugin', () => {
             data: dataPluginMock.createStartContract(),
             share: {} as SharePluginStart,
             dataViews: {
-              dataViewsServiceFactory: jest
+              dataViewsServiceFactory: vi
                 .fn()
                 .mockResolvedValue(dataViewPluginMocks.createStartContract()),
-              getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
+              getScriptedFieldsEnabled: vi.fn().mockReturnValue(true),
             } as DataViewsServerPluginStart,
             maintenanceWindows: maintenanceWindowsMock.createStart(),
           });
@@ -590,7 +595,7 @@ describe('Alerting Plugin', () => {
                 url: '/',
               },
             },
-            getSavedObjectsClient: jest.fn(),
+            getSavedObjectsClient: vi.fn(),
           } as unknown as KibanaRequest;
 
           await startContract.getAlertingAuthorizationWithRequest(fakeRequest);

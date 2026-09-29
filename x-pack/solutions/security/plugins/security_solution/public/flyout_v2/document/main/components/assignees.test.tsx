@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -31,13 +34,13 @@ import { useAlertsPrivileges } from '../../../../detections/containers/detection
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
 import { FLYOUT_ACTION, FLYOUT_HEADER_ITEM, FLYOUT_TYPE } from '../../../../common/lib/telemetry';
 
-const mockReportActionClicked = jest.fn();
-const mockReportHeaderItemClicked = jest.fn();
-jest.mock('../../../shared/hooks/use_flyout_telemetry');
-const mockUseFlyoutTelemetry = useFlyoutTelemetry as jest.Mock;
+const mockReportActionClicked = vi.fn();
+const mockReportHeaderItemClicked = vi.fn();
+vi.mock('../../../shared/hooks/use_flyout_telemetry');
+const mockUseFlyoutTelemetry = useFlyoutTelemetry as Mock;
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
 
   return {
     ...actual,
@@ -59,29 +62,32 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../../../common/components/assignees/assignees_apply_panel', () => ({
-  AssigneesApplyPanel: ({
-    onApply,
-  }: {
-    onApply: (assignees: { add: string[]; remove: string[] }) => void;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="mock-assignees-apply-panel"
-      onClick={() => onApply({ add: ['user-id-3'], remove: [] })}
-    >
-      {'Apply assignees'}
-    </button>
-  ),
-}));
+vi.mock('../../../../common/components/assignees/assignees_apply_panel', () => {
+      const mocked = {
+      AssigneesApplyPanel: ({
+        onApply,
+      }: {
+        onApply: (assignees: { add: string[]; remove: string[] }) => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="mock-assignees-apply-panel"
+          onClick={() => onApply({ add: ['user-id-3'], remove: [] })}
+        >
+          {'Apply assignees'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/components/user_profiles/use_get_current_user_profile');
-jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
-jest.mock('../../../../common/components/user_profiles/use_suggest_users');
-jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
-jest.mock('../../../../common/hooks/use_license');
-jest.mock('../../../../common/hooks/use_upselling');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../../common/components/user_profiles/use_get_current_user_profile');
+vi.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../../../common/components/user_profiles/use_suggest_users');
+vi.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
+vi.mock('../../../../common/hooks/use_license');
+vi.mock('../../../../common/hooks/use_upselling');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
 const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'user1', full_name: 'User 1' }, data: {} },
@@ -113,7 +119,7 @@ const renderAssignees = (
   props: Partial<Parameters<typeof Assignees>[0]> = {},
   assignedUserIds: string[] = ['user-id-1']
 ) => {
-  (useBulkGetUserProfiles as jest.Mock).mockImplementation(
+  (useBulkGetUserProfiles as Mock).mockImplementation(
     ({ uids }: { uids: Set<string> | undefined }) => ({
       isLoading: false,
       data: mockUserProfiles.filter((user) => uids?.has(user.uid)),
@@ -122,37 +128,37 @@ const renderAssignees = (
 
   return render(
     <TestProviders>
-      <Assignees hit={createMockHit(assignedUserIds)} onAlertUpdated={jest.fn()} {...props} />
+      <Assignees hit={createMockHit(assignedUserIds)} onAlertUpdated={vi.fn()} {...props} />
     </TestProviders>
   );
 };
 
 describe('<Assignees />', () => {
-  let setAlertAssigneesMock: jest.MockedFunction<SetAlertAssigneesFunc>;
+  let setAlertAssigneesMock: MockedFunction<SetAlertAssigneesFunc>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useGetCurrentUserProfile as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles[0],
     });
-    (useSuggestUsers as jest.Mock).mockReturnValue({
+    (useSuggestUsers as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles,
     });
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
-    (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
-    (useUpsellingMessage as jest.Mock).mockReturnValue('Go for Platinum!');
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsUpdate: true });
+    (useLicense as Mock).mockReturnValue({ isPlatinumPlus: () => true });
+    (useUpsellingMessage as Mock).mockReturnValue('Go for Platinum!');
     mockUseFlyoutTelemetry.mockReturnValue({
       reportActionClicked: mockReportActionClicked,
       reportHeaderItemClicked: mockReportHeaderItemClicked,
     });
 
-    setAlertAssigneesMock = jest.fn<
+    setAlertAssigneesMock = vi.fn<
       ReturnType<SetAlertAssigneesFunc>,
       Parameters<SetAlertAssigneesFunc>
     >();
-    (useSetAlertAssignees as jest.Mock).mockReturnValue(setAlertAssigneesMock);
+    (useSetAlertAssignees as Mock).mockReturnValue(setAlertAssigneesMock);
   });
 
   it('renders the alert header block and assignee avatars', () => {
@@ -172,7 +178,7 @@ describe('<Assignees />', () => {
   });
 
   it('applies updated assignees and calls the success callback', async () => {
-    const onAlertUpdated = jest.fn();
+    const onAlertUpdated = vi.fn();
     const { getByTestId, queryByTestId } = renderAssignees({ onAlertUpdated });
 
     fireEvent.click(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID));

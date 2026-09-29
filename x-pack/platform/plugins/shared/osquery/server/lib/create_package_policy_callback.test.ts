@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 
@@ -15,20 +18,20 @@ import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import type { OsqueryAppContextService } from './osquery_app_context_services';
 import { getPackagePolicyCreateCallback } from './create_package_policy_callback';
 
-jest.mock('../utils/get_internal_saved_object_client');
-jest.mock('./update_global_packs');
+vi.mock('../utils/get_internal_saved_object_client');
+vi.mock('./update_global_packs');
 
 const getInternalSavedObjectsClientForSpaceIdMock =
-  getInternalSavedObjectsClientForSpaceId as jest.MockedFunction<
+  getInternalSavedObjectsClientForSpaceId as MockedFunction<
     typeof getInternalSavedObjectsClientForSpaceId
   >;
-const updateGlobalPacksCreateCallbackMock = updateGlobalPacksCreateCallback as jest.MockedFunction<
+const updateGlobalPacksCreateCallbackMock = updateGlobalPacksCreateCallback as MockedFunction<
   typeof updateGlobalPacksCreateCallback
 >;
 
 const buildSoClient = (spaceId: string | undefined): SavedObjectsClientContract =>
   ({
-    getCurrentNamespace: jest.fn().mockReturnValue(spaceId),
+    getCurrentNamespace: vi.fn().mockReturnValue(spaceId),
   } as unknown as SavedObjectsClientContract);
 
 const buildNewPackagePolicy = (packageName: string): NewPackagePolicy =>
@@ -44,18 +47,18 @@ const buildNewPackagePolicy = (packageName: string): NewPackagePolicy =>
 describe('getPackagePolicyCreateCallback', () => {
   const core = {} as CoreStart;
   const osqueryContext = {} as OsqueryAppContextService;
-  let initialize: jest.Mock;
-  let spaceScopedClient: { find: jest.Mock };
+  let initialize: Mock;
+  let spaceScopedClient: { find: Mock };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    initialize = jest.fn().mockResolvedValue(undefined);
+    initialize = vi.fn().mockResolvedValue(undefined);
 
     // A single space-scoped client instance is returned; assertions below verify
     // that BOTH the pack `find` and the pack `update` use this same instance.
     spaceScopedClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: 'pack-so-id',
@@ -145,7 +148,7 @@ describe('getPackagePolicyCreateCallback', () => {
 
     expect(initialize).toHaveBeenCalledTimes(1);
     expect(initialize.mock.invocationCallOrder[0]).toBeLessThan(
-      (spaceScopedClient.find as jest.Mock).mock.invocationCallOrder[0]
+      (spaceScopedClient.find as Mock).mock.invocationCallOrder[0]
     );
   });
 });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,48 +14,66 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 
 import { DefaultLayout, FLEET_TAB_IDS } from './default';
 
-jest.mock('../../../../layouts', () => ({
-  WithoutHeaderLayout: ({
-    header,
-    children,
-  }: {
-    header?: React.ReactNode;
-    children: React.ReactNode;
-  }) => (
-    <div>
-      {header}
-      {children}
-    </div>
-  ),
-}));
+vi.mock('../../../../layouts', () => {
+      const mocked = {
+      WithoutHeaderLayout: ({
+        header,
+        children,
+      }: {
+        header?: React.ReactNode;
+        children: React.ReactNode;
+      }) => (
+        <div>
+          {header}
+          {children}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_dismissable_tour', () => ({
-  useDismissableTour: () => ({ isOpen: false, isHidden: true, dismiss: jest.fn() }),
-}));
+vi.mock('../../../../hooks/use_dismissable_tour', () => {
+      const mocked = {
+      useDismissableTour: () => ({ isOpen: false, isHidden: true, dismiss: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_tour_manager', () => ({
-  TourManagerProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../../../hooks/use_tour_manager', () => {
+      const mocked = {
+      TourManagerProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_can_enable_auto_upgrades', () => ({
-  useCanEnableAutomaticAgentUpgrades: () => false,
-}));
+vi.mock('../../../../hooks/use_can_enable_auto_upgrades', () => {
+      const mocked = {
+      useCanEnableAutomaticAgentUpgrades: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services', () => ({
-  ExperimentalFeaturesService: { get: () => ({ enableOtelUI: false }) },
-}));
+vi.mock('../../services', () => {
+      const mocked = {
+      ExperimentalFeaturesService: { get: () => ({ enableOtelUI: false }) },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAuthz = jest.fn();
-const mockUseConfig = jest.fn();
-const mockUseLink = jest.fn();
-const mockUseStartServices = jest.fn();
+const mockUseAuthz = vi.fn();
+const mockUseConfig = vi.fn();
+const mockUseLink = vi.fn();
+const mockUseStartServices = vi.fn();
 
-jest.mock('../../hooks', () => ({
-  useAuthz: () => mockUseAuthz(),
-  useConfig: () => mockUseConfig(),
-  useLink: () => mockUseLink(),
-  useStartServices: () => mockUseStartServices(),
-}));
+vi.mock('../../hooks', () => {
+      const mocked = {
+      useAuthz: () => mockUseAuthz(),
+      useConfig: () => mockUseConfig(),
+      useLink: () => mockUseLink(),
+      useStartServices: () => mockUseStartServices(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultAuthz = {
   fleet: {

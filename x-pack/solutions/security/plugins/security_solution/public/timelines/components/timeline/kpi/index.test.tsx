@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -13,17 +16,20 @@ import { TimelineKpi } from '.';
 import { TimelineId } from '../../../../../common/types';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
-jest.mock('../../../containers/kpis', () => ({
-  useTimelineKpis: jest.fn(),
-}));
+vi.mock('../../../containers/kpis', () => {
+      const mocked = {
+      useTimelineKpis: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock('@kbn/i18n-react', () => {
-  const { i18n } = jest.requireActual('@kbn/i18n');
+vi.mock('@kbn/i18n-react', async () => {
+  const { i18n } = (await vi.importActual('@kbn/i18n'));
   i18n.init({ locale: 'en' });
-  const originalModule = jest.requireActual('@kbn/i18n-react');
-  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
+  const originalModule = (await vi.importActual('@kbn/i18n-react'));
+  const FormattedRelative = vi.fn().mockImplementation(() => '20 hours ago');
 
   return {
     ...originalModule,
@@ -31,7 +37,7 @@ jest.mock('@kbn/i18n-react', () => {
   };
 });
 
-const mockUseTimelineKpis: jest.Mock = useTimelineKpis as jest.Mock;
+const mockUseTimelineKpis: Mock = useTimelineKpis as Mock;
 
 const mockUseTimelineKpiResponse = {
   processCount: 1,

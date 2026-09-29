@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { MigrationRulesFilter } from '.';
@@ -25,7 +27,7 @@ describe('MigrationRulesFilter', () => {
   });
 
   it('calls filter changed handler on `installed` status selection', async () => {
-    const onFilterOptionsChanged = jest.fn();
+    const onFilterOptionsChanged = vi.fn();
     const { getByTestId, getByText } = render(
       <TestProviders>
         <MigrationRulesFilter onFilterOptionsChanged={onFilterOptionsChanged} />
@@ -41,7 +43,7 @@ describe('MigrationRulesFilter', () => {
   });
 
   it('calls filter changed handler on `translated` status selection', async () => {
-    const onFilterOptionsChanged = jest.fn();
+    const onFilterOptionsChanged = vi.fn();
     const { getByTestId, getByText } = render(
       <TestProviders>
         <MigrationRulesFilter onFilterOptionsChanged={onFilterOptionsChanged} />
@@ -57,7 +59,7 @@ describe('MigrationRulesFilter', () => {
   });
 
   it('calls filter changed handler on `partially translated` status selection', async () => {
-    const onFilterOptionsChanged = jest.fn();
+    const onFilterOptionsChanged = vi.fn();
     const { getByTestId, getByText } = render(
       <TestProviders>
         <MigrationRulesFilter onFilterOptionsChanged={onFilterOptionsChanged} />
@@ -75,7 +77,7 @@ describe('MigrationRulesFilter', () => {
   });
 
   it('calls filter changed handler on `not translated` status selection', async () => {
-    const onFilterOptionsChanged = jest.fn();
+    const onFilterOptionsChanged = vi.fn();
     const { getByTestId, getByText } = render(
       <TestProviders>
         <MigrationRulesFilter onFilterOptionsChanged={onFilterOptionsChanged} />
@@ -93,7 +95,7 @@ describe('MigrationRulesFilter', () => {
   });
 
   it('calls filter changed handler on `failed` status selection', async () => {
-    const onFilterOptionsChanged = jest.fn();
+    const onFilterOptionsChanged = vi.fn();
     const { getByTestId, getByText } = render(
       <TestProviders>
         <MigrationRulesFilter onFilterOptionsChanged={onFilterOptionsChanged} />
@@ -109,7 +111,7 @@ describe('MigrationRulesFilter', () => {
   });
 
   it('calls filter changed handler on `index pattern missing` status selection', async () => {
-    const onFilterOptionsChanged = jest.fn();
+    const onFilterOptionsChanged = vi.fn();
     const { getByTestId, getByText } = render(
       <TestProviders>
         <MigrationRulesFilter onFilterOptionsChanged={onFilterOptionsChanged} />

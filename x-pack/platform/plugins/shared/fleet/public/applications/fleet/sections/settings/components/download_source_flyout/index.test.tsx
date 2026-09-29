@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import type { DownloadSource } from '../../../../types';
@@ -12,10 +14,13 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { EditDownloadSourceFlyout } from '.';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useGeneratedHtmlId: () => 'mocked-id',
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useGeneratedHtmlId: () => 'mocked-id',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function renderFlyout(downloadSource?: DownloadSource) {
   const renderer = createFleetTestRendererMock();

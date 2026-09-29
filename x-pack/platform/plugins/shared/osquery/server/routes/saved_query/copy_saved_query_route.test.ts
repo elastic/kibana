@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { API_VERSIONS } from '../../../common/constants';
@@ -13,13 +16,19 @@ import { copySavedQueryRoute } from './copy_saved_query_route';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { getUserInfo } from '../../lib/get_user_info';
 
-jest.mock('../../utils/get_internal_saved_object_client', () => ({
-  createInternalSavedObjectsClientForSpaceId: jest.fn(),
-}));
+vi.mock('../../utils/get_internal_saved_object_client', () => {
+      const mocked = {
+      createInternalSavedObjectsClientForSpaceId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/get_user_info', () => ({
-  getUserInfo: jest.fn(),
-}));
+vi.mock('../../lib/get_user_info', () => {
+      const mocked = {
+      getUserInfo: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('copySavedQueryRoute', () => {
   let routeHandler: RequestHandler;
@@ -53,13 +62,13 @@ describe('copySavedQueryRoute', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockOsqueryContext = {
       logFactory: {
-        get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()),
+        get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()),
       },
       security: {},
-      getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+      getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
     } as unknown as OsqueryAppContext;
   });
 
@@ -78,9 +87,9 @@ describe('copySavedQueryRoute', () => {
 
   it('successfully copies a saved query with all fields', async () => {
     const mockSavedObjectsClient = {
-      get: jest.fn().mockResolvedValue(sourceSavedQuery),
-      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-      create: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue(sourceSavedQuery),
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+      create: vi.fn().mockResolvedValue({
         id: 'new-so-id',
         attributes: {
           id: 'my-query_copy',
@@ -100,10 +109,10 @@ describe('copySavedQueryRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
-    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+    (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
     setupRoute();
 
@@ -129,11 +138,11 @@ describe('copySavedQueryRoute', () => {
 
   it('resolves name collision (_copy exists → _copy_2)', async () => {
     const mockSavedObjectsClient = {
-      get: jest.fn().mockResolvedValue(sourceSavedQuery),
-      find: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue(sourceSavedQuery),
+      find: vi.fn().mockResolvedValue({
         saved_objects: [{ attributes: { id: 'my-query_copy' } }],
       }),
-      create: jest.fn().mockResolvedValue({
+      create: vi.fn().mockResolvedValue({
         id: 'new-so-id',
         attributes: {
           id: 'my-query_copy_2',
@@ -148,10 +157,10 @@ describe('copySavedQueryRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
-    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+    (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
     setupRoute();
 
@@ -169,10 +178,10 @@ describe('copySavedQueryRoute', () => {
 
   it('returns 404 when source not found', async () => {
     const mockSavedObjectsClient = {
-      get: jest.fn().mockRejectedValue(new Error('Not found')),
+      get: vi.fn().mockRejectedValue(new Error('Not found')),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
 
@@ -192,9 +201,9 @@ describe('copySavedQueryRoute', () => {
 
   it('preserves version but strips prebuilt from query copy', async () => {
     const mockSavedObjectsClient = {
-      get: jest.fn().mockResolvedValue(sourceSavedQuery),
-      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-      create: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue(sourceSavedQuery),
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+      create: vi.fn().mockResolvedValue({
         id: 'new-so-id',
         attributes: {
           id: 'my-query_copy',
@@ -209,10 +218,10 @@ describe('copySavedQueryRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
-    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+    (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
     setupRoute();
 

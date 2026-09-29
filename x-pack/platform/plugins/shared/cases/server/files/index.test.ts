@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { MAX_FILE_SIZE, MAX_IMAGE_FILE_SIZE } from '../../common/constants';
 import { createFilesSetupMock } from '@kbn/files-plugin/server/mocks';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
@@ -16,7 +18,7 @@ describe('server files', () => {
     const mockFilesSetup = createFilesSetupMock();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('file sizes', () => {

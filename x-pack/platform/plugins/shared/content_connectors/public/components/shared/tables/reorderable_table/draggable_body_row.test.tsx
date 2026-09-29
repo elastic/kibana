@@ -5,19 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiDraggable: jest.fn(({ children }: { children: (provided: object) => React.ReactNode }) => (
-    <>{children({ dragHandleProps: {} })}</>
-  )),
-}));
-jest.mock('./body_row', () => ({
-  BodyRow: jest.fn(({ leftAction }: { leftAction?: React.ReactNode }) => (
-    <div data-test-subj="bodyRow">{leftAction}</div>
-  )),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiDraggable: vi.fn(({ children }: { children: (provided: object) => React.ReactNode }) => (
+        <>{children({ dragHandleProps: {} })}</>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./body_row', () => {
+      const mocked = {
+      BodyRow: vi.fn(({ leftAction }: { leftAction?: React.ReactNode }) => (
+        <div data-test-subj="bodyRow">{leftAction}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { EuiDraggable } from '@elastic/eui';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -43,11 +51,11 @@ describe('DraggableBodyRow', () => {
   const item = { id: 1 };
   const additionalProps = {};
 
-  const MockEuiDraggable = jest.mocked(EuiDraggable);
-  const MockBodyRow = jest.mocked(BodyRow);
+  const MockEuiDraggable = vi.mocked(EuiDraggable);
+  const MockBodyRow = vi.mocked(BodyRow);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('wraps a BodyRow with an EuiDraggable and injects a drag handle as the first cell', () => {

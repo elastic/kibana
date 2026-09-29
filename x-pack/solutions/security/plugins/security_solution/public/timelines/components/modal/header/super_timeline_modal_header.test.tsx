@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,16 +21,16 @@ import { timelineActions } from '../../../store';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import * as i18n from '../translations';
 
-jest.mock('../../../hooks/use_create_timeline');
-jest.mock('../../../../common/components/inspect/use_inspect');
-jest.mock('./use_is_inspect_disabled');
+vi.mock('../../../hooks/use_create_timeline');
+vi.mock('../../../../common/components/inspect/use_inspect');
+vi.mock('./use_is_inspect_disabled');
 
-const mockGetState = jest.fn().mockReturnValue({});
-jest.mock('react-redux-v7', () => {
-  const actual = jest.requireActual('react-redux-v7');
+const mockGetState = vi.fn().mockReturnValue({});
+vi.mock('react-redux-v7', () => {
+  const actual = require('react-redux-v7');
   return {
     ...actual,
-    useDispatch: jest.fn(),
+    useDispatch: vi.fn(),
     useSelector: (selector: (s: unknown) => unknown) =>
       selector({
         timeline: {
@@ -53,10 +56,10 @@ const renderComponent = () =>
 describe('SuperTimelineModalHeader', () => {
   beforeEach(() => {
     mockGetState.mockReturnValue({ isSuperTimeline: true, timelineType: TimelineTypeEnum.default });
-    (useDispatch as jest.Mock).mockReturnValue(jest.fn());
-    (useCreateTimeline as jest.Mock).mockReturnValue(jest.fn());
-    (useInspect as jest.Mock).mockReturnValue(jest.fn());
-    (useIsInspectDisabled as jest.Mock).mockReturnValue(false);
+    (useDispatch as Mock).mockReturnValue(vi.fn());
+    (useCreateTimeline as Mock).mockReturnValue(vi.fn());
+    (useInspect as Mock).mockReturnValue(vi.fn());
+    (useIsInspectDisabled as Mock).mockReturnValue(false);
   });
 
   it('shows the read-only badge and title', () => {
@@ -95,9 +98,9 @@ describe('SuperTimelineModalHeader', () => {
   });
 
   it('dispatches showTimeline(false) when close button is clicked', async () => {
-    const mockDispatch = jest.fn();
-    (useDispatch as jest.Mock).mockReturnValue(mockDispatch);
-    const spy = jest.spyOn(timelineActions, 'showTimeline');
+    const mockDispatch = vi.fn();
+    (useDispatch as Mock).mockReturnValue(mockDispatch);
+    const spy = vi.spyOn(timelineActions, 'showTimeline');
 
     renderComponent();
     await userEvent.click(screen.getByTestId('timeline-modal-header-close-button'));

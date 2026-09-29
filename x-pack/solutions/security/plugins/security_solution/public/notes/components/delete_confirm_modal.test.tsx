@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { DeleteConfirmModal } from './delete_confirm_modal';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { ReqStatus } from '..';
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -22,7 +24,7 @@ jest.mock('react-redux-v7', () => {
 
 describe('DeleteConfirmModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with correct number of notes', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
@@ -12,9 +14,12 @@ import type { ClassicNavItem } from '@kbn/search-navigation/public';
 
 import '../../__mocks__/react_router';
 
-jest.mock('../react_router_helpers/link_events', () => ({
-  letBrowserHandleEvent: jest.fn(),
-}));
+vi.mock('../react_router_helpers/link_events', () => {
+      const mocked = {
+      letBrowserHandleEvent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { generateSideNavItems } from './classic_nav_helpers';
 
@@ -37,7 +42,7 @@ describe('generateSideNavItems', () => {
     },
   } as unknown as Record<string, ChromeNavLink | undefined>;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibanaValues.history.location.pathname = '/';
   });
 
@@ -159,7 +164,7 @@ describe('generateSideNavItems', () => {
           id: 'child',
           isSelected: true,
           name: 'Index',
-          onClick: jest.fn(),
+          onClick: vi.fn(),
         },
       ],
     };

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -20,9 +23,9 @@ import { createLicenseServiceMock } from '../../../../../../../common/license/mo
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
 
-jest.mock('../../../../../../common/hooks/use_license');
+vi.mock('../../../../../../common/hooks/use_license');
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 
 describe('Policy form Detect Prevent Protection level component', () => {
   let formProps: DetectPreventProtectionLevelProps;
@@ -43,7 +46,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
         .config.policy.value,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': 'test',
       protection: 'malware',

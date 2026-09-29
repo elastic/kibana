@@ -5,36 +5,51 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DataSourceContextProvider } from './data_source_context';
 import { useMlKibana } from '../kibana';
 
-jest.mock('../kibana', () => ({
-  useMlKibana: jest.fn(),
-}));
+vi.mock('../kibana', () => {
+      const mocked = {
+      useMlKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../util/index_utils', () => ({
-  getDataViewAndSavedSearchCallback: jest.fn(() => async (id: string) => ({
-    dataView: { id, title: 'mock-saved-search-data-view' },
-    savedSearch: { id: 'mock-saved-search' },
-  })),
-}));
+vi.mock('../../util/index_utils', () => {
+      const mocked = {
+      getDataViewAndSavedSearchCallback: vi.fn(() => async (id: string) => ({
+        dataView: { id, title: 'mock-saved-search-data-view' },
+        savedSearch: { id: 'mock-saved-search' },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../jobs/new_job/utils/new_job_utils', () => ({
-  createSearchItems: jest.fn(() => ({ combinedQuery: { match_all: {} } })),
-}));
+vi.mock('../../jobs/new_job/utils/new_job_utils', () => {
+      const mocked = {
+      createSearchItems: vi.fn(() => ({ combinedQuery: { match_all: {} } })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockLocationSearch = jest.fn(() => '');
-jest.mock('react-router-dom', () => ({
-  useLocation: () => ({ pathname: '/', search: mockLocationSearch() }),
-}));
+const mockLocationSearch = vi.fn(() => '');
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useLocation: () => ({ pathname: '/', search: mockLocationSearch() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGet = jest.fn();
-const mockGetDefaultId = jest.fn();
-const mockGetIdsWithTitle = jest.fn();
-const mockGetDataViewAndSavedSearch = jest.fn();
+const mockGet = vi.fn();
+const mockGetDefaultId = vi.fn();
+const mockGetIdsWithTitle = vi.fn();
+const mockGetDataViewAndSavedSearch = vi.fn();
 
 const buildKibanaMock = () => ({
   services: {
@@ -59,8 +74,8 @@ const renderProvider = (children = <div data-test-subj="child-content">Hello</di
 
 describe('DataSourceContextProvider', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useMlKibana as jest.Mock).mockReturnValue(buildKibanaMock());
+    vi.clearAllMocks();
+    (useMlKibana as Mock).mockReturnValue(buildKibanaMock());
     mockGetIdsWithTitle.mockResolvedValue([]);
   });
 
@@ -138,7 +153,7 @@ describe('DataSourceContextProvider', () => {
   });
 
   it('renders children when savedSearchId URL param is present', async () => {
-    const { getDataViewAndSavedSearchCallback } = jest.requireMock('../../util/index_utils');
+    const { getDataViewAndSavedSearchCallback } = (await vi.importMock('../../util/index_utils'));
     getDataViewAndSavedSearchCallback.mockReturnValue(async (id: string) => ({
       dataView: { id: 'dv-from-saved-search', title: 'From Saved Search' },
       savedSearch: { id },

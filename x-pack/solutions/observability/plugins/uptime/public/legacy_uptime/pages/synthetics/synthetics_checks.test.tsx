@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '../../lib/helper/rtl_helpers';
 import {
@@ -16,16 +19,22 @@ import { fetchJourneySteps } from '../../state/api/journey';
 import { createMemoryHistory } from 'history';
 import { SYNTHETIC_CHECK_STEPS_ROUTE } from '../../../../common/constants';
 
-jest.mock('../../state/api/journey', () => ({
-  fetchJourneySteps: jest.fn(),
-}));
+vi.mock('../../state/api/journey', () => {
+      const mocked = {
+      fetchJourneySteps: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // We must mock all other API calls because we're using the real store
 // in this test. Using the real store causes actions and effects to actually
 // run, which could trigger API calls.
-jest.mock('../../state/api/utils', () => ({
-  apiService: { get: jest.fn().mockResolvedValue([]) },
-}));
+vi.mock('../../state/api/utils', () => {
+      const mocked = {
+      apiService: { get: vi.fn().mockResolvedValue([]) },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getRelevantPageHistory = () => {
   const history = createMemoryHistory();
@@ -41,11 +50,11 @@ const getRelevantPageHistory = () => {
 
 describe('SyntheticsCheckStepsPageHeader component', () => {
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns the monitor name', async () => {
-    (fetchJourneySteps as jest.Mock).mockResolvedValueOnce({
+    (fetchJourneySteps as Mock).mockResolvedValueOnce({
       checkGroup: 'my-check-group-id',
       details: {
         journey: {
@@ -64,7 +73,7 @@ describe('SyntheticsCheckStepsPageHeader component', () => {
   });
 
   it('returns the monitor ID when no name is provided', async () => {
-    (fetchJourneySteps as jest.Mock).mockResolvedValueOnce({
+    (fetchJourneySteps as Mock).mockResolvedValueOnce({
       checkGroup: 'my-check-group-id',
       details: {
         journey: {
@@ -84,7 +93,7 @@ describe('SyntheticsCheckStepsPageHeader component', () => {
 
 describe('SyntheticsCheckStepsPageRightSideItem component', () => {
   it('returns null when there are no details', () => {
-    (fetchJourneySteps as jest.Mock).mockResolvedValueOnce(null);
+    (fetchJourneySteps as Mock).mockResolvedValueOnce(null);
     const { container } = render(<SyntheticsCheckStepsPageRightSideItem />, {
       history: getRelevantPageHistory(),
       path: SYNTHETIC_CHECK_STEPS_ROUTE,
@@ -94,7 +103,7 @@ describe('SyntheticsCheckStepsPageRightSideItem component', () => {
   });
 
   it('renders navigation element if details exist', async () => {
-    (fetchJourneySteps as jest.Mock).mockResolvedValueOnce({
+    (fetchJourneySteps as Mock).mockResolvedValueOnce({
       checkGroup: 'my-check-group-id',
       details: {
         timestamp: '20031104',
@@ -120,7 +129,7 @@ describe('SyntheticsCheckStepsPageRightSideItem component', () => {
 
 describe('SyntheticsCheckSteps component', () => {
   it('renders empty steps list', async () => {
-    (fetchJourneySteps as jest.Mock).mockResolvedValueOnce({
+    (fetchJourneySteps as Mock).mockResolvedValueOnce({
       checkGroup: 'my-check-group-id',
       details: {
         timestamp: '20031104',
@@ -143,7 +152,7 @@ describe('SyntheticsCheckSteps component', () => {
   });
 
   it('renders steps', async () => {
-    (fetchJourneySteps as jest.Mock).mockResolvedValueOnce({
+    (fetchJourneySteps as Mock).mockResolvedValueOnce({
       checkGroup: 'my-check-group-id',
       details: {
         timestamp: '20031104',

@@ -5,23 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useUrlQuery } from './use_url_query';
 import { useLocation, useHistory } from 'react-router-dom';
 import { encodeQuery } from '@kbn/cloud-security-posture';
 
-jest.mock('react-router-dom', () => ({
-  useHistory: jest.fn(),
-  useLocation: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: vi.fn(),
+      useLocation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useUrlQuery', () => {
   it('uses default query when no query is provided', () => {
     const defaultQuery = { foo: 1 };
-    (useHistory as jest.Mock).mockReturnValue({
-      push: jest.fn(),
+    (useHistory as Mock).mockReturnValue({
+      push: vi.fn(),
     });
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as Mock).mockReturnValue({
       search: encodeQuery(defaultQuery),
     });
 
@@ -39,10 +45,10 @@ describe('useUrlQuery', () => {
     const defaultQuery = { foo: 1, zoo: 2, moo: 3 };
     const first = { zoo: 3 };
     const second = { moo: 4 };
-    (useHistory as jest.Mock).mockReturnValue({
-      push: jest.fn(),
+    (useHistory as Mock).mockReturnValue({
+      push: vi.fn(),
     });
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as Mock).mockReturnValue({
       search: encodeQuery({ ...defaultQuery, ...first, ...second }),
     });
 

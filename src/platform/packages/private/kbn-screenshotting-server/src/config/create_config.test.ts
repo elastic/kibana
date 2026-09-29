@@ -7,19 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { createConfig } from './create_config';
 import type { ConfigType } from './schema';
 
 describe('createConfig$', () => {
-  let logger: jest.Mocked<Logger>;
+  let logger: Mocked<Logger>;
 
   beforeEach(() => {
     logger = {
-      debug: jest.fn(),
-      get: jest.fn(() => logger),
-      info: jest.fn(),
-      warn: jest.fn(),
+      debug: vi.fn(),
+      get: vi.fn(() => logger),
+      info: vi.fn(),
+      warn: vi.fn(),
     } as unknown as typeof logger;
   });
 

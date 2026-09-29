@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
@@ -14,11 +17,14 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 
 type Props = ComponentProps<typeof XyAxisSettings>;
 
-jest.useFakeTimers();
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  debounce: jest.fn((fn) => fn),
-}));
+vi.useFakeTimers();
+vi.mock('lodash', () => {
+      const mocked = {
+      ...require('lodash'),
+      debounce: vi.fn((fn) => fn),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Axis settings', () => {
   let defaultProps: Props;
@@ -34,21 +40,21 @@ describe('Axis settings', () => {
           accessors: ['bar'],
         },
       ],
-      updateTitleState: jest.fn(),
+      updateTitleState: vi.fn(),
       axisTitle: 'My custom X axis title',
       axis: 'x',
       areTickLabelsVisible: true,
       areGridlinesVisible: true,
       isTitleVisible: true,
-      toggleTickLabelsVisibility: jest.fn(),
-      toggleGridlinesVisibility: jest.fn(),
+      toggleTickLabelsVisibility: vi.fn(),
+      toggleGridlinesVisibility: vi.fn(),
       hasBarOrAreaOnAxis: false,
       hasPercentageAxis: false,
       orientation: 0,
-      setOrientation: jest.fn(),
-      setScaleWithExtent: jest.fn(),
-      setExtent: jest.fn(),
-      setScale: jest.fn(),
+      setOrientation: vi.fn(),
+      setScaleWithExtent: vi.fn(),
+      setExtent: vi.fn(),
+      setScale: vi.fn(),
       scale: 'linear',
     };
   });
@@ -114,7 +120,7 @@ describe('Axis settings', () => {
   it('shows the endzone visibility switch if setter is passed in', async () => {
     await renderAxisSettings({
       endzonesVisible: true,
-      setEndzoneVisibility: jest.fn(),
+      setEndzoneVisibility: vi.fn(),
     });
     expect(screen.getByTestId('lnsshowEndzones')).toBeChecked();
   });
@@ -128,7 +134,7 @@ describe('Axis settings', () => {
   });
 
   it('shows the current time marker switch if setter is present', async () => {
-    const setCurrentTimeMarkerVisibilityMock = jest.fn();
+    const setCurrentTimeMarkerVisibilityMock = vi.fn();
 
     await renderAxisSettings({
       currentTimeMarkerVisible: false,
@@ -285,7 +291,7 @@ describe('Axis settings', () => {
           upperBound: undefined,
         });
 
-        (defaultProps.setExtent as jest.Mock).mockClear();
+        (defaultProps.setExtent as Mock).mockClear();
         result.bounds.select('Custom');
         expect(defaultProps.setExtent).toHaveBeenCalledWith({
           mode: 'custom',
@@ -320,7 +326,7 @@ describe('Axis settings', () => {
           upperBound: undefined,
         });
 
-        (defaultProps.setExtent as jest.Mock).mockClear();
+        (defaultProps.setExtent as Mock).mockClear();
         result.bounds.select('Custom');
         expect(defaultProps.setExtent).toHaveBeenCalledWith({
           mode: 'custom',
@@ -344,7 +350,7 @@ describe('Axis settings', () => {
           upperBound: undefined,
         });
 
-        (defaultProps.setExtent as jest.Mock).mockClear();
+        (defaultProps.setExtent as Mock).mockClear();
         result.bounds.select('Custom');
         expect(defaultProps.setExtent).toHaveBeenCalledWith({
           mode: 'custom',

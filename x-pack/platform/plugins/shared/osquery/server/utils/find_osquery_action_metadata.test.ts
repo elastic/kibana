@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ACTIONS_INDEX } from '../../common/constants';
 import { findOsqueryActionMetadata } from './find_osquery_action_metadata';
 
 describe('findOsqueryActionMetadata', () => {
-  const mockSearch = jest.fn();
+  const mockSearch = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns true when a parent action_id matches in the active space', async () => {

@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SlackApiService } from '../../../common/slack_api/types';
 import { api } from './api';
 
-const createMock = (): jest.Mocked<SlackApiService> => {
+const createMock = (): Mocked<SlackApiService> => {
   const service = {
-    postMessage: jest.fn().mockImplementation(() => ({
+    postMessage: vi.fn().mockImplementation(() => ({
       ok: true,
       channel: 'general',
       message: {
@@ -18,14 +21,14 @@ const createMock = (): jest.Mocked<SlackApiService> => {
         type: 'message',
       },
     })),
-    postBlockkit: jest.fn().mockImplementation(() => ({
+    postBlockkit: vi.fn().mockImplementation(() => ({
       ok: true,
       channel: 'general',
       message: {
         text: 'a blockkit message',
       },
     })),
-    validChannelId: jest.fn().mockImplementation(() => [
+    validChannelId: vi.fn().mockImplementation(() => [
       {
         ok: true,
         channels: {
@@ -47,7 +50,7 @@ const slackServiceMock = {
 };
 
 describe('api', () => {
-  let externalService: jest.Mocked<SlackApiService>;
+  let externalService: Mocked<SlackApiService>;
 
   beforeEach(() => {
     externalService = slackServiceMock.create();

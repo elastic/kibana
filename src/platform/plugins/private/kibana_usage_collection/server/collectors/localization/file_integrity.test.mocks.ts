@@ -7,25 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Readable } from 'stream';
 
-jest.doMock('fs', () => ({
-  createReadStream(filepath: string): Readable {
-    if (filepath === 'ERROR') {
-      throw new Error('MOCK ERROR - Invalid Path');
-    }
-    const readableStream = new Readable();
-    const streamData = filepath.split('');
-    let cursor = 0;
+vi.doMock('fs', () => {
+      const mocked = {
+      createReadStream(filepath: string): Readable {
+        if (filepath === 'ERROR') {
+          throw new Error('MOCK ERROR - Invalid Path');
+        }
+        const readableStream = new Readable();
+        const streamData = filepath.split('');
+        let cursor = 0;
 
-    readableStream._read = function (size) {
-      const current = streamData[cursor++];
-      if (typeof current === 'undefined') {
-        return this.push(null);
-      }
-      this.push(current);
+        readableStream._read = function (size) {
+          const current = streamData[cursor++];
+          if (typeof current === 'undefined') {
+            return this.push(null);
+          }
+          this.push(current);
+        };
+
+        return readableStream;
+      },
     };
-
-    return readableStream;
-  },
-}));
+      return { ...mocked, default: mocked };
+    });

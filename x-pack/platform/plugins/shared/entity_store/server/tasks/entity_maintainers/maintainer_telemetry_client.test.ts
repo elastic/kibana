@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createMaintainerTelemetryClient } from './maintainer_telemetry_client';
 import { ENTITY_MAINTAINER_RUN_SUMMARY_EVENT } from '../../telemetry/events';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function createMockAnalytics() {
-  return { reportEvent: jest.fn() };
+  return { reportEvent: vi.fn() };
 }
 
 const BASE_FUNNEL = {

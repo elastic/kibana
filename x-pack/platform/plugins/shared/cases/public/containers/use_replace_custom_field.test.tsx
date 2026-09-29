@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -15,13 +18,19 @@ import { useReplaceCustomField } from './use_replace_custom_field';
 import { basicCaseFixture } from './test_fixtures';
 import { CustomFieldTypes } from '../../common/types/domain';
 
-jest.mock('./api', () => ({
-  getCase: jest.fn(),
-  replaceCustomField: jest.fn(),
-}));
-jest.mock('../common/use_cases_toast', () => ({
-  useCasesToast: jest.fn(),
-}));
+vi.mock('./api', () => {
+      const mocked = {
+      getCase: vi.fn(),
+      replaceCustomField: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../common/use_cases_toast', () => {
+      const mocked = {
+      useCasesToast: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useReplaceCustomField', () => {
   const sampleData = {
@@ -32,11 +41,11 @@ describe('useReplaceCustomField', () => {
     caseData: basicCaseFixture,
   };
 
-  const showErrorToast = jest.fn();
-  (useCasesToast as jest.Mock).mockReturnValue({ showErrorToast });
+  const showErrorToast = vi.fn();
+  (useCasesToast as Mock).mockReturnValue({ showErrorToast });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createQueryClient = () =>
@@ -54,7 +63,7 @@ describe('useReplaceCustomField', () => {
 
   it('replace a customField and refresh the case page', async () => {
     const queryClient = createQueryClient();
-    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const queryClientSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useReplaceCustomField(), {
       wrapper: getWrapper(queryClient),
@@ -72,7 +81,7 @@ describe('useReplaceCustomField', () => {
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const patchCustomFieldSpy = jest.spyOn(api, 'replaceCustomField');
+    const patchCustomFieldSpy = vi.spyOn(api, 'replaceCustomField');
     const queryClient = createQueryClient();
     const { result } = renderHook(() => useReplaceCustomField(), {
       wrapper: getWrapper(queryClient),
@@ -102,7 +111,7 @@ describe('useReplaceCustomField', () => {
       caseVersion: basicCaseFixture.version,
       caseData: basicCaseFixture,
     };
-    const patchCustomFieldSpy = jest.spyOn(api, 'replaceCustomField');
+    const patchCustomFieldSpy = vi.spyOn(api, 'replaceCustomField');
     const queryClient = createQueryClient();
     const { result } = renderHook(() => useReplaceCustomField(), {
       wrapper: getWrapper(queryClient),
@@ -132,7 +141,7 @@ describe('useReplaceCustomField', () => {
       caseVersion: basicCaseFixture.version,
       caseData: basicCaseFixture,
     };
-    const patchCustomFieldSpy = jest.spyOn(api, 'replaceCustomField');
+    const patchCustomFieldSpy = vi.spyOn(api, 'replaceCustomField');
     const queryClient = createQueryClient();
     const { result } = renderHook(() => useReplaceCustomField(), {
       wrapper: getWrapper(queryClient),
@@ -165,7 +174,7 @@ describe('useReplaceCustomField', () => {
       body: { statusCode: 409 },
     });
 
-    const replaceCustomFieldSpy = jest
+    const replaceCustomFieldSpy = vi
       .spyOn(api, 'replaceCustomField')
       .mockRejectedValueOnce(conflictError)
       .mockResolvedValueOnce({
@@ -173,7 +182,7 @@ describe('useReplaceCustomField', () => {
         type: CustomFieldTypes.TEXT,
         value: sampleData.customFieldValue,
       });
-    const getCaseSpy = jest.spyOn(api, 'getCase').mockResolvedValue(latestCase);
+    const getCaseSpy = vi.spyOn(api, 'getCase').mockResolvedValue(latestCase);
     const queryClient = createQueryClient();
 
     const { result } = renderHook(() => useReplaceCustomField(), {
@@ -198,7 +207,7 @@ describe('useReplaceCustomField', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    jest
+    vi
       .spyOn(api, 'replaceCustomField')
       .mockRejectedValue(new Error('useUpdateComment: Test error'));
     const queryClient = createQueryClient();

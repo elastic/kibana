@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -15,76 +17,109 @@ import { PacksTable } from './packs_table';
 import type { OsqueryCapabilities } from '../../../__test_helpers__/create_mock_kibana_services';
 import { ROLE_CAPABILITIES } from '../../../__test_helpers__/create_mock_kibana_services';
 
-const mockPush = jest.fn();
+const mockPush = vi.fn();
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: mockPush }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => ({ push: mockPush }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = jest.fn();
-const mockUseRouterNavigate = jest.fn();
+const mockUseKibana = vi.fn();
+const mockUseRouterNavigate = vi.fn();
 
-jest.mock('../../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../../common/lib/kibana'),
-  useKibana: () => mockUseKibana(),
-  useRouterNavigate: (path: string) => {
-    mockUseRouterNavigate(path);
+vi.mock('../../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/lib/kibana')),
+      useKibana: () => mockUseKibana(),
+      useRouterNavigate: (path: string) => {
+        mockUseRouterNavigate(path);
 
-    return { onClick: jest.fn(), href: path };
-  },
-}));
+        return { onClick: vi.fn(), href: path };
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/use_persisted_page_size', () => ({
-  usePersistedPageSize: jest.fn(() => [20, jest.fn()]),
-  PAGE_SIZE_OPTIONS: [10, 20, 50],
-}));
+vi.mock('../../../common/use_persisted_page_size', () => {
+      const mocked = {
+      usePersistedPageSize: vi.fn(() => [20, vi.fn()]),
+      PAGE_SIZE_OPTIONS: [10, 20, 50],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUsePackUsers = jest.fn(() => ({
+const mockUsePackUsers = vi.fn(() => ({
   users: [],
   profilesMap: new Map(),
   isLoading: false,
 }));
 
-jest.mock('../../../common/use_saved_object_users', () => ({
-  usePackUsers: () => mockUsePackUsers(),
-}));
+vi.mock('../../../common/use_saved_object_users', () => {
+      const mocked = {
+      usePackUsers: () => mockUsePackUsers(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../packs/active_state_switch', () => ({
-  ActiveStateSwitch: ({ item }: { item: { enabled: boolean; name: string } }) => (
-    <div data-test-subj={`pack-switch-${item.name}`}>{item.enabled ? 'Active' : 'Inactive'}</div>
-  ),
-}));
+vi.mock('../../../packs/active_state_switch', () => {
+      const mocked = {
+      ActiveStateSwitch: ({ item }: { item: { enabled: boolean; name: string } }) => (
+        <div data-test-subj={`pack-switch-${item.name}`}>{item.enabled ? 'Active' : 'Inactive'}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../packs/pack_row_actions', () => ({
-  PackRowActions: ({ item }: { item: { name: string } }) => (
-    <div data-test-subj={`pack-row-actions-${item.name}`}>Actions Menu</div>
-  ),
-}));
+vi.mock('../../../packs/pack_row_actions', () => {
+      const mocked = {
+      PackRowActions: ({ item }: { item: { name: string } }) => (
+        <div data-test-subj={`pack-row-actions-${item.name}`}>Actions Menu</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./empty_state', () => ({
-  PacksTableEmptyState: () => <div data-test-subj="packsEmptyState">No packs</div>,
-}));
+vi.mock('./empty_state', () => {
+      const mocked = {
+      PacksTableEmptyState: () => <div data-test-subj="packsEmptyState">No packs</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./load_integration_assets', () => ({
-  LoadIntegrationAssetsButton: () => (
-    <button data-test-subj="loadIntegrationAssets">Load integration assets</button>
-  ),
-}));
+vi.mock('./load_integration_assets', () => {
+      const mocked = {
+      LoadIntegrationAssetsButton: () => (
+        <button data-test-subj="loadIntegrationAssets">Load integration assets</button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/table_toolbar', () => ({
-  TableToolbar: (props: any) => <div data-test-subj="table-toolbar">{props.actionButton}</div>,
-}));
+vi.mock('../../../components/table_toolbar', () => {
+      const mocked = {
+      TableToolbar: (props: any) => <div data-test-subj="table-toolbar">{props.actionButton}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../actions/components/run_by_column', () => ({
-  RunByColumn: ({ userId }: { userId?: string }) => <span>{userId ?? 'unknown'}</span>,
-}));
+vi.mock('../../../actions/components/run_by_column', () => {
+      const mocked = {
+      RunByColumn: ({ userId }: { userId?: string }) => <span>{userId ?? 'unknown'}</span>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUsePacks = jest.fn();
+const mockUsePacks = vi.fn();
 
-jest.mock('../../../packs/use_packs', () => ({
-  usePacks: (...args: unknown[]) => mockUsePacks(...args),
-}));
+vi.mock('../../../packs/use_packs', () => {
+      const mocked = {
+      usePacks: (...args: unknown[]) => mockUsePacks(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createPack = (overrides: Record<string, unknown> = {}) => ({
   name: 'test-pack',
@@ -126,7 +161,7 @@ const renderComponent = (props: { hasAssetsToInstall?: boolean } = {}) =>
 
 describe('PacksTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupKibana();
     mockUsePacks.mockReturnValue({
       data: {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RiskLevelsPrivilegedUsersPanel } from '.';
@@ -12,33 +15,36 @@ import { TestProviders } from '../../../../../common/mock';
 import { useRiskLevelsPrivilegedUserQuery } from './hooks';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
 
-jest.mock('./hooks', () => {
-  const actual = jest.requireActual('./hooks');
+vi.mock('./hooks', async () => {
+  const actual = (await vi.importActual('./hooks'));
   return {
     ...actual,
-    useRiskLevelsPrivilegedUserQuery: jest.fn(),
+    useRiskLevelsPrivilegedUserQuery: vi.fn(),
   };
 });
 
-jest.mock('../../../../../common/containers/query_toggle', () => ({
-  useQueryToggle: jest.fn(),
-}));
+vi.mock('../../../../../common/containers/query_toggle', () => {
+      const mocked = {
+      useQueryToggle: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('RiskLevelsPrivilegedUsersPanel', () => {
-  const mockUseRiskLevelsPrivilegedUserQuery = useRiskLevelsPrivilegedUserQuery as jest.Mock;
-  const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  const mockUseRiskLevelsPrivilegedUserQuery = useRiskLevelsPrivilegedUserQuery as Mock;
+  const mockUseQueryToggle = useQueryToggle as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({
       toggleStatus: true,
-      setToggleStatus: jest.fn(),
+      setToggleStatus: vi.fn(),
     });
     mockUseRiskLevelsPrivilegedUserQuery.mockReturnValue({
       hasEngineBeenInstalled: true,
       records: [],
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       inspect: null,
       isError: false,
     });
@@ -55,7 +61,7 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
       hasEngineBeenInstalled: true,
       records: [],
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       inspect: null,
       isError: true,
     });
@@ -73,7 +79,7 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
         { level: 'High', count: 10 },
       ],
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       inspect: null,
       isError: false,
     });
@@ -91,7 +97,7 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
         { level: 'High', count: 10 },
       ],
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       inspect: null,
       isError: false,
     });
@@ -110,7 +116,7 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
   it('does not render content when toggleStatus is false', () => {
     mockUseQueryToggle.mockReturnValue({
       toggleStatus: false,
-      setToggleStatus: jest.fn(),
+      setToggleStatus: vi.fn(),
     });
 
     render(<RiskLevelsPrivilegedUsersPanel spaceId={'default'} />, { wrapper: TestProviders });
@@ -124,7 +130,7 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
       hasEngineBeenInstalled: false,
       records: [],
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       inspect: null,
       isError: false,
     });

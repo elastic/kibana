@@ -5,20 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { reducer, initialState } from './api';
 import { API_STATUS } from '../../constants';
 import { apiRequestStart, apiRequestEnd, setApiError } from '../actions';
 
-jest.mock('../../constants', () => ({
-  API_STATUS: {
-    IDLE: 'idle',
-    LOADING: 'loading',
-  },
-  SECTIONS: {
-    AUTO_FOLLOW_PATTERN: 'autoFollowPattern',
-    FOLLOWER_INDEX: 'followerIndex',
-  },
-}));
+vi.mock('../../constants', () => {
+      const mocked = {
+      API_STATUS: {
+        IDLE: 'idle',
+        LOADING: 'loading',
+      },
+      SECTIONS: {
+        AUTO_FOLLOW_PATTERN: 'autoFollowPattern',
+        FOLLOWER_INDEX: 'followerIndex',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CCR Api reducers', () => {
   const scope = 'testSection';

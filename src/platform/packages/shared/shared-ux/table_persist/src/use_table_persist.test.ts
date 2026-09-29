@@ -7,21 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CriteriaWithPagination } from '@elastic/eui';
 import { renderHook, act } from '@testing-library/react';
 import { useEuiTablePersist } from './use_table_persist';
 import { createStorage } from './storage'; // Mock this if it's external
 
-jest.mock('./storage');
+vi.mock('./storage');
 
 describe('useEuiTablePersist', () => {
   const mockStorage = {
-    get: jest.fn(),
-    set: jest.fn(),
+    get: vi.fn(),
+    set: vi.fn(),
   };
 
   beforeEach(() => {
-    (createStorage as jest.Mock).mockReturnValue(mockStorage);
+    (createStorage as Mock).mockReturnValue(mockStorage);
     mockStorage.get.mockClear();
     mockStorage.set.mockClear();
   });
@@ -70,7 +73,7 @@ describe('useEuiTablePersist', () => {
   });
 
   it('should call customOnTableChange if provided', () => {
-    const customOnTableChange = jest.fn();
+    const customOnTableChange = vi.fn();
 
     const { result } = renderHook(() =>
       useEuiTablePersist({

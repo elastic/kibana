@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import axios from 'axios';
 import type { AuthContext } from '../connector_spec';
 import { ConnectorAuthorizationError } from '../errors';
@@ -20,9 +23,9 @@ const baseSecret = {
   scope: 'read write',
 };
 
-const makeCtx = (getToken: jest.Mock): AuthContext =>
+const makeCtx = (getToken: Mock): AuthContext =>
   ({
-    logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
     getCustomHostSettings: () => undefined,
     getToken,
     proxySettings: undefined,
@@ -32,7 +35,7 @@ const makeCtx = (getToken: jest.Mock): AuthContext =>
 describe('OAuthAuthorizationCode.configure', () => {
   describe('tokenEndpointAuthMethod based on useBasicAuth', () => {
     it('passes client_secret_basic when useBasicAuth is true', async () => {
-      const getToken = jest.fn().mockResolvedValue('Bearer access-token');
+      const getToken = vi.fn().mockResolvedValue('Bearer access-token');
       await OAuthAuthorizationCode.configure(makeCtx(getToken), axios.create(), {
         ...baseSecret,
         useBasicAuth: true,
@@ -44,7 +47,7 @@ describe('OAuthAuthorizationCode.configure', () => {
     });
 
     it('passes client_secret_post when useBasicAuth is false', async () => {
-      const getToken = jest.fn().mockResolvedValue('Bearer access-token');
+      const getToken = vi.fn().mockResolvedValue('Bearer access-token');
       await OAuthAuthorizationCode.configure(makeCtx(getToken), axios.create(), {
         ...baseSecret,
         useBasicAuth: false,
@@ -59,7 +62,7 @@ describe('OAuthAuthorizationCode.configure', () => {
       // useBasicAuth is typed as optional — this exercises the `?? true` fallback in configure.
       // In practice Zod fills in the default(true) before reaching configure, so this is a
       // defensive code path, but it still documents the intended default.
-      const getToken = jest.fn().mockResolvedValue('Bearer access-token');
+      const getToken = vi.fn().mockResolvedValue('Bearer access-token');
       await OAuthAuthorizationCode.configure(makeCtx(getToken), axios.create(), {
         ...baseSecret,
         useBasicAuth: undefined,
@@ -73,7 +76,7 @@ describe('OAuthAuthorizationCode.configure', () => {
 
   describe('Authorization header', () => {
     it('sets the Authorization header on the axios instance from the token', async () => {
-      const getToken = jest.fn().mockResolvedValue('Bearer my-access-token');
+      const getToken = vi.fn().mockResolvedValue('Bearer my-access-token');
       const axiosInstance = axios.create();
 
       await OAuthAuthorizationCode.configure(makeCtx(getToken), axiosInstance, {
@@ -85,7 +88,7 @@ describe('OAuthAuthorizationCode.configure', () => {
     });
 
     it('returns the same axios instance it was given', async () => {
-      const getToken = jest.fn().mockResolvedValue('Bearer token');
+      const getToken = vi.fn().mockResolvedValue('Bearer token');
       const axiosInstance = axios.create();
 
       const result = await OAuthAuthorizationCode.configure(makeCtx(getToken), axiosInstance, {
@@ -104,7 +107,7 @@ describe('OAuthAuthorizationCode.configure', () => {
         reason: 'token_expired',
         message: 'Token expired',
       });
-      const getToken = jest.fn().mockRejectedValue(authError);
+      const getToken = vi.fn().mockRejectedValue(authError);
 
       await expect(
         OAuthAuthorizationCode.configure(makeCtx(getToken), axios.create(), {
@@ -115,7 +118,7 @@ describe('OAuthAuthorizationCode.configure', () => {
     });
 
     it('wraps a generic getToken error with a user-facing message', async () => {
-      const getToken = jest.fn().mockRejectedValue(new Error('network failure'));
+      const getToken = vi.fn().mockRejectedValue(new Error('network failure'));
 
       await expect(
         OAuthAuthorizationCode.configure(makeCtx(getToken), axios.create(), {
@@ -126,7 +129,7 @@ describe('OAuthAuthorizationCode.configure', () => {
     });
 
     it('throws when getToken returns null (user has not completed OAuth flow)', async () => {
-      const getToken = jest.fn().mockResolvedValue(null);
+      const getToken = vi.fn().mockResolvedValue(null);
 
       await expect(
         OAuthAuthorizationCode.configure(makeCtx(getToken), axios.create(), {

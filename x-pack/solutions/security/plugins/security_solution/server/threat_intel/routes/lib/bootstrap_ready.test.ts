@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { rejectUntilBootstrapped } from './bootstrap_ready';
 
@@ -12,7 +14,7 @@ describe('rejectUntilBootstrapped', () => {
   const response = httpServerMock.createResponseFactory();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('lets the handler proceed once bootstrap has resolved', async () => {

@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { LogFlyoutContent, type LogFlyoutContentProps } from '.';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 
-jest.mock('../../../../../../doc_viewer_logs_overview', () => ({
+vi.mock('../../../../../../doc_viewer_logs_overview', () => ({
   __esModule: true,
   default: ({ hit, dataView, indexes, showTraceWaterfall }: any) => (
     <div
@@ -32,11 +34,14 @@ const mockIndexes = {
   logs: 'logs-*',
 };
 
-jest.mock('../../../../../../../hooks/use_data_sources', () => ({
-  useDataSourcesContext: () => ({
-    indexes: mockIndexes,
-  }),
-}));
+vi.mock('../../../../../../../hooks/use_data_sources', () => {
+      const mocked = {
+      useDataSourcesContext: () => ({
+        indexes: mockIndexes,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('LogFlyoutContent', () => {
   const mockHit = buildDataTableRecord(
@@ -57,7 +62,7 @@ describe('LogFlyoutContent', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render LogsOverview component with correct props', () => {

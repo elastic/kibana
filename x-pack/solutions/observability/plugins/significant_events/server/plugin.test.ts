@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { consumeRunQuota, createRunQuotaInternalRepository } from './lib/run_quotas';
 import { knowledgeIndicatorsDataStream } from './lib/knowledge_indicators';
@@ -13,15 +16,21 @@ import { eventsDataStream } from './lib/significant_events/events';
 import type { SignificantEventsPluginSetupDependencies } from './types';
 import { SignificantEventsPlugin } from './plugin';
 
-jest.mock('./lib/run_quotas', () => ({
-  consumeRunQuota: jest.fn(),
-  createRunQuotaInternalRepository: jest.fn(),
-}));
+vi.mock('./lib/run_quotas', () => {
+      const mocked = {
+      consumeRunQuota: vi.fn(),
+      createRunQuotaInternalRepository: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./routes', () => ({ significantEventsRouteRepository: {} }));
+vi.mock('./routes', () => {
+      const mocked = { significantEventsRouteRepository: {} };
+      return { ...mocked, default: mocked };
+    });
 
-const consumeRunQuotaMock = jest.mocked(consumeRunQuota);
-const createRunQuotaInternalRepositoryMock = jest.mocked(createRunQuotaInternalRepository);
+const consumeRunQuotaMock = vi.mocked(consumeRunQuota);
+const createRunQuotaInternalRepositoryMock = vi.mocked(createRunQuotaInternalRepository);
 
 const createPlugin = () => new SignificantEventsPlugin(coreMock.createPluginInitializerContext());
 
@@ -34,11 +43,11 @@ const createCoreSetup = () => {
 const createSetupDeps = ({
   registerInvestigationQuota,
 }: {
-  registerInvestigationQuota?: jest.Mock;
+  registerInvestigationQuota?: Mock;
 } = {}) =>
   ({
     streams: {
-      registerKnowledgeIndicatorClientProvider: jest.fn(),
+      registerKnowledgeIndicatorClientProvider: vi.fn(),
     },
     ...(registerInvestigationQuota
       ? { nightshiftInvestigations: { registerInvestigationQuota } }
@@ -47,7 +56,7 @@ const createSetupDeps = ({
 
 describe('SignificantEventsPlugin setup', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     consumeRunQuotaMock.mockResolvedValue({ allowed: true });
   });
 
@@ -68,7 +77,7 @@ describe('SignificantEventsPlugin setup', () => {
   });
 
   it('registers a callback without accessing start services', () => {
-    const registerInvestigationQuota = jest.fn();
+    const registerInvestigationQuota = vi.fn();
     const plugin = createPlugin();
 
     plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
@@ -78,7 +87,7 @@ describe('SignificantEventsPlugin setup', () => {
   });
 
   it('reports unavailable start services when the callback is invoked too early', async () => {
-    const registerInvestigationQuota = jest.fn();
+    const registerInvestigationQuota = vi.fn();
     const plugin = createPlugin();
     plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
     const [callback] = registerInvestigationQuota.mock.calls[0];
@@ -88,7 +97,7 @@ describe('SignificantEventsPlugin setup', () => {
   });
 
   it('consumes the investigation quota with the existing internal repository when invoked', async () => {
-    const registerInvestigationQuota = jest.fn();
+    const registerInvestigationQuota = vi.fn();
     const internalRepository = {} as ReturnType<typeof createRunQuotaInternalRepository>;
     createRunQuotaInternalRepositoryMock.mockReturnValue(internalRepository);
     const plugin = createPlugin();

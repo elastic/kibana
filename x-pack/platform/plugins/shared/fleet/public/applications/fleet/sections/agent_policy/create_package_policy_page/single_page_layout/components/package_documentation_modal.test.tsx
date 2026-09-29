@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen, waitFor, act } from '@testing-library/react';
@@ -14,33 +16,45 @@ import type { PackageInfo } from '../../../../../types';
 
 import { PackageDocumentationModal } from './package_documentation_modal';
 
-const mockNavigateToApp = jest.fn();
-const mockBasepathPrepend = jest.fn((url: string) => `http://localhost:5620${url}`);
-const mockGetFilePath = jest.fn((path: string) => `/api/fleet/epm/packages${path}`);
-const mockSendGetFileByPath = jest.fn();
+const mockNavigateToApp = vi.fn();
+const mockBasepathPrepend = vi.fn((url: string) => `http://localhost:5620${url}`);
+const mockGetFilePath = vi.fn((path: string) => `/api/fleet/epm/packages${path}`);
+const mockSendGetFileByPath = vi.fn();
 
-jest.mock('../../../../../hooks', () => ({
-  useStartServices: jest.fn(() => ({
-    http: { basePath: { prepend: mockBasepathPrepend } },
-    application: { navigateToApp: mockNavigateToApp },
-  })),
-  sendGetFileByPath: (...args: any[]) => mockSendGetFileByPath(...args),
-}));
+vi.mock('../../../../../hooks', () => {
+      const mocked = {
+      useStartServices: vi.fn(() => ({
+        http: { basePath: { prepend: mockBasepathPrepend } },
+        application: { navigateToApp: mockNavigateToApp },
+      })),
+      sendGetFileByPath: (...args: any[]) => mockSendGetFileByPath(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../services', () => ({
-  epmRouteService: { getFilePath: (path: string) => mockGetFilePath(path) },
-}));
+vi.mock('../../../../../services', () => {
+      const mocked = {
+      epmRouteService: { getFilePath: (path: string) => mockGetFilePath(path) },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../integrations/sections/epm/screens/detail/overview/readme', () => ({
-  // Kibana's RTL setup maps getByTestId to data-test-subj
-  Readme: ({ markdown }: { markdown?: string }) => (
-    <div data-test-subj="readme">{markdown ?? 'loading'}</div>
-  ),
-}));
+vi.mock('../../../../../../integrations/sections/epm/screens/detail/overview/readme', () => {
+      const mocked = {
+      // Kibana's RTL setup maps getByTestId to data-test-subj
+      Readme: ({ markdown }: { markdown?: string }) => (
+        <div data-test-subj="readme">{markdown ?? 'loading'}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../components', () => ({
-  PackageIcon: () => <div data-testid="package-icon" />,
-}));
+vi.mock('../../../../../components', () => {
+      const mocked = {
+      PackageIcon: () => <div data-testid="package-icon" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const basePackageInfo: PackageInfo = {
   name: 'nginx',
@@ -60,7 +74,7 @@ const basePackageInfo: PackageInfo = {
 const renderModal = (
   props: Partial<React.ComponentProps<typeof PackageDocumentationModal>> = {}
 ) => {
-  const onClose = jest.fn();
+  const onClose = vi.fn();
   return {
     onClose,
     ...render(
@@ -73,7 +87,7 @@ const renderModal = (
 
 describe('PackageDocumentationModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not fetch readme when packageInfo.readme is absent', () => {

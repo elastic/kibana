@@ -5,24 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { ServiceFlyoutApmCharts } from './apm_charts';
 
-const mockUseServiceFlyoutContext = jest.fn();
-jest.mock('../service_flyout_context', () => ({
-  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
-}));
+const mockUseServiceFlyoutContext = vi.fn();
+vi.mock('../service_flyout_context', () => {
+      const mocked = {
+      useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockLatencyChart = jest.fn();
-const mockThroughputChart = jest.fn();
-const mockFailedTransactionChart = jest.fn();
+const mockLatencyChart = vi.fn();
+const mockThroughputChart = vi.fn();
+const mockFailedTransactionChart = vi.fn();
 
-jest.mock('../../../alerting/ui_components/alert_details_app_section/latency_chart', () => {
-  const ReactActual = jest.requireActual('react');
-  const { useHistory } = jest.requireActual('react-router-dom');
+vi.mock('../../../alerting/ui_components/alert_details_app_section/latency_chart', () => {
+  const ReactActual = require('react');
+  const { useHistory } = require('react-router-dom');
   return {
     LatencyChart: (props: unknown) => {
       mockLatencyChart(props as never);
@@ -38,30 +43,36 @@ jest.mock('../../../alerting/ui_components/alert_details_app_section/latency_cha
   };
 });
 
-jest.mock('../../../alerting/ui_components/alert_details_app_section/throughput_chart', () => ({
-  ThroughputChart: (props: unknown) => {
-    mockThroughputChart(props as never);
-    return <div data-test-subj="throughputChartMock" />;
-  },
-}));
+vi.mock('../../../alerting/ui_components/alert_details_app_section/throughput_chart', () => {
+      const mocked = {
+      ThroughputChart: (props: unknown) => {
+        mockThroughputChart(props as never);
+        return <div data-test-subj="throughputChartMock" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../alerting/ui_components/alert_details_app_section/failed_transaction_chart',
-  () => ({
-    FailedTransactionChart: (props: unknown) => {
-      mockFailedTransactionChart(props as never);
-      return <div data-test-subj="failedTransactionChartMock" />;
-    },
-  })
+  () => {
+      const mocked = {
+        FailedTransactionChart: (props: unknown) => {
+          mockFailedTransactionChart(props as never);
+          return <div data-test-subj="failedTransactionChartMock" />;
+        },
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const setRange = jest.fn();
+const setRange = vi.fn();
 
 function buildContextValue(filters: Record<string, unknown> = {}) {
   return {
     deps: {
       core: {
-        uiSettings: { get: jest.fn().mockReturnValue('Browser') },
+        uiSettings: { get: vi.fn().mockReturnValue('Browser') },
       },
     },
     service: { name: 'opbeans-java', agentName: 'java' },
@@ -83,14 +94,14 @@ function renderCharts(filters: Record<string, unknown> = {}) {
     <IntlProvider locale="en">
       <ServiceFlyoutApmCharts
         latencyAggregationType={LatencyAggregationType.p95}
-        setLatencyAggregationType={jest.fn()}
+        setLatencyAggregationType={vi.fn()}
       />
     </IntlProvider>
   );
 }
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('ServiceFlyoutApmCharts', () => {

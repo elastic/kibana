@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type {
   AppContextTestRender,
   UserPrivilegesMockSetter,
@@ -18,9 +21,9 @@ import { ENDPOINT_VERSION_NOT_SUPPORTED, HOST_ISOLATION } from '../../../../comm
 import type { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { useEndpointActionItems } from './use_endpoint_action_items';
 
-jest.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/components/user_privileges');
 
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
 
 describe('useEndpointActionItems', () => {
   let appContextMock: AppContextTestRender;

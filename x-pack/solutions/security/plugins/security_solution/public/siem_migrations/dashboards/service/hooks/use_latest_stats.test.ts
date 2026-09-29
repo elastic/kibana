@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of } from 'rxjs';
 import { renderHook, act } from '@testing-library/react';
 import { useLatestStats } from './use_latest_stats';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
-jest.mock('../../../../common/lib/kibana/kibana_react');
+vi.mock('../../../../common/lib/kibana/kibana_react');
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 describe('useLatestStats', () => {
   beforeEach(() => {
@@ -21,9 +24,9 @@ describe('useLatestStats', () => {
       services: {
         siemMigrations: {
           dashboards: {
-            getLatestStats$: jest.fn().mockReturnValue(of(['test stats'])),
-            startPolling: jest.fn(),
-            getMigrationsStats: jest.fn(),
+            getLatestStats$: vi.fn().mockReturnValue(of(['test stats'])),
+            startPolling: vi.fn(),
+            getMigrationsStats: vi.fn(),
           },
         },
       },

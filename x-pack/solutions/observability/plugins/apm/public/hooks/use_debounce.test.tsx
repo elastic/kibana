@@ -5,25 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useStateDebounced } from './use_debounce'; // Replace 'your-module' with the actual module path
 
 describe('useStateDebounced', () => {
   beforeAll(() => {
     // Mocks console.error so it won't polute tests output when testing the api throwing error
-    jest.spyOn(console, 'error').mockImplementation(() => null);
+    vi.spyOn(console, 'error').mockImplementation(() => null);
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns the initial value and a debounced setter function', () => {
@@ -43,7 +45,7 @@ describe('useStateDebounced', () => {
     });
     expect(result.current[0]).toBe('initialValue');
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
     expect(result.current[0]).toBe('updatedValue');
   });
@@ -55,12 +57,12 @@ describe('useStateDebounced', () => {
       result.current[1]('updatedValue');
     });
     act(() => {
-      jest.advanceTimersByTime(150);
+      vi.advanceTimersByTime(150);
     });
     expect(result.current[0]).toBe('initialValue');
     act(() => {
       result.current[1]('newUpdatedValue');
-      jest.advanceTimersByTime(400);
+      vi.advanceTimersByTime(400);
     });
 
     expect(result.current[0]).toBe('newUpdatedValue');

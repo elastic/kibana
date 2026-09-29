@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useEffect } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import {
@@ -16,38 +18,50 @@ import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { InlineAttachmentWithActions } from './inline_attachment_with_actions';
 
-const mockOpenCanvas = jest.fn();
-const mockSetPreviewedAttachmentKey = jest.fn();
-const mockInvalidateConversation = jest.fn();
-const mockOpenSidebarConversation = jest.fn();
+const mockOpenCanvas = vi.fn();
+const mockSetPreviewedAttachmentKey = vi.fn();
+const mockInvalidateConversation = vi.fn();
+const mockOpenSidebarConversation = vi.fn();
 
-jest.mock('./canvas_context', () => ({
-  getAttachmentPreviewKey: (attachmentId: string, version?: number) =>
-    `${attachmentId}:${version ?? 'latest'}`,
-  useCanvasContext: () => ({
-    openCanvas: mockOpenCanvas,
-    previewedAttachmentKey: null,
-    setPreviewedAttachmentKey: mockSetPreviewedAttachmentKey,
-  }),
-}));
+vi.mock('./canvas_context', () => {
+      const mocked = {
+      getAttachmentPreviewKey: (attachmentId: string, version?: number) =>
+        `${attachmentId}:${version ?? 'latest'}`,
+      useCanvasContext: () => ({
+        openCanvas: mockOpenCanvas,
+        previewedAttachmentKey: null,
+        setPreviewedAttachmentKey: mockSetPreviewedAttachmentKey,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../context/conversation/conversation_context', () => ({
-  useConversationContext: () => ({
-    conversationActions: { invalidateConversation: mockInvalidateConversation },
-  }),
-}));
+vi.mock('../../../../../context/conversation/conversation_context', () => {
+      const mocked = {
+      useConversationContext: () => ({
+        conversationActions: { invalidateConversation: mockInvalidateConversation },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_conversation', () => ({
-  useAgentId: () => 'agent-1',
-}));
+vi.mock('../../../../../hooks/use_conversation', () => {
+      const mocked = {
+      useAgentId: () => 'agent-1',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({
-    openSidebarConversation: mockOpenSidebarConversation,
-  }),
-}));
+vi.mock('../../../../../hooks/use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: () => ({
+        openSidebarConversation: mockOpenSidebarConversation,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const dynamicActionHandler = jest.fn();
+const dynamicActionHandler = vi.fn();
 
 const DynamicInlineContent = ({ callbacks }: { callbacks?: InlineRenderCallbacks }) => {
   const { registerActionButtons } = callbacks ?? {};
@@ -65,13 +79,13 @@ const DynamicInlineContent = ({ callbacks }: { callbacks?: InlineRenderCallbacks
   return <div>Inline content</div>;
 };
 
-const mockRenderInlineContent = jest.fn(() => <div data-test-subj="inline-attachment-content" />);
+const mockRenderInlineContent = vi.fn(() => <div data-test-subj="inline-attachment-content" />);
 const mockAttachmentsService = {
-  getAttachmentUiDefinition: jest.fn(() => ({
+  getAttachmentUiDefinition: vi.fn(() => ({
     getLabel: () => 'Test attachment',
     renderInlineContent: mockRenderInlineContent,
   })),
-  updateOrigin: jest.fn(),
+  updateOrigin: vi.fn(),
 } as Pick<AttachmentsService, 'getAttachmentUiDefinition' | 'updateOrigin'> as AttachmentsService;
 
 const createAttachment = (versionedValue: string, version: number): UnknownAttachment => ({
@@ -89,21 +103,21 @@ const createAttachment = (versionedValue: string, version: number): UnknownAttac
 
 describe('InlineAttachmentWithActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows a fallback instead of crashing when renderInlineContent throws', () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const attachment: UnknownAttachment = { id: 'attachment-1', type: 'test', data: {} };
     const attachmentsService = {
-      getAttachmentUiDefinition: jest.fn().mockReturnValue({
+      getAttachmentUiDefinition: vi.fn().mockReturnValue({
         getLabel: () => 'Test attachment',
         renderInlineContent: () => {
           throw new Error('boom');
         },
       }),
-      updateOrigin: jest.fn(),
+      updateOrigin: vi.fn(),
     };
 
     render(
@@ -121,7 +135,7 @@ describe('InlineAttachmentWithActions', () => {
   it('renders action buttons registered by inline content', async () => {
     const attachment: UnknownAttachment = { id: 'attachment-1', type: 'test', data: {} };
     const attachmentsService = {
-      getAttachmentUiDefinition: jest.fn().mockReturnValue({
+      getAttachmentUiDefinition: vi.fn().mockReturnValue({
         getLabel: () => 'Test attachment',
         renderInlineContent: (
           _props: AttachmentRenderProps<UnknownAttachment>,
@@ -131,11 +145,11 @@ describe('InlineAttachmentWithActions', () => {
           {
             label: 'Static action',
             type: ActionButtonType.SECONDARY,
-            handler: jest.fn(),
+            handler: vi.fn(),
           },
         ],
       }),
-      updateOrigin: jest.fn(),
+      updateOrigin: vi.fn(),
     };
 
     render(
@@ -162,7 +176,7 @@ describe('InlineAttachmentWithActions', () => {
     const renderWithFakeContent = ({ isSidebar }: { isSidebar: boolean }) => {
       const attachment: UnknownAttachment = { id: 'attachment-1', type: 'test', data: {} };
       const attachmentsService = {
-        getAttachmentUiDefinition: jest.fn().mockReturnValue({
+        getAttachmentUiDefinition: vi.fn().mockReturnValue({
           getLabel: () => 'Test attachment',
           renderInlineContent: (props: AttachmentRenderProps<UnknownAttachment>) => (
             <button type="button" onClick={props.openSidebarConversation}>
@@ -184,7 +198,7 @@ describe('InlineAttachmentWithActions', () => {
                 ]
               : [],
         }),
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
       };
 
       render(

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import aws from 'aws4';
 import { PassThrough, Transform } from 'stream';
 import { BedrockConnector } from './bedrock';
@@ -25,11 +28,11 @@ import { DEFAULT_BODY } from '../../../public/connector_types/bedrock/constants'
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import type { AxiosError } from 'axios';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
+vi.mock('../lib/gen_ai/create_gen_ai_dashboard');
 
 // @ts-ignore
-const mockSigner = jest.spyOn(aws, 'sign').mockReturnValue({ signed: true });
-const mockSend = jest.fn();
+const mockSigner = vi.spyOn(aws, 'sign').mockReturnValue({ signed: true });
+const mockSend = vi.fn();
 const encodedModel = encodeURIComponent(DEFAULT_MODEL);
 
 const DEFAULT_MESSAGES = [
@@ -72,8 +75,8 @@ const DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD = {
 };
 
 describe('BedrockConnector', () => {
-  let mockRequest: jest.Mock;
-  let mockError: jest.Mock;
+  let mockRequest: Mock;
+  let mockError: Mock;
   const mockResponseString = 'Hello! How can I assist you today?';
   const claude2Response = {
     completion: mockResponseString,
@@ -103,9 +106,9 @@ describe('BedrockConnector', () => {
   let connectorUsageCollector: ConnectorUsageCollector;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockRequest = jest.fn().mockResolvedValue(mockResponse);
-    mockError = jest.fn().mockImplementation(() => {
+    vi.clearAllMocks();
+    mockRequest = vi.fn().mockResolvedValue(mockResponse);
+    mockError = vi.fn().mockImplementation(() => {
       throw new Error('API Error');
     });
     connectorUsageCollector = new ConnectorUsageCollector({
@@ -212,7 +215,7 @@ describe('BedrockConnector', () => {
           max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
           stop_sequences: [`\n\nHuman:`],
         });
-        mockRequest = jest.fn().mockResolvedValue({
+        mockRequest = vi.fn().mockResolvedValue({
           headers: {},
           data: claude2Response,
         });
@@ -255,7 +258,7 @@ describe('BedrockConnector', () => {
       beforeEach(() => {
         stream = createStreamMock();
         stream.write(new Uint8Array([1, 2, 3]));
-        mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: stream.transform });
+        mockRequest = vi.fn().mockResolvedValue({ ...mockResponse, data: stream.transform });
         // @ts-ignore
         connector.request = mockRequest;
       });
@@ -307,7 +310,7 @@ describe('BedrockConnector', () => {
       });
 
       it('signal and timeout is properly passed to streamApi', async () => {
-        const signal = jest.fn();
+        const signal = vi.fn();
         const timeout = 180000;
         await connector.invokeStream(
           { ...aiAssistantBody, timeout, signal },
@@ -673,7 +676,7 @@ describe('BedrockConnector', () => {
         expect(response.message).toEqual(mockResponseString);
       });
       it('signal and timeout is properly passed to runApi', async () => {
-        const signal = jest.fn();
+        const signal = vi.fn();
         const timeout = 180000;
         await connector.invokeAI({ ...aiAssistantBody, timeout, signal }, connectorUsageCollector);
 
@@ -782,7 +785,7 @@ describe('BedrockConnector', () => {
       };
 
       beforeEach(() => {
-        mockRequest = jest.fn().mockResolvedValue({ headers: {}, data: converseResponse });
+        mockRequest = vi.fn().mockResolvedValue({ headers: {}, data: converseResponse });
         // @ts-ignore
         connector.request = mockRequest;
       });
@@ -980,7 +983,7 @@ describe('BedrockConnector', () => {
         expect(response.output.message.content[0].text).toEqual(mockResponseString);
       });
       it('signal and timeout is properly passed to runApi', async () => {
-        const signal = jest.fn();
+        const signal = vi.fn();
         const timeout = 180000;
         await connector.converse({ ...aiAssistantBody, timeout, signal }, connectorUsageCollector);
 
@@ -1016,7 +1019,7 @@ describe('BedrockConnector', () => {
       beforeEach(() => {
         stream = createStreamMock();
         stream.write(new Uint8Array([1, 2, 3]));
-        mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: stream.transform });
+        mockRequest = vi.fn().mockResolvedValue({ ...mockResponse, data: stream.transform });
         // @ts-ignore
         connector.request = mockRequest;
       });
@@ -1077,7 +1080,7 @@ describe('BedrockConnector', () => {
       });
 
       it('signal and timeout is properly passed to streamApi', async () => {
-        const signal = jest.fn();
+        const signal = vi.fn();
         const timeout = 180000;
         await connector.converseStream(
           { ...aiAssistantBody, timeout, signal },
@@ -1334,13 +1337,13 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
   });
 
   describe('Token dashboard', () => {
-    const mockGenAi = initDashboard as jest.Mock;
+    const mockGenAi = initDashboard as Mock;
     beforeEach(() => {
       // @ts-ignore
       connector.esClient.transport.request = mockRequest;
       mockRequest.mockResolvedValue({ has_all_requested: true });
       mockGenAi.mockResolvedValue({ success: true });
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     it('the create dashboard API call returns available: true when user has correct permissions', async () => {
       const response = await connector.getDashboard({ dashboardId: '123' });

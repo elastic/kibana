@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { TimelineId } from '../../../../../../../common/types/timeline';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
@@ -19,13 +22,13 @@ import { mockTimelines } from '../../../../../../common/mock/mock_timelines_plug
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../../common/constants';
 import type { ThreatEnrichmentEcs } from '@kbn/securitysolution-ecs/src/threat';
 
-jest.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/lib/kibana');
 describe('threatMatchRowRenderer', () => {
   let threatMatchData: ReturnType<typeof getThreatMatchDetectionAlert>;
 
   beforeEach(() => {
     threatMatchData = getThreatMatchDetectionAlert();
-    (useKibana as jest.Mock).mockImplementation(() => {
+    (useKibana as Mock).mockImplementation(() => {
       return {
         services: {
           timelines: { ...mockTimelines },

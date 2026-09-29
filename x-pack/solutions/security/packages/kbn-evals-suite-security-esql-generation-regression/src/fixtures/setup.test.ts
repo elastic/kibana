@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ToolingLog } from '@kbn/tooling-log';
 import { cleanupEsqlFixtures } from './setup';
 
@@ -16,25 +19,25 @@ interface ResolveResponse {
 
 interface FakeEsClient {
   indices: {
-    resolveIndex: jest.Mock<Promise<ResolveResponse>, [unknown]>;
-    delete: jest.Mock<Promise<unknown>, [unknown]>;
-    deleteDataStream: jest.Mock<Promise<unknown>, [unknown]>;
+    resolveIndex: Mock<Promise<ResolveResponse>, [unknown]>;
+    delete: Mock<Promise<unknown>, [unknown]>;
+    deleteDataStream: Mock<Promise<unknown>, [unknown]>;
   };
 }
 
 const makeLog = (): ToolingLog =>
   ({
-    info: jest.fn(),
-    debug: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
   } as unknown as ToolingLog);
 
 const makeEsClient = (overrides?: Partial<FakeEsClient['indices']>): FakeEsClient => ({
   indices: {
-    resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
-    delete: jest.fn().mockResolvedValue({}),
-    deleteDataStream: jest.fn().mockResolvedValue({}),
+    resolveIndex: vi.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+    delete: vi.fn().mockResolvedValue({}),
+    deleteDataStream: vi.fn().mockResolvedValue({}),
     ...overrides,
   },
 });
@@ -42,7 +45,7 @@ const makeEsClient = (overrides?: Partial<FakeEsClient['indices']>): FakeEsClien
 describe('cleanupEsqlFixtures', () => {
   it('resolves wildcard patterns before deleting concrete indices', async () => {
     const esClient = makeEsClient({
-      resolveIndex: jest
+      resolveIndex: vi
         .fn()
         .mockResolvedValueOnce({
           indices: [{ name: 'postgres-logs-production.evaluations.2025.01.01' }],
@@ -64,7 +67,7 @@ describe('cleanupEsqlFixtures', () => {
 
   it('does not pass wildcard patterns to indices.delete (avoids destructive_requires_name)', async () => {
     const esClient = makeEsClient({
-      resolveIndex: jest
+      resolveIndex: vi
         .fn()
         .mockResolvedValueOnce({
           indices: [{ name: 'postgres-logs-production.evaluations.2025.01.01' }],
@@ -102,7 +105,7 @@ describe('cleanupEsqlFixtures', () => {
 
   it('deletes data streams when resolved', async () => {
     const esClient = makeEsClient({
-      resolveIndex: jest
+      resolveIndex: vi
         .fn()
         .mockResolvedValueOnce({
           indices: [],
@@ -125,7 +128,7 @@ describe('cleanupEsqlFixtures', () => {
   it('continues if one pattern fails to resolve', async () => {
     const log = makeLog();
     const esClient = makeEsClient({
-      resolveIndex: jest
+      resolveIndex: vi
         .fn()
         .mockRejectedValueOnce(new Error('boom'))
         .mockResolvedValueOnce({
@@ -147,7 +150,7 @@ describe('cleanupEsqlFixtures', () => {
 
   it('deduplicates index names returned by overlapping patterns', async () => {
     const esClient = makeEsClient({
-      resolveIndex: jest
+      resolveIndex: vi
         .fn()
         .mockResolvedValueOnce({
           indices: [{ name: 'logs-production.evaluations.2025.01.01' }],

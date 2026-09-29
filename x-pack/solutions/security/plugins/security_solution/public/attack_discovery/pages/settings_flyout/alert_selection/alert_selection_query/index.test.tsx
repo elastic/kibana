@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -13,13 +16,13 @@ import { AlertSelectionQuery } from '.';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 describe('AlertSelectionQuery', () => {
   const defaultProps = {
-    filterManager: jest.fn() as unknown as FilterManager,
+    filterManager: vi.fn() as unknown as FilterManager,
     settings: {
       end: 'now',
       filters: [],
@@ -27,11 +30,11 @@ describe('AlertSelectionQuery', () => {
       size: 100,
       start: 'now-15m',
     },
-    onSettingsChanged: jest.fn(),
+    onSettingsChanged: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -41,7 +44,7 @@ describe('AlertSelectionQuery', () => {
           },
         },
       },
-    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+    } as unknown as Mocked<ReturnType<typeof useKibana>>);
   });
 
   it('renders the SearchBar', () => {

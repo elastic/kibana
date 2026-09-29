@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
@@ -18,12 +21,12 @@ import { ChangePasswordModal, validateChangePasswordForm } from './change_passwo
 import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
 
-jest.mock('@kbn/core-user-profile-browser-hooks', () => {
-  const actual = jest.requireActual('@kbn/core-user-profile-browser-hooks');
-  return { ...actual, useCurrentUser: jest.fn() };
+vi.mock('@kbn/core-user-profile-browser-hooks', async () => {
+  const actual = (await vi.importActual('@kbn/core-user-profile-browser-hooks'));
+  return { ...actual, useCurrentUser: vi.fn() };
 });
 
-const useCurrentUserMock = useCurrentUser as jest.Mock;
+const useCurrentUserMock = useCurrentUser as Mock;
 
 describe('ChangePasswordModal', () => {
   describe('#validateChangePasswordForm', () => {
@@ -157,8 +160,8 @@ describe('ChangePasswordModal', () => {
     const coreStart = coreMock.createStart();
     const authc = securityMock.createSetup().authc;
     const history = createMemoryHistory({ initialEntries: ['/users'] });
-    const onCancelMock = jest.fn();
-    const onSuccessMock = jest.fn();
+    const onCancelMock = vi.fn();
+    const onSuccessMock = vi.fn();
 
     const renderChangePasswordModal = (
       username: string,
@@ -179,7 +182,7 @@ describe('ChangePasswordModal', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       // Mock useCurrentUser to return a different user by default
       useCurrentUserMock.mockReturnValue(
         currentUserMock.createResult({

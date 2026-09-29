@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createHandler, resolveToolParameters } from './create_handler';
 import type { EsqlToolConfig } from '@kbn/agent-builder-common';
 
@@ -12,7 +14,7 @@ import type { EsqlToolConfig } from '@kbn/agent-builder-common';
 const mockEsClient = {
   asCurrentUser: {
     esql: {
-      query: jest.fn(),
+      query: vi.fn(),
     },
   },
 };
@@ -25,7 +27,7 @@ const frozenTierFilter = { bool: { must_not: [{ term: { _tier: 'data_frozen' } }
 
 describe('createHandler', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockEsClient.asCurrentUser.esql.query.mockResolvedValue({
       columns: [{ name: 'count', type: 'long' }],
       values: [[42]],

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,9 +19,12 @@ import { createRenderResultCard } from './render_result_card';
 expect.extend(matchers);
 
 // Type-only import above survives this mock: types are erased at runtime.
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  CardIcon: () => <span data-test-subj="resultCardIconStub" />,
-}));
+vi.mock('@kbn/fleet-plugin/public', () => {
+      const mocked = {
+      CardIcon: () => <span data-test-subj="resultCardIconStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const item: IntegrationCardItem = {
   id: 'epr:nginx',
@@ -45,7 +50,7 @@ const collectionItem: CollectionCardItem = {
   ],
 };
 
-const renderCard = (target: IntegrationCardItem, onOpenCollection = jest.fn()) => {
+const renderCard = (target: IntegrationCardItem, onOpenCollection = vi.fn()) => {
   render(<I18nProvider>{createRenderResultCard({ onOpenCollection })(target)}</I18nProvider>);
   return onOpenCollection;
 };

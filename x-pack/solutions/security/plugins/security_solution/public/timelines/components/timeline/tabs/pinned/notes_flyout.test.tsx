@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { Dispatch } from 'redux-v4';
 import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
@@ -45,25 +48,28 @@ import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
  * its own `onToggleShowNotes` mock and so never runs the branch that picks a flyout.
  */
 
-jest.mock('../../../../containers', () => ({
-  useTimelineEvents: jest.fn(),
-}));
+vi.mock('../../../../containers', () => {
+      const mocked = {
+      useTimelineEvents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/components/user_privileges');
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../../../../flyout_v2/use_flyout_api');
+vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
 
-jest.mock('../../../../../common/hooks/use_experimental_features');
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+vi.mock('../../../../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as Mock;
 
-jest.mock('../../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana', async () => {
+  const originalModule = (await vi.importActual('../../../../../common/lib/kibana'));
   return {
     ...originalModule,
-    useKibana: jest.fn(),
-    useGetUserSavedObjectPermissions: jest.fn(),
+    useKibana: vi.fn(),
+    useGetUserSavedObjectPermissions: vi.fn(),
   };
 });
 
@@ -71,38 +77,41 @@ type ControlColumnCellRender = (
   props: EuiDataGridCellValueElementProps & UnifiedTimelineDataGridCellContext
 ) => React.JSX.Element;
 
-jest.mock('../../body/unified_timeline_body', () => ({
-  UnifiedTimelineBody: ({
-    leadingControlColumns,
-  }: {
-    leadingControlColumns: EuiDataGridControlColumn[];
-  }) => {
-    const RowCellRender = leadingControlColumns[0].rowCellRender as ControlColumnCellRender;
+vi.mock('../../body/unified_timeline_body', () => {
+      const mocked = {
+      UnifiedTimelineBody: ({
+        leadingControlColumns,
+      }: {
+        leadingControlColumns: EuiDataGridControlColumn[];
+      }) => {
+        const RowCellRender = leadingControlColumns[0].rowCellRender as ControlColumnCellRender;
 
-    return (
-      <RowCellRender
-        colIndex={0}
-        columnId="default-timeline-control-column"
-        isDetails={false}
-        isExpandable={false}
-        isExpanded={false}
-        rowIndex={0}
-        setCellProps={() => {}}
-      />
-    );
-  },
-}));
+        return (
+          <RowCellRender
+            colIndex={0}
+            columnId="default-timeline-control-column"
+            isDetails={false}
+            isExpandable={false}
+            isExpanded={false}
+            rowIndex={0}
+            setCellProps={() => {}}
+          />
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const kibanaMockResult = {
   services: createStartServicesMock(),
 };
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
 describe('PinnedTabContent Leading actions - notes', () => {
   let props = {} as PinnedTabContentComponentProps;
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
-  const mockOpenFlyout = jest.fn();
+  const mockOpenFlyout = vi.fn();
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
@@ -113,11 +122,11 @@ describe('PinnedTabContent Leading actions - notes', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // The notes control column only renders when the corresponding rawEvent is present,
     // so we provide a rawEvent that matches the first (and only) event.
-    (useTimelineEvents as jest.Mock).mockReturnValue([
+    (useTimelineEvents as Mock).mockReturnValue([
       false,
       {
         events: mockTimelineData.slice(0, 1),
@@ -138,25 +147,25 @@ describe('PinnedTabContent Leading actions - notes', () => {
       },
     ]);
 
-    (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
+    (useIsExperimentalFeatureEnabledMock as Mock).mockImplementation(
       (feature: keyof ExperimentalFeatures) => {
         return allowedExperimentalValues[feature];
       }
     );
 
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       notesPrivileges: { read: true },
       timelinePrivileges: { crud: true, read: true },
     });
 
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
     });
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
 
     useKibanaMock.mockReturnValue(kibanaMockResult);
 
@@ -198,7 +207,7 @@ describe('PinnedTabContent Leading actions - notes', () => {
   });
 
   it('should open the new notes flyout when the new flyout is enabled', async () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
     render(
       <TestProviders>

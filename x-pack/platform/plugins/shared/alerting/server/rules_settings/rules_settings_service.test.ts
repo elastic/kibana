@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import sinon from 'sinon';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -25,7 +28,7 @@ const fakeRequest = {
       url: '/',
     },
   },
-  getSavedObjectsClient: jest.fn(),
+  getSavedObjectsClient: vi.fn(),
 } as unknown as KibanaRequest;
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -44,8 +47,8 @@ describe('RulesSettingsService', () => {
     const label = isServerless ? 'serverless' : 'non-serverless';
     describe(`getSettings in ${label}`, () => {
       afterEach(() => {
-        jest.resetAllMocks();
-        jest.clearAllMocks();
+        vi.resetAllMocks();
+        vi.clearAllMocks();
       });
 
       test('should fetch settings if none in cache', async () => {
@@ -53,7 +56,7 @@ describe('RulesSettingsService', () => {
         const rulesSettingsService = new RulesSettingsService({
           isServerless,
           logger,
-          getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
+          getRulesSettingsClientWithRequest: vi.fn().mockReturnValue(rulesSettingsClient),
         });
         // @ts-ignore - accessing private variable
         expect(rulesSettingsService.settings.get('default')).toBeUndefined();
@@ -75,14 +78,14 @@ describe('RulesSettingsService', () => {
 
       test('should return defaults if fetch settings errors and nothing in cache', async () => {
         const rulesSettingsClient = rulesSettingsClientMock.create();
-        (rulesSettingsClient.queryDelay().get as jest.Mock).mockImplementationOnce(() => {
+        (rulesSettingsClient.queryDelay().get as Mock).mockImplementationOnce(() => {
           throw new Error('no!');
         });
 
         const rulesSettingsService = new RulesSettingsService({
           isServerless,
           logger,
-          getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
+          getRulesSettingsClientWithRequest: vi.fn().mockReturnValue(rulesSettingsClient),
         });
 
         // @ts-ignore - accessing private variable
@@ -107,14 +110,14 @@ describe('RulesSettingsService', () => {
 
       test('should fetch settings per space', async () => {
         const rulesSettingsClient = rulesSettingsClientMock.create();
-        (rulesSettingsClient.queryDelay().get as jest.Mock).mockResolvedValueOnce({ delay: 13 });
-        (rulesSettingsClient.flapping().get as jest.Mock).mockResolvedValueOnce(
+        (rulesSettingsClient.queryDelay().get as Mock).mockResolvedValueOnce({ delay: 13 });
+        (rulesSettingsClient.flapping().get as Mock).mockResolvedValueOnce(
           getFlappingSettings(45, 2)
         );
         const rulesSettingsService = new RulesSettingsService({
           isServerless,
           logger,
-          getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
+          getRulesSettingsClientWithRequest: vi.fn().mockReturnValue(rulesSettingsClient),
         });
         // @ts-ignore - accessing private variable
         expect(rulesSettingsService.settings.get('default')).toBeUndefined();
@@ -150,14 +153,14 @@ describe('RulesSettingsService', () => {
 
       test('should use cached settings if cache has not expired', async () => {
         const rulesSettingsClient = rulesSettingsClientMock.create();
-        (rulesSettingsClient.queryDelay().get as jest.Mock).mockResolvedValueOnce({ delay: 5 });
-        (rulesSettingsClient.flapping().get as jest.Mock).mockResolvedValueOnce(
+        (rulesSettingsClient.queryDelay().get as Mock).mockResolvedValueOnce({ delay: 5 });
+        (rulesSettingsClient.flapping().get as Mock).mockResolvedValueOnce(
           getFlappingSettings(30, 3)
         );
         const rulesSettingsService = new RulesSettingsService({
           isServerless,
           logger,
-          getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
+          getRulesSettingsClientWithRequest: vi.fn().mockReturnValue(rulesSettingsClient),
         });
 
         const settings1 = await rulesSettingsService.getSettings(fakeRequest, 'default');
@@ -174,18 +177,18 @@ describe('RulesSettingsService', () => {
 
       test('should refetch settings if cache has expired', async () => {
         const rulesSettingsClient = rulesSettingsClientMock.create();
-        (rulesSettingsClient.queryDelay().get as jest.Mock).mockResolvedValueOnce({ delay: 5 });
-        (rulesSettingsClient.flapping().get as jest.Mock).mockResolvedValueOnce(
+        (rulesSettingsClient.queryDelay().get as Mock).mockResolvedValueOnce({ delay: 5 });
+        (rulesSettingsClient.flapping().get as Mock).mockResolvedValueOnce(
           getFlappingSettings(30, 3)
         );
-        (rulesSettingsClient.queryDelay().get as jest.Mock).mockResolvedValueOnce({ delay: 21 });
-        (rulesSettingsClient.flapping().get as jest.Mock).mockResolvedValueOnce(
+        (rulesSettingsClient.queryDelay().get as Mock).mockResolvedValueOnce({ delay: 21 });
+        (rulesSettingsClient.flapping().get as Mock).mockResolvedValueOnce(
           getFlappingSettings(11, 44)
         );
         const rulesSettingsService = new RulesSettingsService({
           isServerless,
           logger,
-          getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
+          getRulesSettingsClientWithRequest: vi.fn().mockReturnValue(rulesSettingsClient),
         });
 
         const settings1 = await rulesSettingsService.getSettings(fakeRequest, 'default');
@@ -203,17 +206,17 @@ describe('RulesSettingsService', () => {
 
       test('should return cached settings if refetching throws an error', async () => {
         const rulesSettingsClient = rulesSettingsClientMock.create();
-        (rulesSettingsClient.queryDelay().get as jest.Mock).mockResolvedValueOnce({ delay: 13 });
-        (rulesSettingsClient.flapping().get as jest.Mock).mockResolvedValueOnce(
+        (rulesSettingsClient.queryDelay().get as Mock).mockResolvedValueOnce({ delay: 13 });
+        (rulesSettingsClient.flapping().get as Mock).mockResolvedValueOnce(
           getFlappingSettings(11, 44)
         );
-        (rulesSettingsClient.queryDelay().get as jest.Mock).mockImplementationOnce(() => {
+        (rulesSettingsClient.queryDelay().get as Mock).mockImplementationOnce(() => {
           throw new Error('no!');
         });
         const rulesSettingsService = new RulesSettingsService({
           isServerless,
           logger,
-          getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
+          getRulesSettingsClientWithRequest: vi.fn().mockReturnValue(rulesSettingsClient),
         });
 
         const settings1 = await rulesSettingsService.getSettings(fakeRequest, 'default');

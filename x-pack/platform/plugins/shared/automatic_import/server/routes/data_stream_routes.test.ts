@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import expect from 'expect';
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -20,10 +23,10 @@ describe('Data stream routes - upload samples', () => {
     request: unknown,
     response: unknown
   ) => Promise<unknown>;
-  let mockAddSamplesToDataStream: jest.Mock;
-  let mockEsSearch: jest.Mock;
-  let mockGetCurrentUser: jest.Mock;
-  let mockResponse: { ok: jest.Mock; badRequest: jest.Mock };
+  let mockAddSamplesToDataStream: Mock;
+  let mockEsSearch: Mock;
+  let mockGetCurrentUser: Mock;
+  let mockResponse: { ok: Mock; badRequest: Mock };
   let capturedUploadRouteConfig: { path: string; options?: { body?: { maxBytes?: number } } };
 
   const createMockContext = (): AutomaticImportPluginRequestHandlerContext =>
@@ -39,19 +42,19 @@ describe('Data stream routes - upload samples', () => {
     } as unknown as AutomaticImportPluginRequestHandlerContext);
 
   beforeEach(() => {
-    mockAddSamplesToDataStream = jest.fn().mockResolvedValue({ items: [], errors: false });
-    mockEsSearch = jest.fn();
-    mockGetCurrentUser = jest.fn().mockResolvedValue({ username: 'test-user' });
+    mockAddSamplesToDataStream = vi.fn().mockResolvedValue({ items: [], errors: false });
+    mockEsSearch = vi.fn();
+    mockGetCurrentUser = vi.fn().mockResolvedValue({ username: 'test-user' });
     mockResponse = {
-      ok: jest.fn().mockReturnValue({}),
-      badRequest: jest.fn().mockReturnValue({}),
+      ok: vi.fn().mockReturnValue({}),
+      badRequest: vi.fn().mockReturnValue({}),
     };
 
     const routeHandlers: Record<string, { handler: typeof routeHandler }> = {};
 
     const mockRouter = {
       versioned: {
-        post: jest
+        post: vi
           .fn()
           .mockImplementation(
             (config: { path: string; options?: { body?: { maxBytes?: number } } }) => {
@@ -59,19 +62,19 @@ describe('Data stream routes - upload samples', () => {
                 capturedUploadRouteConfig = config;
               }
               return {
-                addVersion: jest
+                addVersion: vi
                   .fn()
                   .mockImplementation((_versionConfig: unknown, handler: typeof routeHandler) => {
                     routeHandlers[`POST:${config.path}`] = { handler };
-                    return { addVersion: jest.fn() };
+                    return { addVersion: vi.fn() };
                   }),
               };
             }
           ),
-        delete: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
-        patch: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
-        get: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
-        put: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
+        delete: vi.fn().mockReturnValue({ addVersion: vi.fn() }),
+        patch: vi.fn().mockReturnValue({ addVersion: vi.fn() }),
+        get: vi.fn().mockReturnValue({ addVersion: vi.fn() }),
+        put: vi.fn().mockReturnValue({ addVersion: vi.fn() }),
       },
     };
 

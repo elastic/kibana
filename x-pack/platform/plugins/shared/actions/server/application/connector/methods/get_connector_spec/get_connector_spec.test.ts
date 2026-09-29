@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import type { ActionsClientContext } from '../../../../actions_client';
 import type { ActionsConfigurationUtilities } from '../../../../actions_config';
@@ -13,8 +15,8 @@ import { getConnectorSpecAsJsonSchema } from './get_connector_spec';
 
 // All connector specs in kbn-connector-specs have test.enabled = true, so we inject a
 // synthetic non-testable spec to cover the isTestable: false branch.
-jest.mock('@kbn/connector-specs', () => {
-  const actual = jest.requireActual('@kbn/connector-specs');
+vi.mock('@kbn/connector-specs', async () => {
+  const actual = (await vi.importActual('@kbn/connector-specs'));
   return {
     ...actual,
     connectorsSpecs: {
@@ -64,7 +66,7 @@ function createContext(): ActionsClientContext {
 
 describe('getConnectorSpecAsJsonSchema', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     authorization.ensureAuthorized.mockResolvedValue(undefined);
   });
 

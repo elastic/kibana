@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { performance } from 'perf_hooks';
 import { ElasticsearchCircuitBreaker } from './elastic_search_circuit_breaker';
 import {
@@ -31,25 +34,28 @@ import {
 import type { ElasticsearchClient } from '@kbn/core/server';
 import * as perf_hooks from 'perf_hooks';
 
-jest.mock('perf_hooks', () => ({
-  performance: {
-    now: jest.fn(),
-    eventLoopUtilization: jest.fn(),
-  },
-  monitorEventLoopDelay: jest.fn(),
-}));
+vi.mock('perf_hooks', () => {
+      const mocked = {
+      performance: {
+        now: vi.fn(),
+        eventLoopUtilization: vi.fn(),
+      },
+      monitorEventLoopDelay: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockPerformance = performance as jest.Mocked<typeof performance>;
-const mockMonitorEventLoopDelay = perf_hooks.monitorEventLoopDelay as jest.MockedFunction<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+const mockPerformance = performance as Mocked<typeof performance>;
+const mockMonitorEventLoopDelay = perf_hooks.monitorEventLoopDelay as MockedFunction<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 describe('Security Solution - Health Diagnostic Queries - Circuit Breakers', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(process, 'memoryUsage').mockReturnValue(createMockMemoryUsage());
+    vi.clearAllMocks();
+    vi.spyOn(process, 'memoryUsage').mockReturnValue(createMockMemoryUsage());
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('ElasticsearchCircuitBreaker', () => {
@@ -434,7 +440,7 @@ describe('Security Solution - Health Diagnostic Queries - Circuit Breakers', () 
     };
 
     const setupMemoryUsage = (rss: number) => {
-      jest.spyOn(process, 'memoryUsage').mockReturnValue(createMockMemoryUsage({ rss }));
+      vi.spyOn(process, 'memoryUsage').mockReturnValue(createMockMemoryUsage({ rss }));
     };
 
     describe('constructor validation', () => {

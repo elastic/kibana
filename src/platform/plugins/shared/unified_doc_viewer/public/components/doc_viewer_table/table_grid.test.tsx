@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { TableGridProps } from './table_grid';
@@ -17,27 +19,39 @@ import { buildHitMock } from '../../__mocks__';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  euiFontSize: () => ({ fontSize: '12px' }),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      euiFontSize: () => ({ fontSize: '12px' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../plugin', () => ({
-  getUnifiedDocViewerServices: () => ({
-    toasts: {},
-  }),
-}));
+vi.mock('../../plugin', () => {
+      const mocked = {
+      getUnifiedDocViewerServices: () => ({
+        toasts: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./table_cell_actions', () => ({
-  getFieldCellActions: () => [],
-  getFieldValueCellActions: () => [],
-  getFilterExistsDisabledWarning: () => undefined,
-  getFilterInOutPairDisabledWarning: () => undefined,
-}));
+vi.mock('./table_cell_actions', () => {
+      const mocked = {
+      getFieldCellActions: () => [],
+      getFieldValueCellActions: () => [],
+      getFilterExistsDisabledWarning: () => undefined,
+      getFilterInOutPairDisabledWarning: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./get_pin_control', () => ({
-  getPinColumnControl: jest.fn(() => ({ id: 'pin_field', width: 40 })),
-}));
+vi.mock('./get_pin_control', () => {
+      const mocked = {
+      getPinColumnControl: vi.fn(() => ({ id: 'pin_field', width: 40 })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDataView = buildDataViewMock({
   name: 'data-view-mock',
@@ -70,11 +84,11 @@ describe('TableGrid', () => {
     containerWidth: 800,
     rows: mockRows,
     isEsqlMode: false,
-    filter: jest.fn(),
-    onAddColumn: jest.fn(),
-    onRemoveColumn: jest.fn(),
+    filter: vi.fn(),
+    onAddColumn: vi.fn(),
+    onRemoveColumn: vi.fn(),
     columns: [GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE],
-    onFindSearchTermMatch: jest.fn(),
+    onFindSearchTermMatch: vi.fn(),
     searchTerm: '',
   };
 
@@ -87,13 +101,13 @@ describe('TableGrid', () => {
   });
 
   it('renders custom cell value renderer if provided', () => {
-    const customRenderCellValue = jest.fn(() => <span>CustomCell</span>);
+    const customRenderCellValue = vi.fn(() => <span>CustomCell</span>);
     render(<TableGrid {...defaultProps} customRenderCellValue={customRenderCellValue} />);
     expect(screen.getAllByText('CustomCell').length).toBeGreaterThan(0);
   });
 
   it('renders custom cell popover renderer if provided', async () => {
-    const customRenderCellPopover = jest.fn(() => <span>CustomPopover</span>);
+    const customRenderCellPopover = vi.fn(() => <span>CustomPopover</span>);
     render(<TableGrid {...defaultProps} customRenderCellPopover={customRenderCellPopover} />);
     const tableCell = screen.getByText('fieldA');
     await userEvent.hover(tableCell);

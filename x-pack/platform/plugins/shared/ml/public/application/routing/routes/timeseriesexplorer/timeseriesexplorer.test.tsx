@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedClass, MockedFunction } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { render } from '@testing-library/react';
@@ -16,31 +19,40 @@ import { TimeseriesexplorerNoJobsFound } from '../../../timeseriesexplorer/compo
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import type { IUiSettingsClient } from '@kbn/core/public';
 
-jest.mock('../../../services/toast_notification_service');
+vi.mock('../../../services/toast_notification_service');
 
-jest.mock('../../../timeseriesexplorer', () => ({
-  TimeSeriesExplorer: jest.fn(() => {
-    return null;
-  }),
-}));
+vi.mock('../../../timeseriesexplorer', () => {
+      const mocked = {
+      TimeSeriesExplorer: vi.fn(() => {
+        return null;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../timeseriesexplorer/timeseriesexplorer_page', () => ({
-  TimeSeriesExplorerPage: jest.fn(({ children }: PropsWithChildren<unknown>) => {
-    return <>{children}</>;
-  }),
-}));
+vi.mock('../../../timeseriesexplorer/timeseriesexplorer_page', () => {
+      const mocked = {
+      TimeSeriesExplorerPage: vi.fn(({ children }: PropsWithChildren<unknown>) => {
+        return <>{children}</>;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found', () => ({
-  TimeseriesexplorerNoJobsFound: jest.fn(() => {
-    return null;
-  }),
-}));
+vi.mock('../../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found', () => {
+      const mocked = {
+      TimeseriesexplorerNoJobsFound: vi.fn(() => {
+        return null;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MockedTimeSeriesExplorer = TimeSeriesExplorer as jest.MockedClass<typeof TimeSeriesExplorer>;
-const MockedTimeSeriesExplorerPage = TimeSeriesExplorerPage as jest.MockedFunction<
+const MockedTimeSeriesExplorer = TimeSeriesExplorer as MockedClass<typeof TimeSeriesExplorer>;
+const MockedTimeSeriesExplorerPage = TimeSeriesExplorerPage as MockedFunction<
   typeof TimeSeriesExplorerPage
 >;
-const MockedTimeseriesexplorerNoJobsFound = TimeseriesexplorerNoJobsFound as jest.MockedFunction<
+const MockedTimeseriesexplorerNoJobsFound = TimeseriesexplorerNoJobsFound as MockedFunction<
   typeof TimeseriesexplorerNoJobsFound
 >;
 
@@ -49,23 +61,23 @@ const getMockedTimefilter = () => {
   const { of } = require('rxjs');
   return {
     timefilter: {
-      disableTimeRangeSelector: jest.fn(),
-      disableAutoRefreshSelector: jest.fn(),
-      enableTimeRangeSelector: jest.fn(),
-      enableAutoRefreshSelector: jest.fn(),
-      getRefreshInterval: jest.fn(),
-      setRefreshInterval: jest.fn(),
-      getActiveBounds: jest.fn(),
-      getTime: jest.fn(),
-      isAutoRefreshSelectorEnabled: jest.fn(),
-      isTimeRangeSelectorEnabled: jest.fn(),
-      getRefreshIntervalUpdate$: jest.fn(),
-      getTimeUpdate$: jest.fn(() => {
+      disableTimeRangeSelector: vi.fn(),
+      disableAutoRefreshSelector: vi.fn(),
+      enableTimeRangeSelector: vi.fn(),
+      enableAutoRefreshSelector: vi.fn(),
+      getRefreshInterval: vi.fn(),
+      setRefreshInterval: vi.fn(),
+      getActiveBounds: vi.fn(),
+      getTime: vi.fn(),
+      isAutoRefreshSelectorEnabled: vi.fn(),
+      isTimeRangeSelectorEnabled: vi.fn(),
+      getRefreshIntervalUpdate$: vi.fn(),
+      getTimeUpdate$: vi.fn(() => {
         return of();
       }),
-      getEnabledUpdated$: jest.fn(),
+      getEnabledUpdated$: vi.fn(),
     },
-    history: { get: jest.fn() },
+    history: { get: vi.fn() },
   };
 };
 
@@ -80,34 +92,37 @@ const getMockedDatePickerDependencies = () => {
   } as unknown as DatePickerDependencies;
 };
 
-jest.mock('@kbn/ml-url-state', () => {
+vi.mock('@kbn/ml-url-state', () => {
   return {
-    usePageUrlState: jest.fn(() => {
-      return [{}, jest.fn(), {}];
+    usePageUrlState: vi.fn(() => {
+      return [{}, vi.fn(), {}];
     }),
-    useUrlState: jest.fn(() => {
-      return [{ refreshInterval: { value: 0, pause: true } }, jest.fn()];
+    useUrlState: vi.fn(() => {
+      return [{ refreshInterval: { value: 0, pause: true } }, vi.fn()];
     }),
   };
 });
 
-jest.mock('../../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state');
+vi.mock('../../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state');
 
-jest.mock('../../../components/help_menu', () => ({
-  HelpMenu: () => <div id="mockHelpMenu" />,
-}));
+vi.mock('../../../components/help_menu', () => {
+      const mocked = {
+      HelpMenu: () => <div id="mockHelpMenu" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../contexts/kibana/kibana_context', () => {
+vi.mock('../../../contexts/kibana/kibana_context', () => {
   return {
     useMlKibana: () => {
       return {
         services: {
-          chrome: { docTitle: { change: jest.fn() } },
-          application: { getUrlForApp: jest.fn(), navigateToUrl: jest.fn() },
+          chrome: { docTitle: { change: vi.fn() } },
+          application: { getUrlForApp: vi.fn(), navigateToUrl: vi.fn() },
           share: {
-            urlGenerators: { getUrlGenerator: jest.fn() },
+            urlGenerators: { getUrlGenerator: vi.fn() },
           },
-          uiSettings: { get: jest.fn() },
+          uiSettings: { get: vi.fn() },
           data: {
             query: {
               timefilter: getMockedTimefilter(),
@@ -121,7 +136,7 @@ jest.mock('../../../contexts/kibana/kibana_context', () => {
           },
           docLinks: {
             links: {
-              ml: { anomalyDetection: jest.fn() },
+              ml: { anomalyDetection: vi.fn() },
             },
           },
         },

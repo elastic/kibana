@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Subject, startWith, distinctUntilChanged, BehaviorSubject, withLatestFrom } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
@@ -31,14 +33,14 @@ describe('createManagedConfiguration()', () => {
   const logger = mockLogger();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
-  afterAll(() => jest.useRealTimers());
+  afterAll(() => vi.useRealTimers());
 
   test('uses max_workers config as capacity if only max workers is defined', async () => {
     const capacity = calculateStartingCapacity(
@@ -92,13 +94,13 @@ describe('createManagedConfiguration()', () => {
   });
 
   test(`skips errors that aren't about too many requests`, async () => {
-    const errorSubscription = jest.fn();
+    const errorSubscription = vi.fn();
     const errors$ = new Subject<Error>();
     const errorCheck$ = countErrors(errors$, ADJUST_THROUGHPUT_INTERVAL);
     errorCheck$.subscribe(errorSubscription);
 
     errors$.next(new Error('foo'));
-    jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
+    vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
     expect(errorSubscription).toHaveBeenCalledTimes(1);
   });
 
@@ -106,7 +108,7 @@ describe('createManagedConfiguration()', () => {
     function setupScenario(startingCapacity: number, claimStrategy: string = CLAIM_STRATEGY_MGET) {
       const errors$ = new Subject<Error>();
       const errorCheck$ = countErrors(errors$, ADJUST_THROUGHPUT_INTERVAL);
-      const subscription = jest.fn();
+      const subscription = vi.fn();
       const capacityConfiguration$ = errorCheck$.pipe(
         createCapacityScan(
           {
@@ -128,10 +130,10 @@ describe('createManagedConfiguration()', () => {
       test('should not decrease configuration at the next interval when an error without status code is emitted', async () => {
         const { subscription, errors$ } = setupScenario(10);
         errors$.next(new Error());
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
-        jest.advanceTimersByTime(1);
+        vi.advanceTimersByTime(1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
       });
@@ -139,10 +141,10 @@ describe('createManagedConfiguration()', () => {
       test('should decrease configuration at the next interval when an msearch 429 error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(10);
         errors$.next(new MsearchError(429));
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
-        jest.advanceTimersByTime(1);
+        vi.advanceTimersByTime(1);
         expect(subscription).toHaveBeenCalledTimes(2);
         expect(subscription).toHaveBeenNthCalledWith(2, 8);
       });
@@ -150,10 +152,10 @@ describe('createManagedConfiguration()', () => {
       test('should decrease configuration at the next interval when an msearch 500 error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(10);
         errors$.next(new MsearchError(500));
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
-        jest.advanceTimersByTime(1);
+        vi.advanceTimersByTime(1);
         expect(subscription).toHaveBeenCalledTimes(2);
         expect(subscription).toHaveBeenNthCalledWith(2, 8);
       });
@@ -161,10 +163,10 @@ describe('createManagedConfiguration()', () => {
       test('should decrease configuration at the next interval when an msearch 503 error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(10);
         errors$.next(new MsearchError(503));
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
-        jest.advanceTimersByTime(1);
+        vi.advanceTimersByTime(1);
         expect(subscription).toHaveBeenCalledTimes(2);
         expect(subscription).toHaveBeenNthCalledWith(2, 8);
       });
@@ -174,10 +176,10 @@ describe('createManagedConfiguration()', () => {
         errors$.next(
           new BulkUpdateError({ statusCode: 429, message: 'test', type: 'too_many_requests' })
         );
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
-        jest.advanceTimersByTime(1);
+        vi.advanceTimersByTime(1);
         expect(subscription).toHaveBeenCalledTimes(2);
         expect(subscription).toHaveBeenNthCalledWith(2, 8);
       });
@@ -187,10 +189,10 @@ describe('createManagedConfiguration()', () => {
         errors$.next(
           new BulkUpdateError({ statusCode: 500, message: 'test', type: 'server_error' })
         );
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
-        jest.advanceTimersByTime(1);
+        vi.advanceTimersByTime(1);
         expect(subscription).toHaveBeenCalledTimes(2);
         expect(subscription).toHaveBeenNthCalledWith(2, 8);
       });
@@ -198,10 +200,10 @@ describe('createManagedConfiguration()', () => {
       test('should decrease configuration at the next interval when an msearch 502 error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(10);
         errors$.next(new MsearchError(502));
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
-        jest.advanceTimersByTime(1);
+        vi.advanceTimersByTime(1);
         expect(subscription).toHaveBeenCalledTimes(2);
         expect(subscription).toHaveBeenNthCalledWith(2, 8);
       });
@@ -211,10 +213,10 @@ describe('createManagedConfiguration()', () => {
         errors$.next(
           new BulkUpdateError({ statusCode: 503, message: 'test', type: 'unavailable' })
         );
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
-        jest.advanceTimersByTime(1);
+        vi.advanceTimersByTime(1);
         expect(subscription).toHaveBeenCalledTimes(2);
         expect(subscription).toHaveBeenNthCalledWith(2, 8);
       });
@@ -222,10 +224,10 @@ describe('createManagedConfiguration()', () => {
       test('should decrease configuration at the next interval when an msearch 504 error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(10);
         errors$.next(new MsearchError(504));
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
-        jest.advanceTimersByTime(1);
+        vi.advanceTimersByTime(1);
         expect(subscription).toHaveBeenCalledTimes(2);
         expect(subscription).toHaveBeenNthCalledWith(2, 8);
       });
@@ -233,17 +235,17 @@ describe('createManagedConfiguration()', () => {
       test('should not change configuration at the next interval when other msearch error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(10);
         errors$.next(new MsearchError(404));
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
-        jest.advanceTimersByTime(1);
+        vi.advanceTimersByTime(1);
         expect(subscription).toHaveBeenCalledTimes(1);
       });
 
       test('should log a warning when the configuration changes from the starting value', async () => {
         const { errors$ } = setupScenario(10, CLAIM_STRATEGY_MGET);
         errors$.next(new MsearchError(429));
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
         expect(logger.warn).toHaveBeenCalledWith(
           'Capacity configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
         );
@@ -252,7 +254,7 @@ describe('createManagedConfiguration()', () => {
       test('should increase configuration back to normal incrementally after an error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(10, CLAIM_STRATEGY_MGET);
         errors$.next(new MsearchError(429));
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL * 10);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL * 10);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
         expect(subscription).toHaveBeenNthCalledWith(2, 8);
         expect(subscription).toHaveBeenNthCalledWith(3, 9);
@@ -265,7 +267,7 @@ describe('createManagedConfiguration()', () => {
         const { subscription, errors$ } = setupScenario(10, CLAIM_STRATEGY_MGET);
         for (let i = 0; i < 20; i++) {
           errors$.next(new MsearchError(429));
-          jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
+          vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
         }
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
         expect(subscription).toHaveBeenNthCalledWith(2, 8);
@@ -285,7 +287,7 @@ describe('createManagedConfiguration()', () => {
       const errors$ = new Subject<Error>();
       const utilization$ = new BehaviorSubject<number>(100);
       const errorCheck$ = countErrors(errors$, ADJUST_THROUGHPUT_INTERVAL);
-      const subscription = jest.fn();
+      const subscription = vi.fn();
       const queue = createRunningAveragedStat<number>(5);
       const pollIntervalConfiguration$ = errorCheck$.pipe(
         withLatestFrom(utilization$),
@@ -301,9 +303,9 @@ describe('createManagedConfiguration()', () => {
       test('should increase configuration at the next interval when an error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(100, CLAIM_STRATEGY_MGET);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
-        jest.advanceTimersByTime(1);
+        vi.advanceTimersByTime(1);
         expect(subscription).toHaveBeenCalledTimes(2);
         expect(subscription).toHaveBeenNthCalledWith(2, 120);
       });
@@ -311,7 +313,7 @@ describe('createManagedConfiguration()', () => {
       test('should log a warning when the configuration changes from the starting value', async () => {
         const { errors$ } = setupScenario(100, CLAIM_STRATEGY_MGET);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
         expect(logger.warn).toHaveBeenCalledWith(
           'Poll interval configuration changing from 100 to 120 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
         );
@@ -323,7 +325,7 @@ describe('createManagedConfiguration()', () => {
           CLAIM_STRATEGY_MGET
         );
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL * 10);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL * 10);
         expect(subscription).toHaveBeenNthCalledWith(2, 600);
         expect(subscription).toHaveBeenNthCalledWith(3, 500);
         // No new calls due to value not changing and usage of distinctUntilChanged()
@@ -336,7 +338,7 @@ describe('createManagedConfiguration()', () => {
           CLAIM_STRATEGY_MGET
         );
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL * 10);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL * 10);
         expect(subscription).toHaveBeenNthCalledWith(2, 480);
         expect(subscription).toHaveBeenNthCalledWith(3, 400);
         // No new calls due to value not changing and usage of distinctUntilChanged()
@@ -351,7 +353,7 @@ describe('createManagedConfiguration()', () => {
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         for (let i = 0; i < 10; i++) {
           utilization$.next(20);
-          jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
+          vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
         }
         expect(subscription).toHaveBeenNthCalledWith(2, 576);
         expect(subscription).toHaveBeenNthCalledWith(3, 3000);
@@ -364,7 +366,7 @@ describe('createManagedConfiguration()', () => {
         const u = [15, 35, 5, 48, 0];
         for (let i = 0; i < u.length; i++) {
           utilization$.next(u[i]);
-          jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
+          vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
         }
         expect(subscription).toHaveBeenNthCalledWith(2, 3000);
         expect(subscription).toHaveBeenNthCalledWith(3, 500);
@@ -377,7 +379,7 @@ describe('createManagedConfiguration()', () => {
       test('should log a warning when the configuration changes from the starting value based on TM utilization', async () => {
         const { utilization$ } = setupScenario(100, CLAIM_STRATEGY_MGET);
         utilization$.next(20);
-        jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
+        vi.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
         expect(logger.debug).toHaveBeenCalledWith(
           'Poll interval configuration changing from 100 to 3000 after a change in the average task load: 20.'
         );

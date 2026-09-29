@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fieldWildcardFilter, makeRegEx } from './field_wildcard';
 import { fieldWildcardMatcher } from './field_wildcard';
 
@@ -75,7 +77,7 @@ describe('fieldWildcard', () => {
     });
 
     it('logs and safely handles invalid glob inputs (non-string) without throwing', function () {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       // Pass a non-string value to trigger the try/catch path inside fieldWildcardMatcher
       const matcher = fieldWildcardMatcher([null as unknown as string], metaFields);
       expect(() => matcher('foo')).not.toThrow();

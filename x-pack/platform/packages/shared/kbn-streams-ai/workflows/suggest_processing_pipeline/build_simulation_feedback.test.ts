@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FlattenRecord, ProcessingSimulationResponse } from '@kbn/streams-schema';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { buildSimulationFeedback, detectTemporaryFields } from './build_simulation_feedback';
 
-const stubGetFieldSummary = jest
+const stubGetFieldSummary = vi
   .fn()
   .mockResolvedValue(['message (text) - 1 distinct value (`hello`)']);
 
 const stubFieldsMetadataClient = {
-  find: jest.fn().mockResolvedValue({ getFields: () => ({}) }),
-  getByName: jest.fn().mockResolvedValue(undefined),
-  matchesAnyTypeForEventCategory: jest.fn().mockReturnValue(false),
-  getFieldChildren: jest.fn().mockResolvedValue([]),
-  getECSFieldsets: jest.fn().mockResolvedValue({}),
+  find: vi.fn().mockResolvedValue({ getFields: () => ({}) }),
+  getByName: vi.fn().mockResolvedValue(undefined),
+  matchesAnyTypeForEventCategory: vi.fn().mockReturnValue(false),
+  getFieldChildren: vi.fn().mockResolvedValue([]),
+  getECSFieldsets: vi.fn().mockResolvedValue({}),
 } satisfies IFieldsMetadataClient;
 
 const emptyDocumentsMetrics: ProcessingSimulationResponse['documents_metrics'] = {
@@ -63,7 +65,7 @@ describe('detectTemporaryFields', () => {
 
 describe('buildSimulationFeedback', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns invalid feedback when definition_error is present', async () => {

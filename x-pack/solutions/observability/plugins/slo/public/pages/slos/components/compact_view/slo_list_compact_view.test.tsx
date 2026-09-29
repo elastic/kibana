@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
@@ -23,40 +26,46 @@ import { render } from '../../../../utils/test_helper';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { SloListCompactView } from './slo_list_compact_view';
 
-jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
-  RuleFormFlyout: jest.fn(() => <div data-test-subj="add-rule-flyout">Add rule flyout</div>),
-}));
+vi.mock('@kbn/response-ops-rule-form/flyout', () => {
+      const mocked = {
+      RuleFormFlyout: vi.fn(() => <div data-test-subj="add-rule-flyout">Add rule flyout</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../hooks/use_permissions');
-jest.mock('../../../../hooks/use_fetch_active_alerts');
-jest.mock('../../../../hooks/use_fetch_rules_for_slo');
-jest.mock('../../../../hooks/use_fetch_historical_summary');
-jest.mock('../../../../hooks/use_get_filtered_rule_types');
-jest.mock('../../../../context/action_modal');
-jest.mock('../../hooks/use_url_search_state');
-jest.mock('../../../../hooks/use_space');
-jest.mock('../slo_sparkline', () => ({
-  SloSparkline: () => <div data-test-subj="sloSparkline" />,
-}));
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../hooks/use_permissions');
+vi.mock('../../../../hooks/use_fetch_active_alerts');
+vi.mock('../../../../hooks/use_fetch_rules_for_slo');
+vi.mock('../../../../hooks/use_fetch_historical_summary');
+vi.mock('../../../../hooks/use_get_filtered_rule_types');
+vi.mock('../../../../context/action_modal');
+vi.mock('../../hooks/use_url_search_state');
+vi.mock('../../../../hooks/use_space');
+vi.mock('../slo_sparkline', () => {
+      const mocked = {
+      SloSparkline: () => <div data-test-subj="sloSparkline" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mock;
-const usePermissionsMock = usePermissions as jest.Mock;
-const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
-const useFetchRulesForSloMock = useFetchRulesForSlo as jest.Mock;
-const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
-const useGetFilteredRuleTypesMock = useGetFilteredRuleTypes as jest.Mock;
-const useActionModalMock = useActionModal as jest.Mock;
-const useUrlSearchStateMock = useUrlSearchState as jest.Mock;
-const useSpaceMock = useSpace as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const usePermissionsMock = usePermissions as Mock;
+const useFetchActiveAlertsMock = useFetchActiveAlerts as Mock;
+const useFetchRulesForSloMock = useFetchRulesForSlo as Mock;
+const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as Mock;
+const useGetFilteredRuleTypesMock = useGetFilteredRuleTypes as Mock;
+const useActionModalMock = useActionModal as Mock;
+const useUrlSearchStateMock = useUrlSearchState as Mock;
+const useSpaceMock = useSpace as Mock;
 
 describe('SloListCompactView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useKibanaMock.mockReturnValue({
       services: {
-        application: { navigateToUrl: jest.fn() },
+        application: { navigateToUrl: vi.fn() },
         http: {
           basePath: {
             prepend: (url: string) => url,
@@ -68,7 +77,7 @@ describe('SloListCompactView', () => {
         share: {
           url: {
             locators: {
-              get: jest.fn(),
+              get: vi.fn(),
             },
           },
         },
@@ -84,8 +93,8 @@ describe('SloListCompactView', () => {
     useFetchRulesForSloMock.mockReturnValue({ data: {} });
     useFetchHistoricalSummaryMock.mockReturnValue({ isLoading: false, data: [] });
     useGetFilteredRuleTypesMock.mockReturnValue([]);
-    useActionModalMock.mockReturnValue({ triggerAction: jest.fn() });
-    useUrlSearchStateMock.mockReturnValue({ onStateChange: jest.fn() });
+    useActionModalMock.mockReturnValue({ triggerAction: vi.fn() });
+    useUrlSearchStateMock.mockReturnValue({ onStateChange: vi.fn() });
     useSpaceMock.mockReturnValue('default');
   });
 

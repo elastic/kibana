@@ -7,91 +7,127 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/dev-cli-runner', () => ({
-  run: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
 
-jest.mock('@kbn/dev-cli-errors', () => ({
-  createFailError: (message: string) => new Error(message),
-}));
+vi.mock('@kbn/dev-cli-runner', () => {
+      const mocked = {
+      run: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/dev-validation-runner', () => ({
-  readValidationRunFlags: jest.fn(),
-  resolveValidationBaseContext: jest.fn(),
-  resolveValidationAffectedProjects: jest.fn(),
-  VALIDATION_RUN_HELP: [],
-  VALIDATION_RUN_STRING_FLAGS: [],
-}));
+vi.mock('@kbn/dev-cli-errors', () => {
+      const mocked = {
+      createFailError: (message: string) => new Error(message),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/repo',
-}));
+vi.mock('@kbn/dev-validation-runner', () => {
+      const mocked = {
+      readValidationRunFlags: vi.fn(),
+      resolveValidationBaseContext: vi.fn(),
+      resolveValidationAffectedProjects: vi.fn(),
+      VALIDATION_RUN_HELP: [],
+      VALIDATION_RUN_STRING_FLAGS: [],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./type_check_validation_loader', () => ({
-  executeTypeCheckValidation: jest.fn(),
-}));
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/repo',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./eslint/run_eslint_contract', () => ({
-  executeEslintValidation: jest.fn(),
-}));
+vi.mock('./type_check_validation_loader', () => {
+      const mocked = {
+      executeTypeCheckValidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./oxlint/run_oxlint_contract', () => ({
-  executeOxlintValidation: jest.fn(),
-}));
+vi.mock('./eslint/run_eslint_contract', () => {
+      const mocked = {
+      executeEslintValidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/dev-proc-runner', () => ({
-  ProcRunner: jest.fn().mockImplementation(() => ({
-    teardown: jest.fn(),
-  })),
-}));
+vi.mock('./oxlint/run_oxlint_contract', () => {
+      const mocked = {
+      executeOxlintValidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/tooling-log', () => ({
-  ToolingLog: jest.fn().mockImplementation(() => ({
-    writers: [] as Array<{ write: (msg: { args: unknown[]; type: string }) => boolean }>,
-    setWriters: jest.fn(function (this: { writers: unknown[] }, writers: unknown[]) {
-      this.writers = writers;
-    }),
-  })),
-}));
+vi.mock('@kbn/dev-proc-runner', () => {
+      const mocked = {
+      ProcRunner: vi.fn().mockImplementation(() => ({
+        teardown: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRunJestViaMoon = jest.fn();
+vi.mock('@kbn/tooling-log', () => {
+      const mocked = {
+      ToolingLog: vi.fn().mockImplementation(() => ({
+        writers: [] as Array<{ write: (msg: { args: unknown[]; type: string }) => boolean }>,
+        setWriters: vi.fn(function (this: { writers: unknown[] }, writers: unknown[]) {
+          this.writers = writers;
+        }),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/test', () => ({
-  runJestViaMoon: (...args: unknown[]) => mockRunJestViaMoon(...args),
-  JEST_CONFIG_NAMES: [
-    'jest.config.dev.js',
-    'jest.config.js',
-    'jest.config.cjs',
-    'jest.config.mjs',
-    'jest.config.ts',
-    'jest.config.json',
-  ],
-}));
+const mockRunJestViaMoon = vi.fn();
 
-jest.mock('fs', () => ({
-  ...jest.requireActual('fs'),
-  existsSync: jest.fn(),
-  readdirSync: jest.fn(),
-}));
+vi.mock('@kbn/test', () => {
+      const mocked = {
+      runJestViaMoon: (...args: unknown[]) => mockRunJestViaMoon(...args),
+      JEST_CONFIG_NAMES: [
+        'jest.config.dev.js',
+        'jest.config.js',
+        'jest.config.cjs',
+        'jest.config.mjs',
+        'jest.config.ts',
+        'jest.config.json',
+      ],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockExecaFn = jest.fn();
-jest.mock('execa', () => ({ __esModule: true, default: mockExecaFn }));
+vi.mock('fs', () => {
+      const mocked = {
+      ...require('fs'),
+      existsSync: vi.fn(),
+      readdirSync: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRun = jest.requireMock('@kbn/dev-cli-runner').run as jest.Mock;
-const mockReadValidationRunFlags = jest.requireMock('@kbn/dev-validation-runner')
-  .readValidationRunFlags as jest.Mock;
-const mockResolveValidationBaseContext = jest.requireMock('@kbn/dev-validation-runner')
-  .resolveValidationBaseContext as jest.Mock;
-const mockResolveValidationAffectedProjects = jest.requireMock('@kbn/dev-validation-runner')
-  .resolveValidationAffectedProjects as jest.Mock;
-const mockExecuteTypeCheckValidation = jest.requireMock('./type_check_validation_loader')
-  .executeTypeCheckValidation as jest.Mock;
-const mockExecuteEslintValidation = jest.requireMock('./eslint/run_eslint_contract')
-  .executeEslintValidation as jest.Mock;
-const mockExecuteOxlintValidation = jest.requireMock('./oxlint/run_oxlint_contract')
-  .executeOxlintValidation as jest.Mock;
-const mockExistsSync = jest.requireMock('fs').existsSync as jest.Mock;
-const mockReaddirSync = jest.requireMock('fs').readdirSync as jest.Mock;
+const mockExecaFn = vi.fn();
+vi.mock('execa', () => ({ __esModule: true, default: mockExecaFn }));
+
+const mockRun = (await vi.importMock('@kbn/dev-cli-runner')).run as Mock;
+const mockReadValidationRunFlags = (await vi.importMock('@kbn/dev-validation-runner'))
+  .readValidationRunFlags as Mock;
+const mockResolveValidationBaseContext = (await vi.importMock('@kbn/dev-validation-runner'))
+  .resolveValidationBaseContext as Mock;
+const mockResolveValidationAffectedProjects = (await vi.importMock('@kbn/dev-validation-runner'))
+  .resolveValidationAffectedProjects as Mock;
+const mockExecuteTypeCheckValidation = (await vi.importMock('./type_check_validation_loader'))
+  .executeTypeCheckValidation as Mock;
+const mockExecuteEslintValidation = (await vi.importMock('./eslint/run_eslint_contract'))
+  .executeEslintValidation as Mock;
+const mockExecuteOxlintValidation = (await vi.importMock('./oxlint/run_oxlint_contract'))
+  .executeOxlintValidation as Mock;
+const mockExistsSync = (await vi.importMock('fs')).existsSync as Mock;
+const mockReaddirSync = (await vi.importMock('fs')).readdirSync as Mock;
 const mockExeca = mockExecaFn;
 
 let handler: (args: {
@@ -140,7 +176,7 @@ const baseContext = {
 };
 
 describe('run_check', () => {
-  let stdoutSpy: jest.SpyInstance;
+  let stdoutSpy: MockInstance;
   let previousExitCode: typeof process.exitCode;
 
   beforeAll(() => {
@@ -149,10 +185,10 @@ describe('run_check', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     previousExitCode = process.exitCode;
     process.exitCode = undefined;
-    stdoutSpy = jest.spyOn(process.stdout, 'write').mockReturnValue(true);
+    stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true);
     mockReadValidationRunFlags.mockReturnValue({});
     mockResolveValidationBaseContext.mockResolvedValue(baseContext);
     mockExistsSync.mockImplementation(

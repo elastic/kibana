@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { render, waitFor } from '@testing-library/react';
@@ -13,15 +15,18 @@ import { ApmEmbeddableContext } from '../../embeddable_context';
 import { MOCK_ALERT, MOCK_RULE, MOCK_DEPS } from '../testing/fixtures';
 import * as transactionFetcher from '../../../context/apm_service/use_service_transaction_types_fetcher';
 
-jest.mock('../../../context/apm_service/use_service_agent_fetcher', () => ({
-  useServiceAgentFetcher: jest.fn(() => ({
-    agentName: 'mockAgent',
-  })),
-}));
+vi.mock('../../../context/apm_service/use_service_agent_fetcher', () => {
+      const mocked = {
+      useServiceAgentFetcher: vi.fn(() => ({
+        agentName: 'mockAgent',
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('renders chart', () => {
   beforeEach(() => {
-    jest
+    vi
       .spyOn(transactionFetcher, 'useServiceTransactionTypesFetcher')
       .mockReturnValue({ transactionTypes: ['request'], status: FETCH_STATUS.SUCCESS });
   });
@@ -62,7 +67,7 @@ describe('renders chart', () => {
   });
 
   it('supports custom transactionType when transactionType is included in transaction types list', async () => {
-    jest
+    vi
       .spyOn(transactionFetcher, 'useServiceTransactionTypesFetcher')
       .mockReturnValue({ transactionTypes: ['request', 'custom'], status: FETCH_STATUS.SUCCESS });
     const { getByText } = render(
@@ -83,7 +88,7 @@ describe('renders chart', () => {
   });
 
   it('does not support custom transactionType when transactionType is not included in transaction types list', async () => {
-    jest
+    vi
       .spyOn(transactionFetcher, 'useServiceTransactionTypesFetcher')
       .mockReturnValue({ transactionTypes: ['request'], status: FETCH_STATUS.SUCCESS });
     const { queryByText, getByText } = render(
@@ -105,7 +110,7 @@ describe('renders chart', () => {
   });
 
   it('shows latency aggregation type select', async () => {
-    jest
+    vi
       .spyOn(transactionFetcher, 'useServiceTransactionTypesFetcher')
       .mockReturnValue({ transactionTypes: ['request'], status: FETCH_STATUS.SUCCESS });
     const { getByText } = render(

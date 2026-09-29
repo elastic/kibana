@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { IAggConfig } from '@kbn/data-plugin/common';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
@@ -419,11 +421,14 @@ describe('getCustomBucketsFromSiblingAggs', () => {
   });
 });
 
-const mockConvertToSchemaConfig = jest.fn();
+const mockConvertToSchemaConfig = vi.fn();
 
-jest.mock('../../vis_schemas', () => ({
-  convertToSchemaConfig: jest.fn(() => mockConvertToSchemaConfig()),
-}));
+vi.mock('../../vis_schemas', () => {
+      const mocked = {
+      convertToSchemaConfig: vi.fn(() => mockConvertToSchemaConfig()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getMetricFromParentPipelineAgg', () => {
   const metricAggId = 'agg-id-0';
@@ -467,7 +472,7 @@ describe('getMetricFromParentPipelineAgg', () => {
 
   const metric = { aggType: METRIC_TYPES.CUMULATIVE_SUM };
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   beforeAll(() => {

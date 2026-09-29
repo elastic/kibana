@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ControlValuesSource } from '@kbn/controls-constants';
@@ -52,14 +55,14 @@ const buildApi = ({
 };
 
 describe('fetchAndValidate$ ES|QL filter wiring', () => {
-  let fetchSpy: jest.SpyInstance;
+  let fetchSpy: MockInstance;
 
   beforeAll(() => {
     setStubKibanaServices();
   });
 
   beforeEach(() => {
-    fetchSpy = jest.spyOn(coreServices.http, 'fetch').mockResolvedValue({
+    fetchSpy = vi.spyOn(coreServices.http, 'fetch').mockResolvedValue({
       suggestions: [],
       totalCardinality: 0,
     });

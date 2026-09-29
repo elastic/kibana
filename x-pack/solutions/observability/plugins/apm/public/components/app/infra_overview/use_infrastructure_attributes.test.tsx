@@ -5,50 +5,62 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useInfrastructureAttributes } from './use_infrastructure_attributes';
 
-jest.mock('../../../context/apm_service/use_apm_service_context', () => ({
-  useApmServiceContext: () => ({
-    agentName: 'nodejs',
-    serviceName: 'opbeans-node',
-  }),
-}));
+vi.mock('../../../context/apm_service/use_apm_service_context', () => {
+      const mocked = {
+      useApmServiceContext: () => ({
+        agentName: 'nodejs',
+        serviceName: 'opbeans-node',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_apm_params', () => ({
-  useApmParams: () => ({
-    query: {
-      detailTab: undefined,
-      environment: 'ENVIRONMENT_ALL',
-      kuery: '',
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-    },
-  }),
-}));
+vi.mock('../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useApmParams: () => ({
+        query: {
+          detailTab: undefined,
+          environment: 'ENVIRONMENT_ALL',
+          kuery: '',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetcher', () => {
-  const actual = jest.requireActual('../../../hooks/use_fetcher');
+vi.mock('../../../hooks/use_fetcher', async () => {
+  const actual = (await vi.importActual('../../../hooks/use_fetcher'));
 
   return {
     ...actual,
-    useFetcher: jest.fn(),
+    useFetcher: vi.fn(),
   };
 });
 
-jest.mock('../../../hooks/use_time_range', () => ({
-  useTimeRange: () => ({
-    end: '2021-10-10T00:15:00.000Z',
-    start: '2021-10-10T00:00:00.000Z',
-  }),
-}));
+vi.mock('../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => ({
+        end: '2021-10-10T00:15:00.000Z',
+        start: '2021-10-10T00:00:00.000Z',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetcher = useFetcher as jest.Mock;
+const mockUseFetcher = useFetcher as Mock;
 
 describe('useInfrastructureAttributes', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns infrastructure attributes from the fetcher response', () => {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { transportConstructorMock, transportRequestMock } from './create_transport.test.mocks';
 
 import { errors } from '@elastic/elasticsearch';
@@ -81,13 +84,13 @@ const createFailingStreamResponse = () => {
 };
 
 describe('createTransport', () => {
-  let getUnauthorizedErrorHandler: jest.MockedFunction<ErrorHandlerAccessor>;
-  let getExecutionContext: jest.MockedFunction<() => string | undefined>;
+  let getUnauthorizedErrorHandler: MockedFunction<ErrorHandlerAccessor>;
+  let getExecutionContext: MockedFunction<() => string | undefined>;
   let mockLogger: Logger;
 
   beforeEach(() => {
-    getUnauthorizedErrorHandler = jest.fn();
-    getExecutionContext = jest.fn();
+    getUnauthorizedErrorHandler = vi.fn();
+    getExecutionContext = vi.fn();
     mockLogger = loggingSystemMock.createLogger();
   });
 
@@ -100,7 +103,7 @@ describe('createTransport', () => {
     return createTransport({
       getUnauthorizedErrorHandler,
       getExecutionContext,
-      onRequest: jest.fn(),
+      onRequest: vi.fn(),
       logger: mockLogger,
     });
   };
@@ -397,7 +400,7 @@ describe('createTransport', () => {
 
   describe('unauthorized error handler', () => {
     it('does not call the handler if the error is not an `unauthorized`', async () => {
-      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      const handler: MockedFunction<InternalUnauthorizedErrorHandler> = vi.fn();
       handler.mockReturnValue({ type: 'notHandled' });
 
       getUnauthorizedErrorHandler.mockReturnValue(handler);
@@ -431,7 +434,7 @@ describe('createTransport', () => {
     });
 
     it('calls the handler if the error is an `unauthorized`', async () => {
-      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      const handler: MockedFunction<InternalUnauthorizedErrorHandler> = vi.fn();
       handler.mockReturnValue({ type: 'notHandled' });
 
       getUnauthorizedErrorHandler.mockReturnValue(handler);
@@ -454,7 +457,7 @@ describe('createTransport', () => {
     });
 
     it('does not retry the call if the handler returns `notHandled`', async () => {
-      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      const handler: MockedFunction<InternalUnauthorizedErrorHandler> = vi.fn();
       handler.mockReturnValue({ type: 'notHandled' });
 
       getUnauthorizedErrorHandler.mockReturnValue(handler);
@@ -475,7 +478,7 @@ describe('createTransport', () => {
     });
 
     it('retries the call if the handler returns `retry` and return result from the retry', async () => {
-      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      const handler: MockedFunction<InternalUnauthorizedErrorHandler> = vi.fn();
       handler.mockReturnValue({ type: 'retry', authHeaders: {} });
 
       getUnauthorizedErrorHandler.mockReturnValue(handler);
@@ -500,7 +503,7 @@ describe('createTransport', () => {
     });
 
     it('does not retry more than once even in case of unauthorized errors', async () => {
-      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      const handler: MockedFunction<InternalUnauthorizedErrorHandler> = vi.fn();
       handler.mockReturnValue({ type: 'retry', authHeaders: {} });
 
       getUnauthorizedErrorHandler.mockReturnValue(handler);
@@ -521,7 +524,7 @@ describe('createTransport', () => {
     });
 
     it('updates the headers for the second internal call in case of `retry`', async () => {
-      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      const handler: MockedFunction<InternalUnauthorizedErrorHandler> = vi.fn();
       handler.mockReturnValue({ type: 'retry', authHeaders: { authorization: 'retry' } });
 
       getUnauthorizedErrorHandler.mockReturnValue(handler);
@@ -561,7 +564,7 @@ describe('createTransport', () => {
     });
 
     it('updates the headers for next requests in case of `retry`', async () => {
-      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      const handler: MockedFunction<InternalUnauthorizedErrorHandler> = vi.fn();
       handler.mockReturnValue({ type: 'retry', authHeaders: { authorization: 'retry' } });
 
       getUnauthorizedErrorHandler.mockReturnValue(handler);
@@ -595,7 +598,7 @@ describe('createTransport', () => {
     });
 
     it('does not retry streamed unauthorized responses when asStream is plain true', async () => {
-      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      const handler: MockedFunction<InternalUnauthorizedErrorHandler> = vi.fn();
       handler.mockReturnValue({ type: 'retry', authHeaders: { authorization: 'retry' } });
 
       getUnauthorizedErrorHandler.mockReturnValue(handler);
@@ -616,7 +619,7 @@ describe('createTransport', () => {
     });
 
     it('calls the handler for streamed unauthorized responses with retryOn401', async () => {
-      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      const handler: MockedFunction<InternalUnauthorizedErrorHandler> = vi.fn();
       handler.mockReturnValue({ type: 'notHandled' });
 
       getUnauthorizedErrorHandler.mockReturnValue(handler);
@@ -640,7 +643,7 @@ describe('createTransport', () => {
     });
 
     it('retries streamed unauthorized responses when retryOn401 is set and handler returns `retry`', async () => {
-      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      const handler: MockedFunction<InternalUnauthorizedErrorHandler> = vi.fn();
       handler.mockReturnValue({ type: 'retry', authHeaders: { authorization: 'retry' } });
 
       getUnauthorizedErrorHandler.mockReturnValue(handler);
@@ -674,7 +677,7 @@ describe('createTransport', () => {
     });
 
     it('does not retry streamed unauthorized responses more than once with retryOn401', async () => {
-      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      const handler: MockedFunction<InternalUnauthorizedErrorHandler> = vi.fn();
       handler.mockReturnValue({ type: 'retry', authHeaders: { authorization: 'retry' } });
 
       getUnauthorizedErrorHandler.mockReturnValue(handler);
@@ -697,7 +700,7 @@ describe('createTransport', () => {
     });
 
     it('logs a warning with partial body when streamed 401 body exceeds max size', async () => {
-      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      const handler: MockedFunction<InternalUnauthorizedErrorHandler> = vi.fn();
       handler.mockReturnValue({ type: 'notHandled' });
 
       getUnauthorizedErrorHandler.mockReturnValue(handler);
@@ -722,7 +725,7 @@ describe('createTransport', () => {
     });
 
     it('logs a warning when streamed 401 body fails to read', async () => {
-      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      const handler: MockedFunction<InternalUnauthorizedErrorHandler> = vi.fn();
       handler.mockReturnValue({ type: 'notHandled' });
 
       getUnauthorizedErrorHandler.mockReturnValue(handler);
@@ -747,7 +750,7 @@ describe('createTransport', () => {
 
   describe('`scoped` parameter and `onRequest` hook', () => {
     it('calls onRequest with scoped: false when scoped is not provided', async () => {
-      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn();
+      const onRequest: MockedFunction<OnRequestHandler> = vi.fn();
 
       const transportClass = createTransport({
         getUnauthorizedErrorHandler,
@@ -770,7 +773,7 @@ describe('createTransport', () => {
     });
 
     it('calls onRequest with scoped: true when scoped is true', async () => {
-      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn();
+      const onRequest: MockedFunction<OnRequestHandler> = vi.fn();
 
       const transportClass = createTransport({
         scoped: true,
@@ -794,7 +797,7 @@ describe('createTransport', () => {
     });
 
     it('calls onRequest with scoped: false when scoped is explicitly false', async () => {
-      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn();
+      const onRequest: MockedFunction<OnRequestHandler> = vi.fn();
 
       const transportClass = createTransport({
         scoped: false,
@@ -818,7 +821,7 @@ describe('createTransport', () => {
     });
 
     it('passes the correct options to onRequest', async () => {
-      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn();
+      const onRequest: MockedFunction<OnRequestHandler> = vi.fn();
 
       const transportClass = createTransport({
         scoped: true,
@@ -847,7 +850,7 @@ describe('createTransport', () => {
     });
 
     it('allows onRequest to mutate options (e.g., add querystring params)', async () => {
-      const onRequest: jest.MockedFunction<OnRequestHandler> = jest.fn(
+      const onRequest: MockedFunction<OnRequestHandler> = vi.fn(
         (ctx, params, options, logger) => {
           options!.querystring = {
             ...options!.querystring,

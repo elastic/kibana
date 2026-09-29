@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Type } from '@kbn/config-schema';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -82,7 +84,7 @@ const putRoleTest = (
 
     const mockCoreContext = coreMock.createRequestHandlerContext();
     const mockLicensingContext = {
-      license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
+      license: { check: vi.fn().mockReturnValue(licenseCheckResult) },
     } as any;
     const mockContext = coreMock.createCustomRequestHandlerContext({
       core: mockCoreContext,

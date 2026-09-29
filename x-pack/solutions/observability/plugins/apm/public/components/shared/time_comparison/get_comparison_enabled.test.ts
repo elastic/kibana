@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { CoreStart } from '@kbn/core/public';
 import { getComparisonEnabled } from './get_comparison_enabled';
 
@@ -22,7 +24,7 @@ describe('getComparisonEnabled', () => {
   }
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns false when kibana config is disabled and url is empty', () => {

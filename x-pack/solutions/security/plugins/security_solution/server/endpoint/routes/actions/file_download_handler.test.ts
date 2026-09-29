@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   getActionFileDownloadRouteHandler,
   registerActionFileDownloadRoutes,
@@ -22,12 +25,12 @@ import { Readable } from 'stream';
 import { createActionRequestsEsSearchResultsMock } from '../../services/actions/mocks';
 import { applyEsClientSearchMock } from '../../mocks/utils.mock';
 
-jest.mock('../../services', () => {
-  const actual = jest.requireActual('../../services');
+vi.mock('../../services', async () => {
+  const actual = (await vi.importActual('../../services'));
   return {
     ...actual,
-    validateActionIdMock: jest.fn(async () => {}),
-    getActionAgentType: jest.fn(async () => ({ agentType: 'endpoint' })),
+    validateActionIdMock: vi.fn(async () => {}),
+    getActionAgentType: vi.fn(async () => ({ agentType: 'endpoint' })),
   };
 });
 
@@ -61,7 +64,7 @@ describe('Response Actions file download API', () => {
 
     (
       apiTestSetup.endpointAppContextMock.service.getInternalFleetServices()
-        .ensureInCurrentSpace as jest.Mock
+        .ensureInCurrentSpace as Mock
     ).mockResolvedValue(undefined);
   });
 
@@ -85,7 +88,7 @@ describe('Response Actions file download API', () => {
 
     it('should error if user has no authz to api', async () => {
       (
-        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
+        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock
       ).mockResolvedValue(
         getEndpointAuthzInitialStateMock({
           canWriteFileOperations: false,

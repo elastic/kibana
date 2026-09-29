@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import type { Installation } from '../../../../common';
@@ -13,11 +15,11 @@ import { reinstallPackageForInstallation } from './reinstall';
 import { installPackage } from './install';
 import { getBundledPackageForInstallation } from './bundled_packages';
 
-jest.mock('./install');
-jest.mock('./bundled_packages');
+vi.mock('./install');
+vi.mock('./bundled_packages');
 
-const mockedInstallPackage = jest.mocked(installPackage);
-const mockedGetBundledPackageForInstallation = jest.mocked(getBundledPackageForInstallation);
+const mockedInstallPackage = vi.mocked(installPackage);
+const mockedGetBundledPackageForInstallation = vi.mocked(getBundledPackageForInstallation);
 
 describe('reinstallPackageForInstallation', () => {
   beforeEach(() => {

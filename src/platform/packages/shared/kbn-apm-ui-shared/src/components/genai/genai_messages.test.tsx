@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { GenAiMessages } from './genai_messages';
 import { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
 
-jest.mock('@kbn/shared-ux-markdown', () => ({
-  Markdown: ({ children }: { children: string }) => (
-    <div data-test-subj="markdownContent">{children}</div>
-  ),
-}));
+vi.mock('@kbn/shared-ux-markdown', () => {
+      const mocked = {
+      Markdown: ({ children }: { children: string }) => (
+        <div data-test-subj="markdownContent">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function renderMessages(
   inputMessages: Array<{

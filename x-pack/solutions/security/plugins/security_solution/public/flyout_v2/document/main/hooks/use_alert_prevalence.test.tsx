@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import { ALERT_PREVALENCE_AGG, useAlertPrevalence } from './use_alert_prevalence';
@@ -13,33 +16,33 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 
-jest.mock('../../../../common/containers/use_global_time');
-jest.mock('../../../../common/hooks/use_selector');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_query');
+vi.mock('../../../../common/containers/use_global_time');
+vi.mock('../../../../common/hooks/use_selector');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_query');
 
 describe('useAlertPrevalence', () => {
   let hookResult: RenderHookResult<UserAlertPrevalenceResult, UseAlertPrevalenceParams>;
 
   beforeEach(() => {
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({
+    (useDeepEqualSelector as Mock).mockReturnValue({
       from: 'from',
       to: 'to',
     });
-    (useGlobalTime as jest.Mock).mockReturnValue({
+    (useGlobalTime as Mock).mockReturnValue({
       from: 'from',
       to: 'to',
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return all properties', () => {
-    (useQueryAlerts as jest.Mock).mockReturnValue({
+    (useQueryAlerts as Mock).mockReturnValue({
       loading: true,
       data: undefined,
-      setQuery: jest.fn(),
+      setQuery: vi.fn(),
     });
 
     hookResult = renderHook(() =>
@@ -60,10 +63,10 @@ describe('useAlertPrevalence', () => {
   });
 
   it('should return error true if loading is done and no data', () => {
-    (useQueryAlerts as jest.Mock).mockReturnValue({
+    (useQueryAlerts as Mock).mockReturnValue({
       loading: false,
       data: undefined,
-      setQuery: jest.fn(),
+      setQuery: vi.fn(),
     });
 
     hookResult = renderHook(() =>
@@ -84,7 +87,7 @@ describe('useAlertPrevalence', () => {
   });
 
   it('should return correct count from aggregation', () => {
-    (useQueryAlerts as jest.Mock).mockReturnValue({
+    (useQueryAlerts as Mock).mockReturnValue({
       loading: false,
       data: {
         aggregations: {
@@ -96,7 +99,7 @@ describe('useAlertPrevalence', () => {
           hits: [],
         },
       },
-      setQuery: jest.fn(),
+      setQuery: vi.fn(),
     });
 
     hookResult = renderHook(() =>
@@ -117,7 +120,7 @@ describe('useAlertPrevalence', () => {
   });
 
   it('should return alertIds if includeAlertIds is true', () => {
-    (useQueryAlerts as jest.Mock).mockReturnValue({
+    (useQueryAlerts as Mock).mockReturnValue({
       loading: false,
       data: {
         aggregations: {
@@ -129,7 +132,7 @@ describe('useAlertPrevalence', () => {
           hits: [{ _id: 'id' }],
         },
       },
-      setQuery: jest.fn(),
+      setQuery: vi.fn(),
     });
 
     hookResult = renderHook(() =>

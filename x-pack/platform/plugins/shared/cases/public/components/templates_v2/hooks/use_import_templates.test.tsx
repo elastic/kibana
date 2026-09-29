@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { parse as yamlParse } from 'yaml';
@@ -15,8 +18,8 @@ import { useCasesToast } from '../../../common/use_cases_toast';
 import { TestProviders, createTestQueryClient } from '../../../common/mock';
 import type { ParsedTemplateEntry } from './use_parse_yaml';
 
-jest.mock('../api/api');
-jest.mock('../../../common/use_cases_toast');
+vi.mock('../api/api');
+vi.mock('../../../common/use_cases_toast');
 
 const makeTemplate = (overrides: Partial<ParsedTemplateEntry> = {}): ParsedTemplateEntry => ({
   name: 'Test Template',
@@ -27,16 +30,16 @@ const makeTemplate = (overrides: Partial<ParsedTemplateEntry> = {}): ParsedTempl
 });
 
 describe('useImportTemplates', () => {
-  const showErrorToast = jest.fn();
-  const showSuccessToast = jest.fn();
+  const showErrorToast = vi.fn();
+  const showSuccessToast = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useCasesToast as jest.Mock).mockReturnValue({ showErrorToast, showSuccessToast });
+    vi.clearAllMocks();
+    (useCasesToast as Mock).mockReturnValue({ showErrorToast, showSuccessToast });
   });
 
   it('creates new templates via postTemplate', async () => {
-    (postTemplate as jest.Mock).mockResolvedValue({ templateId: 'new-1' });
+    (postTemplate as Mock).mockResolvedValue({ templateId: 'new-1' });
 
     const { result } = renderHook(() => useImportTemplates(), { wrapper: TestProviders });
 
@@ -50,7 +53,7 @@ describe('useImportTemplates', () => {
   });
 
   it('updates existing templates via patchTemplate', async () => {
-    (patchTemplate as jest.Mock).mockResolvedValue({ templateId: 'existing-1' });
+    (patchTemplate as Mock).mockResolvedValue({ templateId: 'existing-1' });
 
     const template = makeTemplate({
       templateId: 'existing-1',
@@ -70,7 +73,7 @@ describe('useImportTemplates', () => {
   });
 
   it('defaults owner to securitySolution for new templates without owner', async () => {
-    (postTemplate as jest.Mock).mockResolvedValue({ templateId: 'new-1' });
+    (postTemplate as Mock).mockResolvedValue({ templateId: 'new-1' });
 
     const { result } = renderHook(() => useImportTemplates(), { wrapper: TestProviders });
     await result.current.importTemplates([makeTemplate({ owner: undefined })]);
@@ -83,7 +86,7 @@ describe('useImportTemplates', () => {
   });
 
   it('sends template metadata as saved-object attributes and only case defaults in the definition', async () => {
-    (postTemplate as jest.Mock).mockResolvedValue({ templateId: 'new-1' });
+    (postTemplate as Mock).mockResolvedValue({ templateId: 'new-1' });
     const template = makeTemplate({
       description: 'Template metadata description',
       tags: ['metadata-tag'],
@@ -111,7 +114,7 @@ describe('useImportTemplates', () => {
       })
     );
 
-    const request = (postTemplate as jest.Mock).mock.calls[0][0] as {
+    const request = (postTemplate as Mock).mock.calls[0][0] as {
       template: { definition: string };
     };
     const parsedDefinition = yamlParse(request.template.definition) as {
@@ -139,7 +142,7 @@ describe('useImportTemplates', () => {
   });
 
   it('keeps an explicit empty assignees list in imported definition YAML', async () => {
-    (postTemplate as jest.Mock).mockResolvedValue({ templateId: 'new-1' });
+    (postTemplate as Mock).mockResolvedValue({ templateId: 'new-1' });
     const template = makeTemplate({
       caseDefaults: {
         assignees: [],
@@ -149,7 +152,7 @@ describe('useImportTemplates', () => {
     const { result } = renderHook(() => useImportTemplates(), { wrapper: TestProviders });
     await result.current.importTemplates([template]);
 
-    const request = (postTemplate as jest.Mock).mock.calls[0][0] as {
+    const request = (postTemplate as Mock).mock.calls[0][0] as {
       template: { definition: string };
     };
     const parsedDefinition = yamlParse(request.template.definition) as {
@@ -160,7 +163,7 @@ describe('useImportTemplates', () => {
   });
 
   it('shows success toast when all imports succeed', async () => {
-    (postTemplate as jest.Mock).mockResolvedValue({});
+    (postTemplate as Mock).mockResolvedValue({});
 
     const { result } = renderHook(() => useImportTemplates(), { wrapper: TestProviders });
     await result.current.importTemplates([makeTemplate(), makeTemplate({ name: 'Second' })]);
@@ -170,7 +173,7 @@ describe('useImportTemplates', () => {
   });
 
   it('shows success toast for partial failures', async () => {
-    (postTemplate as jest.Mock).mockResolvedValueOnce({}).mockRejectedValueOnce(new Error('fail'));
+    (postTemplate as Mock).mockResolvedValueOnce({}).mockRejectedValueOnce(new Error('fail'));
 
     const { result } = renderHook(() => useImportTemplates(), { wrapper: TestProviders });
     const output = await result.current.importTemplates([
@@ -184,7 +187,7 @@ describe('useImportTemplates', () => {
   });
 
   it('shows error toast when all imports fail', async () => {
-    (postTemplate as jest.Mock).mockRejectedValue(new Error('fail'));
+    (postTemplate as Mock).mockRejectedValue(new Error('fail'));
 
     const { result } = renderHook(() => useImportTemplates(), { wrapper: TestProviders });
     const output = await result.current.importTemplates([makeTemplate()]);
@@ -196,7 +199,7 @@ describe('useImportTemplates', () => {
 
   it('captures error details from rejected promises', async () => {
     const apiError = { body: { message: 'Conflict' } };
-    (postTemplate as jest.Mock).mockRejectedValue(apiError);
+    (postTemplate as Mock).mockRejectedValue(apiError);
 
     const { result } = renderHook(() => useImportTemplates(), { wrapper: TestProviders });
     const output = await result.current.importTemplates([makeTemplate({ name: 'Conflicting' })]);
@@ -209,9 +212,9 @@ describe('useImportTemplates', () => {
   });
 
   it('invalidates templates query after import', async () => {
-    (postTemplate as jest.Mock).mockResolvedValue({});
+    (postTemplate as Mock).mockResolvedValue({});
     const queryClient = createTestQueryClient();
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useImportTemplates(), {
       wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
@@ -223,7 +226,7 @@ describe('useImportTemplates', () => {
   });
 
   it('resets isImporting to false even when an error is thrown', async () => {
-    (postTemplate as jest.Mock).mockRejectedValue(new Error('fail'));
+    (postTemplate as Mock).mockRejectedValue(new Error('fail'));
 
     const { result } = renderHook(() => useImportTemplates(), { wrapper: TestProviders });
 
@@ -235,8 +238,8 @@ describe('useImportTemplates', () => {
   });
 
   it('handles mixed create and update operations', async () => {
-    (postTemplate as jest.Mock).mockResolvedValue({});
-    (patchTemplate as jest.Mock).mockResolvedValue({});
+    (postTemplate as Mock).mockResolvedValue({});
+    (patchTemplate as Mock).mockResolvedValue({});
 
     const templates = [
       makeTemplate({ name: 'New' }),

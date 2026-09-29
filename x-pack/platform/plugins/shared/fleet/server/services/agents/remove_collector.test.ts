@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { AGENT_TYPE_OPAMP } from '../../../common/constants';
@@ -16,20 +19,26 @@ import * as crud from './crud';
 import * as actions from './actions';
 import { CollectorRemovalError, removeCollector, removeCollectors } from './remove_collector';
 
-jest.mock('./crud');
-jest.mock('./actions');
-jest.mock('../api_keys');
-jest.mock('../spaces/get_current_namespace', () => ({
-  getCurrentNamespace: () => 'default',
-}));
-jest.mock('../spaces/agent_namespaces', () => ({
-  agentsKueryNamespaceFilter: jest.fn().mockResolvedValue(undefined),
-  buildFilterWithNamespace: jest.fn((_filter, kuery) => kuery),
-}));
+vi.mock('./crud');
+vi.mock('./actions');
+vi.mock('../api_keys');
+vi.mock('../spaces/get_current_namespace', () => {
+      const mocked = {
+      getCurrentNamespace: () => 'default',
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../spaces/agent_namespaces', () => {
+      const mocked = {
+      agentsKueryNamespaceFilter: vi.fn().mockResolvedValue(undefined),
+      buildFilterWithNamespace: vi.fn((_filter, kuery) => kuery),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedCrud = crud as jest.Mocked<typeof crud>;
-const mockedActions = actions as jest.Mocked<typeof actions>;
-const mockedApiKeys = apiKeys as jest.Mocked<typeof apiKeys>;
+const mockedCrud = crud as Mocked<typeof crud>;
+const mockedActions = actions as Mocked<typeof actions>;
+const mockedApiKeys = apiKeys as Mocked<typeof apiKeys>;
 
 const opampAgent: Agent = {
   id: 'opamp-1',
@@ -60,7 +69,7 @@ describe('removeCollector', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     soClient = savedObjectsClientMock.create();
   });
@@ -120,7 +129,7 @@ describe('removeCollectors (bulk)', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     soClient = savedObjectsClientMock.create();
   });

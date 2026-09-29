@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 
 import { act, fireEvent, waitFor } from '@testing-library/react';
@@ -23,18 +26,18 @@ import { ExperimentalFeaturesService } from '../services';
 
 import { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 
-jest.mock('../hooks', () => {
+vi.mock('../hooks', async () => {
   return {
-    ...jest.requireActual('../hooks'),
-    useMultipleAgentPolicies: jest.fn(),
-    useGetOneAgentPolicy: jest.fn().mockReturnValue({ data: undefined, isLoading: false }),
-    sendBulkUpgradeAgentlessPolicies: jest.fn(),
-    useStartServices: jest.fn().mockReturnValue({
+    ...(await vi.importActual('../hooks')),
+    useMultipleAgentPolicies: vi.fn(),
+    useGetOneAgentPolicy: vi.fn().mockReturnValue({ data: undefined, isLoading: false }),
+    sendBulkUpgradeAgentlessPolicies: vi.fn(),
+    useStartServices: vi.fn().mockReturnValue({
       application: {
-        navigateToApp: jest.fn(),
+        navigateToApp: vi.fn(),
       },
       notifications: {
-        toasts: { addSuccess: jest.fn(), addWarning: jest.fn(), addError: jest.fn() },
+        toasts: { addSuccess: vi.fn(), addWarning: vi.fn(), addError: vi.fn() },
       },
       cloud: {
         isCloudEnabled: true,
@@ -42,8 +45,8 @@ jest.mock('../hooks', () => {
         deploymentId: 'abc123def456',
       },
     }),
-    useLink: jest.fn().mockReturnValue({
-      getHref: jest.fn().mockImplementation((page) => {
+    useLink: vi.fn().mockReturnValue({
+      getHref: vi.fn().mockImplementation((page) => {
         if (page === 'edit_integration') {
           return '/mock/app/fleet/policies/some-uuid1/edit-integration/some-uuid2';
         } else if (page === 'integration_policy_edit') {
@@ -55,18 +58,21 @@ jest.mock('../hooks', () => {
     }),
   };
 });
-jest.mock('../applications/integrations/sections/epm/screens/detail/policies/package_policies');
-jest.mock(
+vi.mock('../applications/integrations/sections/epm/screens/detail/policies/package_policies');
+vi.mock(
   '../applications/integrations/sections/epm/screens/installed_integrations/components/pending_upgrade_review_status',
-  () => ({
-    scheduleAutoOpenModal: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        scheduleAutoOpenModal: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 // Capture the textToCopy prop passed to EuiCopy so tests can assert the bundle text
 let capturedCopyText: string | undefined;
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiCopy: ({
@@ -82,10 +88,10 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
+const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as MockedFunction<
   typeof useMultipleAgentPolicies
 >;
-const useGetOneAgentPolicyMock = useGetOneAgentPolicy as jest.MockedFunction<
+const useGetOneAgentPolicyMock = useGetOneAgentPolicy as MockedFunction<
   typeof useGetOneAgentPolicy
 >;
 
@@ -183,7 +189,7 @@ function createMockPackagePolicy(
 describe('PackagePolicyActionsMenu', () => {
   beforeAll(() => {
     useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
-    jest.mocked(useLink().getHref).mockClear();
+    vi.mocked(useLink().getHref).mockClear();
   });
 
   it('Should not have upgrade button if package does not have upgrade', async () => {
@@ -209,24 +215,24 @@ describe('PackagePolicyActionsMenu', () => {
 
   describe('agentless upgrade (disableAgentlessLegacyAPI enabled)', () => {
     beforeEach(() => {
-      jest.mocked(sendBulkUpgradeAgentlessPolicies).mockReset();
+      vi.mocked(sendBulkUpgradeAgentlessPolicies).mockReset();
       // disableAgentlessLegacyAPI is on by default via allowedExperimentalValues.
-      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
         ...allowedExperimentalValues,
       });
     });
 
     afterEach(() => {
-      jest.mocked(ExperimentalFeaturesService.get).mockRestore();
+      vi.mocked(ExperimentalFeaturesService.get).mockRestore();
     });
 
     it('upgrades an agentless policy through the agentless API and refreshes on confirm', async () => {
-      jest
+      vi
         .mocked(sendBulkUpgradeAgentlessPolicies)
         .mockResolvedValue([
           { id: 'some-uuid2', name: 'mock-package-policy', success: true },
         ] as any);
-      const onUpgraded = jest.fn();
+      const onUpgraded = vi.fn();
       const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
       const packagePolicy = createMockPackagePolicy({ hasUpgrade: true, supports_agentless: true });
       const { utils } = renderMenu({ agentPolicies, packagePolicy, onUpgraded });
@@ -262,7 +268,7 @@ describe('PackagePolicyActionsMenu', () => {
   });
 
   it('keeps the legacy upgrade link for an agentless policy while disableAgentlessLegacyAPI is off', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       disableAgentlessLegacyAPI: false,
     });
@@ -273,7 +279,7 @@ describe('PackagePolicyActionsMenu', () => {
     const upgradeButton = await utils.findByTestId('PackagePolicyActionsUpgradeItem');
     // Flag off: the legacy edit-page upgrade still works, so the link is untouched.
     expect(upgradeButton).toHaveAttribute('href', '/test/upgrade-link');
-    jest.mocked(ExperimentalFeaturesService.get).mockRestore();
+    vi.mocked(ExperimentalFeaturesService.get).mockRestore();
   });
 
   it('Should not be able to delete integration from a managed policy', async () => {
@@ -338,7 +344,7 @@ describe('PackagePolicyActionsMenu', () => {
       const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
       expect(editButton).not.toHaveAttribute('disabled');
       expect(editButton).toHaveAttribute('href');
-      expect(useLink().getHref as jest.Mock).toHaveBeenCalledWith('edit_integration', {
+      expect(useLink().getHref as Mock).toHaveBeenCalledWith('edit_integration', {
         policyId: 'some-uuid1',
         packagePolicyId: 'some-uuid2',
       });
@@ -359,7 +365,7 @@ describe('PackagePolicyActionsMenu', () => {
       const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
       expect(editButton).not.toHaveAttribute('disabled');
       expect(editButton).toHaveAttribute('href');
-      expect(jest.mocked(useLink().getHref)).toHaveBeenCalledWith('integration_policy_edit', {
+      expect(vi.mocked(useLink().getHref)).toHaveBeenCalledWith('integration_policy_edit', {
         packagePolicyId: 'some-uuid2',
       });
       // Agentless edit links carry the detect-before-read hint so the edit page uses the
@@ -372,7 +378,7 @@ describe('PackagePolicyActionsMenu', () => {
   });
 
   it('Should not append the isAgentless hint to agentless edit links when the agentless policies UI is disabled', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       enableAgentlessPoliciesUI: false,
       // disableAgentlessLegacyAPI forces the UI on, so it must be off to exercise the disabled path.
@@ -392,7 +398,7 @@ describe('PackagePolicyActionsMenu', () => {
         '/mock/app/integrations/edit-integration/some-uuid2'
       );
     });
-    jest.mocked(ExperimentalFeaturesService.get).mockRestore();
+    vi.mocked(ExperimentalFeaturesService.get).mockRestore();
   });
 
   it('Should show Edit integration with correct href when there is no agent policy', async () => {
@@ -407,7 +413,7 @@ describe('PackagePolicyActionsMenu', () => {
       const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
       expect(editButton).not.toHaveAttribute('disabled');
       expect(editButton).toHaveAttribute('href');
-      expect(useLink().getHref as jest.Mock).toHaveBeenCalledWith('integration_policy_edit', {
+      expect(useLink().getHref as Mock).toHaveBeenCalledWith('integration_policy_edit', {
         packagePolicyId: 'some-uuid2',
       });
     });
@@ -618,10 +624,10 @@ describe('PackagePolicyActionsMenu', () => {
     });
 
     it('should use project_id instead of deployment_id on serverless', async () => {
-      const { useStartServices } = jest.requireMock('../hooks');
+      const { useStartServices } = (await vi.importMock('../hooks'));
       const serverlessReturnValue = {
-        application: { navigateToApp: jest.fn() },
-        notifications: { toasts: { addSuccess: jest.fn() } },
+        application: { navigateToApp: vi.fn() },
+        notifications: { toasts: { addSuccess: vi.fn() } },
         cloud: {
           isCloudEnabled: true,
           isServerlessEnabled: true,
@@ -647,8 +653,8 @@ describe('PackagePolicyActionsMenu', () => {
       });
       // Restore default mock for subsequent tests
       useStartServices.mockReturnValue({
-        application: { navigateToApp: jest.fn() },
-        notifications: { toasts: { addSuccess: jest.fn() } },
+        application: { navigateToApp: vi.fn() },
+        notifications: { toasts: { addSuccess: vi.fn() } },
         cloud: {
           isCloudEnabled: true,
           isServerlessEnabled: false,

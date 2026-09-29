@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { screen, fireEvent } from '@testing-library/react';
@@ -13,12 +16,15 @@ import { render } from '../../../utils/testing';
 import * as settingsHooks from '../../../contexts/synthetics_settings_context';
 import type { SyntheticsSettingsContextValues } from '../../../contexts';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
-  useFetcher: jest.fn(),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+      useFetcher: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSaveSettings = jest.fn();
+const mockSaveSettings = vi.fn();
 
 const mockCCSSettingsData = {
   useAllRemoteClusters: false,
@@ -26,31 +32,40 @@ const mockCCSSettingsData = {
   spaces: ['default'],
 };
 
-jest.mock('./hooks/use_get_ccs_settings', () => ({
-  ...jest.requireActual('./hooks/use_get_ccs_settings'),
-  useGetCCSSettings: () => ({
-    data: mockCCSSettingsData,
-    loading: false,
-    error: undefined,
-  }),
-}));
+vi.mock('./hooks/use_get_ccs_settings', async () => {
+      const mocked = {
+      ...(await vi.importActual('./hooks/use_get_ccs_settings')),
+      useGetCCSSettings: () => ({
+        data: mockCCSSettingsData,
+        loading: false,
+        error: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_put_ccs_settings', () => ({
-  usePutCCSSettings: () => ({
-    saveSettings: mockSaveSettings,
-    isSaving: false,
-  }),
-}));
+vi.mock('./hooks/use_put_ccs_settings', () => {
+      const mocked = {
+      usePutCCSSettings: () => ({
+        saveSettings: mockSaveSettings,
+        isSaving: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockRemoteClusters = [
   { name: 'cluster-a', isConnected: true },
   { name: 'cluster-b', isConnected: false },
 ];
 
-jest.mock('../../../contexts/synthetics_settings_context', () => ({
-  ...jest.requireActual('../../../contexts/synthetics_settings_context'),
-  useSyntheticsSettingsContext: jest.fn(),
-}));
+vi.mock('../../../contexts/synthetics_settings_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../contexts/synthetics_settings_context')),
+      useSyntheticsSettingsContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const buildSpacesService = () => ({
   ui: {
@@ -67,15 +82,15 @@ const buildSpacesService = () => ({
 
 describe('<RemoteClustersForm />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (settingsHooks.useSyntheticsSettingsContext as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (settingsHooks.useSyntheticsSettingsContext as Mock).mockReturnValue({
       isServerless: false,
       isCCSEnabled: true,
     } as SyntheticsSettingsContextValues);
   });
 
   const renderWithClusters = (clusters = mockRemoteClusters) => {
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+    vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       data: clusters,
       status: observabilitySharedPublic.FETCH_STATUS.SUCCESS,
       loading: false,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import { useIacProvisioner, useStartServices } from '../../../hooks';
@@ -13,12 +16,12 @@ import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../../common/types/rest_s
 
 import { useCloudConnectorTemplate } from './use_cloud_connector_template';
 
-jest.mock('../../../hooks');
-jest.mock('../../../hooks/use_request/iac_provisioner');
+vi.mock('../../../hooks');
+vi.mock('../../../hooks/use_request/iac_provisioner');
 
-const mockedUseIacProvisioner = jest.mocked(useIacProvisioner);
-const mockedUseStartServices = jest.mocked(useStartServices);
-const mockedSendRenderIacTemplate = jest.mocked(sendRenderIacTemplate);
+const mockedUseIacProvisioner = vi.mocked(useIacProvisioner);
+const mockedUseStartServices = vi.mocked(useStartServices);
+const mockedSendRenderIacTemplate = vi.mocked(sendRenderIacTemplate);
 
 // cloudId whose base64 part decodes to `host$es-id$kibana-component-id`
 const CLOUD_ID = `test:${btoa('host$es-component-id$kibana-component-id')}`;
@@ -68,18 +71,18 @@ const STATIC_FALLBACK_CONFIRM = {
 };
 
 describe('useCloudConnectorTemplate', () => {
-  let reportEvent: jest.Mock;
-  let windowOpenSpy: jest.SpyInstance;
+  let reportEvent: Mock;
+  let windowOpenSpy: MockInstance;
   // The tab the hook opens synchronously on click and navigates after the
   // render settles (popup blockers drop window.open calls made after an await).
-  let cloudFormationTab: { closed: boolean; close: jest.Mock; location: { href: string } };
+  let cloudFormationTab: { closed: boolean; close: Mock; location: { href: string } };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    reportEvent = jest.fn();
+    vi.clearAllMocks();
+    reportEvent = vi.fn();
     mockedUseStartServices.mockReturnValue({ analytics: { reportEvent } } as any);
-    cloudFormationTab = { closed: false, close: jest.fn(), location: { href: '' } };
-    windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(() => cloudFormationTab as any);
+    cloudFormationTab = { closed: false, close: vi.fn(), location: { href: '' } };
+    windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => cloudFormationTab as any);
   });
 
   afterEach(() => {
@@ -277,7 +280,7 @@ describe('useCloudConnectorTemplate', () => {
         error: { message: 'unrenderable', statusCode: 422 },
       } as any);
 
-      const onTemplateRendered = jest.fn();
+      const onTemplateRendered = vi.fn();
       const { result } = renderHook(() =>
         useCloudConnectorTemplate({ ...HOOK_PARAMS, onTemplateRendered })
       );
@@ -367,7 +370,7 @@ describe('useCloudConnectorTemplate', () => {
 
     it('falls back to a direct window.open when the pre-opened tab was blocked, and still records the template details when that opens', async () => {
       windowOpenSpy.mockReturnValueOnce(null);
-      const onTemplateRendered = jest.fn();
+      const onTemplateRendered = vi.fn();
 
       const { result } = renderHook(() =>
         useCloudConnectorTemplate({ ...HOOK_PARAMS, onTemplateRendered })
@@ -389,7 +392,7 @@ describe('useCloudConnectorTemplate', () => {
       // Both the pre-opened tab and the direct open were eaten by a pop-up blocker: the user never
       // saw the template, so no digest may be recorded and no caller unblocked.
       windowOpenSpy.mockReturnValue(null);
-      const onTemplateRendered = jest.fn();
+      const onTemplateRendered = vi.fn();
 
       const { result } = renderHook(() =>
         useCloudConnectorTemplate({ ...HOOK_PARAMS, onTemplateRendered })
@@ -409,7 +412,7 @@ describe('useCloudConnectorTemplate', () => {
       // Captured inside the callback and asserted afterwards: an expect thrown inside it would be
       // swallowed by the hook's catch and the test would pass on a regressed order.
       let hrefWhenNotified: string | undefined;
-      const onTemplateRendered = jest.fn(() => {
+      const onTemplateRendered = vi.fn(() => {
         hrefWhenNotified = cloudFormationTab.location.href;
       });
 
@@ -482,7 +485,7 @@ describe('useCloudConnectorTemplate', () => {
           error: null,
         } as any);
 
-        const onTemplateRendered = jest.fn();
+        const onTemplateRendered = vi.fn();
         const { result } = renderHook(() =>
           useCloudConnectorTemplate({
             ...HOOK_PARAMS,
@@ -566,7 +569,7 @@ describe('useCloudConnectorTemplate', () => {
           error: null,
         } as any);
 
-        const onTemplateRendered = jest.fn();
+        const onTemplateRendered = vi.fn();
         const { result } = renderHook(() =>
           useCloudConnectorTemplate({ ...HOOK_PARAMS, onTemplateRendered })
         );
@@ -592,7 +595,7 @@ describe('useCloudConnectorTemplate', () => {
         const integrations = [
           { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }] },
         ];
-        const onTemplateRendered = jest.fn();
+        const onTemplateRendered = vi.fn();
         const { result } = renderHook(() =>
           useCloudConnectorTemplate({ ...HOOK_PARAMS, integrations, onTemplateRendered })
         );
@@ -669,7 +672,7 @@ describe('useCloudConnectorTemplate', () => {
       });
 
       it('closes the pre-opened tab and surfaces an error when the launch URL cannot be built (malformed ARN)', async () => {
-        const onTemplateRendered = jest.fn();
+        const onTemplateRendered = vi.fn();
         const { result } = renderHook(() =>
           useCloudConnectorTemplate({
             ...HOOK_PARAMS,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { lastValueFrom, of, toArray } from 'rxjs';
 import type { Observable } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -50,9 +52,12 @@ import {
 } from './conversations';
 import { userMessageEvent } from '../../conversation/client/rounds_to_events';
 
-jest.mock('../../../tracing', () => ({
-  getCurrentTraceId: () => 'trace-1',
-}));
+vi.mock('../../../tracing', () => {
+      const mocked = {
+      getCurrentTraceId: () => 'trace-1',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const attachmentAddedEvent = (id = 'att-evt-1'): AttachmentTimelineEvent => ({
   id,
@@ -1071,7 +1076,7 @@ describe('conversations utils', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('fresh round, failed: rewrites the round with user_message + started + steps + execution_failed', async () => {

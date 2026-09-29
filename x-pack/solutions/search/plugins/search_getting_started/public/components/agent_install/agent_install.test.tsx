@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,13 +17,13 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
-jest.mock('../../hooks/use_kibana');
-jest.mock('../../contexts/usage_tracker_context');
-jest.mock('../../hooks/use_elasticsearch_url');
+vi.mock('../../hooks/use_kibana');
+vi.mock('../../contexts/usage_tracker_context');
+vi.mock('../../hooks/use_elasticsearch_url');
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseUsageTracker = useUsageTracker as jest.Mock;
-const mockUseElasticsearchUrl = useElasticsearchUrl as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseUsageTracker = useUsageTracker as Mock;
+const mockUseElasticsearchUrl = useElasticsearchUrl as Mock;
 
 const renderComponent = () =>
   render(
@@ -36,7 +39,7 @@ describe('AgentInstallSection', () => {
     mockUseKibana.mockReturnValue({
       services: { agentBuilder: undefined },
     });
-    mockUseUsageTracker.mockReturnValue({ click: jest.fn(), count: jest.fn(), load: jest.fn() });
+    mockUseUsageTracker.mockReturnValue({ click: vi.fn(), count: vi.fn(), load: vi.fn() });
     mockUseElasticsearchUrl.mockReturnValue(
       'https://my-deployment.es.us-east-1.aws.elastic.cloud:443'
     );

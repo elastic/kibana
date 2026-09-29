@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
 import { validateRetries } from './validate_retries';
 import { SavedObjectsImportError } from '../errors';
 
 import { getNonUniqueEntries } from './get_non_unique_entries';
-jest.mock('./get_non_unique_entries');
-const mockGetNonUniqueEntries = getNonUniqueEntries as jest.MockedFunction<
+vi.mock('./get_non_unique_entries');
+const mockGetNonUniqueEntries = getNonUniqueEntries as MockedFunction<
   typeof getNonUniqueEntries
 >;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockGetNonUniqueEntries.mockReturnValue([]);
 });
 

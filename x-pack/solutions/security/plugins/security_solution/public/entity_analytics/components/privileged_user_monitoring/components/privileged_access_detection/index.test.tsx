@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { PrivilegedAccessDetectionsPanel } from '.';
@@ -13,31 +16,37 @@ import { useQueryToggle } from '../../../../../common/containers/query_toggle';
 import { usePrivilegedAccessDetectionRoutes } from './pad_routes';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../../../../common/containers/query_toggle', () => ({
-  useQueryToggle: jest.fn(),
-}));
+vi.mock('../../../../../common/containers/query_toggle', () => {
+      const mocked = {
+      useQueryToggle: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./pad_routes', () => ({
-  usePrivilegedAccessDetectionRoutes: jest.fn(),
-}));
+vi.mock('./pad_routes', () => {
+      const mocked = {
+      usePrivilegedAccessDetectionRoutes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAllRoutes = {
-  getPrivilegedAccessDetectionStatus: jest.fn(),
-  setupPrivilegedAccessDetectionMlModule: jest.fn(),
-  installPrivilegedAccessDetectionPackage: jest.fn(),
+  getPrivilegedAccessDetectionStatus: vi.fn(),
+  setupPrivilegedAccessDetectionMlModule: vi.fn(),
+  installPrivilegedAccessDetectionPackage: vi.fn(),
 };
 
 const promiseThatNeverSettles = () => new Promise(() => {});
 
 describe('PrivilegedAccessDetectionsPanel', () => {
-  const mockUseQueryToggle = useQueryToggle as jest.Mock;
-  const mockUsePrivilegedAccessDetectionRoutes = usePrivilegedAccessDetectionRoutes as jest.Mock;
+  const mockUseQueryToggle = useQueryToggle as Mock;
+  const mockUsePrivilegedAccessDetectionRoutes = usePrivilegedAccessDetectionRoutes as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({
       toggleStatus: true,
-      setToggleStatus: jest.fn(),
+      setToggleStatus: vi.fn(),
     });
     mockUsePrivilegedAccessDetectionRoutes.mockReturnValue({
       ...mockAllRoutes,

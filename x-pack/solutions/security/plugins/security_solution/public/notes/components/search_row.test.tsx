@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -20,28 +23,28 @@ import { useSuggestUsers } from '../../common/components/user_profiles/use_sugge
 import { TestProviders } from '../../common/mock';
 import { selectNotesTableSearch, selectNotesTableAssociatedFilter } from '..';
 
-jest.mock('../../common/components/user_profiles/use_suggest_users');
+vi.mock('../../common/components/user_profiles/use_suggest_users');
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
 
   return {
     ...original,
     useDispatch: () => mockDispatch,
-    useSelector: jest.fn(),
+    useSelector: vi.fn(),
   };
 });
 
 describe('SearchRow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useSuggestUsers as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useSuggestUsers as Mock).mockReturnValue({
       isLoading: false,
       data: [{ user: { username: 'test' } }, { user: { username: 'elastic' } }],
     });
     // default: no stored filters
-    (useSelector as jest.Mock).mockReturnValue('');
+    (useSelector as Mock).mockReturnValue('');
   });
 
   it('should render the component', () => {
@@ -100,7 +103,7 @@ describe('SearchRow', () => {
   });
 
   it('should restore a previously applied search value from the store on mount', () => {
-    (useSelector as jest.Mock).mockImplementation((selector: unknown) =>
+    (useSelector as Mock).mockImplementation((selector: unknown) =>
       selector === selectNotesTableSearch ? 'previous search' : AssociatedFilter.all
     );
 
@@ -114,7 +117,7 @@ describe('SearchRow', () => {
   });
 
   it('should restore a previously applied associated filter from the store on mount', () => {
-    (useSelector as jest.Mock).mockImplementation((selector: unknown) =>
+    (useSelector as Mock).mockImplementation((selector: unknown) =>
       selector === selectNotesTableAssociatedFilter ? AssociatedFilter.documentOnly : ''
     );
 

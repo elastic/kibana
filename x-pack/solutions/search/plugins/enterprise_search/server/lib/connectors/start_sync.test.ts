@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { SyncJobType } from '@kbn/search-connectors';
 
@@ -14,34 +17,34 @@ import { ErrorCode } from '../../../common/types/error_codes';
 
 import { startSync } from './start_sync';
 
-jest.mock('@kbn/search-connectors', () => {
-  const originalModule = jest.requireActual('@kbn/search-connectors');
+vi.mock('@kbn/search-connectors', async () => {
+  const originalModule = (await vi.importActual('@kbn/search-connectors'));
   return {
     ...originalModule,
-    fetchConnectorById: jest.fn(),
-    startConnectorSync: jest.fn(),
+    fetchConnectorById: vi.fn(),
+    startConnectorSync: vi.fn(),
   };
 });
 
 describe('startSync lib function', () => {
   const mockClient = {
     asCurrentUser: {
-      get: jest.fn(),
-      index: jest.fn(),
-      update: jest.fn(),
+      get: vi.fn(),
+      index: vi.fn(),
+      update: vi.fn(),
     },
     asInternalUser: {},
     transport: {
-      request: jest.fn(),
+      request: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should start a full sync', async () => {
-    (fetchConnectorById as jest.Mock).mockResolvedValue({
+    (fetchConnectorById as Mock).mockResolvedValue({
       api_key_id: null,
       configuration: {},
       created_at: null,
@@ -64,7 +67,7 @@ describe('startSync lib function', () => {
       sync_now: false,
     });
 
-    (startConnectorSync as jest.Mock).mockResolvedValue({ id: 'fakeId' });
+    (startConnectorSync as Mock).mockResolvedValue({ id: 'fakeId' });
 
     await expect(
       startSync(mockClient as unknown as IScopedClusterClient, 'connectorId', SyncJobType.FULL)
@@ -77,7 +80,7 @@ describe('startSync lib function', () => {
   });
 
   it('should not create job if there is no connector', async () => {
-    (fetchConnectorById as jest.Mock).mockResolvedValue(undefined);
+    (fetchConnectorById as Mock).mockResolvedValue(undefined);
     await expect(
       startSync(mockClient as unknown as IScopedClusterClient, 'connectorId', SyncJobType.FULL)
     ).rejects.toEqual(new Error(ErrorCode.RESOURCE_NOT_FOUND));
@@ -85,7 +88,7 @@ describe('startSync lib function', () => {
   });
 
   it('should start an incremental sync', async () => {
-    (fetchConnectorById as jest.Mock).mockResolvedValue({
+    (fetchConnectorById as Mock).mockResolvedValue({
       api_key_id: null,
       configuration: {},
       created_at: null,
@@ -108,7 +111,7 @@ describe('startSync lib function', () => {
       sync_now: false,
     });
 
-    (startConnectorSync as jest.Mock).mockResolvedValue({ id: 'fakeId' });
+    (startConnectorSync as Mock).mockResolvedValue({ id: 'fakeId' });
 
     await expect(
       startSync(
@@ -125,7 +128,7 @@ describe('startSync lib function', () => {
   });
 
   it('should start an access control sync', async () => {
-    (fetchConnectorById as jest.Mock).mockResolvedValue({
+    (fetchConnectorById as Mock).mockResolvedValue({
       api_key_id: null,
       configuration: {
         use_document_level_security: {
@@ -152,7 +155,7 @@ describe('startSync lib function', () => {
       sync_now: false,
     });
 
-    (startConnectorSync as jest.Mock).mockResolvedValue({ id: 'fakeId' });
+    (startConnectorSync as Mock).mockResolvedValue({ id: 'fakeId' });
 
     await expect(
       startSync(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
@@ -18,10 +21,10 @@ import type { ScopedLogger } from '../utils/with_log_context';
 
 const buildLogger = (): ScopedLogger =>
   ({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as unknown as ScopedLogger);
 
 const collectPages = async <T>(generator: AsyncGenerator<T>): Promise<T[]> => {
@@ -39,13 +42,13 @@ describe('score_resolution_entities', () => {
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-    crudClient = { listEntities: jest.fn() } as unknown as EntityUpdateClient;
+    crudClient = { listEntities: vi.fn() } as unknown as EntityUpdateClient;
     logger = buildLogger();
-    (esClient.esql.query as jest.Mock).mockResolvedValue({ values: [] });
+    (esClient.esql.query as Mock).mockResolvedValue({ values: [] });
   });
 
   it('caps composite page size at MAX_RESOLUTION_TARGETS_PER_PAGE when configured pageSize is larger', async () => {
-    (esClient.search as jest.Mock).mockResolvedValue({
+    (esClient.search as Mock).mockResolvedValue({
       aggregations: {
         by_resolution_target: {
           buckets: [{ key: { resolution_target_id: 'user:target-1' } }],
@@ -102,7 +105,7 @@ describe('score_resolution_entities', () => {
   // valid cursor. The fix swapped to a strict undefined check.
   it('terminates pagination when an entity_id is the empty string', async () => {
     let callCount = 0;
-    (esClient.search as jest.Mock).mockImplementation(async () => {
+    (esClient.search as Mock).mockImplementation(async () => {
       callCount += 1;
       if (callCount === 1) {
         return {
@@ -130,7 +133,7 @@ describe('score_resolution_entities', () => {
 
     // Page-2 must use the last sort value as cursor (here 'user:b'),
     // not undefined — verifying the strict undefined check is in place.
-    const secondCall = (esClient.search as jest.Mock).mock.calls[1][0];
+    const secondCall = (esClient.search as Mock).mock.calls[1][0];
     expect(secondCall.search_after).toEqual(['user:b']);
   });
 });

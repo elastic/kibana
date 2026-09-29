@@ -5,24 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { MappingField } from '../utils/mappings';
 import { extractSnippetsBatch } from './extract_snippets';
 
-jest.mock('../utils/esql', () => ({
-  executeEsql: jest.fn(),
-}));
+vi.mock('../utils/esql', () => {
+      const mocked = {
+      executeEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { executeEsql } from '../utils/esql';
 
-const executeEsqlMock = executeEsql as jest.MockedFunction<typeof executeEsql>;
+const executeEsqlMock = executeEsql as MockedFunction<typeof executeEsql>;
 
 const createMockEsClient = () => ({} as unknown as ElasticsearchClient);
 
 const createMockLogger = () =>
   ({
-    debug: jest.fn(),
+    debug: vi.fn(),
   } as unknown as Logger);
 
 const textField = (path: string): MappingField => ({ path, type: 'text', meta: {} });
@@ -31,7 +37,7 @@ const defaultConfig = { numSnippets: 2, numWords: 750 };
 
 describe('extractSnippetsBatch', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty map for empty docIds', async () => {

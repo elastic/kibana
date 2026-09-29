@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -140,196 +142,199 @@ function mockPackageInfoItem(name: string, version: string) {
   };
 }
 
-jest.mock('../../../../../../hooks/use_request', () => ({
-  ...jest.requireActual('../../../../../../hooks/use_request'),
-  sendGetAgentlessPolicy: jest.fn(),
-  sendUpdateAgentlessPolicy: jest.fn(),
-  sendUpdatePackagePolicy: jest.fn(),
-  sendGetOnePackagePolicy: (packagePolicyId: string) => {
-    if (packagePolicyId === 'package-policy-1') {
-      return {
-        data: {
-          item: {
-            id: 'nginx-1',
-            name: 'nginx-1',
-            namespace: 'default',
-            description: 'Nginx description',
-            package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
-            enabled: true,
-            policy_id: 'agent-policy-1',
-            policy_ids: ['agent-policy-1'],
-            inputs: [
-              {
-                type: 'logfile',
-                policy_template: 'nginx',
+vi.mock('../../../../../../hooks/use_request', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../../hooks/use_request')),
+      sendGetAgentlessPolicy: vi.fn(),
+      sendUpdateAgentlessPolicy: vi.fn(),
+      sendUpdatePackagePolicy: vi.fn(),
+      sendGetOnePackagePolicy: (packagePolicyId: string) => {
+        if (packagePolicyId === 'package-policy-1') {
+          return {
+            data: {
+              item: {
+                id: 'nginx-1',
+                name: 'nginx-1',
+                namespace: 'default',
+                description: 'Nginx description',
+                package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
                 enabled: true,
-                streams: [
+                policy_id: 'agent-policy-1',
+                policy_ids: ['agent-policy-1'],
+                inputs: [
                   {
+                    type: 'logfile',
+                    policy_template: 'nginx',
                     enabled: true,
-                    data_stream: { type: 'logs', dataset: 'nginx.access' },
-                    vars: {
-                      paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
-                    },
+                    streams: [
+                      {
+                        enabled: true,
+                        data_stream: { type: 'logs', dataset: 'nginx.access' },
+                        vars: {
+                          paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
+                        },
+                      },
+                    ],
+                    vars: undefined,
                   },
                 ],
-                vars: undefined,
               },
-            ],
-          },
-        },
-      };
-    }
-    if (packagePolicyId === 'package-policy-2') {
-      return {
-        data: {
-          item: {
-            id: 'nginx-1',
-            name: 'nginx-1',
-            namespace: 'default',
-            description: 'Nginx description',
-            package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
-            enabled: true,
-            policy_id: 'agent-policy-1',
-            policy_ids: ['agent-policy-1'],
-            inputs: [
-              {
-                type: 'logfile',
-                policy_template: 'nginx',
-                enabled: true,
-                streams: [
-                  {
-                    enabled: true,
-                    data_stream: { type: 'logs', dataset: 'nginx.access' },
-                    vars: {
-                      paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
-                    },
-                  },
-                ],
-                vars: {
-                  existing_input_level_var: { value: 'existing-value', type: 'text' },
-                },
-              },
-            ],
-          },
-        },
-      };
-    }
-    // An agentless policy instance read through the package-policy API (i.e. the `isAgentless`
-    // hint was dropped). It carries the authoritative per-instance `supports_agentless` flag.
-    if (packagePolicyId === 'agentless-detect') {
-      return {
-        data: {
-          item: {
-            id: 'nginx-1',
-            name: 'nginx-1',
-            namespace: 'default',
-            description: 'Nginx description',
-            package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
-            enabled: true,
-            supports_agentless: true,
-            policy_id: 'agentless-agent-policy-1',
-            policy_ids: ['agentless-agent-policy-1'],
-            inputs: [
-              {
-                type: 'logfile',
-                policy_template: 'nginx',
-                enabled: true,
-                streams: [
-                  {
-                    enabled: true,
-                    data_stream: { type: 'logs', dataset: 'nginx.access' },
-                    vars: {
-                      paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
-                    },
-                  },
-                ],
-                vars: undefined,
-              },
-            ],
-          },
-        },
-      };
-    }
-  },
-  sendGetPackageInfoByKey: jest
-    .fn()
-    .mockImplementation((name: string, version: string) =>
-      Promise.resolve({ data: { item: mockPackageInfoItem(name, version) }, isLoading: false })
-    ),
-  sendGetPackageInfoByKeyForRq: jest
-    .fn()
-    .mockImplementation((name: string, version: string) =>
-      Promise.resolve({ item: mockPackageInfoItem(name, version) })
-    ),
-  sendUpgradePackagePolicyDryRun: jest.fn().mockResolvedValue({
-    data: [
-      {
-        diff: [
-          {
-            id: 'nginx-1',
-            name: 'nginx-1',
-            namespace: 'default',
-            description: 'Nginx description',
-            package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
-            enabled: true,
-            policy_id: 'agent-policy-1',
-            policy_ids: ['agent-policy-1'],
-            vars: {},
-            inputs: [
-              {
-                type: 'logfile',
-                policy_template: 'nginx',
-                enabled: true,
-                streams: [
-                  {
-                    enabled: true,
-                    data_stream: { type: 'logs', dataset: 'nginx.access' },
-                    vars: {
-                      paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
-                    },
-                  },
-                ],
-                vars: undefined,
-              },
-            ],
-          },
-          {
-            id: 'nginx-1',
-            name: 'nginx-1',
-            namespace: 'default',
-            description: 'Nginx description',
-            package: { name: 'nginx', title: 'Nginx', version: '1.4.0' },
-            enabled: true,
-            policy_id: 'agent-policy-1',
-            policy_ids: ['agent-policy-1'],
-            vars: {
-              new_package_level_var: { value: 'test', type: 'text' },
             },
-            inputs: [
-              {
-                type: 'logfile',
-                policy_template: 'nginx',
+          };
+        }
+        if (packagePolicyId === 'package-policy-2') {
+          return {
+            data: {
+              item: {
+                id: 'nginx-1',
+                name: 'nginx-1',
+                namespace: 'default',
+                description: 'Nginx description',
+                package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
                 enabled: true,
-                streams: [
+                policy_id: 'agent-policy-1',
+                policy_ids: ['agent-policy-1'],
+                inputs: [
                   {
+                    type: 'logfile',
+                    policy_template: 'nginx',
                     enabled: true,
-                    data_stream: { type: 'logs', dataset: 'nginx.access' },
+                    streams: [
+                      {
+                        enabled: true,
+                        data_stream: { type: 'logs', dataset: 'nginx.access' },
+                        vars: {
+                          paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
+                        },
+                      },
+                    ],
                     vars: {
-                      paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
+                      existing_input_level_var: { value: 'existing-value', type: 'text' },
                     },
                   },
                 ],
+              },
+            },
+          };
+        }
+        // An agentless policy instance read through the package-policy API (i.e. the `isAgentless`
+        // hint was dropped). It carries the authoritative per-instance `supports_agentless` flag.
+        if (packagePolicyId === 'agentless-detect') {
+          return {
+            data: {
+              item: {
+                id: 'nginx-1',
+                name: 'nginx-1',
+                namespace: 'default',
+                description: 'Nginx description',
+                package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
+                enabled: true,
+                supports_agentless: true,
+                policy_id: 'agentless-agent-policy-1',
+                policy_ids: ['agentless-agent-policy-1'],
+                inputs: [
+                  {
+                    type: 'logfile',
+                    policy_template: 'nginx',
+                    enabled: true,
+                    streams: [
+                      {
+                        enabled: true,
+                        data_stream: { type: 'logs', dataset: 'nginx.access' },
+                        vars: {
+                          paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
+                        },
+                      },
+                    ],
+                    vars: undefined,
+                  },
+                ],
+              },
+            },
+          };
+        }
+      },
+      sendGetPackageInfoByKey: vi
+        .fn()
+        .mockImplementation((name: string, version: string) =>
+          Promise.resolve({ data: { item: mockPackageInfoItem(name, version) }, isLoading: false })
+        ),
+      sendGetPackageInfoByKeyForRq: vi
+        .fn()
+        .mockImplementation((name: string, version: string) =>
+          Promise.resolve({ item: mockPackageInfoItem(name, version) })
+        ),
+      sendUpgradePackagePolicyDryRun: vi.fn().mockResolvedValue({
+        data: [
+          {
+            diff: [
+              {
+                id: 'nginx-1',
+                name: 'nginx-1',
+                namespace: 'default',
+                description: 'Nginx description',
+                package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
+                enabled: true,
+                policy_id: 'agent-policy-1',
+                policy_ids: ['agent-policy-1'],
+                vars: {},
+                inputs: [
+                  {
+                    type: 'logfile',
+                    policy_template: 'nginx',
+                    enabled: true,
+                    streams: [
+                      {
+                        enabled: true,
+                        data_stream: { type: 'logs', dataset: 'nginx.access' },
+                        vars: {
+                          paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
+                        },
+                      },
+                    ],
+                    vars: undefined,
+                  },
+                ],
+              },
+              {
+                id: 'nginx-1',
+                name: 'nginx-1',
+                namespace: 'default',
+                description: 'Nginx description',
+                package: { name: 'nginx', title: 'Nginx', version: '1.4.0' },
+                enabled: true,
+                policy_id: 'agent-policy-1',
+                policy_ids: ['agent-policy-1'],
                 vars: {
-                  new_input_level_var: { value: 'test', type: 'text' },
+                  new_package_level_var: { value: 'test', type: 'text' },
                 },
+                inputs: [
+                  {
+                    type: 'logfile',
+                    policy_template: 'nginx',
+                    enabled: true,
+                    streams: [
+                      {
+                        enabled: true,
+                        data_stream: { type: 'logs', dataset: 'nginx.access' },
+                        vars: {
+                          paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
+                        },
+                      },
+                    ],
+                    vars: {
+                      new_input_level_var: { value: 'test', type: 'text' },
+                    },
+                  },
+                ],
               },
             ],
           },
         ],
-      },
-    ],
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('usePackagePolicy', () => {
   it('should load the package policy if this is a not an upgrade', async () => {
@@ -406,7 +411,7 @@ describe('usePackagePolicy', () => {
   });
 
   it('should load the package policy if this is an upgrade with new input vars', async () => {
-    jest.mocked(sendUpgradePackagePolicyDryRun).mockResolvedValue({
+    vi.mocked(sendUpgradePackagePolicyDryRun).mockResolvedValue({
       data: [
         {
           diff: [
@@ -487,7 +492,7 @@ describe('usePackagePolicy', () => {
         },
       ],
     } as any);
-    jest.mocked(sendGetPackageInfoByKey).mockResolvedValue({
+    vi.mocked(sendGetPackageInfoByKey).mockResolvedValue({
       data: {
         item: {
           name: 'nginx',
@@ -658,18 +663,18 @@ describe('usePackagePolicy - agentless', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Pin the legacy-block flag off so this describe exercises the default (flag-off) agentless
     // behavior — the flag-on counterpart lives in the describe below.
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       disableAgentlessLegacyAPI: false,
     });
-    jest.mocked(sendGetAgentlessPolicy).mockResolvedValue({ item: agentlessPolicy } as any);
+    vi.mocked(sendGetAgentlessPolicy).mockResolvedValue({ item: agentlessPolicy } as any);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('reads through the agentless API and skips the upgrade dry-run', async () => {
@@ -696,7 +701,7 @@ describe('usePackagePolicy - agentless', () => {
   });
 
   it('saves through the agentless API', async () => {
-    jest
+    vi
       .mocked(sendUpdateAgentlessPolicy)
       .mockResolvedValue({ item: { id: 'agentless-1' } } as any);
 
@@ -729,7 +734,7 @@ describe('usePackagePolicy - agentless', () => {
     // Simulates a refresh / deep link / foreign entry point where the `?isAgentless` hint is
     // absent: the policy is read via the package-policy API, and its per-instance
     // `supports_agentless` flag must still route the write through the agentless API.
-    jest
+    vi
       .mocked(sendUpdateAgentlessPolicy)
       .mockResolvedValue({ item: { id: 'agentless-detect' } } as any);
 
@@ -762,7 +767,7 @@ describe('usePackagePolicy - agentless', () => {
     // Param-only navigation re-runs this hook with a new `packagePolicyId` without a remount.
     // A stale detection from the previously loaded (agentless) policy must not route the next
     // (agent-based) policy's save through the agentless PUT — the server rejects it.
-    jest
+    vi
       .mocked(sendUpdatePackagePolicy)
       .mockResolvedValue({ data: { item: { id: 'nginx-1' } }, error: null } as any);
 
@@ -825,7 +830,7 @@ describe('usePackagePolicy - agentless', () => {
   it('allows an agentless save that echoes the unchanged policy_ids', async () => {
     // The edit page always submits `{ policy_ids: packagePolicy.policy_ids }` — an unchanged
     // echo must not trip the reassignment guard.
-    jest
+    vi
       .mocked(sendUpdateAgentlessPolicy)
       .mockResolvedValue({ item: { id: 'agentless-detect' } } as any);
 
@@ -852,7 +857,7 @@ describe('usePackagePolicy - agentless', () => {
     // The shared read helper's package-info request throws on failure; the loader must surface
     // it through `loadingError`, or the page shows only its generic loading-error copy.
     const pkgError = Object.assign(new Error('registry unavailable'), { statusCode: 502 });
-    jest.mocked(sendGetPackageInfoByKeyForRq).mockRejectedValueOnce(pkgError);
+    vi.mocked(sendGetPackageInfoByKeyForRq).mockRejectedValueOnce(pkgError);
 
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() =>
@@ -865,7 +870,7 @@ describe('usePackagePolicy - agentless', () => {
 
   it('normalizes agentless save failures into the { data, error } shape', async () => {
     const requestError = Object.assign(new Error('conflict'), { statusCode: 409 });
-    jest.mocked(sendUpdateAgentlessPolicy).mockRejectedValue(requestError);
+    vi.mocked(sendUpdateAgentlessPolicy).mockRejectedValue(requestError);
 
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() =>
@@ -886,7 +891,7 @@ describe('usePackagePolicy - agentless', () => {
     // with no `statusCode`. It must still resolve to the `{ data, error }` shape — not reject —
     // and must not pretend to be a 409 conflict.
     const mappingError = new Error('bad mapping');
-    jest.mocked(sendUpdateAgentlessPolicy).mockRejectedValue(mappingError);
+    vi.mocked(sendUpdateAgentlessPolicy).mockRejectedValue(mappingError);
 
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() =>
@@ -907,7 +912,7 @@ describe('usePackagePolicy - agentless', () => {
     // Hold the agentless GET open so it resolves *after* we switch back to the legacy
     // (package-policy) mode. The stale response must not clobber the legacy load.
     let resolveAgentless: (value: unknown) => void = () => {};
-    jest.mocked(sendGetAgentlessPolicy).mockReturnValue(
+    vi.mocked(sendGetAgentlessPolicy).mockReturnValue(
       new Promise((resolve) => {
         resolveAgentless = resolve;
       }) as any
@@ -943,17 +948,17 @@ describe('usePackagePolicy - agentless', () => {
 
 describe('usePackagePolicy - agentless with disableAgentlessLegacyAPI enabled', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // The legacy-block flag makes the package-policy upgrade dry-run 400 for agentless policies
     // server-side. It (and `enableAgentlessPoliciesUI`) are on by default via
     // allowedExperimentalValues, so the save still routes through the agentless API.
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
     });
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('skips the legacy upgrade dry-run for a detected-agentless policy read without the hint', async () => {
@@ -984,20 +989,20 @@ describe('usePackagePolicy - agentless with disableAgentlessLegacyAPI enabled', 
 
 describe('usePackagePolicy - agentless policies UI kill switch off', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+    vi.clearAllMocks();
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       enableAgentlessPoliciesUI: false,
       // disableAgentlessLegacyAPI forces the UI on, so it must be off to exercise the kill switch.
       disableAgentlessLegacyAPI: false,
     });
-    jest.mocked(sendUpdatePackagePolicy).mockResolvedValue({
+    vi.mocked(sendUpdatePackagePolicy).mockResolvedValue({
       data: { item: { id: 'nginx-1' } },
     } as any);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('ignores the isAgentless hint: reads and saves through the package-policy API', async () => {
@@ -1044,7 +1049,7 @@ describe('usePackagePolicy - agentless policies UI kill switch off', () => {
   it('warns when the policy saved but its cloud connector could not record the template details', async () => {
     // The request helper reports a failed template-details write through the options it is handed;
     // the save itself still succeeds, so the hook must surface it as a warning, not an error.
-    jest.mocked(sendUpdatePackagePolicy).mockImplementation(async (_id, _body, options) => {
+    vi.mocked(sendUpdatePackagePolicy).mockImplementation(async (_id, _body, options) => {
       options?.onIacPersistError?.(new Error('connector update failed'));
       return { data: { item: { id: 'nginx-1' } }, error: null } as any;
     });

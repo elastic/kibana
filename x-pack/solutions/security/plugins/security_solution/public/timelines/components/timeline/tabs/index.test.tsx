@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { createMockStore, mockGlobalState } from '../../../../common/mock';
@@ -17,33 +20,36 @@ import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_avai
 import { render, screen, waitFor } from '@testing-library/react';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-jest.mock('../../../../common/hooks/use_license');
-jest.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/hooks/use_license');
+vi.mock('../../../../common/components/user_privileges');
 
-const mockUseUiSetting = jest.fn().mockReturnValue([false]);
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+const mockUseUiSetting = vi.fn().mockReturnValue([false]);
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...original,
     useUiSetting$: () => mockUseUiSetting(),
   };
 });
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
   return {
     ...original,
     useLocation: () => ({}),
   };
 });
 
-jest.mock('../../../../common/hooks/esql/use_esql_availability', () => ({
-  useEsqlAvailability: jest.fn().mockReturnValue({
-    isEsqlAdvancedSettingEnabled: true,
-  }),
-}));
+vi.mock('../../../../common/hooks/esql/use_esql_availability', () => {
+      const mocked = {
+      useEsqlAvailability: vi.fn().mockReturnValue({
+        isEsqlAdvancedSettingEnabled: true,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useEsqlAvailabilityMock = useEsqlAvailability as jest.Mock;
+const useEsqlAvailabilityMock = useEsqlAvailability as Mock;
 
 const defaultProps = {
   renderCellValue: () => {
@@ -144,7 +150,7 @@ describe('Timeline', () => {
 
   describe('privileges', () => {
     it('should show notes and pinned tabs for users with the required privileges', () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         timelinePrivileges: { read: true },
         notesPrivileges: { read: true },
       });
@@ -159,7 +165,7 @@ describe('Timeline', () => {
     });
 
     it('should not show notes and pinned tabs for users with the insufficient privileges', () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         timelinePrivileges: { read: false },
         notesPrivileges: { read: false },
       });

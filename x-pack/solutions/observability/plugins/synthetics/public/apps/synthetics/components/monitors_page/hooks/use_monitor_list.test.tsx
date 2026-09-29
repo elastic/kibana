@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import * as redux from 'react-redux-v7';
@@ -27,11 +29,11 @@ describe('useMonitorList', () => {
   let initialState: Omit<ReturnType<typeof useMonitorList>, 'loadPage' | 'reloadPage'>;
   let filterState: MonitorFilterState;
   let filterStateWithQuery: MonitorFilterState & { query?: string | undefined };
-  const dispatchMockFn = jest.fn();
+  const dispatchMockFn = vi.fn();
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.spyOn(redux, 'useDispatch').mockReturnValue(dispatchMockFn);
+    vi.resetAllMocks();
+    vi.spyOn(redux, 'useDispatch').mockReturnValue(dispatchMockFn);
 
     state = mockState;
     initialState = {
@@ -42,7 +44,7 @@ describe('useMonitorList', () => {
       absoluteTotal: state.monitorList.data.absoluteTotal ?? 0,
       pageState: state.monitorList.pageState,
       syntheticsMonitors: selectEncryptedSyntheticsSavedMonitors.resultFunc(state.monitorList),
-      handleFilterChange: jest.fn(),
+      handleFilterChange: vi.fn(),
     };
 
     filterState = {

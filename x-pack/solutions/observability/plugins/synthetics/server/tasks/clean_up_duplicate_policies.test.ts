@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { deleteDuplicatePackagePolicies } from './clean_up_duplicate_policies';
 import type { SyntheticsServerSetup } from '../types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 describe('deleteDuplicatePackagePolicies', () => {
-  const makeServerSetup = (deleteMock: jest.Mock) => {
+  const makeServerSetup = (deleteMock: Mock) => {
     const logger = {
-      info: jest.fn(),
-      debug: jest.fn(),
-      error: jest.fn(),
+      info: vi.fn(),
+      debug: vi.fn(),
+      error: vi.fn(),
     };
     const serverSetup = {
       pluginsStart: {
@@ -31,7 +34,7 @@ describe('deleteDuplicatePackagePolicies', () => {
   };
 
   test('does nothing and logs when packagePoliciesToDelete is empty', async () => {
-    const deleteMock = jest.fn();
+    const deleteMock = vi.fn();
     const { serverSetup, logger } = makeServerSetup(deleteMock);
     const soClient = {} as SavedObjectsClientContract;
     const esClient = {} as ElasticsearchClient;
@@ -45,7 +48,7 @@ describe('deleteDuplicatePackagePolicies', () => {
   });
 
   test('deletes small list in a single batch', async () => {
-    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const deleteMock = vi.fn().mockResolvedValue(undefined);
     const { serverSetup, logger } = makeServerSetup(deleteMock);
     const soClient = {} as SavedObjectsClientContract;
     const esClient = {} as ElasticsearchClient;
@@ -71,7 +74,7 @@ describe('deleteDuplicatePackagePolicies', () => {
   });
 
   test('deletes large list in multiple batches of 100', async () => {
-    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const deleteMock = vi.fn().mockResolvedValue(undefined);
     const { serverSetup, logger } = makeServerSetup(deleteMock);
     const soClient = {} as SavedObjectsClientContract;
     const esClient = {} as ElasticsearchClient;

@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import { getNoDataConfig, OnboardingFlow } from './no_data_config';
 
 const HOSTS_ONBOARDING_HREF = '/app/observabilityOnboarding?category=host';
 
-const getRedirectUrl = jest.fn().mockReturnValue(HOSTS_ONBOARDING_HREF);
+const getRedirectUrl = vi.fn().mockReturnValue(HOSTS_ONBOARDING_HREF);
 const locators = {
-  get: jest.fn().mockReturnValue({ getRedirectUrl }),
+  get: vi.fn().mockReturnValue({ getRedirectUrl }),
 } as unknown as LocatorClient;
 
 describe('getNoDataConfig', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getRedirectUrl.mockReturnValue(HOSTS_ONBOARDING_HREF);
   });
 

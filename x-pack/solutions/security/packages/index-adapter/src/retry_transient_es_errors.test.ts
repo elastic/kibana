@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors as EsErrors, type DiagnosticResult } from '@elastic/elasticsearch';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
@@ -12,11 +14,11 @@ import { retryTransientEsErrors } from './retry_transient_es_errors';
 const mockLogger = loggingSystemMock.createLogger();
 
 // mock setTimeout to avoid waiting in tests and prevent test flakiness
-global.setTimeout = jest.fn((cb) => jest.fn(cb())) as unknown as typeof global.setTimeout;
+global.setTimeout = vi.fn((cb) => vi.fn(cb())) as unknown as typeof global.setTimeout;
 
 describe('retryTransientEsErrors', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it.each([
@@ -39,7 +41,7 @@ describe('retryTransientEsErrors', () => {
       errorType: 'ResponseError (Gone)',
     },
   ])('should retry $errorType', async ({ error }) => {
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     mockFn.mockRejectedValueOnce(error);
     mockFn.mockResolvedValueOnce('success');
 
@@ -53,7 +55,7 @@ describe('retryTransientEsErrors', () => {
 
   it('should throw non-transient errors', async () => {
     const error = new EsErrors.ResponseError({ statusCode: 403 } as DiagnosticResult);
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     mockFn.mockRejectedValueOnce(error);
 
     await expect(retryTransientEsErrors(mockFn, { logger: mockLogger })).rejects.toEqual(error);
@@ -64,7 +66,7 @@ describe('retryTransientEsErrors', () => {
 
   it('should throw if max retries exceeded', async () => {
     const error = new EsErrors.ConnectionError('test error');
-    const mockFn = jest.fn();
+    const mockFn = vi.fn();
     mockFn.mockRejectedValueOnce(error);
     mockFn.mockRejectedValueOnce(error);
 

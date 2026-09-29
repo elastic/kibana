@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -12,18 +15,21 @@ import { useKibana } from '../../../../common/services';
 import * as i18n from './translations';
 import { UpgradeActions } from '.';
 
-const mockGetUrlForApp = jest
+const mockGetUrlForApp = vi
   .fn()
   .mockReturnValue('http://localhost:5601/app/management/stack/license_management');
 
-jest.mock('../../../../common/services', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../common/services', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('UpgradeActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           getUrlForApp: mockGetUrlForApp,

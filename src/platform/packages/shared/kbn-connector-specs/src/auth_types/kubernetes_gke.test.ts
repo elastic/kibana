@@ -7,20 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { AxiosInstance } from 'axios';
 import type { AuthContext } from '../connector_spec';
 import { KubernetesGkeAuth } from './kubernetes_gke_server';
 import { getGcpAccessToken } from './gcp_jwt_helpers';
 
-jest.mock('./gcp_jwt_helpers', () => {
-  const actual = jest.requireActual('./gcp_jwt_helpers');
+vi.mock('./gcp_jwt_helpers', async () => {
+  const actual = (await vi.importActual('./gcp_jwt_helpers'));
   return {
     ...actual,
-    getGcpAccessToken: jest.fn(),
+    getGcpAccessToken: vi.fn(),
   };
 });
 
-const mockGetGcpAccessToken = getGcpAccessToken as jest.MockedFunction<typeof getGcpAccessToken>;
+const mockGetGcpAccessToken = getGcpAccessToken as MockedFunction<typeof getGcpAccessToken>;
 
 const VALID_SERVICE_ACCOUNT_JSON = JSON.stringify({
   type: 'service_account',
@@ -36,18 +39,18 @@ const VALID_SERVICE_ACCOUNT_JSON = JSON.stringify({
 const createMockAxiosInstance = () =>
   ({
     defaults: { headers: { common: {} } },
-    interceptors: { request: { clear: jest.fn(), use: jest.fn() } },
+    interceptors: { request: { clear: vi.fn(), use: vi.fn() } },
   } as unknown as AxiosInstance);
 
 const mockContext = {
-  getCustomHostSettings: jest.fn(),
-  logger: { debug: jest.fn(), warn: jest.fn() },
+  getCustomHostSettings: vi.fn(),
+  logger: { debug: vi.fn(), warn: vi.fn() },
   sslSettings: {},
 } as unknown as AuthContext;
 
 describe('KubernetesGkeAuth', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('has the expected id and schema fields', () => {

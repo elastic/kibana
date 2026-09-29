@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as connectorsSpecs from './all_specs';
 import type { ActionContext, ConnectorSpec } from './connector_spec';
 
@@ -16,12 +18,12 @@ const createFailingContext = (): ActionContext => {
 
   return {
     client: {
-      get: jest.fn(reject),
-      post: jest.fn(reject),
-      put: jest.fn(reject),
-      patch: jest.fn(reject),
-      delete: jest.fn(reject),
-      request: jest.fn(reject),
+      get: vi.fn(reject),
+      post: vi.fn(reject),
+      put: vi.fn(reject),
+      patch: vi.fn(reject),
+      delete: vi.fn(reject),
+      request: vi.fn(reject),
     },
     // Provide minimal placeholder values so connectors that derive their URL from
     // config/secrets can reach the HTTP call rather than throwing on missing config.
@@ -36,7 +38,7 @@ const createFailingContext = (): ActionContext => {
       subdomain: 'placeholder',
     },
     secrets: { tokenUrl: 'https://placeholder.example.com' },
-    log: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 };
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,45 +17,51 @@ import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { renderAlertSection, renderAlertsSection } from './summary_rows';
 
 // Stub the lazy flyout opener so it records calls synchronously (no Suspense/lazy boundary).
-const mockFlyoutOpener = jest.fn((_props: unknown) => null);
-jest.mock('./open_flyout_on_mount', () => ({
-  AttachmentSummaryFlyoutOpener: (props: unknown) => mockFlyoutOpener(props),
-}));
+const mockFlyoutOpener = vi.fn((_props: unknown) => null);
+vi.mock('./open_flyout_on_mount', () => {
+      const mocked = {
+      AttachmentSummaryFlyoutOpener: (props: unknown) => mockFlyoutOpener(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agentic-investigations-common', () => ({
-  AttachmentSummaryGroup: ({ title, rows }: { title: string; rows: React.ReactNode[] }) =>
-    rows.length === 0 ? null : (
-      <div data-test-subj="group" data-title={title}>
-        <ul>{rows}</ul>
-      </div>
-    ),
-  AttachmentSummaryRow: ({
-    label,
-    onClick,
-    children,
-  }: {
-    label: string;
-    onClick?: () => void;
-    children?: React.ReactNode;
-  }) => (
-    <li data-test-subj="row" data-label={label}>
-      {onClick ? (
-        <button type="button" onClick={onClick} data-test-subj="row-button">
-          {label}
-        </button>
-      ) : (
-        <span data-test-subj="row-readonly">{label}</span>
-      )}
-      {children}
-    </li>
-  ),
-  DEFAULT_COLLAPSED_COUNT: 4,
-}));
+vi.mock('@kbn/agentic-investigations-common', () => {
+      const mocked = {
+      AttachmentSummaryGroup: ({ title, rows }: { title: string; rows: React.ReactNode[] }) =>
+        rows.length === 0 ? null : (
+          <div data-test-subj="group" data-title={title}>
+            <ul>{rows}</ul>
+          </div>
+        ),
+      AttachmentSummaryRow: ({
+        label,
+        onClick,
+        children,
+      }: {
+        label: string;
+        onClick?: () => void;
+        children?: React.ReactNode;
+      }) => (
+        <li data-test-subj="row" data-label={label}>
+          {onClick ? (
+            <button type="button" onClick={onClick} data-test-subj="row-button">
+              {label}
+            </button>
+          ) : (
+            <span data-test-subj="row-readonly">{label}</span>
+          )}
+          {children}
+        </li>
+      ),
+      DEFAULT_COLLAPSED_COUNT: 4,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeSearch = (
   alertHits: Array<{ _id: string; _index?: string; _source: Record<string, unknown> }>
 ): ISearchGeneric =>
-  jest.fn(() =>
+  vi.fn(() =>
     of({
       rawResponse: {
         hits: {
@@ -63,8 +71,8 @@ const makeSearch = (
     })
   ) as unknown as ISearchGeneric;
 
-const resolveSecurityCanvasContext = jest.fn();
-const getSpaceId = jest.fn().mockResolvedValue('default');
+const resolveSecurityCanvasContext = vi.fn();
+const getSpaceId = vi.fn().mockResolvedValue('default');
 
 const makeAlertAttachment = (data: object): UnknownAttachment => ({
   id: 'att-1',
@@ -81,7 +89,7 @@ const makeAlertsAttachment = (alertIds: string[]): UnknownAttachment => ({
 const renderSection = (node: React.ReactNode) => render(<>{node}</>);
 
 describe('renderAlertSection', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('has exactly one row', () => {
     renderSection(
@@ -142,7 +150,7 @@ describe('renderAlertSection', () => {
   });
 
   it('remounts the opener on a second click so the flyout reopens', async () => {
-    const onMount = jest.fn();
+    const onMount = vi.fn();
     mockFlyoutOpener.mockImplementation(() => {
       React.useEffect(() => onMount(), []);
       return null;
@@ -167,7 +175,7 @@ describe('renderAlertSection', () => {
 
 describe('renderAlertsSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getSpaceId.mockResolvedValue('default');
   });
 
@@ -190,7 +198,7 @@ describe('renderAlertsSection', () => {
         attachment: makeAlertsAttachment(['id-1', 'id-2', 'id-3']),
         getSpaceId,
         resolveSecurityCanvasContext,
-        search: jest.fn(() => new Observable(() => {})),
+        search: vi.fn(() => new Observable(() => {})),
       })
     );
 
@@ -322,7 +330,7 @@ describe('renderAlertsSection', () => {
   });
 
   it('renders fallback rows when the fetch throws', async () => {
-    const failingSearch = jest.fn(
+    const failingSearch = vi.fn(
       () =>
         new Observable((s) => {
           s.error(new Error('network error'));

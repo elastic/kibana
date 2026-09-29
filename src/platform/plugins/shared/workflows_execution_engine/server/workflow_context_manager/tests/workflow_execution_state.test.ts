@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -57,11 +60,11 @@ describe('WorkflowExecutionState', () => {
 
   beforeEach(() => {
     workflowExecutionRepository = {} as unknown as WorkflowExecutionRepository;
-    workflowExecutionRepository.updateWorkflowExecution = jest.fn();
+    workflowExecutionRepository.updateWorkflowExecution = vi.fn();
 
     stepExecutionRepository = {} as unknown as StepExecutionRepository;
-    stepExecutionRepository.bulkUpsert = jest.fn();
-    stepExecutionRepository.getStepExecutionsByIds = jest.fn();
+    stepExecutionRepository.bulkUpsert = vi.fn();
+    stepExecutionRepository.getStepExecutionsByIds = vi.fn();
 
     const fakeWorkflowExecution = {
       id: 'test-workflow-execution-id',
@@ -281,7 +284,7 @@ describe('WorkflowExecutionState', () => {
 
   describe('flush', () => {
     beforeEach(() => {
-      workflowExecutionRepository.getWorkflowExecutionById = jest
+      workflowExecutionRepository.getWorkflowExecutionById = vi
         .fn()
         .mockResolvedValue({} as EsWorkflowExecution);
     });
@@ -590,7 +593,7 @@ describe('WorkflowExecutionState', () => {
 
     it('should load existing step executions with output excluded', async () => {
       underTest.updateWorkflowExecution({ stepExecutionIds: ['11', '22'] });
-      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
+      (stepExecutionRepository.getStepExecutionsByIds as Mock).mockResolvedValue([
         {
           id: '11',
           stepId: 'testStep',
@@ -632,7 +635,7 @@ describe('WorkflowExecutionState', () => {
       // pinned. Deferred-output / eviction semantics live in step_io_service.test.ts.
       underTest.updateWorkflowExecution({ stepExecutionIds: ['11', '22'] });
       const dataSetOutput = { myVar: 'hello' };
-      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock)
+      (stepExecutionRepository.getStepExecutionsByIds as Mock)
         .mockResolvedValueOnce([
           {
             id: '11',
@@ -661,7 +664,7 @@ describe('WorkflowExecutionState', () => {
 
     it('should sort step executions by executionIndex when loaded from repository', async () => {
       underTest.updateWorkflowExecution({ stepExecutionIds: ['11', '44', '33', '22'] });
-      (stepExecutionRepository.getStepExecutionsByIds as jest.Mock).mockResolvedValue([
+      (stepExecutionRepository.getStepExecutionsByIds as Mock).mockResolvedValue([
         {
           id: '11',
           stepId: 'testStep',
@@ -1161,7 +1164,7 @@ describe('WorkflowExecutionState', () => {
 
         // Flush the creates to ES
         await ioService.flush();
-        (stepExecutionRepository.bulkUpsert as jest.Mock).mockClear();
+        (stepExecutionRepository.bulkUpsert as Mock).mockClear();
 
         // Now evict — this should NOT trigger another flush of the evicted data
         ioService.evictStaleLoopOutputs(['step']);

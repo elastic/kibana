@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { appContextService } from '../../../app_context';
@@ -13,28 +16,31 @@ import { saveSettings } from '../../../settings';
 
 import { buildDefaultSettings, saveILMMigrationChanges } from './default_settings';
 
-jest.mock('../../../app_context');
-jest.mock('../../../settings', () => ({
-  getSettingsOrUndefined: jest.fn().mockResolvedValue({
-    ilm_migration_status: {
-      metrics: 'success',
-    },
-  }),
-  saveSettings: jest.fn(),
-}));
+vi.mock('../../../app_context');
+vi.mock('../../../settings', () => {
+      const mocked = {
+      getSettingsOrUndefined: vi.fn().mockResolvedValue({
+        ilm_migration_status: {
+          metrics: 'success',
+        },
+      }),
+      saveSettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 mockedAppContextService.getLogger.mockReturnValue({
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
 } as any);
 
-const saveSettingsMock = saveSettings as jest.Mock;
+const saveSettingsMock = saveSettings as Mock;
 
 describe('buildDefaultSettings', () => {
   it('should not generate default_field settings ', () => {
@@ -113,7 +119,7 @@ describe('buildDefaultSettings', () => {
 
 describe('ILM migration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should save settings if migration status changed', async () => {

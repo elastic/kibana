@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Query } from '@elastic/eui';
@@ -38,7 +40,7 @@ const mockTags = [
   },
 ];
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({
     items: [
       { id: 'item-1', title: 'Item 1', tags: ['tag-1', 'tag-2'] },
@@ -85,7 +87,7 @@ const createWrapper = (options?: { tagsService?: ContentManagementTagsServices }
 
 describe('TagFilterRenderer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the tag filter button', () => {
@@ -131,7 +133,7 @@ describe('TagFilterRenderer', () => {
   });
 
   it('calls `onChange` when a tag option is clicked', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     render(<TagFilterRenderer query={Query.parse('')} onChange={onChange} />, {
       wrapper: createWrapper({ tagsService: mockTagsService }),
@@ -174,7 +176,7 @@ describe('TagFilterRenderer', () => {
 
   it('removes a tag from the query when clicking an already-included tag', async () => {
     const query = Query.parse('').addOrFieldValue('tag', 'Production', true, 'eq');
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     render(<TagFilterRenderer query={query} onChange={onChange} />, {
       wrapper: createWrapper({ tagsService: mockTagsService }),
@@ -191,7 +193,7 @@ describe('TagFilterRenderer', () => {
   describe('tag counts from FindItemsResult', () => {
     it('displays counts keyed by tag ID', async () => {
       // Return counts.tag keyed by tag ID.
-      const mockFindItemsWithCounts = jest.fn(
+      const mockFindItemsWithCounts = vi.fn(
         async (_params: FindItemsParams): Promise<FindItemsResult> => ({
           items: [
             { id: 'item-1', title: 'Item 1', tags: ['tag-1', 'tag-2'] },

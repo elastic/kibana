@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useInvestigationTimeEnrichment } from './use_investigation_enrichment';
 import {
@@ -13,39 +16,42 @@ import {
 } from '../../../../../../common/cti/constants';
 import { useEventEnrichmentComplete } from '../../../main/services/threat_intelligence';
 
-jest.mock('../../../main/services/threat_intelligence');
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+vi.mock('../../../main/services/threat_intelligence');
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
-    useDispatch: () => jest.fn(),
+    useDispatch: () => vi.fn(),
   };
 });
-jest.mock('../../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-  }),
-}));
+vi.mock('../../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: vi.fn().mockReturnValue({
+        addError: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockStorageGet = jest.fn();
-jest.mock('../../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
+const mockStorageGet = vi.fn();
+vi.mock('../../../../../common/lib/kibana', async () => {
+  const originalModule = (await vi.importActual('../../../../../common/lib/kibana'));
   return {
     ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
+    useKibana: vi.fn().mockReturnValue({
       services: {
         data: {
           search: {
             search: () => ({
               subscribe: () => ({
-                unsubscribe: jest.fn(),
+                unsubscribe: vi.fn(),
               }),
             }),
           },
         },
         storage: { get: () => mockStorageGet() },
         uiSettings: {
-          get: jest.fn().mockReturnValue(''),
+          get: vi.fn().mockReturnValue(''),
         },
       },
     }),
@@ -54,11 +60,11 @@ jest.mock('../../../../../common/lib/kibana', () => {
 
 describe('useInvestigationTimeEnrichment', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return default range', () => {
-    (useEventEnrichmentComplete as jest.Mock).mockReturnValue({});
+    (useEventEnrichmentComplete as Mock).mockReturnValue({});
 
     const { result } = renderHook(() =>
       useInvestigationTimeEnrichment({
@@ -75,7 +81,7 @@ describe('useInvestigationTimeEnrichment', () => {
 
   it('should return range saved in local storage', () => {
     mockStorageGet.mockReturnValue({ start: 'now-7d', end: 'now-3d' });
-    (useEventEnrichmentComplete as jest.Mock).mockReturnValue({});
+    (useEventEnrichmentComplete as Mock).mockReturnValue({});
 
     const { result } = renderHook(() =>
       useInvestigationTimeEnrichment({
@@ -90,7 +96,7 @@ describe('useInvestigationTimeEnrichment', () => {
   });
 
   it('should return loading', () => {
-    (useEventEnrichmentComplete as jest.Mock).mockReturnValue({
+    (useEventEnrichmentComplete as Mock).mockReturnValue({
       error: null,
       result: undefined,
       loading: true,
@@ -106,7 +112,7 @@ describe('useInvestigationTimeEnrichment', () => {
   });
 
   it('should return no enrichments', () => {
-    (useEventEnrichmentComplete as jest.Mock).mockReturnValue({});
+    (useEventEnrichmentComplete as Mock).mockReturnValue({});
 
     const { result } = renderHook(() =>
       useInvestigationTimeEnrichment({
@@ -118,7 +124,7 @@ describe('useInvestigationTimeEnrichment', () => {
   });
 
   it('should return enrichments and loading false', () => {
-    (useEventEnrichmentComplete as jest.Mock).mockReturnValue({
+    (useEventEnrichmentComplete as Mock).mockReturnValue({
       error: null,
       result: {
         enrichments: [{}],
@@ -126,7 +132,7 @@ describe('useInvestigationTimeEnrichment', () => {
         totalCount: 0,
       },
       loading: false,
-      start: jest.fn(),
+      start: vi.fn(),
     });
 
     const { result } = renderHook(() =>

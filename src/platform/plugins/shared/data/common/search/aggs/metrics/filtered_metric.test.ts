@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IAggConfigs } from '../agg_configs';
 import { AggConfigs } from '../agg_configs';
 import type { AggTypesDependencies } from '../agg_types';
@@ -34,10 +36,10 @@ describe('filtered metric agg type', () => {
   } as any;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     aggTypesDependencies = {
       ...mockAggTypesDependencies,
-      getConfig: jest.fn(),
+      getConfig: vi.fn(),
     };
 
     aggConfigs = new AggConfigs(
@@ -66,7 +68,7 @@ describe('filtered metric agg type', () => {
       {
         typesRegistry,
       },
-      jest.fn()
+      vi.fn()
     );
   });
 
@@ -120,7 +122,7 @@ describe('filtered metric agg type', () => {
       {
         typesRegistry,
       },
-      jest.fn()
+      vi.fn()
     );
 
     expect(

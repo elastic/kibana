@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { cloneDeep } from 'lodash';
 import { performance } from 'perf_hooks';
 import { mergeMissingFieldsWithSource } from './merge_missing_fields_with_source';
@@ -15,11 +17,11 @@ import { emptyEsResult } from '../../../__mocks__/empty_signal_source_hit';
  */
 describe('merge_missing_fields_with_source', () => {
   beforeAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   /** Get the return type of the mergeMissingFieldsWithSource for TypeScript checks against expected */

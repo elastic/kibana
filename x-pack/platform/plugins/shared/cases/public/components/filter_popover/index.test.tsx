@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { render, waitFor, screen } from '@testing-library/react';
@@ -13,11 +15,11 @@ import { FilterPopover } from '.';
 
 // Failing: See https://github.com/elastic/kibana/issues/176679
 describe('FilterPopover ', () => {
-  const onSelectedOptionsChanged = jest.fn();
+  const onSelectedOptionsChanged = vi.fn();
   const tags: string[] = ['coke', 'pepsi'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders button label correctly', async () => {

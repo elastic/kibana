@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getPingHistogram } from './get_ping_histogram';
 import * as intervalHelper from '../../../../common/lib/get_histogram_interval';
 import { getUptimeESMockClient } from './test_helpers';
 
 describe('getPingHistogram', () => {
   beforeEach(() => {
-    jest.spyOn(intervalHelper, 'getHistogramInterval').mockReturnValue(36000);
+    vi.spyOn(intervalHelper, 'getHistogramInterval').mockReturnValue(36000);
   });
 
   const standardMockResponse: any = {

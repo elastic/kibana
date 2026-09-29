@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -18,13 +21,13 @@ import {
   CLI_COMMAND_REFERENCE_URL,
 } from './constants';
 
-jest.mock('../../hooks/use_elasticsearch_url');
+vi.mock('../../hooks/use_elasticsearch_url');
 
-const mockUseElasticsearchUrl = useElasticsearchUrl as jest.Mock;
+const mockUseElasticsearchUrl = useElasticsearchUrl as Mock;
 
 const MOCK_ES_URL = 'https://my-deployment.es.us-east-1.aws.elastic.cloud:443';
 
-const renderComponent = (onClose = jest.fn()) =>
+const renderComponent = (onClose = vi.fn()) =>
   render(
     <I18nProvider>
       <EuiThemeProvider>
@@ -57,7 +60,7 @@ describe('CliInstallModal', () => {
   });
 
   it('calls onClose when the Close button is clicked', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     renderComponent(onClose);
 
     fireEvent.click(screen.getByTestId('cliInstallModalCloseBtn'));

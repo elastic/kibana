@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
 import moment from 'moment';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -25,18 +28,21 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 
 // Mock the step information functions
-jest.mock('./queries/get_step_information', () => ({
-  getStepInformation: jest.fn().mockResolvedValue(null),
-}));
+vi.mock('./queries/get_step_information', () => {
+      const mocked = {
+      getStepInformation: vi.fn().mockResolvedValue(null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('StatusRuleExecutor', () => {
   // @ts-ignore
-  Date.now = jest.fn(() => new Date('2024-05-13T12:33:37.000Z'));
+  Date.now = vi.fn(() => new Date('2024-05-13T12:33:37.000Z'));
 
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
   const logger = loggerMock.create();
   const soClient = savedObjectsClientMock.create();
-  jest.spyOn(locationsUtils, 'getAllLocations').mockResolvedValue({
+  vi.spyOn(locationsUtils, 'getAllLocations').mockResolvedValue({
     // @ts-ignore
     publicLocations: [
       {
@@ -64,7 +70,7 @@ describe('StatusRuleExecutor', () => {
     },
     spaces: {
       spacesService: {
-        getSpaceId: jest.fn().mockReturnValue('test-space'),
+        getSpaceId: vi.fn().mockReturnValue('test-space'),
       },
     },
     encryptedSavedObjects: mockEncryptedSO(),
@@ -95,12 +101,12 @@ describe('StatusRuleExecutor', () => {
 
   afterEach(() => {
     statusRule.params = {};
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('DefaultRule', () => {
     it('should only query enabled monitors', async () => {
-      const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+      const spy = vi.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       const { downConfigs, staleDownConfigs } = await statusRule.getConfigs({});
 
@@ -115,7 +121,7 @@ describe('StatusRuleExecutor', () => {
     it('should use all monitorLocationIds when params locations is an empty array', async () => {
       // Create a spy on the queryMonitorStatusAlert function
       const queryMonitorStatusAlertModule = await import('./queries/query_monitor_status_alert');
-      const spy = jest
+      const spy = vi
         .spyOn(queryMonitorStatusAlertModule, 'queryMonitorStatusAlert')
         .mockResolvedValue({
           upConfigs: {},
@@ -146,7 +152,7 @@ describe('StatusRuleExecutor', () => {
       );
 
       // Mock the getAll method to return test monitors with a location
-      jest
+      vi
         .spyOn(statusRuleWithEmptyLocations.monitorConfigRepository, 'getAll')
         .mockResolvedValue(testMonitors);
 
@@ -162,7 +168,7 @@ describe('StatusRuleExecutor', () => {
     });
 
     it('marks deleted configs as expected', async () => {
-      jest.spyOn(configRepo, 'getAll').mockResolvedValue(testMonitors);
+      vi.spyOn(configRepo, 'getAll').mockResolvedValue(testMonitors);
 
       const { downConfigs } = await statusRule.getConfigs({});
 
@@ -238,7 +244,7 @@ describe('StatusRuleExecutor', () => {
     });
 
     it('does not mark deleted config when monitor does not contain location label', async () => {
-      jest.spyOn(configRepo, 'getAll').mockResolvedValue([
+      vi.spyOn(configRepo, 'getAll').mockResolvedValue([
         {
           ...testMonitors[0],
           attributes: {
@@ -330,10 +336,10 @@ describe('StatusRuleExecutor', () => {
 
   describe('handleDownMonitorThresholdAlert', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     it('should alert if monitor meet location threshold', async () => {
-      const spy = jest.spyOn(statusRule, 'scheduleAlert');
+      const spy = vi.spyOn(statusRule, 'scheduleAlert');
       await statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
           'id1-us_central_qa': {
@@ -407,7 +413,7 @@ describe('StatusRuleExecutor', () => {
         },
       };
 
-      const spy = jest.spyOn(statusRule, 'scheduleAlert');
+      const spy = vi.spyOn(statusRule, 'scheduleAlert');
       await statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
           'id1-us_central_qa': {
@@ -437,7 +443,7 @@ describe('StatusRuleExecutor', () => {
           locationsThreshold: 1,
         },
       };
-      const spy = jest.spyOn(statusRule, 'scheduleAlert');
+      const spy = vi.spyOn(statusRule, 'scheduleAlert');
       await statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
           'id1-us_central_qa': {
@@ -480,7 +486,7 @@ describe('StatusRuleExecutor', () => {
           locationsThreshold: 1,
         },
       };
-      const spy = jest.spyOn(statusRule, 'scheduleAlert');
+      const spy = vi.spyOn(statusRule, 'scheduleAlert');
       await statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
           'id1-us_central_qa': {
@@ -575,7 +581,7 @@ describe('StatusRuleExecutor', () => {
 
     describe('filtering configs with missing latestPing.monitor', () => {
       it('should skip configs where latestPing is undefined', async () => {
-        const spy = jest.spyOn(statusRule, 'scheduleAlert');
+        const spy = vi.spyOn(statusRule, 'scheduleAlert');
         await statusRule.handleDownMonitorThresholdAlert({
           downConfigs: {
             'id1-us_central_qa': {
@@ -596,7 +602,7 @@ describe('StatusRuleExecutor', () => {
       });
 
       it('should skip configs where latestPing.monitor is undefined', async () => {
-        const spy = jest.spyOn(statusRule, 'scheduleAlert');
+        const spy = vi.spyOn(statusRule, 'scheduleAlert');
         await statusRule.handleDownMonitorThresholdAlert({
           downConfigs: {
             'id1-us_central_qa': {
@@ -617,7 +623,7 @@ describe('StatusRuleExecutor', () => {
       });
 
       it('should log a debug message for each skipped config', async () => {
-        const debugSpy = jest.spyOn(statusRule, 'debug');
+        const debugSpy = vi.spyOn(statusRule, 'debug');
         await statusRule.handleDownMonitorThresholdAlert({
           downConfigs: {
             'id1-us_central_qa': {
@@ -655,7 +661,7 @@ describe('StatusRuleExecutor', () => {
       });
 
       it('should only alert for valid configs when mixed with invalid ones (grouped by location)', async () => {
-        const spy = jest.spyOn(statusRule, 'scheduleAlert');
+        const spy = vi.spyOn(statusRule, 'scheduleAlert');
         await statusRule.handleDownMonitorThresholdAlert({
           downConfigs: {
             'id1-us_central_qa': {
@@ -703,7 +709,7 @@ describe('StatusRuleExecutor', () => {
             locationsThreshold: 1,
           },
         };
-        const spy = jest.spyOn(statusRule, 'scheduleAlert');
+        const spy = vi.spyOn(statusRule, 'scheduleAlert');
         await statusRule.handleDownMonitorThresholdAlert({
           downConfigs: {
             'id1-us_central_qa': {
@@ -753,7 +759,7 @@ describe('StatusRuleExecutor', () => {
             locationsThreshold: 1,
           },
         };
-        const spy = jest.spyOn(statusRule, 'scheduleAlert');
+        const spy = vi.spyOn(statusRule, 'scheduleAlert');
         await statusRule.handleDownMonitorThresholdAlert({
           downConfigs: {
             'id1-us_central_qa': {
@@ -797,7 +803,7 @@ describe('StatusRuleExecutor', () => {
           locationsThreshold: 1,
         },
       };
-      const spy = jest.spyOn(statusRule, 'scheduleAlert');
+      const spy = vi.spyOn(statusRule, 'scheduleAlert');
       await statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
           'id1-us_central_qa': {
@@ -909,8 +915,8 @@ describe('StatusRuleExecutor', () => {
   });
 
   describe('handlePendingMonitorAlert', () => {
-    let schedulePendingAlertPerConfigIdSpy: jest.SpyInstance;
-    let schedulePendingAlertPerConfigIdPerLocationSpy: jest.SpyInstance;
+    let schedulePendingAlertPerConfigIdSpy: MockInstance;
+    let schedulePendingAlertPerConfigIdPerLocationSpy: MockInstance;
 
     const MOCK_FIRST_MONITOR = {
       id: 'monitor-1',
@@ -975,11 +981,11 @@ describe('StatusRuleExecutor', () => {
     };
 
     beforeEach(() => {
-      schedulePendingAlertPerConfigIdSpy = jest.spyOn(
+      schedulePendingAlertPerConfigIdSpy = vi.spyOn(
         statusRule,
         'schedulePendingAlertPerConfigId'
       );
-      schedulePendingAlertPerConfigIdPerLocationSpy = jest.spyOn(
+      schedulePendingAlertPerConfigIdPerLocationSpy = vi.spyOn(
         statusRule,
         'schedulePendingAlertPerConfigIdPerLocation'
       );
@@ -1153,7 +1159,7 @@ describe('StatusRuleExecutor', () => {
     });
 
     describe('schedulePendingAlertPerConfigIdPerLocation', () => {
-      let scheduleAlertSpy: jest.SpyInstance;
+      let scheduleAlertSpy: MockInstance;
 
       beforeEach(() => {
         // Set up statusRule with necessary parameters for getMonitorPendingSummary
@@ -1165,11 +1171,11 @@ describe('StatusRuleExecutor', () => {
           } as any,
         };
 
-        scheduleAlertSpy = jest.spyOn(statusRule, 'scheduleAlert');
+        scheduleAlertSpy = vi.spyOn(statusRule, 'scheduleAlert');
       });
 
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('should call scheduleAlert for each pending config with correct parameters', async () => {
@@ -1259,7 +1265,7 @@ describe('StatusRuleExecutor', () => {
     });
 
     describe('schedulePendingAlertPerConfigId', () => {
-      let scheduleAlertSpy: jest.SpyInstance;
+      let scheduleAlertSpy: MockInstance;
 
       beforeEach(() => {
         // Set up statusRule with necessary parameters for getUngroupedPendingSummary
@@ -1271,11 +1277,11 @@ describe('StatusRuleExecutor', () => {
           } as any,
         };
 
-        scheduleAlertSpy = jest.spyOn(statusRule, 'scheduleAlert');
+        scheduleAlertSpy = vi.spyOn(statusRule, 'scheduleAlert');
       });
 
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('should group configs by configId and call scheduleAlert with combined location information', async () => {
@@ -1371,9 +1377,9 @@ describe('StatusRuleExecutor', () => {
 
   describe('scheduleAlert', () => {
     const alertsClientMock = {
-      report: jest.fn().mockReturnValue({ uuid: 'uuid-1', start: undefined }),
-      setAlertData: jest.fn(),
-      getRecoveredAlerts: jest.fn(),
+      report: vi.fn().mockReturnValue({ uuid: 'uuid-1', start: undefined }),
+      setAlertData: vi.fn(),
+      getRecoveredAlerts: vi.fn(),
     };
 
     beforeAll(async () => {
@@ -1385,7 +1391,7 @@ describe('StatusRuleExecutor', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('adds grouping to both context and alert document when only one location', async () => {

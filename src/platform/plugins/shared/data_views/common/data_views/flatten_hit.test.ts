@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { DataView } from './data_view';
 
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -15,7 +17,7 @@ import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
 class MockFieldFormatter {}
 
-fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
+fieldFormatsMock.getInstance = vi.fn().mockImplementation(() => new MockFieldFormatter()) as any;
 
 // helper function to create index patterns
 function create(id: string) {

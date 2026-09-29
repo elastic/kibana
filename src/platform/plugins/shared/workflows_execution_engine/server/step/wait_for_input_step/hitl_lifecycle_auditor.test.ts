@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   emitHitlLifecycle,
   type HitlLifecycleEvent,
@@ -20,8 +22,8 @@ describe('hitl_lifecycle_auditor', () => {
   });
 
   it('registers an auditor and returns a disposer that clears only that registration', () => {
-    const first = jest.fn();
-    const second = jest.fn();
+    const first = vi.fn();
+    const second = vi.fn();
     const disposeFirst = registerHitlLifecycleAuditor(first);
     const disposeSecond = registerHitlLifecycleAuditor(second);
 

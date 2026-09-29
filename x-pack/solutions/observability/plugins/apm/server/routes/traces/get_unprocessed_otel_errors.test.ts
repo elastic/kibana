@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { omit } from 'lodash';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -36,7 +38,7 @@ const validFields = {
 
 function createLogsClientMock(hits: Hit[]): LogsClient {
   return {
-    search: jest.fn().mockResolvedValue({ hits: { hits } }),
+    search: vi.fn().mockResolvedValue({ hits: { hits } }),
   } as unknown as LogsClient;
 }
 

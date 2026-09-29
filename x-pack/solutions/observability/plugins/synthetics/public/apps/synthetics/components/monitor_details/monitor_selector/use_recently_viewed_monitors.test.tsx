@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import type { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
@@ -18,23 +21,29 @@ import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';
 import { WrappedHelper } from '../../../utils/testing';
 import { MONITOR_ROUTE } from '../../../../../../common/constants';
 
-jest.mock('../../../state', () => ({
-  ...jest.requireActual('../../../state'),
-  fetchMonitorManagementList: jest.fn(),
-}));
+vi.mock('../../../state', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../state')),
+      fetchMonitorManagementList: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
-  useFetcher: jest.fn(),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+      useFetcher: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useRecentlyViewedMonitors', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns expected result', () => {
@@ -46,8 +55,8 @@ describe('useRecentlyViewedMonitors', () => {
       );
     };
 
-    jest.spyOn(useMonitorQueryModule, 'useMonitorQueryId').mockReturnValue('1');
-    (useFetcher as jest.Mock).mockImplementation((callback) => {
+    vi.spyOn(useMonitorQueryModule, 'useMonitorQueryId').mockReturnValue('1');
+    (useFetcher as Mock).mockImplementation((callback) => {
       callback();
       return { loading: false, status: 'success' as FETCH_STATUS.SUCCESS, refetch: () => {} };
     });
@@ -60,19 +69,19 @@ describe('useRecentlyViewedMonitors', () => {
     const currentMonitorQueryId = 'id-01';
     const monitorQueryId3 = 'persisted-id-03';
     let persistedIds = ['persisted-id-02', monitorQueryId3];
-    const setPersistedIdsMock = jest.fn().mockImplementation((ids: string[]) => {
+    const setPersistedIdsMock = vi.fn().mockImplementation((ids: string[]) => {
       persistedIds = ids;
     });
 
-    jest
+    vi
       .spyOn(useMonitorQueryModule, 'useMonitorQueryId')
       .mockImplementation(() => currentMonitorQueryId);
 
-    jest
+    vi
       .spyOn(localStorageModule, 'default')
       .mockImplementation(() => [persistedIds, setPersistedIdsMock, () => {}]);
 
-    (useFetcher as jest.Mock).mockImplementation((callback) => {
+    (useFetcher as Mock).mockImplementation((callback) => {
       callback();
       return { loading: false, status: 'success' as FETCH_STATUS.SUCCESS, refetch: () => {} };
     });
@@ -83,7 +92,7 @@ describe('useRecentlyViewedMonitors', () => {
       name: 'Monitor 03',
       locations: [],
     };
-    (fetchMonitorManagementList as jest.Mock).mockReturnValue({
+    (fetchMonitorManagementList as Mock).mockReturnValue({
       monitors: [fetchedMonitor],
     });
 

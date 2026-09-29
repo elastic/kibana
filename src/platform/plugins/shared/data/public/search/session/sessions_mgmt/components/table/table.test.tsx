@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { RenderResult } from '@testing-library/react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -56,8 +59,8 @@ const setup = async ({
 
   const sessionsClient = new SessionsClient({
     http: mockCoreSetup.http,
-  }) as jest.Mocked<SessionsClient>;
-  sessionsClient.find = jest.fn().mockResolvedValue(mockSessionsFindResponse);
+  }) as Mocked<SessionsClient>;
+  sessionsClient.find = vi.fn().mockResolvedValue(mockSessionsFindResponse);
 
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
     notifications: mockCoreStart.notifications,
@@ -270,7 +273,7 @@ describe('<SearchSessionsMgmtTable />', () => {
   });
 
   it('re-fetches data', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const { sessionsClient } = await setup();
 
@@ -279,13 +282,13 @@ describe('<SearchSessionsMgmtTable />', () => {
 
     // Fast-forward timer to trigger the refresh
     act(() => {
-      jest.advanceTimersByTime(1000); // Advance by 1 second (refresh interval)
+      vi.advanceTimersByTime(1000); // Advance by 1 second (refresh interval)
     });
 
     // Verify that the find method was called again
     await waitFor(() => expect(sessionsClient.find).toHaveBeenCalledTimes(2));
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('when hideRefreshButton is false', () => {

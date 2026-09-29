@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -13,17 +16,20 @@ import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
 import { useKibana } from '../../../common/lib/kibana';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../lib/action_connector_api', () => ({
-  ...jest.requireActual('../../lib/action_connector_api'),
-  checkConnectorIdAvailability: jest.fn(),
-}));
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../lib/action_connector_api', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../lib/action_connector_api')),
+      checkConnectorIdAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { checkConnectorIdAvailability } = jest.requireMock('../../lib/action_connector_api');
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const { checkConnectorIdAvailability } = (await vi.importMock('../../lib/action_connector_api'));
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 describe('ConnectorFormFieldsGlobal', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
   const defaultValue = {
     id: 'test-id',
     actionTypeId: '.test',
@@ -32,7 +38,7 @@ describe('ConnectorFormFieldsGlobal', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const httpMock = httpServiceMock.createStartContract();
     useKibanaMock().services.http = httpMock;
     checkConnectorIdAvailability.mockResolvedValue({ isAvailable: true });

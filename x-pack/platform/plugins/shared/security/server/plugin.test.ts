@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Client } from '@elastic/elasticsearch';
 import { of } from 'rxjs';
 
@@ -32,7 +34,7 @@ describe('Security Plugin', () => {
   let mockStartDependencies: PluginStartDependencies;
   let mockInitializerContext: PluginInitializerContextMock<typeof ConfigSchema>;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockInitializerContext = coreMock.createPluginInitializerContext(
       ConfigSchema.validate(
         {
@@ -60,8 +62,8 @@ describe('Security Plugin', () => {
 
     mockSetupDependencies = {
       licensing: {
-        license$: of({ getUnavailableReason: jest.fn() }),
-        featureUsage: { register: jest.fn() },
+        license$: of({ getUnavailableReason: vi.fn() }),
+        featureUsage: { register: vi.fn() },
       },
       features: featuresPluginMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
@@ -287,7 +289,7 @@ describe('Security Plugin', () => {
         cloud.organizationId = organizationId;
         cloud.serverless = { ...cloud.serverless, projectId, projectType };
         mockSetupDependencies.cloud = cloud;
-        const start = jest.spyOn(ServiceAccountsService.prototype, 'start').mockReturnValue(null);
+        const start = vi.spyOn(ServiceAccountsService.prototype, 'start').mockReturnValue(null);
         try {
           plugin.setup(mockCoreSetup, mockSetupDependencies);
           plugin.start(mockCoreStart, mockStartDependencies);

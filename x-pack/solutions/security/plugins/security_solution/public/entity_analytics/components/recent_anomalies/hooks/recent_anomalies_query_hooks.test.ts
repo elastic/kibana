@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useQuery } from '@kbn/react-query';
 import { getESQLResults } from '@kbn/esql-utils';
@@ -19,38 +22,65 @@ import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useInstalledSecurityJobsIds } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 
-jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
-jest.mock('@kbn/esql-utils', () => ({
-  prettifyQuery: jest.fn((q) => q),
-  getESQLResults: jest.fn(),
-}));
-jest.mock('@kbn/entity-store/common', () => ({
-  getEntitiesAlias: jest.fn(),
-  ENTITY_LATEST: 'latest',
-}));
-jest.mock('./recent_anomalies_esql_source_query_hooks', () => ({
-  useRecentAnomaliesTopRowsEsqlSource: jest.fn(),
-  useRecentAnomaliesDataEsqlSource: jest.fn(),
-}));
-jest.mock('../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('../../../../common/hooks/use_global_filter_query', () => ({
-  useGlobalFilterQuery: jest.fn(),
-}));
-jest.mock('../../../../common/containers/use_global_time', () => ({ useGlobalTime: jest.fn() }));
-jest.mock('../../../../common/components/ml/hooks/use_installed_security_jobs', () => ({
-  useInstalledSecurityJobsIds: jest.fn(),
-}));
-jest.mock('../../../../common/hooks/use_error_toast', () => ({ useErrorToast: jest.fn() }));
+vi.mock('@kbn/react-query', () => {
+      const mocked = { useQuery: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      prettifyQuery: vi.fn((q) => q),
+      getESQLResults: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/entity-store/common', () => {
+      const mocked = {
+      getEntitiesAlias: vi.fn(),
+      ENTITY_LATEST: 'latest',
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./recent_anomalies_esql_source_query_hooks', () => {
+      const mocked = {
+      useRecentAnomaliesTopRowsEsqlSource: vi.fn(),
+      useRecentAnomaliesDataEsqlSource: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = { useKibana: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/hooks/use_global_filter_query', () => {
+      const mocked = {
+      useGlobalFilterQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/containers/use_global_time', () => {
+      const mocked = { useGlobalTime: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/components/ml/hooks/use_installed_security_jobs', () => {
+      const mocked = {
+      useInstalledSecurityJobsIds: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/hooks/use_error_toast', () => {
+      const mocked = { useErrorToast: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseQuery = useQuery as jest.Mock;
-const mockGetESQLResults = getESQLResults as jest.Mock;
-const mockGetEntitiesAlias = getEntitiesAlias as jest.Mock;
-const mockTopRowsSource = useRecentAnomaliesTopRowsEsqlSource as jest.Mock;
-const mockDataSource = useRecentAnomaliesDataEsqlSource as jest.Mock;
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseGlobalFilterQuery = useGlobalFilterQuery as jest.Mock;
-const mockUseGlobalTime = useGlobalTime as jest.Mock;
-const mockUseSecurityJobIds = useInstalledSecurityJobsIds as jest.Mock;
+const mockUseQuery = useQuery as Mock;
+const mockGetESQLResults = getESQLResults as Mock;
+const mockGetEntitiesAlias = getEntitiesAlias as Mock;
+const mockTopRowsSource = useRecentAnomaliesTopRowsEsqlSource as Mock;
+const mockDataSource = useRecentAnomaliesDataEsqlSource as Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseGlobalFilterQuery = useGlobalFilterQuery as Mock;
+const mockUseGlobalTime = useGlobalTime as Mock;
+const mockUseSecurityJobIds = useInstalledSecurityJobsIds as Mock;
 
 const TOP_ROWS_SQL = 'TOP_ROWS_SQL';
 const DATA_SQL = 'DATA_SQL';
@@ -90,7 +120,7 @@ const lastTopRowsParams = () => mockTopRowsSource.mock.calls.at(-1)?.[0];
 
 describe('useRecentAnomaliesQuery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resolvedEntityIds = undefined;
     resolveLoading = false;
     topRowsRecords = [];
@@ -99,7 +129,7 @@ describe('useRecentAnomaliesQuery', () => {
 
     mockUseKibana.mockReturnValue({
       services: {
-        data: { search: { search: jest.fn() }, dataViews: { getExistingIndices: jest.fn() } },
+        data: { search: { search: vi.fn() }, dataViews: { getExistingIndices: vi.fn() } },
       },
     });
     mockUseGlobalTime.mockReturnValue({ from: 'global-from', to: 'global-to' });
@@ -129,7 +159,7 @@ describe('useRecentAnomaliesQuery', () => {
         isLoading: false,
         isError: false,
         error: undefined,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
         data: { anomalyRecords: [], rowLabels: [] },
       };
     });

@@ -5,18 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { transformSearchResponseToAlerts } from './transform_search_response_to_alerts';
 import { transformAttackDiscoveryAlertDocumentToApi } from './transform_attack_discovery_alert_document_to_api';
 
-jest.mock('./transform_attack_discovery_alert_document_to_api', () => ({
-  transformAttackDiscoveryAlertDocumentToApi: jest.fn(),
-}));
+vi.mock('./transform_attack_discovery_alert_document_to_api', () => {
+      const mocked = {
+      transformAttackDiscoveryAlertDocumentToApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('transformSearchResponseToAlerts', () => {
   it('returns an empty array when the hit is missing required fields', () => {
-    const logger = { warn: jest.fn() } as unknown as Logger;
+    const logger = { warn: vi.fn() } as unknown as Logger;
     const response = {
       hits: {
         hits: [
@@ -42,7 +48,7 @@ describe('transformSearchResponseToAlerts', () => {
   });
 
   it('returns transformed alerts when the hit has required fields', () => {
-    const logger = { warn: jest.fn() } as unknown as Logger;
+    const logger = { warn: vi.fn() } as unknown as Logger;
     const response = {
       hits: {
         hits: [
@@ -60,7 +66,7 @@ describe('transformSearchResponseToAlerts', () => {
       },
     } as unknown as estypes.SearchResponse<Record<string, unknown>>;
 
-    (transformAttackDiscoveryAlertDocumentToApi as jest.Mock).mockReturnValue({ id: 'id-1' });
+    (transformAttackDiscoveryAlertDocumentToApi as Mock).mockReturnValue({ id: 'id-1' });
 
     expect(
       transformSearchResponseToAlerts({
@@ -73,7 +79,7 @@ describe('transformSearchResponseToAlerts', () => {
   });
 
   it('calls the document transformer with an empty id when the hit id is missing', () => {
-    const logger = { warn: jest.fn() } as unknown as Logger;
+    const logger = { warn: vi.fn() } as unknown as Logger;
     const response = {
       hits: {
         hits: [
@@ -91,7 +97,7 @@ describe('transformSearchResponseToAlerts', () => {
       },
     } as unknown as estypes.SearchResponse<Record<string, unknown>>;
 
-    (transformAttackDiscoveryAlertDocumentToApi as jest.Mock).mockReturnValue({ id: '' });
+    (transformAttackDiscoveryAlertDocumentToApi as Mock).mockReturnValue({ id: '' });
 
     transformSearchResponseToAlerts({
       enableFieldRendering: true,

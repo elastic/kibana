@@ -7,29 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { convertToLens } from '.';
 
-const mockGetColumnsFromVis = jest.fn();
-const mockGetPercentageColumnFormulaColumn = jest.fn();
-const mockGetVisSchemas = jest.fn();
-const mockGetConfiguration = jest.fn().mockReturnValue({});
+const mockGetColumnsFromVis = vi.fn();
+const mockGetPercentageColumnFormulaColumn = vi.fn();
+const mockGetVisSchemas = vi.fn();
+const mockGetConfiguration = vi.fn().mockReturnValue({});
 
-jest.mock('../services', () => ({
-  getDataViewsStart: jest.fn(() => ({ get: () => ({}), getDefault: () => ({}) })),
-}));
+vi.mock('../services', () => {
+      const mocked = {
+      getDataViewsStart: vi.fn(() => ({ get: () => ({}), getDefault: () => ({}) })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/visualizations-plugin/public', () => ({
-  getConvertToLensModule: async () => ({
-    getColumnsFromVis: jest.fn(() => mockGetColumnsFromVis()),
-    getPercentageColumnFormulaColumn: jest.fn(() => mockGetPercentageColumnFormulaColumn()),
-  }),
-  getVisSchemas: jest.fn(() => mockGetVisSchemas()),
-  getDataViewByIndexPatternId: jest.fn(() => ({ id: 'index-pattern' })),
-}));
+vi.mock('@kbn/visualizations-plugin/public', () => {
+      const mocked = {
+      getConvertToLensModule: async () => ({
+        getColumnsFromVis: vi.fn(() => mockGetColumnsFromVis()),
+        getPercentageColumnFormulaColumn: vi.fn(() => mockGetPercentageColumnFormulaColumn()),
+      }),
+      getVisSchemas: vi.fn(() => mockGetVisSchemas()),
+      getDataViewByIndexPatternId: vi.fn(() => ({ id: 'index-pattern' })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./configurations', () => ({
-  getConfiguration: jest.fn(() => mockGetConfiguration()),
-}));
+vi.mock('./configurations', () => {
+      const mocked = {
+      getConfiguration: vi.fn(() => mockGetConfiguration()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const vis = {
   isHierarchical: () => false,
@@ -53,7 +64,7 @@ const timefilter = {
 
 describe('convertToLens', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should return null if getColumnsFromVis returns null', async () => {

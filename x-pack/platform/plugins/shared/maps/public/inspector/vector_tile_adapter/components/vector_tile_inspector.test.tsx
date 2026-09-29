@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-jest.mock('./tile_request_tab', () => ({
-  TileRequestTab: () => {
-    return <div>mockTileRequestTab</div>;
-  },
-}));
+import { vi } from 'vitest';
+
+vi.mock('./tile_request_tab', () => {
+      const mocked = {
+      TileRequestTab: () => {
+        return <div>mockTileRequestTab</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';

@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { esql } from '@elastic/esql';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { esqlControlVariableIsComposerInlinable, inlineEsqlVariables } from './esql_rule_utils';
 
-jest.mock('@elastic/esql', () => {
-  const actual = jest.requireActual('@elastic/esql');
-  return { ...actual, esql: jest.fn(actual.esql) };
+vi.mock('@elastic/esql', () => {
+  const actual = require('@elastic/esql');
+  return { ...actual, esql: vi.fn(actual.esql) };
 });
 
-const esqlMock = esql as jest.MockedFunction<typeof esql>;
+const esqlMock = esql as MockedFunction<typeof esql>;
 
 const makeVar = (
   overrides: Partial<ESQLControlVariable> & Pick<ESQLControlVariable, 'type' | 'value'>

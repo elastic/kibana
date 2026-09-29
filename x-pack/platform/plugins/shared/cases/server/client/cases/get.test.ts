@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObject } from '@kbn/core/server';
 import type { Template } from '../../../common/types/domain';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
@@ -16,7 +18,7 @@ describe('get', () => {
   const clientArgs = createCasesClientMockArgs();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getCasesByAlertID', () => {

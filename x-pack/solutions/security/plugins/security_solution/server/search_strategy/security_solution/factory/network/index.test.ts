@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { NetworkQueries } from '../../../../../common/search_strategy/security_solution';
 
 import { networkFactory } from '.';
@@ -17,14 +19,14 @@ import { networkTopCountries } from './top_countries';
 import { networkTopNFlow } from './top_n_flow';
 import { networkUsers } from './users';
 
-jest.mock('./details');
-jest.mock('./dns');
-jest.mock('./http');
-jest.mock('./overview');
-jest.mock('./tls');
-jest.mock('./top_countries');
-jest.mock('./top_n_flow');
-jest.mock('./users');
+vi.mock('./details');
+vi.mock('./dns');
+vi.mock('./http');
+vi.mock('./overview');
+vi.mock('./tls');
+vi.mock('./top_countries');
+vi.mock('./top_n_flow');
+vi.mock('./users');
 
 describe('networkFactory', () => {
   test('should include correct apis', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { SplitByTermsColorProps } from './get_split_by_terms_color';
 import { getSplitByTermsColor } from './get_split_by_terms_color';
@@ -78,7 +80,7 @@ describe('getSplitByTermsColor Function', () => {
   });
 
   it('Should call the `get` palette method with the correct arguments', () => {
-    const spy = jest.spyOn(chartsRegistry, 'get');
+    const spy = vi.spyOn(chartsRegistry, 'get');
     const gradientPalette = {
       name: 'gradient',
       params: {

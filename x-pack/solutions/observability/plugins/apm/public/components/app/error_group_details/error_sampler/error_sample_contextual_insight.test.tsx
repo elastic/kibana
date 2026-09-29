@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
-jest.mock('../../../../context/apm_plugin/use_apm_plugin_context');
+vi.mock('../../../../context/apm_plugin/use_apm_plugin_context');
 
-const mockUseApmPluginContext = useApmPluginContext as jest.MockedFunction<
+const mockUseApmPluginContext = useApmPluginContext as MockedFunction<
   typeof useApmPluginContext
 >;
 

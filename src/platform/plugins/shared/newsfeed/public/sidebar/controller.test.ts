@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { sidebarServiceMock } from '@kbn/core-chrome-sidebar-mocks';
@@ -34,7 +36,7 @@ const createFetchResult = (): FetchResult => ({
 
 const setup = (fetchResult: FetchResult | null = createFetchResult()) => {
   const fetchResults$ = new BehaviorSubject<FetchResult | void | null>(fetchResult);
-  const markAsRead = jest.fn();
+  const markAsRead = vi.fn();
   const newsfeedApi: NewsfeedApi = { fetchResults$, markAsRead };
 
   const isOpen$ = new BehaviorSubject(false);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -14,16 +16,22 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { JsonEditor } from './json_editor';
 
 // Minimal stub for the CodeEditor to avoid mounting Monaco
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: () => null,
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    core: { docLinks: { links: { ingest: { processors: '#', conditionalProcessor: '#' } } } },
-    dependencies: { start: { streams: { streamsRepositoryClient: { fetch: jest.fn() } } } },
-  }),
-}));
+vi.mock('../../../../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        core: { docLinks: { links: { ingest: { processors: '#', conditionalProcessor: '#' } } } },
+        dependencies: { start: { streams: { streamsRepositoryClient: { fetch: vi.fn() } } } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const fixtures: ProcessorSuggestionsResponse = {
   processors: [
@@ -42,11 +50,11 @@ const fixtures: ProcessorSuggestionsResponse = {
   },
 };
 
-jest.mock('../../../../helpers', () => {
-  const actual = jest.requireActual('../../../../helpers');
+vi.mock('../../../../helpers', async () => {
+  const actual = (await vi.importActual('../../../../helpers'));
   return {
     ...actual,
-    fetchProcessorSuggestions: jest.fn(async () => fixtures),
+    fetchProcessorSuggestions: vi.fn(async () => fixtures),
   };
 });
 
@@ -110,7 +118,7 @@ describe('JsonEditor autocomplete provider', () => {
 
   beforeEach(() => {
     capturedProvider = undefined;
-    jest
+    vi
       .spyOn(monaco.languages, 'registerCompletionItemProvider')
       .mockImplementation(
         (
@@ -125,7 +133,7 @@ describe('JsonEditor autocomplete provider', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const completionContext: monaco.languages.CompletionContext = {

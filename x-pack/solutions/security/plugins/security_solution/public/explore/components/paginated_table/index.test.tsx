@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
@@ -19,10 +22,10 @@ import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { Direction } from '../../../../common/search_strategy';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-jest.mock('../../../common/containers/query_toggle');
+vi.mock('../../../common/containers/query_toggle');
 
-jest.mock('react', () => {
-  const r = jest.requireActual('react');
+vi.mock('react', () => {
+  const r = require('react');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return { ...r, memo: (x: any) => x };
 });
@@ -39,15 +42,15 @@ const mockTheme = getMockTheme({
 });
 
 describe('Paginated Table Component', () => {
-  const loadPage = jest.fn();
-  const updateLimitPagination = jest.fn();
-  const updateActivePage = jest.fn();
-  const mockUseQueryToggle = useQueryToggle as jest.Mock;
-  const mockSetToggle = jest.fn();
-  const mockSetQuerySkip = jest.fn();
+  const loadPage = vi.fn();
+  const updateLimitPagination = vi.fn();
+  const updateActivePage = vi.fn();
+  const mockUseQueryToggle = useQueryToggle as Mock;
+  const mockSetToggle = vi.fn();
+  const mockSetQuerySkip = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
   });
 
@@ -64,7 +67,7 @@ describe('Paginated Table Component', () => {
     loading: false,
     loadPage,
     pageOfItems: mockData.Hosts.edges,
-    setQuerySkip: jest.fn(),
+    setQuerySkip: vi.fn(),
     showMorePagesIndicator: true,
     totalCount: 10,
     updateActivePage,
@@ -237,7 +240,7 @@ describe('Paginated Table Component', () => {
     });
 
     test('Should call onChange when you choose a new sort in the table', () => {
-      const mockOnChange = jest.fn();
+      const mockOnChange = vi.fn();
       const { container } = renderComponent({
         columns: sortedHosts,
         limit: 2,

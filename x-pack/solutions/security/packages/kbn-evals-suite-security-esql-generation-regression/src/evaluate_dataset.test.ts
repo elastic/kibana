@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { DefaultEvaluators, EvalsExecutorClient, Evaluator } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
@@ -17,13 +20,13 @@ function buildEvaluator(name: string): Evaluator {
     name,
     kind: 'CODE',
     direction: 'maximize',
-    evaluate: jest.fn().mockResolvedValue({ score: 0 }),
+    evaluate: vi.fn().mockResolvedValue({ score: 0 }),
   };
 }
 
 function buildChatClient() {
   return {
-    converse: jest.fn().mockResolvedValue({
+    converse: vi.fn().mockResolvedValue({
       messages: [{ message: 'Here is the query.' }],
       steps: [],
       errors: [],
@@ -33,7 +36,7 @@ function buildChatClient() {
 }
 
 function buildDeps() {
-  const runExperiment = jest.fn().mockResolvedValue(undefined);
+  const runExperiment = vi.fn().mockResolvedValue(undefined);
   const executorClient = { runExperiment } as unknown as EvalsExecutorClient;
   const chatClient = buildChatClient();
   const inferenceClient = {} as unknown as BoundInferenceClient;
@@ -128,7 +131,7 @@ describe('createEvaluateEsqlGenerationDataset', () => {
 
   it('extracts ES|QL from a generate_esql tool result returned by the agent', async () => {
     const deps = buildDeps();
-    (deps.chatClient.converse as jest.Mock).mockResolvedValue({
+    (deps.chatClient.converse as Mock).mockResolvedValue({
       messages: [{ message: 'Done.' }],
       steps: [
         {

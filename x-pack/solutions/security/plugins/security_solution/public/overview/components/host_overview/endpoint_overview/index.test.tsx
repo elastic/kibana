@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -16,10 +19,10 @@ import type { EndpointFields } from '../../../../../common/search_strategy/secur
 import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { useGetAgentStatus as _useGetAgentStatus } from '../../../../management/hooks/agents/use_get_agent_status';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../management/hooks/agents/use_get_agent_status');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../management/hooks/agents/use_get_agent_status');
 
-const useGetAgentStatusMock = _useGetAgentStatus as jest.Mock;
+const useGetAgentStatusMock = _useGetAgentStatus as Mock;
 
 describe('EndpointOverview Component', () => {
   let endpointData: EndpointFields;

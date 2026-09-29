@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { BehaviorSubject, first, skip } from 'rxjs';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -17,8 +19,8 @@ import { initializeStateManager } from '@kbn/presentation-publishing';
 import { ControlValuesSource, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 
-const mockGetESQLSingleColumnValues = jest.fn();
-jest.mock('../../../common/options_list/get_esql_single_column_values', () => {
+const mockGetESQLSingleColumnValues = vi.fn();
+vi.mock('../../../common/options_list/get_esql_single_column_values', () => {
   const fn = (...args: unknown[]) => mockGetESQLSingleColumnValues(...args);
   fn.isSuccess = (result: unknown) => !!result && 'column' in (result as Record<string, unknown>);
   fn.isMultiColumnError = (result: unknown) =>
@@ -29,8 +31,8 @@ jest.mock('../../../common/options_list/get_esql_single_column_values', () => {
   return { getESQLSingleColumnValues: fn };
 });
 
-jest.mock('../utils/get_data_view_id_from_esql_query', () => ({
-  getDataViewIdFromESQLQuery: jest.fn().mockResolvedValue('myDataViewId'),
+vi.mock('../utils/get_data_view_id_from_esql_query', () => ({
+  getDataViewIdFromESQLQuery: vi.fn().mockResolvedValue('myDataViewId'),
 }));
 
 describe('initializeDataControlManager', () => {
@@ -68,21 +70,28 @@ describe('initializeDataControlManager', () => {
   describe('data_view_id subscription', () => {
     describe('no blocking errors', () => {
       let dataControlManager: undefined | Awaited<ReturnType<typeof initializeDataControlManager>>;
-      beforeAll((done) => {
-        initializeDataControlManager({
-          controlId: 'myControlId',
-          controlType: 'myControlType',
-          state: dataControlState,
-          editorStateManager: initializeStateManager({}, {}),
-          parentApi: {},
-          typeDisplayName: 'My Control Type',
-        }).then((controlManager) => {
-          dataControlManager = controlManager;
-          dataControlManager.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
-            done();
-          });
-        });
-      });
+      beforeAll(
+        () =>
+          new Promise<void>((resolve, reject) => {
+            const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+              fail: reject,
+            });
+
+            initializeDataControlManager({
+              controlId: 'myControlId',
+              controlType: 'myControlType',
+              state: dataControlState,
+              editorStateManager: initializeStateManager({}, {}),
+              parentApi: {},
+              typeDisplayName: 'My Control Type',
+            }).then((controlManager) => {
+              dataControlManager = controlManager;
+              dataControlManager.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
+                done();
+              });
+            });
+          })
+      );
 
       test('should set data view', () => {
         const dataViews = dataControlManager!.api.dataViews$.value;
@@ -100,24 +109,31 @@ describe('initializeDataControlManager', () => {
 
     describe('data view does not exist', () => {
       let dataControlManager: undefined | Awaited<ReturnType<typeof initializeDataControlManager>>;
-      beforeAll((done) => {
-        initializeDataControlManager({
-          controlId: 'myControlId',
-          controlType: 'myControlType',
-          state: {
-            ...dataControlState,
-            data_view_id: 'notGonnaFindMeDataViewId',
-          },
-          editorStateManager: initializeStateManager({}, {}),
-          parentApi: {},
-          typeDisplayName: 'My Control Type',
-        }).then((controlManager) => {
-          dataControlManager = controlManager;
-          dataControlManager.api.defaultTitle$!.pipe(first()).subscribe(() => {
-            done();
-          });
-        });
-      });
+      beforeAll(
+        () =>
+          new Promise<void>((resolve, reject) => {
+            const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+              fail: reject,
+            });
+
+            initializeDataControlManager({
+              controlId: 'myControlId',
+              controlType: 'myControlType',
+              state: {
+                ...dataControlState,
+                data_view_id: 'notGonnaFindMeDataViewId',
+              },
+              editorStateManager: initializeStateManager({}, {}),
+              parentApi: {},
+              typeDisplayName: 'My Control Type',
+            }).then((controlManager) => {
+              dataControlManager = controlManager;
+              dataControlManager.api.defaultTitle$!.pipe(first()).subscribe(() => {
+                done();
+              });
+            });
+          })
+      );
 
       test('should set blocking error', () => {
         const error = dataControlManager!.api.blockingError$.value;
@@ -127,36 +143,48 @@ describe('initializeDataControlManager', () => {
         );
       });
 
-      test('should clear blocking error when valid data view id provided', (done) => {
-        dataControlManager!.api.dataViews$.pipe(skip(1), first()).subscribe((dataView) => {
-          expect(dataView).not.toBeUndefined();
-          expect(dataControlManager!.api.blockingError$.value).toBeUndefined();
-          done();
-        });
-        dataControlManager!.api.setDataViewId('myDataViewId');
-      });
+      test('should clear blocking error when valid data view id provided', () =>
+        new Promise<void>((resolve, reject) => {
+          const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+            fail: reject,
+          });
+
+          dataControlManager!.api.dataViews$.pipe(skip(1), first()).subscribe((dataView) => {
+            expect(dataView).not.toBeUndefined();
+            expect(dataControlManager!.api.blockingError$.value).toBeUndefined();
+            done();
+          });
+          dataControlManager!.api.setDataViewId('myDataViewId');
+        }));
     });
 
     describe('field does not exist', () => {
       let dataControlManager: undefined | Awaited<ReturnType<typeof initializeDataControlManager>>;
-      beforeAll((done) => {
-        initializeDataControlManager({
-          controlId: 'myControlId',
-          controlType: 'myControlType',
-          state: {
-            ...dataControlState,
-            field_name: 'notGonnaFindMeFieldName',
-          },
-          editorStateManager: initializeStateManager({}, {}),
-          parentApi: {},
-          typeDisplayName: 'My Control Type',
-        }).then((controlManager) => {
-          dataControlManager = controlManager;
-          dataControlManager.api.defaultTitle$!.pipe(first()).subscribe(() => {
-            done();
-          });
-        });
-      });
+      beforeAll(
+        () =>
+          new Promise<void>((resolve, reject) => {
+            const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+              fail: reject,
+            });
+
+            initializeDataControlManager({
+              controlId: 'myControlId',
+              controlType: 'myControlType',
+              state: {
+                ...dataControlState,
+                field_name: 'notGonnaFindMeFieldName',
+              },
+              editorStateManager: initializeStateManager({}, {}),
+              parentApi: {},
+              typeDisplayName: 'My Control Type',
+            }).then((controlManager) => {
+              dataControlManager = controlManager;
+              dataControlManager.api.defaultTitle$!.pipe(first()).subscribe(() => {
+                done();
+              });
+            });
+          })
+      );
 
       test('should set blocking error', () => {
         const error = dataControlManager!.api.blockingError$.value;
@@ -164,14 +192,21 @@ describe('initializeDataControlManager', () => {
         expect(error!.message).toBe('Could not locate field: notGonnaFindMeFieldName');
       });
 
-      test('should clear blocking error when valid field name provided', (done) => {
-        dataControlManager!.api.defaultTitle$!.pipe(skip(1), first()).subscribe((defaultTitle) => {
-          expect(defaultTitle).toBe('My field name');
-          expect(dataControlManager!.api.blockingError$.value).toBeUndefined();
-          done();
-        });
-        dataControlManager!.api.setFieldName('myFieldName');
-      });
+      test('should clear blocking error when valid field name provided', () =>
+        new Promise<void>((resolve, reject) => {
+          const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+            fail: reject,
+          });
+
+          dataControlManager!.api
+            .defaultTitle$!.pipe(skip(1), first())
+            .subscribe((defaultTitle) => {
+              expect(defaultTitle).toBe('My field name');
+              expect(dataControlManager!.api.blockingError$.value).toBeUndefined();
+              done();
+            });
+          dataControlManager!.api.setFieldName('myFieldName');
+        }));
     });
   });
 

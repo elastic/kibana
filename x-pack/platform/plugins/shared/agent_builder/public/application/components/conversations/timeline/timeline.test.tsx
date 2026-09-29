@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { TimelineItem } from './types';
@@ -13,20 +15,32 @@ import { createAttachmentAddedEvent } from './items/attachment_added_event.facto
 import { createAttachmentItem, createCustomEventItem } from './items/timeline_item.factory';
 import { Timeline } from './timeline';
 
-jest.mock('./items/user_message_event', () => ({ UserMessageEvent: () => null }));
-jest.mock('./items/attachment_event', () => ({
-  AttachmentEvent: () => <div data-test-subj="attachmentEvent" />,
-}));
-jest.mock('./items/custom_event', () => ({
-  CustomEvent: ({ isStreaming }: { isStreaming?: boolean }) => (
-    <div data-test-subj="customEvent" data-streaming={String(isStreaming)} />
-  ),
-}));
-jest.mock('./agent_turn', () => ({
-  AgentTurn: ({ isResuming }: { isResuming?: boolean }) => (
-    <div data-test-subj="agentTurn" data-resuming={String(isResuming)} />
-  ),
-}));
+vi.mock('./items/user_message_event', () => {
+      const mocked = { UserMessageEvent: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./items/attachment_event', () => {
+      const mocked = {
+      AttachmentEvent: () => <div data-test-subj="attachmentEvent" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./items/custom_event', () => {
+      const mocked = {
+      CustomEvent: ({ isStreaming }: { isStreaming?: boolean }) => (
+        <div data-test-subj="customEvent" data-streaming={String(isStreaming)} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./agent_turn', () => {
+      const mocked = {
+      AgentTurn: ({ isResuming }: { isResuming?: boolean }) => (
+        <div data-test-subj="agentTurn" data-resuming={String(isResuming)} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Timeline', () => {
   it('marks each item with its key so the scroll anchor can find it', () => {

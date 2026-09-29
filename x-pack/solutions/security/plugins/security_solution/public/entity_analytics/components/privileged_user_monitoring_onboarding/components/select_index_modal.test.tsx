@@ -5,42 +5,53 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IndexSelectorModal } from './select_index_modal';
 import { TestProviders } from '../../../../common/mock';
 
-const mockUpdatePrivMonMonitoredIndices = jest.fn().mockImplementation(() => Promise.resolve({}));
-const mockRegisterPrivMonMonitoredIndices = jest.fn().mockImplementation(() => Promise.resolve({}));
-jest.mock('../../../api/api', () => ({
-  useEntityAnalyticsRoutes: () => ({
-    updatePrivMonMonitoredIndices: () => mockUpdatePrivMonMonitoredIndices(),
-    registerPrivMonMonitoredIndices: () => mockRegisterPrivMonMonitoredIndices(),
-  }),
-}));
+const mockUpdatePrivMonMonitoredIndices = vi.fn().mockImplementation(() => Promise.resolve({}));
+const mockRegisterPrivMonMonitoredIndices = vi.fn().mockImplementation(() => Promise.resolve({}));
+vi.mock('../../../api/api', () => {
+      const mocked = {
+      useEntityAnalyticsRoutes: () => ({
+        updatePrivMonMonitoredIndices: () => mockUpdatePrivMonMonitoredIndices(),
+        registerPrivMonMonitoredIndices: () => mockRegisterPrivMonMonitoredIndices(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addError: jest.fn(),
-  }),
-}));
+vi.mock('../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addError: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchPrivilegedUserIndices = jest.fn().mockReturnValue({
+const mockUseFetchPrivilegedUserIndices = vi.fn().mockReturnValue({
   data: ['index1', 'index2'],
   isFetching: false,
   error: null,
 });
 
-jest.mock('../hooks/use_fetch_privileged_user_indices', () => ({
-  useFetchPrivilegedUserIndices: () => mockUseFetchPrivilegedUserIndices(),
-}));
+vi.mock('../hooks/use_fetch_privileged_user_indices', () => {
+      const mocked = {
+      useFetchPrivilegedUserIndices: () => mockUseFetchPrivilegedUserIndices(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('IndexSelectorModal', () => {
-  const onCloseMock = jest.fn();
-  const onImportMock = jest.fn();
+  const onCloseMock = vi.fn();
+  const onImportMock = vi.fn();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the modal when isOpen is true', () => {

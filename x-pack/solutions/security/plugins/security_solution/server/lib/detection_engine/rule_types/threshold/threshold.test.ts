@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import dateMath from '@kbn/datemath';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -18,12 +21,15 @@ import { getNoReadableShardsWarning } from '../utils/no_readable_shards';
 import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
-jest.mock('../utils/get_filter', () => ({ getFilter: jest.fn() }));
+vi.mock('../utils/get_filter', () => {
+      const mocked = { getFilter: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 describe('threshold_executor', () => {
   let ruleServices: PersistenceExecutorOptionsMock;
 
-  let mockScheduledNotificationResponseAction: jest.Mock;
+  let mockScheduledNotificationResponseAction: Mock;
   const params = getThresholdRuleParams();
   const tuple = {
     from: dateMath.parse(params.from)!,
@@ -54,7 +60,7 @@ describe('threshold_executor', () => {
         thresholdTerms: { buckets: [] },
       },
     });
-    mockScheduledNotificationResponseAction = jest.fn();
+    mockScheduledNotificationResponseAction = vi.fn();
   });
 
   describe('thresholdExecutor', () => {

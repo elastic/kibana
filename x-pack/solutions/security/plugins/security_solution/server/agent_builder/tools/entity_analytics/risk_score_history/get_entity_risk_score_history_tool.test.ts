@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedClass } from 'vitest';
+
 import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
@@ -24,17 +27,23 @@ import {
   SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID,
 } from './get_entity_risk_score_history_tool';
 
-jest.mock('../../../../lib/entity_analytics/risk_score/risk_score_data_client');
-jest.mock('../../../utils/get_agent_builder_resource_availability', () => ({
-  getAgentBuilderResourceAvailability: jest.fn(),
-}));
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  executeEsql: jest.fn(),
-}));
+vi.mock('../../../../lib/entity_analytics/risk_score/risk_score_data_client');
+vi.mock('../../../utils/get_agent_builder_resource_availability', () => {
+      const mocked = {
+      getAgentBuilderResourceAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      executeEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MockRiskScoreDataClient = RiskScoreDataClient as jest.MockedClass<typeof RiskScoreDataClient>;
-const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
-const mockExecuteEsql = executeEsql as jest.Mock;
+const MockRiskScoreDataClient = RiskScoreDataClient as MockedClass<typeof RiskScoreDataClient>;
+const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as Mock;
+const mockExecuteEsql = executeEsql as Mock;
 
 const mockExperimentalFeatures = {
   riskScoreHistoryEnabled: true,
@@ -86,20 +95,20 @@ describe('getEntityRiskScoreHistoryTool', () => {
     '9.5.0'
   );
 
-  let mockGetRiskScoreHistory: jest.Mock;
-  let mockCheckPrivileges: jest.Mock;
+  let mockGetRiskScoreHistory: Mock;
+  let mockCheckPrivileges: Mock;
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
-  let mockAttachmentsAdd: jest.Mock;
-  let mockAttachmentsUpdate: jest.Mock;
-  let mockGetAttachmentRecord: jest.Mock;
+  let mockAttachmentsAdd: Mock;
+  let mockAttachmentsUpdate: Mock;
+  let mockGetAttachmentRecord: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({ status: 'available' });
     mockExecuteEsql.mockResolvedValue(exactHostHit);
 
-    mockGetRiskScoreHistory = jest.fn().mockResolvedValue(HISTORY_ENTRIES);
+    mockGetRiskScoreHistory = vi.fn().mockResolvedValue(HISTORY_ENTRIES);
     MockRiskScoreDataClient.mockImplementation(
       () =>
         ({
@@ -107,11 +116,11 @@ describe('getEntityRiskScoreHistoryTool', () => {
         } as unknown as RiskScoreDataClient)
     );
 
-    mockCheckPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: true });
+    mockCheckPrivileges = vi.fn().mockResolvedValue({ hasAllRequested: true });
     const mockSecurity = {
       authz: {
         actions: { api: { get: (priv: string) => `api:${priv}` } },
-        checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+        checkPrivilegesDynamicallyWithRequest: vi.fn().mockReturnValue(mockCheckPrivileges),
       },
     };
 
@@ -119,20 +128,20 @@ describe('getEntityRiskScoreHistoryTool', () => {
       mockCoreStart,
       {
         security: mockSecurity,
-        entityStore: { createCRUDClient: jest.fn() },
+        entityStore: { createCRUDClient: vi.fn() },
         licensing: {
-          getLicense: jest.fn().mockResolvedValue({ hasAtLeast: () => true }),
+          getLicense: vi.fn().mockResolvedValue({ hasAtLeast: () => true }),
         },
       },
       {},
     ]);
 
-    mockAttachmentsAdd = jest.fn().mockResolvedValue({
+    mockAttachmentsAdd = vi.fn().mockResolvedValue({
       id: `security.riskhistory:host:abc`,
       current_version: 1,
     });
-    mockAttachmentsUpdate = jest.fn();
-    mockGetAttachmentRecord = jest.fn().mockReturnValue(undefined);
+    mockAttachmentsUpdate = vi.fn();
+    mockGetAttachmentRecord = vi.fn().mockReturnValue(undefined);
   });
 
   const runHandler = async (params: Record<string, unknown>) => {
@@ -227,7 +236,7 @@ describe('getEntityRiskScoreHistoryTool', () => {
         {
           security: {},
           licensing: {
-            getLicense: jest.fn().mockResolvedValue({ hasAtLeast: () => hasAtLeast }),
+            getLicense: vi.fn().mockResolvedValue({ hasAtLeast: () => hasAtLeast }),
           },
         },
         {},
@@ -382,7 +391,7 @@ describe('getEntityRiskScoreHistoryTool', () => {
     it('resolves the resolution-group target id before fetching scoreType resolution history', async () => {
       mockExecuteEsql.mockResolvedValueOnce(exactUserHit);
 
-      const mockGetResolutionGroup = jest.fn().mockResolvedValue({
+      const mockGetResolutionGroup = vi.fn().mockResolvedValue({
         group_size: 2,
         target: {
           entity: {
@@ -391,7 +400,7 @@ describe('getEntityRiskScoreHistoryTool', () => {
           },
         },
       });
-      const mockCreateResolutionClient = jest.fn().mockReturnValue({
+      const mockCreateResolutionClient = vi.fn().mockReturnValue({
         getResolutionGroup: mockGetResolutionGroup,
       });
 
@@ -401,15 +410,15 @@ describe('getEntityRiskScoreHistoryTool', () => {
           security: {
             authz: {
               actions: { api: { get: (priv: string) => `api:${priv}` } },
-              checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+              checkPrivilegesDynamicallyWithRequest: vi.fn().mockReturnValue(mockCheckPrivileges),
             },
           },
           entityStore: {
-            createCRUDClient: jest.fn(),
+            createCRUDClient: vi.fn(),
             createResolutionClient: mockCreateResolutionClient,
           },
           licensing: {
-            getLicense: jest.fn().mockResolvedValue({ hasAtLeast: () => true }),
+            getLicense: vi.fn().mockResolvedValue({ hasAtLeast: () => true }),
           },
         },
         {},
@@ -451,17 +460,17 @@ describe('getEntityRiskScoreHistoryTool', () => {
           security: {
             authz: {
               actions: { api: { get: (priv: string) => `api:${priv}` } },
-              checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+              checkPrivilegesDynamicallyWithRequest: vi.fn().mockReturnValue(mockCheckPrivileges),
             },
           },
           entityStore: {
-            createCRUDClient: jest.fn(),
-            createResolutionClient: jest.fn().mockReturnValue({
-              getResolutionGroup: jest.fn().mockRejectedValue(new Error('not found')),
+            createCRUDClient: vi.fn(),
+            createResolutionClient: vi.fn().mockReturnValue({
+              getResolutionGroup: vi.fn().mockRejectedValue(new Error('not found')),
             }),
           },
           licensing: {
-            getLicense: jest.fn().mockResolvedValue({ hasAtLeast: () => true }),
+            getLicense: vi.fn().mockResolvedValue({ hasAtLeast: () => true }),
           },
         },
         {},

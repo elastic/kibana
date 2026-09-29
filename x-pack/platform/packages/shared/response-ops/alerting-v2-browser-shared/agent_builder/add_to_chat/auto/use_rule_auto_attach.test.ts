@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
@@ -32,16 +35,16 @@ const rule = {
 } as RuleResponse;
 
 describe('useRuleAutoAttach', () => {
-  let addAttachment: jest.Mock;
+  let addAttachment: Mock;
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
   let chatEvents$: Subject<ChatEvent>;
   let services: AutoAttachServices;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
-    addAttachment = jest.fn();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
+    addAttachment = vi.fn();
     currentAppId$ = new BehaviorSubject<string | null>(null);
     activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     chatEvents$ = new Subject<ChatEvent>();
@@ -54,7 +57,7 @@ describe('useRuleAutoAttach', () => {
       } as unknown as ChromeStart,
       agentBuilder: {
         addAttachment,
-        removeAttachment: jest.fn(),
+        removeAttachment: vi.fn(),
         events: {
           ui: { activeConversation$: activeConversation$.asObservable() },
           getChatEvents$: () => chatEvents$.asObservable(),
@@ -64,7 +67,7 @@ describe('useRuleAutoAttach', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('stages when sidebar is already open on mount', () => {
@@ -72,7 +75,7 @@ describe('useRuleAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     renderHook(() => useRuleAutoAttach(rule, services));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(addAttachment).toHaveBeenCalledWith(
@@ -88,7 +91,7 @@ describe('useRuleAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     renderHook(() => useRuleAutoAttach(rule, services));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
@@ -97,13 +100,13 @@ describe('useRuleAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     renderHook(() => useRuleAutoAttach(rule, services));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
 
     act(() => {
       currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
@@ -118,12 +121,12 @@ describe('useRuleAutoAttach', () => {
     const { rerender } = renderHook(({ item }) => useRuleAutoAttach(item, services), {
       initialProps: { item: rule },
     });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
     rerender({ item: rule2 });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenLastCalledWith(
@@ -136,7 +139,7 @@ describe('useRuleAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     renderHook(() => useRuleAutoAttach(undefined, services));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
@@ -144,7 +147,7 @@ describe('useRuleAutoAttach', () => {
   it('does not stage when Agent Builder is unavailable', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     renderHook(() => useRuleAutoAttach(rule, { ...services, agentBuilder: undefined }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
@@ -157,7 +160,7 @@ describe('useRuleAutoAttach', () => {
 
     act(() => {
       currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     expect(addAttachment).not.toHaveBeenCalled();

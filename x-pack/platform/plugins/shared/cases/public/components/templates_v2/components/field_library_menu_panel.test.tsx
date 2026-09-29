@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { FieldLibraryMenuPanel } from './field_library_menu_panel';
 
-const mockUseGetFieldDefinitions = jest.fn();
-jest.mock('../../field_library/hooks/use_get_field_definitions', () => ({
-  useGetFieldDefinitions: (args: unknown) => mockUseGetFieldDefinitions(args),
-}));
+const mockUseGetFieldDefinitions = vi.fn();
+vi.mock('../../field_library/hooks/use_get_field_definitions', () => {
+      const mocked = {
+      useGetFieldDefinitions: (args: unknown) => mockUseGetFieldDefinitions(args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // EUI selectable options set `pointer-events: none` on wrappers in jsdom; disable the check.
 const user = userEvent.setup({ pointerEventsCheck: 0 });
@@ -29,13 +34,13 @@ const field = (name: string, isGlobal = false) => ({
 
 describe('FieldLibraryMenuPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows a loading spinner while fetching', () => {
     mockUseGetFieldDefinitions.mockReturnValue({ data: undefined, isLoading: true });
     renderWithTestingProviders(
-      <FieldLibraryMenuPanel owner="cases" existingYaml="" onSelect={jest.fn()} width={320} />
+      <FieldLibraryMenuPanel owner="cases" existingYaml="" onSelect={vi.fn()} width={320} />
     );
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
@@ -46,7 +51,7 @@ describe('FieldLibraryMenuPanel', () => {
       isLoading: false,
     });
     renderWithTestingProviders(
-      <FieldLibraryMenuPanel owner="cases" existingYaml="" onSelect={jest.fn()} width={320} />
+      <FieldLibraryMenuPanel owner="cases" existingYaml="" onSelect={vi.fn()} width={320} />
     );
     expect(screen.getByText('No library fields yet')).toBeInTheDocument();
     expect(screen.getByText(/Create reusable fields in the Field library/)).toBeInTheDocument();
@@ -57,7 +62,7 @@ describe('FieldLibraryMenuPanel', () => {
       data: { fieldDefinitions: [field('root_cause'), field('impact', true)] },
       isLoading: false,
     });
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     renderWithTestingProviders(
       <FieldLibraryMenuPanel owner="cases" existingYaml="" onSelect={onSelect} width={320} />
     );
@@ -79,7 +84,7 @@ describe('FieldLibraryMenuPanel', () => {
       <FieldLibraryMenuPanel
         owner="cases"
         existingYaml={existingYaml}
-        onSelect={jest.fn()}
+        onSelect={vi.fn()}
         width={320}
       />
     );
@@ -100,7 +105,7 @@ describe('FieldLibraryMenuPanel', () => {
       <FieldLibraryMenuPanel
         owner="cases"
         existingYaml={existingYaml}
-        onSelect={jest.fn()}
+        onSelect={vi.fn()}
         width={320}
       />
     );

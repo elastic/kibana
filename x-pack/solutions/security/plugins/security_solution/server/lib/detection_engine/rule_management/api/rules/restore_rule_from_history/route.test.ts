@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { withSpan } from '@kbn/apm-utils';
 import { requestMock, requestContextMock, serverMock } from '../../../../routes/__mocks__';
 import type {
@@ -16,11 +19,14 @@ import { getRulesSchemaMock } from '../../../../../../../common/api/detection_en
 import { ClientError, RuleConcurrencyError } from '../../../logic/detection_rules_client/utils';
 import { restoreRuleFromHistoryRoute } from './route';
 
-jest.mock('@kbn/apm-utils', () => ({
-  withSpan: jest.fn((_opts: unknown, cb: () => Promise<unknown>) => cb()),
-}));
+vi.mock('@kbn/apm-utils', () => {
+      const mocked = {
+      withSpan: vi.fn((_opts: unknown, cb: () => Promise<unknown>) => cb()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
+const withSpanMock = withSpan as MockedFunction<typeof withSpan>;
 
 const RESTORE_ROUTE_SPAN = expect.objectContaining({
   name: 'restoreRuleFromHistoryRoute',
@@ -40,10 +46,10 @@ describe('Restore rule from history route', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    (clients.core.uiSettings.client.get as jest.Mock).mockResolvedValue(true);
+    (clients.core.uiSettings.client.get as Mock).mockResolvedValue(true);
     restoreRuleFromHistoryRoute(server.router);
   });
 
@@ -73,7 +79,7 @@ describe('Restore rule from history route', () => {
   });
 
   test('returns 403 when the ENABLE_RULE_CHANGES_HISTORY_SETTING advanced setting is disabled', async () => {
-    (clients.core.uiSettings.client.get as jest.Mock).mockResolvedValue(false);
+    (clients.core.uiSettings.client.get as Mock).mockResolvedValue(false);
 
     const response = await server.inject(
       buildRestoreRequest({

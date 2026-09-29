@@ -5,46 +5,57 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { ModelOptionsData } from '../utils/get_model_options_for_inference_endpoints';
 import { SelectModelAndInstallKnowledgeBase } from './select_model_and_install_knowledge_base';
 
-jest.mock('../hooks/use_inference_endpoints', () => ({
-  useInferenceEndpoints: () => ({
-    inferenceEndpoints: [{ inference_id: 'id1' }, { inference_id: 'id2' }],
-    isLoading: false,
-  }),
-}));
+vi.mock('../hooks/use_inference_endpoints', () => {
+      const mocked = {
+      useInferenceEndpoints: () => ({
+        inferenceEndpoints: [{ inference_id: 'id1' }, { inference_id: 'id2' }],
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils/get_model_options_for_inference_endpoints', () => ({
-  getModelOptionsForInferenceEndpoints: ({ endpoints }: { endpoints: any[] }): ModelOptionsData[] =>
-    endpoints.map((e, i) => ({
-      key: e.inference_id,
-      label: `Label${i + 1}`,
-      description: `Desc${i + 1}`,
-    })),
-}));
+vi.mock('../utils/get_model_options_for_inference_endpoints', () => {
+      const mocked = {
+      getModelOptionsForInferenceEndpoints: ({ endpoints }: { endpoints: any[] }): ModelOptionsData[] =>
+        endpoints.map((e, i) => ({
+          key: e.inference_id,
+          label: `Label${i + 1}`,
+          description: `Desc${i + 1}`,
+        })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSetEisKnowledgeBaseCalloutDismissed = jest.fn();
+const mockSetEisKnowledgeBaseCalloutDismissed = vi.fn();
 
-jest.mock('@kbn/observability-ai-assistant-plugin/public', () => ({
-  EIS_PRECONFIGURED_INFERENCE_IDS: ['id1'],
-  EisKnowledgeBaseCallout: ({
-    children,
-    isOpen,
-  }: {
-    children: React.ReactNode;
-    isOpen: boolean;
-  }) => (
-    <div data-test-subj="eisKnowledgeBaseCallout" data-is-open={isOpen}>
-      {children}
-    </div>
-  ),
-  useEisKnowledgeBaseCalloutDismissed: () => [false, mockSetEisKnowledgeBaseCalloutDismissed],
-}));
+vi.mock('@kbn/observability-ai-assistant-plugin/public', () => {
+      const mocked = {
+      EIS_PRECONFIGURED_INFERENCE_IDS: ['id1'],
+      EisKnowledgeBaseCallout: ({
+        children,
+        isOpen,
+      }: {
+        children: React.ReactNode;
+        isOpen: boolean;
+      }) => (
+        <div data-test-subj="eisKnowledgeBaseCallout" data-is-open={isOpen}>
+          {children}
+        </div>
+      ),
+      useEisKnowledgeBaseCalloutDismissed: () => [false, mockSetEisKnowledgeBaseCalloutDismissed],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const onInstall = jest.fn();
+const onInstall = vi.fn();
 
 function renderComponent(props = {}) {
   return render(

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import {
   clearAllYamlHoverProviders,
@@ -27,7 +29,7 @@ describe('interceptMonacoYamlHoverProvider', () => {
     interceptMonacoYamlHoverProvider();
 
     const mockProvider: monaco.languages.HoverProvider = {
-      provideHover: jest.fn(),
+      provideHover: vi.fn(),
     };
 
     const disposable = monaco.languages.registerHoverProvider(YAML_LANG_ID, mockProvider);
@@ -43,7 +45,7 @@ describe('interceptMonacoYamlHoverProvider', () => {
     interceptMonacoYamlHoverProvider();
 
     const mockProvider: monaco.languages.HoverProvider = {
-      provideHover: jest.fn(),
+      provideHover: vi.fn(),
     };
 
     const disposable = monaco.languages.registerHoverProvider(YAML_LANG_ID, mockProvider);
@@ -57,7 +59,7 @@ describe('interceptMonacoYamlHoverProvider', () => {
     interceptMonacoYamlHoverProvider();
 
     const unifiedProvider = {
-      provideHover: jest.fn(),
+      provideHover: vi.fn(),
       __providerId: UNIFIED_HOVER_PROVIDER_ID,
     } as unknown as monaco.languages.HoverProvider;
 
@@ -72,7 +74,7 @@ describe('interceptMonacoYamlHoverProvider', () => {
     interceptMonacoYamlHoverProvider();
 
     const mockProvider: monaco.languages.HoverProvider = {
-      provideHover: jest.fn(),
+      provideHover: vi.fn(),
     };
 
     monaco.languages.registerHoverProvider('javascript', mockProvider);
@@ -93,8 +95,8 @@ describe('interceptMonacoYamlHoverProvider', () => {
   it('clearAllYamlHoverProviders removes all stored providers', () => {
     interceptMonacoYamlHoverProvider();
 
-    const provider1: monaco.languages.HoverProvider = { provideHover: jest.fn() };
-    const provider2: monaco.languages.HoverProvider = { provideHover: jest.fn() };
+    const provider1: monaco.languages.HoverProvider = { provideHover: vi.fn() };
+    const provider2: monaco.languages.HoverProvider = { provideHover: vi.fn() };
 
     monaco.languages.registerHoverProvider(YAML_LANG_ID, provider1);
     monaco.languages.registerHoverProvider(YAML_LANG_ID, provider2);
@@ -119,7 +121,7 @@ describe('interceptMonacoYamlHoverProvider', () => {
     interceptMonacoYamlHoverProvider();
 
     const mockProvider: monaco.languages.HoverProvider = {
-      provideHover: jest.fn(),
+      provideHover: vi.fn(),
     };
 
     monaco.languages.registerHoverProvider([YAML_LANG_ID], mockProvider);
@@ -130,7 +132,7 @@ describe('interceptMonacoYamlHoverProvider', () => {
     interceptMonacoYamlHoverProvider();
 
     const mockProvider: monaco.languages.HoverProvider = {
-      provideHover: jest.fn(),
+      provideHover: vi.fn(),
     };
 
     monaco.languages.registerHoverProvider(
@@ -143,7 +145,7 @@ describe('interceptMonacoYamlHoverProvider', () => {
   it('getAllYamlHoverProviders returns a frozen copy', () => {
     interceptMonacoYamlHoverProvider();
 
-    const mockProvider: monaco.languages.HoverProvider = { provideHover: jest.fn() };
+    const mockProvider: monaco.languages.HoverProvider = { provideHover: vi.fn() };
     monaco.languages.registerHoverProvider(YAML_LANG_ID, mockProvider);
 
     const providers = getAllYamlHoverProviders();

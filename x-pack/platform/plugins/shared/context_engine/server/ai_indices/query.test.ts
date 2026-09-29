@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
@@ -22,7 +24,7 @@ import { AiIndexQueryResponseTooLargeError, InvalidAiIndexQueryError } from './e
 import { queryAiIndices } from './query';
 
 describe('queryAiIndices', () => {
-  const esqlQuery = jest.fn();
+  const esqlQuery = vi.fn();
   const esClient = { esql: { query: esqlQuery } } as unknown as ElasticsearchClient;
   const columns = [{ name: 'title', type: 'keyword' }];
   const values = [['Refund policy']];

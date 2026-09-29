@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { loggingSystemMock, savedObjectsRepositoryMock, coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { Logger } from '@kbn/core/server';
@@ -17,9 +20,9 @@ import {
 } from './user_connector_token_cleanup_task';
 import { cleanupStaleUserConnectorTokens } from './cleanup_stale_user_connector_tokens';
 
-jest.mock('./cleanup_stale_user_connector_tokens');
+vi.mock('./cleanup_stale_user_connector_tokens');
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 
 describe('initializeUserConnectorTokenCleanupTask()', () => {
   test('registers the task definition', () => {
@@ -74,10 +77,10 @@ describe('scheduleUserConnectorTokenCleanupTask()', () => {
 
 describe('task runner', () => {
   const mockCleanupStaleUserConnectorTokens =
-    cleanupStaleUserConnectorTokens as jest.MockedFunction<typeof cleanupStaleUserConnectorTokens>;
+    cleanupStaleUserConnectorTokens as MockedFunction<typeof cleanupStaleUserConnectorTokens>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const buildTaskRunner = () => {
@@ -88,7 +91,7 @@ describe('task runner', () => {
     coreSetup.getStartServices.mockResolvedValue([
       {
         savedObjects: {
-          createInternalRepository: jest.fn().mockReturnValue(savedObjectsRepository),
+          createInternalRepository: vi.fn().mockReturnValue(savedObjectsRepository),
         },
       } as never,
       {} as never,

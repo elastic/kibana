@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { monaco } from '@kbn/monaco';
 import { getInterceptedHover } from './get_intercepted_hover';
 
-const mockedMonacoYamlHoverProvideHover = jest.fn();
+const mockedMonacoYamlHoverProvideHover = vi.fn();
 
-jest.mock('./intercept_monaco_yaml_hover_provider', () => ({
-  getAllYamlHoverProviders: jest.fn(),
-}));
+vi.mock('./intercept_monaco_yaml_hover_provider', () => {
+      const mocked = {
+      getAllYamlHoverProviders: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getAllYamlHoverProviders } = jest.requireMock('./intercept_monaco_yaml_hover_provider');
+const { getAllYamlHoverProviders } = (await vi.importMock('./intercept_monaco_yaml_hover_provider'));
 
 describe('useEnhancedMonacoYamlHoverProvider', () => {
   beforeEach(() => {

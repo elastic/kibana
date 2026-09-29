@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { RuleMonitoringService } from './rule_monitoring_service';
 import { getDefaultMonitoring } from '../lib/monitoring';
 import { gapReasonType } from '../../common/constants';
@@ -16,12 +18,12 @@ const ONE_HOUR = 60 * ONE_MINUTE;
 
 describe('RuleMonitoringService', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date(mockNow).getTime());
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(mockNow).getTime());
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should initialize with default monitoring', () => {
@@ -34,7 +36,7 @@ describe('RuleMonitoringService', () => {
   it('should add history', () => {
     const ruleMonitoringService = new RuleMonitoringService();
 
-    jest.advanceTimersByTime(ONE_HOUR);
+    vi.advanceTimersByTime(ONE_HOUR);
     const firstRunDate = new Date();
 
     ruleMonitoringService.addHistory({
@@ -43,7 +45,7 @@ describe('RuleMonitoringService', () => {
       runDate: firstRunDate,
     });
 
-    jest.advanceTimersByTime(ONE_HOUR);
+    vi.advanceTimersByTime(ONE_HOUR);
     const secondRunDate = new Date();
 
     ruleMonitoringService.addHistory({

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import type { CreateRuleParams } from './create_rule';
 import { RulesClient } from '../../../../rules_client';
@@ -24,12 +27,15 @@ import type { RuleSystemAction } from '../../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
-  bulkMarkApiKeysForInvalidation: jest.fn(),
-}));
+vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
+      const mocked = {
+      bulkMarkApiKeysForInvalidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+vi.mock('@kbn/core-saved-objects-utils-server', async () => {
+  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
   return {
     ...actual,
     SavedObjectsUtils: {
@@ -38,14 +44,17 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
   };
 });
 
-jest.mock('uuid', () => {
+vi.mock('uuid', () => {
   let uuid = 100;
   return { v4: () => `${uuid++}` };
 });
 
-jest.mock('../get_schedule_frequency', () => ({
-  validateScheduleLimit: jest.fn(),
-}));
+vi.mock('../get_schedule_frequency', () => {
+      const mocked = {
+      validateScheduleLimit: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
@@ -62,7 +71,7 @@ const {
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 setGlobalDate();
@@ -99,11 +108,11 @@ function getMockData(overwrites: Record<string, unknown> = {}): CreateRuleParams
 
 describe('create()', () => {
   let rulesClient: RulesClient;
-  let actionsClient: jest.Mocked<ActionsClient>;
+  let actionsClient: Mocked<ActionsClient>;
 
   beforeEach(async () => {
     rulesClient = new RulesClient(rulesClientParams);
-    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    actionsClient = (await rulesClientParams.getActionsClient()) as Mocked<ActionsClient>;
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
       createMockConnector({
@@ -1624,7 +1633,7 @@ describe('create()', () => {
       bar: true,
       parameterThatIsSavedObjectId: '9',
     };
-    const extractReferencesFn = jest.fn().mockReturnValue({
+    const extractReferencesFn = vi.fn().mockReturnValue({
       params: {
         bar: true,
         parameterThatIsSavedObjectRef: 'soRef_0',
@@ -1637,7 +1646,7 @@ describe('create()', () => {
         },
       ],
     });
-    const injectReferencesFn = jest.fn().mockReturnValue({
+    const injectReferencesFn = vi.fn().mockReturnValue({
       bar: true,
       parameterThatIsSavedObjectId: '9',
     });
@@ -1833,7 +1842,7 @@ describe('create()', () => {
       bar: true,
       parameterThatIsSavedObjectId: '8',
     };
-    const extractReferencesFn = jest.fn().mockReturnValue({
+    const extractReferencesFn = vi.fn().mockReturnValue({
       params: {
         bar: true,
         parameterThatIsSavedObjectRef: 'action_0',
@@ -1846,7 +1855,7 @@ describe('create()', () => {
         },
       ],
     });
-    const injectReferencesFn = jest.fn().mockReturnValue({
+    const injectReferencesFn = vi.fn().mockReturnValue({
       bar: true,
       parameterThatIsSavedObjectId: '8',
     });
@@ -2810,7 +2819,7 @@ describe('create()', () => {
     const data = getMockData({ actions: [] });
     // Reject so we can assert the call arguments without exercising the full
     // create pipeline (which needs additional per-test mocking).
-    const authorize = jest.fn().mockRejectedValue(new Error('stop'));
+    const authorize = vi.fn().mockRejectedValue(new Error('stop'));
     ruleTypeRegistry.get.mockReturnValue({
       id: '123',
       name: 'Test',
@@ -2855,7 +2864,7 @@ describe('create()', () => {
         params: schema.object({}, { unknowns: 'allow' }),
       },
       authorize: {
-        params: { authorize: jest.fn().mockRejectedValue(new Error('not authorized')) },
+        params: { authorize: vi.fn().mockRejectedValue(new Error('not authorized')) },
       },
       minimumLicenseRequired: 'basic',
       isExportable: true,
@@ -3358,8 +3367,8 @@ describe('create()', () => {
       producer: 'alerts',
       solution: 'stack',
       useSavedObjectReferences: {
-        extractReferences: jest.fn(),
-        injectReferences: jest.fn(),
+        extractReferences: vi.fn(),
+        injectReferences: vi.fn(),
       },
       validate: {
         params: { validate: (params) => params },
@@ -3494,8 +3503,8 @@ describe('create()', () => {
       producer: 'alerts',
       solution: 'stack',
       useSavedObjectReferences: {
-        extractReferences: jest.fn(),
-        injectReferences: jest.fn(),
+        extractReferences: vi.fn(),
+        injectReferences: vi.fn(),
       },
       validate: {
         params: { validate: (params) => params },
@@ -3535,8 +3544,8 @@ describe('create()', () => {
       producer: 'alerts',
       solution: 'stack',
       useSavedObjectReferences: {
-        extractReferences: jest.fn(),
-        injectReferences: jest.fn(),
+        extractReferences: vi.fn(),
+        injectReferences: vi.fn(),
       },
       validate: {
         params: { validate: (params) => params },
@@ -3630,8 +3639,8 @@ describe('create()', () => {
       producer: 'alerts',
       solution: 'stack',
       useSavedObjectReferences: {
-        extractReferences: jest.fn(),
-        injectReferences: jest.fn(),
+        extractReferences: vi.fn(),
+        injectReferences: vi.fn(),
       },
       validate: {
         params: { validate: (params) => params },
@@ -3682,8 +3691,8 @@ describe('create()', () => {
       producer: 'alerts',
       solution: 'stack',
       useSavedObjectReferences: {
-        extractReferences: jest.fn(),
-        injectReferences: jest.fn(),
+        extractReferences: vi.fn(),
+        injectReferences: vi.fn(),
       },
       validate: {
         params: { validate: (params) => params },
@@ -3747,8 +3756,8 @@ describe('create()', () => {
       producer: 'alerts',
       solution: 'stack',
       useSavedObjectReferences: {
-        extractReferences: jest.fn(),
-        injectReferences: jest.fn(),
+        extractReferences: vi.fn(),
+        injectReferences: vi.fn(),
       },
       validate: {
         params: { validate: (params) => params },
@@ -3830,8 +3839,8 @@ describe('create()', () => {
       producer: 'alerts',
       solution: 'stack',
       useSavedObjectReferences: {
-        extractReferences: jest.fn(),
-        injectReferences: jest.fn(),
+        extractReferences: vi.fn(),
+        injectReferences: vi.fn(),
       },
       validate: {
         params: { validate: (params) => params },
@@ -4040,8 +4049,8 @@ describe('create()', () => {
       producer: 'alerts',
       solution: 'stack',
       useSavedObjectReferences: {
-        extractReferences: jest.fn(),
-        injectReferences: jest.fn(),
+        extractReferences: vi.fn(),
+        injectReferences: vi.fn(),
       },
       validate: {
         params: { validate: (params) => params },
@@ -4100,8 +4109,8 @@ describe('create()', () => {
       producer: 'alerts',
       solution: 'stack',
       useSavedObjectReferences: {
-        extractReferences: jest.fn(),
-        injectReferences: jest.fn(),
+        extractReferences: vi.fn(),
+        injectReferences: vi.fn(),
       },
       validate: {
         params: { validate: (params) => params },
@@ -4359,7 +4368,7 @@ describe('create()', () => {
     const connectorAdapter: ConnectorAdapter = {
       connectorTypeId: '.test',
       ruleActionParamsSchema: schema.object({ foo: schema.string() }),
-      buildActionParams: jest.fn(),
+      buildActionParams: vi.fn(),
     };
 
     connectorAdapterRegistry.register(connectorAdapter);
@@ -5144,9 +5153,9 @@ This is the type of text _investigation guides_ will contain.`;
     };
 
     const createChangeTrackingService = () => ({
-      log: jest.fn().mockResolvedValue(undefined),
-      logBulk: jest.fn().mockResolvedValue(undefined),
-      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+      log: vi.fn().mockResolvedValue(undefined),
+      logBulk: vi.fn().mockResolvedValue(undefined),
+      getHistory: vi.fn().mockResolvedValue({ items: [], total: 0 }),
     });
 
     const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
@@ -5371,7 +5380,7 @@ This is the type of text _investigation guides_ will contain.`;
 
     test('does not fail rule creation when reportEvent throws', async () => {
       mockSuccessfulCreate();
-      (rulesClientParams.analytics!.reportEvent as jest.Mock).mockImplementationOnce(() => {
+      (rulesClientParams.analytics!.reportEvent as Mock).mockImplementationOnce(() => {
         throw new Error('report failed');
       });
 

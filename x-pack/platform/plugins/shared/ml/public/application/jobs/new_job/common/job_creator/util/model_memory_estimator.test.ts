@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SinonFakeTimers } from 'sinon';
 import { useFakeTimers } from 'sinon';
 import type { CalculatePayload } from './model_memory_estimator';
@@ -32,7 +34,7 @@ describe('delay', () => {
       wizardInitialized$,
     } as unknown as JobCreator;
     mockMlApiServices = {
-      calculateModelMemoryLimit$: jest.fn(() => {
+      calculateModelMemoryLimit$: vi.fn(() => {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const { of } = require('rxjs');
         return of({ modelMemoryLimit: '15MB' });
@@ -47,11 +49,11 @@ describe('delay', () => {
   });
   afterEach(() => {
     clock.restore();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should not proceed further if the wizard has not been initialized yet', () => {
-    const spy = jest.fn();
+    const spy = vi.fn();
     modelMemoryEstimator.updates$.subscribe(spy);
 
     modelMemoryEstimator.update({ analysisConfig: { detectors: [{}] } } as CalculatePayload);
@@ -62,7 +64,7 @@ describe('delay', () => {
   });
 
   test('should not emit any value on subscription initialization', () => {
-    const spy = jest.fn();
+    const spy = vi.fn();
     modelMemoryEstimator.updates$.subscribe(spy);
     wizardInitialized$.next(true);
     expect(spy).not.toHaveBeenCalled();
@@ -70,7 +72,7 @@ describe('delay', () => {
 
   test('should debounce it for 600 ms', () => {
     // arrange
-    const spy = jest.fn();
+    const spy = vi.fn();
     modelMemoryEstimator.updates$.subscribe(spy);
     // act
     modelMemoryEstimator.update({ analysisConfig: { detectors: [{}] } } as CalculatePayload);
@@ -81,7 +83,7 @@ describe('delay', () => {
   });
 
   test('should not proceed further if the payload has not been changed', () => {
-    const spy = jest.fn();
+    const spy = vi.fn();
     modelMemoryEstimator.updates$.subscribe(spy);
 
     wizardInitialized$.next(true);
@@ -103,7 +105,7 @@ describe('delay', () => {
   });
 
   test('should call the endpoint only with a valid configuration', () => {
-    const spy = jest.fn();
+    const spy = vi.fn();
 
     wizardInitialized$.next(true);
 

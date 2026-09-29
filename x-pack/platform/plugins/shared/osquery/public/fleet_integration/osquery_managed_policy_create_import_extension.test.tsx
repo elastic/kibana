@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,33 +20,42 @@ import {
   packConfigFilesValidator,
 } from './osquery_managed_policy_create_import_extension';
 
-const mockUseFetchStatus = jest.fn().mockReturnValue({
+const mockUseFetchStatus = vi.fn().mockReturnValue({
   loading: false,
   disabled: false,
   permissionDenied: false,
 });
 
-jest.mock('./use_fetch_status', () => ({
-  useFetchStatus: () => mockUseFetchStatus(),
-}));
+vi.mock('./use_fetch_status', () => {
+      const mocked = {
+      useFetchStatus: () => mockUseFetchStatus(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        getUrlForApp: jest.fn().mockReturnValue('/app/osquery'),
-      },
-      http: {
-        fetch: jest.fn().mockResolvedValue({ results: { total: 0 } }),
-      },
-    },
-  }),
-}));
+vi.mock('../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            getUrlForApp: vi.fn().mockReturnValue('/app/osquery'),
+          },
+          http: {
+            fetch: vi.fn().mockResolvedValue({ results: { total: 0 } }),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: () => <div data-test-subj="code-editor-mock" />,
-  CodeEditorField: () => <div data-test-subj="code-editor-field-mock" />,
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: () => <div data-test-subj="code-editor-mock" />,
+      CodeEditorField: () => <div data-test-subj="code-editor-field-mock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createTestQueryClient = () =>
   new QueryClient({ defaultOptions: { queries: { retry: false, cacheTime: 0 } } });
@@ -92,10 +103,10 @@ const createEditPolicy = (overrides = {}) => ({
 });
 
 describe('OsqueryManagedPolicyCreateImportExtension', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseFetchStatus.mockReturnValue({
       loading: false,
       disabled: false,

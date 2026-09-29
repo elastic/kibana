@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getSpanLinksCountById, getLinkedChildrenOfSpan } from './get_linked_children';
 
 describe('get_linked_children', () => {
   const mockApmEventClient = {
-    search: jest.fn(),
+    search: vi.fn(),
   } as unknown as APMEventClient;
 
   const defaultParams = {
@@ -29,11 +32,11 @@ describe('get_linked_children', () => {
   });
 
   const mockSearchWith = (hits: any[]) => {
-    (mockApmEventClient.search as jest.Mock).mockResolvedValue({ hits: { hits } });
+    (mockApmEventClient.search as Mock).mockResolvedValue({ hits: { hits } });
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getSpanLinksCountById', () => {

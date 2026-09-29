@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -13,10 +15,10 @@ import { CaseSeverity } from '../../../../../common/types/domain';
 import { SeverityField } from './severity_field';
 
 describe('SeverityField', () => {
-  const onSeverityChange = jest.fn();
+  const onSeverityChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the currently selected severity', () => {

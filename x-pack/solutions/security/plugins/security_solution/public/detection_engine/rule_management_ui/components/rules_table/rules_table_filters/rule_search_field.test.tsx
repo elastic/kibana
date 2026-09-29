@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
@@ -12,42 +14,42 @@ import { RuleSearchField } from './rule_search_field';
 
 describe('RuleSearchField', () => {
   it('renders without initial value', () => {
-    render(<RuleSearchField onSearch={jest.fn()} />);
+    render(<RuleSearchField onSearch={vi.fn()} />);
 
     expect(screen.getByRole('searchbox')).toHaveValue('');
   });
 
   it('renders with initial value', () => {
-    render(<RuleSearchField initialValue="some initial value" onSearch={jest.fn()} />);
+    render(<RuleSearchField initialValue="some initial value" onSearch={vi.fn()} />);
 
     expect(screen.getByRole('searchbox')).toHaveValue('some initial value');
   });
 
   it('renders with an updated initial value', () => {
     const { rerender } = render(
-      <RuleSearchField initialValue="some initial value" onSearch={jest.fn()} />
+      <RuleSearchField initialValue="some initial value" onSearch={vi.fn()} />
     );
 
-    rerender(<RuleSearchField initialValue="some updated initial value" onSearch={jest.fn()} />);
+    rerender(<RuleSearchField initialValue="some updated initial value" onSearch={vi.fn()} />);
 
     expect(screen.getByRole('searchbox')).toHaveValue('some updated initial value');
   });
 
   it('updates the initial value after editing the value', () => {
     const { rerender } = render(
-      <RuleSearchField initialValue="some initial value" onSearch={jest.fn()} />
+      <RuleSearchField initialValue="some initial value" onSearch={vi.fn()} />
     );
     const input = screen.getByRole<HTMLInputElement>('searchbox');
 
     fireEvent.change(input, { target: { value: 'custom value' } });
 
-    rerender(<RuleSearchField initialValue="some updated initial value" onSearch={jest.fn()} />);
+    rerender(<RuleSearchField initialValue="some updated initial value" onSearch={vi.fn()} />);
 
     expect(screen.getByRole('searchbox')).toHaveValue('some updated initial value');
   });
 
   it('fires onSearch', () => {
-    const searchHandler = jest.fn();
+    const searchHandler = vi.fn();
 
     render(<RuleSearchField initialValue="some initial value" onSearch={searchHandler} />);
     const input = screen.getByRole<HTMLInputElement>('searchbox');

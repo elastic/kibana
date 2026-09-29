@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { KibanaResponseFactory } from '@kbn/core/server';
@@ -43,7 +46,7 @@ describe('Endpoint Pending Action Summary API', () => {
   let endpointActionGenerator: EndpointActionGenerator;
 
   // convenience for calling the route and handler for action status
-  let getPendingStatus: (reqParams?: any) => Promise<jest.Mocked<KibanaResponseFactory>>;
+  let getPendingStatus: (reqParams?: any) => Promise<Mocked<KibanaResponseFactory>>;
 
   // convenience for injecting mock responses for actions index and responses
   let havingActionsAndResponses: (
@@ -62,13 +65,13 @@ describe('Endpoint Pending Action Summary API', () => {
     endpointActionGenerator = new EndpointActionGenerator('seed');
     endpointAppContextService = endpointContextMock.service;
 
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
-      findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+    (endpointAppContextService.getEndpointMetadataService as Mock).mockReturnValue({
+      findHostMetadataForFleetAgents: vi.fn().mockResolvedValue([]),
     });
 
     registerActionStatusRoutes(routerMock, endpointContextMock);
 
-    getPendingStatus = async (reqParams?: any): Promise<jest.Mocked<KibanaResponseFactory>> => {
+    getPendingStatus = async (reqParams?: any): Promise<Mocked<KibanaResponseFactory>> => {
       const req = httpServerMock.createKibanaRequest(reqParams);
       const mockResponse = httpServerMock.createResponseFactory();
       const { routeHandler } = getRegisteredVersionedRouteMock(
@@ -318,10 +321,10 @@ describe('Endpoint Pending Action Summary API', () => {
         }),
       ]
     );
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+    (endpointAppContextService.getEndpointMetadataService as Mock) = vi
       .fn()
       .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+        findHostMetadataForFleetAgents: vi.fn().mockResolvedValue([]),
       });
     const response = await getPendingStatus({
       query: {
@@ -365,10 +368,10 @@ describe('Endpoint Pending Action Summary API', () => {
         }),
       ]
     );
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+    (endpointAppContextService.getEndpointMetadataService as Mock) = vi
       .fn()
       .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+        findHostMetadataForFleetAgents: vi.fn().mockResolvedValue([]),
       });
     const response = await getPendingStatus({
       query: {
@@ -399,7 +402,7 @@ describe('Endpoint Pending Action Summary API', () => {
 
   it('should return 404 when spaces is enabled and agent id is not accessible in space', async () => {
     (
-      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as Mock
     ).mockRejectedValue(new AgentNotFoundError('agent not found'));
     const response = await getPendingStatus({
       query: { agent_ids: ['123'] },

@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { EsqlService } from './esql_service';
 
-const makeClient = (resolveIndexMock: jest.Mock) =>
+const makeClient = (resolveIndexMock: Mock) =>
   ({ indices: { resolveIndex: resolveIndexMock } } as unknown as ElasticsearchClient);
 
 const emptyResponse = { indices: [], aliases: [], data_streams: [] };
 
 describe('EsqlService.getAllIndices', () => {
   it('passes filter_path to limit response payload on both resolveIndex calls', async () => {
-    const resolveIndex = jest.fn().mockResolvedValue(emptyResponse);
+    const resolveIndex = vi.fn().mockResolvedValue(emptyResponse);
     const service = new EsqlService({ client: makeClient(resolveIndex) });
 
     await service.getAllIndices('local');
@@ -47,7 +50,7 @@ describe('EsqlService.getAllIndices', () => {
   });
 
   it('correctly identifies time_series data streams via the hidden backing index mode map', async () => {
-    const resolveIndex = jest
+    const resolveIndex = vi
       .fn()
       .mockResolvedValueOnce({
         indices: [
@@ -74,7 +77,7 @@ describe('EsqlService.getAllIndices', () => {
   });
 
   it('forwards projectRouting to both resolveIndex calls when provided', async () => {
-    const resolveIndex = jest.fn().mockResolvedValue(emptyResponse);
+    const resolveIndex = vi.fn().mockResolvedValue(emptyResponse);
     const service = new EsqlService({ client: makeClient(resolveIndex) });
 
     await service.getAllIndices('local', 'my-project');
@@ -92,7 +95,7 @@ describe('EsqlService.getAllIndices', () => {
   });
 
   it('forwards the abort signal to both resolveIndex calls when provided', async () => {
-    const resolveIndex = jest.fn().mockResolvedValue(emptyResponse);
+    const resolveIndex = vi.fn().mockResolvedValue(emptyResponse);
     const service = new EsqlService({ client: makeClient(resolveIndex) });
     const signal = new AbortController().signal;
 
@@ -104,7 +107,7 @@ describe('EsqlService.getAllIndices', () => {
   });
 
   it('queries remote clusters when scope is all', async () => {
-    const resolveIndex = jest.fn().mockResolvedValue(emptyResponse);
+    const resolveIndex = vi.fn().mockResolvedValue(emptyResponse);
     const service = new EsqlService({ client: makeClient(resolveIndex) });
 
     await service.getAllIndices('all');
@@ -116,14 +119,14 @@ describe('EsqlService.getAllIndices', () => {
 });
 
 describe('EsqlService ES|QL views', () => {
-  const makeViewsClient = (getView: jest.Mock) =>
+  const makeViewsClient = (getView: Mock) =>
     ({ esql: { getView } } as unknown as ElasticsearchClient);
 
   it('gets all views through the generated Elasticsearch client', async () => {
     const response = {
       views: [{ name: 'my-view', query: 'FROM logs-*', description: 'Logs' }],
     };
-    const getView = jest.fn().mockResolvedValue(response);
+    const getView = vi.fn().mockResolvedValue(response);
     const service = new EsqlService({ client: makeViewsClient(getView) });
 
     await expect(service.getViews()).resolves.toEqual(response);
@@ -132,7 +135,7 @@ describe('EsqlService ES|QL views', () => {
 
   it('propagates Elasticsearch errors', async () => {
     const error = new Error('Elasticsearch unavailable');
-    const getView = jest.fn().mockRejectedValue(error);
+    const getView = vi.fn().mockRejectedValue(error);
     const service = new EsqlService({ client: makeViewsClient(getView) });
 
     await expect(service.getViews()).rejects.toBe(error);

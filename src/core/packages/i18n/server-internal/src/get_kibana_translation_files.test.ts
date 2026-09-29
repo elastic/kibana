@@ -7,30 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getKibanaTranslationFiles } from './get_kibana_translation_files';
 import { getTranslationPaths } from './get_translation_paths';
 
-const mockGetTranslationPaths = getTranslationPaths as jest.Mock;
+const mockGetTranslationPaths = getTranslationPaths as Mock;
 
-jest.mock('./get_translation_paths', () => ({
-  getTranslationPaths: jest.fn().mockResolvedValue([]),
-}));
-jest.mock('@kbn/repo-info', () => ({
-  fromRoot: jest.fn().mockImplementation((path: string) => path),
-}));
-jest.mock('@kbn/repo-packages', () => {
+vi.mock('./get_translation_paths', () => {
+      const mocked = {
+      getTranslationPaths: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      fromRoot: vi.fn().mockImplementation((path: string) => path),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/repo-packages', () => {
   return {
-    getPackages: jest.fn().mockReturnValue([]),
-    getPluginPackagesFilter: jest.fn().mockImplementation(() => () => false),
+    getPackages: vi.fn().mockReturnValue([]),
+    getPluginPackagesFilter: vi.fn().mockImplementation(() => () => false),
   };
 });
 
 const locale = 'en';
-const { getPackages, getPluginPackagesFilter } = jest.requireMock('@kbn/repo-packages');
+const { getPackages, getPluginPackagesFilter } = (await vi.importMock('@kbn/repo-packages'));
 
 describe('getKibanaTranslationPaths', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls getTranslationPaths against kibana root and kibana-extra', async () => {
@@ -79,7 +88,7 @@ describe('getKibanaTranslationPaths', () => {
   it('looks for translation paths in filters plugin packages', async () => {
     const package1 = { directory: 'package1' };
     const package2 = { directory: 'package2' };
-    const filter = jest.fn((p: any) => p === package2);
+    const filter = vi.fn((p: any) => p === package2);
 
     getPackages.mockReturnValue([package1, package2]);
     getPluginPackagesFilter.mockReturnValue(filter);

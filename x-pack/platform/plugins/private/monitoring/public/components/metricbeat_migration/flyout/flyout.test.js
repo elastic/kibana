@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Flyout } from './flyout';
@@ -17,29 +19,35 @@ import {
   LOGSTASH_SYSTEM_ID,
 } from '../../../../common/constants';
 
-jest.mock('../../../legacy_shims', () => ({
-  Legacy: {
-    shims: {
-      kfetch: jest.fn(),
-      docLinks: {
-        links: {
-          monitoring: {
-            monitorKibana: 'jest-metadata-mock-url',
-            monitorElasticsearch: 'jest-metadata-mock-url',
-          },
-          metricbeat: {
-            install: 'jest-metadata-mock-url',
-            configure: 'jest-metadata-mock-url',
+vi.mock('../../../legacy_shims', () => {
+      const mocked = {
+      Legacy: {
+        shims: {
+          kfetch: vi.fn(),
+          docLinks: {
+            links: {
+              monitoring: {
+                monitorKibana: 'jest-metadata-mock-url',
+                monitorElasticsearch: 'jest-metadata-mock-url',
+              },
+              metricbeat: {
+                install: 'jest-metadata-mock-url',
+                configure: 'jest-metadata-mock-url',
+              },
+            },
           },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common', () => ({
-  formatTimestampToDuration: () => `0 seconds`,
-}));
+vi.mock('../../../../common', () => {
+      const mocked = {
+      formatTimestampToDuration: () => `0 seconds`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const PRODUCTS = [
   {

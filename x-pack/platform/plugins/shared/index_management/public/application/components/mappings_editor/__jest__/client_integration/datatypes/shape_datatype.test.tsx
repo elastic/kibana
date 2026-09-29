@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,10 +15,10 @@ import { WithAppDependencies } from '../helpers/setup_environment';
 import { MappingsEditor } from '../../../mappings_editor';
 import { defaultShapeParameters } from './fixtures';
 
-const onChangeHandler = jest.fn();
+const onChangeHandler = vi.fn();
 describe('Mappings editor: shape datatype', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('initial view and default parameters values', async () => {

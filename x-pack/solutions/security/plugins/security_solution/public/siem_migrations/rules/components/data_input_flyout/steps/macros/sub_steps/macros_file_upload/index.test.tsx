@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useMacrosFileUploadStep } from '.';
 import { TestProviders } from '../../../../../../../../common/mock';
@@ -12,17 +15,17 @@ import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_r
 import { getRuleMigrationStatsMock } from '../../../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../../../common/siem_migrations/constants';
 
-jest.mock('../../../../../../service/hooks/use_upsert_resources');
-const mockUseUpsertResources = useUpsertResources as jest.Mock;
+vi.mock('../../../../../../service/hooks/use_upsert_resources');
+const mockUseUpsertResources = useUpsertResources as Mock;
 
 describe('useMacrosFileUploadStep', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns step props', () => {
     mockUseUpsertResources.mockReturnValue({
-      upsertResources: jest.fn(),
+      upsertResources: vi.fn(),
       isLoading: false,
       error: null,
     });
@@ -31,7 +34,7 @@ describe('useMacrosFileUploadStep', () => {
       status: 'incomplete' as const,
       migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
       missingMacros: [],
-      onMacrosCreated: jest.fn(),
+      onMacrosCreated: vi.fn(),
     };
     const { result } = renderHook(() => useMacrosFileUploadStep(props), {
       wrapper: TestProviders,
@@ -46,7 +49,7 @@ describe('useMacrosFileUploadStep', () => {
 
   it('returns step props with `loading` status', () => {
     mockUseUpsertResources.mockReturnValue({
-      upsertResources: jest.fn(),
+      upsertResources: vi.fn(),
       isLoading: true,
       error: null,
     });
@@ -55,7 +58,7 @@ describe('useMacrosFileUploadStep', () => {
       status: 'incomplete' as const,
       migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
       missingMacros: [],
-      onMacrosCreated: jest.fn(),
+      onMacrosCreated: vi.fn(),
     };
     const { result } = renderHook(() => useMacrosFileUploadStep(props), {
       wrapper: TestProviders,
@@ -70,7 +73,7 @@ describe('useMacrosFileUploadStep', () => {
 
   it('returns step props with `danger` status', () => {
     mockUseUpsertResources.mockReturnValue({
-      upsertResources: jest.fn(),
+      upsertResources: vi.fn(),
       isLoading: false,
       error: new Error('Test failure!'),
     });
@@ -79,7 +82,7 @@ describe('useMacrosFileUploadStep', () => {
       status: 'incomplete' as const,
       migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
       missingMacros: [],
-      onMacrosCreated: jest.fn(),
+      onMacrosCreated: vi.fn(),
     };
     const { result } = renderHook(() => useMacrosFileUploadStep(props), {
       wrapper: TestProviders,

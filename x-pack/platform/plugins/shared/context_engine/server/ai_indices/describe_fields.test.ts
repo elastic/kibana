@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
@@ -22,8 +24,8 @@ const capability = (searchable: boolean, aggregatable: boolean) => ({
 });
 
 describe('describeAiIndexFields', () => {
-  const getMapping = jest.fn();
-  const fieldCaps = jest.fn();
+  const getMapping = vi.fn();
+  const fieldCaps = vi.fn();
   const esClient = {
     indices: { getMapping },
     fieldCaps,

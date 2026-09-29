@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
@@ -22,7 +24,7 @@ describe('loadTracingPrivacySettings', () => {
   const logger = loggerMock.create();
 
   function createClient(getImpl: (id: string) => Promise<boolean>) {
-    return { get: jest.fn((id: string) => getImpl(id)) };
+    return { get: vi.fn((id: string) => getImpl(id)) };
   }
 
   it('reads all eight tracing privacy settings', async () => {

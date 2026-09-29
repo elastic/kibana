@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
@@ -163,7 +165,7 @@ describe('DateRangePickerPanelNavigation', () => {
   });
 
   it('throws when useDateRangePickerPanelNavigation is used outside provider', () => {
-    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     expect(() => render(<NavigationControls />)).toThrow(
       'useDateRangePickerPanelNavigation must be used within a DateRangePickerPanelNavigationProvider'

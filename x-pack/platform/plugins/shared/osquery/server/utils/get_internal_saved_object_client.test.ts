@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
@@ -19,8 +21,8 @@ describe('get_internal_saved_object_client', () => {
     const coreStart = coreMock.createStart();
     const mockScopedClient = { scoped: true };
 
-    coreStart.savedObjects.createInternalRepository = jest.fn();
-    coreStart.savedObjects.getScopedClient = jest.fn().mockReturnValue(mockScopedClient);
+    coreStart.savedObjects.createInternalRepository = vi.fn();
+    coreStart.savedObjects.getScopedClient = vi.fn().mockReturnValue(mockScopedClient);
 
     return coreStart;
   };
@@ -65,9 +67,9 @@ describe('get_internal_saved_object_client', () => {
     const request = httpServerMock.createKibanaRequest();
     const osqueryContext = {
       service: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'space-a' }),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'space-a' }),
       },
-      getStartServices: jest.fn().mockResolvedValue([coreStart]),
+      getStartServices: vi.fn().mockResolvedValue([coreStart]),
     };
 
     const client = await createInternalSavedObjectsClientForSpaceId(osqueryContext, request);

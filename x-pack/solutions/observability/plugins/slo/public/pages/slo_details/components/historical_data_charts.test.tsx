@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -17,13 +20,13 @@ import { HistoricalDataCharts } from './historical_data_charts';
 import type { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 
-jest.mock('../../../hooks/use_fetch_historical_summary');
-jest.mock('../../../hooks/use_kibana');
-jest.mock('../../../hooks/use_fetch_apm_indices');
+vi.mock('../../../hooks/use_fetch_historical_summary');
+vi.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_fetch_apm_indices');
 
-const useKibanaMock = useKibana as jest.Mock;
-const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
-const useFetchApmIndicesMock = useFetchApmIndices as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as Mock;
+const useFetchApmIndicesMock = useFetchApmIndices as Mock;
 
 const mockHistoricalSummaryData: FetchHistoricalSummaryResponse = [
   {
@@ -69,7 +72,7 @@ const mockHistoricalSummaryData: FetchHistoricalSummaryResponse = [
 
 describe('HistoricalDataCharts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: {
         theme: {},

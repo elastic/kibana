@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { NeedTierUpgrade, type NeedTierUpgradeProps } from './need_tier_upgrade';
@@ -13,7 +15,7 @@ import { translations as defaultTranslations } from '../call_to_action.translati
 import { EuiThemeProvider } from '@elastic/eui';
 
 describe('NeedTierUpgrade', () => {
-  const onManageSubscription = jest.fn();
+  const onManageSubscription = vi.fn();
 
   const renderComponent = (props: NeedTierUpgradeProps) =>
     render(<NeedTierUpgrade {...props} />, { wrapper: EuiThemeProvider });

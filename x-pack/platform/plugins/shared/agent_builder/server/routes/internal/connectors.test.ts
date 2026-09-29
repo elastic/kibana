@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IRouter, CoreSetup } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { listAgentConnectors, getAgentConnectorDetail } from '@kbn/agent-builder-server';
@@ -12,13 +15,16 @@ import { registerInternalConnectorRoutes } from './connectors';
 import type { RouteDependencies } from '../types';
 import { internalApiPath } from '../../../common/constants';
 
-jest.mock('@kbn/agent-builder-server', () => ({
-  listAgentConnectors: jest.fn(),
-  getAgentConnectorDetail: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-server', () => {
+      const mocked = {
+      listAgentConnectors: vi.fn(),
+      getAgentConnectorDetail: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockListAgentConnectors = listAgentConnectors as jest.Mock;
-const mockGetAgentConnectorDetail = getAgentConnectorDetail as jest.Mock;
+const mockListAgentConnectors = listAgentConnectors as Mock;
+const mockGetAgentConnectorDetail = getAgentConnectorDetail as Mock;
 
 type Handler = (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>;
 
@@ -26,21 +32,21 @@ describe('registerInternalConnectorRoutes', () => {
   const ROUTE_PATH = `${internalApiPath}/connectors`;
 
   let handler: Handler;
-  let mockRegistryGet: jest.Mock;
-  let mockResolveAgentConfiguration: jest.Mock;
-  let mockGetActionsClientWithRequest: jest.Mock;
+  let mockRegistryGet: Mock;
+  let mockResolveAgentConfiguration: Mock;
+  let mockGetActionsClientWithRequest: Mock;
 
   const mockCtx = {
     licensing: Promise.resolve({
-      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
     }),
   };
 
   const mockResponse = {
-    ok: jest.fn((params?: { body?: unknown }) => ({ type: 'ok', ...(params ?? {}) })),
-    notFound: jest.fn((params?: { body?: unknown }) => ({ type: 'notFound', ...(params ?? {}) })),
-    forbidden: jest.fn(() => ({ type: 'forbidden' })),
-    customError: jest.fn((params?: unknown) => ({ type: 'customError', ...(params ?? {}) })),
+    ok: vi.fn((params?: { body?: unknown }) => ({ type: 'ok', ...(params ?? {}) })),
+    notFound: vi.fn((params?: { body?: unknown }) => ({ type: 'notFound', ...(params ?? {}) })),
+    forbidden: vi.fn(() => ({ type: 'forbidden' })),
+    customError: vi.fn((params?: unknown) => ({ type: 'customError', ...(params ?? {}) })),
   };
 
   const makeRequest = ({
@@ -52,22 +58,22 @@ describe('registerInternalConnectorRoutes', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const mockAgent = { id: 'agent-1', type: 'chat', configuration: {} };
-    mockRegistryGet = jest.fn().mockResolvedValue(mockAgent);
-    mockResolveAgentConfiguration = jest.fn().mockResolvedValue({ connector_ids: ['conn-1'] });
-    mockGetActionsClientWithRequest = jest.fn().mockResolvedValue({});
+    mockRegistryGet = vi.fn().mockResolvedValue(mockAgent);
+    mockResolveAgentConfiguration = vi.fn().mockResolvedValue({ connector_ids: ['conn-1'] });
+    mockGetActionsClientWithRequest = vi.fn().mockResolvedValue({});
 
     const mockRouter = {
-      get: jest.fn().mockImplementation((config: { path: string }, routeHandler: Handler) => {
+      get: vi.fn().mockImplementation((config: { path: string }, routeHandler: Handler) => {
         if (config.path === ROUTE_PATH) handler = routeHandler;
       }),
-      versioned: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },
+      versioned: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() },
     } as unknown as IRouter;
 
     const coreSetup = {
-      getStartServices: jest
+      getStartServices: vi
         .fn()
         .mockResolvedValue([
           {},
@@ -75,9 +81,9 @@ describe('registerInternalConnectorRoutes', () => {
         ]),
     } as unknown as CoreSetup;
 
-    const getInternalServices = jest.fn().mockReturnValue({
+    const getInternalServices = vi.fn().mockReturnValue({
       agents: {
-        getRegistry: jest.fn().mockResolvedValue({ get: mockRegistryGet }),
+        getRegistry: vi.fn().mockResolvedValue({ get: mockRegistryGet }),
         resolveAgentConfiguration: mockResolveAgentConfiguration,
       },
     });

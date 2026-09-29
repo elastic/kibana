@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -31,17 +33,17 @@ describe('ContextEditor', () => {
     (acc, field, index) => ({ ...acc, [field]: [`value${index + 1}`] }),
     {}
   );
-  const onListUpdated = jest.fn();
+  const onListUpdated = vi.fn();
   const mockSelectionActions = {
-    handleSelectAll: jest.fn(),
-    handleUnselectAll: jest.fn(),
-    handlePageUnchecked: jest.fn(),
-    handlePageChecked: jest.fn(),
-    handleRowUnChecked: jest.fn(),
-    handleRowChecked: jest.fn(),
-    setSelectedFields: jest.fn(),
-    setTotalSelectedItems: jest.fn(),
-    setIsSelectAll: jest.fn(),
+    handleSelectAll: vi.fn(),
+    handleUnselectAll: vi.fn(),
+    handlePageUnchecked: vi.fn(),
+    handlePageChecked: vi.fn(),
+    handleRowUnChecked: vi.fn(),
+    handleRowChecked: vi.fn(),
+    setSelectedFields: vi.fn(),
+    setTotalSelectedItems: vi.fn(),
+    setIsSelectAll: vi.fn(),
   };
 
   const renderComponent = (selectedFields: string[]) => {
@@ -52,7 +54,7 @@ describe('ContextEditor', () => {
           anonymizationPageFields={anonymizationPageFields}
           onListUpdated={onListUpdated}
           rawData={rawData}
-          onTableChange={jest.fn()}
+          onTableChange={vi.fn()}
           pagination={{
             pageIndex: 0,
             pageSize: 10,
@@ -66,10 +68,10 @@ describe('ContextEditor', () => {
             },
           }}
           search={SEARCH}
-          handleSearch={jest.fn()}
-          handleTableReset={jest.fn()}
-          handleRowReset={jest.fn()}
-          handlePageReset={jest.fn()}
+          handleSearch={vi.fn()}
+          handleTableReset={vi.fn()}
+          handleRowReset={vi.fn()}
+          handlePageReset={vi.fn()}
           selectionState={{
             isSelectAll: false,
             selectedFields,
@@ -82,7 +84,7 @@ describe('ContextEditor', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the expected selected field count', () => {

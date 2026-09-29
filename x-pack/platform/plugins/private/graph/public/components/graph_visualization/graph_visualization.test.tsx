@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { GraphVisualization } from './graph_visualization';
@@ -108,19 +111,19 @@ describe('graph_visualization', () => {
     nodes,
     edges,
     selectNone: () => {},
-    changeHandler: jest.fn(),
-    toggleNodeSelection: jest.fn().mockImplementation((node: WorkspaceNode) => {
+    changeHandler: vi.fn(),
+    toggleNodeSelection: vi.fn().mockImplementation((node: WorkspaceNode) => {
       return !node.isSelected;
     }),
-    getAllIntersections: jest.fn(),
-    removeEdgeFromSelection: jest.fn(),
-    addEdgeToSelection: jest.fn(),
-    getEdgeSelection: jest.fn().mockImplementation(() => []),
-    clearEdgeSelection: jest.fn(),
-  } as unknown as jest.Mocked<Workspace>;
+    getAllIntersections: vi.fn(),
+    removeEdgeFromSelection: vi.fn(),
+    addEdgeToSelection: vi.fn(),
+    getEdgeSelection: vi.fn().mockImplementation(() => []),
+    clearEdgeSelection: vi.fn(),
+  } as unknown as Mocked<Workspace>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render empty workspace without data', () => {
@@ -163,7 +166,7 @@ describe('graph_visualization', () => {
   });
 
   it('should react to node selection', () => {
-    const selectSelectedMock = jest.fn();
+    const selectSelectedMock = vi.fn();
 
     const instance = shallow(
       <GraphVisualization
@@ -182,7 +185,7 @@ describe('graph_visualization', () => {
   });
 
   it('should react to node deselection', () => {
-    const onSetControlMock = jest.fn();
+    const onSetControlMock = vi.fn();
     const instance = shallow(
       <GraphVisualization
         workspace={workspace}

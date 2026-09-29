@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
@@ -17,7 +19,7 @@ import * as i18n from './translations';
 import { TestProviders } from '../../../../../common/mock';
 import type { AlertData } from '../../../utils/types';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
 const alertDataMock: AlertData = {
   '@timestamp': '1234567890',
@@ -40,10 +42,10 @@ const defaultProps: ComponentProps = {
   signalIndexNames: ['mock-siem-signals-index'],
   isSignalIndexPatternLoading: false,
   signalIndexPatterns: stubIndexPattern,
-  onDisableBulkClose: jest.fn(),
-  onUpdateBulkCloseIndex: jest.fn(),
-  onBulkCloseCheckboxChange: jest.fn(),
-  onSingleAlertCloseCheckboxChange: jest.fn(),
+  onDisableBulkClose: vi.fn(),
+  onUpdateBulkCloseIndex: vi.fn(),
+  onBulkCloseCheckboxChange: vi.fn(),
+  onSingleAlertCloseCheckboxChange: vi.fn(),
 };
 
 const mountComponent = (props: Partial<ComponentProps> = {}) =>
@@ -55,7 +57,7 @@ const mountComponent = (props: Partial<ComponentProps> = {}) =>
 
 describe('ExceptionItemsFlyoutAlertsActions', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Endpoint specific logic', () => {
@@ -240,14 +242,14 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
 
   describe('bulk close index', () => {
     it('reports the signal index names when bulk close is checked', () => {
-      const onUpdateBulkCloseIndex = jest.fn();
+      const onUpdateBulkCloseIndex = vi.fn();
       mountComponent({ shouldBulkCloseAlert: true, onUpdateBulkCloseIndex });
 
       expect(onUpdateBulkCloseIndex).toHaveBeenLastCalledWith(['mock-siem-signals-index']);
     });
 
     it('reports undefined when bulk close is unchecked', () => {
-      const onUpdateBulkCloseIndex = jest.fn();
+      const onUpdateBulkCloseIndex = vi.fn();
       mountComponent({ shouldBulkCloseAlert: false, onUpdateBulkCloseIndex });
 
       expect(onUpdateBulkCloseIndex).toHaveBeenLastCalledWith(undefined);

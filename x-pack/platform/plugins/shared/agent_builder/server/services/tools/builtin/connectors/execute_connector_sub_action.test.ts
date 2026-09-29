@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { AgentPromptType, AuthorizationStatus } from '@kbn/agent-builder-common/agents';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -26,32 +29,35 @@ import {
 } from './execute_connector_sub_action';
 import type { ConnectorToolsOptions } from './types';
 
-jest.mock('@kbn/connector-specs', () => ({
-  ...jest.requireActual('@kbn/connector-specs'),
-  getConnectorSpec: jest.fn(),
-  isToolAction: jest.fn(),
-}));
+vi.mock('@kbn/connector-specs', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/connector-specs')),
+      getConnectorSpec: vi.fn(),
+      isToolAction: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
-const isToolActionMock = isToolAction as jest.MockedFunction<typeof isToolAction>;
+const getConnectorSpecMock = getConnectorSpec as MockedFunction<typeof getConnectorSpec>;
+const isToolActionMock = isToolAction as MockedFunction<typeof isToolAction>;
 
-const mockExecute = jest.fn();
-const mockGet = jest.fn();
-const mockGetActionsClientWithRequest = jest.fn(() =>
+const mockExecute = vi.fn();
+const mockGet = vi.fn();
+const mockGetActionsClientWithRequest = vi.fn(() =>
   Promise.resolve({ execute: mockExecute, get: mockGet })
 );
-const getActions: ConnectorToolsOptions['getActions'] = jest.fn(() =>
+const getActions: ConnectorToolsOptions['getActions'] = vi.fn(() =>
   Promise.resolve({
     getActionsClientWithRequest: mockGetActionsClientWithRequest,
   })
 ) as unknown as ConnectorToolsOptions['getActions'];
 
-const getInference: ConnectorToolsOptions['getInference'] = jest.fn(() =>
+const getInference: ConnectorToolsOptions['getInference'] = vi.fn(() =>
   Promise.resolve({} as unknown as ReturnType<ConnectorToolsOptions['getInference']>)
 );
 
-const mockCheckAuthorizationStatus = jest.fn();
-const mockAskForAuthorization = jest.fn();
+const mockCheckAuthorizationStatus = vi.fn();
+const mockAskForAuthorization = vi.fn();
 
 const mockContext = {
   spaceId: 'default',
@@ -59,23 +65,23 @@ const mockContext = {
   request: { id: 'test-request' },
   savedObjectsClient: {},
   attachments: {},
-  logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() },
+  logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
   callContext: {
     toolId: platformCoreTools.executeConnectorSubAction,
     toolCallId: 'call-1',
     callSource: 'agent',
   },
   prompts: {
-    checkConfirmationStatus: jest.fn(),
+    checkConfirmationStatus: vi.fn(),
     checkAuthorizationStatus: mockCheckAuthorizationStatus,
-    askForConfirmation: jest.fn(),
+    askForConfirmation: vi.fn(),
     askForAuthorization: mockAskForAuthorization,
   },
 } as unknown as ToolHandlerContext;
 
 describe('createExecuteConnectorSubActionTool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Default: connector resolves to .slack2, spec found, action is a tool
     mockGet.mockResolvedValue({ id: 'conn-123', actionTypeId: '.slack2' });
     getConnectorSpecMock.mockReturnValue({
@@ -91,17 +97,17 @@ describe('createExecuteConnectorSubActionTool', () => {
           isTool: true,
           scope: 'read' as const,
           input: {} as any,
-          handler: jest.fn(),
+          handler: vi.fn(),
         },
         listChannels: {
           isTool: true,
           scope: 'read' as const,
           input: {} as any,
-          handler: jest.fn(),
+          handler: vi.fn(),
         },
-        sendMessage: { isTool: true, scope: 'read' as const, input: {} as any, handler: jest.fn() },
+        sendMessage: { isTool: true, scope: 'read' as const, input: {} as any, handler: vi.fn() },
       },
-      test: { handler: jest.fn(), enabled: false },
+      test: { handler: vi.fn(), enabled: false },
     });
     isToolActionMock.mockReturnValue(true);
     mockCheckAuthorizationStatus.mockReturnValue({ status: AuthorizationStatus.unprompted });
@@ -308,10 +314,10 @@ describe('createExecuteConnectorSubActionTool', () => {
           isTool: false,
           scope: 'read' as const,
           input: {} as any,
-          handler: jest.fn(),
+          handler: vi.fn(),
         },
       },
-      test: { handler: jest.fn(), enabled: false },
+      test: { handler: vi.fn(), enabled: false },
     });
     isToolActionMock.mockReturnValue(false);
 

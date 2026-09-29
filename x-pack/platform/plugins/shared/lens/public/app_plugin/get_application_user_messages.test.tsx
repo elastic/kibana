@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
@@ -26,8 +28,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../user_messages_ids';
 import { getLongMessage } from '../user_messages_utils';
 
-jest.mock('@kbn/shared-ux-link-redirect-app', () => {
-  const original = jest.requireActual('@kbn/shared-ux-link-redirect-app');
+vi.mock('@kbn/shared-ux-link-redirect-app', async () => {
+  const original = (await vi.importActual('@kbn/shared-ux-link-redirect-app'));
   return {
     ...original,
     RedirectAppLinks: () => <a>RedirectAppLinks</a>,
@@ -138,7 +140,7 @@ describe('application-level user messages', () => {
     function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
       const core = {
         application: {
-          getUrlForApp: jest.fn(() => 'fake/url'),
+          getUrlForApp: vi.fn(() => 'fake/url'),
           capabilities: {
             management: {
               kibana: {
@@ -162,7 +164,7 @@ describe('application-level user messages', () => {
       const props = {
         visualizationType: '123',
         activeDatasource: {
-          checkIntegrity: jest.fn(() => ['missing_pattern']),
+          checkIntegrity: vi.fn(() => ['missing_pattern']),
         } as unknown as Datasource,
         activeDatasourceState: { isLoading: false, state: {} },
         // user can go to management, but indexPatterns management is not accessible
@@ -401,7 +403,7 @@ describe('filtering user messages', () => {
 
   describe('override messages with custom callback', () => {
     it('should override embeddableBadge message', async () => {
-      const getBadgeMessage = jest.fn(
+      const getBadgeMessage = vi.fn(
         (): ReturnType<NonNullable<LensPublicCallbacks['onBeforeBadgesRender']>> => [
           {
             uniqueId: FIELD_NOT_FOUND,

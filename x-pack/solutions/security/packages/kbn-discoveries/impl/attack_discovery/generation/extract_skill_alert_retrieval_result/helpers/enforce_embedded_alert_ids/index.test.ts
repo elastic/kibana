@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 
 import { enforceEmbeddedAlertIds } from '.';
 
 const getLogger = (): Logger =>
   ({
-    warn: jest.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 describe('enforceEmbeddedAlertIds', () => {
@@ -69,7 +72,7 @@ describe('enforceEmbeddedAlertIds', () => {
       });
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect((logger.warn as jest.Mock).mock.calls[0][0]).toContain('2');
+      expect((logger.warn as Mock).mock.calls[0][0]).toContain('2');
     });
   });
 

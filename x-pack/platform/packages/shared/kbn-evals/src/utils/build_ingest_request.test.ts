@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
 import type { EvaluationCompleteEvent, DatasetRunResult } from '../types';
 import { buildIngestRequest } from './build_ingest_request';
 
-const createLog = (): jest.Mocked<Pick<SomeDevLog, 'warning'>> => ({
-  warning: jest.fn(),
+const createLog = (): Mocked<Pick<SomeDevLog, 'warning'>> => ({
+  warning: vi.fn(),
 });
 
 const taskModel = {

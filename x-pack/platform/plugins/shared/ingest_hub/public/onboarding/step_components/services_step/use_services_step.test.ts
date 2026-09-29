@@ -5,18 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
-jest.mock('../../onboarding_flow_context', () => ({
-  useOnboardingFlow: jest.fn(),
-}));
+vi.mock('../../onboarding_flow_context', () => {
+      const mocked = {
+      useOnboardingFlow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServicesStep } from './use_services_step';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { AWS_SERVICES_STATIC, buildAwsServiceMatrix } from '../../aws_service_matrix';
 
-const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
+const mockUseOnboardingFlow = useOnboardingFlow as Mock;
 
 // Build the matrix with minimal mocked packages so signalTypes is derived from data_stream.type.
 // AWS_SERVICES_MAP would have signalTypes:[] (no manifest data), breaking signal-filter tests.
@@ -99,12 +105,12 @@ function setupFlow(initial: string[] = []) {
   let ids = initial;
   mockUseOnboardingFlow.mockImplementation(() => ({
     servicesStep: { selectedServiceIds: ids, dataFormat: 'ecs' as const },
-    setSelectedServiceIds: jest.fn((next: string[]) => {
+    setSelectedServiceIds: vi.fn((next: string[]) => {
       ids = next;
       // Re-mock so next render picks up the new ids.
       setupFlow(ids);
     }),
-    setDataFormat: jest.fn(),
+    setDataFormat: vi.fn(),
     awsServiceMatrix: MATRIX,
   }));
 }
@@ -113,7 +119,7 @@ describe('useServicesStep — categoryStats signal-filter consistency', () => {
   beforeEach(() => setupFlow());
 
   it('badge total is not narrowed by the search query', () => {
-    const { result } = renderHook(() => useServicesStep({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServicesStep({ onContinue: vi.fn() }));
 
     const [firstCat] = result.current.categories;
     const totalBeforeSearch = result.current.categoryStats.get(firstCat)?.total ?? 0;
@@ -138,7 +144,7 @@ describe('useServicesStep — categoryStats signal-filter consistency', () => {
   });
 
   it('badge total matches the signal-filtered count, not the full category count', () => {
-    const { result } = renderHook(() => useServicesStep({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServicesStep({ onContinue: vi.fn() }));
 
     // Find a category that has services of both signal types.
     const mixedCat = result.current.categories.find((cat) => {
@@ -164,7 +170,7 @@ describe('useServicesStep — categoryStats signal-filter consistency', () => {
   });
 
   it('selected count only includes signal-filtered services', () => {
-    const { result } = renderHook(() => useServicesStep({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServicesStep({ onContinue: vi.fn() }));
 
     // Find a category with metrics services.
     act(() => result.current.setSignalFilter('metrics'));
@@ -180,7 +186,7 @@ describe('useServicesStep — categoryStats signal-filter consistency', () => {
     // Manually pre-select all metrics services in that category.
     setupFlow(metricsInCat.map((s) => s.id));
 
-    const { result: result2 } = renderHook(() => useServicesStep({ onContinue: jest.fn() }));
+    const { result: result2 } = renderHook(() => useServicesStep({ onContinue: vi.fn() }));
     act(() => result2.current.setSignalFilter('metrics'));
 
     const stats = result2.current.categoryStats.get(firstCat);
@@ -222,27 +228,27 @@ describe('useServicesStep — categories hidden when signal has no matching serv
   beforeEach(() => {
     mockUseOnboardingFlow.mockImplementation(() => ({
       servicesStep: { selectedServiceIds: [], dataFormat: 'ecs' as const },
-      setSelectedServiceIds: jest.fn(),
-      setDataFormat: jest.fn(),
+      setSelectedServiceIds: vi.fn(),
+      setDataFormat: vi.fn(),
       awsServiceMatrix: SPLIT_MATRIX,
     }));
   });
 
   it('shows both categories when signal filter is all', () => {
-    const { result } = renderHook(() => useServicesStep({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServicesStep({ onContinue: vi.fn() }));
     expect(result.current.categories).toContain('compute');
     expect(result.current.categories).toContain('databases');
   });
 
   it('hides metrics-only category when filtering for logs', () => {
-    const { result } = renderHook(() => useServicesStep({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServicesStep({ onContinue: vi.fn() }));
     act(() => result.current.setSignalFilter('logs'));
     expect(result.current.categories).toContain('compute');
     expect(result.current.categories).not.toContain('databases');
   });
 
   it('hides logs-only category when filtering for metrics', () => {
-    const { result } = renderHook(() => useServicesStep({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServicesStep({ onContinue: vi.fn() }));
     act(() => result.current.setSignalFilter('metrics'));
     expect(result.current.categories).not.toContain('compute');
     expect(result.current.categories).toContain('databases');

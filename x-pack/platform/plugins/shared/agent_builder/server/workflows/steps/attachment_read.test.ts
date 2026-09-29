@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { readAttachmentStepDefinition } from './attachment_read';
 import {
   createStepHandlerContext,
   createWorkflowStepAttachmentClientMock,
 } from '../../test_utils/workflow_steps';
 
-const experimentalEnabled = jest.fn().mockResolvedValue(true);
-const experimentalDisabled = jest.fn().mockResolvedValue(false);
+const experimentalEnabled = vi.fn().mockResolvedValue(true);
+const experimentalDisabled = vi.fn().mockResolvedValue(false);
 
 const buildAttachment = () => ({
   id: 'att-1',
@@ -39,7 +41,7 @@ describe('readAttachmentStepDefinition', () => {
 
   it('reads the current version when version is omitted', async () => {
     const { get, getAttachmentClient } = createWorkflowStepAttachmentClientMock({
-      get: jest.fn().mockResolvedValue(buildAttachment()),
+      get: vi.fn().mockResolvedValue(buildAttachment()),
     });
 
     const definition = readAttachmentStepDefinition({
@@ -59,7 +61,7 @@ describe('readAttachmentStepDefinition', () => {
 
   it('reads a specific version when version is provided', async () => {
     const { getAttachmentClient } = createWorkflowStepAttachmentClientMock({
-      get: jest.fn().mockResolvedValue(buildAttachment()),
+      get: vi.fn().mockResolvedValue(buildAttachment()),
     });
 
     const definition = readAttachmentStepDefinition({
@@ -78,7 +80,7 @@ describe('readAttachmentStepDefinition', () => {
 
   it('returns an error when the requested version does not exist', async () => {
     const { getAttachmentClient } = createWorkflowStepAttachmentClientMock({
-      get: jest.fn().mockResolvedValue(buildAttachment()),
+      get: vi.fn().mockResolvedValue(buildAttachment()),
     });
 
     const definition = readAttachmentStepDefinition({
@@ -121,7 +123,7 @@ describe('readAttachmentStepDefinition', () => {
 
   it('returns an error when the client throws', async () => {
     const { getAttachmentClient } = createWorkflowStepAttachmentClientMock({
-      get: jest.fn().mockRejectedValue(new Error('not found')),
+      get: vi.fn().mockRejectedValue(new Error('not found')),
     });
 
     const definition = readAttachmentStepDefinition({

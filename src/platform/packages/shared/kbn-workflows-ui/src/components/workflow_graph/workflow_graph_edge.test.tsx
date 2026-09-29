@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 /**
  * Component-level tests for WorkflowGraphEdge gate logic.
  *
@@ -25,8 +27,8 @@ import React from 'react';
 // ---------------------------------------------------------------------------
 // Mocks — registered before any import of the module under test.
 // ---------------------------------------------------------------------------
-jest.mock('@xyflow/react', () => {
-  const actual = jest.requireActual('@xyflow/react');
+vi.mock('@xyflow/react', () => {
+  const actual = require('@xyflow/react');
   return {
     ...actual,
     // Render labels inline so they appear in the normal DOM tree.

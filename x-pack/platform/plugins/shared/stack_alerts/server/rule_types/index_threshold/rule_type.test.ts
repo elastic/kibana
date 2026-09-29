@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 import sinon from 'sinon';
 import { asSpaceId } from '@kbn/core-spaces-common';
@@ -31,7 +33,7 @@ function getTimeRange() {
 describe('ruleType', () => {
   const logger = loggingSystemMock.create().get();
   const data = {
-    timeSeriesQuery: jest.fn(),
+    timeSeriesQuery: vi.fn(),
   };
   const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { awaitIfPending } from './setup_utils';
 
 async function sleep(ms: number) {
@@ -13,10 +15,10 @@ async function sleep(ms: number) {
 
 describe('awaitIfPending', () => {
   it('first promise called blocks others', async () => {
-    const fnA = jest.fn().mockImplementation(async () => {});
-    const fnB = jest.fn().mockImplementation(async () => {});
-    const fnC = jest.fn().mockImplementation(async () => {});
-    const fnD = jest.fn().mockImplementation(async () => {});
+    const fnA = vi.fn().mockImplementation(async () => {});
+    const fnB = vi.fn().mockImplementation(async () => {});
+    const fnC = vi.fn().mockImplementation(async () => {});
+    const fnD = vi.fn().mockImplementation(async () => {});
     const promises = [
       awaitIfPending(fnA),
       awaitIfPending(fnB),
@@ -33,13 +35,13 @@ describe('awaitIfPending', () => {
 
   describe('first promise created, not necessarily first fulfilled, sets value for all in queue', () => {
     it('succeeds', async () => {
-      const fnA = jest.fn().mockImplementation(async () => {
+      const fnA = vi.fn().mockImplementation(async () => {
         await sleep(1000);
         return 'called first';
       });
-      const fnB = jest.fn().mockImplementation(async () => 'called second');
-      const fnC = jest.fn().mockImplementation(async () => 'called third');
-      const fnD = jest.fn().mockImplementation(async () => 'called fourth');
+      const fnB = vi.fn().mockImplementation(async () => 'called second');
+      const fnC = vi.fn().mockImplementation(async () => 'called third');
+      const fnD = vi.fn().mockImplementation(async () => 'called fourth');
       const promises = [
         awaitIfPending(fnA),
         awaitIfPending(fnB),
@@ -61,13 +63,13 @@ describe('awaitIfPending', () => {
 
     it('throws', async () => {
       const expectedError = new Error('error is called first');
-      const fnA = jest.fn().mockImplementation(async () => {
+      const fnA = vi.fn().mockImplementation(async () => {
         await sleep(1000);
         throw expectedError;
       });
-      const fnB = jest.fn().mockImplementation(async () => 'called second');
-      const fnC = jest.fn().mockImplementation(async () => 'called third');
-      const fnD = jest.fn().mockImplementation(async () => 'called fourth');
+      const fnB = vi.fn().mockImplementation(async () => 'called second');
+      const fnC = vi.fn().mockImplementation(async () => 'called third');
+      const fnD = vi.fn().mockImplementation(async () => 'called fourth');
       const promises = [
         awaitIfPending(fnA),
         awaitIfPending(fnB),
@@ -97,8 +99,8 @@ describe('awaitIfPending', () => {
     // part of the resolved value.
     const firstResult = { large: 'object' };
     const secondResult = { different: 'object' };
-    const fnFirst = jest.fn().mockResolvedValue(firstResult);
-    const fnSecond = jest.fn().mockResolvedValue(secondResult);
+    const fnFirst = vi.fn().mockResolvedValue(firstResult);
+    const fnSecond = vi.fn().mockResolvedValue(secondResult);
 
     const result1 = await awaitIfPending(fnFirst);
     expect(result1).toBe(firstResult);
@@ -111,14 +113,14 @@ describe('awaitIfPending', () => {
   });
 
   it('does not block other calls after batch is fulfilled. can call again for a new result', async () => {
-    const fnA = jest
+    const fnA = vi
       .fn()
       .mockImplementationOnce(async () => 'fnA first')
       .mockImplementationOnce(async () => 'fnA second')
       .mockImplementation(async () => 'fnA default/2+');
-    const fnB = jest.fn().mockImplementation(async () => {});
-    const fnC = jest.fn().mockImplementation(async () => {});
-    const fnD = jest.fn().mockImplementation(async () => {});
+    const fnB = vi.fn().mockImplementation(async () => {});
+    const fnC = vi.fn().mockImplementation(async () => {});
+    const fnD = vi.fn().mockImplementation(async () => {});
     let promises = [
       awaitIfPending(fnA),
       awaitIfPending(fnB),

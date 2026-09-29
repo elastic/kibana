@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FormatFactory } from '../types';
 import { getSuffixFormatter } from '.';
 
 describe('suffix formatter', () => {
   it('should call nested formatter and apply suffix', () => {
-    const convertMock = jest.fn((x) => x);
-    const formatFactory = jest.fn(() => ({ convertToText: convertMock }));
+    const convertMock = vi.fn((x) => x);
+    const formatFactory = vi.fn(() => ({ convertToText: convertMock }));
     const SuffixFormatter = getSuffixFormatter(() => formatFactory as unknown as FormatFactory);
     const nestedParams = { abc: 123 };
     const formatterInstance = new SuffixFormatter({
@@ -28,8 +30,8 @@ describe('suffix formatter', () => {
   });
 
   it('should not add suffix to empty strings', () => {
-    const convertMock = jest.fn((x) => '');
-    const formatFactory = jest.fn(() => ({ convertToText: convertMock }));
+    const convertMock = vi.fn((x) => '');
+    const formatFactory = vi.fn(() => ({ convertToText: convertMock }));
     const SuffixFormatter = getSuffixFormatter(() => formatFactory as unknown as FormatFactory);
     const nestedParams = { abc: 123 };
     const formatterInstance = new SuffixFormatter({
@@ -44,8 +46,8 @@ describe('suffix formatter', () => {
   });
 
   it('should be a hidden formatter', () => {
-    const convertMock = jest.fn((x) => '');
-    const formatFactory = jest.fn(() => ({ convertToText: convertMock }));
+    const convertMock = vi.fn((x) => '');
+    const formatFactory = vi.fn(() => ({ convertToText: convertMock }));
     const SuffixFormatter = getSuffixFormatter(() => formatFactory as unknown as FormatFactory);
     expect(SuffixFormatter.hidden).toBe(true);
   });

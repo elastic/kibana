@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import moment from 'moment';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -15,8 +18,8 @@ import type { SavedObjectsTaggingClientConfigRawType } from './config';
 import { TagsCache } from './services';
 import { tagsCacheMock } from './services/tags/tags_cache.mock';
 
-jest.mock('./services/tags/tags_cache');
-const MockedTagsCache = TagsCache as unknown as jest.Mock<PublicMethodsOf<TagsCache>>;
+vi.mock('./services/tags/tags_cache');
+const MockedTagsCache = TagsCache as unknown as Mock<PublicMethodsOf<TagsCache>>;
 
 describe('SavedObjectTaggingPlugin', () => {
   let plugin: SavedObjectTaggingPlugin;

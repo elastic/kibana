@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { addBasePath } from '../helpers';
 import { registerDefaultRepositoryRoutes } from './default_repository';
 import type { RequestMock } from '../../test/helpers';
@@ -25,7 +27,7 @@ describe('[Snapshot and Restore API Routes] Default repository', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getHandler()', () => {

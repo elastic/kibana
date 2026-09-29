@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import {
   getLensApiMock,
@@ -19,11 +21,14 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import React from 'react';
 import { LensEmbeddableComponent } from './lens_embeddable_component';
 
-jest.mock('../expression_wrapper', () => ({
-  ExpressionWrapper: () => (
-    <div className="lnsExpressionRenderer" data-test-subj="lens-embeddable" />
-  ),
-}));
+vi.mock('../expression_wrapper', () => {
+      const mocked = {
+      ExpressionWrapper: () => (
+        <div className="lnsExpressionRenderer" data-test-subj="lens-embeddable" />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type GetValueType<Type> = Type extends PublishingSubject<infer X> ? X : never;
 
@@ -37,7 +42,7 @@ function getDefaultProps({
   return {
     internalApi,
     api: getLensApiMock(apiOverrides),
-    onUnmount: jest.fn(),
+    onUnmount: vi.fn(),
     services: makeEmbeddableServices(),
   };
 }

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,19 +23,19 @@ import { connectorsMock } from '../../../containers/mock';
 import { useCaseConfigureResponse } from '../../configure_cases/__mock__';
 import { waitForComponentToUpdate } from '../../../common/test_utils';
 
-jest.mock('../../../containers/use_get_tags');
-jest.mock('../../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../../containers/configure/use_get_case_configuration');
-jest.mock('../../markdown_editor/plugins/lens/use_lens_draft_comment');
-jest.mock('../../app/use_available_owners');
+vi.mock('../../../containers/use_get_tags');
+vi.mock('../../../containers/configure/use_get_supported_action_connectors');
+vi.mock('../../../containers/configure/use_get_case_configuration');
+vi.mock('../../markdown_editor/plugins/lens/use_lens_draft_comment');
+vi.mock('../../app/use_available_owners');
 
-const useGetTagsMock = useGetTags as jest.Mock;
-const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
-const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
+const useGetTagsMock = useGetTags as Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as Mock;
+const useAvailableOwnersMock = useAvailableCasesOwners as Mock;
 
-const onClose = jest.fn();
-const onSuccess = jest.fn();
+const onClose = vi.fn();
+const onSuccess = vi.fn();
 const defaultProps = {
   onClose,
   onSuccess,
@@ -41,7 +44,7 @@ const defaultProps = {
 
 describe('CreateCaseFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useAvailableOwnersMock.mockReturnValue(['securitySolution', 'observability']);
     useGetTagsMock.mockReturnValue({ data: ['test'] });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import './helpers/mocks';
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -40,7 +42,7 @@ describe('<PolicyAdd />', () => {
 
     const { history } = renderApp(httpSetup, { initialEntries: ['/add_policy'] });
     // Prevent route transitions during submit (not under test here).
-    jest.spyOn(history, 'push').mockImplementation(() => {});
+    vi.spyOn(history, 'push').mockImplementation(() => {});
 
     // Wait for initial mount-time requests/effects to settle to avoid act warnings.
     await screen.findByTestId('nameInput');
@@ -72,7 +74,7 @@ describe('<PolicyAdd />', () => {
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       await setupPage();
     });
 

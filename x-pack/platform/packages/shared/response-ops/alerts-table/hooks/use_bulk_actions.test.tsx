@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react';
@@ -26,14 +28,14 @@ import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import { createPartialObjectMock, testQueryClientConfig } from '../utils/test';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 
-jest.mock('../apis/bulk_get_cases');
-jest.mock('../contexts/alerts_table_context');
+vi.mock('../apis/bulk_get_cases');
+vi.mock('../contexts/alerts_table_context');
 const mockCasesService = createCasesServiceMock();
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
-jest.mocked(useAlertsTableContext).mockReturnValue(
+vi.mocked(useAlertsTableContext).mockReturnValue(
   createPartialObjectMock<RenderContext<AdditionalContext>>({
-    bulkActionsStore: [{}, jest.fn()],
+    bulkActionsStore: [{}, vi.fn()],
     services: {
       http,
       notifications,
@@ -59,30 +61,30 @@ const casesConfig: PublicAlertsDataGridProps['casesConfiguration'] = {
 
 describe('bulk action hooks', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  const refresh = jest.fn();
-  const clearSelection = jest.fn();
-  const setIsBulkActionsLoading = jest.fn();
+  const refresh = vi.fn();
+  const clearSelection = vi.fn();
+  const setIsBulkActionsLoading = vi.fn();
 
-  const mockOpenExistingCase = jest.fn().mockImplementation(({ getAttachments }) => {
+  const mockOpenExistingCase = vi.fn().mockImplementation(({ getAttachments }) => {
     getAttachments({ theCase: { id: caseId, owner: 'cases' } });
   });
 
-  mockCasesService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
-  mockCasesService.ui.getCasesContext = jest.fn().mockReturnValue(() => 'Cases context');
+  mockCasesService.helpers.canUseCases = vi.fn().mockReturnValue({ create: true, read: true });
+  mockCasesService.ui.getCasesContext = vi.fn().mockReturnValue(() => 'Cases context');
 
   const mockAddExistingCase = mockCasesService.hooks.useCasesAddToExistingCaseModal.mockReturnValue(
     {
       open: mockOpenExistingCase,
-      close: jest.fn(),
+      close: vi.fn(),
     }
   );
 
   describe('useBulkAddToCaseActions', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should refetch when calling onSuccess of useCasesAddToExistingCaseModal', async () => {
@@ -280,7 +282,7 @@ describe('bulk action hooks', () => {
     });
 
     it('should not create attachments when the case owner is unavailable', () => {
-      const getAttachmentsResult = jest.fn();
+      const getAttachmentsResult = vi.fn();
       mockOpenExistingCase.mockImplementationOnce(({ getAttachments }) => {
         getAttachmentsResult(getAttachments({ theCase: { id: caseId } }));
       });
@@ -307,9 +309,9 @@ describe('bulk action hooks', () => {
           },
         ],
         false,
-        jest.fn(),
-        jest.fn(),
-        jest.fn()
+        vi.fn(),
+        vi.fn(),
+        vi.fn()
       );
 
       expect(getAttachmentsResult).toHaveBeenCalledWith([]);
@@ -317,7 +319,7 @@ describe('bulk action hooks', () => {
     });
 
     it('should not show the bulk actions when the user does not have write access', async () => {
-      mockCasesService.helpers.canUseCases = jest
+      mockCasesService.helpers.canUseCases = vi
         .fn()
         .mockReturnValue({ create: false, read: true });
 
@@ -340,7 +342,7 @@ describe('bulk action hooks', () => {
     });
 
     it('should not show the bulk actions when the user does not have read access', async () => {
-      mockCasesService.helpers.canUseCases = jest
+      mockCasesService.helpers.canUseCases = vi
         .fn()
         .mockReturnValue({ create: true, read: false });
 
@@ -381,7 +383,7 @@ describe('bulk action hooks', () => {
     });
 
     it('should not show the bulk actions when the cases context is missing', async () => {
-      mockCasesService.ui.getCasesContext = jest.fn().mockReturnValue(() => null);
+      mockCasesService.ui.getCasesContext = vi.fn().mockReturnValue(() => null);
 
       const { result } = renderHook(
         () =>
@@ -421,13 +423,13 @@ describe('bulk action hooks', () => {
   });
 
   describe('useBulkAddToChatActions', () => {
-    const mockOpenChat = jest.fn();
+    const mockOpenChat = vi.fn();
     const agentBuilderService: OpenChatService = { openChat: mockOpenChat };
     const mockAttachments = [{ type: 'security.alerts', data: { alertIds: ['id1'] } }];
-    const convertAlertToAttachment = jest.fn().mockReturnValue(mockAttachments);
+    const convertAlertToAttachment = vi.fn().mockReturnValue(mockAttachments);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('returns empty array when agentBuilderService is not provided', () => {
@@ -513,7 +515,7 @@ describe('bulk action hooks', () => {
 
   describe('useBulkUntrackActions', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     it('should not show the bulk actions when the user lacks any observability permissions', () => {
       const { result } = renderHook(
@@ -551,7 +553,7 @@ describe('bulk action hooks', () => {
 
   describe('useBulkMuteActions', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should return mute/unmute actions', () => {
@@ -579,8 +581,8 @@ describe('bulk action hooks', () => {
 
   describe('useBulkActions', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
-      mockCasesService.helpers.canUseCases = jest
+      vi.clearAllMocks();
+      mockCasesService.helpers.canUseCases = vi
         .fn()
         .mockReturnValue({ create: true, read: true });
     });

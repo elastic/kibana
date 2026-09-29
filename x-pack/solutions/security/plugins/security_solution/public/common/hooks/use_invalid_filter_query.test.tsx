@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // Some tests are prefixed with `// BUG:` or `// POTENTIAL BUG:`
 // to indicate that the particular test is not working as expected
 // but is simply documenting the current behavior.
@@ -48,7 +50,7 @@ const getWrapper = <P,>(store: Store): React.FC<React.PropsWithChildren<P>> => {
 
 describe('useInvalidFilterQuery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('invokes error toast with error title and error instance without original stack', () => {

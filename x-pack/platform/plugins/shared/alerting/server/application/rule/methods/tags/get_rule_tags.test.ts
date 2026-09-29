@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { Mock } from 'vitest';
 import { v4 } from 'uuid';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
@@ -46,7 +48,7 @@ const listedTypes = new Map<string, RegistryRuleType>([
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 const getMockAggregationResult = (tags: string[]) => {

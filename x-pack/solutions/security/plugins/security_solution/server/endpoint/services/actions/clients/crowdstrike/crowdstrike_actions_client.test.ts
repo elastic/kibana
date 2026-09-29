@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ResponseActionsClient } from '../lib/types';
 import { responseActionsClientMock } from '../mocks';
 import { CrowdstrikeActionsClient } from './crowdstrike_actions_client';
@@ -28,16 +31,16 @@ import {
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
 } from '../../../../../lib/telemetry/event_based/events';
 
-jest.mock('../../action_details_by_id', () => {
-  const originalMod = jest.requireActual('../../action_details_by_id');
+vi.mock('../../action_details_by_id', async () => {
+  const originalMod = (await vi.importActual('../../action_details_by_id'));
 
   return {
     ...originalMod,
-    getActionDetailsById: jest.fn(originalMod.getActionDetailsById),
+    getActionDetailsById: vi.fn(originalMod.getActionDetailsById),
   };
 });
 
-const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
+const getActionDetailsByIdMock = _getActionDetailsById as Mock;
 
 describe('CrowdstrikeActionsClient class', () => {
   let classConstructorOptions: CrowdstrikeActionsClientOptionsMock;
@@ -80,7 +83,7 @@ describe('CrowdstrikeActionsClient class', () => {
 
     (
       classConstructorOptions.endpointService.getInternalFleetServices()
-        .ensureInCurrentSpace as jest.Mock
+        .ensureInCurrentSpace as Mock
     ).mockResolvedValue(undefined);
   });
 
@@ -119,7 +122,7 @@ describe('CrowdstrikeActionsClient class', () => {
         errors: [{ message: 'error message' }],
       },
     };
-    (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
+    (connectorActionsMock.execute as Mock).mockResolvedValueOnce(actionResponse);
 
     await crowdstrikeActionsClient.isolate(
       createCrowdstrikeIsolationOptions({ actionId: '123-345-567' })
@@ -160,7 +163,7 @@ describe('CrowdstrikeActionsClient class', () => {
         createCrowdstrikeIsolationOptions({ actionId: '123-345-456' })
       );
 
-      expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
+      expect(connectorActionsMock.execute as Mock).toHaveBeenCalledWith({
         params: {
           subAction: SUB_ACTION.HOST_ACTIONS,
           subActionParams: {
@@ -290,7 +293,7 @@ describe('CrowdstrikeActionsClient class', () => {
             agent_id: '1-2-3',
           },
         };
-        (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
+        (connectorActionsMock.execute as Mock).mockResolvedValueOnce(actionResponse);
         await crowdstrikeActionsClient.isolate(
           createCrowdstrikeIsolationOptions({ actionId: '123-345-456' })
         );
@@ -322,7 +325,7 @@ describe('CrowdstrikeActionsClient class', () => {
             agent_id: '1-2-3',
           },
         };
-        (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
+        (connectorActionsMock.execute as Mock).mockResolvedValueOnce(actionResponse);
 
         await crowdstrikeActionsClient.isolate(
           createCrowdstrikeIsolationOptions({ actionId: '123-456-678' })
@@ -348,7 +351,7 @@ describe('CrowdstrikeActionsClient class', () => {
         createCrowdstrikeIsolationOptions({ actionId: '123-345-456' })
       );
 
-      expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
+      expect(connectorActionsMock.execute as Mock).toHaveBeenCalledWith({
         params: {
           subAction: SUB_ACTION.HOST_ACTIONS,
           subActionParams: {
@@ -476,7 +479,7 @@ describe('CrowdstrikeActionsClient class', () => {
             agent_id: '1-2-3',
           },
         };
-        (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
+        (connectorActionsMock.execute as Mock).mockResolvedValueOnce(actionResponse);
         await crowdstrikeActionsClient.release(
           createCrowdstrikeIsolationOptions({ actionId: '123-345-456' })
         );
@@ -508,7 +511,7 @@ describe('CrowdstrikeActionsClient class', () => {
             agent_id: '1-2-3',
           },
         };
-        (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
+        (connectorActionsMock.execute as Mock).mockResolvedValueOnce(actionResponse);
 
         await crowdstrikeActionsClient.release(
           createCrowdstrikeIsolationOptions({ actionId: '123-456-678' })
@@ -541,7 +544,7 @@ describe('CrowdstrikeActionsClient class', () => {
         })
       );
 
-      expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
+      expect(connectorActionsMock.execute as Mock).toHaveBeenCalledWith({
         params: {
           subAction: SUB_ACTION.EXECUTE_ADMIN_RTR,
           subActionParams: {
@@ -676,7 +679,7 @@ describe('CrowdstrikeActionsClient class', () => {
           data: undefined,
           status: 'ok',
         };
-        (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
+        (connectorActionsMock.execute as Mock).mockResolvedValueOnce(actionResponse);
 
         await crowdstrikeActionsClient.runscript(
           createCrowdstrikeRunscriptOptions({
@@ -722,7 +725,7 @@ describe('CrowdstrikeActionsClient class', () => {
             },
           },
         };
-        (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
+        (connectorActionsMock.execute as Mock).mockResolvedValueOnce(actionResponse);
 
         await crowdstrikeActionsClient.runscript(
           createCrowdstrikeRunscriptOptions({
@@ -828,7 +831,7 @@ describe('CrowdstrikeActionsClient class', () => {
       async (method) => {
         (
           classConstructorOptions.endpointService.getInternalFleetServices().agent
-            .getByIds as jest.Mock
+            .getByIds as Mock
         ).mockImplementation(async () => {
           throw new AgentNotFoundError('Agent some-id not found');
         });

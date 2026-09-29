@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,13 +17,13 @@ import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from '@emotion/react';
 
-jest.mock('../../../../../hooks/use_profiling_integration_setting');
-jest.mock('../../../hooks/use_tab_switcher');
+vi.mock('../../../../../hooks/use_profiling_integration_setting');
+vi.mock('../../../hooks/use_tab_switcher');
 
-const useProfilingPluginSettingMock = useProfilingPluginSetting as jest.MockedFunction<
+const useProfilingPluginSettingMock = useProfilingPluginSetting as MockedFunction<
   typeof useProfilingPluginSetting
 >;
-const useTabSwitcherContextMock = useTabSwitcherContext as jest.MockedFunction<
+const useTabSwitcherContextMock = useTabSwitcherContext as MockedFunction<
   typeof useTabSwitcherContext
 >;
 
@@ -28,10 +31,10 @@ const mockUseProfilingPluginSetting = (enabled: boolean) => {
   useProfilingPluginSettingMock.mockReturnValue(enabled);
 };
 
-const mockUseTabSwitcherContext = (showTabFn: jest.Mock = jest.fn()) => {
+const mockUseTabSwitcherContext = (showTabFn: Mock = vi.fn()) => {
   useTabSwitcherContextMock.mockReturnValue({
     showTab: showTabFn,
-    isActiveTab: jest.fn(),
+    isActiveTab: vi.fn(),
     activeTabId: 'overview',
   } as unknown as ReturnType<typeof useTabSwitcherContext>);
 };
@@ -47,7 +50,7 @@ const renderCpuProfilingPrompt = () =>
 
 describe('CpuProfilingPrompt', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render when profiling plugin is enabled', () => {
@@ -71,7 +74,7 @@ describe('CpuProfilingPrompt', () => {
   });
 
   it('should call showTab with profiling tab when button is clicked', async () => {
-    const showTabMock = jest.fn();
+    const showTabMock = vi.fn();
     mockUseProfilingPluginSetting(true);
     mockUseTabSwitcherContext(showTabMock);
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
@@ -84,7 +87,7 @@ describe('GET /internal/evals/tracing/projects', () => {
       logger,
       canEncrypt: false,
       evaluatorRegistry: createEvaluatorRegistryMock(),
-      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+      getInferenceStart: async () => ({ getClient: vi.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => ({} as EncryptedSavedObjectsPluginStart),
       getInternalRemoteConfigsSoClient: async () => ({} as SavedObjectsClientContract),
     });
@@ -566,7 +569,7 @@ describe('GET /internal/evals/tracing/projects', () => {
     expect(response.status).toBe(500);
     expect(response.payload).toEqual({ message: 'Failed to get tracing projects' });
 
-    const [logMessage, logMeta] = (logger.error as jest.Mock).mock.calls[0];
+    const [logMessage, logMeta] = (logger.error as Mock).mock.calls[0];
     expect(logMessage).toContain('too_many_buckets_exception');
     expect(logMessage).toContain('status 503');
     expect(logMeta).toEqual(

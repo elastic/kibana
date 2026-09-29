@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { STARDUST_ANIMATION_MS, StardustWrapper } from './stardust_wrapper';
 
 describe('StardustWrapper', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('applies stardust-active while active is true', () => {
@@ -48,12 +50,12 @@ describe('StardustWrapper', () => {
     expect(container.firstChild).toHaveClass('stardust-active');
 
     act(() => {
-      jest.advanceTimersByTime(STARDUST_ANIMATION_MS - 1);
+      vi.advanceTimersByTime(STARDUST_ANIMATION_MS - 1);
     });
     expect(container.firstChild).toHaveClass('stardust-active');
 
     act(() => {
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
     });
     expect(container.firstChild).not.toHaveClass('stardust-active');
   });

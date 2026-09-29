@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { EntityType } from '../../../../../../common/api/entity_analytics';
 import type { ActiveMlModules } from './find_security_ml_jobs';
@@ -12,9 +15,9 @@ import { findMatchingMlJobs } from './find_matching_ml_jobs';
 
 const createMockModel = (invokeResult: {
   jobIds?: string[];
-}): { model: ScopedModel; invokeMock: jest.Mock } => {
-  const invokeMock = jest.fn().mockResolvedValue(invokeResult);
-  const withStructuredOutput = jest.fn().mockReturnValue({ invoke: invokeMock });
+}): { model: ScopedModel; invokeMock: Mock } => {
+  const invokeMock = vi.fn().mockResolvedValue(invokeResult);
+  const withStructuredOutput = vi.fn().mockReturnValue({ invoke: invokeMock });
   const model = {
     chatModel: {
       withStructuredOutput,

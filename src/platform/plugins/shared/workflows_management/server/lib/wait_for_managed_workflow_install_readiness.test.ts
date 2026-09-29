@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import type { CoreStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
@@ -26,12 +28,12 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
   const logger = loggerMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns ready when Elasticsearch is available and ping succeeds', async () => {
     const core$ = new BehaviorSubject(makeCoreStatus(ServiceStatusLevels.available));
-    const esClient = { ping: jest.fn().mockResolvedValue(true) };
+    const esClient = { ping: vi.fn().mockResolvedValue(true) };
 
     await expect(
       waitForManagedWorkflowInstallReadiness({
@@ -47,7 +49,7 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
 
   it('waits until Elasticsearch becomes available by default (no soft timeout)', async () => {
     const core$ = new BehaviorSubject(makeCoreStatus(ServiceStatusLevels.unavailable));
-    const esClient = { ping: jest.fn().mockResolvedValue(true) };
+    const esClient = { ping: vi.fn().mockResolvedValue(true) };
 
     const readinessPromise = waitForManagedWorkflowInstallReadiness({
       core$,
@@ -68,7 +70,7 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
 
   it('returns not ready on timeout while Elasticsearch stays unavailable when timeoutMs is set', async () => {
     const core$ = new BehaviorSubject(makeCoreStatus(ServiceStatusLevels.unavailable));
-    const esClient = { ping: jest.fn().mockResolvedValue(true) };
+    const esClient = { ping: vi.fn().mockResolvedValue(true) };
 
     await expect(
       waitForManagedWorkflowInstallReadiness({
@@ -85,7 +87,7 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
 
   it('returns not ready immediately when already stopping', async () => {
     const core$ = new BehaviorSubject(makeCoreStatus(ServiceStatusLevels.available));
-    const esClient = { ping: jest.fn().mockResolvedValue(true) };
+    const esClient = { ping: vi.fn().mockResolvedValue(true) };
     const stopController = new AbortController();
     stopController.abort();
 
@@ -103,7 +105,7 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
 
   it('returns not ready when stopping flips during the wait', async () => {
     const core$ = new BehaviorSubject(makeCoreStatus(ServiceStatusLevels.unavailable));
-    const esClient = { ping: jest.fn().mockResolvedValue(true) };
+    const esClient = { ping: vi.fn().mockResolvedValue(true) };
     const stopController = new AbortController();
 
     const readinessPromise = waitForManagedWorkflowInstallReadiness({
@@ -125,7 +127,7 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
   it('retries ping until it succeeds when timeoutMs is null', async () => {
     const core$ = new BehaviorSubject(makeCoreStatus(ServiceStatusLevels.available));
     const esClient = {
-      ping: jest
+      ping: vi
         .fn()
         .mockRejectedValueOnce(new Error('NoLivingConnectionsError'))
         .mockResolvedValue(true),
@@ -150,7 +152,7 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
   it('returns not ready when ping keeps failing and soft timeoutMs is set', async () => {
     const core$ = new BehaviorSubject(makeCoreStatus(ServiceStatusLevels.available));
     const esClient = {
-      ping: jest.fn().mockRejectedValue(new Error('NoLivingConnectionsError')),
+      ping: vi.fn().mockRejectedValue(new Error('NoLivingConnectionsError')),
     };
 
     await expect(
@@ -170,7 +172,7 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
     const core$ = new BehaviorSubject(makeCoreStatus(ServiceStatusLevels.available));
     const stopController = new AbortController();
     const esClient = {
-      ping: jest.fn().mockImplementation(async () => {
+      ping: vi.fn().mockImplementation(async () => {
         stopController.abort();
         throw new Error('NoLivingConnectionsError');
       }),

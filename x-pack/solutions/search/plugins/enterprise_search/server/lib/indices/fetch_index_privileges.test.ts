@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import { fetchIndexPrivileges } from './fetch_index_privileges';
@@ -13,7 +15,7 @@ describe('fetchIndexPrivileges lib function', () => {
   const mockClient = {
     asCurrentUser: {
       security: {
-        hasPrivileges: jest.fn(),
+        hasPrivileges: vi.fn(),
       },
     },
   };

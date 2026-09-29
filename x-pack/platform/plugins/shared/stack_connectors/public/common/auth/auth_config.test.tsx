@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { AuthConfig } from './auth_config';
 import { render, screen, waitFor, within } from '@testing-library/react';
@@ -14,19 +17,19 @@ import { AuthType, SSLCertType } from '@kbn/connector-schemas/common/auth/consta
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
 import { useSecretHeaders } from './use_secret_headers';
 
-jest.mock('./use_secret_headers');
+vi.mock('./use_secret_headers');
 
-const useSecretHeadersMock = useSecretHeaders as jest.Mock;
+const useSecretHeadersMock = useSecretHeaders as Mock;
 
 describe('AuthConfig renders', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   beforeEach(() => {
     useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders all fields for authType=None', async () => {
@@ -475,7 +478,7 @@ describe('AuthConfig renders', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('succeeds with hasAuth=True', async () => {

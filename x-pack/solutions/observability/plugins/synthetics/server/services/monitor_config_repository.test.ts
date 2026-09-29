@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { MonitorConfigRepository } from './monitor_config_repository';
 import type { SyntheticsMonitor } from '../../common/runtime_types';
@@ -23,30 +26,36 @@ import {
 import { MONITOR_SEARCH_FIELDS } from '../routes/common';
 
 // Mock the utils functions
-jest.mock('../synthetics_service/utils', () => ({
-  formatSecrets: jest.fn((data) => ({ ...data, formattedSecrets: true })),
-  normalizeSecrets: jest.fn((data) => ({ ...data, normalizedSecrets: true })),
-}));
+vi.mock('../synthetics_service/utils', () => {
+      const mocked = {
+      formatSecrets: vi.fn((data) => ({ ...data, formattedSecrets: true })),
+      normalizeSecrets: vi.fn((data) => ({ ...data, normalizedSecrets: true })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the AMP span
-jest.mock('@kbn/apm-data-access-plugin/server/utils/with_apm_span', () => ({
-  withApmSpan: jest.fn((spanName, fn) => fn()),
-}));
+vi.mock('@kbn/apm-data-access-plugin/server/utils/with_apm_span', () => {
+      const mocked = {
+      withApmSpan: vi.fn((spanName, fn) => fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MonitorConfigRepository', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let encryptedSavedObjectsClient: jest.Mocked<EncryptedSavedObjectsClient>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let encryptedSavedObjectsClient: Mocked<EncryptedSavedObjectsClient>;
   let repository: MonitorConfigRepository;
 
   beforeEach(() => {
     soClient = savedObjectsClientMock.create();
     encryptedSavedObjectsClient = encryptedSavedObjectsMock
       .createStart()
-      .getClient() as jest.Mocked<EncryptedSavedObjectsClient>;
+      .getClient() as Mocked<EncryptedSavedObjectsClient>;
     repository = new MonitorConfigRepository(soClient, encryptedSavedObjectsClient);
 
     // Clear all mocks before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('get', () => {
@@ -194,7 +203,7 @@ describe('MonitorConfigRepository', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(
         mockDecryptedMonitor
       );
-      (utils.normalizeSecrets as jest.Mock).mockReturnValue({
+      (utils.normalizeSecrets as Mock).mockReturnValue({
         ...mockDecryptedMonitor,
       });
 
@@ -828,10 +837,10 @@ describe('MonitorConfigRepository', () => {
       ];
 
       const pointInTimeFinderMock = {
-        find: jest.fn().mockImplementation(function* () {
+        find: vi.fn().mockImplementation(function* () {
           yield { saved_objects: mockDecryptedMonitors };
         }),
-        close: jest.fn().mockResolvedValue(undefined),
+        close: vi.fn().mockResolvedValue(undefined),
       } as any;
 
       encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser.mockReturnValue(
@@ -867,10 +876,10 @@ describe('MonitorConfigRepository', () => {
       ];
 
       const pointInTimeFinderMock = {
-        find: jest.fn().mockImplementation(function* () {
+        find: vi.fn().mockImplementation(function* () {
           yield { saved_objects: mockDecryptedMonitors };
         }),
-        close: jest.fn().mockRejectedValue(new Error('Close failed')),
+        close: vi.fn().mockRejectedValue(new Error('Close failed')),
       } as any;
 
       encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser.mockReturnValue(
@@ -929,10 +938,10 @@ describe('MonitorConfigRepository', () => {
       ];
 
       const pointInTimeFinderMock = {
-        find: jest.fn().mockImplementation(function* () {
+        find: vi.fn().mockImplementation(function* () {
           yield { saved_objects: mockMonitors };
         }),
-        close: jest.fn().mockResolvedValue(undefined),
+        close: vi.fn().mockResolvedValue(undefined),
       };
 
       soClient.createPointInTimeFinder.mockReturnValue(pointInTimeFinderMock);
@@ -963,10 +972,10 @@ describe('MonitorConfigRepository', () => {
       const mockMonitors: any = [];
 
       const pointInTimeFinderMock = {
-        find: jest.fn().mockImplementation(function* () {
+        find: vi.fn().mockImplementation(function* () {
           yield { saved_objects: mockMonitors };
         }),
-        close: jest.fn().mockResolvedValue(undefined),
+        close: vi.fn().mockResolvedValue(undefined),
       };
 
       soClient.createPointInTimeFinder.mockReturnValue(pointInTimeFinderMock);
@@ -991,10 +1000,10 @@ describe('MonitorConfigRepository', () => {
       const mockMonitors: any = [];
 
       const pointInTimeFinderMock = {
-        find: jest.fn().mockImplementation(function* () {
+        find: vi.fn().mockImplementation(function* () {
           yield { saved_objects: mockMonitors };
         }),
-        close: jest.fn().mockResolvedValue(undefined),
+        close: vi.fn().mockResolvedValue(undefined),
       };
 
       soClient.createPointInTimeFinder.mockReturnValue(pointInTimeFinderMock);
@@ -1017,10 +1026,10 @@ describe('MonitorConfigRepository', () => {
       const mockMonitors = [{ id: 'test-id-1', attributes: { name: 'Test Monitor 1' } }];
 
       const pointInTimeFinderMock = {
-        find: jest.fn().mockImplementation(function* () {
+        find: vi.fn().mockImplementation(function* () {
           yield { saved_objects: mockMonitors };
         }),
-        close: jest.fn().mockRejectedValue(new Error('Close failed')),
+        close: vi.fn().mockRejectedValue(new Error('Close failed')),
       };
 
       soClient.createPointInTimeFinder.mockReturnValue(pointInTimeFinderMock);
@@ -1035,7 +1044,7 @@ describe('MonitorConfigRepository', () => {
 
   // Mock logger to spy on its methods
   const mockLogger = {
-    error: jest.fn(),
+    error: vi.fn(),
   };
 
   describe('handleLegacyOptions', () => {
@@ -1046,7 +1055,7 @@ describe('MonitorConfigRepository', () => {
 
     // Restore any mocks after all tests are done
     afterAll(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     test('should convert legacy attributes to new attributes for synthetics-monitor type', () => {

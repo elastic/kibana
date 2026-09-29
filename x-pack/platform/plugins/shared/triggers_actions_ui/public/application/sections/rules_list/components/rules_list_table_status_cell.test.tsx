@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { render } from '@testing-library/react';
@@ -14,9 +17,12 @@ import type { RuleTableItem } from '../../../../types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-jest.mock('../../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockRule: RuleTableItem = {
   id: '1',
@@ -30,7 +36,7 @@ const mockRule: RuleTableItem = {
   nextRun: new Date('2020-08-20T19:23:38Z'),
 } as RuleTableItem;
 
-const onManageLicenseClickMock = jest.fn();
+const onManageLicenseClickMock = vi.fn();
 
 const ComponentWithLocale = (props: RulesListTableStatusCellProps) => {
   return (
@@ -42,7 +48,7 @@ const ComponentWithLocale = (props: RulesListTableStatusCellProps) => {
 
 describe('RulesListTableStatusCell', () => {
   beforeEach(() => {
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
   });
 
   afterEach(() => {

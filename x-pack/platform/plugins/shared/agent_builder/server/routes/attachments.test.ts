@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
@@ -20,36 +23,36 @@ import { registerAttachmentRoutes } from './attachments';
 import type { RouteDependencies } from './types';
 
 describe('Attachment Routes', () => {
-  let mockRouter: jest.Mocked<IRouter>;
+  let mockRouter: Mocked<IRouter>;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
   let mockConversationsClient: {
-    get: jest.MockedFunction<(id: string) => Promise<Conversation>>;
-    update: jest.MockedFunction<
+    get: MockedFunction<(id: string) => Promise<Conversation>>;
+    update: MockedFunction<
       (params: { id: string; attachments: VersionedAttachment[] }) => Promise<void>
     >;
-    appendEvents: jest.MockedFunction<(params: { id: string }) => Promise<void>>;
-    getAuthor: jest.MockedFunction<() => { id: string; username?: string } | undefined>;
+    appendEvents: MockedFunction<(params: { id: string }) => Promise<void>>;
+    getAuthor: MockedFunction<() => { id: string; username?: string } | undefined>;
   };
-  let mockGetInternalServices: jest.MockedFunction<
+  let mockGetInternalServices: MockedFunction<
     () => {
       conversations: {
-        getScopedClient: jest.MockedFunction<() => Promise<typeof mockConversationsClient>>;
+        getScopedClient: MockedFunction<() => Promise<typeof mockConversationsClient>>;
       };
       attachments: {
-        getTypeDefinition: jest.MockedFunction<(type: string) => any>;
+        getTypeDefinition: MockedFunction<(type: string) => any>;
       };
     }
   >;
   let mockResponse: {
-    ok: jest.MockedFunction<(params?: any) => any>;
-    badRequest: jest.MockedFunction<(params?: any) => any>;
-    notFound: jest.MockedFunction<(params?: any) => any>;
-    conflict: jest.MockedFunction<(params?: any) => any>;
-    customError: jest.MockedFunction<(params?: any) => any>;
-    forbidden: jest.MockedFunction<(params?: any) => any>;
+    ok: MockedFunction<(params?: any) => any>;
+    badRequest: MockedFunction<(params?: any) => any>;
+    notFound: MockedFunction<(params?: any) => any>;
+    conflict: MockedFunction<(params?: any) => any>;
+    customError: MockedFunction<(params?: any) => any>;
+    forbidden: MockedFunction<(params?: any) => any>;
   };
   let mockCoreSetup: {
-    getStartServices: jest.MockedFunction<() => Promise<any[]>>;
+    getStartServices: MockedFunction<() => Promise<any[]>>;
   };
   let routeHandlers: Record<string, { config: any; handler: Function }>;
 
@@ -88,23 +91,23 @@ describe('Attachment Routes', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockLogger = loggingSystemMock.createLogger();
 
     mockConversationsClient = {
-      get: jest.fn(),
-      update: jest.fn().mockResolvedValue(undefined),
-      appendEvents: jest.fn().mockResolvedValue(undefined),
-      getAuthor: jest.fn().mockReturnValue({ id: 'user-1', username: 'test-user' }),
+      get: vi.fn(),
+      update: vi.fn().mockResolvedValue(undefined),
+      appendEvents: vi.fn().mockResolvedValue(undefined),
+      getAuthor: vi.fn().mockReturnValue({ id: 'user-1', username: 'test-user' }),
     };
 
-    mockGetInternalServices = jest.fn().mockReturnValue({
+    mockGetInternalServices = vi.fn().mockReturnValue({
       conversations: {
-        getScopedClient: jest.fn().mockResolvedValue(mockConversationsClient),
+        getScopedClient: vi.fn().mockResolvedValue(mockConversationsClient),
       },
       attachments: {
-        getTypeDefinition: jest.fn().mockImplementation((type: string) => ({
+        getTypeDefinition: vi.fn().mockImplementation((type: string) => ({
           id: type,
           validate: (input: unknown) => ({ valid: true, data: input }),
           format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
@@ -115,16 +118,16 @@ describe('Attachment Routes', () => {
     routeHandlers = {};
 
     const createVersionedRoute = (method: string) => ({
-      addVersion: jest.fn().mockImplementation((config: any, handler: Function) => {
-        return { addVersion: jest.fn() };
+      addVersion: vi.fn().mockImplementation((config: any, handler: Function) => {
+        return { addVersion: vi.fn() };
       }),
     });
 
     mockRouter = {
       versioned: {
-        get: jest.fn().mockImplementation((config: any) => {
+        get: vi.fn().mockImplementation((config: any) => {
           const versionedRoute = createVersionedRoute('get');
-          versionedRoute.addVersion = jest
+          versionedRoute.addVersion = vi
             .fn()
             .mockImplementation((vConfig: any, handler: Function) => {
               routeHandlers[`GET:${config.path}`] = { config: vConfig, handler };
@@ -132,9 +135,9 @@ describe('Attachment Routes', () => {
             });
           return versionedRoute;
         }),
-        post: jest.fn().mockImplementation((config: any) => {
+        post: vi.fn().mockImplementation((config: any) => {
           const versionedRoute = createVersionedRoute('post');
-          versionedRoute.addVersion = jest
+          versionedRoute.addVersion = vi
             .fn()
             .mockImplementation((vConfig: any, handler: Function) => {
               routeHandlers[`POST:${config.path}`] = { config: vConfig, handler };
@@ -142,9 +145,9 @@ describe('Attachment Routes', () => {
             });
           return versionedRoute;
         }),
-        put: jest.fn().mockImplementation((config: any) => {
+        put: vi.fn().mockImplementation((config: any) => {
           const versionedRoute = createVersionedRoute('put');
-          versionedRoute.addVersion = jest
+          versionedRoute.addVersion = vi
             .fn()
             .mockImplementation((vConfig: any, handler: Function) => {
               routeHandlers[`PUT:${config.path}`] = { config: vConfig, handler };
@@ -152,9 +155,9 @@ describe('Attachment Routes', () => {
             });
           return versionedRoute;
         }),
-        delete: jest.fn().mockImplementation((config: any) => {
+        delete: vi.fn().mockImplementation((config: any) => {
           const versionedRoute = createVersionedRoute('delete');
-          versionedRoute.addVersion = jest
+          versionedRoute.addVersion = vi
             .fn()
             .mockImplementation((vConfig: any, handler: Function) => {
               routeHandlers[`DELETE:${config.path}`] = { config: vConfig, handler };
@@ -162,9 +165,9 @@ describe('Attachment Routes', () => {
             });
           return versionedRoute;
         }),
-        patch: jest.fn().mockImplementation((config: any) => {
+        patch: vi.fn().mockImplementation((config: any) => {
           const versionedRoute = createVersionedRoute('patch');
-          versionedRoute.addVersion = jest
+          versionedRoute.addVersion = vi
             .fn()
             .mockImplementation((vConfig: any, handler: Function) => {
               routeHandlers[`PATCH:${config.path}`] = { config: vConfig, handler };
@@ -176,19 +179,19 @@ describe('Attachment Routes', () => {
     } as any;
 
     mockResponse = {
-      ok: jest.fn((params) => ({ type: 'ok', ...params })),
-      badRequest: jest.fn((params) => ({ type: 'badRequest', ...params })),
-      notFound: jest.fn((params) => ({ type: 'notFound', ...params })),
-      conflict: jest.fn((params) => ({ type: 'conflict', ...params })),
-      customError: jest.fn((params) => ({ type: 'customError', ...params })),
-      forbidden: jest.fn((params) => ({ type: 'forbidden', ...params })),
+      ok: vi.fn((params) => ({ type: 'ok', ...params })),
+      badRequest: vi.fn((params) => ({ type: 'badRequest', ...params })),
+      notFound: vi.fn((params) => ({ type: 'notFound', ...params })),
+      conflict: vi.fn((params) => ({ type: 'conflict', ...params })),
+      customError: vi.fn((params) => ({ type: 'customError', ...params })),
+      forbidden: vi.fn((params) => ({ type: 'forbidden', ...params })),
     };
 
     mockCoreSetup = {
-      getStartServices: jest.fn().mockResolvedValue([
+      getStartServices: vi.fn().mockResolvedValue([
         {
           savedObjects: {
-            getScopedClient: jest.fn().mockReturnValue({}),
+            getScopedClient: vi.fn().mockReturnValue({}),
           },
         },
         {},
@@ -208,19 +211,19 @@ describe('Attachment Routes', () => {
     core: Promise.resolve({
       uiSettings: {
         client: {
-          get: jest.fn().mockResolvedValue(true),
+          get: vi.fn().mockResolvedValue(true),
         },
       },
     }),
     licensing: Promise.resolve({
       license: {
         status: 'active',
-        hasAtLeast: jest.fn().mockReturnValue(true),
+        hasAtLeast: vi.fn().mockReturnValue(true),
       },
     }),
     agentBuilder: Promise.resolve({
       spaces: {
-        getSpaceId: jest.fn().mockReturnValue('default'),
+        getSpaceId: vi.fn().mockReturnValue('default'),
       },
     }),
   });
@@ -453,7 +456,7 @@ describe('Attachment Routes', () => {
     const path = '/attachments/stale';
 
     it('returns not stale when type has origin and resolve but no isStale (no fallback)', async () => {
-      const resolveMock = jest.fn();
+      const resolveMock = vi.fn();
       const attachment = createMockAttachment({
         id: 'att-1',
         type: 'viz',
@@ -568,8 +571,8 @@ describe('Attachment Routes', () => {
         ],
       });
       mockConversationsClient.get.mockResolvedValue(createMockConversation([attachment]));
-      const isStaleMock = jest.fn().mockResolvedValue(true);
-      const resolveMock = jest.fn().mockResolvedValue(resolvedData);
+      const isStaleMock = vi.fn().mockResolvedValue(true);
+      const resolveMock = vi.fn().mockResolvedValue(resolvedData);
       mockGetInternalServices().attachments.getTypeDefinition.mockImplementation((type: string) => {
         if (type === 'custom') {
           return {

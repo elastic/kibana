@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -14,9 +17,9 @@ import type { TopAlert } from '../../../typings/alerts';
 import { useAlertSnoozeState } from '../hooks/use_alert_snooze_state';
 import { AlertSnoozeStatus } from './alert_snooze_status';
 
-jest.mock('../hooks/use_alert_snooze_state');
+vi.mock('../hooks/use_alert_snooze_state');
 
-const useAlertSnoozeStateMock = useAlertSnoozeState as jest.Mock;
+const useAlertSnoozeStateMock = useAlertSnoozeState as Mock;
 
 const notSnoozedState = {
   ruleId: 'rule-1',
@@ -24,7 +27,7 @@ const notSnoozedState = {
   isMuted: false,
   isSnoozed: false,
   snoozedInstance: undefined,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
   isLoading: false,
 };
 
@@ -38,7 +41,7 @@ const renderComponent = () => render(<AlertSnoozeStatus alert={alert} />, { wrap
 
 describe('AlertSnoozeStatus', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useAlertSnoozeStateMock.mockReturnValue(notSnoozedState);
   });
 

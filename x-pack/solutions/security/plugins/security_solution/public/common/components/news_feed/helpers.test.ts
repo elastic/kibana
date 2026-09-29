@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { NEWS_FEED_URL_SETTING_DEFAULT } from '../../../../common/constants';
 import { KibanaServices } from '../../lib/kibana';
 import { rawNewsApiResponse } from '../../mock/news';
@@ -20,7 +23,7 @@ import {
 } from './helpers';
 import type { NewsItem, RawNewsApiResponse } from './types';
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
 describe('helpers', () => {
   describe('removeSuffixFromVersion', () => {
@@ -383,8 +386,8 @@ describe('helpers', () => {
   });
 
   describe('fetchNews', () => {
-    const mockKibanaServices = KibanaServices.get as jest.Mock;
-    const fetchMock = jest.fn();
+    const mockKibanaServices = KibanaServices.get as Mock;
+    const fetchMock = vi.fn();
     mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
     beforeEach(() => {
@@ -404,7 +407,7 @@ describe('helpers', () => {
     let dateNowSpy: { mockRestore: () => void };
 
     beforeAll(() => {
-      dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => MOCK_DATE_NOW);
+      dateNowSpy = vi.spyOn(Date, 'now').mockImplementation(() => MOCK_DATE_NOW);
     });
 
     afterAll(() => {

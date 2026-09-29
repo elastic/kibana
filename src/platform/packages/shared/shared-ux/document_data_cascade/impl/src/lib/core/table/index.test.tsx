@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { type PropsWithChildren } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import type { Row } from '@tanstack/react-table';
@@ -41,8 +43,8 @@ describe('table', () => {
         initialProps: {
           allowMultipleRowToggle: false,
           enableRowSelection: false,
-          header: jest.fn(),
-          rowCell: jest.fn(),
+          header: vi.fn(),
+          rowCell: vi.fn(),
         } satisfies TableProps<GroupNode, unknown>,
       });
 
@@ -66,8 +68,8 @@ describe('table', () => {
         initialProps: {
           allowMultipleRowToggle: false,
           enableRowSelection: false,
-          header: jest.fn(),
-          rowCell: jest.fn(),
+          header: vi.fn(),
+          rowCell: vi.fn(),
         } satisfies TableProps<GroupNode, unknown>,
       });
 
@@ -91,8 +93,8 @@ describe('table', () => {
           initialProps: {
             allowMultipleRowToggle: true,
             enableRowSelection: false,
-            header: jest.fn(),
-            rowCell: jest.fn(),
+            header: vi.fn(),
+            rowCell: vi.fn(),
           } satisfies TableProps<GroupNode, unknown>,
         });
 
@@ -122,8 +124,8 @@ describe('table', () => {
           initialProps: {
             allowMultipleRowToggle: false,
             enableRowSelection: false,
-            header: jest.fn(),
-            rowCell: jest.fn(),
+            header: vi.fn(),
+            rowCell: vi.fn(),
           } satisfies TableProps<GroupNode, unknown>,
         });
 
@@ -159,8 +161,8 @@ describe('table', () => {
           initialProps: {
             allowMultipleRowToggle: false,
             enableRowSelection: false,
-            header: jest.fn(),
-            rowCell: jest.fn(),
+            header: vi.fn(),
+            rowCell: vi.fn(),
           } satisfies TableProps<GroupNode, unknown>,
         });
 
@@ -195,7 +197,7 @@ describe('table', () => {
         get: (target, prop) => {
           if (prop === 'id') return 'mocked-id';
           if (prop === 'parentId') return 'mocked-parent-id';
-          return jest.fn(() => target);
+          return vi.fn(() => target);
         },
       });
 

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { WorkflowExecutionCursor } from '../workflow_execution_cursor';
 import type { WorkflowRuntimeGraph } from '../workflow_runtime_graph';
@@ -24,18 +27,18 @@ describe('WorkflowExecutionCursor', () => {
     };
     workflowExecutionGraph = {
       topologicalOrder,
-      nodeAfter: jest.fn().mockImplementation((nodeId: string | undefined) => {
+      nodeAfter: vi.fn().mockImplementation((nodeId: string | undefined) => {
         const index = topologicalOrder.findIndex((id) => id === nodeId);
         if (index >= 0 && index < topologicalOrder.length - 1) {
           return graphNodes[topologicalOrder[index + 1]];
         }
         return undefined;
       }),
-      getNode: jest.fn().mockImplementation((nodeId: string) => {
+      getNode: vi.fn().mockImplementation((nodeId: string) => {
         return graphNodes[nodeId];
       }),
-      getNodeStack: jest.fn().mockReturnValue({ stackFrames: [] }),
-      insertSyntheticScope: jest.fn(),
+      getNodeStack: vi.fn().mockReturnValue({ stackFrames: [] }),
+      insertSyntheticScope: vi.fn(),
     } as unknown as WorkflowRuntimeGraph;
 
     workflowExecutionCursor = new WorkflowExecutionCursor({
@@ -70,7 +73,7 @@ describe('WorkflowExecutionCursor', () => {
   });
 
   it('navigateToNode throws when node is missing', () => {
-    (workflowExecutionGraph.getNode as jest.Mock).mockReturnValueOnce(undefined);
+    (workflowExecutionGraph.getNode as Mock).mockReturnValueOnce(undefined);
     expect(() => workflowExecutionCursor.navigateToNode('missing')).toThrow(
       'Node with ID missing is not part of the workflow graph'
     );

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Observable, Subject } from 'rxjs';
 import { ServiceStatusLevels } from '@kbn/core-status-common';
 import type { LoggableServiceStatus } from './types';
@@ -28,7 +30,7 @@ describe('createLogThrottledBuffer', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     buffer$ = new Subject<LoggableServiceStatus>();
     loggedMessages = [];
     throttled$ = createLogThrottledBuffer({
@@ -44,7 +46,7 @@ describe('createLogThrottledBuffer', () => {
 
   afterEach(() => {
     stop$.next();
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   test('returns an observable', async () => {
@@ -62,10 +64,10 @@ describe('createLogThrottledBuffer', () => {
     // not logged yet since the debounce time hasn't passed
     expect(loggedMessages).toMatchInlineSnapshot(`Array []`);
 
-    await jest.advanceTimersByTimeAsync(bufferTimeMillis / 2); // Half the buffer time
+    await vi.advanceTimersByTimeAsync(bufferTimeMillis / 2); // Half the buffer time
     expect(loggedMessages).toMatchInlineSnapshot(`Array []`);
 
-    await jest.advanceTimersByTimeAsync(bufferTimeMillis);
+    await vi.advanceTimersByTimeAsync(bufferTimeMillis);
     expect(loggedMessages).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -85,10 +87,10 @@ describe('createLogThrottledBuffer', () => {
     // not logged yet since the debounce time hasn't passed
     expect(loggedMessages).toMatchInlineSnapshot(`Array []`);
 
-    await jest.advanceTimersByTimeAsync(bufferTimeMillis / 2); // Half the buffer time
+    await vi.advanceTimersByTimeAsync(bufferTimeMillis / 2); // Half the buffer time
     expect(loggedMessages).toMatchInlineSnapshot(`Array []`);
 
-    await jest.advanceTimersByTimeAsync(bufferTimeMillis);
+    await vi.advanceTimersByTimeAsync(bufferTimeMillis);
     expect(loggedMessages).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -109,7 +111,7 @@ describe('createLogThrottledBuffer', () => {
     // not logged yet since the debounce time hasn't passed
     expect(loggedMessages).toMatchInlineSnapshot(`Array []`);
 
-    await jest.advanceTimersByTimeAsync(bufferTimeMillis / 2); // Half the buffer time
+    await vi.advanceTimersByTimeAsync(bufferTimeMillis / 2); // Half the buffer time
     buffer$.next({ ...baseStatus });
     buffer$.next({ ...baseStatus });
     buffer$.next({ ...baseStatus });
@@ -119,7 +121,7 @@ describe('createLogThrottledBuffer', () => {
     buffer$.next({ ...baseStatus });
     buffer$.next({ ...baseStatus });
 
-    await jest.advanceTimersByTimeAsync(bufferTimeMillis);
+    await vi.advanceTimersByTimeAsync(bufferTimeMillis);
     expect(loggedMessages).toMatchInlineSnapshot(`
       Array [
         Object {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useNavigation } from '@kbn/security-solution-navigation';
@@ -12,14 +15,17 @@ import { SuccessToastContent } from './success_notification';
 import { getRuleMigrationStatsMock } from '../../__mocks__';
 import { TestProviders } from '../../../../common/mock';
 
-jest.mock('@kbn/security-solution-navigation', () => ({
-  ...jest.requireActual('@kbn/security-solution-navigation'),
-  useNavigation: jest.fn(),
-}));
+vi.mock('@kbn/security-solution-navigation', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/security-solution-navigation')),
+      useNavigation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const navigateTo = jest.fn();
-const getAppUrl = jest.fn(() => 'some/url');
-const useNavigationMock = useNavigation as jest.Mock;
+const navigateTo = vi.fn();
+const getAppUrl = vi.fn(() => 'some/url');
+const useNavigationMock = useNavigation as Mock;
 
 describe('Success Notification', () => {
   describe('SuccessToastContent', () => {
@@ -33,7 +39,7 @@ describe('Success Notification', () => {
     it('renders the component with correct text and button', () => {
       const { getByText, getByRole } = render(
         <TestProviders>
-          <SuccessToastContent migration={getRuleMigrationStatsMock()} dismissHandler={jest.fn()} />
+          <SuccessToastContent migration={getRuleMigrationStatsMock()} dismissHandler={vi.fn()} />
         </TestProviders>
       );
 
@@ -51,7 +57,7 @@ describe('Success Notification', () => {
     it('calls navigateTo when the button is clicked', () => {
       const { getByRole } = render(
         <TestProviders>
-          <SuccessToastContent migration={getRuleMigrationStatsMock()} dismissHandler={jest.fn()} />
+          <SuccessToastContent migration={getRuleMigrationStatsMock()} dismissHandler={vi.fn()} />
         </TestProviders>
       );
 

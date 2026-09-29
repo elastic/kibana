@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -133,7 +135,7 @@ describe('POST /internal/evals/evaluators/_validate', () => {
       }),
       steps: z.array(z.object({}).catchall(z.unknown())),
     }),
-    evaluate: jest.fn(),
+    evaluate: vi.fn(),
   };
 
   const codeEvaluator: EvaluatorDefinition = {
@@ -143,7 +145,7 @@ describe('POST /internal/evals/evaluators/_validate', () => {
     origin: 'built_in',
     description: 'Latency evaluator',
     direction: 'minimize',
-    evaluate: jest.fn(),
+    evaluate: vi.fn(),
   };
 
   const evaluatorRegistry: EvaluatorRegistry = createEvaluatorRegistryMock([
@@ -157,7 +159,7 @@ describe('POST /internal/evals/evaluators/_validate', () => {
   }: { registry?: EvaluatorRegistry; spaceId?: string } = {}) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    const getSpaceId = spaceId ? jest.fn().mockResolvedValue(spaceId) : undefined;
+    const getSpaceId = spaceId ? vi.fn().mockResolvedValue(spaceId) : undefined;
     const versionedRouter = router.versioned as MockedVersionedRouter;
 
     registerValidateRoute({
@@ -165,7 +167,7 @@ describe('POST /internal/evals/evaluators/_validate', () => {
       logger,
       canEncrypt: false,
       evaluatorRegistry: registry,
-      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+      getInferenceStart: async () => ({ getClient: vi.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
       getSpaceId,
@@ -201,7 +203,7 @@ describe('POST /internal/evals/evaluators/_validate', () => {
 
   it('resolves evaluators from the active space', async () => {
     const registry = createEvaluatorRegistryMock([codeEvaluator]);
-    const asScoped = jest.spyOn(registry, 'asScoped');
+    const asScoped = vi.spyOn(registry, 'asScoped');
     const { handler, getSpaceId } = setup({ registry, spaceId: 'marketing' });
     const request = {
       body: {

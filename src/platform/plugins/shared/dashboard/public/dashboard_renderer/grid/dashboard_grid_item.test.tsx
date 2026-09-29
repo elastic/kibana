@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
@@ -26,8 +28,8 @@ const mockUseEffect = React.useEffect;
 // so tests can simulate the embeddable API becoming available after mount.
 let capturedOnApiAvailable: ((api: DefaultEmbeddableApi) => void) | undefined;
 
-jest.mock('@kbn/embeddable-plugin/public', () => {
-  const original = jest.requireActual('@kbn/embeddable-plugin/public');
+vi.mock('@kbn/embeddable-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/embeddable-plugin/public'));
 
   return {
     ...original,
@@ -199,7 +201,7 @@ const simulateApiAvailable = async (api: DefaultEmbeddableApi) => {
 
 describe('cancelRequests on unmount', () => {
   test('calls cancelRequests when the embeddable supports it', async () => {
-    const cancelRequests = jest.fn();
+    const cancelRequests = vi.fn();
     const mockApi = {
       ...buildMockChildApi('1'),
       cancelRequests,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { take, toArray } from 'rxjs';
 
@@ -17,7 +19,7 @@ let done$: Subject<unknown>;
 function setup(options: { defaults?: any; initialSettings?: any } = {}) {
   const { defaults = { dateFormat: { value: 'Browser' } }, initialSettings = {} } = options;
 
-  const batchSetGlobal = jest.fn(() => ({
+  const batchSetGlobal = vi.fn(() => ({
     settings: {},
   }));
   done$ = new Subject();

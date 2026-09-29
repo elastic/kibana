@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   buildFocusedViewRawQuery,
   buildFocusedViewTimeRange,
@@ -151,11 +153,11 @@ describe('buildFocusedViewTimeRange', () => {
 
   describe('relative time ranges', () => {
     beforeEach(() => {
-      jest.useFakeTimers({ now: FIXED_NOW });
+      vi.useFakeTimers({ now: FIXED_NOW });
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('resolves relative bounds via datemath and applies 3% padding', () => {

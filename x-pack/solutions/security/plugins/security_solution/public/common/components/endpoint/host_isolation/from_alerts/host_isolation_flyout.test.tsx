@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -17,38 +19,50 @@ import {
 } from './host_isolation_flyout';
 import { endpointAlertDataMock } from '../../../../mock/endpoint';
 
-const mockAddSuccess = jest.fn();
+const mockAddSuccess = vi.fn();
 
-jest.mock('../../../../hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({ addSuccess: mockAddSuccess }),
-}));
+vi.mock('../../../../hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({ addSuccess: mockAddSuccess }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../..', () => ({
-  useWithCaseDetailsRefresh: () => undefined,
-}));
+vi.mock('../..', () => {
+      const mocked = {
+      useWithCaseDetailsRefresh: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/endpoint/use_alert_response_actions_support', () => ({
-  useAlertResponseActionsSupport: () => ({ details: { agentType: 'endpoint' } }),
-}));
+vi.mock('../../../../hooks/endpoint/use_alert_response_actions_support', () => {
+      const mocked = {
+      useAlertResponseActionsSupport: () => ({ details: { agentType: 'endpoint' } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./host_isolation_panel', () => ({
-  HostIsolationPanel: ({
-    cancelCallback,
-    successCallback,
-  }: {
-    cancelCallback: () => void;
-    successCallback: () => void;
-  }) => (
-    <>
-      <button type="button" data-test-subj="hostIsolationCancel" onClick={cancelCallback}>
-        {'cancel'}
-      </button>
-      <button type="button" data-test-subj="hostIsolationSuccess" onClick={successCallback}>
-        {'succeed'}
-      </button>
-    </>
-  ),
-}));
+vi.mock('./host_isolation_panel', () => {
+      const mocked = {
+      HostIsolationPanel: ({
+        cancelCallback,
+        successCallback,
+      }: {
+        cancelCallback: () => void;
+        successCallback: () => void;
+      }) => (
+        <>
+          <button type="button" data-test-subj="hostIsolationCancel" onClick={cancelCallback}>
+            {'cancel'}
+          </button>
+          <button type="button" data-test-subj="hostIsolationSuccess" onClick={successCallback}>
+            {'succeed'}
+          </button>
+        </>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const hit: DataTableRecord = {
   id: 'alert-1',
@@ -70,7 +84,7 @@ describe('<HostIsolationFlyout />', () => {
         hit={hit}
         detailsData={detailsData}
         isolateAction="isolateHost"
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -83,7 +97,7 @@ describe('<HostIsolationFlyout />', () => {
         hit={hit}
         detailsData={detailsData}
         isolateAction="unisolateHost"
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -96,7 +110,7 @@ describe('<HostIsolationFlyout />', () => {
         hit={hit}
         detailsData={detailsData}
         isolateAction="isolateHost"
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -110,7 +124,7 @@ describe('<HostIsolationFlyout />', () => {
         hit={hit}
         detailsData={detailsData}
         isolateAction="isolateHost"
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -121,7 +135,7 @@ describe('<HostIsolationFlyout />', () => {
   });
 
   it('fires the isolation success toast and calls onClose when form reports success', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     render(
       <HostIsolationFlyout
         hit={hit}
@@ -139,7 +153,7 @@ describe('<HostIsolationFlyout />', () => {
   });
 
   it('fires the release success toast and calls onClose when form reports success', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     render(
       <HostIsolationFlyout
         hit={hit}
@@ -157,7 +171,7 @@ describe('<HostIsolationFlyout />', () => {
   });
 
   it('calls onClose when the form cancel button is clicked', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     render(
       <HostIsolationFlyout
         hit={hit}

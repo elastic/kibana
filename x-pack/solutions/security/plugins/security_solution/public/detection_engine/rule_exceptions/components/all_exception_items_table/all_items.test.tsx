@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 
@@ -23,9 +25,9 @@ describe('ExceptionsViewerItems', () => {
           isEndpoint={false}
           ruleReferences={null}
           viewerState="empty"
-          onCreateExceptionListItem={jest.fn()}
-          onDeleteException={jest.fn()}
-          onEditExceptionItem={jest.fn()}
+          onCreateExceptionListItem={vi.fn()}
+          onDeleteException={vi.fn()}
+          onEditExceptionItem={vi.fn()}
           isReadOnly={false}
         />
       </TestProviders>
@@ -46,9 +48,9 @@ describe('ExceptionsViewerItems', () => {
           isEndpoint={false}
           ruleReferences={null}
           viewerState="empty_search"
-          onCreateExceptionListItem={jest.fn()}
-          onDeleteException={jest.fn()}
-          onEditExceptionItem={jest.fn()}
+          onCreateExceptionListItem={vi.fn()}
+          onDeleteException={vi.fn()}
+          onEditExceptionItem={vi.fn()}
           isReadOnly={false}
         />
       </TestProviders>
@@ -69,9 +71,9 @@ describe('ExceptionsViewerItems', () => {
           isEndpoint={false}
           ruleReferences={null}
           viewerState={null}
-          onCreateExceptionListItem={jest.fn()}
-          onDeleteException={jest.fn()}
-          onEditExceptionItem={jest.fn()}
+          onCreateExceptionListItem={vi.fn()}
+          onDeleteException={vi.fn()}
+          onEditExceptionItem={vi.fn()}
           isReadOnly={false}
         />
       </TestProviders>

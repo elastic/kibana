@@ -5,17 +5,25 @@
  * 2.0.
  */
 
-jest.mock('../risk_score/risk_score_data_client', () => ({
-  RiskScoreDataClient: jest.fn().mockImplementation(() => ({
-    copyTimestampToEventIngestedForRiskScore: jest
-      .fn()
-      .mockResolvedValue({ updated: 0, failures: [] }),
-  })),
-}));
+import { vi } from 'vitest';
 
-jest.mock('../risk_score/tasks/helpers', () => ({
-  buildScopedInternalSavedObjectsClientUnsafe: jest.fn().mockReturnValue({}),
-}));
+vi.mock('../risk_score/risk_score_data_client', () => {
+      const mocked = {
+      RiskScoreDataClient: vi.fn().mockImplementation(() => ({
+        copyTimestampToEventIngestedForRiskScore: vi
+          .fn()
+          .mockResolvedValue({ updated: 0, failures: [] }),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../risk_score/tasks/helpers', () => {
+      const mocked = {
+      buildScopedInternalSavedObjectsClientUnsafe: vi.fn().mockReturnValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
@@ -32,16 +40,16 @@ describe('riskScoreCopyTimestampToEventIngested — execution context wrap', () 
   const auditLogger = auditLoggerMock.create();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('wraps the migration run in coreStart.executionContext.withContext with the expected label and id', async () => {
-    const withContext = jest.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn());
+    const withContext = vi.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn());
     const mockCoreStart = {
       elasticsearch: { client: elasticsearchServiceMock.createClusterClient() },
       executionContext: { withContext },
     };
-    const getStartServices = jest.fn().mockResolvedValue([mockCoreStart, {}]);
+    const getStartServices = vi.fn().mockResolvedValue([mockCoreStart, {}]);
 
     const migrationTask = createMigrationTask({ getStartServices, logger, auditLogger })({
       signal: new AbortController().signal,

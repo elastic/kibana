@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { act, render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
@@ -12,38 +15,41 @@ import type { GroupBySelection } from '../alerts_progress_bar_panel/types';
 import { useSummaryChartData } from './use_summary_chart_data';
 import { useStackByFields } from '../common/hooks';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/containers/query_toggle');
-jest.mock('./use_summary_chart_data');
-jest.mock('../common/hooks');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/containers/query_toggle');
+vi.mock('./use_summary_chart_data');
+vi.mock('../common/hooks');
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock('../../../../common/components/cell_actions', () => ({
-  ...jest.requireActual('../../../../common/components/cell_actions'),
-  SecurityCellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
-}));
+vi.mock('../../../../common/components/cell_actions', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../common/components/cell_actions')),
+      SecurityCellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AlertsSummaryChartsPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useSummaryChartData as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useSummaryChartData as Mock).mockReturnValue({
       items: [],
       isLoading: false,
     });
-    (useStackByFields as jest.Mock).mockReturnValue(jest.fn());
+    (useStackByFields as Mock).mockReturnValue(vi.fn());
   });
 
-  const mockSetIsExpanded = jest.fn();
+  const mockSetIsExpanded = vi.fn();
   const defaultProps = {
     signalIndexName: 'signalIndexName',
     isExpanded: true,
     setIsExpanded: mockSetIsExpanded,
     groupBySelection: 'host.name' as GroupBySelection,
-    setGroupBySelection: jest.fn(),
+    setGroupBySelection: vi.fn(),
   };
 
   test('renders correctly', () => {
@@ -68,11 +74,14 @@ describe('AlertsSummaryChartsPanel', () => {
 
   describe('Query', () => {
     test('it render with a illegal KQL', () => {
-      jest.mock('@kbn/es-query', () => ({
-        buildEsQuery: jest.fn().mockImplementation(() => {
-          throw new Error('Something went wrong');
-        }),
-      }));
+      vi.doMock('@kbn/es-query', () => {
+            const mocked = {
+                  buildEsQuery: vi.fn().mockImplementation(() => {
+                    throw new Error('Something went wrong');
+                  }),
+                };
+            return { ...mocked, default: mocked };
+          });
       const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
       const { getByTestId } = render(
         <TestProviders>

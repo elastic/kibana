@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -15,10 +17,10 @@ import { useCapabilities } from './use_capabilities';
 import { API_VERSIONS, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
 const http = {
-  get: jest.fn().mockResolvedValue(defaultAssistantFeatures),
+  get: vi.fn().mockResolvedValue(defaultAssistantFeatures),
 };
 const toasts = {
-  addError: jest.fn(),
+  addError: vi.fn(),
 };
 const defaultProps = { http, toasts } as unknown as UseCapabilitiesParams;
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 
@@ -20,21 +23,21 @@ const mockWorkflow = {
   yaml: 'version: "1"',
 } as unknown as WorkflowDetailDto;
 
-const createLogger = (): jest.Mocked<Logger> =>
+const createLogger = (): Mocked<Logger> =>
   ({
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+  } as unknown as Mocked<Logger>);
 
-const createWorkflowsManagementApi = (): jest.Mocked<WorkflowsManagementApi> =>
+const createWorkflowsManagementApi = (): Mocked<WorkflowsManagementApi> =>
   ({
-    getWorkflow: jest.fn().mockResolvedValue(mockWorkflow),
-    getWorkflowExecution: jest.fn(),
-    runWorkflow: jest.fn(),
-    scheduleWorkflow: jest.fn().mockResolvedValue('report-run-id'),
-  } as unknown as jest.Mocked<WorkflowsManagementApi>);
+    getWorkflow: vi.fn().mockResolvedValue(mockWorkflow),
+    getWorkflowExecution: vi.fn(),
+    runWorkflow: vi.fn(),
+    scheduleWorkflow: vi.fn().mockResolvedValue('report-run-id'),
+  } as unknown as Mocked<WorkflowsManagementApi>);
 
 const baseParams = {
   connectorId: 'connector-xyz',
@@ -47,7 +50,7 @@ const baseParams = {
 
 describe('invokeSkillReportWorkflow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('schedules the report workflow with the connector id, conversation id, and execution uuid', async () => {

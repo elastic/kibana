@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { join, sep } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -16,7 +19,7 @@ import { getComponentData } from './get_component_data';
 import { getComponentCodeowners } from '../../lib/codeowners/get_component_codeowners';
 import type { GetComponentDataRequestBody } from './get_component_data';
 
-jest.mock('../../lib/codeowners/get_component_codeowners');
+vi.mock('../../lib/codeowners/get_component_codeowners');
 
 describe('getComponentData', () => {
   const mockRequest = {
@@ -30,8 +33,8 @@ describe('getComponentData', () => {
   const mockLogger = loggingSystemMock.create().get();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getComponentCodeowners as jest.Mock).mockReturnValue(['@user1', '@team/owners']);
+    vi.clearAllMocks();
+    (getComponentCodeowners as Mock).mockReturnValue(['@user1', '@team/owners']);
   });
 
   it('should return correct component data', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { validateParams } from '@kbn/actions-plugin/server/lib';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { Logger } from '@kbn/core/server';
@@ -15,10 +17,10 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 
-const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+const mockedLogger: Mocked<Logger> = loggerMock.create();
 
 let connectorType: ServerLogConnectorType;
-let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let configurationUtilities: Mocked<ActionsConfigurationUtilities>;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();

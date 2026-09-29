@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { shouldScheduleAction } from './should_schedule_action';
 import { ruleRunMetricsStoreMock } from '../../../lib/rule_run_metrics_store.mock';
@@ -15,7 +17,7 @@ const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
 
 describe('shouldScheduleAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should return false if the the limit of executable actions has been reached', () => {

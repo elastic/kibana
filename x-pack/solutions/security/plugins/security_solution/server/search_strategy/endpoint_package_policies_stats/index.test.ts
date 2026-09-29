@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock, Mocked } from 'vitest';
+
 import { createMockEndpointAppContextService } from '../../endpoint/mocks';
 import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -30,7 +32,7 @@ const mockPackagePolicyResponse = (inputs: string[]) => ({
 
 describe('Endpoint package policies stats', () => {
   let endpointAppContextService: EndpointAppContextService;
-  let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockSavedObjectClient: Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     endpointAppContextService = createMockEndpointAppContextService();
@@ -46,7 +48,7 @@ describe('Endpoint package policies stats', () => {
 
     it('when no manifests are outdated.', async () => {
       const listMock = endpointAppContextService.getInternalFleetServices().packagePolicy
-        .list as jest.Mock;
+        .list as Mock;
 
       listMock.mockResolvedValueOnce(mockPackagePolicyResponse(['latest', 'latest', 'latest']));
       const response = await requestEndpointPackagePoliciesStatsSearch(
@@ -65,7 +67,7 @@ describe('Endpoint package policies stats', () => {
 
     it('when some manifests are outdated.', async () => {
       const listMock = endpointAppContextService.getInternalFleetServices().packagePolicy
-        .list as jest.Mock;
+        .list as Mock;
 
       listMock.mockResolvedValueOnce(
         mockPackagePolicyResponse(['2020-01-01', 'latest', '2020-01-01', 'latest'])
@@ -83,7 +85,7 @@ describe('Endpoint package policies stats', () => {
 
     it('when all manifests are outdated but some of them not more than a month', async () => {
       const listMock = endpointAppContextService.getInternalFleetServices().packagePolicy
-        .list as jest.Mock;
+        .list as Mock;
 
       listMock.mockResolvedValueOnce(
         mockPackagePolicyResponse([

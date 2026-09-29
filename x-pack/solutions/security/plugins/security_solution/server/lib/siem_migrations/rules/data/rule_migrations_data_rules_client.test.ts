@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
@@ -30,7 +32,7 @@ describe('RuleMigrationsDataRulesClient', () => {
   const esClient =
     elasticsearchServiceMock.createCustomClusterClient() as unknown as IScopedClusterClient;
   const logger = loggingSystemMock.createLogger();
-  const indexNameProvider = jest.fn().mockReturnValue('.kibana-siem-rule-migrations');
+  const indexNameProvider = vi.fn().mockReturnValue('.kibana-siem-rule-migrations');
   const currentUser = {
     userName: 'testUser',
     profile_uid: 'testProfileUid',
@@ -48,7 +50,7 @@ describe('RuleMigrationsDataRulesClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('create', () => {
@@ -219,7 +221,7 @@ describe('RuleMigrationsDataRulesClient', () => {
       ];
 
       const error = new Error('Bulk update failed');
-      esClient.asInternalUser.bulk = jest.fn().mockRejectedValue(error);
+      esClient.asInternalUser.bulk = vi.fn().mockRejectedValue(error);
 
       await expect(ruleMigrationsDataRulesClient.update(ruleMigrations)).rejects.toThrow(
         'Bulk update failed'
@@ -281,7 +283,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         },
       } as SearchResponse<RuleMigrationRule>;
 
-      esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
+      esClient.asInternalUser.search = vi.fn().mockResolvedValue(mockResponse);
 
       const result = await ruleMigrationsDataRulesClient.get(migrationId, {
         filters: { status: SiemMigrationStatus.COMPLETED },
@@ -336,7 +338,7 @@ describe('RuleMigrationsDataRulesClient', () => {
     test('should throw an error if search fails', async () => {
       const migrationId = 'migration1';
       const error = new Error('Search failed');
-      esClient.asInternalUser.search = jest.fn().mockRejectedValue(error);
+      esClient.asInternalUser.search = vi.fn().mockRejectedValue(error);
 
       await expect(ruleMigrationsDataRulesClient.get(migrationId)).rejects.toThrow('Search failed');
       expect(logger.error).toHaveBeenCalledWith('Error searching migration rule: Search failed');
@@ -524,7 +526,7 @@ describe('RuleMigrationsDataRulesClient', () => {
     test('should throw an error if updateByQuery fails', async () => {
       const migrationId = 'migration1';
       const error = new Error('UpdateByQuery failed');
-      esClient.asInternalUser.updateByQuery = jest.fn().mockRejectedValue(error);
+      esClient.asInternalUser.updateByQuery = vi.fn().mockRejectedValue(error);
 
       await expect(
         ruleMigrationsDataRulesClient.updateStatus(migrationId, {}, SiemMigrationStatus.COMPLETED)
@@ -558,7 +560,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         },
       };
 
-      esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
+      esClient.asInternalUser.search = vi.fn().mockResolvedValue(mockResponse);
       const result = await ruleMigrationsDataRulesClient.getTranslationStats(migrationId);
 
       // make sure the search is being called with correct query
@@ -622,7 +624,7 @@ describe('RuleMigrationsDataRulesClient', () => {
     test('should throw an error if search fails', async () => {
       const migrationId = 'migration1';
       const error = new Error('Search failed');
-      esClient.asInternalUser.search = jest.fn().mockRejectedValue(error);
+      esClient.asInternalUser.search = vi.fn().mockRejectedValue(error);
 
       await expect(ruleMigrationsDataRulesClient.getTranslationStats(migrationId)).rejects.toThrow(
         'Search failed'
@@ -652,7 +654,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         },
       };
 
-      esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
+      esClient.asInternalUser.search = vi.fn().mockResolvedValue(mockResponse);
 
       const result = await ruleMigrationsDataRulesClient.getStats(migrationId);
 
@@ -694,10 +696,10 @@ describe('RuleMigrationsDataRulesClient', () => {
         },
       };
 
-      esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
+      esClient.asInternalUser.search = vi.fn().mockResolvedValue(mockResponse);
 
       // calls to get vendor for the migration
-      jest.spyOn(SiemMigrationsDataItemClient.prototype, 'get').mockResolvedValue({
+      vi.spyOn(SiemMigrationsDataItemClient.prototype, 'get').mockResolvedValue({
         total: 1,
         data: [
           {
@@ -752,7 +754,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         },
       };
 
-      esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
+      esClient.asInternalUser.search = vi.fn().mockResolvedValue(mockResponse);
 
       const result = await ruleMigrationsDataRulesClient.getAllIntegrationsStats();
 
@@ -811,7 +813,7 @@ describe('RuleMigrationsDataRulesClient', () => {
           },
         ] as StoredRuleMigrationRule[],
       };
-      jest.spyOn(ruleMigrationsDataRulesClient, 'get').mockResolvedValue(mockGetResponse);
+      vi.spyOn(ruleMigrationsDataRulesClient, 'get').mockResolvedValue(mockGetResponse);
 
       const result = await ruleMigrationsDataRulesClient.prepareDelete(migrationId);
 
@@ -829,7 +831,7 @@ describe('RuleMigrationsDataRulesClient', () => {
       const translatedRuleIds = ['rule1', 'rule2'];
       const mockResponse = { updated: 2 };
 
-      esClient.asInternalUser.updateByQuery = jest.fn().mockResolvedValue(mockResponse);
+      esClient.asInternalUser.updateByQuery = vi.fn().mockResolvedValue(mockResponse);
 
       const result = await ruleMigrationsDataRulesClient.updateIndexPattern(
         id,
@@ -876,7 +878,7 @@ describe('RuleMigrationsDataRulesClient', () => {
       const indexPattern = 'new-index-*';
       const mockResponse = { updated: 5 };
 
-      esClient.asInternalUser.updateByQuery = jest.fn().mockResolvedValue(mockResponse);
+      esClient.asInternalUser.updateByQuery = vi.fn().mockResolvedValue(mockResponse);
 
       const result = await ruleMigrationsDataRulesClient.updateIndexPattern(id, indexPattern);
 
@@ -913,7 +915,7 @@ describe('RuleMigrationsDataRulesClient', () => {
       const id = 'migration1';
       const indexPattern = 'new-index-*';
       const error = new Error('UpdateByQuery failed');
-      esClient.asInternalUser.updateByQuery = jest.fn().mockRejectedValue(error);
+      esClient.asInternalUser.updateByQuery = vi.fn().mockRejectedValue(error);
 
       await expect(
         ruleMigrationsDataRulesClient.updateIndexPattern(id, indexPattern)

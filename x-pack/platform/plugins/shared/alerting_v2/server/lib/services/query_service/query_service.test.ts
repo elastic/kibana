@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { errors } from '@elastic/elasticsearch';
@@ -22,7 +25,7 @@ import {
 
 describe('QueryService', () => {
   let mockEsClient: DeeplyMockedApi<ElasticsearchClient>;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
   let queryService: QueryService;
 
   beforeEach(() => {
@@ -33,7 +36,7 @@ describe('QueryService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('executeQuery', () => {
@@ -356,7 +359,7 @@ describe('QueryService', () => {
 
     it('passes the query and abort signal to the ES|QL Arrow helper', async () => {
       const reader = createMockArrowReader([{ numRows: 1, rows: [{ host: 'host-a' }] }]);
-      const toArrowReader = jest.fn().mockResolvedValue(reader);
+      const toArrowReader = vi.fn().mockResolvedValue(reader);
       mockHelpersEsqlToArrowReader(mockEsClient, toArrowReader);
 
       const abortController = new AbortController();
@@ -386,7 +389,7 @@ describe('QueryService', () => {
     it('throws and logs error when the helper rejects', async () => {
       mockHelpersEsqlToArrowReader(
         mockEsClient,
-        jest.fn().mockRejectedValue(new Error('ES query failed'))
+        vi.fn().mockRejectedValue(new Error('ES query failed'))
       );
 
       await expect(async () => {
@@ -418,7 +421,7 @@ describe('QueryService', () => {
       const responseError = new FakeResponseError(
         'illegal_argument_exception: ES|QL type [date_range] is not supported by the Arrow format'
       );
-      mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockRejectedValue(responseError));
+      mockHelpersEsqlToArrowReader(mockEsClient, vi.fn().mockRejectedValue(responseError));
 
       await expect(async () => {
         for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
@@ -432,12 +435,12 @@ describe('QueryService', () => {
     it('wraps mid-stream Arrow parse failures with a descriptive error', async () => {
       const reader: MockArrowReader = {
         closed: false,
-        cancel: jest.fn().mockResolvedValue(undefined),
+        cancel: vi.fn().mockResolvedValue(undefined),
         async *[Symbol.asyncIterator]() {
           throw new Error('Expected to read 1919230334 metadata bytes, but only read 8');
         },
       };
-      mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(reader));
+      mockHelpersEsqlToArrowReader(mockEsClient, vi.fn().mockResolvedValue(reader));
 
       await expect(async () => {
         for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
@@ -451,7 +454,7 @@ describe('QueryService', () => {
     it('logs debug instead of error when cancelled', async () => {
       mockHelpersEsqlToArrowReader(
         mockEsClient,
-        jest.fn().mockRejectedValue(new RuleExecutionCancellationError('Streaming query aborted'))
+        vi.fn().mockRejectedValue(new RuleExecutionCancellationError('Streaming query aborted'))
       );
 
       await expect(async () => {
@@ -480,14 +483,14 @@ describe('QueryService', () => {
     it('cancels the reader when iteration throws', async () => {
       const reader: MockArrowReader = {
         closed: false,
-        cancel: jest.fn().mockImplementation(async function (this: MockArrowReader) {
+        cancel: vi.fn().mockImplementation(async function (this: MockArrowReader) {
           this.closed = true;
         }),
         async *[Symbol.asyncIterator]() {
           throw new Error('mid-stream failure');
         },
       };
-      mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(reader));
+      mockHelpersEsqlToArrowReader(mockEsClient, vi.fn().mockResolvedValue(reader));
 
       await expect(async () => {
         for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
@@ -850,12 +853,12 @@ describe('QueryService', () => {
     it('does not let a failing format cleanup mask the primary error', async () => {
       const reader: MockArrowReader = {
         closed: false,
-        cancel: jest.fn().mockRejectedValue(new Error('cancel blew up')),
+        cancel: vi.fn().mockRejectedValue(new Error('cancel blew up')),
         async *[Symbol.asyncIterator]() {
           throw new Error('mid-stream failure');
         },
       };
-      mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(reader));
+      mockHelpersEsqlToArrowReader(mockEsClient, vi.fn().mockResolvedValue(reader));
 
       await expect(async () => {
         for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {

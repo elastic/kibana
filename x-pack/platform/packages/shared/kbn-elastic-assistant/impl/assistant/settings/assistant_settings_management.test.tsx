@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { welcomeConvo } from '../../mock/conversation';
 import { useAssistantContext } from '../../assistant_context';
 import { fireEvent, render } from '@testing-library/react';
@@ -29,12 +32,12 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 
-const mockSetSelectedSettingsTab = jest.fn();
+const mockSetSelectedSettingsTab = vi.fn();
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
   http: {
-    get: jest.fn(),
+    get: vi.fn(),
   },
   assistantFeatures: { assistantModelEvaluation: true },
   assistantAvailability: {
@@ -44,7 +47,7 @@ const mockContext = {
   },
   settings: {
     client: {
-      get: jest.fn((key) => {
+      get: vi.fn((key) => {
         if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
           return 'c5f91dc0-2197-11ee-aded-897192c5d6f5';
         }
@@ -57,51 +60,69 @@ const mockContext = {
   },
   selectedSettingsTab: null,
   setSelectedSettingsTab: mockSetSelectedSettingsTab,
-  navigateToApp: jest.fn(),
+  navigateToApp: vi.fn(),
 };
 
 const mockDataViews = {
-  getIndices: jest.fn(),
+  getIndices: vi.fn(),
 } as unknown as DataViewsContract;
 
-const onTabChange = jest.fn();
+const onTabChange = vi.fn();
 const testProps = {
   selectedConversation: welcomeConvo,
   dataViews: mockDataViews,
   onTabChange,
   currentTab: CONVERSATIONS_TAB,
 };
-jest.mock('../../assistant_context');
+vi.mock('../../assistant_context');
 
-jest.mock('../conversations/conversation_settings_management', () => ({
-  ConversationSettingsManagement: () => <span data-test-subj="conversations-tab" />,
-}));
+vi.mock('../conversations/conversation_settings_management', () => {
+      const mocked = {
+      ConversationSettingsManagement: () => <span data-test-subj="conversations-tab" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../quick_prompts/quick_prompt_settings_management', () => ({
-  QuickPromptSettingsManagement: () => <span data-test-subj="quick_prompts-tab" />,
-}));
+vi.mock('../quick_prompts/quick_prompt_settings_management', () => {
+      const mocked = {
+      QuickPromptSettingsManagement: () => <span data-test-subj="quick_prompts-tab" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../prompt_editor/system_prompt/system_prompt_settings_management', () => ({
-  SystemPromptSettingsManagement: () => <span data-test-subj="system_prompts-tab" />,
-}));
+vi.mock('../prompt_editor/system_prompt/system_prompt_settings_management', () => {
+      const mocked = {
+      SystemPromptSettingsManagement: () => <span data-test-subj="system_prompts-tab" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../knowledge_base/knowledge_base_settings_management', () => ({
-  KnowledgeBaseSettingsManagement: () => <span data-test-subj="knowledge_base-tab" />,
-}));
+vi.mock('../../knowledge_base/knowledge_base_settings_management', () => {
+      const mocked = {
+      KnowledgeBaseSettingsManagement: () => <span data-test-subj="knowledge_base-tab" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../data_anonymization/settings/anonymization_settings_management', () => ({
-  AnonymizationSettingsManagement: () => <span data-test-subj="anonymization-tab" />,
-}));
+vi.mock('../../data_anonymization/settings/anonymization_settings_management', () => {
+      const mocked = {
+      AnonymizationSettingsManagement: () => <span data-test-subj="anonymization-tab" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('.', () => {
+vi.mock('.', () => {
   return {
     EvaluationSettings: () => <span data-test-subj="evaluation-tab" />,
   };
 });
 
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn().mockReturnValue({ data: [] }),
-}));
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn().mockReturnValue({ data: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const queryClient = new QueryClient();
 
@@ -113,8 +134,8 @@ const wrapper = (props: { children: React.ReactNode }) => (
 
 describe('AssistantSettingsManagement', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAssistantContext as jest.Mock).mockImplementation(() => mockContext);
+    vi.clearAllMocks();
+    (useAssistantContext as Mock).mockImplementation(() => mockContext);
   });
 
   it('Bottom bar is hidden when no pending changes', async () => {
@@ -131,7 +152,7 @@ describe('AssistantSettingsManagement', () => {
         ...mockContext,
         selectedSettingsTab: SYSTEM_PROMPTS_TAB,
       };
-      (useAssistantContext as jest.Mock).mockImplementation(() => contextWithTab);
+      (useAssistantContext as Mock).mockImplementation(() => contextWithTab);
 
       render(<AssistantSettingsManagement {...testProps} />, { wrapper });
 
@@ -144,7 +165,7 @@ describe('AssistantSettingsManagement', () => {
         ...mockContext,
         selectedSettingsTab: null,
       };
-      (useAssistantContext as jest.Mock).mockImplementation(() => contextWithoutTab);
+      (useAssistantContext as Mock).mockImplementation(() => contextWithoutTab);
 
       render(<AssistantSettingsManagement {...testProps} />, { wrapper });
 

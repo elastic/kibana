@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddableStateTransfer } from '.';
@@ -19,23 +22,23 @@ const createStorage = (): Storage => {
   const createMockStore = () => {
     let innerStore: Record<string, any> = {};
     return {
-      getItem: jest.fn().mockImplementation((key) => innerStore[key]),
-      setItem: jest.fn().mockImplementation((key, value) => (innerStore[key] = value)),
-      removeItem: jest.fn().mockImplementation((key: string) => delete innerStore[key]),
-      clear: jest.fn().mockImplementation(() => (innerStore = {})),
+      getItem: vi.fn().mockImplementation((key) => innerStore[key]),
+      setItem: vi.fn().mockImplementation((key, value) => (innerStore[key] = value)),
+      removeItem: vi.fn().mockImplementation((key: string) => delete innerStore[key]),
+      clear: vi.fn().mockImplementation(() => (innerStore = {})),
     };
   };
   const store = createMockStore();
   const storage = new Storage(store);
-  storage.get = jest.fn().mockImplementation((key) => store.getItem(key));
-  storage.set = jest.fn().mockImplementation((key, value) => store.setItem(key, value));
-  storage.remove = jest.fn().mockImplementation((key: string) => store.removeItem(key));
-  storage.clear = jest.fn().mockImplementation(() => store.clear());
+  storage.get = vi.fn().mockImplementation((key) => store.getItem(key));
+  storage.set = vi.fn().mockImplementation((key, value) => store.setItem(key, value));
+  storage.remove = vi.fn().mockImplementation((key: string) => store.removeItem(key));
+  storage.clear = vi.fn().mockImplementation(() => store.clear());
   return storage;
 };
 
 describe('embeddable state transfer', () => {
-  let application: jest.Mocked<ApplicationStart>;
+  let application: Mocked<ApplicationStart>;
   let stateTransfer: EmbeddableStateTransfer;
   let currentAppId$: Subject<string | undefined>;
   let store: Storage;

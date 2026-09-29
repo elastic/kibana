@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,14 +18,14 @@ import type { FindItemsResult, FindItemsParams } from '../../datasource';
 import type { ContentListItem } from '../../item';
 import { DeleteConfirmationModal } from './delete_confirmation';
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({
     items: [],
     total: 0,
   })
 );
 
-const mockOnDelete = jest.fn(async () => {});
+const mockOnDelete = vi.fn(async () => {});
 
 const createWrapper = (options?: {
   onDelete?: typeof mockOnDelete;
@@ -53,12 +55,12 @@ const defaultItems: ContentListItem[] = [{ id: '1', title: 'Item 1' }];
 
 describe('DeleteConfirmationModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {
     it('renders the confirmation modal', () => {
-      render(<DeleteConfirmationModal items={defaultItems} onClose={jest.fn()} />, {
+      render(<DeleteConfirmationModal items={defaultItems} onClose={vi.fn()} />, {
         wrapper: createWrapper(),
       });
 
@@ -66,7 +68,7 @@ describe('DeleteConfirmationModal', () => {
     });
 
     it('uses singular entity label for single item', () => {
-      render(<DeleteConfirmationModal items={defaultItems} onClose={jest.fn()} />, {
+      render(<DeleteConfirmationModal items={defaultItems} onClose={vi.fn()} />, {
         wrapper: createWrapper(),
       });
 
@@ -79,7 +81,7 @@ describe('DeleteConfirmationModal', () => {
         { id: '2', title: 'Item 2' },
         { id: '3', title: 'Item 3' },
       ];
-      render(<DeleteConfirmationModal items={items} onClose={jest.fn()} />, {
+      render(<DeleteConfirmationModal items={items} onClose={vi.fn()} />, {
         wrapper: createWrapper(),
       });
 
@@ -87,7 +89,7 @@ describe('DeleteConfirmationModal', () => {
     });
 
     it('always uses plural entity name in body text', () => {
-      render(<DeleteConfirmationModal items={defaultItems} onClose={jest.fn()} />, {
+      render(<DeleteConfirmationModal items={defaultItems} onClose={vi.fn()} />, {
         wrapper: createWrapper(),
       });
 
@@ -95,7 +97,7 @@ describe('DeleteConfirmationModal', () => {
     });
 
     it('focuses the cancel button by default', async () => {
-      render(<DeleteConfirmationModal items={defaultItems} onClose={jest.fn()} />, {
+      render(<DeleteConfirmationModal items={defaultItems} onClose={vi.fn()} />, {
         wrapper: createWrapper(),
       });
 
@@ -107,7 +109,7 @@ describe('DeleteConfirmationModal', () => {
 
   describe('cancel', () => {
     it('calls `onClose` when cancel button is clicked', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       render(<DeleteConfirmationModal items={defaultItems} onClose={onClose} />, {
         wrapper: createWrapper(),
       });
@@ -120,7 +122,7 @@ describe('DeleteConfirmationModal', () => {
 
   describe('confirm', () => {
     it('calls `onDelete` with the items and then `onClose` on success', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       render(<DeleteConfirmationModal items={defaultItems} onClose={onClose} />, {
         wrapper: createWrapper(),
       });
@@ -135,14 +137,14 @@ describe('DeleteConfirmationModal', () => {
 
     it('shows loading state while deleting', async () => {
       let resolveDelete: () => void;
-      const slowDelete = jest.fn(
+      const slowDelete = vi.fn(
         () =>
           new Promise<void>((resolve) => {
             resolveDelete = resolve;
           })
       );
 
-      render(<DeleteConfirmationModal items={defaultItems} onClose={jest.fn()} />, {
+      render(<DeleteConfirmationModal items={defaultItems} onClose={vi.fn()} />, {
         wrapper: createWrapper({ onDelete: slowDelete }),
       });
 
@@ -156,10 +158,10 @@ describe('DeleteConfirmationModal', () => {
     });
 
     it('shows error and keeps modal open on failure', async () => {
-      const failingDelete = jest.fn(async () => {
+      const failingDelete = vi.fn(async () => {
         throw new Error('Network failure');
       });
-      const onClose = jest.fn();
+      const onClose = vi.fn();
 
       render(<DeleteConfirmationModal items={defaultItems} onClose={onClose} />, {
         wrapper: createWrapper({ onDelete: failingDelete }),
@@ -176,11 +178,11 @@ describe('DeleteConfirmationModal', () => {
     });
 
     it('handles non-Error thrown values with an entity-aware fallback message', async () => {
-      const failingDelete = jest.fn(async () => {
+      const failingDelete = vi.fn(async () => {
         throw 'string error'; // eslint-disable-line no-throw-literal
       });
 
-      render(<DeleteConfirmationModal items={defaultItems} onClose={jest.fn()} />, {
+      render(<DeleteConfirmationModal items={defaultItems} onClose={vi.fn()} />, {
         wrapper: createWrapper({ onDelete: failingDelete }),
       });
 
@@ -208,7 +210,7 @@ describe('DeleteConfirmationModal', () => {
       item.managed ? 'Managed dashboards cannot be deleted.' : undefined;
 
     it('uses `permitted` count in the title when some items are skipped', () => {
-      render(<DeleteConfirmationModal items={sampleItems} onClose={jest.fn()} />, {
+      render(<DeleteConfirmationModal items={sampleItems} onClose={vi.fn()} />, {
         wrapper: createWrapper({ getDeleteRestriction: restrictManaged }),
       });
 
@@ -216,7 +218,7 @@ describe('DeleteConfirmationModal', () => {
     });
 
     it('renders a callout listing the skipped items and their reason', () => {
-      render(<DeleteConfirmationModal items={sampleItems} onClose={jest.fn()} />, {
+      render(<DeleteConfirmationModal items={sampleItems} onClose={vi.fn()} />, {
         wrapper: createWrapper({ getDeleteRestriction: restrictManaged }),
       });
 
@@ -242,7 +244,7 @@ describe('DeleteConfirmationModal', () => {
         return undefined;
       };
 
-      render(<DeleteConfirmationModal items={sampleItems} onClose={jest.fn()} />, {
+      render(<DeleteConfirmationModal items={sampleItems} onClose={vi.fn()} />, {
         wrapper: createWrapper({ getDeleteRestriction: restrictMixed }),
       });
 
@@ -253,7 +255,7 @@ describe('DeleteConfirmationModal', () => {
     });
 
     it('passes only `permitted` items to `onDelete` on confirm', async () => {
-      render(<DeleteConfirmationModal items={sampleItems} onClose={jest.fn()} />, {
+      render(<DeleteConfirmationModal items={sampleItems} onClose={vi.fn()} />, {
         wrapper: createWrapper({ getDeleteRestriction: restrictManaged }),
       });
 
@@ -271,7 +273,7 @@ describe('DeleteConfirmationModal', () => {
         { id: '4', title: 'Managed 2', managed: true },
       ];
 
-      render(<DeleteConfirmationModal items={allManaged} onClose={jest.fn()} />, {
+      render(<DeleteConfirmationModal items={allManaged} onClose={vi.fn()} />, {
         wrapper: createWrapper({ getDeleteRestriction: restrictManaged }),
       });
 
@@ -281,7 +283,7 @@ describe('DeleteConfirmationModal', () => {
     });
 
     it('closes via the informational `Close` button without invoking `onDelete`', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const allManaged: ContentListItem[] = [{ id: '2', title: 'Managed 1', managed: true }];
 
       render(<DeleteConfirmationModal items={allManaged} onClose={onClose} />, {
@@ -295,7 +297,7 @@ describe('DeleteConfirmationModal', () => {
     });
 
     it('renders without a skipped callout when no items are restricted', () => {
-      render(<DeleteConfirmationModal items={sampleItems} onClose={jest.fn()} />, {
+      render(<DeleteConfirmationModal items={sampleItems} onClose={vi.fn()} />, {
         wrapper: createWrapper({ getDeleteRestriction: () => undefined }),
       });
 

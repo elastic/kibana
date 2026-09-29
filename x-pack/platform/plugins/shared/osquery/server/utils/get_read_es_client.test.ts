@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getReadEsClient } from './get_read_es_client';
@@ -16,7 +18,7 @@ describe('getReadEsClient', () => {
   clusterClient.asScoped.mockReturnValue(scopedClusterClient);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns asInternalUser when CPS is not active', () => {

@@ -5,53 +5,79 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { Plugin } from './plugin';
 import { PRIVATE_LOCATIONS_SYNC_TASK_ID } from './tasks/sync_private_locations_monitors_task';
 
-jest.mock('./synthetics_service/synthetics_service', () => ({
-  SyntheticsService: jest.fn().mockImplementation(() => ({
-    setup: jest.fn().mockResolvedValue(undefined),
-    start: jest.fn(),
-  })),
-}));
+vi.mock('./synthetics_service/synthetics_service', () => {
+      const mocked = {
+      SyntheticsService: vi.fn().mockImplementation(() => ({
+        setup: vi.fn().mockResolvedValue(undefined),
+        start: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./synthetics_service/synthetics_monitor/synthetics_monitor_client', () => ({
-  SyntheticsMonitorClient: jest.fn(),
-}));
+vi.mock('./synthetics_service/synthetics_monitor/synthetics_monitor_client', () => {
+      const mocked = {
+      SyntheticsMonitorClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./server', () => ({
-  initSyntheticsServer: jest.fn(),
-}));
+vi.mock('./server', () => {
+      const mocked = {
+      initSyntheticsServer: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./saved_objects/saved_objects', () => ({
-  registerSyntheticsSavedObjects: jest.fn(),
-}));
+vi.mock('./saved_objects/saved_objects', () => {
+      const mocked = {
+      registerSyntheticsSavedObjects: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./telemetry/sender', () => ({
-  TelemetryEventsSender: jest.fn().mockImplementation(() => ({
-    setup: jest.fn(),
-    start: jest.fn().mockResolvedValue(undefined),
-  })),
-}));
+vi.mock('./telemetry/sender', () => {
+      const mocked = {
+      TelemetryEventsSender: vi.fn().mockImplementation(() => ({
+        setup: vi.fn(),
+        start: vi.fn().mockResolvedValue(undefined),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./tasks/rebalance_private_location_shards_task', () => ({
-  RebalancePrivateLocationShardsTask: jest.fn().mockImplementation(() => ({
-    registerTaskDefinition: jest.fn(),
-    start: jest.fn().mockResolvedValue(undefined),
-  })),
-}));
+vi.mock('./tasks/rebalance_private_location_shards_task', () => {
+      const mocked = {
+      RebalancePrivateLocationShardsTask: vi.fn().mockImplementation(() => ({
+        registerTaskDefinition: vi.fn(),
+        start: vi.fn().mockResolvedValue(undefined),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./tasks/sync_global_params_task', () => ({
-  SyncGlobalParamsPrivateLocationsTask: jest.fn().mockImplementation(() => ({
-    registerTaskDefinition: jest.fn(),
-  })),
-}));
+vi.mock('./tasks/sync_global_params_task', () => {
+      const mocked = {
+      SyncGlobalParamsPrivateLocationsTask: vi.fn().mockImplementation(() => ({
+        registerTaskDefinition: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./agent_builder/register_data_provider', () => ({
-  registerDataProviders: jest.fn(),
-}));
+vi.mock('./agent_builder/register_data_provider', () => {
+      const mocked = {
+      registerDataProviders: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const flushStart = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -68,11 +94,11 @@ describe('Synthetics server plugin', () => {
     plugin.setup(coreMock.createSetup(), {
       ruleRegistry: {
         ruleDataService: {
-          initializeIndex: jest.fn().mockReturnValue({}),
+          initializeIndex: vi.fn().mockReturnValue({}),
         },
       },
       features: {
-        registerKibanaFeature: jest.fn(),
+        registerKibanaFeature: vi.fn(),
       },
       taskManager: taskManagerSetup,
       telemetry: {},
@@ -80,7 +106,7 @@ describe('Synthetics server plugin', () => {
       share: {},
       alerting: {},
       embeddable: {
-        registerEmbeddableServerDefinition: jest.fn(),
+        registerEmbeddableServerDefinition: vi.fn(),
       },
       encryptedSavedObjects: {},
       observability: {},
@@ -88,12 +114,12 @@ describe('Synthetics server plugin', () => {
       ml: {},
     } as any);
 
-    const registerSyncTask = jest.fn().mockReturnValue(jest.fn());
+    const registerSyncTask = vi.fn().mockReturnValue(vi.fn());
     plugin.start(coreMock.createStart(), {
       taskManager: taskManagerStart,
       maintenanceWindows: {
         registerSyncTask,
-        getMaintenanceWindowClientInternal: jest.fn(),
+        getMaintenanceWindowClientInternal: vi.fn(),
       },
       security: {},
       fleet: {},

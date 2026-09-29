@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -15,54 +17,70 @@ import { useLoadDependencies } from './use_load_dependencies';
 import type { RuleTypeRegistryContract } from '../common/types';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 
-jest.mock('../common/hooks/use_load_ui_config', () => ({
-  useLoadUiConfig: jest.fn(),
-}));
+vi.mock('../common/hooks/use_load_ui_config', () => {
+      const mocked = {
+      useLoadUiConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_health_check', () => ({
-  useHealthCheck: jest.fn(),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_health_check', () => {
+      const mocked = {
+      useHealthCheck: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common/hooks/use_resolve_rule', () => ({
-  useResolveRule: jest.fn(),
-}));
+vi.mock('../common/hooks/use_resolve_rule', () => {
+      const mocked = {
+      useResolveRule: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => ({
-  useGetRuleTypesPermissions: jest.fn(),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => {
+      const mocked = {
+      useGetRuleTypesPermissions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common/hooks/use_load_connectors', () => ({
-  useLoadConnectors: jest.fn(),
-}));
+vi.mock('../common/hooks/use_load_connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common/hooks/use_load_connector_types', () => ({
-  useLoadConnectorTypes: jest.fn(),
-}));
+vi.mock('../common/hooks/use_load_connector_types', () => {
+      const mocked = {
+      useLoadConnectorTypes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common/hooks/use_load_rule_type_alert_fields', () => ({
-  useLoadRuleTypeAlertFields: jest.fn(),
-}));
+vi.mock('../common/hooks/use_load_rule_type_alert_fields', () => {
+      const mocked = {
+      useLoadRuleTypeAlertFields: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings', () => ({
-  useFetchFlappingSettings: jest.fn(),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings', () => {
+      const mocked = {
+      useFetchFlappingSettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useLoadUiConfig } = jest.requireMock('../common/hooks/use_load_ui_config');
-const { useHealthCheck } = jest.requireMock(
-  '@kbn/alerts-ui-shared/src/common/hooks/use_health_check'
-);
-const { useResolveRule } = jest.requireMock('../common/hooks/use_resolve_rule');
-const { useLoadConnectors } = jest.requireMock('../common/hooks/use_load_connectors');
-const { useLoadConnectorTypes } = jest.requireMock('../common/hooks/use_load_connector_types');
-const { useLoadRuleTypeAlertFields } = jest.requireMock(
-  '../common/hooks/use_load_rule_type_alert_fields'
-);
-const { useGetRuleTypesPermissions } = jest.requireMock(
-  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
-);
-const { useFetchFlappingSettings } = jest.requireMock(
-  '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings'
-);
+const { useLoadUiConfig } = (await vi.importMock('../common/hooks/use_load_ui_config'));
+const { useHealthCheck } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_health_check'));
+const { useResolveRule } = (await vi.importMock('../common/hooks/use_resolve_rule'));
+const { useLoadConnectors } = (await vi.importMock('../common/hooks/use_load_connectors'));
+const { useLoadConnectorTypes } = (await vi.importMock('../common/hooks/use_load_connector_types'));
+const { useLoadRuleTypeAlertFields } = (await vi.importMock('../common/hooks/use_load_rule_type_alert_fields'));
+const { useGetRuleTypesPermissions } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'));
+const { useFetchFlappingSettings } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings'));
 
 const uiConfigMock = {
   isUsingSecurity: true,
@@ -218,19 +236,19 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-const httpMock = jest.fn();
-const toastsMock = jest.fn();
+const httpMock = vi.fn();
+const toastsMock = vi.fn();
 
 const ruleTypeRegistryMock: RuleTypeRegistryContract = {
-  has: jest.fn(),
-  register: jest.fn(),
-  get: jest.fn().mockReturnValue(indexThresholdRuleTypeModel),
-  list: jest.fn(),
+  has: vi.fn(),
+  register: vi.fn(),
+  get: vi.fn().mockReturnValue(indexThresholdRuleTypeModel),
+  list: vi.fn(),
 };
 
 describe('useLoadDependencies', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('loads all rule form dependencies', async () => {

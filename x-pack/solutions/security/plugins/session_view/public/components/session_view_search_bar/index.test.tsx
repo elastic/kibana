@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { processMock } from '../../../common/mocks/constants/session_view_process.mock';
 import type { AppContextTestRender } from '../../test';
@@ -20,9 +22,9 @@ describe('SessionViewSearchBar component', () => {
   let props = {
     searchQuery: 'ls',
     totalMatches: 0,
-    onNext: jest.fn((query) => query),
-    onPrevious: jest.fn((query) => query),
-    setSearchQuery: jest.fn((query) => query),
+    onNext: vi.fn((query) => query),
+    onPrevious: vi.fn((query) => query),
+    setSearchQuery: vi.fn((query) => query),
   };
 
   beforeEach(() => {
@@ -31,9 +33,9 @@ describe('SessionViewSearchBar component', () => {
     props = {
       searchQuery: 'ls',
       totalMatches: 0,
-      onNext: jest.fn((query) => query),
-      onPrevious: jest.fn((query) => query),
-      setSearchQuery: jest.fn((query) => query),
+      onNext: vi.fn((query) => query),
+      onPrevious: vi.fn((query) => query),
+      setSearchQuery: vi.fn((query) => query),
     };
   });
 

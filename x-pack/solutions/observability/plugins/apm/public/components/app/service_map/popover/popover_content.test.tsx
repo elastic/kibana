@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MarkerType } from '@xyflow/react';
@@ -15,29 +17,44 @@ import { ExternalsListContents } from './externals_list_contents';
 import { ResourceContents } from './resource_contents';
 import { EdgeContents } from './edge_contents';
 
-jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => ({
-    core: {
-      uiSettings: { get: jest.fn().mockReturnValue(false) },
-    },
-  }),
-}));
+vi.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => {
+      const mocked = {
+      useApmPluginContext: () => ({
+        core: {
+          uiSettings: { get: vi.fn().mockReturnValue(false) },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./dependency_contents', () => ({
-  DependencyContents: jest.fn(() => <div data-testid="dependency-contents" />),
-}));
+vi.mock('./dependency_contents', () => {
+      const mocked = {
+      DependencyContents: vi.fn(() => <div data-testid="dependency-contents" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./externals_list_contents', () => ({
-  ExternalsListContents: jest.fn(() => <div data-testid="externals-list-contents" />),
-}));
+vi.mock('./externals_list_contents', () => {
+      const mocked = {
+      ExternalsListContents: vi.fn(() => <div data-testid="externals-list-contents" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./resource_contents', () => ({
-  ResourceContents: jest.fn(() => <div data-testid="resource-contents" />),
-}));
+vi.mock('./resource_contents', () => {
+      const mocked = {
+      ResourceContents: vi.fn(() => <div data-testid="resource-contents" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./edge_contents', () => ({
-  EdgeContents: jest.fn(() => <div data-testid="edge-contents" />),
-}));
+vi.mock('./edge_contents', () => {
+      const mocked = {
+      EdgeContents: vi.fn(() => <div data-testid="edge-contents" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function node(data: ServiceMapNode['data'], id = data.id): ServiceMapNode {
   return { id, type: 'dependency', position: { x: 0, y: 0 }, data };
@@ -57,7 +74,7 @@ function edge(id: string, source: string, target: string): ServiceMapEdge {
 
 describe('getContentsComponent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('dependency nodes', () => {
@@ -119,7 +136,7 @@ describe('Popover title (display names without ">" for dependencies)', () => {
     kuery: '',
     start: '2024-01-01T00:00:00.000Z',
     end: '2024-01-01T01:00:00.000Z',
-    onFocusClick: jest.fn(),
+    onFocusClick: vi.fn(),
   };
 
   it('shows data.label for dependency node (id may be ">postgresql")', () => {

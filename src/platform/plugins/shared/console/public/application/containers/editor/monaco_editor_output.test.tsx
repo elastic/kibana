@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -57,31 +60,31 @@ const createMockModel = (): monaco.editor.ITextModel =>
   } as unknown as monaco.editor.ITextModel);
 
 const mockEditor = {
-  createDecorationsCollection: jest.fn(() => ({
-    clear: jest.fn(),
-    set: jest.fn(),
+  createDecorationsCollection: vi.fn(() => ({
+    clear: vi.fn(),
+    set: vi.fn(),
   })),
-  getModel: jest.fn(createMockModel),
-  getScrollTop: jest.fn(() => 0),
-  getSelection: jest.fn(() => ({
+  getModel: vi.fn(createMockModel),
+  getScrollTop: vi.fn(() => 0),
+  getSelection: vi.fn(() => ({
     startLineNumber: mockSelectionStartLineNumber,
     endLineNumber: mockSelectionEndLineNumber,
   })),
-  getTopForLineNumber: jest.fn(() => 0),
-  hasTextFocus: jest.fn(() => true),
-  getDomNode: jest.fn(() => ({
-    ownerDocument: { activeElement: { blur: jest.fn() } },
+  getTopForLineNumber: vi.fn(() => 0),
+  hasTextFocus: vi.fn(() => true),
+  getDomNode: vi.fn(() => ({
+    ownerDocument: { activeElement: { blur: vi.fn() } },
   })),
-  onDidBlurEditorText: jest.fn(),
-  onDidChangeCursorPosition: jest.fn(),
-  onDidChangeCursorSelection: jest.fn(),
-  onDidContentSizeChange: jest.fn(),
-  onDidScrollChange: jest.fn(),
-  setSelection: jest.fn(),
-} as unknown as jest.Mocked<monaco.editor.IStandaloneCodeEditor>;
+  onDidBlurEditorText: vi.fn(),
+  onDidChangeCursorPosition: vi.fn(),
+  onDidChangeCursorSelection: vi.fn(),
+  onDidContentSizeChange: vi.fn(),
+  onDidScrollChange: vi.fn(),
+  setSelection: vi.fn(),
+} as unknown as Mocked<monaco.editor.IStandaloneCodeEditor>;
 
-jest.mock('@kbn/code-editor', () => {
-  const ReactActual = jest.requireActual('react');
+vi.mock('@kbn/code-editor', () => {
+  const ReactActual = require('react');
 
   return {
     CodeEditor: (props: {
@@ -99,45 +102,54 @@ jest.mock('@kbn/code-editor', () => {
   };
 });
 
-jest.mock('../../contexts', () => ({
-  useEditorReadContext: jest.fn(),
-  useOutputFilterReadContext: jest.fn(),
-  useRequestReadContext: jest.fn(),
-  useServicesContext: jest.fn(),
-}));
+vi.mock('../../contexts', () => {
+      const mocked = {
+      useEditorReadContext: vi.fn(),
+      useOutputFilterReadContext: vi.fn(),
+      useRequestReadContext: vi.fn(),
+      useServicesContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks', () => ({
-  useResizeCheckerUtils: jest.fn(),
-}));
+vi.mock('./hooks', () => {
+      const mocked = {
+      useResizeCheckerUtils: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/copy_text_to_clipboard', () => ({
-  copyTextToClipboard: jest.fn(),
-}));
+vi.mock('../../lib/copy_text_to_clipboard', () => {
+      const mocked = {
+      copyTextToClipboard: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseEditorReadContext = useEditorReadContext as jest.MockedFunction<
+const mockUseEditorReadContext = useEditorReadContext as MockedFunction<
   typeof useEditorReadContext
 >;
-const mockUseOutputFilterReadContext = useOutputFilterReadContext as jest.MockedFunction<
+const mockUseOutputFilterReadContext = useOutputFilterReadContext as MockedFunction<
   typeof useOutputFilterReadContext
 >;
-const mockUseRequestReadContext = useRequestReadContext as jest.MockedFunction<
+const mockUseRequestReadContext = useRequestReadContext as MockedFunction<
   typeof useRequestReadContext
 >;
-const mockUseServicesContext = useServicesContext as jest.MockedFunction<typeof useServicesContext>;
-const mockUseResizeCheckerUtils = useResizeCheckerUtils as jest.MockedFunction<
+const mockUseServicesContext = useServicesContext as MockedFunction<typeof useServicesContext>;
+const mockUseResizeCheckerUtils = useResizeCheckerUtils as MockedFunction<
   typeof useResizeCheckerUtils
 >;
-const mockCopyTextToClipboard = copyTextToClipboard as jest.MockedFunction<
+const mockCopyTextToClipboard = copyTextToClipboard as MockedFunction<
   typeof copyTextToClipboard
 >;
 
 describe('WHEN rendering Console output', () => {
-  const addSuccess = jest.fn();
-  const addDanger = jest.fn();
+  const addSuccess = vi.fn();
+  const addDanger = vi.fn();
   const responseValue = '{\n  "acknowledged": true\n}';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockEditorValue = '';
     mockSelectionStartLineNumber = 1;
     mockSelectionEndLineNumber = 1;
@@ -183,8 +195,8 @@ describe('WHEN rendering Console output', () => {
       },
     } as any);
     mockUseResizeCheckerUtils.mockReturnValue({
-      destroyResizeChecker: jest.fn(),
-      setupResizeChecker: jest.fn(),
+      destroyResizeChecker: vi.fn(),
+      setupResizeChecker: vi.fn(),
     });
   });
 

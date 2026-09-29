@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SavedObjectReference } from '@kbn/core/server';
 
 import { encode } from '../../common/lib/embeddable_dataurl';
@@ -16,44 +19,47 @@ import { makeWorkpad, getDecodedConfig, getExpressionFunctionName } from './fixt
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 
 const mockLensTransforms = {
-  transformOut: jest.fn((config: any, references: SavedObjectReference[]) => {
+  transformOut: vi.fn((config: any, references: SavedObjectReference[]) => {
     return { ...config, savedObjectId: references[0].id };
   }),
 };
 
 const mockVisualizationTransforms = {
-  transformOut: jest.fn((config: any, references: SavedObjectReference[]) => {
+  transformOut: vi.fn((config: any, references: SavedObjectReference[]) => {
     return { ...config, savedObjectId: references[0].id };
   }),
 };
 
 const mockMapTransforms = {
-  transformOut: jest.fn((config: any, references: SavedObjectReference[]) => {
+  transformOut: vi.fn((config: any, references: SavedObjectReference[]) => {
     return { ...config, savedObjectId: references[0].id };
   }),
 };
 
-jest.mock('../kibana_services', () => ({
-  embeddableService: {
-    getTransforms: jest.fn((type: string) => {
-      switch (type) {
-        case 'lens-dashboard-app':
-          return mockLensTransforms;
-        case 'legacy_vis':
-          return mockVisualizationTransforms;
-        case 'map':
-          return mockMapTransforms;
-      }
-    }),
-  },
-  logger: {
-    warn: jest.fn(),
-  },
-}));
+vi.mock('../kibana_services', () => {
+      const mocked = {
+      embeddableService: {
+        getTransforms: vi.fn((type: string) => {
+          switch (type) {
+            case 'lens-dashboard-app':
+              return mockLensTransforms;
+            case 'legacy_vis':
+              return mockVisualizationTransforms;
+            case 'map':
+              return mockMapTransforms;
+          }
+        }),
+      },
+      logger: {
+        warn: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('transformWorkpadOut', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not apply transforms to non-embeddable elements', () => {
@@ -500,7 +506,7 @@ describe('legacy expressions', () => {
   });
 
   it('logs warnings when transformation fails and returns the original embeddable config', () => {
-    (mockLensTransforms.transformOut as jest.Mock).mockImplementationOnce(() => {
+    (mockLensTransforms.transformOut as Mock).mockImplementationOnce(() => {
       throw new Error('Transform failed');
     });
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Fs from 'fs/promises';
 import { writeFileSync } from 'fs';
 import Path from 'path';
@@ -94,7 +96,7 @@ describe('read_profile', () => {
     await Fs.writeFile(file, '{}', 'utf8');
 
     const original = JSON.parse;
-    jest.spyOn(JSON, 'parse').mockImplementation((str) => {
+    vi.spyOn(JSON, 'parse').mockImplementation((str) => {
       if (str === '{}') {
         throw new RangeError('Invalid string length');
       }
@@ -110,7 +112,7 @@ describe('read_profile', () => {
         })
       ).rejects.toThrow(/KBN_PROFILER_SAMPLING_INTERVAL/);
     } finally {
-      jest.spyOn(JSON, 'parse').mockRestore();
+      vi.spyOn(JSON, 'parse').mockRestore();
     }
   });
 });

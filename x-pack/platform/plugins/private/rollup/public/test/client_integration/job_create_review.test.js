@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, screen, within } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { first } from 'lodash';
@@ -14,11 +16,11 @@ import { setHttp } from '../../crud_app/services';
 import { JOBS } from './helpers/constants';
 import { coreMock } from '@kbn/core/public/mocks';
 
-jest.mock('../../kibana_services', () => {
-  const services = jest.requireActual('../../kibana_services');
+vi.mock('../../kibana_services', async () => {
+  const services = (await vi.importActual('../../kibana_services'));
   return {
     ...services,
-    getUiStatsReporter: jest.fn(() => () => {}),
+    getUiStatsReporter: vi.fn(() => () => {}),
   };
 });
 
@@ -36,15 +38,15 @@ describe('Create Rollup Job, step 6: Review', () => {
   const clickSave = () => fireEvent.click(screen.getByTestId('rollupJobSaveButton'));
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
     mockHttpRequest(startMock.http);
@@ -225,7 +227,7 @@ describe('Create Rollup Job, step 6: Review', () => {
 
         // There is a 500 timeout before receiving the response.
         await act(async () => {
-          await jest.advanceTimersByTimeAsync(500);
+          await vi.advanceTimersByTimeAsync(500);
         });
 
         expect(startMock.http.put).toHaveBeenCalledWith(jobCreateApiPath, expect.anything()); // It has been called!
@@ -257,7 +259,7 @@ describe('Create Rollup Job, step 6: Review', () => {
 
         // Flush the 500ms save delay + the noticeable delay.
         await act(async () => {
-          await jest.runAllTimersAsync();
+          await vi.runAllTimersAsync();
         });
 
         expect(startMock.http.post).toHaveBeenCalledWith(jobStartApiPath, {

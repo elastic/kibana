@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { keyBy } from 'lodash';
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
@@ -18,23 +21,29 @@ import { buildRouteValidation } from '../../utils/build_validation/route_validat
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { getUserInfo } from '../../lib/get_user_info';
 
-jest.mock('../../utils/get_internal_saved_object_client', () => ({
-  createInternalSavedObjectsClientForSpaceId: jest.fn(),
-}));
+vi.mock('../../utils/get_internal_saved_object_client', () => {
+      const mocked = {
+      createInternalSavedObjectsClientForSpaceId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/get_user_info', () => ({
-  getUserInfo: jest.fn(),
-}));
+vi.mock('../../lib/get_user_info', () => {
+      const mocked = {
+      getUserInfo: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockFetchAllItems = (items: unknown[] = []) =>
-  jest.fn().mockResolvedValue(
+  vi.fn().mockResolvedValue(
     (async function* () {
       yield items;
     })()
   );
 
-const fetchAllItemsFromListMock = (listMock: jest.Mock) =>
-  jest.fn().mockImplementation(async () => {
+const fetchAllItemsFromListMock = (listMock: Mock) =>
+  vi.fn().mockImplementation(async () => {
     const { items = [] } = await listMock();
 
     return (async function* () {
@@ -90,32 +99,32 @@ describe('updatePackRoute', () => {
     currentSO: typeof basePackSO,
     updatedSOAttributes?: Partial<PackSavedObject>
   ) => ({
-    get: jest.fn().mockResolvedValue(currentSO),
-    find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-    update: jest.fn().mockResolvedValue({
+    get: vi.fn().mockResolvedValue(currentSO),
+    find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+    update: vi.fn().mockResolvedValue({
       id: 'pack-id',
       attributes: { ...currentSO.attributes, ...updatedSOAttributes },
       references: [],
     }),
-    list: jest.fn().mockResolvedValue({ items: [] }),
+    list: vi.fn().mockResolvedValue({ items: [] }),
   });
 
   const setupRoute = (isRruleFeatureEnabled = true) => {
     const mockRouter = createMockRouter();
     mockOsqueryContext = {
       logFactory: {
-        get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()),
+        get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()),
       },
       security: {},
-      getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+      getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
       experimentalFeatures: { rruleScheduling: isRruleFeatureEnabled },
       service: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-        getAgentPolicyService: jest.fn().mockReturnValue({
-          getByIds: jest.fn().mockResolvedValue([]),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+        getAgentPolicyService: vi.fn().mockReturnValue({
+          getByIds: vi.fn().mockResolvedValue([]),
         }),
-        getPackagePolicyService: jest.fn().mockReturnValue({
-          list: jest.fn().mockResolvedValue({ items: [] }),
+        getPackagePolicyService: vi.fn().mockReturnValue({
+          list: vi.fn().mockResolvedValue({ items: [] }),
           fetchAllItems: mockFetchAllItems([]),
         }),
       },
@@ -133,8 +142,8 @@ describe('updatePackRoute', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester', profile_uid: 'uid-1' });
+    vi.clearAllMocks();
+    (getUserInfo as Mock).mockResolvedValue({ username: 'tester', profile_uid: 'uid-1' });
   });
 
   describe('schedule_type transition', () => {
@@ -155,7 +164,7 @@ describe('updatePackRoute', () => {
         rrule_schedule: rruleValue,
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -197,7 +206,7 @@ describe('updatePackRoute', () => {
         rrule_schedule: null,
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -239,7 +248,7 @@ describe('updatePackRoute', () => {
         rrule_schedule: null,
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -275,7 +284,7 @@ describe('updatePackRoute', () => {
       };
       const mockClient = buildMockSavedObjectsClient(currentSO, {});
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -308,7 +317,7 @@ describe('updatePackRoute', () => {
       };
       const mockClient = buildMockSavedObjectsClient(currentSO, { interval: 120 });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -360,7 +369,7 @@ describe('updatePackRoute', () => {
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -415,7 +424,7 @@ describe('updatePackRoute', () => {
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -468,7 +477,7 @@ describe('updatePackRoute', () => {
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -525,22 +534,22 @@ describe('updatePackRoute', () => {
       // updated SO after writing. Mirror that here.
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [
           {
             id: 'package-policy-1',
@@ -570,20 +579,20 @@ describe('updatePackRoute', () => {
         ],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([{ id: 'policy-1', name: 'policy-1' }]),
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([{ id: 'policy-1', name: 'policy-1' }]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -647,22 +656,22 @@ describe('updatePackRoute', () => {
       // SO after writing. Mirror the pattern used in the regression test above.
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [
           {
             id: 'package-policy-1',
@@ -692,20 +701,20 @@ describe('updatePackRoute', () => {
         ],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([{ id: 'policy-1', name: 'policy-1' }]),
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([{ id: 'policy-1', name: 'policy-1' }]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -768,21 +777,21 @@ describe('updatePackRoute', () => {
       };
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: [],
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -826,7 +835,7 @@ describe('updatePackRoute', () => {
       };
       const mockClient = buildMockSavedObjectsClient(currentSO, {});
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -890,7 +899,7 @@ describe('updatePackRoute', () => {
       };
       const mockClient = buildMockSavedObjectsClient(currentSO, {});
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -948,7 +957,7 @@ describe('updatePackRoute', () => {
       };
       const mockClient = buildMockSavedObjectsClient(currentSO, {});
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -987,7 +996,7 @@ describe('updatePackRoute', () => {
       const rruleValue = { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00Z' };
       const mockClient = buildMockSavedObjectsClient(currentSO, {});
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(false);
 
@@ -1031,21 +1040,21 @@ describe('updatePackRoute', () => {
       };
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(soWithPerQueryRrule);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: soWithPerQueryRrule.attributes,
           references: [],
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(false);
 
@@ -1087,7 +1096,7 @@ describe('updatePackRoute', () => {
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(false);
 
@@ -1130,7 +1139,7 @@ describe('updatePackRoute', () => {
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -1185,7 +1194,7 @@ describe('updatePackRoute', () => {
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -1233,7 +1242,7 @@ describe('updatePackRoute', () => {
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -1283,7 +1292,7 @@ describe('updatePackRoute', () => {
       };
       const mockClient = buildMockSavedObjectsClient(currentSO, {});
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -1343,20 +1352,20 @@ describe('updatePackRoute', () => {
         },
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
-      mockClient.get = jest.fn().mockResolvedValue(currentSO);
-      mockClient.update = jest.fn().mockResolvedValue({
+      mockClient.get = vi.fn().mockResolvedValue(currentSO);
+      mockClient.update = vi.fn().mockResolvedValue({
         id: 'pack-id',
         attributes: currentSO.attributes,
         references: currentSO.references,
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       // The route validates that all currentAgentPolicyIds resolve to known
       // osquery_manager package policies; otherwise it 400s with "invalid
       // policy ids" before reaching buildResponseData. Mock the lookup so
       // policy-a and policy-b are accepted.
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [
           {
             id: 'package-policy-a',
@@ -1375,19 +1384,19 @@ describe('updatePackRoute', () => {
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([
               { id: 'policy-a', name: 'policy-a' },
               { id: 'policy-b', name: 'policy-b' },
             ]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
           }),
@@ -1434,14 +1443,14 @@ describe('updatePackRoute', () => {
         attributes: { ...basePackSO.attributes },
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
-      mockClient.get = jest.fn().mockResolvedValue(currentSO);
-      mockClient.update = jest.fn().mockResolvedValue({
+      mockClient.get = vi.fn().mockResolvedValue(currentSO);
+      mockClient.update = vi.fn().mockResolvedValue({
         id: 'pack-id',
         attributes: currentSO.attributes,
         references: currentSO.references,
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const firstBatch = [
         {
@@ -1460,7 +1469,7 @@ describe('updatePackRoute', () => {
           inputs: [],
         },
       ];
-      const fetchAllItems = jest.fn().mockResolvedValue(
+      const fetchAllItems = vi.fn().mockResolvedValue(
         (async function* () {
           yield firstBatch;
           yield secondBatch;
@@ -1469,19 +1478,19 @@ describe('updatePackRoute', () => {
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([
               { id: 'policy-a', name: 'policy-a' },
               { id: 'policy-b', name: 'policy-b' },
             ]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             fetchAllItems,
           }),
         },
@@ -1526,7 +1535,7 @@ describe('updatePackRoute', () => {
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -1562,7 +1571,7 @@ describe('updatePackRoute', () => {
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -1606,7 +1615,7 @@ describe('updatePackRoute', () => {
         },
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -1637,7 +1646,7 @@ describe('updatePackRoute', () => {
         },
       };
       const firstClient = buildMockSavedObjectsClient(legacySO);
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(firstClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(firstClient);
 
       setupRoute(true);
 
@@ -1664,7 +1673,7 @@ describe('updatePackRoute', () => {
         },
       };
       const secondClient = buildMockSavedObjectsClient(secondSO);
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(secondClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(secondClient);
 
       setupRoute(true);
 
@@ -1702,7 +1711,7 @@ describe('updatePackRoute', () => {
         },
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -1734,8 +1743,8 @@ describe('updatePackRoute', () => {
       // allowed to carry a per-query `id`. This pins that the real route
       // validation (io-ts decode + exactCheck) accepts it rather than 400ing.
       const validate = buildRouteValidation(updatePacksRequestBodySchema);
-      const ok = jest.fn((value) => ({ value }));
-      const badRequest = jest.fn((error) => ({ error }));
+      const ok = vi.fn((value) => ({ value }));
+      const badRequest = vi.fn((error) => ({ error }));
 
       validate({ queries: { 'new-name': { id: 'old-name', query: 'SELECT 1', interval: 60 } } }, {
         ok,
@@ -1774,7 +1783,7 @@ describe('updatePackRoute', () => {
         },
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -1819,7 +1828,7 @@ describe('updatePackRoute', () => {
         },
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -1864,7 +1873,7 @@ describe('updatePackRoute', () => {
         },
       };
       const mockClient = buildMockSavedObjectsClient(currentSO);
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       setupRoute(true);
 
@@ -1898,7 +1907,7 @@ describe('updatePackRoute', () => {
   describe('Fleet package-policy update failure handling', () => {
     // Reuses the enable-flip + policy_ids-omitted harness (the branch that
     // calls packagePolicyService.update), varying only the update rejection.
-    const setupWithPackagePolicyUpdate = (packagePolicyUpdate: jest.Mock) => {
+    const setupWithPackagePolicyUpdate = (packagePolicyUpdate: Mock) => {
       const currentSO = {
         ...basePackSO,
         references: [{ id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' }],
@@ -1917,21 +1926,21 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [
           {
             id: 'package-policy-1',
@@ -1961,20 +1970,20 @@ describe('updatePackRoute', () => {
         ],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([{ id: 'policy-1', name: 'policy-1' }]),
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([{ id: 'policy-1', name: 'policy-1' }]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -1990,7 +1999,7 @@ describe('updatePackRoute', () => {
     };
 
     it('maps a Boom 409 conflict from packagePolicyService.update to response.conflict', async () => {
-      const packagePolicyUpdate = jest
+      const packagePolicyUpdate = vi
         .fn()
         .mockRejectedValue(Object.assign(new Error('Conflict'), { output: { statusCode: 409 } }));
       setupWithPackagePolicyUpdate(packagePolicyUpdate);
@@ -2013,7 +2022,7 @@ describe('updatePackRoute', () => {
     });
 
     it('rethrows a generic (non-409) packagePolicyService.update failure — not downgraded', async () => {
-      const packagePolicyUpdate = jest.fn().mockRejectedValue(new Error('boom-generic'));
+      const packagePolicyUpdate = vi.fn().mockRejectedValue(new Error('boom-generic'));
       setupWithPackagePolicyUpdate(packagePolicyUpdate);
 
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -2068,42 +2077,42 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [sharedOsqueryPackagePolicy(['policy-a', 'policy-b'])],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([
               { id: 'policy-a', name: 'policy-a' },
               { id: 'policy-b', name: 'policy-b' },
             ]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -2153,13 +2162,13 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: [
@@ -2167,31 +2176,31 @@ describe('updatePackRoute', () => {
             { id: 'policy-b', name: 'policy-b', type: 'ingest-agent-policies' },
           ],
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [sharedOsqueryPackagePolicy(['policy-a', 'policy-b'])],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([
               { id: 'policy-a', name: 'policy-a' },
               { id: 'policy-b', name: 'policy-b' },
             ]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -2247,42 +2256,42 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [sharedOsqueryPackagePolicy(['policy-a', 'policy-b'])],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([
               { id: 'policy-a', name: 'policy-a' },
               { id: 'policy-b', name: 'policy-b' },
             ]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -2337,42 +2346,42 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [sharedOsqueryPackagePolicy(['policy-a', 'policy-b'])],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([
               { id: 'policy-a', name: 'policy-a' },
               { id: 'policy-b', name: 'policy-b' },
             ]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -2433,42 +2442,42 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: updatedSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [sharedOsqueryPackagePolicy(['policy-a', 'policy-b'])],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([
               { id: 'policy-a', name: 'policy-a' },
               { id: 'policy-b', name: 'policy-b' },
             ]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -2532,21 +2541,21 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: updatedSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       // The shared package policy already carries the pack under its OLD name.
       const sharedPackagePolicyWithOldPack = {
         ...sharedOsqueryPackagePolicy(['policy-a', 'policy-b']),
@@ -2562,27 +2571,27 @@ describe('updatePackRoute', () => {
           },
         ],
       };
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [sharedPackagePolicyWithOldPack],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([
               { id: 'policy-a', name: 'policy-a' },
               { id: 'policy-b', name: 'policy-b' },
             ]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -2629,18 +2638,18 @@ describe('updatePackRoute', () => {
       let getCallCount = 0;
 
       return {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
     };
 
@@ -2672,23 +2681,23 @@ describe('updatePackRoute', () => {
 
     const runDisable = async (currentSO: typeof basePackSO, wirePolicies: unknown[]) => {
       const mockClient = buildDisableClient(currentSO);
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest.fn().mockResolvedValue({ items: wirePolicies });
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
+      const packagePolicyList = vi.fn().mockResolvedValue({ items: wirePolicies });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([]),
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -2875,22 +2884,22 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [
           buildWirePolicyWithPack('package-policy-1', ['policy-1']),
           // Drifted attachment: pack is on the wire but this agent policy is no
@@ -2899,20 +2908,20 @@ describe('updatePackRoute', () => {
         ],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([{ id: 'policy-1', name: 'policy-1' }]),
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([{ id: 'policy-1', name: 'policy-1' }]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -2982,42 +2991,42 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [
           buildWirePolicyWithPack('package-policy-1', ['policy-1']),
           buildWirePolicyWithPack('package-policy-2', ['policy-2']),
         ],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([]),
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -3075,39 +3084,39 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [buildWirePolicyWithPack('package-policy-1', ['policy-1'])],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([]),
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -3159,45 +3168,45 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [
           buildWirePolicyWithPack('package-policy-1', ['policy-1']),
           buildWirePolicyWithPack('package-policy-2', ['policy-2']),
         ],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([
               { id: 'policy-1', name: 'policy-1' },
               { id: 'policy-2', name: 'policy-2' },
             ]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -3263,21 +3272,21 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       // Only policy-1 carries the pack on the wire; policy-extra does not.
       const policyWithPack = buildWirePolicyWithPack('package-policy-1', ['policy-1']);
       const policyWithoutPack = {
@@ -3286,27 +3295,27 @@ describe('updatePackRoute', () => {
         package: { name: 'osquery_manager', version: '1.0.0' },
         inputs: [{ type: 'osquery', streams: [], config: { osquery: { value: { packs: {} } } } }],
       };
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [policyWithPack, policyWithoutPack],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([
               { id: 'policy-1', name: 'policy-1' },
               { id: 'policy-extra', name: 'policy-extra' },
             ]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -3369,46 +3378,46 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: updatedSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       // Both policy-1 and policy-2 carry the pack on the wire.
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [
           buildWirePolicyWithPack('package-policy-1', ['policy-1']),
           buildWirePolicyWithPack('package-policy-2', ['policy-2']),
         ],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([
               { id: 'policy-1', name: 'policy-1' },
               { id: 'policy-2', name: 'policy-2' },
             ]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -3477,21 +3486,21 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: updatedSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       // policy-1 and policy-2 carry THIS pack on the wire. policy-3 has the
       // osquery integration too (a package policy exists for it, so it is a
       // valid target) but carries no pack block for `my-pack`.
@@ -3507,7 +3516,7 @@ describe('updatePackRoute', () => {
           },
         ],
       };
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [
           buildWirePolicyWithPack('package-policy-1', ['policy-1']),
           buildWirePolicyWithPack('package-policy-2', ['policy-2']),
@@ -3515,24 +3524,24 @@ describe('updatePackRoute', () => {
         ],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([
               { id: 'policy-1', name: 'Policy One' },
               { id: 'policy-2', name: 'Policy Two' },
               { id: 'policy-3', name: 'Policy Three' },
             ]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -3601,49 +3610,49 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       // policy-2's agent policy was deleted, but its package policy still
       // carries the pack block and lists it in policy_ids.
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [
           buildWirePolicyWithPack('package-policy-1', ['policy-1']),
           buildWirePolicyWithPack('package-policy-2', ['policy-2']),
         ],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
             // Only policy-1 still exists; ignoreMissing drops policy-2.
-            getByIds: jest
+            getByIds: vi
               .fn()
               .mockImplementation(async (_soClient, ids: string[]) =>
                 ids.filter((id) => id === 'policy-1').map((id) => ({ id, name: 'Policy One' }))
               ),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -3704,43 +3713,43 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       // One package policy shared by BOTH agent policies; the pack targets only policy-a.
       const sharedPolicy = buildWirePolicyWithPack('package-policy-shared', [
         'policy-a',
         'policy-b',
       ]);
       sharedPolicy.inputs[0].config.osquery.value.packs['default--my-pack'].shard = 25;
-      const packagePolicyList = jest.fn().mockResolvedValue({ items: [sharedPolicy] });
+      const packagePolicyList = vi.fn().mockResolvedValue({ items: [sharedPolicy] });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([{ id: 'policy-a', name: 'policy-a' }]),
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([{ id: 'policy-a', name: 'policy-a' }]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -3799,21 +3808,21 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
       // The drifted package policy carries the block under the LEGACY bare key
       // with the deliberate 25, and hosts only policy-b — a co-tenant the pack
       // does not target. So its target intersection is EMPTY and only the wire
@@ -3837,24 +3846,24 @@ describe('updatePackRoute', () => {
       delete (siblingPolicy.inputs[0].config.osquery.value.packs as Record<string, unknown>)[
         'default--my-pack'
       ];
-      const packagePolicyList = jest
+      const packagePolicyList = vi
         .fn()
         .mockResolvedValue({ items: [legacyPolicy, siblingPolicy] });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([{ id: 'policy-a', name: 'policy-a' }]),
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([{ id: 'policy-a', name: 'policy-a' }]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -3913,42 +3922,42 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [buildWirePolicyWithPack('package-policy-shared', ['policy-a', 'policy-b'])],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([
               { id: 'policy-a', name: 'policy-a' },
               { id: 'policy-b', name: 'policy-b' },
             ]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -4006,41 +4015,41 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: currentSO.references,
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
-      const packagePolicyList = jest.fn().mockResolvedValue({
+      const packagePolicyUpdate = vi.fn().mockResolvedValue({});
+      const packagePolicyList = vi.fn().mockResolvedValue({
         items: [
           buildWirePolicyWithPack('package-policy-1', ['policy-1']),
           buildWirePolicyWithPack('package-policy-2', ['policy-2']),
         ],
       });
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: true },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
             // Resolving the drifted id throws — the heal path's own I/O failing.
-            getByIds: jest.fn().mockImplementation((_client, ids: string[]) => {
+            getByIds: vi.fn().mockImplementation((_client, ids: string[]) => {
               if (ids.includes('policy-2')) {
                 return Promise.reject(new Error('es_unavailable'));
               }
@@ -4048,7 +4057,7 @@ describe('updatePackRoute', () => {
               return Promise.resolve([{ id: 'policy-1', name: 'policy-1' }]);
             }),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
             update: packagePolicyUpdate,
@@ -4109,39 +4118,39 @@ describe('updatePackRoute', () => {
 
       let getCallCount = 0;
       const mockClient = {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           getCallCount += 1;
 
           return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
         }),
-        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
-        update: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+        update: vi.fn().mockResolvedValue({
           id: 'pack-id',
           attributes: updatedSO.attributes,
           references: [],
         }),
-        list: jest.fn().mockResolvedValue({ items: [] }),
+        list: vi.fn().mockResolvedValue({ items: [] }),
       };
 
-      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
-      (getUserInfo as jest.Mock).mockResolvedValue({ username: 'tester' });
+      (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
+      (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
-      const packagePolicyList = jest.fn().mockResolvedValue({ items: [] });
+      const packagePolicyList = vi.fn().mockResolvedValue({ items: [] });
       const mockRouter = createMockRouter();
       mockOsqueryContext = {
-        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        logFactory: { get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()) },
         security: {},
-        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { security: {} }, {}]),
         experimentalFeatures: { rruleScheduling: false },
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-          getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue([]),
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: vi.fn().mockReturnValue({
+            getByIds: vi.fn().mockResolvedValue([]),
           }),
-          getPackagePolicyService: jest.fn().mockReturnValue({
+          getPackagePolicyService: vi.fn().mockReturnValue({
             list: packagePolicyList,
             fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
-            update: jest.fn().mockResolvedValue({}),
+            update: vi.fn().mockResolvedValue({}),
           }),
         },
       } as unknown as OsqueryAppContext;

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import { z } from '@kbn/zod/v4';
 import { initTransform } from './object_transform';
@@ -17,7 +19,7 @@ interface FooV1 {
   fullName: string;
 }
 
-const v1Tv2Transform = jest.fn((v1: FooV1): FooV2 => {
+const v1Tv2Transform = vi.fn((v1: FooV1): FooV2 => {
   const [firstName, lastName] = v1.fullName.split(' ');
   return { firstName, lastName };
 });
@@ -40,7 +42,7 @@ interface FooV2 {
   lastName: string;
 }
 
-const v2Tv1Transform = jest.fn((v2: FooV2): FooV1 => {
+const v2Tv1Transform = vi.fn((v2: FooV2): FooV1 => {
   return {
     fullName: `${v2.firstName} ${v2.lastName}`,
   };

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, screen, within } from '@testing-library/react';
 
 import { mockHttpRequest, renderJobCreate } from './helpers';
@@ -43,7 +45,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
   };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
     initDocumentation(docLinksServiceMock.createStartContract());

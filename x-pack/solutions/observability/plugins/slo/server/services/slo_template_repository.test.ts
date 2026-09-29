@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { DefaultSLOTemplateRepository } from './slo_template_repository';
 
 describe('DefaultSLOTemplateRepository', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
+  let soClient: Mocked<SavedObjectsClientContract>;
   let repository: DefaultSLOTemplateRepository;
 
   beforeEach(() => {

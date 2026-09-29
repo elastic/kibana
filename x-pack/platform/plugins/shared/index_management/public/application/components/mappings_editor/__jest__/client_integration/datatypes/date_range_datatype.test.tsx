@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,10 +16,10 @@ import { WithAppDependencies } from '../helpers/setup_environment';
 import { MappingsEditor } from '../../../mappings_editor';
 import { defaultDateRangeParameters } from './fixtures';
 
-const onChangeHandler = jest.fn();
+const onChangeHandler = vi.fn();
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 interface Mappings {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { FleetRequestHandlerContext } from '../../types';
@@ -27,59 +30,68 @@ import {
 } from './handlers';
 
 // Mock dependencies
-jest.mock('../../services/app_context', () => ({
-  appContextService: {
-    getLogger: jest.fn().mockReturnValue({
-      get: jest.fn().mockReturnValue({
-        info: jest.fn(),
-        error: jest.fn(),
-        warn: jest.fn(),
-        debug: jest.fn(),
-      }),
-    }),
-    getConfig: jest.fn().mockReturnValue({
-      internal: {
-        fleetServerStandalone: false,
+vi.mock('../../services/app_context', () => {
+      const mocked = {
+      appContextService: {
+        getLogger: vi.fn().mockReturnValue({
+          get: vi.fn().mockReturnValue({
+            info: vi.fn(),
+            error: vi.fn(),
+            warn: vi.fn(),
+            debug: vi.fn(),
+          }),
+        }),
+        getConfig: vi.fn().mockReturnValue({
+          internal: {
+            fleetServerStandalone: false,
+          },
+        }),
       },
-    }),
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services', () => ({
-  cloudConnectorService: {
-    create: jest.fn(),
-    getList: jest.fn(),
-    getById: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-  },
-  packagePolicyService: {
-    list: jest.fn(),
-  },
-}));
+vi.mock('../../services', () => {
+      const mocked = {
+      cloudConnectorService: {
+        create: vi.fn(),
+        getList: vi.fn(),
+        getById: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
+      },
+      packagePolicyService: {
+        list: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/secrets', () => ({
-  createSecrets: jest.fn(),
-  deleteSecrets: jest.fn(),
-}));
+vi.mock('../../services/secrets', () => {
+      const mocked = {
+      createSecrets: vi.fn(),
+      deleteSecrets: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Cloud Connector API', () => {
   let context: FleetRequestHandlerContext;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
-  const mockCloudConnectorService = cloudConnectorService as jest.Mocked<
+  const mockCloudConnectorService = cloudConnectorService as Mocked<
     typeof cloudConnectorService
   >;
-  const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
-  const mockCreateSecrets = createSecrets as jest.MockedFunction<typeof createSecrets>;
-  const mockDeleteSecrets = deleteSecrets as jest.MockedFunction<typeof deleteSecrets>;
+  const mockPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
+  const mockCreateSecrets = createSecrets as MockedFunction<typeof createSecrets>;
+  const mockDeleteSecrets = deleteSecrets as MockedFunction<typeof deleteSecrets>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     context = {
       fleet: Promise.resolve({
         internalSoClient: {
-          create: jest.fn(),
-          find: jest.fn(),
+          create: vi.fn(),
+          find: vi.fn(),
         },
       }),
       core: Promise.resolve({
@@ -1392,11 +1404,11 @@ describe('Cloud Connector API', () => {
     it('should register all cloud connector routes', () => {
       const mockRouter = {
         versioned: {
-          post: jest.fn().mockReturnThis(),
-          get: jest.fn().mockReturnThis(),
-          put: jest.fn().mockReturnThis(),
-          delete: jest.fn().mockReturnThis(),
-          addVersion: jest.fn().mockReturnThis(),
+          post: vi.fn().mockReturnThis(),
+          get: vi.fn().mockReturnThis(),
+          put: vi.fn().mockReturnThis(),
+          delete: vi.fn().mockReturnThis(),
+          addVersion: vi.fn().mockReturnThis(),
         },
       };
 

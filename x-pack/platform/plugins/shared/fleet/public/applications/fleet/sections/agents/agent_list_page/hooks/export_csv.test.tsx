@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, type RenderHookResult } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -14,25 +16,28 @@ import { sendPostGenerateAgentsReport } from '../../../../../../hooks';
 
 import { useExportCSV } from './export_csv';
 
-jest.mock('../../../../../../hooks', () => ({
-  sendPostGenerateAgentsReport: jest.fn(),
-  useStartServices: jest.fn().mockReturnValue({
-    notifications: {
-      toasts: {
-        addSuccess: jest.fn(),
-        addError: jest.fn(),
-      },
-    },
-    http: {
-      basePath: {
-        prepend: jest.fn((path) => path),
-      },
-    },
-    uiSettings: {
-      get: () => 'America/Los_Angeles',
-    },
-  }),
-}));
+vi.mock('../../../../../../hooks', () => {
+      const mocked = {
+      sendPostGenerateAgentsReport: vi.fn(),
+      useStartServices: vi.fn().mockReturnValue({
+        notifications: {
+          toasts: {
+            addSuccess: vi.fn(),
+            addError: vi.fn(),
+          },
+        },
+        http: {
+          basePath: {
+            prepend: vi.fn((path) => path),
+          },
+        },
+        uiSettings: {
+          get: () => 'America/Los_Angeles',
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('export_csv', () => {
   let renderResult: RenderHookResult<any, any>;
@@ -43,7 +48,7 @@ describe('export_csv', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     act(() => {
       renderResult = render();
     });
@@ -61,7 +66,7 @@ describe('export_csv', () => {
       renderResult.result.current(agents, columns, sortOptions);
     });
 
-    expect(jest.mocked(sendPostGenerateAgentsReport)).toHaveBeenCalledWith({
+    expect(vi.mocked(sendPostGenerateAgentsReport)).toHaveBeenCalledWith({
       agents: ['agent1', 'agent2'],
       fields: ['agent.id'],
       timezone: 'America/Los_Angeles',
@@ -77,7 +82,7 @@ describe('export_csv', () => {
       renderResult.result.current(agents, columns, undefined);
     });
 
-    expect(jest.mocked(sendPostGenerateAgentsReport)).toHaveBeenCalledWith({
+    expect(vi.mocked(sendPostGenerateAgentsReport)).toHaveBeenCalledWith({
       agents,
       fields: ['agent.id'],
       timezone: 'America/Los_Angeles',

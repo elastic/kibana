@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import {
   ALERT_RULE_EXECUTION_UUID,
@@ -23,14 +25,14 @@ import { ALERT_ATTACK_DISCOVERY_REPLACEMENTS } from '../../schedules/field_names
 
 const createLoggerMock = (): Logger =>
   ({
-    debug: jest.fn(),
-    error: jest.fn(),
-    fatal: jest.fn(),
-    get: jest.fn(() => createLoggerMock()),
-    info: jest.fn(),
-    isLevelEnabled: jest.fn(() => true),
-    trace: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    fatal: vi.fn(),
+    get: vi.fn(() => createLoggerMock()),
+    info: vi.fn(),
+    isLevelEnabled: vi.fn(() => true),
+    trace: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 describe('transformSearchResponseToAlerts', () => {
@@ -38,7 +40,7 @@ describe('transformSearchResponseToAlerts', () => {
 
   beforeEach(() => {
     // reuse the same logger instance but clear mock histories between tests
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the expected alerts from a valid search response', () => {
@@ -468,7 +470,7 @@ describe('transformSearchResponseToAlerts', () => {
     it(`calls transformAttackDiscoveryAlertDocumentToApi with enableFieldRendering=${enableFieldRendering}`, () => {
       const response = getResponseMock();
 
-      const spy = jest.spyOn(transformModule, 'transformAttackDiscoveryAlertDocumentToApi');
+      const spy = vi.spyOn(transformModule, 'transformAttackDiscoveryAlertDocumentToApi');
 
       transformSearchResponseToAlerts({
         enableFieldRendering,
@@ -490,7 +492,7 @@ describe('transformSearchResponseToAlerts', () => {
     it(`calls transformAttackDiscoveryAlertDocumentToApi with withReplacements=${withReplacements}`, () => {
       const response = getResponseMock();
 
-      const spy = jest.spyOn(transformModule, 'transformAttackDiscoveryAlertDocumentToApi');
+      const spy = vi.spyOn(transformModule, 'transformAttackDiscoveryAlertDocumentToApi');
 
       transformSearchResponseToAlerts({
         enableFieldRendering: true,

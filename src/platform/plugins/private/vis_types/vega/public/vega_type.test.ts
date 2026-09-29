@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { vegaVisType } from './vega_type';
 
-jest.mock('./default_spec', () => ({
-  getDefaultSpec: jest.fn(() => ''),
-}));
+vi.mock('./default_spec', () => {
+      const mocked = {
+      getDefaultSpec: vi.fn(() => ''),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('vegaVisType.getEsqlQuery', () => {
   it('returns the ES|QL query from a single-source spec', () => {

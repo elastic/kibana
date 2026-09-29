@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MigrationProgressPanel } from './migration_progress_panel';
@@ -13,11 +16,11 @@ import { TestProviders } from '../../../../common/mock';
 import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
 import { useStopSiemMigration } from '../../hooks/use_stop_siem_migration';
 
-jest.mock('../../../../common/lib/kibana/use_kibana');
+vi.mock('../../../../common/lib/kibana/use_kibana');
 
-jest.mock('../../hooks/use_stop_siem_migration');
-const useStopMigrationMock = useStopSiemMigration as jest.Mock;
-const mockStopMigration = jest.fn();
+vi.mock('../../hooks/use_stop_siem_migration');
+const useStopMigrationMock = useStopSiemMigration as Mock;
+const mockStopMigration = vi.fn();
 
 const createTestStats = (
   migrationType: 'rule' | 'dashboard',

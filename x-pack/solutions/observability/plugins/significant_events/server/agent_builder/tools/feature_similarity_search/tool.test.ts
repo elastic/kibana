@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
@@ -15,27 +18,30 @@ import {
   SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
 } from './tool';
 
-jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn(),
-}));
+vi.mock('../../../routes/utils/assert_significant_events_access', () => {
+      const mocked = {
+      assertSignificantEventsAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ki_feature_similarity_search tool', () => {
   const logger = loggingSystemMock.createLogger();
   const server = {} as SignificantEventsServer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    vi.clearAllMocks();
+    (assertSignificantEventsAccess as Mock).mockResolvedValue(undefined);
   });
 
-  const createTool = (findFeatures = jest.fn().mockResolvedValue({ hits: [] })) => {
-    const getScopedClients = jest.fn(async () => {
+  const createTool = (findFeatures = vi.fn().mockResolvedValue({ hits: [] })) => {
+    const getScopedClients = vi.fn(async () => {
       return {
         licensing: {},
-        streamsClient: { getStream: jest.fn().mockResolvedValue({ name: 'logs.test' }) },
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ findFeatures }),
+        streamsClient: { getStream: vi.fn().mockResolvedValue({ name: 'logs.test' }) },
+        getKnowledgeIndicatorClient: vi.fn().mockResolvedValue({ findFeatures }),
       } as unknown as RouteHandlerScopedClients;
-    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    }) as unknown as MockedFunction<GetScopedClients>;
 
     const tool = createFeatureSimilaritySearchTool({
       getScopedClients,
@@ -92,7 +98,7 @@ describe('ki_feature_similarity_search tool', () => {
   });
 
   it('searches every candidate and groups hits by candidate_id', async () => {
-    const findFeatures = jest.fn().mockResolvedValue({
+    const findFeatures = vi.fn().mockResolvedValue({
       hits: [
         {
           id: 'tech-0',
@@ -158,7 +164,7 @@ describe('ki_feature_similarity_search tool', () => {
   });
 
   it('isolates a per-candidate search failure without failing the call', async () => {
-    const { tool } = createTool(jest.fn().mockRejectedValue(new Error('semantic unavailable')));
+    const { tool } = createTool(vi.fn().mockRejectedValue(new Error('semantic unavailable')));
 
     const result = await invokeHandler(
       tool,

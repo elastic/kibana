@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import type { SelectInputProps } from './select_input';
@@ -18,7 +20,7 @@ const name = 'Some select field';
 const id = 'some:select:field';
 
 describe('SelectInput', () => {
-  const onInputChange = jest.fn();
+  const onInputChange = vi.fn();
   const defaultProps: SelectInputProps = {
     onInputChange,
     field: {
@@ -68,7 +70,7 @@ describe('SelectInput', () => {
   });
 
   it('throws when optionValues is not provided', () => {
-    const consoleMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleMock = vi.spyOn(console, 'error').mockImplementation(() => {});
     const props = {
       ...defaultProps,
       optionLabels: undefined as any,

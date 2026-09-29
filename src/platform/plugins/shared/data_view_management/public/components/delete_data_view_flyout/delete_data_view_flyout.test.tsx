@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { DeleteDataViewFlyout, type RemoveDataViewProps } from './delete_data_view_flyout';
@@ -15,25 +17,31 @@ import type {
   SavedObjectRelationKind,
 } from '@kbn/saved-objects-management-plugin/common';
 
-jest.mock('./delete_data_view_flyout_content', () => ({
-  DeleteModalContent: jest.fn(() => <div data-testid="delete-modal-content" />),
-}));
+vi.mock('./delete_data_view_flyout_content', () => {
+      const mocked = {
+      DeleteModalContent: vi.fn(() => <div data-testid="delete-modal-content" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      notifications: {
-        toasts: {
-          addSuccess: jest.fn(),
-          addDanger: jest.fn(),
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          notifications: {
+            toasts: {
+              addSuccess: vi.fn(),
+              addDanger: vi.fn(),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDataViews = {
-  delete: jest.fn(),
+  delete: vi.fn(),
 };
 
 const defaultProps = {
@@ -49,13 +57,13 @@ const defaultProps = {
     '1': [],
   },
   hasSpaces: false,
-  onDelete: jest.fn(),
-  onClose: jest.fn(),
+  onDelete: vi.fn(),
+  onClose: vi.fn(),
 };
 
 describe('DeleteDataViewFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders flyout with title and buttons', () => {
@@ -107,8 +115,8 @@ describe('DeleteDataViewFlyout', () => {
       } as unknown as Record<string, SavedObjectRelation[]>,
     };
     // Patch useState to simulate reviewedItems
-    const useStateSpy = jest.spyOn(React, 'useState');
-    useStateSpy.mockImplementationOnce(() => [new Set(['rel1']), jest.fn()]);
+    const useStateSpy = vi.spyOn(React, 'useState');
+    useStateSpy.mockImplementationOnce(() => [new Set(['rel1']), vi.fn()]);
     render(<DeleteDataViewFlyout {...props} />);
     expect(screen.getByText('Delete').closest('button')).not.toBeDisabled();
     useStateSpy.mockRestore();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
 import {
   generateKeyPairSync,
@@ -49,7 +51,7 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       Object.defineProperty(global, 'crypto', {
         value: {
           subtle: {
-            digest: jest.fn().mockResolvedValue(
+            digest: vi.fn().mockResolvedValue(
               new ArrayBuffer(32) // Mock SHA-256 output
             ),
           },

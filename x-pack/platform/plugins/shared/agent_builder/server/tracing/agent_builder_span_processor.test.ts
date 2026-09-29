@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Attributes } from '@opentelemetry/api';
 import { context, propagation, TraceFlags } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
@@ -39,10 +42,10 @@ const emptyResource = resources.resourceFromAttributes({});
 describe('AgentBuilderSpanProcessor', () => {
   let contextManager: AsyncLocalStorageContextManager;
   const mockBatch: tracing.SpanProcessor = {
-    onStart: jest.fn(),
-    onEnd: jest.fn(),
-    forceFlush: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
-    shutdown: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
+    onStart: vi.fn(),
+    onEnd: vi.fn(),
+    forceFlush: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
+    shutdown: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
   };
 
   beforeEach(() => {
@@ -50,20 +53,20 @@ describe('AgentBuilderSpanProcessor', () => {
     context.setGlobalContextManager(contextManager);
     contextManager.enable();
 
-    jest
+    vi
       .spyOn(elasticTracing, 'BatchSpanProcessor')
       .mockReturnValue(mockBatch as elasticTracing.BatchSpanProcessor);
 
-    (mockBatch.onStart as jest.Mock).mockClear();
-    (mockBatch.onEnd as jest.Mock).mockClear();
-    (mockBatch.forceFlush as jest.Mock).mockClear();
-    (mockBatch.shutdown as jest.Mock).mockClear();
-    (mockBatch.forceFlush as jest.Mock<Promise<void>, []>).mockResolvedValue(undefined);
-    (mockBatch.shutdown as jest.Mock<Promise<void>, []>).mockResolvedValue(undefined);
+    (mockBatch.onStart as Mock).mockClear();
+    (mockBatch.onEnd as Mock).mockClear();
+    (mockBatch.forceFlush as Mock).mockClear();
+    (mockBatch.shutdown as Mock).mockClear();
+    (mockBatch.forceFlush as Mock<Promise<void>, []>).mockResolvedValue(undefined);
+    (mockBatch.shutdown as Mock<Promise<void>, []>).mockResolvedValue(undefined);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
     contextManager.disable();
   });
 
@@ -127,29 +130,29 @@ describe('AgentBuilderSpanProcessor', () => {
       droppedEventsCount: 0,
       droppedLinksCount: 0,
       attributes,
-      spanContext: jest.fn().mockReturnValue(spanCtx),
-      setAttribute: jest.fn((key: string, value: unknown) => {
+      spanContext: vi.fn().mockReturnValue(spanCtx),
+      setAttribute: vi.fn((key: string, value: unknown) => {
         attributes[key] = value as Attributes[string];
         return span;
       }),
-      setAttributes: jest.fn(),
-      addEvent: jest.fn(),
-      addLink: jest.fn(),
-      addLinks: jest.fn(),
-      setStatus: jest.fn(),
-      updateName: jest.fn(),
-      end: jest.fn(),
-      isRecording: jest.fn().mockReturnValue(true),
-      recordException: jest.fn(),
+      setAttributes: vi.fn(),
+      addEvent: vi.fn(),
+      addLink: vi.fn(),
+      addLinks: vi.fn(),
+      setStatus: vi.fn(),
+      updateName: vi.fn(),
+      end: vi.fn(),
+      isRecording: vi.fn().mockReturnValue(true),
+      recordException: vi.fn(),
     };
     return span;
   }
 
   function createExporter(): tracing.SpanExporter {
     return {
-      export: jest.fn(),
-      shutdown: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
-      forceFlush: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
+      export: vi.fn(),
+      shutdown: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
+      forceFlush: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
     };
   }
 
@@ -172,7 +175,7 @@ describe('AgentBuilderSpanProcessor', () => {
       Object.assign(span, { events: options.events });
     }
     processor.onEnd(span);
-    const calls = (mockBatch.onEnd as jest.Mock).mock.calls;
+    const calls = (mockBatch.onEnd as Mock).mock.calls;
     return calls[calls.length - 1][0] as tracing.ReadableSpan;
   }
 

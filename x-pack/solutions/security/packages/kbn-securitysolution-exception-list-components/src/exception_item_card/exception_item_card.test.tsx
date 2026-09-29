@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 
@@ -25,8 +27,8 @@ describe('ExceptionItemCard', () => {
         listType={ExceptionListTypeEnum.DETECTION}
         ruleReferences={rules}
         dataTestSubj="item"
-        onDeleteException={jest.fn()}
-        onEditException={jest.fn()}
+        onDeleteException={vi.fn()}
+        onEditException={vi.fn()}
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
         getFormattedComments={() => []}
@@ -49,8 +51,8 @@ describe('ExceptionItemCard', () => {
         dataTestSubj="item"
         listType={ExceptionListTypeEnum.DETECTION}
         ruleReferences={rules}
-        onDeleteException={jest.fn()}
-        onEditException={jest.fn()}
+        onDeleteException={vi.fn()}
+        onEditException={vi.fn()}
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
         getFormattedComments={mockGetFormattedComments}
@@ -70,8 +72,8 @@ describe('ExceptionItemCard', () => {
     const wrapper = render(
       <ExceptionItemCard
         disableActions={true}
-        onDeleteException={jest.fn()}
-        onEditException={jest.fn()}
+        onDeleteException={vi.fn()}
+        onEditException={vi.fn()}
         exceptionItem={exceptionItem}
         dataTestSubj="item"
         listType={ExceptionListTypeEnum.DETECTION}
@@ -86,7 +88,7 @@ describe('ExceptionItemCard', () => {
   });
 
   it('it should invoke the "onEditException" when edit button clicked', () => {
-    const mockOnEditException = jest.fn();
+    const mockOnEditException = vi.fn();
     const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = render(
@@ -95,7 +97,7 @@ describe('ExceptionItemCard', () => {
         dataTestSubj="exceptionItemCardHeader"
         listType={ExceptionListTypeEnum.DETECTION}
         ruleReferences={rules}
-        onDeleteException={jest.fn()}
+        onDeleteException={vi.fn()}
         onEditException={mockOnEditException}
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
@@ -110,7 +112,7 @@ describe('ExceptionItemCard', () => {
   });
 
   it('it should invoke the "onDeleteException" when delete button clicked', () => {
-    const mockOnDeleteException = jest.fn();
+    const mockOnDeleteException = vi.fn();
     const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = render(
@@ -119,7 +121,7 @@ describe('ExceptionItemCard', () => {
         dataTestSubj="exceptionItemCardHeader"
         listType={ExceptionListTypeEnum.DETECTION}
         ruleReferences={rules}
-        onEditException={jest.fn()}
+        onEditException={vi.fn()}
         onDeleteException={mockOnDeleteException}
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
@@ -146,8 +148,8 @@ describe('ExceptionItemCard', () => {
         dataTestSubj="exceptionItemCardHeader"
         listType={ExceptionListTypeEnum.DETECTION}
         ruleReferences={rules}
-        onEditException={jest.fn()}
-        onDeleteException={jest.fn()}
+        onEditException={vi.fn()}
+        onDeleteException={vi.fn()}
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
         getFormattedComments={mockGetFormattedComments}

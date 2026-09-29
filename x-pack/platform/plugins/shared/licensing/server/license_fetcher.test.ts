@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { getLicenseFetcher } from './license_fetcher';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
@@ -35,7 +37,7 @@ describe('LicenseFetcher', () => {
     clusterClient = elasticsearchServiceMock.createClusterClient();
   });
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns the license for successful calls', async () => {
@@ -87,7 +89,7 @@ describe('LicenseFetcher', () => {
   });
 
   it('returns an error license in case of error', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     clusterClient.asInternalUser.xpack.info.mockResponseImplementation(() => {
       throw new Error('woups');
     });
@@ -100,7 +102,7 @@ describe('LicenseFetcher', () => {
     });
 
     const licensePromise = fetcher();
-    await jest.advanceTimersByTimeAsync(sumOfRetryTimes);
+    await vi.advanceTimersByTimeAsync(sumOfRetryTimes);
     const license = await licensePromise;
 
     expect(license.error).toEqual('woups');
@@ -109,7 +111,7 @@ describe('LicenseFetcher', () => {
   });
 
   it('returns a license successfully fetched after an error', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     clusterClient.asInternalUser.xpack.info
       .mockResponseImplementationOnce(() => {
         throw new Error('woups');
@@ -130,7 +132,7 @@ describe('LicenseFetcher', () => {
 
     const licensePromise = fetcher();
     // wait one minute since we mocked only one error
-    await jest.advanceTimersByTimeAsync(1000);
+    await vi.advanceTimersByTimeAsync(1000);
     const license = await licensePromise;
 
     expect(license.uid).toEqual('license-1');
@@ -138,7 +140,7 @@ describe('LicenseFetcher', () => {
   });
 
   it('returns the latest fetched license after an error within the cache duration period', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     clusterClient.asInternalUser.xpack.info
       .mockResponseOnce({
         license: buildRawLicense({
@@ -162,7 +164,7 @@ describe('LicenseFetcher', () => {
     expect(clusterClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
 
     const licensePromise = fetcher();
-    await jest.advanceTimersByTimeAsync(sumOfRetryTimes);
+    await vi.advanceTimersByTimeAsync(sumOfRetryTimes);
     license = await licensePromise;
     expect(license.uid).toEqual('license-1');
     // should be called once in the successful mock, once in the error mock
@@ -171,7 +173,7 @@ describe('LicenseFetcher', () => {
   });
 
   it('returns an error license after an error exceeding the cache duration period', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     clusterClient.asInternalUser.xpack.info
       .mockResponseOnce({
         license: buildRawLicense({
@@ -194,7 +196,7 @@ describe('LicenseFetcher', () => {
     expect(license.uid).toEqual('license-1');
 
     const licensePromise = fetcher();
-    await jest.advanceTimersByTimeAsync(sumOfRetryTimes);
+    await vi.advanceTimersByTimeAsync(sumOfRetryTimes);
     license = await licensePromise;
     expect(license.error).toEqual('woups');
   });
@@ -246,7 +248,7 @@ describe('LicenseFetcher', () => {
   });
 
   it('testing the fetcher retry with a different maxRetryDelay using only errors', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     clusterClient.asInternalUser.xpack.info.mockResponseImplementation(() => {
       throw new Error('woups');
     });
@@ -260,7 +262,7 @@ describe('LicenseFetcher', () => {
     const sumOfRetryTimesUntilTen = (1 + 2 + 4 + 8) * 1000;
 
     const licensePromise = fetcher();
-    await jest.advanceTimersByTimeAsync(sumOfRetryTimesUntilTen);
+    await vi.advanceTimersByTimeAsync(sumOfRetryTimesUntilTen);
     const license = await licensePromise;
 
     expect(license.error).toEqual('woups');

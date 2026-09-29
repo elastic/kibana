@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { YesNo } from './yes_no';
 
 describe('YesNo', () => {
   it('call onChange={handleChange} on yes', () => {
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
     const wrapper = shallow(
       <YesNo name="ignore_global_filters" onChange={handleChange} value={0} />
     );
@@ -25,7 +27,7 @@ describe('YesNo', () => {
   });
 
   it('call onChange={handleChange} on no', () => {
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
     const wrapper = shallow(<YesNo name="show_legend" onChange={handleChange} value={1} />);
     wrapper.find('EuiRadio').last().simulate('change');
     expect(handleChange).toHaveBeenCalledTimes(1);

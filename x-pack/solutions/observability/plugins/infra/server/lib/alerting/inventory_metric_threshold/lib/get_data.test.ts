@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { COMPARATORS } from '@kbn/alerting-comparators';
@@ -15,24 +18,24 @@ import { doFieldsExist } from '../../common/utils';
 import { createRequest } from './create_request';
 import { getData } from './get_data';
 
-jest.mock('./create_request', () => {
-  const actual = jest.requireActual('./create_request');
+vi.mock('./create_request', async () => {
+  const actual = (await vi.importActual('./create_request'));
   return {
     ...actual,
-    createRequest: jest.fn(),
+    createRequest: vi.fn(),
   };
 });
 
-jest.mock('../../common/utils', () => {
-  const actual = jest.requireActual('../../common/utils');
+vi.mock('../../common/utils', async () => {
+  const actual = (await vi.importActual('../../common/utils'));
   return {
     ...actual,
-    doFieldsExist: jest.fn(),
+    doFieldsExist: vi.fn(),
   };
 });
 
-const mockedCreateRequest = createRequest as jest.MockedFunction<typeof createRequest>;
-const mockedDoFieldsExist = doFieldsExist as jest.MockedFunction<typeof doFieldsExist>;
+const mockedCreateRequest = createRequest as MockedFunction<typeof createRequest>;
+const mockedDoFieldsExist = doFieldsExist as MockedFunction<typeof doFieldsExist>;
 
 const condition: InventoryMetricConditions = {
   metric: 'cpu',
@@ -67,7 +70,7 @@ const source: InfraSource = {
 };
 
 // Intentional `as Logger` type assertion as the test stub only implements the log methods getData calls;
-const logger = { debug: jest.fn(), trace: jest.fn() } as unknown as Logger;
+const logger = { debug: vi.fn(), trace: vi.fn() } as unknown as Logger;
 
 const callGetData = ({
   nodeType,
@@ -94,7 +97,7 @@ const callGetData = ({
 
 describe('getData additionalContext schema', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedCreateRequest.mockResolvedValue({
       index: 'metrics-*',
       size: 0,
@@ -103,7 +106,7 @@ describe('getData additionalContext schema', () => {
   });
 
   it('reads ECS _source context for a pod rule stored as semconv', async () => {
-    const search = jest.fn().mockResolvedValue({
+    const search = vi.fn().mockResolvedValue({
       aggregations: {
         nodes: {
           buckets: [
@@ -167,7 +170,7 @@ describe('getData additionalContext schema', () => {
   });
 
   it('reads SemConv docvalue fields for a host rule stored as semconv', async () => {
-    const search = jest.fn().mockResolvedValue({
+    const search = vi.fn().mockResolvedValue({
       aggregations: {
         nodes: {
           buckets: [

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
@@ -13,9 +16,9 @@ import { useStartServices } from '../../../../hooks';
 
 import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
 
-jest.mock('../../../../hooks');
+vi.mock('../../../../hooks');
 
-const mockUseStartServices = useStartServices as jest.Mock;
+const mockUseStartServices = useStartServices as Mock;
 
 describe('AgentDetailsJsonFlyout', () => {
   const agent: Agent = {
@@ -35,7 +38,7 @@ describe('AgentDetailsJsonFlyout', () => {
   });
 
   const renderComponent = () => {
-    return renderWithI18n(<AgentDetailsJsonFlyout agent={agent} onClose={jest.fn()} />);
+    return renderWithI18n(<AgentDetailsJsonFlyout agent={agent} onClose={vi.fn()} />);
   };
 
   it('renders a title with the agent id if host name is not defined', () => {
@@ -58,11 +61,11 @@ describe('AgentDetailsJsonFlyout', () => {
     const downloadButton = result.getByRole('button', { name: 'Download JSON' });
     const anchorMocked = {
       href: '',
-      click: jest.fn(),
+      click: vi.fn(),
       download: '',
-      setAttribute: jest.fn(),
+      setAttribute: vi.fn(),
     } as any;
-    const createElementSpyOn = jest
+    const createElementSpyOn = vi
       .spyOn(document, 'createElement')
       .mockReturnValueOnce(anchorMocked);
 

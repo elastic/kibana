@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { MitreTacticDot, computeIsChipVisible, computeHaloOpacity } from './mitre_tactic_dot';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -33,9 +35,9 @@ jest.mock('@elastic/eui', () => {
 
 // ResizeObserver is not available in JSDOM.
 beforeAll(() => {
-  global.ResizeObserver = jest.fn().mockImplementation(() => ({
-    observe: jest.fn(),
-    disconnect: jest.fn(),
+  global.ResizeObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    disconnect: vi.fn(),
   }));
 });
 
@@ -84,7 +86,7 @@ describe('MitreTacticDot', () => {
 
     it('sets chip aria-label to include tactic name and singular anomaly count', () => {
       render(
-        <MitreTacticDot {...defaultProps} anomalyCount={1} isClickable onClick={jest.fn()} />,
+        <MitreTacticDot {...defaultProps} anomalyCount={1} isClickable onClick={vi.fn()} />,
         { wrapper: Wrapper }
       );
       // The dot's outer button carries the chip aria-label.
@@ -95,7 +97,7 @@ describe('MitreTacticDot', () => {
 
     it('sets chip aria-label to include tactic name and plural anomaly count', () => {
       render(
-        <MitreTacticDot {...defaultProps} anomalyCount={3} isClickable onClick={jest.fn()} />,
+        <MitreTacticDot {...defaultProps} anomalyCount={3} isClickable onClick={vi.fn()} />,
         { wrapper: Wrapper }
       );
       expect(
@@ -106,7 +108,7 @@ describe('MitreTacticDot', () => {
 
   describe('interactivity', () => {
     it('has role="button" when isClickable and onClick are provided', () => {
-      render(<MitreTacticDot {...defaultProps} isClickable onClick={jest.fn()} />, {
+      render(<MitreTacticDot {...defaultProps} isClickable onClick={vi.fn()} />, {
         wrapper: Wrapper,
       });
       // The outer container acquires role=button; aria-pressed distinguishes it from the chip button.
@@ -120,21 +122,21 @@ describe('MitreTacticDot', () => {
 
     it('has aria-pressed=false when not selected', () => {
       render(
-        <MitreTacticDot {...defaultProps} isClickable isSelected={false} onClick={jest.fn()} />,
+        <MitreTacticDot {...defaultProps} isClickable isSelected={false} onClick={vi.fn()} />,
         { wrapper: Wrapper }
       );
       expect(screen.getByRole('button', { pressed: false })).toBeInTheDocument();
     });
 
     it('has aria-pressed=true when selected', () => {
-      render(<MitreTacticDot {...defaultProps} isClickable isSelected onClick={jest.fn()} />, {
+      render(<MitreTacticDot {...defaultProps} isClickable isSelected onClick={vi.fn()} />, {
         wrapper: Wrapper,
       });
       expect(screen.getByRole('button', { pressed: true })).toBeInTheDocument();
     });
 
     it('calls onClick when the dot is clicked', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       render(<MitreTacticDot {...defaultProps} isClickable onClick={onClick} />, {
         wrapper: Wrapper,
       });
@@ -143,7 +145,7 @@ describe('MitreTacticDot', () => {
     });
 
     it('calls onClick when Enter is pressed on the dot', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       render(<MitreTacticDot {...defaultProps} isClickable onClick={onClick} />, {
         wrapper: Wrapper,
       });
@@ -152,7 +154,7 @@ describe('MitreTacticDot', () => {
     });
 
     it('calls onClick when Space is pressed on the dot', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       render(<MitreTacticDot {...defaultProps} isClickable onClick={onClick} />, {
         wrapper: Wrapper,
       });
@@ -161,7 +163,7 @@ describe('MitreTacticDot', () => {
     });
 
     it('does not call onClick when isClickable is false', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       render(<MitreTacticDot {...defaultProps} isClickable={false} onClick={onClick} />, {
         wrapper: Wrapper,
       });
@@ -173,7 +175,7 @@ describe('MitreTacticDot', () => {
 
   describe('selected state', () => {
     it('shows the clear (cross) icon in the chip when selected and interactive', () => {
-      render(<MitreTacticDot {...defaultProps} isClickable isSelected onClick={jest.fn()} />, {
+      render(<MitreTacticDot {...defaultProps} isClickable isSelected onClick={vi.fn()} />, {
         wrapper: Wrapper,
       });
       expect(screen.getByTestId('mitreTacticDotV3HoverChipClear')).toBeInTheDocument();
@@ -181,7 +183,7 @@ describe('MitreTacticDot', () => {
 
     it('does not show the clear icon when not selected', () => {
       render(
-        <MitreTacticDot {...defaultProps} isClickable isSelected={false} onClick={jest.fn()} />,
+        <MitreTacticDot {...defaultProps} isClickable isSelected={false} onClick={vi.fn()} />,
         { wrapper: Wrapper }
       );
       expect(screen.queryByTestId('mitreTacticDotV3HoverChipClear')).not.toBeInTheDocument();
@@ -195,7 +197,7 @@ describe('MitreTacticDot', () => {
     });
 
     it('calls onClick when the clear icon is clicked', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       render(<MitreTacticDot {...defaultProps} isClickable isSelected onClick={onClick} />, {
         wrapper: Wrapper,
       });
@@ -206,7 +208,7 @@ describe('MitreTacticDot', () => {
 
   describe('hover callbacks', () => {
     it('calls onHoverChange with (tactic, true) on mouse enter', () => {
-      const onHoverChange = jest.fn();
+      const onHoverChange = vi.fn();
       render(<MitreTacticDot {...defaultProps} anomalyCount={2} onHoverChange={onHoverChange} />, {
         wrapper: Wrapper,
       });
@@ -215,7 +217,7 @@ describe('MitreTacticDot', () => {
     });
 
     it('calls onHoverChange with (tactic, false) on mouse leave', () => {
-      const onHoverChange = jest.fn();
+      const onHoverChange = vi.fn();
       render(<MitreTacticDot {...defaultProps} anomalyCount={2} onHoverChange={onHoverChange} />, {
         wrapper: Wrapper,
       });

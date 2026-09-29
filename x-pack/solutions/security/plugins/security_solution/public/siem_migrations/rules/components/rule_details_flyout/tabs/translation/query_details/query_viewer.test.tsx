@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { QueryViewer } from './query_viewer';
 
 describe('QueryViewer', () => {
-  const mockOnEdit = jest.fn();
+  const mockOnEdit = vi.fn();
 
   it('renders the rule name correctly', () => {
     const { getByTestId } = render(

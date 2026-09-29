@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { addLayer, removeLayer, replaceLayerList } from './layer_actions';
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import { LICENSED_FEATURES } from '../licensed_features';
@@ -13,7 +15,7 @@ import { mapReady } from './map_actions';
 import { LAYER_TYPE, SOURCE_TYPES } from '../../common';
 import { UPDATE_LAYER_PROP } from './map_action_constants';
 
-jest.mock('../kibana_services', () => {
+vi.mock('../kibana_services', () => {
   return {
     getMapsCapabilities() {
       return { save: true };
@@ -35,16 +37,16 @@ jest.mock('../kibana_services', () => {
   };
 });
 
-const getStoreMock = jest.fn();
-const dispatchMock = jest.fn();
+const getStoreMock = vi.fn();
+const dispatchMock = vi.fn();
 
 describe('layer_actions', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('addLayer', () => {
-    const notifyLicensedFeatureUsageMock = jest.fn();
+    const notifyLicensedFeatureUsageMock = vi.fn();
 
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
@@ -25,7 +27,7 @@ export const mockUser = {
 describe('getKnowledgeBaseEntry', () => {
   let loggerMock: Logger;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     loggerMock = loggingSystemMock.createLogger();
   });
 

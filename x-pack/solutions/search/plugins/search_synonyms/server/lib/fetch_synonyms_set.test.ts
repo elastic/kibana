@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { fetchSynonymsSet } from './fetch_synonyms_set';
 
 describe('fetch synonyms set lib function', () => {
   const mockClient = {
     synonyms: {
-      getSynonym: jest.fn(),
+      getSynonym: vi.fn(),
     },
   };
 
   const client = () => mockClient as unknown as ElasticsearchClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return synonym set', async () => {

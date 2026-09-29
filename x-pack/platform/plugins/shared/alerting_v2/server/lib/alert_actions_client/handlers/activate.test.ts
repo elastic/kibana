@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import {
@@ -21,11 +23,11 @@ import { activateHandler } from './activate';
 const FIXED_NOW = '2026-06-28T19:00:00.000Z';
 
 beforeAll(() => {
-  jest.useFakeTimers().setSystemTime(new Date(FIXED_NOW));
+  vi.useFakeTimers().setSystemTime(new Date(FIXED_NOW));
 });
 
 afterAll(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 const buildAlertEvent = (overrides: Partial<AlertEventRecord> = {}): AlertEventRecord =>

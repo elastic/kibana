@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 
 import { sendGetPackageInfoByKeyForRq, sendInstallKibanaAssetsForRq } from '../../../hooks';
 
 import { ensurePackageKibanaAssetsInstalled } from './ensure_kibana_assets_installed';
 
-jest.mock('../../../hooks');
+vi.mock('../../../hooks');
 
 describe('ensurePackageKibanaAssetsInstalled', () => {
   beforeEach(() => {
-    jest.mocked(sendInstallKibanaAssetsForRq).mockReset();
+    vi.mocked(sendInstallKibanaAssetsForRq).mockReset();
   });
   it('install assets if not installed', async () => {
-    jest.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({
+    vi.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({
       item: {
         installationInfo: {
           name: 'nginx',
@@ -46,7 +48,7 @@ describe('ensurePackageKibanaAssetsInstalled', () => {
   });
 
   it('install assets in multiple space if not installed', async () => {
-    jest.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({
+    vi.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({
       item: {
         installationInfo: {
           name: 'nginx',
@@ -75,7 +77,7 @@ describe('ensurePackageKibanaAssetsInstalled', () => {
   });
 
   it('does nothing if assets are already installed', async () => {
-    jest.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({
+    vi.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({
       item: {
         installationInfo: {
           name: 'nginx',
@@ -103,7 +105,7 @@ describe('ensurePackageKibanaAssetsInstalled', () => {
   });
 
   it('show an error toast if install assets failed', async () => {
-    jest.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({
+    vi.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({
       item: {
         installationInfo: {
           name: 'nginx',
@@ -113,7 +115,7 @@ describe('ensurePackageKibanaAssetsInstalled', () => {
       },
     } as any);
 
-    jest.mocked(sendInstallKibanaAssetsForRq).mockRejectedValue(new Error('test123'));
+    vi.mocked(sendInstallKibanaAssetsForRq).mockRejectedValue(new Error('test123'));
 
     const toasts = toastsServiceMock.createStartContract();
 

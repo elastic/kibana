@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   createDeductiveSession,
   refreshDeductiveToken,
@@ -30,10 +32,10 @@ interface MockResponse {
   body?: ReadableStream<Uint8Array>;
 }
 
-const fetchMock = jest.fn();
+const fetchMock = vi.fn();
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   globalThis.fetch = fetchMock as unknown as typeof globalThis.fetch;
 });
 
@@ -108,8 +110,8 @@ describe('deductive_client', () => {
         return asResponse({ status: 202 });
       });
 
-      const onAnswerChunk = jest.fn();
-      const onProgress = jest.fn();
+      const onAnswerChunk = vi.fn();
+      const onProgress = vi.fn();
 
       const result = await sendDeductiveMessageAndReadSse({
         endpoint: 'https://turing.deductive.ai',
@@ -201,7 +203,7 @@ describe('deductive_client', () => {
     });
 
     it('clears the deadline timer when the stream fails before completion', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       try {
         fetchMock.mockResolvedValueOnce(asResponse({ status: 404 }));
 
@@ -215,9 +217,9 @@ describe('deductive_client', () => {
         ).rejects.toBeInstanceOf(DeductiveSessionUnavailableError);
 
         // the `finally` must release the 5-minute deadline timer on the early-throw path
-        expect(jest.getTimerCount()).toBe(0);
+        expect(vi.getTimerCount()).toBe(0);
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock, MockInstance } from 'vitest';
+
 import {
   dataViewMock,
   createDataViewWithBytesField,
@@ -36,7 +38,7 @@ describe('formatHitReact', () => {
       },
     };
     row = buildDataTableRecord(hit, dataViewMock);
-    (dataViewMock.getFormatterForField as jest.Mock).mockReturnValue({
+    (dataViewMock.getFormatterForField as Mock).mockReturnValue({
       convertToReact: (value: unknown) => `formatted:${value}`,
     });
   });
@@ -260,7 +262,7 @@ describe('formatHitReact', () => {
   });
 
   describe('with columnsMeta', () => {
-    let formatFieldValueReactSpy: jest.SpyInstance;
+    let formatFieldValueReactSpy: MockInstance;
 
     beforeEach(() => {
       formatFieldValueReactSpy = createFormatFieldValueReactSpy();

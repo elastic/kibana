@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
@@ -15,10 +17,10 @@ import type { ServiceParams } from './types';
 
 describe('Registration', () => {
   const renderedVariables = { body: '' };
-  const mockRenderParameterTemplates = jest.fn().mockReturnValue(renderedVariables);
-  const mockPreSaveHook = jest.fn();
-  const mockPostSaveHook = jest.fn();
-  const mockPostDeleteHook = jest.fn();
+  const mockRenderParameterTemplates = vi.fn().mockReturnValue(renderedVariables);
+  const mockPreSaveHook = vi.fn();
+  const mockPostSaveHook = vi.fn();
+  const mockPostDeleteHook = vi.fn();
 
   const connector = {
     id: '.test',
@@ -39,7 +41,7 @@ describe('Registration', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('registers the connector correctly', async () => {

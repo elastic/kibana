@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
@@ -14,12 +16,15 @@ import type { ApiDiscoverResultData } from './discover';
 import { getRegistries } from '../../api/registry';
 import type { ApiRegistry, ApiRegistryMeta } from '../../api';
 
-jest.mock('../../api/registry', () => ({
-  ...jest.requireActual('../../api/registry'),
-  getRegistries: jest.fn(),
-}));
+vi.mock('../../api/registry', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../api/registry')),
+      getRegistries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetRegistries = jest.mocked(getRegistries);
+const mockGetRegistries = vi.mocked(getRegistries);
 
 const createMeta = (overrides: Partial<ApiRegistryMeta> = {}): ApiRegistryMeta => ({
   id: 'indices.create',
@@ -32,7 +37,7 @@ const createMeta = (overrides: Partial<ApiRegistryMeta> = {}): ApiRegistryMeta =
 
 const createRegistry = (manifest: ApiRegistryMeta[]): ApiRegistry => ({
   manifest,
-  loadApi: jest.fn(),
+  loadApi: vi.fn(),
 });
 
 describe('createDiscoverApisTool', () => {
@@ -53,7 +58,7 @@ describe('createDiscoverApisTool', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetRegistries.mockResolvedValue({
       elasticsearch: createRegistry(manifest),
       kibana: createRegistry([]),

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { Wrapper } from '@kbn/alerts-ui-shared/src/common/test_utils/wrapper';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -15,15 +18,15 @@ import { unmuteAlertInstance } from '@kbn/response-ops-alerts-apis/apis/unmute_a
 import { unsnoozeAlertInstance } from '@kbn/response-ops-alerts-apis/apis/unsnooze_alert_instance';
 import { useAlertSnooze } from './use_alert_snooze';
 
-jest.mock('@kbn/response-ops-alerts-apis/apis/mute_alert_instance');
-jest.mock('@kbn/response-ops-alerts-apis/apis/snooze_alert_instance');
-jest.mock('@kbn/response-ops-alerts-apis/apis/unmute_alert_instance');
-jest.mock('@kbn/response-ops-alerts-apis/apis/unsnooze_alert_instance');
+vi.mock('@kbn/response-ops-alerts-apis/apis/mute_alert_instance');
+vi.mock('@kbn/response-ops-alerts-apis/apis/snooze_alert_instance');
+vi.mock('@kbn/response-ops-alerts-apis/apis/unmute_alert_instance');
+vi.mock('@kbn/response-ops-alerts-apis/apis/unsnooze_alert_instance');
 
-const mockMute = muteAlertInstance as jest.MockedFunction<typeof muteAlertInstance>;
-const mockSnooze = snoozeAlertInstance as jest.MockedFunction<typeof snoozeAlertInstance>;
-const mockUnmute = unmuteAlertInstance as jest.MockedFunction<typeof unmuteAlertInstance>;
-const mockUnsnooze = unsnoozeAlertInstance as jest.MockedFunction<typeof unsnoozeAlertInstance>;
+const mockMute = muteAlertInstance as MockedFunction<typeof muteAlertInstance>;
+const mockSnooze = snoozeAlertInstance as MockedFunction<typeof snoozeAlertInstance>;
+const mockUnmute = unmuteAlertInstance as MockedFunction<typeof unmuteAlertInstance>;
+const mockUnsnooze = unsnoozeAlertInstance as MockedFunction<typeof unsnoozeAlertInstance>;
 
 const RULE_ID = 'rule-1';
 const INSTANCE_ID = 'instance-1';
@@ -45,7 +48,7 @@ const renderUseAlertSnooze = (overrides: Partial<Parameters<typeof useAlertSnooz
   );
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockMute.mockResolvedValue(undefined);
   mockSnooze.mockResolvedValue(undefined);
   mockUnmute.mockResolvedValue(undefined);
@@ -55,7 +58,7 @@ beforeEach(() => {
 describe('useAlertSnooze', () => {
   describe('snoozeAlert', () => {
     it('mutes the instance for an indefinite snooze with no conditions', async () => {
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const { result } = renderUseAlertSnooze({ onSuccess });
 
       let applied: boolean | undefined;
@@ -130,7 +133,7 @@ describe('useAlertSnooze', () => {
     });
 
     it('returns false and does not call onSuccess when the API fails', async () => {
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       mockMute.mockRejectedValue({ body: { message: 'boom' } });
       const { result } = renderUseAlertSnooze({ onSuccess });
 
@@ -148,7 +151,7 @@ describe('useAlertSnooze', () => {
 
   describe('unsnoozeAlert', () => {
     it('unmutes when the instance is muted', async () => {
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const { result } = renderUseAlertSnooze({ isMuted: true, onSuccess });
 
       let done: boolean | undefined;

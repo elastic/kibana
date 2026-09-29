@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
@@ -21,57 +24,61 @@ import { usePostObservable } from '../../containers/use_post_observables';
 import { useDeleteObservable } from '../../containers/use_delete_observables';
 import { OBSERVABLE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 
-jest.mock('../../containers/use_post_observables');
-jest.mock('../../containers/use_delete_observables');
+vi.mock('../../containers/use_post_observables');
+vi.mock('../../containers/use_delete_observables');
 
-jest.mock('../workflows/use_cases_workflow_executor', () => ({
-  useCasesWorkflowExecutor: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('../workflows/use_cases_workflow_executor', () => {
+      const mocked = {
+      useCasesWorkflowExecutor: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Stub RunWorkflowPanel (used by RunCaseWorkflowModal) so tests don't need Kibana HTTP context.
-jest.mock('@kbn/workflows-ui', () => ({
-  RunWorkflowPanel: ({
-    onClose,
-    runWorkflow,
-    showSuccessToast,
-  }: {
-    onClose: () => void;
-    runWorkflow?: RunWorkflowExecutor;
-    showSuccessToast?: boolean;
-  }) => (
-    <div data-test-subj="run-workflow-panel-mock">
-      <span data-test-subj="panel-has-executor">{runWorkflow ? 'yes' : 'no'}</span>
-      <span data-test-subj="panel-show-success-toast">{String(showSuccessToast)}</span>
-      <button data-test-subj="panel-close" type="button" onClick={onClose}>
-        {'Close'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      RunWorkflowPanel: ({
+        onClose,
+        runWorkflow,
+        showSuccessToast,
+      }: {
+        onClose: () => void;
+        runWorkflow?: RunWorkflowExecutor;
+        showSuccessToast?: boolean;
+      }) => (
+        <div data-test-subj="run-workflow-panel-mock">
+          <span data-test-subj="panel-has-executor">{runWorkflow ? 'yes' : 'no'}</span>
+          <span data-test-subj="panel-show-success-toast">{String(showSuccessToast)}</span>
+          <button data-test-subj="panel-close" type="button" onClick={onClose}>
+            {'Close'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ObservableActionsPopoverButton', () => {
-  const addObservable = jest.fn().mockResolvedValue({});
-  const deleteObservable = jest.fn().mockResolvedValue({});
+  const addObservable = vi.fn().mockResolvedValue({});
+  const deleteObservable = vi.fn().mockResolvedValue({});
 
   const caseData: CaseUI = { ...mockCase };
   const observable = { id: '05041f40-ac9f-4192-b367-7e6a5dafcee5' } as Observable;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jest
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    vi
       .mocked(usePostObservable)
       .mockReturnValue({ mutateAsync: addObservable, isLoading: false } as unknown as ReturnType<
         typeof usePostObservable
       >);
-    jest
+    vi
       .mocked(useDeleteObservable)
       .mockReturnValue({ mutateAsync: deleteObservable, isLoading: false } as unknown as ReturnType<
         typeof useDeleteObservable
       >);
-    const { useCasesWorkflowExecutor } = jest.requireMock(
-      '../workflows/use_cases_workflow_executor'
-    );
-    (useCasesWorkflowExecutor as jest.Mock).mockReturnValue(jest.fn());
+    const { useCasesWorkflowExecutor } = (await vi.importMock('../workflows/use_cases_workflow_executor'));
+    (useCasesWorkflowExecutor as Mock).mockReturnValue(vi.fn());
   });
 
   it('renders observable actions popover button correctly', async () => {
@@ -249,7 +256,7 @@ describe('ObservableActionsPopoverButton', () => {
       expect(await screen.findByTestId('cases-run-workflow-modal')).toBeInTheDocument();
     });
 
-    it('passes the cases.observable origin with the observable id to useCasesWorkflowExecutor', () => {
+    it('passes the cases.observable origin with the observable id to useCasesWorkflowExecutor', async () => {
       renderWithTestingProviders(
         <ObservableActionsPopoverButton
           caseData={caseData}
@@ -258,9 +265,7 @@ describe('ObservableActionsPopoverButton', () => {
         />
       );
 
-      const { useCasesWorkflowExecutor } = jest.requireMock(
-        '../workflows/use_cases_workflow_executor'
-      );
+      const { useCasesWorkflowExecutor } = (await vi.importMock('../workflows/use_cases_workflow_executor'));
       expect(useCasesWorkflowExecutor).toHaveBeenCalledWith(
         expect.objectContaining({
           caseId: caseData.id,

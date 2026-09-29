@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -49,7 +52,7 @@ describe('Risk Scoring Task', () => {
   let mockTaskManagerSetup: ReturnType<typeof taskManagerMock.createSetup>;
   let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
-  let mockTelemetry: jest.Mocked<AnalyticsServiceSetup>;
+  let mockTelemetry: Mocked<AnalyticsServiceSetup>;
 
   beforeEach(() => {
     mockCore = coreMock.createSetup();
@@ -93,9 +96,9 @@ describe('Risk Scoring Task', () => {
     });
 
     it('wraps the run in coreStart.executionContext.withContext with the expected label and id', async () => {
-      const withContext = jest.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn());
+      const withContext = vi.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn());
       const mockCoreStart = { executionContext: { withContext } };
-      const getStartServicesMock = jest.fn().mockResolvedValue([mockCoreStart, {}]);
+      const getStartServicesMock = vi.fn().mockResolvedValue([mockCoreStart, {}]);
 
       // Well-formed id built for namespace 'default', but state.namespace is
       // 'stale-namespace' — runTask's first check ("outdated task; exiting")
@@ -233,7 +236,7 @@ describe('Risk Scoring Task', () => {
   describe('runTask()', () => {
     let riskScoringTaskInstanceMock: ReturnType<typeof riskScoringTaskMock.createInstance>;
     let getRiskScoreService: (namespace: string) => Promise<RiskScoreService>;
-    let mockIsCancelled: jest.MockedFunction<() => boolean>;
+    let mockIsCancelled: MockedFunction<() => boolean>;
 
     beforeEach(async () => {
       await startRiskScoringTask({
@@ -261,9 +264,9 @@ describe('Risk Scoring Task', () => {
         },
         enableResetToZero: true,
       });
-      mockIsCancelled = jest.fn().mockReturnValue(false);
+      mockIsCancelled = vi.fn().mockReturnValue(false);
 
-      getRiskScoreService = jest.fn().mockResolvedValueOnce(mockRiskScoreService);
+      getRiskScoreService = vi.fn().mockResolvedValueOnce(mockRiskScoreService);
     });
 
     describe('when there are no scores to calculate', () => {
@@ -543,7 +546,7 @@ describe('Risk Scoring Task', () => {
 
         it('does not execute if the riskScoreService is not available', async () => {
           await runTask({
-            getRiskScoreService: jest.fn().mockResolvedValueOnce(undefined),
+            getRiskScoreService: vi.fn().mockResolvedValueOnce(undefined),
             logger: mockLogger,
             taskInstance: riskScoringTaskInstanceMock,
             isCancelled: mockIsCancelled,

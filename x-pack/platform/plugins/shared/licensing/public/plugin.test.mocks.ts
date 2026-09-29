@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export const mountExpiredBannerMock = jest.fn();
-jest.doMock('./expired_banner', () => ({
-  mountExpiredBanner: mountExpiredBannerMock,
-}));
+import { vi } from 'vitest';
+
+export const mountExpiredBannerMock = vi.fn();
+vi.doMock('./expired_banner', () => {
+      const mocked = {
+      mountExpiredBanner: mountExpiredBannerMock,
+    };
+      return { ...mocked, default: mocked };
+    });

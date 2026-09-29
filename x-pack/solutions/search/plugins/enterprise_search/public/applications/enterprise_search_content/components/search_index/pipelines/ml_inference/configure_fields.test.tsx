@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 
-jest.mock('./multi_field_selector', () => ({
-  MultiFieldMapping: () => <div data-test-subj="multiFieldMapping" />,
-  SelectedFieldMappings: () => <div data-test-subj="selectedFieldMappings" />,
-}));
+vi.mock('./multi_field_selector', () => {
+      const mocked = {
+      MultiFieldMapping: () => <div data-test-subj="multiFieldMapping" />,
+      SelectedFieldMappings: () => <div data-test-subj="selectedFieldMappings" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 
@@ -22,9 +27,9 @@ import { ConfigureFields } from './configure_fields';
 
 describe('ConfigureFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues({});
-    setMockActions({ makeRequest: jest.fn() });
+    setMockActions({ makeRequest: vi.fn() });
   });
 
   const mockValues = {

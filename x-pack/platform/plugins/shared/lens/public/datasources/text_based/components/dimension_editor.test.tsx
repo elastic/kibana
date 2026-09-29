@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -12,32 +14,41 @@ import type { TextBasedDimensionEditorProps } from './dimension_editor';
 import { TextBasedDimensionEditor } from './dimension_editor';
 import type { FieldSelectProps } from './field_select';
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
+vi.mock('lodash', () => {
+  const original = require('lodash');
   return {
     ...original,
     debounce: (fn: unknown) => fn,
   };
 });
 
-jest.mock('./fetch_fields_from_esql_expression', () => ({
-  fetchFieldsFromESQLExpression: jest.fn(),
-}));
+vi.mock('./fetch_fields_from_esql_expression', () => {
+      const mocked = {
+      fetchFieldsFromESQLExpression: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let capturedOnChoose: FieldSelectProps['onChoose'] | undefined;
 
-jest.mock('./field_select', () => ({
-  FieldSelect: (props: FieldSelectProps) => {
-    capturedOnChoose = props.onChoose;
-    return <div data-test-subj="text-based-dimension-field" />;
-  },
-}));
+vi.mock('./field_select', () => {
+      const mocked = {
+      FieldSelect: (props: FieldSelectProps) => {
+        capturedOnChoose = props.onChoose;
+        return <div data-test-subj="text-based-dimension-field" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../form_based/dimension_panel/format_selector', () => ({
-  FormatSelector: () => <div data-test-subj="format-selector" />,
-}));
+vi.mock('../../form_based/dimension_panel/format_selector', () => {
+      const mocked = {
+      FormatSelector: () => <div data-test-subj="format-selector" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { fetchFieldsFromESQLExpression } = jest.requireMock('./fetch_fields_from_esql_expression');
+const { fetchFieldsFromESQLExpression } = (await vi.importMock('./fetch_fields_from_esql_expression'));
 
 const waitToLoad = async () =>
   await waitFor(() => {
@@ -58,7 +69,7 @@ describe('TextBasedDimensionEditor', () => {
       },
       indexPatternRefs: [],
     },
-    setState: jest.fn(),
+    setState: vi.fn(),
     indexPatterns: {},
     dateRange: { fromDate: '2023-01-01', toDate: '2023-01-31' },
     expressions: {} as ExpressionsStart,
@@ -70,11 +81,11 @@ describe('TextBasedDimensionEditor', () => {
       },
     ],
     isMetricDimension: false,
-    filterOperations: jest.fn(() => true),
+    filterOperations: vi.fn(() => true),
     core: {} as TextBasedDimensionEditorProps['core'],
     groupId: 'rows',
     dimensionGroups: [],
-    toggleFullscreen: jest.fn(),
+    toggleFullscreen: vi.fn(),
     layerType: undefined,
     supportStaticValue: false,
     enableFormatSelector: true,
@@ -101,7 +112,7 @@ describe('TextBasedDimensionEditor', () => {
     } as unknown as TextBasedDimensionEditorProps['state']);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedOnChoose = undefined;
 
     fetchFieldsFromESQLExpression.mockResolvedValue({
@@ -171,7 +182,7 @@ describe('TextBasedDimensionEditor', () => {
   });
 
   it('should set inMetricDimension when selecting a field in a metric dimension', async () => {
-    const setState = jest.fn();
+    const setState = vi.fn();
     render(
       <TextBasedDimensionEditor {...defaultProps} isMetricDimension={true} setState={setState} />
     );
@@ -197,7 +208,7 @@ describe('TextBasedDimensionEditor', () => {
   });
 
   it('should not set inMetricDimension when selecting a field in a non-metric dimension', async () => {
-    const setState = jest.fn();
+    const setState = vi.fn();
     render(
       <TextBasedDimensionEditor {...defaultProps} isMetricDimension={false} setState={setState} />
     );
@@ -241,7 +252,7 @@ describe('TextBasedDimensionEditor', () => {
     });
 
     it('should update label and set customLabel to true on name input change', async () => {
-      const setState = jest.fn();
+      const setState = vi.fn();
       const state = stateWithColumn();
       render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
       await waitToLoad();
@@ -261,7 +272,7 @@ describe('TextBasedDimensionEditor', () => {
     });
 
     it('should set customLabel to false when label is cleared back to the default', async () => {
-      const setState = jest.fn();
+      const setState = vi.fn();
       const state = stateWithColumn({ customLabel: true, label: 'Custom' });
       render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
       await waitToLoad();
@@ -360,7 +371,7 @@ describe('TextBasedDimensionEditor', () => {
 
   describe('field change behavior', () => {
     it('should clear format params when switching from a numeric to a non-numeric field', async () => {
-      const setState = jest.fn();
+      const setState = vi.fn();
       const state = stateWithColumn({
         meta: { type: 'number' },
         params: { format: { id: 'number', params: { decimals: 2 } } },
@@ -378,7 +389,7 @@ describe('TextBasedDimensionEditor', () => {
     });
 
     it('should preserve format params when switching between numeric fields', async () => {
-      const setState = jest.fn();
+      const setState = vi.fn();
       const state = stateWithColumn({
         meta: { type: 'number' },
         params: { format: { id: 'number', params: { decimals: 2 } } },
@@ -398,7 +409,7 @@ describe('TextBasedDimensionEditor', () => {
     });
 
     it("should default the label to the new field's name when the previous column didn't have a custom label", async () => {
-      const setState = jest.fn();
+      const setState = vi.fn();
       const state = stateWithColumn();
       render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
       await waitToLoad();
@@ -414,7 +425,7 @@ describe('TextBasedDimensionEditor', () => {
     });
 
     it('should keep the previous label when the previous column had a custom label', async () => {
-      const setState = jest.fn();
+      const setState = vi.fn();
       const state = stateWithColumn({ customLabel: true, label: 'Custom Label' });
       render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
       await waitToLoad();

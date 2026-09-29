@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type {
   SavedObject,
   SavedObjectsClientContract,
@@ -15,18 +18,18 @@ import { privilegeMonitoringTypeName } from './privilege_monitoring_type';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
 
 describe('PrivilegeMonitoringEngineDescriptorClient', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
+  let soClient: Mocked<SavedObjectsClientContract>;
   let client: PrivilegeMonitoringEngineDescriptorClient;
   const namespace = 'test-namespace';
 
   beforeEach(() => {
     soClient = {
-      create: jest.fn(),
-      update: jest.fn(),
-      find: jest.fn(),
-      get: jest.fn(),
-      delete: jest.fn(),
-    } as unknown as jest.Mocked<SavedObjectsClientContract>;
+      create: vi.fn(),
+      update: vi.fn(),
+      find: vi.fn(),
+      get: vi.fn(),
+      delete: vi.fn(),
+    } as unknown as Mocked<SavedObjectsClientContract>;
 
     client = new PrivilegeMonitoringEngineDescriptorClient({ soClient, namespace });
   });

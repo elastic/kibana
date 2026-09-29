@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { resolveRegisteredStepIcon } from './resolve_registered_step_icon';
 import { createMockWorkflowsUiServices } from '../../context/__mocks__/mocks';
 
-jest.mock('@kbn/connector-specs/icons', () => ({
-  ConnectorIconsMap: new Map([['.abuseipdb', 'plugs']]),
-}));
+vi.mock('@kbn/connector-specs/icons', () => {
+      const mocked = {
+      ConnectorIconsMap: new Map([['.abuseipdb', 'plugs']]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('resolveRegisteredStepIcon', () => {
   it('prefers a workflows extensions step definition icon', () => {
     const { workflowsExtensions, triggersActionsUi } = createMockWorkflowsUiServices();
-    jest.mocked(workflowsExtensions.getStepDefinition).mockReturnValue({
+    vi.mocked(workflowsExtensions.getStepDefinition).mockReturnValue({
       id: 'cases.createCase',
       icon: 'casesApp',
     } as unknown as PublicStepDefinition);
@@ -34,7 +39,7 @@ describe('resolveRegisteredStepIcon', () => {
 
   it('falls back to a family sibling registered under the base type', () => {
     const { workflowsExtensions, triggersActionsUi } = createMockWorkflowsUiServices();
-    jest
+    vi
       .mocked(workflowsExtensions.getAllStepDefinitions)
       .mockReturnValue([
         { id: 'cases.noop' },

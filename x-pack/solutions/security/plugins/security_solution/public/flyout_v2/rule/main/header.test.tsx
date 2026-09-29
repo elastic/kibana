@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { HeaderProps } from './header';
@@ -21,8 +24,8 @@ import {
   RULE_DETAILS_UPDATED_BY_TEST_ID,
 } from './test_ids';
 
-jest.mock('./hooks/use_rule_details_link');
-jest.mock('../../../detection_engine/rule_management/logic/use_rule_author_display_names');
+vi.mock('./hooks/use_rule_details_link');
+vi.mock('../../../detection_engine/rule_management/logic/use_rule_author_display_names');
 
 const defaultProps: HeaderProps = {
   rule: { id: 'id', name: 'rule name' } as RuleResponse,
@@ -38,11 +41,11 @@ const renderHeader = (props: HeaderProps = defaultProps) =>
 
 describe('<Header />', () => {
   beforeEach(() => {
-    (useRuleAuthorDisplayNames as jest.Mock).mockReturnValue({});
+    (useRuleAuthorDisplayNames as Mock).mockReturnValue({});
   });
 
   it('should render title with link when href is available', () => {
-    (useRuleDetailsLink as jest.Mock).mockReturnValue('rule_details_link');
+    (useRuleDetailsLink as Mock).mockReturnValue('rule_details_link');
     const { getByTestId, queryByTestId } = renderHeader();
 
     expect(getByTestId(`${RULE_DETAILS_TITLE_TEST_ID}Text`)).toBeInTheDocument();
@@ -53,7 +56,7 @@ describe('<Header />', () => {
   });
 
   it('should render title without link when href is not available', () => {
-    (useRuleDetailsLink as jest.Mock).mockReturnValue(null);
+    (useRuleDetailsLink as Mock).mockReturnValue(null);
     const { getByTestId, queryByTestId } = renderHeader();
 
     expect(getByTestId(RULE_DETAILS_TITLE_TEST_ID)).toHaveTextContent('rule name');
@@ -61,15 +64,15 @@ describe('<Header />', () => {
   });
 
   it('should render deleted rule badge when suppressed', () => {
-    (useRuleDetailsLink as jest.Mock).mockReturnValue('rule_details_link');
+    (useRuleDetailsLink as Mock).mockReturnValue('rule_details_link');
     const { getByTestId } = renderHeader({ ...defaultProps, isSuppressed: true });
 
     expect(getByTestId(RULE_DETAILS_SUPPRESSED_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render the resolved display names of the rule authors', () => {
-    (useRuleDetailsLink as jest.Mock).mockReturnValue('rule_details_link');
-    (useRuleAuthorDisplayNames as jest.Mock).mockReturnValue({
+    (useRuleDetailsLink as Mock).mockReturnValue('rule_details_link');
+    (useRuleAuthorDisplayNames as Mock).mockReturnValue({
       createdBy: 'Rule Creator',
       updatedBy: 'Rule Updater',
     });
@@ -84,7 +87,7 @@ describe('<Header />', () => {
       },
     });
 
-    expect(useRuleAuthorDisplayNames as jest.Mock).toHaveBeenCalledWith({
+    expect(useRuleAuthorDisplayNames as Mock).toHaveBeenCalledWith({
       createdBy: '1234567890',
       createdByProfileUid: 'created-uid',
       updatedBy: '0987654321',

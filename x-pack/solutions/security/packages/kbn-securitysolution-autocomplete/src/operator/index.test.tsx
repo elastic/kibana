@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ByRoleMatcher, Matcher } from '@testing-library/react';
 import { render, within } from '@testing-library/react';
@@ -36,7 +38,7 @@ describe('OperatorComponent', () => {
         isClearable={false}
         isDisabled={true}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         operator={isOperator}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
@@ -53,7 +55,7 @@ describe('OperatorComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={true}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         operator={isOperator}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
@@ -73,7 +75,7 @@ describe('OperatorComponent', () => {
         isClearable={true}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         operator={isOperator}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
@@ -89,7 +91,7 @@ describe('OperatorComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         operator={isOperator}
         operatorOptions={[isNotOperator]}
         placeholder="Placeholder text"
@@ -107,7 +109,7 @@ describe('OperatorComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         operator={isOperator}
         operatorOptions={[]}
         placeholder="Placeholder text"
@@ -128,7 +130,7 @@ describe('OperatorComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         operator={isOperator}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
@@ -145,7 +147,7 @@ describe('OperatorComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         operator={isOperator}
         placeholder="Placeholder text"
         selectedField={{
@@ -170,7 +172,7 @@ describe('OperatorComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         operator={isOperator}
         placeholder="Placeholder text"
         selectedField={getField('ssl')}
@@ -189,7 +191,7 @@ describe('OperatorComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         operator={isOperator}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
@@ -210,7 +212,7 @@ describe('OperatorComponent', () => {
   });
 
   test('it invokes "onChange" when option selected', async () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
 
     const { getByTestId, findAllByRole } = render(
       <OperatorComponent

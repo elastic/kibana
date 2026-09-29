@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { MAX_USER_ACTIONS_PER_CASE, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { mockCases, mockCaseUnifiedAttachments } from '../../mocks';
 import {
@@ -35,7 +37,7 @@ describe('addComment', () => {
   clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('throws with excess fields', async () => {

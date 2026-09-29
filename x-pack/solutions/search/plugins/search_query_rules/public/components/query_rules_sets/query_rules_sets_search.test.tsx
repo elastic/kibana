@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryRulesSetsSearch } from './query_rules_sets_search';
 import React from 'react';
 
 describe('QueryRulesSetsSearch', () => {
-  const mockSetSearchKey = jest.fn();
+  const mockSetSearchKey = vi.fn();
 
   it('renders correctly', () => {
     render(<QueryRulesSetsSearch searchKey="" setSearchKey={mockSetSearchKey} />);

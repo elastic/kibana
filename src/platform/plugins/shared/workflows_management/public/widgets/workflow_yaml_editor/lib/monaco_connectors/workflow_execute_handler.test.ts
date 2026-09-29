@@ -7,21 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createMockHoverContext, createMockStepContext } from './test_utils/mock_factories';
 import { WorkflowExecuteMonacoConnectorHandler } from './workflow_execute_handler';
 import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
-jest.mock('@kbn/workflows', () => ({
-  getBuiltInStepStability: jest.fn().mockReturnValue(undefined),
-}));
+vi.mock('@kbn/workflows', () => {
+      const mocked = {
+      getBuiltInStepStability: vi.fn().mockReturnValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getBuiltInStepStability } = jest.requireMock('@kbn/workflows');
+const { getBuiltInStepStability } = (await vi.importMock('@kbn/workflows'));
 
 describe('WorkflowExecuteMonacoConnectorHandler', () => {
   let handler: WorkflowExecuteMonacoConnectorHandler;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockStabilityBadgeThemeForTests();
     handler = new WorkflowExecuteMonacoConnectorHandler();
     getBuiltInStepStability.mockReturnValue(undefined);

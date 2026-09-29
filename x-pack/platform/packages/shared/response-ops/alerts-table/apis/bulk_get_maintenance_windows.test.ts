@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { bulkGetMaintenanceWindows } from './bulk_get_maintenance_windows';
 
@@ -13,7 +15,7 @@ describe('bulkGetMaintenanceWindows', () => {
   const http = mockCoreSetup.http;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     http.post.mockResolvedValue({ maintenance_windows: [], errors: [] });
   });
 

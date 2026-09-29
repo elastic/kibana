@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { embeddableFunctionFactory } from './embeddable';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import type { ExpressionValueFilter } from '../../../types';
@@ -32,9 +34,9 @@ const filterContext: ExpressionValueFilter = {
 };
 
 const embeddablePersistableStateServiceMock = {
-  extract: jest.fn(),
-  inject: jest.fn(),
-  getAllMigrations: jest.fn(),
+  extract: vi.fn(),
+  inject: vi.fn(),
+  getAllMigrations: vi.fn(),
 };
 
 describe('embeddable', () => {

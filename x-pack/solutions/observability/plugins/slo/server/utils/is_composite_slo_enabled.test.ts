@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import { SLO_COMPOSITE_ENABLED } from '../../common/feature_flags';
 import { isCompositeSloEnabled } from './is_composite_slo_enabled';
 
 describe('isCompositeSloEnabled', () => {
   it('reads from getBooleanValue$ on the start contract', async () => {
-    const getBooleanValue$ = jest.fn().mockReturnValue(of(true));
+    const getBooleanValue$ = vi.fn().mockReturnValue(of(true));
 
     await expect(isCompositeSloEnabled({ getBooleanValue$ })).resolves.toBe(true);
     expect(getBooleanValue$).toHaveBeenCalledWith(SLO_COMPOSITE_ENABLED, false);
   });
 
   it('reads from getBooleanValue on the request-handler context', async () => {
-    const getBooleanValue = jest.fn().mockResolvedValue(false);
+    const getBooleanValue = vi.fn().mockResolvedValue(false);
 
     await expect(isCompositeSloEnabled({ getBooleanValue })).resolves.toBe(false);
     expect(getBooleanValue).toHaveBeenCalledWith(SLO_COMPOSITE_ENABLED, false);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
 import { fromKueryExpression, toKqlExpression } from '@kbn/es-query';
@@ -22,7 +25,7 @@ const {
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 setGlobalDate();
@@ -209,7 +212,7 @@ describe('findMutedAlerts()', () => {
     test('throws when a returned rule type is not authorized for the user', async () => {
       authorization.getAuthorizationFilter.mockResolvedValue({
         filter: undefined,
-        ensureRuleTypeIsAuthorized: jest.fn(() => {
+        ensureRuleTypeIsAuthorized: vi.fn(() => {
           throw new Error('Unauthorized');
         }),
       });
@@ -255,7 +258,7 @@ describe('findMutedAlerts()', () => {
     test('logs a failure audit event when a rule type is not authorized', async () => {
       authorization.getAuthorizationFilter.mockResolvedValue({
         filter: undefined,
-        ensureRuleTypeIsAuthorized: jest.fn(() => {
+        ensureRuleTypeIsAuthorized: vi.fn(() => {
           throw new Error('Unauthorized');
         }),
       });

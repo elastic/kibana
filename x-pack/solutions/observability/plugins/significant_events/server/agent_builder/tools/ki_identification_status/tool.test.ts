@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
@@ -14,7 +16,7 @@ import { createMockToolContext } from '../../utils/test_helpers';
 describe('createKiIdentificationStatusTool', () => {
   const setup = () => {
     const managementApi = {
-      getWorkflowExecutions: jest.fn().mockResolvedValue({
+      getWorkflowExecutions: vi.fn().mockResolvedValue({
         results: [
           {
             id: 'exec-1',
@@ -25,7 +27,7 @@ describe('createKiIdentificationStatusTool', () => {
           },
         ],
       }),
-      getWorkflowExecution: jest.fn().mockResolvedValue({
+      getWorkflowExecution: vi.fn().mockResolvedValue({
         context: {
           output: {
             featuresSkipped: false,
@@ -39,8 +41,8 @@ describe('createKiIdentificationStatusTool', () => {
       }),
     };
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
-      managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
-      telemetry: { trackOnboardingScheduled: jest.fn() } as never,
+      managementApi: { ...managementApi, getClient: vi.fn(() => managementApi) } as never,
+      telemetry: { trackOnboardingScheduled: vi.fn() } as never,
     });
 
     const tool = createKiIdentificationStatusTool({

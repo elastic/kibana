@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getServerTLSOptionsMock } from './set_tls_config.test.mocks';
 import { Server } from '@hapi/hapi';
 import type { ISslConfig } from './types';
@@ -29,7 +31,7 @@ describe('setTlsConfig', () => {
   it('calls `getServerTLSOptions` with the correct parameters', () => {
     const server = new Server({});
     // easiest way to shim a tls.Server
-    (server.listener as any).setSecureContext = jest.fn();
+    (server.listener as any).setSecureContext = vi.fn();
     const config: ISslConfig = { enabled: true };
 
     setTlsConfig(server, config);
@@ -41,7 +43,7 @@ describe('setTlsConfig', () => {
   it('throws when called for a disabled SSL config', () => {
     const server = new Server({});
     // easiest way to shim a tls.Server
-    (server.listener as any).setSecureContext = jest.fn();
+    (server.listener as any).setSecureContext = vi.fn();
     const config: ISslConfig = { enabled: false };
 
     getServerTLSOptionsMock.mockReturnValue(undefined);
@@ -54,7 +56,7 @@ describe('setTlsConfig', () => {
   it('calls `setSecureContext` on the underlying server', () => {
     const server = new Server({});
     // easiest way to shim a tls.Server
-    const setSecureContextMock = jest.fn();
+    const setSecureContextMock = vi.fn();
     (server.listener as any).setSecureContext = setSecureContextMock;
     const config: ISslConfig = { enabled: true };
 

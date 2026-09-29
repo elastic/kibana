@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,10 +14,10 @@ import { WaffleSortControls } from './waffle_sort_controls';
 import type { WaffleSortOption } from '../../hooks/use_waffle_options';
 
 describe('WaffleSortControls', () => {
-  const mockOnChange = jest.fn();
+  const mockOnChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the sort dropdown', () => {

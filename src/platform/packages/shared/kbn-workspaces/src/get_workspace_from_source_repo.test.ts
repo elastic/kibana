@@ -7,22 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { getWorkspaceFromSourceRepo } from './get_workspace_from_source_repo';
 import { ensureClonedRepo } from './ensure_cloned_repo';
 
-jest.mock('./ensure_cloned_repo');
-jest.mock('./workspace_controller', () => ({
-  WorkspaceController: jest.fn().mockImplementation(() => ({
-    fromSourceRepo: jest.fn().mockResolvedValue({ getDir: () => '/path/to/repo' }),
-  })),
-}));
+vi.mock('./ensure_cloned_repo');
+vi.mock('./workspace_controller', () => {
+      const mocked = {
+      WorkspaceController: vi.fn().mockImplementation(() => ({
+        fromSourceRepo: vi.fn().mockResolvedValue({ getDir: () => '/path/to/repo' }),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockEnsureClonedRepo = ensureClonedRepo as jest.MockedFunction<typeof ensureClonedRepo>;
+const mockEnsureClonedRepo = ensureClonedRepo as MockedFunction<typeof ensureClonedRepo>;
 
 describe('getWorkspaceFromSourceRepo', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not create the base clone', async () => {

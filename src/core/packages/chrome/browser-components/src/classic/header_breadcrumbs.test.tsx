@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -30,7 +32,7 @@ describe('HeaderBreadcrumbs', () => {
   it('forces the last breadcrumb inactivity', async () => {
     render(
       <HeaderBreadcrumbs
-        breadcrumbs={[{ text: 'First' }, { text: 'Last', href: '/something', onClick: jest.fn() }]}
+        breadcrumbs={[{ text: 'First' }, { text: 'Last', href: '/something', onClick: vi.fn() }]}
       />
     );
 

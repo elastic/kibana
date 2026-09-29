@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { InferenceConnectorType } from '@kbn/inference-common';
@@ -14,71 +16,104 @@ import type { Entity } from '../../../../../common/api/entity_analytics';
 import { TestProviders } from '../../../../common/mock';
 
 // Mock the hooks
-const mockUseFetchAnonymizationFields = jest.fn();
-const mockUseAssistantContext = jest.fn();
-const mockUseMaybeAssistantContext = jest.fn();
-const mockUseLoadConnectors = jest.fn();
-const mockUseSpaceId = jest.fn();
-const mockUseStoredAssistantConnectorId = jest.fn();
-const mockUseAssistantAvailability = jest.fn();
-const mockUseAgentBuilderAvailability = jest.fn();
-const mockUseFetchEntityDetailsHighlights = jest.fn();
-const mockUseFetchPersistedAiSummary = jest.fn();
-const mockUseHasEntityHighlightsLicense = jest.fn();
-const mockUseInferenceConnectorAccess = jest.fn();
+const mockUseFetchAnonymizationFields = vi.fn();
+const mockUseAssistantContext = vi.fn();
+const mockUseMaybeAssistantContext = vi.fn();
+const mockUseLoadConnectors = vi.fn();
+const mockUseSpaceId = vi.fn();
+const mockUseStoredAssistantConnectorId = vi.fn();
+const mockUseAssistantAvailability = vi.fn();
+const mockUseAgentBuilderAvailability = vi.fn();
+const mockUseFetchEntityDetailsHighlights = vi.fn();
+const mockUseFetchPersistedAiSummary = vi.fn();
+const mockUseHasEntityHighlightsLicense = vi.fn();
+const mockUseInferenceConnectorAccess = vi.fn();
 
-jest.mock('@kbn/elastic-assistant', () => ({
-  useAssistantContext: () => mockUseAssistantContext(),
-  useMaybeAssistantContext: () => mockUseMaybeAssistantContext(),
-  useFetchAnonymizationFields: () => mockUseFetchAnonymizationFields(),
-  AssistantProvider: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="assistant-provider">{children}</div>
-  ),
-  ConnectorSelectorInline: () => <div data-test-subj="connector-selector-inline" />,
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      useAssistantContext: () => mockUseAssistantContext(),
+      useMaybeAssistantContext: () => mockUseMaybeAssistantContext(),
+      useFetchAnonymizationFields: () => mockUseFetchAnonymizationFields(),
+      AssistantProvider: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="assistant-provider">{children}</div>
+      ),
+      ConnectorSelectorInline: () => <div data-test-subj="connector-selector-inline" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/elastic-assistant/impl/assistant_context', () => ({
-  useAssistantContextValue: jest.fn(() => ({
-    http: { post: jest.fn() },
-    settings: { client: { get: jest.fn() } },
-  })),
-}));
+vi.mock('@kbn/elastic-assistant/impl/assistant_context', () => {
+      const mocked = {
+      useAssistantContextValue: vi.fn(() => ({
+        http: { post: vi.fn() },
+        settings: { client: { get: vi.fn() } },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../assistant/use_assistant_availability', () => ({
-  useAssistantAvailability: () => mockUseAssistantAvailability(),
-}));
+vi.mock('../../../../assistant/use_assistant_availability', () => {
+      const mocked = {
+      useAssistantAvailability: () => mockUseAssistantAvailability(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
-  useAgentBuilderAvailability: () => mockUseAgentBuilderAvailability(),
-}));
+vi.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => {
+      const mocked = {
+      useAgentBuilderAvailability: () => mockUseAgentBuilderAvailability(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../onboarding/components/hooks/use_stored_state', () => ({
-  useStoredAssistantConnectorId: () => mockUseStoredAssistantConnectorId(),
-}));
+vi.mock('../../../../onboarding/components/hooks/use_stored_state', () => {
+      const mocked = {
+      useStoredAssistantConnectorId: () => mockUseStoredAssistantConnectorId(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: () => mockUseSpaceId(),
-}));
+vi.mock('../../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: () => mockUseSpaceId(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_fetch_entity_details_highlights', () => ({
-  useFetchEntityDetailsHighlights: () => mockUseFetchEntityDetailsHighlights(),
-}));
+vi.mock('../hooks/use_fetch_entity_details_highlights', () => {
+      const mocked = {
+      useFetchEntityDetailsHighlights: () => mockUseFetchEntityDetailsHighlights(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_fetch_persisted_ai_summary', () => ({
-  useFetchPersistedAiSummary: () => mockUseFetchPersistedAiSummary(),
-}));
+vi.mock('../hooks/use_fetch_persisted_ai_summary', () => {
+      const mocked = {
+      useFetchPersistedAiSummary: () => mockUseFetchPersistedAiSummary(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_has_entity_highlights_license', () => ({
-  useHasEntityHighlightsLicense: () => mockUseHasEntityHighlightsLicense(),
-}));
+vi.mock('../../../../common/hooks/use_has_entity_highlights_license', () => {
+      const mocked = {
+      useHasEntityHighlightsLicense: () => mockUseHasEntityHighlightsLicense(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_inference_connector_access', () => ({
-  useInferenceConnectorAccess: (params: unknown) => mockUseInferenceConnectorAccess(params),
-}));
+vi.mock('../hooks/use_inference_connector_access', () => {
+      const mocked = {
+      useInferenceConnectorAccess: (params: unknown) => mockUseInferenceConnectorAccess(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: () => mockUseLoadConnectors(),
-}));
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: () => mockUseLoadConnectors(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EntityHighlights', () => {
   const defaultProps = {
@@ -86,7 +121,7 @@ describe('EntityHighlights', () => {
     entityType: 'user' as EntityType,
   };
 
-  const mockFetchEntityHighlights = jest.fn();
+  const mockFetchEntityHighlights = vi.fn();
 
   const defaultAnonymizationFields = {
     data: {
@@ -102,8 +137,8 @@ describe('EntityHighlights', () => {
     isLoading: false,
   };
   const defaultAssistantContext = {
-    http: { post: jest.fn() },
-    settings: { client: { get: jest.fn() } },
+    http: { post: vi.fn() },
+    settings: { client: { get: vi.fn() } },
   };
   const defaultLoadConnectors = {
     data: [
@@ -115,7 +150,7 @@ describe('EntityHighlights', () => {
     ],
   };
   const defaultSpaceId = 'default';
-  const defaultStoredAssistantConnectorId = ['connector-1', jest.fn()];
+  const defaultStoredAssistantConnectorId = ['connector-1', vi.fn()];
   const defaultAssistantAvailability = {
     hasAssistantPrivilege: true,
     hasConnectorsReadPrivilege: true,
@@ -153,7 +188,7 @@ describe('EntityHighlights', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // The staleness callout dismiss state is persisted per-entity/per-space in local storage.
     // Clear it so tests don't leak dismissal state into one another.
     window.localStorage.clear();
@@ -172,7 +207,7 @@ describe('EntityHighlights', () => {
       canRead: true,
       isLoading: false,
       isFetching: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     mockUseHasEntityHighlightsLicense.mockReturnValue(true);
     mockUseInferenceConnectorAccess.mockReturnValue({
@@ -269,7 +304,7 @@ describe('EntityHighlights', () => {
       canRead: true,
       isLoading: false,
       isFetching: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     mockUseFetchEntityDetailsHighlights.mockReturnValue({
       ...defaultFetchEntityDetailsHighlights,
@@ -297,7 +332,7 @@ describe('EntityHighlights', () => {
       canRead: false,
       isLoading: false,
       isFetching: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(<EntityHighlightsAccordion {...defaultProps} />, {
@@ -412,7 +447,7 @@ describe('EntityHighlights', () => {
       },
     ];
     mockUseLoadConnectors.mockReturnValue({ data: mixedConnectors });
-    mockUseStoredAssistantConnectorId.mockReturnValue(['connector-1', jest.fn()]);
+    mockUseStoredAssistantConnectorId.mockReturnValue(['connector-1', vi.fn()]);
     mockUseInferenceConnectorAccess.mockReturnValue({
       canUseSelectedConnector: false,
       isCheckingPrivileges: false,
@@ -473,7 +508,7 @@ describe('EntityHighlights', () => {
       canRead: true,
       isLoading: true,
       isFetching: true,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(<EntityHighlightsAccordion {...defaultProps} />, {
@@ -501,7 +536,7 @@ describe('EntityHighlights', () => {
       canRead: true,
       isLoading: false,
       isFetching: true,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     mockUseFetchEntityDetailsHighlights.mockReturnValue({
       ...defaultFetchEntityDetailsHighlights,
@@ -691,7 +726,7 @@ describe('EntityHighlights', () => {
       canRead: true,
       isLoading: false,
       isFetching: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     };
 
     // Current entity signals — normalized risk score of 90 drifts from the snapshot's 70.

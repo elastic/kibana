@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -18,17 +20,20 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-jest.mock('../apis/resolve_rule/resolve_rule', () => ({
-  resolveRule: jest.fn(),
-}));
+vi.mock('../apis/resolve_rule/resolve_rule', () => {
+      const mocked = {
+      resolveRule: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { resolveRule } = jest.requireMock('../apis/resolve_rule/resolve_rule');
+const { resolveRule } = (await vi.importMock('../apis/resolve_rule/resolve_rule'));
 
-const httpMock = jest.fn();
+const httpMock = vi.fn();
 
 describe('useResolveRule', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should call resolve rule API if ID is passed in', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -16,74 +18,89 @@ import { useTabs } from '../../flyout_v2/shared/hooks/use_tabs';
 import { useNavigateToAttackDetailsLeftPanel } from './hooks/use_navigate_to_attack_details_left_panel';
 import { useKibana } from '../../common/lib/kibana';
 
-const mockFlyoutNavigation = jest.fn((_props?: unknown) => (
+const mockFlyoutNavigation = vi.fn((_props?: unknown) => (
   <div data-test-subj="flyoutNavigation" />
 ));
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('./context');
-jest.mock('../../flyout_v2/shared/hooks/use_tabs');
-jest.mock('./hooks/use_navigate_to_attack_details_left_panel');
-jest.mock('../../common/lib/kibana');
-jest.mock('./content', () => ({ PanelContent: () => <div data-test-subj="panelContent" /> }));
-jest.mock('./footer', () => ({ PanelFooter: () => <div data-test-subj="panelFooter" /> }));
-jest.mock('../shared/components/flyout_navigation', () => ({
-  FlyoutNavigation: (props: unknown) => mockFlyoutNavigation(props),
-}));
-jest.mock('./components/header_actions', () => ({
-  AttackHeaderActions: () => <span data-test-subj="attackHeaderActionsMock" />,
-}));
-jest.mock('./header', () => ({
-  PanelHeader: ({
-    setSelectedTabId,
-  }: {
-    setSelectedTabId: (tab: 'overview' | 'table' | 'json') => void;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="switchTabButton"
-      onClick={() => setSelectedTabId('table')}
-    >
-      {'switch tab'}
-    </button>
-  ),
-}));
+vi.mock('@kbn/expandable-flyout');
+vi.mock('./context');
+vi.mock('../../flyout_v2/shared/hooks/use_tabs');
+vi.mock('./hooks/use_navigate_to_attack_details_left_panel');
+vi.mock('../../common/lib/kibana');
+vi.mock('./content', () => {
+      const mocked = { PanelContent: () => <div data-test-subj="panelContent" /> };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./footer', () => {
+      const mocked = { PanelFooter: () => <div data-test-subj="panelFooter" /> };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../shared/components/flyout_navigation', () => {
+      const mocked = {
+      FlyoutNavigation: (props: unknown) => mockFlyoutNavigation(props),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./components/header_actions', () => {
+      const mocked = {
+      AttackHeaderActions: () => <span data-test-subj="attackHeaderActionsMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./header', () => {
+      const mocked = {
+      PanelHeader: ({
+        setSelectedTabId,
+      }: {
+        setSelectedTabId: (tab: 'overview' | 'table' | 'json') => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="switchTabButton"
+          onClick={() => setSelectedTabId('table')}
+        >
+          {'switch tab'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AttackDetailsPanel', () => {
-  const openRightPanel = jest.fn();
-  const openPreviewPanel = jest.fn();
-  const setStorage = jest.fn();
+  const openRightPanel = vi.fn();
+  const openPreviewPanel = vi.fn();
+  const setStorage = vi.fn();
 
   beforeEach(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue({
       openRightPanel,
       openPreviewPanel,
-      openFlyout: jest.fn(),
-      openLeftPanel: jest.fn(),
-      closeRightPanel: jest.fn(),
-      closeLeftPanel: jest.fn(),
-      closePreviewPanel: jest.fn(),
-      previousPreviewPanel: jest.fn(),
-      closeFlyout: jest.fn(),
+      openFlyout: vi.fn(),
+      openLeftPanel: vi.fn(),
+      closeRightPanel: vi.fn(),
+      closeLeftPanel: vi.fn(),
+      closePreviewPanel: vi.fn(),
+      previousPreviewPanel: vi.fn(),
+      closeFlyout: vi.fn(),
     });
-    jest.mocked(useAttackDetailsContext).mockReturnValue({
+    vi.mocked(useAttackDetailsContext).mockReturnValue({
       attackId: 'attack-1',
       indexName: '.alerts-security.attack.discovery.alerts-default',
       attack: null,
       scopeId: 'scope',
       isPreviewMode: false,
-      getFieldsData: jest.fn(),
+      getFieldsData: vi.fn(),
       browserFields: {},
       dataFormattedForFieldBrowser: [],
       searchHit: { _id: 'attack-1', _source: {} },
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useAttackDetailsContext>);
-    jest.mocked(useTabs).mockReturnValue({
+    vi.mocked(useTabs).mockReturnValue({
       selectedTabId: 'overview',
-      setSelectedTabId: jest.fn(),
+      setSelectedTabId: vi.fn(),
     });
-    jest.mocked(useNavigateToAttackDetailsLeftPanel).mockReturnValue(jest.fn());
-    jest.mocked(useKibana).mockReturnValue({
+    vi.mocked(useNavigateToAttackDetailsLeftPanel).mockReturnValue(vi.fn());
+    vi.mocked(useKibana).mockReturnValue({
       services: {
         storage: {
           set: setStorage,
@@ -118,17 +135,17 @@ describe('AttackDetailsPanel', () => {
   });
 
   it('uses preview navigation when rendered in preview panel', () => {
-    jest.mocked(useAttackDetailsContext).mockReturnValue({
+    vi.mocked(useAttackDetailsContext).mockReturnValue({
       attackId: 'attack-1',
       indexName: '.alerts-security.attack.discovery.alerts-default',
       attack: null,
       scopeId: 'scope',
       isPreviewMode: true,
-      getFieldsData: jest.fn(),
+      getFieldsData: vi.fn(),
       browserFields: {},
       dataFormattedForFieldBrowser: [],
       searchHit: { _id: 'attack-1', _source: {} },
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useAttackDetailsContext>);
 
     const { getByTestId } = render(<AttackDetailsPreviewPanel />);
@@ -148,13 +165,13 @@ describe('AttackDetailsPanel', () => {
   });
 
   it('shows the remote document callout when searchHit._index is a CCS remote index', () => {
-    jest.mocked(useAttackDetailsContext).mockReturnValue({
+    vi.mocked(useAttackDetailsContext).mockReturnValue({
       attackId: 'attack-1',
       indexName: 'remote-cluster:.alerts-security.alerts-default',
       attack: null,
       scopeId: 'scope',
       isPreviewMode: false,
-      getFieldsData: jest.fn(),
+      getFieldsData: vi.fn(),
       browserFields: {},
       dataFormattedForFieldBrowser: [],
       searchHit: {
@@ -162,7 +179,7 @@ describe('AttackDetailsPanel', () => {
         _index: 'remote-cluster:.alerts-security.alerts-default',
         _source: { [EVENT_KIND]: 'signal' },
       },
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useAttackDetailsContext>);
 
     const { getByText } = render(<AttackDetailsRightPanel />);
@@ -173,17 +190,17 @@ describe('AttackDetailsPanel', () => {
   });
 
   it('uses default preview banner', () => {
-    jest.mocked(useAttackDetailsContext).mockReturnValue({
+    vi.mocked(useAttackDetailsContext).mockReturnValue({
       attackId: 'attack-1',
       indexName: '.alerts-security.attack.discovery.alerts-default',
       attack: null,
       scopeId: 'scope',
       isPreviewMode: true,
-      getFieldsData: jest.fn(),
+      getFieldsData: vi.fn(),
       browserFields: {},
       dataFormattedForFieldBrowser: [],
       searchHit: { _id: 'attack-1', _source: {} },
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useAttackDetailsContext>);
 
     const { getByTestId } = render(<AttackDetailsPreviewPanel />);

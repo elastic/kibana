@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
 import React from 'react';
 import * as URL from '../../../hooks/use_url_params';
 import { act, fireEvent } from '@testing-library/react';
@@ -13,24 +16,24 @@ import { SearchField } from './search_field';
 import { ClearAllFilters } from './monitor_filters/clear_all_filters';
 
 describe('SearchField', () => {
-  let useUrlParamsSpy: jest.SpyInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
-  let useGetUrlParamsSpy: jest.SpyInstance<SyntheticsUrlParams>;
-  let updateUrlParamsMock: jest.Mock;
+  let useUrlParamsSpy: MockInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
+  let useGetUrlParamsSpy: MockInstance<SyntheticsUrlParams>;
+  let updateUrlParamsMock: Mock;
 
   beforeEach(() => {
     // Drive the component's 300ms `useDebounce` deterministically so the test
     // never depends on a real timer firing on time under CI parallel load.
-    jest.useFakeTimers();
-    useUrlParamsSpy = jest.spyOn(URL, 'useUrlParams');
-    useGetUrlParamsSpy = jest.spyOn(URL, 'useGetUrlParams');
-    updateUrlParamsMock = jest.fn();
+    vi.useFakeTimers();
+    useUrlParamsSpy = vi.spyOn(URL, 'useUrlParams');
+    useGetUrlParamsSpy = vi.spyOn(URL, 'useGetUrlParams');
+    updateUrlParamsMock = vi.fn();
 
-    useUrlParamsSpy.mockImplementation(() => [jest.fn().mockReturnValue({}), updateUrlParamsMock]);
+    useUrlParamsSpy.mockImplementation(() => [vi.fn().mockReturnValue({}), updateUrlParamsMock]);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.restoreAllMocks();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('updates url params when searching', () => {
@@ -42,7 +45,7 @@ describe('SearchField', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     expect(updateUrlParamsMock).toHaveBeenCalledWith({
@@ -75,7 +78,7 @@ describe('SearchField', () => {
     expect(input.value).toBe('user typed');
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
     expect(updateUrlParamsMock).toHaveBeenCalledWith({ query: 'user typed' });
 
@@ -105,7 +108,7 @@ describe('SearchField', () => {
     fireEvent.click(getByRole('button', { name: 'Clear all selected Synthetics filters' }));
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     expect(updateUrlParamsMock).toHaveBeenCalledWith(

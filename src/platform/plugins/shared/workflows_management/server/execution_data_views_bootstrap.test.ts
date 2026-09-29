@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -22,19 +25,19 @@ describe('ExecutionDataViewsBootstrap', () => {
   const esClient = {} as ElasticsearchClient;
 
   const createDataViewsPlugin = (dataViewsService: {
-    get: jest.Mock;
-    create: jest.Mock;
-    createSavedObject: jest.Mock;
+    get: Mock;
+    create: Mock;
+    createSavedObject: Mock;
   }) =>
     ({
-      dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewsService),
+      dataViewsServiceFactory: vi.fn().mockResolvedValue(dataViewsService),
     } as unknown as DataViewsServerPluginStart);
 
   it('creates two managed data views for the space', async () => {
     const dataViewsService = {
-      get: jest.fn().mockRejectedValue(new Error('Saved object [index-pattern/id] not found')),
-      create: jest.fn().mockImplementation(async (spec) => spec),
-      createSavedObject: jest.fn().mockResolvedValue(undefined),
+      get: vi.fn().mockRejectedValue(new Error('Saved object [index-pattern/id] not found')),
+      create: vi.fn().mockImplementation(async (spec) => spec),
+      createSavedObject: vi.fn().mockResolvedValue(undefined),
     };
     const dataViewsPlugin = createDataViewsPlugin(dataViewsService);
     const bootstrap = new ExecutionDataViewsBootstrap(dataViewsPlugin, loggerMock.create());
@@ -75,9 +78,9 @@ describe('ExecutionDataViewsBootstrap', () => {
 
   it('deduplicates concurrent requests for one space', async () => {
     const dataViewsService = {
-      get: jest.fn().mockResolvedValue({ id: 'existing' }),
-      create: jest.fn(),
-      createSavedObject: jest.fn(),
+      get: vi.fn().mockResolvedValue({ id: 'existing' }),
+      create: vi.fn(),
+      createSavedObject: vi.fn(),
     };
     const dataViewsPlugin = createDataViewsPlugin(dataViewsService);
     const bootstrap = new ExecutionDataViewsBootstrap(dataViewsPlugin, loggerMock.create());
@@ -94,12 +97,12 @@ describe('ExecutionDataViewsBootstrap', () => {
       name: 'DuplicateDataViewError',
     });
     const dataViewsService = {
-      get: jest
+      get: vi
         .fn()
         .mockRejectedValueOnce(new Error('Saved object not found'))
         .mockResolvedValue({ id: 'workflows-executions-managed-marketing' }),
-      create: jest.fn().mockImplementation(async (spec) => spec),
-      createSavedObject: jest.fn().mockRejectedValue(duplicateError),
+      create: vi.fn().mockImplementation(async (spec) => spec),
+      createSavedObject: vi.fn().mockRejectedValue(duplicateError),
     };
     const dataViewsPlugin = createDataViewsPlugin(dataViewsService);
     const logger = loggerMock.create();
@@ -119,9 +122,9 @@ describe('ExecutionDataViewsBootstrap', () => {
       name: 'DuplicateDataViewError',
     });
     const dataViewsService = {
-      get: jest.fn().mockRejectedValue(new Error('Saved object not found')),
-      create: jest.fn().mockImplementation(async (spec) => spec),
-      createSavedObject: jest.fn().mockRejectedValue(duplicateError),
+      get: vi.fn().mockRejectedValue(new Error('Saved object not found')),
+      create: vi.fn().mockImplementation(async (spec) => spec),
+      createSavedObject: vi.fn().mockRejectedValue(duplicateError),
     };
     const dataViewsPlugin = createDataViewsPlugin(dataViewsService);
     const logger = loggerMock.create();
@@ -138,12 +141,12 @@ describe('ExecutionDataViewsBootstrap', () => {
 
   it('does not cache a failed bootstrap', async () => {
     const dataViewsService = {
-      get: jest
+      get: vi
         .fn()
         .mockRejectedValueOnce(new Error('unavailable'))
         .mockResolvedValue({ id: 'existing' }),
-      create: jest.fn(),
-      createSavedObject: jest.fn(),
+      create: vi.fn(),
+      createSavedObject: vi.fn(),
     };
     const dataViewsPlugin = createDataViewsPlugin(dataViewsService);
     const logger = loggerMock.create();

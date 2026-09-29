@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 
@@ -25,40 +28,49 @@ import type {
 
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
 
-jest.mock('../../../../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../../../../hooks'),
-  useStartServices: () => ({
-    docLinks: {
-      links: {
-        fleet: {
-          datastreamsNamingScheme: 'https://docs.elastic.co',
+vi.mock('../../../../../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../../../../hooks')),
+      useStartServices: () => ({
+        docLinks: {
+          links: {
+            fleet: {
+              datastreamsNamingScheme: 'https://docs.elastic.co',
+            },
+          },
         },
-      },
-    },
-  }),
-  sendGetDataStreams: jest.fn(),
-}));
+      }),
+      sendGetDataStreams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../datastream_hooks', () => ({
-  useIndexTemplateExists: () => ({
-    exists: true,
-    isLoading: false,
-  }),
-}));
-jest.mock('../../../single_page_layout/hooks/setup_technology', () => {
+vi.mock('../../datastream_hooks', () => {
+      const mocked = {
+      useIndexTemplateExists: () => ({
+        exists: true,
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../single_page_layout/hooks/setup_technology', () => {
   return {
-    useAgentless: jest.fn(),
+    useAgentless: vi.fn(),
   };
 });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useRouteMatch: () => ({
-    params: {},
-  }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useRouteMatch: () => ({
+        params: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useAgentlessMock = useAgentless as jest.MockedFunction<typeof useAgentless>;
+const useAgentlessMock = useAgentless as MockedFunction<typeof useAgentless>;
 
 // Mock stream-level var_group
 const mockStreamVarGroup: RegistryVarGroup = {
@@ -180,17 +192,17 @@ const mockPackageInfo: PackageInfo = {
 describe('PackagePolicyInputStreamConfig', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  let mockUpdatePackagePolicyInputStream: jest.Mock;
+  let mockUpdatePackagePolicyInputStream: Mock;
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
-    mockUpdatePackagePolicyInputStream = jest.fn();
+    mockUpdatePackagePolicyInputStream = vi.fn();
 
     useAgentlessMock.mockReturnValue({
       isAgentlessEnabled: false,
       isAgentlessDefault: false,
-      isAgentlessAgentPolicy: jest.fn(),
-      getAgentlessStatusForPackage: jest
+      isAgentlessAgentPolicy: vi.fn(),
+      getAgentlessStatusForPackage: vi
         .fn()
         .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
       isServerless: false,
@@ -199,7 +211,7 @@ describe('PackagePolicyInputStreamConfig', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   /**
@@ -348,8 +360,8 @@ describe('PackagePolicyInputStreamConfig', () => {
       useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: true,
         isAgentlessDefault: false,
-        isAgentlessAgentPolicy: jest.fn(),
-        getAgentlessStatusForPackage: jest
+        isAgentlessAgentPolicy: vi.fn(),
+        getAgentlessStatusForPackage: vi
           .fn()
           .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
@@ -371,8 +383,8 @@ describe('PackagePolicyInputStreamConfig', () => {
       useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: false,
         isAgentlessDefault: false,
-        isAgentlessAgentPolicy: jest.fn(),
-        getAgentlessStatusForPackage: jest
+        isAgentlessAgentPolicy: vi.fn(),
+        getAgentlessStatusForPackage: vi
           .fn()
           .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolManager, createToolManager } from './tool_manager';
 import type { StructuredTool } from '@langchain/core/tools';
 import {
@@ -17,55 +20,64 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { z } from '@kbn/zod/v4';
 
 // Mock dependencies
-jest.mock('@kbn/agent-builder-genai-utils/langchain', () => ({
-  createToolIdMappings: jest.fn((tools) => {
-    const map = new Map();
-    tools.forEach((tool: any) => {
-      map.set(tool.id, `langchain_${tool.id}`);
-    });
-    return map;
-  }),
-  toolToLangchain: jest.fn(async ({ tool, toolId }) => {
-    return {
-      name: toolId || tool.id,
-      description: tool.description,
-      invoke: jest.fn(),
-    } as unknown as StructuredTool;
-  }),
-  sanitizeToolId: jest.fn((toolId: string) =>
-    toolId.replaceAll('.', '_').replace(/[^a-zA-Z0-9_-]/g, '')
-  ),
-}));
-
-jest.mock('@kbn/agent-builder-genai-utils/langchain/tools', () => ({
-  reverseMap: jest.fn((map) => {
-    const reversed = new Map();
-    map.forEach((value: string, key: string) => {
-      reversed.set(value, key);
-    });
-    return reversed;
-  }),
-}));
-
-jest.mock('../../../tools/browser_tool_adapter', () => ({
-  browserToolsToLangchain: jest.fn(({ browserApiTools }) => {
-    const tools = browserApiTools.map(
-      (tool: any) =>
-        ({
-          name: `browser_${tool.id}`,
+vi.mock('@kbn/agent-builder-genai-utils/langchain', () => {
+      const mocked = {
+      createToolIdMappings: vi.fn((tools) => {
+        const map = new Map();
+        tools.forEach((tool: any) => {
+          map.set(tool.id, `langchain_${tool.id}`);
+        });
+        return map;
+      }),
+      toolToLangchain: vi.fn(async ({ tool, toolId }) => {
+        return {
+          name: toolId || tool.id,
           description: tool.description,
-          invoke: jest.fn(),
-        } as unknown as StructuredTool)
-    );
-
-    const idMappings = new Map();
-    browserApiTools.forEach((tool: any) => {
-      idMappings.set(`browser_${tool.id}`, `browser_${tool.id}`);
+          invoke: vi.fn(),
+        } as unknown as StructuredTool;
+      }),
+      sanitizeToolId: vi.fn((toolId: string) =>
+        toolId.replaceAll('.', '_').replace(/[^a-zA-Z0-9_-]/g, '')
+      ),
+    };
+      return { ...mocked, default: mocked };
     });
 
-    return { tools, idMappings };
-  }),
-}));
+vi.mock('@kbn/agent-builder-genai-utils/langchain/tools', () => {
+      const mocked = {
+      reverseMap: vi.fn((map) => {
+        const reversed = new Map();
+        map.forEach((value: string, key: string) => {
+          reversed.set(value, key);
+        });
+        return reversed;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../tools/browser_tool_adapter', () => {
+      const mocked = {
+      browserToolsToLangchain: vi.fn(({ browserApiTools }) => {
+        const tools = browserApiTools.map(
+          (tool: any) =>
+            ({
+              name: `browser_${tool.id}`,
+              description: tool.description,
+              invoke: vi.fn(),
+            } as unknown as StructuredTool)
+        );
+
+        const idMappings = new Map();
+        browserApiTools.forEach((tool: any) => {
+          idMappings.set(`browser_${tool.id}`, `browser_${tool.id}`);
+        });
+
+        return { tools, idMappings };
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ToolManager', () => {
   let toolManager: ToolManager;
@@ -88,7 +100,7 @@ describe('ToolManager', () => {
     experimental: false,
     configuration: {},
     getSchema: async () => z.object({}),
-    execute: jest.fn(),
+    execute: vi.fn(),
     origin,
   });
 
@@ -258,12 +270,12 @@ describe('ToolManager', () => {
 
   describe('setEventEmitter', () => {
     it('passes the event emitter to toolToLangchain when set', async () => {
-      const { toolToLangchain } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain') as {
-        toolToLangchain: jest.Mock;
+      const { toolToLangchain } = (await vi.importMock('@kbn/agent-builder-genai-utils/langchain')) as {
+        toolToLangchain: Mock;
       };
 
       const tool = createMockExecutableTool('tool-1');
-      const eventEmitter = jest.fn();
+      const eventEmitter = vi.fn();
 
       toolManager.setEventEmitter(eventEmitter);
 
@@ -281,12 +293,12 @@ describe('ToolManager', () => {
     });
 
     it('uses the event emitter for tools added in subsequent addTools calls', async () => {
-      const { toolToLangchain } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain') as {
-        toolToLangchain: jest.Mock;
+      const { toolToLangchain } = (await vi.importMock('@kbn/agent-builder-genai-utils/langchain')) as {
+        toolToLangchain: Mock;
       };
       toolToLangchain.mockClear();
 
-      const eventEmitter = jest.fn();
+      const eventEmitter = vi.fn();
       toolManager.setEventEmitter(eventEmitter);
 
       // First addTools call
@@ -319,8 +331,8 @@ describe('ToolManager', () => {
     });
 
     it('does not pass event emitter when not set', async () => {
-      const { toolToLangchain } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain') as {
-        toolToLangchain: jest.Mock;
+      const { toolToLangchain } = (await vi.importMock('@kbn/agent-builder-genai-utils/langchain')) as {
+        toolToLangchain: Mock;
       };
 
       const tool = createMockExecutableTool('tool-1');
@@ -819,7 +831,7 @@ describe('ToolManager', () => {
     });
 
     it('returns the summarizer for a tool with summarizeToolReturn', async () => {
-      const summarizer = jest.fn();
+      const summarizer = vi.fn();
       const tool: ExecutableToolWithOrigin = {
         ...createMockExecutableTool('tool-with-summarizer'),
         summarizeToolReturn: summarizer,
@@ -846,8 +858,8 @@ describe('ToolManager', () => {
     });
 
     it('returns the latest summarizer when a tool is re-added', async () => {
-      const summarizer1 = jest.fn();
-      const summarizer2 = jest.fn();
+      const summarizer1 = vi.fn();
+      const summarizer2 = vi.fn();
       const tool1: ExecutableToolWithOrigin = {
         ...createMockExecutableTool('tool-1'),
         summarizeToolReturn: summarizer1,
@@ -878,9 +890,9 @@ describe('ToolManager', () => {
       { tool_result_id: 'r-1', type: 'other', data: { text: 'x'.repeat(100_000) } },
     ];
 
-    const getBuildContent = () => {
-      const { toolToLangchain } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain') as {
-        toolToLangchain: jest.Mock;
+    const getBuildContent = async () => {
+      const { toolToLangchain } = (await vi.importMock('@kbn/agent-builder-genai-utils/langchain')) as {
+        toolToLangchain: Mock;
       };
       const lastCall = toolToLangchain.mock.calls[toolToLangchain.mock.calls.length - 1][0];
       return lastCall.buildContent as (params: {
@@ -979,7 +991,7 @@ describe('ToolManager', () => {
     it('resolves maxResultTokens independently of summarizeToolReturn', async () => {
       const tool = {
         ...createMockExecutableTool('tool-1'),
-        summarizeToolReturn: jest.fn(),
+        summarizeToolReturn: vi.fn(),
       };
 
       toolManager.setMaxToolResultTokens(10);

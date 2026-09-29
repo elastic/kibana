@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ReactNode } from 'react';
 import React from 'react';
 import { QueryClient, QueryClientProvider, useQuery as _useQuery } from '@kbn/react-query';
@@ -15,14 +18,14 @@ import { coreMock as mockCore } from '@kbn/core/public/mocks';
 import { dataUsageTestQueryClientOptions } from '../../common/test_utils';
 import { transformToUTCtime } from '../../common/utils';
 
-const useQueryMock = _useQuery as jest.Mock;
+const useQueryMock = _useQuery as Mock;
 
-jest.mock('@kbn/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
+vi.mock('@kbn/react-query', async () => {
+  const actualReactQueryModule = (await vi.importActual('@kbn/react-query'));
 
   return {
     ...actualReactQueryModule,
-    useQuery: jest.fn((...args) => actualReactQueryModule.useQuery(...args)),
+    useQuery: vi.fn((...args) => actualReactQueryModule.useQuery(...args)),
   };
 });
 
@@ -34,7 +37,7 @@ const createWrapper = () => {
   );
 };
 
-jest.mock('../utils/use_kibana', () => {
+vi.mock('../utils/use_kibana', () => {
   return {
     useKibanaContextForPlugin: () => ({
       services: mockServices,
@@ -60,7 +63,7 @@ describe('useGetDataUsageMetrics', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     defaultUsageMetricsRequestBody = {
       ...defaultUsageMetricsRequestBody,

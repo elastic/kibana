@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { dashboardServiceProvider } from './dashboard_service';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 describe('DashboardService', () => {
-  const getUrlMock = jest.fn();
+  const getUrlMock = vi.fn();
   const dashboard: DashboardStart = {
     // @ts-expect-error Only partial mock of full plugin
     locator: {
-      getUrl: jest.fn(),
+      getUrl: vi.fn(),
     },
-    findDashboardsService: jest.fn().mockResolvedValue({
-      search: jest.fn().mockResolvedValue({
+    findDashboardsService: vi.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         meta: { total: 0 },
         data: [],
       }),

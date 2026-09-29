@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -18,12 +20,18 @@ import type { TimeRange } from '../../../../../../common/time/time_range';
 
 // Keep tests focused on the state machine; children have their own tests.
 // Kibana's testing-library setup resolves getByTestId via data-test-subj.
-jest.mock('./anomalies_swimlane_visualisation', () => ({
-  AnomaliesSwimlaneVisualisation: () => <div data-test-subj="anomaliesSwimlane" />,
-}));
-jest.mock('./table', () => ({
-  AnomaliesTable: () => <div data-test-subj="anomaliesTable" />,
-}));
+vi.mock('./anomalies_swimlane_visualisation', () => {
+      const mocked = {
+      AnomaliesSwimlaneVisualisation: () => <div data-test-subj="anomaliesSwimlane" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./table', () => {
+      const mocked = {
+      AnomaliesTable: () => <div data-test-subj="anomaliesTable" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const timeRange: TimeRange = {
   startTime: new Date('2026-06-12T14:00:00.000Z').valueOf(),
@@ -36,14 +44,14 @@ const paginationOptions: PaginationOptions = { pageSize: 25 };
 const baseProps = {
   isLoadingAnomaliesResults: false,
   hasFailedLoadingAnomaliesResults: false,
-  onRetryAnomaliesResults: jest.fn(),
+  onRetryAnomaliesResults: vi.fn(),
   anomalies: [] as LogEntryAnomalies,
   timeRange,
   page: 1,
   fetchNextPage: undefined,
   fetchPreviousPage: undefined,
-  changeSortOptions: jest.fn(),
-  changePaginationOptions: jest.fn(),
+  changeSortOptions: vi.fn(),
+  changePaginationOptions: vi.fn(),
   sortOptions,
   paginationOptions,
   selectedDatasets: [],
@@ -69,7 +77,7 @@ describe('AnomaliesResults', () => {
     });
 
     it('calls the retry callback when the retry button is clicked', () => {
-      const onRetry = jest.fn();
+      const onRetry = vi.fn();
       renderComponent({
         hasFailedLoadingAnomaliesResults: true,
         onRetryAnomaliesResults: onRetry,

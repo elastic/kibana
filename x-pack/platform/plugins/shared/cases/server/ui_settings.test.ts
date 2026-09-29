@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import {
   MAX_OPEN_CASES_DEFAULT_MAXIMUM,
@@ -18,7 +20,7 @@ describe('initUiSettings', () => {
 
     initUiSettings(uiSettings);
 
-    const registeredSettings = (uiSettings.register as jest.Mock).mock.calls[0][0];
+    const registeredSettings = (uiSettings.register as Mock).mock.calls[0][0];
 
     expect(registeredSettings).toHaveProperty(MAX_OPEN_CASES_ADVANCED_SETTING);
     expect(registeredSettings[MAX_OPEN_CASES_ADVANCED_SETTING]).toEqual(

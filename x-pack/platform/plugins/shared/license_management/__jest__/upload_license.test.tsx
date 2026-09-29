@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { Provider } from 'react-redux-v7';
 import type { LocationDescriptorObject } from 'history';
@@ -56,13 +58,13 @@ describe('UploadLicense', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
       value: {
-        reload: jest.fn(),
+        reload: vi.fn(),
       },
     });
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     history = scopedHistoryMock.create();
     history.createHref.mockImplementation((location: LocationDescriptorObject) => {
@@ -70,7 +72,7 @@ describe('UploadLicense', () => {
     });
 
     breadcrumbService = new BreadcrumbService();
-    breadcrumbService.setup(jest.fn());
+    breadcrumbService.setup(vi.fn());
 
     licensing = licensingMock.createSetup();
 

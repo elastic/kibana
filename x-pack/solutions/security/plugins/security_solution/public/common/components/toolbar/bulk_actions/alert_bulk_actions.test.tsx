@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { TestProviders } from '../../../mock';
@@ -16,7 +19,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
 const mockSelectedEventIds: Record<string, TimelineNonEcsData[]> = {
   nvowrrn: [{ field: 'nvowrrn' }],
@@ -40,7 +43,7 @@ function renderAlertBulkActions(props?: Partial<StatefulAlertBulkActionsProps>) 
 
 describe('AlertBulkActionsComponent', () => {
   beforeEach(() => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsUpdate: true });
   });
 
   it('it renders', async () => {

@@ -7,37 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, within } from '@testing-library/react';
 import { ScriptingHelpFlyout } from './help_flyout';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      docLinks: {
-        links: {
-          scriptedFields: {
-            luceneExpressions: '#',
-            painless: '#',
-            painlessApi: '#',
-            painlessSyntax: '#',
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          docLinks: {
+            links: {
+              scriptedFields: {
+                luceneExpressions: '#',
+                painless: '#',
+                painlessApi: '#',
+                painlessSyntax: '#',
+              },
+            },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderFlyout = (isVisible: boolean) =>
   renderWithI18n(
     <ScriptingHelpFlyout
-      executeScript={jest.fn()}
+      executeScript={vi.fn()}
       indexPattern={buildDataViewMock({})}
       isVisible={isVisible}
       lang="painless"
-      onClose={jest.fn()}
+      onClose={vi.fn()}
     />
   );
 

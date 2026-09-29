@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { hasSeenOnboarding, markOnboardingSeen } from './first_load';
 import { ONBOARDING_SEEN_STORAGE_KEY } from './storage_keys';
 
@@ -28,7 +30,7 @@ describe('hasSeenOnboarding', () => {
   });
 
   it('returns true when localStorage throws', () => {
-    jest.spyOn(Storage.prototype, 'getItem').mockImplementationOnce(() => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementationOnce(() => {
       throw new Error('storage unavailable');
     });
     expect(hasSeenOnboarding()).toBe(true);
@@ -42,7 +44,7 @@ describe('markOnboardingSeen', () => {
   });
 
   it('does not throw when localStorage throws', () => {
-    jest.spyOn(Storage.prototype, 'setItem').mockImplementationOnce(() => {
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementationOnce(() => {
       throw new Error('storage unavailable');
     });
     expect(() => markOnboardingSeen()).not.toThrow();

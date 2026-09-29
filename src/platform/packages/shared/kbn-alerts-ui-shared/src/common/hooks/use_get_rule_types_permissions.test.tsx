@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -29,8 +31,8 @@ const buildAlert = (fields: { ruleTypeId?: string; consumer?: string }): Alert =
 const http = httpServiceMock.createStartContract();
 const { toasts } = notificationServiceMock.createStartContract();
 
-jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types');
-const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
+vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types');
+const { getRuleTypes } = (await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types'));
 getRuleTypes.mockResolvedValue([
   {
     id: 'rule-type-1',

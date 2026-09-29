@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import * as spaceHook from '../../../../../hooks/use_kibana_space';
 import * as paramHook from '../../../hooks/use_url_params';
@@ -28,12 +30,12 @@ const localMonitorIdQuery = (
 
 describe('useMonitorFilters', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  const spaceSpy = jest.spyOn(spaceHook, 'useKibanaSpace');
-  const paramSpy = jest.spyOn(paramHook, 'useGetUrlParams');
-  const selSPy = jest.spyOn(redux, 'useSelector');
+  const spaceSpy = vi.spyOn(spaceHook, 'useKibanaSpace');
+  const paramSpy = vi.spyOn(paramHook, 'useGetUrlParams');
+  const selSPy = vi.spyOn(redux, 'useSelector');
 
   it('should return an empty array when no parameters are provided', () => {
     const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
@@ -194,11 +196,11 @@ describe('useMonitorFilters', () => {
 
 describe('useMonitorIdFilter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  const paramSpy = jest.spyOn(paramHook, 'useGetUrlParams');
-  const selSPy = jest.spyOn(redux, 'useSelector');
+  const paramSpy = vi.spyOn(paramHook, 'useGetUrlParams');
+  const selSPy = vi.spyOn(redux, 'useSelector');
 
   it('returns undefined when no schedules, search, or status filter are active', () => {
     paramSpy.mockReturnValue({} as any);
@@ -666,12 +668,12 @@ describe('useMonitorIdFilter', () => {
 
 describe('useOverviewAlertsKuery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  const spaceSpy = jest.spyOn(spaceHook, 'useKibanaSpace');
-  const paramSpy = jest.spyOn(paramHook, 'useGetUrlParams');
-  const selSPy = jest.spyOn(redux, 'useSelector');
+  const spaceSpy = vi.spyOn(spaceHook, 'useKibanaSpace');
+  const paramSpy = vi.spyOn(paramHook, 'useGetUrlParams');
+  const selSPy = vi.spyOn(redux, 'useSelector');
 
   it('includes lifecycle status, space, and location without expanding monitor ids to KQL', () => {
     spaceSpy.mockReturnValue({ space: { id: 'space1' } } as any);

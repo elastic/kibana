@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
@@ -20,16 +22,18 @@ import { getESQLControlFactory } from './get_esql_control_factory';
 import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 import type { ESQLControlApi } from './types';
 
-const mockGetESQLSingleColumnValues = jest.fn(() => ({ options: ['option1', 'option2'] }));
-const mockIsSuccess = jest.fn(() => true);
+// No default implementations: `vi.resetAllMocks()` in beforeEach restores them in Vitest,
+// while Jest's resetAllMocks dropped them, and these tests were written against Jest's behavior.
+const mockGetESQLSingleColumnValues = vi.fn();
+const mockIsSuccess = vi.fn();
 
 const mockFetch$ = new BehaviorSubject({});
-jest.mock('@kbn/presentation-publishing', () => ({
-  ...jest.requireActual('@kbn/presentation-publishing'),
+vi.mock('@kbn/presentation-publishing', async () => ({
+  ...(await vi.importActual('@kbn/presentation-publishing')),
   fetch$: () => mockFetch$,
 }));
 
-jest.mock('../../../common/options_list/get_esql_single_column_values', () => {
+vi.mock('../../../common/options_list/get_esql_single_column_values', () => {
   const getESQLSingleColumnValues = async () => mockGetESQLSingleColumnValues();
   getESQLSingleColumnValues.isSuccess = () => mockIsSuccess();
   return {
@@ -39,7 +43,7 @@ jest.mock('../../../common/options_list/get_esql_single_column_values', () => {
 
 describe('ESQLControlApi', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const uuid = 'myESQLControl';
@@ -58,7 +62,7 @@ describe('ESQLControlApi', () => {
       control_type: 'STATIC_VALUES',
     };
     const { api } = await factory.buildEmbeddable({
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
       initialState,
       finalizeApi,
       uuid,
@@ -84,7 +88,7 @@ describe('ESQLControlApi', () => {
       control_type: EsqlControlType.STATIC_VALUES,
     };
     const { api } = await factory.buildEmbeddable({
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
       initialState,
       finalizeApi,
       uuid,
@@ -112,7 +116,7 @@ describe('ESQLControlApi', () => {
         control_type: EsqlControlType.VALUES_FROM_QUERY,
       };
       await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -135,7 +139,7 @@ describe('ESQLControlApi', () => {
         control_type: EsqlControlType.VALUES_FROM_QUERY,
       };
       await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -174,7 +178,7 @@ describe('ESQLControlApi', () => {
         control_type: 'STATIC_VALUES',
       };
       const { Component, api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -221,7 +225,7 @@ describe('ESQLControlApi', () => {
         variable_name: 'new name',
       };
       const embeddable = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -243,7 +247,7 @@ describe('ESQLControlApi', () => {
         esql_query: 'from kibana_sample_data_logs | KEEP machine.os.keyword',
       });
       const embeddable = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -259,43 +263,55 @@ describe('ESQLControlApi', () => {
 
   describe('anyStateChange$', () => {
     let embeddableApi: ESQLControlApi<OptionsListESQLControlState>;
-    beforeEach((done) => {
-      factory
-        .buildEmbeddable({
-          initializeDrilldownsManager: jest.fn(),
-          initialState: optionsListESQLControlSchema.parse({
-            control_type: 'VALUES_FROM_QUERY',
-            selected_options: ['osx'],
-            variable_name: 'machineOs',
-            variable_type: 'values',
-            esql_query: 'from kibana_sample_data_logs | KEEP machine.os.keyword',
-          }),
-          finalizeApi,
-          uuid,
-          parentApi: {},
-        })
-        .then(({ api }) => {
-          embeddableApi = api;
-          done();
-        })
-        .catch(done);
-    });
+    beforeEach(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+            fail: reject,
+          });
 
-    test('should not emit on subscribe and emit when any state changes', (done) => {
-      embeddableApi.anyStateChange$.subscribe(() => {
-        try {
-          const { title } = embeddableApi.serializeState();
-          expect(title).toBe('cute puppies');
-        } catch (error) {
-          // title assertion fails when
-          // anyStateChange$ emits on subscribe
-          done(error);
-          return;
-        }
-        done();
-      });
-      embeddableApi.setTitle('cute puppies');
-    });
+          factory
+            .buildEmbeddable({
+              initializeDrilldownsManager: vi.fn(),
+              initialState: optionsListESQLControlSchema.parse({
+                control_type: 'VALUES_FROM_QUERY',
+                selected_options: ['osx'],
+                variable_name: 'machineOs',
+                variable_type: 'values',
+                esql_query: 'from kibana_sample_data_logs | KEEP machine.os.keyword',
+              }),
+              finalizeApi,
+              uuid,
+              parentApi: {},
+            })
+            .then(({ api }) => {
+              embeddableApi = api;
+              done();
+            })
+            .catch(done);
+        })
+    );
+
+    test('should not emit on subscribe and emit when any state changes', () =>
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
+
+        embeddableApi.anyStateChange$.subscribe(() => {
+          try {
+            const { title } = embeddableApi.serializeState();
+            expect(title).toBe('cute puppies');
+          } catch (error) {
+            // title assertion fails when
+            // anyStateChange$ emits on subscribe
+            done(error);
+            return;
+          }
+          done();
+        });
+        embeddableApi.setTitle('cute puppies');
+      }));
   });
 
   describe('cancelRequests', () => {
@@ -309,7 +325,7 @@ describe('ESQLControlApi', () => {
         control_type: 'STATIC_VALUES',
       };
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -328,7 +344,7 @@ describe('ESQLControlApi', () => {
         control_type: 'STATIC_VALUES',
       };
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState,
         finalizeApi,
         uuid,

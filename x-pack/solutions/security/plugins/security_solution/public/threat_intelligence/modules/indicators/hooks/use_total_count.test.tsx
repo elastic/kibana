@@ -5,26 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { useIndicatorsTotalCount } from './use_total_count';
 import { TestProvidersComponent, mockedSearchService } from '../../../mocks/test_providers';
 import { useKibana } from '../../../../common/lib/kibana';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };
 
 describe('useIndicatorsTotalCount()', () => {
   beforeEach(() => {
-    jest.mocked(useKibana).mockReturnValue({
+    vi.mocked(useKibana).mockReturnValue({
       services: { data: { search: mockedSearchService } },
     } as unknown as ReturnType<typeof useKibana>);
 
-    jest
+    vi
       .mocked(mockedSearchService.search)
       .mockReturnValue(new BehaviorSubject(indicatorsResponse));
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when mounted', () => {

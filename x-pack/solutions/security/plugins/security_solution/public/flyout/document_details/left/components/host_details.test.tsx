@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
@@ -43,18 +46,18 @@ import { useAlertsByStatus } from '../../../../overview/components/detection_res
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { getMockDataViewWithMatchedIndices } from '../../../../data_view_manager/mocks/mock_data_view';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -63,54 +66,66 @@ jest.mock('react-redux-v7', () => {
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
-jest.mock('../../../../common/containers/use_global_time', () => {
-  const actual = jest.requireActual('../../../../common/containers/use_global_time');
+vi.mock('../../../../common/containers/use_global_time', async () => {
+  const actual = (await vi.importActual('../../../../common/containers/use_global_time'));
   return {
     ...actual,
-    useGlobalTime: jest
+    useGlobalTime: vi
       .fn()
-      .mockReturnValue({ from, to, setQuery: jest.fn(), deleteQuery: jest.fn() }),
+      .mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() }),
   };
 });
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
-const mockUseMlUserPermissions = useMlCapabilities as jest.Mock;
+vi.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
+const mockUseMlUserPermissions = useMlCapabilities as Mock;
 
-const mockUseHasSecurityCapability = jest.fn().mockReturnValue(false);
-jest.mock('../../../../helper_hooks', () => ({
-  useHasSecurityCapability: () => mockUseHasSecurityCapability(),
-}));
+const mockUseHasSecurityCapability = vi.fn().mockReturnValue(false);
+vi.mock('../../../../helper_hooks', () => {
+      const mocked = {
+      useHasSecurityCapability: () => mockUseHasSecurityCapability(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: () => 'default',
-}));
+vi.mock('../../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: () => 'default',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
-  AnomalyTableProvider: ({
-    children,
-  }: {
-    children: (args: {
-      anomaliesData: Anomalies;
-      isLoadingAnomaliesData: boolean;
-      jobNameById: Record<string, string | undefined>;
-    }) => React.ReactNode;
-  }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
-}));
+vi.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => {
+      const mocked = {
+      AnomalyTableProvider: ({
+        children,
+      }: {
+        children: (args: {
+          anomaliesData: Anomalies;
+          isLoadingAnomaliesData: boolean;
+          jobNameById: Record<string, string | undefined>;
+        }) => React.ReactNode;
+      }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../flyout_v2/entity/host/main/hooks/use_observed_host');
-const mockUseObservedHost = useObservedHost as jest.Mock;
+vi.mock('../../../../flyout_v2/entity/host/main/hooks/use_observed_host');
+const mockUseObservedHost = useObservedHost as Mock;
 
-jest.mock('../../../../common/containers/related_entities/related_users');
-const mockUseHostsRelatedUsers = useHostRelatedUsers as jest.Mock;
+vi.mock('../../../../common/containers/related_entities/related_users');
+const mockUseHostsRelatedUsers = useHostRelatedUsers as Mock;
 
-jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
-const mockUseRiskScore = useRiskScore as jest.Mock;
+vi.mock('../../../../entity_analytics/api/hooks/use_risk_score');
+const mockUseRiskScore = useRiskScore as Mock;
 
-jest.mock(
+vi.mock(
   '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
 );
 const mockAlertData = {
@@ -139,7 +154,7 @@ const mockObservedHostResult = {
   entityRecord: null,
   refetchEntityStore: undefined,
   observedDetailsInspect: undefined,
-  refetchObservedDetails: jest.fn(),
+  refetchObservedDetails: vi.fn(),
 };
 
 const mockRiskScoreResponse = {
@@ -155,8 +170,8 @@ const mockRiskScoreResponse = {
 };
 
 const mockRelatedUsersResponse = {
-  inspect: jest.fn(),
-  refetch: jest.fn(),
+  inspect: vi.fn(),
+  refetch: vi.fn(),
   relatedUsers: [{ user: 'test user', ip: ['100.XXX.XXX'], risk: RiskSeverity.Low }],
   loading: false,
 };
@@ -172,16 +187,16 @@ const renderHostDetails = (contextValue: DocumentDetailsContext) =>
 
 describe('<HostDetails />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.clearAllMocks();
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     mockUseMlUserPermissions.mockReturnValue({ isPlatinumOrTrialLicense: false, capabilities: {} });
     mockUseObservedHost.mockReturnValue(mockObservedHostResult);
     mockUseRiskScore.mockReturnValue(mockRiskScoreResponse);
     mockUseHostsRelatedUsers.mockReturnValue(mockRelatedUsersResponse);
-    (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
-    (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({});
-    (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
-    jest
+    (useMisconfigurationPreview as Mock).mockReturnValue({});
+    (useVulnerabilitiesPreview as Mock).mockReturnValue({});
+    (useAlertsByStatus as Mock).mockReturnValue({ isLoading: false, items: {} });
+    vi
       .mocked(useDataView)
       .mockReturnValue({ dataView: getMockDataViewWithMatchedIndices(['index']), status: 'ready' });
   });
@@ -337,7 +352,7 @@ describe('<HostDetails />', () => {
     });
 
     it('should render alert count when data is available', () => {
-      (useAlertsByStatus as jest.Mock).mockReturnValue({
+      (useAlertsByStatus as Mock).mockReturnValue({
         isLoading: false,
         items: mockAlertData,
       });
@@ -347,7 +362,7 @@ describe('<HostDetails />', () => {
     });
 
     it('should render misconfiguration when data is available', () => {
-      (useMisconfigurationPreview as jest.Mock).mockReturnValue({
+      (useMisconfigurationPreview as Mock).mockReturnValue({
         data: { count: { passed: 1, failed: 2 } },
       });
 
@@ -356,7 +371,7 @@ describe('<HostDetails />', () => {
     });
 
     it('should render vulnerabilities when data is available', () => {
-      (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({
+      (useVulnerabilitiesPreview as Mock).mockReturnValue({
         data: { count: { CRITICAL: 0, HIGH: 1, MEDIUM: 1, LOW: 0, UNKNOWN: 0 } },
       });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { type FC, type PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -17,15 +19,15 @@ import type { SearchItems } from './use_search_items';
 import { useIndexData } from './use_index_data';
 import { useTransformConfigData } from './use_transform_config_data';
 
-jest.mock('../app_dependencies');
+vi.mock('../app_dependencies');
 
-const mockResetPagination = jest.fn();
-const mockUseDataGrid = jest.fn();
-const mockShowDataGridColumnChartErrorMessageToast = jest.fn();
-const mockUseGetHistogramsForFields = jest.fn();
+const mockResetPagination = vi.fn();
+const mockUseDataGrid = vi.fn();
+const mockShowDataGridColumnChartErrorMessageToast = vi.fn();
+const mockUseGetHistogramsForFields = vi.fn();
 
-jest.mock('@kbn/ml-data-grid', () => {
-  const actual = jest.requireActual('@kbn/ml-data-grid');
+vi.mock('@kbn/ml-data-grid', async () => {
+  const actual = (await vi.importActual('@kbn/ml-data-grid'));
 
   return {
     ...actual,
@@ -35,9 +37,12 @@ jest.mock('@kbn/ml-data-grid', () => {
   };
 });
 
-jest.mock('./use_get_histograms_for_fields', () => ({
-  useGetHistogramsForFields: (...args: unknown[]) => mockUseGetHistogramsForFields(...args),
-}));
+vi.mock('./use_get_histograms_for_fields', () => {
+      const mocked = {
+      useGetHistogramsForFields: (...args: unknown[]) => mockUseGetHistogramsForFields(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const query: SimpleQuery = {
   query_string: {
@@ -77,13 +82,13 @@ const getMockDataGrid = () => ({
   chartsVisible: false,
   pagination: { pageIndex: 2, pageSize: 10 },
   resetPagination: mockResetPagination,
-  setCcsWarning: jest.fn(),
-  setColumnCharts: jest.fn(),
-  setErrorMessage: jest.fn(),
-  setNoDataMessage: jest.fn(),
-  setRowCountInfo: jest.fn(),
-  setStatus: jest.fn(),
-  setTableItems: jest.fn(),
+  setCcsWarning: vi.fn(),
+  setColumnCharts: vi.fn(),
+  setErrorMessage: vi.fn(),
+  setNoDataMessage: vi.fn(),
+  setRowCountInfo: vi.fn(),
+  setStatus: vi.fn(),
+  setTableItems: vi.fn(),
   sortingColumns: [],
   tableItems: [],
   visibleColumns: [],
@@ -91,7 +96,7 @@ const getMockDataGrid = () => ({
 
 describe('project routing pagination reset', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseDataGrid.mockReturnValue(getMockDataGrid());
     mockUseGetHistogramsForFields.mockReturnValue({ data: [], error: null });
   });

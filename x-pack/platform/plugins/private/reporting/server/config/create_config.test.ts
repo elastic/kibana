@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { CoreSetup, HttpServerInfo, Logger } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
@@ -12,7 +15,7 @@ import { createConfig } from './create_config';
 
 describe('Reporting server createConfig', () => {
   let mockCoreSetup: CoreSetup;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
@@ -20,7 +23,7 @@ describe('Reporting server createConfig', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('creates random encryption key and default config using host, protocol, and port from server info', () => {
@@ -114,7 +117,7 @@ describe('Reporting server createConfig', () => {
   it.each(['0', '0.0', '0.0.0', '0.0.0.0', '0000:0000:0000:0000:0000:0000:0000:0000', '::'])(
     `apply failover logic when hostname is given as "%s"`,
     (hostname) => {
-      mockCoreSetup.http.getServerInfo = jest.fn(
+      mockCoreSetup.http.getServerInfo = vi.fn(
         (): HttpServerInfo => ({
           name: 'cool server',
           hostname,

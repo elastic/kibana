@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import DateMath from '@kbn/datemath';
 import { DurationChartComponent } from './duration_chart';
@@ -16,12 +18,12 @@ describe('MonitorCharts component', () => {
   const MOCK_DATE_VALUE = 20;
 
   beforeEach(() => {
-    dateMathSpy = jest.spyOn(DateMath, 'parse');
+    dateMathSpy = vi.spyOn(DateMath, 'parse');
     dateMathSpy.mockReturnValue(MOCK_DATE_VALUE);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const chartResponse: { monitorChartsData: MonitorDurationResult } = {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { createMockPackagePolicy, stubClusterInfo, stubLicenseInfo } from './__mocks__';
 import {
@@ -811,7 +813,7 @@ describe('test advanced policy config overlap ', () => {
 
 describe('test metrics response to value list meta data', () => {
   test('can succeed when metrics response is fully populated', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-01-30'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-01-30'));
     const stubMetricResponses = {
       listMetricsResponse: {
         aggregations: {

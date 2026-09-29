@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getOrRedirectToTransactionType } from './apm_service_context';
 import { createMemoryHistory } from 'history';
 
 describe('getOrRedirectToTransactionType', () => {
   const history = createMemoryHistory();
-  jest.spyOn(history, 'replace');
+  vi.spyOn(history, 'replace');
 
   describe('with transaction type in url', () => {
     it('returns the transaction type in the url ', () => {

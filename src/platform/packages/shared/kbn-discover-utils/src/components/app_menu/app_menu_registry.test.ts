@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { AppMenuRegistry } from './app_menu_registry';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '../../types';
 
@@ -25,7 +27,7 @@ describe('AppMenuRegistry', () => {
         label: 'Test Item',
         iconType: 'magnify',
         testId: 'testItem',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerItem(item);
@@ -41,7 +43,7 @@ describe('AppMenuRegistry', () => {
         order: 1,
         label: 'Test Item 1',
         iconType: 'magnify',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       const item2: DiscoverAppMenuItemType = {
@@ -49,7 +51,7 @@ describe('AppMenuRegistry', () => {
         order: 2,
         label: 'Test Item 2',
         iconType: 'bell',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerItem(item1);
@@ -69,21 +71,21 @@ describe('AppMenuRegistry', () => {
           order: 1,
           label: 'Item 1',
           iconType: 'magnify',
-          run: jest.fn(),
+          run: vi.fn(),
         },
         {
           id: 'item-2',
           order: 2,
           label: 'Item 2',
           iconType: 'warning',
-          run: jest.fn(),
+          run: vi.fn(),
         },
         {
           id: 'item-3',
           order: 3,
           label: 'Item 3',
           iconType: 'bell',
-          run: jest.fn(),
+          run: vi.fn(),
         },
       ];
 
@@ -100,7 +102,7 @@ describe('AppMenuRegistry', () => {
         id: 'primary',
         label: 'Primary',
         iconType: 'save',
-        run: jest.fn(),
+        run: vi.fn(),
         testId: 'primaryButton',
       };
 
@@ -115,14 +117,14 @@ describe('AppMenuRegistry', () => {
         id: 'primary',
         label: 'Primary 1',
         iconType: 'save',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       const primaryItem2 = {
         id: 'primary',
         label: 'Primary 2',
         iconType: 'save',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.setPrimaryActionItem(primaryItem1);
@@ -148,7 +150,7 @@ describe('AppMenuRegistry', () => {
         order: 1,
         label: 'Child 1',
         iconType: 'bell',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerItem(parentItem);
@@ -169,7 +171,7 @@ describe('AppMenuRegistry', () => {
         label: 'Parent',
         iconType: 'warning',
         href: '/parent',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       const popoverItem: DiscoverAppMenuPopoverItem = {
@@ -177,7 +179,7 @@ describe('AppMenuRegistry', () => {
         order: 1,
         label: 'Child 1',
         iconType: 'bell',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerItem(parentItem);
@@ -211,7 +213,7 @@ describe('AppMenuRegistry', () => {
         order: 1,
         label: 'Child 1',
         iconType: 'bell',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerItem(parentItem);
@@ -238,7 +240,7 @@ describe('AppMenuRegistry', () => {
         order: 1,
         label: 'Child 1',
         iconType: 'bell',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerItem(parentItem);
@@ -250,7 +252,7 @@ describe('AppMenuRegistry', () => {
         order: 2,
         label: 'Child 2',
         iconType: 'bell',
-        run: jest.fn(),
+        run: vi.fn(),
       });
 
       expect(registry.getPopoverItems('parent')).toEqual([popoverItem]);
@@ -264,7 +266,7 @@ describe('AppMenuRegistry', () => {
         order: 1,
         label: 'Test Item',
         iconType: 'magnify',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerItem(item);
@@ -290,7 +292,7 @@ describe('AppMenuRegistry', () => {
         order: 1,
         label: 'Child 1',
         iconType: 'bell',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerItem(parentItem);
@@ -302,7 +304,7 @@ describe('AppMenuRegistry', () => {
         order: 2,
         label: 'Child 2',
         iconType: 'bell',
-        run: jest.fn(),
+        run: vi.fn(),
       });
 
       expect(registry.getItem('parent')?.items).toEqual([popoverItem]);
@@ -317,7 +319,7 @@ describe('AppMenuRegistry', () => {
         label: 'Custom Item',
         iconType: 'flask',
         testId: 'customItem',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerCustomItem(customItem);
@@ -333,7 +335,7 @@ describe('AppMenuRegistry', () => {
         order: 1,
         label: 'Custom Item 1',
         iconType: 'flask',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       const customItem2: DiscoverAppMenuItemType = {
@@ -341,7 +343,7 @@ describe('AppMenuRegistry', () => {
         order: 2,
         label: 'Custom Item 2',
         iconType: 'bolt',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerCustomItem(customItem1);
@@ -358,7 +360,7 @@ describe('AppMenuRegistry', () => {
         order: 1,
         label: 'Custom 1',
         iconType: 'flask',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       const customItem2: DiscoverAppMenuItemType = {
@@ -366,7 +368,7 @@ describe('AppMenuRegistry', () => {
         order: 2,
         label: 'Custom 2',
         iconType: 'bolt',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       const customItem3: DiscoverAppMenuItemType = {
@@ -374,7 +376,7 @@ describe('AppMenuRegistry', () => {
         order: 3,
         label: 'Custom 3',
         iconType: 'brush',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerCustomItem(customItem1);
@@ -394,7 +396,7 @@ describe('AppMenuRegistry', () => {
         order: 2,
         label: 'Regular Item',
         iconType: 'magnify',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       const customItem: DiscoverAppMenuItemType = {
@@ -402,7 +404,7 @@ describe('AppMenuRegistry', () => {
         order: 1,
         label: 'Custom Item',
         iconType: 'flask',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerItem(regularItem);
@@ -428,7 +430,7 @@ describe('AppMenuRegistry', () => {
         order: 1,
         label: 'Custom Child 1',
         iconType: 'bell',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerCustomItem(parentItem);
@@ -447,7 +449,7 @@ describe('AppMenuRegistry', () => {
         id: 'custom-child-1',
         order: 1,
         label: 'Custom Child 1',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       // Register popover item first
@@ -484,14 +486,14 @@ describe('AppMenuRegistry', () => {
         id: 'custom-child-1',
         label: 'Custom Child 1',
         order: 1,
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       const popoverItem2: DiscoverAppMenuPopoverItem = {
         id: 'custom-child-2',
         label: 'Custom Child 2',
         order: 1,
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerCustomItem(parentItem);
@@ -515,7 +517,7 @@ describe('AppMenuRegistry', () => {
         order: 1,
         label: 'Item 1',
         iconType: 'magnify',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       const item2: DiscoverAppMenuItemType = {
@@ -530,14 +532,14 @@ describe('AppMenuRegistry', () => {
         id: 'popover-1',
         order: 1,
         label: 'Popover 1',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       const primaryItem = {
         id: 'primary',
         label: 'Save',
         iconType: 'save',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerItems([item1, item2]);
@@ -566,7 +568,7 @@ describe('AppMenuRegistry', () => {
         order: 2,
         label: 'Regular',
         iconType: 'magnify',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       const customItem: DiscoverAppMenuItemType = {
@@ -574,7 +576,7 @@ describe('AppMenuRegistry', () => {
         order: 1,
         label: 'Custom',
         iconType: 'flask',
-        run: jest.fn(),
+        run: vi.fn(),
       };
 
       registry.registerItem(regularItem);

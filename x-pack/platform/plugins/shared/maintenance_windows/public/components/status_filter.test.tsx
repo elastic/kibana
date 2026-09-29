@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -15,10 +17,10 @@ import { MaintenanceWindowStatus } from '../../common';
 
 describe('StatusFilter', () => {
   let appMockRenderer: AppMockRenderer;
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
   });
 

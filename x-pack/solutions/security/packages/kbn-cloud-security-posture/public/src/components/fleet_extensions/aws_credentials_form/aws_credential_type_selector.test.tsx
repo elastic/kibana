@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
@@ -15,7 +17,7 @@ import {
 } from './get_aws_credentials_form_options';
 
 describe('AwsCredentialTypeSelector', () => {
-  const mockOnChange = jest.fn();
+  const mockOnChange = vi.fn();
 
   beforeEach(() => {
     mockOnChange.mockClear();

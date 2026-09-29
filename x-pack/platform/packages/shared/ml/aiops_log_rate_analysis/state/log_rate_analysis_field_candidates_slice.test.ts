@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import type { FetchFieldCandidatesResponse } from '../queries/fetch_field_candidates';
@@ -15,8 +17,8 @@ const mockHttp = httpServiceMock.createStartContract();
 
 describe('fetchFieldCandidates', () => {
   it('dispatches field candidates', async () => {
-    const mockDispatch = jest.fn();
-    const mockGetState = jest.fn().mockReturnValue({
+    const mockDispatch = vi.fn();
+    const mockGetState = vi.fn().mockReturnValue({
       logRateAnalysisFieldCandidates: getDefaultState(),
     });
 

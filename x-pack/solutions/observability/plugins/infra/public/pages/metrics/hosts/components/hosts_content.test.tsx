@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,34 +16,55 @@ import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { HostsContent } from './hosts_content';
 
-jest.mock('../hooks/use_unified_search');
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('../hooks/use_hosts_view', () => ({
-  HostsViewProvider: ({ children }: React.PropsWithChildren) => children,
-}));
-jest.mock('../hooks/use_hosts_table', () => ({
-  HostsTableProvider: ({ children }: React.PropsWithChildren) => children,
-}));
-jest.mock('../hooks/use_host_count', () => ({
-  HostCountProvider: ({ children }: React.PropsWithChildren) => children,
-}));
-jest.mock('../hooks/use_alerts_query', () => ({
-  AlertsQueryProvider: ({ children }: React.PropsWithChildren) => children,
-}));
-jest.mock('./kpis/kpi_grid', () => ({
-  KPIGrid: () => <div data-test-subj="hostsKpiGrid" />,
-}));
-jest.mock('./hosts_table', () => ({
-  HostsTable: () => <div data-test-subj="hostsTable" />,
-}));
-jest.mock('./tabs/tabs', () => ({
-  Tabs: () => <div data-test-subj="hostsTabs" />,
-}));
+vi.mock('../hooks/use_unified_search');
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('../hooks/use_hosts_view', () => {
+      const mocked = {
+      HostsViewProvider: ({ children }: React.PropsWithChildren) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_hosts_table', () => {
+      const mocked = {
+      HostsTableProvider: ({ children }: React.PropsWithChildren) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_host_count', () => {
+      const mocked = {
+      HostCountProvider: ({ children }: React.PropsWithChildren) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_alerts_query', () => {
+      const mocked = {
+      AlertsQueryProvider: ({ children }: React.PropsWithChildren) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./kpis/kpi_grid', () => {
+      const mocked = {
+      KPIGrid: () => <div data-test-subj="hostsKpiGrid" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./hosts_table', () => {
+      const mocked = {
+      HostsTable: () => <div data-test-subj="hostsTable" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./tabs/tabs', () => {
+      const mocked = {
+      Tabs: () => <div data-test-subj="hostsTabs" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseUnifiedSearchContext = useUnifiedSearchContext as jest.MockedFunction<
+const mockUseUnifiedSearchContext = useUnifiedSearchContext as MockedFunction<
   typeof useUnifiedSearchContext
 >;
-const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as jest.MockedFunction<
+const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as MockedFunction<
   typeof useKibanaContextForPlugin
 >;
 
@@ -53,9 +77,9 @@ const renderContent = () =>
 
 describe('HostsContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibanaContextForPlugin.mockReturnValue({
-      services: { notifications: { showErrorDialog: jest.fn() } },
+      services: { notifications: { showErrorDialog: vi.fn() } },
     } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
   });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ExtractedVisualization } from '../extract_visualization';
 import {
@@ -97,7 +99,7 @@ describe('createChartCompatibleResultEvaluator', () => {
   }) => {
     const esClient = {
       esql: {
-        query: jest.fn().mockImplementation(async () => {
+        query: vi.fn().mockImplementation(async () => {
           if (esError) {
             throw esError;
           }

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -17,34 +20,52 @@ import { ControlsContent } from './controls_content';
 
 const capturedProps: { current?: ControlGroupRendererProps } = {};
 
-jest.mock('@kbn/control-group-renderer', () => ({
-  ControlGroupRenderer: jest.fn().mockImplementation((props) => {
-    capturedProps.current = props;
-    return <div data-test-subj="control-group-renderer" />;
-  }),
-}));
+vi.mock('@kbn/control-group-renderer', () => {
+      const mocked = {
+      ControlGroupRenderer: vi.fn().mockImplementation((props) => {
+        capturedProps.current = props;
+        return <div data-test-subj="control-group-renderer" />;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useControlPanels: jest.fn(() => [{}, jest.fn()]),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useControlPanels: vi.fn(() => [{}, vi.fn()]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_unified_search', () => ({
-  useUnifiedSearchContext: jest.fn(() => ({ onPreferredSchemaChange: jest.fn() })),
-}));
+vi.mock('../../hooks/use_unified_search', () => {
+      const mocked = {
+      useUnifiedSearchContext: vi.fn(() => ({ onPreferredSchemaChange: vi.fn() })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_time_range_metadata', () => ({
-  useTimeRangeMetadataContext: jest.fn(() => ({ status: 'success' })),
-}));
+vi.mock('../../../../../hooks/use_time_range_metadata', () => {
+      const mocked = {
+      useTimeRangeMetadataContext: vi.fn(() => ({ status: 'success' })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../components/schema_selector', () => ({
-  SchemaSelector: () => null,
-}));
+vi.mock('../../../../../components/schema_selector', () => {
+      const mocked = {
+      SchemaSelector: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
 const baseProps = {
   dataView: { id: 'infra-data-view' } as DataView,
@@ -53,7 +74,7 @@ const baseProps = {
   query: { query: '', language: 'kuery' as const },
   schema: null,
   schemas: [],
-  onFiltersChange: jest.fn(),
+  onFiltersChange: vi.fn(),
 };
 
 const renderControlsContent = () =>
@@ -72,8 +93,8 @@ describe('ControlsContent', () => {
     const projectRouting$ = new BehaviorSubject<string | undefined>('_alias:*');
     const cpsManager = {
       ...cpsPluginMock.createStartContract().cpsManager,
-      getProjectRouting$: jest.fn(() => projectRouting$),
-      getProjectRouting: jest.fn(() => projectRouting$.getValue()),
+      getProjectRouting$: vi.fn(() => projectRouting$),
+      getProjectRouting: vi.fn(() => projectRouting$.getValue()),
     };
     useKibanaMock.mockReturnValue({ services: { cps: { cpsManager } } });
 

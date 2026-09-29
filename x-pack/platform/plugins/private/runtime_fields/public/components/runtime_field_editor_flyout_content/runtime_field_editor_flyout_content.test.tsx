@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -55,7 +58,7 @@ describe('Runtime field editor flyout', () => {
       type: 'date',
       script: { source: 'test=123' },
     };
-    const onSave: jest.Mock<Props['onSave']> = jest.fn();
+    const onSave: Mock<Props['onSave']> = vi.fn();
 
     renderComponent({ onSave, defaultValue: field });
 
@@ -66,7 +69,7 @@ describe('Runtime field editor flyout', () => {
   });
 
   test('should accept an onCancel prop', () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
     renderComponent({ onCancel });
 
     fireEvent.click(screen.getByTestId('closeFlyoutButton'));
@@ -76,7 +79,7 @@ describe('Runtime field editor flyout', () => {
 
   describe('validation', () => {
     test('should validate the fields and prevent saving invalid form', async () => {
-      const onSave: jest.Mock<Props['onSave']> = jest.fn();
+      const onSave: Mock<Props['onSave']> = vi.fn();
 
       renderComponent({ onSave });
 
@@ -95,7 +98,7 @@ describe('Runtime field editor flyout', () => {
     });
 
     test('should forward values from the form', async () => {
-      const onSave: jest.Mock<Props['onSave']> = jest.fn();
+      const onSave: Mock<Props['onSave']> = vi.fn();
 
       renderComponent({ onSave });
 

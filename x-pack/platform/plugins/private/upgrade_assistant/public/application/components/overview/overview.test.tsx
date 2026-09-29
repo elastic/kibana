@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -20,37 +22,58 @@ import type { ApiService } from '../../lib/api';
 import type { CloudStackVersionState } from './use_cloud_stack_version_info';
 import { Overview } from './overview';
 
-const mockUseAppContext = jest.fn();
-jest.mock('../../app_context', () => ({
-  useAppContext: () => mockUseAppContext(),
-}));
+const mockUseAppContext = vi.fn();
+vi.mock('../../app_context', () => {
+      const mocked = {
+      useAppContext: () => mockUseAppContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseCloudStackVersionInfo = jest.fn<
+const mockUseCloudStackVersionInfo = vi.fn<
   CloudStackVersionState,
   [Pick<ApiService, 'getCloudStackVersionInfo'>, string]
 >();
-jest.mock('./use_cloud_stack_version_info', () => ({
-  useCloudStackVersionInfo: (
-    api: Pick<ApiService, 'getCloudStackVersionInfo'>,
-    currentVersion: string
-  ) => mockUseCloudStackVersionInfo(api, currentVersion),
-}));
+vi.mock('./use_cloud_stack_version_info', () => {
+      const mocked = {
+      useCloudStackVersionInfo: (
+        api: Pick<ApiService, 'getCloudStackVersionInfo'>,
+        currentVersion: string
+      ) => mockUseCloudStackVersionInfo(api, currentVersion),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./backup_step', () => ({
-  getBackupStep: () => ({ title: 'Backup', children: null }),
-}));
-jest.mock('./fix_issues_step', () => ({
-  getFixIssuesStep: () => ({ title: 'Fix issues', children: null }),
-}));
-jest.mock('./upgrade_step', () => ({
-  getUpgradeStep: () => ({ title: 'Upgrade', children: null }),
-}));
-jest.mock('./migrate_system_indices', () => ({
-  getMigrateSystemIndicesStep: () => ({ title: 'Migrate system indices', children: null }),
-}));
-jest.mock('./logs_step', () => ({
-  getLogsStep: () => ({ title: 'Logs', children: null }),
-}));
+vi.mock('./backup_step', () => {
+      const mocked = {
+      getBackupStep: () => ({ title: 'Backup', children: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./fix_issues_step', () => {
+      const mocked = {
+      getFixIssuesStep: () => ({ title: 'Fix issues', children: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./upgrade_step', () => {
+      const mocked = {
+      getUpgradeStep: () => ({ title: 'Upgrade', children: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./migrate_system_indices', () => {
+      const mocked = {
+      getMigrateSystemIndicesStep: () => ({ title: 'Migrate system indices', children: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./logs_step', () => {
+      const mocked = {
+      getLogsStep: () => ({ title: 'Logs', children: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderOverview = () =>
   renderWithI18n(
@@ -66,8 +89,8 @@ describe('Overview', () => {
     mockUseAppContext.mockReturnValue({
       featureSet: { migrateSystemIndices: false },
       services: {
-        api: { getCloudStackVersionInfo: jest.fn() },
-        breadcrumbs: { setBreadcrumbs: jest.fn() },
+        api: { getCloudStackVersionInfo: vi.fn() },
+        breadcrumbs: { setBreadcrumbs: vi.fn() },
         core: { docLinks: docLinksServiceMock.createStartContract() },
       },
       plugins: { cloud: {} },

@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { useConnectorSelection, _resetConnectorSelectionStore } from './use_connector_selection';
 
-jest.mock('../use_kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useKibana } from '../use_kibana';
 import { storageKeys } from '../../storage_keys';
@@ -20,14 +26,14 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 describe('useConnectorSelection', () => {
   let defaultConnector$: BehaviorSubject<string | undefined>;
   let defaultConnectorOnly$: BehaviorSubject<boolean>;
 
   const buildGet$ = () =>
-    jest.fn((key: string) => {
+    vi.fn((key: string) => {
       if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return defaultConnector$;
       if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) return defaultConnectorOnly$;
       return new BehaviorSubject(undefined);
@@ -49,8 +55,8 @@ describe('useConnectorSelection', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
     localStorage.clear();
     act(() => {
       _resetConnectorSelectionStore();

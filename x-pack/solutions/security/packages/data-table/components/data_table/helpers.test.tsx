@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { ColumnHeaderOptions } from '../../common/types';
 import {
@@ -180,7 +182,7 @@ describe('helpers', () => {
     const THEME = { eui: { euiColorHighlight: 'euiColorHighlight' }, darkMode: false } as EuiTheme;
 
     test('it calls `setCellProps` with background color when event is a building block', () => {
-      const mockedSetCellProps = jest.fn();
+      const mockedSetCellProps = vi.fn();
       const ecs = {
         ...mockDnsEvent,
         ...{ kibana: { alert: { building_block_type: ['default'] } } },
@@ -196,7 +198,7 @@ describe('helpers', () => {
     });
 
     test('it call `setCellProps` resetting the background color when event is not a building block', () => {
-      const mockedSetCellProps = jest.fn();
+      const mockedSetCellProps = vi.fn();
 
       addBuildingBlockStyle(mockDnsEvent, THEME, mockedSetCellProps);
 

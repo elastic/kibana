@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EMSFileSource } from './ems_file_source';
 
-jest.mock('../../layers/vector_layer', () => {});
+vi.mock('../../layers/vector_layer', () => {});
 
 function makeEMSFileSource(tooltipProperties: string[]) {
   const emsFileSource = new EMSFileSource({ tooltipProperties });

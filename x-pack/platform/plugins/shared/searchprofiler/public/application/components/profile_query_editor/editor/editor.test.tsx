@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@kbn/code-editor-mock/jest_helper';
@@ -14,8 +16,8 @@ import { Editor } from './editor';
 
 describe('Editor Component', () => {
   it('renders', () => {
-    const setEditorValue = jest.fn();
-    const onEditorReady = jest.fn();
+    const setEditorValue = vi.fn();
+    const onEditorReady = vi.fn();
 
     const props: Props = {
       editorValue: '',

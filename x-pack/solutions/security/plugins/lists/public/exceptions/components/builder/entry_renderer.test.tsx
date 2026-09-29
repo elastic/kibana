@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
@@ -36,8 +39,8 @@ import { getFoundListsBySizeSchemaMock } from '../../../../common/schemas/respon
 import { BuilderEntryItem } from './entry_renderer';
 import * as i18n from './translations';
 
-jest.mock('@kbn/securitysolution-list-hooks');
-jest.mock('@kbn/securitysolution-utils');
+vi.mock('@kbn/securitysolution-list-hooks');
+vi.mock('@kbn/securitysolution-utils');
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = kqlPluginMock.createStartContract();
@@ -48,16 +51,16 @@ describe('BuilderEntryItem', () => {
   let wrapper: ReactWrapper;
 
   beforeEach(() => {
-    (useFindListsBySize as jest.Mock).mockReturnValue({
+    (useFindListsBySize as Mock).mockReturnValue({
       error: undefined,
       loading: false,
       result: mockResult,
-      start: jest.fn(),
+      start: vi.fn(),
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     wrapper.unmount();
   });
 
@@ -82,9 +85,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         exceptionItemIndex={0}
         showLabel
         showValueListModal={MockedShowValueListModal}
@@ -116,9 +119,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel
         allowCustomOptions
         exceptionItemIndex={0}
@@ -155,9 +158,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel
         allowCustomOptions
         exceptionItemIndex={0}
@@ -192,9 +195,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel
         allowCustomOptions={false}
         exceptionItemIndex={0}
@@ -230,9 +233,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel
         allowCustomOptions
         getExtendedFields={(): Promise<FieldSpec[]> => Promise.resolve([field])}
@@ -270,9 +273,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -311,9 +314,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -352,9 +355,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -393,9 +396,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -435,9 +438,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -478,9 +481,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -520,9 +523,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -565,9 +568,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -610,9 +613,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -655,9 +658,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="rule_default"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -691,9 +694,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -752,9 +755,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -776,7 +779,7 @@ describe('BuilderEntryItem', () => {
   });
 
   test('it invokes "onChange" when new field is selected and resets operator and value fields', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -798,8 +801,8 @@ describe('BuilderEntryItem', () => {
         }}
         listType="detection"
         onChange={mockOnChange}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -819,7 +822,7 @@ describe('BuilderEntryItem', () => {
   });
 
   test('it invokes "onChange" when new operator is selected', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -841,8 +844,8 @@ describe('BuilderEntryItem', () => {
         }}
         listType="detection"
         onChange={mockOnChange}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -862,7 +865,7 @@ describe('BuilderEntryItem', () => {
   });
 
   test('it invokes "onChange" when new value field is entered for match operator', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -884,8 +887,8 @@ describe('BuilderEntryItem', () => {
         }}
         listType="detection"
         onChange={mockOnChange}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -905,7 +908,7 @@ describe('BuilderEntryItem', () => {
   });
 
   test('it invokes "onChange" when new value field is entered for match_any operator', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -927,8 +930,8 @@ describe('BuilderEntryItem', () => {
         }}
         listType="detection"
         onChange={mockOnChange}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -948,7 +951,7 @@ describe('BuilderEntryItem', () => {
   });
 
   test('it invokes "onChange" when new value field is entered for list operator', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -970,8 +973,8 @@ describe('BuilderEntryItem', () => {
         }}
         listType="detection"
         onChange={mockOnChange}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -997,7 +1000,7 @@ describe('BuilderEntryItem', () => {
   });
 
   test('it invokes "onChange" when new value field is entered for wildcard operator', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -1019,8 +1022,8 @@ describe('BuilderEntryItem', () => {
         }}
         listType="detection"
         onChange={mockOnChange}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -1040,7 +1043,7 @@ describe('BuilderEntryItem', () => {
   });
 
   test('it invokes "setErrorsExist" when user touches value input and leaves empty', async () => {
-    const mockSetErrorExists = jest.fn();
+    const mockSetErrorExists = vi.fn();
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -1061,9 +1064,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         setErrorsExist={mockSetErrorExists}
-        setWarningsExist={jest.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -1082,7 +1085,7 @@ describe('BuilderEntryItem', () => {
   });
 
   test('it invokes "setErrorsExist" when invalid value inputted for field value input', async () => {
-    const mockSetErrorExists = jest.fn();
+    const mockSetErrorExists = vi.fn();
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -1103,9 +1106,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         setErrorsExist={mockSetErrorExists}
-        setWarningsExist={jest.fn()}
+        setWarningsExist={vi.fn()}
         showLabel={false}
         exceptionItemIndex={0}
         showValueListModal={MockedShowValueListModal}
@@ -1131,9 +1134,9 @@ describe('BuilderEntryItem', () => {
   });
 
   test('it invokes "setWarningsExist" when invalid value in field value input', async () => {
-    const mockSetWarningsExists = jest.fn();
+    const mockSetWarningsExists = vi.fn();
 
-    (validatePotentialWildcardInput as jest.Mock).mockReturnValue('some warning message');
+    (validatePotentialWildcardInput as Mock).mockReturnValue('some warning message');
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -1154,8 +1157,8 @@ describe('BuilderEntryItem', () => {
           title: 'logs-endpoint.events.*',
         }}
         listType="endpoint_events"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
         setWarningsExist={mockSetWarningsExists}
         showLabel={false}
         exceptionItemIndex={0}
@@ -1182,9 +1185,9 @@ describe('BuilderEntryItem', () => {
   });
 
   test('it does not invoke "setWarningsExist" when valid value in field value input', async () => {
-    const mockSetWarningsExists = jest.fn();
+    const mockSetWarningsExists = vi.fn();
 
-    (validatePotentialWildcardInput as jest.Mock).mockReturnValue(undefined);
+    (validatePotentialWildcardInput as Mock).mockReturnValue(undefined);
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -1205,8 +1208,8 @@ describe('BuilderEntryItem', () => {
           title: 'logs-endpoint.events.*',
         }}
         listType="endpoint_events"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
         setWarningsExist={mockSetWarningsExists}
         showLabel={false}
         exceptionItemIndex={0}
@@ -1253,9 +1256,9 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
         }}
         listType="detection"
-        onChange={jest.fn()}
-        setErrorsExist={jest.fn()}
-        setWarningsExist={jest.fn()}
+        onChange={vi.fn()}
+        setErrorsExist={vi.fn()}
+        setWarningsExist={vi.fn()}
         osTypes={['windows']}
         showLabel={false}
         isDisabled={true}

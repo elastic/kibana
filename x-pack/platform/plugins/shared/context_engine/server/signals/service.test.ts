@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { Signal } from '../../common/http_api/signals';
 import { SignalsService } from './service';
 import { createSignalsStorageClient } from './storage';
 
-jest.mock('./storage');
+vi.mock('./storage');
 
-const createSignalsStorageClientMock = createSignalsStorageClient as jest.MockedFunction<
+const createSignalsStorageClientMock = createSignalsStorageClient as MockedFunction<
   typeof createSignalsStorageClient
 >;
 
@@ -42,8 +45,8 @@ const makeToolCallSignal = (overrides: Partial<Signal> = {}): Signal => ({
 
 describe('SignalsService', () => {
   const storageClient = {
-    bulk: jest.fn(),
-    reconcileMappings: jest.fn(),
+    bulk: vi.fn(),
+    reconcileMappings: vi.fn(),
   } as unknown as ReturnType<typeof createSignalsStorageClient>;
 
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -52,9 +55,9 @@ describe('SignalsService', () => {
   let service: SignalsService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     createSignalsStorageClientMock.mockReturnValue(storageClient);
-    (storageClient.reconcileMappings as jest.Mock).mockResolvedValue(undefined);
+    (storageClient.reconcileMappings as Mock).mockResolvedValue(undefined);
     service = new SignalsService({ esClient, logger });
   });
 
@@ -99,7 +102,7 @@ describe('SignalsService', () => {
     });
 
     it('bulk-indexes each signal off the refresh path, with throwOnFail', async () => {
-      (storageClient.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [] });
+      (storageClient.bulk as Mock).mockResolvedValue({ errors: false, items: [] });
       const signal = makeToolCallSignal();
 
       await service.write('default', [signal]);
@@ -112,19 +115,19 @@ describe('SignalsService', () => {
     });
 
     it('uses signal_id as the document _id (so a re-processed span overwrites)', async () => {
-      (storageClient.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [] });
+      (storageClient.bulk as Mock).mockResolvedValue({ errors: false, items: [] });
       const signal = makeToolCallSignal();
 
       await service.write('default', [signal]);
       await service.write('default', [signal]);
 
-      for (const call of (storageClient.bulk as jest.Mock).mock.calls) {
+      for (const call of (storageClient.bulk as Mock).mock.calls) {
         expect(call[0].operations[0].index._id).toBe(signal.signal_id);
       }
     });
 
     it('rejects when the storage client rejects (so the producer can retry)', async () => {
-      (storageClient.bulk as jest.Mock).mockRejectedValue(new Error('bulk failed'));
+      (storageClient.bulk as Mock).mockRejectedValue(new Error('bulk failed'));
       await expect(service.write('default', [makeToolCallSignal()])).rejects.toThrow('bulk failed');
     });
   });

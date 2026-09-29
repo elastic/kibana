@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
@@ -12,12 +14,15 @@ import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled
 import { runSoonRoute } from './run_soon_route';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('runSoonRuleRoute', () => {

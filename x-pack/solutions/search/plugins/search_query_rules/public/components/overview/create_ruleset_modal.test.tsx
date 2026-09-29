@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { I18nProvider } from '@kbn/i18n-react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -43,35 +46,41 @@ const ACTIONS = {
   },
 };
 
-const mockOnClose = jest.fn();
+const mockOnClose = vi.fn();
 
-const mockUseFetchQueryRulesetExist = useFetchQueryRulesetExist as jest.Mock;
-jest.mock('../../hooks/use_fetch_ruleset_exists', () => ({
-  useFetchQueryRulesetExist: jest.fn().mockImplementation(() => ({
-    data: undefined,
-    isLoading: false,
-    isError: false,
-  })),
-}));
+const mockUseFetchQueryRulesetExist = useFetchQueryRulesetExist as Mock;
+vi.mock('../../hooks/use_fetch_ruleset_exists', () => {
+      const mocked = {
+      useFetchQueryRulesetExist: vi.fn().mockImplementation(() => ({
+        data: undefined,
+        isLoading: false,
+        isError: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: {
-        basePath: {
-          prepend: (path: string) => path,
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: {
+            basePath: {
+              prepend: (path: string) => path,
+            },
+          },
+          application: {
+            navigateToUrl: vi.fn(),
+          },
         },
-      },
-      application: {
-        navigateToUrl: jest.fn(),
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CreateRulesetModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('renders', () => {
     render(<CreateRulesetModal onClose={mockOnClose} />, { wrapper: Wrapper });
@@ -126,7 +135,7 @@ describe('CreateRulesetModal', () => {
   });
 
   it('should redirect user to create endpoint with given name', () => {
-    const mockNavigateToUrl = jest.fn();
+    const mockNavigateToUrl = vi.fn();
     useKibana().services.application.navigateToUrl = mockNavigateToUrl;
 
     render(<CreateRulesetModal onClose={mockOnClose} />, { wrapper: Wrapper });

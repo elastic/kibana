@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -15,10 +18,10 @@ import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../data_view_manager/hooks/use_data_view');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../data_view_manager/hooks/use_data_view');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 const mockDataView: Partial<DataView> = {
   id: 'test-data-view-id',
@@ -26,17 +29,20 @@ const mockDataView: Partial<DataView> = {
   fields: [] as unknown as DataView['fields'],
 };
 
-jest.mock('../../../common/components/page_loader', () => ({
-  PageLoader: (props: Record<string, unknown>) => <div data-test-subj="page-loader" {...props} />,
-}));
+vi.mock('../../../common/components/page_loader', () => {
+      const mocked = {
+      PageLoader: (props: Record<string, unknown>) => <div data-test-subj="page-loader" {...props} />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AlertFiltersKqlBar', () => {
   let queryClient: QueryClient;
-  const mockOnQueryChange = jest.fn();
-  const mockOnFiltersChange = jest.fn();
+  const mockOnQueryChange = vi.fn();
+  const mockOnFiltersChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient({
       defaultOptions: {
         queries: {
@@ -50,7 +56,7 @@ describe('AlertFiltersKqlBar', () => {
       services: {
         unifiedSearch: {
           ui: {
-            SearchBar: jest.fn().mockImplementation(({ onQuerySubmit, onQueryChange, query }) => (
+            SearchBar: vi.fn().mockImplementation(({ onQuerySubmit, onQueryChange, query }) => (
               <div data-test-subj="mockSearchBar">
                 <input
                   data-test-subj="searchBarInput"
@@ -79,14 +85,14 @@ describe('AlertFiltersKqlBar', () => {
       },
     } as unknown as ReturnType<typeof useKibana>);
 
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       dataView: mockDataView,
       status: 'ready',
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderComponent = (props = {}) => {
@@ -122,7 +128,7 @@ describe('AlertFiltersKqlBar', () => {
     });
 
     it('does render page loaded if dataView is pristine', () => {
-      (useDataView as jest.Mock).mockReturnValue({
+      (useDataView as Mock).mockReturnValue({
         dataView: mockDataView,
         status: 'pristine',
       });

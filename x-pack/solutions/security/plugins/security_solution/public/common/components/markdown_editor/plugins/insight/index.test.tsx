@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import moment from 'moment';
@@ -21,17 +24,15 @@ import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { useIsInSecurityApp } from '../../../../hooks/is_in_security_app';
 import { useOpenTimelineInNewTab } from '../../../../hooks/timeline/use_open_timeline_in_new_tab';
 
-jest.mock('../../../../lib/kibana');
-const mockGetServices = KibanaServices.get as jest.Mock;
+vi.mock('../../../../lib/kibana');
+const mockGetServices = KibanaServices.get as Mock;
 
-jest.mock('../../../../hooks/is_in_security_app');
-jest.mock('../../../../hooks/timeline/use_open_timeline_in_new_tab');
-const openAdHocTimelineInNewTab = jest.fn();
+vi.mock('../../../../hooks/is_in_security_app');
+vi.mock('../../../../hooks/timeline/use_open_timeline_in_new_tab');
+const openAdHocTimelineInNewTab = vi.fn();
 
-jest.mock('../../../event_details/investigate_in_timeline_button', () => {
-  const originalModule = jest.requireActual(
-    '../../../event_details/investigate_in_timeline_button'
-  );
+vi.mock('../../../event_details/investigate_in_timeline_button', async () => {
+  const originalModule = (await vi.importActual('../../../event_details/investigate_in_timeline_button'));
   return {
     ...originalModule,
     InvestigateInTimelineButton: function InvestigateInTimelineButton(
@@ -65,18 +66,18 @@ const mockTimeRange = (
   }));
 };
 
-jest.mock('../../../../hooks/use_upselling');
+vi.mock('../../../../hooks/use_upselling');
 
 describe('insight component renderer', () => {
   beforeEach(() => {
-    (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
-    (useOpenTimelineInNewTab as jest.Mock).mockReturnValue({ openAdHocTimelineInNewTab });
+    (useIsInSecurityApp as Mock).mockReturnValue(true);
+    (useOpenTimelineInNewTab as Mock).mockReturnValue({ openAdHocTimelineInNewTab });
     openAdHocTimelineInNewTab.mockClear();
   });
 
   describe('when there is no upselling message', () => {
     beforeAll(() => {
-      (useUpsellingMessage as jest.Mock).mockReturnValue(null);
+      (useUpsellingMessage as Mock).mockReturnValue(null);
       mockTimeRange(null);
     });
     it('renders correctly with valid date strings with no timestamp from results', () => {
@@ -108,11 +109,11 @@ describe('insight component renderer', () => {
 
   describe('when rendered outside of the Security Solution app (e.g. Discover)', () => {
     beforeAll(() => {
-      (useUpsellingMessage as jest.Mock).mockReturnValue(null);
+      (useUpsellingMessage as Mock).mockReturnValue(null);
       mockTimeRange(null);
     });
     beforeEach(() => {
-      (useIsInSecurityApp as jest.Mock).mockReturnValue(false);
+      (useIsInSecurityApp as Mock).mockReturnValue(false);
     });
     it('opens the timeline in a new tab instead of in-place', () => {
       render(
@@ -133,7 +134,7 @@ describe('insight component renderer', () => {
 
   describe('when there is an upselling message', () => {
     beforeAll(() => {
-      (useUpsellingMessage as jest.Mock).mockReturnValue('Go for Platinum!');
+      (useUpsellingMessage as Mock).mockReturnValue('Go for Platinum!');
       mockTimeRange(null);
     });
     it('renders a disabled eui button with label', () => {

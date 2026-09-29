@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -13,7 +16,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 interface MockContext {
   core: Promise<{
     logger: {
-      get: jest.Mock;
+      get: Mock;
     };
   }>;
 }
@@ -27,24 +30,24 @@ describe('getBulkAgentDetailsRoute', () => {
   let mockContext: MockContext;
 
   const mockAgentService = {
-    asInternalScopedUser: jest.fn(),
+    asInternalScopedUser: vi.fn(),
   };
 
-  const mockGetByIds = jest.fn();
+  const mockGetByIds = vi.fn();
 
   const mockLogger = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
   };
 
   const createMockContext = (): MockContext => ({
     core: Promise.resolve({
       logger: {
-        get: jest.fn().mockReturnValue({
-          debug: jest.fn(),
-          info: jest.fn(),
-          error: jest.fn(),
+        get: vi.fn().mockReturnValue({
+          debug: vi.fn(),
+          info: vi.fn(),
+          error: vi.fn(),
         }),
       },
     }),
@@ -58,7 +61,7 @@ describe('getBulkAgentDetailsRoute', () => {
   const createMockResponse = () => httpServerMock.createResponseFactory();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockAgentService.asInternalScopedUser.mockReturnValue({
       getByIds: mockGetByIds,
@@ -66,11 +69,11 @@ describe('getBulkAgentDetailsRoute', () => {
 
     mockOsqueryContext = {
       logFactory: {
-        get: jest.fn().mockReturnValue(mockLogger),
+        get: vi.fn().mockReturnValue(mockLogger),
       },
       service: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'default', name: 'Default' }),
-        getAgentService: jest.fn().mockReturnValue(mockAgentService),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'default', name: 'Default' }),
+        getAgentService: vi.fn().mockReturnValue(mockAgentService),
       },
     } as unknown as OsqueryAppContext;
 
@@ -168,7 +171,7 @@ describe('getBulkAgentDetailsRoute', () => {
 
       mockGetByIds.mockResolvedValue(mockAgents);
 
-      mockOsqueryContext.service.getActiveSpace = jest
+      mockOsqueryContext.service.getActiveSpace = vi
         .fn()
         .mockResolvedValue({ id: customSpaceId, name: 'Custom Space' });
 
@@ -186,7 +189,7 @@ describe('getBulkAgentDetailsRoute', () => {
 
       mockGetByIds.mockResolvedValue(mockAgents);
 
-      mockOsqueryContext.service.getActiveSpace = jest.fn().mockResolvedValue(undefined);
+      mockOsqueryContext.service.getActiveSpace = vi.fn().mockResolvedValue(undefined);
 
       const mockRequest = createMockRequest(['agent-1']);
       const mockResponse = createMockResponse();
@@ -200,7 +203,7 @@ describe('getBulkAgentDetailsRoute', () => {
 
   describe('Error handling', () => {
     it('should return empty array when agent service is unavailable', async () => {
-      mockOsqueryContext.service.getAgentService = jest.fn().mockReturnValue(null);
+      mockOsqueryContext.service.getAgentService = vi.fn().mockReturnValue(null);
 
       const mockRequest = createMockRequest(['agent-1']);
       const mockResponse = createMockResponse();

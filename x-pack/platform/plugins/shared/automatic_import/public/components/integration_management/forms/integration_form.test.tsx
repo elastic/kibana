@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, act, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -16,15 +19,18 @@ import type { IntegrationFormData } from './types';
 
 const mockExistingPackageNames = ['existing_integration', 'my_custom_package', 'test_package'];
 
-jest.mock('../../../common/lib/api', () => ({
-  getInstalledPackages: jest.fn(() =>
-    Promise.resolve({
-      items: mockExistingPackageNames.map((id) => ({ id })),
-    })
-  ),
-  getAllIntegrations: jest.fn(() => Promise.resolve([])),
-  getAllIntegrationNames: jest.fn(() => Promise.resolve([])),
-}));
+vi.mock('../../../common/lib/api', () => {
+      const mocked = {
+      getInstalledPackages: vi.fn(() =>
+        Promise.resolve({
+          items: mockExistingPackageNames.map((id) => ({ id })),
+        })
+      ),
+      getAllIntegrations: vi.fn(() => Promise.resolve([])),
+      getAllIntegrationNames: vi.fn(() => Promise.resolve([])),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockServices = coreMock.createStart();
 
@@ -135,14 +141,14 @@ const FormTestConsumer: React.FC<{ onSubmitResult?: (data: IntegrationFormData) 
 
 interface RenderFormOptions {
   initialValue?: Partial<IntegrationFormData>;
-  onSubmit?: jest.Mock;
+  onSubmit?: Mock;
   onSubmitResult?: (data: IntegrationFormData) => void;
 }
 
 const renderForm = (options: RenderFormOptions = {}) => {
   const {
     initialValue,
-    onSubmit = jest.fn().mockResolvedValue(undefined),
+    onSubmit = vi.fn().mockResolvedValue(undefined),
     onSubmitResult,
   } = options;
 
@@ -162,7 +168,7 @@ const renderForm = (options: RenderFormOptions = {}) => {
 
 const advancePastDebounce = async () => {
   await act(async () => {
-    jest.advanceTimersByTime(350);
+    vi.advanceTimersByTime(350);
   });
 };
 
@@ -183,12 +189,12 @@ const fillAllRequiredFields = async (getByTestId: (id: string) => HTMLElement) =
 
 describe('IntegrationFormProvider', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('useIntegrationForm hook - isValid state', () => {
@@ -327,7 +333,7 @@ describe('IntegrationFormProvider', () => {
 
   describe('form submission', () => {
     it('should call onSubmit with form data when all required fields are filled', async () => {
-      const onSubmit = jest.fn().mockResolvedValue(undefined);
+      const onSubmit = vi.fn().mockResolvedValue(undefined);
       const { getByTestId } = renderForm({ onSubmit });
 
       await fillAllRequiredFields(getByTestId);
@@ -348,7 +354,7 @@ describe('IntegrationFormProvider', () => {
     });
 
     it('should not call onSubmit when form has validation errors', async () => {
-      const onSubmit = jest.fn().mockResolvedValue(undefined);
+      const onSubmit = vi.fn().mockResolvedValue(undefined);
       const { getByTestId } = renderForm({ onSubmit });
 
       await act(async () => {

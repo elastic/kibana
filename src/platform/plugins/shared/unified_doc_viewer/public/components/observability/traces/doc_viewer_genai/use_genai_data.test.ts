@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { GEN_AI_LONG_MESSAGE_FIELDS } from '@kbn/apm-ui-shared';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -14,14 +17,17 @@ import { of } from 'rxjs';
 import { useGenAiData } from './use_genai_data';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 
-jest.mock('../../../../plugin', () => ({
-  getUnifiedDocViewerServices: jest.fn(),
-}));
+vi.mock('../../../../plugin', () => {
+      const mocked = {
+      getUnifiedDocViewerServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const INPUT_MESSAGES_FIELD = 'attributes.gen_ai.input.messages';
-const mockSearch = jest.fn();
+const mockSearch = vi.fn();
 
-(getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
+(getUnifiedDocViewerServices as Mock).mockReturnValue({
   data: {
     search: {
       search: mockSearch,

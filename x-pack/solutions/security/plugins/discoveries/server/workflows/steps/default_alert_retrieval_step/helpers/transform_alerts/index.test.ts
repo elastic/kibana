@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import {
@@ -13,15 +16,18 @@ import {
   getAnonymizedAlertsFromEsql,
 } from '.';
 
-jest.mock('@kbn/elastic-assistant-common', () => ({
-  getAnonymizedValue: jest.fn((value: unknown) => String(value)),
-  getRawDataOrDefault: jest.fn((data: unknown) => data),
-  transformRawData: jest.fn(({ rawData }: { rawData: Record<string, unknown[]> }) =>
-    Object.entries(rawData)
-      .map(([k, v]) => `${k},${v[0] ?? ''}`)
-      .join(',')
-  ),
-}));
+vi.mock('@kbn/elastic-assistant-common', () => {
+      const mocked = {
+      getAnonymizedValue: vi.fn((value: unknown) => String(value)),
+      getRawDataOrDefault: vi.fn((data: unknown) => data),
+      transformRawData: vi.fn(({ rawData }: { rawData: Record<string, unknown[]> }) =>
+        Object.entries(rawData)
+          .map(([k, v]) => `${k},${v[0] ?? ''}`)
+          .join(',')
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('convertEsqlRowToRawData', () => {
   it('maps column names to arrays of values', () => {
@@ -123,7 +129,7 @@ describe('ensureRequiredAnonymizationFields', () => {
 
 describe('getAnonymizedAlertsFromEsql', () => {
   const mockEsClient = {
-    esql: { query: jest.fn() },
+    esql: { query: vi.fn() },
   } as unknown as ElasticsearchClient;
 
   const anonymizationFields: AnonymizationFieldResponse[] = [
@@ -131,11 +137,11 @@ describe('getAnonymizedAlertsFromEsql', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('auto-injects METADATA _id when the query omits it', async () => {
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+    (mockEsClient.esql.query as Mock).mockResolvedValue({
       columns: [],
       values: [],
     });
@@ -146,13 +152,13 @@ describe('getAnonymizedAlertsFromEsql', () => {
       esqlQuery: 'FROM .alerts | LIMIT 10',
     });
 
-    const { query } = (mockEsClient.esql.query as jest.Mock).mock.calls[0][0];
+    const { query } = (mockEsClient.esql.query as Mock).mock.calls[0][0];
 
     expect(query).toContain('METADATA _id');
   });
 
   it('is idempotent when METADATA _id is already present', async () => {
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+    (mockEsClient.esql.query as Mock).mockResolvedValue({
       columns: [],
       values: [],
     });
@@ -163,13 +169,13 @@ describe('getAnonymizedAlertsFromEsql', () => {
       esqlQuery: 'FROM .alerts METADATA _id | LIMIT 10',
     });
 
-    const { query } = (mockEsClient.esql.query as jest.Mock).mock.calls[0][0];
+    const { query } = (mockEsClient.esql.query as Mock).mock.calls[0][0];
 
     expect(query.match(/METADATA/g)).toHaveLength(1);
   });
 
   it('returns one string per row', async () => {
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+    (mockEsClient.esql.query as Mock).mockResolvedValue({
       columns: [{ name: 'host.name' }],
       values: [['server-1'], ['server-2']],
     });
@@ -184,7 +190,7 @@ describe('getAnonymizedAlertsFromEsql', () => {
   });
 
   it('returns empty array when there are no rows', async () => {
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+    (mockEsClient.esql.query as Mock).mockResolvedValue({
       columns: [{ name: 'host.name' }],
       values: [],
     });
@@ -199,9 +205,7 @@ describe('getAnonymizedAlertsFromEsql', () => {
   });
 
   it('calls onNewReplacements when replacements are updated', async () => {
-    const { transformRawData: mockTransformRawData } = jest.requireMock(
-      '@kbn/elastic-assistant-common'
-    );
+    const { transformRawData: mockTransformRawData } = (await vi.importMock('@kbn/elastic-assistant-common'));
     mockTransformRawData.mockImplementation(
       ({ onNewReplacements: cb }: { onNewReplacements: (r: Record<string, string>) => void }) => {
         cb({ 'server-1': 'SERVER_001' });
@@ -209,12 +213,12 @@ describe('getAnonymizedAlertsFromEsql', () => {
       }
     );
 
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+    (mockEsClient.esql.query as Mock).mockResolvedValue({
       columns: [{ name: 'host.name' }],
       values: [['server-1']],
     });
 
-    const onNewReplacements = jest.fn();
+    const onNewReplacements = vi.fn();
 
     await getAnonymizedAlertsFromEsql({
       anonymizationFields,

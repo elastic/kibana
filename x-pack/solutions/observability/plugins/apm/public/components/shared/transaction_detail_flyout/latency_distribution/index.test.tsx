@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TransactionDetailFlyoutLatencyDistribution } from '.';
@@ -12,23 +15,26 @@ import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_
 import { useTransactionDetailFlyoutDistributionChartData } from './use_transaction_detail_flyout_distribution_chart_data';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
-jest.mock('../transaction_detail_flyout_context');
-jest.mock('./use_transaction_detail_flyout_distribution_chart_data');
-jest.mock('@kbn/apm-ui-shared', () => ({
-  DurationDistributionChart: ({
-    'data-test-subj': testSubj,
-    loading,
-    hasError,
-  }: {
-    'data-test-subj'?: string;
-    loading: boolean;
-    hasError: boolean;
-  }) => <div data-test-subj={testSubj} data-loading={loading} data-has-error={hasError} />,
-}));
+vi.mock('../transaction_detail_flyout_context');
+vi.mock('./use_transaction_detail_flyout_distribution_chart_data');
+vi.mock('@kbn/apm-ui-shared', () => {
+      const mocked = {
+      DurationDistributionChart: ({
+        'data-test-subj': testSubj,
+        loading,
+        hasError,
+      }: {
+        'data-test-subj'?: string;
+        loading: boolean;
+        hasError: boolean;
+      }) => <div data-test-subj={testSubj} data-loading={loading} data-has-error={hasError} />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseTransactionDetailFlyoutContext = useTransactionDetailFlyoutContext as jest.Mock;
+const mockedUseTransactionDetailFlyoutContext = useTransactionDetailFlyoutContext as Mock;
 const mockedUseTransactionDetailFlyoutDistributionChartData =
-  useTransactionDetailFlyoutDistributionChartData as jest.Mock;
+  useTransactionDetailFlyoutDistributionChartData as Mock;
 
 const FILTERS = {
   serviceName: 'checkout',
@@ -44,7 +50,7 @@ const FILTERS = {
 describe('TransactionDetailFlyoutLatencyDistribution', () => {
   beforeEach(() => {
     mockedUseTransactionDetailFlyoutContext.mockReturnValue({
-      deps: { core: { notifications: { toasts: { addDanger: jest.fn() } } } },
+      deps: { core: { notifications: { toasts: { addDanger: vi.fn() } } } },
       filters: FILTERS,
     });
     mockedUseTransactionDetailFlyoutDistributionChartData.mockReturnValue({

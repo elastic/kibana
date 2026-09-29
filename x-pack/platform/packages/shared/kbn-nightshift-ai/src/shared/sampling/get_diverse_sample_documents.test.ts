@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import objectHash from 'object-hash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import type { Logger } from '@kbn/logging';
 import { getDiverseSampleDocuments, selectStratifiedWindow } from './get_diverse_sample_documents';
 
 const createEsClient = () => {
-  const esql = jest.fn();
-  const schemaQuery = jest.fn().mockResolvedValue(schemaResponse());
+  const esql = vi.fn();
+  const schemaQuery = vi.fn().mockResolvedValue(schemaResponse());
 
   return {
     esClient: {
@@ -25,8 +27,8 @@ const createEsClient = () => {
 };
 
 const logger = {
-  warn: jest.fn(),
-  debug: jest.fn(),
+  warn: vi.fn(),
+  debug: vi.fn(),
 } as unknown as Logger;
 
 const countResponse = (total: number) => ({
@@ -97,7 +99,7 @@ const aliasFetchResponse = (
 
 describe('getDiverseSampleDocuments', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('categorizes and fetches sources without _index/_id metadata (concrete indices)', async () => {

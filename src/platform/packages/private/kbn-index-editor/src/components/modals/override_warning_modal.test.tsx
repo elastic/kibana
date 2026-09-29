@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -16,24 +19,27 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import type { KibanaContextExtra } from '../../types';
 
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: (component: unknown) => component,
-}));
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = {
+      toMountPoint: (component: unknown) => component,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockStorage: jest.Mocked<Storage> = {
-  get: jest.fn(),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
-} as unknown as jest.Mocked<Storage>;
+const mockStorage: Mocked<Storage> = {
+  get: vi.fn(),
+  set: vi.fn(),
+  remove: vi.fn(),
+  clear: vi.fn(),
+} as unknown as Mocked<Storage>;
 
 describe('OverrideWarningModal', () => {
-  let onCancel: jest.Mock;
-  let onContinue: jest.Mock;
+  let onCancel: Mock;
+  let onContinue: Mock;
 
   beforeEach(() => {
-    onCancel = jest.fn();
-    onContinue = jest.fn();
+    onCancel = vi.fn();
+    onContinue = vi.fn();
   });
 
   it('renders the modal with title and body', () => {
@@ -105,7 +111,7 @@ describe('getOverrideConfirmation', () => {
       } as any,
       storage: mockStorage,
       overlays: {
-        openModal: jest.fn(() => ({ close: jest.fn() })),
+        openModal: vi.fn(() => ({ close: vi.fn() })),
       } as any,
       rendering: {} as any,
     } as unknown as KibanaContextExtra;
@@ -141,7 +147,7 @@ describe('getOverrideConfirmation', () => {
       expect(mockKibanaContext.overlays.openModal).toHaveBeenCalled();
     });
 
-    const openModalMock = mockKibanaContext.overlays.openModal as jest.Mock;
+    const openModalMock = mockKibanaContext.overlays.openModal as Mock;
     const modalComponent = openModalMock.mock.calls[0][0];
     modalComponent.props.onCancel();
 
@@ -157,7 +163,7 @@ describe('getOverrideConfirmation', () => {
       expect(mockKibanaContext.overlays.openModal).toHaveBeenCalled();
     });
 
-    const openModalMock = mockKibanaContext.overlays.openModal as jest.Mock;
+    const openModalMock = mockKibanaContext.overlays.openModal as Mock;
     const modalComponent = openModalMock.mock.calls[0][0];
     modalComponent.props.onContinue();
 

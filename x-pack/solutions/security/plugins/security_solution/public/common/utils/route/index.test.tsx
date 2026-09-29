@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -15,20 +18,23 @@ import { useRouteSpy } from './use_route_spy';
 import { generateHistoryMock, generateRoutesMock } from './mocks';
 import { SecurityPageName } from '../../../app/types';
 
-const mockUseRouteSpy: jest.Mock = useRouteSpy as jest.Mock;
-jest.mock('./use_route_spy', () => ({
-  useRouteSpy: jest.fn(),
-}));
+const mockUseRouteSpy: Mock = useRouteSpy as Mock;
+vi.mock('./use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Spy Routes', () => {
   let mockRoutes: ReturnType<typeof generateRoutesMock>;
   let mockHistoryValue: ReturnType<typeof generateHistoryMock>;
-  let dispatchMock: jest.Mock;
+  let dispatchMock: Mock;
 
   beforeEach(() => {
     mockRoutes = generateRoutesMock();
     mockHistoryValue = generateHistoryMock();
-    dispatchMock = jest.fn();
+    dispatchMock = vi.fn();
     mockUseRouteSpy.mockImplementation(() => [mockRoutes, dispatchMock]);
   });
 

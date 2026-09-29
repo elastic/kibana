@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewSource } from './sources/data_view_source';
 import { EsqlSource } from './sources/esql_source';
@@ -16,12 +18,12 @@ function makeDataView(id: string): DataView {
   return {
     id,
     timeFieldName: undefined,
-    getName: jest.fn(() => 'mock'),
-    getIndexPattern: jest.fn(() => 'logs-*'),
-    isPersisted: jest.fn(() => true),
+    getName: vi.fn(() => 'mock'),
+    getIndexPattern: vi.fn(() => 'logs-*'),
+    isPersisted: vi.fn(() => true),
     fields: {
-      getAll: jest.fn(() => []),
-      getByName: jest.fn(),
+      getAll: vi.fn(() => []),
+      getByName: vi.fn(),
     },
   } as unknown as DataView;
 }

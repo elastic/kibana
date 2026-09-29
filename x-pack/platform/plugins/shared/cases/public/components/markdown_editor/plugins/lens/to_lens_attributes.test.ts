@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { toLensAttributes } from './to_lens_attributes';
 
-const mockIsSupported = jest.fn();
-const mockFromAPIFormat = jest.fn();
+const mockIsSupported = vi.fn();
+const mockFromAPIFormat = vi.fn();
 
-jest.mock('@kbn/lens-embeddable-utils', () => ({
-  LensConfigBuilder: jest.fn().mockImplementation(() => ({
-    isSupported: (type?: string) => mockIsSupported(type),
-    fromAPIFormat: (config: unknown) => mockFromAPIFormat(config),
-  })),
-}));
+vi.mock('@kbn/lens-embeddable-utils', () => {
+      const mocked = {
+      LensConfigBuilder: vi.fn().mockImplementation(() => ({
+        isSupported: (type?: string) => mockIsSupported(type),
+        fromAPIFormat: (config: unknown) => mockFromAPIFormat(config),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('toLensAttributes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('passes internal Lens state through untouched when the type is unsupported', () => {

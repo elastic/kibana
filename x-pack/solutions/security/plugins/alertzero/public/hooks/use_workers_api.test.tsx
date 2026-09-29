@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -47,7 +50,7 @@ describe('notifyWorkerUpdateError', () => {
   const toasts = coreMock.createStart().notifications.toasts;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('warns on 409 without a stack toast', () => {
@@ -79,7 +82,7 @@ describe('notifyWorkerUpdateError', () => {
 });
 
 describe('useUpdateWorker', () => {
-  const renderUpdateWorker = (worker: Worker, patchImpl: jest.Mock) => {
+  const renderUpdateWorker = (worker: Worker, patchImpl: Mock) => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
     });
@@ -99,7 +102,7 @@ describe('useUpdateWorker', () => {
   });
 
   it("sends the caller's revision as-is instead of the cached one", async () => {
-    const patch = jest.fn().mockResolvedValue({
+    const patch = vi.fn().mockResolvedValue({
       worker: createWorker({
         settingsRevision: 5,
         settings: { workerId: TRIAGE, autonomy: 'manual', scheduleInterval: '15m' },
@@ -124,7 +127,7 @@ describe('useUpdateWorker', () => {
 
   it('leaves the cached Worker untouched while the PATCH is pending and replaces it on success', async () => {
     let resolvePatch: ((value: { worker: Worker }) => void) | undefined;
-    const patch = jest.fn(
+    const patch = vi.fn(
       () =>
         new Promise<{ worker: Worker }>((resolve) => {
           resolvePatch = resolve;
@@ -170,7 +173,7 @@ describe('useUpdateWorker', () => {
       settingsRevision: 2,
       settings: { workerId: TRIAGE, autonomy: 'assisted' },
     });
-    const patch = jest
+    const patch = vi
       .fn()
       .mockResolvedValueOnce({ worker: persistedTriage })
       .mockRejectedValueOnce(httpError(503));
@@ -215,7 +218,7 @@ describe('useUpdateWorker', () => {
 
   it('sends a null revision for a Worker that is not installed yet', async () => {
     const uninstalled = createWorker({ settingsRevision: null });
-    const patch = jest.fn().mockResolvedValue({
+    const patch = vi.fn().mockResolvedValue({
       worker: createWorker({
         settingsRevision: 1,
         settings: { workerId: TRIAGE, autonomy: 'assisted' },

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,20 +16,23 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { MeasureButton } from './measure_button';
 import { isMeasureShortcut } from '../lib/keyboard_shortcuts';
 
-jest.mock('../lib/keyboard_shortcuts', () => ({
-  isEscapeKey: jest.fn(),
-  isMeasureShortcut: jest.fn(),
-}));
+vi.mock('../lib/keyboard_shortcuts', () => {
+      const mocked = {
+      isEscapeKey: vi.fn(),
+      isMeasureShortcut: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedIsMeasureShortcut = jest.mocked(isMeasureShortcut);
+const mockedIsMeasureShortcut = vi.mocked(isMeasureShortcut);
 
 describe('MeasureButton', () => {
   beforeAll(() => {
-    document.elementsFromPoint = jest.fn().mockReturnValue([document.createElement('div')]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([document.createElement('div')]);
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the button', () => {
@@ -64,7 +69,7 @@ describe('MeasureButton', () => {
 
     const button = screen.getByTestId('measureSpacingButton');
     const mouseDownEvent = new MouseEvent('mousedown', { bubbles: true });
-    const preventDefaultSpy = jest.spyOn(mouseDownEvent, 'preventDefault');
+    const preventDefaultSpy = vi.spyOn(mouseDownEvent, 'preventDefault');
 
     fireEvent(button, mouseDownEvent);
 

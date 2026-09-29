@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -22,7 +24,7 @@ const renderWithIntl = (ui: React.ReactElement) => {
 describe('when expression', () => {
   it('renders with builtin aggregation types', async () => {
     const user = userEvent.setup();
-    const onChangeSelectedAggType = jest.fn();
+    const onChangeSelectedAggType = vi.fn();
     renderWithIntl(
       <WhenExpression aggType={'count'} onChangeSelectedAggType={onChangeSelectedAggType} />
     );
@@ -48,7 +50,7 @@ describe('when expression', () => {
 
   it('renders with custom aggregation types', async () => {
     const user = userEvent.setup();
-    const onChangeSelectedAggType = jest.fn();
+    const onChangeSelectedAggType = vi.fn();
     renderWithIntl(
       <WhenExpression
         aggType={'count'}
@@ -88,7 +90,7 @@ describe('when expression', () => {
 
   it('renders when popover title', async () => {
     const user = userEvent.setup();
-    const onChangeSelectedAggType = jest.fn();
+    const onChangeSelectedAggType = vi.fn();
     renderWithIntl(
       <WhenExpression aggType={'avg'} onChangeSelectedAggType={onChangeSelectedAggType} />
     );

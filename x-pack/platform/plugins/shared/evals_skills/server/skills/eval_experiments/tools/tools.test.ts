@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -27,19 +30,19 @@ const firstResult = (ret: unknown) =>
   (ret as { results: Array<{ type: string; data: any }> }).results[0];
 
 interface WorkflowsApiMock {
-  createWorkflow: jest.Mock;
-  updateWorkflow: jest.Mock;
-  executeWorkflow: jest.Mock;
-  getWorkflow: jest.Mock;
-  cancelWorkflowExecution: jest.Mock;
+  createWorkflow: Mock;
+  updateWorkflow: Mock;
+  executeWorkflow: Mock;
+  getWorkflow: Mock;
+  cancelWorkflowExecution: Mock;
 }
 
 /** A dataset service that reports every dataset as visible by default. */
 const datasetServiceWith = ({
   visible = true,
-  getClient = jest.fn(),
-}: { visible?: boolean; getClient?: jest.Mock } = {}) => {
-  getClient.mockReturnValue({ datasetExists: jest.fn().mockResolvedValue(visible) });
+  getClient = vi.fn(),
+}: { visible?: boolean; getClient?: Mock } = {}) => {
+  getClient.mockReturnValue({ datasetExists: vi.fn().mockResolvedValue(visible) });
   return { evals: { datasetService: { getClient } } };
 };
 
@@ -51,18 +54,18 @@ const createDeps = (
   logger: ReturnType<typeof loggingSystemMock.createLogger>;
 } => {
   const workflowsApi: WorkflowsApiMock = {
-    createWorkflow: jest.fn(),
-    updateWorkflow: jest.fn(),
-    executeWorkflow: jest.fn(),
-    getWorkflow: jest.fn(),
-    cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    createWorkflow: vi.fn(),
+    updateWorkflow: vi.fn(),
+    executeWorkflow: vi.fn(),
+    getWorkflow: vi.fn(),
+    cancelWorkflowExecution: vi.fn().mockResolvedValue(undefined),
   };
   const logger = loggingSystemMock.createLogger();
   const deps: EvalExperimentsToolDeps = {
     workflowsApi: workflowsApi as unknown as EvalExperimentsToolDeps['workflowsApi'],
     serverBasePath: '',
     logger,
-    getStartDependencies: jest.fn().mockResolvedValue(datasetServiceWith()),
+    getStartDependencies: vi.fn().mockResolvedValue(datasetServiceWith()),
     ...overrides,
   };
   return { deps, workflowsApi, logger };
@@ -82,7 +85,7 @@ const securityWith = (hasAllRequested: boolean) =>
   } as unknown as Awaited<ReturnType<EvalExperimentsToolDeps['getStartDependencies']>>);
 
 const denyingDeps = () => ({
-  getStartDependencies: jest
+  getStartDependencies: vi
     .fn()
     .mockResolvedValue(
       securityWith(false)
@@ -90,7 +93,7 @@ const denyingDeps = () => ({
 });
 
 const grantingDeps = () => ({
-  getStartDependencies: jest
+  getStartDependencies: vi
     .fn()
     .mockResolvedValue(
       securityWith(true)
@@ -235,7 +238,7 @@ describe('saveEvalExperimentTool', () => {
 
   it('refuses to save an experiment against a dataset the space cannot see', async () => {
     const { deps, workflowsApi } = createDeps({
-      getStartDependencies: jest
+      getStartDependencies: vi
         .fn()
         .mockResolvedValue(
           datasetServiceWith({ visible: false })
@@ -380,9 +383,9 @@ describe('runEvalExperimentTool', () => {
   });
 
   it('refuses to launch against a dataset the space cannot see', async () => {
-    const getClient = jest.fn();
+    const getClient = vi.fn();
     const { deps, workflowsApi } = createDeps({
-      getStartDependencies: jest
+      getStartDependencies: vi
         .fn()
         .mockResolvedValue(
           datasetServiceWith({ visible: false, getClient })
@@ -416,14 +419,14 @@ describe('discovery tools', () => {
   const emptyFacets = { tags: [], maturity: [] };
 
   it('lists datasets via the evals dataset service', async () => {
-    const list = jest.fn().mockResolvedValue({
+    const list = vi.fn().mockResolvedValue({
       datasets: [{ id: 'd1', name: 'D1', description: 'x', examples_count: 2 }],
       total: 1,
       facets: emptyFacets,
     });
-    const getClient = jest.fn().mockReturnValue({ list });
+    const getClient = vi.fn().mockReturnValue({ list });
     const { deps } = createDeps({
-      getStartDependencies: jest.fn().mockResolvedValue({
+      getStartDependencies: vi.fn().mockResolvedValue({
         evals: { datasetService: { getClient } },
         agentBuilder: {},
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
@@ -450,10 +453,10 @@ describe('discovery tools', () => {
   });
 
   it('lists only the datasets of the space the tool runs in', async () => {
-    const list = jest.fn().mockResolvedValue({ datasets: [], total: 0, facets: emptyFacets });
-    const getClient = jest.fn().mockReturnValue({ list });
+    const list = vi.fn().mockResolvedValue({ datasets: [], total: 0, facets: emptyFacets });
+    const getClient = vi.fn().mockReturnValue({ list });
     const { deps } = createDeps({
-      getStartDependencies: jest.fn().mockResolvedValue({
+      getStartDependencies: vi.fn().mockResolvedValue({
         evals: { datasetService: { getClient } },
         agentBuilder: {},
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
@@ -468,7 +471,7 @@ describe('discovery tools', () => {
   });
 
   it('narrows datasets by tag and maturity and reports the available tags', async () => {
-    const list = jest.fn().mockResolvedValue({
+    const list = vi.fn().mockResolvedValue({
       datasets: [
         {
           id: 'd1',
@@ -483,7 +486,7 @@ describe('discovery tools', () => {
       facets: { tags: [{ value: 'golden', count: 3 }], maturity: [{ value: 'golden', count: 3 }] },
     });
     const { deps } = createDeps({
-      getStartDependencies: jest.fn().mockResolvedValue({
+      getStartDependencies: vi.fn().mockResolvedValue({
         evals: { datasetService: { getClient: () => ({ list }) } },
         agentBuilder: {},
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
@@ -508,7 +511,7 @@ describe('discovery tools', () => {
 
   it('returns an error result when the dataset service is unavailable', async () => {
     const { deps } = createDeps({
-      getStartDependencies: jest.fn().mockResolvedValue({
+      getStartDependencies: vi.fn().mockResolvedValue({
         evals: {},
         agentBuilder: {},
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
@@ -525,9 +528,9 @@ describe('discovery tools', () => {
   });
 
   it('refuses to list datasets when the caller lacks read_evals', async () => {
-    const list = jest.fn();
+    const list = vi.fn();
     const { deps } = createDeps({
-      getStartDependencies: jest.fn().mockResolvedValue({
+      getStartDependencies: vi.fn().mockResolvedValue({
         ...securityWith(false),
         evals: { datasetService: { getClient: () => ({ list }) } },
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
@@ -547,7 +550,7 @@ describe('discovery tools', () => {
 
   it('lists evaluators via the evals start contract', async () => {
     const { deps } = createDeps({
-      getStartDependencies: jest.fn().mockResolvedValue({
+      getStartDependencies: vi.fn().mockResolvedValue({
         evals: {
           listEvaluators: () => [
             {
@@ -570,9 +573,9 @@ describe('discovery tools', () => {
   });
 
   it('refuses to list evaluators when the caller lacks read_evals', async () => {
-    const listEvaluators = jest.fn();
+    const listEvaluators = vi.fn();
     const { deps } = createDeps({
-      getStartDependencies: jest.fn().mockResolvedValue({
+      getStartDependencies: vi.fn().mockResolvedValue({
         ...securityWith(false),
         evals: { listEvaluators },
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
@@ -586,11 +589,11 @@ describe('discovery tools', () => {
   });
 
   it('lists model connectors via the evals start contract', async () => {
-    const listModelConnectors = jest
+    const listModelConnectors = vi
       .fn()
       .mockResolvedValue([{ id: '.gen-ai-1', name: 'GPT', type: 'openai' }]);
     const { deps } = createDeps({
-      getStartDependencies: jest.fn().mockResolvedValue({
+      getStartDependencies: vi.fn().mockResolvedValue({
         evals: { listModelConnectors },
         agentBuilder: {},
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
@@ -606,7 +609,7 @@ describe('discovery tools', () => {
 
   it('returns an error result when connector listing is unavailable', async () => {
     const { deps } = createDeps({
-      getStartDependencies: jest.fn().mockResolvedValue({
+      getStartDependencies: vi.fn().mockResolvedValue({
         evals: {},
         agentBuilder: {},
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
@@ -618,9 +621,9 @@ describe('discovery tools', () => {
   });
 
   it('refuses to list model connectors when the caller lacks read_evals', async () => {
-    const listModelConnectors = jest.fn();
+    const listModelConnectors = vi.fn();
     const { deps } = createDeps({
-      getStartDependencies: jest.fn().mockResolvedValue({
+      getStartDependencies: vi.fn().mockResolvedValue({
         ...securityWith(false),
         evals: { listModelConnectors },
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
@@ -635,7 +638,7 @@ describe('discovery tools', () => {
 
   it('lists agent targets from the agent builder registry', async () => {
     const { deps } = createDeps({
-      getStartDependencies: jest.fn().mockResolvedValue({
+      getStartDependencies: vi.fn().mockResolvedValue({
         evals: {},
         agentBuilder: {
           agents: {
@@ -653,9 +656,9 @@ describe('discovery tools', () => {
   });
 
   it('refuses to list agent targets when the caller lacks read_evals', async () => {
-    const getRegistry = jest.fn();
+    const getRegistry = vi.fn();
     const { deps } = createDeps({
-      getStartDependencies: jest.fn().mockResolvedValue({
+      getStartDependencies: vi.fn().mockResolvedValue({
         ...securityWith(false),
         agentBuilder: { agents: { getRegistry } },
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],

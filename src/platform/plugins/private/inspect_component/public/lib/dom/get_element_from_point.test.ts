@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getElementFromPoint } from './get_element_from_point';
 import { INSPECT_OVERLAY_ID } from '../constants';
 
@@ -28,7 +30,7 @@ describe('getElementFromPoint', () => {
 
   it('should return the first valid element', () => {
     const mockHtmlElement = document.createElement('div');
-    document.elementsFromPoint = jest.fn().mockReturnValue([mockHtmlElement]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([mockHtmlElement]);
 
     const result = getElementFromPoint(mockEvent);
 
@@ -41,7 +43,7 @@ describe('getElementFromPoint', () => {
     mockOverlayElement.id = INSPECT_OVERLAY_ID;
     const mockValidElement = document.createElement('div');
 
-    document.elementsFromPoint = jest.fn().mockReturnValue([mockOverlayElement, mockValidElement]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([mockOverlayElement, mockValidElement]);
 
     const result = getElementFromPoint(mockEvent);
 
@@ -52,7 +54,7 @@ describe('getElementFromPoint', () => {
     const mockSvgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     const mockValidElement = document.createElement('div');
 
-    document.elementsFromPoint = jest.fn().mockReturnValue([mockSvgPath, mockValidElement]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([mockSvgPath, mockValidElement]);
 
     const result = getElementFromPoint(mockEvent);
 
@@ -64,7 +66,7 @@ describe('getElementFromPoint', () => {
     const mockParentElement = document.createElement('div');
     mockParentElement.appendChild(mockSvg);
 
-    document.elementsFromPoint = jest.fn().mockReturnValue([mockSvg]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([mockSvg]);
 
     const result = getElementFromPoint(mockEvent);
 
@@ -76,7 +78,7 @@ describe('getElementFromPoint', () => {
     mockOverlayElement.id = INSPECT_OVERLAY_ID;
     const mockSvgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
-    document.elementsFromPoint = jest.fn().mockReturnValue([mockOverlayElement, mockSvgPath]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([mockOverlayElement, mockSvgPath]);
 
     const result = getElementFromPoint(mockEvent);
 
@@ -84,7 +86,7 @@ describe('getElementFromPoint', () => {
   });
 
   it('should return null when elements array is empty', () => {
-    document.elementsFromPoint = jest.fn().mockReturnValue([]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([]);
 
     const result = getElementFromPoint(mockEvent);
 

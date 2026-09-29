@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CoreSetup } from '@kbn/core/server';
 import { trackDiscoverSessionAction } from './user_activity';
 
@@ -18,11 +21,11 @@ describe('trackDiscoverSessionAction', () => {
       tags: ['tag-1', 'tag-2'],
     },
   };
-  let trackUserAction: jest.Mock;
+  let trackUserAction: Mock;
   let userActivity: CoreSetup['userActivity'];
 
   beforeEach(() => {
-    trackUserAction = jest.fn();
+    trackUserAction = vi.fn();
     userActivity = { trackUserAction };
   });
 

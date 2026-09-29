@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { Global } from '@kbn/core-di-internal';
 import { Request } from '@kbn/core-di-server';
@@ -22,26 +24,26 @@ const flushMicrotasks = () => new Promise<void>((resolve) => setImmediate(resolv
 
 const createMockScope = (runner: AlertingTaskRunner) => {
   const scopeBinding = {
-    inRequestScope: jest.fn(),
-    inTransientScope: jest.fn(),
+    inRequestScope: vi.fn(),
+    inTransientScope: vi.fn(),
   };
   const bindResult = {
-    toConstantValue: jest.fn(),
-    toSelf: jest.fn().mockReturnValue(scopeBinding),
+    toConstantValue: vi.fn(),
+    toSelf: vi.fn().mockReturnValue(scopeBinding),
   };
 
   return {
-    bind: jest.fn().mockReturnValue(bindResult),
-    get: jest.fn().mockReturnValue(runner),
-    unbindAllAsync: jest.fn().mockResolvedValue(undefined),
+    bind: vi.fn().mockReturnValue(bindResult),
+    get: vi.fn().mockReturnValue(runner),
+    unbindAllAsync: vi.fn().mockResolvedValue(undefined),
     _scopeBinding: scopeBinding,
   };
 };
 
 const createMockInjection = (scope: ReturnType<typeof createMockScope>): CoreDiServiceStart =>
   ({
-    fork: jest.fn().mockReturnValue(scope),
-    getContainer: jest.fn(),
+    fork: vi.fn().mockReturnValue(scope),
+    getContainer: vi.fn(),
   } as unknown as CoreDiServiceStart);
 
 const createRunContext = (overrides: Partial<RunContext> = {}): RunContext =>
@@ -152,7 +154,7 @@ describe('createTaskRunnerFactory', () => {
   it('binds the fakeRequest into a request scope and runs the task runner', async () => {
     const runResult: RunResult = { state: { foo: 'bar' } };
     const runner = new TestTaskRunner();
-    jest.spyOn(runner, 'run').mockResolvedValue(runResult);
+    vi.spyOn(runner, 'run').mockResolvedValue(runResult);
 
     const scope = createMockScope(runner);
     const injectionPromise = Promise.resolve(createMockInjection(scope));
@@ -203,7 +205,7 @@ describe('createTaskRunnerFactory', () => {
   it('unbinds the scope even when the task runner throws', async () => {
     const runner = new TestTaskRunner();
     const failure = new Error('boom');
-    jest.spyOn(runner, 'run').mockRejectedValue(failure);
+    vi.spyOn(runner, 'run').mockRejectedValue(failure);
 
     const scope = createMockScope(runner);
     const injectionPromise = Promise.resolve(createMockInjection(scope));

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { useThreatIntelligenceDetails } from './use_threat_intelligence_details';
 import { renderHook } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useInvestigationTimeEnrichment } from './use_investigation_enrichment';
 
-jest.mock('./use_investigation_enrichment');
+vi.mock('./use_investigation_enrichment');
 
 const mockHit: DataTableRecord = {
   id: '1',
@@ -23,16 +25,16 @@ const mockHit: DataTableRecord = {
 
 describe('useThreatIntelligenceDetails', () => {
   beforeEach(() => {
-    jest.mocked(useInvestigationTimeEnrichment).mockReturnValue({
+    vi.mocked(useInvestigationTimeEnrichment).mockReturnValue({
       result: { enrichments: [] },
       loading: false,
-      setRange: jest.fn(),
+      setRange: vi.fn(),
       range: { from: '2023-04-27T00:00:00Z', to: '2023-04-27T23:59:59Z' },
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the expected values', () => {

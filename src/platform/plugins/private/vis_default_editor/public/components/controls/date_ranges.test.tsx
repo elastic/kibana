@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DateRangesParamEditor } from './date_ranges';
@@ -14,15 +17,15 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
 
 describe('DateRangesParamEditor component', () => {
-  let setValue: jest.Mock;
-  let setValidity: jest.Mock;
-  let setTouched: jest.Mock;
+  let setValue: Mock;
+  let setValidity: Mock;
+  let setTouched: Mock;
   let defaultProps: any;
 
   beforeEach(() => {
-    setValue = jest.fn();
-    setValidity = jest.fn();
-    setTouched = jest.fn();
+    setValue = vi.fn();
+    setValidity = vi.fn();
+    setTouched = vi.fn();
 
     defaultProps = {
       agg: {},
@@ -56,7 +59,7 @@ describe('DateRangesParamEditor component', () => {
   });
 
   it('should validate range values with date math', function () {
-    const mockedConsoleWarn = jest.spyOn(console, 'warn'); // mocked console.warn to avoid console messages when running tests
+    const mockedConsoleWarn = vi.spyOn(console, 'warn'); // mocked console.warn to avoid console messages when running tests
     mockedConsoleWarn.mockImplementation(() => {});
 
     const component = mountWithIntl(<DateRangesWrapped {...defaultProps} />);

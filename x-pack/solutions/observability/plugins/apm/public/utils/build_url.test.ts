@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { type ItemType, buildUrl } from './build_url';
 
 describe('buildUrl', () => {
@@ -80,7 +82,7 @@ describe('buildUrl', () => {
   });
 
   it('should return undefined and log an error if the port is invalid', () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const item = {
       url: {

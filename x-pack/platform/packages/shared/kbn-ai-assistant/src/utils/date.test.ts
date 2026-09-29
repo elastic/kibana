@@ -4,17 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
 import datemath from '@kbn/datemath';
 import moment from 'moment';
 import { getAbsoluteTime, isValidDateMath } from './date';
 
 describe('getAbsoluteTime', () => {
-  let parseSpy: jest.SpyInstance;
+  let parseSpy: MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    parseSpy = jest
+    parseSpy = vi
       .spyOn(datemath, 'parse')
       .mockImplementation((range: string, opts: { forceNow?: Date; roundUp?: boolean } = {}) => {
         switch (range) {

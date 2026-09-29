@@ -5,22 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useGetIntegrationById } from './use_get_integration_by_id';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import * as api from '../lib/api';
 
-jest.mock('../lib/api');
-const mockGetIntegrationById = api.getIntegrationById as jest.Mock;
+vi.mock('../lib/api');
+const mockGetIntegrationById = api.getIntegrationById as Mock;
 
-jest.mock('./use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: {},
-    },
-  }),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: {},
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -41,7 +47,7 @@ const createWrapper = () => {
 
 describe('useGetIntegrationById', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return undefined integration when integrationId is undefined', async () => {
@@ -100,7 +106,7 @@ describe('useGetIntegrationById', () => {
 
   it('should handle API errors', async () => {
     // Suppress unrelated React Query errors
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // Use 404-shaped error so the hook does not retry (hook disables retry for 404)
     const notFoundError = new Error('Not found') as Error & { response?: { status?: number } };

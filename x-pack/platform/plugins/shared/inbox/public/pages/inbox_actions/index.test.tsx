@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -19,9 +22,9 @@ import {
 import { createStubInboxAction } from '../../../common/test_helpers';
 import { InboxActionsPage } from '.';
 
-jest.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createWrapper = (): FC<PropsWithChildren<{}>> => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -33,10 +36,10 @@ const createWrapper = (): FC<PropsWithChildren<{}>> => {
 };
 
 describe('InboxActionsPage', () => {
-  let httpGet: jest.Mock;
+  let httpGet: Mock;
 
   beforeEach(() => {
-    httpGet = jest.fn().mockImplementation(async (url: string) => {
+    httpGet = vi.fn().mockImplementation(async (url: string) => {
       if (url === INBOX_ACTIONS_URL) {
         return {
           actions: [

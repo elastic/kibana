@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import type { ElasticsearchResponseError } from '../../utils/identify_exceptions';
@@ -15,14 +17,14 @@ describe('deleteAccessControlIndex lib function', () => {
   const mockClient = {
     asCurrentUser: {
       indices: {
-        delete: jest.fn(),
+        delete: vi.fn(),
       },
     },
     asInternalUser: {},
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when ACL index exists', () => {

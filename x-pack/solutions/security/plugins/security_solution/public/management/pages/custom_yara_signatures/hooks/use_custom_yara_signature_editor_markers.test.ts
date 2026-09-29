@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { ValidateCustomYaraSignatureDiagnostic } from '../../../../../common/api/endpoint/custom_yara_signatures';
 
-const mockSetModelMarkers = jest.fn();
+const mockSetModelMarkers = vi.fn();
 
-jest.mock('@kbn/code-editor', () => ({
-  monaco: {
-    editor: {
-      setModelMarkers: (...args: unknown[]) => mockSetModelMarkers(...args),
-    },
-    MarkerSeverity: { Error: 8, Warning: 4 },
-  },
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      monaco: {
+        editor: {
+          setModelMarkers: (...args: unknown[]) => mockSetModelMarkers(...args),
+        },
+        MarkerSeverity: { Error: 8, Warning: 4 },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   CUSTOM_YARA_SIGNATURE_EDITOR_MARKER_OWNER,
@@ -40,9 +45,9 @@ const createModel = ({
 } = {}) => ({
   isDisposed: () => isDisposed,
   getLineCount: () => lineCount,
-  getLineMaxColumn: jest.fn((lineNumber: number) => (lineNumber <= lineCount ? lineMaxColumn : 1)),
-  getLineFirstNonWhitespaceColumn: jest.fn(() => firstNonWhitespaceColumn),
-  getLineLastNonWhitespaceColumn: jest.fn(() => lastNonWhitespaceColumn ?? lineMaxColumn),
+  getLineMaxColumn: vi.fn((lineNumber: number) => (lineNumber <= lineCount ? lineMaxColumn : 1)),
+  getLineFirstNonWhitespaceColumn: vi.fn(() => firstNonWhitespaceColumn),
+  getLineLastNonWhitespaceColumn: vi.fn(() => lastNonWhitespaceColumn ?? lineMaxColumn),
 });
 
 const createEditor = (

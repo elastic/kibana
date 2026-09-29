@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject, take } from 'rxjs';
 import type { EditPanelActionApi } from './edit_panel_action';
@@ -25,9 +27,9 @@ describe('Edit panel action', () => {
     context = {
       embeddable: {
         viewMode$,
-        onEdit: jest.fn(),
-        isEditingEnabled: jest.fn().mockReturnValue(true),
-        getTypeDisplayName: jest.fn().mockReturnValue('A very fun panel type'),
+        onEdit: vi.fn(),
+        isEditingEnabled: vi.fn().mockReturnValue(true),
+        getTypeDisplayName: vi.fn().mockReturnValue('A very fun panel type'),
       },
     };
   });
@@ -49,12 +51,12 @@ describe('Edit panel action', () => {
   });
 
   it('is incompatible when editing is not enabled', async () => {
-    context.embeddable.isEditingEnabled = jest.fn().mockReturnValue(false);
+    context.embeddable.isEditingEnabled = vi.fn().mockReturnValue(false);
     expect(await action.isCompatible(context)).toBe(false);
   });
 
   it('calls the onEdit method on execute', async () => {
-    const returnFocus = jest.fn();
+    const returnFocus = vi.fn();
     context.returnFocus = returnFocus;
 
     await action.execute(context);
@@ -63,15 +65,19 @@ describe('Edit panel action', () => {
 
   it('returns an href if one is available', async () => {
     const href = '#/very-fun-panel-type/edit';
-    context.embeddable.getEditHref = jest.fn().mockReturnValue(href);
+    context.embeddable.getEditHref = vi.fn().mockReturnValue(href);
     expect(await action.getHref(context)).toBe(href);
   });
 
-  it('getCompatibilityChangesSubject emits when view mode changes', (done) => {
-    const subject = action.getCompatibilityChangesSubject(context);
-    subject?.pipe(take(1)).subscribe(() => {
-      done();
-    });
-    setViewMode('view');
-  });
+  it('getCompatibilityChangesSubject emits when view mode changes', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+          const subject = action.getCompatibilityChangesSubject(context);
+          subject?.pipe(take(1)).subscribe(() => {
+            done();
+          });
+          setViewMode('view');
+        
+      }));
 });

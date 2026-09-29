@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { unauthenticatedApp } from './unauthenticated_app';
 
 // Mock the dynamic import
-const mockRenderUnauthenticatedPage = jest.fn(() => jest.fn());
-jest.mock('./unauthenticated_page', () => ({
-  renderUnauthenticatedPage: mockRenderUnauthenticatedPage,
-}));
+const mockRenderUnauthenticatedPage = vi.fn(() => vi.fn());
+vi.mock('./unauthenticated_page', () => {
+      const mocked = {
+      renderUnauthenticatedPage: mockRenderUnauthenticatedPage,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('unauthenticatedApp', () => {
   const originalWindowLocation = window.location;
@@ -33,7 +38,7 @@ describe('unauthenticatedApp', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('application registration', () => {

@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import { fetchAssetsByVersion } from './fetch_assets_by_version';
 
-jest.mock('../../prebuilt_rule_assets_validation', () => ({
-  validatePrebuiltRuleAssets: (assets: unknown[]) => assets,
-}));
+vi.mock('../../prebuilt_rule_assets_validation', () => {
+      const mocked = {
+      validatePrebuiltRuleAssets: (assets: unknown[]) => assets,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const emptySearchResponse = {
   took: 1,
@@ -25,11 +31,11 @@ const soId = (ruleId: string, version: number) =>
   `${PREBUILT_RULE_ASSETS_SO_TYPE}:${ruleId}_${version}`;
 
 describe('fetchAssetsByVersion', () => {
-  let searchMock: jest.Mock;
+  let searchMock: Mock;
   let savedObjectsClient: SavedObjectsClientContract;
 
   beforeEach(() => {
-    searchMock = jest.fn().mockResolvedValue(emptySearchResponse);
+    searchMock = vi.fn().mockResolvedValue(emptySearchResponse);
     savedObjectsClient = {
       search: searchMock,
       getCurrentNamespace: () => 'default',

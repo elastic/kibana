@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@kbn/code-editor-mock/jest_helper';
 
 import React from 'react';
@@ -15,37 +17,46 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { Processor } from '../../../../common/types';
 import { PipelineForm } from './pipeline_form';
 
-const mockUseKibana = jest.fn();
+const mockUseKibana = vi.fn();
 
-jest.mock('@kbn/unsaved-changes-prompt', () => ({
-  useUnsavedChangesPrompt: jest.fn(),
-}));
+vi.mock('@kbn/unsaved-changes-prompt', () => {
+      const mocked = {
+      useUnsavedChangesPrompt: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared_imports', () => ({
-  ...jest.requireActual('../../../shared_imports'),
-  useKibana: () => mockUseKibana(),
-  JsonEditorField: () => <div data-test-subj="jsonEditorFieldStub" />,
-}));
+vi.mock('../../../shared_imports', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../shared_imports')),
+      useKibana: () => mockUseKibana(),
+      JsonEditorField: () => <div data-test-subj="jsonEditorFieldStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Avoid mounting the real processors editor (which registers `onUpdate` in an effect)
-jest.mock('../pipeline_editor', () => ({
-  ProcessorsEditorContextProvider: ({ children }: { children?: React.ReactNode }) => (
-    <>{children}</>
-  ),
-  PipelineEditor: () => <div data-test-subj="pipelineEditorStub" />,
-}));
+vi.mock('../pipeline_editor', () => {
+      const mocked = {
+      ProcessorsEditorContextProvider: ({ children }: { children?: React.ReactNode }) => (
+        <>{children}</>
+      ),
+      PipelineEditor: () => <div data-test-subj="pipelineEditorStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('PipelineForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
-        overlays: { openConfirm: jest.fn() },
+        overlays: { openConfirm: vi.fn() },
         history: {},
-        application: { navigateToUrl: jest.fn() },
+        application: { navigateToUrl: vi.fn() },
         http: {},
         documentation: {
-          getFieldAccessPatternUrl: jest.fn(() => 'https://elastic.co/docs'),
+          getFieldAccessPatternUrl: vi.fn(() => 'https://elastic.co/docs'),
         },
       },
     });
@@ -53,7 +64,7 @@ describe('PipelineForm', () => {
 
   it('can submit using last-known processors state if the editor has not registered yet', async () => {
     const user = userEvent.setup();
-    const onSave = jest.fn();
+    const onSave = vi.fn();
 
     const processors: Processor[] = [
       {

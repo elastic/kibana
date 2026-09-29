@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ResolutionClient } from '.';
@@ -55,7 +58,7 @@ const createTruncatedSearchResponse = (
   },
 });
 
-const getBulkDocs = (esClient: jest.Mocked<ElasticsearchClient>): unknown[] => {
+const getBulkDocs = (esClient: Mocked<ElasticsearchClient>): unknown[] => {
   const operations = esClient.bulk.mock.calls[0][0].operations;
   if (!operations) {
     throw new Error('expected bulk operations');
@@ -69,15 +72,15 @@ const getBulkDocs = (esClient: jest.Mocked<ElasticsearchClient>): unknown[] => {
 describe('ResolutionClient', () => {
   let client: ResolutionClient;
   let mockLogger: ReturnType<typeof loggerMock.create>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockEsClient: Mocked<ElasticsearchClient>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockLogger = loggerMock.create();
     mockEsClient = {
-      search: jest.fn(),
-      bulk: jest.fn(),
-    } as unknown as jest.Mocked<ElasticsearchClient>;
+      search: vi.fn(),
+      bulk: vi.fn(),
+    } as unknown as Mocked<ElasticsearchClient>;
 
     client = new ResolutionClient({
       logger: mockLogger,

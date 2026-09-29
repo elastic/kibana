@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { createEvent, fireEvent, render } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -20,23 +23,35 @@ import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { useDocViewerExtensionActionsContext } from '../../../../../hooks/use_doc_viewer_extension_actions';
 
 // Mock the i18n module
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    translate: jest.fn((key, options) => options?.defaultMessage || key),
-  },
-}));
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: {
+        translate: vi.fn((key, options) => options?.defaultMessage || key),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_discover_link_and_esql_query', () => ({
-  useDiscoverLinkAndEsqlQuery: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_discover_link_and_esql_query', () => {
+      const mocked = {
+      useDiscoverLinkAndEsqlQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_data_sources', () => ({
-  useDataSourcesContext: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_data_sources', () => {
+      const mocked = {
+      useDataSourcesContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_doc_viewer_extension_actions', () => ({
-  useDocViewerExtensionActionsContext: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_doc_viewer_extension_actions', () => {
+      const mocked = {
+      useDocViewerExtensionActionsContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getColumns', () => {
   const traceId = 'trace-123';
@@ -80,12 +95,12 @@ describe('getColumns', () => {
   } as unknown as ErrorsByTraceId['traceErrors'][0];
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useDataSourcesContext as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useDataSourcesContext as Mock).mockReturnValue({
       indexes: { apm: { errors: 'apm-errors-*' } },
     });
-    (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue(undefined);
-    (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+    (useDocViewerExtensionActionsContext as Mock).mockReturnValue(undefined);
+    (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
       discoverUrl: '/app/discover#/?_a=1',
       esqlQueryString: 'FROM apm-errors-* | WHERE true',
     });
@@ -104,11 +119,11 @@ describe('getColumns', () => {
   });
 
   it('renders plain text when both discoverUrl and openInNewTab are unavailable', () => {
-    (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+    (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
       discoverUrl: undefined,
       esqlQueryString: undefined,
     });
-    (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue(undefined);
+    (useDocViewerExtensionActionsContext as Mock).mockReturnValue(undefined);
 
     const columns = getColumns({
       traceId,
@@ -123,9 +138,9 @@ describe('getColumns', () => {
   });
 
   it('calls openInNewTab on plain left click when esqlQueryString is available', () => {
-    const openInNewTab = jest.fn();
-    (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue({ openInNewTab });
-    (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+    const openInNewTab = vi.fn();
+    (useDocViewerExtensionActionsContext as Mock).mockReturnValue({ openInNewTab });
+    (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
       discoverUrl: '/app/discover#/?_a=1',
       esqlQueryString: 'FROM apm-errors-* | WHERE trace.id == "trace-123"',
     });
@@ -150,9 +165,9 @@ describe('getColumns', () => {
   });
 
   it('does not intercept modifier click when href is present', () => {
-    const openInNewTab = jest.fn();
-    (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue({ openInNewTab });
-    (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+    const openInNewTab = vi.fn();
+    (useDocViewerExtensionActionsContext as Mock).mockReturnValue({ openInNewTab });
+    (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
       discoverUrl: '/app/discover#/?_a=1',
       esqlQueryString: 'FROM apm-errors-* | WHERE trace.id == "trace-123"',
     });
@@ -246,7 +261,7 @@ describe('getColumns', () => {
       const ErrorRender = columns[0].render;
       render(<>{ErrorRender?.(null, item)}</>);
 
-      const { whereClause } = (useDiscoverLinkAndEsqlQuery as jest.Mock).mock.calls[0][0] as {
+      const { whereClause } = (useDiscoverLinkAndEsqlQuery as Mock).mock.calls[0][0] as {
         whereClause: ESQLAstExpression;
       };
 
@@ -309,14 +324,14 @@ describe('getColumns', () => {
       const ErrorRender = columns[0].render;
       render(<>{ErrorRender?.(null, mockErrorItem)}</>);
 
-      const { indexPattern } = (useDiscoverLinkAndEsqlQuery as jest.Mock).mock.calls[0][0] as {
+      const { indexPattern } = (useDiscoverLinkAndEsqlQuery as Mock).mock.calls[0][0] as {
         indexPattern: string;
       };
       expect(indexPattern).toBe('apm-errors-*');
     });
 
     it('uses logs pattern for unprocessed OTel items when logs index is configured', () => {
-      (useDataSourcesContext as jest.Mock).mockReturnValue({
+      (useDataSourcesContext as Mock).mockReturnValue({
         indexes: { apm: { errors: 'apm-errors-*' }, logs: 'logs-*-*' },
       });
 
@@ -326,7 +341,7 @@ describe('getColumns', () => {
       const ErrorRender = columns[0].render;
       render(<>{ErrorRender?.(null, mockUnprocessedOtelErrorItem)}</>);
 
-      const { indexPattern } = (useDiscoverLinkAndEsqlQuery as jest.Mock).mock.calls[0][0] as {
+      const { indexPattern } = (useDiscoverLinkAndEsqlQuery as Mock).mock.calls[0][0] as {
         indexPattern: string;
       };
       expect(indexPattern).toBe('logs-*-*');
@@ -334,7 +349,7 @@ describe('getColumns', () => {
 
     it('does not fall back to apm.errors for unprocessed OTel items when no logs index is configured', () => {
       // No indexes.logs
-      (useDataSourcesContext as jest.Mock).mockReturnValue({
+      (useDataSourcesContext as Mock).mockReturnValue({
         indexes: { apm: { errors: 'apm-errors-*' } },
       });
 
@@ -344,7 +359,7 @@ describe('getColumns', () => {
       const ErrorRender = columns[0].render;
       render(<>{ErrorRender?.(null, mockUnprocessedOtelErrorItem)}</>);
 
-      const { indexPattern } = (useDiscoverLinkAndEsqlQuery as jest.Mock).mock.calls[0][0] as {
+      const { indexPattern } = (useDiscoverLinkAndEsqlQuery as Mock).mock.calls[0][0] as {
         indexPattern?: string;
       };
       // The APM error pattern cannot match custom OTel log datasets, so no pattern is passed and

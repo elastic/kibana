@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useInvalidateFindAttackDiscoveries } from '../../../../use_find_attack_discoveries';
 import React from 'react';
@@ -12,20 +15,23 @@ import React from 'react';
 import { VisibilityFilter } from '.';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 
-jest.mock('../../../../use_find_attack_discoveries', () => ({
-  useInvalidateFindAttackDiscoveries: jest.fn(() => jest.fn()),
-}));
+vi.mock('../../../../use_find_attack_discoveries', () => {
+      const mocked = {
+      useInvalidateFindAttackDiscoveries: vi.fn(() => vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
-  setShared: jest.fn(),
+  setShared: vi.fn(),
 };
 
 describe('VisibilityFilter', () => {
-  let setShared: jest.Mock;
+  let setShared: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    setShared = jest.fn();
+    vi.clearAllMocks();
+    setShared = vi.fn();
   });
 
   describe('expected options', () => {
@@ -102,8 +108,8 @@ describe('VisibilityFilter', () => {
   });
 
   it('calls invalidateFindAttackDiscoveries on change', () => {
-    const invalidateFindAttackDiscoveries = jest.fn();
-    (useInvalidateFindAttackDiscoveries as jest.Mock).mockImplementation(
+    const invalidateFindAttackDiscoveries = vi.fn();
+    (useInvalidateFindAttackDiscoveries as Mock).mockImplementation(
       () => invalidateFindAttackDiscoveries
     );
 

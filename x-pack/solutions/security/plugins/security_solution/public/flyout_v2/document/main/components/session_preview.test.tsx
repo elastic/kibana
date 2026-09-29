@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useProcessData } from '../hooks/use_process_data';
@@ -15,8 +18,8 @@ import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID } from './test_ids';
 import { useRuleDetailsLink } from '../../../rule/main/hooks/use_rule_details_link';
 
-jest.mock('../hooks/use_process_data');
-jest.mock('../../../rule/main/hooks/use_rule_details_link');
+vi.mock('../hooks/use_process_data');
+vi.mock('../../../rule/main/hooks/use_rule_details_link');
 
 const hit = {
   id: '1',
@@ -40,11 +43,11 @@ const renderSessionPreview = ({
 
 describe('SessionPreview', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders session preview with all data', () => {
-    jest.mocked(useProcessData).mockReturnValue({
+    vi.mocked(useProcessData).mockReturnValue({
       processName: 'process1',
       userName: 'user1',
       startAt: '2022-01-01T00:00:00.000Z',
@@ -53,7 +56,7 @@ describe('SessionPreview', () => {
       workdir: '/path/to/workdir',
       command: 'command1',
     });
-    (useRuleDetailsLink as jest.Mock).mockReturnValue('rule1_link');
+    (useRuleDetailsLink as Mock).mockReturnValue('rule1_link');
 
     renderSessionPreview();
 
@@ -70,7 +73,7 @@ describe('SessionPreview', () => {
   });
 
   it('renders session preview without optional data', () => {
-    jest.mocked(useProcessData).mockReturnValue({
+    vi.mocked(useProcessData).mockReturnValue({
       processName: 'process1',
       userName: 'user1',
       startAt: '',
@@ -79,7 +82,7 @@ describe('SessionPreview', () => {
       command: '',
       workdir: '',
     });
-    (useRuleDetailsLink as jest.Mock).mockReturnValue(null);
+    (useRuleDetailsLink as Mock).mockReturnValue(null);
 
     renderSessionPreview();
 
@@ -93,7 +96,7 @@ describe('SessionPreview', () => {
   });
 
   it('does not render rule details link when navigation is disabled', () => {
-    jest.mocked(useProcessData).mockReturnValue({
+    vi.mocked(useProcessData).mockReturnValue({
       processName: 'process1',
       userName: 'user1',
       startAt: '2022-01-01T00:00:00.000Z',
@@ -102,7 +105,7 @@ describe('SessionPreview', () => {
       command: '',
       workdir: '',
     });
-    (useRuleDetailsLink as jest.Mock).mockReturnValue(null);
+    (useRuleDetailsLink as Mock).mockReturnValue(null);
 
     renderSessionPreview({ disableNavigation: true });
 

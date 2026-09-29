@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type {
   SecurityActivateUserProfileResponse,
@@ -30,19 +33,22 @@ import { securityMock } from '../mocks';
 import { securityTelemetry } from '../otel/instrumentation';
 import { sessionMock } from '../session_management/session.mock';
 
-jest.mock('../otel/instrumentation', () => ({
-  securityTelemetry: {
-    recordGetCurrentProfileInvocation: jest.fn(),
-    recordGetCurrentProfileIdInvocation: jest.fn(),
-  },
-}));
+vi.mock('../otel/instrumentation', () => {
+      const mocked = {
+      securityTelemetry: {
+        recordGetCurrentProfileInvocation: vi.fn(),
+        recordGetCurrentProfileIdInvocation: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const logger = loggingSystemMock.createLogger();
 describe('UserProfileService', () => {
   let mockStartParams: {
     clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
     session: ReturnType<typeof sessionMock.create>;
-    getCurrentUser: jest.Mock;
+    getCurrentUser: Mock;
   };
   let mockAuthz: ReturnType<typeof authorizationMock.create>;
   let userProfileService: UserProfileService;
@@ -50,7 +56,7 @@ describe('UserProfileService', () => {
     mockStartParams = {
       clusterClient: elasticsearchServiceMock.createClusterClient(),
       session: sessionMock.create(),
-      getCurrentUser: jest.fn().mockReturnValue(null),
+      getCurrentUser: vi.fn().mockReturnValue(null),
     };
     mockAuthz = authorizationMock.create();
 
@@ -491,7 +497,7 @@ describe('UserProfileService', () => {
       });
 
       it('returns `null` when es-security-runas-user header is present', async () => {
-        (securityTelemetry.recordGetCurrentProfileInvocation as jest.Mock).mockClear();
+        (securityTelemetry.recordGetCurrentProfileInvocation as Mock).mockClear();
 
         const runAsRequest = httpServerMock.createKibanaRequest({
           headers: {
@@ -797,7 +803,7 @@ describe('UserProfileService', () => {
       });
 
       it('returns `null` when es-security-runas-user header is present', async () => {
-        (securityTelemetry.recordGetCurrentProfileInvocation as jest.Mock).mockClear();
+        (securityTelemetry.recordGetCurrentProfileInvocation as Mock).mockClear();
 
         const runAsRequest = httpServerMock.createKibanaRequest({
           headers: {
@@ -905,7 +911,7 @@ describe('UserProfileService', () => {
       });
 
       it('returns `null` for basic auth requests without calling any ES APIs or recording telemetry', async () => {
-        (securityTelemetry.recordGetCurrentProfileInvocation as jest.Mock).mockClear();
+        (securityTelemetry.recordGetCurrentProfileInvocation as Mock).mockClear();
 
         const request = httpServerMock.createKibanaRequest({
           headers: {
@@ -926,7 +932,7 @@ describe('UserProfileService', () => {
       });
 
       it('returns `null` for API key requests without calling any ES APIs or recording telemetry', async () => {
-        (securityTelemetry.recordGetCurrentProfileInvocation as jest.Mock).mockClear();
+        (securityTelemetry.recordGetCurrentProfileInvocation as Mock).mockClear();
 
         const testApiKeyId = 'some-api-key-id';
         const testApiKeyValue = 'some-api-key-value';
@@ -951,7 +957,7 @@ describe('UserProfileService', () => {
       });
 
       it('returns `null` for session-authenticated requests without calling any ES APIs or recording telemetry', async () => {
-        (securityTelemetry.recordGetCurrentProfileInvocation as jest.Mock).mockClear();
+        (securityTelemetry.recordGetCurrentProfileInvocation as Mock).mockClear();
         mockStartParams.session.getSID.mockResolvedValue('some-session-id');
 
         const startContract = userProfileService.start(mockStartParams);
@@ -966,7 +972,7 @@ describe('UserProfileService', () => {
       });
 
       it('returns `null` for requests with runas header without calling any ES APIs or recording telemetry', async () => {
-        (securityTelemetry.recordGetCurrentProfileInvocation as jest.Mock).mockClear();
+        (securityTelemetry.recordGetCurrentProfileInvocation as Mock).mockClear();
 
         const request = httpServerMock.createKibanaRequest({
           headers: { 'es-security-runas-user': 'some-user' },
@@ -1168,7 +1174,7 @@ describe('UserProfileService', () => {
       });
 
       it('returns `null` when es-security-runas-user header is present', async () => {
-        (securityTelemetry.recordGetCurrentProfileIdInvocation as jest.Mock).mockClear();
+        (securityTelemetry.recordGetCurrentProfileIdInvocation as Mock).mockClear();
 
         const runAsRequest = httpServerMock.createKibanaRequest({
           headers: {
@@ -1378,7 +1384,7 @@ describe('UserProfileService', () => {
       });
 
       it('returns `null` when es-security-runas-user header is present', async () => {
-        (securityTelemetry.recordGetCurrentProfileIdInvocation as jest.Mock).mockClear();
+        (securityTelemetry.recordGetCurrentProfileIdInvocation as Mock).mockClear();
 
         const runAsRequest = httpServerMock.createKibanaRequest({
           headers: {
@@ -1453,7 +1459,7 @@ describe('UserProfileService', () => {
       });
 
       it('returns `null` for basic auth requests without calling any ES APIs or recording telemetry', async () => {
-        (securityTelemetry.recordGetCurrentProfileIdInvocation as jest.Mock).mockClear();
+        (securityTelemetry.recordGetCurrentProfileIdInvocation as Mock).mockClear();
 
         const request = httpServerMock.createKibanaRequest({
           headers: {
@@ -1474,7 +1480,7 @@ describe('UserProfileService', () => {
       });
 
       it('returns `null` for API key requests without calling any ES APIs or recording telemetry', async () => {
-        (securityTelemetry.recordGetCurrentProfileIdInvocation as jest.Mock).mockClear();
+        (securityTelemetry.recordGetCurrentProfileIdInvocation as Mock).mockClear();
 
         const testApiKeyId = 'some-api-key-id';
         const testApiKeyValue = 'some-api-key-value';
@@ -1499,7 +1505,7 @@ describe('UserProfileService', () => {
       });
 
       it('returns `null` for session-authenticated requests without calling any ES APIs or recording telemetry', async () => {
-        (securityTelemetry.recordGetCurrentProfileIdInvocation as jest.Mock).mockClear();
+        (securityTelemetry.recordGetCurrentProfileIdInvocation as Mock).mockClear();
         mockStartParams.session.getSID.mockResolvedValue('some-session-id');
 
         const startContract = userProfileService.start(mockStartParams);
@@ -1516,7 +1522,7 @@ describe('UserProfileService', () => {
       });
 
       it('returns `null` for requests with runas header without calling any ES APIs or recording telemetry', async () => {
-        (securityTelemetry.recordGetCurrentProfileIdInvocation as jest.Mock).mockClear();
+        (securityTelemetry.recordGetCurrentProfileIdInvocation as Mock).mockClear();
 
         const request = httpServerMock.createKibanaRequest({
           headers: { 'es-security-runas-user': 'some-user' },
@@ -1702,7 +1708,7 @@ describe('UserProfileService', () => {
     });
 
     it('retries activation if initially fails with 409 error', async () => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
 
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 409, body: 'some message' })
@@ -1719,7 +1725,7 @@ describe('UserProfileService', () => {
         accessToken: 'some-token',
       });
       await nextTick();
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       await expect(activatePromise).resolves.toMatchInlineSnapshot(`
               Object {
@@ -1746,7 +1752,7 @@ describe('UserProfileService', () => {
     });
 
     it('fails if activation max retries exceeded', async () => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
 
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 409, body: 'some message' })
@@ -1766,7 +1772,7 @@ describe('UserProfileService', () => {
       // Re-try 9 more times.
       for (const _ of Array.from({ length: 9 })) {
         await nextTick();
-        jest.runAllTimers();
+        vi.runAllTimers();
       }
 
       await expect(activatePromise).rejects.toBe(failureReason);
@@ -1779,7 +1785,7 @@ describe('UserProfileService', () => {
     });
 
     it('retries activation if initially fails with 503 error', async () => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
 
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 503, body: 'some message' })
@@ -1796,7 +1802,7 @@ describe('UserProfileService', () => {
         accessToken: 'some-token',
       });
       await nextTick();
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       await expect(activatePromise).resolves.toMatchInlineSnapshot(`
               Object {
@@ -1823,7 +1829,7 @@ describe('UserProfileService', () => {
     });
 
     it('fails if activation with 503 error exceeds max retries', async () => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
 
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 503, body: 'service unavailable' })
@@ -1843,7 +1849,7 @@ describe('UserProfileService', () => {
       // Re-try 9 more times.
       for (const _ of Array.from({ length: 9 })) {
         await nextTick();
-        jest.runAllTimers();
+        vi.runAllTimers();
       }
 
       await expect(activatePromise).rejects.toBe(failureReason);
@@ -1856,7 +1862,7 @@ describe('UserProfileService', () => {
     });
 
     it('retries activation if fails with both 409 and 503 errors', async () => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
 
       const conflict409 = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 409, body: 'conflict' })
@@ -1879,11 +1885,11 @@ describe('UserProfileService', () => {
 
       // Wait for first retry (409)
       await nextTick();
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       // Wait for second retry (503)
       await nextTick();
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       await expect(activatePromise).resolves.toMatchInlineSnapshot(`
               Object {
@@ -2373,7 +2379,7 @@ describe('UserProfileService', () => {
         ),
       } as unknown as SecuritySuggestUserProfilesResponse);
 
-      const mockAtSpacePrivilegeCheck = { atSpace: jest.fn() };
+      const mockAtSpacePrivilegeCheck = { atSpace: vi.fn() };
       mockAtSpacePrivilegeCheck.atSpace.mockResolvedValue({
         hasPrivilegeUids: ['UID-0', 'UID-1', 'UID-8'],
       });
@@ -2466,7 +2472,7 @@ describe('UserProfileService', () => {
         ),
       } as unknown as SecuritySuggestUserProfilesResponse);
 
-      const mockAtSpacePrivilegeCheck = { atSpace: jest.fn() };
+      const mockAtSpacePrivilegeCheck = { atSpace: vi.fn() };
       mockAtSpacePrivilegeCheck.atSpace
         .mockResolvedValueOnce({
           hasPrivilegeUids: ['UID-0'],
@@ -2573,7 +2579,7 @@ describe('UserProfileService', () => {
         ),
       } as unknown as SecuritySuggestUserProfilesResponse);
 
-      const mockAtSpacePrivilegeCheck = { atSpace: jest.fn() };
+      const mockAtSpacePrivilegeCheck = { atSpace: vi.fn() };
       mockAtSpacePrivilegeCheck.atSpace.mockResolvedValue({
         hasPrivilegeUids: ['UID-0', 'UID-1', 'UID-8'],
       });
@@ -2654,7 +2660,7 @@ describe('UserProfileService', () => {
         ),
       } as unknown as SecuritySuggestUserProfilesResponse);
 
-      const mockAtSpacePrivilegeCheck = { atSpace: jest.fn() };
+      const mockAtSpacePrivilegeCheck = { atSpace: vi.fn() };
 
       mockAtSpacePrivilegeCheck.atSpace.mockResolvedValue({
         hasPrivilegeUids: ['UID-0', 'UID-1', 'UID-8'],

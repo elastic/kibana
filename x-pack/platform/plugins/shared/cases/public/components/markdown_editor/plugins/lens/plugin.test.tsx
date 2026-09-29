@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { of } from 'rxjs';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -23,54 +26,60 @@ import {
   SEARCH_INPUT_HELP_TEXT_WITH_ATTACH_HINT,
 } from './translations';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../analytics/use_markdown_editor_ebt');
-jest.mock('./use_lens_draft_comment');
-jest.mock('../../../../common/hooks');
-jest.mock('../../../attachments/lens/lens_return/storage');
-jest.mock('react-router-dom', () => ({
-  useLocation: () => ({ pathname: '/', search: '' }),
-}));
-jest.mock('@kbn/saved-objects-finder-plugin/public', () => ({
-  SavedObjectFinder: ({
-    onChoose,
-    helpText,
-  }: {
-    onChoose: (
-      id: string,
-      type: string,
-      fullName: string,
-      savedObject: { attributes: unknown; references: unknown[] }
-    ) => void;
-    helpText?: string;
-  }) => (
-    <div>
-      <div data-test-subj="saved-object-finder-help">{helpText}</div>
-      <button
-        type="button"
-        data-test-subj="choose-lens-so"
-        onClick={() =>
-          onChoose('so-1', 'lens', 'Chart', {
-            attributes: { title: 'Chosen viz', type: 'lens' },
-            references: [],
-          })
-        }
-      >
-        {'choose'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../analytics/use_markdown_editor_ebt');
+vi.mock('./use_lens_draft_comment');
+vi.mock('../../../../common/hooks');
+vi.mock('../../../attachments/lens/lens_return/storage');
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useLocation: () => ({ pathname: '/', search: '' }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/saved-objects-finder-plugin/public', () => {
+      const mocked = {
+      SavedObjectFinder: ({
+        onChoose,
+        helpText,
+      }: {
+        onChoose: (
+          id: string,
+          type: string,
+          fullName: string,
+          savedObject: { attributes: unknown; references: unknown[] }
+        ) => void;
+        helpText?: string;
+      }) => (
+        <div>
+          <div data-test-subj="saved-object-finder-help">{helpText}</div>
+          <button
+            type="button"
+            data-test-subj="choose-lens-so"
+            onClick={() =>
+              onChoose('so-1', 'lens', 'Chart', {
+                attributes: { title: 'Chosen viz', type: 'lens' },
+                references: [],
+              })
+            }
+          >
+            {'choose'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const trackMarkdownEditorPluginClicked = jest.fn();
-const navigateToPrefilledEditor = jest.fn();
-const getIncomingEmbeddablePackage = jest.fn();
-const contentManagementGet = jest.fn();
-const getTime = jest.fn();
-const onSave = jest.fn();
-const onCancel = jest.fn();
-const clearDraftComment = jest.fn();
-const addDanger = jest.fn();
+const trackMarkdownEditorPluginClicked = vi.fn();
+const navigateToPrefilledEditor = vi.fn();
+const getIncomingEmbeddablePackage = vi.fn();
+const contentManagementGet = vi.fn();
+const getTime = vi.fn();
+const onSave = vi.fn();
+const onCancel = vi.fn();
+const clearDraftComment = vi.fn();
+const addDanger = vi.fn();
 
 const renderEditor = async (node?: unknown) => {
   const view = render(
@@ -86,31 +95,31 @@ const renderEditor = async (node?: unknown) => {
 
 describe('lens markdown plugin', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getIncomingEmbeddablePackage.mockReturnValue(undefined);
     contentManagementGet.mockReset();
     getTime.mockReturnValue({});
-    (useMarkdownEditorPluginClickedEBT as jest.Mock).mockReturnValue(
+    (useMarkdownEditorPluginClickedEBT as Mock).mockReturnValue(
       trackMarkdownEditorPluginClicked
     );
-    (useLensDraftComment as jest.Mock).mockReturnValue({
+    (useLensDraftComment as Mock).mockReturnValue({
       draftComment: undefined,
       clearDraftComment,
     });
-    (useIsMainApplication as jest.Mock).mockReturnValue(false);
-    (getPendingLensAttach as jest.Mock).mockReturnValue(false);
-    (useCasesConfig as jest.Mock).mockReturnValue({
+    (useIsMainApplication as Mock).mockReturnValue(false);
+    (getPendingLensAttach as Mock).mockReturnValue(false);
+    (useCasesConfig as Mock).mockReturnValue({
       attachmentsEnabled: false,
     });
-    (useToasts as jest.Mock).mockReturnValue({ addDanger });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useToasts as Mock).mockReturnValue({ addDanger });
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: { currentAppId$: of('cases') },
         embeddable: {
           getStateTransfer: () => ({ getIncomingEmbeddablePackage }),
         },
         lens: { navigateToPrefilledEditor },
-        storage: { set: jest.fn(), get: jest.fn() },
+        storage: { set: vi.fn(), get: vi.fn() },
         contentManagement: { client: { get: contentManagementGet } },
         uiSettings: {},
         data: { query: { timefilter: { timefilter: { getTime } } } },
@@ -140,7 +149,7 @@ describe('lens markdown plugin', () => {
   });
 
   it('points users at Attach when attachments are enabled', async () => {
-    (useCasesConfig as jest.Mock).mockReturnValue({ attachmentsEnabled: true });
+    (useCasesConfig as Mock).mockReturnValue({ attachmentsEnabled: true });
     await renderEditor();
 
     expect(screen.getByTestId('saved-object-finder-help')).toHaveTextContent(
@@ -160,7 +169,7 @@ describe('lens markdown plugin', () => {
   });
 
   it('inserts incoming by-value lens attributes into the comment', async () => {
-    (useLensDraftComment as jest.Mock).mockReturnValue({
+    (useLensDraftComment as Mock).mockReturnValue({
       draftComment: { commentId: 'c1', comment: 'draft' },
       clearDraftComment,
     });
@@ -185,7 +194,7 @@ describe('lens markdown plugin', () => {
   });
 
   it('resolves incoming ref_id via content management and inserts into the comment', async () => {
-    (useLensDraftComment as jest.Mock).mockReturnValue({
+    (useLensDraftComment as Mock).mockReturnValue({
       draftComment: { commentId: 'c1', comment: 'draft' },
       clearDraftComment,
     });
@@ -213,7 +222,7 @@ describe('lens markdown plugin', () => {
   });
 
   it('does not drain the incoming package when content management resolve fails', async () => {
-    (useLensDraftComment as jest.Mock).mockReturnValue({
+    (useLensDraftComment as Mock).mockReturnValue({
       draftComment: { commentId: 'c1', comment: 'draft' },
       clearDraftComment,
     });
@@ -233,7 +242,7 @@ describe('lens markdown plugin', () => {
   });
 
   it('updates the existing block when a draft position is set and the incoming package resolves by-value', async () => {
-    (useLensDraftComment as jest.Mock).mockReturnValue({
+    (useLensDraftComment as Mock).mockReturnValue({
       draftComment: { commentId: 'c1', comment: 'draft', position: { start: {}, end: {} } },
       clearDraftComment,
     });
@@ -248,8 +257,8 @@ describe('lens markdown plugin', () => {
           ]
     );
 
-    const markdownContextValue = { replaceNode: jest.fn() };
-    const { EuiMarkdownContext } = jest.requireActual('@elastic/eui');
+    const markdownContextValue = { replaceNode: vi.fn() };
+    const { EuiMarkdownContext } = (await vi.importActual('@elastic/eui'));
     render(
       <I18nProvider>
         <EuiMarkdownContext.Provider value={markdownContextValue}>
@@ -269,7 +278,7 @@ describe('lens markdown plugin', () => {
   });
 
   it('resolves an incoming by-ref draft update via content management', async () => {
-    (useLensDraftComment as jest.Mock).mockReturnValue({
+    (useLensDraftComment as Mock).mockReturnValue({
       draftComment: { commentId: 'c1', comment: 'draft', position: { start: {}, end: {} } },
       clearDraftComment,
     });
@@ -280,8 +289,8 @@ describe('lens markdown plugin', () => {
       item: { attributes: { title: 'Updated from SO', type: 'lens' }, references: [] },
     });
 
-    const markdownContextValue = { replaceNode: jest.fn() };
-    const { EuiMarkdownContext } = jest.requireActual('@elastic/eui');
+    const markdownContextValue = { replaceNode: vi.fn() };
+    const { EuiMarkdownContext } = (await vi.importActual('@elastic/eui'));
     render(
       <I18nProvider>
         <EuiMarkdownContext.Provider value={markdownContextValue}>

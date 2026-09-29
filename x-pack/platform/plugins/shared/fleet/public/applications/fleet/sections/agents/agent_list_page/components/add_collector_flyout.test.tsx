@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -25,48 +27,60 @@ import { useGetCreateApiKey } from '../../../../../../components/agent_enrollmen
 import { useManagedOtlp } from './use_managed_otlp';
 import { AddCollectorFlyout } from './add_collector_flyout';
 
-jest.mock('../../../../hooks', () => ({
-  ...jest.requireActual('../../../../hooks'),
-  sendGetOneAgentPolicy: jest.fn(),
-  sendCreateAgentPolicyForRq: jest.fn(),
-  sendGetEnrollmentAPIKeys: jest.fn(),
-  useGetFleetServerHosts: jest.fn(),
-  useFleetStatus: jest.fn(),
-  useStartServices: jest.fn(),
-}));
-jest.mock('../../../../components', () => ({
-  AgentEnrollmentConfirmationStep: () => ({
-    title: 'Confirm enrollment',
-    children: <div>Confirmation</div>,
-  }),
-  usePollingAgentCount: jest.fn(),
-}));
-jest.mock('../../../../../../components/agent_enrollment_flyout/hooks', () => ({
-  useGetCreateApiKey: jest.fn(),
-}));
-jest.mock('./use_managed_otlp', () => ({
-  useManagedOtlp: jest.fn(),
-}));
+vi.mock('../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../hooks')),
+      sendGetOneAgentPolicy: vi.fn(),
+      sendCreateAgentPolicyForRq: vi.fn(),
+      sendGetEnrollmentAPIKeys: vi.fn(),
+      useGetFleetServerHosts: vi.fn(),
+      useFleetStatus: vi.fn(),
+      useStartServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../components', () => {
+      const mocked = {
+      AgentEnrollmentConfirmationStep: () => ({
+        title: 'Confirm enrollment',
+        children: <div>Confirmation</div>,
+      }),
+      usePollingAgentCount: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../../components/agent_enrollment_flyout/hooks', () => {
+      const mocked = {
+      useGetCreateApiKey: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_managed_otlp', () => {
+      const mocked = {
+      useManagedOtlp: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedSendGetOneAgentPolicy = jest.mocked(sendGetOneAgentPolicy);
-const mockedSendCreateAgentPolicyForRq = jest.mocked(sendCreateAgentPolicyForRq);
-const mockedSendGetEnrollmentAPIKeys = jest.mocked(sendGetEnrollmentAPIKeys);
-const mockedUseGetFleetServerHosts = jest.mocked(useGetFleetServerHosts);
-const mockedUsePollingAgentCount = jest.mocked(usePollingAgentCount);
-const mockedUseFleetStatus = jest.mocked(useFleetStatus);
-const mockedUseGetCreateApiKey = jest.mocked(useGetCreateApiKey);
-const mockedUseStartServices = jest.mocked(useStartServices);
-const mockedUseManagedOtlp = jest.mocked(useManagedOtlp);
+const mockedSendGetOneAgentPolicy = vi.mocked(sendGetOneAgentPolicy);
+const mockedSendCreateAgentPolicyForRq = vi.mocked(sendCreateAgentPolicyForRq);
+const mockedSendGetEnrollmentAPIKeys = vi.mocked(sendGetEnrollmentAPIKeys);
+const mockedUseGetFleetServerHosts = vi.mocked(useGetFleetServerHosts);
+const mockedUsePollingAgentCount = vi.mocked(usePollingAgentCount);
+const mockedUseFleetStatus = vi.mocked(useFleetStatus);
+const mockedUseGetCreateApiKey = vi.mocked(useGetCreateApiKey);
+const mockedUseStartServices = vi.mocked(useStartServices);
+const mockedUseManagedOtlp = vi.mocked(useManagedOtlp);
 
 describe('AddCollectorFlyout', () => {
   let renderer: TestRenderer;
 
   const renderFlyout = () =>
-    renderer.render(<AddCollectorFlyout onClose={jest.fn()} onClickViewAgents={jest.fn()} />);
+    renderer.render(<AddCollectorFlyout onClose={vi.fn()} onClickViewAgents={vi.fn()} />);
 
   beforeEach(() => {
     renderer = createFleetTestRendererMock();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockedUseGetFleetServerHosts.mockReturnValue({
       data: {
@@ -79,7 +93,7 @@ describe('AddCollectorFlyout', () => {
       },
       isLoading: false,
       isError: false,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as any);
 
     mockedUsePollingAgentCount.mockReturnValue({
@@ -97,14 +111,14 @@ describe('AddCollectorFlyout', () => {
       apiKey: undefined,
       apiKeyEncoded: undefined,
       isLoading: false,
-      onCreateApiKey: jest.fn(),
+      onCreateApiKey: vi.fn(),
     });
     mockedUseManagedOtlp.mockReturnValue({
       available: false,
       endpoint: undefined,
       apiKeyEncoded: undefined,
       isCreatingApiKey: false,
-      onCreateApiKey: jest.fn(),
+      onCreateApiKey: vi.fn(),
     });
   });
 
@@ -253,7 +267,7 @@ describe('AddCollectorFlyout', () => {
     );
 
     const component = renderer.render(
-      <AddCollectorFlyout onClose={jest.fn()} onClickViewAgents={jest.fn()} />,
+      <AddCollectorFlyout onClose={vi.fn()} onClickViewAgents={vi.fn()} />,
       { wrapper }
     );
 
@@ -286,7 +300,7 @@ describe('AddCollectorFlyout', () => {
         apiKey: undefined,
         apiKeyEncoded: 'my-real-es-api-key',
         isLoading: false,
-        onCreateApiKey: jest.fn(),
+        onCreateApiKey: vi.fn(),
       });
 
       const component = renderFlyout();
@@ -299,7 +313,7 @@ describe('AddCollectorFlyout', () => {
     });
 
     it('calls onCreateApiKey when the button is clicked', async () => {
-      const onCreateApiKey = jest.fn();
+      const onCreateApiKey = vi.fn();
       mockedUseGetCreateApiKey.mockReturnValue({
         apiKey: undefined,
         apiKeyEncoded: undefined,
@@ -320,7 +334,7 @@ describe('AddCollectorFlyout', () => {
         apiKey: undefined,
         apiKeyEncoded: 'existing-key',
         isLoading: false,
-        onCreateApiKey: jest.fn(),
+        onCreateApiKey: vi.fn(),
       });
 
       const component = renderFlyout();
@@ -693,7 +707,7 @@ describe('AddCollectorFlyout', () => {
         endpoint: 'https://motlp.example.com:443',
         apiKeyEncoded: undefined,
         isCreatingApiKey: false,
-        onCreateApiKey: jest.fn(),
+        onCreateApiKey: vi.fn(),
       });
 
       const component = renderFlyout();
@@ -714,7 +728,7 @@ describe('AddCollectorFlyout', () => {
         endpoint: 'https://motlp.example.com:443',
         apiKeyEncoded: 'my-apm-key',
         isCreatingApiKey: false,
-        onCreateApiKey: jest.fn(),
+        onCreateApiKey: vi.fn(),
       });
 
       const component = renderFlyout();
@@ -727,7 +741,7 @@ describe('AddCollectorFlyout', () => {
     });
 
     it('routes the Create API key button to the MOTLP creator when available', async () => {
-      const onCreateMotlpApiKey = jest.fn();
+      const onCreateMotlpApiKey = vi.fn();
       mockedUseManagedOtlp.mockReturnValue({
         available: true,
         endpoint: 'https://motlp.example.com:443',
@@ -735,7 +749,7 @@ describe('AddCollectorFlyout', () => {
         isCreatingApiKey: false,
         onCreateApiKey: onCreateMotlpApiKey,
       });
-      const onCreateEsApiKey = jest.fn();
+      const onCreateEsApiKey = vi.fn();
       mockedUseGetCreateApiKey.mockReturnValue({
         apiKey: undefined,
         apiKeyEncoded: undefined,

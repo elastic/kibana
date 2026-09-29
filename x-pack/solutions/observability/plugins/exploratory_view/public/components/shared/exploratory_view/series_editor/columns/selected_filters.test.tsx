@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getFips } from 'crypto';
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
@@ -15,7 +17,7 @@ import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fi
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 
 if (getFips() === 1) {
-  jest.setTimeout(30_000);
+  vi.setConfig({ testTimeout: 30_000 });
 }
 
 // Failing: See https://github.com/elastic/kibana/issues/253605

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { ShareSelect } from './share_select';
@@ -12,19 +14,22 @@ import { TestProviders } from '../../mock/test_providers/test_providers';
 import { welcomeConvo } from '../../mock/conversation';
 import { ConversationSharedState } from '@kbn/elastic-assistant-common';
 
-const onUsersUpdate = jest.fn();
-const onSharedSelectionChange = jest.fn();
+const onUsersUpdate = vi.fn();
+const onSharedSelectionChange = vi.fn();
 const testProps = {
   selectedConversation: welcomeConvo,
   onUsersUpdate,
   onSharedSelectionChange,
 };
-jest.mock('./share_user_select', () => ({
-  ShareUserSelect: () => <div data-test-subj="share_user_select">{'ShareUserSelect'}</div>,
-}));
+vi.mock('./share_user_select', () => {
+      const mocked = {
+      ShareUserSelect: () => <div data-test-subj="share_user_select">{'ShareUserSelect'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 describe('ShareSelect', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the select and options', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,38 +20,44 @@ import {
 import { EntityAnalyticsAgentNavigationProvider } from './entity_analytics_agent_navigation_context';
 import { EntityListTable, type EntityListRow } from './entity_list_table';
 
-jest.mock('./entity_explore_navigation', () => {
-  const actual = jest.requireActual('./entity_explore_navigation');
+vi.mock('./entity_explore_navigation', async () => {
+  const actual = (await vi.importActual('./entity_explore_navigation'));
   return {
     ...actual,
-    navigateToEntityAnalyticsWithFlyoutInApp: jest.fn(),
-    navigateToEntityAnalyticsHomePageInApp: jest.fn(),
+    navigateToEntityAnalyticsWithFlyoutInApp: vi.fn(),
+    navigateToEntityAnalyticsHomePageInApp: vi.fn(),
   };
 });
 
 // `RiskScoreLevel` relies on a full EuiThemeProvider for styled-emotion tokens
 // that are not wired up in this focused test. Mocked so rendering the Risk
 // level column doesn't pull the whole EUI theme setup into every test case.
-jest.mock('../../entity_analytics/components/severity/common', () => ({
-  RiskScoreLevel: ({ severity }: { severity?: string }) => (
-    <span data-test-subj="riskScoreLevelMock">{severity}</span>
-  ),
-}));
+vi.mock('../../entity_analytics/components/severity/common', () => {
+      const mocked = {
+      RiskScoreLevel: ({ severity }: { severity?: string }) => (
+        <span data-test-subj="riskScoreLevelMock">{severity}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // `FormattedRelativePreferenceDate` pulls in Kibana UI settings and the shared
 // date-formatting infrastructure. We only care about the Name column here, so
 // stub it with a trivial renderer.
-jest.mock('../../common/components/formatted_date', () => ({
-  FormattedRelativePreferenceDate: ({ value }: { value?: string }) => (
-    <span data-test-subj="formattedRelativePreferenceDateMock">{value}</span>
-  ),
-}));
+vi.mock('../../common/components/formatted_date', () => {
+      const mocked = {
+      FormattedRelativePreferenceDate: ({ value }: { value?: string }) => (
+        <span data-test-subj="formattedRelativePreferenceDateMock">{value}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedNavigateToFlyout = navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock;
-const mockedNavigateToHome = navigateToEntityAnalyticsHomePageInApp as jest.Mock;
+const mockedNavigateToFlyout = navigateToEntityAnalyticsWithFlyoutInApp as Mock;
+const mockedNavigateToHome = navigateToEntityAnalyticsHomePageInApp as Mock;
 
 const buildApplication = (): ApplicationStart =>
-  ({ navigateToApp: jest.fn() } as unknown as ApplicationStart);
+  ({ navigateToApp: vi.fn() } as unknown as ApplicationStart);
 
 const renderTable = (
   rows: EntityListRow[],
@@ -72,7 +81,7 @@ const renderTable = (
 
 describe('EntityListTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders one row per entity with its display name', () => {
@@ -231,7 +240,7 @@ describe('EntityListTable', () => {
     });
 
     it('forwards searchSession to the flyout helper', () => {
-      const searchSession = { clear: jest.fn() } as unknown as ISessionService;
+      const searchSession = { clear: vi.fn() } as unknown as ISessionService;
 
       renderTable(
         [
@@ -251,7 +260,7 @@ describe('EntityListTable', () => {
     });
 
     it('forwards searchSession to the home fallback helper', () => {
-      const searchSession = { clear: jest.fn() } as unknown as ISessionService;
+      const searchSession = { clear: vi.fn() } as unknown as ISessionService;
 
       renderTable(
         [
@@ -271,7 +280,7 @@ describe('EntityListTable', () => {
     });
 
     it('closes the canvas before navigating to the Entity Analytics flyout so it is not overlaid by the canvas', () => {
-      const closeCanvas = jest.fn();
+      const closeCanvas = vi.fn();
       let navigateCallOrder = -1;
       mockedNavigateToFlyout.mockImplementation(() => {
         navigateCallOrder = closeCanvas.mock.invocationCallOrder[0] ?? -1;
@@ -299,7 +308,7 @@ describe('EntityListTable', () => {
     });
 
     it('closes the canvas before falling back to the Entity Analytics home page for generic entities', () => {
-      const closeCanvas = jest.fn();
+      const closeCanvas = vi.fn();
 
       renderTable(
         [

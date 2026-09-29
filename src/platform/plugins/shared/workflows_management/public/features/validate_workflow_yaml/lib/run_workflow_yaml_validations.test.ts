@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { monaco } from '@kbn/code-editor';
 import { runWorkflowYamlValidations } from './run_workflow_yaml_validations';
 import { createMockWorkflowContextRegistry } from '../../../../common/lib/create_workflow_context_registry.mock';
@@ -29,7 +31,7 @@ describe('runWorkflowYamlValidations', () => {
     if (!yamlDocument || !yamlLineCounter || !workflowGraph || !workflowDefinition) {
       throw new Error('Expected a parsed workflow and graph');
     }
-    const getAllPredecessorsSpy = jest.spyOn(workflowGraph, 'getAllPredecessors');
+    const getAllPredecessorsSpy = vi.spyOn(workflowGraph, 'getAllPredecessors');
     const model = monaco.editor.createModel(yaml, 'yaml');
     const params = {
       registry: emptyRegistry,

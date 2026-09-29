@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { registerGetConnectorsTool } from './get_connectors_tool';
@@ -43,14 +45,14 @@ const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, contex
 describe('registerGetConnectorsTool', () => {
   let registeredTool: BuiltinToolDefinition;
   const mockApi = {
-    getAvailableConnectors: jest.fn().mockResolvedValue(mockConnectorResponse),
+    getAvailableConnectors: vi.fn().mockResolvedValue(mockConnectorResponse),
   } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const agentBuilder = {
       tools: {
-        register: jest.fn((tool: BuiltinToolDefinition) => {
+        register: vi.fn((tool: BuiltinToolDefinition) => {
           registeredTool = tool;
         }),
       },

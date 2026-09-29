@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { retryIfConflicts, RetryForConflictsAttempts } from './retry_if_conflicts';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -12,7 +14,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 describe('retry_if_conflicts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should work when operation is a success', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
 import { LegendValue, Position } from '@elastic/charts';
 import type {
@@ -761,7 +764,7 @@ describe('xy_visualization', () => {
           first: mockDatasource.publicAPIMock,
         };
         const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
-        datasourceLayers.first.getOperationForColumnId = jest.fn((accessor) => {
+        datasourceLayers.first.getOperationForColumnId = vi.fn((accessor) => {
           if (accessor === 'a') {
             return {
               dataType: 'date',
@@ -2411,7 +2414,7 @@ describe('xy_visualization', () => {
         (state.layers[1] as XYReferenceLineLayerConfig).yConfig = []; // empty the configuration
         // set the xAccessor as date_histogram
         const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
-        datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+        datasourceLayers.referenceLine.getOperationForColumnId = vi.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'date',
@@ -2442,7 +2445,7 @@ describe('xy_visualization', () => {
         (state.layers[1] as XYReferenceLineLayerConfig).yConfig![0].axisMode = 'bottom';
         // set the xAccessor as date_histogram
         const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
-        datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+        datasourceLayers.referenceLine.getOperationForColumnId = vi.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'date',
@@ -2487,7 +2490,7 @@ describe('xy_visualization', () => {
         ];
         const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
         // set the xAccessor as number histogram
-        datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+        datasourceLayers.referenceLine.getOperationForColumnId = vi.fn((accessor) => {
           if (accessor === 'c') {
             return {
               dataType: 'number',
@@ -2520,7 +2523,7 @@ describe('xy_visualization', () => {
         (state.layers[1] as XYReferenceLineLayerConfig).yConfig = []; // empty the configuration
         // set the xAccessor as top values
         const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
-        datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+        datasourceLayers.referenceLine.getOperationForColumnId = vi.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'string',
@@ -2551,7 +2554,7 @@ describe('xy_visualization', () => {
         (state.layers[1] as XYReferenceLineLayerConfig).yConfig![0].axisMode = 'bottom';
         // set the xAccessor as date_histogram
         const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
-        datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+        datasourceLayers.referenceLine.getOperationForColumnId = vi.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'string',
@@ -2661,7 +2664,7 @@ describe('xy_visualization', () => {
           first: mockDatasource.publicAPIMock,
         };
         const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
-        datasourceLayers.first.getOperationForColumnId = jest.fn((accessor) => {
+        datasourceLayers.first.getOperationForColumnId = vi.fn((accessor) => {
           if (accessor === 'a') {
             return {
               dataType: 'date',
@@ -2785,7 +2788,7 @@ describe('xy_visualization', () => {
 
       it('should query palette to fill in colors for other dimensions', () => {
         const palette = paletteServiceMock.get('default');
-        (palette.getCategoricalColor as jest.Mock).mockClear();
+        (palette.getCategoricalColor as Mock).mockClear();
         const accessorConfig = callConfigAndFindYConfig({}, 'c');
         expect(accessorConfig.triggerIconType).toEqual('color');
         // black is the color returned from the palette mock
@@ -2806,11 +2809,11 @@ describe('xy_visualization', () => {
 
       it('should pass name of current series along', () => {
         const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
-        (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+        (datasourceLayers.first.getOperationForColumnId as Mock).mockReturnValue({
           label: 'Overwritten label',
         });
         const palette = paletteServiceMock.get('default');
-        (palette.getCategoricalColor as jest.Mock).mockClear();
+        (palette.getCategoricalColor as Mock).mockClear();
         callConfigAndFindYConfig({}, 'c');
         expect(palette.getCategoricalColor).toHaveBeenCalledWith(
           [
@@ -2856,7 +2859,7 @@ describe('xy_visualization', () => {
       it('should show current palette for breakdown dimension', () => {
         const palette = paletteServiceMock.get('mock');
         const customColors = ['yellow', 'green'];
-        (palette.getCategoricalColors as jest.Mock).mockReturnValue(customColors);
+        (palette.getCategoricalColors as Mock).mockReturnValue(customColors);
         const breakdownConfig = callConfigForBreakdownConfigs({
           palette: { type: 'palette', name: 'mock', params: {} },
           splitAccessors: ['d'],
@@ -2870,14 +2873,14 @@ describe('xy_visualization', () => {
           { columnId: 'c', fields: [] },
           { columnId: 'b', fields: [] },
         ]);
-        const paletteGetter = jest.spyOn(paletteServiceMock, 'get');
+        const paletteGetter = vi.spyOn(paletteServiceMock, 'get');
         // overrite palette with a palette returning first blue, then green as color
         paletteGetter.mockReturnValue({
           id: 'default',
           title: '',
-          getCategoricalColors: jest.fn(),
-          toExpression: jest.fn(),
-          getCategoricalColor: jest.fn().mockReturnValueOnce('blue').mockReturnValueOnce('green'),
+          getCategoricalColors: vi.fn(),
+          toExpression: vi.fn(),
+          getCategoricalColor: vi.fn().mockReturnValueOnce('blue').mockReturnValueOnce('green'),
         });
 
         const yConfigs = callConfigForYConfigs({});
@@ -3266,7 +3269,7 @@ describe('xy_visualization', () => {
           first: mockDatasource.publicAPIMock,
           second: createMockDatasource('formBased').publicAPIMock,
         };
-        datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
+        datasourceLayers.first.getOperationForColumnId = vi.fn((id: string) =>
           id === 'a'
             ? ({
                 dataType: 'date',
@@ -3274,7 +3277,7 @@ describe('xy_visualization', () => {
               } as unknown as OperationDescriptor)
             : null
         );
-        datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
+        datasourceLayers.second.getOperationForColumnId = vi.fn((id: string) =>
           id === 'e'
             ? ({
                 dataType: 'number',
@@ -3323,7 +3326,7 @@ describe('xy_visualization', () => {
           first: mockDatasource.publicAPIMock,
           second: createMockDatasource('formBased').publicAPIMock,
         };
-        datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
+        datasourceLayers.first.getOperationForColumnId = vi.fn((id: string) =>
           id === 'a'
             ? ({
                 dataType: 'date',
@@ -3331,7 +3334,7 @@ describe('xy_visualization', () => {
               } as unknown as OperationDescriptor)
             : null
         );
-        datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
+        datasourceLayers.second.getOperationForColumnId = vi.fn((id: string) =>
           id === 'e'
             ? ({
                 dataType: 'string',
@@ -3607,7 +3610,7 @@ describe('xy_visualization', () => {
 
       it('should return a warning when numeric accessors contain array', () => {
         const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
-        (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+        (datasourceLayers.first.getOperationForColumnId as Mock).mockReturnValue({
           label: 'Label B',
         });
         const warningMessages = onlyWarnings(
@@ -4181,7 +4184,7 @@ describe('xy_visualization', () => {
   describe('getSupportedActionsForLayer', () => {
     it('should return no actions for a data layer', () => {
       expect(
-        xyVisualization.getSupportedActionsForLayer?.('first', exampleState(), jest.fn(), jest.fn())
+        xyVisualization.getSupportedActionsForLayer?.('first', exampleState(), vi.fn(), vi.fn())
       ).toHaveLength(0);
     });
 
@@ -4203,8 +4206,8 @@ describe('xy_visualization', () => {
               ...baseState,
               layers: [annotationLayer],
             },
-            jest.fn(),
-            jest.fn()
+            vi.fn(),
+            vi.fn()
           )
         ).toEqual([]);
       });
@@ -4225,8 +4228,8 @@ describe('xy_visualization', () => {
             ...baseState,
             layers: [annotationLayer],
           },
-          jest.fn(),
-          jest.fn(),
+          vi.fn(),
+          vi.fn(),
           true
         );
         expect(
@@ -4263,8 +4266,8 @@ describe('xy_visualization', () => {
                 ...baseState,
                 layers: [annotationLayer],
               },
-              jest.fn(),
-              jest.fn(),
+              vi.fn(),
+              vi.fn(),
               true
             )
           ).toMatchInlineSnapshot(`
@@ -4302,8 +4305,8 @@ describe('xy_visualization', () => {
                   ...baseState,
                   layers: [annotationLayer],
                 },
-                jest.fn(),
-                jest.fn(),
+                vi.fn(),
+                vi.fn(),
                 true
               )
               .some((action) => action['data-test-subj'] === 'lnsXY_annotationLayer_saveToLibrary')
@@ -4325,8 +4328,8 @@ describe('xy_visualization', () => {
                     },
                   ],
                 },
-                jest.fn(),
-                jest.fn(),
+                vi.fn(),
+                vi.fn(),
                 false
               )
               .find((action) => action['data-test-subj'] === 'lnsXY_annotationLayer_revertChanges')

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 
@@ -15,8 +17,8 @@ describe('ExceptionsViewerSearchBar', () => {
     const wrapper = mount(
       <ExceptionsViewerSearchBar
         isEndpoint={false}
-        onSearch={jest.fn()}
-        onAddExceptionClick={jest.fn()}
+        onSearch={vi.fn()}
+        onAddExceptionClick={vi.fn()}
         isSearching={false}
         isReadOnly
       />
@@ -26,13 +28,13 @@ describe('ExceptionsViewerSearchBar', () => {
   });
 
   it('it invokes "onAddExceptionClick" when user selects to add an exception item', () => {
-    const mockOnAddExceptionClick = jest.fn();
+    const mockOnAddExceptionClick = vi.fn();
     const wrapper = mount(
       <ExceptionsViewerSearchBar
         isReadOnly={false}
         isEndpoint={false}
         isSearching={false}
-        onSearch={jest.fn()}
+        onSearch={vi.fn()}
         onAddExceptionClick={mockOnAddExceptionClick}
       />
     );
@@ -46,13 +48,13 @@ describe('ExceptionsViewerSearchBar', () => {
   });
 
   it('it invokes "onAddExceptionClick" when user selects to add an endpoint exception item', () => {
-    const mockOnAddExceptionClick = jest.fn();
+    const mockOnAddExceptionClick = vi.fn();
     const wrapper = mount(
       <ExceptionsViewerSearchBar
         isReadOnly={false}
         isEndpoint={true}
         isSearching={false}
-        onSearch={jest.fn()}
+        onSearch={vi.fn()}
         onAddExceptionClick={mockOnAddExceptionClick}
       />
     );

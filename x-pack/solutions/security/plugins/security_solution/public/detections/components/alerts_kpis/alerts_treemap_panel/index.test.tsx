@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
@@ -22,50 +25,56 @@ import type { Props } from '.';
 import { AlertsTreemapPanel } from '.';
 import { mockAlertSearchResponse } from './alerts_treemap/lib/mocks/mock_alert_search_response';
 
-jest.mock('../../../../common/components/cell_actions', () => ({
-  ...jest.requireActual('../../../../common/components/cell_actions'),
-  SecurityCellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
-}));
+vi.mock('../../../../common/components/cell_actions', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../common/components/cell_actions')),
+      SecurityCellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
-jest.mock('../../../../common/containers/use_global_time', () => {
-  const actual = jest.requireActual('../../../../common/containers/use_global_time');
+vi.mock('../../../../common/containers/use_global_time', async () => {
+  const actual = (await vi.importActual('../../../../common/containers/use_global_time'));
   return {
     ...actual,
-    useGlobalTime: jest
+    useGlobalTime: vi
       .fn()
-      .mockReturnValue({ from, to, setQuery: jest.fn(), deleteQuery: jest.fn() }),
+      .mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() }),
   };
 });
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const originalModule = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...originalModule,
     useUiSetting$: () => ['0,0.[000]'],
   };
 });
 
-jest.mock('../../../containers/detection_engine/alerts/use_query', () => ({
-  useQueryAlerts: jest.fn(),
-}));
+vi.mock('../../../containers/detection_engine/alerts/use_query', () => {
+      const mocked = {
+      useQueryAlerts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps: Props = {
-  addFilter: jest.fn(),
+  addFilter: vi.fn(),
   alignHeader: 'flexStart',
   chartOptionsContextMenu: (queryId: string) => (
     <ChartContextMenu
       defaultStackByField={DEFAULT_STACK_BY_FIELD}
       defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
       queryId={queryId}
-      setStackBy={jest.fn()}
-      setStackByField1={jest.fn()}
+      setStackBy={vi.fn()}
+      setStackByField1={vi.fn()}
     />
   ),
   inspectTitle: TREEMAP,
@@ -117,24 +126,24 @@ const defaultProps: Props = {
       },
     },
   },
-  setIsPanelExpanded: jest.fn(),
-  setStackByField0: jest.fn(),
-  setStackByField1: jest.fn(),
+  setIsPanelExpanded: vi.fn(),
+  setStackByField0: vi.fn(),
+  setStackByField1: vi.fn(),
   signalIndexName: '.alerts-security.alerts-default',
   stackByField0: 'kibana.alert.rule.name',
   stackByField1: 'host.name',
-  title: <ChartSelect alertViewSelection="treemap" setAlertViewSelection={jest.fn()} />,
+  title: <ChartSelect alertViewSelection="treemap" setAlertViewSelection={vi.fn()} />,
 };
 
 describe('AlertsTreemapPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useLocation as jest.Mock).mockReturnValue([
+    (useLocation as Mock).mockReturnValue([
       { pageName: SecurityPageName.alerts, detailName: undefined },
     ]);
 
-    (useQueryAlerts as jest.Mock).mockReturnValue({
+    (useQueryAlerts as Mock).mockReturnValue({
       loading: false,
       data: mockAlertSearchResponse,
       setQuery: () => {},
@@ -221,7 +230,7 @@ describe('AlertsTreemapPanel', () => {
   });
 
   it('renders the progress bar when data is loading', async () => {
-    (useQueryAlerts as jest.Mock).mockReturnValue({
+    (useQueryAlerts as Mock).mockReturnValue({
       loading: true,
       data: mockAlertSearchResponse,
       setQuery: () => {},
@@ -240,7 +249,7 @@ describe('AlertsTreemapPanel', () => {
   });
 
   it('does NOT render the progress bar when loading is true, but the panel is collapsed', async () => {
-    (useQueryAlerts as jest.Mock).mockReturnValue({
+    (useQueryAlerts as Mock).mockReturnValue({
       loading: true, // <-- true when users click the page-level Refresh button
       data: mockAlertSearchResponse,
       setQuery: () => {},
@@ -269,7 +278,7 @@ describe('AlertsTreemapPanel', () => {
   });
 
   it('renders the treemap when data is available and `isPanelExpanded` is true', async () => {
-    jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
+    vi.doMock('../../../containers/detection_engine/alerts/use_query', () => {
       return {
         useQueryAlerts: () => ({
           loading: true,

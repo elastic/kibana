@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { FileWrapper } from './file_wrapper';
 import type { MappingTypeMapping, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 // Mock the dependencies
-jest.mock('@kbn/file-upload-plugin/public/api');
-jest.mock('@kbn/data-plugin/public');
-jest.mock('./tika_utils');
-jest.mock('./tika_analyzer');
-jest.mock('./file_size_check');
-jest.mock('../src/utils');
-jest.mock('./doc_count_service');
+vi.mock('@kbn/file-upload-plugin/public/api');
+vi.mock('@kbn/data-plugin/public');
+vi.mock('./tika_utils');
+vi.mock('./tika_analyzer');
+vi.mock('./file_size_check');
+vi.mock('../src/utils');
+vi.mock('./doc_count_service');
 
 Object.defineProperty(global.crypto, 'randomUUID', {
-  value: jest.fn(() => 'test-uuid-1234567890'),
+  value: vi.fn(() => 'test-uuid-1234567890'),
 });
 
 describe('FileWrapper', () => {

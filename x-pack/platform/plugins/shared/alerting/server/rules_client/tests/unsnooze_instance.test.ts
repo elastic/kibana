@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { RulesClient } from '../rules_client';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -20,7 +22,7 @@ const {
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 setGlobalDate();

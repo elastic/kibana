@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MissingPrivilegesCallOut } from './missing_privileges_callout';
@@ -12,16 +15,16 @@ import { useMissingPrivileges } from '../../../common/hooks/use_missing_privileg
 import { useGetMigrationMissingPrivileges } from '../logic/use_get_migration_privileges';
 import { TestProviders } from '../../../common/mock/test_providers';
 
-jest.mock('../../../common/hooks/use_missing_privileges');
-jest.mock('../logic/use_get_migration_privileges');
+vi.mock('../../../common/hooks/use_missing_privileges');
+vi.mock('../logic/use_get_migration_privileges');
 
 describe('MissingPrivilegesCallOut', () => {
   it('renders nothing when there are no missing privileges', () => {
-    (useMissingPrivileges as jest.Mock).mockReturnValue({
+    (useMissingPrivileges as Mock).mockReturnValue({
       featurePrivileges: [],
       indexPrivileges: [],
     });
-    (useGetMigrationMissingPrivileges as jest.Mock).mockReturnValue({
+    (useGetMigrationMissingPrivileges as Mock).mockReturnValue({
       data: [],
     });
 
@@ -35,11 +38,11 @@ describe('MissingPrivilegesCallOut', () => {
   });
 
   it('renders a callout when there are missing feature privileges', () => {
-    (useMissingPrivileges as jest.Mock).mockReturnValue({
+    (useMissingPrivileges as Mock).mockReturnValue({
       featurePrivileges: [['test-feature', ['read']]],
       indexPrivileges: [],
     });
-    (useGetMigrationMissingPrivileges as jest.Mock).mockReturnValue({
+    (useGetMigrationMissingPrivileges as Mock).mockReturnValue({
       data: [],
     });
 
@@ -53,11 +56,11 @@ describe('MissingPrivilegesCallOut', () => {
   });
 
   it('renders a callout when there are missing index privileges', () => {
-    (useMissingPrivileges as jest.Mock).mockReturnValue({
+    (useMissingPrivileges as Mock).mockReturnValue({
       featurePrivileges: [],
       indexPrivileges: [],
     });
-    (useGetMigrationMissingPrivileges as jest.Mock).mockReturnValue({
+    (useGetMigrationMissingPrivileges as Mock).mockReturnValue({
       data: [{ indexName: 'test-index', privileges: ['read'] }],
     });
 

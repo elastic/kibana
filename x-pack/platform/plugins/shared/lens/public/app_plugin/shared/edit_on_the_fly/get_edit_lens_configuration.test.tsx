@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockStoreDeps } from '../../../mocks';
 import {
   initEmpty,
@@ -18,13 +20,13 @@ import { updatingMiddleware } from './get_edit_lens_configuration';
 
 describe('Lens flyout', () => {
   let store: ReturnType<typeof makeConfigureStore>;
-  const updaterFn = jest.fn();
+  const updaterFn = vi.fn();
   beforeEach(() => {
     store = makeConfigureStore(mockStoreDeps(), undefined, updatingMiddleware(updaterFn));
-    store.dispatch = jest.fn(store.dispatch);
+    store.dispatch = vi.fn(store.dispatch);
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('updatingMiddleware for the Lens flyout', () => {

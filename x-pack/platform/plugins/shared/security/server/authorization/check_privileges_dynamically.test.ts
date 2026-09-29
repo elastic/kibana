@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { CheckPrivilegesOptions } from '@kbn/security-plugin-types-server';
 
@@ -14,16 +16,16 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
   const expectedResult = Symbol();
   const spaceId = 'foo-space';
   const mockCheckPrivileges = {
-    atSpace: jest.fn().mockReturnValue(expectedResult),
+    atSpace: vi.fn().mockReturnValue(expectedResult),
   };
-  const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+  const mockCheckPrivilegesWithRequest = vi.fn().mockReturnValue(mockCheckPrivileges);
   const request = httpServerMock.createKibanaRequest();
   const privilegeOrPrivileges = ['foo', 'bar'];
   const checkPrivilegesDynamically = checkPrivilegesDynamicallyWithRequestFactory(
     mockCheckPrivilegesWithRequest,
     () => ({
-      getSpaceId: jest.fn().mockReturnValue(spaceId),
-      namespaceToSpaceId: jest.fn(),
+      getSpaceId: vi.fn().mockReturnValue(spaceId),
+      namespaceToSpaceId: vi.fn(),
     })
   )(request);
   const options: CheckPrivilegesOptions = { requireLoginAction: true };
@@ -43,9 +45,9 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
 test(`checkPrivileges.globally when spaces is disabled`, async () => {
   const expectedResult = Symbol();
   const mockCheckPrivileges = {
-    globally: jest.fn().mockReturnValue(expectedResult),
+    globally: vi.fn().mockReturnValue(expectedResult),
   };
-  const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+  const mockCheckPrivilegesWithRequest = vi.fn().mockReturnValue(mockCheckPrivileges);
   const request = httpServerMock.createKibanaRequest();
   const privilegeOrPrivileges = ['foo', 'bar'];
   const checkPrivilegesDynamically = checkPrivilegesDynamicallyWithRequestFactory(

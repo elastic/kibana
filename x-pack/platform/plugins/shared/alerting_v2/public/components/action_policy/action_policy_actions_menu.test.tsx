@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,9 +15,12 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyActionsMenu } from './action_policy_actions_menu';
 
 let mockIsLicenseValid = true;
-jest.mock('../../hooks/use_is_action_policies_license_valid', () => ({
-  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
-}));
+vi.mock('../../hooks/use_is_action_policies_license_valid', () => {
+      const mocked = {
+      useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
@@ -39,9 +44,9 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
 const renderMenu = (props: Partial<React.ComponentProps<typeof ActionPolicyActionsMenu>> = {}) => {
   const defaults = {
     policy: createPolicy(),
-    onClone: jest.fn(),
-    onDelete: jest.fn(),
-    onUpdateApiKey: jest.fn(),
+    onClone: vi.fn(),
+    onDelete: vi.fn(),
+    onUpdateApiKey: vi.fn(),
   };
   render(
     <I18nProvider>
@@ -62,9 +67,9 @@ describe('ActionPolicyActionsMenu', () => {
     it('enables edit, clone, and enable when the license is valid', () => {
       renderMenu({
         policy: createPolicy({ enabled: false }),
-        onEdit: jest.fn(),
-        onEnable: jest.fn(),
-        onDisable: jest.fn(),
+        onEdit: vi.fn(),
+        onEnable: vi.fn(),
+        onDisable: vi.fn(),
       });
       openMenu();
       expect(screen.getByTestId('editActionPolicy-policy-1')).toBeEnabled();
@@ -74,12 +79,12 @@ describe('ActionPolicyActionsMenu', () => {
 
     it('disables edit, clone, and enable when the license is not valid', () => {
       mockIsLicenseValid = false;
-      const onEnable = jest.fn();
+      const onEnable = vi.fn();
       renderMenu({
         policy: createPolicy({ enabled: false }),
-        onEdit: jest.fn(),
+        onEdit: vi.fn(),
         onEnable,
-        onDisable: jest.fn(),
+        onDisable: vi.fn(),
       });
       openMenu();
       expect(screen.getByTestId('editActionPolicy-policy-1')).toBeDisabled();
@@ -92,8 +97,8 @@ describe('ActionPolicyActionsMenu', () => {
 
     it('keeps disable, update API key, and delete available when the license is not valid', () => {
       mockIsLicenseValid = false;
-      const onDisable = jest.fn();
-      renderMenu({ onEnable: jest.fn(), onDisable });
+      const onDisable = vi.fn();
+      renderMenu({ onEnable: vi.fn(), onDisable });
       openMenu();
       expect(screen.getByTestId('updateApiKeyActionPolicy-policy-1')).toBeEnabled();
       expect(screen.getByTestId('deleteActionPolicy-policy-1')).toBeEnabled();
@@ -124,7 +129,7 @@ describe('ActionPolicyActionsMenu', () => {
 
   describe('item data-test-subj', () => {
     it('renders items with policy-scoped test subjects', () => {
-      renderMenu({ onEdit: jest.fn(), onEnable: jest.fn(), onDisable: jest.fn() });
+      renderMenu({ onEdit: vi.fn(), onEnable: vi.fn(), onDisable: vi.fn() });
       openMenu();
       expect(screen.getByTestId('editActionPolicy-policy-1')).toBeInTheDocument();
       expect(screen.getByTestId('cloneActionPolicy-policy-1')).toBeInTheDocument();
@@ -144,8 +149,8 @@ describe('ActionPolicyActionsMenu', () => {
     it('does not render the snooze item when the policy is disabled', () => {
       renderMenu({
         policy: createPolicy({ enabled: false }),
-        onSnooze: jest.fn(),
-        onCancelSnooze: jest.fn(),
+        onSnooze: vi.fn(),
+        onCancelSnooze: vi.fn(),
       });
       openMenu();
       expect(screen.queryByTestId('snoozeActionPolicy-policy-1')).not.toBeInTheDocument();
@@ -154,8 +159,8 @@ describe('ActionPolicyActionsMenu', () => {
 
     it('shows "Snooze" item on an active non-snoozed policy', () => {
       renderMenu({
-        onSnooze: jest.fn(),
-        onCancelSnooze: jest.fn(),
+        onSnooze: vi.fn(),
+        onCancelSnooze: vi.fn(),
       });
       openMenu();
       expect(screen.getByTestId('snoozeActionPolicy-policy-1')).toBeInTheDocument();
@@ -166,8 +171,8 @@ describe('ActionPolicyActionsMenu', () => {
       const futureIso = new Date(Date.now() + 3_600_000).toISOString();
       renderMenu({
         policy: createPolicy({ snoozed_until: futureIso }),
-        onSnooze: jest.fn(),
-        onCancelSnooze: jest.fn(),
+        onSnooze: vi.fn(),
+        onCancelSnooze: vi.fn(),
       });
       openMenu();
       expect(screen.getByTestId('unsnoozeActionPolicy-policy-1')).toBeInTheDocument();
@@ -176,10 +181,10 @@ describe('ActionPolicyActionsMenu', () => {
 
     it('calls onCancelSnooze when Unsnooze is clicked', async () => {
       const futureIso = new Date(Date.now() + 3_600_000).toISOString();
-      const onCancelSnooze = jest.fn();
+      const onCancelSnooze = vi.fn();
       renderMenu({
         policy: createPolicy({ snoozed_until: futureIso }),
-        onSnooze: jest.fn(),
+        onSnooze: vi.fn(),
         onCancelSnooze,
       });
       openMenu();
@@ -189,8 +194,8 @@ describe('ActionPolicyActionsMenu', () => {
 
     it('opens the snooze modal when Snooze is clicked', async () => {
       renderMenu({
-        onSnooze: jest.fn(),
-        onCancelSnooze: jest.fn(),
+        onSnooze: vi.fn(),
+        onCancelSnooze: vi.fn(),
       });
       openMenu();
       fireEvent.click(screen.getByTestId('snoozeActionPolicy-policy-1'));
@@ -199,8 +204,8 @@ describe('ActionPolicyActionsMenu', () => {
 
     it('calls onSnooze when the snooze modal is applied', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
-      const onSnooze = jest.fn();
-      renderMenu({ onSnooze, onCancelSnooze: jest.fn() });
+      const onSnooze = vi.fn();
+      renderMenu({ onSnooze, onCancelSnooze: vi.fn() });
       openMenu();
       fireEvent.click(screen.getByTestId('snoozeActionPolicy-policy-1'));
       await user.click(screen.getByTestId('actionPolicySnoozeModalApply'));
@@ -211,7 +216,7 @@ describe('ActionPolicyActionsMenu', () => {
 
   describe('anchorId mode', () => {
     it('renders nothing when anchorId is set but the anchor element does not exist in the DOM', () => {
-      renderMenu({ anchorId: 'nonexistent-anchor', isOpen: true, onOpenChange: jest.fn() });
+      renderMenu({ anchorId: 'nonexistent-anchor', isOpen: true, onOpenChange: vi.fn() });
       // No popover content should be visible
       expect(screen.queryByTestId('editActionPolicy-policy-1')).not.toBeInTheDocument();
     });
@@ -222,10 +227,10 @@ describe('ActionPolicyActionsMenu', () => {
       document.body.appendChild(anchor);
 
       renderMenu({
-        onEdit: jest.fn(),
+        onEdit: vi.fn(),
         anchorId: 'test-take-action-anchor',
         isOpen: true,
-        onOpenChange: jest.fn(),
+        onOpenChange: vi.fn(),
       });
 
       expect(screen.getByTestId('editActionPolicy-policy-1')).toBeInTheDocument();
@@ -241,11 +246,11 @@ describe('ActionPolicyActionsMenu', () => {
       document.body.appendChild(anchor);
 
       renderMenu({
-        onSnooze: jest.fn(),
-        onCancelSnooze: jest.fn(),
+        onSnooze: vi.fn(),
+        onCancelSnooze: vi.fn(),
         anchorId: 'test-anchor-for-snooze',
         isOpen: true,
-        onOpenChange: jest.fn(),
+        onOpenChange: vi.fn(),
       });
 
       fireEvent.click(screen.getByTestId('snoozeActionPolicy-policy-1'));

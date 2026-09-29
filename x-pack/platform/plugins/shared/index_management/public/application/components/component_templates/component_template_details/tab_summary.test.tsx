@@ -5,20 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 
 import type { ComponentTemplateDeserialized } from '../shared_imports';
 import { TabSummary } from './tab_summary';
 
-jest.mock('@kbn/i18n-react', () => ({
-  FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => (
-    <span>{defaultMessage}</span>
-  ),
-}));
+vi.mock('@kbn/i18n-react', () => {
+      const mocked = {
+      FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => (
+        <span>{defaultMessage}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiIconTip: ({ content }: { content: string }) => (
@@ -27,20 +32,29 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const mockUseAppContext = jest.fn();
-jest.mock('../../../app_context', () => ({
-  useAppContext: () => mockUseAppContext(),
-}));
+const mockUseAppContext = vi.fn();
+vi.mock('../../../app_context', () => {
+      const mocked = {
+      useAppContext: () => mockUseAppContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseLoadFailureStoreSettings = jest.fn();
-jest.mock('../../../services/api', () => ({
-  useLoadFailureStoreSettings: () => mockUseLoadFailureStoreSettings(),
-}));
+const mockUseLoadFailureStoreSettings = vi.fn();
+vi.mock('../../../services/api', () => {
+      const mocked = {
+      useLoadFailureStoreSettings: () => mockUseLoadFailureStoreSettings(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseComponentTemplatesContext = jest.fn();
-jest.mock('../component_templates_context', () => ({
-  useComponentTemplatesContext: () => mockUseComponentTemplatesContext(),
-}));
+const mockUseComponentTemplatesContext = vi.fn();
+vi.mock('../component_templates_context', () => {
+      const mocked = {
+      useComponentTemplatesContext: () => mockUseComponentTemplatesContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeComponentTemplateDetails = (
   overrides: Partial<ComponentTemplateDeserialized> = {}
@@ -53,7 +67,7 @@ const makeComponentTemplateDetails = (
 
 describe('Component template TabSummary', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAppContext.mockReturnValue({ config: { isServerless: false } });
     mockUseComponentTemplatesContext.mockReturnValue({ getUrlForApp: () => '' });
   });

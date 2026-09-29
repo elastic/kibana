@@ -7,24 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { SearchSourceDependencies } from '.';
 import { SearchSourceService } from '.';
 
 describe('SearchSource service', () => {
-  let dependencies: jest.Mocked<SearchSourceDependencies>;
+  let dependencies: Mocked<SearchSourceDependencies>;
 
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     dependencies = {
       aggs: {} as SearchSourceDependencies['aggs'],
-      getConfig: jest.fn(),
-      search: jest.fn(),
-      onResponse: jest.fn(),
+      getConfig: vi.fn(),
+      search: vi.fn(),
+      onResponse: vi.fn(),
       scriptedFieldsEnabled: true,
       dataViews: {
-        getMetaFields: jest.fn(),
-        getShortDotsEnable: jest.fn(),
+        getMetaFields: vi.fn(),
+        getShortDotsEnable: vi.fn(),
       } as unknown as DataViewsContract,
     };
   });
@@ -32,7 +35,7 @@ describe('SearchSource service', () => {
   describe('start()', () => {
     test('exposes proper contract', () => {
       const start = new SearchSourceService().start(
-        jest.fn() as unknown as jest.Mocked<DataViewsContract>,
+        vi.fn() as unknown as Mocked<DataViewsContract>,
         dependencies
       );
 

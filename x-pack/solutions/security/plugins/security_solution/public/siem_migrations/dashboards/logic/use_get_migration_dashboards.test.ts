@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor, act } from '@testing-library/react';
 import '@kbn/react-query/mock';
 import { useQueryClient } from '@kbn/react-query';
@@ -16,16 +19,16 @@ import { migrationDashboards } from '../__mocks__';
 import { getMigrationDashboards } from '../api';
 import { TestProviders } from '../../../common/mock/test_providers';
 
-jest.mock('../api');
+vi.mock('../api');
 
 describe('Get Migration Dashboards Hooks', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('useGetMigrationDashboards', () => {
     it('returns dashboards and total count', async () => {
-      (getMigrationDashboards as jest.Mock).mockResolvedValue({
+      (getMigrationDashboards as Mock).mockResolvedValue({
         data: migrationDashboards,
         total: 2,
       });
@@ -53,7 +56,7 @@ describe('Get Migration Dashboards Hooks', () => {
 
     it('handles API errors gracefully', async () => {
       const mockError = new Error('API error');
-      (getMigrationDashboards as jest.Mock).mockRejectedValue(mockError);
+      (getMigrationDashboards as Mock).mockRejectedValue(mockError);
 
       const { result } = renderHook(
         () =>
@@ -77,10 +80,10 @@ describe('Get Migration Dashboards Hooks', () => {
   });
 
   describe('useInvalidateGetMigrationDashboards', () => {
-    const invalidateQueries = jest.fn();
+    const invalidateQueries = vi.fn();
 
     beforeEach(() => {
-      (useQueryClient as jest.Mock).mockReturnValue({
+      (useQueryClient as Mock).mockReturnValue({
         invalidateQueries,
       });
     });

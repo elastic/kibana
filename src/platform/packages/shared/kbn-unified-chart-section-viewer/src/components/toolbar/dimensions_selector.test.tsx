@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -17,16 +19,19 @@ import {
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
 } from '../../common/constants';
 
-const mockTrackMaxDimensionsReached = jest.fn();
+const mockTrackMaxDimensionsReached = vi.fn();
 
-jest.mock('../../context/ebt_telemetry_context', () => ({
-  useTelemetry: () => ({
-    trackMaxDimensionsReached: mockTrackMaxDimensionsReached,
-  }),
-}));
+vi.mock('../../context/ebt_telemetry_context', () => {
+      const mocked = {
+      useTelemetry: () => ({
+        trackMaxDimensionsReached: mockTrackMaxDimensionsReached,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/shared-ux-toolbar-selector', () => {
-  const actual = jest.requireActual('@kbn/shared-ux-toolbar-selector');
+vi.mock('@kbn/shared-ux-toolbar-selector', async () => {
+  const actual = (await vi.importActual('@kbn/shared-ux-toolbar-selector'));
   return {
     ...actual,
     ToolbarSelector: ({
@@ -107,20 +112,20 @@ jest.mock('@kbn/shared-ux-toolbar-selector', () => {
   };
 });
 
-jest.mock('lodash', () => {
-  const actual = jest.requireActual('lodash');
+vi.mock('lodash', () => {
+  const actual = require('lodash');
   return {
     ...actual,
     debounce: (fn: any) => {
       const debounced = (...args: any[]) => fn(...args);
-      debounced.cancel = jest.fn();
+      debounced.cancel = vi.fn();
       return debounced;
     },
   };
 });
 
-jest.mock('../../common/constants', () => {
-  const actual = jest.requireActual('../../common/constants');
+vi.mock('../../common/constants', async () => {
+  const actual = (await vi.importActual('../../common/constants'));
   return {
     ...actual,
     MAX_DIMENSIONS_SELECTIONS: 5, // Override for tests to allow multiple selections
@@ -149,13 +154,13 @@ describe('DimensionsSelector', () => {
   const defaultProps = {
     dimensions: mockDimensions,
     selectedDimensions: [],
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     singleSelection: false,
     isLoading: false,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Basic rendering', () => {
@@ -255,7 +260,7 @@ describe('DimensionsSelector', () => {
     });
 
     it('calls onChange with empty array when clear selection is clicked', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithIntl(
         <DimensionsSelector
           {...defaultProps}
@@ -271,7 +276,7 @@ describe('DimensionsSelector', () => {
 
   describe('Single selection mode', () => {
     it('calls onChange immediately when option is selected', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithIntl(
         <DimensionsSelector {...defaultProps} singleSelection={true} onChange={onChange} />
       );
@@ -316,7 +321,7 @@ describe('DimensionsSelector', () => {
 
   describe('Multi-selection mode', () => {
     it('calls onChange with debounce when option is selected', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithIntl(
         <DimensionsSelector {...defaultProps} singleSelection={false} onChange={onChange} />
       );
@@ -398,7 +403,7 @@ describe('DimensionsSelector', () => {
     });
 
     it('limits selection to maximum when multiple options are selected at once', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithIntl(<DimensionsSelector {...defaultProps} onChange={onChange} />);
 
       const optionElements = screen.getAllByTestId(
@@ -427,7 +432,7 @@ describe('DimensionsSelector', () => {
 
   describe('Debounce cancellation', () => {
     it('cancels debounced onChange when clear all is clicked', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithIntl(
         <DimensionsSelector
           {...defaultProps}
@@ -534,7 +539,7 @@ describe('DimensionsSelector', () => {
     });
 
     it('deselecting an orphan selection calls onChange with the remaining selections', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithIntl(
         <DimensionsSelector
           {...defaultProps}

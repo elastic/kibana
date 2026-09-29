@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -16,28 +18,37 @@ import {
 import { useGetMissingIndexPrivileges } from '.';
 import * as i18n from './translations';
 
-const mockAddError = jest.fn();
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addError: mockAddError,
-  }),
-}));
+const mockAddError = vi.fn();
+vi.mock('../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addError: mockAddError,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./translations', () => ({
-  GET_ATTACK_DISCOVERY_MISSING_PRIVILEGES_FAILURE:
-    'GET_ATTACK_DISCOVERY_MISSING_PRIVILEGES_FAILURE',
-}));
+vi.mock('./translations', () => {
+      const mocked = {
+      GET_ATTACK_DISCOVERY_MISSING_PRIVILEGES_FAILURE:
+        'GET_ATTACK_DISCOVERY_MISSING_PRIVILEGES_FAILURE',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockHttpGet = jest.fn();
-jest.mock('../../../common/lib/kibana', () => ({
-  KibanaServices: {
-    get: () => ({
-      http: {
-        get: mockHttpGet,
+const mockHttpGet = vi.fn();
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      KibanaServices: {
+        get: () => ({
+          http: {
+            get: mockHttpGet,
+          },
+        }),
       },
-    }),
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let queryClient: QueryClient;
 
@@ -47,7 +58,7 @@ function wrapper(props: { children: React.ReactNode }) {
 
 describe('useGetMissingIndexPrivileges', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient();
   });
 

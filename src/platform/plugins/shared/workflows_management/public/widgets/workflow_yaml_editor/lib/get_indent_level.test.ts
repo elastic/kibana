@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getIndentLevel, getIndentLevelFromLineNumber } from './get_indent_level';
 
 describe('getIndentLevel', () => {
@@ -25,7 +27,7 @@ describe('getIndentLevel', () => {
 describe('getIndentLevelFromLineNumber', () => {
   it('delegates to getIndentLevel with line content from model', () => {
     const mockModel = {
-      getLineContent: jest.fn().mockReturnValue('    content'),
+      getLineContent: vi.fn().mockReturnValue('    content'),
     };
     expect(getIndentLevelFromLineNumber(mockModel as never, 3)).toBe(4);
     expect(mockModel.getLineContent).toHaveBeenCalledWith(3);

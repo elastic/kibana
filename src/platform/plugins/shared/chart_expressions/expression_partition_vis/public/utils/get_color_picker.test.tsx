@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { LegendColorPickerProps } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
@@ -24,12 +26,12 @@ const visData = createMockVisData();
 describe('LegendColorPickerWrapper', () => {
   const mockState = new Map();
   const uiState = {
-    get: jest
+    get: vi
       .fn()
       .mockImplementation((key, fallback) => (mockState.has(key) ? mockState.get(key) : fallback)),
-    set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
-    emit: jest.fn(),
-    setSilent: jest.fn(),
+    set: vi.fn().mockImplementation((key, value) => mockState.set(key, value)),
+    emit: vi.fn(),
+    setSilent: vi.fn(),
   } as unknown as PersistedState;
 
   let wrapperProps: LegendColorPickerProps;
@@ -38,8 +40,8 @@ describe('LegendColorPickerWrapper', () => {
   beforeAll(() => {
     wrapperProps = {
       color: 'rgb(109, 204, 177)',
-      onClose: jest.fn(),
-      onChange: jest.fn(),
+      onClose: vi.fn(),
+      onChange: vi.fn(),
       anchor: document.createElement('div'),
       seriesIdentifiers: [
         {
@@ -54,7 +56,7 @@ describe('LegendColorPickerWrapper', () => {
     props: LegendColorPickerProps = wrapperProps,
     context: LegendColorPickerWrapperContextType = {
       legendPosition: 'left',
-      setColor: jest.fn(),
+      setColor: vi.fn(),
       bucketColumns,
       palette: 'default',
       data: visData.rows,
@@ -108,7 +110,7 @@ describe('LegendColorPickerWrapper', () => {
       { ...wrapperProps, seriesIdentifier: { key: '1', specId: 'pie' } } as LegendColorPickerProps,
       {
         legendPosition: 'left',
-        setColor: jest.fn(),
+        setColor: vi.fn(),
         bucketColumns,
         palette: 'kibana_palette',
         data: visData.rows,

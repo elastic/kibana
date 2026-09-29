@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -19,83 +21,104 @@ import type { HomeProps } from './home';
 import { Home } from './home';
 
 let mockHasIntegrationsPermission = true;
-const mockNavigateToUrl = jest.fn();
-const mockSetBreadcrumbs = jest.fn();
-const mockTrackUiMetric = jest.fn();
-const mockWelcomeOnRendered = jest.fn();
+const mockNavigateToUrl = vi.fn();
+const mockSetBreadcrumbs = vi.fn();
+const mockTrackUiMetric = vi.fn();
+const mockWelcomeOnRendered = vi.fn();
 
-jest.mock('../kibana_services', () => ({
-  getServices: () => ({
-    getBasePath: () => 'path',
-    tutorialVariables: () => ({}),
-    homeConfig: { disableWelcomeScreen: false },
-    chrome: {
-      setBreadcrumbs: mockSetBreadcrumbs,
-    },
-    application: {
-      navigateToUrl: mockNavigateToUrl,
-      navigateToApp: jest.fn(),
-      capabilities: {
-        navLinks: {
-          integrations: mockHasIntegrationsPermission,
+vi.mock('../kibana_services', () => {
+      const mocked = {
+      getServices: () => ({
+        getBasePath: () => 'path',
+        tutorialVariables: () => ({}),
+        homeConfig: { disableWelcomeScreen: false },
+        chrome: {
+          setBreadcrumbs: mockSetBreadcrumbs,
         },
-      },
-    },
-    trackUiMetric: mockTrackUiMetric,
-    welcomeService: {
-      onRendered: mockWelcomeOnRendered,
-      renderTelemetryNotice: () => null,
-    },
-  }),
-}));
+        application: {
+          navigateToUrl: mockNavigateToUrl,
+          navigateToApp: vi.fn(),
+          capabilities: {
+            navLinks: {
+              integrations: mockHasIntegrationsPermission,
+            },
+          },
+        },
+        trackUiMetric: mockTrackUiMetric,
+        welcomeService: {
+          onRendered: mockWelcomeOnRendered,
+          renderTelemetryNotice: () => null,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  OverviewPageFooter: () => <div data-test-subj="overviewPageFooter" />,
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      OverviewPageFooter: () => <div data-test-subj="overviewPageFooter" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/shared-ux-page-kibana-template', () => ({
-  KibanaPageTemplate: ({
-    children,
-    ...rest
-  }: {
-    children?: React.ReactNode;
-    'data-test-subj'?: string;
-  }) => <div data-test-subj={rest['data-test-subj']}>{children}</div>,
-}));
+vi.mock('@kbn/shared-ux-page-kibana-template', () => {
+      const mocked = {
+      KibanaPageTemplate: ({
+        children,
+        ...rest
+      }: {
+        children?: React.ReactNode;
+        'data-test-subj'?: string;
+      }) => <div data-test-subj={rest['data-test-subj']}>{children}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./add_data', () => ({
-  AddData: () => <div data-test-subj="addData" />,
-}));
+vi.mock('./add_data', () => {
+      const mocked = {
+      AddData: () => <div data-test-subj="addData" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./manage_data', () => ({
-  ManageData: ({ features }: { features: Array<{ id: string }> }) => (
-    <div data-test-subj="manageData">
-      {features.map((feature) => (
-        <div key={feature.id} data-test-subj={`manage-feature-${feature.id}`} />
-      ))}
-    </div>
-  ),
-}));
-
-jest.mock('./solutions_section', () => ({
-  SolutionsSection: ({ solutions }: { solutions: Array<{ id: string; title: string }> }) => (
-    <div data-test-subj="solutionsSection">
-      {solutions.map((solution) => (
-        <div key={solution.id} data-test-subj={`solution-${solution.id}`}>
-          {solution.title}
+vi.mock('./manage_data', () => {
+      const mocked = {
+      ManageData: ({ features }: { features: Array<{ id: string }> }) => (
+        <div data-test-subj="manageData">
+          {features.map((feature) => (
+            <div key={feature.id} data-test-subj={`manage-feature-${feature.id}`} />
+          ))}
         </div>
-      ))}
-    </div>
-  ),
-}));
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./sample_data', () => ({
-  SampleDataCard: ({ onDecline }: { onDecline: () => void }) => (
-    <button type="button" data-test-subj="skipWelcomeScreen" onClick={onDecline}>
-      Explore on my own
-    </button>
-  ),
-}));
+vi.mock('./solutions_section', () => {
+      const mocked = {
+      SolutionsSection: ({ solutions }: { solutions: Array<{ id: string; title: string }> }) => (
+        <div data-test-subj="solutionsSection">
+          {solutions.map((solution) => (
+            <div key={solution.id} data-test-subj={`solution-${solution.id}`}>
+              {solution.title}
+            </div>
+          ))}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('./sample_data', () => {
+      const mocked = {
+      SampleDataCard: ({ onDecline }: { onDecline: () => void }) => (
+        <button type="button" data-test-subj="skipWelcomeScreen" onClick={onDecline}>
+          Explore on my own
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createSolution = (
   overrides: Partial<FeatureCatalogueSolution> & Pick<FeatureCatalogueSolution, 'id' | 'title'>
@@ -131,14 +154,14 @@ describe('home', () => {
       solutions: [],
       localStorage: {
         ...localStorage,
-        getItem: jest.fn().mockReturnValue(null),
-        setItem: jest.fn(),
+        getItem: vi.fn().mockReturnValue(null),
+        setItem: vi.fn(),
       },
       urlBasePath: 'goober',
       addBasePath(url) {
         return `base_path/${url}`;
       },
-      hasDataView: jest.fn(async () => true),
+      hasDataView: vi.fn(async () => true),
       isCloudEnabled: false,
     };
   });
@@ -241,9 +264,9 @@ describe('home', () => {
 
   describe('welcome', () => {
     test('shows the welcome screen when enabled and there are no data views', async () => {
-      defaultProps.localStorage.getItem = jest.fn().mockReturnValue('true');
+      defaultProps.localStorage.getItem = vi.fn().mockReturnValue('true');
 
-      renderHome({ hasDataView: jest.fn(async () => false) });
+      renderHome({ hasDataView: vi.fn(async () => false) });
 
       await expectWelcomeScreen();
       expect(defaultProps.localStorage.getItem).toHaveBeenCalledWith('home:welcome:show');
@@ -251,9 +274,9 @@ describe('home', () => {
 
     test('stores skip welcome setting and shows the home page when skipped', async () => {
       const user = userEvent.setup();
-      defaultProps.localStorage.getItem = jest.fn().mockReturnValue('true');
+      defaultProps.localStorage.getItem = vi.fn().mockReturnValue('true');
 
-      renderHome({ hasDataView: jest.fn(async () => false) });
+      renderHome({ hasDataView: vi.fn(async () => false) });
 
       await expectWelcomeScreen();
       await user.click(screen.getByTestId('skipWelcomeScreen'));
@@ -263,17 +286,17 @@ describe('home', () => {
     });
 
     test('shows the normal home page if loading fails', async () => {
-      defaultProps.localStorage.getItem = jest.fn().mockReturnValue('true');
+      defaultProps.localStorage.getItem = vi.fn().mockReturnValue('true');
 
-      renderHome({ hasDataView: jest.fn(() => Promise.reject(new Error('Doh!'))) });
+      renderHome({ hasDataView: vi.fn(() => Promise.reject(new Error('Doh!'))) });
 
       await expectHomePage();
     });
 
     test('shows the normal home page if welcome screen is disabled locally', async () => {
-      defaultProps.localStorage.getItem = jest.fn().mockReturnValue('false');
+      defaultProps.localStorage.getItem = vi.fn().mockReturnValue('false');
 
-      renderHome({ hasDataView: jest.fn(async () => false) });
+      renderHome({ hasDataView: vi.fn(async () => false) });
 
       await expectHomePage();
     });
@@ -281,7 +304,7 @@ describe('home', () => {
     test("shows the normal home page if the user doesn't have access to integrations", async () => {
       mockHasIntegrationsPermission = false;
 
-      renderHome({ hasDataView: jest.fn(async () => false) });
+      renderHome({ hasDataView: vi.fn(async () => false) });
 
       await expectHomePage();
     });
@@ -289,20 +312,20 @@ describe('home', () => {
 
   describe('isNewKibanaInstance', () => {
     test('shows welcome when there are no data views', async () => {
-      renderHome({ hasDataView: jest.fn(async () => false) });
+      renderHome({ hasDataView: vi.fn(async () => false) });
 
       await expectWelcomeScreen();
     });
 
     test('shows the home page when there are data views', async () => {
-      renderHome({ hasDataView: jest.fn(async () => true) });
+      renderHome({ hasDataView: vi.fn(async () => true) });
 
       await expectHomePage();
     });
 
     test('shows the home page when checking for data views throws', async () => {
       renderHome({
-        hasDataView: jest.fn(() => {
+        hasDataView: vi.fn(() => {
           throw new Error('simulated find error');
         }),
       });

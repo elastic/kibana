@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ALERT_URL,
   ALERT_UUID,
@@ -89,7 +91,7 @@ describe('wrapSuppressedEsqlAlerts', () => {
   });
 
   test('should call generateAlertId for alert id', () => {
-    jest.spyOn(esqlUtils, 'generateAlertId').mockReturnValueOnce('mocked-alert-id');
+    vi.spyOn(esqlUtils, 'generateAlertId').mockReturnValueOnce('mocked-alert-id');
     const doc = sampleDocNoSortIdWithTimestamp(docId);
     const alerts = wrapSuppressedEsqlAlerts({
       sharedParams,

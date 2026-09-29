@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
@@ -178,13 +181,13 @@ const INDICATOR_PREVIEW_CASES: Array<{ name: string; params: GetPreviewDataParam
 describe('GetPreviewData', () => {
   let esClientMock: ElasticsearchClientMock;
   let service: GetPreviewData;
-  let mockDataViewsService: jest.Mocked<DataViewsService>;
+  let mockDataViewsService: Mocked<DataViewsService>;
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     mockDataViewsService = {
       ...dataViewsService,
-      get: jest.fn().mockImplementation((dataViewId: string) => {
+      get: vi.fn().mockImplementation((dataViewId: string) => {
         if (dataViewId === 'e7744dbe-a7a4-457b-83aa-539e9c88764c') {
           return Promise.resolve(
             createStubDataView({

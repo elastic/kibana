@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { RollupSearchStrategy } from './rollup_search_strategy';
 
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -16,7 +18,7 @@ import type {
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
 
-jest.mock('./abstract_search_strategy', () => {
+vi.mock('./abstract_search_strategy', () => {
   class AbstractSearchStrategyMock {
     getFieldsForWildcard() {
       return [
@@ -45,7 +47,7 @@ describe('Rollup Search Strategy', () => {
         client: {
           asCurrentUser: {
             rollup: {
-              getRollupIndexCaps: jest.fn().mockImplementation(() => rollupResolvedData),
+              getRollupIndexCaps: vi.fn().mockImplementation(() => rollupResolvedData),
             },
           },
         },
@@ -67,7 +69,7 @@ describe('Rollup Search Strategy', () => {
 
     beforeEach(() => {
       rollupSearchStrategy = new RollupSearchStrategy();
-      rollupSearchStrategy.getRollupData = jest.fn(() =>
+      rollupSearchStrategy.getRollupData = vi.fn(() =>
         Promise.resolve({
           [rollupIndex]: {
             rollup_jobs: [

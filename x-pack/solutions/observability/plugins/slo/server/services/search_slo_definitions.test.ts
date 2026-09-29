@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -78,8 +81,8 @@ function createMockSummaryDocResponseWithPagination(
 }
 
 describe('SearchSLODefinitions', () => {
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockEsClient: Mocked<ElasticsearchClient>;
+  let mockLogger: Mocked<Logger>;
   let searchSLODefinitions: SearchSLODefinitions;
   let mockSettings: SLOSettings;
 
@@ -97,7 +100,7 @@ describe('SearchSLODefinitions', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('happy path', () => {

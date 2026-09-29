@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -20,7 +22,7 @@ import type { Serializable } from '@kbn/utility-types';
 
 const fieldType = 'string';
 const format = {
-  convertToReact: jest.fn().mockImplementation((input: string) => `converted url for ${input}`),
+  convertToReact: vi.fn().mockImplementation((input: string) => `converted url for ${input}`),
   type: {
     urlTypes: [
       { kind: 'a', text: 'Link' },
@@ -38,8 +40,8 @@ const formatParams: UrlFormatEditorFormatParams = {
   type: 'a',
 };
 
-const onChange = jest.fn();
-const onError = jest.fn();
+const onChange = vi.fn();
+const onError = vi.fn();
 
 const renderWithContext = (Element: React.ReactElement) =>
   render(

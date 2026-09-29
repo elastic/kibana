@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   mockFetchIndexPatterns,
   mockPersistedLog,
@@ -24,7 +26,7 @@ import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { QueryStringInput } from './query_string_input';
 import { autocompleteStartMock } from '../../autocomplete/mocks';
 
-jest.useFakeTimers({ legacyFakeTimers: true });
+vi.useFakeTimers({ legacyFakeTimers: true });
 
 const startMock = coreMock.createStart();
 
@@ -43,20 +45,20 @@ const luceneQuery = {
 };
 
 const createMockWebStorage = () => ({
-  clear: jest.fn(),
-  getItem: jest.fn(),
-  key: jest.fn(),
-  removeItem: jest.fn(),
-  setItem: jest.fn(),
+  clear: vi.fn(),
+  getItem: vi.fn(),
+  key: vi.fn(),
+  removeItem: vi.fn(),
+  setItem: vi.fn(),
   length: 0,
 });
 
 const createMockStorage = () => ({
   storage: createMockWebStorage(),
-  get: jest.fn(),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
+  remove: vi.fn(),
+  clear: vi.fn(),
 });
 
 function wrapQueryStringInputInContext(testProps: any, storage?: any) {
@@ -86,7 +88,7 @@ function wrapQueryStringInputInContext(testProps: any, storage?: any) {
 
 describe('QueryStringInput', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Should render the given query', async () => {
@@ -152,7 +154,7 @@ describe('QueryStringInput', () => {
 
   it("On language selection, should store the user's preference in localstorage and reset the query", async () => {
     const mockStorage = createMockStorage();
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
 
     render(
       wrapQueryStringInputInContext(
@@ -210,7 +212,7 @@ describe('QueryStringInput', () => {
   });
 
   it('Should call onSubmit when the user hits enter inside the query bar', async () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
 
     render(
       wrapQueryStringInputInContext({
@@ -227,8 +229,8 @@ describe('QueryStringInput', () => {
   });
 
   it('Should fire onBlur callback on input blur', async () => {
-    const mockCallback = jest.fn();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const mockCallback = vi.fn();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
     render(
       wrapQueryStringInputInContext({
@@ -248,7 +250,7 @@ describe('QueryStringInput', () => {
   });
 
   it('Should fire onChangeQueryInputFocus after a delay', async () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
 
     render(
       wrapQueryStringInputInContext({
@@ -265,8 +267,8 @@ describe('QueryStringInput', () => {
   });
 
   it('Should not fire onChangeQueryInputFocus if input is focused back', async () => {
-    const mockCallback = jest.fn();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const mockCallback = vi.fn();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
     render(
       wrapQueryStringInputInContext({
@@ -283,19 +285,19 @@ describe('QueryStringInput', () => {
     await user.click(textarea);
     await user.tab();
 
-    jest.advanceTimersByTime(5);
+    vi.advanceTimersByTime(5);
     const callCountAfterBlur = mockCallback.mock.calls.length;
 
     await user.click(textarea);
     expect(mockCallback).toHaveBeenCalledWith(true);
 
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     const finalCallCount = mockCallback.mock.calls.length;
     expect(finalCallCount).toBeGreaterThanOrEqual(callCountAfterBlur + 1);
   });
 
   it('Should call onSubmit after a delay when submitOnBlur is on and blurs input', async () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
 
     render(
       wrapQueryStringInputInContext({
@@ -312,8 +314,8 @@ describe('QueryStringInput', () => {
   });
 
   it("Shouldn't call onSubmit on blur by default", async () => {
-    const mockCallback = jest.fn();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const mockCallback = vi.fn();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
     render(
       wrapQueryStringInputInContext({
@@ -329,12 +331,12 @@ describe('QueryStringInput', () => {
     await user.click(textarea);
     await user.tab();
 
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     expect(mockCallback).toHaveBeenCalledTimes(0);
   });
 
   it('Should use PersistedLog for recent search suggestions', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
     render(
       wrapQueryStringInputInContext({
@@ -425,8 +427,8 @@ describe('QueryStringInput', () => {
   });
 
   it('Should convert non-breaking spaces into regular spaces', async () => {
-    const mockCallback = jest.fn();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const mockCallback = vi.fn();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
     render(
       wrapQueryStringInputInContext({
@@ -448,8 +450,8 @@ describe('QueryStringInput', () => {
   });
 
   it('Stops Escape propagation while suggestions are visible so parent overlays do not close', async () => {
-    const onParentKeyDown = jest.fn();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const onParentKeyDown = vi.fn();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
     render(
       <div onKeyDown={onParentKeyDown}>
@@ -475,7 +477,7 @@ describe('QueryStringInput', () => {
   });
 
   it('Lets Escape propagate when no suggestions are visible so parent Esc-to-close still works', () => {
-    const onParentKeyDown = jest.fn();
+    const onParentKeyDown = vi.fn();
 
     render(
       <div onKeyDown={onParentKeyDown}>

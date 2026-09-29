@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -28,17 +30,23 @@ import { DiscoverGrid } from '../../../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 import type { RenderViewModeToggle } from '../../../../components/view_mode_toggle';
 
-jest.mock('../../../../components/discover_grid', () => ({
-  ...jest.requireActual('../../../../components/discover_grid'),
-  DiscoverGrid: jest.fn(),
-}));
+vi.mock('../../../../components/discover_grid', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../components/discover_grid')),
+      DiscoverGrid: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../components/discover_grid_flyout', () => ({
-  ...jest.requireActual('../../../../components/discover_grid_flyout'),
-  DiscoverGridFlyout: jest.fn(),
-}));
+vi.mock('../../../../components/discover_grid_flyout', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../components/discover_grid_flyout')),
+      DiscoverGridFlyout: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const discoverGridMock = jest.mocked(DiscoverGrid);
+const discoverGridMock = vi.mocked(DiscoverGrid);
 const singleEsHit = esHitsMock.slice(0, 1);
 const cascadedColumnsMeta: DataTableColumnsMeta = {
   bytes: {
@@ -100,16 +108,16 @@ async function mountComponent({
   dataStateContainer.data$.documents$.next(testDocuments);
 
   // Prevent any further updates to documents$ from clearing test data
-  dataStateContainer.data$.documents$.next = jest.fn();
+  dataStateContainer.data$.documents$.next = vi.fn();
 
   const props = {
-    renderViewModeToggle: jest.fn<
+    renderViewModeToggle: vi.fn<
       ReturnType<RenderViewModeToggle>,
       Parameters<RenderViewModeToggle>
     >(() => <div data-test-subj="viewModeToggle">test</div>),
     dataView: dataViewMock,
-    onAddFilter: jest.fn(),
-    onFieldEdited: jest.fn(),
+    onAddFilter: vi.fn(),
+    onFieldEdited: vi.fn(),
   };
 
   return renderWithI18n(
@@ -120,14 +128,14 @@ async function mountComponent({
 }
 
 describe('Discover documents layout', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    const discoverGrid = jest.requireActual('../../../../components/discover_grid');
-    const discoverGridFlyout = jest.requireActual('../../../../components/discover_grid_flyout');
-    jest
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    const discoverGrid = (await vi.importActual('../../../../components/discover_grid'));
+    const discoverGridFlyout = (await vi.importActual('../../../../components/discover_grid_flyout'));
+    vi
       .mocked(DiscoverGrid)
       .mockImplementation((props) => React.createElement(discoverGrid.DiscoverGrid, props));
-    jest
+    vi
       .mocked(DiscoverGridFlyout)
       .mockImplementation((props) =>
         React.createElement(discoverGridFlyout.DiscoverGridFlyout, props)
@@ -236,12 +244,12 @@ describe('Discover documents layout', () => {
 
   describe('external doc view', () => {
     beforeEach(() => {
-      jest
+      vi
         .mocked(DiscoverGrid)
         .mockImplementation((props) => (
           <div data-test-subj="discoverGridMock">{props.expandedDoc?.id ?? 'no-expanded-doc'}</div>
         ));
-      jest
+      vi
         .mocked(DiscoverGridFlyout)
         .mockImplementation((props) => (
           <div data-test-subj="discoverGridFlyoutMock">{props.hit?.id ?? 'no-expanded-doc'}</div>

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import os from 'os';
 import Path from 'path';
@@ -17,15 +20,15 @@ import { getGitCommonDir } from './utils/get_git_common_dir';
 import { commitExists } from './utils/commit_exists';
 import type { WorkspaceGlobalContext } from './types';
 
-jest.mock('./exec');
-jest.mock('./utils/exists');
-jest.mock('./utils/get_git_common_dir');
-jest.mock('./utils/commit_exists');
+vi.mock('./exec');
+vi.mock('./utils/exists');
+vi.mock('./utils/get_git_common_dir');
+vi.mock('./utils/commit_exists');
 
-const mockExec = exec as jest.MockedFunction<typeof exec>;
-const mockExists = exists as jest.MockedFunction<typeof exists>;
-const mockGetGitCommonDir = getGitCommonDir as jest.MockedFunction<typeof getGitCommonDir>;
-const mockCommitExists = commitExists as jest.MockedFunction<typeof commitExists>;
+const mockExec = exec as MockedFunction<typeof exec>;
+const mockExists = exists as MockedFunction<typeof exists>;
+const mockGetGitCommonDir = getGitCommonDir as MockedFunction<typeof getGitCommonDir>;
+const mockCommitExists = commitExists as MockedFunction<typeof commitExists>;
 
 function createContext(): WorkspaceGlobalContext {
   const log = new ToolingLog({
@@ -51,7 +54,7 @@ function createContext(): WorkspaceGlobalContext {
 
 describe('ensureClonedRepo', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockExec.mockResolvedValue({} as Awaited<ReturnType<typeof exec>>);
     mockCommitExists.mockResolvedValue(false);
   });

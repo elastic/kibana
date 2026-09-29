@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ForwardDefinition } from '..';
 import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
 import type { CoreStart } from '@kbn/core/public';
@@ -22,7 +24,7 @@ describe('migrate legacy kibana urls', () => {
       {
         legacyAppId: 'myApp',
         newAppId: 'updatedApp',
-        rewritePath: jest.fn(() => '/new/path'),
+        rewritePath: vi.fn(() => '/new/path'),
       },
     ];
   });

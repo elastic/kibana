@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { JobImportService } from './jobs_import_service';
 import type { MlApi } from '../../../services/ml_api_service';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
@@ -61,14 +64,14 @@ function createBaseDfaJob(overrides?: {
 
 describe('JobImportService', () => {
   let jobImportService: JobImportService;
-  let mockEsSearch: jest.MockedFunction<MlApi['esSearch']>;
-  let mockValidateDatafeedPreview: jest.MockedFunction<MlApi['validateDatafeedPreview']>;
-  let mockGetFilters: jest.Mock;
+  let mockEsSearch: MockedFunction<MlApi['esSearch']>;
+  let mockValidateDatafeedPreview: MockedFunction<MlApi['validateDatafeedPreview']>;
+  let mockGetFilters: Mock;
 
   beforeEach(() => {
-    mockEsSearch = jest.fn();
-    mockValidateDatafeedPreview = jest.fn();
-    mockGetFilters = jest.fn().mockResolvedValue([]);
+    mockEsSearch = vi.fn();
+    mockValidateDatafeedPreview = vi.fn();
+    mockGetFilters = vi.fn().mockResolvedValue([]);
     jobImportService = new JobImportService(
       mockEsSearch,
       mockValidateDatafeedPreview,

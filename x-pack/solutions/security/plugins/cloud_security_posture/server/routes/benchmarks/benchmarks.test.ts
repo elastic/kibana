@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import { httpServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   benchmarksQueryParamsSchema,
@@ -18,7 +21,7 @@ import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 
 describe('benchmarks API', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('validate the API route path', async () => {
@@ -103,7 +106,7 @@ describe('benchmarks API', () => {
   });
 
   describe('test benchmarks utils', () => {
-    let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
+    let mockSoClient: Mocked<SavedObjectsClientContract>;
 
     beforeEach(() => {
       mockSoClient = savedObjectsClientMock.create();

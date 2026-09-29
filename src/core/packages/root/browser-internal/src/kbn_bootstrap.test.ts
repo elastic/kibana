@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   apmSystem,
   fatalErrorMock,
@@ -32,14 +34,14 @@ const setMetadata = (
 
 describe('kbn_bootstrap', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    window.performance.mark = jest.fn();
+    vi.clearAllMocks();
+    window.performance.mark = vi.fn();
     setMetadata();
   });
 
   it('does not report a fatal error if apm load fails', async () => {
     apmSystem.setup.mockRejectedValueOnce(new Error('reason'));
-    const consoleSpy = jest.spyOn(console, 'warn').mockImplementationOnce(() => undefined);
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementationOnce(() => undefined);
 
     await __kbnBootstrap__();
 

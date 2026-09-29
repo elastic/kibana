@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
@@ -17,21 +20,27 @@ import { AGENTS_PREFIX, FLEET_CONNECTORS_PACKAGE } from '../../constants';
 
 import { AgentlessEnrollmentFlyout } from '.';
 
-jest.mock('../../hooks', () => ({
-  ...jest.requireActual('../../hooks'),
-  useGetPackageInfoByKeyQuery: jest.fn(),
-  useGetAgentsQuery: jest.fn(),
-  useFleetStatus: jest.fn(),
-}));
+vi.mock('../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../hooks')),
+      useGetPackageInfoByKeyQuery: vi.fn(),
+      useGetAgentsQuery: vi.fn(),
+      useFleetStatus: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../agent_enrollment_flyout/use_get_agent_incoming_data', () => ({
-  usePollingIncomingData: jest.fn(),
-}));
+vi.mock('../agent_enrollment_flyout/use_get_agent_incoming_data', () => {
+      const mocked = {
+      usePollingIncomingData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetAgentsQuery = useGetAgentsQuery as jest.Mock;
-const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
-const mockUsePollingIncomingData = usePollingIncomingData as jest.Mock;
-const mockUseFleetStatus = useFleetStatus as jest.Mock;
+const mockUseGetAgentsQuery = useGetAgentsQuery as Mock;
+const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as Mock;
+const mockUsePollingIncomingData = usePollingIncomingData as Mock;
+const mockUseFleetStatus = useFleetStatus as Mock;
 
 const makeDashboardInstallation = (count: number) => ({
   installed_kibana_space_id: 'default',
@@ -42,7 +51,7 @@ const makeDashboardInstallation = (count: number) => ({
 });
 
 describe('AgentlessEnrollmentFlyout', () => {
-  const onClose = jest.fn();
+  const onClose = vi.fn();
   const baseProps = {
     onClose,
     policyId: 'test-policy-id',
@@ -51,7 +60,7 @@ describe('AgentlessEnrollmentFlyout', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Step 1 — Confirm managed integration enrollment', () => {

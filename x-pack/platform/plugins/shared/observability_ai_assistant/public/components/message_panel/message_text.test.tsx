@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MessageText } from './message_text';
 
 const renderComponent = (content: string, props: Partial<Parameters<typeof MessageText>[0]> = {}) =>
-  render(<MessageText loading={false} content={content} onActionClick={jest.fn()} {...props} />);
+  render(<MessageText loading={false} content={content} onActionClick={vi.fn()} {...props} />);
 
 describe('MessageText', () => {
   describe('anonymizedHighlightPlugin', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('renders anonymized highlighted content with dedicated parser', () => {

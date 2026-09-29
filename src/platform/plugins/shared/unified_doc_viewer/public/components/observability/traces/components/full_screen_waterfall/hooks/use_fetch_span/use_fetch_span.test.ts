@@ -7,32 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { UnifiedSpanDocument } from '@kbn/apm-types';
 import { useFetchSpan } from '.';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
-jest.mock('../../../../../../../plugin', () => ({
-  getUnifiedDocViewerServices: jest.fn(),
-}));
+vi.mock('../../../../../../../plugin', () => {
+      const mocked = {
+      getUnifiedDocViewerServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFetchSpan = jest.fn<Promise<UnifiedSpanDocument | undefined>, any>();
-const mockAddDanger = jest.fn();
-const mockGetAbsoluteTime = jest.fn(() => ({
+const mockFetchSpan = vi.fn<Promise<UnifiedSpanDocument | undefined>, any>();
+const mockAddDanger = vi.fn();
+const mockGetAbsoluteTime = vi.fn(() => ({
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-01T01:00:00.000Z',
 }));
 
-const mockGetById: jest.Mock<
+const mockGetById: Mock<
   | {
-      fetchSpan: jest.Mock<Promise<UnifiedSpanDocument | undefined>>;
+      fetchSpan: Mock<Promise<UnifiedSpanDocument | undefined>>;
     }
   | undefined
-> = jest.fn(() => ({
+> = vi.fn(() => ({
   fetchSpan: mockFetchSpan,
 }));
 
-(getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
+(getUnifiedDocViewerServices as Mock).mockReturnValue({
   data: {
     query: {
       timefilter: {
@@ -63,7 +69,7 @@ describe('useFetchSpan', () => {
   const traceId = 'test-trace-id';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetById.mockReturnValue({
       fetchSpan: mockFetchSpan,
     });

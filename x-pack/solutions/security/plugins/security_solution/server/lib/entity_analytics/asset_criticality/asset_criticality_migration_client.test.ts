@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { AssetCriticalityMigrationClient } from './asset_criticality_migration_client';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { ASSET_CRITICALITY_MAPPINGS_VERSIONS } from './constants';
 
-jest.mock('./asset_criticality_data_client');
+vi.mock('./asset_criticality_data_client');
 
 const emptySearchResponse = {
   took: 1,
@@ -24,21 +27,21 @@ describe('AssetCriticalityMigrationClient', () => {
   let logger: Logger;
   let auditLogger: AuditLogger | undefined;
   let esClient: ElasticsearchClient;
-  let assetCriticalityDataClient: jest.Mocked<AssetCriticalityDataClient>;
+  let assetCriticalityDataClient: Mocked<AssetCriticalityDataClient>;
   let migrationClient: AssetCriticalityMigrationClient;
 
   beforeEach(() => {
-    logger = { info: jest.fn(), error: jest.fn() } as unknown as Logger;
+    logger = { info: vi.fn(), error: vi.fn() } as unknown as Logger;
     auditLogger = undefined;
-    esClient = { updateByQuery: jest.fn() } as unknown as ElasticsearchClient;
+    esClient = { updateByQuery: vi.fn() } as unknown as ElasticsearchClient;
     assetCriticalityDataClient = new AssetCriticalityDataClient({
       logger,
       auditLogger,
       esClient,
       namespace: '*',
-    }) as jest.Mocked<AssetCriticalityDataClient>;
+    }) as Mocked<AssetCriticalityDataClient>;
 
-    (AssetCriticalityDataClient as jest.Mock).mockImplementation(() => assetCriticalityDataClient);
+    (AssetCriticalityDataClient as Mock).mockImplementation(() => assetCriticalityDataClient);
 
     assetCriticalityDataClient.getIndex.mockImplementation(
       () => '.asset-criticality.asset-criticality-default'
@@ -90,15 +93,15 @@ describe('AssetCriticalityMigrationClient', () => {
   });
 
   describe('migrateMappings', () => {
-    let createOrUpdateIndexSpy: jest.Mock;
+    let createOrUpdateIndexSpy: Mock;
 
     beforeEach(() => {
       // Replace createOrUpdateIndex with a fresh spy each time to avoid count bleed-over
       // from previous tests sharing the same AssetCriticalityDataClient mock instance.
-      createOrUpdateIndexSpy = jest.fn();
+      createOrUpdateIndexSpy = vi.fn();
       assetCriticalityDataClient.createOrUpdateIndex = createOrUpdateIndexSpy;
 
-      migrationClient.getAllSpacesWithAssetCriticalityInstalled = jest
+      migrationClient.getAllSpacesWithAssetCriticalityInstalled = vi
         .fn()
         .mockResolvedValue(['default', 'other-space']);
     });

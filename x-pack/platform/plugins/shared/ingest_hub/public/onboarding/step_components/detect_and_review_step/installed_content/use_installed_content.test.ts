@@ -5,15 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn(),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@kbn/react-query';
@@ -21,13 +30,13 @@ import { useInstalledContent } from './use_installed_content';
 import { displayedAssetTypes } from '@kbn/fleet-plugin/common';
 import { AssetTitleMap } from '@kbn/fleet-plugin/public';
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseQuery = useQuery as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseQuery = useQuery as Mock;
 
-const httpMock = { post: jest.fn() };
+const httpMock = { post: vi.fn() };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseKibana.mockReturnValue({ services: { http: httpMock } });
   mockUseQuery.mockReturnValue({ data: undefined, isLoading: false });
 });

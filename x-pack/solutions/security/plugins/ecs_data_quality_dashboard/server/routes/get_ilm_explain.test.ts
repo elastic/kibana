@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { GET_ILM_EXPLAIN } from '../../common/constants';
 
 import { fetchILMExplain } from '../lib';
@@ -14,9 +17,12 @@ import { requestContextMock } from '../__mocks__/request_context';
 import { getILMExplainRoute } from './get_ilm_explain';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
-jest.mock('../lib', () => ({
-  fetchILMExplain: jest.fn(),
-}));
+vi.mock('../lib', () => {
+      const mocked = {
+      fetchILMExplain: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getILMExplainRoute route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -32,7 +38,7 @@ describe('getILMExplainRoute route', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     server = serverMock.create();
     logger = loggerMock.create();
@@ -76,7 +82,7 @@ describe('getILMExplainRoute route', () => {
       },
     };
 
-    (fetchILMExplain as jest.Mock).mockResolvedValue(mockIlmExplain);
+    (fetchILMExplain as Mock).mockResolvedValue(mockIlmExplain);
 
     const response = await server.inject(req, requestContextMock.convertContext(context));
     expect(response.status).toEqual(200);
@@ -85,7 +91,7 @@ describe('getILMExplainRoute route', () => {
 
   test('Handles error', async () => {
     const errorMessage = 'Error!';
-    (fetchILMExplain as jest.Mock).mockRejectedValue({ message: errorMessage });
+    (fetchILMExplain as Mock).mockRejectedValue({ message: errorMessage });
 
     const response = await server.inject(req, requestContextMock.convertContext(context));
     expect(response.status).toEqual(500);

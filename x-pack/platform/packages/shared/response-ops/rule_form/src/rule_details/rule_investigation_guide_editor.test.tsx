@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render as rtlRender, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -15,7 +17,7 @@ const render = (toRender: any) => rtlRender(toRender, { wrapper: IntlProvider })
 
 describe('RuleInvestigationGuide', () => {
   it('should render the investigation guide when provided', () => {
-    const setRuleParams = jest.fn();
+    const setRuleParams = vi.fn();
     render(<InvestigationGuideEditor setRuleParams={setRuleParams} value="123" />);
     const editorElement = screen.getByLabelText(
       'Add guidelines for addressing alerts created by this rule'
@@ -24,7 +26,7 @@ describe('RuleInvestigationGuide', () => {
   });
 
   it('should call setRuleParams when the value changes', async () => {
-    const setRuleParams = jest.fn();
+    const setRuleParams = vi.fn();
     render(<InvestigationGuideEditor setRuleParams={setRuleParams} value="# Markdown Summary" />);
     const editorElement = screen.getByLabelText(
       'Add guidelines for addressing alerts created by this rule'

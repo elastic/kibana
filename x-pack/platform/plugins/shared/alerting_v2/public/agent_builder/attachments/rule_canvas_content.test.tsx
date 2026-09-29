@@ -5,48 +5,66 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { RuleCanvasContent } from './rule_canvas_content';
 
-const mockUpsertRule = jest.fn().mockResolvedValue({});
-const mockNavigateToUrl = jest.fn();
-const mockAddSuccess = jest.fn();
+const mockUpsertRule = vi.fn().mockResolvedValue({});
+const mockNavigateToUrl = vi.fn();
+const mockAddSuccess = vi.fn();
 const mockPrepend = (path: string) => `/base${path}`;
 
-jest.mock('@kbn/core-di-browser', () => ({
-  CoreStart: (key: string) => key,
-  useService: (token: unknown) => {
-    if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl };
-    }
-    if (token === 'http') {
-      return { basePath: { prepend: mockPrepend } };
-    }
-    if (token === 'notifications') {
-      return { toasts: { addSuccess: mockAddSuccess } };
-    }
-    return { upsertRule: mockUpsertRule };
-  },
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      CoreStart: (key: string) => key,
+      useService: (token: unknown) => {
+        if (token === 'application') {
+          return { navigateToUrl: mockNavigateToUrl };
+        }
+        if (token === 'http') {
+          return { basePath: { prepend: mockPrepend } };
+        }
+        if (token === 'notifications') {
+          return { toasts: { addSuccess: mockAddSuccess } };
+        }
+        return { upsertRule: mockUpsertRule };
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/rule_details/rule_context', () => ({
-  RuleProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../components/rule_details/rule_context', () => {
+      const mocked = {
+      RuleProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/rule_details/rule_summary_header', () => ({
-  RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
-  RuleTagsList: () => <div data-test-subj="mockRuleTagsList" />,
-}));
+vi.mock('../../components/rule_details/rule_summary_header', () => {
+      const mocked = {
+      RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
+      RuleTagsList: () => <div data-test-subj="mockRuleTagsList" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/rule_details/sidebar/rule_sidebar', () => ({
-  RuleSidebar: () => <div data-test-subj="mockRuleSidebar" />,
-}));
+vi.mock('../../components/rule_details/sidebar/rule_sidebar', () => {
+      const mocked = {
+      RuleSidebar: () => <div data-test-subj="mockRuleSidebar" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/rules_api', () => ({
-  RulesApi: Symbol('RulesApi'),
-}));
+vi.mock('../../services/rules_api', () => {
+      const mocked = {
+      RulesApi: Symbol('RulesApi'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createAttachment = (
   overrides: { origin?: string; enabled?: boolean; dataId?: string } = {}
@@ -69,12 +87,12 @@ const createAttachment = (
 
 const renderCanvas = (
   overrides: { origin?: string; enabled?: boolean; dataId?: string } = {},
-  callbackOverrides: Record<string, jest.Mock> = {}
+  callbackOverrides: Record<string, Mock> = {}
 ) => {
   const attachment = createAttachment(overrides);
-  const registerActionButtons = jest.fn();
-  const updateOrigin = jest.fn().mockResolvedValue(undefined);
-  const closeCanvas = jest.fn();
+  const registerActionButtons = vi.fn();
+  const updateOrigin = vi.fn().mockResolvedValue(undefined);
+  const closeCanvas = vi.fn();
 
   const result = render(
     <RuleCanvasContent
@@ -94,14 +112,14 @@ const renderCanvas = (
   };
 };
 
-const getLastRegisteredButtons = (registerActionButtons: jest.Mock) => {
+const getLastRegisteredButtons = (registerActionButtons: Mock) => {
   const { calls } = registerActionButtons.mock;
   return calls[calls.length - 1][0] as Array<{ label: string; handler: () => unknown }>;
 };
 
 describe('RuleCanvasContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {
@@ -130,7 +148,7 @@ describe('RuleCanvasContent', () => {
     });
 
     it('Create rule handler calls upsertRule and updateOrigin', async () => {
-      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+      const updateOrigin = vi.fn().mockResolvedValue(undefined);
       const { registerActionButtons } = renderCanvas(
         { dataId: 'pre-assigned-id' },
         { updateOrigin }

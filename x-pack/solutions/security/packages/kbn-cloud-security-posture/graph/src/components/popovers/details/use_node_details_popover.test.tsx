@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, render, screen } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers';
 import { useNodeDetailsPopover } from './use_node_details_popover';
 import type { GenericPopoverItem } from './use_node_details_popover';
 
-const mockOpenPopover = jest.fn();
-const mockClosePopover = jest.fn();
+const mockOpenPopover = vi.fn();
+const mockClosePopover = vi.fn();
 
-const mockUseGraphPopoverState = jest.fn(() => ({
+const mockUseGraphPopoverState = vi.fn(() => ({
   id: 'test-popover-id',
   state: {
     isOpen: false,
@@ -26,9 +29,12 @@ const mockUseGraphPopoverState = jest.fn(() => ({
   },
 }));
 
-jest.mock('../primitives/use_graph_popover_state', () => ({
-  useGraphPopoverState: () => mockUseGraphPopoverState(),
-}));
+vi.mock('../primitives/use_graph_popover_state', () => {
+      const mocked = {
+      useGraphPopoverState: () => mockUseGraphPopoverState(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createTestItems = (count: number): GenericPopoverItem[] => {
   return Array.from({ length: count }, (_, index) => ({
@@ -45,7 +51,7 @@ const defaultProps = {
 };
 
 const mockOpenPopoverState = () => {
-  (mockUseGraphPopoverState as jest.Mock).mockReturnValue({
+  (mockUseGraphPopoverState as Mock).mockReturnValue({
     id: 'test-popover-id',
     state: {
       isOpen: true,
@@ -82,7 +88,7 @@ const expectPopoverContentToRender = (items: GenericPopoverItem[], expectedCount
 
 describe('useNodeDetailsPopover', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseGraphPopoverState.mockReturnValue({
       id: 'test-popover-id',

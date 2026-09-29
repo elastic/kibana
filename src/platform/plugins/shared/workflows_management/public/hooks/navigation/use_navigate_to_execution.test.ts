@@ -7,29 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useNavigateToExecution } from './use_navigate_to_execution';
 import { PLUGIN_ID } from '../../../common';
 import { createStartServicesMock, createUseKibanaMockValue } from '../../mocks';
 import { useKibana } from '../use_kibana';
 
-jest.mock('../use_kibana');
+vi.mock('../use_kibana');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 describe('useNavigateToExecution', () => {
-  let mockNavigateToApp: jest.Mock;
-  let mockGetUrlForApp: jest.Mock;
+  let mockNavigateToApp: Mock;
+  let mockGetUrlForApp: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const services = createStartServicesMock();
-    mockNavigateToApp = jest.fn();
-    mockGetUrlForApp = jest.fn(
+    mockNavigateToApp = vi.fn();
+    mockGetUrlForApp = vi.fn(
       (appId: string, opts: { path: string }) => `/app/${appId}${opts.path}`
     );
-    (services.application.navigateToApp as jest.Mock) = mockNavigateToApp;
-    (services.application.getUrlForApp as jest.Mock) = mockGetUrlForApp;
+    (services.application.navigateToApp as Mock) = mockNavigateToApp;
+    (services.application.getUrlForApp as Mock) = mockGetUrlForApp;
     mockUseKibana.mockReturnValue(createUseKibanaMockValue(services));
   });
 

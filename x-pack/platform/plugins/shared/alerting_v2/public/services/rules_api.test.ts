@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { RulesApi } from './rules_api';
 import { ALERTING_V2_INTERNAL_RULE_API_PATH, ALERTING_V2_RULE_API_PATH } from '../constants';
@@ -17,7 +19,7 @@ describe('RulesApi', () => {
     }
   })();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('upsertRule', () => {
     it('sends a PUT request with the rule id in the path', async () => {

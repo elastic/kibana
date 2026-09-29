@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   createCaseRequestFixture,
   createCaseResponseFixture,
@@ -18,7 +20,7 @@ const createContext = (input: unknown, config: Record<string, unknown> = {}) =>
 
 describe('createCaseStepDefinition', () => {
   it('creates expected step definition structure', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     const definition = createCaseStepDefinition(getCasesClient);
 
     expect(definition.id).toBe('cases.createCase');
@@ -27,8 +29,8 @@ describe('createCaseStepDefinition', () => {
   });
 
   it('calls client.cases.create and wraps output.case on success', async () => {
-    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest
+    const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi
       .fn()
       .mockResolvedValue({ cases: { create } } as unknown as CasesClient);
     const definition = createCaseStepDefinition(getCasesClient);
@@ -52,8 +54,8 @@ describe('createCaseStepDefinition', () => {
   });
 
   it('passes extended_fields through to client.cases.create', async () => {
-    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest
+    const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi
       .fn()
       .mockResolvedValue({ cases: { create } } as unknown as CasesClient);
     const definition = createCaseStepDefinition(getCasesClient);
@@ -74,8 +76,8 @@ describe('createCaseStepDefinition', () => {
 
   it('returns error when client.cases.create throws', async () => {
     const createError = new Error('create failed');
-    const create = jest.fn().mockRejectedValue(createError);
-    const getCasesClient = jest
+    const create = vi.fn().mockRejectedValue(createError);
+    const getCasesClient = vi
       .fn()
       .mockResolvedValue({ cases: { create } } as unknown as CasesClient);
     const definition = createCaseStepDefinition(getCasesClient);
@@ -86,15 +88,15 @@ describe('createCaseStepDefinition', () => {
   });
 
   it('uses configured connector when connector-id is provided', async () => {
-    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getConnectors = jest.fn().mockResolvedValue([
+    const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getConnectors = vi.fn().mockResolvedValue([
       {
         id: 'jira-1',
         name: 'Jira Connector',
         actionTypeId: '.jira',
       },
     ]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       configure: { getConnectors },
       cases: { create },
     } as unknown as CasesClient);
@@ -116,15 +118,15 @@ describe('createCaseStepDefinition', () => {
   });
 
   it('returns error when configured connector cannot be found', async () => {
-    const create = jest.fn();
-    const getConnectors = jest.fn().mockResolvedValue([
+    const create = vi.fn();
+    const getConnectors = vi.fn().mockResolvedValue([
       {
         id: 'jira-1',
         name: 'Jira Connector',
         actionTypeId: '.jira',
       },
     ]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       configure: { getConnectors },
       cases: { create },
     } as unknown as CasesClient);
@@ -144,9 +146,9 @@ describe('createCaseStepDefinition', () => {
   });
 
   it('pushes the case when push-case is enabled', async () => {
-    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const push = jest.fn().mockResolvedValue(undefined);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const push = vi.fn().mockResolvedValue(undefined);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { create, push },
     } as unknown as CasesClient);
     const definition = createCaseStepDefinition(getCasesClient);
@@ -161,8 +163,8 @@ describe('createCaseStepDefinition', () => {
   });
 
   it('omits extractObservables from the create payload when the caller did not supply it', async () => {
-    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest
+    const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi
       .fn()
       .mockResolvedValue({ cases: { create } } as unknown as CasesClient);
     const definition = createCaseStepDefinition(getCasesClient);

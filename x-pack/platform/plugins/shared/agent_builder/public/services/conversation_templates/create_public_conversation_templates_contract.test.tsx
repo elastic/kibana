@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type {
@@ -34,8 +36,8 @@ describe('createPublicConversationTemplatesContract', () => {
   const setup = () => {
     const context: ConversationTemplateUIContext = {
       attachmentsService: agentBuilderMocks.createStart().attachments,
-      openSidebarConversation: jest.fn(),
-      openFullscreenConversation: jest.fn().mockResolvedValue(undefined),
+      openSidebarConversation: vi.fn(),
+      openFullscreenConversation: vi.fn().mockResolvedValue(undefined),
     };
     return {
       context,
@@ -68,7 +70,7 @@ describe('createPublicConversationTemplatesContract', () => {
 
   it('supplies the same context to tabs and templates without wrapping their components', () => {
     const { contract, context } = setup();
-    const createTab = jest.fn(
+    const createTab = vi.fn(
       (capabilities: ConversationTemplateUIContext): ConversationTemplateTabDefinition => ({
         label: 'Overview',
         content: function TabContent({ conversation: tabConversation }) {
@@ -98,7 +100,7 @@ describe('createPublicConversationTemplatesContract', () => {
         },
       })
     );
-    const createTemplate = jest.fn(() => ({ name: 'Investigation', tabs: ['overview'] }));
+    const createTemplate = vi.fn(() => ({ name: 'Investigation', tabs: ['overview'] }));
     contract.registerTab('overview', createTab);
     contract.registerTemplateUIDefinition('investigation', createTemplate);
     const TabContent = contract.getTab('overview')?.content;
@@ -126,7 +128,7 @@ describe('createPublicConversationTemplatesContract', () => {
 
   it('supplies navigation at registration and preserves the returned card and its hook state', () => {
     const { contract, context } = setup();
-    const createDefinition = jest.fn(
+    const createDefinition = vi.fn(
       ({
         openSidebarConversation,
         openFullscreenConversation,

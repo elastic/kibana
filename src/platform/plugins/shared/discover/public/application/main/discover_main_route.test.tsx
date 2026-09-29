@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, waitFor } from '@testing-library/react';
@@ -26,17 +28,17 @@ import { DATASETS_ROUTE } from '@kbn/esql-types';
 
 let mockCustomizationService: Promise<DiscoverCustomizationService> | undefined;
 
-jest.mock('../../customizations', () => {
-  const originalModule = jest.requireActual('../../customizations');
+vi.mock('../../customizations', async () => {
+  const originalModule = (await vi.importActual('../../customizations'));
   return {
     ...originalModule,
     useDiscoverCustomizationService: () => () => mockCustomizationService,
   };
 });
 
-jest.mock('./components/single_tab_view/main_app', () => {
+vi.mock('./components/single_tab_view/main_app', () => {
   return {
-    DiscoverMainApp: jest.fn(() => <div data-test-subj="discover-main-app" />),
+    DiscoverMainApp: vi.fn(() => <div data-test-subj="discover-main-app" />),
   };
 });
 
@@ -47,9 +49,12 @@ const defaultRootProfileState: RootProfileState = {
 };
 let mockRootProfileState: RootProfileState = defaultRootProfileState;
 
-jest.mock('../../context_awareness/hooks/use_root_profile', () => ({
-  useRootProfile: () => mockRootProfileState,
-}));
+vi.mock('../../context_awareness/hooks/use_root_profile', () => {
+      const mocked = {
+      useRootProfile: () => mockRootProfileState,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function getServicesMock(
   hasESData = true,
@@ -59,12 +64,12 @@ function getServicesMock(
 ) {
   const dataViewsMock = discoverServiceMock.data.dataViews;
   dataViewsMock.hasData = {
-    hasESData: jest.fn(() => Promise.resolve(hasESData)),
-    hasUserDataView: jest.fn(),
-    hasDataView: jest.fn(() => Promise.resolve(hasDataView)),
+    hasESData: vi.fn(() => Promise.resolve(hasESData)),
+    hasUserDataView: vi.fn(),
+    hasDataView: vi.fn(() => Promise.resolve(hasDataView)),
   };
-  dataViewsMock.create = jest.fn().mockResolvedValue(dataViewMock);
-  discoverServiceMock.core.http.get = jest.fn().mockImplementation((path: string) => {
+  dataViewsMock.create = vi.fn().mockResolvedValue(dataViewMock);
+  discoverServiceMock.core.http.get = vi.fn().mockImplementation((path: string) => {
     if (path === DATASETS_ROUTE) {
       return Promise.resolve({
         datasets: hasESQLDatasets
@@ -74,11 +79,11 @@ function getServicesMock(
     }
     return Promise.resolve({});
   });
-  discoverServiceMock.getScopedHistory = jest.fn().mockReturnValue({
+  discoverServiceMock.getScopedHistory = vi.fn().mockReturnValue({
     location: {
       state: locationState,
     },
-    replace: jest.fn(),
+    replace: vi.fn(),
   });
   return discoverServiceMock;
 }
@@ -87,7 +92,7 @@ const setupComponent = ({
   hasESData = true,
   hasDataView = true,
   locationState,
-  onAppLeave = jest.fn(),
+  onAppLeave = vi.fn(),
   hasESQLDatasets = false,
 }: {
   hasESData?: boolean;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 
@@ -19,7 +21,7 @@ const defaultProps = {
   aiConnectors,
   connectorNames,
   selectedConnectorNames: [],
-  setSelectedConnectorNames: jest.fn(),
+  setSelectedConnectorNames: vi.fn(),
 };
 
 const openConnectorFilter = () => fireEvent.click(screen.getByTestId('connectorFilterButton'));

@@ -7,37 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { default as React } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { TestWrapper } from '../../../shared/test_utils';
 
-const mockCancelExecution = jest.fn();
+const mockCancelExecution = vi.fn();
 
-jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsApi: () => ({
-    cancelExecution: mockCancelExecution,
-  }),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useWorkflowsApi: () => ({
+        cancelExecution: mockCancelExecution,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockReportWorkflowRunCancelled = jest.fn();
+const mockReportWorkflowRunCancelled = vi.fn();
 
-jest.mock('../../../hooks/use_telemetry', () => ({
-  useTelemetry: jest.fn(() => ({
-    reportWorkflowRunCancelled: mockReportWorkflowRunCancelled,
-  })),
-}));
+vi.mock('../../../hooks/use_telemetry', () => {
+      const mocked = {
+      useTelemetry: vi.fn(() => ({
+        reportWorkflowRunCancelled: mockReportWorkflowRunCancelled,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useKibana } = jest.requireMock('@kbn/kibana-react-plugin/public');
+const { useKibana } = (await vi.importMock('@kbn/kibana-react-plugin/public'));
 
 describe('CancelExecutionButton', () => {
-  const mockAddSuccess = jest.fn();
-  const mockAddError = jest.fn();
+  const mockAddSuccess = vi.fn();
+  const mockAddError = vi.fn();
 
   const defaultProps = {
     executionId: 'exec-123',
@@ -46,7 +57,7 @@ describe('CancelExecutionButton', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCancelExecution.mockResolvedValue({});
     useKibana.mockReturnValue({
       services: {
@@ -185,7 +196,7 @@ describe('CancelExecutionButton', () => {
 
   describe('CancelExecutionButton authorization', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it.each([
@@ -207,7 +218,7 @@ describe('CancelExecutionButton', () => {
               workflowsManagement: { cancelWorkflowExecution },
             },
           },
-          notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+          notifications: { toasts: { addSuccess: vi.fn(), addError: vi.fn() } },
         },
       });
 

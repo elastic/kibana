@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import { TableTabSettingButton } from './table_tab_setting_button';
@@ -22,8 +24,8 @@ const mockTableTabState = {
   hideEmptyFields: false,
   hideAlertFields: false,
 };
-const mockSetTableTabState = jest.fn();
-const mockSetIsPopoverOpen = jest.fn();
+const mockSetTableTabState = vi.fn();
+const mockSetIsPopoverOpen = vi.fn();
 
 const renderComponent = () => {
   return render(

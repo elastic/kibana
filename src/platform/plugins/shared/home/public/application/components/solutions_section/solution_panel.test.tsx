@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { SolutionPanel } from './solution_panel';
@@ -20,11 +22,14 @@ const solutionEntry = {
   order: 1,
 };
 
-jest.mock('../../kibana_services', () => ({
-  getServices: () => ({
-    trackUiMetric: jest.fn(),
-  }),
-}));
+vi.mock('../../kibana_services', () => {
+      const mocked = {
+      getServices: () => ({
+        trackUiMetric: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const addBasePathMock = (path: string) => (path ? path : 'path');
 

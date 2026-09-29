@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getDocumentById } from './get_documents';
 
@@ -12,7 +15,7 @@ describe('getDocumentById', () => {
   describe('CCS targets', () => {
     it('uses _search with term query for a CCS index', async () => {
       const esClient = {
-        search: jest.fn().mockResolvedValue({
+        search: vi.fn().mockResolvedValue({
           hits: {
             hits: [
               {
@@ -23,7 +26,7 @@ describe('getDocumentById', () => {
             ],
           },
         }),
-        get: jest.fn(),
+        get: vi.fn(),
       } as unknown as ElasticsearchClient;
 
       const result = await getDocumentById({
@@ -55,10 +58,10 @@ describe('getDocumentById', () => {
 
     it('returns not found when _search returns no hits for a CCS index', async () => {
       const esClient = {
-        search: jest.fn().mockResolvedValue({
+        search: vi.fn().mockResolvedValue({
           hits: { hits: [] },
         }),
-        get: jest.fn(),
+        get: vi.fn(),
       } as unknown as ElasticsearchClient;
 
       const result = await getDocumentById({
@@ -76,8 +79,8 @@ describe('getDocumentById', () => {
 
     it('omits the frozen tier exclusion when frozen tier indices are included', async () => {
       const esClient = {
-        search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
-        get: jest.fn(),
+        search: vi.fn().mockResolvedValue({ hits: { hits: [] } }),
+        get: vi.fn(),
       } as unknown as ElasticsearchClient;
 
       await getDocumentById({
@@ -87,7 +90,7 @@ describe('getDocumentById', () => {
         esClient,
       });
 
-      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const searchCall = (esClient.search as Mock).mock.calls[0][0];
       expect(searchCall.query.bool).not.toHaveProperty('must_not');
     });
   });
@@ -95,8 +98,8 @@ describe('getDocumentById', () => {
   describe('local targets', () => {
     it('uses _get API for a local index', async () => {
       const esClient = {
-        search: jest.fn(),
-        get: jest.fn().mockResolvedValue({
+        search: vi.fn(),
+        get: vi.fn().mockResolvedValue({
           body: {
             _id: 'doc-456',
             _index: 'my-local-index',
@@ -129,8 +132,8 @@ describe('getDocumentById', () => {
 
     it('returns not found when _get returns 404 for a local index', async () => {
       const esClient = {
-        search: jest.fn(),
-        get: jest.fn().mockResolvedValue({
+        search: vi.fn(),
+        get: vi.fn().mockResolvedValue({
           body: {},
           statusCode: 404,
         }),

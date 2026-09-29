@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -17,9 +20,9 @@ import {
 import { RelatedCases } from './related_cases';
 import { useFetchRelatedCases } from '../hooks/use_fetch_related_cases';
 
-jest.mock('../hooks/use_fetch_related_cases');
+vi.mock('../hooks/use_fetch_related_cases');
 
-const mockOnShowCorrelationsDetails = jest.fn();
+const mockOnShowCorrelationsDetails = vi.fn();
 
 const eventId = 'eventId';
 
@@ -36,11 +39,11 @@ const renderRelatedCases = () =>
 
 describe('<RelatedCases />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render single related case correctly', () => {
-    (useFetchRelatedCases as jest.Mock).mockReturnValue({
+    (useFetchRelatedCases as Mock).mockReturnValue({
       loading: false,
       error: false,
       dataCount: 1,
@@ -52,7 +55,7 @@ describe('<RelatedCases />', () => {
   });
 
   it('should render multiple related cases correctly', () => {
-    (useFetchRelatedCases as jest.Mock).mockReturnValue({
+    (useFetchRelatedCases as Mock).mockReturnValue({
       loading: false,
       error: false,
       dataCount: 2,
@@ -64,7 +67,7 @@ describe('<RelatedCases />', () => {
   });
 
   it('should render loading skeleton', () => {
-    (useFetchRelatedCases as jest.Mock).mockReturnValue({
+    (useFetchRelatedCases as Mock).mockReturnValue({
       loading: true,
     });
 
@@ -73,7 +76,7 @@ describe('<RelatedCases />', () => {
   });
 
   it('should render null if error', () => {
-    (useFetchRelatedCases as jest.Mock).mockReturnValue({
+    (useFetchRelatedCases as Mock).mockReturnValue({
       loading: false,
       error: true,
     });
@@ -83,7 +86,7 @@ describe('<RelatedCases />', () => {
   });
 
   it('should open the expanded section to the correct tab when the number is clicked', () => {
-    (useFetchRelatedCases as jest.Mock).mockReturnValue({
+    (useFetchRelatedCases as Mock).mockReturnValue({
       loading: false,
       error: false,
       dataCount: 1,

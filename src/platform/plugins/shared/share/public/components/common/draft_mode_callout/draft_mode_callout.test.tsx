@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { DraftModeCallout } from './draft_mode_callout';
@@ -33,18 +35,18 @@ describe('DraftModeCallout', () => {
 
   describe('Save button case', () => {
     it('renders a save button when onSave is present', () => {
-      render(<DraftModeCallout saveButtonProps={{ onSave: jest.fn() }} />);
+      render(<DraftModeCallout saveButtonProps={{ onSave: vi.fn() }} />);
       const saveButton = screen.getByRole('button', { name: 'Save changes' });
       expect(saveButton).toBeInTheDocument();
     });
     it('renders a loading state when isSaving is true', () => {
-      render(<DraftModeCallout saveButtonProps={{ onSave: jest.fn(), isSaving: true }} />);
+      render(<DraftModeCallout saveButtonProps={{ onSave: vi.fn(), isSaving: true }} />);
       const saveButton = screen.getByRole('button', { name: 'Save changes' });
       expect(saveButton).toBeDisabled();
     });
     it('renders a custom label when a label is provided', () => {
       const customLabel = 'Custom label';
-      render(<DraftModeCallout saveButtonProps={{ onSave: jest.fn(), label: customLabel }} />);
+      render(<DraftModeCallout saveButtonProps={{ onSave: vi.fn(), label: customLabel }} />);
       const saveButton = screen.getByRole('button', { name: customLabel });
       expect(saveButton).toBeInTheDocument();
     });

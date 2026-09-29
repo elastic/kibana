@@ -5,19 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { AIConnector } from '@kbn/inference-connectors';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { useGenAIConnectors } from './use_genai_connectors';
 import { useKibana } from './use_kibana';
 
-jest.mock('./use_kibana');
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn(),
-}));
+vi.mock('./use_kibana');
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseLoadConnectors = useLoadConnectors as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseLoadConnectors = useLoadConnectors as Mock;
 
 const mockAIConnectors: AIConnector[] = [
   {
@@ -56,7 +62,7 @@ describe('useGenAIConnectors', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return connectors and set hasConnectors to true when connectors exist', () => {
@@ -64,7 +70,7 @@ describe('useGenAIConnectors', () => {
       data: mockAIConnectors,
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { result } = renderHook(() => useGenAIConnectors());
@@ -81,7 +87,7 @@ describe('useGenAIConnectors', () => {
       data: [],
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { result } = renderHook(() => useGenAIConnectors());
@@ -95,7 +101,7 @@ describe('useGenAIConnectors', () => {
       data: undefined,
       isLoading: true,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { result } = renderHook(() => useGenAIConnectors());
@@ -110,7 +116,7 @@ describe('useGenAIConnectors', () => {
       data: [],
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderHook(() => useGenAIConnectors());

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -53,8 +56,8 @@ describe('Cases Ui Plugin', () => {
   let plugin: CasesUiPlugin;
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
-  let pluginsSetup: jest.Mocked<CasesPublicSetupDependencies>;
-  let pluginsStart: jest.Mocked<CasesPublicStartDependencies>;
+  let pluginsSetup: Mocked<CasesPublicSetupDependencies>;
+  let pluginsStart: Mocked<CasesPublicStartDependencies>;
 
   beforeEach(() => {
     context = coreMock.createPluginInitializerContext(getConfig());
@@ -64,8 +67,8 @@ describe('Cases Ui Plugin', () => {
 
     pluginsSetup = {
       files: {
-        filesClientFactory: { asScoped: jest.fn(), asUnscoped: jest.fn() },
-        registerFileKind: jest.fn(),
+        filesClientFactory: { asScoped: vi.fn(), asUnscoped: vi.fn() },
+        registerFileKind: vi.fn(),
       },
       security: securityMock.createSetup(),
       management: managementPluginMock.createSetupContract(),
@@ -76,14 +79,14 @@ describe('Cases Ui Plugin', () => {
       licensing: licensingMock.createStart(),
       uiActions: uiActionsPluginMock.createStartContract(),
       files: {
-        filesClientFactory: { asScoped: jest.fn(), asUnscoped: jest.fn() },
-        getAllFindKindDefinitions: jest.fn(),
-        getFileKindDefinition: jest.fn(),
+        filesClientFactory: { asScoped: vi.fn(), asUnscoped: vi.fn() },
+        getAllFindKindDefinitions: vi.fn(),
+        getFileKindDefinition: vi.fn(),
       },
       features: featuresPluginMock.createStart(),
       security: securityMock.createStart(),
       dashboard: {
-        findDashboardsService: jest.fn(),
+        findDashboardsService: vi.fn(),
       } as unknown as CasesPublicStartDependencies['dashboard'],
       data: dataPluginMock.createStartContract(),
       embeddable: embeddablePluginMock.createStartContract(),
@@ -92,11 +95,11 @@ describe('Cases Ui Plugin', () => {
         Map: () => null,
         PassiveMap: () => null,
         createLayerDescriptors: {
-          createSecurityLayerDescriptors: jest.fn(),
-          createBasemapLayerDescriptor: jest.fn(),
-          createESSearchSourceLayerDescriptor: jest.fn(),
+          createSecurityLayerDescriptors: vi.fn(),
+          createBasemapLayerDescriptor: vi.fn(),
+          createESSearchSourceLayerDescriptor: vi.fn(),
         },
-        suggestEMSTermJoinConfig: jest.fn(),
+        suggestEMSTermJoinConfig: vi.fn(),
       },
       contentManagement: contentManagementMock.createStartContract(),
       storage: {
@@ -106,10 +109,10 @@ describe('Cases Ui Plugin', () => {
           removeItem: mockStorage.removeItem,
           clear: mockStorage.clear,
         },
-        get: jest.fn(),
-        set: jest.fn(),
-        clear: jest.fn(),
-        remove: jest.fn(),
+        get: vi.fn(),
+        set: vi.fn(),
+        clear: vi.fn(),
+        remove: vi.fn(),
       },
       triggersActionsUi: triggersActionsUiMock.createStart(),
       fieldFormats: fieldFormatsMock,

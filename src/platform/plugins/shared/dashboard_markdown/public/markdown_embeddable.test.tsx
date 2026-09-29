@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,10 +20,10 @@ import type { MarkdownEditorApi } from './types';
 import type { MarkdownEmbeddableState } from '../server/embeddable/schemas';
 import { markdownEmbeddableSchema } from '../server/embeddable/schemas';
 
-jest.mock('./markdown_client/markdown_client', () => {
+vi.mock('./markdown_client/markdown_client', () => {
   return {
     markdownClient: {
-      get: jest.fn(() => {
+      get: vi.fn(() => {
         return Promise.resolve({
           data: {
             title: 'Markdown from library',
@@ -33,8 +35,8 @@ jest.mock('./markdown_client/markdown_client', () => {
           },
         });
       }),
-      create: jest.fn().mockResolvedValue({ id: 'markdown-id-123' }),
-      update: jest.fn().mockResolvedValue({ id: 'markdown-id-123' }),
+      create: vi.fn().mockResolvedValue({ id: 'markdown-id-123' }),
+      update: vi.fn().mockResolvedValue({ id: 'markdown-id-123' }),
     },
   };
 });
@@ -57,11 +59,11 @@ const renderEmbeddable = async (
     return lastSavedState ?? getInitialState();
   }
   const parentApiStub = {
-    replacePanel: jest.fn(),
+    replacePanel: vi.fn(),
     children$: new BehaviorSubject([]),
-    removePanel: jest.fn(),
-    setFocusedPanelId: jest.fn(),
-    addNewPanel: jest.fn(),
+    removePanel: vi.fn(),
+    setFocusedPanelId: vi.fn(),
+    addNewPanel: vi.fn(),
     viewMode$: new BehaviorSubject<ViewMode>('view'),
     lastSavedStateForChild$: () => of(getLastSavedState()),
     getLastSavedStateForChild: getLastSavedState,
@@ -70,7 +72,7 @@ const renderEmbeddable = async (
   const factory = markdownEmbeddableFactory;
 
   const embeddable = await factory.buildEmbeddable({
-    initializeDrilldownsManager: jest.fn(),
+    initializeDrilldownsManager: vi.fn(),
     initialState: getInitialState(),
     parentApi: parentApiStub,
     finalizeApi: (api) =>
@@ -92,7 +94,7 @@ const renderEmbeddable = async (
 
 describe('MarkdownEmbeddable', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders markdown content as HTML', async () => {
@@ -342,34 +344,42 @@ describe('MarkdownEmbeddable', () => {
 
   describe('anyStateChange$', () => {
     let embeddableApi: MarkdownEditorApi;
-    beforeEach((done) => {
-      renderEmbeddable(
-        markdownEmbeddableSchema.parse({
-          content: 'hello',
-          settings: {},
-        })
-      )
-        .then(({ embeddable }) => {
-          embeddableApi = embeddable.api;
-          done();
-        })
-        .catch(done);
-    });
+    beforeEach(() =>
+    new Promise<void>((resolve, reject) => {
+    const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-    test('should not emit on subscribe and emit when any state changes', (done) => {
-      embeddableApi.anyStateChange$.subscribe(() => {
-        try {
-          const { title } = embeddableApi.serializeState();
-          expect(title).toBe('cute puppies');
-        } catch (error) {
-          // title assertion fails when
-          // anyStateChange$ emits on subscribe
-          done(error);
-          return;
-        }
-        done();
-      });
-      embeddableApi.setTitle('cute puppies');
-    });
+          renderEmbeddable(
+            markdownEmbeddableSchema.parse({
+              content: 'hello',
+              settings: {},
+            })
+          )
+            .then(({ embeddable }) => {
+              embeddableApi = embeddable.api;
+              done();
+            })
+            .catch(done);
+        
+    }));
+
+    test('should not emit on subscribe and emit when any state changes', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              embeddableApi.anyStateChange$.subscribe(() => {
+                try {
+                  const { title } = embeddableApi.serializeState();
+                  expect(title).toBe('cute puppies');
+                } catch (error) {
+                  // title assertion fails when
+                  // anyStateChange$ emits on subscribe
+                  done(error);
+                  return;
+                }
+                done();
+              });
+              embeddableApi.setTitle('cute puppies');
+            
+        }));
   });
 });

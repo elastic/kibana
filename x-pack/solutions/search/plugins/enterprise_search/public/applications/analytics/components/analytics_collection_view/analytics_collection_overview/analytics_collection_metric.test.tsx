@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { screen } from '@testing-library/react';
@@ -15,12 +17,12 @@ import { AnalyticsCollectionViewMetric } from './analytics_collection_metric';
 
 const mockProps = {
   dataViewQuery: 'test',
-  getFormula: jest.fn(),
+  getFormula: vi.fn(),
   isLoading: false,
   isSelected: false,
   metric: 100,
   name: 'Test metric',
-  onClick: jest.fn(),
+  onClick: vi.fn(),
   secondaryMetric: 50,
 };
 

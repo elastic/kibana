@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -30,7 +33,7 @@ import type { MetricsSourceConfigurationProperties } from '../../../../../common
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 import type { ResolvedDataView } from '../../../../utils/data_view';
 
-const mockedFetch = jest.fn();
+const mockedFetch = vi.fn();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,20 +51,23 @@ const mockDataView = {
   isPersisted: () => false,
   getName: () => 'mock-data-view',
   toSpec: () => ({}),
-} as jest.Mocked<DataView>;
+} as Mocked<DataView>;
 
-jest.mock('../../../../containers/metrics_source', () => ({
-  useMetricsDataViewContext: () => ({
-    metricsView: {
-      indices: 'metricbeat-*',
-      timeFieldName: mockDataView.timeFieldName,
-      fields: mockDataView.fields,
-      dataViewReference: mockDataView,
-    } as ResolvedDataView,
-    loading: false,
-    error: undefined,
-  }),
-}));
+vi.mock('../../../../containers/metrics_source', () => {
+      const mocked = {
+      useMetricsDataViewContext: () => ({
+        metricsView: {
+          indices: 'metricbeat-*',
+          timeFieldName: mockDataView.timeFieldName,
+          fields: mockDataView.fields,
+          dataViewReference: mockDataView,
+        } as ResolvedDataView,
+        loading: false,
+        error: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderUseMetricsExplorerDataHook = () => {
   const wrapper: FC<PropsWithChildren<any>> = ({ children }) => {
@@ -99,7 +105,7 @@ const renderUseMetricsExplorerDataHook = () => {
   );
 };
 
-jest.mock('../../../../utils/kuery', () => {
+vi.mock('../../../../utils/kuery', () => {
   return {
     convertKueryToElasticSearchQuery: (query: string) => query,
   };

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ConversationResponse, Message } from '@kbn/elastic-assistant-common';
 import type {
@@ -26,23 +29,29 @@ import {
 import { transformESToConversations } from './transforms';
 import { getUpdateScript } from './helpers';
 
-jest.mock('./transforms', () => ({
-  transformESToConversations: jest.fn(),
-}));
+vi.mock('./transforms', () => {
+      const mocked = {
+      transformESToConversations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers', () => ({
-  getUpdateScript: jest.fn(),
-}));
+vi.mock('./helpers', () => {
+      const mocked = {
+      getUpdateScript: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockUser = authenticatedUser;
 
 // Reusable mock helpers to keep tests DRY
-const createMockDataWriter = (): jest.Mocked<DocumentsDataWriter> =>
+const createMockDataWriter = (): Mocked<DocumentsDataWriter> =>
   ({
-    bulk: jest.fn(),
-    getFilterByUser: jest.fn(),
-    getFilterByConversationUser: jest.fn(),
-  } as unknown as jest.Mocked<DocumentsDataWriter>);
+    bulk: vi.fn(),
+    getFilterByUser: vi.fn(),
+    getFilterByConversationUser: vi.fn(),
+  } as unknown as Mocked<DocumentsDataWriter>);
 // Use existing mocks to keep tests DRY
 const createMockConversation = (
   overrides?: Partial<ConversationResponse>
@@ -92,7 +101,7 @@ const createErrorBulkResponse = (): WriterBulkResponse<EsConversationSchema> => 
 
 describe('appendConversationMessages', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let dataWriter: jest.Mocked<DocumentsDataWriter>;
+  let dataWriter: Mocked<DocumentsDataWriter>;
   let existingConversation: ConversationResponse;
   let newMessages: Message[];
 
@@ -103,7 +112,7 @@ describe('appendConversationMessages', () => {
     const expectedConversation = createMockConversation();
 
     dataWriter.bulk.mockResolvedValue(bulkResponse);
-    (transformESToConversations as jest.Mock).mockReturnValue([expectedConversation]);
+    (transformESToConversations as Mock).mockReturnValue([expectedConversation]);
 
     return { mockEsConversation, bulkResponse, expectedConversation };
   };
@@ -143,7 +152,7 @@ describe('appendConversationMessages', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggingSystemMock.createLogger();
     dataWriter = createMockDataWriter();
     existingConversation = createMockConversation();
@@ -151,16 +160,16 @@ describe('appendConversationMessages', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2024-01-01T01:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T01:00:00.000Z'));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns updated conversation when bulk operation succeeds', async () => {
@@ -169,7 +178,7 @@ describe('appendConversationMessages', () => {
       messages: [...existingConversation.messages!, ...newMessages],
       updatedAt: '2024-01-01T01:00:00.000Z',
     });
-    (transformESToConversations as jest.Mock).mockReturnValue([expectedResult]);
+    (transformESToConversations as Mock).mockReturnValue([expectedResult]);
 
     const result = await callAppendConversationMessages();
 
@@ -178,7 +187,7 @@ describe('appendConversationMessages', () => {
 
   it('calls dataWriter.bulk with correct parameters', async () => {
     setupSuccessfulTest();
-    (getUpdateScript as jest.Mock).mockReturnValue({ script: { source: 'test' } });
+    (getUpdateScript as Mock).mockReturnValue({ script: { source: 'test' } });
 
     await callAppendConversationMessages();
 
@@ -243,7 +252,7 @@ describe('appendConversationMessages', () => {
     const expectedConversation = createMockConversation();
 
     dataWriter.bulk.mockResolvedValue(bulkResponse);
-    (transformESToConversations as jest.Mock).mockReturnValue([expectedConversation]);
+    (transformESToConversations as Mock).mockReturnValue([expectedConversation]);
 
     await appendConversationMessages({
       dataWriter,

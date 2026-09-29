@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -19,7 +21,7 @@ const defaultProps = {
 
 describe('PipelineIndicator', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the pipeline indicator', () => {

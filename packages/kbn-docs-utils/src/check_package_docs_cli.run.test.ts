@@ -7,35 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import apm from 'elastic-apm-node';
 import { runCheckPackageDocs } from './check_package_docs_cli';
 import { parseCliFlags, setupProject, buildApiMap, collectStats, reportMetrics } from './cli';
 
-jest.mock('elastic-apm-node', () => {
+vi.mock('elastic-apm-node', () => {
   const tx = {
-    startSpan: jest.fn(),
-    end: jest.fn(),
-    setOutcome: jest.fn(),
+    startSpan: vi.fn(),
+    end: vi.fn(),
+    setOutcome: vi.fn(),
   };
   return {
-    startTransaction: jest.fn(() => tx),
-    isStarted: jest.fn(() => false),
-    flush: jest.fn(),
+    startTransaction: vi.fn(() => tx),
+    isStarted: vi.fn(() => false),
+    flush: vi.fn(),
     __tx: tx,
   };
 });
 
-jest.mock('@kbn/apm-config-loader', () => ({
-  initApm: jest.fn(),
-}));
+vi.mock('@kbn/apm-config-loader', () => {
+      const mocked = {
+      initApm: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./cli', () => ({
-  parseCliFlags: jest.fn(),
-  setupProject: jest.fn(),
-  buildApiMap: jest.fn(),
-  collectStats: jest.fn(),
-  reportMetrics: jest.fn(),
-}));
+vi.mock('./cli', () => {
+      const mocked = {
+      parseCliFlags: vi.fn(),
+      setupProject: vi.fn(),
+      buildApiMap: vi.fn(),
+      collectStats: vi.fn(),
+      reportMetrics: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockTx = (apm as any).__tx;
 
@@ -46,24 +55,24 @@ const plugin = {
 };
 
 describe('runCheckPackageDocs', () => {
-  const log = { info: jest.fn(), warning: jest.fn(), error: jest.fn() };
+  const log = { info: vi.fn(), warning: vi.fn(), error: vi.fn() };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     process.exitCode = undefined;
   });
 
   it('sets exitCode when validation fails', async () => {
-    (parseCliFlags as jest.Mock).mockReturnValue({ stats: ['any'], pluginFilter: ['plugin-a'] });
-    (setupProject as jest.Mock).mockResolvedValue({ plugins: [plugin], project: {} });
-    (buildApiMap as jest.Mock).mockReturnValue({
+    (parseCliFlags as Mock).mockReturnValue({ stats: ['any'], pluginFilter: ['plugin-a'] });
+    (setupProject as Mock).mockResolvedValue({ plugins: [plugin], project: {} });
+    (buildApiMap as Mock).mockReturnValue({
       pluginApiMap: { 'plugin-a': { id: 'plugin-a', client: [], server: [], common: [] } },
       missingApiItems: { 'plugin-a': { 'src/path.ts': ['ref'] } },
       referencedDeprecations: {},
       unreferencedDeprecations: {},
       adoptionTrackedAPIs: {},
     });
-    (collectStats as jest.Mock).mockResolvedValue({
+    (collectStats as Mock).mockResolvedValue({
       'plugin-a': {
         missingComments: [],
         isAnyType: [{ id: 'x' }],
@@ -96,16 +105,16 @@ describe('runCheckPackageDocs', () => {
   });
 
   it('passes when there are no validation issues', async () => {
-    (parseCliFlags as jest.Mock).mockReturnValue({ stats: ['any'], pluginFilter: ['plugin-a'] });
-    (setupProject as jest.Mock).mockResolvedValue({ plugins: [plugin], project: {} });
-    (buildApiMap as jest.Mock).mockReturnValue({
+    (parseCliFlags as Mock).mockReturnValue({ stats: ['any'], pluginFilter: ['plugin-a'] });
+    (setupProject as Mock).mockResolvedValue({ plugins: [plugin], project: {} });
+    (buildApiMap as Mock).mockReturnValue({
       pluginApiMap: { 'plugin-a': { id: 'plugin-a', client: [], server: [], common: [] } },
       missingApiItems: {},
       referencedDeprecations: {},
       unreferencedDeprecations: {},
       adoptionTrackedAPIs: {},
     });
-    (collectStats as jest.Mock).mockResolvedValue({
+    (collectStats as Mock).mockResolvedValue({
       'plugin-a': {
         missingComments: [],
         isAnyType: [],

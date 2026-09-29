@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 import { decisionTreePrepareStepDefinition } from './decision_tree_prepare';
 
-jest.mock('../decision_trees/register_decision_trees', () => ({
-  prepareReinforcementTurn: jest.fn().mockResolvedValue({ message: 'turn prompt', treeCount: 1 }),
-}));
+vi.mock('../decision_trees/register_decision_trees', () => {
+      const mocked = {
+      prepareReinforcementTurn: vi.fn().mockResolvedValue({ message: 'turn prompt', treeCount: 1 }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('decisionTreePrepareStepDefinition', () => {
   const logger = loggerMock.create();
@@ -22,11 +27,11 @@ describe('decisionTreePrepareStepDefinition', () => {
       input,
       rawInput: input,
       contextManager: {
-        getContext: jest.fn().mockReturnValue({ workflow: { spaceId: 'space-1' } }),
-        getFakeRequest: jest.fn(),
-        getScopedEsClient: jest.fn().mockReturnValue({}),
-        renderInputTemplate: jest.fn((val) => val),
-        callKibanaApi: jest.fn(),
+        getContext: vi.fn().mockReturnValue({ workflow: { spaceId: 'space-1' } }),
+        getFakeRequest: vi.fn(),
+        getScopedEsClient: vi.fn().mockReturnValue({}),
+        renderInputTemplate: vi.fn((val) => val),
+        callKibanaApi: vi.fn(),
       },
       logger,
       abortSignal: new AbortController().signal,
@@ -41,7 +46,7 @@ describe('decisionTreePrepareStepDefinition', () => {
     }).handler(createContext(input));
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('skips a round with no agent_id rather than trusting it', async () => {

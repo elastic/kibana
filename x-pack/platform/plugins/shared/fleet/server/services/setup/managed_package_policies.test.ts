@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { packagePolicyService } from '../package_policy';
@@ -15,36 +18,36 @@ import {
   setupUpgradeManagedPackagePolicies,
 } from './managed_package_policies';
 
-jest.mock('../package_policy');
-jest.mock('../epm/packages');
-jest.mock('../epm/packages/deprecation_helpers');
-jest.mock('../app_context', () => {
+vi.mock('../package_policy');
+vi.mock('../epm/packages');
+vi.mock('../epm/packages/deprecation_helpers');
+vi.mock('../app_context', async () => {
   return {
-    ...jest.requireActual('../app_context'),
+    ...(await vi.importActual('../app_context')),
     appContextService: {
-      getLogger: jest.fn(() => {
-        return { error: jest.fn(), debug: jest.fn(), warn: jest.fn(), info: jest.fn() };
+      getLogger: vi.fn(() => {
+        return { error: vi.fn(), debug: vi.fn(), warn: vi.fn(), info: vi.fn() };
       }),
-      getConfig: jest.fn(() => ({})),
-      getTaskManagerStart: jest.fn(() => ({
-        ensureScheduled: jest.fn(),
+      getConfig: vi.fn(() => ({})),
+      getTaskManagerStart: vi.fn(() => ({
+        ensureScheduled: vi.fn(),
       })),
     },
   };
 });
-jest.mock('../audit_logging');
+vi.mock('../audit_logging');
 
 describe('upgradeManagedPackagePolicies', () => {
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(packagePolicyService.fetchAllItems).mockReset();
+    vi.clearAllMocks();
+    vi.mocked(packagePolicyService.fetchAllItems).mockReset();
   });
 
   it('should not upgrade policies for installed package', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const soClient = savedObjectsClientMock.create();
 
-    (getInstallation as jest.Mock).mockResolvedValueOnce(undefined);
+    (getInstallation as Mock).mockResolvedValueOnce(undefined);
 
     await upgradeManagedPackagePolicies(soClient, esClient, 'testpkg');
 
@@ -70,19 +73,19 @@ describe('upgradeManagedPackagePolicies', () => {
       },
     };
 
-    (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
+    (packagePolicyService.fetchAllItems as Mock).mockResolvedValueOnce(
       (async function* () {
         yield [packagePolicy];
       })()
     );
 
-    (packagePolicyService.getUpgradeDryRunDiff as jest.Mock).mockResolvedValueOnce({
+    (packagePolicyService.getUpgradeDryRunDiff as Mock).mockResolvedValueOnce({
       name: 'non-managed-package-policy',
       diff: [{ id: 'foo' }, { id: 'bar' }],
       hasErrors: false,
     });
 
-    (getInstallation as jest.Mock).mockResolvedValueOnce({
+    (getInstallation as Mock).mockResolvedValueOnce({
       id: 'test-installation',
       version: '1.0.0',
       keep_policies_up_to_date: true,
@@ -107,7 +110,7 @@ describe('upgradeManagedPackagePolicies', () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const soClient = savedObjectsClientMock.create();
 
-    (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
+    (packagePolicyService.fetchAllItems as Mock).mockResolvedValueOnce(
       (async function* () {
         yield [
           {
@@ -129,7 +132,7 @@ describe('upgradeManagedPackagePolicies', () => {
       })()
     );
 
-    (getInstallation as jest.Mock).mockResolvedValueOnce({
+    (getInstallation as Mock).mockResolvedValueOnce({
       id: 'test-installation',
       version: '1.0.0',
       keep_policies_up_to_date: true,
@@ -146,7 +149,7 @@ describe('upgradeManagedPackagePolicies', () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = savedObjectsClientMock.create();
 
-      (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
+      (packagePolicyService.fetchAllItems as Mock).mockResolvedValueOnce(
         (async function* () {
           yield [
             {
@@ -168,7 +171,7 @@ describe('upgradeManagedPackagePolicies', () => {
         })()
       );
 
-      (packagePolicyService.getUpgradeDryRunDiff as jest.Mock).mockResolvedValueOnce({
+      (packagePolicyService.getUpgradeDryRunDiff as Mock).mockResolvedValueOnce({
         name: 'conflicting-package-policy',
         diff: [
           { id: 'foo' },
@@ -177,7 +180,7 @@ describe('upgradeManagedPackagePolicies', () => {
         hasErrors: true,
       });
 
-      (getInstallation as jest.Mock).mockResolvedValueOnce({
+      (getInstallation as Mock).mockResolvedValueOnce({
         id: 'test-installation',
         version: '1.0.0',
         keep_policies_up_to_date: true,
@@ -216,17 +219,17 @@ describe('upgradeManagedPackagePolicies', () => {
   });
 });
 
-describe('setupUpgradeManagedPackagePolicies', () => {
-  const { hasNewDeprecations } = jest.requireMock('../epm/packages/deprecation_helpers');
+describe('setupUpgradeManagedPackagePolicies', async () => {
+  const { hasNewDeprecations } = (await vi.importMock('../epm/packages/deprecation_helpers'));
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should block policy upgrade for non-autoUpgrade package with new deprecations', async () => {
     const soClient = savedObjectsClientMock.create();
 
-    (getInstallations as jest.Mock).mockResolvedValueOnce({
+    (getInstallations as Mock).mockResolvedValueOnce({
       saved_objects: [
         {
           id: 'custom-pkg',
@@ -240,7 +243,7 @@ describe('setupUpgradeManagedPackagePolicies', () => {
       ],
     });
 
-    (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
+    (packagePolicyService.fetchAllItems as Mock).mockResolvedValueOnce(
       (async function* () {
         yield [
           {
@@ -251,7 +254,7 @@ describe('setupUpgradeManagedPackagePolicies', () => {
       })()
     );
 
-    (getPackageInfo as jest.Mock).mockImplementation(({ pkgVersion }: { pkgVersion: string }) =>
+    (getPackageInfo as Mock).mockImplementation(({ pkgVersion }: { pkgVersion: string }) =>
       Promise.resolve({ name: 'custom_package', version: pkgVersion })
     );
 
@@ -274,7 +277,7 @@ describe('setupUpgradeManagedPackagePolicies', () => {
   it('should skip if pending_upgrade_review.action is declined for this version', async () => {
     const soClient = savedObjectsClientMock.create();
 
-    (getInstallations as jest.Mock).mockResolvedValueOnce({
+    (getInstallations as Mock).mockResolvedValueOnce({
       saved_objects: [
         {
           id: 'custom-pkg',
@@ -294,7 +297,7 @@ describe('setupUpgradeManagedPackagePolicies', () => {
       ],
     });
 
-    (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
+    (packagePolicyService.fetchAllItems as Mock).mockResolvedValueOnce(
       (async function* () {
         yield [
           {
@@ -313,7 +316,7 @@ describe('setupUpgradeManagedPackagePolicies', () => {
   it('should block upgrade when pending_upgrade_review.action is pending (re-enabled)', async () => {
     const soClient = savedObjectsClientMock.create();
 
-    (getInstallations as jest.Mock).mockResolvedValueOnce({
+    (getInstallations as Mock).mockResolvedValueOnce({
       saved_objects: [
         {
           id: 'custom-pkg',
@@ -333,7 +336,7 @@ describe('setupUpgradeManagedPackagePolicies', () => {
       ],
     });
 
-    (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
+    (packagePolicyService.fetchAllItems as Mock).mockResolvedValueOnce(
       (async function* () {
         yield [
           {
@@ -353,7 +356,7 @@ describe('setupUpgradeManagedPackagePolicies', () => {
   it('should proceed with upgrade if pending_upgrade_review.action is accepted', async () => {
     const soClient = savedObjectsClientMock.create();
 
-    (getInstallations as jest.Mock).mockResolvedValueOnce({
+    (getInstallations as Mock).mockResolvedValueOnce({
       saved_objects: [
         {
           id: 'custom-pkg',
@@ -373,7 +376,7 @@ describe('setupUpgradeManagedPackagePolicies', () => {
       ],
     });
 
-    (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
+    (packagePolicyService.fetchAllItems as Mock).mockResolvedValueOnce(
       (async function* () {
         yield [
           {
@@ -392,7 +395,7 @@ describe('setupUpgradeManagedPackagePolicies', () => {
   it('should not gate autoUpgradePoliciesPackages even with deprecations', async () => {
     const soClient = savedObjectsClientMock.create();
 
-    (getInstallations as jest.Mock).mockResolvedValueOnce({
+    (getInstallations as Mock).mockResolvedValueOnce({
       saved_objects: [
         {
           id: 'apm-pkg',
@@ -406,7 +409,7 @@ describe('setupUpgradeManagedPackagePolicies', () => {
       ],
     });
 
-    (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
+    (packagePolicyService.fetchAllItems as Mock).mockResolvedValueOnce(
       (async function* () {
         yield [
           {

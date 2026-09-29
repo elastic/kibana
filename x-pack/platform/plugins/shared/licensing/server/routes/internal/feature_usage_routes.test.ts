@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import type { FeatureUsageServiceSetup } from '../../services';
 import { registerNotifyFeatureUsageRoute } from './notify_feature_usage';
@@ -50,7 +52,7 @@ describe('licensing feature usage route maxLength bounds', () => {
       registerRegisterFeatureRoute(
         router as any,
         {
-          register: jest.fn(),
+          register: vi.fn(),
         } as unknown as FeatureUsageServiceSetup
       );
       const [routeDefinition] = router.post.mock.calls[0];

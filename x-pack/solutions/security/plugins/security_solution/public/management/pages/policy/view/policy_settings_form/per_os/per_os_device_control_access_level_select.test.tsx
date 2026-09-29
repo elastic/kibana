@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
@@ -15,7 +17,7 @@ import type { PerOsDeviceControlAccessLevelSelectProps } from './per_os_device_c
 import { PerOsDeviceControlAccessLevelSelect } from './per_os_device_control_access_level_select';
 import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 describe('PerOsDeviceControlAccessLevelSelect', () => {
   const testSubj = 'deviceControlAccessLevelSelect';
   let props: PerOsDeviceControlAccessLevelSelectProps;
@@ -28,7 +30,7 @@ describe('PerOsDeviceControlAccessLevelSelect', () => {
     const mockedContext = createAppRootMockRenderer();
     props = {
       accessLevel: DeviceControlAccessLevel.audit,
-      onAccessLevelChange: jest.fn(),
+      onAccessLevelChange: vi.fn(),
       'data-test-subj': testSubj,
     };
     render = (overrides = {}) =>
@@ -108,7 +110,7 @@ describe('PerOsDeviceControlAccessLevelSelect', () => {
     const result = renderer.render(
       <PerOsDeviceControlAccessLevelSelect
         accessLevel={DeviceControlAccessLevel.deny_all}
-        onAccessLevelChange={jest.fn()}
+        onAccessLevelChange={vi.fn()}
         data-test-subj={testSubj}
       />
     );
@@ -120,7 +122,7 @@ describe('PerOsDeviceControlAccessLevelSelect', () => {
     result.rerender(
       <PerOsDeviceControlAccessLevelSelect
         accessLevel={DeviceControlAccessLevel.audit}
-        onAccessLevelChange={jest.fn()}
+        onAccessLevelChange={vi.fn()}
         data-test-subj={testSubj}
       />
     );

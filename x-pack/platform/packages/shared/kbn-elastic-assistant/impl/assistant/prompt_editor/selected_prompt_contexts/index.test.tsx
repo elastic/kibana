@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -21,7 +23,7 @@ const defaultProps: Props = {
     [mockEventPromptContext.id]: mockEventPromptContext,
   },
   selectedPromptContexts: {},
-  setSelectedPromptContexts: jest.fn(),
+  setSelectedPromptContexts: vi.fn(),
   currentReplacements: {},
 };
 
@@ -38,7 +40,7 @@ const mockSelectedEventPromptContext: SelectedPromptContext = {
 };
 
 describe('SelectedPromptContexts', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('it does NOT render the selected prompt contexts when promptContexts is empty', async () => {
     render(
@@ -72,7 +74,7 @@ describe('SelectedPromptContexts', () => {
   });
 
   it('removes a prompt context when the remove button is clicked', async () => {
-    const setSelectedPromptContexts = jest.fn();
+    const setSelectedPromptContexts = vi.fn();
     const promptContextId = mockAlertPromptContext.id;
     const selectedPromptContexts = {
       [mockAlertPromptContext.id]: mockSelectedAlertPromptContext,

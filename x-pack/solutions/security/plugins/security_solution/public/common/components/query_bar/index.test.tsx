@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import React from 'react';
 import { waitFor, render, fireEvent, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -39,15 +42,15 @@ const getMockIndexPattern = (id: string = '1234') => ({
 const mockDataView = getMockIndexPattern('data-view-id');
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
 describe('QueryBar ', () => {
-  const mockClearInstanceCache = jest.fn().mockImplementation(({ id }: { id: string }) => {
+  const mockClearInstanceCache = vi.fn().mockImplementation(({ id }: { id: string }) => {
     return id;
   });
-  const mockDataViewCreate = jest.fn().mockResolvedValue(getMockIndexPattern());
+  const mockDataViewCreate = vi.fn().mockResolvedValue(getMockIndexPattern());
 
-  (useKibana as jest.Mock).mockReturnValue({
+  (useKibana as Mock).mockReturnValue({
     services: {
       data: {
         dataViews: {
@@ -57,10 +60,10 @@ describe('QueryBar ', () => {
       },
     },
   });
-  const mockOnChangeQuery = jest.fn();
-  const mockOnSubmitQuery = jest.fn();
-  const mockOnSavedQuery = jest.fn();
-  const mockOnCreateQuery = jest.fn().mockResolvedValue({
+  const mockOnChangeQuery = vi.fn();
+  const mockOnSubmitQuery = vi.fn();
+  const mockOnSavedQuery = vi.fn();
+  const mockOnCreateQuery = vi.fn().mockResolvedValue({
     attributes: {
       title: 'hello',
     },
@@ -89,11 +92,11 @@ describe('QueryBar ', () => {
       </TestProviders>
     );
   };
-  let abortSpy: jest.SpyInstance;
+  let abortSpy: MockInstance;
   beforeAll(() => {
     const mockAbort = new AbortController();
     mockAbort.abort();
-    abortSpy = jest.spyOn(window, 'AbortController').mockImplementation(() => mockAbort);
+    abortSpy = vi.spyOn(window, 'AbortController').mockImplementation(() => mockAbort);
   });
 
   afterAll(() => {

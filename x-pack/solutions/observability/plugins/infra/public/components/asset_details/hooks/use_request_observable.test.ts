@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useRequestObservable } from './use_request_observable';
 import { type RequestState, useLoadingStateContext } from './use_loading_state';
@@ -12,18 +15,18 @@ import { useDatePickerContext, type UseDateRangeProviderProps } from './use_date
 import { useReloadRequestTimeContext } from '../../../hooks/use_reload_request_time';
 import { BehaviorSubject } from 'rxjs';
 
-jest.mock('./use_loading_state');
-jest.mock('./use_date_picker');
-jest.mock('../../../hooks/use_reload_request_time');
+vi.mock('./use_loading_state');
+vi.mock('./use_date_picker');
+vi.mock('../../../hooks/use_reload_request_time');
 
-const useLoadingStateContextMock = useLoadingStateContext as jest.MockedFunction<
+const useLoadingStateContextMock = useLoadingStateContext as MockedFunction<
   typeof useLoadingStateContext
 >;
-const useDatePickerContextMock = useDatePickerContext as jest.MockedFunction<
+const useDatePickerContextMock = useDatePickerContext as MockedFunction<
   typeof useDatePickerContext
 >;
 
-const useReloadRequestTimeMock = useReloadRequestTimeContext as jest.MockedFunction<
+const useReloadRequestTimeMock = useReloadRequestTimeContext as MockedFunction<
   typeof useReloadRequestTimeContext
 >;
 
@@ -36,11 +39,11 @@ describe('useRequestObservable', () => {
 
   const requestStateMock$ = new BehaviorSubject<RequestState | null>(null);
   // needed to spy on `next` function
-  requestStateMock$.next = jest.fn();
+  requestStateMock$.next = vi.fn();
 
   const mockUseRequestTimeMock = () => {
     useReloadRequestTimeMock.mockReturnValue({
-      updateReloadRequestTime: jest.fn(() => {}),
+      updateReloadRequestTime: vi.fn(() => {}),
       reloadRequestTime: 0,
     });
   };
@@ -59,15 +62,15 @@ describe('useRequestObservable', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockDatePickerContext();
     mockUseRequestTimeMock();
     mockUseLoadingStateContextMock();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   it('should process a valid request function', async () => {
@@ -76,7 +79,7 @@ describe('useRequestObservable', () => {
     act(() => {
       result.current.request$.next(() => Promise.resolve());
 
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     await waitFor(() => expect(requestStateMock$.next).toHaveBeenCalledWith('running'));

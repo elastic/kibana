@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -21,10 +23,10 @@ import { CasesTableUtilityBar } from './utility_bar';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import { VIEW_TOGGLE_LIST_ID, VIEW_TOGGLE_TABLE_ID } from '../constants';
 
-jest.mock('../../../common/use_cases_local_storage');
+vi.mock('../../../common/use_cases_local_storage');
 
 describe('Severity form field', () => {
-  const deselectCases = jest.fn();
+  const deselectCases = vi.fn();
   const localStorageKey = 'securitySolution.cases.utilityBar.hideMaxLimitWarning';
 
   const props = {
@@ -36,15 +38,15 @@ describe('Severity form field', () => {
       pageSize: 10,
       totalItemCount: 5,
     },
-    onClearFilters: jest.fn(),
+    onClearFilters: vi.fn(),
     showClearFiltersButton: false,
     viewMode: VIEW_TOGGLE_TABLE_ID,
-    onSelectAll: jest.fn(),
+    onSelectAll: vi.fn(),
     totalOnPage: 5,
   };
 
   beforeAll(() => {
-    jest.mocked(useCasesLocalStorage).mockReturnValue([false, jest.fn()]);
+    vi.mocked(useCasesLocalStorage).mockReturnValue([false, vi.fn()]);
   });
 
   afterAll(() => {
@@ -52,7 +54,7 @@ describe('Severity form field', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders', async () => {
@@ -217,7 +219,7 @@ describe('Severity form field', () => {
   });
 
   it('calls onSelectAll when select all link is clicked', async () => {
-    const onSelectAll = jest.fn();
+    const onSelectAll = vi.fn();
 
     renderWithTestingProviders(
       <CasesTableUtilityBar
@@ -398,7 +400,7 @@ describe('Severity form field', () => {
 
     describe('do not show button', () => {
       it('should show the limit warning', async () => {
-        jest.mocked(useCasesLocalStorage).mockReturnValue([false, jest.fn()]);
+        vi.mocked(useCasesLocalStorage).mockReturnValue([false, vi.fn()]);
 
         renderWithTestingProviders(
           <CasesTableUtilityBar
@@ -414,7 +416,7 @@ describe('Severity form field', () => {
       });
 
       it('should NOT show the limit warning if it has been dismissed', async () => {
-        jest.mocked(useCasesLocalStorage).mockReturnValue([true, jest.fn()]);
+        vi.mocked(useCasesLocalStorage).mockReturnValue([true, vi.fn()]);
 
         renderWithTestingProviders(
           <CasesTableUtilityBar
@@ -429,8 +431,8 @@ describe('Severity form field', () => {
       });
 
       it('should hide warning correctly when do not show button clicked', async () => {
-        const setDoNotShowAgain = jest.fn();
-        jest.mocked(useCasesLocalStorage).mockReturnValue([false, setDoNotShowAgain]);
+        const setDoNotShowAgain = vi.fn();
+        vi.mocked(useCasesLocalStorage).mockReturnValue([false, setDoNotShowAgain]);
 
         renderWithTestingProviders(
           <CasesTableUtilityBar

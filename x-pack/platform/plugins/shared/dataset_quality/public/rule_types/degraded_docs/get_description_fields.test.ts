@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { RULE_PREBUILD_DESCRIPTION_FIELDS } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Rule, PrebuildFieldsMap } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { HttpSetup } from '@kbn/core/public';
@@ -12,13 +14,13 @@ import { getDescriptionFields } from '.';
 import type { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
 
 describe('degraded_docs getDescriptionFields', () => {
-  const mockPrebuildField = jest.fn();
+  const mockPrebuildField = vi.fn();
   const mockPrebuildFields = {
     [RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]: mockPrebuildField,
   } as unknown as PrebuildFieldsMap;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return empty array when rule is not provided', () => {

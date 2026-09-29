@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createStripAnsiSerializer } from '@kbn/jest-serializers';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
@@ -20,11 +22,11 @@ const log = new ToolingLog();
 const writer = new ToolingLogCollectingWriter();
 log.setWriters([writer]);
 
-const fetchMock = jest.spyOn(global, 'fetch');
+const fetchMock = vi.spyOn(global, 'fetch');
 
 afterEach(() => {
   writer.messages.length = 0;
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 const jsonResponse = (data: unknown) => new Response(JSON.stringify(data), { status: 200 });

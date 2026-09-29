@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -21,14 +23,14 @@ describe('OpenLensButton', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the button correctly', () => {
     const services = createStartServicesMock();
     services.lens.canUseEditor = () => true;
 
-    const navigateToPrefilledEditor = jest.fn();
+    const navigateToPrefilledEditor = vi.fn();
     services.lens.navigateToPrefilledEditor = navigateToPrefilledEditor;
 
     // @ts-expect-error: props are correct
@@ -43,7 +45,7 @@ describe('OpenLensButton', () => {
     const services = createStartServicesMock();
     services.lens.canUseEditor = () => true;
 
-    const navigateToPrefilledEditor = jest.fn();
+    const navigateToPrefilledEditor = vi.fn();
     services.lens.navigateToPrefilledEditor = navigateToPrefilledEditor;
 
     // @ts-expect-error: props are correct

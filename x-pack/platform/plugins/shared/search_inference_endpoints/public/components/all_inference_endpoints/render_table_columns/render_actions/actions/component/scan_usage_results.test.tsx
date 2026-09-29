@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { ScanUsageResults } from './scan_usage_results';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 
-jest.mock('../../../../../../hooks/use_kibana');
-const mockUseKibana = useKibana as jest.Mock;
-const mockGetUrl = jest.fn();
-const mockLocatorGet = jest.fn();
-const mockOnCheckboxChange = jest.fn();
+vi.mock('../../../../../../hooks/use_kibana');
+const mockUseKibana = useKibana as Mock;
+const mockGetUrl = vi.fn();
+const mockLocatorGet = vi.fn();
+const mockOnCheckboxChange = vi.fn();
 
 describe('ScanUsageResults', () => {
   const items = [
@@ -29,7 +32,7 @@ describe('ScanUsageResults', () => {
     },
   ];
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetUrl.mockResolvedValue('/index_management/indices');
     mockLocatorGet.mockReturnValue({ getUrl: mockGetUrl });
 
@@ -45,7 +48,7 @@ describe('ScanUsageResults', () => {
       },
     });
 
-    jest.spyOn(window, 'open').mockImplementation(() => null);
+    vi.spyOn(window, 'open').mockImplementation(() => null);
 
     render(
       <ScanUsageResults
@@ -57,7 +60,7 @@ describe('ScanUsageResults', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('renders', () => {

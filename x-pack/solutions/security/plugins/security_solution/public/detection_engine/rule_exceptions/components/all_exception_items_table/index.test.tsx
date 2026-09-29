@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { useReducer } from 'react';
 import { mount, shallow } from 'enzyme';
 import { fireEvent, render as rtlRender, waitFor } from '@testing-library/react';
@@ -28,22 +31,22 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 import type { OptInStatusMetadata } from '../../../../../server/endpoint/lib/reference_data';
 
-jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
-jest.mock('../../../../common/lib/kibana');
-jest.mock('@kbn/securitysolution-list-hooks');
-jest.mock('@kbn/securitysolution-list-api');
-jest.mock('../../logic/use_find_references');
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in');
-jest.mock('react', () => {
-  const r = jest.requireActual('react');
-  return { ...r, useReducer: jest.fn() };
+vi.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('@kbn/securitysolution-list-hooks');
+vi.mock('@kbn/securitysolution-list-api');
+vi.mock('../../logic/use_find_references');
+vi.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in');
+vi.mock('react', () => {
+  const r = require('react');
+  return { ...r, useReducer: vi.fn() };
 });
 
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as Mock;
 const mockUseGetEndpointExceptionsPerPolicyOptIn =
-  useGetEndpointExceptionsPerPolicyOptIn as jest.Mock;
-const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
+  useGetEndpointExceptionsPerPolicyOptIn as Mock;
+const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as Mock;
 
 const sampleExceptionItem = {
   _version: 'WzEwMjM4MSwxXQ==',
@@ -88,7 +91,7 @@ const getMockRule = (): Rule => ({
 
 describe('ExceptionsViewer', () => {
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         http: {},
         application: {
@@ -102,9 +105,9 @@ describe('ExceptionsViewer', () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({ data: { status: false } });
 
-    (fetchExceptionListsItemsByListIds as jest.Mock).mockReturnValue({ total: 0 });
+    (fetchExceptionListsItemsByListIds as Mock).mockReturnValue({ total: 0 });
 
-    (useFindExceptionListReferences as jest.Mock).mockReturnValue([
+    (useFindExceptionListReferences as Mock).mockReturnValue([
       false,
       false,
       {
@@ -143,12 +146,12 @@ describe('ExceptionsViewer', () => {
           ],
         },
       },
-      jest.fn(),
+      vi.fn(),
     ]);
   });
 
   it('it renders loading screen when "currentState" is "loading"', () => {
-    (useReducer as jest.Mock).mockReturnValue([
+    (useReducer as Mock).mockReturnValue([
       {
         exceptions: [],
         pagination: { pageIndex: 0, pageSize: 25, totalItemCount: 0, pageSizeOptions: [25, 50] },
@@ -158,7 +161,7 @@ describe('ExceptionsViewer', () => {
         exceptionLists: [],
         exceptionsToShow: { active: true },
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
     const wrapper = mount(
@@ -187,7 +190,7 @@ describe('ExceptionsViewer', () => {
   });
 
   it('it renders empty search screen when "currentState" is "empty_search"', () => {
-    (useReducer as jest.Mock).mockReturnValue([
+    (useReducer as Mock).mockReturnValue([
       {
         exceptions: [],
         pagination: { pageIndex: 0, pageSize: 25, totalItemCount: 0, pageSizeOptions: [25, 50] },
@@ -197,7 +200,7 @@ describe('ExceptionsViewer', () => {
         exceptionLists: [],
         exceptionsToShow: { active: true },
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
     const wrapper = mount(
@@ -226,7 +229,7 @@ describe('ExceptionsViewer', () => {
   });
 
   it('it renders no endpoint items screen when "currentState" is "empty" and "listTypes" includes only "endpoint"', () => {
-    (useReducer as jest.Mock).mockReturnValue([
+    (useReducer as Mock).mockReturnValue([
       {
         exceptions: [],
         pagination: { pageIndex: 0, pageSize: 25, totalItemCount: 0, pageSizeOptions: [25, 50] },
@@ -236,7 +239,7 @@ describe('ExceptionsViewer', () => {
         exceptionLists: [],
         exceptionsToShow: { active: true },
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
     const wrapper = mount(
@@ -271,7 +274,7 @@ describe('ExceptionsViewer', () => {
   });
 
   it('it renders no exception items screen when "currentState" is "empty" and "listTypes" includes "detection"', () => {
-    (useReducer as jest.Mock).mockReturnValue([
+    (useReducer as Mock).mockReturnValue([
       {
         exceptions: [],
         pagination: { pageIndex: 0, pageSize: 25, totalItemCount: 0, pageSizeOptions: [25, 50] },
@@ -281,7 +284,7 @@ describe('ExceptionsViewer', () => {
         exceptionLists: [],
         exceptionsToShow: { active: true },
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
     const wrapper = mount(
@@ -316,7 +319,7 @@ describe('ExceptionsViewer', () => {
   });
 
   it('it renders add exception flyout if "currentFlyout" is "addException"', () => {
-    (useReducer as jest.Mock).mockReturnValue([
+    (useReducer as Mock).mockReturnValue([
       {
         exceptions: [],
         pagination: { pageIndex: 0, pageSize: 25, totalItemCount: 0, pageSizeOptions: [25, 50] },
@@ -326,7 +329,7 @@ describe('ExceptionsViewer', () => {
         exceptionLists: [],
         exceptionsToShow: { active: true },
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
     const wrapper = shallow(
@@ -351,7 +354,7 @@ describe('ExceptionsViewer', () => {
   });
 
   it('it renders edit exception flyout if "currentFlyout" is "editException"', () => {
-    (useReducer as jest.Mock).mockReturnValue([
+    (useReducer as Mock).mockReturnValue([
       {
         exceptions: [sampleExceptionItem],
         pagination: { pageIndex: 0, pageSize: 25, totalItemCount: 0, pageSizeOptions: [25, 50] },
@@ -361,7 +364,7 @@ describe('ExceptionsViewer', () => {
         exceptionLists: [],
         exceptionsToShow: { active: true },
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
     const wrapper = shallow(
@@ -386,7 +389,7 @@ describe('ExceptionsViewer', () => {
   });
 
   it('should not render any callout when Endpoint exception is moved under management FF is disabled', () => {
-    (useReducer as jest.Mock).mockReturnValue([
+    (useReducer as Mock).mockReturnValue([
       {
         exceptions: [],
         pagination: { pageIndex: 0, pageSize: 25, totalItemCount: 0, pageSizeOptions: [25, 50] },
@@ -396,7 +399,7 @@ describe('ExceptionsViewer', () => {
         exceptionLists: [],
         exceptionsToShow: { active: true },
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
     const wrapper = mount(
@@ -449,7 +452,7 @@ describe('ExceptionsViewer', () => {
     beforeEach(() => {
       mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
 
-      (useReducer as jest.Mock).mockReturnValue([
+      (useReducer as Mock).mockReturnValue([
         {
           exceptions: [],
           pagination: { pageIndex: 0, pageSize: 25, totalItemCount: 0, pageSizeOptions: [25, 50] },
@@ -459,7 +462,7 @@ describe('ExceptionsViewer', () => {
           exceptionLists: [],
           exceptionsToShow: { active: true },
         },
-        jest.fn(),
+        vi.fn(),
       ]);
     });
 
@@ -599,10 +602,10 @@ describe('ExceptionsViewer', () => {
 
   describe('deleting an exception item', () => {
     beforeEach(() => {
-      (deleteExceptionListItemById as jest.Mock).mockClear();
-      (deleteExceptionListItemById as jest.Mock).mockResolvedValue({});
+      (deleteExceptionListItemById as Mock).mockClear();
+      (deleteExceptionListItemById as Mock).mockResolvedValue({});
 
-      (useReducer as jest.Mock).mockReturnValue([
+      (useReducer as Mock).mockReturnValue([
         {
           exceptions: [sampleExceptionItem],
           pagination: { pageIndex: 0, pageSize: 25, totalItemCount: 1, pageSizeOptions: [25, 50] },
@@ -612,7 +615,7 @@ describe('ExceptionsViewer', () => {
           exceptionLists: [],
           exceptionsToShow: { active: true },
         },
-        jest.fn(),
+        vi.fn(),
       ]);
     });
 

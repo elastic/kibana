@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { errors } from '@elastic/elasticsearch';
@@ -14,21 +17,24 @@ import { errors } from '@elastic/elasticsearch';
 import { updateConnectorConfiguration } from './update_connector_configuration';
 import { fetchConnectorById } from './fetch_connectors';
 
-jest.mock('./fetch_connectors', () => ({ fetchConnectorById: jest.fn() }));
+vi.mock('./fetch_connectors', () => {
+      const mocked = { fetchConnectorById: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 describe('updateConnectorConfiguration lib function', () => {
   const mockClient = {
     transport: {
-      request: jest.fn(),
+      request: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should update configuration', async () => {
-    (fetchConnectorById as jest.Mock).mockResolvedValue({
+    (fetchConnectorById as Mock).mockResolvedValue({
       configuration: { test: { value: 'haha' } },
     });
 

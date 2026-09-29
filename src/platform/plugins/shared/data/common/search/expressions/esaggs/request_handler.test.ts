@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { from } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { Filter } from '@kbn/es-query';
@@ -17,9 +20,12 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { handleRequest } from './request_handler';
 
-jest.mock('../../tabify', () => ({
-  tabifyAggResponse: jest.fn(),
-}));
+vi.mock('../../tabify', () => {
+      const mocked = {
+      tabifyAggResponse: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { tabifyAggResponse } from '../../tabify';
 import { of } from 'rxjs';
@@ -29,27 +35,27 @@ describe('esaggs expression function - public', () => {
   let mockParams: MockedKeys<Parameters<typeof handleRequest>[0]>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    searchSourceInstanceMock.fetch$ = jest.fn().mockReturnValue(
+    searchSourceInstanceMock.fetch$ = vi.fn().mockReturnValue(
       of({
         rawResponse: {},
       })
     );
 
     mockParams = {
-      abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
+      abortSignal: vi.fn() as unknown as Mocked<AbortSignal>,
       aggs: {
-        aggs: [{ type: { name: 'terms', postFlightRequest: jest.fn().mockResolvedValue({}) } }],
+        aggs: [{ type: { name: 'terms', postFlightRequest: vi.fn().mockResolvedValue({}) } }],
         partialRows: false,
-        setTimeRange: jest.fn(),
-        toDsl: jest.fn().mockReturnValue({ aggs: {} }),
-        onSearchRequestStart: jest.fn(),
-        setTimeFields: jest.fn(),
-        setForceNow: jest.fn(),
-      } as unknown as jest.Mocked<IAggConfigs>,
+        setTimeRange: vi.fn(),
+        toDsl: vi.fn().mockReturnValue({ aggs: {} }),
+        onSearchRequestStart: vi.fn(),
+        setTimeFields: vi.fn(),
+        setForceNow: vi.fn(),
+      } as unknown as Mocked<IAggConfigs>,
       filters: undefined,
-      indexPattern: { id: 'logstash-*' } as unknown as jest.Mocked<DataView>,
+      indexPattern: { id: 'logstash-*' } as unknown as Mocked<DataView>,
       inspectorAdapters: {},
       query: undefined,
       searchSessionId: 'abc123',
@@ -75,7 +81,7 @@ describe('esaggs expression function - public', () => {
 
     test('setField(index)', () => {
       expect(searchSource.setField).toHaveBeenCalledTimes(5);
-      expect((searchSource.setField as jest.Mock).mock.calls[0]).toEqual([
+      expect((searchSource.setField as Mock).mock.calls[0]).toEqual([
         'index',
         mockParams.indexPattern,
       ]);
@@ -83,48 +89,48 @@ describe('esaggs expression function - public', () => {
 
     test('setField(size)', () => {
       expect(searchSource.setField).toHaveBeenCalledTimes(5);
-      expect((searchSource.setField as jest.Mock).mock.calls[1]).toEqual(['size', 0]);
+      expect((searchSource.setField as Mock).mock.calls[1]).toEqual(['size', 0]);
     });
 
     test('setField(aggs)', async () => {
       expect(searchSource.setField).toHaveBeenCalledTimes(5);
-      expect((searchSource.setField as jest.Mock).mock.calls[2][1]).toEqual(mockParams.aggs);
+      expect((searchSource.setField as Mock).mock.calls[2][1]).toEqual(mockParams.aggs);
     });
 
     test('setField(filter)', async () => {
       expect(searchSource.setField).toHaveBeenCalledTimes(5);
-      expect((searchSource.setField as jest.Mock).mock.calls[3]).toEqual([
+      expect((searchSource.setField as Mock).mock.calls[3]).toEqual([
         'filter',
         mockParams.filters,
       ]);
 
       // make sure param is passed through
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const mockFilters = [{ meta: {} }] as Filter[];
       await handleRequest({
         ...mockParams,
         filters: mockFilters,
       }).toPromise();
       searchSource = await mockParams.searchSourceService.create();
-      expect((searchSource.setField as jest.Mock).mock.calls[3]).toEqual(['filter', mockFilters]);
+      expect((searchSource.setField as Mock).mock.calls[3]).toEqual(['filter', mockFilters]);
     });
 
     test('setField(query)', async () => {
       expect(searchSource.setField).toHaveBeenCalledTimes(5);
-      expect((searchSource.setField as jest.Mock).mock.calls[4]).toEqual([
+      expect((searchSource.setField as Mock).mock.calls[4]).toEqual([
         'query',
         mockParams.query,
       ]);
 
       // make sure param is passed through
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const mockQuery = { query: 'foo', language: 'bar' };
       await handleRequest({
         ...mockParams,
         query: mockQuery,
       }).toPromise();
       searchSource = await mockParams.searchSourceService.create();
-      expect((searchSource.setField as jest.Mock).mock.calls[4]).toEqual(['query', mockQuery]);
+      expect((searchSource.setField as Mock).mock.calls[4]).toEqual(['query', mockQuery]);
     });
   });
 
@@ -181,7 +187,7 @@ describe('esaggs expression function - public', () => {
       ...mockParams,
       timeRange: { from: '2020-12-01', to: '2020-12-31' },
     }).toPromise();
-    expect((tabifyAggResponse as jest.Mock).mock.calls[0][2].timeRange).toMatchInlineSnapshot(`
+    expect((tabifyAggResponse as Mock).mock.calls[0][2].timeRange).toMatchInlineSnapshot(`
       Object {
         "from": "2020-12-01T05:00:00.000Z",
         "timeFields": Array [
@@ -196,7 +202,7 @@ describe('esaggs expression function - public', () => {
   test('returns partial results', async () => {
     const searchSource = await mockParams.searchSourceService.create();
 
-    (searchSource.fetch$ as jest.MockedFunction<typeof searchSource.fetch$>).mockReturnValue(
+    (searchSource.fetch$ as MockedFunction<typeof searchSource.fetch$>).mockReturnValue(
       from([
         {
           rawResponse: {},

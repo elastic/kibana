@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ExitNormalPathNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitNormalPathNodeImpl } from '../exit_normal_path_node_impl';
@@ -26,7 +28,7 @@ describe('ExitNormalPathNodeImpl', () => {
       enterNodeId: 'enterNormalPath1',
     };
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
-    workflowRuntime.navigateToNode = jest.fn();
+    workflowRuntime.navigateToNode = vi.fn();
 
     underTest = new ExitNormalPathNodeImpl(node, workflowRuntime);
   });

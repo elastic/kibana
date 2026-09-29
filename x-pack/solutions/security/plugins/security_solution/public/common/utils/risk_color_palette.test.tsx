@@ -4,14 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { getRiskSeverityColors, useRiskSeverityColors } from './risk_color_palette';
 import { useEuiTheme } from '@elastic/eui';
 import { getMockEuiBorealisTheme } from './__mocks__/severity_colors';
 
-jest.mock('@elastic/eui', () => ({
-  useEuiTheme: jest.fn(),
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      useEuiTheme: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const EXPECTED_SEVERITY_COLOR_BOREALIS = {
   low: '#54B399',
@@ -41,7 +47,7 @@ describe('risk_color_palette', () => {
   describe.each(scenarios)(
     '$themeName: useRiskSeverityColors',
     ({ mockEuiTheme, themeName, expected }) => {
-      const useEuiThemeMock = useEuiTheme as jest.Mock;
+      const useEuiThemeMock = useEuiTheme as Mock;
 
       it(`returns the correct colors for ${themeName} theme`, () => {
         useEuiThemeMock.mockReturnValue({

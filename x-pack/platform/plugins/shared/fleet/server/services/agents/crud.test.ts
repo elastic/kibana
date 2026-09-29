@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -38,50 +41,59 @@ import {
   getAgentVersionsForAgentPolicyIds,
 } from './crud';
 
-jest.mock('../audit_logging');
-jest.mock('../agent_policy', () => ({
-  agentPolicyService: {
-    list: jest.fn().mockResolvedValue({ items: [] }),
-    get: jest.fn().mockResolvedValue(null),
-    getByIds: jest.fn().mockResolvedValue([]),
-    getInactivityTimeouts: jest.fn().mockResolvedValue([]),
-    // fetchAllAgentPolicyIds returns an AsyncIterable<string[]>; default to empty.
-    fetchAllAgentPolicyIds: jest.fn().mockResolvedValue((async function* () {})()),
-  },
-  getAgentPolicySavedObjectType: jest.fn().mockResolvedValue('fleet-agent-policies'),
-}));
-jest.mock('../../../common/services/is_agent_upgradeable', () => ({
-  isAgentUpgradeAvailable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
-}));
-jest.mock('./versions', () => {
+vi.mock('../audit_logging');
+vi.mock('../agent_policy', () => {
+      const mocked = {
+      agentPolicyService: {
+        list: vi.fn().mockResolvedValue({ items: [] }),
+        get: vi.fn().mockResolvedValue(null),
+        getByIds: vi.fn().mockResolvedValue([]),
+        getInactivityTimeouts: vi.fn().mockResolvedValue([]),
+        // fetchAllAgentPolicyIds returns an AsyncIterable<string[]>; default to empty.
+        fetchAllAgentPolicyIds: vi.fn().mockResolvedValue((async function* () {})()),
+      },
+      getAgentPolicySavedObjectType: vi.fn().mockResolvedValue('fleet-agent-policies'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/services/is_agent_upgradeable', () => {
+      const mocked = {
+      isAgentUpgradeAvailable: vi.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./versions', () => {
   return {
-    getAvailableVersions: jest
+    getAvailableVersions: vi
       .fn()
       .mockResolvedValue(['8.4.0', '8.5.0', '8.6.0', '8.7.0', '8.8.0']),
-    getLatestAvailableAgentVersion: jest.fn().mockResolvedValue('8.8.0'),
+    getLatestAvailableAgentVersion: vi.fn().mockResolvedValue('8.8.0'),
   };
 });
-jest.mock('../spaces/helpers');
-jest.mock('timers/promises', () => ({
-  setTimeout: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../spaces/helpers');
+vi.mock('timers/promises', () => {
+      const mocked = {
+      setTimeout: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
-const isSpaceAwarenessEnabledMock = _isSpaceAwarenessEnabled as jest.Mock;
+const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
+const isSpaceAwarenessEnabledMock = _isSpaceAwarenessEnabled as Mock;
 
 describe('Agents CRUD test', () => {
   const soClientMock = savedObjectsClientMock.create();
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   let esClientMock: ElasticsearchClient;
-  let searchMock: jest.Mock;
+  let searchMock: Mock;
 
   beforeEach(() => {
-    searchMock = jest.fn();
-    soClientMock.find = jest.fn().mockResolvedValue({ saved_objects: [] });
+    searchMock = vi.fn();
+    soClientMock.find = vi.fn().mockResolvedValue({ saved_objects: [] });
     esClientMock = {
       search: searchMock,
-      openPointInTime: jest.fn().mockResolvedValue({ id: '1' }),
-      closePointInTime: jest.fn(),
+      openPointInTime: vi.fn().mockResolvedValue({ id: '1' }),
+      closePointInTime: vi.fn(),
     } as unknown as ElasticsearchClient;
 
     mockContract = createAppContextStartContractMock({}, false, {
@@ -226,7 +238,7 @@ describe('Agents CRUD test', () => {
   describe('filterAgentIdsByNamespace', () => {
     it('should return all ids unchanged when space awareness is disabled', async () => {
       isSpaceAwarenessEnabledMock.mockResolvedValue(false);
-      (soClientMock.getCurrentNamespace as jest.Mock).mockReturnValue('default');
+      (soClientMock.getCurrentNamespace as Mock).mockReturnValue('default');
 
       const result = await filterAgentIdsByNamespace(esClientMock, soClientMock, [
         'agent1',
@@ -248,7 +260,7 @@ describe('Agents CRUD test', () => {
 
     it('should filter ids by namespace when space awareness is enabled', async () => {
       isSpaceAwarenessEnabledMock.mockResolvedValue(true);
-      (soClientMock.getCurrentNamespace as jest.Mock).mockReturnValue('finance');
+      (soClientMock.getCurrentNamespace as Mock).mockReturnValue('finance');
       searchMock.mockResolvedValueOnce({
         hits: { hits: [{ _id: 'agent1' }] },
       });
@@ -781,14 +793,14 @@ describe('Agents CRUD test', () => {
       });
 
       afterEach(() => {
-        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockReset();
-        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockResolvedValue(
+        (agentPolicyService.fetchAllAgentPolicyIds as Mock).mockReset();
+        (agentPolicyService.fetchAllAgentPolicyIds as Mock).mockResolvedValue(
           makeAsyncIterable([])
         );
       });
 
       it('excludes agents on versioned agentless policies using policy_base_id fallback', async () => {
-        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockResolvedValueOnce(
+        (agentPolicyService.fetchAllAgentPolicyIds as Mock).mockResolvedValueOnce(
           makeAsyncIterable(agentlessPolicyIds)
         );
 
@@ -817,7 +829,7 @@ describe('Agents CRUD test', () => {
         // .fleet-agents is not space-partitioned. If a space-scoped client is used to build the
         // exclusion list, agentless policies from other spaces are missed and their agents leak
         // through. The fix uses getInternalUserSOClientWithoutSpaceExtension() + spaceId '*'.
-        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockResolvedValueOnce(
+        (agentPolicyService.fetchAllAgentPolicyIds as Mock).mockResolvedValueOnce(
           makeAsyncIterable(agentlessPolicyIds)
         );
 
@@ -841,7 +853,7 @@ describe('Agents CRUD test', () => {
         // finds policies from other spaces. Without the unscoped client the ids.length > 0
         // guard fails and NO filter is built, leaking every agentless agent deployment-wide.
         const crossSpacePolicyIds = ['space-a-policy-1', 'space-a-policy-2'];
-        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockResolvedValueOnce(
+        (agentPolicyService.fetchAllAgentPolicyIds as Mock).mockResolvedValueOnce(
           makeAsyncIterable(crossSpacePolicyIds)
         );
 
@@ -860,7 +872,7 @@ describe('Agents CRUD test', () => {
         // A single-page mock cannot catch regressions where only the first page is consumed.
         // This test yields a policy ID only on the second page and asserts it still reaches
         // the must_not filter, proving the for-await loop drains all pages.
-        (agentPolicyService.fetchAllAgentPolicyIds as jest.Mock).mockResolvedValueOnce(
+        (agentPolicyService.fetchAllAgentPolicyIds as Mock).mockResolvedValueOnce(
           (async function* () {
             yield ['policy-page-1'];
             yield ['policy-page-2-only'];
@@ -946,7 +958,7 @@ describe('Agents CRUD test', () => {
 
   describe('getAgentsById()', () => {
     beforeEach(() => {
-      (soClientMock.getCurrentNamespace as jest.Mock).mockReturnValue('foo');
+      (soClientMock.getCurrentNamespace as Mock).mockReturnValue('foo');
     });
 
     it('chunks requests so each search stays within max_result_window (10k)', async () => {
@@ -992,7 +1004,7 @@ describe('Agents CRUD test', () => {
       searchResponse = getEsResponse(['1', '2'], 2, 'online', (id) => {
         return { id, namespaces: ['foo'] };
       });
-      (soClientMock.getCurrentNamespace as jest.Mock).mockReturnValue('foo');
+      (soClientMock.getCurrentNamespace as Mock).mockReturnValue('foo');
       searchMock.mockImplementation(async () => searchResponse);
     });
 
@@ -1119,7 +1131,7 @@ describe('Agents CRUD test', () => {
 
 describe('getAgentVersionsForAgentPolicyIds', () => {
   it('returns an empty array when no policy ids are provided', async () => {
-    const searchMock = jest.fn();
+    const searchMock = vi.fn();
     const esClientMock = { search: searchMock } as unknown as ElasticsearchClient;
 
     const result = await getAgentVersionsForAgentPolicyIds(
@@ -1133,7 +1145,7 @@ describe('getAgentVersionsForAgentPolicyIds', () => {
   });
 
   it('queries with a term-or-variant filter and rolls up version-specific variants under their base policy id', async () => {
-    const searchMock = jest.fn().mockResolvedValue({
+    const searchMock = vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {

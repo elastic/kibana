@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import type { DiscoverSessionSaveDashboardModalProps } from './discover_session_save_dashboard_modal';
@@ -33,11 +35,14 @@ import { TransferAction } from '../../../../../plugin_imports/embeddable_editor_
 import { DiscoverToolkitTestProvider } from '../../../../../__mocks__/test_provider';
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 
-jest.mock('./discover_session_save_dashboard_modal', () => ({
-  DiscoverSessionSaveDashboardModal: jest.fn(() => null),
-}));
+vi.mock('./discover_session_save_dashboard_modal', () => {
+      const mocked = {
+      DiscoverSessionSaveDashboardModal: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MockModal = jest.mocked(DiscoverSessionSaveDashboardModal);
+const MockModal = vi.mocked(DiscoverSessionSaveDashboardModal);
 
 const defaultServices = createDiscoverServicesMock();
 
@@ -116,7 +121,7 @@ const setup = async ({
   );
 
   if (isEmbedded) {
-    jest.spyOn(services.embeddableEditor, 'isEmbeddedEditor').mockReturnValue(true);
+    vi.spyOn(services.embeddableEditor, 'isEmbeddedEditor').mockReturnValue(true);
   }
 
   const toolkit = getDiscoverInternalStateMock({
@@ -124,7 +129,7 @@ const setup = async ({
     persistedDataViews: uniqueDataViews,
   });
 
-  jest
+  vi
     .spyOn(services.savedSearch, 'saveDiscoverSession')
     .mockImplementation(mockSaveDiscoverSession);
 
@@ -151,7 +156,7 @@ const setup = async ({
 
   MockModal.mockClear();
 
-  const onClose = jest.fn();
+  const onClose = vi.fn();
 
   render(
     <DiscoverToolkitTestProvider toolkit={toolkit}>
@@ -521,7 +526,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should call transferBackToEditor on save for embedded editor', async () => {
       const services = createDiscoverServicesMock();
-      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
+      const transferSpy = vi.spyOn(services.embeddableEditor, 'transferBackToEditor');
       const { modalProps } = await setup({ isEmbedded: true, services });
 
       await act(async () => {
@@ -533,9 +538,9 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should navigate to new session on Save As from embedded editor', async () => {
       const services = createDiscoverServicesMock();
-      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
-      const clearEditorStateSpy = jest.spyOn(services.embeddableEditor, 'clearEditorState');
-      const navigateSpy = jest.spyOn(services.locator, 'navigate');
+      const transferSpy = vi.spyOn(services.embeddableEditor, 'transferBackToEditor');
+      const clearEditorStateSpy = vi.spyOn(services.embeddableEditor, 'clearEditorState');
+      const navigateSpy = vi.spyOn(services.locator, 'navigate');
       const { modalProps, onClose } = await setup({
         initialCopyOnSave: true,
         isEmbedded: true,
@@ -561,9 +566,9 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should navigate to new session when newCopyOnSave is toggled on in embedded editor', async () => {
       const services = createDiscoverServicesMock();
-      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
-      const clearEditorStateSpy = jest.spyOn(services.embeddableEditor, 'clearEditorState');
-      const navigateSpy = jest.spyOn(services.locator, 'navigate');
+      const transferSpy = vi.spyOn(services.embeddableEditor, 'transferBackToEditor');
+      const clearEditorStateSpy = vi.spyOn(services.embeddableEditor, 'clearEditorState');
+      const navigateSpy = vi.spyOn(services.locator, 'navigate');
       const { modalProps, onClose } = await setup({
         isEmbedded: true,
         services,
@@ -588,9 +593,9 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should navigate to new session on Save As from embedded editor without persisted session', async () => {
       const services = createDiscoverServicesMock();
-      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
-      const clearEditorStateSpy = jest.spyOn(services.embeddableEditor, 'clearEditorState');
-      const navigateSpy = jest.spyOn(services.locator, 'navigate');
+      const transferSpy = vi.spyOn(services.embeddableEditor, 'transferBackToEditor');
+      const clearEditorStateSpy = vi.spyOn(services.embeddableEditor, 'clearEditorState');
+      const navigateSpy = vi.spyOn(services.locator, 'navigate');
       const { modalProps, onClose } = await setup({
         initialCopyOnSave: true,
         isEmbedded: true,
@@ -617,7 +622,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should not navigate for embedded editor on regular save', async () => {
       const services = createDiscoverServicesMock();
-      const navigateSpy = jest.spyOn(services.locator, 'navigate');
+      const navigateSpy = vi.spyOn(services.locator, 'navigate');
       const { modalProps } = await setup({ isEmbedded: true, services });
 
       await act(async () => {
@@ -629,7 +634,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should not navigate when updating an existing session (non-embedded)', async () => {
       const services = createDiscoverServicesMock();
-      const navigateSpy = jest.spyOn(services.locator, 'navigate');
+      const navigateSpy = vi.spyOn(services.locator, 'navigate');
       const { modalProps } = await setup({ services });
 
       await act(async () => {
@@ -641,7 +646,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should navigate to new Discover session on save', async () => {
       const services = createDiscoverServicesMock();
-      const navigateSpy = jest.spyOn(services.locator, 'navigate');
+      const navigateSpy = vi.spyOn(services.locator, 'navigate');
       const { modalProps, toolkit } = await setup({
         persistedDiscoverSession: false,
         services,
@@ -662,7 +667,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
     it('should include the resolved profile state when navigating to a newly saved session', async () => {
       const services = createDiscoverServicesMock();
       services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
-      const navigateSpy = jest.spyOn(services.locator, 'navigate');
+      const navigateSpy = vi.spyOn(services.locator, 'navigate');
       const { modalProps, toolkit } = await setup({
         persistedDiscoverSession: false,
         services,
@@ -695,7 +700,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should navigate to dashboard when dashboardId is set', async () => {
       const services = createDiscoverServicesMock();
-      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
+      const transferSpy = vi.spyOn(services.embeddableEditor, 'transferBackToEditor');
       const { modalProps } = await setup({
         initialCopyOnSave: true,
         services,
@@ -715,7 +720,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should navigate to new dashboard when dashboardId is "new"', async () => {
       const services = createDiscoverServicesMock();
-      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
+      const transferSpy = vi.spyOn(services.embeddableEditor, 'transferBackToEditor');
       const { modalProps } = await setup({
         initialCopyOnSave: true,
         services,
@@ -735,7 +740,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should navigate to a dashboard when dashboardId is set for Save As', async () => {
       const services = createDiscoverServicesMock();
-      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
+      const transferSpy = vi.spyOn(services.embeddableEditor, 'transferBackToEditor');
       const { modalProps } = await setup({
         initialCopyOnSave: true,
         isEmbedded: true,
@@ -758,7 +763,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should navigate to a dashboard when dashboardId is set to "new" for Save As', async () => {
       const services = createDiscoverServicesMock();
-      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
+      const transferSpy = vi.spyOn(services.embeddableEditor, 'transferBackToEditor');
       const { modalProps } = await setup({
         initialCopyOnSave: true,
         isEmbedded: true,
@@ -779,7 +784,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should show a success toast on save', async () => {
       const services = createDiscoverServicesMock();
-      const successSpy = jest.spyOn(services.toastNotifications, 'addSuccess');
+      const successSpy = vi.spyOn(services.toastNotifications, 'addSuccess');
       const { modalProps } = await setup({ isEmbedded: true, services });
 
       await act(async () => {
@@ -794,7 +799,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should show a danger toast on error', async () => {
       const services = createDiscoverServicesMock();
-      const dangerSpy = jest.spyOn(services.toastNotifications, 'addDanger');
+      const dangerSpy = vi.spyOn(services.toastNotifications, 'addDanger');
       const { modalProps } = await setup({
         isEmbedded: true,
         mockSaveDiscoverSession: () => Promise.reject(new Error('Save error')),
@@ -814,7 +819,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
     it('should not close modal when navigating to dashboard', async () => {
       const services = createDiscoverServicesMock();
       const stateTransfer = services.embeddable.getStateTransfer();
-      jest.spyOn(services.embeddable, 'getStateTransfer').mockReturnValue(stateTransfer);
+      vi.spyOn(services.embeddable, 'getStateTransfer').mockReturnValue(stateTransfer);
       const { modalProps, onClose } = await setup({ initialCopyOnSave: true, services });
 
       await act(async () => {
@@ -852,8 +857,8 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should show no toast when save is unsuccessful without an error', async () => {
       const services = createDiscoverServicesMock();
-      const successSpy = jest.spyOn(services.toastNotifications, 'addSuccess');
-      const dangerSpy = jest.spyOn(services.toastNotifications, 'addDanger');
+      const successSpy = vi.spyOn(services.toastNotifications, 'addSuccess');
+      const dangerSpy = vi.spyOn(services.toastNotifications, 'addDanger');
       const { modalProps } = await setup({
         isEmbedded: true,
         mockSaveDiscoverSession: () => Promise.resolve(undefined),
@@ -880,7 +885,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
   describe('onSaveCb', () => {
     it('should hide dashboard options when onSaveCb is provided', async () => {
       const { modalProps } = await setup({
-        onSaveCb: jest.fn(),
+        onSaveCb: vi.fn(),
         persistedDiscoverSession: false,
       });
 
@@ -889,8 +894,8 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should call onSaveCb after successful save and skip locator navigation', async () => {
       const services = createDiscoverServicesMock();
-      const navigateSpy = jest.spyOn(services.locator, 'navigate');
-      const onSaveCb = jest.fn();
+      const navigateSpy = vi.spyOn(services.locator, 'navigate');
+      const onSaveCb = vi.fn();
       const { modalProps } = await setup({
         onSaveCb,
         persistedDiscoverSession: false,
@@ -907,8 +912,8 @@ describe('DiscoverSessionSaveModalContainer', () => {
 
     it('should show a success toast and call onSaveCb on save', async () => {
       const services = createDiscoverServicesMock();
-      const successSpy = jest.spyOn(services.toastNotifications, 'addSuccess');
-      const onSaveCb = jest.fn();
+      const successSpy = vi.spyOn(services.toastNotifications, 'addSuccess');
+      const onSaveCb = vi.fn();
       const { modalProps, onClose } = await setup({
         onSaveCb,
         persistedDiscoverSession: false,

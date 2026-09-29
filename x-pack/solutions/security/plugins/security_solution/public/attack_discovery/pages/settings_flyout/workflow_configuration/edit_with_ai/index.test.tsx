@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common/chat/conversation';
 import { ChatEventType } from '@kbn/agent-builder-common/chat/events';
@@ -20,23 +23,29 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { EditWithAi } from '.';
 import * as i18n from './translations';
 
-jest.mock('../../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
-  useAgentBuilderAvailability: jest.fn(),
-}));
+vi.mock('../../../../../agent_builder/hooks/use_agent_builder_availability', () => {
+      const mocked = {
+      useAgentBuilderAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenChat = jest.fn();
-const mockUseAgentBuilderAvailability = jest.mocked(useAgentBuilderAvailability);
-const mockUseKibana = useKibana as jest.Mock;
+const mockOpenChat = vi.fn();
+const mockUseAgentBuilderAvailability = vi.mocked(useAgentBuilderAvailability);
+const mockUseKibana = useKibana as Mock;
 
 let mockChat$: Subject<ChatEvent>;
 
 const defaultProps = {
   esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 100',
-  onEsqlQueryChange: jest.fn(),
+  onEsqlQueryChange: vi.fn(),
 };
 
 const createRoundCompleteEvent = ({
@@ -69,7 +78,7 @@ const createRoundCompleteEvent = ({
 
 describe('EditWithAi', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockChat$ = new Subject<ChatEvent>();
 
@@ -86,7 +95,7 @@ describe('EditWithAi', () => {
           events: { chat$: mockChat$.asObservable() },
           openChat: mockOpenChat,
         },
-        telemetry: { reportEvent: jest.fn() },
+        telemetry: { reportEvent: vi.fn() },
       },
     });
   });
@@ -334,7 +343,7 @@ describe('EditWithAi', () => {
   });
 
   it('calls onEsqlQueryChange when the update_esql_query tool handler is invoked', async () => {
-    const onEsqlQueryChange = jest.fn();
+    const onEsqlQueryChange = vi.fn();
 
     render(
       <TestProviders>
@@ -360,7 +369,7 @@ describe('EditWithAi', () => {
     mockUseKibana.mockReturnValue({
       services: {
         agentBuilder: undefined,
-        telemetry: { reportEvent: jest.fn() },
+        telemetry: { reportEvent: vi.fn() },
       },
     });
 
@@ -383,8 +392,8 @@ describe('EditWithAi', () => {
   });
 
   it('calls the LATEST onEsqlQueryChange when the tool handler is invoked after a re-render', async () => {
-    const firstOnEsqlQueryChange = jest.fn();
-    const secondOnEsqlQueryChange = jest.fn();
+    const firstOnEsqlQueryChange = vi.fn();
+    const secondOnEsqlQueryChange = vi.fn();
 
     const { rerender } = render(
       <TestProviders>
@@ -436,7 +445,7 @@ describe('EditWithAi', () => {
     ];
 
     it('auto-applies ES|QL from attachments when no explicit tool call occurred in the round', async () => {
-      const onEsqlQueryChange = jest.fn();
+      const onEsqlQueryChange = vi.fn();
 
       render(
         <TestProviders>
@@ -456,7 +465,7 @@ describe('EditWithAi', () => {
     });
 
     it('does NOT auto-apply from attachments when an explicit tool call already updated the query', async () => {
-      const onEsqlQueryChange = jest.fn();
+      const onEsqlQueryChange = vi.fn();
 
       render(
         <TestProviders>
@@ -503,7 +512,7 @@ describe('EditWithAi', () => {
     });
 
     it('resets the explicit tool call flag between rounds', async () => {
-      const onEsqlQueryChange = jest.fn();
+      const onEsqlQueryChange = vi.fn();
 
       render(
         <TestProviders>
@@ -554,7 +563,7 @@ describe('EditWithAi', () => {
     });
 
     it('does not auto-apply when the attachment query matches the last applied query', async () => {
-      const onEsqlQueryChange = jest.fn();
+      const onEsqlQueryChange = vi.fn();
 
       render(
         <TestProviders>

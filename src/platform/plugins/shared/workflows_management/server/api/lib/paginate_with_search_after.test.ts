@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { paginateWithSearchAfter } from './paginate_with_search_after';
@@ -24,11 +26,11 @@ const makeSearchResponse = (hits: Array<ReturnType<typeof makeHit>>) => ({
 });
 
 describe('paginateWithSearchAfter', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('processes a single page of results', async () => {
-    const search = jest.fn().mockResolvedValueOnce(makeSearchResponse([makeHit('a')]));
-    const onPage = jest.fn();
+    const search = vi.fn().mockResolvedValueOnce(makeSearchResponse([makeHit('a')]));
+    const onPage = vi.fn();
 
     const result = await paginateWithSearchAfter(
       { search, pageSize: 10, logger, operationName: 'test' },
@@ -43,12 +45,12 @@ describe('paginateWithSearchAfter', () => {
   });
 
   it('paginates through multiple pages using search_after', async () => {
-    const search = jest
+    const search = vi
       .fn()
       .mockResolvedValueOnce(makeSearchResponse([makeHit('a', [1]), makeHit('b', [2])]))
       .mockResolvedValueOnce(makeSearchResponse([makeHit('c')]));
 
-    const onPage = jest.fn();
+    const onPage = vi.fn();
 
     const result = await paginateWithSearchAfter(
       { search, pageSize: 2, logger, operationName: 'test' },
@@ -63,10 +65,10 @@ describe('paginateWithSearchAfter', () => {
   });
 
   it('stops at maxPages and reports truncation', async () => {
-    const search = jest
+    const search = vi
       .fn()
       .mockResolvedValue(makeSearchResponse([makeHit('a', [1]), makeHit('b', [2])]));
-    const onPage = jest.fn();
+    const onPage = vi.fn();
 
     const result = await paginateWithSearchAfter(
       { search, pageSize: 2, maxPages: 2, logger, operationName: 'testOp' },
@@ -80,12 +82,12 @@ describe('paginateWithSearchAfter', () => {
   });
 
   it('stops when a page returns empty results', async () => {
-    const search = jest
+    const search = vi
       .fn()
       .mockResolvedValueOnce(makeSearchResponse([makeHit('a', [1]), makeHit('b', [2])]))
       .mockResolvedValueOnce(makeSearchResponse([]));
 
-    const onPage = jest.fn();
+    const onPage = vi.fn();
 
     const result = await paginateWithSearchAfter(
       { search, pageSize: 2, logger, operationName: 'test' },
@@ -98,7 +100,7 @@ describe('paginateWithSearchAfter', () => {
   });
 
   it('filters out hits with null _id or _source', async () => {
-    const search = jest
+    const search = vi
       .fn()
       .mockResolvedValueOnce(
         makeSearchResponse([
@@ -107,7 +109,7 @@ describe('paginateWithSearchAfter', () => {
           { _id: 'c', _source: null } as any,
         ])
       );
-    const onPage = jest.fn();
+    const onPage = vi.fn();
 
     await paginateWithSearchAfter({ search, pageSize: 10, logger, operationName: 'test' }, onPage);
 
@@ -115,10 +117,10 @@ describe('paginateWithSearchAfter', () => {
   });
 
   it('breaks silently when sort is missing (default)', async () => {
-    const search = jest
+    const search = vi
       .fn()
       .mockResolvedValueOnce(makeSearchResponse([makeHit('a'), makeHit('b')]));
-    const onPage = jest.fn();
+    const onPage = vi.fn();
 
     const result = await paginateWithSearchAfter(
       { search, pageSize: 2, logger, operationName: 'test' },
@@ -130,10 +132,10 @@ describe('paginateWithSearchAfter', () => {
   });
 
   it('throws when sort is missing and throwOnMissingSort is true', async () => {
-    const search = jest
+    const search = vi
       .fn()
       .mockResolvedValueOnce(makeSearchResponse([makeHit('a'), makeHit('b')]));
-    const onPage = jest.fn();
+    const onPage = vi.fn();
 
     await expect(
       paginateWithSearchAfter(

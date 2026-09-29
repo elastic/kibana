@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useValueMetrics } from './use_value_metrics';
 
@@ -17,26 +20,29 @@ const mockedUseKibana = {
   ...mockUseKibana(),
 };
 
-jest.mock('../../../hooks/use_alert_count_query');
-jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../../../../common/lib/kibana', () => {
+vi.mock('../../../hooks/use_alert_count_query');
+vi.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
+vi.mock('../../../../common/lib/kibana', () => {
   return {
     useKibana: () => mockedUseKibana,
   };
 });
-const mockAssistantAvailability = jest.fn(() => ({
+const mockAssistantAvailability = vi.fn(() => ({
   hasAssistantPrivilege: true,
 }));
-jest.mock('@kbn/elastic-assistant', () => ({
-  useAssistantContext: () => ({
-    alertsIndexPattern: 'alerts-index-pattern',
-    assistantAvailability: mockAssistantAvailability(),
-    knowledgeBase: {
-      latestAlerts: 20,
-    },
-  }),
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      useAssistantContext: () => ({
+        alertsIndexPattern: 'alerts-index-pattern',
+        assistantAvailability: mockAssistantAvailability(),
+        knowledgeBase: {
+          latestAlerts: 20,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 describe('useValueMetrics', () => {
   const mockSignalIndexName = 'mock-signal-index';
   const mockUniqueAlertIds = ['id1', 'id2'];
@@ -46,8 +52,8 @@ describe('useValueMetrics', () => {
   const mockIsLoading = false;
 
   beforeEach(() => {
-    (useSignalIndex as jest.Mock).mockReturnValue({ signalIndexName: mockSignalIndexName });
-    (useFindAttackDiscoveries as jest.Mock).mockImplementation(({ start }) => {
+    (useSignalIndex as Mock).mockReturnValue({ signalIndexName: mockSignalIndexName });
+    (useFindAttackDiscoveries as Mock).mockImplementation(({ start }) => {
       if (start === 'compareFrom') {
         return {
           data: { unique_alert_ids: ['id3'], total: 1 },
@@ -59,7 +65,7 @@ describe('useValueMetrics', () => {
         isLoading: mockIsLoading,
       };
     });
-    (useAlertCountQuery as jest.Mock).mockImplementation(({ filters }) => {
+    (useAlertCountQuery as Mock).mockImplementation(({ filters }) => {
       if (filters && filters[0]?.query?.bool?.must_not?.length) {
         return { alertCount: mockFilteredAlertsCount };
       }
@@ -68,7 +74,7 @@ describe('useValueMetrics', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should return correct value metrics and loading state', () => {
@@ -115,7 +121,7 @@ describe('useValueMetrics', () => {
   });
 
   it('hasNoCurrentDiscoveries is true when loaded and discovery count is zero', () => {
-    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+    (useFindAttackDiscoveries as Mock).mockReturnValue({
       data: { unique_alert_ids: [], total: 0 },
       isLoading: false,
     });
@@ -131,11 +137,11 @@ describe('useValueMetrics', () => {
   });
 
   it('hasNoCurrentDiscoveries is false while still loading', () => {
-    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+    (useFindAttackDiscoveries as Mock).mockReturnValue({
       data: { unique_alert_ids: [], total: 0 },
       isLoading: true,
     });
-    (useAlertCountQuery as jest.Mock).mockReturnValue({ alertCount: 0, isLoading: true });
+    (useAlertCountQuery as Mock).mockReturnValue({ alertCount: 0, isLoading: true });
     const { result } = renderHook(() =>
       useValueMetrics({
         analystHourlyRate: 100,

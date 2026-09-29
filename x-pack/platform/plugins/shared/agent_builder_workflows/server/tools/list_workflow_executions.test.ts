@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { listWorkflowExecutionsTool } from './list_workflow_executions';
@@ -26,7 +28,7 @@ const mockExecution = {
 
 const createWorkflowsManagement = () => ({
   management: {
-    getWorkflowExecutions: jest.fn().mockResolvedValue({
+    getWorkflowExecutions: vi.fn().mockResolvedValue({
       results: [mockExecution],
       total: 1,
       page: 1,
@@ -37,9 +39,9 @@ const createWorkflowsManagement = () => ({
 
 const createSecurity = (hasAllRequested = true) => ({
   authz: {
-    actions: { api: { get: jest.fn((priv: string) => `api:${priv}`) } },
-    checkPrivilegesWithRequest: jest.fn().mockReturnValue({
-      atSpace: jest.fn().mockResolvedValue({ hasAllRequested }),
+    actions: { api: { get: vi.fn((priv: string) => `api:${priv}`) } },
+    checkPrivilegesWithRequest: vi.fn().mockReturnValue({
+      atSpace: vi.fn().mockResolvedValue({ hasAllRequested }),
     }),
   },
 });
@@ -57,7 +59,7 @@ const mockContext = {
 
 describe('listWorkflowExecutionsTool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should have the correct tool id', () => {

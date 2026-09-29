@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
@@ -20,11 +23,11 @@ import { useUpsellingMessage } from '../../hooks/use_upselling';
 import { FILTER_BY_ASSIGNEES_BUTTON } from './test_ids';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../user_profiles/use_get_current_user_profile');
-jest.mock('../user_profiles/use_bulk_get_user_profiles');
-jest.mock('../user_profiles/use_suggest_users');
-jest.mock('../../hooks/use_license');
-jest.mock('../../hooks/use_upselling');
+vi.mock('../user_profiles/use_get_current_user_profile');
+vi.mock('../user_profiles/use_bulk_get_user_profiles');
+vi.mock('../user_profiles/use_suggest_users');
+vi.mock('../../hooks/use_license');
+vi.mock('../../hooks/use_upselling');
 
 const mockUserProfiles = [
   {
@@ -49,7 +52,7 @@ const mockUserProfiles = [
 
 const renderFilterByAssigneesPopover = (
   alertAssignees: AssigneesIdsSelection[] = [],
-  onUsersChange = jest.fn()
+  onUsersChange = vi.fn()
 ) =>
   render(
     <TestProviders>
@@ -62,21 +65,21 @@ const renderFilterByAssigneesPopover = (
 
 describe('<FilterByAssigneesPopover />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useGetCurrentUserProfile as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles[0],
     });
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+    (useBulkGetUserProfiles as Mock).mockReturnValue({
       isLoading: false,
       data: [],
     });
-    (useSuggestUsers as jest.Mock).mockReturnValue({
+    (useSuggestUsers as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles,
     });
-    (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
-    (useUpsellingMessage as jest.Mock).mockReturnValue('Go for Platinum!');
+    (useLicense as Mock).mockReturnValue({ isPlatinumPlus: () => true });
+    (useUpsellingMessage as Mock).mockReturnValue('Go for Platinum!');
   });
 
   it('should render closed popover component', () => {
@@ -124,7 +127,7 @@ describe('<FilterByAssigneesPopover />', () => {
   });
 
   it('should call onUsersChange on closing the popover', () => {
-    const onUsersChangeMock = jest.fn();
+    const onUsersChangeMock = vi.fn();
     const { getByTestId, getByText } = renderFilterByAssigneesPopover([], onUsersChangeMock);
 
     fireEvent.click(getByTestId(FILTER_BY_ASSIGNEES_BUTTON));

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { ContentListProvider } from '@kbn/content-list-provider';
@@ -54,7 +56,7 @@ describe('ContentListEmptyState', () => {
   });
 
   it('renders a primary action when configured', async () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
 
     renderWithProvider(
       <ContentListEmptyState

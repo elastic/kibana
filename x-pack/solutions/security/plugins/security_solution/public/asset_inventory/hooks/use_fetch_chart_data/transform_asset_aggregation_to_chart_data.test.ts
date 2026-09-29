@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { transformAssetAggregationToChartData } from './transform_asset_aggregation_to_chart_data';
 import { ASSET_FIELDS } from '../../constants';
 
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    translate: (_id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
-  },
-}));
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: {
+        translate: (_id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('transformAssetAggregationToChartData', () => {
   it('returns flattened subtype entries and other count', () => {

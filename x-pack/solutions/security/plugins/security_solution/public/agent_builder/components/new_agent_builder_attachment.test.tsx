@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../common/mock';
 import { NewAgentBuilderAttachment } from './new_agent_builder_attachment';
 import * as i18n from './translations';
 import { useAgentBuilderAvailability } from '../hooks/use_agent_builder_availability';
-jest.mock('../hooks/use_agent_builder_availability');
+vi.mock('../hooks/use_agent_builder_availability');
 
 describe('NewAgentBuilderAttachment', () => {
   const defaultProps = {
-    onClick: jest.fn(),
+    onClick: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentBuilderEnabled: true,
       hasAgentBuilderPrivilege: true,
       isAgentChatExperienceEnabled: true,
@@ -61,7 +64,7 @@ describe('NewAgentBuilderAttachment', () => {
   });
 
   it('calls onClick callback when button is clicked', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     render(
       <TestProviders>
         <NewAgentBuilderAttachment onClick={onClick} />
@@ -84,7 +87,7 @@ describe('NewAgentBuilderAttachment', () => {
   });
 
   it('renders disabled when license is invalid', () => {
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentBuilderEnabled: false,
       hasAgentBuilderPrivilege: true,
       isAgentChatExperienceEnabled: true,

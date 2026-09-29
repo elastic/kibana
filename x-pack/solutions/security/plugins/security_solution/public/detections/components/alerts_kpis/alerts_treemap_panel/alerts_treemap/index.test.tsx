@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import { Settings } from '@elastic/charts';
 import React from 'react';
@@ -20,10 +23,13 @@ import * as i18n from './translations';
 import type { Props } from '.';
 import { AlertsTreemap } from '.';
 
-jest.mock('../../../../../common/components/cell_actions', () => ({
-  ...jest.requireActual('../../../../../common/components/cell_actions'),
-  SecurityCellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
-}));
+vi.mock('../../../../../common/components/cell_actions', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../common/components/cell_actions')),
+      SecurityCellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps: Props = {
   data: mockAlertSearchResponse,
@@ -33,18 +39,18 @@ const defaultProps: Props = {
   stackByField1: 'host.name',
 };
 
-jest.mock('@elastic/charts', () => {
-  const actual = jest.requireActual('@elastic/charts');
+vi.mock('@elastic/charts', () => {
+  const actual = require('@elastic/charts');
   return {
     ...actual,
-    Settings: jest.fn().mockReturnValue(null),
+    Settings: vi.fn().mockReturnValue(null),
   };
 });
 
 describe('AlertsTreemap', () => {
   describe('when the response has data', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       render(
         <TestProviders>
@@ -62,7 +68,7 @@ describe('AlertsTreemap', () => {
     });
 
     test('it uses a theme with the expected `minFontSize` to show more labels at various screen resolutions', () => {
-      expect((Settings as jest.Mock).mock.calls[0][0].theme[0].partition.minFontSize).toEqual(4);
+      expect((Settings as Mock).mock.calls[0][0].theme[0].partition.minFontSize).toEqual(4);
     });
   });
 

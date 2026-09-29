@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { getInitialESQLQuery } from './get_initial_esql_query';
@@ -24,12 +26,12 @@ const getDataView = (name: string, dataViewFields: DataView['fields'], timeField
     type: 'default',
     getName: () => name,
     getIndexPattern: () => name,
-    getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
+    getFieldByName: vi.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
     timeFieldName,
     isPersisted: () => true,
     toSpec: () => ({}),
     toMinimalSpec: () => ({}),
-    isTSDBMode: jest.fn(() =>
+    isTSDBMode: vi.fn(() =>
       dataViewFields.some((field) => field.timeSeriesMetric || field.timeSeriesDimension)
     ),
   } as unknown as DataView;

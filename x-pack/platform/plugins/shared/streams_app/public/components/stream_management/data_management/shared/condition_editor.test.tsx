@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -16,41 +18,50 @@ import type { Condition, FilterCondition } from '@kbn/streamlang';
 import { ConditionEditor } from './condition_editor';
 import type { Suggestion } from './autocomplete_selector';
 
-jest.mock('@kbn/code-editor', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  CodeEditor: ({ value, onChange, onBlur, dataTestSubj }: any) => (
-    <textarea
-      data-test-subj={dataTestSubj}
-      value={value}
-      onChange={(e) => onChange?.(e.target.value)}
-      onBlur={() => onBlur?.()}
-    />
-  ),
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      CodeEditor: ({ value, onChange, onBlur, dataTestSubj }: any) => (
+        <textarea
+          data-test-subj={dataTestSubj}
+          value={value}
+          onChange={(e) => onChange?.(e.target.value)}
+          onBlur={() => onBlur?.()}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the useKibana hook
-jest.mock('../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    core: {
-      docLinks: {
-        links: {
-          date: {
-            dateMath:
-              'https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math',
+vi.mock('../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        core: {
+          docLinks: {
+            links: {
+              date: {
+                dateMath:
+                  'https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math',
+              },
+            },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the condition YAML service
-jest.mock('./condition_yaml_service', () => ({
-  conditionYamlService: {
-    register: jest.fn().mockResolvedValue(undefined),
-    release: jest.fn().mockResolvedValue(undefined),
-  },
-}));
+vi.mock('./condition_yaml_service', () => {
+      const mocked = {
+      conditionYamlService: {
+        register: vi.fn().mockResolvedValue(undefined),
+        release: vi.fn().mockResolvedValue(undefined),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (ui: React.ReactElement) => {
   return render(<I18nProvider>{ui}</I18nProvider>);
@@ -62,8 +73,8 @@ const renderWithIntl = (component: React.ReactElement) => {
 };
 
 describe('ConditionEditor', () => {
-  const mockOnConditionChange = jest.fn();
-  const mockOnValidityChange = jest.fn();
+  const mockOnConditionChange = vi.fn();
+  const mockOnValidityChange = vi.fn();
 
   const defaultFieldSuggestions: Suggestion[] = [
     { name: 'status', type: 'keyword' },
@@ -77,7 +88,7 @@ describe('ConditionEditor', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Syntax editor', () => {
@@ -126,8 +137,8 @@ describe('ConditionEditor', () => {
     });
 
     it('does not call onConditionChange on every keystroke; emits on debounce when YAML is valid', async () => {
-      jest.useFakeTimers();
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      vi.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
       renderWithProviders(
         <ConditionEditor
@@ -150,18 +161,18 @@ describe('ConditionEditor', () => {
       expect(mockOnConditionChange).not.toHaveBeenCalled();
 
       act(() => {
-        jest.advanceTimersByTime(400);
+        vi.advanceTimersByTime(400);
       });
 
       expect(mockOnConditionChange).toHaveBeenCalledTimes(1);
       expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'severity_text', eq: 'error' });
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('flushes the last valid YAML immediately on blur', async () => {
-      jest.useFakeTimers();
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      vi.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
       renderWithProviders(
         <ConditionEditor
@@ -188,11 +199,11 @@ describe('ConditionEditor', () => {
       expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'severity_text', eq: 'warn' });
 
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
       expect(mockOnConditionChange).toHaveBeenCalledTimes(1);
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('does not flush on blur when the syntax editor value has not changed', async () => {
@@ -218,8 +229,8 @@ describe('ConditionEditor', () => {
     });
 
     it('flushes pending debounced updates on unmount', async () => {
-      jest.useFakeTimers();
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      vi.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
       const { unmount } = renderWithProviders(
         <ConditionEditor
@@ -245,7 +256,7 @@ describe('ConditionEditor', () => {
       expect(mockOnConditionChange).toHaveBeenCalledTimes(1);
       expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'severity_text', eq: 'debug' });
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 
@@ -325,8 +336,8 @@ describe('ConditionEditor', () => {
     });
 
     it('should call onConditionChange when syntax editor contains valid YAML', async () => {
-      jest.useFakeTimers();
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      vi.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       renderWithProviders(
         <ConditionEditor
           condition={{ field: 'severity_text', eq: 'info' }}
@@ -351,14 +362,14 @@ describe('ConditionEditor', () => {
 
       // Wait for debounce to complete
       act(() => {
-        jest.advanceTimersByTime(400);
+        vi.advanceTimersByTime(400);
       });
 
       // Verify onConditionChange was called with the parsed YAML
       expect(mockOnConditionChange).toHaveBeenCalled();
       expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'test', eq: 'value' });
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should show error message when condition becomes invalid via syntax editor', () => {
@@ -380,8 +391,8 @@ describe('ConditionEditor', () => {
     });
 
     it('should NOT call onConditionChange and should report invalid when syntax editor is cleared (empty string)', async () => {
-      jest.useFakeTimers();
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      vi.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       renderWithProviders(
         <ConditionEditor
           condition={{ field: 'severity_text', eq: 'info' }}
@@ -402,18 +413,18 @@ describe('ConditionEditor', () => {
       fireEvent.change(codeEditor, { target: { value: '' } });
 
       act(() => {
-        jest.advanceTimersByTime(400);
+        vi.advanceTimersByTime(400);
       });
 
       expect(mockOnConditionChange).not.toHaveBeenCalled();
       expect(mockOnValidityChange).toHaveBeenCalledWith(false);
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should NOT call onConditionChange and should report invalid when YAML has unrecognized keys', async () => {
-      jest.useFakeTimers();
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      vi.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       renderWithProviders(
         <ConditionEditor
           condition={{ field: 'severity_text', eq: 'info' }}
@@ -436,13 +447,13 @@ describe('ConditionEditor', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(400);
+        vi.advanceTimersByTime(400);
       });
 
       expect(mockOnConditionChange).not.toHaveBeenCalled();
       expect(mockOnValidityChange).toHaveBeenCalledWith(false);
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should NOT flush on blur when YAML has unrecognized keys', async () => {
@@ -507,8 +518,8 @@ describe('ConditionEditor', () => {
         <ConditionEditor
           condition={condition}
           status="enabled"
-          onConditionChange={jest.fn()}
-          onValidityChange={jest.fn()}
+          onConditionChange={vi.fn()}
+          onValidityChange={vi.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -528,8 +539,8 @@ describe('ConditionEditor', () => {
         <ConditionEditor
           condition={condition}
           status="enabled"
-          onConditionChange={jest.fn()}
-          onValidityChange={jest.fn()}
+          onConditionChange={vi.fn()}
+          onValidityChange={vi.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -548,8 +559,8 @@ describe('ConditionEditor', () => {
         <ConditionEditor
           condition={condition}
           status="enabled"
-          onConditionChange={jest.fn()}
-          onValidityChange={jest.fn()}
+          onConditionChange={vi.fn()}
+          onValidityChange={vi.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -568,8 +579,8 @@ describe('ConditionEditor', () => {
         <ConditionEditor
           condition={condition}
           status="enabled"
-          onConditionChange={jest.fn()}
-          onValidityChange={jest.fn()}
+          onConditionChange={vi.fn()}
+          onValidityChange={vi.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -588,8 +599,8 @@ describe('ConditionEditor', () => {
         <ConditionEditor
           condition={condition}
           status="enabled"
-          onConditionChange={jest.fn()}
-          onValidityChange={jest.fn()}
+          onConditionChange={vi.fn()}
+          onValidityChange={vi.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -660,8 +671,8 @@ describe('ConditionEditor', () => {
     });
 
     it('should report valid YAML and update condition on parse', async () => {
-      jest.useFakeTimers();
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      vi.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       renderWithProviders(
         <ConditionEditor
           condition={{ field: 'severity_text', eq: 'info' }}
@@ -681,13 +692,13 @@ describe('ConditionEditor', () => {
 
       // Wait for debounce to complete
       act(() => {
-        jest.advanceTimersByTime(400);
+        vi.advanceTimersByTime(400);
       });
 
       expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'severity_text', eq: 'warn' });
       expect(mockOnValidityChange).toHaveBeenLastCalledWith(true);
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 });

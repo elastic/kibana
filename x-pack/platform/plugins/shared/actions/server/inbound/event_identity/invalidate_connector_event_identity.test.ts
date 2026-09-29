@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
 
@@ -12,10 +15,10 @@ import { encodeApiKey } from './encode_api_key';
 import { invalidateConnectorEventIdentity } from './invalidate_connector_event_identity';
 
 describe('invalidateConnectorEventIdentity', () => {
-  const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('invalidates the ES key as the internal user', async () => {

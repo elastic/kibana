@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useGetReplacements } from '../services/replacements/hooks/use_get_replacements';
 import { useResolveAnonymizedValues } from './use_resolve_anonymized_values';
 
-jest.mock('../services/replacements/hooks/use_get_replacements', () => ({
-  useGetReplacements: jest.fn(),
-}));
+vi.mock('../services/replacements/hooks/use_get_replacements', () => {
+      const mocked = {
+      useGetReplacements: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const client = {
-  getReplacements: jest.fn(),
-  deanonymizeText: jest.fn(),
-  getTokenToOriginalMap: jest.fn(),
+  getReplacements: vi.fn(),
+  deanonymizeText: vi.fn(),
+  getTokenToOriginalMap: vi.fn(),
 };
 
 const setReplacementsQuery = (overrides = {}) => {
-  jest.mocked(useGetReplacements).mockReturnValue({
+  vi.mocked(useGetReplacements).mockReturnValue({
     data: undefined,
     isLoading: false,
     error: undefined,
@@ -30,7 +35,7 @@ const setReplacementsQuery = (overrides = {}) => {
 
 describe('useResolveAnonymizedValues', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setReplacementsQuery();
   });
 

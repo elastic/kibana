@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { Filter } from '@kbn/es-query';
 import { getInitialAppState } from './get_initial_app_state';
@@ -112,7 +114,7 @@ describe('getInitialAppState', () => {
 
   test('should return default query if query is undefined', () => {
     const services = createDiscoverServicesMock();
-    services.data.query.queryString.getDefaultQuery = jest.fn().mockReturnValue(defaultQuery);
+    services.data.query.queryString.getDefaultQuery = vi.fn().mockReturnValue(defaultQuery);
     const persistedTab = fromTabStateToSavedObjectTab({
       tab: getTabStateMock({
         id: 'new-saved-search-id',
@@ -423,7 +425,7 @@ describe('getInitialAppState', () => {
           // Given
           const services = createDiscoverServicesMock();
           const dataSource = createDataViewDataSource({ dataViewId: 'some-data-view-id' });
-          services.data.query.queryString.getDefaultQuery = jest.fn().mockReturnValue(defaultQuery);
+          services.data.query.queryString.getDefaultQuery = vi.fn().mockReturnValue(defaultQuery);
 
           // When
           const appState = getInitialAppState({
@@ -475,7 +477,7 @@ describe('getInitialAppState', () => {
             // Given
             const services = createDiscoverServicesMock();
             const dataSource = createDataViewDataSource({ dataViewId: 'some-data-view-id' });
-            services.data.query.queryString.getDefaultQuery = jest
+            services.data.query.queryString.getDefaultQuery = vi
               .fn()
               .mockReturnValue(defaultQuery);
 
@@ -503,7 +505,7 @@ describe('getInitialAppState', () => {
           it('should return an esql initial query', () => {
             // Given
             const services = createDiscoverServicesMock();
-            services.storage.get = jest
+            services.storage.get = vi
               .fn()
               .mockReturnValue({ currentMode: 'esql', defaultMode: 'classic' });
             mockParticularUiSettings(
@@ -538,7 +540,7 @@ describe('getInitialAppState', () => {
         describe('when the persisted query mode was recorded against a stale default mode', () => {
           it('should ignore a legacy (pre-object) persisted value and use the current esql default', () => {
             const services = createDiscoverServicesMock();
-            services.storage.get = jest.fn().mockReturnValue('classic');
+            services.storage.get = vi.fn().mockReturnValue('classic');
             mockParticularUiSettings(
               {
                 [DEFAULT_ESQL_QUERY_SETTING]: '',
@@ -546,7 +548,7 @@ describe('getInitialAppState', () => {
               },
               services.uiSettings
             );
-            services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+            services.discoverFeatureFlags.getIsEsqlDefault = vi.fn(() => true);
 
             const appState = getInitialAppState({
               hasGlobalState: false,
@@ -568,7 +570,7 @@ describe('getInitialAppState', () => {
 
           it('should ignore a persisted value recorded under a different default mode and use the current default', () => {
             const services = createDiscoverServicesMock();
-            services.storage.get = jest
+            services.storage.get = vi
               .fn()
               .mockReturnValue({ currentMode: 'classic', defaultMode: 'classic' });
             mockParticularUiSettings(
@@ -578,7 +580,7 @@ describe('getInitialAppState', () => {
               },
               services.uiSettings
             );
-            services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+            services.discoverFeatureFlags.getIsEsqlDefault = vi.fn(() => true);
 
             const appState = getInitialAppState({
               hasGlobalState: false,
@@ -600,12 +602,12 @@ describe('getInitialAppState', () => {
 
           it('should honor a persisted value recorded under the current default mode', () => {
             const services = createDiscoverServicesMock();
-            services.storage.get = jest
+            services.storage.get = vi
               .fn()
               .mockReturnValue({ currentMode: 'classic', defaultMode: 'esql' });
-            services.uiSettings.get = jest.fn().mockReturnValue(true);
-            services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
-            services.data.query.queryString.getDefaultQuery = jest
+            services.uiSettings.get = vi.fn().mockReturnValue(true);
+            services.discoverFeatureFlags.getIsEsqlDefault = vi.fn(() => true);
+            services.data.query.queryString.getDefaultQuery = vi
               .fn()
               .mockReturnValue(defaultQuery);
 
@@ -633,7 +635,7 @@ describe('getInitialAppState', () => {
             it('should return an esql initial query', () => {
               // Given
               const services = createDiscoverServicesMock();
-              services.storage.get = jest.fn().mockReturnValue(undefined);
+              services.storage.get = vi.fn().mockReturnValue(undefined);
               mockParticularUiSettings(
                 {
                   [DEFAULT_ESQL_QUERY_SETTING]: '',
@@ -641,7 +643,7 @@ describe('getInitialAppState', () => {
                 },
                 services.uiSettings
               );
-              services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+              services.discoverFeatureFlags.getIsEsqlDefault = vi.fn(() => true);
 
               // When
               const appState = getInitialAppState({
@@ -666,7 +668,7 @@ describe('getInitialAppState', () => {
             it('should prefer the root profile default esql query when provided', () => {
               // Given
               const services = createDiscoverServicesMock();
-              services.storage.get = jest.fn().mockReturnValue(undefined);
+              services.storage.get = vi.fn().mockReturnValue(undefined);
               mockParticularUiSettings(
                 {
                   [DEFAULT_ESQL_QUERY_SETTING]: '',
@@ -674,7 +676,7 @@ describe('getInitialAppState', () => {
                 },
                 services.uiSettings
               );
-              services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+              services.discoverFeatureFlags.getIsEsqlDefault = vi.fn(() => true);
 
               const defaultProfileEsqlQuery = {
                 query: 'FROM test | WHERE 1 == 1',
@@ -705,8 +707,8 @@ describe('getInitialAppState', () => {
               it('should prefer the setting over the profile default and the data view query', () => {
                 // Given
                 const services = createDiscoverServicesMock();
-                services.storage.get = jest.fn().mockReturnValue(undefined);
-                services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+                services.storage.get = vi.fn().mockReturnValue(undefined);
+                services.discoverFeatureFlags.getIsEsqlDefault = vi.fn(() => true);
                 mockParticularUiSettings(
                   {
                     [DEFAULT_ESQL_QUERY_SETTING]: 'FROM my-custom-index',
@@ -739,8 +741,8 @@ describe('getInitialAppState', () => {
               it('should fall through to the data view query when the setting is only whitespace', () => {
                 // Given
                 const services = createDiscoverServicesMock();
-                services.storage.get = jest.fn().mockReturnValue(undefined);
-                services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+                services.storage.get = vi.fn().mockReturnValue(undefined);
+                services.discoverFeatureFlags.getIsEsqlDefault = vi.fn(() => true);
                 mockParticularUiSettings(
                   {
                     [DEFAULT_ESQL_QUERY_SETTING]: ' ',
@@ -774,10 +776,10 @@ describe('getInitialAppState', () => {
               it('should return the default query', () => {
                 // Given
                 const services = createDiscoverServicesMock();
-                services.storage.get = jest.fn().mockReturnValue(undefined);
-                services.uiSettings.get = jest.fn().mockReturnValue(false);
-                services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
-                services.data.query.queryString.getDefaultQuery = jest
+                services.storage.get = vi.fn().mockReturnValue(undefined);
+                services.uiSettings.get = vi.fn().mockReturnValue(false);
+                services.discoverFeatureFlags.getIsEsqlDefault = vi.fn(() => true);
+                services.data.query.queryString.getDefaultQuery = vi
                   .fn()
                   .mockReturnValue(defaultQuery);
 
@@ -806,7 +808,7 @@ describe('getInitialAppState', () => {
               it('should return the default query', () => {
                 // Given
                 const services = createDiscoverServicesMock();
-                services.storage.get = jest.fn().mockReturnValue(undefined);
+                services.storage.get = vi.fn().mockReturnValue(undefined);
                 mockParticularUiSettings(
                   {
                     [DEFAULT_ESQL_QUERY_SETTING]: '',
@@ -814,8 +816,8 @@ describe('getInitialAppState', () => {
                   },
                   services.uiSettings
                 );
-                services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
-                services.data.query.queryString.getDefaultQuery = jest
+                services.discoverFeatureFlags.getIsEsqlDefault = vi.fn(() => true);
+                services.data.query.queryString.getDefaultQuery = vi
                   .fn()
                   .mockReturnValue(defaultQuery);
 
@@ -853,9 +855,9 @@ describe('getInitialAppState', () => {
           it('should return the default query', () => {
             // Given
             const services = createDiscoverServicesMock();
-            services.storage.get = jest.fn().mockReturnValue(queryMode);
-            services.uiSettings.get = jest.fn().mockReturnValue(false);
-            services.data.query.queryString.getDefaultQuery = jest
+            services.storage.get = vi.fn().mockReturnValue(queryMode);
+            services.uiSettings.get = vi.fn().mockReturnValue(false);
+            services.data.query.queryString.getDefaultQuery = vi
               .fn()
               .mockReturnValue(defaultQuery);
 
@@ -978,7 +980,7 @@ describe('getInitialAppState', () => {
 
     test('should use an empty array if stored as empty in persistedTab and no default columns are set in uiSettings', () => {
       const services = createDiscoverServicesMock();
-      services.uiSettings.get = jest.fn().mockImplementation((key: string) => {
+      services.uiSettings.get = vi.fn().mockImplementation((key: string) => {
         if (key === DEFAULT_COLUMNS_SETTING) {
           return [];
         }
@@ -998,7 +1000,7 @@ describe('getInitialAppState', () => {
 
     test('should return an empty array if provided as empty via URL and no default columns are set in uiSettings', () => {
       const services = createDiscoverServicesMock();
-      services.uiSettings.get = jest.fn().mockImplementation((key: string) => {
+      services.uiSettings.get = vi.fn().mockImplementation((key: string) => {
         if (key === DEFAULT_COLUMNS_SETTING) {
           return [];
         }
@@ -1015,7 +1017,7 @@ describe('getInitialAppState', () => {
 
     test('should return undefined if not provided and no default columns are set in uiSettings', () => {
       const services = createDiscoverServicesMock();
-      services.uiSettings.get = jest.fn().mockImplementation((key: string) => {
+      services.uiSettings.get = vi.fn().mockImplementation((key: string) => {
         if (key === DEFAULT_COLUMNS_SETTING) {
           return [];
         }

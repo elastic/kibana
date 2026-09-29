@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import Boom from '@hapi/boom';
 
 import type { RequestHandler } from '@kbn/core/server';
@@ -30,7 +33,7 @@ describe('Bulk delete OAuth connections route', () => {
     const coreContext = coreMock.createRequestHandlerContext();
     return coreMock.createCustomRequestHandlerContext({
       core: coreContext,
-      licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
+      licensing: { license: { check: vi.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
 
@@ -42,11 +45,11 @@ describe('Bulk delete OAuth connections route', () => {
 
   let routeHandler: RequestHandler<any, any, any, any>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
-  let oauthMock: jest.Mocked<UiamOAuthType>;
+  let oauthMock: Mocked<UiamOAuthType>;
 
   beforeEach(() => {
     authc = authenticationServiceMock.createStart();
-    oauthMock = authc.oauth as jest.Mocked<UiamOAuthType>;
+    oauthMock = authc.oauth as Mocked<UiamOAuthType>;
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
 

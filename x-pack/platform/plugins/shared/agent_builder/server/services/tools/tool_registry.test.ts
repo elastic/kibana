@@ -5,13 +5,22 @@
  * 2.0.
  */
 
-jest.mock('@elastic/schemas/es/tools/manifest.js', () => ({
-  esManifest: [{ id: 'indices.create' }, { id: 'indices.delete' }],
-}));
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 
-jest.mock('@elastic/schemas/kibana/tools/manifest.js', () => ({
-  kibanaManifest: [{ id: 'cases.create' }],
-}));
+vi.mock('@elastic/schemas/es/tools/manifest.js', () => {
+      const mocked = {
+      esManifest: [{ id: 'indices.create' }, { id: 'indices.delete' }],
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@elastic/schemas/kibana/tools/manifest.js', () => {
+      const mocked = {
+      kibanaManifest: [{ id: 'cases.create' }],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -47,42 +56,42 @@ const applyFilters = (
 const createMockBuiltinProvider = (tools: InternalToolDefinition[]): ReadonlyToolProvider => ({
   id: 'builtin',
   readonly: true,
-  has: jest.fn((toolId) => tools.some((t) => t.id === toolId)),
-  get: jest.fn((toolId) => {
+  has: vi.fn((toolId) => tools.some((t) => t.id === toolId)),
+  get: vi.fn((toolId) => {
     const tool = tools.find((t) => t.id === toolId);
     if (!tool) throw new Error(`Tool ${toolId} not found`);
     return tool;
   }),
-  list: jest.fn((filters?: ToolProviderListFilters) => applyFilters(tools, filters)),
+  list: vi.fn((filters?: ToolProviderListFilters) => applyFilters(tools, filters)),
 });
 
 const createMockPersistedProvider = (tools: InternalToolDefinition[]): WritableToolProvider => ({
   id: 'persisted',
   readonly: false,
-  has: jest.fn(async (toolId) => tools.some((t) => t.id === toolId)),
-  get: jest.fn(async (toolId) => {
+  has: vi.fn(async (toolId) => tools.some((t) => t.id === toolId)),
+  get: vi.fn(async (toolId) => {
     const tool = tools.find((t) => t.id === toolId);
     if (!tool) throw new Error(`Tool ${toolId} not found`);
     return tool;
   }),
-  list: jest.fn(async (filters?: ToolProviderListFilters) => applyFilters(tools, filters)),
-  create: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
+  list: vi.fn(async (filters?: ToolProviderListFilters) => applyFilters(tools, filters)),
+  create: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
 });
 
-const createMockHealthClient = (): jest.Mocked<ToolHealthClient> => ({
-  get: jest.fn(),
-  upsert: jest.fn(),
-  recordSuccess: jest.fn(),
-  recordFailure: jest.fn(),
-  delete: jest.fn(),
-  listBySpace: jest.fn(),
+const createMockHealthClient = (): Mocked<ToolHealthClient> => ({
+  get: vi.fn(),
+  upsert: vi.fn(),
+  recordSuccess: vi.fn(),
+  recordFailure: vi.fn(),
+  delete: vi.fn(),
+  listBySpace: vi.fn(),
 });
 
 const availableTool = (overrides: Partial<MockedTool> = {}) =>
   createMockedTool({
-    isAvailable: jest.fn(async () => ({ status: 'available' as const })),
+    isAvailable: vi.fn(async () => ({ status: 'available' as const })),
     ...overrides,
   }) as unknown as InternalToolDefinition;
 
@@ -103,7 +112,7 @@ describe('ToolRegistryImpl', () => {
     const builtinProvider = createMockBuiltinProvider(builtinTools);
     const persistedProvider = createMockPersistedProvider(persistedTools);
     const healthClient = createMockHealthClient();
-    const runTool = jest.fn().mockResolvedValue({ results: [] });
+    const runTool = vi.fn().mockResolvedValue({ results: [] });
 
     const registry = createToolRegistry({
       logger: loggerMock.create(),
@@ -405,7 +414,7 @@ describe('ToolRegistryImpl', () => {
         id: 'unavailable-mcp',
         type: ToolType.mcp,
         tags: ['search'],
-        isAvailable: jest.fn(async () => ({ status: 'unavailable' as const })),
+        isAvailable: vi.fn(async () => ({ status: 'unavailable' as const })),
       }) as unknown as InternalToolDefinition;
 
       const { registry } = setup({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,7 +19,7 @@ import {
 import { CountryFlags, useCountryFlagsPopover } from './country_flags';
 
 describe('CountryFlags', () => {
-  const mockOnCountryClick = jest.fn();
+  const mockOnCountryClick = vi.fn();
 
   beforeEach(() => {
     mockOnCountryClick.mockClear();

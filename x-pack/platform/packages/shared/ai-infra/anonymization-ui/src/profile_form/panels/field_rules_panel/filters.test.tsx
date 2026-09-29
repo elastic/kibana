@@ -5,42 +5,47 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { FieldRulesPanelFilters } from './filters';
 import { useFieldRulesPanelContext } from './context';
 
-jest.mock('./context', () => ({
-  useFieldRulesPanelContext: jest.fn(),
-}));
+vi.mock('./context', () => {
+      const mocked = {
+      useFieldRulesPanelContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('FieldRulesPanelFilters', () => {
   it('updates search query and resets page index', () => {
-    const setFieldSearchQuery = jest.fn();
-    const setFieldPageIndex = jest.fn();
-    jest.mocked(useFieldRulesPanelContext).mockReturnValue({
+    const setFieldSearchQuery = vi.fn();
+    const setFieldPageIndex = vi.fn();
+    vi.mocked(useFieldRulesPanelContext).mockReturnValue({
       fieldSearchQuery: '',
       setFieldSearchQuery,
       fieldActionFilter: 'all',
-      setFieldActionFilter: jest.fn(),
+      setFieldActionFilter: vi.fn(),
       fieldPageIndex: 0,
       setFieldPageIndex,
       bulkAction: 'allow',
-      setBulkAction: jest.fn(),
+      setBulkAction: vi.fn(),
       bulkEntityClass: '',
-      setBulkEntityClass: jest.fn(),
+      setBulkEntityClass: vi.fn(),
       pagedRules: [],
       filteredRules: [],
       allRules: [],
       selectedFields: [],
-      setSelectedFields: jest.fn(),
+      setSelectedFields: vi.fn(),
       allFieldsSelected: false,
       hasActiveFieldFilters: false,
       selectedCount: 0,
-      toggleSelectAllFields: jest.fn(),
-      onRuleActionChange: jest.fn(),
-      onRuleEntityClassChange: jest.fn(),
-      applyBulkAction: jest.fn(),
+      toggleSelectAllFields: vi.fn(),
+      onRuleActionChange: vi.fn(),
+      onRuleEntityClassChange: vi.fn(),
+      applyBulkAction: vi.fn(),
       policyCounters: { allow: 0, anonymize: 0, deny: 0 },
       isManageMode: true,
       isSubmitting: false,
@@ -56,31 +61,31 @@ describe('FieldRulesPanelFilters', () => {
   });
 
   it('updates action filter and resets page index', () => {
-    const setFieldActionFilter = jest.fn();
-    const setFieldPageIndex = jest.fn();
-    jest.mocked(useFieldRulesPanelContext).mockReturnValue({
+    const setFieldActionFilter = vi.fn();
+    const setFieldPageIndex = vi.fn();
+    vi.mocked(useFieldRulesPanelContext).mockReturnValue({
       fieldSearchQuery: '',
-      setFieldSearchQuery: jest.fn(),
+      setFieldSearchQuery: vi.fn(),
       fieldActionFilter: 'all',
       setFieldActionFilter,
       fieldPageIndex: 1,
       setFieldPageIndex,
       bulkAction: 'allow',
-      setBulkAction: jest.fn(),
+      setBulkAction: vi.fn(),
       bulkEntityClass: '',
-      setBulkEntityClass: jest.fn(),
+      setBulkEntityClass: vi.fn(),
       pagedRules: [],
       filteredRules: [],
       allRules: [],
       selectedFields: [],
-      setSelectedFields: jest.fn(),
+      setSelectedFields: vi.fn(),
       allFieldsSelected: false,
       hasActiveFieldFilters: false,
       selectedCount: 0,
-      toggleSelectAllFields: jest.fn(),
-      onRuleActionChange: jest.fn(),
-      onRuleEntityClassChange: jest.fn(),
-      applyBulkAction: jest.fn(),
+      toggleSelectAllFields: vi.fn(),
+      onRuleActionChange: vi.fn(),
+      onRuleEntityClassChange: vi.fn(),
+      applyBulkAction: vi.fn(),
       policyCounters: { allow: 0, anonymize: 0, deny: 0 },
       isManageMode: true,
       isSubmitting: false,

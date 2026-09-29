@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { createRecursiveSerializer } from '@kbn/jest-serializers';
 
@@ -51,7 +53,7 @@ const log = new ToolingLog();
 
 class MockClient {
   helpers = {
-    bulk: jest.fn(),
+    bulk: vi.fn(),
   };
 }
 

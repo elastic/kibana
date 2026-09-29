@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -106,7 +108,7 @@ describe('ScheduleField', () => {
   it('accepts a schedule interval at the minimum on submit', async () => {
     const queryClient = createTestQueryClient();
     const services = createMockServices();
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
 
     const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
       const form = useForm<FormValues>({

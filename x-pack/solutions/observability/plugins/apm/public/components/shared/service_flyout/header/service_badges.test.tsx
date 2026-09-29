@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ServiceAnomalyScoreResponse } from '@kbn/apm-api-shared';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -12,21 +15,30 @@ import React from 'react';
 import type { ServiceFlyoutService } from '..';
 import { ServiceBadges } from './service_badges';
 
-const mockNavigateToUrl = jest.fn();
-const mockUseServiceFlyoutContext = jest.fn();
-jest.mock('../service_flyout_context', () => ({
-  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
-}));
+const mockNavigateToUrl = vi.fn();
+const mockUseServiceFlyoutContext = vi.fn();
+vi.mock('../service_flyout_context', () => {
+      const mocked = {
+      useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseServiceBadgesData = jest.fn();
-jest.mock('../hooks/use_service_badges_data', () => ({
-  useServiceBadgesData: (...args: unknown[]) => mockUseServiceBadgesData(...args),
-}));
+const mockUseServiceBadgesData = vi.fn();
+vi.mock('../hooks/use_service_badges_data', () => {
+      const mocked = {
+      useServiceBadgesData: (...args: unknown[]) => mockUseServiceBadgesData(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseServiceFlyoutLinks = jest.fn();
-jest.mock('../hooks/use_service_flyout_links', () => ({
-  useServiceFlyoutLinks: (...args: unknown[]) => mockUseServiceFlyoutLinks(...args),
-}));
+const mockUseServiceFlyoutLinks = vi.fn();
+vi.mock('../hooks/use_service_flyout_links', () => {
+      const mocked = {
+      useServiceFlyoutLinks: (...args: unknown[]) => mockUseServiceFlyoutLinks(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseNodeData: ServiceFlyoutService = {
   name: 'opbeans-java',
@@ -36,11 +48,11 @@ const baseNodeData: ServiceFlyoutService = {
 function setupContext({
   service = baseNodeData,
   transactionType,
-  locators = { get: jest.fn() },
+  locators = { get: vi.fn() },
 }: {
   service?: ServiceFlyoutService;
   transactionType?: string;
-  locators?: { get: jest.Mock };
+  locators?: { get: Mock };
 } = {}) {
   mockUseServiceFlyoutContext.mockReturnValue({
     deps: {
@@ -105,7 +117,7 @@ function renderBadges() {
 
 describe('ServiceBadges', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupLinks();
   });
 
@@ -118,9 +130,9 @@ describe('ServiceBadges', () => {
 
   describe('alerts badge', () => {
     it('shows the alerts count and renders a link to the alerts tab', () => {
-      const mockGetRedirectUrl = jest.fn().mockReturnValue('/app/apm/services/opbeans-java/alerts');
+      const mockGetRedirectUrl = vi.fn().mockReturnValue('/app/apm/services/opbeans-java/alerts');
       setupContext({
-        locators: { get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }) },
+        locators: { get: vi.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }) },
       });
       setupBadgesData({ alertsCount: 3 });
       renderBadges();
@@ -195,14 +207,14 @@ describe('ServiceBadges', () => {
     });
 
     it('passes transactionType from context to the anomaly badge navigation link', async () => {
-      const mockGetUrl = jest.fn().mockResolvedValue('/app/apm/services/opbeans-java/overview');
-      const mockGetRedirectUrl = jest
+      const mockGetUrl = vi.fn().mockResolvedValue('/app/apm/services/opbeans-java/overview');
+      const mockGetRedirectUrl = vi
         .fn()
         .mockReturnValue('/app/r?l=APM_LOCATOR&lz=compressed-payload');
       setupContext({
         transactionType: 'request',
         locators: {
-          get: jest.fn().mockReturnValue({
+          get: vi.fn().mockReturnValue({
             getUrl: mockGetUrl,
             getRedirectUrl: mockGetRedirectUrl,
           }),

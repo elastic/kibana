@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { screen } from '@testing-library/react';
 import { ProjectAPIKeys } from './project_api_keys';
 import { makeUptimePermissionsCore, render } from '../../../utils/testing';
 
-jest.mock('@kbn/observability-shared-plugin/public');
+vi.mock('@kbn/observability-shared-plugin/public');
 
 describe('<ProjectAPIKeys />', () => {
   const state = {
@@ -23,7 +25,7 @@ describe('<ProjectAPIKeys />', () => {
   };
 
   beforeAll(() => {
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+    vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       data: undefined,
       status: observabilitySharedPublic.FETCH_STATUS.SUCCESS,
       refetch: () => {},
@@ -31,7 +33,7 @@ describe('<ProjectAPIKeys />', () => {
   });
 
   it('shows the button', () => {
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+    vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       data: undefined,
       status: observabilitySharedPublic.FETCH_STATUS.SUCCESS,
       refetch: () => {},

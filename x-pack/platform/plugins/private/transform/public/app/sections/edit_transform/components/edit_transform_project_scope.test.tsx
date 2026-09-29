@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -17,14 +19,17 @@ import { EditTransformFlyoutProvider } from '../state_management/edit_transform_
 
 import { EditTransformProjectScope } from './edit_transform_project_scope';
 
-const mockUseGetTransformCpsEnabled = jest.fn(
+const mockUseGetTransformCpsEnabled = vi.fn(
   (_args?: { enabled: boolean }) => ({ data: true } as { data: boolean | undefined })
 );
 
-jest.mock('../../../app_dependencies');
-jest.mock('../../../hooks/use_get_transform_cps_enabled', () => ({
-  useGetTransformCpsEnabled: (args: { enabled: boolean }) => mockUseGetTransformCpsEnabled(args),
-}));
+vi.mock('../../../app_dependencies');
+vi.mock('../../../hooks/use_get_transform_cps_enabled', () => {
+      const mocked = {
+      useGetTransformCpsEnabled: (args: { enabled: boolean }) => mockUseGetTransformCpsEnabled(args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const originProject = {
   _id: 'origin-id',
@@ -48,7 +53,7 @@ const linkedObservabilityProject = {
 };
 
 const renderProjectScope = (projectRouting?: string) => {
-  const onOpenProjectScope = jest.fn();
+  const onOpenProjectScope = vi.fn();
   const config = {
     ...getTransformConfigMock(),
     source: {
@@ -72,7 +77,7 @@ describe('EditTransformProjectScope', () => {
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
-        fetchProjects: jest.fn(async (routing?: string) => {
+        fetchProjects: vi.fn(async (routing?: string) => {
           if (routing === PROJECT_ROUTING.ALL) {
             return {
               origin: originProject,
@@ -92,7 +97,7 @@ describe('EditTransformProjectScope', () => {
             linkedProjects: [],
           };
         }),
-        getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
+        getDefaultProjectRouting: vi.fn(() => PROJECT_ROUTING.ALL),
       },
     } as any;
   });
@@ -136,8 +141,8 @@ describe('EditTransformProjectScope', () => {
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
-        fetchProjects: jest.fn().mockRejectedValue(new Error('Project fetch failed')),
-        getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
+        fetchProjects: vi.fn().mockRejectedValue(new Error('Project fetch failed')),
+        getDefaultProjectRouting: vi.fn(() => PROJECT_ROUTING.ALL),
       },
     } as any;
     const { onOpenProjectScope } = renderProjectScope();

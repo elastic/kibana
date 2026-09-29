@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import ConnectorFields from './connector';
@@ -727,39 +729,43 @@ const providersSchemas = [
 ];
 
 const mockUseKibanaReturnValue = createStartServicesMock();
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => ({
+  useKibana: vi.fn(() => ({
     services: mockUseKibanaReturnValue,
   })),
 }));
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
-  ...jest.requireActual(
-    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
-  ),
-  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
-}));
+vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api')),
+      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@faker-js/faker', () => {
-  const originalModule = jest.requireActual('@faker-js/faker');
+vi.mock('@faker-js/faker', () => {
+  const originalModule = require('@faker-js/faker');
   return {
     ...originalModule,
     faker: {
       ...originalModule.faker,
       string: {
         ...originalModule.faker.string,
-        alpha: jest.fn().mockReturnValue('123'),
+        alpha: vi.fn().mockReturnValue('123'),
       },
     },
   };
 });
 
-jest.mock('@kbn/inference-endpoint-ui-common/src/hooks/use_providers', () => ({
-  useProviders: jest.fn(() => ({
-    data: providersSchemas,
-  })),
-}));
+vi.mock('@kbn/inference-endpoint-ui-common/src/hooks/use_providers', () => {
+      const mocked = {
+      useProviders: vi.fn(() => ({
+        data: providersSchemas,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const openAiConnector = createMockActionConnector({
   actionTypeId: '.inference',
@@ -855,11 +861,11 @@ describe('ConnectorFields renders', () => {
   });
 
   describe('Validation', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      jest.spyOn(global.Math, 'random').mockReturnValue(0.123456789);
+      vi.clearAllMocks();
+      vi.spyOn(global.Math, 'random').mockReturnValue(0.123456789);
     });
 
     it('connector validation succeeds when connector config is valid', async () => {

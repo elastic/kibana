@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { parseDocument } from 'yaml';
 import { z } from '@kbn/zod/v4';
@@ -14,26 +17,32 @@ import { formatMonacoYamlMarker } from './format_monaco_yaml_marker';
 import { useMonacoMarkersChangedInterceptor } from './use_monaco_markers_changed_interceptor';
 import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 
-jest.mock('./filter_monaco_yaml_markers', () => ({
-  filterMonacoYamlMarkers: jest.fn((markers: any[]) => markers),
-}));
-jest.mock('./format_monaco_yaml_marker', () => ({
-  formatMonacoYamlMarker: jest.fn((marker: any) => ({ ...marker, formatted: true })),
-}));
+vi.mock('./filter_monaco_yaml_markers', () => {
+      const mocked = {
+      filterMonacoYamlMarkers: vi.fn((markers: any[]) => markers),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./format_monaco_yaml_marker', () => {
+      const mocked = {
+      formatMonacoYamlMarker: vi.fn((marker: any) => ({ ...marker, formatted: true })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('yaml', () => {
-  const actual = jest.requireActual('yaml');
+vi.mock('yaml', () => {
+  const actual = require('yaml');
   return {
     ...actual,
-    parseDocument: jest.fn(actual.parseDocument),
+    parseDocument: vi.fn(actual.parseDocument),
   };
 });
 
-const parseDocumentMock = parseDocument as jest.MockedFunction<typeof parseDocument>;
+const parseDocumentMock = parseDocument as MockedFunction<typeof parseDocument>;
 
 const mockModel = {} as any;
 
-const formatMonacoYamlMarkerMock = formatMonacoYamlMarker as jest.MockedFunction<
+const formatMonacoYamlMarkerMock = formatMonacoYamlMarker as MockedFunction<
   typeof formatMonacoYamlMarker
 >;
 

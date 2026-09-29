@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IUiSettingsClient, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { ISearchStartSearchSource, SearchSource } from '@kbn/data-plugin/common';
@@ -83,7 +85,7 @@ beforeAll(async () => {
   };
 
   const soClientGet = soClient.get;
-  soClient.get = jest.fn().mockImplementation((type, id) => {
+  soClient.get = vi.fn().mockImplementation((type, id) => {
     if (id === mockSavedSearchId) return mockSavedSearch;
     return soClientGet(type, id);
   });
@@ -103,10 +105,10 @@ beforeEach(() => {
 
   mockSearchSource = createSearchSourceMock();
   mockSearchSource.setField('index', mockDataView);
-  searchSourceStart.create = jest.fn().mockResolvedValue(mockSearchSource);
+  searchSourceStart.create = vi.fn().mockResolvedValue(mockSearchSource);
 
   const uiSettingsGet = uiSettingsClient.get;
-  uiSettingsClient.get = jest.fn().mockImplementation((key: string) => {
+  uiSettingsClient.get = vi.fn().mockImplementation((key: string) => {
     if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
       return false; // this is the default for the real setting
     }
@@ -137,7 +139,7 @@ test('with search source using columns without time field in the DataView', asyn
 
 test('with search source using columns when DOC_HIDE_TIME_COLUMN_SETTING is true', async () => {
   const uiSettingsGet = uiSettingsClient.get;
-  uiSettingsClient.get = jest.fn().mockImplementation((key: string) => {
+  uiSettingsClient.get = vi.fn().mockImplementation((key: string) => {
     if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
       return true;
     }

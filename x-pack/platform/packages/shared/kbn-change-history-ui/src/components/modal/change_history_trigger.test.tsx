@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -19,8 +21,8 @@ import {
 import { TestProvider } from '../../test_utils/test_providers';
 
 const adapter: ChangeHistoryAdapter = {
-  listChanges: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-  getChange: jest.fn(),
+  listChanges: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+  getChange: vi.fn(),
 };
 
 const renderTrigger = (props: React.ComponentProps<typeof ChangeHistoryTrigger> = {}) =>

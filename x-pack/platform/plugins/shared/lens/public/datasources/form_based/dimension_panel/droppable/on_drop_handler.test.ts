@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { DropType } from '@kbn/dom-drag-drop';
 import { onDrop } from './on_drop_handler';
 import {
@@ -31,7 +34,7 @@ import {
   mockedColumns,
 } from './mocks';
 
-jest.mock('../../../../id_generator');
+vi.mock('../../../../id_generator');
 
 const dimensionGroups = [
   {
@@ -97,7 +100,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
       indexPatterns: mockDataViews(),
     };
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('dropping a field', () => {
@@ -439,7 +442,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
     });
 
     it('when duplicating fullReference column, the referenced columns get duplicated too', () => {
-      (generateId as jest.Mock).mockReturnValue(`ref1Copy`);
+      (generateId as Mock).mockReturnValue(`ref1Copy`);
       const testState: FormBasedPrivateState = {
         ...state,
         layers: {
@@ -500,8 +503,8 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
     });
 
     it('when duplicating fullReference column, the multiple referenced columns get duplicated too', () => {
-      (generateId as jest.Mock).mockReturnValueOnce(`ref1Copy`);
-      (generateId as jest.Mock).mockReturnValueOnce(`ref2Copy`);
+      (generateId as Mock).mockReturnValueOnce(`ref1Copy`);
+      (generateId as Mock).mockReturnValueOnce(`ref2Copy`);
       const testState: FormBasedPrivateState = {
         ...state,
         layers: {
@@ -565,8 +568,8 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
     });
 
     it('when duplicating fullReference column, the referenced columns get duplicated', () => {
-      (generateId as jest.Mock).mockReturnValueOnce(`ref1Copy`);
-      (generateId as jest.Mock).mockReturnValueOnce(`ref2Copy`);
+      (generateId as Mock).mockReturnValueOnce(`ref1Copy`);
+      (generateId as Mock).mockReturnValueOnce(`ref2Copy`);
       const testState: FormBasedPrivateState = {
         ...state,
         layers: {
@@ -1553,7 +1556,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             targetLayerDimensionGroups: defaultDimensionGroups,
             dropType: 'move_compatible',
           };
-          jest.clearAllMocks();
+          vi.clearAllMocks();
         });
         it('doesnt allow dropping for different data views', () => {
           props.state.layers.second.indexPatternId = 'second';
@@ -2114,7 +2117,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             },
           };
 
-          jest.clearAllMocks();
+          vi.clearAllMocks();
         });
 
         it('move_compatible; allows dropping to the compatible group in different layer to empty column', () => {

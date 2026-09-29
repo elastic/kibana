@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -17,21 +20,27 @@ import { useGlobalInlineFields } from '../../../hooks/use_global_inline_fields';
 import { ListItemOptionalFields } from './list_item_optional_fields';
 import * as i18n from '../../../translations';
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../../../../common/lib/kibana'),
-  useCasesConfig: jest.fn(),
-}));
-jest.mock('../../../hooks/use_global_inline_fields', () => ({
-  ...jest.requireActual('../../../hooks/use_global_inline_fields'),
-  useGlobalInlineFields: jest.fn(),
-}));
+vi.mock('../../../../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../common/lib/kibana')),
+      useCasesConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_global_inline_fields', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../hooks/use_global_inline_fields')),
+      useGlobalInlineFields: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useCasesConfigMock = useCasesConfig as jest.Mock;
-const useGlobalInlineFieldsMock = useGlobalInlineFields as jest.Mock;
+const useCasesConfigMock = useCasesConfig as Mock;
+const useGlobalInlineFieldsMock = useGlobalInlineFields as Mock;
 
 describe('ListItemOptionalFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useCasesConfigMock.mockReturnValue({ templatesEnabled: false });
     useGlobalInlineFieldsMock.mockReturnValue({ globalInlineFields: [], isLoading: false });
   });

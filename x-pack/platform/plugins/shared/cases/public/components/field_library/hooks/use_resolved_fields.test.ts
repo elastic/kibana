@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useResolvedFields } from './use_resolved_fields';
 import type { Field } from '../../../../common/types/domain/template/fields';
 
-const mockUseGetFieldDefinitions = jest.fn();
-jest.mock('./use_get_field_definitions', () => ({
-  useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
-}));
+const mockUseGetFieldDefinitions = vi.fn();
+vi.mock('./use_get_field_definitions', () => {
+      const mocked = {
+      useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const inlineField: Field = {
   name: 'inline',
@@ -30,7 +35,7 @@ const libraryFieldDefinition = {
 
 describe('useResolvedFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseGetFieldDefinitions.mockReturnValue({
       data: { fieldDefinitions: [libraryFieldDefinition] },
       isLoading: false,

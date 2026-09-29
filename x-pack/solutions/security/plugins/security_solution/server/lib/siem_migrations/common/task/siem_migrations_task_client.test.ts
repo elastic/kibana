@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedClass } from 'vitest';
+
 import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import type { MigrationsRunning } from './siem_migrations_task_client';
 import { SiemMigrationsTaskClient } from './siem_migrations_task_client';
@@ -24,20 +27,20 @@ import type { SiemMigrationsClientDependencies, StoredSiemMigration } from '../t
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { StoredRuleMigration } from '../../rules/types';
 
-jest.mock('./siem_migrations_task_runner');
+vi.mock('./siem_migrations_task_runner');
 
 const currentUser = {} as AuthenticatedUser;
 const dependencies = {} as SiemMigrationsClientDependencies;
 const migrationId = 'migration1';
 
 const mockRunnerInstance = {
-  setup: jest.fn().mockResolvedValue(undefined),
-  run: jest.fn().mockResolvedValue(undefined),
-  abortController: { abort: jest.fn() },
+  setup: vi.fn().mockResolvedValue(undefined),
+  run: vi.fn().mockResolvedValue(undefined),
+  abortController: { abort: vi.fn() },
 } as unknown as SiemMigrationTaskRunner;
 
 const MockTaskRunnerClass =
-  SiemMigrationTaskRunner as unknown as jest.MockedClass<SiemTaskRunnerConstructor>;
+  SiemMigrationTaskRunner as unknown as MockedClass<SiemTaskRunnerConstructor>;
 
 MockTaskRunnerClass.mockImplementation(() => mockRunnerInstance);
 
@@ -65,7 +68,7 @@ describe('RuleMigrationsTaskClient', () => {
     data = createSiemMigrationsDataClientMock();
     // @ts-expect-error resetting private property for each test.
     TestTaskClient.migrationsLastError = new Map();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('start', () => {
@@ -129,7 +132,7 @@ describe('RuleMigrationsTaskClient', () => {
       } as SiemMigrationDataStats);
 
       // Use our custom mock for this test.
-      (SiemMigrationTaskRunner as jest.Mock).mockImplementationOnce(() => mockRunnerInstance);
+      (SiemMigrationTaskRunner as Mock).mockImplementationOnce(() => mockRunnerInstance);
 
       const client = new TestTaskClient(
         migrationsRunning,
@@ -158,15 +161,15 @@ describe('RuleMigrationsTaskClient', () => {
         items: { total: 10, pending: 5, completed: 0, failed: 0 },
       } as SiemMigrationDataStats);
       const mockedRunnerInstance = {
-        setup: jest.fn().mockImplementationOnce(() => {
+        setup: vi.fn().mockImplementationOnce(() => {
           // Simulate a race condition by setting the migration as running during setup.
           migrationsRunning.set(migrationId, {} as SiemMigrationTaskRunner);
           return Promise.resolve();
         }),
-        run: jest.fn().mockResolvedValue(undefined),
-        abortController: { abort: jest.fn() },
+        run: vi.fn().mockResolvedValue(undefined),
+        abortController: { abort: vi.fn() },
       };
-      (SiemMigrationTaskRunner as jest.Mock).mockImplementation(() => mockedRunnerInstance);
+      (SiemMigrationTaskRunner as Mock).mockImplementation(() => mockedRunnerInstance);
 
       const client = new TestTaskClient(
         migrationsRunning,
@@ -415,7 +418,7 @@ describe('RuleMigrationsTaskClient', () => {
 
   describe('stop', () => {
     it('should stop a running migration', async () => {
-      const abortMock = jest.fn();
+      const abortMock = vi.fn();
       const migrationRunner = {
         abortController: { abort: abortMock },
       } as unknown as SiemMigrationTaskRunner;
@@ -485,7 +488,7 @@ describe('RuleMigrationsTaskClient', () => {
     });
 
     it('should mark migration task as stopped when manually stopping a running migration', async () => {
-      const abortMock = jest.fn();
+      const abortMock = vi.fn();
       const migrationRunner = {
         abortController: { abort: abortMock },
       } as unknown as SiemMigrationTaskRunner;
@@ -512,11 +515,11 @@ describe('RuleMigrationsTaskClient', () => {
       const error = new Error('Migration error');
 
       const mockedRunnerInstance = {
-        setup: jest.fn().mockResolvedValue(undefined),
-        run: jest.fn().mockRejectedValue(error),
+        setup: vi.fn().mockResolvedValue(undefined),
+        run: vi.fn().mockRejectedValue(error),
       } as unknown as SiemMigrationTaskRunner;
 
-      (SiemMigrationTaskRunner as jest.Mock).mockImplementation(() => mockedRunnerInstance);
+      (SiemMigrationTaskRunner as Mock).mockImplementation(() => mockedRunnerInstance);
 
       const client = new TestTaskClient(
         migrationsRunning,

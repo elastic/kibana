@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedClass } from 'vitest';
+
 import { ResourceRetriever } from './resource_retriever'; // Adjust path as needed
 import type { ResourceIdentifierConstructor } from '../../../../../../common/siem_migrations/resources';
 import { ResourceIdentifier } from '../../../../../../common/siem_migrations/resources';
@@ -13,8 +16,8 @@ import type { RuleMigrationRule } from '../../../../../../common/siem_migrations
 import type { ItemDocument } from '../../types';
 import type { ExperimentalFeatures } from '../../../../../../common';
 
-jest.mock('../../data/siem_migrations_data_resources_client');
-jest.mock('../../../../../../common/siem_migrations/resources');
+vi.mock('../../data/siem_migrations_data_resources_client');
+vi.mock('../../../../../../common/siem_migrations/resources');
 
 const migrationItem = {
   original_rule: {
@@ -23,7 +26,7 @@ const migrationItem = {
 } as unknown as RuleMigrationRule;
 
 const MockResourceIdentifierClass =
-  ResourceIdentifier as unknown as jest.MockedClass<ResourceIdentifierConstructor>;
+  ResourceIdentifier as unknown as MockedClass<ResourceIdentifierConstructor>;
 
 class TestResourceRetriever extends ResourceRetriever {
   protected ResourceIdentifierClass = MockResourceIdentifierClass;
@@ -35,24 +38,24 @@ const mockExperimentalFeatures = {
 
 const defaultResourceIdentifier = () =>
   ({
-    fromOriginal: jest.fn().mockResolvedValue([]),
-    fromResources: jest.fn().mockResolvedValue([]),
-  } as unknown as jest.Mocked<ResourceIdentifier<ItemDocument>>);
+    fromOriginal: vi.fn().mockResolvedValue([]),
+    fromResources: vi.fn().mockResolvedValue([]),
+  } as unknown as Mocked<ResourceIdentifier<ItemDocument>>);
 
 describe('ResourceRetriever', () => {
   let retriever: ResourceRetriever;
-  let mockDataClient: jest.Mocked<SiemMigrationsDataResourcesClient>;
-  let mockResourceIdentifier: jest.Mocked<ResourceIdentifier<ItemDocument>>;
+  let mockDataClient: Mocked<SiemMigrationsDataResourcesClient>;
+  let mockResourceIdentifier: Mocked<ResourceIdentifier<ItemDocument>>;
 
   beforeEach(() => {
     mockDataClient = {
-      searchBatches: jest.fn().mockReturnValue({ next: jest.fn(() => []) }),
-    } as unknown as jest.Mocked<SiemMigrationsDataResourcesClient>;
+      searchBatches: vi.fn().mockReturnValue({ next: vi.fn(() => []) }),
+    } as unknown as Mocked<SiemMigrationsDataResourcesClient>;
 
     MockResourceIdentifierClass.mockImplementation(defaultResourceIdentifier);
     mockResourceIdentifier = new MockResourceIdentifierClass('splunk', {
       experimentalFeatures: mockExperimentalFeatures,
-    }) as jest.Mocked<ResourceIdentifier<ItemDocument>>;
+    }) as Mocked<ResourceIdentifier<ItemDocument>>;
 
     retriever = new TestResourceRetriever('mockMigrationId', MockResourceIdentifierClass, {
       resourcesDataClient: mockDataClient,
@@ -92,8 +95,8 @@ describe('ResourceRetriever', () => {
       () =>
         ({
           ...defaultResourceIdentifier(),
-          fromOriginal: jest.fn().mockReturnValue(mockResourcesIdentified),
-        } as unknown as jest.Mocked<ResourceIdentifier<ItemDocument>>)
+          fromOriginal: vi.fn().mockReturnValue(mockResourcesIdentified),
+        } as unknown as Mocked<ResourceIdentifier<ItemDocument>>)
     );
 
     const result = await retriever.getResources(migrationItem.original_rule);
@@ -131,9 +134,9 @@ describe('ResourceRetriever', () => {
       () =>
         ({
           ...defaultResourceIdentifier(),
-          fromOriginal: jest.fn().mockResolvedValue(mockResourcesIdentifiedFromRule),
-          fromResources: jest.fn().mockResolvedValue([]).mockResolvedValueOnce(mockNestedResources),
-        } as unknown as jest.Mocked<ResourceIdentifier<ItemDocument>>)
+          fromOriginal: vi.fn().mockResolvedValue(mockResourcesIdentifiedFromRule),
+          fromResources: vi.fn().mockResolvedValue([]).mockResolvedValueOnce(mockNestedResources),
+        } as unknown as Mocked<ResourceIdentifier<ItemDocument>>)
     );
 
     const result = await retriever.getResources(migrationItem.original_rule);

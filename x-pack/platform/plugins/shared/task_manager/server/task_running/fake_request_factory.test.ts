@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { isExternalUiamCredential } from '@kbn/core-security-server';
 import { buildChildRequestEnricher, buildTaskFakeRequest } from './fake_request_factory';
@@ -13,7 +15,7 @@ describe('buildTaskFakeRequest', () => {
   const apiKey = 'abc';
 
   it('returns undefined when no API key is provided', () => {
-    expect(buildTaskFakeRequest({ enrichFakeRequest: jest.fn() })).toBeUndefined();
+    expect(buildTaskFakeRequest({ enrichFakeRequest: vi.fn() })).toBeUndefined();
   });
 
   it('builds a fake request with the ApiKey authorization header', () => {
@@ -50,7 +52,7 @@ describe('buildTaskFakeRequest', () => {
   });
 
   it('does not call the enrichment hook when userProfileId and userName are absent', () => {
-    const enrichFakeRequest = jest.fn();
+    const enrichFakeRequest = vi.fn();
     buildTaskFakeRequest({ apiKey, enrichFakeRequest });
     expect(enrichFakeRequest).not.toHaveBeenCalled();
   });
@@ -60,7 +62,7 @@ describe('buildTaskFakeRequest', () => {
   });
 
   it('enriches the fake request when both userProfileId and enricher are present', () => {
-    const enrichFakeRequest = jest.fn();
+    const enrichFakeRequest = vi.fn();
     const fakeRequest = buildTaskFakeRequest({
       apiKey,
       userProfileId: 'u_1',
@@ -74,7 +76,7 @@ describe('buildTaskFakeRequest', () => {
   });
 
   it('enriches the fake request with userName when present', () => {
-    const enrichFakeRequest = jest.fn();
+    const enrichFakeRequest = vi.fn();
     const fakeRequest = buildTaskFakeRequest({
       apiKey,
       userProfileId: 'u_1',
@@ -88,7 +90,7 @@ describe('buildTaskFakeRequest', () => {
   });
 
   it('enriches the fake request when only userName is present', () => {
-    const enrichFakeRequest = jest.fn();
+    const enrichFakeRequest = vi.fn();
     const fakeRequest = buildTaskFakeRequest({
       apiKey,
       userName: 'jdoe',
@@ -104,7 +106,7 @@ describe('buildTaskFakeRequest', () => {
 
 describe('buildChildRequestEnricher', () => {
   it('returns undefined when userProfileId and userName are absent', () => {
-    expect(buildChildRequestEnricher({ enrichFakeRequest: jest.fn() })).toBeUndefined();
+    expect(buildChildRequestEnricher({ enrichFakeRequest: vi.fn() })).toBeUndefined();
   });
 
   it('returns undefined when the enricher is missing', () => {
@@ -112,7 +114,7 @@ describe('buildChildRequestEnricher', () => {
   });
 
   it('returns a function that forwards the bound identity to the enricher', () => {
-    const enrichFakeRequest = jest.fn();
+    const enrichFakeRequest = vi.fn();
     const enricher = buildChildRequestEnricher({
       userProfileId: 'u_42',
       userName: 'jdoe',

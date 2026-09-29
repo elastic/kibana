@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -14,14 +17,14 @@ import { useAllEntityStoreUsers } from '../../containers/users/use_all_entity_st
 import { AllUsersQueryTabBody } from './all_users_query_tab_body';
 import { UsersType } from '../../store/model';
 
-jest.mock('../../containers/users/use_all_entity_store_users');
-jest.mock('../../../../common/containers/query_toggle');
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../containers/users/use_all_entity_store_users');
+vi.mock('../../../../common/containers/query_toggle');
+vi.mock('../../../../common/lib/kibana');
 
-const mockSearch = jest.fn();
+const mockSearch = vi.fn();
 
-jest.mock('../../../../common/containers/use_search_strategy', () => {
-  const original = jest.requireActual('../../../../common/containers/use_search_strategy');
+vi.mock('../../../../common/containers/use_search_strategy', async () => {
+  const original = (await vi.importActual('../../../../common/containers/use_search_strategy'));
   return {
     ...original,
     useSearchStrategy: () => ({
@@ -36,18 +39,18 @@ jest.mock('../../../../common/containers/use_search_strategy', () => {
         totalCount: 0,
         pageInfo: { activePage: 1, fakeTotalCount: 100, showMorePagesIndicator: false },
       },
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     }),
   };
 });
 
 describe('All users query tab body', () => {
-  const mockUseAllEntityStoreUsers = useAllEntityStoreUsers as jest.Mock;
-  const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  const mockUseAllEntityStoreUsers = useAllEntityStoreUsers as Mock;
+  const mockUseQueryToggle = useQueryToggle as Mock;
   const defaultProps = {
     skip: false,
     indexNames: [],
-    setQuery: jest.fn(),
+    setQuery: vi.fn(),
     startDate: '2019-06-25T04:31:59.345Z',
     endDate: '2019-06-25T06:31:59.345Z',
     type: UsersType.page,
@@ -63,19 +66,19 @@ describe('All users query tab body', () => {
     isInspected: false,
     totalCount: 0,
     pageInfo: { activePage: 0, fakeTotalCount: 50, showMorePagesIndicator: false },
-    loadPage: jest.fn(),
-    refetch: jest.fn(),
+    loadPage: vi.fn(),
+    refetch: vi.fn(),
     startDate: defaultProps.startDate,
     endDate: defaultProps.endDate,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAllEntityStoreUsers.mockReturnValue([false, emptyUsersArgs]);
   });
 
   it('calls search when toggleStatus=true and entity store v2 is disabled', () => {
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: vi.fn() });
     render(
       <TestProviders>
         <AllUsersQueryTabBody {...defaultProps} />
@@ -86,7 +89,7 @@ describe('All users query tab body', () => {
   });
 
   it("doesn't call search when toggleStatus=false", () => {
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: vi.fn() });
     render(
       <TestProviders>
         <AllUsersQueryTabBody {...defaultProps} />

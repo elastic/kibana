@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -16,8 +19,8 @@ import { useEntityAnalyticsRoutes } from '../../../api/api';
 import type { RiskScoreConfiguration } from '../common';
 
 // Mock the API hook
-jest.mock('../../../api/api');
-const mockUseEntityAnalyticsRoutes = useEntityAnalyticsRoutes as jest.Mock;
+vi.mock('../../../api/api');
+const mockUseEntityAnalyticsRoutes = useEntityAnalyticsRoutes as Mock;
 
 // Mock React Query
 const createWrapper = () => {
@@ -36,7 +39,7 @@ const createWrapper = () => {
 };
 
 describe('useRiskEngineSettingsQuery', () => {
-  const mockFetchRiskEngineSettings = jest.fn();
+  const mockFetchRiskEngineSettings = vi.fn();
 
   beforeEach(() => {
     mockUseEntityAnalyticsRoutes.mockReturnValue({
@@ -45,7 +48,7 @@ describe('useRiskEngineSettingsQuery', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should fetch risk engine settings successfully', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,50 +14,68 @@ import { renderWithTestingProviders } from '../../../common/mock';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
 import { AllFieldDefinitionsPage } from './all_field_definitions_page';
 
-const mockGetFieldDefinitions = jest.fn();
-const mockReorderGlobalFieldDefinitions = jest.fn();
+const mockGetFieldDefinitions = vi.fn();
+const mockReorderGlobalFieldDefinitions = vi.fn();
 
-jest.mock('../hooks/use_get_field_definitions', () => ({
-  useGetFieldDefinitions: () => mockGetFieldDefinitions(),
-}));
+vi.mock('../hooks/use_get_field_definitions', () => {
+      const mocked = {
+      useGetFieldDefinitions: () => mockGetFieldDefinitions(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Keep the production mutation hooks connected to their reporter dependencies. The API mock
 // prevents a page test from making a request if it starts a mutation.
-jest.mock('../api/api');
+vi.mock('../api/api');
 
 const mockReorderState = { isLoading: false, isError: false };
 
-jest.mock('../hooks/use_reorder_global_field_definitions', () => ({
-  useReorderGlobalFieldDefinitions: () => ({
-    mutate: mockReorderGlobalFieldDefinitions,
-    ...mockReorderState,
-  }),
-}));
+vi.mock('../hooks/use_reorder_global_field_definitions', () => {
+      const mocked = {
+      useReorderGlobalFieldDefinitions: () => ({
+        mutate: mockReorderGlobalFieldDefinitions,
+        ...mockReorderState,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/navigation', () => ({
-  useCasesTemplatesNavigation: () => ({
-    getCasesTemplatesUrl: () => '/templates',
-    navigateToCasesTemplates: jest.fn(),
-  }),
-}));
+vi.mock('../../../common/navigation', () => {
+      const mocked = {
+      useCasesTemplatesNavigation: () => ({
+        getCasesTemplatesUrl: () => '/templates',
+        navigateToCasesTemplates: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The create flyout embeds the Monaco-based YAML editor, which cannot mount in jsdom.
-jest.mock('../components/field_definition_yaml_editor', () => ({
-  FieldDefinitionYamlEditor: () => <textarea data-test-subj="fieldDefinitionYamlInput" />,
-}));
+vi.mock('../components/field_definition_yaml_editor', () => {
+      const mocked = {
+      FieldDefinitionYamlEditor: () => <textarea data-test-subj="fieldDefinitionYamlInput" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/field_definition_preview', () => ({
-  FieldDefinitionPreview: () => <div data-test-subj="fieldDefinitionPreview" />,
-}));
+vi.mock('../components/field_definition_preview', () => {
+      const mocked = {
+      FieldDefinitionPreview: () => <div data-test-subj="fieldDefinitionPreview" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockReportCreated = jest.fn();
-const mockReportUpdated = jest.fn();
-const mockReportDeleted = jest.fn();
-jest.mock('../../../analytics/field_library', () => ({
-  useFieldDefinitionCreatedEBT: () => mockReportCreated,
-  useFieldDefinitionUpdatedEBT: () => mockReportUpdated,
-  useFieldDefinitionDeletedEBT: () => mockReportDeleted,
-}));
+const mockReportCreated = vi.fn();
+const mockReportUpdated = vi.fn();
+const mockReportDeleted = vi.fn();
+vi.mock('../../../analytics/field_library', () => {
+      const mocked = {
+      useFieldDefinitionCreatedEBT: () => mockReportCreated,
+      useFieldDefinitionUpdatedEBT: () => mockReportUpdated,
+      useFieldDefinitionDeletedEBT: () => mockReportDeleted,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const buildFieldDefinition = (overrides: Partial<FieldDefinition>): FieldDefinition => ({
   fieldDefinitionId: 'id-1',
@@ -67,7 +87,7 @@ const buildFieldDefinition = (overrides: Partial<FieldDefinition>): FieldDefinit
 
 describe('AllFieldDefinitionsPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockReorderState.isLoading = false;
     mockReorderState.isError = false;
     mockGetFieldDefinitions.mockReturnValue({ data: { fieldDefinitions: [] }, isLoading: false });

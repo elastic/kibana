@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 
 import type { ObjectType } from '@kbn/config-schema';
@@ -27,7 +29,7 @@ import {
 import { interactiveSetupMock } from '../mocks';
 
 describe('Configure routes', () => {
-  let router: jest.Mocked<IRouter>;
+  let router: Mocked<IRouter>;
   let mockRouteParams: ReturnType<typeof routeDefinitionParamsMock.create>;
   let mockContext: RequestHandlerContext;
   beforeEach(() => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
@@ -15,7 +17,7 @@ describe('ServiceProviderFilter', () => {
     const { getByTestId } = render(
       <ServiceProviderFilter
         optionKeys={[]}
-        onChange={jest.fn}
+        onChange={vi.fn}
         uniqueProviders={new Set(['elasticsearch', 'unknownProvider'] as ServiceProviderKeys[])}
       />
     );

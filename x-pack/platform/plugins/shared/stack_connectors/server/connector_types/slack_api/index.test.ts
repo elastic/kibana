@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type { Services } from '@kbn/actions-plugin/server/types';
@@ -20,26 +23,26 @@ import type { SlackApiConnectorType } from '../../../common/slack_api/types';
 import type { PostMessageParams } from '@kbn/connector-schemas/slack_api';
 import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/slack_api';
 
-jest.mock('axios');
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+vi.mock('axios');
+vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
+  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
   return {
     ...originalUtils,
-    request: jest.fn(),
+    request: vi.fn(),
   };
 });
 
-const requestMock = utils.request as jest.Mock;
+const requestMock = utils.request as Mock;
 
 const services: Services = actionsMock.createServices();
-const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+const mockedLogger: Mocked<Logger> = loggerMock.create();
 const headers = {
   Authorization: 'Bearer some token',
   'Content-type': 'application/json; charset=UTF-8',
 };
 
 let connectorType: SlackApiConnectorType;
-let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let configurationUtilities: Mocked<ActionsConfigurationUtilities>;
 let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {
@@ -179,8 +182,8 @@ describe('validate secrets', () => {
 
 describe('execute', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    axios.create = jest.fn().mockImplementation(() => axios);
+    vi.resetAllMocks();
+    axios.create = vi.fn().mockImplementation(() => axios);
     connectorType = getConnectorType();
   });
 

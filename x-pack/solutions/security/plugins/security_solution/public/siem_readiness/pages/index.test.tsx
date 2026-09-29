@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useHistory, useParams } from 'react-router-dom';
@@ -12,43 +15,61 @@ import SiemReadinessDashboard from '.';
 import { useKibana } from '../../common/lib/kibana';
 import { SiemReadinessEventTypes } from '../../common/lib/telemetry/events/siem_readiness/types';
 
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
-jest.mock('react-router-dom', () => ({
-  useHistory: jest.fn(),
-  useParams: jest.fn(),
-}));
-jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [[], jest.fn()]));
-jest.mock('@kbn/siem-readiness', () => ({ ALL_CATEGORIES: [] }));
-jest.mock('./visibility_section_boxes', () => ({
-  VisibilitySectionBoxes: ({ onTabSelect }: { onTabSelect: (id: string) => void }) => (
-    <button type="button" onClick={() => onTabSelect('quality')}>
-      {'box-tab'}
-    </button>
-  ),
-}));
-jest.mock('./visibility_section_tabs', () => ({
-  VisibilitySectionTabs: ({ onTabSelect }: { onTabSelect: (id: string) => void }) => (
-    <button type="button" onClick={() => onTabSelect('continuity')}>
-      {'nav-tab'}
-    </button>
-  ),
-}));
-jest.mock('./components/configuration_panel', () => ({
-  CategoryConfigurationPanel: () => null,
-  ACTIVE_CATEGORIES_STORAGE_KEY: 'test-key',
-}));
+vi.mock('../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: vi.fn(),
+      useParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-use/lib/useLocalStorage', () => vi.fn(() => [[], vi.fn()]));
+vi.mock('@kbn/siem-readiness', () => {
+      const mocked = { ALL_CATEGORIES: [] };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./visibility_section_boxes', () => {
+      const mocked = {
+      VisibilitySectionBoxes: ({ onTabSelect }: { onTabSelect: (id: string) => void }) => (
+        <button type="button" onClick={() => onTabSelect('quality')}>
+          {'box-tab'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./visibility_section_tabs', () => {
+      const mocked = {
+      VisibilitySectionTabs: ({ onTabSelect }: { onTabSelect: (id: string) => void }) => (
+        <button type="button" onClick={() => onTabSelect('continuity')}>
+          {'nav-tab'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./components/configuration_panel', () => {
+      const mocked = {
+      CategoryConfigurationPanel: () => null,
+      ACTIVE_CATEGORIES_STORAGE_KEY: 'test-key',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockPush = jest.fn();
-const mockReportEvent = jest.fn();
+const mockPush = vi.fn();
+const mockReportEvent = vi.fn();
 
 describe('SiemReadinessDashboard telemetry', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useHistory as jest.Mock).mockReturnValue({ push: mockPush });
-    (useParams as jest.Mock).mockReturnValue({ tab: undefined });
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useHistory as Mock).mockReturnValue({ push: mockPush });
+    (useParams as Mock).mockReturnValue({ tab: undefined });
+    (useKibana as Mock).mockReturnValue({
       services: { telemetry: { reportEvent: mockReportEvent } },
     });
   });

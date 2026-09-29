@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { FieldSelect } from './field_select';
 
 describe('FieldSelect', () => {
-  const mockOnTypeChange = jest.fn();
+  const mockOnTypeChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should display placeholder when no type is selected', () => {

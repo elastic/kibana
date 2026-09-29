@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { InternalIStorageClient } from '@kbn/storage-adapter';
@@ -183,7 +186,7 @@ const createDatasetStorageClient = ({ onReadForWrite }: { onReadForWrite?: () =>
     return seqNo;
   };
 
-  const search = jest.fn(async (params: Record<string, unknown>) => {
+  const search = vi.fn(async (params: Record<string, unknown>) => {
     const query = params.query as MockQuery | undefined;
     const allRows: MockRow[] = Array.from(docs.entries()).map(([id, document]) => ({
       _id: id,
@@ -248,7 +251,7 @@ const createDatasetStorageClient = ({ onReadForWrite }: { onReadForWrite?: () =>
       meta: {} as any,
     });
 
-  const index = jest.fn(
+  const index = vi.fn(
     async ({
       id,
       op_type: opType,
@@ -274,13 +277,13 @@ const createDatasetStorageClient = ({ onReadForWrite }: { onReadForWrite?: () =>
     }
   );
 
-  const remove = jest.fn(async ({ id }: Record<string, unknown>) => {
+  const remove = vi.fn(async ({ id }: Record<string, unknown>) => {
     const deleted = docs.delete(id as string);
     seqNos.delete(id as string);
     return { result: deleted ? 'deleted' : 'not_found' };
   });
 
-  const bulk = jest.fn(
+  const bulk = vi.fn(
     async ({
       operations,
     }: {
@@ -324,7 +327,7 @@ const createDatasetStorageClient = ({ onReadForWrite }: { onReadForWrite?: () =>
 const createExamplesStorageClient = () => {
   const docs = new Map<string, DatasetExampleStorageDocument>();
 
-  const search = jest.fn(async (params: Record<string, unknown>) => {
+  const search = vi.fn(async (params: Record<string, unknown>) => {
     const termQuery = (params.query as { term?: Record<string, string> } | undefined)?.term;
     const termsQuery = (params.query as { terms?: { dataset_id?: string[] } } | undefined)?.terms
       ?.dataset_id;
@@ -401,17 +404,17 @@ const createExamplesStorageClient = () => {
     };
   });
 
-  const index = jest.fn(async ({ id, document }: Record<string, unknown>) => {
+  const index = vi.fn(async ({ id, document }: Record<string, unknown>) => {
     docs.set(id as string, document as DatasetExampleStorageDocument);
     return { result: 'created' };
   });
 
-  const remove = jest.fn(async ({ id }: Record<string, unknown>) => {
+  const remove = vi.fn(async ({ id }: Record<string, unknown>) => {
     const deleted = docs.delete(id as string);
     return { result: deleted ? 'deleted' : 'not_found' };
   });
 
-  const bulk = jest.fn(
+  const bulk = vi.fn(
     async ({
       operations,
       throwOnFail,
@@ -500,7 +503,7 @@ const createClient = ({
     getClient: () => examplesStorage.client,
   } as unknown as DatasetExamplesStorageAdapter;
 
-  const logger = { warn: jest.fn(), debug: jest.fn() } as unknown as Logger;
+  const logger = { warn: vi.fn(), debug: vi.fn() } as unknown as Logger;
 
   const client = new DatasetClient({
     datasetsStorageAdapter,
@@ -533,7 +536,7 @@ const hideFromSearch = (
   storage: ReturnType<typeof createDatasetStorageClient>,
   datasetId: string
 ) => {
-  const search = storage.client.search as jest.Mock;
+  const search = storage.client.search as Mock;
   const refreshed = search.getMockImplementation()!;
 
   search.mockImplementation(async (params: Record<string, unknown>) => {
@@ -720,8 +723,8 @@ describe('DatasetClient', () => {
       examples: [baseExampleA, baseExampleB, baseExampleC],
     });
     const [exampleA, exampleB, exampleC] = created.examples;
-    (examplesStorage.client.bulk as jest.Mock).mockClear();
-    (datasetsStorage.client.index as jest.Mock).mockClear();
+    (examplesStorage.client.bulk as Mock).mockClear();
+    (datasetsStorage.client.index as Mock).mockClear();
 
     const result = await client.deleteExamples(created.id, [
       exampleA.id,
@@ -903,7 +906,7 @@ describe('DatasetClient', () => {
 
   it('rolls back a new dataset when adding examples fails', async () => {
     const { client, examplesStorage } = createClient();
-    (examplesStorage.client.bulk as jest.Mock).mockResolvedValueOnce({
+    (examplesStorage.client.bulk as Mock).mockResolvedValueOnce({
       items: [{ index: { status: 500 } }],
     });
 
@@ -936,7 +939,7 @@ describe('DatasetClient', () => {
     });
     await client.addExamples(source.id, [baseExampleA, baseExampleB]);
     const sourceBeforeCopy = await client.get(source.id);
-    (datasetsStorage.client.index as jest.Mock).mockClear();
+    (datasetsStorage.client.index as Mock).mockClear();
 
     const copy = await client.copy(source.id, { name: 'copied-dataset' });
     const sourceAfterCopy = await client.get(source.id);
@@ -1079,7 +1082,7 @@ describe('DatasetClient', () => {
       description: 'A dataset',
       examples: [],
     });
-    const search = examplesStorage.client.search as jest.Mock;
+    const search = examplesStorage.client.search as Mock;
     search.mockResolvedValueOnce({ hits: { hits: [], total: MAX_EXAMPLES_PER_DATASET } });
 
     await expect(client.addExamples(created.id, [baseExampleA])).rejects.toThrow(
@@ -1817,7 +1820,7 @@ describe('DatasetClient', () => {
     // what the write was carrying, because only one of the two is recoverable.
     describe('when conflicts outlast the retries', () => {
       const withoutRetryDelays = async <T>(run: () => Promise<T>): Promise<T> => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         try {
           const settled = run().then(
             (value) => () => value,
@@ -1825,10 +1828,10 @@ describe('DatasetClient', () => {
               throw error;
             }
           );
-          await jest.advanceTimersByTimeAsync(10_000);
+          await vi.advanceTimersByTimeAsync(10_000);
           return (await settled)();
         } finally {
-          jest.useRealTimers();
+          vi.useRealTimers();
         }
       };
 

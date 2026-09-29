@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { getMlInferenceErrors } from './get_ml_inference_errors';
@@ -13,11 +15,11 @@ describe('getMlInferenceErrors', () => {
   const indexName = 'my-index';
 
   const mockClient = {
-    search: jest.fn(),
+    search: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should fetch aggregations and transform them', async () => {

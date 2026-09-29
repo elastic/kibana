@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/logging';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
@@ -85,9 +88,9 @@ const createDashboardClient = ({
   id?: string;
   attachmentData?: DashboardAttachmentData;
   data?: DashboardState;
-} = {}): jest.Mocked<DashboardPluginStart['client']> =>
+} = {}): Mocked<DashboardPluginStart['client']> =>
   ({
-    read: jest.fn().mockResolvedValue({
+    read: vi.fn().mockResolvedValue({
       id,
       data: data ?? attachmentDataToDashboardState(attachmentData),
       meta: {
@@ -95,11 +98,11 @@ const createDashboardClient = ({
         version: 'v1',
       },
     }),
-  } as jest.Mocked<DashboardPluginStart['client']>);
+  } as Mocked<DashboardPluginStart['client']>);
 
 const createLogger = (): Logger =>
   ({
-    warn: jest.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 const createSavedObjectsClient = () => ({} as never);
@@ -115,7 +118,7 @@ describe('dashboardSmlType', () => {
 
   it('lists dashboards across all spaces', async () => {
     const finder = {
-      find: jest.fn().mockReturnValue(
+      find: vi.fn().mockReturnValue(
         (async function* () {
           yield {
             saved_objects: [
@@ -128,10 +131,10 @@ describe('dashboardSmlType', () => {
           };
         })()
       ),
-      close: jest.fn().mockResolvedValue(undefined),
+      close: vi.fn().mockResolvedValue(undefined),
     };
     const savedObjectsClient = {
-      createPointInTimeFinder: jest.fn().mockReturnValue(finder),
+      createPointInTimeFinder: vi.fn().mockReturnValue(finder),
     };
     const dashboardSmlType = createDashboardSmlType({
       getDashboardClient: async () => createDashboardClient(),

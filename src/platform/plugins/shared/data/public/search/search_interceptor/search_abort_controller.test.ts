@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { SearchAbortController } from './search_abort_controller';
 
 const timeTravel = (msToRun = 0) => {
-  jest.advanceTimersByTime(msToRun);
-  return new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
+  vi.advanceTimersByTime(msToRun);
+  return new Promise((resolve) => require('timers').setImmediate(resolve));
 };
 
 describe('search abort controller', () => {
@@ -93,11 +95,11 @@ describe('search abort controller', () => {
 
   describe('timeout abort', () => {
     beforeEach(() => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     test('doesnt abort on timeout, if cleared', () => {

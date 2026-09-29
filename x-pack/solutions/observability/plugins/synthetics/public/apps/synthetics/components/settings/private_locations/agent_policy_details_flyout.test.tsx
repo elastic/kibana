@@ -5,37 +5,48 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AgentPolicyDetailsFlyout } from './agent_policy_details_flyout';
 import type { LocationAgentStats } from '../../../../../../common/types';
 
-jest.mock('../../../contexts', () => ({
-  useSyntheticsSettingsContext: () => ({ basePath: '/s/default' }),
-}));
+vi.mock('../../../contexts', () => {
+      const mocked = {
+      useSyntheticsSettingsContext: () => ({ basePath: '/s/default' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks', () => ({
-  useFleetPermissions: () => ({ canReadAgents: true, canReadAgentPolicies: true }),
-}));
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useFleetPermissions: () => ({ canReadAgents: true, canReadAgentPolicies: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-redux-v7', () => ({
-  useSelector: (selector: (state: unknown) => unknown) =>
-    selector({
-      agentPolicies: {
-        data: [
-          {
-            id: 'policy-1',
-            name: 'Policy One',
-            agents: 1,
-            status: 'active',
-            namespace: 'default',
-            description: 'Synthetics policy',
-            spaceIds: ['default'],
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useSelector: (selector: (state: unknown) => unknown) =>
+        selector({
+          agentPolicies: {
+            data: [
+              {
+                id: 'policy-1',
+                name: 'Policy One',
+                agents: 1,
+                status: 'active',
+                namespace: 'default',
+                description: 'Synthetics policy',
+                spaceIds: ['default'],
+              },
+            ],
           },
-        ],
-      },
-    }),
-}));
+        }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const locationStats: LocationAgentStats = {
   locationId: 'loc-1',
@@ -70,7 +81,7 @@ describe('AgentPolicyDetailsFlyout', () => {
       <AgentPolicyDetailsFlyout
         agentPolicyId="policy-1"
         locationStats={locationStats}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 

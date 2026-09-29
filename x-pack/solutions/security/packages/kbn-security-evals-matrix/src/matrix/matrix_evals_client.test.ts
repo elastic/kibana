@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { KbnClient } from '@kbn/kbn-client';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -16,7 +18,7 @@ import {
 const log = new ToolingLog();
 
 const clientReturning = (data: unknown) => {
-  const request = jest.fn().mockResolvedValue({ data, status: 200 });
+  const request = vi.fn().mockResolvedValue({ data, status: 200 });
   return { kbnClient: { request } as unknown as KbnClient, request };
 };
 
@@ -58,7 +60,7 @@ describe('MatrixEvalsClient', () => {
       })),
       total: MAX_LIST_EXPERIMENTS * 2,
     });
-    const request = jest
+    const request = vi
       .fn()
       .mockResolvedValueOnce({ data: page(1), status: 200 })
       .mockResolvedValueOnce({
@@ -78,7 +80,7 @@ describe('MatrixEvalsClient', () => {
   });
 
   it('stops paging when the server returns fewer rows than requested', async () => {
-    const request = jest.fn().mockResolvedValue({
+    const request = vi.fn().mockResolvedValue({
       data: { experiments: [experiment('only', 'main')], total: 1 },
       status: 200,
     });
@@ -101,7 +103,7 @@ describe('MatrixEvalsClient', () => {
       ),
       total: MAX_LIST_EXPERIMENTS + 5,
     });
-    const request = jest
+    const request = vi
       .fn()
       .mockResolvedValueOnce({ data: fullPage(), status: 200 })
       .mockResolvedValueOnce({
@@ -123,7 +125,7 @@ describe('MatrixEvalsClient', () => {
   });
 
   it('sends example score filters and rethrows request failures so bounded retry can engage', async () => {
-    const request = jest.fn().mockRejectedValue(new Error('boom'));
+    const request = vi.fn().mockRejectedValue(new Error('boom'));
     const client = new MatrixEvalsClient({ request } as unknown as KbnClient, log);
 
     await expect(
@@ -138,7 +140,7 @@ describe('MatrixEvalsClient', () => {
 
 describe('createEvaluationsKbnClient', () => {
   it('adds the API key header without dropping caller headers', async () => {
-    const baseRequest = jest
+    const baseRequest = vi
       .spyOn(KbnClient.prototype, 'request')
       .mockResolvedValue({ data: {}, status: 200 } as never);
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import '@kbn/react-query/mock';
@@ -29,11 +31,11 @@ const mockDataView = { fields: [] } as unknown as DataView;
 
 const mockDataViewsService = dataViewPluginMocks.createStartContract();
 mockDataViewsService.create.mockResolvedValue(mockDataView);
-mockDataViewsService.clearInstanceCache = jest.fn();
+mockDataViewsService.clearInstanceCache = vi.fn();
 
 describe('useVirtualDataViewQuery', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { MaintenanceWindowServiceContract } from '../../services/maintenance_window_service/maintenance_window_service';
 import { createMaintenanceWindowServiceMock } from '../../services/maintenance_window_service/maintenance_window_service.mock';
 import { ApplyMaintenanceWindowStep } from './apply_maintenance_window_step';
@@ -35,7 +37,7 @@ const buildMw = (overrides: Partial<ActiveMaintenanceWindow> = {}): ActiveMainte
 });
 
 describe('ApplyMaintenanceWindowStep', () => {
-  let service: jest.Mocked<MaintenanceWindowServiceContract>;
+  let service: Mocked<MaintenanceWindowServiceContract>;
   let step: ApplyMaintenanceWindowStep;
 
   beforeEach(() => {

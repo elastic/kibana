@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { i18n } from '@kbn/i18n';
 import { getCountryName, getCountryFlag } from './country_codes';
 
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    getLocale: jest.fn(),
-  },
-}));
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: {
+        getLocale: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockI18n = i18n as jest.Mocked<typeof i18n>;
+const mockI18n = i18n as Mocked<typeof i18n>;
 
 describe('country_utils', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getCountryName', () => {

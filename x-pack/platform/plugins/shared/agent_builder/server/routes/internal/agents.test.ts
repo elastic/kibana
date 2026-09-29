@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
@@ -20,15 +23,15 @@ type Handler = (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>;
 
 describe('registerInternalAgentRoutes - agent AI indices', () => {
   const handlers = new Map<string, Handler>();
-  let mockList: jest.Mock;
-  let mockGet: jest.Mock;
-  let mockResolveBase: jest.Mock;
+  let mockList: Mock;
+  let mockGet: Mock;
+  let mockResolveBase: Mock;
 
   const createMockContext = (contextEngineEnabled: boolean) => ({
     core: Promise.resolve({
       uiSettings: {
         client: {
-          get: jest.fn(async (key: string) =>
+          get: vi.fn(async (key: string) =>
             key === CONTEXT_ENGINE_ENABLED_SETTING_ID ? contextEngineEnabled : false
           ),
         },
@@ -36,13 +39,13 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
     }),
     // `wrapHandler` gates every route on the license before the handler body runs.
     licensing: Promise.resolve({
-      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
     }),
   });
 
   const mockResponse = {
-    ok: jest.fn((params: { body?: unknown }) => ({ type: 'ok', ...params })),
-    notFound: jest.fn(() => ({ type: 'notFound' })),
+    ok: vi.fn((params: { body?: unknown }) => ({ type: 'ok', ...params })),
+    notFound: vi.fn(() => ({ type: 'notFound' })),
   };
 
   const callList = (contextEngineEnabled: boolean) =>
@@ -66,35 +69,35 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
     }>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     handlers.clear();
 
-    mockList = jest.fn().mockResolvedValue([
+    mockList = vi.fn().mockResolvedValue([
       { id: 'chat-agent', type: 'chat', configuration: { tools: [], ai_indices: ['my-index'] } },
       { id: 'discovery-agent', type: 'platform.sig_events.discovery-type', configuration: {} },
     ]);
-    mockGet = jest.fn().mockResolvedValue({
+    mockGet = vi.fn().mockResolvedValue({
       id: 'chat-agent',
       type: 'chat',
       configuration: { tools: [], ai_indices: ['my-index'] },
     });
-    mockResolveBase = jest.fn(async ({ agentType }) =>
+    mockResolveBase = vi.fn(async ({ agentType }) =>
       agentType === 'chat' ? { ai_indices: ['elastic'] } : { ai_indices: ['another-one'] }
     );
 
-    const getInternalServices = jest.fn().mockReturnValue({
+    const getInternalServices = vi.fn().mockReturnValue({
       agents: {
-        getRegistry: jest.fn().mockResolvedValue({ list: mockList, get: mockGet }),
+        getRegistry: vi.fn().mockResolvedValue({ list: mockList, get: mockGet }),
         resolveAgentBaseConfiguration: mockResolveBase,
       },
     });
 
     const mockRouter = {
-      get: jest.fn().mockImplementation((config: { path: string }, routeHandler: Handler) => {
+      get: vi.fn().mockImplementation((config: { path: string }, routeHandler: Handler) => {
         handlers.set(config.path, routeHandler);
       }),
-      versioned: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },
-    } as unknown as jest.Mocked<IRouter>;
+      versioned: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() },
+    } as unknown as Mocked<IRouter>;
 
     registerInternalAgentRoutes({
       router: mockRouter,

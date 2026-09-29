@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -12,15 +14,21 @@ import { TestProviders } from '../../../../common/mock';
 import { ResponseDetails } from '.';
 import { ResponseDetailsContent } from './components/response_details';
 
-jest.mock('../../../shared/components/tools_flyout_header', () => ({
-  ToolsFlyoutHeader: ({ title }: { title: string }) => (
-    <div data-test-subj="toolsFlyoutHeaderMock">{title}</div>
-  ),
-}));
+vi.mock('../../../shared/components/tools_flyout_header', () => {
+      const mocked = {
+      ToolsFlyoutHeader: ({ title }: { title: string }) => (
+        <div data-test-subj="toolsFlyoutHeaderMock">{title}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/response_details', () => ({
-  ResponseDetailsContent: jest.fn(() => <div data-test-subj="responseDetailsContentMock" />),
-}));
+vi.mock('./components/response_details', () => {
+      const mocked = {
+      ResponseDetailsContent: vi.fn(() => <div data-test-subj="responseDetailsContentMock" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const hit = {
   id: '1',
@@ -30,10 +38,10 @@ const hit = {
 } as DataTableRecord;
 
 describe('<ResponseDetails />', () => {
-  const mockResponseDetailsContent = jest.mocked(ResponseDetailsContent);
+  const mockResponseDetailsContent = vi.mocked(ResponseDetailsContent);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders response details content with the provided hit', () => {

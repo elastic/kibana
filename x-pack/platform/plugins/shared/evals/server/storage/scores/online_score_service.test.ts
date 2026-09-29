@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AnyIDataStreamClient } from '@kbn/data-streams';
@@ -17,19 +20,19 @@ import {
 } from './online_score_service';
 
 const createDataStreamsMock = () => {
-  const create = jest.fn();
-  const search = jest.fn();
+  const create = vi.fn();
+  const search = vi.fn();
   const dataStreamClient = {
     create,
     search,
   } as unknown as AnyIDataStreamClient;
   const coreDataStreams = {
-    initializeClient: jest.fn().mockResolvedValue(dataStreamClient),
+    initializeClient: vi.fn().mockResolvedValue(dataStreamClient),
   } as unknown as DataStreamsStart;
 
   return {
     coreDataStreams,
-    initializeClient: coreDataStreams.initializeClient as jest.Mock,
+    initializeClient: coreDataStreams.initializeClient as Mock,
     create,
     search,
   };

@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-export const fetchServerResultsMock = jest.fn();
-jest.doMock('./fetch_server_results', () => ({
-  fetchServerResults: fetchServerResultsMock,
-}));
+import { vi } from 'vitest';
 
-export const fetchServerSearchableTypesMock = jest.fn();
-jest.doMock('./fetch_server_searchable_types', () => ({
-  fetchServerSearchableTypes: fetchServerSearchableTypesMock,
-}));
+export const fetchServerResultsMock = vi.fn();
+vi.doMock('./fetch_server_results', () => {
+      const mocked = {
+      fetchServerResults: fetchServerResultsMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const getDefaultPreferenceMock = jest.fn();
-jest.doMock('./utils', () => {
-  const original = jest.requireActual('./utils');
+export const fetchServerSearchableTypesMock = vi.fn();
+vi.doMock('./fetch_server_searchable_types', () => {
+      const mocked = {
+      fetchServerSearchableTypes: fetchServerSearchableTypesMock,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+export const getDefaultPreferenceMock = vi.fn();
+vi.doMock('./utils', async () => {
+  const original = (await vi.importActual('./utils'));
 
   return {
     ...original,

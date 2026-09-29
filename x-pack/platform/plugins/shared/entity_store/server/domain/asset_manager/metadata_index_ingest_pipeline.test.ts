@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -52,7 +54,7 @@ describe('metadata index ingest pipeline', () => {
 
   describe('installMetadataIndexIngestPipeline', () => {
     it('puts the pipeline through esClient.ingest.putPipeline with the expected id', async () => {
-      const putPipeline = jest.fn().mockResolvedValue(undefined);
+      const putPipeline = vi.fn().mockResolvedValue(undefined);
       const esClient = {
         ingest: { putPipeline },
       } as unknown as ElasticsearchClient;

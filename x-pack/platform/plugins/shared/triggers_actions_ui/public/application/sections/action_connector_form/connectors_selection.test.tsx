@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
@@ -93,7 +95,7 @@ describe('connectors_selection', () => {
           actionTypesIndex={actionTypeIndex}
           actionTypeRegistered={actionType}
           connectors={connectors}
-          onConnectorSelected={jest.fn()}
+          onConnectorSelected={vi.fn()}
         />
       </KibanaThemeProvider>
     );
@@ -110,7 +112,7 @@ describe('connectors_selection', () => {
           actionTypesIndex={actionTypeIndex}
           actionTypeRegistered={actionType}
           connectors={connectors}
-          onConnectorSelected={jest.fn()}
+          onConnectorSelected={vi.fn()}
         />
       </KibanaThemeProvider>
     );
@@ -128,7 +130,7 @@ describe('connectors_selection', () => {
             actionTypesIndex={actionTypeIndex}
             actionTypeRegistered={actionType}
             connectors={connectors}
-            onConnectorSelected={jest.fn()}
+            onConnectorSelected={vi.fn()}
           />
         </EuiFormRow>
       </KibanaThemeProvider>
@@ -152,7 +154,7 @@ describe('connectors_selection', () => {
             actionTypesIndex={actionTypeIndex}
             actionTypeRegistered={actionType}
             connectors={connectors}
-            onConnectorSelected={jest.fn()}
+            onConnectorSelected={vi.fn()}
           />
         </>
       </KibanaThemeProvider>
@@ -172,7 +174,7 @@ describe('connectors_selection', () => {
           actionTypesIndex={actionTypeIndex}
           actionTypeRegistered={actionType}
           connectors={connectors}
-          onConnectorSelected={jest.fn()}
+          onConnectorSelected={vi.fn()}
         />
       </KibanaThemeProvider>
     );

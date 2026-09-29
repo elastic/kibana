@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -15,18 +18,18 @@ import { useFetchSloInstances } from '../../../hooks/use_fetch_slo_instances';
 import { CompositeSloMembersSection } from './composite_slo_members_section';
 import type { CreateCompositeSLOForm } from '../types';
 
-jest.mock('../../../hooks/use_fetch_slo_definitions_with_remote');
-jest.mock('../../../hooks/use_fetch_slo_instances');
+vi.mock('../../../hooks/use_fetch_slo_definitions_with_remote');
+vi.mock('../../../hooks/use_fetch_slo_instances');
 
-const useFetchSloDefinitionsWithRemoteMock = useFetchSloDefinitionsWithRemote as jest.Mock;
-const useFetchSloInstancesMock = useFetchSloInstances as jest.Mock;
+const useFetchSloDefinitionsWithRemoteMock = useFetchSloDefinitionsWithRemote as Mock;
+const useFetchSloInstancesMock = useFetchSloInstances as Mock;
 
 const defaultDefinitions = {
   results: [{ id: 'slo-1', name: 'SLO One', groupBy: 'env' }],
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   useFetchSloDefinitionsWithRemoteMock.mockReturnValue({
     data: defaultDefinitions,
     isLoading: false,
@@ -162,7 +165,7 @@ describe('CompositeSloMembersSection', () => {
       // Regression for: the instance combo box did not wire `onSearchChange`, so user
       // input never reached the server-side `search` filter. Combined with the
       // hard-coded size=100 page, instances outside the first page were unreachable.
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const defaultValues: Partial<CreateCompositeSLOForm> = {
         members: [
           {
@@ -204,7 +207,7 @@ describe('CompositeSloMembersSection', () => {
         fireEvent.change(input, { target: { value: 'prod' } });
 
         // Search is debounced — flush timers.
-        jest.advanceTimersByTime(400);
+        vi.advanceTimersByTime(400);
 
         await waitFor(() => {
           expect(useFetchSloInstancesMock).toHaveBeenCalledWith(
@@ -212,7 +215,7 @@ describe('CompositeSloMembersSection', () => {
           );
         });
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 

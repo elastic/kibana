@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -50,7 +52,7 @@ const mockShareContext: IShareContext = {
   objectType: 'type',
   sharingData: { title: 'title', url: 'url', locatorParams: { id: 'test', params: {} } },
   isDirty: false,
-  onClose: jest.fn(),
+  onClose: vi.fn(),
 };
 
 function ExportPopoverRender({
@@ -162,7 +164,7 @@ describe('Export Integrations', () => {
           config: {
             icon: 'empty',
             label: 'CSV',
-            generateAssetExport: jest.fn(() => Promise.resolve()),
+            generateAssetExport: vi.fn(() => Promise.resolve()),
           },
         } as unknown as ExportShareConfig,
       ],
@@ -208,8 +210,8 @@ describe('Export Integrations', () => {
               isDirty={mockShareContext.isDirty}
               publicAPIEnabled={true}
               intl={null as any}
-              onCloseFlyout={jest.fn()}
-              onSave={jest.fn()}
+              onCloseFlyout={vi.fn()}
+              onSave={vi.fn()}
               isSaving={false}
               sharingData={mockShareContext.sharingData}
             />

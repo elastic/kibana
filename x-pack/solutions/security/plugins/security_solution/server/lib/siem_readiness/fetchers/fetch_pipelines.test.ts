@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { CategoriesResponse, MainCategories } from '@kbn/siem-readiness';
@@ -13,10 +15,10 @@ import { fetchPipelines } from './fetch_pipelines';
 const MINUTE = 60 * 1000;
 
 const logger = {
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
 } as unknown as Logger;
 
 /** Group an indexName -> main category mapping into the CategoriesResponse shape. */
@@ -89,21 +91,21 @@ const makeEsClient = ({
 
   return {
     indices: {
-      getSettings: jest.fn().mockResolvedValue(settingsResponse),
-      dataStreamsStats: jest.fn().mockResolvedValue({
+      getSettings: vi.fn().mockResolvedValue(settingsResponse),
+      dataStreamsStats: vi.fn().mockResolvedValue({
         data_streams: Object.entries(lastEventByStream).map(([name, maximum_timestamp]) => ({
           data_stream: name,
           maximum_timestamp,
         })),
       }),
-      getDataStream: jest.fn().mockResolvedValue({ data_streams: [] }),
+      getDataStream: vi.fn().mockResolvedValue({ data_streams: [] }),
     },
     nodes: {
-      stats: jest.fn().mockResolvedValue({
+      stats: vi.fn().mockResolvedValue({
         nodes: { node1: { ingest: { pipelines: ingestPipelines } } },
       }),
     },
-    search: jest.fn().mockImplementation((params: { aggs?: Record<string, unknown> }) => {
+    search: vi.fn().mockImplementation((params: { aggs?: Record<string, unknown> }) => {
       // Volume composite aggregation from fetchIndexHealth — not needed for silence assertions.
       if (params?.aggs?.by_index_day) {
         return Promise.resolve({ aggregations: { by_index_day: { buckets: [] } } });
@@ -119,7 +121,7 @@ const makeEsClient = ({
 };
 
 describe('fetchPipelines - per-category silence threshold', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('does NOT flag an Application/SaaS pipeline silent between 30m and 24h (regression)', async () => {
     const now = Date.now();

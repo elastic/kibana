@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type {
   ESQLCallbacks,
   ESQLFieldWithMetadata,
@@ -23,14 +25,14 @@ const fields: ESQLFieldWithMetadata[] = [
 
 const mockGetFieldsMetadata = (_fields: Record<string, { type: string }>) =>
   Promise.resolve<PartialFieldsMetadataClient>({
-    find: jest.fn().mockResolvedValue({
+    find: vi.fn().mockResolvedValue({
       fields: _fields,
     }),
   });
 
 describe('ecs suggestions', () => {
   const callbacks: Partial<ESQLCallbacks> = {
-    getColumnsFor: jest.fn(() => fields),
+    getColumnsFor: vi.fn(() => fields),
     getFieldsMetadata: mockGetFieldsMetadata({
       'ecs.field': { type: 'keyword' },
       'ecs.type_mismatch.field': { type: 'keyword' }, // orignal type is boolean

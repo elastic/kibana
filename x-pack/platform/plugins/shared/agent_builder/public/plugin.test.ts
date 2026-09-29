@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { AttachmentGroup } from '@kbn/agent-builder-common/attachments';
@@ -18,107 +21,152 @@ import type {
 import { clearSidebarRuntimeContext, setSidebarRuntimeContext } from './sidebar';
 import { AgentBuilderAccessChecker } from './services';
 
-jest.mock('./services/access', () => ({
-  ...jest.requireActual('./services/access'),
-  AgentBuilderAccessChecker: jest.fn(),
-}));
+vi.mock('./services/access', async () => {
+      const mocked = {
+      ...(await vi.importActual('./services/access')),
+      AgentBuilderAccessChecker: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MockAgentBuilderAccessChecker = jest.mocked(AgentBuilderAccessChecker);
+const MockAgentBuilderAccessChecker = vi.mocked(AgentBuilderAccessChecker);
 
-jest.mock('@kbn/shared-ux-utility', () => ({
-  dynamic: jest.fn(() => () => null),
-}));
+vi.mock('@kbn/shared-ux-utility', () => {
+      const mocked = {
+      dynamic: vi.fn(() => () => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./services', () => ({
-  AgentService: jest.fn(),
-  AttachmentsService: jest.fn(() => ({ addAttachmentType: jest.fn() })),
-  RenderersService: jest.fn(() => ({ register: jest.fn() })),
-  ConversationEventsService: jest.fn(() => ({
-    register: jest.fn(),
-    getUiDefinition: jest.fn(),
-    has: jest.fn(),
-    list: jest.fn().mockReturnValue([]),
-  })),
-  ChatService: jest.fn(),
-  ConversationsService: jest.fn(),
-  ConversationTemplatesService: jest.fn(() => ({
-    registerTab: jest.fn(),
-    getTab: jest.fn(),
-    registerTemplateUIDefinition: jest.fn(),
-    getTemplateUIDefinition: jest.fn(),
-  })),
-  DocLinksService: jest.fn(),
-  NavigationService: jest.fn(),
-  ToolsService: jest.fn(),
-  SkillsService: jest.fn(),
-  SmlService: jest.fn(),
-  OAuthClientsService: jest.fn(),
-  PluginsService: jest.fn(),
-  EventsService: jest.fn(),
-  SpaceSettingsService: jest.fn(),
-  AgentBuilderAccessChecker: jest.fn(),
-}));
+vi.mock('./services', () => {
+      const mocked = {
+      AgentService: vi.fn(),
+      AttachmentsService: vi.fn(() => ({ addAttachmentType: vi.fn() })),
+      RenderersService: vi.fn(() => ({ register: vi.fn() })),
+      ConversationEventsService: vi.fn(() => ({
+        register: vi.fn(),
+        getUiDefinition: vi.fn(),
+        has: vi.fn(),
+        list: vi.fn().mockReturnValue([]),
+      })),
+      ChatService: vi.fn(),
+      ConversationsService: vi.fn(),
+      ConversationTemplatesService: vi.fn(() => ({
+        registerTab: vi.fn(),
+        getTab: vi.fn(),
+        registerTemplateUIDefinition: vi.fn(),
+        getTemplateUIDefinition: vi.fn(),
+      })),
+      DocLinksService: vi.fn(),
+      NavigationService: vi.fn(),
+      ToolsService: vi.fn(),
+      SkillsService: vi.fn(),
+      SmlService: vi.fn(),
+      OAuthClientsService: vi.fn(),
+      PluginsService: vi.fn(),
+      EventsService: vi.fn(),
+      SpaceSettingsService: vi.fn(),
+      AgentBuilderAccessChecker: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./services/attachments', () => ({
-  createPublicAttachmentContract: jest.fn(() => ({})),
-}));
+vi.mock('./services/attachments', () => {
+      const mocked = {
+      createPublicAttachmentContract: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./services/conversation_templates', () => ({
-  createPublicConversationTemplatesContract: jest.fn(() => ({})),
-}));
+vi.mock('./services/conversation_templates', () => {
+      const mocked = {
+      createPublicConversationTemplatesContract: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./services/renderers', () => ({
-  createPublicRenderersContract: jest.fn(() => ({})),
-}));
+vi.mock('./services/renderers', () => {
+      const mocked = {
+      createPublicRenderersContract: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./services/conversation_events', () => ({
-  createPublicConversationEventsContract: jest.fn(() => ({})),
-}));
+vi.mock('./services/conversation_events', () => {
+      const mocked = {
+      createPublicConversationEventsContract: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./services/tools', () => ({
-  createPublicToolContract: jest.fn(() => ({})),
-}));
+vi.mock('./services/tools', () => {
+      const mocked = {
+      createPublicToolContract: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./services/agents', () => ({
-  createPublicAgentsContract: jest.fn(() => ({})),
-}));
+vi.mock('./services/agents', () => {
+      const mocked = {
+      createPublicAgentsContract: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./services/events', () => ({
-  createPublicEventsContract: jest.fn(() => ({})),
-}));
+vi.mock('./services/events', () => {
+      const mocked = {
+      createPublicEventsContract: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./register', () => ({
-  registerApp: jest.fn(),
-  registerAnalytics: jest.fn(),
-  buildAgentBuilderDeepLinks: jest.fn(() => []),
-}));
+vi.mock('./register', () => {
+      const mocked = {
+      registerApp: vi.fn(),
+      registerAnalytics: vi.fn(),
+      buildAgentBuilderDeepLinks: vi.fn(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./locator/register_locators', () => ({
-  registerLocators: jest.fn(),
-}));
+vi.mock('./locator/register_locators', () => {
+      const mocked = {
+      registerLocators: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./step_types', () => ({
-  registerWorkflowSteps: jest.fn(),
-}));
+vi.mock('./step_types', () => {
+      const mocked = {
+      registerWorkflowSteps: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./sidebar', () => ({
-  setSidebarServices: jest.fn(),
-  setSidebarRuntimeContext: jest.fn(),
-  clearSidebarRuntimeContext: jest.fn(),
-}));
+vi.mock('./sidebar', () => {
+      const mocked = {
+      setSidebarServices: vi.fn(),
+      setSidebarRuntimeContext: vi.fn(),
+      clearSidebarRuntimeContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/nav_control/lazy_agent_builder_nav_control', () => ({
-  AgentBuilderNavControlInitiator: () => null,
-}));
+vi.mock('./components/nav_control/lazy_agent_builder_nav_control', () => {
+      const mocked = {
+      AgentBuilderNavControlInitiator: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockInitializerContext = (): PluginInitializerContext<ConfigSchema> =>
   ({
     logger: {
-      get: jest.fn(() => ({
-        debug: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
-        error: jest.fn(),
+      get: vi.fn(() => ({
+        debug: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
       })),
     },
   } as unknown as PluginInitializerContext<ConfigSchema>);
@@ -127,14 +175,14 @@ const createMockSidebarApp = () => {
   const isOpen$ = new BehaviorSubject(false);
 
   return {
-    open: jest.fn(() => {
+    open: vi.fn(() => {
       isOpen$.next(true);
     }),
-    close: jest.fn(() => {
+    close: vi.fn(() => {
       isOpen$.next(false);
     }),
-    isOpen: jest.fn(() => isOpen$.getValue()),
-    isOpen$: jest.fn(() => isOpen$),
+    isOpen: vi.fn(() => isOpen$.getValue()),
+    isOpen$: vi.fn(() => isOpen$),
     setIsOpen: (nextIsOpen: boolean) => {
       isOpen$.next(nextIsOpen);
     },
@@ -143,9 +191,9 @@ const createMockSidebarApp = () => {
 
 const createMockCoreSetup = (): CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart> =>
   ({
-    analytics: { reportEvent: jest.fn() },
+    analytics: { reportEvent: vi.fn() },
     chrome: {
-      sidebar: { registerApp: jest.fn() },
+      sidebar: { registerApp: vi.fn() },
     },
   } as unknown as CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>);
 
@@ -162,13 +210,13 @@ const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>
       },
     },
     chrome: {
-      sidebar: { getApp: jest.fn(() => sidebarApp) },
-      controls: { aiButton: { register: jest.fn() } },
+      sidebar: { getApp: vi.fn(() => sidebarApp) },
+      controls: { aiButton: { register: vi.fn() } },
     },
     uiSettings: {
-      get$: jest.fn(() => new BehaviorSubject(false)),
+      get$: vi.fn(() => new BehaviorSubject(false)),
     },
-    analytics: { reportEvent: jest.fn() },
+    analytics: { reportEvent: vi.fn() },
   } as unknown as CoreStart);
 
 const createMockSetupDeps = (): AgentBuilderSetupDependencies =>
@@ -178,14 +226,14 @@ const createMockSetupDeps = (): AgentBuilderSetupDependencies =>
     licenseManagement: undefined,
     share: {},
     workflowsExtensions: {},
-    files: { registerFileKind: jest.fn() },
+    files: { registerFileKind: vi.fn() },
   } as unknown as AgentBuilderSetupDependencies);
 
 const createMockStartDeps = (): AgentBuilderStartDependencies =>
   ({
     licensing: {},
     inference: {},
-    files: { filesClientFactory: { asScoped: jest.fn().mockReturnValue({}) } },
+    files: { filesClientFactory: { asScoped: vi.fn().mockReturnValue({}) } },
   } as unknown as AgentBuilderStartDependencies);
 
 const createMockAttachmentGroup = (overrides: Partial<AttachmentGroup> = {}): AttachmentGroup => ({
@@ -198,27 +246,27 @@ const createMockAttachmentGroup = (overrides: Partial<AttachmentGroup> = {}): At
 
 const openSidebarAndRegisterCallbacks = (
   start: AgentBuilderPluginStart,
-  mocks: { updateProps?: jest.Mock } = {}
+  mocks: { updateProps?: Mock } = {}
 ) => {
   start.openChat({});
-  const [sidebarCtx] = jest.mocked(setSidebarRuntimeContext).mock.calls[0];
-  const mockUpdateProps = mocks.updateProps ?? jest.fn();
+  const [sidebarCtx] = vi.mocked(setSidebarRuntimeContext).mock.calls[0];
+  const mockUpdateProps = mocks.updateProps ?? vi.fn();
   sidebarCtx.onRegisterCallbacks?.({
     updateProps: mockUpdateProps,
-    resetBrowserApiTools: jest.fn(),
-    addAttachment: jest.fn(),
-    removeAttachmentById: jest.fn(),
+    resetBrowserApiTools: vi.fn(),
+    addAttachment: vi.fn(),
+    removeAttachmentById: vi.fn(),
   });
   return { mockUpdateProps };
 };
 
 describe('AgentBuilderPlugin', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     MockAgentBuilderAccessChecker.mockImplementation(
       () =>
         ({
-          getAgentBuilderAccess: jest.fn().mockResolvedValue({
+          getAgentBuilderAccess: vi.fn().mockResolvedValue({
             hasRequiredLicense: true,
             hasLlmConnector: true,
           }),
@@ -228,7 +276,7 @@ describe('AgentBuilderPlugin', () => {
 
   describe('getAgentBuilderAccess', () => {
     it('delegates to accessChecker.getAgentBuilderAccess when show privilege is granted', async () => {
-      const getAgentBuilderAccess = jest.fn().mockResolvedValue({
+      const getAgentBuilderAccess = vi.fn().mockResolvedValue({
         hasRequiredLicense: true,
         hasLlmConnector: true,
       });
@@ -256,7 +304,7 @@ describe('AgentBuilderPlugin', () => {
     });
 
     it('returns denied access without calling getAgentBuilderAccess when show privilege is missing', async () => {
-      const getAgentBuilderAccess = jest.fn();
+      const getAgentBuilderAccess = vi.fn();
       MockAgentBuilderAccessChecker.mockImplementation(
         () => ({ getAgentBuilderAccess } as unknown as AgentBuilderAccessChecker)
       );
@@ -276,7 +324,7 @@ describe('AgentBuilderPlugin', () => {
     });
 
     it('returns denied access when accessChecker.getAgentBuilderAccess resolves denied', async () => {
-      const getAgentBuilderAccess = jest.fn().mockResolvedValue({
+      const getAgentBuilderAccess = vi.fn().mockResolvedValue({
         hasRequiredLicense: false,
         hasLlmConnector: false,
       });
@@ -345,7 +393,7 @@ describe('AgentBuilderPlugin', () => {
       plugin.setup(createMockCoreSetup(), createMockSetupDeps());
       const start = plugin.start(createMockCoreStart(sidebarApp), createMockStartDeps());
       const { mockUpdateProps } = openSidebarAndRegisterCallbacks(start);
-      jest.mocked(clearSidebarRuntimeContext).mockClear();
+      vi.mocked(clearSidebarRuntimeContext).mockClear();
 
       sidebarApp.setIsOpen(false);
       start.setChatConfig({ newConversation: true });

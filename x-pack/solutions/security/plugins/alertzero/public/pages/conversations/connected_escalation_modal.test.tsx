@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -21,45 +24,57 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ConnectedEscalationModal } from './connected_escalation_modal';
 
-jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
-  useListEscalations: jest.fn(),
-  useCreateEscalation: jest.fn(),
-  useAttachToEscalation: jest.fn(),
-  useCurrentUserProfile: jest.fn(),
-  useSuggestUserProfiles: jest.fn(),
-}));
+vi.mock('@kbn/agentic-investigations-plugin/public', () => {
+      const mocked = {
+      useListEscalations: vi.fn(),
+      useCreateEscalation: vi.fn(),
+      useAttachToEscalation: vi.fn(),
+      useCurrentUserProfile: vi.fn(),
+      useSuggestUserProfiles: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/user-profile-components', () => ({
-  getUserDisplayName: (user: { username?: string }) => user?.username ?? '',
-  UserProfilesSelectable: () => <div data-test-subj="escalationModalCollaboratorPicker" />,
-}));
+vi.mock('@kbn/user-profile-components', () => {
+      const mocked = {
+      getUserDisplayName: (user: { username?: string }) => user?.username ?? '',
+      UserProfilesSelectable: () => <div data-test-subj="escalationModalCollaboratorPicker" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-http-browser', () => ({
-  isHttpFetchError: jest.fn(() => false),
-}));
+vi.mock('@kbn/core-http-browser', () => {
+      const mocked = {
+      isHttpFetchError: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseListEscalations = useListEscalations as jest.MockedFunction<typeof useListEscalations>;
-const mockUseCreateEscalation = useCreateEscalation as jest.MockedFunction<
+const mockUseListEscalations = useListEscalations as MockedFunction<typeof useListEscalations>;
+const mockUseCreateEscalation = useCreateEscalation as MockedFunction<
   typeof useCreateEscalation
 >;
-const mockUseAttachToEscalation = useAttachToEscalation as jest.MockedFunction<
+const mockUseAttachToEscalation = useAttachToEscalation as MockedFunction<
   typeof useAttachToEscalation
 >;
-const mockUseCurrentUserProfile = useCurrentUserProfile as jest.MockedFunction<
+const mockUseCurrentUserProfile = useCurrentUserProfile as MockedFunction<
   typeof useCurrentUserProfile
 >;
-const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.MockedFunction<
+const mockUseSuggestUserProfiles = useSuggestUserProfiles as MockedFunction<
   typeof useSuggestUserProfiles
 >;
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
-const createMutate = jest.fn();
-const addMutate = jest.fn();
-const onClose = jest.fn();
+const createMutate = vi.fn();
+const addMutate = vi.fn();
+const onClose = vi.fn();
 
 const investigation: Investigation = {
   id: 'inv-1',
@@ -96,7 +111,7 @@ beforeEach(() => {
     data: { results: [], pagination: { total: 0, page: 1, per_page: 20 } },
     isLoading: false,
     isError: false,
-    refetch: jest.fn(),
+    refetch: vi.fn(),
   } as unknown as ReturnType<typeof useListEscalations>);
 
   mockUseCreateEscalation.mockReturnValue({
@@ -121,18 +136,18 @@ beforeEach(() => {
 
   mockUseKibana.mockReturnValue({
     services: {
-      notifications: { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } },
+      notifications: { toasts: { addDanger: vi.fn(), addSuccess: vi.fn() } },
       application: {
-        getUrlForApp: jest.fn(
+        getUrlForApp: vi.fn(
           (_appId: string, { path = '' }: { path?: string } = {}) => `/base/app/alertzero${path}`
         ),
-        navigateToApp: jest.fn(),
+        navigateToApp: vi.fn(),
       },
     },
   } as unknown as ReturnType<typeof useKibana>);
 });
 
-afterEach(() => jest.clearAllMocks());
+afterEach(() => vi.clearAllMocks());
 
 describe('ConnectedEscalationModal', () => {
   it('renders nothing when investigation has no conversationId', () => {
@@ -222,7 +237,7 @@ describe('ConnectedEscalationModal', () => {
       },
       isLoading: false,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useListEscalations>);
 
     renderModal({ mode: 'addToExisting' });
@@ -246,7 +261,7 @@ describe('ConnectedEscalationModal', () => {
       },
       isLoading: false,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useListEscalations>);
 
     renderModal({ mode: 'addToExisting' });
@@ -260,7 +275,7 @@ describe('ConnectedEscalationModal', () => {
       data: undefined,
       isLoading: false,
       isError: true,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useListEscalations>);
 
     renderModal({ mode: 'addToExisting' });
@@ -273,7 +288,7 @@ describe('ConnectedEscalationModal', () => {
     fireEvent.click(screen.getByTestId('escalationModalCreateEscalation'));
 
     const [, callbacks] = createMutate.mock.calls[0];
-    const { services } = (mockUseKibana as jest.Mock).mock.results[0].value;
+    const { services } = (mockUseKibana as Mock).mock.results[0].value;
     // onSuccess receives the created Conversation; its id is used to build the deep link.
     callbacks.onSuccess({ id: 'new-esc-1' });
 
@@ -303,7 +318,7 @@ describe('ConnectedEscalationModal', () => {
       },
       isLoading: false,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useListEscalations>);
 
     renderModal({ mode: 'addToExisting' });
@@ -311,7 +326,7 @@ describe('ConnectedEscalationModal', () => {
     fireEvent.click(screen.getByTestId('escalationModalattachToEscalation'));
 
     const [, callbacks] = addMutate.mock.calls[0];
-    const { services } = (mockUseKibana as jest.Mock).mock.results[0].value;
+    const { services } = (mockUseKibana as Mock).mock.results[0].value;
     callbacks.onSuccess();
 
     expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(

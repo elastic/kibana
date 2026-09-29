@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { COMPARATORS } from '@kbn/alerting-comparators';
@@ -50,7 +52,7 @@ describe('AlertDetailsAppSection', () => {
             ...kibanaStartMock.startContract().services,
             uiSettings: {
               ...uiSettingsServiceMock.createStartContract(),
-              get: jest.fn().mockReturnValue(true),
+              get: vi.fn().mockReturnValue(true),
             },
           }}
         />
@@ -59,7 +61,7 @@ describe('AlertDetailsAppSection', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // To avoid https://github.com/elastic/kibana/issues/206588

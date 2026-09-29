@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { CreatePolicyModal } from './create_new_policy_modal';
@@ -30,7 +32,7 @@ describe('CreatePolicyModal', () => {
   });
 
   it('calls onBack when back button is clicked', () => {
-    const onBack = jest.fn();
+    const onBack = vi.fn();
     renderWithI18n(
       <CreatePolicyModal
         policyNames={policyNames}
@@ -45,7 +47,7 @@ describe('CreatePolicyModal', () => {
   });
 
   it('submits a valid policy name', async () => {
-    const onSave = jest.fn();
+    const onSave = vi.fn();
     renderWithI18n(
       <CreatePolicyModal
         policyNames={policyNames}
@@ -131,17 +133,17 @@ describe('CreatePolicyModal', () => {
     const validationDebounceMs = 500;
     const advanceValidation = async () => {
       await act(async () => {
-        jest.advanceTimersByTime(validationDebounceMs);
+        vi.advanceTimersByTime(validationDebounceMs);
       });
     };
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.runOnlyPendingTimers();
-      jest.useRealTimers();
+      vi.runOnlyPendingTimers();
+      vi.useRealTimers();
     });
 
     it('shows an error for duplicate policy names', async () => {

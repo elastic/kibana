@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { monaco } from '@kbn/code-editor';
@@ -21,8 +23,8 @@ import {
 import { createServiceAccountEditor } from '../../lib/service_accounts/service_account_editor';
 import { useServiceAccountEditor } from '../hooks/use_service_account_editor';
 
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('../hooks/use_service_account_editor');
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('../hooks/use_service_account_editor');
 
 const account = {
   id: 'opaque-id',
@@ -47,8 +49,8 @@ const mouseEvent = (position: monaco.Position | null): monaco.editor.IEditorMous
     altKey: false,
     metaKey: false,
     timestamp: 0,
-    preventDefault: jest.fn(),
-    stopPropagation: jest.fn(),
+    preventDefault: vi.fn(),
+    stopPropagation: vi.fn(),
   },
   target: {
     type: monaco.editor.MouseTargetType.UNKNOWN,
@@ -62,32 +64,32 @@ const mouseEvent = (position: monaco.Position | null): monaco.editor.IEditorMous
 const setup = (enabled = true, yaml = 'settings:\n  run_as: ') => {
   const directory = {
     isEnabled: () => enabled,
-    get: jest.fn().mockResolvedValue(account),
-    list: jest.fn().mockResolvedValue({ serviceAccounts: [account] }),
+    get: vi.fn().mockResolvedValue(account),
+    list: vi.fn().mockResolvedValue({ serviceAccounts: [account] }),
   };
-  jest.mocked(useServiceAccountEditor).mockReturnValue(createServiceAccountEditor(directory));
-  jest.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(createStartServicesMock()));
+  vi.mocked(useServiceAccountEditor).mockReturnValue(createServiceAccountEditor(directory));
+  vi.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(createStartServicesMock()));
   const { editor, model } = createMockMonacoEditor(yaml, {
-    addContentWidget: jest.fn((widget) => document.body.appendChild(widget.getDomNode())),
-    removeContentWidget: jest.fn((widget) => widget.getDomNode().remove()),
-    layoutContentWidget: jest.fn(),
-    createContextKey: jest.fn(() => ({ set: jest.fn(), reset: jest.fn(), get: jest.fn() })),
-    getOption: jest.fn(),
-    updateOptions: jest.fn(),
-    hasTextFocus: jest.fn(() => true),
-    getPosition: jest.fn(() => new monaco.Position(2, 11)),
-    onDidFocusEditorText: jest.fn(() => ({ dispose: jest.fn() })),
-    onDidBlurEditorText: jest.fn(() => ({ dispose: jest.fn() })),
-    onMouseMove: jest.fn(() => ({ dispose: jest.fn() })),
-    onMouseLeave: jest.fn(() => ({ dispose: jest.fn() })),
-    trigger: jest.fn(),
-    pushUndoStop: jest.fn(() => true),
-    executeEdits: jest.fn(() => true),
+    addContentWidget: vi.fn((widget) => document.body.appendChild(widget.getDomNode())),
+    removeContentWidget: vi.fn((widget) => widget.getDomNode().remove()),
+    layoutContentWidget: vi.fn(),
+    createContextKey: vi.fn(() => ({ set: vi.fn(), reset: vi.fn(), get: vi.fn() })),
+    getOption: vi.fn(),
+    updateOptions: vi.fn(),
+    hasTextFocus: vi.fn(() => true),
+    getPosition: vi.fn(() => new monaco.Position(2, 11)),
+    onDidFocusEditorText: vi.fn(() => ({ dispose: vi.fn() })),
+    onDidBlurEditorText: vi.fn(() => ({ dispose: vi.fn() })),
+    onMouseMove: vi.fn(() => ({ dispose: vi.fn() })),
+    onMouseLeave: vi.fn(() => ({ dispose: vi.fn() })),
+    trigger: vi.fn(),
+    pushUndoStop: vi.fn(() => true),
+    executeEdits: vi.fn(() => true),
   });
-  model.isDisposed = jest.fn(() => false);
+  model.isDisposed = vi.fn(() => false);
   const result = render(<ServiceAccountEditorWidgets editor={editor} />, { wrapper: I18nProvider });
   const action = async (id: string) => {
-    const descriptor = jest
+    const descriptor = vi
       .mocked(editor.addAction)
       .mock.calls.find(([value]) => value.id === `workflows.serviceAccount.${id}`)?.[0];
     if (!descriptor) throw new Error(`Missing action: ${id}`);
@@ -100,12 +102,12 @@ const setup = (enabled = true, yaml = 'settings:\n  run_as: ') => {
 
 describe('ServiceAccountEditorWidgets', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    HTMLElement.prototype.scrollIntoView = jest.fn();
+    vi.clearAllMocks();
+    HTMLElement.prototype.scrollIntoView = vi.fn();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('offers unrelated accounts when replacing an existing ID with Ctrl+Space', async () => {
@@ -131,11 +133,11 @@ describe('ServiceAccountEditorWidgets', () => {
     });
     await screen.findByRole('option', { name: 'Investigation reader viewer' });
     Object.assign(model, createMockMonacoModel('settings:\n  run_as: Different'));
-    model.getVersionId = jest.fn(() => 2);
+    model.getVersionId = vi.fn(() => 2);
     const position = new monaco.Position(2, 20);
-    jest.mocked(editor.getPosition).mockReturnValue(position);
+    vi.mocked(editor.getPosition).mockReturnValue(position);
     act(() => {
-      jest.mocked(editor.onDidChangeModelContent).mock.calls[0][0]({
+      vi.mocked(editor.onDidChangeModelContent).mock.calls[0][0]({
         changes: [
           {
             range: new monaco.Range(2, 11, 2, 11),
@@ -151,7 +153,7 @@ describe('ServiceAccountEditorWidgets', () => {
         isFlush: false,
         isEolChange: false,
       });
-      jest.mocked(editor.onDidChangeCursorPosition).mock.calls[0][0]({
+      vi.mocked(editor.onDidChangeCursorPosition).mock.calls[0][0]({
         position,
         secondaryPositions: [],
         reason: monaco.editor.CursorChangeReason.NotSet,
@@ -170,7 +172,7 @@ describe('ServiceAccountEditorWidgets', () => {
   it.each(['over value', 'outside value', 'leave editor'])(
     'keeps pending completions when the pointer moves %s',
     async (movement) => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const { directory, editor } = setup(true, 'settings:\n  run_as: opaque-id');
       let resolvePage: (page: { serviceAccounts: (typeof account)[] }) => void = () => {};
       directory.list.mockReturnValue(
@@ -179,14 +181,14 @@ describe('ServiceAccountEditorWidgets', () => {
         })
       );
       await act(async () => {
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
       });
       expect(directory.list).toHaveBeenCalled();
       act(() => {
         if (movement === 'leave editor') {
-          jest.mocked(editor.onMouseLeave).mock.calls[0][0](mouseEvent(null));
+          vi.mocked(editor.onMouseLeave).mock.calls[0][0](mouseEvent(null));
         } else {
-          jest
+          vi
             .mocked(editor.onMouseMove)
             .mock.calls[0][0](
               mouseEvent(new monaco.Position(movement === 'over value' ? 2 : 1, 12))
@@ -198,7 +200,7 @@ describe('ServiceAccountEditorWidgets', () => {
       });
       expect(screen.getByRole('option')).toHaveTextContent(account.name);
       await act(async () => {
-        jest.advanceTimersByTime(500);
+        vi.advanceTimersByTime(500);
       });
       expect(screen.getByRole('option')).toHaveTextContent(account.name);
       expect(screen.queryByText('This deployment')).not.toBeInTheDocument();
@@ -274,7 +276,7 @@ describe('ServiceAccountEditorWidgets', () => {
   it('does not accept a suggestion after the editor becomes read-only', async () => {
     const { editor } = setup();
     const option = await screen.findByRole('option');
-    jest.mocked(editor.getOption).mockReturnValue(true);
+    vi.mocked(editor.getOption).mockReturnValue(true);
     fireEvent.click(option);
     expect(editor.executeEdits).not.toHaveBeenCalled();
   });

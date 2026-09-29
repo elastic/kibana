@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   CheckPrivilegesResponse,
@@ -22,15 +25,15 @@ import { Actions } from '../authorization';
 describe('ensureAuthorized', () => {
   function setupDependencies() {
     const actions = new Actions();
-    jest
+    vi
       .spyOn(actions.savedObject, 'get')
       .mockImplementation((type: string, action: string) => `mock-saved_object:${type}/${action}`);
     const errors = {
-      decorateForbiddenError: jest.fn().mockImplementation((err) => err),
-      decorateGeneralError: jest.fn().mockImplementation((err) => err),
-    } as unknown as jest.Mocked<typeof SavedObjectsErrorHelpers>;
-    const checkSavedObjectsPrivilegesAsCurrentUser: jest.MockedFunction<CheckSavedObjectsPrivileges> =
-      jest.fn();
+      decorateForbiddenError: vi.fn().mockImplementation((err) => err),
+      decorateGeneralError: vi.fn().mockImplementation((err) => err),
+    } as unknown as Mocked<typeof SavedObjectsErrorHelpers>;
+    const checkSavedObjectsPrivilegesAsCurrentUser: MockedFunction<CheckSavedObjectsPrivileges> =
+      vi.fn();
     return { actions, errors, checkSavedObjectsPrivilegesAsCurrentUser };
   }
 

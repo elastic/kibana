@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { UpdateESQLQueryAction } from './update_esql_query_actions';
 
@@ -21,7 +23,7 @@ describe('update ES|QL query action', () => {
     });
 
     it('is incompatible if query is not ES|QL', async () => {
-      dataMock.query.queryString.getQuery = jest.fn().mockReturnValue({ query: 'not esql' });
+      dataMock.query.queryString.getQuery = vi.fn().mockReturnValue({ query: 'not esql' });
       const updateQueryAction = new UpdateESQLQueryAction(dataMock);
       const isCompatible = await updateQueryAction.isCompatible();
 
@@ -29,7 +31,7 @@ describe('update ES|QL query action', () => {
     });
 
     it('is compatible if query is ES|QL', async () => {
-      dataMock.query.queryString.getQuery = jest.fn().mockReturnValue({ esql: 'from meow' });
+      dataMock.query.queryString.getQuery = vi.fn().mockReturnValue({ esql: 'from meow' });
       const updateQueryAction = new UpdateESQLQueryAction(dataMock);
       const isCompatible = await updateQueryAction.isCompatible();
 

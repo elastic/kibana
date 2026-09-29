@@ -76,19 +76,27 @@ describe('filters notification action', () => {
     expect(await action.isCompatible(context)).toBe(true);
   });
 
-  it('getCompatibilityChangesSubject emits when filters change', (done) => {
-    const subject = action.getCompatibilityChangesSubject(context);
-    subject?.pipe(take(1)).subscribe(() => {
-      done();
-    });
-    updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
-  });
+  it('getCompatibilityChangesSubject emits when filters change', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-  it('getCompatibilityChangesSubject emits when query changes', (done) => {
-    const subject = action.getCompatibilityChangesSubject(context);
-    subject?.pipe(take(1)).subscribe(() => {
-      done();
-    });
-    updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
-  });
+          const subject = action.getCompatibilityChangesSubject(context);
+          subject?.pipe(take(1)).subscribe(() => {
+            done();
+          });
+          updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
+        
+      }));
+
+  it('getCompatibilityChangesSubject emits when query changes', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+          const subject = action.getCompatibilityChangesSubject(context);
+          subject?.pipe(take(1)).subscribe(() => {
+            done();
+          });
+          updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
+        
+      }));
 });

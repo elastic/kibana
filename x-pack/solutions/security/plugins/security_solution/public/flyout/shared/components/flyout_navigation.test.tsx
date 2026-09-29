@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { act, render } from '@testing-library/react';
@@ -25,7 +27,7 @@ import {
   useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
 
-const expandDetails = jest.fn();
+const expandDetails = vi.fn();
 const flyoutHistory: FlyoutPanelHistory[] = [
   { lastOpen: Date.now(), panel: { id: 'id1', params: {} } },
   { lastOpen: Date.now(), panel: { id: 'id2', params: {} } },
@@ -35,22 +37,25 @@ const ExpandableFlyoutTestProviders: FC<PropsWithChildren<{}>> = ({ children }) 
   return <TestProviders>{children}</TestProviders>;
 };
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  useExpandableFlyoutState: jest.fn(),
-  useExpandableFlyoutHistory: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+      useExpandableFlyoutState: vi.fn(),
+      useExpandableFlyoutHistory: vi.fn(),
+      ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const flyoutContextValue = {
-  closeLeftPanel: jest.fn(),
+  closeLeftPanel: vi.fn(),
 } as unknown as ExpandableFlyoutApi;
 
 describe('<FlyoutNavigation />', () => {
   beforeEach(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
-    jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
-    jest.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+    vi.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
+    vi.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
   });
 
   it('should render expand button', () => {
@@ -68,7 +73,7 @@ describe('<FlyoutNavigation />', () => {
   });
 
   it('should render collapse button', () => {
-    jest
+    vi
       .mocked(useExpandableFlyoutState)
       .mockReturnValue({ left: {} } as unknown as ExpandableFlyoutState);
 
@@ -121,7 +126,7 @@ describe('<FlyoutNavigation />', () => {
   });
 
   it('should render history button when there is no item in history', () => {
-    jest.mocked(useExpandableFlyoutHistory).mockReturnValue([]);
+    vi.mocked(useExpandableFlyoutHistory).mockReturnValue([]);
     const { getByTestId } = render(
       <ExpandableFlyoutTestProviders>
         <FlyoutNavigation flyoutIsExpandable={false} />

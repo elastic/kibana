@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -43,7 +45,7 @@ describe('ItemRow', () => {
   });
 
   it('renders a badge and actions when provided', () => {
-    const onAction = jest.fn();
+    const onAction = vi.fn();
     renderRow(
       <ItemRow
         label="Drive"

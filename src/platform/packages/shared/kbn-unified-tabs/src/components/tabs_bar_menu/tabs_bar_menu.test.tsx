@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -32,10 +34,10 @@ const mockRecentlyClosedSingle: RecentlyClosedTabItem[] = [
 ];
 
 describe('TabsBarMenu', () => {
-  const mockOnSelectOpenedTab = jest.fn();
-  const mockOnSelectClosedTab = jest.fn();
-  const mockOnRestoreClosedGroup = jest.fn();
-  const mockOnClearRecentlyClosed = jest.fn();
+  const mockOnSelectOpenedTab = vi.fn();
+  const mockOnSelectClosedTab = vi.fn();
+  const mockOnRestoreClosedGroup = vi.fn();
+  const mockOnClearRecentlyClosed = vi.fn();
 
   const defaultProps = {
     items: mockTabs,
@@ -49,7 +51,7 @@ describe('TabsBarMenu', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the menu button', async () => {

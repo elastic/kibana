@@ -4,23 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import 'moment-timezone';
 import moment from 'moment';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useDefaultTimezone } from './use_default_timezone';
 
-jest.mock('@kbn/kibana-react-plugin/public');
-const mockedUseUiSetting = jest.mocked(useUiSetting);
+vi.mock('@kbn/kibana-react-plugin/public');
+const mockedUseUiSetting = vi.mocked(useUiSetting);
 
 describe('useDefaultTimezone', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     moment.tz.setDefault('Browser');
   });
 
   it('returns browser timezone when kibanaTz is "Browser"', () => {
     mockedUseUiSetting.mockReturnValue('Browser');
-    jest.spyOn(moment.tz, 'guess').mockReturnValue('Europe/Berlin');
+    vi.spyOn(moment.tz, 'guess').mockReturnValue('Europe/Berlin');
     const result = useDefaultTimezone();
     expect(result).toEqual({ defaultTimezone: 'Europe/Berlin', isBrowser: true });
   });
@@ -28,7 +30,7 @@ describe('useDefaultTimezone', () => {
   it('returns UTC when kibanaTz is falsy', () => {
     mockedUseUiSetting.mockReturnValue(undefined);
     // @ts-expect-error testing fallback to UTC
-    jest.spyOn(moment.tz, 'guess').mockReturnValue(undefined);
+    vi.spyOn(moment.tz, 'guess').mockReturnValue(undefined);
     const result = useDefaultTimezone();
     expect(result).toEqual({ defaultTimezone: 'UTC', isBrowser: true });
   });

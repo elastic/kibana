@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { useKibana } from './lib/kibana';
 import { useGenericBulkGetUserProfiles } from './use_bulk_get_user_profiles';
 
-jest.mock('./lib/kibana');
+vi.mock('./lib/kibana');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createWrapper = (queryClient: QueryClient) => {
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
@@ -28,12 +31,12 @@ const MOCK_PROFILES = [
 ];
 
 describe('useGenericBulkGetUserProfiles', () => {
-  let mockBulkGet: jest.Mock;
+  let mockBulkGet: Mock;
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockBulkGet = jest.fn().mockResolvedValue(MOCK_PROFILES);
+    vi.clearAllMocks();
+    mockBulkGet = vi.fn().mockResolvedValue(MOCK_PROFILES);
     queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
       logger: { log: () => null, warn: () => null, error: () => null },

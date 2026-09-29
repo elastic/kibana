@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import { checkEntityExists, EntityStoreAccessError } from './check_entity_exists';
 
 describe('checkEntityExists', () => {
-  const listEntities = jest.fn();
-  const latestIndexName = jest.fn();
-  const hasPrivileges = jest.fn();
+  const listEntities = vi.fn();
+  const latestIndexName = vi.fn();
+  const hasPrivileges = vi.fn();
   const crudClient = { listEntities, latestIndexName } as unknown as EntityStoreCRUDClient;
   const esClient = {
     security: { hasPrivileges },

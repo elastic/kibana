@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import type { History as HistoryPackageHistoryInterface } from 'history';
@@ -18,8 +21,8 @@ import '../../test_utilities/extend_jest';
 import { urlSearch } from '../../test_utilities/url_search';
 import { useLinkProps } from '../use_link_props';
 
-jest.mock('../use_link_props');
-const mockUseLinkProps = useLinkProps as jest.Mock;
+vi.mock('../use_link_props');
+const mockUseLinkProps = useLinkProps as Mock;
 
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
@@ -115,8 +118,8 @@ describe(`Resolver: when analyzing a tree with only the origin and paginated rel
 
 describe('<NodeEventsListItem />', () => {
   it('should call custom node onclick when it is available', () => {
-    const nodeEventOnClick = jest.fn();
-    mockUseLinkProps.mockReturnValue({ href: '#', onClick: jest.fn() });
+    const nodeEventOnClick = vi.fn();
+    mockUseLinkProps.mockReturnValue({ href: '#', onClick: vi.fn() });
     const { getByTestId } = render(
       <TestProviders>
         <NodeEventsListItem

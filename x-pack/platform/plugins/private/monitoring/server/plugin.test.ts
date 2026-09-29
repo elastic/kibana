@@ -5,32 +5,47 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { MonitoringPlugin } from './plugin';
 import { RulesFactory } from './rules';
 
-jest.mock('./es_client/instantiate_client', () => ({
-  instantiateClient: jest.fn().mockImplementation(() => ({
-    cluster: {},
-  })),
-  instantiateLegacyClient: jest.fn().mockImplementation(() => ({
-    cluster: {},
-  })),
-}));
+vi.mock('./es_client/instantiate_client', () => {
+      const mocked = {
+      instantiateClient: vi.fn().mockImplementation(() => ({
+        cluster: {},
+      })),
+      instantiateLegacyClient: vi.fn().mockImplementation(() => ({
+        cluster: {},
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./license_service', () => ({
-  LicenseService: jest.fn().mockImplementation(() => ({
-    setup: jest.fn().mockImplementation(() => ({})),
-  })),
-}));
+vi.mock('./license_service', () => {
+      const mocked = {
+      LicenseService: vi.fn().mockImplementation(() => ({
+        setup: vi.fn().mockImplementation(() => ({})),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./kibana_monitoring/collectors', () => ({
-  registerCollectors: jest.fn(),
-}));
+vi.mock('./kibana_monitoring/collectors', () => {
+      const mocked = {
+      registerCollectors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./config', () => ({
-  createConfig: (config: any) => config,
-}));
+vi.mock('./config', () => {
+      const mocked = {
+      createConfig: (config: any) => config,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Monitoring plugin', () => {
   const coreSetup = coreMock.createSetup();
@@ -38,12 +53,12 @@ describe('Monitoring plugin', () => {
 
   const setupPlugins = {
     usageCollection: {
-      getCollectorByType: jest.fn(),
-      makeStatsCollector: jest.fn(),
-      registerCollector: jest.fn(),
+      getCollectorByType: vi.fn(),
+      makeStatsCollector: vi.fn(),
+      registerCollector: vi.fn(),
     },
     alerting: {
-      registerType: jest.fn(),
+      registerType: vi.fn(),
     },
   };
 
@@ -61,7 +76,7 @@ describe('Monitoring plugin', () => {
   const initializerContext = coreMock.createPluginInitializerContext(defaultConfig);
 
   afterEach(() => {
-    (setupPlugins.alerting.registerType as jest.Mock).mockReset();
+    (setupPlugins.alerting.registerType as Mock).mockReset();
   });
 
   it('always create the bulk uploader', async () => {

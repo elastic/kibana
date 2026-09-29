@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useCallback, useState } from 'react';
 import { waitFor } from '@testing-library/react';
 
@@ -12,15 +14,18 @@ import { createFleetTestRendererMock } from '../../mock';
 
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 
-const mockSendGetEnrollmentAPIKeys = jest.fn();
+const mockSendGetEnrollmentAPIKeys = vi.fn();
 
-jest.mock('../../applications/fleet/hooks', () => ({
-  ...jest.requireActual('../../applications/fleet/hooks'),
-  useStartServices: jest.fn().mockReturnValue({
-    notifications: { toasts: { addError: jest.fn(), addSuccess: jest.fn() } },
-  }),
-  sendGetEnrollmentAPIKeys: (...args: unknown[]) => mockSendGetEnrollmentAPIKeys(...args),
-}));
+vi.mock('../../applications/fleet/hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../applications/fleet/hooks')),
+      useStartServices: vi.fn().mockReturnValue({
+        notifications: { toasts: { addError: vi.fn(), addSuccess: vi.fn() } },
+      }),
+      sendGetEnrollmentAPIKeys: (...args: unknown[]) => mockSendGetEnrollmentAPIKeys(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const key = (id: string, extra: Record<string, unknown> = {}) => ({
   id,
@@ -57,11 +62,11 @@ const Harness: React.FunctionComponent<{ onKeyChange: (keyId?: string) => void }
   );
 };
 
-jest.setTimeout(30_000);
+vi.setConfig({ testTimeout: 30_000 });
 
 describe('AdvancedAgentAuthenticationSettings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not offer a token that has expired', async () => {
@@ -75,7 +80,7 @@ describe('AdvancedAgentAuthenticationSettings', () => {
         ],
       },
     });
-    const onKeyChange = jest.fn();
+    const onKeyChange = vi.fn();
 
     const testRenderer = createFleetTestRendererMock();
     const result = testRenderer.render(<Harness onKeyChange={onKeyChange} />);
@@ -97,7 +102,7 @@ describe('AdvancedAgentAuthenticationSettings', () => {
     });
 
     const testRenderer = createFleetTestRendererMock();
-    const result = testRenderer.render(<Harness onKeyChange={jest.fn()} />);
+    const result = testRenderer.render(<Harness onKeyChange={vi.fn()} />);
 
     await waitFor(() =>
       expect(

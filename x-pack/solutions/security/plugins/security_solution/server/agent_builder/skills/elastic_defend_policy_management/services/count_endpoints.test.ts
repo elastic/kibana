@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { AgentStatusKueryHelper } from '@kbn/fleet-plugin/common/services';
@@ -27,7 +29,7 @@ const asFleetAgentStatus = (status: Record<string, unknown>): FleetAgentStatus =
 
 const createCountAccess = async () => {
   const endpointAppContextService = createMockEndpointAppContextService();
-  const getHostMetadataList = jest.fn();
+  const getHostMetadataList = vi.fn();
   endpointAppContextService.getEndpointAuthz.mockResolvedValue(
     getEndpointAuthzInitialStateMock({
       canReadSecuritySolution: true,
@@ -36,20 +38,20 @@ const createCountAccess = async () => {
       canWritePolicyManagement: false,
     })
   );
-  jest.mocked(endpointAppContextService.getEndpointMetadataService).mockReturnValue({
+  vi.mocked(endpointAppContextService.getEndpointMetadataService).mockReturnValue({
     getHostMetadataList,
   } as unknown as ReturnType<typeof endpointAppContextService.getEndpointMetadataService>);
   const access = await createPolicyAccessContext(
     endpointAppContextService,
     { request: httpServerMock.createKibanaRequest(), spaceId: SPACE_ID },
     ENDPOINT_METADATA_LIST_REQUIRED_AUTHZ,
-    jest.fn(async () => [
-      { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
+    vi.fn(async () => [
+      { savedObjects: { getScopedClient: vi.fn().mockReturnValue({}) } },
     ]) as unknown as StartServicesAccessor
   );
   return {
     access,
-    getAgentStatusForAgentPolicy: jest.spyOn(access.fleet.agent, 'getAgentStatusForAgentPolicy'),
+    getAgentStatusForAgentPolicy: vi.spyOn(access.fleet.agent, 'getAgentStatusForAgentPolicy'),
   };
 };
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { CellActionsProvider } from '../context';
@@ -30,7 +32,7 @@ const defaultProps = {
 };
 describe('HoverActionsPopover', () => {
   const TestComponent = () => <span data-test-subj="test-component" />;
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 
   it('renders the children', () => {
     const getActions = () => Promise.resolve([]);
@@ -59,7 +61,7 @@ describe('HoverActionsPopover', () => {
 
     await hoverElement(getByTestId('test-component'), async () => {
       await getActionsPromise;
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(queryByTestId('actionItem-test-action')).toBeInTheDocument();
@@ -80,7 +82,7 @@ describe('HoverActionsPopover', () => {
 
     await hoverElement(getByTestId('test-component'), async () => {
       await getActionsPromise;
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     // Mouse leaves hover state
@@ -106,7 +108,7 @@ describe('HoverActionsPopover', () => {
 
     await hoverElement(getByTestId('test-component'), async () => {
       await getActionsPromise;
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(getByTestId('showExtraActionsButton')).toBeInTheDocument();
@@ -127,7 +129,7 @@ describe('HoverActionsPopover', () => {
 
     await hoverElement(getByTestId('test-component'), async () => {
       await getActionsPromise;
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     act(() => {
@@ -157,7 +159,7 @@ describe('HoverActionsPopover', () => {
 
     await hoverElement(getByTestId('test-component'), async () => {
       await getActionsPromise;
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     act(() => {
@@ -166,7 +168,7 @@ describe('HoverActionsPopover', () => {
 
     await hoverElement(getByTestId('test-component'), async () => {
       await getActionsPromise;
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(queryByTestId('actionItem-test-action-1')).not.toBeInTheDocument();
@@ -187,7 +189,7 @@ describe('HoverActionsPopover', () => {
 
     await hoverElement(getByTestId('test-component'), async () => {
       await getActionsPromise;
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(Object.values(getByTestId('hoverActionsPopover').style).includes('margin-top')).toEqual(
@@ -208,7 +210,7 @@ describe('HoverActionsPopover', () => {
 
     await hoverElement(getByTestId('test-component'), async () => {
       await getActionsPromise;
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(Object.values(getByTestId('hoverActionsPopover').style).includes('margin-top')).toEqual(

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -27,8 +29,8 @@ const renderSection = ({
   total = 0,
   hasMore = false,
   error = null,
-  onShowMore = jest.fn(),
-  onRetry = jest.fn(),
+  onShowMore = vi.fn(),
+  onRetry = vi.fn(),
 }: {
   isInitialLoading?: boolean;
   investigations?: ListInvestigationItem[];
@@ -79,8 +81,8 @@ describe('InvestigationSection', () => {
           investigations={[investigation]}
           total={1}
           hasMore={false}
-          onShowMore={jest.fn()}
-          onRetry={jest.fn()}
+          onShowMore={vi.fn()}
+          onRetry={vi.fn()}
         />
       </I18nProvider>
     );
@@ -96,8 +98,8 @@ describe('InvestigationSection', () => {
           investigations={[investigation]}
           total={11}
           hasMore={true}
-          onShowMore={jest.fn()}
-          onRetry={jest.fn()}
+          onShowMore={vi.fn()}
+          onRetry={vi.fn()}
         />
       </I18nProvider>
     );
@@ -108,7 +110,7 @@ describe('InvestigationSection', () => {
   });
 
   it('loads more investigations for this section only', () => {
-    const onShowMore = jest.fn();
+    const onShowMore = vi.fn();
     renderSection({ investigations: [investigation], total: 11, hasMore: true, onShowMore });
 
     fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionShowMore-80-critical'));
@@ -116,7 +118,7 @@ describe('InvestigationSection', () => {
   });
 
   it('retries a failed section load', () => {
-    const onRetry = jest.fn();
+    const onRetry = vi.fn();
     renderSection({ error: new Error('Network unavailable'), onRetry });
 
     fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionRetry-80-critical'));

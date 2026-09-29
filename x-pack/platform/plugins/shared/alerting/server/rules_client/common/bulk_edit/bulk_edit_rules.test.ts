@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import {
@@ -37,18 +39,21 @@ import { RecoveredActionGroup, type BulkEditSkipReason } from '../../../types';
 import type { SavedObject } from '@kbn/core/server';
 import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 
-jest.mock('../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
-  bulkMarkApiKeysForInvalidation: jest.fn(),
-}));
+vi.mock('../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
+      const mocked = {
+      bulkMarkApiKeysForInvalidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const actionsAuthorization = actionsAuthorizationMock.create() as unknown as ActionsAuthorization;
 const auditLogger = auditLoggerMock.create();
 const authorization = alertingAuthorizationMock.create();
-const createAPIKeyMock = jest.fn();
+const createAPIKeyMock = vi.fn();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const getAuthenticationApiKeyMock = jest.fn();
+const getAuthenticationApiKeyMock = vi.fn();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-const isAuthenticationTypeApiKeyMock = jest.fn();
+const isAuthenticationTypeApiKeyMock = vi.fn();
 const kibanaVersion = 'v8.2.0';
 const logger = loggingSystemMock.create().get();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -64,15 +69,15 @@ const rulesClientContext: RulesClientContext = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
-  getUserName: jest.fn(),
-  getProfileUid: jest.fn(),
+  getUserName: vi.fn(),
+  getProfileUid: vi.fn(),
   createAPIKey: createAPIKeyMock,
-  cloneAPIKey: jest.fn(),
+  cloneAPIKey: vi.fn(),
   logger,
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
+  getActionsClient: vi.fn(),
+  getEventLogClient: vi.fn(),
   kibanaVersion,
   auditLogger,
   maxScheduledPerMinute: 10000,
@@ -80,8 +85,8 @@ const rulesClientContext: RulesClientContext = {
   isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
   getAuthenticationAPIKey: getAuthenticationApiKeyMock,
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  isSystemAction: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
+  isSystemAction: vi.fn(),
+  getAlertIndicesAlias: vi.fn(),
   alertsService: null,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
@@ -141,10 +146,10 @@ const existingDecryptedRule: SavedObject<RawRule> = {
 const mockCreatePointInTimeFinderAsInternalUser = (
   response = { saved_objects: [existingDecryptedRule] }
 ) => {
-  encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+  encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
     .fn()
     .mockResolvedValueOnce({
-      close: jest.fn(),
+      close: vi.fn(),
       find: function* asyncGenerator() {
         yield response;
       },
@@ -153,7 +158,7 @@ const mockCreatePointInTimeFinderAsInternalUser = (
 
 describe('bulkEditRules', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       aggregations: {
         alertTypeId: {
@@ -206,7 +211,7 @@ describe('bulkEditRules', () => {
         filter: 'alert.attributes.tags: "APM"',
         ids: ['1', '2'],
         name: `rulesClient.bulkEdit`,
-        updateFn: jest.fn(),
+        updateFn: vi.fn(),
         requiredAuthOperation: WriteOperations.BulkEdit,
         auditAction: RuleAuditAction.BULK_EDIT,
         shouldInvalidateApiKeys: false,
@@ -220,7 +225,7 @@ describe('bulkEditRules', () => {
     await bulkEditRules(rulesClientContext, {
       filter: 'alert.attributes.tags: "APM"',
       name: `rulesClient.bulkEdit`,
-      updateFn: jest.fn(),
+      updateFn: vi.fn(),
       requiredAuthOperation: WriteOperations.BulkEdit,
       auditAction: RuleAuditAction.BULK_EDIT,
       shouldInvalidateApiKeys: false,
@@ -255,7 +260,7 @@ describe('bulkEditRules', () => {
     await bulkEditRules(rulesClientContext, {
       ids: ['1', '2'],
       name: `rulesClient.bulkEdit`,
-      updateFn: jest.fn(),
+      updateFn: vi.fn(),
       requiredAuthOperation: WriteOperations.BulkEdit,
       auditAction: RuleAuditAction.BULK_EDIT,
       shouldInvalidateApiKeys: false,
@@ -311,7 +316,7 @@ describe('bulkEditRules', () => {
     await expect(
       bulkEditRules(rulesClientContext, {
         name: `rulesClient.bulkEdit`,
-        updateFn: jest.fn(),
+        updateFn: vi.fn(),
         shouldInvalidateApiKeys: false,
         requiredAuthOperation: WriteOperations.BulkEdit,
         auditAction: RuleAuditAction.BULK_EDIT,
@@ -330,7 +335,7 @@ describe('bulkEditRules', () => {
     await expect(
       bulkEditRules(rulesClientContext, {
         name: `rulesClient.bulkEdit`,
-        updateFn: jest.fn(),
+        updateFn: vi.fn(),
         shouldInvalidateApiKeys: false,
         requiredAuthOperation: WriteOperations.BulkEdit,
         auditAction: RuleAuditAction.BULK_EDIT,
@@ -345,7 +350,7 @@ describe('bulkEditRules', () => {
     await expect(
       bulkEditRules(rulesClientContext, {
         name: `rulesClient.bulkEdit`,
-        updateFn: jest.fn(),
+        updateFn: vi.fn(),
         shouldInvalidateApiKeys: false,
         requiredAuthOperation: WriteOperations.BulkEdit,
         auditAction: RuleAuditAction.BULK_EDIT,
@@ -360,7 +365,7 @@ describe('bulkEditRules', () => {
     await expect(
       bulkEditRules(rulesClientContext, {
         name: `rulesClient.bulkEdit`,
-        updateFn: jest.fn(),
+        updateFn: vi.fn(),
         shouldInvalidateApiKeys: false,
         requiredAuthOperation: WriteOperations.BulkEdit,
         auditAction: RuleAuditAction.BULK_EDIT,
@@ -391,7 +396,7 @@ describe('bulkEditRules', () => {
     });
     await bulkEditRules(rulesClientContext, {
       name: `rulesClient.bulkEdit`,
-      updateFn: jest.fn(),
+      updateFn: vi.fn(),
       shouldInvalidateApiKeys: false,
       requiredAuthOperation: ReadOperations.BulkEditParams,
       auditAction: RuleAuditAction.BULK_EDIT,
@@ -421,7 +426,7 @@ describe('bulkEditRules', () => {
     mockCreatePointInTimeFinderAsInternalUser({
       saved_objects: [decryptedRule1, decryptedRule2],
     });
-    const updateFn = jest.fn();
+    const updateFn = vi.fn();
     await bulkEditRules(rulesClientContext, {
       name: `rulesClient.bulkEdit`,
       updateFn,
@@ -455,7 +460,7 @@ describe('bulkEditRules', () => {
   test('should call bulkMarkApiKeysForInvalidation if there are apiKeysToInvalidate', async () => {
     await bulkEditRules(rulesClientContext, {
       name: `rulesClient.bulkEdit`,
-      updateFn: jest.fn().mockImplementation(({ apiKeysMap, rules }) => {
+      updateFn: vi.fn().mockImplementation(({ apiKeysMap, rules }) => {
         rules.push(existingDecryptedRule);
         apiKeysMap.set('1', {
           oldApiKey: MOCK_API_KEY_1,
@@ -477,7 +482,7 @@ describe('bulkEditRules', () => {
   test('should call bulkMarkApiKeysForInvalidation with UIAM API keys if there are any', async () => {
     await bulkEditRules(rulesClientContext, {
       name: `rulesClient.bulkEdit`,
-      updateFn: jest.fn().mockImplementation(({ apiKeysMap, rules }) => {
+      updateFn: vi.fn().mockImplementation(({ apiKeysMap, rules }) => {
         rules.push(existingDecryptedRule);
         apiKeysMap.set('1', {
           oldApiKey: MOCK_API_KEY_1,
@@ -505,7 +510,7 @@ describe('bulkEditRules', () => {
     try {
       await bulkEditRules(rulesClientContext, {
         name: `rulesClient.bulkEdit`,
-        updateFn: jest.fn().mockImplementation(({ apiKeysMap, rules }) => {
+        updateFn: vi.fn().mockImplementation(({ apiKeysMap, rules }) => {
           rules.push(existingDecryptedRule);
           apiKeysMap.set('1', {
             oldApiKey: MOCK_API_KEY_1,
@@ -537,7 +542,7 @@ describe('bulkEditRules', () => {
   test('should return updated rules formatted for the public API', async () => {
     const result = await bulkEditRules(rulesClientContext, {
       name: `rulesClient.bulkEdit`,
-      updateFn: jest.fn().mockImplementation(({ rules, skipped }) => {
+      updateFn: vi.fn().mockImplementation(({ rules, skipped }) => {
         rules.push(existingDecryptedRule);
         skipped.push({
           id: 'skip-1',
@@ -622,7 +627,7 @@ describe('bulkEditRules', () => {
 
     await bulkEditRules(rulesClientContext, {
       name: `rulesClient.bulkEdit`,
-      updateFn: jest.fn().mockImplementation(({ rules }) => {
+      updateFn: vi.fn().mockImplementation(({ rules }) => {
         rules.push(decryptedRule1);
         rules.push(decryptedRule2);
       }),
@@ -661,7 +666,7 @@ describe('bulkEditRules', () => {
   test('should log audit event with BULK_EDIT_PARAMS action for read-auth operations', async () => {
     await bulkEditRules(rulesClientContext, {
       name: `rulesClient.bulkEditRuleParams`,
-      updateFn: jest.fn().mockImplementation(({ rules }) => {
+      updateFn: vi.fn().mockImplementation(({ rules }) => {
         rules.push(existingDecryptedRule);
       }),
       shouldInvalidateApiKeys: false,
@@ -686,7 +691,7 @@ describe('bulkEditRules', () => {
   test('should not log audit event for skipped rules', async () => {
     await bulkEditRules(rulesClientContext, {
       name: `rulesClient.bulkEdit`,
-      updateFn: jest.fn().mockImplementation(({ skipped }) => {
+      updateFn: vi.fn().mockImplementation(({ skipped }) => {
         skipped.push({
           id: 'skip-1',
           name: 'skip-1',
@@ -727,7 +732,7 @@ describe('bulkEditRules', () => {
       await bulkEditRules(rulesClientContext, {
         filter: 'alert.attributes.tags: "APM"',
         name: `rulesClient.bulkEdit`,
-        updateFn: jest.fn(),
+        updateFn: vi.fn(),
         requiredAuthOperation: WriteOperations.BulkEdit,
         auditAction: RuleAuditAction.BULK_EDIT,
         shouldInvalidateApiKeys: false,
@@ -752,7 +757,7 @@ describe('bulkEditRules', () => {
       await bulkEditRules(rulesClientContext, {
         filter: 'alert.attributes.tags: "APM"',
         name: `rulesClient.bulkEdit`,
-        updateFn: jest.fn(),
+        updateFn: vi.fn(),
         requiredAuthOperation: WriteOperations.BulkEdit,
         auditAction: RuleAuditAction.BULK_EDIT,
         shouldInvalidateApiKeys: false,

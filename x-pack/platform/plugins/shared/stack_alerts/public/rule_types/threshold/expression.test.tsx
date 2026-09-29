@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -21,8 +23,8 @@ import {
   getTimeUnitLabel,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
-  const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
+vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/triggers-actions-ui-plugin/public'));
   return {
     ...original,
     getIndexPatterns: () => {
@@ -59,7 +61,7 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
 const dataMock = dataPluginMock.createStartContract();
 const dataViewMock = {
   ...dataViewPluginMocks.createStartContract(),
-  getFieldsForWildcard: jest.fn().mockResolvedValue([
+  getFieldsForWildcard: vi.fn().mockResolvedValue([
     {
       name: '@timestamp',
       type: 'date',
@@ -77,7 +79,7 @@ const dataViewMock = {
       isMapped: true,
     },
   ]),
-  getIndices: jest.fn().mockResolvedValue([]),
+  getIndices: vi.fn().mockResolvedValue([]),
 };
 const chartsStartMock = chartPluginMock.createStartContract();
 

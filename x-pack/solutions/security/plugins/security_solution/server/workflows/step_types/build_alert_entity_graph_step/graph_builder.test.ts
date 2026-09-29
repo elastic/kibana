@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { buildRelatedAlertsGraph } from './graph_builder';
 import type { DetectionAlert800 } from '../../../../common/api/detection_engine/model/alerts';
 import type { EsSearchClient, EsSearchResponse } from './types';
@@ -40,7 +43,7 @@ const makeEsClient = (params: { seedIndex: string; seedId: string; docs: Doc[] }
   const { seedIndex, seedId, docs } = params;
 
   return {
-    search: jest.fn(async <TSource>(req: Record<string, unknown>) => {
+    search: vi.fn(async <TSource>(req: Record<string, unknown>) => {
       const typedReq = req as unknown as SearchRequest;
       // Seed fetch
       if (typedReq.index === seedIndex) {
@@ -377,7 +380,7 @@ describe('buildRelatedAlertsGraph', () => {
     expect(result.nodes.map((n) => n.id)).toEqual(['B']);
 
     // Verify the query the ES client received had non-empty `terms` arrays.
-    const calls = (esClient.search as jest.Mock).mock.calls;
+    const calls = (esClient.search as Mock).mock.calls;
     const searchCall = calls.find(([req]) => (req as SearchRequest).index === searchIndex);
     expect(searchCall).toBeTruthy();
     const typedReq = searchCall?.[0] as SearchRequest | undefined;

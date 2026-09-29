@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Streams } from '@kbn/streams-schema';
 import { WiredStream } from './wired_stream';
 import type { StateDependencies, StreamChange } from '../types';
@@ -36,7 +38,7 @@ interface WiredStreamTestable {
 describe('WiredStream', () => {
   const createMockDependencies = (): StateDependencies =>
     ({
-      logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+      logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
       isServerless: false,
       isWiredStreamViewsEnabled: true,
       isDev: false,
@@ -383,13 +385,13 @@ describe('WiredStream', () => {
   describe('doDetermineCreateActions - ES|QL view', () => {
     const createMockDependenciesWithEs = (): StateDependencies =>
       ({
-        logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+        logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
         isServerless: false,
         isWiredStreamViewsEnabled: true,
         isDev: false,
         esClient: {
           indices: {
-            getDataStream: jest.fn().mockResolvedValue({
+            getDataStream: vi.fn().mockResolvedValue({
               data_streams: [{ _meta: { managed_by: 'streams' } }],
             }),
           },
@@ -642,13 +644,13 @@ describe('WiredStream', () => {
   describe('ES|QL view actions', () => {
     const createMockDependenciesWithEsClient = (): StateDependencies =>
       ({
-        logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+        logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
         isServerless: false,
         isWiredStreamViewsEnabled: true,
         isDev: false,
         esClient: {
           indices: {
-            getDataStream: jest.fn().mockResolvedValue({
+            getDataStream: vi.fn().mockResolvedValue({
               data_streams: [{ _meta: { managed_by: 'streams' } }],
             }),
           },

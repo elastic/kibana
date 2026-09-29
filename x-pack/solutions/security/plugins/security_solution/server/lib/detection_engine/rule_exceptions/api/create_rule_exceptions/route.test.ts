@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getDetectionsExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../common/constants';
@@ -38,7 +40,7 @@ describe('createRuleExceptionsRoute', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     request = requestMock.create({
@@ -54,7 +56,7 @@ describe('createRuleExceptionsRoute', () => {
 
     clients.rulesClient.resolve.mockResolvedValue(resolveRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
-    clients.lists.exceptionListClient.createExceptionList = jest
+    clients.lists.exceptionListClient.createExceptionList = vi
       .fn()
       .mockResolvedValue(getDetectionsExceptionListSchemaMock());
 
@@ -62,8 +64,8 @@ describe('createRuleExceptionsRoute', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('happy paths', () => {
@@ -93,7 +95,7 @@ describe('createRuleExceptionsRoute', () => {
         })
       );
 
-      clients.lists.exceptionListClient.createExceptionList = jest.fn().mockResolvedValue({
+      clients.lists.exceptionListClient.createExceptionList = vi.fn().mockResolvedValue({
         ...getDetectionsExceptionListSchemaMock(),
         type: 'rule_default',
       });

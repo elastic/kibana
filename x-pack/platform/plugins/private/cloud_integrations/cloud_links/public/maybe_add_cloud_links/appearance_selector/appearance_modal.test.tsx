@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 
@@ -12,11 +15,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { useUpdateUserProfile } from '@kbn/user-profile-components';
 import { AppearanceModal } from './appearance_modal';
 
-jest.mock('@kbn/user-profile-components', () => {
-  const original = jest.requireActual('@kbn/user-profile-components');
+vi.mock('@kbn/user-profile-components', async () => {
+  const original = (await vi.importActual('@kbn/user-profile-components'));
   return {
     ...original,
-    useUpdateUserProfile: jest.fn().mockImplementation(() => ({
+    useUpdateUserProfile: vi.fn().mockImplementation(() => ({
       userProfileData: {
         userSettings: {
           darkMode: 'light',
@@ -24,38 +27,41 @@ jest.mock('@kbn/user-profile-components', () => {
         },
       },
       isLoading: false,
-      update: jest.fn(),
+      update: vi.fn(),
       userProfileLoaded: true,
     })),
   };
 });
 
-jest.mock('./values_group', () => ({
-  ValuesGroup: jest.fn().mockImplementation(({ title, selectedValue, onChange }) => (
-    <div data-test-subj={`values-group-${title}`}>
-      <h3>{title}</h3>
-      <div>
-        <button data-test-subj={`option-dark-${title}`} onClick={() => onChange('dark')}>
-          Dark
-        </button>
-        <button data-test-subj={`option-high-${title}`} onClick={() => onChange('high')}>
-          High
-        </button>
-      </div>
-      <div>Selected: {selectedValue}</div>
-    </div>
-  )),
-}));
+vi.mock('./values_group', () => {
+      const mocked = {
+      ValuesGroup: vi.fn().mockImplementation(({ title, selectedValue, onChange }) => (
+        <div data-test-subj={`values-group-${title}`}>
+          <h3>{title}</h3>
+          <div>
+            <button data-test-subj={`option-dark-${title}`} onClick={() => onChange('dark')}>
+              Dark
+            </button>
+            <button data-test-subj={`option-high-${title}`} onClick={() => onChange('high')}>
+              High
+            </button>
+          </div>
+          <div>Selected: {selectedValue}</div>
+        </div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AppearanceModal', () => {
-  const closeModal = jest.fn();
+  const closeModal = vi.fn();
   const uiSettingsClient = coreMock.createStart().uiSettings;
-  let updateMock: jest.Mock;
+  let updateMock: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    updateMock = jest.fn();
-    (useUpdateUserProfile as jest.Mock).mockImplementation(() => ({
+    vi.clearAllMocks();
+    updateMock = vi.fn();
+    (useUpdateUserProfile as Mock).mockImplementation(() => ({
       userProfileData: {
         userSettings: {
           darkMode: 'light',
@@ -190,7 +196,7 @@ describe('AppearanceModal', () => {
 
   it('defaults color mode to "system" when the user has no persisted preference', () => {
     // No `darkMode` persisted in the user profile -> falls back to the default
-    (useUpdateUserProfile as jest.Mock).mockImplementation(() => ({
+    (useUpdateUserProfile as Mock).mockImplementation(() => ({
       userProfileData: {
         userSettings: {
           contrastMode: 'standard',

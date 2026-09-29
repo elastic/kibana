@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -27,45 +30,48 @@ import {
   createMockWorkflowListItemDto,
 } from '../../../shared/test_utils/mock_workflow_factories';
 
-const mockParseImportFile = parseImportFile as jest.MockedFunction<typeof parseImportFile>;
+const mockParseImportFile = parseImportFile as MockedFunction<typeof parseImportFile>;
 
-jest.mock('../../../features/import_workflows/lib/parse_import_file');
-jest.mock('../../../hooks/use_telemetry');
-jest.mock('@kbn/workflows-ui', () => ({
-  useRunWorkflow: ({ onSuccess, onError }: { onSuccess: Function; onError: Function }) => ({
-    mutate: jest.fn((...args: unknown[]) => {
-      try {
-        onSuccess(undefined, args[0]);
-      } catch {
-        // no-op
-      }
-    }),
-    mutateAsync: jest.fn().mockResolvedValue(undefined),
-    isLoading: false,
-    data: undefined,
-    error: null,
-    reset: jest.fn(),
-    onSuccess,
-    onError,
-  }),
-}));
+vi.mock('../../../features/import_workflows/lib/parse_import_file');
+vi.mock('../../../hooks/use_telemetry');
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useRunWorkflow: ({ onSuccess, onError }: { onSuccess: Function; onError: Function }) => ({
+        mutate: vi.fn((...args: unknown[]) => {
+          try {
+            onSuccess(undefined, args[0]);
+          } catch {
+            // no-op
+          }
+        }),
+        mutateAsync: vi.fn().mockResolvedValue(undefined),
+        isLoading: false,
+        data: undefined,
+        error: null,
+        reset: vi.fn(),
+        onSuccess,
+        onError,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockWorkflowApi = createMockWorkflowApi();
-jest.mock('@kbn/workflows-ui', () => {
+vi.mock('@kbn/workflows-ui', () => {
   return {
     useRunWorkflow: () => ({
-      mutate: jest.fn(),
-      mutateAsync: jest.fn(),
+      mutate: vi.fn(),
+      mutateAsync: vi.fn(),
       isLoading: false,
       data: undefined,
       error: null,
-      reset: jest.fn(),
+      reset: vi.fn(),
     }),
     useWorkflowsApi: () => mockWorkflowApi,
   };
 });
 
-const mockUseTelemetry = useTelemetry as jest.MockedFunction<typeof useTelemetry>;
+const mockUseTelemetry = useTelemetry as MockedFunction<typeof useTelemetry>;
 
 const createFile = (name: string, content: string): File =>
   new File([content], name, { type: 'text/plain' });
@@ -80,18 +86,18 @@ const createQueryClient = () =>
   });
 
 describe('useWorkflowActions – import mutations', () => {
-  let mockTelemetry: Record<string, jest.Mock>;
+  let mockTelemetry: Record<string, Mock>;
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockTelemetry = {
-      reportWorkflowUpdated: jest.fn(),
-      reportWorkflowDeleted: jest.fn(),
-      reportWorkflowCloned: jest.fn(),
-      reportWorkflowRunInitiated: jest.fn(),
-      reportWorkflowStepTestRunInitiated: jest.fn(),
+      reportWorkflowUpdated: vi.fn(),
+      reportWorkflowDeleted: vi.fn(),
+      reportWorkflowCloned: vi.fn(),
+      reportWorkflowRunInitiated: vi.fn(),
+      reportWorkflowStepTestRunInitiated: vi.fn(),
     };
 
     mockUseTelemetry.mockReturnValue(mockTelemetry as unknown as ReturnType<typeof useTelemetry>);
@@ -440,7 +446,7 @@ describe('useWorkflowActions – import mutations', () => {
 
     it('should invalidate workflows queries on success', async () => {
       mockWorkflowApi.bulkCreateWorkflows.mockResolvedValueOnce(importSuccess);
-      const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
@@ -459,7 +465,7 @@ describe('useWorkflowActions – import mutations', () => {
 
     it('should NOT invalidate queries on error', async () => {
       mockWorkflowApi.bulkCreateWorkflows.mockRejectedValueOnce(new Error('Server error'));
-      const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
@@ -1009,7 +1015,7 @@ describe('useWorkflowActions – import mutations', () => {
 
     it('should skip refetch when skipRefetch is true', async () => {
       mockWorkflowApi.updateWorkflow.mockResolvedValueOnce(undefined as never);
-      const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
@@ -1101,7 +1107,7 @@ describe('useWorkflowActions – import mutations', () => {
     });
 
     it('reports hasCustomEventTrigger on list enable when workflowDefinition is provided', async () => {
-      const reportEvent = jest.fn();
+      const reportEvent = vi.fn();
       const telemetryClient: TelemetryServiceClient = { reportEvent };
       const realTelemetry = new WorkflowsBaseTelemetry(telemetryClient);
       mockUseTelemetry.mockReturnValue(realTelemetry as unknown as ReturnType<typeof useTelemetry>);
@@ -1405,7 +1411,7 @@ describe('useWorkflowActions – import mutations', () => {
     it('should invalidate workflow queries on success', async () => {
       const cloned = createMockWorkflowDetailDto({ id: 'wf-clone', name: 'Clone' });
       mockWorkflowApi.cloneWorkflow.mockResolvedValueOnce(cloned);
-      const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 

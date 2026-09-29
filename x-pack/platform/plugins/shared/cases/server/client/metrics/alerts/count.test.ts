@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCasesClientMock } from '../../mocks';
 import type { CasesClientArgs } from '../../types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -17,7 +19,7 @@ const clientMock = createCasesClientMock();
 const attachmentService = createAttachmentServiceMock();
 
 const logger = loggingSystemMock.createLogger();
-const getAuthorizationFilter = jest.fn().mockResolvedValue({});
+const getAuthorizationFilter = vi.fn().mockResolvedValue({});
 
 const clientArgs = {
   logger,
@@ -40,7 +42,7 @@ describe('AlertsCount', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty values when attachment services returns undefined', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -55,7 +57,7 @@ describe('<InsightsSummaryRow />', () => {
   });
 
   it('should render the value as EuiBadge and EuiButtonEmpty', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const { getByTestId, queryByTestId } = render(
       <IntlProvider locale="en">
         <InsightsSummaryRow
@@ -73,7 +75,7 @@ describe('<InsightsSummaryRow />', () => {
   });
 
   it('should render big numbers formatted correctly', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const { getByTestId } = render(
       <IntlProvider locale="en">
         <InsightsSummaryRow
@@ -89,7 +91,7 @@ describe('<InsightsSummaryRow />', () => {
   });
 
   it('should call the callback when button is clicked', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const { getByTestId } = render(
       <IntlProvider locale="en">
         <InsightsSummaryRow

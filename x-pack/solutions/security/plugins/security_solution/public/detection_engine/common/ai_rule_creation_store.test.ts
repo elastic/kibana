@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom } from 'rxjs';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
 import { AiRuleCreationService } from './ai_rule_creation_store';
@@ -34,7 +36,7 @@ describe('AiRuleCreationService', () => {
 
     it('carries the attachmentId and updateOrigin through requestSaveRule', async () => {
       const promise = firstValueFrom(service.saveRuleRequest$);
-      const updateOrigin = jest.fn();
+      const updateOrigin = vi.fn();
       service.requestSaveRule(mockRule, { attachmentId: ATT_A, updateOrigin });
       const value = await promise;
       expect(value).toEqual({ rule: mockRule, attachmentId: ATT_A, updateOrigin });

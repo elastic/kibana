@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { Template } from '@kbn/workflows-library';
 import { TemplateCard } from './template_card';
 
-jest.mock('@kbn/connector-specs/icons', () => ({
-  ConnectorIconsMap: new Map(),
-}));
-jest.mock('../../context/workflows_ui_services');
+vi.mock('@kbn/connector-specs/icons', () => {
+      const mocked = {
+      ConnectorIconsMap: new Map(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../context/workflows_ui_services');
 
 const template: Template = {
   slug: 'ip-reputation-check',
@@ -32,7 +37,7 @@ const template: Template = {
 
 describe('TemplateCard', () => {
   it('renders the template name, description, and category badges', () => {
-    render(<TemplateCard template={template} onSelect={jest.fn()} />);
+    render(<TemplateCard template={template} onSelect={vi.fn()} />);
 
     expect(screen.getByText('IP Reputation Check')).toBeInTheDocument();
     expect(screen.getByText('Assess the reputation of an IP address.')).toBeInTheDocument();
@@ -43,7 +48,7 @@ describe('TemplateCard', () => {
   });
 
   it('sets the expected data-test-subj', () => {
-    render(<TemplateCard template={template} onSelect={jest.fn()} />);
+    render(<TemplateCard template={template} onSelect={vi.fn()} />);
 
     expect(
       document.querySelector(
@@ -53,7 +58,7 @@ describe('TemplateCard', () => {
   });
 
   it('calls onSelect with the template when clicked', () => {
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     render(<TemplateCard template={template} onSelect={onSelect} />);
 
     fireEvent.click(screen.getByText('IP Reputation Check'));

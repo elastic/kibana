@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ToolTypeConversionContext, ToolTypeDefinition } from '../tool_types/definitions';
 import { convertPersistedDefinition } from './converter';
 import type { ToolPersistedDefinition } from './client';
@@ -37,18 +39,18 @@ describe('convertPersistedDefinition', () => {
 
   const mockedDefinition: ToolTypeDefinition = {
     toolType: ToolType.esql,
-    convertFromPersistence: jest.fn(() => convertedConfig as any),
-    getDynamicProps: jest.fn(() => {
+    convertFromPersistence: vi.fn(() => convertedConfig as any),
+    getDynamicProps: vi.fn(() => {
       return {
-        getSchema: jest.fn(async () => ({} as any)),
-        getHandler: jest.fn(async () => (async () => ({ results: [] })) as any),
+        getSchema: vi.fn(async () => ({} as any)),
+        getHandler: vi.fn(async () => (async () => ({ results: [] })) as any),
       };
     }),
     // Not used by this test
     createSchema: {} as any,
     updateSchema: {} as any,
-    validateForCreate: jest.fn(async ({ config }) => config as any),
-    validateForUpdate: jest.fn(async ({ current }) => current as any),
+    validateForCreate: vi.fn(async ({ config }) => config as any),
+    validateForUpdate: vi.fn(async ({ current }) => current as any),
   };
 
   const mockedContext: ToolTypeConversionContext = {

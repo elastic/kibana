@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject, first } from 'rxjs';
 
@@ -36,8 +38,8 @@ const render = (ui: React.ReactElement) => {
 };
 
 const factory = getOptionsListControlFactory();
-const mockFetch = jest.fn();
-const contextSpy = jest.spyOn(ControlContextModule, 'useOptionsListContext');
+const mockFetch = vi.fn();
+const contextSpy = vi.spyOn(ControlContextModule, 'useOptionsListContext');
 
 describe('Options list popover', () => {
   const waitForSubjectToPublish = async (subject: PublishingSubject<any>) => {
@@ -62,7 +64,7 @@ describe('Options list popover', () => {
 
     const finalizeApi = getMockedFinalizeApi(uuid, factory);
     const { Component } = await factory.buildEmbeddable({
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
       initialState: {
         ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         values_source: ControlValuesSource.FIELD,
@@ -129,7 +131,7 @@ describe('Options list popover', () => {
           timeFieldName: '@timestamp',
         },
       });
-      stubDataView.getFormatterForField = jest.fn().mockImplementation(() => {
+      stubDataView.getFormatterForField = vi.fn().mockImplementation(() => {
         return {
           convertToText: (value: string) => `${value}:formatted`,
           toJSON: (value: any) => JSON.stringify(value),
@@ -137,7 +139,7 @@ describe('Options list popover', () => {
       });
       return stubDataView;
     };
-    dataViewsService.get = jest.fn().mockImplementation(getDataView);
+    dataViewsService.get = vi.fn().mockImplementation(getDataView);
     coreServices.http.fetch = mockFetch.mockResolvedValue({
       suggestions: [
         { value: 'woof', docCount: 10 },
@@ -305,7 +307,9 @@ describe('Options list popover', () => {
       ).toHaveTextContent('75');
       const title = popover.getByTestId('optionList__invalidSelectionLabel');
       expect(title).toHaveTextContent('Invalid selection');
-      const invalidSelection = popover.getByTestId('optionsList-control-invalid-selection-woof');
+      const invalidSelection = await popover.findByTestId(
+        'optionsList-control-invalid-selection-woof'
+      );
       expect(invalidSelection).toHaveTextContent('woof');
       expect(invalidSelection).toHaveClass('optionsList__selectionInvalid');
     });
@@ -429,7 +433,7 @@ describe('Options list popover', () => {
 
   describe('field formatter', () => {
     const contextMock = getOptionsListContextMock();
-    const mockedFormatter = jest
+    const mockedFormatter = vi
       .fn()
       .mockImplementation((value: string | number) => `formatted:${value}`);
     contextMock.componentApi.fieldFormatter = new BehaviorSubject(
@@ -577,7 +581,7 @@ describe('Options list popover', () => {
     });
 
     test('passes view mode to partial results tooltip', () => {
-      const getTooltipSpy = jest.spyOn(OptionsListStrings.popover, 'getPartialResultsTooltip');
+      const getTooltipSpy = vi.spyOn(OptionsListStrings.popover, 'getPartialResultsTooltip');
       const contextMock = getOptionsListContextMock();
       (contextMock.componentApi.viewMode$ as unknown as BehaviorSubject<ViewMode>).next('view');
       (contextMock.componentApi.isPartial$ as unknown as BehaviorSubject<boolean>).next(true);

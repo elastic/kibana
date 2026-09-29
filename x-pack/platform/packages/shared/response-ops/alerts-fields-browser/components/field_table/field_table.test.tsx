@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { RenderResult } from '@testing-library/react';
 import { render } from '@testing-library/react';
@@ -18,7 +20,7 @@ const timestampFieldId = '@timestamp';
 
 const columnIds = [timestampFieldId];
 
-const mockOnToggleColumn = jest.fn();
+const mockOnToggleColumn = vi.fn();
 
 const defaultProps: FieldTableProps = {
   selectedCategoryIds: [],
@@ -26,8 +28,8 @@ const defaultProps: FieldTableProps = {
   filteredBrowserFields: {},
   searchInput: '',
   filterSelectedEnabled: false,
-  onFilterSelectedChange: jest.fn(),
-  onHide: jest.fn(),
+  onFilterSelectedChange: vi.fn(),
+  onHide: vi.fn(),
   onToggleColumn: mockOnToggleColumn,
 };
 
@@ -41,7 +43,7 @@ describe('FieldTable', () => {
   const defaultPageSize = 10;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render empty field table', () => {

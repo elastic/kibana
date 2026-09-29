@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useIsAddToCaseOpen } from './use_is_add_to_case_open';
@@ -12,15 +15,15 @@ import { useCasesToast } from '../../../common/use_cases_toast';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 import { TestProviders } from '../../../common/mock';
 
-jest.mock('../../../common/use_cases_toast');
-const useCasesToastMock = useCasesToast as jest.Mock;
+vi.mock('../../../common/use_cases_toast');
+const useCasesToastMock = useCasesToast as Mock;
 useCasesToastMock.mockReturnValue({
-  showInfoToast: jest.fn(),
+  showInfoToast: vi.fn(),
 });
 
 describe('use is add to existing case modal open hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should throw if called outside of a cases context', () => {

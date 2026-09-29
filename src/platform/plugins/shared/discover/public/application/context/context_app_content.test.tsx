@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen, waitFor, within } from '@testing-library/react';
@@ -118,7 +120,7 @@ describe('ContextAppContent test', () => {
 
   it('should reset column width in surrounding documents app state', async () => {
     const user = userEvent.setup();
-    const setAppState = jest.fn();
+    const setAppState = vi.fn();
 
     await renderComponent({
       grid: { columns: { _source: { width: 250 } } },

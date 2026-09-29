@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, Mocked } from 'vitest';
+
 import type { Container } from 'inversify';
 import { inject, injectable } from 'inversify';
 import { KibanaContainerModule, Scope, type ScopedContainer } from '@kbn/core-di';
@@ -32,13 +35,13 @@ export class TestApplication {
 }
 
 describe('application', () => {
-  let injection: jest.Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
+  let injection: Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
   let container: Container;
-  let application: jest.Mocked<TCoreSetup['application']>;
+  let application: Mocked<TCoreSetup['application']>;
 
   beforeEach(() => {
     injection = injectionServiceMock.createStartContract();
-    application = { register: jest.fn() } as unknown as typeof application;
+    application = { register: vi.fn() } as unknown as typeof application;
     container = injection.getContainer();
 
     container.load(new KibanaContainerModule(loadApplication));
@@ -72,18 +75,18 @@ describe('application', () => {
   describe('Application', () => {
     let scope: ScopedContainer;
     let mount: App['mount'];
-    let mountSpy: jest.SpyInstance;
-    let unmountSpy: jest.SpyInstance;
-    let disposeSpy: jest.SpyInstance;
+    let mountSpy: MockInstance;
+    let unmountSpy: MockInstance;
+    let disposeSpy: MockInstance;
     let params: AppMountParameters;
 
     beforeEach(() => {
       scope = container.get(Scope);
       params = {} as unknown as AppMountParameters;
 
-      mountSpy = jest.spyOn(TestApplication.prototype, 'mount');
-      unmountSpy = jest.spyOn(TestApplication.prototype, 'unmount');
-      disposeSpy = jest.spyOn(scope, 'dispose');
+      mountSpy = vi.spyOn(TestApplication.prototype, 'mount');
+      unmountSpy = vi.spyOn(TestApplication.prototype, 'unmount');
+      disposeSpy = vi.spyOn(scope, 'dispose');
 
       setup(container);
       start(container);
@@ -91,7 +94,7 @@ describe('application', () => {
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('should mount an application', async () => {

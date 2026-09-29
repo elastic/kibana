@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { TimeCache } from './time_cache';
-jest.mock('../services');
+vi.mock('../services');
 
 describe(`TimeCache`, () => {
   class FauxTimefilter {
@@ -92,7 +94,7 @@ describe(`TimeCache`, () => {
 
   it('falls back to timefilter.getTime when time range is undefined', () => {
     const timefilter = new FauxTimefilter(10, 20);
-    timefilter.getTime = jest.fn(() => ({ from: 'now-15m', to: 'now' }));
+    timefilter.getTime = vi.fn(() => ({ from: 'now-15m', to: 'now' }));
 
     const tc = new TimeCache(timefilter, 0);
     tc.setTimeRange(undefined);

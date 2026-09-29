@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { stdDeviationBands } from './std_deviation_bands';
 
 describe('stdDeviationBands(resp, panel, series)', () => {
@@ -68,7 +70,7 @@ describe('stdDeviationBands(resp, panel, series)', () => {
   });
 
   test('calls next when finished', async () => {
-    const next = jest.fn();
+    const next = vi.fn();
     await stdDeviationBands(resp, panel, series, {})(next)([]);
     expect(next.mock.calls.length).toEqual(1);
   });

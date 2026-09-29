@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ProductFeatures } from './product_features';
@@ -159,13 +161,13 @@ const logger = loggingSystemMock.create().get('mock');
 const featureGroup = 'test-feature' as ProductFeatureGroup;
 
 const featuresSetup = {
-  registerKibanaFeature: jest.fn(),
-  getKibanaFeatures: jest.fn(),
+  registerKibanaFeature: vi.fn(),
+  getKibanaFeatures: vi.fn(),
 } as unknown as FeaturesPluginSetup;
 
 describe('ProductFeatures', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Reset productFeatureConfig for each test
     if (testFeatureParams.productFeatureConfig) {
       delete testFeatureParams.productFeatureConfig;

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
@@ -31,12 +33,12 @@ const createHit = (id: string) =>
 
 describe('useDocViewerViewedEvent', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('reports an event on mount and when the event key changes', () => {
     const reportEvent = createReportEvent();
-    const onEventKeyChange = jest.fn();
+    const onEventKeyChange = vi.fn();
 
     const { rerender } = renderHook(useDocViewerViewedEvent, {
       initialProps: {
@@ -81,7 +83,7 @@ describe('useDocViewerViewedEvent', () => {
 
   test('reports originDocType and includes it in the dedup key', () => {
     const reportEvent = createReportEvent();
-    const onEventKeyChange = jest.fn();
+    const onEventKeyChange = vi.fn();
 
     const { rerender } = renderHook(useDocViewerViewedEvent, {
       initialProps: {
@@ -194,7 +196,7 @@ describe('useDocViewerViewedEvent', () => {
   test('logs and swallows report errors', () => {
     const reportEvent = createReportEvent();
     const reportError = new Error('boom');
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     reportEvent.mockImplementation(() => {
       throw reportError;

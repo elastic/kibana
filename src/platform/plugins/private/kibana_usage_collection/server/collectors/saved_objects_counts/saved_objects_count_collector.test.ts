@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
@@ -17,7 +19,7 @@ import { registerSavedObjectsCountUsageCollector } from './saved_objects_count_c
 describe('saved_objects_count_collector', () => {
   const usageCollectionMock = createUsageCollectionSetupMock();
   const fetchContextMock = createCollectorFetchContextMock();
-  const mockGetSoClientWithHiddenIndices = jest.fn().mockResolvedValue(fetchContextMock.soClient);
+  const mockGetSoClientWithHiddenIndices = vi.fn().mockResolvedValue(fetchContextMock.soClient);
 
   beforeAll(() =>
     registerSavedObjectsCountUsageCollector(
@@ -26,7 +28,7 @@ describe('saved_objects_count_collector', () => {
       mockGetSoClientWithHiddenIndices
     )
   );
-  afterAll(() => jest.clearAllTimers());
+  afterAll(() => vi.clearAllTimers());
 
   afterEach(() => {
     getSavedObjectsCountsMock.mockReset();

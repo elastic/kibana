@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -20,7 +22,7 @@ describe('LifecycleMethodCard', () => {
 
   it('calls onChange with its method when selected', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     renderWithTheme(
       <LifecycleMethodCard method="dlm" selectedMethod="ilm" disabled={false} onChange={onChange} />
@@ -34,7 +36,7 @@ describe('LifecycleMethodCard', () => {
 
   it('is disabled and cannot be selected when disabled is true', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     renderWithTheme(
       <LifecycleMethodCard method="ilm" selectedMethod="dlm" disabled onChange={onChange} />

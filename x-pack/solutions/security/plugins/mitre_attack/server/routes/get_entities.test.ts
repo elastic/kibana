@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { GET_MITRE_ENTITIES_URL } from '@kbn/security-mitre-attack-common';
@@ -102,7 +104,7 @@ describe('registerGetEntitiesRoute', () => {
       await handler(context, request, mockResponse);
 
       expect(mockResponse.ok).toHaveBeenCalledTimes(1);
-      const { body } = (mockResponse.ok as jest.Mock).mock.calls[0][0];
+      const { body } = (mockResponse.ok as Mock).mock.calls[0][0];
 
       expect(body.framework).toBe('enterprise');
       expect(body.framework_version).toBe('15.1');
@@ -137,7 +139,7 @@ describe('registerGetEntitiesRoute', () => {
       const request = httpServerMock.createKibanaRequest({ query: {} });
       await handler(context, request, mockResponse);
 
-      const { body } = (mockResponse.ok as jest.Mock).mock.calls[0][0];
+      const { body } = (mockResponse.ok as Mock).mock.calls[0][0];
       expect(body.framework_version).toBeUndefined();
     });
 

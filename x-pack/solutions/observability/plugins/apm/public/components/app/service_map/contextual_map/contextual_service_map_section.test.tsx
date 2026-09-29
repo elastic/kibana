@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-types';
@@ -18,22 +20,28 @@ import { ContextualServiceMapSection } from './contextual_service_map_section';
 import { APM_EBT_ACTIONS } from '../../ebt_constants';
 import { SERVICE_MAP_EBT_ELEMENTS } from '../ebt_constants';
 
-const mockServiceMapEmbeddable = jest.fn((_props: unknown) => (
+const mockServiceMapEmbeddable = vi.fn((_props: unknown) => (
   <div data-test-subj="mockServiceMapEmbeddable" />
 ));
 
-jest.mock('../../../../embeddable/service_map/service_map_embeddable', () => ({
-  ServiceMapEmbeddable: (props: unknown) => mockServiceMapEmbeddable(props as never),
-}));
+vi.mock('../../../../embeddable/service_map/service_map_embeddable', () => {
+      const mocked = {
+      ServiceMapEmbeddable: (props: unknown) => mockServiceMapEmbeddable(props as never),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetServiceMapUrl = jest.fn(
+const mockGetServiceMapUrl = vi.fn(
   (_core: unknown, _params?: unknown) => '/app/apm#/service-map?rangeFrom=now-15m&rangeTo=now'
 );
 
-jest.mock('../../../../embeddable/service_map/get_service_map_url', () => ({
-  getServiceMapUrl: (...args: Parameters<typeof mockGetServiceMapUrl>) =>
-    mockGetServiceMapUrl(...args),
-}));
+vi.mock('../../../../embeddable/service_map/get_service_map_url', () => {
+      const mocked = {
+      getServiceMapUrl: (...args: Parameters<typeof mockGetServiceMapUrl>) =>
+        mockGetServiceMapUrl(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps: ContextualServiceMapSectionProps = {
   serviceName: 'opbeans-node',

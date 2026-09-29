@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -26,8 +28,8 @@ const mockJoana = mockProfile('uid-joana', 'joana.cardoso@elastic.co');
 const mockAnt = mockProfile('uid-ant', 'ant.fdjw@elastic.co');
 
 const mockCore = coreMock.createStart();
-const mockBulkGet = jest.fn();
-const mockSuggest = jest.fn();
+const mockBulkGet = vi.fn();
+const mockSuggest = vi.fn();
 
 const mockServices = {
   ...mockCore,
@@ -50,7 +52,7 @@ const renderPanel = (props: Partial<React.ComponentProps<typeof EpisodeAssigneeP
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, cacheTime: 0 } },
   });
-  const onApply = jest.fn();
+  const onApply = vi.fn();
 
   render(
     <KibanaContextProvider services={mockServices}>
@@ -64,7 +66,7 @@ const renderPanel = (props: Partial<React.ComponentProps<typeof EpisodeAssigneeP
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockBulkGet.mockResolvedValue([]);
   mockSuggest.mockResolvedValue([]);
 });

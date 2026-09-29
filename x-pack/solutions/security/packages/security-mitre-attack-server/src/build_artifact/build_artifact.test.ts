@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { getMockStixBundle } from './stix_entities.mock';
 import { buildMitreArtifact, mapBundleToMitreEntities } from './build_artifact';
 import { fetchStixBundle } from './fetch_stix_bundle';
 
-jest.mock('./fetch_stix_bundle');
+vi.mock('./fetch_stix_bundle');
 
-const fetchStixBundleMock = fetchStixBundle as jest.MockedFunction<typeof fetchStixBundle>;
+const fetchStixBundleMock = fetchStixBundle as MockedFunction<typeof fetchStixBundle>;
 
 const bundle = getMockStixBundle();
 
@@ -28,7 +31,7 @@ describe('mapBundleToMitreEntities', () => {
 
 describe('buildMitreArtifact', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     fetchStixBundleMock.mockResolvedValue(bundle);
   });
 

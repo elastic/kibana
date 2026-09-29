@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -16,67 +18,97 @@ import type { SavedQuerySO } from '.';
 import type { OsqueryCapabilities } from '../../../__test_helpers__/create_mock_kibana_services';
 import { ROLE_CAPABILITIES } from '../../../__test_helpers__/create_mock_kibana_services';
 
-const mockUseKibana = jest.fn();
-const mockUseRouterNavigate = jest.fn();
-const mockPush = jest.fn();
+const mockUseKibana = vi.fn();
+const mockUseRouterNavigate = vi.fn();
+const mockPush = vi.fn();
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: mockPush }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => ({ push: mockPush }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../../common/lib/kibana'),
-  useKibana: () => mockUseKibana(),
-  useRouterNavigate: (path: string) => {
-    mockUseRouterNavigate(path);
+vi.mock('../../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/lib/kibana')),
+      useKibana: () => mockUseKibana(),
+      useRouterNavigate: (path: string) => {
+        mockUseRouterNavigate(path);
 
-    return { onClick: jest.fn(), href: path };
-  },
-}));
+        return { onClick: vi.fn(), href: path };
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_breadcrumbs', () => ({
-  useBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../../common/hooks/use_breadcrumbs', () => {
+      const mocked = {
+      useBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/use_persisted_page_size', () => ({
-  usePersistedPageSize: jest.fn(() => [20, jest.fn()]),
-  PAGE_SIZE_OPTIONS: [10, 20, 50],
-}));
+vi.mock('../../../common/use_persisted_page_size', () => {
+      const mocked = {
+      usePersistedPageSize: vi.fn(() => [20, vi.fn()]),
+      PAGE_SIZE_OPTIONS: [10, 20, 50],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSavedQueryUsers = jest.fn(() => ({
+const mockUseSavedQueryUsers = vi.fn(() => ({
   users: [],
   profilesMap: new Map(),
   isLoading: false,
 }));
 
-jest.mock('../../../common/use_saved_object_users', () => ({
-  useSavedQueryUsers: () => mockUseSavedQueryUsers(),
-}));
+vi.mock('../../../common/use_saved_object_users', () => {
+      const mocked = {
+      useSavedQueryUsers: () => mockUseSavedQueryUsers(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../saved_queries/use_copy_saved_query', () => ({
-  useCopySavedQuery: () => ({ mutateAsync: jest.fn(), isLoading: false }),
-}));
+vi.mock('../../../saved_queries/use_copy_saved_query', () => {
+      const mocked = {
+      useCopySavedQuery: () => ({ mutateAsync: vi.fn(), isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../saved_queries/use_delete_saved_query', () => ({
-  useDeleteSavedQuery: () => ({ mutateAsync: jest.fn(), isLoading: false }),
-}));
+vi.mock('../../../saved_queries/use_delete_saved_query', () => {
+      const mocked = {
+      useDeleteSavedQuery: () => ({ mutateAsync: vi.fn(), isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/table_toolbar', () => ({
-  TableToolbar: (props: any) => <div data-test-subj="table-toolbar">{props.actionButton}</div>,
-}));
+vi.mock('../../../components/table_toolbar', () => {
+      const mocked = {
+      TableToolbar: (props: any) => <div data-test-subj="table-toolbar">{props.actionButton}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../actions/components/run_by_column', () => ({
-  RunByColumn: ({ userId }: { userId?: string }) => (
-    <span data-test-subj="run-by-column">{userId ?? 'unknown'}</span>
-  ),
-}));
+vi.mock('../../../actions/components/run_by_column', () => {
+      const mocked = {
+      RunByColumn: ({ userId }: { userId?: string }) => (
+        <span data-test-subj="run-by-column">{userId ?? 'unknown'}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSavedQueries = jest.fn();
+const mockUseSavedQueries = vi.fn();
 
-jest.mock('../../../saved_queries/use_saved_queries', () => ({
-  useSavedQueries: (...args: unknown[]) => mockUseSavedQueries(...args),
-}));
+vi.mock('../../../saved_queries/use_saved_queries', () => {
+      const mocked = {
+      useSavedQueries: (...args: unknown[]) => mockUseSavedQueries(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createSavedQuery = (overrides: Partial<SavedQuerySO> = {}): SavedQuerySO => ({
   id: 'test-query-1',
@@ -118,7 +150,7 @@ const renderComponent = () =>
 
 describe('SavedQueriesTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupKibana();
     mockUseSavedQueries.mockReturnValue({
       data: {

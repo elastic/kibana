@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { startKiIdentificationToolHandler } from './handler';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
@@ -15,22 +17,22 @@ import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onb
 describe('startKiIdentificationToolHandler', () => {
   const setup = (maintenanceState: 'enabled' | 'paused' = 'enabled') => {
     const managementApi = {
-      getWorkflow: jest.fn().mockResolvedValue({
+      getWorkflow: vi.fn().mockResolvedValue({
         id: 'system-streams-ki-onboarding',
         name: 'onboarding',
         enabled: true,
         definition: {},
         yaml: '',
       }),
-      runWorkflow: jest.fn().mockResolvedValue('execution-id-123'),
+      runWorkflow: vi.fn().mockResolvedValue('execution-id-123'),
     };
-    const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
+    const telemetry = { trackOnboardingScheduled: vi.fn() } as never;
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
-      managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
+      managementApi: { ...managementApi, getClient: vi.fn(() => managementApi) } as never,
       telemetry,
     });
     const maintenanceService = {
-      getState: jest.fn().mockResolvedValue(maintenanceState),
+      getState: vi.fn().mockResolvedValue(maintenanceState),
     } as unknown as SignificantEventsMaintenanceService;
 
     return {

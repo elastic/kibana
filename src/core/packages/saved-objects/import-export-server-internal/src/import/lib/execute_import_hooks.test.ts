@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObjectsImportWarning } from '@kbn/core-saved-objects-common';
 import type { SavedObject, SavedObjectsImportHookResult } from '@kbn/core-saved-objects-server';
 import { executeImportHooks } from './execute_import_hooks';
@@ -20,7 +22,7 @@ const createObject = (type: string, id: string): SavedObject => ({
 
 const createHook = (
   result: SavedObjectsImportHookResult | Promise<SavedObjectsImportHookResult> = {}
-) => jest.fn().mockReturnValue(result);
+) => vi.fn().mockReturnValue(result);
 
 const createWarning = (message: string): SavedObjectsImportWarning => ({
   type: 'simple',

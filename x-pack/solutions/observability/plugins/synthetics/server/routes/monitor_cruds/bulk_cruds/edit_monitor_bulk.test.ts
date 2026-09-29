@@ -5,31 +5,39 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { syncEditedMonitorBulk } from './edit_monitor_bulk';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { ConfigKey } from '../../../../common/runtime_types';
 
-jest.mock('@kbn/fleet-plugin/server/services/package_policy', () => ({
-  getPackagePolicySavedObjectType: jest.fn().mockResolvedValue('fleet-package-policies'),
-}));
+vi.mock('@kbn/fleet-plugin/server/services/package_policy', () => {
+      const mocked = {
+      getPackagePolicySavedObjectType: vi.fn().mockResolvedValue('fleet-package-policies'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../telemetry/monitor_upgrade_sender', () => ({
-  formatTelemetryUpdateEvent: jest.fn(),
-  sendTelemetryEvents: jest.fn(),
-}));
+vi.mock('../../telemetry/monitor_upgrade_sender', () => {
+      const mocked = {
+      formatTelemetryUpdateEvent: vi.fn(),
+      sendTelemetryEvents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('syncEditedMonitorBulk', () => {
   const mockMonitorConfigRepository = {
-    bulkUpdate: jest.fn(),
+    bulkUpdate: vi.fn(),
   };
 
   const mockSyntheticsMonitorClient = {
-    editMonitors: jest.fn(),
+    editMonitors: vi.fn(),
   };
 
   const mockRouteContext = {
     server: {
-      logger: { error: jest.fn() },
+      logger: { error: vi.fn() },
       telemetry: {},
       stackVersion: '8.0.0',
     },
@@ -39,7 +47,7 @@ describe('syncEditedMonitorBulk', () => {
   } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('package policy references', () => {

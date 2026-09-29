@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { QuerySource } from '@kbn/esql-types';
 import type { monaco } from '@kbn/code-editor';
@@ -17,11 +19,11 @@ import type { ESQLEditorProps } from '../types';
 const createMockEditorRef = (value = 'FROM logs') => {
   const ref: React.MutableRefObject<Partial<monaco.editor.IStandaloneCodeEditor> | undefined> = {
     current: {
-      getValue: jest.fn().mockReturnValue(value),
-      getSelection: jest.fn().mockReturnValue(null),
-      getLayoutInfo: jest.fn().mockReturnValue({ contentWidth: 800 }),
-      getOption: jest.fn().mockReturnValue({ typicalHalfwidthCharacterWidth: 8 }),
-      executeEdits: jest.fn(),
+      getValue: vi.fn().mockReturnValue(value),
+      getSelection: vi.fn().mockReturnValue(null),
+      getLayoutInfo: vi.fn().mockReturnValue({ contentWidth: 800 }),
+      getOption: vi.fn().mockReturnValue({ typicalHalfwidthCharacterWidth: 8 }),
+      executeEdits: vi.fn(),
     },
   };
   return ref as React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -30,7 +32,7 @@ const createMockEditorRef = (value = 'FROM logs') => {
 const createMockEditorModelRef = () => {
   const ref: React.MutableRefObject<Partial<monaco.editor.ITextModel> | undefined> = {
     current: {
-      getLineContent: jest.fn().mockReturnValue(''),
+      getLineContent: vi.fn().mockReturnValue(''),
     },
   };
   return ref as React.MutableRefObject<monaco.editor.ITextModel | undefined>;
@@ -38,8 +40,8 @@ const createMockEditorModelRef = () => {
 
 const createMockTelemetryService = () =>
   ({
-    trackQuerySubmitted: jest.fn(),
-    trackQueryHistoryClicked: jest.fn(),
+    trackQuerySubmitted: vi.fn(),
+    trackQueryHistoryClicked: vi.fn(),
   } as unknown as ESQLEditorTelemetryService);
 
 const defaultParams = () => ({
@@ -48,16 +50,16 @@ const defaultParams = () => ({
   isLoading: false,
   allowQueryCancellation: false,
   measuredEditorWidth: 800,
-  onTextLangQuerySubmit: jest
+  onTextLangQuerySubmit: vi
     .fn()
     .mockResolvedValue(undefined) as unknown as ESQLEditorProps['onTextLangQuerySubmit'],
-  onQueryUpdate: jest.fn(),
+  onQueryUpdate: vi.fn(),
   telemetryService: createMockTelemetryService(),
 });
 
 describe('useQueryActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns all expected properties', () => {
@@ -122,7 +124,7 @@ describe('useQueryActions', () => {
 
   describe('onUpdateAndSubmitQuery', () => {
     it('updates query then submits', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const params = defaultParams();
       const { result } = renderHook(() => useQueryActions(params));
 
@@ -134,15 +136,15 @@ describe('useQueryActions', () => {
       expect(params.telemetryService.trackQueryHistoryClicked).toHaveBeenCalledWith(false);
 
       act(() => {
-        jest.runAllTimers();
+        vi.runAllTimers();
       });
 
       expect(params.onTextLangQuerySubmit).toHaveBeenCalled();
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('tracks starred query source', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const params = defaultParams();
       const { result } = renderHook(() => useQueryActions(params));
 
@@ -151,7 +153,7 @@ describe('useQueryActions', () => {
       });
 
       expect(params.telemetryService.trackQueryHistoryClicked).toHaveBeenCalledWith(true);
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 

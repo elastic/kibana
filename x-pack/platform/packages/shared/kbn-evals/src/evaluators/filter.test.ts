@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { selectEvaluators, parseSelectedEvaluators } from './filter';
 import type { Evaluator } from '../types';
 
@@ -13,7 +15,7 @@ describe('evaluator filter', () => {
     name,
     kind: 'CODE',
     direction: 'maximize',
-    evaluate: jest.fn(),
+    evaluate: vi.fn(),
   });
 
   const allEvaluators = [

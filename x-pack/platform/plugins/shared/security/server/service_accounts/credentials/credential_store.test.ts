@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -31,14 +34,14 @@ const attributes = (
 describe('ServiceAccountCredentialStore', () => {
   let client: ReturnType<typeof savedObjectsClientMock.create>;
   let encryptedClient: ReturnType<typeof encryptedSavedObjectsMock.createClient>;
-  let isEncryptionError: jest.Mock<boolean, [Error]>;
+  let isEncryptionError: Mock<boolean, [Error]>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let store: ServiceAccountCredentialStore;
 
   beforeEach(() => {
     client = savedObjectsClientMock.create();
     encryptedClient = encryptedSavedObjectsMock.createClient();
-    isEncryptionError = jest.fn().mockReturnValue(false);
+    isEncryptionError = vi.fn().mockReturnValue(false);
     logger = loggingSystemMock.createLogger();
     store = new ServiceAccountCredentialStore({
       client,

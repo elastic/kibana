@@ -4,20 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { sloFeatureId } from '@kbn/observability-shared-plugin/common';
 import { useKibana } from './use_kibana';
 import { useFetchSloGlobalDiagnosis } from './use_fetch_global_diagnosis';
 import { usePermissions } from './use_permissions';
 
-jest.mock('./use_kibana');
-jest.mock('./use_fetch_global_diagnosis');
+vi.mock('./use_kibana');
+vi.mock('./use_fetch_global_diagnosis');
 
-const useKibanaMock = useKibana as jest.Mock;
-const useFetchSloGlobalDiagnosisMock = useFetchSloGlobalDiagnosis as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useFetchSloGlobalDiagnosisMock = useFetchSloGlobalDiagnosis as Mock;
 
 describe('usePermissions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('is loading until diagnosis is done', () => {

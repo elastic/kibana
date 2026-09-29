@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { shallow, mount } from 'enzyme';
 import React from 'react';
 
@@ -16,10 +18,10 @@ import type { SecurityJob } from '../types';
 
 describe('JobSwitch', () => {
   let securityJobs: SecurityJob[];
-  let onJobStateChangeMock = jest.fn();
+  let onJobStateChangeMock = vi.fn();
   beforeEach(() => {
     securityJobs = cloneDeep(mockSecurityJobs);
-    onJobStateChangeMock = jest.fn();
+    onJobStateChangeMock = vi.fn();
   });
 
   test('renders correctly against snapshot', () => {

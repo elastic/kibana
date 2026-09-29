@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 import { v4 as uuidv4 } from 'uuid';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -12,19 +14,19 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 
 describe('SavedObjectProviderRegistry', () => {
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   describe('registerProvider()', () => {
     test('should register providers', () => {
       const registry = new SavedObjectProviderRegistry();
-      registry.registerProvider('alert', jest.fn());
+      registry.registerProvider('alert', vi.fn());
     });
 
     test('should throw an error if type is already registered', () => {
       const registry = new SavedObjectProviderRegistry();
-      registry.registerProvider('alert', jest.fn());
+      registry.registerProvider('alert', vi.fn());
       expect(() =>
-        registry.registerProvider('alert', jest.fn())
+        registry.registerProvider('alert', vi.fn())
       ).toThrowErrorMatchingInlineSnapshot(
         `"The Event Log has already registered a Provider for the Save Object type \\"alert\\"."`
       );
@@ -34,10 +36,10 @@ describe('SavedObjectProviderRegistry', () => {
   describe('getProvidersClient()', () => {
     test('should get SavedObject using the registered provider by type', async () => {
       const registry = new SavedObjectProviderRegistry();
-      registry.registerDefaultProvider(jest.fn());
+      registry.registerDefaultProvider(vi.fn());
 
-      const getter = jest.fn();
-      const provider = jest.fn().mockReturnValue(getter);
+      const getter = vi.fn();
+      const provider = vi.fn().mockReturnValue(getter);
       registry.registerProvider('alert', provider);
 
       const request = fakeRequest();
@@ -55,10 +57,10 @@ describe('SavedObjectProviderRegistry', () => {
 
     test('should get SavedObject using the default provider for unregistered types', async () => {
       const registry = new SavedObjectProviderRegistry();
-      const defaultProvider = jest.fn();
+      const defaultProvider = vi.fn();
       registry.registerDefaultProvider(defaultProvider);
 
-      registry.registerProvider('alert', jest.fn().mockReturnValue(jest.fn()));
+      registry.registerProvider('alert', vi.fn().mockReturnValue(vi.fn()));
 
       const request = fakeRequest();
       const action = {
@@ -68,7 +70,7 @@ describe('SavedObjectProviderRegistry', () => {
         references: [],
       };
 
-      const getter = jest.fn();
+      const getter = vi.fn();
       defaultProvider.mockReturnValue(getter);
       getter.mockResolvedValue(action);
 
@@ -84,10 +86,10 @@ describe('SavedObjectProviderRegistry', () => {
   describe('getProvidersClientWithRequestInSpace()', () => {
     test('should pass spaceId to the registered provider', async () => {
       const registry = new SavedObjectProviderRegistry();
-      registry.registerDefaultProvider(jest.fn());
+      registry.registerDefaultProvider(vi.fn());
 
-      const getter = jest.fn();
-      const provider = jest.fn().mockReturnValue(getter);
+      const getter = vi.fn();
+      const provider = vi.fn().mockReturnValue(getter);
       registry.registerProvider('alert', provider);
 
       const request = fakeRequest();
@@ -110,10 +112,10 @@ describe('SavedObjectProviderRegistry', () => {
 
     test('should pass spaceId to the default provider for unregistered types', async () => {
       const registry = new SavedObjectProviderRegistry();
-      const defaultProvider = jest.fn();
+      const defaultProvider = vi.fn();
       registry.registerDefaultProvider(defaultProvider);
 
-      registry.registerProvider('alert', jest.fn().mockReturnValue(jest.fn()));
+      registry.registerProvider('alert', vi.fn().mockReturnValue(vi.fn()));
 
       const request = fakeRequest();
       const action = {
@@ -123,7 +125,7 @@ describe('SavedObjectProviderRegistry', () => {
         references: [],
       };
 
-      const getter = jest.fn();
+      const getter = vi.fn();
       defaultProvider.mockReturnValue(getter);
       getter.mockResolvedValue(action);
 

@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useKibana } from '../lib/kibana';
 import { useSpaceId } from './use_space_id';
 
-jest.mock('../lib/kibana');
+vi.mock('../lib/kibana');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createMockServices = (spaceId: string) => ({
   services: {
     spaces: {
-      getActiveSpace: jest.fn().mockResolvedValue({ id: spaceId }),
+      getActiveSpace: vi.fn().mockResolvedValue({ id: spaceId }),
     },
   },
 });
@@ -64,7 +67,7 @@ describe('useSpaceId', () => {
     useKibanaMock.mockReturnValue({
       services: {
         spaces: {
-          getActiveSpace: jest.fn().mockRejectedValue(new Error('space not found')),
+          getActiveSpace: vi.fn().mockRejectedValue(new Error('space not found')),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);

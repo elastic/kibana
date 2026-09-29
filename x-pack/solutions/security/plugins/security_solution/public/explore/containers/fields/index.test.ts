@@ -4,17 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsFieldInIndexPattern } from '.';
 import { renderHook } from '@testing-library/react';
 import { getRequiredMapsFields } from '../../network/components/embeddables/map_config';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../network/components/embeddables/map_config');
-const mockUseKibana = useKibana as jest.Mock;
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../network/components/embeddables/map_config');
+const mockUseKibana = useKibana as Mock;
 describe('useIsFieldInIndexPattern', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         http: {},
@@ -25,7 +28,7 @@ describe('useIsFieldInIndexPattern', () => {
         },
       },
     });
-    (getRequiredMapsFields as jest.Mock).mockReturnValue(['fields.list']);
+    (getRequiredMapsFields as Mock).mockReturnValue(['fields.list']);
   });
   it('returns false when no fields in field list exist in the index pattern', async () => {
     mockUseKibana.mockReturnValue({
@@ -44,7 +47,7 @@ describe('useIsFieldInIndexPattern', () => {
     expect(res).toEqual(false);
   });
   it('returns false when some but not all fields in field list exist in the index pattern', async () => {
-    (getRequiredMapsFields as jest.Mock).mockReturnValue(['fields.list', 'another']);
+    (getRequiredMapsFields as Mock).mockReturnValue(['fields.list', 'another']);
     const {
       result: { current: isFieldInIndexPattern },
     } = renderHook(useIsFieldInIndexPattern);

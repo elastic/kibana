@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,55 +16,67 @@ import { createMockClassicStreamDefinition, createMockMappedField } from '../../
 import type { SchemaField } from '../types';
 
 // Mock the useKibana hook
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    core: {
-      docLinks: {
-        links: {
-          elasticsearch: {
-            mappingParameters: 'https://elastic.co/docs/mapping-parameters',
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        core: {
+          docLinks: {
+            links: {
+              elasticsearch: {
+                mappingParameters: 'https://elastic.co/docs/mapping-parameters',
+              },
+            },
           },
         },
-      },
-    },
-    dependencies: {
-      start: {
-        streams: {
-          streamsRepositoryClient: {
-            fetch: jest.fn(),
+        dependencies: {
+          start: {
+            streams: {
+              streamsRepositoryClient: {
+                fetch: vi.fn(),
+              },
+            },
+            fieldsMetadata: {
+              useFieldsMetadata: () => ({
+                fieldsMetadata: {},
+                loading: false,
+              }),
+            },
           },
         },
-        fieldsMetadata: {
-          useFieldsMetadata: () => ({
-            fieldsMetadata: {},
-            loading: false,
-          }),
-        },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the useStreamsAppRouter hook
-jest.mock('../../../../../hooks/use_streams_app_router', () => ({
-  useStreamsAppRouter: () => ({
-    link: jest.fn(() => '/mock-link'),
-  }),
-}));
+vi.mock('../../../../../hooks/use_streams_app_router', () => {
+      const mocked = {
+      useStreamsAppRouter: () => ({
+        link: vi.fn(() => '/mock-link'),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the useStreamsAppFetch hook used by SamplePreviewTable
-jest.mock('../../../../../hooks/use_streams_app_fetch', () => ({
-  useStreamsAppFetch: () => ({
-    value: null,
-    loading: false,
-    error: null,
-  }),
-}));
+vi.mock('../../../../../hooks/use_streams_app_fetch', () => {
+      const mocked = {
+      useStreamsAppFetch: () => ({
+        value: null,
+        loading: false,
+        error: null,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock CodeEditor to avoid Monaco initialization in tests
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: () => <div data-testid="mock-code-editor">CodeEditor</div>,
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: () => <div data-testid="mock-code-editor">CodeEditor</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderFlyout = (
   fieldOverrides: Partial<SchemaField> = {},
@@ -82,8 +96,8 @@ const renderFlyout = (
       <SchemaEditorFlyout
         field={defaultField}
         stream={definition.stream}
-        onClose={jest.fn()}
-        onStage={jest.fn()}
+        onClose={vi.fn()}
+        onStage={vi.fn()}
         withFieldSimulation={true}
         {...props}
       />
@@ -111,7 +125,7 @@ describe('SchemaEditorFlyout', () => {
     });
 
     it('renders "Go to source field" button for alias fields when onGoToField is provided', () => {
-      const onGoToField = jest.fn();
+      const onGoToField = vi.fn();
       renderFlyout({ alias_for: 'original.field' }, { onGoToField });
 
       const goToFieldButton = screen.getByTestId('streamsAppFieldSummaryGoToFieldButton');
@@ -121,7 +135,7 @@ describe('SchemaEditorFlyout', () => {
 
     it('calls onGoToField with the correct field name when "Go to source field" button is clicked', async () => {
       const user = userEvent.setup();
-      const onGoToField = jest.fn();
+      const onGoToField = vi.fn();
       renderFlyout({ alias_for: 'original.field' }, { onGoToField });
 
       const goToFieldButton = screen.getByTestId('streamsAppFieldSummaryGoToFieldButton');
@@ -152,7 +166,7 @@ describe('SchemaEditorFlyout', () => {
     });
 
     it('does not render "Go to source field" button for non-alias fields', () => {
-      const onGoToField = jest.fn();
+      const onGoToField = vi.fn();
       renderFlyout({ alias_for: undefined }, { onGoToField });
 
       expect(screen.queryByTestId('streamsAppFieldSummaryGoToFieldButton')).not.toBeInTheDocument();

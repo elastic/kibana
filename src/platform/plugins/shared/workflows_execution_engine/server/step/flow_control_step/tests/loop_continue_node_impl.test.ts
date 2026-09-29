@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { LoopContinueNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
@@ -35,29 +37,29 @@ describe('LoopContinueNodeImpl', () => {
     };
 
     stepExecutionRuntime = {
-      startStep: jest.fn(),
-      finishStep: jest.fn(),
+      startStep: vi.fn(),
+      finishStep: vi.fn(),
     } as unknown as StepExecutionRuntime;
 
     wfExecutionRuntimeManager = {
-      navigateToNextNode: jest.fn(),
-      navigateToNode: jest.fn(),
-      unwindScopes: jest.fn(),
+      navigateToNextNode: vi.fn(),
+      navigateToNode: vi.fn(),
+      unwindScopes: vi.fn(),
     } as unknown as WorkflowExecutionRuntimeManager;
 
     workflowLogger = {
-      logDebug: jest.fn(),
+      logDebug: vi.fn(),
     } as unknown as IWorkflowEventLogger;
 
     stepExecutionRuntimeFactory = {} as StepExecutionRuntimeFactory;
 
     stepIoService = {
-      evictStaleLoopOutputs: jest.fn(),
+      evictStaleLoopOutputs: vi.fn(),
     } as unknown as StepIoService;
 
     workflowGraph = {
-      getNode: jest.fn().mockReturnValue({ stepId: 'my_loop' }),
-      getInnerStepIds: jest.fn().mockReturnValue(new Set(['innerAction'])),
+      getNode: vi.fn().mockReturnValue({ stepId: 'my_loop' }),
+      getInnerStepIds: vi.fn().mockReturnValue(new Set(['innerAction'])),
     } as unknown as WorkflowGraph;
 
     underTest = new LoopContinueNodeImpl(

@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
 import type { Logger } from '@kbn/logging';
 
 const logger = {
-  warn: jest.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 describe('getNodeSSLOptions', () => {

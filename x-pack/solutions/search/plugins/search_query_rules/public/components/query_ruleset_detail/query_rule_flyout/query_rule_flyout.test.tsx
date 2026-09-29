@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { I18nProvider } from '@kbn/i18n-react';
@@ -62,10 +64,10 @@ describe('Query rule edit flyout', () => {
     </I18nProvider>
   );
 
-  const onCloseMock = jest.fn();
-  const onSaveMock = jest.fn();
-  const appendMock = jest.fn();
-  const removeMock = jest.fn();
+  const onCloseMock = vi.fn();
+  const onSaveMock = vi.fn();
+  const appendMock = vi.fn();
+  const removeMock = vi.fn();
   const rulesMock: SearchQueryRulesQueryRule[] = [
     {
       rule_id: 'rule-1',
@@ -89,8 +91,8 @@ describe('Query rule edit flyout', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(formContext, 'useFieldArray').mockReturnValue({
+    vi.clearAllMocks();
+    vi.spyOn(formContext, 'useFieldArray').mockReturnValue({
       fields: [...rulesMock[0].criteria],
       append: appendMock,
       remove: removeMock,

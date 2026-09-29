@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useInvalidateEpisodeQueries } from './use_invalidate_episode_queries';
 import { queryKeys } from '../query_keys';
 
-const mockInvalidateQueries = jest.fn().mockResolvedValue(undefined);
+const mockInvalidateQueries = vi.fn().mockResolvedValue(undefined);
 
-jest.mock('@kbn/react-query', () => ({
-  useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useInvalidateEpisodeQueries', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('invalidates every episode-scoped query key affected by an action', async () => {

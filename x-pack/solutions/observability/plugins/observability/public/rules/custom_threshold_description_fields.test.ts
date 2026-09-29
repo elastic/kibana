@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Rule, PrebuildFieldsMap } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { HttpSetup } from '@kbn/core/public';
 import type { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold/latest';
 import { getDescriptionFields } from './custom_threshold_description_fields';
 
 describe('custom threshold getDescriptionFields', () => {
-  const mockDataViewIndexPatternField = jest.fn();
-  const mockCustomQueryField = jest.fn();
-  const mockQueryFiltersField = jest.fn();
+  const mockDataViewIndexPatternField = vi.fn();
+  const mockCustomQueryField = vi.fn();
+  const mockQueryFiltersField = vi.fn();
 
   const mockPrebuildFields = {
     dataViewIndexPattern: mockDataViewIndexPatternField,
@@ -22,7 +24,7 @@ describe('custom threshold getDescriptionFields', () => {
   } as unknown as PrebuildFieldsMap;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return empty array when rule is not provided', () => {

@@ -5,28 +5,42 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Subtitle } from '.';
 import { TestProviders } from '../../../../../../../common/mock/test_providers';
 import { getMockAttackDiscoveryAlerts } from '../../../../../mock/mock_attack_discovery_alerts';
 
-jest.mock('../../../../../../../common/lib/kibana', () => ({
-  useDateFormat: jest.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
-  useKibana: jest.fn(() => ({ services: { upselling: {} } })),
-}));
+vi.mock('../../../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useDateFormat: vi.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
+      useKibana: vi.fn(() => ({ services: { upselling: {} } })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../utils/is_attack_discovery_alert', () => ({
-  isAttackDiscoveryAlert: jest.fn((obj) => 'generationUuid' in obj),
-}));
+vi.mock('../../../../../utils/is_attack_discovery_alert', () => {
+      const mocked = {
+      isAttackDiscoveryAlert: vi.fn((obj) => 'generationUuid' in obj),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../loading_callout/loading_messages/get_formatted_time', () => ({
-  getFormattedDate: jest.fn(({ date }) => `formatted-${date}`),
-}));
+vi.mock('../../../../../loading_callout/loading_messages/get_formatted_time', () => {
+      const mocked = {
+      getFormattedDate: vi.fn(({ date }) => `formatted-${date}`),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./translations', () => ({
-  CREATED_BY_USER: (user: string) => `Created by: ${user}`,
-}));
+vi.mock('./translations', () => {
+      const mocked = {
+      CREATED_BY_USER: (user: string) => `Created by: ${user}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAlert = getMockAttackDiscoveryAlerts()[0];
 const defaultProps = { attackDiscovery: mockAlert };

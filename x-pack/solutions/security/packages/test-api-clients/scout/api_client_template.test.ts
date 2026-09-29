@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
@@ -30,13 +33,13 @@ describe('generated Scout API client (api_client_scout template)', () => {
     body: {},
   };
 
-  const createApiClientMock = (): jest.Mocked<ApiClientFixture> => ({
-    get: jest.fn().mockResolvedValue(response),
-    post: jest.fn().mockResolvedValue(response),
-    put: jest.fn().mockResolvedValue(response),
-    delete: jest.fn().mockResolvedValue(response),
-    patch: jest.fn().mockResolvedValue(response),
-    head: jest.fn().mockResolvedValue(response),
+  const createApiClientMock = (): Mocked<ApiClientFixture> => ({
+    get: vi.fn().mockResolvedValue(response),
+    post: vi.fn().mockResolvedValue(response),
+    put: vi.fn().mockResolvedValue(response),
+    delete: vi.fn().mockResolvedValue(response),
+    patch: vi.fn().mockResolvedValue(response),
+    head: vi.fn().mockResolvedValue(response),
   });
 
   const parseRequestUrl = (url: string): { pathname: string; searchParams: URLSearchParams } => {

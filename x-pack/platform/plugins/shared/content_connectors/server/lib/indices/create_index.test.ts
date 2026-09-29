@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { createIndex } from './create_index';
@@ -55,7 +57,7 @@ describe('createApiIndex lib function', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('successfully creates an index', async () => {

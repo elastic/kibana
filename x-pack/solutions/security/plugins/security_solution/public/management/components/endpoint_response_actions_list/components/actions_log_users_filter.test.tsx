@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -27,10 +30,10 @@ describe('Users filter', () => {
   const testPrefix = 'test';
   const filterPrefix = 'users-filter';
   const delay = 100; // ms
-  let onChangeUsersFilter: jest.Mock;
+  let onChangeUsersFilter: Mock;
 
   beforeEach(() => {
-    onChangeUsersFilter = jest.fn();
+    onChangeUsersFilter = vi.fn();
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
     render = (props?: React.ComponentProps<typeof ActionsLogUsersFilter>) =>

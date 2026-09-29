@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   dataTableContextComplexMock,
   dataTableContextComplexRowsMock,
@@ -23,8 +26,8 @@ import {
 import { convertValueToString } from './convert_value_to_string';
 import type { ValueToStringConverter } from '../types';
 
-const execCommandMock = (global.document.execCommand = jest.fn());
-const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+const execCommandMock = (global.document.execCommand = vi.fn());
+const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 describe('copyValueToClipboard', () => {
   const valueToStringConverter: ValueToStringConverter = (rowIndex, columnId, options) =>
@@ -43,12 +46,12 @@ describe('copyValueToClipboard', () => {
   beforeEach(() => {
     Object.defineProperty(navigator, 'clipboard', {
       value: {
-        writeText: jest.fn(),
+        writeText: vi.fn(),
       },
       writable: true,
     });
     Object.defineProperty(window, 'sessionStorage', {
-      value: { clear: jest.fn() },
+      value: { clear: vi.fn() },
       writable: true,
     });
   });
@@ -59,8 +62,8 @@ describe('copyValueToClipboard', () => {
     Object.defineProperty(navigator, 'clipboard', {
       value: originalClipboard,
     });
-    (servicesMock.toastNotifications.addInfo as jest.Mock).mockReset();
-    (servicesMock.toastNotifications.addWarning as jest.Mock).mockReset();
+    (servicesMock.toastNotifications.addInfo as Mock).mockReset();
+    (servicesMock.toastNotifications.addWarning as Mock).mockReset();
   });
 
   it('should copy a value to clipboard', () => {

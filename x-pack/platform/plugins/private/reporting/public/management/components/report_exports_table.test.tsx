@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   applicationServiceMock,
   coreMock,
@@ -25,9 +27,12 @@ import { mockJobs } from '../../../common/test';
 import type { RecursivePartial, UseEuiTheme } from '@elastic/eui';
 import { ThemeProvider } from '@emotion/react';
 
-jest.mock('./report_info_flyout', () => ({
-  ReportInfoFlyout: () => <div data-test-subj="reportInfoFlyout" />,
-}));
+vi.mock('./report_info_flyout', () => {
+      const mocked = {
+      ReportInfoFlyout: () => <div data-test-subj="reportInfoFlyout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const coreStart = coreMock.createStart();
 const http = httpServiceMock.createSetupContract();
@@ -67,13 +72,13 @@ const defaultProps = {
 describe('ReportExportsTable', () => {
   const mockTheme = getMockTheme({ euiTheme: { size: { s: '' } } });
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest
+    vi.clearAllMocks();
+    vi
       .spyOn(reportingAPIClient, 'list')
       .mockImplementation(() => Promise.resolve(mockJobs.map((j) => new Job(j))));
-    jest.spyOn(reportingAPIClient, 'total').mockImplementation(() => Promise.resolve(18));
-    window.open = jest.fn();
-    window.focus = jest.fn();
+    vi.spyOn(reportingAPIClient, 'total').mockImplementation(() => Promise.resolve(18));
+    window.open = vi.fn();
+    window.focus = vi.fn();
   });
 
   it('renders table correctly', async () => {
@@ -87,8 +92,8 @@ describe('ReportExportsTable', () => {
   });
 
   it('renders empty state correctly', async () => {
-    jest.spyOn(reportingAPIClient, 'list').mockImplementation(() => Promise.resolve([]));
-    jest.spyOn(reportingAPIClient, 'total').mockImplementation(() => Promise.resolve(0));
+    vi.spyOn(reportingAPIClient, 'list').mockImplementation(() => Promise.resolve([]));
+    vi.spyOn(reportingAPIClient, 'total').mockImplementation(() => Promise.resolve(0));
     render(
       <ThemeProvider theme={mockTheme}>
         <ReportExportsTable {...defaultProps} />

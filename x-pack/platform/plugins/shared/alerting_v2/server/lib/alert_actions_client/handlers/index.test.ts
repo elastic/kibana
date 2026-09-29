@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ALERT_EPISODE_ACTION_TYPE, type CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
 import type { AlertAction } from '../../../resources/datastreams/alert_actions';
 import type { ActionHandler, HandlerItem, PreparedAction } from '../handler';
@@ -129,8 +131,8 @@ describe('prepareWithHandler', () => {
     const ackPrepared: PreparedAction = { alertActionDoc: fakeAuditDoc };
     const unsnoozePrepared: PreparedAction = { alertActionDoc: fakeAuditDoc };
 
-    const ackPrepare = jest.fn().mockReturnValue(ackPrepared);
-    const unsnoozePrepare = jest.fn().mockReturnValue(unsnoozePrepared);
+    const ackPrepare = vi.fn().mockReturnValue(ackPrepared);
+    const unsnoozePrepare = vi.fn().mockReturnValue(unsnoozePrepared);
 
     const registry = buildTestRegistry({
       [ALERT_EPISODE_ACTION_TYPE.ACK]: { prepare: ackPrepare },
@@ -150,7 +152,7 @@ describe('prepareWithHandler', () => {
   it('forwards the item unchanged to the handler', () => {
     // The handler must see exactly what the orchestrator passed; the
     // helper has no business mutating the argument.
-    const prepare = jest.fn().mockReturnValue({ alertActionDoc: fakeAuditDoc });
+    const prepare = vi.fn().mockReturnValue({ alertActionDoc: fakeAuditDoc });
     const registry = buildTestRegistry({
       [ALERT_EPISODE_ACTION_TYPE.ACK]: { prepare },
     });

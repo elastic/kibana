@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { resetContext } from 'kea';
 import { BehaviorSubject } from 'rxjs';
 
@@ -19,7 +21,7 @@ describe('LicensingLogic', () => {
     mountLicensingLogic({ license$: mockLicense$, canManageLicense: true, ...props });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resetContext({});
   });
 
@@ -68,7 +70,7 @@ describe('LicensingLogic', () => {
 
     describe('on unmount', () => {
       it('unsubscribes to the license observable', () => {
-        const mockUnsubscribe = jest.fn();
+        const mockUnsubscribe = vi.fn();
         const unmount = mount({
           license$: { subscribe: () => ({ unsubscribe: mockUnsubscribe }) } as any,
         });

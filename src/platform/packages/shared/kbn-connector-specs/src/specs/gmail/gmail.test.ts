@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { GmailConnector } from './gmail';
@@ -18,20 +20,20 @@ const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me';
 // ---------------------------------------------------------------------------
 
 const mockClient = {
-  get: jest.fn(),
-  post: jest.fn(),
+  get: vi.fn(),
+  post: vi.fn(),
 };
 
 /** Context for read-only actions (no secrets recorded — bearer or legacy). */
 const mockContext = {
   client: mockClient,
-  log: { debug: jest.fn(), error: jest.fn() },
+  log: { debug: vi.fn(), error: vi.fn() },
 } as unknown as ActionContext;
 
 /** Context for write-capable actions (oauth_authorization_code + gmail.modify scope). */
 const mockWriteContext = {
   client: mockClient,
-  log: { debug: jest.fn(), error: jest.fn() },
+  log: { debug: vi.fn(), error: vi.fn() },
   secrets: {
     authType: 'oauth_authorization_code',
     scope: 'https://www.googleapis.com/auth/gmail.modify',
@@ -41,14 +43,14 @@ const mockWriteContext = {
 /** Context that simulates an EARS-authed connector (read-only, scope is fixed). */
 const mockEarsContext = {
   client: mockClient,
-  log: { debug: jest.fn(), error: jest.fn() },
+  log: { debug: vi.fn(), error: vi.fn() },
   secrets: { authType: 'ears', scope: 'https://www.googleapis.com/auth/gmail.readonly' },
 } as unknown as ActionContext;
 
 /** Context that simulates a connector re-authorized under the old readonly scope. */
 const mockStaleOAuthContext = {
   client: mockClient,
-  log: { debug: jest.fn(), error: jest.fn() },
+  log: { debug: vi.fn(), error: vi.fn() },
   secrets: {
     authType: 'oauth_authorization_code',
     scope: 'https://www.googleapis.com/auth/gmail.readonly',
@@ -56,7 +58,7 @@ const mockStaleOAuthContext = {
 } as unknown as ActionContext;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 // ---------------------------------------------------------------------------
@@ -959,7 +961,7 @@ describe('auth guard', () => {
     mockClient.post.mockResolvedValue({ data: { id: 'id', threadId: 't', labelIds: [] } });
     const bearerCtx = {
       client: mockClient,
-      log: { debug: jest.fn(), error: jest.fn() },
+      log: { debug: vi.fn(), error: vi.fn() },
       secrets: { authType: 'bearer' },
     } as unknown as ActionContext;
 
@@ -972,7 +974,7 @@ describe('auth guard', () => {
     mockClient.post.mockResolvedValue({ data: { id: 'id', threadId: 't', labelIds: [] } });
     const broadCtx = {
       client: mockClient,
-      log: { debug: jest.fn(), error: jest.fn() },
+      log: { debug: vi.fn(), error: vi.fn() },
       secrets: {
         authType: 'oauth_authorization_code',
         scope: 'https://mail.google.com/',

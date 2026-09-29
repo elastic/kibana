@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../../constants/saved_objects';
@@ -25,7 +27,7 @@ describe('findIngressCredentialsForConnector', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('pages until collected length matches total', async () => {

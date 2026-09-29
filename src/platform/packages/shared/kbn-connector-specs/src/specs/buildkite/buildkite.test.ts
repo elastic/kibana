@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { Buildkite } from './buildkite';
 
-const mockCallTool = jest.fn();
-const mockListTools = jest.fn();
+const mockCallTool = vi.fn();
+const mockListTools = vi.fn();
 
-jest.mock('../../lib/mcp/with_mcp_client', () => ({
-  withMcpClient: jest.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
-    return fn({ callTool: mockCallTool, listTools: mockListTools });
-  }),
-}));
+vi.mock('../../lib/mcp/with_mcp_client', () => {
+      const mocked = {
+      withMcpClient: vi.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
+        return fn({ callTool: mockCallTool, listTools: mockListTools });
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const parse = <K extends keyof typeof Buildkite.actions>(action: K, raw: Record<string, unknown>) =>
   Buildkite.actions[action].input.parse(raw);
@@ -32,7 +37,7 @@ describe('Buildkite', () => {
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCallTool.mockResolvedValue({ content: jsonContent({ ok: true }) });
     mockListTools.mockResolvedValue({
       tools: [{ name: 'list_pipelines' }, { name: 'create_build' }],
@@ -582,7 +587,7 @@ describe('Buildkite', () => {
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
-      const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
+      const { withMcpClient } = (await vi.importMock('../../lib/mcp/with_mcp_client'));
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
 
       await expect(Buildkite.test.handler(mockContext)).rejects.toThrow('connection refused');

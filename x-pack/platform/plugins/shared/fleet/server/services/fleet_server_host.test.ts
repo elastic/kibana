@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
@@ -31,19 +34,19 @@ import {
   isSecretStorageEnabled,
 } from './secrets';
 
-jest.mock('./app_context');
-jest.mock('./agent_policy');
-jest.mock('./agents');
-jest.mock('./secrets');
+vi.mock('./app_context');
+vi.mock('./agent_policy');
+vi.mock('./agents');
+vi.mock('./secrets');
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
 mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
-let mockedLogger: jest.Mocked<Logger>;
-const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
+let mockedLogger: Mocked<Logger>;
+const mockedGetAgentsByKuery = getAgentsByKuery as MockedFunction<typeof getAgentsByKuery>;
 
 function getMockedSoClient(options?: { id?: string; findHosts?: boolean; findSettings?: boolean }) {
   const soClientMock = createSavedObjectClientMock();
@@ -128,9 +131,9 @@ function getMockedSoClient(options?: { id?: string; findHosts?: boolean; findSet
 }
 
 function getMockedEncryptedSoClient() {
-  const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
-    getDecryptedAsInternalUser: jest.fn(),
-    createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
+  const esoClientMock: Mocked<EncryptedSavedObjectsClient> = {
+    getDecryptedAsInternalUser: vi.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: vi.fn(),
   };
 
   esoClientMock.getDecryptedAsInternalUser.mockImplementation(async (type: string, id: string) => {
@@ -236,7 +239,7 @@ describe('create', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should throw if encryptedSavedObject is not configured', async () => {
@@ -280,7 +283,7 @@ describe('create', () => {
     const soClientMock = getMockedSoClient();
     const esoClientMock = getMockedEncryptedSoClient();
 
-    (isSecretStorageEnabled as jest.Mock).mockResolvedValue(false);
+    (isSecretStorageEnabled as Mock).mockResolvedValue(false);
 
     // getDefaultFleetServerHost() uses soClient.find — return a preconfigured default.
     soClientMock.find.mockImplementation(async ({ type }: any) => {
@@ -362,7 +365,7 @@ describe('delete fleetServerHost', () => {
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
   });
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should removeFleetServerHostFromAll agent policies without force if not deleted from preconfiguration', async () => {
@@ -376,7 +379,7 @@ describe('delete fleetServerHost', () => {
       FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
       'test1'
     );
-    expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toHaveBeenCalledWith(
+    expect(vi.mocked(agentPolicyService.removeFleetServerHostFromAll)).toHaveBeenCalledWith(
       esClientMock,
       'test1',
       {
@@ -391,7 +394,7 @@ describe('delete fleetServerHost', () => {
     const soClientMock = getMockedSoClient();
     const esoClientMock = getMockedEncryptedSoClient();
 
-    await (fleetServerHostService.delete as jest.Mock)(esClientMock, 'test1', {
+    await (fleetServerHostService.delete as Mock)(esClientMock, 'test1', {
       fromPreconfiguration: true,
     });
 
@@ -399,7 +402,7 @@ describe('delete fleetServerHost', () => {
       FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
       'test1'
     );
-    expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toHaveBeenCalledWith(
+    expect(vi.mocked(agentPolicyService.removeFleetServerHostFromAll)).toHaveBeenCalledWith(
       esClientMock,
       'test1',
       {
@@ -417,7 +420,7 @@ describe('bulkGet', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should decrypt and return multiple fleet server hosts', async () => {
@@ -557,7 +560,7 @@ describe('update', () => {
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
       canEncrypt: true,
     } as any);
-    (isSecretStorageEnabled as jest.Mock).mockResolvedValue(false);
+    (isSecretStorageEnabled as Mock).mockResolvedValue(false);
   });
 
   it('should throw when updating a non-allow_edit field on a preconfigured host', async () => {
@@ -590,7 +593,7 @@ describe('update', () => {
     const soClient = getMockedSoClient({ findHosts: true });
     mockGetPreconfiguredHost({ is_default: false });
     soClient.update.mockResolvedValue({ id: 'private-fleet-server', attributes: {} } as any);
-    (agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts as jest.Mock).mockResolvedValue(
+    (agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts as Mock).mockResolvedValue(
       undefined
     );
 
@@ -690,7 +693,7 @@ describe('update', () => {
     } as any);
 
     soClient.update.mockResolvedValue({ id: 'fleet-server-with-secrets', attributes: {} } as any);
-    (isSecretStorageEnabled as jest.Mock).mockResolvedValue(true);
+    (isSecretStorageEnabled as Mock).mockResolvedValue(true);
 
     await fleetServerHostService.update(soClient, esClientMock, 'fleet-server-with-secrets', {
       ssl: { certificate_authorities: ['/etc/certs/ca.pem'] },

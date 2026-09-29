@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { PromptContextSelector } from './prompt_context_selector';
 import { mockPromptContexts } from '../../../mock/prompt_context';
 
-const onPromptContextSelectionChange = jest.fn();
+const onPromptContextSelectionChange = vi.fn();
 const testProps = {
   promptContexts: mockPromptContexts,
   selectedPromptContexts: [mockPromptContexts[0]],
@@ -19,7 +21,7 @@ const testProps = {
 
 describe('PromptContextSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('Selects an existing prompt context and adds it to the previous selection', () => {
     const { getByTestId } = render(<PromptContextSelector {...testProps} />);

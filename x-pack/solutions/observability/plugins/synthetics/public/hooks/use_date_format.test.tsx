@@ -5,24 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { i18n } from '@kbn/i18n';
 
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    getLocale: jest.fn().mockReturnValue(undefined),
-  },
-}));
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: {
+        getLocale: vi.fn().mockReturnValue(undefined),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useDateFormat } from './use_date_format';
 
 describe('useDateFormat', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   Object.defineProperty(global.navigator, 'language', {
@@ -42,7 +47,7 @@ describe('useDateFormat', () => {
     expect(response.result.current('2023-02-01 13:00:00')).toEqual('1 Feb 2023 @ 13:00:00');
   });
   it('prefers Kibana locale if set', () => {
-    jest.spyOn(i18n, 'getLocale').mockReturnValue('fr-FR');
+    vi.spyOn(i18n, 'getLocale').mockReturnValue('fr-FR');
 
     Object.defineProperty(global.navigator, 'language', {
       value: 'en-GB',

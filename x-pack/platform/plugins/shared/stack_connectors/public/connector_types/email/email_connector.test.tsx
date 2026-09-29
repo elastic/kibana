@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React, { Suspense } from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,18 +18,19 @@ import { ConnectorFormTestProvider, createAppMockRenderer } from '../lib/test_ut
 import { AdditionalEmailServices } from '../../../common';
 import { getServiceConfig } from './api';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
-jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
-  ...jest.requireActual(
-    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
-  ),
-  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
-}));
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api')),
+      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
-jest.mock('./api', () => {
+vi.mock('./api', () => {
   return {
-    getServiceConfig: jest.fn(),
+    getServiceConfig: vi.fn(),
   };
 });
 
@@ -39,7 +43,7 @@ describe('EmailActionConnectorFields', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('all connector fields are rendered', async () => {
@@ -285,7 +289,7 @@ describe('EmailActionConnectorFields', () => {
   });
 
   it('host, port and secure fields should be disabled when service field is set to well known service', async () => {
-    (getServiceConfig as jest.Mock).mockResolvedValue({
+    (getServiceConfig as Mock).mockResolvedValue({
       host: 'https://example.com',
       port: 80,
       secure: false,
@@ -328,7 +332,7 @@ describe('EmailActionConnectorFields', () => {
   });
 
   it('host, port and secure fields should not be disabled when service field is set to other', async () => {
-    (getServiceConfig as jest.Mock).mockResolvedValue({
+    (getServiceConfig as Mock).mockResolvedValue({
       host: 'https://example.com',
       port: 80,
       secure: false,
@@ -406,11 +410,11 @@ describe('EmailActionConnectorFields', () => {
   );
 
   describe('Validation', () => {
-    const onSubmit = jest.fn();
-    const validateEmailAddresses = jest.fn();
+    const onSubmit = vi.fn();
+    const validateEmailAddresses = vi.fn();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       appMockRenderer = createAppMockRenderer();
       validateEmailAddresses.mockReturnValue([{ valid: true }]);
     });
@@ -604,7 +608,7 @@ describe('EmailActionConnectorFields', () => {
     });
 
     it('submits the connector with a service correctly', async () => {
-      (getServiceConfig as jest.Mock).mockResolvedValue({
+      (getServiceConfig as Mock).mockResolvedValue({
         host: 'https://example.com',
         port: 80,
         secure: false,
@@ -670,7 +674,7 @@ describe('EmailActionConnectorFields', () => {
     });
 
     it('connector validation fails when connector config is not valid', async () => {
-      useKibanaMock().services.actions.validateEmailAddresses = jest
+      useKibanaMock().services.actions.validateEmailAddresses = vi
         .fn()
         .mockReturnValue([{ valid: false }]);
       const actionConnector = {
@@ -922,13 +926,13 @@ describe('EmailActionConnectorFields', () => {
 describe('when not all email services are enabled', () => {
   const enabledEmailServices = ['amazon-ses', 'other', 'microsoft-exchange'];
   let appMockRenderer: AppMockRenderer;
-  const onSubmit = jest.fn();
-  const validateEmailAddresses = jest.fn();
+  const onSubmit = vi.fn();
+  const validateEmailAddresses = vi.fn();
 
   beforeEach(() => {
     appMockRenderer = createAppMockRenderer();
     validateEmailAddresses.mockReturnValue([{ valid: true }]);
-    (getServiceConfig as jest.Mock).mockResolvedValue({
+    (getServiceConfig as Mock).mockResolvedValue({
       host: 'https://example.com',
       port: 2255,
       secure: true,
@@ -936,7 +940,7 @@ describe('when not all email services are enabled', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('only allows enabled services to be selected only', async () => {

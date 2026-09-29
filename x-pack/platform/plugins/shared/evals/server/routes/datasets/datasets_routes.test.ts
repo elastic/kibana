@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -16,16 +19,16 @@ import { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constant
 import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
-jest.mock('../../remote_kibana/forward_to_remote_kibana', () => {
-  const actual = jest.requireActual('../../remote_kibana/forward_to_remote_kibana');
+vi.mock('../../remote_kibana/forward_to_remote_kibana', async () => {
+  const actual = (await vi.importActual('../../remote_kibana/forward_to_remote_kibana'));
   return {
     ...actual,
-    forwardToRemoteKibana: jest.fn(),
+    forwardToRemoteKibana: vi.fn(),
   };
 });
 
 import { forwardToRemoteKibana } from '../../remote_kibana/forward_to_remote_kibana';
-const mockedForwardToRemoteKibana = forwardToRemoteKibana as jest.MockedFunction<
+const mockedForwardToRemoteKibana = forwardToRemoteKibana as MockedFunction<
   typeof forwardToRemoteKibana
 >;
 import {
@@ -78,8 +81,8 @@ const buildRouteSetup = ({
 }) => {
   const router = httpServiceMock.createRouter();
   const logger = loggingSystemMock.createLogger();
-  const checkManageEvalsPrivileges = jest.fn().mockResolvedValue(hasManageEvalsPrivileges);
-  const getAccessibleSpaceIds = jest
+  const checkManageEvalsPrivileges = vi.fn().mockResolvedValue(hasManageEvalsPrivileges);
+  const getAccessibleSpaceIds = vi
     .fn()
     .mockResolvedValue(accessibleSpaceIds ?? [spaceId, 'marketing', 'sales']);
   registerRoute({
@@ -97,23 +100,23 @@ const buildRouteSetup = ({
   const { handler } = versionedRouter.getRoute(method, path).versions[API_VERSIONS.internal.v1];
 
   const datasetClient = {
-    list: jest.fn(),
-    create: jest.fn(),
-    get: jest.fn(),
-    getMetadata: jest.fn(),
-    datasetExists: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    addExamples: jest.fn(),
-    updateExample: jest.fn(),
-    deleteExample: jest.fn(),
-    upsert: jest.fn(),
-    resolveByName: jest.fn(),
-    copy: jest.fn(),
+    list: vi.fn(),
+    create: vi.fn(),
+    get: vi.fn(),
+    getMetadata: vi.fn(),
+    datasetExists: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    addExamples: vi.fn(),
+    updateExample: vi.fn(),
+    deleteExample: vi.fn(),
+    upsert: vi.fn(),
+    resolveByName: vi.fn(),
+    copy: vi.fn(),
   };
 
   const datasetService = {
-    getClient: jest.fn(),
+    getClient: vi.fn(),
   };
 
   const mockCoreContext = coreMock.createRequestHandlerContext();
@@ -1529,7 +1532,7 @@ describe('dataset routes', () => {
         canEncrypt,
         evaluatorRegistry: createEvaluatorRegistryMock(),
         getInferenceStart: async () =>
-          ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+          ({ getClient: vi.fn() } as unknown as InferenceServerStart),
         getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
         getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
       });
@@ -1540,8 +1543,8 @@ describe('dataset routes', () => {
       ];
 
       const mockCoreContext = coreMock.createRequestHandlerContext();
-      const datasetClient = { list: jest.fn() };
-      const datasetService = { getClient: jest.fn().mockReturnValue(datasetClient) };
+      const datasetClient = { list: vi.fn() };
+      const datasetService = { getClient: vi.fn().mockReturnValue(datasetClient) };
       const context = coreMock.createCustomRequestHandlerContext({
         core: mockCoreContext,
         evals: { datasetService } as any,

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import { renderHook } from '@testing-library/react';
 import { useRegisterDiscoverEsqlFeedback } from './use_register_discover_esql_feedback';
@@ -15,13 +18,13 @@ import { useIsEsqlMode } from './use_is_esql_mode';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import type { DiscoverServices } from '../../../build_services';
 
-jest.mock('../../../hooks/use_discover_services');
-jest.mock('./use_is_esql_mode');
+vi.mock('../../../hooks/use_discover_services');
+vi.mock('./use_is_esql_mode');
 
-const mockUseDiscoverServices = useDiscoverServices as jest.MockedFunction<
+const mockUseDiscoverServices = useDiscoverServices as MockedFunction<
   typeof useDiscoverServices
 >;
-const mockUseIsEsqlMode = useIsEsqlMode as jest.MockedFunction<typeof useIsEsqlMode>;
+const mockUseIsEsqlMode = useIsEsqlMode as MockedFunction<typeof useIsEsqlMode>;
 
 const mockServices = (feedback?: DiscoverServices['feedback']) => {
   mockUseDiscoverServices.mockReturnValue({
@@ -39,8 +42,8 @@ describe('useRegisterDiscoverEsqlFeedback', () => {
   });
 
   it('registers ES|QL context and unregisters on unmount', () => {
-    const unregister = jest.fn();
-    const setContext = jest.fn().mockReturnValue(unregister);
+    const unregister = vi.fn();
+    const setContext = vi.fn().mockReturnValue(unregister);
     mockServices({ setContext });
     mockUseIsEsqlMode.mockReturnValue(true);
 
@@ -58,7 +61,7 @@ describe('useRegisterDiscoverEsqlFeedback', () => {
   });
 
   it('clears ES|QL context when Discover is in classic mode', () => {
-    const setContext = jest.fn().mockReturnValue(jest.fn());
+    const setContext = vi.fn().mockReturnValue(vi.fn());
     mockServices({ setContext });
     mockUseIsEsqlMode.mockReturnValue(false);
 

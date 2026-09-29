@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { Rootly } from './rootly';
@@ -14,14 +16,14 @@ import { RootlyCreateIncidentInputSchema, RootlyAddIncidentSubscribersInputSchem
 
 describe('Rootly', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-    put: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
   };
 
   const mockContext = {
     client: mockClient,
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   const JSON_API_HEADERS = {
@@ -37,7 +39,7 @@ describe('Rootly', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {

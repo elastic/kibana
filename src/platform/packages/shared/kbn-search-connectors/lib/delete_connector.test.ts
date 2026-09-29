@@ -7,25 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { deleteConnectorById } from './delete_connector';
 
-jest.mock('./cancel_syncs', () => ({
-  cancelSyncs: jest.fn(),
-}));
+vi.mock('./cancel_syncs', () => {
+      const mocked = {
+      cancelSyncs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 import { cancelSyncs } from './cancel_syncs';
 
 describe('deleteConnector lib function', () => {
   const mockClient = {
     transport: {
-      request: jest.fn(),
+      request: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   it('should delete connector and cancel syncs', async () => {
@@ -36,7 +42,7 @@ describe('deleteConnector lib function', () => {
     await expect(
       deleteConnectorById(mockClient as unknown as ElasticsearchClient, 'connectorId')
     ).resolves.toEqual({ acknowledged: true });
-    expect(cancelSyncs as jest.Mock).toHaveBeenCalledWith(mockClient, 'connectorId');
+    expect(cancelSyncs as Mock).toHaveBeenCalledWith(mockClient, 'connectorId');
     expect(mockClient.transport.request).toHaveBeenCalledWith({
       method: 'DELETE',
       path: '/_connector/connectorId',
@@ -45,6 +51,6 @@ describe('deleteConnector lib function', () => {
         delete_sync_jobs: true,
       },
     });
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });

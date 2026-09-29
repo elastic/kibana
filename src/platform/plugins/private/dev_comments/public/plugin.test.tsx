@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -46,9 +49,9 @@ describe('DevCommentsPlugin', () => {
 
   beforeAll(() => {
     // jsdom has no layout; every element gets a box, with nothing drawn over it, so anchors resolve and pins show.
-    Element.prototype.scrollIntoView = jest.fn();
+    Element.prototype.scrollIntoView = vi.fn();
     Document.prototype.elementsFromPoint = () => [];
-    jest.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({
       x: 10,
       y: 10,
       left: 10,
@@ -61,7 +64,7 @@ describe('DevCommentsPlugin', () => {
     });
   });
 
-  afterAll(() => jest.restoreAllMocks());
+  afterAll(() => vi.restoreAllMocks());
 
   beforeEach(() => {
     page.innerHTML = `<button type="button" id="target">Target</button>`;
@@ -74,8 +77,8 @@ describe('DevCommentsPlugin', () => {
     const core = coreMock.createStart();
     core.http.get.mockResolvedValue([]);
     core.http.post.mockResolvedValue(created);
-    const developerToolbar: jest.Mocked<DeveloperToolbarStart> = {
-      registerItem: jest.fn().mockReturnValue(() => {}),
+    const developerToolbar: Mocked<DeveloperToolbarStart> = {
+      registerItem: vi.fn().mockReturnValue(() => {}),
     };
     const plugin = new DevCommentsPlugin(
       coreMock.createPluginInitializerContext({ enabled: true })
@@ -125,8 +128,8 @@ describe('DevCommentsPlugin', () => {
 
   it('registers nothing outside dev mode, when disabled, or without the toolbar', () => {
     const core = coreMock.createStart();
-    const developerToolbar: jest.Mocked<DeveloperToolbarStart> = {
-      registerItem: jest.fn().mockReturnValue(() => {}),
+    const developerToolbar: Mocked<DeveloperToolbarStart> = {
+      registerItem: vi.fn().mockReturnValue(() => {}),
     };
 
     const disabled = new DevCommentsPlugin(

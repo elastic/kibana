@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 
@@ -14,12 +17,12 @@ import { TestProviders } from '../../../../../common/mock';
 import { useOnUpdateField } from '../../../use_on_update_field';
 import type { CaseUI } from '../../../../../../common';
 
-jest.mock('../../../../../common/navigation/hooks');
-jest.mock('../../../use_on_update_field');
+vi.mock('../../../../../common/navigation/hooks');
+vi.mock('../../../use_on_update_field');
 
-const onUpdateField = jest.fn();
+const onUpdateField = vi.fn();
 
-const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
+const useOnUpdateFieldMock = useOnUpdateField as Mock;
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(TestProviders, null, children);
@@ -28,7 +31,7 @@ const caseData: CaseUI = basicCase;
 
 describe('useAttributesFieldActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useOnUpdateFieldMock.mockReturnValue({ onUpdateField, isLoading: false, loadingKey: null });
   });
 

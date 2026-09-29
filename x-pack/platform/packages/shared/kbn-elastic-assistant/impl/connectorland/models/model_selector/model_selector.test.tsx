@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { MODEL_GPT_41, MODEL_GPT_4_TURBO, ModelSelector } from './model_selector';
 import { fireEvent, render } from '@testing-library/react';
 
 describe('ModelSelector', () => {
   it('should render with correct default selection', () => {
-    const onModelSelectionChange = jest.fn();
+    const onModelSelectionChange = vi.fn();
     const { getByTestId } = render(
       <ModelSelector onModelSelectionChange={onModelSelectionChange} />
     );
     expect(getByTestId('comboBoxSearchInput')).toHaveValue(MODEL_GPT_41);
   });
   it('should call onModelSelectionChange when custom option', () => {
-    const onModelSelectionChange = jest.fn();
+    const onModelSelectionChange = vi.fn();
     const { getByTestId } = render(
       <ModelSelector onModelSelectionChange={onModelSelectionChange} />
     );
@@ -33,7 +35,7 @@ describe('ModelSelector', () => {
     expect(onModelSelectionChange).toHaveBeenCalledWith(customOption);
   });
   it('should call onModelSelectionChange when existing option is selected', () => {
-    const onModelSelectionChange = jest.fn();
+    const onModelSelectionChange = vi.fn();
     const { getByTestId } = render(
       <ModelSelector onModelSelectionChange={onModelSelectionChange} />
     );

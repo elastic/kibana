@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObject } from '@kbn/core/server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import { createSavedObjectsSerializerMock } from '../../../client/mocks';
@@ -65,21 +67,21 @@ describe('UserActionPersister', () => {
   // below can inspect the fire-and-forget dispatches. `jest.resetAllMocks`
   // in `beforeEach` clears call state between tests.
   const analyticsV2ActivityWriter = {
-    upsertAction: jest.fn(),
-    bulkUpsertActions: jest.fn(),
-    bulkDeleteActionsByCaseIds: jest.fn(),
-    bulkUpsertActionsAwait: jest.fn().mockResolvedValue(undefined),
+    upsertAction: vi.fn(),
+    bulkUpsertActions: vi.fn(),
+    bulkDeleteActionsByCaseIds: vi.fn(),
+    bulkUpsertActionsAwait: vi.fn().mockResolvedValue(undefined),
   };
 
   let persister: UserActionPersister;
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     persister = new UserActionPersister({
       log: mockLogger,
       unsecuredSavedObjectsClient,
@@ -90,7 +92,7 @@ describe('UserActionPersister', () => {
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   const getRequest = <T extends keyof BuilderParameters = 'connector'>(overrides = {}) =>

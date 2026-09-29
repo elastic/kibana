@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -13,21 +16,21 @@ import { queryKeys } from '../query_keys';
 import { ChatTriggerMode } from '../../../common/http_api/chat';
 import { useSendUserMessage } from './use_send_user_message';
 
-jest.mock('./use_agent_builder_service');
-jest.mock('../context/conversation/use_conversation_id');
-jest.mock('../context/conversation/conversation_context');
+vi.mock('./use_agent_builder_service');
+vi.mock('../context/conversation/use_conversation_id');
+vi.mock('../context/conversation/conversation_context');
 
-const { useAgentBuilderServices } = jest.requireMock('./use_agent_builder_service');
-const { useConversationId } = jest.requireMock('../context/conversation/use_conversation_id');
-const { useConversationContext } = jest.requireMock('../context/conversation/conversation_context');
+const { useAgentBuilderServices } = (await vi.importMock('./use_agent_builder_service'));
+const { useConversationId } = (await vi.importMock('../context/conversation/use_conversation_id'));
+const { useConversationContext } = (await vi.importMock('../context/conversation/conversation_context'));
 
 const conversationId = 'conv-1';
 const updatedConversation = { id: conversationId, events: [{ id: 'evt-1', type: 'user_message' }] };
 
 describe('useSendUserMessage', () => {
   let queryClient: QueryClient;
-  let sendUserMessage: jest.Mock;
-  let resetAttachments: jest.Mock;
+  let sendUserMessage: Mock;
+  let resetAttachments: Mock;
 
   const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -35,8 +38,8 @@ describe('useSendUserMessage', () => {
 
   beforeEach(() => {
     queryClient = new QueryClient();
-    sendUserMessage = jest.fn().mockResolvedValue(updatedConversation);
-    resetAttachments = jest.fn();
+    sendUserMessage = vi.fn().mockResolvedValue(updatedConversation);
+    resetAttachments = vi.fn();
     useAgentBuilderServices.mockReturnValue({ chatService: { sendUserMessage } });
     useConversationId.mockReturnValue(conversationId);
     useConversationContext.mockReturnValue({

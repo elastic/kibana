@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useAttackDiscoveryControls } from '.';
 import { useLoadConnectors } from '@kbn/inference-connectors';
@@ -20,83 +23,107 @@ const mockConnectors: unknown[] = [
   },
 ];
 
-jest.mock('react-use/lib/useLocalStorage', () =>
-  jest.fn().mockImplementation((key, defaultValue) => {
+vi.mock('react-use/lib/useLocalStorage', () =>
+  vi.fn().mockImplementation((key, defaultValue) => {
     if (key.includes('START_LOCAL_STORAGE_KEY')) {
-      return ['now-24h', jest.fn()];
+      return ['now-24h', vi.fn()];
     }
     if (key.includes('END_LOCAL_STORAGE_KEY')) {
-      return ['now', jest.fn()];
+      return ['now', vi.fn()];
     }
     if (key.includes('CONNECTOR_ID_LOCAL_STORAGE_KEY')) {
-      return ['test-id', jest.fn()];
+      return ['test-id', vi.fn()];
     }
-    return [defaultValue || 'test-id', jest.fn()];
+    return [defaultValue || 'test-id', vi.fn()];
   })
 );
 
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn(() => ({
-    isFetched: true,
-    data: mockConnectors,
-  })),
-}));
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn(() => ({
+        isFetched: true,
+        data: mockConnectors,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../use_attack_discovery', () => ({
-  useAttackDiscovery: jest.fn().mockReturnValue({
-    fetchAttackDiscoveries: jest.fn(),
-    isLoading: false,
-  }),
-}));
+vi.mock('../use_attack_discovery', () => {
+      const mocked = {
+      useAttackDiscovery: vi.fn().mockReturnValue({
+        fetchAttackDiscoveries: vi.fn(),
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      uiSettings: {
-        get: jest.fn(),
-      },
-      settings: {},
-    },
-  }),
-}));
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          uiSettings: {
+            get: vi.fn(),
+          },
+          settings: {},
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/elastic-assistant', () => ({
-  useAssistantContext: () => ({
-    http: {},
-  }),
-  ATTACK_DISCOVERY_STORAGE_KEY: 'attackDiscovery',
-  DEFAULT_ASSISTANT_NAMESPACE: 'elasticAssistantDefault',
-  DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS: 100,
-  END_LOCAL_STORAGE_KEY: 'end',
-  FILTERS_LOCAL_STORAGE_KEY: 'filters',
-  MAX_ALERTS_LOCAL_STORAGE_KEY: 'maxAlerts',
-  QUERY_LOCAL_STORAGE_KEY: 'query',
-  START_LOCAL_STORAGE_KEY: 'start',
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      useAssistantContext: () => ({
+        http: {},
+      }),
+      ATTACK_DISCOVERY_STORAGE_KEY: 'attackDiscovery',
+      DEFAULT_ASSISTANT_NAMESPACE: 'elasticAssistantDefault',
+      DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS: 100,
+      END_LOCAL_STORAGE_KEY: 'end',
+      FILTERS_LOCAL_STORAGE_KEY: 'filters',
+      MAX_ALERTS_LOCAL_STORAGE_KEY: 'maxAlerts',
+      QUERY_LOCAL_STORAGE_KEY: 'query',
+      START_LOCAL_STORAGE_KEY: 'start',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: () => ({
-    dataView: {},
-  }),
-}));
+vi.mock('../../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: () => ({
+        dataView: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/lib/kuery', () => ({
-  convertToBuildEsQuery: jest.fn().mockReturnValue([{}, null]),
-}));
+vi.mock('../../../common/lib/kuery', () => {
+      const mocked = {
+      convertToBuildEsQuery: vi.fn().mockReturnValue([{}, null]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_invalid_filter_query', () => ({
-  useInvalidFilterQuery: jest.fn(),
-}));
+vi.mock('../../../common/hooks/use_invalid_filter_query', () => {
+      const mocked = {
+      useInvalidFilterQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../use_get_attack_discovery_generations', () => ({
-  useInvalidateGetAttackDiscoveryGenerations: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('../use_get_attack_discovery_generations', () => {
+      const mocked = {
+      useInvalidateGetAttackDiscoveryGenerations: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useAttackDiscoveryControls', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useLoadConnectors as jest.Mock).mockReturnValue({
+    (useLoadConnectors as Mock).mockReturnValue({
       isFetched: true,
       data: mockConnectors,
     });
@@ -124,24 +151,24 @@ describe('useAttackDiscoveryControls', () => {
   });
 
   it('invokes fetchAttackDiscoveries with the expected parameters when onGenerate is called', async () => {
-    const fetchAttackDiscoveriesMock = jest.fn();
-    (useAttackDiscovery as jest.Mock).mockReturnValue({
+    const fetchAttackDiscoveriesMock = vi.fn();
+    (useAttackDiscovery as Mock).mockReturnValue({
       fetchAttackDiscoveries: fetchAttackDiscoveriesMock,
       isLoading: false,
     });
 
     // Override the localStorage mock to return proper values for this test
-    (useLocalStorage as jest.Mock).mockImplementation((key: string) => {
+    (useLocalStorage as Mock).mockImplementation((key: string) => {
       if (key.includes('start')) {
-        return ['now-24h', jest.fn()];
+        return ['now-24h', vi.fn()];
       }
       if (key.includes('end')) {
-        return ['now', jest.fn()];
+        return ['now', vi.fn()];
       }
       if (key.includes('connectorId')) {
-        return ['test-id', jest.fn()];
+        return ['test-id', vi.fn()];
       }
-      return [undefined, jest.fn()];
+      return [undefined, vi.fn()];
     });
 
     const { result } = renderHook(() => useAttackDiscoveryControls());
@@ -170,18 +197,18 @@ describe('useAttackDiscoveryControls', () => {
     ];
 
     beforeEach(() => {
-      (useLoadConnectors as jest.Mock).mockReturnValue({
+      (useLoadConnectors as Mock).mockReturnValue({
         isFetched: true,
         data: multipleConnectors,
       });
     });
 
     it('defaults to the first (highest-priority) connector when none is selected', () => {
-      (useLocalStorage as jest.Mock).mockImplementation((key: string) => {
+      (useLocalStorage as Mock).mockImplementation((key: string) => {
         if (key.endsWith('connectorId')) {
-          return [undefined, jest.fn()];
+          return [undefined, vi.fn()];
         }
-        return ['test-id', jest.fn()];
+        return ['test-id', vi.fn()];
       });
 
       const { result } = renderHook(() => useAttackDiscoveryControls());
@@ -190,11 +217,11 @@ describe('useAttackDiscoveryControls', () => {
     });
 
     it('does not override an existing selected connectorId', () => {
-      (useLocalStorage as jest.Mock).mockImplementation((key: string) => {
+      (useLocalStorage as Mock).mockImplementation((key: string) => {
         if (key.endsWith('connectorId')) {
-          return ['connector-2', jest.fn()];
+          return ['connector-2', vi.fn()];
         }
-        return ['test-id', jest.fn()];
+        return ['test-id', vi.fn()];
       });
 
       const { result } = renderHook(() => useAttackDiscoveryControls());

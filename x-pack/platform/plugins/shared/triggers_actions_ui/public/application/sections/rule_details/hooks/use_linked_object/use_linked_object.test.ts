@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -12,29 +15,29 @@ import { useLinkedObject } from './use_linked_object';
 import { getSLOLinkData } from './get_link_data/get_slo_link_data';
 import type { Rule } from '../../../../../types';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('./get_link_data/get_slo_link_data');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('./get_link_data/get_slo_link_data');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockGetSLOLinkData = getSLOLinkData as jest.MockedFunction<typeof getSLOLinkData>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockGetSLOLinkData = getSLOLinkData as MockedFunction<typeof getSLOLinkData>;
 
 describe('useLinkedObject', () => {
   const mockLocator = {
-    getRedirectUrl: jest.fn(),
+    getRedirectUrl: vi.fn(),
   };
 
   const mockServices = {
     share: {
       url: {
         locators: {
-          get: jest.fn(),
+          get: vi.fn(),
         },
       },
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: mockServices,
     } as any);

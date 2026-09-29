@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { take } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -47,18 +50,18 @@ const ZDT_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
   },
 ];
 
-jest.mock('./run_v2_migration', () => {
+vi.mock('./run_v2_migration', () => {
   return {
-    runV2Migration: jest.fn((options): Promise<MigrationResult[]> => {
+    runV2Migration: vi.fn((options): Promise<MigrationResult[]> => {
       options.logger.info('Running v2 migrations');
       return Promise.resolve(V2_SUCCESSFUL_MIGRATION_RESULT);
     }),
   };
 });
 
-jest.mock('./zdt', () => {
+vi.mock('./zdt', () => {
   return {
-    runZeroDowntimeMigration: jest.fn(
+    runZeroDowntimeMigration: vi.fn(
       (): Promise<MigrationResult[]> => Promise.resolve(ZDT_SUCCESSFUL_MIGRATION_RESULT)
     ),
   };
@@ -79,8 +82,8 @@ const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   return registry;
 };
 
-const mockRunV2Migration = runV2Migration as jest.MockedFunction<typeof runV2Migration>;
-const mockRunZeroDowntimeMigration = runZeroDowntimeMigration as jest.MockedFunction<
+const mockRunV2Migration = runV2Migration as MockedFunction<typeof runV2Migration>;
+const mockRunZeroDowntimeMigration = runZeroDowntimeMigration as MockedFunction<
   typeof runZeroDowntimeMigration
 >;
 
@@ -127,7 +130,7 @@ describe('KibanaMigrator', () => {
     it('calls documentMigrator.migrate', () => {
       const options = mockOptions();
       const kibanaMigrator = new KibanaMigrator(options);
-      jest.spyOn(DocumentMigrator.prototype, 'migrate').mockImplementation((doc) => doc);
+      vi.spyOn(DocumentMigrator.prototype, 'migrate').mockImplementation((doc) => doc);
       const doc = {} as any;
 
       expect(() => kibanaMigrator.migrateDocument(doc)).not.toThrow();
@@ -219,7 +222,7 @@ describe('KibanaMigrator', () => {
       mockRunV2Migration.mockRejectedValueOnce(fatal);
 
       migrator.prepareMigrations();
-      expect(migrator.runMigrations()).rejects.toEqual(fatal);
+      await expect(migrator.runMigrations()).rejects.toEqual(fatal);
     });
 
     it('rejects when the zdt migrator algorithm rejects', async () => {
@@ -232,7 +235,7 @@ describe('KibanaMigrator', () => {
       mockRunZeroDowntimeMigration.mockRejectedValueOnce(fatal);
 
       migrator.prepareMigrations();
-      expect(migrator.runMigrations()).rejects.toEqual(fatal);
+      await expect(migrator.runMigrations()).rejects.toEqual(fatal);
     });
 
     it('does not log intermediate steps when `useCumulativeLogger: true`', async () => {
@@ -264,7 +267,7 @@ describe('KibanaMigrator', () => {
 
 const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2'): KibanaMigratorOptions => {
   const mockedClient = elasticsearchClientMock.createElasticsearchClient();
-  (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
+  (mockedClient as any).child = vi.fn().mockImplementation(() => mockedClient);
 
   return {
     logger: loggingSystemMock.create().get(),
@@ -285,7 +288,7 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2'): KibanaMigratorOptions => {
             name: { type: 'keyword' },
           },
         },
-        migrations: { '8.2.3': jest.fn().mockImplementation((doc) => doc) },
+        migrations: { '8.2.3': vi.fn().mockImplementation((doc) => doc) },
       },
       {
         name: 'testtype2',

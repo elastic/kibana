@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 import type { AnalyticsCollection } from '../../../../common/types/analytics';
@@ -12,28 +14,31 @@ import { KibanaLogic } from '../../shared/kibana/kibana_logic';
 
 import { findOrCreateDataView } from './find_or_create_data_view';
 
-jest.mock('../../shared/kibana/kibana_logic', () => ({
-  KibanaLogic: {
-    values: {
-      data: {
-        dataViews: {
-          createAndSave: jest.fn(),
-          find: jest.fn(() => Promise.resolve([])),
+vi.mock('../../shared/kibana/kibana_logic', () => {
+      const mocked = {
+      KibanaLogic: {
+        values: {
+          data: {
+            dataViews: {
+              createAndSave: vi.fn(),
+              find: vi.fn(() => Promise.resolve([])),
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('findOrCreateDataView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should find and set dataView when analytics collection fetched', async () => {
     const dataView = { id: 'test', title: 'events1' } as DataView;
     if (KibanaLogic.values.data) {
-      jest.spyOn(KibanaLogic.values.data.dataViews, 'find').mockResolvedValueOnce([dataView]);
+      vi.spyOn(KibanaLogic.values.data.dataViews, 'find').mockResolvedValueOnce([dataView]);
     }
 
     expect(
@@ -48,7 +53,7 @@ describe('findOrCreateDataView', () => {
   it('should create, save and set dataView when analytics collection fetched but dataView is not found', async () => {
     const dataView = { id: 'test21' } as DataView;
     if (KibanaLogic.values.data) {
-      jest
+      vi
         .spyOn(KibanaLogic.values.data.dataViews, 'createAndSave')
         .mockResolvedValueOnce(dataView);
     }

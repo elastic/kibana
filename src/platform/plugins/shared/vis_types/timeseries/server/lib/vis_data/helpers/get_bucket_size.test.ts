@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getBucketSize } from './get_bucket_size';
 
 import type { VisTypeTimeseriesVisDataRequest } from '../../../types';
@@ -25,7 +27,7 @@ describe('getBucketSize', () => {
   const capabilities = {
     timezone: 'UTC',
     maxBucketsLimit: 200000,
-    getValidTimeInterval: jest.fn((v) => v),
+    getValidTimeInterval: vi.fn((v) => v),
   } as unknown as SearchCapabilities;
 
   test('returns auto calculated buckets', () => {

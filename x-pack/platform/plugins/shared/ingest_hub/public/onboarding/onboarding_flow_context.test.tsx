@@ -5,34 +5,40 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 
-jest.mock('./use_aws_service_matrix', () => ({
-  useAwsServiceMatrix: jest
-    .fn()
-    .mockReturnValue({ matrix: [], isError: false, refetch: jest.fn() }),
-}));
+vi.mock('./use_aws_service_matrix', () => {
+      const mocked = {
+      useAwsServiceMatrix: vi
+        .fn()
+        .mockReturnValue({ matrix: [], isError: false, refetch: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { OnboardingFlowProvider, useOnboardingFlow } from './onboarding_flow_context';
 
-jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
+vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
 
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
-const mockUseSessionStorage = useSessionStorage as jest.Mock;
+const mockUseSessionStorage = useSessionStorage as Mock;
 
 // Stateful mock: tracks the stored value per key and triggers re-renders by re-calling the setter.
 // The setter updates the store and returns a fresh value on the next call, which is what the
 // context's persistedDetectAndReviewStepRef needs to merge correctly across multiple updates.
 function makeStatefulStorageMock() {
   const stores: Record<string, unknown> = {};
-  const setters: Record<string, jest.Mock> = {};
+  const setters: Record<string, Mock> = {};
 
   return (key: string, defaultValue: unknown) => {
     if (!(key in stores)) stores[key] = defaultValue;
     if (!setters[key]) {
-      setters[key] = jest.fn((value: unknown) => {
+      setters[key] = vi.fn((value: unknown) => {
         stores[key] = value;
       });
     }
@@ -46,7 +52,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 describe('OnboardingFlowProvider', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseSessionStorage.mockImplementation(makeStatefulStorageMock());
   });
 
@@ -449,7 +455,7 @@ describe('OnboardingFlowProvider', () => {
       });
 
       const persistedWrites = mockUseSessionStorage.mock.results
-        .map((r) => (r.value as [unknown, jest.Mock])[1])
+        .map((r) => (r.value as [unknown, Mock])[1])
         .flatMap((setter) => setter.mock.calls.map(([value]: [unknown]) => value));
       expect(JSON.stringify(persistedWrites)).not.toContain('sha256:new');
     });

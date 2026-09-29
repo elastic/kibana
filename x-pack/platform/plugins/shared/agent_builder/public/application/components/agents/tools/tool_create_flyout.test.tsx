@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -14,23 +16,21 @@ import { EuiProvider } from '@elastic/eui';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolCreateFlyout } from './tool_create_flyout';
 
-jest.mock('../../../hooks/tools/use_create_tools');
-jest.mock('../../../hooks/tools/use_tool_form');
-jest.mock('../../tools/form/registry/tools_form_registry');
+vi.mock('../../../hooks/tools/use_create_tools');
+vi.mock('../../../hooks/tools/use_tool_form');
+vi.mock('../../tools/form/registry/tools_form_registry');
 
-jest.mock('../../tools/form/tool_form', () => {
-  const actual = jest.requireActual('../../tools/form/tool_form');
+vi.mock('../../tools/form/tool_form', async () => {
+  const actual = (await vi.importActual('../../tools/form/tool_form'));
   return {
     ...actual,
     ToolForm: () => <div data-test-subj="toolForm" />,
   };
 });
 
-const { useCreateTool } = jest.requireMock('../../../hooks/tools/use_create_tools');
-const { useToolForm } = jest.requireMock('../../../hooks/tools/use_tool_form');
-const { getCreatePayloadFromData } = jest.requireMock(
-  '../../tools/form/registry/tools_form_registry'
-);
+const { useCreateTool } = (await vi.importMock('../../../hooks/tools/use_create_tools'));
+const { useToolForm } = (await vi.importMock('../../../hooks/tools/use_tool_form'));
+const { getCreatePayloadFromData } = (await vi.importMock('../../tools/form/registry/tools_form_registry'));
 
 const mockFormData = {
   type: ToolType.esql,
@@ -45,14 +45,14 @@ const renderComponent = (props: Partial<React.ComponentProps<typeof ToolCreateFl
   render(
     <EuiProvider>
       <IntlProvider locale="en">
-        <ToolCreateFlyout onClose={jest.fn()} {...props} />
+        <ToolCreateFlyout onClose={vi.fn()} {...props} />
       </IntlProvider>
     </EuiProvider>
   );
 
 describe('ToolCreateFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useToolForm.mockReturnValue({
       handleSubmit: (fn: (data: unknown) => void) => () => fn(mockFormData),
@@ -61,7 +61,7 @@ describe('ToolCreateFlyout', () => {
 
     useCreateTool.mockReturnValue({
       isSubmitting: false,
-      createTool: jest.fn(),
+      createTool: vi.fn(),
     });
 
     getCreatePayloadFromData.mockReturnValue({ id: mockFormData.toolId });
@@ -88,7 +88,7 @@ describe('ToolCreateFlyout', () => {
   });
 
   it('calls onClose when Cancel is clicked', async () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     renderComponent({ onClose });
 
@@ -109,7 +109,7 @@ describe('ToolCreateFlyout', () => {
   });
 
   it('creates the tool with the payload built from the form data on save', async () => {
-    const createTool = jest.fn();
+    const createTool = vi.fn();
     useCreateTool.mockReturnValue({ isSubmitting: false, createTool });
 
     const user = userEvent.setup({ pointerEventsCheck: 0 });
@@ -122,8 +122,8 @@ describe('ToolCreateFlyout', () => {
   });
 
   it('calls onToolCreated and onClose when the create mutation succeeds', () => {
-    const onClose = jest.fn();
-    const onToolCreated = jest.fn();
+    const onClose = vi.fn();
+    const onToolCreated = vi.fn();
     renderComponent({ onClose, onToolCreated });
 
     const { onSuccess } = useCreateTool.mock.calls[0][0];

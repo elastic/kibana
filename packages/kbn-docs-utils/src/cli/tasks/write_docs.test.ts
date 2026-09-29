@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { writeDocs } from './write_docs';
 import type {
@@ -18,12 +21,12 @@ import type {
 } from '../types';
 
 // Mock dependencies
-jest.mock('../../mdx/write_plugin_mdx_docs');
-jest.mock('../../mdx/write_deprecations_doc_by_api');
-jest.mock('../../mdx/write_deprecations_doc_by_plugin');
-jest.mock('../../mdx/write_plugin_directory_doc');
-jest.mock('../../mdx/write_deprecations_due_by_team');
-jest.mock('../../trim_deleted_docs_from_nav');
+vi.mock('../../mdx/write_plugin_mdx_docs');
+vi.mock('../../mdx/write_deprecations_doc_by_api');
+vi.mock('../../mdx/write_deprecations_doc_by_plugin');
+vi.mock('../../mdx/write_plugin_directory_doc');
+vi.mock('../../mdx/write_deprecations_due_by_team');
+vi.mock('../../trim_deleted_docs_from_nav');
 
 import { writePluginDocs } from '../../mdx/write_plugin_mdx_docs';
 import { writeDeprecationDocByApi } from '../../mdx/write_deprecations_doc_by_api';
@@ -57,8 +60,8 @@ describe('writeDocs', () => {
         writeTo: process.stdout,
       }),
       transaction: {
-        startSpan: jest.fn(() => ({
-          end: jest.fn(),
+        startSpan: vi.fn(() => ({
+          end: vi.fn(),
         })),
       } as any,
       outputFolder: '/tmp/api_docs',
@@ -114,15 +117,15 @@ describe('writeDocs', () => {
     };
 
     // Clear all mocks before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Set up mock implementations
-    (writePluginDocs as jest.Mock).mockResolvedValue(undefined);
-    (writeDeprecationDocByApi as jest.Mock).mockResolvedValue(undefined);
-    (writeDeprecationDocByPlugin as jest.Mock).mockResolvedValue(undefined);
-    (writePluginDirectoryDoc as jest.Mock).mockResolvedValue(undefined);
-    (writeDeprecationDueByTeam as jest.Mock).mockResolvedValue(undefined);
-    (trimDeletedDocsFromNav as jest.Mock).mockResolvedValue(undefined);
+    (writePluginDocs as Mock).mockResolvedValue(undefined);
+    (writeDeprecationDocByApi as Mock).mockResolvedValue(undefined);
+    (writeDeprecationDocByPlugin as Mock).mockResolvedValue(undefined);
+    (writePluginDirectoryDoc as Mock).mockResolvedValue(undefined);
+    (writeDeprecationDueByTeam as Mock).mockResolvedValue(undefined);
+    (trimDeletedDocsFromNav as Mock).mockResolvedValue(undefined);
   });
 
   it('skips writing plugin directory doc when stats is provided', async () => {

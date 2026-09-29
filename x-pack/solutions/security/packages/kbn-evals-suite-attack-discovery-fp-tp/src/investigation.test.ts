@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpHandler } from '@kbn/core/public';
 import { createInvestigation, waitForConversationsReady } from './investigation';
 
 describe('createInvestigation', () => {
   it('returns a conversation created as public so the workflow API key can read it', async () => {
-    const fetch = jest.fn().mockResolvedValue({});
+    const fetch = vi.fn().mockResolvedValue({});
     await createInvestigation(fetch as unknown as HttpHandler, 'title');
     expect(JSON.parse(fetch.mock.calls[0][1].body).access_control).toEqual({
       access_mode: 'public',
@@ -25,10 +28,10 @@ const shardError = new Error(
 
 describe('waitForConversationsReady', () => {
   const options = { maxAttempts: 3, retryDelayMs: 0 };
-  let fetch: jest.Mock;
+  let fetch: Mock;
 
   beforeEach(() => {
-    fetch = jest.fn();
+    fetch = vi.fn();
   });
 
   it('returns once a probe conversation is created and deleted', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { MlModelDeploymentState } from '../../../common/types/ml';
@@ -17,13 +19,13 @@ import { startMlModelDeployment } from './start_ml_model_deployment';
 describe('startMlModelDeployment', () => {
   const modelName = '.elser_model_2';
   const mockTrainedModelsProvider = {
-    getTrainedModels: jest.fn(),
-    getTrainedModelsStats: jest.fn(),
-    startTrainedModelDeployment: jest.fn(),
+    getTrainedModels: vi.fn(),
+    getTrainedModelsStats: vi.fn(),
+    startTrainedModelDeployment: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should error when there is no trained model provider', async () => {
@@ -46,7 +48,7 @@ describe('startMlModelDeployment', () => {
   });
 
   it('should return the deployment state if not "downloaded"', async () => {
-    jest.spyOn(mockGetStatus, 'getMlModelDeploymentStatus').mockReturnValueOnce(
+    vi.spyOn(mockGetStatus, 'getMlModelDeploymentStatus').mockReturnValueOnce(
       Promise.resolve({
         deploymentState: MlModelDeploymentState.Starting,
         modelId: modelName,
@@ -66,7 +68,7 @@ describe('startMlModelDeployment', () => {
   });
 
   it('should return the deployment state if not "downloaded" for snapshot model', async () => {
-    jest.spyOn(mockGetStatus, 'getMlModelDeploymentStatus').mockReturnValueOnce(
+    vi.spyOn(mockGetStatus, 'getMlModelDeploymentStatus').mockReturnValueOnce(
       Promise.resolve({
         deploymentState: MlModelDeploymentState.Starting,
         modelId: modelName,
@@ -86,7 +88,7 @@ describe('startMlModelDeployment', () => {
   });
 
   it('should deploy model if it is downloaded', async () => {
-    jest
+    vi
       .spyOn(mockGetStatus, 'getMlModelDeploymentStatus')
       .mockReturnValueOnce(
         Promise.resolve({

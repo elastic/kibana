@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getGapRange } from './utils';
 import { GapRangeValue } from '../../constants';
 
 describe('getGapRange', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2024-01-15T10:00:00Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-15T10:00:00Z'));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should return correct range for LAST_24_H', () => {

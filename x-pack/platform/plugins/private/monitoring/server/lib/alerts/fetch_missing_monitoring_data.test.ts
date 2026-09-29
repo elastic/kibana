@@ -5,20 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchMissingMonitoringData } from './fetch_missing_monitoring_data';
 
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      config: {
-        ui: {
-          ccs: { enabled: true },
+vi.mock('../../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          config: {
+            ui: {
+              ccs: { enabled: true },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 import { Globals } from '../../static_globals';
 
 function getResponse(

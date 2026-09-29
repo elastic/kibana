@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import { IncomingWebhook } from '@slack/webhook';
 import type { Logger } from '@kbn/core/server';
 import type {
@@ -21,13 +24,13 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { CONNECTOR_ID } from '@kbn/connector-schemas/slack';
 
-const sendSpy = jest.spyOn(IncomingWebhook.prototype, 'send');
+const sendSpy = vi.spyOn(IncomingWebhook.prototype, 'send');
 
 const services: Services = actionsMock.createServices();
-const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+const mockedLogger: Mocked<Logger> = loggerMock.create();
 
 let connectorType: SlackConnectorType;
-let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let configurationUtilities: Mocked<ActionsConfigurationUtilities>;
 let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {
@@ -150,7 +153,7 @@ describe('validateConnectorTypeSecrets()', () => {
 
 describe('execute()', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     async function mockSlackExecutor(options: SlackConnectorTypeExecutorOptions) {
       const { params } = options;
       const { message } = params;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
@@ -39,8 +41,8 @@ const componentTemplate: ClusterPutComponentTemplateRequest = {
 
 describe('createOrUpdateComponentTemplate', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
+    vi.resetAllMocks();
+    vi.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
   });
 
   it(`should call esClient to put component template`, async () => {

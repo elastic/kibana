@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type {
   GlobalSearchBatchedResults,
   GlobalSearchResult,
@@ -13,36 +15,48 @@ import { act, renderHook } from '@testing-library/react';
 import { Subject, of } from 'rxjs';
 import { useSearchState } from './use_search_state';
 
-jest.mock('@elastic/apm-rum', () => ({
-  apm: {
-    captureError: jest.fn(),
-  },
-}));
+vi.mock('@elastic/apm-rum', () => {
+      const mocked = {
+      apm: {
+        captureError: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../suggestions', () => ({
-  getSuggestions: jest.fn(() => []),
-}));
+vi.mock('../suggestions', () => {
+      const mocked = {
+      getSuggestions: vi.fn(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib', () => ({
-  resultToOption: jest.fn((r: { id: string; title: string; url: string; type: string }) => ({
-    key: r.id,
-    label: r.title,
-    url: r.url,
-    type: r.type,
-  })),
-  suggestionToOption: jest.fn((s: { suggestion: string }) => ({
-    label: s.suggestion,
-    type: '__suggestion__',
-    suggestion: s.suggestion,
-  })),
-}));
+vi.mock('../lib', () => {
+      const mocked = {
+      resultToOption: vi.fn((r: { id: string; title: string; url: string; type: string }) => ({
+        key: r.id,
+        label: r.title,
+        url: r.url,
+        type: r.type,
+      })),
+      suggestionToOption: vi.fn((s: { suggestion: string }) => ({
+        label: s.suggestion,
+        type: '__suggestion__',
+        suggestion: s.suggestion,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../search_syntax', () => ({
-  parseSearchParams: jest.fn((value: string) => ({
-    term: value,
-    filters: { types: [], tags: [] },
-  })),
-}));
+vi.mock('../search_syntax', () => {
+      const mocked = {
+      parseSearchParams: vi.fn((value: string) => ({
+        term: value,
+        filters: { types: [], tags: [] },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type Result =
   | string
@@ -83,27 +97,27 @@ const createBatch = (...results: Result[]): GlobalSearchBatchedResults => ({
 
 describe('useSearchState', () => {
   beforeEach(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-    jest.clearAllMocks();
+    vi.useFakeTimers({ legacyFakeTimers: true });
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   const makeDeps = (overrides?: { searchCharLimit?: number }) => {
     const globalSearch = {
       searchCharLimit: overrides?.searchCharLimit ?? 1000,
-      getSearchableTypes: jest.fn().mockResolvedValue(['application', 'test']),
-      find: jest.fn().mockReturnValue(of(createBatch())),
+      getSearchableTypes: vi.fn().mockResolvedValue(['application', 'test']),
+      find: vi.fn().mockReturnValue(of(createBatch())),
     } as any;
 
-    const navigateToUrl = jest.fn();
+    const navigateToUrl = vi.fn();
     const reportEvent = {
-      searchRequest: jest.fn(),
-      navigateToApplication: jest.fn(),
-      navigateToSavedObject: jest.fn(),
+      searchRequest: vi.fn(),
+      navigateToApplication: vi.fn(),
+      navigateToSavedObject: vi.fn(),
     } as any;
 
     return { globalSearch, navigateToUrl, reportEvent };
@@ -120,7 +134,7 @@ describe('useSearchState', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(350);
+      vi.advanceTimersByTime(350);
     });
   };
 
@@ -146,7 +160,7 @@ describe('useSearchState', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(350);
+      vi.advanceTimersByTime(350);
     });
 
     expect(result.current.searchCharLimitExceeded).toBe(true);
@@ -205,7 +219,7 @@ describe('useSearchState', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(350);
+      vi.advanceTimersByTime(350);
     });
 
     expect(reportEvent.searchRequest).toHaveBeenCalledTimes(1);
@@ -249,7 +263,7 @@ describe('useSearchState', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(350);
+      vi.advanceTimersByTime(350);
     });
 
     expect(globalSearch.find).toHaveBeenCalledTimes(2);

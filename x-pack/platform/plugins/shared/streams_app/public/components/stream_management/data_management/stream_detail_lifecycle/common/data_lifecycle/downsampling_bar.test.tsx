@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { DownsamplingBar, getDownsamplingLayout } from './downsampling_bar';
@@ -247,7 +249,7 @@ describe('DownsamplingBar', () => {
     });
 
     it('should render remove button for ILM and call onRemoveStep', () => {
-      const onRemoveStep = jest.fn();
+      const onRemoveStep = vi.fn();
       const segments: DownsamplingSegment[] = [
         { grow: 5, step: { after: '10d', fixed_interval: '1h' }, stepIndex: 0, phaseName: 'hot' },
       ];
@@ -269,7 +271,7 @@ describe('DownsamplingBar', () => {
         <DownsamplingBar
           {...defaultProps}
           segments={segments}
-          onRemoveStep={jest.fn()}
+          onRemoveStep={vi.fn()}
           canManageLifecycle={false}
         />
       );

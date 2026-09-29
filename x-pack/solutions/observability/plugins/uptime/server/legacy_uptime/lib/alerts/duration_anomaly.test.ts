@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
 import {
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
@@ -132,15 +135,15 @@ const mockOptions = (
 };
 
 describe('duration anomaly alert', () => {
-  let toISOStringSpy: jest.SpyInstance<string, []>;
+  let toISOStringSpy: MockInstance<string, []>;
   const mockDate = 'date';
   beforeAll(() => {
-    Date.now = jest.fn().mockReturnValue(new Date('2021-05-13T12:33:37.000Z'));
-    jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(() => ({
-      format: jest.fn(),
-      formatToParts: jest.fn(),
-      formatRange: jest.fn(),
-      formatRangeToParts: jest.fn(),
+    Date.now = vi.fn().mockReturnValue(new Date('2021-05-13T12:33:37.000Z'));
+    vi.spyOn(Intl, 'DateTimeFormat').mockImplementation(() => ({
+      format: vi.fn(),
+      formatToParts: vi.fn(),
+      formatRange: vi.fn(),
+      formatRangeToParts: vi.fn(),
       resolvedOptions: () => ({
         locale: '',
         calendar: '',
@@ -148,17 +151,17 @@ describe('duration anomaly alert', () => {
         timeZone: 'UTC',
       }),
     }));
-    toISOStringSpy = jest.spyOn(Date.prototype, 'toISOString');
+    toISOStringSpy = vi.spyOn(Date.prototype, 'toISOString');
   });
 
   describe('alert executor', () => {
     it('triggers when aging or expiring alerts are found', async () => {
       toISOStringSpy.mockImplementation(() => mockDate);
-      const mockResultServiceProviderGetter: jest.Mock<{
-        getAnomaliesTableData: jest.Mock<MockAnomalyResult>;
-      }> = jest.fn();
-      const mockGetAnomliesTableDataGetter: jest.Mock<MockAnomalyResult> = jest.fn();
-      const mockGetLatestMonitorGetter: jest.Mock<Partial<Ping>> = jest.fn();
+      const mockResultServiceProviderGetter: Mock<{
+        getAnomaliesTableData: Mock<MockAnomalyResult>;
+      }> = vi.fn();
+      const mockGetAnomliesTableDataGetter: Mock<MockAnomalyResult> = vi.fn();
+      const mockGetLatestMonitorGetter: Mock<Partial<Ping>> = vi.fn();
 
       mockGetLatestMonitorGetter.mockReturnValue(mockPing);
       mockGetAnomliesTableDataGetter.mockReturnValue(mockAnomaliesResult);
@@ -300,11 +303,11 @@ Response times as high as ${slowestResponse} ms have been detected from location
 
     it('sets alert recovery context for recovered alerts', async () => {
       toISOStringSpy.mockImplementation(() => mockDate);
-      const mockResultServiceProviderGetter: jest.Mock<{
-        getAnomaliesTableData: jest.Mock<MockAnomalyResult>;
-      }> = jest.fn();
-      const mockGetAnomliesTableDataGetter: jest.Mock<MockAnomalyResult> = jest.fn();
-      const mockGetLatestMonitorGetter: jest.Mock<Partial<Ping>> = jest.fn();
+      const mockResultServiceProviderGetter: Mock<{
+        getAnomaliesTableData: Mock<MockAnomalyResult>;
+      }> = vi.fn();
+      const mockGetAnomliesTableDataGetter: Mock<MockAnomalyResult> = vi.fn();
+      const mockGetLatestMonitorGetter: Mock<Partial<Ping>> = vi.fn();
 
       mockGetLatestMonitorGetter.mockReturnValue(mockPing);
       mockGetAnomliesTableDataGetter.mockReturnValue(mockAnomaliesResult);

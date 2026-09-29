@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
@@ -21,13 +24,16 @@ import {
   type AttackDiscoveryAttachment,
 } from './attack_discovery_attachment';
 
-jest.mock('../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => ({
-  AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown }: { markdown: string }) => (
-    <div data-test-subj="attackDiscoveryMarkdownFormatter">{markdown}</div>
-  )),
-}));
+vi.mock('../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => {
+      const mocked = {
+      AttackDiscoveryMarkdownFormatter: vi.fn(({ markdown }: { markdown: string }) => (
+        <div data-test-subj="attackDiscoveryMarkdownFormatter">{markdown}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFormatter = AttackDiscoveryMarkdownFormatter as jest.MockedFunction<
+const mockFormatter = AttackDiscoveryMarkdownFormatter as MockedFunction<
   typeof AttackDiscoveryMarkdownFormatter
 >;
 
@@ -91,7 +97,7 @@ describe('createAttackDiscoveryAttachmentDefinition', () => {
 
 describe('registerAttackDiscoveryAttachment', () => {
   it('registers the security.attack_discovery attachment type', () => {
-    const addAttachmentType = jest.fn();
+    const addAttachmentType = vi.fn();
     const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
 
     registerAttackDiscoveryAttachment({ attachments });

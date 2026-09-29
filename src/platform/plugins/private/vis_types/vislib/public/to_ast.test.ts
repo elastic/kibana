@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import { buildExpression } from '@kbn/expressions-plugin/public';
 
@@ -14,15 +17,18 @@ import type { BasicVislibParams } from './types';
 import { toExpressionAst } from './to_ast';
 import { sampleAreaVis } from '@kbn/vis-type-xy-plugin/public/sample_vis.test.mocks';
 
-jest.mock('@kbn/expressions-plugin/public', () => ({
-  ...(jest.requireActual('@kbn/expressions-plugin/public') as any),
-  buildExpression: jest.fn().mockImplementation(() => ({
-    toAst: () => ({
-      type: 'expression',
-      chain: [],
-    }),
-  })),
-}));
+vi.mock('@kbn/expressions-plugin/public', async () => {
+      const mocked = {
+      ...((await vi.importActual('@kbn/expressions-plugin/public')) as any),
+      buildExpression: vi.fn().mockImplementation(() => ({
+        toAst: () => ({
+          type: 'expression',
+          chain: [],
+        }),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('vislib vis toExpressionAst function', () => {
   let vis: Vis<BasicVislibParams>;
@@ -39,7 +45,7 @@ describe('vislib vis toExpressionAst function', () => {
 
   it('should match basic snapshot', () => {
     toExpressionAst(vis, params);
-    const [builtExpression] = (buildExpression as jest.Mock).mock.calls[0][0];
+    const [builtExpression] = (buildExpression as Mock).mock.calls[0][0];
 
     expect(builtExpression).toMatchSnapshot();
   });

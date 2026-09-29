@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,7 +14,7 @@ import { Tags } from './tags';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 
 describe('Tags', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   const options = {
     values: [],
@@ -20,7 +22,7 @@ describe('Tags', () => {
     executionMode: ActionConnectorMode.ActionForm,
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders tags initially', () => {
     render(<Tags {...{ ...options, values: ['super', 'hello'] }} />);

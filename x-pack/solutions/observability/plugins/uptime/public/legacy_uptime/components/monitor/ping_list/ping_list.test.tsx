@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { formatDuration, PingList } from './ping_list';
 import type { Ping, PingsResponse } from '../../../../../common/runtime_types';
@@ -59,7 +61,7 @@ describe('PingList component', () => {
   };
 
   beforeEach(() => {
-    jest.spyOn(pingListHook, 'usePingsList').mockReturnValue({
+    vi.spyOn(pingListHook, 'usePingsList').mockReturnValue({
       ...response,
       error: undefined,
       loading: false,
@@ -68,7 +70,7 @@ describe('PingList component', () => {
   });
 
   it('renders loading state when pings are loading', () => {
-    jest.spyOn(pingListHook, 'usePingsList').mockReturnValue({
+    vi.spyOn(pingListHook, 'usePingsList').mockReturnValue({
       pings: [],
       total: 0,
       error: undefined,
@@ -80,7 +82,7 @@ describe('PingList component', () => {
   });
 
   it('renders no pings state when pings are not found', () => {
-    jest.spyOn(pingListHook, 'usePingsList').mockReturnValue({
+    vi.spyOn(pingListHook, 'usePingsList').mockReturnValue({
       pings: [],
       total: 0,
       error: undefined,

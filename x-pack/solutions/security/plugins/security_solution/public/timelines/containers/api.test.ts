@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import * as api from './api';
@@ -13,14 +16,14 @@ import { TimelineTypeEnum, TimelineStatusEnum } from '../../../common/api/timeli
 import { TIMELINE_DRAFT_URL, TIMELINE_URL, TIMELINE_COPY_URL } from '../../../common/constants';
 import type { ImportDataProps } from '../../detection_engine/rule_management/logic/types';
 
-jest.mock('../../common/lib/kibana', () => {
+vi.mock('../../common/lib/kibana', () => {
   return {
     KibanaServices: {
-      get: jest.fn(() => ({
+      get: vi.fn(() => ({
         http: {
-          fetch: jest.fn(),
+          fetch: vi.fn(),
         },
-        savedSearch: jest.fn(),
+        savedSearch: vi.fn(),
       })),
     },
   };
@@ -106,15 +109,15 @@ describe('persistTimeline', () => {
     };
 
     const version = null;
-    const fetchMock = jest.fn();
-    const postMock = jest.fn();
-    const patchMock = jest.fn();
+    const fetchMock = vi.fn();
+    const postMock = vi.fn();
+    const patchMock = vi.fn();
 
     beforeAll(() => {
-      jest.resetAllMocks();
-      jest.resetModules();
+      vi.resetAllMocks();
+      vi.resetModules();
 
-      (KibanaServices.get as jest.Mock).mockReturnValue({
+      (KibanaServices.get as Mock).mockReturnValue({
         http: {
           fetch: fetchMock,
           post: postMock.mockReturnValue(mockDraftResponse),
@@ -166,15 +169,15 @@ describe('persistTimeline', () => {
     };
 
     const version = null;
-    const fetchMock = jest.fn();
-    const postMock = jest.fn();
-    const patchMock = jest.fn();
+    const fetchMock = vi.fn();
+    const postMock = vi.fn();
+    const patchMock = vi.fn();
 
     beforeAll(() => {
-      jest.resetAllMocks();
-      jest.resetModules();
+      vi.resetAllMocks();
+      vi.resetModules();
 
-      (KibanaServices.get as jest.Mock).mockReturnValue({
+      (KibanaServices.get as Mock).mockReturnValue({
         http: {
           fetch: fetchMock.mockRejectedValue({
             body: { status_code: 403, message: 'you do not have the permission' },
@@ -212,15 +215,15 @@ describe('persistTimeline', () => {
     };
 
     const version = null;
-    const fetchMock = jest.fn();
-    const postMock = jest.fn();
-    const patchMock = jest.fn();
+    const fetchMock = vi.fn();
+    const postMock = vi.fn();
+    const patchMock = vi.fn();
 
     beforeAll(() => {
-      jest.resetAllMocks();
-      jest.resetModules();
+      vi.resetAllMocks();
+      vi.resetModules();
 
-      (KibanaServices.get as jest.Mock).mockReturnValue({
+      (KibanaServices.get as Mock).mockReturnValue({
         http: {
           fetch: fetchMock,
           post: postMock.mockReturnValue(mockPostTimelineResponse),
@@ -255,15 +258,15 @@ describe('persistTimeline', () => {
     };
 
     const version = 'initial version';
-    const fetchMock = jest.fn();
-    const postMock = jest.fn();
-    const patchMock = jest.fn();
+    const fetchMock = vi.fn();
+    const postMock = vi.fn();
+    const patchMock = vi.fn();
 
     beforeAll(() => {
-      jest.resetAllMocks();
-      jest.resetModules();
+      vi.resetAllMocks();
+      vi.resetModules();
 
-      (KibanaServices.get as jest.Mock).mockReturnValue({
+      (KibanaServices.get as Mock).mockReturnValue({
         http: {
           fetch: fetchMock,
           post: postMock,
@@ -293,7 +296,7 @@ describe('persistTimeline', () => {
   describe('discover session title', () => {
     const timelineId = '9d5693e0-a42a-11ea-b8f4-c5434162742a';
     const version = 'initial version';
-    const saveSavedSearchMock = jest.fn();
+    const saveSavedSearchMock = vi.fn();
 
     const mockSavedSearch = {
       id: 'savedSearchId',
@@ -306,10 +309,10 @@ describe('persistTimeline', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
-      (KibanaServices.get as jest.Mock).mockReturnValue({
-        http: { patch: jest.fn().mockResolvedValue(mockPatchTimelineResponse) },
+      (KibanaServices.get as Mock).mockReturnValue({
+        http: { patch: vi.fn().mockResolvedValue(mockPatchTimelineResponse) },
         savedSearch: { save: saveSavedSearchMock },
       });
     });
@@ -348,13 +351,13 @@ describe('persistTimeline', () => {
 
 describe('importTimelines', () => {
   const fileToImport = { fileToImport: {} } as ImportDataProps;
-  const fetchMock = jest.fn();
+  const fetchMock = vi.fn();
 
   beforeAll(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
+    vi.resetAllMocks();
+    vi.resetModules();
 
-    (KibanaServices.get as jest.Mock).mockReturnValue({
+    (KibanaServices.get as Mock).mockReturnValue({
       http: {
         fetch: fetchMock,
       },
@@ -381,13 +384,13 @@ describe('importTimelines', () => {
 
 describe('exportSelectedTimeline', () => {
   const ids = ['123', 'abc'];
-  const fetchMock = jest.fn();
+  const fetchMock = vi.fn();
 
   beforeAll(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
+    vi.resetAllMocks();
+    vi.resetModules();
 
-    (KibanaServices.get as jest.Mock).mockReturnValue({
+    (KibanaServices.get as Mock).mockReturnValue({
       http: {
         fetch: fetchMock,
       },
@@ -412,13 +415,13 @@ describe('exportSelectedTimeline', () => {
 
 describe('getDraftTimeline', () => {
   const timelineType = { timelineType: TimelineTypeEnum.default };
-  const getMock = jest.fn();
+  const getMock = vi.fn();
 
   beforeAll(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
+    vi.resetAllMocks();
+    vi.resetModules();
 
-    (KibanaServices.get as jest.Mock).mockReturnValue({
+    (KibanaServices.get as Mock).mockReturnValue({
       http: {
         get: getMock.mockImplementation(() => Promise.resolve(mockPatchTimelineResponse)),
       },
@@ -435,13 +438,13 @@ describe('getDraftTimeline', () => {
 });
 
 describe('cleanDraftTimeline', () => {
-  const postMock = jest.fn();
+  const postMock = vi.fn();
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
+    vi.resetAllMocks();
+    vi.resetModules();
 
-    (KibanaServices.get as jest.Mock).mockReturnValue({
+    (KibanaServices.get as Mock).mockReturnValue({
       http: {
         post: postMock.mockImplementation(() => Promise.resolve(mockPatchTimelineResponse)),
       },
@@ -482,8 +485,8 @@ describe('copyTimeline', () => {
     version: 'WzMzMiwxXQ==',
   };
 
-  const saveSavedSearchMock = jest.fn();
-  const postMock = jest.fn();
+  const saveSavedSearchMock = vi.fn();
+  const postMock = vi.fn();
   const initialSavedSearchId = 'initialId';
   const newSavedSearchId = 'newId-230820349807209752';
 
@@ -509,10 +512,10 @@ describe('copyTimeline', () => {
   };
 
   beforeAll(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
+    vi.resetAllMocks();
+    vi.resetModules();
 
-    (KibanaServices.get as jest.Mock).mockReturnValue({
+    (KibanaServices.get as Mock).mockReturnValue({
       http: {
         post: postMock.mockReturnValue(mockPostTimelineResponse),
       },
@@ -571,7 +574,7 @@ describe('copyTimeline', () => {
   });
 
   it('derives the copied saved search title from the timeline title', async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     await api.copyTimeline({
       timelineId: 'test',
@@ -592,7 +595,7 @@ describe('copyTimeline', () => {
   });
 
   it('does not save a saved search for timelines without `savedSearchId`', async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     await api.copyTimeline({
       timelineId: 'test',

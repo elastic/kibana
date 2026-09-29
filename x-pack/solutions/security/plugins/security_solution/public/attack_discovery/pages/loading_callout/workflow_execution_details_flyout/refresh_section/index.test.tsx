@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { RefreshSection } from '.';
 
 describe('RefreshSection', () => {
-  const mockOnClose = jest.fn();
-  const mockOnRefresh = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockOnRefresh = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the Refresh button', () => {

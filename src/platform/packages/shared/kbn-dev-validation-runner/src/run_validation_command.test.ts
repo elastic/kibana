@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   assertNoValidationRunFlagsForDirectTarget,
   resolveValidationRunContext,
@@ -17,18 +20,24 @@ import {
   type ValidationBaseContext,
 } from './run_validation_command';
 
-jest.mock('@kbn/dev-utils', () => ({
-  parseAndResolveValidationContract: jest.fn(),
-}));
+vi.mock('@kbn/dev-utils', () => {
+      const mocked = {
+      parseAndResolveValidationContract: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./resolve_validation_run_context', () => ({
-  assertNoValidationRunFlagsForDirectTarget: jest.fn(),
-  resolveValidationRunContext: jest.fn(),
-}));
+vi.mock('./resolve_validation_run_context', () => {
+      const mocked = {
+      assertNoValidationRunFlagsForDirectTarget: vi.fn(),
+      resolveValidationRunContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAssertNoValidationRunFlagsForDirectTarget =
-  assertNoValidationRunFlagsForDirectTarget as jest.Mock;
-const mockResolveValidationRunContext = resolveValidationRunContext as jest.Mock;
+  assertNoValidationRunFlagsForDirectTarget as Mock;
+const mockResolveValidationRunContext = resolveValidationRunContext as Mock;
 
 const directTargetContext: ValidationBaseContext = {
   mode: 'direct_target',
@@ -37,7 +46,7 @@ const directTargetContext: ValidationBaseContext = {
 
 describe('resolveValidationBaseContext', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockResolveValidationRunContext.mockResolvedValue({
       kind: 'affected',
       contract: {

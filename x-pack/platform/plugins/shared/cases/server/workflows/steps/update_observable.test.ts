@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import type { CasesClient } from '../../client';
 import { updateObservableStepDefinition } from './update_observable';
@@ -15,7 +17,7 @@ const createContext = (input: unknown) =>
 
 describe('updateObservableStepDefinition', () => {
   it('creates expected step definition structure', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     const definition = updateObservableStepDefinition(getCasesClient);
 
     expect(definition.id).toBe('cases.updateObservable');
@@ -30,8 +32,8 @@ describe('updateObservableStepDefinition', () => {
   });
 
   it('calls cases.updateObservable with correct params and returns updated case', async () => {
-    const updateObservable = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const updateObservable = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { updateObservable },
     } as unknown as CasesClient);
     const definition = updateObservableStepDefinition(getCasesClient);
@@ -54,8 +56,8 @@ describe('updateObservableStepDefinition', () => {
   });
 
   it('passes null description when description is not provided', async () => {
-    const updateObservable = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const updateObservable = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { updateObservable },
     } as unknown as CasesClient);
     const definition = updateObservableStepDefinition(getCasesClient);
@@ -71,8 +73,8 @@ describe('updateObservableStepDefinition', () => {
 
   it('returns error when cases.updateObservable throws', async () => {
     // FAILURE SCENARIO: client throws (e.g. observable not found or platinum license missing)
-    const updateObservable = jest.fn().mockRejectedValue(new Error('observable not found'));
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const updateObservable = vi.fn().mockRejectedValue(new Error('observable not found'));
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { updateObservable },
     } as unknown as CasesClient);
     const definition = updateObservableStepDefinition(getCasesClient);

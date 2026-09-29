@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -13,30 +16,51 @@ import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_ent
 import { ServicePanelContent } from './content';
 import { mockServiceEntityRiskScores } from '../mocks';
 
-jest.mock('../../../entity_analytics/components/entity_resolution/resolution_section', () => ({
-  ResolutionSection: () => <div data-test-subj="securitySolutionFlyoutResolutionSection" />,
-}));
-jest.mock('../../../common/hooks/use_has_entity_resolution_license', () => ({
-  useHasEntityResolutionLicense: jest.fn(() => false),
-}));
-jest.mock('../../../entity_analytics/components/risk_summary_flyout/risk_summary', () => ({
-  FlyoutRiskSummary: () => null,
-}));
-jest.mock('../shared/components/right/visualizations_section', () => ({
-  VisualizationsSection: () => null,
-}));
-jest.mock(
+vi.mock('../../../entity_analytics/components/entity_resolution/resolution_section', () => {
+      const mocked = {
+      ResolutionSection: () => <div data-test-subj="securitySolutionFlyoutResolutionSection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/hooks/use_has_entity_resolution_license', () => {
+      const mocked = {
+      useHasEntityResolutionLicense: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../entity_analytics/components/risk_summary_flyout/risk_summary', () => {
+      const mocked = {
+      FlyoutRiskSummary: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../shared/components/right/visualizations_section', () => {
+      const mocked = {
+      VisualizationsSection: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock(
   '../../../entity_analytics/components/asset_criticality/asset_criticality_selector',
-  () => ({
-    AssetCriticalityAccordion: () => <div data-test-subj="assetCriticalityAccordionMock" />,
-  })
+  () => {
+      const mocked = {
+        AssetCriticalityAccordion: () => <div data-test-subj="assetCriticalityAccordionMock" />,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock('../../../flyout_v2/entity/shared/components/observed_entity', () => ({
-  ObservedEntity: () => null,
-}));
-jest.mock('./hooks/use_observed_service_items', () => ({
-  useObservedServiceItems: () => [],
-}));
+vi.mock('../../../flyout_v2/entity/shared/components/observed_entity', () => {
+      const mocked = {
+      ObservedEntity: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./hooks/use_observed_service_items', () => {
+      const mocked = {
+      useObservedServiceItems: () => [],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
   serviceName: 'nginx',
@@ -56,7 +80,7 @@ const defaultProps = {
 
 describe('ServicePanelContent — resolution license gating', () => {
   beforeEach(() => {
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(false);
   });
 
   it('does not render ResolutionSection when license is inactive', () => {
@@ -65,7 +89,7 @@ describe('ServicePanelContent — resolution license gating', () => {
   });
 
   it('renders ResolutionSection when license is active and entityStoreEntityId is set', () => {
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(true);
     render(<ServicePanelContent {...defaultProps} />, { wrapper: TestProviders });
     expect(screen.getByTestId(RESOLUTION_SECTION_TEST_ID)).toBeInTheDocument();
   });
@@ -73,7 +97,7 @@ describe('ServicePanelContent — resolution license gating', () => {
 
 describe('ServicePanelContent — legacy asset criticality accordion gating', () => {
   beforeEach(() => {
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(false);
   });
 
   it('renders the legacy accordion when entity store v2 is disabled', () => {

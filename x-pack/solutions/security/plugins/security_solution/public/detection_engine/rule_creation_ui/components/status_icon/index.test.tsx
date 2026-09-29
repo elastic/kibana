@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow, type ComponentType as EnzymeComponentType } from 'enzyme';
 
 import { TestProviders } from '../../../../common/mock';
 import { RuleStatusIcon } from '.';
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('RuleStatusIcon', () => {
   it('renders correctly', () => {

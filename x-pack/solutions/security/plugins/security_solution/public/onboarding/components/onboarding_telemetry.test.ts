@@ -5,28 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useOnboardingTelemetry } from './onboarding_telemetry';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { OnboardingHubEventTypes } from '../../common/lib/telemetry';
 import type { OnboardingCardId } from '../constants';
 
-jest.mock('../config', () => ({
-  onboardingConfig: [
-    { id: 'default', body: [{ cards: [{ id: 'testCard' }] }] },
-    { id: 'testTopic', body: [{ cards: [{ id: 'testCard2' }] }] },
-  ],
-}));
+vi.mock('../config', () => {
+      const mocked = {
+      onboardingConfig: [
+        { id: 'default', body: [{ cards: [{ id: 'testCard' }] }] },
+        { id: 'testTopic', body: [{ cards: [{ id: 'testCard2' }] }] },
+      ],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/lib/kibana/kibana_react');
-const telemetryMock = { reportEvent: jest.fn() };
-(useKibana as jest.Mock).mockReturnValue({
+vi.mock('../../common/lib/kibana/kibana_react');
+const telemetryMock = { reportEvent: vi.fn() };
+(useKibana as Mock).mockReturnValue({
   services: { telemetry: telemetryMock },
 });
 
 describe('useOnboardingTelemetry', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when opening a card', () => {

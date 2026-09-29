@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -12,12 +14,12 @@ import { Footer } from '.';
 import { CLOSE } from './translations';
 
 const defaultProps = {
-  closeModal: jest.fn(),
+  closeModal: vi.fn(),
 };
 
 describe('Footer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the default close button text', () => {

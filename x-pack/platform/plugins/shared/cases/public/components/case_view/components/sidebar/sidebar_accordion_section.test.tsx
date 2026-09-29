@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,7 +14,7 @@ import { SidebarAccordionSection } from './sidebar_accordion_section';
 
 describe('SidebarAccordionSection', () => {
   it('renders the title and children when open', () => {
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
 
     render(
       <SidebarAccordionSection
@@ -31,7 +33,7 @@ describe('SidebarAccordionSection', () => {
   });
 
   it('keeps children mounted but inert when closed, so pending edits are not lost', () => {
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
 
     render(
       <SidebarAccordionSection
@@ -53,7 +55,7 @@ describe('SidebarAccordionSection', () => {
   });
 
   it('renders the subtitle inside the trigger when provided', () => {
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
 
     render(
       <SidebarAccordionSection
@@ -75,7 +77,7 @@ describe('SidebarAccordionSection', () => {
   });
 
   it('renders extraAction when provided', () => {
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
 
     render(
       <SidebarAccordionSection
@@ -98,7 +100,7 @@ describe('SidebarAccordionSection', () => {
   });
 
   it('falls back to a default data-test-subj when none is provided', () => {
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
 
     render(
       <SidebarAccordionSection id="attributes" title="Attributes" isOpen={true} onToggle={onToggle}>
@@ -111,7 +113,7 @@ describe('SidebarAccordionSection', () => {
 
   it('calls onToggle with the section id when toggled', async () => {
     const user = userEvent.setup();
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
 
     render(
       <SidebarAccordionSection

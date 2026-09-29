@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { render } from '../../../../../lib/helper/rtl_helpers';
@@ -22,10 +24,10 @@ describe('StepImageCaption', () => {
       captionContent: 'test caption content',
       imgSrc: 'http://sample.com/sampleImageSrc.png',
       maxSteps: 3,
-      setStepNumber: jest.fn(),
+      setStepNumber: vi.fn(),
       stepNumber: 2,
       label: getShortTimeStamp(moment('2020-11-26T15:28:56.896Z')),
-      onVisible: jest.fn(),
+      onVisible: vi.fn(),
       isLoading: false,
     };
   });

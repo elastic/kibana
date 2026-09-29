@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { ExceptionsAddToListsTable } from '.';
@@ -14,14 +17,14 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { mount } from 'enzyme';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 
-jest.mock('../../../logic/use_find_references');
+vi.mock('../../../logic/use_find_references');
 
 // TODO need to change it to use React-testing-library
 describe.skip('ExceptionsAddToListsTable', () => {
-  const mockFn = jest.fn();
+  const mockFn = vi.fn();
 
   beforeEach(() => {
-    (useFindExceptionListReferences as jest.Mock).mockReturnValue([
+    (useFindExceptionListReferences as Mock).mockReturnValue([
       false,
       false,
       {
@@ -54,11 +57,11 @@ describe.skip('ExceptionsAddToListsTable', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('it displays loading state while fetching data', () => {
-    (useFindExceptionListReferences as jest.Mock).mockReturnValue([true, false, null, mockFn]);
+    (useFindExceptionListReferences as Mock).mockReturnValue([true, false, null, mockFn]);
     const wrapper = mount(
       <TestProviders>
         <ExceptionsAddToListsTable
@@ -71,7 +74,7 @@ describe.skip('ExceptionsAddToListsTable', () => {
               type: ExceptionListTypeEnum.DETECTION,
             },
           ]}
-          onListSelectionChange={jest.fn()}
+          onListSelectionChange={vi.fn()}
         />
       </TestProviders>
     );
@@ -87,7 +90,7 @@ describe.skip('ExceptionsAddToListsTable', () => {
   });
 
   it('it displays error state if fetching list and references data fails', () => {
-    (useFindExceptionListReferences as jest.Mock).mockReturnValue([false, true, null, jest.fn()]);
+    (useFindExceptionListReferences as Mock).mockReturnValue([false, true, null, vi.fn()]);
     const wrapper = mount(
       <TestProviders>
         <ExceptionsAddToListsTable
@@ -100,7 +103,7 @@ describe.skip('ExceptionsAddToListsTable', () => {
               type: ExceptionListTypeEnum.DETECTION,
             },
           ]}
-          onListSelectionChange={jest.fn()}
+          onListSelectionChange={vi.fn()}
         />
       </TestProviders>
     );
@@ -123,7 +126,7 @@ describe.skip('ExceptionsAddToListsTable', () => {
               type: ExceptionListTypeEnum.DETECTION,
             },
           ]}
-          onListSelectionChange={jest.fn()}
+          onListSelectionChange={vi.fn()}
         />
       </TestProviders>
     );
@@ -147,7 +150,7 @@ describe.skip('ExceptionsAddToListsTable', () => {
               type: ExceptionListTypeEnum.DETECTION,
             },
           ]}
-          onListSelectionChange={jest.fn()}
+          onListSelectionChange={vi.fn()}
         />
       </TestProviders>
     );

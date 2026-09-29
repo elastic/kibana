@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,11 +16,11 @@ import { RuleQueryInspector } from './rule_query_inspector';
 import { useKibana } from '../../common/lib/kibana';
 import * as inspectQueryApi from '../lib/rule_api/inspect_query';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../lib/rule_api/inspect_query');
+vi.mock('../../common/lib/kibana');
+vi.mock('../lib/rule_api/inspect_query');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const loadRuleQueryInspectorMock = inspectQueryApi.loadRuleQueryInspector as jest.Mock;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+const loadRuleQueryInspectorMock = inspectQueryApi.loadRuleQueryInspector as Mock;
 
 const mockResponse = {
   queries: [
@@ -36,8 +39,8 @@ const mockResponse = {
   ],
 };
 
-const mockInspectorOpen = jest.fn();
-const mockToastsAddError = jest.fn();
+const mockInspectorOpen = vi.fn();
+const mockToastsAddError = vi.fn();
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -45,8 +48,8 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('RuleQueryInspector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibanaMock as unknown as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibanaMock as unknown as Mock).mockReturnValue({
       services: {
         http: {},
         inspector: { open: mockInspectorOpen },
@@ -77,7 +80,7 @@ describe('RuleQueryInspector', () => {
   });
 
   it('renders nothing when inspector plugin is not available', () => {
-    (useKibanaMock as unknown as jest.Mock).mockReturnValue({
+    (useKibanaMock as unknown as Mock).mockReturnValue({
       services: {
         http: {},
         notifications: { toasts: { addError: mockToastsAddError } },

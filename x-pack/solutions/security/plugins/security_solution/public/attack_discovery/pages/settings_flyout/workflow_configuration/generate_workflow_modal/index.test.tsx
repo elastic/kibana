@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -18,25 +20,31 @@ import {
   WORKFLOW_DESCRIPTION_PLACEHOLDER,
 } from './translations';
 
-jest.mock('../../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn().mockReturnValue('default'),
-}));
+vi.mock('../../../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn().mockReturnValue('default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/elastic-assistant', () => ({
-  AssistantSpaceIdProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  ConnectorSelectorInline: () => <div data-test-subj="connectorSelectorInline" />,
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      AssistantSpaceIdProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      ConnectorSelectorInline: () => <div data-test-subj="connectorSelectorInline" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
   connectorId: 'test-connector-id',
   isGenerating: false,
-  onClose: jest.fn(),
-  onGenerate: jest.fn(),
+  onClose: vi.fn(),
+  onGenerate: vi.fn(),
 };
 
 describe('GenerateWorkflowModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the modal with the expected title', () => {

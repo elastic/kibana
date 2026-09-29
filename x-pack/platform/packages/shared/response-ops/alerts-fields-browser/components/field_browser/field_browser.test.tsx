@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -16,8 +18,8 @@ import type { FieldBrowserProps } from '../../types';
 const defaultProps: FieldBrowserProps = {
   browserFields: mockBrowserFields,
   columnIds: [],
-  onToggleColumn: jest.fn(),
-  onResetColumns: jest.fn(),
+  onToggleColumn: vi.fn(),
+  onResetColumns: vi.fn(),
 };
 
 const renderComponent = (props: Partial<FieldBrowserProps> = {}) =>

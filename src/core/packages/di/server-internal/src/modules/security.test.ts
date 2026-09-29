@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { type Container, ContainerModule } from 'inversify';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import {
@@ -23,7 +26,7 @@ import { auditLoggerMock, securityServiceMock } from '@kbn/core-security-server-
 import { loadSecurity } from './security';
 
 describe('loadSecurity', () => {
-  let injection: jest.Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
+  let injection: Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
   let container: Container;
   let security: ReturnType<typeof securityServiceMock.createStart>;
   let auditLogger: ReturnType<typeof auditLoggerMock.create>;
@@ -31,12 +34,12 @@ describe('loadSecurity', () => {
   let request: KibanaRequest;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     injection = injectionServiceMock.createStartContract();
     auditLogger = auditLoggerMock.create();
     user = securityServiceMock.createMockAuthenticatedUser();
     security = securityServiceMock.createStart();
-    jest.mocked(security.audit.asScoped).mockReturnValue(auditLogger);
+    vi.mocked(security.audit.asScoped).mockReturnValue(auditLogger);
     security.authc.getCurrentUser.mockReturnValue(user);
     request = httpServerMock.createKibanaRequest();
     container = injection.getContainer();
@@ -64,7 +67,7 @@ describe('loadSecurity', () => {
   });
 
   it('should resolve null for unauthenticated requests', () => {
-    jest.mocked(security.authc.getCurrentUser).mockReturnValue(null);
+    vi.mocked(security.authc.getCurrentUser).mockReturnValue(null);
 
     expect(container.get(CurrentUser)).toBeNull();
   });

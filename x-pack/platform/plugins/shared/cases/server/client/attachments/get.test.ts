@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockCaseUnifiedAttachments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { find, get } from './get';
@@ -15,7 +17,7 @@ describe('get', () => {
     const emptyFindResponse = { page: 1, per_page: 20, total: 0, saved_objects: [] };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.attachmentService.find.mockResolvedValue(emptyFindResponse as never);
     });
 
@@ -94,7 +96,7 @@ describe('get', () => {
     const attachmentSO = mockCaseUnifiedAttachments[0];
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.attachmentService.getter.get.mockResolvedValue(attachmentSO as never);
     });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 import { FlashMessagesLogic, mountFlashMessagesLogic } from './flash_messages_logic';
@@ -22,7 +24,7 @@ import { mockHistory } from '../../../__mocks__/react_router';
 describe('Flash Message Helpers', () => {
   const mockNotifications = {
     toasts: {
-      add: jest.fn(),
+      add: vi.fn(),
     },
   };
   const history = mockHistory;
@@ -35,7 +37,7 @@ describe('Flash Message Helpers', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('setSuccessMessage()', () => {
@@ -91,7 +93,7 @@ describe('Flash Message Helpers', () => {
   describe('toast helpers', () => {
     describe('without optional args', () => {
       beforeEach(() => {
-        jest.spyOn(global.Date, 'now').mockReturnValueOnce(1234567890);
+        vi.spyOn(global.Date, 'now').mockReturnValueOnce(1234567890);
       });
 
       it('flashSuccessToast', () => {

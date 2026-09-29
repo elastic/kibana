@@ -5,31 +5,39 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useStopSiemMigration, STOP_SUCCESS, STOP_ERROR } from './use_stop_siem_migration';
 import { MigrationSource } from '../types';
 
-const mockStopRuleMigration = jest.fn();
-const mockStopDashboardMigration = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
+const mockStopRuleMigration = vi.fn();
+const mockStopDashboardMigration = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
 
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
-}));
+vi.mock('../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: () => ({
-    services: {
-      siemMigrations: {
-        rules: { stopRuleMigration: mockStopRuleMigration },
-        dashboards: { stopDashboardMigration: mockStopDashboardMigration },
-      },
-    },
-  }),
-}));
+vi.mock('../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          siemMigrations: {
+            rules: { stopRuleMigration: mockStopRuleMigration },
+            dashboards: { stopDashboardMigration: mockStopDashboardMigration },
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createWrapper = () => {
   const client = new QueryClient();
@@ -41,7 +49,7 @@ const createWrapper = () => {
 
 describe('useStopSiemMigration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('stops a rule migration and shows success toast', async () => {

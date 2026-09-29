@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { monaco } from '../../../../monaco_imports';
 import { getCodeActionProvider } from './code_action_provider';
 import { createDisposedTextModel, createTextModel, createWiredStreamSource } from './test_helpers';
@@ -27,7 +29,7 @@ describe('Code actions provider', () => {
         code: 'unknownColumn',
       };
 
-      const getSources = jest.fn(async () => [createWiredStreamSource('logs.otel.child')]);
+      const getSources = vi.fn(async () => [createWiredStreamSource('logs.otel.child')]);
 
       const deps: ESQLDependencies = {
         getEditorMessages: () => ({

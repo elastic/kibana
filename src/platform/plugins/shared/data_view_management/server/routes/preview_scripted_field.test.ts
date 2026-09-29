@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -21,7 +23,7 @@ describe('preview_scripted_field route', () => {
 
   it('handler calls /_search with the given request', async () => {
     const response = { body: { responses: [{ hits: { _id: 'hi' } }] } };
-    const mockClient = { search: jest.fn().mockResolvedValue(response) };
+    const mockClient = { search: vi.fn().mockResolvedValue(response) };
     const mockContext = {
       core: {
         elasticsearch: { client: { asCurrentUser: mockClient } },
@@ -71,7 +73,7 @@ describe('preview_scripted_field route', () => {
 
   it('uses optional parameters when they are provided', async () => {
     const response = { body: { responses: [{ hits: { _id: 'hi' } }] } };
-    const mockClient = { search: jest.fn().mockResolvedValue(response) };
+    const mockClient = { search: vi.fn().mockResolvedValue(response) };
     const mockContext = {
       core: {
         elasticsearch: { client: { asCurrentUser: mockClient } },
@@ -131,7 +133,7 @@ describe('preview_scripted_field route', () => {
       statusCode: 400,
       message: 'oops',
     };
-    const mockClient = { search: jest.fn().mockReturnValue(Promise.reject(response)) };
+    const mockClient = { search: vi.fn().mockReturnValue(Promise.reject(response)) };
     const mockContext = {
       core: {
         elasticsearch: { client: { asCurrentUser: mockClient } },

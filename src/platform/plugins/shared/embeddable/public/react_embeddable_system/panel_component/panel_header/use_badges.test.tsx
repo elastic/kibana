@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { PANEL_BADGE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
@@ -32,22 +34,22 @@ const BadgeHost = ({
 };
 
 const makeGetActions = (actions: Array<Action<EmbeddableApiContext>>) =>
-  jest.fn().mockResolvedValue(actions);
+  vi.fn().mockResolvedValue(actions);
 
 describe('useBadges', () => {
   describe('MenuItem branch', () => {
     it('renders the MenuItem component directly with context and dataTestSubj instead of an EuiBadge shell', async () => {
-      const MenuItem = jest.fn(({ dataTestSubj }: ActionMenuItemProps<EmbeddableApiContext>) => (
+      const MenuItem = vi.fn(({ dataTestSubj }: ActionMenuItemProps<EmbeddableApiContext>) => (
         <span data-test-subj={dataTestSubj} data-badge-type="menu-item" />
       ));
 
       const action = {
         id: 'menuItemBadge',
         MenuItem,
-        isCompatible: jest.fn().mockResolvedValue(true),
-        getDisplayName: jest.fn().mockReturnValue('MenuItem Badge'),
-        getIconType: jest.fn(),
-        execute: jest.fn(),
+        isCompatible: vi.fn().mockResolvedValue(true),
+        getDisplayName: vi.fn().mockReturnValue('MenuItem Badge'),
+        getIconType: vi.fn(),
+        execute: vi.fn(),
       } as unknown as Action<EmbeddableApiContext>;
 
       render(<BadgeHost showBadges api={mockApi} getActions={makeGetActions([action])} />);
@@ -80,10 +82,10 @@ describe('useBadges', () => {
     it('renders an EuiBadge with the correct data-test-subj when no MenuItem is defined', async () => {
       const action = {
         id: 'plainBadge',
-        isCompatible: jest.fn().mockResolvedValue(true),
-        getDisplayName: jest.fn().mockReturnValue('Plain Badge'),
-        getIconType: jest.fn().mockReturnValue(undefined),
-        execute: jest.fn(),
+        isCompatible: vi.fn().mockResolvedValue(true),
+        getDisplayName: vi.fn().mockReturnValue('Plain Badge'),
+        getIconType: vi.fn().mockReturnValue(undefined),
+        execute: vi.fn(),
       } as unknown as Action<EmbeddableApiContext>;
 
       render(<BadgeHost showBadges api={mockApi} getActions={makeGetActions([action])} />);
@@ -100,10 +102,10 @@ describe('useBadges', () => {
       const displayName = 'No Tooltip Badge';
       const action = {
         id: 'noTooltipBadge',
-        isCompatible: jest.fn().mockResolvedValue(true),
-        getDisplayName: jest.fn().mockReturnValue(displayName),
-        getIconType: jest.fn().mockReturnValue(undefined),
-        execute: jest.fn(),
+        isCompatible: vi.fn().mockResolvedValue(true),
+        getDisplayName: vi.fn().mockReturnValue(displayName),
+        getIconType: vi.fn().mockReturnValue(undefined),
+        execute: vi.fn(),
       } as unknown as Action<EmbeddableApiContext>;
 
       render(<BadgeHost showBadges api={mockApi} getActions={makeGetActions([action])} />);
@@ -124,11 +126,11 @@ describe('useBadges', () => {
       const tooltipText = 'Badge tooltip description';
       const action = {
         id: 'tooltipBadge',
-        isCompatible: jest.fn().mockResolvedValue(true),
-        getDisplayName: jest.fn().mockReturnValue('Tooltip Badge'),
-        getDisplayNameTooltip: jest.fn().mockReturnValue(tooltipText),
-        getIconType: jest.fn().mockReturnValue(undefined),
-        execute: jest.fn(),
+        isCompatible: vi.fn().mockResolvedValue(true),
+        getDisplayName: vi.fn().mockReturnValue('Tooltip Badge'),
+        getDisplayNameTooltip: vi.fn().mockReturnValue(tooltipText),
+        getIconType: vi.fn().mockReturnValue(undefined),
+        execute: vi.fn(),
       } as unknown as Action<EmbeddableApiContext>;
 
       render(<BadgeHost showBadges api={mockApi} getActions={makeGetActions([action])} />);

@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { createFleetAuthzMock } from '../../common/mocks';
 
 import { OutputClient } from './output_client';
 import { outputService } from './output';
 
-jest.mock('./output');
+vi.mock('./output');
 
-const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
+const mockedOutputService = outputService as Mocked<typeof outputService>;
 
 describe('OutputClient', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getDefaultDataOutputId()', () => {

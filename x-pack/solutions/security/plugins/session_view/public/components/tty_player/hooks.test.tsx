@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import type { XtermPlayerDeps } from './hooks';
@@ -16,7 +18,7 @@ const VIM_LINE_START = 22;
 
 describe('TTYPlayer/hooks', () => {
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
 
   describe('useIOLines', () => {
@@ -54,7 +56,7 @@ describe('TTYPlayer/hooks', () => {
       initialProps = {
         ref: mockRef,
         isPlaying: false,
-        setIsPlaying: jest.fn(),
+        setIsPlaying: vi.fn(),
         lines,
         hasNextPage: false,
         fetchNextPage: () => null,
@@ -71,7 +73,7 @@ describe('TTYPlayer/hooks', () => {
       const { terminal, currentLine, seekToLine } = xTermResult.current;
 
       // there is a minor delay in updates to xtermjs after writeln is called.
-      await act(async () => jest.advanceTimersByTime(100));
+      await act(async () => vi.advanceTimersByTime(100));
 
       // check that first line rendered in xtermjs
       expect(terminal.buffer.active.getLine(0)?.translateToString(true)).toBe('256');
@@ -81,7 +83,7 @@ describe('TTYPlayer/hooks', () => {
         seekToLine(VIM_LINE_START); // line where vim output starts
       });
 
-      await act(async () => jest.advanceTimersByTime(100));
+      await act(async () => vi.advanceTimersByTime(100));
 
       expect(terminal.buffer.active.getLine(0)?.translateToString(true)).toBe('#!/bin/env bash');
     });
@@ -95,7 +97,7 @@ describe('TTYPlayer/hooks', () => {
         xTermResult.current.seekToLine(VIM_LINE_START); // line where vim output starts
       });
 
-      await act(async () => jest.advanceTimersByTime(100));
+      await act(async () => vi.advanceTimersByTime(100));
 
       const { terminal, currentLine } = xTermResult.current;
 
@@ -110,7 +112,7 @@ describe('TTYPlayer/hooks', () => {
 
       rerender({ ...initialProps, isPlaying: true });
 
-      await act(async () => jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10));
+      await act(async () => vi.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10));
 
       expect(result.current.currentLine).toBe(10);
     });
@@ -122,13 +124,13 @@ describe('TTYPlayer/hooks', () => {
 
       rerender({ ...initialProps, isPlaying: true });
 
-      await act(async () => jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10));
+      await act(async () => vi.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10));
 
       expect(result.current.currentLine).toBe(10);
 
       rerender({ ...initialProps, isPlaying: false });
 
-      await act(async () => jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10));
+      await act(async () => vi.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10));
 
       expect(result.current.currentLine).toBe(10); // should not have advanced
     });
@@ -141,7 +143,7 @@ describe('TTYPlayer/hooks', () => {
       rerender({ ...initialProps, isPlaying: true });
 
       await act(async () =>
-        jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * initialProps.lines.length + 100)
+        vi.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * initialProps.lines.length + 100)
       );
 
       expect(result.current.currentLine).toBe(initialProps.lines.length - 1);
@@ -156,7 +158,7 @@ describe('TTYPlayer/hooks', () => {
 
       await act(async () => {
         // advance render loop
-        jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS);
+        vi.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS);
       });
 
       rerender({ ...initialProps, isPlaying: false });
@@ -175,7 +177,7 @@ describe('TTYPlayer/hooks', () => {
 
       await act(async () => {
         // advance render loop
-        jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * LOOPS);
+        vi.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * LOOPS);
       });
 
       rerender({ ...initialProps, isPlaying: false });
@@ -206,7 +208,7 @@ describe('TTYPlayer/hooks', () => {
         initialProps,
       });
 
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
 
       act(() => {
         xTermResult.current.search('256', 0);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
@@ -13,26 +16,32 @@ import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_fi
 import { getMockAttackDiscoveryAlerts } from '../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
 import { useAttackGroupHandler } from './use_attack_group_handler';
 
-jest.mock('@kbn/elastic-assistant', () => ({
-  useAssistantContext: jest.fn(),
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      useAssistantContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
-  useFindAttackDiscoveries: jest.fn(),
-}));
+vi.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => {
+      const mocked = {
+      useFindAttackDiscoveries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAttacks = getMockAttackDiscoveryAlerts();
 
 describe('useAttackGroupHandler', () => {
   beforeEach(() => {
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    (useAssistantContext as Mock).mockReturnValue({
       assistantAvailability: { isAssistantEnabled: true },
       http: {},
     });
   });
 
   it('should return isLoading true when fetching attacks', () => {
-    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+    (useFindAttackDiscoveries as Mock).mockReturnValue({
       data: undefined,
       isLoading: true,
     });
@@ -43,7 +52,7 @@ describe('useAttackGroupHandler', () => {
   });
 
   it('should return isLoading false when attacks are loaded', () => {
-    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+    (useFindAttackDiscoveries as Mock).mockReturnValue({
       data: { data: mockAttacks },
       isLoading: false,
     });
@@ -55,7 +64,7 @@ describe('useAttackGroupHandler', () => {
 
   describe('getAttack', () => {
     beforeEach(() => {
-      (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+      (useFindAttackDiscoveries as Mock).mockReturnValue({
         data: { data: mockAttacks },
         isLoading: false,
       });
@@ -124,7 +133,7 @@ describe('useAttackGroupHandler', () => {
     });
 
     it('should return undefined when attacks are loading or empty', () => {
-      (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+      (useFindAttackDiscoveries as Mock).mockReturnValue({
         data: undefined,
         isLoading: true,
       });

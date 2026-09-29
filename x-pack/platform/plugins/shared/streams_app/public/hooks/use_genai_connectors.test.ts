@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useGenAIConnectors } from './use_genai_connectors';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { InferenceConnectorType } from '@kbn/inference-common';
 
-jest.mock('@kbn/inference-connectors', () => {
-  const actual = jest.requireActual('@kbn/inference-connectors');
+vi.mock('@kbn/inference-connectors', async () => {
+  const actual = (await vi.importActual('@kbn/inference-connectors'));
   return {
     ...actual,
-    useLoadConnectors: jest.fn(),
+    useLoadConnectors: vi.fn(),
   };
 });
 
 import { useLoadConnectors } from '@kbn/inference-connectors';
 
-const mockUseLoadConnectors = useLoadConnectors as jest.MockedFunction<typeof useLoadConnectors>;
+const mockUseLoadConnectors = useLoadConnectors as MockedFunction<typeof useLoadConnectors>;
 
 const STREAMS_CONNECTOR_STORAGE_KEY = 'xpack.streamsApp.lastUsedConnector';
 const OLD_STORAGE_KEY = 'xpack.observabilityAiAssistant.lastUsedConnector';
@@ -47,7 +50,7 @@ const createLoadConnectorsResult = (
     data: connectors,
     isLoading: false,
     error: null,
-    refetch: jest.fn(),
+    refetch: vi.fn(),
     soEntryFound: false,
     ...overrides,
   } as unknown as ReturnType<typeof useLoadConnectors>);
@@ -57,7 +60,7 @@ describe('useGenAIConnectors', () => {
   const mockSettings = {} as SettingsStart;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.removeItem(STREAMS_CONNECTOR_STORAGE_KEY);
     localStorage.removeItem(OLD_STORAGE_KEY);
   });

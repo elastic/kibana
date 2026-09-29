@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,7 +17,7 @@ import { ColumnControlWithSummary } from './column_control_with_summary';
 
 describe('ColumnControlWithSummary', () => {
   it('injects the Pin summary toggle above the Columns popover content', async () => {
-    const onChangeShowSummaryColumn = jest.fn();
+    const onChangeShowSummaryColumn = vi.fn();
 
     render(
       <EuiThemeProvider>

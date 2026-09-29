@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
@@ -17,11 +19,11 @@ const createMockContext = (
   ({
     core: Promise.resolve({
       featureFlags: {
-        getBooleanValue: jest.fn().mockResolvedValue(featureFlagValue),
+        getBooleanValue: vi.fn().mockResolvedValue(featureFlagValue),
       },
       uiSettings: {
         client: {
-          get: jest.fn().mockResolvedValue(uiSettingValue),
+          get: vi.fn().mockResolvedValue(uiSettingValue),
         },
       },
     }),
@@ -31,7 +33,7 @@ describe('assertWorkflowsEnabled', () => {
   const response = httpServerMock.createResponseFactory();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns null when the feature flag is enabled', async () => {
@@ -54,12 +56,12 @@ describe('assertWorkflowsEnabled', () => {
   });
 
   it('reads the correct feature flag key', async () => {
-    const getBooleanValue = jest.fn().mockResolvedValue(true);
+    const getBooleanValue = vi.fn().mockResolvedValue(true);
     const context = {
       core: Promise.resolve({
         featureFlags: { getBooleanValue },
         uiSettings: {
-          client: { get: jest.fn().mockResolvedValue(true) },
+          client: { get: vi.fn().mockResolvedValue(true) },
         },
       }),
     } as unknown as RequestHandlerContext;
@@ -79,10 +81,10 @@ describe('assertWorkflowsEnabled', () => {
     const context = {
       core: Promise.resolve({
         featureFlags: {
-          getBooleanValue: jest.fn().mockResolvedValue(null),
+          getBooleanValue: vi.fn().mockResolvedValue(null),
         },
         uiSettings: {
-          client: { get: jest.fn().mockResolvedValue(true) },
+          client: { get: vi.fn().mockResolvedValue(true) },
         },
       }),
     } as unknown as RequestHandlerContext;

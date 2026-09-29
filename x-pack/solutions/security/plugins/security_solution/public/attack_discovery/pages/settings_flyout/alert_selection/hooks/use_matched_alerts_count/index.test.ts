@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { of, throwError } from 'rxjs';
 
 import { useMatchedAlertsCount } from '.';
 
-const mockSetQuery = jest.fn();
+const mockSetQuery = vi.fn();
 
-const mockUseQueryAlerts = jest.fn().mockReturnValue({
+const mockUseQueryAlerts = vi.fn().mockReturnValue({
   data: null,
   loading: false,
   setQuery: mockSetQuery,
@@ -21,34 +23,43 @@ const mockUseQueryAlerts = jest.fn().mockReturnValue({
   refetch: null,
 });
 
-jest.mock('../../../../../../detections/containers/detection_engine/alerts/use_query', () => ({
-  useQueryAlerts: (...args: unknown[]) => mockUseQueryAlerts(...args),
-}));
+vi.mock('../../../../../../detections/containers/detection_engine/alerts/use_query', () => {
+      const mocked = {
+      useQueryAlerts: (...args: unknown[]) => mockUseQueryAlerts(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSignalIndex = jest.fn().mockReturnValue({
+const mockUseSignalIndex = vi.fn().mockReturnValue({
   signalIndexName: '.alerts-security.alerts-default',
 });
 
-jest.mock(
+vi.mock(
   '../../../../../../detections/containers/detection_engine/alerts/use_signal_index',
-  () => ({
-    useSignalIndex: () => mockUseSignalIndex(),
-  })
+  () => {
+      const mocked = {
+        useSignalIndex: () => mockUseSignalIndex(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const mockSearch = jest.fn();
+const mockSearch = vi.fn();
 
-jest.mock('../../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      data: {
-        search: {
-          search: mockSearch,
+vi.mock('../../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          data: {
+            search: {
+              search: mockSearch,
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultSettings = {
   end: 'now',
@@ -60,7 +71,7 @@ const defaultSettings = {
 
 describe('useMatchedAlertsCount', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSetQuery.mockClear();
     mockUseQueryAlerts.mockReturnValue({
       data: null,

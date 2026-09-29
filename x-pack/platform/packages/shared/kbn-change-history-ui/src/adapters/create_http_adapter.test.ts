@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createChangeHistoryHttpAdapter } from './create_http_adapter';
 import type { ChangeHistoryListItem } from '../types/change_history_list_item';
 
 describe('createChangeHistoryHttpAdapter', () => {
   it('fetches and maps list changes with 0-based pagination by default', async () => {
     const http = {
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         items: [{ id: 'evt-1', timestamp: '2026-01-01T00:00:00Z' }],
         total: 1,
       }),
     };
 
-    const mapListItem = jest.fn((dto: unknown) => dto as ChangeHistoryListItem);
+    const mapListItem = vi.fn((dto: unknown) => dto as ChangeHistoryListItem);
 
     const adapter = createChangeHistoryHttpAdapter({
       http,
@@ -40,7 +42,7 @@ describe('createChangeHistoryHttpAdapter', () => {
 
   it('translates page index when pageIndexBase is 1', async () => {
     const http = {
-      get: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+      get: vi.fn().mockResolvedValue({ items: [], total: 0 }),
     };
 
     const adapter = createChangeHistoryHttpAdapter({
@@ -62,14 +64,14 @@ describe('createChangeHistoryHttpAdapter', () => {
 
   it('maps HTTP errors on listChanges', async () => {
     const http = {
-      get: jest.fn().mockRejectedValue({
+      get: vi.fn().mockRejectedValue({
         response: { status: 403 },
         body: { message: 'Forbidden' },
         message: 'Forbidden',
       }),
     };
 
-    const mapHttpError = jest.fn((error: unknown) => new Error(`mapped: ${String(error)}`));
+    const mapHttpError = vi.fn((error: unknown) => new Error(`mapped: ${String(error)}`));
 
     const adapter = createChangeHistoryHttpAdapter({
       http,
@@ -89,7 +91,7 @@ describe('createChangeHistoryHttpAdapter', () => {
 
   it('getChange requires detailPath', async () => {
     const adapter = createChangeHistoryHttpAdapter({
-      http: { get: jest.fn() },
+      http: { get: vi.fn() },
       listPath: '/api/history/{objectId}',
     });
 
@@ -103,8 +105,8 @@ describe('createChangeHistoryHttpAdapter', () => {
 
   it('restoreChange posts to restorePath when configured', async () => {
     const http = {
-      get: jest.fn(),
-      post: jest.fn().mockResolvedValue(undefined),
+      get: vi.fn(),
+      post: vi.fn().mockResolvedValue(undefined),
     };
 
     const adapter = createChangeHistoryHttpAdapter({
@@ -125,7 +127,7 @@ describe('createChangeHistoryHttpAdapter', () => {
 
   it('restoreChange requires http.post', async () => {
     const adapter = createChangeHistoryHttpAdapter({
-      http: { get: jest.fn() },
+      http: { get: vi.fn() },
       listPath: '/api/history/{objectId}',
       restorePath: '/api/history/{objectId}/{eventId}/restore',
     });

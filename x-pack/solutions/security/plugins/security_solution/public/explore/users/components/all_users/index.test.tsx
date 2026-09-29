@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock';
@@ -16,32 +18,44 @@ import { UsersFields } from '../../../../../common/search_strategy/security_solu
 import { fireEvent, render } from '@testing-library/react';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
-const mockUseMlCapabilities = jest.fn().mockReturnValue({ isPlatinumOrTrialLicense: false });
+const mockUseMlCapabilities = vi.fn().mockReturnValue({ isPlatinumOrTrialLicense: false });
 
-jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
-  useMlCapabilities: () => mockUseMlCapabilities(),
-}));
+vi.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => {
+      const mocked = {
+      useMlCapabilities: () => mockUseMlCapabilities(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenUserFlyout = jest.fn();
-const mockOpenFlyout = jest.fn();
+const mockOpenUserFlyout = vi.fn();
+const mockOpenFlyout = vi.fn();
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout, closeFlyout: jest.fn() }),
-}));
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => true,
-}));
-jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
-  useFlyoutApi: () => ({
-    openUserFlyout: mockOpenUserFlyout,
-    openHostFlyout: jest.fn(),
-    openServiceFlyout: jest.fn(),
-    openGenericEntityFlyout: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout, closeFlyout: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => {
+      const mocked = {
+      useIsNewFlyoutEnabled: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../flyout_v2/use_flyout_api', () => {
+      const mocked = {
+      useFlyoutApi: () => ({
+        openUserFlyout: mockOpenUserFlyout,
+        openHostFlyout: vi.fn(),
+        openServiceFlyout: vi.fn(),
+        openGenericEntityFlyout: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Users Table Component', () => {
-  const loadPage = jest.fn();
+  const loadPage = vi.fn();
 
   beforeEach(() => {
     mockOpenUserFlyout.mockClear();

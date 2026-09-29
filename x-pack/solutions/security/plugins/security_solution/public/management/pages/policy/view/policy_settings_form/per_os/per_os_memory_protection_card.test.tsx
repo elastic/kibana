@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { within } from '@testing-library/react';
@@ -27,11 +30,11 @@ import {
 } from './per_os_memory_protection_card';
 import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
-jest.mock('../../../../../../common/hooks/use_license');
+vi.mock('../../../../../../common/hooks/use_license');
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 
 describe('PerOsMemoryProtectionCard', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').perOsMemory;
@@ -48,7 +51,7 @@ describe('PerOsMemoryProtectionCard', () => {
     renderResult.rerender(<PerOsMemoryProtectionCard {...props} policy={nextPolicy} />);
   };
   const getUpdatedPolicy = (): PolicyConfig => {
-    const onChange = props.onChange as jest.Mock;
+    const onChange = props.onChange as Mock;
     return onChange.mock.calls[onChange.mock.calls.length - 1][0].updatedPolicy;
   };
 
@@ -58,7 +61,7 @@ describe('PerOsMemoryProtectionCard', () => {
       .config.policy.value;
     props = {
       policy,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': testSubj.card,
     };

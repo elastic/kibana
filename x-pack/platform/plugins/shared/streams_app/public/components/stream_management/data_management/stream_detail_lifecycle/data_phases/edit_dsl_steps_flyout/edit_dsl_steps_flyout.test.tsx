@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
@@ -13,9 +16,12 @@ import { EditDslStepsFlyout } from './edit_dsl_steps_flyout';
 
 const DATA_TEST_SUBJ = 'streamsEditDslStepsFlyout';
 
-jest.mock('../../../../../../hooks/use_streams_privileges', () => ({
-  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
-}));
+vi.mock('../../../../../../hooks/use_streams_privileges', () => {
+      const mocked = {
+      useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const tick = async () => {
   await act(async () => {
@@ -35,9 +41,9 @@ const renderFlyout = (
   props: Partial<React.ComponentProps<typeof EditDslStepsFlyout>> = {},
   options: { initialSelectedStepIndex?: number } = {}
 ) => {
-  const onClose = jest.fn();
-  const onChange = jest.fn();
-  const onSave = jest.fn();
+  const onClose = vi.fn();
+  const onChange = vi.fn();
+  const onSave = vi.fn();
 
   const initialSteps: IngestStreamLifecycleDSL =
     props.initialSteps ??
@@ -50,7 +56,7 @@ const renderFlyout = (
   const setSelectedStepIndexRef: { current: ((index: number | undefined) => void) | null } = {
     current: null,
   };
-  const onSelectedStepIndexChange = jest.fn();
+  const onSelectedStepIndexChange = vi.fn();
 
   const { unmount } = render(
     <Wrapper
@@ -102,7 +108,7 @@ const Wrapper = ({
   onChange: React.ComponentProps<typeof EditDslStepsFlyout>['onChange'];
   onSave: (next: IngestStreamLifecycleDSL) => void;
   setSelectedStepIndexRef: { current: ((index: number | undefined) => void) | null };
-  onSelectedStepIndexChange: jest.Mock;
+  onSelectedStepIndexChange: Mock;
 }) => {
   const [selectedStepIndex, setSelectedStepIndex] = React.useState<number | undefined>(
     initialSelectedStepIndex
@@ -428,7 +434,7 @@ describe('EditDslStepsFlyout', () => {
 
   describe('after', () => {
     it('restores the last after value on blur when cleared', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderFlyout({
         initialSteps: {
           dsl: {
@@ -458,7 +464,7 @@ describe('EditDslStepsFlyout', () => {
 
   describe('fixed_interval', () => {
     it('restores the last fixed_interval value on blur when cleared', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderFlyout({
         initialSteps: {
           dsl: {
@@ -621,7 +627,7 @@ describe('EditDslStepsFlyout', () => {
 
   describe('onChange emission', () => {
     it('coalesces rapid internal updates and only emits the latest value when adding a step', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderFlyout({
         initialSteps: {
           dsl: {
@@ -690,10 +696,10 @@ describe('EditDslStepsFlyout', () => {
     });
 
     it('debounces rapid user edits into a single onChange', async () => {
-      jest.useFakeTimers();
-      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      vi.useFakeTimers();
+      const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
       try {
-        const onChange = jest.fn();
+        const onChange = vi.fn();
         renderFlyout({
           onChange,
           onChangeDebounceMs: 100,
@@ -707,7 +713,7 @@ describe('EditDslStepsFlyout', () => {
 
         // Flush initial mount work.
         await act(async () => {
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
         });
         onChange.mockClear();
         clearTimeoutSpy.mockClear();
@@ -726,12 +732,12 @@ describe('EditDslStepsFlyout', () => {
         expect(onChange).toHaveBeenCalledTimes(0);
 
         await act(async () => {
-          jest.advanceTimersByTime(99);
+          vi.advanceTimersByTime(99);
         });
         expect(onChange).toHaveBeenCalledTimes(0);
 
         await act(async () => {
-          jest.advanceTimersByTime(1);
+          vi.advanceTimersByTime(1);
         });
 
         expect(onChange).toHaveBeenCalledTimes(1);
@@ -749,15 +755,15 @@ describe('EditDslStepsFlyout', () => {
         expect(clearTimeoutSpy).toHaveBeenCalled();
       } finally {
         clearTimeoutSpy.mockRestore();
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
     it('cleans up a pending debounced onChange on unmount', async () => {
-      jest.useFakeTimers();
-      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      vi.useFakeTimers();
+      const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
       try {
-        const onChange = jest.fn();
+        const onChange = vi.fn();
         const { unmount } = renderFlyout({
           onChange,
           onChangeDebounceMs: 100,
@@ -770,7 +776,7 @@ describe('EditDslStepsFlyout', () => {
         });
 
         await act(async () => {
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
         });
         onChange.mockClear();
         clearTimeoutSpy.mockClear();
@@ -787,15 +793,15 @@ describe('EditDslStepsFlyout', () => {
         unmount();
 
         await act(async () => {
-          jest.runOnlyPendingTimers();
-          jest.advanceTimersByTime(100);
+          vi.runOnlyPendingTimers();
+          vi.advanceTimersByTime(100);
         });
 
         expect(onChange).toHaveBeenCalledTimes(0);
         expect(clearTimeoutSpy).toHaveBeenCalled();
       } finally {
         clearTimeoutSpy.mockRestore();
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
   });
@@ -833,8 +839,8 @@ describe('EditDslStepsFlyout', () => {
                   isEqual(prev, next) ? prev : (next as IngestStreamLifecycleDSL)
                 )
               }
-              onSave={jest.fn()}
-              onClose={jest.fn()}
+              onSave={vi.fn()}
+              onClose={vi.fn()}
               onChangeDebounceMs={0}
             />
           </>

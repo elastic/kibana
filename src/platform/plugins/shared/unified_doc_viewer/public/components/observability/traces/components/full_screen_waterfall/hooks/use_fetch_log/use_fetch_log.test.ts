@@ -7,15 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useFetchLog } from '.';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
-jest.mock('../../../../../../../plugin', () => ({
-  getUnifiedDocViewerServices: jest.fn(),
-}));
+vi.mock('../../../../../../../plugin', () => {
+      const mocked = {
+      getUnifiedDocViewerServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFetchLogDocumentById = jest.fn<
+const mockFetchLogDocumentById = vi.fn<
   Promise<
     | {
         _index: string;
@@ -25,11 +31,11 @@ const mockFetchLogDocumentById = jest.fn<
   >,
   any
 >();
-const mockAdd = jest.fn();
+const mockAdd = vi.fn();
 
-const mockGetById: jest.Mock<
+const mockGetById: Mock<
   | {
-      fetchLogDocumentById: jest.Mock<
+      fetchLogDocumentById: Mock<
         Promise<
           | {
               _index: string;
@@ -40,11 +46,11 @@ const mockGetById: jest.Mock<
       >;
     }
   | undefined
-> = jest.fn(() => ({
+> = vi.fn(() => ({
   fetchLogDocumentById: mockFetchLogDocumentById,
 }));
 
-(getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
+(getUnifiedDocViewerServices as Mock).mockReturnValue({
   discoverShared: {
     features: {
       registry: {
@@ -66,7 +72,7 @@ describe('useFetchLog', () => {
   const index = 'remote_cluster:.ds-logs-apm.error-default-2026.01.14-000054';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetById.mockReturnValue({
       fetchLogDocumentById: mockFetchLogDocumentById,
     });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject, Subject } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { getFetch$ } from './get_fetch_observable';
@@ -49,32 +51,36 @@ function createDataMock(
 
 describe('getFetchObservable', () => {
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
-  test('refetch$.next should trigger fetch$.next', (done) => {
-    const searchSessionManagerMock = createSearchSessionMock();
+  test('refetch$.next should trigger fetch$.next', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-    const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
-    const refetch$: DataRefetch$ = new Subject();
-    const fetch$ = getFetch$({
-      setAutoRefreshDone: jest.fn(),
-      main$,
-      refetch$,
-      data: createDataMock(new Subject(), new Subject(), new Subject(), new Subject()),
-      searchSessionManager: searchSessionManagerMock.searchSessionManager,
-    });
+          const searchSessionManagerMock = createSearchSessionMock();
 
-    fetch$.subscribe(() => {
-      done();
-    });
-    refetch$.next(undefined);
-  });
+          const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
+          const refetch$: DataRefetch$ = new Subject();
+          const fetch$ = getFetch$({
+            setAutoRefreshDone: vi.fn(),
+            main$,
+            refetch$,
+            data: createDataMock(new Subject(), new Subject(), new Subject(), new Subject()),
+            searchSessionManager: searchSessionManagerMock.searchSessionManager,
+          });
+
+          fetch$.subscribe(() => {
+            done();
+          });
+          refetch$.next(undefined);
+        
+      }));
 
   test(
     'getAutoRefreshFetch$ should trigger fetch$.next',
     fakeSchedulers((advance) => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
       const searchSessionManagerMock = createSearchSessionMock();
       const autoRefreshFetch$ = new Subject();
 
@@ -86,7 +92,7 @@ describe('getFetchObservable', () => {
         new Subject(),
         autoRefreshFetch$
       );
-      const setAutoRefreshDone = jest.fn();
+      const setAutoRefreshDone = vi.fn();
       const fetch$ = getFetch$({
         setAutoRefreshDone,
         main$,
@@ -95,11 +101,11 @@ describe('getFetchObservable', () => {
         searchSessionManager: searchSessionManagerMock.searchSessionManager,
       });
 
-      const fetchfnMock = jest.fn();
+      const fetchfnMock = vi.fn();
       fetch$.subscribe(() => {
         fetchfnMock();
       });
-      autoRefreshFetch$.next(jest.fn());
+      autoRefreshFetch$.next(vi.fn());
       advance(100);
       expect(fetchfnMock).toHaveBeenCalledTimes(1);
       expect(setAutoRefreshDone).toHaveBeenCalled();

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -40,7 +43,7 @@ const createRecoveryTestHarness = () => {
   const stepExecutionsDataClient = createMockStepDataClient();
   const repository = new WorkflowExecutionRepository(workflowExecutionsDataClient);
   const stepExecutionRepository = new StepExecutionRepository(stepExecutionsDataClient);
-  jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
+  vi.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
   workflowExecutionsDataClient.bulk.mockResolvedValue({
     errors: false,
     items: [{ id: 'mock-id', index: '.mock' }],
@@ -49,7 +52,7 @@ const createRecoveryTestHarness = () => {
 };
 
 const mockExecutionLookup = (
-  workflowExecutionsDataClient: jest.Mocked<WorkflowExecutionsDataClient>,
+  workflowExecutionsDataClient: Mocked<WorkflowExecutionsDataClient>,
   execution: EsWorkflowExecution | null
 ) => {
   workflowExecutionsDataClient.getByIds.mockResolvedValue(
@@ -58,7 +61,7 @@ const mockExecutionLookup = (
 };
 
 const expectFailedWorkflowUpdate = (
-  workflowExecutionsDataClient: jest.Mocked<WorkflowExecutionsDataClient>,
+  workflowExecutionsDataClient: Mocked<WorkflowExecutionsDataClient>,
   id: string,
   error: { type: string; message: string }
 ) => {
@@ -112,7 +115,7 @@ describe('shouldFailOnWorkflowRunRetry', () => {
 });
 
 describe('resolveInterruptedWorkflowRunTask', () => {
-  let workflowExecutionsDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
+  let workflowExecutionsDataClient: Mocked<WorkflowExecutionsDataClient>;
   let repository: WorkflowExecutionRepository;
   let stepExecutionRepository: StepExecutionRepository;
   const logger = loggingSystemMock.create().get();
@@ -172,7 +175,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
 
   it('returns run_workflow when execution is missing on retry and logs a warning', async () => {
     mockExecutionLookup(workflowExecutionsDataClient, null);
-    const warnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
 
     await expect(
       resolveInterruptedWorkflowRunTask({
@@ -227,7 +230,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
       workflowId: 'w',
       status: ExecutionStatus.WAITING_FOR_INPUT,
     } as EsWorkflowExecution);
-    const warnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
 
     await expect(
       resolveInterruptedWorkflowRunTask({
@@ -280,7 +283,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
 });
 
 describe('resolveInterruptedWorkflowResumeTask', () => {
-  let workflowExecutionsDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
+  let workflowExecutionsDataClient: Mocked<WorkflowExecutionsDataClient>;
   let repository: WorkflowExecutionRepository;
   let stepExecutionRepository: StepExecutionRepository;
   const logger = loggingSystemMock.create().get();
@@ -338,7 +341,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
 
   it('returns resume_workflow when execution is missing on retry and logs a warning', async () => {
     mockExecutionLookup(workflowExecutionsDataClient, null);
-    const warnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
 
     await expect(
       resolveInterruptedWorkflowResumeTask({
@@ -440,7 +443,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
 });
 
 describe('resolveExhaustedWorkflowRunTask', () => {
-  let workflowExecutionsDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
+  let workflowExecutionsDataClient: Mocked<WorkflowExecutionsDataClient>;
   let repository: WorkflowExecutionRepository;
   let stepExecutionRepository: StepExecutionRepository;
   const logger = loggingSystemMock.create().get();
@@ -448,11 +451,11 @@ describe('resolveExhaustedWorkflowRunTask', () => {
   beforeEach(() => {
     ({ workflowExecutionsDataClient, repository, stepExecutionRepository } =
       createRecoveryTestHarness());
-    jest.spyOn(logger, 'error').mockImplementation(() => {});
+    vi.spyOn(logger, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('does nothing when taskAttempts is below maxAttempts', async () => {
@@ -587,7 +590,7 @@ describe('resolveExhaustedWorkflowRunTask', () => {
 });
 
 describe('markScheduledExecutionFailedAfterTaskError', () => {
-  let workflowExecutionsDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
+  let workflowExecutionsDataClient: Mocked<WorkflowExecutionsDataClient>;
   let repository: WorkflowExecutionRepository;
   let stepExecutionRepository: StepExecutionRepository;
   const logger = loggingSystemMock.create().get();
@@ -597,9 +600,9 @@ describe('markScheduledExecutionFailedAfterTaskError', () => {
     const stepExecutionsDataClient = createMockStepDataClient();
     repository = new WorkflowExecutionRepository(workflowExecutionsDataClient);
     stepExecutionRepository = new StepExecutionRepository(stepExecutionsDataClient);
-    jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
-    jest.spyOn(logger, 'warn').mockImplementation(() => {});
-    jest.spyOn(logger, 'error').mockImplementation(() => {});
+    vi.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
+    vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    vi.spyOn(logger, 'error').mockImplementation(() => {});
     workflowExecutionsDataClient.bulk.mockResolvedValue({
       errors: false,
       items: [{ id: 'mock-id', index: '.mock' }],
@@ -607,7 +610,7 @@ describe('markScheduledExecutionFailedAfterTaskError', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('marks a non-terminal execution FAILED with refresh wait_for', async () => {
@@ -677,10 +680,10 @@ describe('markScheduledExecutionFailedAfterTaskError', () => {
 
       expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
       expect(stepExecutionRepository.markNonTerminalStepsFailed).not.toHaveBeenCalled();
-      jest.clearAllMocks();
-      jest.spyOn(logger, 'warn').mockImplementation(() => {});
-      jest.spyOn(logger, 'error').mockImplementation(() => {});
-      jest
+      vi.clearAllMocks();
+      vi.spyOn(logger, 'warn').mockImplementation(() => {});
+      vi.spyOn(logger, 'error').mockImplementation(() => {});
+      vi
         .spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed')
         .mockResolvedValue(undefined);
     }
@@ -719,7 +722,7 @@ describe('markScheduledExecutionFailedAfterTaskError', () => {
 });
 
 describe('failExecutionMissingIdentity', () => {
-  let workflowExecutionsDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
+  let workflowExecutionsDataClient: Mocked<WorkflowExecutionsDataClient>;
   let repository: WorkflowExecutionRepository;
   let stepExecutionRepository: StepExecutionRepository;
   const logger = loggingSystemMock.create().get();
@@ -729,9 +732,9 @@ describe('failExecutionMissingIdentity', () => {
     const stepExecutionsDataClient = createMockStepDataClient();
     repository = new WorkflowExecutionRepository(workflowExecutionsDataClient);
     stepExecutionRepository = new StepExecutionRepository(stepExecutionsDataClient);
-    jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
-    jest.spyOn(logger, 'warn').mockImplementation(() => {});
-    jest.spyOn(logger, 'error').mockImplementation(() => {});
+    vi.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
+    vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    vi.spyOn(logger, 'error').mockImplementation(() => {});
     workflowExecutionsDataClient.bulk.mockResolvedValue({
       errors: false,
       items: [{ id: 'mock-id', index: '.mock' }],
@@ -739,7 +742,7 @@ describe('failExecutionMissingIdentity', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('marks a pending execution FAILED with the missing-identity message', async () => {

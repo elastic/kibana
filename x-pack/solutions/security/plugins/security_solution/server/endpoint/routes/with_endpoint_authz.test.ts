@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { requestContextMock } from '../../lib/detection_engine/routes/__mocks__';
@@ -15,14 +18,14 @@ import { EndpointAuthorizationError, NotFoundError } from '../errors';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
 
 describe('When using `withEndpointAuthz()`', () => {
-  let mockRequestHandler: jest.Mocked<RequestHandler>;
+  let mockRequestHandler: Mocked<RequestHandler>;
   let mockContext: ReturnType<typeof requestContextMock.create>;
   let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    mockRequestHandler = jest.fn(async (_context, _request, response) => {
+    mockRequestHandler = vi.fn(async (_context, _request, response) => {
       return response.ok();
     });
     mockContext = requestContextMock.create();
@@ -107,7 +110,7 @@ describe('When using `withEndpointAuthz()`', () => {
   });
 
   it('should call additionalChecks callback if defined', async () => {
-    const additionalChecks = jest.fn();
+    const additionalChecks = vi.fn();
     const routeContextMock = coreMock.createCustomRequestHandlerContext(mockContext);
     await withEndpointAuthz(
       { any: ['canGetRunningProcesses'] },
@@ -122,7 +125,7 @@ describe('When using `withEndpointAuthz()`', () => {
 
   it('should deny access if additionalChecks callback throws an error', async () => {
     const error = new NotFoundError('something happen');
-    const additionalChecks = jest.fn(async () => {
+    const additionalChecks = vi.fn(async () => {
       throw error;
     });
     const routeContextMock = coreMock.createCustomRequestHandlerContext(mockContext);

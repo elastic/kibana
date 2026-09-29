@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Redirect, type RouteComponentProps } from 'react-router-dom';
@@ -21,63 +24,93 @@ import { useSpaceId } from '../common/hooks/use_space_id';
 import { useIdsFromUrl } from './pages/results/history/use_ids_from_url';
 import { buildAttackDetailPath } from '../../common/utils/attack_detail_path';
 
-jest.mock('react-router-dom', () => ({
-  Redirect: jest.fn(() => <div data-test-subj="mock-redirect" />),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      Redirect: vi.fn(() => <div data-test-subj="mock-redirect" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/shared-ux-router', () => ({
-  useSearchParams: jest.fn(),
-}));
+vi.mock('@kbn/shared-ux-router', () => {
+      const mocked = {
+      useSearchParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common/hooks/use_is_alerts_and_attacks_alignment_enabled', () => ({
-  useIsAlertsAndAttacksAlignmentEnabled: jest.fn(),
-}));
+vi.mock('../common/hooks/use_is_alerts_and_attacks_alignment_enabled', () => {
+      const mocked = {
+      useIsAlertsAndAttacksAlignmentEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn(),
-}));
+vi.mock('../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./pages/results/history/use_ids_from_url', () => ({
-  useIdsFromUrl: jest.fn(),
-}));
+vi.mock('./pages/results/history/use_ids_from_url', () => {
+      const mocked = {
+      useIdsFromUrl: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/utils/attack_detail_path', () => ({
-  buildAttackDetailPath: jest.fn(),
-}));
+vi.mock('../../common/utils/attack_detail_path', () => {
+      const mocked = {
+      buildAttackDetailPath: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./pages', () => ({
-  AttackDiscoveryPage: () => <div data-test-subj="mock-attack-discovery-page" />,
-}));
+vi.mock('./pages', () => {
+      const mocked = {
+      AttackDiscoveryPage: () => <div data-test-subj="mock-attack-discovery-page" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./pages/attack_discovery_moved', () => ({
-  AttackDiscoveryMovedPage: () => <div data-test-subj="mock-attack-discovery-moved-page" />,
-}));
+vi.mock('./pages/attack_discovery_moved', () => {
+      const mocked = {
+      AttackDiscoveryMovedPage: () => <div data-test-subj="mock-attack-discovery-moved-page" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common/components/plugin_template_wrapper', () => ({
-  PluginTemplateWrapper: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="mock-plugin-template-wrapper">{children}</div>
-  ),
-}));
+vi.mock('../common/components/plugin_template_wrapper', () => {
+      const mocked = {
+      PluginTemplateWrapper: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="mock-plugin-template-wrapper">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common/components/security_route_page_wrapper', () => ({
-  SecurityRoutePageWrapper: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="mock-security-route-page-wrapper">{children}</div>
-  ),
-}));
+vi.mock('../common/components/security_route_page_wrapper', () => {
+      const mocked = {
+      SecurityRoutePageWrapper: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="mock-security-route-page-wrapper">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AttackDiscoveryRoutes', () => {
   const mockSearchParams = new URLSearchParams();
   const mockRouteProps = {} as RouteComponentProps;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useSearchParams as jest.Mock).mockReturnValue([mockSearchParams]);
-    (useSpaceId as jest.Mock).mockReturnValue('default');
-    (useIdsFromUrl as jest.Mock).mockReturnValue({ ids: [] });
+    vi.clearAllMocks();
+    (useSearchParams as Mock).mockReturnValue([mockSearchParams]);
+    (useSpaceId as Mock).mockReturnValue('default');
+    (useIdsFromUrl as Mock).mockReturnValue({ ids: [] });
   });
 
   it('renders the legacy AttackDiscoveryPage when alignment is disabled', () => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(false);
+    (useIsAlertsAndAttacksAlignmentEnabled as Mock).mockReturnValue(false);
 
     render(<AttackDiscoveryRoutes {...mockRouteProps} />);
 
@@ -87,7 +120,7 @@ describe('AttackDiscoveryRoutes', () => {
   });
 
   it('renders the AttackDiscoveryMovedPage when alignment is enabled', () => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
+    (useIsAlertsAndAttacksAlignmentEnabled as Mock).mockReturnValue(true);
 
     render(<AttackDiscoveryRoutes {...mockRouteProps} />);
 
@@ -99,9 +132,9 @@ describe('AttackDiscoveryRoutes', () => {
   // Legacy `/attack_discovery?id=<id>` deep links (e.g. the generated `kibana.alert.url`) must
   // redirect to the new Attacks page with the attack flyout open when alignment is enabled.
   it('redirects to the attack flyout when alignment is enabled and the URL contains an attack id', () => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
-    (useSpaceId as jest.Mock).mockReturnValue('default');
-    (useIdsFromUrl as jest.Mock).mockReturnValue({ ids: ['attack-id-1', 'attack-id-2'] });
+    (useIsAlertsAndAttacksAlignmentEnabled as Mock).mockReturnValue(true);
+    (useSpaceId as Mock).mockReturnValue('default');
+    (useIdsFromUrl as Mock).mockReturnValue({ ids: ['attack-id-1', 'attack-id-2'] });
 
     render(<AttackDiscoveryRoutes {...mockRouteProps} />);
 
@@ -115,9 +148,9 @@ describe('AttackDiscoveryRoutes', () => {
   });
 
   it('waits for the space id to resolve before redirecting', () => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
-    (useSpaceId as jest.Mock).mockReturnValue(undefined);
-    (useIdsFromUrl as jest.Mock).mockReturnValue({ ids: ['attack-id-1'] });
+    (useIsAlertsAndAttacksAlignmentEnabled as Mock).mockReturnValue(true);
+    (useSpaceId as Mock).mockReturnValue(undefined);
+    (useIdsFromUrl as Mock).mockReturnValue({ ids: ['attack-id-1'] });
 
     render(<AttackDiscoveryRoutes {...mockRouteProps} />);
 
@@ -126,8 +159,8 @@ describe('AttackDiscoveryRoutes', () => {
   });
 
   it('does not redirect when alignment is disabled even if the URL contains an attack id', () => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(false);
-    (useIdsFromUrl as jest.Mock).mockReturnValue({ ids: ['attack-id-1'] });
+    (useIsAlertsAndAttacksAlignmentEnabled as Mock).mockReturnValue(false);
+    (useIdsFromUrl as Mock).mockReturnValue({ ids: ['attack-id-1'] });
 
     render(<AttackDiscoveryRoutes {...mockRouteProps} />);
 

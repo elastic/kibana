@@ -5,28 +5,49 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 // jest.mock calls are hoisted before imports. Define inline jest.fn() inside
 // factories (do NOT reference outer const variables — they are undefined at
 // hoist time due to the temporal dead zone).
-jest.mock('../run_pipeline', () => ({
-  runLeadGenerationPipeline: jest.fn(),
-}));
-jest.mock('../entity_conversion', () => ({
-  fetchCandidateEntities: jest.fn(),
-}));
-jest.mock('../saved_object', () => ({
-  getLeadGenerationConfig: jest.fn(),
-  updateLeadGenerationConfig: jest.fn(),
-}));
-jest.mock('../utils', () => ({
-  resolveChatModel: jest.fn(),
-}));
-jest.mock('../../risk_score/risk_score_data_client', () => ({
-  RiskScoreDataClient: jest.fn().mockImplementation(() => ({})),
-}));
-jest.mock('../../risk_score/tasks/helpers', () => ({
-  buildScopedInternalSavedObjectsClientUnsafe: jest.fn().mockReturnValue({}),
-}));
+vi.mock('../run_pipeline', () => {
+      const mocked = {
+      runLeadGenerationPipeline: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../entity_conversion', () => {
+      const mocked = {
+      fetchCandidateEntities: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../saved_object', () => {
+      const mocked = {
+      getLeadGenerationConfig: vi.fn(),
+      updateLeadGenerationConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../utils', () => {
+      const mocked = {
+      resolveChatModel: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../risk_score/risk_score_data_client', () => {
+      const mocked = {
+      RiskScoreDataClient: vi.fn().mockImplementation(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../risk_score/tasks/helpers', () => {
+      const mocked = {
+      buildScopedInternalSavedObjectsClientUnsafe: vi.fn().mockReturnValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { loggingSystemMock, httpServerMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -50,13 +71,13 @@ describe('Lead Generation Task', () => {
   const logger = loggingSystemMock.createLogger();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('registerLeadGenerationTask', () => {
     it('skips registration when taskManager is unavailable', () => {
       registerLeadGenerationTask({
-        getStartServices: jest.fn(),
+        getStartServices: vi.fn(),
         logger,
         telemetry: {} as never,
         taskManager: undefined,
@@ -75,7 +96,7 @@ describe('Lead Generation Task', () => {
       const mockTaskManager = taskManagerMock.createSetup();
 
       registerLeadGenerationTask({
-        getStartServices: jest.fn(),
+        getStartServices: vi.fn(),
         logger,
         telemetry: {} as never,
         taskManager: mockTaskManager,
@@ -92,7 +113,7 @@ describe('Lead Generation Task', () => {
       const mockTaskManager = taskManagerMock.createSetup();
 
       registerLeadGenerationTask({
-        getStartServices: jest.fn(),
+        getStartServices: vi.fn(),
         logger,
         telemetry: {} as never,
         taskManager: mockTaskManager,
@@ -213,43 +234,43 @@ describe('Lead Generation Task', () => {
 
     // Re-created in each beforeEach so clearAllMocks() doesn't wipe return values
     let mockCore: {
-      elasticsearch: { client: { asScoped: jest.Mock } };
-      executionContext: { withContext: jest.Mock };
+      elasticsearch: { client: { asScoped: Mock } };
+      executionContext: { withContext: Mock };
     };
     let mockStartPlugins: {
-      entityStore: { createCRUDClient: jest.Mock; createRelationshipsClient: jest.Mock };
+      entityStore: { createCRUDClient: Mock; createRelationshipsClient: Mock };
       inference: object;
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let capturedCreateTaskRunner: any;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       mockCore = {
         elasticsearch: {
           client: {
-            asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }),
+            asScoped: vi.fn().mockReturnValue({ asCurrentUser: {} }),
           },
         },
         executionContext: {
-          withContext: jest.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn()),
+          withContext: vi.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn()),
         },
       };
       mockStartPlugins = {
         entityStore: {
-          createCRUDClient: jest.fn().mockReturnValue({}),
-          createRelationshipsClient: jest.fn().mockReturnValue({}),
+          createCRUDClient: vi.fn().mockReturnValue({}),
+          createRelationshipsClient: vi.fn().mockReturnValue({}),
         },
         inference: {},
       };
 
-      (runLeadGenerationPipeline as jest.Mock).mockResolvedValue(undefined);
-      (updateLeadGenerationConfig as jest.Mock).mockResolvedValue(undefined);
-      (resolveChatModel as jest.Mock).mockResolvedValue({});
+      (runLeadGenerationPipeline as Mock).mockResolvedValue(undefined);
+      (updateLeadGenerationConfig as Mock).mockResolvedValue(undefined);
+      (resolveChatModel as Mock).mockResolvedValue({});
 
       const mockTaskManager = taskManagerMock.createSetup();
-      const getStartServicesMock = jest.fn().mockResolvedValue([mockCore, mockStartPlugins]);
+      const getStartServicesMock = vi.fn().mockResolvedValue([mockCore, mockStartPlugins]);
 
       registerLeadGenerationTask({
         getStartServices: getStartServicesMock,
@@ -276,7 +297,7 @@ describe('Lead Generation Task', () => {
     });
 
     it('re-throws USER error when connectorId is missing', async () => {
-      (getLeadGenerationConfig as jest.Mock).mockResolvedValueOnce(null);
+      (getLeadGenerationConfig as Mock).mockResolvedValueOnce(null);
       const fakeRequest = httpServerMock.createKibanaRequest();
       const runner = capturedCreateTaskRunner({ taskInstance, fakeRequest });
       const err = await runner.run().catch((e: Error) => e);
@@ -286,7 +307,7 @@ describe('Lead Generation Task', () => {
     });
 
     it('updates SO with lastError: null after successful pipeline run', async () => {
-      (getLeadGenerationConfig as jest.Mock).mockResolvedValueOnce({ connectorId: 'c1' });
+      (getLeadGenerationConfig as Mock).mockResolvedValueOnce({ connectorId: 'c1' });
       const fakeRequest = httpServerMock.createKibanaRequest();
       const runner = capturedCreateTaskRunner({ taskInstance, fakeRequest });
       await runner.run();
@@ -298,8 +319,8 @@ describe('Lead Generation Task', () => {
     });
 
     it('updates SO with error message and does NOT re-throw on plain pipeline failure', async () => {
-      (getLeadGenerationConfig as jest.Mock).mockResolvedValueOnce({ connectorId: 'c1' });
-      (runLeadGenerationPipeline as jest.Mock).mockRejectedValueOnce(new Error('LLM timeout'));
+      (getLeadGenerationConfig as Mock).mockResolvedValueOnce({ connectorId: 'c1' });
+      (runLeadGenerationPipeline as Mock).mockRejectedValueOnce(new Error('LLM timeout'));
       const fakeRequest = httpServerMock.createKibanaRequest();
       const runner = capturedCreateTaskRunner({ taskInstance, fakeRequest });
       await expect(runner.run()).resolves.toBeDefined();
@@ -316,7 +337,7 @@ describe('Lead Generation Task', () => {
     });
 
     it('wraps the task run in coreStart.executionContext.withContext with the expected label and id', async () => {
-      (getLeadGenerationConfig as jest.Mock).mockResolvedValueOnce({ connectorId: 'c1' });
+      (getLeadGenerationConfig as Mock).mockResolvedValueOnce({ connectorId: 'c1' });
       const fakeRequest = httpServerMock.createKibanaRequest();
       const runner = capturedCreateTaskRunner({ taskInstance, fakeRequest });
       await runner.run();

@@ -5,32 +5,40 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
 
-const mockRegisterCompletionItemProvider = jest.fn();
-const mockDispose = jest.fn();
+const mockRegisterCompletionItemProvider = vi.fn();
+const mockDispose = vi.fn();
 
-jest.mock('@kbn/monaco', () => ({
-  monaco: {
-    languages: {
-      registerCompletionItemProvider: (...args: unknown[]) => {
-        mockRegisterCompletionItemProvider(...args);
-        return { dispose: mockDispose };
+vi.mock('@kbn/monaco', () => {
+      const mocked = {
+      monaco: {
+        languages: {
+          registerCompletionItemProvider: (...args: unknown[]) => {
+            mockRegisterCompletionItemProvider(...args);
+            return { dispose: mockDispose };
+          },
+          CompletionItemKind: { Reference: 17 },
+        },
+        // A no-op stand-in — the completion provider constructs a Range, but the tests assert on the
+        // suggestion labels, not the range geometry. (A class with TS parameter properties trips jest's
+        // mock-factory hoist analyzer, so keep it property-free.)
+        Range: class MockRange {},
       },
-      CompletionItemKind: { Reference: 17 },
-    },
-    // A no-op stand-in — the completion provider constructs a Range, but the tests assert on the
-    // suggestion labels, not the range geometry. (A class with TS parameter properties trips jest's
-    // mock-factory hoist analyzer, so keep it property-free.)
-    Range: class MockRange {},
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetFieldDefinitions = jest.fn();
-jest.mock('../../field_library/hooks/use_get_field_definitions', () => ({
-  useGetFieldDefinitions: (args: unknown) => mockUseGetFieldDefinitions(args),
-}));
+const mockUseGetFieldDefinitions = vi.fn();
+vi.mock('../../field_library/hooks/use_get_field_definitions', () => {
+      const mocked = {
+      useGetFieldDefinitions: (args: unknown) => mockUseGetFieldDefinitions(args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useRefFieldCompletion } from './use_ref_field_completion';
 
@@ -55,7 +63,7 @@ const completionArgs = (uri: string) => [
 
 describe('useRefFieldCompletion', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseGetFieldDefinitions.mockReturnValue({
       data: { fieldDefinitions: [field('root_cause')] },
     });

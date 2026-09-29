@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('./run_build', () => {
-  const actual = jest.requireActual<typeof import('./run_build')>('./run_build');
+import { vi } from 'vitest';
+
+vi.mock('./run_build', async () => {
+  const actual = (await vi.importActual<typeof import('./run_build')>('./run_build'));
   return {
     ...actual,
-    runBuild: jest.fn(),
+    runBuild: vi.fn(),
   };
 });
 
 import { runBuild } from './run_build';
 
-const processSend = jest.fn();
+const processSend = vi.fn();
 
 describe('worker', () => {
   beforeAll(async () => {
@@ -34,11 +36,11 @@ describe('worker', () => {
   describe('handleStart', () => {
     beforeEach(() => {
       processSend.mockClear();
-      jest.mocked(runBuild).mockReset();
+      vi.mocked(runBuild).mockReset();
     });
 
     it('calls runBuild with mapped options and default theme tags', async () => {
-      jest.mocked(runBuild).mockResolvedValue({
+      vi.mocked(runBuild).mockResolvedValue({
         success: true,
         bundleCount: 1,
         totalSize: 100,
@@ -67,7 +69,7 @@ describe('worker', () => {
           basePath: undefined,
         })
       );
-      expect(jest.mocked(runBuild).mock.calls[0][0].log).toEqual(
+      expect(vi.mocked(runBuild).mock.calls[0][0].log).toEqual(
         expect.objectContaining({
           info: expect.any(Function),
           error: expect.any(Function),
@@ -80,7 +82,7 @@ describe('worker', () => {
     });
 
     it('maps explicit start options to runBuild', async () => {
-      jest.mocked(runBuild).mockResolvedValue({
+      vi.mocked(runBuild).mockResolvedValue({
         success: true,
         bundleCount: 1,
         totalSize: 0,
@@ -120,7 +122,7 @@ describe('worker', () => {
     });
 
     it('sends done with summary on success', async () => {
-      jest.mocked(runBuild).mockResolvedValue({
+      vi.mocked(runBuild).mockResolvedValue({
         success: true,
         bundleCount: 2,
         totalSize: 1024,
@@ -142,7 +144,7 @@ describe('worker', () => {
     });
 
     it('sends done with errors when build fails', async () => {
-      jest.mocked(runBuild).mockResolvedValue({
+      vi.mocked(runBuild).mockResolvedValue({
         success: false,
         errors: ['compile failed'],
       });
@@ -163,7 +165,7 @@ describe('worker', () => {
     });
 
     it('sends done with error message when runBuild throws', async () => {
-      jest.mocked(runBuild).mockRejectedValue(new Error('boom'));
+      vi.mocked(runBuild).mockRejectedValue(new Error('boom'));
 
       (process as unknown as NodeJS.EventEmitter).emit('message', {
         type: 'start',
@@ -181,7 +183,7 @@ describe('worker', () => {
     });
 
     it('createWorkerLog methods send log messages with correct levels', async () => {
-      jest.mocked(runBuild).mockImplementation(async (opts) => {
+      vi.mocked(runBuild).mockImplementation(async (opts) => {
         opts.log?.info('i');
         opts.log?.error('e');
         opts.log?.warning('w');
@@ -211,11 +213,11 @@ describe('worker', () => {
     });
 
     it('completes successfully in watch mode without exiting (done is still sent once)', async () => {
-      const exitSpy = jest.spyOn(process, 'exit').mockImplementation(((code?: number) => {
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: number) => {
         throw new Error(`unexpected process.exit(${code})`);
       }) as never);
 
-      jest.mocked(runBuild).mockResolvedValue({
+      vi.mocked(runBuild).mockResolvedValue({
         success: true,
         bundleCount: 1,
         totalSize: 0,

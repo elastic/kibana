@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { transformActionParams, transformSummaryActionParams } from './transform_action_params';
 import {
   actionsMock,
@@ -17,7 +19,7 @@ const actionsPlugin = actionsMock.createStart();
 const actionTypeId = 'test-actionTypeId';
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   actionsPlugin.renderActionParameterTemplates.mockImplementation(
     renderActionParameterTemplatesDefault
   );

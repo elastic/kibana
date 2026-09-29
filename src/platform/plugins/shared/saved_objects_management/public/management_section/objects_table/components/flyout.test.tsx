@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { importFileMock, resolveImportErrorsMock } from './flyout.test.mocks';
 
 import React from 'react';
@@ -45,11 +47,11 @@ describe('Flyout', () => {
     const basePath = httpServiceMock.createBasePath();
 
     defaultProps = {
-      close: jest.fn(),
-      done: jest.fn(),
+      close: vi.fn(),
+      done: vi.fn(),
       newIndexPatternUrl: '',
       dataViews: {
-        getCache: jest.fn().mockImplementation(() => [
+        getCache: vi.fn().mockImplementation(() => [
           { id: '1', attributes: {} },
           { id: '2', attributes: {} },
         ]),

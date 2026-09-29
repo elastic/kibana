@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { EvalExperimentsToolDeps } from './tools/deps';
@@ -15,7 +17,7 @@ const deps: EvalExperimentsToolDeps = {
   workflowsApi: {} as unknown as EvalExperimentsToolDeps['workflowsApi'],
   serverBasePath: '',
   logger: loggingSystemMock.createLogger(),
-  getStartDependencies: jest.fn(),
+  getStartDependencies: vi.fn(),
 };
 
 describe('createEvalExperimentsSkill', () => {

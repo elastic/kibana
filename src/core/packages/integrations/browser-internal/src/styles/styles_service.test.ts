@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 
-jest.mock('./disable_animations.css?raw', () => 'MOCK DISABLE ANIMATIONS CSS');
+vi.mock('./disable_animations.css?raw', () => 'MOCK DISABLE ANIMATIONS CSS');
 
 import { StylesService } from './styles_service';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';

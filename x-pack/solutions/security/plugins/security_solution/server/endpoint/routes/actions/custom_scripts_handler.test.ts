@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { KibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
@@ -14,15 +17,15 @@ import { getResponseActionsClient } from '../../services';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import { EndpointAuthorizationError } from '../../errors';
 
-jest.mock('../../services', () => {
-  const actual = jest.requireActual('../../services');
+vi.mock('../../services', async () => {
+  const actual = (await vi.importActual('../../services'));
   return {
     ...actual,
-    getResponseActionsClient: jest.fn(),
+    getResponseActionsClient: vi.fn(),
   };
 });
 
-const mockGetResponseActionsClient = getResponseActionsClient as jest.Mock;
+const mockGetResponseActionsClient = getResponseActionsClient as Mock;
 const mockCustomScripts = [
   { id: 'script-1', name: 'Test Script', description: 'Test description' },
 ];
@@ -31,7 +34,7 @@ describe('custom_scripts_handler', () => {
   let testSetup: HttpApiTestSetupMock;
   let httpRequestMock: ReturnType<HttpApiTestSetupMock['createRequestMock']>;
   let httpHandlerContextMock: HttpApiTestSetupMock['httpHandlerContextMock'];
-  let httpResponseMock: jest.Mocked<KibanaResponseFactory>;
+  let httpResponseMock: Mocked<KibanaResponseFactory>;
   let callHandler: () => ReturnType<RequestHandler>;
 
   beforeEach(() => {
@@ -45,7 +48,7 @@ describe('custom_scripts_handler', () => {
     });
 
     mockGetResponseActionsClient.mockReturnValue({
-      getCustomScripts: jest.fn().mockResolvedValue(mockCustomScripts),
+      getCustomScripts: vi.fn().mockResolvedValue(mockCustomScripts),
     });
 
     registerCustomScriptsRoute(testSetup.routerMock, testSetup.endpointAppContextMock);
@@ -59,12 +62,12 @@ describe('custom_scripts_handler', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should error if user has no Authz to API', async () => {
     (
-      (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
+      (await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock
     ).mockResolvedValue(
       getEndpointAuthzInitialStateMock({
         canWriteExecuteOperations: false,

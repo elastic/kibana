@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, within, act, fireEvent } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import { API_BASE_PATH } from '../../../common/constants';
@@ -22,15 +24,15 @@ describe('Edit follower index', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
@@ -49,7 +51,7 @@ describe('Edit follower index', () => {
       user = result.user;
 
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 
@@ -79,7 +81,7 @@ describe('Edit follower index', () => {
       user = result.user;
 
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 
@@ -108,7 +110,7 @@ describe('Edit follower index', () => {
       fireEvent.click(confirmButton);
 
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
 
       // PUT should have been called
@@ -138,7 +140,7 @@ describe('Edit follower index', () => {
       fireEvent.click(confirmButton);
 
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
 
       const putEndpoint = `${API_BASE_PATH}/follower_indices/${FOLLOWER_INDEX_EDIT_NAME}`;
@@ -174,7 +176,7 @@ describe('Edit follower index', () => {
       ({ user } = setup());
 
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 

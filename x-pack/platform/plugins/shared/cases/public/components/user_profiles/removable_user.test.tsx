@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import type { UserRepresentationProps } from './removable_user';
@@ -24,7 +26,7 @@ describe('UserRepresentation', () => {
   beforeEach(() => {
     defaultProps = {
       assignee: { uid: userProfiles[0].uid, profile: userProfiles[0] },
-      onRemoveAssignee: jest.fn(),
+      onRemoveAssignee: vi.fn(),
     };
   });
 

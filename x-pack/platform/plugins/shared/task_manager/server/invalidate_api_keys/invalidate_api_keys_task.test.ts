@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CoreStart } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { TaskManagerPluginsStart, TaskManagerStartContract } from '../plugin';
@@ -12,21 +15,24 @@ import { INVALIDATE_API_KEY_SO_NAME, TASK_SO_NAME } from '../saved_objects';
 import { runInvalidate } from './lib';
 import { taskRunner } from './invalidate_api_keys_task';
 
-jest.mock('./lib', () => ({
-  runInvalidate: jest.fn(),
-}));
+vi.mock('./lib', () => {
+      const mocked = {
+      runInvalidate: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const runInvalidateMock = runInvalidate as jest.Mock;
+const runInvalidateMock = runInvalidate as Mock;
 
 describe('invalidate api keys task runner', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     runInvalidateMock.mockResolvedValue({ totalInvalidated: 0, missingApiKeyRetries: {} });
   });
 
   it('builds the saved objects client with the hidden `task` type so the in-use guard works', async () => {
     const coreStart = coreMock.createStart();
-    const coreStartServices = jest
+    const coreStartServices = vi
       .fn()
       .mockResolvedValue([
         coreStart as CoreStart,
@@ -39,7 +45,7 @@ describe('invalidate api keys task runner', () => {
       configInterval: '5m',
       coreStartServices,
       getEncryptedSavedObjectsClient: () => undefined,
-      invalidateApiKeyFn: jest.fn(),
+      invalidateApiKeyFn: vi.fn(),
       invalidateUiamApiKeyFn: () => undefined,
       removalDelay: '1h',
     })({ taskInstance: { state: {} } });
@@ -50,7 +56,7 @@ describe('invalidate api keys task runner', () => {
       expect.arrayContaining([INVALIDATE_API_KEY_SO_NAME, TASK_SO_NAME])
     );
 
-    const expectedClient = (coreStart.savedObjects.createInternalRepository as jest.Mock).mock
+    const expectedClient = (coreStart.savedObjects.createInternalRepository as Mock).mock
       .results[0].value;
     expect(runInvalidateMock).toHaveBeenCalledWith(
       expect.objectContaining({ savedObjectsClient: expectedClient })
@@ -59,7 +65,7 @@ describe('invalidate api keys task runner', () => {
 
   it('guards against invalidating both ES and UIAM keys that are still referenced by a task', async () => {
     const coreStart = coreMock.createStart();
-    const coreStartServices = jest
+    const coreStartServices = vi
       .fn()
       .mockResolvedValue([
         coreStart as CoreStart,
@@ -72,7 +78,7 @@ describe('invalidate api keys task runner', () => {
       configInterval: '5m',
       coreStartServices,
       getEncryptedSavedObjectsClient: () => undefined,
-      invalidateApiKeyFn: jest.fn(),
+      invalidateApiKeyFn: vi.fn(),
       invalidateUiamApiKeyFn: () => undefined,
       removalDelay: '1h',
     })({ taskInstance: { state: {} } });

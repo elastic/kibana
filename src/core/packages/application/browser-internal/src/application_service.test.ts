@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import {
   MockCapabilitiesService,
   MockHistory,
@@ -53,13 +56,13 @@ let service: ApplicationService;
 
 describe('#setup()', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
     setupDeps = {
       http,
       analytics,
-      redirectTo: jest.fn(),
+      redirectTo: vi.fn(),
     };
     startDeps = {
       http,
@@ -519,7 +522,7 @@ describe('#start()', () => {
     setupDeps = {
       http,
       analytics,
-      redirectTo: jest.fn(),
+      redirectTo: vi.fn(),
     };
     startDeps = {
       http,
@@ -874,7 +877,7 @@ describe('#start()', () => {
 
     it('updates httpLoadingCount$ while mounting', async () => {
       // Use a memory history so that mounting the component will work
-      const { createMemoryHistory } = jest.requireActual('history');
+      const { createMemoryHistory } = require('history');
       const history = createMemoryHistory();
       setupDeps.history = history;
 
@@ -943,7 +946,7 @@ describe('#start()', () => {
     it('should call private function shouldNavigate with overlays and the nextAppId', async () => {
       service.setup(setupDeps);
 
-      const shouldNavigateSpy = jest.spyOn(service as any, 'shouldNavigate');
+      const shouldNavigateSpy = vi.spyOn(service as any, 'shouldNavigate');
       const { navigateToApp } = await service.start(startDeps);
       await navigateToApp('myTestApp');
       expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myTestApp');
@@ -954,7 +957,7 @@ describe('#start()', () => {
 
     it('should call private function shouldNavigate with overlays, nextAppId and skipAppLeave', async () => {
       service.setup(setupDeps);
-      const shouldNavigateSpy = jest.spyOn(service as any, 'shouldNavigate');
+      const shouldNavigateSpy = vi.spyOn(service as any, 'shouldNavigate');
       const { navigateToApp } = await service.start(startDeps);
       await navigateToApp('myTestApp', { skipAppLeave: true });
       expect(shouldNavigateSpy).not.toHaveBeenCalledWith(startDeps.overlays, 'myTestApp');
@@ -1170,14 +1173,14 @@ describe('#start()', () => {
     });
 
     describe('navigateToUrl with options', () => {
-      let addListenerSpy: jest.SpyInstance;
-      let removeListenerSpy: jest.SpyInstance;
+      let addListenerSpy: MockInstance;
+      let removeListenerSpy: MockInstance;
       beforeEach(() => {
-        addListenerSpy = jest.spyOn(window, 'addEventListener');
-        removeListenerSpy = jest.spyOn(window, 'removeEventListener');
+        addListenerSpy = vi.spyOn(window, 'addEventListener');
+        removeListenerSpy = vi.spyOn(window, 'removeEventListener');
       });
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('calls `navigateToApp` with `skipAppLeave` option', async () => {
@@ -1240,12 +1243,12 @@ describe('#start()', () => {
 });
 
 describe('#stop()', () => {
-  let addListenerSpy: jest.SpyInstance;
-  let removeListenerSpy: jest.SpyInstance;
+  let addListenerSpy: MockInstance;
+  let removeListenerSpy: MockInstance;
 
   beforeEach(() => {
-    addListenerSpy = jest.spyOn(window, 'addEventListener');
-    removeListenerSpy = jest.spyOn(window, 'removeEventListener');
+    addListenerSpy = vi.spyOn(window, 'addEventListener');
+    removeListenerSpy = vi.spyOn(window, 'removeEventListener');
 
     MockHistory.push.mockReset();
     const http = httpServiceMock.createSetupContract({ basePath: '/test' });
@@ -1265,7 +1268,7 @@ describe('#stop()', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('removes the beforeunload listener', async () => {
@@ -1282,10 +1285,10 @@ describe('#stop()', () => {
 
 describe('#start() getRegisteredAppsInfo()', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
-    setupDeps = { http, analytics, redirectTo: jest.fn() };
+    setupDeps = { http, analytics, redirectTo: vi.fn() };
     startDeps = {
       http,
       overlays: overlayServiceMock.createStartContract(),

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import React from 'react';
@@ -14,9 +16,12 @@ import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_ap
 import { expectTextsInDocument } from '../../../utils/test_helpers';
 import type { SectionDescriptor } from './types';
 
-jest.mock('../../../hooks/use_adhoc_apm_data_view', () => ({
-  useAdHocApmDataView: () => ({ dataView: undefined, apmIndices: undefined }),
-}));
+vi.mock('../../../hooks/use_adhoc_apm_data_view', () => {
+      const mocked = {
+      useAdHocApmDataView: () => ({ dataView: undefined, apmIndices: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (

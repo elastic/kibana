@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -80,9 +82,9 @@ describe('IlmField', () => {
   ] as unknown as IlmPolicy[];
 
   it('loads and displays ILM policies', async () => {
-    const getIlmPolicies = jest.fn().mockResolvedValue(policies);
-    const setLifecycle = jest.fn();
-    const setSaveDisabled = jest.fn();
+    const getIlmPolicies = vi.fn().mockResolvedValue(policies);
+    const setLifecycle = vi.fn();
+    const setSaveDisabled = vi.fn();
     renderI18n(
       <IlmField
         getIlmPolicies={getIlmPolicies}
@@ -101,13 +103,13 @@ describe('IlmField', () => {
   });
 
   it('renders readOnly view showing initial policy', async () => {
-    const getIlmPolicies = jest.fn().mockResolvedValue(policies);
+    const getIlmPolicies = vi.fn().mockResolvedValue(policies);
     renderI18n(
       <IlmField
         getIlmPolicies={getIlmPolicies}
         initialValue={{ ilm: { policy: 'policyA' } } as unknown as IngestStreamLifecycleAll}
-        setLifecycle={jest.fn()}
-        setSaveButtonDisabled={jest.fn()}
+        setLifecycle={vi.fn()}
+        setSaveButtonDisabled={vi.fn()}
         readOnly
       />
     );
@@ -120,9 +122,9 @@ describe('IlmField', () => {
   });
 
   it('handles getIlmPolicies error', async () => {
-    const getIlmPolicies = jest.fn().mockRejectedValue(new Error('Failed to load policies'));
-    const setLifecycle = jest.fn();
-    const setSaveDisabled = jest.fn();
+    const getIlmPolicies = vi.fn().mockRejectedValue(new Error('Failed to load policies'));
+    const setLifecycle = vi.fn();
+    const setSaveDisabled = vi.fn();
     renderI18n(
       <IlmField
         getIlmPolicies={getIlmPolicies}

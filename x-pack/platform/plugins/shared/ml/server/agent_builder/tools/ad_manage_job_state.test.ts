@@ -5,34 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getAdminCapabilities } from '../../lib/capabilities/__mocks__/ml_capabilities';
 import { createAdManageJobStateTool } from './ad_manage_job_state';
 import { AD_MANAGE_JOB_STATE_TOOL_ID } from './tool_ids';
 
-const resolveMlCapabilities = jest.fn().mockResolvedValue(getAdminCapabilities());
+const resolveMlCapabilities = vi.fn().mockResolvedValue(getAdminCapabilities());
 const adManageJobStateTool = createAdManageJobStateTool(resolveMlCapabilities);
 
 const createMlMock = () => ({
-  openJob: jest.fn().mockResolvedValue({ opened: true }),
-  closeJob: jest.fn().mockResolvedValue({ closed: true }),
-  startDatafeed: jest.fn().mockResolvedValue({ started: true }),
-  stopDatafeed: jest.fn().mockResolvedValue({ stopped: true }),
-  revertModelSnapshot: jest.fn().mockResolvedValue({ model: {} }),
-  previewDatafeed: jest.fn().mockResolvedValue([]),
-  getJobs: jest.fn().mockResolvedValue({ jobs: [{ groups: ['ml-agent-scratch'] }] }),
-  deleteDatafeed: jest.fn().mockResolvedValue({ acknowledged: true }),
-  deleteJob: jest.fn().mockResolvedValue({ acknowledged: true }),
-  getDatafeedStats: jest.fn().mockResolvedValue({ datafeeds: [{ state: 'stopped' }] }),
-  getJobStats: jest.fn().mockResolvedValue({
+  openJob: vi.fn().mockResolvedValue({ opened: true }),
+  closeJob: vi.fn().mockResolvedValue({ closed: true }),
+  startDatafeed: vi.fn().mockResolvedValue({ started: true }),
+  stopDatafeed: vi.fn().mockResolvedValue({ stopped: true }),
+  revertModelSnapshot: vi.fn().mockResolvedValue({ model: {} }),
+  previewDatafeed: vi.fn().mockResolvedValue([]),
+  getJobs: vi.fn().mockResolvedValue({ jobs: [{ groups: ['ml-agent-scratch'] }] }),
+  deleteDatafeed: vi.fn().mockResolvedValue({ acknowledged: true }),
+  deleteJob: vi.fn().mockResolvedValue({ acknowledged: true }),
+  getDatafeedStats: vi.fn().mockResolvedValue({ datafeeds: [{ state: 'stopped' }] }),
+  getJobStats: vi.fn().mockResolvedValue({
     jobs: [{ state: 'opened', data_counts: { latest_record_timestamp: 100 } }],
   }),
 });
 
 const createContext = (
   mlMock = createMlMock(),
-  events = { reportProgress: jest.fn(), sendUiEvent: jest.fn() }
+  events = { reportProgress: vi.fn(), sendUiEvent: vi.fn() }
 ) =>
   ({
     esClient: { asCurrentUser: { ml: mlMock } },
@@ -154,7 +156,7 @@ describe('adManageJobStateTool', () => {
 
     it('operation=await_batch_completion returns completed when the datafeed has stopped', async () => {
       const ml = createMlMock();
-      const events = { reportProgress: jest.fn(), sendUiEvent: jest.fn() };
+      const events = { reportProgress: vi.fn(), sendUiEvent: vi.fn() };
       const result = await adManageJobStateTool.handler(
         {
           operation: 'await_batch_completion',
@@ -208,7 +210,7 @@ describe('adManageJobStateTool', () => {
     });
 
     it('operation=await_batch_completion polls until the datafeed stops', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       try {
         const ml = createMlMock();
         ml.getDatafeedStats
@@ -229,7 +231,7 @@ describe('adManageJobStateTool', () => {
           createContext(ml)
         );
 
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
         const resultData = getResultData(await resultPromise);
         expect(ml.getDatafeedStats.mock.calls.length).toBeGreaterThanOrEqual(2);
         expect(resultData.data).toMatchObject({
@@ -238,7 +240,7 @@ describe('adManageJobStateTool', () => {
           progress_pct: 100,
         });
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 

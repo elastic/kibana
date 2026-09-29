@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
@@ -13,37 +15,43 @@ import { QueryClient } from '@kbn/react-query';
 import { createMockSpaces } from '../hooks/test_utils';
 import { openTagsFlyout } from './tags_flyout';
 
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: (node: unknown) => (element: HTMLElement) => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { createRoot } = require('react-dom/client');
-    const root = createRoot(element);
-    root.render(node);
-    return () => root.unmount();
-  },
-}));
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = {
+      toMountPoint: (node: unknown) => (element: HTMLElement) => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { createRoot } = require('react-dom/client');
+        const root = createRoot(element);
+        root.render(node);
+        return () => root.unmount();
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./actions/edit_episode_tags_flyout', () => ({
-  AlertEpisodeTagsFlyout: ({
-    currentTags,
-    onSave,
-    onClose,
-  }: {
-    currentTags: string[];
-    onSave: (tags: string[]) => void;
-    onClose: () => void;
-  }) => (
-    <div data-test-subj="tagsFlyout">
-      <span data-test-subj="tagsFlyoutCurrentTags">{JSON.stringify(currentTags)}</span>
-      <button data-test-subj="tagsFlyoutConfirm" onClick={() => onSave(['tag-a', 'tag-b'])}>
-        Save
-      </button>
-      <button data-test-subj="tagsFlyoutCancel" onClick={onClose}>
-        Cancel
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./actions/edit_episode_tags_flyout', () => {
+      const mocked = {
+      AlertEpisodeTagsFlyout: ({
+        currentTags,
+        onSave,
+        onClose,
+      }: {
+        currentTags: string[];
+        onSave: (tags: string[]) => void;
+        onClose: () => void;
+      }) => (
+        <div data-test-subj="tagsFlyout">
+          <span data-test-subj="tagsFlyoutCurrentTags">{JSON.stringify(currentTags)}</span>
+          <button data-test-subj="tagsFlyoutConfirm" onClick={() => onSave(['tag-a', 'tag-b'])}>
+            Save
+          </button>
+          <button data-test-subj="tagsFlyoutCancel" onClick={onClose}>
+            Cancel
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockOverlays = overlayServiceMock.createStartContract();
 const mockRendering = renderingServiceMock.create();
@@ -52,13 +60,13 @@ const mockSpaces = createMockSpaces();
 const mockQueryClient = new QueryClient();
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 
   mockOverlays.openFlyout.mockImplementation((mount: any) => {
     const div = document.createElement('div');
     document.body.appendChild(div);
     const unmount = mount(div);
-    const close = jest.fn(() => {
+    const close = vi.fn(() => {
       act(() => {
         if (typeof unmount === 'function') {
           unmount();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -16,15 +18,18 @@ import type { UseFetchDefaultEsqlQueryResult } from '../../workflow_configuratio
 
 const mockFilterManager = createFilterManagerMock();
 
-jest.mock('./alert_retrieval_content', () => ({
-  AlertRetrievalContent: (props: Record<string, unknown>) => (
-    <div
-      data-test-subj="alertRetrievalContent"
-      data-alert-retrieval-has-error={String(props.alertRetrievalHasError)}
-      data-connector-id={String(props.connectorId)}
-    />
-  ),
-}));
+vi.mock('./alert_retrieval_content', () => {
+      const mocked = {
+      AlertRetrievalContent: (props: Record<string, unknown>) => (
+        <div
+          data-test-subj="alertRetrievalContent"
+          data-alert-retrieval-has-error={String(props.alertRetrievalHasError)}
+          data-connector-id={String(props.connectorId)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultWorkflowConfiguration: WorkflowConfiguration = {
   alertRetrievalMode: 'custom_query',
@@ -37,10 +42,10 @@ const defaultWorkflowConfiguration: WorkflowConfiguration = {
 
 const defaultFetchDefaultEsqlQueryResult: UseFetchDefaultEsqlQueryResult = {
   defaultEsqlQuery: undefined,
-  fetchDefaultEsqlQuery: jest.fn().mockResolvedValue(undefined),
+  fetchDefaultEsqlQuery: vi.fn().mockResolvedValue(undefined),
   isError: false,
   isLoading: false,
-  resetCache: jest.fn(),
+  resetCache: vi.fn(),
 };
 
 const defaultProps = {
@@ -50,11 +55,11 @@ const defaultProps = {
   connectorId: 'test-connector',
   fetchDefaultEsqlQueryResult: defaultFetchDefaultEsqlQueryResult,
   filterManager: mockFilterManager,
-  onConnectorIdSelected: jest.fn(),
-  onSettingsChanged: jest.fn(),
-  onWorkflowConfigurationChange: jest.fn(),
-  setAlertsPreviewStackBy0: jest.fn(),
-  setAlertSummaryStackBy0: jest.fn(),
+  onConnectorIdSelected: vi.fn(),
+  onSettingsChanged: vi.fn(),
+  onWorkflowConfigurationChange: vi.fn(),
+  setAlertsPreviewStackBy0: vi.fn(),
+  setAlertSummaryStackBy0: vi.fn(),
   settings: {
     end: 'now',
     filters: [],
@@ -67,7 +72,7 @@ const defaultProps = {
 
 describe('AlertRetrievalStep', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the description text', () => {

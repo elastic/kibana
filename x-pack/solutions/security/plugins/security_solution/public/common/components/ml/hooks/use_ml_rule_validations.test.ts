@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
 import { buildMockJobsSummary, getJobsSummaryResponseMock } from '../../ml_popover/api.mock';
@@ -12,13 +15,13 @@ import { useInstalledSecurityJobs } from './use_installed_security_jobs';
 
 import { useMlRuleValidations } from './use_ml_rule_validations';
 
-jest.mock('./use_installed_security_jobs');
+vi.mock('./use_installed_security_jobs');
 
 describe('useMlRuleValidations', () => {
   const machineLearningJobId = ['test_job', 'test_job_2'];
 
   beforeEach(() => {
-    (useInstalledSecurityJobs as jest.Mock).mockReturnValue({
+    (useInstalledSecurityJobs as Mock).mockReturnValue({
       loading: true,
       jobs: [],
     });
@@ -30,7 +33,7 @@ describe('useMlRuleValidations', () => {
     });
     expect(result.current).toEqual(expect.objectContaining({ loading: true }));
 
-    (useInstalledSecurityJobs as jest.Mock).mockReturnValueOnce({
+    (useInstalledSecurityJobs as Mock).mockReturnValueOnce({
       loading: false,
       jobs: [],
     });
@@ -51,7 +54,7 @@ describe('useMlRuleValidations', () => {
   });
 
   it('returns a unique state when only some jobs are started', () => {
-    (useInstalledSecurityJobs as jest.Mock).mockReturnValueOnce({
+    (useInstalledSecurityJobs as Mock).mockReturnValueOnce({
       loading: false,
       jobs: getJobsSummaryResponseMock([
         buildMockJobsSummary({
@@ -75,7 +78,7 @@ describe('useMlRuleValidations', () => {
   });
 
   it('returns a unique state when all jobs are started', () => {
-    (useInstalledSecurityJobs as jest.Mock).mockReturnValueOnce({
+    (useInstalledSecurityJobs as Mock).mockReturnValueOnce({
       loading: false,
       jobs: getJobsSummaryResponseMock([
         buildMockJobsSummary({

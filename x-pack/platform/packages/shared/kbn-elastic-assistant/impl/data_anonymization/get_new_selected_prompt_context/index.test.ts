@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PromptContext, SelectedPromptContext } from '../../assistant/prompt_context/types';
 import { mockAlertPromptContext } from '../../mock/prompt_context';
 import { getNewSelectedPromptContext } from '.';
@@ -73,7 +75,7 @@ describe('getNewSelectedPromptContext', () => {
   it('calls getPromptContext from the given promptContext', async () => {
     const promptContext: PromptContext = {
       ...mockAlertPromptContext,
-      getPromptContext: jest.fn(() => Promise.resolve('string data')),
+      getPromptContext: vi.fn(() => Promise.resolve('string data')),
     };
 
     await getNewSelectedPromptContext({

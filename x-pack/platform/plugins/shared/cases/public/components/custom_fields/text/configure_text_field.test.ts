@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { configureTextCustomFieldFactory } from './configure_text_field';
 
 describe('configureTextCustomFieldFactory ', () => {
   const builder = configureTextCustomFieldFactory();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

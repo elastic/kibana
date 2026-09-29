@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import {
   Collector,
@@ -32,7 +34,7 @@ describe('telemetry_application_usage_collector', () => {
   });
 
   const uiSettingsClient = uiSettingsServiceMock.createClient();
-  const getUiSettingsClient = jest.fn((): IUiSettingsClient | undefined => uiSettingsClient);
+  const getUiSettingsClient = vi.fn((): IUiSettingsClient | undefined => uiSettingsClient);
   const mockedFetchContext = createCollectorFetchContextMock();
 
   beforeAll(() => {
@@ -92,14 +94,14 @@ describe('createCollectorFetch', () => {
   };
 
   it('returns #fetchUsageStats function', () => {
-    const getUiSettingsClient = jest.fn(() => undefined);
+    const getUiSettingsClient = vi.fn(() => undefined);
     const fetchFunction = createCollectorFetch(getUiSettingsClient);
     expect(typeof fetchFunction).toBe('function');
   });
 
   describe('#fetchUsageStats', () => {
     it('returns undefined if no uiSettingsClient returned from getUiSettingsClient', async () => {
-      const getUiSettingsClient = jest.fn(() => undefined);
+      const getUiSettingsClient = vi.fn(() => undefined);
       const fetchFunction = createCollectorFetch(getUiSettingsClient);
       const result = await fetchFunction();
       expect(result).toBe(undefined);
@@ -108,7 +110,7 @@ describe('createCollectorFetch', () => {
 
     it('returns all user changed settings', async () => {
       const uiSettingsClient = uiSettingsServiceMock.createClient();
-      const getUiSettingsClient = jest.fn(() => uiSettingsClient);
+      const getUiSettingsClient = vi.fn(() => uiSettingsClient);
       uiSettingsClient.getUserProvided.mockResolvedValue(mockUserSettings);
       uiSettingsClient.isSensitive.mockImplementation(mockIsSensitive);
       const fetchFunction = createCollectorFetch(getUiSettingsClient);
@@ -119,7 +121,7 @@ describe('createCollectorFetch', () => {
 
     it('returns the actual values of non-sensitive settings', async () => {
       const uiSettingsClient = uiSettingsServiceMock.createClient();
-      const getUiSettingsClient = jest.fn(() => uiSettingsClient);
+      const getUiSettingsClient = vi.fn(() => uiSettingsClient);
       uiSettingsClient.getUserProvided.mockResolvedValue(mockUserSettings);
       uiSettingsClient.isSensitive.mockImplementation(mockIsSensitive);
       const fetchFunction = createCollectorFetch(getUiSettingsClient);
@@ -133,7 +135,7 @@ describe('createCollectorFetch', () => {
 
     it('returns [REDACTED] as a value for sensitive settings', async () => {
       const uiSettingsClient = uiSettingsServiceMock.createClient();
-      const getUiSettingsClient = jest.fn(() => uiSettingsClient);
+      const getUiSettingsClient = vi.fn(() => uiSettingsClient);
       uiSettingsClient.getUserProvided.mockResolvedValue(mockUserSettings);
       uiSettingsClient.isSensitive.mockImplementation(mockIsSensitive);
       const fetchFunction = createCollectorFetch(getUiSettingsClient);

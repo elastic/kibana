@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getPaddedAlertTimeRange } from './get_padded_alert_time_range';
 
 describe('getPaddedAlertTimeRange', () => {
   const mockedDate = '2023-03-28T09:22:32.660Z';
-  const mockDate = jest
+  const mockDate = vi
     .spyOn(global.Date, 'now')
     .mockImplementation(() => new Date(mockedDate).valueOf());
 

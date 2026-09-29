@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
@@ -76,7 +78,7 @@ describe('mapInterruptCompleteReasonToOutcome', () => {
 
 describe('stampWorkflowTaskRunEventFields', () => {
   it('calls setCustomTaskRunEventFields with the full field set', () => {
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
 
     stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
       workflow_execution_id: 'exec-1',
@@ -95,7 +97,7 @@ describe('stampWorkflowTaskRunEventFields', () => {
   });
 
   it('omits optional ids when not provided', () => {
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
 
     stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
       space_id: 'default',
@@ -120,7 +122,7 @@ describe('getExecutionForTaskRunEvent', () => {
       status: ExecutionStatus.COMPLETED,
     };
     const workflowExecutionRepository = {
-      getWorkflowExecutionById: jest.fn().mockResolvedValue(execution),
+      getWorkflowExecutionById: vi.fn().mockResolvedValue(execution),
     };
 
     await expect(
@@ -130,7 +132,7 @@ describe('getExecutionForTaskRunEvent', () => {
 
   it('returns null when the repository throws', async () => {
     const workflowExecutionRepository = {
-      getWorkflowExecutionById: jest.fn().mockRejectedValue(new Error('es down')),
+      getWorkflowExecutionById: vi.fn().mockRejectedValue(new Error('es down')),
     };
     const logger = loggingSystemMock.createLogger();
 

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
@@ -49,10 +51,10 @@ describe('TTYPlayerControls component', () => {
       isPlaying: false,
       currentLine: 0,
       linesLength: 10,
-      onSeekLine: jest.fn(),
-      onTogglePlayback: jest.fn(),
-      onClose: jest.fn(),
-      onJumpToEvent: jest.fn(),
+      onSeekLine: vi.fn(),
+      onTogglePlayback: vi.fn(),
+      onClose: vi.fn(),
+      onJumpToEvent: vi.fn(),
       textSizer: <div>tty text sizer placeholder</div>,
     };
   });

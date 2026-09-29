@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
@@ -35,46 +38,49 @@ type PendingActionOption = EuiSelectableOption<Partial<{ description: string }>>
   data?: ActionDetails;
 };
 
-jest.mock('../../../hooks/response_actions/use_get_endpoint_action_list');
-jest.mock('../../console/hooks/state_selectors/use_console_state_dispatch');
-jest.mock('../shared/hooks', () => ({
-  useGenericErrorToast: jest.fn(),
-  useBaseSelectorHandlers: jest.fn(() => ({
-    handleOpenPopover: jest.fn(),
-    handleClosePopover: jest.fn(),
-    setIsPopoverOpen: jest.fn(),
-  })),
-  useBaseSelectorState: jest.fn((store, value) => store ?? { isPopoverOpen: !value }),
-  useRenderDelay: jest.fn(() => false),
-  useFocusManagement: jest.fn(),
-  usePendingActionsOptions: jest.fn(() => []),
-}));
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../common/experimental_features_service');
+vi.mock('../../../hooks/response_actions/use_get_endpoint_action_list');
+vi.mock('../../console/hooks/state_selectors/use_console_state_dispatch');
+vi.mock('../shared/hooks', () => {
+      const mocked = {
+      useGenericErrorToast: vi.fn(),
+      useBaseSelectorHandlers: vi.fn(() => ({
+        handleOpenPopover: vi.fn(),
+        handleClosePopover: vi.fn(),
+        setIsPopoverOpen: vi.fn(),
+      })),
+      useBaseSelectorState: vi.fn((store, value) => store ?? { isPopoverOpen: !value }),
+      useRenderDelay: vi.fn(() => false),
+      useFocusManagement: vi.fn(),
+      usePendingActionsOptions: vi.fn(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/experimental_features_service');
 
-jest.useFakeTimers();
+vi.useFakeTimers();
 
 describe('CancelablePendingActionsSelector', () => {
-  const mockUseGetEndpointActionList = useGetEndpointActionList as jest.MockedFunction<
+  const mockUseGetEndpointActionList = useGetEndpointActionList as MockedFunction<
     typeof useGetEndpointActionList
   >;
-  const mockUseGenericErrorToast = useGenericErrorToast as jest.MockedFunction<
+  const mockUseGenericErrorToast = useGenericErrorToast as MockedFunction<
     typeof useGenericErrorToast
   >;
-  const mockUseBaseSelectorHandlers = useBaseSelectorHandlers as jest.MockedFunction<
+  const mockUseBaseSelectorHandlers = useBaseSelectorHandlers as MockedFunction<
     typeof useBaseSelectorHandlers
   >;
-  const mockUseFocusManagement = useFocusManagement as jest.MockedFunction<
+  const mockUseFocusManagement = useFocusManagement as MockedFunction<
     typeof useFocusManagement
   >;
-  const mockUsePendingActionsOptions = usePendingActionsOptions as jest.MockedFunction<
+  const mockUsePendingActionsOptions = usePendingActionsOptions as MockedFunction<
     typeof usePendingActionsOptions
   >;
-  const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-  const mockUseUserPrivileges = useUserPrivileges as jest.MockedFunction<typeof useUserPrivileges>;
-  const mockOnChange = jest.fn();
-  const mockRequestFocus = jest.fn();
+  const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+  const mockUseUserPrivileges = useUserPrivileges as MockedFunction<typeof useUserPrivileges>;
+  const mockOnChange = vi.fn();
+  const mockRequestFocus = vi.fn();
 
   const mockActionDetails: ActionDetails = {
     id: 'action-123-abc',
@@ -149,13 +155,13 @@ describe('CancelablePendingActionsSelector', () => {
     command: mockCommand,
     requestFocus: mockRequestFocus,
     consoleApi: {
-      setInput: jest.fn(),
-      setFocusOnInput: jest.fn(),
+      setInput: vi.fn(),
+      setFocusOnInput: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseGetEndpointActionList.mockReturnValue({
       data: mockApiResponse,
       isLoading: false,
@@ -167,7 +173,7 @@ describe('CancelablePendingActionsSelector', () => {
     mockUseGenericErrorToast.mockImplementation(() => {});
 
     // Mock the base selector handlers hook with working implementations
-    const mockHandleOpenPopover = jest.fn(() => {
+    const mockHandleOpenPopover = vi.fn(() => {
       mockOnChange({
         value: defaultProps.value,
         valueText: defaultProps.valueText,
@@ -175,7 +181,7 @@ describe('CancelablePendingActionsSelector', () => {
       });
     });
 
-    const mockHandleClosePopover = jest.fn(() => {
+    const mockHandleClosePopover = vi.fn(() => {
       mockOnChange({
         value: defaultProps.value,
         valueText: defaultProps.valueText,
@@ -185,7 +191,7 @@ describe('CancelablePendingActionsSelector', () => {
     mockUseBaseSelectorHandlers.mockReturnValue({
       handleOpenPopover: mockHandleOpenPopover,
       handleClosePopover: mockHandleClosePopover,
-      setIsPopoverOpen: jest.fn(),
+      setIsPopoverOpen: vi.fn(),
     });
 
     mockUseFocusManagement.mockImplementation((isPopoverOpen, requestFocus) => {
@@ -200,10 +206,10 @@ describe('CancelablePendingActionsSelector', () => {
       services: {
         notifications: {
           toasts: {
-            add: jest.fn(),
-            addSuccess: jest.fn(),
-            addWarning: jest.fn(),
-            addDanger: jest.fn(),
+            add: vi.fn(),
+            addSuccess: vi.fn(),
+            addWarning: vi.fn(),
+            addDanger: vi.fn(),
           },
         },
       },
@@ -240,14 +246,14 @@ describe('CancelablePendingActionsSelector', () => {
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   const renderAndWaitForComponent = async (component: React.ReactElement) => {
     const result = render(component);
     // Fast-forward the timers to skip the delay
     act(() => {
-      jest.advanceTimersByTime(10);
+      vi.advanceTimersByTime(10);
     });
     // Wait for component to finish rendering
     await waitFor(() => {

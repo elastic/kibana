@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -12,28 +14,34 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { HeaderTitle } from './header_title';
 import { HEADER_BADGE_TEST_ID, HEADER_TITLE_TEST_ID } from '../constants/test_ids';
 
-jest.mock('../../../shared/components/flyout_title', () => ({
-  FlyoutTitle: ({
-    title,
-    'data-test-subj': dataTestSubj,
-  }: {
-    title: string;
-    'data-test-subj'?: string;
-  }) => <div data-test-subj={dataTestSubj ?? 'flyoutTitle'}>{title}</div>,
-}));
+vi.mock('../../../shared/components/flyout_title', () => {
+      const mocked = {
+      FlyoutTitle: ({
+        title,
+        'data-test-subj': dataTestSubj,
+      }: {
+        title: string;
+        'data-test-subj'?: string;
+      }) => <div data-test-subj={dataTestSubj ?? 'flyoutTitle'}>{title}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/components/timestamp', () => ({
-  Timestamp: ({ hit, children }: { hit: DataTableRecord; children?: React.ReactNode }) => {
-    const timestamp = hit.flattened?.['@timestamp'];
-    if (!timestamp) return null;
-    return (
-      <>
-        <div data-test-subj="timestamp">{String(timestamp)}</div>
-        {children}
-      </>
-    );
-  },
-}));
+vi.mock('../../../shared/components/timestamp', () => {
+      const mocked = {
+      Timestamp: ({ hit, children }: { hit: DataTableRecord; children?: React.ReactNode }) => {
+        const timestamp = hit.flattened?.['@timestamp'];
+        if (!timestamp) return null;
+        return (
+          <>
+            <div data-test-subj="timestamp">{String(timestamp)}</div>
+            {children}
+          </>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const buildHit = (overrides: Record<string, unknown> = {}): DataTableRecord =>
   ({

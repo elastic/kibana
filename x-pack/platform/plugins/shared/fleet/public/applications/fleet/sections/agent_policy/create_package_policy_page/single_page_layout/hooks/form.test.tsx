@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { act, waitFor } from '@testing-library/react';
 
@@ -18,34 +21,40 @@ import { SelectedPolicyTab } from '../../components';
 import { useOnSubmit, updateAgentlessCloudConnectorConfig } from './form';
 import { useAwsOnboardingTelemetry } from './aws_onboarding_telemetry';
 
-type MockFn = jest.MockedFunction<any>;
+type MockFn = MockedFunction<any>;
 
-jest.mock('./aws_onboarding_telemetry', () => ({
-  useAwsOnboardingTelemetry: jest.fn(() => ({
-    reportCredentialsAdded: jest.fn(),
-    reportDeployClicked: jest.fn(),
-    reportEnrollmentSucceeded: jest.fn(),
-  })),
-}));
+vi.mock('./aws_onboarding_telemetry', () => {
+      const mocked = {
+      useAwsOnboardingTelemetry: vi.fn(() => ({
+        reportCredentialsAdded: vi.fn(),
+        reportDeployClicked: vi.fn(),
+        reportEnrollmentSucceeded: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../hooks/use_request/agentless_policy', () => ({
-  sendCreateAgentlessPolicy: jest.fn().mockRejectedValue(new Error('mocked agentless api')),
-}));
+vi.mock('../../../../../../../hooks/use_request/agentless_policy', () => {
+      const mocked = {
+      sendCreateAgentlessPolicy: vi.fn().mockRejectedValue(new Error('mocked agentless api')),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks', () => {
+vi.mock('../../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../../hooks'),
-    sendGetPackagePolicies: jest.fn().mockReturnValue({
+    ...(await vi.importActual('../../../../../hooks')),
+    sendGetPackagePolicies: vi.fn().mockReturnValue({
       data: {
         items: [{ name: 'nginx-1' }, { name: 'other-policy' }],
       },
       isLoading: false,
     }),
-    useFleetStatus: jest.fn().mockReturnValue({ isReady: true } as any),
-    sendGetStatus: jest
+    useFleetStatus: vi.fn().mockReturnValue({ isReady: true } as any),
+    sendGetStatus: vi
       .fn()
       .mockResolvedValue({ data: { isReady: true, missing_requirements: [] } }),
-    useConfig: jest.fn(),
+    useConfig: vi.fn(),
   };
 });
 
@@ -96,8 +105,8 @@ describe('useOnSubmit', () => {
         newAgentPolicy: { name: 'test', namespace: '' },
         queryParamsPolicyId: undefined,
         hasFleetAddAgentsPrivileges: true,
-        setNewAgentPolicy: jest.fn(),
-        setSelectedPolicyTab: jest.fn(),
+        setNewAgentPolicy: vi.fn(),
+        setSelectedPolicyTab: vi.fn(),
       })
     );
 
@@ -211,8 +220,8 @@ describe('useOnSubmit', () => {
           newAgentPolicy: { name: 'test', namespace: '' },
           queryParamsPolicyId: undefined,
           hasFleetAddAgentsPrivileges: true,
-          setNewAgentPolicy: jest.fn(),
-          setSelectedPolicyTab: jest.fn(),
+          setNewAgentPolicy: vi.fn(),
+          setSelectedPolicyTab: vi.fn(),
         })
       );
       await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -245,7 +254,7 @@ describe('useOnSubmit', () => {
   });
 
   it('should set incremented name if other package policies exist', async () => {
-    (sendGetPackagePolicies as jest.MockedFunction<any>).mockReturnValue({
+    (sendGetPackagePolicies as MockedFunction<any>).mockReturnValue({
       data: {
         items: [
           { name: 'apache-1' },
@@ -303,8 +312,8 @@ describe('useOnSubmit', () => {
           newAgentPolicy: { name: 'test', namespace: '' },
           queryParamsPolicyId: undefined,
           hasFleetAddAgentsPrivileges: true,
-          setNewAgentPolicy: jest.fn(),
-          setSelectedPolicyTab: jest.fn(),
+          setNewAgentPolicy: vi.fn(),
+          setSelectedPolicyTab: vi.fn(),
           defaultPolicyData: {
             name: 'copied-policy',
             supports_agentless: true,
@@ -330,7 +339,7 @@ describe('useOnSubmit', () => {
 
   describe('input deployment mode filtering', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should disable inputs that are not allowed for agentless deployment mode', async () => {
@@ -385,8 +394,8 @@ describe('useOnSubmit', () => {
           newAgentPolicy: { name: 'test', namespace: '', supports_agentless: true },
           queryParamsPolicyId: undefined,
           hasFleetAddAgentsPrivileges: true,
-          setNewAgentPolicy: jest.fn(),
-          setSelectedPolicyTab: jest.fn(),
+          setNewAgentPolicy: vi.fn(),
+          setSelectedPolicyTab: vi.fn(),
         })
       );
 
@@ -490,8 +499,8 @@ describe('useOnSubmit', () => {
           newAgentPolicy: { name: 'test', namespace: '', supports_agentless: true },
           queryParamsPolicyId: undefined,
           hasFleetAddAgentsPrivileges: true,
-          setNewAgentPolicy: jest.fn(),
-          setSelectedPolicyTab: jest.fn(),
+          setNewAgentPolicy: vi.fn(),
+          setSelectedPolicyTab: vi.fn(),
         })
       );
 
@@ -553,8 +562,8 @@ describe('useOnSubmit', () => {
           newAgentPolicy: { name: 'test', namespace: '' },
           queryParamsPolicyId: undefined,
           hasFleetAddAgentsPrivileges: true,
-          setNewAgentPolicy: jest.fn(),
-          setSelectedPolicyTab: jest.fn(),
+          setNewAgentPolicy: vi.fn(),
+          setSelectedPolicyTab: vi.fn(),
         })
       );
 
@@ -621,8 +630,8 @@ describe('useOnSubmit', () => {
           newAgentPolicy: { name: 'test', namespace: '' },
           queryParamsPolicyId: undefined,
           hasFleetAddAgentsPrivileges: true,
-          setNewAgentPolicy: jest.fn(),
-          setSelectedPolicyTab: jest.fn(),
+          setNewAgentPolicy: vi.fn(),
+          setSelectedPolicyTab: vi.fn(),
         })
       );
 
@@ -696,8 +705,8 @@ describe('useOnSubmit', () => {
           newAgentPolicy: { name: 'test', namespace: '', supports_agentless: true },
           queryParamsPolicyId: undefined,
           hasFleetAddAgentsPrivileges: true,
-          setNewAgentPolicy: jest.fn(),
-          setSelectedPolicyTab: jest.fn(),
+          setNewAgentPolicy: vi.fn(),
+          setSelectedPolicyTab: vi.fn(),
         })
       );
 
@@ -790,8 +799,8 @@ describe('useOnSubmit', () => {
           newAgentPolicy: { name: 'test', namespace: '', supports_agentless: true },
           queryParamsPolicyId: undefined,
           hasFleetAddAgentsPrivileges: true,
-          setNewAgentPolicy: jest.fn(),
-          setSelectedPolicyTab: jest.fn(),
+          setNewAgentPolicy: vi.fn(),
+          setSelectedPolicyTab: vi.fn(),
         })
       );
 
@@ -816,8 +825,8 @@ describe('useOnSubmit', () => {
 
   describe('updateAgentlessCloudConnectorConfig', () => {
     it('should update agentless cloud connector config when enabled and target CSP is aws', () => {
-      const setNewAgentPolicy = jest.fn();
-      const setPackagePolicy = jest.fn();
+      const setNewAgentPolicy = vi.fn();
+      const setPackagePolicy = vi.fn();
 
       const packagePolicy = {
         inputs: [
@@ -872,8 +881,8 @@ describe('useOnSubmit', () => {
     });
 
     it('should set cloud_connectors enabled to false and supports_cloud_connector to false for aws when cloud connector input var is false', () => {
-      const setNewAgentPolicy = jest.fn();
-      const setPackagePolicy = jest.fn();
+      const setNewAgentPolicy = vi.fn();
+      const setPackagePolicy = vi.fn();
 
       const packagePolicy = {
         inputs: [
@@ -926,8 +935,8 @@ describe('useOnSubmit', () => {
     });
 
     it('should update agentless cloud connector config when enabled and target CSP is azure', () => {
-      const setNewAgentPolicy = jest.fn();
-      const setPackagePolicy = jest.fn();
+      const setNewAgentPolicy = vi.fn();
+      const setPackagePolicy = vi.fn();
 
       const packagePolicy = {
         inputs: [
@@ -982,8 +991,8 @@ describe('useOnSubmit', () => {
     });
 
     it('should set cloud_connectors enabled to false and supports_cloud_connector to false for azure when cloud connector input var is false', () => {
-      const setNewAgentPolicy = jest.fn();
-      const setPackagePolicy = jest.fn();
+      const setNewAgentPolicy = vi.fn();
+      const setPackagePolicy = vi.fn();
 
       const packagePolicy = {
         inputs: [
@@ -1036,8 +1045,8 @@ describe('useOnSubmit', () => {
     });
 
     it('should update cloud_connectors with target_csp gcp and set supports_cloud_connector to false for gcp', () => {
-      const setNewAgentPolicy = jest.fn();
-      const setPackagePolicy = jest.fn();
+      const setNewAgentPolicy = vi.fn();
+      const setPackagePolicy = vi.fn();
 
       const packagePolicy = {
         inputs: [
@@ -1090,8 +1099,8 @@ describe('useOnSubmit', () => {
     });
 
     it('should set cloud_connectors enabled to false and supports_cloud_connector to false for gcp when cloud connector input var is false', () => {
-      const setNewAgentPolicy = jest.fn();
-      const setPackagePolicy = jest.fn();
+      const setNewAgentPolicy = vi.fn();
+      const setPackagePolicy = vi.fn();
 
       const packagePolicy = {
         inputs: [
@@ -1144,8 +1153,8 @@ describe('useOnSubmit', () => {
     });
 
     it('should not update agentless cloud connector config if nothing changed', () => {
-      const setNewAgentPolicy = jest.fn();
-      const setPackagePolicy = jest.fn();
+      const setNewAgentPolicy = vi.fn();
+      const setPackagePolicy = vi.fn();
 
       const packagePolicy = {
         inputs: [
@@ -1186,8 +1195,8 @@ describe('useOnSubmit', () => {
     });
 
     it('should not update if input is missing or not enabled', () => {
-      const setNewAgentPolicy = jest.fn();
-      const setPackagePolicy = jest.fn();
+      const setNewAgentPolicy = vi.fn();
+      const setPackagePolicy = vi.fn();
 
       const packagePolicy = {
         inputs: [
@@ -1224,8 +1233,8 @@ describe('useOnSubmit', () => {
   });
 
   describe('AWS onboarding telemetry on agentless submit', () => {
-    const mockReportCredentialsAdded = jest.fn();
-    const mockReportDeployClicked = jest.fn();
+    const mockReportCredentialsAdded = vi.fn();
+    const mockReportDeployClicked = vi.fn();
 
     const awsPackageInfo: PackageInfo = {
       name: 'aws_cloudwatch_input_otel',
@@ -1260,12 +1269,12 @@ describe('useOnSubmit', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       (useConfig as MockFn).mockReturnValue({ agentless: { enabled: true } } as any);
-      (useAwsOnboardingTelemetry as jest.Mock).mockReturnValue({
+      (useAwsOnboardingTelemetry as Mock).mockReturnValue({
         reportCredentialsAdded: mockReportCredentialsAdded,
         reportDeployClicked: mockReportDeployClicked,
-        reportEnrollmentSucceeded: jest.fn(),
+        reportEnrollmentSucceeded: vi.fn(),
       });
     });
 
@@ -1279,8 +1288,8 @@ describe('useOnSubmit', () => {
           newAgentPolicy: { name: 'test', namespace: '', supports_agentless: true },
           queryParamsPolicyId: undefined,
           hasFleetAddAgentsPrivileges: true,
-          setNewAgentPolicy: jest.fn(),
-          setSelectedPolicyTab: jest.fn(),
+          setNewAgentPolicy: vi.fn(),
+          setSelectedPolicyTab: vi.fn(),
         })
       );
 
@@ -1308,8 +1317,8 @@ describe('useOnSubmit', () => {
           newAgentPolicy: { name: 'test', namespace: '' },
           queryParamsPolicyId: undefined,
           hasFleetAddAgentsPrivileges: true,
-          setNewAgentPolicy: jest.fn(),
-          setSelectedPolicyTab: jest.fn(),
+          setNewAgentPolicy: vi.fn(),
+          setSelectedPolicyTab: vi.fn(),
         })
       );
 

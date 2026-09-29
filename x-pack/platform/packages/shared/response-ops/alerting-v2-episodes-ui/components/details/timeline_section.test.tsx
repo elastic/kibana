@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,13 +19,13 @@ import { useFetchEpisodeActionsHistoryQuery } from '../../hooks/use_fetch_episod
 import { useBulkGetProfiles } from '../../hooks/use_bulk_get_profiles';
 import { AlertEpisodeTimelineSection } from './timeline_section';
 
-jest.mock('../../hooks/use_fetch_episode_events_query');
-jest.mock('../../hooks/use_fetch_episode_actions_history_query');
-jest.mock('../../hooks/use_bulk_get_profiles');
+vi.mock('../../hooks/use_fetch_episode_events_query');
+vi.mock('../../hooks/use_fetch_episode_actions_history_query');
+vi.mock('../../hooks/use_bulk_get_profiles');
 
-const mockUseFetchEvents = jest.mocked(useFetchEpisodeEventsQuery);
-const mockUseFetchActionsHistory = jest.mocked(useFetchEpisodeActionsHistoryQuery);
-const mockUseBulkGetProfiles = jest.mocked(useBulkGetProfiles);
+const mockUseFetchEvents = vi.mocked(useFetchEpisodeEventsQuery);
+const mockUseFetchActionsHistory = vi.mocked(useFetchEpisodeActionsHistoryQuery);
+const mockUseBulkGetProfiles = vi.mocked(useBulkGetProfiles);
 
 const mockServices = {
   data: {} as never,
@@ -86,14 +88,14 @@ const mockActions = (
   mockUseFetchActionsHistory.mockReturnValue({
     entries: actions,
     isLoading,
-    fetchNextPage: jest.fn(),
+    fetchNextPage: vi.fn(),
     hasNextPage: false,
     isFetchingNextPage: false,
     ...overrides,
   } as never);
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseBulkGetProfiles.mockReturnValue({ data: [], isLoading: false } as never);
   mockEvents(mockEventRows);
   mockActions([]);
@@ -177,7 +179,7 @@ describe('AlertEpisodeTimelineSection', () => {
   });
 
   it('calls fetchNextPage when the load-more button is clicked', () => {
-    const fetchNextPage = jest.fn();
+    const fetchNextPage = vi.fn();
     mockEvents([]);
     mockActions([mockAction], false, { hasNextPage: true, fetchNextPage });
     renderSection();

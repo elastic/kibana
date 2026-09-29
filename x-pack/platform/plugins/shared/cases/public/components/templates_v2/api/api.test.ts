@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, Mocked, MockedFunction } from 'vitest';
+
 import type { ParsedTemplate } from '../../../../common/types/domain/template/v1';
 import {
   INTERNAL_BULK_DELETE_TEMPLATES_URL,
@@ -15,18 +18,18 @@ import {
   INTERNAL_TEMPLATES_URL,
 } from '../../../../common/constants';
 
-jest.mock('../../../common/lib/kibana', () => {
+vi.mock('../../../common/lib/kibana', () => {
   return {
     KibanaServices: {
-      get: jest.fn(),
+      get: vi.fn(),
     },
   };
 });
 
-jest.mock('../utils/templates_to_yaml', () => {
+vi.mock('../utils/templates_to_yaml', () => {
   return {
-    templatesToYaml: jest.fn(),
-    templateToYaml: jest.fn(),
+    templatesToYaml: vi.fn(),
+    templateToYaml: vi.fn(),
   };
 });
 
@@ -41,14 +44,14 @@ import {
   getTemplateCreators,
 } from './api';
 
-const kibanaServicesMock = KibanaServices as jest.Mocked<typeof KibanaServices>;
-const templatesToYamlMock = templatesToYaml as jest.MockedFunction<typeof templatesToYaml>;
+const kibanaServicesMock = KibanaServices as Mocked<typeof KibanaServices>;
+const templatesToYamlMock = templatesToYaml as MockedFunction<typeof templatesToYaml>;
 
 describe('templates_v2 api bulk actions', () => {
-  const fetchMock = jest.fn();
+  const fetchMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     kibanaServicesMock.get.mockReturnValue({
       http: {
@@ -284,14 +287,14 @@ describe('templates_v2 api bulk actions', () => {
   // NOTE: single-template delete is implemented by calling bulkDeleteTemplates with a single id.
 
   describe('bulkExportTemplates', () => {
-    let dateNowSpy: jest.SpyInstance<number, []> | undefined;
-    let anchorClickSpy: jest.SpyInstance<void, []> | undefined;
+    let dateNowSpy: MockInstance<number, []> | undefined;
+    let anchorClickSpy: MockInstance<void, []> | undefined;
 
     beforeEach(() => {
       // stable filename
-      dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(123);
+      dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(123);
 
-      anchorClickSpy = jest
+      anchorClickSpy = vi
         .spyOn(HTMLAnchorElement.prototype, 'click')
         .mockImplementation(() => {});
     });

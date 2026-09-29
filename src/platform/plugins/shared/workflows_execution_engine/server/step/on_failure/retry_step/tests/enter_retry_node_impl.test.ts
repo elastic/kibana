@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import type { EnterRetryNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -21,7 +24,7 @@ describe('EnterRetryNodeImpl', () => {
   let workflowRuntime: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
   let fakeFailedContext: StepExecutionRuntime;
-  let fakeFailedContextManager: jest.Mocked<StepExecutionRuntime['contextManager']>;
+  let fakeFailedContextManager: Mocked<StepExecutionRuntime['contextManager']>;
   let fakeStepExecutionDoc: Partial<EsWorkflowStepExecution>;
 
   beforeEach(() => {
@@ -34,22 +37,22 @@ describe('EnterRetryNodeImpl', () => {
       exitNodeId: 'afterRetry',
     };
     stepExecutionRuntime = {
-      getCurrentStepState: jest.fn(),
-      startStep: jest.fn(),
-      setCurrentStepState: jest.fn(),
-      getCurrentStepResult: jest.fn(),
-      failStep: jest.fn(),
-      setWaitStep: jest.fn(),
+      getCurrentStepState: vi.fn(),
+      startStep: vi.fn(),
+      setCurrentStepState: vi.fn(),
+      getCurrentStepResult: vi.fn(),
+      failStep: vi.fn(),
+      setWaitStep: vi.fn(),
     } as unknown as StepExecutionRuntime;
     workflowRuntime = {
-      enterScope: jest.fn(),
-      navigateToNextNode: jest.fn(),
-      navigateToNode: jest.fn(),
-      setWorkflowError: jest.fn(),
+      enterScope: vi.fn(),
+      navigateToNextNode: vi.fn(),
+      navigateToNode: vi.fn(),
+      setWorkflowError: vi.fn(),
     } as unknown as WorkflowExecutionRuntimeManager;
     workflowLogger = {
-      logDebug: jest.fn(),
-      logError: jest.fn(),
+      logDebug: vi.fn(),
+      logError: vi.fn(),
     } as unknown as IWorkflowEventLogger;
     underTest = new EnterRetryNodeImpl(node, stepExecutionRuntime, workflowRuntime, workflowLogger);
     fakeStepExecutionDoc = {
@@ -61,29 +64,29 @@ describe('EnterRetryNodeImpl', () => {
       },
     };
 
-    fakeFailedContextManager = jest.mocked({
-      evaluateBooleanExpressionInContext: jest.fn(),
+    fakeFailedContextManager = vi.mocked({
+      evaluateBooleanExpressionInContext: vi.fn(),
     } as unknown as StepExecutionRuntime['contextManager']);
     fakeFailedContextManager.evaluateBooleanExpressionInContext.mockReturnValue(true);
     fakeFailedContext = {
       stepExecution: fakeStepExecutionDoc,
       contextManager: fakeFailedContextManager,
-      getCurrentStepResult: jest.fn(),
+      getCurrentStepResult: vi.fn(),
     } as unknown as StepExecutionRuntime;
   });
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('run', () => {
     describe('when first time entering retry step', () => {
       beforeEach(() => {
-        (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue(undefined);
+        (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue(undefined);
       });
 
       it('should enter first attempt scope', async () => {
@@ -110,7 +113,7 @@ describe('EnterRetryNodeImpl', () => {
 
     describe('when re-entering retry step after a failure', () => {
       beforeEach(() => {
-        (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 1 });
+        (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({ attempt: 1 });
       });
 
       it('should enter next attempt scope', async () => {
@@ -140,8 +143,8 @@ describe('EnterRetryNodeImpl', () => {
     describe('when re-entering retry step after a failure with delay configured', () => {
       beforeEach(() => {
         node.configuration.delay = '10s';
-        (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 1 });
-        stepExecutionRuntime.tryEnterDelay = jest.fn().mockReturnValue(true);
+        (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({ attempt: 1 });
+        stepExecutionRuntime.tryEnterDelay = vi.fn().mockReturnValue(true);
       });
 
       it('should call tryEnterDelay with configured delay', async () => {
@@ -173,8 +176,8 @@ describe('EnterRetryNodeImpl', () => {
     describe('when exiting delay period', () => {
       beforeEach(() => {
         node.configuration.delay = '10s';
-        (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 1 });
-        stepExecutionRuntime.tryEnterDelay = jest.fn().mockReturnValue(false);
+        (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({ attempt: 1 });
+        stepExecutionRuntime.tryEnterDelay = vi.fn().mockReturnValue(false);
       });
 
       it('should increment attempt in step state', async () => {
@@ -208,15 +211,15 @@ describe('EnterRetryNodeImpl', () => {
           strategy: 'exponential',
           multiplier: 2,
         };
-        (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 1 });
-        stepExecutionRuntime.tryEnterWaitUntil = jest.fn().mockReturnValue(true);
+        (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({ attempt: 1 });
+        stepExecutionRuntime.tryEnterWaitUntil = vi.fn().mockReturnValue(true);
       });
 
       it('should call tryEnterWaitUntil with a date (exponential delay for attempt 1 = 2s)', async () => {
         const now = Date.now();
         await underTest.run();
         expect(stepExecutionRuntime.tryEnterWaitUntil).toHaveBeenCalledTimes(1);
-        const [resumeDate] = (stepExecutionRuntime.tryEnterWaitUntil as jest.Mock).mock.calls[0];
+        const [resumeDate] = (stepExecutionRuntime.tryEnterWaitUntil as Mock).mock.calls[0];
         expect(resumeDate).toBeInstanceOf(Date);
         const expectedMin = now + 1900;
         const expectedMax = now + 2100;
@@ -239,8 +242,8 @@ describe('EnterRetryNodeImpl', () => {
           delay: '1s',
           strategy: 'exponential',
         };
-        stepExecutionRuntime.tryEnterWaitUntil = jest.fn().mockReturnValue(false);
-        (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+        stepExecutionRuntime.tryEnterWaitUntil = vi.fn().mockReturnValue(false);
+        (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
           attempt: 1,
           resumeAt: '2026-02-08T16:00:26.485Z',
         });
@@ -273,8 +276,8 @@ describe('EnterRetryNodeImpl', () => {
 
   describe('catchError', () => {
     beforeEach(() => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 2 });
-      (fakeFailedContext.getCurrentStepResult as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({ attempt: 2 });
+      (fakeFailedContext.getCurrentStepResult as Mock).mockReturnValue({
         error: new ExecutionError({
           type: 'NetworkError',
           message: 'Failed to connect to server',
@@ -284,7 +287,7 @@ describe('EnterRetryNodeImpl', () => {
 
     describe('when attempts exceed max limit', () => {
       beforeEach(() => {
-        (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 3 });
+        (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({ attempt: 3 });
       });
 
       it('should fail the step with appropriate error', async () => {
@@ -301,7 +304,7 @@ describe('EnterRetryNodeImpl', () => {
     describe('no delay configured', () => {
       describe('when attempts are within max limit', () => {
         beforeEach(() => {
-          (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 2 });
+          (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({ attempt: 2 });
         });
 
         it('should clear workflow error', async () => {

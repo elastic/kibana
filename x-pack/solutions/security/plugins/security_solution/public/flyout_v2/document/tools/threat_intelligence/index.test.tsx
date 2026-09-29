@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -18,7 +20,7 @@ import { ThreatIntelligenceDetails } from '.';
 import { useThreatIntelligenceDetails } from './hooks/use_threat_intelligence_details';
 import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
 
-jest.mock('./hooks/use_threat_intelligence_details');
+vi.mock('./hooks/use_threat_intelligence_details');
 
 const mockHit: DataTableRecord = {
   id: '1',
@@ -36,7 +38,7 @@ const renderThreatIntelligenceDetails = () =>
 
 describe('<ThreatIntelligenceDetails />', () => {
   it('should render the view', () => {
-    jest.mocked(useThreatIntelligenceDetails).mockReturnValue({
+    vi.mocked(useThreatIntelligenceDetails).mockReturnValue({
       isLoading: true,
       enrichments: [],
       isEventDataLoading: false,
@@ -53,7 +55,7 @@ describe('<ThreatIntelligenceDetails />', () => {
   });
 
   it('should render loading spinner when event details are pending', () => {
-    jest.mocked(useThreatIntelligenceDetails).mockReturnValue({
+    vi.mocked(useThreatIntelligenceDetails).mockReturnValue({
       isLoading: true,
       enrichments: [],
       isEventDataLoading: true,
@@ -75,7 +77,7 @@ describe('<ThreatIntelligenceDetails />', () => {
       buildEventEnrichmentMock({ 'matched.id': ['other.id'], 'matched.field': ['other.field'] }),
     ];
 
-    jest.mocked(useThreatIntelligenceDetails).mockReturnValue({
+    vi.mocked(useThreatIntelligenceDetails).mockReturnValue({
       isLoading: true,
       enrichments,
       isEventDataLoading: false,

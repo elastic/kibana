@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
@@ -50,37 +53,40 @@ let mockQueryState = {
 
 mockData.query.getState = () => mockQueryState;
 
-jest.mock('../../../../hooks/use_discover_services', () => {
-  const originalModule = jest.requireActual('../../../../hooks/use_discover_services');
+vi.mock('../../../../hooks/use_discover_services', async () => {
+  const originalModule = (await vi.importActual('../../../../hooks/use_discover_services'));
   return {
     ...originalModule,
     useDiscoverServices: () => ({ data: mockData }),
   };
 });
 
-jest.mock('../../hooks/use_saved_search_messages', () => {
-  const originalModule = jest.requireActual('../../hooks/use_saved_search_messages');
+vi.mock('../../hooks/use_saved_search_messages', async () => {
+  const originalModule = (await vi.importActual('../../hooks/use_saved_search_messages'));
   return {
     ...originalModule,
-    checkHitCount: jest.fn(originalModule.checkHitCount),
-    sendErrorTo: jest.fn(originalModule.sendErrorTo),
+    checkHitCount: vi.fn(originalModule.checkHitCount),
+    sendErrorTo: vi.fn(originalModule.sendErrorTo),
   };
 });
-jest.mock('../../../../customizations', () => ({
-  ...jest.requireActual('../../../../customizations'),
-  useDiscoverCustomization: jest.fn(),
-}));
+vi.mock('../../../../customizations', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../customizations')),
+      useDiscoverCustomization: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockUseCustomizations = false;
 
 const mockHistogramCustomization: UnifiedHistogramCustomization = {
   id: 'unified_histogram',
-  onFilter: jest.fn(),
-  onBrushEnd: jest.fn(),
+  onFilter: vi.fn(),
+  onBrushEnd: vi.fn(),
   withDefaultActions: true,
 };
 
-const mockCheckHitCount = checkHitCount as jest.MockedFunction<typeof checkHitCount>;
+const mockCheckHitCount = checkHitCount as MockedFunction<typeof checkHitCount>;
 
 describe('useDiscoverHistogram', () => {
   const setup = async () => {
@@ -131,9 +137,9 @@ describe('useDiscoverHistogram', () => {
 
   beforeEach(() => {
     mockUseCustomizations = false;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useDiscoverCustomization as jest.Mock).mockImplementation((id: DiscoverCustomizationId) => {
+    (useDiscoverCustomization as Mock).mockImplementation((id: DiscoverCustomizationId) => {
       if (!mockUseCustomizations) {
         return undefined;
       }
@@ -196,7 +202,7 @@ describe('useDiscoverHistogram', () => {
     it('should subscribe to state changes', async () => {
       const { hook } = await renderUseDiscoverHistogram();
       const api = createMockUnifiedHistogramApi();
-      jest.spyOn(api.state$, 'subscribe');
+      vi.spyOn(api.state$, 'subscribe');
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
@@ -206,7 +212,7 @@ describe('useDiscoverHistogram', () => {
     it('should sync Unified Histogram state with the state container', async () => {
       const { toolkit } = await setup();
       const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
-      const updateAppStateSpy = jest.spyOn(internalStateActions, 'updateAppState').mockClear();
+      const updateAppStateSpy = vi.spyOn(internalStateActions, 'updateAppState').mockClear();
       const inspectorAdapters = { requests: new RequestAdapter(), lensRequests: undefined };
       dataStateContainer.inspectorAdapters = inspectorAdapters;
       const { hook } = await renderUseDiscoverHistogram({ toolkit });
@@ -260,8 +266,8 @@ describe('useDiscoverHistogram', () => {
 
     it('should not sync Unified Histogram state with the state container if there are no changes', async () => {
       const { toolkit } = await setup();
-      const updateAppStateSpy = jest.spyOn(internalStateActions, 'updateAppState').mockClear();
-      const setAppStateSpy = jest.spyOn(internalStateActions, 'setAppState').mockClear();
+      const updateAppStateSpy = vi.spyOn(internalStateActions, 'updateAppState').mockClear();
+      const setAppStateSpy = vi.spyOn(internalStateActions, 'setAppState').mockClear();
       const { hook } = await renderUseDiscoverHistogram({ toolkit });
       const containerState = toolkit.getCurrentTab().appState;
       const state = {
@@ -283,10 +289,10 @@ describe('useDiscoverHistogram', () => {
       const { hook } = await renderUseDiscoverHistogram({ toolkit });
       const api = createMockUnifiedHistogramApi();
       let params: Partial<UnifiedHistogramState> = {};
-      api.setTotalHits = jest.fn((p) => {
+      api.setTotalHits = vi.fn((p) => {
         params = { ...params, ...p };
       });
-      api.setChartHidden = jest.fn((chartHidden) => {
+      api.setChartHidden = vi.fn((chartHidden) => {
         params = { ...params, chartHidden };
       });
       act(() => {
@@ -313,7 +319,7 @@ describe('useDiscoverHistogram', () => {
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi();
       let params: Partial<UnifiedHistogramState> = {};
-      api.setChartHidden = jest.fn((chartHidden) => {
+      api.setChartHidden = vi.fn((chartHidden) => {
         params = { ...params, chartHidden };
       });
       const subject$ = new BehaviorSubject(state);
@@ -471,7 +477,7 @@ describe('useDiscoverHistogram', () => {
       );
       const { hook } = await renderUseDiscoverHistogram({ toolkit });
       const api = createMockUnifiedHistogramApi();
-      jest.spyOn(api.state$, 'subscribe');
+      vi.spyOn(api.state$, 'subscribe');
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
@@ -644,7 +650,7 @@ describe('useDiscoverHistogram', () => {
       const fetch$ = new Subject<DiscoverLatestFetchDetails>();
       dataStateContainer.fetchChart$ = fetch$;
       const api = createMockUnifiedHistogramApi();
-      api.fetch = jest.fn((params) => {
+      api.fetch = vi.fn((params) => {
         getModifiedVisAttributes = params.getModifiedVisAttributes;
       });
       act(() => {

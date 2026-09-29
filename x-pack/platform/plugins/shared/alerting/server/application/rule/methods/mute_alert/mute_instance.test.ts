@@ -5,22 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RulesClientContext } from '../../../../rules_client';
 import { muteInstance } from './mute_instance';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 describe('mute alert instance', () => {
-  const loggerErrorMock = jest.fn();
+  const loggerErrorMock = vi.fn();
   const savedObjectsMock = savedObjectsRepositoryMock.create();
   const unsecuredSavedObjectsClient = savedObjectsMock;
-  const auditLoggerMock = { log: jest.fn() };
-  const authorizationMock = { ensureAuthorized: jest.fn() };
-  const actionsAuthorizationMock = { ensureAuthorized: jest.fn() };
-  const ruleTypeRegistryMock = { ensureRuleTypeEnabled: jest.fn() };
-  const getAlertIndicesAliasMock = jest.fn();
+  const auditLoggerMock = { log: vi.fn() };
+  const authorizationMock = { ensureAuthorized: vi.fn() };
+  const actionsAuthorizationMock = { ensureAuthorized: vi.fn() };
+  const ruleTypeRegistryMock = { ensureRuleTypeEnabled: vi.fn() };
+  const getAlertIndicesAliasMock = vi.fn();
   const alertsServiceMock = {
-    isExistingAlert: jest.fn(),
-    muteAlertInstance: jest.fn(),
+    isExistingAlert: vi.fn(),
+    muteAlertInstance: vi.fn(),
   };
 
   beforeEach(() => {
@@ -30,7 +32,7 @@ describe('mute alert instance', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const context = {

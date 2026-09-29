@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,14 +18,17 @@ import React from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { AiIndexDeleteConfirmModal } from './ai_index_delete_confirm_modal';
 
-const mockDeleteAiIndex = jest.fn();
+const mockDeleteAiIndex = vi.fn();
 
-jest.mock('../../hooks/use_delete_ai_index', () => ({
-  useDeleteAiIndex: () => ({
-    deleteAiIndex: mockDeleteAiIndex,
-    isDeleting: false,
-  }),
-}));
+vi.mock('../../hooks/use_delete_ai_index', () => {
+      const mocked = {
+      useDeleteAiIndex: () => ({
+        deleteAiIndex: mockDeleteAiIndex,
+        isDeleting: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const aiIndex: AiIndexHttpItem = {
   id: 'my-ai-index',
@@ -47,9 +53,9 @@ const createServices = () => {
 const renderModal = (
   overrides: Partial<AiIndexHttpItem> = {},
   {
-    onClose = jest.fn(),
-    onSuccess = jest.fn(),
-  }: { onClose?: jest.Mock; onSuccess?: jest.Mock } = {}
+    onClose = vi.fn(),
+    onSuccess = vi.fn(),
+  }: { onClose?: Mock; onSuccess?: Mock } = {}
 ) => {
   const services = createServices();
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -73,7 +79,7 @@ const renderModal = (
 
 describe('AiIndexDeleteConfirmModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows success toast and calls onSuccess/onClose on clean delete', async () => {
@@ -140,7 +146,7 @@ describe('AiIndexDeleteConfirmModal', () => {
 
   it('does not request automation deletion when the user lacks deleteWorkflow capability', async () => {
     mockDeleteAiIndex.mockResolvedValue({ acknowledged: true, errors: [] });
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     const services = coreMock.createStart();
     services.application.capabilities = {
       ...services.application.capabilities,
@@ -155,7 +161,7 @@ describe('AiIndexDeleteConfirmModal', () => {
               <AiIndexDeleteConfirmModal
                 aiIndex={{ ...aiIndex, automations: [{ type: 'workflow', value: 'wf-1' }] }}
                 onClose={onClose}
-                onSuccess={jest.fn()}
+                onSuccess={vi.fn()}
               />
             </QueryClientProvider>
           </KibanaContextProvider>

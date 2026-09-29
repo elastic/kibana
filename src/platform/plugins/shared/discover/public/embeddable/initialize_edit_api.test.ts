@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
@@ -61,31 +64,31 @@ describe('initialize edit api', () => {
 
       if (useRedirect) {
         // This is the "by value with ad hoc data view" (redirect) case.
-        jest
+        vi
           .spyOn(discoverServiceMock.locator, 'getUrl')
           .mockClear()
           .mockResolvedValueOnce('/base/state-url-for-redirect'); // For urlWithoutLocationState
-        jest
+        vi
           .spyOn(discoverServiceMock.locator, 'getLocation')
           .mockClear()
           .mockResolvedValueOnce({ app: 'r', path: '/state-url-for-redirect', state: {} })
           .mockResolvedValueOnce({ app: 'r', path: '/state-url-for-redirect', state: {} });
-        jest
+        vi
           .spyOn(discoverServiceMock.core.http.basePath, 'remove')
           .mockClear()
           .mockReturnValueOnce('/mock-url'); // For editPath (applied to getRedirectUrl result)
       } else {
         // This is a "by reference" or "by value with persisted data view" (non-redirect) case.
-        jest
+        vi
           .spyOn(discoverServiceMock.locator, 'getUrl')
           .mockClear()
           .mockResolvedValueOnce('/base/discover-home')
           .mockResolvedValueOnce('/base/mock-url'); // For getUrl(locatorParams) -> raw editUrl
-        jest
+        vi
           .spyOn(discoverServiceMock.core.http.basePath, 'remove')
           .mockClear()
           .mockReturnValueOnce('/mock-url'); // For remove('/base/mock-url') -> editPath
-        jest
+        vi
           .spyOn(discoverServiceMock.locator, 'getLocation')
           .mockClear()
           .mockResolvedValueOnce({ app: 'discover', path: '/discover-home', state: {} })
@@ -143,7 +146,7 @@ describe('initialize edit api', () => {
 
     it('should correctly output edit link params for by value saved search with ad hoc data view', async () => {
       // This specific test case mocks getRedirectUrl because it's unique to the redirect flow
-      jest
+      vi
         .spyOn(discoverServiceMock.locator, 'getRedirectUrl')
         .mockClear()
         .mockReturnValueOnce('/base/mock-url'); // This will be the raw editUrl
@@ -171,24 +174,24 @@ describe('initialize edit api', () => {
     const mockedParentApi = {
       ...getMockPresentationContainer(),
       children$: new BehaviorSubject<Record<string, unknown>>({}),
-      getAppContext: jest.fn().mockReturnValue({
-        getCurrentPath: jest.fn().mockReturnValue('/current-parent-path'),
+      getAppContext: vi.fn().mockReturnValue({
+        getCurrentPath: vi.fn().mockReturnValue('/current-parent-path'),
         currentAppId: 'dashboard',
       }),
     };
 
-    let mockedNavigate: jest.Mock;
-    let getLocationMock: jest.Mock;
+    let mockedNavigate: Mock;
+    let getLocationMock: Mock;
 
     beforeEach(() => {
-      mockedNavigate = jest.fn();
-      discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockReturnValue({
+      mockedNavigate = vi.fn();
+      discoverServiceMock.embeddable.getStateTransfer = vi.fn().mockReturnValue({
         navigateToEditor: mockedNavigate,
       });
       mockedApi.dataViews$.next([dataViewMock]);
       mockedApi.savedObjectId$.next('test-id');
 
-      getLocationMock = jest.mocked(discoverServiceMock.locator.getLocation);
+      getLocationMock = vi.mocked(discoverServiceMock.locator.getLocation);
 
       getLocationMock.mockReset().mockResolvedValue({
         app: 'discover',
@@ -293,7 +296,7 @@ describe('initialize edit api', () => {
         },
       };
       const locatorParams = getDiscoverLocatorParams(partialApi);
-      const getDiscoverLocatorParamsSpy = jest
+      const getDiscoverLocatorParamsSpy = vi
         .spyOn(getDiscoverLocatorParamsModule, 'getDiscoverLocatorParams')
         .mockReturnValue({
           ...locatorParams,

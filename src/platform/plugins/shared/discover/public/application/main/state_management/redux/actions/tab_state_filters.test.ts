@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
@@ -50,7 +52,7 @@ const setup = async () => {
 
 describe('tab_state_filters actions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should append a WHERE clause in ES|QL mode', async () => {
@@ -61,7 +63,7 @@ describe('tab_state_filters actions', () => {
 
     expect(tab.appState.query).toStrictEqual({ esql: 'FROM test-index' });
 
-    const setQuerySpy = jest.spyOn(services.data.query.queryString, 'setQuery');
+    const setQuerySpy = vi.spyOn(services.data.query.queryString, 'setQuery');
 
     internalState.dispatch(
       internalStateActions.addFilter({
@@ -79,7 +81,7 @@ describe('tab_state_filters actions', () => {
 
   it('should use the generic WHERE clause when cascade groups are available but none are selected', async () => {
     const { internalState, tabId, services } = await setup();
-    const setQuerySpy = jest.spyOn(services.data.query.queryString, 'setQuery');
+    const setQuerySpy = vi.spyOn(services.data.query.queryString, 'setQuery');
 
     internalState.dispatch(
       internalStateActions.setCascadedDocumentsState({
@@ -110,7 +112,7 @@ describe('tab_state_filters actions', () => {
 
   it('should pass the ES mapping type to appendWhereClauseToESQLQuery', async () => {
     const { internalState, tabId, services } = await setup();
-    const setQuerySpy = jest.spyOn(services.data.query.queryString, 'setQuery');
+    const setQuerySpy = vi.spyOn(services.data.query.queryString, 'setQuery');
     const keywordField = dataViewMockWithTimeField.fields.create({
       name: 'tags.keyword',
       type: 'string',
@@ -143,9 +145,9 @@ describe('tab_state_filters actions', () => {
 
   it('should add classic filter in non-ES|QL mode', async () => {
     const { internalState, tabId, services, runtimeStateManager } = await setup();
-    const addFiltersSpy = jest.spyOn(services.filterManager, 'addFilters');
-    const trackUiMetricSpy = jest.spyOn(services, 'trackUiMetric');
-    const trackFilterAdditionSpy = jest.spyOn(
+    const addFiltersSpy = vi.spyOn(services.filterManager, 'addFilters');
+    const trackUiMetricSpy = vi.spyOn(services, 'trackUiMetric');
+    const trackFilterAdditionSpy = vi.spyOn(
       selectTabRuntimeState(runtimeStateManager, tabId).scopedEbtManager$.getValue(),
       'trackFilterAddition'
     );
@@ -181,8 +183,8 @@ describe('tab_state_filters actions', () => {
 
   it('should not add a filter when field is undefined', async () => {
     const { internalState, tabId, services } = await setup();
-    const addFiltersSpy = jest.spyOn(services.filterManager, 'addFilters');
-    const setQuerySpy = jest.spyOn(services.data.query.queryString, 'setQuery');
+    const addFiltersSpy = vi.spyOn(services.filterManager, 'addFilters');
+    const setQuerySpy = vi.spyOn(services.data.query.queryString, 'setQuery');
     setQuerySpy.mockClear();
 
     internalState.dispatch(
@@ -200,8 +202,8 @@ describe('tab_state_filters actions', () => {
 
   it('should not add a filter when current data view is missing', async () => {
     const { internalState, tabId, services, runtimeStateManager } = await setup();
-    const addFiltersSpy = jest.spyOn(services.filterManager, 'addFilters');
-    const setQuerySpy = jest.spyOn(services.data.query.queryString, 'setQuery');
+    const addFiltersSpy = vi.spyOn(services.filterManager, 'addFilters');
+    const setQuerySpy = vi.spyOn(services.data.query.queryString, 'setQuery');
     setQuerySpy.mockClear();
 
     selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.next(undefined);
@@ -221,7 +223,7 @@ describe('tab_state_filters actions', () => {
 
   it('should handle _exists_ operator in ES|QL mode', async () => {
     const { internalState, tabId, services } = await setup();
-    const setQuerySpy = jest.spyOn(services.data.query.queryString, 'setQuery');
+    const setQuerySpy = vi.spyOn(services.data.query.queryString, 'setQuery');
 
     internalState.dispatch(
       internalStateActions.addFilter({
@@ -239,7 +241,7 @@ describe('tab_state_filters actions', () => {
 
   it('should map null exclusion to is_not_null in ES|QL mode', async () => {
     const { internalState, tabId, services } = await setup();
-    const setQuerySpy = jest.spyOn(services.data.query.queryString, 'setQuery');
+    const setQuerySpy = vi.spyOn(services.data.query.queryString, 'setQuery');
 
     internalState.dispatch(
       internalStateActions.addFilter({

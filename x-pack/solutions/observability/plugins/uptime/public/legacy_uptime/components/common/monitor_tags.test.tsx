@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, fireEvent, screen } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
@@ -130,8 +132,8 @@ describe('MonitorTags component', () => {
   };
 
   beforeAll(() => {
-    jest.spyOn(hooks, 'useGetUrlParams').mockReturnValue({} as any);
-    jest.spyOn(hooks, 'useUrlParams').mockReturnValue([
+    vi.spyOn(hooks, 'useGetUrlParams').mockReturnValue({} as any);
+    vi.spyOn(hooks, 'useUrlParams').mockReturnValue([
       () => {
         return {};
       },

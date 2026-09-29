@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { ROUTE_VERSIONS } from '../../common/constants';
@@ -14,24 +17,24 @@ import { MockRouter } from '../../__mocks__/router.mock';
 import { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { defineInferenceFeaturesRoutes } from './inference_features';
 
-const makeContext = (uiSettingsGet: jest.Mock): jest.Mocked<RequestHandlerContext> =>
+const makeContext = (uiSettingsGet: Mock): Mocked<RequestHandlerContext> =>
   ({
     core: Promise.resolve({
       uiSettings: { client: { get: uiSettingsGet } },
     }),
-  } as unknown as jest.Mocked<RequestHandlerContext>);
+  } as unknown as Mocked<RequestHandlerContext>);
 
 describe('Inference Features API', () => {
   const mockLogger = loggingSystemMock.createLogger().get();
   let mockRouter: MockRouter;
   let featureRegistry: InferenceFeatureRegistry;
-  let uiSettingsGet: jest.Mock;
-  let context: jest.Mocked<RequestHandlerContext>;
+  let uiSettingsGet: Mock;
+  let context: Mocked<RequestHandlerContext>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     featureRegistry = new InferenceFeatureRegistry(mockLogger);
-    uiSettingsGet = jest.fn().mockRejectedValue(new Error('setting not found'));
+    uiSettingsGet = vi.fn().mockRejectedValue(new Error('setting not found'));
     context = makeContext(uiSettingsGet);
   });
 

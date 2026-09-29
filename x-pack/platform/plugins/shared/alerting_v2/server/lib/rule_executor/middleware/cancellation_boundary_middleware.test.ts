@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CancellationBoundaryMiddleware } from './cancellation_boundary_middleware';
 import { createRuleExecutionMiddlewareContext } from './test_utils';
 import {
@@ -23,7 +25,7 @@ describe('CancellationBoundaryMiddleware', () => {
 
   it('passes through results when signal is active', async () => {
     const state = createRulePipelineState();
-    const next = jest.fn().mockReturnValue(createPipelineStream([state]));
+    const next = vi.fn().mockReturnValue(createPipelineStream([state]));
 
     const context = createRuleExecutionMiddlewareContext();
     const results = await collectStreamResults(
@@ -42,7 +44,7 @@ describe('CancellationBoundaryMiddleware', () => {
       input: createRuleExecutionInput({ abortSignal: abortController.signal }),
     });
 
-    const next = jest.fn((input) => input);
+    const next = vi.fn((input) => input);
     const context = createRuleExecutionMiddlewareContext();
 
     await expect(
@@ -57,7 +59,7 @@ describe('CancellationBoundaryMiddleware', () => {
       input: createRuleExecutionInput({ abortSignal: abortController.signal }),
     });
 
-    const next = jest.fn().mockReturnValue(
+    const next = vi.fn().mockReturnValue(
       (async function* () {
         abortController.abort();
         yield { type: 'continue' as const, state: abortedState };

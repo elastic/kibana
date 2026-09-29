@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { Readable } from 'stream';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
@@ -47,8 +49,8 @@ describe('getExportByObjectIds', () => {
   const actionsClient = actionsClientMock.create();
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
 
     actionsClient.getAll.mockResolvedValue(connectors);
   });
@@ -184,8 +186,8 @@ describe('getExportByObjectIds', () => {
 
     const ruleIds = ['rule-1'];
     const actionsExporterMock = {
-      exportByObjects: jest.fn().mockReturnValueOnce(actionsConnectorsStreamMock),
-      exportByTypes: jest.fn(),
+      exportByObjects: vi.fn().mockReturnValueOnce(actionsConnectorsStreamMock),
+      exportByTypes: vi.fn(),
     };
     const exports = await getExportByObjectIds(
       rulesClient,
@@ -246,8 +248,8 @@ describe('getExportByObjectIds', () => {
 
     const ruleIds = ['rule-1'];
     const exporterMockWithConnector = {
-      exportByObjects: jest.fn().mockReturnValueOnce(readable),
-      exportByTypes: jest.fn(),
+      exportByObjects: vi.fn().mockReturnValueOnce(readable),
+      exportByTypes: vi.fn(),
     };
     const exports = await getExportByObjectIds(
       rulesClient,

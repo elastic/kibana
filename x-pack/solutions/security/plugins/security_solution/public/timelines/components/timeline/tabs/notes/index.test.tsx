@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import NotesTabContentComponent, { FETCH_NOTES_ERROR, NO_NOTES } from '.';
 import { render } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../../common/mock';
@@ -22,18 +25,21 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
 import type { State } from '../../../../../common/store';
 
-jest.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/components/user_privileges');
 
-const mockAddError = jest.fn();
-jest.mock('../../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addError: mockAddError,
-  }),
-}));
+const mockAddError = vi.fn();
+vi.mock('../../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addError: mockAddError,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -69,8 +75,8 @@ const mockGlobalStateWithUnSavedTimeline: State = {
 
 describe('NotesTabContentComponent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useUserPrivileges as Mock).mockReturnValue({
       notesPrivileges: { crud: true },
       timelinePrivileges: { crud: true },
     });

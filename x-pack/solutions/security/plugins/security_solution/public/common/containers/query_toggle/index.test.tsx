@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { waitFor, act, cleanup, renderHook } from '@testing-library/react';
 import type { QueryToggle } from '.';
@@ -20,17 +23,20 @@ const mockRouteSpy: RouteSpyState = {
   search: '',
   pathName: '/',
 };
-jest.mock('../../lib/kibana');
-jest.mock('../../utils/route/use_route_spy', () => ({
-  useRouteSpy: () => [mockRouteSpy],
-}));
+vi.mock('../../lib/kibana');
+vi.mock('../../utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: () => [mockRouteSpy],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useQueryToggle', () => {
   let result: RenderHookResult<QueryToggle, unknown>['result'];
 
-  const mockSet = jest.fn();
+  const mockSet = vi.fn();
   beforeAll(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         storage: {
           get: () => true,
@@ -40,7 +46,7 @@ describe('useQueryToggle', () => {
     });
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('Toggles local storage', async () => {
     ({ result } = renderHook(() => useQueryToggle('queryId')));

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ArtifactListPageProps } from '../artifact_list_page';
 import userEvent from '@testing-library/user-event';
@@ -27,7 +29,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
     props = {
       errors: [],
-      onClose: jest.fn(),
+      onClose: vi.fn(),
     };
 
     render = async () => {

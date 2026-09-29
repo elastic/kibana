@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -13,11 +15,11 @@ import { fetchRiskScoreGrounding } from './risk_score_grounding';
 
 describe('risk_score_grounding', () => {
   const logger = loggingSystemMock.createLogger();
-  const getMaintainerStatus = jest.fn();
+  const getMaintainerStatus = vi.fn();
   const entityStore = { getMaintainerStatus } as unknown as EntityStoreStartContract;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('fetchRiskScoreGrounding', () => {

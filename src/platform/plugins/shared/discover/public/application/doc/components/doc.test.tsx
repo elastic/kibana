@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/types';
 import React from 'react';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
@@ -22,17 +24,23 @@ import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 
 const INDEX_NAME = 'index1';
 const services = createDiscoverServicesMock();
-const mockSearchApi = jest.fn();
+const mockSearchApi = vi.fn();
 
-jest.mock('@kbn/unified-doc-viewer-plugin/public', () => ({
-  useEsDocSearch: jest.fn(),
-}));
+vi.mock('@kbn/unified-doc-viewer-plugin/public', () => {
+      const mocked = {
+      useEsDocSearch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseDocSearch = jest.mocked(useEsDocSearch);
+const mockUseDocSearch = vi.mocked(useEsDocSearch);
 
-jest.mock('./single_doc_viewer', () => ({
-  SingleDocViewer: () => <div data-test-subj="singleDocViewerMock" />,
-}));
+vi.mock('./single_doc_viewer', () => {
+      const mocked = {
+      SingleDocViewer: () => <div data-test-subj="singleDocViewerMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function setupDoc() {
   setUnifiedDocViewerServices({
@@ -53,11 +61,11 @@ function setupDoc() {
 
 describe('Test of <Doc /> of Discover', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders Loading msg', () => {
-    mockUseDocSearch.mockReturnValue([ElasticRequestState.Loading, null, jest.fn()]);
+    mockUseDocSearch.mockReturnValue([ElasticRequestState.Loading, null, vi.fn()]);
 
     setupDoc();
 
@@ -67,7 +75,7 @@ describe('Test of <Doc /> of Discover', () => {
   });
 
   it('renders NotFound msg', () => {
-    mockUseDocSearch.mockReturnValue([ElasticRequestState.NotFound, null, jest.fn()]);
+    mockUseDocSearch.mockReturnValue([ElasticRequestState.NotFound, null, vi.fn()]);
 
     setupDoc();
 
@@ -77,7 +85,7 @@ describe('Test of <Doc /> of Discover', () => {
   });
 
   it('renders NotFoundDataView msg', () => {
-    mockUseDocSearch.mockReturnValue([ElasticRequestState.NotFoundDataView, null, jest.fn()]);
+    mockUseDocSearch.mockReturnValue([ElasticRequestState.NotFoundDataView, null, vi.fn()]);
 
     setupDoc();
 
@@ -86,7 +94,7 @@ describe('Test of <Doc /> of Discover', () => {
   });
 
   it('renders Error msg', () => {
-    mockUseDocSearch.mockReturnValue([ElasticRequestState.Error, null, jest.fn()]);
+    mockUseDocSearch.mockReturnValue([ElasticRequestState.Error, null, vi.fn()]);
 
     setupDoc();
 
@@ -100,7 +108,7 @@ describe('Test of <Doc /> of Discover', () => {
     mockUseDocSearch.mockReturnValue([
       ElasticRequestState.Found,
       getDataTableRecordMock(),
-      jest.fn(),
+      vi.fn(),
     ]);
 
     setupDoc();

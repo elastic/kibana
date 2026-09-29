@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -25,17 +28,17 @@ import {
 } from '../../../../common/constants';
 
 // Mocks
-jest.mock('@kbn/elastic-assistant');
-jest.mock('../../../../context/typed_kibana_context/typed_kibana_context');
-jest.mock(
+vi.mock('@kbn/elastic-assistant');
+vi.mock('../../../../context/typed_kibana_context/typed_kibana_context');
+vi.mock(
   '../../../../hooks/navigate_to_alerts_page_with_filters/use_navigate_to_alerts_page_with_filters'
 );
 
-const mockNavigateToApp = jest.fn();
-const mockOpenAlertsPageWithFilters = jest.fn();
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseAssistantContext = useAssistantContext as jest.Mock;
-const mockUseNavigateToAlertsPageWithFilters = useNavigateToAlertsPageWithFilters as jest.Mock;
+const mockNavigateToApp = vi.fn();
+const mockOpenAlertsPageWithFilters = vi.fn();
+const mockUseKibana = useKibana as Mock;
+const mockUseAssistantContext = useAssistantContext as Mock;
+const mockUseNavigateToAlertsPageWithFilters = useNavigateToAlertsPageWithFilters as Mock;
 
 const defaultProps = {
   contentReferenceNode: {
@@ -49,7 +52,7 @@ const defaultProps = {
 
 describe('SecurityAlertsPageReference', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: { application: { navigateToApp: mockNavigateToApp } },
     });

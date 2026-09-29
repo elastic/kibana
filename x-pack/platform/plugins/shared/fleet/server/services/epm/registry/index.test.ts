@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import {
@@ -27,58 +30,76 @@ import {
 
 const mockLogger = loggingSystemMock.create().get();
 
-const mockGetConfig = jest.fn();
+const mockGetConfig = vi.fn();
 
-const mockGetBundledPackageByName = jest.fn();
-const mockFetchUrl = jest.fn();
-const mockGetResponseStreamWithSize = jest.fn();
-const mockStreamToBuffer = jest.fn();
-const mockVerifyPackageArchiveSignature = jest.fn();
-const mockGetPackageAssetsMapCache = jest.fn();
+const mockGetBundledPackageByName = vi.fn();
+const mockFetchUrl = vi.fn();
+const mockGetResponseStreamWithSize = vi.fn();
+const mockStreamToBuffer = vi.fn();
+const mockVerifyPackageArchiveSignature = vi.fn();
+const mockGetPackageAssetsMapCache = vi.fn();
 
-const MockArchive = Archive as jest.Mocked<typeof Archive>;
+const MockArchive = Archive as Mocked<typeof Archive>;
 
-jest.mock('../archive');
-jest.mock('./requests');
-jest.mock('../streams');
-jest.mock('../packages/cache');
+vi.mock('../archive');
+vi.mock('./requests');
+vi.mock('../streams');
+vi.mock('../packages/cache');
 
-jest.mock('../..', () => ({
-  appContextService: {
-    getLogger: () => mockLogger,
-    getKibanaBranch: () => 'main',
-    getKibanaVersion: () => '99.0.0',
-    getConfig: () => mockGetConfig(),
-    getIsProductionMode: () => false,
-  },
-}));
+vi.mock('../..', () => {
+      const mocked = {
+      appContextService: {
+        getLogger: () => mockLogger,
+        getKibanaBranch: () => 'main',
+        getKibanaVersion: () => '99.0.0',
+        getConfig: () => mockGetConfig(),
+        getIsProductionMode: () => false,
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./requests', () => ({
-  fetchUrl: (url: string) => mockFetchUrl(url),
-  getResponseStreamWithSize: (url: string) => mockGetResponseStreamWithSize(url),
-}));
+vi.mock('./requests', () => {
+      const mocked = {
+      fetchUrl: (url: string) => mockFetchUrl(url),
+      getResponseStreamWithSize: (url: string) => mockGetResponseStreamWithSize(url),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../streams', () => ({
-  streamToBuffer: (stream: NodeJS.ReadableStream, size?: number) =>
-    mockStreamToBuffer(stream, size),
-}));
+vi.mock('../streams', () => {
+      const mocked = {
+      streamToBuffer: (stream: NodeJS.ReadableStream, size?: number) =>
+        mockStreamToBuffer(stream, size),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../packages/bundled_packages', () => ({
-  getBundledPackageByName: (name: string) => mockGetBundledPackageByName(name),
-}));
+vi.mock('../packages/bundled_packages', () => {
+      const mocked = {
+      getBundledPackageByName: (name: string) => mockGetBundledPackageByName(name),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../packages/package_verification', () => ({
-  verifyPackageArchiveSignature: (
-    pkgName: string,
-    pkgVersion: string,
-    pkgArchiveBuffer: Buffer | undefined,
-    logger: Logger
-  ) => mockVerifyPackageArchiveSignature(pkgName, pkgVersion, pkgArchiveBuffer, logger),
-}));
+vi.mock('../packages/package_verification', () => {
+      const mocked = {
+      verifyPackageArchiveSignature: (
+        pkgName: string,
+        pkgVersion: string,
+        pkgArchiveBuffer: Buffer | undefined,
+        logger: Logger
+      ) => mockVerifyPackageArchiveSignature(pkgName, pkgVersion, pkgArchiveBuffer, logger),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../packages/cache', () => ({
-  getPackageAssetsMapCache: () => mockGetPackageAssetsMapCache(),
-}));
+vi.mock('../packages/cache', () => {
+      const mocked = {
+      getPackageAssetsMapCache: () => mockGetPackageAssetsMapCache(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('splitPkgKey', () => {
   it('throws an error if there is nothing before the delimiter', () => {
@@ -217,8 +238,8 @@ describe('fetch package', () => {
   });
 });
 
-describe('getLicensePath', () => {
-  MockArchive.getPathParts = jest.requireActual('../archive').getPathParts;
+describe('getLicensePath', async () => {
+  MockArchive.getPathParts = (await vi.importActual('../archive')).getPathParts;
 
   it('returns first license path if found', () => {
     const path = getLicensePath([
@@ -244,7 +265,7 @@ describe('getLicensePath', () => {
 
 describe('fetchInfo', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     mockFetchUrl.mockRejectedValueOnce(new RegistryResponseError('Not found', 404));
     mockGetBundledPackageByName.mockResolvedValueOnce({
@@ -431,7 +452,7 @@ describe('getPackage', () => {
     getBuffer: () => Promise.resolve(Buffer.from('testpkg')),
   };
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should return bundled package if isAirGapped = true', async () => {

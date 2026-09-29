@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { addInternalBasePath } from '..';
 import type { RequestMock } from '../../../test/helpers';
 import { RouterMock, routeDependencies } from '../../../test/helpers';
@@ -26,7 +28,7 @@ describe('Enrich policies API', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('Get all policies - GET /internal/index_management/enrich_policies', () => {

@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 let toggleSetupMode;
 let initSetupModeState;
 let getSetupModeState;
 let updateSetupModeData;
 
-const handleErrorsMock = jest.fn();
-const callbackMock = jest.fn();
+const handleErrorsMock = vi.fn();
+const callbackMock = vi.fn();
 
-jest.mock('../legacy_shims', () => {
+vi.mock('../legacy_shims', () => {
   return {
     Legacy: {
       shims: {
         toastNotifications: {
-          addDanger: jest.fn(),
+          addDanger: vi.fn(),
         },
         I18nContext: '<div>',
       },
@@ -27,7 +29,7 @@ jest.mock('../legacy_shims', () => {
 });
 
 function setModulesAndMocks() {
-  jest.clearAllMocks().resetModules();
+  vi.clearAllMocks().resetModules();
 
   const setupMode = require('./setup_mode');
   toggleSetupMode = setupMode.toggleSetupMode;
@@ -49,10 +51,10 @@ describe('setup_mode', () => {
     it('should enable toggle mode', async () => {
       const globalState = {
         inSetupMode: false,
-        save: jest.fn(),
+        save: vi.fn(),
       };
       const httpServiceMock = {
-        post: jest.fn(),
+        post: vi.fn(),
       };
 
       await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);
@@ -63,13 +65,13 @@ describe('setup_mode', () => {
     it('should disable toggle mode', async () => {
       const globalState = {
         inSetupMode: true,
-        save: jest.fn(),
+        save: vi.fn(),
       };
       const httpServiceMock = {
-        post: jest.fn(),
+        post: vi.fn(),
       };
-      const handleErrorsMock = jest.fn();
-      const callbackMock = jest.fn();
+      const handleErrorsMock = vi.fn();
+      const callbackMock = vi.fn();
       await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);
       toggleSetupMode(false);
       expect(globalState.inSetupMode).toBe(false);
@@ -80,10 +82,10 @@ describe('setup_mode', () => {
     it('should not fetch data if the user does not have sufficient permissions', async () => {
       const globalState = {
         inSetupMode: false,
-        save: jest.fn(),
+        save: vi.fn(),
       };
       const httpServiceMock = {
-        post: jest.fn().mockReturnValue(
+        post: vi.fn().mockReturnValue(
           Promise.resolve({
             _meta: {
               hasPermissions: false,
@@ -92,17 +94,20 @@ describe('setup_mode', () => {
         ),
       };
 
-      const addDanger = jest.fn();
-      jest.doMock('../legacy_shims', () => ({
-        Legacy: {
-          shims: {
-            toastNotifications: {
-              addDanger,
-            },
-            I18nContext: '<div>',
-          },
-        },
-      }));
+      const addDanger = vi.fn();
+      vi.doMock('../legacy_shims', () => {
+            const mocked = {
+                  Legacy: {
+                    shims: {
+                      toastNotifications: {
+                        addDanger,
+                      },
+                      I18nContext: '<div>',
+                    },
+                  },
+                };
+            return { ...mocked, default: mocked };
+          });
 
       setModulesAndMocks();
       await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);
@@ -121,11 +126,11 @@ describe('setup_mode', () => {
       const globalState = {
         inSetupMode: false,
         cluster_uuid: undefined,
-        save: jest.fn(),
+        save: vi.fn(),
       };
       const clusterUuid = '1ajy';
       const httpServiceMock = {
-        post: jest.fn().mockReturnValue(
+        post: vi.fn().mockReturnValue(
           Promise.resolve({
             _meta: {
               liveClusterUuid: clusterUuid,
@@ -154,10 +159,10 @@ describe('setup_mode', () => {
       const globalState = {
         inSetupMode: false,
         cluster_uuid: clusterUuid,
-        save: jest.fn(),
+        save: vi.fn(),
       };
       const httpServiceMock = {
-        post: jest.fn().mockReturnValue(
+        post: vi.fn().mockReturnValue(
           Promise.resolve({
             _meta: {
               liveClusterUuid: clusterUuid,
@@ -188,10 +193,10 @@ describe('setup_mode', () => {
       const clusterUuid = '1ajy';
       const globalState = {
         inSetupMode: false,
-        save: jest.fn(),
+        save: vi.fn(),
       };
       const httpServiceMock = {
-        post: jest.fn().mockReturnValue(
+        post: vi.fn().mockReturnValue(
           Promise.resolve({
             _meta: {
               liveClusterUuid: clusterUuid,
@@ -222,10 +227,10 @@ describe('setup_mode', () => {
     it('should fetch data without a cluster uuid', async () => {
       const globalState = {
         inSetupMode: false,
-        save: jest.fn(),
+        save: vi.fn(),
       };
       const httpServiceMock = {
-        post: jest.fn(),
+        post: vi.fn(),
       };
 
       await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);

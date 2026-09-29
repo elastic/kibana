@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { isConfigured } from './is_configured';
 
 describe('isConfigured', () => {
@@ -68,8 +70,8 @@ describe('isConfigured', () => {
   });
 
   describe('stringOrArray', () => {
-    const arraySpy = jest.spyOn(isConfigured, 'array');
-    const stringSpy = jest.spyOn(isConfigured, 'string');
+    const arraySpy = vi.spyOn(isConfigured, 'array');
+    const stringSpy = vi.spyOn(isConfigured, 'string');
 
     it('calls #array for an array', () => {
       isConfigured.stringOrArray([]);

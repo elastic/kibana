@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { createResolveContextMock } from '../../test_utils';
 import { validateAttachmentInputs } from './validate_attachment_inputs';
@@ -61,7 +63,7 @@ describe('validateAttachmentInputs', () => {
     });
 
     it('data and origin: uses inline data and does not call resolve', async () => {
-      const resolve = jest.fn().mockRejectedValue(new Error('resolve should not run'));
+      const resolve = vi.fn().mockRejectedValue(new Error('resolve should not run'));
       const registry = createRegistry({
         validate: async (input) => ({ valid: true, data: input }),
         resolve,

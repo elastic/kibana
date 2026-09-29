@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { NewTimelineButton } from '.';
@@ -20,15 +23,15 @@ import { TestProviders } from '../../../common/mock';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 import { useSecurityDefaultPatterns } from '../../../data_view_manager/hooks/use_security_default_patterns';
 
-jest.mock('../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
-jest.mock('../../../common/hooks/use_selector');
-jest.mock('../../../data_view_manager/hooks/use_security_default_patterns');
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+vi.mock('../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
+vi.mock('../../../common/hooks/use_selector');
+vi.mock('../../../data_view_manager/hooks/use_security_default_patterns');
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
 
   return {
     ...original,
-    useDispatch: () => jest.fn(),
+    useDispatch: () => vi.fn(),
   };
 });
 
@@ -51,17 +54,17 @@ describe('NewTimelineButton', () => {
   ];
 
   beforeEach(() => {
-    (useDiscoverInTimelineContext as jest.Mock).mockReturnValue({
-      resetDiscoverAppState: jest.fn(),
+    (useDiscoverInTimelineContext as Mock).mockReturnValue({
+      resetDiscoverAppState: vi.fn(),
     });
-    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
+    (useSecurityDefaultPatterns as Mock).mockReturnValue({
       id: dataViewId,
       indexPatterns: selectedPatterns,
     });
   });
 
   it('should render timeline button and call correct action when clicking on the button', async () => {
-    const spy = jest.spyOn(timelineActions, 'createTimeline');
+    const spy = vi.spyOn(timelineActions, 'createTimeline');
 
     const { getByTestId, queryByTestId, queryByText } = renderNewTimelineButton(
       TimelineTypeEnum.default
@@ -91,7 +94,7 @@ describe('NewTimelineButton', () => {
   });
 
   it('should render timeline template button and call correct action when clicking on the button', async () => {
-    const spy = jest.spyOn(timelineActions, 'createTimeline');
+    const spy = vi.spyOn(timelineActions, 'createTimeline');
 
     const { getByTestId, queryByTestId, queryByText } = renderNewTimelineButton(
       TimelineTypeEnum.template

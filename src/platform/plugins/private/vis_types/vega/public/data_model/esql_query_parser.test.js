@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { getESQLTimeField } from '@kbn/esql-utils';
 import { EsqlQueryParser } from './esql_query_parser';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLTimeField: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/esql-utils')),
+      getESQLTimeField: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const rangeStart = 1000000;
 const rangeEnd = 2000000;
@@ -33,10 +38,10 @@ function createParser(min = rangeStart, max = rangeEnd, dashboardCtx = {}, esqlV
   };
 
   const searchAPI = {
-    searchEsql: jest.fn(() => of([])),
+    searchEsql: vi.fn(() => of([])),
   };
 
-  const onWarning = jest.fn();
+  const onWarning = vi.fn();
 
   const parser = new EsqlQueryParser(timeCache, searchAPI, dashboardCtx, onWarning, esqlVariables);
   parser.$$$warnCount = 0;
@@ -48,9 +53,12 @@ function createParser(min = rangeStart, max = rangeEnd, dashboardCtx = {}, esqlV
   return { parser, searchAPI, onWarning };
 }
 
-jest.mock('../services', () => ({
-  getHttp: jest.fn(() => ({})),
-}));
+vi.mock('../services', () => {
+      const mocked = {
+      getHttp: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
   getESQLTimeField.mockReset();

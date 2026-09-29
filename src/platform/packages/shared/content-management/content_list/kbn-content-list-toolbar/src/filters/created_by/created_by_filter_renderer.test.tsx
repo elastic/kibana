@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { Query } from '@elastic/eui';
@@ -37,7 +39,7 @@ const mockUsers: UserProfileEntry[] = [
   },
 ];
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({
     items: [],
     total: 0,
@@ -87,7 +89,7 @@ const InteractiveCreatedByFilter = () => {
 
 describe('CreatedByFilterRenderer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders nothing when user profiles are unavailable', () => {
@@ -113,7 +115,7 @@ describe('CreatedByFilterRenderer', () => {
   });
 
   it('calls onChange with the selected email value', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     await act(async () => {
       render(<CreatedByFilterRenderer query={Query.parse('')} onChange={onChange} />, {

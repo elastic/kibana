@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -27,24 +30,24 @@ import {
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 
 // Mock the context hook
-jest.mock('../contexts/enabled_features_context');
-const mockUseEnabledFeatures = useEnabledFeatures as jest.MockedFunction<typeof useEnabledFeatures>;
+vi.mock('../contexts/enabled_features_context');
+const mockUseEnabledFeatures = useEnabledFeatures as MockedFunction<typeof useEnabledFeatures>;
 
 // Mock productDocBase
 const mockProductDocBase = {
   installation: {
-    getStatus: jest.fn().mockResolvedValue({
+    getStatus: vi.fn().mockResolvedValue({
       overall: 'uninstalled',
     }),
-    install: jest.fn().mockResolvedValue({}),
-    uninstall: jest.fn().mockResolvedValue({}),
-    getDefaultInferenceId: jest.fn().mockResolvedValue('.elser-2-elasticsearch'),
+    install: vi.fn().mockResolvedValue({}),
+    uninstall: vi.fn().mockResolvedValue({}),
+    getDefaultInferenceId: vi.fn().mockResolvedValue('.elser-2-elasticsearch'),
   },
 };
 
 describe('GenAiSettingsApp', () => {
   const coreStart = coreMock.createStart();
-  const setBreadcrumbs = jest.fn();
+  const setBreadcrumbs = vi.fn();
 
   const createSettingsMock = (overrides = {}) => ({
     'genAiSettings:defaultAIConnector': {
@@ -87,7 +90,7 @@ describe('GenAiSettingsApp', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
@@ -104,7 +107,7 @@ describe('GenAiSettingsApp', () => {
     };
 
     // Mock feature flags to enable AI Agents by default
-    jest
+    vi
       .spyOn(coreStart.featureFlags, 'getBooleanValue')
       .mockImplementation((_flagName: string, _fallbackValue: boolean) => true as boolean);
 
@@ -127,10 +130,10 @@ describe('GenAiSettingsApp', () => {
       productDocBase: mockProductDocBase,
       agentBuilder: {
         tools: {
-          listWorkflows: jest.fn().mockResolvedValue({ results: [] }),
+          listWorkflows: vi.fn().mockResolvedValue({ results: [] }),
         },
       },
-      analytics: { reportEvent: jest.fn() },
+      analytics: { reportEvent: vi.fn() },
       ...servicesOverrides,
     };
     return renderWithI18n(
@@ -159,7 +162,7 @@ describe('GenAiSettingsApp', () => {
         },
       ]);
 
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock({ showAiBreadcrumb: false }));
 
@@ -260,7 +263,7 @@ describe('GenAiSettingsApp', () => {
 
   describe('pre-execution workflow section gating', () => {
     it('renders pre-execution workflow section when required advanced settings are enabled', async () => {
-      jest.spyOn(coreStart.settings.client, 'get').mockImplementation((key, fallback) => {
+      vi.spyOn(coreStart.settings.client, 'get').mockImplementation((key, fallback) => {
         if (
           key === WORKFLOWS_UI_SETTING_ID ||
           key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
@@ -277,13 +280,13 @@ describe('GenAiSettingsApp', () => {
     });
 
     it('does not render pre-execution workflow section when workflows UI advanced setting is disabled', () => {
-      jest.spyOn(coreStart.settings.client, 'get').mockImplementation((key, fallback) => {
+      vi.spyOn(coreStart.settings.client, 'get').mockImplementation((key, fallback) => {
         if (key === WORKFLOWS_UI_SETTING_ID) {
           return false;
         }
         return fallback;
       });
-      jest
+      vi
         .spyOn(coreStart.featureFlags, 'getBooleanValue')
         .mockImplementation((_flagName, _fallbackValue) => true);
 
@@ -294,7 +297,7 @@ describe('GenAiSettingsApp', () => {
     });
 
     it('does not render pre-execution workflow section when experimental features setting is disabled', () => {
-      jest.spyOn(coreStart.settings.client, 'get').mockImplementation((key, fallback) => {
+      vi.spyOn(coreStart.settings.client, 'get').mockImplementation((key, fallback) => {
         if (key === WORKFLOWS_UI_SETTING_ID) {
           return true;
         }
@@ -452,7 +455,7 @@ describe('GenAiSettingsApp', () => {
   });
 
   it('returns opt out telemetry when saving a switch from Agent to Classic', async () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
     mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
 
     coreStart.settings.client.getAll.mockReturnValue(
@@ -484,7 +487,7 @@ describe('GenAiSettingsApp', () => {
   });
 
   it('returns opt out telemetry when saving a switch from default Agent to Classic (no userValue)', async () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
     mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
 
     coreStart.settings.client.getAll.mockReturnValue(
@@ -520,7 +523,7 @@ describe('GenAiSettingsApp', () => {
 
       coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
 
-      const genAiSettingsApi = jest.fn().mockResolvedValue({ installed: true });
+      const genAiSettingsApi = vi.fn().mockResolvedValue({ installed: true });
 
       renderComponent({}, { genAiSettingsApi });
 
@@ -554,7 +557,7 @@ describe('GenAiSettingsApp', () => {
         }) as any
       );
 
-      const genAiSettingsApi = jest.fn().mockResolvedValue({ installed: false });
+      const genAiSettingsApi = vi.fn().mockResolvedValue({ installed: false });
 
       renderComponent({}, { genAiSettingsApi });
 
@@ -578,10 +581,10 @@ describe('GenAiSettingsApp', () => {
 
       coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
 
-      const genAiSettingsApi = jest
+      const genAiSettingsApi = vi
         .fn()
         .mockRejectedValue(Object.assign(new Error('boom'), { body: { message: 'boom' } }));
-      const addDanger = jest.spyOn(coreStart.notifications.toasts, 'addDanger');
+      const addDanger = vi.spyOn(coreStart.notifications.toasts, 'addDanger');
 
       renderComponent({}, { genAiSettingsApi });
 
@@ -605,7 +608,7 @@ describe('GenAiSettingsApp', () => {
   });
 
   it('returns confirmed opt in telemetry when saving a switch to Agent', async () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
     mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
 
     coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);

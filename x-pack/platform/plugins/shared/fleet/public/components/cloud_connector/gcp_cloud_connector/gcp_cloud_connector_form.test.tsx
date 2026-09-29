@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -21,48 +23,54 @@ import type { CloudConnectorFormProps } from '../types';
 
 import { GCPCloudConnectorForm } from './gcp_cloud_connector_form';
 
-jest.mock('../../../hooks', () => ({
-  ...jest.requireActual('../../../hooks'),
-  useStartServices: jest.fn().mockReturnValue({
-    docLinks: {
-      links: {
-        securitySolution: {
-          cspmGcpAgentless: 'https://www.elastic.co/docs/mock',
+vi.mock('../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../hooks')),
+      useStartServices: vi.fn().mockReturnValue({
+        docLinks: {
+          links: {
+            securitySolution: {
+              cspmGcpAgentless: 'https://www.elastic.co/docs/mock',
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the LazyPackagePolicyInputVarField
-jest.mock('../../..', () => ({
-  LazyPackagePolicyInputVarField: jest.fn(({ varDef, onChange, value }) => {
-    // Extract the field name from the varDef - use the last part of multi_fields path or name
-    const fieldName = varDef.multi_fields?.[0] || varDef.name || 'unknown';
-    // Use hardcoded test subject values to avoid accessing out-of-scope variables
-    const testSubjMap: Record<string, string> = {
-      service_account: 'gcpCredentialsServiceAccountInput',
-      'gcp.credentials.service_account_email': 'gcpCredentialsServiceAccountInput',
-      audience: 'gcpCredentialsAudienceInput',
-      'gcp.credentials.audience': 'gcpCredentialsAudienceInput',
-      gcp_credentials_cloud_connector_id: 'gcpCredentialsCloudConnectorIdInput',
-    };
-    const testSubj = testSubjMap[fieldName] || `mock-var-field-${fieldName}`;
+vi.mock('../../..', () => {
+      const mocked = {
+      LazyPackagePolicyInputVarField: vi.fn(({ varDef, onChange, value }) => {
+        // Extract the field name from the varDef - use the last part of multi_fields path or name
+        const fieldName = varDef.multi_fields?.[0] || varDef.name || 'unknown';
+        // Use hardcoded test subject values to avoid accessing out-of-scope variables
+        const testSubjMap: Record<string, string> = {
+          service_account: 'gcpCredentialsServiceAccountInput',
+          'gcp.credentials.service_account_email': 'gcpCredentialsServiceAccountInput',
+          audience: 'gcpCredentialsAudienceInput',
+          'gcp.credentials.audience': 'gcpCredentialsAudienceInput',
+          gcp_credentials_cloud_connector_id: 'gcpCredentialsCloudConnectorIdInput',
+        };
+        const testSubj = testSubjMap[fieldName] || `mock-var-field-${fieldName}`;
 
-    return (
-      <input
-        data-test-subj={testSubj}
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={varDef.title}
-      />
-    );
-  }),
-}));
+        return (
+          <input
+            data-test-subj={testSubj}
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={varDef.title}
+          />
+        );
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('GCPCloudConnectorForm', () => {
-  const mockUpdatePolicy = jest.fn();
-  const mockSetCredentials = jest.fn();
+  const mockUpdatePolicy = vi.fn();
+  const mockSetCredentials = vi.fn();
 
   const createMockInput = (overrides = {}): NewPackagePolicyInput => ({
     type: 'cloudbeat/cis_gcp',
@@ -198,7 +206,7 @@ describe('GCPCloudConnectorForm', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {

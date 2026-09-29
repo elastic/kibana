@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -16,12 +19,12 @@ import {
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
 } from '../test_ids';
 
-jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue([false, jest.fn()]));
+vi.mock('react-use/lib/useLocalStorage', () => vi.fn().mockReturnValue([false, vi.fn()]));
 const SEARCH_BAR_TOUR_TITLE = 'Refine your view with search';
 
-const mockToursIsEnabled = jest.fn(() => true);
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const { notificationServiceMock } = jest.requireActual('@kbn/core/public/mocks');
+const mockToursIsEnabled = vi.fn(() => true);
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const { notificationServiceMock } = (await vi.importActual('@kbn/core/public/mocks'));
 
   return {
     useKibana: () => ({
@@ -40,8 +43,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 const defaultProps: ActionsProps = {
   showToggleSearch: true,
   showInvestigateInTimeline: true,
-  onSearchToggle: jest.fn(),
-  onInvestigateInTimeline: jest.fn(),
+  onSearchToggle: vi.fn(),
+  onInvestigateInTimeline: vi.fn(),
   searchFilterCounter: 0,
 };
 
@@ -167,10 +170,10 @@ describe('Actions component', () => {
   describe('search bar tour', () => {
     it('opens the search bar tour when searchFilterCounter is greater than 0 and shouldShowSearchBarButtonTour is true', () => {
       let shouldShowSearchBarButtonTour = true;
-      const setShouldShowSearchBarButtonTourMock = jest.fn(
+      const setShouldShowSearchBarButtonTourMock = vi.fn(
         (value: boolean) => (shouldShowSearchBarButtonTour = value)
       );
-      (useLocalStorage as jest.Mock).mockImplementation(() => [
+      (useLocalStorage as Mock).mockImplementation(() => [
         shouldShowSearchBarButtonTour,
         setShouldShowSearchBarButtonTourMock,
       ]);
@@ -185,8 +188,8 @@ describe('Actions component', () => {
     });
 
     it('does not open the search bar tour when searchFilterCounter is greater than 0 and shouldShowSearchBarButtonTour is false', () => {
-      const setShouldShowSearchBarButtonTourMock = jest.fn();
-      (useLocalStorage as jest.Mock).mockReturnValue([false, setShouldShowSearchBarButtonTourMock]);
+      const setShouldShowSearchBarButtonTourMock = vi.fn();
+      (useLocalStorage as Mock).mockReturnValue([false, setShouldShowSearchBarButtonTourMock]);
       const { queryByText } = renderWithProviders({
         ...defaultProps,
         searchFilterCounter: 2,
@@ -197,8 +200,8 @@ describe('Actions component', () => {
     });
 
     it('should not show the tour if user already toggled the search bar', () => {
-      const setShouldShowSearchBarButtonTourMock = jest.fn();
-      (useLocalStorage as jest.Mock).mockReturnValue([true, setShouldShowSearchBarButtonTourMock]);
+      const setShouldShowSearchBarButtonTourMock = vi.fn();
+      (useLocalStorage as Mock).mockReturnValue([true, setShouldShowSearchBarButtonTourMock]);
       renderWithProviders({
         ...defaultProps,
         searchFilterCounter: 0,
@@ -213,10 +216,10 @@ describe('Actions component', () => {
     it('should not show the tour if tours is disabled', () => {
       mockToursIsEnabled.mockReturnValue(false);
       let shouldShowSearchBarButtonTour = true;
-      const setShouldShowSearchBarButtonTourMock = jest.fn(
+      const setShouldShowSearchBarButtonTourMock = vi.fn(
         (value: boolean) => (shouldShowSearchBarButtonTour = value)
       );
-      (useLocalStorage as jest.Mock).mockImplementation(() => [
+      (useLocalStorage as Mock).mockImplementation(() => [
         shouldShowSearchBarButtonTour,
         setShouldShowSearchBarButtonTourMock,
       ]);
@@ -231,10 +234,10 @@ describe('Actions component', () => {
 
     it('closes the search bar tour when the search toggle button is clicked', async () => {
       let shouldShowSearchBarButtonTourState = true;
-      const setShouldShowSearchBarButtonTourMock = jest.fn(
+      const setShouldShowSearchBarButtonTourMock = vi.fn(
         (value: boolean) => (shouldShowSearchBarButtonTourState = value)
       );
-      (useLocalStorage as jest.Mock).mockImplementation(() => [
+      (useLocalStorage as Mock).mockImplementation(() => [
         shouldShowSearchBarButtonTourState,
         setShouldShowSearchBarButtonTourMock,
       ]);

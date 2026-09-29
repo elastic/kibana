@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { APP_ID } from '../../../../../common';
 import { bulkUpdateLeadsRoute } from './bulk_update_leads';
@@ -15,10 +17,13 @@ import {
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 
-const mockBulkUpdateLeads = jest.fn();
-jest.mock('../lead_data_client', () => ({
-  createLeadDataClient: () => ({ bulkUpdateLeads: mockBulkUpdateLeads }),
-}));
+const mockBulkUpdateLeads = vi.fn();
+vi.mock('../lead_data_client', () => {
+      const mocked = {
+      createLeadDataClient: () => ({ bulkUpdateLeads: mockBulkUpdateLeads }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeEsSecurityException = () => ({
   statusCode: 403,
@@ -32,7 +37,7 @@ describe('bulkUpdateLeadsRoute', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     const { clients } = requestContextMock.createTools();
     context = requestContextMock.convertContext(requestContextMock.create({ ...clients }));

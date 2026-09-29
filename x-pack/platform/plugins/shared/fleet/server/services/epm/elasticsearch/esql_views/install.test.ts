@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   loggingSystemMock,
   elasticsearchServiceMock,
@@ -17,7 +19,7 @@ import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 
 import { installEsqlViews } from './install';
 
-jest.mock('../../packages/es_assets_reference');
+vi.mock('../../packages/es_assets_reference');
 
 async function createPackageInstallContext() {
   const archiveIterator = createArchiveIteratorFromMap(
@@ -53,8 +55,8 @@ async function createPackageInstallContext() {
 
 describe('installEsqlViews', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest
+    vi.resetAllMocks();
+    vi
       .mocked(updateEsAssetReferences)
       .mockImplementation(async (_, __, currentAssets, { assetsToAdd }) => {
         return [...currentAssets, ...(assetsToAdd ?? [])];

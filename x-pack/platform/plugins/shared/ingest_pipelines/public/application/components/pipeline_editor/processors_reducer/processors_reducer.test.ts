@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { State } from './processors_reducer';
 import { reducer } from './processors_reducer';
 import { DropSpecialLocations } from '../constants';
@@ -274,7 +276,7 @@ describe('Processors reducer', () => {
       // eslint-disable-next-line no-console
       originalErrorLogger = console.error;
       // eslint-disable-next-line no-console
-      console.error = jest.fn();
+      console.error = vi.fn();
     });
 
     afterEach(() => {

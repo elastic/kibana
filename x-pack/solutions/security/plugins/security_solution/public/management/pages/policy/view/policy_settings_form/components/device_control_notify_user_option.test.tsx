@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { cloneDeep } from 'lodash';
 import userEvent from '@testing-library/user-event';
@@ -24,9 +27,9 @@ import {
 import type { DeviceControlNotifyUserOptionProps } from './device_control_notify_user_option';
 import { DeviceControlNotifyUserOption } from './device_control_notify_user_option';
 
-jest.mock('../../../../../../common/hooks/use_license');
+vi.mock('../../../../../../common/hooks/use_license');
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 
 describe('Policy form DeviceControlNotifyUserOption component', () => {
   let formProps: DeviceControlNotifyUserOptionProps;
@@ -50,7 +53,7 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
 
     formProps = {
       policy,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': 'test',
     };

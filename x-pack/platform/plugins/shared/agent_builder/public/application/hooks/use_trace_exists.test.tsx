@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
@@ -12,23 +14,29 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { of } from 'rxjs';
 import { useTraceExists } from './use_trace_exists';
 
-const mockSearch = jest.fn();
+const mockSearch = vi.fn();
 let mockSpaceId: string | undefined = 'test-space';
 
-jest.mock('./use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      plugins: {
-        data: { search: { search: mockSearch } },
-        spaces: {},
-      },
-    },
-  }),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          plugins: {
+            data: { search: { search: mockSearch } },
+            spaces: {},
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_space_id', () => ({
-  useSpaceId: () => mockSpaceId,
-}));
+vi.mock('./use_space_id', () => {
+      const mocked = {
+      useSpaceId: () => mockSpaceId,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -47,7 +55,7 @@ const searchResponse = (totalHits: number) =>
 
 describe('useTraceExists', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSpaceId = 'test-space';
   });
 
@@ -140,7 +148,7 @@ describe('useTraceExists', () => {
   });
 
   it('stops polling after traces are found', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockSearch.mockReturnValueOnce(searchResponse(0)).mockReturnValue(searchResponse(1));
     const { queryClient, Wrapper } = createWrapper();
 
@@ -150,19 +158,19 @@ describe('useTraceExists', () => {
     expect(result.current.exists).toBe(false);
 
     await act(async () => {
-      jest.advanceTimersByTime(5_000);
+      vi.advanceTimersByTime(5_000);
     });
 
     await waitFor(() => expect(result.current.exists).toBe(true));
     const callCountAfterFound = mockSearch.mock.calls.length;
 
     await act(async () => {
-      jest.advanceTimersByTime(10_000);
+      vi.advanceTimersByTime(10_000);
     });
 
     expect(mockSearch).toHaveBeenCalledTimes(callCountAfterFound);
 
-    jest.useRealTimers();
+    vi.useRealTimers();
     queryClient.clear();
   });
 });

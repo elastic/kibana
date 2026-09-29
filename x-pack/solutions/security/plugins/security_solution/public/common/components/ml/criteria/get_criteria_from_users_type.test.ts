@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
@@ -39,9 +41,9 @@ describe('get_criteria_from_user_type', () => {
   test('with EUID API, defers to getEntityIdentifiersFromDocument when scoped DSL is unavailable', () => {
     const euid = {
       dsl: {
-        getEuidFilterBasedOnDocument: jest.fn().mockReturnValue(undefined),
+        getEuidFilterBasedOnDocument: vi.fn().mockReturnValue(undefined),
       },
-      getEntityIdentifiersFromDocument: jest.fn().mockReturnValue({
+      getEntityIdentifiersFromDocument: vi.fn().mockReturnValue({
         'user.id': 'uid-1',
         'user.name': 'from-identity',
       }),
@@ -67,9 +69,9 @@ describe('get_criteria_from_user_type', () => {
 
     const euid = {
       dsl: {
-        getEuidFilterBasedOnDocument: jest.fn().mockReturnValue(undefined),
+        getEuidFilterBasedOnDocument: vi.fn().mockReturnValue(undefined),
       },
-      getEntityIdentifiersFromDocument: jest.fn().mockReturnValue({
+      getEntityIdentifiersFromDocument: vi.fn().mockReturnValue({
         'user.id': 'record-uid',
         'user.name': 'from-record',
       }),

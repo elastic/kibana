@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ToolResultType,
   isErrorResult,
@@ -14,10 +16,13 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../../common/panel_context_attachment';
 import { createUpdateCustomContentTool } from './update_custom_content_tool';
 
-const mockResolver = jest.fn();
-jest.mock('@kbn/custom-content-server', () => ({
-  createCustomContentTemplateResolver: jest.fn(() => mockResolver),
-}));
+const mockResolver = vi.fn();
+vi.mock('@kbn/custom-content-server', () => {
+      const mocked = {
+      createCustomContentTemplateResolver: vi.fn(() => mockResolver),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeAttachment = (data: Record<string, unknown>) => ({
   id: 'att-1',
@@ -30,13 +35,13 @@ const makeContext = (attachmentData?: Record<string, unknown>) => {
   const attachment = attachmentData ? makeAttachment(attachmentData) : undefined;
   // `attachments.update` resolves the new versioned attachment; the tool reads `current_version`
   // off it so the agent can address that exact version in its render tag.
-  const update = jest.fn().mockResolvedValue({ ...attachment, current_version: 2 });
+  const update = vi.fn().mockResolvedValue({ ...attachment, current_version: 2 });
   return {
     attachments: {
-      getAll: jest.fn().mockReturnValue(attachment ? [attachment] : []),
+      getAll: vi.fn().mockReturnValue(attachment ? [attachment] : []),
       update,
     },
-    logger: { warn: jest.fn(), error: jest.fn() },
+    logger: { warn: vi.fn(), error: vi.fn() },
     esClient: {},
     modelProvider: {},
     update,
@@ -59,7 +64,7 @@ const callHandler = async (
 
 describe('createUpdateCustomContentTool handler', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockResolver.mockResolvedValue({ template: '<div>generated</div>', height: 320 });
   });
 
@@ -231,7 +236,7 @@ describe('createUpdateCustomContentTool handler', () => {
     it('omits the version when the update produced no new one', async () => {
       const tool = createUpdateCustomContentTool();
       const ctx = makeContext(existing);
-      ctx.attachments.update = jest.fn().mockResolvedValue(undefined);
+      ctx.attachments.update = vi.fn().mockResolvedValue(undefined);
 
       type HandlerParams = Parameters<typeof tool.handler>[0];
       type HandlerCtx = Parameters<typeof tool.handler>[1];
@@ -271,10 +276,10 @@ describe('createUpdateCustomContentTool handler', () => {
           },
         ],
       };
-      const update = jest.fn().mockResolvedValue({ ...panelB, current_version: 2 });
+      const update = vi.fn().mockResolvedValue({ ...panelB, current_version: 2 });
       const ctx = {
-        attachments: { getAll: jest.fn().mockReturnValue([panelA, panelB]), update },
-        logger: { warn: jest.fn(), error: jest.fn() },
+        attachments: { getAll: vi.fn().mockReturnValue([panelA, panelB]), update },
+        logger: { warn: vi.fn(), error: vi.fn() },
         esClient: {},
         modelProvider: {},
       };

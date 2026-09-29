@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
@@ -15,20 +17,23 @@ import type { AlertsGroupingAggregation } from '../../../alerts_table/grouping_s
 
 import { useGroupStats } from './use_group_stats';
 
-jest.mock('@elastic/eui', () => ({
-  useEuiTheme: () => ({
-    euiTheme: {
-      colors: {
-        danger: 'red',
-      },
-    },
-  }),
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      useEuiTheme: () => ({
+        euiTheme: {
+          colors: {
+            danger: 'red',
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useGroupStats', () => {
   describe('aggregations', () => {
     it('returns the correct aggregations configuration', () => {
-      const getAttack = jest.fn();
+      const getAttack = vi.fn();
       const { result } = renderHook(() => useGroupStats({ getAttack }));
       const aggregations = result.current.aggregations();
 
@@ -68,7 +73,7 @@ describe('useGroupStats', () => {
 
   describe('renderer', () => {
     it('returns the correct stats item with count when no attack is found', () => {
-      const getAttack = jest.fn().mockReturnValue(undefined);
+      const getAttack = vi.fn().mockReturnValue(undefined);
       const { result } = renderHook(() => useGroupStats({ getAttack }));
       const renderer = result.current.renderer;
       const bucket = {
@@ -95,7 +100,7 @@ describe('useGroupStats', () => {
     });
 
     it('returns the correct stats item with count from attack document when attack is found', () => {
-      const getAttack = jest.fn().mockReturnValue({ alertIds: ['alert-1', 'alert-2', 'alert-3'] });
+      const getAttack = vi.fn().mockReturnValue({ alertIds: ['alert-1', 'alert-2', 'alert-3'] });
       const { result } = renderHook(() => useGroupStats({ getAttack }));
       const renderer = result.current.renderer;
       const bucket = {
@@ -122,7 +127,7 @@ describe('useGroupStats', () => {
     });
 
     it('returns 0 when attackRelatedAlerts is missing and no attack is found', () => {
-      const getAttack = jest.fn().mockReturnValue(undefined);
+      const getAttack = vi.fn().mockReturnValue(undefined);
       const { result } = renderHook(() => useGroupStats({ getAttack }));
       const renderer = result.current.renderer;
       const bucket = {

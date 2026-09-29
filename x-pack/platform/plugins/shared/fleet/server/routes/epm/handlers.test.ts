@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { PolicyNamespaceValidationError } from '../../../common/errors';
 import { FleetUnauthorizedError } from '../../errors';
 import { appContextService, licenseService } from '../../services';
@@ -17,57 +20,57 @@ import {
 
 import { rollbackPackageHandler, updatePackageHandler } from './handlers';
 
-jest.mock('../../services', () => {
+vi.mock('../../services', () => {
   return {
     licenseService: {
-      isEnterprise: jest.fn(),
+      isEnterprise: vi.fn(),
     },
     appContextService: {
-      getTaskManagerStart: jest.fn().mockReturnValue({}),
+      getTaskManagerStart: vi.fn().mockReturnValue({}),
     },
   };
 });
 
-jest.mock('../../services/epm/packages/rollback', () => {
+vi.mock('../../services/epm/packages/rollback', () => {
   return {
-    rollbackInstallation: jest.fn(),
+    rollbackInstallation: vi.fn(),
   };
 });
 
-jest.mock('../../services/epm/packages/get', () => {
+vi.mock('../../services/epm/packages/get', () => {
   return {
-    getInstallation: jest.fn(),
+    getInstallation: vi.fn(),
   };
 });
 
-jest.mock('../../services/epm/packages/update', () => {
+vi.mock('../../services/epm/packages/update', () => {
   return {
-    updatePackage: jest.fn(),
+    updatePackage: vi.fn(),
   };
 });
 
-jest.mock('../../tasks/sync_namespace_templates_task', () => {
+vi.mock('../../tasks/sync_namespace_templates_task', () => {
   return {
-    scheduleSyncNamespaceTemplatesTask: jest.fn(),
+    scheduleSyncNamespaceTemplatesTask: vi.fn(),
   };
 });
 
-jest.mock('../../tasks/sync_ilm_policy_task', () => {
+vi.mock('../../tasks/sync_ilm_policy_task', () => {
   return {
-    scheduleSyncIlmPolicyTask: jest.fn(),
+    scheduleSyncIlmPolicyTask: vi.fn(),
   };
 });
 
-jest.mock('../../services/spaces/policy_namespaces', () => {
+vi.mock('../../services/spaces/policy_namespaces', () => {
   return {
-    getAllowedNamespacePrefixesForSpace: jest.fn(),
-    isNamespaceAllowedByPrefixes: jest.fn().mockReturnValue(true),
+    getAllowedNamespacePrefixesForSpace: vi.fn(),
+    isNamespaceAllowedByPrefixes: vi.fn().mockReturnValue(true),
   };
 });
 
-jest.mock('./bulk_handler', () => {
+vi.mock('./bulk_handler', () => {
   return {
-    getPackagePolicyIdsForCurrentUser: jest.fn().mockResolvedValue({}),
+    getPackagePolicyIdsForCurrentUser: vi.fn().mockResolvedValue({}),
   };
 });
 
@@ -75,7 +78,7 @@ const context = {
   core: {
     elasticsearch: {
       client: {
-        asIntegernalUser: jest.fn(),
+        asIntegernalUser: vi.fn(),
       },
     },
   },
@@ -87,12 +90,12 @@ const request = {
   params: { pkgName: 'test-package' },
 } as any;
 const response = {
-  ok: jest.fn(),
+  ok: vi.fn(),
 } as any;
 
 describe('rollback package handler', () => {
   it('should throw if license is not enterprise', async () => {
-    (licenseService.isEnterprise as jest.Mock).mockReturnValue(false);
+    (licenseService.isEnterprise as Mock).mockReturnValue(false);
 
     await expect(rollbackPackageHandler(context, request, response)).rejects.toThrow(
       FleetUnauthorizedError
@@ -100,7 +103,7 @@ describe('rollback package handler', () => {
   });
 
   it('should continue if license is enterprise', async () => {
-    (licenseService.isEnterprise as jest.Mock).mockReturnValue(true);
+    (licenseService.isEnterprise as Mock).mockReturnValue(true);
 
     await rollbackPackageHandler(context, request, response);
 
@@ -109,8 +112,8 @@ describe('rollback package handler', () => {
 });
 
 describe('updatePackageHandler — ILM policy validation', () => {
-  const getLifecycle = jest.fn();
-  const hasPrivileges = jest.fn();
+  const getLifecycle = vi.fn();
+  const hasPrivileges = vi.fn();
   const updateContext = {
     core: Promise.resolve({
       elasticsearch: {
@@ -128,21 +131,21 @@ describe('updatePackageHandler — ILM policy validation', () => {
       },
     }),
   } as any;
-  const updateResponse = { ok: jest.fn() } as any;
+  const updateResponse = { ok: vi.fn() } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getInstallation as jest.Mock).mockResolvedValue({
+    vi.clearAllMocks();
+    (getInstallation as Mock).mockResolvedValue({
       namespace_customization_enabled_for: ['production'],
     });
-    (updatePackage as jest.Mock).mockResolvedValue({
+    (updatePackage as Mock).mockResolvedValue({
       packageInfo: {},
       namespaceCustomizationDiff: { addedNamespaces: [], removedNamespaces: [] },
       ilmPolicyChanges: [],
     });
-    (getAllowedNamespacePrefixesForSpace as jest.Mock).mockResolvedValue(null);
-    (isNamespaceAllowedByPrefixes as jest.Mock).mockReturnValue(true);
-    (appContextService.getTaskManagerStart as jest.Mock).mockReturnValue({});
+    (getAllowedNamespacePrefixesForSpace as Mock).mockResolvedValue(null);
+    (isNamespaceAllowedByPrefixes as Mock).mockReturnValue(true);
+    (appContextService.getTaskManagerStart as Mock).mockReturnValue({});
     hasPrivileges.mockResolvedValue({ has_all_requested: true });
   });
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { ContentListProvider } from '../context';
@@ -25,7 +27,7 @@ const sampleItems: ContentListItem[] = [
 ];
 
 describe('useContentListItems', () => {
-  const mockFindItems = jest.fn(
+  const mockFindItems = vi.fn(
     async (_params: FindItemsParams): Promise<FindItemsResult> => ({
       items: sampleItems,
       total: sampleItems.length,
@@ -47,7 +49,7 @@ describe('useContentListItems', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(async () => {
@@ -57,7 +59,7 @@ describe('useContentListItems', () => {
 
   describe('error handling', () => {
     it('throws when used outside provider', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       expect(() => {
         renderHook(() => useContentListItems());
@@ -174,7 +176,7 @@ describe('useContentListItems', () => {
     });
 
     it('returns empty items when `findItems` returns no results', async () => {
-      const emptyFindItems = jest.fn(async () => ({ items: [] as ContentListItem[], total: 0 }));
+      const emptyFindItems = vi.fn(async () => ({ items: [] as ContentListItem[], total: 0 }));
 
       const { result } = renderHook(() => useContentListItems(), {
         wrapper: createWrapper({
@@ -193,13 +195,13 @@ describe('useContentListItems', () => {
 
     it('warms the profile cache from fetched items for direct-provider user filters', async () => {
       const userItems: ContentListItem[] = [{ id: '1', title: 'Dashboard A', createdBy: 'u_jane' }];
-      const userFindItems = jest.fn(
+      const userFindItems = vi.fn(
         async (_params: FindItemsParams): Promise<FindItemsResult> => ({
           items: userItems,
           total: userItems.length,
         })
       );
-      const bulkResolve = jest.fn(async (uids: string[]) =>
+      const bulkResolve = vi.fn(async (uids: string[]) =>
         uids.includes('u_jane')
           ? [
               {
@@ -251,11 +253,11 @@ describe('useContentListItems', () => {
     });
 
     it('provides an error when `findItems` rejects', async () => {
-      const failingFindItems = jest.fn(async () => {
+      const failingFindItems = vi.fn(async () => {
         throw new Error('Network failure');
       });
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const { result } = renderHook(() => useContentListItems(), {
         wrapper: createWrapper({
@@ -274,11 +276,11 @@ describe('useContentListItems', () => {
     });
 
     it('normalizes non-Error rejections into an `Error` instance', async () => {
-      const failingFindItems = jest.fn(async () => {
+      const failingFindItems = vi.fn(async () => {
         throw 'string error'; // eslint-disable-line no-throw-literal
       });
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const { result } = renderHook(() => useContentListItems(), {
         wrapper: createWrapper({
@@ -300,7 +302,7 @@ describe('useContentListItems', () => {
 
   describe('onFetchSuccess callback', () => {
     it('invokes `onFetchSuccess` after a successful fetch', async () => {
-      const onFetchSuccess = jest.fn();
+      const onFetchSuccess = vi.fn();
 
       const { result } = renderHook(() => useContentListItems(), {
         wrapper: createWrapper({
@@ -319,8 +321,8 @@ describe('useContentListItems', () => {
     });
 
     it('logs a warning if `onFetchSuccess` throws, without breaking the query', async () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-      const onFetchSuccess = jest.fn(() => {
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const onFetchSuccess = vi.fn(() => {
         throw new Error('callback error');
       });
 
@@ -442,7 +444,7 @@ describe('useContentListItems', () => {
     });
 
     it('is true when totalItems is 0 and queryText is empty after loading', async () => {
-      const emptyFindItems = jest.fn(async () => ({ items: [] as ContentListItem[], total: 0 }));
+      const emptyFindItems = vi.fn(async () => ({ items: [] as ContentListItem[], total: 0 }));
 
       const { result } = renderHook(() => useContentListItems(), {
         wrapper: createWrapper({
@@ -462,7 +464,7 @@ describe('useContentListItems', () => {
     it('stays true during a background refetch of an empty unfiltered list', async () => {
       let callCount = 0;
       let resolveRefetch: ((value: FindItemsResult) => void) | undefined;
-      const emptyFindItems = jest.fn((_params: FindItemsParams): Promise<FindItemsResult> => {
+      const emptyFindItems = vi.fn((_params: FindItemsParams): Promise<FindItemsResult> => {
         callCount++;
 
         if (callCount === 1) {
@@ -508,7 +510,7 @@ describe('useContentListItems', () => {
     });
 
     it('is true when queryText contains only whitespace', async () => {
-      const emptyFindItems = jest.fn(async () => ({ items: [] as ContentListItem[], total: 0 }));
+      const emptyFindItems = vi.fn(async () => ({ items: [] as ContentListItem[], total: 0 }));
 
       const { result } = renderHook(() => useContentListItems(), {
         wrapper: createWrapper({
@@ -540,11 +542,11 @@ describe('useContentListItems', () => {
     });
 
     it('is false when error is set', async () => {
-      const failingFindItems = jest.fn(async () => {
+      const failingFindItems = vi.fn(async () => {
         throw new Error('Network failure');
       });
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const { result } = renderHook(() => useContentListItems(), {
         wrapper: createWrapper({
@@ -576,7 +578,7 @@ describe('useContentListItems', () => {
     });
 
     it('is true when totalItems is 0 and a query is active', async () => {
-      const emptyFindItems = jest.fn(async () => ({ items: [] as ContentListItem[], total: 0 }));
+      const emptyFindItems = vi.fn(async () => ({ items: [] as ContentListItem[], total: 0 }));
 
       const { result } = renderHook(
         () => ({
@@ -616,11 +618,11 @@ describe('useContentListItems', () => {
     });
 
     it('is false when error is set', async () => {
-      const failingFindItems = jest.fn(async () => {
+      const failingFindItems = vi.fn(async () => {
         throw new Error('Network failure');
       });
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const { result } = renderHook(() => useContentListItems(), {
         wrapper: createWrapper({
@@ -642,7 +644,7 @@ describe('useContentListItems', () => {
 
   describe('hasNoItems / hasNoResults mutual exclusivity', () => {
     it('hasNoItems and hasNoResults are never both true simultaneously', async () => {
-      const emptyFindItems = jest.fn(async () => ({ items: [] as ContentListItem[], total: 0 }));
+      const emptyFindItems = vi.fn(async () => ({ items: [] as ContentListItem[], total: 0 }));
 
       const { result } = renderHook(() => useContentListItems(), {
         wrapper: createWrapper({

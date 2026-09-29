@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { TableId } from '@kbn/securitysolution-data-table';
 import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { fireEvent, render } from '@testing-library/react';
@@ -27,14 +30,17 @@ import { useIsNewFlyoutEnabled } from '../../../hooks/use_is_new_flyout_enabled'
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 
-jest.mock('../../../hooks/use_is_new_flyout_enabled');
-jest.mock('../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../hooks/use_space_id', () => ({
-  useSpaceId: () => 'default',
-}));
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+vi.mock('../../../hooks/use_is_new_flyout_enabled');
+vi.mock('../../../../flyout_v2/use_flyout_api');
+vi.mock('../../../hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: () => 'default',
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
 
   return {
     ...original,
@@ -42,14 +48,14 @@ jest.mock('react-redux-v7', () => {
   };
 });
 
-jest.mock('../../../utils/route/use_route_spy');
+vi.mock('../../../utils/route/use_route_spy');
 
-const mockOpenFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout');
+const mockOpenFlyout = vi.fn();
+vi.mock('@kbn/expandable-flyout');
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../lib/kibana', () => {
-  const original = jest.requireActual('../../../lib/kibana');
+vi.mock('../../../lib/kibana', async () => {
+  const original = (await vi.importActual('../../../lib/kibana'));
   return {
     ...original,
     useKibana: () => ({
@@ -62,7 +68,7 @@ jest.mock('../../../lib/kibana', () => {
   };
 });
 
-jest.mock('../../user_privileges');
+vi.mock('../../user_privileges');
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -94,14 +100,14 @@ describe('RowAction', () => {
     index: 1,
     isEventViewer: false,
     loadingEventIds: [],
-    onRowSelected: jest.fn(),
-    onRuleChange: jest.fn(),
-    refetch: jest.fn(),
+    onRowSelected: vi.fn(),
+    onRuleChange: vi.fn(),
+    refetch: vi.fn(),
     selectedEventIds: {},
     tableId: TableId.test,
     width: 100,
-    setEventsLoading: jest.fn(),
-    setEventsDeleted: jest.fn(),
+    setEventsLoading: vi.fn(),
+    setEventsDeleted: vi.fn(),
     pageRowIndex: 0,
     columnId: 'test-columnId',
     isDetails: false,
@@ -109,22 +115,22 @@ describe('RowAction', () => {
     isExpandable: false,
     rowIndex: 0,
     colIndex: 0,
-    setCellProps: jest.fn(),
+    setCellProps: vi.fn(),
     tabType: 'query',
     showCheckboxes: false,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
     });
-    jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    (useRouteSpy as jest.Mock).mockReturnValue([mockRouteSpy]);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    (useRouteSpy as Mock).mockReturnValue([mockRouteSpy]);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   test('displays expand events button', () => {
@@ -137,7 +143,7 @@ describe('RowAction', () => {
   });
 
   test('should always show expandable flyout if the page is attackDiscovery', () => {
-    (useRouteSpy as jest.Mock).mockReturnValue([
+    (useRouteSpy as Mock).mockReturnValue([
       { ...mockRouteSpy, pageName: SecurityPageName.attackDiscovery },
     ]);
     const wrapper = render(
@@ -173,8 +179,8 @@ describe('RowAction', () => {
   });
 
   test('should open the new document flyout when enableNewFlyout setting is enabled', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-    const refetch = jest.fn();
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    const refetch = vi.fn();
 
     const wrapper = render(
       <TestProviders>
@@ -200,7 +206,7 @@ describe('RowAction', () => {
   });
 
   test('binds the new document flyout cell actions to the table scope and details-flyout trigger', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
     const wrapper = render(
       <TestProviders>
@@ -231,7 +237,7 @@ describe('RowAction', () => {
   });
 
   test('should open the pattern-based flyout for rule preview alerts, converting the backing index to its alias', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
     const backingIndex = '.internal.preview.alerts-security.alerts-default';
     const aliasIndex = '.preview.alerts-security.alerts-default';
 
@@ -274,7 +280,7 @@ describe('RowAction', () => {
 
   describe('notes', () => {
     beforeEach(() => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         ...initialUserPrivilegesState(),
         notesPrivileges: { read: true, crud: true },
         timelinePrivileges: { read: true },
@@ -295,7 +301,7 @@ describe('RowAction', () => {
     });
 
     test('should open the new notes flyout when enableNewFlyout setting is enabled', () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+      vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
       const wrapper = render(
         <TestProviders>
@@ -314,7 +320,7 @@ describe('RowAction', () => {
 
   describe('privileges', () => {
     test('should show notes and timeline buttons when the user has the required privileges', () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         ...initialUserPrivilegesState(),
         notesPrivileges: { read: true },
         timelinePrivileges: { read: true },
@@ -331,7 +337,7 @@ describe('RowAction', () => {
     });
 
     test('should not show notes and timeline buttons when the user does not have the required privileges', () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         ...initialUserPrivilegesState(),
         notesPrivileges: { read: false },
         timelinePrivileges: { read: false },

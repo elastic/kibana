@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   getCaseConflictRebaseDecision,
   isRetryableCaseConflictError,
@@ -49,11 +51,11 @@ describe('conflict_rebase', () => {
       updatedAt: '2024-01-01T00:00:00.000Z',
       version: 'WzQ4LDFd',
     };
-    const executeRequest = jest
+    const executeRequest = vi
       .fn()
       .mockRejectedValueOnce(conflictError)
       .mockResolvedValueOnce('ok');
-    const fetchLatestCase = jest.fn().mockResolvedValue(latestCase);
+    const fetchLatestCase = vi.fn().mockResolvedValue(latestCase);
 
     const response = await rebaseCaseMutationOnConflict({
       request: { caseId: basicCaseFixture.id, version: basicCaseFixture.version },
@@ -75,11 +77,11 @@ describe('conflict_rebase', () => {
   });
 
   it('re-throws the original error when user-visible fields changed on the latest case', async () => {
-    const executeRequest = jest
+    const executeRequest = vi
       .fn()
       .mockRejectedValueOnce(conflictError)
       .mockResolvedValueOnce('ok');
-    const fetchLatestCase = jest.fn().mockResolvedValue({
+    const fetchLatestCase = vi.fn().mockResolvedValue({
       ...basicCaseFixture,
       title: 'A different title',
       version: 'WzQ4LDFd',
@@ -100,8 +102,8 @@ describe('conflict_rebase', () => {
   });
 
   it('does not attempt a rebase for non-conflict errors', async () => {
-    const executeRequest = jest.fn().mockRejectedValue(new Error('boom'));
-    const fetchLatestCase = jest.fn();
+    const executeRequest = vi.fn().mockRejectedValue(new Error('boom'));
+    const fetchLatestCase = vi.fn();
 
     await expect(
       rebaseCaseMutationOnConflict({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -93,7 +95,7 @@ describe('EsqlQuerySummarySection callouts', () => {
           queryCommitted={queryCommitted}
           kind={kind}
           isEditorOpen={false}
-          onOpenEditor={jest.fn()}
+          onOpenEditor={vi.fn()}
         />
       </IntlProvider>
     );

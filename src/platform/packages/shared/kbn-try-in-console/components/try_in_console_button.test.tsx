@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
@@ -17,7 +20,7 @@ import type { TryInConsoleButtonProps } from './try_in_console_button';
 import { TryInConsoleButton } from './try_in_console_button';
 
 describe('TryInConsoleButton', () => {
-  let windowOpenSpy: jest.SpyInstance;
+  let windowOpenSpy: MockInstance;
   const mockApplication = {
     capabilities: {
       dev_tools: {
@@ -25,8 +28,8 @@ describe('TryInConsoleButton', () => {
       },
     },
   };
-  const mockLocatorUseUrl = jest.fn();
-  const mockLocatorGet = jest.fn().mockReturnValue({
+  const mockLocatorUseUrl = vi.fn();
+  const mockLocatorGet = vi.fn().mockReturnValue({
     useUrl: mockLocatorUseUrl,
   });
   const mockShare = {
@@ -37,8 +40,8 @@ describe('TryInConsoleButton', () => {
     },
   };
   const mockConsole = {
-    openEmbeddedConsole: jest.fn(),
-    isEmbeddedConsoleAvailable: jest.fn(),
+    openEmbeddedConsole: vi.fn(),
+    isEmbeddedConsoleAvailable: vi.fn(),
   };
 
   const defaultProps = ({
@@ -59,8 +62,8 @@ describe('TryInConsoleButton', () => {
     type,
   });
   beforeEach(() => {
-    jest.resetAllMocks();
-    windowOpenSpy = jest.spyOn(window, 'open');
+    vi.resetAllMocks();
+    windowOpenSpy = vi.spyOn(window, 'open');
     windowOpenSpy.mockImplementation(() => {});
     mockLocatorUseUrl.mockReturnValue('/app/test/dev_tools');
     mockLocatorGet.mockReturnValue({
@@ -137,7 +140,7 @@ describe('TryInConsoleButton', () => {
       sharePlugin: {
         url: {
           locators: {
-            get: jest.fn().mockReturnValue(undefined),
+            get: vi.fn().mockReturnValue(undefined),
           },
         },
       } as unknown as SharePluginStart,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
@@ -17,14 +20,17 @@ import { useLinkInfo } from '../../links';
 import { useUpsellingPage } from '../../hooks/use_upselling';
 import { SpyRoute } from '../../utils/route/spy_routes';
 
-jest.mock('../../links');
-jest.mock('../../hooks/use_upselling');
-jest.mock('../../utils/route/spy_routes', () => ({
-  SpyRoute: jest.fn(() => null),
-}));
+vi.mock('../../links');
+vi.mock('../../hooks/use_upselling');
+vi.mock('../../utils/route/spy_routes', () => {
+      const mocked = {
+      SpyRoute: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseLinkInfo = useLinkInfo as jest.Mock;
-const mockUseUpsellingPage = useUpsellingPage as jest.Mock;
+const mockUseLinkInfo = useLinkInfo as Mock;
+const mockUseUpsellingPage = useUpsellingPage as Mock;
 
 const defaultLinkInfo: LinkInfo = {
   id: SecurityPageName.exploreLanding,
@@ -32,11 +38,14 @@ const defaultLinkInfo: LinkInfo = {
   path: '/test',
 };
 
-const mockRedirect = jest.fn(() => null);
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  Redirect: () => mockRedirect(),
-}));
+const mockRedirect = vi.fn(() => null);
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      Redirect: () => mockRedirect(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TEST_COMPONENT_SUBJ = 'test-component';
 const TestComponent = () => <div data-test-subj={TEST_COMPONENT_SUBJ} />;
@@ -54,7 +63,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('SecurityRoutePageWrapper', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseLinkInfo.mockReturnValue(defaultLinkInfo);
     mockUseUpsellingPage.mockReturnValue(undefined);

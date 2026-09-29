@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { INVESTIGATION_PROGRESS_UI_EVENT } from '@kbn/significant-events-schema';
@@ -13,7 +15,7 @@ import {
   SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
 } from './tool';
 
-const availability = { cacheMode: 'space' as const, handler: jest.fn() };
+const availability = { cacheMode: 'space' as const, handler: vi.fn() };
 
 const createTool = () =>
   createInvestigationProgressReportTool({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createHash } from 'node:crypto';
 import { stableStringify } from '@kbn/std';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -22,7 +24,7 @@ describe('CasesOracleService', () => {
   let service: CasesOracleService;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     service = new CasesOracleService({ savedObjectsClient, logger });
   });
 

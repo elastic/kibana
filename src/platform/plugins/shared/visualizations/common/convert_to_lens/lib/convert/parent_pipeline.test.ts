@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { FormulaColumn, AggBasedColumn } from './types';
@@ -17,28 +19,37 @@ import {
   convertToCumulativeSumAggColumn,
 } from './parent_pipeline';
 
-const mockGetMetricFromParentPipelineAgg = jest.fn();
-const mockGetFormulaForPipelineAgg = jest.fn();
-const mockConvertMetricToColumns = jest.fn();
-const mockGetFieldByName = jest.fn();
-const mockConvertMetricAggregationColumnWithoutSpecialParams = jest.fn();
+const mockGetMetricFromParentPipelineAgg = vi.fn();
+const mockGetFormulaForPipelineAgg = vi.fn();
+const mockConvertMetricToColumns = vi.fn();
+const mockGetFieldByName = vi.fn();
+const mockConvertMetricAggregationColumnWithoutSpecialParams = vi.fn();
 
-jest.mock('../utils', () => ({
-  getMetricFromParentPipelineAgg: jest.fn(() => mockGetMetricFromParentPipelineAgg()),
-  getLabel: jest.fn(() => 'label'),
-  getFieldNameFromField: jest.fn(() => 'document'),
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      getMetricFromParentPipelineAgg: vi.fn(() => mockGetMetricFromParentPipelineAgg()),
+      getLabel: vi.fn(() => 'label'),
+      getFieldNameFromField: vi.fn(() => 'document'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./metric', () => ({
-  convertMetricAggregationColumnWithoutSpecialParams: jest.fn(() =>
-    mockConvertMetricAggregationColumnWithoutSpecialParams()
-  ),
-}));
+vi.mock('./metric', () => {
+      const mocked = {
+      convertMetricAggregationColumnWithoutSpecialParams: vi.fn(() =>
+        mockConvertMetricAggregationColumnWithoutSpecialParams()
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../metrics', () => ({
-  getFormulaForPipelineAgg: jest.fn(() => mockGetFormulaForPipelineAgg()),
-  convertMetricToColumns: jest.fn(() => mockConvertMetricToColumns()),
-}));
+vi.mock('../metrics', () => {
+      const mocked = {
+      getFormulaForPipelineAgg: vi.fn(() => mockGetFormulaForPipelineAgg()),
+      convertMetricToColumns: vi.fn(() => mockConvertMetricToColumns()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('convertToOtherParentPipelineAggColumns', () => {
   const visType = 'heatmap';
@@ -65,7 +76,7 @@ describe('convertToOtherParentPipelineAggColumns', () => {
   ];
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test.each<
@@ -272,7 +283,7 @@ describe('convertToCumulativeSumAggColumn', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test.each<

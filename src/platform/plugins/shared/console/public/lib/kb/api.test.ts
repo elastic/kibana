@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import * as bodyCompleter from '../autocomplete/body_completer';
 import { Api } from './api';
 
 describe('WHEN loading Console autocomplete definitions', () => {
-  let compileBodyDescription: jest.SpyInstance;
+  let compileBodyDescription: MockInstance;
 
   beforeEach(() => {
-    compileBodyDescription = jest.spyOn(bodyCompleter, 'compileBodyDescription');
+    compileBodyDescription = vi.spyOn(bodyCompleter, 'compileBodyDescription');
   });
 
   afterEach(() => {

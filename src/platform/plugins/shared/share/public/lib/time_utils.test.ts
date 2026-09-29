@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   convertRelativeTimeStringToAbsoluteTimeDate,
   convertRelativeTimeStringToAbsoluteTimeString,
@@ -103,7 +105,7 @@ describe('Time Utils', () => {
 
       // Mock current time to a specific moment
       const mockDate = new Date('2026-01-30T15:30:00.000Z');
-      jest.useFakeTimers().setSystemTime(mockDate);
+      vi.useFakeTimers().setSystemTime(mockDate);
 
       const resultStart = convertRelativeTimeStringToAbsoluteTimeDate(date);
       const resultEnd = convertRelativeTimeStringToAbsoluteTimeDate(date, { roundUp: true });
@@ -116,14 +118,14 @@ describe('Time Utils', () => {
       // End should be later than start
       expect(resultEnd!.getTime()).toBeGreaterThan(resultStart!.getTime());
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('handles roundUp option for "now" to get current time with ms precision', () => {
       const date = 'now';
 
       const mockDate = new Date('2026-01-30T15:30:45.123Z');
-      jest.useFakeTimers().setSystemTime(mockDate);
+      vi.useFakeTimers().setSystemTime(mockDate);
 
       const resultNormal = convertRelativeTimeStringToAbsoluteTimeDate(date);
       const resultRoundUp = convertRelativeTimeStringToAbsoluteTimeDate(date, { roundUp: true });
@@ -132,7 +134,7 @@ describe('Time Utils', () => {
       expect(resultNormal?.getTime()).toBe(mockDate.getTime());
       expect(resultRoundUp?.getTime()).toBe(mockDate.getTime());
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 
@@ -165,14 +167,14 @@ describe('Time Utils', () => {
 
       // Freeze current time to a fixed point
       const fixedNow = new Date('2025-04-16T19:14:54.027Z');
-      jest.spyOn(Date, 'now').mockImplementation(() => fixedNow.getTime());
+      vi.spyOn(Date, 'now').mockImplementation(() => fixedNow.getTime());
 
       const result = convertRelativeTimeStringToAbsoluteTimeString(date);
 
       expect(result).toBe('2025-04-16T19:13:54.027Z');
 
       // Restore Date.now()
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('returns absolute date string for absolute date', () => {
@@ -193,7 +195,7 @@ describe('Time Utils', () => {
       const date = 'now/d';
 
       const mockDate = new Date('2026-01-30T15:30:00.000Z');
-      jest.useFakeTimers().setSystemTime(mockDate);
+      vi.useFakeTimers().setSystemTime(mockDate);
 
       const resultStart = convertRelativeTimeStringToAbsoluteTimeString(date);
       const resultEnd = convertRelativeTimeStringToAbsoluteTimeString(date, { roundUp: true });
@@ -206,7 +208,7 @@ describe('Time Utils', () => {
       expect(resultStart).not.toBe(resultEnd);
       expect(new Date(resultEnd!).getTime()).toBeGreaterThan(new Date(resultStart!).getTime());
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 });

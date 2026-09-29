@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
@@ -17,12 +19,12 @@ describe('CancelCreationConfirmationModal', () => {
     title: 'My title',
     confirmButtonText: 'My confirm button text',
     cancelButtonText: 'My cancel button text',
-    onCancel: jest.fn(),
-    onConfirm: jest.fn(),
+    onCancel: vi.fn(),
+    onConfirm: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

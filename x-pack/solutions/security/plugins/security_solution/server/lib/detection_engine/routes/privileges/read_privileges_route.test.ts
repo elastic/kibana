@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { readPrivilegesRoute } from './read_privileges_route';
 import { serverMock } from '../__mocks__/server';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
@@ -17,7 +19,7 @@ describe('read_privileges route', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
 
@@ -29,8 +31,8 @@ describe('read_privileges route', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('normal status codes', () => {

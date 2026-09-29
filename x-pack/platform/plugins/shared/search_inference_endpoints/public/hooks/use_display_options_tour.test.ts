@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import {
   EIS_DISPLAY_OPTIONS_TOUR_STORAGE_KEY,
@@ -12,9 +15,9 @@ import {
 } from './use_display_options_tour';
 import { useKibana } from './use_kibana';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 const mockTours = (enabled: boolean) => {
   mockUseKibana.mockReturnValue({
@@ -24,7 +27,7 @@ const mockTours = (enabled: boolean) => {
 
 describe('useDisplayOptionsTour', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     window.localStorage.clear();
     mockTours(true);
   });

@@ -7,23 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { registerGetNpreValueRoute } from './get_npre_value';
 import { NpreClient } from '../npre/npre_client';
 
-jest.mock('../npre/npre_client');
+vi.mock('../npre/npre_client');
 
 describe('get_npre_value route', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createHandler = () => {
     const router = coreMock.createSetup().http.createRouter();
     registerGetNpreValueRoute(router, coreMock.createPluginInitializerContext());
-    const handler = (router.get as jest.Mock).mock.calls[0][1];
-    const routeConfig = (router.get as jest.Mock).mock.calls[0][0];
+    const handler = (router.get as Mock).mock.calls[0][1];
+    const routeConfig = (router.get as Mock).mock.calls[0][0];
     return { handler, routeConfig };
   };
 
@@ -38,8 +41,8 @@ describe('get_npre_value route', () => {
   });
 
   it('returns the raw npre value', async () => {
-    (NpreClient as unknown as jest.Mock).mockImplementation(() => ({
-      getNpre: jest.fn().mockResolvedValue('project:test'),
+    (NpreClient as unknown as Mock).mockImplementation(() => ({
+      getNpre: vi.fn().mockResolvedValue('project:test'),
     }));
 
     const { handler } = createHandler();
@@ -59,8 +62,8 @@ describe('get_npre_value route', () => {
   });
 
   it('returns 404 when expression is missing', async () => {
-    (NpreClient as unknown as jest.Mock).mockImplementation(() => ({
-      getNpre: jest.fn().mockResolvedValue(undefined),
+    (NpreClient as unknown as Mock).mockImplementation(() => ({
+      getNpre: vi.fn().mockResolvedValue(undefined),
     }));
 
     const { handler } = createHandler();
@@ -82,8 +85,8 @@ describe('get_npre_value route', () => {
   it('propagates non-404 errors', async () => {
     const error = new Error('boom');
 
-    (NpreClient as unknown as jest.Mock).mockImplementation(() => ({
-      getNpre: jest.fn().mockRejectedValue(error),
+    (NpreClient as unknown as Mock).mockImplementation(() => ({
+      getNpre: vi.fn().mockRejectedValue(error),
     }));
 
     const { handler } = createHandler();

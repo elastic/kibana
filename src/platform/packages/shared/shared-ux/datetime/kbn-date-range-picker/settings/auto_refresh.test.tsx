@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -76,8 +78,8 @@ describe('Auto-refresh settings row', () => {
   });
 
   it('toggles `isEnabled` via the switch and calls `onSettingsChange`', () => {
-    const onSettingsChange = jest.fn();
-    const onRefresh = jest.fn();
+    const onSettingsChange = vi.fn();
+    const onRefresh = vi.fn();
 
     renderWithProvider(
       {
@@ -105,8 +107,8 @@ describe('Auto-refresh settings row', () => {
   });
 
   it('updates interval when the count field changes', () => {
-    const onSettingsChange = jest.fn();
-    const onRefresh = jest.fn();
+    const onSettingsChange = vi.fn();
+    const onRefresh = vi.fn();
 
     renderWithProvider(
       {
@@ -136,8 +138,8 @@ describe('Auto-refresh settings row', () => {
   });
 
   it('updates `intervalMs` and `intervalDisplayUnit` when the unit select changes', () => {
-    const onSettingsChange = jest.fn();
-    const onRefresh = jest.fn();
+    const onSettingsChange = vi.fn();
+    const onRefresh = vi.fn();
 
     renderWithProvider(
       {

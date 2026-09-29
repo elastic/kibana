@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import {
@@ -13,19 +16,19 @@ import {
 } from '../mock/alert_summary_widget';
 import { useLoadAlertSummary } from './use_load_alert_summary';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 describe('useLoadAlertSummary', () => {
   const ruleTypeIds: string[] = ['apm'];
-  const mockedPostAPI = jest.fn();
+  const mockedPostAPI = vi.fn();
 
   beforeAll(() => {
     useKibanaMock().services.http.post = mockedPostAPI;
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return the mocked data from API', async () => {

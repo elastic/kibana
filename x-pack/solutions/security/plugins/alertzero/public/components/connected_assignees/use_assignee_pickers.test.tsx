@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -16,15 +19,18 @@ import { useUserProfiles, useSuggestUserProfiles } from '@kbn/agentic-investigat
 import { assigneeSignal } from './assignee_overrides';
 import { useAssigneePickers } from './use_assignee_pickers';
 
-jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
-  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
-  useUserProfiles: jest.fn(),
-  useSuggestUserProfiles: jest.fn(),
-}));
+vi.mock('@kbn/agentic-investigations-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/agentic-investigations-plugin/public')),
+      useUserProfiles: vi.fn(),
+      useSuggestUserProfiles: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Replace AssignToUsers with a minimal stub so we can drive onChange directly.
-jest.mock('@kbn/agentic-investigations-common', () => {
-  const actual = jest.requireActual('@kbn/agentic-investigations-common');
+vi.mock('@kbn/agentic-investigations-common', async () => {
+  const actual = (await vi.importActual('@kbn/agentic-investigations-common'));
   return {
     ...actual,
     // eslint-disable-next-line react/display-name
@@ -58,8 +64,8 @@ jest.mock('@kbn/agentic-investigations-common', () => {
   };
 });
 
-const mockUseUserProfiles = useUserProfiles as jest.Mock;
-const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
+const mockUseUserProfiles = useUserProfiles as Mock;
+const mockUseSuggestUserProfiles = useSuggestUserProfiles as Mock;
 
 interface TestItem {
   id: string;
@@ -136,14 +142,14 @@ const renderWithProviders = (
 const makeHook = (
   items: TestItem[],
   {
-    assign = jest.fn().mockResolvedValue({}),
-    refresh = jest.fn().mockResolvedValue(undefined),
+    assign = vi.fn().mockResolvedValue({}),
+    refresh = vi.fn().mockResolvedValue(undefined),
     canManage = true,
     isReadOnly,
     buttonIconSize,
   }: {
-    assign?: jest.Mock;
-    refresh?: jest.Mock;
+    assign?: Mock;
+    refresh?: Mock;
     canManage?: boolean;
     isReadOnly?: (item: TestItem) => boolean;
     buttonIconSize?: 's';
@@ -181,7 +187,7 @@ beforeEach(() => {
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
 });
 
-afterEach(() => jest.clearAllMocks());
+afterEach(() => vi.clearAllMocks());
 
 describe('useAssigneePickers', () => {
   it('renders as idle before any interaction', () => {
@@ -192,7 +198,7 @@ describe('useAssigneePickers', () => {
 
   it('shows updating while the mutation is in flight', async () => {
     let resolveAssign!: () => void;
-    const assign = jest.fn(
+    const assign = vi.fn(
       () =>
         new Promise<{}>((res) => {
           resolveAssign = () => res({});
@@ -220,7 +226,7 @@ describe('useAssigneePickers', () => {
 
   it('awaits refresh before clearing pending (regression: stuck picker)', async () => {
     let resolveRefresh!: () => void;
-    const refresh = jest.fn(
+    const refresh = vi.fn(
       () =>
         new Promise<void>((res) => {
           resolveRefresh = () => res();
@@ -253,7 +259,7 @@ describe('useAssigneePickers', () => {
   });
 
   it('calls refresh exactly once on success (not twice via self-bump)', async () => {
-    const refresh = jest.fn().mockResolvedValue(undefined);
+    const refresh = vi.fn().mockResolvedValue(undefined);
     const items = [makeItem('item-1', 'target-1')];
     setup(items, { refresh });
 
@@ -265,7 +271,7 @@ describe('useAssigneePickers', () => {
   });
 
   it('rolls back pending and shows a danger toast on error', async () => {
-    const assign = jest.fn().mockRejectedValue(new Error('Network error'));
+    const assign = vi.fn().mockRejectedValue(new Error('Network error'));
     const items = [makeItem('item-1')];
     const { core } = setup(items, { assign });
 
@@ -278,7 +284,7 @@ describe('useAssigneePickers', () => {
   });
 
   it('calls refresh when an external bump targets a visible item', async () => {
-    const refresh = jest.fn().mockResolvedValue(undefined);
+    const refresh = vi.fn().mockResolvedValue(undefined);
     const items = [makeItem('item-1', 'target-1')];
     setup(items, { refresh });
 
@@ -290,7 +296,7 @@ describe('useAssigneePickers', () => {
   });
 
   it('does not call refresh when an external bump targets a non-visible item', async () => {
-    const refresh = jest.fn().mockResolvedValue(undefined);
+    const refresh = vi.fn().mockResolvedValue(undefined);
     const items = [makeItem('item-1', 'target-1')];
     setup(items, { refresh });
 

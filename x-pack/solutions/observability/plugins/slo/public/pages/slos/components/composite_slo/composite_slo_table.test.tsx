@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import type { CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -18,18 +21,21 @@ import { usePermissions } from '../../../../hooks/use_permissions';
 import { render } from '../../../../utils/test_helper';
 import { CompositeSloTable } from './composite_slo_table';
 
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../hooks/use_permissions');
-jest.mock('../../../../hooks/use_fetch_active_alerts');
-jest.mock('../../../../hooks/use_fetch_composite_historical_summary');
-jest.mock('../slo_sparkline', () => ({
-  SloSparkline: () => <div data-test-subj="sloSparkline" />,
-}));
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../hooks/use_permissions');
+vi.mock('../../../../hooks/use_fetch_active_alerts');
+vi.mock('../../../../hooks/use_fetch_composite_historical_summary');
+vi.mock('../slo_sparkline', () => {
+      const mocked = {
+      SloSparkline: () => <div data-test-subj="sloSparkline" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mock;
-const usePermissionsMock = usePermissions as jest.Mock;
-const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
-const useFetchCompositeHistoricalSummaryMock = useFetchCompositeHistoricalSummary as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const usePermissionsMock = usePermissions as Mock;
+const useFetchActiveAlertsMock = useFetchActiveAlerts as Mock;
+const useFetchCompositeHistoricalSummaryMock = useFetchCompositeHistoricalSummary as Mock;
 
 type CompositeSLOItem = CompositeSLOWithSummaryResponse;
 
@@ -77,26 +83,26 @@ const defaultTableProps = {
   results: [],
   pagination: { pageIndex: 0, pageSize: 25, totalItemCount: 0 },
   sort: { field: 'createdAt' as const, direction: 'desc' as const },
-  onPageChange: jest.fn(),
-  onSortChange: jest.fn(),
-  onDelete: jest.fn(),
+  onPageChange: vi.fn(),
+  onSortChange: vi.fn(),
+  onDelete: vi.fn(),
 };
 
 describe('CompositeSloTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useKibanaMock.mockReturnValue({
       services: {
         uiSettings: {
           get: (key: string) => (key === 'format:percent:defaultPattern' ? '0.0%' : ''),
         },
-        application: { navigateToApp: jest.fn() },
+        application: { navigateToApp: vi.fn() },
         http: { basePath: { prepend: (url: string) => url } },
         share: {
           url: {
             locators: {
-              get: () => ({ getRedirectUrl: jest.fn().mockReturnValue('/slos') }),
+              get: () => ({ getRedirectUrl: vi.fn().mockReturnValue('/slos') }),
             },
           },
         },

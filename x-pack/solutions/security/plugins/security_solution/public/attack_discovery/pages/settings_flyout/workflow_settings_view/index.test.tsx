@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -17,37 +20,46 @@ import type { UseFetchDefaultEsqlQueryResult } from '../workflow_configuration/h
 import * as workflowI18n from '../workflow_configuration/translations';
 import type { ValidationItem } from '../types';
 
-jest.mock('../../use_workflow_editor_link');
+vi.mock('../../use_workflow_editor_link');
 
-const mockUseWorkflowEditorLink = useWorkflowEditorLink as jest.Mock;
+const mockUseWorkflowEditorLink = useWorkflowEditorLink as Mock;
 
 const MOCK_RUN_EXAMPLE_URL = 'http://localhost:5601/s/default/app/workflows/workflow-run-example';
 
 const mockFilterManager = createFilterManagerMock();
 
-jest.mock('./alert_retrieval_step', () => ({
-  AlertRetrievalStep: () => <div data-test-subj="alertRetrievalStep" />,
-}));
+vi.mock('./alert_retrieval_step', () => {
+      const mocked = {
+      AlertRetrievalStep: () => <div data-test-subj="alertRetrievalStep" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../alert_selection/connector_field', () => ({
-  ConnectorField: ({ helpText }: { helpText?: React.ReactNode }) => (
-    <div data-test-subj="connectorField">{helpText}</div>
-  ),
-}));
+vi.mock('../alert_selection/connector_field', () => {
+      const mocked = {
+      ConnectorField: ({ helpText }: { helpText?: React.ReactNode }) => (
+        <div data-test-subj="connectorField">{helpText}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../workflow_configuration', () => ({
-  ValidationPanel: ({
-    isInvalid,
-    onChange,
-    value,
-  }: {
-    isInvalid: boolean;
-    onChange: (id: string) => void;
-    value: string;
-  }) => (
-    <div data-test-subj="validationPanel" data-is-invalid={String(isInvalid)} data-value={value} />
-  ),
-}));
+vi.mock('../workflow_configuration', () => {
+      const mocked = {
+      ValidationPanel: ({
+        isInvalid,
+        onChange,
+        value,
+      }: {
+        isInvalid: boolean;
+        onChange: (id: string) => void;
+        value: string;
+      }) => (
+        <div data-test-subj="validationPanel" data-is-invalid={String(isInvalid)} data-value={value} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultWorkflowConfiguration: WorkflowConfiguration = {
   alertRetrievalMode: 'custom_query',
@@ -60,10 +72,10 @@ const defaultWorkflowConfiguration: WorkflowConfiguration = {
 
 const defaultFetchDefaultEsqlQueryResult: UseFetchDefaultEsqlQueryResult = {
   defaultEsqlQuery: undefined,
-  fetchDefaultEsqlQuery: jest.fn().mockResolvedValue(undefined),
+  fetchDefaultEsqlQuery: vi.fn().mockResolvedValue(undefined),
   isError: false,
   isLoading: false,
-  resetCache: jest.fn(),
+  resetCache: vi.fn(),
 };
 
 const defaultProps = {
@@ -73,12 +85,12 @@ const defaultProps = {
   connectorId: 'test-connector',
   fetchDefaultEsqlQueryResult: defaultFetchDefaultEsqlQueryResult,
   filterManager: mockFilterManager,
-  onConnectorIdSelected: jest.fn(),
-  onSettingsChanged: jest.fn(),
-  onWorkflowConfigurationChange: jest.fn(),
+  onConnectorIdSelected: vi.fn(),
+  onSettingsChanged: vi.fn(),
+  onWorkflowConfigurationChange: vi.fn(),
   validationHasError: false,
-  setAlertsPreviewStackBy0: jest.fn(),
-  setAlertSummaryStackBy0: jest.fn(),
+  setAlertsPreviewStackBy0: vi.fn(),
+  setAlertSummaryStackBy0: vi.fn(),
   settings: {
     end: 'now',
     filters: [],
@@ -93,11 +105,11 @@ const defaultProps = {
 
 describe('WorkflowSettingsView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: MOCK_RUN_EXAMPLE_URL,
-      navigateToEditor: jest.fn(),
+      navigateToEditor: vi.fn(),
       resolvedWorkflowId: 'workflow-run-example',
     });
   });

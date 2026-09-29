@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import moment from 'moment-timezone';
 import { RelativeDateFormat } from './relative_date';
@@ -20,7 +22,7 @@ describe('Relative Date Format', () => {
   let convertToReact: RelativeDateFormat['convertToReact'];
 
   beforeEach(() => {
-    const relativeDate = new RelativeDateFormat({}, jest.fn());
+    const relativeDate = new RelativeDateFormat({}, vi.fn());
     convert = relativeDate.convertToText.bind(relativeDate);
     convertToReact = relativeDate.convertToReact.bind(relativeDate);
   });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { Observable } from 'rxjs';
 import { getTableActions } from '.';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -20,15 +23,15 @@ describe('getTableActions', () => {
   let tagClient: ReturnType<typeof tagClientMock.create>;
   let tagCache: ReturnType<typeof tagsCacheMock.create>;
   let assignmentService: ReturnType<typeof assignmentServiceMock.create>;
-  let setLoading: jest.MockedFunction<(loading: boolean) => void>;
-  let fetchTags: jest.MockedFunction<() => Promise<void>>;
+  let setLoading: MockedFunction<(loading: boolean) => void>;
+  let fetchTags: MockedFunction<() => Promise<void>>;
 
   beforeEach(() => {
     core = coreMock.createStart();
     tagClient = tagClientMock.create();
     tagCache = tagsCacheMock.create();
     assignmentService = assignmentServiceMock.create();
-    setLoading = jest.fn();
+    setLoading = vi.fn();
   });
 
   const getActions = (

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type {
   TermsColumn as VisualizeContextTermsColumn,
   FiltersColumn as VisualizeContextFiltersColumn,
@@ -33,8 +36,8 @@ import { documentField } from './document_field';
 import { getFieldByNameFactory } from './pure_helpers';
 import { isEqual } from 'lodash';
 
-jest.mock('./loader');
-jest.mock('../../id_generator');
+vi.mock('./loader');
+vi.mock('../../id_generator');
 
 const fieldsOne = [
   {
@@ -220,8 +223,8 @@ function getSuggestionSubset(
 describe('IndexPattern Data Source suggestions', () => {
   beforeEach(async () => {
     let count = 0;
-    jest.resetAllMocks();
-    (generateId as jest.Mock).mockImplementation(() => `id${++count}`);
+    vi.resetAllMocks();
+    (generateId as Mock).mockImplementation(() => `id${++count}`);
   });
 
   describe('#getDatasourceSuggestionsForField', () => {
@@ -907,7 +910,7 @@ describe('IndexPattern Data Source suggestions', () => {
       });
 
       it('puts a date histogram column after the last bucket column on date field', () => {
-        (generateId as jest.Mock).mockReturnValue('newid');
+        (generateId as Mock).mockReturnValue('newid');
         const initialState = stateWithNonEmptyTables();
         const suggestions = getDatasourceSuggestionsForField(
           initialState,
@@ -977,7 +980,7 @@ describe('IndexPattern Data Source suggestions', () => {
       });
 
       it('appends a terms column with default size on string field', () => {
-        (generateId as jest.Mock).mockReturnValue('newid');
+        (generateId as Mock).mockReturnValue('newid');
         const initialState = stateWithNonEmptyTables();
         const suggestions = getDatasourceSuggestionsForField(
           initialState,
@@ -1014,7 +1017,7 @@ describe('IndexPattern Data Source suggestions', () => {
       });
 
       it('suggests both replacing and adding metric if only one other metric is set', () => {
-        (generateId as jest.Mock).mockReturnValue('newid');
+        (generateId as Mock).mockReturnValue('newid');
         const initialState = stateWithNonEmptyTables();
         const suggestions = getDatasourceSuggestionsForField(
           initialState,
@@ -1069,7 +1072,7 @@ describe('IndexPattern Data Source suggestions', () => {
       });
 
       it('adds a metric column on a number field if no other metrics set', () => {
-        (generateId as jest.Mock).mockReturnValue('newid');
+        (generateId as Mock).mockReturnValue('newid');
         const initialState = stateWithNonEmptyTables();
         const modifiedState: FormBasedPrivateState = {
           ...initialState,
@@ -1203,7 +1206,7 @@ describe('IndexPattern Data Source suggestions', () => {
       });
 
       it('hides any referenced metrics when adding new metrics', () => {
-        (generateId as jest.Mock).mockReturnValue('newid');
+        (generateId as Mock).mockReturnValue('newid');
         const initialState = stateWithNonEmptyTables();
         const modifiedState: FormBasedPrivateState = {
           ...initialState,
@@ -1272,7 +1275,7 @@ describe('IndexPattern Data Source suggestions', () => {
       });
 
       it('makes a suggestion to extending from an invalid state with a new metric', () => {
-        (generateId as jest.Mock).mockReturnValue('newid');
+        (generateId as Mock).mockReturnValue('newid');
         const initialState = stateWithNonEmptyTables();
         const modifiedState: FormBasedPrivateState = {
           ...initialState,
@@ -1343,7 +1346,7 @@ describe('IndexPattern Data Source suggestions', () => {
       });
 
       it('should apply layers filter if passed and model the suggestion based on that', () => {
-        (generateId as jest.Mock).mockReturnValue('newid');
+        (generateId as Mock).mockReturnValue('newid');
         const initialState = stateWithNonEmptyTables();
 
         const modifiedState: FormBasedPrivateState = {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getEventMetadata } from './get_event_metadata';
 import { getFieldFromSource } from './get_field_from_source';
@@ -19,7 +21,7 @@ function createApmEventClientMock(hit: {
   _ignored?: string[];
 }): APMEventClient {
   return {
-    search: jest.fn().mockResolvedValue({ hits: { hits: [hit] } }),
+    search: vi.fn().mockResolvedValue({ hits: { hits: [hit] } }),
   } as unknown as APMEventClient;
 }
 

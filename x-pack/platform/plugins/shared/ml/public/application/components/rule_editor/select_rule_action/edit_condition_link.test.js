@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-jest.mock('../../../services/job_service', () => 'mlJobService');
+import { vi } from 'vitest';
+
+vi.mock('../../../services/job_service', () => 'mlJobService');
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -26,7 +28,7 @@ const testAnomaly = {
 };
 
 describe('EditConditionLink', () => {
-  const updateConditionValue = jest.fn();
+  const updateConditionValue = vi.fn();
 
   // Helper function to get common props
   const getProps = (appliesTo) => ({

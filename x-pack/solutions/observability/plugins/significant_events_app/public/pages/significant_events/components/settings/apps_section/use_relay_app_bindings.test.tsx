@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -12,15 +15,18 @@ import type { SlackAppBindingsResponse } from '@kbn/significant-events-plugin/co
 import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_relay_app_bindings';
 import { useKibana } from '../../../../../hooks/use_kibana';
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
-const httpGet = jest.fn();
-const httpPost = jest.fn();
-const addError = jest.fn();
+const httpGet = vi.fn();
+const httpPost = vi.fn();
+const addError = vi.fn();
 
 const createSetup = () => {
   const queryClient = new QueryClient({
@@ -32,12 +38,12 @@ const createSetup = () => {
   return { queryClient, wrapper };
 };
 
-const flush = (ms = 0) => act(() => jest.advanceTimersByTimeAsync(ms));
+const flush = (ms = 0) => act(() => vi.advanceTimersByTimeAsync(ms));
 
 describe('useRelayAppBindings', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       core: {
         http: { get: httpGet, post: httpPost },
@@ -47,7 +53,7 @@ describe('useRelayAppBindings', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('does not fetch when enabled is false', async () => {
@@ -128,8 +134,8 @@ describe('useRelayAppBindings', () => {
 
 describe('useBindChannel', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       core: {
         http: { get: httpGet, post: httpPost },
@@ -139,7 +145,7 @@ describe('useBindChannel', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('POSTs to the bind route and invalidates the bindings query', async () => {
@@ -192,8 +198,8 @@ describe('useBindChannel', () => {
 
 describe('useUnbindChannel', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       core: {
         http: { get: httpGet, post: httpPost },
@@ -203,7 +209,7 @@ describe('useUnbindChannel', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('POSTs to the unbind route and invalidates the bindings query', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -24,8 +26,8 @@ import { HISTORY_TAB_ID, LATEST_CHECK_TAB_ID } from '../constants';
 
 describe('IndexCheckFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('rendering', () => {
@@ -38,7 +40,7 @@ describe('IndexCheckFlyout', () => {
                 initialSelectedTabId="latest_check"
                 ilmExplain={mockIlmExplain}
                 indexName="auditbeat-custom-index-1"
-                onClose={jest.fn()}
+                onClose={vi.fn()}
                 pattern="auditbeat-*"
                 patternRollup={auditbeatWithAllResults}
                 stats={mockStats}
@@ -85,7 +87,7 @@ describe('IndexCheckFlyout', () => {
 
   describe('when flyout close is clicked', () => {
     it('should call onClose', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       render(
         <TestExternalProviders>
           <TestDataQualityProviders>
@@ -113,7 +115,7 @@ describe('IndexCheckFlyout', () => {
 
   describe('when check now button is clicked', () => {
     it('should call checkIndex', async () => {
-      const checkIndex = jest.fn();
+      const checkIndex = vi.fn();
       render(
         <TestExternalProviders>
           <TestDataQualityProviders
@@ -125,7 +127,7 @@ describe('IndexCheckFlyout', () => {
               <IndexCheckFlyout
                 ilmExplain={mockIlmExplain}
                 indexName="auditbeat-custom-index-1"
-                onClose={jest.fn()}
+                onClose={vi.fn()}
                 pattern="auditbeat-*"
                 patternRollup={auditbeatWithAllResults}
                 stats={mockStats}
@@ -152,7 +154,7 @@ describe('IndexCheckFlyout', () => {
 
   describe('when history tab is clicked', () => {
     it('should call fetchHistoricalResults and switch to history tab', async () => {
-      const fetchHistoricalResults = jest.fn();
+      const fetchHistoricalResults = vi.fn();
 
       const historicalResultsState = {
         results: [mockHistoricalResult],
@@ -171,7 +173,7 @@ describe('IndexCheckFlyout', () => {
               <IndexCheckFlyout
                 ilmExplain={mockIlmExplain}
                 indexName="auditbeat-custom-index-1"
-                onClose={jest.fn()}
+                onClose={vi.fn()}
                 pattern="auditbeat-*"
                 patternRollup={auditbeatWithAllResults}
                 stats={mockStats}

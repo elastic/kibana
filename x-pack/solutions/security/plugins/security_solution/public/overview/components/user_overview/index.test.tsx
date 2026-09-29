@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
@@ -25,9 +28,9 @@ const defaultProps = {
   loading: false,
 };
 
-jest.mock('../../../entity_analytics/api/hooks/use_risk_score');
+vi.mock('../../../entity_analytics/api/hooks/use_risk_score');
 
-const mockRiskScore = useRiskScore as jest.Mock;
+const mockRiskScore = useRiskScore as Mock;
 
 describe('User Summary Component', () => {
   const mockProps: UserSummaryProps = {
@@ -52,7 +55,7 @@ describe('User Summary Component', () => {
     isInDetailsSidePanel: false,
     isLoadingAnomaliesData: false,
     loading: false,
-    narrowDateRange: jest.fn(),
+    narrowDateRange: vi.fn(),
     startDate: '2019-06-15T06:00:00.000Z',
     indexPatterns: [],
     jobNameById: {},
@@ -61,7 +64,7 @@ describe('User Summary Component', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockRiskScore.mockReturnValue({
       ...defaultProps,
       loading: true,

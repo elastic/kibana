@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Observable } from 'rxjs';
 import { TelemetryConfigProvider } from './telemetry_config_provider';
 
@@ -32,7 +34,7 @@ describe('TelemetryConfigProvider', () => {
   });
 
   it('stop() unsubscribes from Observable', async () => {
-    const unsubscribeMock = jest.fn();
+    const unsubscribeMock = vi.fn();
     const observableMock = {
       subscribe: () => ({
         unsubscribe: unsubscribeMock,

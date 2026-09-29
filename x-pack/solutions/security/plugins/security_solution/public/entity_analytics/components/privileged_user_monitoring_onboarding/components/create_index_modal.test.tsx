@@ -5,24 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CreateIndexModal } from './create_index_modal';
 import { TestProviders } from '../../../../common/mock';
 
-const mockCreatePrivMonImportIndex = jest.fn().mockResolvedValue({});
-jest.mock('../../../api/api', () => ({
-  useEntityAnalyticsRoutes: () => ({
-    createPrivMonImportIndex: mockCreatePrivMonImportIndex,
-  }),
-}));
+const mockCreatePrivMonImportIndex = vi.fn().mockResolvedValue({});
+vi.mock('../../../api/api', () => {
+      const mocked = {
+      useEntityAnalyticsRoutes: () => ({
+        createPrivMonImportIndex: mockCreatePrivMonImportIndex,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const onCloseMock = jest.fn();
-const onCreateMock = jest.fn();
+const onCloseMock = vi.fn();
+const onCreateMock = vi.fn();
 
 describe('CreateIndexModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders modal with form fields and buttons', () => {

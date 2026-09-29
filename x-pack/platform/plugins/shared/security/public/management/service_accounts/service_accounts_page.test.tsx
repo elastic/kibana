@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { screen, waitFor } from '@testing-library/react';
 import user from '@testing-library/user-event';
@@ -46,8 +48,8 @@ describe('ServiceAccountsPage', () => {
     nextResponseCursor?: string;
     loadMoreError?: Error;
   } = {}) => {
-    const onCreateAccount = jest.fn();
-    const list = jest.fn();
+    const onCreateAccount = vi.fn();
+    const list = vi.fn();
     if (loadError) {
       list.mockRejectedValue(loadError);
     } else {

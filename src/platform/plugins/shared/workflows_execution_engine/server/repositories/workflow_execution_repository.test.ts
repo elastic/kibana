@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
   ExecutionStatus,
@@ -30,7 +32,7 @@ const asCountResponse = (value: unknown) =>
 
 describe('WorkflowExecutionRepository', () => {
   let repository: WorkflowExecutionRepository;
-  let workflowExecutionsDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
+  let workflowExecutionsDataClient: Mocked<WorkflowExecutionsDataClient>;
 
   beforeEach(() => {
     workflowExecutionsDataClient = createMockWorkflowDataClient();

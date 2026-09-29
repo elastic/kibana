@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TabPreview } from './tab_preview';
@@ -22,7 +24,7 @@ const previewTestSubj = `unifiedTabs_tabPreview_outerPanel_${tabItem.id}`;
 
 describe('TabPreview', () => {
   it('should call setShowPreview when mouse enters and change opacity after a delay', async () => {
-    const setShowPreview = jest.fn();
+    const setShowPreview = vi.fn();
 
     render(
       <TabPreview
@@ -50,7 +52,7 @@ describe('TabPreview', () => {
   });
 
   it('should call setShowPreview when mouse leaves', async () => {
-    const setShowPreview = jest.fn();
+    const setShowPreview = vi.fn();
 
     render(
       <TabPreview
@@ -77,7 +79,7 @@ describe('TabPreview', () => {
   });
 
   it('should not call setShowPreview when stopPreviewOnHover is true', async () => {
-    const setShowPreview = jest.fn();
+    const setShowPreview = vi.fn();
 
     render(
       <TabPreview

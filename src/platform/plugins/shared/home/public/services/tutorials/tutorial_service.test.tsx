@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { TutorialService } from './tutorial_service';
 
@@ -119,7 +121,7 @@ describe('TutorialService', () => {
     });
     test('returns custom status check', () => {
       const service = new TutorialService();
-      const callback = jest.fn();
+      const callback = vi.fn();
       service.setup().registerCustomStatusCheck('foo', callback);
       const customStatusCheckCallback = service.getCustomStatusCheck('foo');
       expect(customStatusCheckCallback).toBeDefined();

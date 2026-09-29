@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import { useRiskEngineStatus } from './use_risk_engine_status';
 import { useEntityAnalyticsRoutes } from '../api';
 
-jest.mock('../api');
+vi.mock('../api');
 
-const mockFetchRiskEngineStatus = jest.fn();
+const mockFetchRiskEngineStatus = vi.fn();
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
     {children}
@@ -21,8 +24,8 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  (useEntityAnalyticsRoutes as jest.Mock).mockReturnValue({
+  vi.clearAllMocks();
+  (useEntityAnalyticsRoutes as Mock).mockReturnValue({
     fetchRiskEngineStatus: mockFetchRiskEngineStatus,
   });
   mockFetchRiskEngineStatus.mockResolvedValue({ risk_engine_status: 'ENABLED' });

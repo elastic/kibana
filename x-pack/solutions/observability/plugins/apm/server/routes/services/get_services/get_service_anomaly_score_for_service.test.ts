@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getServiceAnomalyScoreForService } from './get_service_anomaly_score_for_service';
 import * as getServiceAnomaliesModule from '../../service_map/get_service_anomalies';
 
@@ -14,11 +16,11 @@ describe('getServiceAnomalyScoreForService', () => {
   >[0]['mlClient'];
 
   beforeEach(() => {
-    jest.spyOn(getServiceAnomaliesModule, 'getServiceAnomalies').mockReset();
+    vi.spyOn(getServiceAnomaliesModule, 'getServiceAnomalies').mockReset();
   });
 
   it('returns the anomaly score for the matching service', async () => {
-    jest.spyOn(getServiceAnomaliesModule, 'getServiceAnomalies').mockResolvedValue({
+    vi.spyOn(getServiceAnomaliesModule, 'getServiceAnomalies').mockResolvedValue({
       mlJobIds: ['apm-job'],
       serviceAnomalies: [
         {
@@ -57,7 +59,7 @@ describe('getServiceAnomalyScoreForService', () => {
   });
 
   it('returns empty object when the service is not in anomaly results', async () => {
-    jest.spyOn(getServiceAnomaliesModule, 'getServiceAnomalies').mockResolvedValue({
+    vi.spyOn(getServiceAnomaliesModule, 'getServiceAnomalies').mockResolvedValue({
       mlJobIds: [],
       serviceAnomalies: [
         {

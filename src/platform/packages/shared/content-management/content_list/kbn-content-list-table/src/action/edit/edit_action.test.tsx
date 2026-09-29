@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type React from 'react';
 import type { ActionBuilderContext, EditActionProps } from '../types';
 import { buildEditAction } from './edit_action';
 
 const defaultContext: ActionBuilderContext = {
   itemConfig: {
-    actions: { edit: { onItemAction: jest.fn() } },
+    actions: { edit: { onItemAction: vi.fn() } },
   },
   isReadOnly: false,
   entityName: 'dashboard',
@@ -85,7 +87,7 @@ describe('edit action builder', () => {
     });
 
     it('calls `actions.edit.onItemAction` when onClick is triggered', () => {
-      const onItemAction = jest.fn();
+      const onItemAction = vi.fn();
       const context: ActionBuilderContext = {
         ...defaultContext,
         itemConfig: { actions: { edit: { onItemAction } } },
@@ -108,7 +110,7 @@ describe('edit action builder', () => {
         const context: ActionBuilderContext = {
           ...defaultContext,
           itemConfig: {
-            actions: { edit: { onItemAction: jest.fn(), restriction: restrictManaged } },
+            actions: { edit: { onItemAction: vi.fn(), restriction: restrictManaged } },
           },
         };
 
@@ -136,7 +138,7 @@ describe('edit action builder', () => {
         const context: ActionBuilderContext = {
           ...defaultContext,
           itemConfig: {
-            actions: { edit: { onItemAction: jest.fn(), restriction: () => undefined } },
+            actions: { edit: { onItemAction: vi.fn(), restriction: () => undefined } },
           },
         };
 
@@ -149,7 +151,7 @@ describe('edit action builder', () => {
         const context: ActionBuilderContext = {
           ...defaultContext,
           itemConfig: {
-            actions: { edit: { onItemAction: jest.fn(), restriction: () => 'restricted' } },
+            actions: { edit: { onItemAction: vi.fn(), restriction: () => 'restricted' } },
           },
         };
 
@@ -163,8 +165,8 @@ describe('edit action builder', () => {
           ...defaultContext,
           itemConfig: {
             actions: {
-              edit: { onItemAction: jest.fn() },
-              delete: { onBulkAction: jest.fn(async () => {}), restriction: () => 'Cannot delete' },
+              edit: { onItemAction: vi.fn() },
+              delete: { onBulkAction: vi.fn(async () => {}), restriction: () => 'Cannot delete' },
             },
           },
         };

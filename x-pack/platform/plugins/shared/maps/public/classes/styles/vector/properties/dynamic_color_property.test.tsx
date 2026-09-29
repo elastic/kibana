@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-jest.mock('../components/vector_style_editor', () => ({
-  VectorStyleEditor: () => {
-    return <div>mockVectorStyleEditor</div>;
-  },
-}));
+import { vi } from 'vitest';
+
+vi.mock('../components/vector_style_editor', () => {
+      const mocked = {
+      VectorStyleEditor: () => {
+        return <div>mockVectorStyleEditor</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 import { shallow } from 'enzyme';

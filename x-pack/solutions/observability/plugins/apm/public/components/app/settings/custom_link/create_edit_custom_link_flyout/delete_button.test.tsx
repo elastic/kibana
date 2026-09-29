@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import React from 'react';
@@ -24,11 +26,11 @@ function Wrapper({ children }: { children?: ReactNode }) {
 
 describe('DeleteButton', () => {
   beforeAll(() => {
-    jest.spyOn(apmApi, 'callApmApi').mockResolvedValue({});
+    vi.spyOn(apmApi, 'callApmApi').mockResolvedValue({});
   });
 
   it('deletes a custom link', async () => {
-    const onDeleteMock = jest.fn();
+    const onDeleteMock = vi.fn();
     const { getByText } = render(<DeleteButton onDelete={onDeleteMock} customLinkId="1" />, {
       wrapper: Wrapper,
     });

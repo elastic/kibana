@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook, act } from '@testing-library/react';
 import { useExceptionListHeader } from './use_list_header';
 
 describe('useExceptionListHeader', () => {
-  const onEditListDetails = jest.fn();
+  const onEditListDetails = vi.fn();
   it('should return the default values', () => {
     const {
       result: { current },

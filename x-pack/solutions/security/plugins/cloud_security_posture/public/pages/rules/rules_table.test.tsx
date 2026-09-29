@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -54,19 +57,22 @@ const getWrapper =
     );
   };
 
-jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
-  uiMetricService: {
-    trackUiMetric: jest.fn(),
-  },
-  CHANGE_RULE_STATE: 'cloud_security_posture.rule.change_state',
-}));
+vi.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => {
+      const mocked = {
+      uiMetricService: {
+        trackUiMetric: vi.fn(),
+      },
+      CHANGE_RULE_STATE: 'cloud_security_posture.rule.change_state',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_change_csp_rule_state');
+vi.mock('./use_change_csp_rule_state');
 
 describe('RulesTable', () => {
   const Wrapper = getWrapper();
   const mockProps = {
-    setPagination: jest.fn(),
+    setPagination: vi.fn(),
     perPage: 25,
     rules_page: selectRulesMock as CspBenchmarkRulesWithStates[],
     page: 0,
@@ -75,17 +81,17 @@ describe('RulesTable', () => {
     error: undefined,
     selectedRuleId: undefined,
     selectedRules: [],
-    setSelectedRules: jest.fn(),
-    onRuleClick: jest.fn(),
-    onSortChange: jest.fn(),
+    setSelectedRules: vi.fn(),
+    onRuleClick: vi.fn(),
+    onSortChange: vi.fn(),
   };
 
   beforeEach(() => {
-    (useChangeCspRuleState as jest.Mock).mockReturnValue({
-      mutate: jest.fn(),
+    (useChangeCspRuleState as Mock).mockReturnValue({
+      mutate: vi.fn(),
       isLoading: false,
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders table with correct test id', () => {
@@ -115,8 +121,8 @@ describe('RulesTable', () => {
   });
 
   it('calls mutateRulesStates with correct params when toggling rule state', async () => {
-    const mutateMock = jest.fn();
-    (useChangeCspRuleState as jest.Mock).mockReturnValue({
+    const mutateMock = vi.fn();
+    (useChangeCspRuleState as Mock).mockReturnValue({
       mutate: mutateMock,
       isLoading: false,
     });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { getExternalAlertLensAttributes } from './lens_attributes/common/external_alert';
@@ -32,30 +35,39 @@ import {
   withIndices,
 } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('generated-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('generated-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/route/use_route_spy', () => ({
-  useRouteSpy: jest.fn(),
-}));
+vi.mock('../../utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_global_filter_query', () => ({
-  useGlobalFilterQuery: () => () => ({
-    filterQuery: undefined,
-  }),
-}));
+vi.mock('../../hooks/use_global_filter_query', () => {
+      const mocked = {
+      useGlobalFilterQuery: () => () => ({
+        filterQuery: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const params = {
   euiTheme: {} as EuiThemeComputed,
 };
 describe('useLensAttributes', () => {
   beforeAll(() => {
-    jest.mocked(useDataView).mockReturnValue(withIndices(['auditbeat-*']));
+    vi.mocked(useDataView).mockReturnValue(withIndices(['auditbeat-*']));
   });
 
   beforeEach(() => {
-    (useRouteSpy as jest.Mock).mockReturnValue([
+    (useRouteSpy as Mock).mockReturnValue([
       {
         detailName: 'mockHost',
         pageName: 'hosts',
@@ -116,7 +128,7 @@ describe('useLensAttributes', () => {
   });
 
   it('skips user.name exists tab filter when entityStoreV2Enabled on users page', () => {
-    (useRouteSpy as jest.Mock).mockReturnValue([
+    (useRouteSpy as Mock).mockReturnValue([
       {
         detailName: 'elastic',
         pageName: SecurityPageName.users,
@@ -142,7 +154,7 @@ describe('useLensAttributes', () => {
   });
 
   it('should add correct filters - network details', () => {
-    (useRouteSpy as jest.Mock).mockReturnValue([
+    (useRouteSpy as Mock).mockReturnValue([
       {
         detailName: '192.168.1.1',
         pageName: 'network',
@@ -168,7 +180,7 @@ describe('useLensAttributes', () => {
   });
 
   it('should add correct filters - user details', () => {
-    (useRouteSpy as jest.Mock).mockReturnValue([
+    (useRouteSpy as Mock).mockReturnValue([
       {
         detailName: 'elastic',
         pageName: 'user',
@@ -193,7 +205,7 @@ describe('useLensAttributes', () => {
   });
 
   it('should not apply global queries and filters - applyGlobalQueriesAndFilters = false', () => {
-    (useRouteSpy as jest.Mock).mockReturnValue([
+    (useRouteSpy as Mock).mockReturnValue([
       {
         detailName: undefined,
         pageName: SecurityPageName.entityAnalytics,
@@ -220,7 +232,7 @@ describe('useLensAttributes', () => {
 
   it('should apply esql query and filter', () => {
     const esql = 'SELECT * FROM test-*';
-    (useRouteSpy as jest.Mock).mockReturnValue([
+    (useRouteSpy as Mock).mockReturnValue([
       {
         detailName: undefined,
         pageName: SecurityPageName.entityAnalytics,
@@ -248,7 +260,7 @@ describe('useLensAttributes', () => {
   });
 
   it('should not apply tabs and pages when applyPageAndTabsFilters = false', () => {
-    (useRouteSpy as jest.Mock).mockReturnValue([
+    (useRouteSpy as Mock).mockReturnValue([
       {
         detailName: 'elastic',
         pageName: 'user',
@@ -326,7 +338,7 @@ describe('useLensAttributes', () => {
   });
 
   it('should return null if no indices exist', () => {
-    jest.mocked(useDataView).mockImplementation(defaultImplementation);
+    vi.mocked(useDataView).mockImplementation(defaultImplementation);
 
     const { result } = renderHook(
       () =>
@@ -373,7 +385,7 @@ describe('useLensAttributes', () => {
     // The "should return null if no indices exist" test (above this one in execution order)
     // changes useDataView to the default (no matched indices), so restore it here.
     // The scope includes both event and alert-backing index patterns.
-    jest
+    vi
       .mocked(useDataView)
       .mockReturnValue(withIndices(['auditbeat-*', '.alerts-security.alerts-default']));
 
@@ -413,7 +425,7 @@ describe('useLensAttributes', () => {
   });
 
   it('signalIndexName scope is maintained even when excludedPatterns is also provided', () => {
-    jest.mocked(useDataView).mockReturnValue(withIndices(['auditbeat-*']));
+    vi.mocked(useDataView).mockReturnValue(withIndices(['auditbeat-*']));
 
     // When signalIndexName is present the negated-exclusion path is bypassed so that
     // the Alerts trend chart always scopes to the local signal index only.

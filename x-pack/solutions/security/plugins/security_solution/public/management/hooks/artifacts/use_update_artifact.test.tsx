@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { useUpdateArtifact } from './use_update_artifact';
 import type { HttpSetup } from '@kbn/core/public';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
@@ -20,7 +23,7 @@ import { act } from '@testing-library/react';
 describe('Update artifact hook', () => {
   let result: ReturnType<typeof useUpdateArtifact>;
 
-  let fakeHttpServices: jest.Mocked<HttpSetup>;
+  let fakeHttpServices: Mocked<HttpSetup>;
   let instance: ExceptionsListApiClient;
 
   beforeEach(() => {
@@ -37,7 +40,7 @@ describe('Update artifact hook', () => {
 
     fakeHttpServices.put.mockClear();
     fakeHttpServices.put.mockResolvedValueOnce(exceptionItem);
-    const onSuccessMock: jest.Mock = jest.fn();
+    const onSuccessMock: Mock = vi.fn();
 
     result = await renderMutation(() =>
       useUpdateArtifact(instance, {
@@ -70,7 +73,7 @@ describe('Update artifact hook', () => {
     fakeHttpServices.put.mockClear();
     fakeHttpServices.put.mockRejectedValue(error);
 
-    const onErrorMock: jest.Mock = jest.fn();
+    const onErrorMock: Mock = vi.fn();
 
     result = await renderMutation(() =>
       useUpdateArtifact(instance, {

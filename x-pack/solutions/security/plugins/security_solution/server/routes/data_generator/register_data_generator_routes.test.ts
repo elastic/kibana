@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
@@ -21,10 +24,10 @@ describe('registerDataGeneratorRoutes', () => {
   const defaultTimestamp = '2026-01-01T00:00:00.000Z';
 
   let router: RouterMock;
-  let getStartServices: jest.MockedFunction<StartServicesAccessor<StartPlugins>>;
+  let getStartServices: MockedFunction<StartServicesAccessor<StartPlugins>>;
 
   let coreStart: ReturnType<typeof coreMock.createStart>;
-  let internalRepo: { update: jest.Mock };
+  let internalRepo: { update: Mock };
   let pluginsStart: Partial<StartPlugins>;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
 
@@ -35,7 +38,7 @@ describe('registerDataGeneratorRoutes', () => {
 
   const createContext = (): SecuritySolutionRequestHandlerContext => {
     const securitySolutionContext = {
-      getSpaceId: jest.fn().mockReturnValue('default'),
+      getSpaceId: vi.fn().mockReturnValue('default'),
     } as Pick<SecuritySolutionApiRequestHandlerContext, 'getSpaceId'>;
 
     return {
@@ -67,11 +70,11 @@ describe('registerDataGeneratorRoutes', () => {
     mockResponse = httpServerMock.createResponseFactory();
 
     coreStart = coreMock.createStart();
-    internalRepo = { update: jest.fn().mockResolvedValue({}) };
-    (coreStart.savedObjects.createInternalRepository as jest.Mock).mockReturnValue(
+    internalRepo = { update: vi.fn().mockResolvedValue({}) };
+    (coreStart.savedObjects.createInternalRepository as Mock).mockReturnValue(
       internalRepo as unknown as ReturnType<typeof coreStart.savedObjects.createInternalRepository>
     );
-    (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+    (coreStart.security.authc.getCurrentUser as Mock).mockReturnValue({
       username: 'elastic',
       roles: ['superuser'],
       authentication_type: 'realm',
@@ -80,14 +83,14 @@ describe('registerDataGeneratorRoutes', () => {
       elastic_cloud_user: false,
     });
 
-    const casesGet = jest.fn().mockResolvedValue({ id: 'case-1' });
+    const casesGet = vi.fn().mockResolvedValue({ id: 'case-1' });
     pluginsStart = {
       cases: {
-        getCasesClientWithRequest: jest.fn().mockResolvedValue({ cases: { get: casesGet } }),
+        getCasesClientWithRequest: vi.fn().mockResolvedValue({ cases: { get: casesGet } }),
       } as unknown as StartPlugins['cases'],
     };
 
-    getStartServices = jest
+    getStartServices = vi
       .fn()
       .mockResolvedValue([
         coreStart as unknown as typeof coreStart,
@@ -107,7 +110,7 @@ describe('registerDataGeneratorRoutes', () => {
   });
 
   it('returns forbidden when the current user is not privileged', async () => {
-    (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+    (coreStart.security.authc.getCurrentUser as Mock).mockReturnValue({
       username: 'elastic',
       roles: [],
       authentication_type: 'realm',

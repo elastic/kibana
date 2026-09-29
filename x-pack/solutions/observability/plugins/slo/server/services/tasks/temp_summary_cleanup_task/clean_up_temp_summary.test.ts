@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CleanUpTempSummary } from './clean_up_temp_summary';
@@ -28,7 +30,7 @@ describe('CleanUpTempSummary', () => {
   let service: CleanUpTempSummary;
 
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2025-02-10T15:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2025-02-10T15:00:00.000Z'));
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     service = new CleanUpTempSummary(
       esClientMock,
@@ -38,7 +40,7 @@ describe('CleanUpTempSummary', () => {
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns early if there is no temporary documents', async () => {

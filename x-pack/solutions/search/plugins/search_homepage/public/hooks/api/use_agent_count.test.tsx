@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -13,17 +16,17 @@ import { useGetLicenseInfo } from '../use_get_license_info';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAgentCount } from './use_agent_count';
 
-jest.mock('../use_kibana');
-jest.mock('../use_get_license_info');
+vi.mock('../use_kibana');
+vi.mock('../use_get_license_info');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseGetLicenseInfo = useGetLicenseInfo as jest.MockedFunction<typeof useGetLicenseInfo>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseGetLicenseInfo = useGetLicenseInfo as MockedFunction<typeof useGetLicenseInfo>;
 
 const mockToolsService = {
-  list: jest.fn().mockReturnValue(Promise.resolve([])),
+  list: vi.fn().mockReturnValue(Promise.resolve([])),
 };
 const mockAgentsService = {
-  list: jest.fn().mockReturnValue(Promise.resolve([])),
+  list: vi.fn().mockReturnValue(Promise.resolve([])),
 };
 const mockAgentBuilderService = {
   tools: mockToolsService,
@@ -37,7 +40,7 @@ const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
 
 describe('useAgentCount', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
 
     mockUseKibana.mockReturnValue({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -32,14 +34,14 @@ import { TestProviders } from '../../mock';
 import { getHostDetailsUrl, getUsersDetailsUrl } from '../link_to';
 import { EntityType } from '../../../../common/entity_analytics/types';
 
-jest.mock('@kbn/security-solution-navigation/src/navigation');
-jest.mock('../navigation/use_url_state_query_params');
-jest.mock('../../../overview/components/events_by_dataset');
+vi.mock('@kbn/security-solution-navigation/src/navigation');
+vi.mock('../navigation/use_url_state_query_params');
+vi.mock('../../../overview/components/events_by_dataset');
 
-const mockNavigateToApp = jest.fn();
-const mockUseUiSetting$ = jest.fn();
-jest.mock('../../lib/kibana', () => {
-  const original = jest.requireActual('../../lib/kibana');
+const mockNavigateToApp = vi.fn();
+const mockUseUiSetting$ = vi.fn();
+vi.mock('../../lib/kibana', async () => {
+  const original = (await vi.importActual('../../lib/kibana'));
   return {
     ...original,
     useKibana: () => ({

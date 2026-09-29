@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { DataStreamClient } from '@kbn/data-streams';
@@ -13,23 +16,29 @@ import { FLAGS } from './constants';
 import { ChangeHistoryClient } from './client';
 import type { ObjectChange } from './types';
 
-jest.mock('@kbn/data-streams', () => ({
-  DataStreamClient: {
-    initialize: jest.fn(),
-  },
-}));
+vi.mock('@kbn/data-streams', () => {
+      const mocked = {
+      DataStreamClient: {
+        initialize: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/apm-utils', () => ({
-  withSpan: jest.fn(<T>(_opts: unknown, cb: () => Promise<T>) => cb()),
-}));
+vi.mock('@kbn/apm-utils', () => {
+      const mocked = {
+      withSpan: vi.fn(<T>(_opts: unknown, cb: () => Promise<T>) => cb()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
+const withSpanMock = withSpan as MockedFunction<typeof withSpan>;
 
-const DataStreamClientMock = DataStreamClient as jest.Mocked<typeof DataStreamClient>;
+const DataStreamClientMock = DataStreamClient as Mocked<typeof DataStreamClient>;
 
 const dataStreamClientMock = {
-  create: jest.fn().mockResolvedValue(undefined),
-  search: jest.fn().mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } }),
+  create: vi.fn().mockResolvedValue(undefined),
+  search: vi.fn().mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } }),
 };
 
 describe('ChangeHistoryClient', () => {
@@ -53,7 +62,7 @@ describe('ChangeHistoryClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initialize', () => {
@@ -439,7 +448,7 @@ describe('ChangeHistoryClient.logBulk', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('re-throws the original ES error without wrapping so retry classifiers can read .name', async () => {
@@ -447,7 +456,7 @@ describe('ChangeHistoryClient.logBulk', () => {
       name: 'NoLivingConnectionsError',
     });
     const dataStreamClient = {
-      create: jest.fn().mockRejectedValue(noLivingConnections),
+      create: vi.fn().mockRejectedValue(noLivingConnections),
     };
     DataStreamClientMock.initialize.mockResolvedValue(dataStreamClient as never);
 

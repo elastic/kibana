@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, screen } from '@testing-library/react';
@@ -24,11 +26,14 @@ import {
   createUpdateIndexState,
 } from '../test_utils/helpers';
 
-const mockUseIndexContext = jest.fn<IndexStateContext, []>();
+const mockUseIndexContext = vi.fn<IndexStateContext, []>();
 
-jest.mock('./context', () => ({
-  useIndexContext: () => mockUseIndexContext(),
-}));
+vi.mock('./context', () => {
+      const mocked = {
+      useIndexContext: () => mockUseIndexContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseDeprecation = {
   level: 'critical',
@@ -65,9 +70,9 @@ const unfreezeDeprecation = {
 } satisfies EnrichedDeprecationInfo;
 
 describe('ReindexActionCell', () => {
-  const mockOpenFlyout = jest.fn<void, []>();
-  const mockOpenModal = jest.fn<void, []>();
-  const mockSetSelectedResolutionType = jest.fn<void, [step: string]>();
+  const mockOpenFlyout = vi.fn<void, []>();
+  const mockOpenModal = vi.fn<void, []>();
+  const mockSetSelectedResolutionType = vi.fn<void, [step: string]>();
 
   beforeEach(() => {
     mockUseIndexContext.mockReset();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { createConnectorRoute } from './create';
 import { httpServiceMock } from '@kbn/core/server/mocks';
@@ -22,13 +25,16 @@ import {
 import { createMockConnector } from '../../../application/connector/mocks';
 import { actionsConfigMock } from '../../../actions_config.mock';
 
-jest.mock('../../verify_access_and_context', () => ({
-  verifyAccessAndContext: jest.fn(),
-}));
+vi.mock('../../verify_access_and_context', () => {
+      const mocked = {
+      verifyAccessAndContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
-  (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
+  vi.resetAllMocks();
+  (verifyAccessAndContext as Mock).mockImplementation((license, handler) => handler);
 });
 
 const setupRoute = ({ inboundEventsFeatureEnabled = false } = {}) => {
@@ -193,7 +199,7 @@ describe('createConnectorRoute', () => {
   });
 
   it('ensures the license check prevents creating actions', async () => {
-    (verifyAccessAndContext as jest.Mock).mockImplementation(() => async () => {
+    (verifyAccessAndContext as Mock).mockImplementation(() => async () => {
       throw new Error('OMG');
     });
 

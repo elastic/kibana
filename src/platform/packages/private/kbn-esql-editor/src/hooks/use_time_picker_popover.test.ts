@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { monaco } from '@kbn/code-editor';
 import { useTimePickerPopover } from './use_time_picker_popover';
@@ -16,26 +19,26 @@ describe('useTimePickerPopover', () => {
   const createMockEditorRef = () => {
     const ref: React.MutableRefObject<Partial<monaco.editor.IStandaloneCodeEditor> | undefined> = {
       current: {
-        getPosition: jest.fn().mockReturnValue({ lineNumber: 1, column: 5 }),
-        getDomNode: jest.fn().mockReturnValue({
+        getPosition: vi.fn().mockReturnValue({ lineNumber: 1, column: 5 }),
+        getDomNode: vi.fn().mockReturnValue({
           getBoundingClientRect: () => ({ top: 100, left: 50, width: 800, right: 850 }),
         }),
-        getScrolledVisiblePosition: jest.fn().mockReturnValue({ top: 20, left: 40 }),
+        getScrolledVisiblePosition: vi.fn().mockReturnValue({ top: 20, left: 40 }),
       },
     };
     return ref as React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   };
 
   const createMockPopoverRef = (): React.MutableRefObject<HTMLDivElement | null> => ({
-    current: { focus: jest.fn() } as unknown as HTMLDivElement,
+    current: { focus: vi.fn() } as unknown as HTMLDivElement,
   });
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns initial state', () => {
@@ -59,7 +62,7 @@ describe('useTimePickerPopover', () => {
     act(() => {
       result.current.openTimePickerPopover();
       // Flush requestAnimationFrame for the deferred focus call
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     // absoluteTop = editorTop (100) + editorPosition.top (20) + 25 = 145
@@ -72,7 +75,7 @@ describe('useTimePickerPopover', () => {
     const editorRef = createMockEditorRef();
     // Cursor far right: absoluteLeft = 50 + 800 = 850
     // 850 + DATEPICKER_WIDTH(373) = 1223 > editorCoords.right(850) → triggers adjustment
-    (editorRef.current!.getScrolledVisiblePosition as jest.Mock).mockReturnValue({
+    (editorRef.current!.getScrolledVisiblePosition as Mock).mockReturnValue({
       top: 20,
       left: 800,
     });
@@ -105,7 +108,7 @@ describe('useTimePickerPopover', () => {
 
   it('does nothing when editor has no cursor position', () => {
     const editorRef = createMockEditorRef();
-    (editorRef.current!.getPosition as jest.Mock).mockReturnValue(null);
+    (editorRef.current!.getPosition as Mock).mockReturnValue(null);
     const popoverRef = createMockPopoverRef();
 
     const { result } = renderHook(() => useTimePickerPopover({ editorRef, popoverRef }));

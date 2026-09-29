@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useTagsAction } from './use_tags_action';
 
@@ -14,14 +16,14 @@ import { TestProviders } from '../../../common/mock';
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 
-jest.mock('../../../containers/api');
+vi.mock('../../../containers/api');
 
 describe('useTagsAction', () => {
-  const onAction = jest.fn();
-  const onActionSuccess = jest.fn();
+  const onAction = vi.fn();
+  const onActionSuccess = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders an action', async () => {
@@ -54,7 +56,7 @@ describe('useTagsAction', () => {
   });
 
   it('update the tags correctly', async () => {
-    const updateSpy = jest.spyOn(api, 'updateCases');
+    const updateSpy = vi.spyOn(api, 'updateCases');
 
     const { result } = renderHook(
       () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),

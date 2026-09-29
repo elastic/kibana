@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createMemoryHistory } from 'history';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { render } from '../utils/testing';
@@ -129,7 +131,7 @@ const createBreadcrumbsCore = (): {
       application: {
         getUrlForApp: (app: string) =>
           app === 'synthetics' ? '/app/synthetics' : '/app/observability',
-        navigateToUrl: jest.fn(),
+        navigateToUrl: vi.fn(),
       } as unknown as CoreStart['application'],
       chrome: {
         ...defaultCoreMock.chrome,

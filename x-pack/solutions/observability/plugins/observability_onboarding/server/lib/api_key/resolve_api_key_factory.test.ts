@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ApiEndpointId } from '../../../common/api_endpoints';
 import { resolveApiKeyFactory } from './resolve_api_key_factory';
@@ -13,16 +15,16 @@ import { createManagedOtlpServiceApiKey } from './create_managed_otlp_service_ap
 import { createPrometheusApiKey } from './create_prometheus_api_key';
 import { createEsOtlpApiKey } from './create_es_otlp_api_key';
 
-jest.mock('./create_shipper_api_key');
-jest.mock('./create_managed_otlp_service_api_key');
-jest.mock('./create_prometheus_api_key');
-jest.mock('./create_es_otlp_api_key');
+vi.mock('./create_shipper_api_key');
+vi.mock('./create_managed_otlp_service_api_key');
+vi.mock('./create_prometheus_api_key');
+vi.mock('./create_es_otlp_api_key');
 
 const esClient = {} as unknown as ElasticsearchClient;
 
 describe('resolveApiKeyFactory', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('OpenTelemetry', () => {

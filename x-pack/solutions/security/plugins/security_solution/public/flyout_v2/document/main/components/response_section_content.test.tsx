@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { fireEvent, render } from '@testing-library/react';
@@ -17,12 +19,15 @@ import {
 import { ResponseSectionContent } from './response_section_content';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 
-jest.mock('../../../shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
+vi.mock('../../../shared/hooks/use_expand_section', () => {
+      const mocked = {
+      useExpandSection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
-const onShowResponseDetails = jest.fn();
+const onShowResponseDetails = vi.fn();
 
 const createMockHit = (
   flattened: DataTableRecord['flattened'],
@@ -63,10 +68,10 @@ const renderResponseSectionContent = ({ hit = alertMockHit }: { hit?: DataTableR
   );
 
 describe('<ResponseSectionContent />', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseExpandSection = vi.mocked(useExpandSection);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseExpandSection.mockReturnValue(true);
   });
 

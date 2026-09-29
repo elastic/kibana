@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import type { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 import { getGapsSummaryForRule } from './get_gaps_summary_for_rule';
@@ -19,7 +21,7 @@ describe('getGapsSummaryForRule', () => {
 
   beforeEach(() => {
     rulesClient = {
-      getGapsSummaryByRuleIds: jest.fn().mockResolvedValue({ data: [] }),
+      getGapsSummaryByRuleIds: vi.fn().mockResolvedValue({ data: [] }),
     } as unknown as RulesClient;
     ruleId = 'rule-1';
     interval = {
@@ -38,7 +40,7 @@ describe('getGapsSummaryForRule', () => {
   });
 
   it('should return gaps summary for rule', async () => {
-    rulesClient.getGapsSummaryByRuleIds = jest.fn().mockResolvedValue({
+    rulesClient.getGapsSummaryByRuleIds = vi.fn().mockResolvedValue({
       data: [
         {
           ruleId,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as getAllMonitors from '../../saved_objects/synthetics_monitor/process_monitors';
 import * as getCertsFacets from '../../queries/get_certs_facets';
 import { getSyntheticsCertsFacetsRoute } from './get_certificates_facets';
@@ -12,11 +14,11 @@ import { getSyntheticsCertsFacetsRoute } from './get_certificates_facets';
 const serverlessServer = { isElasticsearchServerless: true } as any;
 
 describe('getSyntheticsCertsFacetsRoute', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('forwards showFromAllSpaces to getAll and the facets query', async () => {
     // @ts-expect-error partial implementation for testing
-    jest.spyOn(getAllMonitors, 'processMonitors').mockReturnValue({
+    vi.spyOn(getAllMonitors, 'processMonitors').mockReturnValue({
       enabledMonitorQueryIds: ['other-id'],
     });
     const facets = {
@@ -27,17 +29,17 @@ describe('getSyntheticsCertsFacetsRoute', () => {
       certOrigin: [],
       expiringWithin: [],
     };
-    const getSyntheticsCertsFacetsSpy = jest
+    const getSyntheticsCertsFacetsSpy = vi
       .spyOn(getCertsFacets, 'getSyntheticsCertsFacets')
       .mockResolvedValue(facets);
-    const getAll = jest.fn().mockReturnValue([{ id: 'other-id' }]);
+    const getAll = vi.fn().mockReturnValue([{ id: 'other-id' }]);
     const route = getSyntheticsCertsFacetsRoute();
 
     const result = await route.handler({
       // @ts-expect-error partial implementation for testing
       request: { query: { showFromAllSpaces: true } },
       // @ts-expect-error partial implementation for testing
-      syntheticsEsClient: jest.fn(),
+      syntheticsEsClient: vi.fn(),
       // @ts-expect-error partial implementation for testing
       monitorConfigRepository: { getAll },
       server: serverlessServer,

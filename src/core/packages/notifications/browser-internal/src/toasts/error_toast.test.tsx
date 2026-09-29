@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getErrorToastActionProps } from './error_toast';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-let openModal: jest.Mock;
+let openModal: Mock;
 const mockRendering = renderingServiceMock.create();
 
-beforeEach(() => (openModal = jest.fn()));
+beforeEach(() => (openModal = vi.fn()));
 
 it('returns actionProps with a primary action', () => {
   const props = getErrorToastActionProps({

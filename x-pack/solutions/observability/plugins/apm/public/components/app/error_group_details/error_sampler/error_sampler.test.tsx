@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
@@ -14,48 +16,63 @@ import { ErrorSampler } from '.';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
-const mockUseFetcher = jest.fn();
+const mockUseFetcher = vi.fn();
 
-jest.mock('../../../../hooks/use_fetcher', () => ({
-  useFetcher: () => mockUseFetcher(),
-  isPending: jest.fn((status: string) => status === 'loading' || status === 'not_initiated'),
-  isSuccess: jest.fn((status: string) => status === 'success'),
-  isFailure: jest.fn((status: string) => status === 'failure'),
-  FETCH_STATUS: {
-    LOADING: 'loading',
-    SUCCESS: 'success',
-    FAILURE: 'failure',
-    NOT_INITIATED: 'not_initiated',
-  },
-}));
+vi.mock('../../../../hooks/use_fetcher', () => {
+      const mocked = {
+      useFetcher: () => mockUseFetcher(),
+      isPending: vi.fn((status: string) => status === 'loading' || status === 'not_initiated'),
+      isSuccess: vi.fn((status: string) => status === 'success'),
+      isFailure: vi.fn((status: string) => status === 'failure'),
+      FETCH_STATUS: {
+        LOADING: 'loading',
+        SUCCESS: 'success',
+        FAILURE: 'failure',
+        NOT_INITIATED: 'not_initiated',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: () => ({
-    path: { groupId: 'test-group-id' },
-    query: {
-      rangeFrom: 'now-24h',
-      rangeTo: 'now',
-      environment: 'ENVIRONMENT_ALL',
-      kuery: '',
-      errorId: 'error-id-1',
-    },
-  }),
-}));
+vi.mock('../../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useAnyOfApmParams: () => ({
+        path: { groupId: 'test-group-id' },
+        query: {
+          rangeFrom: 'now-24h',
+          rangeTo: 'now',
+          environment: 'ENVIRONMENT_ALL',
+          kuery: '',
+          errorId: 'error-id-1',
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../context/apm_service/use_apm_service_context', () => ({
-  useApmServiceContext: () => ({ serviceName: 'test-service' }),
-}));
+vi.mock('../../../../context/apm_service/use_apm_service_context', () => {
+      const mocked = {
+      useApmServiceContext: () => ({ serviceName: 'test-service' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_time_range', () => ({
-  useTimeRange: () => ({
-    start: '2025-01-01T00:00:00.000Z',
-    end: '2025-01-02T00:00:00.000Z',
-  }),
-}));
+vi.mock('../../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => ({
+        start: '2025-01-01T00:00:00.000Z',
+        end: '2025-01-02T00:00:00.000Z',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./error_sample_contextual_insight', () => ({
-  ErrorSampleContextualInsight: () => null,
-}));
+vi.mock('./error_sample_contextual_insight', () => {
+      const mocked = {
+      ErrorSampleContextualInsight: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -83,7 +100,7 @@ const minimalErrorData = {
 
 describe('ErrorSampler', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows spinner while loading', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Path from 'path';
 import Fs from 'fs';
 
@@ -18,14 +20,14 @@ import type { Platform } from '../../lib';
 import { Config } from '../../lib';
 import { VerifyExistingNodeBuilds } from './verify_existing_node_builds_task';
 
-jest.mock('./node_shasums');
-jest.mock('./node_download_info');
-jest.mock('../../lib/fs');
-jest.mock('../../lib/get_build_number');
+vi.mock('./node_shasums');
+vi.mock('./node_download_info');
+vi.mock('../../lib/fs');
+vi.mock('../../lib/get_build_number');
 
-const { getNodeShasums } = jest.requireMock('./node_shasums');
-const { getNodeDownloadInfo } = jest.requireMock('./node_download_info');
-const { getFileHash } = jest.requireMock('../../lib/fs');
+const { getNodeShasums } = (await vi.importMock('./node_shasums'));
+const { getNodeDownloadInfo } = (await vi.importMock('./node_download_info'));
+const { getFileHash } = (await vi.importMock('../../lib/fs'));
 
 const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();
@@ -98,7 +100,7 @@ async function setup(actualShaSums?: Record<string, string>) {
 
 beforeEach(() => {
   testWriter.messages.length = 0;
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 it('checks shasums for each downloaded node build', async () => {

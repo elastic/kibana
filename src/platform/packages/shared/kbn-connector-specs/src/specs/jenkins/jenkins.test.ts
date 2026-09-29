@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { Jenkins } from './jenkins';
@@ -18,13 +20,13 @@ interface TestResult {
 }
 
 describe('Jenkins connector', () => {
-  const mockRequest = jest.fn();
+  const mockRequest = vi.fn();
   const mockClient = { request: mockRequest };
 
   const mockContext = {
     client: mockClient,
     config: { baseUrl: BASE_URL },
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   const okResponse = (data: unknown, headers: Record<string, string> = {}) => ({
@@ -33,7 +35,7 @@ describe('Jenkins connector', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('metadata', () => {

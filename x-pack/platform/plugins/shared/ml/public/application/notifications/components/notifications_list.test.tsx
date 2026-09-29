@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { type FC, type PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, waitFor } from '@testing-library/react';
@@ -12,37 +14,37 @@ import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-
 import { NotificationsList } from './notifications_list';
 import { useMlKibana } from '../../contexts/kibana';
 
-jest.mock('../../contexts/kibana');
-jest.mock('../../services/toast_notification_service');
-jest.mock('../../contexts/ml/ml_notifications_context');
-jest.mock('../../contexts/kibana/use_field_formatter');
-jest.mock('../../components/saved_objects_warning');
-jest.mock('../../capabilities/check_capabilities');
+vi.mock('../../contexts/kibana');
+vi.mock('../../services/toast_notification_service');
+vi.mock('../../contexts/ml/ml_notifications_context');
+vi.mock('../../contexts/kibana/use_field_formatter');
+vi.mock('../../components/saved_objects_warning');
+vi.mock('../../capabilities/check_capabilities');
 
 const getMockedTimefilter = () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { of } = require('rxjs');
   return {
     timefilter: {
-      disableTimeRangeSelector: jest.fn(),
-      disableAutoRefreshSelector: jest.fn(),
-      enableTimeRangeSelector: jest.fn(),
-      enableAutoRefreshSelector: jest.fn(),
-      getRefreshInterval: jest.fn(),
-      setRefreshInterval: jest.fn(),
-      getTime: jest.fn(() => {
+      disableTimeRangeSelector: vi.fn(),
+      disableAutoRefreshSelector: vi.fn(),
+      enableTimeRangeSelector: vi.fn(),
+      enableAutoRefreshSelector: vi.fn(),
+      getRefreshInterval: vi.fn(),
+      setRefreshInterval: vi.fn(),
+      getTime: vi.fn(() => {
         return { from: '', to: '' };
       }),
-      setTime: jest.fn(),
-      isAutoRefreshSelectorEnabled: jest.fn(),
-      isTimeRangeSelectorEnabled: jest.fn(),
-      getRefreshIntervalUpdate$: jest.fn(),
-      getTimeUpdate$: jest.fn(() => {
+      setTime: vi.fn(),
+      isAutoRefreshSelectorEnabled: vi.fn(),
+      isTimeRangeSelectorEnabled: vi.fn(),
+      getRefreshIntervalUpdate$: vi.fn(),
+      getTimeUpdate$: vi.fn(() => {
         return of();
       }),
-      getEnabledUpdated$: jest.fn(),
+      getEnabledUpdated$: vi.fn(),
     },
-    history: { get: jest.fn() },
+    history: { get: vi.fn() },
   };
 };
 
@@ -67,18 +69,18 @@ const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
 
 describe('NotificationsList', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   test('starts fetching notification on mount with default params', async () => {
     const {} = render(<NotificationsList />, { wrapper: Wrapper });
 
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     await waitFor(() => {
       expect(

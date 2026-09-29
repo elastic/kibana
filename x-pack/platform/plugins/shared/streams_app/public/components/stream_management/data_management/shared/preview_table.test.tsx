@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -23,13 +25,16 @@ const mockKibana = {
   },
 };
 
-jest.mock('../../../../hooks/use_kibana', () => ({
-  useKibana: () => mockKibana,
-}));
+vi.mock('../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => mockKibana,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // EuiDataGrid relies on ColumnHeaderTruncateContainer which imports from kbn-unified-data-table.
 // Provide a lightweight stub so the module resolves without loading the full package.
-jest.mock('@kbn/unified-data-table/src/components/column_header_truncate_container', () => ({
+vi.mock('@kbn/unified-data-table/src/components/column_header_truncate_container', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));

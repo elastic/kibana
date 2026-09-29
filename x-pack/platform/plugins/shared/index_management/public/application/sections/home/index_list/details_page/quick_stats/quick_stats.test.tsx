@@ -5,33 +5,56 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { QuickStats } from './quick_stats';
 import { useAppContext } from '../../../../../app_context';
 import { loadIndexVectorCount } from '../../../../../services/api';
 
-jest.mock('../../../../../app_context', () => ({
-  useAppContext: jest.fn(),
-}));
+vi.mock('../../../../../app_context', () => {
+      const mocked = {
+      useAppContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../services/api', () => ({
-  loadIndexDocCount: jest.fn().mockResolvedValue({ data: { 'test-index': 0 } }),
-  loadIndexVectorCount: jest.fn().mockResolvedValue({ data: { vectorCount: 5 } }),
-}));
+vi.mock('../../../../../services/api', () => {
+      const mocked = {
+      loadIndexDocCount: vi.fn().mockResolvedValue({ data: { 'test-index': 0 } }),
+      loadIndexVectorCount: vi.fn().mockResolvedValue({ data: { vectorCount: 5 } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./storage_details', () => ({ StorageDetails: () => null }));
-jest.mock('./status_details', () => ({ StatusDetails: () => null }));
-jest.mock('./size_doc_count_details', () => ({ SizeDocCountDetails: () => null }));
-jest.mock('./aliases_details', () => ({ AliasesDetails: () => null }));
-jest.mock('./data_stream_details', () => ({ DataStreamDetails: () => null }));
+vi.mock('./storage_details', () => {
+      const mocked = { StorageDetails: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./status_details', () => {
+      const mocked = { StatusDetails: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./size_doc_count_details', () => {
+      const mocked = { SizeDocCountDetails: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./aliases_details', () => {
+      const mocked = { AliasesDetails: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./data_stream_details', () => {
+      const mocked = { DataStreamDetails: () => null };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAppContext = jest.mocked(useAppContext);
-const mockLoadIndexVectorCount = jest.mocked(loadIndexVectorCount);
+const mockUseAppContext = vi.mocked(useAppContext);
+const mockLoadIndexVectorCount = vi.mocked(loadIndexVectorCount);
 
 describe('QuickStats', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAppContext.mockReturnValue({
       config: { enableSizeAndDocCount: true, enableVectorCount: true },
     } as ReturnType<typeof useAppContext>);

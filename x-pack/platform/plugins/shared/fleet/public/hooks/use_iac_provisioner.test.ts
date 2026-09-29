@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { ENABLE_IAC_PROVISIONER_FLAG } from '../../common/constants';
@@ -13,11 +15,11 @@ import { useConfig, useStartServices } from '.';
 
 import { useIacProvisioner } from './use_iac_provisioner';
 
-jest.mock('./use_config');
-jest.mock('./use_core');
+vi.mock('./use_config');
+vi.mock('./use_core');
 
-const mockedUseConfig = jest.mocked(useConfig);
-const mockedUseStartServices = jest.mocked(useStartServices);
+const mockedUseConfig = vi.mocked(useConfig);
+const mockedUseStartServices = vi.mocked(useStartServices);
 
 const mockEnvironment = ({
   isCloudEnabled = false,
@@ -30,13 +32,13 @@ const mockEnvironment = ({
   } as any);
   mockedUseStartServices.mockReturnValue({
     cloud: { isCloudEnabled, isServerlessEnabled },
-    featureFlags: { useBooleanValue: jest.fn().mockReturnValue(iacProvisionerEnabled) },
+    featureFlags: { useBooleanValue: vi.fn().mockReturnValue(iacProvisionerEnabled) },
   } as any);
 };
 
 describe('useIacProvisioner', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it.each([
@@ -86,7 +88,7 @@ describe('useIacProvisioner', () => {
   });
 
   it('evaluates fleet.enableIacProvisioner with fallback false', () => {
-    const useBooleanValue = jest.fn().mockReturnValue(true);
+    const useBooleanValue = vi.fn().mockReturnValue(true);
     mockedUseConfig.mockReturnValue({
       agentless: { enabled: true },
     } as any);
@@ -101,7 +103,7 @@ describe('useIacProvisioner', () => {
   });
 
   it('evaluates the flag even when hosted or agentless gates are closed', () => {
-    const useBooleanValue = jest.fn().mockReturnValue(true);
+    const useBooleanValue = vi.fn().mockReturnValue(true);
     mockedUseConfig.mockReturnValue({
       agentless: { enabled: false },
     } as any);

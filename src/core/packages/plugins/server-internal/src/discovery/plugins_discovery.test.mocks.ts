@@ -7,28 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
 
-const realFs = jest.requireActual('fs');
+const realFs = require('fs');
 const kibanaPackagePath = resolve(REPO_ROOT, 'package.json');
 
 export const mockPackage = {
   raw: {},
 };
 
-jest.doMock('fs', () => ({
-  ...realFs,
-  readFileSync: (filePath: string, options?: unknown) => {
-    if (filePath === kibanaPackagePath) {
-      return JSON.stringify(mockPackage.raw);
-    }
-    return realFs.readFileSync(filePath, options);
-  },
-}));
+vi.doMock('fs', () => {
+      const mocked = {
+      ...realFs,
+      readFileSync: (filePath: string, options?: unknown) => {
+        if (filePath === kibanaPackagePath) {
+          return JSON.stringify(mockPackage.raw);
+        }
+        return realFs.readFileSync(filePath, options);
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { scanPluginSearchPaths } = jest.requireActual('./scan_plugin_search_paths');
-export const scanPluginSearchPathsMock = jest.fn().mockImplementation(scanPluginSearchPaths);
-jest.doMock('./scan_plugin_search_paths', () => ({
-  scanPluginSearchPaths: scanPluginSearchPathsMock,
-}));
+const { scanPluginSearchPaths } = (await vi.importActual('./scan_plugin_search_paths'));
+export const scanPluginSearchPathsMock = vi.fn().mockImplementation(scanPluginSearchPaths);
+vi.doMock('./scan_plugin_search_paths', () => {
+      const mocked = {
+      scanPluginSearchPaths: scanPluginSearchPathsMock,
+    };
+      return { ...mocked, default: mocked };
+    });

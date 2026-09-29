@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { isContextEngineEnabledInSpace } from './is_context_engine_enabled_in_space';
@@ -15,8 +17,8 @@ describe('isContextEngineEnabledInSpace', () => {
     const internalClient = savedObjectsClientMock.create();
     internalClient.asScopedToNamespace.mockReturnValue(spaceClient);
 
-    const spaceUiSettings = { get: jest.fn().mockResolvedValue(true) };
-    const asScopedToClient = jest.fn().mockReturnValue(spaceUiSettings);
+    const spaceUiSettings = { get: vi.fn().mockResolvedValue(true) };
+    const asScopedToClient = vi.fn().mockReturnValue(spaceUiSettings);
 
     await expect(
       isContextEngineEnabledInSpace({
@@ -40,7 +42,7 @@ describe('isContextEngineEnabledInSpace', () => {
       isContextEngineEnabledInSpace({
         savedObjects: { getUnsafeInternalClient: () => internalClient },
         uiSettings: {
-          asScopedToClient: () => ({ get: jest.fn().mockResolvedValue(false) }),
+          asScopedToClient: () => ({ get: vi.fn().mockResolvedValue(false) }),
         },
         spaceId: 'marketing',
       })

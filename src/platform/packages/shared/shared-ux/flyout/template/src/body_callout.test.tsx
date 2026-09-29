@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,17 +21,17 @@ import {
 } from '@kbn/ui-callout';
 import { FlyoutTemplate } from './flyout_template';
 
-jest.mock('@elastic/apm-rum');
+vi.mock('@elastic/apm-rum');
 
 // Each callout renders through a counting wrapper, so tests can tell which one rendered and how often.
-jest.mock('@kbn/ui-callout', () => {
-  const actual = jest.requireActual('@kbn/ui-callout');
+vi.mock('@kbn/ui-callout', async () => {
+  const actual = (await vi.importActual('@kbn/ui-callout'));
   return {
     ...actual,
-    KbnInfoCallout: jest.fn(actual.KbnInfoCallout),
-    KbnSuccessCallout: jest.fn(actual.KbnSuccessCallout),
-    KbnWarningCallout: jest.fn(actual.KbnWarningCallout),
-    KbnDangerCallout: jest.fn(actual.KbnDangerCallout),
+    KbnInfoCallout: vi.fn(actual.KbnInfoCallout),
+    KbnSuccessCallout: vi.fn(actual.KbnSuccessCallout),
+    KbnWarningCallout: vi.fn(actual.KbnWarningCallout),
+    KbnDangerCallout: vi.fn(actual.KbnDangerCallout),
   };
 });
 
@@ -82,10 +84,10 @@ const ControlledTabs = () => {
 
 describe('FlyoutTemplate body callouts', () => {
   beforeEach(() => {
-    jest.mocked(KbnInfoCallout).mockClear();
-    jest.mocked(KbnSuccessCallout).mockClear();
-    jest.mocked(KbnWarningCallout).mockClear();
-    jest.mocked(KbnDangerCallout).mockClear();
+    vi.mocked(KbnInfoCallout).mockClear();
+    vi.mocked(KbnSuccessCallout).mockClear();
+    vi.mocked(KbnWarningCallout).mockClear();
+    vi.mocked(KbnDangerCallout).mockClear();
   });
 
   it('renders the callout matching each level', () => {
@@ -100,15 +102,15 @@ describe('FlyoutTemplate body callouts', () => {
       </FlyoutTemplate>
     );
 
-    expect(jest.mocked(KbnInfoCallout).mock.calls[0][0]).toEqual({ title: 'Info title' });
-    expect(jest.mocked(KbnSuccessCallout).mock.calls[0][0]).toEqual({ title: 'Success title' });
-    expect(jest.mocked(KbnWarningCallout).mock.calls[0][0]).toEqual({ title: 'Warning title' });
-    expect(jest.mocked(KbnDangerCallout).mock.calls[0][0]).toEqual({ title: 'Danger title' });
+    expect(vi.mocked(KbnInfoCallout).mock.calls[0][0]).toEqual({ title: 'Info title' });
+    expect(vi.mocked(KbnSuccessCallout).mock.calls[0][0]).toEqual({ title: 'Success title' });
+    expect(vi.mocked(KbnWarningCallout).mock.calls[0][0]).toEqual({ title: 'Warning title' });
+    expect(vi.mocked(KbnDangerCallout).mock.calls[0][0]).toEqual({ title: 'Danger title' });
   });
 
   it('forwards callout props other than level and id', async () => {
     const user = userEvent.setup();
-    const onRetry = jest.fn();
+    const onRetry = vi.fn();
     renderWithKibanaRenderContext(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Body>
@@ -213,7 +215,7 @@ describe('FlyoutTemplate body callouts', () => {
     const user = userEvent.setup();
     renderWithKibanaRenderContext(<UncontrolledTabs />);
 
-    const renderCount = jest.mocked(KbnWarningCallout).mock.calls.length;
+    const renderCount = vi.mocked(KbnWarningCallout).mock.calls.length;
     await user.click(screen.getByRole('tab', { name: 'Metadata' }));
 
     expect(screen.getByText('metadata content')).toBeInTheDocument();
@@ -225,7 +227,7 @@ describe('FlyoutTemplate body callouts', () => {
     renderWithKibanaRenderContext(<ControlledTabs />);
 
     const callout = screen.getByText('Rule is disabled');
-    const renderCount = jest.mocked(KbnWarningCallout).mock.calls.length;
+    const renderCount = vi.mocked(KbnWarningCallout).mock.calls.length;
     await user.click(screen.getByRole('tab', { name: 'Metadata' }));
 
     expect(screen.getByText('metadata content')).toBeInTheDocument();

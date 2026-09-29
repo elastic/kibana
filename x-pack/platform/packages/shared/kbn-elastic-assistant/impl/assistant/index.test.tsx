@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -33,16 +36,19 @@ import {
   STREAMING_LOCAL_STORAGE_KEY,
 } from '../assistant_context/constants';
 
-jest.mock('@kbn/inference-connectors');
-jest.mock('../connectorland/connector_setup');
-jest.mock('react-use/lib/useLocalStorage');
-jest.mock('react-use/lib/useSessionStorage');
+vi.mock('@kbn/inference-connectors');
+vi.mock('../connectorland/connector_setup');
+vi.mock('react-use/lib/useLocalStorage');
+vi.mock('react-use/lib/useSessionStorage');
 
-jest.mock('./quick_prompts/quick_prompts', () => ({ QuickPrompts: jest.fn() }));
-jest.mock('./api/conversations/use_fetch_current_user_conversations');
-jest.mock('./api/anonymization_fields/use_fetch_anonymization_fields');
+vi.mock('./quick_prompts/quick_prompts', () => {
+      const mocked = { QuickPrompts: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./api/conversations/use_fetch_current_user_conversations');
+vi.mock('./api/anonymization_fields/use_fetch_anonymization_fields');
 
-jest.mock('./use_conversation');
+vi.mock('./use_conversation');
 const apiConfig = { connectorId: '123' };
 const fullWelcomeConversation = {
   ...welcomeConvo,
@@ -68,13 +74,13 @@ const mockData = {
 };
 
 const renderAssistant = async (extraProps = {}) => {
-  const chatSendSpy = jest.spyOn(all, 'useChatSend');
+  const chatSendSpy = vi.spyOn(all, 'useChatSend');
   const assistant = render(
     <TestProviders>
       <Assistant
         lastConversation={{ id: 'welcome_id' }}
         chatHistoryVisible={true}
-        setChatHistoryVisible={jest.fn()}
+        setChatHistoryVisible={vi.fn()}
         {...extraProps}
       />
     </TestProviders>
@@ -89,17 +95,17 @@ const renderAssistant = async (extraProps = {}) => {
   });
   return assistant;
 };
-const mockDeleteConvo = jest.fn();
-const clearConversation = jest.fn();
+const mockDeleteConvo = vi.fn();
+const clearConversation = vi.fn();
 const mockUseConversation = {
   clearConversation: clearConversation.mockResolvedValue(fullWelcomeConversation),
-  getConversation: jest.fn().mockResolvedValue(fullWelcomeConversation),
+  getConversation: vi.fn().mockResolvedValue(fullWelcomeConversation),
   deleteConversation: mockDeleteConvo,
-  setApiConfig: jest.fn().mockResolvedValue({}),
+  setApiConfig: vi.fn().mockResolvedValue({}),
 };
 
 const mockAnonymizationFields: FetchAnonymizationFields = {
-  refetch: jest.fn(),
+  refetch: vi.fn(),
   data: { page: 1, perPage: 20, total: 0, data: [] },
   isFetching: false,
   isError: false,
@@ -107,7 +113,7 @@ const mockAnonymizationFields: FetchAnonymizationFields = {
   isFetched: true,
 };
 
-const refetchResults = jest.fn();
+const refetchResults = vi.fn();
 const defaultFetchUserConversations = {
   data: mockData,
   isLoading: false,
@@ -126,19 +132,19 @@ const defaultFetchUserConversations = {
   }),
   isFetched: true,
   isFetching: false,
-  setPaginationObserver: jest.fn(),
+  setPaginationObserver: vi.fn(),
 };
 describe('Assistant', () => {
-  let persistToLocalStorage: jest.Mock;
-  let persistToSessionStorage: jest.Mock;
+  let persistToLocalStorage: Mock;
+  let persistToSessionStorage: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    persistToLocalStorage = jest.fn();
-    persistToSessionStorage = jest.fn();
-    (useConversation as jest.Mock).mockReturnValue(mockUseConversation);
+    vi.clearAllMocks();
+    persistToLocalStorage = vi.fn();
+    persistToSessionStorage = vi.fn();
+    (useConversation as Mock).mockReturnValue(mockUseConversation);
 
-    jest.mocked(QuickPrompts).mockReturnValue(null);
+    vi.mocked(QuickPrompts).mockReturnValue(null);
     const connectors: unknown[] = [
       {
         id: 'hi',
@@ -147,17 +153,17 @@ describe('Assistant', () => {
       },
     ];
 
-    jest.mocked(useLoadConnectors).mockReturnValue({
+    vi.mocked(useLoadConnectors).mockReturnValue({
       isFetched: true,
       isFetchedAfterMount: true,
       data: connectors,
     } as unknown as UseLoadConnectorsResult);
 
-    jest
+    vi
       .mocked(useFetchCurrentUserConversations)
       .mockReturnValue(defaultFetchUserConversations as unknown as FetchCurrentUserConversations);
 
-    jest.mocked(useFetchAnonymizationFields).mockReturnValue(mockAnonymizationFields);
+    vi.mocked(useFetchAnonymizationFields).mockReturnValue(mockAnonymizationFields);
 
     const localStorageDefaults: Array<[string, unknown]> = [
       [LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY, mockData.welcome_id],
@@ -168,13 +174,13 @@ describe('Assistant', () => {
       [KNOWLEDGE_BASE_LOCAL_STORAGE_KEY, DEFAULT_KNOWLEDGE_BASE_SETTINGS],
     ];
 
-    jest.mocked(useLocalStorage).mockImplementation((key, initialValue) => {
+    vi.mocked(useLocalStorage).mockImplementation((key, initialValue) => {
       const match = localStorageDefaults.find(([storageKey]) => key.includes(storageKey));
       const value = match ? match[1] : initialValue;
       return [value, persistToLocalStorage] as unknown as ReturnType<typeof useLocalStorage>;
     });
 
-    jest
+    vi
       .mocked(useSessionStorage)
       .mockReturnValue([undefined, persistToSessionStorage] as unknown as ReturnType<
         typeof useSessionStorage
@@ -207,8 +213,8 @@ describe('Assistant', () => {
       });
     });
     it('should refetchCurrentUserConversations after clear chat history button click', async () => {
-      const getConversation = jest.fn().mockResolvedValue(fullSheepConversation);
-      (useConversation as jest.Mock).mockReturnValue({
+      const getConversation = vi.fn().mockResolvedValue(fullSheepConversation);
+      (useConversation as Mock).mockReturnValue({
         ...mockUseConversation,
         getConversation,
       });
@@ -225,8 +231,8 @@ describe('Assistant', () => {
 
   describe('when selected conversation changes and some connectors are loaded', () => {
     it('should persist the conversation id to local storage', async () => {
-      const getConversation = jest.fn().mockResolvedValue(fullSheepConversation);
-      (useConversation as jest.Mock).mockReturnValue({
+      const getConversation = vi.fn().mockResolvedValue(fullSheepConversation);
+      (useConversation as Mock).mockReturnValue({
         ...mockUseConversation,
         getConversation,
       });
@@ -248,12 +254,12 @@ describe('Assistant', () => {
     });
 
     it('should fetch current conversation when id has value', async () => {
-      const getConversation = jest.fn().mockResolvedValue(fullSheepConversation);
-      (useConversation as jest.Mock).mockReturnValue({
+      const getConversation = vi.fn().mockResolvedValue(fullSheepConversation);
+      (useConversation as Mock).mockReturnValue({
         ...mockUseConversation,
         getConversation,
       });
-      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+      vi.mocked(useFetchCurrentUserConversations).mockReturnValue({
         ...defaultFetchUserConversations,
         data: {
           ...mockData,
@@ -318,13 +324,13 @@ describe('Assistant', () => {
         welcome_id: noConnectorConversation,
       };
 
-      jest.mocked(useLoadConnectors).mockReturnValue({
+      vi.mocked(useLoadConnectors).mockReturnValue({
         isFetched: true,
         isFetchedAfterMount: true,
         data: [],
       } as unknown as UseLoadConnectorsResult);
 
-      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+      vi.mocked(useFetchCurrentUserConversations).mockReturnValue({
         ...defaultFetchUserConversations,
         data: noConnectorData,
       } as unknown as FetchCurrentUserConversations);
@@ -334,7 +340,7 @@ describe('Assistant', () => {
           <Assistant
             lastConversation={{ id: 'welcome_id' }}
             chatHistoryVisible={true}
-            setChatHistoryVisible={jest.fn()}
+            setChatHistoryVisible={vi.fn()}
           />
         </TestProviders>
       );
@@ -355,7 +361,7 @@ describe('Assistant', () => {
           actionTypeId: '.gen-ai',
         },
       ];
-      jest.mocked(useLoadConnectors).mockReturnValue({
+      vi.mocked(useLoadConnectors).mockReturnValue({
         isFetched: true,
         isFetchedAfterMount: true,
         data: connectors,

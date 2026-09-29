@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -13,9 +16,9 @@ import type { StepDataModalProps } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { useWorkflowEditorLink } from '../../use_workflow_editor_link';
 
-jest.mock('../../use_workflow_editor_link');
+vi.mock('../../use_workflow_editor_link');
 
-const mockUseWorkflowEditorLink = useWorkflowEditorLink as jest.Mock;
+const mockUseWorkflowEditorLink = useWorkflowEditorLink as Mock;
 
 const createJsonAlert = (fields: Record<string, string>): string => JSON.stringify(fields);
 
@@ -43,7 +46,7 @@ const mockDiscoveries = [
 ];
 
 describe('StepDataModal', () => {
-  const mockOnClose = jest.fn();
+  const mockOnClose = vi.fn();
 
   const defaultProps: StepDataModalProps = {
     dataCount: 2,
@@ -55,10 +58,10 @@ describe('StepDataModal', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: null,
-      navigateToEditor: jest.fn(),
+      navigateToEditor: vi.fn(),
       resolvedWorkflowId: null,
     });
   });
@@ -184,7 +187,7 @@ describe('StepDataModal', () => {
     it('renders workflow name as a link when editorUrl is available', () => {
       mockUseWorkflowEditorLink.mockReturnValue({
         editorUrl: 'http://localhost:5601/app/workflows/workflow-legacy',
-        navigateToEditor: jest.fn(),
+        navigateToEditor: vi.fn(),
         resolvedWorkflowId: null,
       });
 
@@ -366,7 +369,7 @@ describe('StepDataModal', () => {
     });
 
     it('copies data to clipboard when copy all button is clicked', () => {
-      const mockWriteText = jest.fn().mockResolvedValue(undefined);
+      const mockWriteText = vi.fn().mockResolvedValue(undefined);
 
       Object.assign(navigator, {
         clipboard: { writeText: mockWriteText },

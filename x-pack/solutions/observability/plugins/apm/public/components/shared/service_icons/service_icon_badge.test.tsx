@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -26,7 +28,7 @@ const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
 } as Partial<CoreStart>);
 
-const httpGet = jest.fn();
+const httpGet = vi.fn();
 
 function Wrapper({ children }: { children?: ReactNode }) {
   const mockPluginContext = merge({}, mockApmPluginContextValue, {
@@ -53,17 +55,17 @@ function Wrapper({ children }: { children?: ReactNode }) {
 
 describe('ServiceIconBadge', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('opens a popover and loads details when clicked', async () => {
     const user = userEvent.setup();
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+    vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: {
         service: { agent: { name: 'java' } },
       },
       status: fetcherHook.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -89,10 +91,10 @@ describe('ServiceIconBadge', () => {
 
   it('shows a loading skeleton while details are fetching', async () => {
     const user = userEvent.setup();
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+    vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: undefined,
       status: fetcherHook.FETCH_STATUS.LOADING,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(

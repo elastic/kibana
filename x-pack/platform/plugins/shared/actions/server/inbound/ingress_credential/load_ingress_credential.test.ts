@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
@@ -15,7 +17,7 @@ describe('loadIngressCredential', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns attributes when the credential is bound to the connector', async () => {

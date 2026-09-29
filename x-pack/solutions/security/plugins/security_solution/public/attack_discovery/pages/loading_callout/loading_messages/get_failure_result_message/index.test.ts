@@ -5,17 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import * as i18n from '../../translations';
 import { getFailureResultMessage } from '.';
 import { getFormattedDate } from '../get_formatted_time';
 
-jest.mock('../get_formatted_time', () => ({
-  getFormattedDate: jest.fn(),
-}));
+vi.mock('../get_formatted_time', () => {
+      const mocked = {
+      getFormattedDate: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../translations', () => ({
-  FAILED_VIA: jest.fn(),
-}));
+vi.mock('../../translations', () => {
+      const mocked = {
+      FAILED_VIA: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getFailureResultMessage', () => {
   const mockConnectorName = 'Test Connector';
@@ -25,9 +34,9 @@ describe('getFailureResultMessage', () => {
   const mockMessage = 'Failed via Test Connector at May 2, 2025 @ 17:46:43.486';
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getFormattedDate as jest.Mock).mockReturnValue(mockFormattedDate);
-    (i18n.FAILED_VIA as jest.Mock).mockReturnValue(mockMessage);
+    vi.clearAllMocks();
+    (getFormattedDate as Mock).mockReturnValue(mockFormattedDate);
+    (i18n.FAILED_VIA as Mock).mockReturnValue(mockMessage);
   });
 
   it('invokes FAILED_VIA with the connector name and formatted generation end time', () => {

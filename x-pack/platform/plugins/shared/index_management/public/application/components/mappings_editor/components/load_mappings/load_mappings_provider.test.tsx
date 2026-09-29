@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
+vi.mock('lodash', () => {
+  const original = require('lodash');
 
   return {
     ...original,
@@ -20,7 +22,7 @@ jest.mock('lodash', () => {
   };
 });
 
-jest.mock('@kbn/code-editor');
+vi.mock('@kbn/code-editor');
 
 import { LoadMappingsProvider } from './load_mappings_provider';
 
@@ -48,7 +50,7 @@ describe('<LoadMappingsProvider />', () => {
       },
     };
 
-    const onJson = jest.fn();
+    const onJson = vi.fn();
 
     render(<ComponentToTest onJson={onJson} />);
 

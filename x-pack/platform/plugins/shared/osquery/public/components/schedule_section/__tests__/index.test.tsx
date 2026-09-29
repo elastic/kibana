@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { ScheduleSection } from '..';
@@ -38,7 +40,7 @@ describe('ScheduleSection', () => {
   describe('feature-flag gate', () => {
     it('renders nothing when `rruleScheduling` is off', () => {
       const { container } = renderWithProviders(
-        <ScheduleSection value={intervalState()} onChange={jest.fn()} />,
+        <ScheduleSection value={intervalState()} onChange={vi.fn()} />,
         { experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false } }
       );
 
@@ -49,13 +51,13 @@ describe('ScheduleSection', () => {
 
   describe('rendering with the flag on', () => {
     it('renders the section title by default', () => {
-      renderFlagOn(<ScheduleSection value={intervalState()} onChange={jest.fn()} />);
+      renderFlagOn(<ScheduleSection value={intervalState()} onChange={vi.fn()} />);
 
       expect(screen.getByText(SCHEDULE_SECTION_TITLE)).toBeInTheDocument();
     });
 
     it('omits the title when `title={null}` is passed (embedded QueryFlyout shape)', () => {
-      renderFlagOn(<ScheduleSection value={intervalState()} onChange={jest.fn()} title={null} />);
+      renderFlagOn(<ScheduleSection value={intervalState()} onChange={vi.fn()} title={null} />);
 
       expect(screen.queryByText(SCHEDULE_SECTION_TITLE)).not.toBeInTheDocument();
       // Still renders the type selector + body — only the heading is suppressed.
@@ -63,7 +65,7 @@ describe('ScheduleSection', () => {
     });
 
     it('renders the interval body when scheduleType is "interval"', () => {
-      renderFlagOn(<ScheduleSection value={intervalState()} onChange={jest.fn()} />);
+      renderFlagOn(<ScheduleSection value={intervalState()} onChange={vi.fn()} />);
 
       expect(screen.getByTestId('osquery-schedule-interval')).toBeInTheDocument();
       expect(screen.queryByTestId('osquery-schedule-start-date')).not.toBeInTheDocument();
@@ -71,7 +73,7 @@ describe('ScheduleSection', () => {
     });
 
     it('renders the recurrence body when scheduleType is "rrule"', () => {
-      renderFlagOn(<ScheduleSection value={recurrenceState()} onChange={jest.fn()} />);
+      renderFlagOn(<ScheduleSection value={recurrenceState()} onChange={vi.fn()} />);
 
       expect(screen.getByTestId('osquery-schedule-start-date')).toBeInTheDocument();
       expect(screen.getByTestId('osquery-frequency-selector')).toBeInTheDocument();
@@ -90,14 +92,14 @@ describe('ScheduleSection', () => {
         },
       });
 
-      renderFlagOn(<ScheduleSection value={state} onChange={jest.fn()} />);
+      renderFlagOn(<ScheduleSection value={state} onChange={vi.fn()} />);
 
       expect(screen.getByText(ADVANCED_PARTS_ADVISORY_TITLE)).toBeInTheDocument();
       expect(screen.getByTestId('osquery-schedule-advanced-parts-advisory')).toBeInTheDocument();
     });
 
     it('does NOT render the advisory when `_unknown` is undefined', () => {
-      renderFlagOn(<ScheduleSection value={recurrenceState()} onChange={jest.fn()} />);
+      renderFlagOn(<ScheduleSection value={recurrenceState()} onChange={vi.fn()} />);
 
       expect(
         screen.queryByTestId('osquery-schedule-advanced-parts-advisory')
@@ -112,7 +114,7 @@ describe('ScheduleSection', () => {
         },
       });
 
-      renderFlagOn(<ScheduleSection value={state} onChange={jest.fn()} />);
+      renderFlagOn(<ScheduleSection value={state} onChange={vi.fn()} />);
 
       expect(
         screen.queryByTestId('osquery-schedule-advanced-parts-advisory')
@@ -127,7 +129,7 @@ describe('ScheduleSection', () => {
         },
       });
 
-      renderFlagOn(<ScheduleSection value={state} onChange={jest.fn()} />);
+      renderFlagOn(<ScheduleSection value={state} onChange={vi.fn()} />);
 
       expect(
         screen.queryByTestId('osquery-schedule-advanced-parts-advisory')
@@ -140,15 +142,15 @@ describe('ScheduleSection', () => {
       const NOW = new Date('2026-06-19T12:00:00.000Z');
 
       beforeEach(() => {
-        jest.useFakeTimers().setSystemTime(NOW);
+        vi.useFakeTimers().setSystemTime(NOW);
       });
 
       afterEach(() => {
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
       it('re-seeds startDate to a fresh valid slot instead of carrying the interval-era value', () => {
-        const onChange = jest.fn();
+        const onChange = vi.fn();
         const staleStartDate = new Date('2024-01-01T00:00:00.000Z');
         const state = intervalState({ startDate: staleStartDate });
         renderFlagOn(<ScheduleSection value={state} onChange={onChange} />);
@@ -172,7 +174,7 @@ describe('ScheduleSection', () => {
 
       it('does not re-seed when already in rrule mode (clicking the selected card is a no-op)', () => {
         // Same-mode click never fires onChange, so handleTypeChange never runs.
-        const onChange = jest.fn();
+        const onChange = vi.fn();
         const chosenStartDate = new Date('2026-06-25T00:00:00.000Z');
         const state = recurrenceState({ startDate: chosenStartDate });
         renderFlagOn(<ScheduleSection value={state} onChange={onChange} />);
@@ -185,7 +187,7 @@ describe('ScheduleSection', () => {
       // Regression (PR #276996 review, @szwarckonrad): round-tripping through
       // Interval must not clobber a still-valid custom rrule startDate/stopAfter.
       it('preserves a still-valid custom startDate/stopAfter across a round trip through Interval mode', () => {
-        const onChange = jest.fn();
+        const onChange = vi.fn();
         const customStartDate = new Date('2026-06-25T00:00:00.000Z'); // in the future relative to NOW
         const customStopAfter = new Date('2026-06-26T00:00:00.000Z');
         const rruleState = recurrenceState({
@@ -205,7 +207,7 @@ describe('ScheduleSection', () => {
       });
 
       it('still re-seeds when the custom startDate has gone stale while dwelling in Interval mode', () => {
-        const onChange = jest.fn();
+        const onChange = vi.fn();
         const customStartDate = new Date('2026-06-19T13:00:00.000Z'); // valid when picked...
         const rruleState = recurrenceState({ startDate: customStartDate });
         const intervalAfterRoundTrip = { ...rruleState, scheduleType: 'interval' as const };
@@ -213,7 +215,7 @@ describe('ScheduleSection', () => {
         renderFlagOn(<ScheduleSection value={intervalAfterRoundTrip} onChange={onChange} />);
 
         // Time passes while dwelling in Interval mode; startDate goes stale.
-        jest.setSystemTime(new Date('2026-06-19T14:00:00.000Z'));
+        vi.setSystemTime(new Date('2026-06-19T14:00:00.000Z'));
 
         fireEvent.click(screen.getByTestId('osquery-schedule-type-rrule'));
 
@@ -231,7 +233,7 @@ describe('ScheduleSection', () => {
     });
 
     it('propagates an interval change in interval mode', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const state = intervalState({ interval: 60 });
       renderFlagOn(<ScheduleSection value={state} onChange={onChange} />);
 
@@ -248,7 +250,7 @@ describe('ScheduleSection', () => {
       renderFlagOn(
         <ScheduleSection
           value={recurrenceState()}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           lockedScheduleType="rrule"
         />
       );
@@ -257,7 +259,7 @@ describe('ScheduleSection', () => {
     });
 
     it('rejects type-switch attempts when locked', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderFlagOn(
         <ScheduleSection value={recurrenceState()} onChange={onChange} lockedScheduleType="rrule" />
       );

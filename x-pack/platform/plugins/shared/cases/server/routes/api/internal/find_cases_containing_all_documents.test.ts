@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { type CasesClient } from '../../../client';
 import { processCase } from './find_cases_containing_all_documents';
 
@@ -17,7 +19,7 @@ describe('findCasesContainingAllDocuments', () => {
     ) =>
       ({
         attachments: {
-          getAllDocumentsAttachedToCase: jest.fn().mockResolvedValue(overrides.documents ?? []),
+          getAllDocumentsAttachedToCase: vi.fn().mockResolvedValue(overrides.documents ?? []),
         },
       } as unknown as CasesClient);
 
@@ -44,7 +46,7 @@ describe('findCasesContainingAllDocuments', () => {
 
       const {
         calls: [params],
-      } = jest.mocked(casesClient.attachments.getAllDocumentsAttachedToCase).mock;
+      } = vi.mocked(casesClient.attachments.getAllDocumentsAttachedToCase).mock;
 
       const filter = JSON.stringify(params[0].filter);
       expect(filter).toContain('cases-comments.attributes.alertId');
@@ -61,7 +63,7 @@ describe('findCasesContainingAllDocuments', () => {
 
       const {
         calls: [params],
-      } = jest.mocked(casesClient.attachments.getAllDocumentsAttachedToCase).mock;
+      } = vi.mocked(casesClient.attachments.getAllDocumentsAttachedToCase).mock;
 
       expect(params[0].unifiedAttachmentTypes).toEqual(['security.entity']);
     });

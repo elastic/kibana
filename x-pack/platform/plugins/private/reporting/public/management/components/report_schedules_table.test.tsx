@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   applicationServiceMock,
   httpServiceMock,
@@ -27,32 +30,41 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 import { bulkEnableScheduledReports } from '../apis/bulk_enable_scheduled_reports';
 
-jest.mock('@kbn/reporting-public', () => ({
-  useKibana: jest.fn(),
-  ReportingAPIClient: jest.fn().mockImplementation(() => ({
-    getScheduledList: jest.fn(),
-    disableScheduledReports: jest.fn(),
-  })),
-}));
+vi.mock('@kbn/reporting-public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+      ReportingAPIClient: vi.fn().mockImplementation(() => ({
+        getScheduledList: vi.fn(),
+        disableScheduledReports: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./view_scheduled_report_flyout', () => ({
-  ViewScheduledReportFlyout: () => <div data-test-subj="viewScheduledReportFlyout" />,
-}));
-jest.mock('./edit_scheduled_report_flyout', () => ({
-  EditScheduledReportFlyout: () => <div data-test-subj="editScheduledReportFlyout" />,
-}));
+vi.mock('./view_scheduled_report_flyout', () => {
+      const mocked = {
+      ViewScheduledReportFlyout: () => <div data-test-subj="viewScheduledReportFlyout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./edit_scheduled_report_flyout', () => {
+      const mocked = {
+      EditScheduledReportFlyout: () => <div data-test-subj="editScheduledReportFlyout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../apis/get_scheduled_reports_list');
-jest.mock('../apis/bulk_disable_scheduled_reports');
-jest.mock('../apis/bulk_delete_scheduled_reports');
-jest.mock('../hooks/use_get_user_profile_query');
-jest.mock('../apis/bulk_enable_scheduled_reports');
+vi.mock('../apis/get_scheduled_reports_list');
+vi.mock('../apis/bulk_disable_scheduled_reports');
+vi.mock('../apis/bulk_delete_scheduled_reports');
+vi.mock('../hooks/use_get_user_profile_query');
+vi.mock('../apis/bulk_enable_scheduled_reports');
 
-const mockGetScheduledReports = jest.mocked(getScheduledReportsList);
-const mockDisableScheduledReports = jest.mocked(bulkDisableScheduledReports);
-const mockDeleteScheduledReports = jest.mocked(bulkDeleteScheduledReports);
-const mockGetUserProfileQuery = jest.mocked(useGetUserProfileQuery);
-const mockEnableScheduledReports = jest.mocked(bulkEnableScheduledReports);
+const mockGetScheduledReports = vi.mocked(getScheduledReportsList);
+const mockDisableScheduledReports = vi.mocked(bulkDisableScheduledReports);
+const mockDeleteScheduledReports = vi.mocked(bulkDeleteScheduledReports);
+const mockGetUserProfileQuery = vi.mocked(useGetUserProfileQuery);
+const mockEnableScheduledReports = vi.mocked(bulkEnableScheduledReports);
 
 const http = httpServiceMock.createSetupContract();
 const application = applicationServiceMock.createStartContract();
@@ -68,7 +80,7 @@ const queryClient = new QueryClient({
     },
   },
 });
-const mockValidateEmailAddresses = jest.fn().mockReturnValue([]);
+const mockValidateEmailAddresses = vi.fn().mockReturnValue([]);
 
 describe('ReportSchedulesTable', () => {
   // Disabling delay to avoid issues with fake timers
@@ -88,18 +100,18 @@ describe('ReportSchedulesTable', () => {
   });
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    window.open = jest.fn();
-    window.focus = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    window.open = vi.fn();
+    window.focus = vi.fn();
+    (useKibana as Mock).mockReturnValue({
       services: mockKibanaServices(false),
     });
     mockGetUserProfileQuery.mockReturnValue({
@@ -328,10 +340,10 @@ describe('ReportSchedulesTable', () => {
 
   describe('when user is author of reports', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
-      window.open = jest.fn();
-      window.focus = jest.fn();
-      (useKibana as jest.Mock).mockReturnValue({
+      vi.clearAllMocks();
+      window.open = vi.fn();
+      window.focus = vi.fn();
+      (useKibana as Mock).mockReturnValue({
         services: mockKibanaServices(false),
       });
       mockGetUserProfileQuery.mockReturnValue({
@@ -436,10 +448,10 @@ describe('ReportSchedulesTable', () => {
 
   describe('when user is reporting manager', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
-      window.open = jest.fn();
-      window.focus = jest.fn();
-      (useKibana as jest.Mock).mockReturnValue({
+      vi.clearAllMocks();
+      window.open = vi.fn();
+      window.focus = vi.fn();
+      (useKibana as Mock).mockReturnValue({
         services: mockKibanaServices(true),
       });
       mockGetUserProfileQuery.mockReturnValue({
@@ -639,7 +651,7 @@ describe('ReportSchedulesTable', () => {
     });
 
     it('shows edit schedule config', async () => {
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: mockKibanaServices(true),
       });
 
@@ -664,7 +676,7 @@ describe('ReportSchedulesTable', () => {
     });
 
     it('should show edit flyout correctly', async () => {
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: mockKibanaServices(true),
       });
 

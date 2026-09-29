@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -13,11 +16,14 @@ import type { AggregatedWorkflowExecution, StepExecutionWithLink } from '../../t
 import { WorkflowPipelineMonitor } from '../../workflow_pipeline_monitor';
 import { ExecutionContent } from '.';
 
-jest.mock('../../workflow_pipeline_monitor', () => ({
-  WorkflowPipelineMonitor: jest.fn(() => (
-    <div data-test-subj="workflowPipelineMonitor">{'Mock WorkflowPipelineMonitor'}</div>
-  )),
-}));
+vi.mock('../../workflow_pipeline_monitor', () => {
+      const mocked = {
+      WorkflowPipelineMonitor: vi.fn(() => (
+        <div data-test-subj="workflowPipelineMonitor">{'Mock WorkflowPipelineMonitor'}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockStepExecutions: StepExecutionWithLink[] = [
   {
@@ -52,13 +58,13 @@ const defaultProps = {
   effectiveWorkflowId: 'workflow-123',
   effectiveWorkflowRunId: 'run-456',
   isLoading: false,
-  onViewData: jest.fn(),
+  onViewData: vi.fn(),
   pipelineData: undefined,
 };
 
 describe('ExecutionContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('loading state', () => {
@@ -122,7 +128,7 @@ describe('ExecutionContent', () => {
     it('passes stepExecutions to WorkflowPipelineMonitor', () => {
       render(<ExecutionContent {...defaultProps} />);
 
-      const lastCall = (WorkflowPipelineMonitor as unknown as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCall = (WorkflowPipelineMonitor as unknown as Mock).mock.calls.at(-1)?.[0];
 
       expect(lastCall?.stepExecutions).toEqual(mockStepExecutions);
     });
@@ -130,7 +136,7 @@ describe('ExecutionContent', () => {
     it('passes effectiveWorkflowId to WorkflowPipelineMonitor', () => {
       render(<ExecutionContent {...defaultProps} />);
 
-      const lastCall = (WorkflowPipelineMonitor as unknown as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCall = (WorkflowPipelineMonitor as unknown as Mock).mock.calls.at(-1)?.[0];
 
       expect(lastCall?.workflowId).toBe('workflow-123');
     });
@@ -138,7 +144,7 @@ describe('ExecutionContent', () => {
     it('passes effectiveWorkflowRunId to WorkflowPipelineMonitor', () => {
       render(<ExecutionContent {...defaultProps} />);
 
-      const lastCall = (WorkflowPipelineMonitor as unknown as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCall = (WorkflowPipelineMonitor as unknown as Mock).mock.calls.at(-1)?.[0];
 
       expect(lastCall?.workflowRunId).toBe('run-456');
     });
@@ -146,7 +152,7 @@ describe('ExecutionContent', () => {
     it('passes onViewData to WorkflowPipelineMonitor', () => {
       render(<ExecutionContent {...defaultProps} />);
 
-      const lastCall = (WorkflowPipelineMonitor as unknown as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCall = (WorkflowPipelineMonitor as unknown as Mock).mock.calls.at(-1)?.[0];
 
       expect(lastCall?.onViewData).toEqual(expect.any(Function));
     });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -16,36 +19,39 @@ import { useStartServices, useAuthz } from '../../../../hooks';
 
 import { ViewErrors } from './view_errors';
 
-jest.mock('../../../../hooks', () => {
+vi.mock('../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../hooks'),
-    useLink: jest.fn(),
-    useStartServices: jest.fn(),
-    useAuthz: jest.fn(),
-    useDiscoverLocator: jest.fn().mockImplementation(() => {
+    ...(await vi.importActual('../../../../hooks')),
+    useLink: vi.fn(),
+    useStartServices: vi.fn(),
+    useAuthz: vi.fn(),
+    useDiscoverLocator: vi.fn().mockImplementation(() => {
       return {
         id: 'DISCOVER_APP_LOCATOR',
-        getRedirectUrl: jest.fn().mockResolvedValue('app/discover/logs/someview'),
+        getRedirectUrl: vi.fn().mockResolvedValue('app/discover/logs/someview'),
       };
     }),
   };
 });
 
-const mockUseStartServices = useStartServices as jest.Mock;
+const mockUseStartServices = useStartServices as Mock;
 
-jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
-  RedirectAppLinks: (props: any) => {
-    return <div>{props.children}</div>;
-  },
-}));
+vi.mock('@kbn/shared-ux-link-redirect-app', () => {
+      const mocked = {
+      RedirectAppLinks: (props: any) => {
+        return <div>{props.children}</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/logs-shared-plugin/common', () => {
-  const originalModule = jest.requireActual('@kbn/logs-shared-plugin/common');
+vi.mock('@kbn/logs-shared-plugin/common', async () => {
+  const originalModule = (await vi.importActual('@kbn/logs-shared-plugin/common'));
   return {
     ...originalModule,
-    getLogsLocatorFromUrlService: jest
+    getLogsLocatorFromUrlService: vi
       .fn()
-      .mockReturnValue({ getRedirectUrl: jest.fn(() => 'https://discover-redirect-url') }),
+      .mockReturnValue({ getRedirectUrl: vi.fn(() => 'https://discover-redirect-url') }),
   };
 });
 
@@ -56,7 +62,7 @@ const mockStartServices = (isServerlessEnabled?: boolean) => {
       query: {
         timefilter: {
           timefilter: {
-            calculateBounds: jest.fn().mockReturnValue({
+            calculateBounds: vi.fn().mockReturnValue({
               min: '2023-10-04T13:08:53.340Z',
               max: '2023-10-05T13:08:53.340Z',
             }),
@@ -78,7 +84,7 @@ const mockStartServices = (isServerlessEnabled?: boolean) => {
 
 describe('ViewErrors', () => {
   beforeEach(() => {
-    jest.mocked(useAuthz).mockReturnValue({
+    vi.mocked(useAuthz).mockReturnValue({
       fleet: {
         allAgents: true,
         readAgents: true,
@@ -128,7 +134,7 @@ describe('ViewErrors', () => {
   });
 
   it('should not render open in Logs button if privileges are not set', () => {
-    jest.mocked(useAuthz).mockReturnValue({
+    vi.mocked(useAuthz).mockReturnValue({
       fleet: {
         readAgents: false,
       },

@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { OnCompareContext, PairedComparisonStart } from '@kbn/bench';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { compareWarmStartMemory } from './compare_warm_start_memory';
 import { writeWarmStartMemoryRegressionReport } from './memory_regression_report';
 
-jest.mock('./memory_regression_report', () => ({
-  ...jest.requireActual('./memory_regression_report'),
-  writeWarmStartMemoryRegressionReport: jest.fn().mockResolvedValue('report.json'),
-}));
+vi.mock('./memory_regression_report', async () => {
+      const mocked = {
+      ...(await vi.importActual('./memory_regression_report')),
+      writeWarmStartMemoryRegressionReport: vi.fn().mockResolvedValue('report.json'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const MIB = 1024 * 1024;
 
@@ -114,8 +119,8 @@ const makeContext = ({
 
   return {
     log: {
-      info: jest.fn(),
-      warning: jest.fn(),
+      info: vi.fn(),
+      warning: vi.fn(),
     } as unknown as ToolingLog,
     left: { config, benchmarks: [] },
     right: { config, benchmarks: [] },
@@ -142,7 +147,7 @@ const makeContext = ({
 
 describe('post-forced-GC warm-start report', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('uses post-forced-GC heap as the threshold-enforced metric', async () => {
@@ -150,7 +155,7 @@ describe('post-forced-GC warm-start report', () => {
       'Warm-start memory regression detected'
     );
 
-    const report = jest.mocked(writeWarmStartMemoryRegressionReport).mock.calls[0][0];
+    const report = vi.mocked(writeWarmStartMemoryRegressionReport).mock.calls[0][0];
     expect(report.outcome).toBe('regression');
     expect(report.protocol.thresholdBytes).toBe(5 * MIB);
     expect(report.tailHeapUsed).toEqual(
@@ -184,7 +189,7 @@ describe('post-forced-GC warm-start report', () => {
       })
     );
 
-    const diagnosticNaturalReport = jest.mocked(writeWarmStartMemoryRegressionReport).mock
+    const diagnosticNaturalReport = vi.mocked(writeWarmStartMemoryRegressionReport).mock
       .calls[1][0];
     expect(diagnosticNaturalReport.outcome).toBe('observed');
     expect(diagnosticNaturalReport.tailHeapUsed).toEqual(

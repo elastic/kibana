@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SecurityAppStore } from '../../../../common/store/types';
 import { TimelineId } from '../../../../../common/types';
 import { addProvider, showTimeline } from '../../../../timelines/store/actions';
@@ -18,7 +20,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 const services = createStartServicesMock();
 const mockWarningToast = services.notifications.toasts.addWarning;
 
-const mockDispatch = jest.fn();
+const mockDispatch = vi.fn();
 const store = {
   dispatch: mockDispatch,
 } as unknown as SecurityAppStore;
@@ -64,7 +66,7 @@ describe('createAddToNewTimelineCellAction', () => {
   const addToTimelineAction = addToTimelineCellActionFactory({ id: 'testAddToTimeline', order: 1 });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return display name', () => {

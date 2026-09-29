@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EsDataTypeUnion } from '../../schemas/common/schemas';
 
 import {
@@ -22,11 +24,11 @@ import {
 
 describe('transform_elastic_to_elastic_query', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('transformListItemToElasticQuery', () => {

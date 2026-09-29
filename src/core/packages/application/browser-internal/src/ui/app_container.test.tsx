@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -22,10 +24,10 @@ import { CoreScopedHistory as ScopedHistory } from '../scoped_history';
 
 describe('AppContainer', () => {
   const appId = 'someApp';
-  const setAppLeaveHandler = jest.fn();
-  const setAppActionMenu = jest.fn();
-  const setIsMounting = jest.fn();
-  const setAppNotFoundState = jest.fn();
+  const setAppLeaveHandler = vi.fn();
+  const setAppActionMenu = vi.fn();
+  const setIsMounting = vi.fn();
+  const setAppNotFoundState = vi.fn();
   const theme$ = themeServiceMock.createTheme$();
 
   const createScopedHistory = (appPath: string) =>
@@ -104,7 +106,7 @@ describe('AppContainer', () => {
       appRoute: '/some-route',
       unmountBeforeMounting: false,
       exactRoute: false,
-      mount: jest.fn().mockImplementation(({ element }) => {
+      mount: vi.fn().mockImplementation(({ element }) => {
         const container = document.createElement('div');
         container.innerHTML = 'some-content';
         element.appendChild(container);

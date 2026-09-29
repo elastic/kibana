@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -49,19 +52,22 @@ const WATCH_VISUALIZE_DATA = {
 };
 
 // Since watchID's are dynamically created, we have to mock the function that generates them.
-jest.mock('uuid', () => ({
-  v4: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    return require('./helpers/jest_constants').WATCH_ID;
-  },
-  v1: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    return require('./helpers/jest_constants').WATCH_ID;
-  },
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        return require('./helpers/jest_constants').WATCH_ID;
+      },
+      v1: () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        return require('./helpers/jest_constants').WATCH_ID;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   const isRecord = (v: unknown): v is Record<string, unknown> =>
     typeof v === 'object' && v !== null;
@@ -116,7 +122,7 @@ const renderCreateThresholdWatch = (httpSetup: HttpSetup) => {
 describe('<ThresholdWatchEditPage /> create route', () => {
   let httpSetup: HttpSetup;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
-  let routerHistoryPush: jest.Mock;
+  let routerHistoryPush: Mock;
 
   const fillRequiredThresholdFields = async () => {
     fireEvent.change(screen.getByTestId('nameInput'), { target: { value: WATCH_NAME } });
@@ -169,9 +175,9 @@ describe('<ThresholdWatchEditPage /> create route', () => {
   };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
-    routerHistoryPush = jest.fn();
+    routerHistoryPush = vi.fn();
     registerRouter({ history: { push: routerHistoryPush } });
 
     httpRequestsMockHelpers.setLoadIndexPatternsResponse([]);
@@ -346,7 +352,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
       });
 
       const [, request] = getLastCallForUrl(
-        jest.mocked(httpSetup.put).mock.calls as Array<[unknown, unknown?]>,
+        vi.mocked(httpSetup.put).mock.calls as Array<[unknown, unknown?]>,
         `${API_BASE_PATH}/watch/execute`
       );
       const payload = parseJsonBody(request);
@@ -391,7 +397,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
       });
 
       const [, request] = getLastCallForUrl(
-        jest.mocked(httpSetup.put).mock.calls as Array<[unknown, unknown?]>,
+        vi.mocked(httpSetup.put).mock.calls as Array<[unknown, unknown?]>,
         `${API_BASE_PATH}/watch/execute`
       );
       const payload = parseJsonBody(request);
@@ -434,7 +440,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
       });
 
       const [, request] = getLastCallForUrl(
-        jest.mocked(httpSetup.put).mock.calls as Array<[unknown, unknown?]>,
+        vi.mocked(httpSetup.put).mock.calls as Array<[unknown, unknown?]>,
         `${API_BASE_PATH}/watch/execute`
       );
       const payload = parseJsonBody(request);
@@ -484,7 +490,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
       });
 
       const [, request] = getLastCallForUrl(
-        jest.mocked(httpSetup.put).mock.calls as Array<[unknown, unknown?]>,
+        vi.mocked(httpSetup.put).mock.calls as Array<[unknown, unknown?]>,
         `${API_BASE_PATH}/watch/execute`
       );
       const payload = parseJsonBody(request);
@@ -573,7 +579,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
       });
 
       const [, request] = getLastCallForUrl(
-        jest.mocked(httpSetup.put).mock.calls as Array<[unknown, unknown?]>,
+        vi.mocked(httpSetup.put).mock.calls as Array<[unknown, unknown?]>,
         `${API_BASE_PATH}/watch/execute`
       );
       const payload = parseJsonBody(request);
@@ -652,7 +658,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
       });
 
       const [, request] = getLastCallForUrl(
-        jest.mocked(httpSetup.put).mock.calls as Array<[unknown, unknown?]>,
+        vi.mocked(httpSetup.put).mock.calls as Array<[unknown, unknown?]>,
         `${API_BASE_PATH}/watch/execute`
       );
       const payload = parseJsonBody(request);
@@ -715,7 +721,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
       });
 
       const [, request] = getLastCallForUrl(
-        jest.mocked(httpSetup.put).mock.calls as Array<[unknown, unknown?]>,
+        vi.mocked(httpSetup.put).mock.calls as Array<[unknown, unknown?]>,
         `${API_BASE_PATH}/watch/execute`
       );
       const payload = parseJsonBody(request);
@@ -746,7 +752,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
       await screen.findByTestId('watchVisualizationChart');
 
       const [, request] = getLastCallForUrl(
-        jest.mocked(httpSetup.post).mock.calls as Array<[unknown, unknown?]>,
+        vi.mocked(httpSetup.post).mock.calls as Array<[unknown, unknown?]>,
         `${API_BASE_PATH}/watch/visualize`
       );
       const payload = parseJsonBody(request);

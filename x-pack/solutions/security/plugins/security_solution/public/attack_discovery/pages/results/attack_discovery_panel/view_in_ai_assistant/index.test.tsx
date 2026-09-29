@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -14,13 +17,16 @@ import { TestProviders } from '../../../../../common/mock';
 import { mockAttackDiscovery } from '../../../mock/mock_attack_discovery';
 import { VIEW_IN_AI_ASSISTANT } from './translations';
 
-jest.mock('./use_view_in_ai_assistant', () => ({
-  useViewInAiAssistant: jest.fn().mockReturnValue({
-    showAssistantOverlay: jest.fn(),
-    disabled: false,
-    isAssistantVisible: true,
-  }),
-}));
+vi.mock('./use_view_in_ai_assistant', () => {
+      const mocked = {
+      useViewInAiAssistant: vi.fn().mockReturnValue({
+        showAssistantOverlay: vi.fn(),
+        disabled: false,
+        isAssistantVisible: true,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ViewInAiAssistant', () => {
   it('renders the assistant avatar', () => {
@@ -74,8 +80,8 @@ describe('ViewInAiAssistant', () => {
   });
 
   it('does not render when isAssistantVisible is false', () => {
-    (useViewInAiAssistant as jest.Mock).mockReturnValueOnce({
-      showAssistantOverlay: jest.fn(),
+    (useViewInAiAssistant as Mock).mockReturnValueOnce({
+      showAssistantOverlay: vi.fn(),
       disabled: false,
       isAssistantVisible: false,
     });

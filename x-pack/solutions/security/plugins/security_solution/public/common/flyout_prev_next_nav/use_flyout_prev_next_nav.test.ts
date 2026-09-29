@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useFlyoutPrevNextNav } from './use_flyout_prev_next_nav';
 
@@ -22,7 +24,7 @@ interface NavProps {
   openedId?: string;
 }
 
-const renderNav = (items: TestItem[], openedItemId?: string, onNavigate = jest.fn()) => {
+const renderNav = (items: TestItem[], openedItemId?: string, onNavigate = vi.fn()) => {
   const utils = renderHook(
     ({ items: currentItems, openedId }: NavProps) =>
       useFlyoutPrevNextNav({

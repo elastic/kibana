@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -32,14 +34,17 @@ interface CapturedWaterfallProps {
   traceSamples?: Array<{ traceId: string; transactionId: string }>;
 }
 
-const mockWaterfallWithSummarySpy = jest.fn<void, [CapturedWaterfallProps]>();
+const mockWaterfallWithSummarySpy = vi.fn<void, [CapturedWaterfallProps]>();
 
-jest.mock('../waterfall_with_summary', () => ({
-  WaterfallWithSummary: (props: CapturedWaterfallProps) => {
-    mockWaterfallWithSummarySpy(props);
-    return null;
-  },
-}));
+vi.mock('../waterfall_with_summary', () => {
+      const mocked = {
+      WaterfallWithSummary: (props: CapturedWaterfallProps) => {
+        mockWaterfallWithSummarySpy(props);
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const coreMock = {
   settings: { client: { get: () => {} } },
@@ -57,11 +62,11 @@ function Wrapper({
     usageCollection: { reportUiCounter: () => {} },
   } as Partial<CoreStart>);
 
-  const httpGet = jest.fn();
+  const httpGet = vi.fn();
 
   const history = createMemoryHistory();
-  jest.spyOn(history, 'push');
-  jest.spyOn(history, 'replace');
+  vi.spyOn(history, 'push');
+  vi.spyOn(history, 'replace');
 
   history.replace({
     pathname: '/services/the-service-name/transactions/view',
@@ -106,7 +111,7 @@ describe('transaction_details/distribution', () => {
 
   describe('TransactionDistribution', () => {
     it('shows loading indicator when the service is running and returned no results yet', async () => {
-      jest.spyOn(useFetcherModule, 'useFetcher').mockImplementation(() => ({
+      vi.spyOn(useFetcherModule, 'useFetcher').mockImplementation(() => ({
         data: undefined,
         refetch: () => {},
         status: useFetcherModule.FETCH_STATUS.LOADING,
@@ -114,8 +119,8 @@ describe('transaction_details/distribution', () => {
 
       render(
         <TransactionDistribution
-          onChartSelection={jest.fn()}
-          onClearSelection={jest.fn()}
+          onChartSelection={vi.fn()}
+          onClearSelection={vi.fn()}
           traceSamplesFetchResult={{
             data: { traceSamples: [] },
             status: useFetcherModule.FETCH_STATUS.LOADING,
@@ -133,7 +138,7 @@ describe('transaction_details/distribution', () => {
     });
 
     it("doesn't show loading indicator when the service isn't running", async () => {
-      jest
+      vi
         .spyOn(useFetcherModule, 'useFetcher')
         .mockImplementationOnce(() => ({
           data: {
@@ -157,8 +162,8 @@ describe('transaction_details/distribution', () => {
       render(
         <Wrapper>
           <TransactionDistribution
-            onChartSelection={jest.fn()}
-            onClearSelection={jest.fn()}
+            onChartSelection={vi.fn()}
+            onClearSelection={vi.fn()}
             traceSamplesFetchResult={{
               data: { traceSamples: [] },
               status: useFetcherModule.FETCH_STATUS.LOADING,
@@ -197,7 +202,7 @@ describe('transaction_details/distribution', () => {
       ];
 
       beforeEach(() => {
-        jest.spyOn(useFetcherModule, 'useFetcher').mockImplementation(() => ({
+        vi.spyOn(useFetcherModule, 'useFetcher').mockImplementation(() => ({
           data: undefined,
           refetch: () => {},
           status: useFetcherModule.FETCH_STATUS.SUCCESS,
@@ -210,8 +215,8 @@ describe('transaction_details/distribution', () => {
       it('passes the URL-selected sample to WaterfallWithSummary so the index tracks the URL', async () => {
         render(
           <TransactionDistribution
-            onChartSelection={jest.fn()}
-            onClearSelection={jest.fn()}
+            onChartSelection={vi.fn()}
+            onClearSelection={vi.fn()}
             traceSamplesFetchResult={{
               data: { traceSamples },
               status: useFetcherModule.FETCH_STATUS.SUCCESS,
@@ -240,8 +245,8 @@ describe('transaction_details/distribution', () => {
       it('passes selectedSample as null when the URL sample is not among the samples', async () => {
         render(
           <TransactionDistribution
-            onChartSelection={jest.fn()}
-            onClearSelection={jest.fn()}
+            onChartSelection={vi.fn()}
+            onClearSelection={vi.fn()}
             traceSamplesFetchResult={{
               data: { traceSamples },
               status: useFetcherModule.FETCH_STATUS.SUCCESS,

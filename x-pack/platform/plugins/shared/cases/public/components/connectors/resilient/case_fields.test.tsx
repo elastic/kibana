@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -17,10 +20,10 @@ import Fields from './case_fields';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { MockFormWrapperComponent } from '../test_utils';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('./use_get_fields');
+vi.mock('../../../common/lib/kibana');
+vi.mock('./use_get_fields');
 
-const useGetFieldsMock = useGetFields as jest.Mock;
+const useGetFieldsMock = useGetFields as Mock;
 
 describe('ResilientParamsFields renders', () => {
   const fields = {
@@ -46,19 +49,19 @@ describe('ResilientParamsFields renders', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
     useGetFieldsMock.mockReturnValue(useGetFieldsResponse);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('all params fields are rendered', () => {

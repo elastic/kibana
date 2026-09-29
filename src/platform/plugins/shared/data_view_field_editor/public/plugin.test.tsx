@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { DataView } from './shared_imports';
 import React from 'react';
@@ -18,8 +20,8 @@ import { IndexPatternFieldEditorPlugin } from './plugin';
 import { render, screen, waitFor } from '@testing-library/react';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
-jest.mock('@kbn/react-kibana-mount', () => {
-  const original = jest.requireActual('@kbn/react-kibana-mount');
+vi.mock('@kbn/react-kibana-mount', async () => {
+  const original = (await vi.importActual('@kbn/react-kibana-mount'));
 
   return {
     ...original,
@@ -27,7 +29,7 @@ jest.mock('@kbn/react-kibana-mount', () => {
   };
 });
 
-jest.mock('./components/field_editor_loader', () => {
+vi.mock('./components/field_editor_loader', () => {
   return {
     FieldEditorLoader: ({ onSave }: { onSave: (fields: unknown[]) => void }) => (
       <button type="button" onClick={() => onSave([])}>
@@ -64,7 +66,7 @@ describe('DataViewFieldEditorPlugin', () => {
   });
 
   const createOverlayRef = () => {
-    const close = jest.fn().mockResolvedValue(undefined);
+    const close = vi.fn().mockResolvedValue(undefined);
     const overlayRef: OverlayRef = { close, onClose: Promise.resolve() };
 
     return { close, overlayRef };
@@ -72,7 +74,7 @@ describe('DataViewFieldEditorPlugin', () => {
 
   const createFlyoutMock = () => {
     const { close, overlayRef } = createOverlayRef();
-    const openFlyout = jest.fn<
+    const openFlyout = vi.fn<
       ReturnType<CoreStart['overlays']['openFlyout']>,
       Parameters<CoreStart['overlays']['openFlyout']>
     >(() => overlayRef);
@@ -82,7 +84,7 @@ describe('DataViewFieldEditorPlugin', () => {
 
   const createModalMock = () => {
     const { close, overlayRef } = createOverlayRef();
-    const openModal = jest.fn<
+    const openModal = vi.fn<
       ReturnType<CoreStart['overlays']['openModal']>,
       Parameters<CoreStart['overlays']['openModal']>
     >(() => overlayRef);
@@ -99,7 +101,7 @@ describe('DataViewFieldEditorPlugin', () => {
   it('should call core.overlays.openFlyout when opening the editor', async () => {
     const user = userEvent.setup();
     const { closeFlyout, openFlyout } = createFlyoutMock();
-    const onSaveSpy = jest.fn();
+    const onSaveSpy = vi.fn();
 
     const { openEditor } = plugin.start(createCoreStart({ openFlyout }), pluginStart);
 
@@ -120,7 +122,7 @@ describe('DataViewFieldEditorPlugin', () => {
     const { openEditor } = plugin.start(coreStart, pluginStart);
 
     const closeEditorHandler = await openEditor({
-      onSave: jest.fn(),
+      onSave: vi.fn(),
       ctx: { dataView: {} as DataView },
     });
     expect(typeof closeEditorHandler).toBe('function');
@@ -135,9 +137,9 @@ describe('DataViewFieldEditorPlugin', () => {
   it('should call correct services when opening the deletion modal', async () => {
     const user = userEvent.setup();
     const { closeModal, openModal } = createModalMock();
-    const onDeleteSpy = jest.fn();
-    const removeFieldSpy = jest.fn();
-    const updateSavedObject = jest.fn();
+    const onDeleteSpy = vi.fn();
+    const removeFieldSpy = vi.fn();
+    const updateSavedObject = vi.fn();
     const fieldNames = ['a', 'b', 'c'];
     const dataViews = {
       ...pluginStart.dataViews,
@@ -215,7 +217,7 @@ describe('DataViewFieldEditorPlugin', () => {
       </DeleteRuntimeFieldProvider>
     );
 
-    const spy = jest.fn();
+    const spy = vi.fn();
     render(<TestComponent callback={spy} />);
 
     expect(spy).toHaveBeenCalled();

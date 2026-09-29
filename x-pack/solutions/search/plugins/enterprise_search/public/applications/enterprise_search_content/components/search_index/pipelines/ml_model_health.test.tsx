@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -21,7 +23,7 @@ import { TrainedModelHealth } from './ml_model_health';
 
 describe('TrainedModelHealth', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues({});
   });
 

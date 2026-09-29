@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import type { AppContextTestRender } from '../../test';
@@ -28,7 +30,7 @@ describe('TTYTextSizer component', () => {
       },
       containerHeight: 200,
       fontSize: DEFAULT_TTY_FONT_SIZE,
-      onFontSizeChanged: jest.fn(),
+      onFontSizeChanged: vi.fn(),
     };
   });
 

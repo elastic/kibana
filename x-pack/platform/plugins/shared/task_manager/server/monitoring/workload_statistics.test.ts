@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { first, take, bufferCount } from 'rxjs';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type {
@@ -43,21 +45,21 @@ definitions.registerTaskDefinitions({
   report: {
     title: 'report',
     cost: TaskCost.ExtraLarge,
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
   foo: {
     title: 'foo',
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
   bar: {
     title: 'bar',
     cost: TaskCost.Tiny,
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
 });
 describe('Workload Statistics Aggregator', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('queries the Task Store at a fixed interval for the current workload', async () => {

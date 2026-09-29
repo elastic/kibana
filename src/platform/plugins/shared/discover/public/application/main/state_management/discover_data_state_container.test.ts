@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { BehaviorSubject, Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -32,24 +35,33 @@ import {
 import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
 import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
 
-jest.mock('../data_fetching/fetch_documents', () => ({
-  fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
-}));
+vi.mock('../data_fetching/fetch_documents', () => {
+      const mocked = {
+      fetchDocuments: vi.fn().mockResolvedValue({ records: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../data_fetching/fetch_esql', () => ({
-  fetchEsql: jest.fn().mockResolvedValue({ records: [] }),
-}));
+vi.mock('../data_fetching/fetch_esql', () => {
+      const mocked = {
+      fetchEsql: vi.fn().mockResolvedValue({ records: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/ebt-tools', () => ({
-  reportPerformanceMetricEvent: jest.fn(),
-}));
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      reportPerformanceMetricEvent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFetchDocuments = jest.mocked(fetchDocuments);
-const mockFetchEsql = jest.mocked(fetchEsql);
+const mockFetchDocuments = vi.mocked(fetchDocuments);
+const mockFetchEsql = vi.mocked(fetchEsql);
 
 describe('test getDataStateContainer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetchDocuments.mockResolvedValue({ records: [] });
   });
 
@@ -116,7 +128,7 @@ describe('test getDataStateContainer', () => {
       })
     );
 
-    jest.spyOn(toolkit.searchSessionManager, 'getNextSearchSessionId');
+    vi.spyOn(toolkit.searchSessionManager, 'getNextSearchSessionId');
 
     const { dataStateContainer } = await toolkit.initializeSingleTab({
       tabId,
@@ -139,12 +151,12 @@ describe('test getDataStateContainer', () => {
 
   test('refetch$ triggers a search', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    jest.spyOn(stateContainer.searchSessionManager, 'getNextSearchSessionId');
+    vi.spyOn(stateContainer.searchSessionManager, 'getNextSearchSessionId');
     expect(
-      stateContainer.searchSessionManager.getNextSearchSessionId as jest.Mock
+      stateContainer.searchSessionManager.getNextSearchSessionId as Mock
     ).not.toHaveBeenCalled();
 
-    discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+    discoverServiceMock.data.query.timefilter.timefilter.getTime = vi.fn(() => {
       return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
     });
 
@@ -154,7 +166,7 @@ describe('test getDataStateContainer', () => {
       stateContainer.runtimeStateManager,
       stateContainer.getCurrentTab().id
     );
-    const resolveDataSourceProfileSpy = jest.spyOn(
+    const resolveDataSourceProfileSpy = vi.spyOn(
       scopedProfilesManager$.getValue(),
       'resolveDataSourceProfile'
     );
@@ -185,7 +197,7 @@ describe('test getDataStateContainer', () => {
 
     // gets a new search session id
     expect(
-      stateContainer.searchSessionManager.getNextSearchSessionId as jest.Mock
+      stateContainer.searchSessionManager.getNextSearchSessionId as Mock
     ).toHaveBeenCalled();
 
     unsubscribe();
@@ -262,7 +274,7 @@ describe('test getDataStateContainer', () => {
     ).scopedProfilesManager$.getValue();
     const contexts = scopedProfilesManager.getContexts();
 
-    jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+    vi.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
       ...contexts,
       dataSourceContext: {
         ...contexts.dataSourceContext,
@@ -270,7 +282,7 @@ describe('test getDataStateContainer', () => {
       },
     });
 
-    const setUrlStateSpy = jest.spyOn(toolkit.stateStorageContainer, 'set');
+    const setUrlStateSpy = vi.spyOn(toolkit.stateStorageContainer, 'set');
 
     await toolkit.initializeSingleTab({ tabId });
 
@@ -300,7 +312,7 @@ describe('test getDataStateContainer', () => {
       firstTabId
     ).scopedProfilesManager$.getValue();
 
-    jest
+    vi
       .spyOn(scopedProfilesManager, 'resolveDataSourceProfile')
       .mockReturnValue(resolveProfileDeferred.promise);
 
@@ -332,7 +344,7 @@ describe('test getDataStateContainer', () => {
       replace: true,
     });
 
-    const setUrlStateSpy = jest.spyOn(toolkit.stateStorageContainer, 'set');
+    const setUrlStateSpy = vi.spyOn(toolkit.stateStorageContainer, 'set');
 
     resolveProfileDeferred.resolve({ didProfileChange: false, isFirstResolution: true });
     await toolkit.waitForDataFetching({ tabId: firstTabId });
@@ -346,7 +358,7 @@ describe('test getDataStateContainer', () => {
   test('reset sets back to initial state', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
-    discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+    discoverServiceMock.data.query.timefilter.timefilter.getTime = vi.fn(() => {
       return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
     });
 
@@ -369,51 +381,55 @@ describe('test getDataStateContainer', () => {
     unsubscribe();
   });
 
-  test('refetch$ accepts "fetch_more" signal', (done) => {
-    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    const initialRecords = [records[0], records[1]];
-    const moreRecords = [records[2], records[3]];
+  test('refetch$ accepts "fetch_more" signal', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-    mockFetchDocuments.mockResolvedValue({ records: moreRecords });
+          const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+          const initialRecords = [records[0], records[1]];
+          const moreRecords = [records[2], records[3]];
 
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
-    dataState.data$.documents$ = new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-      result: initialRecords,
-    }) as DataDocuments$;
+          mockFetchDocuments.mockResolvedValue({ records: moreRecords });
 
-    const unsubscribe = dataState.subscribe();
-    const { scopedProfilesManager$ } = selectTabRuntimeState(
-      stateContainer.runtimeStateManager,
-      stateContainer.getCurrentTab().id
-    );
-    const resolveDataSourceProfileSpy = jest.spyOn(
-      scopedProfilesManager$.getValue(),
-      'resolveDataSourceProfile'
-    );
+          const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+          const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
+          dataState.data$.documents$ = new BehaviorSubject({
+            fetchStatus: FetchStatus.COMPLETE,
+            result: initialRecords,
+          }) as DataDocuments$;
 
-    expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
-    expect(dataState.data$.documents$.value.result).toEqual(initialRecords);
+          const unsubscribe = dataState.subscribe();
+          const { scopedProfilesManager$ } = selectTabRuntimeState(
+            stateContainer.runtimeStateManager,
+            stateContainer.getCurrentTab().id
+          );
+          const resolveDataSourceProfileSpy = vi.spyOn(
+            scopedProfilesManager$.getValue(),
+            'resolveDataSourceProfile'
+          );
 
-    let hasLoadingMoreStarted = false;
+          expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
+          expect(dataState.data$.documents$.value.result).toEqual(initialRecords);
 
-    dataState.data$.documents$.subscribe((value) => {
-      if (value.fetchStatus === FetchStatus.LOADING_MORE) {
-        hasLoadingMoreStarted = true;
-        return;
-      }
+          let hasLoadingMoreStarted = false;
 
-      if (hasLoadingMoreStarted && value.fetchStatus === FetchStatus.COMPLETE) {
-        expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
-        expect(value.result).toEqual([...initialRecords, ...moreRecords]);
-        unsubscribe();
-        done();
-      }
-    });
+          dataState.data$.documents$.subscribe((value) => {
+            if (value.fetchStatus === FetchStatus.LOADING_MORE) {
+              hasLoadingMoreStarted = true;
+              return;
+            }
 
-    dataState.refetch$.next('fetch_more');
-  });
+            if (hasLoadingMoreStarted && value.fetchStatus === FetchStatus.COMPLETE) {
+              expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
+              expect(value.result).toEqual([...initialRecords, ...moreRecords]);
+              unsubscribe();
+              done();
+            }
+          });
+
+          dataState.refetch$.next('fetch_more');
+        
+      }));
 
   describe('profile app state defaults', () => {
     it('should populate snapshotsByProfileId when the data source profile changes', async () => {
@@ -433,7 +449,7 @@ describe('test getDataStateContainer', () => {
       const { scopedProfilesManager$ } = selectTabRuntimeState(toolkit.runtimeStateManager, tabId);
       const previousProfileId = selectDataSourceProfileId(toolkit.runtimeStateManager, tabId);
 
-      jest
+      vi
         .spyOn(scopedProfilesManager$.getValue(), 'resolveDataSourceProfile')
         .mockResolvedValue({ didProfileChange: true, isFirstResolution: true });
 
@@ -502,9 +518,9 @@ describe('test getDataStateContainer', () => {
         },
       };
       let currentContexts = initialContexts;
-      jest.spyOn(scopedProfilesManager, 'getContexts').mockImplementation(() => currentContexts);
+      vi.spyOn(scopedProfilesManager, 'getContexts').mockImplementation(() => currentContexts);
 
-      jest.spyOn(scopedProfilesManager, 'resolveDataSourceProfile').mockImplementation(async () => {
+      vi.spyOn(scopedProfilesManager, 'resolveDataSourceProfile').mockImplementation(async () => {
         currentContexts = incomingContexts;
 
         return { didProfileChange: true, isFirstResolution: false };
@@ -608,9 +624,9 @@ describe('test getDataStateContainer', () => {
         },
       };
       let currentContexts = initialContexts;
-      jest.spyOn(scopedProfilesManager, 'getContexts').mockImplementation(() => currentContexts);
+      vi.spyOn(scopedProfilesManager, 'getContexts').mockImplementation(() => currentContexts);
 
-      jest.spyOn(scopedProfilesManager, 'resolveDataSourceProfile').mockImplementation(async () => {
+      vi.spyOn(scopedProfilesManager, 'resolveDataSourceProfile').mockImplementation(async () => {
         currentContexts = incomingContexts;
 
         return { didProfileChange: true, isFirstResolution: false };
@@ -710,8 +726,8 @@ describe('test getDataStateContainer', () => {
       };
       let currentContexts = initialContexts;
 
-      jest.spyOn(scopedProfilesManager, 'getContexts').mockImplementation(() => currentContexts);
-      jest.spyOn(scopedProfilesManager, 'getProfiles').mockReturnValue([
+      vi.spyOn(scopedProfilesManager, 'getContexts').mockImplementation(() => currentContexts);
+      vi.spyOn(scopedProfilesManager, 'getProfiles').mockReturnValue([
         {},
         {
           getDefaultAppState: () => () => ({
@@ -727,7 +743,7 @@ describe('test getDataStateContainer', () => {
         },
         {},
       ]);
-      const resolveDataSourceProfileSpy = jest
+      const resolveDataSourceProfileSpy = vi
         .spyOn(scopedProfilesManager, 'resolveDataSourceProfile')
         .mockImplementation(async () => {
           currentContexts = incomingContexts;
@@ -825,7 +841,7 @@ describe('test getDataStateContainer', () => {
 
     it('should fall back to shared layout state when switching to a new profile without layout overrides', async () => {
       const services = createDiscoverServicesMock();
-      services.storage.get = jest.fn((key: string) => {
+      services.storage.get = vi.fn((key: string) => {
         if (key === 'discover:chartHidden') {
           return true;
         }
@@ -858,8 +874,8 @@ describe('test getDataStateContainer', () => {
       };
       let currentContexts = initialContexts;
 
-      jest.spyOn(scopedProfilesManager, 'getContexts').mockImplementation(() => currentContexts);
-      const resolveDataSourceProfileSpy = jest
+      vi.spyOn(scopedProfilesManager, 'getContexts').mockImplementation(() => currentContexts);
+      const resolveDataSourceProfileSpy = vi
         .spyOn(scopedProfilesManager, 'resolveDataSourceProfile')
         .mockImplementation(async () => {
           currentContexts = incomingContexts;
@@ -951,7 +967,7 @@ describe('test getDataStateContainer', () => {
     const setup = async ({ featureFlagEnabled = true }: { featureFlagEnabled?: boolean } = {}) => {
       const services = createDiscoverServicesMock();
 
-      jest
+      vi
         .spyOn(services.discoverFeatureFlags, 'getCascadeLayoutEnabled')
         .mockReturnValue(featureFlagEnabled);
 

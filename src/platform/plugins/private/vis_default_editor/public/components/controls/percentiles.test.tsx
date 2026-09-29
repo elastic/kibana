@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { AggParamEditorProps } from '../agg_param_props';
 import type { IAggConfig } from '@kbn/data-plugin/public';
@@ -15,8 +18,8 @@ import { PercentilesEditor } from './percentiles';
 import type { EditorVisState } from '../sidebar/state/reducers';
 
 // mocking random id generator function
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   return {
     ...original,
@@ -27,15 +30,15 @@ jest.mock('@elastic/eui', () => {
   };
 });
 describe('PercentilesEditor component', () => {
-  let setValue: jest.Mock;
-  let setValidity: jest.Mock;
-  let setTouched: jest.Mock;
+  let setValue: Mock;
+  let setValidity: Mock;
+  let setTouched: Mock;
   let defaultProps: AggParamEditorProps<Array<number | undefined>>;
 
   beforeEach(() => {
-    setValue = jest.fn();
-    setValidity = jest.fn();
-    setTouched = jest.fn();
+    setValue = vi.fn();
+    setValidity = vi.fn();
+    setTouched = vi.fn();
 
     defaultProps = {
       agg: {} as IAggConfig,

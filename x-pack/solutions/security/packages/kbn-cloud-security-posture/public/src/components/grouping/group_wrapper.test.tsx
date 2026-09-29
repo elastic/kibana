@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { useGrouping } from '@kbn/grouping';
 import { GroupWrapper } from './group_wrapper';
 
 describe('GroupWrapper', () => {
-  const mockGetGrouping = jest.fn((props: Record<string, unknown>) => (
+  const mockGetGrouping = vi.fn((props: Record<string, unknown>) => (
     <div data-test-subj="mock-grouping-content">
       {`isLoading:${props.isLoading} activePage:${props.activePage}`}
     </div>
@@ -21,7 +23,7 @@ describe('GroupWrapper', () => {
     getGrouping: mockGetGrouping,
     groupSelector: <div />,
     selectedGroups: ['host.name'],
-    setSelectedGroups: jest.fn(),
+    setSelectedGroups: vi.fn(),
   } as unknown as ReturnType<typeof useGrouping>;
 
   const baseProps = {
@@ -29,8 +31,8 @@ describe('GroupWrapper', () => {
     grouping: mockGrouping,
     activePageIndex: 0,
     pageSize: 25,
-    onChangeGroupsItemsPerPage: jest.fn(),
-    onChangeGroupsPage: jest.fn(),
+    onChangeGroupsItemsPerPage: vi.fn(),
+    onChangeGroupsPage: vi.fn(),
     selectedGroup: 'host.name',
   };
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import mockFs from 'mock-fs';
 import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 import { createDynamicAssetHandler } from './dynamic_asset_response';
@@ -16,9 +18,9 @@ function getHandler(args?: Partial<Parameters<typeof createDynamicAssetHandler>[
     bundlesPath: '/test',
     publicPath: '/public',
     fileHashCache: {
-      get: jest.fn(),
-      set: jest.fn(),
-      del: jest.fn(),
+      get: vi.fn(),
+      set: vi.fn(),
+      del: vi.fn(),
     },
     isDist: true,
     ...args,

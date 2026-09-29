@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -29,12 +31,12 @@ const hit = createMockHit({
 
 describe('EnhancedAlertFlyoutHeader', () => {
   it('renders the security solution header feature', () => {
-    const renderHeaderFeature = jest.fn().mockReturnValue(<div>Header</div>);
+    const renderHeaderFeature = vi.fn().mockReturnValue(<div>Header</div>);
     const providerServices = {
       discoverShared: {
         features: {
           registry: {
-            getById: jest.fn().mockReturnValue({
+            getById: vi.fn().mockReturnValue({
               id: 'security-solution-alert-flyout-header-title',
               renderHeader: renderHeaderFeature,
             }),
@@ -64,12 +66,12 @@ describe('EnhancedAlertFlyoutHeader', () => {
   });
 
   it('falls back to the previous renderHeader when feature is unavailable', () => {
-    const fallbackRenderHeader = jest.fn().mockReturnValue(<div>Fallback Header</div>);
+    const fallbackRenderHeader = vi.fn().mockReturnValue(<div>Fallback Header</div>);
     const providerServices = {
       discoverShared: {
         features: {
           registry: {
-            getById: jest.fn().mockReturnValue(undefined),
+            getById: vi.fn().mockReturnValue(undefined),
           },
         },
       },

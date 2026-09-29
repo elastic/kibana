@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { Replacements } from '@kbn/elastic-assistant-common';
@@ -36,33 +38,36 @@ const initialGraphState: DefendInsightsGraphState = {
   unrefinedResults: null,
 };
 
-jest.mock('./events_retriever', () => ({
-  AnonymizedEventsRetriever: jest
-    .fn()
-    .mockImplementation(
-      ({
-        onNewReplacements,
-        replacements,
-      }: {
-        onNewReplacements?: (replacements: Replacements) => void;
-        replacements?: Replacements;
-      }) => ({
-        withConfig: jest.fn().mockReturnValue({
-          invoke: jest.fn(async () => {
-            if (onNewReplacements != null && replacements != null) {
-              onNewReplacements(replacements);
-            }
+vi.mock('./events_retriever', () => {
+      const mocked = {
+      AnonymizedEventsRetriever: vi
+        .fn()
+        .mockImplementation(
+          ({
+            onNewReplacements,
+            replacements,
+          }: {
+            onNewReplacements?: (replacements: Replacements) => void;
+            replacements?: Replacements;
+          }) => ({
+            withConfig: vi.fn().mockReturnValue({
+              invoke: vi.fn(async () => {
+                if (onNewReplacements != null && replacements != null) {
+                  onNewReplacements(replacements);
+                }
 
-            return mockAnonymizedEvents;
-          }),
-        }),
-      })
-    ),
-}));
+                return mockAnonymizedEvents;
+              }),
+            }),
+          })
+        ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getRetrieveAnonymizedEventsNode', () => {
   const logger = {
-    debug: jest.fn(),
+    debug: vi.fn(),
   } as unknown as Logger;
 
   let esClient: ElasticsearchClient;
@@ -100,7 +105,7 @@ describe('getRetrieveAnonymizedEventsNode', () => {
 
   it('calls onNewReplacements with updated replacements', async () => {
     const state: DefendInsightsGraphState = { ...initialGraphState };
-    const onNewReplacements = jest.fn();
+    const onNewReplacements = vi.fn();
     const replacements = { key: 'value' };
 
     const retrieveAnonymizedEvents = getRetrieveAnonymizedEventsNode({

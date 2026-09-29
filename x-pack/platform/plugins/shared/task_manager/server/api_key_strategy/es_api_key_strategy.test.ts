@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance } from '../task';
@@ -40,10 +43,10 @@ describe('EsApiKeyStrategy', () => {
   });
 
   describe('getApiKeyForFakeRequest', () => {
-    let recordTaskRunSpy: jest.SpyInstance;
+    let recordTaskRunSpy: MockInstance;
 
     beforeEach(() => {
-      recordTaskRunSpy = jest
+      recordTaskRunSpy = vi
         .spyOn(taskManagerUiamTelemetry, 'recordTaskRun')
         .mockImplementation(() => {});
     });

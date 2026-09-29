@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -18,11 +21,14 @@ import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/pe
 import { mockAuthenticatedUser } from '../../../__mocks__/mock_authenticated_user';
 import { requestContextMock } from '../../../__mocks__/request_context';
 
-jest.mock('./get_missing_workflows_privileges', () => ({
-  getMissingWorkflowsPrivileges: jest.fn(),
-}));
+vi.mock('./get_missing_workflows_privileges', () => {
+      const mocked = {
+      getMissingWorkflowsPrivileges: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetMissingWorkflowsPrivileges = getMissingWorkflowsPrivileges as jest.MockedFunction<
+const mockGetMissingWorkflowsPrivileges = getMissingWorkflowsPrivileges as MockedFunction<
   typeof getMissingWorkflowsPrivileges
 >;
 
@@ -34,13 +40,13 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
   let mockDataClient: {
     spaceId: string;
-    getAdHocAlertsIndexPattern: jest.Mock;
+    getAdHocAlertsIndexPattern: Mock;
   };
-  let addVersionMock: jest.Mock;
+  let addVersionMock: Mock;
   let getHandler: (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>;
   let mockEsClient: {
     security: {
-      hasPrivileges: jest.Mock;
+      hasPrivileges: Mock;
     };
   };
 
@@ -48,33 +54,33 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
   const adhocIndexPattern = '.internal.alerts-security.alerts-attack-discovery-adhoc-default';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     router = httpServiceMock.createRouter();
     mockDataClient = {
       spaceId: 'default',
-      getAdHocAlertsIndexPattern: jest.fn().mockReturnValue(adhocIndexPattern),
+      getAdHocAlertsIndexPattern: vi.fn().mockReturnValue(adhocIndexPattern),
     };
     mockContext.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(
       mockDataClient as unknown as AttackDiscoveryDataClient
     );
     mockRequest = {};
     mockResponse = httpServerMock.createResponseFactory();
-    jest
+    vi
       .spyOn(helpers, 'performChecks')
       .mockResolvedValue({ isSuccess: true, currentUser: mockAuthenticatedUser });
 
     mockEsClient = {
       security: {
-        hasPrivileges: jest.fn(),
+        hasPrivileges: vi.fn(),
       },
     };
     (mockContext.core.elasticsearch.client.asCurrentUser as unknown) = mockEsClient;
 
-    (mockContext.core.featureFlags.getBooleanValue as jest.Mock).mockResolvedValue(false);
+    (mockContext.core.featureFlags.getBooleanValue as Mock).mockResolvedValue(false);
     mockGetMissingWorkflowsPrivileges.mockResolvedValue([]);
 
-    addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({ addVersion: addVersionMock });
     getMissingIndexPrivilegesInternalRoute(router as never);
     getHandler = addVersionMock.mock.calls[0][1];
   });
@@ -216,7 +222,7 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
     });
 
     it('reads the workflows feature flag with a true default', async () => {
-      (mockContext.core.featureFlags.getBooleanValue as jest.Mock).mockResolvedValue(true);
+      (mockContext.core.featureFlags.getBooleanValue as Mock).mockResolvedValue(true);
 
       await getHandler(mockContext, mockRequest, mockResponse);
 
@@ -227,7 +233,7 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
     });
 
     it('does not evaluate workflows privileges when the workflows feature flag is OFF', async () => {
-      (mockContext.core.featureFlags.getBooleanValue as jest.Mock).mockResolvedValue(false);
+      (mockContext.core.featureFlags.getBooleanValue as Mock).mockResolvedValue(false);
 
       await getHandler(mockContext, mockRequest, mockResponse);
 
@@ -235,7 +241,7 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
     });
 
     it('returns empty feature_privileges when the workflows feature flag is OFF', async () => {
-      (mockContext.core.featureFlags.getBooleanValue as jest.Mock).mockResolvedValue(false);
+      (mockContext.core.featureFlags.getBooleanValue as Mock).mockResolvedValue(false);
 
       await getHandler(mockContext, mockRequest, mockResponse);
 
@@ -245,7 +251,7 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
     });
 
     it('evaluates workflows privileges when the workflows feature flag is ON', async () => {
-      (mockContext.core.featureFlags.getBooleanValue as jest.Mock).mockResolvedValue(true);
+      (mockContext.core.featureFlags.getBooleanValue as Mock).mockResolvedValue(true);
 
       await getHandler(mockContext, mockRequest, mockResponse);
 
@@ -255,7 +261,7 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
     });
 
     it('returns missing workflows feature privileges when the workflows feature flag is ON', async () => {
-      (mockContext.core.featureFlags.getBooleanValue as jest.Mock).mockResolvedValue(true);
+      (mockContext.core.featureFlags.getBooleanValue as Mock).mockResolvedValue(true);
       mockGetMissingWorkflowsPrivileges.mockResolvedValue([
         { feature_id: WORKFLOWS_MANAGEMENT_FEATURE_ID, privileges: ['read', 'execute'] },
       ]);
@@ -291,7 +297,7 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
   });
 
   it('returns an error when performChecks fails', async () => {
-    (helpers.performChecks as jest.Mock).mockResolvedValueOnce({
+    (helpers.performChecks as Mock).mockResolvedValueOnce({
       isSuccess: false,
       response: { status: 403, payload: { message: 'Forbidden' } },
     });

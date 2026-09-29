@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,11 +14,11 @@ import { TemplateList } from './template_list';
 import type { RuleTypeModalProps } from './rule_type_modal';
 
 // Mock IntersectionObserver
-const mockIntersectionObserver = jest.fn();
+const mockIntersectionObserver = vi.fn();
 mockIntersectionObserver.mockReturnValue({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
 });
 window.IntersectionObserver = mockIntersectionObserver;
 
@@ -50,14 +52,14 @@ describe('TemplateList', () => {
 
   const defaultProps = {
     templates: mockTemplates,
-    onSelectTemplate: jest.fn(),
+    onSelectTemplate: vi.fn(),
     hasMore: false,
-    onLoadMore: jest.fn(),
+    onLoadMore: vi.fn(),
     loadingMore: false,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render all template cards correctly', () => {
@@ -77,7 +79,7 @@ describe('TemplateList', () => {
   });
 
   it('should call onSelectTemplate when card is clicked', async () => {
-    const onSelectTemplate = jest.fn();
+    const onSelectTemplate = vi.fn();
     render(<TemplateList {...defaultProps} onSelectTemplate={onSelectTemplate} />);
 
     const card = screen.getByTestId('template-1-SelectOption');
@@ -88,7 +90,7 @@ describe('TemplateList', () => {
   });
 
   it('should call onSelectTemplate when Enter key is pressed on card', async () => {
-    const onSelectTemplate = jest.fn();
+    const onSelectTemplate = vi.fn();
     render(<TemplateList {...defaultProps} onSelectTemplate={onSelectTemplate} />);
 
     const card = screen.getByTestId('template-1-SelectOption');
@@ -99,7 +101,7 @@ describe('TemplateList', () => {
   });
 
   it('should call onSelectTemplate when Space key is pressed on card', async () => {
-    const onSelectTemplate = jest.fn();
+    const onSelectTemplate = vi.fn();
     render(<TemplateList {...defaultProps} onSelectTemplate={onSelectTemplate} />);
 
     const card = screen.getByTestId('template-1-SelectOption');
@@ -145,7 +147,7 @@ describe('TemplateList', () => {
   });
 
   it('should call onLoadMore when intersection observer triggers', () => {
-    const onLoadMore = jest.fn();
+    const onLoadMore = vi.fn();
     render(<TemplateList {...defaultProps} hasMore={true} onLoadMore={onLoadMore} />);
 
     // Get the callback passed to IntersectionObserver

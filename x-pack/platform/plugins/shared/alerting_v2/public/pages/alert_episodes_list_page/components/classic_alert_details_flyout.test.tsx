@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -12,9 +14,9 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id';
 import { ClassicAlertDetailsFlyout } from './classic_alert_details_flyout';
 
-jest.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id');
+vi.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id');
 
-const mockFetchClassicAlertById = jest.mocked(fetchClassicAlertById);
+const mockFetchClassicAlertById = vi.mocked(fetchClassicAlertById);
 
 const services = {
   http: {
@@ -35,7 +37,7 @@ const renderFlyout = (props?: Partial<React.ComponentProps<typeof ClassicAlertDe
   render(
     <ClassicAlertDetailsFlyout
       alertId="alert-1"
-      onClose={jest.fn()}
+      onClose={vi.fn()}
       services={services}
       {...props}
     />,
@@ -44,7 +46,7 @@ const renderFlyout = (props?: Partial<React.ComponentProps<typeof ClassicAlertDe
 
 describe('ClassicAlertDetailsFlyout', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows a loading spinner while the classic alert is being fetched', () => {

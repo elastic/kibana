@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -17,13 +19,19 @@ import type { DefaultPresentationPanelApi } from '../types';
 import { isApiCompatibleWithCustomizePanelAction } from '../../../ui_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../../ui_actions/customize_panel_action/open_customize_panel';
 
-jest.mock('../../../ui_actions/customize_panel_action', () => ({
-  isApiCompatibleWithCustomizePanelAction: jest.fn(() => false),
-}));
+vi.mock('../../../ui_actions/customize_panel_action', () => {
+      const mocked = {
+      isApiCompatibleWithCustomizePanelAction: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../ui_actions/customize_panel_action/open_customize_panel', () => ({
-  openCustomizePanelFlyout: jest.fn(),
-}));
+vi.mock('../../../ui_actions/customize_panel_action/open_customize_panel', () => {
+      const mocked = {
+      openCustomizePanelFlyout: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('PresentationPanelTitle', () => {
   const mockApi: DefaultPresentationPanelApi = {
@@ -91,12 +99,12 @@ describe('PresentationPanelTitle', () => {
 
   describe('keyboard accessibility in edit mode', () => {
     beforeEach(() => {
-      jest.mocked(isApiCompatibleWithCustomizePanelAction).mockReturnValue(true);
-      jest.mocked(openCustomizePanelFlyout).mockClear();
+      vi.mocked(isApiCompatibleWithCustomizePanelAction).mockReturnValue(true);
+      vi.mocked(openCustomizePanelFlyout).mockClear();
     });
 
     afterEach(() => {
-      jest.mocked(isApiCompatibleWithCustomizePanelAction).mockReturnValue(false);
+      vi.mocked(isApiCompatibleWithCustomizePanelAction).mockReturnValue(false);
     });
 
     it('opens the customize panel flyout when Enter is pressed on the editable title', () => {

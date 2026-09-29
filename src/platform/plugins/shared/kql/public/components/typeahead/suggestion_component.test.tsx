@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { SuggestionComponent } from './suggestion_component';
@@ -70,7 +72,7 @@ describe('SuggestionComponent', () => {
   });
 
   it('calls innerRef with the reference to the root element', () => {
-    const innerRefMock = jest.fn();
+    const innerRefMock = vi.fn();
 
     render(
       <SuggestionComponent
@@ -94,7 +96,7 @@ describe('SuggestionComponent', () => {
   });
 
   it('calls onClick with suggestion and index', async () => {
-    const clickHandler = jest.fn();
+    const clickHandler = vi.fn();
 
     render(
       <SuggestionComponent
@@ -115,7 +117,7 @@ describe('SuggestionComponent', () => {
   });
 
   it('calls onMouseEnter when user hovers the element', async () => {
-    const mouseEnterHandler = jest.fn();
+    const mouseEnterHandler = vi.fn();
 
     render(
       <SuggestionComponent

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom } from 'rxjs';
 import { skip, take, toArray } from 'rxjs';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -47,14 +49,14 @@ describe('TaskExecutionControlService', () => {
     });
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     savedObjectsRepository = savedObjectsRepositoryMock.create();
     logger = loggingSystemMock.createLogger();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   describe('start / read state', () => {
@@ -98,8 +100,8 @@ describe('TaskExecutionControlService', () => {
       const service = createService();
       const startPromise = service.start();
       // Advance through the bounded retry delays.
-      await jest.runOnlyPendingTimersAsync();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       await startPromise;
 
       expect(service.getState()).toEqual({ paused: false, pausedTaskTypes: [] });
@@ -121,8 +123,8 @@ describe('TaskExecutionControlService', () => {
       const emissions = firstValueFrom(service.state.pipe(skip(1), take(1), toArray()));
       await service.start();
 
-      await jest.advanceTimersByTimeAsync(POLL_INTERVAL); // unchanged, no emit
-      await jest.advanceTimersByTimeAsync(POLL_INTERVAL); // paused, emits
+      await vi.advanceTimersByTimeAsync(POLL_INTERVAL); // unchanged, no emit
+      await vi.advanceTimersByTimeAsync(POLL_INTERVAL); // paused, emits
 
       await expect(emissions).resolves.toEqual([{ paused: true, pausedTaskTypes: [] }]);
     });
@@ -136,7 +138,7 @@ describe('TaskExecutionControlService', () => {
       await service.start();
       expect(service.getState().paused).toBe(true);
 
-      await jest.advanceTimersByTimeAsync(POLL_INTERVAL);
+      await vi.advanceTimersByTimeAsync(POLL_INTERVAL);
 
       expect(service.getState().paused).toBe(true);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('could not be refreshed'));
@@ -151,7 +153,7 @@ describe('TaskExecutionControlService', () => {
       const callsAfterStart = savedObjectsRepository.get.mock.calls.length;
 
       service.stop();
-      await jest.advanceTimersByTimeAsync(POLL_INTERVAL * 3);
+      await vi.advanceTimersByTimeAsync(POLL_INTERVAL * 3);
 
       expect(savedObjectsRepository.get).toHaveBeenCalledTimes(callsAfterStart);
     });

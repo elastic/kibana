@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { stringify } from 'yaml';
@@ -13,9 +15,12 @@ import type { OTelCollectorConfig } from '../../../../common/types';
 
 import { YamlViewer } from './yaml_viewer';
 
-jest.mock('../../../services/use_yaml', () => ({
-  useYaml: () => require('yaml'),
-}));
+vi.mock('../../../services/use_yaml', () => {
+      const mocked = {
+      useYaml: () => require('yaml'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const config: OTelCollectorConfig = {
   receivers: {

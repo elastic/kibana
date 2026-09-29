@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { PolicySelectorProps } from './policy_selector';
 import { PolicySelector } from './policy_selector';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -24,9 +27,9 @@ import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import type { BulkGetPackagePoliciesRequestBody } from '@kbn/fleet-plugin/common/types';
 import { policySelectorMocks } from './mocks';
 
-jest.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/components/user_privileges');
 
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
 
 describe('PolicySelector component', () => {
   let mockedContext: AppContextTestRender;
@@ -74,7 +77,7 @@ describe('PolicySelector component', () => {
 
     props = {
       selectedPolicyIds: [],
-      onChange: jest.fn((updatedPolicySelection, updatedAdditionalItems) => {
+      onChange: vi.fn((updatedPolicySelection, updatedAdditionalItems) => {
         // Update props and re-render component so we get the latest state of it after user interactions
         const updatedProps: PolicySelectorProps = {
           ...props,
@@ -620,7 +623,7 @@ describe('PolicySelector component', () => {
 
   it('should call "onFetch" after having queried Fleet API', async () => {
     props.selectedPolicyIds = [testPolicyId1];
-    props.onFetch = jest.fn();
+    props.onFetch = vi.fn();
     await render();
 
     expect(props.onFetch).toHaveBeenCalledWith({
@@ -651,7 +654,7 @@ describe('PolicySelector component', () => {
   });
 
   it('should allow policy display configuration via "policyDisplayOptions" prop', async () => {
-    props.policyDisplayOptions = jest.fn((_policy) => {
+    props.policyDisplayOptions = vi.fn((_policy) => {
       return { disabled: true };
     });
     const { getByTestId } = await render();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Escape } from './mustache_renderer';
 import {
@@ -42,7 +44,7 @@ const variables = {
 
 describe('mustache_renderer', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('renderMustacheString()', () => {

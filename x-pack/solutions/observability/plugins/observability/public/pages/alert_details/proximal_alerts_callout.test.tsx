@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import React from 'react';
 import type { AlertData } from '../../hooks/use_fetch_alert_detail';
@@ -17,16 +20,16 @@ import { alertDetail } from './mock/alert';
 import { ProximalAlertsCallout } from './proximal_alerts_callout';
 import { fireEvent } from '@testing-library/dom';
 
-jest.mock('../../utils/kibana_react');
+vi.mock('../../utils/kibana_react');
 
-jest.mock('../../hooks/use_fetch_alert_detail');
+vi.mock('../../hooks/use_fetch_alert_detail');
 
-jest.mock('./hooks/use_find_proximal_alerts');
-jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('@kbn/ebt-tools');
+vi.mock('./hooks/use_find_proximal_alerts');
+vi.mock('@kbn/observability-shared-plugin/public');
+vi.mock('@kbn/ebt-tools');
 
-const useFetchAlertDetailMock = useFetchAlertDetail as jest.Mock;
-const useFindProximalAlertsMock = useFindProximalAlerts as jest.Mock;
+const useFetchAlertDetailMock = useFetchAlertDetail as Mock;
+const useFindProximalAlertsMock = useFindProximalAlerts as Mock;
 
 const config: Subset<ConfigSchema> = {
   unsafe: {
@@ -38,10 +41,10 @@ const config: Subset<ConfigSchema> = {
 
 describe('Proximal callout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  const switchTabs = jest.fn();
+  const switchTabs = vi.fn();
 
   const renderCallout = (alert: AlertData) =>
     render(

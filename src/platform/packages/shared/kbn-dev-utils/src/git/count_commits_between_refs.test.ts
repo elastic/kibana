@@ -7,16 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import execa from 'execa';
 
 import { countCommitsBetweenRefs } from './count_commits_between_refs';
 
-jest.mock('execa');
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/repo',
-}));
+vi.mock('execa');
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/repo',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockExeca = execa as unknown as jest.Mock;
+const mockExeca = execa as unknown as Mock;
 
 describe('countCommitsBetweenRefs', () => {
   beforeEach(() => {

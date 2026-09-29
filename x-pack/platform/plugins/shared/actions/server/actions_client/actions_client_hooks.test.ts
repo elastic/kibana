@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { omit } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -36,31 +39,34 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
 import { authTypeRegistryMock } from '../auth_types/auth_type_registry.mock';
 
-jest.mock('uuid', () => ({
-  v4: () => ConnectorSavedObject.id,
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => ConnectorSavedObject.id,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const kibanaIndices = ['.kibana'];
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
-const bulkExecutionEnqueuer = jest.fn();
+const bulkExecutionEnqueuer = vi.fn();
 const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditLoggerMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const mockTaskManager = taskManagerMock.createSetup();
-const getEventLogClient = jest.fn();
-const preSaveHook = jest.fn();
-const postSaveHook = jest.fn();
-const postDeleteHook = jest.fn();
+const getEventLogClient = vi.fn();
+const preSaveHook = vi.fn();
+const postSaveHook = vi.fn();
+const postDeleteHook = vi.fn();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
-const getAxiosInstanceWithAuth = jest.fn();
+const getAxiosInstanceWithAuth = vi.fn();
 const isESOCanEncrypt = true;
 
 let actionsClient: ActionsClient;
-let mockedLicenseState: jest.Mocked<ILicenseState>;
+let mockedLicenseState: Mocked<ILicenseState>;
 let actionTypeRegistry: ActionTypeRegistry;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
 let authTypeRegistry: AuthTypeRegistry;
@@ -116,7 +122,7 @@ const inMemoryMetrics = inMemoryMetricsMock.create();
 let logger: MockedLogger;
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   logger = loggerMock.create();
   mockedLicenseState = licenseStateMock.create();
 

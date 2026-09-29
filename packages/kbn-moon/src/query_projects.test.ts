@@ -7,23 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const mockExeca = jest.fn();
+import { vi } from 'vitest';
 
-jest.mock('fs', () => ({
-  ...jest.requireActual('fs'),
-  existsSync: jest.fn().mockReturnValue(true),
-}));
+const mockExeca = vi.fn();
 
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/repo',
-}));
+vi.mock('fs', () => {
+      const mocked = {
+      ...require('fs'),
+      existsSync: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/dev-utils', () => ({
-  getRemoteDefaultBranchRefs: jest.fn(),
-  resolveNearestMergeBase: jest.fn(),
-}));
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/repo',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('execa', () => ({
+vi.mock('@kbn/dev-utils', () => {
+      const mocked = {
+      getRemoteDefaultBranchRefs: vi.fn(),
+      resolveNearestMergeBase: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('execa', () => ({
   __esModule: true,
   default: mockExeca,
 }));
@@ -45,7 +56,7 @@ const createMoonProjectsOutput = (projects: Array<{ id: string; sourceRoot: stri
 
 describe('getAffectedMoonProjectsFromChangedFiles', () => {
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     mockExeca.mockReset();
   });
 

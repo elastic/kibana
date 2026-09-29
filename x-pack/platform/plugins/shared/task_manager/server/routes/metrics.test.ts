@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { of, Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,7 +17,7 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 describe('metricsRoute', () => {
   let logger: Logger;
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     logger = loggingSystemMock.createLogger();
   });
 

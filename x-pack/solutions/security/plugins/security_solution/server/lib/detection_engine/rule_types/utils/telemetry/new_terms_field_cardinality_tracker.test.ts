@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { estypes } from '@elastic/elasticsearch';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
@@ -30,12 +33,12 @@ const ruleParamsOf = (params: Partial<NewTermsRuleParams>): NewTermsRuleParams =
   } as NewTermsRuleParams);
 
 describe('createNewTermsFieldCardinalityTracker', () => {
-  let mockAnalytics: jest.Mocked<AnalyticsServiceSetup>;
+  let mockAnalytics: Mocked<AnalyticsServiceSetup>;
   let logger: Logger;
 
   beforeEach(() => {
     mockAnalytics = coreMock.createSetup().analytics;
-    logger = { debug: jest.fn() } as unknown as Logger;
+    logger = { debug: vi.fn() } as unknown as Logger;
   });
 
   const createTracker = (params: Partial<NewTermsRuleParams> = {}, analytics = mockAnalytics) =>

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -12,13 +14,13 @@ import { TestProviders, renderWithTestingProviders } from '../../common/mock';
 import { HeaderPage } from '.';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
-jest.mock('../../common/navigation/hooks');
+vi.mock('../../common/navigation/hooks');
 
 describe('HeaderPage', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders', () => {

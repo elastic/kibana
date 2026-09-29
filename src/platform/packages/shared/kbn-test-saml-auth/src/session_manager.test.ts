@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, MockedFunction } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import crypto from 'crypto';
 import { Cookie } from 'tough-cookie';
@@ -15,11 +18,14 @@ import { Session } from './saml_auth';
 import type { SupportedRoles } from './session_manager';
 import { SamlSessionManager } from './session_manager';
 
-jest.mock('./fetch_kibana_version', () => ({
-  fetchKibanaVersionHeaderString: jest.fn(),
-}));
+vi.mock('./fetch_kibana_version', () => {
+      const mocked = {
+      fetchKibanaVersionHeaderString: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedFetchKibanaVersionHeaderString = fetchKibanaVersionHeaderString as jest.MockedFunction<
+const mockedFetchKibanaVersionHeaderString = fetchKibanaVersionHeaderString as MockedFunction<
   typeof fetchKibanaVersionHeaderString
 >;
 import * as samlAuth from './saml_auth';
@@ -39,21 +45,21 @@ const roleViewer = 'viewer';
 const roleEditor = 'editor';
 const cloudUsersFilePath = resolve(REPO_ROOT, SERVERLESS_ROLES_ROOT_PATH, 'role_users.json');
 
-const createLocalSAMLSessionMock = jest.spyOn(samlAuth, 'createLocalSAMLSession');
-const getSecurityProfileMock = jest.spyOn(samlAuth, 'getSecurityProfile');
-const readCloudUsersFromFileMock = jest.spyOn(helper, 'readCloudUsersFromFile');
+const createLocalSAMLSessionMock = vi.spyOn(samlAuth, 'createLocalSAMLSession');
+const getSecurityProfileMock = vi.spyOn(samlAuth, 'getSecurityProfile');
+const readCloudUsersFromFileMock = vi.spyOn(helper, 'readCloudUsersFromFile');
 
 const getTestToken = () => 'kbn_cookie_' + crypto.randomBytes(16).toString('hex');
 
 describe('SamlSessionManager', () => {
-  let createCloudSAMLSessionMock: jest.SpyInstance;
+  let createCloudSAMLSessionMock: MockInstance;
   beforeEach(() => {
-    createCloudSAMLSessionMock = jest.spyOn(samlAuth, 'createCloudSAMLSession');
+    createCloudSAMLSessionMock = vi.spyOn(samlAuth, 'createCloudSAMLSession');
   });
 
   describe('for local session', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
 
       createLocalSAMLSessionMock.mockResolvedValue(new Session(cookieInstance, testEmail));
     });
@@ -263,7 +269,7 @@ describe('SamlSessionManager', () => {
 
     describe('handles errors', () => {
       beforeEach(() => {
-        jest.resetAllMocks();
+        vi.resetAllMocks();
 
         readCloudUsersFromFileMock.mockReturnValue(cloudUsers);
         delete process.env.TEST_CLOUD_HOST_NAME; // Ensure variable is unset
@@ -285,7 +291,7 @@ describe('SamlSessionManager', () => {
     });
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
 
       mockedFetchKibanaVersionHeaderString.mockResolvedValue('8.12.0');
       createCloudSAMLSessionMock.mockResolvedValue(new Session(cloudCookieInstance, cloudEmail));
@@ -464,7 +470,7 @@ describe('SamlSessionManager', () => {
     };
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     test('should throw an error when kbnHost points to a Cloud instance', () => {

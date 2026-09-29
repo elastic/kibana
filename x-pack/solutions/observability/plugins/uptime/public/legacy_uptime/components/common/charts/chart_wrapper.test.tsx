@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { ChartWrapper } from './chart_wrapper';
@@ -14,11 +16,14 @@ import { mockCore } from '../../../lib/helper/rtl_helpers';
 import { render } from '@testing-library/react';
 const SNAPSHOT_CHART_HEIGHT = 144;
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn().mockImplementation(() => ({
-    services: mockCore(),
-  })),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn().mockImplementation(() => ({
+        services: mockCore(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ChartWrapper component', () => {
   it('renders the component with loading false', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
@@ -13,16 +15,16 @@ import { GenAiSettingsPlugin } from './plugin';
 
 describe('GenAiSettingsPlugin', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createPlugin = () => {
     const initializerContext = {
       logger: {
-        get: jest.fn().mockReturnValue({
-          error: jest.fn(),
-          debug: jest.fn(),
-          warn: jest.fn(),
+        get: vi.fn().mockReturnValue({
+          error: vi.fn(),
+          debug: vi.fn(),
+          warn: vi.fn(),
         }),
       },
     } as unknown as PluginInitializerContext;
@@ -34,11 +36,11 @@ describe('GenAiSettingsPlugin', () => {
     const coreSetup = coreMock.createSetup();
 
     const mockActionsClient = {
-      getAll: jest.fn().mockResolvedValue(options.connectors ?? []),
+      getAll: vi.fn().mockResolvedValue(options.connectors ?? []),
     };
 
     const mockActions = {
-      getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
+      getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClient),
     };
 
     coreSetup.getStartServices.mockResolvedValue([

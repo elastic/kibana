@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -15,9 +18,9 @@ import FieldsPreview from './servicenow_itsm_case_fields_preview';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { tableMatchesExpectedContent } from '../../../common/test_utils';
 
-jest.mock('./use_get_choices');
+vi.mock('./use_get_choices');
 
-const useGetChoicesMock = useGetChoices as jest.Mock;
+const useGetChoicesMock = useGetChoices as Mock;
 
 describe('ServiceNowITSM Fields: Preview', () => {
   const fields = {
@@ -35,7 +38,7 @@ describe('ServiceNowITSM Fields: Preview', () => {
       isFetching: false,
       data: { data: choices },
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders all fields correctly', () => {

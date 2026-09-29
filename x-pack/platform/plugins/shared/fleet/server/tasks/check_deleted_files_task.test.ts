@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
@@ -46,7 +49,7 @@ describe('check deleted files task', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   let mockTask: CheckDeletedFilesTask;
   let mockCore: CoreSetup;
-  let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
+  let mockTaskManagerSetup: Mocked<TaskManagerSetupContract>;
   beforeEach(() => {
     mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
@@ -60,7 +63,7 @@ describe('check deleted files task', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('task lifecycle', () => {
@@ -89,7 +92,7 @@ describe('check deleted files task', () => {
     });
 
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     const runTask = async (taskInstance = MOCK_TASK_INSTANCE) => {

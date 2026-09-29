@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { usePreparedState } from './use_prepared_state';
 
@@ -17,11 +19,11 @@ describe('usePreparedState', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('starts loading and then returns a success state', async () => {
-    const prepareExportJson = jest.fn().mockResolvedValue({
+    const prepareExportJson = vi.fn().mockResolvedValue({
       data: { ...state, title: 'my object (prepared)' },
       warnings: ['Unsupported property removed'],
     });
@@ -38,7 +40,7 @@ describe('usePreparedState', () => {
   });
 
   test('retries when retry is called', async () => {
-    const prepareExportJson = jest
+    const prepareExportJson = vi
       .fn()
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce({
@@ -64,7 +66,7 @@ describe('usePreparedState', () => {
   });
 
   test('uses the state returned by the preparation function', async () => {
-    const prepareExportJson = jest.fn(async (currentState) => ({
+    const prepareExportJson = vi.fn(async (currentState) => ({
       data: currentState,
       warnings: [],
     }));

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { EventEmitter } from 'events';
 import { diag } from '@opentelemetry/api';
 import { createCleanupBeforeExit } from './create_cleanup_before_exit';
@@ -20,20 +23,20 @@ const waitForTimers = async (ms = 5) => {
 };
 
 type MockedProcess = NodeJS.Process & {
-  exit: jest.Mock<void, [number?]>;
-  kill: jest.Mock;
+  exit: Mock<void, [number?]>;
+  kill: Mock;
 };
 
 function createMockProc() {
   const emitter = new EventEmitter();
-  const originalExit = jest.fn();
+  const originalExit = vi.fn();
 
   const proc = Object.assign(emitter, {
     pid: 1234,
-    exit: jest.fn(function (this: NodeJS.Process, ...args: any[]) {
+    exit: vi.fn(function (this: NodeJS.Process, ...args: any[]) {
       originalExit(...args);
     }),
-    kill: jest.fn(),
+    kill: vi.fn(),
   }) as unknown as MockedProcess;
 
   return { proc, originalExit };
@@ -43,7 +46,7 @@ describe('createCleanupBeforeExit', () => {
   it('invokes cleanup handler when beforeExit is emitted', async () => {
     const { proc } = createMockProc();
     const cleanupBeforeExit = createCleanupBeforeExit(proc);
-    const handler = jest.fn();
+    const handler = vi.fn();
 
     cleanupBeforeExit(handler);
 
@@ -58,7 +61,7 @@ describe('createCleanupBeforeExit', () => {
     const cleanupBeforeExit = createCleanupBeforeExit(proc);
     let resolveHandler: (() => void) | undefined;
 
-    const handler = jest.fn(
+    const handler = vi.fn(
       () =>
         new Promise<void>((resolve) => {
           resolveHandler = resolve;
@@ -83,7 +86,7 @@ describe('createCleanupBeforeExit', () => {
   it('does not block exit when handler is non-blocking', () => {
     const { proc, originalExit } = createMockProc();
     const cleanupBeforeExit = createCleanupBeforeExit(proc);
-    const handler = jest.fn();
+    const handler = vi.fn();
 
     cleanupBeforeExit(handler);
 
@@ -96,7 +99,7 @@ describe('createCleanupBeforeExit', () => {
   it('does not override an existing process.exitCode', () => {
     const { proc, originalExit } = createMockProc();
     const cleanupBeforeExit = createCleanupBeforeExit(proc);
-    const handler = jest.fn();
+    const handler = vi.fn();
 
     proc.exitCode = 1;
 
@@ -112,7 +115,7 @@ describe('createCleanupBeforeExit', () => {
   it('only runs cleanup once for multiple signals', async () => {
     const { proc } = createMockProc();
     const cleanupBeforeExit = createCleanupBeforeExit(proc);
-    const handler = jest.fn();
+    const handler = vi.fn();
 
     cleanupBeforeExit(handler);
 
@@ -127,8 +130,8 @@ describe('createCleanupBeforeExit', () => {
   it('allows unregistering handlers', async () => {
     const { proc } = createMockProc();
     const cleanupBeforeExit = createCleanupBeforeExit(proc);
-    const handlerA = jest.fn();
-    const handlerB = jest.fn();
+    const handlerA = vi.fn();
+    const handlerB = vi.fn();
 
     const removeA = cleanupBeforeExit(handlerA);
     cleanupBeforeExit(handlerB);
@@ -144,7 +147,7 @@ describe('createCleanupBeforeExit', () => {
   });
 
   it('logs a timeout warning when a blocking handler exceeds its timeout', async () => {
-    const warnSpy = jest.spyOn(diag, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(diag, 'warn').mockImplementation(() => {});
 
     try {
       const { proc } = createMockProc();
@@ -166,9 +169,9 @@ describe('createCleanupBeforeExit', () => {
   });
 
   it('logs an error when a non-blocking handler outlives process.exit', async () => {
-    const warnSpy = jest.spyOn(diag, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(diag, 'warn').mockImplementation(() => {});
 
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     try {
       const { proc, originalExit } = createMockProc();
@@ -181,7 +184,7 @@ describe('createCleanupBeforeExit', () => {
 
       proc.exit(0);
 
-      await jest.advanceTimersToNextTimerAsync();
+      await vi.advanceTimersToNextTimerAsync();
 
       expect(warnSpy).toHaveBeenCalled();
 
@@ -192,7 +195,7 @@ describe('createCleanupBeforeExit', () => {
       expect(messages.some((message) => message.includes('Process exited'))).toBe(true);
     } finally {
       warnSpy.mockRestore();
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 });

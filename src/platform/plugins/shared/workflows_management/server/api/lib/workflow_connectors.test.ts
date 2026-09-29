@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getAvailableConnectors } from './workflow_connectors';
 
 const mockActionType = (overrides: Record<string, unknown> = {}) => ({
@@ -33,14 +35,14 @@ describe('getAvailableConnectors', () => {
   const request = {} as any;
 
   it('groups connectors by type and returns the configured action-type metadata', async () => {
-    const actionsClient = { getAll: jest.fn().mockResolvedValue([mockConnector()]) };
+    const actionsClient = { getAll: vi.fn().mockResolvedValue([mockConnector()]) };
     const actionsClientWithRequest = {
-      listTypes: jest.fn().mockResolvedValue([mockActionType()]),
+      listTypes: vi.fn().mockResolvedValue([mockActionType()]),
     };
 
     const result = await getAvailableConnectors({
-      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
-      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getActionsClient: vi.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: vi.fn().mockResolvedValue(actionsClientWithRequest),
       spaceId: 'default',
       request,
     });
@@ -55,14 +57,14 @@ describe('getAvailableConnectors', () => {
   });
 
   it('includes action types that have no connector instances with an empty instances array', async () => {
-    const actionsClient = { getAll: jest.fn().mockResolvedValue([]) };
+    const actionsClient = { getAll: vi.fn().mockResolvedValue([]) };
     const actionsClientWithRequest = {
-      listTypes: jest.fn().mockResolvedValue([mockActionType({ id: '.email', name: 'Email' })]),
+      listTypes: vi.fn().mockResolvedValue([mockActionType({ id: '.email', name: 'Email' })]),
     };
 
     const result = await getAvailableConnectors({
-      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
-      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getActionsClient: vi.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: vi.fn().mockResolvedValue(actionsClientWithRequest),
       spaceId: 'default',
       request,
     });
@@ -73,7 +75,7 @@ describe('getAvailableConnectors', () => {
 
   it('drops connectors whose actionTypeId is not in the allowed action-types list', async () => {
     const actionsClient = {
-      getAll: jest
+      getAll: vi
         .fn()
         .mockResolvedValue([
           mockConnector(),
@@ -81,12 +83,12 @@ describe('getAvailableConnectors', () => {
         ]),
     };
     const actionsClientWithRequest = {
-      listTypes: jest.fn().mockResolvedValue([mockActionType()]),
+      listTypes: vi.fn().mockResolvedValue([mockActionType()]),
     };
 
     const result = await getAvailableConnectors({
-      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
-      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getActionsClient: vi.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: vi.fn().mockResolvedValue(actionsClientWithRequest),
       spaceId: 'default',
       request,
     });
@@ -100,17 +102,17 @@ describe('getAvailableConnectors', () => {
 
   it('groups multiple instances of the same type together', async () => {
     const actionsClient = {
-      getAll: jest
+      getAll: vi
         .fn()
         .mockResolvedValue([mockConnector(), mockConnector({ id: 'slack-2', name: 'Secondary' })]),
     };
     const actionsClientWithRequest = {
-      listTypes: jest.fn().mockResolvedValue([mockActionType()]),
+      listTypes: vi.fn().mockResolvedValue([mockActionType()]),
     };
 
     const result = await getAvailableConnectors({
-      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
-      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getActionsClient: vi.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: vi.fn().mockResolvedValue(actionsClientWithRequest),
       spaceId: 'default',
       request,
     });
@@ -123,7 +125,7 @@ describe('getAvailableConnectors', () => {
 
   it('surfaces inference taskType config in the instance payload', async () => {
     const actionsClient = {
-      getAll: jest.fn().mockResolvedValue([
+      getAll: vi.fn().mockResolvedValue([
         mockConnector({
           id: 'inf-1',
           name: 'Inference',
@@ -133,14 +135,14 @@ describe('getAvailableConnectors', () => {
       ]),
     };
     const actionsClientWithRequest = {
-      listTypes: jest
+      listTypes: vi
         .fn()
         .mockResolvedValue([mockActionType({ id: '.inference', name: 'Inference' })]),
     };
 
     const result = await getAvailableConnectors({
-      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
-      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getActionsClient: vi.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: vi.fn().mockResolvedValue(actionsClientWithRequest),
       spaceId: 'default',
       request,
     });
@@ -158,7 +160,7 @@ describe('getAvailableConnectors', () => {
       minimumLicenseRequired: 'gold',
     });
     const actionsClient = {
-      getAll: jest.fn().mockResolvedValue([
+      getAll: vi.fn().mockResolvedValue([
         mockConnector({
           id: 'testyng',
           name: 'testyng',
@@ -167,15 +169,15 @@ describe('getAvailableConnectors', () => {
       ]),
     };
     const actionsClientWithRequest = {
-      listTypes: jest
+      listTypes: vi
         .fn()
         .mockResolvedValueOnce([mockActionType()])
         .mockResolvedValueOnce([mockActionType(), inboundType]),
     };
 
     const result = await getAvailableConnectors({
-      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
-      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getActionsClient: vi.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: vi.fn().mockResolvedValue(actionsClientWithRequest),
       spaceId: 'default',
       request,
     });
@@ -189,12 +191,12 @@ describe('getAvailableConnectors', () => {
   });
 
   it('returns an empty payload when there are neither connectors nor action types', async () => {
-    const actionsClient = { getAll: jest.fn().mockResolvedValue([]) };
-    const actionsClientWithRequest = { listTypes: jest.fn().mockResolvedValue([]) };
+    const actionsClient = { getAll: vi.fn().mockResolvedValue([]) };
+    const actionsClientWithRequest = { listTypes: vi.fn().mockResolvedValue([]) };
 
     const result = await getAvailableConnectors({
-      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
-      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getActionsClient: vi.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: vi.fn().mockResolvedValue(actionsClientWithRequest),
       spaceId: 'default',
       request,
     });
@@ -204,13 +206,13 @@ describe('getAvailableConnectors', () => {
 
   it('fires getAll and listTypes in parallel (both started before either resolves)', async () => {
     const order: string[] = [];
-    const getAll = jest.fn().mockImplementation(async () => {
+    const getAll = vi.fn().mockImplementation(async () => {
       order.push('getAll:start');
       await Promise.resolve();
       order.push('getAll:end');
       return [];
     });
-    const listTypes = jest.fn().mockImplementation(async () => {
+    const listTypes = vi.fn().mockImplementation(async () => {
       order.push('listTypes:start');
       await Promise.resolve();
       order.push('listTypes:end');
@@ -218,8 +220,8 @@ describe('getAvailableConnectors', () => {
     });
 
     await getAvailableConnectors({
-      getActionsClient: jest.fn().mockResolvedValue({ getAll }),
-      getActionsClientWithRequest: jest.fn().mockResolvedValue({ listTypes }),
+      getActionsClient: vi.fn().mockResolvedValue({ getAll }),
+      getActionsClientWithRequest: vi.fn().mockResolvedValue({ listTypes }),
       spaceId: 'default',
       request,
     });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -18,15 +20,18 @@ import {
   useObservabilityMiniTiles,
 } from './observability_flavor';
 
-const mockUseAvailablePackages = jest.fn();
+const mockUseAvailablePackages = vi.fn();
 
 // Stubbed rather than required from the real module, which executes Fleet's whole
 // public bundle. These tests build tiles and never search.
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  LocalSearchHook: () => Promise.resolve({ useLocalSearch: jest.fn() }),
-  AvailablePackagesHook: () => Promise.resolve({ useAvailablePackages: mockUseAvailablePackages }),
-  useGetSettingsQuery: () => ({ data: undefined }),
-}));
+vi.mock('@kbn/fleet-plugin/public', () => {
+      const mocked = {
+      LocalSearchHook: () => Promise.resolve({ useLocalSearch: vi.fn() }),
+      AvailablePackagesHook: () => Promise.resolve({ useAvailablePackages: mockUseAvailablePackages }),
+      useGetSettingsQuery: () => ({ data: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const plainLeftClick = (overrides: Partial<React.MouseEvent> = {}) =>
   ({
@@ -35,7 +40,7 @@ const plainLeftClick = (overrides: Partial<React.MouseEvent> = {}) =>
     altKey: false,
     ctrlKey: false,
     shiftKey: false,
-    preventDefault: jest.fn(),
+    preventDefault: vi.fn(),
     ...overrides,
   } as unknown as React.MouseEvent);
 
@@ -65,7 +70,7 @@ const makeCollectionCard = (groupId: string, memberCount: number) => ({
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseAvailablePackages.mockReturnValue({
     isLoading: false,
     eprPackageLoadingError: undefined,
@@ -89,12 +94,12 @@ const buildServices = ({
   return {
     ...core,
     featureFlags: {
-      useBooleanValue: jest.fn(
+      useBooleanValue: vi.fn(
         (key: string, fallback: boolean) => featureFlagValues[key] ?? fallback
       ),
     },
     pricing: {
-      isFeatureAvailable: jest.fn(() => metricsOnboardingEnabled),
+      isFeatureAvailable: vi.fn(() => metricsOnboardingEnabled),
     },
     observability: { config: { managedOtlpServiceUrl: '' } },
     cloud: undefined,
@@ -131,7 +136,7 @@ const createProviderWrapper = () => {
 describe('useObservabilityCuratedCategories', () => {
   it('builds the four curated categories', () => {
     const { result } = renderHook(
-      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      () => useObservabilityCuratedCategories({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(),
       }
@@ -146,7 +151,7 @@ describe('useObservabilityCuratedCategories', () => {
 
   it('hides the Applications category when metrics onboarding is unavailable', () => {
     const { result } = renderHook(
-      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      () => useObservabilityCuratedCategories({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(buildServices({ metricsOnboardingEnabled: false })),
       }
@@ -156,7 +161,7 @@ describe('useObservabilityCuratedCategories', () => {
 
   it('wires internal routes for quickstart tiles', () => {
     const { result } = renderHook(
-      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      () => useObservabilityCuratedCategories({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(),
       }
@@ -175,7 +180,7 @@ describe('useObservabilityCuratedCategories', () => {
       featureFlagValues: { [IS_INGEST_HUB_ONBOARDING_ENABLED]: true },
     });
     const { result } = renderHook(
-      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      () => useObservabilityCuratedCategories({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(services),
       }
@@ -198,7 +203,7 @@ describe('useObservabilityCuratedCategories', () => {
       featureFlagValues: { [IS_INGEST_HUB_ONBOARDING_ENABLED]: true },
     });
     const { result } = renderHook(
-      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      () => useObservabilityCuratedCategories({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(services),
       }
@@ -214,7 +219,7 @@ describe('useObservabilityCuratedCategories', () => {
 
   it('wires EPR-backed tiles to the integrations detail page', () => {
     const { result } = renderHook(
-      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      () => useObservabilityCuratedCategories({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(),
       }
@@ -237,7 +242,7 @@ describe('useObservabilityCuratedCategories', () => {
 
   it('preserves the existing data-test-subj values', () => {
     const { result } = renderHook(
-      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      () => useObservabilityCuratedCategories({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(),
       }
@@ -250,7 +255,7 @@ describe('useObservabilityCuratedCategories', () => {
 
   it('renders the decision-log tile membership and order', () => {
     const { result } = renderHook(
-      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      () => useObservabilityCuratedCategories({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(),
       }
@@ -266,7 +271,7 @@ describe('useObservabilityCuratedCategories', () => {
 
   it('wires the application tiles to their destinations on stateful', () => {
     const { result } = renderHook(
-      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      () => useObservabilityCuratedCategories({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(buildServices({ isServerless: false })),
       }
@@ -286,7 +291,7 @@ describe('useObservabilityCuratedCategories', () => {
 
   it('prefers the OTel quickstart and APM onboarding on serverless', () => {
     const { result } = renderHook(
-      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      () => useObservabilityCuratedCategories({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(buildServices({ isServerless: true })),
       }
@@ -303,7 +308,7 @@ describe('useObservabilityCuratedCategories', () => {
 describe('useObservabilityMiniTiles', () => {
   it('builds the mini tiles with preserved data-test-subj values', () => {
     const { result } = renderHook(
-      () => useObservabilityMiniTiles({ onOpenCollection: jest.fn() }),
+      () => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(),
       }
@@ -323,7 +328,7 @@ describe('useObservabilityMiniTiles', () => {
 
   it('swaps the metrics-only tiles for OpenTelemetry when metrics onboarding is unavailable', () => {
     const { result } = renderHook(
-      () => useObservabilityMiniTiles({ onOpenCollection: jest.fn() }),
+      () => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(buildServices({ metricsOnboardingEnabled: false })),
       }
@@ -338,7 +343,7 @@ describe('useObservabilityMiniTiles', () => {
 
   it('wires EPR-backed mini tiles to the integrations detail page', () => {
     const { result } = renderHook(
-      () => useObservabilityMiniTiles({ onOpenCollection: jest.fn() }),
+      () => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(),
       }
@@ -354,7 +359,7 @@ describe('useObservabilityMiniTiles', () => {
 
   it('sends the OpenTelemetry mini tile to the OTel quickstart on serverless Logs Essentials', () => {
     const { result } = renderHook(
-      () => useObservabilityMiniTiles({ onOpenCollection: jest.fn() }),
+      () => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(
           buildServices({ isServerless: true, metricsOnboardingEnabled: false })
@@ -368,7 +373,7 @@ describe('useObservabilityMiniTiles', () => {
 
   it('wires the custom logs mini tile to the OTel logs flow route', () => {
     const { result } = renderHook(
-      () => useObservabilityMiniTiles({ onOpenCollection: jest.fn() }),
+      () => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(),
       }
@@ -380,7 +385,7 @@ describe('useObservabilityMiniTiles', () => {
 
   it('wires the Auto Import and Upload a file mini tiles to their apps', () => {
     const { result } = renderHook(
-      () => useObservabilityMiniTiles({ onOpenCollection: jest.fn() }),
+      () => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(),
       }
@@ -396,7 +401,7 @@ describe('useObservabilityMiniTiles', () => {
 
   it('leaves no mini tile without a destination', () => {
     const { result } = renderHook(
-      () => useObservabilityMiniTiles({ onOpenCollection: jest.fn() }),
+      () => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }),
       {
         wrapper: createWrapper(),
       }
@@ -411,7 +416,7 @@ describe('collection chooser tiles', () => {
   const clickEvent = {} as React.MouseEvent<HTMLElement>;
 
   it('turns the docker tile into a badged chooser opener when Fleet provides the group', async () => {
-    const onOpenCollection = jest.fn();
+    const onOpenCollection = vi.fn();
     const { result } = renderHook(() => useObservabilityCuratedCategories({ onOpenCollection }), {
       wrapper: createProviderWrapper(),
     });
@@ -435,7 +440,7 @@ describe('collection chooser tiles', () => {
   // The tile spends a moment before Fleet's packages land and must stay usable.
   it('keeps the docker tile navigating while the packages are still loading', async () => {
     const { result } = renderHook(
-      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      () => useObservabilityCuratedCategories({ onOpenCollection: vi.fn() }),
       { wrapper: createProviderWrapper() }
     );
 
@@ -449,7 +454,7 @@ describe('collection chooser tiles', () => {
   });
 
   it('turns the prometheus mini tile into a chooser opener when Fleet provides the group', async () => {
-    const onOpenCollection = jest.fn();
+    const onOpenCollection = vi.fn();
     const { result } = renderHook(() => useObservabilityMiniTiles({ onOpenCollection }), {
       wrapper: createProviderWrapper(),
     });
@@ -467,7 +472,7 @@ describe('collection chooser tiles', () => {
 
   it('keeps the other tiles navigating even with collection data present', async () => {
     const { result } = renderHook(
-      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      () => useObservabilityCuratedCategories({ onOpenCollection: vi.fn() }),
       { wrapper: createProviderWrapper() }
     );
 

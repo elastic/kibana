@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -15,13 +18,13 @@ import { useInvalidateRiskEngineSettingsQuery } from './use_risk_engine_settings
 import type { RiskScoreConfiguration } from '../common';
 
 // Mock dependencies
-jest.mock('../../../api/hooks/use_configure_risk_engine_saved_object');
-jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('./use_risk_engine_settings_query');
+vi.mock('../../../api/hooks/use_configure_risk_engine_saved_object');
+vi.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('./use_risk_engine_settings_query');
 
-const mockUseConfigureSORiskEngineMutation = useConfigureSORiskEngineMutation as jest.Mock;
-const mockUseAppToasts = useAppToasts as jest.Mock;
-const mockUseInvalidateRiskEngineSettingsQuery = useInvalidateRiskEngineSettingsQuery as jest.Mock;
+const mockUseConfigureSORiskEngineMutation = useConfigureSORiskEngineMutation as Mock;
+const mockUseAppToasts = useAppToasts as Mock;
+const mockUseInvalidateRiskEngineSettingsQuery = useInvalidateRiskEngineSettingsQuery as Mock;
 
 // Mock React Query
 const createWrapper = () => {
@@ -40,9 +43,9 @@ const createWrapper = () => {
 };
 
 describe('useRiskEngineSettingsMutations', () => {
-  const mockMutateAsync = jest.fn();
-  const mockAddSuccess = jest.fn();
-  const mockInvalidateQueries = jest.fn();
+  const mockMutateAsync = vi.fn();
+  const mockAddSuccess = vi.fn();
+  const mockInvalidateQueries = vi.fn();
 
   beforeEach(() => {
     mockUseConfigureSORiskEngineMutation.mockReturnValue({
@@ -57,7 +60,7 @@ describe('useRiskEngineSettingsMutations', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should save settings successfully', async () => {

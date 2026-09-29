@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AttacksTrendsPanel } from './attacks_trends_panel';
@@ -12,50 +15,65 @@ import { useAttacksKpiState } from './common/use_attacks_kpi_state';
 import { useEuiComboBoxReset } from '../../../../common/components/use_combo_box_reset';
 
 // Mock dependencies
-jest.mock('./common/use_attacks_kpi_state', () => ({
-  useAttacksKpiState: jest.fn(),
-}));
+vi.mock('./common/use_attacks_kpi_state', () => {
+      const mocked = {
+      useAttacksKpiState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/components/use_combo_box_reset', () => ({
-  useEuiComboBoxReset: jest.fn(),
-}));
+vi.mock('../../../../common/components/use_combo_box_reset', () => {
+      const mocked = {
+      useEuiComboBoxReset: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../alerts_kpis/alerts_histogram_panel', () => ({
-  AlertsHistogramPanel: jest.fn(() => <div data-test-subj="alerts-histogram-panel" />),
-}));
+vi.mock('../../alerts_kpis/alerts_histogram_panel', () => {
+      const mocked = {
+      AlertsHistogramPanel: vi.fn(() => <div data-test-subj="alerts-histogram-panel" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../user_info', () => ({
-  useUserData: jest.fn(),
-}));
+vi.mock('../../user_info', () => {
+      const mocked = {
+      useUserData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-redux-v7', () => ({
-  useDispatch: jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useDispatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useUserData } from '../../user_info';
 import { useDispatch } from 'react-redux-v7';
 
 describe('AttacksTrendsPanel', () => {
-  const mockSetStackBy0 = jest.fn();
-  const mockSetIsExpanded = jest.fn();
-  const mockUseUserData = useUserData as jest.Mock;
-  const mockDispatch = jest.fn();
+  const mockSetStackBy0 = vi.fn();
+  const mockSetIsExpanded = vi.fn();
+  const mockUseUserData = useUserData as Mock;
+  const mockDispatch = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useAttacksKpiState as jest.Mock).mockReturnValue({
+    (useAttacksKpiState as Mock).mockReturnValue({
       stackBy0: 'test.field',
       setStackBy0: mockSetStackBy0,
     });
 
-    (useEuiComboBoxReset as jest.Mock).mockReturnValue({
+    (useEuiComboBoxReset as Mock).mockReturnValue({
       comboboxRef: { current: null },
-      setComboboxInputRef: jest.fn(),
+      setComboboxInputRef: vi.fn(),
     });
 
     mockUseUserData.mockReturnValue([{ signalIndexName: 'test-index' }]);
-    (useDispatch as jest.Mock).mockReturnValue(mockDispatch);
+    (useDispatch as Mock).mockReturnValue(mockDispatch);
   });
 
   it('renders AlertsHistogramPanel with correct props', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
@@ -19,15 +21,18 @@ import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 import { setExecution, setStepExecutionPages, setStepExecutionsTotal } from '../slice';
 
-const mockGetExecutionSteps = jest.fn();
-const mockGetExecution = jest.fn();
+const mockGetExecutionSteps = vi.fn();
+const mockGetExecution = vi.fn();
 
-jest.mock('@kbn/workflows-ui', () => ({
-  WorkflowApi: jest.fn().mockImplementation(() => ({
-    getExecutionSteps: mockGetExecutionSteps,
-    getExecution: mockGetExecution,
-  })),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      WorkflowApi: vi.fn().mockImplementation(() => ({
+        getExecutionSteps: mockGetExecutionSteps,
+        getExecution: mockGetExecution,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockExecution: WorkflowExecutionDto = {
   spaceId: 'default',
@@ -63,7 +68,7 @@ describe('loadExecutionThunk pagination', () => {
   let mockServices: MockServices;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetExecutionSteps.mockReset();
     mockGetExecution.mockReset();
     mockGetExecution.mockResolvedValue(mockExecution);

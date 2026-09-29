@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -12,47 +15,44 @@ import {
 } from '@kbn/core/server/mocks';
 import { createEntitySourcesService } from './entity_sources_service';
 
-jest.mock('../management/watchlist_config');
-jest.mock('./infra/entity_source_client');
-jest.mock('../entities/service');
-jest.mock('./sync/index_sync');
-jest.mock('../entities/utils');
-jest.mock('./bulk/soft_delete');
-jest.mock('@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request', () => ({
-  getFakeKibanaRequest: jest.fn().mockReturnValue({ fakeRequest: true }),
-}));
+vi.mock('../management/watchlist_config');
+vi.mock('./infra/entity_source_client');
+vi.mock('../entities/service');
+vi.mock('./sync/index_sync');
+vi.mock('../entities/utils');
+vi.mock('./bulk/soft_delete');
+vi.mock('@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request', () => {
+      const mocked = {
+      getFakeKibanaRequest: vi.fn().mockReturnValue({ fakeRequest: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { mockListEntitySources } = jest.requireMock('./infra/entity_source_client') as {
-  mockListEntitySources: jest.Mock;
+const { mockListEntitySources } = (await vi.importMock('./infra/entity_source_client')) as {
+  mockListEntitySources: Mock;
 };
 
-const { mockWatchlistGet, mockGetEntitySourceIds, mockWatchlistList } = jest.requireMock(
-  '../management/watchlist_config'
-) as {
-  mockWatchlistGet: jest.Mock;
-  mockGetEntitySourceIds: jest.Mock;
-  mockWatchlistList: jest.Mock;
+const { mockWatchlistGet, mockGetEntitySourceIds, mockWatchlistList } = (await vi.importMock('../management/watchlist_config')) as {
+  mockWatchlistGet: Mock;
+  mockGetEntitySourceIds: Mock;
+  mockWatchlistList: Mock;
 };
 
-const { mockListEntityStoreEntities } = jest.requireMock('../entities/service') as {
-  mockListEntityStoreEntities: jest.Mock;
+const { mockListEntityStoreEntities } = (await vi.importMock('../entities/service')) as {
+  mockListEntityStoreEntities: Mock;
 };
 
-const { mockPlainIndexSync, mockCreateIndexSyncService } = jest.requireMock(
-  './sync/index_sync'
-) as {
-  mockPlainIndexSync: jest.Mock;
-  mockCreateIndexSyncService: jest.Mock;
+const { mockPlainIndexSync, mockCreateIndexSyncService } = (await vi.importMock('./sync/index_sync')) as {
+  mockPlainIndexSync: Mock;
+  mockCreateIndexSyncService: Mock;
 };
 
-const { mockGetIndexForWatchlist } = jest.requireMock('../entities/utils') as {
-  mockGetIndexForWatchlist: jest.Mock;
+const { mockGetIndexForWatchlist } = (await vi.importMock('../entities/utils')) as {
+  mockGetIndexForWatchlist: Mock;
 };
 
-const { applyBulkRemoveSource: mockApplyBulkRemoveSource } = jest.requireMock(
-  './bulk/soft_delete'
-) as {
-  applyBulkRemoveSource: jest.Mock;
+const { applyBulkRemoveSource: mockApplyBulkRemoveSource } = (await vi.importMock('./bulk/soft_delete')) as {
+  applyBulkRemoveSource: Mock;
 };
 
 describe('createEntitySourcesService', () => {
@@ -60,10 +60,10 @@ describe('createEntitySourcesService', () => {
   const soClient = savedObjectsClientMock.create();
   const logger = loggingSystemMock.createLogger();
   const namespace = 'default';
-  const mockGetStartServices = jest.fn();
+  const mockGetStartServices = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetStartServices.mockResolvedValue([
       { elasticsearch: { client: {} } },
       { encryptedSavedObjects: undefined },
@@ -162,16 +162,16 @@ describe('createEntitySourcesService', () => {
   it('uses a scoped ES client for an index source when an API key is stored', async () => {
     const mockDataEsClient = elasticsearchServiceMock.createElasticsearchClient();
     const mockCoreElasticsearchClient = {
-      asScoped: jest.fn().mockReturnValue({ asCurrentUser: mockDataEsClient }),
+      asScoped: vi.fn().mockReturnValue({ asCurrentUser: mockDataEsClient }),
     };
-    const mockEsoClientGet = jest.fn().mockResolvedValue({
+    const mockEsoClientGet = vi.fn().mockResolvedValue({
       attributes: { apiKeyId: 'key-id', apiKey: 'key-secret' },
     });
     const mockEncryptedSavedObjects = {
       getClient: () => ({ getDecryptedAsInternalUser: mockEsoClientGet }),
     };
 
-    const getStartServices = jest
+    const getStartServices = vi
       .fn()
       .mockResolvedValue([
         { elasticsearch: { client: mockCoreElasticsearchClient } },

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { omit } from 'lodash';
 
 import { schema } from '@kbn/config-schema';
@@ -18,11 +20,11 @@ import { EventBus } from '../../core/event_bus';
 import { get } from './get';
 
 disableTransformsCache();
-const storageContextGetTransforms = jest.fn();
+const storageContextGetTransforms = vi.fn();
 const spy = () => storageContextGetTransforms;
 
-jest.mock('@kbn/object-versioning', () => {
-  const original = jest.requireActual('@kbn/object-versioning');
+vi.mock('@kbn/object-versioning', async () => {
+  const original = (await vi.importActual('@kbn/object-versioning'));
   return {
     ...original,
     getContentManagementServicesTransforms: (...args: any[]) => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -25,52 +27,70 @@ const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 const onboardingHref = '/app/observabilityOnboarding';
 const onboardingLocator = sharePluginMock.createLocator();
 onboardingLocator.useUrl.mockReturnValue(onboardingHref);
-jest
+vi
   .spyOn(mockUseKibanaReturnValue.services.share.url.locators, 'get')
   .mockReturnValue(onboardingLocator);
 
-jest.mock('../../utils/kibana_react', () => ({
+vi.mock('../../utils/kibana_react', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+  useKibana: vi.fn(() => mockUseKibanaReturnValue),
 }));
 
-jest.mock('@kbn/ebt-tools', () => ({
-  usePageReady: jest.fn(),
-}));
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      usePageReady: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
-  useBreadcrumbs: jest.fn(),
-  useFetcher: jest.fn(() => ({ data: undefined })),
-  ExternalResourceLinks: () => <div data-test-subj="externalResourceLinks" />,
-}));
+vi.mock('@kbn/observability-shared-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+      useBreadcrumbs: vi.fn(),
+      useFetcher: vi.fn(() => ({ data: undefined })),
+      ExternalResourceLinks: () => <div data-test-subj="externalResourceLinks" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_plugin_context');
-jest.mock('../../hooks/use_has_data');
-jest.mock('../../hooks/use_date_picker_context');
-jest.mock('../../hooks/use_time_buckets');
+vi.mock('../../hooks/use_plugin_context');
+vi.mock('../../hooks/use_has_data');
+vi.mock('../../hooks/use_date_picker_context');
+vi.mock('../../hooks/use_time_buckets');
 
-jest.mock('./components/header_actions/header_actions', () => ({
-  HeaderActions: () => <div data-test-subj="overviewHeaderActions" />,
-}));
+vi.mock('./components/header_actions/header_actions', () => {
+      const mocked = {
+      HeaderActions: () => <div data-test-subj="overviewHeaderActions" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/data_sections', () => ({
-  DATA_SECTIONS: ['alert', 'infra_logs', 'infra_metrics', 'apm', 'ux'],
-  DataSections: () => <div data-test-subj="overviewDataSections" />,
-}));
+vi.mock('./components/data_sections', () => {
+      const mocked = {
+      DATA_SECTIONS: ['alert', 'infra_logs', 'infra_metrics', 'apm', 'ux'],
+      DataSections: () => <div data-test-subj="overviewDataSections" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/news_feed/news_feed', () => ({
-  NewsFeed: () => <div data-test-subj="overviewNewsFeed" />,
-}));
+vi.mock('./components/news_feed/news_feed', () => {
+      const mocked = {
+      NewsFeed: () => <div data-test-subj="overviewNewsFeed" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/observability_onboarding_callout', () => ({
-  ObservabilityOnboardingCallout: () => <div data-test-subj="overviewOnboardingCallout" />,
-}));
+vi.mock('./components/observability_onboarding_callout', () => {
+      const mocked = {
+      ObservabilityOnboardingCallout: () => <div data-test-subj="overviewOnboardingCallout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { usePluginContext } = jest.requireMock('../../hooks/use_plugin_context');
-const { useHasData } = jest.requireMock('../../hooks/use_has_data');
-const { useDatePickerContext } = jest.requireMock('../../hooks/use_date_picker_context');
-const { useTimeBuckets } = jest.requireMock('../../hooks/use_time_buckets');
+const { usePluginContext } = (await vi.importMock('../../hooks/use_plugin_context'));
+const { useHasData } = (await vi.importMock('../../hooks/use_has_data'));
+const { useDatePickerContext } = (await vi.importMock('../../hooks/use_date_picker_context'));
+const { useTimeBuckets } = (await vi.importMock('../../hooks/use_time_buckets'));
 
 function completeHasDataMap(overrides: Partial<HasDataMap> = {}): HasDataMap {
   const loaded = { hasData: false, status: FETCH_STATUS.SUCCESS };
@@ -134,14 +154,14 @@ describe('OverviewPage header', () => {
       relativeEnd: 'now',
       refreshInterval: 0,
       refreshPaused: true,
-      updateTimeRange: jest.fn(),
-      updateRefreshInterval: jest.fn(),
+      updateTimeRange: vi.fn(),
+      updateRefreshInterval: vi.fn(),
       lastUpdated: Date.now(),
     });
 
     useTimeBuckets.mockReturnValue({
-      setInterval: jest.fn(),
-      getScaledDateFormat: jest.fn(() => 'YYYY-MM-DD'),
+      setInterval: vi.fn(),
+      getScaledDateFormat: vi.fn(() => 'YYYY-MM-DD'),
     });
   });
 

@@ -5,23 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { IntegrationSelectablePopover } from './integrations_selectable_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import { SiemReadinessEventTypes } from '../../../common/lib/telemetry/events/siem_readiness/types';
 
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-  useBasePath: jest.fn(() => '/test/base/path'),
-}));
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+      useBasePath: vi.fn(() => '/test/base/path'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockReportEvent = jest.fn();
+const mockReportEvent = vi.fn();
 
 describe('IntegrationSelectablePopover telemetry', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: { telemetry: { reportEvent: mockReportEvent } },
     });
   });

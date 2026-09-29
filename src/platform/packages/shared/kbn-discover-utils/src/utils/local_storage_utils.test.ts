@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   CHART_HIDDEN_KEY,
@@ -26,7 +28,7 @@ import {
 describe('local storage utils', () => {
   const localStorageKeyPrefix = 'testPrefix';
   const mockStorage = {
-    get: jest.fn((key: string) => {
+    get: vi.fn((key: string) => {
       switch (key) {
         case `${localStorageKeyPrefix}:${CHART_HIDDEN_KEY}`:
           return true;
@@ -40,7 +42,7 @@ describe('local storage utils', () => {
           return undefined;
       }
     }),
-    set: jest.fn(),
+    set: vi.fn(),
   };
   const storage = mockStorage as unknown as Storage;
 

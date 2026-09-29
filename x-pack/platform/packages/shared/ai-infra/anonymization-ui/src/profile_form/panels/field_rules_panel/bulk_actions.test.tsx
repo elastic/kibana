@@ -5,42 +5,47 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { FIELD_RULE_ACTION_ANONYMIZE } from '../../hooks/field_rule_actions';
 import { FieldRulesPanelBulkActions } from './bulk_actions';
 import { useFieldRulesPanelContext } from './context';
 
-jest.mock('./context', () => ({
-  useFieldRulesPanelContext: jest.fn(),
-}));
+vi.mock('./context', () => {
+      const mocked = {
+      useFieldRulesPanelContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createContextValue = (
   overrides: Partial<ReturnType<typeof useFieldRulesPanelContext>> = {}
 ) =>
   ({
     fieldSearchQuery: '',
-    setFieldSearchQuery: jest.fn(),
+    setFieldSearchQuery: vi.fn(),
     fieldActionFilter: 'all',
-    setFieldActionFilter: jest.fn(),
+    setFieldActionFilter: vi.fn(),
     fieldPageIndex: 0,
-    setFieldPageIndex: jest.fn(),
+    setFieldPageIndex: vi.fn(),
     bulkAction: 'allow',
-    setBulkAction: jest.fn(),
+    setBulkAction: vi.fn(),
     bulkEntityClass: '',
-    setBulkEntityClass: jest.fn(),
+    setBulkEntityClass: vi.fn(),
     pagedRules: [],
     filteredRules: [],
     allRules: [],
     selectedFields: [],
-    setSelectedFields: jest.fn(),
+    setSelectedFields: vi.fn(),
     allFieldsSelected: false,
     hasActiveFieldFilters: false,
     selectedCount: 2,
-    toggleSelectAllFields: jest.fn(),
-    onRuleActionChange: jest.fn(),
-    onRuleEntityClassChange: jest.fn(),
-    applyBulkAction: jest.fn(),
+    toggleSelectAllFields: vi.fn(),
+    onRuleActionChange: vi.fn(),
+    onRuleEntityClassChange: vi.fn(),
+    applyBulkAction: vi.fn(),
     policyCounters: { allow: 0, anonymize: 0, deny: 0 },
     isManageMode: true,
     isSubmitting: false,
@@ -49,10 +54,10 @@ const createContextValue = (
 
 describe('FieldRulesPanelBulkActions', () => {
   it('applies selected action and entity class updates', () => {
-    const setBulkAction = jest.fn();
-    const setBulkEntityClass = jest.fn();
-    const applyBulkAction = jest.fn();
-    jest.mocked(useFieldRulesPanelContext).mockReturnValue(
+    const setBulkAction = vi.fn();
+    const setBulkEntityClass = vi.fn();
+    const applyBulkAction = vi.fn();
+    vi.mocked(useFieldRulesPanelContext).mockReturnValue(
       createContextValue({
         setBulkAction,
         setBulkEntityClass,
@@ -76,7 +81,7 @@ describe('FieldRulesPanelBulkActions', () => {
   });
 
   it('disables apply button when no rows are selected', () => {
-    jest.mocked(useFieldRulesPanelContext).mockReturnValue(
+    vi.mocked(useFieldRulesPanelContext).mockReturnValue(
       createContextValue({
         selectedCount: 0,
       })
@@ -89,7 +94,7 @@ describe('FieldRulesPanelBulkActions', () => {
   });
 
   it('disables bulk controls when form is not editable', () => {
-    jest.mocked(useFieldRulesPanelContext).mockReturnValue(
+    vi.mocked(useFieldRulesPanelContext).mockReturnValue(
       createContextValue({
         isManageMode: false,
       })

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TabsBar } from './tabs_bar';
@@ -26,25 +28,25 @@ const recentlyClosedItems = Array.from({ length: 3 }).map((_, i) => ({
 
 const tabContentId = 'test-content-id';
 
-const onAdd = jest.fn();
-const onSelect = jest.fn();
-const onSelectRecentlyClosed = jest.fn();
-const onRestoreRecentlyClosedGroup = jest.fn();
-const onClearRecentlyClosed = jest.fn();
-const onLabelEdited = jest.fn();
-const onClose = jest.fn();
-const onReorder = jest.fn();
-const getPreviewData = jest.fn(() => ({
+const onAdd = vi.fn();
+const onSelect = vi.fn();
+const onSelectRecentlyClosed = vi.fn();
+const onRestoreRecentlyClosedGroup = vi.fn();
+const onClearRecentlyClosed = vi.fn();
+const onLabelEdited = vi.fn();
+const onClose = vi.fn();
+const onReorder = vi.fn();
+const getPreviewData = vi.fn(() => ({
   query: {
     esql: 'SELECT * FROM table',
   },
   status: TabStatus.SUCCESS,
 }));
-const onEBTEvent = jest.fn();
+const onEBTEvent = vi.fn();
 
 describe('TabsBar', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders tabs bar', async () => {
@@ -100,7 +102,7 @@ describe('TabsBar', () => {
   it('renders customNewTabButton when provided', () => {
     const selectedItem = items[0];
 
-    const customElementClickHandler = jest.fn();
+    const customElementClickHandler = vi.fn();
     const customNewTabButton = (
       <button data-test-subj="custom-create-item-button" onClick={customElementClickHandler}>
         Custom Create Item

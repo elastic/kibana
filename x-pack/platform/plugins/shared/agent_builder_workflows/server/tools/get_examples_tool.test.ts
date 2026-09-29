@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { WORKFLOW_EXAMPLES } from '@kbn/workflows';
 import { registerGetExamplesTool } from './get_examples_tool';
 
-jest.mock('fs/promises', () => ({
-  readFile: jest.fn(() => Promise.resolve('name: Test Workflow\nenabled: true')),
-}));
+vi.mock('fs/promises', () => {
+      const mocked = {
+      readFile: vi.fn(() => Promise.resolve('name: Test Workflow\nenabled: true')),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
   (await tool.handler(input as never, context as never)) as ToolHandlerStandardReturn;
@@ -21,10 +26,10 @@ describe('registerGetExamplesTool', () => {
   let registeredTool: BuiltinToolDefinition;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const agentBuilder = {
       tools: {
-        register: jest.fn((tool: BuiltinToolDefinition) => {
+        register: vi.fn((tool: BuiltinToolDefinition) => {
           registeredTool = tool;
         }),
       },

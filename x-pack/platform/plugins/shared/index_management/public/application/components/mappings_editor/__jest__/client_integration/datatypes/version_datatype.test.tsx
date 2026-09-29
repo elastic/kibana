@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -16,10 +18,10 @@ export const defaultVersionParameters = {
   type: 'version',
 };
 
-const onChangeHandler = jest.fn();
+const onChangeHandler = vi.fn();
 describe('Mappings editor: version datatype', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('supports meta parameter', async () => {

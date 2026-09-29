@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { transformMuteRequestToRuleAttributes } from './transform_rule_mute_instance_ids';
 import type { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import type { RawRule } from '../../../../../saved_objects/schemas/raw_rule';
 
 describe('transformMuteRequestToRuleAttributes', () => {
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2025-11-01T08:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2025-11-01T08:00:00.000Z'));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should transform mute request to rule attributes by merging instance IDs and setting updatedAt', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
@@ -24,15 +27,15 @@ import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator'
 
 import { stepSaveSystemObject } from './step_save_system_object';
 
-jest.mock('../../../../audit_logging');
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+vi.mock('../../../../audit_logging');
+const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
 
-jest.mock('../../../../package_policy');
-const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
+vi.mock('../../../../package_policy');
+const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
 
 describe('updateLatestExecutedState', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let esClient: Mocked<ElasticsearchClient>;
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(async () => {
@@ -63,7 +66,7 @@ describe('updateLatestExecutedState', () => {
     await stepSaveSystemObject({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger,
       packageInstallContext: {
@@ -132,7 +135,7 @@ describe('updateLatestExecutedState', () => {
     await stepSaveSystemObject({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger,
       packageInstallContext: {
@@ -201,7 +204,7 @@ describe('updateLatestExecutedState', () => {
     await stepSaveSystemObject({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger,
       packageInstallContext: {
@@ -592,10 +595,10 @@ describe('updateLatestExecutedState', () => {
       ],
     } as any;
 
-    let experimentalFeaturesSpy: jest.SpyInstance;
+    let experimentalFeaturesSpy: MockInstance;
 
     beforeEach(() => {
-      experimentalFeaturesSpy = jest
+      experimentalFeaturesSpy = vi
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableOtelIntegrations: true } as any);
       soClient.get.mockResolvedValue({

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 import { fireEvent, render, renderHook, waitFor } from '@testing-library/react';
@@ -37,74 +40,77 @@ import {
   RULE_FROM_TIMELINE_URL_PARAM,
 } from '../../../detections/hooks/use_rule_from_timeline';
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const originalModule = require('react-router-dom');
 
   return {
     ...originalModule,
-    useParams: jest.fn(),
-    useHistory: jest.fn(),
+    useParams: vi.fn(),
+    useHistory: vi.fn(),
   };
 });
 
-const mockQueryTimelineById = jest.fn();
+const mockQueryTimelineById = vi.fn();
 
-jest.mock('./helpers', () => {
-  const originalModule = jest.requireActual('./helpers');
+vi.mock('./helpers', async () => {
+  const originalModule = (await vi.importActual('./helpers'));
   return {
     ...originalModule,
     useQueryTimelineById: () => mockQueryTimelineById,
   };
 });
 
-jest.mock('../../containers/all', () => {
-  const originalModule = jest.requireActual('../../containers/all');
+vi.mock('../../containers/all', async () => {
+  const originalModule = (await vi.importActual('../../containers/all'));
   return {
     ...originalModule,
-    useGetAllTimeline: jest.fn(),
+    useGetAllTimeline: vi.fn(),
   };
 });
-const mockNavigateTo = jest.fn();
-jest.mock('../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../common/lib/kibana');
+const mockNavigateTo = vi.fn();
+vi.mock('../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../common/lib/kibana'));
   return {
     ...actual,
     useNavigation: () => ({
-      getAppUrl: jest.fn(),
+      getAppUrl: vi.fn(),
       navigateTo: mockNavigateTo,
     }),
   };
 });
 
-jest.mock('../../../common/components/link_to', () => {
-  const originalModule = jest.requireActual('../../../common/components/link_to');
+vi.mock('../../../common/components/link_to', async () => {
+  const originalModule = (await vi.importActual('../../../common/components/link_to'));
   return {
     ...originalModule,
-    getTimelineTabsUrl: jest.fn(),
-    useFormatUrl: jest.fn().mockReturnValue({ formatUrl: jest.fn(), search: 'urlSearch' }),
+    getTimelineTabsUrl: vi.fn(),
+    useFormatUrl: vi.fn().mockReturnValue({ formatUrl: vi.fn(), search: 'urlSearch' }),
   };
 });
 
-jest.mock('./use_timeline_status', () => {
+vi.mock('./use_timeline_status', () => {
   return {
-    useTimelineStatus: jest.fn(),
+    useTimelineStatus: vi.fn(),
   };
 });
 
-jest.mock('../../containers/api', () => ({
-  deleteTimelinesByIds: jest.fn(),
-}));
+vi.mock('../../containers/api', () => {
+      const mocked = {
+      deleteTimelinesByIds: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/components/user_privileges');
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+vi.mock('../../../common/components/user_privileges');
+const useUserPrivilegesMock = useUserPrivileges as Mock;
 
 describe('StatefulOpenTimeline', () => {
   const title = 'All Timelines / Open Timelines';
   let mockHistory: History[];
-  const mockInstallPrepackagedTimelines = jest.fn();
+  const mockInstallPrepackagedTimelines = vi.fn();
 
   beforeEach(() => {
-    (useParams as jest.Mock).mockReturnValue({
+    (useParams as Mock).mockReturnValue({
       tabName: TimelineTypeEnum.default,
       pageName: SecurityPageName.timelines,
     });
@@ -113,15 +119,15 @@ describe('StatefulOpenTimeline', () => {
       notesPrivileges: { crud: true, read: true },
     });
     mockHistory = [];
-    (useHistory as jest.Mock).mockReturnValue(mockHistory);
-    (useGetAllTimeline as unknown as jest.Mock).mockReturnValue({
-      fetchAllTimeline: jest.fn(),
+    (useHistory as Mock).mockReturnValue(mockHistory);
+    (useGetAllTimeline as unknown as Mock).mockReturnValue({
+      fetchAllTimeline: vi.fn(),
       timelines: getAllTimeline('', mockOpenTimelineQueryResults.timeline ?? []),
       loading: false,
       totalCount: mockOpenTimelineQueryResults.totalCount,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
-    (useTimelineStatus as unknown as jest.Mock).mockReturnValue({
+    (useTimelineStatus as unknown as Mock).mockReturnValue({
       timelineStatus: null,
       templateTimelineType: null,
       templateTimelineFilter: <div />,
@@ -131,7 +137,7 @@ describe('StatefulOpenTimeline', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockHistory = [];
   });
 
@@ -175,7 +181,7 @@ describe('StatefulOpenTimeline', () => {
     });
 
     test("should land on correct timelines' tab with url timelines/template", () => {
-      (useParams as jest.Mock).mockReturnValue({
+      (useParams as Mock).mockReturnValue({
         tabName: TimelineTypeEnum.template,
         pageName: SecurityPageName.timelines,
       });
@@ -191,7 +197,7 @@ describe('StatefulOpenTimeline', () => {
     });
 
     test("should land on correct templates' tab after switching tab", async () => {
-      (useParams as jest.Mock).mockReturnValue({
+      (useParams as Mock).mockReturnValue({
         tabName: TimelineTypeEnum.template,
         pageName: SecurityPageName.timelines,
       });
@@ -217,7 +223,7 @@ describe('StatefulOpenTimeline', () => {
     });
 
     test("should selecting correct timelines' filter", () => {
-      (useParams as jest.Mock).mockReturnValue({
+      (useParams as Mock).mockReturnValue({
         tabName: 'mockTabName',
         pageName: SecurityPageName.case,
       });
@@ -233,7 +239,7 @@ describe('StatefulOpenTimeline', () => {
     });
 
     test('should not change url after switching filter', async () => {
-      (useParams as jest.Mock).mockReturnValue({
+      (useParams as Mock).mockReturnValue({
         tabName: 'mockTabName',
         pageName: SecurityPageName.case,
       });
@@ -348,7 +354,7 @@ describe('StatefulOpenTimeline', () => {
   describe('#onAddTimelinesToFavorites', () => {
     // This functionality is hiding for now and waiting to see the light in the near future
     test.skip('it invokes addTimelinesToFavorites with the selected timelines when the button is clicked', async () => {
-      const addTimelinesToFavorites = jest.fn();
+      const addTimelinesToFavorites = vi.fn();
 
       const wrapper = mount(
         <TestProviders>
@@ -685,10 +691,10 @@ describe('StatefulOpenTimeline', () => {
         .last()
         .simulate('click');
 
-      expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
+      expect((mockQueryTimelineById as Mock).mock.calls[0][0].timelineId).toEqual(
         mockOpenTimelineQueryResults.timeline[0].savedObjectId
       );
-      expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(false);
+      expect((mockQueryTimelineById as Mock).mock.calls[0][0].duplicate).toEqual(false);
     });
   });
 
@@ -709,18 +715,18 @@ describe('StatefulOpenTimeline', () => {
       .simulate('click');
     wrapper.find('button[data-test-subj="open-duplicate"]').first().simulate('click');
 
-    expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
+    expect((mockQueryTimelineById as Mock).mock.calls[0][0].timelineId).toEqual(
       mockOpenTimelineQueryResults.timeline[0].savedObjectId
     );
-    expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(true);
+    expect((mockQueryTimelineById as Mock).mock.calls[0][0].duplicate).toEqual(true);
   });
 
   describe('Create rule from timeline', () => {
     const timeline = mockOpenTimelineQueryResults.timeline[0];
     beforeEach(() => {
       const lastTimeline = getAllTimeline('', [timeline])[0];
-      (useGetAllTimeline as jest.Mock).mockReturnValue({
-        fetchAllTimeline: jest.fn(),
+      (useGetAllTimeline as Mock).mockReturnValue({
+        fetchAllTimeline: vi.fn(),
         timelines: [
           {
             ...lastTimeline,
@@ -732,7 +738,7 @@ describe('StatefulOpenTimeline', () => {
         ],
         loading: false,
         totalCount: 1,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
     });
     test('navigates to create rule page with timeline id in URL when Create rule from timeline query click', async () => {
@@ -774,8 +780,8 @@ describe('StatefulOpenTimeline', () => {
 
     test('Does not display Create rule from timeline/eql when no query', async () => {
       const lastTimeline = getAllTimeline('', [timeline])[0];
-      (useGetAllTimeline as jest.Mock).mockReturnValue({
-        fetchAllTimeline: jest.fn(),
+      (useGetAllTimeline as Mock).mockReturnValue({
+        fetchAllTimeline: vi.fn(),
         timelines: [
           {
             ...lastTimeline,
@@ -787,7 +793,7 @@ describe('StatefulOpenTimeline', () => {
         ],
         loading: false,
         totalCount: 1,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
       const { getAllByTestId, queryByTestId } = render(
         <TestProviders>
@@ -808,7 +814,7 @@ describe('StatefulOpenTimeline', () => {
 
   describe('privileges', () => {
     test('installs prepackaged timelines when the user has sufficient privileges', async () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         timelinePrivileges: { crud: true },
       });
       mount(
@@ -827,7 +833,7 @@ describe('StatefulOpenTimeline', () => {
     });
 
     test('does not install prepackaged timelines when the user has insufficient privileges', async () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         timelinePrivileges: { crud: false },
       });
       mount(

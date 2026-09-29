@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { FlyoutTemplate } from './flyout_template';
 import type { FlyoutFooterMenuPanel } from './types';
 
-jest.mock('@elastic/apm-rum');
+vi.mock('@elastic/apm-rum');
 
 const noop = () => {};
 
@@ -133,7 +135,7 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
   });
 
   it('clicking an item fires its onClick once and closes the menu', async () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     const panels: FlyoutFooterMenuPanel[] = [{ id: 0, items: [{ name: 'Do it', onClick }] }];
 
     const { container } = renderMenu({ panels });
@@ -148,7 +150,7 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
   });
 
   it('closeOnItemClick={false} keeps the menu open after clicking an item', async () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     const panels: FlyoutFooterMenuPanel[] = [{ id: 0, items: [{ name: 'Do it', onClick }] }];
 
     renderMenu({ panels, closeOnItemClick: false });
@@ -233,7 +235,7 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
   });
 
   it('onPanelChange fires with the new panel id when a nested panel opens', async () => {
-    const onPanelChange = jest.fn();
+    const onPanelChange = vi.fn();
 
     renderMenu({ panels: NESTED_PANELS, onPanelChange });
 
@@ -245,7 +247,7 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
   });
 
   it('a nested panel with no title warns in development; a titled one does not', async () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(noop);
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(noop);
 
     const untitledNestedPanels: FlyoutFooterMenuPanel[] = [
       {
@@ -270,7 +272,7 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
   });
 
   it('a titled nested panel does not trigger the title warning', async () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(noop);
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(noop);
 
     renderMenu({ panels: NESTED_PANELS });
     await user.click(screen.getByRole('button', { name: /take action/i }));
@@ -347,7 +349,7 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
   it('the trigger is always type="button" even inside a form', async () => {
     // A type="submit" override would submit the enclosing form when clicked.
     // The template rejects the prop at the type level and hard-codes type="button" after the spread.
-    const onSubmit = jest.fn((e: React.FormEvent) => e.preventDefault());
+    const onSubmit = vi.fn((e: React.FormEvent) => e.preventDefault());
     render(
       <form onSubmit={onSubmit}>
         <FlyoutTemplate onClose={noop} session="never">
@@ -377,7 +379,7 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
   });
 
   it('declaring both PrimaryAction and PrimaryActionMenu warns and renders only the menu', async () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(noop);
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(noop);
 
     renderWithMenu(
       <FlyoutTemplate onClose={noop} session="never">

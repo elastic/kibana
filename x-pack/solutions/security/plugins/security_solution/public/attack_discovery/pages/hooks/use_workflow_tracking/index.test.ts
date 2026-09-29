@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { HttpSetup } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -12,7 +14,7 @@ import React from 'react';
 
 import { useWorkflowTracking, type WorkflowTrackingResponse } from '.';
 
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 const mockHttp = { fetch: mockFetch } as unknown as HttpSetup;
 
 const wrapper = ({ children }: { children: React.ReactNode }) => {
@@ -46,7 +48,7 @@ const mockTrackingResponse: WorkflowTrackingResponse = {
 
 describe('useWorkflowTracking', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not fetch when executionId is null', () => {

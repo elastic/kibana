@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
@@ -12,14 +15,14 @@ import { findExceptionList } from '../../find_exception_list';
 
 import { findAllListTypes, getAllListTypes, getListFilter } from './find_all_exception_list_types';
 
-jest.mock('../../find_exception_list');
+vi.mock('../../find_exception_list');
 
 describe('find_all_exception_list_item_types', () => {
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     savedObjectsClient = savedObjectsClientMock.create();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getListFilter', () => {
@@ -111,7 +114,7 @@ describe('find_all_exception_list_item_types', () => {
     });
 
     it('returns found items', async () => {
-      (findExceptionList as jest.Mock).mockResolvedValue({
+      (findExceptionList as Mock).mockResolvedValue({
         data: [
           {
             description: 'some description',

@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { API_KEY_INVALIDATION_BATCH_SIZE } from '../../constants';
 import { appContextService } from '../app_context';
 import { invalidateAPIKeys } from './security';
 
-jest.mock('../app_context');
+vi.mock('../app_context');
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 
 describe('invalidateAPIKeys', () => {
-  let invalidateAsInternalUserMock: jest.Mock;
+  let invalidateAsInternalUserMock: Mock;
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    invalidateAsInternalUserMock = jest.fn();
+    vi.resetAllMocks();
+    invalidateAsInternalUserMock = vi.fn();
     mockedAppContextService.getSecurity.mockReturnValue({
       authc: {
         apiKeys: {

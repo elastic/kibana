@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import {
   DURATION,
@@ -17,7 +20,10 @@ import {
 import { getUnifiedTraceItemsPaginated } from './get_unified_trace_items_page';
 
 // Use a small page size so tests don't need thousands of hits
-jest.mock('./trace_constants', () => ({ MAX_ITEMS_PER_PAGE: 2 }));
+vi.mock('./trace_constants', () => {
+      const mocked = { MAX_ITEMS_PER_PAGE: 2 };
+      return { ...mocked, default: mocked };
+    });
 
 const makeHit = (id: string, sort = [0, 0, id]) => ({
   fields: { [SPAN_ID]: [id] },
@@ -43,7 +49,7 @@ const makeSearchResponse = (
 
 describe('getUnifiedTraceItemsPaginated', () => {
   const mockApmEventClient = {
-    search: jest.fn(),
+    search: vi.fn(),
   } as unknown as APMEventClient;
 
   const defaultParams = {
@@ -55,12 +61,12 @@ describe('getUnifiedTraceItemsPaginated', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('single page', () => {
     it('stops when hits are fewer than MAX_ITEMS_PER_PAGE', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+      (mockApmEventClient.search as Mock).mockResolvedValueOnce(
         makeSearchResponse([makeHit('span-1')], 1)
       );
 
@@ -71,7 +77,7 @@ describe('getUnifiedTraceItemsPaginated', () => {
     });
 
     it('stops when hits are empty', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(makeSearchResponse([], 0));
+      (mockApmEventClient.search as Mock).mockResolvedValueOnce(makeSearchResponse([], 0));
 
       const result = await getUnifiedTraceItemsPaginated(defaultParams);
 
@@ -80,7 +86,7 @@ describe('getUnifiedTraceItemsPaginated', () => {
     });
 
     it('stops when mergedHits reaches total', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+      (mockApmEventClient.search as Mock).mockResolvedValueOnce(
         makeSearchResponse([makeHit('span-1'), makeHit('span-2')], 2)
       );
 
@@ -93,7 +99,7 @@ describe('getUnifiedTraceItemsPaginated', () => {
 
   describe('multiple pages', () => {
     it('fetches subsequent pages using search_after from last hit sort', async () => {
-      (mockApmEventClient.search as jest.Mock)
+      (mockApmEventClient.search as Mock)
         .mockResolvedValueOnce(
           makeSearchResponse(
             [makeHit('span-1', [1, 100, 'span-1']), makeHit('span-2', [1, 90, 'span-2'])],
@@ -108,12 +114,12 @@ describe('getUnifiedTraceItemsPaginated', () => {
       expect(result.hits).toHaveLength(3);
 
       // Second call should include search_after from last hit of first page
-      const secondCallArgs = (mockApmEventClient.search as jest.Mock).mock.calls[1][1];
+      const secondCallArgs = (mockApmEventClient.search as Mock).mock.calls[1][1];
       expect(secondCallArgs.search_after).toEqual([1, 90, 'span-2']);
     });
 
     it('accumulates hits across pages', async () => {
-      (mockApmEventClient.search as jest.Mock)
+      (mockApmEventClient.search as Mock)
         .mockResolvedValueOnce(makeSearchResponse([makeHit('span-1'), makeHit('span-2')], 4))
         .mockResolvedValueOnce(makeSearchResponse([makeHit('span-3'), makeHit('span-4')], 4));
 
@@ -126,7 +132,7 @@ describe('getUnifiedTraceItemsPaginated', () => {
 
   describe('maxTraceItems limit', () => {
     it('stops and truncates when maxTraceItems is reached', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+      (mockApmEventClient.search as Mock).mockResolvedValueOnce(
         makeSearchResponse([makeHit('span-1'), makeHit('span-2')], 100)
       );
 
@@ -144,7 +150,7 @@ describe('getUnifiedTraceItemsPaginated', () => {
       // maxTraceItems=3, MAX_ITEMS_PER_PAGE=2
       // page 1: span-1, span-2 → 2 hits == MAX_ITEMS_PER_PAGE, paginate
       // page 2: span-3, span-4 → merged total becomes 4, exceeds maxTraceItems=3 → truncate to 3
-      (mockApmEventClient.search as jest.Mock)
+      (mockApmEventClient.search as Mock)
         .mockResolvedValueOnce(makeSearchResponse([makeHit('span-1'), makeHit('span-2')], 100))
         .mockResolvedValueOnce(makeSearchResponse([makeHit('span-3'), makeHit('span-4')], 100));
 
@@ -160,7 +166,7 @@ describe('getUnifiedTraceItemsPaginated', () => {
 
   describe('deduplication', () => {
     it('deduplicates spans with the same SPAN_ID across pages', async () => {
-      (mockApmEventClient.search as jest.Mock)
+      (mockApmEventClient.search as Mock)
         .mockResolvedValueOnce(makeSearchResponse([makeHit('span-1'), makeHit('span-2')], 3))
         .mockResolvedValueOnce(
           makeSearchResponse([makeHit('span-2'), makeHit('span-3')], 3) // span-2 is a duplicate
@@ -172,7 +178,7 @@ describe('getUnifiedTraceItemsPaginated', () => {
     });
 
     it('deduplicates using TRANSACTION_ID when SPAN_ID is absent', async () => {
-      (mockApmEventClient.search as jest.Mock)
+      (mockApmEventClient.search as Mock)
         .mockResolvedValueOnce(makeSearchResponse([makeTxHit('tx-1'), makeTxHit('tx-2')], 3))
         .mockResolvedValueOnce(
           makeSearchResponse([makeTxHit('tx-2'), makeTxHit('tx-3')], 3) // tx-2 is a duplicate
@@ -184,7 +190,7 @@ describe('getUnifiedTraceItemsPaginated', () => {
     });
 
     it('keeps fetching after dedup if below maxTraceItems', async () => {
-      (mockApmEventClient.search as jest.Mock)
+      (mockApmEventClient.search as Mock)
         .mockResolvedValueOnce(makeSearchResponse([makeHit('span-1'), makeHit('span-2')], 3))
         .mockResolvedValueOnce(makeSearchResponse([makeHit('span-3')], 3));
 
@@ -194,7 +200,7 @@ describe('getUnifiedTraceItemsPaginated', () => {
     });
 
     it('drops hits with no id', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+      (mockApmEventClient.search as Mock).mockResolvedValueOnce(
         makeSearchResponse([{ fields: {}, sort: [], _source: {} }, makeHit('span-1')], 1)
       );
 
@@ -206,85 +212,85 @@ describe('getUnifiedTraceItemsPaginated', () => {
 
   describe('ecsOnly flag', () => {
     it('uses simple bool.filter query when ecsOnly=true', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+      (mockApmEventClient.search as Mock).mockResolvedValueOnce(
         makeSearchResponse([makeHit('span-1')], 1)
       );
 
       await getUnifiedTraceItemsPaginated({ ...defaultParams, ecsOnly: true });
 
-      const callArgs = (mockApmEventClient.search as jest.Mock).mock.calls[0][1];
+      const callArgs = (mockApmEventClient.search as Mock).mock.calls[0][1];
       expect(callArgs.query.bool.must).toBeUndefined();
       expect(callArgs.query.bool.filter).toBeDefined();
       expect(callArgs.query.bool.minimum_should_match).toBeUndefined();
     });
 
     it('uses OTel-aware must/should query when ecsOnly=false', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+      (mockApmEventClient.search as Mock).mockResolvedValueOnce(
         makeSearchResponse([makeHit('span-1')], 1)
       );
 
       await getUnifiedTraceItemsPaginated({ ...defaultParams, ecsOnly: false });
 
-      const callArgs = (mockApmEventClient.search as jest.Mock).mock.calls[0][1];
+      const callArgs = (mockApmEventClient.search as Mock).mock.calls[0][1];
       expect(callArgs.query.bool.must).toBeDefined();
       expect(callArgs.query.bool.minimum_should_match).toBe(1);
     });
 
     it('does not include OTel fields when ecsOnly=true', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+      (mockApmEventClient.search as Mock).mockResolvedValueOnce(
         makeSearchResponse([makeHit('span-1')], 1)
       );
 
       await getUnifiedTraceItemsPaginated({ ...defaultParams, ecsOnly: true });
 
-      const callArgs = (mockApmEventClient.search as jest.Mock).mock.calls[0][1];
+      const callArgs = (mockApmEventClient.search as Mock).mock.calls[0][1];
       expect(callArgs.fields).not.toContain(DURATION);
       expect(callArgs.fields).not.toContain(KIND);
     });
 
     it('includes GenAI token fields when ecsOnly=true', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+      (mockApmEventClient.search as Mock).mockResolvedValueOnce(
         makeSearchResponse([makeHit('span-1')], 1)
       );
 
       await getUnifiedTraceItemsPaginated({ ...defaultParams, ecsOnly: true });
 
-      const callArgs = (mockApmEventClient.search as jest.Mock).mock.calls[0][1];
+      const callArgs = (mockApmEventClient.search as Mock).mock.calls[0][1];
       expect(callArgs.fields).toContain(GEN_AI_USAGE_INPUT_TOKENS);
       expect(callArgs.fields).toContain(GEN_AI_USAGE_OUTPUT_TOKENS);
     });
 
     it('includes OTel fields when ecsOnly=false', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+      (mockApmEventClient.search as Mock).mockResolvedValueOnce(
         makeSearchResponse([makeHit('span-1')], 1)
       );
 
       await getUnifiedTraceItemsPaginated({ ...defaultParams, ecsOnly: false });
 
-      const callArgs = (mockApmEventClient.search as jest.Mock).mock.calls[0][1];
+      const callArgs = (mockApmEventClient.search as Mock).mock.calls[0][1];
       expect(callArgs.fields).toContain(DURATION);
       expect(callArgs.fields).toContain(KIND);
     });
 
     it('passes skipProcessorEventFilter=false when ecsOnly=true', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+      (mockApmEventClient.search as Mock).mockResolvedValueOnce(
         makeSearchResponse([makeHit('span-1')], 1)
       );
 
       await getUnifiedTraceItemsPaginated({ ...defaultParams, ecsOnly: true });
 
-      const options = (mockApmEventClient.search as jest.Mock).mock.calls[0][2];
+      const options = (mockApmEventClient.search as Mock).mock.calls[0][2];
       expect(options?.skipProcessorEventFilter).toBe(false);
     });
 
     it('passes skipProcessorEventFilter=true when ecsOnly=false', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+      (mockApmEventClient.search as Mock).mockResolvedValueOnce(
         makeSearchResponse([makeHit('span-1')], 1)
       );
 
       await getUnifiedTraceItemsPaginated({ ...defaultParams, ecsOnly: false });
 
-      const options = (mockApmEventClient.search as jest.Mock).mock.calls[0][2];
+      const options = (mockApmEventClient.search as Mock).mock.calls[0][2];
       expect(options?.skipProcessorEventFilter).toBe(true);
     });
   });

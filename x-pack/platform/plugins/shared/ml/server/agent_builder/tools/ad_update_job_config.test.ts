@@ -5,22 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getAdminCapabilities } from '../../lib/capabilities/__mocks__/ml_capabilities';
 import { createAdUpdateJobConfigTool } from './ad_update_job_config';
 import { AD_UPDATE_JOB_CONFIG_TOOL_ID } from './tool_ids';
 
-const resolveMlCapabilities = jest.fn().mockResolvedValue(getAdminCapabilities());
+const resolveMlCapabilities = vi.fn().mockResolvedValue(getAdminCapabilities());
 const adUpdateJobConfigTool = createAdUpdateJobConfigTool(resolveMlCapabilities);
 
 const createMlMock = () => ({
-  updateJob: jest.fn().mockResolvedValue({ job_id: 'my-job' }),
-  updateDatafeed: jest.fn().mockResolvedValue({ datafeed_id: 'datafeed-my-job' }),
-  putCalendar: jest.fn().mockResolvedValue({ calendar_id: 'calendar-my-job' }),
-  putCalendarJob: jest.fn().mockResolvedValue({ calendar_id: 'calendar-my-job' }),
-  getCalendarEvents: jest.fn().mockResolvedValue({ events: [] }),
-  postCalendarEvents: jest.fn().mockResolvedValue({ events: [] }),
+  updateJob: vi.fn().mockResolvedValue({ job_id: 'my-job' }),
+  updateDatafeed: vi.fn().mockResolvedValue({ datafeed_id: 'datafeed-my-job' }),
+  putCalendar: vi.fn().mockResolvedValue({ calendar_id: 'calendar-my-job' }),
+  putCalendarJob: vi.fn().mockResolvedValue({ calendar_id: 'calendar-my-job' }),
+  getCalendarEvents: vi.fn().mockResolvedValue({ events: [] }),
+  postCalendarEvents: vi.fn().mockResolvedValue({ events: [] }),
 });
 
 const createContext = (mlMock = createMlMock()) =>

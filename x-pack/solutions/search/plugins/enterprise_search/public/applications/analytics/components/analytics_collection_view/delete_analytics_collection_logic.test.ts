@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   LogicMounter,
   mockFlashMessageHelpers,
@@ -23,8 +25,8 @@ describe('deleteAnalyticsCollectionLogic', () => {
   const { http } = mockHttpValues;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
     mount();
   });
 
@@ -51,10 +53,10 @@ describe('deleteAnalyticsCollectionLogic', () => {
     it('calls makeRequest on deleteAnalyticsCollections', async () => {
       const collectionName = 'name';
 
-      jest.useFakeTimers({ legacyFakeTimers: true });
-      DeleteAnalyticsCollectionLogic.actions.makeRequest = jest.fn();
+      vi.useFakeTimers({ legacyFakeTimers: true });
+      DeleteAnalyticsCollectionLogic.actions.makeRequest = vi.fn();
       DeleteAnalyticsCollectionLogic.actions.deleteAnalyticsCollection(collectionName);
-      jest.advanceTimersByTime(150);
+      vi.advanceTimersByTime(150);
       await nextTick();
       expect(DeleteAnalyticsCollectionLogic.actions.makeRequest).toHaveBeenCalledWith({
         name: collectionName,

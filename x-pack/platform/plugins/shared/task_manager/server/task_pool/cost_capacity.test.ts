@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { of, Subject } from 'rxjs';
 import { TaskCost } from '../task';
@@ -15,7 +17,7 @@ const logger = loggingSystemMock.create().get();
 
 describe('CostCapacity', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('capacity responds to changes from capacity$ observable', () => {
@@ -104,7 +106,7 @@ describe('CostCapacity', () => {
       pool.availableCapacity(tasksInPool, {
         type: 'type1',
         cost: TaskCost.Normal,
-        createTaskRunner: jest.fn(),
+        createTaskRunner: vi.fn(),
         timeout: '5m',
       })
     ).toBe(15);
@@ -124,7 +126,7 @@ describe('CostCapacity', () => {
         type: 'type1',
         maxConcurrency: 3,
         cost: TaskCost.Normal,
-        createTaskRunner: jest.fn(),
+        createTaskRunner: vi.fn(),
         timeout: '5m',
       })
     ).toBe(4);
@@ -144,7 +146,7 @@ describe('CostCapacity', () => {
         type: 'type1',
         maxConcurrency: 0,
         cost: TaskCost.Normal,
-        createTaskRunner: jest.fn(),
+        createTaskRunner: vi.fn(),
         timeout: '5m',
       })
     ).toBe(0);

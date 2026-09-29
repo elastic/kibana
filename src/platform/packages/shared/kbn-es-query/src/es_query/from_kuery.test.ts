@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { buildQueryFromKuery } from './from_kuery';
 import { fromKueryExpression, toElasticsearchQuery } from '../kuery';
 import { fields } from '../filters/stubs';
 import type { DataViewBase } from './types';
 import type { Query } from '../..';
 
-jest.mock('../kuery/grammar');
+vi.mock('../kuery/grammar');
 
 describe('build query', () => {
   const indexPattern: DataViewBase = {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance, Mocked, MockedClass, MockedFunction } from 'vitest';
+
 /**
  * Facade tests for WorkflowsService.
  *
@@ -38,71 +41,74 @@ import { WorkflowSearchService } from '../services/workflow_search_service';
 import { WorkflowValidationService } from '../services/workflow_validation_service';
 import type { WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStartDeps } from '../types';
 
-jest.mock('../services/workflow_change_history_service');
-jest.mock('../lib/wait_for_managed_workflow_install_readiness', () => ({
-  waitForManagedWorkflowInstallReadiness: jest.fn(),
-}));
+vi.mock('../services/workflow_change_history_service');
+vi.mock('../lib/wait_for_managed_workflow_install_readiness', () => {
+      const mocked = {
+      waitForManagedWorkflowInstallReadiness: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MockedWorkflowChangeHistoryService = WorkflowChangeHistoryService as jest.MockedClass<
+const MockedWorkflowChangeHistoryService = WorkflowChangeHistoryService as MockedClass<
   typeof WorkflowChangeHistoryService
 >;
 
 const mockedWaitForManagedWorkflowInstallReadiness =
-  waitForManagedWorkflowInstallReadiness as jest.MockedFunction<
+  waitForManagedWorkflowInstallReadiness as MockedFunction<
     typeof waitForManagedWorkflowInstallReadiness
   >;
 
-type PrototypeSpies = Record<string, jest.SpyInstance>;
+type PrototypeSpies = Record<string, MockInstance>;
 
 const spyPrototype = <T extends object>(
   klass: { prototype: T },
   methods: ReadonlyArray<keyof T & string>
 ): PrototypeSpies => {
   const spies: PrototypeSpies = {};
-  const prototype = klass.prototype as unknown as Record<string, jest.Mock>;
+  const prototype = klass.prototype as unknown as Record<string, Mock>;
   for (const method of methods) {
-    spies[method] = jest
+    spies[method] = vi
       .spyOn(prototype, method)
       .mockResolvedValue({ facadeTest: method } as never);
   }
   return spies;
 };
 
-const makeEsClient = (): jest.Mocked<ElasticsearchClient> =>
+const makeEsClient = (): Mocked<ElasticsearchClient> =>
   ({
     indices: {
-      exists: jest.fn().mockResolvedValue(true),
-      create: jest.fn(),
-      putMapping: jest.fn(),
-      getIndexTemplate: jest.fn().mockResolvedValue({}),
-      putIndexTemplate: jest.fn(),
-      getAlias: jest.fn().mockResolvedValue({}),
-      putAlias: jest.fn(),
-      get: jest.fn().mockResolvedValue({}),
-      simulateIndexTemplate: jest.fn().mockResolvedValue({ template: { mappings: {} } }),
+      exists: vi.fn().mockResolvedValue(true),
+      create: vi.fn(),
+      putMapping: vi.fn(),
+      getIndexTemplate: vi.fn().mockResolvedValue({}),
+      putIndexTemplate: vi.fn(),
+      getAlias: vi.fn().mockResolvedValue({}),
+      putAlias: vi.fn(),
+      get: vi.fn().mockResolvedValue({}),
+      simulateIndexTemplate: vi.fn().mockResolvedValue({ template: { mappings: {} } }),
     },
-    search: jest.fn(),
-    index: jest.fn(),
-    bulk: jest.fn(),
-    delete: jest.fn(),
-    deleteByQuery: jest.fn(),
-  } as unknown as jest.Mocked<ElasticsearchClient>);
+    search: vi.fn(),
+    index: vi.fn(),
+    bulk: vi.fn(),
+    delete: vi.fn(),
+    deleteByQuery: vi.fn(),
+  } as unknown as Mocked<ElasticsearchClient>);
 
 const makePluginsStart = (): WorkflowsServerPluginStartDeps =>
   ({
     workflowsExecutionEngine: workflowsExecutionEngineMock.createStart(),
     taskManager: {
-      schedule: jest.fn(),
-      ensureScheduled: jest.fn(),
-      fetch: jest.fn().mockResolvedValue({ docs: [] }),
-      remove: jest.fn().mockResolvedValue(undefined),
+      schedule: vi.fn(),
+      ensureScheduled: vi.fn(),
+      fetch: vi.fn().mockResolvedValue({ docs: [] }),
+      remove: vi.fn().mockResolvedValue(undefined),
     },
     actions: {
-      getUnsecuredActionsClient: jest.fn().mockReturnValue({}),
-      getActionsClientWithRequest: jest.fn().mockResolvedValue({}),
+      getUnsecuredActionsClient: vi.fn().mockReturnValue({}),
+      getActionsClientWithRequest: vi.fn().mockResolvedValue({}),
     },
     workflowsExtensions: {
-      getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
+      getAllTriggerDefinitions: vi.fn().mockReturnValue([]),
     },
   } as unknown as WorkflowsServerPluginStartDeps);
 
@@ -118,7 +124,7 @@ const makeCoreSetup = (
   ({
     getStartServices: startServices,
     status: {
-      core$: { subscribe: jest.fn() },
+      core$: { subscribe: vi.fn() },
     },
   } as unknown as CoreSetup<WorkflowsServerPluginStartDeps>);
 
@@ -134,7 +140,7 @@ describe('WorkflowsService (facade)', () => {
 
   const buildService = async (): Promise<WorkflowsService> => {
     const coreStart = makeCoreStart(makeEsClient());
-    const startServices = jest.fn().mockResolvedValue([coreStart, makePluginsStart()]);
+    const startServices = vi.fn().mockResolvedValue([coreStart, makePluginsStart()]);
     const service = new WorkflowsService(
       makeCoreSetup(startServices),
       makePluginsSetup(),
@@ -151,8 +157,8 @@ describe('WorkflowsService (facade)', () => {
     MockedWorkflowChangeHistoryService.mockImplementation(
       () =>
         ({
-          initialize: jest.fn().mockResolvedValue(undefined),
-          isInitialized: jest.fn().mockReturnValue(true),
+          initialize: vi.fn().mockResolvedValue(undefined),
+          isInitialized: vi.fn().mockReturnValue(true),
         } as unknown as WorkflowChangeHistoryService)
     );
     mockedWaitForManagedWorkflowInstallReadiness.mockResolvedValue({ ready: true });
@@ -200,14 +206,14 @@ describe('WorkflowsService (facade)', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('initialization', () => {
     it('initializes change history at startup', async () => {
       const changeHistoryInstance = {
-        initialize: jest.fn().mockResolvedValue(undefined),
-        isInitialized: jest.fn().mockReturnValue(true),
+        initialize: vi.fn().mockResolvedValue(undefined),
+        isInitialized: vi.fn().mockReturnValue(true),
       };
       MockedWorkflowChangeHistoryService.mockImplementation(
         () => changeHistoryInstance as unknown as WorkflowChangeHistoryService
@@ -216,7 +222,7 @@ describe('WorkflowsService (facade)', () => {
       const esClient = makeEsClient();
       const coreStart = makeCoreStart(esClient);
       const service = await (async () => {
-        const startServices = jest.fn().mockResolvedValue([coreStart, makePluginsStart()]);
+        const startServices = vi.fn().mockResolvedValue([coreStart, makePluginsStart()]);
         const svc = new WorkflowsService(
           makeCoreSetup(startServices),
           makePluginsSetup(),
@@ -245,7 +251,7 @@ describe('WorkflowsService (facade)', () => {
         }
       );
 
-      const startServices = jest.fn().mockReturnValue(startServicesPromise);
+      const startServices = vi.fn().mockReturnValue(startServicesPromise);
       const service = new WorkflowsService(
         makeCoreSetup(startServices),
         makePluginsSetup(),
@@ -344,12 +350,12 @@ describe('WorkflowsService (facade)', () => {
     });
 
     it('reads soft-deleted workflows when gating workflow change history', async () => {
-      const getHistory = jest.fn().mockResolvedValue({ total: 0, items: [] });
+      const getHistory = vi.fn().mockResolvedValue({ total: 0, items: [] });
       MockedWorkflowChangeHistoryService.mockImplementation(
         () =>
           ({
-            initialize: jest.fn().mockResolvedValue(undefined),
-            isInitialized: jest.fn().mockReturnValue(true),
+            initialize: vi.fn().mockResolvedValue(undefined),
+            isInitialized: vi.fn().mockReturnValue(true),
             getHistory,
           } as unknown as WorkflowChangeHistoryService)
       );
@@ -459,7 +465,7 @@ describe('WorkflowsService (facade)', () => {
     it('surfaces rejections from sub-services untouched', async () => {
       const service = await buildService();
       const boom = new Error('sub-service failure');
-      (crudSpies.getWorkflow as jest.SpyInstance).mockRejectedValueOnce(boom);
+      (crudSpies.getWorkflow as MockInstance).mockRejectedValueOnce(boom);
 
       await expect(service.getWorkflow('wf-1', 'default')).rejects.toBe(boom);
     });
@@ -544,7 +550,7 @@ describe('WorkflowsService (facade)', () => {
       // Behavioural coverage for this method lives next to the implementation
       // in `services/workflow_execution_query_service.test.ts`. This facade
       // test only asserts the delegation shape.
-      const listSpy = jest
+      const listSpy = vi
         .spyOn(WorkflowExecutionQueryService.prototype, 'listWaitingForInputSteps')
         .mockResolvedValue({ results: [], total: 0 } as never);
       try {
@@ -561,7 +567,7 @@ describe('WorkflowsService (facade)', () => {
     it('resolves the responder via the security service and delegates with full audit metadata', async () => {
       // The service owns username resolution so callers cannot spoof audit identity.
       // Behavioral coverage of the ES update lives in the query-service tests.
-      const markSpy = jest
+      const markSpy = vi
         .spyOn(WorkflowExecutionQueryService.prototype, 'markStepAsResponded')
         .mockResolvedValue(true as never);
       try {

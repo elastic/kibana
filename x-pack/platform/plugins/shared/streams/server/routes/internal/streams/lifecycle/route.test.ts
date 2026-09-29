@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getEffectiveLifecycle } from '../../../../lib/streams/lifecycle/get_effective_lifecycle';
 import { internalLifecycleRoutes } from './route';
 
-jest.mock('../../../../lib/streams/lifecycle/get_effective_lifecycle');
+vi.mock('../../../../lib/streams/lifecycle/get_effective_lifecycle');
 
-jest.mock('@kbn/streams-schema', () => {
-  const actual = jest.requireActual('@kbn/streams-schema');
+vi.mock('@kbn/streams-schema', async () => {
+  const actual = (await vi.importActual('@kbn/streams-schema'));
   return {
     ...actual,
     Streams: {
@@ -21,17 +24,17 @@ jest.mock('@kbn/streams-schema', () => {
         ...actual.Streams.ingest,
         all: {
           ...actual.Streams.ingest.all,
-          Definition: { is: jest.fn().mockReturnValue(true) },
+          Definition: { is: vi.fn().mockReturnValue(true) },
         },
       },
     },
-    isIlmLifecycle: jest.fn().mockReturnValue(false),
+    isIlmLifecycle: vi.fn().mockReturnValue(false),
   };
 });
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { Streams, isIlmLifecycle } = require('@kbn/streams-schema');
-const mockGetEffectiveLifecycle = getEffectiveLifecycle as jest.MockedFunction<
+const mockGetEffectiveLifecycle = getEffectiveLifecycle as MockedFunction<
   typeof getEffectiveLifecycle
 >;
 
@@ -39,7 +42,7 @@ const route = internalLifecycleRoutes['GET /internal/streams/{name}/lifecycle/_d
 
 type HandlerParams = Parameters<typeof route.handler>[0];
 
-const mockWarn = jest.fn();
+const mockWarn = vi.fn();
 
 const callHandler = ({
   name,
@@ -55,22 +58,22 @@ const callHandler = ({
   searchError?: Error;
 }) => {
   const search = searchError
-    ? jest.fn().mockRejectedValue(searchError)
-    : jest.fn().mockResolvedValue(searchResult ?? { aggregations: undefined });
-  const stats = jest.fn().mockResolvedValue(statsResult ?? { indices: {} });
-  const getSettings = jest.fn().mockResolvedValue(settingsResult ?? {});
+    ? vi.fn().mockRejectedValue(searchError)
+    : vi.fn().mockResolvedValue(searchResult ?? { aggregations: undefined });
+  const stats = vi.fn().mockResolvedValue(statsResult ?? { indices: {} });
+  const getSettings = vi.fn().mockResolvedValue(settingsResult ?? {});
 
-  const getScopedClients = jest.fn().mockResolvedValue({
+  const getScopedClients = vi.fn().mockResolvedValue({
     scopedClusterClient: { asCurrentUser: { search, indices: { stats, getSettings } } },
     streamsClient: {
-      getStream: jest.fn().mockResolvedValue({ name }),
-      getDataStream: jest.fn().mockResolvedValue({ name }),
+      getStream: vi.fn().mockResolvedValue({ name }),
+      getDataStream: vi.fn().mockResolvedValue({ name }),
     },
   });
 
   const telemetry = {
-    startTrackingEndpointLatency: jest.fn().mockReturnValue(jest.fn()),
-    reportStreamsStateError: jest.fn(),
+    startTrackingEndpointLatency: vi.fn().mockReturnValue(vi.fn()),
+    reportStreamsStateError: vi.fn(),
   };
 
   const handlerParams = {
@@ -78,7 +81,7 @@ const callHandler = ({
     request: {},
     getScopedClients,
     response: {},
-    logger: { error: jest.fn(), warn: mockWarn },
+    logger: { error: vi.fn(), warn: mockWarn },
     context: {},
     telemetry,
   } as unknown as HandlerParams;
@@ -87,9 +90,9 @@ const callHandler = ({
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  (Streams.ingest.all.Definition.is as jest.Mock).mockReturnValue(true);
-  (isIlmLifecycle as jest.Mock).mockReturnValue(false);
+  vi.clearAllMocks();
+  (Streams.ingest.all.Definition.is as Mock).mockReturnValue(true);
+  (isIlmLifecycle as Mock).mockReturnValue(false);
   mockGetEffectiveLifecycle.mockResolvedValue({
     dsl: { data_retention: '30d', frozen_after: '10s' },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -242,7 +245,7 @@ describe('lifecycle _dsl_phase_stats route', () => {
   });
 
   it('rejects ILM streams with a 400', async () => {
-    (isIlmLifecycle as jest.Mock).mockReturnValue(true);
+    (isIlmLifecycle as Mock).mockReturnValue(true);
 
     await expect(callHandler({ name: 'ilm-stream' })).rejects.toThrow(
       'DSL phase stats are only available for data stream lifecycle (DSL) streams'
@@ -250,7 +253,7 @@ describe('lifecycle _dsl_phase_stats route', () => {
   });
 
   it('rejects non-ingest streams with a 400', async () => {
-    (Streams.ingest.all.Definition.is as jest.Mock).mockReturnValue(false);
+    (Streams.ingest.all.Definition.is as Mock).mockReturnValue(false);
 
     await expect(callHandler({ name: 'group-stream' })).rejects.toThrow(
       'Lifecycle phase stats are only available for ingest streams'
@@ -271,25 +274,25 @@ describe('lifecycle _snapshot_repositories route', () => {
     repositories?: Record<string, { type?: string }>;
     clusterSettings?: Record<string, unknown>;
   }) => {
-    const getRepository = jest.fn().mockResolvedValue(repositories);
-    const getSettings = jest.fn().mockResolvedValue(clusterSettings);
+    const getRepository = vi.fn().mockResolvedValue(repositories);
+    const getSettings = vi.fn().mockResolvedValue(clusterSettings);
 
-    const getScopedClients = jest.fn().mockResolvedValue({
+    const getScopedClients = vi.fn().mockResolvedValue({
       scopedClusterClient: {
         asCurrentUser: { snapshot: { getRepository }, cluster: { getSettings } },
       },
     });
 
     const telemetry = {
-      startTrackingEndpointLatency: jest.fn().mockReturnValue(jest.fn()),
-      reportStreamsStateError: jest.fn(),
+      startTrackingEndpointLatency: vi.fn().mockReturnValue(vi.fn()),
+      reportStreamsStateError: vi.fn(),
     };
 
     const handlerParams = {
       request: {},
       getScopedClients,
       response: {},
-      logger: { error: jest.fn(), warn: jest.fn() },
+      logger: { error: vi.fn(), warn: vi.fn() },
       context: {},
       telemetry,
     } as unknown as SnapshotHandlerParams;

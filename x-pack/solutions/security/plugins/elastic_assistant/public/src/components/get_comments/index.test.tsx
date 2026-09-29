@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { MessageRole } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import { getComments } from '.';
@@ -34,14 +36,14 @@ const currentConversation = {
 };
 const showAnonymizedValues = false;
 const testProps = {
-  abortStream: jest.fn(),
+  abortStream: vi.fn(),
   contentReferencesVisible: true,
   currentConversation,
   isConversationOwner: true,
   isFetchingResponse: false,
-  refetchCurrentConversation: jest.fn(),
-  regenerateMessage: jest.fn(),
-  setIsStreaming: jest.fn(),
+  refetchCurrentConversation: vi.fn(),
+  regenerateMessage: vi.fn(),
+  setIsStreaming: vi.fn(),
   showAnonymizedValues,
 };
 describe('getComments', () => {

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
 
@@ -19,38 +22,41 @@ import { INTEGRATION_TABS } from '../configs/integration_tabs_configs';
 import { mockReportLinkClick } from '../hooks/__mocks__/mocks';
 import type { AvailablePackages } from './with_available_packages';
 
-jest.mock('../hooks/integration_context');
-jest.mock('../hooks/use_stored_state');
-jest.mock('../../kibana', () => ({
-  ...jest.requireActual('../../kibana'),
-  useNavigation: jest.fn().mockReturnValue({
-    navigateTo: jest.fn(),
-    getAppUrl: jest.fn(),
-  }),
-}));
+vi.mock('../hooks/integration_context');
+vi.mock('../hooks/use_stored_state');
+vi.mock('../../kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../kibana')),
+      useNavigation: vi.fn().mockReturnValue({
+        navigateTo: vi.fn(),
+        getAppUrl: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockPackageList = jest.fn<
+const mockPackageList = vi.fn<
   React.JSX.Element,
   Array<{ showSearchTools?: boolean; searchTerm: string; list: unknown[] }>
 >(() => <div data-test-subj="packageList" />);
 
-jest.mock('@kbn/fleet-plugin/public');
-jest
+vi.mock('@kbn/fleet-plugin/public');
+vi
   .spyOn(module, 'PackageList')
   .mockImplementation(() => Promise.resolve({ PackageListGrid: mockPackageList }));
 
-const mockUseStoredIntegrationTabId = useStoredIntegrationTabId as jest.MockedFunction<
+const mockUseStoredIntegrationTabId = useStoredIntegrationTabId as MockedFunction<
   typeof useStoredIntegrationTabId
 >;
-const mockUseStoredIntegrationSearchTerm = useStoredIntegrationSearchTerm as jest.MockedFunction<
+const mockUseStoredIntegrationSearchTerm = useStoredIntegrationSearchTerm as MockedFunction<
   typeof useStoredIntegrationSearchTerm
 >;
 
 describe('IntegrationsCardGridTabsComponent', () => {
-  const mockSetTabId = jest.fn();
-  const mockSetCategory = jest.fn();
-  const mockSetSelectedSubCategory = jest.fn();
-  const mockSetSearchTerm = jest.fn();
+  const mockSetTabId = vi.fn();
+  const mockSetCategory = vi.fn();
+  const mockSetSelectedSubCategory = vi.fn();
+  const mockSetSearchTerm = vi.fn();
   const props: SecurityIntegrationsGridTabsProps = {
     activeIntegrationsCount: 1,
     isAgentRequired: false,
@@ -67,9 +73,9 @@ describe('IntegrationsCardGridTabsComponent', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseStoredIntegrationTabId.mockReturnValue([INTEGRATION_TABS[0].id, jest.fn()]);
-    mockUseStoredIntegrationSearchTerm.mockReturnValue(['', jest.fn()]);
+    vi.clearAllMocks();
+    mockUseStoredIntegrationTabId.mockReturnValue([INTEGRATION_TABS[0].id, vi.fn()]);
+    mockUseStoredIntegrationSearchTerm.mockReturnValue(['', vi.fn()]);
   });
 
   it('renders loading skeleton when data is loading', () => {
@@ -98,7 +104,7 @@ describe('IntegrationsCardGridTabsComponent', () => {
   });
 
   it('saves the selected tab to storage', () => {
-    (useStoredIntegrationTabId as jest.Mock).mockReturnValue(['recommended', mockSetTabId]);
+    (useStoredIntegrationTabId as Mock).mockReturnValue(['recommended', mockSetTabId]);
 
     const { getByTestId } = render(<SecurityIntegrationsGridTabs {...props} />, {
       wrapper: TestProviders,
@@ -113,7 +119,7 @@ describe('IntegrationsCardGridTabsComponent', () => {
   });
 
   it('tracks the tab clicks', () => {
-    (useStoredIntegrationTabId as jest.Mock).mockReturnValue(['recommended', mockSetTabId]);
+    (useStoredIntegrationTabId as Mock).mockReturnValue(['recommended', mockSetTabId]);
 
     const { getByTestId } = render(<SecurityIntegrationsGridTabs {...props} />, {
       wrapper: TestProviders,
@@ -137,8 +143,8 @@ describe('IntegrationsCardGridTabsComponent', () => {
   });
 
   it('updates the search term when the search input changes', async () => {
-    const mockSetSearchTermToStorage = jest.fn();
-    (useStoredIntegrationSearchTerm as jest.Mock).mockReturnValue([
+    const mockSetSearchTermToStorage = vi.fn();
+    (useStoredIntegrationSearchTerm as Mock).mockReturnValue([
       'new search term',
       mockSetSearchTermToStorage,
     ]);

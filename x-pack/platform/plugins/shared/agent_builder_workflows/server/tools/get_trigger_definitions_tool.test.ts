@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -29,16 +32,16 @@ const mockCasesTrigger = {
 
 describe('registerGetTriggerDefinitionsTool', () => {
   let registeredTool: BuiltinToolDefinition;
-  let mockApi: jest.Mocked<GetRegisteredTriggersApi>;
+  let mockApi: Mocked<GetRegisteredTriggersApi>;
 
   beforeEach(() => {
     mockApi = {
-      getRegisteredTriggers: jest.fn().mockResolvedValue([mockCasesTrigger]),
+      getRegisteredTriggers: vi.fn().mockResolvedValue([mockCasesTrigger]),
     };
 
     const agentBuilder = {
       tools: {
-        register: jest.fn((tool: BuiltinToolDefinition) => {
+        register: vi.fn((tool: BuiltinToolDefinition) => {
           registeredTool = tool;
         }),
       },

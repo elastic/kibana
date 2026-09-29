@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock/test_providers';
@@ -12,7 +15,7 @@ import { MigrationRuleDetailsFlyout } from '.';
 import { getRuleMigrationRuleMock } from '../../../../../common/siem_migrations/model/__mocks__';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 
-jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
 
 const getMockUser = () => ({
   uid: 'user-1',
@@ -25,17 +28,17 @@ const getMockUser = () => ({
 });
 
 describe('MigrationRuleDetailsFlyout', () => {
-  const closeFlyout = jest.fn();
+  const closeFlyout = vi.fn();
   const defaultNavigation = {
     hasPrevious: false,
     hasNext: false,
-    goToPrevious: jest.fn(),
-    goToNext: jest.fn(),
+    goToPrevious: vi.fn(),
+    goToNext: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useBulkGetUserProfiles as Mock).mockReturnValue({
       isLoading: false,
       data: [getMockUser()],
     });
@@ -246,8 +249,8 @@ describe('MigrationRuleDetailsFlyout', () => {
     const getNavigation = (overrides = {}) => ({
       hasPrevious: true,
       hasNext: true,
-      goToPrevious: jest.fn(),
-      goToNext: jest.fn(),
+      goToPrevious: vi.fn(),
+      goToNext: vi.fn(),
       ...overrides,
     });
 
@@ -329,8 +332,8 @@ describe('MigrationRuleDetailsFlyout', () => {
     const bothWaysNavigation = {
       hasPrevious: true,
       hasNext: true,
-      goToPrevious: jest.fn(),
-      goToNext: jest.fn(),
+      goToPrevious: vi.fn(),
+      goToNext: vi.fn(),
     };
 
     it('should focus the first enabled tab when a different rule is shown', () => {

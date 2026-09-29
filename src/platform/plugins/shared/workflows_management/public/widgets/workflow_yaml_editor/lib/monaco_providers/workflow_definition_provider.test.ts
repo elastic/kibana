@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { WorkflowDefinitionProvider } from './workflow_definition_provider';
 import type { WorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
-jest.mock('../template_expression/parse_template_at_position');
+vi.mock('../template_expression/parse_template_at_position');
 
-const { parseTemplateAtPosition } = jest.requireMock(
-  '../template_expression/parse_template_at_position'
-);
+const { parseTemplateAtPosition } = (await vi.importMock('../template_expression/parse_template_at_position'));
 
 const WORKFLOW_YAML = `name: test-workflow
 enabled: false
@@ -66,8 +66,8 @@ const createMockModel = () => {
   const lines = WORKFLOW_YAML.split('\n');
   return {
     uri: { toString: () => 'inmemory://test' },
-    getLineContent: jest.fn((lineNumber: number) => lines[lineNumber - 1] || ''),
-    getPositionAt: jest.fn((offset: number) => {
+    getLineContent: vi.fn((lineNumber: number) => lines[lineNumber - 1] || ''),
+    getPositionAt: vi.fn((offset: number) => {
       let remaining = offset;
       for (let i = 0; i < lines.length; i++) {
         if (remaining <= lines[i].length) {
@@ -182,7 +182,7 @@ describe('WorkflowDefinitionProvider', () => {
   let lookup: WorkflowLookup;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     model = createMockModel();
     lookup = createWorkflowLookup();
     provider = new WorkflowDefinitionProvider({
@@ -273,10 +273,10 @@ steps:
       const jsonSchemaDoc = YAML.parseDocument(jsonSchemaYaml);
       const jsonSchemaModel = {
         ...model,
-        getLineContent: jest.fn(
+        getLineContent: vi.fn(
           (lineNumber: number) => jsonSchemaYaml.split('\n')[lineNumber - 1] || ''
         ),
-        getPositionAt: jest.fn((offset: number) => {
+        getPositionAt: vi.fn((offset: number) => {
           const lines = jsonSchemaYaml.split('\n');
           let remaining = offset;
           for (let i = 0; i < lines.length; i++) {
@@ -395,10 +395,10 @@ steps:
       const outputDoc = YAML.parseDocument(outputYaml);
       const outputModel = {
         ...model,
-        getLineContent: jest.fn(
+        getLineContent: vi.fn(
           (lineNumber: number) => outputYaml.split('\n')[lineNumber - 1] || ''
         ),
-        getPositionAt: jest.fn((offset: number) => {
+        getPositionAt: vi.fn((offset: number) => {
           const lines = outputYaml.split('\n');
           let remaining = offset;
           for (let i = 0; i < lines.length; i++) {

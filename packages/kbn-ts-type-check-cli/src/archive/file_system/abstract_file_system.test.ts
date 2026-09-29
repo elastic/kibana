@@ -7,21 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import Fs from 'fs';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { TMP_DIR } from '../constants';
 import type { ArchiveMetadata } from './types';
 import { AbstractFileSystem } from './abstract_file_system';
 
-jest.mock('../utils', () => ({
-  cleanTypeCheckArtifacts: jest.fn(),
-  calculateFileHashes: jest.fn().mockResolvedValue({
-    'pnpm-lock.yaml': 'hash1',
-  }),
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      cleanTypeCheckArtifacts: vi.fn(),
+      calculateFileHashes: vi.fn().mockResolvedValue({
+        'pnpm-lock.yaml': 'hash1',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { cleanTypeCheckArtifacts } = jest.requireMock('../utils') as {
-  cleanTypeCheckArtifacts: jest.MockedFunction<(log: SomeDevLog) => Promise<void>>;
+const { cleanTypeCheckArtifacts } = (await vi.importMock('../utils')) as {
+  cleanTypeCheckArtifacts: MockedFunction<(log: SomeDevLog) => Promise<void>>;
 };
 
 class TestFileSystem extends AbstractFileSystem {
@@ -61,16 +67,16 @@ class TestFileSystem extends AbstractFileSystem {
 
 const createLog = (): SomeDevLog => {
   return {
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   } as unknown as SomeDevLog;
 };
 
 describe('AbstractFileSystem', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     cleanTypeCheckArtifacts.mockResolvedValue(undefined);
   });
 
@@ -165,7 +171,7 @@ describe('AbstractFileSystem', () => {
 
       expect(fs.extractCalls).toHaveLength(0);
       expect(cleanTypeCheckArtifacts).not.toHaveBeenCalled();
-      expect((log.info as jest.Mock).mock.calls).toContainEqual([
+      expect((log.info as Mock).mock.calls).toContainEqual([
         'No cached TypeScript build artifacts available to restore.',
       ]);
     });
@@ -187,7 +193,7 @@ describe('AbstractFileSystem', () => {
 
       expect(fs.extractCalls).toHaveLength(0);
       expect(cleanTypeCheckArtifacts).not.toHaveBeenCalled();
-      expect((log.warning as jest.Mock).mock.calls).toContainEqual([
+      expect((log.warning as Mock).mock.calls).toContainEqual([
         expect.stringContaining(
           'Cached TypeScript build artifacts for shaX found, but cache invalidation files have changed:'
         ),

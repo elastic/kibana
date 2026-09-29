@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { BulkCreateRulesError, type IRulesManagementClient } from './rules/rules_management_client';
@@ -47,18 +50,18 @@ const makeQueryLinks = (count: number): QueryLink[] =>
     };
   });
 
-const makeRulesClient = (): jest.Mocked<IRulesManagementClient> => ({
-  createRule: jest.fn().mockResolvedValue(undefined),
-  bulkCreateRules: jest
+const makeRulesClient = (): Mocked<IRulesManagementClient> => ({
+  createRule: vi.fn().mockResolvedValue(undefined),
+  bulkCreateRules: vi
     .fn()
     .mockImplementation((rules) =>
       Promise.resolve({ createdIds: rules.map(({ id }: { id: string }) => id) })
     ),
-  updateRule: jest.fn().mockResolvedValue(undefined),
-  bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-  findExistingRuleIds: jest.fn().mockResolvedValue([]),
-  findOwnedRuleIds: jest.fn().mockResolvedValue([]),
-  findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue([]),
+  updateRule: vi.fn().mockResolvedValue(undefined),
+  bulkDeleteRules: vi.fn().mockResolvedValue(undefined),
+  findExistingRuleIds: vi.fn().mockResolvedValue([]),
+  findOwnedRuleIds: vi.fn().mockResolvedValue([]),
+  findStreamNamesWithOwnedRules: vi.fn().mockResolvedValue([]),
 });
 
 describe('toRuleDefinition', () => {

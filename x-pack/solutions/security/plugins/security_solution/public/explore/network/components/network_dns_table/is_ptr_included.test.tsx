@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import { IsPtrIncluded } from './is_ptr_included';
 
 describe('NetworkTopNFlow Select direction', () => {
-  const mockOnChange = jest.fn();
+  const mockOnChange = vi.fn();
 
   describe('rendering', () => {
     test('it renders the basic switch to include PTR in table', () => {

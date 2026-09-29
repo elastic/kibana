@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { ENTRY_LEADER_INTERACTIVE } from '../../../common/constants';
 import type { AppContextTestRender } from '../../test';
@@ -38,16 +41,19 @@ const DATA_VALUE_MAP = {
 
 const MOCK_DATA_VIEW_ID = 'dataViewId';
 
-jest.mock('../../hooks/use_filter', () => ({
-  useSetFilter: () => ({
-    getFilterForValueButton: jest.fn(),
-    getFilterOutValueButton: jest.fn(),
-    filterManager: {},
-  }),
-}));
+vi.mock('../../hooks/use_filter', () => {
+      const mocked = {
+      useSetFilter: () => ({
+        getFilterForValueButton: vi.fn(),
+        getFilterOutValueButton: vi.fn(),
+        filterManager: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks');
-const mockUseFetchData = useFetchPercentWidgetData as jest.Mock;
+vi.mock('./hooks');
+const mockUseFetchData = useFetchPercentWidgetData as Mock;
 
 describe('PercentWidget component', () => {
   let renderResult: ReturnType<typeof render>;
@@ -61,7 +67,7 @@ describe('PercentWidget component', () => {
         widgetKey="percentWidget"
         globalFilter={GLOBAL_FILTER}
         groupedBy={ENTRY_LEADER_INTERACTIVE}
-        onReduce={jest.fn()}
+        onReduce={vi.fn()}
       />
     ));
 

@@ -5,43 +5,61 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { UseFormReturn } from 'react-hook-form';
 import { useTemplateFormSync } from './use_template_form_sync';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 
-const mockSetFieldValue = jest.fn();
-const mockUpdateFieldValues = jest.fn();
-const mockUseFormContext = jest.fn(() => ({
+const mockSetFieldValue = vi.fn();
+const mockUpdateFieldValues = vi.fn();
+const mockUseFormContext = vi.fn(() => ({
   setFieldValue: mockSetFieldValue,
   updateFieldValues: mockUpdateFieldValues,
 }));
-const mockUseFormData = jest.fn();
+const mockUseFormData = vi.fn();
 
-jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => ({
-  useFormContext: () => mockUseFormContext(),
-  useFormData: (...args: unknown[]) => mockUseFormData(...args),
-}));
+vi.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => {
+      const mocked = {
+      useFormContext: () => mockUseFormContext(),
+      useFormData: (...args: unknown[]) => mockUseFormData(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetTemplate = jest.fn();
-jest.mock('../templates_v2/hooks/use_get_template', () => ({
-  useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
-}));
+const mockUseGetTemplate = vi.fn();
+vi.mock('../templates_v2/hooks/use_get_template', () => {
+      const mocked = {
+      useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetFieldDefinitions = jest.fn();
-jest.mock('../field_library/hooks/use_get_field_definitions', () => ({
-  useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
-}));
+const mockUseGetFieldDefinitions = vi.fn();
+vi.mock('../field_library/hooks/use_get_field_definitions', () => {
+      const mocked = {
+      useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetSupportedActionConnectors = jest.fn();
-jest.mock('../../containers/configure/use_get_supported_action_connectors', () => ({
-  useGetSupportedActionConnectors: () => mockUseGetSupportedActionConnectors(),
-}));
+const mockUseGetSupportedActionConnectors = vi.fn();
+vi.mock('../../containers/configure/use_get_supported_action_connectors', () => {
+      const mocked = {
+      useGetSupportedActionConnectors: () => mockUseGetSupportedActionConnectors(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetAllCaseConfigurations = jest.fn();
-jest.mock('../../containers/configure/use_get_all_case_configurations', () => ({
-  useGetAllCaseConfigurations: () => mockUseGetAllCaseConfigurations(),
-}));
+const mockUseGetAllCaseConfigurations = vi.fn();
+vi.mock('../../containers/configure/use_get_all_case_configurations', () => {
+      const mocked = {
+      useGetAllCaseConfigurations: () => mockUseGetAllCaseConfigurations(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const jiraConnector = { id: 'jira-1', actionTypeId: '.jira', name: 'My Jira' };
 
@@ -112,10 +130,10 @@ const mockTemplateWithTopLevelDefaults = {
 
 const createInnerFormMock = (): UseFormReturn => {
   return {
-    reset: jest.fn(),
-    setValue: jest.fn(),
-    watch: jest.fn(),
-    getValues: jest.fn(),
+    reset: vi.fn(),
+    setValue: vi.fn(),
+    watch: vi.fn(),
+    getValues: vi.fn(),
   } as unknown as UseFormReturn;
 };
 
@@ -123,7 +141,7 @@ describe('useTemplateFormSync', () => {
   let innerForm: UseFormReturn;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     innerForm = createInnerFormMock();
     mockUseGetFieldDefinitions.mockReturnValue({
       data: { fieldDefinitions: [] },
@@ -182,7 +200,7 @@ describe('useTemplateFormSync', () => {
     const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
 
     mockSetFieldValue.mockClear();
-    (innerForm.reset as jest.Mock).mockClear();
+    (innerForm.reset as Mock).mockClear();
 
     mockUseFormData.mockReturnValue([{ templateId: '' }]);
     mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
@@ -312,13 +330,13 @@ describe('useTemplateFormSync', () => {
       mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
       mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
       // Seed a current global field value in the inner form
-      (innerForm.getValues as jest.Mock).mockReturnValue({
+      (innerForm.getValues as Mock).mockReturnValue({
         [CASE_EXTENDED_FIELDS]: { [GLOBAL_KEY]: GLOBAL_VALUE },
       });
 
       const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set([GLOBAL_KEY])));
 
-      (innerForm.reset as jest.Mock).mockClear();
+      (innerForm.reset as Mock).mockClear();
       mockUseFormData.mockReturnValue([{ templateId: '' }]);
       mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
 
@@ -336,13 +354,13 @@ describe('useTemplateFormSync', () => {
         isLoading: false,
       });
       // Seed a current global field value in the inner form
-      (innerForm.getValues as jest.Mock).mockReturnValue({
+      (innerForm.getValues as Mock).mockReturnValue({
         [CASE_EXTENDED_FIELDS]: { [GLOBAL_KEY]: GLOBAL_VALUE },
       });
 
       const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set([GLOBAL_KEY])));
 
-      (innerForm.reset as jest.Mock).mockClear();
+      (innerForm.reset as Mock).mockClear();
 
       const differentTemplate = {
         templateId: 'template-3',
@@ -375,19 +393,19 @@ describe('useTemplateFormSync', () => {
     it('does NOT preserve keys absent from globalFieldKeys when deselecting template', () => {
       mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
       mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
-      (innerForm.getValues as jest.Mock).mockReturnValue({
+      (innerForm.getValues as Mock).mockReturnValue({
         [CASE_EXTENDED_FIELDS]: { [GLOBAL_KEY]: GLOBAL_VALUE, template_only_key: 'drop me' },
       });
 
       const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set([GLOBAL_KEY])));
 
-      (innerForm.reset as jest.Mock).mockClear();
+      (innerForm.reset as Mock).mockClear();
       mockUseFormData.mockReturnValue([{ templateId: '' }]);
       mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
 
       rerender();
 
-      const resetCall = (innerForm.reset as jest.Mock).mock.calls[0][0];
+      const resetCall = (innerForm.reset as Mock).mock.calls[0][0];
       expect(resetCall[CASE_EXTENDED_FIELDS]).toHaveProperty(GLOBAL_KEY, GLOBAL_VALUE);
       expect(resetCall[CASE_EXTENDED_FIELDS]).not.toHaveProperty('template_only_key');
     });
@@ -415,13 +433,13 @@ describe('useTemplateFormSync', () => {
 
       mockUseFormData.mockReturnValue([{ templateId: 'template-shared' }]);
       mockUseGetTemplate.mockReturnValue({ data: templateWithSharedField, isLoading: false });
-      (innerForm.getValues as jest.Mock).mockReturnValue({
+      (innerForm.getValues as Mock).mockReturnValue({
         [CASE_EXTENDED_FIELDS]: { [SHARED_KEY]: 'from-global' },
       });
 
       renderHook(() => useTemplateFormSync(innerForm, new Set([SHARED_KEY])));
 
-      const resetCall = (innerForm.reset as jest.Mock).mock.calls[0][0];
+      const resetCall = (innerForm.reset as Mock).mock.calls[0][0];
       // Preserved global value must win over the template's 'from-template' default.
       expect(resetCall[CASE_EXTENDED_FIELDS]).toHaveProperty(SHARED_KEY, 'from-global');
     });
@@ -456,7 +474,7 @@ describe('useTemplateFormSync', () => {
 
       const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
 
-      (innerForm.reset as jest.Mock).mockClear();
+      (innerForm.reset as Mock).mockClear();
       mockUseFormData.mockReturnValue([{ templateId: '' }]);
       mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
 
@@ -483,7 +501,7 @@ describe('useTemplateFormSync', () => {
 
       const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
 
-      (innerForm.reset as jest.Mock).mockClear();
+      (innerForm.reset as Mock).mockClear();
 
       const differentTemplate = {
         templateId: 'template-3',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -13,50 +15,65 @@ import { AttackFlyout, JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID
 import { TestProviders } from '../../../common/mock';
 import { useSharedToolsFlyoutApi } from '../../shared/tools/use_shared_tools_flyout_api';
 
-jest.mock('../../shared/tools/use_shared_tools_flyout_api');
+vi.mock('../../shared/tools/use_shared_tools_flyout_api');
 
-jest.mock('./footer', () => ({
-  Footer: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
-    <button
-      type="button"
-      data-test-subj="mock-footer"
-      data-has-on-attack-updated={String(onAttackUpdated != null)}
-      onClick={onAttackUpdated}
-    />
-  ),
-}));
+vi.mock('./footer', () => {
+      const mocked = {
+      Footer: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
+        <button
+          type="button"
+          data-test-subj="mock-footer"
+          data-has-on-attack-updated={String(onAttackUpdated != null)}
+          onClick={onAttackUpdated}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./header', () => ({
-  Header: ({
-    onAttackUpdated,
-    onShowNotes,
-  }: {
-    onAttackUpdated: () => void;
-    onShowNotes: () => void;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="mock-header"
-      data-has-on-attack-updated={String(onAttackUpdated != null)}
-      onClick={onShowNotes}
-    />
-  ),
-}));
+vi.mock('./header', () => {
+      const mocked = {
+      Header: ({
+        onAttackUpdated,
+        onShowNotes,
+      }: {
+        onAttackUpdated: () => void;
+        onShowNotes: () => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="mock-header"
+          data-has-on-attack-updated={String(onAttackUpdated != null)}
+          onClick={onShowNotes}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./tabs/overview_tab', () => ({
-  OverviewTab: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
-    <div
-      data-test-subj="mock-overview-tab"
-      data-has-on-attack-updated={String(onAttackUpdated != null)}
-    />
-  ),
-}));
-jest.mock('./tabs/table_tab', () => ({
-  TableTab: () => <div data-test-subj="mock-table-tab" />,
-}));
-jest.mock('../../shared/components/json_tab', () => ({
-  JsonTab: () => <div data-test-subj="mock-json-tab" />,
-}));
+vi.mock('./tabs/overview_tab', () => {
+      const mocked = {
+      OverviewTab: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
+        <div
+          data-test-subj="mock-overview-tab"
+          data-has-on-attack-updated={String(onAttackUpdated != null)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./tabs/table_tab', () => {
+      const mocked = {
+      TableTab: () => <div data-test-subj="mock-table-tab" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../shared/components/json_tab', () => {
+      const mocked = {
+      JsonTab: () => <div data-test-subj="mock-json-tab" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createAttackHit = (extra: DataTableRecord['flattened'] = {}): DataTableRecord =>
   ({
@@ -75,17 +92,17 @@ const createAttackHit = (extra: DataTableRecord['flattened'] = {}): DataTableRec
 const mockAttack = {} as AttackDiscoveryAlert;
 
 describe('<AttackFlyout />', () => {
-  const mockOpenNotes = jest.fn();
+  const mockOpenNotes = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useSharedToolsFlyoutApi).mockReturnValue({ openNotes: mockOpenNotes });
+    vi.clearAllMocks();
+    vi.mocked(useSharedToolsFlyoutApi).mockReturnValue({ openNotes: mockOpenNotes });
   });
 
   it('renders the header, body, and footer', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={vi.fn()} />
       </TestProviders>
     );
 
@@ -97,7 +114,7 @@ describe('<AttackFlyout />', () => {
   it('renders Overview and JSON tabs and switches between them', () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={vi.fn()} />
       </TestProviders>
     );
 
@@ -134,7 +151,7 @@ describe('<AttackFlyout />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={minimalHit} attack={mockAttack} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={minimalHit} attack={mockAttack} onAttackUpdated={vi.fn()} />
       </TestProviders>
     );
 
@@ -147,7 +164,7 @@ describe('<AttackFlyout />', () => {
     const hit = createAttackHit();
     const { getByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={hit} attack={mockAttack} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={hit} attack={mockAttack} onAttackUpdated={vi.fn()} />
       </TestProviders>
     );
 
@@ -158,7 +175,7 @@ describe('<AttackFlyout />', () => {
   });
 
   it('passes onAttackUpdated callback to the header and footer', () => {
-    const onAttackUpdated = jest.fn();
+    const onAttackUpdated = vi.fn();
     const { getByTestId } = render(
       <TestProviders>
         <AttackFlyout
@@ -174,7 +191,7 @@ describe('<AttackFlyout />', () => {
   });
 
   it('forwards onAttackUpdated unchanged so the wrapper-supplied refetch fires', () => {
-    const onAttackUpdated = jest.fn();
+    const onAttackUpdated = vi.fn();
     const { getByTestId } = render(
       <TestProviders>
         <AttackFlyout

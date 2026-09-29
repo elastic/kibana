@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { validateConfig } from './validate_configuration';
 import { validateQuery } from '@kbn/esql-language';
@@ -12,29 +15,38 @@ import type { EsqlToolFieldTypes } from '@kbn/agent-builder-common';
 import { createBadRequestError } from '@kbn/agent-builder-common';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 
-jest.mock('@kbn/esql-language', () => ({
-  validateQuery: jest.fn(),
-}));
+vi.mock('@kbn/esql-language', () => {
+      const mocked = {
+      validateQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLQueryVariables: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getESQLQueryVariables: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agent-builder-common', () => ({
-  createBadRequestError: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-common', () => {
+      const mocked = {
+      createBadRequestError: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockValidateQuery = validateQuery as jest.MockedFunction<typeof validateQuery>;
-const mockGetESQLQueryVariables = getESQLQueryVariables as jest.MockedFunction<
+const mockValidateQuery = validateQuery as MockedFunction<typeof validateQuery>;
+const mockGetESQLQueryVariables = getESQLQueryVariables as MockedFunction<
   typeof getESQLQueryVariables
 >;
-const mockCreateBadRequestError = createBadRequestError as jest.MockedFunction<
+const mockCreateBadRequestError = createBadRequestError as MockedFunction<
   typeof createBadRequestError
 >;
 
 describe('validateConfig', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockValidateQuery.mockResolvedValue({ errors: [], warnings: [] });
     mockGetESQLQueryVariables.mockReturnValue([]);

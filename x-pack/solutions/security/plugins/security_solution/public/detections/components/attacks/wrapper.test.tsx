@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import {
@@ -21,26 +24,29 @@ import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
-jest.mock('../../../data_view_manager/hooks/use_data_view');
-jest.mock('../../../common/hooks/use_is_cps_linked_search_space');
-jest.mock('./content', () => ({
-  AttacksPageContent: () => <div data-test-subj={'attacks-page-content'} />,
-}));
+vi.mock('../../../data_view_manager/hooks/use_data_view');
+vi.mock('../../../common/hooks/use_is_cps_linked_search_space');
+vi.mock('./content', () => {
+      const mocked = {
+      AttacksPageContent: () => <div data-test-subj={'attacks-page-content'} />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const dataView: DataView = createStubDataView({ spec: {} });
-const mockUseIsCpsLinkedSearchSpace = useIsCpsLinkedSearchSpace as jest.Mock;
+const mockUseIsCpsLinkedSearchSpace = useIsCpsLinkedSearchSpace as Mock;
 
 const degradedDataView = {
   ...dataView,
-  getName: jest.fn().mockReturnValue('My Data View'),
-  getIndexPattern: jest.fn().mockReturnValue('my-pattern-*'),
-  getRuntimeMappings: jest.fn(),
-  hasMatchedIndices: jest.fn().mockReturnValue(false),
+  getName: vi.fn().mockReturnValue('My Data View'),
+  getIndexPattern: vi.fn().mockReturnValue('my-pattern-*'),
+  getRuntimeMappings: vi.fn(),
+  hasMatchedIndices: vi.fn().mockReturnValue(false),
 };
 
 describe('<Wrapper />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseIsCpsLinkedSearchSpace.mockReturnValue({
       isReady: true,
       isLinkedSearchSpace: false,
@@ -48,7 +54,7 @@ describe('<Wrapper />', () => {
   });
 
   it('should render a loading skeleton if the dataView status is pristine', async () => {
-    (useDataView as jest.Mock).mockReturnValue({ dataView, status: 'pristine' });
+    (useDataView as Mock).mockReturnValue({ dataView, status: 'pristine' });
 
     render(
       <TestProviders>
@@ -63,7 +69,7 @@ describe('<Wrapper />', () => {
   });
 
   it('should render a loading skeleton if the dataView status is loading', async () => {
-    (useDataView as jest.Mock).mockReturnValue({ dataView, status: 'loading' });
+    (useDataView as Mock).mockReturnValue({ dataView, status: 'loading' });
 
     render(
       <TestProviders>
@@ -82,7 +88,7 @@ describe('<Wrapper />', () => {
       isReady: false,
       isLinkedSearchSpace: false,
     });
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       dataView: degradedDataView,
       status: 'ready',
     });
@@ -103,7 +109,7 @@ describe('<Wrapper />', () => {
   });
 
   it('should render an error if the dataView status is error', async () => {
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       dataView: undefined,
       status: 'error',
     });
@@ -122,7 +128,7 @@ describe('<Wrapper />', () => {
   });
 
   it('should render the uninitialized empty state when the dataView has no indices outside a CPS linked-search space', async () => {
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       dataView: degradedDataView,
       status: 'ready',
     });
@@ -147,7 +153,7 @@ describe('<Wrapper />', () => {
       isReady: true,
       isLinkedSearchSpace: true,
     });
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       dataView: degradedDataView,
       status: 'ready',
     });
@@ -175,13 +181,13 @@ describe('<Wrapper />', () => {
   });
 
   it('should render the content', async () => {
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       dataView: {
         ...dataView,
         id: 'id',
-        getIndexPattern: jest.fn().mockReturnValue('title'),
-        getRuntimeMappings: jest.fn(),
-        hasMatchedIndices: jest.fn().mockReturnValue(true),
+        getIndexPattern: vi.fn().mockReturnValue('title'),
+        getRuntimeMappings: vi.fn(),
+        hasMatchedIndices: vi.fn().mockReturnValue(true),
       },
       status: 'ready',
     });

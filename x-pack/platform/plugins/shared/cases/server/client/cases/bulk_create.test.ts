@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { omit } from 'lodash';
 import Boom from '@hapi/boom';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -26,8 +28,8 @@ import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/
 
 import type { CaseCustomFields } from '../../../common/types/domain';
 
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+vi.mock('@kbn/core-saved-objects-utils-server', async () => {
+  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
 
   return {
     ...actual,
@@ -59,10 +61,10 @@ describe('bulkCreate', () => {
 
   const caseSO = mockCases[0];
   const casesClientMock = createCasesClientMock();
-  casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+  casesClientMock.configure.get = vi.fn().mockResolvedValue([]);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('workflow events', () => {
@@ -92,7 +94,7 @@ describe('bulkCreate', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.config = { ...clientArgs.config, assigneeIdentity: { enabled: true } };
       clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
         saved_objects: [caseSO],
@@ -155,12 +157,12 @@ describe('bulkCreate', () => {
     const createdAtDate = new Date('2023-11-05');
 
     beforeAll(() => {
-      jest.useFakeTimers();
-      jest.setSystemTime(createdAtDate);
+      vi.useFakeTimers();
+      vi.setSystemTime(createdAtDate);
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     const clientArgs = createCasesClientMockArgs();
@@ -758,7 +760,7 @@ describe('bulkCreate', () => {
       // skips this via `partial: !hadExtendedFieldsBeforeDefaults`; bulkCreate must match.
       const localClientArgs = createCasesClientMockArgs();
       const localCasesClient = createCasesClientMock();
-      localCasesClient.configure.get = jest.fn().mockResolvedValue([
+      localCasesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: SECURITY_SOLUTION_OWNER,
           customFields: [
@@ -877,7 +879,7 @@ describe('bulkCreate', () => {
     const setup = (fieldDefinitions: Array<typeof priorityWithDefault>) => {
       const localClientArgs = createCasesClientMockArgs();
       const localCasesClient = createCasesClientMock();
-      localCasesClient.configure.get = jest.fn().mockResolvedValue([]);
+      localCasesClient.configure.get = vi.fn().mockResolvedValue([]);
       localClientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
         fieldDefinitions,
         total: fieldDefinitions.length,
@@ -1259,11 +1261,11 @@ describe('bulkCreate', () => {
     ];
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
         saved_objects: [caseSO],
       });
-      casesClient.configure.get = jest.fn().mockResolvedValue([
+      casesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: theCase.owner,
           customFields: defaultCustomFieldsConfiguration,
@@ -1283,7 +1285,7 @@ describe('bulkCreate', () => {
     });
 
     it('fills out missing required custom fields', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
+      casesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: theCase.owner,
           customFields: [
@@ -1311,7 +1313,7 @@ describe('bulkCreate', () => {
     });
 
     it('throws error when required customFields are null', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
+      casesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: theCase.owner,
           customFields: [
@@ -1356,7 +1358,7 @@ describe('bulkCreate', () => {
     });
 
     it('throws error when required customFields are undefined and missing a default value', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
+      casesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: theCase.owner,
           customFields: [
@@ -1483,7 +1485,7 @@ describe('bulkCreate', () => {
     it('validate required custom fields from different owners', async () => {
       const casesWithDifferentOwners = [getCases()[0], getCases({ owner: 'cases' })[0]];
 
-      casesClient.configure.get = jest.fn().mockResolvedValue([
+      casesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: theCase.owner,
           customFields: [
@@ -1518,7 +1520,7 @@ describe('bulkCreate', () => {
     it('should fill out missing custom fields from different owners correctly', async () => {
       const casesWithDifferentOwners = [getCases()[0], getCases({ owner: 'cases' })[0]];
 
-      casesClient.configure.get = jest.fn().mockResolvedValue([
+      casesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: theCase.owner,
           customFields: [
@@ -1589,7 +1591,7 @@ describe('bulkCreate', () => {
     const clientArgs = createCasesClientMockArgs();
     clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({ saved_objects: [caseSO] });
 
-    casesClient.configure.get = jest.fn().mockResolvedValue([
+    casesClient.configure.get = vi.fn().mockResolvedValue([
       {
         owner: caseWithOptionalFields.owner,
         customFields: [
@@ -1681,10 +1683,10 @@ describe('bulkCreate', () => {
   describe('Template usage stats', () => {
     const clientArgs = createCasesClientMockArgs();
     const casesClient = createCasesClientMock();
-    casesClient.configure.get = jest.fn().mockResolvedValue([]);
+    casesClient.configure.get = vi.fn().mockResolvedValue([]);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('increments template usage stats when cases are created with a template', async () => {
@@ -1860,7 +1862,7 @@ describe('bulkCreate', () => {
       .createUsageCounter('cases');
     const clientArgs = { ...createCasesClientMockArgs(), usageCounter };
     const casesClient = createCasesClientMock();
-    casesClient.configure.get = jest.fn().mockResolvedValue([]);
+    casesClient.configure.get = vi.fn().mockResolvedValue([]);
 
     const caseSOWithTemplate = (id: string, templateId: string) => ({
       ...caseSO,
@@ -1869,7 +1871,7 @@ describe('bulkCreate', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('counts created cases, not distinct templates', async () => {
@@ -2004,8 +2006,8 @@ describe('bulkCreate', () => {
     ];
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      adapterCasesClient.configure.get = jest
+      vi.clearAllMocks();
+      adapterCasesClient.configure.get = vi
         .fn()
         .mockResolvedValue([
           { owner: SECURITY_SOLUTION_OWNER, customFields: adapterCustomFieldsCfg },
@@ -2159,7 +2161,7 @@ describe('bulkCreate', () => {
       // "missing" even though pairing would have produced a fully valid final map.
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
-      adapterCasesClient.configure.get = jest.fn().mockResolvedValue([
+      adapterCasesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: SECURITY_SOLUTION_OWNER,
           customFields: adapterCustomFieldsCfg.map((cf) => ({ ...cf, required: true })),
@@ -2268,7 +2270,7 @@ describe('bulkCreate', () => {
       clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
         saved_objects: [caseSoForDefaults],
       });
-      extractObservablesCasesClient.configure.get = jest.fn().mockResolvedValue([
+      extractObservablesCasesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: SECURITY_SOLUTION_OWNER,
           customFields: [],
@@ -2305,7 +2307,7 @@ describe('bulkCreate', () => {
       clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
         saved_objects: [caseSoForDefaults],
       });
-      extractObservablesCasesClient.configure.get = jest.fn().mockResolvedValue([]);
+      extractObservablesCasesClient.configure.get = vi.fn().mockResolvedValue([]);
       const cases = getCases({ settings: { syncAlerts: true } });
 
       await bulkCreate({ cases }, clientArgs, extractObservablesCasesClient);

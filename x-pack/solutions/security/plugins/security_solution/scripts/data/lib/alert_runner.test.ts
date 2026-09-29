@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import {
   ENDPOINT_SECURITY_RULE_ID,
@@ -21,13 +23,13 @@ describe('resolveEndpointSecurityRule', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('passes --rule-from into the stand-in rule create body', async () => {
-    jest.spyOn(ruleset, 'findInstalledRuleByRuleId').mockResolvedValue(undefined);
-    jest.spyOn(ruleset, 'fetchAllInstalledRules').mockResolvedValue([]);
-    const create = jest.spyOn(ruleset, 'createCustomRule').mockResolvedValue({
+    vi.spyOn(ruleset, 'findInstalledRuleByRuleId').mockResolvedValue(undefined);
+    vi.spyOn(ruleset, 'fetchAllInstalledRules').mockResolvedValue([]);
+    const create = vi.spyOn(ruleset, 'createCustomRule').mockResolvedValue({
       id: 'so-endpoint',
       rule_id: ENDPOINT_SECURITY_RULE_ID,
       name: 'Endpoint Security',
@@ -73,7 +75,7 @@ describe('runAlertJobs live mode wiring', () => {
   };
 
   it('enables rules by default in live mode', async () => {
-    const request = jest.fn().mockResolvedValue({ data: {} });
+    const request = vi.fn().mockResolvedValue({ data: {} });
     const results = await runAlertJobs({
       esClient: {} as never,
       kbnClient: { request } as never,
@@ -93,7 +95,7 @@ describe('runAlertJobs live mode wiring', () => {
   });
 
   it('leaves rules disabled when leaveRulesDisabled is true', async () => {
-    const request = jest.fn().mockResolvedValue({ data: {} });
+    const request = vi.fn().mockResolvedValue({ data: {} });
     await runAlertJobs({
       esClient: {} as never,
       kbnClient: { request } as never,
@@ -113,7 +115,7 @@ describe('runAlertJobs live mode wiring', () => {
   });
 
   it('returns zero counts without enable/disable when alert-mode is none', async () => {
-    const request = jest.fn().mockResolvedValue({ data: {} });
+    const request = vi.fn().mockResolvedValue({ data: {} });
     const results = await runAlertJobs({
       esClient: {} as never,
       kbnClient: { request } as never,

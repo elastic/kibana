@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { BashExecResult, IBashService } from '@kbn/agent-builder-server/runner';
 import { SAFEGUARD_TOKEN_COUNT } from '../bash/output_truncation';
 import { createBashTool } from './bash';
 
 describe('bash tool', () => {
   it('delegates to BashService.exec with the command', async () => {
-    const exec = jest.fn<Promise<BashExecResult>, [string]>().mockResolvedValue({
+    const exec = vi.fn<Promise<BashExecResult>, [string]>().mockResolvedValue({
       stdout: 'ok\n',
       stderr: '',
       exit_code: 0,
@@ -38,7 +40,7 @@ describe('bash tool', () => {
       stderr: 'boom\n',
       exit_code: 2,
     };
-    const exec = jest.fn<Promise<BashExecResult>, [string]>().mockResolvedValue(execResult);
+    const exec = vi.fn<Promise<BashExecResult>, [string]>().mockResolvedValue(execResult);
     const bashService = { exec } as unknown as IBashService;
     const tool = createBashTool({ bashService });
     const result = (await tool.handler({ command: 'do-it' }, {} as never)) as {
@@ -51,7 +53,7 @@ describe('bash tool', () => {
   });
 
   it('returns an other result when the command exits non-zero without stderr (e.g. grep no match)', async () => {
-    const exec = jest.fn<Promise<BashExecResult>, [string]>().mockResolvedValue({
+    const exec = vi.fn<Promise<BashExecResult>, [string]>().mockResolvedValue({
       stdout: '',
       stderr: '',
       exit_code: 1,
@@ -67,7 +69,7 @@ describe('bash tool', () => {
   });
 
   it('raises the tool-result length guardrail budget to cover its own worst case', () => {
-    const bashService = { exec: jest.fn() } as unknown as IBashService;
+    const bashService = { exec: vi.fn() } as unknown as IBashService;
     const tool = createBashTool({ bashService });
     // stdout and stderr are each capped independently at SAFEGUARD_TOKEN_COUNT.
     expect(tool.maxResultTokens).toBe(SAFEGUARD_TOKEN_COUNT * 2);

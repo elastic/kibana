@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { QueryDetailsHeader } from './query_details_header';
@@ -17,33 +20,45 @@ import {
 import type { LiveQueryDetailsItem } from '../../../actions/use_live_query_details';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
-jest.mock('../../../actions/use_user_profiles');
-jest.mock('../../../common/experimental_features_context', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-  useExperimentalFeatures: jest
-    .fn()
-    .mockReturnValue({ exportResults: false, rruleScheduling: false, crossProjectSearch: false }),
-  ExperimentalFeaturesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('../../../results/export_filters_context', () => ({
-  useExportFilters: jest.fn().mockReturnValue(undefined),
-  ExportFiltersProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('../../../cases/add_to_cases', () => ({
-  AddToCaseWrapper: () => null,
-}));
+vi.mock('../../../actions/use_user_profiles');
+vi.mock('../../../common/experimental_features_context', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+      useExperimentalFeatures: vi
+        .fn()
+        .mockReturnValue({ exportResults: false, rruleScheduling: false, crossProjectSearch: false }),
+      ExperimentalFeaturesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../results/export_filters_context', () => {
+      const mocked = {
+      useExportFilters: vi.fn().mockReturnValue(undefined),
+      ExportFiltersProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../cases/add_to_cases', () => {
+      const mocked = {
+      AddToCaseWrapper: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseBulkGetUserProfiles = useBulkGetUserProfiles as jest.MockedFunction<
+const mockUseBulkGetUserProfiles = useBulkGetUserProfiles as MockedFunction<
   typeof useBulkGetUserProfiles
 >;
 
-const mockUseKibana = jest.fn();
+const mockUseKibana = vi.fn();
 
-jest.mock('../../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../../common/lib/kibana'),
-  useKibana: () => mockUseKibana(),
-  useRouterNavigate: (path: string) => ({ onClick: jest.fn(), href: path }),
-}));
+vi.mock('../../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/lib/kibana')),
+      useKibana: () => mockUseKibana(),
+      useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseData: LiveQueryDetailsItem = {
   action_id: 'action-123',
@@ -83,7 +98,7 @@ const renderHeader = (props: Partial<Parameters<typeof QueryDetailsHeader>[0]> =
 
 describe('QueryDetailsHeader', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseBulkGetUserProfiles.mockReturnValue({
       profilesMap: new Map(),
       isLoading: false,
@@ -138,7 +153,7 @@ describe('QueryDetailsHeader', () => {
     });
 
     it('is rendered when onSaveQuery is provided', () => {
-      renderHeader({ onSaveQuery: jest.fn() });
+      renderHeader({ onSaveQuery: vi.fn() });
 
       expect(screen.getByTestId('save-query-button')).toBeInTheDocument();
     });
@@ -177,18 +192,16 @@ describe('QueryDetailsHeader', () => {
       expect(screen.queryByText('Export')).not.toBeInTheDocument();
     });
 
-    it('is shown when exportResults flag is on', () => {
-      const { useIsExperimentalFeatureEnabled } = jest.requireMock(
-        '../../../common/experimental_features_context'
-      );
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    it('is shown when exportResults flag is on', async () => {
+      const { useIsExperimentalFeatureEnabled } = (await vi.importMock('../../../common/experimental_features_context'));
+      (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(true);
 
       renderHeader();
 
       const exportBtn = screen.queryByText(/export/i);
       expect(exportBtn).not.toBeNull();
 
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+      (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(false);
     });
   });
   describe('scheduled execution variant', () => {

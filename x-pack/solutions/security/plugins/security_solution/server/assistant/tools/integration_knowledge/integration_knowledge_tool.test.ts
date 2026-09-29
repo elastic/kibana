@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { DynamicStructuredTool } from '@langchain/core/tools';
 import { INTEGRATION_KNOWLEDGE_TOOL } from './integration_knowledge_tool';
 import type {
@@ -15,7 +18,7 @@ import type {
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 
-const mockSearch = jest.fn();
+const mockSearch = vi.fn();
 const mockAssistantContext = {
   core: {
     elasticsearch: {
@@ -37,7 +40,7 @@ describe('IntegrationKnowledgeTool', () => {
   } as unknown as AssistantToolParams;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Default to index existing - mock search call with size: 0 for index existence check
     mockSearch.mockResolvedValue({ hits: { total: { value: 0 } } });
   });
@@ -104,7 +107,7 @@ describe('IntegrationKnowledgeTool', () => {
 
       const tool = (await INTEGRATION_KNOWLEDGE_TOOL.getTool(defaultArgs)) as DynamicStructuredTool;
 
-      (contentReferencesStore.add as jest.Mock).mockImplementation(
+      (contentReferencesStore.add as Mock).mockImplementation(
         (creator: Parameters<ContentReferencesStore['add']>[0]) => {
           const reference = creator({ id: 'exampleContentReferenceId' });
           expect(reference.type).toEqual('Href');
@@ -158,7 +161,7 @@ describe('IntegrationKnowledgeTool', () => {
       const tool = (await INTEGRATION_KNOWLEDGE_TOOL.getTool(defaultArgs)) as DynamicStructuredTool;
 
       // Mock the href reference creation to throw an error to trigger fallback
-      (contentReferencesStore.add as jest.Mock)
+      (contentReferencesStore.add as Mock)
         .mockImplementationOnce(() => {
           throw new Error('Reference creation failed');
         })
@@ -200,7 +203,7 @@ describe('IntegrationKnowledgeTool', () => {
 
       const tool = (await INTEGRATION_KNOWLEDGE_TOOL.getTool(defaultArgs)) as DynamicStructuredTool;
 
-      (contentReferencesStore.add as jest.Mock).mockImplementation(
+      (contentReferencesStore.add as Mock).mockImplementation(
         (creator: Parameters<ContentReferencesStore['add']>[0]) => {
           const reference = creator({ id: 'mysqlReferenceId' });
           return reference;
@@ -263,7 +266,7 @@ describe('IntegrationKnowledgeTool', () => {
 
       const tool = (await INTEGRATION_KNOWLEDGE_TOOL.getTool(defaultArgs)) as DynamicStructuredTool;
 
-      (contentReferencesStore.add as jest.Mock).mockImplementation(
+      (contentReferencesStore.add as Mock).mockImplementation(
         (creator: Parameters<ContentReferencesStore['add']>[0]) => {
           return creator({ id: 'largeContentId' });
         }

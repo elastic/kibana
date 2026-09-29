@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { FeaturesPlugin } from './plugin';
 
 import { coreMock, httpServiceMock } from '@kbn/core/public/mocks';
 
-jest.mock('./features_api_client', () => {
+vi.mock('./features_api_client', () => {
   const instance = {
-    getFeatures: jest.fn(),
+    getFeatures: vi.fn(),
   };
   return {
-    FeaturesAPIClient: jest.fn().mockImplementation(() => instance),
+    FeaturesAPIClient: vi.fn().mockImplementation(() => instance),
   };
 });
 

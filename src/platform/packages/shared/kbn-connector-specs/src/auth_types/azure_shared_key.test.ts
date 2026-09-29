@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import axios from 'axios';
 import type { AuthContext } from '../connector_spec';
 import {
@@ -17,15 +19,18 @@ import {
 } from './azure_shared_key';
 import { computeSignature } from './azure_shared_key_crypto';
 
-jest.mock('./azure_shared_key_crypto', () => ({
-  computeSignature: jest.fn().mockResolvedValue('mock-signature'),
-}));
+vi.mock('./azure_shared_key_crypto', () => {
+      const mocked = {
+      computeSignature: vi.fn().mockResolvedValue('mock-signature'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockComputeSignature = jest.mocked(computeSignature);
+const mockComputeSignature = vi.mocked(computeSignature);
 
 describe('Azure Shared Key auth', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockComputeSignature.mockResolvedValue('mock-signature');
   });
 
@@ -55,7 +60,7 @@ describe('Azure Shared Key auth', () => {
       });
 
       const mockCtx = {
-        logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+        logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
         getCustomHostSettings: () => undefined,
         getToken: async () => null,
         proxySettings: undefined,
@@ -83,7 +88,7 @@ describe('Azure Shared Key auth', () => {
       axiosInstance.defaults.headers.common['x-ms-version'] = '2021-06-08';
 
       const mockCtx = {
-        logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+        logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
         getCustomHostSettings: () => undefined,
         getToken: async () => null,
         proxySettings: undefined,
@@ -118,7 +123,7 @@ describe('Azure Shared Key auth', () => {
     it('throws if query params are embedded in the URL string', async () => {
       const axiosInstance = axios.create();
       const mockCtx = {
-        logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+        logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
         getCustomHostSettings: () => undefined,
         getToken: async () => null,
         proxySettings: undefined,

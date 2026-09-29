@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { UnexpectedAlertOpenError } from 'selenium-webdriver/lib/error';
 import type { FtrProviderContext } from './ftr_provider_context';
@@ -14,14 +17,14 @@ import { BrowserService } from './browser';
 
 describe('Browser#get', () => {
   let log: ToolingLog;
-  let accept: jest.Mock;
-  let driver: { get: jest.Mock; switchTo: () => { alert: () => { accept: jest.Mock } } };
+  let accept: Mock;
+  let driver: { get: Mock; switchTo: () => { alert: () => { accept: Mock } } };
 
   beforeEach(() => {
     log = new ToolingLog();
-    jest.spyOn(log, 'warning').mockImplementation(() => {});
-    accept = jest.fn();
-    driver = { get: jest.fn(), switchTo: () => ({ alert: () => ({ accept }) }) };
+    vi.spyOn(log, 'warning').mockImplementation(() => {});
+    accept = vi.fn();
+    driver = { get: vi.fn(), switchTo: () => ({ alert: () => ({ accept }) }) };
   });
 
   const getBrowser = () => {

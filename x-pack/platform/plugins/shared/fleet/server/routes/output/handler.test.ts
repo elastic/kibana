@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { SERVERLESS_DEFAULT_OUTPUT_ID } from '../../constants';
 import { agentPolicyService, appContextService, outputService } from '../../services';
 import { withDefaultErrorHandler } from '../../services/security/fleet_router';
@@ -27,33 +30,33 @@ describe('Outputs handler', () => {
     }),
   } as any;
   const mockResponse = {
-    customError: jest.fn().mockImplementation((options) => options),
-    ok: jest.fn().mockImplementation((options) => options),
-    badRequest: jest.fn().mockImplementation((options) => options),
-    notFound: jest.fn().mockImplementation((options) => options),
+    customError: vi.fn().mockImplementation((options) => options),
+    ok: vi.fn().mockImplementation((options) => options),
+    badRequest: vi.fn().mockImplementation((options) => options),
+    notFound: vi.fn().mockImplementation((options) => options),
   };
 
   beforeEach(() => {
-    jest
+    vi
       .spyOn(appContextService, 'getLogger')
-      .mockReturnValue({ error: jest.fn(), debug: jest.fn() } as any);
-    jest.spyOn(outputService, 'create').mockResolvedValue({ id: 'output1' } as any);
-    jest.spyOn(outputService, 'update').mockResolvedValue({ id: 'output1' } as any);
-    jest.spyOn(outputService, 'get').mockImplementation((id: string) => {
+      .mockReturnValue({ error: vi.fn(), debug: vi.fn() } as any);
+    vi.spyOn(outputService, 'create').mockResolvedValue({ id: 'output1' } as any);
+    vi.spyOn(outputService, 'update').mockResolvedValue({ id: 'output1' } as any);
+    vi.spyOn(outputService, 'get').mockImplementation((id: string) => {
       if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
         return { hosts: ['http://elasticsearch:9200'] } as any;
       } else {
         return { id: 'output1' } as any;
       }
     });
-    jest.spyOn(agentPolicyService, 'bumpAllAgentPoliciesForOutput').mockResolvedValue({} as any);
-    jest
+    vi.spyOn(agentPolicyService, 'bumpAllAgentPoliciesForOutput').mockResolvedValue({} as any);
+    vi
       .spyOn(outputService, 'getAgentAndPolicyCountForOutput')
       .mockResolvedValue({ agentPolicyCount: 3, agentCount: 7 });
   });
 
   it('should return ok on post output using remote_elasticsearch in stateful', async () => {
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
@@ -67,7 +70,7 @@ describe('Outputs handler', () => {
   });
 
   it('should return ok on post output using remote_elasticsearch in serverless', async () => {
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
     const res = await postOutputHandlerWithErrorHandler(
       mockContext,
@@ -79,7 +82,7 @@ describe('Outputs handler', () => {
   });
 
   it('should return ok on put output using remote_elasticsearch in stateful', async () => {
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
@@ -93,7 +96,7 @@ describe('Outputs handler', () => {
   });
 
   it('should return ok on put output using remote_elasticsearch in serverless', async () => {
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
     const res = await putOutputHandlerWithErrorHandler(
       mockContext,
@@ -105,7 +108,7 @@ describe('Outputs handler', () => {
   });
 
   it('should return ok on post elasticsearch output in serverless if host url is same as default', async () => {
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
     const res = await postOutputHandlerWithErrorHandler(
       mockContext,
@@ -119,7 +122,7 @@ describe('Outputs handler', () => {
   });
 
   it('should return ok on post elasticsearch output in stateful if host url is different from default', async () => {
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
@@ -133,7 +136,7 @@ describe('Outputs handler', () => {
   });
 
   it('should return ok on put elasticsearch output in serverless if host url is same as default', async () => {
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
     const res = await putOutputHandlerWithErrorHandler(
       mockContext,
@@ -148,7 +151,7 @@ describe('Outputs handler', () => {
   });
 
   it('should return ok on put elasticsearch output in serverless if host url is not passed', async () => {
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
     const res = await putOutputHandlerWithErrorHandler(
       mockContext,
@@ -163,7 +166,7 @@ describe('Outputs handler', () => {
   });
 
   it('should return ok on put elasticsearch output in stateful if host url is different from default', async () => {
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
@@ -180,10 +183,10 @@ describe('Outputs handler', () => {
   });
 
   it('should call bumpAllAgentPoliciesForOutput with isDefault flags on put', async () => {
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
-    jest.spyOn(outputService, 'get').mockImplementation((id: string) => {
+    vi.spyOn(outputService, 'get').mockImplementation((id: string) => {
       if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
         return { hosts: ['http://elasticsearch:9200'] } as any;
       }
@@ -207,10 +210,10 @@ describe('Outputs handler', () => {
   });
 
   it('should call bumpAllAgentPoliciesForOutput with isDefault flags on post', async () => {
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
-    jest.spyOn(outputService, 'create').mockResolvedValue({
+    vi.spyOn(outputService, 'create').mockResolvedValue({
       id: 'output1',
       is_default: false,
       is_default_monitoring: true,
@@ -230,7 +233,7 @@ describe('Outputs handler', () => {
   });
 
   it('should return ok if one of service_token and secrets.service_token is provided for remote_elasticsearch output', async () => {
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
@@ -244,7 +247,7 @@ describe('Outputs handler', () => {
   });
 
   it('should return ok if one of kibana_api_key is provided for remote_elasticsearch output', async () => {
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
@@ -258,7 +261,7 @@ describe('Outputs handler', () => {
   });
 
   it('should return ok if one of ssl.key and secrets.ssl.key is provided for remote_elasticsearch output', async () => {
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
@@ -272,7 +275,7 @@ describe('Outputs handler', () => {
   });
 
   it('should return ok if one of ssl.key and secrets.ssl.key is provided for elasticsearch output', async () => {
-    jest
+    vi
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
@@ -287,14 +290,14 @@ describe('Outputs handler', () => {
 
   describe('putOutputHandler ID immutability', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
-      jest.spyOn(outputService, 'update').mockResolvedValue({ id: 'output1' } as any);
-      jest.spyOn(outputService, 'get').mockResolvedValue({ id: 'output1' } as any);
-      jest.spyOn(agentPolicyService, 'bumpAllAgentPoliciesForOutput').mockResolvedValue({} as any);
+      vi.clearAllMocks();
+      vi.spyOn(outputService, 'update').mockResolvedValue({ id: 'output1' } as any);
+      vi.spyOn(outputService, 'get').mockResolvedValue({ id: 'output1' } as any);
+      vi.spyOn(agentPolicyService, 'bumpAllAgentPoliciesForOutput').mockResolvedValue({} as any);
     });
 
     it('should return badRequest when body id does not match path outputId', async () => {
-      jest
+      vi
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: false } as any);
 
@@ -318,7 +321,7 @@ describe('Outputs handler', () => {
     });
 
     it('should return ok when body id matches path outputId', async () => {
-      jest
+      vi
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: false } as any);
 
@@ -335,7 +338,7 @@ describe('Outputs handler', () => {
     });
 
     it('should return ok when body has no id field', async () => {
-      jest
+      vi
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: false } as any);
 
@@ -352,7 +355,7 @@ describe('Outputs handler', () => {
     });
 
     it('should not pass id to outputService.update', async () => {
-      jest
+      vi
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: false } as any);
 
@@ -365,7 +368,7 @@ describe('Outputs handler', () => {
         mockResponse as any
       );
 
-      const updateCallArgs = (outputService.update as jest.Mock).mock.calls[0];
+      const updateCallArgs = (outputService.update as Mock).mock.calls[0];
       expect(updateCallArgs[2]).toBe('output1');
       expect(updateCallArgs[3]).not.toHaveProperty('id');
     });
@@ -385,7 +388,7 @@ describe('Outputs handler', () => {
     });
 
     it('applies pending isDefault query param over persisted value', async () => {
-      jest
+      vi
         .spyOn(outputService, 'get')
         .mockResolvedValueOnce({ id: 'output1', is_default: false } as any);
 
@@ -395,13 +398,13 @@ describe('Outputs handler', () => {
         mockResponse as any
       );
 
-      const passedOutput = (outputService.getAgentAndPolicyCountForOutput as jest.Mock).mock
+      const passedOutput = (outputService.getAgentAndPolicyCountForOutput as Mock).mock
         .lastCall![1];
       expect(passedOutput.is_default).toBe(true);
     });
 
     it('applies pending isDefaultMonitoring query param over persisted value', async () => {
-      jest
+      vi
         .spyOn(outputService, 'get')
         .mockResolvedValueOnce({ id: 'output1', is_default_monitoring: false } as any);
 
@@ -411,14 +414,14 @@ describe('Outputs handler', () => {
         mockResponse as any
       );
 
-      const passedOutput = (outputService.getAgentAndPolicyCountForOutput as jest.Mock).mock
+      const passedOutput = (outputService.getAgentAndPolicyCountForOutput as Mock).mock
         .lastCall![1];
       expect(passedOutput.is_default_monitoring).toBe(true);
     });
 
     it('returns 404 when output does not exist', async () => {
       const boomNotFound = { isBoom: true, output: { statusCode: 404 } };
-      jest.spyOn(outputService, 'get').mockRejectedValueOnce(boomNotFound);
+      vi.spyOn(outputService, 'get').mockRejectedValueOnce(boomNotFound);
 
       await getOutputAgentPolicyCountHandlerWithErrorHandler(
         mockContext,
@@ -435,7 +438,7 @@ describe('Outputs handler', () => {
 
     it('surfaces non-404 errors as 500', async () => {
       const unexpectedError = new Error('ES cluster down');
-      jest
+      vi
         .spyOn(outputService, 'getAgentAndPolicyCountForOutput')
         .mockRejectedValueOnce(unexpectedError);
 

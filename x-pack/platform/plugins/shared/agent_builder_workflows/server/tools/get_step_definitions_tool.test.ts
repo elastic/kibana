@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { builtInStepDefinitions } from '@kbn/workflows';
 import { registerGetStepDefinitionsTool } from './get_step_definitions_tool';
 
-const mockGetAllConnectors = jest.fn();
-const mockAddDynamicConnectorsToCache = jest.fn();
-jest.mock('@kbn/workflows-management-plugin/common/schema', () => ({
-  getAllConnectors: (...args: unknown[]) => mockGetAllConnectors(...args),
-  addDynamicConnectorsToCache: (...args: unknown[]) => mockAddDynamicConnectorsToCache(...args),
-  getCachedAllConnectorsMap: () => null,
-  getDeprecatedStepMetadata: () => undefined,
-}));
+const mockGetAllConnectors = vi.fn();
+const mockAddDynamicConnectorsToCache = vi.fn();
+vi.mock('@kbn/workflows-management-plugin/common/schema', () => {
+      const mocked = {
+      getAllConnectors: (...args: unknown[]) => mockGetAllConnectors(...args),
+      addDynamicConnectorsToCache: (...args: unknown[]) => mockAddDynamicConnectorsToCache(...args),
+      getCachedAllConnectorsMap: () => null,
+      getDeprecatedStepMetadata: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
   (await tool.handler(input as never, context as never)) as ToolHandlerStandardReturn;
@@ -25,7 +30,7 @@ const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, contex
 describe('registerGetStepDefinitionsTool', () => {
   let registeredTool: BuiltinToolDefinition;
   const api = {
-    getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
+    getAvailableConnectors: vi.fn().mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
   } as any;
 
   beforeEach(async () => {
@@ -57,7 +62,7 @@ describe('registerGetStepDefinitionsTool', () => {
 
     const agentBuilder = {
       tools: {
-        register: jest.fn((tool: BuiltinToolDefinition) => {
+        register: vi.fn((tool: BuiltinToolDefinition) => {
           registeredTool = tool;
         }),
       },

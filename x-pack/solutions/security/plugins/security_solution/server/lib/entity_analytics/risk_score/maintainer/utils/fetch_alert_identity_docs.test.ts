@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
@@ -16,10 +19,10 @@ import {
 
 const buildLogger = (): ScopedLogger =>
   ({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as unknown as ScopedLogger);
 
 interface MockBucketSpec {
@@ -81,24 +84,24 @@ describe('fetchAlertIdentityDocs', () => {
   });
 
   it('excludes event.outcome: failure from the selection via must_not', async () => {
-    (esClient.search as jest.Mock).mockResolvedValueOnce(
+    (esClient.search as Mock).mockResolvedValueOnce(
       mockAggResponse({ 'host:host-1': { host: { id: 'host-1' } } })
     );
 
     await fetchAlertIdentityDocs({ esClient, logger, ...baseParams, euids: ['host:host-1'] });
 
-    const query = (esClient.search as jest.Mock).mock.calls[0][0].query;
+    const query = (esClient.search as Mock).mock.calls[0][0].query;
     expect(query.bool.must_not).toEqual([{ term: { 'event.outcome': 'failure' } }]);
   });
 
   it('excludes known bulk alert paths from the top_hits _source', async () => {
-    (esClient.search as jest.Mock).mockResolvedValueOnce(
+    (esClient.search as Mock).mockResolvedValueOnce(
       mockAggResponse({ 'host:host-1': { host: { id: 'host-1' } } })
     );
 
     await fetchAlertIdentityDocs({ esClient, logger, ...baseParams, euids: ['host:host-1'] });
 
-    const topHits = (esClient.search as jest.Mock).mock.calls[0][0].aggs.by_entity_id.aggs.latest
+    const topHits = (esClient.search as Mock).mock.calls[0][0].aggs.by_entity_id.aggs.latest
       .top_hits;
     expect(topHits._source.excludes).toEqual(
       expect.arrayContaining([
@@ -111,18 +114,18 @@ describe('fetchAlertIdentityDocs', () => {
   });
 
   it('requests a first_seen min aggregation alongside the top_hits', async () => {
-    (esClient.search as jest.Mock).mockResolvedValueOnce(
+    (esClient.search as Mock).mockResolvedValueOnce(
       mockAggResponse({ 'host:host-1': { host: { id: 'host-1' } } })
     );
 
     await fetchAlertIdentityDocs({ esClient, logger, ...baseParams, euids: ['host:host-1'] });
 
-    const aggs = (esClient.search as jest.Mock).mock.calls[0][0].aggs.by_entity_id.aggs;
+    const aggs = (esClient.search as Mock).mock.calls[0][0].aggs.by_entity_id.aggs;
     expect(aggs.first_seen).toEqual({ min: { field: '@timestamp' } });
   });
 
   it('returns the representative document and firstSeen per EUID from the aggregation', async () => {
-    (esClient.search as jest.Mock).mockResolvedValueOnce(
+    (esClient.search as Mock).mockResolvedValueOnce(
       mockAggResponse({
         'host:host-1': {
           source: { host: { id: 'host-1' } },
@@ -155,15 +158,15 @@ describe('fetchAlertIdentityDocs', () => {
       { length: ALERT_IDENTITY_DOCS_CHUNK_SIZE + 1 },
       (_, i) => `host:host-${i}`
     );
-    (esClient.search as jest.Mock)
+    (esClient.search as Mock)
       .mockResolvedValueOnce(mockAggResponse({}))
       .mockResolvedValueOnce(mockAggResponse({}));
 
     await fetchAlertIdentityDocs({ esClient, logger, ...baseParams, euids });
 
     expect(esClient.search).toHaveBeenCalledTimes(2);
-    const firstChunkFilter = (esClient.search as jest.Mock).mock.calls[0][0].query.bool.filter;
-    const secondChunkFilter = (esClient.search as jest.Mock).mock.calls[1][0].query.bool.filter;
+    const firstChunkFilter = (esClient.search as Mock).mock.calls[0][0].query.bool.filter;
+    const secondChunkFilter = (esClient.search as Mock).mock.calls[1][0].query.bool.filter;
     expect(firstChunkFilter[firstChunkFilter.length - 1].terms.entity_id).toHaveLength(
       ALERT_IDENTITY_DOCS_CHUNK_SIZE
     );
@@ -176,7 +179,7 @@ describe('fetchAlertIdentityDocs', () => {
       (_, i) => `host:host-${i}`
     );
     const controller = new AbortController();
-    (esClient.search as jest.Mock).mockImplementationOnce(async () => {
+    (esClient.search as Mock).mockImplementationOnce(async () => {
       controller.abort();
       return mockAggResponse({});
     });
@@ -195,7 +198,7 @@ describe('fetchAlertIdentityDocs', () => {
   });
 
   it('does not throw when a chunk request fails, and logs a warning instead', async () => {
-    (esClient.search as jest.Mock).mockRejectedValueOnce(new Error('es unavailable'));
+    (esClient.search as Mock).mockRejectedValueOnce(new Error('es unavailable'));
 
     const result = await fetchAlertIdentityDocs({
       esClient,

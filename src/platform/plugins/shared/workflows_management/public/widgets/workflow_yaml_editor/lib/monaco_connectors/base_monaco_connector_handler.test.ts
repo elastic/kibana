@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { monaco } from '@kbn/monaco';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { createMockHoverContext, createMockStepContext } from './test_utils/mock_factories';
@@ -15,13 +18,19 @@ import { getCachedAllConnectors } from '../connectors_cache';
 import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
 import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
-jest.mock('../connectors_cache', () => ({
-  getCachedAllConnectors: jest.fn(),
-}));
+vi.mock('../connectors_cache', () => {
+      const mocked = {
+      getCachedAllConnectors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/schema', () => ({
-  getCachedAllConnectorsMap: jest.fn(),
-}));
+vi.mock('../../../../../common/schema', () => {
+      const mocked = {
+      getCachedAllConnectorsMap: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /**
  * Concrete subclass to test the abstract BaseMonacoConnectorHandler
@@ -89,10 +98,10 @@ describe('BaseMonacoConnectorHandler', () => {
   let handler: TestHandler;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockStabilityBadgeThemeForTests();
-    (getCachedAllConnectors as jest.Mock).mockReturnValue([]);
-    (getCachedAllConnectorsMap as jest.Mock).mockReturnValue(null);
+    (getCachedAllConnectors as Mock).mockReturnValue([]);
+    (getCachedAllConnectorsMap as Mock).mockReturnValue(null);
     handler = new TestHandler();
   });
 
@@ -301,7 +310,7 @@ describe('BaseMonacoConnectorHandler', () => {
 
   describe('getConnectorStabilityFromCache', () => {
     it('should return tech_preview stability from cached connectors', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+      (getCachedAllConnectors as Mock).mockReturnValue([
         { type: 'slack.postMessage', stability: 'tech_preview' },
       ]);
       expect(handler.exposedGetConnectorStabilityFromCache('slack.postMessage')).toBe(
@@ -310,15 +319,15 @@ describe('BaseMonacoConnectorHandler', () => {
     });
 
     it('should return beta stability from cached connectors', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+      (getCachedAllConnectors as Mock).mockReturnValue([
         { type: 'elasticsearch.search', stability: 'beta' },
       ]);
       expect(handler.exposedGetConnectorStabilityFromCache('elasticsearch.search')).toBe('beta');
     });
 
     it('should return stability from connectors map when static list is empty', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([]);
-      (getCachedAllConnectorsMap as jest.Mock).mockReturnValue(
+      (getCachedAllConnectors as Mock).mockReturnValue([]);
+      (getCachedAllConnectorsMap as Mock).mockReturnValue(
         new Map([
           ['my.dynamic.connector', { type: 'my.dynamic.connector', stability: 'tech_preview' }],
         ])
@@ -329,10 +338,10 @@ describe('BaseMonacoConnectorHandler', () => {
     });
 
     it('should prefer connectors map stability over static list', () => {
-      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+      (getCachedAllConnectors as Mock).mockReturnValue([
         { type: 'slack.postMessage', stability: 'beta' },
       ]);
-      (getCachedAllConnectorsMap as jest.Mock).mockReturnValue(
+      (getCachedAllConnectorsMap as Mock).mockReturnValue(
         new Map([['slack.postMessage', { type: 'slack.postMessage', stability: 'tech_preview' }]])
       );
       expect(handler.exposedGetConnectorStabilityFromCache('slack.postMessage')).toBe(

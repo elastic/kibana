@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
 import { resolve, join } from 'path';
@@ -33,7 +36,7 @@ import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import type { DiscoveredPlugin } from '@kbn/core-base-common';
 import { PluginType } from '@kbn/core-base-common';
 
-const MockPluginsSystem: jest.Mock<PluginsSystem<PluginType>> = PluginsSystem as any;
+const MockPluginsSystem: Mock<PluginsSystem<PluginType>> = PluginsSystem as any;
 
 let pluginsService: PluginsService;
 let pluginsConfig: PluginsConfigType;
@@ -41,8 +44,8 @@ let config$: BehaviorSubject<Record<string, any>>;
 let configService: ConfigService;
 let coreId: symbol;
 let env: Env;
-let prebootMockPluginSystem: jest.Mocked<PluginsSystem<PluginType.preboot>>;
-let standardMockPluginSystem: jest.Mocked<PluginsSystem<PluginType.standard>>;
+let prebootMockPluginSystem: Mocked<PluginsSystem<PluginType.preboot>>;
+let standardMockPluginSystem: Mocked<PluginsSystem<PluginType.standard>>;
 let environmentPreboot: ReturnType<typeof environmentServiceMock.createPrebootContract>;
 let nodePreboot: ReturnType<typeof nodeServiceMock.createInternalPrebootContract>;
 
@@ -55,7 +58,10 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 ['path-1', 'path-2', 'path-3', 'path-4', 'path-5', 'path-6', 'path-7', 'path-8'].forEach((path) => {
   [PluginType.preboot, PluginType.standard].forEach((type) => {
-    jest.doMock(join(`${path}-${type}`, 'server'), () => ({}), {
+    vi.doMock(join(`${path}-${type}`, 'server'), () => {
+          const mocked = {};
+          return { ...mocked, default: mocked };
+        }, {
       virtual: true,
     });
   });
@@ -65,7 +71,10 @@ const OSS_PLUGIN_PATH = '/kibana/src/plugins/ossPlugin';
 const XPACK_PLUGIN_PATH = '/kibana/x-pack/plugins/xPackPlugin';
 const EXTERNAL_PLUGIN_PATH = '/kibana/plugins/externalPlugin';
 [OSS_PLUGIN_PATH, XPACK_PLUGIN_PATH, EXTERNAL_PLUGIN_PATH].forEach((path) => {
-  jest.doMock(join(path, 'server'), () => ({}), {
+  vi.doMock(join(path, 'server'), () => {
+        const mocked = {};
+        return { ...mocked, default: mocked };
+      }, {
     virtual: true,
   });
 });
@@ -160,7 +169,7 @@ async function testSetup() {
 }
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('PluginsService', () => {
@@ -351,7 +360,7 @@ describe('PluginsService', () => {
     });
 
     it('properly detects plugins that should be disabled.', async () => {
-      jest
+      vi
         .spyOn(configService, 'isEnabledAtPath')
         .mockImplementation((path) => Promise.resolve(!path.includes('disabled')));
 
@@ -482,7 +491,7 @@ describe('PluginsService', () => {
     describe('forceEnableAllPlugins', () => {
       it('enables all plugins when "true"', async () => {
         (pluginsConfig as any).forceEnableAllPlugins = true;
-        jest
+        vi
           .spyOn(configService, 'isEnabledAtPath')
           .mockImplementation((path) => Promise.resolve(!path.includes('disabled')));
         prebootMockPluginSystem.setupPlugins.mockResolvedValue(new Map());
@@ -769,15 +778,21 @@ describe('PluginsService', () => {
 
     it('registers plugin config schema in config service', async () => {
       const configSchema = schema.string();
-      jest.spyOn(configService, 'setSchema').mockImplementation(() => Promise.resolve());
-      jest.doMock(
+      vi.spyOn(configService, 'setSchema').mockImplementation(() => Promise.resolve());
+      vi.doMock(
         join('path-with-schema-preboot', 'server'),
-        () => ({ config: { schema: configSchema } }),
+        () => {
+            const mocked = { config: { schema: configSchema } };
+            return { ...mocked, default: mocked };
+          },
         { virtual: true }
       );
-      jest.doMock(
+      vi.doMock(
         join('path-with-schema-standard', 'server'),
-        () => ({ config: { schema: configSchema } }),
+        () => {
+            const mocked = { config: { schema: configSchema } };
+            return { ...mocked, default: mocked };
+          },
         { virtual: true }
       );
 
@@ -802,20 +817,26 @@ describe('PluginsService', () => {
 
     it('registers plugin config deprecation provider in config service', async () => {
       const configSchema = schema.string();
-      jest.spyOn(configService, 'setSchema').mockImplementation(() => Promise.resolve());
-      jest.spyOn(configService, 'addDeprecationProvider');
+      vi.spyOn(configService, 'setSchema').mockImplementation(() => Promise.resolve());
+      vi.spyOn(configService, 'addDeprecationProvider');
 
       const prebootDeprecationProvider = () => [];
-      jest.doMock(
+      vi.doMock(
         join('path-with-provider-preboot', 'server'),
-        () => ({ config: { schema: configSchema, deprecations: prebootDeprecationProvider } }),
+        () => {
+            const mocked = { config: { schema: configSchema, deprecations: prebootDeprecationProvider } };
+            return { ...mocked, default: mocked };
+          },
         { virtual: true }
       );
 
       const standardDeprecationProvider = () => [];
-      jest.doMock(
+      vi.doMock(
         join('path-with-provider-standard', 'server'),
-        () => ({ config: { schema: configSchema, deprecations: standardDeprecationProvider } }),
+        () => {
+            const mocked = { config: { schema: configSchema, deprecations: standardDeprecationProvider } };
+            return { ...mocked, default: mocked };
+          },
         { virtual: true }
       );
 
@@ -896,14 +917,17 @@ describe('PluginsService', () => {
         }),
       ];
       for (const plugin of pluginsWithExposeUsage) {
-        jest.doMock(
+        vi.doMock(
           join(plugin.path, 'server'),
-          () => ({
-            config: {
-              exposeToUsage: { test: true, nested: { prop: true } },
-              schema: schema.maybe(schema.any()),
+          () => {
+              const mocked = {
+                        config: {
+                          exposeToUsage: { test: true, nested: { prop: true } },
+                          schema: schema.maybe(schema.any()),
+                        },
+                      };
+              return { ...mocked, default: mocked };
             },
-          }),
           { virtual: true }
         );
       }
@@ -922,14 +946,17 @@ describe('PluginsService', () => {
         }),
       ];
       for (const plugin of pluginsWithArrayConfigPath) {
-        jest.doMock(
+        vi.doMock(
           join(plugin.path, 'server'),
-          () => ({
-            config: {
-              exposeToUsage: { test: true },
-              schema: schema.maybe(schema.any()),
+          () => {
+              const mocked = {
+                        config: {
+                          exposeToUsage: { test: true },
+                          schema: schema.maybe(schema.any()),
+                        },
+                      };
+              return { ...mocked, default: mocked };
             },
-          }),
           { virtual: true }
         );
       }
@@ -946,13 +973,16 @@ describe('PluginsService', () => {
         }),
       ];
       for (const plugin of pluginsWithoutExpose) {
-        jest.doMock(
+        vi.doMock(
           join(plugin.path, 'server'),
-          () => ({
-            config: {
-              schema: schema.maybe(schema.any()),
+          () => {
+              const mocked = {
+                        config: {
+                          schema: schema.maybe(schema.any()),
+                        },
+                      };
+              return { ...mocked, default: mocked };
             },
-          }),
           { virtual: true }
         );
       }
@@ -1015,23 +1045,26 @@ describe('PluginsService', () => {
         configPath: 'path-standard',
       });
       for (const plugin of [prebootPlugin, standardPlugin]) {
-        jest.doMock(
+        vi.doMock(
           join(plugin.path, 'server'),
-          () => ({
-            config: {
-              exposeToBrowser: {
-                sharedProp: true,
-              },
-              schema: schema.object({
-                serverProp: schema.string({
-                  defaultValue: `serverProp default value ${plugin.name}`,
-                }),
-                sharedProp: schema.string({
-                  defaultValue: `sharedProp default value ${plugin.name}`,
-                }),
-              }),
+          () => {
+              const mocked = {
+                        config: {
+                          exposeToBrowser: {
+                            sharedProp: true,
+                          },
+                          schema: schema.object({
+                            serverProp: schema.string({
+                              defaultValue: `serverProp default value ${plugin.name}`,
+                            }),
+                            sharedProp: schema.string({
+                              defaultValue: `sharedProp default value ${plugin.name}`,
+                            }),
+                          }),
+                        },
+                      };
+              return { ...mocked, default: mocked };
             },
-          }),
           { virtual: true }
         );
       }
@@ -1078,15 +1111,18 @@ describe('PluginsService', () => {
         configPath: 'path-standard',
       });
       for (const plugin of [prebootPlugin, standardPlugin]) {
-        jest.doMock(
+        vi.doMock(
           join(plugin.path, 'server'),
-          () => ({
-            config: {
-              schema: schema.object({
-                serverProp: schema.string({ defaultValue: 'serverProp default value' }),
-              }),
+          () => {
+              const mocked = {
+                        config: {
+                          schema: schema.object({
+                            serverProp: schema.string({ defaultValue: 'serverProp default value' }),
+                          }),
+                        },
+                      };
+              return { ...mocked, default: mocked };
             },
-          }),
           { virtual: true }
         );
       }
@@ -1124,33 +1160,39 @@ describe('PluginsService', () => {
       version: 'version-2',
     });
 
-    jest.doMock(
+    vi.doMock(
       join(pluginA.path, 'server'),
-      () => ({
-        config: {
-          schema: schema.object({
-            enabled: schema.maybe(schema.boolean({ defaultValue: true })),
-          }),
+      () => {
+          const mocked = {
+                config: {
+                  schema: schema.object({
+                    enabled: schema.maybe(schema.boolean({ defaultValue: true })),
+                  }),
+                },
+              };
+          return { ...mocked, default: mocked };
         },
-      }),
       { virtual: true }
     );
 
-    jest.doMock(
+    vi.doMock(
       join(pluginB.path, 'server'),
-      (): { config: PluginConfigDescriptor } => ({
-        config: {
-          schema: schema.object({
-            enabled: schema.maybe(schema.boolean({ defaultValue: true })),
-            renamed: schema.string(), // Mandatory string to make sure that the field is actually renamed by deprecations
-          }),
-          deprecations: ({ renameFromRoot }) => [
-            renameFromRoot('plugin-1-deprecations.toBeRenamed', 'plugin-2-deprecations.renamed', {
-              level: 'critical',
-            }),
-          ],
+      () => {
+          const mocked = {
+                config: {
+                  schema: schema.object({
+                    enabled: schema.maybe(schema.boolean({ defaultValue: true })),
+                    renamed: schema.string(), // Mandatory string to make sure that the field is actually renamed by deprecations
+                  }),
+                  deprecations: ({ renameFromRoot }) => [
+                    renameFromRoot('plugin-1-deprecations.toBeRenamed', 'plugin-2-deprecations.renamed', {
+                      level: 'critical',
+                    }),
+                  ],
+                },
+              };
+          return { ...mocked, default: mocked };
         },
-      }),
       { virtual: true }
     );
 
@@ -1201,15 +1243,18 @@ describe('PluginsService', () => {
       ];
 
       for (const plugin of [...prebootPlugins, ...standardPlugins]) {
-        jest.doMock(
+        vi.doMock(
           join(plugin.path, 'server'),
-          () => ({
-            config: {
-              schema: schema.object({
-                enabled: schema.maybe(schema.boolean({ defaultValue: true })),
-              }),
+          () => {
+              const mocked = {
+                        config: {
+                          schema: schema.object({
+                            enabled: schema.maybe(schema.boolean({ defaultValue: true })),
+                          }),
+                        },
+                      };
+              return { ...mocked, default: mocked };
             },
-          }),
           { virtual: true }
         );
       }

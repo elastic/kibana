@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ApiKeyType } from '../config';
 import { createApiKeyStrategy } from './create_api_key_strategy';
@@ -17,9 +19,9 @@ describe('createApiKeyStrategy', () => {
   const uiamAvailable = () => {
     const coreStart = coreMock.createStart();
     coreStart.security.authc.apiKeys.uiam = {
-      grant: jest.fn(),
-      invalidate: jest.fn(),
-      convert: jest.fn(),
+      grant: vi.fn(),
+      invalidate: vi.fn(),
+      convert: vi.fn(),
     } as never;
     return coreStart;
   };

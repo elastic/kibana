@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent } from '@testing-library/react';
@@ -130,7 +132,7 @@ describe('CertMonitors', () => {
     });
 
     it('threads the active space into the remote deep link', () => {
-      jest.spyOn(useKibanaSpaceModule, 'useKibanaSpace').mockReturnValue({
+      vi.spyOn(useKibanaSpaceModule, 'useKibanaSpace').mockReturnValue({
         space: { id: asSpaceId('team-a'), name: 'Team A', disabledFeatures: [] },
         loading: false,
         error: undefined,
@@ -169,7 +171,7 @@ describe('CertMonitors', () => {
     };
 
     it('threads ?spaceId= when the monitor lives in another space', () => {
-      jest.spyOn(useKibanaSpaceModule, 'useKibanaSpace').mockReturnValue({
+      vi.spyOn(useKibanaSpaceModule, 'useKibanaSpace').mockReturnValue({
         space: { id: asSpaceId('default'), name: 'Default', disabledFeatures: [] },
         loading: false,
         error: undefined,
@@ -185,7 +187,7 @@ describe('CertMonitors', () => {
     });
 
     it('omits ?spaceId= when the monitor is in the active space', () => {
-      jest.spyOn(useKibanaSpaceModule, 'useKibanaSpace').mockReturnValue({
+      vi.spyOn(useKibanaSpaceModule, 'useKibanaSpace').mockReturnValue({
         space: { id: asSpaceId('default'), name: 'Default', disabledFeatures: [] },
         loading: false,
         error: undefined,

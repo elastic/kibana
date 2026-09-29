@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import type { MultiSelectFilterOption } from './multi_select_filter';
@@ -92,7 +94,7 @@ describe('MultiSelectFilter', () => {
   });
 
   it('should call the onChange function with the updated options when an option is clicked', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const { getByText } = render(
       <MultiSelectFilter
         onChange={onChange}

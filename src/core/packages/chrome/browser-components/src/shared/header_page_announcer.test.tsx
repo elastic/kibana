@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { render, fireEvent, act } from '@testing-library/react';
@@ -20,8 +22,8 @@ import {
   resolveChromeHeaderAnnouncement,
 } from './resolve_chrome_header_announcement';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
 
   return {
     ...actual,
@@ -96,7 +98,7 @@ describe('HeaderPageAnnouncer', () => {
       </TestChromeProviders>
     );
     const skipLink = getByTestId('skipToMainButton');
-    skipLink.focus = jest.fn();
+    skipLink.focus = vi.fn();
     fireEvent.keyDown(window, { key: 'Tab' });
 
     expect(skipLink.focus).toHaveBeenCalledTimes(1);
@@ -119,7 +121,7 @@ describe('HeaderPageAnnouncer', () => {
 
     mainButton.focus();
 
-    skipLink.focus = jest.fn();
+    skipLink.focus = vi.fn();
     fireEvent.keyDown(window, { key: 'Tab' });
 
     expect(skipLink.focus).not.toHaveBeenCalled();
@@ -142,7 +144,7 @@ describe('HeaderPageAnnouncer', () => {
 
     mainButton.focus();
 
-    skipLink.focus = jest.fn();
+    skipLink.focus = vi.fn();
     fireEvent.keyDown(window, { key: 'Tab' });
 
     expect(skipLink.focus).not.toHaveBeenCalled();
@@ -165,7 +167,7 @@ describe('HeaderPageAnnouncer', () => {
 
     flyoutButton.focus();
 
-    skipLink.focus = jest.fn();
+    skipLink.focus = vi.fn();
     fireEvent.keyDown(window, { key: 'Tab' });
 
     expect(skipLink.focus).not.toHaveBeenCalled();
@@ -186,9 +188,9 @@ const createNavNode = (
 describe('resolveChromeHeaderAnnouncement', () => {
   it('normalizes string and editable titles', () => {
     expect(normalizeAppHeaderTitle('  Dashboards  ')).toBe('Dashboards');
-    expect(normalizeAppHeaderTitle({ text: '  Name  ', onSave: jest.fn() })).toBe('Name');
+    expect(normalizeAppHeaderTitle({ text: '  Name  ', onSave: vi.fn() })).toBe('Name');
     expect(
-      normalizeAppHeaderTitle({ text: '  ', placeholder: '  Untitled  ', onSave: jest.fn() })
+      normalizeAppHeaderTitle({ text: '  ', placeholder: '  Untitled  ', onSave: vi.fn() })
     ).toBe('Untitled');
     expect(normalizeAppHeaderTitle('   ')).toBeUndefined();
   });
@@ -248,7 +250,7 @@ describe('resolveChromeHeaderAnnouncement', () => {
 describe('ChromeHeaderPageAnnouncer', () => {
   const flushAnnouncement = () => {
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
   };
 
@@ -287,11 +289,11 @@ describe('ChromeHeaderPageAnnouncer', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('lets an inline title win over registered, document, and navigation titles', () => {
@@ -360,7 +362,7 @@ describe('ChromeHeaderPageAnnouncer', () => {
     const inline = chrome.inlineAppHeader.register({
       text: 'Named dashboard',
       placeholder: 'Untitled dashboard',
-      onSave: jest.fn(),
+      onSave: vi.fn(),
     });
 
     const { getByLabelText } = renderAnnouncer();
@@ -369,7 +371,7 @@ describe('ChromeHeaderPageAnnouncer', () => {
     expect(announcer).toHaveTextContent('Named dashboard');
 
     act(() => {
-      inline.update({ text: '  ', placeholder: 'Untitled dashboard', onSave: jest.fn() });
+      inline.update({ text: '  ', placeholder: 'Untitled dashboard', onSave: vi.fn() });
     });
     flushAnnouncement();
 
@@ -499,7 +501,7 @@ describe('ChromeHeaderPageAnnouncer', () => {
     const { currentLocation$, renderAnnouncer } = createHarness();
     const { getByTestId } = renderAnnouncer();
     const skipLink = getByTestId('skipToMainButton');
-    skipLink.focus = jest.fn();
+    skipLink.focus = vi.fn();
 
     act(() => {
       currentLocation$.next('/b');
@@ -514,10 +516,10 @@ describe('ChromeHeaderPageAnnouncer', () => {
     const inline = chrome.inlineAppHeader.register('First');
     const { getByTestId } = renderAnnouncer();
     const skipLink = getByTestId('skipToMainButton');
-    skipLink.focus = jest.fn();
+    skipLink.focus = vi.fn();
 
     fireEvent.mouseDown(window);
-    skipLink.focus = jest.fn();
+    skipLink.focus = vi.fn();
 
     act(() => {
       inline.update('Second');

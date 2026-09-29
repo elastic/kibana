@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -17,25 +19,34 @@ import {
 } from '../../../hooks/use_conversation';
 import { EmbeddableConversationTitle } from './embeddable_conversation_title';
 
-jest.mock('../../../hooks/use_conversation', () => ({
-  useConversationTitle: jest.fn(),
-  useHasPersistedConversation: jest.fn(),
-  useConversationPermissions: jest.fn(),
-  useConversationReadOnly: jest.fn(),
-}));
+vi.mock('../../../hooks/use_conversation', () => {
+      const mocked = {
+      useConversationTitle: vi.fn(),
+      useHasPersistedConversation: vi.fn(),
+      useConversationPermissions: vi.fn(),
+      useConversationReadOnly: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../rename_conversation_modal', () => ({
-  RenameConversationModal: () => null,
-}));
+vi.mock('../rename_conversation_modal', () => {
+      const mocked = {
+      RenameConversationModal: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../delete_conversation_modal', () => ({
-  DeleteConversationModal: () => null,
-}));
+vi.mock('../delete_conversation_modal', () => {
+      const mocked = {
+      DeleteConversationModal: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseConversationTitle = jest.mocked(useConversationTitle);
-const mockUseHasPersistedConversation = jest.mocked(useHasPersistedConversation);
-const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
-const mockUseConversationReadOnly = jest.mocked(useConversationReadOnly);
+const mockUseConversationTitle = vi.mocked(useConversationTitle);
+const mockUseHasPersistedConversation = vi.mocked(useHasPersistedConversation);
+const mockUseConversationPermissions = vi.mocked(useConversationPermissions);
+const mockUseConversationReadOnly = vi.mocked(useConversationReadOnly);
 
 const renderTitle = ({
   permissions,
@@ -66,7 +77,7 @@ const openTitleMenu = () =>
 
 describe('EmbeddableConversationTitle', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('offers rename and delete when both are permitted', () => {

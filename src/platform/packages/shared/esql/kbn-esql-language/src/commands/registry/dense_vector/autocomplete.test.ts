@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import {
   mockContext,
   lookupIndexFields,
@@ -70,9 +73,9 @@ describe('DENSE_VECTOR Autocomplete', () => {
   let mockCallbacks: ICommandCallbacks;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCallbacks = getMockCallbacks();
-    (mockCallbacks.getColumnsForQuery as jest.Mock).mockResolvedValue([...lookupIndexFields]);
+    (mockCallbacks.getColumnsForQuery as Mock).mockResolvedValue([...lookupIndexFields]);
   });
 
   describe('field list', () => {
@@ -88,7 +91,7 @@ describe('DENSE_VECTOR Autocomplete', () => {
     });
 
     test('suggests a target column name, to open the `target = field` form', async () => {
-      (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
+      (mockCallbacks.getSuggestedUserDefinedColumnName as Mock).mockReturnValue('col0');
 
       await expectDenseVectorSuggestions(
         'from a | dense_vector ',
@@ -106,7 +109,7 @@ describe('DENSE_VECTOR Autocomplete', () => {
     });
 
     test('does not suggest a target assignment after a comma, where the grammar rejects it', async () => {
-      (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
+      (mockCallbacks.getSuggestedUserDefinedColumnName as Mock).mockReturnValue('col0');
 
       await expectDenseVectorSuggestions(
         'from a | dense_vector textField, ',
@@ -146,7 +149,7 @@ describe('DENSE_VECTOR Autocomplete', () => {
 
   describe('target = field form', () => {
     test('suggests fields, but no further target, inside the assignment', async () => {
-      (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
+      (mockCallbacks.getSuggestedUserDefinedColumnName as Mock).mockReturnValue('col0');
 
       await expectDenseVectorSuggestions(
         'from a | dense_vector vec = ',
@@ -239,7 +242,7 @@ describe('DENSE_VECTOR Autocomplete', () => {
     });
 
     test('does not suggest a target assignment in the ON list', async () => {
-      (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
+      (mockCallbacks.getSuggestedUserDefinedColumnName as Mock).mockReturnValue('col0');
 
       await expectDenseVectorSuggestions(
         'from a | dense_vector suffix = "_dv" ON ',

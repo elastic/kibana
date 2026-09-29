@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import type { TypesStart, BaseVisType } from '../../vis_types';
@@ -94,13 +96,13 @@ describe('GroupSelection', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
       value: {
-        assign: jest.fn(),
+        assign: vi.fn(),
       },
     });
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderGroupSelectionComponent = (overrideProps?: Partial<GroupSelectionProps>) => {
@@ -108,11 +110,11 @@ describe('GroupSelection', () => {
       <I18nProvider>
         <GroupSelection
           tab="recommended"
-          setTab={jest.fn()}
+          setTab={vi.fn()}
           visTypesRegistry={visTypesRegistry(_visTypes)}
           docLinks={docLinks as DocLinksStart}
-          showMainDialog={jest.fn()}
-          onVisTypeSelected={jest.fn()}
+          showMainDialog={vi.fn()}
+          onVisTypeSelected={vi.fn()}
           {...overrideProps}
         />
       </I18nProvider>
@@ -152,7 +154,7 @@ describe('GroupSelection', () => {
   });
 
   it('should call the showMainDialog if the aggBased group card is clicked', async () => {
-    const showMainDialog = jest.fn();
+    const showMainDialog = vi.fn();
     const aggBasedVisType = {
       name: 'visWithSearch',
       title: 'Vis with search',

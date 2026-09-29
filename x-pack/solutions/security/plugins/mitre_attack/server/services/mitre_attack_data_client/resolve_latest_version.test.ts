@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { getMockMitreTactic } from '../../mocks/mitre_entities.mock';
@@ -21,7 +23,7 @@ describe('resolveLatestVersion', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the framework_version of the first result when documents exist', async () => {

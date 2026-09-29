@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createActionsColumn } from './actions';
 
-const mockInstallDashboard = jest.fn();
+const mockInstallDashboard = vi.fn();
 
 describe('createActionsColumn', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the correct column definition', () => {

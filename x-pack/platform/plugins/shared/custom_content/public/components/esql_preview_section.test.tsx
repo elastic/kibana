@@ -5,40 +5,52 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@kbn/esql/public', () => ({
-  ESQLLangEditor: () => null,
-}));
+vi.mock('@kbn/esql/public', () => {
+      const mocked = {
+      ESQLLangEditor: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLTimeField: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getESQLTimeField: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../services', () => ({
-  getServices: () => ({ core: { http: {} } }),
-}));
+vi.mock('../services', () => {
+      const mocked = {
+      getServices: () => ({ core: { http: {} } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { getESQLTimeField } from '@kbn/esql-utils';
 import { EsqlPreviewSection } from './esql_preview_section';
 import type { EsqlDataResult } from '@kbn/custom-content-renderer';
 
-const mockGetESQLTimeField = getESQLTimeField as jest.MockedFunction<typeof getESQLTimeField>;
+const mockGetESQLTimeField = getESQLTimeField as MockedFunction<typeof getESQLTimeField>;
 
 const defaultProps = {
   esqlQuery: '',
-  onEsqlQueryChange: jest.fn(),
+  onEsqlQueryChange: vi.fn(),
   isDataLoading: false,
   esqlData: null,
   esqlDataError: null,
-  onFetchData: jest.fn(),
+  onFetchData: vi.fn(),
 };
 
 describe('EsqlPreviewSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetESQLTimeField.mockResolvedValue(undefined);
   });
 

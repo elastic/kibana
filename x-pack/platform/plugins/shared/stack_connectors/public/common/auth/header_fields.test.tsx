@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
@@ -13,10 +15,10 @@ import userEvent from '@testing-library/user-event';
 import { HeaderFields } from './header_fields';
 
 describe('HeaderFields', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders one default header row', async () => {

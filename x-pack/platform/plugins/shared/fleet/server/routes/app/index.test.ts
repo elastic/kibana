@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { FleetRequestHandlerContext } from '../../types';
@@ -18,13 +21,16 @@ import {
   getCheckPermissionsHandler,
 } from '.';
 
-jest.mock('../../services', () => ({
-  appContextService: {
-    getSecurityLicense: jest.fn().mockReturnValue({ isEnabled: jest.fn().mockReturnValue(false) }),
-    getCloud: jest.fn().mockReturnValue({ isServerlessEnabled: false } as any),
-    getLogger: jest.fn().mockReturnValue({ debug: jest.fn(), error: jest.fn() } as any),
-  },
-}));
+vi.mock('../../services', () => {
+      const mocked = {
+      appContextService: {
+        getSecurityLicense: vi.fn().mockReturnValue({ isEnabled: vi.fn().mockReturnValue(false) }),
+        getCloud: vi.fn().mockReturnValue({ isServerlessEnabled: false } as any),
+        getLogger: vi.fn().mockReturnValue({ debug: vi.fn(), error: vi.fn() } as any),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;
@@ -51,7 +57,7 @@ describe('schema validation', () => {
 
   it('generate service token should return valid response', async () => {
     (
-      (await context.core).elasticsearch.client.asCurrentUser.transport.request as jest.Mock
+      (await context.core).elasticsearch.client.asCurrentUser.transport.request as Mock
     ).mockResolvedValue({
       created: true,
       token: {

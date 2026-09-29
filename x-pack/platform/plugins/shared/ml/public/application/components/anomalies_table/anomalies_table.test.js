@@ -5,26 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import mockAnomaliesTableData from '../../../../common/__mocks__/mock_anomalies_table_data.json';
 import { getColumns } from './anomalies_table_columns';
 
-jest.mock('../../capabilities/check_capabilities', () => ({
-  checkPermission: () => false,
-}));
-jest.mock('../../license', () => ({
-  hasLicenseExpired: () => false,
-}));
-jest.mock('../../capabilities/get_capabilities', () => ({
-  getCapabilities: () => {},
-}));
-jest.mock('./links_menu', () => () => <div id="mocLinkCom">mocked link component</div>);
-jest.mock('./description_cell', () => () => (
+vi.mock('../../capabilities/check_capabilities', () => {
+      const mocked = {
+      checkPermission: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../license', () => {
+      const mocked = {
+      hasLicenseExpired: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../capabilities/get_capabilities', () => {
+      const mocked = {
+      getCapabilities: () => {},
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./links_menu', () => () => <div id="mocLinkCom">mocked link component</div>);
+vi.mock('./description_cell', () => () => (
   <div id="mockDescriptorCom">mocked description component</div>
 ));
-jest.mock('./detector_cell', () => () => <div id="mocDetectorCom">mocked detector component</div>);
-jest.mock('../entity_cell', () => () => <div id="mocEntityCom">mocked entity component</div>);
-jest.mock('./influencers_cell', () => () => (
+vi.mock('./detector_cell', () => () => <div id="mocDetectorCom">mocked detector component</div>);
+vi.mock('../entity_cell', () => () => <div id="mocEntityCom">mocked entity component</div>);
+vi.mock('./influencers_cell', () => () => (
   <div id="mocInfluencerCom">mocked influencer component</div>
 ));
 
@@ -38,11 +49,11 @@ const columnData = {
   examplesByJobId: mockAnomaliesTableData.default.examplesByJobId,
   isAggregatedData: true,
   interval: mockAnomaliesTableData.default.interval,
-  timefilter: jest.fn(),
+  timefilter: vi.fn(),
   showViewSeriesLink: mockAnomaliesTableData.default.showViewSeriesLink,
   showRuleEditorFlyout: false,
   itemIdToExpandedRowMap: false,
-  toggleRow: jest.fn(),
+  toggleRow: vi.fn(),
   filter: undefined,
 };
 

@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { EditFilterListToolbar } from './toolbar';
 
 describe('EditFilterListToolbar', () => {
-  const onSearchChange = jest.fn(() => {});
-  const addItems = jest.fn(() => {});
-  const deleteSelectedItems = jest.fn(() => {});
+  const onSearchChange = vi.fn(() => {});
+  const addItems = vi.fn(() => {});
+  const deleteSelectedItems = vi.fn(() => {});
 
   const requiredProps = {
     onSearchChange,

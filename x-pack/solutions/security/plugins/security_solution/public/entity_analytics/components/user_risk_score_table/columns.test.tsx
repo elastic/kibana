@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { UserRiskScoreColumns } from '.';
@@ -13,8 +15,8 @@ import { RiskScoreFields } from '../../../../common/search_strategy';
 
 describe('getUserRiskScoreColumns', () => {
   const defaultProps = {
-    dispatchSeverityUpdate: jest.fn(),
-    openUserFlyout: jest.fn(),
+    dispatchSeverityUpdate: vi.fn(),
+    openUserFlyout: vi.fn(),
   };
 
   test('should have expected fields', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,7 +14,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { ComponentTemplateListItem } from '../../../../../common';
 import { StepComponents } from './step_components';
 
-const mockComponentTemplatesSelectorPropsSpy = jest.fn();
+const mockComponentTemplatesSelectorPropsSpy = vi.fn();
 
 interface ComponentTemplatesSelectorMockProps {
   defaultValue?: string[];
@@ -20,7 +22,7 @@ interface ComponentTemplatesSelectorMockProps {
   onChange: (components: string[]) => void;
 }
 
-jest.mock('../../component_templates', () => ({
+vi.mock('../../component_templates', () => ({
   __esModule: true,
   ComponentTemplatesSelector: (props: ComponentTemplatesSelectorMockProps) => {
     mockComponentTemplatesSelectorPropsSpy(props);
@@ -59,7 +61,7 @@ jest.mock('../../component_templates', () => ({
 
 describe('StepComponents', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockComponentTemplatesSelectorPropsSpy.mockClear();
   });
 
@@ -67,7 +69,7 @@ describe('StepComponents', () => {
     it('SHOULD show the header', () => {
       render(
         <I18nProvider>
-          <StepComponents esDocsBase="https://docs" onChange={jest.fn()} defaultValue={[]} />
+          <StepComponents esDocsBase="https://docs" onChange={vi.fn()} defaultValue={[]} />
         </I18nProvider>
       );
 
@@ -81,7 +83,7 @@ describe('StepComponents', () => {
     it('SHOULD hide the header', () => {
       render(
         <I18nProvider>
-          <StepComponents esDocsBase="https://docs" onChange={jest.fn()} defaultValue={[]} />
+          <StepComponents esDocsBase="https://docs" onChange={vi.fn()} defaultValue={[]} />
         </I18nProvider>
       );
 
@@ -95,7 +97,7 @@ describe('StepComponents', () => {
     it('SHOULD show the header', () => {
       render(
         <I18nProvider>
-          <StepComponents esDocsBase="https://docs" onChange={jest.fn()} defaultValue={[]} />
+          <StepComponents esDocsBase="https://docs" onChange={vi.fn()} defaultValue={[]} />
         </I18nProvider>
       );
 
@@ -107,7 +109,7 @@ describe('StepComponents', () => {
 
   describe('WHEN selection is empty', () => {
     it('SHOULD emit wizard content with undefined data', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       render(
         <I18nProvider>
           <StepComponents esDocsBase="https://docs" onChange={onChange} defaultValue={[]} />
@@ -124,7 +126,7 @@ describe('StepComponents', () => {
 
   describe('WHEN components are selected', () => {
     it('SHOULD emit wizard content with the selected component names', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       render(
         <I18nProvider>
           <StepComponents esDocsBase="https://docs" onChange={onChange} defaultValue={[]} />
@@ -145,7 +147,7 @@ describe('StepComponents', () => {
         <I18nProvider>
           <StepComponents
             esDocsBase="https://docs"
-            onChange={jest.fn()}
+            onChange={vi.fn()}
             defaultValue={['component_template@custom']}
           />
         </I18nProvider>

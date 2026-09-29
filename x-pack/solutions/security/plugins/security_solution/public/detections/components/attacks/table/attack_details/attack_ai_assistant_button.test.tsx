@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import {
@@ -20,25 +23,37 @@ import { useViewInAiAssistant } from '../../../../../attack_discovery/pages/resu
 import { NewAgentBuilderAttachment } from '../../../../../agent_builder/components/new_agent_builder_attachment';
 import type { AgentBuilderAddToChatTelemetry } from '../../../../../agent_builder/hooks/use_report_add_to_chat';
 
-jest.mock('../../../../../agent_builder/components/new_agent_builder_attachment', () => ({
-  NewAgentBuilderAttachment: jest.fn(() => (
-    <div data-test-subj="newAgentBuilderAttachment">{'NewAgentBuilderAttachment'}</div>
-  )),
-}));
+vi.mock('../../../../../agent_builder/components/new_agent_builder_attachment', () => {
+      const mocked = {
+      NewAgentBuilderAttachment: vi.fn(() => (
+        <div data-test-subj="newAgentBuilderAttachment">{'NewAgentBuilderAttachment'}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
-  useAgentBuilderAvailability: jest.fn(),
-}));
+vi.mock('../../../../../agent_builder/hooks/use_agent_builder_availability', () => {
+      const mocked = {
+      useAgentBuilderAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../attack_discovery/pages/results/use_attack_discovery_attachment', () => ({
-  useAttackDiscoveryAttachment: jest.fn(),
-}));
+vi.mock('../../../../../attack_discovery/pages/results/use_attack_discovery_attachment', () => {
+      const mocked = {
+      useAttackDiscoveryAttachment: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../../attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant',
-  () => ({
-    useViewInAiAssistant: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        useViewInAiAssistant: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 describe('AttackAiAssistantButton', () => {
@@ -62,11 +77,11 @@ describe('AttackAiAssistantButton', () => {
       </TestProviders>
     );
 
-  const mockShowAssistantOverlay = jest.fn();
+  const mockShowAssistantOverlay = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useViewInAiAssistant as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useViewInAiAssistant as Mock).mockReturnValue({
       disabled: false,
       showAssistantOverlay: mockShowAssistantOverlay,
       isAssistantVisible: true,
@@ -74,10 +89,10 @@ describe('AttackAiAssistantButton', () => {
   });
 
   it('renders NewAgentBuilderAttachment when isAgentChatExperienceEnabled is true', () => {
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: true,
     });
-    (useAttackDiscoveryAttachment as jest.Mock).mockReturnValue(jest.fn());
+    (useAttackDiscoveryAttachment as Mock).mockReturnValue(vi.fn());
 
     renderComponent();
 
@@ -95,10 +110,10 @@ describe('AttackAiAssistantButton', () => {
   });
 
   it('renders AiButton when isAgentChatExperienceEnabled is false', () => {
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: false,
     });
-    (useAttackDiscoveryAttachment as jest.Mock).mockReturnValue(jest.fn());
+    (useAttackDiscoveryAttachment as Mock).mockReturnValue(vi.fn());
 
     renderComponent();
 
@@ -108,11 +123,11 @@ describe('AttackAiAssistantButton', () => {
   });
 
   it('disables the AiButton when useViewInAiAssistant returns disabled', () => {
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: false,
     });
-    (useAttackDiscoveryAttachment as jest.Mock).mockReturnValue(jest.fn());
-    (useViewInAiAssistant as jest.Mock).mockReturnValue({
+    (useAttackDiscoveryAttachment as Mock).mockReturnValue(vi.fn());
+    (useViewInAiAssistant as Mock).mockReturnValue({
       disabled: true,
       showAssistantOverlay: mockShowAssistantOverlay,
       isAssistantVisible: true,
@@ -124,11 +139,11 @@ describe('AttackAiAssistantButton', () => {
   });
 
   it('does not render when isAssistantVisible is false', () => {
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: false,
     });
-    (useAttackDiscoveryAttachment as jest.Mock).mockReturnValue(jest.fn());
-    (useViewInAiAssistant as jest.Mock).mockReturnValue({
+    (useAttackDiscoveryAttachment as Mock).mockReturnValue(vi.fn());
+    (useViewInAiAssistant as Mock).mockReturnValue({
       disabled: false,
       showAssistantOverlay: mockShowAssistantOverlay,
       isAssistantVisible: false,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, renderHook } from '@testing-library/react';
 import type { UseFieldTableColumnsProps } from '.';
@@ -14,9 +16,9 @@ import { TestProviders } from '../../../../common/mock';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { BrowserFieldItem } from '@kbn/response-ops-alerts-fields-browser/types';
 
-const mockOnHide = jest.fn();
-const mockOpenFieldEditor = jest.fn();
-const mockOpenDeleteFieldModal = jest.fn();
+const mockOnHide = vi.fn();
+const mockOpenFieldEditor = vi.fn();
+const mockOpenDeleteFieldModal = vi.fn();
 
 // helper function to render the hook
 const renderUseFieldTableColumns = (props: Partial<UseFieldTableColumnsProps> = {}) =>
@@ -42,7 +44,7 @@ const fieldItem: BrowserFieldItem = {
 
 describe('useFieldTableColumns', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render all columns when user has edit permissions', async () => {

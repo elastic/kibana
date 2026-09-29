@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues } from '../../../../../__mocks__/kea_logic';
 import { mockPipelineState } from '../../../../__mocks__/pipeline.mock';
 import { indices } from '../../../../__mocks__/search_indices.mock';
 
-jest.mock('../../components/curl_request/curl_request', () => ({
-  CurlRequest: () => <div data-test-subj="curlRequest" />,
-}));
+vi.mock('../../components/curl_request/curl_request', () => {
+      const mocked = {
+      CurlRequest: () => <div data-test-subj="curlRequest" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 
@@ -28,7 +33,7 @@ describe('DefaultPipelineItem', () => {
 
   it('renders default pipeline item for ingestion indices', () => {
     const index = indices[1];
-    const mockOpenModal = jest.fn();
+    const mockOpenModal = vi.fn();
     const ingestionMethod = 'connector';
 
     renderWithKibanaRenderContext(
@@ -57,7 +62,7 @@ describe('DefaultPipelineItem', () => {
 
   it('renders default pipeline item for api indices', () => {
     const index = indices[0];
-    const mockOpenModal = jest.fn();
+    const mockOpenModal = vi.fn();
     const ingestionMethod = 'api';
 
     renderWithKibanaRenderContext(

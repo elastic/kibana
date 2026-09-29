@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { Zoom } from './zoom';
@@ -22,16 +24,16 @@ interface ZoomPaginatedResponse<T = unknown> {
 
 describe('Zoom', () => {
   const mockClient = {
-    get: jest.fn(),
+    get: vi.fn(),
   };
 
   const mockContext = {
     client: mockClient,
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('auth', () => {

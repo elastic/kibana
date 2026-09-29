@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 // Mock the dependencies before imports
-jest.mock('../../management/links', () => ({
-  getManagementFilteredLinks: jest.fn(),
-}));
+vi.mock('../../management/links', () => {
+      const mocked = {
+      getManagementFilteredLinks: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { getFilteredLinks } from './app_links';
 import type { LinkItem } from '../../common/links/types';
@@ -20,7 +26,7 @@ import { of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 
-const mockGetManagementFilteredLinks = getManagementFilteredLinks as jest.MockedFunction<
+const mockGetManagementFilteredLinks = getManagementFilteredLinks as MockedFunction<
   typeof getManagementFilteredLinks
 >;
 
@@ -43,9 +49,9 @@ describe('getFilteredLinks', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Mock uiSettings.get$ to return an observable that emits immediately
-    mockCore.uiSettings.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
+    mockCore.uiSettings.get$ = vi.fn().mockReturnValue(of(AIChatExperience.Classic));
   });
 
   it('returns filtered links including launchpad', async () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { rollDailyData } from './daily';
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
@@ -15,7 +17,7 @@ describe('rollDailyData', () => {
   const logger = loggingSystemMock.createLogger();
   const mockSavedObjectsClient = savedObjectsRepositoryMock.create();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns false if no savedObjectsClient', async () => {
     await rollDailyData(logger, undefined);

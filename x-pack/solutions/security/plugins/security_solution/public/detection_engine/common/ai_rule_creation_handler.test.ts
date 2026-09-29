@@ -5,23 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Subject } from 'rxjs';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
 import { createAiRuleCreationHandler } from './ai_rule_creation_handler';
 import type { AiRuleCreationService } from './ai_rule_creation_store';
 
-jest.mock('../rule_management/api/api', () => ({
-  createRule: jest.fn(),
-  updateRule: jest.fn(),
-}));
-jest.mock('./transforms', () => ({
-  transformOutput: jest.fn((r) => r),
-}));
+vi.mock('../rule_management/api/api', () => {
+      const mocked = {
+      createRule: vi.fn(),
+      updateRule: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./transforms', () => {
+      const mocked = {
+      transformOutput: vi.fn((r) => r),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { createRule, updateRule } from '../rule_management/api/api';
 
-const mockCreateRule = createRule as jest.Mock;
-const mockUpdateRule = updateRule as jest.Mock;
+const mockCreateRule = createRule as Mock;
+const mockUpdateRule = updateRule as Mock;
 
 const makeRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
   ({
@@ -46,17 +55,17 @@ const makeService = (): AiRuleCreationService => {
   return {
     saveRuleRequest$: subject.asObservable(),
     _subject: subject,
-    clearSaving: jest.fn(),
-    deactivateFormSync: jest.fn(),
-    getSession: jest.fn().mockReturnValue(null),
+    clearSaving: vi.fn(),
+    deactivateFormSync: vi.fn(),
+    getSession: vi.fn().mockReturnValue(null),
   } as unknown as AiRuleCreationService & { _subject: typeof subject };
 };
 
 const makeNotifications = () => ({
   toasts: {
-    addSuccess: jest.fn(),
-    addDanger: jest.fn(),
-    addWarning: jest.fn(),
+    addSuccess: vi.fn(),
+    addDanger: vi.fn(),
+    addWarning: vi.fn(),
   },
 });
 
@@ -66,15 +75,15 @@ const makeAgentBuilder = (convId?: string) => {
     events: {
       ui: {
         activeConversation$: {
-          subscribe: jest.fn((cb: (v: { id: string | undefined } | undefined) => void) => {
+          subscribe: vi.fn((cb: (v: { id: string | undefined } | undefined) => void) => {
             emitConversation = cb;
             if (convId) cb({ id: convId });
-            return { unsubscribe: jest.fn() };
+            return { unsubscribe: vi.fn() };
           }),
         },
       },
     },
-    addAttachment: jest.fn(),
+    addAttachment: vi.fn(),
     emitConversation: (v: { id: string | undefined } | undefined) => emitConversation(v),
   };
 };
@@ -86,7 +95,7 @@ const emit = (service: AiRuleCreationService & { _subject: Subject<unknown> }, p
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
 describe('createAiRuleCreationHandler', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('validation failure', () => {
     it('calls clearSaving and shows danger toast without calling the API', async () => {
@@ -159,7 +168,7 @@ describe('createAiRuleCreationHandler', () => {
     it('calls updateOrigin with the saved rule id', async () => {
       mockCreateRule.mockResolvedValue(savedRule);
       const service = makeService();
-      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+      const updateOrigin = vi.fn().mockResolvedValue(undefined);
 
       createAiRuleCreationHandler({
         aiRuleCreation: service,
@@ -177,7 +186,7 @@ describe('createAiRuleCreationHandler', () => {
       mockCreateRule.mockResolvedValue(savedRule);
       const service = makeService();
       let resolveOrigin!: () => void;
-      const updateOrigin = jest.fn(() => new Promise<void>((resolve) => (resolveOrigin = resolve)));
+      const updateOrigin = vi.fn(() => new Promise<void>((resolve) => (resolveOrigin = resolve)));
 
       createAiRuleCreationHandler({
         aiRuleCreation: service,
@@ -201,7 +210,7 @@ describe('createAiRuleCreationHandler', () => {
       mockCreateRule.mockResolvedValue(savedRule);
       const service = makeService();
       const notifications = makeNotifications();
-      const updateOrigin = jest.fn().mockRejectedValue(new Error('link failed'));
+      const updateOrigin = vi.fn().mockRejectedValue(new Error('link failed'));
 
       createAiRuleCreationHandler({
         aiRuleCreation: service,
@@ -224,7 +233,7 @@ describe('createAiRuleCreationHandler', () => {
       );
       const service = makeService();
       const agentBuilder = makeAgentBuilder('conv-1');
-      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+      const updateOrigin = vi.fn().mockResolvedValue(undefined);
 
       createAiRuleCreationHandler({
         aiRuleCreation: service,
@@ -246,7 +255,7 @@ describe('createAiRuleCreationHandler', () => {
     it('does not call updateOrigin when convId is absent', async () => {
       mockCreateRule.mockResolvedValue(savedRule);
       const service = makeService();
-      const updateOrigin = jest.fn();
+      const updateOrigin = vi.fn();
 
       createAiRuleCreationHandler({
         aiRuleCreation: service,
@@ -265,7 +274,7 @@ describe('createAiRuleCreationHandler', () => {
     it('calls updateRule and does not call updateOrigin', async () => {
       mockUpdateRule.mockResolvedValue(savedRule);
       const service = makeService();
-      const updateOrigin = jest.fn();
+      const updateOrigin = vi.fn();
 
       createAiRuleCreationHandler({
         aiRuleCreation: service,

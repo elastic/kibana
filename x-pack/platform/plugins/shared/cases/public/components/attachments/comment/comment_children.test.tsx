@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -15,8 +17,8 @@ import { renderWithTestingProviders } from '../../../common/mock';
 import { getMockCommentRenderingContext } from '../../user_actions/mock';
 import type { CommentChildrenProps } from './comment_children';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/navigation/hooks');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/navigation/hooks');
 
 const defaultProps: CommentChildrenProps = {
   commentId: 'comment-1',
@@ -44,7 +46,7 @@ const renderComponent = (
 
 describe('CommentChildren', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the comment content', () => {

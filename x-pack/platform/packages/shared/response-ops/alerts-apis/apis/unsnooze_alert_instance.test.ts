@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { unsnoozeAlertInstance } from './unsnooze_alert_instance';
 
@@ -12,7 +14,7 @@ const http = httpServiceMock.createStartContract();
 
 describe('unsnoozeAlertInstance', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('calls the unsnooze API with correct URL', async () => {

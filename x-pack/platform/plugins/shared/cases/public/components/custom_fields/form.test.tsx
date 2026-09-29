@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent, waitFor, act } from '@testing-library/react';
 
@@ -18,7 +20,7 @@ import type { FormState } from '../configure_cases/flyout';
 import { renderWithTestingProviders } from '../../common/mock';
 
 describe('CustomFieldsForm ', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   const props = {
     onChange,
@@ -26,7 +28,7 @@ describe('CustomFieldsForm ', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

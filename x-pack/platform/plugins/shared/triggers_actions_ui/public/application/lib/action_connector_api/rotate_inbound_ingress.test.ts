@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { rotateInboundIngress } from './rotate_inbound_ingress';
 
 const http = httpServiceMock.createStartContract();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('rotateInboundIngress', () => {
   it('posts the internal rotate path with an encoded id and returns ingestToken', async () => {

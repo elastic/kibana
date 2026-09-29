@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
@@ -56,7 +59,7 @@ describe('isLicenseValid', () => {
 
 describe('AvailabilityUpdater', () => {
   let license$: Subject<ILicense>;
-  let disableAllWorkflows: jest.Mock;
+  let disableAllWorkflows: Mock;
   let mockLogger: ReturnType<typeof loggerMock.create>;
 
   const baseConfig = {
@@ -67,7 +70,7 @@ describe('AvailabilityUpdater', () => {
 
   beforeEach(() => {
     license$ = new Subject<ILicense>();
-    disableAllWorkflows = jest.fn().mockResolvedValue(emptyDisableResult());
+    disableAllWorkflows = vi.fn().mockResolvedValue(emptyDisableResult());
     mockLogger = loggerMock.create();
   });
 

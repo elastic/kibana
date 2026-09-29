@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { AdditionalToolbarControls } from './additional_toolbar_controls';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -16,19 +19,19 @@ import { createTelemetryServiceMock } from '../../../common/lib/telemetry/teleme
 import { PageScope } from '../../../data_view_manager/constants';
 import * as useGetGroupSelectorHook from '@kbn/grouping/src/hooks/use_get_group_selector';
 
-const mockDispatch = jest.fn();
+const mockDispatch = vi.fn();
 const mockedUseKibana = mockUseKibana();
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
   };
 });
-jest.mock('../../../common/hooks/use_selector');
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
+vi.mock('../../../common/hooks/use_selector');
+vi.mock('../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../common/lib/kibana'));
 
   return {
     ...original,
@@ -56,16 +59,16 @@ const groups = {
 
 describe('AdditionalToolbarControls', () => {
   beforeEach(() => {
-    (useDeepEqualSelector as jest.Mock).mockImplementation(() => groups[tableId]);
-    (useShallowEqualSelector as jest.Mock).mockReturnValue({
+    (useDeepEqualSelector as Mock).mockImplementation(() => groups[tableId]);
+    (useShallowEqualSelector as Mock).mockReturnValue({
       showOnlyThreatIndicatorAlerts: false,
       showBuildBlockAlerts: false,
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    (useDeepEqualSelector as jest.Mock).mockClear();
+    (useDeepEqualSelector as Mock).mockClear();
   });
 
   test('Should render the group selector component and allow the user to select a grouping field', async () => {
@@ -97,12 +100,12 @@ describe('AdditionalToolbarControls', () => {
       hideOptionsTitle: true,
       popoverButtonLabel: 'Custom Label',
     };
-    (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
+    (useDeepEqualSelector as Mock).mockImplementation(() => ({
       ...groups[tableId],
       settings,
     }));
 
-    const useGetGroupSelectorStatelessSpy = jest.spyOn(
+    const useGetGroupSelectorStatelessSpy = vi.spyOn(
       useGetGroupSelectorHook,
       'useGetGroupSelectorStateless'
     );

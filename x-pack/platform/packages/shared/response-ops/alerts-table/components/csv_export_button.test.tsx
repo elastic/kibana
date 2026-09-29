@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import 'moment-timezone';
@@ -18,31 +20,40 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CsvExportButton } from './csv_export_button';
 import { testQueryClientConfig } from '../utils/test';
 
-jest.mock('../contexts/alerts_table_context', () => {
-  const actual = jest.requireActual('../contexts/alerts_table_context');
+vi.mock('../contexts/alerts_table_context', async () => {
+  const actual = (await vi.importActual('../contexts/alerts_table_context'));
   return {
     ...actual,
-    useAlertsTableContext: jest.fn(),
+    useAlertsTableContext: vi.fn(),
   };
 });
 
-const { useAlertsTableContext } = jest.requireMock('../contexts/alerts_table_context');
+const { useAlertsTableContext } = (await vi.importMock('../contexts/alerts_table_context'));
 
-jest.mock('@kbn/alerts-ui-shared', () => ({
-  useFetchAlertsIndexNamesQuery: jest.fn().mockReturnValue({
-    data: ['.alerts-security.alerts-default'],
-    isLoading: false,
-    isError: false,
-  }),
-}));
+vi.mock('@kbn/alerts-ui-shared', () => {
+      const mocked = {
+      useFetchAlertsIndexNamesQuery: vi.fn().mockReturnValue({
+        data: ['.alerts-security.alerts-default'],
+        isLoading: false,
+        isError: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: jest.fn((node) => node),
-}));
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = {
+      toMountPoint: vi.fn((node) => node),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/rison', () => ({
-  encode: jest.fn((val) => JSON.stringify(val)),
-}));
+vi.mock('@kbn/rison', () => {
+      const mocked = {
+      encode: vi.fn((val) => JSON.stringify(val)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
@@ -56,7 +67,7 @@ describe('CsvExportButton', () => {
   const application = applicationServiceMock.createStartContract();
   const settings = {
     client: {
-      get: jest.fn().mockReturnValue('UTC'),
+      get: vi.fn().mockReturnValue('UTC'),
     },
   };
 
@@ -77,7 +88,7 @@ describe('CsvExportButton', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     application.capabilities = {
       ...application.capabilities,
@@ -130,8 +141,8 @@ describe('CsvExportButton', () => {
     expect(body.jobParams).toBeDefined();
   });
 
-  it('fetches alert index names via the query hook', () => {
-    const { useFetchAlertsIndexNamesQuery } = jest.requireMock('@kbn/alerts-ui-shared');
+  it('fetches alert index names via the query hook', async () => {
+    const { useFetchAlertsIndexNamesQuery } = (await vi.importMock('@kbn/alerts-ui-shared'));
     render(<CsvExportButton />, { wrapper });
 
     expect(useFetchAlertsIndexNamesQuery).toHaveBeenCalledWith({

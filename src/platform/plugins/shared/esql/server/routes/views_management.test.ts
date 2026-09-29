@@ -7,33 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedClass } from 'vitest';
+
 import type { IRouter, Logger, PluginInitializerContext } from '@kbn/core/server';
 import { EsqlService } from '@kbn/esql-server-utils';
 import { VIEWS_BULK_DELETE_ROUTE, VIEWS_ROUTE } from '@kbn/esql-types';
 import { registerGetViewsRoute } from './get_views';
 import { registerViewsManagementRoutes } from './views_management';
 
-jest.mock('@kbn/esql-server-utils');
+vi.mock('@kbn/esql-server-utils');
 
-const MockedEsqlService = EsqlService as jest.MockedClass<typeof EsqlService>;
+const MockedEsqlService = EsqlService as MockedClass<typeof EsqlService>;
 
 const createMocks = () => {
   const handlers = {
-    get: jest.fn(),
-    put: jest.fn(),
-    delete: jest.fn(),
-    post: jest.fn(),
+    get: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+    post: vi.fn(),
   };
   const router = {
-    get: jest.fn((_, handler) => handlers.get.mockImplementation(handler)),
-    put: jest.fn((_, handler) => handlers.put.mockImplementation(handler)),
-    delete: jest.fn((_, handler) => handlers.delete.mockImplementation(handler)),
-    post: jest.fn((_, handler) => handlers.post.mockImplementation(handler)),
+    get: vi.fn((_, handler) => handlers.get.mockImplementation(handler)),
+    put: vi.fn((_, handler) => handlers.put.mockImplementation(handler)),
+    delete: vi.fn((_, handler) => handlers.delete.mockImplementation(handler)),
+    post: vi.fn((_, handler) => handlers.post.mockImplementation(handler)),
   };
   const esql = {
-    getView: jest.fn(),
-    putView: jest.fn(),
-    deleteView: jest.fn(),
+    getView: vi.fn(),
+    putView: vi.fn(),
+    deleteView: vi.fn(),
   };
   const asCurrentUser = { esql };
   const requestHandlerContext = {
@@ -42,12 +45,12 @@ const createMocks = () => {
     }),
   };
   const response = {
-    ok: jest.fn(({ body }) => ({ status: 200, body })),
-    notFound: jest.fn(({ body }) => ({ status: 404, body })),
-    customError: jest.fn(({ statusCode, body }) => ({ status: statusCode, body })),
+    ok: vi.fn(({ body }) => ({ status: 200, body })),
+    notFound: vi.fn(({ body }) => ({ status: 404, body })),
+    customError: vi.fn(({ statusCode, body }) => ({ status: statusCode, body })),
   };
   const logger = {
-    error: jest.fn(),
+    error: vi.fn(),
   } as unknown as Logger;
   const initializerContext = {
     logger: { get: () => logger },
@@ -68,11 +71,11 @@ const createMocks = () => {
 
 describe('ES|QL views routes', () => {
   const service = {
-    getViews: jest.fn(),
+    getViews: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     MockedEsqlService.mockImplementation(() => service as unknown as EsqlService);
   });
 

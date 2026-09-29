@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-jest.mock('@kbn/shared-ux-page-kibana-template', () => {
-  const MockKibanaPageTemplate: any = jest.fn(({ children, solutionNav }: any) =>
+import { vi } from 'vitest';
+
+vi.mock('@kbn/shared-ux-page-kibana-template', () => {
+  const MockKibanaPageTemplate: any = vi.fn(({ children, solutionNav }: any) =>
     solutionNav?.footer ? [solutionNav.footer, children] : children
   );
-  MockKibanaPageTemplate.Section = jest.fn(({ children }: any) => children);
+  MockKibanaPageTemplate.Section = vi.fn(({ children }: any) => children);
   return { KibanaPageTemplate: MockKibanaPageTemplate };
 });
 
@@ -30,14 +32,14 @@ import {
 import type { PageTemplateProps } from './page_template';
 import { EnterpriseSearchPageTemplateWrapper } from './page_template';
 
-const MockKibanaPageTemplate = jest.mocked(KibanaPageTemplate);
+const MockKibanaPageTemplate = vi.mocked(KibanaPageTemplate);
 
 describe('EnterpriseSearchPageTemplateWrapper', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues({
       readOnlyMode: false,
-      notifications: { tours: { isEnabled: jest.fn(() => false) } },
+      notifications: { tours: { isEnabled: vi.fn(() => false) } },
     });
   });
 
@@ -141,7 +143,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
     it('renders a callout if in read-only mode', () => {
       setMockValues({
         readOnlyMode: true,
-        notifications: { tours: { isEnabled: jest.fn(() => false) } },
+        notifications: { tours: { isEnabled: vi.fn(() => false) } },
       });
       renderWithKibanaRenderContext(<EnterpriseSearchPageTemplateWrapper />);
 
@@ -151,7 +153,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
     it('does not render a callout if not in read-only mode', () => {
       setMockValues({
         readOnlyMode: false,
-        notifications: { tours: { isEnabled: jest.fn(() => false) } },
+        notifications: { tours: { isEnabled: vi.fn(() => false) } },
       });
       renderWithKibanaRenderContext(<EnterpriseSearchPageTemplateWrapper />);
 
@@ -262,7 +264,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
 
       setMockValues({
         readOnlyMode: false,
-        notifications: { tours: { isEnabled: jest.fn(() => false) } },
+        notifications: { tours: { isEnabled: vi.fn(() => false) } },
         consolePlugin,
       });
 
@@ -287,7 +289,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
 
       setMockValues({
         readOnlyMode: false,
-        notifications: { tours: { isEnabled: jest.fn(() => false) } },
+        notifications: { tours: { isEnabled: vi.fn(() => false) } },
         consolePlugin,
       });
 
@@ -308,12 +310,12 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
       renderWithKibanaRenderContext(<EnterpriseSearchPageTemplateWrapper {...props} />);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('merges SolutionViewSwitchCallout into solutionNav when available', () => {
       setMockValues({
-        notifications: { tours: { isEnabled: jest.fn(() => true) } },
+        notifications: { tours: { isEnabled: vi.fn(() => true) } },
         capabilities: { spaces: { manage: true } },
         spaces: {
           ui: {
@@ -333,7 +335,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
 
     it('does not set footer when announcements are disabled', () => {
       setMockValues({
-        notifications: { tours: { isEnabled: jest.fn(() => false) } },
+        notifications: { tours: { isEnabled: vi.fn(() => false) } },
         spaces: {
           ui: {
             components: {
@@ -352,7 +354,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
 
     it('does not set footer when canManageSpaces is false', () => {
       setMockValues({
-        notifications: { tours: { isEnabled: jest.fn(() => true) } },
+        notifications: { tours: { isEnabled: vi.fn(() => true) } },
         capabilities: { spaces: { manage: false } },
         spaces: {
           ui: {

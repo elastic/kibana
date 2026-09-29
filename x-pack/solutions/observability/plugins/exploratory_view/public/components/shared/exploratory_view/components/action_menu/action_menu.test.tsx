@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import React from 'react';
@@ -19,8 +21,8 @@ import {
 
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 
-jest.mock('../../hooks/use_kibana', () => {
-  const originalModule = jest.requireActual('../../hooks/use_kibana');
+vi.mock('../../hooks/use_kibana', async () => {
+  const originalModule = (await vi.importActual('../../hooks/use_kibana'));
   return {
     ...originalModule,
     useKibana: () => {
@@ -39,7 +41,7 @@ describe('Exploratory view app header actions', () => {
   mockAppDataView();
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   async function renderReadyView(core?: { isDev?: boolean }) {

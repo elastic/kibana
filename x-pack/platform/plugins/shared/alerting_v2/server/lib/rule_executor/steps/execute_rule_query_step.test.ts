@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { QueryResponseSizeExceededError } from '../../errors/query_response_size_exceeded_error';
@@ -103,7 +106,7 @@ describe('ExecuteRuleQueryStep', () => {
         }),
       })
     );
-    const debugMessage = (mockLogger.debug as jest.Mock).mock.calls[0][0] as string;
+    const debugMessage = (mockLogger.debug as Mock).mock.calls[0][0] as string;
     expect(debugMessage).not.toContain('FROM');
     expect(debugMessage).not.toContain('LIMIT');
   });
@@ -507,7 +510,7 @@ describe('ExecuteRuleQueryStep', () => {
         [RULE_EXECUTION_COUNTERS.rowsDroppedByLimit]: 1,
       });
 
-      const truncationLogs = (mockLogger.debug as jest.Mock).mock.calls.filter(
+      const truncationLogs = (mockLogger.debug as Mock).mock.calls.filter(
         ([message]) => typeof message === 'string' && message.includes('truncated')
       );
       expect(truncationLogs).toHaveLength(1);
@@ -528,7 +531,7 @@ describe('ExecuteRuleQueryStep', () => {
     it('marks ResponseError(400) ES|QL errors as TaskErrorSource.USER', async () => {
       mockHelpersEsqlToArrowReader(
         mockEsClient,
-        jest
+        vi
           .fn()
           .mockRejectedValue(new errors.ResponseError({ statusCode: 400 } as DiagnosticResult))
       );

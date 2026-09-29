@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { apiHasUserMessages } from './type_guards';
 
 describe('apiHasUserMessages', () => {
@@ -30,7 +32,7 @@ describe('apiHasUserMessages', () => {
     { input: null, label: 'null' },
     { input: undefined, label: 'undefined' },
     {
-      input: { onLoad: jest.fn(), onBeforeBadgesRender: jest.fn() },
+      input: { onLoad: vi.fn(), onBeforeBadgesRender: vi.fn() },
       label: 'object without userMessages property',
     },
     { input: 0, label: 'number primitive' },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
@@ -17,8 +19,8 @@ const getStackManagementSectionLinks = async (
   sectionId: string
 ): Promise<Array<string | undefined>> => {
   const coreStart = coreMock.createStart();
-  coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
-  coreStart.settings.client.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
+  coreStart.featureFlags.getBooleanValue$ = vi.fn().mockReturnValue(of(false));
+  coreStart.settings.client.get$ = vi.fn().mockReturnValue(of(AIChatExperience.Classic));
   coreStart.settings.globalClient.get.mockReturnValue(false);
 
   const definition = createDefinition(coreStart, {

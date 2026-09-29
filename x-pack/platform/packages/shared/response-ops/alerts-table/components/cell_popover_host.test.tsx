@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useEffect } from 'react';
 import { screen, render } from '@testing-library/react';
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
@@ -17,7 +19,7 @@ import type { AdditionalContext, RenderContext } from '../types';
 
 const props = createPartialObjectMock<EuiDataGridCellPopoverElementProps>({
   rowIndex: 0,
-  DefaultCellPopover: jest.fn(() => <div data-test-subj="defaultCellPopover" />),
+  DefaultCellPopover: vi.fn(() => <div data-test-subj="defaultCellPopover" />),
 });
 
 describe('CellPopoverHost', () => {
@@ -27,7 +29,7 @@ describe('CellPopoverHost', () => {
         value={
           {
             ...mockRenderContext,
-            renderCellPopover: jest.fn(() => <div data-test-subj="renderCellPopover" />),
+            renderCellPopover: vi.fn(() => <div data-test-subj="renderCellPopover" />),
           } as RenderContext<AdditionalContext>
         }
       >

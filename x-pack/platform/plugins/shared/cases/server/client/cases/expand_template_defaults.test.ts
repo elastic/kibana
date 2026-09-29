@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { stringify as yamlStringify } from 'yaml';
 import type { SavedObject } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -96,7 +98,7 @@ describe('expand_template_defaults', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
       fieldDefinitions: [],
       total: 0,

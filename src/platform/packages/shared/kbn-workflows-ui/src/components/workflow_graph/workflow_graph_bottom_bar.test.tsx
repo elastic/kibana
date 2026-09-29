@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -14,21 +16,21 @@ import { WorkflowDetailBottomBar } from './workflow_graph_bottom_bar';
 
 const defaultProps = {
   editorView: 'yaml' as const,
-  onEditorViewChange: jest.fn(),
+  onEditorViewChange: vi.fn(),
 };
 
 describe('WorkflowDetailBottomBar', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
     // Unmount before flushing timers so pending state updates have no component to target.
     cleanup();
     act(() => {
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('renders the bar container', () => {
@@ -43,8 +45,8 @@ describe('WorkflowDetailBottomBar', () => {
   });
 
   it('calls onEditorViewChange with graph when graph toggle is clicked', async () => {
-    const onEditorViewChange = jest.fn();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const onEditorViewChange = vi.fn();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(
       <WorkflowDetailBottomBar
         editorView="yaml"
@@ -58,8 +60,8 @@ describe('WorkflowDetailBottomBar', () => {
   });
 
   it('calls onEditorViewChange with yaml when yaml toggle is clicked', async () => {
-    const onEditorViewChange = jest.fn();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const onEditorViewChange = vi.fn();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(
       <WorkflowDetailBottomBar
         editorView="graph"
@@ -86,7 +88,7 @@ describe('WorkflowDetailBottomBar', () => {
 
     // Advance past the 5s collapse timer.
     act(() => {
-      jest.advanceTimersByTime(5001);
+      vi.advanceTimersByTime(5001);
     });
 
     // The collapsed pill (aria-label "Show toolbar") should now be visible.
@@ -97,7 +99,7 @@ describe('WorkflowDetailBottomBar', () => {
     render(<WorkflowDetailBottomBar {...defaultProps} disableAutoCollapse={true} />);
 
     act(() => {
-      jest.advanceTimersByTime(6000);
+      vi.advanceTimersByTime(6000);
     });
 
     // The pill is rendered but has pointerEvents: none and opacity: 0 when expanded.
@@ -110,7 +112,7 @@ describe('WorkflowDetailBottomBar', () => {
 
     // Collapse the bar.
     act(() => {
-      jest.advanceTimersByTime(5001);
+      vi.advanceTimersByTime(5001);
     });
 
     const pill = screen.getByRole('button', { name: 'Show toolbar' });
@@ -128,7 +130,7 @@ describe('WorkflowDetailBottomBar', () => {
 
     // First collapse via auto-timer then expand again.
     act(() => {
-      jest.advanceTimersByTime(5001);
+      vi.advanceTimersByTime(5001);
     });
     const pill = screen.getByRole('button', { name: 'Show toolbar' });
     act(() => {
@@ -144,13 +146,13 @@ describe('WorkflowDetailBottomBar', () => {
 
     // Before 600ms: should still be expanded (toggle buttons still accessible).
     act(() => {
-      jest.advanceTimersByTime(599);
+      vi.advanceTimersByTime(599);
     });
     expect(screen.getByTestId('workflowEditorViewToggle-graph')).toBeInTheDocument();
 
     // After 600ms: bar has collapsed.
     act(() => {
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
     });
     expect(screen.getByRole('button', { name: 'Show toolbar' })).toBeInTheDocument();
   });

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { UserActionContentToolbar } from './content_toolbar';
 
 import { renderWithTestingProviders } from '../../common/mock';
 
-jest.mock('../../common/navigation/hooks');
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/navigation/hooks');
+vi.mock('../../common/lib/kibana');
 
 describe('UserActionContentToolbar ', () => {
   it('renders', async () => {

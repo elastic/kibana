@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 
@@ -12,7 +14,7 @@ import { render } from '../../../../../utils/testing';
 import { WaterfallTickAxis } from './waterfall_tick_axis';
 
 describe('WaterfallChartWrapper', () => {
-  const setOnlyHighlightedMock = jest.fn();
+  const setOnlyHighlightedMock = vi.fn();
   const defaultProps = {
     showOnlyHighlightedNetworkRequests: false,
     setOnlyHighlighted: setOnlyHighlightedMock,

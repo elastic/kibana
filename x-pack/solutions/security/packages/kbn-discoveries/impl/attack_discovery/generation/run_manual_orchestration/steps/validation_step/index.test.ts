@@ -5,27 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 
 import { runValidationStep } from '.';
 
-const mockLogHealthCheck = jest.fn();
+const mockLogHealthCheck = vi.fn();
 
-jest.mock('../../../../../lib/log_health_check', () => ({
-  logHealthCheck: (...args: unknown[]) => mockLogHealthCheck(...args),
-}));
+vi.mock('../../../../../lib/log_health_check', () => {
+      const mocked = {
+      logHealthCheck: (...args: unknown[]) => mockLogHealthCheck(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockInvokeValidationWorkflow = jest.fn();
+const mockInvokeValidationWorkflow = vi.fn();
 
-jest.mock('../../../invoke_validation_workflow', () => ({
-  invokeValidationWorkflow: (...args: unknown[]) => mockInvokeValidationWorkflow(...args),
-}));
+vi.mock('../../../invoke_validation_workflow', () => {
+      const mocked = {
+      invokeValidationWorkflow: (...args: unknown[]) => mockInvokeValidationWorkflow(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockLogger = {
-  debug: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 const mockAlertRetrievalResult = {
@@ -90,7 +98,7 @@ const baseParams = {
 
 describe('runValidationStep', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockInvokeValidationWorkflow.mockResolvedValue(mockValidationResult);
   });
 

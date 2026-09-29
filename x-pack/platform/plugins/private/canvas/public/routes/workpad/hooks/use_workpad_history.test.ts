@@ -5,25 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useWorkpadHistory } from './use_workpad_history';
 import { encode } from '../route_state';
 
-const mockGetState = jest.fn();
-const mockGetHistory = jest.fn();
+const mockGetState = vi.fn();
+const mockGetHistory = vi.fn();
 
 // Mock the hooks and actions used by the UseWorkpad hook
-jest.mock('react-router-dom', () => ({
-  useHistory: () => mockGetHistory(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: () => mockGetHistory(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-redux-v7', () => ({
-  useSelector: (selector: any) => selector(mockGetState()),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useSelector: (selector: any) => selector(mockGetState()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useRestoreHistory', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('initial run', () => {
@@ -33,8 +41,8 @@ describe('useRestoreHistory', () => {
           state: undefined,
           pathname: 'somepath',
         },
-        push: jest.fn(),
-        replace: jest.fn(),
+        push: vi.fn(),
+        replace: vi.fn(),
       };
 
       const state = {
@@ -59,8 +67,8 @@ describe('useRestoreHistory', () => {
           state: encode({ prior: 'state' }) as string | undefined,
           pathname: 'somepath',
         },
-        push: jest.fn(),
-        replace: jest.fn(),
+        push: vi.fn(),
+        replace: vi.fn(),
       };
 
       const state = {
@@ -83,8 +91,8 @@ describe('useRestoreHistory', () => {
           state: encode(state),
           pathname: 'somepath',
         },
-        push: jest.fn(),
-        replace: jest.fn(),
+        push: vi.fn(),
+        replace: vi.fn(),
       };
       mockGetState.mockReturnValue(state);
       mockGetHistory.mockReturnValue(history);
@@ -98,8 +106,8 @@ describe('useRestoreHistory', () => {
 
   describe('state changes', () => {
     it('does a replace if location state is undefined', () => {
-      const push = jest.fn();
-      const replace = jest.fn();
+      const push = vi.fn();
+      const replace = vi.fn();
 
       const history = {
         location: {
@@ -139,8 +147,8 @@ describe('useRestoreHistory', () => {
           state: encode({ old: 'state' }),
           pathname: 'somepath',
         },
-        push: jest.fn(),
-        replace: jest.fn(),
+        push: vi.fn(),
+        replace: vi.fn(),
       };
 
       const oldState = {
@@ -177,8 +185,8 @@ describe('useRestoreHistory', () => {
           state: encode(state.persistent),
           pathname: 'somepath',
         },
-        push: jest.fn(),
-        replace: jest.fn(),
+        push: vi.fn(),
+        replace: vi.fn(),
       };
 
       mockGetState.mockReturnValue(state);
@@ -209,8 +217,8 @@ describe('useRestoreHistory', () => {
           state: encode(state.persistent) as string | undefined,
           pathname: 'somepath',
         },
-        push: jest.fn(),
-        replace: jest.fn(),
+        push: vi.fn(),
+        replace: vi.fn(),
       };
 
       mockGetState.mockReturnValue(state);
@@ -241,8 +249,8 @@ describe('useRestoreHistory', () => {
           pathname: 'somepath',
           search: '',
         },
-        push: jest.fn(),
-        replace: jest.fn(),
+        push: vi.fn(),
+        replace: vi.fn(),
       };
 
       mockGetState.mockReturnValue(state);

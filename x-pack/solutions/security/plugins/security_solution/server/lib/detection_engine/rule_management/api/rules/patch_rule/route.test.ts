@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { getPatchRulesSchemaMock } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 
@@ -39,7 +41,7 @@ describe('Patch rule route', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
@@ -56,8 +58,8 @@ describe('Patch rule route', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('status codes', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import {
   RuleCustomizationStatus,
@@ -23,33 +26,33 @@ import { useIsInitializingPrebuiltRulesPackage } from '../logic/prebuilt_rules/u
 import { useOutdatedMlJobsUpgradeModal } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_ml_jobs_upgrade_modal';
 import { useUpgradeWithConflictsModal } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_upgrade_with_conflicts_modal';
 
-jest.mock('../logic/prebuilt_rules/use_perform_rule_upgrade');
-jest.mock('../logic/prebuilt_rules/use_prebuilt_rules_upgrade_review');
-jest.mock('../logic/prebuilt_rules/use_prebuilt_rules_customization_status');
-jest.mock('../logic/prebuilt_rules/use_is_initializing_prebuilt_rules_package');
-jest.mock(
+vi.mock('../logic/prebuilt_rules/use_perform_rule_upgrade');
+vi.mock('../logic/prebuilt_rules/use_prebuilt_rules_upgrade_review');
+vi.mock('../logic/prebuilt_rules/use_prebuilt_rules_customization_status');
+vi.mock('../logic/prebuilt_rules/use_is_initializing_prebuilt_rules_package');
+vi.mock(
   '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_ml_jobs_upgrade_modal'
 );
-jest.mock(
+vi.mock(
   '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_upgrade_with_conflicts_modal'
 );
-jest.mock('../../../common/components/user_privileges');
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/lib/kibana');
 
-const mockUsePerformUpgradeRules = usePerformUpgradeRules as jest.Mock;
-const mockUsePrebuiltRulesUpgradeReview = usePrebuiltRulesUpgradeReview as jest.Mock;
-const mockUsePrebuiltRulesCustomizationStatus = usePrebuiltRulesCustomizationStatus as jest.Mock;
+const mockUsePerformUpgradeRules = usePerformUpgradeRules as Mock;
+const mockUsePrebuiltRulesUpgradeReview = usePrebuiltRulesUpgradeReview as Mock;
+const mockUsePrebuiltRulesCustomizationStatus = usePrebuiltRulesCustomizationStatus as Mock;
 const mockUseIsInitializingPrebuiltRulesPackage =
-  useIsInitializingPrebuiltRulesPackage as jest.Mock;
-const mockUseOutdatedMlJobsUpgradeModal = useOutdatedMlJobsUpgradeModal as jest.Mock;
-const mockUseUpgradeWithConflictsModal = useUpgradeWithConflictsModal as jest.Mock;
+  useIsInitializingPrebuiltRulesPackage as Mock;
+const mockUseOutdatedMlJobsUpgradeModal = useOutdatedMlJobsUpgradeModal as Mock;
+const mockUseUpgradeWithConflictsModal = useUpgradeWithConflictsModal as Mock;
 
 describe('usePrebuiltRulesUpgrade', () => {
-  const mutateAsync = jest.fn().mockResolvedValue({});
-  const confirmLegacyMLJobs = jest.fn().mockResolvedValue(true);
+  const mutateAsync = vi.fn().mockResolvedValue({});
+  const confirmLegacyMLJobs = vi.fn().mockResolvedValue(true);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mutateAsync.mockResolvedValue({});
     confirmLegacyMLJobs.mockResolvedValue(true);
@@ -66,7 +69,7 @@ describe('usePrebuiltRulesUpgrade', () => {
     });
     mockUseUpgradeWithConflictsModal.mockReturnValue({
       modal: null,
-      confirmConflictsUpgrade: jest.fn(),
+      confirmConflictsUpgrade: vi.fn(),
     });
 
     mockUsePrebuiltRulesUpgradeReview.mockReturnValue(buildReviewResult());
@@ -311,7 +314,7 @@ describe('usePrebuiltRulesUpgrade', () => {
 
     it('does not call onUpgrade when the legacy-ML-jobs confirmation is cancelled', async () => {
       confirmLegacyMLJobs.mockResolvedValueOnce(false);
-      const onUpgrade = jest.fn();
+      const onUpgrade = vi.fn();
 
       const { result } = renderHook(() => usePrebuiltRulesUpgrade({ onUpgrade }), {
         wrapper: TestProviders,
@@ -568,7 +571,7 @@ describe('usePrebuiltRulesUpgrade', () => {
     });
 
     it('fetchAllRulesCustomizationCounts re-fetches the review and derives counts from the fresh response', async () => {
-      const refetch = jest.fn().mockResolvedValue({
+      const refetch = vi.fn().mockResolvedValue({
         isSuccess: true,
         data: buildReviewResult([], { total: 7, counts: { isCustomized: { true: 3, false: 4 } } })
           .data,
@@ -592,7 +595,7 @@ describe('usePrebuiltRulesUpgrade', () => {
     });
 
     it('fetchAllRulesCustomizationCounts defaults customizedCount to 0 when the counts facet is absent', async () => {
-      const refetch = jest.fn().mockResolvedValue({
+      const refetch = vi.fn().mockResolvedValue({
         isSuccess: true,
         data: buildReviewResult([], { total: 42 }).data,
       });
@@ -615,7 +618,7 @@ describe('usePrebuiltRulesUpgrade', () => {
         total: 5,
         counts: { isCustomized: { true: 0, false: 5 } },
       });
-      const refetch = jest.fn().mockResolvedValue({
+      const refetch = vi.fn().mockResolvedValue({
         isSuccess: false,
         isError: true,
         error: new Error('boom'),
@@ -632,7 +635,7 @@ describe('usePrebuiltRulesUpgrade', () => {
     });
 
     it('fetchAllRulesCustomizationCounts resolves to null when the re-fetch yields no data', async () => {
-      const refetch = jest.fn().mockResolvedValue({ isSuccess: true, data: undefined });
+      const refetch = vi.fn().mockResolvedValue({ isSuccess: true, data: undefined });
       mockUsePrebuiltRulesUpgradeReview.mockReturnValue({ ...buildReviewResult([]), refetch });
 
       const { result } = renderHook(() => usePrebuiltRulesUpgrade({}), {
@@ -701,7 +704,7 @@ function buildReviewResult(
       rules,
       counts: overrides.counts,
     },
-    refetch: jest.fn(),
+    refetch: vi.fn(),
     dataUpdatedAt: 0,
     isFetched: true,
     isLoading: false,

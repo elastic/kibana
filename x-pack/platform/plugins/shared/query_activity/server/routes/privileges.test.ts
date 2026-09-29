@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -29,7 +31,7 @@ describe(`GET ${API_BASE_PATH}/privileges`, () => {
 
   it('defaults to allowed when the security client is unavailable', async () => {
     const { handler, context, esClient } = setup();
-    jest.spyOn(esClient, 'security', 'get').mockReturnValue(undefined);
+    vi.spyOn(esClient, 'security', 'get').mockReturnValue(undefined);
 
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
@@ -50,12 +52,12 @@ describe(`GET ${API_BASE_PATH}/privileges`, () => {
     const { handler, context, esClient } = setup();
 
     const security = {
-      hasPrivileges: jest.fn().mockResolvedValue({
+      hasPrivileges: vi.fn().mockResolvedValue({
         has_all_requested: false,
         cluster: { monitor: true, manage: false },
       }),
     };
-    jest.spyOn(esClient, 'security', 'get').mockReturnValue(security);
+    vi.spyOn(esClient, 'security', 'get').mockReturnValue(security);
 
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
@@ -76,9 +78,9 @@ describe(`GET ${API_BASE_PATH}/privileges`, () => {
     const { handler, context, esClient, logger } = setup();
 
     const security = {
-      hasPrivileges: jest.fn().mockRejectedValue(new Error('ES error')),
+      hasPrivileges: vi.fn().mockRejectedValue(new Error('ES error')),
     };
-    jest.spyOn(esClient, 'security', 'get').mockReturnValue(security);
+    vi.spyOn(esClient, 'security', 'get').mockReturnValue(security);
 
     const request = httpServerMock.createKibanaRequest({
       method: 'get',

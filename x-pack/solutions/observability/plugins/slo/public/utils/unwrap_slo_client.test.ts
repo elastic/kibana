@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SLORepositoryClient } from '../types';
 import { createUnwrappingSloClient } from './unwrap_slo_client';
 
 describe('createUnwrappingSloClient', () => {
   const createSloClient = (response: unknown): SLORepositoryClient =>
     ({
-      fetch: jest.fn().mockResolvedValue(response),
-      stream: jest.fn(),
+      fetch: vi.fn().mockResolvedValue(response),
+      stream: vi.fn(),
     } as unknown as SLORepositoryClient);
 
   const fetch = (client: SLORepositoryClient) =>

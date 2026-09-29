@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -24,7 +26,7 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 describe('ClearEntityDataButton', () => {
   it('opens the confirmation modal when clicked', () => {
-    render(<ClearEntityDataButton onDelete={jest.fn()} isDeleting={false} />, {
+    render(<ClearEntityDataButton onDelete={vi.fn()} isDeleting={false} />, {
       wrapper: Wrapper,
     });
 
@@ -39,7 +41,7 @@ describe('ClearEntityDataButton', () => {
   });
 
   it('dismisses the modal when Close is clicked', () => {
-    render(<ClearEntityDataButton onDelete={jest.fn()} isDeleting={false} />, {
+    render(<ClearEntityDataButton onDelete={vi.fn()} isDeleting={false} />, {
       wrapper: Wrapper,
     });
 
@@ -51,7 +53,7 @@ describe('ClearEntityDataButton', () => {
   });
 
   it('calls onDelete and closes the modal when confirmed', async () => {
-    const mockOnDelete = jest.fn().mockResolvedValue(undefined);
+    const mockOnDelete = vi.fn().mockResolvedValue(undefined);
     render(<ClearEntityDataButton onDelete={mockOnDelete} isDeleting={false} />, {
       wrapper: Wrapper,
     });
@@ -67,7 +69,7 @@ describe('ClearEntityDataButton', () => {
   });
 
   it('passes isDeleting to the modal loading state', () => {
-    render(<ClearEntityDataButton onDelete={jest.fn()} isDeleting={true} />, {
+    render(<ClearEntityDataButton onDelete={vi.fn()} isDeleting={true} />, {
       wrapper: Wrapper,
     });
 

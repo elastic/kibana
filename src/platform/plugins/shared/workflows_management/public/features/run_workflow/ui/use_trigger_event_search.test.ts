@@ -7,20 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useQueryTriggerEvents } from '@kbn/workflows-ui';
 import { TIMEPICKER_FALLBACK } from './constants';
 import { useTriggerEventSearch } from './use_trigger_event_search';
 
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
+vi.mock('@kbn/workflows-ui', async () => {
+  const actual = (await vi.importActual('@kbn/workflows-ui'));
   return {
     ...actual,
-    useQueryTriggerEvents: jest.fn(),
+    useQueryTriggerEvents: vi.fn(),
   };
 });
 
-const mockUseQueryTriggerEvents = useQueryTriggerEvents as jest.MockedFunction<
+const mockUseQueryTriggerEvents = useQueryTriggerEvents as MockedFunction<
   typeof useQueryTriggerEvents
 >;
 
@@ -47,10 +50,10 @@ const hit = (id: string) => ({
 const customTriggerTypeIds = ['custom.trigger'];
 
 describe('useTriggerEventSearch pagination', () => {
-  const refetch = jest.fn();
+  const refetch = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     refetch.mockResolvedValue(undefined);
   });
 

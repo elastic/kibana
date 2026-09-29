@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
@@ -21,7 +23,7 @@ import { ExportDiscoverSessionJsonFlyout } from './json_flyout';
 
 type MockExportJsonFlyoutContentProps = React.ComponentProps<typeof ExportJsonFlyoutContent>;
 
-const mockGetExportJson = jest.fn(
+const mockGetExportJson = vi.fn(
   (
     _exportCurrentTab: boolean,
     _includeCurrentTimeSettings: boolean
@@ -33,7 +35,7 @@ const mockGetExportJson = jest.fn(
     },
   })
 );
-const mockSanitizeExportJson = jest.fn(
+const mockSanitizeExportJson = vi.fn(
   async (): Promise<{ data: DiscoverSessionApiData; warnings: readonly string[] }> => ({
     data: {
       title: 'Discover session',
@@ -43,29 +45,35 @@ const mockSanitizeExportJson = jest.fn(
     warnings: ['An unsupported control panel was omitted.'],
   })
 );
-const mockDownloadFileAs = jest.fn();
-const mockUseUrl = jest.fn(() => 'console-url');
-const mockExportJsonFlyoutContent = jest.fn((_props: MockExportJsonFlyoutContentProps) => null);
+const mockDownloadFileAs = vi.fn();
+const mockUseUrl = vi.fn(() => 'console-url');
+const mockExportJsonFlyoutContent = vi.fn((_props: MockExportJsonFlyoutContentProps) => null);
 
-jest.mock('@kbn/as-code-export-flyout-component', () => ({
-  ExportJsonFlyoutContent: (props: MockExportJsonFlyoutContentProps) =>
-    mockExportJsonFlyoutContent(props),
-}));
+vi.mock('@kbn/as-code-export-flyout-component', () => {
+      const mocked = {
+      ExportJsonFlyoutContent: (props: MockExportJsonFlyoutContentProps) =>
+        mockExportJsonFlyoutContent(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/share-plugin/public', () => ({
-  downloadFileAs: (...args: unknown[]) => mockDownloadFileAs(...args),
-}));
+vi.mock('@kbn/share-plugin/public', () => {
+      const mocked = {
+      downloadFileAs: (...args: unknown[]) => mockDownloadFileAs(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Discover export JSON flyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderFlyout = (showIncludeCurrentTimeSettings = true) =>
     render(
       <ExportDiscoverSessionJsonFlyout
         canShowDevTools
-        closeFlyout={jest.fn()}
+        closeFlyout={vi.fn()}
         getExportJson={mockGetExportJson}
         sanitizeExportJson={mockSanitizeExportJson}
         showIncludeCurrentTimeSettings={showIncludeCurrentTimeSettings}

@@ -7,23 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import fs from 'fs';
 import path from 'path';
 import { groupByPackage } from './group_by_package';
 
 // Mock fs and path modules
-jest.mock('fs');
-jest.mock('path');
+vi.mock('fs');
+vi.mock('path');
 
 describe('groupByPackage', () => {
   // Reset mocks before each test
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should group dependencies by their package directories', () => {
     // Mock path.dirname to simulate directory structure
-    const mockDirname = jest.fn().mockImplementation((filePath) => {
+    const mockDirname = vi.fn().mockImplementation((filePath) => {
       if (filePath === 'src/package1/file1.js' || filePath === 'src/package1/sub/file2.js') {
         // First call for the file's immediate directory
         if (filePath === 'src/package1/file1.js') return 'src/package1';
@@ -39,15 +42,15 @@ describe('groupByPackage', () => {
     });
 
     // Mock path.join to handle path concatenation
-    const mockJoin = jest
+    const mockJoin = vi
       .fn()
       .mockImplementation((...args) => args.join('/').replace(/\/\//g, '/'));
 
     // Mock path.parse to handle root directory detection
-    const mockParse = jest.fn().mockReturnValue({ root: '/' });
+    const mockParse = vi.fn().mockReturnValue({ root: '/' });
 
     // Mock fs.existsSync to simulate kibana.jsonc files
-    const mockExistsSync = jest.fn().mockImplementation((filePath) => {
+    const mockExistsSync = vi.fn().mockImplementation((filePath) => {
       if (filePath === 'src/package1/kibana.jsonc') return true;
       if (filePath === 'src/package2/kibana.jsonc') return true;
       // No kibana.jsonc in 'src/package1/sub'
@@ -56,10 +59,10 @@ describe('groupByPackage', () => {
     });
 
     // Apply mocks
-    (path.dirname as jest.Mock).mockImplementation(mockDirname);
-    (path.join as jest.Mock).mockImplementation(mockJoin);
-    (path.parse as jest.Mock).mockImplementation(mockParse);
-    (fs.existsSync as jest.Mock).mockImplementation(mockExistsSync);
+    (path.dirname as Mock).mockImplementation(mockDirname);
+    (path.join as Mock).mockImplementation(mockJoin);
+    (path.parse as Mock).mockImplementation(mockParse);
+    (fs.existsSync as Mock).mockImplementation(mockExistsSync);
 
     const dependencies = [
       { from: 'src/package1/file1.js', to: 'node_modules/module1' },
@@ -77,27 +80,27 @@ describe('groupByPackage', () => {
 
   it('should handle a dependency with no package directory', () => {
     // Mock directoryname to return consistent paths
-    const mockDirname = jest.fn().mockImplementation((filePath) => {
+    const mockDirname = vi.fn().mockImplementation((filePath) => {
       if (filePath === 'src/no-package/file.js') return 'src/no-package';
       return filePath;
     });
 
     // Mock path.join for consistent behavior
-    const mockJoin = jest
+    const mockJoin = vi
       .fn()
       .mockImplementation((...args) => args.join('/').replace(/\/\//g, '/'));
 
     // Mock path.parse to handle root directory detection
-    const mockParse = jest.fn().mockReturnValue({ root: '/' });
+    const mockParse = vi.fn().mockReturnValue({ root: '/' });
 
     // Mock fs.existsSync to return false (no kibana.jsonc exists)
-    const mockExistsSync = jest.fn().mockReturnValue(false);
+    const mockExistsSync = vi.fn().mockReturnValue(false);
 
     // Apply mocks
-    (path.dirname as jest.Mock).mockImplementation(mockDirname);
-    (path.join as jest.Mock).mockImplementation(mockJoin);
-    (path.parse as jest.Mock).mockImplementation(mockParse);
-    (fs.existsSync as jest.Mock).mockImplementation(mockExistsSync);
+    (path.dirname as Mock).mockImplementation(mockDirname);
+    (path.join as Mock).mockImplementation(mockJoin);
+    (path.parse as Mock).mockImplementation(mockParse);
+    (fs.existsSync as Mock).mockImplementation(mockExistsSync);
 
     const dependencies = [{ from: 'src/no-package/file.js', to: 'node_modules/module1' }];
 
@@ -111,29 +114,29 @@ describe('groupByPackage', () => {
 
   it('should group multiple dependencies from files in the same package', () => {
     // Mock path.dirname for consistent behavior
-    const mockDirname = jest.fn().mockImplementation((filePath) => {
+    const mockDirname = vi.fn().mockImplementation((filePath) => {
       if (filePath.startsWith('src/package1/')) return 'src/package1';
       return filePath;
     });
 
     // Mock path.join for path concatenation
-    const mockJoin = jest
+    const mockJoin = vi
       .fn()
       .mockImplementation((...args) => args.join('/').replace(/\/\//g, '/'));
 
     // Mock path.parse for root directory
-    const mockParse = jest.fn().mockReturnValue({ root: '/' });
+    const mockParse = vi.fn().mockReturnValue({ root: '/' });
 
     // Mock fs.existsSync to simulate kibana.jsonc file
-    const mockExistsSync = jest.fn().mockImplementation((filePath) => {
+    const mockExistsSync = vi.fn().mockImplementation((filePath) => {
       return filePath === 'src/package1/kibana.jsonc';
     });
 
     // Apply mocks
-    (path.dirname as jest.Mock).mockImplementation(mockDirname);
-    (path.join as jest.Mock).mockImplementation(mockJoin);
-    (path.parse as jest.Mock).mockImplementation(mockParse);
-    (fs.existsSync as jest.Mock).mockImplementation(mockExistsSync);
+    (path.dirname as Mock).mockImplementation(mockDirname);
+    (path.join as Mock).mockImplementation(mockJoin);
+    (path.parse as Mock).mockImplementation(mockParse);
+    (fs.existsSync as Mock).mockImplementation(mockExistsSync);
 
     const dependencies = [
       { from: 'src/package1/file1.js', to: 'node_modules/module1' },
@@ -150,24 +153,24 @@ describe('groupByPackage', () => {
 
   it('should remove "node_modules/" prefix from dependencies', () => {
     // Mock path.dirname for consistent behavior
-    const mockDirname = jest.fn().mockReturnValue('src/package1');
+    const mockDirname = vi.fn().mockReturnValue('src/package1');
 
     // Mock path.join for path concatenation
-    const mockJoin = jest
+    const mockJoin = vi
       .fn()
       .mockImplementation((...args) => args.join('/').replace(/\/\//g, '/'));
 
     // Mock path.parse for root directory
-    const mockParse = jest.fn().mockReturnValue({ root: '/' });
+    const mockParse = vi.fn().mockReturnValue({ root: '/' });
 
     // Mock fs.existsSync to simulate kibana.jsonc file
-    const mockExistsSync = jest.fn().mockReturnValue(true);
+    const mockExistsSync = vi.fn().mockReturnValue(true);
 
     // Apply mocks
-    (path.dirname as jest.Mock).mockImplementation(mockDirname);
-    (path.join as jest.Mock).mockImplementation(mockJoin);
-    (path.parse as jest.Mock).mockImplementation(mockParse);
-    (fs.existsSync as jest.Mock).mockImplementation(mockExistsSync);
+    (path.dirname as Mock).mockImplementation(mockDirname);
+    (path.join as Mock).mockImplementation(mockJoin);
+    (path.parse as Mock).mockImplementation(mockParse);
+    (fs.existsSync as Mock).mockImplementation(mockExistsSync);
 
     const dependencies = [
       { from: 'src/package1/file1.js', to: 'node_modules/module1' },
@@ -189,32 +192,32 @@ describe('groupByPackage', () => {
 
   it('should handle multiple packages in nested directory structure', () => {
     // Mock path.dirname to simulate directory structure
-    const mockDirname = jest.fn().mockImplementation((filePath) => {
+    const mockDirname = vi.fn().mockImplementation((filePath) => {
       if (filePath === 'src/parent/package1/file1.js') return 'src/parent/package1';
       if (filePath === 'src/parent/package2/file2.js') return 'src/parent/package2';
       return path.dirname(filePath);
     });
 
     // Mock path.join to handle path concatenation
-    const mockJoin = jest
+    const mockJoin = vi
       .fn()
       .mockImplementation((...args) => args.join('/').replace(/\/\//g, '/'));
 
     // Mock path.parse to handle root directory detection
-    const mockParse = jest.fn().mockReturnValue({ root: '/' });
+    const mockParse = vi.fn().mockReturnValue({ root: '/' });
 
     // Mock fs.existsSync to simulate kibana.jsonc files
-    const mockExistsSync = jest.fn().mockImplementation((filePath) => {
+    const mockExistsSync = vi.fn().mockImplementation((filePath) => {
       if (filePath === 'src/parent/package1/kibana.jsonc') return true;
       if (filePath === 'src/parent/package2/kibana.jsonc') return true;
       return false;
     });
 
     // Apply mocks
-    (path.dirname as jest.Mock).mockImplementation(mockDirname);
-    (path.join as jest.Mock).mockImplementation(mockJoin);
-    (path.parse as jest.Mock).mockImplementation(mockParse);
-    (fs.existsSync as jest.Mock).mockImplementation(mockExistsSync);
+    (path.dirname as Mock).mockImplementation(mockDirname);
+    (path.join as Mock).mockImplementation(mockJoin);
+    (path.parse as Mock).mockImplementation(mockParse);
+    (fs.existsSync as Mock).mockImplementation(mockExistsSync);
 
     const dependencies = [
       { from: 'src/parent/package1/file1.js', to: 'node_modules/module1' },

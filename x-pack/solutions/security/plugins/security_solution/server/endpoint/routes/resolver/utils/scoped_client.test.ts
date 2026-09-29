@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IClusterClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
@@ -14,12 +17,12 @@ describe('getResolverClusterClient', () => {
   const request = httpServerMock.createKibanaRequest();
   const originClient = elasticsearchServiceMock.createScopedClusterClient();
   let clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
-  let getClusterClient: jest.Mock<Promise<IClusterClient>>;
+  let getClusterClient: Mock<Promise<IClusterClient>>;
   let context: SecuritySolutionRequestHandlerContext;
 
   beforeEach(() => {
     clusterClient = elasticsearchServiceMock.createClusterClient();
-    getClusterClient = jest.fn().mockResolvedValue(clusterClient);
+    getClusterClient = vi.fn().mockResolvedValue(clusterClient);
     context = {
       core: Promise.resolve({ elasticsearch: { client: originClient } }),
     } as unknown as SecuritySolutionRequestHandlerContext;

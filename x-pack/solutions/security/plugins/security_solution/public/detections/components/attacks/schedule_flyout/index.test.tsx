@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
@@ -16,34 +19,37 @@ import {
   ATTACK_DISCOVERY_SETTINGS,
 } from '../../../../attack_discovery/pages/settings_flyout/translations';
 
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../common/lib/kibana');
-jest.mock('react-router-dom', () => ({
-  matchPath: jest.fn(),
-  useLocation: jest.fn().mockReturnValue({
-    search: '',
-  }),
-  withRouter: jest.fn(),
-}));
+vi.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      matchPath: vi.fn(),
+      useLocation: vi.fn().mockReturnValue({
+        search: '',
+      }),
+      withRouter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
-  onClose: jest.fn(),
+  onClose: vi.fn(),
 };
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 const setupMocks = () => {
   mockUseKibana.mockReturnValue({
     services: {
       featureFlags: {
-        useBooleanValue: jest.fn().mockReturnValue(false),
+        useBooleanValue: vi.fn().mockReturnValue(false),
       },
       lens: {
         EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
       },
-      telemetry: { reportEvent: jest.fn() },
+      telemetry: { reportEvent: vi.fn() },
       uiSettings: {
-        get: jest.fn(),
+        get: vi.fn(),
       },
       unifiedSearch: {
         ui: {
@@ -51,7 +57,7 @@ const setupMocks = () => {
         },
       },
     },
-  } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+  } as unknown as Mocked<ReturnType<typeof useKibana>>);
 };
 
 const renderComponent = (props = defaultProps) => {
@@ -69,7 +75,7 @@ const clickButton = (testId: string) => {
 
 describe('SchedulesFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupMocks();
   });
 

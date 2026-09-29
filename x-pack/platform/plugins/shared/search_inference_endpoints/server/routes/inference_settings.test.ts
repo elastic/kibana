@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -18,34 +21,34 @@ import { MockRouter } from '../../__mocks__/router.mock';
 import { defineInferenceSettingsRoutes } from './inference_settings';
 
 const mockFeatureRegistry = {
-  getAll: jest.fn().mockReturnValue([]),
-  get: jest.fn(),
-  register: jest.fn(),
+  getAll: vi.fn().mockReturnValue([]),
+  get: vi.fn(),
+  register: vi.fn(),
 };
 
 describe('Inference Settings API', () => {
   const mockLogger = loggingSystemMock.createLogger().get();
   let mockRouter: MockRouter;
-  let getConnectorById: jest.Mock;
+  let getConnectorById: Mock;
   const mockSOClient = {
-    create: jest.fn(),
-    get: jest.fn(),
+    create: vi.fn(),
+    get: vi.fn(),
   };
   const mockCore = {
     savedObjects: {
-      getClient: jest.fn().mockReturnValue(mockSOClient),
+      getClient: vi.fn().mockReturnValue(mockSOClient),
     },
   };
 
-  let context: jest.Mocked<RequestHandlerContext>;
+  let context: Mocked<RequestHandlerContext>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    getConnectorById = jest.fn().mockRejectedValue(new Error('Not found'));
+    vi.clearAllMocks();
+    getConnectorById = vi.fn().mockRejectedValue(new Error('Not found'));
 
     context = {
       core: Promise.resolve(mockCore),
-    } as unknown as jest.Mocked<RequestHandlerContext>;
+    } as unknown as Mocked<RequestHandlerContext>;
   });
 
   describe('GET /internal/search_inference_endpoints/settings', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, within, act } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -38,7 +40,7 @@ describe('Collapsed mode', () => {
 
   beforeEach(() => {
     user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
+      advanceTimers: vi.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     mockClientHeight(mockMenuItemHeight);
@@ -48,9 +50,12 @@ describe('Collapsed mode', () => {
     // Mock the client height for the primary menu item
     mockClientHeight(mockMenuItemHeight);
     // Mock the gap between the primary menu items
-    jest.mock('../utils/get_style_property', () => ({
-      getStyleProperty: jest.fn(() => mockCollapsedMenuGap),
-    }));
+    vi.doMock('../utils/get_style_property', () => {
+          const mocked = {
+              getStyleProperty: vi.fn(() => mockCollapsedMenuGap),
+            };
+          return { ...mocked, default: mocked };
+        });
   });
 
   it('should render the side navigation', () => {

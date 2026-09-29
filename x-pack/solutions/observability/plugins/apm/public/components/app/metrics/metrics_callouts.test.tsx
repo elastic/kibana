@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -71,7 +73,7 @@ describe('MixedAgentCallout', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns null when ingestionTimeRanges is undefined', () => {
@@ -110,7 +112,7 @@ describe('MixedAgentCallout', () => {
   });
 
   it('calls onNavigateToIngestionType when a time range link is clicked', () => {
-    const onNavigate = jest.fn();
+    const onNavigate = vi.fn();
     const { getByTestId } = renderWithWrapper(
       <MixedAgentCallout
         ingestionTimeRanges={sequentialRanges}
@@ -176,7 +178,7 @@ describe('MixedAgentCallout', () => {
   });
 
   it('swaps current/previous when forcedIngestionType differs from default', () => {
-    const onNavigate = jest.fn();
+    const onNavigate = vi.fn();
     const { getByTestId } = renderWithWrapper(
       <MixedAgentCallout
         ingestionTimeRanges={sequentialRanges}

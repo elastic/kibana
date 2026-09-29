@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,88 +16,121 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useDeveloperMode } from '../../../../hooks/use_developer_mode';
 import { SettingsTab } from './tab';
 
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../hooks/use_developer_mode');
-jest.mock('../../../../hooks/use_model_settings_url', () => ({
-  useModelSettingsUrl: () => undefined,
-}));
-jest.mock('../../../../hooks/use_significant_events_maintenance', () => ({
-  useBlocksNewActivity: () => ({
-    blocksActivity: false,
-    isBlocked: false,
-    status: undefined,
-    activityBlockTooltip: undefined,
-  }),
-}));
-jest.mock('../../hooks/use_fetch_streams', () => ({
-  useFetchStreams: () => ({ data: { streams: [] } }),
-}));
-jest.mock('./use_continuous_extraction_settings', () => ({
-  useContinuousExtractionSettings: () => ({
-    draft: { enabled: false, intervalHours: 24 },
-    setDraft: jest.fn(),
-    hasChanged: false,
-    reset: jest.fn(),
-    save: jest.fn(),
-  }),
-}));
-jest.mock('./use_scheduled_discovery_settings', () => ({
-  useScheduledDiscoverySettings: () => ({
-    draft: {
-      enabled: false,
-      detectionIntervalMinutes: 30,
-      targetCoverageMinutes: 30,
-      reviewIntervalMinutes: 10,
-      discoveryBatchSize: 3,
-      maxReviewPasses: 3,
-    },
-    setDraft: jest.fn(),
-    hasChanged: false,
-    reset: jest.fn(),
-    save: jest.fn(),
-  }),
-}));
-jest.mock('./maintenance_section', () => ({
-  MaintenanceSection: () => <div data-test-subj="maintenance-section" />,
-}));
-jest.mock('./stale_event_cleanup_section', () => ({
-  StaleEventCleanupSection: () => <div data-test-subj="stale-event-cleanup-section" />,
-}));
-jest.mock('./cost_estimate', () => ({
-  CostEstimate: () => <div data-test-subj="cost-estimate" />,
-}));
-jest.mock('./run_limits_section', () => ({
-  RunLimitsSection: () => null,
-}));
-jest.mock('./apps_section', () => ({
-  AppsSection: () => null,
-}));
-jest.mock('./significant_events_tuning_config_editor', () => ({
-  configToAnnotatedYaml: (config: unknown) => JSON.stringify(config),
-  SignificantEventsTuningConfigEditor: ({
-    value,
-    onChange,
-    isReadOnly,
-  }: {
-    value: string;
-    onChange: (yaml: string, parsed: null) => void;
-    isReadOnly: boolean;
-  }) => (
-    <textarea
-      data-test-subj="streams-settings-tuning-editor"
-      value={value}
-      disabled={isReadOnly}
-      onChange={(event) => onChange(event.target.value, null)}
-    />
-  ),
-}));
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../hooks/use_developer_mode');
+vi.mock('../../../../hooks/use_model_settings_url', () => {
+      const mocked = {
+      useModelSettingsUrl: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../hooks/use_significant_events_maintenance', () => {
+      const mocked = {
+      useBlocksNewActivity: () => ({
+        blocksActivity: false,
+        isBlocked: false,
+        status: undefined,
+        activityBlockTooltip: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_fetch_streams', () => {
+      const mocked = {
+      useFetchStreams: () => ({ data: { streams: [] } }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_continuous_extraction_settings', () => {
+      const mocked = {
+      useContinuousExtractionSettings: () => ({
+        draft: { enabled: false, intervalHours: 24 },
+        setDraft: vi.fn(),
+        hasChanged: false,
+        reset: vi.fn(),
+        save: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_scheduled_discovery_settings', () => {
+      const mocked = {
+      useScheduledDiscoverySettings: () => ({
+        draft: {
+          enabled: false,
+          detectionIntervalMinutes: 30,
+          targetCoverageMinutes: 30,
+          reviewIntervalMinutes: 10,
+          discoveryBatchSize: 3,
+          maxReviewPasses: 3,
+        },
+        setDraft: vi.fn(),
+        hasChanged: false,
+        reset: vi.fn(),
+        save: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./maintenance_section', () => {
+      const mocked = {
+      MaintenanceSection: () => <div data-test-subj="maintenance-section" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./stale_event_cleanup_section', () => {
+      const mocked = {
+      StaleEventCleanupSection: () => <div data-test-subj="stale-event-cleanup-section" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./cost_estimate', () => {
+      const mocked = {
+      CostEstimate: () => <div data-test-subj="cost-estimate" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./run_limits_section', () => {
+      const mocked = {
+      RunLimitsSection: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./apps_section', () => {
+      const mocked = {
+      AppsSection: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./significant_events_tuning_config_editor', () => {
+      const mocked = {
+      configToAnnotatedYaml: (config: unknown) => JSON.stringify(config),
+      SignificantEventsTuningConfigEditor: ({
+        value,
+        onChange,
+        isReadOnly,
+      }: {
+        value: string;
+        onChange: (yaml: string, parsed: null) => void;
+        isReadOnly: boolean;
+      }) => (
+        <textarea
+          data-test-subj="streams-settings-tuning-editor"
+          value={value}
+          disabled={isReadOnly}
+          onChange={(event) => onChange(event.target.value, null)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseDeveloperMode = useDeveloperMode as jest.MockedFunction<typeof useDeveloperMode>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseDeveloperMode = useDeveloperMode as MockedFunction<typeof useDeveloperMode>;
 
-const setDeveloperMode = jest.fn();
-const settingsClientSet = jest.fn();
-const settingsGlobalClientSet = jest.fn();
+const setDeveloperMode = vi.fn();
+const settingsClientSet = vi.fn();
+const settingsGlobalClientSet = vi.fn();
 
 const setup = ({
   isDeveloperMode = false,
@@ -129,20 +165,20 @@ const setup = ({
       },
       settings: {
         client: {
-          get: jest.fn().mockReturnValue('logs-*'),
+          get: vi.fn().mockReturnValue('logs-*'),
           set: settingsClientSet,
         },
         globalClient: {
-          get: jest.fn().mockReturnValue({}),
+          get: vi.fn().mockReturnValue({}),
           set: settingsGlobalClientSet,
         },
       },
       featureFlags: {
-        getBooleanValue$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
+        getBooleanValue$: vi.fn().mockReturnValue(new BehaviorSubject(false)),
       },
       notifications: {
         toasts: {
-          addDanger: jest.fn(),
+          addDanger: vi.fn(),
         },
       },
     },
@@ -157,7 +193,7 @@ const setup = ({
 
 describe('SettingsTab developer mode', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     settingsClientSet.mockResolvedValue(true);
     settingsGlobalClientSet.mockResolvedValue(true);
   });

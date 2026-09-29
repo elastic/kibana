@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
@@ -23,10 +26,13 @@ const mockTheme = getMockTheme({
   },
 });
 
-jest.mock('../../lib/kibana');
-jest.mock('../../hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
+vi.mock('../../lib/kibana');
+vi.mock('../../hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const singlePayload = (): ThreatMapping[number] => ({
   entries: [
@@ -54,10 +60,10 @@ const doublePayload = (): ThreatMapping[number] => ({
 });
 
 describe('ListItemComponent', () => {
-  const getValueSuggestionsMock = jest.fn().mockResolvedValue(['field.one', 'field.two']);
+  const getValueSuggestionsMock = vi.fn().mockResolvedValue(['field.one', 'field.two']);
 
   beforeAll(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         unifiedSearch: {
           autocomplete: {
@@ -95,8 +101,8 @@ describe('ListItemComponent', () => {
             }
             andLogicIncluded={true}
             isOnlyItem={false}
-            onDeleteEntryItem={jest.fn()}
-            onChangeEntryItem={jest.fn()}
+            onDeleteEntryItem={vi.fn()}
+            onChangeEntryItem={vi.fn()}
           />
         </ThemeProvider>
       );
@@ -121,8 +127,8 @@ describe('ListItemComponent', () => {
             }
             andLogicIncluded={true}
             isOnlyItem={false}
-            onDeleteEntryItem={jest.fn()}
-            onChangeEntryItem={jest.fn()}
+            onDeleteEntryItem={vi.fn()}
+            onChangeEntryItem={vi.fn()}
             threatIndexPatterns={
               {
                 id: '1234',
@@ -159,8 +165,8 @@ describe('ListItemComponent', () => {
             }
             andLogicIncluded={true}
             isOnlyItem={false}
-            onDeleteEntryItem={jest.fn()}
-            onChangeEntryItem={jest.fn()}
+            onDeleteEntryItem={vi.fn()}
+            onChangeEntryItem={vi.fn()}
           />
         </ThemeProvider>
       );
@@ -192,8 +198,8 @@ describe('ListItemComponent', () => {
             }
             andLogicIncluded={false}
             isOnlyItem={false}
-            onDeleteEntryItem={jest.fn()}
-            onChangeEntryItem={jest.fn()}
+            onDeleteEntryItem={vi.fn()}
+            onChangeEntryItem={vi.fn()}
           />
         </ThemeProvider>
       );
@@ -233,8 +239,8 @@ describe('ListItemComponent', () => {
           }
           andLogicIncluded={false}
           isOnlyItem={true}
-          onDeleteEntryItem={jest.fn()}
-          onChangeEntryItem={jest.fn()}
+          onDeleteEntryItem={vi.fn()}
+          onChangeEntryItem={vi.fn()}
         />
       );
 
@@ -264,8 +270,8 @@ describe('ListItemComponent', () => {
           }
           andLogicIncluded={false}
           isOnlyItem={false}
-          onDeleteEntryItem={jest.fn()}
-          onChangeEntryItem={jest.fn()}
+          onDeleteEntryItem={vi.fn()}
+          onChangeEntryItem={vi.fn()}
         />
       );
 
@@ -297,8 +303,8 @@ describe('ListItemComponent', () => {
           // if entryItemIndex is not 0, wouldn't make sense for
           // this to be true, but done for testing purposes
           isOnlyItem={true}
-          onDeleteEntryItem={jest.fn()}
-          onChangeEntryItem={jest.fn()}
+          onDeleteEntryItem={vi.fn()}
+          onChangeEntryItem={vi.fn()}
         />
       );
 
@@ -328,8 +334,8 @@ describe('ListItemComponent', () => {
           }
           andLogicIncluded={false}
           isOnlyItem={true}
-          onDeleteEntryItem={jest.fn()}
-          onChangeEntryItem={jest.fn()}
+          onDeleteEntryItem={vi.fn()}
+          onChangeEntryItem={vi.fn()}
         />
       );
 
@@ -339,7 +345,7 @@ describe('ListItemComponent', () => {
     });
 
     test('it invokes "onChangeEntryItem" when delete button clicked', () => {
-      const mockOnDeleteEntryItem = jest.fn();
+      const mockOnDeleteEntryItem = vi.fn();
       const wrapper = mount(
         <ListItemComponent
           listItem={doublePayload()}
@@ -361,7 +367,7 @@ describe('ListItemComponent', () => {
           andLogicIncluded={false}
           isOnlyItem={true}
           onDeleteEntryItem={mockOnDeleteEntryItem}
-          onChangeEntryItem={jest.fn()}
+          onChangeEntryItem={vi.fn()}
         />
       );
 

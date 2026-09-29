@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { EuiBreakpointSize } from '@elastic/eui';
@@ -17,12 +19,15 @@ import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 let mockCurrentBreakpoint: EuiBreakpointSize | undefined = 'xl';
 let mockViewportBreakpoint: EuiBreakpointSize = 'xl';
 
-jest.mock('@kbn/ui-chrome-layout', () => ({
-  useCurrentChromeApplicationBreakpoint: () => mockCurrentBreakpoint,
-}));
+vi.mock('@kbn/ui-chrome-layout', () => {
+      const mocked = {
+      useCurrentChromeApplicationBreakpoint: () => mockCurrentBreakpoint,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
 
   return {
     ...actual,
@@ -32,8 +37,8 @@ jest.mock('@elastic/eui', () => {
 
 describe('AppMenu', () => {
   const defaultItems = [
-    { id: 'item1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
-    { id: 'item2', label: 'Item 2', run: jest.fn(), iconType: 'magnify', order: 2 },
+    { id: 'item1', label: 'Item 1', run: vi.fn(), iconType: 'gear', order: 1 },
+    { id: 'item2', label: 'Item 2', run: vi.fn(), iconType: 'magnify', order: 2 },
   ];
 
   const defaultConfig: AppMenuConfig = {
@@ -41,7 +46,7 @@ describe('AppMenu', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCurrentBreakpoint = 'xl';
     mockViewportBreakpoint = 'xl';
   });
@@ -86,10 +91,10 @@ describe('AppMenu', () => {
               {
                 id: 'hack',
                 label: <span data-test-subj="hacked-menu-label">hack</span>,
-                run: jest.fn(),
+                run: vi.fn(),
                 iconType: 'gear',
               } as unknown as AppMenuItemType,
-              { id: 'ok', label: 'Settings', run: jest.fn(), iconType: 'gear' },
+              { id: 'ok', label: 'Settings', run: vi.fn(), iconType: 'gear' },
             ],
           }}
         />
@@ -106,7 +111,7 @@ describe('AppMenu', () => {
         primaryActionItem: {
           id: 'save',
           label: 'Save',
-          run: jest.fn(),
+          run: vi.fn(),
           iconType: 'save',
         },
       };
@@ -171,7 +176,7 @@ describe('AppMenu', () => {
       const forcedOverflowItem: AppMenuItemType = {
         id: 'singleOverflowItem',
         label: 'Single overflow item',
-        run: jest.fn(),
+        run: vi.fn(),
         iconType: 'gear',
         order: 1,
         overflow: true,
@@ -228,7 +233,7 @@ describe('AppMenu', () => {
       label: 'Test switch',
       labelProps: {},
       checked: false,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       'data-test-subj': 'test-switch',
     };
 

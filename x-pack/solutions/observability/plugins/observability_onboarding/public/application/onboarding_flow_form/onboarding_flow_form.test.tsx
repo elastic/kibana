@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, within, fireEvent } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -17,52 +20,70 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
 import type { ObservabilityOnboardingAppServices } from '../..';
 
-jest.mock('@kbn/kibana-react-plugin/public');
-jest.mock('../quickstart_flows/shared/use_pricing_feature');
-jest.mock('@kbn/ebt-tools', () => ({
-  usePerformanceContext: () => ({
-    onPageReady: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public');
+vi.mock('../quickstart_flows/shared/use_pricing_feature');
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      usePerformanceContext: () => ({
+        onPageReady: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseCustomCards = jest.fn<IntegrationCardItem[], []>(() => []);
+const mockUseCustomCards = vi.fn<IntegrationCardItem[], []>(() => []);
 
-jest.mock('./use_custom_cards', () => ({
-  useCustomCards: () => mockUseCustomCards(),
-  AWS_CLOUDWATCH_OTEL_CARD_ID: 'aws-cloudwatch-otel-virtual',
-}));
+vi.mock('./use_custom_cards', () => {
+      const mocked = {
+      useCustomCards: () => mockUseCustomCards(),
+      AWS_CLOUDWATCH_OTEL_CARD_ID: 'aws-cloudwatch-otel-virtual',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../package_list/package_list', () => ({
-  PackageList: ({ list }: { list: IntegrationCardItem[] }) => (
-    <div data-test-subj="package-list">
-      {list.map((item, index) => (
-        <div key={index} data-test-subj={`package-item-${item.id || index}`}>
-          {item.title || item.name}
+vi.mock('../package_list/package_list', () => {
+      const mocked = {
+      PackageList: ({ list }: { list: IntegrationCardItem[] }) => (
+        <div data-test-subj="package-list">
+          {list.map((item, index) => (
+            <div key={index} data-test-subj={`package-item-${item.id || index}`}>
+              {item.title || item.name}
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
-  ),
-}));
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  LazyPackageCard: ({ id, title }: IntegrationCardItem) => (
-    <div data-test-subj={`package-card-${id}`}>{title}</div>
-  ),
-}));
+vi.mock('@kbn/fleet-plugin/public', () => {
+      const mocked = {
+      LazyPackageCard: ({ id, title }: IntegrationCardItem) => (
+        <div data-test-subj={`package-card-${id}`}>{title}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../api_endpoints/api_endpoints', () => ({
-  ApiEndpoints: () => <div data-test-subj="apiEndpointsStub" />,
-}));
+vi.mock('../api_endpoints/api_endpoints', () => {
+      const mocked = {
+      ApiEndpoints: () => <div data-test-subj="apiEndpointsStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUsePricingFeature = usePricingFeature as jest.MockedFunction<typeof usePricingFeature>;
-const mockPackageListSearchForm = jest.fn(({ searchQuery }: { searchQuery: string }) => (
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUsePricingFeature = usePricingFeature as MockedFunction<typeof usePricingFeature>;
+const mockPackageListSearchForm = vi.fn(({ searchQuery }: { searchQuery: string }) => (
   <div data-test-subj="package-search-form">Search Form: {searchQuery}</div>
 ));
 
-jest.mock('../package_list_search_form/package_list_search_form', () => ({
-  PackageListSearchForm: (props: { searchQuery: string }) => mockPackageListSearchForm(props),
-}));
+vi.mock('../package_list_search_form/package_list_search_form', () => {
+      const mocked = {
+      PackageListSearchForm: (props: { searchQuery: string }) => mockPackageListSearchForm(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (children: React.ReactNode, initialEntries: string[] = ['/']) => {
   return render(
@@ -79,7 +100,7 @@ const LocationDisplay = () => {
 
 describe('OnboardingFlowForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCustomCards.mockReturnValue([]);
 
     mockUseKibana.mockReturnValue({

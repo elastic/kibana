@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getUpdateAssetCriticalityStepDefinition } from './update_asset_criticality';
 import { ExecutionError } from '@kbn/workflows/server';
 import type {
@@ -50,24 +53,24 @@ const createMockContext = (
   input: Record<string, unknown>,
   esClient: unknown = {},
   config: Record<string, unknown> = {},
-  callKibanaApi: jest.Mock = jest.fn()
+  callKibanaApi: Mock = vi.fn()
 ) => {
   return {
     input,
     config,
     rawInput: input,
     contextManager: {
-      getContext: jest.fn().mockReturnValue({ workflow: { spaceId: 'default' } }),
-      getScopedEsClient: jest.fn().mockReturnValue(esClient),
-      renderInputTemplate: jest.fn(),
-      getFakeRequest: jest.fn().mockReturnValue(fakeRequest),
+      getContext: vi.fn().mockReturnValue({ workflow: { spaceId: 'default' } }),
+      getScopedEsClient: vi.fn().mockReturnValue(esClient),
+      renderInputTemplate: vi.fn(),
+      getFakeRequest: vi.fn().mockReturnValue(fakeRequest),
       callKibanaApi,
     },
     logger: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     },
     abortSignal: new AbortController().signal,
     stepId: 'test-step',
@@ -76,27 +79,27 @@ const createMockContext = (
 };
 
 describe('updateAssetCriticalityStepDefinition', () => {
-  const updateEntity = jest.fn();
-  const listEntities = jest.fn();
-  const createCRUDClient = jest.fn().mockReturnValue({
+  const updateEntity = vi.fn();
+  const listEntities = vi.fn();
+  const createCRUDClient = vi.fn().mockReturnValue({
     updateEntity,
     listEntities,
   }) as unknown as EntityStoreStartContract['createCRUDClient'];
-  const getCreateCRUDClient = jest.fn(async () => createCRUDClient);
-  const getClient = jest.fn();
-  const getWorkflowsExtensionsStart = jest.fn(
+  const getCreateCRUDClient = vi.fn(async () => createCRUDClient);
+  const getClient = vi.fn();
+  const getWorkflowsExtensionsStart = vi.fn(
     async () =>
       ({
         getClient,
       } as unknown as WorkflowsExtensionsServerPluginStart)
   );
-  const getLicense = jest.fn().mockResolvedValue({ hasAtLeast: () => true });
-  const getLicensingStart = jest.fn(
+  const getLicense = vi.fn().mockResolvedValue({ hasAtLeast: () => true });
+  const getLicensingStart = vi.fn(
     async () => ({ getLicense } as unknown as LicensingPluginStart)
   );
-  const checkPrivileges = jest.fn().mockResolvedValue(buildCheckPrivilegesResponse(true));
-  const checkPrivilegesDynamicallyWithRequest = jest.fn().mockReturnValue(checkPrivileges);
-  const getSecurityStart = jest.fn(
+  const checkPrivileges = vi.fn().mockResolvedValue(buildCheckPrivilegesResponse(true));
+  const checkPrivilegesDynamicallyWithRequest = vi.fn().mockReturnValue(checkPrivileges);
+  const getSecurityStart = vi.fn(
     async () =>
       ({
         authz: {
@@ -114,8 +117,8 @@ describe('updateAssetCriticalityStepDefinition', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (createCRUDClient as jest.Mock).mockReturnValue({ updateEntity, listEntities });
+    vi.clearAllMocks();
+    (createCRUDClient as Mock).mockReturnValue({ updateEntity, listEntities });
     getCreateCRUDClient.mockImplementation(async () => createCRUDClient);
     updateEntity.mockResolvedValue(undefined);
     listEntities.mockResolvedValue({
@@ -191,7 +194,7 @@ describe('updateAssetCriticalityStepDefinition', () => {
 
       await updateAssetCriticalityStepDefinition.handler(mockContext);
 
-      const getWorkflowsClient = (createCRUDClient as jest.Mock).mock.calls[0][2];
+      const getWorkflowsClient = (createCRUDClient as Mock).mock.calls[0][2];
       await getWorkflowsClient();
 
       expect(getClient).toHaveBeenCalledWith(fakeRequest);
@@ -324,7 +327,7 @@ describe('updateAssetCriticalityStepDefinition', () => {
     };
 
     it('triggers recalculation when configured and the license is at least platinum', async () => {
-      const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body: {} });
+      const callKibanaApi = vi.fn().mockResolvedValue({ status: 200, headers: {}, body: {} });
       const mockContext = createMockContext(
         input,
         {},
@@ -354,7 +357,7 @@ describe('updateAssetCriticalityStepDefinition', () => {
     });
 
     it('does not trigger recalculation when the config flag is false', async () => {
-      const callKibanaApi = jest.fn();
+      const callKibanaApi = vi.fn();
       const mockContext = createMockContext(
         input,
         {},
@@ -369,7 +372,7 @@ describe('updateAssetCriticalityStepDefinition', () => {
 
     it('does not trigger recalculation when the license is below platinum and notes it in the message', async () => {
       getLicense.mockResolvedValueOnce({ hasAtLeast: () => false });
-      const callKibanaApi = jest.fn();
+      const callKibanaApi = vi.fn();
       const mockContext = createMockContext(
         input,
         {},
@@ -391,7 +394,7 @@ describe('updateAssetCriticalityStepDefinition', () => {
     });
 
     it('still reports success and notes the failure in the message if the recalculation call fails', async () => {
-      const callKibanaApi = jest.fn().mockRejectedValue(new Error('risk engine not configured'));
+      const callKibanaApi = vi.fn().mockRejectedValue(new Error('risk engine not configured'));
       const mockContext = createMockContext(
         input,
         {},
@@ -413,7 +416,7 @@ describe('updateAssetCriticalityStepDefinition', () => {
 
     it('truncates the output message to stay within the schema limit, even with a long entity_id and a long recalculation error', async () => {
       const longEntityId = `host:${'a'.repeat(990)}`;
-      const callKibanaApi = jest.fn().mockRejectedValue(new Error('x'.repeat(5000)));
+      const callKibanaApi = vi.fn().mockRejectedValue(new Error('x'.repeat(5000)));
       const mockContext = createMockContext(
         { ...input, entity_id: longEntityId },
         {},

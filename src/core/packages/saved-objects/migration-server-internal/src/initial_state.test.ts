@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
@@ -100,7 +102,7 @@ describe('createInitialState', () => {
     };
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('creates the initial state for the model based on the passed in parameters', () => {
     expect(
@@ -216,7 +218,7 @@ describe('createInitialState', () => {
   });
 
   it('returns state with the correct `excludeFromUpgradeFilterHooks`', () => {
-    const fooExcludeOnUpgradeHook = jest.fn();
+    const fooExcludeOnUpgradeHook = vi.fn();
     typeRegistry.registerType({
       name: 'baz',
       namespaceType: 'single',
@@ -230,7 +232,7 @@ describe('createInitialState', () => {
   });
 
   it('returns state with an outdatedDocumentsQuery', () => {
-    jest.spyOn(getOutdatedDocumentsQueryModule, 'getOutdatedDocumentsQuery');
+    vi.spyOn(getOutdatedDocumentsQueryModule, 'getOutdatedDocumentsQuery');
 
     expect(
       createInitialState({

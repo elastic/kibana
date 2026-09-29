@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { defer, of, throwError, concat } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -101,24 +104,24 @@ const createExecutionAbortedEvent = (): ChatEvent =>
   } as unknown as ChatEvent);
 
 const createCallbackDeliveryServiceMock = () => {
-  const transport = jest.fn().mockResolvedValue({ status: 200 });
+  const transport = vi.fn().mockResolvedValue({ status: 200 });
   const service = {
-    getCallbackUrl: jest.fn((execution: AgentExecution) =>
+    getCallbackUrl: vi.fn((execution: AgentExecution) =>
       execution.executionMode === AgentExecutionMode.conversation
         ? execution.agentParams.callback?.url
         : undefined
     ),
-    validateCallbackUrl: jest.fn(),
-    createTransport: jest.fn().mockReturnValue(transport),
-    makeCallbackRequest: jest.fn().mockResolvedValue(undefined),
-  } as unknown as jest.Mocked<CallbackDeliveryService>;
+    validateCallbackUrl: vi.fn(),
+    createTransport: vi.fn().mockReturnValue(transport),
+    makeCallbackRequest: vi.fn().mockResolvedValue(undefined),
+  } as unknown as Mocked<CallbackDeliveryService>;
   return { service, transport };
 };
 
 describe('deliverCallbackEvents', () => {
   it('resolves without subscribing when no callback is configured', async () => {
     const { service } = createCallbackDeliveryServiceMock();
-    const subscribed = jest.fn();
+    const subscribed = vi.fn();
     const events$ = defer(() => {
       subscribed();
       return of(createReasoningEvent('hello'));

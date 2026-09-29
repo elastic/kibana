@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -19,25 +21,31 @@ import { createStartServicesMock, createUseKibanaMockValue } from '../../../mock
 import { createQueryClientWrapper } from '../../../shared/test_utils/query_client_wrapper';
 import { buildOverviewStepExecutionFromContext } from '../../workflow_execution_detail/ui/workflow_pseudo_step_context';
 
-jest.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_kibana');
 
 const renderWithIntl = (component: React.ReactElement) => {
   return render(<I18nProvider>{component}</I18nProvider>, { wrapper: createQueryClientWrapper() });
 };
 
-jest.mock('./step_execution_data_view', () => ({
-  StepExecutionDataView: ({ stepExecution, mode }: any) => (
-    <div data-test-subj="mocked-step-execution-data-view">
-      {`Mode: ${mode}, Step: ${stepExecution.stepId}`}
-    </div>
-  ),
-}));
+vi.mock('./step_execution_data_view', () => {
+      const mocked = {
+      StepExecutionDataView: ({ stepExecution, mode }: any) => (
+        <div data-test-subj="mocked-step-execution-data-view">
+          {`Mode: ${mode}, Step: ${stepExecution.stepId}`}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced', () => ({
-  FormattedRelativeEnhanced: ({ value }: { value: string }) => (
-    <span data-test-subj="formatted-relative">{value}</span>
-  ),
-}));
+vi.mock('../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced', () => {
+      const mocked = {
+      FormattedRelativeEnhanced: ({ value }: { value: string }) => (
+        <span data-test-subj="formatted-relative">{value}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockStepExecution = (
   overrides?: Partial<WorkflowStepExecutionDto>
@@ -74,14 +82,14 @@ const createMockStepExecution = (
 
 describe('WorkflowExecutionOverview', () => {
   beforeEach(() => {
-    jest.mocked(useKibana).mockImplementation(() => createUseKibanaMockValue());
+    vi.mocked(useKibana).mockImplementation(() => createUseKibanaMockValue());
   });
 
   it('resolves the execution identity rather than a workflow definition account', async () => {
     const services = createStartServicesMock();
     services.security.serviceAccounts.isEnabled.mockReturnValue(true);
     services.http.get.mockResolvedValue({ id: 'original-account', name: 'Original reader' });
-    jest.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(services));
+    vi.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(services));
     const stepExecution = createMockStepExecution({
       input: {
         execution: { effectiveIdentity: { type: 'service_account', id: 'original-account' } },

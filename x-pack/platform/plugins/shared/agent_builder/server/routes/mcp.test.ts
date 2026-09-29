@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerMCPRoutes, filterToolsByNamespace } from './mcp';
@@ -26,9 +29,9 @@ const createMockTool = (
   configuration: {},
   readonly: false,
   experimental: false,
-  isAvailable: jest.fn().mockResolvedValue({ status: 'available' }),
-  getSchema: jest.fn().mockResolvedValue(z.object({})),
-  getHandler: jest.fn().mockResolvedValue(jest.fn()),
+  isAvailable: vi.fn().mockResolvedValue({ status: 'available' }),
+  getSchema: vi.fn().mockResolvedValue(z.object({})),
+  getHandler: vi.fn().mockResolvedValue(vi.fn()),
   ...overrides,
 });
 
@@ -140,21 +143,27 @@ describe('filterToolsByNamespace', () => {
   });
 });
 
-const mockRegisterTool = jest.fn();
-jest.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
-  McpServer: jest.fn().mockImplementation(() => ({
-    registerTool: mockRegisterTool,
-    connect: jest.fn(),
-    close: jest.fn(),
-  })),
-}));
+const mockRegisterTool = vi.fn();
+vi.mock('@modelcontextprotocol/sdk/server/mcp.js', () => {
+      const mocked = {
+      McpServer: vi.fn().mockImplementation(() => ({
+        registerTool: mockRegisterTool,
+        connect: vi.fn(),
+        close: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils/mcp/kibana_mcp_http_transport', () => ({
-  KibanaMcpHttpTransport: jest.fn().mockImplementation(() => ({
-    handleRequest: jest.fn().mockResolvedValue({ status: 200 }),
-    close: jest.fn(),
-  })),
-}));
+vi.mock('../utils/mcp/kibana_mcp_http_transport', () => {
+      const mocked = {
+      KibanaMcpHttpTransport: vi.fn().mockImplementation(() => ({
+        handleRequest: vi.fn().mockResolvedValue({ status: 200 }),
+        close: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MCP route — registerTool arguments', () => {
   const mockAnnotations = {
@@ -168,7 +177,7 @@ describe('MCP route — registerTool arguments', () => {
   let postHandler: Function;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const mockLogger = loggingSystemMock.createLogger();
 
@@ -182,17 +191,17 @@ describe('MCP route — registerTool arguments', () => {
     });
 
     const mockRegistry = {
-      list: jest.fn().mockResolvedValue([annotatedTool, unannotatedTool, excludedTool]),
-      execute: jest.fn().mockResolvedValue({ results: [{ type: 'other', data: {} }] }),
+      list: vi.fn().mockResolvedValue([annotatedTool, unannotatedTool, excludedTool]),
+      execute: vi.fn().mockResolvedValue({ results: [{ type: 'other', data: {} }] }),
     };
-    const getInternalServices = jest.fn().mockReturnValue({
-      tools: { getRegistry: jest.fn().mockResolvedValue(mockRegistry) },
+    const getInternalServices = vi.fn().mockReturnValue({
+      tools: { getRegistry: vi.fn().mockResolvedValue(mockRegistry) },
     });
 
     const captureVersioned = (method: string) =>
-      jest.fn().mockImplementation((routeConfig: { path: string }) => {
+      vi.fn().mockImplementation((routeConfig: { path: string }) => {
         const versionedRoute = {
-          addVersion: jest.fn().mockImplementation((_config: any, handler: Function) => {
+          addVersion: vi.fn().mockImplementation((_config: any, handler: Function) => {
             if (method === 'POST') {
               postHandler = handler;
             }
@@ -203,9 +212,9 @@ describe('MCP route — registerTool arguments', () => {
       });
 
     const mockRouter = {
-      get: jest.fn(),
+      get: vi.fn(),
       versioned: { post: captureVersioned('POST') },
-    } as unknown as jest.Mocked<IRouter>;
+    } as unknown as Mocked<IRouter>;
 
     registerMCPRoutes({
       router: mockRouter,
@@ -216,18 +225,18 @@ describe('MCP route — registerTool arguments', () => {
 
   const createMockRequest = () => ({
     query: {},
-    events: { aborted$: { subscribe: jest.fn() } },
+    events: { aborted$: { subscribe: vi.fn() } },
   });
 
   const createMockContext = () => ({
-    core: Promise.resolve({ uiSettings: { client: { get: jest.fn() } } }),
+    core: Promise.resolve({ uiSettings: { client: { get: vi.fn() } } }),
     licensing: Promise.resolve({
       license: { status: 'active', hasAtLeast: () => true },
     }),
   });
 
   it('passes annotations in config when the tool has them', async () => {
-    await postHandler(createMockContext(), createMockRequest(), { customError: jest.fn() });
+    await postHandler(createMockContext(), createMockRequest(), { customError: vi.fn() });
 
     const annotatedCall = mockRegisterTool.mock.calls.find(
       (call: any[]) => call[0] === 'platform_core_list_indices'
@@ -240,7 +249,7 @@ describe('MCP route — registerTool arguments', () => {
   });
 
   it('passes undefined annotations when tool has none', async () => {
-    await postHandler(createMockContext(), createMockRequest(), { customError: jest.fn() });
+    await postHandler(createMockContext(), createMockRequest(), { customError: vi.fn() });
 
     const unannotatedCall = mockRegisterTool.mock.calls.find(
       (call: any[]) => call[0] === 'platform_core_search'
@@ -252,7 +261,7 @@ describe('MCP route — registerTool arguments', () => {
   });
 
   it('excludes tools with excludeFromMcp: true', async () => {
-    await postHandler(createMockContext(), createMockRequest(), { customError: jest.fn() });
+    await postHandler(createMockContext(), createMockRequest(), { customError: vi.fn() });
 
     const excludedCall = mockRegisterTool.mock.calls.find(
       (call: any[]) => call[0] === 'platform_core_execute_connector_sub_action'
@@ -264,13 +273,11 @@ describe('MCP route — registerTool arguments', () => {
 
 describe('MCP route — real SDK tool registration', () => {
   it('registers an unannotated tool without throwing', () => {
-    jest.restoreAllMocks();
-    const { McpServer: RealMcpServer } = jest.requireActual<
-      typeof import('@modelcontextprotocol/sdk/server/mcp.js')
-    >('@modelcontextprotocol/sdk/server/mcp.js');
+    vi.restoreAllMocks();
+    const { McpServer: RealMcpServer } = (require('@modelcontextprotocol/sdk/server/mcp.js') as typeof import('@modelcontextprotocol/sdk/server/mcp.js'));
 
     const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
-    const handler = jest.fn().mockResolvedValue({
+    const handler = vi.fn().mockResolvedValue({
       content: [{ type: 'text' as const, text: 'ok' }],
     });
 
@@ -284,13 +291,11 @@ describe('MCP route — real SDK tool registration', () => {
   });
 
   it('registers an annotated tool without throwing', () => {
-    jest.restoreAllMocks();
-    const { McpServer: RealMcpServer } = jest.requireActual<
-      typeof import('@modelcontextprotocol/sdk/server/mcp.js')
-    >('@modelcontextprotocol/sdk/server/mcp.js');
+    vi.restoreAllMocks();
+    const { McpServer: RealMcpServer } = (require('@modelcontextprotocol/sdk/server/mcp.js') as typeof import('@modelcontextprotocol/sdk/server/mcp.js'));
 
     const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
-    const handler = jest.fn().mockResolvedValue({
+    const handler = vi.fn().mockResolvedValue({
       content: [{ type: 'text' as const, text: 'ok' }],
     });
 
@@ -314,13 +319,11 @@ describe('MCP route — real SDK tool registration', () => {
   });
 
   it('rejects duplicate registration (proves first registration took effect)', () => {
-    jest.restoreAllMocks();
-    const { McpServer: RealMcpServer } = jest.requireActual<
-      typeof import('@modelcontextprotocol/sdk/server/mcp.js')
-    >('@modelcontextprotocol/sdk/server/mcp.js');
+    vi.restoreAllMocks();
+    const { McpServer: RealMcpServer } = (require('@modelcontextprotocol/sdk/server/mcp.js') as typeof import('@modelcontextprotocol/sdk/server/mcp.js'));
 
     const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
-    const handler = jest.fn();
+    const handler = vi.fn();
 
     server.registerTool('my_tool', { description: 'first', inputSchema: {} }, handler);
 
@@ -336,22 +339,22 @@ describe('registerMCPRoutes', () => {
   let routeHandlers: Record<string, { routeConfig: any; config: any; handler: Function }>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     routeHandlers = {};
 
     const mockLogger = loggingSystemMock.createLogger();
     const mockRegistry = {
-      list: jest.fn(),
-      execute: jest.fn().mockResolvedValue({ results: [{ type: 'other', data: {} }] }),
+      list: vi.fn(),
+      execute: vi.fn().mockResolvedValue({ results: [{ type: 'other', data: {} }] }),
     };
-    const getInternalServices = jest.fn().mockReturnValue({
-      tools: { getRegistry: jest.fn().mockResolvedValue(mockRegistry) },
+    const getInternalServices = vi.fn().mockReturnValue({
+      tools: { getRegistry: vi.fn().mockResolvedValue(mockRegistry) },
     });
 
     const captureVersioned = (method: string) =>
-      jest.fn().mockImplementation((routeConfig: { path: string }) => {
-        const versionedRoute = { addVersion: jest.fn() };
-        versionedRoute.addVersion = jest
+      vi.fn().mockImplementation((routeConfig: { path: string }) => {
+        const versionedRoute = { addVersion: vi.fn() };
+        versionedRoute.addVersion = vi
           .fn()
           .mockImplementation((vConfig: any, handler: Function) => {
             routeHandlers[`${method}:${routeConfig.path}`] = {
@@ -366,13 +369,13 @@ describe('registerMCPRoutes', () => {
 
     const mockRouter = {
       // The GET fallback is a non-versioned route registered directly on the router.
-      get: jest.fn().mockImplementation((routeConfig: { path: string }, handler: Function) => {
+      get: vi.fn().mockImplementation((routeConfig: { path: string }, handler: Function) => {
         routeHandlers[`GET:${routeConfig.path}`] = { routeConfig, config: undefined, handler };
       }),
       versioned: {
         post: captureVersioned('POST'),
       },
-    } as unknown as jest.Mocked<IRouter>;
+    } as unknown as Mocked<IRouter>;
 
     registerMCPRoutes({
       router: mockRouter,
@@ -426,7 +429,7 @@ describe('registerMCPRoutes', () => {
 
     it('responds 405 so MCP clients ignore the stream and use POST', async () => {
       const { handler } = routeHandlers[getRouteKey];
-      const response = { customError: jest.fn() };
+      const response = { customError: vi.fn() };
       await handler({}, {}, response);
       expect(response.customError).toHaveBeenCalledWith(
         expect.objectContaining({ statusCode: 405 })

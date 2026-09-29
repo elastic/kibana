@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import moment from 'moment';
 import { fireEvent, waitFor, screen } from '@testing-library/react';
@@ -14,8 +16,8 @@ import { MaintenanceWindowsList } from './maintenance_windows_list';
 import type { MaintenanceWindowUI } from '../../common';
 import { MaintenanceWindowStatus } from '../../common';
 
-jest.mock('../utils/kibana_react', () => {
-  const originalModule = jest.requireActual('../utils/kibana_react');
+vi.mock('../utils/kibana_react', async () => {
+  const originalModule = (await vi.importActual('../utils/kibana_react'));
   return {
     ...originalModule,
     // mocks the date format in settings
@@ -95,7 +97,7 @@ describe('MaintenanceWindowsList', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
   });
 
@@ -163,7 +165,7 @@ describe('MaintenanceWindowsList', () => {
   });
 
   test('it calls refreshData when user presses refresh button', async () => {
-    const refreshData = jest.fn();
+    const refreshData = vi.fn();
     appMockRenderer.render(
       <MaintenanceWindowsList
         refreshData={refreshData}

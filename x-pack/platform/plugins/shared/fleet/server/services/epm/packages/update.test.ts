@@ -5,21 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 
 import { reviewUpgrade, updatePackage } from './update';
 
-jest.mock('./get', () => ({
-  getInstallationObject: jest.fn(),
-  getPackageInfo: jest.fn(),
-}));
-jest.mock('../../audit_logging', () => ({
-  auditLoggingService: { writeCustomSoAuditLog: jest.fn() },
-}));
+vi.mock('./get', () => {
+      const mocked = {
+      getInstallationObject: vi.fn(),
+      getPackageInfo: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../audit_logging', () => {
+      const mocked = {
+      auditLoggingService: { writeCustomSoAuditLog: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getInstallationObject, getPackageInfo } = jest.requireMock('./get');
+const { getInstallationObject, getPackageInfo } = (await vi.importMock('./get'));
 
 const pendingReview = {
   target_version: '2.0.0',
@@ -30,7 +38,7 @@ const pendingReview = {
 
 describe('reviewUpgrade', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should throw when package is not installed', async () => {
@@ -145,7 +153,7 @@ describe('reviewUpgrade', () => {
 
 describe('updatePackage — namespace_customization_settings per-namespace merge', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('merges incoming namespace settings per-namespace, preserving namespaces absent from the payload', async () => {
@@ -222,7 +230,7 @@ describe('updatePackage — namespace_customization_settings per-namespace merge
 
 describe('updatePackage', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should clear pending_upgrade_review when disabling keep_policies_up_to_date', async () => {

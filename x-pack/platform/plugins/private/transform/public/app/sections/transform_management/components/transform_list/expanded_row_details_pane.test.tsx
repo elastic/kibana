@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import moment from 'moment-timezone';
@@ -20,26 +23,32 @@ import transformListRow from '../../../../common/__mocks__/transform_list_row.js
 import { useGetTransformStats } from '../../../../hooks';
 import { useEnabledFeatures } from '../../../../serverless_context';
 
-jest.mock('../../../../hooks', () => ({
-  useGetTransformStats: jest.fn(),
-}));
+vi.mock('../../../../hooks', () => {
+      const mocked = {
+      useGetTransformStats: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../app_dependencies');
+vi.mock('../../../../app_dependencies');
 
-jest.mock('../../../../serverless_context', () => ({
-  useEnabledFeatures: jest.fn(),
-}));
+vi.mock('../../../../serverless_context', () => {
+      const mocked = {
+      useEnabledFeatures: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetTransformStats = useGetTransformStats as jest.MockedFunction<
+const mockUseGetTransformStats = useGetTransformStats as MockedFunction<
   typeof useGetTransformStats
 >;
-const mockUseEnabledFeatures = useEnabledFeatures as jest.MockedFunction<typeof useEnabledFeatures>;
+const mockUseEnabledFeatures = useEnabledFeatures as MockedFunction<typeof useEnabledFeatures>;
 
 describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', () => {
-  const onAlertEdit = jest.fn();
+  const onAlertEdit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseEnabledFeatures.mockReturnValue({ showNodeInfo: false });
     appDependencies.useAppDependencies().cps = undefined;
 
@@ -112,8 +121,8 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
     appDependencies.useAppDependencies().cps = {
       isTierEligible: true,
       cpsManager: {
-        whenReady: jest.fn().mockResolvedValue(undefined),
-        hasLinkedProjects: jest.fn(() => true),
+        whenReady: vi.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: vi.fn(() => true),
       },
     } as any;
     mockUseGetTransformStats.mockReturnValue({
@@ -140,7 +149,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
   });
 
   test('hides project routing when there are no linked projects', async () => {
-    const fetchProjects = jest.fn().mockResolvedValue({
+    const fetchProjects = vi.fn().mockResolvedValue({
       origin: {
         _id: 'origin-id',
         _alias: 'local_project',
@@ -152,8 +161,8 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
     appDependencies.useAppDependencies().cps = {
       isTierEligible: true,
       cpsManager: {
-        whenReady: jest.fn().mockResolvedValue(undefined),
-        hasLinkedProjects: jest.fn(() => false),
+        whenReady: vi.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: vi.fn(() => false),
         fetchProjects,
       },
     } as any;
@@ -184,12 +193,12 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
   });
 
   test('keeps project routing visible when linked project discovery fails', async () => {
-    const fetchProjects = jest.fn().mockRejectedValue(new Error('Project fetch failed'));
+    const fetchProjects = vi.fn().mockRejectedValue(new Error('Project fetch failed'));
     appDependencies.useAppDependencies().cps = {
       isTierEligible: true,
       cpsManager: {
-        whenReady: jest.fn().mockResolvedValue(undefined),
-        hasLinkedProjects: jest.fn(() => false),
+        whenReady: vi.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: vi.fn(() => false),
         fetchProjects,
       },
     } as any;

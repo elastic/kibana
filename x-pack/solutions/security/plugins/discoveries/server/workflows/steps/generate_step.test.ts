@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -15,11 +18,11 @@ import { GenerateStepTypeId } from '../../../common/step_types/generate_step';
 import { invokeAttackDiscoveryGraphWithAlerts } from '@kbn/discoveries/impl/attack_discovery/graphs/invoke_graph_with_alerts';
 import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/prompts';
 
-jest.mock('@kbn/discoveries/impl/attack_discovery/graphs/invoke_graph_with_alerts');
-jest.mock('../../lib/attack_discovery/prompts');
+vi.mock('@kbn/discoveries/impl/attack_discovery/graphs/invoke_graph_with_alerts');
+vi.mock('../../lib/attack_discovery/prompts');
 
-const mockInvokeAttackDiscoveryGraphWithAlerts = invokeAttackDiscoveryGraphWithAlerts as jest.Mock;
-const mockGetAttackDiscoveryPrompts = getAttackDiscoveryPrompts as jest.Mock;
+const mockInvokeAttackDiscoveryGraphWithAlerts = invokeAttackDiscoveryGraphWithAlerts as Mock;
+const mockGetAttackDiscoveryPrompts = getAttackDiscoveryPrompts as Mock;
 
 describe('GenerateStepDefinition', () => {
   const mockLogger: Logger = loggerMock.create();
@@ -27,20 +30,20 @@ describe('GenerateStepDefinition', () => {
   const mockActionsClient = actionsClientMock.create();
   const mockEsClient = mockCoreStart.elasticsearch.client.asScoped({} as any).asCurrentUser;
   const mockEventLogger = {
-    logEvent: jest.fn(),
+    logEvent: vi.fn(),
   };
 
-  const mockGetStartServices = jest.fn().mockResolvedValue({
+  const mockGetStartServices = vi.fn().mockResolvedValue({
     coreStart: mockCoreStart,
     pluginsStart: {
       actions: {
-        getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
+        getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClient),
       },
     },
   });
 
-  const mockGetEventLogger = jest.fn().mockResolvedValue(mockEventLogger);
-  const mockGetEventLogIndex = jest.fn().mockResolvedValue('.kibana-event-log-*');
+  const mockGetEventLogger = vi.fn().mockResolvedValue(mockEventLogger);
+  const mockGetEventLogIndex = vi.fn().mockResolvedValue('.kibana-event-log-*');
 
   const defaultInput = {
     alerts: [
@@ -59,7 +62,7 @@ describe('GenerateStepDefinition', () => {
   const mockContext = {
     abortSignal: undefined,
     contextManager: {
-      getContext: jest.fn().mockReturnValue({
+      getContext: vi.fn().mockReturnValue({
         execution: {
           id: 'test-execution-id',
         },
@@ -68,7 +71,7 @@ describe('GenerateStepDefinition', () => {
           spaceId: 'default',
         },
       }),
-      getFakeRequest: jest.fn().mockReturnValue({}),
+      getFakeRequest: vi.fn().mockReturnValue({}),
     },
     input: defaultInput,
     logger: mockLogger,
@@ -110,7 +113,7 @@ describe('GenerateStepDefinition', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetAttackDiscoveryPrompts.mockResolvedValue(mockPrompts);
     mockActionsClient.get.mockResolvedValue({
       actionTypeId: '.gemini',
@@ -712,7 +715,7 @@ describe('GenerateStepDefinition', () => {
     };
 
     it('uses inference.getConnectorById when action_type_id is not provided and inference is available', async () => {
-      const mockGetConnectorById = jest.fn().mockResolvedValue({
+      const mockGetConnectorById = vi.fn().mockResolvedValue({
         type: '.inference',
         connectorId: '.anthropic-claude-4.6-opus-chat_completion',
         isInferenceEndpoint: true,
@@ -722,14 +725,14 @@ describe('GenerateStepDefinition', () => {
         isPreconfigured: true,
       });
 
-      const getStartServicesWithInference = jest.fn().mockResolvedValue({
+      const getStartServicesWithInference = vi.fn().mockResolvedValue({
         coreStart: mockCoreStart,
         pluginsStart: {
           actions: {
-            getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
+            getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClient),
           },
           inference: {
-            getClient: jest.fn().mockReturnValue({ chatComplete: jest.fn() }),
+            getClient: vi.fn().mockReturnValue({ chatComplete: vi.fn() }),
             getConnectorById: mockGetConnectorById,
           },
         },
@@ -760,7 +763,7 @@ describe('GenerateStepDefinition', () => {
     });
 
     it('passes resolved actionTypeId from inference connector to the graph', async () => {
-      const mockGetConnectorById = jest.fn().mockResolvedValue({
+      const mockGetConnectorById = vi.fn().mockResolvedValue({
         type: '.inference',
         connectorId: '.anthropic-claude-4.6-opus-chat_completion',
         isInferenceEndpoint: true,
@@ -770,14 +773,14 @@ describe('GenerateStepDefinition', () => {
         isPreconfigured: true,
       });
 
-      const getStartServicesWithInference = jest.fn().mockResolvedValue({
+      const getStartServicesWithInference = vi.fn().mockResolvedValue({
         coreStart: mockCoreStart,
         pluginsStart: {
           actions: {
-            getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
+            getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClient),
           },
           inference: {
-            getClient: jest.fn().mockReturnValue({ chatComplete: jest.fn() }),
+            getClient: vi.fn().mockReturnValue({ chatComplete: vi.fn() }),
             getConnectorById: mockGetConnectorById,
           },
         },
@@ -813,17 +816,17 @@ describe('GenerateStepDefinition', () => {
     it('falls back to resolveConnectorDetails when inference plugin is not available', async () => {
       const mockActionsClientWithGet = {
         ...mockActionsClient,
-        get: jest.fn().mockResolvedValue({
+        get: vi.fn().mockResolvedValue({
           actionTypeId: '.gen-ai',
           name: 'OpenAI Connector',
         }),
       };
 
-      const getStartServicesWithoutInference = jest.fn().mockResolvedValue({
+      const getStartServicesWithoutInference = vi.fn().mockResolvedValue({
         coreStart: mockCoreStart,
         pluginsStart: {
           actions: {
-            getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClientWithGet),
+            getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClientWithGet),
           },
           // inference intentionally omitted
         },

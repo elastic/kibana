@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AuthenticatedUser } from '@kbn/core/server';
 
 import { getSuccessfulSignalUpdateResponse } from '../../__mocks__/request_responses';
@@ -22,7 +24,7 @@ describe('updateAlertsWorkflowStatus', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ context } = requestContextMock.createTools());
     context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
       getSuccessfulSignalUpdateResponse()
@@ -30,8 +32,8 @@ describe('updateAlertsWorkflowStatus', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns the updateByQuery response', async () => {

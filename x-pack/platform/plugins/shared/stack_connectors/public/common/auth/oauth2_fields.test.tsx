@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { OAuth2Fields, jsonValidator } from './oauth2_fields';
@@ -12,7 +14,7 @@ import * as i18n from './translations';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
 
 describe('OAuth2Fields', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
   const baseFormData = {
     config: {
       hasAuth: true,

@@ -5,41 +5,45 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
 import { MacrosFileUpload } from './macros_file_upload';
 import { TestProviders } from '../../../../../../../../common/mock';
 import { useParseFileInput } from '../../../../../../../common/hooks/use_parse_file_input';
 
-jest.mock('../../../../../../../common/hooks/use_parse_file_input', () => {
-  const { parseContent } = jest.requireActual(
-    '../../../../../../../common/hooks/use_parse_file_input'
-  );
+vi.mock('../../../../../../../common/hooks/use_parse_file_input', async () => {
+  const { parseContent } = (await vi.importActual('../../../../../../../common/hooks/use_parse_file_input'));
   return {
     parseContent,
-    useParseFileInput: jest.fn(),
+    useParseFileInput: vi.fn(),
   };
 });
 
-jest.mock('../../../../../../../common/components/migration_steps', () => ({
-  UploadFileButton: ({
-    onClick,
-    isLoading,
-    disabled,
-  }: {
-    onClick: () => void;
-    isLoading?: boolean;
-    disabled?: boolean;
-  }) => (
-    <button type="button" onClick={onClick} disabled={isLoading || disabled}>
-      {'Upload'}
-    </button>
-  ),
-}));
+vi.mock('../../../../../../../common/components/migration_steps', () => {
+      const mocked = {
+      UploadFileButton: ({
+        onClick,
+        isLoading,
+        disabled,
+      }: {
+        onClick: () => void;
+        isLoading?: boolean;
+        disabled?: boolean;
+      }) => (
+        <button type="button" onClick={onClick} disabled={isLoading || disabled}>
+          {'Upload'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MacrosFileUpload', () => {
-  const mockUseParseFileInput = useParseFileInput as jest.Mock;
-  const mockParseFile = jest.fn();
+  const mockUseParseFileInput = useParseFileInput as Mock;
+  const mockParseFile = vi.fn();
   let onFileParsedCallback: (content: string) => void;
 
   beforeEach(() => {
@@ -56,7 +60,7 @@ describe('MacrosFileUpload', () => {
   it('renders correctly', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <MacrosFileUpload createResources={jest.fn()} />
+        <MacrosFileUpload createResources={vi.fn()} />
       </TestProviders>
     );
     expect(getByTestId('macrosFilePicker')).toBeInTheDocument();
@@ -64,7 +68,7 @@ describe('MacrosFileUpload', () => {
   });
 
   it('handles file selection and upload', async () => {
-    const createResources = jest.fn();
+    const createResources = vi.fn();
     const { getByLabelText, getByText } = render(
       <TestProviders>
         <MacrosFileUpload createResources={createResources} />
@@ -105,7 +109,7 @@ describe('MacrosFileUpload', () => {
   it('shows an API error', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <MacrosFileUpload createResources={jest.fn()} apiError="test api error" />
+        <MacrosFileUpload createResources={vi.fn()} apiError="test api error" />
       </TestProviders>
     );
     expect(getByTestId('macrosFileUploadError')).toBeInTheDocument();
@@ -120,7 +124,7 @@ describe('MacrosFileUpload', () => {
     });
     const { getByTestId } = render(
       <TestProviders>
-        <MacrosFileUpload createResources={jest.fn()} />
+        <MacrosFileUpload createResources={vi.fn()} />
       </TestProviders>
     );
     expect(getByTestId('macrosFileUploadError')).toBeInTheDocument();

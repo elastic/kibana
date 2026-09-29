@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   fromStoredDataViewToAsCodeSavedSchema,
   toStoredDataView,
@@ -46,18 +49,18 @@ const createMockDataViewLazy = ({
     managed,
     version,
     namespaces,
-    toSpec: jest.fn().mockResolvedValue(spec),
-    toMinimalSpec: jest.fn().mockResolvedValue(minimalSpec),
-    getFieldAttrs: jest.fn().mockReturnValue(new Map(Object.entries(fieldAttrs))),
-    getAsSavedObjectBody: jest.fn().mockReturnValue(savedObjectBody ?? spec),
+    toSpec: vi.fn().mockResolvedValue(spec),
+    toMinimalSpec: vi.fn().mockResolvedValue(minimalSpec),
+    getFieldAttrs: vi.fn().mockReturnValue(new Map(Object.entries(fieldAttrs))),
+    getAsSavedObjectBody: vi.fn().mockReturnValue(savedObjectBody ?? spec),
   } as unknown as DataViewLazy);
 
 const createService = () => {
-  dataViewsService.clearInstanceCache = jest.fn();
+  dataViewsService.clearInstanceCache = vi.fn();
   const mockSavedObjectsClient = savedObjectsClientMock.create();
   const mockFieldFormats = {
-    has: jest.fn().mockReturnValue(true),
-  } as unknown as jest.Mocked<FieldFormatsRegistry>;
+    has: vi.fn().mockReturnValue(true),
+  } as unknown as Mocked<FieldFormatsRegistry>;
   const service = new DataViewsAsCodeService(
     dataViewsService,
     mockSavedObjectsClient,
@@ -78,7 +81,7 @@ const getExpectedMappedData = (spec: DataViewSpec) => {
 
 describe('DataViewsAsCodeService', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('search', () => {
@@ -483,7 +486,7 @@ describe('DataViewsAsCodeService', () => {
       mockDataViewsService.getDataViewLazy
         .mockResolvedValueOnce(existingDataView)
         .mockResolvedValueOnce(refetchedDataView);
-      mockDataViewsService.createFromSpecLazy = jest.fn().mockResolvedValue(updatableDataView);
+      mockDataViewsService.createFromSpecLazy = vi.fn().mockResolvedValue(updatableDataView);
       mockSavedObjectsClient.update.mockResolvedValue({
         id,
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
@@ -526,7 +529,7 @@ describe('DataViewsAsCodeService', () => {
       mockDataViewsService.getDataViewLazy.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError()
       );
-      mockDataViewsService.createFromSpecLazy = jest.fn();
+      mockDataViewsService.createFromSpecLazy = vi.fn();
       const createdDataView = createMockDataViewLazy({
         id,
         managed: false,
@@ -564,7 +567,7 @@ describe('DataViewsAsCodeService', () => {
         SavedObjectsErrorHelpers.createGenericNotFoundError()
       );
       mockDataViewsService.createAndSaveDataViewLazy.mockRejectedValue(error);
-      mockDataViewsService.createFromSpecLazy = jest.fn();
+      mockDataViewsService.createFromSpecLazy = vi.fn();
 
       await expect(service.upsert(id, inputSpecWithoutId)).rejects.toThrow('Create failed');
       expect(mockDataViewsService.getDataViewLazy).toHaveBeenCalledWith(id);
@@ -578,7 +581,7 @@ describe('DataViewsAsCodeService', () => {
       const existingDataView = createMockDataViewLazy({ id, spec: storedSpec });
       const updatableDataView = createMockDataViewLazy({ id, spec: storedSpec });
       mockDataViewsService.getDataViewLazy.mockResolvedValue(existingDataView);
-      mockDataViewsService.createFromSpecLazy = jest.fn().mockResolvedValue(updatableDataView);
+      mockDataViewsService.createFromSpecLazy = vi.fn().mockResolvedValue(updatableDataView);
       mockSavedObjectsClient.update.mockRejectedValue(new Error('Update failed'));
 
       await expect(service.upsert(id, inputSpecWithoutId)).rejects.toThrow('Update failed');

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createMemoryHistory } from 'history';
 import { useRedirectPath } from './redirect_path';
 import { useKibana } from '..';
 
-const mockedUseKibana = jest.mocked(useKibana);
-jest.mock('..');
+const mockedUseKibana = vi.mocked(useKibana);
+vi.mock('..');
 
 describe('useRedirectPath', () => {
   const mockStart = coreMock.createStart();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiFieldNumber } from '@elastic/eui';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Formik } from 'formik';
@@ -12,7 +14,7 @@ import React from 'react';
 
 import { createFieldValidator, FormField } from './form_field';
 
-const onSubmit = jest.fn();
+const onSubmit = vi.fn();
 
 describe('FormField', () => {
   it('should render text field by default', () => {

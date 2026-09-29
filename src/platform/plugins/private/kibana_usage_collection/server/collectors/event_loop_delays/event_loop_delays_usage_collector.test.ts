@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Subject } from 'rxjs';
 import {
   Collector,
@@ -21,7 +23,7 @@ const logger = loggingSystemMock.createLogger();
 
 describe('registerEventLoopDelaysCollector', () => {
   let collector: Collector<unknown>;
-  const mockRegisterType = jest.fn();
+  const mockRegisterType = vi.fn();
   const mockInternalRepository = savedObjectsRepositoryMock.create();
   const mockGetSavedObjectsClient = () => mockInternalRepository;
 
@@ -66,7 +68,7 @@ describe('registerEventLoopDelaysCollector', () => {
   });
 
   it('returns objects from event_loop_delays_daily from fetch function', async () => {
-    const mockFind = jest.fn().mockResolvedValue({
+    const mockFind = vi.fn().mockResolvedValue({
       saved_objects: [{ attributes: { test: 1 } }],
     } as unknown as SavedObjectsFindResponse);
     mockInternalRepository.find = mockFind;

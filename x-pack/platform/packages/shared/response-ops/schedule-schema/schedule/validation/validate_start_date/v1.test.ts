@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { validateStartDate } from './v1';
 
 describe('validateStartDate', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('validates start date correctly', () => {
     expect(validateStartDate('2025-02-17T05:05:00.000Z')).toBeUndefined();

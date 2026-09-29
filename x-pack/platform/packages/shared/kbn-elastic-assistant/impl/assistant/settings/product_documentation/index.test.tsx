@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ProductDocumentationManagement } from '.';
@@ -11,19 +14,19 @@ import * as i18n from './translations';
 import { useInstallProductDoc } from '../../api/product_docs/use_install_product_doc';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
-jest.mock('../../api/product_docs/use_install_product_doc');
-jest.mock('../../api/product_docs/use_get_product_doc_status');
+vi.mock('../../api/product_docs/use_install_product_doc');
+vi.mock('../../api/product_docs/use_get_product_doc_status');
 
 describe('ProductDocumentationManagement', () => {
-  const mockInstallProductDoc = jest.fn().mockResolvedValue({});
+  const mockInstallProductDoc = vi.fn().mockResolvedValue({});
 
   beforeEach(() => {
-    (useInstallProductDoc as jest.Mock).mockReturnValue({
+    (useInstallProductDoc as Mock).mockReturnValue({
       mutateAsync: mockInstallProductDoc,
       isLoading: false,
       isSuccess: false,
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders install button when not installed', () => {
@@ -47,7 +50,7 @@ describe('ProductDocumentationManagement', () => {
   });
 
   it('does not render anything when the installation was started by the plugin', () => {
-    (useInstallProductDoc as jest.Mock).mockReturnValue({
+    (useInstallProductDoc as Mock).mockReturnValue({
       mutateAsync: mockInstallProductDoc,
       isLoading: false,
       isSuccess: false,
@@ -62,7 +65,7 @@ describe('ProductDocumentationManagement', () => {
   });
 
   it('shows installing spinner and text when installing', async () => {
-    (useInstallProductDoc as jest.Mock).mockReturnValue({
+    (useInstallProductDoc as Mock).mockReturnValue({
       mutateAsync: mockInstallProductDoc,
       isLoading: true,
       isSuccess: false,
@@ -78,7 +81,7 @@ describe('ProductDocumentationManagement', () => {
   });
 
   it('sets installed state to true after successful installation', async () => {
-    (useInstallProductDoc as jest.Mock).mockReturnValue({
+    (useInstallProductDoc as Mock).mockReturnValue({
       mutateAsync: mockInstallProductDoc,
       isLoading: false,
       isSuccess: true,
@@ -94,7 +97,7 @@ describe('ProductDocumentationManagement', () => {
   });
 
   it('sets installed state to false after failed installation', async () => {
-    (useInstallProductDoc as jest.Mock).mockReturnValue({
+    (useInstallProductDoc as Mock).mockReturnValue({
       mutateAsync: mockInstallProductDoc,
       isLoading: false,
       isSuccess: false,

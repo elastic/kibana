@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { AlertsGroupingLevel, type AlertsGroupingLevelProps } from './alerts_grouping_level';
@@ -13,52 +16,58 @@ import * as buildEsQueryModule from '@kbn/es-query/src/es_query/build_es_query';
 import { mockGroupingProps } from '../mocks/grouping_props.mock';
 import { groupingSearchResponse } from '../mocks/grouping_query.mock';
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_alerts_group_aggregations_query', () => ({
-  useGetAlertsGroupAggregationsQuery: jest.fn(),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_alerts_group_aggregations_query', () => {
+      const mocked = {
+      useGetAlertsGroupAggregationsQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetAlertsGroupAggregationsQuery = useGetAlertsGroupAggregationsQuery as jest.Mock;
+const mockUseGetAlertsGroupAggregationsQuery = useGetAlertsGroupAggregationsQuery as Mock;
 mockUseGetAlertsGroupAggregationsQuery.mockReturnValue({
   loading: false,
   data: groupingSearchResponse,
 });
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view', () => ({
-  useAlertDataView: jest.fn().mockReturnValue({ dataViews: [{ fields: [] }] }),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view', () => {
+      const mocked = {
+      useAlertDataView: vi.fn().mockReturnValue({ dataViews: [{ fields: [] }] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../contexts/alerts_grouping_context', () => {
-  const original = jest.requireActual('../contexts/alerts_grouping_context');
+vi.mock('../contexts/alerts_grouping_context', async () => {
+  const original = (await vi.importActual('../contexts/alerts_grouping_context'));
   return {
     ...original,
-    useAlertsGroupingState: jest.fn(),
+    useAlertsGroupingState: vi.fn(),
   };
 });
 
-const getGrouping = jest
+const getGrouping = vi
   .fn()
   .mockImplementation(({ renderChildComponent }) => <span>{renderChildComponent()}</span>);
 
 const mockGroupingLevelProps: Omit<AlertsGroupingLevelProps, 'children'> = {
   ...mockGroupingProps,
   getGrouping,
-  onGroupClose: jest.fn(),
+  onGroupClose: vi.fn(),
   pageIndex: 0,
   pageSize: 10,
   selectedGroup: 'selectedGroup',
-  setPageIndex: jest.fn(),
-  setPageSize: jest.fn(),
+  setPageIndex: vi.fn(),
+  setPageSize: vi.fn(),
 };
 
 describe('AlertsGroupingLevel', () => {
-  let buildEsQuerySpy: jest.SpyInstance;
+  let buildEsQuerySpy: MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   beforeAll(() => {
-    buildEsQuerySpy = jest.spyOn(buildEsQueryModule, 'buildEsQuery');
+    buildEsQuerySpy = vi.spyOn(buildEsQueryModule, 'buildEsQuery');
   });
 
   it('should render', () => {

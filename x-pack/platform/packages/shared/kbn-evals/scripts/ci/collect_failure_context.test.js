@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-jest.mock('child_process', () => ({ execFileSync: jest.fn() }));
+import { vi } from 'vitest';
+
+vi.mock('child_process', () => {
+      const mocked = { execFileSync: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 const { execFileSync } = require('child_process');
 const { collectFailureContext } = require('./collect_failure_context');

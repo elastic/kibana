@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -67,7 +69,7 @@ async function renderFilter(
     searchTerm: '',
     getValue: (ki) => (ki.kind === 'feature' ? ki.feature.type : undefined),
     selected: [],
-    onSelectedChange: jest.fn(),
+    onSelectedChange: vi.fn(),
     filterCriteria: EMPTY_CRITERIA,
     labels: DEFAULT_LABELS,
     ...props,
@@ -149,7 +151,7 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
     });
 
     it('calls onSelectedChange with toggled selections', async () => {
-      const onSelectedChange = jest.fn();
+      const onSelectedChange = vi.fn();
       const kis = [
         makeFeatureKI({ type: 'entity', id: 'f1' }),
         makeFeatureKI({ type: 'infrastructure', id: 'f2' }),

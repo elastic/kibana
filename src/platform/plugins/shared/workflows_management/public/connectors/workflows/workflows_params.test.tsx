@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -22,14 +25,20 @@ import {
 } from './workflows_params.test_fixtures';
 
 // Mock useKibana hook
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockWorkflowApi = createMockWorkflowApi();
-jest.mock('@kbn/workflows-ui/src/api/workflows_api', () => ({
-  WorkflowApi: jest.fn().mockImplementation(() => mockWorkflowApi),
-}));
+vi.mock('@kbn/workflows-ui/src/api/workflows_api', () => {
+      const mocked = {
+      WorkflowApi: vi.fn().mockImplementation(() => mockWorkflowApi),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Suppress known React warnings/errors from UI library components in tests
 // These are expected and don't affect test functionality:
@@ -59,10 +68,10 @@ const renderWithIntl = (component: React.ReactElement) => {
   return render(component, { wrapper: I18nProvider });
 };
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 describe('WorkflowsParamsFields', () => {
-  const mockEditAction = jest.fn();
+  const mockEditAction = vi.fn();
 
   const defaultProps = {
     actionParams: {
@@ -81,7 +90,7 @@ describe('WorkflowsParamsFields', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockWorkflowApi.getWorkflows.mockResolvedValue(
       createWorkflowListResponse([
         createWorkflowListItem({
@@ -107,7 +116,7 @@ describe('WorkflowsParamsFields', () => {
               readManagedWorkflow: true,
             },
           },
-          getUrlForApp: jest.fn().mockReturnValue('/app/workflows'),
+          getUrlForApp: vi.fn().mockReturnValue('/app/workflows'),
         },
       },
     } as any);
@@ -211,7 +220,7 @@ describe('WorkflowsParamsFields', () => {
               readManagedWorkflow: false,
             },
           },
-          getUrlForApp: jest.fn().mockReturnValue('/app/workflows'),
+          getUrlForApp: vi.fn().mockReturnValue('/app/workflows'),
         },
       },
     } as any);
@@ -257,7 +266,7 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should show error message when fetch fails', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
     mockWorkflowApi.getWorkflows.mockRejectedValue(new Error('Failed to fetch'));
 
     await act(async () => {
@@ -463,7 +472,7 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should handle create new workflow click', async () => {
-    const mockGetUrlForApp = jest.fn().mockReturnValue('/app/workflows');
+    const mockGetUrlForApp = vi.fn().mockReturnValue('/app/workflows');
     mockUseKibana.mockReturnValue({
       services: {
         http: {},
@@ -752,7 +761,7 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should render view all workflows link and handle click to open in new tab', async () => {
-    const mockGetUrlForApp = jest.fn().mockReturnValue('/app/workflows');
+    const mockGetUrlForApp = vi.fn().mockReturnValue('/app/workflows');
     mockUseKibana.mockReturnValue({
       services: {
         http: {},

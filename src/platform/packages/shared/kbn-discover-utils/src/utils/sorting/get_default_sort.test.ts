@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getDefaultSort } from './get_default_sort';
 import {
   stubDataView,
@@ -14,13 +16,13 @@ import {
 } from '@kbn/data-views-plugin/common/data_view.stub';
 import { isSortable } from './get_sort';
 
-const isSortableMock = jest.mocked(isSortable);
+const isSortableMock = vi.mocked(isSortable);
 
-jest.mock('./get_sort', () => {
-  const originalModule = jest.requireActual('./get_sort');
+vi.mock('./get_sort', async () => {
+  const originalModule = (await vi.importActual('./get_sort'));
   return {
     ...originalModule,
-    isSortable: jest.fn(originalModule.isSortable),
+    isSortable: vi.fn(originalModule.isSortable),
   };
 });
 

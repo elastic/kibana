@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
@@ -29,7 +31,7 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
   const esClient =
     elasticsearchServiceMock.createCustomClusterClient() as unknown as IScopedClusterClient;
   const logger = loggingSystemMock.createLogger();
-  const indexNameProvider = jest.fn().mockReturnValue('.kibana-siem-dashboard-migrations');
+  const indexNameProvider = vi.fn().mockReturnValue('.kibana-siem-dashboard-migrations');
   const currentUser = {
     userName: 'testUser',
     profile_uid: 'testProfileUid',
@@ -47,7 +49,7 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('create', () => {
@@ -216,7 +218,7 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
       ];
 
       const error = new Error('Bulk update failed');
-      esClient.asInternalUser.bulk = jest.fn().mockRejectedValue(error);
+      esClient.asInternalUser.bulk = vi.fn().mockRejectedValue(error);
 
       await expect(
         dashboardMigrationsDataDashboardsClient.update(dashboardMigrations)
@@ -278,7 +280,7 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
         },
       } as SearchResponse<DashboardMigrationDashboard>;
 
-      esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
+      esClient.asInternalUser.search = vi.fn().mockResolvedValue(mockResponse);
 
       const result = await dashboardMigrationsDataDashboardsClient.get(migrationId, {
         filters: { status: SiemMigrationStatus.COMPLETED },
@@ -333,7 +335,7 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
     test('should throw an error if search fails', async () => {
       const migrationId = 'migration1';
       const error = new Error('Search failed');
-      esClient.asInternalUser.search = jest.fn().mockRejectedValue(error);
+      esClient.asInternalUser.search = vi.fn().mockRejectedValue(error);
 
       await expect(dashboardMigrationsDataDashboardsClient.get(migrationId)).rejects.toThrow(
         'Search failed'
@@ -534,7 +536,7 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
     test('should throw an error if updateByQuery fails', async () => {
       const migrationId = 'migration1';
       const error = new Error('UpdateByQuery failed');
-      esClient.asInternalUser.updateByQuery = jest.fn().mockRejectedValue(error);
+      esClient.asInternalUser.updateByQuery = vi.fn().mockRejectedValue(error);
 
       await expect(
         dashboardMigrationsDataDashboardsClient.updateStatus(
@@ -570,7 +572,7 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
         },
       };
 
-      esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
+      esClient.asInternalUser.search = vi.fn().mockResolvedValue(mockResponse);
       const result = await dashboardMigrationsDataDashboardsClient.getTranslationStats(migrationId);
 
       // make sure the search is being called with correct query
@@ -631,7 +633,7 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
     test('should throw an error if search fails', async () => {
       const migrationId = 'migration1';
       const error = new Error('Search failed');
-      esClient.asInternalUser.search = jest.fn().mockRejectedValue(error);
+      esClient.asInternalUser.search = vi.fn().mockRejectedValue(error);
 
       await expect(
         dashboardMigrationsDataDashboardsClient.getTranslationStats(migrationId)
@@ -661,7 +663,7 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
         },
       };
 
-      esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
+      esClient.asInternalUser.search = vi.fn().mockResolvedValue(mockResponse);
 
       const result = await dashboardMigrationsDataDashboardsClient.getStats(migrationId);
 
@@ -704,10 +706,10 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
       };
 
       // return the migration response
-      esClient.asInternalUser.search = jest.fn().mockResolvedValueOnce(mockResponse);
+      esClient.asInternalUser.search = vi.fn().mockResolvedValueOnce(mockResponse);
 
       // calls to get vendor for the migration
-      jest.spyOn(SiemMigrationsDataItemClient.prototype, 'get').mockResolvedValue({
+      vi.spyOn(SiemMigrationsDataItemClient.prototype, 'get').mockResolvedValue({
         total: 1,
         data: [
           {
@@ -797,7 +799,7 @@ describe('DashboardMigrationsDataDashboardsClient', () => {
           },
         ] as StoredDashboardMigrationDashboard[],
       };
-      jest.spyOn(dashboardMigrationsDataDashboardsClient, 'get').mockResolvedValue(mockGetResponse);
+      vi.spyOn(dashboardMigrationsDataDashboardsClient, 'get').mockResolvedValue(mockGetResponse);
 
       const result = await dashboardMigrationsDataDashboardsClient.prepareDelete(migrationId);
 

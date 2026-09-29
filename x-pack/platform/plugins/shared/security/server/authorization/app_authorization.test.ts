@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   coreMock,
   httpServerMock,
@@ -151,7 +153,7 @@ describe('initAppAuthorization', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
 
-    const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: true });
+    const mockCheckPrivileges = vi.fn().mockReturnValue({ hasAllRequested: true });
     mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
     mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
       // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
@@ -191,7 +193,7 @@ describe('initAppAuthorization', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
 
-    const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: false });
+    const mockCheckPrivileges = vi.fn().mockReturnValue({ hasAllRequested: false });
     mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
     mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
       // hapi conceals the actual "request" from us, so we make sure that the headers are passed to

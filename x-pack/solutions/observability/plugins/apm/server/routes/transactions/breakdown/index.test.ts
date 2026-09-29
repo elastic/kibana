@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getTransactionBreakdown } from '.';
 import * as constants from './constants';
 import noDataResponse from './mock_responses/no_data.json';
@@ -20,7 +22,7 @@ const mockConfig = new Proxy(
 ) as APMConfig;
 
 function getMockApmEventClient(esResponse: any) {
-  const apmEventClientSpy = jest.fn().mockReturnValueOnce(esResponse);
+  const apmEventClientSpy = vi.fn().mockReturnValueOnce(esResponse);
   return { apmEventClient: { search: apmEventClientSpy } as any };
 }
 

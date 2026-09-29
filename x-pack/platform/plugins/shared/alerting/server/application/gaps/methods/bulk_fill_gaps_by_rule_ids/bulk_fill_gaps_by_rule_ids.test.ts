@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { rulesClientContextMock } from '../../../../rules_client/rules_client.mock';
 import { bulkFillGapsByRuleIds } from './bulk_fill_gaps_by_rule_ids';
 import {
@@ -20,23 +23,23 @@ import { RULE_SAVED_OBJECT_TYPE } from '../get_rule_ids_with_gaps/get_rule_ids_w
 import { toBulkGapFillError } from './utils';
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 
-jest.mock('./batch_backfill_rule_gaps', () => {
+vi.mock('./batch_backfill_rule_gaps', () => {
   return {
-    batchBackfillRuleGaps: jest.fn(),
+    batchBackfillRuleGaps: vi.fn(),
   };
 });
 
-const batchBackfillRuleGapsMock = batchBackfillRuleGaps as jest.Mock;
+const batchBackfillRuleGapsMock = batchBackfillRuleGaps as Mock;
 
-jest.mock('../../../../rules_client/common/audit_events', () => {
-  const actual = jest.requireActual('../../../../rules_client/common/audit_events');
+vi.mock('../../../../rules_client/common/audit_events', async () => {
+  const actual = (await vi.importActual('../../../../rules_client/common/audit_events'));
   return {
     ...actual,
-    ruleAuditEvent: jest.fn(),
+    ruleAuditEvent: vi.fn(),
   };
 });
 
-const ruleAuditEventMock = ruleAuditEvent as jest.Mock;
+const ruleAuditEventMock = ruleAuditEvent as Mock;
 
 const buildRule = (id: number): BulkFillGapsByRuleIdsParams['rules'][0] => {
   return {
@@ -70,20 +73,20 @@ const rulesThatAttemptedToBackfill = [...successfulRules, skippedRule, erroredRu
 let rulesClientContext: RulesClientContext;
 
 describe('bulkFillGapsByRuleIds', () => {
-  let refreshIndexMock: jest.Mock;
+  let refreshIndexMock: Mock;
   let results: BulkFillGapsByRuleIdsResult;
-  let ensuredAuthorizedMock: jest.Mock;
+  let ensuredAuthorizedMock: Mock;
 
   const authorizationError = new Error('error at authorization');
   const schedulingError = new Error('error at scheduling');
 
   beforeEach(async () => {
     rulesClientContext = rulesClientContextMock.create();
-    const eventLogClientMock = rulesClientContext.getEventLogClient as jest.Mock;
-    refreshIndexMock = jest.fn();
+    const eventLogClientMock = rulesClientContext.getEventLogClient as Mock;
+    refreshIndexMock = vi.fn();
     eventLogClientMock.mockResolvedValue({ refreshIndex: refreshIndexMock });
 
-    ensuredAuthorizedMock = rulesClientContext.authorization.ensureAuthorized as jest.Mock;
+    ensuredAuthorizedMock = rulesClientContext.authorization.ensureAuthorized as Mock;
     ensuredAuthorizedMock.mockImplementation(async ({ ruleTypeId }) => {
       if (ruleTypeId === erroredRuleAtAuthorization.alertTypeId) {
         throw authorizationError;
@@ -128,7 +131,7 @@ describe('bulkFillGapsByRuleIds', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should ensure the user is authorized for each combination of ruleTypeId and consumer found in the rules', () => {

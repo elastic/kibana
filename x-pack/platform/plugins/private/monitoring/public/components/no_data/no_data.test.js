@@ -5,49 +5,60 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { NoData } from '.';
 
-jest.mock('@elastic/eui-illustrations', () => ({
-  megaphone: {
-    id: 'megaphone',
-    title: 'Megaphone',
-    light: '<svg></svg>',
-    dark: '<svg></svg>',
-  },
-}));
+vi.mock('@elastic/eui-illustrations', () => {
+      const mocked = {
+      megaphone: {
+        id: 'megaphone',
+        title: 'Megaphone',
+        light: '<svg></svg>',
+        dark: '<svg></svg>',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../legacy_shims', () => ({
-  Legacy: {
-    shims: {
-      isAirGapped: false,
-      useCloudConnectStatus: () => ({ isCloudConnectAutoopsEnabled: false, isLoading: false }),
-    },
-  },
-}));
+vi.mock('../../legacy_shims', () => {
+      const mocked = {
+      Legacy: {
+        shims: {
+          isAirGapped: false,
+          useCloudConnectStatus: () => ({ isCloudConnectAutoopsEnabled: false, isLoading: false }),
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        getUrlForApp: jest.fn(() => '/app/cloud_connect'),
-        navigateToApp: jest.fn(),
-        capabilities: {
-          cloudConnect: {
-            show: true,
-            configure: true,
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            getUrlForApp: vi.fn(() => '/app/cloud_connect'),
+            navigateToApp: vi.fn(),
+            capabilities: {
+              cloudConnect: {
+                show: true,
+                configure: true,
+              },
+            },
+          },
+          notifications: {
+            tours: {
+              isEnabled: vi.fn(() => true),
+            },
           },
         },
-      },
-      notifications: {
-        tours: {
-          isEnabled: jest.fn(() => true),
-        },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const enabler = {};
 

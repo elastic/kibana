@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { get } from 'lodash';
 import { SearchStrategyRegistry } from './search_strategy_registry';
 import { AbstractSearchStrategy, DefaultSearchStrategy } from './strategies';
@@ -30,7 +32,7 @@ describe('SearchStrategyRegister', () => {
     core: {
       uiSettings: {
         client: {
-          get: jest.fn(),
+          get: vi.fn(),
         },
       },
     },

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { ReplaySubject } from 'rxjs';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
@@ -16,13 +19,19 @@ import { useChangePointLensProps, getChangePointLensProps } from './use_change_p
 
 // ---- module mocks ----
 
-jest.mock('@kbn/lens-embeddable-utils/config_builder', () => ({
-  LensConfigBuilder: jest.fn(),
-}));
+vi.mock('@kbn/lens-embeddable-utils/config_builder', () => {
+      const mocked = {
+      LensConfigBuilder: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => ({
-  useEuiTheme: () => ({ euiTheme: { size: { base: '16px' } } }),
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      useEuiTheme: () => ({ euiTheme: { size: { base: '16px' } } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // IntersectionObserver is instantiated unconditionally inside the hook.
 // The callback is captured per-test so viewport-gate tests can trigger it directly.
@@ -32,9 +41,9 @@ beforeAll(() => {
   Object.defineProperty(window, 'IntersectionObserver', {
     writable: true,
     configurable: true,
-    value: jest.fn().mockImplementation((cb: IntersectionObserverCallback) => {
+    value: vi.fn().mockImplementation((cb: IntersectionObserverCallback) => {
       capturedIntersectionCallback = cb;
-      return { observe: jest.fn(), disconnect: jest.fn() };
+      return { observe: vi.fn(), disconnect: vi.fn() };
     }),
   });
 });
@@ -164,11 +173,11 @@ describe('getChangePointLensProps', () => {
 // ---- useChangePointLensProps — reactive pipeline tests ----
 
 describe('useChangePointLensProps', () => {
-  let mockBuild: jest.Mock;
+  let mockBuild: Mock;
 
   beforeEach(() => {
-    mockBuild = jest.fn().mockResolvedValue({ ...attributesStub });
-    (LensConfigBuilder as jest.Mock).mockImplementation(() => ({ build: mockBuild }));
+    mockBuild = vi.fn().mockResolvedValue({ ...attributesStub });
+    (LensConfigBuilder as Mock).mockImplementation(() => ({ build: mockBuild }));
   });
 
   it('uses the timeRange override in preference to fetchParams.timeRange', async () => {
@@ -281,7 +290,7 @@ describe('useChangePointLensProps', () => {
   });
 
   it('survives a builder error and resolves correctly on the next trigger', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const discoverFetch$ = makeDiscoverFetch$();
 
     // First call (initial BehaviorSubject emission) throws; second call (discoverFetch$) succeeds.

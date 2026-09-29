@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { DataContext } from './table_basic';
@@ -20,10 +22,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 describe('datatable cell renderer', () => {
-  const innerCellColorFnMock = jest.fn().mockReturnValue('blue');
-  const cellColorFnMock = jest.fn().mockReturnValue(innerCellColorFnMock);
+  const innerCellColorFnMock = vi.fn().mockReturnValue('blue');
+  const cellColorFnMock = vi.fn().mockReturnValue(innerCellColorFnMock);
   const paletteServiceMock = chartPluginMock.createPaletteRegistry();
-  const setCellProps = jest.fn();
+  const setCellProps = vi.fn();
 
   const baseTable: Datatable = {
     type: 'datatable',
@@ -60,7 +62,7 @@ describe('datatable cell renderer', () => {
   const defaultMinMaxByColumnId = new Map([['a', { min: 12, max: 155 }]]);
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const DataContextProviderWrapper =
@@ -200,7 +202,7 @@ describe('datatable cell renderer', () => {
     });
 
     it('renders a clickable dash for missing values', async () => {
-      const handleFilterClick = jest.fn();
+      const handleFilterClick = vi.fn();
       const cellRenderer = makeCellRenderer({
         columnConfig: {
           columns: [{ columnId: 'a', type: 'lens_datatable_column', oneClickFilter: true }],
@@ -223,7 +225,7 @@ describe('datatable cell renderer', () => {
     });
 
     it('passes the correct colIndex to handleFilterClick for a non-first column', async () => {
-      const handleFilterClick = jest.fn();
+      const handleFilterClick = vi.fn();
       const cellRenderer = makeCellRenderer({
         columnConfig: {
           columns: [
@@ -514,7 +516,7 @@ describe('datatable cell renderer', () => {
     });
 
     it('should render a link for null values in badge mode when oneClickFilter is enabled', async () => {
-      const handleFilterClick = jest.fn();
+      const handleFilterClick = vi.fn();
       const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'badge';
       columnConfig.columns[0].oneClickFilter = true;
@@ -530,7 +532,7 @@ describe('datatable cell renderer', () => {
     });
 
     it('should invoke handleFilterClick when badge with oneClickFilter is clicked', async () => {
-      const handleFilterClick = jest.fn();
+      const handleFilterClick = vi.fn();
       const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'badge';
       columnConfig.columns[0].oneClickFilter = true;
@@ -653,7 +655,7 @@ describe('datatable cell renderer', () => {
   });
 
   describe('one-click filter with background color', () => {
-    const handleFilterClick = jest.fn();
+    const handleFilterClick = vi.fn();
 
     const renderThemedCellRenderer = (
       columnConfig: DatatableArgs,
@@ -803,7 +805,7 @@ describe('datatable cell renderer', () => {
     });
 
     it('resolves solid progress-bar fills through a stepped palette over the active bar domain', () => {
-      const getColorForValueSpy = jest.spyOn(paletteServiceMock.get('custom'), 'getColorForValue');
+      const getColorForValueSpy = vi.spyOn(paletteServiceMock.get('custom'), 'getColorForValue');
       getColorForValueSpy.mockReturnValueOnce('#663399');
 
       const columnConfig = progressColumnConfig({

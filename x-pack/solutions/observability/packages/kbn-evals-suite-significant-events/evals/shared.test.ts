@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import type { GcsConfig, ReplayStats } from '../src/data_generators/replay';
@@ -22,11 +24,14 @@ import {
   replayDatasetSnapshot,
 } from './shared';
 
-jest.mock('../src/data_generators/replay', () => ({
-  ...jest.requireActual('../src/data_generators/replay'),
-  replayIntoManagedStream: jest.fn(),
-  replaySignificantEventsSnapshot: jest.fn(),
-}));
+vi.mock('../src/data_generators/replay', async () => {
+      const mocked = {
+      ...(await vi.importActual('../src/data_generators/replay')),
+      replayIntoManagedStream: vi.fn(),
+      replaySignificantEventsSnapshot: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const BUCKET = 'significant-events-datasets';
 
@@ -155,8 +160,8 @@ describe('dataset-aware replay', () => {
   };
 
   beforeEach(() => {
-    jest.mocked(replayIntoManagedStream).mockReset().mockResolvedValue(replayStats);
-    jest.mocked(replaySignificantEventsSnapshot).mockReset().mockResolvedValue(undefined);
+    vi.mocked(replayIntoManagedStream).mockReset().mockResolvedValue(replayStats);
+    vi.mocked(replaySignificantEventsSnapshot).mockReset().mockResolvedValue(undefined);
   });
 
   it('replays a standard dataset from its own snapshot path', async () => {

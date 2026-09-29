@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, Mocked } from 'vitest';
+
 import type { ISessionService } from './session_service';
 import { SessionService } from './session_service';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -21,8 +24,8 @@ import type { ISessionsClient, SearchSessionSavedObject } from './sessions_clien
 import type { CoreStart } from '@kbn/core/public';
 import { addInProgressSessionId } from './in_progress_session';
 
-jest.mock('./in_progress_session');
-const mockedAddInProgressSessionId = jest.mocked(addInProgressSessionId);
+vi.mock('./in_progress_session');
+const mockedAddInProgressSessionId = vi.mocked(addInProgressSessionId);
 
 const mockSavedObject: SearchSessionSavedObject = {
   id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
@@ -43,11 +46,11 @@ const mockSavedObject: SearchSessionSavedObject = {
 describe('Session service', () => {
   let sessionService: ISessionService;
   let state$: BehaviorSubject<SearchSessionState>;
-  let nowProvider: jest.Mocked<NowProviderInternalContract>;
+  let nowProvider: Mocked<NowProviderInternalContract>;
   let userHasAccessToSearchSessions = true;
   let currentAppId$: BehaviorSubject<string>;
-  let toastService: jest.Mocked<CoreStart['notifications']['toasts']>;
-  let sessionsClient: jest.Mocked<ISessionsClient>;
+  let toastService: Mocked<CoreStart['notifications']['toasts']>;
+  let sessionsClient: Mocked<ISessionsClient>;
 
   beforeEach(() => {
     const initializerContext = coreMock.createPluginInitializerContext();
@@ -91,7 +94,7 @@ describe('Session service', () => {
     state$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
     sessionService.state$.subscribe(state$);
 
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('Session management', () => {
@@ -159,8 +162,8 @@ describe('Session service', () => {
     });
 
     it('Cancels all tracked searches within current session', async () => {
-      const abort = jest.fn();
-      const poll = jest.fn();
+      const abort = vi.fn();
+      const poll = vi.fn();
 
       sessionService.start();
       sessionService.trackSearch({ abort, poll });
@@ -176,14 +179,14 @@ describe('Session service', () => {
   });
 
   describe('Keeping searches alive', () => {
-    let dateNowSpy: jest.SpyInstance;
+    let dateNowSpy: MockInstance;
     let now = Date.now();
     const advanceTimersBy = (by: number) => {
       now = now + by;
-      jest.advanceTimersByTime(by);
+      vi.advanceTimersByTime(by);
     };
     beforeEach(() => {
-      dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
+      dateNowSpy = vi.spyOn(Date, 'now').mockImplementation(() => now);
       now = Date.now();
 
       sessionService.enableStorage({
@@ -195,18 +198,18 @@ describe('Session service', () => {
         }),
       });
 
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
     afterEach(() => {
       dateNowSpy.mockRestore();
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     describe('when there is only 1 search', () => {
       describe('when it finishes', () => {
         it('should NOT poll the search', () => {
-          const abort = jest.fn();
-          const poll = jest.fn(() => Promise.resolve());
+          const abort = vi.fn();
+          const poll = vi.fn(() => Promise.resolve());
 
           sessionService.start();
 
@@ -224,12 +227,12 @@ describe('Session service', () => {
       describe('when not all of them are is finished', () => {
         it('should poll the finished searches', () => {
           const search1 = {
-            poll: jest.fn(() => Promise.resolve()),
-            abort: jest.fn(),
+            poll: vi.fn(() => Promise.resolve()),
+            abort: vi.fn(),
           };
           const search2 = {
-            poll: jest.fn(() => Promise.resolve()),
-            abort: jest.fn(),
+            poll: vi.fn(() => Promise.resolve()),
+            abort: vi.fn(),
           };
 
           sessionService.start();
@@ -250,12 +253,12 @@ describe('Session service', () => {
       describe('when all of them are is finished', () => {
         it('should not poll anything', () => {
           const search1 = {
-            poll: jest.fn(() => Promise.resolve()),
-            abort: jest.fn(),
+            poll: vi.fn(() => Promise.resolve()),
+            abort: vi.fn(),
           };
           const search2 = {
-            poll: jest.fn(() => Promise.resolve()),
-            abort: jest.fn(),
+            poll: vi.fn(() => Promise.resolve()),
+            abort: vi.fn(),
           };
 
           sessionService.start();
@@ -475,8 +478,8 @@ describe('Session service', () => {
     });
 
     sessionService.start();
-    const abort = jest.fn();
-    const poll = jest.fn(() => Promise.resolve());
+    const abort = vi.fn();
+    const poll = vi.fn(() => Promise.resolve());
 
     const search1 = sessionService.trackSearch({ poll, abort });
     search1.complete();
@@ -504,9 +507,9 @@ describe('Session service', () => {
     });
 
     sessionService.start();
-    const abort = jest.fn();
-    const poll = jest.fn(() => Promise.resolve());
-    const onSavingSession = jest.fn(() => Promise.resolve());
+    const abort = vi.fn();
+    const poll = vi.fn(() => Promise.resolve());
+    const onSavingSession = vi.fn(() => Promise.resolve());
 
     sessionService.trackSearch({ poll, abort, onSavingSession });
 
@@ -530,9 +533,9 @@ describe('Session service', () => {
     sessionsClient.create.mockResolvedValue(mockSavedObject);
 
     sessionService.start();
-    const abort = jest.fn();
-    const poll = jest.fn(() => Promise.resolve());
-    const onSavingSession = jest.fn(() => Promise.resolve());
+    const abort = vi.fn();
+    const poll = vi.fn(() => Promise.resolve());
+    const onSavingSession = vi.fn(() => Promise.resolve());
 
     sessionService.trackSearch({ poll, abort, onSavingSession });
 
@@ -555,8 +558,8 @@ describe('Session service', () => {
 
     const sessionId = sessionService.start();
     sessionService.trackSearch({
-      poll: jest.fn().mockResolvedValue(undefined),
-      abort: jest.fn().mockResolvedValue(undefined),
+      poll: vi.fn().mockResolvedValue(undefined),
+      abort: vi.fn().mockResolvedValue(undefined),
     });
 
     expect(mockedAddInProgressSessionId).toHaveBeenCalledTimes(0);
@@ -646,9 +649,9 @@ describe('Session service', () => {
         // We need to store the search so poll gets called when the search is completed and we can assert on it
         await sessionService.save({ entryPoint: 'test' });
 
-        const poll = jest.fn().mockResolvedValue(undefined);
+        const poll = vi.fn().mockResolvedValue(undefined);
         const { complete } = sessionService.trackSearch({
-          abort: jest.fn(),
+          abort: vi.fn(),
           poll,
         });
         sessionService.start();

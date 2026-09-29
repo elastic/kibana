@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, renderHook, act } from '@testing-library/react';
 import { CaseStatuses } from '@kbn/cases-components';
@@ -25,23 +28,26 @@ import { CustomFieldTypes } from '../../../../common/types/domain';
 import { useCaseConfigureResponse } from '../../configure_cases/__mock__';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 
-jest.mock('../../../containers/configure/use_get_case_configuration');
+vi.mock('../../../containers/configure/use_get_case_configuration');
 
 const mockLocation = { search: '' };
-const mockPush = jest.fn();
-const mockReplace = jest.fn();
+const mockPush = vi.fn();
+const mockReplace = vi.fn();
 let mockHistory: unknown = {
   replace: mockReplace,
   push: mockPush,
   location: mockLocation,
 };
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => mockHistory,
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => mockHistory,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as Mock;
 
 const LS_KEY = 'securitySolution.cases.list.state';
 
@@ -59,7 +65,7 @@ describe('useAllCasesQueryParams', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns default state with empty URL and local storage', () => {
@@ -641,7 +647,7 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('does not update the local storage when navigating to an empty URL', () => {
-    const lsSpy = jest.spyOn(Storage.prototype, 'setItem');
+    const lsSpy = vi.spyOn(Storage.prototype, 'setItem');
 
     renderHook(() => useAllCasesState(), {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => (
@@ -659,7 +665,7 @@ describe('useAllCasesQueryParams', () => {
       status: [CaseStatuses['in-progress']],
     });
 
-    const lsSpy = jest.spyOn(Storage.prototype, 'setItem');
+    const lsSpy = vi.spyOn(Storage.prototype, 'setItem');
 
     const { rerender } = renderHook(() => useAllCasesState(), {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => (
@@ -678,7 +684,7 @@ describe('useAllCasesQueryParams', () => {
       perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
     });
 
-    const lsSpy = jest.spyOn(Storage.prototype, 'setItem');
+    const lsSpy = vi.spyOn(Storage.prototype, 'setItem');
 
     const existingLocalStorageValues = {
       queryParams: {
@@ -711,7 +717,7 @@ describe('useAllCasesQueryParams', () => {
       isFetching: true,
     }));
 
-    const lsSpy = jest.spyOn(Storage.prototype, 'setItem');
+    const lsSpy = vi.spyOn(Storage.prototype, 'setItem');
 
     renderHook(() => useAllCasesState(), {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => (

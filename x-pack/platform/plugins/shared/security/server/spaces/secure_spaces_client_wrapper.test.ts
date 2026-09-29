@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { EcsEvent, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
@@ -107,13 +110,13 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
 
   const forbiddenError = new Error('Mock ForbiddenError');
   const errors = {
-    decorateForbiddenError: jest.fn().mockReturnValue(forbiddenError),
+    decorateForbiddenError: vi.fn().mockReturnValue(forbiddenError),
     // other errors exist but are not needed for these test cases
-  } as unknown as jest.Mocked<typeof SavedObjectsErrorHelpers>;
+  } as unknown as Mocked<typeof SavedObjectsErrorHelpers>;
 
   const securityExtension = securityEnabled
     ? (savedObjectsExtensionsMock.create()
-        .securityExtension as jest.Mocked<ISavedObjectsSecurityExtension>)
+        .securityExtension as Mocked<ISavedObjectsSecurityExtension>)
     : undefined;
   const wrapper = new SecureSpacesClientWrapper(
     baseClient,
@@ -136,7 +139,7 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
 };
 
 const expectNoAuthorizationCheck = (
-  authorization: jest.Mocked<AuthorizationServiceSetupInternal>
+  authorization: Mocked<AuthorizationServiceSetupInternal>
 ) => {
   expect(authorization.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
   expect(authorization.checkPrivilegesWithRequest).not.toHaveBeenCalled();
@@ -259,7 +262,7 @@ describe('SecureSpacesClientWrapper', () => {
 
           const privileges = scenario.expectedPrivilege(authorization);
 
-          const checkPrivileges = jest.fn().mockResolvedValue({
+          const checkPrivileges = vi.fn().mockResolvedValue({
             username,
             privileges: {
               kibana: [
@@ -295,7 +298,7 @@ describe('SecureSpacesClientWrapper', () => {
 
           const privileges = scenario.expectedPrivilege(authorization);
 
-          const checkPrivileges = jest.fn().mockResolvedValue({
+          const checkPrivileges = vi.fn().mockResolvedValue({
             username,
             privileges: {
               kibana: [
@@ -355,7 +358,7 @@ describe('SecureSpacesClientWrapper', () => {
         securityEnabled: true,
       });
 
-      const checkPrivileges = jest.fn().mockResolvedValue({
+      const checkPrivileges = vi.fn().mockResolvedValue({
         username,
         hasAllRequested: false,
         privileges: {
@@ -393,7 +396,7 @@ describe('SecureSpacesClientWrapper', () => {
         securityEnabled: true,
       });
 
-      const checkPrivileges = jest.fn().mockResolvedValue({
+      const checkPrivileges = vi.fn().mockResolvedValue({
         username,
         hasAllRequested: true,
         privileges: {
@@ -448,7 +451,7 @@ describe('SecureSpacesClientWrapper', () => {
         securityEnabled: true,
       });
 
-      const checkPrivileges = jest.fn().mockResolvedValue({
+      const checkPrivileges = vi.fn().mockResolvedValue({
         username,
         hasAllRequested: false,
         privileges: {
@@ -481,7 +484,7 @@ describe('SecureSpacesClientWrapper', () => {
         securityEnabled: true,
       });
 
-      const checkPrivileges = jest.fn().mockResolvedValue({
+      const checkPrivileges = vi.fn().mockResolvedValue({
         username,
         hasAllRequested: true,
         privileges: {
@@ -534,7 +537,7 @@ describe('SecureSpacesClientWrapper', () => {
         securityEnabled: true,
       });
 
-      const checkPrivileges = jest.fn().mockResolvedValue({
+      const checkPrivileges = vi.fn().mockResolvedValue({
         username,
         hasAllRequested: false,
         privileges: {
@@ -568,7 +571,7 @@ describe('SecureSpacesClientWrapper', () => {
       });
       baseClient.isInitialSolutionSetupRequired.mockResolvedValue(true);
 
-      const checkPrivileges = jest.fn().mockResolvedValue({
+      const checkPrivileges = vi.fn().mockResolvedValue({
         username,
         hasAllRequested: true,
         privileges: {
@@ -615,7 +618,7 @@ describe('SecureSpacesClientWrapper', () => {
         securityEnabled: true,
       });
 
-      const checkPrivileges = jest.fn().mockResolvedValue({
+      const checkPrivileges = vi.fn().mockResolvedValue({
         username,
         hasAllRequested: false,
         privileges: {
@@ -648,7 +651,7 @@ describe('SecureSpacesClientWrapper', () => {
         securityEnabled: true,
       });
 
-      const checkPrivileges = jest.fn().mockResolvedValue({
+      const checkPrivileges = vi.fn().mockResolvedValue({
         username,
         hasAllRequested: true,
         privileges: {
@@ -701,7 +704,7 @@ describe('SecureSpacesClientWrapper', () => {
         securityEnabled: true,
       });
 
-      const checkPrivileges = jest.fn().mockResolvedValue({
+      const checkPrivileges = vi.fn().mockResolvedValue({
         username,
         hasAllRequested: false,
         privileges: {
@@ -736,7 +739,7 @@ describe('SecureSpacesClientWrapper', () => {
         securityEnabled: true,
       });
 
-      const checkPrivileges = jest.fn().mockResolvedValue({
+      const checkPrivileges = vi.fn().mockResolvedValue({
         username,
         hasAllRequested: true,
         privileges: {
@@ -796,7 +799,7 @@ describe('SecureSpacesClientWrapper', () => {
         securityEnabled: true,
       });
 
-      const checkPrivileges = jest.fn().mockResolvedValue({
+      const checkPrivileges = vi.fn().mockResolvedValue({
         username,
         hasAllRequested: false,
         privileges: {
@@ -831,7 +834,7 @@ describe('SecureSpacesClientWrapper', () => {
         securityEnabled: true,
       });
 
-      const checkPrivileges = jest.fn().mockResolvedValue({
+      const checkPrivileges = vi.fn().mockResolvedValue({
         username,
         hasAllRequested: true,
         privileges: {
@@ -890,7 +893,7 @@ describe('SecureSpacesClientWrapper', () => {
         securityEnabled: true,
       });
 
-      const checkPrivileges = jest.fn().mockResolvedValue({
+      const checkPrivileges = vi.fn().mockResolvedValue({
         username,
         hasAllRequested: false,
         privileges: {
@@ -927,7 +930,7 @@ describe('SecureSpacesClientWrapper', () => {
         }
       );
 
-      const checkPrivileges = jest.fn().mockResolvedValue({
+      const checkPrivileges = vi.fn().mockResolvedValue({
         username,
         hasAllRequested: true,
         privileges: {
@@ -985,7 +988,7 @@ describe('SecureSpacesClientWrapper', () => {
     const alias2 = { targetSpace: 'space-2', targetType: 'type-2', sourceId: 'id' };
 
     function expectAuthorizationCheck(
-      securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>,
+      securityExtension: Mocked<ISavedObjectsSecurityExtension>,
       aliases: Array<{ targetSpace: string; targetType: string }>
     ) {
       expect(securityExtension.authorizeDisableLegacyUrlAliases).toHaveBeenCalledTimes(1);

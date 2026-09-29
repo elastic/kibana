@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { type Case, type Observable } from '../../../common/types/domain';
 import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
@@ -60,14 +63,14 @@ describe('extractAndAddObservables', () => {
   let clientArgs: ReturnType<typeof createCasesClientMockArgs>;
   let licensingService: ReturnType<typeof createLicensingServiceMock>;
   let caseService: ReturnType<typeof createCaseServiceMock>;
-  let alertsService: jest.Mocked<AlertService>;
+  let alertsService: Mocked<AlertService>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     clientArgs = createCasesClientMockArgs();
     licensingService = createLicensingServiceMock();
     caseService = createCaseServiceMock();
-    alertsService = clientArgs.services.alertsService as jest.Mocked<AlertService>;
+    alertsService = clientArgs.services.alertsService as Mocked<AlertService>;
 
     clientArgs.services.licensingService = licensingService;
     clientArgs.services.caseService = caseService;
@@ -274,7 +277,7 @@ describe('extractAndAddObservables', () => {
           observableTypeKeys: [OBSERVABLE_TYPE_IPV4.key],
         })
       );
-      const [[, payload]] = (clientArgs.casesEventBus.emitObservablesAdded as jest.Mock).mock.calls;
+      const [[, payload]] = (clientArgs.casesEventBus.emitObservablesAdded as Mock).mock.calls;
       expect(payload).not.toHaveProperty('value');
       expect(payload).not.toHaveProperty('description');
       expect(payload).not.toHaveProperty('observables');

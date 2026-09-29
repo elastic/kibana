@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
@@ -19,19 +22,19 @@ const defaultRegisteredDomainParameters = {
 const REGISTERED_DOMAIN_TYPE = 'registered_domain';
 
 describe('Processor: Registered Domain', () => {
-  let onUpdate: jest.Mock;
+  let onUpdate: Mock;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ httpSetup } = setupEnvironment());
-    onUpdate = jest.fn();
+    onUpdate = vi.fn();
 
     renderProcessorEditor(httpSetup, {
       value: {
         processors: [],
       },
-      onFlyoutOpen: jest.fn(),
+      onFlyoutOpen: vi.fn(),
       onUpdate,
     });
 

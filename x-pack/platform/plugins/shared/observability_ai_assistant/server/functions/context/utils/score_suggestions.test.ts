@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { SCORE_SUGGESTIONS_FUNCTION_NAME, scoreSuggestions } from './score_suggestions';
 import type { Logger } from '@kbn/logging';
 import { of } from 'rxjs';
@@ -23,11 +26,11 @@ const suggestions: RecalledSuggestion[] = [
 const screenDescription = 'The user is currently looking at Discover';
 
 describe('scoreSuggestions', () => {
-  const mockLogger = { error: jest.fn(), debug: jest.fn() } as unknown as Logger;
-  let mockChat: jest.MockedFunction<FunctionCallChatFunction>;
+  const mockLogger = { error: vi.fn(), debug: vi.fn() } as unknown as Logger;
+  let mockChat: MockedFunction<FunctionCallChatFunction>;
 
   beforeEach(() => {
-    mockChat = jest.fn((_name, _params) =>
+    mockChat = vi.fn((_name, _params) =>
       of({
         type: StreamingChatResponseEventType.ChatCompletionChunk,
         message: {

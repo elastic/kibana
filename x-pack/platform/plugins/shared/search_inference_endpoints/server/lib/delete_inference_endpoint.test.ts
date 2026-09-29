@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { deleteInferenceEndpoint } from './delete_inference_endpoint';
 
 describe('deleteInferenceEndpoint', () => {
@@ -13,7 +15,7 @@ describe('deleteInferenceEndpoint', () => {
   beforeEach(() => {
     mockClient = {
       inference: {
-        delete: jest.fn(),
+        delete: vi.fn(),
       },
     };
   });

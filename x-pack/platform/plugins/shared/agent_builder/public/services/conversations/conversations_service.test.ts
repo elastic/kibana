@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
@@ -14,7 +16,7 @@ import { ConversationsService } from './conversations_service';
 
 describe('ConversationsService', () => {
   it('creates an empty conversation for an agent', async () => {
-    const post = jest.fn().mockResolvedValue({ id: 'conv-1' });
+    const post = vi.fn().mockResolvedValue({ id: 'conv-1' });
     const service = new ConversationsService({ http: { post } as never });
 
     const created = await service.create({ agentId: 'agent-1' });
@@ -26,7 +28,7 @@ describe('ConversationsService', () => {
   });
 
   it('requests _search with the snake_case query mapping', async () => {
-    const get = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue({
       pagination: { total: 0, page: 1, per_page: 25 },
       results: [],
     });
@@ -59,7 +61,7 @@ describe('ConversationsService', () => {
         },
       ],
     };
-    const post = jest.fn().mockResolvedValue(responseBody);
+    const post = vi.fn().mockResolvedValue(responseBody);
     const service = new ConversationsService({ http: { post } as never });
 
     const result = await service.addEvents({
@@ -74,7 +76,7 @@ describe('ConversationsService', () => {
   });
 
   it('updates conversation access control', async () => {
-    const put = jest.fn().mockResolvedValue({
+    const put = vi.fn().mockResolvedValue({
       access_mode: ConversationAccessControlMode.Private,
       entries: [],
     });

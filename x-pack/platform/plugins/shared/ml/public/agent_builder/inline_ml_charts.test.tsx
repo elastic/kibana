@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { act, render, screen } from '@testing-library/react';
@@ -23,39 +26,45 @@ import {
   type InlineMlChartServices,
 } from './inline_ml_charts';
 
-const mockNavigateToWithEmbeddablePackages = jest.fn();
-const mockedUseVisPreviewUnifiedSearch = useVisPreviewUnifiedSearch as jest.MockedFunction<
+const mockNavigateToWithEmbeddablePackages = vi.fn();
+const mockedUseVisPreviewUnifiedSearch = useVisPreviewUnifiedSearch as MockedFunction<
   typeof useVisPreviewUnifiedSearch
 >;
 
-jest.mock('@kbn/agent-builder-visualizations', () => {
-  const actual = jest.requireActual('@kbn/agent-builder-visualizations');
+vi.mock('@kbn/agent-builder-visualizations', async () => {
+  const actual = (await vi.importActual('@kbn/agent-builder-visualizations'));
   return {
     ...actual,
-    useVisPreviewUnifiedSearch: jest.fn(actual.useVisPreviewUnifiedSearch),
+    useVisPreviewUnifiedSearch: vi.fn(actual.useVisPreviewUnifiedSearch),
   };
 });
 
-jest.mock('@kbn/embeddable-plugin/public', () => ({
-  EmbeddableRenderer: () => <div data-test-subj="mockMlEmbeddable" />,
-}));
+vi.mock('@kbn/embeddable-plugin/public', () => {
+      const mocked = {
+      EmbeddableRenderer: () => <div data-test-subj="mockMlEmbeddable" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/presentation-util-plugin/public', () => ({
-  SavedObjectSaveModalDashboard: ({
-    onSave,
-  }: {
-    onSave: (args: { dashboardId: string; newTitle: string; newDescription: string }) => void;
-  }) => (
-    <button
-      type="button"
-      onClick={() =>
-        onSave({ dashboardId: 'new', newTitle: 'Saved chart', newDescription: 'desc' })
-      }
-    >
-      confirm-save
-    </button>
-  ),
-}));
+vi.mock('@kbn/presentation-util-plugin/public', () => {
+      const mocked = {
+      SavedObjectSaveModalDashboard: ({
+        onSave,
+      }: {
+        onSave: (args: { dashboardId: string; newTitle: string; newDescription: string }) => void;
+      }) => (
+        <button
+          type="button"
+          onClick={() =>
+            onSave({ dashboardId: 'new', newTitle: 'Saved chart', newDescription: 'desc' })
+          }
+        >
+          confirm-save
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(ui, {
@@ -81,27 +90,27 @@ const createServices = (overrides?: Partial<InlineMlChartServices>): InlineMlCha
     }),
   } as unknown as InlineMlChartServices['embeddable'],
   locator: {
-    getRedirectUrl: jest.fn((params: { page: string }) => `/app/ml/${params.page}`),
+    getRedirectUrl: vi.fn((params: { page: string }) => `/app/ml/${params.page}`),
   } as unknown as InlineMlChartServices['locator'],
   ...overrides,
 });
 
-const getLastRegisteredButtons = (registerActionButtons: jest.Mock): ActionButton[] => {
+const getLastRegisteredButtons = (registerActionButtons: Mock): ActionButton[] => {
   const { calls } = registerActionButtons.mock;
   return calls[calls.length - 1]?.[0] ?? [];
 };
 
 describe('inline ML chart visualizations', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     mockNavigateToWithEmbeddablePackages.mockReset();
     mockedUseVisPreviewUnifiedSearch.mockReset();
     mockedUseVisPreviewUnifiedSearch.mockImplementation(
-      jest.requireActual('@kbn/agent-builder-visualizations').useVisPreviewUnifiedSearch
+      (await vi.importActual('@kbn/agent-builder-visualizations')).useVisPreviewUnifiedSearch
     );
   });
 
   it('registers View in Anomaly Explorer and Save to dashboard for swim lanes', () => {
-    const registerActionButtons = jest.fn();
+    const registerActionButtons = vi.fn();
     const services = createServices();
 
     renderWithProviders(
@@ -143,7 +152,7 @@ describe('inline ML chart visualizations', () => {
   });
 
   it('includes the swim lane severity threshold in the Anomaly Explorer link', () => {
-    const registerActionButtons = jest.fn();
+    const registerActionButtons = vi.fn();
     const services = createServices();
 
     renderWithProviders(
@@ -179,7 +188,7 @@ describe('inline ML chart visualizations', () => {
   });
 
   it('includes the anomaly charts severity threshold in the Anomaly Explorer link', () => {
-    const registerActionButtons = jest.fn();
+    const registerActionButtons = vi.fn();
     const services = createServices();
 
     renderWithProviders(
@@ -212,7 +221,7 @@ describe('inline ML chart visualizations', () => {
   });
 
   it('registers View in Single Metric Viewer for the single metric viewer', () => {
-    const registerActionButtons = jest.fn();
+    const registerActionButtons = vi.fn();
 
     renderWithProviders(
       <InlineSingleMetricViewer
@@ -240,7 +249,7 @@ describe('inline ML chart visualizations', () => {
 
   it('saves anomaly charts to a dashboard with the preview time range', async () => {
     const user = userEvent.setup();
-    const registerActionButtons = jest.fn();
+    const registerActionButtons = vi.fn();
 
     renderWithProviders(
       <InlineAnomalyCharts
@@ -287,7 +296,7 @@ describe('inline ML chart visualizations', () => {
 
   it('saves a historical chart with the time range from the inline picker', async () => {
     const user = userEvent.setup();
-    const registerActionButtons = jest.fn();
+    const registerActionButtons = vi.fn();
     const pickerTimeRange = {
       from: '2024-01-01T00:00:00.000Z',
       to: '2024-03-31T23:59:59.000Z',
@@ -295,7 +304,7 @@ describe('inline ML chart visualizations', () => {
     mockedUseVisPreviewUnifiedSearch.mockReturnValue({
       searchBarProps: {},
       effectiveTimeRange: pickerTimeRange,
-      onBrushEnd: jest.fn(),
+      onBrushEnd: vi.fn(),
     } as unknown as ReturnType<typeof useVisPreviewUnifiedSearch>);
 
     renderWithProviders(
@@ -328,7 +337,7 @@ describe('inline ML chart visualizations', () => {
   });
 
   it('disables Save to dashboard without dashboard write permissions', () => {
-    const registerActionButtons = jest.fn();
+    const registerActionButtons = vi.fn();
 
     renderWithProviders(
       <InlineSwimLane

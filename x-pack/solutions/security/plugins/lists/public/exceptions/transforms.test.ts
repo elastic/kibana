@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type {
   CreateExceptionListItemSchema,
   Entry,
@@ -25,9 +27,12 @@ import { getUpdateExceptionListItemSchemaMock } from '../../common/schemas/reque
 import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
 import { ENTRIES_WITH_IDS } from '../../common/constants.mock';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('123'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('123'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // TODO: Once mocks are figured out, move this test to the kbn package of: kbn-securitysolution-list-hooks/src/transforms/index.test.ts
 

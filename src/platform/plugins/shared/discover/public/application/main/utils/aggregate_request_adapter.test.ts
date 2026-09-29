@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { AggregateRequestAdapter } from './aggregate_request_adapter';
 
@@ -30,7 +32,7 @@ describe('AggregateRequestAdapter', () => {
     const adapter1 = new RequestAdapter();
     const adapter2 = new RequestAdapter();
     const aggregateAdapter = new AggregateRequestAdapter([adapter1, adapter2]);
-    const listener = jest.fn();
+    const listener = vi.fn();
     aggregateAdapter.addListener('change', listener);
     adapter1.start('request1');
     adapter2.start('request2');

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
@@ -19,14 +21,14 @@ import { registerGetUnreadStatusRoute } from './get_unread_status';
 
 describe('GET /internal/notification_center/notifications/_unread_status', () => {
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns 403 when the caller has no scoped user profile', async () => {
     const router = httpServiceMock.createRouter();
-    const getStartServices = jest.fn().mockResolvedValue([
+    const getStartServices = vi.fn().mockResolvedValue([
       {
-        userStorage: { asScoped: jest.fn().mockReturnValue(undefined) },
+        userStorage: { asScoped: vi.fn().mockReturnValue(undefined) },
       },
     ]);
     registerGetUnreadStatusRoute({
@@ -50,10 +52,10 @@ describe('GET /internal/notification_center/notifications/_unread_status', () =>
 
   it('returns 500 when the caller read state cannot be loaded', async () => {
     const router = httpServiceMock.createRouter();
-    const client = { get: jest.fn().mockRejectedValue(new Error('user storage unavailable')) };
-    const getStartServices = jest.fn().mockResolvedValue([
+    const client = { get: vi.fn().mockRejectedValue(new Error('user storage unavailable')) };
+    const getStartServices = vi.fn().mockResolvedValue([
       {
-        userStorage: { asScoped: jest.fn().mockReturnValue(client) },
+        userStorage: { asScoped: vi.fn().mockReturnValue(client) },
       },
     ]);
     registerGetUnreadStatusRoute({
@@ -77,13 +79,13 @@ describe('GET /internal/notification_center/notifications/_unread_status', () =>
   });
 
   it('initializes the first-read horizon before returning the unread status', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-07-20T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2026-07-20T00:00:00.000Z'));
     const router = httpServiceMock.createRouter();
     const client = {
-      get: jest.fn(async (key: string) => (key === OVERRIDES_KEY ? {} : READ_ALL_BEFORE_DEFAULT)),
-      set: jest.fn(),
+      get: vi.fn(async (key: string) => (key === OVERRIDES_KEY ? {} : READ_ALL_BEFORE_DEFAULT)),
+      set: vi.fn(),
     };
-    const search = jest.fn().mockResolvedValue({
+    const search = vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {
@@ -98,10 +100,10 @@ describe('GET /internal/notification_center/notifications/_unread_status', () =>
     });
     const dataStreams = dataStreamServiceMock.createStartContract();
     dataStreams.initializeClient.mockResolvedValue({ search } as never);
-    const getStartServices = jest.fn().mockResolvedValue([
+    const getStartServices = vi.fn().mockResolvedValue([
       {
         dataStreams,
-        userStorage: { asScoped: jest.fn().mockReturnValue(client) },
+        userStorage: { asScoped: vi.fn().mockReturnValue(client) },
       },
     ]);
     registerGetUnreadStatusRoute({

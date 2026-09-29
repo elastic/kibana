@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -19,8 +22,8 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 const createSpacesDisabledFeaturesMock = (disabledFeatures: string[] = []) => {
-  const spacesStart: jest.Mocked<SpacesPluginStart> = spacesMock.createStart();
-  (spacesStart.spacesService.getActiveSpace as jest.Mock).mockImplementation(async () => {
+  const spacesStart: Mocked<SpacesPluginStart> = spacesMock.createStart();
+  (spacesStart.spacesService.getActiveSpace as Mock).mockImplementation(async () => {
     return {
       disabledFeatures: [],
     };
@@ -31,7 +34,7 @@ const createSpacesDisabledFeaturesMock = (disabledFeatures: string[] = []) => {
 
 describe('authorization', () => {
   let request: KibanaRequest;
-  let mockLogger: jest.Mocked<AuditLogger>;
+  let mockLogger: Mocked<AuditLogger>;
 
   beforeEach(() => {
     request = httpServerMock.createKibanaRequest();
@@ -39,9 +42,9 @@ describe('authorization', () => {
   });
 
   describe('create', () => {
-    let securityStart: jest.Mocked<SecurityPluginStart>;
-    let featuresStart: jest.Mocked<FeaturesPluginStart>;
-    let spacesStart: jest.Mocked<SpacesPluginStart>;
+    let securityStart: Mocked<SecurityPluginStart>;
+    let featuresStart: Mocked<FeaturesPluginStart>;
+    let spacesStart: Mocked<SpacesPluginStart>;
 
     beforeEach(() => {
       securityStart = securityMock.createStart();
@@ -85,7 +88,7 @@ describe('authorization', () => {
     });
 
     it('if spaces are disabled it does not filtered out disabled features', async () => {
-      (spacesStart.spacesService.getActiveSpace as jest.Mock).mockImplementation(() => {
+      (spacesStart.spacesService.getActiveSpace as Mock).mockImplementation(() => {
         return { disabledFeatures: ['1'] } as Space;
       });
 
@@ -104,7 +107,7 @@ describe('authorization', () => {
     it('throws and error when a failure occurs', async () => {
       expect.assertions(1);
 
-      (spacesStart.spacesService.getActiveSpace as jest.Mock).mockImplementation(() => {
+      (spacesStart.spacesService.getActiveSpace as Mock).mockImplementation(() => {
         throw new Error('space error');
       });
 
@@ -123,11 +126,11 @@ describe('authorization', () => {
 
   describe('ensureAuthorized', () => {
     const feature = { id: '1', cases: ['a'] };
-    const checkRequestReturningHasAllAsTrue = jest.fn(async () => ({ hasAllRequested: true }));
+    const checkRequestReturningHasAllAsTrue = vi.fn(async () => ({ hasAllRequested: true }));
 
     let securityStart: ReturnType<typeof securityMock.createStart>;
-    let featuresStart: jest.Mocked<FeaturesPluginStart>;
-    let spacesStart: jest.Mocked<SpacesPluginStart>;
+    let featuresStart: Mocked<FeaturesPluginStart>;
+    let spacesStart: Mocked<SpacesPluginStart>;
     let auth: Authorization;
 
     beforeEach(async () => {
@@ -155,7 +158,7 @@ describe('authorization', () => {
     it('calls checkRequest with no repeated owners', async () => {
       expect.assertions(2);
 
-      const casesGet = securityStart.authz.actions.cases.get as jest.Mock;
+      const casesGet = securityStart.authz.actions.cases.get as Mock;
       casesGet.mockImplementation((owner, op) => `${owner}/${op}`);
 
       try {
@@ -359,7 +362,7 @@ describe('authorization', () => {
       expect.assertions(1);
 
       securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-        jest.fn(async () => ({ hasAllRequested: false }))
+        vi.fn(async () => ({ hasAllRequested: false }))
       );
 
       try {
@@ -376,7 +379,7 @@ describe('authorization', () => {
       expect.assertions(1);
 
       securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-        jest.fn(async () => ({ hasAllRequested: false }))
+        vi.fn(async () => ({ hasAllRequested: false }))
       );
 
       try {
@@ -395,7 +398,7 @@ describe('authorization', () => {
     it('throws an error when owner does not exist because it was from a disabled plugin', async () => {
       expect.assertions(1);
 
-      (spacesStart.spacesService.getActiveSpace as jest.Mock).mockImplementation(() => {
+      (spacesStart.spacesService.getActiveSpace as Mock).mockImplementation(() => {
         return { disabledFeatures: [feature.id] } as Space;
       });
 
@@ -554,15 +557,15 @@ describe('authorization', () => {
     const feature = { id: '1', cases: ['a', 'b'] };
 
     let securityStart: ReturnType<typeof securityMock.createStart>;
-    let featuresStart: jest.Mocked<FeaturesPluginStart>;
-    let spacesStart: jest.Mocked<SpacesPluginStart>;
+    let featuresStart: Mocked<FeaturesPluginStart>;
+    let spacesStart: Mocked<SpacesPluginStart>;
     let auth: Authorization;
 
     beforeEach(async () => {
       securityStart = securityMock.createStart();
       securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
       securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-        jest.fn(async () => ({
+        vi.fn(async () => ({
           hasAllRequested: true,
           username: 'super',
           privileges: { kibana: [] },
@@ -867,7 +870,7 @@ describe('authorization', () => {
     describe('hasAllRequested: false', () => {
       beforeEach(async () => {
         securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-          jest.fn(async () => ({
+          vi.fn(async () => ({
             hasAllRequested: false,
             username: 'super',
             privileges: {
@@ -890,7 +893,7 @@ describe('authorization', () => {
         );
 
         (
-          securityStart.authz.actions.cases.get as jest.MockedFunction<
+          securityStart.authz.actions.cases.get as MockedFunction<
             typeof securityStart.authz.actions.cases.get
           >
         ).mockImplementation((owner, opName) => {
@@ -1126,15 +1129,15 @@ describe('authorization', () => {
     const feature = { id: '1', cases: ['a', 'b'] };
 
     let securityStart: ReturnType<typeof securityMock.createStart>;
-    let featuresStart: jest.Mocked<FeaturesPluginStart>;
-    let spacesStart: jest.Mocked<SpacesPluginStart>;
+    let featuresStart: Mocked<FeaturesPluginStart>;
+    let spacesStart: Mocked<SpacesPluginStart>;
     let auth: Authorization;
 
     beforeEach(async () => {
       securityStart = securityMock.createStart();
       securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
       securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-        jest.fn(async () => ({
+        vi.fn(async () => ({
           hasAllRequested: true,
           username: 'super',
           privileges: { kibana: [] },
@@ -1407,18 +1410,18 @@ describe('authorization', () => {
 
       beforeEach(async () => {
         securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValueOnce(
-          jest.fn(async () => checkPrivilegesResponse)
+          vi.fn(async () => checkPrivilegesResponse)
         );
 
         securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValueOnce(
-          jest.fn(async () => ({
+          vi.fn(async () => ({
             ...checkPrivilegesResponse,
             hasAllRequested: true,
           }))
         );
 
         (
-          securityStart.authz.actions.cases.get as jest.MockedFunction<
+          securityStart.authz.actions.cases.get as MockedFunction<
             typeof securityStart.authz.actions.cases.get
           >
         ).mockImplementation((owner, opName) => {
@@ -1463,14 +1466,14 @@ describe('authorization', () => {
   describe('ensureAuthorized with operation arrays', () => {
     let auth: Authorization;
     let securityStart: ReturnType<typeof securityMock.createStart>;
-    let featuresStart: jest.Mocked<FeaturesPluginStart>;
-    let spacesStart: jest.Mocked<SpacesPluginStart>;
+    let featuresStart: Mocked<FeaturesPluginStart>;
+    let spacesStart: Mocked<SpacesPluginStart>;
 
     beforeEach(async () => {
       securityStart = securityMock.createStart();
       securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
       securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-        jest.fn(async () => ({ hasAllRequested: true }))
+        vi.fn(async () => ({ hasAllRequested: true }))
       );
 
       featuresStart = featuresPluginMock.createStart();
@@ -1503,7 +1506,7 @@ describe('authorization', () => {
 
     it('throws on first unauthorized operation in array', async () => {
       securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-        jest.fn(async () => ({ hasAllRequested: false }))
+        vi.fn(async () => ({ hasAllRequested: false }))
       );
 
       await expect(

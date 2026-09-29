@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 
@@ -123,7 +125,7 @@ describe('CloudService', () => {
     });
 
     it('expects unusable bodies', () => {
-      const parseBody = jest.fn().mockReturnValue(null);
+      const parseBody = vi.fn().mockReturnValue(null);
 
       expect(() =>
         service._parseResponse(JSON.stringify(body), parseBody)
@@ -141,7 +143,7 @@ describe('CloudService', () => {
 
     it('uses parsed object to create response', async () => {
       const serviceResponse = new CloudServiceResponse('a123', true, { id: 'xyz' });
-      const parseBody = jest.fn().mockReturnValue(serviceResponse);
+      const parseBody = vi.fn().mockReturnValue(serviceResponse);
 
       const response = await service._parseResponse(body, parseBody);
       expect(parseBody).toHaveBeenCalledWith(body);
@@ -150,7 +152,7 @@ describe('CloudService', () => {
 
     it('parses object before passing it to parseBody to create response', async () => {
       const serviceResponse = new CloudServiceResponse('a123', true, { id: 'xyz' });
-      const parseBody = jest.fn().mockReturnValue(serviceResponse);
+      const parseBody = vi.fn().mockReturnValue(serviceResponse);
 
       const response = await service._parseResponse(JSON.stringify(body), parseBody);
       expect(parseBody).toHaveBeenCalledWith(body);

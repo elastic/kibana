@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 
@@ -15,17 +18,17 @@ import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_
 import { TestProviders } from '../../../../../../common/mock';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
-jest.mock('../../../../../../data_view_manager/hooks/use_data_view');
-jest.mock('../../../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../../../data_view_manager/hooks/use_data_view');
+vi.mock('../../../../../../common/hooks/use_experimental_features');
 
 // The filter badge is a lazily-loaded, Suspense-wrapped component from
 // `@kbn/unified-search-plugin`. Its first cold render (on-demand module
 // transform plus Suspense resolution) is costly enough to exceed the default
 // 5s test budget under CI's parallel load, which is what made this test flaky.
 // Give the render headroom rather than waiting the slowness out.
-jest.setTimeout(60_000);
+vi.setConfig({ testTimeout: 60_000 });
 
-const mockUseDataView = useDataView as jest.MockedFunction<typeof useDataView>;
+const mockUseDataView = useDataView as MockedFunction<typeof useDataView>;
 
 const renderComponent = async () => {
   // `act(async ...)` so the lazily-loaded filter badge finishes resolving
@@ -45,9 +48,9 @@ const renderComponent = async () => {
 
 describe('Filters', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(false);
     mockUseDataView.mockReturnValue({
       dataView: stubDataView,
       status: 'ready',

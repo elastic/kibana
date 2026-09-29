@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useHasGraphVisualizationLicense } from './use_has_graph_visualization_license';
 import { useProductFeatureKeys } from './use_product_feature_keys';
 import { useLicense } from './use_license';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 
-jest.mock('./use_product_feature_keys');
-jest.mock('./use_license');
+vi.mock('./use_product_feature_keys');
+vi.mock('./use_license');
 
 describe('useHasGraphVisualizationLicense', () => {
-  const mockUseProductFeatureKeys = useProductFeatureKeys as jest.Mock;
-  const mockUseLicense = useLicense as jest.Mock;
+  const mockUseProductFeatureKeys = useProductFeatureKeys as Mock;
+  const mockUseLicense = useLicense as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return true when both PLI feature is enabled and user has Platinum-level feature', () => {
@@ -34,7 +37,7 @@ describe('useHasGraphVisualizationLicense', () => {
     );
 
     mockUseLicense.mockReturnValue({
-      isPlatinumPlus: jest.fn(() => true),
+      isPlatinumPlus: vi.fn(() => true),
     });
 
     const { result } = renderHook(() => useHasGraphVisualizationLicense());
@@ -48,7 +51,7 @@ describe('useHasGraphVisualizationLicense', () => {
     );
 
     mockUseLicense.mockReturnValue({
-      isPlatinumPlus: jest.fn(() => false),
+      isPlatinumPlus: vi.fn(() => false),
     });
 
     const { result } = renderHook(() => useHasGraphVisualizationLicense());
@@ -60,7 +63,7 @@ describe('useHasGraphVisualizationLicense', () => {
     mockUseProductFeatureKeys.mockReturnValue(new Set<string>([]));
 
     mockUseLicense.mockReturnValue({
-      isPlatinumPlus: jest.fn(() => true),
+      isPlatinumPlus: vi.fn(() => true),
     });
 
     const { result } = renderHook(() => useHasGraphVisualizationLicense());
@@ -72,7 +75,7 @@ describe('useHasGraphVisualizationLicense', () => {
     mockUseProductFeatureKeys.mockReturnValue(new Set<string>([]));
 
     mockUseLicense.mockReturnValue({
-      isPlatinumPlus: jest.fn(() => false),
+      isPlatinumPlus: vi.fn(() => false),
     });
 
     const { result } = renderHook(() => useHasGraphVisualizationLicense());
@@ -84,7 +87,7 @@ describe('useHasGraphVisualizationLicense', () => {
     mockUseProductFeatureKeys.mockReturnValue(new Set<string>([]));
 
     mockUseLicense.mockReturnValue({
-      isPlatinumPlus: jest.fn(() => true),
+      isPlatinumPlus: vi.fn(() => true),
     });
 
     const { result } = renderHook(() => useHasGraphVisualizationLicense());

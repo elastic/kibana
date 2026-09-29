@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mockCreateWriteStream, resetAllMocks } from './rolling_file_manager.test.mocks';
 
 import { EventEmitter } from 'events';
@@ -19,7 +21,7 @@ import { RollingFileManager } from './rolling_file_manager';
 const FILE_PATH = '/var/log/kibana/audit.log';
 
 const createMockStream = () =>
-  Object.assign(new EventEmitter(), { write: jest.fn(), end: jest.fn((cb) => cb?.()) });
+  Object.assign(new EventEmitter(), { write: vi.fn(), end: vi.fn((cb) => cb?.()) });
 
 const enospc = () =>
   Object.assign(new Error(`ENOSPC: no space left on device, write '${FILE_PATH}'`), {
@@ -41,7 +43,7 @@ describe('RollingFileManager', () => {
   describe('when no `onWriteError` handler is configured', () => {
     it('does not subscribe to stream errors, leaving them unhandled as before', () => {
       const stream = createMockStream();
-      const onSpy = jest.spyOn(stream, 'on');
+      const onSpy = vi.spyOn(stream, 'on');
       mockCreateWriteStream.mockReturnValue(stream);
 
       createManager().write('record\n');
@@ -54,7 +56,7 @@ describe('RollingFileManager', () => {
     it('reports a stream failure instead of crashing the process', () => {
       const stream = createMockStream();
       mockCreateWriteStream.mockReturnValue(stream);
-      const onWriteError = jest.fn();
+      const onWriteError = vi.fn();
 
       createManager(onWriteError).write('record\n');
 
@@ -70,7 +72,7 @@ describe('RollingFileManager', () => {
       const beforeRollover = createMockStream();
       const afterRollover = createMockStream();
       mockCreateWriteStream.mockReturnValueOnce(beforeRollover).mockReturnValue(afterRollover);
-      const onWriteError = jest.fn();
+      const onWriteError = vi.fn();
 
       const manager = createManager(onWriteError);
       manager.write('record\n');
@@ -89,7 +91,7 @@ describe('RollingFileManager', () => {
       'ignores a non-function %p, leaving stream errors unhandled',
       (onWriteError) => {
         const stream = createMockStream();
-        const onSpy = jest.spyOn(stream, 'on');
+        const onSpy = vi.spyOn(stream, 'on');
         mockCreateWriteStream.mockReturnValue(stream);
 
         createManager(onWriteError as unknown as LogFileWriteErrorHandler).write('record\n');

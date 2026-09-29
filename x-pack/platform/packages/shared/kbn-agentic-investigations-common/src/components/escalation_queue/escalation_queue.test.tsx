@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -83,7 +85,7 @@ describe('EscalationQueue', () => {
         status="open"
         escalations={[openItem]}
         totalItemCount={51}
-        onLoadMore={jest.fn()}
+        onLoadMore={vi.fn()}
         renderAssignees={() => <span />}
       />
     );
@@ -93,7 +95,7 @@ describe('EscalationQueue', () => {
   });
 
   it('calls onLoadMore when the "Show more" button is clicked', () => {
-    const onLoadMore = jest.fn();
+    const onLoadMore = vi.fn();
     renderWithKibanaRenderContext(
       <EscalationQueue
         status="open"
@@ -113,7 +115,7 @@ describe('EscalationQueue', () => {
         status="open"
         escalations={[openItem]}
         totalItemCount={1}
-        onLoadMore={jest.fn()}
+        onLoadMore={vi.fn()}
         renderAssignees={() => <span />}
       />
     );

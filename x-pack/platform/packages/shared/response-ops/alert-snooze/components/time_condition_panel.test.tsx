@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -14,25 +16,28 @@ import {
   type TimeConditionState,
 } from './time_condition_panel';
 
-jest.mock('./snooze_duration_picker', () => ({
-  SnoozeDurationPicker: ({
-    onChange,
-    isDurationInvalid,
-    isDateTimeInvalid,
-  }: {
-    onChange: (update: Partial<TimeConditionState>) => void;
-    isDurationInvalid: boolean;
-    isDateTimeInvalid: boolean;
-  }) => (
-    <div data-test-subj="mockSnoozeDurationPicker">
-      <button onClick={() => onChange({ value: 3, unit: 'd' })} data-test-subj="mockPickerUpdate">
-        update
-      </button>
-      {isDurationInvalid ? <span>duration invalid</span> : null}
-      {isDateTimeInvalid ? <span>datetime invalid</span> : null}
-    </div>
-  ),
-}));
+vi.mock('./snooze_duration_picker', () => {
+      const mocked = {
+      SnoozeDurationPicker: ({
+        onChange,
+        isDurationInvalid,
+        isDateTimeInvalid,
+      }: {
+        onChange: (update: Partial<TimeConditionState>) => void;
+        isDurationInvalid: boolean;
+        isDateTimeInvalid: boolean;
+      }) => (
+        <div data-test-subj="mockSnoozeDurationPicker">
+          <button onClick={() => onChange({ value: 3, unit: 'd' })} data-test-subj="mockPickerUpdate">
+            update
+          </button>
+          {isDurationInvalid ? <span>duration invalid</span> : null}
+          {isDateTimeInvalid ? <span>datetime invalid</span> : null}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -48,10 +53,10 @@ const createValue = (overrides: Partial<TimeConditionState> = {}): TimeCondition
 });
 
 describe('TimeConditionPanel', () => {
-  const onChangeMock = jest.fn();
+  const onChangeMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders an add button when there is no time condition', () => {

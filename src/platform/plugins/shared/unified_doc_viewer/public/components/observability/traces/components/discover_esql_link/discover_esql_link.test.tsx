@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { createEvent, fireEvent, render } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -17,13 +20,19 @@ import { useDocViewerExtensionActionsContext } from '../../../../../hooks/use_do
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
 
-jest.mock('../../../../../hooks/use_discover_link_and_esql_query', () => ({
-  useDiscoverLinkAndEsqlQuery: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_discover_link_and_esql_query', () => {
+      const mocked = {
+      useDiscoverLinkAndEsqlQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_doc_viewer_extension_actions', () => ({
-  useDocViewerExtensionActionsContext: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_doc_viewer_extension_actions', () => {
+      const mocked = {
+      useDocViewerExtensionActionsContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DiscoverEsqlLink', () => {
   const indexPattern = 'apm-*';
@@ -37,9 +46,9 @@ describe('DiscoverEsqlLink', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue(undefined);
-    (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useDocViewerExtensionActionsContext as Mock).mockReturnValue(undefined);
+    (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
       discoverUrl: undefined,
       esqlQueryString: undefined,
     });
@@ -63,7 +72,7 @@ describe('DiscoverEsqlLink', () => {
   });
 
   it('renders a link when discoverUrl is available', () => {
-    (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+    (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
       discoverUrl: '/app/discover#/?_a=1',
       esqlQueryString: undefined,
     });
@@ -88,9 +97,9 @@ describe('DiscoverEsqlLink', () => {
   });
 
   it('calls openInNewTab on plain left click when esqlQueryString is available', () => {
-    const openInNewTab = jest.fn();
-    (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue({ openInNewTab });
-    (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+    const openInNewTab = vi.fn();
+    (useDocViewerExtensionActionsContext as Mock).mockReturnValue({ openInNewTab });
+    (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
       discoverUrl: '/app/discover#/?_a=1',
       esqlQueryString: 'FROM apm-* | WHERE true',
     });
@@ -119,9 +128,9 @@ describe('DiscoverEsqlLink', () => {
   });
 
   it('does not intercept modifier clicks when href is present', () => {
-    const openInNewTab = jest.fn();
-    (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue({ openInNewTab });
-    (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+    const openInNewTab = vi.fn();
+    (useDocViewerExtensionActionsContext as Mock).mockReturnValue({ openInNewTab });
+    (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
       discoverUrl: '/app/discover#/?_a=1',
       esqlQueryString: 'FROM apm-* | WHERE true',
     });

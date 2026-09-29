@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { EvalsSetupDependencies } from './types';
@@ -17,7 +20,7 @@ describe('EvalsPublicPlugin', () => {
     } as unknown as PluginInitializerContext);
 
   const createManagementMock = () => {
-    const registerApp = jest.fn();
+    const registerApp = vi.fn();
     return {
       sections: {
         section: {
@@ -27,23 +30,23 @@ describe('EvalsPublicPlugin', () => {
         },
       },
     } as unknown as ManagementSetup & {
-      sections: { section: { ai: { registerApp: jest.Mock } } };
+      sections: { section: { ai: { registerApp: Mock } } };
     };
   };
 
   const createWorkflowsExtensionsMock = () =>
     ({
-      registerStepDefinition: jest.fn(),
+      registerStepDefinition: vi.fn(),
     } as unknown as EvalsSetupDependencies['workflowsExtensions'] & {
-      registerStepDefinition: jest.Mock;
+      registerStepDefinition: Mock;
     });
 
   const createCoreSetupMock = () =>
     ({
       application: {
-        register: jest.fn(),
+        register: vi.fn(),
       },
-      getStartServices: jest.fn(),
+      getStartServices: vi.fn(),
     } as any);
 
   it('registers the standalone app and the Stack Management AI entry when management is available', () => {

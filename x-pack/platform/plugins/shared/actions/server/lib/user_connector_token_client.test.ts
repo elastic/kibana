@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-jest.mock('./ears/revoke_ears_credentials');
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
+vi.mock('./ears/revoke_ears_credentials');
 
 import sinon from 'sinon';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -16,13 +19,13 @@ import { actionsConfigMock } from '../actions_config.mock';
 import type { Logger } from '@kbn/core/server';
 import type { UserConnectorToken } from '../types';
 
-const mockRevokeEarsCredentials = revokeEarsCredentials as jest.MockedFunction<
+const mockRevokeEarsCredentials = revokeEarsCredentials as MockedFunction<
   typeof revokeEarsCredentials
 >;
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
+vi.mock('@kbn/core-saved-objects-utils-server', async () => {
+  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
   return {
     ...actual,
     SavedObjectsUtils: {
@@ -43,8 +46,8 @@ beforeAll(() => {
 });
 beforeEach(() => {
   clock.reset();
-  jest.resetAllMocks();
-  jest.restoreAllMocks();
+  vi.resetAllMocks();
+  vi.restoreAllMocks();
   mockRevokeEarsCredentials.mockResolvedValue(undefined);
   userClient = new UserConnectorTokenClient({
     unsecuredSavedObjectsClient,
@@ -339,9 +342,9 @@ describe('UserConnectorTokenClient', () => {
   describe('deleteAllConnectorTokens()', () => {
     const mockOAuthTokensFinder = (savedObjects: unknown[]) => {
       (
-        encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock
+        encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as Mock
       ).mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         async *find() {
           yield { saved_objects: savedObjects };
         },
@@ -507,9 +510,9 @@ describe('UserConnectorTokenClient', () => {
 
     test('logs when the finder throws but still completes deletion', async () => {
       (
-        encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock
+        encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as Mock
       ).mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         async *find() {
           throw new Error('find failed');
         },
@@ -964,9 +967,9 @@ describe('UserConnectorTokenClient', () => {
       test('revokes tokens for every connected user when profileUid is omitted (connector deletion)', async () => {
         mockActionSecrets({ authType: 'ears', provider: 'google' });
         (
-          encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock
+          encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as Mock
         ).mockResolvedValueOnce({
-          close: jest.fn(),
+          close: vi.fn(),
           async *find() {
             yield {
               saved_objects: [

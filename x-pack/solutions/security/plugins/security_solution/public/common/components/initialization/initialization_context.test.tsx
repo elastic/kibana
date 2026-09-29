@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React, { useContext } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -21,11 +24,11 @@ import {
   INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../../common/api/initialization';
 
-jest.mock('./api');
-jest.mock('../../lib/kibana');
+vi.mock('./api');
+vi.mock('../../lib/kibana');
 
 const mockHttp = {};
-const mockInitializeSecuritySolution = initializeSecuritySolution as jest.Mock;
+const mockInitializeSecuritySolution = initializeSecuritySolution as Mock;
 
 const flowA = INITIALIZATION_FLOW_CREATE_LIST_INDICES;
 const flowB = INITIALIZATION_FLOW_SECURITY_DATA_VIEWS;
@@ -58,8 +61,8 @@ const renderInit = (flows: InitializationFlowId[]) =>
   );
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  (useHttp as jest.Mock).mockReturnValue(mockHttp);
+  vi.clearAllMocks();
+  (useHttp as Mock).mockReturnValue(mockHttp);
 });
 
 describe('InitializationProvider - happy path', () => {

@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { SearchStatus } from '../types';
 import { getSearchStatus } from './get_search_status';
 import type { SearchSessionRequestInfo } from '../../../../common';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-const getEsClientMock = (asyncQueryGet = jest.fn(), status = jest.fn()) => {
+const getEsClientMock = (asyncQueryGet = vi.fn(), status = vi.fn()) => {
   const client = elasticsearchClientMock.createElasticsearchClient();
   return {
     ...client,
@@ -31,11 +34,11 @@ const getSearch = ({
 });
 
 const getClientMock = (returnValue: unknown) => {
-  const status = jest.fn().mockResolvedValue(returnValue);
-  const asyncQueryGet = jest.fn().mockResolvedValue(returnValue);
+  const status = vi.fn().mockResolvedValue(returnValue);
+  const asyncQueryGet = vi.fn().mockResolvedValue(returnValue);
   const mockEsClient = getEsClientMock(asyncQueryGet, status);
 
-  const mockFunctions: Record<string, jest.Mock> = {
+  const mockFunctions: Record<string, Mock> = {
     asyncQueryGet,
     status,
   };
@@ -214,11 +217,11 @@ describe('getSearchStatus', () => {
         // Given
         const error = new Error('Unexpected error');
 
-        const status = jest.fn().mockRejectedValue(error);
-        const asyncQueryGet = jest.fn().mockRejectedValue(error);
+        const status = vi.fn().mockRejectedValue(error);
+        const asyncQueryGet = vi.fn().mockRejectedValue(error);
         const mockEsClient = getEsClientMock(asyncQueryGet, status);
 
-        const mockFunctions: Record<string, jest.Mock> = {
+        const mockFunctions: Record<string, Mock> = {
           asyncQueryGet,
           status,
         };

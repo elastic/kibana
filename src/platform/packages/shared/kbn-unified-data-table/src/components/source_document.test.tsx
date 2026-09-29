@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { EsHitRecord } from '@kbn/discover-utils/src/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React from 'react';
@@ -24,7 +26,7 @@ import { screen, within } from '@testing-library/react';
 
 const mockServices = {
   fieldFormats: {
-    getDefaultInstance: jest.fn(() => ({
+    getDefaultInstance: vi.fn(() => ({
       convertToReact: (value: unknown) => (value ? value : '-'),
     })),
   },
@@ -70,9 +72,9 @@ describe('Unified data table source document cell rendering', () => {
   });
 
   it('passes values through appropriate formatter when `useTopLevelObjectColumns` is true', () => {
-    const mockConvertToReact = jest.fn((value: unknown) => `${value}`.replaceAll('foo', 'bar'));
+    const mockConvertToReact = vi.fn((value: unknown) => `${value}`.replaceAll('foo', 'bar'));
     const mockFieldFormats = {
-      getDefaultInstance: jest.fn(() => ({ convertToReact: mockConvertToReact })),
+      getDefaultInstance: vi.fn(() => ({ convertToReact: mockConvertToReact })),
     };
 
     const row = build({

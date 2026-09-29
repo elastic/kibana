@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import './helpers/mocks';
 
 import type { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
@@ -30,17 +32,20 @@ import { WithAppDependencies } from './helpers/setup_environment';
  * &searchField=repository&searchValue=test&searchMatch=must&searchOperator=exact
  * would be shown as url=/api/snapshot_restore/snapshots is sinon server
  */
-jest.mock('../../public/application/services/http', () => ({
-  useLoadSnapshots: jest.fn(),
-  useLoadRepositories: jest.fn(),
-  setUiMetricServiceSnapshot: () => {},
-  setUiMetricService: () => {},
-}));
+vi.mock('../../public/application/services/http', () => {
+      const mocked = {
+      useLoadSnapshots: vi.fn(),
+      useLoadRepositories: vi.fn(),
+      setUiMetricServiceSnapshot: () => {},
+      setUiMetricService: () => {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /*
  * Mocking EuiSearchBar because its onChange is not firing during tests
  */
-jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
+vi.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
   return {
     EuiSearchBox: (props: EuiSearchBoxProps) => (
       <input
@@ -72,14 +77,14 @@ const renderSnapshotList = (initialEntry: string = '/snapshots') => {
 
 describe('<SnapshotList />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const snapshot = fixtures.getSnapshot({
       repository: REPOSITORY_NAME,
       snapshot: getRandomString(),
     });
     const snapshots = [snapshot];
-    jest.mocked(useLoadSnapshots).mockReturnValue({
+    vi.mocked(useLoadSnapshots).mockReturnValue({
       error: null,
       isInitialRequest: false,
       isLoading: false,
@@ -91,7 +96,7 @@ describe('<SnapshotList />', () => {
       },
       resendRequest: () => {},
     });
-    jest.mocked(useLoadRepositories).mockReturnValue({
+    vi.mocked(useLoadRepositories).mockReturnValue({
       error: null,
       isInitialRequest: false,
       isLoading: false,
@@ -140,18 +145,18 @@ describe('<SnapshotList />', () => {
 
     describe('debounce', () => {
       beforeAll(() => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
       });
 
       afterAll(() => {
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
       afterEach(async () => {
         await act(async () => {
-          await jest.runOnlyPendingTimersAsync();
+          await vi.runOnlyPendingTimersAsync();
         });
-        jest.clearAllTimers();
+        vi.clearAllTimers();
       });
 
       test('waits after input to update list params for search', async () => {
@@ -167,7 +172,7 @@ describe('<SnapshotList />', () => {
         // advance the timers until after the debounce timeout
         // we use act because the component is updated when the timers advance
         await act(async () => {
-          await jest.advanceTimersByTimeAsync(250);
+          await vi.advanceTimersByTimeAsync(250);
         });
 
         await waitFor(() => {
@@ -184,24 +189,24 @@ describe('<SnapshotList />', () => {
 
     describe('query parsing', () => {
       beforeAll(() => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
       });
 
       afterAll(() => {
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
       afterEach(async () => {
         await act(async () => {
-          await jest.runOnlyPendingTimersAsync();
+          await vi.runOnlyPendingTimersAsync();
         });
-        jest.clearAllTimers();
+        vi.clearAllTimers();
       });
 
       const setSearchTextAndFlushDebounce = async (value: string) => {
         fireEvent.change(screen.getByTestId('snapshotListSearch'), { target: { value } });
         await act(async () => {
-          await jest.advanceTimersByTimeAsync(250);
+          await vi.advanceTimersByTimeAsync(250);
         });
       };
 
@@ -529,7 +534,7 @@ describe('<SnapshotList />', () => {
     const managedRepository = 'managed_repo';
 
     beforeEach(() => {
-      jest.mocked(useLoadRepositories).mockReturnValue({
+      vi.mocked(useLoadRepositories).mockReturnValue({
         error: null,
         isInitialRequest: false,
         isLoading: false,
@@ -565,7 +570,7 @@ describe('<SnapshotList />', () => {
         }),
       ];
 
-      jest.mocked(useLoadSnapshots).mockReturnValue({
+      vi.mocked(useLoadSnapshots).mockReturnValue({
         error: null,
         isInitialRequest: false,
         isLoading: false,
@@ -600,7 +605,7 @@ describe('<SnapshotList />', () => {
         }),
       ];
 
-      jest.mocked(useLoadSnapshots).mockReturnValue({
+      vi.mocked(useLoadSnapshots).mockReturnValue({
         error: null,
         isInitialRequest: false,
         isLoading: false,
@@ -634,7 +639,7 @@ describe('<SnapshotList />', () => {
         }),
       ];
 
-      jest.mocked(useLoadSnapshots).mockReturnValue({
+      vi.mocked(useLoadSnapshots).mockReturnValue({
         error: null,
         isInitialRequest: false,
         isLoading: false,

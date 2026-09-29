@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { InternalSkillDefinition, SkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -20,8 +22,8 @@ const createMockSkill = (
   content: 'skill content',
   readonly: true,
   basePath: 'skills/platform',
-  getRegistryTools: jest.fn().mockReturnValue([]),
-  getInlineTools: jest.fn().mockReturnValue([]),
+  getRegistryTools: vi.fn().mockReturnValue([]),
+  getInlineTools: vi.fn().mockReturnValue([]),
   referencedContentCount: 0,
   experimental: false,
   ...overrides,
@@ -40,8 +42,8 @@ describe('loadSkillTools', () => {
     const registryTool = { id: 'registry-1' } as any;
 
     const skill = createMockSkill({
-      getInlineTools: jest.fn().mockReturnValue([inlineTool]),
-      getRegistryTools: jest.fn().mockReturnValue(['registry-1']),
+      getInlineTools: vi.fn().mockReturnValue([inlineTool]),
+      getRegistryTools: vi.fn().mockReturnValue(['registry-1']),
     });
 
     ctx.skills.convertSkillTool.mockReturnValue(convertedInline);
@@ -74,7 +76,7 @@ describe('loadSkillTools', () => {
   it(`throws when the skill exceeds the ${MAX_SKILL_REGISTRY_TOOLS}-tool registry limit`, async () => {
     const tooMany = Array.from({ length: MAX_SKILL_REGISTRY_TOOLS + 1 }, (_, i) => `t-${i}`);
     const skill = createMockSkill({
-      getRegistryTools: jest.fn().mockReturnValue(tooMany),
+      getRegistryTools: vi.fn().mockReturnValue(tooMany),
     });
 
     await expect(
@@ -94,7 +96,7 @@ describe('loadSkillTools', () => {
   it('handles a skill with no getInlineTools method', async () => {
     const skill = createMockSkill({
       getInlineTools: undefined,
-      getRegistryTools: jest.fn().mockReturnValue([]),
+      getRegistryTools: vi.fn().mockReturnValue([]),
     });
 
     const ids = await loadSkillTools({

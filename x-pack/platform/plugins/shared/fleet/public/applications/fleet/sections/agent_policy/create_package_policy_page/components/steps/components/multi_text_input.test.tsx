@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, act } from '@testing-library/react';
 
@@ -14,7 +16,7 @@ import { MultiTextInput } from './multi_text_input';
 
 function renderInput(value = ['value1']) {
   const renderer = createFleetTestRendererMock();
-  const mockOnChange = jest.fn();
+  const mockOnChange = vi.fn();
   const fieldLabel = 'Hosts';
 
   const utils = renderer.render(

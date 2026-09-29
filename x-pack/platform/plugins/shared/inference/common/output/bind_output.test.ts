@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { BoundOptions, OutputAPI, UnboundOutputOptions } from '@kbn/inference-common';
 import { bindOutput } from './bind_output';
 
 describe('createScopedOutputAPI', () => {
-  let chatComplete: OutputAPI & jest.MockedFn<OutputAPI>;
+  let chatComplete: OutputAPI & MockedFunction<OutputAPI>;
 
   beforeEach(() => {
-    chatComplete = jest.fn();
+    chatComplete = vi.fn();
   });
 
   it('calls chatComplete with both bound and unbound params', async () => {

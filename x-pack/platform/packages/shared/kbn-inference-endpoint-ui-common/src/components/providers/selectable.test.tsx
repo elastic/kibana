@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { FieldType } from '../../types/types';
@@ -53,14 +55,14 @@ const providers = [
 describe('SelectableProvider', () => {
   const props = {
     providers,
-    onClosePopover: jest.fn(),
-    onProviderChange: jest.fn(),
-    onSolutionFilterChange: jest.fn(),
+    onClosePopover: vi.fn(),
+    onProviderChange: vi.fn(),
+    onSolutionFilterChange: vi.fn(),
   };
   describe('should render', () => {
     describe('provider', () => {
       afterAll(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       test('render placeholder', async () => {

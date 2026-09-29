@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import dateMath from '@kbn/datemath';
@@ -20,20 +22,23 @@ const huntResultOf = (entry: ReturnType<typeof buildSseData>[number]) => {
   return huntResult;
 };
 
-jest.mock('./resolve_index_scope', () => ({
-  resolveHuntScope: jest.fn().mockResolvedValue({
-    technologies: ['aws_iam'],
-    status: 'ok',
-    // A wildcard pattern matching what resolveIndexScope returns in production
-    // (`logs-aws.*`), not a concrete `_index` bucket name. The fixture must use
-    // the pattern so `matchesRequired`'s regex logic is exercised correctly.
-    required: ['logs-aws.*'],
-    optional: ['.alerts-security.alerts-default'],
-    missing: [],
-    window: { from: 'now-24h', to: 'now' },
-    row_limit: 100,
-  }),
-}));
+vi.mock('./resolve_index_scope', () => {
+      const mocked = {
+      resolveHuntScope: vi.fn().mockResolvedValue({
+        technologies: ['aws_iam'],
+        status: 'ok',
+        // A wildcard pattern matching what resolveIndexScope returns in production
+        // (`logs-aws.*`), not a concrete `_index` bucket name. The fixture must use
+        // the pattern so `matchesRequired`'s regex logic is exercised correctly.
+        required: ['logs-aws.*'],
+        optional: ['.alerts-security.alerts-default'],
+        missing: [],
+        window: { from: 'now-24h', to: 'now' },
+        row_limit: 100,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const HIT_TIER1_RESULT = {
   status: 'environment_hits_found' as const,
@@ -138,18 +143,27 @@ const HIT_TIER2_RESULT_TWO_BEHAVIORS = {
 
 // The coordinator loads the report when only report_id is given; these tests
 // supply text and IOCs themselves, so the loader returns an empty context.
-jest.mock('./load_report_context', () => ({
-  loadReportHuntContext: jest.fn().mockResolvedValue({ iocs: [], techniques: [] }),
-}));
+vi.mock('./load_report_context', () => {
+      const mocked = {
+      loadReportHuntContext: vi.fn().mockResolvedValue({ iocs: [], techniques: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../tier1/hunt_for_threat', () => ({
-  ...jest.requireActual('../tier1/hunt_for_threat'),
-  huntForThreat: jest.fn(),
-}));
+vi.mock('../tier1/hunt_for_threat', async () => {
+      const mocked = {
+      ...(await vi.importActual('../tier1/hunt_for_threat')),
+      huntForThreat: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../tier2/hunt_behavior', () => ({
-  huntBehavior: jest.fn(),
-}));
+vi.mock('../tier2/hunt_behavior', () => {
+      const mocked = {
+      huntBehavior: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const logger = loggingSystemMock.createLogger();
 
@@ -262,12 +276,12 @@ describe('buildSseAttachmentId', () => {
 
 describe('buildSseData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns one SSE entry per corroborated technique on a tier1_and_tier2 hit', async () => {
-    const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
-    const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
+    const { huntForThreat } = (await vi.importMock('../tier1/hunt_for_threat'));
+    const { huntBehavior } = (await vi.importMock('../tier2/hunt_behavior'));
     huntForThreat.mockResolvedValue(HIT_TIER1_RESULT);
     huntBehavior.mockResolvedValue(HIT_TIER2_RESULT_TWO_BEHAVIORS);
 
@@ -405,8 +419,8 @@ describe('buildSseData', () => {
   });
 
   it('returns a single report-scoped entry when Tier 2 produced no behaviors', async () => {
-    const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
-    const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
+    const { huntForThreat } = (await vi.importMock('../tier1/hunt_for_threat'));
+    const { huntBehavior } = (await vi.importMock('../tier2/hunt_behavior'));
     huntForThreat.mockResolvedValue(HIT_TIER1_RESULT);
     huntBehavior.mockResolvedValue({
       status: 'no_behaviors_found',
@@ -437,8 +451,8 @@ describe('buildSseData', () => {
   });
 
   it('emits a Tier 2-only hit with tier2 hit_sources and Tier 2 entities', async () => {
-    const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
-    const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
+    const { huntForThreat } = (await vi.importMock('../tier1/hunt_for_threat'));
+    const { huntBehavior } = (await vi.importMock('../tier2/hunt_behavior'));
     huntForThreat.mockResolvedValue(CLEAN_TIER1_RESULT);
     huntBehavior.mockResolvedValue({
       status: 'behaviors_proposed',
@@ -498,8 +512,8 @@ describe('buildSseData', () => {
   });
 
   it('returns a single report-scoped entry for a tier1_only clean result', async () => {
-    const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
-    const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
+    const { huntForThreat } = (await vi.importMock('../tier1/hunt_for_threat'));
+    const { huntBehavior } = (await vi.importMock('../tier2/hunt_behavior'));
     huntForThreat.mockResolvedValue(CLEAN_TIER1_RESULT);
     huntBehavior.mockResolvedValue({
       status: 'no_behaviors_found',
@@ -562,8 +576,8 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     tier1: RawTier1,
     behaviors: TestBehavior[]
   ): Promise<HuntCoordinatorResult> => {
-    const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
-    const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
+    const { huntForThreat } = (await vi.importMock('../tier1/hunt_for_threat'));
+    const { huntBehavior } = (await vi.importMock('../tier2/hunt_behavior'));
     huntForThreat.mockResolvedValue(tier1);
     huntBehavior.mockResolvedValue({
       status: 'behaviors_proposed',
@@ -820,7 +834,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
       ]
     );
 
-    const parseSpy = jest.spyOn(dateMath, 'parse');
+    const parseSpy = vi.spyOn(dateMath, 'parse');
     const entries = entriesFor(result);
     expect(entries).toHaveLength(2);
 
@@ -835,8 +849,8 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
 
 describe('buildSseData output parses against the SSE attachment schema', () => {
   it('validates mapper output as-is (schema-complete, no caller fill)', async () => {
-    const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
-    const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
+    const { huntForThreat } = (await vi.importMock('../tier1/hunt_for_threat'));
+    const { huntBehavior } = (await vi.importMock('../tier2/hunt_behavior'));
     huntForThreat.mockResolvedValue(HIT_TIER1_RESULT);
     huntBehavior.mockResolvedValue(HIT_TIER2_RESULT_TWO_BEHAVIORS);
 

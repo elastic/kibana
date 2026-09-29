@@ -5,24 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { initDashboard } from './create_gen_ai_dashboard';
 import { getDashboard } from './gen_ai_dashboard';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/logging';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('12345'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('12345'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const dashboardId = 'test-dashboard-id';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const defaultArgs = { logger, savedObjectsClient, dashboardId, genAIProvider: 'OpenAI' as const };
 describe('createDashboard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('fetches the Gen Ai Dashboard saved object', async () => {
     const result = await initDashboard(defaultArgs);
@@ -34,7 +40,7 @@ describe('createDashboard', () => {
   it('creates the Gen Ai Dashboard saved object when the dashboard saved object does not exist', async () => {
     const soClient = {
       ...savedObjectsClient,
-      get: jest.fn().mockRejectedValue({
+      get: vi.fn().mockRejectedValue({
         output: {
           statusCode: 404,
           payload: {
@@ -60,7 +66,7 @@ describe('createDashboard', () => {
   it('handles an error when fetching the dashboard saved object', async () => {
     const soClient = {
       ...savedObjectsClient,
-      get: jest.fn().mockRejectedValue({
+      get: vi.fn().mockRejectedValue({
         output: {
           statusCode: 500,
           payload: {

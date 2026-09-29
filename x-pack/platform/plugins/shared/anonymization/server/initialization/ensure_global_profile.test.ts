@@ -5,26 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ProfilesRepository } from '../repository';
 import { ensureGlobalProfileForNamespace } from './ensure_global_profile';
 import { ensureGlobalAnonymizationProfile } from './global_profile_initializer';
 import { migrateLegacyUiSettingsIntoGlobalProfile } from './legacy_ui_settings_migration';
 
-jest.mock('./global_profile_initializer', () => ({
-  ensureGlobalAnonymizationProfile: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./global_profile_initializer', () => {
+      const mocked = {
+      ensureGlobalAnonymizationProfile: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./legacy_ui_settings_migration', () => ({
-  migrateLegacyUiSettingsIntoGlobalProfile: jest.fn().mockResolvedValue(true),
-}));
+vi.mock('./legacy_ui_settings_migration', () => {
+      const mocked = {
+      migrateLegacyUiSettingsIntoGlobalProfile: vi.fn().mockResolvedValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ensureGlobalProfileForNamespace', () => {
   const logger = loggingSystemMock.createLogger();
   const profilesRepo = {} as unknown as ProfilesRepository;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('migrates only on first namespace touch and skips repeat work within TTL', async () => {
@@ -71,7 +80,7 @@ describe('ensureGlobalProfileForNamespace', () => {
 
   it('retries legacy migration on next ensure when migration fails', async () => {
     const namespace = `test-retry-migration-${Date.now()}`;
-    (migrateLegacyUiSettingsIntoGlobalProfile as jest.Mock)
+    (migrateLegacyUiSettingsIntoGlobalProfile as Mock)
       .mockResolvedValueOnce(false)
       .mockResolvedValueOnce(true);
 

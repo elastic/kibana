@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as Rx from 'rxjs';
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -17,19 +19,19 @@ import { SpacesClientService } from './spaces_client_service';
 import type { ConfigType } from '../config';
 import { spacesConfig } from '../lib/__fixtures__';
 
-const debugLogger = jest.fn();
+const debugLogger = vi.fn();
 
 const createMockCpsStart = (): CPSServerStart => {
   return {
-    createNpreClient: jest.fn().mockReturnValue({
-      getNpre: jest.fn().mockResolvedValue(undefined),
-      canGetNpre: jest.fn().mockResolvedValue(true),
-      putNpre: jest.fn().mockResolvedValue(undefined),
-      deleteNpre: jest.fn().mockResolvedValue(undefined),
-      canPutNpre: jest.fn().mockResolvedValue(true),
+    createNpreClient: vi.fn().mockReturnValue({
+      getNpre: vi.fn().mockResolvedValue(undefined),
+      canGetNpre: vi.fn().mockResolvedValue(true),
+      putNpre: vi.fn().mockResolvedValue(undefined),
+      deleteNpre: vi.fn().mockResolvedValue(undefined),
+      canPutNpre: vi.fn().mockResolvedValue(true),
     }),
-    getLinkedProjects: jest.fn().mockResolvedValue([]),
-    isCpsActive: jest.fn().mockResolvedValue(false),
+    getLinkedProjects: vi.fn().mockResolvedValue([]),
+    isCpsActive: vi.fn().mockResolvedValue(false),
   };
 };
 
@@ -39,7 +41,7 @@ describe('SpacesClientService', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
       const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
-      const repositoryFactory = jest.fn();
+      const repositoryFactory = vi.fn();
       setup.setClientRepositoryFactory(repositoryFactory);
 
       expect(() =>
@@ -51,7 +53,7 @@ describe('SpacesClientService', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
       const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
-      const clientWrapper = jest.fn();
+      const clientWrapper = vi.fn();
       setup.registerClientWrapper(clientWrapper);
 
       expect(() => setup.registerClientWrapper(clientWrapper)).toThrowErrorMatchingInlineSnapshot(
@@ -97,7 +99,7 @@ describe('SpacesClientService', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
       const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
-      const customRepositoryFactory = jest.fn();
+      const customRepositoryFactory = vi.fn();
       setup.setClientRepositoryFactory(customRepositoryFactory);
 
       const coreStart = coreMock.createStart();
@@ -119,7 +121,7 @@ describe('SpacesClientService', () => {
 
       const wrapper = Symbol() as unknown as ISpacesClient;
 
-      const clientWrapper = jest.fn().mockReturnValue(wrapper);
+      const clientWrapper = vi.fn().mockReturnValue(wrapper);
       setup.registerClientWrapper(clientWrapper);
 
       const coreStart = coreMock.createStart();
@@ -142,12 +144,12 @@ describe('SpacesClientService', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
       const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
-      const customRepositoryFactory = jest.fn();
+      const customRepositoryFactory = vi.fn();
       setup.setClientRepositoryFactory(customRepositoryFactory);
 
       const wrapper = Symbol() as unknown as ISpacesClient;
 
-      const clientWrapper = jest.fn().mockReturnValue(wrapper);
+      const clientWrapper = vi.fn().mockReturnValue(wrapper);
       setup.registerClientWrapper(clientWrapper);
 
       const coreStart = coreMock.createStart();

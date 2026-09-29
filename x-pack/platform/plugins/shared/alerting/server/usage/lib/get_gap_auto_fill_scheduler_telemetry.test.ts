@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getGapAutoFillSchedulerTelemetryPerDay } from './get_gap_auto_fill_scheduler_telemetry';
 
 describe('getGapAutoFillSchedulerTelemetryPerDay', () => {
   it('parses aggregations including nested processed gaps sum', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         hits: { total: { value: 3 } },
         aggregations: {
           by_status: {
@@ -40,9 +42,9 @@ describe('getGapAutoFillSchedulerTelemetryPerDay', () => {
       esClient,
       eventLogIndex: '.kibana-event-log-*',
       logger: {
-        warn: jest.fn(),
-        debug: jest.fn(),
-        isLevelEnabled: jest.fn().mockReturnValue(false),
+        warn: vi.fn(),
+        debug: vi.fn(),
+        isLevelEnabled: vi.fn().mockReturnValue(false),
       } as unknown as Logger,
     });
 

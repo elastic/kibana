@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import type { FeatureFlagsStart } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -17,7 +19,7 @@ import { EsqlResponseFormatService } from './esql_response_format_service';
 
 const setup = (flagValue$: BehaviorSubject<string>) => {
   const { loggerService, mockLogger } = createLoggerService();
-  const featureFlags = coreMock.createStart().featureFlags as jest.Mocked<FeatureFlagsStart>;
+  const featureFlags = coreMock.createStart().featureFlags as Mocked<FeatureFlagsStart>;
   featureFlags.getStringValue$.mockReturnValue(flagValue$);
 
   const service = new EsqlResponseFormatService(featureFlags, loggerService);

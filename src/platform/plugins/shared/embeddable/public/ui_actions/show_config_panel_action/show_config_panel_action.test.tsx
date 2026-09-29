@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject, take } from 'rxjs';
 import type { ShowConfigPanelActionApi } from './show_config_panel_action';
@@ -19,15 +21,15 @@ describe('Show config panel action', () => {
 
   beforeEach(() => {
     const viewModeSubject = new BehaviorSubject<ViewMode>('view');
-    updateViewMode = jest.fn((viewMode) => viewModeSubject.next(viewMode));
+    updateViewMode = vi.fn((viewMode) => viewModeSubject.next(viewMode));
 
     action = new ShowConfigPanelAction();
     context = {
       embeddable: {
         viewMode$: viewModeSubject,
-        onShowConfig: jest.fn(),
-        isReadOnlyEnabled: jest.fn().mockReturnValue({ read: true, write: false }),
-        getTypeDisplayName: jest.fn().mockReturnValue('A very fun panel type'),
+        onShowConfig: vi.fn(),
+        isReadOnlyEnabled: vi.fn().mockReturnValue({ read: true, write: false }),
+        getTypeDisplayName: vi.fn().mockReturnValue('A very fun panel type'),
       },
     };
   });
@@ -49,20 +51,24 @@ describe('Show config panel action', () => {
   });
 
   it('is incompatible when view is not enabled', async () => {
-    context.embeddable.isReadOnlyEnabled = jest.fn().mockReturnValue({ read: false, write: false });
+    context.embeddable.isReadOnlyEnabled = vi.fn().mockReturnValue({ read: false, write: false });
     expect(await action.isCompatible(context)).toBe(false);
   });
 
   it('is incompatible when view mode is view but user has write permissions', async () => {
-    context.embeddable.isReadOnlyEnabled = jest.fn().mockReturnValue({ read: true, write: true });
+    context.embeddable.isReadOnlyEnabled = vi.fn().mockReturnValue({ read: true, write: true });
     expect(await action.isCompatible(context)).toBe(false);
   });
 
-  it('should trigger a change ont he subject when changing viewMode', (done) => {
-    const subject$ = action.getCompatibilityChangesSubject(context);
-    subject$?.pipe(take(1)).subscribe(() => {
-      done();
-    });
-    updateViewMode('edit');
-  });
+  it('should trigger a change ont he subject when changing viewMode', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+          const subject$ = action.getCompatibilityChangesSubject(context);
+          subject$?.pipe(take(1)).subscribe(() => {
+            done();
+          });
+          updateViewMode('edit');
+        
+      }));
 });

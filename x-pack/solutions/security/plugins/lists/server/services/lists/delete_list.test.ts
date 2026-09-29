@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
 import { LIST_ID, LIST_INDEX, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 
@@ -12,25 +15,31 @@ import { getList } from './get_list';
 import { deleteList } from './delete_list';
 import { getDeleteListOptionsMock } from './delete_list.mock';
 
-jest.mock('../utils', () => ({
-  waitUntilDocumentIndexed: jest.fn(),
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      waitUntilDocumentIndexed: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./get_list', () => ({
-  getList: jest.fn(),
-}));
+vi.mock('./get_list', () => {
+      const mocked = {
+      getList: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('delete_list', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Delete returns a null if the list is also null', async () => {
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(null);
+    (getList as unknown as Mock).mockResolvedValueOnce(null);
     const options = getDeleteListOptionsMock();
     const deletedList = await deleteList(options);
     expect(deletedList).toEqual(null);
@@ -38,18 +47,18 @@ describe('delete_list', () => {
 
   test('Delete returns the list if a list is returned from getList', async () => {
     const list = getListResponseMock();
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
+    (getList as unknown as Mock).mockResolvedValueOnce(list);
     const options = getDeleteListOptionsMock();
-    options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
+    options.esClient.deleteByQuery = vi.fn().mockResolvedValue({ deleted: 1 });
     const deletedList = await deleteList(options);
     expect(deletedList).toEqual(list);
   });
 
   test('Delete calls "deleteByQuery" for list items if a list is returned from getList', async () => {
     const list = getListResponseMock();
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
+    (getList as unknown as Mock).mockResolvedValueOnce(list);
     const options = getDeleteListOptionsMock();
-    options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
+    options.esClient.deleteByQuery = vi.fn().mockResolvedValue({ deleted: 1 });
     await deleteList(options);
     const deleteByQuery = {
       conflicts: 'proceed',
@@ -62,9 +71,9 @@ describe('delete_list', () => {
 
   test('Delete calls "deleteByQuery" for list if a list is returned from getList', async () => {
     const list = getListResponseMock();
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
+    (getList as unknown as Mock).mockResolvedValueOnce(list);
     const options = getDeleteListOptionsMock();
-    options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
+    options.esClient.deleteByQuery = vi.fn().mockResolvedValue({ deleted: 1 });
     await deleteList(options);
     const deleteByQuery = {
       conflicts: 'proceed',
@@ -80,7 +89,7 @@ describe('delete_list', () => {
   });
 
   test('Delete does not call data client if the list returns null', async () => {
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(null);
+    (getList as unknown as Mock).mockResolvedValueOnce(null);
     const options = getDeleteListOptionsMock();
     await deleteList(options);
     expect(options.esClient.delete).not.toHaveBeenCalled();
@@ -88,9 +97,9 @@ describe('delete_list', () => {
 
   test('throw error if no list was deleted', async () => {
     const list = getListResponseMock();
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
+    (getList as unknown as Mock).mockResolvedValueOnce(list);
     const options = getDeleteListOptionsMock();
-    options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 0 });
+    options.esClient.deleteByQuery = vi.fn().mockResolvedValue({ deleted: 0 });
 
     await expect(deleteList(options)).rejects.toThrow('No list has been deleted');
   });

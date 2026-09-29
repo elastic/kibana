@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ESQLViewInitializer } from './esql_view_initializer';
 
-const createMockEsClient = (transportRequestMock: jest.Mock) =>
+const createMockEsClient = (transportRequestMock: Mock) =>
   ({
     transport: { request: transportRequestMock },
   } as unknown as ElasticsearchClient);
 
 describe('ESQLViewInitializer', () => {
   let esClient: ElasticsearchClient;
-  let transportRequestMock: jest.Mock;
+  let transportRequestMock: Mock;
   const mockLogger = loggerMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    transportRequestMock = jest.fn().mockResolvedValue(undefined);
+    vi.clearAllMocks();
+    transportRequestMock = vi.fn().mockResolvedValue(undefined);
     esClient = createMockEsClient(transportRequestMock);
   });
 

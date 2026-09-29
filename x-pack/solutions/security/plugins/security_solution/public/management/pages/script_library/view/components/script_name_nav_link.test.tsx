@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { ScriptNameNavLink, type ScriptNameNavLinkProps } from './script_name_nav_link';
 import {
@@ -25,7 +27,7 @@ describe('ScriptNameNavLink component', () => {
       name: 'Test Script',
       queryParams: { page: 1, pageSize: 10, sortField: 'name', sortDirection: 'asc' },
       scriptId: 'script-1',
-      onClick: jest.fn(),
+      onClick: vi.fn(),
       'data-test-subj': 'test',
     };
     render = (props?: ScriptNameNavLinkProps) => {

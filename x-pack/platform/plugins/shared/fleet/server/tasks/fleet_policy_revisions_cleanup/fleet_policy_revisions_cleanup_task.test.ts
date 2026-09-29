@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -20,16 +23,16 @@ import {
 } from './fleet_policy_revisions_cleanup_task';
 import { sweepOrphanedFleetPolicies } from './sweep_orphaned_fleet_policies';
 
-jest.mock('../../services');
+vi.mock('../../services');
 // Mock the orphan sweep so that existing revision-cleanup tests are unaffected.
 // Dedicated tests for the sweep logic live in sweep_orphaned_fleet_policies.test.ts.
-jest.mock('./sweep_orphaned_fleet_policies');
+vi.mock('./sweep_orphaned_fleet_policies');
 
-const mockedSweepOrphanedFleetPolicies = sweepOrphanedFleetPolicies as jest.MockedFunction<
+const mockedSweepOrphanedFleetPolicies = sweepOrphanedFleetPolicies as MockedFunction<
   typeof sweepOrphanedFleetPolicies
 >;
 
-const mockAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockAppContextService = appContextService as Mocked<typeof appContextService>;
 
 const expectedDeleteByQueryConfig = {
   conflicts: 'proceed',
@@ -58,7 +61,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockCore = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();

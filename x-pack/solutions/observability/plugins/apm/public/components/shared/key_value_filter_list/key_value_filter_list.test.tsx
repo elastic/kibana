@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { KeyValueFilterList } from '.';
 import { expectTextsInDocument, renderWithTheme } from '../../../utils/test_helpers';
@@ -12,7 +14,7 @@ import { fireEvent } from '@testing-library/react';
 describe('KeyValueFilterList', () => {
   it('hides accordion when key value list is empty', () => {
     const { container } = renderWithTheme(
-      <KeyValueFilterList title="foo" keyValueList={[]} onClickFilter={jest.fn} />
+      <KeyValueFilterList title="foo" keyValueList={[]} onClickFilter={vi.fn} />
     );
     expect(container).toBeEmptyDOMElement();
   });
@@ -24,7 +26,7 @@ describe('KeyValueFilterList', () => {
           { key: 'foo', value: 'foo value', isFilterable: true },
           { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
-        onClickFilter={jest.fn}
+        onClickFilter={vi.fn}
       />
     );
     expectTextsInDocument(component, ['title', 'foo', 'foo value', 'bar', 'bar value']);
@@ -38,7 +40,7 @@ describe('KeyValueFilterList', () => {
           { key: 'foo', value: 'foo value', isFilterable: true },
           { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
-        onClickFilter={jest.fn}
+        onClickFilter={vi.fn}
       />
     );
     expect(component.getByTestId('accordion_title_icon')).toBeInTheDocument();
@@ -52,7 +54,7 @@ describe('KeyValueFilterList', () => {
           { key: 'foo', value: 'foo value', isFilterable: true },
           { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
-        onClickFilter={jest.fn}
+        onClickFilter={vi.fn}
       />
     );
     expect(component.queryAllByTestId('accordion_title_icon')).toEqual([]);
@@ -67,14 +69,14 @@ describe('KeyValueFilterList', () => {
           { key: 'foo', value: 'foo value', isFilterable: false },
           { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
-        onClickFilter={jest.fn}
+        onClickFilter={vi.fn}
       />
     );
     expect(component.queryAllByTestId('filter_by_foo')).toEqual([]);
     expect(component.queryAllByTestId('filter_by_bar')).toHaveLength(1);
   });
   it('returns selected key value when the filter button is clicked', () => {
-    const mockFilter = jest.fn();
+    const mockFilter = vi.fn();
     const component = renderWithTheme(
       <KeyValueFilterList
         title="title"

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
 import { range } from 'lodash';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
@@ -17,19 +20,25 @@ import { saveSettings } from '../../../settings';
 
 import { prepareTemplate, prepareToInstallTemplates } from './install';
 
-jest.mock('../../fields/field', () => ({
-  ...jest.requireActual('../../fields/field'),
-  loadDatastreamsFieldsFromYaml: jest.fn(),
-}));
+vi.mock('../../fields/field', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../fields/field')),
+      loadDatastreamsFieldsFromYaml: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../settings', () => ({
-  getSettingsOrUndefined: jest.fn().mockResolvedValue({
-    ilm_migration_status: {},
-  }),
-  saveSettings: jest.fn(),
-}));
+vi.mock('../../../settings', () => {
+      const mocked = {
+      getSettingsOrUndefined: vi.fn().mockResolvedValue({
+        ilm_migration_status: {},
+      }),
+      saveSettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedLoadFieldsFromYaml = loadDatastreamsFieldsFromYaml as jest.MockedFunction<
+const mockedLoadFieldsFromYaml = loadDatastreamsFieldsFromYaml as MockedFunction<
   typeof loadDatastreamsFieldsFromYaml
 >;
 const packageInstallContext = {
@@ -1104,17 +1113,17 @@ describe('EPM index template install', () => {
 
   describe('prepareToInstallTemplates', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const esClientMock = {
         ilm: {
-          getLifecycle: jest.fn().mockImplementation(async (name: string) => ({
+          getLifecycle: vi.fn().mockImplementation(async (name: string) => ({
             [name]: {
               version: 1,
             },
           })),
         },
       } as any;
-      jest.spyOn(appContextService, 'getInternalUserESClient').mockReturnValue(esClientMock);
+      vi.spyOn(appContextService, 'getInternalUserESClient').mockReturnValue(esClientMock);
     });
     it('should not include stack component templates in tracked assets', async () => {
       const dataStreamDatasetIsPrefixUnset = {
@@ -1200,7 +1209,7 @@ describe('EPM index template install', () => {
         type: 'component_template',
       });
       // otel templates use new ILMs, doesn't affect migrations
-      expect(saveSettings as jest.Mock).not.toHaveBeenCalled();
+      expect(saveSettings as Mock).not.toHaveBeenCalled();
     });
   });
 });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import {
@@ -28,52 +31,61 @@ import { useRuleWithFallback } from '../../../../detection_engine/rule_managemen
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const actual = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...actual,
-    useUiSetting: jest.fn(),
+    useUiSetting: vi.fn(),
   };
 });
 
-jest.mock('@kbn/entity-store/public', () => {
-  const actual = jest.requireActual('@kbn/entity-store/public');
-  const { euid } = jest.requireActual('@kbn/entity-store/common/euid_helpers');
+vi.mock('@kbn/entity-store/public', async () => {
+  const actual = (await vi.importActual('@kbn/entity-store/public'));
+  const { euid } = (await vi.importActual('@kbn/entity-store/common/euid_helpers'));
   return {
     ...actual,
-    useEntityStoreEuidApi: jest.fn(() => ({ euid })),
+    useEntityStoreEuidApi: vi.fn(() => ({ euid })),
   };
 });
 
-jest.mock('../../../entity_details/shared/hooks/use_entity_from_store');
+vi.mock('../../../entity_details/shared/hooks/use_entity_from_store');
 
-jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
-jest.mock('../../../../flyout_v2/document/main/hooks/use_highlighted_fields');
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../flyout_v2/rule/main/hooks/use_rule_details');
-jest.mock('../../../../flyout_v2/document/main/hooks/use_highlighted_fields_privilege');
-jest.mock('../../shared/hooks/use_basic_data_from_details_data');
-jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
-jest.mock('../../shared/hooks/use_navigate_to_left_panel', () => ({
-  useNavigateToLeftPanel: () => jest.fn(),
-}));
+vi.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => {
+      const mocked = {
+      useExpandSection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../flyout_v2/document/main/hooks/use_highlighted_fields');
+vi.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../flyout_v2/rule/main/hooks/use_rule_details');
+vi.mock('../../../../flyout_v2/document/main/hooks/use_highlighted_fields_privilege');
+vi.mock('../../shared/hooks/use_basic_data_from_details_data');
+vi.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
+vi.mock('../../shared/hooks/use_navigate_to_left_panel', () => {
+      const mocked = {
+      useNavigateToLeftPanel: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...actual,
-    useUiSetting: jest.fn().mockReturnValue(false),
+    useUiSetting: vi.fn().mockReturnValue(false),
   };
 });
 
-const mockAddSuccess = jest.fn();
-jest.mock('../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addSuccess: mockAddSuccess,
-  }),
-}));
+const mockAddSuccess = vi.fn();
+vi.mock('../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addSuccess: mockAddSuccess,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const panelContextValue = {
   ...mockContextValue,
@@ -107,12 +119,12 @@ const renderInvestigationSection = (contextValue = panelContextValue) =>
   );
 
 describe('<InvestigationSection />', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
-  const mockUseEntityFromStore = useEntityFromStore as jest.Mock;
-  const mockUseUiSetting = useUiSetting as jest.Mock;
+  const mockUseExpandSection = vi.mocked(useExpandSection);
+  const mockUseEntityFromStore = useEntityFromStore as Mock;
+  const mockUseUiSetting = useUiSetting as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseUiSetting.mockReturnValue(false);
     mockUseEntityFromStore.mockReturnValue({
       entityRecord: null,
@@ -121,22 +133,22 @@ describe('<InvestigationSection />', () => {
       lastSeen: null,
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     mockUseExpandSection.mockReturnValue(true);
-    (useExpandSection as jest.Mock).mockReturnValue(true);
-    (useHighlightedFields as jest.Mock).mockReturnValue([]);
-    (useRuleDetails as jest.Mock).mockReturnValue({
+    (useExpandSection as Mock).mockReturnValue(true);
+    (useHighlightedFields as Mock).mockReturnValue([]);
+    (useRuleDetails as Mock).mockReturnValue({
       rule: { id: '123' } as RuleResponse,
       isExistingRule: true,
       loading: false,
     });
-    (useHighlightedFieldsPrivilege as jest.Mock).mockReturnValue({
+    (useHighlightedFieldsPrivilege as Mock).mockReturnValue({
       isDisabled: false,
       tooltipContent: 'tooltip content',
     });
-    (useBasicDataFromDetailsData as jest.Mock).mockReturnValue(mockBasicAlertData);
-    (useRuleWithFallback as jest.Mock).mockReturnValue({
+    (useBasicDataFromDetailsData as Mock).mockReturnValue(mockBasicAlertData);
+    (useRuleWithFallback as Mock).mockReturnValue({
       loading: false,
       error: false,
       rule: { note: 'test note' },

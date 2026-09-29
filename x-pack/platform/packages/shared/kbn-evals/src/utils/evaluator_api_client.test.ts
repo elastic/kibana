@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KbnClient } from '@kbn/kbn-client';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { EvaluatorApiClient } from './evaluator_api_client';
 
 describe('EvaluatorApiClient', () => {
   it('exposes the evaluator version returned by the evaluate API', async () => {
-    const request = jest.fn().mockResolvedValue({
+    const request = vi.fn().mockResolvedValue({
       data: {
         results: [
           {
@@ -24,7 +26,7 @@ describe('EvaluatorApiClient', () => {
     });
     const client = new EvaluatorApiClient(
       { request } as unknown as KbnClient,
-      { error: jest.fn() } as unknown as SomeDevLog
+      { error: vi.fn() } as unknown as SomeDevLog
     );
     const [evaluator] = client.toEvaluators([
       { name: 'tone', kind: 'LLM', direction: 'maximize', connectorId: 'connector-1' },

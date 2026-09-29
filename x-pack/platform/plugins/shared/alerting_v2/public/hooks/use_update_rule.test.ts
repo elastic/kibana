@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -13,11 +16,11 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 
-jest.mock('@kbn/core-di-browser');
-jest.mock('../services/rules_api');
+vi.mock('@kbn/core-di-browser');
+vi.mock('../services/rules_api');
 
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
-const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
+const mockUseService = useService as MockedFunction<typeof useService>;
+const mockCoreStart = CoreStart as MockedFunction<typeof CoreStart>;
 
 const mockRuleResponse: RuleResponse = {
   id: 'rule-1',
@@ -50,12 +53,12 @@ const createWrapper = () => {
 };
 
 describe('useUpdateRule', () => {
-  const mockUpdateRule = jest.fn();
-  const mockAddSuccess = jest.fn();
-  const mockAddError = jest.fn();
+  const mockUpdateRule = vi.fn();
+  const mockAddSuccess = vi.fn();
+  const mockAddError = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockCoreStart.mockImplementation((key: string) => key as any);
 

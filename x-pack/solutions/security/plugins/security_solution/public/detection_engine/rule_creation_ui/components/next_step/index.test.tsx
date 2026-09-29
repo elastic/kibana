@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { shallow } from 'enzyme';
 import React from 'react';
 import { NextStep } from '.';
 
 describe('NextStep', () => {
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(<NextStep onClick={jest.fn()} isDisabled={false} />);
+    const wrapper = shallow(<NextStep onClick={vi.fn()} isDisabled={false} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

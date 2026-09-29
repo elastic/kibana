@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedClass } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { agentIdCondition } from '../../../synthetics_service/private_location/assign_by_condition';
 import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
@@ -12,12 +15,12 @@ import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import { getMonitorAgentAssignment } from './get_monitor_agent_assignment';
 import type { MonitorLocationAssignment } from '../../../../common/types';
 
-jest.mock('./get_private_locations');
-jest.mock('../../../synthetics_service/private_location/package_policy_service');
+vi.mock('./get_private_locations');
+vi.mock('../../../synthetics_service/private_location/package_policy_service');
 
-const mockGetLocations = getPrivateLocationsAndAgentPolicies as jest.Mock;
-const mockGetByIds = jest.fn();
-const mockPackagePolicyService = PackagePolicyService as jest.MockedClass<
+const mockGetLocations = getPrivateLocationsAndAgentPolicies as Mock;
+const mockGetByIds = vi.fn();
+const mockPackagePolicyService = PackagePolicyService as MockedClass<
   typeof PackagePolicyService
 >;
 
@@ -40,12 +43,12 @@ const makeContext = ({
   rebalanceEnabled = true,
 }: {
   monitorId?: string;
-  listAgentsImpl: jest.Mock;
-  getMonitorImpl: jest.Mock;
+  listAgentsImpl: Mock;
+  getMonitorImpl: Mock;
   hasEnterprise?: boolean;
   rebalanceEnabled?: boolean;
 }) => {
-  const notFound = jest.fn((opts) => ({ status: 404, ...opts }));
+  const notFound = vi.fn((opts) => ({ status: 404, ...opts }));
   const routeContext = {
     request: { params: { monitorId } },
     response: { notFound },
@@ -55,19 +58,19 @@ const makeContext = ({
       fleet: { agentService: { asInternalUser: { listAgents: listAgentsImpl } } },
       pluginsStart: {
         taskManager: {
-          get: jest.fn().mockResolvedValue({
+          get: vi.fn().mockResolvedValue({
             state: { rebalancePrivateLocationShardsEnabled: rebalanceEnabled },
           }),
         },
         licensing: {
-          getLicense: jest.fn().mockResolvedValue({
+          getLicense: vi.fn().mockResolvedValue({
             isAvailable: true,
             isActive: true,
             hasAtLeast: (level: string) => level === 'enterprise' && hasEnterprise,
           }),
         },
       },
-      logger: { error: jest.fn() },
+      logger: { error: vi.fn() },
     },
     savedObjectsClient: {},
     syntheticsMonitorClient: {},
@@ -104,15 +107,15 @@ describe('getMonitorAgentAssignment route', () => {
     );
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('returns 404 when the monitor does not exist', async () => {
-    const getMonitor = jest
+    const getMonitor = vi
       .fn()
       .mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError('synthetics-monitor', 'missing')
       );
-    const listAgents = jest.fn();
+    const listAgents = vi.fn();
     const { routeContext, notFound } = makeContext({
       monitorId: 'missing',
       listAgentsImpl: listAgents,
@@ -129,11 +132,11 @@ describe('getMonitorAgentAssignment route', () => {
   });
 
   it('returns an empty list when the monitor has no private locations', async () => {
-    const getMonitor = jest.fn().mockResolvedValue({
+    const getMonitor = vi.fn().mockResolvedValue({
       attributes: { locations: [{ id: 'us-east', isServiceManaged: true }] },
     });
     const { routeContext } = makeContext({
-      listAgentsImpl: jest.fn(),
+      listAgentsImpl: vi.fn(),
       getMonitorImpl: getMonitor,
     });
 
@@ -143,10 +146,10 @@ describe('getMonitorAgentAssignment route', () => {
   });
 
   it('returns every enrolled agent without an Enterprise license', async () => {
-    const getMonitor = jest.fn().mockResolvedValue({
+    const getMonitor = vi.fn().mockResolvedValue({
       attributes: { locations: [{ id: 'loc-1', label: 'Location 1', isServiceManaged: false }] },
     });
-    const listAgents = jest.fn().mockResolvedValue({
+    const listAgents = vi.fn().mockResolvedValue({
       agents: [
         agent(),
         agent({
@@ -199,10 +202,10 @@ describe('getMonitorAgentAssignment route', () => {
       agentPolicies: [{ id: 'policy-1', name: 'Policy One' }],
     });
     mockGetByIds.mockResolvedValue([{ id: 'mon-1-loc-1', condition: agentIdCondition('agent-2') }]);
-    const getMonitor = jest.fn().mockResolvedValue({
+    const getMonitor = vi.fn().mockResolvedValue({
       attributes: { locations: [{ id: 'loc-1', isServiceManaged: false }] },
     });
-    const listAgents = jest.fn().mockResolvedValue({
+    const listAgents = vi.fn().mockResolvedValue({
       agents: [
         agent(),
         agent({
@@ -248,13 +251,13 @@ describe('getMonitorAgentAssignment route', () => {
     mockGetByIds.mockResolvedValue([
       { id: 'journey-project-default-loc-1', condition: agentIdCondition('agent-2') },
     ]);
-    const getMonitor = jest.fn().mockResolvedValue({
+    const getMonitor = vi.fn().mockResolvedValue({
       attributes: {
         id: 'journey-project-default',
         locations: [{ id: 'loc-1', isServiceManaged: false }],
       },
     });
-    const listAgents = jest.fn().mockResolvedValue({
+    const listAgents = vi.fn().mockResolvedValue({
       agents: [
         agent({
           id: 'agent-2',
@@ -302,10 +305,10 @@ describe('getMonitorAgentAssignment route', () => {
       agentPolicies: [{ id: 'policy-1', name: 'Policy One' }],
     });
     mockGetByIds.mockResolvedValue([]);
-    const getMonitor = jest.fn().mockResolvedValue({
+    const getMonitor = vi.fn().mockResolvedValue({
       attributes: { locations: [{ id: 'loc-1', isServiceManaged: false }] },
     });
-    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const listAgents = vi.fn().mockResolvedValue({ agents: [agent()], total: 1 });
     const { routeContext } = makeContext({
       listAgentsImpl: listAgents,
       getMonitorImpl: getMonitor,
@@ -325,10 +328,10 @@ describe('getMonitorAgentAssignment route', () => {
     mockGetByIds.mockResolvedValue([
       { id: 'mon-1-loc-1', condition: agentIdCondition('gone-agent') },
     ]);
-    const getMonitor = jest.fn().mockResolvedValue({
+    const getMonitor = vi.fn().mockResolvedValue({
       attributes: { locations: [{ id: 'loc-1', isServiceManaged: false }] },
     });
-    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const listAgents = vi.fn().mockResolvedValue({ agents: [agent()], total: 1 });
     const { routeContext } = makeContext({
       listAgentsImpl: listAgents,
       getMonitorImpl: getMonitor,
@@ -354,11 +357,11 @@ describe('getMonitorAgentAssignment route', () => {
       agentPolicies: [{ id: 'policy-1', name: 'Policy One' }],
     });
     mockGetByIds.mockRejectedValue(new Error('Fleet unavailable'));
-    const getMonitor = jest.fn().mockResolvedValue({
+    const getMonitor = vi.fn().mockResolvedValue({
       attributes: { locations: [{ id: 'loc-1', isServiceManaged: false }] },
     });
     const { routeContext } = makeContext({
-      listAgentsImpl: jest.fn(),
+      listAgentsImpl: vi.fn(),
       getMonitorImpl: getMonitor,
       hasEnterprise: true,
     });
@@ -367,10 +370,10 @@ describe('getMonitorAgentAssignment route', () => {
   });
 
   it('returns every enrolled agent when shard rebalancing is off, even with an Enterprise license', async () => {
-    const getMonitor = jest.fn().mockResolvedValue({
+    const getMonitor = vi.fn().mockResolvedValue({
       attributes: { locations: [{ id: 'loc-1', isServiceManaged: false }] },
     });
-    const listAgents = jest.fn().mockResolvedValue({
+    const listAgents = vi.fn().mockResolvedValue({
       agents: [agent(), agent({ id: 'agent-2' })],
       total: 2,
     });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, fireEvent, waitFor, within } from '@testing-library/react';
@@ -19,12 +21,12 @@ import { ExperimentalFeaturesService } from '../../common/experimental_features_
 import { ExperimentalFeaturesProvider } from '../../common/experimental_features_context';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 
-const mockUseRouterNavigate = jest.fn();
-const mockAddDanger = jest.fn();
+const mockUseRouterNavigate = vi.fn();
+const mockAddDanger = vi.fn();
 
 // Mutable references so the payload-shape tests can capture and assert on calls.
-let mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
-let mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+let mockCreateAsync = vi.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+let mockUpdateAsync = vi.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
 
 beforeAll(() => {
   ExperimentalFeaturesService.init({
@@ -32,42 +34,54 @@ beforeAll(() => {
   });
 });
 
-jest.mock('../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../common/lib/kibana'),
-  useRouterNavigate: (path: string) => {
-    mockUseRouterNavigate(path);
+vi.mock('../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../common/lib/kibana')),
+      useRouterNavigate: (path: string) => {
+        mockUseRouterNavigate(path);
 
-    return {
-      onClick: jest.fn(),
-      href: path,
+        return {
+          onClick: vi.fn(),
+          href: path,
+        };
+      },
+      useKibana: () => ({
+        services: {
+          notifications: { toasts: { addDanger: mockAddDanger } },
+        },
+      }),
     };
-  },
-  useKibana: () => ({
-    services: {
-      notifications: { toasts: { addDanger: mockAddDanger } },
-    },
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../agent_policies', () => ({
-  useAgentPolicies: () => ({
-    data: {
-      agentPoliciesById: {},
-    },
-  }),
-}));
+vi.mock('../../agent_policies', () => {
+      const mocked = {
+      useAgentPolicies: () => ({
+        data: {
+          agentPoliciesById: {},
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../use_create_pack', () => ({
-  useCreatePack: () => ({
-    mutateAsync: (...args: unknown[]) => mockCreateAsync(...args),
-  }),
-}));
+vi.mock('../use_create_pack', () => {
+      const mocked = {
+      useCreatePack: () => ({
+        mutateAsync: (...args: unknown[]) => mockCreateAsync(...args),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../use_update_pack', () => ({
-  useUpdatePack: () => ({
-    mutateAsync: (...args: unknown[]) => mockUpdateAsync(...args),
-  }),
-}));
+vi.mock('../use_update_pack', () => {
+      const mocked = {
+      useUpdatePack: () => ({
+        mutateAsync: (...args: unknown[]) => mockUpdateAsync(...args),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithContext = (Element: React.ReactElement) =>
   render(
@@ -92,7 +106,7 @@ const renderWithContext = (Element: React.ReactElement) =>
 
 describe('PackForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     sessionStorage.clear();
   });
 
@@ -257,8 +271,8 @@ describe('PackForm', () => {
 
   describe('onSubmit payload shape', () => {
     beforeEach(() => {
-      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
-      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockCreateAsync = vi.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockUpdateAsync = vi.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
       ExperimentalFeaturesService.init({
         experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
       });
@@ -525,17 +539,17 @@ describe('PackForm', () => {
     const NOW = new Date('2026-06-19T12:00:00.000Z');
 
     beforeEach(() => {
-      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
-      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockCreateAsync = vi.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockUpdateAsync = vi.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
       mockAddDanger.mockClear();
-      jest.useFakeTimers().setSystemTime(NOW);
+      vi.useFakeTimers().setSystemTime(NOW);
       ExperimentalFeaturesService.init({
         experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
       });
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
       ExperimentalFeaturesService.init({
         experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
       });
@@ -596,8 +610,8 @@ describe('PackForm', () => {
 
   describe('schedule submit-gate UX (toast on click)', () => {
     beforeEach(() => {
-      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
-      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockCreateAsync = vi.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockUpdateAsync = vi.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
       mockAddDanger.mockClear();
       ExperimentalFeaturesService.init({
         experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
@@ -775,8 +789,8 @@ describe('PackForm', () => {
   // shape (no schedule_type / interval / rrule_schedule).
   describe('flag-off leak — RRULE SO with the flag off', () => {
     beforeEach(() => {
-      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
-      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockCreateAsync = vi.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockUpdateAsync = vi.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
       ExperimentalFeaturesService.init({
         experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
       });
@@ -1020,7 +1034,7 @@ describe('PackForm', () => {
     });
 
     it('emits min_osquery_version and result_type in serializer on create', async () => {
-      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
+      mockCreateAsync = vi.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
       const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
 
       // Fill in required name field via native input selector
@@ -1041,7 +1055,7 @@ describe('PackForm', () => {
     });
 
     it('does not force a result_type onto an existing pack that has none', async () => {
-      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'legacy-pack' } });
+      mockUpdateAsync = vi.fn().mockResolvedValue({ data: { name: 'legacy-pack' } });
       const legacyPack = {
         ...basePackValue,
         name: 'legacy-pack',
@@ -1065,7 +1079,7 @@ describe('PackForm', () => {
     });
 
     it('emits selected min_osquery_version and result_type on create', async () => {
-      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
+      mockCreateAsync = vi.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
       const { getByTestId, container } = renderWithContext(<PackForm editMode={false} />);
 
       const nameInput = container.querySelector('input[name="name"]') as HTMLInputElement;
@@ -1089,7 +1103,7 @@ describe('PackForm', () => {
     });
 
     it('emits null when a previously stored pack default is cleared', async () => {
-      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
+      mockUpdateAsync = vi.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
       const packWithDefaults = {
         ...basePackValue,
         min_osquery_version: '5.0.1',
@@ -1149,7 +1163,7 @@ describe('PackForm', () => {
     });
 
     it('still renders the migration advisory when sessionStorage throws', () => {
-      const getItemSpy = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      const getItemSpy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
         throw new DOMException('The operation is insecure.', 'SecurityError');
       });
       const nonUniformPack = {
@@ -1179,7 +1193,7 @@ describe('PackForm', () => {
 
         expect(getByTestId('pack-migration-advisory')).toBeInTheDocument();
 
-        const setItemSpy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+        const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
           throw new DOMException('The operation is insecure.', 'SecurityError');
         });
         try {

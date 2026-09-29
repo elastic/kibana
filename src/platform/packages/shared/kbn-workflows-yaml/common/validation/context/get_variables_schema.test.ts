@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { getVariablesSchema } from './get_variables_schema';
 
@@ -25,8 +27,8 @@ function createMockWorkflowGraph(opts: {
   predecessors?: MockGraphNode[];
 }): WorkflowGraph {
   return {
-    getStepNode: jest.fn().mockReturnValue(opts.stepNode ?? undefined),
-    getAllPredecessors: jest.fn().mockReturnValue(opts.predecessors ?? []),
+    getStepNode: vi.fn().mockReturnValue(opts.stepNode ?? undefined),
+    getAllPredecessors: vi.fn().mockReturnValue(opts.predecessors ?? []),
   } as unknown as WorkflowGraph;
 }
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -41,7 +43,7 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 describe('AcknowledgeAlertAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders "Acknowledge" for an active alert with open workflow status', () => {
@@ -52,7 +54,7 @@ describe('AcknowledgeAlertAction', () => {
         [ALERT_UUID]: ['test-uuid'] as never,
         [ALERT_RULE_UUID]: ['rule-uuid'] as never,
       },
-      refresh: jest.fn(),
+      refresh: vi.fn(),
     });
 
     render(
@@ -72,7 +74,7 @@ describe('AcknowledgeAlertAction', () => {
         [ALERT_UUID]: ['test-uuid'] as never,
         [ALERT_RULE_UUID]: ['rule-uuid'] as never,
       },
-      refresh: jest.fn(),
+      refresh: vi.fn(),
     });
 
     render(
@@ -92,7 +94,7 @@ describe('AcknowledgeAlertAction', () => {
         [ALERT_UUID]: ['test-uuid'] as never,
         [ALERT_RULE_UUID]: ['rule-uuid'] as never,
       },
-      refresh: jest.fn(),
+      refresh: vi.fn(),
     });
 
     render(
@@ -107,7 +109,7 @@ describe('AcknowledgeAlertAction', () => {
 
   it('calls the bulk_update API when Acknowledge is clicked', async () => {
     http.post.mockResolvedValueOnce({});
-    const refresh = jest.fn();
+    const refresh = vi.fn();
     const props = createPartialObjectMock<AlertActionsProps>({
       alert: {
         [ALERT_STATUS]: [ALERT_STATUS_ACTIVE] as never,

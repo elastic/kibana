@@ -5,24 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
 import { useEsqlCallbacks } from './use_esql_callbacks';
 
-jest.mock('@kbn/esql-utils');
+vi.mock('@kbn/esql-utils');
 
-const mockGetESQLSources = jest.mocked(getESQLSources);
-const mockGetEsqlColumns = jest.mocked(getEsqlColumns);
+const mockGetESQLSources = vi.mocked(getESQLSources);
+const mockGetEsqlColumns = vi.mocked(getEsqlColumns);
 
 describe('useEsqlCallbacks', () => {
-  const mockSearch = jest.fn();
+  const mockSearch = vi.fn();
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
   let application: ReturnType<typeof applicationServiceMock.createStartContract>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     http = httpServiceMock.createStartContract();
     application = applicationServiceMock.createStartContract();
   });
@@ -134,7 +136,7 @@ describe('useEsqlCallbacks', () => {
 
     const firstCallbacks = result.current;
 
-    const newMockSearch = jest.fn();
+    const newMockSearch = vi.fn();
     rerender({ search: newMockSearch });
 
     expect(result.current).not.toBe(firstCallbacks);

@@ -5,29 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { CortexTelemetry } from '../telemetry';
 import { applyCortexEdits, optimizeCortex } from './optimize';
 import type { CortexPageStore } from './page_store';
 
-const createTelemetry = (): jest.Mocked<CortexTelemetry> => ({
-  reportHydrated: jest.fn(),
-  reportEditsApplied: jest.fn(),
+const createTelemetry = (): Mocked<CortexTelemetry> => ({
+  reportHydrated: vi.fn(),
+  reportEditsApplied: vi.fn(),
 });
 
 describe('applyCortexEdits', () => {
   it('upserts, corroborates, and archives proposed pages', async () => {
     const store: CortexPageStore = {
-      list: jest.fn().mockResolvedValue({
+      list: vi.fn().mockResolvedValue({
         pages: [],
         stats: { total: 0, established: 0, total_corroborations: 0 },
       }),
-      get: jest.fn().mockResolvedValue(undefined),
-      upsert: jest.fn().mockResolvedValue({}),
-      create: jest.fn(),
-      corroborate: jest.fn().mockResolvedValue({}),
-      archive: jest.fn().mockResolvedValue({}),
-      pruneDuplicates: jest.fn().mockResolvedValue(0),
+      get: vi.fn().mockResolvedValue(undefined),
+      upsert: vi.fn().mockResolvedValue({}),
+      create: vi.fn(),
+      corroborate: vi.fn().mockResolvedValue({}),
+      archive: vi.fn().mockResolvedValue({}),
+      pruneDuplicates: vi.fn().mockResolvedValue(0),
     };
 
     const telemetry = createTelemetry();
@@ -79,16 +82,16 @@ describe('applyCortexEdits', () => {
   // wiki. Dropping their counts would understate writes exactly when a run went wrong.
   it('reports the edits already written when a later edit throws', async () => {
     const store: CortexPageStore = {
-      list: jest.fn().mockResolvedValue({
+      list: vi.fn().mockResolvedValue({
         pages: [],
         stats: { total: 0, established: 0, total_corroborations: 0 },
       }),
-      get: jest.fn().mockResolvedValue(undefined),
-      upsert: jest.fn().mockResolvedValue({}),
-      create: jest.fn(),
-      corroborate: jest.fn().mockRejectedValue(new Error('request_timeout')),
-      archive: jest.fn().mockResolvedValue({}),
-      pruneDuplicates: jest.fn().mockResolvedValue(0),
+      get: vi.fn().mockResolvedValue(undefined),
+      upsert: vi.fn().mockResolvedValue({}),
+      create: vi.fn(),
+      corroborate: vi.fn().mockRejectedValue(new Error('request_timeout')),
+      archive: vi.fn().mockResolvedValue({}),
+      pruneDuplicates: vi.fn().mockResolvedValue(0),
     };
 
     const telemetry = createTelemetry();
@@ -131,16 +134,16 @@ describe('applyCortexEdits', () => {
   // overstate how much the optimizer actually writes.
   it('reports only the edits that changed a page', async () => {
     const store: CortexPageStore = {
-      list: jest.fn().mockResolvedValue({
+      list: vi.fn().mockResolvedValue({
         pages: [],
         stats: { total: 0, established: 0, total_corroborations: 0 },
       }),
-      get: jest.fn().mockResolvedValue(undefined),
-      upsert: jest.fn().mockResolvedValue({}),
-      create: jest.fn(),
-      corroborate: jest.fn().mockResolvedValue(undefined),
-      archive: jest.fn().mockResolvedValue(undefined),
-      pruneDuplicates: jest.fn().mockResolvedValue(0),
+      get: vi.fn().mockResolvedValue(undefined),
+      upsert: vi.fn().mockResolvedValue({}),
+      create: vi.fn(),
+      corroborate: vi.fn().mockResolvedValue(undefined),
+      archive: vi.fn().mockResolvedValue(undefined),
+      pruneDuplicates: vi.fn().mockResolvedValue(0),
     };
 
     const telemetry = createTelemetry();
@@ -163,7 +166,7 @@ describe('applyCortexEdits', () => {
 
   it('rewrites prefixed slugs onto the existing page', async () => {
     const store: CortexPageStore = {
-      list: jest.fn().mockResolvedValue({
+      list: vi.fn().mockResolvedValue({
         pages: [
           {
             id: 'cortex_service_email-service',
@@ -176,7 +179,7 @@ describe('applyCortexEdits', () => {
         ],
         stats: { total: 1, established: 1, total_corroborations: 1 },
       }),
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         id: 'cortex_service_email-service',
         title: 'Email Service',
         entity_type: 'service',
@@ -186,11 +189,11 @@ describe('applyCortexEdits', () => {
         slug: 'email-service',
         content: 'Sends mail.',
       }),
-      upsert: jest.fn().mockResolvedValue({}),
-      create: jest.fn(),
-      corroborate: jest.fn(),
-      archive: jest.fn(),
-      pruneDuplicates: jest.fn().mockResolvedValue(0),
+      upsert: vi.fn().mockResolvedValue({}),
+      create: vi.fn(),
+      corroborate: vi.fn(),
+      archive: vi.fn(),
+      pruneDuplicates: vi.fn().mockResolvedValue(0),
     };
 
     await applyCortexEdits({
@@ -220,16 +223,16 @@ describe('applyCortexEdits', () => {
 describe('optimizeCortex', () => {
   it('applies LLM proposals from the investigation transcript', async () => {
     const store: CortexPageStore = {
-      list: jest.fn().mockResolvedValue({
+      list: vi.fn().mockResolvedValue({
         pages: [],
         stats: { total: 0, established: 0, total_corroborations: 0 },
       }),
-      get: jest.fn().mockResolvedValue(undefined),
-      upsert: jest.fn().mockResolvedValue({}),
-      create: jest.fn(),
-      corroborate: jest.fn(),
-      archive: jest.fn(),
-      pruneDuplicates: jest.fn().mockResolvedValue(0),
+      get: vi.fn().mockResolvedValue(undefined),
+      upsert: vi.fn().mockResolvedValue({}),
+      create: vi.fn(),
+      corroborate: vi.fn(),
+      archive: vi.fn(),
+      pruneDuplicates: vi.fn().mockResolvedValue(0),
     };
 
     await optimizeCortex({
@@ -263,16 +266,16 @@ describe('optimizeCortex', () => {
 
   it('skips writes when the optimizer proposes nothing', async () => {
     const store: CortexPageStore = {
-      list: jest.fn().mockResolvedValue({
+      list: vi.fn().mockResolvedValue({
         pages: [],
         stats: { total: 0, established: 0, total_corroborations: 0 },
       }),
-      get: jest.fn(),
-      upsert: jest.fn(),
-      create: jest.fn(),
-      corroborate: jest.fn(),
-      archive: jest.fn(),
-      pruneDuplicates: jest.fn().mockResolvedValue(0),
+      get: vi.fn(),
+      upsert: vi.fn(),
+      create: vi.fn(),
+      corroborate: vi.fn(),
+      archive: vi.fn(),
+      pruneDuplicates: vi.fn().mockResolvedValue(0),
     };
 
     const telemetry = createTelemetry();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchEntityEnrichment } from './fetch_entity_enrichment';
@@ -15,17 +18,17 @@ describe('fetchEntityEnrichment', () => {
   let logger: Logger;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = {
-      trace: jest.fn(),
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      trace: vi.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     } as unknown as Logger;
   });
 
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => vi.restoreAllMocks());
 
   it('returns empty map when entityIds is empty', async () => {
     const result = await fetchEntityEnrichment({
@@ -51,8 +54,8 @@ describe('fetchEntityEnrichment', () => {
   });
 
   it('never sets project_routing — entity enrichment is always origin-only via asInternalUser', async () => {
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockResolvedValue({ records: [] }),
+    (esClient.asInternalUser.helpers.esql as unknown as Mock).mockReturnValue({
+      toRecords: vi.fn().mockResolvedValue({ records: [] }),
     });
 
     await fetchEntityEnrichment({
@@ -62,13 +65,13 @@ describe('fetchEntityEnrichment', () => {
       entityStoreIndexName: '.entities.v2.latest.default-00001',
     });
 
-    const [args] = (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mock.calls[0];
+    const [args] = (esClient.asInternalUser.helpers.esql as unknown as Mock).mock.calls[0];
     expect(args).not.toHaveProperty('project_routing');
   });
 
   it('returns enrichment data for known entity IDs', async () => {
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockResolvedValue({
+    (esClient.asInternalUser.helpers.esql as unknown as Mock).mockReturnValue({
+      toRecords: vi.fn().mockResolvedValue({
         records: [
           {
             'entity.id': 'user:alice',
@@ -97,8 +100,8 @@ describe('fetchEntityEnrichment', () => {
   });
 
   it('maps risk score and asset criticality from the entity store', async () => {
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockResolvedValue({
+    (esClient.asInternalUser.helpers.esql as unknown as Mock).mockReturnValue({
+      toRecords: vi.fn().mockResolvedValue({
         records: [
           {
             'entity.id': 'user:alice',
@@ -121,8 +124,8 @@ describe('fetchEntityEnrichment', () => {
   });
 
   it('preserves null risk score and criticality rather than defaulting them', async () => {
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockResolvedValue({
+    (esClient.asInternalUser.helpers.esql as unknown as Mock).mockReturnValue({
+      toRecords: vi.fn().mockResolvedValue({
         records: [
           {
             'entity.id': 'user:alice',
@@ -146,8 +149,8 @@ describe('fetchEntityEnrichment', () => {
   });
 
   it('maps multi-value entity.source to a sources array', async () => {
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockResolvedValue({
+    (esClient.asInternalUser.helpers.esql as unknown as Mock).mockReturnValue({
+      toRecords: vi.fn().mockResolvedValue({
         records: [
           {
             'entity.id': 'host:ea-endpoint-1',
@@ -172,8 +175,8 @@ describe('fetchEntityEnrichment', () => {
   });
 
   it('normalizes a single-value entity.source to a one-element array', async () => {
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockResolvedValue({
+    (esClient.asInternalUser.helpers.esql as unknown as Mock).mockReturnValue({
+      toRecords: vi.fn().mockResolvedValue({
         records: [{ 'entity.id': 'user:alice@example.com@okta', 'entity.source': 'okta' }],
       }),
     });
@@ -189,8 +192,8 @@ describe('fetchEntityEnrichment', () => {
   });
 
   it('omits sources entirely when entity.source is null', async () => {
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockResolvedValue({
+    (esClient.asInternalUser.helpers.esql as unknown as Mock).mockReturnValue({
+      toRecords: vi.fn().mockResolvedValue({
         records: [{ 'entity.id': 'user:alice', 'entity.source': null }],
       }),
     });
@@ -206,8 +209,8 @@ describe('fetchEntityEnrichment', () => {
   });
 
   it('requests risk score and asset criticality columns', async () => {
-    const esqlMock = esClient.asInternalUser.helpers.esql as unknown as jest.Mock;
-    esqlMock.mockReturnValue({ toRecords: jest.fn().mockResolvedValue({ records: [] }) });
+    const esqlMock = esClient.asInternalUser.helpers.esql as unknown as Mock;
+    esqlMock.mockReturnValue({ toRecords: vi.fn().mockResolvedValue({ records: [] }) });
 
     await fetchEntityEnrichment({
       esClient,
@@ -223,8 +226,8 @@ describe('fetchEntityEnrichment', () => {
   });
 
   it('builds typed sourceFields for user entities', async () => {
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockResolvedValue({
+    (esClient.asInternalUser.helpers.esql as unknown as Mock).mockReturnValue({
+      toRecords: vi.fn().mockResolvedValue({
         records: [
           {
             'entity.id': 'user:alice@example.com',
@@ -263,8 +266,8 @@ describe('fetchEntityEnrichment', () => {
   });
 
   it('builds typed sourceFields for host entities', async () => {
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockResolvedValue({
+    (esClient.asInternalUser.helpers.esql as unknown as Mock).mockReturnValue({
+      toRecords: vi.fn().mockResolvedValue({
         records: [
           {
             'entity.id': 'host:my-server',
@@ -298,8 +301,8 @@ describe('fetchEntityEnrichment', () => {
   });
 
   it('omits sourceFields entirely when all source columns are null', async () => {
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockResolvedValue({
+    (esClient.asInternalUser.helpers.esql as unknown as Mock).mockReturnValue({
+      toRecords: vi.fn().mockResolvedValue({
         records: [
           {
             'entity.id': 'user:alice',
@@ -328,8 +331,8 @@ describe('fetchEntityEnrichment', () => {
   });
 
   it('chunks 1001 entity IDs into two queries', async () => {
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockResolvedValue({ records: [] }),
+    (esClient.asInternalUser.helpers.esql as unknown as Mock).mockReturnValue({
+      toRecords: vi.fn().mockResolvedValue({ records: [] }),
     });
 
     const ids = Array.from({ length: 1001 }, (_, i) => `user:entity${i}`);
@@ -345,18 +348,18 @@ describe('fetchEntityEnrichment', () => {
   describe('retry behavior (p-retry with isRetryableEsClientError)', () => {
     // p-retry uses real setTimeout for backoff; mock it so tests don't wait seconds.
     beforeEach(() => {
-      jest.useFakeTimers({ doNotFake: ['nextTick', 'queueMicrotask'] });
+      vi.useFakeTimers({ doNotFake: ['nextTick', 'queueMicrotask'] });
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('throws when a chunk fails after exhausting retries', async () => {
       // retries: 3 in the p-retry config → 1 initial + 3 retries = 4 calls before throwing.
       const transient = new EsErrors.ConnectionError('connection reset', {} as never);
-      (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-        toRecords: jest.fn().mockRejectedValue(transient),
+      (esClient.asInternalUser.helpers.esql as unknown as Mock).mockReturnValue({
+        toRecords: vi.fn().mockRejectedValue(transient),
       });
 
       // Attach the rejection assertion BEFORE flushing timers to avoid an unhandled
@@ -368,7 +371,7 @@ describe('fetchEntityEnrichment', () => {
         entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
       const expectation = expect(promise).rejects.toBe(transient);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
       await expectation;
       expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(4);
     });
@@ -383,12 +386,12 @@ describe('fetchEntityEnrichment', () => {
         'entity.EngineMetadata.Type': null,
         'host.ip': null,
       };
-      (esClient.asInternalUser.helpers.esql as unknown as jest.Mock)
+      (esClient.asInternalUser.helpers.esql as unknown as Mock)
         .mockReturnValueOnce({
-          toRecords: jest.fn().mockRejectedValue(transient),
+          toRecords: vi.fn().mockRejectedValue(transient),
         })
         .mockReturnValueOnce({
-          toRecords: jest.fn().mockResolvedValue({ records: [successRecord] }),
+          toRecords: vi.fn().mockResolvedValue({ records: [successRecord] }),
         });
 
       const promise = fetchEntityEnrichment({
@@ -397,7 +400,7 @@ describe('fetchEntityEnrichment', () => {
         entityIds: ['user:alice'],
         entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
       const result = await promise;
       expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(2);
       expect(result.get('user:alice')?.name).toBe('Alice');
@@ -413,8 +416,8 @@ describe('fetchEntityEnrichment', () => {
         warnings: null,
         meta: {} as never,
       });
-      (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-        toRecords: jest.fn().mockRejectedValue(permanent),
+      (esClient.asInternalUser.helpers.esql as unknown as Mock).mockReturnValue({
+        toRecords: vi.fn().mockRejectedValue(permanent),
       });
 
       const promise = fetchEntityEnrichment({
@@ -424,15 +427,15 @@ describe('fetchEntityEnrichment', () => {
         entityStoreIndexName: '.entities.v2.latest.default-00001',
       });
       const expectation = expect(promise).rejects.toBe(permanent);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
       await expectation;
       expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(1);
     });
   });
 
   it('handles array host.ip values', async () => {
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockResolvedValue({
+    (esClient.asInternalUser.helpers.esql as unknown as Mock).mockReturnValue({
+      toRecords: vi.fn().mockResolvedValue({
         records: [
           {
             'entity.id': 'host:myhost',
@@ -456,8 +459,8 @@ describe('fetchEntityEnrichment', () => {
   });
 
   it('uses parameterized query format', async () => {
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockResolvedValue({ records: [] }),
+    (esClient.asInternalUser.helpers.esql as unknown as Mock).mockReturnValue({
+      toRecords: vi.fn().mockResolvedValue({ records: [] }),
     });
 
     await fetchEntityEnrichment({
@@ -467,7 +470,7 @@ describe('fetchEntityEnrichment', () => {
       entityStoreIndexName: '.entities.v2.latest.default-00001',
     });
 
-    const esqlCallArgs = (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mock
+    const esqlCallArgs = (esClient.asInternalUser.helpers.esql as unknown as Mock).mock
       .calls[0];
     const callArg = esqlCallArgs[0];
     // Query should use parameter placeholders, not embedded IDs

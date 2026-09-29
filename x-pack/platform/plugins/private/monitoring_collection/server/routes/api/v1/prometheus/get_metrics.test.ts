@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { PrometheusExporter } from '@kbn/metrics';
@@ -14,14 +17,14 @@ describe('Prometheus route', () => {
   it('forwards the request to the prometheus exporter', async () => {
     const router = httpServiceMock.createRouter();
     const prometheusExporter = {
-      exportMetrics: jest.fn(),
+      exportMetrics: vi.fn(),
     } as Partial<PrometheusExporter> as PrometheusExporter;
 
     registerV1PrometheusRoute({ router, prometheusExporter });
 
     const [, handler] = router.get.mock.calls[0];
 
-    const context = {} as jest.Mocked<RequestHandlerContext>;
+    const context = {} as Mocked<RequestHandlerContext>;
     const req = httpServerMock.createKibanaRequest();
     const factory = httpServerMock.createResponseFactory();
 

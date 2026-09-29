@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -23,43 +26,49 @@ import {
   syncIlmPolicy,
 } from './namespace_ilm_settings';
 
-jest.mock('./get');
-jest.mock('../elasticsearch/template/template', () => ({
-  generateNamespaceTemplateName: jest.fn(
-    (templateName: string, namespace: string) => `${templateName}@namespace.${namespace}`
-  ),
-  updateCurrentWriteIndices: jest.fn(),
-}));
-jest.mock('../elasticsearch/template/remove');
-jest.mock('./es_assets_reference');
-jest.mock('../../app_context');
-jest.mock('../elasticsearch/retry', () => ({
-  retryTransientEsErrors: jest.fn((fn: () => unknown) => fn()),
-}));
+vi.mock('./get');
+vi.mock('../elasticsearch/template/template', () => {
+      const mocked = {
+      generateNamespaceTemplateName: vi.fn(
+        (templateName: string, namespace: string) => `${templateName}@namespace.${namespace}`
+      ),
+      updateCurrentWriteIndices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../elasticsearch/template/remove');
+vi.mock('./es_assets_reference');
+vi.mock('../../app_context');
+vi.mock('../elasticsearch/retry', () => {
+      const mocked = {
+      retryTransientEsErrors: vi.fn((fn: () => unknown) => fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 mockedAppContextService.getLogger.mockReturnValue({
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
 } as any);
 mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
 
-const mockedGetInstalledPackageWithAssets = getInstalledPackageWithAssets as jest.MockedFunction<
+const mockedGetInstalledPackageWithAssets = getInstalledPackageWithAssets as MockedFunction<
   typeof getInstalledPackageWithAssets
 >;
-const mockedGetInstallation = getInstallation as jest.MockedFunction<typeof getInstallation>;
-const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.MockedFunction<
+const mockedGetInstallation = getInstallation as MockedFunction<typeof getInstallation>;
+const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as MockedFunction<
   typeof updateCurrentWriteIndices
 >;
-const mockedDeleteComponentTemplates = deleteComponentTemplates as jest.MockedFunction<
+const mockedDeleteComponentTemplates = deleteComponentTemplates as MockedFunction<
   typeof deleteComponentTemplates
 >;
-const mockedUpdateEsAssetReferences = updateEsAssetReferences as jest.MockedFunction<
+const mockedUpdateEsAssetReferences = updateEsAssetReferences as MockedFunction<
   typeof updateEsAssetReferences
 >;
 
@@ -193,12 +202,12 @@ describe('syncIlmPolicy — set', () => {
   const soClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedAppContextService.getLogger.mockReturnValue({
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     } as any);
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
     mockedUpdateCurrentWriteIndices.mockResolvedValue(undefined);
@@ -261,7 +270,7 @@ describe('syncIlmPolicy — set', () => {
       ilmPolicy: 'my-policy',
     });
 
-    const putCalls = (esClient.indices.putIndexTemplate as unknown as jest.Mock).mock.calls;
+    const putCalls = (esClient.indices.putIndexTemplate as unknown as Mock).mock.calls;
     expect(putCalls).toHaveLength(1);
     const [putArgs] = putCalls;
     expect(putArgs[0].name).toBe('logs-nginx.access@namespace.production');
@@ -380,12 +389,12 @@ describe('syncIlmPolicy — clear', () => {
   const soClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedAppContextService.getLogger.mockReturnValue({
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     } as any);
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
     mockedUpdateCurrentWriteIndices.mockResolvedValue(undefined);
@@ -433,7 +442,7 @@ describe('syncIlmPolicy — clear', () => {
       ilmPolicy: undefined,
     });
 
-    const putCalls = (esClient.indices.putIndexTemplate as unknown as jest.Mock).mock.calls;
+    const putCalls = (esClient.indices.putIndexTemplate as unknown as Mock).mock.calls;
     expect(putCalls).toHaveLength(1);
     expect(putCalls[0][0].composed_of).not.toContain('logs-nginx.access@namespace.production');
   });
@@ -496,12 +505,12 @@ describe('handleIlmSettingsRestoreAfterPackageInstall', () => {
   const soClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedAppContextService.getLogger.mockReturnValue({
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     } as any);
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
     mockedUpdateCurrentWriteIndices.mockResolvedValue(undefined);
@@ -543,7 +552,7 @@ describe('handleIlmSettingsRestoreAfterPackageInstall', () => {
       packageName: 'nginx',
     });
 
-    const putCalls = (esClient.cluster.putComponentTemplate as unknown as jest.Mock).mock.calls;
+    const putCalls = (esClient.cluster.putComponentTemplate as unknown as Mock).mock.calls;
     const names = putCalls.map((c: any) => c[0].name).sort();
     expect(names).toEqual([
       'logs-nginx.access@namespace.production',

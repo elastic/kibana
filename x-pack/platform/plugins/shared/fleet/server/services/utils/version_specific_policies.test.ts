@@ -5,47 +5,59 @@
  * 2.0.
  */
 
-jest.mock('../agents', () => ({
-  getAvailableVersions: jest
-    .fn()
-    .mockResolvedValue(['9.3.0', '9.1.0', '8.6.0', '8.9.0', '8.8.0', '7.17.0']),
-  getAgentsByKuery: jest.fn(),
-  reassignAgents: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
-jest.mock('../app_context', () => ({
-  appContextService: {
-    getKibanaVersion: () => '9.3.0',
-    getLogger: () => ({
-      debug: jest.fn(),
-      info: jest.fn(),
-    }),
-  },
-}));
+vi.mock('../agents', () => {
+      const mocked = {
+      getAvailableVersions: vi
+        .fn()
+        .mockResolvedValue(['9.3.0', '9.1.0', '8.6.0', '8.9.0', '8.8.0', '7.17.0']),
+      getAgentsByKuery: vi.fn(),
+      reassignAgents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../agent_policy', () => ({
-  agentPolicyService: {
-    getFullAgentPolicy: jest.fn().mockImplementation(async (_, id, { agentVersion }) => {
-      const inputs = agentVersion.startsWith('9.')
-        ? [
-            {
-              type: 'cel',
-            },
-          ]
-        : [];
+vi.mock('../app_context', () => {
+      const mocked = {
+      appContextService: {
+        getKibanaVersion: () => '9.3.0',
+        getLogger: () => ({
+          debug: vi.fn(),
+          info: vi.fn(),
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-      if (id === 'policyBothConditions') {
-        inputs.unshift({
-          meta: { package: { agentVersion: '>=9.3.0' } },
-        } as any);
-      }
+vi.mock('../agent_policy', () => {
+      const mocked = {
+      agentPolicyService: {
+        getFullAgentPolicy: vi.fn().mockImplementation(async (_, id, { agentVersion }) => {
+          const inputs = agentVersion.startsWith('9.')
+            ? [
+                {
+                  type: 'cel',
+                },
+              ]
+            : [];
 
-      return {
-        inputs,
-      };
-    }),
-  },
-}));
+          if (id === 'policyBothConditions') {
+            inputs.unshift({
+              meta: { package: { agentVersion: '>=9.3.0' } },
+            } as any);
+          }
+
+          return {
+            inputs,
+          };
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import * as AgentService from '../agents';
 
@@ -244,9 +256,7 @@ describe('getVersionSpecificPolicies', () => {
   });
 
   it('uses the rebuilt policy secret_references when the policy is rebuilt for the agent version', async () => {
-    const { agentPolicyService: mockedAgentPolicyService } = jest.requireMock(
-      '../agent_policy'
-    ) as any;
+    const { agentPolicyService: mockedAgentPolicyService } = (await vi.importMock('../agent_policy')) as any;
     mockedAgentPolicyService.getFullAgentPolicy.mockImplementation(
       async (_: any, id: string, { agentVersion }: { agentVersion: string }) => ({
         id,
@@ -283,12 +293,12 @@ describe('getVersionSpecificPolicies', () => {
 
 describe('reassignAgentsFromVersionSpecificPolicies', () => {
   const soClient = {} as any;
-  const esClient = { deleteByQuery: jest.fn() } as any;
-  const getAgentsByKueryMock = AgentService.getAgentsByKuery as jest.Mock;
-  const reassignAgentsMock = AgentService.reassignAgents as jest.Mock;
+  const esClient = { deleteByQuery: vi.fn() } as any;
+  const getAgentsByKueryMock = AgentService.getAgentsByKuery as Mock;
+  const reassignAgentsMock = AgentService.reassignAgents as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient.deleteByQuery.mockResolvedValue({});
   });
 
@@ -330,10 +340,10 @@ describe('reassignAgentsFromVersionSpecificPolicies', () => {
 });
 
 describe('deleteVersionSpecificFleetServerPolicies', () => {
-  const esClient = { deleteByQuery: jest.fn() } as any;
+  const esClient = { deleteByQuery: vi.fn() } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient.deleteByQuery.mockResolvedValue({});
   });
 
@@ -364,10 +374,10 @@ describe('buildVariantAgentsKuery', () => {
 });
 
 describe('deleteVersionSpecificFleetServerPoliciesForVersions', () => {
-  const esClient = { deleteByQuery: jest.fn() } as any;
+  const esClient = { deleteByQuery: vi.fn() } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient.deleteByQuery.mockResolvedValue({});
   });
 
@@ -403,10 +413,10 @@ describe('deleteVersionSpecificFleetServerPoliciesForVersions', () => {
 });
 
 describe('getAgentAssignedVersionsForPolicies', () => {
-  const esClient = { search: jest.fn() } as any;
+  const esClient = { search: vi.fn() } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns an empty map without querying when given no parent ids', async () => {
@@ -486,10 +496,10 @@ describe('getAgentAssignedVersionsForPolicies', () => {
 });
 
 describe('getAgentCountsForVariantPolicyIds', () => {
-  const esClient = { search: jest.fn() } as any;
+  const esClient = { search: vi.fn() } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns an empty map without querying when given no variant ids', async () => {

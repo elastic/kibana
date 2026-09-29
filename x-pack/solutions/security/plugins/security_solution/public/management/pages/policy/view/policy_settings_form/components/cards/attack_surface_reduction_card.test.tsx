@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
@@ -23,9 +26,9 @@ import userEvent from '@testing-library/user-event';
 import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
 
-jest.mock('../../../../../../../common/hooks/use_license');
+vi.mock('../../../../../../../common/hooks/use_license');
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 
 describe('Policy Attack Surface Reduction Card', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').attackSurface;
@@ -40,7 +43,7 @@ describe('Policy Attack Surface Reduction Card', () => {
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
         .config.policy.value,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': testSubj.card,
     };

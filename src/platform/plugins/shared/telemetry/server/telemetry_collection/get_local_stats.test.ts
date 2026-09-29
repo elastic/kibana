@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { merge, omit } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 
@@ -20,8 +22,8 @@ import type { StatsCollectionConfig } from '@kbn/telemetry-collection-manager-pl
 
 function mockUsageCollection(kibanaUsage = {}) {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
-  usageCollection.bulkFetch = jest.fn().mockResolvedValue(kibanaUsage);
-  usageCollection.toObject = jest.fn().mockImplementation((data) => data);
+  usageCollection.bulkFetch = vi.fn().mockResolvedValue(kibanaUsage);
+  usageCollection.toObject = vi.fn().mockImplementation((data) => data);
   return usageCollection;
 }
 

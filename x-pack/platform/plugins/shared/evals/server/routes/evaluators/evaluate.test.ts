@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -35,15 +38,21 @@ import {
   withHits,
 } from './test_helpers';
 
-jest.mock('../../evaluators/trace_readiness', () => ({
-  ...jest.requireActual('../../evaluators/trace_readiness'),
-  awaitTraceReady: jest.fn(),
-}));
-jest.mock('../../evaluators/evaluator_tracing_context', () => ({
-  withEvaluatorNameBaggage: jest.fn((_: string, fn: () => unknown) => fn()),
-}));
-const awaitTraceReadyMock = awaitTraceReady as jest.MockedFunction<typeof awaitTraceReady>;
-const withEvaluatorNameBaggageMock = withEvaluatorNameBaggage as jest.MockedFunction<
+vi.mock('../../evaluators/trace_readiness', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../evaluators/trace_readiness')),
+      awaitTraceReady: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../evaluators/evaluator_tracing_context', () => {
+      const mocked = {
+      withEvaluatorNameBaggage: vi.fn((_: string, fn: () => unknown) => fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
+const awaitTraceReadyMock = awaitTraceReady as MockedFunction<typeof awaitTraceReady>;
+const withEvaluatorNameBaggageMock = withEvaluatorNameBaggage as MockedFunction<
   typeof withEvaluatorNameBaggage
 >;
 const DEFAULT_ROUND = {
@@ -72,7 +81,7 @@ describe('POST /internal/evals/_evaluate', () => {
     version = '1.0.0',
     kind = 'llm',
     direction = 'maximize',
-    evaluate = jest.fn().mockResolvedValue({
+    evaluate = vi.fn().mockResolvedValue({
       scores: [{ name: 'groundedness', score: 1, label: 'GROUNDED' }],
     }),
   }: Partial<EvaluatorDefinition> & Pick<EvaluatorDefinition, 'name'>): EvaluatorDefinition => ({
@@ -89,7 +98,7 @@ describe('POST /internal/evals/_evaluate', () => {
     createEvaluatorRegistryMock(definitions);
 
   const buildContext = (
-    searchMock: jest.Mock = jest.fn().mockResolvedValue({
+    searchMock: Mock = vi.fn().mockResolvedValue({
       hits: {
         hits: [],
       },
@@ -118,7 +127,7 @@ describe('POST /internal/evals/_evaluate', () => {
   } = {}) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    const getSpaceId = spaceId ? jest.fn().mockResolvedValue(spaceId) : undefined;
+    const getSpaceId = spaceId ? vi.fn().mockResolvedValue(spaceId) : undefined;
     const versionedRouter = router.versioned as MockedVersionedRouter;
 
     registerEvaluateRoute({
@@ -129,7 +138,7 @@ describe('POST /internal/evals/_evaluate', () => {
       getInferenceStart: async () =>
         inferenceStart ??
         ({
-          getClient: jest.fn(),
+          getClient: vi.fn(),
         } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
@@ -148,7 +157,7 @@ describe('POST /internal/evals/_evaluate', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('registers manage privilege authz requirement', () => {
@@ -162,7 +171,7 @@ describe('POST /internal/evals/_evaluate', () => {
   it('resolves evaluators from the active space', async () => {
     const latency = buildEvaluator({ name: 'latency', kind: 'code' });
     const evaluatorRegistry = buildEvaluatorRegistry([latency]);
-    const asScoped = jest.spyOn(evaluatorRegistry, 'asScoped');
+    const asScoped = vi.spyOn(evaluatorRegistry, 'asScoped');
     const { handler, getSpaceId } = setup({
       evaluatorRegistry,
       spaceId: 'marketing',
@@ -199,10 +208,10 @@ describe('POST /internal/evals/_evaluate', () => {
       ],
     };
     awaitTraceReadyMock.mockResolvedValueOnce(buildReadyResult(round));
-    const firstEvaluate = jest.fn().mockResolvedValue({
+    const firstEvaluate = vi.fn().mockResolvedValue({
       scores: [{ name: 'groundedness', score: 0.9, label: 'GROUNDED' }],
     });
-    const secondEvaluate = jest.fn().mockResolvedValue({
+    const secondEvaluate = vi.fn().mockResolvedValue({
       scores: [{ name: 'correctness', score: 0.8, label: 'FACTUAL' }],
     });
     const groundedness = buildEvaluator({
@@ -215,8 +224,8 @@ describe('POST /internal/evals/_evaluate', () => {
       kind: 'llm',
       evaluate: secondEvaluate,
     });
-    const getClient = jest.fn().mockReturnValue({ prompt: jest.fn() });
-    const searchMock = jest
+    const getClient = vi.fn().mockReturnValue({ prompt: vi.fn() });
+    const searchMock = vi
       .fn()
       .mockResolvedValueOnce({
         hits: {
@@ -335,10 +344,10 @@ describe('POST /internal/evals/_evaluate', () => {
       steps: [],
     };
     awaitTraceReadyMock.mockResolvedValueOnce(buildReadyResult(round, 'otel-genai-attributes'));
-    const evaluate = jest.fn().mockResolvedValue({
+    const evaluate = vi.fn().mockResolvedValue({
       scores: [{ name: 'latency', score: 42 }],
     });
-    const searchMock = jest
+    const searchMock = vi
       .fn()
       .mockResolvedValueOnce({
         hits: {
@@ -415,9 +424,7 @@ describe('POST /internal/evals/_evaluate', () => {
   });
 
   it('normalizes claude-code evidence through the real readiness path', async () => {
-    const actualTraceReadiness = jest.requireActual(
-      '../../evaluators/trace_readiness'
-    ) as typeof import('../../evaluators/trace_readiness');
+    const actualTraceReadiness = (await vi.importActual('../../evaluators/trace_readiness')) as typeof import('../../evaluators/trace_readiness');
     awaitTraceReadyMock.mockImplementation((traceAccessor, request, log) =>
       actualTraceReadiness.awaitTraceReady(traceAccessor, request, log, {
         retries: 2,
@@ -428,7 +435,7 @@ describe('POST /internal/evals/_evaluate', () => {
       })
     );
 
-    const evaluate = jest.fn().mockResolvedValue({
+    const evaluate = vi.fn().mockResolvedValue({
       scores: [{ name: 'groundedness', score: 0.95, label: 'GROUNDED' }],
     });
     const searchMock = buildSearchMock(async ({ index, filters }) => {
@@ -522,14 +529,14 @@ describe('POST /internal/evals/_evaluate', () => {
         steps: [],
       })
     );
-    const groundednessEvaluate = jest.fn().mockResolvedValue({
+    const groundednessEvaluate = vi.fn().mockResolvedValue({
       scores: [{ name: 'groundedness', score: 1, label: 'GROUNDED' }],
     });
-    const latencyEvaluate = jest.fn().mockResolvedValue({
+    const latencyEvaluate = vi.fn().mockResolvedValue({
       scores: [{ name: 'latency', score: 42 }],
     });
-    const getClient = jest.fn().mockReturnValue({ prompt: jest.fn() });
-    const searchMock = jest
+    const getClient = vi.fn().mockReturnValue({ prompt: vi.fn() });
+    const searchMock = vi
       .fn()
       .mockResolvedValueOnce({
         hits: {
@@ -616,7 +623,7 @@ describe('POST /internal/evals/_evaluate', () => {
         steps: [],
       })
     );
-    const latencyEvaluate = jest.fn().mockResolvedValue({
+    const latencyEvaluate = vi.fn().mockResolvedValue({
       scores: [{ name: 'latency', score: 42 }],
     });
     const { handler } = setup({
@@ -753,7 +760,7 @@ describe('POST /internal/evals/_evaluate', () => {
     const { handler } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([correctness]),
       inferenceStart: {
-        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+        getClient: vi.fn().mockReturnValue({ prompt: vi.fn() }),
       } as unknown as InferenceServerStart,
     });
 
@@ -788,7 +795,7 @@ describe('POST /internal/evals/_evaluate', () => {
     const { handler } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([evaluatorA, evaluatorB]),
       inferenceStart: {
-        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+        getClient: vi.fn().mockReturnValue({ prompt: vi.fn() }),
       } as unknown as InferenceServerStart,
     });
 
@@ -872,7 +879,7 @@ describe('POST /internal/evals/_evaluate', () => {
     const { handler } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([buildEvaluator({ name: 'groundedness' })]),
       inferenceStart: {
-        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+        getClient: vi.fn().mockReturnValue({ prompt: vi.fn() }),
       } as unknown as InferenceServerStart,
     });
 
@@ -894,8 +901,8 @@ describe('POST /internal/evals/_evaluate', () => {
   });
 
   it('returns per-item runtime errors while keeping sibling evaluator results', async () => {
-    const failingEvaluate = jest.fn().mockRejectedValue(new Error('failed badly'));
-    const successfulEvaluate = jest.fn().mockResolvedValue({
+    const failingEvaluate = vi.fn().mockRejectedValue(new Error('failed badly'));
+    const successfulEvaluate = vi.fn().mockResolvedValue({
       scores: [{ name: 'latency', score: 42 }],
     });
     const groundedness = buildEvaluator({
@@ -912,7 +919,7 @@ describe('POST /internal/evals/_evaluate', () => {
     const { handler } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([groundedness, latency]),
       inferenceStart: {
-        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+        getClient: vi.fn().mockReturnValue({ prompt: vi.fn() }),
       } as unknown as InferenceServerStart,
     });
 
@@ -954,15 +961,15 @@ describe('POST /internal/evals/_evaluate', () => {
     const correctness = buildEvaluator({
       name: 'correctness',
       kind: 'llm',
-      evaluate: jest.fn().mockResolvedValue({ scores: [{ name: 'correctness', score: 1 }] }),
+      evaluate: vi.fn().mockResolvedValue({ scores: [{ name: 'correctness', score: 1 }] }),
     });
     const latency = buildEvaluator({
       name: 'latency',
       kind: 'code',
       direction: 'minimize',
-      evaluate: jest.fn().mockResolvedValue({ scores: [{ name: 'latency', score: 42 }] }),
+      evaluate: vi.fn().mockResolvedValue({ scores: [{ name: 'latency', score: 42 }] }),
     });
-    const getConnectorById = jest.fn().mockImplementation(async (connectorId: string) => ({
+    const getConnectorById = vi.fn().mockImplementation(async (connectorId: string) => ({
       connectorId,
       name: connectorId,
       type: connectorId === 'openai-connector' ? '.gen-ai' : '.bedrock',
@@ -974,7 +981,7 @@ describe('POST /internal/evals/_evaluate', () => {
     const { handler } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([groundedness, correctness, latency]),
       inferenceStart: {
-        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+        getClient: vi.fn().mockReturnValue({ prompt: vi.fn() }),
         getConnectorById,
       } as unknown as InferenceServerStart,
     });
@@ -1023,7 +1030,7 @@ describe('POST /internal/evals/_evaluate', () => {
       name: 'latency',
       kind: 'code',
       direction: 'minimize',
-      evaluate: jest.fn().mockResolvedValue({ scores: [{ name: 'latency', score: 42 }] }),
+      evaluate: vi.fn().mockResolvedValue({ scores: [{ name: 'latency', score: 42 }] }),
     });
     const groundedness = buildEvaluator({
       name: 'groundedness',
@@ -1034,7 +1041,7 @@ describe('POST /internal/evals/_evaluate', () => {
     const { handler } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([latency, groundedness]),
       inferenceStart: {
-        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+        getClient: vi.fn().mockReturnValue({ prompt: vi.fn() }),
       } as unknown as InferenceServerStart,
     });
 
@@ -1065,9 +1072,9 @@ describe('POST /internal/evals/_evaluate', () => {
     const correctness = buildEvaluator({
       name: 'correctness',
       kind: 'llm',
-      evaluate: jest.fn().mockResolvedValue({ scores: [{ name: 'correctness', score: 1 }] }),
+      evaluate: vi.fn().mockResolvedValue({ scores: [{ name: 'correctness', score: 1 }] }),
     });
-    const getConnectorById = jest.fn().mockResolvedValue({
+    const getConnectorById = vi.fn().mockResolvedValue({
       connectorId: 'shared-connector',
       name: 'shared-connector',
       type: '.gen-ai',
@@ -1077,7 +1084,7 @@ describe('POST /internal/evals/_evaluate', () => {
     const { handler } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([groundedness, correctness]),
       inferenceStart: {
-        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+        getClient: vi.fn().mockReturnValue({ prompt: vi.fn() }),
         getConnectorById,
       } as unknown as InferenceServerStart,
     });
@@ -1109,7 +1116,7 @@ describe('POST /internal/evals/_evaluate', () => {
   });
 
   it('passes through multi-score results unchanged within a single result item', async () => {
-    const evaluate = jest.fn().mockResolvedValue({
+    const evaluate = vi.fn().mockResolvedValue({
       scores: [
         { name: 'factuality', score: 0.7, label: 'HIGH' },
         { name: 'relevance', score: 0.5, label: 'MEDIUM' },
@@ -1124,7 +1131,7 @@ describe('POST /internal/evals/_evaluate', () => {
     const { handler } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([correctness]),
       inferenceStart: {
-        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+        getClient: vi.fn().mockReturnValue({ prompt: vi.fn() }),
       } as unknown as InferenceServerStart,
     });
 
@@ -1172,7 +1179,7 @@ describe('POST /internal/evals/_evaluate', () => {
     const { handler } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([groundedness, latency]),
       inferenceStart: {
-        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+        getClient: vi.fn().mockReturnValue({ prompt: vi.fn() }),
       } as unknown as InferenceServerStart,
     });
 
@@ -1207,7 +1214,7 @@ describe('POST /internal/evals/_evaluate', () => {
     const { handler } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([groundedness]),
       inferenceStart: {
-        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+        getClient: vi.fn().mockReturnValue({ prompt: vi.fn() }),
       } as unknown as InferenceServerStart,
     });
 

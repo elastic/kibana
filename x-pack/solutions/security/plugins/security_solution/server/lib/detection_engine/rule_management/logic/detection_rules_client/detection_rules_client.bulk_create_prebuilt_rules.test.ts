@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
@@ -26,19 +29,25 @@ import { createProductFeaturesServiceMock } from '../../../../product_features_s
 import { getMockRulesAuthz } from '../../__mocks__/authz';
 import { convertRuleResponseToAlertingRule } from './converters/convert_rule_response_to_alerting_rule';
 
-jest.mock('uuid', () => ({
-  ...jest.requireActual('uuid'),
-  v4: jest.fn(() => jest.requireActual('uuid').v4()),
-}));
-jest.mock('../../../../machine_learning/authz');
-jest.mock('../../../../machine_learning/validation');
-jest.mock('./converters/convert_rule_response_to_alerting_rule', () => ({
-  ...jest.requireActual('./converters/convert_rule_response_to_alerting_rule'),
-  convertRuleResponseToAlertingRule: jest.fn(
-    jest.requireActual('./converters/convert_rule_response_to_alerting_rule')
-      .convertRuleResponseToAlertingRule
-  ),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      ...require('uuid'),
+      v4: vi.fn(() => require('uuid').v4()),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../machine_learning/authz');
+vi.mock('../../../../machine_learning/validation');
+vi.mock('./converters/convert_rule_response_to_alerting_rule', async () => {
+      const mocked = {
+      ...(await vi.importActual('./converters/convert_rule_response_to_alerting_rule')),
+      convertRuleResponseToAlertingRule: vi.fn(
+        (await vi.importActual('./converters/convert_rule_response_to_alerting_rule'))
+          .convertRuleResponseToAlertingRule
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // bulkCreatePrebuiltRules always supplies options.id (see methods/bulk_create_prebuilt_rules.ts),
 // even though the alerting plugin's public types mark it optional.
@@ -53,15 +62,15 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
 
-  const mlAuthz = (buildMlAuthz as jest.Mock)();
+  const mlAuthz = (buildMlAuthz as Mock)();
   const rulesAuthz = getMockRulesAuthz();
-  const actionsClient: jest.Mocked<ActionsClient> = {} as unknown as jest.Mocked<ActionsClient>;
+  const actionsClient: Mocked<ActionsClient> = {} as unknown as Mocked<ActionsClient>;
   const changeTracking: SecurityRuleChangeTracking = {
     action: SecurityRuleChangeTrackingAction.ruleInstall,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     rulesClient = rulesClientMock.create();
     rulesClient.bulkCreateRules.mockResolvedValue({
       successfulIds: [],
@@ -210,12 +219,12 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       rule_id: 'ml-rule',
     };
 
-    (throwAuthzError as jest.Mock).mockImplementation((validationResult) => {
+    (throwAuthzError as Mock).mockImplementation((validationResult) => {
       if (validationResult && !validationResult.valid) {
         throw new Error('ML auth error');
       }
     });
-    (mlAuthz as jest.Mocked<typeof mlAuthz>).validateRuleType = jest
+    (mlAuthz as Mocked<typeof mlAuthz>).validateRuleType = vi
       .fn()
       .mockImplementation(async (type: string) => ({
         valid: type !== 'machine_learning',
@@ -243,7 +252,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
   it('maps BulkOperationErrors back with statusCode', async () => {
     const params = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-1' };
     const preAssignedId = 'fail-uuid';
-    (uuidv4 as jest.Mock).mockReturnValueOnce(preAssignedId);
+    (uuidv4 as Mock).mockReturnValueOnce(preAssignedId);
 
     rulesClient.bulkCreateRules.mockResolvedValue({
       successfulIds: [],
@@ -272,7 +281,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
   it('omits statusCode when BulkOperationError has no status', async () => {
     const params = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-1' };
     const preAssignedId = 'fail-uuid';
-    (uuidv4 as jest.Mock).mockReturnValueOnce(preAssignedId);
+    (uuidv4 as Mock).mockReturnValueOnce(preAssignedId);
 
     rulesClient.bulkCreateRules.mockResolvedValue({
       successfulIds: [],
@@ -305,7 +314,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       rule_id: 'ml-rule',
     };
 
-    (throwAuthzError as jest.Mock).mockImplementation(() => {
+    (throwAuthzError as Mock).mockImplementation(() => {
       throw new Error('ML not allowed');
     });
 
@@ -320,7 +329,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
   });
 
   it('returns structured errors when bulkCreateRules rejects', async () => {
-    (throwAuthzError as jest.Mock).mockImplementation(() => {});
+    (throwAuthzError as Mock).mockImplementation(() => {});
 
     const rules = [
       { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-1' },
@@ -368,11 +377,9 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
     const goodRule = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'good-rule' };
     const badRule = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'bad-rule' };
 
-    const realImpl = jest.requireActual(
-      './converters/convert_rule_response_to_alerting_rule'
-    ).convertRuleResponseToAlertingRule;
+    const realImpl = (await vi.importActual('./converters/convert_rule_response_to_alerting_rule')).convertRuleResponseToAlertingRule;
     let callCount = 0;
-    (convertRuleResponseToAlertingRule as jest.Mock).mockImplementation((...args: unknown[]) => {
+    (convertRuleResponseToAlertingRule as Mock).mockImplementation((...args: unknown[]) => {
       callCount++;
       if (callCount === 2) {
         throw new Error('conversion failed');
@@ -404,7 +411,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
 
     const successId = 'success-uuid';
     const failId = 'fail-uuid';
-    (uuidv4 as jest.Mock).mockReturnValueOnce(successId).mockReturnValueOnce(failId);
+    (uuidv4 as Mock).mockReturnValueOnce(successId).mockReturnValueOnce(failId);
 
     rulesClient.bulkCreateRules.mockResolvedValue({
       successfulIds: [successId],
@@ -435,7 +442,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
   });
 
   it('uses caller-provided bulkCount in changeTracking metadata', async () => {
-    (throwAuthzError as jest.Mock).mockImplementation(() => {});
+    (throwAuthzError as Mock).mockImplementation(() => {});
 
     const rules = [
       { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-1' },

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useSuggestUsers } from './use_suggest_users';
 
@@ -14,19 +17,19 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useAppToastsMock } from '../../hooks/use_app_toasts.mock';
 import { TestProviders } from '../../mock';
 
-jest.mock('./api');
-jest.mock('../../hooks/use_app_toasts');
+vi.mock('./api');
+vi.mock('../../hooks/use_app_toasts');
 
 describe('useSuggestUsers hook', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
   });
 
   it('returns an array of userProfiles', async () => {
-    const spyOnUserProfiles = jest.spyOn(api, 'suggestUsers');
+    const spyOnUserProfiles = vi.spyOn(api, 'suggestUsers');
     const { result } = renderHook(() => useSuggestUsers({ searchTerm: '' }), {
       wrapper: TestProviders,
     });

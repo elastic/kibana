@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { CertificateExpirationForm } from './certificate_form';
 import { shallowWithRouter, mountWithRouter } from '../../lib';
@@ -15,7 +17,7 @@ describe('CertificateForm', () => {
       shallowWithRouter(
         <CertificateExpirationForm
           loading={false}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           formFields={{
             heartbeatIndices: 'heartbeat-8*',
             certExpirationThreshold: 7,
@@ -31,7 +33,7 @@ describe('CertificateForm', () => {
   });
 
   it('submits number values for certs settings fields', () => {
-    const onChangeMock = jest.fn();
+    const onChangeMock = vi.fn();
     const wrapper = mountWithRouter(
       <CertificateExpirationForm
         loading={false}
@@ -85,7 +87,7 @@ describe('CertificateForm', () => {
   });
 
   it('submits undefined for NaN values', () => {
-    const onChangeMock = jest.fn();
+    const onChangeMock = vi.fn();
     const wrapper = mountWithRouter(
       <CertificateExpirationForm
         loading={false}

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { errors } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -28,46 +31,61 @@ import {
   getAgentsHandler,
 } from './handlers';
 
-jest.mock('../../services/agents/versions', () => {
+vi.mock('../../services/agents/versions', () => {
   return {
-    getAvailableVersions: jest.fn().mockReturnValue(['8.1.0', '8.0.0', '7.17.0']),
+    getAvailableVersions: vi.fn().mockReturnValue(['8.1.0', '8.0.0', '7.17.0']),
   };
 });
 
-jest.mock('../../services/app_context', () => {
-  const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
+vi.mock('../../services/app_context', async () => {
+  const { loggerMock } = (await vi.importActual('@kbn/logging-mocks'));
   return {
     appContextService: {
       getLogger: () => loggerMock.create(),
-      getInternalUserESClient: jest.fn(),
-      getExperimentalFeatures: jest.fn(),
+      getInternalUserESClient: vi.fn(),
+      getExperimentalFeatures: vi.fn(),
     },
   };
 });
 
-jest.mock('../../services/spaces/helpers', () => ({
-  isSpaceAwarenessEnabled: jest.fn().mockReturnValue(true),
-}));
+vi.mock('../../services/spaces/helpers', () => {
+      const mocked = {
+      isSpaceAwarenessEnabled: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/agents/status', () => ({
-  getAgentStatusForAgentPolicy: jest.fn(),
-  getIncomingDataByAgentsId: jest.fn(),
-  getIncomingDataByDataStreams: jest.fn(),
-}));
+vi.mock('../../services/agents/status', () => {
+      const mocked = {
+      getAgentStatusForAgentPolicy: vi.fn(),
+      getIncomingDataByAgentsId: vi.fn(),
+      getIncomingDataByDataStreams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/agent_policy', () => ({
-  agentPolicyService: {
-    getByIds: jest.fn(),
-  },
-}));
+vi.mock('../../services/agent_policy', () => {
+      const mocked = {
+      agentPolicyService: {
+        getByIds: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/agents/agent_metrics', () => ({
-  fetchAndAssignAgentMetrics: jest.fn(),
-}));
+vi.mock('../../services/agents/agent_metrics', () => {
+      const mocked = {
+      fetchAndAssignAgentMetrics: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/epm/packages', () => ({
-  getPackageInfo: jest.fn(),
-}));
+vi.mock('../../services/epm/packages', () => {
+      const mocked = {
+      getPackageInfo: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Handlers', () => {
   // Helper function to create mock Elasticsearch errors
@@ -89,7 +107,7 @@ describe('Handlers', () => {
     beforeEach(() => {
       mockAgentClient = {
         asCurrentUser: {
-          listAgents: jest.fn(),
+          listAgents: vi.fn(),
         },
       };
 
@@ -101,7 +119,7 @@ describe('Handlers', () => {
       };
 
       mockResponse = httpServerMock.createResponseFactory();
-      (fetchAndAssignAgentMetrics as jest.Mock).mockClear();
+      (fetchAndAssignAgentMetrics as Mock).mockClear();
     });
 
     it('should handle successful agent listing', async () => {
@@ -386,16 +404,16 @@ describe('Handlers', () => {
     let mockResponse: any;
     let mockEsClient: any;
     let mockSoClient: any;
-    let mockGetInternalUserESClient: jest.Mock;
+    let mockGetInternalUserESClient: Mock;
 
     beforeEach(() => {
       mockEsClient = {
-        get: jest.fn(),
+        get: vi.fn(),
       };
       mockSoClient = {
-        getCurrentNamespace: jest.fn().mockReturnValue('default'),
+        getCurrentNamespace: vi.fn().mockReturnValue('default'),
       };
-      mockGetInternalUserESClient = jest.fn().mockReturnValue(mockEsClient);
+      mockGetInternalUserESClient = vi.fn().mockReturnValue(mockEsClient);
       mockResponse = httpServerMock.createResponseFactory();
       mockContext = {
         core: Promise.resolve({
@@ -403,13 +421,13 @@ describe('Handlers', () => {
         }),
         fleet: Promise.resolve({}),
       };
-      jest
+      vi
         .spyOn(appContextService, 'getInternalUserESClient')
         .mockReturnValue(mockGetInternalUserESClient());
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('returns effective_config on success', async () => {
@@ -423,7 +441,7 @@ describe('Handlers', () => {
 
     it('returns notFound if SavedObjectsErrorHelpers.isNotFoundError', async () => {
       const error = new Error('not found');
-      jest.spyOn(SavedObjectsErrorHelpers, 'isNotFoundError').mockReturnValue(true);
+      vi.spyOn(SavedObjectsErrorHelpers, 'isNotFoundError').mockReturnValue(true);
       mockEsClient.get.mockRejectedValue(error);
       const request = { params: { agentId: 'agent-404' }, query: {} };
       await getAgentEffectiveConfigHandler(mockContext, request as any, mockResponse);
@@ -446,19 +464,19 @@ describe('Handlers', () => {
   describe('getAgentDataHandler', () => {
     let mockResponse: any;
     let mockContext: any;
-    let mockGetByIds: jest.Mock;
+    let mockGetByIds: Mock;
 
     beforeEach(() => {
-      (getIncomingDataByAgentsId as jest.Mock).mockResolvedValue({ items: [], dataPreview: [] });
-      (getIncomingDataByDataStreams as jest.Mock).mockResolvedValue({ items: [], dataPreview: [] });
+      (getIncomingDataByAgentsId as Mock).mockResolvedValue({ items: [], dataPreview: [] });
+      (getIncomingDataByDataStreams as Mock).mockResolvedValue({ items: [], dataPreview: [] });
       // Not found by default, so the identity-free gate falls back unless a test opts an agent in.
-      mockGetByIds = jest.fn().mockResolvedValue([]);
-      (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([]);
+      mockGetByIds = vi.fn().mockResolvedValue([]);
+      (agentPolicyService.getByIds as Mock).mockResolvedValue([]);
       mockResponse = httpServerMock.createResponseFactory();
       mockContext = {
         core: Promise.resolve({
           elasticsearch: { client: { asCurrentUser: {} } },
-          savedObjects: { client: { getCurrentNamespace: jest.fn().mockReturnValue('default') } },
+          savedObjects: { client: { getCurrentNamespace: vi.fn().mockReturnValue('default') } },
         }),
         fleet: Promise.resolve({
           agentClient: { asCurrentUser: { getByIds: mockGetByIds } },
@@ -468,11 +486,11 @@ describe('Handlers', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('passes dataStreamPattern: undefined when the package has empty data_streams (prevents empty string reaching hasPrivileges)', async () => {
-      (getPackageInfo as jest.Mock).mockResolvedValue({ data_streams: [] });
+      (getPackageInfo as Mock).mockResolvedValue({ data_streams: [] });
 
       await getAgentDataHandler(
         mockContext,
@@ -493,7 +511,7 @@ describe('Handlers', () => {
     });
 
     it('passes dataStreamPattern: undefined when data_streams is absent from the package info', async () => {
-      (getPackageInfo as jest.Mock).mockResolvedValue({});
+      (getPackageInfo as Mock).mockResolvedValue({});
 
       await getAgentDataHandler(
         mockContext,
@@ -514,7 +532,7 @@ describe('Handlers', () => {
     });
 
     it('passes a non-empty dataStreamPattern when the package has data_streams', async () => {
-      (getPackageInfo as jest.Mock).mockResolvedValue({
+      (getPackageInfo as Mock).mockResolvedValue({
         data_streams: [{ type: 'logs', dataset: 'aws.cloudwatch' }],
       });
 
@@ -531,16 +549,16 @@ describe('Handlers', () => {
         mockResponse
       );
 
-      const [[{ dataStreamPattern }]] = (getIncomingDataByAgentsId as jest.Mock).mock.calls;
+      const [[{ dataStreamPattern }]] = (getIncomingDataByAgentsId as Mock).mock.calls;
       expect(dataStreamPattern).toBeDefined();
       expect(dataStreamPattern).not.toBe('');
     });
 
     it('appends the .otel dataset suffix only for data streams on the OTel input', async () => {
-      (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+      (appContextService.getExperimentalFeatures as Mock).mockReturnValue({
         enableOtelIntegrations: true,
       });
-      (getPackageInfo as jest.Mock).mockResolvedValue({
+      (getPackageInfo as Mock).mockResolvedValue({
         policy_templates: [{ name: 'supabase', inputs: [{ type: 'otelcol' }] }],
         data_streams: [
           {
@@ -571,7 +589,7 @@ describe('Handlers', () => {
         mockResponse
       );
 
-      const [[{ dataStreamPattern }]] = (getIncomingDataByAgentsId as jest.Mock).mock.calls;
+      const [[{ dataStreamPattern }]] = (getIncomingDataByAgentsId as Mock).mock.calls;
       expect(dataStreamPattern).toBe('metrics-supabase.metrics.otel-*,logs-supabase.logs-*');
     });
 
@@ -589,15 +607,15 @@ describe('Handlers', () => {
       };
 
       beforeEach(() => {
-        (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+        (appContextService.getExperimentalFeatures as Mock).mockReturnValue({
           enableOtelIntegrations: true,
         });
       });
 
       it('uses getIncomingDataByDataStreams with a namespace-scoped pattern for one agentless agent', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        (getPackageInfo as Mock).mockResolvedValue(otelPackageInfo);
         mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([
           {
             id: 'policy-1',
             namespace: 'default',
@@ -631,9 +649,9 @@ describe('Handlers', () => {
       });
 
       it('falls back to getIncomingDataByAgentsId for a non-agentless agent', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        (getPackageInfo as Mock).mockResolvedValue(otelPackageInfo);
         mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([
           { id: 'policy-1', namespace: 'default', supports_agentless: false },
         ]);
 
@@ -655,11 +673,11 @@ describe('Handlers', () => {
       });
 
       it('falls back for a regular (non-OTel) package even with an agentless agent', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue({
+        (getPackageInfo as Mock).mockResolvedValue({
           data_streams: [{ type: 'logs', dataset: 'aws.cloudwatch', path: 'logs' }],
         });
         mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([
           { id: 'policy-1', namespace: 'default', supports_agentless: true },
         ]);
 
@@ -699,7 +717,7 @@ describe('Handlers', () => {
       });
 
       it('falls back for more than one requested id, even with an OTel package and agentless agents', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        (getPackageInfo as Mock).mockResolvedValue(otelPackageInfo);
 
         await getAgentDataHandler(
           mockContext,
@@ -720,7 +738,7 @@ describe('Handlers', () => {
       });
 
       it('falls back for an agent that is notFound', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        (getPackageInfo as Mock).mockResolvedValue(otelPackageInfo);
         mockGetByIds.mockResolvedValue([]);
 
         await getAgentDataHandler(
@@ -742,9 +760,9 @@ describe('Handlers', () => {
       });
 
       it('falls back for an agent whose policy cannot be resolved', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        (getPackageInfo as Mock).mockResolvedValue(otelPackageInfo);
         mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([]);
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([]);
 
         await getAgentDataHandler(
           mockContext,
@@ -764,9 +782,9 @@ describe('Handlers', () => {
       });
 
       it('scopes the pattern to the namespace of the agent whose policy is silent, so a healthy sibling does not mask it', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        (getPackageInfo as Mock).mockResolvedValue(otelPackageInfo);
         mockGetByIds.mockResolvedValue([{ id: 'agent-2', policy_id: 'policy-2' }]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([
           {
             id: 'policy-2',
             namespace: 'staging',
@@ -790,15 +808,15 @@ describe('Handlers', () => {
           mockResponse
         );
 
-        const [[{ dataStreamPattern }]] = (getIncomingDataByDataStreams as jest.Mock).mock.calls;
+        const [[{ dataStreamPattern }]] = (getIncomingDataByDataStreams as Mock).mock.calls;
         expect(dataStreamPattern).toBe('metrics-supabase.metrics.otel-staging');
         expect(dataStreamPattern).not.toContain('*');
       });
 
       it('falls back for an agentless agent whose policy has no package policy matching pkgName', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        (getPackageInfo as Mock).mockResolvedValue(otelPackageInfo);
         mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([
           {
             id: 'policy-1',
             namespace: 'default',
@@ -825,9 +843,9 @@ describe('Handlers', () => {
       });
 
       it('falls back for an agentless agent whose attached package policy runs a different version', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        (getPackageInfo as Mock).mockResolvedValue(otelPackageInfo);
         mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([
           {
             id: 'policy-1',
             namespace: 'default',
@@ -856,9 +874,9 @@ describe('Handlers', () => {
       });
 
       it('falls back for an agentless agent whose policy has more than one package policy matching pkgName and pkgVersion', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        (getPackageInfo as Mock).mockResolvedValue(otelPackageInfo);
         mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([
           {
             id: 'policy-1',
             namespace: 'default',
@@ -889,12 +907,12 @@ describe('Handlers', () => {
       });
 
       it('falls back and skips agent/policy lookups when enableOtelIntegrations is disabled, even for an otherwise-eligible agentless setup', async () => {
-        (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+        (appContextService.getExperimentalFeatures as Mock).mockReturnValue({
           enableOtelIntegrations: false,
         });
-        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        (getPackageInfo as Mock).mockResolvedValue(otelPackageInfo);
         mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([
           {
             id: 'policy-1',
             namespace: 'default',
@@ -928,9 +946,9 @@ describe('Handlers', () => {
       });
 
       it('passes ignoreMissing so a deleted agent policy falls back instead of throwing', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        (getPackageInfo as Mock).mockResolvedValue(otelPackageInfo);
         mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([]);
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([]);
 
         await getAgentDataHandler(
           mockContext,
@@ -954,7 +972,7 @@ describe('Handlers', () => {
       });
 
       it('combines the identity-free OTel answer with the identity answer for a mixed package', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue({
+        (getPackageInfo as Mock).mockResolvedValue({
           policy_templates: [{ name: 'supabase', inputs: [{ type: 'otelcol' }] }],
           data_streams: [
             {
@@ -972,7 +990,7 @@ describe('Handlers', () => {
           ],
         });
         mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([
           {
             id: 'policy-1',
             namespace: 'default',
@@ -982,11 +1000,11 @@ describe('Handlers', () => {
             ],
           },
         ]);
-        (getIncomingDataByDataStreams as jest.Mock).mockResolvedValue({
+        (getIncomingDataByDataStreams as Mock).mockResolvedValue({
           items: [{ 'agent-1': { data: false } }],
           dataPreview: [{ _index: 'otel-preview' }],
         });
-        (getIncomingDataByAgentsId as jest.Mock).mockResolvedValue({
+        (getIncomingDataByAgentsId as Mock).mockResolvedValue({
           items: [{ 'agent-1': { data: true } }],
           dataPreview: [{ _index: 'regular-preview' }],
         });
@@ -1017,9 +1035,9 @@ describe('Handlers', () => {
       });
 
       it('allows an ordinary Fleet reader through the agent client, not the raw ES client', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue(otelPackageInfo);
+        (getPackageInfo as Mock).mockResolvedValue(otelPackageInfo);
         mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([
           {
             id: 'policy-1',
             namespace: 'default',
@@ -1093,15 +1111,15 @@ describe('Handlers', () => {
       };
 
       beforeEach(() => {
-        (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+        (appContextService.getExperimentalFeatures as Mock).mockReturnValue({
           enableOtelIntegrations: true,
         });
       });
 
       it('derives the dataset from the package policy and queries the namespaced .otel pattern', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue(inputOtelPackageInfo);
+        (getPackageInfo as Mock).mockResolvedValue(inputOtelPackageInfo);
         mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
-        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue(
+        (agentPolicyService.getByIds as Mock).mockResolvedValue(
           agentlessPolicyWith(inputPackagePolicy)
         );
 
@@ -1128,7 +1146,7 @@ describe('Handlers', () => {
       });
 
       it('does not open the gate for a non-OTel input package (no agent/policy lookups)', async () => {
-        (getPackageInfo as jest.Mock).mockResolvedValue({
+        (getPackageInfo as Mock).mockResolvedValue({
           type: 'input',
           name: 'custom_logs',
           version: '1.0.0',

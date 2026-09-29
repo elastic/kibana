@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { of } from 'rxjs';
 import { renderWithI18n as render } from '@kbn/test-jest-helpers';
@@ -17,24 +19,24 @@ import { APP_UI_ID } from '../../../../common';
 
 const mockCurrentAppId$ = of(APP_UI_ID);
 
-jest.mock('../../utils/default_date_settings', () => {
-  const original = jest.requireActual('../../utils/default_date_settings');
+vi.mock('../../utils/default_date_settings', async () => {
+  const original = (await vi.importActual('../../utils/default_date_settings'));
   return {
     ...original,
     getTimeRangeSettings: () => ({ to: '', from: '' }),
   };
 });
 
-jest.mock('../../utils/normalize_time_range', () => {
-  const original = jest.requireActual('../../utils/normalize_time_range');
+vi.mock('../../utils/normalize_time_range', async () => {
+  const original = (await vi.importActual('../../utils/normalize_time_range'));
   return {
     ...original,
     normalizeTimeRange: () => ({ to: '', from: '' }),
   };
 });
 
-jest.mock('../../lib/kibana/kibana_react', () => {
-  const original = jest.requireActual('../../lib/kibana/kibana_react');
+vi.mock('../../lib/kibana/kibana_react', async () => {
+  const original = (await vi.importActual('../../lib/kibana/kibana_react'));
   return {
     useKibana: () => ({
       ...original,
@@ -42,28 +44,31 @@ jest.mock('../../lib/kibana/kibana_react', () => {
         ...original.services,
         chrome: undefined,
         application: {
-          navigateToApp: jest.fn(),
+          navigateToApp: vi.fn(),
           getUrlForApp: (appId: string, options?: { path?: string; deepLinkId?: boolean }) =>
             `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`,
           currentAppId$: mockCurrentAppId$,
         },
         uiSettings: {
-          get: jest.fn(),
+          get: vi.fn(),
         },
         data: {
-          dataViews: jest.fn(),
+          dataViews: vi.fn(),
         },
       },
     }),
   };
 });
 
-jest.mock('../../hooks/use_app_toasts', () => ({
-  useAppToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-  }),
-}));
+vi.mock('../../hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: vi.fn().mockReturnValue({
+        addError: vi.fn(),
+        addSuccess: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockUpselling = new UpsellingService();
 

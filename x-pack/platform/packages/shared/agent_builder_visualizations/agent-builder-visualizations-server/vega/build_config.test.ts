@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -13,24 +16,33 @@ import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { createVegaGraph } from './graph';
 import { buildVegaConfig } from './build_config';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  validateEsqlQuery: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      validateEsqlQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-server-utils', () => ({
-  buildServerESQLCallbacks: jest.fn(() => ({})),
-}));
+vi.mock('@kbn/esql-server-utils', () => {
+      const mocked = {
+      buildServerESQLCallbacks: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./graph', () => ({
-  createVegaGraph: jest.fn(),
-}));
+vi.mock('./graph', () => {
+      const mocked = {
+      createVegaGraph: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedValidateEsqlQuery = jest.mocked(validateEsqlQuery);
-const mockedBuildCallbacks = jest.mocked(buildServerESQLCallbacks);
-const mockedCreateGraph = jest.mocked(createVegaGraph);
+const mockedValidateEsqlQuery = vi.mocked(validateEsqlQuery);
+const mockedBuildCallbacks = vi.mocked(buildServerESQLCallbacks);
+const mockedCreateGraph = vi.mocked(createVegaGraph);
 
 const createMockLogger = (): Logger =>
-  ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() } as unknown as Logger);
+  ({ debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() } as unknown as Logger);
 
 const PROVIDED_ESQL = 'FROM logs-* | STATS count = COUNT(*)';
 const SPEC = '{"$schema":"vega-lite","mark":"bar"}';
@@ -42,14 +54,14 @@ describe('buildVegaConfig', () => {
   const modelProvider = {} as ModelProvider;
 
   let logger: Logger;
-  let invoke: jest.Mock;
+  let invoke: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedValidateEsqlQuery.mockReset();
     mockedValidateEsqlQuery.mockResolvedValue(undefined); // default: query is valid
     logger = createMockLogger();
-    invoke = jest.fn().mockResolvedValue({
+    invoke = vi.fn().mockResolvedValue({
       spec: SPEC,
       authoringNote: AUTHORING_NOTE,
       error: null,

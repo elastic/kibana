@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 
 import { ChartSettingsPopover } from '.';
 
 describe('ChartSettingsPopover', () => {
-  const setIsPopoverOpen = jest.fn();
+  const setIsPopoverOpen = vi.fn();
   const initialPanelId = 'default-initial-panel';
 
   const panels = [

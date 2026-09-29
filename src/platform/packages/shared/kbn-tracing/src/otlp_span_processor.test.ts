@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@opentelemetry/exporter-trace-otlp-grpc');
-jest.mock('@opentelemetry/exporter-trace-otlp-http');
-jest.mock('@opentelemetry/exporter-trace-otlp-proto');
+import { vi } from 'vitest';
+import type { MockedClass } from 'vitest';
+
+vi.mock('@opentelemetry/exporter-trace-otlp-grpc');
+vi.mock('@opentelemetry/exporter-trace-otlp-http');
+vi.mock('@opentelemetry/exporter-trace-otlp-proto');
 
 import { OTLPTraceExporter as OTLPTraceExporterGRPC } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { OTLPTraceExporter as OTLPTraceExporterHTTP } from '@opentelemetry/exporter-trace-otlp-http';
@@ -17,9 +20,9 @@ import { OTLPTraceExporter as OTLPTraceExporterPROTO } from '@opentelemetry/expo
 import { Metadata } from '@grpc/grpc-js';
 import { OTLPSpanProcessor } from './otlp_span_processor';
 
-const MockedGRPC = OTLPTraceExporterGRPC as jest.MockedClass<typeof OTLPTraceExporterGRPC>;
-const MockedHTTP = OTLPTraceExporterHTTP as jest.MockedClass<typeof OTLPTraceExporterHTTP>;
-const MockedPROTO = OTLPTraceExporterPROTO as jest.MockedClass<typeof OTLPTraceExporterPROTO>;
+const MockedGRPC = OTLPTraceExporterGRPC as MockedClass<typeof OTLPTraceExporterGRPC>;
+const MockedHTTP = OTLPTraceExporterHTTP as MockedClass<typeof OTLPTraceExporterHTTP>;
+const MockedPROTO = OTLPTraceExporterPROTO as MockedClass<typeof OTLPTraceExporterPROTO>;
 
 const BASE_CONFIG = {
   url: 'http://localhost:4317',
@@ -28,7 +31,7 @@ const BASE_CONFIG = {
 
 describe('OTLPSpanProcessor', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('grpc protocol', () => {

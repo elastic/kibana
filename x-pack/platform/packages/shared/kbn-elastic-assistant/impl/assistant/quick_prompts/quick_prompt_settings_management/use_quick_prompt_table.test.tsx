@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useQuickPromptTable } from './use_quick_prompt_table';
 import type { EuiTableActionsColumnType, EuiTableComputedColumnType } from '@elastic/eui';
@@ -12,9 +14,9 @@ import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
 import { mockPromptContexts } from '../../../mock/prompt_context';
 import type { PromptResponse } from '@kbn/elastic-assistant-common';
 
-const mockIsEditEnabled = jest.fn();
-const mockOnEditActionClicked = jest.fn();
-const mockOnDeleteActionClicked = jest.fn();
+const mockIsEditEnabled = vi.fn();
+const mockOnEditActionClicked = vi.fn();
+const mockOnDeleteActionClicked = vi.fn();
 
 describe('useQuickPromptTable', () => {
   const { result } = renderHook(() => useQuickPromptTable());
@@ -29,7 +31,7 @@ describe('useQuickPromptTable', () => {
 
   describe('getColumns', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     it('should return columns with correct render functions', () => {
       const columns = result.current.getColumns(props);

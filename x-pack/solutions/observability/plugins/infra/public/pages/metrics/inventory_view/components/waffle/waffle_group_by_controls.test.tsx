@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
@@ -15,8 +17,8 @@ import userEvent from '@testing-library/user-event';
 const wrapWithProviders = (children: React.ReactNode) => <IntlProvider>{children}</IntlProvider>;
 
 describe('WaffleGroupByControls', () => {
-  const mockOnChange = jest.fn();
-  const mockOnChangeCustomOptions = jest.fn();
+  const mockOnChange = vi.fn();
+  const mockOnChangeCustomOptions = vi.fn();
 
   const defaultProps = {
     options: [
@@ -49,7 +51,7 @@ describe('WaffleGroupByControls', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders "All" label when no groupBy is selected', () => {

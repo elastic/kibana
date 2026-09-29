@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import type {
   ScopedRunnerRunToolsParams,
@@ -42,15 +45,15 @@ import {
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 
-jest.mock('../run_agent/create_handler');
-jest.mock('@kbn/agent-builder-server/tools/utils');
+vi.mock('../run_agent/create_handler');
+vi.mock('@kbn/agent-builder-server/tools/utils');
 
-const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResultId>;
-const createAgentHandlerMock = createAgentHandler as jest.MockedFn<typeof createAgentHandler>;
+const getToolResultIdMock = getToolResultId as MockedFunction<typeof getToolResultId>;
+const createAgentHandlerMock = createAgentHandler as MockedFunction<typeof createAgentHandler>;
 
 describe('AgentBuilder runner', () => {
   let scopedRunnerDeps: CreateScopedRunnerDepsMock;
-  let toolHandler: jest.MockedFunction<ToolHandlerFn>;
+  let toolHandler: MockedFunction<ToolHandlerFn>;
 
   beforeEach(() => {
     scopedRunnerDeps = createScopedRunnerDepsMock();
@@ -68,7 +71,7 @@ describe('AgentBuilder runner', () => {
       } = scopedRunnerDeps;
       getRegistry.mockResolvedValue(registry);
 
-      toolHandler = jest.fn().mockReturnValue({ results: [] });
+      toolHandler = vi.fn().mockReturnValue({ results: [] });
 
       tool = createMockedTool({});
       tool.getSchema.mockReturnValue(
@@ -218,7 +221,7 @@ describe('AgentBuilder runner', () => {
     );
 
     it('executes beforeToolCall hook and aborts when it throws', async () => {
-      scopedRunnerDeps.hooks.run = jest.fn(async () => {
+      scopedRunnerDeps.hooks.run = vi.fn(async () => {
         throw new Error('blocked by beforeToolCall');
       });
 
@@ -241,7 +244,7 @@ describe('AgentBuilder runner', () => {
   describe('runAgent', () => {
     let agent: MockedInternalAgent;
     let agentClient: AgentRegistryMock;
-    let agentHandler: jest.MockedFn<any>;
+    let agentHandler: MockedFunction<any>;
 
     beforeEach(() => {
       agent = createMockedInternalAgent();
@@ -254,7 +257,7 @@ describe('AgentBuilder runner', () => {
       } = scopedRunnerDeps;
       getRegistry.mockResolvedValue(agentClient);
 
-      agentHandler = jest.fn();
+      agentHandler = vi.fn();
       agentHandler.mockResolvedValue({
         result: { success: true },
       });
@@ -347,8 +350,8 @@ describe('AgentBuilder runner', () => {
       async ({ experimentalEnabled, contextEngineEnabled, expectedAiIndices }) => {
         const runnerDeps = createRunnerDepsMock();
         runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
-        (runnerDeps.uiSettings.asScopedToClient as jest.Mock).mockReturnValue({
-          get: jest.fn((settingId: string) => {
+        (runnerDeps.uiSettings.asScopedToClient as Mock).mockReturnValue({
+          get: vi.fn((settingId: string) => {
             if (settingId === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) {
               return Promise.resolve(experimentalEnabled);
             }
@@ -393,8 +396,8 @@ describe('AgentBuilder runner', () => {
       async ({ experimentalEnabled, apiDiscoveryEnabled }) => {
         const runnerDeps = createRunnerDepsMock();
         runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
-        (runnerDeps.uiSettings.asScopedToClient as jest.Mock).mockReturnValue({
-          get: jest.fn((settingId: string) => {
+        (runnerDeps.uiSettings.asScopedToClient as Mock).mockReturnValue({
+          get: vi.fn((settingId: string) => {
             if (settingId === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) {
               return Promise.resolve(experimentalEnabled);
             }

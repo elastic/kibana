@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
 import { DashboardMigrationsUploadMissingPanel } from './upload_missing_panel';
@@ -14,31 +17,34 @@ import { useMigrationDataInputContext } from '../../../common/components/migrati
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 
-jest.mock('../../../common/hooks/use_get_missing_resources');
-jest.mock('../../../common/components/migration_data_input_flyout_context', () => ({
-  useMigrationDataInputContext: jest.fn(),
-}));
+vi.mock('../../../common/hooks/use_get_missing_resources');
+vi.mock('../../../common/components/migration_data_input_flyout_context', () => {
+      const mocked = {
+      useMigrationDataInputContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetMissingResources = useGetMissingResources as jest.Mock;
-const mockUseMigrationDataInputContext = useMigrationDataInputContext as jest.Mock;
+const mockUseGetMissingResources = useGetMissingResources as Mock;
+const mockUseMigrationDataInputContext = useMigrationDataInputContext as Mock;
 
 const missingResourcesMock: SiemMigrationResourceBase[] = [{ name: 'missing-1', type: 'macro' }];
 
 describe('DashboardMigrationsUploadMissingPanel', () => {
-  let openFlyout: jest.Mock;
-  const getMissingResources = jest.fn();
+  let openFlyout: Mock;
+  const getMissingResources = vi.fn();
   const migrationStats = getDashboardMigrationStatsMock();
 
   beforeEach(() => {
-    openFlyout = jest.fn();
+    openFlyout = vi.fn();
     mockUseMigrationDataInputContext.mockReturnValue({
       openFlyout,
-      closeFlyout: jest.fn(),
+      closeFlyout: vi.fn(),
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders null when there are no missing resources', () => {
@@ -70,7 +76,7 @@ describe('DashboardMigrationsUploadMissingPanel', () => {
   });
 
   it('renders the panel when there are missing resources', () => {
-    let setMissingResourcesCallback: (resources: SiemMigrationResourceBase[]) => void = jest.fn();
+    let setMissingResourcesCallback: (resources: SiemMigrationResourceBase[]) => void = vi.fn();
     mockUseGetMissingResources.mockImplementation((_entity, setMissingResources) => {
       setMissingResourcesCallback = setMissingResources;
       return {
@@ -107,7 +113,7 @@ describe('DashboardMigrationsUploadMissingPanel', () => {
   });
 
   it('opens the flyout on button click', () => {
-    let setMissingResourcesCallback: (resources: SiemMigrationResourceBase[]) => void = jest.fn();
+    let setMissingResourcesCallback: (resources: SiemMigrationResourceBase[]) => void = vi.fn();
     mockUseGetMissingResources.mockImplementation((_entity, setMissingResources) => {
       setMissingResourcesCallback = setMissingResources;
       return {

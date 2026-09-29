@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import {
@@ -13,42 +15,51 @@ import {
   useFilterUrlSync,
 } from './use_filter_url_sync';
 
-const mockGet = jest.fn();
-const mockSet = jest.fn();
+const mockGet = vi.fn();
+const mockSet = vi.fn();
 
-jest.mock('@kbn/kibana-utils-plugin/public', () => ({
-  createKbnUrlStateStorage: () => ({
-    get: mockGet,
-    set: mockSet,
-  }),
-  withNotifyOnErrors: () => ({}),
-}));
+vi.mock('@kbn/kibana-utils-plugin/public', () => {
+      const mocked = {
+      createKbnUrlStateStorage: () => ({
+        get: mockGet,
+        set: mockSet,
+      }),
+      withNotifyOnErrors: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockHistory = { replace: jest.fn(), location: { search: '' } };
-jest.mock('react-router-dom', () => ({
-  useHistory: () => mockHistory,
-}));
+const mockHistory = { replace: vi.fn(), location: { search: '' } };
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: () => mockHistory,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const filterUpdates$ = new Subject<void>();
 const mockFilterManager = {
-  setAppFilters: jest.fn(),
-  getAppFilters: jest.fn().mockReturnValue([]),
-  getFilters: jest.fn().mockReturnValue([]),
+  setAppFilters: vi.fn(),
+  getAppFilters: vi.fn().mockReturnValue([]),
+  getFilters: vi.fn().mockReturnValue([]),
   getUpdates$: () => filterUpdates$.asObservable(),
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      data: { query: { filterManager: mockFilterManager } },
-      notifications: { toasts: {} },
-    },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          data: { query: { filterManager: mockFilterManager } },
+          notifications: { toasts: {} },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useFilterUrlSync', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGet.mockReturnValue(null);
   });
 

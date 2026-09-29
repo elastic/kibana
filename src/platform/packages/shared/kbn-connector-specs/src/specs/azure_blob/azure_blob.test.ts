@@ -7,24 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { AzureBlob } from './azure_blob';
 
 describe('AzureBlob', () => {
   const mockClient = {
-    get: jest.fn(),
-    head: jest.fn(),
+    get: vi.fn(),
+    head: vi.fn(),
   };
 
   const baseUrl = 'https://myaccount.blob.core.windows.net';
   const mockContext = {
     client: mockClient,
     config: { accountUrl: baseUrl },
-    log: { debug: jest.fn() },
+    log: { debug: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {

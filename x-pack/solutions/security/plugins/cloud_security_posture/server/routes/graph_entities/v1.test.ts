@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getEntities } from './v1';
 import { fetchEntities } from './fetch';
 import { parseEntityRecords } from './parse';
 
-jest.mock('./fetch');
-jest.mock('./parse');
+vi.mock('./fetch');
+vi.mock('./parse');
 
-const mockedFetchEntities = jest.mocked(fetchEntities);
-const mockedParseEntityRecords = jest.mocked(parseEntityRecords);
+const mockedFetchEntities = vi.mocked(fetchEntities);
+const mockedParseEntityRecords = vi.mocked(parseEntityRecords);
 
 describe('getEntities', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -27,7 +29,7 @@ describe('getEntities', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('paginates entity ids before fetching and preserves totalRecords', async () => {

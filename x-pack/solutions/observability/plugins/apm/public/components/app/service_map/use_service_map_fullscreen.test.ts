@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useServiceMapFullScreen } from './use_service_map_fullscreen';
 import {
@@ -14,8 +16,8 @@ import {
   MOCK_EUI_THEME_FOR_USE_THEME,
 } from './constants';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     useEuiTheme: () => ({ euiTheme: MOCK_EUI_THEME_FOR_USE_THEME }),

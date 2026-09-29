@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FormEvent } from 'react';
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
@@ -15,8 +18,8 @@ import { TestProviders } from '../../../../common/mock';
 import { ValueListsForm } from './form';
 import { useImportList } from '@kbn/securitysolution-list-hooks';
 
-jest.mock('@kbn/securitysolution-list-hooks');
-const mockUseImportList = useImportList as jest.Mock;
+vi.mock('@kbn/securitysolution-list-hooks');
+const mockUseImportList = useImportList as Mock;
 
 const mockFile = {
   name: 'foo.csv',
@@ -36,10 +39,10 @@ const mockSelectFile: <P>(container: ReactWrapper<P>, file: File) => Promise<voi
 };
 
 describe('ValueListsForm', () => {
-  let mockImportList: jest.Mock;
+  let mockImportList: Mock;
 
   beforeEach(() => {
-    mockImportList = jest.fn();
+    mockImportList = vi.fn();
     mockUseImportList.mockImplementation(() => ({
       start: mockImportList,
     }));
@@ -48,7 +51,7 @@ describe('ValueListsForm', () => {
   it('disables upload button when file is absent', () => {
     const container = mount(
       <TestProviders>
-        <ValueListsForm onError={jest.fn()} onSuccess={jest.fn()} />
+        <ValueListsForm onError={vi.fn()} onSuccess={vi.fn()} />
       </TestProviders>
     );
 
@@ -60,7 +63,7 @@ describe('ValueListsForm', () => {
   it('calls importList when upload is clicked', async () => {
     const container = mount(
       <TestProviders>
-        <ValueListsForm onError={jest.fn()} onSuccess={jest.fn()} />
+        <ValueListsForm onError={vi.fn()} onSuccess={vi.fn()} />
       </TestProviders>
     );
 
@@ -73,14 +76,14 @@ describe('ValueListsForm', () => {
 
   it('calls onError if import fails', async () => {
     mockUseImportList.mockImplementation(() => ({
-      start: jest.fn(),
+      start: vi.fn(),
       error: 'whoops',
     }));
 
-    const onError = jest.fn();
+    const onError = vi.fn();
     mount(
       <TestProviders>
-        <ValueListsForm onError={onError} onSuccess={jest.fn()} />
+        <ValueListsForm onError={onError} onSuccess={vi.fn()} />
       </TestProviders>
     );
 
@@ -95,7 +98,7 @@ describe('ValueListsForm', () => {
 
     const container = mount(
       <TestProviders>
-        <ValueListsForm onError={jest.fn()} onSuccess={jest.fn()} />
+        <ValueListsForm onError={vi.fn()} onSuccess={vi.fn()} />
       </TestProviders>
     );
 
@@ -112,14 +115,14 @@ describe('ValueListsForm', () => {
 
   it('calls onSuccess if import succeeds', async () => {
     mockUseImportList.mockImplementation(() => ({
-      start: jest.fn(),
+      start: vi.fn(),
       result: { mockResult: true },
     }));
 
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     mount(
       <TestProviders>
-        <ValueListsForm onSuccess={onSuccess} onError={jest.fn()} />
+        <ValueListsForm onSuccess={onSuccess} onError={vi.fn()} />
       </TestProviders>
     );
 

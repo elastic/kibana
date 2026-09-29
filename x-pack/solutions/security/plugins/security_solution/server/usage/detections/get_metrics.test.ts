@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DetectionMetrics } from './types';
 
 import {
@@ -48,11 +50,14 @@ import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } 
 
 let mockPrebuiltRuleAssetsClient: ReturnType<typeof createPrebuiltRuleAssetsClientMock>;
 
-jest.mock(
+vi.mock(
   '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
-  () => ({
-    createPrebuiltRuleAssetsClient: () => mockPrebuiltRuleAssetsClient,
-  })
+  () => {
+      const mocked = {
+        createPrebuiltRuleAssetsClient: () => mockPrebuiltRuleAssetsClient,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 describe('Detections Usage and Metrics', () => {
@@ -1828,12 +1833,12 @@ describe('Detections Usage and Metrics', () => {
 
     it('returns an ml job telemetry object from anomaly detectors provider', async () => {
       const logger = loggingSystemMock.createLogger();
-      const mockJobSummary = jest.fn().mockResolvedValue(getMockMlJobSummaryResponse());
-      const mockForceStartDatafeeds = jest
+      const mockJobSummary = vi.fn().mockResolvedValue(getMockMlJobSummaryResponse());
+      const mockForceStartDatafeeds = vi
         .fn()
         .mockResolvedValue(getMockMlForceStartDatafeedsResponse());
-      const mockStopDatafeeds = jest.fn().mockResolvedValue(getMockMlStopDatafeedsResponse());
-      const mockListModules = jest.fn().mockResolvedValue(getMockListModulesResponse());
+      const mockStopDatafeeds = vi.fn().mockResolvedValue(getMockMlStopDatafeedsResponse());
+      const mockListModules = vi.fn().mockResolvedValue(getMockListModulesResponse());
       mlClient.modulesProvider.mockReturnValue({
         listModules: mockListModules,
       } as unknown as ReturnType<typeof mlClient.modulesProvider>);
@@ -1842,9 +1847,9 @@ describe('Detections Usage and Metrics', () => {
         forceStartDatafeeds: mockForceStartDatafeeds,
         stopDatafeeds: mockStopDatafeeds,
       });
-      const mockJobsResponse = jest.fn().mockResolvedValue(getMockMlJobDetailsResponse());
-      const mockJobStatsResponse = jest.fn().mockResolvedValue(getMockMlJobStatsResponse());
-      const mockDatafeedStatsResponse = jest
+      const mockJobsResponse = vi.fn().mockResolvedValue(getMockMlJobDetailsResponse());
+      const mockJobStatsResponse = vi.fn().mockResolvedValue(getMockMlJobStatsResponse());
+      const mockDatafeedStatsResponse = vi
         .fn()
         .mockResolvedValue(getMockMlDatafeedStatsResponse());
 

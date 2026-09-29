@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { AlertEpisodesTagFilter } from './tag_filter';
@@ -15,20 +17,23 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import * as useFetchEpisodeTagOptionsModule from '../../hooks/use_fetch_episode_tag_options';
 import userEvent from '@testing-library/user-event';
 
-const InlineFilterPopoverSpy = jest.spyOn(inlineFilterPopoverModule, 'InlineFilterPopover');
+const InlineFilterPopoverSpy = vi.spyOn(inlineFilterPopoverModule, 'InlineFilterPopover');
 
-jest.mock('../../hooks/use_fetch_episode_tag_options', () => ({
-  useFetchEpisodeTagOptions: jest.fn(),
-}));
+vi.mock('../../hooks/use_fetch_episode_tag_options', () => {
+      const mocked = {
+      useFetchEpisodeTagOptions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchEpisodeTagOptions = jest.mocked(
+const mockUseFetchEpisodeTagOptions = vi.mocked(
   useFetchEpisodeTagOptionsModule.useFetchEpisodeTagOptions
 );
 
 describe('TagFilter', () => {
   const defaultProps = {
     selectedTags: null as string[] | null,
-    onTagsChange: jest.fn(),
+    onTagsChange: vi.fn(),
     services: {
       expressions: {} as ExpressionsStart,
       http: httpServiceMock.createStartContract(),
@@ -41,7 +46,7 @@ describe('TagFilter', () => {
   const user = userEvent.setup({ delay: null });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseFetchEpisodeTagOptions.mockReturnValue({
       data: ['alpha', 'beta'],
       isLoading: false,
@@ -80,7 +85,7 @@ describe('TagFilter', () => {
     });
 
     it('calls onTagsChange when selection changes', async () => {
-      const onTagsChange = jest.fn();
+      const onTagsChange = vi.fn();
       render(<AlertEpisodesTagFilter {...defaultProps} onTagsChange={onTagsChange} />);
       await openPopover();
 
@@ -93,7 +98,7 @@ describe('TagFilter', () => {
     });
 
     it('calls onTagsChange with undefined when cleared', async () => {
-      const onTagsChange = jest.fn();
+      const onTagsChange = vi.fn();
       render(<AlertEpisodesTagFilter {...defaultProps} onTagsChange={onTagsChange} />);
       await openPopover();
 

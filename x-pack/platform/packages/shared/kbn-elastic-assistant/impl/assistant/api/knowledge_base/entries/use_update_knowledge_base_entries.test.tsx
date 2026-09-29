@@ -5,52 +5,61 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { UseUpdateKnowledgeBaseEntriesParams } from './use_update_knowledge_base_entries';
 import { useUpdateKnowledgeBaseEntries } from './use_update_knowledge_base_entries';
 import { useInvalidateKnowledgeBaseEntries } from './use_knowledge_base_entries';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
-jest.mock('./use_knowledge_base_entries', () => ({
-  useInvalidateKnowledgeBaseEntries: jest.fn(),
-}));
-
-jest.mock('@kbn/react-query', () => ({
-  useMutation: jest.fn().mockImplementation((queryKey, fn, opts) => {
-    return {
-      mutate: async (variables: unknown) => {
-        try {
-          const res = await fn(variables);
-          opts.onSuccess(res);
-          opts.onSettled();
-          return Promise.resolve(res);
-        } catch (e) {
-          opts.onError(e);
-          opts.onSettled();
-        }
-      },
+vi.mock('./use_knowledge_base_entries', () => {
+      const mocked = {
+      useInvalidateKnowledgeBaseEntries: vi.fn(),
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useMutation: vi.fn().mockImplementation((queryKey, fn, opts) => {
+        return {
+          mutate: async (variables: unknown) => {
+            try {
+              const res = await fn(variables);
+              opts.onSuccess(res);
+              opts.onSettled();
+              return Promise.resolve(res);
+            } catch (e) {
+              opts.onError(e);
+              opts.onSettled();
+            }
+          },
+        };
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const http = {
-  post: jest.fn(),
+  post: vi.fn(),
 };
 const toasts = {
-  addError: jest.fn(),
-  addSuccess: jest.fn(),
+  addError: vi.fn(),
+  addSuccess: vi.fn(),
 };
 const defaultProps = { http, toasts } as unknown as UseUpdateKnowledgeBaseEntriesParams;
 const defaultArgs = { ids: ['1'], query: '', data: { field: 'value' } };
 
 describe('useUpdateKnowledgeBaseEntries', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call the mutation function on success', async () => {
-    const invalidateKnowledgeBaseEntries = jest.fn();
-    (useInvalidateKnowledgeBaseEntries as jest.Mock).mockReturnValue(
+    const invalidateKnowledgeBaseEntries = vi.fn();
+    (useInvalidateKnowledgeBaseEntries as Mock).mockReturnValue(
       invalidateKnowledgeBaseEntries
     );
     http.post.mockResolvedValue({});
@@ -92,8 +101,8 @@ describe('useUpdateKnowledgeBaseEntries', () => {
   });
 
   it('should call the onSettled function after mutation', async () => {
-    const invalidateKnowledgeBaseEntries = jest.fn();
-    (useInvalidateKnowledgeBaseEntries as jest.Mock).mockReturnValue(
+    const invalidateKnowledgeBaseEntries = vi.fn();
+    (useInvalidateKnowledgeBaseEntries as Mock).mockReturnValue(
       invalidateKnowledgeBaseEntries
     );
     http.post.mockResolvedValue({});

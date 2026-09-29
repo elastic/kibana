@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
@@ -26,7 +29,7 @@ import { EventTracker } from '../../analytics';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 
-jest.mock('@elastic/eui/lib/components/overlay_mask', () => {
+vi.mock('@elastic/eui/lib/components/overlay_mask', () => {
   return {
     EuiOverlayMask: (props: any) => <div>{props.children}</div>,
   };
@@ -49,7 +52,7 @@ featuresStart.getFeatures.mockResolvedValue([
   }),
 ]);
 
-const reportEvent = jest.fn();
+const reportEvent = vi.fn();
 const eventTracker = new EventTracker({ reportEvent });
 
 const renderWithIntl = (ui: React.ReactElement) =>
@@ -62,7 +65,7 @@ const renderWithIntl = (ui: React.ReactElement) =>
 describe('ManageSpacePage', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
-      value: { reload: jest.fn() },
+      value: { reload: vi.fn() },
       writable: true,
     });
   });
@@ -78,8 +81,8 @@ describe('ManageSpacePage', () => {
 
   it('allows a space to be created', async () => {
     const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+    spacesManager.createSpace = vi.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = vi.fn().mockResolvedValue(space);
 
     renderWithIntl(
       <CreateSpacePage
@@ -128,8 +131,8 @@ describe('ManageSpacePage', () => {
 
   it('validates the form (name, initials, solution view...)', async () => {
     const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+    spacesManager.createSpace = vi.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = vi.fn().mockResolvedValue(space);
 
     renderWithIntl(
       <CreateSpacePage
@@ -182,8 +185,8 @@ describe('ManageSpacePage', () => {
 
   it('shows solution view select when visible', async () => {
     const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+    spacesManager.createSpace = vi.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = vi.fn().mockResolvedValue(space);
 
     renderWithIntl(
       <CreateSpacePage
@@ -214,8 +217,8 @@ describe('ManageSpacePage', () => {
 
   it('hides solution view select when not visible', async () => {
     const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+    spacesManager.createSpace = vi.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = vi.fn().mockResolvedValue(space);
 
     renderWithIntl(
       <CreateSpacePage
@@ -246,8 +249,8 @@ describe('ManageSpacePage', () => {
 
   it('shows feature visibility controls when allowed', async () => {
     const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+    spacesManager.createSpace = vi.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = vi.fn().mockResolvedValue(space);
 
     renderWithIntl(
       <CreateSpacePage
@@ -282,8 +285,8 @@ describe('ManageSpacePage', () => {
 
   it('hides feature visibility controls when not allowed', async () => {
     const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+    spacesManager.createSpace = vi.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = vi.fn().mockResolvedValue(space);
 
     renderWithIntl(
       <CreateSpacePage
@@ -314,8 +317,8 @@ describe('ManageSpacePage', () => {
 
   it('notifies when there is an error retrieving features', async () => {
     const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+    spacesManager.createSpace = vi.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = vi.fn().mockResolvedValue(space);
 
     const error = new Error('something awful happened');
     const notifications = notificationServiceMock.createStartContract();
@@ -349,8 +352,8 @@ describe('ManageSpacePage', () => {
 
   it('hides CustomizeCps component when project_routing capability is not present', async () => {
     const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+    spacesManager.createSpace = vi.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = vi.fn().mockResolvedValue(space);
 
     renderWithIntl(
       <CreateSpacePage
@@ -381,8 +384,8 @@ describe('ManageSpacePage', () => {
 
   it('shows CustomizeCps component when project_routing.manage_space_default capability is true and project is on a CPS-eligible tier', async () => {
     const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+    spacesManager.createSpace = vi.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = vi.fn().mockResolvedValue(space);
 
     renderWithIntl(
       <CreateSpacePage
@@ -414,8 +417,8 @@ describe('ManageSpacePage', () => {
 
   it('hides CustomizeCps component when project_routing.manage_space_default capability is false', async () => {
     const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+    spacesManager.createSpace = vi.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = vi.fn().mockResolvedValue(space);
 
     renderWithIntl(
       <CreateSpacePage
@@ -447,8 +450,8 @@ describe('ManageSpacePage', () => {
 
   it('hides CustomizeCps component when project_routing.manage_space_default capability is true but project is not on a CPS-eligible tier', async () => {
     const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+    spacesManager.createSpace = vi.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = vi.fn().mockResolvedValue(space);
 
     renderWithIntl(
       <CreateSpacePage
@@ -480,8 +483,8 @@ describe('ManageSpacePage', () => {
 
   it('includes projectRouting in createSpace call when provided', async () => {
     const spacesManager = spacesManagerMock.create();
-    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+    spacesManager.createSpace = vi.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = vi.fn().mockResolvedValue(space);
 
     const mockProjectRoutingFetchResult = {
       origin: {
@@ -502,7 +505,7 @@ describe('ManageSpacePage', () => {
       ],
     };
 
-    const mockFetchProjects = jest.fn().mockResolvedValue(mockProjectRoutingFetchResult);
+    const mockFetchProjects = vi.fn().mockResolvedValue(mockProjectRoutingFetchResult);
 
     renderWithIntl(
       <KibanaContextProvider
@@ -510,7 +513,7 @@ describe('ManageSpacePage', () => {
           cps: {
             cpsManager: {
               fetchProjects: mockFetchProjects,
-              getConfigurationLinks: jest.fn(),
+              getConfigurationLinks: vi.fn(),
             },
           },
           application: {
@@ -571,7 +574,7 @@ describe('ManageSpacePage', () => {
       expect(spacesManager.createSpace).toHaveBeenCalled();
     });
 
-    const callArgs = (spacesManager.createSpace as jest.Mock).mock.calls[0][0];
+    const callArgs = (spacesManager.createSpace as Mock).mock.calls[0][0];
     expect(callArgs).toMatchObject({
       id: 'new-space-name',
       name: 'New Space Name',
@@ -586,18 +589,18 @@ describe('ManageSpacePage', () => {
     // `history.block` handler, which the mock does not implement, so a mocked history cannot tell
     // whether the user would have been asked to confirm.
     let realHistory: CoreScopedHistory;
-    let openConfirm: jest.Mocked<OverlayStart>['openConfirm'];
+    let openConfirm: Mocked<OverlayStart>['openConfirm'];
 
     const renderCreateSpacePage = async () => {
       const spacesManager = spacesManagerMock.create();
-      spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-      spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+      spacesManager.createSpace = vi.fn(spacesManager.createSpace);
+      spacesManager.getActiveSpace = vi.fn().mockResolvedValue(space);
 
       realHistory = new CoreScopedHistory(
         createMemoryHistory({ initialEntries: ['/mock/create'] }),
         '/mock'
       );
-      openConfirm = jest.fn().mockResolvedValue(false);
+      openConfirm = vi.fn().mockResolvedValue(false);
 
       renderWithIntl(
         <CreateSpacePage

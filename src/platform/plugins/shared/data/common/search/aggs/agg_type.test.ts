@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { AggTypeConfig } from './agg_type';
 import { AggType } from './agg_type';
 import type { IAggConfig } from './agg_config';
@@ -184,7 +186,7 @@ describe('AggType Class', () => {
             },
           },
         } as unknown as IAggConfig;
-        const getSerializedFormat = jest.fn().mockReturnValue({ id: 'hello' });
+        const getSerializedFormat = vi.fn().mockReturnValue({ id: 'hello' });
         const aggType = new AggType({
           name: 'name',
           expressionName: 'aggName',

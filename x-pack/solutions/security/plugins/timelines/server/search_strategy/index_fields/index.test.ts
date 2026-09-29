@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { sortBy } from 'lodash/fp';
 
 import { formatIndexFields, createFieldItem, requestIndexFieldSearchHandler } from '.';
@@ -239,9 +241,9 @@ describe('Index Fields', () => {
 
 describe('Fields Provider', () => {
   describe('search', () => {
-    const getFieldsForWildcardMock = jest.fn();
-    const esClientSearchMock = jest.fn();
-    const esClientFieldCapsMock = jest.fn();
+    const getFieldsForWildcardMock = vi.fn();
+    const esClientSearchMock = vi.fn();
+    const esClientFieldCapsMock = vi.fn();
     const mockPattern = {
       title: 'coolbro',
       fields: {
@@ -258,13 +260,13 @@ describe('Fields Provider', () => {
         runtimeFieldMap: { runtimeField: { type: 'keyword' } },
       }),
     };
-    const getStartServices = jest.fn().mockReturnValue([
+    const getStartServices = vi.fn().mockReturnValue([
       null,
       {
         data: {
           indexPatterns: {
             dataViewsServiceFactory: () => ({
-              get: jest.fn().mockReturnValue(mockPattern),
+              get: vi.fn().mockReturnValue(mockPattern),
             }),
           },
         },

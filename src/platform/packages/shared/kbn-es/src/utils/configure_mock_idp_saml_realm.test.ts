@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 
-const mockWriteFileSync = jest.fn();
-jest.mock('fs', () => ({
-  ...jest.requireActual('fs'),
-  writeFileSync: (...args: unknown[]) => mockWriteFileSync(...args),
-}));
+const mockWriteFileSync = vi.fn();
+vi.mock('fs', () => {
+      const mocked = {
+      ...require('fs'),
+      writeFileSync: (...args: unknown[]) => mockWriteFileSync(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { configureMockIdpSamlRealm } from './configure_mock_idp_saml_realm';
 
@@ -26,8 +31,8 @@ describe('configureMockIdpSamlRealm', () => {
     mockWriteFileSync.mockReset();
     warnings = [];
     log = new ToolingLog();
-    jest.spyOn(log, 'warning').mockImplementation((msg) => warnings.push(String(msg)));
-    jest.spyOn(log, 'info').mockImplementation(() => {});
+    vi.spyOn(log, 'warning').mockImplementation((msg) => warnings.push(String(msg)));
+    vi.spyOn(log, 'info').mockImplementation(() => {});
   });
 
   it('auto-configures the SAML realm for a trial license', async () => {

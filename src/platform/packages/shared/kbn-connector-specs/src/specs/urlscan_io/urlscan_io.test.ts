@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { ConnectorIconsMap } from '../../connector_icons_map';
 import { UrlscanIo } from './urlscan_io';
@@ -20,26 +23,26 @@ import {
 } from './types';
 
 interface MockClient {
-  get: jest.Mock;
-  post: jest.Mock;
-  put: jest.Mock;
-  patch: jest.Mock;
-  delete: jest.Mock;
+  get: Mock;
+  post: Mock;
+  put: Mock;
+  patch: Mock;
+  delete: Mock;
 }
 
 const createContext = (secrets: Record<string, unknown> = { authType: 'api_key_header' }) => {
   const client: MockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-    put: jest.fn(),
-    patch: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
   };
   const ctx = {
     client,
     config: {},
     secrets,
-    log: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
   return { ctx, client };
 };
@@ -251,7 +254,7 @@ const UUID = '0e37e828-a9d9-45c0-ac50-1ca579b86c72';
 const POLL_STEP_MS = 1000;
 
 describe('URLScan.io connector', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   describe('metadata', () => {
     it('exposes the expected id and display name', () => {
@@ -865,11 +868,11 @@ describe('URLScan.io connector', () => {
   });
 
   describe('scanUrlAndWait', () => {
-    beforeEach(() => jest.useFakeTimers({ doNotFake: ['performance'] }));
+    beforeEach(() => vi.useFakeTimers({ doNotFake: ['performance'] }));
     afterEach(() => {
       // Drop any sleep still pending on a failed expectation, so the suite leaves no open handle.
-      jest.clearAllTimers();
-      jest.useRealTimers();
+      vi.clearAllTimers();
+      vi.useRealTimers();
     });
 
     /**
@@ -894,7 +897,7 @@ describe('URLScan.io connector', () => {
         // Let any pending .then callbacks run, then release the next sleep.
         await Promise.resolve();
         await Promise.resolve();
-        jest.advanceTimersByTime(POLL_STEP_MS);
+        vi.advanceTimersByTime(POLL_STEP_MS);
       }
       return tracked;
     };

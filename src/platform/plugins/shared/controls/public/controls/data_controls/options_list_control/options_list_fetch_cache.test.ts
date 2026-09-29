@@ -7,19 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { setStubKibanaServices } from '../../../services/mocks';
 import { coreServices } from '../../../services/kibana_services';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
 
 describe('OptionsListFetchCache', () => {
-  let fetchSpy: jest.SpyInstance;
+  let fetchSpy: MockInstance;
 
   beforeAll(() => {
     setStubKibanaServices();
   });
 
   beforeEach(() => {
-    fetchSpy = jest.spyOn(coreServices.http, 'fetch').mockResolvedValue({
+    fetchSpy = vi.spyOn(coreServices.http, 'fetch').mockResolvedValue({
       suggestions: [{ value: 'a' }],
       totalCardinality: 1,
       invalidSelections: [],

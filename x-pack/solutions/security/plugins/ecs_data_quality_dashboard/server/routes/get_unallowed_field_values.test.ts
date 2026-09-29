@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { GET_UNALLOWED_FIELD_VALUES } from '../../common/constants';
 
 import { getUnallowedFieldValues } from '../lib';
@@ -15,9 +18,12 @@ import { getUnallowedFieldValuesRoute } from './get_unallowed_field_values';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-jest.mock('../lib', () => ({
-  getUnallowedFieldValues: jest.fn(),
-}));
+vi.mock('../lib', () => {
+      const mocked = {
+      getUnallowedFieldValues: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getUnallowedFieldValuesRoute route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -37,7 +43,7 @@ describe('getUnallowedFieldValuesRoute route', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
@@ -90,7 +96,7 @@ describe('getUnallowedFieldValuesRoute route', () => {
         },
       ],
     };
-    (getUnallowedFieldValues as jest.Mock).mockResolvedValue({
+    (getUnallowedFieldValues as Mock).mockResolvedValue({
       responses,
       took: 3,
     });
@@ -102,7 +108,7 @@ describe('getUnallowedFieldValuesRoute route', () => {
 
   test('Handles error', async () => {
     const errorMessage = 'Error!';
-    (getUnallowedFieldValues as jest.Mock).mockRejectedValue({ message: errorMessage });
+    (getUnallowedFieldValues as Mock).mockRejectedValue({ message: errorMessage });
 
     const response = await server.inject(req, requestContextMock.convertContext(context));
     expect(response.status).toEqual(500);

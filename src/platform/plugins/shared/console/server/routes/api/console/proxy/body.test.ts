@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IKibanaResponse } from '@kbn/core/server';
 import { getProxyRouteHandlerDeps, getRequestHandlerContext } from './mocks';
 
@@ -48,7 +50,7 @@ describe('Console Proxy Route', () => {
     });
 
   afterEach(async () => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('response body', () => {

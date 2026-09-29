@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -15,12 +18,12 @@ import { MemoryRouter } from '@kbn/shared-ux-router';
 import { FleetCardsProvider } from './fleet_cards_provider';
 import { ObservabilitySearchResults } from './observability_search_results';
 
-const mockUseAvailablePackages = jest.fn();
-const mockAvailablePackagesHook = jest.fn();
+const mockUseAvailablePackages = vi.fn();
+const mockAvailablePackagesHook = vi.fn();
 
-jest.mock('@kbn/fleet-plugin/public', () => {
-  const ReactActual = jest.requireActual('react');
-  const { LocalSearchHook } = jest.requireActual('@kbn/fleet-plugin/public');
+vi.mock('@kbn/fleet-plugin/public', async () => {
+  const ReactActual = require('react');
+  const { LocalSearchHook } = (await vi.importActual('@kbn/fleet-plugin/public'));
   return {
     LocalSearchHook,
     AvailablePackagesHook: () => mockAvailablePackagesHook(),
@@ -29,7 +32,7 @@ jest.mock('@kbn/fleet-plugin/public', () => {
   };
 });
 
-const renderResults = (searchTerm = 'redis', onOpenCollection = jest.fn()) => {
+const renderResults = (searchTerm = 'redis', onOpenCollection = vi.fn()) => {
   render(
     <I18nProvider>
       <KibanaContextProvider services={coreMock.createStart()}>
@@ -89,7 +92,7 @@ const nginxCollectionResult = () => ({
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockAvailablePackagesHook.mockResolvedValue({
     useAvailablePackages: mockUseAvailablePackages,
   });
@@ -127,7 +130,7 @@ describe('ObservabilitySearchResults', () => {
 
   it('shows loading rather than the stale error while a retry is in flight', async () => {
     const user = userEvent.setup();
-    let resolveRetry: (hook: { useAvailablePackages: jest.Mock }) => void = () => {};
+    let resolveRetry: (hook: { useAvailablePackages: Mock }) => void = () => {};
     mockAvailablePackagesHook
       .mockRejectedValueOnce(new Error('chunk failed'))
       .mockImplementationOnce(

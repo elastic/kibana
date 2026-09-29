@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { JobIdFilter } from './job_id_filter';
@@ -18,7 +20,7 @@ describe('JobIdFilter', () => {
         title="Job id"
         selectedJobIds={[]}
         jobIds={[]}
-        onSelect={jest.fn()}
+        onSelect={vi.fn()}
         jobNameById={{}}
       />
     );
@@ -26,7 +28,7 @@ describe('JobIdFilter', () => {
   });
 
   it('calls onSelect when clicked', () => {
-    const onSelectCb = jest.fn();
+    const onSelectCb = vi.fn();
     const { getByText, getByTestId } = render(
       <JobIdFilter
         title="Job id"
@@ -48,7 +50,7 @@ describe('JobIdFilter', () => {
         title="Job id"
         selectedJobIds={['test_job_2']}
         jobIds={JOB_IDS}
-        onSelect={jest.fn()}
+        onSelect={vi.fn()}
         jobNameById={{}}
       />
     );
@@ -67,7 +69,7 @@ describe('JobIdFilter', () => {
         title="Job id"
         selectedJobIds={[]}
         jobIds={['test_job']}
-        onSelect={jest.fn()}
+        onSelect={vi.fn()}
         jobNameById={{ test_job: jobName }}
       />
     );

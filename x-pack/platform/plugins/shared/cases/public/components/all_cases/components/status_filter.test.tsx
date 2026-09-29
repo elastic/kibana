@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,7 +22,7 @@ const LABELS = {
 };
 
 describe('StatusFilter', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const defaultProps = {
     selectedOptionKeys: [],
     countClosedCases: 7,
@@ -30,7 +32,7 @@ describe('StatusFilter', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render', async () => {

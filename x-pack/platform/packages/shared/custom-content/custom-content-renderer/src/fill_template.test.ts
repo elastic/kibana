@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fillTemplate } from './fill_template';
 
 const columns = [
@@ -100,14 +102,14 @@ describe('fillTemplate', () => {
   // The engine is fetched over the network now, so a failed load must not be memoized —
   // otherwise one transient failure breaks every later render until a page reload.
   it('retries after a failed engine load instead of caching the failure', async () => {
-    jest.resetModules();
+    vi.resetModules();
     let attempt = 0;
-    jest.doMock('liquidjs', () => {
+    vi.doMock('liquidjs', () => {
       attempt += 1;
       if (attempt === 1) {
         throw new Error('chunk load failed');
       }
-      return jest.requireActual('liquidjs');
+      return require('liquidjs');
     });
 
     const { fillTemplate: fillWithMockedEngine } = await import('./fill_template');
@@ -115,6 +117,6 @@ describe('fillTemplate', () => {
     await expect(fillWithMockedEngine('<p>hi</p>', [], [])).rejects.toThrow('chunk load failed');
     await expect(fillWithMockedEngine('<p>hi</p>', [], [])).resolves.toBe('<p>hi</p>');
 
-    jest.dontMock('liquidjs');
+    vi.dontMock('liquidjs');
   });
 });

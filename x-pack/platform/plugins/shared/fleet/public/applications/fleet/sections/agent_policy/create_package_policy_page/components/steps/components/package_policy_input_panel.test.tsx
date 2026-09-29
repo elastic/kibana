@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 
@@ -26,13 +29,13 @@ import {
 
 import { shouldShowStreamsByDefault, PackagePolicyInputPanel } from './package_policy_input_panel';
 
-jest.mock('../../../single_page_layout/hooks/setup_technology', () => {
+vi.mock('../../../single_page_layout/hooks/setup_technology', () => {
   return {
-    useAgentless: jest.fn(),
+    useAgentless: vi.fn(),
   };
 });
 
-const useAgentlessMock = useAgentless as jest.MockedFunction<typeof useAgentless>;
+const useAgentlessMock = useAgentless as MockedFunction<typeof useAgentless>;
 
 const mockParse = () => ({});
 
@@ -417,7 +420,7 @@ describe('PackagePolicyInputPanel', () => {
       },
     },
   ];
-  const mockUpdatePackagePolicyInput = jest.fn().mockImplementation((val: any) => {
+  const mockUpdatePackagePolicyInput = vi.fn().mockImplementation((val: any) => {
     return undefined;
   });
   const inputValidationResults = {
@@ -466,15 +469,15 @@ describe('PackagePolicyInputPanel', () => {
     testRenderer = createFleetTestRendererMock();
   });
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   describe('When agentless is enabled', () => {
     beforeEach(() => {
       useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: true,
         isAgentlessDefault: false,
-        isAgentlessAgentPolicy: jest.fn(),
-        getAgentlessStatusForPackage: jest
+        isAgentlessAgentPolicy: vi.fn(),
+        getAgentlessStatusForPackage: vi
           .fn()
           .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
@@ -510,8 +513,8 @@ describe('PackagePolicyInputPanel', () => {
       useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: false,
         isAgentlessDefault: false,
-        isAgentlessAgentPolicy: jest.fn(),
-        getAgentlessStatusForPackage: jest
+        isAgentlessAgentPolicy: vi.fn(),
+        getAgentlessStatusForPackage: vi
           .fn()
           .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
@@ -1039,8 +1042,8 @@ describe('PackagePolicyInputPanel', () => {
       useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: false,
         isAgentlessDefault: false,
-        isAgentlessAgentPolicy: jest.fn(),
-        getAgentlessStatusForPackage: jest
+        isAgentlessAgentPolicy: vi.fn(),
+        getAgentlessStatusForPackage: vi
           .fn()
           .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
@@ -1258,20 +1261,20 @@ describe('PackagePolicyInputPanel', () => {
       streams: { 'my_otel.data': { vars: {} } },
     };
 
-    let mockUpdateOtelInput: jest.Mock;
+    let mockUpdateOtelInput: Mock;
 
     beforeEach(() => {
       useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: false,
         isAgentlessDefault: false,
-        isAgentlessAgentPolicy: jest.fn(),
-        getAgentlessStatusForPackage: jest
+        isAgentlessAgentPolicy: vi.fn(),
+        getAgentlessStatusForPackage: vi
           .fn()
           .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
         isCloud: false,
       });
-      mockUpdateOtelInput = jest.fn();
+      mockUpdateOtelInput = vi.fn();
     });
 
     it('adds use_apm var by default when data_stream.type changes to traces', async () => {
@@ -1426,8 +1429,8 @@ describe('PackagePolicyInputPanel', () => {
       useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: false,
         isAgentlessDefault: false,
-        isAgentlessAgentPolicy: jest.fn(),
-        getAgentlessStatusForPackage: jest
+        isAgentlessAgentPolicy: vi.fn(),
+        getAgentlessStatusForPackage: vi
           .fn()
           .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
@@ -1592,8 +1595,8 @@ describe('PackagePolicyInputPanel', () => {
       useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: false,
         isAgentlessDefault: false,
-        isAgentlessAgentPolicy: jest.fn(),
-        getAgentlessStatusForPackage: jest
+        isAgentlessAgentPolicy: vi.fn(),
+        getAgentlessStatusForPackage: vi
           .fn()
           .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,

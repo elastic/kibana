@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { getConnectorSpec } from '../../..';
 import type { ActionContext } from '../../connector_spec';
@@ -24,10 +26,10 @@ import { DatadogReceivedEventSchema, UpdateIncidentInputSchema } from './types';
 
 describe('Datadog', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-    patch: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
     defaults: {
       headers: { common: {} as Record<string, string> },
       auth: { username: 'api-key', password: 'app-key' } as
@@ -40,11 +42,11 @@ describe('Datadog', () => {
     client: mockClient,
     config: { site: 'datadoghq.com' },
     secrets: { authType: 'basic', username: 'api-key', password: 'app-key' },
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockClient.defaults.headers.common = {};
     mockClient.defaults.auth = { username: 'api-key', password: 'app-key' };
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
@@ -19,16 +21,22 @@ import { runAfterExecutionWorkflows } from './run_after_execution_workflows';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import { getCurrentSpaceId } from '../../utils/spaces';
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
-  executeWorkflow: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-tools-base/workflows', () => {
+      const mocked = {
+      executeWorkflow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/spaces', () => ({
-  getCurrentSpaceId: jest.fn(() => 'default'),
-}));
+vi.mock('../../utils/spaces', () => {
+      const mocked = {
+      getCurrentSpaceId: vi.fn(() => 'default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const executeWorkflowMock = jest.mocked(executeWorkflow);
-const getCurrentSpaceIdMock = jest.mocked(getCurrentSpaceId);
+const executeWorkflowMock = vi.mocked(executeWorkflow);
+const getCurrentSpaceIdMock = vi.mocked(getCurrentSpaceId);
 
 type RunAfterExecutionWorkflowsParams = Parameters<typeof runAfterExecutionWorkflows>[0];
 type WorkflowApi = RunAfterExecutionWorkflowsParams['workflowApi'];
@@ -62,7 +70,7 @@ describe('runAfterExecutionWorkflows', () => {
 
     return {
       workflowApi: {} as WorkflowApi,
-      getInternalServices: jest.fn(() => ({
+      getInternalServices: vi.fn(() => ({
         spaces: {},
         uiSettings,
         savedObjects,
@@ -90,7 +98,7 @@ describe('runAfterExecutionWorkflows', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getCurrentSpaceIdMock.mockReturnValue('default');
     executeWorkflowMock.mockResolvedValue({ success: true, execution: completedExecution });
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,34 +21,52 @@ import {
 } from '@kbn/apm-ui-shared';
 import { TRACE_SAMPLE_EBT_ELEMENTS } from './ebt_constants';
 
-const mockUseGenAiData = jest.fn();
-const mockReportEvent = jest.fn();
+const mockUseGenAiData = vi.fn();
+const mockReportEvent = vi.fn();
 
-jest.mock('../../../../context/kibana_context/use_kibana', () => ({
-  useKibana: () => ({
-    services: { analytics: { reportEvent: mockReportEvent } },
-  }),
-}));
+vi.mock('../../../../context/kibana_context/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: { analytics: { reportEvent: mockReportEvent } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/genai_tab/use_genai_data', () => ({
-  useGenAiData: (params: unknown) => mockUseGenAiData(params),
-}));
+vi.mock('../../../shared/genai_tab/use_genai_data', () => {
+      const mocked = {
+      useGenAiData: (params: unknown) => mockUseGenAiData(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./waterfall_container/unified_waterfall_container', () => ({
-  UnifiedWaterfallContainer: () => <div data-test-subj="unifiedWaterfallContainer" />,
-}));
+vi.mock('./waterfall_container/unified_waterfall_container', () => {
+      const mocked = {
+      UnifiedWaterfallContainer: () => <div data-test-subj="unifiedWaterfallContainer" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: () => ({ query: { rangeFrom: 'now-15m', rangeTo: 'now' } }),
-}));
+vi.mock('../../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useAnyOfApmParams: () => ({ query: { rangeFrom: 'now-15m', rangeTo: 'now' } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/links/discover_links/use_discover_href', () => ({
-  useDiscoverHref: () => undefined,
-}));
+vi.mock('../../../shared/links/discover_links/use_discover_href', () => {
+      const mocked = {
+      useDiscoverHref: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/shared-ux-markdown', () => ({
-  Markdown: ({ children }: { children: string }) => <div data-testid="markdown">{children}</div>,
-}));
+vi.mock('@kbn/shared-ux-markdown', () => {
+      const mocked = {
+      Markdown: ({ children }: { children: string }) => <div data-testid="markdown">{children}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const transaction = {
   '@timestamp': '2024-01-01T00:00:00.000Z',
@@ -83,7 +103,7 @@ function mockGenAiData({ isGenAiSpan }: { isGenAiSpan: boolean }) {
 }
 
 function renderTabs({ detailTab }: { detailTab?: TransactionTab } = {}) {
-  const onTabClick = jest.fn();
+  const onTabClick = vi.fn();
 
   render(
     <EuiThemeProvider>
@@ -93,7 +113,7 @@ function renderTabs({ detailTab }: { detailTab?: TransactionTab } = {}) {
         detailTab={detailTab}
         onTabClick={onTabClick}
         showCriticalPath={false}
-        onShowCriticalPathChange={jest.fn()}
+        onShowCriticalPathChange={vi.fn()}
         unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
       />
     </EuiThemeProvider>
@@ -104,7 +124,7 @@ function renderTabs({ detailTab }: { detailTab?: TransactionTab } = {}) {
 
 describe('TransactionTabs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows the GenAI tab when the transaction has gen_ai data', () => {

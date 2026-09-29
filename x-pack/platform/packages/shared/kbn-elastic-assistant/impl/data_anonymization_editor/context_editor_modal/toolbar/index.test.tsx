@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -15,17 +17,17 @@ const selected = ['event.action', 'event.category', 'user.name'];
 
 describe('Toolbar', () => {
   const defaultProps = {
-    onListUpdated: jest.fn(),
+    onListUpdated: vi.fn(),
     onlyDefaults: false,
-    onSelectAll: jest.fn(),
+    onSelectAll: vi.fn(),
     selectedFields: [], // no rows selected
     totalFields: 5,
     anonymizationAllFieldsData: [
       { id: '1', field: 'event.action', allowed: true, anonymized: false },
       { id: '2', field: 'event.category', allowed: true, anonymized: false },
     ],
-    handleRowChecked: jest.fn(),
-    handleUnselectAll: jest.fn(),
+    handleRowChecked: vi.fn(),
+    handleUnselectAll: vi.fn(),
   };
 
   it('displays the number of selected fields', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
@@ -35,16 +38,16 @@ const policy = {
 } as ActionPolicyResponse;
 
 describe('useActionPolicyAutoAttach', () => {
-  let addAttachment: jest.Mock;
+  let addAttachment: Mock;
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
   let chatEvents$: Subject<ChatEvent>;
   let services: AutoAttachServices;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
-    addAttachment = jest.fn();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
+    addAttachment = vi.fn();
     currentAppId$ = new BehaviorSubject<string | null>(null);
     activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     chatEvents$ = new Subject<ChatEvent>();
@@ -57,7 +60,7 @@ describe('useActionPolicyAutoAttach', () => {
       } as unknown as ChromeStart,
       agentBuilder: {
         addAttachment,
-        removeAttachment: jest.fn(),
+        removeAttachment: vi.fn(),
         events: {
           ui: { activeConversation$: activeConversation$.asObservable() },
           getChatEvents$: () => chatEvents$.asObservable(),
@@ -67,7 +70,7 @@ describe('useActionPolicyAutoAttach', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('stages when sidebar is already open on mount', () => {
@@ -75,7 +78,7 @@ describe('useActionPolicyAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     renderHook(() => useActionPolicyAutoAttach(policy, services));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(addAttachment).toHaveBeenCalledWith(
@@ -91,7 +94,7 @@ describe('useActionPolicyAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     renderHook(() => useActionPolicyAutoAttach(policy, services));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
@@ -100,13 +103,13 @@ describe('useActionPolicyAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     renderHook(() => useActionPolicyAutoAttach(policy, services));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
 
     act(() => {
       currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
@@ -121,12 +124,12 @@ describe('useActionPolicyAutoAttach', () => {
     const { rerender } = renderHook(({ item }) => useActionPolicyAutoAttach(item, services), {
       initialProps: { item: policy },
     });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
     rerender({ item: policy2 });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenLastCalledWith(
@@ -139,7 +142,7 @@ describe('useActionPolicyAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     renderHook(() => useActionPolicyAutoAttach(undefined, services));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
@@ -147,7 +150,7 @@ describe('useActionPolicyAutoAttach', () => {
   it('does not stage when Agent Builder is unavailable', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     renderHook(() => useActionPolicyAutoAttach(policy, { ...services, agentBuilder: undefined }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
@@ -160,7 +163,7 @@ describe('useActionPolicyAutoAttach', () => {
 
     act(() => {
       currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
 
     expect(addAttachment).not.toHaveBeenCalled();

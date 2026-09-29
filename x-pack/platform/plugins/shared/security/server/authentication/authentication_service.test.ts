@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-jest.mock('./authenticator');
+import { vi } from 'vitest';
+import type { Mock, MockInstance, Mocked } from 'vitest';
+
+vi.mock('./authenticator');
 
 import { mockCanRedirectRequest } from './authentication_service.test.mocks';
 
@@ -63,28 +66,28 @@ import { userProfileServiceMock } from '../user_profile/user_profile_service.moc
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
-  let logger: jest.Mocked<Logger>;
+  let logger: Mocked<Logger>;
   let mockSetupAuthenticationParams: {
-    http: jest.Mocked<HttpServiceSetup>;
-    elasticsearch: jest.Mocked<ElasticsearchServiceSetup>;
+    http: Mocked<HttpServiceSetup>;
+    elasticsearch: Mocked<ElasticsearchServiceSetup>;
     config: ConfigType;
-    license: jest.Mocked<SecurityLicense>;
+    license: Mocked<SecurityLicense>;
     staticAssets: IStaticAssets;
-    customBranding: jest.Mocked<CustomBrandingSetup>;
-    getServiceAccounts: jest.Mock;
+    customBranding: Mocked<CustomBrandingSetup>;
+    getServiceAccounts: Mock;
   };
   let mockStartAuthenticationParams: {
-    audit: jest.Mocked<AuditServiceSetup>;
+    audit: Mocked<AuditServiceSetup>;
     config: ConfigType;
     loggers: LoggerFactory;
-    http: jest.Mocked<HttpServiceStart>;
+    http: Mocked<HttpServiceStart>;
     clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
-    featureUsageService: jest.Mocked<SecurityFeatureUsageServiceStart>;
+    featureUsageService: Mocked<SecurityFeatureUsageServiceStart>;
     userProfileService: ReturnType<typeof userProfileServiceMock.createStart>;
-    session: jest.Mocked<PublicMethodsOf<Session>>;
+    session: Mocked<PublicMethodsOf<Session>>;
     applicationName: 'kibana-.kibana';
     kibanaFeatures: [];
-    isElasticCloudDeployment: jest.Mock;
+    isElasticCloudDeployment: Mock;
     customLogoutURL?: string;
     userActivity: UserActivityServiceStart;
   };
@@ -93,10 +96,10 @@ describe('AuthenticationService', () => {
 
     const coreSetupMock = coreMock.createSetup();
     const httpMock = coreSetupMock.http;
-    (httpMock.basePath.prepend as jest.Mock).mockImplementation(
+    (httpMock.basePath.prepend as Mock).mockImplementation(
       (path) => `${httpMock.basePath.serverBasePath}${path}`
     );
-    (httpMock.basePath.get as jest.Mock).mockImplementation(() => httpMock.basePath.serverBasePath);
+    (httpMock.basePath.get as Mock).mockImplementation(() => httpMock.basePath.serverBasePath);
     mockSetupAuthenticationParams = {
       http: httpMock,
       elasticsearch: coreSetupMock.elasticsearch,
@@ -106,7 +109,7 @@ describe('AuthenticationService', () => {
       license: licenseMock.create(),
       staticAssets: coreSetupMock.http.staticAssets,
       customBranding: customBrandingServiceMock.createSetupContract(),
-      getServiceAccounts: jest.fn().mockReturnValue(null),
+      getServiceAccounts: vi.fn().mockReturnValue(null),
     };
     mockCanRedirectRequest.mockReturnValue(false);
 
@@ -130,18 +133,18 @@ describe('AuthenticationService', () => {
       userProfileService: userProfileServiceMock.createStart(),
       applicationName: 'kibana-.kibana',
       kibanaFeatures: [],
-      isElasticCloudDeployment: jest.fn().mockReturnValue(false),
+      isElasticCloudDeployment: vi.fn().mockReturnValue(false),
       customLogoutURL: 'https://some-logout-origin/logout',
       userActivity: userActivityServiceMock.createStartContract(),
     };
-    (mockStartAuthenticationParams.http.basePath.get as jest.Mock).mockImplementation(
+    (mockStartAuthenticationParams.http.basePath.get as Mock).mockImplementation(
       () => mockStartAuthenticationParams.http.basePath.serverBasePath
     );
 
     service = new AuthenticationService(logger);
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   describe('#setup()', () => {
     it('properly registers auth handler', () => {
@@ -170,7 +173,7 @@ describe('AuthenticationService', () => {
         mockSetupAuthenticationParams.elasticsearch.setUnauthorizedErrorHandler.mock.calls[0];
       const serviceAccounts = serviceAccountsServiceMock.createStart();
       mockSetupAuthenticationParams.getServiceAccounts.mockReturnValue(serviceAccounts);
-      const toolkit = { notHandled: jest.fn(), retry: jest.fn() };
+      const toolkit = { notHandled: vi.fn(), retry: vi.fn() };
       const error = new errors.ResponseError(
         securityMock.createApiResponse({
           statusCode: 401,
@@ -259,16 +262,16 @@ describe('AuthenticationService', () => {
 
     describe('authentication handler', () => {
       let authHandler: AuthenticationHandler;
-      let authenticate: jest.SpyInstance<Promise<AuthenticationResult>, [KibanaRequest]>;
-      let mockAuthToolkit: jest.Mocked<AuthToolkit>;
-      beforeEach(() => {
+      let authenticate: MockInstance<Promise<AuthenticationResult>, [KibanaRequest]>;
+      let mockAuthToolkit: Mocked<AuthToolkit>;
+      beforeEach(async () => {
         mockAuthToolkit = httpServiceMock.createAuthToolkit();
 
         service.start(mockStartAuthenticationParams);
 
         authHandler = mockSetupAuthenticationParams.http.registerAuth.mock.calls[0][0];
         authenticate =
-          jest.requireMock('./authenticator').Authenticator.mock.instances[0].authenticate;
+          (await vi.importMock('./authenticator')).Authenticator.mock.instances[0].authenticate;
       });
 
       it('returns error if license is not available.', async () => {
@@ -476,17 +479,17 @@ describe('AuthenticationService', () => {
 
     describe('unauthorized error handler', () => {
       let unauthorizedErrorHandler: UnauthorizedErrorHandler;
-      let reauthenticate: jest.SpyInstance<Promise<AuthenticationResult>, [KibanaRequest]>;
-      let mockUnauthorizedErrorToolkit: jest.Mocked<UnauthorizedErrorHandlerToolkit>;
-      beforeEach(() => {
-        mockUnauthorizedErrorToolkit = { notHandled: jest.fn(), retry: jest.fn() };
+      let reauthenticate: MockInstance<Promise<AuthenticationResult>, [KibanaRequest]>;
+      let mockUnauthorizedErrorToolkit: Mocked<UnauthorizedErrorHandlerToolkit>;
+      beforeEach(async () => {
+        mockUnauthorizedErrorToolkit = { notHandled: vi.fn(), retry: vi.fn() };
 
         service.start(mockStartAuthenticationParams);
 
         unauthorizedErrorHandler =
           mockSetupAuthenticationParams.elasticsearch.setUnauthorizedErrorHandler.mock.calls[0][0];
         reauthenticate =
-          jest.requireMock('./authenticator').Authenticator.mock.instances[0].reauthenticate;
+          (await vi.importMock('./authenticator')).Authenticator.mock.instances[0].reauthenticate;
       });
 
       describe('service-account-bound fake requests', () => {
@@ -916,7 +919,7 @@ describe('AuthenticationService', () => {
 
     describe('getServerBaseURL()', () => {
       let getServerBaseURL: () => string;
-      beforeEach(() => {
+      beforeEach(async () => {
         mockStartAuthenticationParams.http.getServerInfo.mockReturnValue({
           name: 'some-name',
           protocol: 'socket',
@@ -928,7 +931,7 @@ describe('AuthenticationService', () => {
         service.start(mockStartAuthenticationParams);
 
         getServerBaseURL =
-          jest.requireMock('./authenticator').Authenticator.mock.calls[0][0].getServerBaseURL;
+          (await vi.importMock('./authenticator')).Authenticator.mock.calls[0][0].getServerBaseURL;
       });
 
       it('falls back to legacy server config if `public` config is not specified', async () => {
@@ -969,7 +972,7 @@ describe('AuthenticationService', () => {
       it('returns user from the auth state.', () => {
         const mockUser = mockAuthenticatedUser();
 
-        const mockAuthGet = mockStartAuthenticationParams.http.auth.get as jest.Mock;
+        const mockAuthGet = mockStartAuthenticationParams.http.auth.get as Mock;
         mockAuthGet.mockReturnValue({ state: mockUser });
 
         const mockRequest = httpServerMock.createKibanaRequest();
@@ -979,7 +982,7 @@ describe('AuthenticationService', () => {
       });
 
       it('returns null if auth state is not available.', () => {
-        const mockAuthGet = mockStartAuthenticationParams.http.auth.get as jest.Mock;
+        const mockAuthGet = mockStartAuthenticationParams.http.auth.get as Mock;
         mockAuthGet.mockReturnValue({});
 
         const mockRequest = httpServerMock.createKibanaRequest();
@@ -991,7 +994,7 @@ describe('AuthenticationService', () => {
   });
 
   describe('onPreResponse handler', () => {
-    function getService({ runStart = true }: { runStart?: boolean } = {}) {
+    async function getService({ runStart = true }: { runStart?: boolean } = {}) {
       service.setup(mockSetupAuthenticationParams);
 
       if (runStart) {
@@ -1000,7 +1003,7 @@ describe('AuthenticationService', () => {
 
       const onPreResponseHandler =
         mockSetupAuthenticationParams.http.registerOnPreResponse.mock.calls[0][0];
-      const [authenticator] = jest.requireMock('./authenticator').Authenticator.mock.instances;
+      const [authenticator] = (await vi.importMock('./authenticator')).Authenticator.mock.instances;
 
       return { authenticator, onPreResponseHandler };
     }
@@ -1193,7 +1196,7 @@ describe('AuthenticationService', () => {
 
     describe('when login form is available', () => {
       let mockReturnedValue: { type: any; body: string };
-      let mockOnPreResponseToolkit: jest.Mocked<OnPreResponseToolkit>;
+      let mockOnPreResponseToolkit: Mocked<OnPreResponseToolkit>;
       beforeEach(() => {
         mockReturnedValue = { type: 'render' as any, body: 'body' };
         mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
@@ -1351,7 +1354,7 @@ describe('AuthenticationService', () => {
 
     describe('when login selector is available', () => {
       let mockReturnedValue: { type: any; body: string };
-      let mockOnPreResponseToolkit: jest.Mocked<OnPreResponseToolkit>;
+      let mockOnPreResponseToolkit: Mocked<OnPreResponseToolkit>;
       beforeEach(() => {
         mockReturnedValue = { type: 'render' as any, body: 'body' };
         mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
@@ -1521,7 +1524,7 @@ describe('AuthenticationService', () => {
 
     describe('when neither login selector nor login form is available', () => {
       let mockReturnedValue: { type: any; body: string };
-      let mockOnPreResponseToolkit: jest.Mocked<OnPreResponseToolkit>;
+      let mockOnPreResponseToolkit: Mocked<OnPreResponseToolkit>;
       beforeEach(() => {
         mockReturnedValue = { type: 'render' as any, body: 'body' };
         mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
@@ -1685,7 +1688,7 @@ describe('AuthenticationService', () => {
 
     describe('handles unexpected post-authentication failures', () => {
       let mockReturnedValue: { type: any; body: string };
-      let mockOnPreResponseToolkit: jest.Mocked<OnPreResponseToolkit>;
+      let mockOnPreResponseToolkit: Mocked<OnPreResponseToolkit>;
       beforeEach(() => {
         mockReturnedValue = { type: 'render' as any, body: 'body' };
         mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();

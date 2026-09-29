@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, Mocked, MockedFunction } from 'vitest';
+
 import { Readable, PassThrough } from 'stream';
 import { SavedObjectsImportError } from '../errors';
 import { collectSavedObjects } from './collect_saved_objects';
@@ -22,14 +25,14 @@ import type {
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import { createFilterStream } from '@kbn/utils';
 
-jest.mock('./create_limit_stream');
-jest.mock('./get_non_unique_entries');
+vi.mock('./create_limit_stream');
+vi.mock('./get_non_unique_entries');
 
 const getMockFn = <T extends (...args: any[]) => any, U>(fn: (...args: Parameters<T>) => U) =>
-  fn as jest.MockedFunction<(...args: Parameters<T>) => U>;
+  fn as MockedFunction<(...args: Parameters<T>) => U>;
 
-let limitStreamPush: jest.SpyInstance;
-let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
+let limitStreamPush: MockInstance;
+let typeRegistry: Mocked<ISavedObjectTypeRegistry>;
 
 const READ_ONLY_TYPE = 'read-only-type';
 
@@ -61,9 +64,9 @@ const createAccessControlImportTransforms: AccessControlImportTransformsFactory 
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   const stream = new PassThrough({ objectMode: true });
-  limitStreamPush = jest.spyOn(stream, 'push');
+  limitStreamPush = vi.spyOn(stream, 'push');
   getMockFn(createLimitStream).mockReturnValue(stream);
   getMockFn(getNonUniqueEntries).mockReturnValue([]);
 
@@ -163,7 +166,7 @@ describe('collectSavedObjects()', () => {
 
     test('filter with empty input stream is not called', async () => {
       const readStream = createReadStream();
-      const filter = jest.fn();
+      const filter = vi.fn();
       await collectSavedObjects({
         readStream,
         supportedTypes: [],
@@ -177,7 +180,7 @@ describe('collectSavedObjects()', () => {
 
     test('filter with non-empty input stream is called with all objects of supported types', async () => {
       const readStream = createReadStream(obj1, obj2, obj3);
-      const filter = jest.fn();
+      const filter = vi.fn();
       const supportedTypes = [obj2.type];
       await collectSavedObjects({
         readStream,
@@ -355,7 +358,7 @@ describe('collectSavedObjects()', () => {
     describe('with optional filter', () => {
       test('filters out objects when result === false', async () => {
         const readStream = createReadStream(obj1, obj2);
-        const filter = jest.fn().mockReturnValue(false);
+        const filter = vi.fn().mockReturnValue(false);
         const supportedTypes = [obj2.type];
         const result = await collectSavedObjects({
           readStream,
@@ -373,7 +376,7 @@ describe('collectSavedObjects()', () => {
 
       test('does not filter out objects when result === true', async () => {
         const readStream = createReadStream(obj1, obj2);
-        const filter = jest.fn().mockReturnValue(true);
+        const filter = vi.fn().mockReturnValue(true);
         const supportedTypes = [obj2.type];
         const result = await collectSavedObjects({
           readStream,

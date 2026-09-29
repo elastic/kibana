@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance, MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,43 +25,46 @@ import { getAgentPolicyForAgents, getAgents, getAgentsByKuery, openPointInTime }
 import * as migrateActionRunner from './migrate_action_runner';
 
 // Mock the imported functions
-jest.mock('./actions');
-jest.mock('../action_sender');
-jest.mock('./detect_target_cluster_type');
+vi.mock('./actions');
+vi.mock('../action_sender');
+vi.mock('./detect_target_cluster_type');
 
-jest.mock('./crud', () => {
+vi.mock('./crud', () => {
   return {
-    getAgentPolicyForAgents: jest.fn(),
-    getAgents: jest.fn(),
-    getAgentsByKuery: jest.fn(),
-    openPointInTime: jest.fn(),
+    getAgentPolicyForAgents: vi.fn(),
+    getAgents: vi.fn(),
+    getAgentsByKuery: vi.fn(),
+    openPointInTime: vi.fn(),
   };
 });
 
 // Mock uuid to return predictable values
-jest.mock('uuid', () => ({
-  v4: jest.fn(),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the license service
-jest.mock('..', () => {
+vi.mock('..', () => {
   return {
     licenseService: {
-      hasAtLeast: jest.fn(),
+      hasAtLeast: vi.fn(),
     },
     appContextService: {
-      getLogger: jest.fn(),
-      getTelemetryEventsSender: jest.fn(),
-      getCloud: jest.fn(),
+      getLogger: vi.fn(),
+      getTelemetryEventsSender: vi.fn(),
+      getCloud: vi.fn(),
     },
   };
 });
 
-const mockedCreateAgentAction = createAgentAction as jest.MockedFunction<typeof createAgentAction>;
-const mockedCreateErrorActionResults = createErrorActionResults as jest.MockedFunction<
+const mockedCreateAgentAction = createAgentAction as MockedFunction<typeof createAgentAction>;
+const mockedCreateErrorActionResults = createErrorActionResults as MockedFunction<
   typeof createErrorActionResults
 >;
-const mockedUuidv4 = uuidv4 as jest.MockedFunction<typeof uuidv4>;
+const mockedUuidv4 = uuidv4 as MockedFunction<typeof uuidv4>;
 
 const mockedAgent: Agent = {
   id: 'agent-123',
@@ -90,7 +96,7 @@ const mockedPolicy: AgentPolicy = {
   namespace: 'default',
 };
 
-const mockedDetectTargetClusterType = detectTargetClusterType as jest.MockedFunction<
+const mockedDetectTargetClusterType = detectTargetClusterType as MockedFunction<
   typeof detectTargetClusterType
 >;
 
@@ -99,21 +105,21 @@ describe('Agent migration', () => {
   let mockLicenseService: any;
   let mockAppContextService: any;
   const soClientMock = {
-    getCurrentNamespace: jest.fn(),
+    getCurrentNamespace: vi.fn(),
   } as any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Reset mocks before each test
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     esClientMock = elasticsearchServiceMock.createInternalClient();
 
-    mockLicenseService = jest.requireMock('..').licenseService;
+    mockLicenseService = (await vi.importMock('..')).licenseService;
     mockLicenseService.hasAtLeast.mockReturnValue(true);
 
-    mockAppContextService = jest.requireMock('..').appContextService;
-    mockAppContextService.getLogger.mockReturnValue({ debug: jest.fn() });
+    mockAppContextService = (await vi.importMock('..')).appContextService;
+    mockAppContextService.getLogger.mockReturnValue({ debug: vi.fn() });
     mockAppContextService.getTelemetryEventsSender.mockReturnValue({
-      queueTelemetryEvents: jest.fn(),
+      queueTelemetryEvents: vi.fn(),
     });
     mockAppContextService.getCloud.mockReturnValue({
       isCloudEnabled: true,
@@ -121,7 +127,7 @@ describe('Agent migration', () => {
       deploymentId: 'dep-123',
     });
 
-    (getAgentPolicyForAgents as jest.Mock).mockResolvedValue([mockedPolicy]);
+    (getAgentPolicyForAgents as Mock).mockResolvedValue([mockedPolicy]);
 
     // Mock the createAgentAction response
     mockedCreateAgentAction.mockResolvedValue({
@@ -412,7 +418,7 @@ describe('Agent migration', () => {
 
   describe('migrateBulkAgents', () => {
     it('should create a MIGRATE action for the specified agents', async () => {
-      (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
+      (getAgents as Mock).mockResolvedValue([mockedAgent, mockedAgent]);
       const options = {
         enrollment_token: 'test-enrollment-token',
         uri: 'https://test-fleet-server.example.com',
@@ -446,7 +452,7 @@ describe('Agent migration', () => {
     });
 
     it('should handle empty additional settings', async () => {
-      (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
+      (getAgents as Mock).mockResolvedValue([mockedAgent, mockedAgent]);
       const options = {
         enrollment_token: 'test-enrollment-token',
         uri: 'https://test-fleet-server.example.com',
@@ -475,7 +481,7 @@ describe('Agent migration', () => {
 
     it('should send telemetry with source and target cluster types', async () => {
       mockedDetectTargetClusterType.mockReturnValue('serverless');
-      (getAgents as jest.Mock).mockResolvedValue([mockedAgent]);
+      (getAgents as Mock).mockResolvedValue([mockedAgent]);
 
       await bulkMigrateAgents(esClientMock, soClientMock, {
         agentIds: [mockedAgent.id],
@@ -501,7 +507,7 @@ describe('Agent migration', () => {
         deploymentId: undefined,
       });
       mockedDetectTargetClusterType.mockReturnValue('ech');
-      (getAgents as jest.Mock).mockResolvedValue([mockedAgent]);
+      (getAgents as Mock).mockResolvedValue([mockedAgent]);
 
       await bulkMigrateAgents(esClientMock, soClientMock, {
         agentIds: [mockedAgent.id],
@@ -520,7 +526,7 @@ describe('Agent migration', () => {
     });
 
     it('should record error result if the agent is protected', async () => {
-      (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
+      (getAgents as Mock).mockResolvedValue([mockedAgent, mockedAgent]);
       const options = {
         enrollment_token: 'test-enrollment-token',
         uri: 'https://test-fleet-server.example.com',
@@ -544,7 +550,7 @@ describe('Agent migration', () => {
 
     it('should record error result if the agent is fleet-server', async () => {
       const agent = { ...mockedAgent, components: [{ type: 'fleet-server' } as any] };
-      (getAgents as jest.Mock).mockResolvedValue([agent, agent]);
+      (getAgents as Mock).mockResolvedValue([agent, agent]);
       const options = {
         enrollment_token: 'test-enrollment-token',
         uri: 'https://test-fleet-server.example.com',
@@ -567,7 +573,7 @@ describe('Agent migration', () => {
 
     it('should record error result if the agent is on unsupported version', async () => {
       const agent = { ...mockedAgent, agent: { version: '9.1.0' } as any };
-      (getAgents as jest.Mock).mockResolvedValue([agent, agent]);
+      (getAgents as Mock).mockResolvedValue([agent, agent]);
       const options = {
         enrollment_token: 'test-enrollment-token',
         uri: 'https://test-fleet-server.example.com',
@@ -608,7 +614,7 @@ describe('Agent migration', () => {
       );
 
       // Verify that getAgents was not called when license is insufficient
-      expect(getAgents as jest.Mock).not.toHaveBeenCalled();
+      expect(getAgents as Mock).not.toHaveBeenCalled();
     });
 
     it('should record error result if the agent is containerized', async () => {
@@ -623,7 +629,7 @@ describe('Agent migration', () => {
           },
         },
       };
-      (getAgents as jest.Mock).mockResolvedValue([agent, agent]);
+      (getAgents as Mock).mockResolvedValue([agent, agent]);
       const options = {
         enrollment_token: 'test-enrollment-token',
         uri: 'https://test-fleet-server.example.com',
@@ -646,7 +652,7 @@ describe('Agent migration', () => {
     it('should proceed normally when license is sufficient', async () => {
       // Ensure license is valid (default mock)
       mockLicenseService.hasAtLeast.mockReturnValue(true);
-      (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
+      (getAgents as Mock).mockResolvedValue([mockedAgent, mockedAgent]);
 
       const options = {
         agentIds: ['agent-123', 'agent-456'],
@@ -658,41 +664,41 @@ describe('Agent migration', () => {
       const result = await bulkMigrateAgents(esClientMock, soClientMock, options);
 
       // Verify that the bulk migration proceeded normally
-      expect(getAgents as jest.Mock).toHaveBeenCalled();
+      expect(getAgents as Mock).toHaveBeenCalled();
       expect(result).toEqual({ actionId: 'test-action-id' });
     });
   });
 });
 
 describe('bulkMigrateAgents kuery path — cheap count and sync/async branching', () => {
-  const soClient2 = { getCurrentNamespace: jest.fn() } as any;
+  const soClient2 = { getCurrentNamespace: vi.fn() } as any;
   let esClient2: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
   const baseOptions = { enrollment_token: 'token', uri: 'https://target.example.com' };
-  let mockBulkMigrateAgentsBatch: jest.SpyInstance;
-  let mockMigrateActionRunner: jest.SpyInstance;
+  let mockBulkMigrateAgentsBatch: MockInstance;
+  let mockMigrateActionRunner: MockInstance;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
     esClient2 = elasticsearchServiceMock.createInternalClient();
-    const mockLicenseService = jest.requireMock('..').licenseService;
+    const mockLicenseService = (await vi.importMock('..')).licenseService;
     mockLicenseService.hasAtLeast.mockReturnValue(true);
-    const mockAppContextService = jest.requireMock('..').appContextService;
-    mockAppContextService.getLogger.mockReturnValue({ debug: jest.fn() });
+    const mockAppContextService = (await vi.importMock('..')).appContextService;
+    mockAppContextService.getLogger.mockReturnValue({ debug: vi.fn() });
     mockAppContextService.getTelemetryEventsSender.mockReturnValue({
-      queueTelemetryEvents: jest.fn(),
+      queueTelemetryEvents: vi.fn(),
     });
     mockAppContextService.getCloud.mockReturnValue({ isCloudEnabled: false });
-    (detectTargetClusterType as jest.Mock).mockReturnValue('ech');
-    (openPointInTime as jest.Mock).mockResolvedValue('pit-id');
-    mockBulkMigrateAgentsBatch = jest
+    (detectTargetClusterType as Mock).mockReturnValue('ech');
+    (openPointInTime as Mock).mockResolvedValue('pit-id');
+    mockBulkMigrateAgentsBatch = vi
       .spyOn(migrateActionRunner, 'bulkMigrateAgentsBatch')
       .mockResolvedValue({ actionId: 'test-action-id' });
-    mockMigrateActionRunner = jest
+    mockMigrateActionRunner = vi
       .spyOn(migrateActionRunner, 'MigrateActionRunner')
       .mockImplementation(
         () =>
           ({
-            runActionAsyncTask: jest.fn().mockResolvedValue({ actionId: 'async-action-id' }),
+            runActionAsyncTask: vi.fn().mockResolvedValue({ actionId: 'async-action-id' }),
           } as any)
       );
   });
@@ -703,7 +709,7 @@ describe('bulkMigrateAgents kuery path — cheap count and sync/async branching'
   });
 
   it('uses perPage:0 for the initial count query', async () => {
-    (getAgentsByKuery as jest.Mock).mockResolvedValue({
+    (getAgentsByKuery as Mock).mockResolvedValue({
       agents: [],
       total: 0,
       page: 1,
@@ -712,7 +718,7 @@ describe('bulkMigrateAgents kuery path — cheap count and sync/async branching'
 
     await bulkMigrateAgents(esClient2, soClient2, { ...baseOptions, kuery: 'status:online' });
 
-    expect(getAgentsByKuery as jest.Mock).toHaveBeenCalledWith(
+    expect(getAgentsByKuery as Mock).toHaveBeenCalledWith(
       esClient2,
       soClient2,
       expect.objectContaining({ perPage: 0 })
@@ -721,19 +727,19 @@ describe('bulkMigrateAgents kuery path — cheap count and sync/async branching'
 
   it('runs inline and fetches agents when total <= batchSize', async () => {
     const agents = [{ id: 'agent-1' }];
-    (getAgentsByKuery as jest.Mock)
+    (getAgentsByKuery as Mock)
       .mockResolvedValueOnce({ agents: [], total: 5, page: 1, perPage: 0 })
       .mockResolvedValueOnce({ agents, total: 5, page: 1, perPage: SO_SEARCH_LIMIT });
 
     await bulkMigrateAgents(esClient2, soClient2, { ...baseOptions, kuery: 'status:online' });
 
     // count call (perPage: 0) and fetch call (perPage: SO_SEARCH_LIMIT) both happened
-    expect(getAgentsByKuery as jest.Mock).toHaveBeenCalledWith(
+    expect(getAgentsByKuery as Mock).toHaveBeenCalledWith(
       esClient2,
       soClient2,
       expect.objectContaining({ perPage: 0 })
     );
-    expect(getAgentsByKuery as jest.Mock).toHaveBeenCalledWith(
+    expect(getAgentsByKuery as Mock).toHaveBeenCalledWith(
       esClient2,
       soClient2,
       expect.objectContaining({ perPage: SO_SEARCH_LIMIT })
@@ -749,7 +755,7 @@ describe('bulkMigrateAgents kuery path — cheap count and sync/async branching'
 
   it('schedules async task and returns actionId immediately when total > batchSize', async () => {
     const batchSize = 100;
-    (getAgentsByKuery as jest.Mock).mockResolvedValue({
+    (getAgentsByKuery as Mock).mockResolvedValue({
       agents: [],
       total: 500,
       page: 1,
@@ -764,7 +770,7 @@ describe('bulkMigrateAgents kuery path — cheap count and sync/async branching'
 
     expect(result).toEqual({ actionId: 'async-action-id' });
     // only the count call — no second full-doc fetch
-    expect(getAgentsByKuery as jest.Mock).not.toHaveBeenCalledWith(
+    expect(getAgentsByKuery as Mock).not.toHaveBeenCalledWith(
       esClient2,
       soClient2,
       expect.objectContaining({ perPage: batchSize })
@@ -780,7 +786,7 @@ describe('bulkMigrateAgents kuery path — cheap count and sync/async branching'
 
   it('runs inline when total equals batchSize (boundary)', async () => {
     const batchSize = 100;
-    (getAgentsByKuery as jest.Mock)
+    (getAgentsByKuery as Mock)
       .mockResolvedValueOnce({ agents: [], total: 100, page: 1, perPage: 0 })
       .mockResolvedValueOnce({ agents: [], total: 100, page: 1, perPage: batchSize });
 

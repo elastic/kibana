@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { EvaluationExperimentSummary, EvaluationScoreDocument } from '@kbn/evals-common';
@@ -274,13 +277,13 @@ describe('queryMatrixScores', () => {
 
   const createClient = (
     experimentsByModel: Record<string, EvaluationExperimentSummary[]>
-  ): { client: MatrixEvalsClient; listExperiments: jest.Mock; getExperimentStats: jest.Mock } => {
-    const listExperiments = jest
+  ): { client: MatrixEvalsClient; listExperiments: Mock; getExperimentStats: Mock } => {
+    const listExperiments = vi
       .fn()
       .mockImplementation(async ({ taskModelId }: { taskModelId?: string }) =>
         taskModelId ? experimentsByModel[taskModelId] ?? [] : []
       );
-    const getExperimentStats = jest.fn().mockResolvedValue(stats);
+    const getExperimentStats = vi.fn().mockResolvedValue(stats);
     const client = { listExperiments, getExperimentStats } as unknown as MatrixEvalsClient;
     return { client, listExperiments, getExperimentStats };
   };
@@ -301,7 +304,7 @@ describe('queryMatrixScores', () => {
       ],
     });
 
-    const listExperiments = jest.fn().mockResolvedValue([
+    const listExperiments = vi.fn().mockResolvedValue([
       experiment({
         experiment_id: 'exp-s1',
         execution_id: 'sweep-9-s1of2::suite-a::m1',
@@ -315,7 +318,7 @@ describe('queryMatrixScores', () => {
         timestamp: '2026-06-10T01:00:00.000Z',
       }),
     ]);
-    const getExperimentStats = jest
+    const getExperimentStats = vi
       .fn()
       .mockImplementation(
         async (_experimentId: string, { executionId }: { executionId?: string }) =>
@@ -357,7 +360,7 @@ describe('queryMatrixScores', () => {
       ],
     });
 
-    const listExperiments = jest.fn().mockResolvedValue([
+    const listExperiments = vi.fn().mockResolvedValue([
       experiment({
         experiment_id: 'exp-s1',
         execution_id: 'sweep-1-s1of2::suite-a::m1',
@@ -373,7 +376,7 @@ describe('queryMatrixScores', () => {
         evaluator_model: { id: 'judge-b' }, // independent judge, newer -> picked as `latest`
       }),
     ]);
-    const getExperimentStats = jest.fn().mockResolvedValue(shardStats(0.9));
+    const getExperimentStats = vi.fn().mockResolvedValue(shardStats(0.9));
     const client = { listExperiments, getExperimentStats } as unknown as MatrixEvalsClient;
 
     const result = await queryMatrixScores(client, log, {
@@ -456,11 +459,11 @@ describe('queryMatrixScores', () => {
     const { client } = createClient({
       m1: [experiment({ experiment_id: 'exp-m1', modelId: 'm1' })],
     });
-    (client as unknown as { getExperimentScores: jest.Mock }).getExperimentScores = jest
+    (client as unknown as { getExperimentScores: Mock }).getExperimentScores = vi
       .fn()
       .mockResolvedValue([selfJudgedScore(1), selfJudgedScore(2)]);
 
-    const warn = jest.spyOn(log, 'warning');
+    const warn = vi.spyOn(log, 'warning');
     const [model] = await queryMatrixScores(client, log, {
       suiteIds: ['suite-a'],
       modelIds: ['m1'],
@@ -494,7 +497,7 @@ describe('queryMatrixScores', () => {
     const { client } = createClient({
       m1: [experiment({ experiment_id: 'exp-m1', modelId: 'm1' })],
     });
-    (client as unknown as { getExperimentScores: jest.Mock }).getExperimentScores = jest
+    (client as unknown as { getExperimentScores: Mock }).getExperimentScores = vi
       .fn()
       .mockResolvedValue([selfJudgedScore()]);
 
@@ -526,7 +529,7 @@ describe('queryMatrixScores', () => {
       complete: [experiment({ experiment_id: 'exp-complete', modelId: 'complete' })],
       short: [experiment({ experiment_id: 'exp-short', modelId: 'short' })],
     });
-    (client as unknown as { getExperimentScores: jest.Mock }).getExperimentScores = jest
+    (client as unknown as { getExperimentScores: Mock }).getExperimentScores = vi
       .fn()
       .mockImplementation(async (experimentId: string) =>
         experimentId === 'exp-complete'
@@ -534,7 +537,7 @@ describe('queryMatrixScores', () => {
           : [score('short', 1)]
       );
 
-    const warn = jest.spyOn(log, 'warning');
+    const warn = vi.spyOn(log, 'warning');
     await queryMatrixScores(client, log, {
       suiteIds: ['suite-a'],
       modelIds: ['complete', 'short'],
@@ -559,7 +562,7 @@ describe('queryMatrixScores', () => {
       once: [experiment({ experiment_id: 'exp-once', modelId: 'once' })],
       thrice: [experiment({ experiment_id: 'exp-thrice', modelId: 'thrice' })],
     });
-    (client as unknown as { getExperimentScores: jest.Mock }).getExperimentScores = jest
+    (client as unknown as { getExperimentScores: Mock }).getExperimentScores = vi
       .fn()
       .mockImplementation(async (experimentId: string) =>
         experimentId === 'exp-once'
@@ -572,7 +575,7 @@ describe('queryMatrixScores', () => {
             ]
       );
 
-    const warn = jest.spyOn(log, 'warning');
+    const warn = vi.spyOn(log, 'warning');
     await queryMatrixScores(client, log, {
       suiteIds: ['suite-a'],
       modelIds: ['once', 'thrice'],
@@ -586,7 +589,7 @@ describe('queryMatrixScores', () => {
 
   it('unions a suite across several branches so no branch-local model is lost', async () => {
     // A suite's models can be split across branches, so a branch list is unioned.
-    const listExperiments = jest
+    const listExperiments = vi
       .fn()
       .mockImplementation(
         async ({ taskModelId, branch }: { taskModelId?: string; branch?: string }) => {
@@ -601,7 +604,7 @@ describe('queryMatrixScores', () => {
       );
     const client = {
       listExperiments,
-      getExperimentStats: jest.fn().mockResolvedValue(stats),
+      getExperimentStats: vi.fn().mockResolvedValue(stats),
     } as unknown as MatrixEvalsClient;
 
     const result = await queryMatrixScores(client, log, {
@@ -617,7 +620,7 @@ describe('queryMatrixScores', () => {
 
   it('prefers the newest run when the same model ran on several unioned branches', async () => {
     // When a model exists on both branches, selection still picks the most recent experiment.
-    const listExperiments = jest
+    const listExperiments = vi
       .fn()
       .mockImplementation(async ({ branch }: { branch?: string }) => {
         if (branch === 'old') {
@@ -637,7 +640,7 @@ describe('queryMatrixScores', () => {
           }),
         ];
       });
-    const getExperimentStats = jest.fn().mockResolvedValue(stats);
+    const getExperimentStats = vi.fn().mockResolvedValue(stats);
     const client = { listExperiments, getExperimentStats } as unknown as MatrixEvalsClient;
 
     await queryMatrixScores(client, log, {
@@ -992,8 +995,8 @@ describe('queryMatrixScores with examplePrefixes', () => {
     ],
   };
 
-  const createClient = (): { client: MatrixEvalsClient; getExperimentScores: jest.Mock } => {
-    const listExperiments = jest.fn().mockResolvedValue([
+  const createClient = (): { client: MatrixEvalsClient; getExperimentScores: Mock } => {
+    const listExperiments = vi.fn().mockResolvedValue([
       {
         experiment_id: 'e1',
         execution_id: 'x1',
@@ -1001,8 +1004,8 @@ describe('queryMatrixScores with examplePrefixes', () => {
         task_model: { id: 'm1' },
       },
     ]);
-    const getExperimentStats = jest.fn().mockResolvedValue(stats);
-    const getExperimentScores = jest.fn().mockResolvedValue([
+    const getExperimentStats = vi.fn().mockResolvedValue(stats);
+    const getExperimentScores = vi.fn().mockResolvedValue([
       {
         example: { id: 'alert-analysis-a', index: 0, dataset: { id: 'd1', name: 'D1' } },
         task: { model: { id: 'm1' }, trace_id: 't' },
@@ -1045,7 +1048,7 @@ describe('queryMatrixScores with examplePrefixes', () => {
     ];
 
     const build = () => {
-      const listExperiments = jest.fn().mockResolvedValue([
+      const listExperiments = vi.fn().mockResolvedValue([
         {
           experiment_id: 'e1',
           execution_id: 'x1',
@@ -1056,8 +1059,8 @@ describe('queryMatrixScores with examplePrefixes', () => {
       ]);
       return {
         listExperiments,
-        getExperimentStats: jest.fn().mockResolvedValue(stats),
-        getExperimentScores: jest.fn().mockResolvedValue(selfJudged),
+        getExperimentStats: vi.fn().mockResolvedValue(stats),
+        getExperimentScores: vi.fn().mockResolvedValue(selfJudged),
       } as unknown as MatrixEvalsClient;
     };
 
@@ -1090,8 +1093,8 @@ describe('queryMatrixScores with examplePrefixes', () => {
 
     // An arm's-length judge in the same opted-out suite must not be flagged.
     const armsLength = build() as unknown as {
-      listExperiments: jest.Mock;
-      getExperimentScores: jest.Mock;
+      listExperiments: Mock;
+      getExperimentScores: Mock;
     };
     armsLength.listExperiments.mockResolvedValue([
       {
@@ -1163,7 +1166,7 @@ describe('queryMatrixScores with examplePrefixes', () => {
       },
     ];
     const client = {
-      listExperiments: jest.fn().mockResolvedValue([
+      listExperiments: vi.fn().mockResolvedValue([
         {
           experiment_id: 'e1',
           execution_id: 'x1',
@@ -1173,8 +1176,8 @@ describe('queryMatrixScores with examplePrefixes', () => {
           evaluator_models: [{ id: 'eis-judge-b' }, { id: 'm1' }],
         },
       ]),
-      getExperimentStats: jest.fn().mockResolvedValue(shardStats),
-      getExperimentScores: jest.fn().mockResolvedValue(mixedDocs),
+      getExperimentStats: vi.fn().mockResolvedValue(shardStats),
+      getExperimentScores: vi.fn().mockResolvedValue(mixedDocs),
     } as unknown as MatrixEvalsClient;
 
     const result = await queryMatrixScores(client, log, {
@@ -1200,7 +1203,7 @@ describe('queryMatrixScores with examplePrefixes', () => {
   });
 
   it('degrades gracefully when the scores route fails', async () => {
-    const listExperiments = jest.fn().mockResolvedValue([
+    const listExperiments = vi.fn().mockResolvedValue([
       {
         experiment_id: 'e1',
         execution_id: 'x1',
@@ -1208,8 +1211,8 @@ describe('queryMatrixScores with examplePrefixes', () => {
         task_model: { id: 'm1' },
       },
     ]);
-    const getExperimentStats = jest.fn().mockResolvedValue(stats);
-    const getExperimentScores = jest.fn().mockRejectedValue(new Error('route down'));
+    const getExperimentStats = vi.fn().mockResolvedValue(stats);
+    const getExperimentScores = vi.fn().mockRejectedValue(new Error('route down'));
     const client = {
       listExperiments,
       getExperimentStats,
@@ -1358,7 +1361,7 @@ describe('round 6 regression: admission and accumulation fixes', () => {
     // Regression: excludedByModel.set overwrote the prior suite's counts, so a model
     // rejected in two suites reported only the last suite's rejections.
     const client = {
-      listExperiments: jest.fn().mockResolvedValue([
+      listExperiments: vi.fn().mockResolvedValue([
         {
           experiment_id: 'e1',
           execution_id: 'x1',
@@ -1366,11 +1369,11 @@ describe('round 6 regression: admission and accumulation fixes', () => {
           task_model: { id: 'm1' },
         },
       ]),
-      getExperimentStats: jest.fn().mockResolvedValue(stats),
+      getExperimentStats: vi.fn().mockResolvedValue(stats),
       // Suite s1 drops a self-judged doc (judge === task model, both eis-backed so the
       // EIS guard does not fire first); suite s2 drops a non-EIS judge doc. Both
       // counts must survive on the row.
-      getExperimentScores: jest
+      getExperimentScores: vi
         .fn()
         .mockImplementation((_id: string, opts: { suiteId: string }) =>
           Promise.resolve(
@@ -1407,7 +1410,7 @@ describe('round 7 regression: non-EIS exclusion surfaces as excluded, not missin
       metadata: {},
     };
     const client = {
-      listExperiments: jest.fn().mockResolvedValue([
+      listExperiments: vi.fn().mockResolvedValue([
         {
           experiment_id: 'e1',
           execution_id: 'x1',
@@ -1415,13 +1418,13 @@ describe('round 7 regression: non-EIS exclusion surfaces as excluded, not missin
           task_model: { id: 'm1' },
         },
       ]),
-      getExperimentStats: jest.fn().mockResolvedValue({
+      getExperimentStats: vi.fn().mockResolvedValue({
         taskModel: { id: 'm1' },
         evaluatorModel: { id: 'judge' },
         totalRepetitions: 1,
         stats: [],
       }),
-      getExperimentScores: jest.fn().mockResolvedValue([doc]),
+      getExperimentScores: vi.fn().mockResolvedValue([doc]),
     } as unknown as MatrixEvalsClient;
 
     const rows = await queryMatrixScores(client, log, {
@@ -1464,19 +1467,19 @@ describe('round 8 review findings', () => {
     // lost the older shard's admissible independent scores. For prefix suites the
     // per-document filter in scoresByPrefixToDatasets is the policy.
     const client = {
-      listExperiments: jest
+      listExperiments: vi
         .fn()
         .mockResolvedValue([
           experimentFor('e-new', 'sweep-1-s1of2', '2026-09-23T12:00:00Z', ['eis-judge-a']),
           experimentFor('e-old', 'sweep-1-s2of2', '2026-09-23T10:00:00Z', ['eis-judge-a', 'm1']),
         ]),
-      getExperimentStats: jest.fn().mockResolvedValue({
+      getExperimentStats: vi.fn().mockResolvedValue({
         taskModel: { id: 'm1' },
         evaluatorModel: { id: 'eis-judge-a' },
         totalRepetitions: 1,
         stats: [],
       }),
-      getExperimentScores: jest
+      getExperimentScores: vi
         .fn()
         .mockImplementation((_id: string, opts: { executionId: string }) =>
           Promise.resolve(
@@ -1510,18 +1513,18 @@ describe('round 8 review findings', () => {
     // survived; `noPrefixDatasetSurvived` stayed false, so the alert column rendered
     // as missing instead of excluded:non-eis-judge.
     const client = {
-      listExperiments: jest
+      listExperiments: vi
         .fn()
         .mockResolvedValue([
           experimentFor('e1', 'x1', '2026-09-23T12:00:00Z', ['mystery-judge', 'eis-judge-a']),
         ]),
-      getExperimentStats: jest.fn().mockResolvedValue({
+      getExperimentStats: vi.fn().mockResolvedValue({
         taskModel: { id: 'm1' },
         evaluatorModel: { id: 'eis-judge-a' },
         totalRepetitions: 1,
         stats: [],
       }),
-      getExperimentScores: jest
+      getExperimentScores: vi
         .fn()
         .mockResolvedValue([
           scoreDoc('alert-a', 'mystery-judge', 'x1'),

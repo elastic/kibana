@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import fetch from 'node-fetch';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -15,9 +18,9 @@ import {
   stripDestinationFromSearchParams,
 } from './forward_to_remote_kibana';
 
-jest.mock('node-fetch');
+vi.mock('node-fetch');
 
-const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
+const mockedFetch = fetch as MockedFunction<typeof fetch>;
 
 describe('forward_to_remote_kibana', () => {
   beforeEach(() => {
@@ -45,8 +48,8 @@ describe('forward_to_remote_kibana', () => {
   it('forwards to remote Kibana and removes destination from query', async () => {
     const esoStart = encryptedSavedObjectsMock.createStart();
     const esoClient = encryptedSavedObjectsMock.createClient();
-    (esoStart.getClient as jest.Mock).mockReturnValue(esoClient);
-    (esoClient.getDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce({
+    (esoStart.getClient as Mock).mockReturnValue(esoClient);
+    (esoClient.getDecryptedAsInternalUser as Mock).mockResolvedValueOnce({
       attributes: {
         displayName: 'Remote',
         url: 'https://my-deployment-abc123.kb.us-central1.gcp.cloud.es.io/base',
@@ -96,8 +99,8 @@ describe('forward_to_remote_kibana', () => {
   it('sends JSON body for non-GET requests', async () => {
     const esoStart = encryptedSavedObjectsMock.createStart();
     const esoClient = encryptedSavedObjectsMock.createClient();
-    (esoStart.getClient as jest.Mock).mockReturnValue(esoClient);
-    (esoClient.getDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce({
+    (esoStart.getClient as Mock).mockReturnValue(esoClient);
+    (esoClient.getDecryptedAsInternalUser as Mock).mockResolvedValueOnce({
       attributes: {
         displayName: 'Remote',
         url: 'https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud/',
@@ -140,8 +143,8 @@ describe('forward_to_remote_kibana', () => {
   it('drops the local space from the forwarded path', async () => {
     const esoStart = encryptedSavedObjectsMock.createStart();
     const esoClient = encryptedSavedObjectsMock.createClient();
-    (esoStart.getClient as jest.Mock).mockReturnValue(esoClient);
-    (esoClient.getDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce({
+    (esoStart.getClient as Mock).mockReturnValue(esoClient);
+    (esoClient.getDecryptedAsInternalUser as Mock).mockResolvedValueOnce({
       attributes: {
         displayName: 'Remote',
         url: 'https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud/',

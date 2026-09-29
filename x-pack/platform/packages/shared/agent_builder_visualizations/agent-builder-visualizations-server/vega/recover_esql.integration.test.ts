@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -13,30 +16,42 @@ import { VEGA_LITE_SCHEMA } from './normalize_spec';
 import { buildVegaConfig } from './build_config';
 
 // Stub only the LLM/ES boundaries; the real build_config + real graph run.
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  generateEsql: jest.fn(),
-  executeEsql: jest.fn(),
-  validateEsqlQuery: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      generateEsql: vi.fn(),
+      executeEsql: vi.fn(),
+      validateEsqlQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => ({
-  buildTimeRangeParams: jest.fn(() => undefined),
-}));
+vi.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => {
+      const mocked = {
+      buildTimeRangeParams: vi.fn(() => undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-server-utils', () => ({
-  buildServerESQLCallbacks: jest.fn(() => ({})),
-}));
+vi.mock('@kbn/esql-server-utils', () => {
+      const mocked = {
+      buildServerESQLCallbacks: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils/extract_text_from_message', () => ({
-  extractTextFromMessage: (message: unknown) => String(message),
-}));
+vi.mock('../utils/extract_text_from_message', () => {
+      const mocked = {
+      extractTextFromMessage: (message: unknown) => String(message),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedGenerateEsql = jest.mocked(generateEsql);
-const mockedExecuteEsql = jest.mocked(executeEsql);
-const mockedValidateEsqlQuery = jest.mocked(validateEsqlQuery);
+const mockedGenerateEsql = vi.mocked(generateEsql);
+const mockedExecuteEsql = vi.mocked(executeEsql);
+const mockedValidateEsqlQuery = vi.mocked(validateEsqlQuery);
 
 // The real LangGraph compile+invoke can exceed the default 5s budget on first run under CI's parallel worker load.
-jest.setTimeout(30_000);
+vi.setConfig({ testTimeout: 30_000 });
 
 const RECOVERED_ESQL = 'FROM kibana_sample_data_logs | STATS count = COUNT() BY response.keyword';
 
@@ -48,21 +63,21 @@ const existingSpec = JSON.stringify({
 });
 
 const createMockLogger = (): Logger =>
-  ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() } as unknown as Logger);
+  ({ debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() } as unknown as Logger);
 
 describe('recover_esql end-to-end (real build_config + real graph)', () => {
   const events = {} as ToolEventEmitter;
   const esClient = { asCurrentUser: {} } as IScopedClusterClient;
 
   let logger: Logger;
-  let invoke: jest.Mock;
+  let invoke: Mock;
   let modelProvider: ModelProvider;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = createMockLogger();
     // The author step returns a re-styled spec; normalization re-binds the ES|QL data source.
-    invoke = jest.fn().mockResolvedValue(
+    invoke = vi.fn().mockResolvedValue(
       '```json\n' +
         JSON.stringify({
           authoring_note: 'Restyled the existing bar chart while preserving its data.',
@@ -80,8 +95,8 @@ describe('recover_esql end-to-end (real build_config + real graph)', () => {
       chatModel: { invoke },
     };
     modelProvider = {
-      getDefaultModel: jest.fn().mockResolvedValue(scopedModel),
-      selectModel: jest.fn().mockResolvedValue(scopedModel),
+      getDefaultModel: vi.fn().mockResolvedValue(scopedModel),
+      selectModel: vi.fn().mockResolvedValue(scopedModel),
     } as unknown as ModelProvider;
     mockedValidateEsqlQuery.mockResolvedValue(undefined);
     // A visual-only edit: the generator keeps the seeded query unchanged and

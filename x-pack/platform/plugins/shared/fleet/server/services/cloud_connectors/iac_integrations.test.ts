@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constants';
@@ -16,12 +18,12 @@ import {
   mergeIntegrationSelections,
 } from './iac_integrations';
 
-jest.mock('../app_context');
+vi.mock('../app_context');
 
 const soClient = savedObjectsClientMock.create();
 
 beforeEach(() => {
-  jest.spyOn(appContextService, 'getLogger').mockReturnValue(loggingSystemMock.createLogger());
+  vi.spyOn(appContextService, 'getLogger').mockReturnValue(loggingSystemMock.createLogger());
 });
 
 describe('mergeIntegrationSelections', () => {
@@ -91,7 +93,7 @@ describe('getCloudConnectorIntegrationSelections', () => {
           yield { saved_objects: page };
         }
       },
-      close: jest.fn(),
+      close: vi.fn(),
     };
     return finder;
   };

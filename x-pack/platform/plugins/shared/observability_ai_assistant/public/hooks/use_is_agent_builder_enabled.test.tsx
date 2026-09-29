@@ -5,34 +5,42 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { useIsAgentBuilderEnabled } from './use_is_agent_builder_enabled';
 
-const mockUseUiSetting$ = jest.fn();
+const mockUseUiSetting$ = vi.fn();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting$: (...args: unknown[]) => mockUseUiSetting$(...args),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useUiSetting$: (...args: unknown[]) => mockUseUiSetting$(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockCapabilities: { agentBuilder?: { show?: boolean } } = {};
-const mockFeatureFlags = { getBooleanValue: jest.fn() };
+const mockFeatureFlags = { getBooleanValue: vi.fn() };
 
-jest.mock('./use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        capabilities: mockCapabilities,
-      },
-      featureFlags: mockFeatureFlags,
-    },
-  }),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            capabilities: mockCapabilities,
+          },
+          featureFlags: mockFeatureFlags,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useIsAgentBuilderEnabled', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCapabilities.agentBuilder = { show: true };
   });
 

@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-// Mock @kbn/timerange module
-const mockGetDateISORange = jest.fn();
+import { vi } from 'vitest';
 
-jest.mock('@kbn/timerange', () => ({
-  getDateISORange: (...args: unknown[]) => mockGetDateISORange(...args),
-}));
+// Mock @kbn/timerange module
+const mockGetDateISORange = vi.fn();
+
+vi.mock('@kbn/timerange', () => {
+      const mocked = {
+      getDateISORange: (...args: unknown[]) => mockGetDateISORange(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Import after mocking
 import { getSafeDateISORange } from './safe_date_range';
 
 describe('getSafeDateISORange', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return date range when getDateISORange succeeds', () => {

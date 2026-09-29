@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -14,33 +16,45 @@ import { EsqlParams } from './esql_params';
 import type { EsqlToolFormData } from '../../types/tool_form_types';
 import { EsqlParamSource } from '../../types/tool_form_types';
 
-const mockUseKibana = jest.fn();
-const mockUseEsqlEditorParams = jest.fn();
-const mockUseEsqlParamsValidation = jest.fn();
+const mockUseKibana = vi.fn();
+const mockUseEsqlEditorParams = vi.fn();
+const mockUseEsqlParamsValidation = vi.fn();
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: () => mockUseKibana(),
-}));
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_esql_editor_params', () => ({
-  useEsqlEditorParams: (props: any) => mockUseEsqlEditorParams(props),
-}));
+vi.mock('../../hooks/use_esql_editor_params', () => {
+      const mocked = {
+      useEsqlEditorParams: (props: any) => mockUseEsqlEditorParams(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_esql_params_validation', () => ({
-  useEsqlParamsValidation: () => mockUseEsqlParamsValidation(),
-}));
+vi.mock('../../hooks/use_esql_params_validation', () => {
+      const mocked = {
+      useEsqlParamsValidation: () => mockUseEsqlParamsValidation(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./esql_param_row', () => ({
-  EsqlParamRow: ({ paramField }: { paramField: any }) => (
-    <div data-test-subj={`esql-param-row-${paramField.name}`}>{paramField.name}</div>
-  ),
-}));
+vi.mock('./esql_param_row', () => {
+      const mocked = {
+      EsqlParamRow: ({ paramField }: { paramField: any }) => (
+        <div data-test-subj={`esql-param-row-${paramField.name}`}>{paramField.name}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EsqlParams - Array Type Warning', () => {
   const warningMessage = /in your ES\|QL query to filter by array type parameters/i;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         docLinks: {
@@ -54,8 +68,8 @@ describe('EsqlParams - Array Type Warning', () => {
     });
     mockUseEsqlEditorParams.mockReturnValue(undefined);
     mockUseEsqlParamsValidation.mockReturnValue({
-      triggerEsqlParamWarnings: jest.fn(),
-      triggerEsqlParamFieldsValidation: jest.fn(),
+      triggerEsqlParamWarnings: vi.fn(),
+      triggerEsqlParamFieldsValidation: vi.fn(),
     });
   });
 

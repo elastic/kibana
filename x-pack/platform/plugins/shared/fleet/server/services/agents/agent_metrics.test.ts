@@ -5,23 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { appContextService } from '../app_context';
 
 import { fetchAndAssignAgentMetrics } from './agent_metrics';
 
 describe('fetchAndAssignAgentMetrics', () => {
-  const mockLogger = { warn: jest.fn() } as any;
+  const mockLogger = { warn: vi.fn() } as any;
   beforeAll(() => {
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
+    vi.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns agents with metrics from both fleet and opamp', async () => {
     const esClient = {
-      search: jest
+      search: vi
         .fn()
         // First call: _fetchAndAssignAgentMetrics (for FLEET)
         .mockResolvedValueOnce({
@@ -59,7 +61,7 @@ describe('fetchAndAssignAgentMetrics', () => {
 
   it('uses elastic.display.name as service.instance.id for OPAMP agents when present', async () => {
     const esClient = {
-      search: jest
+      search: vi
         .fn()
         .mockResolvedValueOnce({ aggregations: { agents: { buckets: [] } } })
         .mockResolvedValueOnce({
@@ -103,7 +105,7 @@ describe('fetchAndAssignAgentMetrics', () => {
 
   it('does not assign metrics to non-reporting OPAMP agents (offline, inactive, unenrolled, uninstalled)', async () => {
     const esClient = {
-      search: jest
+      search: vi
         .fn()
         .mockResolvedValueOnce({ aggregations: { agents: { buckets: [] } } }) // fleet
         .mockResolvedValueOnce({
@@ -177,7 +179,7 @@ describe('fetchAndAssignAgentMetrics', () => {
 
   it('skips the ES query entirely when all OPAMP agents are non-reporting', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValueOnce({ aggregations: { agents: { buckets: [] } } }), // fleet only
+      search: vi.fn().mockResolvedValueOnce({ aggregations: { agents: { buckets: [] } } }), // fleet only
     };
     const agents = [
       {
@@ -196,7 +198,7 @@ describe('fetchAndAssignAgentMetrics', () => {
 
   it('assigns metrics only to the most-recently-enrolled agent when two share the same elastic.display.name', async () => {
     const esClient = {
-      search: jest
+      search: vi
         .fn()
         .mockResolvedValueOnce({ aggregations: { agents: { buckets: [] } } })
         .mockResolvedValueOnce({

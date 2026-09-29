@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { AllCasesSelectorModal } from '.';
@@ -15,24 +18,24 @@ import { waitFor, screen } from '@testing-library/react';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { useGetCategories } from '../../../containers/use_get_categories';
 
-jest.mock('../../../containers/api');
-jest.mock('../../../containers/user_profiles/api');
-jest.mock('../../../containers/use_get_tags');
-jest.mock('../../../containers/use_get_categories');
+vi.mock('../../../containers/api');
+vi.mock('../../../containers/user_profiles/api');
+vi.mock('../../../containers/use_get_tags');
+vi.mock('../../../containers/use_get_categories');
 
-const onRowClick = jest.fn();
+const onRowClick = vi.fn();
 const defaultProps = {
   onRowClick,
 };
 
 describe('AllCasesSelectorModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
-    (useGetCategories as jest.Mock).mockReturnValue({
+    (useGetTags as Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: vi.fn() });
+    (useGetCategories as Mock).mockReturnValue({
       data: ['beverages', 'snacks'],
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
   });
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, within, waitFor, act } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -43,14 +45,17 @@ describe('Expanded mode', () => {
     // Mock the client height for the primary menu item
     mockClientHeight(mockMenuItemHeight);
     // Mock the gap between the primary menu items
-    jest.mock('../utils/get_style_property', () => ({
-      getStyleProperty: jest.fn(() => mockExpandedMenuGap),
-    }));
+    vi.doMock('../utils/get_style_property', () => {
+          const mocked = {
+              getStyleProperty: vi.fn(() => mockExpandedMenuGap),
+            };
+          return { ...mocked, default: mocked };
+        });
   });
 
   beforeEach(() => {
     user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
+      advanceTimers: vi.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
   });

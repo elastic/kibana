@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import {
@@ -21,7 +23,7 @@ describe('getAttackDiscoveryScheduleType', () => {
   const mockTelemetry = analyticsServiceMock.createAnalyticsServiceSetup();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return schedule type definition', async () => {

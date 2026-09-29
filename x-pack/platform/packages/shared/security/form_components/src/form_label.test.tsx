@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, render } from '@testing-library/react';
 import type { FormikContextType } from 'formik';
 import { Formik, FormikConsumer } from 'formik';
@@ -15,8 +17,8 @@ import { FormLabel } from './form_label';
 
 describe('FormLabel', () => {
   it('should report form changes', () => {
-    const onSubmit = jest.fn();
-    const report = jest.fn();
+    const onSubmit = vi.fn();
+    const report = vi.fn();
 
     let formik: FormikContextType<any>;
     render(

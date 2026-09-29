@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Detection } from '@kbn/significant-events-schema';
 import { DetectionClient } from './detection_client';
@@ -50,7 +53,7 @@ interface MockResponses {
 }
 
 const createClient = (responses: MockResponses) => {
-  const query = jest.fn(async (request: { query: string }) => {
+  const query = vi.fn(async (request: { query: string }) => {
     const q = request.query;
     if (q.includes('STATS total')) {
       return countResponse(responses.detections.length);
@@ -74,7 +77,7 @@ const createClient = (responses: MockResponses) => {
   };
 };
 
-const queriesFrom = (query: jest.Mock): string[] =>
+const queriesFrom = (query: Mock): string[] =>
   query.mock.calls.map((c) => (c[0] as { query: string }).query);
 
 describe('DetectionClient', () => {

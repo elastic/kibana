@@ -7,21 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { runStackMonitor } from './run_stack_monitor';
 
-jest.mock('./process_node_stack_monitoring', () => ({
-  processNodeStackMonitoring: jest.fn(),
-}));
+vi.mock('./process_node_stack_monitoring', () => {
+      const mocked = {
+      processNodeStackMonitoring: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils', () => ({
-  abortableTimeout: jest.fn(),
-  TimeoutAbortedError: class TimeoutAbortedError extends Error {
-    constructor() {
-      super('Timeout aborted');
-      this.name = 'TimeoutAbortedError';
-    }
-  },
-}));
+vi.mock('../../utils', () => {
+      const mocked = {
+      abortableTimeout: vi.fn(),
+      TimeoutAbortedError: class TimeoutAbortedError extends Error {
+        constructor() {
+          super('Timeout aborted');
+          this.name = 'TimeoutAbortedError';
+        }
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { processNodeStackMonitoring } = require('./process_node_stack_monitoring');
@@ -30,7 +39,7 @@ const { abortableTimeout, TimeoutAbortedError } = require('../../utils');
 
 describe('runStackMonitor', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls processNodeStackMonitoring and exits when aborted during processing', async () => {
@@ -38,7 +47,7 @@ describe('runStackMonitor', () => {
     const params = {} as any;
     const monitoredRuntime = {} as any;
 
-    (processNodeStackMonitoring as jest.Mock).mockImplementation(async () => {
+    (processNodeStackMonitoring as Mock).mockImplementation(async () => {
       monitorAbortController.abort();
     });
 
@@ -53,8 +62,8 @@ describe('runStackMonitor', () => {
     const monitoredRuntime = {} as any;
 
     let callCount = 0;
-    (processNodeStackMonitoring as jest.Mock).mockResolvedValue(undefined);
-    (abortableTimeout as jest.Mock).mockImplementation(async () => {
+    (processNodeStackMonitoring as Mock).mockResolvedValue(undefined);
+    (abortableTimeout as Mock).mockImplementation(async () => {
       callCount++;
       if (callCount >= 1) {
         throw new TimeoutAbortedError();
@@ -71,8 +80,8 @@ describe('runStackMonitor', () => {
     const params = {} as any;
     const monitoredRuntime = {} as any;
 
-    (processNodeStackMonitoring as jest.Mock).mockResolvedValue(undefined);
-    (abortableTimeout as jest.Mock).mockRejectedValue(new Error('unexpected'));
+    (processNodeStackMonitoring as Mock).mockResolvedValue(undefined);
+    (abortableTimeout as Mock).mockRejectedValue(new Error('unexpected'));
 
     await expect(runStackMonitor(params, monitoredRuntime, monitorAbortController)).rejects.toThrow(
       'unexpected'

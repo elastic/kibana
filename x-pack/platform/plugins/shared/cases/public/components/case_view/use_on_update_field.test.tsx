@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 
@@ -16,11 +19,11 @@ import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import { CaseStatuses, CaseSeverity } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common';
 
-jest.mock('../../containers/use_update_case');
+vi.mock('../../containers/use_update_case');
 
-const mockMutate = jest.fn();
+const mockMutate = vi.fn();
 
-(useUpdateCase as jest.Mock).mockReturnValue({
+(useUpdateCase as Mock).mockReturnValue({
   isLoading: false,
   mutate: mockMutate,
 });
@@ -31,7 +34,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('useOnUpdateField', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls updateCaseProperty with the title key', () => {
@@ -311,7 +314,7 @@ describe('useOnUpdateField', () => {
       options.onSuccess();
     });
 
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const { result } = renderHook(() => useOnUpdateField({ caseData: basicCase }), { wrapper });
 
     act(() => {
@@ -326,7 +329,7 @@ describe('useOnUpdateField', () => {
       options.onError();
     });
 
-    const onError = jest.fn();
+    const onError = vi.fn();
     const { result } = renderHook(() => useOnUpdateField({ caseData: basicCase }), { wrapper });
 
     act(() => {

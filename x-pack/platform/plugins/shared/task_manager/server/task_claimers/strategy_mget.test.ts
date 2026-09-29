@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { filter, take } from 'rxjs';
@@ -40,24 +42,27 @@ import {
   createFindSO,
 } from '../kibana_discovery_service/mock_kibana_discovery_service';
 
-jest.mock('../constants', () => ({
-  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
-    'limitedToZero',
-    'limitedToOne',
-    'anotherLimitedToZero',
-    'anotherLimitedToOne',
-    'limitedToTwo',
-    'limitedToFive',
-    'yawn',
-    'sampleTaskSharedConcurrencyType1',
-    'sampleTaskSharedConcurrencyType2',
-    'sampleTaskZeroMaxConcurrency',
-  ],
-}));
+vi.mock('../constants', () => {
+      const mocked = {
+      CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
+        'limitedToZero',
+        'limitedToOne',
+        'anotherLimitedToZero',
+        'anotherLimitedToOne',
+        'limitedToTwo',
+        'limitedToFive',
+        'yawn',
+        'sampleTaskSharedConcurrencyType1',
+        'sampleTaskSharedConcurrencyType2',
+        'sampleTaskZeroMaxConcurrency',
+      ],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const taskManagerLogger = mockLogger();
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 
@@ -76,33 +81,33 @@ taskDefinitions.registerTaskDefinitions({
   report: {
     title: 'report',
     cost: TaskCost.Normal,
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
   dernstraight: {
     title: 'dernstraight',
     cost: TaskCost.ExtraLarge,
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
   yawn: {
     title: 'yawn',
     cost: TaskCost.Tiny,
     maxConcurrency: 1,
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
   sampleTaskSharedConcurrencyType1: {
     title: 'Shared Concurrency Task Type 1',
     maxConcurrency: 2,
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
   sampleTaskSharedConcurrencyType2: {
     title: 'Shared Concurrency Task Type 2',
     maxConcurrency: 2,
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
 });
 
 const mockApmTrans = {
-  end: jest.fn(),
+  end: vi.fn(),
 };
 
 const discoveryServiceMock = createDiscoveryServiceMock('test');
@@ -137,21 +142,21 @@ afterAll(async () => {
 
 describe('TaskClaiming', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('1970-01-01T00:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('1970-01-01T00:00:00.000Z'));
   });
 
-  afterAll(() => jest.useRealTimers());
+  afterAll(() => vi.useRealTimers());
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     otelExporter?.reset();
-    jest
+    vi
       .spyOn(apm, 'startTransaction')
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .mockImplementation(() => mockApmTrans as any);
-    jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([1, 3]);
+    vi.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([1, 3]);
   });
 
   describe('claimAvailableTasks', () => {
@@ -300,8 +305,8 @@ describe('TaskClaiming', () => {
     test('merges runtime paused task types into the excluded task types', async () => {
       const definitions = new TaskTypeDictionary(mockLogger());
       definitions.registerTaskDefinitions({
-        foo: { title: 'foo', createTaskRunner: jest.fn() },
-        bar: { title: 'bar', createTaskRunner: jest.fn() },
+        foo: { title: 'foo', createTaskRunner: vi.fn() },
+        bar: { title: 'bar', createTaskRunner: vi.fn() },
       });
 
       const { taskClaiming, store } = initialiseTestClaiming({
@@ -333,12 +338,12 @@ describe('TaskClaiming', () => {
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
         bar: {
           title: 'bar',
           maxAttempts: customMaxAttempts,
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
       });
 
@@ -381,17 +386,17 @@ describe('TaskClaiming', () => {
         foo: {
           title: 'foo',
           priority: TaskPriority.Maintenance,
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
         bar: {
           title: 'bar',
           maxAttempts: customMaxAttempts,
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
         foobar: {
           title: 'foobar',
           maxAttempts: customMaxAttempts,
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
       });
 
@@ -1986,11 +1991,11 @@ describe('TaskClaiming', () => {
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
         bar: {
           title: 'bar',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
       });
       const claimedResults = await testClaimAvailableTasks({
@@ -2136,17 +2141,17 @@ describe('TaskClaiming', () => {
     });
 
     test(`it shouldn't filter for partitions when the node has no assigned partitions`, async () => {
-      jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
+      vi.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
       const taskManagerId = uuidv4();
       const definitions = new TaskTypeDictionary(mockLogger());
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
         bar: {
           title: 'bar',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
       });
       const claimedResults = await testClaimAvailableTasks({
@@ -2302,19 +2307,19 @@ describe('TaskClaiming', () => {
 
     test(`it should log warning on interval when the node has no assigned partitions`, async () => {
       // Reset the warning timer by advancing more
-      jest.advanceTimersByTime(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL);
+      vi.advanceTimersByTime(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL);
 
-      jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
+      vi.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
       const taskManagerId = uuidv4();
       const definitions = new TaskTypeDictionary(mockLogger());
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
         bar: {
           title: 'bar',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
       });
       await testClaimAvailableTasks({
@@ -2334,7 +2339,7 @@ describe('TaskClaiming', () => {
       );
 
       taskManagerLogger.warn.mockReset();
-      jest.advanceTimersByTime(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL - 500);
+      vi.advanceTimersByTime(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL - 500);
 
       await testClaimAvailableTasks({
         storeOpts: {
@@ -2349,7 +2354,7 @@ describe('TaskClaiming', () => {
 
       expect(taskManagerLogger.warn).not.toHaveBeenCalled();
 
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
 
       await testClaimAvailableTasks({
         storeOpts: {
@@ -2370,19 +2375,19 @@ describe('TaskClaiming', () => {
 
     test(`it should log a message after the node no longer has no assigned partitions`, async () => {
       // Reset the warning timer by advancing more
-      jest.advanceTimersByTime(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL);
+      vi.advanceTimersByTime(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL);
 
-      jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
+      vi.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
       const taskManagerId = uuidv4();
       const definitions = new TaskTypeDictionary(mockLogger());
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
         bar: {
           title: 'bar',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
       });
       await testClaimAvailableTasks({
@@ -2402,8 +2407,8 @@ describe('TaskClaiming', () => {
       );
 
       taskManagerLogger.warn.mockReset();
-      jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([1, 2, 3]);
-      jest.advanceTimersByTime(500);
+      vi.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([1, 2, 3]);
+      vi.advanceTimersByTime(500);
 
       await testClaimAvailableTasks({
         storeOpts: {
@@ -2428,19 +2433,19 @@ describe('TaskClaiming', () => {
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
         bar: {
           title: 'bar',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
         baz: {
           title: 'baz',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
         sampleTaskZeroMaxConcurrency: {
           title: 'report',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
           maxConcurrency: 0,
         },
       });
@@ -2584,11 +2589,11 @@ describe('TaskClaiming', () => {
       taskDefs.registerTaskDefinitions({
         foo: {
           title: 'foo',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
         bar: {
           title: 'bar',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
       });
 

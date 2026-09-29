@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants';
@@ -12,12 +14,15 @@ import { render } from '../../../utils/testing';
 import { AlertDefaultsForm } from './alert_defaults_form';
 import type { DynamicSettings } from '../../../../../../common/runtime_types';
 
-jest.mock('./hooks/use_alerting_defaults', () => ({
-  useAlertingDefaults: () => ({
-    connectors: [],
-    options: [],
-  }),
-}));
+vi.mock('./hooks/use_alerting_defaults', () => {
+      const mocked = {
+      useAlertingDefaults: () => ({
+        connectors: [],
+        options: [],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const savedSettings: DynamicSettings = {
   ...DYNAMIC_SETTINGS_DEFAULTS,

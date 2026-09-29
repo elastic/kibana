@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { fireEvent } from '@testing-library/react';
@@ -28,7 +30,7 @@ const TestFormWrapper = ({ children }: { children: React.ReactNode }) => {
 
 describe('TextWidget', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with label and placeholder', () => {

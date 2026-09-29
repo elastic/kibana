@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -21,13 +23,13 @@ describe('InlineFilterPopover', () => {
     options: mockOptions,
     selectedValues: [],
     singleSelect: false,
-    onSelectionChange: jest.fn(),
+    onSelectionChange: vi.fn(),
     emptyMessage: 'No options',
     'data-test-subj': 'test-popover',
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with options', () => {
@@ -53,7 +55,7 @@ describe('InlineFilterPopover', () => {
   });
 
   it('calls onSelectionChange when option is selected in multi-select mode', async () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
     render(<InlineFilterPopover {...defaultProps} onSelectionChange={onSelectionChange} />);
 
     await userEvent.click(screen.getByText('Option 1'));
@@ -61,7 +63,7 @@ describe('InlineFilterPopover', () => {
   });
 
   it('calls onSelectionChange with multiple values in multi-select mode', async () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
     render(
       <InlineFilterPopover
         {...defaultProps}
@@ -75,7 +77,7 @@ describe('InlineFilterPopover', () => {
   });
 
   it('calls onSelectionChange with only last selected value in single-select mode', async () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
     render(
       <InlineFilterPopover
         {...defaultProps}
@@ -90,7 +92,7 @@ describe('InlineFilterPopover', () => {
   });
 
   it('calls onSelectionChange with empty array when deselecting in single-select mode', async () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
     render(
       <InlineFilterPopover
         {...defaultProps}
@@ -105,7 +107,7 @@ describe('InlineFilterPopover', () => {
   });
 
   it('renders search input when searchable is true', () => {
-    const onSearchChange = jest.fn();
+    const onSearchChange = vi.fn();
     render(
       <InlineFilterPopover
         {...defaultProps}
@@ -122,7 +124,7 @@ describe('InlineFilterPopover', () => {
   });
 
   it('calls onSearchChange when typing in search input', async () => {
-    const onSearchChange = jest.fn();
+    const onSearchChange = vi.fn();
     render(
       <InlineFilterPopover
         {...defaultProps}

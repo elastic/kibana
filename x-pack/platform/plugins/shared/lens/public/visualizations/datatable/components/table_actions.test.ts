@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type React from 'react';
 
 import type { EuiDataGridSorting } from '@elastic/eui';
@@ -53,11 +55,11 @@ function createUntransposedRef(options?: { withDate: boolean }): React.MutableRe
 }
 
 describe('Table actions', () => {
-  const onEditAction = jest.fn();
+  const onEditAction = vi.fn();
 
   describe('Table filtering', () => {
     it('should set a filter on click with the correct configuration', () => {
-      const onClickValue = jest.fn();
+      const onClickValue = vi.fn();
       const tableRef = createTableRef();
       const filterHandle = createGridFilterHandler(tableRef, onClickValue);
 
@@ -76,7 +78,7 @@ describe('Table actions', () => {
     });
 
     it('should set a negate filter on click with the correct confgiuration', () => {
-      const onClickValue = jest.fn();
+      const onClickValue = vi.fn();
       const tableRef = createTableRef();
       const filterHandle = createGridFilterHandler(tableRef, onClickValue);
 
@@ -95,7 +97,7 @@ describe('Table actions', () => {
     });
 
     it('should set a time filter on click', () => {
-      const onClickValue = jest.fn();
+      const onClickValue = vi.fn();
       const tableRef = createTableRef({ withDate: true });
       const filterHandle = createGridFilterHandler(tableRef, onClickValue);
 
@@ -114,7 +116,7 @@ describe('Table actions', () => {
     });
 
     it('should set a negative time filter on click', () => {
-      const onClickValue = jest.fn();
+      const onClickValue = vi.fn();
       const tableRef = createTableRef({ withDate: true });
       const filterHandle = createGridFilterHandler(tableRef, onClickValue);
 
@@ -135,7 +137,7 @@ describe('Table actions', () => {
 
   describe('Transposed column filtering', () => {
     it('should set a filter on click with the correct configuration', () => {
-      const onClickValue = jest.fn();
+      const onClickValue = vi.fn();
       const tableRef = createUntransposedRef({ withDate: true });
       tableRef.current.rows = [{ a: 123456 }];
       const filterHandle = createTransposeColumnFilterHandler(onClickValue, tableRef);
@@ -163,7 +165,7 @@ describe('Table actions', () => {
     });
 
     it('should set a negate filter on click with the correct configuration', () => {
-      const onClickValue = jest.fn();
+      const onClickValue = vi.fn();
       const tableRef = createUntransposedRef({ withDate: true });
       tableRef.current.rows = [{ a: 123456 }];
       const filterHandle = createTransposeColumnFilterHandler(onClickValue, tableRef);
@@ -191,7 +193,7 @@ describe('Table actions', () => {
     });
 
     it('should set a multi filter and look up positions of the values', () => {
-      const onClickValue = jest.fn();
+      const onClickValue = vi.fn();
       const tableRef = createUntransposedRef({ withDate: false });
       const filterHandle = createTransposeColumnFilterHandler(onClickValue, tableRef);
       tableRef.current.columns = [
@@ -329,7 +331,7 @@ describe('Table actions', () => {
     });
   });
   describe('Table resize', () => {
-    const setColumnConfig = jest.fn();
+    const setColumnConfig = vi.fn();
 
     it('should resize the table locally and globally with the given size', () => {
       const columnConfig = getDefaultConfig();
@@ -370,7 +372,7 @@ describe('Table actions', () => {
     });
   });
   describe('Column hiding', () => {
-    const setColumnConfig = jest.fn();
+    const setColumnConfig = vi.fn();
 
     it('should allow to hide column', () => {
       const columnConfig = getDefaultConfig();

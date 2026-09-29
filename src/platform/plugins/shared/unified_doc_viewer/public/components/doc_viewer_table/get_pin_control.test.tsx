@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
@@ -24,14 +26,14 @@ const rows: FieldRow[] = [
 const setup = () => {
   const user = userEvent.setup();
 
-  const onTogglePinned = jest.fn();
+  const onTogglePinned = vi.fn();
   const control = getPinColumnControl({ rows, onTogglePinned });
   const Cell = control.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
   render(
     <Cell
       rowIndex={0}
       columnId="test"
-      setCellProps={jest.fn()}
+      setCellProps={vi.fn()}
       colIndex={0}
       isDetails={false}
       isExpanded={false}

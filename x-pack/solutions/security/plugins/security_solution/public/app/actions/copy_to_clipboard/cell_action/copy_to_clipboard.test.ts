@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCopyToClipboardCellActionFactory } from './copy_to_clipboard';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
@@ -12,8 +14,8 @@ import type { CellActionExecutionContext } from '@kbn/cell-actions';
 const services = createStartServicesMock();
 const mockSuccessToast = services.notifications.toasts.addSuccess;
 
-const mockCopy = jest.fn((text: string) => true);
-jest.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
+const mockCopy = vi.fn((text: string) => true);
+vi.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
 
 describe('createCopyToClipboardCellActionFactory', () => {
   const copyToClipboardActionFactory = createCopyToClipboardCellActionFactory({ services });
@@ -23,7 +25,7 @@ describe('createCopyToClipboardCellActionFactory', () => {
   } as CellActionExecutionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return display name', () => {

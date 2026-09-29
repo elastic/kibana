@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
@@ -14,12 +16,15 @@ import { getRuleExecutionKPIRoute } from './get_rule_execution_kpi';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('getRuleExecutionKPIRoute', () => {
@@ -82,7 +87,7 @@ describe('getRuleExecutionKPIRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.getRuleExecutionKPI = jest
+    rulesClient.getRuleExecutionKPI = vi
       .fn()
       .mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, '1')

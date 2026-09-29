@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import axios from 'axios';
 import { ArtifactNotFoundError, ManifestNotFoundError } from './artifact.errors';
@@ -13,12 +16,12 @@ import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import AdmZip from 'adm-zip';
 import { ArtifactService } from './artifact';
 
-jest.mock('axios');
+vi.mock('axios');
 
 describe('ArtifactService', () => {
   const url = 'http://localhost:3000';
   const requestTimeout = 10_000;
-  const mockedAxios = axios as jest.Mocked<typeof axios>;
+  const mockedAxios = axios as Mocked<typeof axios>;
   const logger = loggingSystemMock.createLogger();
   const defaultClusterInfo: InfoResponse = {
     name: 'elasticsearch',

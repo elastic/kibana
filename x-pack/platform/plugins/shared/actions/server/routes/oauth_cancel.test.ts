@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-jest.mock('./verify_access_and_context', () => ({
-  verifyAccessAndContext: jest.fn(),
-}));
-jest.mock('../lib/oauth_state_client');
+import { vi } from 'vitest';
+import type { Mock, MockedClass } from 'vitest';
+
+vi.mock('./verify_access_and_context', () => {
+      const mocked = {
+      verifyAccessAndContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/oauth_state_client');
 
 import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
@@ -16,25 +22,25 @@ import { verifyAccessAndContext } from './verify_access_and_context';
 import { oauthCancelRoute } from './oauth_cancel';
 import { OAuthStateClient } from '../lib/oauth_state_client';
 
-const MockOAuthStateClient = OAuthStateClient as jest.MockedClass<typeof OAuthStateClient>;
+const MockOAuthStateClient = OAuthStateClient as MockedClass<typeof OAuthStateClient>;
 
 const mockLogger = loggingSystemMock.create().get();
 
 const mockOAuthStateClientInstance = {
-  get: jest.fn(),
-  delete: jest.fn(),
+  get: vi.fn(),
+  delete: vi.fn(),
 };
 
 const mockEncryptedSavedObjectsClient = {
-  getClient: jest.fn().mockReturnValue({}),
+  getClient: vi.fn().mockReturnValue({}),
 };
 
 const mockActionsClient = {
-  get: jest.fn(),
+  get: vi.fn(),
 };
 
 const createMockCoreSetup = () => ({
-  getStartServices: jest.fn().mockResolvedValue([
+  getStartServices: vi.fn().mockResolvedValue([
     {},
     {
       encryptedSavedObjects: mockEncryptedSavedObjectsClient,
@@ -48,15 +54,15 @@ const createMockContext = (
   core: Promise.resolve({
     security: {
       authc: {
-        getCurrentUser: jest.fn().mockReturnValue(currentUser),
+        getCurrentUser: vi.fn().mockReturnValue(currentUser),
       },
     },
     savedObjects: {
-      getClient: jest.fn().mockReturnValue({}),
+      getClient: vi.fn().mockReturnValue({}),
     },
   }),
   actions: Promise.resolve({
-    getActionsClient: jest.fn().mockReturnValue(mockActionsClient),
+    getActionsClient: vi.fn().mockReturnValue(mockActionsClient),
   }),
 });
 
@@ -64,11 +70,11 @@ describe('oauthCancelRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     router = httpServiceMock.createRouter();
-    (verifyAccessAndContext as jest.Mock).mockImplementation((_license, handler) => handler);
+    (verifyAccessAndContext as Mock).mockImplementation((_license, handler) => handler);
 
-    (mockLogger.get as jest.Mock).mockReturnValue(mockLogger);
+    (mockLogger.get as Mock).mockReturnValue(mockLogger);
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue({});
 
     MockOAuthStateClient.mockImplementation(() => mockOAuthStateClientInstance as never);
@@ -264,8 +270,8 @@ describe('oauthCancelRoute', () => {
   });
 
   it('creates OAuthStateClient with the correct saved objects clients', async () => {
-    const mockEncryptedClient = { getDecryptedAsInternalUser: jest.fn() };
-    const mockUnsecuredClient = { find: jest.fn() };
+    const mockEncryptedClient = { getDecryptedAsInternalUser: vi.fn() };
+    const mockUnsecuredClient = { find: vi.fn() };
 
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue(mockEncryptedClient);
 
@@ -273,15 +279,15 @@ describe('oauthCancelRoute', () => {
       core: Promise.resolve({
         security: {
           authc: {
-            getCurrentUser: jest.fn().mockReturnValue({ profile_uid: 'test-profile-uid' }),
+            getCurrentUser: vi.fn().mockReturnValue({ profile_uid: 'test-profile-uid' }),
           },
         },
         savedObjects: {
-          getClient: jest.fn().mockReturnValue(mockUnsecuredClient),
+          getClient: vi.fn().mockReturnValue(mockUnsecuredClient),
         },
       }),
       actions: Promise.resolve({
-        getActionsClient: jest.fn().mockReturnValue(mockActionsClient),
+        getActionsClient: vi.fn().mockReturnValue(mockActionsClient),
       }),
     };
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import { usePageReady } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,41 +20,47 @@ import type { InvestigationSectionState } from '../hooks/use_investigation_secti
 import { useInvestigationSections } from '../hooks/use_investigation_sections';
 import { useKibana } from '../hooks/use_kibana';
 
-jest.mock('../hooks/use_investigation_sections');
-jest.mock('../hooks/use_kibana');
-jest.mock('@kbn/ebt-tools');
+vi.mock('../hooks/use_investigation_sections');
+vi.mock('../hooks/use_kibana');
+vi.mock('@kbn/ebt-tools');
 
-jest.mock('../investigation/start_investigation_panel', () => ({
-  START_INVESTIGATION_PANEL_ID: 'nightshiftStartInvestigationPanel',
-  StartInvestigationPanel: ({ onClose }: { onClose: () => void }) => (
-    <div data-test-subj="nightshiftStartInvestigationPanel">
-      <button onClick={onClose} type="button">
-        Cancel investigation
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../investigation/start_investigation_panel', () => {
+      const mocked = {
+      START_INVESTIGATION_PANEL_ID: 'nightshiftStartInvestigationPanel',
+      StartInvestigationPanel: ({ onClose }: { onClose: () => void }) => (
+        <div data-test-subj="nightshiftStartInvestigationPanel">
+          <button onClick={onClose} type="button">
+            Cancel investigation
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../investigation/investigation_detail_flyout', () => ({
-  InvestigationDetailFlyout: ({
-    investigationId,
-    onClose,
-  }: {
-    investigationId: string;
-    onClose: () => void;
-  }) => (
-    <div>
-      <span>{`Flyout: ${investigationId}`}</span>
-      <button onClick={onClose} type="button">
-        Close
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../investigation/investigation_detail_flyout', () => {
+      const mocked = {
+      InvestigationDetailFlyout: ({
+        investigationId,
+        onClose,
+      }: {
+        investigationId: string;
+        onClose: () => void;
+      }) => (
+        <div>
+          <span>{`Flyout: ${investigationId}`}</span>
+          <button onClick={onClose} type="button">
+            Close
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
-const mockUseKibana = useKibana as jest.Mock;
-const mockUsePageReady = usePageReady as jest.Mock;
+const mockUseInvestigationSections = useInvestigationSections as Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUsePageReady = usePageReady as Mock;
 
 const investigation: ListInvestigationItem = {
   investigation_id: 'investigation-1',
@@ -82,7 +91,7 @@ const highInvestigation: ListInvestigationItem = {
   severity: '60-high',
 };
 
-const refetchAll = jest.fn();
+const refetchAll = vi.fn();
 
 const manageCapabilities = {
   [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
@@ -90,7 +99,7 @@ const manageCapabilities = {
 };
 
 // jsdom implements neither, and scrolling to a section is how a tile and `?severity=` both work.
-const scrollIntoView = jest.fn();
+const scrollIntoView = vi.fn();
 Element.prototype.scrollIntoView = scrollIntoView;
 
 function makeSection(
@@ -107,8 +116,8 @@ function makeSection(
     isFetching: false,
     isPreviousData: false,
     error: null,
-    fetchNextPage: jest.fn(),
-    refetch: jest.fn(),
+    fetchNextPage: vi.fn(),
+    refetch: vi.fn(),
     ...overrides,
   };
 }
@@ -293,8 +302,8 @@ describe('NightshiftApp', () => {
   });
 
   it('loads more investigations for one severity without touching the others', () => {
-    const fetchCritical = jest.fn();
-    const fetchHigh = jest.fn();
+    const fetchCritical = vi.fn();
+    const fetchHigh = vi.fn();
     setSections({
       sections: defaultSections({
         '80-critical': {

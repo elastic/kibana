@@ -7,27 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { PostHog } from './posthog';
 
 describe('PostHog', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-    patch: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
   };
 
   const mockContext = {
     client: mockClient,
     config: { instanceHost: 'https://us.posthog.com', projectId: '123' },
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   const BASE = 'https://us.posthog.com/api/projects/123';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, renderHook } from '@testing-library/react';
 import { useLeadingControlColumns } from './use_leading_control_columns';
@@ -12,20 +14,26 @@ import type { RowControlColumn } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
 
-const mockGetEuidFilterBasedOnDocument = jest.fn();
-const mockUseEntityStoreEuidApi = jest.fn();
-const mockInvestigateInTimeline = jest.fn();
+const mockGetEuidFilterBasedOnDocument = vi.fn();
+const mockUseEntityStoreEuidApi = vi.fn();
+const mockInvestigateInTimeline = vi.fn();
 
-jest.mock('@kbn/entity-store/public', () => ({
-  useEntityStoreEuidApi: (...args: unknown[]) => mockUseEntityStoreEuidApi(...args),
-  ENTITY_STORE_ROUTES: { public: { RESOLUTION_GROUP: '/mock/resolution/group' } },
-}));
+vi.mock('@kbn/entity-store/public', () => {
+      const mocked = {
+      useEntityStoreEuidApi: (...args: unknown[]) => mockUseEntityStoreEuidApi(...args),
+      ENTITY_STORE_ROUTES: { public: { RESOLUTION_GROUP: '/mock/resolution/group' } },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
-  useInvestigateInTimeline: jest.fn(),
-}));
+vi.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline', () => {
+      const mocked = {
+      useInvestigateInTimeline: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseInvestigateInTimeline = jest.mocked(useInvestigateInTimeline);
+const mockUseInvestigateInTimeline = vi.mocked(useInvestigateInTimeline);
 
 const mockRecord: DataTableRecord = {
   id: '1',
@@ -70,7 +78,7 @@ describe('useLeadingControlColumns', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: { kql: { getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument } },
     });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { Subscription } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
@@ -36,20 +39,20 @@ import {
 } from '../ebt/events';
 import { createMockTelemetryConfigProvider } from '../__mocks__';
 
-jest.mock('./receiver');
-jest.mock('./sender');
+vi.mock('./receiver');
+vi.mock('./sender');
 
 describe('Indices Metadata - IndicesMetadataService', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let configurationService: jest.Mocked<ConfigurationService>;
+  let configurationService: Mocked<ConfigurationService>;
   let service: IndicesMetadataService;
-  let taskManager: jest.Mocked<TaskManagerSetupContract>;
-  let taskManagerStart: jest.Mocked<TaskManagerStartContract>;
-  let analytics: jest.Mocked<AnalyticsServiceStart>;
-  let esClient: jest.Mocked<ElasticsearchClient>;
-  let receiver: jest.Mocked<MetadataReceiver>;
-  let sender: jest.Mocked<MetadataSender>;
-  let subscription: jest.Mocked<Subscription>;
+  let taskManager: Mocked<TaskManagerSetupContract>;
+  let taskManagerStart: Mocked<TaskManagerStartContract>;
+  let analytics: Mocked<AnalyticsServiceStart>;
+  let esClient: Mocked<ElasticsearchClient>;
+  let receiver: Mocked<MetadataReceiver>;
+  let sender: Mocked<MetadataSender>;
+  let subscription: Mocked<Subscription>;
   const telemetryConfigProvider = createMockTelemetryConfigProvider();
   const mockConfiguration: IndicesMetadataConfiguration = {
     indices_threshold: 100,
@@ -109,49 +112,49 @@ describe('Indices Metadata - IndicesMetadataService', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     logger = loggingSystemMock.createLogger();
     configurationService = {
-      getIndicesMetadataConfiguration$: jest.fn(),
-      start: jest.fn(),
-      stop: jest.fn(),
-    } as unknown as jest.Mocked<ConfigurationService>;
+      getIndicesMetadataConfiguration$: vi.fn(),
+      start: vi.fn(),
+      stop: vi.fn(),
+    } as unknown as Mocked<ConfigurationService>;
 
     taskManager = {
-      registerTaskDefinitions: jest.fn(),
-    } as unknown as jest.Mocked<TaskManagerSetupContract>;
+      registerTaskDefinitions: vi.fn(),
+    } as unknown as Mocked<TaskManagerSetupContract>;
 
     taskManagerStart = {
-      ensureScheduled: jest.fn(),
-    } as unknown as jest.Mocked<TaskManagerStartContract>;
+      ensureScheduled: vi.fn(),
+    } as unknown as Mocked<TaskManagerStartContract>;
 
     analytics = {
-      reportEvent: jest.fn(),
-    } as unknown as jest.Mocked<AnalyticsServiceStart>;
+      reportEvent: vi.fn(),
+    } as unknown as Mocked<AnalyticsServiceStart>;
 
-    esClient = {} as jest.Mocked<ElasticsearchClient>;
+    esClient = {} as Mocked<ElasticsearchClient>;
 
     receiver = {
-      getIndices: jest.fn(),
-      getDataStreams: jest.fn(),
-      getIndexTemplatesStats: jest.fn(),
-      getIndicesStats: jest.fn(),
-      isIlmStatsAvailable: jest.fn(),
-      getIlmsStats: jest.fn(),
-      getIlmsPolicies: jest.fn(),
-    } as unknown as jest.Mocked<MetadataReceiver>;
+      getIndices: vi.fn(),
+      getDataStreams: vi.fn(),
+      getIndexTemplatesStats: vi.fn(),
+      getIndicesStats: vi.fn(),
+      isIlmStatsAvailable: vi.fn(),
+      getIlmsStats: vi.fn(),
+      getIlmsPolicies: vi.fn(),
+    } as unknown as Mocked<MetadataReceiver>;
 
     sender = {
-      reportEBT: jest.fn(),
-    } as unknown as jest.Mocked<MetadataSender>;
+      reportEBT: vi.fn(),
+    } as unknown as Mocked<MetadataSender>;
 
     subscription = {
-      unsubscribe: jest.fn(),
-    } as unknown as jest.Mocked<Subscription>;
+      unsubscribe: vi.fn(),
+    } as unknown as Mocked<Subscription>;
 
-    (MetadataReceiver as jest.Mock).mockImplementation(() => receiver);
-    (MetadataSender as jest.Mock).mockImplementation(() => sender);
+    (MetadataReceiver as Mock).mockImplementation(() => receiver);
+    (MetadataSender as Mock).mockImplementation(() => sender);
 
     service = new IndicesMetadataService(logger, configurationService);
   });
@@ -193,7 +196,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
   describe('start', () => {
     beforeEach(() => {
       configurationService.getIndicesMetadataConfiguration$.mockReturnValue({
-        subscribe: jest.fn().mockReturnValue(subscription),
+        subscribe: vi.fn().mockReturnValue(subscription),
       } as any);
 
       taskManagerStart.ensureScheduled.mockResolvedValue({
@@ -210,7 +213,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
     });
 
     it('should subscribe to configuration updates', () => {
-      const mockSubscribe = jest.fn().mockReturnValue(subscription);
+      const mockSubscribe = vi.fn().mockReturnValue(subscription);
       configurationService.getIndicesMetadataConfiguration$.mockReturnValue({
         subscribe: mockSubscribe,
       } as any);
@@ -251,7 +254,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
     });
 
     it('should handle configuration updates', () => {
-      const mockSubscribe = jest.fn();
+      const mockSubscribe = vi.fn();
       configurationService.getIndicesMetadataConfiguration$.mockReturnValue({
         subscribe: mockSubscribe,
       } as any);
@@ -270,7 +273,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
   describe('stop', () => {
     it('should unsubscribe from configuration updates', () => {
       configurationService.getIndicesMetadataConfiguration$.mockReturnValue({
-        subscribe: jest.fn().mockReturnValue(subscription),
+        subscribe: vi.fn().mockReturnValue(subscription),
       } as any);
 
       service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
@@ -288,7 +291,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
   describe('publishIndicesMetadata', () => {
     beforeEach(() => {
       configurationService.getIndicesMetadataConfiguration$.mockReturnValue({
-        subscribe: jest.fn().mockImplementation((callback) => {
+        subscribe: vi.fn().mockImplementation((callback) => {
           callback(mockConfiguration);
           return subscription;
         }),
@@ -450,7 +453,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
       );
 
       configurationService.getIndicesMetadataConfiguration$.mockReturnValue({
-        subscribe: jest.fn().mockImplementation((callback) => {
+        subscribe: vi.fn().mockImplementation((callback) => {
           callback(mockConfiguration);
           return subscription;
         }),
@@ -459,7 +462,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
 
     it('should run publishIndicesMetadata and return state', async () => {
       service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
-      jest.spyOn(service as any, 'publishIndicesMetadata').mockResolvedValue(undefined);
+      vi.spyOn(service as any, 'publishIndicesMetadata').mockResolvedValue(undefined);
 
       const result = await taskRunner.run();
 
@@ -470,7 +473,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
     it('should skip publishIndicesMetadata when telemetry is opted out', async () => {
       const optedOutProvider = createMockTelemetryConfigProvider(false);
       service.start(taskManagerStart, analytics, esClient, false, optedOutProvider);
-      jest.spyOn(service as any, 'publishIndicesMetadata').mockResolvedValue(undefined);
+      vi.spyOn(service as any, 'publishIndicesMetadata').mockResolvedValue(undefined);
 
       const result = await taskRunner.run();
 
@@ -491,7 +494,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
   describe('publish EBT', () => {
     beforeEach(() => {
       configurationService.getIndicesMetadataConfiguration$.mockReturnValue({
-        subscribe: jest.fn().mockImplementation((callback) => {
+        subscribe: vi.fn().mockImplementation((callback) => {
           callback(mockConfiguration);
           return subscription;
         }),
@@ -751,7 +754,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
   describe('error scenarios', () => {
     beforeEach(() => {
       configurationService.getIndicesMetadataConfiguration$.mockReturnValue({
-        subscribe: jest.fn().mockImplementation((callback) => {
+        subscribe: vi.fn().mockImplementation((callback) => {
           callback(mockConfiguration);
           return subscription;
         }),

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { BLOCKLIST_PATH } from '../../../../../common/constants';
@@ -14,8 +17,8 @@ import { Blocklist } from './blocklist';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 
-jest.mock('../../../../common/components/user_privileges');
-const mockUserPrivileges = useUserPrivileges as jest.Mock;
+vi.mock('../../../../common/components/user_privileges');
+const mockUserPrivileges = useUserPrivileges as Mock;
 
 describe('When on the blocklist page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

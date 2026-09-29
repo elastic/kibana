@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useTraceActions, type TraceGroup } from './use_trace_actions';
 
-jest.mock('../../../context/apm_plugin/use_apm_plugin_context');
+vi.mock('../../../context/apm_plugin/use_apm_plugin_context');
 
-const mockUseApmPluginContext = useApmPluginContext as jest.MockedFunction<
+const mockUseApmPluginContext = useApmPluginContext as MockedFunction<
   typeof useApmPluginContext
 >;
 
-const mockGetRedirectUrl = jest.fn<string | undefined, [unknown]>();
-const mockLocatorGet = jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl });
+const mockGetRedirectUrl = vi.fn<string | undefined, [unknown]>();
+const mockLocatorGet = vi.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl });
 
 const TRACES_INDEX = 'traces-apm-*';
 
@@ -66,7 +69,7 @@ describe('useTraceActions', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a discover action group with the Explore traces row action', () => {

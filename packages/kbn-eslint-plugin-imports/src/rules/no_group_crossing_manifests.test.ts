@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { RuleTester } from 'eslint';
 import dedent from 'dedent';
 import { NoGroupCrossingManifestsRule } from './no_group_crossing_manifests';
@@ -86,7 +88,7 @@ const makeError = (line: number, ...violations: string[]) => ({
   },
 });
 
-jest.mock('../helpers/repo_source_classifier', () => {
+vi.mock('../helpers/repo_source_classifier', () => {
   const MODULES_BY_PATH: Record<string, ModuleId> = {
     ...makeModuleByPath(
       'path/to/search/plugins/searchPlugin1/server/index.ts',
@@ -156,8 +158,8 @@ jest.mock('../helpers/repo_source_classifier', () => {
   };
 });
 
-jest.mock('@kbn/repo-packages', () => {
-  const original = jest.requireActual('@kbn/repo-packages');
+vi.mock('@kbn/repo-packages', async () => {
+  const original = (await vi.importActual('@kbn/repo-packages'));
 
   return {
     ...original,

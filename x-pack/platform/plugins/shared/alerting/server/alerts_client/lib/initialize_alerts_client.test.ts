@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import {
@@ -48,10 +51,10 @@ const fakeRequest = {
       url: '/',
     },
   },
-  getSavedObjectsClient: jest.fn(),
+  getSavedObjectsClient: vi.fn(),
 } as unknown as KibanaRequest;
 
-const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
+const ruleTypeWithAlerts: Mocked<UntypedNormalizedRuleType> = {
   ...ruleType,
   alerts: {
     context: 'test',
@@ -89,7 +92,7 @@ const mockedTaskInstance = mockTaskInstance();
 describe('initializeAlertsClient', () => {
   test('should initialize and return alertsClient if createAlertsClient succeeds', async () => {
     const startedAt = new Date(Date.now() + 5 * 60 * 1000);
-    const spy1 = jest
+    const spy1 = vi
       .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
       .mockImplementation(() => legacyAlertsClient);
     alertsService.createAlertsClient.mockImplementationOnce(() => alertsClient);
@@ -154,7 +157,7 @@ describe('initializeAlertsClient', () => {
   });
 
   test('should use DEFAULT_FLAPPING_SETTINGS if flappingSettings not defined', async () => {
-    const spy1 = jest
+    const spy1 = vi
       .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
       .mockImplementation(() => legacyAlertsClient);
     alertsService.createAlertsClient.mockImplementationOnce(() => alertsClient);
@@ -218,7 +221,7 @@ describe('initializeAlertsClient', () => {
   });
 
   test('should use LegacyAlertsClient if createAlertsClient returns null', async () => {
-    const spy1 = jest
+    const spy1 = vi
       .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
       .mockImplementation(() => legacyAlertsClient);
     alertsService.createAlertsClient.mockImplementationOnce(() => null);
@@ -290,7 +293,7 @@ describe('initializeAlertsClient', () => {
   });
 
   test('should use LegacyAlertsClient if createAlertsClient throws error', async () => {
-    const spy1 = jest
+    const spy1 = vi
       .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
       .mockImplementation(() => legacyAlertsClient);
     alertsService.createAlertsClient.mockImplementationOnce(() => {
@@ -377,7 +380,7 @@ describe('initializeAlertsClient', () => {
         expiresAt: '2026-12-31T00:00:00.000Z',
       },
     ];
-    const spy1 = jest
+    const spy1 = vi
       .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
       .mockImplementation(() => legacyAlertsClient);
     alertsService.createAlertsClient.mockImplementationOnce(() => alertsClient);

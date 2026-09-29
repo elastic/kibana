@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ICommandContext } from '../../../registry/types';
 import type { ParameterHint } from '../../types';
 import { parametersFromHintsResolvers } from './parameters_from_hints';
@@ -22,7 +24,7 @@ describe('Parameters from hints handlers', () => {
     ];
 
     const mockCallbacks: ESQLCallbacks = {
-      getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
+      getInferenceEndpoints: vi.fn(async () => ({ inferenceEndpoints })),
     };
 
     const hint: ParameterHint = {
@@ -33,7 +35,7 @@ describe('Parameters from hints handlers', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should return inference endpoint suggestions filtered by task_type constraint', async () => {

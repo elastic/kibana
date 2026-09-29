@@ -5,32 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { getExecutionState, toWorkflowExecutionState } from './get_execution_state';
 import { getWorkflowOutput } from './get_workflow_output';
 
-jest.mock('./get_workflow_output', () => ({
-  getWorkflowOutput: jest.fn(),
-}));
+vi.mock('./get_workflow_output', () => {
+      const mocked = {
+      getWorkflowOutput: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getWorkflowOutputMock = jest.mocked(getWorkflowOutput);
+const getWorkflowOutputMock = vi.mocked(getWorkflowOutput);
 
 describe('getExecutionState', () => {
   const request = httpServerMock.createKibanaRequest();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createWorkflowApi = () =>
     ({
-      getWorkflowExecution: jest.fn(),
+      getWorkflowExecution: vi.fn(),
     } as unknown as Parameters<typeof getExecutionState>[0]['workflowApi']);
 
   it('returns null when execution is not found', async () => {
     const workflowApi = createWorkflowApi();
-    workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue(null);
+    workflowApi.getWorkflowExecution = vi.fn().mockResolvedValue(null);
 
     const state = await getExecutionState({
       executionId: 'exec-1',
@@ -49,7 +54,7 @@ describe('getExecutionState', () => {
   it('includes output for completed execution', async () => {
     const workflowApi = createWorkflowApi();
     const stepExecutions = [{ id: 'step-1' }];
-    workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue({
+    workflowApi.getWorkflowExecution = vi.fn().mockResolvedValue({
       status: ExecutionStatus.COMPLETED,
       workflowId: 'workflow-1',
       startedAt: '2026-01-01T00:00:00.000Z',
@@ -80,7 +85,7 @@ describe('getExecutionState', () => {
 
   it('includes error_message for failed execution with error details', async () => {
     const workflowApi = createWorkflowApi();
-    workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue({
+    workflowApi.getWorkflowExecution = vi.fn().mockResolvedValue({
       status: ExecutionStatus.FAILED,
       workflowId: 'workflow-2',
       startedAt: '2026-01-01T00:00:00.000Z',
@@ -111,7 +116,7 @@ describe('getExecutionState', () => {
 
   it('does not include error_message for failed execution without error', async () => {
     const workflowApi = createWorkflowApi();
-    workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue({
+    workflowApi.getWorkflowExecution = vi.fn().mockResolvedValue({
       status: ExecutionStatus.FAILED,
       workflowId: 'workflow-3',
       startedAt: '2026-01-01T00:00:00.000Z',
@@ -141,7 +146,7 @@ describe('getExecutionState', () => {
   describe('WAITING_FOR_INPUT status', () => {
     it('includes waiting_input with message and schema when step has both', async () => {
       const workflowApi = createWorkflowApi();
-      workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue({
+      workflowApi.getWorkflowExecution = vi.fn().mockResolvedValue({
         status: ExecutionStatus.WAITING_FOR_INPUT,
         workflowId: 'wf-1',
         startedAt: '2026-01-01T00:00:00.000Z',
@@ -199,7 +204,7 @@ describe('getExecutionState', () => {
 
     it('includes waiting_input with only message when step has no schema', async () => {
       const workflowApi = createWorkflowApi();
-      workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue({
+      workflowApi.getWorkflowExecution = vi.fn().mockResolvedValue({
         status: ExecutionStatus.WAITING_FOR_INPUT,
         workflowId: 'wf-2',
         startedAt: '2026-01-01T00:00:00.000Z',
@@ -238,7 +243,7 @@ describe('getExecutionState', () => {
 
     it('finds waitForInput step nested inside a foreach', async () => {
       const workflowApi = createWorkflowApi();
-      workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue({
+      workflowApi.getWorkflowExecution = vi.fn().mockResolvedValue({
         status: ExecutionStatus.WAITING_FOR_INPUT,
         workflowId: 'wf-3',
         startedAt: '2026-01-01T00:00:00.000Z',
@@ -284,7 +289,7 @@ describe('getExecutionState', () => {
 
     it('uses the waiting step execution id when the same stepId has a prior completed instance (loop)', async () => {
       const workflowApi = createWorkflowApi();
-      workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue({
+      workflowApi.getWorkflowExecution = vi.fn().mockResolvedValue({
         status: ExecutionStatus.WAITING_FOR_INPUT,
         workflowId: 'wf-loop',
         startedAt: '2026-01-01T00:00:00.000Z',
@@ -327,7 +332,7 @@ describe('getExecutionState', () => {
 
     it('omits waiting_input entirely when no waiting step is found', async () => {
       const workflowApi = createWorkflowApi();
-      workflowApi.getWorkflowExecution = jest.fn().mockResolvedValue({
+      workflowApi.getWorkflowExecution = vi.fn().mockResolvedValue({
         status: ExecutionStatus.WAITING_FOR_INPUT,
         workflowId: 'wf-4',
         startedAt: '2026-01-01T00:00:00.000Z',

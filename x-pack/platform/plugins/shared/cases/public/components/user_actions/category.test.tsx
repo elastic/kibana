@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
@@ -15,14 +17,14 @@ import { createCategoryUserActionBuilder } from './category';
 import { getMockBuilderArgs } from './mock';
 import { UserActionActions } from '../../../common/types/domain';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/navigation/hooks');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/navigation/hooks');
 
 describe('createCategoryUserActionBuilder ', () => {
   const builderArgs = getMockBuilderArgs();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly when the category is updated', () => {

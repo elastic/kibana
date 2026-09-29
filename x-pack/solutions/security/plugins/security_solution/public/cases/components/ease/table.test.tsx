@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -27,7 +29,7 @@ const packages: PackageListItem[] = [
 ];
 const id = 'id';
 const query = { ids: { values: ['abcdef'] } };
-const onLoaded = jest.fn();
+const onLoaded = vi.fn();
 
 describe('<Table />', () => {
   it('should render all components', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { validateConfig, validateParams } from '@kbn/actions-plugin/server/lib';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
@@ -20,14 +23,14 @@ import { AlertHistoryEsIndexConnectorId } from '@kbn/actions-plugin/common';
 import type { ActionParamsType, ConnectorTypeConfigType } from '@kbn/connector-schemas/es_index';
 
 const services = actionsMock.createServices();
-const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+const mockedLogger: Mocked<Logger> = loggerMock.create();
 
 let connectorType: ESIndexConnectorType;
 let configurationUtilities: ActionsConfigurationUtilities;
 let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
   connectorUsageCollector = new ConnectorUsageCollector({

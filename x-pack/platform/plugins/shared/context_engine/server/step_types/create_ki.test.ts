@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { AiIndexService } from '../ai_indices/service';
@@ -29,7 +31,7 @@ const kiInput = {
 
 const enabled = async () => true;
 const allowed = async () => true;
-const verifyKi = jest.fn();
+const verifyKi = vi.fn();
 
 describe('getCreateKiStepDefinition', () => {
   beforeEach(() => {
@@ -37,7 +39,7 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('indexes the KI into an index dest and returns the document id', async () => {
-    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+    const esClient = { index: vi.fn().mockResolvedValue({ _id: 'ki-1' }) };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki: kiInput },
       esClient,
@@ -71,7 +73,7 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('omits attributes rendered as null, since the engine hands the handler unparsed input', async () => {
-    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+    const esClient = { index: vi.fn().mockResolvedValue({ _id: 'ki-1' }) };
     const context = createMockStepContext({
       input: {
         ai_index_id: 'my-ai-index',
@@ -109,14 +111,14 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('uses the workflow space for the feature flag and AI index lookup', async () => {
-    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+    const esClient = { index: vi.fn().mockResolvedValue({ _id: 'ki-1' }) };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki: kiInput },
       esClient,
       spaceId: 'marketing',
     });
     const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
-    const isContextEngineEnabled = jest.fn().mockResolvedValue(true);
+    const isContextEngineEnabled = vi.fn().mockResolvedValue(true);
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
@@ -132,7 +134,7 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('uses op_type create for a data stream dest', async () => {
-    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+    const esClient = { index: vi.fn().mockResolvedValue({ _id: 'ki-1' }) };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki: kiInput },
       esClient,
@@ -155,7 +157,7 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('indexes with the provided ki_id so re-runs replace the same KI', async () => {
-    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'logs-index-profile' }) };
+    const esClient = { index: vi.fn().mockResolvedValue({ _id: 'logs-index-profile' }) };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'logs-index-profile', ki: kiInput },
       esClient,
@@ -183,7 +185,7 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('uses the generated id as both _id and the id field on an index dest', async () => {
-    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ignored' }) };
+    const esClient = { index: vi.fn().mockResolvedValue({ _id: 'ignored' }) };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki: kiInput },
       esClient,
@@ -206,7 +208,7 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('appends a data stream document carrying ki_id as its logical id', async () => {
-    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'generated' }) };
+    const esClient = { index: vi.fn().mockResolvedValue({ _id: 'generated' }) };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'logs-index-profile', ki: kiInput },
       esClient,
@@ -234,7 +236,7 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('waits for the refresh when refresh is true', async () => {
-    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+    const esClient = { index: vi.fn().mockResolvedValue({ _id: 'ki-1' }) };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki: kiInput, refresh: true },
       esClient,
@@ -257,7 +259,7 @@ describe('getCreateKiStepDefinition', () => {
 
   it('throws ValidationError when the dest is an index pattern', async () => {
     for (const destValue of ['ai-index-idx-foo*', 'ai-index-idx-foo,ai-index-idx-bar']) {
-      const esClient = { index: jest.fn() };
+      const esClient = { index: vi.fn() };
       const context = createMockStepContext({
         input: { ai_index_id: 'my-ai-index', ki: kiInput },
         esClient,
@@ -280,14 +282,14 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('lazily creates the AI index when it does not exist', async () => {
-    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+    const esClient = { index: vi.fn().mockResolvedValue({ _id: 'ki-1' }) };
     const context = createMockStepContext({
       input: { ai_index_id: 'new-ai-index', ki: kiInput },
       esClient,
     });
     const service = {
-      get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('new-ai-index')),
-      create: jest.fn().mockResolvedValue(undefined),
+      get: vi.fn().mockRejectedValue(new AiIndexNotFoundError('new-ai-index')),
+      create: vi.fn().mockResolvedValue(undefined),
     } as unknown as AiIndexService;
 
     const { handler } = getCreateKiStepDefinition({
@@ -313,14 +315,14 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('does not squat a reserved managed AI index id', async () => {
-    const esClient = { index: jest.fn() };
+    const esClient = { index: vi.fn() };
     const context = createMockStepContext({
       input: { ai_index_id: 'elastic', ki: kiInput },
       esClient,
     });
     const service = {
-      get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('elastic')),
-      create: jest.fn().mockRejectedValue(new AiIndexManagedError('elastic')),
+      get: vi.fn().mockRejectedValue(new AiIndexNotFoundError('elastic')),
+      create: vi.fn().mockRejectedValue(new AiIndexManagedError('elastic')),
     } as unknown as AiIndexService;
 
     const { handler } = getCreateKiStepDefinition({
@@ -339,20 +341,20 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('re-resolves the dest when losing a concurrent AI index creation race', async () => {
-    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+    const esClient = { index: vi.fn().mockResolvedValue({ _id: 'ki-1' }) };
     const context = createMockStepContext({
       input: { ai_index_id: 'new-ai-index', ki: kiInput },
       esClient,
     });
     const service = {
-      get: jest
+      get: vi
         .fn()
         .mockRejectedValueOnce(new AiIndexNotFoundError('new-ai-index'))
         .mockResolvedValueOnce({
           id: 'new-ai-index',
           dest: { type: 'data_stream', value: 'ai-index-ds-new-ai-index' },
         }),
-      create: jest.fn().mockRejectedValue(new AiIndexAlreadyExistsError('new-ai-index')),
+      create: vi.fn().mockRejectedValue(new AiIndexAlreadyExistsError('new-ai-index')),
     } as unknown as AiIndexService;
 
     const { handler } = getCreateKiStepDefinition({
@@ -372,14 +374,14 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('throws ValidationError when lazily creating with an invalid AI index id', async () => {
-    const esClient = { index: jest.fn() };
+    const esClient = { index: vi.fn() };
     const context = createMockStepContext({
       input: { ai_index_id: 'Invalid Id', ki: kiInput },
       esClient,
     });
     const service = {
-      get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('Invalid Id')),
-      create: jest.fn(),
+      get: vi.fn().mockRejectedValue(new AiIndexNotFoundError('Invalid Id')),
+      create: vi.fn(),
     } as unknown as AiIndexService;
 
     const { handler } = getCreateKiStepDefinition({
@@ -398,7 +400,7 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('throws FeatureDisabledError when Context Engine is disabled', async () => {
-    const esClient = { index: jest.fn() };
+    const esClient = { index: vi.fn() };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki: kiInput },
       esClient,
@@ -422,13 +424,13 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('throws PermissionError when the workflow user lacks the write privilege', async () => {
-    const esClient = { index: jest.fn() };
+    const esClient = { index: vi.fn() };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki: kiInput },
       esClient,
     });
     const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
-    const checkWritePrivilege = jest.fn().mockResolvedValue(false);
+    const checkWritePrivilege = vi.fn().mockResolvedValue(false);
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
@@ -449,7 +451,7 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('reports a success event and logs after the write', async () => {
-    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+    const esClient = { index: vi.fn().mockResolvedValue({ _id: 'ki-1' }) };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki: kiInput },
       esClient,
@@ -479,7 +481,7 @@ describe('getCreateKiStepDefinition', () => {
   });
 
   it('reports managed:true when the AI index is managed', async () => {
-    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+    const esClient = { index: vi.fn().mockResolvedValue({ _id: 'ki-1' }) };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki: kiInput },
       esClient,
@@ -504,7 +506,7 @@ describe('getCreateKiStepDefinition', () => {
   it('reports a failure event with the error type', async () => {
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki: kiInput },
-      esClient: { index: jest.fn() },
+      esClient: { index: vi.fn() },
     });
     const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
     const telemetry = mockKiStepTelemetry();
@@ -512,7 +514,7 @@ describe('getCreateKiStepDefinition', () => {
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
-      checkWritePrivilege: jest.fn().mockResolvedValue(false),
+      checkWritePrivilege: vi.fn().mockResolvedValue(false),
       verifyKi,
       ...telemetry,
     });
@@ -530,7 +532,7 @@ describe('getCreateKiStepDefinition', () => {
   it('reports an aborted event when the run was cancelled', async () => {
     const abortController = new AbortController();
     const esClient = {
-      index: jest.fn().mockImplementation(() => {
+      index: vi.fn().mockImplementation(() => {
         abortController.abort();
         return Promise.reject(new errors.RequestAbortedError('Request aborted'));
       }),
@@ -568,9 +570,9 @@ describe('getCreateKiStepDefinition', () => {
     const cause = new Error('ES connection refused');
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki: kiInput },
-      esClient: { index: jest.fn() },
+      esClient: { index: vi.fn() },
     });
-    const service = { get: jest.fn().mockRejectedValue(cause) } as unknown as AiIndexService;
+    const service = { get: vi.fn().mockRejectedValue(cause) } as unknown as AiIndexService;
 
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
@@ -594,7 +596,7 @@ describe('getCreateKiStepDefinition', () => {
 
     it('runs the verifiers before writing and returns their results', async () => {
       verifyKi.mockResolvedValue(passed);
-      const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+      const esClient = { index: vi.fn().mockResolvedValue({ _id: 'ki-1' }) };
       const context = createMockStepContext({
         input: { ai_index_id: 'my-ai-index', ki: kiInput, verifiers },
         esClient,
@@ -622,7 +624,7 @@ describe('getCreateKiStepDefinition', () => {
 
     it('skips the write when verification fails', async () => {
       verifyKi.mockResolvedValue(failed);
-      const esClient = { index: jest.fn() };
+      const esClient = { index: vi.fn() };
       const context = createMockStepContext({
         input: { ai_index_id: 'my-ai-index', ki: kiInput, verifiers },
         esClient,
@@ -649,7 +651,7 @@ describe('getCreateKiStepDefinition', () => {
     });
 
     it('checks the write privilege before running verifiers', async () => {
-      const esClient = { index: jest.fn() };
+      const esClient = { index: vi.fn() };
       const context = createMockStepContext({
         input: { ai_index_id: 'my-ai-index', ki: kiInput, verifiers },
         esClient,
@@ -659,7 +661,7 @@ describe('getCreateKiStepDefinition', () => {
       const { handler } = getCreateKiStepDefinition({
         getAiIndexService: () => service,
         isContextEngineEnabled: enabled,
-        checkWritePrivilege: jest.fn().mockResolvedValue(false),
+        checkWritePrivilege: vi.fn().mockResolvedValue(false),
         verifyKi,
         ...mockKiStepTelemetry(),
       });
@@ -672,7 +674,7 @@ describe('getCreateKiStepDefinition', () => {
     });
 
     it('does not run verifiers when none are given', async () => {
-      const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+      const esClient = { index: vi.fn().mockResolvedValue({ _id: 'ki-1' }) };
       const context = createMockStepContext({
         input: { ai_index_id: 'my-ai-index', ki: kiInput },
         esClient,
@@ -698,7 +700,7 @@ describe('getCreateKiStepDefinition', () => {
         message: 'Unknown verifier',
       });
       verifyKi.mockRejectedValue(cause);
-      const esClient = { index: jest.fn() };
+      const esClient = { index: vi.fn() };
       const context = createMockStepContext({
         input: { ai_index_id: 'my-ai-index', ki: kiInput, verifiers },
         esClient,

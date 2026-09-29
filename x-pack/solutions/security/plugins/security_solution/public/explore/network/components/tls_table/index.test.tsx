@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
@@ -16,10 +18,10 @@ import { networkModel } from '../../store';
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('Tls Table Component', () => {
-  const loadPage = jest.fn();
+  const loadPage = vi.fn();
   const defaultProps = {
     data: mockTlsData.edges,
     fakeTotalCount: getOr(50, 'fakeTotalCount', mockTlsData.pageInfo),
@@ -27,7 +29,7 @@ describe('Tls Table Component', () => {
     isInspect: false,
     loading: false,
     loadPage,
-    setQuerySkip: jest.fn(),
+    setQuerySkip: vi.fn(),
     showMorePagesIndicator: getOr(false, 'showMorePagesIndicator', mockTlsData.pageInfo),
     totalCount: 1,
     type: networkModel.NetworkType.details,

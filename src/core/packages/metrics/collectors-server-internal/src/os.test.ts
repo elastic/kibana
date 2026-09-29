@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 let mockGetOsResult: object = {};
-jest.mock('getos', () => (cb: Function) => cb(null, mockGetOsResult));
+vi.mock('getos', () => (cb: Function) => cb(null, mockGetOsResult));
 
 import { loggerMock } from '@kbn/logging-mocks';
 import os from 'os';
@@ -26,15 +28,15 @@ describe('OsMetricsCollector', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('collects platform info from the os package', async () => {
     const platform = 'darwin';
     const release = '10.14.1';
 
-    jest.spyOn(os, 'platform').mockImplementation(() => platform);
-    jest.spyOn(os, 'release').mockImplementation(() => release);
+    vi.spyOn(os, 'platform').mockImplementation(() => platform);
+    vi.spyOn(os, 'release').mockImplementation(() => release);
 
     const metrics = await collector.collect();
 
@@ -45,7 +47,7 @@ describe('OsMetricsCollector', () => {
   it('collects distribution info when platform is linux', async () => {
     const platform = 'linux';
 
-    jest.spyOn(os, 'platform').mockImplementation(() => platform);
+    vi.spyOn(os, 'platform').mockImplementation(() => platform);
 
     const metrics = await collector.collect();
 
@@ -58,7 +60,7 @@ describe('OsMetricsCollector', () => {
 
     const platform = 'linux';
 
-    jest.spyOn(os, 'platform').mockImplementation(() => platform);
+    vi.spyOn(os, 'platform').mockImplementation(() => platform);
 
     const metrics = await collector.collect();
 
@@ -70,8 +72,8 @@ describe('OsMetricsCollector', () => {
     const totalMemory = 1457886;
     const freeMemory = 456786;
 
-    jest.spyOn(os, 'totalmem').mockImplementation(() => totalMemory);
-    jest.spyOn(os, 'freemem').mockImplementation(() => freeMemory);
+    vi.spyOn(os, 'totalmem').mockImplementation(() => totalMemory);
+    vi.spyOn(os, 'freemem').mockImplementation(() => freeMemory);
 
     const metrics = await collector.collect();
 
@@ -83,7 +85,7 @@ describe('OsMetricsCollector', () => {
   it('collects uptime info from the os package', async () => {
     const uptime = 325;
 
-    jest.spyOn(os, 'uptime').mockImplementation(() => uptime);
+    vi.spyOn(os, 'uptime').mockImplementation(() => uptime);
 
     const metrics = await collector.collect();
 
@@ -95,7 +97,7 @@ describe('OsMetricsCollector', () => {
     const fiveMinLoad = 2;
     const fifteenMinLoad = 3;
 
-    jest.spyOn(os, 'loadavg').mockImplementation(() => [oneMinLoad, fiveMinLoad, fifteenMinLoad]);
+    vi.spyOn(os, 'loadavg').mockImplementation(() => [oneMinLoad, fiveMinLoad, fifteenMinLoad]);
 
     const metrics = await collector.collect();
 

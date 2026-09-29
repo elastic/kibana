@@ -5,24 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of, throwError } from 'rxjs';
 import { renderHook } from '@testing-library/react';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../lib/kibana';
 import { useResolvedLatestEntitiesIndexName } from './use_resolved_latest_entities_index_name';
 
-jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
-jest.mock('../lib/kibana', () => ({ useKibana: jest.fn() }));
+vi.mock('@kbn/react-query', () => {
+      const mocked = { useQuery: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/kibana', () => {
+      const mocked = { useKibana: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseQuery = useQuery as jest.Mock;
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseQuery = useQuery as Mock;
+const mockUseKibana = useKibana as Mock;
 
 const NEUTRAL_INDEX = '.entities.v2.latest.default-00001';
 const LEGACY_INDEX = '.entities.v2.latest.security_default-00001';
 const COLLIDING_SPACE_ALIAS = 'entities-latest-security_default';
 
 describe('useResolvedLatestEntitiesIndexName', () => {
-  const mockSearch = jest.fn();
+  const mockSearch = vi.fn();
 
   const shardsResponse = (total: number) => of({ rawResponse: { _shards: { total } } });
 
@@ -33,7 +42,7 @@ describe('useResolvedLatestEntitiesIndexName', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: { data: { search: { search: mockSearch } } },
     });

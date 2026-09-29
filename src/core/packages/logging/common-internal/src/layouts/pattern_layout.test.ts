@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SnapshotSerializer } from 'vitest';
+
 import stripAnsi from 'strip-ansi';
 import hasAnsi from 'has-ansi';
 import type { LogRecord } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { PatternLayout } from './pattern_layout';
 
-const stripAnsiSnapshotSerializer: jest.SnapshotSerializerPlugin = {
+const stripAnsiSnapshotSerializer: SnapshotSerializer = {
   serialize(value: string) {
     return stripAnsi(value);
   },

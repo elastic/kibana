@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -18,18 +20,24 @@ import { saveTemplate, useLoadIndexTemplate } from '../../services/api';
 import { TemplateClone } from './template_clone';
 import type { UseRequestResponse, Error as EsUiSharedError } from '../../../shared_imports';
 
-jest.mock('../../services/api', () => ({
-  ...jest.requireActual('../../services/api'),
-  saveTemplate: jest.fn(),
-  useLoadIndexTemplate: jest.fn(),
-}));
+vi.mock('../../services/api', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../services/api')),
+      saveTemplate: vi.fn(),
+      useLoadIndexTemplate: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../app_context', () => ({
-  ...jest.requireActual('../../app_context'),
-  useAppContext: jest.fn(() => ({
-    config: { enableLegacyTemplates: true },
-  })),
-}));
+vi.mock('../../app_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../app_context')),
+      useAppContext: vi.fn(() => ({
+        config: { enableLegacyTemplates: true },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 interface TemplateFormMockProps {
   defaultValue: TemplateDeserialized;
@@ -37,8 +45,8 @@ interface TemplateFormMockProps {
   title: React.ReactNode;
 }
 
-const mockTemplateFormPropsSpy = jest.fn();
-jest.mock('../../components', () => ({
+const mockTemplateFormPropsSpy = vi.fn();
+vi.mock('../../components', () => ({
   __esModule: true,
   TemplateForm: (props: TemplateFormMockProps) => {
     mockTemplateFormPropsSpy(props);
@@ -57,15 +65,18 @@ jest.mock('../../components', () => ({
   },
 }));
 
-jest.mock('../../../shared_imports', () => ({
-  PageLoading: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="pageLoading">{children}</div>
-  ),
-  PageError: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
-    <div data-test-subj={dataTestSubj ?? 'pageError'} />
-  ),
-  attemptToURIDecode: (value: string) => value,
-}));
+vi.mock('../../../shared_imports', () => {
+      const mocked = {
+      PageLoading: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="pageLoading">{children}</div>
+      ),
+      PageError: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
+        <div data-test-subj={dataTestSubj ?? 'pageError'} />
+      ),
+      attemptToURIDecode: (value: string) => value,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
@@ -121,22 +132,22 @@ const getUseRequestMock = <T,>({
   isLoading,
   error,
   data,
-  resendRequest: jest.fn(),
+  resendRequest: vi.fn(),
 });
 
 describe('TemplateClone', () => {
   beforeEach(() => {
-    breadcrumbService.setup(jest.fn());
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    breadcrumbService.setup(vi.fn());
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
     mockTemplateFormPropsSpy.mockClear();
     const okResponse: Awaited<ReturnType<typeof saveTemplate>> = { data: null, error: null };
-    jest.mocked(saveTemplate).mockResolvedValue(okResponse);
+    vi.mocked(saveTemplate).mockResolvedValue(okResponse);
   });
 
   describe('WHEN the template is loading', () => {
     it('SHOULD render the loading state', () => {
-      jest
+      vi
         .mocked(useLoadIndexTemplate)
         .mockReturnValue(
           getUseRequestMock<TemplateDeserialized>({ isLoading: true, error: null, data: null })
@@ -151,7 +162,7 @@ describe('TemplateClone', () => {
 
   describe('WHEN the template load fails', () => {
     it('SHOULD render the error state', () => {
-      jest.mocked(useLoadIndexTemplate).mockReturnValue(
+      vi.mocked(useLoadIndexTemplate).mockReturnValue(
         getUseRequestMock<TemplateDeserialized>({
           isLoading: false,
           error: createRequestError('boom'),
@@ -176,12 +187,12 @@ describe('TemplateClone', () => {
         indexMode: 'standard',
         template: { settings: { index: { number_of_shards: 1 } } },
       });
-      jest
+      vi
         .mocked(useLoadIndexTemplate)
         .mockReturnValue(getUseRequestMock({ isLoading: false, error: null, data: template }));
 
       const { history, location, match } = createRouterProps({ name: template.name });
-      const pushSpy = jest.spyOn(history, 'push');
+      const pushSpy = vi.spyOn(history, 'push');
 
       renderWithProviders(<TemplateClone match={match} location={location} history={history} />);
 
@@ -198,7 +209,7 @@ describe('TemplateClone', () => {
         expect(saveTemplate).toHaveBeenCalledTimes(1);
       });
 
-      const [savedTemplate, cloneFlag] = jest.mocked(saveTemplate).mock.calls[0];
+      const [savedTemplate, cloneFlag] = vi.mocked(saveTemplate).mock.calls[0];
 
       expect(savedTemplate).toEqual({
         ...template,

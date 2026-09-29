@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { set } from '@kbn/safer-lodash-set';
 import Boom from '@hapi/boom';
 import type { SavedObjectsSearchOptions } from '@kbn/core-saved-objects-api-server';
@@ -49,7 +52,7 @@ describe('search', () => {
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let serializer: jest.Mocked<SavedObjectsSerializer>;
+  let serializer: Mocked<SavedObjectsSerializer>;
   let extensions: SavedObjectsExtensions;
   let options: SavedObjectsSearchOptions;
 
@@ -60,8 +63,8 @@ describe('search', () => {
     client = elasticsearchClientMock.createElasticsearchClient();
     migrator = kibanaMigratorMock.create();
     documentMigrator.prepareMigrations();
-    migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
-    migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+    migrator.migrateDocument = vi.fn().mockImplementation(documentMigrator.migrate);
+    migrator.runMigrations = vi.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
     extensions = {};
     options = { type: 'index-pattern', namespaces: ['foo-namespace'] };
@@ -262,7 +265,7 @@ describe('search', () => {
   });
 
   describe('with spaces extension', () => {
-    let spacesExtension!: jest.Mocked<ISavedObjectsSpacesExtension>;
+    let spacesExtension!: Mocked<ISavedObjectsSpacesExtension>;
 
     beforeEach(() => {
       spacesExtension = savedObjectsExtensionsMock.createSpacesExtension();
@@ -306,7 +309,7 @@ describe('search', () => {
   });
 
   describe('with security extension', () => {
-    let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
+    let securityExtension: Mocked<ISavedObjectsSecurityExtension>;
 
     beforeEach(() => {
       securityExtension = savedObjectsExtensionsMock.createSecurityExtension();

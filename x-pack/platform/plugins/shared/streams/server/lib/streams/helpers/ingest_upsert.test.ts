@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Streams } from '@kbn/streams-schema';
 import { getStreamAttachmentIds, updateClassicIngest, updateWiredIngest } from './ingest_upsert';
 
@@ -12,15 +14,15 @@ const now = '2026-06-15T12:14:50.416Z';
 const queryStreams = [{ name: 'logs.ecs.android.pixel1qs' }];
 
 const createMockClients = (definition: Streams.ingest.all.Definition) => {
-  const upsertStream = jest.fn().mockResolvedValue({ acknowledged: true, result: 'updated' });
+  const upsertStream = vi.fn().mockResolvedValue({ acknowledged: true, result: 'updated' });
 
   return {
     streamsClient: {
-      getStream: jest.fn().mockResolvedValue(definition),
+      getStream: vi.fn().mockResolvedValue(definition),
       upsertStream,
     },
     attachmentClient: {
-      getAttachments: jest.fn().mockResolvedValue([]),
+      getAttachments: vi.fn().mockResolvedValue([]),
     },
     upsertStream,
   };
@@ -107,7 +109,7 @@ describe('ingest_upsert', () => {
   describe('getStreamAttachmentIds', () => {
     it('partitions attachments into dashboard and rule ids', async () => {
       const attachmentClient = {
-        getAttachments: jest.fn().mockResolvedValue([
+        getAttachments: vi.fn().mockResolvedValue([
           { type: 'dashboard', id: 'dashboard-1' },
           { type: 'rule', id: 'rule-1' },
           { type: 'dashboard', id: 'dashboard-2' },
@@ -128,7 +130,7 @@ describe('ingest_upsert', () => {
     });
 
     it('returns empty arrays when the stream has no attachments', async () => {
-      const attachmentClient = { getAttachments: jest.fn().mockResolvedValue([]) };
+      const attachmentClient = { getAttachments: vi.fn().mockResolvedValue([]) };
 
       const result = await getStreamAttachmentIds({
         name: 'logs.otel',

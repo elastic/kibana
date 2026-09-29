@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorPendingWrapper } from './monitor_pending_wrapper';
@@ -17,13 +19,13 @@ describe('MonitorPendingWrapper', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(selectedMonitorHooks, 'useSelectedMonitor').mockReturnValue({
+    vi.clearAllMocks();
+    vi.spyOn(selectedMonitorHooks, 'useSelectedMonitor').mockReturnValue({
       monitor: {
         id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
       },
     } as ReturnType<typeof selectedMonitorHooks.useSelectedMonitor>);
-    jest.spyOn(locationHooks, 'useSelectedLocation').mockReturnValue({
+    vi.spyOn(locationHooks, 'useSelectedLocation').mockReturnValue({
       label: 'North America - US Central',
     } as ReturnType<typeof locationHooks.useSelectedLocation>);
   });

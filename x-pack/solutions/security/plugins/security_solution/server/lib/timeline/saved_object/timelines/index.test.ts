@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FrameworkRequest } from '../../../framework';
 import { mockGetTimelineValue, mockSavedObject } from '../../__mocks__/import_timelines';
 import { mockTimeline } from '../../__mocks__/create_timelines';
@@ -46,25 +49,37 @@ import { DATA_VIEW_ID_REF_NAME, SAVED_QUERY_ID_REF_NAME, SAVED_QUERY_TYPE } from
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { SavedObjectsUpdateResponse } from '@kbn/core/server';
 
-jest.mock('./convert_saved_object_to_savedtimeline', () => ({
-  convertSavedObjectToSavedTimeline: jest.fn(),
-}));
+vi.mock('./convert_saved_object_to_savedtimeline', () => {
+      const mocked = {
+      convertSavedObjectToSavedTimeline: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../notes/saved_object', () => ({
-  deleteNotesByTimelineId: jest.fn().mockResolvedValue(undefined),
-  getNotesByTimelineId: jest.fn().mockResolvedValue([]),
-  persistNote: jest.fn(),
-}));
+vi.mock('../notes/saved_object', () => {
+      const mocked = {
+      deleteNotesByTimelineId: vi.fn().mockResolvedValue(undefined),
+      getNotesByTimelineId: vi.fn().mockResolvedValue([]),
+      persistNote: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../pinned_events', () => ({
-  deleteAllPinnedEventsOnTimeline: jest.fn().mockResolvedValue(undefined),
-  getAllPinnedEventsByTimelineId: jest.fn().mockResolvedValue([]),
-  persistPinnedEventOnTimeline: jest.fn(),
-}));
+vi.mock('../pinned_events', () => {
+      const mocked = {
+      deleteAllPinnedEventsOnTimeline: vi.fn().mockResolvedValue(undefined),
+      getAllPinnedEventsByTimelineId: vi.fn().mockResolvedValue([]),
+      persistPinnedEventOnTimeline: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../saved_search', () => ({
-  deleteSearchByTimelineId: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../saved_search', () => {
+      const mocked = {
+      deleteSearchByTimelineId: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('saved_object', () => {
   describe('convertStringToBase64', () => {
@@ -84,11 +99,11 @@ describe('saved_object', () => {
   });
 
   describe('getExistingPrepackagedTimelines', () => {
-    let mockFindSavedObject: jest.Mock;
+    let mockFindSavedObject: Mock;
     let mockRequest: FrameworkRequest;
 
     beforeEach(() => {
-      mockFindSavedObject = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+      mockFindSavedObject = vi.fn().mockResolvedValue({ saved_objects: [], total: 0 });
       mockRequest = {
         user: {
           username: 'username',
@@ -107,8 +122,8 @@ describe('saved_object', () => {
 
     afterEach(() => {
       mockFindSavedObject.mockClear();
-      (getNotesByTimelineId as jest.Mock).mockClear();
-      (getAllPinnedEventsByTimelineId as jest.Mock).mockClear();
+      (getNotesByTimelineId as Mock).mockClear();
+      (getAllPinnedEventsByTimelineId as Mock).mockClear();
     });
 
     test('should send correct options if countsOnly is true', async () => {
@@ -151,7 +166,7 @@ describe('saved_object', () => {
   });
 
   describe('getAllTimeline', () => {
-    let mockFindSavedObject: jest.Mock;
+    let mockFindSavedObject: Mock;
     let mockRequest: FrameworkRequest;
     const pageInfo = {
       pageSize: 10,
@@ -159,8 +174,8 @@ describe('saved_object', () => {
     };
     let result = null as unknown as GetTimelinesResponse;
     beforeEach(async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(mockGetTimelineValue);
-      mockFindSavedObject = jest
+      (convertSavedObjectToSavedTimeline as Mock).mockReturnValue(mockGetTimelineValue);
+      mockFindSavedObject = vi
         .fn()
         .mockResolvedValueOnce({ saved_objects: [mockSavedObject], total: 1 })
         .mockResolvedValueOnce({ saved_objects: [], total: 0 })
@@ -187,8 +202,8 @@ describe('saved_object', () => {
 
     afterEach(() => {
       mockFindSavedObject.mockClear();
-      (getNotesByTimelineId as jest.Mock).mockClear();
-      (getAllPinnedEventsByTimelineId as jest.Mock).mockClear();
+      (getNotesByTimelineId as Mock).mockClear();
+      (getAllPinnedEventsByTimelineId as Mock).mockClear();
     });
 
     test('should send correct options if no filters applies', async () => {
@@ -256,11 +271,11 @@ describe('saved_object', () => {
     });
 
     test('should call getNotesByTimelineId', async () => {
-      expect((getNotesByTimelineId as jest.Mock).mock.calls[0][1]).toEqual(mockSavedObject.id);
+      expect((getNotesByTimelineId as Mock).mock.calls[0][1]).toEqual(mockSavedObject.id);
     });
 
     test('should call getAllPinnedEventsByTimelineId', async () => {
-      expect((getAllPinnedEventsByTimelineId as jest.Mock).mock.calls[0][1]).toEqual(
+      expect((getAllPinnedEventsByTimelineId as Mock).mock.calls[0][1]).toEqual(
         mockSavedObject.id
       );
     });
@@ -314,12 +329,12 @@ describe('saved_object', () => {
   });
 
   describe('resolveTimelineOrNull', () => {
-    let mockResolveSavedObject: jest.Mock;
+    let mockResolveSavedObject: Mock;
     let mockRequest: FrameworkRequest;
     let result: ResolvedTimeline | null = null;
     beforeEach(async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(mockResolvedTimeline);
-      mockResolveSavedObject = jest.fn().mockReturnValue(mockResolvedSavedObject);
+      (convertSavedObjectToSavedTimeline as Mock).mockReturnValue(mockResolvedTimeline);
+      mockResolveSavedObject = vi.fn().mockReturnValue(mockResolvedSavedObject);
       mockRequest = {
         user: {
           username: 'username',
@@ -340,18 +355,18 @@ describe('saved_object', () => {
 
     afterEach(() => {
       mockResolveSavedObject.mockClear();
-      (getNotesByTimelineId as jest.Mock).mockClear();
-      (getAllPinnedEventsByTimelineId as jest.Mock).mockClear();
+      (getNotesByTimelineId as Mock).mockClear();
+      (getAllPinnedEventsByTimelineId as Mock).mockClear();
     });
 
     test('should call getNotesByTimelineId', async () => {
-      expect((getNotesByTimelineId as jest.Mock).mock.calls[0][1]).toEqual(
+      expect((getNotesByTimelineId as Mock).mock.calls[0][1]).toEqual(
         mockResolvedSavedObject.saved_object.id
       );
     });
 
     test('should call getAllPinnedEventsByTimelineId', async () => {
-      expect((getAllPinnedEventsByTimelineId as jest.Mock).mock.calls[0][1]).toEqual(
+      expect((getAllPinnedEventsByTimelineId as Mock).mock.calls[0][1]).toEqual(
         mockResolvedSavedObject.saved_object.id
       );
     });
@@ -361,7 +376,7 @@ describe('saved_object', () => {
     });
 
     test('returns null when the resolved timeline is a draft owned by a different user', async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue({
+      (convertSavedObjectToSavedTimeline as Mock).mockReturnValue({
         ...mockResolvedTimeline,
         status: TimelineStatusEnum.draft,
         createdBy: 'other-user',
@@ -387,15 +402,15 @@ describe('saved_object', () => {
   });
 
   describe('getTimelineOrNull', () => {
-    let mockGetSavedObject: jest.Mock;
-    let mockFindSavedObject: jest.Mock;
+    let mockGetSavedObject: Mock;
+    let mockFindSavedObject: Mock;
     let mockRequest: FrameworkRequest;
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(mockResolvedTimeline);
-      mockGetSavedObject = jest.fn().mockResolvedValue(mockResolvedSavedObject.saved_object);
-      mockFindSavedObject = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+      vi.clearAllMocks();
+      (convertSavedObjectToSavedTimeline as Mock).mockReturnValue(mockResolvedTimeline);
+      mockGetSavedObject = vi.fn().mockResolvedValue(mockResolvedSavedObject.saved_object);
+      mockFindSavedObject = vi.fn().mockResolvedValue({ saved_objects: [], total: 0 });
       mockRequest = {
         user: { username: 'username' },
         context: {
@@ -412,12 +427,12 @@ describe('saved_object', () => {
     });
 
     afterEach(() => {
-      (getNotesByTimelineId as jest.Mock).mockClear();
-      (getAllPinnedEventsByTimelineId as jest.Mock).mockClear();
+      (getNotesByTimelineId as Mock).mockClear();
+      (getAllPinnedEventsByTimelineId as Mock).mockClear();
     });
 
     test('returns the timeline when the requester is the owner of the draft', async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue({
+      (convertSavedObjectToSavedTimeline as Mock).mockReturnValue({
         ...mockResolvedTimeline,
         status: TimelineStatusEnum.draft,
         createdBy: 'username',
@@ -429,7 +444,7 @@ describe('saved_object', () => {
     });
 
     test('returns null when the fetched draft belongs to a different user', async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue({
+      (convertSavedObjectToSavedTimeline as Mock).mockReturnValue({
         ...mockResolvedTimeline,
         status: TimelineStatusEnum.draft,
         createdBy: 'other-user',
@@ -440,7 +455,7 @@ describe('saved_object', () => {
     });
 
     test('returns the timeline for a non-draft regardless of createdBy', async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue({
+      (convertSavedObjectToSavedTimeline as Mock).mockReturnValue({
         ...mockResolvedTimeline,
         status: TimelineStatusEnum.active,
         createdBy: 'other-user',
@@ -452,14 +467,14 @@ describe('saved_object', () => {
     });
   });
   describe('field migrator', () => {
-    let mockResolveSavedObject: jest.Mock;
-    const convertSavedObjectToSavedTimelineMock: jest.Mock =
-      convertSavedObjectToSavedTimeline as jest.Mock;
+    let mockResolveSavedObject: Mock;
+    const convertSavedObjectToSavedTimelineMock: Mock =
+      convertSavedObjectToSavedTimeline as Mock;
     let mockRequest: FrameworkRequest;
     beforeEach(async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       convertSavedObjectToSavedTimelineMock.mockReturnValue(mockResolvedTimeline);
-      mockResolveSavedObject = jest.fn().mockReturnValue({
+      mockResolveSavedObject = vi.fn().mockReturnValue({
         ...mockResolvedSavedObject,
         saved_object: {
           ...mockResolvedSavedObject.saved_object,
@@ -503,8 +518,8 @@ describe('saved_object', () => {
   });
 
   describe('updatePartialSavedTimeline', () => {
-    let mockSOClientGet: jest.Mock;
-    let mockSOClientUpdate: jest.Mock;
+    let mockSOClientGet: Mock;
+    let mockSOClientUpdate: Mock;
     let mockRequest: FrameworkRequest;
 
     const patchTimelineRequest: SavedTimeline = {
@@ -512,14 +527,14 @@ describe('saved_object', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
-      mockSOClientUpdate = jest.fn(() => ({
+      mockSOClientUpdate = vi.fn(() => ({
         ...mockResolvedSavedObject.saved_object,
         attributes: {},
       }));
 
-      mockSOClientGet = jest.fn(async () => ({
+      mockSOClientGet = vi.fn(async () => ({
         ...mockResolvedSavedObject.saved_object,
         references: [
           {
@@ -559,11 +574,11 @@ describe('saved_object', () => {
   });
 
   describe('get draft timelines', () => {
-    let mockFindSavedObject: jest.Mock;
+    let mockFindSavedObject: Mock;
     let mockRequest: FrameworkRequest;
 
     beforeEach(() => {
-      mockFindSavedObject = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+      mockFindSavedObject = vi.fn().mockResolvedValue({ saved_objects: [], total: 0 });
       mockRequest = {
         user: {
           username: 'username',
@@ -582,8 +597,8 @@ describe('saved_object', () => {
 
     afterEach(() => {
       mockFindSavedObject.mockClear();
-      (getNotesByTimelineId as jest.Mock).mockClear();
-      (getAllPinnedEventsByTimelineId as jest.Mock).mockClear();
+      (getNotesByTimelineId as Mock).mockClear();
+      (getAllPinnedEventsByTimelineId as Mock).mockClear();
     });
 
     test('should get draft filtered by current user', async () => {
@@ -600,13 +615,13 @@ describe('saved_object', () => {
   });
 
   describe('Copy timeline', () => {
-    let mockFindSavedObject: jest.Mock;
+    let mockFindSavedObject: Mock;
     let mockRequest: FrameworkRequest;
-    let createSavedObject: jest.Mock;
+    let createSavedObject: Mock;
 
     beforeEach(() => {
-      mockFindSavedObject = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
-      createSavedObject = jest.fn().mockResolvedValue({
+      mockFindSavedObject = vi.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+      createSavedObject = vi.fn().mockResolvedValue({
         id: '1',
         version: '2323r23',
         attributes: {
@@ -624,7 +639,7 @@ describe('saved_object', () => {
               client: {
                 find: mockFindSavedObject,
                 create: createSavedObject,
-                get: jest.fn(async () => ({
+                get: vi.fn(async () => ({
                   ...mockResolvedSavedObject.saved_object,
                 })),
               },
@@ -636,9 +651,9 @@ describe('saved_object', () => {
 
     afterEach(() => {
       mockFindSavedObject.mockClear();
-      (getNotesByTimelineId as jest.Mock).mockClear();
-      (persistNote as jest.Mock).mockClear();
-      (getAllPinnedEventsByTimelineId as jest.Mock).mockClear();
+      (getNotesByTimelineId as Mock).mockClear();
+      (persistNote as Mock).mockClear();
+      (getAllPinnedEventsByTimelineId as Mock).mockClear();
     });
 
     it('should resolve all associated saved objects and copy those', async () => {
@@ -648,12 +663,12 @@ describe('saved_object', () => {
         version: '23d23f',
         note: 'test note',
       };
-      (getNotesByTimelineId as jest.Mock).mockResolvedValue([note]);
+      (getNotesByTimelineId as Mock).mockResolvedValue([note]);
       const pinnedEvent = {
         timelineId: 'original_id',
         eventId: 'randomEventId',
       };
-      (getAllPinnedEventsByTimelineId as jest.Mock).mockResolvedValue([pinnedEvent]);
+      (getAllPinnedEventsByTimelineId as Mock).mockResolvedValue([pinnedEvent]);
 
       const originalId = 'original_id';
       const res = await copyTimeline(
@@ -691,8 +706,8 @@ describe('saved_object', () => {
   });
 
   describe('deleteTimeline', () => {
-    let mockDeleteSavedObject: jest.Mock;
-    let mockBulkGetSavedObject: jest.Mock;
+    let mockDeleteSavedObject: Mock;
+    let mockBulkGetSavedObject: Mock;
     let mockRequest: FrameworkRequest;
 
     const buildActiveTimelineSO = (id: string, createdBy = 'username') => ({
@@ -710,9 +725,9 @@ describe('saved_object', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
-      mockBulkGetSavedObject = jest.fn();
+      vi.clearAllMocks();
+      mockDeleteSavedObject = vi.fn().mockResolvedValue(undefined);
+      mockBulkGetSavedObject = vi.fn();
       mockRequest = {
         user: { username: 'username' },
         context: {
@@ -843,8 +858,8 @@ describe('saved_object', () => {
   });
 
   describe('getAllTimelineByIds', () => {
-    let mockBulkGet: jest.Mock;
-    let mockFindSavedObject: jest.Mock;
+    let mockBulkGet: Mock;
+    let mockFindSavedObject: Mock;
     let mockRequest: FrameworkRequest;
 
     // Override type intentionally widened: tests need to set fields such as `status`,
@@ -871,11 +886,11 @@ describe('saved_object', () => {
 
     beforeEach(() => {
       // Reset (not just clear) so queued mockReturnValueOnce calls do not leak across tests.
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockReset();
-      (getNotesByTimelineId as jest.Mock).mockReset().mockResolvedValue([]);
-      (getAllPinnedEventsByTimelineId as jest.Mock).mockReset().mockResolvedValue([]);
-      mockFindSavedObject = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
-      mockBulkGet = jest.fn();
+      (convertSavedObjectToSavedTimeline as Mock).mockReset();
+      (getNotesByTimelineId as Mock).mockReset().mockResolvedValue([]);
+      (getAllPinnedEventsByTimelineId as Mock).mockReset().mockResolvedValue([]);
+      mockFindSavedObject = vi.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+      mockBulkGet = vi.fn();
       mockRequest = {
         user: { username: 'username' },
         context: {
@@ -889,7 +904,7 @@ describe('saved_object', () => {
     });
 
     test('uses bulkGet and never calls find', async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(buildTimeline());
+      (convertSavedObjectToSavedTimeline as Mock).mockReturnValue(buildTimeline());
       mockBulkGet.mockResolvedValue({ saved_objects: [buildSavedObject('id-1')] });
 
       await getAllTimelineByIds(mockRequest, ['id-1'], defaultOptions);
@@ -899,7 +914,7 @@ describe('saved_object', () => {
     });
 
     test('deduplicates ids before bulkGet', async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(buildTimeline());
+      (convertSavedObjectToSavedTimeline as Mock).mockReturnValue(buildTimeline());
       mockBulkGet.mockResolvedValue({ saved_objects: [buildSavedObject('id-1')] });
 
       await getAllTimelineByIds(mockRequest, ['id-1', 'id-1', 'id-2'], defaultOptions);
@@ -911,7 +926,7 @@ describe('saved_object', () => {
     });
 
     test('excludes saved objects that returned an error', async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(buildTimeline());
+      (convertSavedObjectToSavedTimeline as Mock).mockReturnValue(buildTimeline());
       mockBulkGet.mockResolvedValue({
         saved_objects: [
           buildSavedObject('id-1'),
@@ -926,7 +941,7 @@ describe('saved_object', () => {
     });
 
     test('applies search filter against title and description', async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock)
+      (convertSavedObjectToSavedTimeline as Mock)
         .mockReturnValueOnce(buildTimeline({ title: 'Phishing investigation' }))
         .mockReturnValueOnce(buildTimeline({ title: 'Unrelated' }));
       mockBulkGet.mockResolvedValue({
@@ -943,7 +958,7 @@ describe('saved_object', () => {
     });
 
     test('sorts by the requested field/order', async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock)
+      (convertSavedObjectToSavedTimeline as Mock)
         .mockReturnValueOnce(buildTimeline({ updated: 1000 }))
         .mockReturnValueOnce(buildTimeline({ updated: 3000 }))
         .mockReturnValueOnce(buildTimeline({ updated: 2000 }));
@@ -964,7 +979,7 @@ describe('saved_object', () => {
     });
 
     test('paginates the in-memory result set', async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock)
+      (convertSavedObjectToSavedTimeline as Mock)
         .mockReturnValueOnce(buildTimeline({ savedObjectId: 'a' }))
         .mockReturnValueOnce(buildTimeline({ savedObjectId: 'b' }))
         .mockReturnValueOnce(buildTimeline({ savedObjectId: 'c' }));
@@ -987,7 +1002,7 @@ describe('saved_object', () => {
     });
 
     test('returns empty page when pageIndex is beyond the result set', async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(buildTimeline());
+      (convertSavedObjectToSavedTimeline as Mock).mockReturnValue(buildTimeline());
       mockBulkGet.mockResolvedValue({ saved_objects: [buildSavedObject('id-1')] });
 
       const result = await getAllTimelineByIds(mockRequest, ['id-1'], {
@@ -1000,7 +1015,7 @@ describe('saved_object', () => {
     });
 
     test('filters by timelineType', async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock)
+      (convertSavedObjectToSavedTimeline as Mock)
         .mockReturnValueOnce(buildTimeline({ timelineType: 'template' }))
         .mockReturnValueOnce(buildTimeline({ timelineType: 'default' }));
       mockBulkGet.mockResolvedValue({
@@ -1017,7 +1032,7 @@ describe('saved_object', () => {
     });
 
     test('hides drafts unless status=draft is requested', async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock)
+      (convertSavedObjectToSavedTimeline as Mock)
         .mockReturnValueOnce(buildTimeline({ status: 'active' }))
         .mockReturnValueOnce(buildTimeline({ status: 'draft' }));
       mockBulkGet.mockResolvedValue({
@@ -1031,7 +1046,7 @@ describe('saved_object', () => {
     });
 
     test('filters by onlyUserFavorite using the current user', async () => {
-      (convertSavedObjectToSavedTimeline as jest.Mock)
+      (convertSavedObjectToSavedTimeline as Mock)
         .mockReturnValueOnce(
           buildTimeline({ favorite: [{ userName: 'username', favoriteDate: 1 }] })
         )
@@ -1055,8 +1070,8 @@ describe('saved_object', () => {
   });
 
   describe('updateTimeline (via persistTimeline)', () => {
-    let mockSOClientGet: jest.Mock;
-    let mockSOClientUpdate: jest.Mock;
+    let mockSOClientGet: Mock;
+    let mockSOClientUpdate: Mock;
     let mockRequest: FrameworkRequest;
 
     const buildSavedObjectForUpdate = (overrides: Record<string, unknown> = {}) => ({
@@ -1069,20 +1084,20 @@ describe('saved_object', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
-      mockSOClientUpdate = jest.fn().mockResolvedValue({
+      mockSOClientUpdate = vi.fn().mockResolvedValue({
         ...mockResolvedSavedObject.saved_object,
         attributes: {},
       });
 
-      mockSOClientGet = jest
+      mockSOClientGet = vi
         .fn()
         .mockResolvedValue(
           buildSavedObjectForUpdate({ status: TimelineStatusEnum.active, createdBy: 'username' })
         );
 
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue({
+      (convertSavedObjectToSavedTimeline as Mock).mockReturnValue({
         ...mockResolvedTimeline,
         status: TimelineStatusEnum.active,
         createdBy: 'username',
@@ -1149,7 +1164,7 @@ describe('saved_object', () => {
   });
 
   describe('getAllTimelineByIds draft ownership', () => {
-    let mockBulkGet: jest.Mock;
+    let mockBulkGet: Mock;
     let mockRequest: FrameworkRequest;
 
     const buildSO = (
@@ -1173,16 +1188,16 @@ describe('saved_object', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockImplementation((so) => ({
+      vi.clearAllMocks();
+      (convertSavedObjectToSavedTimeline as Mock).mockImplementation((so) => ({
         ...mockGetTimelineValue,
         savedObjectId: so.id,
         status: so.attributes.status,
         createdBy: so.attributes.createdBy,
       }));
-      (getNotesByTimelineId as jest.Mock).mockResolvedValue([]);
-      (getAllPinnedEventsByTimelineId as jest.Mock).mockResolvedValue([]);
-      mockBulkGet = jest.fn();
+      (getNotesByTimelineId as Mock).mockResolvedValue([]);
+      (getAllPinnedEventsByTimelineId as Mock).mockResolvedValue([]);
+      mockBulkGet = vi.fn();
       mockRequest = {
         user: { username: 'username' },
         context: {
@@ -1226,27 +1241,27 @@ describe('saved_object', () => {
   });
 
   describe('copyTimeline draft ownership', () => {
-    let mockGetSO: jest.Mock;
-    let mockCreateSO: jest.Mock;
+    let mockGetSO: Mock;
+    let mockCreateSO: Mock;
     let mockRequest: FrameworkRequest;
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      (getNotesByTimelineId as jest.Mock).mockResolvedValue([]);
-      (getAllPinnedEventsByTimelineId as jest.Mock).mockResolvedValue([]);
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue({
+      vi.clearAllMocks();
+      (getNotesByTimelineId as Mock).mockResolvedValue([]);
+      (getAllPinnedEventsByTimelineId as Mock).mockResolvedValue([]);
+      (convertSavedObjectToSavedTimeline as Mock).mockReturnValue({
         ...mockResolvedTimeline,
         status: TimelineStatusEnum.active,
         createdBy: 'username',
       });
 
-      mockCreateSO = jest.fn().mockResolvedValue({
+      mockCreateSO = vi.fn().mockResolvedValue({
         id: 'new-id',
         version: 'v1',
         attributes: { ...mockGetTimelineValue },
       });
 
-      mockGetSO = jest.fn().mockResolvedValue({
+      mockGetSO = vi.fn().mockResolvedValue({
         ...mockResolvedSavedObject.saved_object,
         attributes: {
           ...mockResolvedSavedObject.saved_object.attributes,
@@ -1329,8 +1344,8 @@ describe('saved_object', () => {
   });
 
   describe('getSelectedTimelines draft ownership', () => {
-    let mockBulkGet: jest.Mock;
-    let mockFindSO: jest.Mock;
+    let mockBulkGet: Mock;
+    let mockFindSO: Mock;
     let mockRequest: FrameworkRequest;
 
     const buildSO = (id: string, status: string, createdBy: string) => ({
@@ -1340,15 +1355,15 @@ describe('saved_object', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      (convertSavedObjectToSavedTimeline as jest.Mock).mockImplementation((so) => ({
+      vi.clearAllMocks();
+      (convertSavedObjectToSavedTimeline as Mock).mockImplementation((so) => ({
         ...mockGetTimelineValue,
         savedObjectId: so.id ?? so.attributes?.savedObjectId,
         status: so.attributes?.status,
         createdBy: so.attributes?.createdBy,
       }));
-      mockBulkGet = jest.fn();
-      mockFindSO = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+      mockBulkGet = vi.fn();
+      mockFindSO = vi.fn().mockResolvedValue({ saved_objects: [], total: 0 });
       mockRequest = {
         user: { username: 'username' },
         context: {

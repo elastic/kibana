@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { IntegrationDeprecation, INTEGRATION_DEPRECATION_SESSION_STORAGE_KEY } from '.';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 
-jest.mock('@kbn/observability-shared-plugin/public');
+vi.mock('@kbn/observability-shared-plugin/public');
 
 const DEPRECATION_TITLE = 'Migrate your Elastic Synthetics integration monitors';
 
@@ -19,10 +21,10 @@ describe('IntegrationDeprecation', () => {
 
   afterEach(() => {
     window.sessionStorage.clear();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
   it('shows deprecation notice when hasIntegrationMonitors is true', () => {
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+    vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: { hasIntegrationMonitors: true },
       refetch: () => null,
@@ -34,7 +36,7 @@ describe('IntegrationDeprecation', () => {
   });
 
   it('does not show deprecation notice when hasIntegrationMonitors is false', () => {
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+    vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: { hasIntegrationMonitors: false },
       refetch: () => null,
@@ -46,7 +48,7 @@ describe('IntegrationDeprecation', () => {
   });
 
   it('dismisses notification', () => {
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+    vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: { hasIntegrationMonitors: true },
       refetch: () => null,
@@ -60,7 +62,7 @@ describe('IntegrationDeprecation', () => {
   });
 
   it('does not show notification when session storage key is true', () => {
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+    vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: { hasIntegrationMonitors: true },
       refetch: () => null,

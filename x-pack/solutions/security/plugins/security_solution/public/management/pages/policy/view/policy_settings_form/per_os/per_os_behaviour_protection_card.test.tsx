@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { within } from '@testing-library/react';
@@ -22,11 +25,11 @@ import type { PerOsBehaviourProtectionCardProps } from './per_os_behaviour_prote
 import { PerOsBehaviourProtectionCard } from './per_os_behaviour_protection_card';
 import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
-jest.mock('../../../../../../common/hooks/use_license');
+vi.mock('../../../../../../common/hooks/use_license');
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 const BEHAVIOUR_OS_VALUES = [
   PolicyOperatingSystem.windows,
   PolicyOperatingSystem.mac,
@@ -50,7 +53,7 @@ describe('PerOsBehaviourProtectionCard', () => {
     renderResult.rerender(<PerOsBehaviourProtectionCard {...props} policy={nextPolicy} />);
   };
   const getUpdatedPolicy = (): PolicyConfig => {
-    const onChange = props.onChange as jest.Mock;
+    const onChange = props.onChange as Mock;
     return onChange.mock.calls[onChange.mock.calls.length - 1][0].updatedPolicy;
   };
 
@@ -61,7 +64,7 @@ describe('PerOsBehaviourProtectionCard', () => {
       .config.policy.value;
     props = {
       policy,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': testSubj.card,
     };
@@ -181,7 +184,7 @@ describe('PerOsBehaviourProtectionCard', () => {
     expect(afterMode.windows).toEqual(windowsBefore);
     expect(afterMode.linux).toEqual(linuxBefore);
 
-    (props.onChange as jest.Mock).mockClear();
+    (props.onChange as Mock).mockClear();
     rerender(afterMode);
     await userEvent.click(renderResult.getByTestId(testSubj.mac.reputationServiceCheckbox));
     const afterReputation = getUpdatedPolicy();
@@ -189,7 +192,7 @@ describe('PerOsBehaviourProtectionCard', () => {
     expect(afterReputation.windows).toEqual(windowsBefore);
     expect(afterReputation.linux).toEqual(linuxBefore);
 
-    (props.onChange as jest.Mock).mockClear();
+    (props.onChange as Mock).mockClear();
     rerender(afterReputation);
     await userEvent.click(renderResult.getByTestId(testSubj.mac.notifyUserCheckbox));
     const afterNotify = getUpdatedPolicy();
@@ -222,7 +225,7 @@ describe('PerOsBehaviourProtectionCard', () => {
       expectedOnPolicy[os].behavior_protection.reputation_service = true;
       expectedOnPolicy[os].popup.behavior_protection.enabled = true;
     }
-    (props.onChange as jest.Mock).mockClear();
+    (props.onChange as Mock).mockClear();
     rerender(afterOff);
 
     await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));

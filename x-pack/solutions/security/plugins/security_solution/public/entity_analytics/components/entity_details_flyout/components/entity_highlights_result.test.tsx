@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EntityHighlightsResult, joinSignalLabels } from './entity_highlights_result';
 import { TestProviders } from '../../../../common/mock';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 
-jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
 
-const mockUseBulkGetUserProfiles = useBulkGetUserProfiles as jest.Mock;
+const mockUseBulkGetUserProfiles = useBulkGetUserProfiles as Mock;
 
 describe('EntityHighlightsResult', () => {
-  const mockOnRefresh = jest.fn();
+  const mockOnRefresh = vi.fn();
 
   const defaultAssistantResult = {
     response: {
@@ -36,7 +39,7 @@ describe('EntityHighlightsResult', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseBulkGetUserProfiles.mockReturnValue({ data: [] });
   });
 
@@ -607,7 +610,7 @@ describe('EntityHighlightsResult', () => {
     });
 
     it('renders a dismiss affordance and calls onDismiss when it is clicked', () => {
-      const mockOnDismiss = jest.fn();
+      const mockOnDismiss = vi.fn();
 
       render(
         <EntityHighlightsResult

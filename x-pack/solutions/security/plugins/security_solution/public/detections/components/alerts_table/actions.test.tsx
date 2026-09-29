@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import sinon from 'sinon';
 import moment from 'moment';
 import set from '@kbn/safer-lodash-set/set';
@@ -62,11 +65,14 @@ import { of } from 'rxjs';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { defaultUdtHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 
-jest.mock('../../../timelines/containers/api', () => ({
-  getTimelineTemplate: jest.fn(),
-}));
+vi.mock('../../../timelines/containers/api', () => {
+      const mocked = {
+      getTimelineTemplate: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 export const getExceptionListItemSchemaMock = (
   overrides?: Partial<ExceptionListItemSchema>
@@ -130,12 +136,12 @@ describe('alert actions', () => {
   const anchor = '2020-03-01T17:59:46.349Z';
   const unix = moment(anchor).valueOf();
   let createTimeline: CreateTimeline;
-  let searchStrategyClient: jest.Mocked<ISearchStart>;
+  let searchStrategyClient: Mocked<ISearchStart>;
   let clock: sinon.SinonFakeTimers;
-  let mockKibanaServices: jest.Mock;
-  let mockGetExceptionFilter: jest.Mock;
-  let fetchMock: jest.Mock;
-  let toastMock: jest.Mock;
+  let mockKibanaServices: Mock;
+  let mockGetExceptionFilter: Mock;
+  let fetchMock: Mock;
+  let toastMock: Mock;
   const mockEcsData = mockTimelineData.map((item) => item.ecs);
   const eventIds = mockEcsData.map((ecs) => ecs._id);
 
@@ -268,14 +274,14 @@ describe('alert actions', () => {
     // jest carries state between mocked implementations when using
     // spyOn. So now we're doing all three of these.
     // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
-    jest.clearAllMocks();
-    mockGetExceptionFilter = jest.fn().mockResolvedValue(undefined);
+    vi.clearAllMocks();
+    mockGetExceptionFilter = vi.fn().mockResolvedValue(undefined);
 
-    createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;
-    mockKibanaServices = KibanaServices.get as jest.Mock;
+    createTimeline = vi.fn() as Mocked<CreateTimeline>;
+    mockKibanaServices = KibanaServices.get as Mock;
 
-    fetchMock = jest.fn();
-    toastMock = jest.fn();
+    fetchMock = vi.fn();
+    toastMock = vi.fn();
     mockKibanaServices.mockReturnValue({
       http: { fetch: fetchMock },
       notifications: { toasts: { addError: toastMock } },
@@ -283,10 +289,10 @@ describe('alert actions', () => {
 
     searchStrategyClient = {
       ...searchServiceMock.createStartContract(),
-      search: jest.fn().mockImplementation(() => of({ data: mockTimelineDetails })),
+      search: vi.fn().mockImplementation(() => of({ data: mockTimelineDetails })),
     };
 
-    (getTimelineTemplate as jest.Mock).mockResolvedValue(mockGetOneTimelineResult);
+    (getTimelineTemplate as Mock).mockResolvedValue(mockGetOneTimelineResult);
 
     clock = sinon.useFakeTimers(unix);
   });
@@ -458,7 +464,7 @@ describe('alert actions', () => {
             },
           },
         };
-        (getTimelineTemplate as jest.Mock).mockResolvedValue(mockTimelineResultModified);
+        (getTimelineTemplate as Mock).mockResolvedValue(mockTimelineResultModified);
 
         await sendAlertToTimelineAction({
           createTimeline,
@@ -466,14 +472,14 @@ describe('alert actions', () => {
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
-        const createTimelineArg = (createTimeline as jest.Mock).mock.calls[0][0];
+        const createTimelineArg = (createTimeline as Mock).mock.calls[0][0];
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimelineArg.timeline.kqlQuery.filterQuery.kuery.kind).toEqual('kuery');
       });
 
       test('it invokes createTimeline with default timeline if apolloClient throws', async () => {
-        (getTimelineTemplate as jest.Mock).mockImplementation(() => {
+        (getTimelineTemplate as Mock).mockImplementation(() => {
           throw new Error('Test error');
         });
 

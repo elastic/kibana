@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import sinon from 'sinon';
 import { errors } from '@elastic/elasticsearch';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
@@ -109,21 +112,27 @@ import { ErrorWithType } from '../lib/error_with_type';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
 const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
-jest.mock('uuid', () => ({
-  v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/wrap_scoped_cluster_client', () => ({
-  createWrappedScopedClusterClientFactory: jest.fn(),
-}));
+vi.mock('../lib/wrap_scoped_cluster_client', () => {
+      const mocked = {
+      createWrappedScopedClusterClientFactory: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/alerting_event_logger/alerting_event_logger');
-jest.mock('../monitoring/rule_result_service');
+vi.mock('../lib/alerting_event_logger/alerting_event_logger');
+vi.mock('../monitoring/rule_result_service');
 
-jest.mock('../rules_client/lib/get_alert_from_raw');
-const mockGetRuleFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
+vi.mock('../rules_client/lib/get_alert_from_raw');
+const mockGetRuleFromRaw = getAlertFromRaw as MockedFunction<typeof getAlertFromRaw>;
 
-jest.spyOn(getExecutorServicesModule, 'getExecutorServices');
+vi.spyOn(getExecutorServicesModule, 'getExecutorServices');
 
 let fakeTimer: sinon.SinonFakeTimers;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
@@ -166,17 +175,17 @@ describe('Task Runner', () => {
   const uiSettingsService = uiSettingsServiceMock.createStartContract();
   const inMemoryMetrics = inMemoryMetricsMock.create();
   const dataViewsMock = {
-    dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
-    getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
+    dataViewsServiceFactory: vi.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+    getScriptedFieldsEnabled: vi.fn().mockReturnValue(true),
   } as DataViewsServerPluginStart;
   const alertsService = alertsServiceMock.create();
   const connectorAdapterRegistry = new ConnectorAdapterRegistry();
   const rulesSettingsService = rulesSettingsServiceMock.create();
   const auditService = securityServiceMock.createStart().audit;
 
-  type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
-    actionsPlugin: jest.Mocked<ActionsPluginStart>;
-    eventLogger: jest.Mocked<IEventLogger>;
+  type TaskRunnerFactoryInitializerParamsType = Mocked<TaskRunnerContext> & {
+    actionsPlugin: Mocked<ActionsPluginStart>;
+    eventLogger: Mocked<IEventLogger>;
     executionContext: ReturnType<typeof executionContextServiceMock.createInternalStartContract>;
   };
 
@@ -202,21 +211,20 @@ describe('Task Runner', () => {
     rulesSettingsService,
     savedObjects: savedObjectsService,
     share: {} as SharePluginStart,
-    spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+    spaceIdToNamespace: vi.fn().mockReturnValue(undefined),
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
     isServerless: false,
-    getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+    getEventLogClient: vi.fn().mockReturnValue(eventLogClientMock.create()),
     apiKeyType: ApiKeyType.ES,
     shouldGrantUiam: false,
   };
 
-  beforeEach(() => {
-    jest.resetAllMocks();
-    jest.restoreAllMocks(); // clear spy mock implementations
+  beforeEach(async () => {
+    vi.resetAllMocks();
+    vi.restoreAllMocks(); // clear spy mock implementations
     logger.isLevelEnabled.mockReturnValue(true);
-    jest
-      .requireMock('../lib/wrap_scoped_cluster_client')
+    (await vi.importMock('../lib/wrap_scoped_cluster_client'))
       .createWrappedScopedClusterClientFactory.mockReturnValue({
         client: () => services.scopedClusterClient,
         getMetrics: () => ({
@@ -249,7 +257,7 @@ describe('Task Runner', () => {
     mockedRuleTypeSavedObject.monitoring!.run.calculated_metrics.success_ratio = 0;
 
     alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
-    (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
+    (AlertingEventLogger as Mock).mockImplementation(() => alertingEventLogger);
     logger.get.mockImplementation(() => logger);
 
     ruleType.executor.mockResolvedValue({ state: {} });
@@ -267,7 +275,7 @@ describe('Task Runner', () => {
       warnings: [],
       outcomeMessage: '',
     }));
-    (RuleResultService as jest.Mock).mockImplementation(() => ruleResultService);
+    (RuleResultService as Mock).mockImplementation(() => ruleResultService);
   });
 
   const createTaskRunner = (overrides: Partial<ConstructorParameters<typeof TaskRunner>[0]> = {}) =>
@@ -404,7 +412,7 @@ describe('Task Runner', () => {
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     expect(
-      jest.requireMock('../lib/wrap_scoped_cluster_client').createWrappedScopedClusterClientFactory
+      (await vi.importMock('../lib/wrap_scoped_cluster_client')).createWrappedScopedClusterClientFactory
     ).toHaveBeenCalled();
   });
 
@@ -424,7 +432,7 @@ describe('Task Runner', () => {
   });
 
   test('passes total_search_duration_ms from execution metrics into rule monitoring via addFrameworkMetrics', async () => {
-    const addFrameworkMetricsSpy = jest.spyOn(
+    const addFrameworkMetricsSpy = vi.spyOn(
       RuleMonitoringService.prototype,
       'addFrameworkMetrics'
     );
@@ -1838,7 +1846,7 @@ describe('Task Runner', () => {
       }),
     ]);
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test("should skip alertInstances which weren't active on the previous execution", async () => {
@@ -1964,8 +1972,8 @@ describe('Task Runner', () => {
     });
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
-    expect((actionsClient.bulkEnqueueExecution as jest.Mock).mock.calls[0][0][0].id).toEqual('1');
-    expect((actionsClient.bulkEnqueueExecution as jest.Mock).mock.calls[0][0][1].id).toEqual('2');
+    expect((actionsClient.bulkEnqueueExecution as Mock).mock.calls[0][0][0].id).toEqual('1');
+    expect((actionsClient.bulkEnqueueExecution as Mock).mock.calls[0][0][1].id).toEqual('2');
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
@@ -2273,7 +2281,7 @@ describe('Task Runner', () => {
   });
 
   test('should set authentication errors as user-error', async () => {
-    jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
+    vi.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
       throw new errors.ResponseError({
         warnings: [],
         meta: {} as never,
@@ -2300,7 +2308,7 @@ describe('Task Runner', () => {
   });
 
   test('should set unexpected errors as framework-error', async () => {
-    jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
+    vi.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
       throw new Error('test');
     });
 
@@ -3642,7 +3650,7 @@ describe('Task Runner', () => {
   test('when there is a gap, report it with reason to alert event log', async () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    jest.spyOn(RuleMonitoringService.prototype, 'getMonitoring').mockImplementation(() => {
+    vi.spyOn(RuleMonitoringService.prototype, 'getMonitoring').mockImplementation(() => {
       return {
         run: {
           history: [],

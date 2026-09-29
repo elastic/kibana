@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -66,7 +68,7 @@ const createService = (
   const logger = loggerMock.create();
   const executions: FailedExecutionSearch = {
     searchFailedManagedExecutions: search,
-    getWorkflowExecution: jest.fn(
+    getWorkflowExecution: vi.fn(
       async (id: string) => lookup.get(id) ?? null
     ) as FailedExecutionSearch['getWorkflowExecution'],
   };
@@ -101,7 +103,7 @@ describe('ScanFailuresService', () => {
       ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
       ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID
     );
-    const search = jest.fn(async () => failedPage);
+    const search = vi.fn(async () => failedPage);
     const { service } = createService(search, lookup);
 
     await expect(service.list(request, 'default')).resolves.toEqual({
@@ -111,7 +113,7 @@ describe('ScanFailuresService', () => {
   });
 
   it('reports a catalog Worker that failed on its own', async () => {
-    const search = jest.fn(
+    const search = vi.fn(
       async () =>
         ({
           results: [
@@ -141,7 +143,7 @@ describe('ScanFailuresService', () => {
       ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
       ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID
     );
-    const search = jest.fn(async () => failedPage);
+    const search = vi.fn(async () => failedPage);
     const { service } = createService(search, lookup);
 
     await expect(service.list(request, 'default')).resolves.toEqual({
@@ -160,7 +162,7 @@ describe('ScanFailuresService', () => {
       ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
       ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID
     );
-    const search = jest.fn(async () => failedPage);
+    const search = vi.fn(async () => failedPage);
     const { service } = createService(search, lookup);
 
     await expect(service.list(request, 'default')).resolves.toEqual({
@@ -179,7 +181,7 @@ describe('ScanFailuresService', () => {
       ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
       ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID
     );
-    const search = jest.fn(async () => failedPage);
+    const search = vi.fn(async () => failedPage);
     const { service } = createService(search, lookup);
 
     await expect(service.list(request, 'default')).resolves.toEqual({
@@ -205,7 +207,7 @@ describe('ScanFailuresService', () => {
       id: parentId,
       triggeredBy: 'scheduled',
     });
-    const search = jest.fn(
+    const search = vi.fn(
       async (): Promise<FailedExecutionPage> => ({ results: [child], total: 1 })
     );
     const { service } = createService(
@@ -245,7 +247,7 @@ describe('ScanFailuresService', () => {
       id: rootId,
       triggeredBy: 'scheduled',
     });
-    const search = jest.fn(
+    const search = vi.fn(
       async (): Promise<FailedExecutionPage> => ({ results: [review], total: 1 })
     );
     const { service } = createService(
@@ -269,7 +271,7 @@ describe('ScanFailuresService', () => {
   });
 
   it('keeps Workers it could attribute when a parent lookup throws', async () => {
-    const search = jest.fn(async () => ({
+    const search = vi.fn(async () => ({
       results: [
         execution(ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, undefined, {
           id: 'triage-run',
@@ -286,7 +288,7 @@ describe('ScanFailuresService', () => {
     const logger = loggerMock.create();
     const executions: FailedExecutionSearch = {
       searchFailedManagedExecutions: search,
-      getWorkflowExecution: jest.fn(async () => {
+      getWorkflowExecution: vi.fn(async () => {
         throw new Error('workflows down');
       }),
     };
@@ -304,7 +306,7 @@ describe('ScanFailuresService', () => {
   });
 
   it('skips a child whose parent execution is missing', async () => {
-    const search = jest.fn(async () => ({
+    const search = vi.fn(async () => ({
       results: [
         execution(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID, undefined, {
           id: 'review-run',
@@ -323,7 +325,7 @@ describe('ScanFailuresService', () => {
   });
 
   it('skips a shared workflow that was not started by a Worker', async () => {
-    const search = jest.fn(
+    const search = vi.fn(
       async () =>
         ({
           results: [
@@ -365,7 +367,7 @@ describe('ScanFailuresService', () => {
       triggeredBy: WORKFLOW_STEP,
       parentId: ruleTuningParentId,
     });
-    const search = jest.fn(
+    const search = vi.fn(
       async ({ page: pageNumber }: { page: number }): Promise<FailedExecutionPage> => {
         if (pageNumber === 1) {
           return {
@@ -419,7 +421,7 @@ describe('ScanFailuresService', () => {
         triggeredBy: WORKFLOW_STEP,
         parentId,
       });
-    const search = jest.fn(async () => ({
+    const search = vi.fn(async () => ({
       results: [child('child-a'), child('child-b')],
       total: 2,
     }));
@@ -443,7 +445,7 @@ describe('ScanFailuresService', () => {
 
   it('marks the window incomplete when failures remain past the page cap', async () => {
     const total = SCAN_FAILURE_PAGE_SIZE * SCAN_FAILURE_MAX_PAGES + 1;
-    const search = jest.fn(async () =>
+    const search = vi.fn(async () =>
       page(
         Array.from({ length: SCAN_FAILURE_PAGE_SIZE }, () => ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID),
         total
@@ -458,7 +460,7 @@ describe('ScanFailuresService', () => {
   });
 
   it('reads the next page while a full page of failures remains', async () => {
-    const search = jest.fn(
+    const search = vi.fn(
       async ({ page: pageNumber }: { page: number }): Promise<FailedExecutionPage> => {
         if (pageNumber === 1) {
           return page(
@@ -480,7 +482,7 @@ describe('ScanFailuresService', () => {
   });
 
   it('returns an empty body when the query throws', async () => {
-    const search = jest.fn(async () => {
+    const search = vi.fn(async () => {
       throw new Error('workflows down');
     });
     const { service } = createService(search);
@@ -492,7 +494,7 @@ describe('ScanFailuresService', () => {
   });
 
   it('logs a warning when the query throws', async () => {
-    const search = jest.fn(async () => {
+    const search = vi.fn(async () => {
       throw new Error('workflows down');
     });
     const { logger, service } = createService(search);

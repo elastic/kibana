@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { appContextService } from '../app_context';
 
 import { getManagedOtlpEndpoint, isManagedOtlpEndpoint } from './managed_otlp';
 
-jest.mock('../app_context');
+vi.mock('../app_context');
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 
 const MANAGED_HOST = 'my-cluster.ingest.elastic.cloud';
 
 describe('getManagedOtlpEndpoint', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('returns undefined when managedOtlp is absent', () => {
     mockedAppContextService.getCloud.mockReturnValue({} as any);
@@ -32,7 +35,7 @@ describe('getManagedOtlpEndpoint', () => {
 });
 
 describe('isManagedOtlpEndpoint', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('returns false when cloud.managedOtlp is absent', () => {
     mockedAppContextService.getCloud.mockReturnValue({} as any);

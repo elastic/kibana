@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import type { AgentStatusProps } from './agent_status';
@@ -19,10 +22,10 @@ import { createAppRootMockRenderer } from '../../../../mock/endpoint';
 import type { AgentStatusInfo } from '../../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 
-jest.mock('../../../../hooks/use_experimental_features');
-jest.mock('../../../../../management/hooks/agents/use_get_agent_status');
+vi.mock('../../../../hooks/use_experimental_features');
+vi.mock('../../../../../management/hooks/agents/use_get_agent_status');
 
-const useGetAgentStatusMock = _useGetAgentStatus as jest.Mock;
+const useGetAgentStatusMock = _useGetAgentStatus as Mock;
 
 describe('AgentStatus component', () => {
   let render: (agentType?: ResponseActionAgentType) => ReturnType<AppContextTestRender['render']>;
@@ -61,7 +64,7 @@ describe('AgentStatus component', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call the API when `agentId` is provided and no `statusInfo` prop', () => {

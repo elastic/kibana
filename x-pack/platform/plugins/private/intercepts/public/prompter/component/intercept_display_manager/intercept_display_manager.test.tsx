@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import * as Rx from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -14,7 +16,7 @@ import { InterceptDisplayManagerMemoized, type Intercept } from './intercept_dis
 
 const staticAssetsHelperMock = httpServiceMock.createSetupContract().staticAssets;
 
-const mockPerformanceMark = jest.fn(
+const mockPerformanceMark = vi.fn(
   (name) =>
     ({
       name,
@@ -26,7 +28,7 @@ const mockPerformanceMark = jest.fn(
     } as PerformanceMark)
 );
 
-const mockPerformanceMeasure = jest.fn(
+const mockPerformanceMeasure = vi.fn(
   (name) =>
     ({
       name,
@@ -45,11 +47,11 @@ describe('InterceptDisplayManager', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not render the dialog shell when there is no intercept to display', () => {
-    const ackProductIntercept = jest.fn();
+    const ackProductIntercept = vi.fn();
 
     render(
       <InterceptDisplayManagerMemoized
@@ -63,7 +65,7 @@ describe('InterceptDisplayManager', () => {
   });
 
   it('renders the dialog shell when there is an intercept to display', () => {
-    const ackProductIntercept = jest.fn();
+    const ackProductIntercept = vi.fn();
 
     const interceptStep: Intercept['steps'][number] = {
       id: 'hello',
@@ -79,7 +81,7 @@ describe('InterceptDisplayManager', () => {
         interceptStep,
         { ...interceptStep, id: 'completion' },
       ],
-      onFinish: jest.fn(),
+      onFinish: vi.fn(),
     });
 
     render(
@@ -99,7 +101,7 @@ describe('InterceptDisplayManager', () => {
   it('closes the dialog and calls the provided ack function when the close button is clicked', async () => {
     const user = userEvent.setup();
 
-    const ackProductIntercept = jest.fn();
+    const ackProductIntercept = vi.fn();
     const interceptStep: Intercept['steps'][number] = {
       id: 'hello',
       title: 'Hello World',
@@ -114,7 +116,7 @@ describe('InterceptDisplayManager', () => {
         interceptStep,
         { ...interceptStep, id: 'completion' },
       ],
-      onFinish: jest.fn(),
+      onFinish: vi.fn(),
     });
 
     render(
@@ -142,7 +144,7 @@ describe('InterceptDisplayManager', () => {
   it('invokes the passed onProgress handler with the response the user provides as feedback', async () => {
     const user = userEvent.setup();
 
-    const ackProductIntercept = jest.fn();
+    const ackProductIntercept = vi.fn();
 
     const interceptStep: Intercept['steps'][number] = {
       id: 'hello',
@@ -191,8 +193,8 @@ describe('InterceptDisplayManager', () => {
         },
         { ...interceptStep, id: 'completion' },
       ],
-      onProgress: jest.fn(),
-      onFinish: jest.fn(),
+      onProgress: vi.fn(),
+      onFinish: vi.fn(),
     };
 
     const intercept$ = new Rx.BehaviorSubject<Intercept>(productIntercept);
@@ -228,7 +230,7 @@ describe('InterceptDisplayManager', () => {
 
   it('provides each step content with a responseMap containing only responses from previous steps', async () => {
     const user = userEvent.setup();
-    const ackProductIntercept = jest.fn();
+    const ackProductIntercept = vi.fn();
 
     const capturedResponseMaps: Record<string, Record<string, unknown>> = {};
 
@@ -269,8 +271,8 @@ describe('InterceptDisplayManager', () => {
           },
         },
       ],
-      onProgress: jest.fn(),
-      onFinish: jest.fn(),
+      onProgress: vi.fn(),
+      onFinish: vi.fn(),
     };
 
     const intercept$ = new Rx.BehaviorSubject<Intercept>(productIntercept);
@@ -309,9 +311,9 @@ describe('InterceptDisplayManager', () => {
 
   it('completes the intercept when onValue is called on the last step', async () => {
     const user = userEvent.setup();
-    const ackProductIntercept = jest.fn();
-    const onFinish = jest.fn();
-    const onProgress = jest.fn();
+    const ackProductIntercept = vi.fn();
+    const onFinish = vi.fn();
+    const onProgress = vi.fn();
 
     const productIntercept: Intercept = {
       id: '1',

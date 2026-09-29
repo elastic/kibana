@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
@@ -17,35 +20,35 @@ import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { TestProviders } from '../../../../common/mock';
 import { ValueListsFlyout } from './flyout';
 
-jest.mock('@kbn/securitysolution-list-hooks', () => {
-  const actual = jest.requireActual('@kbn/securitysolution-list-hooks');
+vi.mock('@kbn/securitysolution-list-hooks', async () => {
+  const actual = (await vi.importActual('@kbn/securitysolution-list-hooks'));
 
   return {
     ...actual,
-    useDeleteList: jest.fn(),
-    useFindLists: jest.fn(),
+    useDeleteList: vi.fn(),
+    useFindLists: vi.fn(),
   };
 });
 
-jest.mock('@kbn/securitysolution-list-api', () => {
-  const actual = jest.requireActual('@kbn/securitysolution-list-api');
+vi.mock('@kbn/securitysolution-list-api', async () => {
+  const actual = (await vi.importActual('@kbn/securitysolution-list-api'));
 
   return {
     ...actual,
-    exportList: jest.fn(),
+    exportList: vi.fn(),
   };
 });
 
 describe('ValueListsFlyout', () => {
   beforeEach(() => {
     // Do not resolve the export in tests as it causes unexpected state updates
-    (exportList as jest.Mock).mockImplementation(() => new Promise(() => {}));
-    (useFindLists as jest.Mock).mockReturnValue({
-      start: jest.fn(),
+    (exportList as Mock).mockImplementation(() => new Promise(() => {}));
+    (useFindLists as Mock).mockReturnValue({
+      start: vi.fn(),
       result: { data: Array<ListSchema>(3).fill(getListResponseMock()), total: 3 },
     });
-    (useDeleteList as jest.Mock).mockReturnValue({
-      start: jest.fn(),
+    (useDeleteList as Mock).mockReturnValue({
+      start: vi.fn(),
       result: getListResponseMock(),
     });
   });
@@ -53,7 +56,7 @@ describe('ValueListsFlyout', () => {
   it('renders nothing if showFlyout is false', () => {
     const container = mount(
       <TestProviders>
-        <ValueListsFlyout showFlyout={false} onClose={jest.fn()} />
+        <ValueListsFlyout showFlyout={false} onClose={vi.fn()} />
       </TestProviders>
     );
 
@@ -63,7 +66,7 @@ describe('ValueListsFlyout', () => {
   it('renders flyout if showFlyout is true', () => {
     const container = mount(
       <TestProviders>
-        <ValueListsFlyout showFlyout={true} onClose={jest.fn()} />
+        <ValueListsFlyout showFlyout={true} onClose={vi.fn()} />
       </TestProviders>
     );
 
@@ -71,14 +74,14 @@ describe('ValueListsFlyout', () => {
   });
 
   it('should get value lists sorted desc by created_at', async () => {
-    const findListMock = jest.fn();
-    (useFindLists as jest.Mock).mockReturnValue({
+    const findListMock = vi.fn();
+    (useFindLists as Mock).mockReturnValue({
       start: findListMock,
       result: getListResponseMock(),
     });
     mount(
       <TestProviders>
-        <ValueListsFlyout showFlyout={true} onClose={jest.fn()} />
+        <ValueListsFlyout showFlyout={true} onClose={vi.fn()} />
       </TestProviders>
     );
 
@@ -87,7 +90,7 @@ describe('ValueListsFlyout', () => {
     );
   });
   it('calls onClose when flyout is closed', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     const container = mount(
       <TestProviders>
         <ValueListsFlyout showFlyout={true} onClose={onClose} />
@@ -102,7 +105,7 @@ describe('ValueListsFlyout', () => {
   it('renders ValueListsForm and an EuiTable', () => {
     const container = mount(
       <TestProviders>
-        <ValueListsFlyout showFlyout={true} onClose={jest.fn()} />
+        <ValueListsFlyout showFlyout={true} onClose={vi.fn()} />
       </TestProviders>
     );
 
@@ -114,7 +117,7 @@ describe('ValueListsFlyout', () => {
     it('calls exportList when export is clicked', async () => {
       const container = mount(
         <TestProviders>
-          <ValueListsFlyout showFlyout={true} onClose={jest.fn()} />
+          <ValueListsFlyout showFlyout={true} onClose={vi.fn()} />
         </TestProviders>
       );
 
@@ -129,14 +132,14 @@ describe('ValueListsFlyout', () => {
     });
 
     it('calls deleteList when delete is clicked', async () => {
-      const deleteListMock = jest.fn();
-      (useDeleteList as jest.Mock).mockReturnValue({
+      const deleteListMock = vi.fn();
+      (useDeleteList as Mock).mockReturnValue({
         start: deleteListMock,
         result: getListResponseMock(),
       });
       const container = mount(
         <TestProviders>
-          <ValueListsFlyout showFlyout={true} onClose={jest.fn()} />
+          <ValueListsFlyout showFlyout={true} onClose={vi.fn()} />
         </TestProviders>
       );
 
@@ -151,14 +154,14 @@ describe('ValueListsFlyout', () => {
     });
 
     it('should render the first page after importing new file', async () => {
-      const findListMock = jest.fn();
-      (useFindLists as jest.Mock).mockReturnValue({
+      const findListMock = vi.fn();
+      (useFindLists as Mock).mockReturnValue({
         start: findListMock,
         result: { data: Array<ListSchema>(6).fill(getListResponseMock()), total: 6 },
       });
       const container = mount(
         <TestProviders>
-          <ValueListsFlyout showFlyout={true} onClose={jest.fn()} />
+          <ValueListsFlyout showFlyout={true} onClose={vi.fn()} />
         </TestProviders>
       );
       await waitFor(() => {

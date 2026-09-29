@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 import { API_VERSIONS, ATTACK_DISCOVERY_GENERATE } from '@kbn/elastic-assistant-common';
 import { renderHook, act } from '@testing-library/react';
@@ -18,21 +21,24 @@ import { ERROR_GENERATING_ATTACK_DISCOVERIES } from '../translations';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createQueryWrapperMock } from '../../../common/__mocks__/query_wrapper';
 
-jest.mock('../../../assistant/use_assistant_availability', () => ({
-  useAssistantAvailability: jest.fn(() => ({
-    hasAssistantPrivilege: true,
-    isAssistantEnabled: true,
-    isAssistantVisible: true,
-  })),
-}));
+vi.mock('../../../assistant/use_assistant_availability', () => {
+      const mocked = {
+      useAssistantAvailability: vi.fn(() => ({
+        hasAssistantPrivilege: true,
+        isAssistantEnabled: true,
+        isAssistantVisible: true,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields'
 );
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 const mockedUseKibana = mockUseKibana();
 
-const mockAssistantAvailability = jest.fn(() => ({
+const mockAssistantAvailability = vi.fn(() => ({
   hasAssistantPrivilege: true,
 }));
 const mockConnectors: unknown[] = [
@@ -42,25 +48,31 @@ const mockConnectors: unknown[] = [
     actionTypeId: '.gen-ai',
   },
 ];
-jest.mock('@kbn/elastic-assistant', () => ({
-  AssistantOverlay: () => <div data-test-subj="assistantOverlay" />,
-  useAssistantContext: () => ({
-    alertsIndexPattern: 'alerts-index-pattern',
-    assistantAvailability: mockAssistantAvailability(),
-    knowledgeBase: {
-      latestAlerts: 20,
-    },
-  }),
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      AssistantOverlay: () => <div data-test-subj="assistantOverlay" />,
+      useAssistantContext: () => ({
+        alertsIndexPattern: 'alerts-index-pattern',
+        assistantAvailability: mockAssistantAvailability(),
+        knowledgeBase: {
+          latestAlerts: 20,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn(() => ({
-    isFetched: true,
-    data: mockConnectors,
-  })),
-}));
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn(() => ({
+        isFetched: true,
+        data: mockConnectors,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const setLoadingConnectorId = jest.fn();
+const setLoadingConnectorId = vi.fn();
 
 const SIZE = 20;
 
@@ -68,11 +80,11 @@ const { wrapper: queryWrapper } = createQueryWrapperMock();
 
 describe('useAttackDiscovery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Mock feature flags service to return false by default
-    mockedUseKibana.services.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
-    (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
-    (useFetchAnonymizationFields as jest.Mock).mockReturnValue({ data: [] });
+    mockedUseKibana.services.featureFlags.getBooleanValue$ = vi.fn().mockReturnValue(of(false));
+    (useKibana as Mock).mockReturnValue(mockedUseKibana);
+    (useFetchAnonymizationFields as Mock).mockReturnValue({ data: [] });
   });
 
   it('initializes with correct default values', () => {
@@ -92,7 +104,7 @@ describe('useAttackDiscovery', () => {
   });
 
   it('calls POST with the public API route', async () => {
-    (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({});
+    (mockedUseKibana.services.http.post as Mock).mockResolvedValue({});
     const { result } = renderHook(
       () =>
         useAttackDiscovery({
@@ -109,7 +121,7 @@ describe('useAttackDiscovery', () => {
       await result.current.fetchAttackDiscoveries();
     });
 
-    expect(mockedUseKibana.services.http.post as jest.Mock).toHaveBeenCalledWith(
+    expect(mockedUseKibana.services.http.post as Mock).toHaveBeenCalledWith(
       ATTACK_DISCOVERY_GENERATE,
       expect.objectContaining({
         version: API_VERSIONS.public.v1,
@@ -118,7 +130,7 @@ describe('useAttackDiscovery', () => {
   });
 
   it('calls POST using the public API version', async () => {
-    (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({});
+    (mockedUseKibana.services.http.post as Mock).mockResolvedValue({});
     const { result } = renderHook(
       () =>
         useAttackDiscovery({
@@ -135,7 +147,7 @@ describe('useAttackDiscovery', () => {
       await result.current.fetchAttackDiscoveries();
     });
 
-    expect(mockedUseKibana.services.http.post as jest.Mock).toHaveBeenCalledWith(
+    expect(mockedUseKibana.services.http.post as Mock).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({
         version: API_VERSIONS.public.v1,
@@ -144,7 +156,7 @@ describe('useAttackDiscovery', () => {
   });
 
   it("reports GenerationStarted telemetry with execution_mode 'legacy' on the public path", async () => {
-    (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({});
+    (mockedUseKibana.services.http.post as Mock).mockResolvedValue({});
 
     const { result } = renderHook(
       () =>
@@ -171,7 +183,7 @@ describe('useAttackDiscovery', () => {
   it('handles fetch errors correctly', async () => {
     const errorMessage = 'Fetch error';
     const error = new Error(errorMessage);
-    (mockedUseKibana.services.http.post as jest.Mock).mockRejectedValue(error);
+    (mockedUseKibana.services.http.post as Mock).mockRejectedValue(error);
 
     const { result } = renderHook(
       () => useAttackDiscovery({ connectorId: 'test-id', size: SIZE }),
@@ -193,17 +205,17 @@ describe('useAttackDiscovery', () => {
 
   describe('when the feature flag is ON but the per-space uiSetting is OFF', () => {
     beforeEach(() => {
-      mockedUseKibana.services.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(true));
-      mockedUseKibana.services.uiSettings.get = jest.fn().mockReturnValue(false);
+      mockedUseKibana.services.featureFlags.getBooleanValue$ = vi.fn().mockReturnValue(of(true));
+      mockedUseKibana.services.uiSettings.get = vi.fn().mockReturnValue(false);
     });
 
     afterEach(() => {
-      mockedUseKibana.services.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
-      mockedUseKibana.services.uiSettings.get = jest.fn().mockReturnValue(false);
+      mockedUseKibana.services.featureFlags.getBooleanValue$ = vi.fn().mockReturnValue(of(false));
+      mockedUseKibana.services.uiSettings.get = vi.fn().mockReturnValue(false);
     });
 
     it('calls the public API route when the uiSetting is off (FF on, setting off → legacy)', async () => {
-      (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({});
+      (mockedUseKibana.services.http.post as Mock).mockResolvedValue({});
 
       const { result } = renderHook(
         () =>
@@ -221,7 +233,7 @@ describe('useAttackDiscovery', () => {
         await result.current.fetchAttackDiscoveries();
       });
 
-      expect(mockedUseKibana.services.http.post as jest.Mock).toHaveBeenCalledWith(
+      expect(mockedUseKibana.services.http.post as Mock).toHaveBeenCalledWith(
         ATTACK_DISCOVERY_GENERATE,
         expect.objectContaining({
           version: API_VERSIONS.public.v1,
@@ -231,7 +243,7 @@ describe('useAttackDiscovery', () => {
   });
 
   it('reads the feature flag with the correct key and a true default (ON by default)', async () => {
-    (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({});
+    (mockedUseKibana.services.http.post as Mock).mockResolvedValue({});
 
     const { result } = renderHook(
       () =>
@@ -257,17 +269,17 @@ describe('useAttackDiscovery', () => {
 
   describe('when the feature flag is OFF but the per-space uiSetting is ON', () => {
     beforeEach(() => {
-      mockedUseKibana.services.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
-      mockedUseKibana.services.uiSettings.get = jest.fn().mockReturnValue(true);
+      mockedUseKibana.services.featureFlags.getBooleanValue$ = vi.fn().mockReturnValue(of(false));
+      mockedUseKibana.services.uiSettings.get = vi.fn().mockReturnValue(true);
     });
 
     afterEach(() => {
-      mockedUseKibana.services.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
-      mockedUseKibana.services.uiSettings.get = jest.fn().mockReturnValue(false);
+      mockedUseKibana.services.featureFlags.getBooleanValue$ = vi.fn().mockReturnValue(of(false));
+      mockedUseKibana.services.uiSettings.get = vi.fn().mockReturnValue(false);
     });
 
     it('calls the public API route when the FF is off (FF off, setting on → legacy)', async () => {
-      (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({});
+      (mockedUseKibana.services.http.post as Mock).mockResolvedValue({});
 
       const { result } = renderHook(
         () =>
@@ -285,7 +297,7 @@ describe('useAttackDiscovery', () => {
         await result.current.fetchAttackDiscoveries();
       });
 
-      expect(mockedUseKibana.services.http.post as jest.Mock).toHaveBeenCalledWith(
+      expect(mockedUseKibana.services.http.post as Mock).toHaveBeenCalledWith(
         ATTACK_DISCOVERY_GENERATE,
         expect.objectContaining({
           version: API_VERSIONS.public.v1,
@@ -297,19 +309,19 @@ describe('useAttackDiscovery', () => {
   describe('when attackDiscoveryWorkflowsEnabled feature flag is enabled', () => {
     beforeEach(() => {
       // Mock feature flags service to return true for this test suite
-      mockedUseKibana.services.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(true));
+      mockedUseKibana.services.featureFlags.getBooleanValue$ = vi.fn().mockReturnValue(of(true));
       // Also enable the per-space uiSetting opt-in
-      mockedUseKibana.services.uiSettings.get = jest.fn().mockReturnValue(true);
+      mockedUseKibana.services.uiSettings.get = vi.fn().mockReturnValue(true);
     });
 
     afterEach(() => {
       // Reset to default (false)
-      mockedUseKibana.services.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
-      mockedUseKibana.services.uiSettings.get = jest.fn().mockReturnValue(false);
+      mockedUseKibana.services.featureFlags.getBooleanValue$ = vi.fn().mockReturnValue(of(false));
+      mockedUseKibana.services.uiSettings.get = vi.fn().mockReturnValue(false);
     });
 
     it('calls the internal API with workflow configuration', async () => {
-      (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({
+      (mockedUseKibana.services.http.post as Mock).mockResolvedValue({
         execution_uuid: 'test-uuid',
       });
 
@@ -329,7 +341,7 @@ describe('useAttackDiscovery', () => {
         await result.current.fetchAttackDiscoveries();
       });
 
-      expect(mockedUseKibana.services.http.post as jest.Mock).toHaveBeenCalledWith(
+      expect(mockedUseKibana.services.http.post as Mock).toHaveBeenCalledWith(
         '/internal/attack_discovery/_generate',
         expect.objectContaining({
           version: '1',
@@ -339,7 +351,7 @@ describe('useAttackDiscovery', () => {
     });
 
     it('includes workflow configuration in request body', async () => {
-      (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({
+      (mockedUseKibana.services.http.post as Mock).mockResolvedValue({
         execution_uuid: 'test-uuid',
       });
 
@@ -359,7 +371,7 @@ describe('useAttackDiscovery', () => {
         await result.current.fetchAttackDiscoveries();
       });
 
-      const callArgs = (mockedUseKibana.services.http.post as jest.Mock).mock.calls[0];
+      const callArgs = (mockedUseKibana.services.http.post as Mock).mock.calls[0];
       const requestBody = JSON.parse(callArgs[1].body);
 
       expect(requestBody.workflow_config).toEqual({
@@ -373,7 +385,7 @@ describe('useAttackDiscovery', () => {
     });
 
     it("reports GenerationStarted telemetry with execution_mode 'workflow'", async () => {
-      (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({
+      (mockedUseKibana.services.http.post as Mock).mockResolvedValue({
         execution_uuid: 'test-uuid',
       });
 

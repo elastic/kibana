@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable dot-notation */
 import { mockTelemetryNotifications, mockTelemetryService } from '../../mocks';
 
@@ -15,7 +17,7 @@ describe('setOptedInNoticeSeen', () => {
     const bannerId = 'bruce-banner';
 
     const telemetryService = mockTelemetryService();
-    telemetryService.setUserHasSeenNotice = jest.fn();
+    telemetryService.setUserHasSeenNotice = vi.fn();
     const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
     telemetryNotifications['optInStatusNoticeBannerId'] = bannerId;
     await telemetryNotifications.setOptInStatusNoticeSeen();
@@ -29,7 +31,7 @@ describe('setOptedInNoticeSeen', () => {
 describe('shouldShowOptedInNoticeBanner', () => {
   describe(`when the banner isn't visible yet`, () => {
     const telemetryService = mockTelemetryService();
-    const getUserShouldSeeOptInNotice = jest.fn();
+    const getUserShouldSeeOptInNotice = vi.fn();
     telemetryService.getUserShouldSeeOptInNotice = getUserShouldSeeOptInNotice;
     const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
 
@@ -46,7 +48,7 @@ describe('shouldShowOptedInNoticeBanner', () => {
 
   describe(`when the banner is already visible`, () => {
     const telemetryService = mockTelemetryService();
-    const getUserShouldSeeOptInNotice = jest.fn();
+    const getUserShouldSeeOptInNotice = vi.fn();
     telemetryService.getUserShouldSeeOptInNotice = getUserShouldSeeOptInNotice;
     const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
     telemetryNotifications['optInStatusNoticeBannerId'] = 'bruce-banner';

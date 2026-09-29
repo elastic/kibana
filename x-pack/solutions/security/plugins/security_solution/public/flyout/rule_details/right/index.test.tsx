@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
@@ -31,28 +34,34 @@ import {
   useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
 
-const mockPreviewFooter = jest.fn();
-jest.mock('../preview/footer', () => ({
-  PreviewFooter: (props: Record<string, unknown>) => {
-    mockPreviewFooter(props);
-    return <div data-test-subj="RULE_PREVIEW_FOOTER_TEST_ID" />;
-  },
-}));
+const mockPreviewFooter = vi.fn();
+vi.mock('../preview/footer', () => {
+      const mocked = {
+      PreviewFooter: (props: Record<string, unknown>) => {
+        mockPreviewFooter(props);
+        return <div data-test-subj="RULE_PREVIEW_FOOTER_TEST_ID" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRuleDetails = useRuleDetails as jest.Mock;
-jest.mock('../../../flyout_v2/rule/main/hooks/use_rule_details');
+const mockUseRuleDetails = useRuleDetails as Mock;
+vi.mock('../../../flyout_v2/rule/main/hooks/use_rule_details');
 
-const mockGetStepsData = getStepsData as jest.Mock;
-jest.mock('../../../detection_engine/common/helpers');
+const mockGetStepsData = getStepsData as Mock;
+vi.mock('../../../detection_engine/common/helpers');
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  useExpandableFlyoutState: jest.fn(),
-  useExpandableFlyoutHistory: jest.fn(),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+      useExpandableFlyoutState: vi.fn(),
+      useExpandableFlyoutHistory: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const flyoutContextValue = {
-  closeLeftPanel: jest.fn(),
+  closeLeftPanel: vi.fn(),
 } as unknown as ExpandableFlyoutApi;
 
 const flyoutHistory: FlyoutPanelHistory[] = [
@@ -74,9 +83,9 @@ const renderRulePanel = (isPreviewMode = false) =>
 
 describe('<RulePanel />', () => {
   beforeEach(() => {
-    jest.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
-    jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+    vi.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
+    vi.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
   it('should render rule details and its sub sections', () => {

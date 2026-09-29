@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
@@ -42,7 +44,7 @@ const paramsWithResponseActions = (responseActions?: RuleResponseAction[]): Rule
 describe('createSecurityRuleParamsAuthorizer', () => {
   let endpointAppContextService: ReturnType<typeof createMockEndpointAppContextService>;
   const request = httpServerMock.createKibanaRequest();
-  const getRulesAuthz = jest.fn<Promise<DetectionRulesAuthz>, [unknown]>();
+  const getRulesAuthz = vi.fn<Promise<DetectionRulesAuthz>, [unknown]>();
 
   const buildAuthorizer = (
     overrides: Partial<Parameters<typeof createSecurityRuleParamsAuthorizer>[0]> = {}
@@ -112,8 +114,8 @@ describe('createSecurityRuleParamsAuthorizer', () => {
     });
 
     it('uses the request-scoped osquery authz checker for osquery response actions', async () => {
-      const osqueryCheck = jest.fn().mockResolvedValue(undefined);
-      const getOsqueryResponseActionsAuthzChecker = jest.fn().mockReturnValue(osqueryCheck);
+      const osqueryCheck = vi.fn().mockResolvedValue(undefined);
+      const getOsqueryResponseActionsAuthzChecker = vi.fn().mockReturnValue(osqueryCheck);
       const osqueryAction = {
         actionTypeId: '.osquery',
         params: { savedQueryId: 'saved-query-1' },
@@ -141,7 +143,7 @@ describe('createSecurityRuleParamsAuthorizer', () => {
       });
 
       const error = await buildAuthorizer({
-        getOsqueryResponseActionsAuthzChecker: () => jest.fn().mockRejectedValue(osqueryError),
+        getOsqueryResponseActionsAuthzChecker: () => vi.fn().mockRejectedValue(osqueryError),
       })
         .authorize(paramsWithResponseActions([osqueryAction()]), { request })
         .catch((e) => e);
@@ -153,7 +155,7 @@ describe('createSecurityRuleParamsAuthorizer', () => {
 
     it('defaults to a 400 status code for a thrown error without a status code', async () => {
       const error = await buildAuthorizer({
-        getOsqueryResponseActionsAuthzChecker: () => jest.fn().mockRejectedValue(new Error('boom')),
+        getOsqueryResponseActionsAuthzChecker: () => vi.fn().mockRejectedValue(new Error('boom')),
       })
         .authorize(paramsWithResponseActions([osqueryAction()]), { request })
         .catch((e) => e);

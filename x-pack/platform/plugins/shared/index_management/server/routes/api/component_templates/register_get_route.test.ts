@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerComponentTemplateRoutes } from '.';
 import { addBasePath } from '..';
 import type { RequestMock } from '../../../test/helpers';
@@ -15,31 +17,34 @@ import {
   deserializeComponentTemplateList,
 } from '../../../../common/lib';
 
-jest.mock('../../../../common/lib', () => ({
-  ...jest.requireActual('../../../../common/lib'),
-  deserializeComponentTemplate: jest.fn(
-    jest.requireActual('../../../../common/lib').deserializeComponentTemplate
-  ),
-  deserializeComponentTemplateList: jest.fn(
-    jest.requireActual('../../../../common/lib').deserializeComponentTemplateList
-  ),
-}));
+vi.mock('../../../../common/lib', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../common/lib')),
+      deserializeComponentTemplate: vi.fn(
+        (await vi.importActual('../../../../common/lib')).deserializeComponentTemplate
+      ),
+      deserializeComponentTemplateList: vi.fn(
+        (await vi.importActual('../../../../common/lib')).deserializeComponentTemplateList
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const router = new RouterMock();
 const getComponentTemplate = router.getMockESApiFn('cluster.getComponentTemplate');
 const getIndexTemplate = router.getMockESApiFn('indices.getIndexTemplate');
 
-const deserializeComponentTemplateMock = jest.mocked(deserializeComponentTemplate);
-const deserializeComponentTemplateListMock = jest.mocked(deserializeComponentTemplateList);
+const deserializeComponentTemplateMock = vi.mocked(deserializeComponentTemplate);
+const deserializeComponentTemplateListMock = vi.mocked(deserializeComponentTemplateList);
 
-beforeEach(() => {
-  jest.clearAllMocks();
+beforeEach(async () => {
+  vi.clearAllMocks();
   registerComponentTemplateRoutes({
     ...routeDependencies,
     router,
   });
 
-  const actualLib = jest.requireActual('../../../../common/lib');
+  const actualLib = (await vi.importActual('../../../../common/lib'));
   deserializeComponentTemplateMock.mockImplementation(actualLib.deserializeComponentTemplate);
   deserializeComponentTemplateListMock.mockImplementation(
     actualLib.deserializeComponentTemplateList

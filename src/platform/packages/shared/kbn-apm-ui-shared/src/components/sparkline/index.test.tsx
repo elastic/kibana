@@ -7,34 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
 import { Sparkline } from '.';
 
-jest.mock('@elastic/charts', () => ({
-  Chart: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="mock-chart">{children}</div>
-  ),
-  LineSeries: () => null,
-  AreaSeries: () => null,
-  BarSeries: () => null,
-  Settings: () => null,
-  Tooltip: () => null,
-  ScaleType: { Linear: 'linear', Time: 'time' },
-  CurveType: { CURVE_MONOTONE_X: 'monotoneX' },
-}));
+vi.mock('@elastic/charts', () => {
+      const mocked = {
+      Chart: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="mock-chart">{children}</div>
+      ),
+      LineSeries: () => null,
+      AreaSeries: () => null,
+      BarSeries: () => null,
+      Settings: () => null,
+      Tooltip: () => null,
+      ScaleType: { Linear: 'linear', Time: 'time' },
+      CurveType: { CURVE_MONOTONE_X: 'monotoneX' },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_chart_theme', () => ({
-  useChartThemes: () => ({ theme: [], baseTheme: {} }),
-}));
+vi.mock('../../hooks/use_chart_theme', () => {
+      const mocked = {
+      useChartThemes: () => ({ theme: [], baseTheme: {} }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: jest.fn(),
-  EuiLoadingChart: () => <div data-test-subj="loading-chart" />,
-  EuiIcon: ({ type }: { type: string }) => <div data-test-subj={`icon-${type}`} />,
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiTheme: vi.fn(),
+      EuiLoadingChart: () => <div data-test-subj="loading-chart" />,
+      EuiIcon: ({ type }: { type: string }) => <div data-test-subj={`icon-${type}`} />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const color = '#000';
 const validSeries = [
@@ -49,13 +61,13 @@ const allNullSeries = [
 
 describe('Sparkline', () => {
   beforeEach(() => {
-    (useEuiTheme as jest.Mock).mockReturnValue({
+    (useEuiTheme as Mock).mockReturnValue({
       euiTheme: { colors: { mediumShade: '#ccc' } },
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a loading indicator when isLoading is true', () => {

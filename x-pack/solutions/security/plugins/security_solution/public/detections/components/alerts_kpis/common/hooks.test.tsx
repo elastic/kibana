@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
@@ -15,14 +18,17 @@ import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { TestProviders } from '../../../../common/mock';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
-jest.mock('../../../../data_view_manager/hooks/use_browser_fields');
-jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: jest.fn(() => ({ dataView: {}, status: 'ready' })),
-}));
+vi.mock('../../../../data_view_manager/hooks/use_browser_fields');
+vi.mock('../../../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: vi.fn(() => ({ dataView: {}, status: 'ready' })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getAggregatableFields', () => {
   test('getAggregatableFields when useLensCompatibleFields = false', () => {
@@ -66,25 +72,25 @@ describe('getAggregatableFields', () => {
 });
 
 describe('hooks', () => {
-  const mockUseBrowserFields = useBrowserFields as jest.Mock;
+  const mockUseBrowserFields = useBrowserFields as Mock;
 
   describe('useInspectButton', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     const defaultParams: UseInspectButtonParams = {
-      setQuery: jest.fn(),
+      setQuery: vi.fn(),
       response: '',
       request: '',
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       uniqueQueryId: 'test-uniqueQueryId',
-      deleteQuery: jest.fn(),
+      deleteQuery: vi.fn(),
       loading: false,
     };
 
     it('calls setQuery when rendering', () => {
-      const mockSetQuery = jest.fn();
+      const mockSetQuery = vi.fn();
 
       renderHook(() => useInspectButton({ ...defaultParams, setQuery: mockSetQuery }));
 
@@ -96,7 +102,7 @@ describe('hooks', () => {
     });
 
     it('calls deleteQuery when unmounting', () => {
-      const mockDeleteQuery = jest.fn();
+      const mockDeleteQuery = vi.fn();
 
       const result = renderHook(() =>
         useInspectButton({ ...defaultParams, deleteQuery: mockDeleteQuery })
@@ -109,7 +115,7 @@ describe('hooks', () => {
 
   describe('useStackByFields', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('returns only aggregateable fields', () => {

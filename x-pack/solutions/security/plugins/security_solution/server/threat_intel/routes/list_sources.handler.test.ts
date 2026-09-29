@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   httpServiceMock,
   httpServerMock,
@@ -27,8 +29,8 @@ describe('list_sources routes', () => {
 
   const buildDeps = (overrides: { getBootstrapReady?: () => Promise<void> } = {}) => {
     const router = httpServiceMock.createRouter();
-    const getSpacesService = jest.fn().mockReturnValue(undefined);
-    const getBootstrapReady = overrides.getBootstrapReady ?? jest.fn().mockResolvedValue(undefined);
+    const getSpacesService = vi.fn().mockReturnValue(undefined);
+    const getBootstrapReady = overrides.getBootstrapReady ?? vi.fn().mockResolvedValue(undefined);
     return { router, getSpacesService, getBootstrapReady };
   };
 
@@ -65,7 +67,7 @@ describe('list_sources routes', () => {
         router,
         logger,
         getSpacesService,
-        getBootstrapReady: jest.fn().mockRejectedValue(new Error('template install failed')),
+        getBootstrapReady: vi.fn().mockRejectedValue(new Error('template install failed')),
       } as never);
 
       const version = getRegisteredVersion(router, 'post', LIST_SOURCES_API_PATH);
@@ -158,7 +160,7 @@ describe('list_sources routes', () => {
         router,
         logger,
         getSpacesService,
-        getBootstrapReady: jest.fn().mockRejectedValue(new Error('template install failed')),
+        getBootstrapReady: vi.fn().mockRejectedValue(new Error('template install failed')),
       } as never);
 
       const version = getRegisteredVersion(router, 'patch', SOURCE_BY_ID_API_PATH);

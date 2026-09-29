@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createLoggerService } from '../../../lib/services/logger_service/logger_service.mock';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
@@ -36,22 +39,22 @@ const baseEpisodeData: EpisodeAttachmentData = {
 describe('refreshEpisodeTool', () => {
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
-  let get: jest.Mock;
-  let getRule: jest.Mock;
-  let canRead: jest.Mock;
+  let get: Mock;
+  let getRule: Mock;
+  let canRead: Mock;
 
   const createPrivilegeCheckerMock = (canReadResult: boolean = true) => {
-    canRead = jest.fn().mockResolvedValue(canReadResult);
+    canRead = vi.fn().mockResolvedValue(canReadResult);
     return {
       canRead,
-      canWrite: jest.fn().mockResolvedValue(true),
+      canWrite: vi.fn().mockResolvedValue(true),
     } as unknown as PrivilegeChecker;
   };
 
   beforeEach(() => {
     ({ loggerService, mockLogger } = createLoggerService());
-    get = jest.fn();
-    getRule = jest.fn();
+    get = vi.fn();
+    getRule = vi.fn();
   });
 
   const createTool = (canReadResult: boolean = true) =>

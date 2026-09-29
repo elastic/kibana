@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -12,15 +15,18 @@ import { TestProviders } from '../../../../../common/mock';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ConversationLink } from '.';
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetUrlForApp = jest.fn();
-const mockUseKibana = useKibana as jest.Mock;
+const mockGetUrlForApp = vi.fn();
+const mockUseKibana = useKibana as Mock;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 
   mockUseKibana.mockReturnValue({
     services: {

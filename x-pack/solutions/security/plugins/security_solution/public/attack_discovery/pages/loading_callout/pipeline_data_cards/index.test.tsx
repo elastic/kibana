@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -15,7 +17,7 @@ describe('PipelineDataCards', () => {
   const defaultProps = {
     combinedAlertsCount: 50,
     discoveriesCount: 5,
-    onViewData: jest.fn(),
+    onViewData: vi.fn(),
     validatedCount: 3,
     retrievalWorkflows: [
       { alertsContextCount: 23, workflowName: 'Default Alert Retrieval' },
@@ -24,7 +26,7 @@ describe('PipelineDataCards', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('retrieval workflow badges', () => {

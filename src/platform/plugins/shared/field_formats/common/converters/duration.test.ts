@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { DurationFormat } from './duration';
 import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 import { asPrettyString } from '../utils';
@@ -18,7 +20,7 @@ describe('Duration Format', () => {
         inputFormat: 'seconds',
         outputFormat: 'humanize',
       },
-      jest.fn()
+      vi.fn()
     );
     expect(duration.convertToText(null)).toBe('(null)');
     expect(duration.convertToText(undefined)).toBe('(null)');
@@ -29,7 +31,7 @@ describe('Duration Format', () => {
   test('returns a plain string for a numeric duration', () => {
     const formatter = new DurationFormat(
       { inputFormat: 'seconds', outputFormat: 'humanize' },
-      jest.fn()
+      vi.fn()
     );
 
     expect(formatter.convertToText(60)).toBe('a minute');
@@ -39,7 +41,7 @@ describe('Duration Format', () => {
   test('renders object values (e.g. histogram fields) as JSON instead of NaN', () => {
     const formatter = new DurationFormat(
       { inputFormat: 'seconds', outputFormat: 'humanize' },
-      jest.fn()
+      vi.fn()
     );
     const histogramValue = { scale: 20, sum: 0.000825416, min: 0.000825416, max: 0.000825416 };
 
@@ -50,7 +52,7 @@ describe('Duration Format', () => {
   test('wraps a multi-value array with bracket notation', () => {
     const formatter = new DurationFormat(
       { inputFormat: 'seconds', outputFormat: 'humanize' },
-      jest.fn()
+      vi.fn()
     );
 
     expect(formatter.convertToText([60, 3600])).toBe('["a minute","an hour"]');
@@ -60,7 +62,7 @@ describe('Duration Format', () => {
   test('returns the single element without brackets for a one-element array', () => {
     const formatter = new DurationFormat(
       { inputFormat: 'seconds', outputFormat: 'humanize' },
-      jest.fn()
+      vi.fn()
     );
 
     expect(formatter.convertToText([60])).toBe('["a minute"]');
@@ -635,7 +637,7 @@ describe('Duration Format', () => {
             useShortSuffix,
             includeSpaceWithSuffix,
           },
-          jest.fn()
+          vi.fn()
         );
         expect(duration.convertToText(input)).toBe(output);
 

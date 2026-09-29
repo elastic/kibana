@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -18,44 +21,65 @@ import type { ExportFiltersStore } from '../../results/export_filters_context';
 // the store the toggle handler clears is the one supplied by that internal
 // provider — not anything the test renders around it. Spy on the hook to
 // capture that exact store instance.
-jest.mock('../../results/export_filters_context', () => {
-  const actual = jest.requireActual('../../results/export_filters_context');
+vi.mock('../../results/export_filters_context', async () => {
+  const actual = (await vi.importActual('../../results/export_filters_context'));
 
   return {
     ...actual,
-    useExportFiltersContext: jest.fn(actual.useExportFiltersContext),
+    useExportFiltersContext: vi.fn(actual.useExportFiltersContext),
   };
 });
 
-const useExportFiltersContextMock = useExportFiltersContext as jest.MockedFunction<
+const useExportFiltersContextMock = useExportFiltersContext as MockedFunction<
   typeof useExportFiltersContext
 >;
-jest.mock('../../routes/saved_queries/edit/tabs', () => ({
-  ResultTabs: () => <div data-test-subj="mock-result-tabs" />,
-}));
-jest.mock('./query_details_flyout', () => ({
-  QueryDetailsFlyout: () => null,
-}));
-jest.mock('./pack_results_header', () => ({
-  PackResultsHeader: () => null,
-}));
+vi.mock('../../routes/saved_queries/edit/tabs', () => {
+      const mocked = {
+      ResultTabs: () => <div data-test-subj="mock-result-tabs" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./query_details_flyout', () => {
+      const mocked = {
+      QueryDetailsFlyout: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./pack_results_header', () => {
+      const mocked = {
+      PackResultsHeader: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 // Capturing spies rather than `() => null`: the date window these two build is
 // derived entirely from the props this table hands them, so withholding a prop
 // here is invisible to any assertion made further down the tree.
-const mockPackViewInLensAction = jest.fn((_props: Record<string, unknown>) => null);
-const mockPackViewInDiscoverAction = jest.fn((_props: Record<string, unknown>) => null);
-jest.mock('../../lens/pack_view_in_lens', () => ({
-  PackViewInLensAction: (props: Record<string, unknown>) => mockPackViewInLensAction(props),
-}));
-jest.mock('../../discover/pack_view_in_discover', () => ({
-  PackViewInDiscoverAction: (props: Record<string, unknown>) => mockPackViewInDiscoverAction(props),
-}));
-jest.mock('../../actions/components/tags_column', () => ({
-  TagsColumn: () => null,
-}));
-jest.mock('./row_kebab_menu', () => ({
-  RowKebabMenu: () => null,
-}));
+const mockPackViewInLensAction = vi.fn((_props: Record<string, unknown>) => null);
+const mockPackViewInDiscoverAction = vi.fn((_props: Record<string, unknown>) => null);
+vi.mock('../../lens/pack_view_in_lens', () => {
+      const mocked = {
+      PackViewInLensAction: (props: Record<string, unknown>) => mockPackViewInLensAction(props),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../discover/pack_view_in_discover', () => {
+      const mocked = {
+      PackViewInDiscoverAction: (props: Record<string, unknown>) => mockPackViewInDiscoverAction(props),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../actions/components/tags_column', () => {
+      const mocked = {
+      TagsColumn: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./row_kebab_menu', () => {
+      const mocked = {
+      RowKebabMenu: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithContext = (Element: React.ReactElement) =>
   render(
@@ -97,7 +121,7 @@ const twoItemData = [
 
 describe('PackQueriesStatusTable — export filters store', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('clears the store entry for a row when it is collapsed, but not when it is expanded', () => {
@@ -140,7 +164,7 @@ describe('PackQueriesStatusTable — view in Discover/Lens bounds', () => {
   const startDate = '2026-08-10T09:00:00.000Z';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // Half of https://github.com/elastic/sdh-security-team/issues/1779 was the

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -26,15 +28,15 @@ const mapOptionValues = (option: HTMLElement) => ({
 
 describe('BreakdownFieldSelector', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should render correctly for dataview fields', () => {
-    const onBreakdownFieldChange = jest.fn();
+    const onBreakdownFieldChange = vi.fn();
     const breakdown: UnifiedHistogramBreakdownContext = {
       field: undefined,
     };
@@ -80,7 +82,7 @@ describe('BreakdownFieldSelector', () => {
   });
 
   it('should render correctly for ES|QL columns', () => {
-    const onBreakdownFieldChange = jest.fn();
+    const onBreakdownFieldChange = vi.fn();
     const breakdown: UnifiedHistogramBreakdownContext = {
       field: undefined,
     };
@@ -138,7 +140,7 @@ describe('BreakdownFieldSelector', () => {
   });
 
   it('should mark the option as checked if breakdown.field is defined', () => {
-    const onBreakdownFieldChange = jest.fn();
+    const onBreakdownFieldChange = vi.fn();
     const field = dataViewWithTimefieldMock.fields.find((f) => f.name === 'extension')!;
     const breakdown: UnifiedHistogramBreakdownContext = { field };
 
@@ -183,7 +185,7 @@ describe('BreakdownFieldSelector', () => {
   });
 
   it('renders the button label with the field name slotted into the message and passed to EuiTextTruncate', () => {
-    const onBreakdownFieldChange = jest.fn();
+    const onBreakdownFieldChange = vi.fn();
     const field = dataViewWithTimefieldMock.fields.find((f) => f.name === 'extension')!;
     const breakdown: UnifiedHistogramBreakdownContext = { field };
 
@@ -214,7 +216,7 @@ describe('BreakdownFieldSelector', () => {
       <BreakdownFieldSelector
         dataView={dataViewWithTimefieldMock}
         breakdown={{ field: undefined }}
-        onBreakdownFieldChange={jest.fn()}
+        onBreakdownFieldChange={vi.fn()}
       />
     );
 
@@ -224,7 +226,7 @@ describe('BreakdownFieldSelector', () => {
   });
 
   it('should filter options based on the search input', async () => {
-    const onBreakdownFieldChange = jest.fn();
+    const onBreakdownFieldChange = vi.fn();
     const breakdown: UnifiedHistogramBreakdownContext = {
       field: undefined,
     };
@@ -272,7 +274,7 @@ describe('BreakdownFieldSelector', () => {
       const input = screen.getByTestId('unifiedHistogramBreakdownSelectorSelectorSearch');
       input.focus();
       fireEvent.change(input, { target: { value: 'extee' } });
-      jest.advanceTimersByTime(300); // Wait for debounce
+      vi.advanceTimersByTime(300); // Wait for debounce
     });
 
     await waitFor(() => {
@@ -291,7 +293,7 @@ describe('BreakdownFieldSelector', () => {
   });
 
   it('should call onBreakdownFieldChange with the selected field when the user selects a dataview field', () => {
-    const onBreakdownFieldChange = jest.fn();
+    const onBreakdownFieldChange = vi.fn();
     const selectedField = dataViewWithTimefieldMock.fields.find((f) => f.name === 'bytes')!;
     const breakdown: UnifiedHistogramBreakdownContext = {
       field: undefined,
@@ -320,7 +322,7 @@ describe('BreakdownFieldSelector', () => {
       <BreakdownFieldSelector
         dataView={dataViewWithTimefieldMock}
         breakdown={{ field: undefined }}
-        onBreakdownFieldChange={jest.fn()}
+        onBreakdownFieldChange={vi.fn()}
         recommendedFields={['extension', 'bytes']}
       />
     );
@@ -343,7 +345,7 @@ describe('BreakdownFieldSelector', () => {
       <BreakdownFieldSelector
         dataView={dataViewWithTimefieldMock}
         breakdown={{ field: undefined }}
-        onBreakdownFieldChange={jest.fn()}
+        onBreakdownFieldChange={vi.fn()}
         recommendedFields={['service.name', 'host.name']}
       />
     );
@@ -357,7 +359,7 @@ describe('BreakdownFieldSelector', () => {
   });
 
   it('should call onBreakdownFieldChange with the selected field when the user selects an ES|QL field', () => {
-    const onBreakdownFieldChange = jest.fn();
+    const onBreakdownFieldChange = vi.fn();
     const esqlColumns = [
       {
         name: 'bytes',

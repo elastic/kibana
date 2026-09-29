@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
@@ -21,7 +23,7 @@ const createTypeRegistryStub = (types: AgentTypeDefinition[]): AgentTypeRegistry
     typeMap.set(chatAgentTypeId, { id: chatAgentTypeId, baseConfiguration: {} });
   }
   return {
-    register: jest.fn(),
+    register: vi.fn(),
     has: (id) => typeMap.has(id),
     get: (id) => typeMap.get(id),
     list: () => [...typeMap.values()],
@@ -73,7 +75,7 @@ describe('createConfigurationResolver', () => {
   });
 
   it('invokes a function base with the resolution context', async () => {
-    const baseConfiguration = jest.fn().mockResolvedValue({ skill_ids: ['from-fn'] });
+    const baseConfiguration = vi.fn().mockResolvedValue({ skill_ids: ['from-fn'] });
     const resolver = createConfigurationResolver({
       typeRegistry: createTypeRegistryStub([{ id: 'investigation', baseConfiguration }]),
       logger: loggerMock.create(),
@@ -123,7 +125,7 @@ describe('createConfigurationResolver', () => {
     });
 
     it('resolves the function form against the request context', async () => {
-      const baseConfiguration = jest.fn().mockReturnValue({ ai_indices: ['per-request'] });
+      const baseConfiguration = vi.fn().mockReturnValue({ ai_indices: ['per-request'] });
       const resolver = createConfigurationResolver({
         typeRegistry: createTypeRegistryStub([{ id: 'investigation', baseConfiguration }]),
         logger: loggerMock.create(),

@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { generateApiKey } from './generate_connector_api_key_api_logic';
 
-jest.mock('@kbn/search-connectors', () => ({
-  createConnectorSecret: jest.fn(),
-  updateConnectorSecret: jest.fn(),
-}));
+vi.mock('@kbn/search-connectors', () => {
+      const mocked = {
+      createConnectorSecret: vi.fn(),
+      updateConnectorSecret: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('generateConnectorApiKeyApiLogic', () => {
   const http = httpServiceMock.createSetupContract();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('generateApiKey for connector clients', () => {
     it('calls correct api', async () => {

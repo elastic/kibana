@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import Boom from '@hapi/boom';
 import type {
   KibanaRequest,
@@ -46,8 +49,8 @@ class TestRoute extends BaseAlertingRoute {
   public static schemas: AlertingRouteSchemas = {};
 
   protected readonly routeName = 'test route';
-  public executeFn = jest.fn();
-  public onErrorSpy = jest.fn();
+  public executeFn = vi.fn();
+  public onErrorSpy = vi.fn();
 
   protected async execute() {
     return this.executeFn();
@@ -65,8 +68,8 @@ class TestRoute extends BaseAlertingRoute {
 }
 
 describe('BaseAlertingRoute', () => {
-  let response: jest.Mocked<KibanaResponseFactory>;
-  let mockLogger: jest.Mocked<Logger>;
+  let response: Mocked<KibanaResponseFactory>;
+  let mockLogger: Mocked<Logger>;
   let mockUiSettingsClient: MockUiSettingsClient;
   let route: TestRoute;
 
@@ -453,7 +456,7 @@ describe('BaseAlertingRoute', () => {
     });
 
     it('merges the subclass response schemas with the common ones', () => {
-      const okSchemaFactory = jest.fn(() => z.object({ id: z.string() }));
+      const okSchemaFactory = vi.fn(() => z.object({ id: z.string() }));
 
       TestRoute.schemas = {
         response: {
@@ -506,7 +509,7 @@ describe('BaseAlertingRoute', () => {
     });
 
     it('lets the subclass override a common response body with its own schema', () => {
-      const subclassUnauthorizedBody = jest.fn(() => z.object({ reason: z.string() }));
+      const subclassUnauthorizedBody = vi.fn(() => z.object({ reason: z.string() }));
 
       TestRoute.schemas = {
         response: {

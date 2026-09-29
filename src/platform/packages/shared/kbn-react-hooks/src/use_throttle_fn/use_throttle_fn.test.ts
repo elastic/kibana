@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useThrottleFn } from '../..';
 
 describe('useThrottleFn hook', () => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 
   it('should throttle the function call', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     const { result } = renderHook(() => useThrottleFn(fn, { wait: 200, leading: false }));
 
     act(() => {
@@ -27,21 +29,21 @@ describe('useThrottleFn hook', () => {
     expect(fn).toHaveBeenCalledTimes(0);
 
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     expect(fn).toHaveBeenCalledTimes(1);
 
     act(() => {
       result.current.run();
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
   it('should cancel the throttled function call', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     const { result } = renderHook(() => useThrottleFn(fn, { wait: 200, leading: false }));
 
     act(() => {
@@ -50,14 +52,14 @@ describe('useThrottleFn hook', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     expect(fn).not.toHaveBeenCalled();
   });
 
   it('should flush the throttled function call', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     const { result } = renderHook(() => useThrottleFn(fn, { wait: 200 }));
 
     act(() => {
@@ -69,7 +71,7 @@ describe('useThrottleFn hook', () => {
   });
 
   it('should handle leading option correctly', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     const { result } = renderHook(() => useThrottleFn(fn, { wait: 200, leading: true }));
 
     act(() => {
@@ -79,7 +81,7 @@ describe('useThrottleFn hook', () => {
     expect(fn).toHaveBeenCalledTimes(1);
 
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     act(() => {
@@ -90,7 +92,7 @@ describe('useThrottleFn hook', () => {
   });
 
   it('should handle trailing option correctly', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     const { result } = renderHook(() => useThrottleFn(fn, { wait: 200, trailing: true }));
 
     act(() => {
@@ -101,7 +103,7 @@ describe('useThrottleFn hook', () => {
     expect(fn).toHaveBeenCalledTimes(1);
 
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     expect(fn).toHaveBeenCalledTimes(2);

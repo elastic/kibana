@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockInstance, Mocked } from 'vitest';
 import sinon from 'sinon';
 import { of, Subject } from 'rxjs';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
@@ -21,9 +24,12 @@ import { CLAIM_STRATEGY_MGET } from '../config';
 import { mockRun, mockTask } from './test_utils';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 
-jest.mock('../constants', () => ({
-  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report', 'quickReport'],
-}));
+vi.mock('../constants', () => {
+      const mocked = {
+      CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report', 'quickReport'],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TaskPool', () => {
   const costCapacityMock = capacityMock.create();
@@ -35,29 +41,29 @@ describe('TaskPool', () => {
       title: 'report',
       maxConcurrency: 1,
       cost: TaskCost.ExtraLarge,
-      createTaskRunner: jest.fn(),
+      createTaskRunner: vi.fn(),
     },
     quickReport: {
       title: 'quickReport',
       maxConcurrency: 5,
-      createTaskRunner: jest.fn(),
+      createTaskRunner: vi.fn(),
     },
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date(2021, 12, 30));
+    vi.resetAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2021, 12, 30));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('uses the correct capacity calculator based on the strategy', () => {
-    let costCapacitySpy: jest.SpyInstance;
+    let costCapacitySpy: MockInstance;
     beforeEach(() => {
-      costCapacitySpy = jest
+      costCapacitySpy = vi
         .spyOn(CostCapacityModule, 'CostCapacity')
         .mockImplementation(() => costCapacityMock);
     });
@@ -187,7 +193,7 @@ describe('TaskPool', () => {
         'Mark Task as running has failed miserably'
       );
 
-      expect((logger as jest.Mocked<Logger>).error.mock.calls[0]).toMatchInlineSnapshot(`
+      expect((logger as Mocked<Logger>).error.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "Failed to mark Task TaskType \\"shooooo\\" as running: Mark Task as running has failed miserably",
       ]
@@ -209,7 +215,7 @@ describe('TaskPool', () => {
 
       const result = await pool.run([mockTask(), taskFailedToRun, mockTask()]);
 
-      expect((logger as jest.Mocked<Logger>).warn.mock.calls[0]).toMatchInlineSnapshot(`
+      expect((logger as Mocked<Logger>).warn.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "Task TaskType \\"shooooo\\" failed in attempt to run: Run Task has failed miserably",
         ]
@@ -234,7 +240,7 @@ describe('TaskPool', () => {
 
       const result = await pool.run([mockTask(), taskFailedToRun, mockTask()]);
 
-      expect((logger as jest.Mocked<Logger>).warn.mock.calls[0]).toMatchInlineSnapshot(`
+      expect((logger as Mocked<Logger>).warn.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "Task TaskType \\"shooooo\\" failed in attempt to run: {\\"statusCode\\":500,\\"error\\":{}}",
         ]
@@ -482,7 +488,7 @@ describe('TaskPool', () => {
       // Allow the task to cancel...
       await cancelled;
 
-      expect((logger as jest.Mocked<Logger>).error.mock.calls[0][0]).toMatchInlineSnapshot(
+      expect((logger as Mocked<Logger>).error.mock.calls[0][0]).toMatchInlineSnapshot(
         `"Failed to cancel task \\"shooooo!\\": Error: Dern!"`
       );
     });
@@ -525,8 +531,8 @@ describe('TaskPool', () => {
         strategy: CLAIM_STRATEGY_MGET,
       });
 
-      const fooCancel = jest.fn(async () => undefined);
-      const barCancel = jest.fn(async () => undefined);
+      const fooCancel = vi.fn(async () => undefined);
+      const barCancel = vi.fn(async () => undefined);
       const fooTask = mockTask({ taskType: 'foo', cancel: fooCancel });
       const barTask = mockTask({ taskType: 'bar', cancel: barCancel });
 
@@ -546,7 +552,7 @@ describe('TaskPool', () => {
         strategy: CLAIM_STRATEGY_MGET,
       });
 
-      const cancel = jest.fn(async () => undefined);
+      const cancel = vi.fn(async () => undefined);
       await pool.run([mockTask({ taskType: 'foo', cancel })]);
 
       pool.cancelRunningTasksByTypes([]);

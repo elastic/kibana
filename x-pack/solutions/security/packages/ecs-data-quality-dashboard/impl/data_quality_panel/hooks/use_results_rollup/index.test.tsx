@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 // fixing timezone for Date
 // so when tests are run in different timezones, the results are consistent
 process.env.TZ = 'UTC';
@@ -20,18 +23,21 @@ import { useResultsRollup } from '.';
 import { getPatternRollupStub } from '../../stub/get_pattern_rollup_stub';
 import { formatBytes, formatNumber } from '../../mock/test_providers/utils/format';
 
-jest.mock('./hooks/use_stored_pattern_results', () => ({
-  ...jest.requireActual('./hooks/use_stored_pattern_results'),
-  useStoredPatternResults: jest.fn().mockReturnValue([]),
-}));
+vi.mock('./hooks/use_stored_pattern_results', async () => {
+      const mocked = {
+      ...(await vi.importActual('./hooks/use_stored_pattern_results')),
+      useStoredPatternResults: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useResultsRollup', () => {
-  const httpFetch = jest.fn();
+  const httpFetch = vi.fn();
   const toasts = notificationServiceMock.createStartContract().toasts;
 
   const mockTelemetryEvents: TelemetryEvents = {
-    reportDataQualityIndexChecked: jest.fn(),
-    reportDataQualityCheckAllCompleted: jest.fn(),
+    reportDataQualityIndexChecked: vi.fn(),
+    reportDataQualityCheckAllCompleted: vi.fn(),
   };
 
   const patterns = ['auditbeat-*', 'packetbeat-*'];
@@ -39,10 +45,10 @@ describe('useResultsRollup', () => {
   const startTime = 'now-7d';
   const endTime = 'now';
 
-  const useStoredPatternResultsMock = useStoredPatternResults as jest.Mock;
+  const useStoredPatternResultsMock = useStoredPatternResults as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useStoredPatternResultsMock.mockReturnValue([]);
   });
 
@@ -182,12 +188,12 @@ describe('useResultsRollup', () => {
   describe('onCheckCompleted', () => {
     describe('when invoked with successful check data', () => {
       beforeEach(() => {
-        jest.useFakeTimers();
-        jest.setSystemTime(new Date('2021-10-07T00:00:00Z').getTime());
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2021-10-07T00:00:00Z').getTime());
       });
 
       afterEach(() => {
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
       it('should update patternRollup with said data, report to telemetry and persist it in storage', () => {
@@ -223,7 +229,7 @@ describe('useResultsRollup', () => {
           }
         );
 
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
 
         const mockOnCheckCompletedOpts = {
           batchId: 'test-batch',
@@ -239,7 +245,7 @@ describe('useResultsRollup', () => {
           isCheckAll: true,
         };
 
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
 
         act(() => {
           result.current.onCheckCompleted(mockOnCheckCompletedOpts);
@@ -400,7 +406,7 @@ describe('useResultsRollup', () => {
             result.current.updatePatternRollup(patternRollup);
           });
 
-          jest.advanceTimersByTime(1000);
+          vi.advanceTimersByTime(1000);
 
           const mockOnCheckCompletedOpts = {
             batchId: 'test-batch',
@@ -416,7 +422,7 @@ describe('useResultsRollup', () => {
             isCheckAll: true,
           };
 
-          jest.advanceTimersByTime(1000);
+          vi.advanceTimersByTime(1000);
 
           act(() => {
             result.current.onCheckCompleted(mockOnCheckCompletedOpts);

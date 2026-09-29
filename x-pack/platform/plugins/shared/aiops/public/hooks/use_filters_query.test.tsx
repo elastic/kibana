@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { FilterQueryContextProvider, useFilterQueryUpdates } from './use_filters_query';
 import { renderHook, act } from '@testing-library/react';
 import { dataPluginMock as mockDataPlugin } from '@kbn/data-plugin/public/mocks';
@@ -15,30 +18,36 @@ import { useReload } from './use_reload';
 
 const mockCurrentDate = new Date('2024-02-23T00:13:45.000Z');
 
-jest.mock('./use_aiops_app_context');
+vi.mock('./use_aiops_app_context');
 
-jest.mock('./use_reload');
+vi.mock('./use_reload');
 
-jest.mock('@kbn/ml-date-picker', () => ({
-  useTimeRangeUpdates: jest.fn(() => {
-    return { from: 'now-24h', to: 'now' };
-  }),
-}));
+vi.mock('@kbn/ml-date-picker', () => {
+      const mocked = {
+      useTimeRangeUpdates: vi.fn(() => {
+        return { from: 'now-24h', to: 'now' };
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/ml-date-picker', () => ({
-  useTimeRangeUpdates: jest.fn(() => {
-    return { from: 'now-24h', to: 'now' };
-  }),
-}));
+vi.mock('@kbn/ml-date-picker', () => {
+      const mocked = {
+      useTimeRangeUpdates: vi.fn(() => {
+        return { from: 'now-24h', to: 'now' };
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useFilterQueryUpdates', () => {
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(mockCurrentDate);
+    vi.useFakeTimers().setSystemTime(mockCurrentDate);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   test('provides correct search bounds for relative time range on each reload', async () => {
@@ -71,9 +80,9 @@ describe('useFilterQueryUpdates', () => {
     act(() => {
       // 30 minutes later...
       const nextMockDate = new Date('2024-02-23T00:53:45.000Z');
-      jest.setSystemTime(nextMockDate);
+      vi.setSystemTime(nextMockDate);
 
-      (useReload as jest.MockedFunction<typeof useReload>).mockReturnValue({
+      (useReload as MockedFunction<typeof useReload>).mockReturnValue({
         refreshTimestamp: nextMockDate.getTime(),
       });
 

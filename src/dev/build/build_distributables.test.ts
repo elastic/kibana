@@ -7,25 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 
 import type { BuildOptions } from './build_distributables';
 import { buildDistributables } from './build_distributables';
 import * as Tasks from './tasks';
 
-jest.mock('./lib/version_info', () => ({
-  getVersionInfo: () => ({
-    buildSha: 'abc1234abcdef',
-    buildVersion: '8.0.0',
-    buildNumber: 1234,
-    buildDate: '2023-05-15T23:12:09+0000',
-  }),
-}));
+vi.mock('./lib/version_info', () => {
+      const mocked = {
+      getVersionInfo: () => ({
+        buildSha: 'abc1234abcdef',
+        buildVersion: '8.0.0',
+        buildNumber: 1234,
+        buildDate: '2023-05-15T23:12:09+0000',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./tasks', () => {
-  const actual = jest.requireActual('./tasks') as Record<string, unknown>;
-  const noopTaskRun = jest.fn().mockResolvedValue(undefined);
-  const mockBundleTaskRun = jest.fn().mockResolvedValue(undefined);
+vi.mock('./tasks', async () => {
+  const actual = (await vi.importActual('./tasks')) as Record<string, unknown>;
+  const noopTaskRun = vi.fn().mockResolvedValue(undefined);
+  const mockBundleTaskRun = vi.fn().mockResolvedValue(undefined);
 
   const result: Record<string, unknown> = {};
 
@@ -49,7 +55,7 @@ jest.mock('./tasks', () => {
   return result;
 });
 
-const mockBundleTaskRun = Tasks.BuildBundles.run as jest.MockedFunction<
+const mockBundleTaskRun = Tasks.BuildBundles.run as MockedFunction<
   typeof Tasks.BuildBundles.run
 >;
 

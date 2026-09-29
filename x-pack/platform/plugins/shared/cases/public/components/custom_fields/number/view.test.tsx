@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { CustomFieldTypes } from '../../../../common/types/domain';
@@ -12,7 +14,7 @@ import { View } from './view';
 
 describe('View ', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const customField = {

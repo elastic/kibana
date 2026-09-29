@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -28,7 +30,7 @@ const totalFieldsLimit = 1000;
 
 describe('updateDataStreams', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(`should update data streams when expandIndexPattern is true`, async () => {
@@ -117,7 +119,7 @@ describe('updateDataStreams', () => {
 
 describe('createDataStream', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(`should create data stream`, async () => {
@@ -149,7 +151,7 @@ describe('createDataStream', () => {
 
 describe('createOrUpdateDataStream', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(`should create data stream if not exists`, async () => {

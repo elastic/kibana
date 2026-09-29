@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import BedrockConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
@@ -16,22 +19,23 @@ import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => ({
+  useKibana: vi.fn(() => ({
     services: mockUseKibanaReturnValue,
   })),
 }));
-jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
-  ...jest.requireActual(
-    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
-  ),
-  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
-}));
-jest.mock('../lib/gen_ai/use_get_dashboard');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api')),
+      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/gen_ai/use_get_dashboard');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const mockDashboard = useGetDashboard as jest.Mock;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+const mockDashboard = useGetDashboard as Mock;
 const bedrockConnector = {
   actionTypeId: '.bedrock',
   name: 'bedrock',
@@ -47,11 +51,11 @@ const bedrockConnector = {
   isDeprecated: false,
 };
 
-const navigateToUrl = jest.fn();
+const navigateToUrl = vi.fn();
 
 describe('BedrockConnectorFields renders', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock().services.application.navigateToUrl = navigateToUrl;
     mockDashboard.mockImplementation(({ connectorId }) => ({
       dashboardUrl: `https://dashboardurl.com/${connectorId}`,
@@ -124,10 +128,10 @@ describe('BedrockConnectorFields renders', () => {
   });
 
   describe('Validation', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('connector validation succeeds when connector config is valid', async () => {

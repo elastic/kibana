@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ChatEventType,
   ConversationRoundStepType,
@@ -21,9 +23,12 @@ import { RunTracker, type RunSeed } from '../run_tracker';
 import { applyStepUpdates, stepUpdates, type RunStepUpdate } from '../step_state';
 import { buildInterruptedRound } from './round_summary';
 
-jest.mock('../../../../tracing', () => ({
-  getCurrentTraceId: () => 'trace-1',
-}));
+vi.mock('../../../../tracing', () => {
+      const mocked = {
+      getCurrentTraceId: () => 'trace-1',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const toolCall = (id: string, results: ToolCallStep['results'] = []): ToolCallStep => ({
   type: ConversationRoundStepType.toolCall,

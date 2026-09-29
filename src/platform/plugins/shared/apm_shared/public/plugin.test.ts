@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';
@@ -18,11 +21,14 @@ import {
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
 } from '.';
 
-jest.mock('@kbn/apm-api-shared', () => ({
-  createCallApmApiV2: jest.fn(),
-}));
+vi.mock('@kbn/apm-api-shared', () => {
+      const mocked = {
+      createCallApmApiV2: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const createCallApmApiV2Mock = createCallApmApiV2 as jest.MockedFunction<typeof createCallApmApiV2>;
+const createCallApmApiV2Mock = createCallApmApiV2 as MockedFunction<typeof createCallApmApiV2>;
 
 describe('ApmSharedPlugin', () => {
   const startPlugin = (isCpsEnabled$: BehaviorSubject<boolean>) => {
@@ -43,8 +49,8 @@ describe('ApmSharedPlugin', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    createCallApmApiV2Mock.mockReturnValue(jest.fn() as unknown as APMClientV2);
+    vi.clearAllMocks();
+    createCallApmApiV2Mock.mockReturnValue(vi.fn() as unknown as APMClientV2);
   });
 
   it('observes the CPS feature flag with the shared default as fallback', () => {

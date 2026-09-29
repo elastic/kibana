@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import type { TextareaInputArgumentProps } from './textarea_input_argument';
 import {
@@ -25,7 +27,7 @@ import { waitFor } from '@testing-library/react';
 
 describe('TextareaInputArgument component', () => {
   let appTestContext: AppContextTestRender;
-  let componentPropsMock: jest.Mocked<TextareaInputArgumentProps>;
+  let componentPropsMock: Mocked<TextareaInputArgumentProps>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
 
   const render = () =>

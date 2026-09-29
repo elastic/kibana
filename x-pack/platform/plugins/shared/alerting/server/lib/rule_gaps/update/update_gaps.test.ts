@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { updateGaps } from './update_gaps';
 import { backfillClientMock } from '../../../backfill_client/backfill_client.mock';
 
@@ -20,8 +23,8 @@ import { updateGapsBatch } from './update_gaps_batch';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import { backfillInitiator } from '../../../../common/constants';
 
-jest.mock('../process_all_rule_gaps');
-jest.mock('./update_gaps_batch');
+vi.mock('../process_all_rule_gaps');
+vi.mock('./update_gaps_batch');
 
 describe('updateGaps', () => {
   const mockLogger = loggerMock.create();
@@ -31,8 +34,8 @@ describe('updateGaps', () => {
   const mockBackfillClient = backfillClientMock.create();
   const mockActionsClient = actionsClientMock.create();
 
-  const processAllRuleGapsMock = processAllRuleGaps as jest.Mock;
-  const updateGapsBatchMock = updateGapsBatch as jest.Mock;
+  const processAllRuleGapsMock = processAllRuleGaps as Mock;
+  const updateGapsBatchMock = updateGapsBatch as Mock;
 
   const ruleId = 'test-rule-id';
   const gaps = [
@@ -55,7 +58,7 @@ describe('updateGaps', () => {
   let processGapsBatchResult = {};
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     processAllRuleGapsMock.mockImplementation(async ({ processGapsBatch }) => {
       processGapsBatchResult = await processGapsBatch(gaps);
       return processGapsBatchResult;

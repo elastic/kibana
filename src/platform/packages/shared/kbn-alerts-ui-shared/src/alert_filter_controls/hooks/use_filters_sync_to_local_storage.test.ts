@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
 import { waitFor, act, renderHook } from '@testing-library/react';
 import { useControlGroupSyncToLocalStorage } from './use_control_group_sync_to_local_storage';
@@ -26,10 +28,10 @@ describe('Filters Sync to Local Storage', () => {
   beforeEach(() => {
     Object.defineProperty(global, 'localStorage', {
       value: {
-        getItem: jest.fn((key) => {
+        getItem: vi.fn((key) => {
           return key in mockLocalStorage ? mockLocalStorage[key] : undefined;
         }),
-        setItem: jest.fn((key, val) => (mockLocalStorage[key] = val)),
+        setItem: vi.fn((key, val) => (mockLocalStorage[key] = val)),
       },
       writable: true,
     });

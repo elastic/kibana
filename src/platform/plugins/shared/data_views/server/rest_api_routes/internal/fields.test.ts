@@ -6,29 +6,32 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { createHandler } from './fields';
 import { IndexPatternsFetcher } from '../../fetcher';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
-jest.mock('../../fetcher');
+vi.mock('../../fetcher');
 
 describe('createHandler', () => {
-  const mockIsRollupsEnabled = jest.fn();
+  const mockIsRollupsEnabled = vi.fn();
   const mockContext = {
     core: coreMock.createRequestHandlerContext(),
   } as unknown as RequestHandlerContext;
   const mockResponse = httpServerMock.createResponseFactory();
-  let getFieldsForWildcard: jest.Mock;
+  let getFieldsForWildcard: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    getFieldsForWildcard = jest.fn().mockResolvedValue({
+    vi.clearAllMocks();
+    getFieldsForWildcard = vi.fn().mockResolvedValue({
       fields: [{ name: 'field1', type: 'string' }],
       indices: ['index1'],
     });
 
-    (IndexPatternsFetcher as jest.Mock).mockImplementation(() => ({
+    (IndexPatternsFetcher as Mock).mockImplementation(() => ({
       getFieldsForWildcard,
     }));
   });

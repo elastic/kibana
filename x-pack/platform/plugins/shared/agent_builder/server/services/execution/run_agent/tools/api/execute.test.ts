@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { AgentExecutionMode, ToolResultType } from '@kbn/agent-builder-common';
 import type { AutoApprovedApi } from '@kbn/agent-builder-common';
@@ -20,19 +23,22 @@ import type { ApiExecuteResultData } from './execute';
 import { getRegistries } from '../../api/registry';
 import type { ApiRegistry, ApiRegistryDefinition, ApiRequest, LoadedApi } from '../../api';
 
-jest.mock('../../api/registry', () => ({
-  ...jest.requireActual('../../api/registry'),
-  getRegistries: jest.fn(),
-}));
+vi.mock('../../api/registry', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../api/registry')),
+      getRegistries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetRegistries = jest.mocked(getRegistries);
+const mockGetRegistries = vi.mocked(getRegistries);
 
 const createLoadedApi = (definition: ApiRegistryDefinition, apiRequest: ApiRequest): LoadedApi => ({
   definition,
-  buildRequest: jest.fn().mockReturnValue(apiRequest),
+  buildRequest: vi.fn().mockReturnValue(apiRequest),
 });
 
-const createRegistry = (loadApi: jest.Mock): ApiRegistry => ({
+const createRegistry = (loadApi: Mock): ApiRegistry => ({
   manifest: [],
   loadApi,
 });
@@ -46,19 +52,19 @@ class UnknownApiError extends Error {
 
 describe('createExecuteApiTool', () => {
   let selfClient: ReturnType<typeof httpServiceMock.createStartContract>['selfClient'];
-  let mockFetch: jest.Mock;
-  let esLoadApi: jest.Mock;
-  let kibanaLoadApi: jest.Mock;
+  let mockFetch: Mock;
+  let esLoadApi: Mock;
+  let kibanaLoadApi: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     ({ selfClient } = httpServiceMock.createStartContract());
-    mockFetch = jest.fn();
-    jest.mocked(selfClient.asScoped).mockReturnValue({ fetch: mockFetch });
+    mockFetch = vi.fn();
+    vi.mocked(selfClient.asScoped).mockReturnValue({ fetch: mockFetch });
 
-    esLoadApi = jest.fn();
-    kibanaLoadApi = jest.fn();
+    esLoadApi = vi.fn();
+    kibanaLoadApi = vi.fn();
     mockGetRegistries.mockResolvedValue({
       elasticsearch: createRegistry(esLoadApi),
       kibana: createRegistry(kibanaLoadApi),
@@ -87,7 +93,7 @@ describe('createExecuteApiTool', () => {
     );
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+    const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
     transportRequest.mockResolvedValue({ acknowledged: true });
 
     const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
@@ -352,7 +358,7 @@ describe('createExecuteApiTool', () => {
     );
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+    const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
 
     const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
@@ -421,7 +427,7 @@ describe('createExecuteApiTool', () => {
     );
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+    const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
 
     const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
@@ -461,7 +467,7 @@ describe('createExecuteApiTool', () => {
     );
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+    const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
 
     const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
@@ -525,7 +531,7 @@ describe('createExecuteApiTool', () => {
     );
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+    const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
     transportRequest.mockResolvedValue({ result: 'created' });
 
     const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
@@ -604,7 +610,7 @@ describe('createExecuteApiTool', () => {
     );
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+    const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
     transportRequest.mockResolvedValue({ errors: false });
 
     const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
@@ -653,7 +659,7 @@ describe('createExecuteApiTool', () => {
     );
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+    const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
     transportRequest.mockResolvedValue({ num_lines_analyzed: 2 });
 
     const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
@@ -689,7 +695,7 @@ describe('createExecuteApiTool', () => {
     );
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+    const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
     transportRequest.mockRejectedValue(new Error('cluster unavailable'));
 
     const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
@@ -724,7 +730,7 @@ describe('createExecuteApiTool', () => {
     });
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    jest.mocked(context.esClient.asCurrentUser.transport.request).mockRejectedValue(responseError);
+    vi.mocked(context.esClient.asCurrentUser.transport.request).mockRejectedValue(responseError);
 
     const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
@@ -878,7 +884,7 @@ describe('createExecuteApiTool', () => {
       context.prompts.askForConfirmation.mockImplementation((confirm) => ({
         prompt: { type: AgentPromptType.confirmation, ...confirm },
       }));
-      const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+      const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
 
       const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
       const result = await tool.handler(deleteIndexParams, context);
@@ -900,7 +906,7 @@ describe('createExecuteApiTool', () => {
       context.prompts.checkConfirmationStatus.mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
-      const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+      const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
       transportRequest.mockResolvedValue({ acknowledged: true });
 
       const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
@@ -919,7 +925,7 @@ describe('createExecuteApiTool', () => {
       context.prompts.checkConfirmationStatus.mockReturnValue({
         status: ConfirmationStatus.rejected,
       });
-      const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+      const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
 
       const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
       const result = (await tool.handler(deleteIndexParams, context)) as ToolHandlerStandardReturn;
@@ -937,7 +943,7 @@ describe('createExecuteApiTool', () => {
         ...agentBuilderMocks.tools.createHandlerContext(),
         executionMode: AgentExecutionMode.standalone,
       };
-      const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+      const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
 
       const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
       const result = (await tool.handler(deleteIndexParams, context)) as ToolHandlerStandardReturn;
@@ -957,7 +963,7 @@ describe('createExecuteApiTool', () => {
       context.prompts.checkConfirmationStatus.mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
-      jest
+      vi
         .mocked(context.esClient.asCurrentUser.transport.request)
         .mockResolvedValue({ acknowledged: true });
 
@@ -984,7 +990,7 @@ describe('createExecuteApiTool', () => {
       );
 
       const context = agentBuilderMocks.tools.createHandlerContext();
-      jest.mocked(context.esClient.asCurrentUser.transport.request).mockResolvedValue({});
+      vi.mocked(context.esClient.asCurrentUser.transport.request).mockResolvedValue({});
 
       const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
       const result = (await tool.handler(
@@ -1039,7 +1045,7 @@ describe('createExecuteApiTool', () => {
             enabled,
             autoApprovedApis: covered,
           });
-          const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+          const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
           transportRequest.mockResolvedValue({ acknowledged: true });
 
           const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
@@ -1072,7 +1078,7 @@ describe('createExecuteApiTool', () => {
             enabled: false,
             autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.create' }],
           });
-          const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+          const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
 
           const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
           const result = (await tool.handler(
@@ -1109,7 +1115,7 @@ describe('createExecuteApiTool', () => {
             enabled: false,
             autoApprovedApis,
           });
-          const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+          const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
           transportRequest.mockResolvedValue({ acknowledged: true });
 
           const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
@@ -1133,7 +1139,7 @@ describe('createExecuteApiTool', () => {
           enabled: false,
           autoApprovedApis: [{ target: 'kibana', api: '*' }],
         });
-        const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+        const transportRequest = vi.mocked(context.esClient.asCurrentUser.transport.request);
 
         const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
         const result = (await tool.handler(
@@ -1175,7 +1181,7 @@ describe('createExecuteApiTool', () => {
           enabled: false,
           autoApprovedApis: covered,
         });
-        jest
+        vi
           .mocked(context.esClient.asCurrentUser.transport.request)
           .mockRejectedValue(new Error('index_not_found_exception'));
 

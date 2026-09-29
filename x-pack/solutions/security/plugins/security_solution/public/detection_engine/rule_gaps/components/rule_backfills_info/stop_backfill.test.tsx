@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -16,21 +19,21 @@ import * as i18n from '../../translations';
 import type { BackfillRow } from '../../types';
 import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
-jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../api/hooks/use_delete_backfill');
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('../../api/hooks/use_delete_backfill');
+vi.mock('../../../../common/lib/kibana');
 
-const mockUseAppToasts = useAppToasts as jest.Mock;
-const mockUseDeleteBackfill = useDeleteBackfill as jest.Mock;
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseAppToasts = useAppToasts as Mock;
+const mockUseDeleteBackfill = useDeleteBackfill as Mock;
+const mockUseKibana = useKibana as Mock;
 
 describe('StopBackfill', () => {
   const mockTelemetry = {
-    reportEvent: jest.fn(),
+    reportEvent: vi.fn(),
   };
 
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
+  const addSuccess = vi.fn();
+  const addError = vi.fn();
 
   const backfill = {
     id: 'backfill-id',
@@ -60,7 +63,7 @@ describe('StopBackfill', () => {
   } as BackfillRow;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseAppToasts.mockReturnValue({
       addSuccess,

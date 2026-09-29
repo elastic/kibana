@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, render } from '@testing-library/react';
 
@@ -14,12 +17,12 @@ import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_dat
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
 import { ThreatIntelLinkPanel } from '.';
 
-jest.mock('../../containers/overview_cti_links/use_ti_data_sources');
-const useTiDataSourcesMock = useTiDataSources as jest.Mock;
+vi.mock('../../containers/overview_cti_links/use_ti_data_sources');
+const useTiDataSourcesMock = useTiDataSources as Mock;
 useTiDataSourcesMock.mockReturnValue(mockTiDataSources);
 
-jest.mock('../../containers/overview_cti_links');
-const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
+vi.mock('../../containers/overview_cti_links');
+const useCtiDashboardLinksMock = useCtiDashboardLinks as Mock;
 useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
 
 describe('ThreatIntelLinkPanel', () => {

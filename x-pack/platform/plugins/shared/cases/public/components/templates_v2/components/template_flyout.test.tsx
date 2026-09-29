@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,124 +16,139 @@ import { useParseYaml } from '../hooks/use_parse_yaml';
 import { useImportTemplates } from '../hooks/use_import_templates';
 import { useImportSteps, ImportStep } from '../hooks/use_import_steps';
 
-jest.mock('../hooks/use_parse_yaml');
-jest.mock('../hooks/use_import_templates');
-jest.mock('../hooks/use_import_steps');
-jest.mock('./upload_yaml_step', () => ({
-  UploadYamlStep: ({
-    onValidationComplete,
-  }: {
-    onValidationComplete: (result: { validFiles: unknown[]; errors: unknown[] }) => void;
-  }) => (
-    <div data-test-subj="upload-yaml-step">
-      <button
-        type="button"
-        onClick={() =>
-          onValidationComplete({
-            validFiles: [{ fileName: 'test.yaml', content: 'name: Test' }],
-            errors: [],
-          })
-        }
-      >
-        {'Mock Upload'}
-      </button>
-    </div>
-  ),
-}));
-jest.mock('./select_templates_step', () => ({
-  SelectTemplatesStep: ({
-    onSelectionChange,
-    onRowClick,
-  }: {
-    onSelectionChange: (templates: unknown[]) => void;
-    onRowClick: (template: unknown) => void;
-  }) => (
-    <div data-test-subj="select-templates-step">
-      <button
-        type="button"
-        onClick={() =>
-          onSelectionChange([
-            {
-              name: 'Test',
-              sourceFileName: 'test.yaml',
-              documentIndex: 0,
-              existsOnServer: false,
-            },
-          ])
-        }
-      >
-        {'Mock Select'}
-      </button>
-      <button
-        type="button"
-        onClick={() =>
-          onRowClick({
-            name: 'Test',
-            sourceFileName: 'test.yaml',
-            documentIndex: 0,
-            existsOnServer: false,
-          })
-        }
-      >
-        {'Mock Row Click'}
-      </button>
-    </div>
-  ),
-}));
-jest.mock('./template_flyout_header', () => ({
-  TemplateFlyoutHeader: () => <div data-test-subj="template-flyout-header" />,
-}));
-jest.mock('./template_flyout_footer', () => ({
-  TemplateFlyoutFooter: ({
-    onNext,
-    onImport,
-    onBack,
-    onCancel,
-  }: {
-    onNext: () => void;
-    onImport: () => void;
-    onBack: () => void;
-    onCancel: () => void;
-  }) => (
-    <div data-test-subj="template-flyout-footer">
-      <button type="button" onClick={onCancel}>
-        {'Cancel'}
-      </button>
-      <button type="button" onClick={onBack}>
-        {'Back'}
-      </button>
-      <button type="button" onClick={onNext}>
-        {'Next'}
-      </button>
-      <button type="button" onClick={onImport}>
-        {'Import'}
-      </button>
-    </div>
-  ),
-}));
-jest.mock('./template_preview_panel', () => ({
-  TemplatePreviewPanel: ({ onClose }: { onClose: () => void }) => (
-    <div data-test-subj="template-preview-panel">
-      <button type="button" onClick={onClose}>
-        {'Close Preview'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../hooks/use_parse_yaml');
+vi.mock('../hooks/use_import_templates');
+vi.mock('../hooks/use_import_steps');
+vi.mock('./upload_yaml_step', () => {
+      const mocked = {
+      UploadYamlStep: ({
+        onValidationComplete,
+      }: {
+        onValidationComplete: (result: { validFiles: unknown[]; errors: unknown[] }) => void;
+      }) => (
+        <div data-test-subj="upload-yaml-step">
+          <button
+            type="button"
+            onClick={() =>
+              onValidationComplete({
+                validFiles: [{ fileName: 'test.yaml', content: 'name: Test' }],
+                errors: [],
+              })
+            }
+          >
+            {'Mock Upload'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./select_templates_step', () => {
+      const mocked = {
+      SelectTemplatesStep: ({
+        onSelectionChange,
+        onRowClick,
+      }: {
+        onSelectionChange: (templates: unknown[]) => void;
+        onRowClick: (template: unknown) => void;
+      }) => (
+        <div data-test-subj="select-templates-step">
+          <button
+            type="button"
+            onClick={() =>
+              onSelectionChange([
+                {
+                  name: 'Test',
+                  sourceFileName: 'test.yaml',
+                  documentIndex: 0,
+                  existsOnServer: false,
+                },
+              ])
+            }
+          >
+            {'Mock Select'}
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              onRowClick({
+                name: 'Test',
+                sourceFileName: 'test.yaml',
+                documentIndex: 0,
+                existsOnServer: false,
+              })
+            }
+          >
+            {'Mock Row Click'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./template_flyout_header', () => {
+      const mocked = {
+      TemplateFlyoutHeader: () => <div data-test-subj="template-flyout-header" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./template_flyout_footer', () => {
+      const mocked = {
+      TemplateFlyoutFooter: ({
+        onNext,
+        onImport,
+        onBack,
+        onCancel,
+      }: {
+        onNext: () => void;
+        onImport: () => void;
+        onBack: () => void;
+        onCancel: () => void;
+      }) => (
+        <div data-test-subj="template-flyout-footer">
+          <button type="button" onClick={onCancel}>
+            {'Cancel'}
+          </button>
+          <button type="button" onClick={onBack}>
+            {'Back'}
+          </button>
+          <button type="button" onClick={onNext}>
+            {'Next'}
+          </button>
+          <button type="button" onClick={onImport}>
+            {'Import'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./template_preview_panel', () => {
+      const mocked = {
+      TemplatePreviewPanel: ({ onClose }: { onClose: () => void }) => (
+        <div data-test-subj="template-preview-panel">
+          <button type="button" onClick={onClose}>
+            {'Close Preview'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseParseYaml = useParseYaml as jest.MockedFunction<typeof useParseYaml>;
-const mockUseImportTemplates = useImportTemplates as jest.MockedFunction<typeof useImportTemplates>;
-const mockUseImportSteps = useImportSteps as jest.MockedFunction<typeof useImportSteps>;
+const mockUseParseYaml = useParseYaml as MockedFunction<typeof useParseYaml>;
+const mockUseImportTemplates = useImportTemplates as MockedFunction<typeof useImportTemplates>;
+const mockUseImportSteps = useImportSteps as MockedFunction<typeof useImportSteps>;
 
 describe('TemplateFlyout', () => {
-  const mockOnClose = jest.fn();
-  const mockOnImport = jest.fn();
-  const mockParseFiles = jest.fn();
-  const mockImportTemplates = jest.fn();
-  const mockGoToStep = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockOnImport = vi.fn();
+  const mockParseFiles = vi.fn();
+  const mockImportTemplates = vi.fn();
+  const mockGoToStep = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseParseYaml.mockReturnValue({
       parseFiles: mockParseFiles,

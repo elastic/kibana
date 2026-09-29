@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObject, SavedObjectsClient } from '@kbn/core/server';
@@ -34,7 +36,7 @@ describe('AutomaticImportSavedObjectService', () => {
    * multi-page sweep can be exercised without producing a full 1000-item page.
    */
   const givenFinderPages = (pages: Array<Array<SavedObject<IntegrationAttributes>>>) => {
-    const close = jest.fn().mockResolvedValue(undefined);
+    const close = vi.fn().mockResolvedValue(undefined);
     const finder = {
       find: async function* find() {
         for (const savedObjects of pages) {
@@ -50,7 +52,7 @@ describe('AutomaticImportSavedObjectService', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     clientMock = savedObjectsClientMock.create();
     service = new AutomaticImportSavedObjectService(
       loggerMock.create(),
@@ -100,7 +102,7 @@ describe('AutomaticImportSavedObjectService', () => {
     });
 
     it('closes the finder when the sweep throws', async () => {
-      const close = jest.fn().mockResolvedValue(undefined);
+      const close = vi.fn().mockResolvedValue(undefined);
       clientMock.createPointInTimeFinder.mockReturnValue({
         find: () => ({
           [Symbol.asyncIterator]: () => ({
@@ -115,7 +117,7 @@ describe('AutomaticImportSavedObjectService', () => {
     });
 
     it('rethrows a Saved Objects 404 from the finder so a missing PIT does not look like an empty catalog', async () => {
-      const close = jest.fn().mockResolvedValue(undefined);
+      const close = vi.fn().mockResolvedValue(undefined);
       clientMock.createPointInTimeFinder.mockReturnValue({
         find: () => ({
           [Symbol.asyncIterator]: () => ({
@@ -130,7 +132,7 @@ describe('AutomaticImportSavedObjectService', () => {
     });
 
     it('rethrows a Saved Objects 404 from close()', async () => {
-      const close = jest
+      const close = vi
         .fn()
         .mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
       clientMock.createPointInTimeFinder.mockReturnValue({

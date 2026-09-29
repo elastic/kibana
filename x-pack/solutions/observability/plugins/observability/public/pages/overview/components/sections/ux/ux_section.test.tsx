@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { HasDataContextValue } from '../../../../../context/has_data_context/has_data_context';
 import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
@@ -18,18 +20,21 @@ import {
   LEGEND_POOR_LABEL,
 } from './core_web_vitals/translations';
 
-jest.mock('react-router-dom', () => ({
-  useLocation: () => ({
-    pathname: '/observability/overview/',
-    search: '',
-  }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useLocation: () => ({
+        pathname: '/observability/overview/',
+        search: '',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('UXSection', () => {
   const bucketSize = { intervalString: '60s', bucketSize: 60, dateFormat: 'YYYY-MM-DD HH:mm' };
 
   beforeAll(() => {
-    jest.spyOn(hasDataHook, 'useHasData').mockReturnValue({
+    vi.spyOn(hasDataHook, 'useHasData').mockReturnValue({
       hasDataMap: {
         ux: {
           status: fetcherHook.FETCH_STATUS.SUCCESS,
@@ -46,10 +51,10 @@ describe('UXSection', () => {
     });
   });
   it('renders with core web vitals', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+    vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: response,
       status: fetcherHook.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     const { getByText, getByTestId, getAllByTestId } = render(
       <UXSection bucketSize={bucketSize} />
@@ -80,10 +85,10 @@ describe('UXSection', () => {
     expect(getByTestId(`${LEGEND_POOR_LABEL}-6`)).toBeInTheDocument();
   });
   it('shows loading state', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+    vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: undefined,
       status: fetcherHook.FETCH_STATUS.LOADING,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     const { getByText, queryAllByText, getAllByText } = render(
       <UXSection bucketSize={bucketSize} />
@@ -95,10 +100,10 @@ describe('UXSection', () => {
     expect(getByText('elastic-co-frontend')).toBeInTheDocument();
   });
   it('shows empty state', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+    vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: undefined,
       status: fetcherHook.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     const { getByText, queryAllByText, getAllByText } = render(
       <UXSection bucketSize={bucketSize} />

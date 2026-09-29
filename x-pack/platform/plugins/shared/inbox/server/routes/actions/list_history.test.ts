@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -29,16 +32,16 @@ type Router = ReturnType<typeof httpServiceMock.createRouter>;
 const fakeProviderWithHistory = (
   sourceApp: string,
   history: InboxAction[]
-): jest.Mocked<InboxActionProvider> => ({
+): Mocked<InboxActionProvider> => ({
   sourceApp,
-  list: jest.fn<ReturnType<InboxActionProvider['list']>, Parameters<InboxActionProvider['list']>>(
+  list: vi.fn<ReturnType<InboxActionProvider['list']>, Parameters<InboxActionProvider['list']>>(
     async () => ({ actions: [], total: 0 })
   ),
-  listProcessed: jest.fn<
+  listProcessed: vi.fn<
     ReturnType<NonNullable<InboxActionProvider['listProcessed']>>,
     Parameters<NonNullable<InboxActionProvider['listProcessed']>>
   >(async () => ({ actions: history, total: history.length })),
-  respond: jest.fn<
+  respond: vi.fn<
     ReturnType<InboxActionProvider['respond']>,
     Parameters<InboxActionProvider['respond']>
   >(async () => {}),
@@ -157,8 +160,8 @@ describe('GET /internal/inbox/actions/history', () => {
     it('returns an empty result without invoking history fan-out', async () => {
       const legacy: InboxActionProvider = {
         sourceApp: 'legacy',
-        list: jest.fn(async () => ({ actions: [], total: 0 })),
-        respond: jest.fn(async () => {}),
+        list: vi.fn(async () => ({ actions: [], total: 0 })),
+        respond: vi.fn(async () => {}),
       };
       registry.register(legacy);
 
@@ -170,7 +173,7 @@ describe('GET /internal/inbox/actions/history', () => {
   describe('error handling', () => {
     it('returns a 500 when the registry throws unexpectedly', async () => {
       const registryThatThrows = new InboxActionRegistry(logger);
-      jest.spyOn(registryThatThrows, 'listHistory').mockRejectedValueOnce(new Error('boom'));
+      vi.spyOn(registryThatThrows, 'listHistory').mockRejectedValueOnce(new Error('boom'));
 
       const dedicatedRouter = httpServiceMock.createRouter();
       registerListInboxActionsHistoryRoute({

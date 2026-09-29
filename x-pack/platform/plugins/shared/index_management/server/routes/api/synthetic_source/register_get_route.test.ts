@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SYNTHETIC_SOURCE_FALLBACK_TO_STORED_SOURCE_SETTING } from '../../../../common/constants';
 import { addBasePath } from '..';
 import { RouterMock, routeDependencies, type RequestMock } from '../../../test/helpers';
@@ -72,7 +74,7 @@ describe('[Index management API Routes] Synthetic source', () => {
 
   describe('GET /synthetic_source', () => {
     const router = new RouterMock();
-    const getClusterSettings = jest.mocked(
+    const getClusterSettings = vi.mocked(
       router.contextMock.core.elasticsearch.client.asInternalUser.cluster.getSettings
     );
 

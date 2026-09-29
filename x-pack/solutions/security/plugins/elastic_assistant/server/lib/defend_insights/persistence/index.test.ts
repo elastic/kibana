@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
@@ -28,19 +30,19 @@ import {
 } from './helpers';
 import { DefendInsightsDataClient } from '.';
 
-jest.mock('./get_defend_insight');
-jest.mock('./helpers', () => {
-  const original = jest.requireActual('./helpers');
+vi.mock('./get_defend_insight');
+vi.mock('./helpers', async () => {
+  const original = (await vi.importActual('./helpers'));
   return {
     ...original,
-    queryParamsToEsQuery: jest.fn(),
+    queryParamsToEsQuery: vi.fn(),
   };
 });
 
 describe('DefendInsightsDataClient', () => {
   const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
   const mockLogger = loggerMock.create();
-  const mockGetDefendInsight = jest.mocked(getDefendInsight);
+  const mockGetDefendInsight = vi.mocked(getDefendInsight);
   let user: AuthenticatedUser;
   let dataClientParams: AIAssistantDataClientParams;
   let dataClient: DefendInsightsDataClient;
@@ -74,7 +76,7 @@ describe('DefendInsightsDataClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getDefendInsight', () => {
@@ -162,7 +164,7 @@ describe('DefendInsightsDataClient', () => {
     beforeEach(() => {
       queryParams = getDefaultQueryParams();
       expectedTermFilters = getDefaultExpectedTermFilters();
-      mockQueryParamsToEsQuery = jest
+      mockQueryParamsToEsQuery = vi
         .mocked(queryParamsToEsQuery)
         .mockReturnValueOnce(expectedTermFilters);
     });
@@ -319,7 +321,7 @@ describe('DefendInsightsDataClient', () => {
         { id: defendInsightsUpdateProps[0].id } as DefendInsightsResponse,
       ];
 
-      const findDefendInsightsByParamsSpy = jest.spyOn(dataClient, 'findDefendInsightsByParams');
+      const findDefendInsightsByParamsSpy = vi.spyOn(dataClient, 'findDefendInsightsByParams');
       findDefendInsightsByParamsSpy.mockResolvedValueOnce(mockResponse);
 
       const result = await dataClient.updateDefendInsights({
@@ -391,7 +393,7 @@ describe('DefendInsightsDataClient', () => {
           },
         ],
       };
-      const updateDefendInsightsSpy = jest.spyOn(dataClient, 'updateDefendInsights');
+      const updateDefendInsightsSpy = vi.spyOn(dataClient, 'updateDefendInsights');
       updateDefendInsightsSpy.mockResolvedValueOnce([]);
       await dataClient.updateDefendInsight({
         defendInsightUpdateProps,

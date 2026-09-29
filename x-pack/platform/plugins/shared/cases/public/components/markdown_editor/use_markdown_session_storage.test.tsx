@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook, act } from '@testing-library/react';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useMarkdownSessionStorage } from './use_markdown_session_storage';
@@ -16,30 +18,30 @@ describe('useMarkdownSessionStorage', () => {
     type: '',
     value: 'test',
     errors: [],
-    onChange: jest.fn(),
-    setValue: jest.fn(),
-    setErrors: jest.fn(),
-    reset: jest.fn(),
+    onChange: vi.fn(),
+    setValue: vi.fn(),
+    setErrors: vi.fn(),
+    reset: vi.fn(),
   } as unknown as FieldHook<string>;
 
   const sessionKey = 'testKey';
   const initialValue = '';
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
     sessionStorage.removeItem(sessionKey);
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return hasConflicts as false', async () => {
@@ -75,7 +77,7 @@ describe('useMarkdownSessionStorage', () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     await waitFor(() => {
@@ -97,7 +99,7 @@ describe('useMarkdownSessionStorage', () => {
     expect(sessionStorage.getItem(sessionKey)).toBe('');
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     await waitFor(() => {
@@ -118,13 +120,13 @@ describe('useMarkdownSessionStorage', () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     rerender({ field: { ...field, value: 'new value' }, sessionKey, initialValue });
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     await waitFor(() => {
@@ -173,7 +175,7 @@ describe('useMarkdownSessionStorage', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       await waitFor(() => {
@@ -198,13 +200,13 @@ describe('useMarkdownSessionStorage', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       rerender({ field: { ...field, value: 'new value' }, sessionKey, initialValue });
 
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       await waitFor(() => {

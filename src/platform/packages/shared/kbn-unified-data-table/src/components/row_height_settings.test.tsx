@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
@@ -18,7 +20,7 @@ const renderRowHeightSettings = ({
   onChangeRowHeightLines,
 }: {
   maxRowHeight?: number;
-  onChangeRowHeightLines?: jest.Mock;
+  onChangeRowHeightLines?: Mock;
 } = {}) => {
   const Wrapper = () => {
     const [rowHeight, setRowHeight] = useState<RowHeightSettingsProps['rowHeight']>();

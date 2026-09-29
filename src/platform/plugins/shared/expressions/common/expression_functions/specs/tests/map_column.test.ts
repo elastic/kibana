@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
@@ -15,7 +17,7 @@ import type { MapColumnArguments } from '../map_column';
 import { mapColumn } from '../map_column';
 import { emptyTable, functionWrapper, testTable, tableWithNulls } from './utils';
 
-const pricePlusTwo = jest.fn((datatable: Datatable) =>
+const pricePlusTwo = vi.fn((datatable: Datatable) =>
   of(typeof datatable.rows[0].price === 'number' ? datatable.rows[0].price + 2 : null)
 );
 

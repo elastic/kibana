@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-jest.mock('@kbn/kibana-react-plugin/public');
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
-const mockUseMutation = jest.fn();
-jest.mock('@kbn/react-query', () => ({
-  useMutation: (...args: unknown[]) => mockUseMutation(...args),
-}));
+vi.mock('@kbn/kibana-react-plugin/public');
+
+const mockUseMutation = vi.fn();
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useMutation: (...args: unknown[]) => mockUseMutation(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { renderHook, act } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -18,21 +24,21 @@ import { useConnectorOAuthConnect, OAuthRedirectMode } from './use_connector_oau
 import { OAuthAuthorizationStatus } from '@kbn/actions-plugin/common';
 import { OAUTH_BROADCAST_CHANNEL_NAME } from '../oauth';
 
-const mockHttpPost = jest.fn();
-(useKibana as jest.Mock).mockReturnValue({ services: { http: { post: mockHttpPost } } });
+const mockHttpPost = vi.fn();
+(useKibana as Mock).mockReturnValue({ services: { http: { post: mockHttpPost } } });
 
 class MockBroadcastChannel {
   static instances: MockBroadcastChannel[] = [];
   name: string;
   onmessage: ((event: MessageEvent) => void) | null = null;
-  close = jest.fn();
+  close = vi.fn();
 
   constructor(name: string) {
     this.name = name;
     MockBroadcastChannel.instances.push(this);
   }
 
-  postMessage = jest.fn();
+  postMessage = vi.fn();
 }
 
 describe('useConnectorOAuthConnect', () => {
@@ -40,21 +46,21 @@ describe('useConnectorOAuthConnect', () => {
   const originalWindowOpen = window.open;
   const originalLocationAssign = window.location.assign;
 
-  let mockMutate: jest.Mock;
+  let mockMutate: Mock;
   let capturedMutationOptions: Record<string, unknown>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
     MockBroadcastChannel.instances = [];
     globalThis.BroadcastChannel = MockBroadcastChannel as never;
-    window.open = jest.fn();
+    window.open = vi.fn();
     Object.defineProperty(window, 'location', {
-      value: { ...window.location, assign: jest.fn(), href: 'http://localhost/app/connectors' },
+      value: { ...window.location, assign: vi.fn(), href: 'http://localhost/app/connectors' },
       writable: true,
     });
 
-    mockMutate = jest.fn();
+    mockMutate = vi.fn();
     mockUseMutation.mockImplementation((options: Record<string, unknown>) => {
       capturedMutationOptions = options;
       return { mutate: mockMutate, isLoading: false };
@@ -66,7 +72,7 @@ describe('useConnectorOAuthConnect', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
     globalThis.BroadcastChannel = originalBroadcastChannel;
     window.open = originalWindowOpen;
     Object.defineProperty(window, 'location', {
@@ -176,7 +182,7 @@ describe('useConnectorOAuthConnect', () => {
         useConnectorOAuthConnect({
           connectorId: 'conn-1',
           redirectMode: OAuthRedirectMode.NewTab,
-          onSuccess: jest.fn(),
+          onSuccess: vi.fn(),
         })
       );
 
@@ -301,7 +307,7 @@ describe('useConnectorOAuthConnect', () => {
         useConnectorOAuthConnect({
           connectorId: 'conn-1',
           redirectMode: OAuthRedirectMode.NewTab,
-          onSuccess: jest.fn(),
+          onSuccess: vi.fn(),
         })
       );
 
@@ -330,12 +336,12 @@ describe('useConnectorOAuthConnect', () => {
           connectorId: 'conn-1',
           redirectMode: OAuthRedirectMode.NewTab,
           timeout: 5000,
-          onError: jest.fn(),
+          onError: vi.fn(),
         })
       );
 
       triggerMutationSuccess('my-state');
-      act(() => jest.advanceTimersByTime(5000));
+      act(() => vi.advanceTimersByTime(5000));
       mockHttpPost.mockClear();
 
       act(() => result.current.cancelConnect());
@@ -367,7 +373,7 @@ describe('useConnectorOAuthConnect', () => {
 
   describe('NewTab mode - BroadcastChannel', () => {
     it('invokes onSuccess when receiving a success message for the matching connectorId', () => {
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       renderHook(() =>
         useConnectorOAuthConnect({
           connectorId: 'conn-1',
@@ -398,8 +404,8 @@ describe('useConnectorOAuthConnect', () => {
     });
 
     it('ignores BroadcastChannel messages for a different connectorId', () => {
-      const onSuccess = jest.fn();
-      const onError = jest.fn();
+      const onSuccess = vi.fn();
+      const onError = vi.fn();
       renderHook(() =>
         useConnectorOAuthConnect({
           connectorId: 'conn-1',
@@ -432,7 +438,7 @@ describe('useConnectorOAuthConnect', () => {
     });
 
     it('invokes onError when receiving an error message', () => {
-      const onError = jest.fn();
+      const onError = vi.fn();
       renderHook(() =>
         useConnectorOAuthConnect({
           connectorId: 'conn-1',
@@ -469,7 +475,7 @@ describe('useConnectorOAuthConnect', () => {
 
   describe('NewTab mode - timeout', () => {
     it('fires onError when the timeout elapses', () => {
-      const onError = jest.fn();
+      const onError = vi.fn();
       renderHook(() =>
         useConnectorOAuthConnect({
           connectorId: 'conn-1',
@@ -487,7 +493,7 @@ describe('useConnectorOAuthConnect', () => {
         onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth', state: 'test-state' })
       );
 
-      act(() => jest.advanceTimersByTime(5000));
+      act(() => vi.advanceTimersByTime(5000));
 
       expect(onError).toHaveBeenCalledWith(
         expect.objectContaining({ message: expect.any(String) })
@@ -495,8 +501,8 @@ describe('useConnectorOAuthConnect', () => {
     });
 
     it('does not fire timeout if BroadcastChannel message arrives first', () => {
-      const onError = jest.fn();
-      const onSuccess = jest.fn();
+      const onError = vi.fn();
+      const onSuccess = vi.fn();
       renderHook(() =>
         useConnectorOAuthConnect({
           connectorId: 'conn-1',
@@ -525,7 +531,7 @@ describe('useConnectorOAuthConnect', () => {
         } as MessageEvent);
       });
 
-      act(() => jest.advanceTimersByTime(5000));
+      act(() => vi.advanceTimersByTime(5000));
 
       expect(onSuccess).toHaveBeenCalledTimes(1);
       expect(onError).not.toHaveBeenCalled();
@@ -534,7 +540,7 @@ describe('useConnectorOAuthConnect', () => {
 
   describe('mutation onError', () => {
     it('surfaces body.message from an HttpFetchError', () => {
-      const onError = jest.fn();
+      const onError = vi.fn();
       renderHook(() =>
         useConnectorOAuthConnect({
           connectorId: 'conn-1',
@@ -563,7 +569,7 @@ describe('useConnectorOAuthConnect', () => {
     });
 
     it('falls back to error.message when body.message is absent', () => {
-      const onError = jest.fn();
+      const onError = vi.fn();
       renderHook(() =>
         useConnectorOAuthConnect({
           connectorId: 'conn-1',

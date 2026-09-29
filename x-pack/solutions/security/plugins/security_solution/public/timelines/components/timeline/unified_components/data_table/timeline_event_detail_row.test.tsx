@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RowRenderer } from '../../../../../../common/types';
 import React from 'react';
 import { mockTimelineData, TestProviders } from '../../../../../common/mock';
@@ -16,17 +19,17 @@ import { useTimelineUnifiedDataTableContext } from './use_timeline_unified_data_
 
 const mockData = structuredClone(mockTimelineData);
 
-const setCellPropsMock = jest.fn();
+const setCellPropsMock = vi.fn();
 
-jest.mock('../../body/events/stateful_row_renderer', () => {
+vi.mock('../../body/events/stateful_row_renderer', () => {
   return {
-    StatefulRowRenderer: jest.fn(),
+    StatefulRowRenderer: vi.fn(),
   };
 });
 
-const StatefulRowRendererMock = StatefulRowRenderer as unknown as jest.Mock;
+const StatefulRowRendererMock = StatefulRowRenderer as unknown as Mock;
 
-jest.mock('./use_timeline_unified_data_table_context');
+vi.mock('./use_timeline_unified_data_table_context');
 
 const renderTestComponent = (props: Partial<TimelineEventDetailRowProps> = {}) => {
   const finalProps: TimelineEventDetailRowProps = {
@@ -53,13 +56,13 @@ describe('TimelineEventDetailRow', () => {
   beforeEach(() => {
     StatefulRowRendererMock.mockReturnValue(<div>{'Test Row Renderer'}</div>);
 
-    (useTimelineUnifiedDataTableContext as jest.Mock).mockReturnValue({
+    (useTimelineUnifiedDataTableContext as Mock).mockReturnValue({
       expanded: { id: undefined },
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the AdditionalRow when row Renderer is available', () => {
@@ -82,7 +85,7 @@ describe('TimelineEventDetailRow', () => {
   });
 
   it('should style additional row correctly when the row is expanded', () => {
-    (useTimelineUnifiedDataTableContext as jest.Mock).mockReturnValue({
+    (useTimelineUnifiedDataTableContext as Mock).mockReturnValue({
       expanded: { id: mockData[0]._id },
     });
     renderTestComponent();

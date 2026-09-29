@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import * as searchHooks from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
 import { useStdErrorLogs } from './use_std_error_logs';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
 describe('useStdErrorLogs', () => {
-  let searchHookSpy: jest.SpyInstance;
+  let searchHookSpy: MockInstance;
 
   beforeEach(() => {
-    searchHookSpy = jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
+    searchHookSpy = vi.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
       loading: false,
       data: {
         hits: {
@@ -26,7 +29,7 @@ describe('useStdErrorLogs', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('queries ES with the correct parameters when checkGroup is provided', () => {

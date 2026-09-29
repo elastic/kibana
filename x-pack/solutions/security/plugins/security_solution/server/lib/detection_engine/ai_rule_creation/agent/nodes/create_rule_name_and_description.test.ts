@@ -5,36 +5,42 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { OutputParserException } from '@langchain/core/output_parsers';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { RuleCreationState } from '../state';
 
-const mockChainInvoke = jest.fn();
-const mockJsonParserInvoke = jest.fn();
-const mockModelInvoke = jest.fn();
-const mockFormatMessages = jest.fn();
+const mockChainInvoke = vi.fn();
+const mockJsonParserInvoke = vi.fn();
+const mockModelInvoke = vi.fn();
+const mockFormatMessages = vi.fn();
 
-jest.mock('./prompts', () => ({
-  CREATE_ESQL_RULE_NAME_AND_DESCRIPTION_PROMPT: {
-    pipe: jest.fn(() => ({
-      pipe: jest.fn(() => ({
-        invoke: mockChainInvoke,
+vi.mock('./prompts', () => {
+      const mocked = {
+      CREATE_ESQL_RULE_NAME_AND_DESCRIPTION_PROMPT: {
+        pipe: vi.fn(() => ({
+          pipe: vi.fn(() => ({
+            invoke: mockChainInvoke,
+          })),
+        })),
+        formatMessages: mockFormatMessages,
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@langchain/core/output_parsers', () => {
+      const mocked = {
+      ...require('@langchain/core/output_parsers'),
+      JsonOutputParser: vi.fn().mockImplementation(() => ({
+        invoke: mockJsonParserInvoke,
       })),
-    })),
-    formatMessages: mockFormatMessages,
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@langchain/core/output_parsers', () => ({
-  ...jest.requireActual('@langchain/core/output_parsers'),
-  JsonOutputParser: jest.fn().mockImplementation(() => ({
-    invoke: mockJsonParserInvoke,
-  })),
-}));
-
-const { createRuleNameAndDescriptionNode } = jest.requireActual(
-  './create_rule_name_and_description'
-) as typeof import('./create_rule_name_and_description');
+const { createRuleNameAndDescriptionNode } = (await vi.importActual('./create_rule_name_and_description')) as typeof import('./create_rule_name_and_description');
 
 const createState = (overrides: Partial<RuleCreationState> = {}): RuleCreationState => ({
   userQuery: 'detect brute force logins',
@@ -52,13 +58,13 @@ const createState = (overrides: Partial<RuleCreationState> = {}): RuleCreationSt
 
 describe('createRuleNameAndDescriptionNode', () => {
   const mockEvents = {
-    reportProgress: jest.fn(),
-    sendUiEvent: jest.fn(),
+    reportProgress: vi.fn(),
+    sendUiEvent: vi.fn(),
   };
   const mockModel = { invoke: mockModelInvoke } as unknown as InferenceChatModel;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFormatMessages.mockResolvedValue([]);
     mockModelInvoke.mockResolvedValue({});
     mockJsonParserInvoke.mockResolvedValue({});

@@ -7,23 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { BuildContext } from './client_type_spec';
 import { mysqlClientType } from './mysql';
 
 interface MockPool {
-  end: jest.Mock;
+  end: Mock;
 }
 
-const mockCreatePool = jest.fn<MockPool, [unknown?]>(() => ({
-  end: jest.fn().mockResolvedValue(undefined),
+const mockCreatePool = vi.fn<MockPool, [unknown?]>(() => ({
+  end: vi.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock('mysql2/promise', () => ({
-  createPool: (opts: unknown) => mockCreatePool(opts),
-}));
+vi.mock('mysql2/promise', () => {
+      const mocked = {
+      createPool: (opts: unknown) => mockCreatePool(opts),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeCredential = (username: string, password: string): BuildContext['credential'] => ({
-  getAuthHeaders: jest.fn().mockResolvedValue({
+  getAuthHeaders: vi.fn().mockResolvedValue({
     Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
   }),
 });
@@ -31,21 +37,21 @@ const makeCredential = (username: string, password: string): BuildContext['crede
 const makeNetworkSettings = (
   overrides: Partial<BuildContext['networkSettings']> = {}
 ): BuildContext['networkSettings'] => ({
-  ensureHostnameAllowed: jest.fn(),
-  ensureUriAllowed: jest.fn(),
-  getSslSettings: jest.fn().mockReturnValue({}),
-  getProxySettings: jest.fn().mockReturnValue(undefined),
-  getCustomHostSettings: jest.fn().mockReturnValue(undefined),
-  getResponseSettings: jest.fn().mockReturnValue({ timeout: 60000, maxContentLength: 10485760 }),
+  ensureHostnameAllowed: vi.fn(),
+  ensureUriAllowed: vi.fn(),
+  getSslSettings: vi.fn().mockReturnValue({}),
+  getProxySettings: vi.fn().mockReturnValue(undefined),
+  getCustomHostSettings: vi.fn().mockReturnValue(undefined),
+  getResponseSettings: vi.fn().mockReturnValue({ timeout: 60000, maxContentLength: 10485760 }),
   ...overrides,
 });
 
 const makeCtx = (overrides: Partial<BuildContext> = {}): BuildContext => ({
-  logger: { info: jest.fn(), debug: jest.fn(), error: jest.fn(), warn: jest.fn() } as never,
+  logger: { info: vi.fn(), debug: vi.fn(), error: vi.fn(), warn: vi.fn() } as never,
   config: { host: 'db.example.com', port: 3306, database: 'testdb' },
   networkSettings: makeNetworkSettings(),
   credential: makeCredential('tester', 'secret'),
-  platform: { resolveSrvHosts: jest.fn(), buildTlsOptions: jest.fn() },
+  platform: { resolveSrvHosts: vi.fn(), buildTlsOptions: vi.fn() },
   ...overrides,
 });
 
@@ -71,7 +77,7 @@ describe('mysqlClientType', () => {
 
     it('does not create the pool when the host is not allowlisted', async () => {
       const networkSettings = makeNetworkSettings({
-        ensureHostnameAllowed: jest.fn().mockImplementation(() => {
+        ensureHostnameAllowed: vi.fn().mockImplementation(() => {
           throw new Error('Host not allowed');
         }),
       });
@@ -105,8 +111,8 @@ describe('mysqlClientType', () => {
 
     it('applies Kibana TLS settings and connect timeout by default', async () => {
       const networkSettings = makeNetworkSettings({
-        getSslSettings: jest.fn().mockReturnValue({ verificationMode: 'full' }),
-        getResponseSettings: jest.fn().mockReturnValue({ timeout: 15000, maxContentLength: 1 }),
+        getSslSettings: vi.fn().mockReturnValue({ verificationMode: 'full' }),
+        getResponseSettings: vi.fn().mockReturnValue({ timeout: 15000, maxContentLength: 1 }),
       });
       const ctx = makeCtx({ networkSettings });
 

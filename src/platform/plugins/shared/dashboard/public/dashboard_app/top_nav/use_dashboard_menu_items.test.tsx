@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 
 import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
@@ -19,27 +21,30 @@ import { useDashboardMenuItems } from './use_dashboard_menu_items';
 import { BehaviorSubject } from 'rxjs';
 import type { DashboardApi } from '../../dashboard_api/types';
 
-jest.mock('@kbn/presentation-util', () => ({
-  ...jest.requireActual('@kbn/presentation-util'),
-  openLazyFlyout: jest.fn(),
-}));
+vi.mock('@kbn/presentation-util', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/presentation-util')),
+      openLazyFlyout: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useDashboardMenuItems', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    jest
+    vi
       .mocked(shareService!.availableIntegrations)
       .mockImplementation(() => [] as ShareActionIntents[]);
   });
 
   describe('Add panel', () => {
     test('returns focus to the Add button when the flyout closes', () => {
-      const returnFocus = jest.fn();
+      const returnFocus = vi.fn();
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            redirectTo: jest.fn(),
+            redirectTo: vi.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({}),
@@ -53,7 +58,7 @@ describe('useDashboardMenuItems', () => {
           returnFocus,
         });
 
-      const [{ returnFocus: restoreFocus }] = jest.mocked(openLazyFlyout).mock.calls[0];
+      const [{ returnFocus: restoreFocus }] = vi.mocked(openLazyFlyout).mock.calls[0];
       restoreFocus?.();
 
       expect(returnFocus).toHaveBeenCalledTimes(1);
@@ -65,7 +70,7 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            redirectTo: jest.fn(),
+            redirectTo: vi.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
@@ -80,7 +85,7 @@ describe('useDashboardMenuItems', () => {
     });
 
     test('includes Export top-nav item with JSON when only exportDerivatives integrations are available', () => {
-      jest
+      vi
         .mocked(shareService!.availableIntegrations)
         .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
           if (groupId === 'export') {
@@ -104,7 +109,7 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            redirectTo: jest.fn(),
+            redirectTo: vi.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
@@ -127,7 +132,7 @@ describe('useDashboardMenuItems', () => {
     });
 
     test('does not include Schedule export when only exportJson and scheduledReports are available', () => {
-      jest
+      vi
         .mocked(shareService!.availableIntegrations)
         .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
           if (groupId === 'export') {
@@ -157,7 +162,7 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            redirectTo: jest.fn(),
+            redirectTo: vi.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
@@ -180,7 +185,7 @@ describe('useDashboardMenuItems', () => {
     });
 
     test('includes Schedule export when a schedulable export integration is available', () => {
-      jest
+      vi
         .mocked(shareService!.availableIntegrations)
         .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
           if (groupId === 'export') {
@@ -217,7 +222,7 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            redirectTo: jest.fn(),
+            redirectTo: vi.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
@@ -242,7 +247,7 @@ describe('useDashboardMenuItems', () => {
     });
 
     test('includes Export top-nav item with JSON and Reporting items when export and exportDerivatives integrations are available', () => {
-      jest
+      vi
         .mocked(shareService!.availableIntegrations)
         .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
           if (groupId === 'export') {
@@ -279,7 +284,7 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            redirectTo: jest.fn(),
+            redirectTo: vi.fn(),
           }),
         {
           wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
@@ -322,7 +327,7 @@ describe('useDashboardMenuItems', () => {
     };
 
     const renderMenuItems = () =>
-      renderHook(() => useDashboardMenuItems({ redirectTo: jest.fn() }), {
+      renderHook(() => useDashboardMenuItems({ redirectTo: vi.fn() }), {
         wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
       });
 
@@ -399,12 +404,12 @@ describe('useDashboardMenuItems', () => {
   describe('run switchToViewMode', () => {
     describe('dashboard does not have unsaved changes', () => {
       test('should switch to view mode', () => {
-        const mockSetViewMode = jest.fn();
+        const mockSetViewMode = vi.fn();
 
         const { result } = renderHook(
           () =>
             useDashboardMenuItems({
-              redirectTo: jest.fn(),
+              redirectTo: vi.fn(),
             }),
           {
             wrapper: dashboardContextWrapper({
@@ -424,8 +429,8 @@ describe('useDashboardMenuItems', () => {
     });
 
     describe('dashboard has unsaved changes', () => {
-      const mockSetViewMode = jest.fn();
-      const mockAsyncResetToLastSavedState = jest.fn();
+      const mockSetViewMode = vi.fn();
+      const mockAsyncResetToLastSavedState = vi.fn();
       const hasUnsavedChanges$ = new BehaviorSubject(true) as DashboardApi['hasUnsavedChanges$'];
 
       const apiOverrides = {
@@ -443,14 +448,14 @@ describe('useDashboardMenuItems', () => {
         const { result } = renderHook(
           () =>
             useDashboardMenuItems({
-              redirectTo: jest.fn(),
+              redirectTo: vi.fn(),
             }),
           {
             wrapper: dashboardContextWrapper({ savedObjectId: 'test-id', apiOverrides }),
           }
         );
 
-        const openConfirmSpy = jest.spyOn(coreServices.overlays, 'openConfirm');
+        const openConfirmSpy = vi.spyOn(coreServices.overlays, 'openConfirm');
         openConfirmSpy.mockResolvedValueOnce(false);
 
         const switchToViewMode = result.current.editModeTopNavConfig.items?.find(
@@ -469,14 +474,14 @@ describe('useDashboardMenuItems', () => {
         const { result } = renderHook(
           () =>
             useDashboardMenuItems({
-              redirectTo: jest.fn(),
+              redirectTo: vi.fn(),
             }),
           {
             wrapper: dashboardContextWrapper({ savedObjectId: 'test-id', apiOverrides }),
           }
         );
 
-        const openConfirmSpy = jest.spyOn(coreServices.overlays, 'openConfirm');
+        const openConfirmSpy = vi.spyOn(coreServices.overlays, 'openConfirm');
         openConfirmSpy.mockResolvedValueOnce(true);
 
         const switchToViewMode = result.current.editModeTopNavConfig.items?.find(

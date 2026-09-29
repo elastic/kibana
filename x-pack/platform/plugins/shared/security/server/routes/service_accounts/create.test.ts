@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import Boom from '@hapi/boom';
 
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
@@ -46,7 +49,7 @@ describe('Create service account route', () => {
   ) {
     return coreMock.createCustomRequestHandlerContext({
       core: coreMock.createRequestHandlerContext(),
-      licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
+      licensing: { license: { check: vi.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
 
@@ -81,7 +84,7 @@ describe('Create service account route', () => {
     return {
       routeConfig: routeConfig as RouteConfig<any, any, any, 'post'>,
       routeHandler: handler as RequestHandler<any, any, any, any>,
-      serviceAccounts: serviceAccountsMock as jest.MockedObjectDeep<ServiceAccountsServiceStart>,
+      serviceAccounts: serviceAccountsMock as Mocked<ServiceAccountsServiceStart>,
     };
   }
 
@@ -251,10 +254,10 @@ describe('Create service account route', () => {
       });
       const license = licenseMock.create();
       license.isEnabled.mockReturnValue(true);
-      const checkPrivileges: jest.Mocked<CheckPrivileges> = {
-        atSpace: jest.fn(),
-        atSpaces: jest.fn(),
-        globally: jest.fn().mockResolvedValue({
+      const checkPrivileges: Mocked<CheckPrivileges> = {
+        atSpace: vi.fn(),
+        atSpaces: vi.fn(),
+        globally: vi.fn().mockResolvedValue({
           hasAllRequested: true,
           username: 'elastic',
           privileges: {
@@ -266,7 +269,7 @@ describe('Create service account route', () => {
           },
         }),
       };
-      const checkPrivilegesWithRequest: jest.MockedFunction<CheckPrivilegesWithRequest> = jest
+      const checkPrivilegesWithRequest: MockedFunction<CheckPrivilegesWithRequest> = vi
         .fn()
         .mockReturnValue(checkPrivileges);
       const backend = new UiamServiceAccounts({

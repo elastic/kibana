@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getPrompt, getPromptsByGroupId } from './get_prompt';
 import * as securityAiPromptsModule from '@kbn/security-ai-prompts';
 
-jest.mock('@kbn/security-ai-prompts');
+vi.mock('@kbn/security-ai-prompts');
 
 describe('get_prompt', () => {
-  const mockGetPrompt = jest.fn();
-  const mockGetPromptsByGroupId = jest.fn();
+  const mockGetPrompt = vi.fn();
+  const mockGetPromptsByGroupId = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (securityAiPromptsModule.getPrompt as jest.Mock) = mockGetPrompt;
-    (securityAiPromptsModule.getPromptsByGroupId as jest.Mock) = mockGetPromptsByGroupId;
+    vi.clearAllMocks();
+    (securityAiPromptsModule.getPrompt as Mock) = mockGetPrompt;
+    (securityAiPromptsModule.getPromptsByGroupId as Mock) = mockGetPromptsByGroupId;
   });
 
   describe('getPromptsByGroupId', () => {

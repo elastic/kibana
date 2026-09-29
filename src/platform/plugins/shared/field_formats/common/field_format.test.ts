@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable max-classes-per-file -- needs TestFormat (generic test double) + ConvertOverrideFormat (tests textConvert override path, as used by AggsTermsFieldFormat) */
 
 import '@emotion/jest';
@@ -37,7 +39,7 @@ const getTestFormat = (
     static title = 'Test Format';
 
     textConvert = textConvert;
-  })(_params, jest.fn());
+  })(_params, vi.fn());
 
 describe('FieldFormat class', () => {
   describe('params', () => {
@@ -237,7 +239,7 @@ describe('FieldFormat class', () => {
         }
 
         test('wraps matched text in <mark> via convertToReact when highlights are present', () => {
-          const f = new ConvertOverrideFormat(undefined, jest.fn());
+          const f = new ConvertOverrideFormat(undefined, vi.fn());
           const result = renderReact(
             f.convertToReact('ipsum', makeOptions('myField', [`${hl('formatted:ipsum')}`]))
           );
@@ -245,7 +247,7 @@ describe('FieldFormat class', () => {
         });
 
         test('returns plain text when no highlights present', () => {
-          const f = new ConvertOverrideFormat(undefined, jest.fn());
+          const f = new ConvertOverrideFormat(undefined, vi.fn());
           expect(f.convertToReact('ipsum', { field: { name: 'myField' }, hit: {} })).toBe(
             'formatted:ipsum'
           );

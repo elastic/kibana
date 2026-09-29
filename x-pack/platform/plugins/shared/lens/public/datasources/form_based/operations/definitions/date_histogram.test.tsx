@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { dateHistogramOperation } from '.';
 import { mount, shallow } from 'enzyme';
@@ -114,8 +116,8 @@ const defaultOptions = {
   indexPattern: indexPattern1,
   operationDefinitionMap: {},
   isFullscreen: false,
-  toggleFullscreen: jest.fn(),
-  setIsCloseable: jest.fn(),
+  toggleFullscreen: vi.fn(),
+  setIsCloseable: vi.fn(),
 };
 
 describe('date_histogram', () => {
@@ -338,7 +340,7 @@ describe('date_histogram', () => {
 
   describe('param editor', () => {
     it('should render current value', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultOptions}
@@ -355,7 +357,7 @@ describe('date_histogram', () => {
     });
 
     it('should render current value for other index pattern', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
 
       const secondLayer: FormBasedLayer = {
         indexPatternId: '2',
@@ -415,7 +417,7 @@ describe('date_histogram', () => {
         <InlineOptions
           {...defaultOptions}
           layer={thirdLayer}
-          paramEditorUpdater={jest.fn()}
+          paramEditorUpdater={vi.fn()}
           columnId="col1"
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
           indexPattern={indexPattern1}
@@ -446,7 +448,7 @@ describe('date_histogram', () => {
         },
       };
 
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultOptions}
@@ -488,7 +490,7 @@ describe('date_histogram', () => {
         },
       };
 
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultOptions}
@@ -531,7 +533,7 @@ describe('date_histogram', () => {
         },
       };
 
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultOptions}
@@ -573,7 +575,7 @@ describe('date_histogram', () => {
         },
       };
 
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultOptions}
@@ -590,7 +592,7 @@ describe('date_histogram', () => {
     });
 
     it('should force calendar values to 1', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultOptions}
@@ -611,7 +613,7 @@ describe('date_histogram', () => {
     });
 
     it('should display error if an invalid interval is specified', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const testLayer = layerWithInterval('4quid');
       const instance = shallow(
         <InlineOptions
@@ -628,7 +630,7 @@ describe('date_histogram', () => {
     });
 
     it('should not display error if interval value is blank', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const testLayer = layerWithInterval('d');
       const instance = shallow(
         <InlineOptions
@@ -645,7 +647,7 @@ describe('date_histogram', () => {
     });
 
     it('should display error if interval value is 0', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const testLayer = layerWithInterval('0d');
       const instance = shallow(
         <InlineOptions
@@ -662,7 +664,7 @@ describe('date_histogram', () => {
     });
 
     it('should update the unit', async () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = mount(
         <InlineOptions
           {...defaultOptions}
@@ -684,7 +686,7 @@ describe('date_histogram', () => {
     });
 
     it('should update the value', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const testLayer = layerWithInterval('42d');
 
       const instance = mount(
@@ -708,7 +710,7 @@ describe('date_histogram', () => {
     });
 
     it('syncs the local interval input when the current column interval changes externally', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const testLayer = layerWithInterval('42d');
       const nextLayer = layerWithInterval('1d');
 
@@ -737,7 +739,7 @@ describe('date_histogram', () => {
     });
 
     it('does not normalize shorthand calendar intervals on mount', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const testLayer = layerWithInterval('M');
 
       mount(
@@ -754,7 +756,7 @@ describe('date_histogram', () => {
     });
 
     it('does not re-commit equivalent shorthand intervals', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const testLayer = layerWithInterval('1w');
 
       const instance = mount(
@@ -781,7 +783,7 @@ describe('date_histogram', () => {
     });
 
     it('toggles include empty rows against the latest layer state', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const staleLayer = {
         indexPatternId: '1',
         columnOrder: ['col1'],
@@ -837,7 +839,7 @@ describe('date_histogram', () => {
     });
 
     it('should not render options if they are restricted', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
 
       const indexPattern = {
         ...indexPattern1,
@@ -902,7 +904,7 @@ describe('date_histogram', () => {
         },
       };
 
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultOptions}

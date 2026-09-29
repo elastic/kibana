@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { alertDeleteScheduleRoute } from './create_alert_delete_schedule_route';
@@ -15,23 +18,32 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { AlertingPluginsStart } from '../../../../plugin';
 import { hasRequiredPrivilegeGrantedInAllSpaces } from '../../../../lib/has_required_privilege_granted_in_all_spaces';
 
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/track_legacy_terminology', () => ({
-  trackLegacyTerminology: jest.fn(),
-}));
+vi.mock('../../../lib/track_legacy_terminology', () => {
+      const mocked = {
+      trackLegacyTerminology: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../lib/has_required_privilege_granted_in_all_spaces', () => ({
-  hasRequiredPrivilegeGrantedInAllSpaces: jest.fn(),
-}));
+vi.mock('../../../../lib/has_required_privilege_granted_in_all_spaces', () => {
+      const mocked = {
+      hasRequiredPrivilegeGrantedInAllSpaces: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('alertDeleteScheduleRoute', () => {
   const alertDeletionClient = alertDeletionClientMock.create();
   const rulesClient = rulesClientMock.create();
   const hasRequiredPrivilegeGrantedInAllSpacesMock =
-    hasRequiredPrivilegeGrantedInAllSpaces as jest.Mock;
+    hasRequiredPrivilegeGrantedInAllSpaces as Mock;
   const coreMock = {
     getStartServices: async () => [
       {} as unknown,
@@ -44,7 +56,7 @@ describe('alertDeleteScheduleRoute', () => {
   } as unknown as CoreSetup<AlertingPluginsStart, unknown>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('registers the route without public access', async () => {
@@ -82,8 +94,8 @@ describe('alertDeleteScheduleRoute', () => {
       `"/internal/alerting/rules/settings/_alert_delete_schedule"`
     );
 
-    (rulesClient.getSpaceId as jest.Mock).mockResolvedValueOnce('default');
-    (alertDeletionClient.scheduleTask as jest.Mock).mockResolvedValueOnce(undefined);
+    (rulesClient.getSpaceId as Mock).mockResolvedValueOnce('default');
+    (alertDeletionClient.scheduleTask as Mock).mockResolvedValueOnce(undefined);
 
     const [context, req, res] = mockHandlerArguments(
       {
@@ -116,8 +128,8 @@ describe('alertDeleteScheduleRoute', () => {
       `"/internal/alerting/rules/settings/_alert_delete_schedule"`
     );
 
-    (rulesClient.getSpaceId as jest.Mock).mockResolvedValueOnce('default');
-    (alertDeletionClient.scheduleTask as jest.Mock).mockResolvedValueOnce(`already running!`);
+    (rulesClient.getSpaceId as Mock).mockResolvedValueOnce('default');
+    (alertDeletionClient.scheduleTask as Mock).mockResolvedValueOnce(`already running!`);
 
     const [context, req, res] = mockHandlerArguments(
       {
@@ -222,7 +234,7 @@ describe('alertDeleteScheduleRoute', () => {
     const [, handler] = router.post.mock.calls[0];
 
     hasRequiredPrivilegeGrantedInAllSpacesMock.mockResolvedValueOnce(true);
-    (alertDeletionClient.scheduleTask as jest.Mock).mockResolvedValueOnce(undefined);
+    (alertDeletionClient.scheduleTask as Mock).mockResolvedValueOnce(undefined);
 
     const [context, req, res] = mockHandlerArguments(
       {

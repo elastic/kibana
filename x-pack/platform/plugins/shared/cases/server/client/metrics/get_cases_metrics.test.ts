@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CaseMetricsFeature } from '../../../common/types/api';
 import type { CasesClientMock } from '../mocks';
 import { getCasesMetrics } from './get_cases_metrics';
@@ -19,11 +21,11 @@ describe('getCasesMetrics', () => {
     client = createMockClient();
     ({ mockServices, clientArgs } = createMockClientArgs());
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('MTTR', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { parse } from 'yaml';
 import { monaco } from '@kbn/monaco';
@@ -15,19 +18,22 @@ import {
   createInvalidNameMarkers,
 } from './use_field_name_validation';
 
-jest.mock('@kbn/monaco', () => ({
-  monaco: {
-    editor: {
-      setModelMarkers: jest.fn(),
-      MarkerSeverity: {
-        Error: 8,
-        Warning: 4,
+vi.mock('@kbn/monaco', () => {
+      const mocked = {
+      monaco: {
+        editor: {
+          setModelMarkers: vi.fn(),
+          MarkerSeverity: {
+            Error: 8,
+            Warning: 4,
+          },
+        },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSetModelMarkers = monaco.editor.setModelMarkers as jest.Mock;
+const mockSetModelMarkers = monaco.editor.setModelMarkers as Mock;
 
 describe('collectFieldNames', () => {
   it('should collect field names and positions', () => {
@@ -185,31 +191,31 @@ describe('createInvalidNameMarkers', () => {
 });
 
 describe('useFieldNameValidation', () => {
-  let mockEditor: jest.Mocked<monaco.editor.IStandaloneCodeEditor>;
-  let mockModel: jest.Mocked<monaco.editor.ITextModel>;
+  let mockEditor: Mocked<monaco.editor.IStandaloneCodeEditor>;
+  let mockModel: Mocked<monaco.editor.ITextModel>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
 
     mockModel = {
       uri: { toString: () => 'test-uri' },
-      isDisposed: jest.fn(() => false),
-    } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+      isDisposed: vi.fn(() => false),
+    } as unknown as Mocked<monaco.editor.ITextModel>;
 
     mockEditor = {
-      getModel: jest.fn(() => mockModel),
-    } as unknown as jest.Mocked<monaco.editor.IStandaloneCodeEditor>;
+      getModel: vi.fn(() => mockModel),
+    } as unknown as Mocked<monaco.editor.IStandaloneCodeEditor>;
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should not set markers when editor is null', () => {
     renderHook(() => useFieldNameValidation(null, 'name: test'));
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(mockSetModelMarkers).not.toHaveBeenCalled();
   });
@@ -219,7 +225,7 @@ describe('useFieldNameValidation', () => {
 
     renderHook(() => useFieldNameValidation(mockEditor, yaml));
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(mockSetModelMarkers).toHaveBeenCalledWith(mockModel, 'field-name-validation', []);
   });
@@ -236,7 +242,7 @@ fields:
 
     renderHook(() => useFieldNameValidation(mockEditor, yaml));
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(mockSetModelMarkers).toHaveBeenCalledWith(mockModel, 'field-name-validation', []);
   });
@@ -253,7 +259,7 @@ fields:
 
     renderHook(() => useFieldNameValidation(mockEditor, yaml));
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(mockSetModelMarkers).toHaveBeenCalled();
     const markers = mockSetModelMarkers.mock.calls[0][2];
@@ -288,7 +294,7 @@ fields:
 
     renderHook(() => useFieldNameValidation(mockEditor, yaml));
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     const markers = mockSetModelMarkers.mock.calls[0][2];
     expect(markers).toHaveLength(4);
@@ -307,7 +313,7 @@ fields:
 
     expect(mockSetModelMarkers).not.toHaveBeenCalled();
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(mockSetModelMarkers).toHaveBeenCalledTimes(1);
   });
@@ -317,7 +323,7 @@ fields:
 
     renderHook(() => useFieldNameValidation(mockEditor, invalidYaml));
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(mockSetModelMarkers).toHaveBeenCalledWith(mockModel, 'field-name-validation', []);
   });
@@ -333,7 +339,7 @@ fields:
 
     renderHook(() => useFieldNameValidation(mockEditor, yaml));
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(mockSetModelMarkers).toHaveBeenCalledWith(mockModel, 'field-name-validation', []);
   });
@@ -348,7 +354,7 @@ fields:
     it('flags an invalid field name with no existingDefinition', () => {
       renderHook(() => useFieldNameValidation(mockEditor, yamlWithLegacyField));
 
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       const markers = mockSetModelMarkers.mock.calls[0][2];
       expect(markers).toEqual(
@@ -363,7 +369,7 @@ fields:
         useFieldNameValidation(mockEditor, yamlWithLegacyField, yamlWithLegacyField)
       );
 
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(mockSetModelMarkers).toHaveBeenCalledWith(mockModel, 'field-name-validation', []);
     });
@@ -382,7 +388,7 @@ fields:
         useFieldNameValidation(mockEditor, yamlWithBrandNewField, yamlWithLegacyField)
       );
 
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       const markers = mockSetModelMarkers.mock.calls[0][2];
       expect(markers).toEqual(

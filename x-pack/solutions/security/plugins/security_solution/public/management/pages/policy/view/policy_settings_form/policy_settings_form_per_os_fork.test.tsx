@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { getPolicySettingsFormTestSubjects } from './mocks';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
@@ -16,11 +19,11 @@ import { useLicense as _useLicense } from '../../../../../common/hooks/use_licen
 import { licenseService as licenseServiceMocked } from '../../../../../common/hooks/__mocks__/use_license';
 import { useGetDeviceControlUpsellComponent as _useGetDeviceControlUpsellComponent } from './hooks/use_get_device_control_component';
 
-jest.mock('../../../../../common/hooks/use_license');
-jest.mock('./hooks/use_get_device_control_component');
+vi.mock('../../../../../common/hooks/use_license');
+vi.mock('./hooks/use_get_device_control_component');
 
-const useLicenseMock = _useLicense as jest.Mock;
-const useGetDeviceControlUpsellComponentMock = _useGetDeviceControlUpsellComponent as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
+const useGetDeviceControlUpsellComponentMock = _useGetDeviceControlUpsellComponent as Mock;
 
 describe('PolicySettingsForm per-OS feature-flag fork', () => {
   const formTestSubj = getPolicySettingsFormTestSubjects('test');
@@ -37,7 +40,7 @@ describe('PolicySettingsForm per-OS feature-flag fork', () => {
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
         .config.policy.value,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': 'test',
     };

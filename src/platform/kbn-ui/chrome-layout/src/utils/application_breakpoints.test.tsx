@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '../constants';
 import {
@@ -22,15 +24,18 @@ const EUI_BREAKPOINTS = {
   xl: 1200,
 };
 
-jest.mock('@elastic/eui', () => ({
-  useEuiTheme: () => ({
-    euiTheme: { breakpoint: EUI_BREAKPOINTS },
-  }),
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      useEuiTheme: () => ({
+        euiTheme: { breakpoint: EUI_BREAKPOINTS },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let resizeObserverCallback: ResizeObserverCallback | undefined;
-const observeMock = jest.fn();
-const disconnectMock = jest.fn();
+const observeMock = vi.fn();
+const disconnectMock = vi.fn();
 
 class ResizeObserverMock {
   constructor(callback: ResizeObserverCallback) {
@@ -39,7 +44,7 @@ class ResizeObserverMock {
 
   observe = observeMock;
   disconnect = disconnectMock;
-  unobserve = jest.fn();
+  unobserve = vi.fn();
 }
 
 const mountApplicationScrollContainer = (clientWidth = 0) => {
@@ -69,7 +74,7 @@ describe('useCurrentChromeApplicationBreakpoint', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resizeObserverCallback = undefined;
     document.body.innerHTML = '';
   });
@@ -140,7 +145,7 @@ describe('useIsWithinChromeApplicationBreakpoints', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resizeObserverCallback = undefined;
     document.body.innerHTML = '';
   });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, renderHook, screen } from '@testing-library/react';
 import type { RenderContentPanelProps, TimelineItem } from '@kbn/response-ops-alerts-table/types';
@@ -16,21 +19,27 @@ import { TestProviders } from '../../../common/mock';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../../components/alerts_table/translations';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsCapabilities: jest.fn(),
-  useWorkflowsUIEnabledSetting: jest.fn(),
-}));
-jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useWorkflowsCapabilities: vi.fn(),
+      useWorkflowsUIEnabledSetting: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
 
-const mockUseCaseAttachmentWorkflowRouting = jest.fn();
-jest.mock('@kbn/cases-plugin/public', () => ({
-  useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
-}));
+const mockUseCaseAttachmentWorkflowRouting = vi.fn();
+vi.mock('@kbn/cases-plugin/public', () => {
+      const mocked = {
+      useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useWorkflowsCapabilitiesMock = useWorkflowsCapabilities as jest.MockedFunction<
+const useWorkflowsCapabilitiesMock = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
 >;
-const useWorkflowsUIEnabledSettingMock = useWorkflowsUIEnabledSetting as jest.MockedFunction<
+const useWorkflowsUIEnabledSettingMock = useWorkflowsUIEnabledSetting as MockedFunction<
   typeof useWorkflowsUIEnabledSetting
 >;
 
@@ -47,10 +56,8 @@ const createCapabilities = (
   };
 };
 
-jest.mock('../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel', () => {
-  const actual = jest.requireActual(
-    '../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel'
-  );
+vi.mock('../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel', async () => {
+  const actual = (await vi.importActual('../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel'));
   const MockAlertWorkflowsPanel = ({
     alertIds,
   }: {
@@ -72,14 +79,14 @@ jest.mock('../../components/alerts_table/timeline_actions/use_run_alert_workflow
 
 describe('useBulkRunAlertWorkflowPanel', () => {
   beforeEach(() => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasIndexWrite: true });
     useWorkflowsCapabilitiesMock.mockReturnValue(createCapabilities());
     useWorkflowsUIEnabledSettingMock.mockReturnValue(true);
     mockUseCaseAttachmentWorkflowRouting.mockReturnValue('outside');
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('hook return values', () => {
@@ -133,7 +140,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     });
 
     it('returns empty arrays when user does not have index write', () => {
-      (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
+      (useAlertsPrivileges as Mock).mockReturnValue({ hasIndexWrite: false });
 
       const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
         wrapper: TestProviders,
@@ -172,7 +179,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
         wrapper: TestProviders,
       });
 
-      const closePopoverMenu = jest.fn();
+      const closePopoverMenu = vi.fn();
       const renderContent = result.current.runWorkflowPanels[0].renderContent;
       const alertItems: TimelineItem[] = [
         { _id: 'alert-1', _index: 'index-1', data: [], ecs: { _id: 'alert-1', _index: 'index-1' } },
@@ -180,7 +187,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
       ];
       const props: RenderContentPanelProps = {
         alertItems,
-        setIsBulkActionsLoading: jest.fn(),
+        setIsBulkActionsLoading: vi.fn(),
         closePopoverMenu,
       };
 
@@ -200,8 +207,8 @@ describe('useBulkRunAlertWorkflowPanel', () => {
       const alertItems: TimelineItem[] = [{ _id: 'no-index', data: [], ecs: { _id: 'no-index' } }];
       const props: RenderContentPanelProps = {
         alertItems,
-        setIsBulkActionsLoading: jest.fn(),
-        closePopoverMenu: jest.fn(),
+        setIsBulkActionsLoading: vi.fn(),
+        closePopoverMenu: vi.fn(),
       };
 
       render(<TestProviders>{renderContent(props)}</TestProviders>);

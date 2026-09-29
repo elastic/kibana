@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DistributionBar } from '..';
@@ -142,10 +145,10 @@ describe('DistributionBar', () => {
   });
 
   describe('tooltip overflow edge cases', () => {
-    let mockGetBoundingClientRect: jest.SpyInstance;
+    let mockGetBoundingClientRect: MockInstance;
 
     beforeEach(() => {
-      mockGetBoundingClientRect = jest.spyOn(Element.prototype, 'getBoundingClientRect');
+      mockGetBoundingClientRect = vi.spyOn(Element.prototype, 'getBoundingClientRect');
     });
 
     afterEach(() => {

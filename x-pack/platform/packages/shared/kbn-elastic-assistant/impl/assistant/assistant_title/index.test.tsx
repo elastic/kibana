@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AssistantTitle } from '.';
@@ -14,8 +16,8 @@ const testProps = {
   title: 'Test Title',
   docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co/', DOC_LINK_VERSION: '7.15' },
   selectedConversation: undefined,
-  onChange: jest.fn(),
-  refetchCurrentUserConversations: jest.fn(),
+  onChange: vi.fn(),
+  refetchCurrentUserConversations: vi.fn(),
 };
 
 describe('AssistantTitle', () => {

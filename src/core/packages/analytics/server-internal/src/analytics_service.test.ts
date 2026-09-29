@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, Observable } from 'rxjs';
 import { createTestEnv, createTestPackageInfo } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
@@ -23,7 +25,7 @@ const createCoreContext = () => {
 describe('AnalyticsService', () => {
   let analyticsService: AnalyticsService;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     analyticsService = new AnalyticsService(createCoreContext());
   });
 

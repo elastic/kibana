@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import {
@@ -22,24 +24,30 @@ import { basicCase } from '../../containers/mock';
 
 // ---- module mocks ----
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../cases_context/use_cases_context');
-jest.mock('./use_cases_workflow_executor', () => ({
-  useCasesWorkflowExecutor: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('../../common/lib/kibana');
+vi.mock('../cases_context/use_cases_context');
+vi.mock('./use_cases_workflow_executor', () => {
+      const mocked = {
+      useCasesWorkflowExecutor: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWorkflowsCapabilities = jest.fn();
-const mockUseWorkflowsUIEnabledSetting = jest.fn();
+const mockUseWorkflowsCapabilities = vi.fn();
+const mockUseWorkflowsUIEnabledSetting = vi.fn();
 
-jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
-  useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
+      useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ---- helpers ----
 
-const { useCasesContext } = jest.requireMock('../cases_context/use_cases_context');
-const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
+const { useCasesContext } = (await vi.importMock('../cases_context/use_cases_context'));
+const { useCasesConfig } = (await vi.importMock('../../common/lib/kibana'));
 
 const setupMocks = ({
   permissionsUpdate = true,
@@ -62,7 +70,7 @@ const setupMocks = ({
 
 describe('useRunCaseWorkflow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupMocks();
   });
 
@@ -129,8 +137,8 @@ describe('useRunCaseWorkflow', () => {
   });
 
   describe('origin', () => {
-    it('uses the CASE_WORKFLOW_ORIGIN_TYPE for the case-level origin', () => {
-      const { useCasesWorkflowExecutor } = jest.requireMock('./use_cases_workflow_executor');
+    it('uses the CASE_WORKFLOW_ORIGIN_TYPE for the case-level origin', async () => {
+      const { useCasesWorkflowExecutor } = (await vi.importMock('./use_cases_workflow_executor'));
       renderHookWithDefaults();
       expect(useCasesWorkflowExecutor).toHaveBeenCalledWith(
         expect.objectContaining({

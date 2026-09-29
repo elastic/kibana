@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
@@ -15,17 +17,21 @@ import { ResumeExecutionButton } from './resume_execution_button';
 import { createTestQueryClient, TestWrapper } from '../../../shared/test_utils';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows/spec/lib/build_fields_zod_validator', () => ({
-  convertJsonSchemaToZod: jest.fn(),
-}));
+vi.mock('@kbn/workflows/spec/lib/build_fields_zod_validator', () => {
+      const mocked = {
+      convertJsonSchemaToZod: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { convertJsonSchemaToZod } = jest.requireMock(
-  '@kbn/workflows/spec/lib/build_fields_zod_validator'
-);
+const { convertJsonSchemaToZod } = (await vi.importMock('@kbn/workflows/spec/lib/build_fields_zod_validator'));
 
 // Capture callbacks and props exposed by ResumeExecutionModal so tests can inspect them.
 let capturedOnSubmit:
@@ -33,40 +39,43 @@ let capturedOnSubmit:
   | undefined;
 let capturedContextOverride: ContextOverrideData | undefined;
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: jest.fn(),
-  generateSampleFromJsonSchema: jest.fn(),
-  ResumeExecutionModal: ({
-    onSubmit,
-    onClose,
-    resumeMessage,
-    initialcontextOverride,
-  }: {
-    onSubmit?: (params: { stepInputs: Record<string, unknown> }) => Promise<void>;
-    onClose: () => void;
-    resumeMessage?: string;
-    initialcontextOverride?: ContextOverrideData;
-  }) => {
-    capturedOnSubmit = onSubmit;
-    capturedContextOverride = initialcontextOverride;
-    return (
-      <div data-test-subj="resume-execution-modal">
-        <span data-test-subj="modal-resume-message">{resumeMessage ?? ''}</span>
-        <button type="button" data-test-subj="modal-close" onClick={onClose}>
-          {'Close'}
-        </button>
-      </div>
-    );
-  },
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      useWorkflowsCapabilities: vi.fn(),
+      generateSampleFromJsonSchema: vi.fn(),
+      ResumeExecutionModal: ({
+        onSubmit,
+        onClose,
+        resumeMessage,
+        initialcontextOverride,
+      }: {
+        onSubmit?: (params: { stepInputs: Record<string, unknown> }) => Promise<void>;
+        onClose: () => void;
+        resumeMessage?: string;
+        initialcontextOverride?: ContextOverrideData;
+      }) => {
+        capturedOnSubmit = onSubmit;
+        capturedContextOverride = initialcontextOverride;
+        return (
+          <div data-test-subj="resume-execution-modal">
+            <span data-test-subj="modal-resume-message">{resumeMessage ?? ''}</span>
+            <button type="button" data-test-subj="modal-close" onClick={onClose}>
+              {'Close'}
+            </button>
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useKibana } = jest.requireMock('@kbn/kibana-react-plugin/public');
+const { useKibana } = (await vi.importMock('@kbn/kibana-react-plugin/public'));
 
 describe('ResumeExecutionButton', () => {
-  const mockHttpPost = jest.fn();
-  const mockAddSuccess = jest.fn();
-  const mockAddError = jest.fn();
+  const mockHttpPost = vi.fn();
+  const mockAddSuccess = vi.fn();
+  const mockAddError = vi.fn();
   const queryClient = createTestQueryClient();
 
   const defaultProps = {
@@ -75,11 +84,11 @@ describe('ResumeExecutionButton', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedOnSubmit = undefined;
     capturedContextOverride = undefined;
     // Default: schema conversion succeeds and returns a minimal Zod-like object.
-    convertJsonSchemaToZod.mockReturnValue({ safeParse: jest.fn(() => ({ success: true })) });
+    convertJsonSchemaToZod.mockReturnValue({ safeParse: vi.fn(() => ({ success: true })) });
     mockHttpPost.mockResolvedValue({});
     useKibana.mockReturnValue({
       services: {
@@ -89,7 +98,7 @@ describe('ResumeExecutionButton', () => {
         },
       },
     });
-    jest.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
+    vi.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
   });
 
   const renderComponent = (props = {}) =>
@@ -111,7 +120,7 @@ describe('ResumeExecutionButton', () => {
     });
 
     it('disables the button when user lacks executeWorkflow capability', () => {
-      jest.mocked(useWorkflowsCapabilities).mockReturnValue({
+      vi.mocked(useWorkflowsCapabilities).mockReturnValue({
         ...createMockWorkflowsCapabilities(),
         canExecuteWorkflow: false,
       });

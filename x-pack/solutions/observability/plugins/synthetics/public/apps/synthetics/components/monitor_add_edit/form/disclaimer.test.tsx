@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import * as formContext from 'react-hook-form';
@@ -23,7 +25,7 @@ export const mockLocation = {
 };
 describe('<Disclaimer />', () => {
   beforeEach(() => {
-    jest.spyOn(formContext, 'useFormContext').mockReturnValue({
+    vi.spyOn(formContext, 'useFormContext').mockReturnValue({
       watch: () => [[mockLocation] as ServiceLocations],
     } as unknown as formContext.UseFormReturn);
   });
@@ -35,7 +37,7 @@ describe('<Disclaimer />', () => {
   });
 
   it('does not show disclaimer when locations are not service managed', () => {
-    jest.spyOn(formContext, 'useFormContext').mockReturnValue({
+    vi.spyOn(formContext, 'useFormContext').mockReturnValue({
       watch: () => [[{ ...mockLocation, isServiceManaged: false }] as ServiceLocations],
     } as unknown as formContext.UseFormReturn);
     const { queryByText } = render(<Disclaimer />);

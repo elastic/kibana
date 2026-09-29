@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -16,22 +18,22 @@ describe('LiveTimer', () => {
   let nowMs = 0;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
     nowMs = 0;
 
-    jest.spyOn(Date, 'now').mockImplementation(() => nowMs);
+    vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('basic rendering', () => {
@@ -88,7 +90,7 @@ describe('LiveTimer', () => {
 
       act(() => {
         nowMs = 1100;
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
       });
 
       expect(screen.getByTestId('liveTimer')).toHaveTextContent('600ms');
@@ -109,7 +111,7 @@ describe('LiveTimer', () => {
       // Advance by 100ms
       act(() => {
         nowMs = 100;
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
       });
 
       expect(screen.getByTestId('liveTimer')).toHaveTextContent('200ms');
@@ -117,7 +119,7 @@ describe('LiveTimer', () => {
       // Advance by another 100ms
       act(() => {
         nowMs = 200;
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
       });
 
       expect(screen.getByTestId('liveTimer')).toHaveTextContent('300ms');
@@ -132,7 +134,7 @@ describe('LiveTimer', () => {
 
       act(() => {
         nowMs = 100;
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
       });
 
       rerender(
@@ -143,7 +145,7 @@ describe('LiveTimer', () => {
 
       act(() => {
         nowMs = 1000;
-        jest.advanceTimersByTime(900);
+        vi.advanceTimersByTime(900);
       });
 
       expect(screen.getByTestId('liveTimer')).toHaveTextContent('100ms');
@@ -194,7 +196,7 @@ describe('LiveTimer', () => {
 
   describe('render prop', () => {
     it('calls render prop with formattedDuration and liveTimeMs', () => {
-      const renderFn = jest.fn(({ formattedDuration, liveTimeMs }: LiveTimerRenderProps) => (
+      const renderFn = vi.fn(({ formattedDuration, liveTimeMs }: LiveTimerRenderProps) => (
         <span data-test-subj="customRender">
           {formattedDuration} {'('}
           {liveTimeMs}
@@ -216,7 +218,7 @@ describe('LiveTimer', () => {
     });
 
     it('updates render prop with new values when running', () => {
-      const renderFn = jest.fn(({ liveTimeMs }: LiveTimerRenderProps) => (
+      const renderFn = vi.fn(({ liveTimeMs }: LiveTimerRenderProps) => (
         <span data-test-subj="customRender">
           {liveTimeMs}
           {'ms'}
@@ -235,14 +237,14 @@ describe('LiveTimer', () => {
 
       act(() => {
         nowMs = 100;
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
       });
 
       expect(screen.getByTestId('customRender')).toHaveTextContent('600ms');
     });
 
     it('returns null from render prop when appropriate', () => {
-      const renderFn = jest.fn(() => null);
+      const renderFn = vi.fn(() => null);
 
       const { container } = render(
         <TestProviders>
@@ -315,7 +317,7 @@ describe('LiveTimer', () => {
       // Advance time by 2 seconds
       act(() => {
         nowMs = 7000;
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
       });
 
       expect(screen.getByTestId('liveTimer')).toHaveTextContent('5s');
@@ -336,7 +338,7 @@ describe('LiveTimer', () => {
       // Simulate parent re-render (e.g., from polling) - same props
       act(() => {
         nowMs = 7000;
-        jest.advanceTimersByTime(2000);
+        vi.advanceTimersByTime(2000);
       });
 
       rerender(

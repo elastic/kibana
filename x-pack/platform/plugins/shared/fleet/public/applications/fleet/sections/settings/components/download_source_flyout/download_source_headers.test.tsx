@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -12,10 +14,13 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { DownloadSourceFormInputsType } from './use_download_source_flyout_form';
 import { DownloadSourceHeaders } from './download_source_headers';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useGeneratedHtmlId: () => 'mocked-id',
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useGeneratedHtmlId: () => 'mocked-id',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockInputs = (
   overrides: {
@@ -26,7 +31,7 @@ const createMockInputs = (
 ): DownloadSourceFormInputsType => {
   const { disabled = false, keyValuePairs = [{ key: '', value: '' }], errors = [] } = overrides;
   const headersInput = {
-    props: { onChange: jest.fn(), disabled },
+    props: { onChange: vi.fn(), disabled },
     value: keyValuePairs,
     formRowProps: { error: errors },
   };

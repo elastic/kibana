@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -121,7 +123,7 @@ describe('DescriptionField', () => {
   it('does not show a length error when submitted with a description of exactly 1024 characters', async () => {
     const queryClient = createTestQueryClient();
     const services = createMockServices();
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
 
     const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
       const form = useForm<FormValues>({
@@ -159,7 +161,7 @@ describe('DescriptionField', () => {
   });
 
   it('does not show a length error when the description is empty', async () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
     const queryClient = createTestQueryClient();
     const services = createMockServices();
 

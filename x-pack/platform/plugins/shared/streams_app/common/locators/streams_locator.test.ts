@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { StreamsAppLocatorDefinition } from './streams_locator';
 import type { StreamsAppLocatorDefinitionParams } from './streams_locator';
 
@@ -13,7 +15,7 @@ describe('StreamsAppLocatorDefinition', () => {
 
   beforeEach(() => {
     locator = new StreamsAppLocatorDefinition();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getLocation method', () => {

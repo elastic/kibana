@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
@@ -20,11 +23,11 @@ import { createTempSummaryDocument } from './summary_transform_generator/helpers
 
 describe('SLODefinitionClient', () => {
   let esClientMock: ElasticsearchClientMock;
-  let loggerMock: jest.Mocked<MockedLogger>;
-  let mockRepository: jest.Mocked<SLODefinitionRepository>;
+  let loggerMock: Mocked<MockedLogger>;
+  let mockRepository: Mocked<SLODefinitionRepository>;
   let sloDefinitionClient: SLODefinitionClient;
 
-  jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
+  vi.useFakeTimers().setSystemTime(new Date('2024-01-01'));
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();

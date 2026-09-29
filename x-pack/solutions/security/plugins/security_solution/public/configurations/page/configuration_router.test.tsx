@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
@@ -16,30 +19,36 @@ import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent
 import { useKibana, useNavigation } from '../../common/lib/kibana';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 
-jest.mock('../../agent_builder/hooks/use_agent_builder_availability');
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-  useNavigation: jest.fn(),
-}));
-jest.mock('../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn().mockReturnValue('default'),
-}));
+vi.mock('../../agent_builder/hooks/use_agent_builder_availability');
+vi.mock('../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+      useNavigation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn().mockReturnValue('default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockNavigateTo = jest.fn();
+const mockNavigateTo = vi.fn();
 
 describe('ConfigurationsRouter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: false,
     });
-    (useNavigation as jest.Mock).mockReturnValue({
+    (useNavigation as Mock).mockReturnValue({
       navigateTo: mockNavigateTo,
     });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
-          navigateToApp: jest.fn(),
+          navigateToApp: vi.fn(),
           capabilities: {
             securitySolutionAssistant: { 'ai-assistant': true },
           },
@@ -64,7 +73,7 @@ describe('ConfigurationsRouter', () => {
   });
 
   it('redirects when isAgentChatExperienceEnabled is true', () => {
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: true,
     });
 

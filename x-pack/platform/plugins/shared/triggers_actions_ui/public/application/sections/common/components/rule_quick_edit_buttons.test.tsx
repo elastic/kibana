@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as React from 'react';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from './rule_quick_edit_buttons';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -12,20 +14,23 @@ import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { RuleTableItem } from '../../../../types';
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      notifications: { toast: { addDanger: jest.fn() } },
-    },
-  }),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          notifications: { toast: { addDanger: vi.fn() } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const updateRulesToBulkEdit = jest.fn();
-const onDisable = jest.fn();
+const updateRulesToBulkEdit = vi.fn();
+const onDisable = vi.fn();
 
 describe('rule_quick_edit_buttons', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Lifecycle alerts', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { UploadTemplateFlyout } from './upload_template_flyout';
@@ -36,8 +38,8 @@ const selectFile = (content: string, name = 'template.yml') => {
 
 describe('UploadTemplateFlyout', () => {
   it('validates a valid template and enables Continue, then hands back the raw YAML', async () => {
-    const onUploaded = jest.fn();
-    render(<UploadTemplateFlyout onClose={jest.fn()} onUploaded={onUploaded} />);
+    const onUploaded = vi.fn();
+    render(<UploadTemplateFlyout onClose={vi.fn()} onUploaded={onUploaded} />);
 
     expect(screen.getByTestId('workflowLibraryUploadContinue')).toBeDisabled();
 
@@ -53,8 +55,8 @@ describe('UploadTemplateFlyout', () => {
   });
 
   it('shows a descriptive error for an invalid template and keeps Continue disabled', async () => {
-    const onUploaded = jest.fn();
-    render(<UploadTemplateFlyout onClose={jest.fn()} onUploaded={onUploaded} />);
+    const onUploaded = vi.fn();
+    render(<UploadTemplateFlyout onClose={vi.fn()} onUploaded={onUploaded} />);
 
     selectFile('not: a valid template\n');
 
@@ -66,8 +68,8 @@ describe('UploadTemplateFlyout', () => {
   });
 
   it('calls onClose when Cancel is clicked', () => {
-    const onClose = jest.fn();
-    render(<UploadTemplateFlyout onClose={onClose} onUploaded={jest.fn()} />);
+    const onClose = vi.fn();
+    render(<UploadTemplateFlyout onClose={onClose} onUploaded={vi.fn()} />);
 
     fireEvent.click(screen.getByTestId('workflowLibraryUploadCancel'));
     expect(onClose).toHaveBeenCalled();

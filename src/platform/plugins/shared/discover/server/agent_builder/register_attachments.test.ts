@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type {
   AttachmentTypeDefinition,
   AttachmentFormatContext,
@@ -24,11 +26,11 @@ const createMockAgentBuilder = () => {
   return {
     mock: {
       attachments: {
-        registerType: jest.fn((type: AttachmentTypeDefinition) => {
+        registerType: vi.fn((type: AttachmentTypeDefinition) => {
           registeredTypes.push(type);
         }),
       },
-      skills: { register: jest.fn() },
+      skills: { register: vi.fn() },
     } as unknown as AgentBuilderPluginSetup,
     getRegisteredType: () => registeredTypes[0],
   };

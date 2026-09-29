@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { OCC_CONFLICT_STATUS_CODE } from '@kbn/occ';
 
@@ -54,9 +57,9 @@ const makeOccHit = (
   primaryTerm,
 });
 
-const makeClient = (): jest.Mocked<BulkOccIndexClient> => ({
-  bulk: jest.fn(),
-  search: jest.fn(),
+const makeClient = (): Mocked<BulkOccIndexClient> => ({
+  bulk: vi.fn(),
+  search: vi.fn(),
 });
 
 const WORKFLOW_INDEX = 'workflows';
@@ -121,13 +124,13 @@ describe('toOccHit', () => {
 });
 
 describe('bulkIndexWithOccRetry', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('bulk indexes with per-item OCC metadata', async () => {
     const client = makeClient();
     client.bulk.mockResolvedValue(bulkResponse([bulkIndexItem('wf-1', 200)]));
 
-    const mutate = jest.fn((hit: OccWorkflowHit) => ({ ...hit._source, enabled: false }));
+    const mutate = vi.fn((hit: OccWorkflowHit) => ({ ...hit._source, enabled: false }));
     const result = await bulkIndexWithOccRetry({
       client,
       hits: [makeOccHit('wf-1', 7, 2)],
@@ -206,7 +209,7 @@ describe('bulkIndexWithOccRetry', () => {
       hits: { hits: [makeSearchHit('wf-1', 3, 1, { enabled: false })] },
     });
 
-    const mutate = jest.fn((hit: OccWorkflowHit) => ({
+    const mutate = vi.fn((hit: OccWorkflowHit) => ({
       ...hit._source,
       tags: ['patched'],
     }));
@@ -396,7 +399,7 @@ describe('bulkIndexWithOccRetry', () => {
 });
 
 describe('fetchOccHitsByIds', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns empty results without querying when ids is empty', async () => {
     const client = makeClient();

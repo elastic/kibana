@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
@@ -15,7 +17,7 @@ import { GRAPH_PREVIEW_TEST_ID, GRAPH_PREVIEW_LOADING_TEST_ID } from './test_ids
 
 const mockGraph = () => <div data-test-subj={GRAPH_PREVIEW_TEST_ID} />;
 
-jest.mock('@kbn/cloud-security-posture-graph', () => {
+vi.mock('@kbn/cloud-security-posture-graph', () => {
   return { Graph: mockGraph };
 });
 
@@ -33,7 +35,7 @@ const EMPTY_MESSAGE = 'No graph nodes found.';
 
 describe('<GraphPreview />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows graph preview correctly when data is loaded', async () => {

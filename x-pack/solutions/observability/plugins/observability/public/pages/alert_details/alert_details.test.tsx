@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -32,24 +35,30 @@ import { createTelemetryClientMock } from '../../services/telemetry/telemetry_cl
 import type { SavedObjectReference } from '@kbn/core/server';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn(),
-  useLocation: jest.fn(),
-  useHistory: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: vi.fn(),
+      useLocation: vi.fn(),
+      useHistory: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/kibana_react');
-jest.mock('@kbn/response-ops-rule-form/src/common');
+vi.mock('../../utils/kibana_react');
+vi.mock('@kbn/response-ops-rule-form/src/common');
 
-const mockUseGetRuleTypesPermissions = jest.fn(() => ({
+const mockUseGetRuleTypesPermissions = vi.fn(() => ({
   authorizedToReadAnyRules: true,
   authorizedToReadRuleType: (): boolean => true,
 }));
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
-  ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
-  useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
+      useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
+    };
+      return { ...mocked, default: mocked };
+    });
 const validationMethod = (): ValidationResult => ({ errors: {} });
 const ruleType: RuleTypeModel = {
   id: 'logs.alert.document.count',
@@ -62,48 +71,57 @@ const ruleType: RuleTypeModel = {
   alertDetailsAppSection: () => <Fragment />,
 };
 
-jest.mock('./hooks/use_add_suggested_dashboard', () => ({
-  useAddSuggestedDashboards: () => ({
-    onClickAddSuggestedDashboard: jest.fn(),
-    addingDashboardId: undefined,
-  }),
-}));
+vi.mock('./hooks/use_add_suggested_dashboard', () => {
+      const mocked = {
+      useAddSuggestedDashboards: () => ({
+        onClickAddSuggestedDashboard: vi.fn(),
+        addingDashboardId: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_discover_url', () => ({
-  useDiscoverUrl: () => ({
-    discoverUrl: null,
-  }),
-}));
+vi.mock('./hooks/use_discover_url', () => {
+      const mocked = {
+      useDiscoverUrl: () => ({
+        discoverUrl: null,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_related_dashboards', () => ({
-  useRelatedDashboards: () => ({
-    isLoadingSuggestedDashboards: false,
-    suggestedDashboards: [
-      {
-        id: 'suggested-dashboard-1',
-        title: 'Suggested Dashboard 1',
-        description: 'A suggested dashboard for testing',
-        tags: ['SuggestedTag', 'SecondTag'],
-      },
-    ],
-    linkedDashboards: [
-      {
-        id: 'dashboard-1',
-      },
-    ],
-  }),
-}));
+vi.mock('./hooks/use_related_dashboards', () => {
+      const mocked = {
+      useRelatedDashboards: () => ({
+        isLoadingSuggestedDashboards: false,
+        suggestedDashboards: [
+          {
+            id: 'suggested-dashboard-1',
+            title: 'Suggested Dashboard 1',
+            description: 'A suggested dashboard for testing',
+            tags: ['SuggestedTag', 'SecondTag'],
+          },
+        ],
+        linkedDashboards: [
+          {
+            id: 'dashboard-1',
+          },
+        ],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 
-const spacesUnsubscribeMock = jest.fn();
-const spacesSubscribeMock = jest.fn().mockReturnValue({ unsubscribe: spacesUnsubscribeMock });
+const spacesUnsubscribeMock = vi.fn();
+const spacesSubscribeMock = vi.fn().mockReturnValue({ unsubscribe: spacesUnsubscribeMock });
 const mockSpaces = {
-  getActiveSpace$: jest.fn().mockReturnValue({
+  getActiveSpace$: vi.fn().mockReturnValue({
     subscribe: spacesSubscribeMock,
     pipe: () => ({
       subscribe: spacesSubscribeMock,
@@ -111,13 +129,13 @@ const mockSpaces = {
   }),
 };
 
-const mockConvertNameToReference = jest
+const mockConvertNameToReference = vi
   .fn()
   .mockImplementation((value: string) => ({ id: value, type: value }));
 
 const myLocator = {
   ...sharePluginMock.createLocator(),
-  getLocation: jest.fn().mockResolvedValue({ path: '' }),
+  getLocation: vi.fn().mockResolvedValue({ path: '' }),
 };
 const kibanaStartMockServices = kibanaStartMock.startContract().services;
 
@@ -125,11 +143,11 @@ const kibanaStartMockServicesWithLocator = {
   ...kibanaStartMockServices,
   share: {
     ...kibanaStartMockServices.share,
-    url: { ...kibanaStartMockServices.share.url, locators: { get: jest.fn(() => myLocator) } },
+    url: { ...kibanaStartMockServices.share.url, locators: { get: vi.fn(() => myLocator) } },
   },
 };
 
-const mockRegisterAppAccess = jest.fn();
+const mockRegisterAppAccess = vi.fn();
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -140,9 +158,9 @@ const mockKibana = () => {
       cps: { cpsManager: { registerAppAccess: mockRegisterAppAccess } },
       http: {
         basePath: {
-          prepend: jest.fn(),
+          prepend: vi.fn(),
         },
-        get: jest.fn().mockReturnValue({ alertContext: [] }),
+        get: vi.fn().mockReturnValue({ alertContext: [] }),
       },
       observabilityAIAssistant: mockObservabilityAIAssistant,
       theme: {},
@@ -202,27 +220,27 @@ const MOCK_RULE = {
     ],
   },
 };
-jest.mock('../../hooks/use_fetch_alert_detail');
-jest.mock('../../hooks/use_fetch_rule', () => {
+vi.mock('../../hooks/use_fetch_alert_detail');
+vi.mock('../../hooks/use_fetch_rule', () => {
   return {
     useFetchRule: () => ({
-      reloadRule: jest.fn(),
+      reloadRule: vi.fn(),
       rule: MOCK_RULE,
     }),
   };
 });
-jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('@kbn/ebt-tools');
+vi.mock('@kbn/observability-shared-plugin/public');
+vi.mock('@kbn/ebt-tools');
 
-const usePerformanceContextMock = usePerformanceContext as jest.Mock;
-const useFetchAlertDetailMock = useFetchAlertDetail as jest.Mock;
-const useParamsMock = useParams as jest.Mock;
-const useLocationMock = useLocation as jest.Mock;
-const useHistoryMock = useHistory as jest.Mock;
-const useBreadcrumbsMock = useBreadcrumbs as jest.Mock;
-const TagsListMock = TagsList as jest.Mock;
+const usePerformanceContextMock = usePerformanceContext as Mock;
+const useFetchAlertDetailMock = useFetchAlertDetail as Mock;
+const useParamsMock = useParams as Mock;
+const useLocationMock = useLocation as Mock;
+const useHistoryMock = useHistory as Mock;
+const useBreadcrumbsMock = useBreadcrumbs as Mock;
+const TagsListMock = TagsList as Mock;
 
-usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
+usePerformanceContextMock.mockReturnValue({ onPageReady: vi.fn() });
 
 const chance = new Chance();
 const params = {
@@ -238,19 +256,19 @@ const config: Subset<ConfigSchema> = {
 };
 
 describe('Alert details', () => {
-  jest
+  vi
     .spyOn(useUiSettingHook, 'useUiSetting')
     .mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseGetRuleTypesPermissions.mockReturnValue({
       authorizedToReadAnyRules: true,
       authorizedToReadRuleType: () => true,
     });
     useParamsMock.mockReturnValue(params);
     useLocationMock.mockReturnValue({ pathname: '/alerts/uuid', search: '', state: '', hash: '' });
-    useHistoryMock.mockReturnValue({ replace: jest.fn(), location: { pathname: '/alerts/uuid' } });
+    useHistoryMock.mockReturnValue({ replace: vi.fn(), location: { pathname: '/alerts/uuid' } });
     useBreadcrumbsMock.mockReturnValue([]);
     TagsListMock.mockReturnValue(<div data-test-subj="TagsList" />);
     ruleTypeRegistry.list.mockReturnValue([ruleType]);
@@ -455,8 +473,8 @@ describe('Alert details', () => {
           application: { currentAppId$: of('mockedApp') },
           // No cps key — simulates stateful or flag-off
           http: {
-            basePath: { prepend: jest.fn() },
-            get: jest.fn().mockReturnValue({ alertContext: [] }),
+            basePath: { prepend: vi.fn() },
+            get: vi.fn().mockReturnValue({ alertContext: [] }),
           },
           observabilityAIAssistant: mockObservabilityAIAssistant,
           theme: {},

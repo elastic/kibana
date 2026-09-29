@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,16 +16,16 @@ import { useKibana } from '../../common/lib/kibana';
 import { withActionSourceEvent } from './action_source_event';
 import { useCanOpenAgentConversation } from './use_can_open_agent_conversation';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('./use_can_open_agent_conversation');
+vi.mock('../../common/lib/kibana');
+vi.mock('./use_can_open_agent_conversation');
 
-const mockOpenChat = jest.fn();
-const mockGetUrlForApp = jest.fn(
+const mockOpenChat = vi.fn();
+const mockGetUrlForApp = vi.fn(
   (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
 );
 
-const useKibanaMock = useKibana as jest.Mock;
-const useCanOpenAgentConversationMock = useCanOpenAgentConversation as jest.MockedFunction<
+const useKibanaMock = useKibana as Mock;
+const useCanOpenAgentConversationMock = useCanOpenAgentConversation as MockedFunction<
   typeof useCanOpenAgentConversation
 >;
 
@@ -31,7 +34,7 @@ const renderEvent = (event: React.ReactNode, source: unknown) =>
 
 describe('withActionSourceEvent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useCanOpenAgentConversationMock.mockImplementation((conversationId) => Boolean(conversationId));
     useKibanaMock.mockReturnValue({
       services: {

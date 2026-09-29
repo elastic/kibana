@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
@@ -19,7 +21,7 @@ describe('createUnsecuredInboundSavedObjectsClient', () => {
     const coreStart = coreMock.createStart();
     const scopedClient = {};
     coreStart.savedObjects.getScopedClient.mockReturnValue(scopedClient as never);
-    const getStartServices = jest.fn().mockResolvedValue([coreStart, {}, {}]);
+    const getStartServices = vi.fn().mockResolvedValue([coreStart, {}, {}]);
 
     const client = await createUnsecuredInboundSavedObjectsClient({
       getStartServices,

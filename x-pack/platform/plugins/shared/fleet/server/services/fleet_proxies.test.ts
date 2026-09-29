@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { Logger } from '@kbn/core/server';
@@ -19,16 +22,16 @@ import { fleetServerHostService } from './fleet_server_host';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 
-jest.mock('./output');
-jest.mock('./download_source');
-jest.mock('./fleet_server_host');
-jest.mock('./app_context');
+vi.mock('./output');
+vi.mock('./download_source');
+vi.mock('./fleet_server_host');
+vi.mock('./app_context');
 
-const mockedFleetServerHostService = fleetServerHostService as jest.Mocked<
+const mockedFleetServerHostService = fleetServerHostService as Mocked<
   typeof fleetServerHostService
 >;
-const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
-const mockedDownloadSourceService = downloadSourceService as jest.Mocked<
+const mockedOutputService = outputService as Mocked<typeof outputService>;
+const mockedDownloadSourceService = downloadSourceService as Mocked<
   typeof downloadSourceService
 >;
 
@@ -36,12 +39,12 @@ const PROXY_IDS = {
   PRECONFIGURED: 'test-preconfigured',
   RELATED_PRECONFIGURED: 'test-related-preconfigured',
 };
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-let mockedLogger: jest.Mocked<Logger>;
+let mockedLogger: Mocked<Logger>;
 
 describe('Fleet proxies service', () => {
   beforeEach(() => {

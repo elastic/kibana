@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createToolEventEmitter, createAgentEventEmitter } from './events';
 import type { RunContext } from '@kbn/agent-builder-server';
 import { ChatEventType, type MessageChunkEvent } from '@kbn/agent-builder-common';
@@ -12,7 +14,7 @@ import { ChatEventType, type MessageChunkEvent } from '@kbn/agent-builder-common
 describe('Event utilities', () => {
   describe('createToolEventEmitter', () => {
     it('should emit events ', () => {
-      const mockEventHandler = jest.fn();
+      const mockEventHandler = vi.fn();
       const context: RunContext = {
         runId: 'test-run-id',
         stack: [],
@@ -34,7 +36,7 @@ describe('Event utilities', () => {
 
   describe('createAgentEventEmitter', () => {
     it('should emit events directly to the event handler when provided', () => {
-      const mockEventHandler = jest.fn();
+      const mockEventHandler = vi.fn();
       const context: RunContext = {
         runId: 'test-run-id',
         stack: [],

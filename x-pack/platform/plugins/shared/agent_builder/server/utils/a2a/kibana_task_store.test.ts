@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { AgentExecutionMode, ChatEventType, ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import { KibanaTaskStore } from './kibana_task_store';
@@ -25,20 +28,20 @@ describe('KibanaTaskStore', () => {
     } as AgentExecution);
 
   const createStore = (
-    getExecution: jest.Mock,
+    getExecution: Mock,
     { currentSpaceId = 'default' }: { currentSpaceId?: string } = {}
   ) => {
     const getInternalServices = () =>
       ({
         execution: { getExecution },
-        spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue(currentSpaceId) } },
+        spaces: { spacesService: { getSpaceId: vi.fn().mockReturnValue(currentSpaceId) } },
       } as any);
     const kibanaRequest = {} as any;
     return new KibanaTaskStore(getInternalServices, kibanaRequest);
   };
 
   it('returns undefined when the execution is not found', async () => {
-    const getExecution = jest.fn().mockResolvedValue(undefined);
+    const getExecution = vi.fn().mockResolvedValue(undefined);
     const store = createStore(getExecution);
 
     const task = await store.load('missing-id');
@@ -53,7 +56,7 @@ describe('KibanaTaskStore', () => {
     [ExecutionStatus.failed, 'failed'],
     [ExecutionStatus.aborted, 'canceled'],
   ] as const)('maps execution status %s to task state %s', async (status, expectedState) => {
-    const getExecution = jest.fn().mockResolvedValue(createExecution({ status }));
+    const getExecution = vi.fn().mockResolvedValue(createExecution({ status }));
     const store = createStore(getExecution);
 
     const task = await store.load('exec-1');
@@ -69,7 +72,7 @@ describe('KibanaTaskStore', () => {
   });
 
   it('returns undefined when the execution belongs to a different space', async () => {
-    const getExecution = jest.fn().mockResolvedValue(createExecution({ spaceId: 'other-space' }));
+    const getExecution = vi.fn().mockResolvedValue(createExecution({ spaceId: 'other-space' }));
     const store = createStore(getExecution, { currentSpaceId: 'default' });
 
     const task = await store.load('exec-1');
@@ -78,7 +81,7 @@ describe('KibanaTaskStore', () => {
   });
 
   it('uses the persisted a2aContextId as contextId when present', async () => {
-    const getExecution = jest
+    const getExecution = vi
       .fn()
       .mockResolvedValue(createExecution({ metadata: { a2aContextId: 'ctx-1' } }));
     const store = createStore(getExecution);
@@ -89,7 +92,7 @@ describe('KibanaTaskStore', () => {
   });
 
   it('includes the final response message when completed', async () => {
-    const getExecution = jest.fn().mockResolvedValue(
+    const getExecution = vi.fn().mockResolvedValue(
       createExecution({
         status: ExecutionStatus.completed,
         events: [
@@ -116,7 +119,7 @@ describe('KibanaTaskStore', () => {
   });
 
   it('is a no-op on save, since the execution document is the source of truth', async () => {
-    const store = createStore(jest.fn());
+    const store = createStore(vi.fn());
     await expect(
       store.save({ id: 'exec-1', contextId: 'exec-1', kind: 'task', status: { state: 'working' } })
     ).resolves.toBeUndefined();

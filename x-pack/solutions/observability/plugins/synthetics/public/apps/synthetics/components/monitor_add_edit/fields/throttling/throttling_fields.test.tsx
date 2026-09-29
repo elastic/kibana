@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { fireEvent, render as testLibRender, screen, configure } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -30,7 +32,7 @@ describe('ThrottlingFields', () => {
   });
 
   it('calls setValue on change', async () => {
-    const setValue = jest.fn();
+    const setValue = vi.fn();
     render(<ThrottlingFields throttling={PROFILES_MAP.default} setValue={setValue} />);
 
     const throttling = PROFILES_MAP.default;
@@ -64,7 +66,7 @@ describe('ThrottlingFields', () => {
   });
 
   it('shows maximum bandwidth callout on download and upload change', async () => {
-    const setValue = jest.fn();
+    const setValue = vi.fn();
     const throttling = PROFILES_MAP.default;
 
     render(

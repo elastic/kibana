@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
@@ -16,9 +19,9 @@ import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../../../common/endpoint
 import type { Platform } from '../platforms';
 import { HostStatus } from '../../../../../../../common/endpoint/types';
 
-jest.mock('../../../../../hooks/agents/use_get_agent_status');
+vi.mock('../../../../../hooks/agents/use_get_agent_status');
 
-const getAgentStatusMock = useGetAgentStatus as jest.Mock;
+const getAgentStatusMock = useGetAgentStatus as Mock;
 
 describe('Responder header Agent Info', () => {
   let render: (
@@ -38,11 +41,11 @@ describe('Responder header Agent Info', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
@@ -61,7 +64,7 @@ describe('Responder header Agent Info', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe.each(RESPONSE_ACTION_AGENT_TYPE)('`%s` agentType', (agentType) => {

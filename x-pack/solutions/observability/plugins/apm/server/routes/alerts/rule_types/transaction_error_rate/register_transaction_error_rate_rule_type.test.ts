@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerTransactionErrorRateRuleType } from './register_transaction_error_rate_rule_type';
 import { createRuleTypeMocks } from '../../test_utils';
 
@@ -725,8 +727,8 @@ describe('Transaction error rate alert', () => {
     services.alertsClient.getRecoveredAlerts.mockReturnValue([
       {
         alert: {
-          getId: jest.fn().mockReturnValue('test-id'),
-          getUuid: jest.fn().mockReturnValue('test-uuid'),
+          getId: vi.fn().mockReturnValue('test-id'),
+          getUuid: vi.fn().mockReturnValue('test-uuid'),
           scheduledExecutionOptions: undefined,
           meta: [],
           state: [],
@@ -867,8 +869,8 @@ describe('Transaction error rate alert', () => {
     services.alertsClient.getRecoveredAlerts.mockReturnValue([
       {
         alert: {
-          getId: jest.fn().mockReturnValue('test-id'),
-          getUuid: jest.fn().mockReturnValue('test-uuid'),
+          getId: vi.fn().mockReturnValue('test-id'),
+          getUuid: vi.fn().mockReturnValue('test-uuid'),
           scheduledExecutionOptions: undefined,
           meta: [],
           state: [],

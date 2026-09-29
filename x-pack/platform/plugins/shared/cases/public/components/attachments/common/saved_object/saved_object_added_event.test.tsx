@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithTestingProviders } from '../../../../common/mock';
 import { SavedObjectAddedEvent } from './saved_object_added_event';
 import { useSavedObjectInAppUrl } from './use_saved_object_in_app_url';
 
-jest.mock('./use_saved_object_in_app_url');
+vi.mock('./use_saved_object_in_app_url');
 
-const useSavedObjectInAppUrlMock = useSavedObjectInAppUrl as jest.Mock;
+const useSavedObjectInAppUrlMock = useSavedObjectInAppUrl as Mock;
 
 describe('SavedObjectAddedEvent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the title as a link when the in-app URL resolves', () => {

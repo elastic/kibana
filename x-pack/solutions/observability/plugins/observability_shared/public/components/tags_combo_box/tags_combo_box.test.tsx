@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { TagsComboBox } from './tags_combo_box';
 
 const renderComboBox = (props: Partial<React.ComponentProps<typeof TagsComboBox>> = {}) => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   render(
     <EuiThemeProvider>
       <TagsComboBox

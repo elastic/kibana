@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getNextRollingTimeMock } from './time_interval_policy.test.mocks';
 import moment from 'moment-timezone';
 import type { LogRecord } from '@kbn/logging';
@@ -21,7 +23,7 @@ const format = 'YYYY-MM-DD HH:mm:ss';
 describe('TimeIntervalTriggeringPolicy', () => {
   afterEach(() => {
     getNextRollingTimeMock.mockReset();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const createLogRecord = (timestamp: Date): LogRecord => ({
@@ -64,7 +66,7 @@ describe('TimeIntervalTriggeringPolicy', () => {
 
   it('calls `getNextRollingTime` with the current time if `context.currentFileTime` is not set', () => {
     const currentTime = moment('2018-06-15 04:27:12', format).toDate().getTime();
-    jest.spyOn(Date, 'now').mockReturnValue(currentTime);
+    vi.spyOn(Date, 'now').mockReturnValue(currentTime);
     const context = createContext(0);
     const config = createConfig('15m', true);
 

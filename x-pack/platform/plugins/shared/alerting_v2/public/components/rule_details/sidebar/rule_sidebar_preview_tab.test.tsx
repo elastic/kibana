@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { RuleApiResponse } from '../../../services/rules_api';
@@ -13,32 +15,44 @@ import { RuleSidebarPreviewTab } from './rule_sidebar_preview_tab';
 
 let capturedProps: Record<string, unknown> = {};
 
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  QuerySandbox: (props: Record<string, unknown>) => {
-    capturedProps = props;
-    return <div data-test-subj="mockQuerySandbox" />;
-  },
-  RuleFormProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('@kbn/alerting-v2-rule-form', () => {
+      const mocked = {
+      QuerySandbox: (props: Record<string, unknown>) => {
+        capturedProps = props;
+        return <div data-test-subj="mockQuerySandbox" />;
+      },
+      RuleFormProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-query', () => ({
-  QueryClient: jest.fn().mockImplementation(() => ({})),
-  QueryClientProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      QueryClient: vi.fn().mockImplementation(() => ({})),
+      QueryClientProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di-browser', () => ({
-  CoreStart: (key: string) => key,
-  useService: (token: unknown) => {
-    if (token === 'http') return { basePath: { prepend: (p: string) => p } };
-    if (token === 'notifications') return { toasts: { addSuccess: jest.fn() } };
-    if (token === 'application') return { navigateToUrl: jest.fn() };
-    return {};
-  },
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      CoreStart: (key: string) => key,
+      useService: (token: unknown) => {
+        if (token === 'http') return { basePath: { prepend: (p: string) => p } };
+        if (token === 'notifications') return { toasts: { addSuccess: vi.fn() } };
+        if (token === 'application') return { navigateToUrl: vi.fn() };
+        return {};
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di', () => ({
-  PluginStart: (key: string) => `plugin:${key}`,
-}));
+vi.mock('@kbn/core-di', () => {
+      const mocked = {
+      PluginStart: (key: string) => `plugin:${key}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',
@@ -64,7 +78,7 @@ const renderPreviewTab = (rule: RuleApiResponse = baseRule) =>
 describe('RuleSidebarPreviewTab', () => {
   beforeEach(() => {
     capturedProps = {};
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders QuerySandbox', () => {

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import datemath from '@kbn/datemath';
 import moment from 'moment-timezone';
 import * as helpers from './helpers';
 
 describe('url_params_context helpers', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
   describe('getDateRange', () => {
     describe('with non-rounded dates', () => {
@@ -93,7 +95,7 @@ describe('url_params_context helpers', () => {
     describe('when rangeFrom or rangeTo are falsy', () => {
       it('returns the previous state', () => {
         // Disable console warning about not receiving a valid date for rangeFrom
-        jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
+        vi.spyOn(console, 'warn').mockImplementationOnce(() => {});
 
         expect(
           helpers.getDateRange({
@@ -116,7 +118,7 @@ describe('url_params_context helpers', () => {
     describe('when the start or end are invalid', () => {
       it('returns the previous state', () => {
         const endDate = moment('2021-06-04T18:03:24.211Z');
-        jest
+        vi
           .spyOn(datemath, 'parse')
           .mockReturnValueOnce(undefined)
           .mockReturnValueOnce(endDate)
@@ -144,7 +146,7 @@ describe('url_params_context helpers', () => {
 
     describe('when rangeFrom or rangeTo have changed', () => {
       it('returns new state', () => {
-        jest.spyOn(datemath, 'parse').mockReturnValue(moment(0).utc());
+        vi.spyOn(datemath, 'parse').mockReturnValue(moment(0).utc());
 
         expect(
           helpers.getDateRange({
@@ -176,20 +178,20 @@ describe('url_params_context helpers', () => {
 
     ['s', 'm', 'h', 'd', 'w'].map((roundingOption) =>
       it(`removes /${roundingOption} rounding option from relative time`, () => {
-        const spy = jest.spyOn(datemath, 'parse');
+        const spy = vi.spyOn(datemath, 'parse');
         helpers.getExactDate(`now/${roundingOption}`);
         expect(spy).toHaveBeenCalledWith('now', {});
       })
     );
 
     it('removes rounding option but keeps subtracting time', () => {
-      const spy = jest.spyOn(datemath, 'parse');
+      const spy = vi.spyOn(datemath, 'parse');
       helpers.getExactDate('now-24h/h');
       expect(spy).toHaveBeenCalledWith('now-24h', {});
     });
 
     it('removes rounding option but keeps adding time', () => {
-      const spy = jest.spyOn(datemath, 'parse');
+      const spy = vi.spyOn(datemath, 'parse');
       helpers.getExactDate('now+15m/h');
       expect(spy).toHaveBeenCalledWith('now+15m', {});
     });

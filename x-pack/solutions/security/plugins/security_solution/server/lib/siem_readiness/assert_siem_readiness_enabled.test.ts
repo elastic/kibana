@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IUiSettingsClient, KibanaResponseFactory } from '@kbn/core/server';
 import { ENABLE_SIEM_READINESS_SETTING } from '../../../common/constants';
 import { assertSiemReadinessEnabled } from './assert_siem_readiness_enabled';
@@ -12,11 +14,11 @@ import { assertSiemReadinessEnabled } from './assert_siem_readiness_enabled';
 describe('assertSiemReadinessEnabled', () => {
   const createUiSettingsClient = (enabled: boolean) =>
     ({
-      get: jest.fn().mockResolvedValue(enabled),
+      get: vi.fn().mockResolvedValue(enabled),
     } as unknown as IUiSettingsClient);
 
   const createResponse = () => {
-    const forbidden = jest.fn().mockReturnValue({ status: 403 });
+    const forbidden = vi.fn().mockReturnValue({ status: 403 });
     return {
       response: { forbidden } as unknown as KibanaResponseFactory,
       forbidden,

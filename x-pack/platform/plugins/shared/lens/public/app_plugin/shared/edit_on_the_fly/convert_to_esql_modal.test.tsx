@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -64,8 +66,8 @@ const mockLayers: ConvertibleLayer[] = [
   },
 ];
 
-const mockOnCancel = jest.fn();
-const mockOnConfirm = jest.fn();
+const mockOnCancel = vi.fn();
+const mockOnConfirm = vi.fn();
 
 const renderComponent = (
   propsOverrides?: Partial<React.ComponentProps<typeof ConvertToEsqlModal>>
@@ -82,7 +84,7 @@ const renderComponent = (
 
 describe('ConvertToEsqlModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('single layer', () => {

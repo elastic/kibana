@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook, act } from '@testing-library/react';
 import {
   stubDataViewWithoutTimeField,
@@ -88,7 +91,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       services: mockedServices,
     };
 
-    jest.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
+    vi.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
       (): ExistingFieldsReader => ({
         hasFieldData: (dataViewId) => {
           return dataViewId === props.dataViewId;
@@ -139,7 +142,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
     expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
 
-    (ExistenceApi.useExistingFieldsReader as jest.Mock).mockRestore();
+    (ExistenceApi.useExistingFieldsReader as Mock).mockRestore();
   });
 
   it('should work correctly with fields', async () => {
@@ -149,7 +152,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       services: mockedServices,
     };
 
-    jest.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
+    vi.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
       (): ExistingFieldsReader => ({
         hasFieldData: (dataViewId) => {
           return dataViewId === props.dataViewId;
@@ -207,7 +210,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     expect(result.current.allFieldsModified).toBe(allFields);
     expect(result.current.hasNewFields).toBe(false);
 
-    (ExistenceApi.useExistingFieldsReader as jest.Mock).mockRestore();
+    (ExistenceApi.useExistingFieldsReader as Mock).mockRestore();
   });
 
   it('should work correctly with new fields', async () => {
@@ -220,7 +223,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
     const newField = { name: 'test', type: 'keyword', searchable: true, aggregatable: true };
 
-    jest.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
+    vi.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
       (): ExistingFieldsReader => ({
         hasFieldData: (dataViewId) => {
           return dataViewId === props.dataViewId;
@@ -281,7 +284,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     expect(result.current.allFieldsModified).toBe(allFields);
     expect(result.current.hasNewFields).toBe(false);
 
-    (ExistenceApi.useExistingFieldsReader as jest.Mock).mockRestore();
+    (ExistenceApi.useExistingFieldsReader as Mock).mockRestore();
   });
 
   it('should work correctly when searched and filtered', async () => {
@@ -515,7 +518,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
   it('should work correctly when details are overwritten', async () => {
     const onOverrideFieldGroupDetails: GroupedFieldsParams<DataViewField>['onOverrideFieldGroupDetails'] =
-      jest.fn((groupName) => {
+      vi.fn((groupName) => {
         if (groupName === FieldsGroupNames.SelectedFields) {
           return {
             helpText: 'test',
@@ -549,7 +552,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       services: mockedServices,
     };
 
-    jest.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
+    vi.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
       (): ExistingFieldsReader => ({
         hasFieldData: (dataViewId, fieldName) => {
           return dataViewId === knownDataViewId && ['bytes', 'extension'].includes(fieldName);
@@ -615,12 +618,12 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
     expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
 
-    (ExistenceApi.useExistingFieldsReader as jest.Mock).mockRestore();
+    (ExistenceApi.useExistingFieldsReader as Mock).mockRestore();
   });
 
   it('should work correctly when popular fields limit is present', async () => {
     // `bytes` is popular, but we are skipping it here to test that it would not be shown under Popular and Available
-    const onSupportedFieldFilter = jest.fn((field) => field.name !== 'bytes');
+    const onSupportedFieldFilter = vi.fn((field) => field.name !== 'bytes');
 
     const { result } = renderHook(useGroupedFields, {
       initialProps: {

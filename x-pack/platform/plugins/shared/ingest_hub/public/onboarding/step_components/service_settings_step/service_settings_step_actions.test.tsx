@@ -5,20 +5,44 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('../../onboarding_flow_context', () => ({ useOnboardingFlow: jest.fn() }));
-jest.mock('./use_service_settings', () => ({ useServiceSettings: jest.fn() }));
-jest.mock('./service_settings_flyout', () => ({ ServiceSettingsFlyout: () => null }));
-jest.mock('./duplicate_service_modal', () => ({
-  DuplicateServiceModal: () => <div data-test-subj="duplicate-modal" />,
-}));
-jest.mock('../service_search_filter', () => ({ ServiceSearchFilter: () => null }));
-jest.mock('./duplicate_name', () => ({ buildDuplicateName: () => 'Copy' }));
-jest.mock('@kbn/ui-callout', () => ({ KbnWarningCallout: () => null }));
+vi.mock('../../onboarding_flow_context', () => {
+      const mocked = { useOnboardingFlow: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_service_settings', () => {
+      const mocked = { useServiceSettings: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./service_settings_flyout', () => {
+      const mocked = { ServiceSettingsFlyout: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./duplicate_service_modal', () => {
+      const mocked = {
+      DuplicateServiceModal: () => <div data-test-subj="duplicate-modal" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../service_search_filter', () => {
+      const mocked = { ServiceSearchFilter: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./duplicate_name', () => {
+      const mocked = { buildDuplicateName: () => 'Copy' };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/ui-callout', () => {
+      const mocked = { KbnWarningCallout: () => null };
+      return { ...mocked, default: mocked };
+    });
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServiceSettings } from './use_service_settings';
@@ -78,34 +102,34 @@ function makeInstance(
 }
 
 function renderStep(instances: ServiceInstance[], servicesMap: Map<string, AwsServiceMatrixEntry>) {
-  (useOnboardingFlow as jest.Mock).mockReturnValue({
+  (useOnboardingFlow as Mock).mockReturnValue({
     awsServicesMap: servicesMap,
     detectAndReviewStep: { policyIdsByInstance: {}, serviceStatuses: {} },
   });
-  (useServiceSettings as jest.Mock).mockReturnValue({
+  (useServiceSettings as Mock).mockReturnValue({
     globalRegion: 'us-east-1',
-    setGlobalRegion: jest.fn(),
+    setGlobalRegion: vi.fn(),
     instances,
     filteredInstances: instances,
     incompleteInstances: [],
     incompleteInstanceIds: new Set(),
     searchQuery: '',
-    setSearchQuery: jest.fn(),
+    setSearchQuery: vi.fn(),
     signalFilter: 'all',
-    setSignalFilter: jest.fn(),
-    getServiceVars: jest.fn().mockReturnValue({ enabledDataStreams: [], varsByDataStream: {} }),
-    setServiceFieldsAndInputs: jest.fn(),
-    addDuplicate: jest.fn(),
-    removeInstance: jest.fn(),
+    setSignalFilter: vi.fn(),
+    getServiceVars: vi.fn().mockReturnValue({ enabledDataStreams: [], varsByDataStream: {} }),
+    setServiceFieldsAndInputs: vi.fn(),
+    addDuplicate: vi.fn(),
+    removeInstance: vi.fn(),
     allInstanceNames: instances.map((i) => i.name),
     globalRegionTouched: false,
-    setGlobalRegionTouched: jest.fn(),
+    setGlobalRegionTouched: vi.fn(),
     isReady: true,
-    handleNext: jest.fn(),
+    handleNext: vi.fn(),
   });
   render(
     <I18nProvider>
-      <ServiceSettingsStep onContinue={jest.fn()} />
+      <ServiceSettingsStep onContinue={vi.fn()} />
     </I18nProvider>
   );
 }
@@ -172,37 +196,37 @@ describe('ServiceSettingsStep — global region lock', () => {
     policyIdsByInstance?: Record<string, string>;
     serviceStatuses?: Record<string, string>;
   }) {
-    (useOnboardingFlow as jest.Mock).mockReturnValue({
+    (useOnboardingFlow as Mock).mockReturnValue({
       awsServicesMap: new Map(),
       detectAndReviewStep: {
         policyIdsByInstance: detectAndReviewStep.policyIdsByInstance ?? {},
         serviceStatuses: detectAndReviewStep.serviceStatuses ?? {},
       },
     });
-    (useServiceSettings as jest.Mock).mockReturnValue({
+    (useServiceSettings as Mock).mockReturnValue({
       globalRegion: 'us-east-1',
-      setGlobalRegion: jest.fn(),
+      setGlobalRegion: vi.fn(),
       instances: [],
       filteredInstances: [],
       incompleteInstances: [],
       incompleteInstanceIds: new Set(),
       searchQuery: '',
-      setSearchQuery: jest.fn(),
+      setSearchQuery: vi.fn(),
       signalFilter: 'all',
-      setSignalFilter: jest.fn(),
-      getServiceVars: jest.fn().mockReturnValue({ enabledDataStreams: [], varsByDataStream: {} }),
-      setServiceFieldsAndInputs: jest.fn(),
-      addDuplicate: jest.fn(),
-      removeInstance: jest.fn(),
+      setSignalFilter: vi.fn(),
+      getServiceVars: vi.fn().mockReturnValue({ enabledDataStreams: [], varsByDataStream: {} }),
+      setServiceFieldsAndInputs: vi.fn(),
+      addDuplicate: vi.fn(),
+      removeInstance: vi.fn(),
       allInstanceNames: [],
       globalRegionTouched: false,
-      setGlobalRegionTouched: jest.fn(),
+      setGlobalRegionTouched: vi.fn(),
       isReady: true,
-      handleNext: jest.fn(),
+      handleNext: vi.fn(),
     });
     render(
       <I18nProvider>
-        <ServiceSettingsStep onContinue={jest.fn()} />
+        <ServiceSettingsStep onContinue={vi.fn()} />
       </I18nProvider>
     );
   }

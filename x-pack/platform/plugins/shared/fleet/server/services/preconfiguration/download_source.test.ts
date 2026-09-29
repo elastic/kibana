@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { downloadSourceService } from '../download_source';
@@ -15,13 +18,13 @@ import {
   ensurePreconfiguredDownloadSources,
 } from './download_source';
 
-jest.mock('../download_source');
-jest.mock('../agent_policy');
+vi.mock('../download_source');
+vi.mock('../agent_policy');
 
-const mockedDownloadSourceService = downloadSourceService as jest.Mocked<
+const mockedDownloadSourceService = downloadSourceService as Mocked<
   typeof downloadSourceService
 >;
-const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
 
 describe('getPreconfiguredDownloadSourcesFromConfig', () => {
   it('should return empty array when config is undefined', () => {
@@ -102,7 +105,7 @@ describe('ensurePreconfiguredDownloadSources', () => {
   const esClient = elasticsearchServiceMock.createInternalClient();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedAgentPolicyService.bumpAllAgentPoliciesForDownloadSource.mockResolvedValue(
       undefined as any
     );

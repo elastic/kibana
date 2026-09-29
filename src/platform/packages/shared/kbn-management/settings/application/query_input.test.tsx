@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { Query } from '@elastic/eui';
 import { screen } from '@testing-library/react';
@@ -28,18 +30,18 @@ const categories = Object.keys(
 );
 
 beforeAll(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 });
 
 afterAll(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
-const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
 describe('Search', () => {
   it('should render normally', async () => {
@@ -50,7 +52,7 @@ describe('Search', () => {
   });
 
   it('should call parent function when query is changed', async () => {
-    const onQueryChange = jest.fn();
+    const onQueryChange = vi.fn();
     renderWithI18n(<QueryInput {...{ categories, query, onQueryChange }} />);
 
     const searchBar = screen.getByTestId('settingsSearchBar');
@@ -60,7 +62,7 @@ describe('Search', () => {
   });
 
   it('should handle query parse error', async () => {
-    const onQueryChange = jest.fn();
+    const onQueryChange = vi.fn();
     renderWithI18n(<QueryInput {...{ categories, query }} onQueryChange={onQueryChange} />);
 
     const searchBar = screen.getByTestId('settingsSearchBar');

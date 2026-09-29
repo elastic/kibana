@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import { ExecutionStatus } from '@kbn/workflows';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import type { StepExecutionsDataClient } from './data_access_layer';
@@ -18,7 +20,7 @@ import { StepExecutionRepository } from './step_execution_repository';
 
 describe('StepExecutionRepository', () => {
   let underTest: StepExecutionRepository;
-  let stepExecutionsDataClient: jest.Mocked<StepExecutionsDataClient>;
+  let stepExecutionsDataClient: Mocked<StepExecutionsDataClient>;
 
   beforeEach(() => {
     stepExecutionsDataClient = createMockStepDataClient();

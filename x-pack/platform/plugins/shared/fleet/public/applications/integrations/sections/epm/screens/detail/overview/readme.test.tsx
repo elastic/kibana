@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { waitFor } from '@testing-library/dom';
@@ -17,8 +19,8 @@ describe('Readme', () => {
   function render(markdown: string | undefined) {
     const refs = {
       current: {
-        set: jest.fn(),
-        get: jest.fn(),
+        set: vi.fn(),
+        get: vi.fn(),
       },
     } as any;
     const testRenderer = createIntegrationsTestRendererMock();

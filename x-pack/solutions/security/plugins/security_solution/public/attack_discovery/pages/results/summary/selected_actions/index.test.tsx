@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { SelectedActions } from '.';
 import { render, screen, act } from '@testing-library/react';
@@ -14,57 +16,75 @@ import { TestProviders } from '../../../../../common/mock';
 import { getMockAttackDiscoveryAlerts } from '../../../mock/mock_attack_discovery_alerts';
 import * as i18n from './translations';
 
-jest.mock('../../../../../assistant/use_assistant_availability', () => ({
-  useAssistantAvailability: () => ({
-    hasSearchAILakeConfigurations: true, // This ensures direct call to onConfirm
-  }),
-}));
+vi.mock('../../../../../assistant/use_assistant_availability', () => {
+      const mocked = {
+      useAssistantAvailability: () => ({
+        hasSearchAILakeConfigurations: true, // This ensures direct call to onConfirm
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../use_attack_discovery_bulk', () => ({
-  useAttackDiscoveryBulk: () => ({
-    mutateAsync: jest.fn().mockResolvedValue({}),
-  }),
-}));
+vi.mock('../../../use_attack_discovery_bulk', () => {
+      const mocked = {
+      useAttackDiscoveryBulk: () => ({
+        mutateAsync: vi.fn().mockResolvedValue({}),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../take_action/use_update_alerts_status', () => ({
-  useUpdateAlertsStatus: () => ({
-    mutateAsync: jest.fn().mockResolvedValue({}),
-  }),
-}));
+vi.mock('../../take_action/use_update_alerts_status', () => {
+      const mocked = {
+      useUpdateAlertsStatus: () => ({
+        mutateAsync: vi.fn().mockResolvedValue({}),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../take_action/use_add_to_case', () => ({
-  useAddToCase: () => ({
-    disabled: false,
-    onAddToCase: jest.fn(),
-  }),
-}));
+vi.mock('../../take_action/use_add_to_case', () => {
+      const mocked = {
+      useAddToCase: () => ({
+        disabled: false,
+        onAddToCase: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant', () => ({
-  useViewInAiAssistant: () => ({
-    showAssistantOverlay: jest.fn(),
-    disabled: false,
-    isAssistantVisible: true,
-  }),
-}));
+vi.mock('../../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant', () => {
+      const mocked = {
+      useViewInAiAssistant: () => ({
+        showAssistantOverlay: vi.fn(),
+        disabled: false,
+        isAssistantVisible: true,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
-  () => ({
-    useAlertsPrivileges: () => ({
-      hasAlertsUpdate: true,
-    }),
-  })
+  () => {
+      const mocked = {
+        useAlertsPrivileges: () => ({
+          hasAlertsUpdate: true,
+        }),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 describe('SelectedActions', () => {
   const defaultProps = {
-    refetchFindAttackDiscoveries: jest.fn(),
+    refetchFindAttackDiscoveries: vi.fn(),
     selectedAttackDiscoveries: { '0b8cf9c7-5ba1-49ce-b53d-3cfb06918b60': true },
     selectedConnectorAttackDiscoveries: getMockAttackDiscoveryAlerts(),
-    setSelectedAttackDiscoveries: jest.fn(),
+    setSelectedAttackDiscoveries: vi.fn(),
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders the expected selected discoveries count', () => {
     render(

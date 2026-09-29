@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import {
   createToolHandlerContext,
@@ -24,33 +27,45 @@ import { getInstallableRulesForReview } from '../../../lib/detection_engine/preb
 import { buildMlAuthz } from '../../../lib/machine_learning/authz';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 
-jest.mock(
+vi.mock(
   '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
-  () => ({ createPrebuiltRuleAssetsClient: jest.fn() })
+  () => {
+      const mocked = { createPrebuiltRuleAssetsClient: vi.fn() };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock(
+vi.mock(
   '../../../lib/detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client',
-  () => ({ createPrebuiltRuleObjectsClient: jest.fn() })
+  () => {
+      const mocked = { createPrebuiltRuleObjectsClient: vi.fn() };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock(
+vi.mock(
   '../../../lib/detection_engine/prebuilt_rules/logic/get_installable_rules_for_review',
-  () => ({ getInstallableRulesForReview: jest.fn() })
+  () => {
+      const mocked = { getInstallableRulesForReview: vi.fn() };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock('../../../lib/machine_learning/authz', () => ({
-  buildMlAuthz: jest.fn().mockReturnValue({
-    validateRuleType: jest.fn().mockResolvedValue({ valid: true, message: undefined }),
-  }),
-}));
+vi.mock('../../../lib/machine_learning/authz', () => {
+      const mocked = {
+      buildMlAuthz: vi.fn().mockReturnValue({
+        validateRuleType: vi.fn().mockResolvedValue({ valid: true, message: undefined }),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCreatePrebuiltRuleAssetsClient = jest.mocked(createPrebuiltRuleAssetsClient);
-const mockCreatePrebuiltRuleObjectsClient = jest.mocked(createPrebuiltRuleObjectsClient);
-const mockGetInstallableRulesForReview = jest.mocked(getInstallableRulesForReview);
-const mockBuildMlAuthz = jest.mocked(buildMlAuthz);
+const mockCreatePrebuiltRuleAssetsClient = vi.mocked(createPrebuiltRuleAssetsClient);
+const mockCreatePrebuiltRuleObjectsClient = vi.mocked(createPrebuiltRuleObjectsClient);
+const mockGetInstallableRulesForReview = vi.mocked(getInstallableRulesForReview);
+const mockBuildMlAuthz = vi.mocked(buildMlAuthz);
 
-const mockMl = { mlSystemProvider: jest.fn() } as unknown as Parameters<
+const mockMl = { mlSystemProvider: vi.fn() } as unknown as Parameters<
   typeof createFindPrebuiltRulesInlineTool
 >[0]['ml'];
-const mockLicense = { hasAtLeast: jest.fn() };
+const mockLicense = { hasAtLeast: vi.fn() };
 
 const makeRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
   ({
@@ -76,13 +91,13 @@ const createMockDeps = () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
 
-  mockCoreStart.savedObjects.getScopedClient = jest.fn().mockReturnValue({});
+  mockCoreStart.savedObjects.getScopedClient = vi.fn().mockReturnValue({});
 
   const alertingPlugin = {
-    getRulesClientWithRequest: jest.fn().mockResolvedValue({}),
+    getRulesClientWithRequest: vi.fn().mockResolvedValue({}),
   };
   const licensingPlugin = {
-    getLicense: jest.fn().mockResolvedValue(mockLicense),
+    getLicense: vi.fn().mockResolvedValue(mockLicense),
   };
   const startPlugins: Record<string, unknown> = {
     alerting: alertingPlugin,
@@ -91,17 +106,17 @@ const createMockDeps = () => {
   mockCore.getStartServices.mockResolvedValue([mockCoreStart, startPlugins, {}] as never);
 
   mockCreatePrebuiltRuleAssetsClient.mockReturnValue({
-    fetchLatestAssets: jest.fn(),
-    fetchLatestVersions: jest.fn(),
-    fetchAssetsByVersion: jest.fn(),
-    fetchTagsByVersion: jest.fn(),
-    fetchDeprecatedRules: jest.fn(),
+    fetchLatestAssets: vi.fn(),
+    fetchLatestVersions: vi.fn(),
+    fetchAssetsByVersion: vi.fn(),
+    fetchTagsByVersion: vi.fn(),
+    fetchDeprecatedRules: vi.fn(),
   });
   mockCreatePrebuiltRuleObjectsClient.mockReturnValue({
-    fetchInstalledRulesByIds: jest.fn(),
-    fetchInstalledRules: jest.fn(),
-    fetchInstalledRuleVersionsByIds: jest.fn(),
-    fetchInstalledRuleVersions: jest.fn().mockResolvedValue([]),
+    fetchInstalledRulesByIds: vi.fn(),
+    fetchInstalledRules: vi.fn(),
+    fetchInstalledRuleVersionsByIds: vi.fn(),
+    fetchInstalledRuleVersions: vi.fn().mockResolvedValue([]),
   });
 
   return {
@@ -216,7 +231,7 @@ describe('findPrebuiltRulesSchema', () => {
 
 describe('createFindPrebuiltRulesInlineTool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('has the correct id and type', () => {
@@ -248,9 +263,9 @@ describe('createFindPrebuiltRulesInlineTool', () => {
       mockGetInstallableRulesForReview.mockResolvedValue({ rules: [], total: 0 });
       const savedObjectsClient = { tag: 'so-client' };
       const [coreStart] = await getStartServices();
-      (coreStart.savedObjects.getScopedClient as jest.Mock).mockReturnValue(savedObjectsClient);
+      (coreStart.savedObjects.getScopedClient as Mock).mockReturnValue(savedObjectsClient);
       const builtMlAuthz = {
-        validateRuleType: jest.fn().mockResolvedValue({ valid: true, message: undefined }),
+        validateRuleType: vi.fn().mockResolvedValue({ valid: true, message: undefined }),
       };
       mockBuildMlAuthz.mockReturnValue(builtMlAuthz);
 

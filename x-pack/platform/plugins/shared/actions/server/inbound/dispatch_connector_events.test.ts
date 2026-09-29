@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { dispatchConnectorEvents } from './dispatch_connector_events';
@@ -33,7 +35,7 @@ describe('dispatchConnectorEvents', () => {
   });
 
   it('invokes the registered emitter and returns ok:true', async () => {
-    const emitter: ConnectorEventEmitter = { emit: jest.fn() };
+    const emitter: ConnectorEventEmitter = { emit: vi.fn() };
     await expect(dispatchConnectorEvents({ emitter, params })).resolves.toEqual({
       ok: true,
     });
@@ -42,7 +44,7 @@ describe('dispatchConnectorEvents', () => {
 
   it('returns ok:false when the emitter throws (does not rethrow)', async () => {
     const emitter: ConnectorEventEmitter = {
-      emit: jest.fn().mockRejectedValue(new Error('boom')),
+      emit: vi.fn().mockRejectedValue(new Error('boom')),
     };
     await expect(dispatchConnectorEvents({ emitter, params })).resolves.toEqual({
       ok: false,

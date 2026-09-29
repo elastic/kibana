@@ -7,31 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as filterTransformModule from '@kbn/as-code-filters-transforms';
 import * as sharedTransformsModule from '@kbn/as-code-shared-transforms';
-jest.mock('@kbn/as-code-filters-transforms', () => {
+vi.mock('@kbn/as-code-filters-transforms', async () => {
   return {
     __esModule: true,
-    ...jest.requireActual('@kbn/as-code-filters-transforms'),
+    ...(await vi.importActual('@kbn/as-code-filters-transforms')),
   };
 });
-jest.mock('@kbn/as-code-shared-transforms', () => {
+vi.mock('@kbn/as-code-shared-transforms', async () => {
   return {
     __esModule: true,
-    ...jest.requireActual('@kbn/as-code-shared-transforms'),
+    ...(await vi.importActual('@kbn/as-code-shared-transforms')),
   };
 });
 
 import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformSearchSourceOut } from './transform_search_source_out';
 
-jest.mock('../../../kibana_services', () => ({
-  logger: { warn: jest.fn() },
-}));
+vi.mock('../../../kibana_services', () => {
+      const mocked = {
+      logger: { warn: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('transformSearchSourceOut', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const references = [
@@ -63,7 +68,7 @@ describe('transformSearchSourceOut', () => {
   });
 
   it('drops any invalid filters', () => {
-    const spy = jest
+    const spy = vi
       .spyOn(filterTransformModule, 'fromStoredFilter')
       .mockImplementation((val: any) => {
         // `fromStoredFilter` is **too** type safe so we have to allow invalid filters through
@@ -140,7 +145,7 @@ describe('transformSearchSourceOut', () => {
   });
 
   it('drops invalid query', () => {
-    jest.spyOn(sharedTransformsModule, 'toAsCodeQuery').mockImplementationOnce((val: any) => {
+    vi.spyOn(sharedTransformsModule, 'toAsCodeQuery').mockImplementationOnce((val: any) => {
       // `toAsCodeQuery` is **too** type safe so we have to allow invalid query through
       return val;
     });

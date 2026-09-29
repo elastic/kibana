@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -19,8 +22,8 @@ import { INTEGRATION_ICON_TEST_ID } from '../common/integration_icon';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 
-jest.mock('@kbn/fleet-plugin/public/hooks');
-jest.mock('./table_section_context');
+vi.mock('@kbn/fleet-plugin/public/hooks');
+vi.mock('./table_section_context');
 
 const packages: PackageListItem[] = [
   {
@@ -35,7 +38,7 @@ const packages: PackageListItem[] = [
 
 describe('getIntegrationComponent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return an empty array', () => {
@@ -89,12 +92,12 @@ describe('getIntegrationComponent', () => {
 
 describe('IntegrationIcon', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render integration icon', () => {
-    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
-    (useTableSectionContext as jest.Mock).mockReturnValue({
+    (usePackageIconType as Mock).mockReturnValue('iconType');
+    (useTableSectionContext as Mock).mockReturnValue({
       packages,
       ruleResponse: {},
     });
@@ -107,8 +110,8 @@ describe('IntegrationIcon', () => {
   });
 
   it('should not render icon', () => {
-    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
-    (useTableSectionContext as jest.Mock).mockReturnValue({
+    (usePackageIconType as Mock).mockReturnValue('iconType');
+    (useTableSectionContext as Mock).mockReturnValue({
       packages: [],
       ruleResponse: {},
     });
@@ -123,7 +126,7 @@ describe('IntegrationIcon', () => {
 
 describe('groupStatsRenderer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return array of badges for relatedIntegration field', () => {

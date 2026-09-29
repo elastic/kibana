@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { useControllableState } from './use_controllable_state';
 import { renderHook } from '@testing-library/react';
 
@@ -21,7 +23,7 @@ describe('useControllableState', () => {
 
   it('should call onChange with the correct value with when the state is controlled (`value` and `onChange` both defined)', () => {
     let controlledState = 'propValue';
-    const onChange = jest.fn((newValue) => {
+    const onChange = vi.fn((newValue) => {
       controlledState = newValue;
     });
 
@@ -43,7 +45,7 @@ describe('useControllableState', () => {
   });
 
   it('should call `onChange` with the correct value with when the state is uncontrolled', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const { result } = renderHook(() =>
       useControllableState({
         onChange,
@@ -59,7 +61,7 @@ describe('useControllableState', () => {
   });
 
   it('should not call `onChange` on initial render', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderHook(() =>
       useControllableState({
         value: 'propValue',
@@ -72,7 +74,7 @@ describe('useControllableState', () => {
   });
 
   it('should update the state if the `value` prop changes', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const { result, rerender } = renderHook(
       (props) =>
         useControllableState({

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -15,10 +18,10 @@ import * as Api from '@kbn/securitysolution-list-api';
 import { getListIndexExistSchemaMock } from '../mocks/response/read_list_index_schema.mock';
 import { useReadListIndex } from '.';
 
-jest.mock('@kbn/securitysolution-list-api');
+vi.mock('@kbn/securitysolution-list-api');
 
 const customQueryProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-  const mockLogger = { error: jest.fn(), log: jest.fn(), warn: jest.fn() };
+  const mockLogger = { error: vi.fn(), log: vi.fn(), warn: vi.fn() };
   const queryClient = new QueryClient({ logger: mockLogger });
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 };
@@ -32,7 +35,7 @@ describe('useReadListIndex', () => {
 
   describe('when both indices exist', () => {
     beforeEach(() => {
-      (Api.readListIndex as jest.Mock).mockResolvedValue(getListIndexExistSchemaMock());
+      (Api.readListIndex as Mock).mockResolvedValue(getListIndexExistSchemaMock());
     });
 
     it('returns a response indicating both indices exist', async () => {
@@ -58,10 +61,10 @@ describe('useReadListIndex', () => {
   });
 
   describe('error conditions', () => {
-    let mockOnError: jest.Mock;
+    let mockOnError: Mock;
 
     beforeEach(() => {
-      mockOnError = jest.fn();
+      mockOnError = vi.fn();
     });
 
     it('does not call onError for an expected 404 response', async () => {
@@ -73,7 +76,7 @@ describe('useReadListIndex', () => {
           status_code: 404,
         },
       };
-      (Api.readListIndex as jest.Mock).mockRejectedValue(notFoundError);
+      (Api.readListIndex as Mock).mockRejectedValue(notFoundError);
 
       const { result } = renderHook(
         () =>
@@ -106,7 +109,7 @@ describe('useReadListIndex', () => {
           status_code: 404,
         },
       };
-      (Api.readListIndex as jest.Mock).mockRejectedValue(neitherFoundError);
+      (Api.readListIndex as Mock).mockRejectedValue(neitherFoundError);
 
       const { result } = renderHook(
         () =>
@@ -137,7 +140,7 @@ describe('useReadListIndex', () => {
           status_code: 404,
         },
       };
-      (Api.readListIndex as jest.Mock).mockRejectedValue(neitherFoundError);
+      (Api.readListIndex as Mock).mockRejectedValue(neitherFoundError);
 
       const { result } = renderHook(
         () =>
@@ -168,7 +171,7 @@ describe('useReadListIndex', () => {
           status_code: 404,
         },
       };
-      (Api.readListIndex as jest.Mock).mockRejectedValue(neitherFoundError);
+      (Api.readListIndex as Mock).mockRejectedValue(neitherFoundError);
 
       const { result } = renderHook(
         () =>
@@ -192,7 +195,7 @@ describe('useReadListIndex', () => {
 
     it('calls onError with and returns a generic error', async () => {
       const genericError = new Error('Generic error');
-      (Api.readListIndex as jest.Mock).mockRejectedValue(genericError);
+      (Api.readListIndex as Mock).mockRejectedValue(genericError);
 
       const { result } = renderHook(
         () =>
@@ -225,7 +228,7 @@ describe('useReadListIndex', () => {
           status_code: 404,
         },
       };
-      (Api.readListIndex as jest.Mock).mockRejectedValue(genericNotFoundError);
+      (Api.readListIndex as Mock).mockRejectedValue(genericNotFoundError);
 
       const { result } = renderHook(
         () =>

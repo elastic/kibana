@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
@@ -14,7 +17,7 @@ import {
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { registerInferenceConnectorsUsageCollector } from './inference_connectors_usage_collector';
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('inference_connectors_usage_collector', () => {
   let collector: Collector<unknown>;
@@ -59,8 +62,8 @@ describe('inference_connectors_usage_collector', () => {
       const core = coreMock.createSetup();
       const [coreStart] = await core.getStartServices();
       const esClient = coreStart.elasticsearch.client
-        .asInternalUser as unknown as jest.Mocked<ElasticsearchClient>;
-      (coreStart.savedObjects.getIndexForType as unknown as jest.Mock).mockReturnValue('.kibana_1');
+        .asInternalUser as unknown as Mocked<ElasticsearchClient>;
+      (coreStart.savedObjects.getIndexForType as unknown as Mock).mockReturnValue('.kibana_1');
 
       // @ts-expect-error Partial SearchResponse shape for test
       esClient.search.mockResolvedValueOnce({
@@ -94,8 +97,8 @@ describe('inference_connectors_usage_collector', () => {
       const core = coreMock.createSetup();
       const [coreStart] = await core.getStartServices();
       const esClient = coreStart.elasticsearch.client
-        .asInternalUser as unknown as jest.Mocked<ElasticsearchClient>;
-      (coreStart.savedObjects.getIndexForType as unknown as jest.Mock).mockReturnValue('.kibana_1');
+        .asInternalUser as unknown as Mocked<ElasticsearchClient>;
+      (coreStart.savedObjects.getIndexForType as unknown as Mock).mockReturnValue('.kibana_1');
 
       esClient.search.mockRejectedValueOnce(new Error('boom'));
 

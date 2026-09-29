@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
 import { useUserRelatedHosts } from '.';
 import { useSearchStrategy } from '../../use_search_strategy';
 
-jest.mock('../../use_search_strategy', () => ({
-  useSearchStrategy: jest.fn(),
-}));
+vi.mock('../../use_search_strategy', () => {
+      const mocked = {
+      useSearchStrategy: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
-const mockSearch = jest.fn();
+const mockUseSearchStrategy = useSearchStrategy as Mock;
+const mockSearch = vi.fn();
 
 const defaultProps = {
   userName: 'user1',
@@ -28,12 +34,12 @@ const mockResult = {
   totalCount: 1,
   relatedHosts: [{ host: 'test host', ip: '100.000.XX' }],
   loading: false,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
 };
 
 describe('useUsersRelatedHosts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseSearchStrategy.mockReturnValue({
       loading: false,
       result: {
@@ -41,7 +47,7 @@ describe('useUsersRelatedHosts', () => {
         relatedHosts: mockResult.relatedHosts,
       },
       search: mockSearch,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       inspect: {},
     });
   });

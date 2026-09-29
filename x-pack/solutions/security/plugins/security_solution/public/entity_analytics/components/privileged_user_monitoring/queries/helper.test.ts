@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import type { EsqlQueryOrInvalidFields } from './helpers';
 import { getPrivilegedMonitorUsersJoin, removeInvalidForkBranchesFromESQL } from './helpers';
@@ -52,7 +54,7 @@ describe('removeInvalidForkBranchesFromESQL', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return the original esql if there is no fork command', () => {

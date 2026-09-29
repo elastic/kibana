@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
@@ -16,14 +19,17 @@ import { BehaviorSubject } from 'rxjs';
 import { FlyoutFooter } from './flyout_footer';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
-jest.mock('@kbn/kibana-react-plugin/public');
-jest.mock('@kbn/file-upload', () => ({
-  ...jest.requireActual('@kbn/file-upload'),
-  useFileUploadContext: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/file-upload', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/file-upload')),
+      useFileUploadContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseFileUploadContext = useFileUploadContext as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseFileUploadContext = useFileUploadContext as Mock;
 
 describe('FlyoutFooter', () => {
   let isSaving$: BehaviorSubject<boolean>;
@@ -32,7 +38,7 @@ describe('FlyoutFooter', () => {
   let indexName$: BehaviorSubject<string | null>;
   let mockIndexUpdateService: any;
   let mockFileUploadContext: any;
-  let onClose: jest.Mock;
+  let onClose: Mock;
 
   beforeEach(() => {
     isSaving$ = new BehaviorSubject<boolean>(false);
@@ -48,26 +54,26 @@ describe('FlyoutFooter', () => {
       hasUnsavedChanges$,
       indexName$,
       getIndexName: () => indexName$.getValue(),
-      createIndex: jest.fn().mockResolvedValue({}),
-      flush: jest.fn(),
+      createIndex: vi.fn().mockResolvedValue({}),
+      flush: vi.fn(),
     };
 
     mockFileUploadContext = {
       uploadStatus: { overallImportStatus: STATUS.NOT_STARTED },
-      onImportClick: jest.fn(),
+      onImportClick: vi.fn(),
       canImport: false,
-      setExistingIndexName: jest.fn(),
+      setExistingIndexName: vi.fn(),
     };
 
     mockUseKibana.mockReturnValue({
       services: {
         indexUpdateService: mockIndexUpdateService,
-        notifications: { toasts: { addError: jest.fn() } },
+        notifications: { toasts: { addError: vi.fn() } },
       },
     });
 
     mockUseFileUploadContext.mockReturnValue(mockFileUploadContext);
-    onClose = jest.fn();
+    onClose = vi.fn();
   });
 
   it('calls onClose when the close button is clicked', async () => {

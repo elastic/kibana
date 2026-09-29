@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -46,7 +48,7 @@ function renderColorRanges(props: ColorRangesProps) {
 
 describe('Color Ranges', () => {
   let props: ColorRangesProps;
-  const dispatch = jest.fn();
+  const dispatch = vi.fn();
 
   beforeEach(() => {
     dispatch.mockClear();

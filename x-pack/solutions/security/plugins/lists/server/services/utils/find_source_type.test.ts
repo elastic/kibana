@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getSearchEsListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
@@ -14,11 +16,11 @@ import { findSourceType } from './find_source_type';
 
 describe('find_source_type', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it returns the item ip if it exists', () => {

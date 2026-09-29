@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitWorkflowTimeoutZoneNodeImpl } from '../exit_workflow_timeout_zone_node_impl';
 
@@ -16,7 +18,7 @@ describe('ExitWorkflowTimeoutZoneNodeImpl', () => {
 
   beforeEach(() => {
     wfExecutionRuntimeManagerMock = {
-      navigateToNextNode: jest.fn(),
+      navigateToNextNode: vi.fn(),
     } as unknown as WorkflowExecutionRuntimeManager;
 
     impl = new ExitWorkflowTimeoutZoneNodeImpl(wfExecutionRuntimeManagerMock);

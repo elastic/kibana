@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useGetPackagesQuery } from '../../../../../../../hooks/use_request/epm';
 
 import { useInstalledIntegrations } from './use_installed_integrations';
 
-jest.mock('../../../../../../../hooks/use_request/epm');
+vi.mock('../../../../../../../hooks/use_request/epm');
 
 describe('useInstalledIntegrations', () => {
   beforeEach(() => {
-    jest.mocked(useGetPackagesQuery).mockReturnValue({
+    vi.mocked(useGetPackagesQuery).mockReturnValue({
       data: {
         items: [
           {
@@ -163,7 +165,7 @@ describe('useInstalledIntegrations', () => {
   });
 
   it('should compute pending_upgrade_review status when keep_policies_up_to_date is true', () => {
-    jest.mocked(useGetPackagesQuery).mockReturnValue({
+    vi.mocked(useGetPackagesQuery).mockReturnValue({
       data: {
         items: [
           {
@@ -199,7 +201,7 @@ describe('useInstalledIntegrations', () => {
   });
 
   it('should compute declined_review status when keep_policies_up_to_date is true', () => {
-    jest.mocked(useGetPackagesQuery).mockReturnValue({
+    vi.mocked(useGetPackagesQuery).mockReturnValue({
       data: {
         items: [
           {
@@ -235,7 +237,7 @@ describe('useInstalledIntegrations', () => {
   });
 
   it('should not show review statuses when keep_policies_up_to_date is false', () => {
-    jest.mocked(useGetPackagesQuery).mockReturnValue({
+    vi.mocked(useGetPackagesQuery).mockReturnValue({
       data: {
         items: [
           {

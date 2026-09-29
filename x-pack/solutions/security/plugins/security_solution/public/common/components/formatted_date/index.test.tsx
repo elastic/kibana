@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
@@ -14,9 +17,9 @@ import { TestProviders } from '../../mock';
 import { getEmptyString, getEmptyValue } from '../empty_value';
 import { PreferenceFormattedDate, FormattedDate, FormattedRelativePreferenceDate } from '.';
 
-jest.mock('../../lib/kibana');
-const mockUseDateFormat = useDateFormat as jest.Mock;
-const mockUseTimeZone = useTimeZone as jest.Mock;
+vi.mock('../../lib/kibana');
+const mockUseDateFormat = useDateFormat as Mock;
+const mockUseTimeZone = useTimeZone as Mock;
 
 const isoDateString = '2019-02-25T22:27:05.000Z';
 

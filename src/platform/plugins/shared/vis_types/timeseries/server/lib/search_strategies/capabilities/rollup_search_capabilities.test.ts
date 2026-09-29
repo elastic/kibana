@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Unit } from '@kbn/datemath';
 import type { Panel } from '../../../../common/types';
 import { RollupSearchCapabilities } from './rollup_search_capabilities';
@@ -58,13 +60,13 @@ describe('Rollup Search Capabilities', () => {
     let getSuitableUnit: Unit;
 
     beforeEach(() => {
-      rollupSearchCaps.parseInterval = jest
+      rollupSearchCaps.parseInterval = vi
         .fn()
         .mockImplementationOnce(() => rollupJobInterval)
         .mockImplementationOnce(() => userInterval);
 
-      rollupSearchCaps.convertIntervalToUnit = jest.fn(() => userInterval);
-      rollupSearchCaps.getSuitableUnit = jest.fn(() => getSuitableUnit);
+      rollupSearchCaps.convertIntervalToUnit = vi.fn(() => userInterval);
+      rollupSearchCaps.getSuitableUnit = vi.fn(() => getSuitableUnit);
     });
 
     test('should return 1d as common interval for 5d(user interval) and 1d(rollup interval) - calendar intervals', () => {

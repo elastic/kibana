@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
@@ -28,12 +31,12 @@ const converter: AttachmentConverter<TestItem> = {
 };
 
 describe('addItemsToChat', () => {
-  let openChat: jest.MockedFunction<AgentBuilderPluginStart['openChat']>;
-  let addAttachment: jest.Mock;
+  let openChat: MockedFunction<AgentBuilderPluginStart['openChat']>;
+  let addAttachment: Mock;
 
   beforeEach(() => {
-    openChat = jest.fn();
-    addAttachment = jest.fn();
+    openChat = vi.fn();
+    addAttachment = vi.fn();
   });
 
   it('does nothing when items is empty', () => {

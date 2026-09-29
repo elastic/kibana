@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IEventLogService } from '@kbn/event-log-plugin/server';
 
 import { registerEventLogProvider } from '.';
@@ -15,14 +17,14 @@ describe('registerEventLogProvider', () => {
 
   beforeEach(() => {
     eventLog = {
-      getProviderActionId: jest.fn().mockReturnValue(''),
-      getProviderActionName: jest.fn().mockReturnValue(''),
-      getProviderActions: jest.fn().mockReturnValue([]),
-      getProviderActionsForProvider: jest.fn().mockReturnValue([]),
-      isIndexingEntries: jest.fn().mockReturnValue(true),
-      isLoggingEntries: jest.fn().mockReturnValue(true),
-      isProviderActionRegistered: jest.fn().mockReturnValue(false),
-      registerProviderActions: jest.fn(),
+      getProviderActionId: vi.fn().mockReturnValue(''),
+      getProviderActionName: vi.fn().mockReturnValue(''),
+      getProviderActions: vi.fn().mockReturnValue([]),
+      getProviderActionsForProvider: vi.fn().mockReturnValue([]),
+      isIndexingEntries: vi.fn().mockReturnValue(true),
+      isLoggingEntries: vi.fn().mockReturnValue(true),
+      isProviderActionRegistered: vi.fn().mockReturnValue(false),
+      registerProviderActions: vi.fn(),
     } as unknown as IEventLogService;
   });
 

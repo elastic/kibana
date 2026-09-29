@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, act } from '@testing-library/react';
 
 import { Form, UseField } from '../components';
@@ -18,11 +20,11 @@ import { VALIDATION_TYPES } from '..';
 
 describe('useField() hook', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('field.validate()', () => {
@@ -65,7 +67,7 @@ describe('useField() hook', () => {
           validationType: VALIDATION_TYPES.ARRAY_ITEM,
         });
 
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
 
         validateResponse = await validatePromise;
       });
@@ -109,7 +111,7 @@ describe('useField() hook', () => {
           validationType: VALIDATION_TYPES.ARRAY_ITEM,
         });
 
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
 
         validateResponse = await validatePromise;
       });
@@ -133,7 +135,7 @@ describe('useField() hook', () => {
     });
 
     test('it should only run the FIELD validadtion type when no type is specified', async () => {
-      const validatorFn = jest.fn(() => undefined);
+      const validatorFn = vi.fn(() => undefined);
       const TestForm = getTestForm({
         validations: [
           {
@@ -153,7 +155,7 @@ describe('useField() hook', () => {
           validationType: undefined, // Although not necessary adding it to be explicit
         });
 
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
 
         await validatePromise;
       });
@@ -177,7 +179,7 @@ describe('useField() hook', () => {
       };
 
     test('validates dependent fields on unmount', async () => {
-      const field2ValidatorFn = jest.fn();
+      const field2ValidatorFn = vi.fn();
       const TestForm = getTestForm(
         {
           fieldsToValidateOnChange: ['field1', 'field2'],
@@ -197,7 +199,7 @@ describe('useField() hook', () => {
       rerender(<TestForm showField1={false} showField2={true} />);
 
       await act(async () => {
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
       });
 
       expect(field2ValidatorFn).toHaveBeenCalledTimes(1);

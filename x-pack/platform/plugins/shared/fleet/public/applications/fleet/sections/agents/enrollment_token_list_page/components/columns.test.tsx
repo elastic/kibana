@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
@@ -28,7 +30,7 @@ function renderStatusCell(apiKey: EnrollmentAPIKey) {
   const statusColumn = getColumns({
     agentPoliciesById: {},
     agentPolicies: [],
-    refresh: jest.fn(),
+    refresh: vi.fn(),
   }).find(
     (column): column is EuiTableFieldDataColumnType<EnrollmentAPIKey> =>
       'field' in column && column.field === 'active'

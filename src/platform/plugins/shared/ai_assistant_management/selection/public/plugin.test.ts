@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
@@ -18,7 +20,7 @@ describe('AI Assistant Management Selection Plugin', () => {
   it('uses the correct setting key to get the correct value from uiSettings', async () => {
     const plugin = new AIAssistantManagementPlugin({
       config: {
-        get: jest.fn(),
+        get: vi.fn(),
       },
       env: { packageInfo: { buildFlavor: 'traditional', branch: 'main' } },
     } as unknown as PluginInitializerContext);
@@ -26,15 +28,15 @@ describe('AI Assistant Management Selection Plugin', () => {
     const coreStart = {
       settings: {
         client: {
-          get: jest.fn((key: string) => {
+          get: vi.fn((key: string) => {
             if (key === PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY) {
               return AIAssistantType.Default;
             }
           }),
-          get$: jest.fn(() =>
+          get$: vi.fn(() =>
             new BehaviorSubject<AIAssistantType>(AIAssistantType.Default).asObservable()
           ),
-          isDefault: jest.fn(() => false),
+          isDefault: vi.fn(() => false),
         },
       },
       application: {
@@ -92,7 +94,7 @@ describe('AI Assistant Management Selection Plugin', () => {
 
     const createCoreSetupMock = (): CoreSetup<any, any> =>
       ({
-        getStartServices: jest.fn().mockResolvedValue([{} as any, {} as any, {} as any]),
+        getStartServices: vi.fn().mockResolvedValue([{} as any, {} as any, {} as any]),
       } as any);
 
     const rank: Record<string, number> = {
@@ -122,7 +124,7 @@ describe('AI Assistant Management Selection Plugin', () => {
 
     it('is disabled by default and only enabled for enterprise license', async () => {
       const plugin = new AIAssistantManagementPlugin({
-        config: { get: jest.fn() },
+        config: { get: vi.fn() },
         env: { packageInfo: { buildFlavor: 'traditional', branch: 'main' } },
       } as unknown as PluginInitializerContext);
 
@@ -142,11 +144,11 @@ describe('AI Assistant Management Selection Plugin', () => {
         {
           settings: {
             client: {
-              get: jest.fn(() => AIAssistantType.Default),
-              get$: jest.fn(() =>
+              get: vi.fn(() => AIAssistantType.Default),
+              get$: vi.fn(() =>
                 new BehaviorSubject<AIAssistantType>(AIAssistantType.Default).asObservable()
               ),
-              isDefault: jest.fn(() => false),
+              isDefault: vi.fn(() => false),
             },
           },
           application: applicationCapabilities,
@@ -168,7 +170,7 @@ describe('AI Assistant Management Selection Plugin', () => {
 
     it('remains disabled for platinum license', async () => {
       const plugin = new AIAssistantManagementPlugin({
-        config: { get: jest.fn() },
+        config: { get: vi.fn() },
         env: { packageInfo: { buildFlavor: 'traditional', branch: 'main' } },
       } as unknown as PluginInitializerContext);
 
@@ -187,11 +189,11 @@ describe('AI Assistant Management Selection Plugin', () => {
         {
           settings: {
             client: {
-              get: jest.fn(() => AIAssistantType.Default),
-              get$: jest.fn(() =>
+              get: vi.fn(() => AIAssistantType.Default),
+              get$: vi.fn(() =>
                 new BehaviorSubject<AIAssistantType>(AIAssistantType.Default).asObservable()
               ),
-              isDefault: jest.fn(() => false),
+              isDefault: vi.fn(() => false),
             },
           },
           application: applicationCapabilities,
@@ -206,7 +208,7 @@ describe('AI Assistant Management Selection Plugin', () => {
 
     it('remains disabled for enterprise license when user has no assistant privileges', async () => {
       const plugin = new AIAssistantManagementPlugin({
-        config: { get: jest.fn() },
+        config: { get: vi.fn() },
         env: { packageInfo: { buildFlavor: 'traditional', branch: 'main' } },
       } as unknown as PluginInitializerContext);
 
@@ -225,11 +227,11 @@ describe('AI Assistant Management Selection Plugin', () => {
         {
           settings: {
             client: {
-              get: jest.fn(() => AIAssistantType.Default),
-              get$: jest.fn(() =>
+              get: vi.fn(() => AIAssistantType.Default),
+              get$: vi.fn(() =>
                 new BehaviorSubject<AIAssistantType>(AIAssistantType.Default).asObservable()
               ),
-              isDefault: jest.fn(() => false),
+              isDefault: vi.fn(() => false),
             },
           },
           application: {

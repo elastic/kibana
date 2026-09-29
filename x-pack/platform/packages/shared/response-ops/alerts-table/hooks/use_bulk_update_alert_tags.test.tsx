@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -30,12 +32,12 @@ const wrapper = ({ children }: PropsWithChildren) => {
 
 describe('useBulkUpdateAlertTags', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 
-  const onSuccess = jest.fn();
-  const onError = jest.fn();
+  const onSuccess = vi.fn();
+  const onError = vi.fn();
 
   it('should call the API with correct parameters when adding tags', async () => {
     http.post.mockResolvedValue('success');

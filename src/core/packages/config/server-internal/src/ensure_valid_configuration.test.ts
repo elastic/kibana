@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { configServiceMock } from '@kbn/config-mocks';
 import { ensureValidConfiguration } from './ensure_valid_configuration';
 import { CriticalError } from '@kbn/core-base-server-internal';
@@ -15,7 +17,7 @@ describe('ensureValidConfiguration', () => {
   let configService: ReturnType<typeof configServiceMock.create>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     configService = configServiceMock.create();
 
     configService.validate.mockResolvedValue();

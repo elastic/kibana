@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,12 +14,12 @@ import userEvent from '@testing-library/user-event';
 import { BUTTON_TEST_ID, BUTTON_TEXT_TEST_ID, NewChatByTitle } from '.';
 
 const testProps = {
-  showAssistantOverlay: jest.fn(),
+  showAssistantOverlay: vi.fn(),
 };
 
 describe('NewChatByTitle', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render icon only by default', () => {

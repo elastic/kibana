@@ -5,30 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
 
-jest.mock('../utils/kibana_react');
-jest.mock('@kbn/alerts-ui-shared', () => ({
-  AlertsSearchBar: () => <div />,
-}));
+vi.mock('../utils/kibana_react');
+vi.mock('@kbn/alerts-ui-shared', () => {
+      const mocked = {
+      AlertsSearchBar: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useKibana } = jest.requireMock('../utils/kibana_react');
+const { useKibana } = (await vi.importMock('../utils/kibana_react'));
 
 describe('MaintenanceWindowScopedQuery', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibana.mockReturnValue({
       services: {
         notifications: {
           toasts: {
-            addSuccess: jest.fn(),
-            addDanger: jest.fn(),
+            addSuccess: vi.fn(),
+            addDanger: vi.fn(),
           },
         },
         data: {
@@ -50,8 +55,8 @@ describe('MaintenanceWindowScopedQuery', () => {
         ruleTypeIds={['apm', '.es-query', 'siem.esqlRule']}
         query={''}
         filters={[]}
-        onQueryChange={jest.fn()}
-        onFiltersChange={jest.fn()}
+        onQueryChange={vi.fn()}
+        onFiltersChange={vi.fn()}
       />
     );
     expect(screen.getByTestId('maintenanceWindowScopeQuery')).toBeInTheDocument();
@@ -64,8 +69,8 @@ describe('MaintenanceWindowScopedQuery', () => {
         isEnabled={false}
         query={''}
         filters={[]}
-        onQueryChange={jest.fn()}
-        onFiltersChange={jest.fn()}
+        onQueryChange={vi.fn()}
+        onFiltersChange={vi.fn()}
       />
     );
     expect(screen.queryByTestId('maintenanceWindowScopeQuery')).not.toBeInTheDocument();
@@ -78,8 +83,8 @@ describe('MaintenanceWindowScopedQuery', () => {
         isLoading={true}
         query={''}
         filters={[]}
-        onQueryChange={jest.fn()}
-        onFiltersChange={jest.fn()}
+        onQueryChange={vi.fn()}
+        onFiltersChange={vi.fn()}
       />
     );
     expect(screen.getByTestId('maintenanceWindowScopedQueryLoading')).toBeInTheDocument();

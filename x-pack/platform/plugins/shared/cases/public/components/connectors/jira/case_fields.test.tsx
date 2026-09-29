@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { omit } from 'lodash/fp';
 import { screen, fireEvent, within } from '@testing-library/react';
@@ -20,16 +23,16 @@ import { useGetIssues } from './use_get_issues';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { MockFormWrapperComponent } from '../test_utils';
 
-jest.mock('./use_get_issue_types');
-jest.mock('./use_get_fields_by_issue_type');
-jest.mock('./use_get_issues');
-jest.mock('./use_get_issue');
-jest.mock('../../../common/lib/kibana');
+vi.mock('./use_get_issue_types');
+vi.mock('./use_get_fields_by_issue_type');
+vi.mock('./use_get_issues');
+vi.mock('./use_get_issue');
+vi.mock('../../../common/lib/kibana');
 
-const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
-const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
-const useGetIssuesMock = useGetIssues as jest.Mock;
-const useGetIssueMock = useGetIssue as jest.Mock;
+const useGetIssueTypesMock = useGetIssueTypes as Mock;
+const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as Mock;
+const useGetIssuesMock = useGetIssues as Mock;
+const useGetIssueMock = useGetIssue as Mock;
 
 describe('Jira Fields', () => {
   const useGetIssueTypesResponse = {
@@ -98,7 +101,7 @@ describe('Jira Fields', () => {
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
     useGetIssuesMock.mockReturnValue(useGetIssuesResponse);
     useGetIssueMock.mockReturnValue(useGetIssueResponse);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('all params fields are rendered', async () => {

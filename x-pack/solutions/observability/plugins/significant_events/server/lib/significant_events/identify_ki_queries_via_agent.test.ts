@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { ChatEventType } from '@kbn/agent-builder-common';
@@ -35,7 +37,7 @@ const definition: Streams.WiredStream.Definition = {
 
 describe('executeKIQueryGenerationAgent', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns finalized queries from the latest validation result', async () => {
@@ -48,7 +50,7 @@ describe('executeKIQueryGenerationAgent', () => {
       severity_score: 60,
       features: [{ id: 'feature-1', run_id: 'run-1' }],
     };
-    const executeAgent = jest.fn().mockResolvedValue({
+    const executeAgent = vi.fn().mockResolvedValue({
       events$: of(
         {
           type: ChatEventType.toolResult,
@@ -103,8 +105,8 @@ describe('executeKIQueryGenerationAgent', () => {
     const request = {} as KibanaRequest;
     const agentBuilder = {
       conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({
-          create: jest.fn().mockResolvedValue({ id: 'conversation-1' }),
+        getScopedClient: vi.fn().mockResolvedValue({
+          create: vi.fn().mockResolvedValue({ id: 'conversation-1' }),
         }),
       },
       execution: { executeAgent },
@@ -112,8 +114,8 @@ describe('executeKIQueryGenerationAgent', () => {
     const requestSignal = new AbortController().signal;
     const timeoutSignal = new AbortController().signal;
     const executionSignal = new AbortController().signal;
-    const timeoutSpy = jest.spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
-    const anySpy = jest.spyOn(AbortSignal, 'any').mockReturnValue(executionSignal);
+    const timeoutSpy = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
+    const anySpy = vi.spyOn(AbortSignal, 'any').mockReturnValue(executionSignal);
 
     await expect(
       executeKIQueryGenerationAgent({
@@ -166,7 +168,7 @@ describe('executeKIQueryGenerationAgent', () => {
   });
 
   it('rejects queries finalized for a different target', async () => {
-    const executeAgent = jest.fn().mockResolvedValue({
+    const executeAgent = vi.fn().mockResolvedValue({
       events$: of({
         type: ChatEventType.toolResult,
         data: {
@@ -187,8 +189,8 @@ describe('executeKIQueryGenerationAgent', () => {
     });
     const agentBuilder = {
       conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({
-          create: jest.fn().mockResolvedValue({ id: 'conversation-1' }),
+        getScopedClient: vi.fn().mockResolvedValue({
+          create: vi.fn().mockResolvedValue({ id: 'conversation-1' }),
         }),
       },
       execution: { executeAgent },

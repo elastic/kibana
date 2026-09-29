@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
 import { getIsDataAnonymizable, updateSelectedPromptContext } from '.';
 import type { SelectedPromptContext } from '../../assistant/prompt_context/types';
 
 describe('helpers', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('getIsDataAnonymizable', () => {
     it('returns false for string data', () => {

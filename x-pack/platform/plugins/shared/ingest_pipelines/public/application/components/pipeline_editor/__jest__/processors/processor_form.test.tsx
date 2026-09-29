@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, screen, within } from '@testing-library/react';
 import { renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 describe('Processor: Bytes', () => {
-  let onUpdate: jest.Mock;
+  let onUpdate: Mock;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ httpSetup } = setupEnvironment());
-    onUpdate = jest.fn();
+    onUpdate = vi.fn();
 
     renderProcessorEditor(httpSetup, {
       value: {
         processors: [],
       },
-      onFlyoutOpen: jest.fn(),
+      onFlyoutOpen: vi.fn(),
       onUpdate,
     });
   });

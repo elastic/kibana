@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Fs from 'fs';
 import Path from 'path';
 
@@ -73,7 +75,7 @@ describe('registerBundleRoutes', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
     registerRouteForBundleMock.mockReset();
   });
 
@@ -138,7 +140,7 @@ describe('registerBundleRoutes', () => {
   });
 
   it('registers external plugin bundle route only when standalone bundle exists on disk', () => {
-    jest.spyOn(Fs, 'existsSync').mockReturnValue(false);
+    vi.spyOn(Fs, 'existsSync').mockReturnValue(false);
 
     registerBundleRoutes({
       router,
@@ -156,9 +158,9 @@ describe('registerBundleRoutes', () => {
     );
 
     registerRouteForBundleMock.mockClear();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
 
-    jest.spyOn(Fs, 'existsSync').mockReturnValue(true);
+    vi.spyOn(Fs, 'existsSync').mockReturnValue(true);
 
     registerBundleRoutes({
       router,

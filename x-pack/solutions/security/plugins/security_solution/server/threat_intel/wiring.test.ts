@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -22,23 +25,41 @@ import { createThreatIntelRuntime, setupThreatIntel, startThreatIntel } from './
 
 // Explicit factories rather than automock: these are barrels, and automock does not
 // reliably produce callables for their re-exports.
-jest.mock('./routes', () => ({ registerRoutes: jest.fn() }));
-jest.mock('./setup/bootstrap_threat_intel', () => ({ ensureThreatIntelBootstrap: jest.fn() }));
-jest.mock('./tasks', () => ({
-  PROMOTE_THREAT_INDICATORS_TASK_ID: 'threat_intel:promote_threat_indicators:default',
-  SCRUB_REPORT_CONTENT_TASK_ID: 'threat_intel:scrub_report_content:default',
-  registerPromoteThreatIndicatorsTask: jest.fn(),
-  registerScrubReportContentTask: jest.fn(),
-  schedulePromoteThreatIndicatorsTask: jest.fn(),
-  scheduleScrubReportContentTask: jest.fn(),
-}));
-jest.mock('./workflows/step_types', () => ({ registerThreatIntelWorkflowSteps: jest.fn() }));
-jest.mock('./setup/indicator_alias', () => ({
-  ensureIndicatorAliasForSpace: jest.fn().mockResolvedValue(undefined),
-}));
-jest.mock('../workflows/security_managed_workflows', () => ({
-  reconcileThreatIntelAttributeWorkflowsForSpaces: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./routes', () => {
+      const mocked = { registerRoutes: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./setup/bootstrap_threat_intel', () => {
+      const mocked = { ensureThreatIntelBootstrap: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./tasks', () => {
+      const mocked = {
+      PROMOTE_THREAT_INDICATORS_TASK_ID: 'threat_intel:promote_threat_indicators:default',
+      SCRUB_REPORT_CONTENT_TASK_ID: 'threat_intel:scrub_report_content:default',
+      registerPromoteThreatIndicatorsTask: vi.fn(),
+      registerScrubReportContentTask: vi.fn(),
+      schedulePromoteThreatIndicatorsTask: vi.fn(),
+      scheduleScrubReportContentTask: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./workflows/step_types', () => {
+      const mocked = { registerThreatIntelWorkflowSteps: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./setup/indicator_alias', () => {
+      const mocked = {
+      ensureIndicatorAliasForSpace: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../workflows/security_managed_workflows', () => {
+      const mocked = {
+      reconcileThreatIntelAttributeWorkflowsForSpaces: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /**
  * Everything the pipeline registers. The alertzero-off case asserts every one of these is
@@ -60,8 +81,8 @@ const ALL_REGISTRATIONS = [
 
 const taskManager = () =>
   ({
-    registerTaskDefinitions: jest.fn(),
-    removeIfExists: jest.fn().mockResolvedValue(undefined),
+    registerTaskDefinitions: vi.fn(),
+    removeIfExists: vi.fn().mockResolvedValue(undefined),
   } as never);
 
 const setupDeps = () => ({ taskManager: taskManager(), workflowsExtensions: {} } as never);
@@ -69,10 +90,10 @@ const startDeps = () => ({ taskManager: taskManager() } as never);
 
 describe('threat intel wiring', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (ensureThreatIntelBootstrap as jest.Mock).mockResolvedValue(undefined);
-    (schedulePromoteThreatIndicatorsTask as jest.Mock).mockResolvedValue(undefined);
-    (scheduleScrubReportContentTask as jest.Mock).mockResolvedValue(undefined);
+    vi.clearAllMocks();
+    (ensureThreatIntelBootstrap as Mock).mockResolvedValue(undefined);
+    (schedulePromoteThreatIndicatorsTask as Mock).mockResolvedValue(undefined);
+    (scheduleScrubReportContentTask as Mock).mockResolvedValue(undefined);
   });
 
   describe('alertzero off', () => {
@@ -124,7 +145,7 @@ describe('threat intel wiring', () => {
     it('removes any task left behind by a previous alertzero-on boot', () => {
       const runtime = createThreatIntelRuntime();
       const plugins = startDeps() as unknown as {
-        taskManager: { removeIfExists: jest.Mock };
+        taskManager: { removeIfExists: Mock };
       };
       startThreatIntel({
         alertZeroEnabled: false,
@@ -231,7 +252,7 @@ describe('threat intel wiring', () => {
     // Scheduling is gated on bootstrap: the tasks read and write the same indices, so
     // a failed bootstrap means there is no schema for them to work against.
     it('does not schedule tasks when bootstrap fails', async () => {
-      (ensureThreatIntelBootstrap as jest.Mock).mockRejectedValue(new Error('no cluster'));
+      (ensureThreatIntelBootstrap as Mock).mockRejectedValue(new Error('no cluster'));
       const runtime = createThreatIntelRuntime();
 
       startThreatIntel({

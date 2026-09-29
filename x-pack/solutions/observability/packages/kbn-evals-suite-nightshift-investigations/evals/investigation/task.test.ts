@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
 import { runInvestigation } from './task';
 import { ungradedPlaceholder } from './placeholder';
@@ -32,7 +34,7 @@ it('keeps multi-megabyte conversation evidence out of the persisted score output
     ],
   };
   expect(Buffer.byteLength(JSON.stringify(conversation))).toBeGreaterThan(5 * 1024 * 1024);
-  const fetch = jest
+  const fetch = vi
     .fn()
     .mockResolvedValueOnce({ investigation_id: 'large-investigation' })
     .mockResolvedValueOnce({
@@ -57,7 +59,7 @@ it('keeps multi-megabyte conversation evidence out of the persisted score output
 });
 
 it('bounds an oversized report and failure message while retaining evidence identifiers', async () => {
-  const fetch = jest
+  const fetch = vi
     .fn()
     .mockResolvedValueOnce({ investigation_id: 'large-report' })
     .mockResolvedValueOnce({
@@ -116,7 +118,7 @@ it('executes the manual investigation and preserves the report and references to
       },
     ],
   };
-  const fetch = jest
+  const fetch = vi
     .fn()
     .mockResolvedValueOnce({ investigation_id: 'investigation' })
     .mockResolvedValueOnce({
@@ -152,7 +154,7 @@ it.each([
   'retains failed execution evidence even when workflow details are unavailable (%s)',
   async (error, expectedError) => {
     const conversation = { rounds: [{ trace_id: 'partial-trace', steps: [] }] };
-    const fetch = jest
+    const fetch = vi
       .fn()
       .mockResolvedValueOnce({ investigation_id: 'failed-investigation' })
       .mockResolvedValueOnce({
@@ -185,7 +187,7 @@ it.each([
 
 it('reports an investigation start failure as execution evidence', async () => {
   const output = await runInvestigation(
-    jest.fn().mockRejectedValue(new Error('Service unavailable')),
+    vi.fn().mockRejectedValue(new Error('Service unavailable')),
     example
   );
   expect(output.execution_error).toBe('Service unavailable');
@@ -194,7 +196,7 @@ it('reports an investigation start failure as execution evidence', async () => {
 
 it('bounds a start failure even when no investigation was created', async () => {
   const output = await runInvestigation(
-    jest.fn().mockRejectedValue(new Error('x'.repeat(6 * 1024 * 1024))),
+    vi.fn().mockRejectedValue(new Error('x'.repeat(6 * 1024 * 1024))),
     example
   );
   expect(output.execution_error).toContain('[truncated]');
@@ -203,7 +205,7 @@ it('bounds a start failure even when no investigation was created', async () => 
 });
 
 it('reports a completed investigation without a conversation as an execution error', async () => {
-  const fetch = jest
+  const fetch = vi
     .fn()
     .mockResolvedValueOnce({ investigation_id: 'no-conversation' })
     .mockResolvedValueOnce({ status: 'completed', conclusion: 'Report without trace evidence' });
@@ -213,7 +215,7 @@ it('reports a completed investigation without a conversation as an execution err
 });
 
 it('retains the latest report and conversation when a later poll fails', async () => {
-  const fetch = jest
+  const fetch = vi
     .fn()
     .mockResolvedValueOnce({ investigation_id: 'interrupted-investigation' })
     .mockResolvedValueOnce({
@@ -234,12 +236,12 @@ it('retains the latest report and conversation when a later poll fails', async (
 });
 
 it('bounds polling and retains partial conversation evidence when an investigation times out', async () => {
-  const clock = jest
+  const clock = vi
     .spyOn(Date, 'now')
     .mockReturnValueOnce(0)
     .mockReturnValue(21 * 60_000);
   try {
-    const fetch = jest
+    const fetch = vi
       .fn()
       .mockResolvedValueOnce({ investigation_id: 'slow-investigation' })
       .mockResolvedValueOnce({ status: 'running', conversation_id: 'slow-conversation' })

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { screen, cleanup, act, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -24,11 +27,11 @@ import { TrustedDevicesForm } from './form';
 import { licenseService } from '../../../../../common/hooks/use_license';
 import { useGetTrustedDeviceSuggestions } from '../../hooks/use_get_trusted_device_suggestions';
 
-jest.mock('../../../../../common/components/user_privileges');
-jest.mock('../../../../../common/hooks/use_license', () => {
+vi.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
-    isEnterprise: jest.fn(),
+    isPlatinumPlus: vi.fn(),
+    isEnterprise: vi.fn(),
   };
   return {
     licenseService: licenseServiceInstance,
@@ -38,20 +41,23 @@ jest.mock('../../../../../common/hooks/use_license', () => {
   };
 });
 
-jest.mock('../../hooks/use_get_trusted_device_suggestions');
-jest.mock('../../../../../common/containers/source', () => ({
-  useFetchIndex: jest.fn(),
-}));
+vi.mock('../../hooks/use_get_trusted_device_suggestions');
+vi.mock('../../../../../common/containers/source', () => {
+      const mocked = {
+      useFetchIndex: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useFetchIndex } from '../../../../../common/containers/source';
 
 describe('Trusted devices form', () => {
-  jest.setTimeout(10000);
+  vi.setConfig({ testTimeout: 10000 });
 
   const formPrefix = 'trustedDevices-form';
   let resetHTMLElementOffsetWidth: ReturnType<typeof forceHTMLElementOffsetWidth>;
 
-  let formProps: jest.Mocked<ArtifactFormComponentProps>;
+  let formProps: Mocked<ArtifactFormComponentProps>;
   let mockedContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let latestUpdatedItem: ArtifactFormComponentProps['item'];
@@ -178,12 +184,12 @@ describe('Trusted devices form', () => {
 
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
-    (licenseService.isEnterprise as jest.Mock).mockReturnValue(true);
+    (licenseService.isPlatinumPlus as Mock).mockReturnValue(true);
+    (licenseService.isEnterprise as Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
     latestUpdatedItem = createItem();
 
-    (useFetchIndex as jest.Mock).mockReturnValue([
+    (useFetchIndex as Mock).mockReturnValue([
       false, // isLoading
       {
         indexPatterns: {
@@ -193,7 +199,7 @@ describe('Trusted devices form', () => {
       },
     ]);
 
-    (useGetTrustedDeviceSuggestions as jest.Mock).mockReturnValue({
+    (useGetTrustedDeviceSuggestions as Mock).mockReturnValue({
       data: [],
       isLoading: false,
       isError: false,
@@ -205,10 +211,10 @@ describe('Trusted devices form', () => {
       mode: 'create',
       disabled: false,
       error: undefined,
-      onChange: jest.fn((updates) => {
+      onChange: vi.fn((updates) => {
         latestUpdatedItem = updates.item;
       }),
-    } as unknown as jest.Mocked<ArtifactFormComponentProps>;
+    } as unknown as Mocked<ArtifactFormComponentProps>;
   });
 
   afterEach(() => {
@@ -419,7 +425,7 @@ describe('Trusted devices form', () => {
 
       await userEvent.click(screen.getByRole('option', { name: OPERATOR_TITLES.matches }));
 
-      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCall = (formProps.onChange as Mock).mock.calls.at(-1)?.[0];
       expect(lastCall?.item.entries?.[0]?.type).toBe('wildcard');
     });
 
@@ -435,7 +441,7 @@ describe('Trusted devices form', () => {
         })
       );
 
-      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCall = (formProps.onChange as Mock).mock.calls.at(-1)?.[0];
       expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.PRODUCT_ID);
       expect(lastCall?.item.entries?.[0]?.value).toBe('');
 
@@ -459,7 +465,7 @@ describe('Trusted devices form', () => {
         })
       );
 
-      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCall = (formProps.onChange as Mock).mock.calls.at(-1)?.[0];
       expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.PRODUCT_ID);
       expect(lastCall?.item.entries[0].value).toBe('');
       expect(lastCall?.item.entries[1].field).toBe(TrustedDeviceConditionEntryField.HOST);
@@ -515,7 +521,7 @@ describe('Trusted devices form', () => {
       await userEvent.click(screen.getByRole('option', { name: OS_TITLES[OperatingSystem.MAC] }));
 
       // The only entry was USERNAME, so entries falls back to [defaultDeviceEntry()] → DEVICE_ID with ''
-      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCall = (formProps.onChange as Mock).mock.calls.at(-1)?.[0];
       expect(lastCall?.item.entries).toHaveLength(1);
       expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
       expect(lastCall?.item.entries?.[0]?.value).toBe('');
@@ -535,7 +541,7 @@ describe('Trusted devices form', () => {
       await userEvent.click(screen.getByRole('option', { name: OPERATING_SYSTEM_WINDOWS_AND_MAC }));
 
       // The only entry was USERNAME, so entries falls back to [defaultDeviceEntry()] → DEVICE_ID with ''
-      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCall = (formProps.onChange as Mock).mock.calls.at(-1)?.[0];
       expect(lastCall?.item.entries).toHaveLength(1);
       expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
       expect(lastCall?.item.entries?.[0]?.value).toBe('');
@@ -552,14 +558,14 @@ describe('Trusted devices form', () => {
       rerenderWithLatestProps();
 
       // Clear onChange calls to get only the OS change call
-      (formProps.onChange as jest.Mock).mockClear();
+      (formProps.onChange as Mock).mockClear();
 
       // Change OS to Windows+Mac - HOST field should be preserved
       await openOsCombo();
       await userEvent.click(screen.getByRole('option', { name: OPERATING_SYSTEM_WINDOWS_AND_MAC }));
 
       // Expect field and value to be preserved (no reset for HOST field)
-      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCall = (formProps.onChange as Mock).mock.calls.at(-1)?.[0];
       expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.HOST);
       expect(lastCall?.item.entries?.[0]?.value).toBe('myhost');
     });
@@ -572,7 +578,7 @@ describe('Trusted devices form', () => {
       it('should add a second entry when the AND button is clicked', async () => {
         await userEvent.click(getAndButton());
 
-        const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+        const lastCall = (formProps.onChange as Mock).mock.calls.at(-1)?.[0];
         expect(lastCall?.item.entries).toHaveLength(2);
         expect(lastCall?.item.entries[1]).toMatchObject({
           field: TrustedDeviceConditionEntryField.DEVICE_ID,
@@ -609,7 +615,7 @@ describe('Trusted devices form', () => {
         const secondValueField = getEntryValueField(1);
         await setTextFieldValue(secondValueField, 'my-second-device');
 
-        const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+        const lastCall = (formProps.onChange as Mock).mock.calls.at(-1)?.[0];
         expect(lastCall?.item.entries).toHaveLength(2);
         expect(lastCall?.item.entries[1].value).toBe('my-second-device');
       });
@@ -640,7 +646,7 @@ describe('Trusted devices form', () => {
 
         await userEvent.click(getEntryRemoveButton(0));
 
-        const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+        const lastCall = (formProps.onChange as Mock).mock.calls.at(-1)?.[0];
         expect(lastCall?.item.entries).toHaveLength(1);
         expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.HOST);
         expect(lastCall?.item.entries[0].value).toBe('my-host');
@@ -658,7 +664,7 @@ describe('Trusted devices form', () => {
 
         await userEvent.click(getEntryRemoveButton(1));
 
-        const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+        const lastCall = (formProps.onChange as Mock).mock.calls.at(-1)?.[0];
         expect(lastCall?.item.entries).toHaveLength(1);
         expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
         expect(lastCall?.item.entries[0].value).toBe('first-device');
@@ -712,7 +718,7 @@ describe('Trusted devices form', () => {
       // Trigger an onChange so we can inspect isValid
       await setTextFieldValue(getNameField(), 'My TD');
 
-      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCall = (formProps.onChange as Mock).mock.calls.at(-1)?.[0];
       expect(lastCall?.isValid).toBe(false);
     });
 
@@ -875,7 +881,7 @@ describe('Trusted devices form', () => {
       expect(renderResult.queryByText(INPUT_ERRORS.entryValueEmpty)).toBeTruthy();
 
       // The form should be invalid (both entries are empty)
-      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCall = (formProps.onChange as Mock).mock.calls.at(-1)?.[0];
       expect(lastCall?.isValid).toBe(false);
     });
 
@@ -910,7 +916,7 @@ describe('Trusted devices form', () => {
         )
       ).toBeTruthy();
 
-      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCall = (formProps.onChange as Mock).mock.calls.at(-1)?.[0];
       expect(lastCall?.isValid).toBe(false);
     });
   });
@@ -926,12 +932,12 @@ describe('Trusted devices form', () => {
       });
       await render();
 
-      (formProps.onChange as jest.Mock).mockClear();
+      (formProps.onChange as Mock).mockClear();
 
       await openOsCombo();
       await userEvent.click(screen.getByRole('option', { name: OPERATING_SYSTEM_WINDOWS_AND_MAC }));
 
-      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCall = (formProps.onChange as Mock).mock.calls.at(-1)?.[0];
       expect(lastCall?.item.entries).toHaveLength(2);
       expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
       expect(lastCall?.item.entries[0].value).toBe('dev-1');
@@ -949,12 +955,12 @@ describe('Trusted devices form', () => {
       });
       await render();
 
-      (formProps.onChange as jest.Mock).mockClear();
+      (formProps.onChange as Mock).mockClear();
 
       await openOsCombo();
       await userEvent.click(screen.getByRole('option', { name: OS_TITLES[OperatingSystem.MAC] }));
 
-      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      const lastCall = (formProps.onChange as Mock).mock.calls.at(-1)?.[0];
       // USERNAME entry is removed; only the DEVICE_ID entry survives
       expect(lastCall?.item.entries).toHaveLength(1);
       expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
@@ -977,7 +983,7 @@ describe('Trusted devices form', () => {
 
   describe('Suggestions API gating', () => {
     it('should call suggestions hook with enabled=true when index has fields', async () => {
-      (useFetchIndex as jest.Mock).mockReturnValue([
+      (useFetchIndex as Mock).mockReturnValue([
         false,
         {
           indexPatterns: {
@@ -995,7 +1001,7 @@ describe('Trusted devices form', () => {
     });
 
     it('should call suggestions hook with enabled=false when index has no fields', async () => {
-      (useFetchIndex as jest.Mock).mockReturnValue([
+      (useFetchIndex as Mock).mockReturnValue([
         false,
         {
           indexPatterns: {
@@ -1013,7 +1019,7 @@ describe('Trusted devices form', () => {
     });
 
     it('should call suggestions hook with enabled=false while index is loading', async () => {
-      (useFetchIndex as jest.Mock).mockReturnValue([
+      (useFetchIndex as Mock).mockReturnValue([
         true, // isLoading = true
         {
           indexPatterns: {
@@ -1033,14 +1039,14 @@ describe('Trusted devices form', () => {
 
   describe('Assignment section visibility', () => {
     it('should show assignment section with enterprise license', async () => {
-      (licenseService.isEnterprise as jest.Mock).mockReturnValue(true);
+      (licenseService.isEnterprise as Mock).mockReturnValue(true);
       await render();
 
       expect(renderResult.getByTestId(`${formPrefix}-policySelection`)).toBeTruthy();
     });
 
     it('should hide assignment section with non-enterprise license in create mode', async () => {
-      (licenseService.isEnterprise as jest.Mock).mockReturnValue(false);
+      (licenseService.isEnterprise as Mock).mockReturnValue(false);
       formProps.mode = 'create';
       await render();
 
@@ -1048,7 +1054,7 @@ describe('Trusted devices form', () => {
     });
 
     it('should show assignment section with non-enterprise license in edit mode for by-policy artifacts', async () => {
-      (licenseService.isEnterprise as jest.Mock).mockReturnValue(false);
+      (licenseService.isEnterprise as Mock).mockReturnValue(false);
       formProps.mode = 'edit';
       formProps.item = createItem({
         name: 'existing device',
@@ -1060,7 +1066,7 @@ describe('Trusted devices form', () => {
     });
 
     it('should hide assignment section with non-enterprise license in edit mode for global artifacts', async () => {
-      (licenseService.isEnterprise as jest.Mock).mockReturnValue(false);
+      (licenseService.isEnterprise as Mock).mockReturnValue(false);
       formProps.mode = 'edit';
       formProps.item = createItem({
         name: 'existing device',

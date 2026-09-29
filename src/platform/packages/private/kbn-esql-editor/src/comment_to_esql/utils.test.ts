@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { monaco } from '@kbn/code-editor';
 import {
   findTargetComment,
@@ -18,9 +21,9 @@ import {
 const buildModel = (lines: string[], options?: { isDisposed?: boolean }) => {
   const isDisposed = options?.isDisposed ?? false;
   return {
-    getLineContent: jest.fn((lineNumber: number) => lines[lineNumber - 1] ?? ''),
-    getLineCount: jest.fn(() => lines.length),
-    isDisposed: jest.fn(() => isDisposed),
+    getLineContent: vi.fn((lineNumber: number) => lines[lineNumber - 1] ?? ''),
+    getLineCount: vi.fn(() => lines.length),
+    isDisposed: vi.fn(() => isDisposed),
   } as unknown as monaco.editor.ITextModel;
 };
 
@@ -103,7 +106,7 @@ describe('comment_to_esql/utils', () => {
   describe('insertGeneratedCode', () => {
     const buildEditor = () =>
       ({
-        executeEdits: jest.fn(),
+        executeEdits: vi.fn(),
       } as unknown as monaco.editor.IStandaloneCodeEditor);
 
     it('inserts on the next line and returns the matching range when not on the last line', () => {
@@ -114,7 +117,7 @@ describe('comment_to_esql/utils', () => {
 
       expect(result).toEqual({ generatedLineStart: 2, generatedLineEnd: 3 });
       expect(editor.executeEdits).toHaveBeenCalledTimes(1);
-      const [, edits] = (editor.executeEdits as jest.Mock).mock.calls[0];
+      const [, edits] = (editor.executeEdits as Mock).mock.calls[0];
       expect(edits[0].range).toEqual(new monaco.Range(2, 1, 2, 1));
       expect(edits[0].text).toBe('| LIMIT 10\n| KEEP foo\n');
     });
@@ -125,7 +128,7 @@ describe('comment_to_esql/utils', () => {
 
       insertGeneratedCode(editor, model, 1, '| LIMIT 10');
 
-      const [, edits] = (editor.executeEdits as jest.Mock).mock.calls[0];
+      const [, edits] = (editor.executeEdits as Mock).mock.calls[0];
       expect(edits[0].text).toBe('| LIMIT 10\n');
     });
 
@@ -136,7 +139,7 @@ describe('comment_to_esql/utils', () => {
       const result = insertGeneratedCode(editor, model, 2, '| LIMIT 10\n');
 
       expect(result).toEqual({ generatedLineStart: 3, generatedLineEnd: 3 });
-      const [, edits] = (editor.executeEdits as jest.Mock).mock.calls[0];
+      const [, edits] = (editor.executeEdits as Mock).mock.calls[0];
       // On the last line we insert at the end-of-line column with a leading newline
       expect(edits[0].text).toBe('\n| LIMIT 10\n');
       // Range is at the end of the existing comment line ('// generate'.length === 11, so column 12)

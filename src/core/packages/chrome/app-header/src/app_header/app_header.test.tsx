@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
@@ -154,7 +156,7 @@ describe('AppHeader adapter', () => {
 
   it('adds a feedback item from the registered handler', async () => {
     const chrome = chromeServiceMock.createStartContract();
-    const feedbackHandler = jest.fn();
+    const feedbackHandler = vi.fn();
     chrome.help.getFeedbackHandler$.mockReturnValue(
       new BehaviorSubject<(() => void) | undefined>(feedbackHandler)
     );
@@ -168,7 +170,7 @@ describe('AppHeader adapter', () => {
 
   it('mounts the legacy action menu when no structured menu is provided', () => {
     const chrome = chromeServiceMock.createStartContract();
-    const mount: MountPoint = jest.fn((el) => {
+    const mount: MountPoint = vi.fn((el) => {
       el.setAttribute('data-mounted', 'true');
       return () => el.removeAttribute('data-mounted');
     });
@@ -188,7 +190,7 @@ describe('AppHeader adapter', () => {
 
   it('prefers a structured menu over the legacy action menu', async () => {
     const chrome = chromeServiceMock.createStartContract();
-    const mount: MountPoint = jest.fn((el) => {
+    const mount: MountPoint = vi.fn((el) => {
       el.setAttribute('data-mounted', 'true');
       return () => undefined;
     });
@@ -211,7 +213,7 @@ describe('AppHeader adapter', () => {
               label: 'Settings',
               iconType: 'gear',
               testId: 'settingsMenu',
-              run: jest.fn(),
+              run: vi.fn(),
             },
           ],
         }}

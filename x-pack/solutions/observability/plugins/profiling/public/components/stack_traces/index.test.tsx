@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,62 +16,69 @@ import { AsyncStatus, type AsyncState } from '../../hooks/use_async';
 import type { TopNSubchart } from '../../../common/topn';
 
 // Mock child components
-jest.mock('../stacked_bar_chart', () => ({
-  StackedBarChart: ({ onClick }: { onClick?: (chart: TopNSubchart) => void }) => (
-    <div data-test-subj="stackedBarChart">
-      <button
-        data-test-subj="mockChartClick"
-        onClick={() =>
-          onClick?.({
-            Category: 'test-category',
-            Label: 'Test Label',
-            Percentage: 50,
-            Series: [],
-            Color: '#000000',
-            Index: 0,
-            Metadata: [],
-          })
-        }
-      >
-        Click Chart
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../stacked_bar_chart', () => {
+      const mocked = {
+      StackedBarChart: ({ onClick }: { onClick?: (chart: TopNSubchart) => void }) => (
+        <div data-test-subj="stackedBarChart">
+          <button
+            data-test-subj="mockChartClick"
+            onClick={() =>
+              onClick?.({
+                Category: 'test-category',
+                Label: 'Test Label',
+                Percentage: 50,
+                Series: [],
+                Color: '#000000',
+                Index: 0,
+                Metadata: [],
+              })
+            }
+          >
+            Click Chart
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../chart_grid', () => ({
-  ChartGrid: ({ onChartClick }: { onChartClick?: (chart: TopNSubchart) => void }) => (
-    <div data-test-subj="chartGrid">
-      <button
-        data-test-subj="mockGridChartClick"
-        onClick={() =>
-          onChartClick?.({
-            Category: 'grid-category',
-            Label: 'Grid Label',
-            Percentage: 30,
-            Series: [],
-            Color: '#FF0000',
-            Index: 1,
-            Metadata: [],
-          })
-        }
-      >
-        Click Grid Chart
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../chart_grid', () => {
+      const mocked = {
+      ChartGrid: ({ onChartClick }: { onChartClick?: (chart: TopNSubchart) => void }) => (
+        <div data-test-subj="chartGrid">
+          <button
+            data-test-subj="mockGridChartClick"
+            onClick={() =>
+              onChartClick?.({
+                Category: 'grid-category',
+                Label: 'Grid Label',
+                Percentage: 30,
+                Series: [],
+                Color: '#FF0000',
+                Index: 1,
+                Metadata: [],
+              })
+            }
+          >
+            Click Grid Chart
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../subchart', () => ({
-  SubChart: ({ category }: { category: string }) => (
-    <div data-test-subj="subChart">SubChart: {category}</div>
-  ),
-}));
+vi.mock('../subchart', () => {
+      const mocked = {
+      SubChart: ({ category }: { category: string }) => (
+        <div data-test-subj="subChart">SubChart: {category}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../async_component', () => {
-  const { AsyncStatus: AsyncStatusEnum } = jest.requireActual<{ AsyncStatus: any }>(
-    '../../hooks/use_async'
-  );
+vi.mock('../async_component', async () => {
+  const { AsyncStatus: AsyncStatusEnum } = (await vi.importActual<{ AsyncStatus: any }>('../../hooks/use_async'));
   return {
     AsyncComponent: ({
       children,
@@ -120,9 +129,9 @@ describe('StackTraces', () => {
   const defaultProps = {
     type: TopNType.Traces,
     displayOption: StackTracesDisplayOption.StackTraces,
-    onChangeDisplayOption: jest.fn(),
-    onStackedBarChartBrushEnd: jest.fn(),
-    onChartClick: jest.fn(),
+    onChangeDisplayOption: vi.fn(),
+    onStackedBarChartBrushEnd: vi.fn(),
+    onChartClick: vi.fn(),
     limit: 10,
   };
 
@@ -134,11 +143,11 @@ describe('StackTraces', () => {
     status,
     data,
     error,
-    refresh: jest.fn(),
+    refresh: vi.fn(),
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Loading state', () => {
@@ -217,7 +226,7 @@ describe('StackTraces', () => {
     });
 
     it('calls onChangeDisplayOption when display option is changed', async () => {
-      const onChangeDisplayOption = jest.fn();
+      const onChangeDisplayOption = vi.fn();
       const state = createMockState(AsyncStatus.Settled, { charts: [mockChart] });
       render(
         <StackTraces
@@ -307,7 +316,7 @@ describe('StackTraces', () => {
 
   describe('Show more button', () => {
     it('shows "Show more" button when charts exceed limit and onShowMoreClick is provided', () => {
-      const onShowMoreClick = jest.fn();
+      const onShowMoreClick = vi.fn();
       const state = createMockState(AsyncStatus.Settled, {
         charts: [mockChart, mockOtherChart, mockChart, mockOtherChart],
       });
@@ -321,7 +330,7 @@ describe('StackTraces', () => {
     });
 
     it('does not show "Show more" button when charts do not exceed limit', () => {
-      const onShowMoreClick = jest.fn();
+      const onShowMoreClick = vi.fn();
       const state = createMockState(AsyncStatus.Settled, { charts: [mockChart] });
       render(
         <StackTraces {...defaultProps} state={state} limit={10} onShowMoreClick={onShowMoreClick} />
@@ -344,7 +353,7 @@ describe('StackTraces', () => {
     });
 
     it('calls onShowMoreClick with increased limit when button is clicked', async () => {
-      const onShowMoreClick = jest.fn();
+      const onShowMoreClick = vi.fn();
       const state = createMockState(AsyncStatus.Settled, {
         charts: [mockChart, mockOtherChart, mockChart],
       });
@@ -375,7 +384,7 @@ describe('StackTraces', () => {
     });
 
     it('calls onChartClick when clicking chart in non-Traces type', async () => {
-      const onChartClick = jest.fn();
+      const onChartClick = vi.fn();
       const state = createMockState(AsyncStatus.Settled, { charts: [mockChart] });
       render(
         <StackTraces
@@ -394,7 +403,7 @@ describe('StackTraces', () => {
     });
 
     it('calls onChartClick when clicking grid chart in non-Traces type', async () => {
-      const onChartClick = jest.fn();
+      const onChartClick = vi.fn();
       const state = createMockState(AsyncStatus.Settled, { charts: [mockChart] });
       render(
         <StackTraces
@@ -450,7 +459,7 @@ describe('StackTraces', () => {
 
   describe('Top label calculation', () => {
     it('shows total chart count when onShowMoreClick is provided', () => {
-      const onShowMoreClick = jest.fn();
+      const onShowMoreClick = vi.fn();
       const state = createMockState(AsyncStatus.Settled, {
         charts: [mockChart, mockOtherChart, mockChart],
       });

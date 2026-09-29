@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
@@ -44,8 +46,8 @@ describe('DataSourcePrivileges', () => {
   const baseProps = {
     indexPatterns: [],
     validator: new RoleValidator(),
-    onAdd: jest.fn(),
-    onChange: jest.fn(),
+    onAdd: vi.fn(),
+    onChange: vi.fn(),
     editable: true,
   };
 

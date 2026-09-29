@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
@@ -130,7 +132,7 @@ describe('name column builder', () => {
     });
 
     it('uses custom render function when provided', () => {
-      const customRender = jest.fn(() => React.createElement('span', null, 'Custom'));
+      const customRender = vi.fn(() => React.createElement('span', null, 'Custom'));
       const props: NameColumnProps = { render: customRender };
       const result = buildNameColumn(props, defaultContext) as NameColumn;
 
@@ -140,7 +142,7 @@ describe('name column builder', () => {
     });
 
     it('passes title click handlers through to the rendered name cell', () => {
-      const handleClick = jest.fn();
+      const handleClick = vi.fn();
       const props: NameColumnProps = { onClick: handleClick, shouldUseHref: true };
       const result = buildNameColumn(props, defaultContext) as NameColumn;
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import sinon from 'sinon';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AuthTypeRegistry, registerAuthTypes } from '../auth_types';
@@ -23,20 +26,29 @@ import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_
 import { PFX } from '@kbn/connector-specs/src/auth_types/pfx';
 import type { NormalizedAuthType } from '@kbn/connector-specs';
 
-jest.mock('./get_custom_agents', () => ({
-  getCustomAgents: jest.fn().mockReturnValue({
-    httpAgent: undefined,
-    httpsAgent: undefined,
-  }),
-}));
+vi.mock('./get_custom_agents', () => {
+      const mocked = {
+      getCustomAgents: vi.fn().mockReturnValue({
+        httpAgent: undefined,
+        httpsAgent: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./request_oauth_client_credentials_token', () => ({
-  requestOAuthClientCredentialsToken: jest.fn(),
-}));
+vi.mock('./request_oauth_client_credentials_token', () => {
+      const mocked = {
+      requestOAuthClientCredentialsToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./get_oauth_authorization_code_access_token', () => ({
-  getOAuthAuthorizationCodeAccessToken: jest.fn(),
-}));
+vi.mock('./get_oauth_authorization_code_access_token', () => {
+      const mocked = {
+      getOAuthAuthorizationCodeAccessToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let clock: sinon.SinonFakeTimers;
 
@@ -56,7 +68,7 @@ describe('getAxiosInstance', () => {
   });
   afterAll(() => clock.restore());
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     clock.reset();
   });
 
@@ -311,7 +323,7 @@ describe('getAxiosInstance', () => {
   });
 
   test('returns axios instance configured for oauth client credentials auth when connector token client is undefined', async () => {
-    (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
+    (requestOAuthClientCredentialsToken as Mock).mockResolvedValueOnce({
       tokenType: 'Bearer',
       accessToken: 'brandnewaccesstoken',
       expiresIn: 1000,
@@ -332,7 +344,7 @@ describe('getAxiosInstance', () => {
       },
     });
 
-    expect(requestOAuthClientCredentialsToken as jest.Mock).toHaveBeenCalledWith(
+    expect(requestOAuthClientCredentialsToken as Mock).toHaveBeenCalledWith(
       'https://test/oauth/token',
       logger,
       { clientId: 'my-client-id', clientSecret: 'my-client-secret', scope: 'grant' },
@@ -389,7 +401,7 @@ describe('getAxiosInstance', () => {
       },
     });
 
-    expect(requestOAuthClientCredentialsToken as jest.Mock).not.toHaveBeenCalled();
+    expect(requestOAuthClientCredentialsToken as Mock).not.toHaveBeenCalled();
 
     expect(result).not.toBeUndefined();
     expect(result!.defaults.auth).toBeUndefined();
@@ -559,7 +571,7 @@ describe('getAxiosInstance', () => {
   });
 
   test('401 handler passes tokenResponseOptions to getOAuthAuthorizationCodeAccessToken', async () => {
-    const mockGetToken = getOAuthAuthorizationCodeAccessToken as jest.Mock;
+    const mockGetToken = getOAuthAuthorizationCodeAccessToken as Mock;
     mockGetToken.mockResolvedValue('bearer xoxp-refreshed-token');
 
     const getAxios = getAxiosInstanceWithAuth({
@@ -592,7 +604,7 @@ describe('getAxiosInstance', () => {
     const rejectionHandler = result!.interceptors.response.handlers[0].rejected as Function;
 
     // Mock the retry request so it doesn't make a real HTTP call
-    jest.spyOn(result!, 'request').mockResolvedValue({ status: 200, data: 'ok' });
+    vi.spyOn(result!, 'request').mockResolvedValue({ status: 200, data: 'ok' });
 
     const mock401Error = {
       response: { status: 401 },

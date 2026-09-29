@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { withOptionalSignal } from '.';
 
 type TestFn = ({ number, signal }: { number: number; signal: AbortSignal }) => boolean;
 
 describe('withOptionalSignal', () => {
   it('does not require a signal on the returned function', () => {
-    const fn = jest.fn().mockReturnValue('hello') as TestFn;
+    const fn = vi.fn().mockReturnValue('hello') as TestFn;
 
     const wrappedFn = withOptionalSignal(fn);
 
@@ -19,7 +21,7 @@ describe('withOptionalSignal', () => {
   });
 
   it('will pass a given signal to the wrapped function', () => {
-    const fn = jest.fn().mockReturnValue('hello') as TestFn;
+    const fn = vi.fn().mockReturnValue('hello') as TestFn;
     const { signal } = new AbortController();
 
     const wrappedFn = withOptionalSignal(fn);

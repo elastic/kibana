@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 
@@ -14,12 +16,12 @@ import { SETTINGS_TAB_ID } from '../../settings_flyout/constants';
 
 const defaultProps = {
   isLoading: false,
-  openFlyout: jest.fn(),
+  openFlyout: vi.fn(),
 };
 
 describe('Settings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the settings button with the expected aria-label', () => {

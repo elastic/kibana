@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import axios, { AxiosHeaders } from 'axios';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -19,18 +22,18 @@ import { z as z3 } from '@kbn/zod';
 import type { z } from '@kbn/zod/v4';
 import { SubActionConnector } from './sub_action_connector';
 
-jest.mock('axios');
+vi.mock('axios');
 
-jest.mock('../lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('../lib/axios_utils');
+vi.mock('../lib/axios_utils', async () => {
+  const originalUtils = (await vi.importActual('../lib/axios_utils'));
   return {
     ...originalUtils,
-    request: jest.fn(),
+    request: vi.fn(),
   };
 });
 
-const axiosMock = axios as jest.Mocked<typeof axios>;
-const requestMock = utils.request as jest.Mock;
+const axiosMock = axios as Mocked<typeof axios>;
+const requestMock = utils.request as Mock;
 const createAxiosError = (): AxiosError => {
   const error = new Error() as AxiosError;
   error.isAxiosError = true;
@@ -43,16 +46,16 @@ const createAxiosError = (): AxiosError => {
 };
 
 describe('SubActionConnector', () => {
-  const axiosInstanceMock = jest.fn();
+  const axiosInstanceMock = vi.fn();
   let logger: MockedLogger;
   let services: ReturnType<typeof actionsMock.createServices>;
-  let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
+  let mockedActionsConfig: Mocked<ActionsConfigurationUtilities>;
   let service: TestSubActionConnector;
   let connectorUsageCollector: ConnectorUsageCollector;
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
 
     requestMock.mockReturnValue({ data: { status: 'ok' } });
     axiosMock.create.mockImplementation(() => {

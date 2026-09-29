@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { useLayoutEffect, useRef } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,27 +23,33 @@ import {
 
 import { useStreamsAppFetch } from '../../../../../../hooks/use_streams_app_fetch';
 
-jest.mock('../../../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    dependencies: {
-      start: {
-        streams: {
-          streamsRepositoryClient: { fetch: jest.fn() },
+vi.mock('../../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        dependencies: {
+          start: {
+            streams: {
+              streamsRepositoryClient: { fetch: vi.fn() },
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../hooks/use_streams_app_fetch', () => ({
-  useStreamsAppFetch: jest.fn(() => ({
-    value: undefined,
-    loading: false,
-    refresh: jest.fn(),
-  })),
-}));
+vi.mock('../../../../../../hooks/use_streams_app_fetch', () => {
+      const mocked = {
+      useStreamsAppFetch: vi.fn(() => ({
+        value: undefined,
+        loading: false,
+        refresh: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseStreamsAppFetch = useStreamsAppFetch as unknown as jest.Mock;
+const mockUseStreamsAppFetch = useStreamsAppFetch as unknown as Mock;
 
 const AfterSaveTrigger = () => {
   const { notifyAfterSave } = useLifecycleAfterSave();
@@ -129,11 +138,11 @@ describe('RetentionCard', () => {
     } as any);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseStreamsAppFetch.mockReturnValue({
       value: undefined,
       loading: false,
-      refresh: jest.fn(),
+      refresh: vi.fn(),
     });
   });
 
@@ -147,7 +156,7 @@ describe('RetentionCard', () => {
     });
 
     it('refetches ILM _stats after after-save notification', async () => {
-      const refresh = jest.fn();
+      const refresh = vi.fn();
       mockUseStreamsAppFetch.mockReturnValue({
         value: {
           phases: {
@@ -184,7 +193,7 @@ describe('RetentionCard', () => {
           },
         },
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       const definition = createMockDefinition({
@@ -235,7 +244,7 @@ describe('RetentionCard', () => {
           },
         },
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       const definition: Streams.WiredStream.GetResponse = {
@@ -285,7 +294,7 @@ describe('RetentionCard', () => {
 
   describe('DSL lifecycle', () => {
     it('does not refetch ILM _stats after after-save notification', async () => {
-      const refresh = jest.fn();
+      const refresh = vi.fn();
       mockUseStreamsAppFetch.mockReturnValue({
         value: undefined,
         loading: false,

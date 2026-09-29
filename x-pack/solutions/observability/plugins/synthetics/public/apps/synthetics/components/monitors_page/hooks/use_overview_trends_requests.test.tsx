@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useOverviewTrendsRequests } from './use_overview_trends_requests';
@@ -12,11 +15,14 @@ import { WrappedHelper } from '../../../utils/testing';
 import type { OverviewStatusMetaData } from '../../../../../../common/runtime_types';
 import * as reduxHooks from 'react-redux-v7';
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useDispatch: jest.fn(),
-  useSelector: jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useDispatch: vi.fn(),
+      useSelector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useOverviewTrendsRequests', () => {
   const mockMonitor1 = {
@@ -47,17 +53,17 @@ describe('useOverviewTrendsRequests', () => {
     schedule: '3',
   } as OverviewStatusMetaData;
 
-  let mockDispatch: jest.Mock;
-  let mockUseSelector: jest.SpyInstance;
+  let mockDispatch: Mock;
+  let mockUseSelector: MockInstance;
 
   beforeEach(() => {
-    mockDispatch = jest.fn();
-    mockUseSelector = jest.spyOn(reduxHooks, 'useSelector');
-    jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+    mockDispatch = vi.fn();
+    mockUseSelector = vi.spyOn(reduxHooks, 'useSelector');
+    vi.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createWrapper = () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -20,31 +23,31 @@ import { SHARDED_PACKAGE_POLICY_FIELDS } from './rebalance_writes';
 import type { SyntheticsServerSetup } from '../../types';
 
 beforeEach(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 });
 
 afterEach(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 // The space-scoped SO client is opaque here; we tag it with the namespace it was
 // scoped to so we can assert which space a package policy was written into.
 const makeServer = () => {
-  const asScopedToNamespace = jest.fn((space: string) => {
+  const asScopedToNamespace = vi.fn((space: string) => {
     const client = { __space: space };
     Object.defineProperty(client, 'getCurrentNamespace', { value: () => space });
     return client;
   });
   const unsafeClient = { asScopedToNamespace };
-  const getUnsafeInternalClient = jest.fn(() => unsafeClient);
-  const fleetBulkCreate = jest.fn().mockResolvedValue({ created: [], failed: [] });
-  const fleetBulkUpdate = jest.fn().mockResolvedValue({ updatedPolicies: [], failedPolicies: [] });
-  const fleetGetByIDs = jest.fn().mockResolvedValue([]);
-  const fleetDelete = jest.fn().mockResolvedValue([]);
+  const getUnsafeInternalClient = vi.fn(() => unsafeClient);
+  const fleetBulkCreate = vi.fn().mockResolvedValue({ created: [], failed: [] });
+  const fleetBulkUpdate = vi.fn().mockResolvedValue({ updatedPolicies: [], failedPolicies: [] });
+  const fleetGetByIDs = vi.fn().mockResolvedValue([]);
+  const fleetDelete = vi.fn().mockResolvedValue([]);
   // Serves both the create/edit space routing and the batched bump's
   // agent-policy space lookup; individual tests override as needed.
-  const getByIds = jest.fn().mockResolvedValue([]);
-  const bumpRevision = jest.fn().mockResolvedValue(undefined);
+  const getByIds = vi.fn().mockResolvedValue([]);
+  const bumpRevision = vi.fn().mockResolvedValue(undefined);
 
   const server = {
     logger: loggerMock.create(),
@@ -106,7 +109,7 @@ describe('PackagePolicyService.getByIds', () => {
 });
 
 describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate)', () => {
-  const clientPassedToFleet = (fleetBulkCreate: jest.Mock) => fleetBulkCreate.mock.calls[0][0];
+  const clientPassedToFleet = (fleetBulkCreate: Mock) => fleetBulkCreate.mock.calls[0][0];
 
   it('writes the package policy to the DEFAULT space when the agent policy lives in default and the monitor is in another space', async () => {
     const { server, getByIds, fleetBulkCreate } = makeServer();
@@ -191,7 +194,7 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
         spaceId: DEFAULT_SPACE_ID,
       }),
     ]);
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await vi.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await requests;
 
     expect(fleetBulkCreate).toHaveBeenCalledTimes(2);
@@ -230,7 +233,7 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
       policiesToUpdate: [updatedPolicy],
       spaceId: DEFAULT_SPACE_ID,
     });
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await vi.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await request;
 
     expect(fleetBulkUpdate).toHaveBeenCalledWith(
@@ -255,7 +258,7 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
       policyIdsToDelete: [deletedPolicyId],
       spaceId: DEFAULT_SPACE_ID,
     });
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await vi.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await request;
 
     expect(fleetDelete).toHaveBeenCalledWith(
@@ -289,7 +292,7 @@ describe('PackagePolicyService revision batcher sharing', () => {
         spaceId: DEFAULT_SPACE_ID,
       }),
     ]);
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await vi.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await requests;
 
     expect(fleetBulkCreate).toHaveBeenCalledTimes(2);
@@ -316,7 +319,7 @@ describe('PackagePolicyService revision batcher sharing', () => {
         spaceId: DEFAULT_SPACE_ID,
       }),
     ]);
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await vi.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await requests;
 
     expect(first.bumpRevision).toHaveBeenCalledTimes(1);
@@ -338,7 +341,7 @@ describe('PackagePolicyService.flushPendingAgentPolicyRevisionBumps', () => {
     });
     // Let the package-policy write settle so the bump is queued, but stay
     // inside the debounce window so the timer has not fired.
-    await jest.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(0);
     expect(bumpRevision).not.toHaveBeenCalled();
 
     // Simulates plugin stop() landing before the debounce window elapses.
@@ -365,7 +368,7 @@ describe('PackagePolicyService batched revision bump space resolution', () => {
       newPolicies: [scalablePolicy()],
       spaceId: DEFAULT_SPACE_ID,
     });
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await vi.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await request;
   };
 
@@ -450,7 +453,7 @@ describe('PackagePolicyService.bulkDelete', () => {
 
 describe('PackagePolicyService.listByAgentPolicy', () => {
   const makeListServer = (pages: Array<Array<{ id: string }>>) => {
-    const list = jest.fn(async (_soClient: unknown, { page }: { page: number }) => ({
+    const list = vi.fn(async (_soClient: unknown, { page }: { page: number }) => ({
       items: pages[page - 1] ?? [],
     }));
     const server = {
@@ -516,16 +519,16 @@ describe('PackagePolicyService.listByAgentPolicy', () => {
 
 describe('PackagePolicyService.bulkUpdateInSpace', () => {
   const makeUpdateServer = () => {
-    const asScopedToNamespace = jest.fn((space: string) => {
+    const asScopedToNamespace = vi.fn((space: string) => {
       const client = { __space: space };
       Object.defineProperty(client, 'getCurrentNamespace', { value: () => space });
       return client;
     });
-    const bulkUpdatePartial = jest
+    const bulkUpdatePartial = vi
       .fn()
       .mockResolvedValue({ failedPolicies: [], updatedPolicies: [] });
-    const getByIds = jest.fn().mockResolvedValue([]);
-    const bumpRevision = jest.fn().mockResolvedValue(undefined);
+    const getByIds = vi.fn().mockResolvedValue([]);
+    const bumpRevision = vi.fn().mockResolvedValue(undefined);
     const server = {
       logger: loggerMock.create(),
       fleet: {
@@ -599,7 +602,7 @@ describe('PackagePolicyService.bulkUpdateInSpace', () => {
       policiesToUpdate: [update('m1-loc'), update('m2-loc')],
       spaceId: 'team-x',
     });
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await vi.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await request;
 
     expect(bumpRevision).toHaveBeenCalledTimes(1);
@@ -619,7 +622,7 @@ describe('PackagePolicyService.bulkUpdateInSpace', () => {
       policiesToUpdate: [update('m1-loc', ['ap-ok']), update('m2-loc', ['ap-conflicted'])],
       spaceId: 'team-x',
     });
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await vi.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     const failed = await request;
 
     expect(failed).toHaveLength(1);

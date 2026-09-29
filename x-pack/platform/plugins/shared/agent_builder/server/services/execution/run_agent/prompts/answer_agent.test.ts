@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getStructuredAnswerPrompt } from './answer_agent';
 import { prepareMessages } from '../utils/to_langchain_messages';
 
-jest.mock('../utils/to_langchain_messages', () => ({
-  prepareMessages: jest.fn().mockResolvedValue([['human', 'history']]),
-}));
+vi.mock('../utils/to_langchain_messages', () => {
+      const mocked = {
+      prepareMessages: vi.fn().mockResolvedValue([['human', 'history']]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getStructuredAnswerPrompt', () => {
   const now = new Date().toISOString();
@@ -46,7 +51,7 @@ describe('getStructuredAnswerPrompt', () => {
       },
       experimentalFeatures: { bash: false, skills: false },
       toolManager: {} as any,
-      resultTransformer: jest.fn(),
+      resultTransformer: vi.fn(),
     } as any;
 
     const messages = await getStructuredAnswerPrompt(params);
@@ -88,7 +93,7 @@ describe('getStructuredAnswerPrompt', () => {
       },
       experimentalFeatures: { bash: false, skills: false },
       toolManager: {} as any,
-      resultTransformer: jest.fn(),
+      resultTransformer: vi.fn(),
     } as any;
 
     const messages = await getStructuredAnswerPrompt(params);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { clearPendingLensAttach, getPendingLensAttach, setPendingLensAttach } from './storage';
 import { PENDING_LENS_ATTACH_STORAGE_ID } from './constants';
@@ -17,14 +19,14 @@ const buildStorage = (
   const store: Record<string, unknown> = { ...initial };
   return {
     store,
-    get: jest.fn((key: string) => store[key]),
-    set: jest.fn((key: string, value: unknown) => {
+    get: vi.fn((key: string) => store[key]),
+    set: vi.fn((key: string, value: unknown) => {
       store[key] = value;
     }),
-    remove: jest.fn((key: string) => {
+    remove: vi.fn((key: string) => {
       delete store[key];
     }),
-    clear: jest.fn(() => {
+    clear: vi.fn(() => {
       for (const key of Object.keys(store)) delete store[key];
     }),
   };

@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { errors as EsErrors, type DiagnosticResult } from '@elastic/elasticsearch';
 
 import type { StartTransformsResponseSchema } from '../../api_schemas/start_transforms';
 
 import { startTransforms } from './start_transforms';
 
-const createEsClient = (startTransform: jest.Mock) => ({ transform: { startTransform } } as any);
+const createEsClient = (startTransform: Mock) => ({ transform: { startTransform } } as any);
 
 describe('startTransforms', () => {
   it('returns per-transform timeout results and stops the loop when a request times out', async () => {
-    const startTransform = jest
+    const startTransform = vi
       .fn()
       .mockResolvedValueOnce({})
       .mockRejectedValueOnce(
@@ -36,7 +39,7 @@ describe('startTransforms', () => {
   });
 
   it('returns a failure result with an error body when the request fails without an ES error body', async () => {
-    const startTransform = jest
+    const startTransform = vi
       .fn()
       .mockRejectedValue(new EsErrors.ConnectionError('connection reset'));
 
@@ -53,7 +56,7 @@ describe('startTransforms', () => {
 
   it('passes the ES error body through when present', async () => {
     const esError = { type: 'status_exception', reason: 'cannot start transform' };
-    const startTransform = jest.fn().mockRejectedValue({ meta: { body: { error: esError } } });
+    const startTransform = vi.fn().mockRejectedValue({ meta: { body: { error: esError } } });
 
     const results = (await startTransforms(
       [{ id: 'transform-1' }],

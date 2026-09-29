@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { NEVER, of, throwError } from 'rxjs';
 import { escapeKuery } from '@kbn/es-query';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -18,28 +21,31 @@ import { exportLiveQueryResultsRoute } from './export_live_query_results_route';
 const LIVE_EXPORT_PATH = '/api/osquery/live_queries/{id}/results/{actionId}/_export';
 
 // Mock createExportRouteHandler so we can assert on the params it receives
-jest.mock('../export/create_export_route_handler', () => ({
-  createExportRouteHandler: jest.fn(),
-}));
+vi.mock('../export/create_export_route_handler', () => {
+      const mocked = {
+      createExportRouteHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { createExportRouteHandler } from '../export/create_export_route_handler';
 
-const mockCreateExportRouteHandler = createExportRouteHandler as jest.MockedFunction<
+const mockCreateExportRouteHandler = createExportRouteHandler as MockedFunction<
   typeof createExportRouteHandler
 >;
 
 const createOsqueryContext = (): OsqueryAppContext =>
   ({
     logFactory: { get: () => loggingSystemMock.createLogger() },
-    isCpsActive: jest.fn().mockResolvedValue(false),
+    isCpsActive: vi.fn().mockResolvedValue(false),
     experimentalFeatures: { ...allowedExperimentalValues, exportResults: true },
     security: {} as OsqueryAppContext['security'],
     service: {
-      getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+      getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
       getIntegrationNamespaces: undefined,
     },
-    getStartServices: jest.fn(),
-    config: jest.fn(),
+    getStartServices: vi.fn(),
+    config: vi.fn(),
     telemetryEventsSender: {},
     licensing: {},
   } as unknown as OsqueryAppContext);
@@ -47,7 +53,7 @@ const createOsqueryContext = (): OsqueryAppContext =>
 const buildSearchMock = (
   queries?: Array<{ action_id: string; query: string; ecs_mapping?: Record<string, string> }>
 ) =>
-  jest.fn().mockReturnValue(
+  vi.fn().mockReturnValue(
     of({
       actionDetails: {
         _source: {
@@ -58,11 +64,11 @@ const buildSearchMock = (
   );
 
 describe('exportLiveQueryResultsRoute', () => {
-  let mockHandler: jest.Mock;
+  let mockHandler: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockHandler = jest.fn().mockResolvedValue({ status: 200 });
+    vi.clearAllMocks();
+    mockHandler = vi.fn().mockResolvedValue({ status: 200 });
     mockCreateExportRouteHandler.mockReturnValue(mockHandler);
   });
 
@@ -95,7 +101,7 @@ describe('exportLiveQueryResultsRoute', () => {
     exportLiveQueryResultsRoute(router as never, osqueryContext);
 
     // Retrieve the registered handler function
-    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
       .mock.calls[0][1];
 
     const request = {
@@ -136,7 +142,7 @@ describe('exportLiveQueryResultsRoute', () => {
 
     exportLiveQueryResultsRoute(router as never, osqueryContext);
 
-    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
       .mock.calls[0][1];
 
     const searchMock = buildSearchMock([{ action_id: 'action-abc', query: 'SELECT * FROM users' }]);
@@ -175,7 +181,7 @@ describe('exportLiveQueryResultsRoute', () => {
     const router = httpServiceMock.createRouter();
     exportLiveQueryResultsRoute(router as never, createOsqueryContext());
 
-    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
       .mock.calls[0][1];
 
     const ecsMap = { custom: { field: 'host.name' } };
@@ -220,7 +226,7 @@ describe('exportLiveQueryResultsRoute', () => {
 
     exportLiveQueryResultsRoute(router as never, osqueryContext);
 
-    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
       .mock.calls[0][1];
 
     // actionDetails returns successfully but with a different action_id — mismatch
@@ -257,13 +263,13 @@ describe('exportLiveQueryResultsRoute', () => {
 
     exportLiveQueryResultsRoute(router as never, osqueryContext);
 
-    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
       .mock.calls[0][1];
 
     const context = {
       core: Promise.resolve({}),
       search: Promise.resolve({
-        search: jest.fn().mockReturnValue(throwError(() => new Error('search error'))),
+        search: vi.fn().mockReturnValue(throwError(() => new Error('search error'))),
       }),
     };
 
@@ -292,14 +298,14 @@ describe('exportLiveQueryResultsRoute', () => {
 
     exportLiveQueryResultsRoute(router as never, osqueryContext);
 
-    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
       .mock.calls[0][1];
 
     // An unknown or out-of-space parent id resolves to no actionDetails at all, which must
     // not fall through to the export with a caller-supplied actionId.
     const context = {
       core: Promise.resolve({}),
-      search: Promise.resolve({ search: jest.fn().mockReturnValue(of({})) }),
+      search: Promise.resolve({ search: vi.fn().mockReturnValue(of({})) }),
     };
 
     const request = {
@@ -328,7 +334,7 @@ describe('exportLiveQueryResultsRoute', () => {
 
     exportLiveQueryResultsRoute(router as never, osqueryContext);
 
-    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
       .mock.calls[0][1];
 
     const context = {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -61,7 +63,7 @@ describe('esql notification popover', () => {
   });
 
   it('locks hover actions when opening the popover', async () => {
-    const lockHoverActions = jest.fn();
+    const lockHoverActions = vi.fn();
     const api = {
       ...makeApi([{ esql: 'FROM logs' }]),
       lockHoverActions,
@@ -73,7 +75,7 @@ describe('esql notification popover', () => {
 
   it('unlocks hover actions when closing the popover via the toggle button', async () => {
     const hasLockedHoverActions$ = new BehaviorSubject(false);
-    const lockHoverActions = jest.fn().mockImplementation((lock: boolean) => {
+    const lockHoverActions = vi.fn().mockImplementation((lock: boolean) => {
       hasLockedHoverActions$.next(lock);
     });
     const api = {

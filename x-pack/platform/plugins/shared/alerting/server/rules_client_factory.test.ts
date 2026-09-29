@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import Boom from '@hapi/boom';
 import type { RulesClientFactoryOpts } from './rules_client_factory';
 import { RulesClientFactory } from './rules_client_factory';
@@ -49,36 +52,36 @@ import { asSpaceId } from '@kbn/core-spaces-common';
 import { bulkMarkApiKeysForInvalidation } from './invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ALERTING_CLONE_API_KEY_HEADER } from '../common';
 
-let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+let savedObjectsClient: Mocked<SavedObjectsClientContract>;
 let savedObjectsService: ReturnType<typeof savedObjectsServiceMock.createInternalStartContract>;
 let securityPluginSetup: ReturnType<typeof securityMock.createSetup>;
 let securityPluginStart: ReturnType<typeof securityMock.createStart>;
 let securityService: SecurityStartMock;
 let alertingAuthorization: ReturnType<typeof alertingAuthorizationMock.create>;
 
-let rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts>;
+let rulesClientFactoryParams: Mocked<RulesClientFactoryOpts>;
 let alertingAuthorizationClientFactory: ReturnType<
   typeof alertingAuthorizationClientFactoryMock.createFactory
 >;
 
 let actionsAuthorization: ActionsAuthorizationMock;
-let backfillClient: jest.Mocked<BackfillClient>;
+let backfillClient: Mocked<BackfillClient>;
 let scopedChangeTrackingService: {
-  log: jest.Mock;
-  logBulk: jest.Mock;
-  getHistory: jest.Mock;
+  log: Mock;
+  logBulk: Mock;
+  getHistory: Mock;
 };
 
-jest.mock('./rules_client');
-jest.mock('./authorization/alerting_authorization');
-jest.mock('./invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation');
+vi.mock('./rules_client');
+vi.mock('./authorization/alerting_authorization');
+vi.mock('./invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation');
 
 describe('RulesClientFactory', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     savedObjectsClient = savedObjectsClientMock.create();
-    savedObjectsClient.asScopedToNamespace = jest.fn().mockReturnValue(savedObjectsClient);
+    savedObjectsClient.asScopedToNamespace = vi.fn().mockReturnValue(savedObjectsClient);
     savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
 
     securityPluginSetup = securityMock.createSetup();
@@ -96,17 +99,17 @@ describe('RulesClientFactory', () => {
     const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
     backfillClient = backfillClientMock.create();
     scopedChangeTrackingService = {
-      log: jest.fn(),
-      logBulk: jest.fn(),
-      getHistory: jest.fn(),
+      log: vi.fn(),
+      logBulk: vi.fn(),
+      getHistory: vi.fn(),
     };
 
     rulesClientFactoryParams = {
       logger: loggingSystemMock.create().get(),
       taskManager: taskManagerMock.createStart(),
       ruleTypeRegistry: ruleTypeRegistryMock.create(),
-      getSpaceId: jest.fn(),
-      spaceIdToNamespace: jest.fn(),
+      getSpaceId: vi.fn(),
+      spaceIdToNamespace: vi.fn(),
       maxScheduledPerMinute: 10000,
       minimumScheduleInterval: { value: '1m', enforce: false },
       internalSavedObjectsRepository,
@@ -114,7 +117,7 @@ describe('RulesClientFactory', () => {
       actions: actionsMock.createStart(),
       eventLog: eventLogMock.createStart(),
       changeTrackingService: {
-        asScoped: jest.fn().mockReturnValue(scopedChangeTrackingService),
+        asScoped: vi.fn().mockReturnValue(scopedChangeTrackingService),
       },
       kibanaVersion: '7.10.0',
       authorization:
@@ -123,7 +126,7 @@ describe('RulesClientFactory', () => {
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       securityService: securityServiceMock.createStart(),
-      getAlertIndicesAlias: jest.fn(),
+      getAlertIndicesAlias: vi.fn(),
       alertsService: null,
       shouldGrantUiam: false,
       apiKeyType: ApiKeyType.ES,
@@ -133,7 +136,7 @@ describe('RulesClientFactory', () => {
 
     rulesClientFactoryParams.actions = actionsMock.createStart();
     (
-      rulesClientFactoryParams.actions as jest.Mocked<ActionsStartContract>
+      rulesClientFactoryParams.actions as Mocked<ActionsStartContract>
     ).getActionsAuthorizationWithRequest.mockReturnValue(actionsAuthorization);
     rulesClientFactoryParams.getSpaceId.mockReturnValue(asSpaceId('default'));
     rulesClientFactoryParams.spaceIdToNamespace.mockReturnValue('default');
@@ -179,7 +182,7 @@ describe('RulesClientFactory', () => {
       rulesClientFactoryParams.actions.getActionsAuthorizationWithRequest
     ).toHaveBeenCalledWith(request);
 
-    expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith(
+    expect((await vi.importMock('./rules_client')).RulesClient).toHaveBeenCalledWith(
       expect.objectContaining({
         auditLogger: {
           enabled: true,
@@ -232,7 +235,7 @@ describe('RulesClientFactory', () => {
 
     await factory.create(request, savedObjectsService);
 
-    expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith(
+    expect((await vi.importMock('./rules_client')).RulesClient).toHaveBeenCalledWith(
       expect.objectContaining({
         changeTrackingService: undefined,
       })
@@ -267,7 +270,7 @@ describe('RulesClientFactory', () => {
       'default'
     );
 
-    expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith(
+    expect((await vi.importMock('./rules_client')).RulesClient).toHaveBeenCalledWith(
       expect.objectContaining({
         unsecuredSavedObjectsClient: savedObjectsClient,
         authorization: alertingAuthorization,
@@ -305,7 +308,7 @@ describe('RulesClientFactory', () => {
     const factory = new RulesClientFactory();
     factory.initialize(rulesClientFactoryParams);
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     const userNameResult = await constructorCall.getUserName();
     expect(userNameResult).toEqual(null);
@@ -318,7 +321,7 @@ describe('RulesClientFactory', () => {
       securityService,
     });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     securityService.authc.getCurrentUser.mockReturnValueOnce({
       username: 'bob',
@@ -331,7 +334,7 @@ describe('RulesClientFactory', () => {
     const factory = new RulesClientFactory();
     factory.initialize(rulesClientFactoryParams);
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     const profileUidResult = await constructorCall.getProfileUid();
     expect(profileUidResult).toEqual(null);
@@ -344,7 +347,7 @@ describe('RulesClientFactory', () => {
       securityService,
     });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     securityService.authc.getCurrentUser.mockReturnValueOnce({
       username: 'bob',
@@ -358,7 +361,7 @@ describe('RulesClientFactory', () => {
     const factory = new RulesClientFactory();
     factory.initialize(rulesClientFactoryParams);
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     const actionsClient = await constructorCall.getActionsClient();
     expect(actionsClient).not.toBe(null);
@@ -368,7 +371,7 @@ describe('RulesClientFactory', () => {
     const factory = new RulesClientFactory();
     factory.initialize(rulesClientFactoryParams);
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     const createAPIKeyResult = await constructorCall.createAPIKey('test');
     expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
@@ -382,7 +385,7 @@ describe('RulesClientFactory', () => {
       securityService,
     });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce(null);
     const createAPIKeyResult = await constructorCall.createAPIKey('test');
@@ -402,15 +405,15 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'ApiKey essu_uiam_api_key' },
     });
     await factory.create(requestWithUiam, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     const uiamApiKeys = {
-      grant: jest.fn().mockResolvedValueOnce({
+      grant: vi.fn().mockResolvedValueOnce({
         api_key: 'uiam-key',
         id: 'uiam-id',
         name: 'uiam-name',
       }),
-      invalidate: jest.fn().mockResolvedValueOnce({}),
+      invalidate: vi.fn().mockResolvedValueOnce({}),
     };
     securityService.authc.apiKeys.uiam = uiamApiKeys as never;
     securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce(null);
@@ -439,11 +442,11 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'ApiKey essu_uiam_api_key' },
     });
     await factory.create(requestWithUiam, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     const uiamApiKeys = {
-      grant: jest.fn().mockResolvedValueOnce(null),
-      invalidate: jest.fn(),
+      grant: vi.fn().mockResolvedValueOnce(null),
+      invalidate: vi.fn(),
     };
     securityService.authc.apiKeys.uiam = uiamApiKeys as never;
     securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce(null);
@@ -471,11 +474,11 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'ApiKey essu_uiam_api_key' },
     });
     await factory.create(requestWithUiam, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     const uiamApiKeys = {
-      grant: jest.fn().mockResolvedValueOnce(null),
-      invalidate: jest.fn(),
+      grant: vi.fn().mockResolvedValueOnce(null),
+      invalidate: vi.fn(),
     };
     securityService.authc.apiKeys.uiam = uiamApiKeys as never;
     securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
@@ -513,12 +516,12 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'ApiKey essu_uiam_api_key' },
     });
     await factory.create(requestWithUiam, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     const uiamError = new Error('UIAM service unavailable');
     const uiamApiKeys = {
-      grant: jest.fn().mockRejectedValueOnce(uiamError),
-      invalidate: jest.fn(),
+      grant: vi.fn().mockRejectedValueOnce(uiamError),
+      invalidate: vi.fn(),
     };
     securityService.authc.apiKeys.uiam = uiamApiKeys as never;
     securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
@@ -557,11 +560,11 @@ describe('RulesClientFactory', () => {
     });
     const requestWithoutAuth = mockRouter.createKibanaRequest();
     await factory.create(requestWithoutAuth, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     const uiamApiKeys = {
-      grant: jest.fn(),
-      invalidate: jest.fn(),
+      grant: vi.fn(),
+      invalidate: vi.fn(),
     };
     securityService.authc.apiKeys.uiam = uiamApiKeys as never;
     securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
@@ -599,11 +602,11 @@ describe('RulesClientFactory', () => {
       },
     });
     await factory.create(requestWithNonUiamAuth, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     const uiamApiKeys = {
-      grant: jest.fn(),
-      invalidate: jest.fn(),
+      grant: vi.fn(),
+      invalidate: vi.fn(),
     };
     securityService.authc.apiKeys.uiam = uiamApiKeys as never;
     securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
@@ -640,7 +643,7 @@ describe('RulesClientFactory', () => {
         apiKeyType: ApiKeyType.UIAM,
       });
       await factory.create(request, savedObjectsService);
-      return jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+      return (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
     };
 
     test('throws when uiam.grant throws a generic error', async () => {
@@ -650,8 +653,8 @@ describe('RulesClientFactory', () => {
       const constructorCall = await initializeUiamFactory(requestWithUiam);
 
       const uiamApiKeys = {
-        grant: jest.fn().mockRejectedValueOnce(new Error('UIAM service unavailable')),
-        invalidate: jest.fn(),
+        grant: vi.fn().mockRejectedValueOnce(new Error('UIAM service unavailable')),
+        invalidate: vi.fn(),
       };
       securityService.authc.apiKeys.uiam = uiamApiKeys as never;
 
@@ -668,8 +671,8 @@ describe('RulesClientFactory', () => {
       const constructorCall = await initializeUiamFactory(requestWithUiam);
 
       const uiamApiKeys = {
-        grant: jest.fn().mockResolvedValueOnce(null),
-        invalidate: jest.fn(),
+        grant: vi.fn().mockResolvedValueOnce(null),
+        invalidate: vi.fn(),
       };
       securityService.authc.apiKeys.uiam = uiamApiKeys as never;
 
@@ -688,8 +691,8 @@ describe('RulesClientFactory', () => {
       const constructorCall = await initializeUiamFactory(requestWithNonUiamAuth);
 
       const uiamApiKeys = {
-        grant: jest.fn(),
-        invalidate: jest.fn(),
+        grant: vi.fn(),
+        invalidate: vi.fn(),
       };
       securityService.authc.apiKeys.uiam = uiamApiKeys as never;
       securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
@@ -718,7 +721,7 @@ describe('RulesClientFactory', () => {
       securityPluginStart,
     });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
       api_key: '123',
@@ -750,7 +753,7 @@ describe('RulesClientFactory', () => {
       securityPluginStart,
     });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
       api_key: '123',
@@ -778,7 +781,7 @@ describe('RulesClientFactory', () => {
       securityPluginStart,
     });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     securityService.authc.apiKeys.grantAsInternalUser.mockRejectedValueOnce(
       new Error('TLS disabled')
@@ -801,15 +804,15 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'ApiKey essu_uiam_api_key' },
     });
     await factory.create(requestWithUiam, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     const uiamApiKeys = {
-      grant: jest.fn().mockResolvedValueOnce({
+      grant: vi.fn().mockResolvedValueOnce({
         api_key: 'uiam-key',
         id: 'uiam-id',
         name: 'uiam-name',
       }),
-      invalidate: jest.fn().mockResolvedValueOnce({
+      invalidate: vi.fn().mockResolvedValueOnce({
         invalidated_api_keys: [{ id: 'uiam-id', invalidated: true }],
         previously_invalidated_api_keys: [],
         error_count: 0,
@@ -873,7 +876,7 @@ describe('RulesClientFactory', () => {
     expect(savedObjectsClient.asScopedToNamespace).toHaveBeenCalledWith('custom-space');
 
     // RulesClient should be created with the custom spaceId
-    expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith(
+    expect((await vi.importMock('./rules_client')).RulesClient).toHaveBeenCalledWith(
       expect.objectContaining({
         spaceId: 'custom-space',
       })
@@ -892,7 +895,7 @@ describe('RulesClientFactory', () => {
 
     await factory.create(request, savedObjectsService);
 
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     // Call getActionsClient and verify it uses the request-derived method
     await constructorCall.getActionsClient();
@@ -921,7 +924,7 @@ describe('RulesClientFactory', () => {
 
     await factory.createWithSpaceId(request, savedObjectsService, asSpaceId('custom-space'));
 
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     // Call getActionsClient and verify it uses the space-scoped method
     await constructorCall.getActionsClient();
@@ -956,7 +959,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     expect(() =>
       constructorCall.getAuthenticationAPIKey('test')
@@ -982,7 +985,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     expect(() =>
       constructorCall.getAuthenticationAPIKey('test')
@@ -1009,7 +1012,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     expect(constructorCall.getAuthenticationAPIKey('test')).toEqual({
       apiKeysEnabled: true,
@@ -1043,7 +1046,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     expect(constructorCall.getAuthenticationAPIKey('test')).toEqual({
       apiKeysEnabled: true,
@@ -1072,7 +1075,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     expect(() =>
       constructorCall.getAuthenticationAPIKey('test')
@@ -1108,7 +1111,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     expect(constructorCall.getAuthenticationAPIKey('test')).toEqual({
       apiKeysEnabled: true,
@@ -1131,7 +1134,7 @@ describe('RulesClientFactory', () => {
 
     const request = mockRouter.createKibanaRequest();
     await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     expect(constructorCall.cloneAPIKey).toEqual(expect.any(Function));
   });
@@ -1147,7 +1150,7 @@ describe('RulesClientFactory', () => {
 
     const request = mockRouter.createKibanaRequest();
     await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     expect(constructorCall.cloneApiKeysOnCreate).toBe(false);
   });
@@ -1163,7 +1166,7 @@ describe('RulesClientFactory', () => {
 
     const request = mockRouter.createKibanaRequest();
     await factory.create(request, savedObjectsService, { cloneApiKeysOnCreate: true });
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     expect(constructorCall.cloneApiKeysOnCreate).toBe(true);
   });
@@ -1181,7 +1184,7 @@ describe('RulesClientFactory', () => {
       headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
     });
     await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     expect(constructorCall.cloneApiKeysOnCreate).toBe(true);
   });
@@ -1199,7 +1202,7 @@ describe('RulesClientFactory', () => {
       headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
     });
     await factory.createWithSpaceId(request, savedObjectsService, asSpaceId('other-space'));
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     expect(constructorCall.cloneApiKeysOnCreate).toBe(true);
   });
@@ -1217,7 +1220,7 @@ describe('RulesClientFactory', () => {
       headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
     });
     await factory.create(request, savedObjectsService, { cloneApiKeysOnCreate: false });
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     expect(constructorCall.cloneApiKeysOnCreate).toBe(false);
   });
@@ -1243,7 +1246,7 @@ describe('RulesClientFactory', () => {
       headers: { authorization: `ApiKey ${apiKeyCredentials}` },
     });
     await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     const result = await constructorCall.cloneAPIKey('test-rule-key');
 
@@ -1277,15 +1280,15 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'ApiKey essu_uiam_api_key' },
     });
     await factory.create(requestWithUiam, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     const uiamApiKeys = {
-      grant: jest.fn().mockResolvedValueOnce({
+      grant: vi.fn().mockResolvedValueOnce({
         api_key: 'uiam-key',
         id: 'uiam-id',
         name: 'uiam-name',
       }),
-      invalidate: jest.fn(),
+      invalidate: vi.fn(),
     };
     securityService.authc.apiKeys.uiam = uiamApiKeys as never;
 
@@ -1314,11 +1317,11 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'ApiKey essu_uiam_api_key' },
     });
     await factory.create(requestWithUiam, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     const uiamApiKeys = {
-      grant: jest.fn().mockResolvedValueOnce(null),
-      invalidate: jest.fn(),
+      grant: vi.fn().mockResolvedValueOnce(null),
+      invalidate: vi.fn(),
     };
     securityService.authc.apiKeys.uiam = uiamApiKeys as never;
 
@@ -1347,7 +1350,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     await expect(constructorCall.cloneAPIKey('test-rule-key')).rejects.toThrow(
       'Clone endpoint not available'
@@ -1372,7 +1375,7 @@ describe('RulesClientFactory', () => {
     });
 
     await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     await expect(constructorCall.cloneAPIKey('test-rule-key')).rejects.toThrow(
       'Unable to clone an API key, expected ApiKey authorization scheme but got "Bearer"'
@@ -1393,7 +1396,7 @@ describe('RulesClientFactory', () => {
       headers: { authorization: `ApiKey ${apiKeyCredentials}` },
     });
     await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     securityService.authc.getCurrentUser.mockReturnValueOnce(null);
 
@@ -1413,7 +1416,7 @@ describe('RulesClientFactory', () => {
       headers: { authorization: 'Bearer some-token' },
     });
     await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    const constructorCall = (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
 
     securityService.authc.getCurrentUser.mockReturnValueOnce(null);
 
@@ -1438,7 +1441,7 @@ describe('RulesClientFactory', () => {
         mockRouter.createKibanaRequest({ headers: { authorization: 'Basic non-uiam-caller' } }),
         savedObjectsService
       );
-      return jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+      return (await vi.importMock('./rules_client')).RulesClient.mock.calls[0][0];
     };
 
     test('invalidates ES API key via invalidateAsInternalUser, not the caller-scoped invalidate', async () => {
@@ -1454,9 +1457,9 @@ describe('RulesClientFactory', () => {
 
     test("invalidates UIAM API key with a forged request carrying the rule's own UIAM credential", async () => {
       const constructorCall = await setupFactory({ shouldGrantUiam: true });
-      const uiamInvalidate = jest.fn().mockResolvedValueOnce({});
+      const uiamInvalidate = vi.fn().mockResolvedValueOnce({});
       securityService.authc.apiKeys.uiam = {
-        grant: jest.fn(),
+        grant: vi.fn(),
         invalidate: uiamInvalidate,
       } as never;
 
@@ -1471,9 +1474,9 @@ describe('RulesClientFactory', () => {
 
     test('does not call uiam.invalidate when the stored uiamApiKey is not a UIAM credential', async () => {
       const constructorCall = await setupFactory({ shouldGrantUiam: true });
-      const uiamInvalidate = jest.fn();
+      const uiamInvalidate = vi.fn();
       securityService.authc.apiKeys.uiam = {
-        grant: jest.fn(),
+        grant: vi.fn(),
         invalidate: uiamInvalidate,
       } as never;
 

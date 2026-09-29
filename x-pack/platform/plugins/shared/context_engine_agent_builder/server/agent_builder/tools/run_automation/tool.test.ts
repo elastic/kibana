@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { CONTEXT_ENGINE_RUN_AUTOMATION_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { createRunAutomationTool } from './tool';
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
-  hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
-  hasWorkflowExecutePrivilege: jest.fn().mockResolvedValue(true),
-  hasWorkflowUpdatePrivilege: jest.fn().mockResolvedValue(true),
-}));
+vi.mock('@kbn/agent-builder-tools-base/workflows', () => {
+      const mocked = {
+      hasWorkflowReadPrivilege: vi.fn().mockResolvedValue(true),
+      hasWorkflowExecutePrivilege: vi.fn().mockResolvedValue(true),
+      hasWorkflowUpdatePrivilege: vi.fn().mockResolvedValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const { hasWorkflowReadPrivilege, hasWorkflowExecutePrivilege, hasWorkflowUpdatePrivilege } =
-  jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+  (await vi.importMock('@kbn/agent-builder-tools-base/workflows'));
 
 describe('run_automation tool', () => {
-  const getWorkflowMock = jest.fn();
+  const getWorkflowMock = vi.fn();
 
   const createTool = () =>
     createRunAutomationTool({
@@ -47,7 +52,7 @@ describe('run_automation tool', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     hasWorkflowReadPrivilege.mockResolvedValue(true);
     hasWorkflowExecutePrivilege.mockResolvedValue(true);
     hasWorkflowUpdatePrivilege.mockResolvedValue(true);

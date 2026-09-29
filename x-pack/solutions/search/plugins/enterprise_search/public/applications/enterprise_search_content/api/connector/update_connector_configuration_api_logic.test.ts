@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -14,7 +16,7 @@ import { postConnectorConfiguration } from './update_connector_configuration_api
 describe('updateConnectorConfigurationLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('postConnectorConfiguration', () => {
     it('calls correct api', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { apiIndex, connectorIndex } from '../../__mocks__/view_index.mock';
 import { LogicMounter, mockFlashMessageHelpers } from '../../__mocks__';
 
@@ -79,8 +81,8 @@ describe('IndexViewLogic', () => {
   let resultCachedFetchIndexApiLogic = CachedFetchIndexApiLogic;
   let resultIndexNameLogic = IndexNameLogic;
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
     http.get.mockReturnValueOnce(Promise.resolve({}));
     resultIndexNameLogic = indexNameMount({}, { http });
     apiLogicMount({}, { http });
@@ -130,7 +132,7 @@ describe('IndexViewLogic', () => {
         );
       });
       it('should flash success if recheckFetchIndexLoading', () => {
-        resultIndexViewLogic.actions.resetRecheckIndexLoading = jest.fn();
+        resultIndexViewLogic.actions.resetRecheckIndexLoading = vi.fn();
         resultIndexNameLogic.actions.setIndexName('api');
         resultIndexViewLogic.actions.recheckIndex();
         resultCachedFetchIndexApiLogic.actions.apiSuccess(apiIndex);
@@ -144,7 +146,7 @@ describe('IndexViewLogic', () => {
         // TODO: replace with mounting connectorIndex to FetchIndexApiDirectly to avoid
         // needing to mock out actions unrelated to test called by listeners
         resultCachedFetchIndexApiLogic.actions.apiSuccess(connectorIndex);
-        resultIndexViewLogic.actions.makeStartSyncRequest = jest.fn();
+        resultIndexViewLogic.actions.makeStartSyncRequest = vi.fn();
 
         resultIndexViewLogic.actions.startSync();
         await nextTick();
@@ -196,7 +198,7 @@ describe('IndexViewLogic', () => {
 
   describe('listeners', () => {
     it('calls makeFetchIndexRequest on fetchIndex', () => {
-      resultIndexViewLogic.actions.makeFetchIndexRequest = jest.fn();
+      resultIndexViewLogic.actions.makeFetchIndexRequest = vi.fn();
       IndexNameLogic.actions.setIndexName('indexName');
       resultIndexViewLogic.actions.fetchIndex();
       expect(resultIndexViewLogic.actions.makeFetchIndexRequest).toHaveBeenCalledWith({

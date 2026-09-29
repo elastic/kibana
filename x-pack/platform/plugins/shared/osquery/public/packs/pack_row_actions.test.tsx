@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -15,30 +17,42 @@ import type { PackSavedObject } from './types';
 import type { OsqueryCapabilities } from '../__test_helpers__/create_mock_kibana_services';
 import { ROLE_CAPABILITIES } from '../__test_helpers__/create_mock_kibana_services';
 
-const mockPush = jest.fn();
+const mockPush = vi.fn();
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: mockPush }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => ({ push: mockPush }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = jest.fn();
+const mockUseKibana = vi.fn();
 
-jest.mock('../common/lib/kibana', () => ({
-  ...jest.requireActual('../common/lib/kibana'),
-  useKibana: () => mockUseKibana(),
-}));
+vi.mock('../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../common/lib/kibana')),
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCopyMutateAsync = jest.fn().mockResolvedValue(undefined);
-const mockDeleteMutateAsync = jest.fn().mockResolvedValue(undefined);
+const mockCopyMutateAsync = vi.fn().mockResolvedValue(undefined);
+const mockDeleteMutateAsync = vi.fn().mockResolvedValue(undefined);
 
-jest.mock('./use_copy_pack', () => ({
-  useCopyPack: () => ({ mutateAsync: mockCopyMutateAsync, isLoading: false }),
-}));
+vi.mock('./use_copy_pack', () => {
+      const mocked = {
+      useCopyPack: () => ({ mutateAsync: mockCopyMutateAsync, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_delete_pack', () => ({
-  useDeletePack: () => ({ mutateAsync: mockDeleteMutateAsync, isLoading: false }),
-}));
+vi.mock('./use_delete_pack', () => {
+      const mocked = {
+      useDeletePack: () => ({ mutateAsync: mockDeleteMutateAsync, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const setupKibana = (capabilities: Partial<OsqueryCapabilities> = {}) => {
   mockUseKibana.mockReturnValue({
@@ -84,7 +98,7 @@ const openKebabMenu = () => {
 
 describe('PackRowActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupKibana();
   });
 

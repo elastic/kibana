@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   envCreateDefaultMock,
   configServiceMock,
@@ -79,7 +81,7 @@ describe('getConfigService', () => {
   });
 
   test('attempts to load the config', () => {
-    const mockLoadConfig = jest.fn();
+    const mockLoadConfig = vi.fn();
     rawConfigServiceMock.mockImplementationOnce(() => ({
       loadConfig: mockLoadConfig,
     }));

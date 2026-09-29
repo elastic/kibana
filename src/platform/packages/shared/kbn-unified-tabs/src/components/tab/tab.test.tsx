@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -31,18 +33,18 @@ const tabsSizeConfig = {
 
 describe('Tab', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   it('renders tab', async () => {
-    const onLabelEdited = jest.fn();
-    const onSelect = jest.fn();
-    const onClose = jest.fn();
+    const onLabelEdited = vi.fn();
+    const onSelect = vi.fn();
+    const onClose = vi.fn();
 
     render(
       <Tab
@@ -79,8 +81,8 @@ describe('Tab', () => {
   });
 
   it('can render tab menu items', async () => {
-    const mockClick = jest.fn();
-    const getTabMenuItems = jest.fn(() => [
+    const mockClick = vi.fn();
+    const getTabMenuItems = vi.fn(() => [
       {
         'data-test-subj': 'test-subj',
         name: 'test-name',
@@ -98,9 +100,9 @@ describe('Tab', () => {
         services={servicesMock}
         getTabMenuItems={getTabMenuItems}
         getPreviewData={getPreviewDataMock}
-        onLabelEdited={jest.fn()}
-        onSelect={jest.fn()}
-        onClose={jest.fn()}
+        onLabelEdited={vi.fn()}
+        onSelect={vi.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -120,10 +122,10 @@ describe('Tab', () => {
   });
 
   it('can edit tab label', async () => {
-    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
-    const onLabelEdited = jest.fn();
-    const onSelect = jest.fn();
-    const onClose = jest.fn();
+    const user = userEvent.setup({ delay: null, advanceTimers: vi.advanceTimersByTime });
+    const onLabelEdited = vi.fn();
+    const onSelect = vi.fn();
+    const onClose = vi.fn();
 
     render(
       <Tab
@@ -155,10 +157,10 @@ describe('Tab', () => {
   });
 
   it('can cancel editing of tab label', async () => {
-    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
-    const onLabelEdited = jest.fn();
-    const onSelect = jest.fn();
-    const onClose = jest.fn();
+    const user = userEvent.setup({ delay: null, advanceTimers: vi.advanceTimersByTime });
+    const onLabelEdited = vi.fn();
+    const onSelect = vi.fn();
+    const onClose = vi.fn();
 
     render(
       <Tab
@@ -192,10 +194,10 @@ describe('Tab', () => {
   });
 
   it('can finish editing of tab label on blur', async () => {
-    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
-    const onLabelEdited = jest.fn();
-    const onSelect = jest.fn();
-    const onClose = jest.fn();
+    const user = userEvent.setup({ delay: null, advanceTimers: vi.advanceTimersByTime });
+    const onLabelEdited = vi.fn();
+    const onSelect = vi.fn();
+    const onClose = vi.fn();
 
     render(
       <Tab
@@ -227,10 +229,10 @@ describe('Tab', () => {
   });
 
   it('does not trigger inline editing when disableInlineLabelEditing is true', async () => {
-    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
-    const onLabelEdited = jest.fn();
-    const onSelect = jest.fn();
-    const onClose = jest.fn();
+    const user = userEvent.setup({ delay: null, advanceTimers: vi.advanceTimersByTime });
+    const onLabelEdited = vi.fn();
+    const onSelect = vi.fn();
+    const onClose = vi.fn();
 
     render(
       <Tab
@@ -257,10 +259,10 @@ describe('Tab', () => {
   });
 
   it('shows preview when getPreviewData is set', async () => {
-    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
-    const onLabelEdited = jest.fn();
-    const onSelect = jest.fn();
-    const onClose = jest.fn();
+    const user = userEvent.setup({ delay: null, advanceTimers: vi.advanceTimersByTime });
+    const onLabelEdited = vi.fn();
+    const onSelect = vi.fn();
+    const onClose = vi.fn();
 
     render(
       <Tab
@@ -283,7 +285,7 @@ describe('Tab', () => {
 
     // Fast-forward the preview delay (default is 1250ms)
     act(() => {
-      jest.advanceTimersByTime(1250);
+      vi.advanceTimersByTime(1250);
     });
 
     await waitFor(() => {
@@ -295,10 +297,10 @@ describe('Tab', () => {
   });
 
   it('does not show preview when getPreviewData is not set', async () => {
-    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
-    const onLabelEdited = jest.fn();
-    const onSelect = jest.fn();
-    const onClose = jest.fn();
+    const user = userEvent.setup({ delay: null, advanceTimers: vi.advanceTimersByTime });
+    const onLabelEdited = vi.fn();
+    const onSelect = vi.fn();
+    const onClose = vi.fn();
 
     render(
       <Tab
@@ -320,7 +322,7 @@ describe('Tab', () => {
 
     // Fast-forward the preview delay (default is 1250ms)
     act(() => {
-      jest.advanceTimersByTime(1250);
+      vi.advanceTimersByTime(1250);
     });
 
     await waitFor(() => {
@@ -332,9 +334,9 @@ describe('Tab', () => {
   });
 
   it('shows close button when disableCloseButton is false', () => {
-    const onLabelEdited = jest.fn();
-    const onSelect = jest.fn();
-    const onClose = jest.fn();
+    const onLabelEdited = vi.fn();
+    const onSelect = vi.fn();
+    const onClose = vi.fn();
 
     render(
       <Tab
@@ -356,9 +358,9 @@ describe('Tab', () => {
   });
 
   it('does not show close button when disableCloseButton is true', () => {
-    const onLabelEdited = jest.fn();
-    const onSelect = jest.fn();
-    const onClose = jest.fn();
+    const onLabelEdited = vi.fn();
+    const onSelect = vi.fn();
+    const onClose = vi.fn();
 
     render(
       <Tab
@@ -380,12 +382,12 @@ describe('Tab', () => {
   });
 
   it('renders default menu button when customMenuButton is not provided', () => {
-    const getTabMenuItems = jest.fn(() => [
+    const getTabMenuItems = vi.fn(() => [
       {
         'data-test-subj': 'test-menu-item',
         name: 'test-item',
         label: 'Test Item',
-        onClick: jest.fn(),
+        onClick: vi.fn(),
       },
     ]);
 
@@ -398,9 +400,9 @@ describe('Tab', () => {
         services={servicesMock}
         getTabMenuItems={getTabMenuItems}
         getPreviewData={getPreviewDataMock}
-        onLabelEdited={jest.fn()}
-        onSelect={jest.fn()}
-        onClose={jest.fn()}
+        onLabelEdited={vi.fn()}
+        onSelect={vi.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -415,12 +417,12 @@ describe('Tab', () => {
       ...tabItem,
       customMenuButton: customButton,
     };
-    const getTabMenuItems = jest.fn(() => [
+    const getTabMenuItems = vi.fn(() => [
       {
         'data-test-subj': 'test-menu-item',
         name: 'test-item',
         label: 'Test Item',
-        onClick: jest.fn(),
+        onClick: vi.fn(),
       },
     ]);
 
@@ -433,9 +435,9 @@ describe('Tab', () => {
         services={servicesMock}
         getTabMenuItems={getTabMenuItems}
         getPreviewData={getPreviewDataMock}
-        onLabelEdited={jest.fn()}
-        onSelect={jest.fn()}
-        onClose={jest.fn()}
+        onLabelEdited={vi.fn()}
+        onSelect={vi.fn()}
+        onClose={vi.fn()}
       />
     );
 

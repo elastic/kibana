@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { fireEvent } from '@testing-library/react';
@@ -22,14 +25,14 @@ import type { PerOsDeviceControlNotifyUserOptionProps } from './per_os_device_co
 import { PerOsDeviceControlNotifyUserOption } from './per_os_device_control_notify_user_option';
 import { createDeviceControlPolicyAccessor } from './policy_accessor';
 
-jest.mock('../../../../../../common/hooks/use_license');
+vi.mock('../../../../../../common/hooks/use_license');
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 
 describe('PerOsDeviceControlNotifyUserOption', () => {
   const testSubj = 'perOsDeviceControlNotifyUser';
   let policy: PolicyConfig;
-  let onChange: jest.Mock;
+  let onChange: Mock;
   let mockedContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let hasRendered: boolean;
@@ -76,7 +79,7 @@ describe('PerOsDeviceControlNotifyUserOption', () => {
       enabled: false,
       message: 'Windows message',
     };
-    onChange = jest.fn();
+    onChange = vi.fn();
   });
 
   it('reads checkbox and message from the bound macOS accessor', () => {

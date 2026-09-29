@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
@@ -14,11 +16,11 @@ import userEvent from '@testing-library/user-event';
 import { CustomizeNavigationUserMenuLink } from './customize_navigation_user_menu_link';
 
 describe('CustomizeNavigationUserMenuLink', () => {
-  const closePopover = jest.fn();
-  const onClick = jest.fn();
+  const closePopover = vi.fn();
+  const onClick = vi.fn();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the menu link', () => {

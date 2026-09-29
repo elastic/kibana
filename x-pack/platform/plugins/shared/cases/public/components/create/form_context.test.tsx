@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { waitFor, within, screen, act } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -61,38 +64,38 @@ import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
 import { useGetFieldsResponse } from '../connectors/resilient/mocks';
 import { useSubmitCase } from './use_submit_case';
 
-jest.mock('../../containers/use_post_case');
-jest.mock('../../containers/use_create_attachments');
-jest.mock('../../containers/use_post_push_to_service');
-jest.mock('../../containers/use_get_tags');
-jest.mock('../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../containers/configure/use_get_all_case_configurations');
-jest.mock('../connectors/resilient/use_get_fields');
-jest.mock('../connectors/jira/use_get_issue_types');
-jest.mock('../connectors/jira/use_get_fields_by_issue_type');
-jest.mock('../connectors/jira/use_get_issues');
-jest.mock('../connectors/servicenow/use_get_choices');
-jest.mock('../../common/lib/kibana');
-jest.mock('../../containers/user_profiles/api');
-jest.mock('../../common/use_license');
-jest.mock('../../containers/use_get_categories');
-jest.mock('../app/use_available_owners');
+vi.mock('../../containers/use_post_case');
+vi.mock('../../containers/use_create_attachments');
+vi.mock('../../containers/use_post_push_to_service');
+vi.mock('../../containers/use_get_tags');
+vi.mock('../../containers/configure/use_get_supported_action_connectors');
+vi.mock('../../containers/configure/use_get_all_case_configurations');
+vi.mock('../connectors/resilient/use_get_fields');
+vi.mock('../connectors/jira/use_get_issue_types');
+vi.mock('../connectors/jira/use_get_fields_by_issue_type');
+vi.mock('../connectors/jira/use_get_issues');
+vi.mock('../connectors/servicenow/use_get_choices');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../containers/user_profiles/api');
+vi.mock('../../common/use_license');
+vi.mock('../../containers/use_get_categories');
+vi.mock('../app/use_available_owners');
 
-const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
-const usePostCaseMock = usePostCase as jest.Mock;
-const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
-const usePostPushToServiceMock = usePostPushToService as jest.Mock;
-const useGetFieldsMock = useGetFields as jest.Mock;
-const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
-const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
-const useGetChoicesMock = useGetChoices as jest.Mock;
-const postCase = jest.fn();
-const pushCaseToExternalService = jest.fn();
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const useLicenseMock = useLicense as jest.Mock;
-const useGetCategoriesMock = useGetCategories as jest.Mock;
-const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as Mock;
+const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as Mock;
+const usePostCaseMock = usePostCase as Mock;
+const useCreateAttachmentsMock = useCreateAttachments as Mock;
+const usePostPushToServiceMock = usePostPushToService as Mock;
+const useGetFieldsMock = useGetFields as Mock;
+const useGetIssueTypesMock = useGetIssueTypes as Mock;
+const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as Mock;
+const useGetChoicesMock = useGetChoices as Mock;
+const postCase = vi.fn();
+const pushCaseToExternalService = vi.fn();
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+const useLicenseMock = useLicense as Mock;
+const useGetCategoriesMock = useGetCategories as Mock;
+const useAvailableOwnersMock = useAvailableCasesOwners as Mock;
 
 const sampleId = 'case-id';
 
@@ -185,17 +188,17 @@ const TestComponent = ({
 };
 
 describe('Create case', () => {
-  const refetch = jest.fn();
-  const onFormSubmitSuccess = jest.fn();
-  const afterCaseCreated = jest.fn();
-  const createAttachments = jest.fn();
+  const refetch = vi.fn();
+  const onFormSubmitSuccess = vi.fn();
+  const afterCaseCreated = vi.fn();
+  const createAttachments = vi.fn();
   let user: UserEvent;
 
   // eslint-disable-next-line prefer-object-spread
   const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     // The JSDOM implementation is too slow
     // Especially for dropdowns that try to position themselves
     // perf issue - https://github.com/jsdom/jsdom/issues/3234
@@ -241,12 +244,12 @@ describe('Create case', () => {
     useGetCategoriesMock.mockReturnValue({ isLoading: false, data: categories });
     useAvailableOwnersMock.mockReturnValue(['securitySolution', 'observability', 'cases']);
 
-    (useGetTags as jest.Mock).mockImplementation(() => ({
+    (useGetTags as Mock).mockImplementation(() => ({
       data: sampleTags,
       refetch,
     }));
 
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = vi.fn().mockReturnValue({
       actionTypeTitle: '.servicenow',
       iconClass: 'logoSecurity',
     });
@@ -256,19 +259,19 @@ describe('Create case', () => {
 
   afterAll(() => {
     Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime, pointerEventsCheck: 0 });
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
     sessionStorage.removeItem(defaultCreateCaseForm.draftStorageKey);
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   describe('Step 1 - Case Fields', () => {
@@ -1101,7 +1104,7 @@ describe('Create case', () => {
   });
 
   it('should succeed even when pushing to an external service fails', async () => {
-    const failPushCaseToExternalService = jest.fn().mockRejectedValue(new Error('Push failed'));
+    const failPushCaseToExternalService = vi.fn().mockRejectedValue(new Error('Push failed'));
     usePostPushToServiceMock.mockImplementation(() => ({
       isLoading: false,
       isError: false,
@@ -1189,7 +1192,7 @@ describe('Create case', () => {
       await user.click(assigneesComboBox.getByTestId('comboBoxSearchInput'));
       await user.paste('dr');
       act(() => {
-        jest.advanceTimersByTime(500);
+        vi.advanceTimersByTime(500);
       });
 
       await user.click(await screen.findByText(`${userProfiles[0].user.full_name}`));
@@ -1256,7 +1259,7 @@ describe('Create case', () => {
           'euiMarkdownEditorTextArea'
         );
 
-        act(() => jest.advanceTimersByTime(1000));
+        act(() => vi.advanceTimersByTime(1000));
 
         await waitFor(() => expect(descriptionInput).toHaveValue('value set in storage'));
       });

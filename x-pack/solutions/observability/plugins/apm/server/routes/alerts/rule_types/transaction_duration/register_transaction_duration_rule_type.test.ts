@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerTransactionDurationRuleType } from './register_transaction_duration_rule_type';
 import { createRuleTypeMocks } from '../../test_utils';
 
@@ -589,8 +591,8 @@ describe('registerTransactionDurationRuleType', () => {
     services.alertsClient.getRecoveredAlerts.mockReturnValue([
       {
         alert: {
-          getId: jest.fn().mockReturnValue('test-id'),
-          getUuid: jest.fn().mockReturnValue('test-uuid'),
+          getId: vi.fn().mockReturnValue('test-id'),
+          getUuid: vi.fn().mockReturnValue('test-uuid'),
           scheduledExecutionOptions: undefined,
           meta: {},
           state: {},

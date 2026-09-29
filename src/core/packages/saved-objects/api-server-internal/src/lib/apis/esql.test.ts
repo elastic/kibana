@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { esql } from '@elastic/esql';
 import type { SavedObjectsEsqlOptions } from '@kbn/core-saved-objects-api-server';
@@ -59,8 +62,8 @@ describe('esql', () => {
     client = elasticsearchClientMock.createElasticsearchClient();
     const migrator = kibanaMigratorMock.create();
     documentMigrator.prepareMigrations();
-    migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
-    migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+    migrator.migrateDocument = vi.fn().mockImplementation(documentMigrator.migrate);
+    migrator.runMigrations = vi.fn().mockResolvedValue([{ status: 'skipped' }]);
     const logger = loggerMock.create();
     extensions = {};
     options = {
@@ -210,7 +213,7 @@ describe('esql', () => {
   });
 
   describe('with spaces extension', () => {
-    let spacesExtension: jest.Mocked<ISavedObjectsSpacesExtension>;
+    let spacesExtension: Mocked<ISavedObjectsSpacesExtension>;
 
     beforeEach(() => {
       spacesExtension = savedObjectsExtensionsMock.createSpacesExtension();
@@ -241,7 +244,7 @@ describe('esql', () => {
   });
 
   describe('with security extension', () => {
-    let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
+    let securityExtension: Mocked<ISavedObjectsSecurityExtension>;
 
     beforeEach(() => {
       securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
@@ -280,7 +283,7 @@ describe('esql', () => {
   });
 
   describe('encrypted attribute stripping', () => {
-    let encryptionExtension: jest.Mocked<ISavedObjectsEncryptionExtension>;
+    let encryptionExtension: Mocked<ISavedObjectsEncryptionExtension>;
 
     beforeEach(() => {
       encryptionExtension = savedObjectsExtensionsMock.createEncryptionExtension();
@@ -353,7 +356,7 @@ describe('esql', () => {
   });
 
   describe('_source decryption', () => {
-    let encryptionExtension: jest.Mocked<ISavedObjectsEncryptionExtension>;
+    let encryptionExtension: Mocked<ISavedObjectsEncryptionExtension>;
 
     beforeEach(() => {
       encryptionExtension = savedObjectsExtensionsMock.createEncryptionExtension();

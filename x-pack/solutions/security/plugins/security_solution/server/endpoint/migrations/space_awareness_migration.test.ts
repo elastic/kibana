@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock, Mocked } from 'vitest';
+
 import { createMockEndpointAppContextService } from '../mocks';
 import type { MigrationStateReferenceData } from './space_awareness_migration';
 import {
@@ -91,13 +93,13 @@ describe('Space awareness migration', () => {
       const exceptionsGenerator = new ExceptionsListItemGenerator('seed');
 
       const exceptionsClient = endpointServiceMock.getExceptionListsClient();
-      (endpointServiceMock.getExceptionListsClient as jest.Mock).mockClear();
+      (endpointServiceMock.getExceptionListsClient as Mock).mockClear();
 
       findExceptionsResultData = [
         exceptionsGenerator.generateTrustedApp({ tags: [GLOBAL_ARTIFACT_TAG] }),
       ];
 
-      (exceptionsClient.findExceptionListsItemPointInTimeFinder as jest.Mock).mockImplementation(
+      (exceptionsClient.findExceptionListsItemPointInTimeFinder as Mock).mockImplementation(
         async (options) => {
           const executeFunctionOnStream = options.executeFunctionOnStream;
 
@@ -267,15 +269,15 @@ describe('Space awareness migration', () => {
       esClientMock.indices.exists.mockResolvedValue(true);
 
       const fleetServices = endpointServiceMock.getInternalFleetServices();
-      const agentClientMock = fleetServices.agent as jest.Mocked<AgentClient>;
+      const agentClientMock = fleetServices.agent as Mocked<AgentClient>;
 
       agentClientMock.getAgent.mockResolvedValue(data.agent);
 
-      (fleetServices.packagePolicy.list as jest.Mock).mockResolvedValue({
+      (fleetServices.packagePolicy.list as Mock).mockResolvedValue({
         items: [data.packagePolicy],
       });
 
-      (fleetServices.packages.getInstalledPackages as jest.Mock).mockResolvedValue({
+      (fleetServices.packages.getInstalledPackages as Mock).mockResolvedValue({
         items: [
           {
             name: 'endpoint',
@@ -343,7 +345,7 @@ describe('Space awareness migration', () => {
     });
 
     it('should handle case where agent is no longer enrolled', async () => {
-      (endpointServiceMock.getInternalFleetServices().agent.getAgent as jest.Mock).mockReturnValue(
+      (endpointServiceMock.getInternalFleetServices().agent.getAgent as Mock).mockReturnValue(
         Promise.reject(new Error('not found'))
       );
       await expect(
@@ -374,7 +376,7 @@ describe('Space awareness migration', () => {
 
     it('should handle case where integration policy might not exist', async () => {
       (
-        endpointServiceMock.getInternalFleetServices().packagePolicy.list as jest.Mock
+        endpointServiceMock.getInternalFleetServices().packagePolicy.list as Mock
       ).mockResolvedValue({ items: [] });
 
       await expect(

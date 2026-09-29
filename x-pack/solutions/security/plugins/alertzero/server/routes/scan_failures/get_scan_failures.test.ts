@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { RouteDependencies } from '../register_routes';
 import { createRouteContextMock } from '../route_context.mock';
@@ -12,14 +15,14 @@ import { registerGetScanFailuresRoute } from './get_scan_failures';
 
 const emptyFailures = { workers: [], unknown: false };
 
-const makeDeps = (listFn: jest.Mock, spaceId = 'default') => {
-  const addVersion = jest.fn();
+const makeDeps = (listFn: Mock, spaceId = 'default') => {
+  const addVersion = vi.fn();
   const router = {
     versioned: {
-      get: jest.fn().mockReturnValue({ addVersion }),
+      get: vi.fn().mockReturnValue({ addVersion }),
     },
   };
-  const getSpaceId = jest.fn().mockReturnValue(spaceId);
+  const getSpaceId = vi.fn().mockReturnValue(spaceId);
 
   registerGetScanFailuresRoute({
     router: router as unknown as RouteDependencies['router'],
@@ -39,13 +42,13 @@ const makeDeps = (listFn: jest.Mock, spaceId = 'default') => {
 
 describe('registerGetScanFailuresRoute', () => {
   it('requires alertzero_read', () => {
-    const { routeConfig } = makeDeps(jest.fn());
+    const { routeConfig } = makeDeps(vi.fn());
 
     expect(routeConfig.security.authz.requiredPrivileges).toEqual(['alertzero_read']);
   });
 
   it('returns the failures for the request space', async () => {
-    const list = jest.fn().mockResolvedValue(emptyFailures);
+    const list = vi.fn().mockResolvedValue(emptyFailures);
     const { handler, getSpaceId } = makeDeps(list, 'other-space');
     const request = httpServerMock.createKibanaRequest();
     const response = httpServerMock.createResponseFactory();
@@ -58,7 +61,7 @@ describe('registerGetScanFailuresRoute', () => {
   });
 
   it('responds 404 without listing failures when AlertZero is off', async () => {
-    const list = jest.fn();
+    const list = vi.fn();
     const { handler } = makeDeps(list);
     const response = httpServerMock.createResponseFactory();
 

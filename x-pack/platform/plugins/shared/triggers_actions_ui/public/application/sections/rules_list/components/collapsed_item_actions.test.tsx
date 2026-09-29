@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import * as React from 'react';
 import moment from 'moment';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -13,19 +16,19 @@ import { CollapsedItemActions } from './collapsed_item_actions';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import type { RuleTableItem, RuleTypeModel } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-const onRuleChanged = jest.fn();
-const onEditRule = jest.fn();
-const onDeleteRule = jest.fn();
-const bulkDisableRules = jest.fn();
-const bulkEnableRules = jest.fn();
-const onUpdateAPIKey = jest.fn();
-const snoozeRule = jest.fn();
-const unsnoozeRule = jest.fn();
-const onLoading = jest.fn();
-const onRunRule = jest.fn();
-const onCloneRule = jest.fn();
+const onRuleChanged = vi.fn();
+const onEditRule = vi.fn();
+const onDeleteRule = vi.fn();
+const bulkDisableRules = vi.fn();
+const bulkEnableRules = vi.fn();
+const onUpdateAPIKey = vi.fn();
+const snoozeRule = vi.fn();
+const unsnoozeRule = vi.fn();
+const onLoading = vi.fn();
+const onRunRule = vi.fn();
+const onCloneRule = vi.fn();
 
 describe('CollapsedItemActions', () => {
   async function setup(editable: boolean = true) {
@@ -39,11 +42,11 @@ describe('CollapsedItemActions', () => {
       validate: () => {
         return { errors: {} };
       },
-      ruleParamsExpression: jest.fn(),
+      ruleParamsExpression: vi.fn(),
       requiresAppContext: !editable,
     };
     ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
-    const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+    const useKibanaMock = useKibana as Mocked<typeof useKibana>;
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
   }
@@ -139,7 +142,7 @@ describe('CollapsedItemActions', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('shows untrack active alerts modal if `autoRecoverAlerts` is `true`', async () => {
@@ -200,7 +203,7 @@ describe('CollapsedItemActions', () => {
     });
 
     afterAll(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('renders actions correctly when rule type is not editable in this context', async () => {
@@ -229,11 +232,11 @@ describe('CollapsedItemActions', () => {
     });
 
     afterAll(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     test('does not render panel items when rule is not editable', async () => {

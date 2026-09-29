@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { fetchESUsage } from './fetch_es_usage';
 
@@ -12,7 +14,7 @@ describe('fetchESUsage', () => {
   const clusterUuid = '1abcde2';
   const index = '.monitoring-es-*';
   const callCluster = {
-    search: jest.fn().mockImplementation(() => ({
+    search: vi.fn().mockImplementation(() => ({
       hits: {
         hits: [
           {
@@ -51,7 +53,7 @@ describe('fetchESUsage', () => {
 
   it('should handle some indices coming from Metricbeat', async () => {
     const customCallCluster = {
-      search: jest.fn().mockImplementation(() => ({
+      search: vi.fn().mockImplementation(() => ({
         hits: {
           hits: [
             {
@@ -88,7 +90,7 @@ describe('fetchESUsage', () => {
 
   it('should handle no monitoring data', async () => {
     const customCallCluster = {
-      search: jest.fn().mockImplementation(() => ({
+      search: vi.fn().mockImplementation(() => ({
         hits: {
           hits: [],
         },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { readCommands, resolveCommandFiles } from './parse_command_files';
 import type { ZipArchive } from '../archive';
 import type { PluginManifest } from '@kbn/agent-builder-common';
@@ -19,7 +21,7 @@ const createMockArchive = (files: Record<string, string>): ZipArchive => {
       }
       return Buffer.from(files[path], 'utf-8');
     },
-    close: jest.fn(),
+    close: vi.fn(),
   };
 };
 

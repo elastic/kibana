@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type React from 'react';
 import type { ActionBuilderContext } from '../types';
 import { buildContentEditorAction } from './content_editor_action';
 
-const open = jest.fn();
+const open = vi.fn();
 
 const defaultContext: ActionBuilderContext = {
   itemConfig: undefined,
@@ -31,7 +33,7 @@ const defaultContext: ActionBuilderContext = {
 
 describe('content editor action builder', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('buildContentEditorAction', () => {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createRoot } from 'react-dom/client';
 import createCache from '@emotion/cache';
 import { EuiProvider, euiStylisPrefixer } from '@elastic/eui';
@@ -15,36 +18,51 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { createDocsRegistry } from '.';
 import { EMBEDDABLE_RESIZE_EVENT } from '../embeddable';
 
-jest.mock('react-dom/client', () => ({
-  createRoot: jest.fn(() => ({ render: jest.fn(), unmount: jest.fn() })),
-}));
+vi.mock('react-dom/client', () => {
+      const mocked = {
+      createRoot: vi.fn(() => ({ render: vi.fn(), unmount: vi.fn() })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@storybook/react', () => ({
-  setProjectAnnotations: (annotations: unknown) => annotations,
-  composeStories: (storyModule: { stories: Record<string, unknown> }) => storyModule.stories,
-}));
+vi.mock('@storybook/react', () => {
+      const mocked = {
+      setProjectAnnotations: (annotations: unknown) => annotations,
+      composeStories: (storyModule: { stories: Record<string, unknown> }) => storyModule.stories,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@emotion/cache', () => ({
+vi.mock('@emotion/cache', () => ({
   __esModule: true,
-  default: jest.fn((options: unknown) => ({ options })),
+  default: vi.fn((options: unknown) => ({ options })),
 }));
 
-jest.mock('@elastic/eui', () => ({
-  EuiProvider: function MockEuiProvider() {
-    return null;
-  },
-  euiStylisPrefixer: { name: 'euiStylisPrefixer' },
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      EuiProvider: function MockEuiProvider() {
+        return null;
+      },
+      euiStylisPrefixer: { name: 'euiStylisPrefixer' },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/i18n', () => ({
-  i18n: { getIsInitialized: jest.fn(() => false), init: jest.fn() },
-}));
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: { getIsInitialized: vi.fn(() => false), init: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/i18n-react', () => ({
-  I18nProvider: function MockI18nProvider() {
-    return null;
-  },
-}));
+vi.mock('@kbn/i18n-react', () => {
+      const mocked = {
+      I18nProvider: function MockI18nProvider() {
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const composeStory = (id: string, parameters?: Record<string, unknown>) =>
   Object.assign(() => null, { id, parameters });
@@ -123,7 +141,7 @@ describe('createDocsRegistry', () => {
       projectAnnotations: {},
     });
     const container = makeContainer();
-    const onResize = jest.fn();
+    const onResize = vi.fn();
     const heights: number[] = [];
 
     container.addEventListener(EMBEDDABLE_RESIZE_EVENT, (event) => {
@@ -147,20 +165,20 @@ describe('createDocsRegistry', () => {
     (global as { document?: unknown }).document = { createElement: () => renderNode };
 
     const shadowRoot = {
-      replaceChildren: jest.fn(),
-      appendChild: jest.fn(),
+      replaceChildren: vi.fn(),
+      appendChild: vi.fn(),
     } as unknown as ShadowRoot;
     const fakeContainer = makeContainer() as unknown as {
       shadowRoot: ShadowRoot | null;
-      attachShadow: jest.Mock;
+      attachShadow: Mock;
     };
     fakeContainer.shadowRoot = null;
-    fakeContainer.attachShadow = jest.fn(() => {
+    fakeContainer.attachShadow = vi.fn(() => {
       fakeContainer.shadowRoot = shadowRoot;
       return shadowRoot;
     });
     const container = fakeContainer as unknown as HTMLElement;
-    const onResize = jest.fn();
+    const onResize = vi.fn();
 
     try {
       const registry = createDocsRegistry({
@@ -187,7 +205,7 @@ describe('createDocsRegistry', () => {
       // wrapped in an I18nProvider so `@kbn/i18n-react` stories find their IntlProvider.
       expect(i18n.init).toHaveBeenCalledWith({ locale: 'en', messages: {} });
 
-      const rootResult = (createRoot as jest.Mock).mock.results.at(-1)?.value;
+      const rootResult = (createRoot as Mock).mock.results.at(-1)?.value;
       const element = rootResult.render.mock.calls[0][0];
       expect(element.type).toBe(EuiProvider);
       expect(element.props.cache).toEqual({ options: cacheOptions });

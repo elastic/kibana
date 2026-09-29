@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { MitreEntity } from '@kbn/security-mitre-attack-common';
@@ -13,11 +15,14 @@ import type { SavedObjectsBulkResponse } from '@kbn/core/server';
 import { loadMitreArtifact } from '@kbn/security-mitre-attack-server';
 import { MitreAttackDataService } from './mitre_attack_data_service';
 
-jest.mock('@kbn/security-mitre-attack-server', () => ({
-  loadMitreArtifact: jest.fn(),
-}));
+vi.mock('@kbn/security-mitre-attack-server', () => {
+      const mocked = {
+      loadMitreArtifact: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockLoadMitreArtifact = jest.mocked(loadMitreArtifact);
+const mockLoadMitreArtifact = vi.mocked(loadMitreArtifact);
 
 describe('MitreAttackDataService', () => {
   let service: MitreAttackDataService;
@@ -45,7 +50,7 @@ describe('MitreAttackDataService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('successful population sets isInitialized to true and logs info', async () => {

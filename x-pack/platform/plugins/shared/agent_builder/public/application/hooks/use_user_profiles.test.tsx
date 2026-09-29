@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useUserProfiles } from './use_user_profiles';
 
-const mockBulkGet = jest.fn();
+const mockBulkGet = vi.fn();
 
-jest.mock('./use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      userProfile: {
-        bulkGet: mockBulkGet,
-      },
-    },
-  }),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          userProfile: {
+            bulkGet: mockBulkGet,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const memberProfile = {
   uid: 'member-1',
@@ -51,7 +56,7 @@ const createWrapper = () => {
 
 describe('useUserProfiles', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockBulkGet.mockResolvedValue([memberProfile, secondMemberProfile]);
   });
 

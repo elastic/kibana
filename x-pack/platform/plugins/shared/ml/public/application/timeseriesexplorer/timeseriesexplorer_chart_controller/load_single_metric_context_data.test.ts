@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { NEVER, of, throwError } from 'rxjs';
 
@@ -67,7 +69,7 @@ describe('loadSingleMetricContextData', () => {
   };
 
   it('calls displayError and returns null when metric query fails', async () => {
-    const displayError = jest.fn();
+    const displayError = vi.fn();
     const result = await loadSingleMetricContextData({
       bounds,
       selectedJob,
@@ -103,7 +105,7 @@ describe('loadSingleMetricContextData', () => {
   });
 
   it('calls displayError for every failing query, not just the first', async () => {
-    const displayError = jest.fn();
+    const displayError = vi.fn();
     const result = await loadSingleMetricContextData({
       bounds,
       selectedJob,
@@ -157,7 +159,7 @@ describe('loadSingleMetricContextData', () => {
   it('returns null when signal is already aborted (skips work)', async () => {
     const ac = new AbortController();
     ac.abort();
-    const displayError = jest.fn();
+    const displayError = vi.fn();
     const result = await loadSingleMetricContextData({
       signal: ac.signal,
       bounds,
@@ -188,7 +190,7 @@ describe('loadSingleMetricContextData', () => {
 
   it('returns null when aborted while metric request never completes', async () => {
     const ac = new AbortController();
-    const displayError = jest.fn();
+    const displayError = vi.fn();
     const p = loadSingleMetricContextData({
       signal: ac.signal,
       bounds,
@@ -226,7 +228,7 @@ describe('loadSingleMetricContextData', () => {
   });
 
   it('returns zoomSelection when partitioning is satisfied and default range applies', async () => {
-    const displayError = jest.fn();
+    const displayError = vi.fn();
     const result = await loadSingleMetricContextData({
       bounds,
       selectedJob,
@@ -257,7 +259,7 @@ describe('loadSingleMetricContextData', () => {
   });
 
   it('calls displayError with swimlane message and returns null when swimlane rejects but metric succeeds', async () => {
-    const displayError = jest.fn();
+    const displayError = vi.fn();
     const result = await loadSingleMetricContextData({
       bounds,
       selectedJob,
@@ -294,7 +296,7 @@ describe('loadSingleMetricContextData', () => {
   });
 
   it('calls displayError with entityCounts message and returns null when chart details rejects', async () => {
-    const displayError = jest.fn();
+    const displayError = vi.fn();
     const result = await loadSingleMetricContextData({
       bounds,
       selectedJob,
@@ -332,7 +334,7 @@ describe('loadSingleMetricContextData', () => {
   });
 
   it('calls displayError with forecast message and returns null when forecast load rejects', async () => {
-    const displayError = jest.fn();
+    const displayError = vi.fn();
     const result = await loadSingleMetricContextData({
       bounds,
       selectedJob,
@@ -367,7 +369,7 @@ describe('loadSingleMetricContextData', () => {
   });
 
   it('rejects when detectorIndex is out of range and a forecast id is set', async () => {
-    const displayError = jest.fn();
+    const displayError = vi.fn();
     await expect(
       loadSingleMetricContextData({
         bounds,

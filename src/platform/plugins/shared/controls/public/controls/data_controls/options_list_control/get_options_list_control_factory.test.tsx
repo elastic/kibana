@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ControlValuesSource, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -46,7 +48,7 @@ describe('Options List Control Api', () => {
         timeFieldName: '@timestamp',
       },
     });
-    stubDataView.getFormatterForField = jest.fn().mockImplementation(() => {
+    stubDataView.getFormatterForField = vi.fn().mockImplementation(() => {
       return {
         convertToText: (value: string) => `${value}:formatted`,
         toJSON: (value: any) => JSON.stringify(value),
@@ -59,7 +61,7 @@ describe('Options List Control Api', () => {
     let dataviewDelayPromise: Promise<void> | undefined;
 
     beforeAll(() => {
-      dataViewsService.get = jest.fn().mockImplementation(async (id: string) => {
+      dataViewsService.get = vi.fn().mockImplementation(async (id: string) => {
         if (dataviewDelayPromise) await dataviewDelayPromise;
         return getDataView(id);
       });
@@ -71,7 +73,7 @@ describe('Options List Control Api', () => {
       dataviewDelayPromise = new Promise((res) => (resolveDataView = res));
       (async () => {
         await factory.buildEmbeddable({
-          initializeDrilldownsManager: jest.fn(),
+          initializeDrilldownsManager: vi.fn(),
           initialState: {
             ...DEFAULT_DSL_OPTIONS_LIST_STATE,
             data_view_id: 'myDataViewId',
@@ -95,7 +97,7 @@ describe('Options List Control Api', () => {
       dataviewDelayPromise = new Promise((res) => (resolveDataView = res));
       (async () => {
         await factory.buildEmbeddable({
-          initializeDrilldownsManager: jest.fn(),
+          initializeDrilldownsManager: vi.fn(),
           initialState: {
             ...DEFAULT_DSL_OPTIONS_LIST_STATE,
             data_view_id: 'myDataViewId',
@@ -123,12 +125,12 @@ describe('Options List Control Api', () => {
 
   describe('appliedFilters$', () => {
     beforeAll(() => {
-      dataViewsService.get = jest.fn().mockImplementation(getDataView);
+      dataViewsService.get = vi.fn().mockImplementation(getDataView);
     });
 
     test('should not set appliedFilters$ when selectedOptions is not provided', async () => {
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
@@ -143,7 +145,7 @@ describe('Options List Control Api', () => {
 
     test('should set appliedFilters$ when selectedOptions is provided', async () => {
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
@@ -186,7 +188,7 @@ describe('Options List Control Api', () => {
 
     test('should set appliedFilters$ when exists is selected', async () => {
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
@@ -215,7 +217,7 @@ describe('Options List Control Api', () => {
 
     test('should set appliedFilters$ when exclude is selected', async () => {
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
@@ -246,7 +248,7 @@ describe('Options List Control Api', () => {
 
     test('should set appliedFilters$ when option is selected', async () => {
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
@@ -285,7 +287,7 @@ describe('Options List Control Api', () => {
         data_view_id: 'newDataViewId',
       } as OptionsListDSLControlState;
       const embeddable = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -305,7 +307,7 @@ describe('Options List Control Api', () => {
         field_name: 'myFieldName',
       });
       const embeddable = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -321,50 +323,62 @@ describe('Options List Control Api', () => {
 
   describe('anyStateChange$', () => {
     let embeddableApi: OptionsListControlApi;
-    beforeEach((done) => {
-      factory
-        .buildEmbeddable({
-          initializeDrilldownsManager: jest.fn(),
-          initialState: optionsListDSLControlSchema.parse({
-            data_view_id: 'myDataViewId',
-            field_name: 'myFieldName',
-          }),
-          finalizeApi,
-          uuid,
-          parentApi: {},
-        })
-        .then(({ api }) => {
-          embeddableApi = api;
-          done();
-        })
-        .catch(done);
-    });
+    beforeEach(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+            fail: reject,
+          });
 
-    test('should not emit on subscribe and emit when any state changes', (done) => {
-      embeddableApi.anyStateChange$.subscribe(() => {
-        try {
-          const { title } = embeddableApi.serializeState();
-          expect(title).toBe('cute puppies');
-        } catch (error) {
-          // title assertion fails when
-          // anyStateChange$ emits on subscribe
-          done(error);
-          return;
-        }
-        done();
-      });
-      embeddableApi.setTitle('cute puppies');
-    });
+          factory
+            .buildEmbeddable({
+              initializeDrilldownsManager: vi.fn(),
+              initialState: optionsListDSLControlSchema.parse({
+                data_view_id: 'myDataViewId',
+                field_name: 'myFieldName',
+              }),
+              finalizeApi,
+              uuid,
+              parentApi: {},
+            })
+            .then(({ api }) => {
+              embeddableApi = api;
+              done();
+            })
+            .catch(done);
+        })
+    );
+
+    test('should not emit on subscribe and emit when any state changes', () =>
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
+
+        embeddableApi.anyStateChange$.subscribe(() => {
+          try {
+            const { title } = embeddableApi.serializeState();
+            expect(title).toBe('cute puppies');
+          } catch (error) {
+            // title assertion fails when
+            // anyStateChange$ emits on subscribe
+            done(error);
+            return;
+          }
+          done();
+        });
+        embeddableApi.setTitle('cute puppies');
+      }));
   });
 
   describe('cancelRequests', () => {
     beforeAll(() => {
-      dataViewsService.get = jest.fn().mockImplementation(getDataView);
+      dataViewsService.get = vi.fn().mockImplementation(getDataView);
     });
 
     test('should expose cancelRequests function on api', async () => {
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
@@ -379,7 +393,7 @@ describe('Options List Control Api', () => {
 
     test('calling cancelRequests should not throw', async () => {
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',

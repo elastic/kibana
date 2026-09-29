@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
@@ -14,19 +16,22 @@ import CreateConnectorFlyout from '.';
 import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 
-jest.mock('../../../lib/action_connector_api', () => ({
-  ...(jest.requireActual('../../../lib/action_connector_api') as object),
-  loadActionTypes: jest.fn(),
-  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
-}));
+vi.mock('../../../lib/action_connector_api', async () => {
+      const mocked = {
+      ...((await vi.importActual('../../../lib/action_connector_api')) as object),
+      loadActionTypes: vi.fn(),
+      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { loadActionTypes } = jest.requireMock('../../../lib/action_connector_api');
+const { loadActionTypes } = (await vi.importMock('../../../lib/action_connector_api'));
 
 describe('spec connector with API fetch', () => {
   let appMockRenderer: AppMockRenderer;
-  const onClose = jest.fn();
-  const onConnectorCreated = jest.fn();
-  const onTestConnector = jest.fn();
+  const onClose = vi.fn();
+  const onConnectorCreated = vi.fn();
+  const onTestConnector = vi.fn();
   const actionTypeRegistry = actionTypeRegistryMock.create();
 
   // Use 'workflows' feature ID since spec connectors are only shown when workflows UI is enabled
@@ -82,7 +87,7 @@ describe('spec connector with API fetch', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
     appMockRenderer.coreStart.application.capabilities = {
       ...appMockRenderer.coreStart.application.capabilities,
@@ -91,9 +96,9 @@ describe('spec connector with API fetch', () => {
     loadActionTypes.mockResolvedValue([specConnectorType]);
     // Spec connectors are not in the UI actionTypeRegistry; useActionTypeModel fetches the spec API.
     actionTypeRegistry.has.mockReturnValue(false);
-    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue(mockSpecResponse);
+    appMockRenderer.coreStart.http.get = vi.fn().mockResolvedValue(mockSpecResponse);
     // Enable workflows UI setting so spec connectors are displayed
-    appMockRenderer.coreStart.uiSettings.get = jest.fn().mockImplementation((key: string) => {
+    appMockRenderer.coreStart.uiSettings.get = vi.fn().mockImplementation((key: string) => {
       if (key === 'workflows:ui:enabled') {
         return true;
       }
@@ -128,7 +133,7 @@ describe('spec connector with API fetch', () => {
     const specPromise = new Promise<typeof mockSpecResponse>((resolve) => {
       resolveSpec = resolve;
     });
-    appMockRenderer.coreStart.http.get = jest.fn().mockReturnValue(specPromise);
+    appMockRenderer.coreStart.http.get = vi.fn().mockReturnValue(specPromise);
 
     appMockRenderer.render(
       <CreateConnectorFlyout
@@ -157,7 +162,7 @@ describe('spec connector with API fetch', () => {
 
   it('shows error state when spec fetch fails', async () => {
     const errorMessage = 'Failed to fetch spec';
-    appMockRenderer.coreStart.http.get = jest.fn().mockRejectedValue(new Error(errorMessage));
+    appMockRenderer.coreStart.http.get = vi.fn().mockRejectedValue(new Error(errorMessage));
 
     appMockRenderer.render(
       <CreateConnectorFlyout
@@ -273,7 +278,7 @@ describe('spec connector with API fetch', () => {
     });
 
     it('links to the connectors index when the spec docsUrl is an empty string (no dedicated page)', async () => {
-      appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue({
+      appMockRenderer.coreStart.http.get = vi.fn().mockResolvedValue({
         ...mockSpecResponse,
         metadata: { ...mockSpecResponse.metadata, docs_url: '' },
       });

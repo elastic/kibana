@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaResponseFactory } from '@kbn/core-http-server';
 import {
@@ -24,7 +27,7 @@ import { handleResolutionUnlink } from './unlink';
 const NAMESPACE = 'default';
 
 function createMockAnalytics(): TelemetryReporter {
-  return { reportEvent: jest.fn() };
+  return { reportEvent: vi.fn() };
 }
 
 function createMockContext(
@@ -43,19 +46,19 @@ function createMockContext(
 
 function createMockResponse() {
   return {
-    ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
-    customError: jest.fn(({ statusCode, body }) => ({ status: statusCode, payload: body })),
-    badRequest: jest.fn(({ body }) => ({ status: 400, payload: body })),
+    ok: vi.fn(({ body }) => ({ status: 200, payload: body })),
+    customError: vi.fn(({ statusCode, body }) => ({ status: statusCode, payload: body })),
+    badRequest: vi.fn(({ body }) => ({ status: 400, payload: body })),
   } as unknown as KibanaResponseFactory;
 }
 
 describe('handleResolutionUnlink', () => {
   let analytics: TelemetryReporter;
-  let mockUnlinkEntities: jest.Mock;
+  let mockUnlinkEntities: Mock;
 
   beforeEach(() => {
     analytics = createMockAnalytics();
-    mockUnlinkEntities = jest.fn();
+    mockUnlinkEntities = vi.fn();
   });
 
   it('reports unlink telemetry on success', async () => {

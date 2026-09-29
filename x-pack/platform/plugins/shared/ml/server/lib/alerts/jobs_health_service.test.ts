@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, Mocked } from 'vitest';
+
 import type { JobsHealthService } from './jobs_health_service';
 import {
   DELAYED_DATA_BUCKETS_PAGE_SIZE,
@@ -145,8 +148,8 @@ const getDelayedDataPayloadResults = (
 
 describe('JobsHealthService', () => {
   const mlClient = {
-    getBuckets: jest.fn().mockResolvedValue({ count: 0, buckets: [] }),
-    getJobs: jest.fn().mockImplementation(({ job_id: jobIds = [] }) => {
+    getBuckets: vi.fn().mockResolvedValue({ count: 0, buckets: [] }),
+    getJobs: vi.fn().mockImplementation(({ job_id: jobIds = [] }) => {
       let jobs: MlJob[] = [];
 
       if (jobIds.some((v: string) => v === 'test_group')) {
@@ -177,7 +180,7 @@ describe('JobsHealthService', () => {
 
       return Promise.resolve({ jobs });
     }),
-    getJobStats: jest.fn().mockImplementation(({ job_id: jobIdsStr }) => {
+    getJobStats: vi.fn().mockImplementation(({ job_id: jobIdsStr }) => {
       const jobsIds = jobIdsStr.split(',');
       return Promise.resolve({
         jobs: jobsIds.map((j: string) => {
@@ -196,7 +199,7 @@ describe('JobsHealthService', () => {
         }) as MlJobStats,
       });
     }),
-    getDatafeedStats: jest.fn().mockImplementation(({ datafeed_id: datafeedIdsStr }) => {
+    getDatafeedStats: vi.fn().mockImplementation(({ datafeed_id: datafeedIdsStr }) => {
       const datafeedIds = datafeedIdsStr.split(',');
       return Promise.resolve({
         datafeeds: datafeedIds.map((d: string) => {
@@ -210,10 +213,10 @@ describe('JobsHealthService', () => {
         }) as MlJobStats,
       });
     }),
-  } as unknown as jest.Mocked<MlClient>;
+  } as unknown as Mocked<MlClient>;
 
   const datafeedsService = {
-    getDatafeedByJobId: jest.fn().mockImplementation((jobIds: string[]) => {
+    getDatafeedByJobId: vi.fn().mockImplementation((jobIds: string[]) => {
       return Promise.resolve(
         jobIds.map((j) => {
           return {
@@ -224,10 +227,10 @@ describe('JobsHealthService', () => {
         })
       );
     }),
-  } as unknown as jest.Mocked<DatafeedsService>;
+  } as unknown as Mocked<DatafeedsService>;
 
   const annotationService = {
-    getDelayedDataAnnotations: jest.fn().mockImplementation(({ jobIds }: { jobIds: string[] }) => {
+    getDelayedDataAnnotations: vi.fn().mockImplementation(({ jobIds }: { jobIds: string[] }) => {
       return Promise.resolve(
         jobIds.map((jobId) =>
           createDelayedDataAnnotation(
@@ -239,40 +242,40 @@ describe('JobsHealthService', () => {
         )
       );
     }),
-  } as unknown as jest.Mocked<AnnotationService>;
+  } as unknown as Mocked<AnnotationService>;
 
   const jobAuditMessagesService = {
-    getJobsErrorMessages: jest.fn().mockImplementation((jobIds: string) => {
+    getJobsErrorMessages: vi.fn().mockImplementation((jobIds: string) => {
       return Promise.resolve([]);
     }),
-  } as unknown as jest.Mocked<JobAuditMessagesService>;
+  } as unknown as Mocked<JobAuditMessagesService>;
 
   const logger = {
-    warn: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
-  } as unknown as jest.Mocked<Logger>;
+    warn: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+  } as unknown as Mocked<Logger>;
 
-  const getFieldsFormatRegistry = jest.fn().mockImplementation(() => {
+  const getFieldsFormatRegistry = vi.fn().mockImplementation(() => {
     return Promise.resolve({
-      deserialize: jest.fn().mockImplementation(({ id }: { id: string }) => {
+      deserialize: vi.fn().mockImplementation(({ id }: { id: string }) => {
         if (id === 'date') {
           return {
-            convertToText: jest.fn().mockImplementation((v) => {
+            convertToText: vi.fn().mockImplementation((v) => {
               return new Date(v).toUTCString();
             }),
           };
         }
         if (id === 'bytes') {
           return {
-            convertToText: jest.fn().mockImplementation((v) => {
+            convertToText: vi.fn().mockImplementation((v) => {
               return `${Math.round(v / 1000)}KB`;
             }),
           };
         }
       }),
     });
-  }) as jest.Mocked<FieldFormatsRegistryProvider>;
+  }) as Mocked<FieldFormatsRegistryProvider>;
 
   const jobHealthService: JobsHealthService = jobsHealthServiceProvider(
     mlClient,
@@ -283,10 +286,10 @@ describe('JobsHealthService', () => {
     logger
   );
 
-  let dateNowSpy: jest.SpyInstance;
+  let dateNowSpy: MockInstance;
 
   beforeEach(() => {
-    dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => MOCK_DATE_NOW);
+    dateNowSpy = vi.spyOn(Date, 'now').mockImplementation(() => MOCK_DATE_NOW);
 
     annotationService.getDelayedDataAnnotations.mockImplementation(
       ({ jobIds }: { jobIds: string[] }) =>
@@ -306,7 +309,7 @@ describe('JobsHealthService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     dateNowSpy.mockRestore();
   });
 

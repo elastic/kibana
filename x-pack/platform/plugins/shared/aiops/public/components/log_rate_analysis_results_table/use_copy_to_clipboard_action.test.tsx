@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ReactElement } from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, renderHook } from '@testing-library/react';
@@ -22,8 +24,8 @@ interface Action {
   render: (tableItem: SignificantItem | GroupTableItem) => ReactElement;
 }
 
-const execCommandMock = (global.document.execCommand = jest.fn());
-const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+const execCommandMock = (global.document.execCommand = vi.fn());
+const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 describe('useCopyToClipboardAction', () => {
   it('renders the action for a single significant item', async () => {

@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { NewNote } from './new_note';
 
-jest.mock('../../../../common/hooks/use_upselling', () => ({
-  useUpsellingMessage: jest.fn(),
-}));
+vi.mock('../../../../common/hooks/use_upselling', () => {
+      const mocked = {
+      useUpsellingMessage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('NewNote', () => {
   const note = 'The contents of a new note';
@@ -22,8 +27,8 @@ describe('NewNote', () => {
       <NewNote
         noteInputHeight={200}
         note={note}
-        updateNewNote={jest.fn()}
-        setIsMarkdownInvalid={jest.fn()}
+        updateNewNote={vi.fn()}
+        setIsMarkdownInvalid={vi.fn()}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -34,8 +39,8 @@ describe('NewNote', () => {
       <NewNote
         noteInputHeight={200}
         note={note}
-        updateNewNote={jest.fn()}
-        setIsMarkdownInvalid={jest.fn()}
+        updateNewNote={vi.fn()}
+        setIsMarkdownInvalid={vi.fn()}
       />
     );
 

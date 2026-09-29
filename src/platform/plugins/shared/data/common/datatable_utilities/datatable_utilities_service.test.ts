@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -17,17 +20,17 @@ import { BUCKET_TYPES } from '../search/aggs/buckets/bucket_agg_types';
 import { DatatableUtilitiesService } from './datatable_utilities_service';
 
 describe('DatatableUtilitiesService', () => {
-  let aggs: jest.Mocked<AggsCommonStart>;
-  let dataViews: jest.Mocked<DataViewsContract>;
+  let aggs: Mocked<AggsCommonStart>;
+  let dataViews: Mocked<DataViewsContract>;
   let datatableUtilitiesService: DatatableUtilitiesService;
 
   beforeEach(() => {
     aggs = {
-      createAggConfigs: jest.fn(),
-      types: { get: jest.fn() },
+      createAggConfigs: vi.fn(),
+      types: { get: vi.fn() },
     } as unknown as typeof aggs;
     dataViews = {
-      get: jest.fn(),
+      get: vi.fn(),
     } as unknown as typeof dataViews;
 
     datatableUtilitiesService = new DatatableUtilitiesService(aggs, dataViews, fieldFormatsMock);
@@ -75,8 +78,8 @@ describe('DatatableUtilitiesService', () => {
       const column = { meta: { field: 'field', index: 'index' } } as DatatableColumn;
       const dataView = createStubDataView({ spec: {} });
       const field = {} as any;
-      jest.spyOn(datatableUtilitiesService, 'getDataView').mockResolvedValue(dataView);
-      jest.spyOn(dataView, 'getFieldByName').mockReturnValue(field);
+      vi.spyOn(datatableUtilitiesService, 'getDataView').mockResolvedValue(dataView);
+      vi.spyOn(dataView, 'getFieldByName').mockReturnValue(field);
 
       await expect(datatableUtilitiesService.getField(column)).resolves.toBe(field);
       expect(dataView.getFieldByName).toHaveBeenCalledWith('field');

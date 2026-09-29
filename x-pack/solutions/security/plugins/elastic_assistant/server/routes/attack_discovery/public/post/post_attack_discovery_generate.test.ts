@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 // Use a TS import type via a type alias to avoid parser issues with `import type` in some jest transforms
@@ -21,33 +24,42 @@ import { serverMock } from '../../../../__mocks__/server';
 import { requestContextMock } from '../../../../__mocks__/request_context';
 import { postAttackDiscoveryGenerateRoute } from './post_attack_discovery_generate';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'static-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn(() => 'static-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../helpers/index_privileges', () => {
-  const privilegesOriginal = jest.requireActual('../../helpers/index_privileges');
+vi.mock('../../helpers/index_privileges', async () => {
+  const privilegesOriginal = (await vi.importActual('../../helpers/index_privileges'));
   return {
     ...privilegesOriginal,
-    hasReadWriteAttackDiscoveryAlertsPrivileges: jest.fn(),
+    hasReadWriteAttackDiscoveryAlertsPrivileges: vi.fn(),
   };
 });
 
-jest.mock('../../../helpers', () => {
-  const helpersModuleOriginal = jest.requireActual('../../../helpers');
+vi.mock('../../../helpers', async () => {
+  const helpersModuleOriginal = (await vi.importActual('../../../helpers'));
   return {
     ...helpersModuleOriginal,
-    performChecks: jest.fn(),
+    performChecks: vi.fn(),
   };
 });
 
-jest.mock('./helpers/request_is_valid', () => ({
-  requestIsValid: jest.fn(),
-}));
+vi.mock('./helpers/request_is_valid', () => {
+      const mocked = {
+      requestIsValid: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../helpers/generate_and_update_discoveries', () => ({
-  generateAndUpdateAttackDiscoveries: jest.fn(),
-}));
+vi.mock('../../helpers/generate_and_update_discoveries', () => {
+      const mocked = {
+      generateAndUpdateAttackDiscoveries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();
@@ -81,10 +93,10 @@ const mockApiConfig = {
 };
 
 const mockDataClient = {
-  updateAttackDiscovery: jest.fn(),
-  createAttackDiscovery: jest.fn(),
-  getAttackDiscovery: jest.fn(),
-  refreshEventLogIndex: jest.fn(),
+  updateAttackDiscovery: vi.fn(),
+  createAttackDiscovery: vi.fn(),
+  getAttackDiscovery: vi.fn(),
+  refreshEventLogIndex: vi.fn(),
 } as unknown as AttackDiscoveryDataClient;
 
 const mockRequestBody: PostAttackDiscoveryGenerateRequestBody = {
@@ -100,12 +112,12 @@ const mockRequestBody: PostAttackDiscoveryGenerateRequestBody = {
 };
 
 describe('postAttackDiscoveryGenerateRoute', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(mockDataClient);
     context.elasticAssistant.actions = actionsMock.createStart();
-    (context.elasticAssistant.inference.getConnectorById as jest.Mock).mockResolvedValue({
+    (context.elasticAssistant.inference.getConnectorById as Mock).mockResolvedValue({
       type: mockApiConfig.actionTypeId,
       connectorId: mockApiConfig.connectorId,
       name: 'test connector',
@@ -114,37 +126,35 @@ describe('postAttackDiscoveryGenerateRoute', () => {
       isInferenceEndpoint: false,
       isPreconfigured: false,
     });
-    context.core.featureFlags.getBooleanValue = jest.fn().mockResolvedValue(false);
+    context.core.featureFlags.getBooleanValue = vi.fn().mockResolvedValue(false);
     postAttackDiscoveryGenerateRoute(server.router);
 
     // Mock successful defaults
-    (performChecks as jest.Mock).mockResolvedValue({ isSuccess: true });
-    (requestIsValid as jest.Mock).mockReturnValue(true);
-    (hasReadWriteAttackDiscoveryAlertsPrivileges as jest.Mock).mockResolvedValue({
+    (performChecks as Mock).mockResolvedValue({ isSuccess: true });
+    (requestIsValid as Mock).mockReturnValue(true);
+    (hasReadWriteAttackDiscoveryAlertsPrivileges as Mock).mockResolvedValue({
       isSuccess: true,
     });
 
     // Mock generateAndUpdateAttackDiscoveries to resolve successfully
-    const { generateAndUpdateAttackDiscoveries } = jest.requireMock(
-      '../../helpers/generate_and_update_discoveries'
-    );
+    const { generateAndUpdateAttackDiscoveries } = (await vi.importMock('../../helpers/generate_and_update_discoveries'));
     generateAndUpdateAttackDiscoveries.mockResolvedValue({
       anonymizedAlerts: [],
       attackDiscoveries: [],
       replacements: {},
     });
 
-    jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('privilege validation', () => {
     it('returns a 403 status when the privilege check returns forbidden', async () => {
-      context.core.featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
-      (hasReadWriteAttackDiscoveryAlertsPrivileges as jest.Mock).mockImplementation(
+      context.core.featureFlags.getBooleanValue = vi.fn().mockResolvedValue(true);
+      (hasReadWriteAttackDiscoveryAlertsPrivileges as Mock).mockImplementation(
         ({ response }) => {
           return Promise.resolve({
             isSuccess: false,
@@ -161,7 +171,7 @@ describe('postAttackDiscoveryGenerateRoute', () => {
     });
 
     it('returns a 403 status when the user has missing privileges', async () => {
-      (hasReadWriteAttackDiscoveryAlertsPrivileges as jest.Mock).mockImplementation(
+      (hasReadWriteAttackDiscoveryAlertsPrivileges as Mock).mockImplementation(
         ({ response }) => {
           return Promise.resolve({
             isSuccess: false,
@@ -179,7 +189,7 @@ describe('postAttackDiscoveryGenerateRoute', () => {
     });
 
     it('returns the correct error message when the user has missing privileges', async () => {
-      (hasReadWriteAttackDiscoveryAlertsPrivileges as jest.Mock).mockImplementation(
+      (hasReadWriteAttackDiscoveryAlertsPrivileges as Mock).mockImplementation(
         ({ response }) => {
           return Promise.resolve({
             isSuccess: false,
@@ -199,7 +209,7 @@ describe('postAttackDiscoveryGenerateRoute', () => {
 
   describe('request validation', () => {
     it('returns a 400 status when request body is missing required fields', async () => {
-      (requestIsValid as jest.Mock).mockReturnValue(false);
+      (requestIsValid as Mock).mockReturnValue(false);
       const invalidBody: PostAttackDiscoveryGenerateRequestBody = {
         ...mockRequestBody,
         alertsIndexPattern: '',
@@ -286,9 +296,7 @@ describe('postAttackDiscoveryGenerateRoute', () => {
     });
 
     it('always calls generateAndUpdateAttackDiscoveries with withReplacements: false for the _generate route', async () => {
-      const { generateAndUpdateAttackDiscoveries } = jest.requireMock(
-        '../../helpers/generate_and_update_discoveries'
-      );
+      const { generateAndUpdateAttackDiscoveries } = (await vi.importMock('../../helpers/generate_and_update_discoveries'));
 
       // Make sure the mock is cleared
       generateAndUpdateAttackDiscoveries.mockClear();
@@ -307,9 +315,7 @@ describe('postAttackDiscoveryGenerateRoute', () => {
     });
 
     it('always calls generateAndUpdateAttackDiscoveries with enableFieldRendering: true for the _generate route', async () => {
-      const { generateAndUpdateAttackDiscoveries } = jest.requireMock(
-        '../../helpers/generate_and_update_discoveries'
-      );
+      const { generateAndUpdateAttackDiscoveries } = (await vi.importMock('../../helpers/generate_and_update_discoveries'));
 
       // Make sure the mock is cleared
       generateAndUpdateAttackDiscoveries.mockClear();

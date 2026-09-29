@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
 import 'jest-styled-components';
 import { DonutChart } from './donut_chart';
@@ -12,11 +14,14 @@ import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { mockCore } from '../../../lib/helper/rtl_helpers';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn().mockImplementation(() => ({
-    services: mockCore(),
-  })),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn().mockImplementation(() => ({
+        services: mockCore(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DonutChart component', () => {
   it('passes correct props without errors for valid props', () => {

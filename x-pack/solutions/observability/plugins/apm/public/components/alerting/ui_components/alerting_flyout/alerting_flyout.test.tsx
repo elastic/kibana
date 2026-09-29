@@ -5,72 +5,92 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AlertingFlyout } from '.';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-const mockRuleFormFlyout = jest.fn();
+const mockRuleFormFlyout = vi.fn();
 
 const start = '2024-01-01T00:00:00.000Z';
 const end = '2024-01-01T01:00:00.000Z';
 
-jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
-  RuleFormFlyout: (props: any) => {
-    mockRuleFormFlyout(props);
-    return <div data-test-subj="mockRuleFormFlyout">Rule Form Flyout</div>;
-  },
-}));
-
-jest.mock('@kbn/response-ops-rule-form/lib', () => ({
-  isValidRuleFormPlugins: () => true,
-}));
-
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      triggersActionsUi: {
-        ruleTypeRegistry: { get: jest.fn() },
-        actionTypeRegistry: { get: jest.fn() },
+vi.mock('@kbn/response-ops-rule-form/flyout', () => {
+      const mocked = {
+      RuleFormFlyout: (props: any) => {
+        mockRuleFormFlyout(props);
+        return <div data-test-subj="mockRuleFormFlyout">Rule Form Flyout</div>;
       },
-      application: { capabilities: {} },
-      notifications: { toasts: {} },
-      http: { basePath: { prepend: jest.fn() } },
-      docLinks: { links: {} },
-      uiSettings: { get: jest.fn() },
-      settings: { client: { get: jest.fn() } },
-    },
-  }),
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_service_name', () => ({
-  useServiceName: () => 'test-service',
-}));
+vi.mock('@kbn/response-ops-rule-form/lib', () => {
+      const mocked = {
+      isValidRuleFormPlugins: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_apm_params', () => ({
-  useApmParams: () => ({
-    query: {
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-      environment: 'production',
-      transactionType: 'request',
-    },
-    path: {},
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          triggersActionsUi: {
+            ruleTypeRegistry: { get: vi.fn() },
+            actionTypeRegistry: { get: vi.fn() },
+          },
+          application: { capabilities: {} },
+          notifications: { toasts: {} },
+          http: { basePath: { prepend: vi.fn() } },
+          docLinks: { links: {} },
+          uiSettings: { get: vi.fn() },
+          settings: { client: { get: vi.fn() } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_time_range', () => ({
-  useTimeRange: () => ({
-    start,
-    end,
-  }),
-}));
+vi.mock('../../../../hooks/use_service_name', () => {
+      const mocked = {
+      useServiceName: () => 'test-service',
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useApmParams: () => ({
+        query: {
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          environment: 'production',
+          transactionType: 'request',
+        },
+        path: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => ({
+        start,
+        end,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function renderAlertingFlyout(props: Partial<React.ComponentProps<typeof AlertingFlyout>> = {}) {
   const defaultProps = {
     addFlyoutVisible: true,
-    setAddFlyoutVisibility: jest.fn(),
+    setAddFlyoutVisibility: vi.fn(),
     ruleType: ApmRuleType.TransactionDuration,
   };
 
@@ -83,7 +103,7 @@ function renderAlertingFlyout(props: Partial<React.ComponentProps<typeof Alertin
 
 describe('AlertingFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {
@@ -267,7 +287,7 @@ describe('AlertingFlyout', () => {
 
   describe('callbacks', () => {
     it('calls setAddFlyoutVisibility with false on cancel', () => {
-      const setAddFlyoutVisibility = jest.fn();
+      const setAddFlyoutVisibility = vi.fn();
       renderAlertingFlyout({
         addFlyoutVisible: true,
         ruleType: ApmRuleType.TransactionDuration,
@@ -281,7 +301,7 @@ describe('AlertingFlyout', () => {
     });
 
     it('calls setAddFlyoutVisibility with false on submit', () => {
-      const setAddFlyoutVisibility = jest.fn();
+      const setAddFlyoutVisibility = vi.fn();
       renderAlertingFlyout({
         addFlyoutVisible: true,
         ruleType: ApmRuleType.TransactionDuration,

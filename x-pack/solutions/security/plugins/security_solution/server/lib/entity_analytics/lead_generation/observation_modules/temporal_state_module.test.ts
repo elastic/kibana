@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTemporalStateModule } from './temporal_state_module';
@@ -76,7 +78,7 @@ describe('TemporalStateModule', () => {
   const spaceId = 'default';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient.search.mockResolvedValue({ hits: { hits: [] }, aggregations: {} } as never);
   });
 

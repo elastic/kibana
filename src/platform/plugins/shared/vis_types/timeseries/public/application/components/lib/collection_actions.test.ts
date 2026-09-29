@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CollectionActionsProps } from './collection_actions';
 import { handleChange, handleAdd, handleDelete } from './collection_actions';
 
 describe('collection actions', () => {
   test('handleChange() calls props.onChange() with updated collection', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     const props = {
       model: { test: [{ id: '1', title: 'foo' }] },
       name: 'test',
@@ -26,8 +28,8 @@ describe('collection actions', () => {
   });
 
   test('handleAdd() calls props.onChange() with update collection', () => {
-    const newItemFn = jest.fn(() => ({ id: '2', text: 'example' }));
-    const fn = jest.fn();
+    const newItemFn = vi.fn(() => ({ id: '2', text: 'example' }));
+    const fn = vi.fn();
     const props = {
       model: { test: [{ id: '1', text: 'foo' }] },
       name: 'test',
@@ -45,7 +47,7 @@ describe('collection actions', () => {
   });
 
   test('handleDelete() calls props.onChange() with update collection', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     const props = {
       model: { test: [{ id: '1', title: 'foo' }] },
       name: 'test',

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { fetchAlertSnapshot, parseAlertSnapshot } from './alert_snapshot';
 
@@ -63,10 +66,10 @@ describe('parseAlertSnapshot', () => {
 });
 
 describe('fetchAlertSnapshot', () => {
-  const makeAlertsClient = (overrides: Partial<Record<string, jest.Mock>> = {}) =>
+  const makeAlertsClient = (overrides: Partial<Record<string, Mock>> = {}) =>
     ({
-      getAuthorizedAlertsIndices: jest.fn().mockResolvedValue(['.alerts-observability.test']),
-      get: jest.fn().mockResolvedValue(alert),
+      getAuthorizedAlertsIndices: vi.fn().mockResolvedValue(['.alerts-observability.test']),
+      get: vi.fn().mockResolvedValue(alert),
       ...overrides,
     } as unknown as AlertsClient);
 
@@ -78,7 +81,7 @@ describe('fetchAlertSnapshot', () => {
 
   it('returns not found when the user has no authorized alert indices', async () => {
     const alertsClient = makeAlertsClient({
-      getAuthorizedAlertsIndices: jest.fn().mockResolvedValue([]),
+      getAuthorizedAlertsIndices: vi.fn().mockResolvedValue([]),
     });
     await expect(fetchAlertSnapshot(alertsClient, 'alert-1')).rejects.toMatchObject({
       output: { statusCode: 404 },
@@ -87,7 +90,7 @@ describe('fetchAlertSnapshot', () => {
 
   it('returns bad request when the alert lacks required fields', async () => {
     const alertsClient = makeAlertsClient({
-      get: jest.fn().mockResolvedValue({ ...alert, 'kibana.alert.uuid': undefined }),
+      get: vi.fn().mockResolvedValue({ ...alert, 'kibana.alert.uuid': undefined }),
     });
     await expect(fetchAlertSnapshot(alertsClient, 'alert-1')).rejects.toMatchObject({
       output: { statusCode: 400 },
@@ -96,7 +99,7 @@ describe('fetchAlertSnapshot', () => {
 
   it('preserves alert lookup failures', async () => {
     const lookupError = new Error('Elasticsearch unavailable');
-    const alertsClient = makeAlertsClient({ get: jest.fn().mockRejectedValue(lookupError) });
+    const alertsClient = makeAlertsClient({ get: vi.fn().mockRejectedValue(lookupError) });
     await expect(fetchAlertSnapshot(alertsClient, 'alert-1')).rejects.toBe(lookupError);
   });
 });

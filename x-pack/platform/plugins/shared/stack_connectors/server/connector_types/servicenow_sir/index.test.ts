@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -14,18 +17,21 @@ import { getServiceNowSIRConnectorType } from '.';
 import { api } from './api';
 import type { ServiceNowPublicConfigurationType } from '@kbn/connector-schemas/servicenow';
 
-jest.mock('./api', () => ({
-  api: {
-    getChoices: jest.fn(),
-    getFields: jest.fn(),
-    getIncident: jest.fn(),
-    handshake: jest.fn(),
-    pushToService: jest.fn(),
-  },
-}));
+vi.mock('./api', () => {
+      const mocked = {
+      api: {
+        getChoices: vi.fn(),
+        getFields: vi.fn(),
+        getIncident: vi.fn(),
+        handshake: vi.fn(),
+        pushToService: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const services = actionsMock.createServices();
-const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+const mockedLogger: Mocked<Logger> = loggerMock.create();
 
 describe('ServiceNow', () => {
   const config = { apiUrl: 'https://instance.com' };
@@ -41,7 +47,7 @@ describe('ServiceNow', () => {
   };
 
   beforeEach(() => {
-    (api.pushToService as jest.Mock).mockResolvedValue({ id: 'some-id' });
+    (api.pushToService as Mock).mockResolvedValue({ id: 'some-id' });
   });
 
   describe('ServiceNow SIR', () => {
@@ -53,7 +59,7 @@ describe('ServiceNow', () => {
 
     describe('execute()', () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       test('it pass the correct comment field key', async () => {
@@ -70,7 +76,7 @@ describe('ServiceNow', () => {
           ExecutorParams
         >;
         await connectorType.executor(executorOptions);
-        expect((api.pushToService as jest.Mock).mock.calls[0][0].commentFieldKey).toBe(
+        expect((api.pushToService as Mock).mock.calls[0][0].commentFieldKey).toBe(
           'work_notes'
         );
       });
@@ -94,7 +100,7 @@ describe('ServiceNow', () => {
           ExecutorParams
         >;
         await connectorType.executor(executorOptions);
-        expect((api.getIncident as jest.Mock).mock.calls[0][0].params.externalId).toBe(
+        expect((api.getIncident as Mock).mock.calls[0][0].params.externalId).toBe(
           'incident-1'
         );
       });

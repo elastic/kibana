@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -12,13 +15,19 @@ import { useDocumentFlyoutTitle } from './use_document_flyout_title';
 import { useFlyoutApi } from '../../use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 
-jest.mock('../../use_flyout_api');
-jest.mock('../../document/main/components/severity', () => ({
-  DocumentSeverity: () => <div data-test-subj="documentSeverityMock" />,
-}));
-jest.mock('../components/timestamp', () => ({
-  Timestamp: () => <div data-test-subj="timestampMock" />,
-}));
+vi.mock('../../use_flyout_api');
+vi.mock('../../document/main/components/severity', () => {
+      const mocked = {
+      DocumentSeverity: () => <div data-test-subj="documentSeverityMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../components/timestamp', () => {
+      const mocked = {
+      Timestamp: () => <div data-test-subj="timestampMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -46,12 +55,12 @@ const attackHit = createHit({
 });
 
 describe('useDocumentFlyoutTitle', () => {
-  const openDocumentFlyoutFromIndexAsChild = jest.fn();
-  const openAttackFlyoutAsChild = jest.fn();
+  const openDocumentFlyoutFromIndexAsChild = vi.fn();
+  const openAttackFlyoutAsChild = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useFlyoutApi as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useFlyoutApi as Mock).mockReturnValue({
       openDocumentFlyoutFromIndexAsChild,
       openAttackFlyoutAsChild,
     });

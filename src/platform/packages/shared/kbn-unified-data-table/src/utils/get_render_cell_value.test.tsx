@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CodeEditorProps } from '@kbn/code-editor';
 import type { CustomCellRenderer } from '../types';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -30,17 +33,17 @@ import { getRenderCellValueFn } from './get_render_cell_value';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
-const mockSourceDocument = jest.spyOn(sourceDocumentModule, 'SourceDocument');
-const mockSourcePopoverContent = jest.spyOn(sourcePopoverContentModule, 'default');
+const mockSourceDocument = vi.spyOn(sourceDocumentModule, 'SourceDocument');
+const mockSourcePopoverContent = vi.spyOn(sourcePopoverContentModule, 'default');
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
+vi.mock('@kbn/code-editor', async () => {
+  const original = (await vi.importActual('@kbn/code-editor'));
 
   const CodeEditorMock = (props: CodeEditorProps) => (
     <input
       data-test-subj="mockCodeEditor"
       data-value={props.value}
-      onChange={jest.fn()}
+      onChange={vi.fn()}
       value={props.value}
     />
   );
@@ -53,7 +56,7 @@ jest.mock('@kbn/code-editor', () => {
 
 const mockServices = {
   fieldFormats: {
-    getDefaultInstance: jest.fn(() => ({
+    getDefaultInstance: vi.fn(() => ({
       convert: (value: unknown) => (value ? value : '-'),
       convertToReact: (value: unknown) => (value ? value : '-'),
     })),
@@ -133,7 +136,7 @@ const getCustomEsqlDataTableCellValue = () => {
 
   return getRenderCellValueFn({
     documentsDisplayMode: 'table',
-    closePopover: jest.fn(),
+    closePopover: vi.fn(),
     columnsMeta: {
       // custom ES|QL var
       var0: {
@@ -155,7 +158,7 @@ const getCustomEsqlDataTableCellValue = () => {
 };
 
 const getUnmappedFieldDataTableCellValue = () => {
-  (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+  (dataViewMock.getFieldByName as Mock).mockReturnValueOnce(undefined);
 
   const rowsFieldsUnmapped: EsHitRecord[] = [
     {
@@ -172,7 +175,7 @@ const getUnmappedFieldDataTableCellValue = () => {
 
   return getRenderCellValueFn({
     documentsDisplayMode: 'table',
-    closePopover: jest.fn(),
+    closePopover: vi.fn(),
     columnsMeta: undefined,
     dataView: dataViewMock,
     fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -191,7 +194,7 @@ describe('Unified data table cell rendering', () => {
   it('renders bytes column correctly', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -208,7 +211,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -221,7 +224,7 @@ describe('Unified data table cell rendering', () => {
   it('renders bytes column correctly using _source when details is true', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -238,13 +241,13 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
   });
 
   it('renders bytes column correctly using fields when details is true', async () => {
-    const closePopoverMockFn = jest.fn();
+    const closePopoverMockFn = vi.fn();
     const user = userEvent.setup();
 
     const DataTableCellValue = getRenderCellValueFn({
@@ -266,7 +269,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -282,7 +285,7 @@ describe('Unified data table cell rendering', () => {
 
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -299,7 +302,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -328,12 +331,12 @@ describe('Unified data table cell rendering', () => {
   });
 
   it('renders JSON source mode instead of a custom _source cell renderer', () => {
-    const CustomSourceRenderer = jest.fn(() => <span>custom source</span>);
+    const CustomSourceRenderer = vi.fn(() => <span>custom source</span>);
     const rows = rowsSource.map(build);
 
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'json',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       externalCustomRenderers: {
@@ -353,7 +356,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -382,7 +385,7 @@ describe('Unified data table cell rendering', () => {
 
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewWithoutSource,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -400,7 +403,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -420,7 +423,7 @@ describe('Unified data table cell rendering', () => {
   it('renders _source column correctly when isDetails is set to true', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -437,7 +440,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
   });
@@ -448,7 +451,7 @@ describe('Unified data table cell rendering', () => {
 
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -466,7 +469,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -499,7 +502,7 @@ describe('Unified data table cell rendering', () => {
 
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -516,7 +519,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -550,7 +553,7 @@ describe('Unified data table cell rendering', () => {
 
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -568,7 +571,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -596,7 +599,7 @@ describe('Unified data table cell rendering', () => {
   it('renders fields-based column correctly when isDetails is set to true', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -613,7 +616,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
   });
@@ -625,7 +628,7 @@ describe('Unified data table cell rendering', () => {
 
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -642,7 +645,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -667,14 +670,14 @@ describe('Unified data table cell rendering', () => {
   });
 
   it('collect object fields and renders them like _source with fallback for unmapped', () => {
-    (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    (dataViewMock.getFieldByName as Mock).mockReturnValueOnce(undefined);
     const showFieldHandler = (fieldName: string) =>
       ['extension', 'bytes', 'object.value'].includes(fieldName);
     const rows = rowsFieldsWithTopLevelObject.map(build);
 
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -691,7 +694,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -716,7 +719,7 @@ describe('Unified data table cell rendering', () => {
   });
 
   it('collect object fields and renders them as json in details', () => {
-    const closePopoverMockFn = jest.fn();
+    const closePopoverMockFn = vi.fn();
 
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
@@ -737,13 +740,13 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
   });
 
   it('renders a functional close button when CodeEditor is rendered', async () => {
-    const closePopoverMockFn = jest.fn();
+    const closePopoverMockFn = vi.fn();
     const user = userEvent.setup();
 
     const DataTableCellValue = getRenderCellValueFn({
@@ -766,7 +769,7 @@ describe('Unified data table cell rendering', () => {
           isExpandable={true}
           isExpanded={false}
           rowIndex={0}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />
       </KibanaContextProvider>
     );
@@ -778,11 +781,11 @@ describe('Unified data table cell rendering', () => {
   });
 
   it('does not collect subfields when the the column is unmapped but part of fields response', () => {
-    (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    (dataViewMock.getFieldByName as Mock).mockReturnValueOnce(undefined);
 
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -799,7 +802,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -811,7 +814,7 @@ describe('Unified data table cell rendering', () => {
   it('renders correctly when invalid row is given', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -828,7 +831,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={1}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -840,7 +843,7 @@ describe('Unified data table cell rendering', () => {
   it('renders correctly when invalid column is given', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -857,7 +860,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -877,7 +880,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -897,7 +900,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -920,7 +923,7 @@ describe('Unified data table cell rendering', () => {
 
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -937,7 +940,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -959,7 +962,7 @@ describe('Unified data table cell rendering', () => {
 
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -976,7 +979,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -998,7 +1001,7 @@ describe('Unified data table cell rendering', () => {
 
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -1015,7 +1018,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -1035,7 +1038,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -1045,7 +1048,7 @@ describe('Unified data table cell rendering', () => {
   });
 
   it('renders custom ES|QL fields from columnsMeta correctly', () => {
-    const fieldsCreateSpy = jest.spyOn(dataViewMock.fields, 'create');
+    const fieldsCreateSpy = vi.spyOn(dataViewMock.fields, 'create');
     fieldsCreateSpy.mockClear();
     const DataTableCellValue = getCustomEsqlDataTableCellValue();
 
@@ -1057,7 +1060,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -1078,7 +1081,7 @@ describe('Unified data table cell rendering', () => {
   });
 
   it('renders ES|QL fields with columnsMeta overrides correctly', () => {
-    const fieldsCreateSpy = jest.spyOn(dataViewMock.fields, 'create');
+    const fieldsCreateSpy = vi.spyOn(dataViewMock.fields, 'create');
     fieldsCreateSpy.mockClear();
     const DataTableCellValue = getCustomEsqlDataTableCellValue();
 
@@ -1090,7 +1093,7 @@ describe('Unified data table cell rendering', () => {
         isExpandable={true}
         isExpanded={false}
         rowIndex={0}
-        setCellProps={jest.fn()}
+        setCellProps={vi.fn()}
       />
     );
 
@@ -1129,7 +1132,7 @@ describe('Unified data table cell rendering', () => {
 
       const DataTableCellValue = getRenderCellValueFn({
         documentsDisplayMode: 'table',
-        closePopover: jest.fn(),
+        closePopover: vi.fn(),
         columnsMeta: undefined,
         dataView: testDataView,
         fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -1146,7 +1149,7 @@ describe('Unified data table cell rendering', () => {
           isExpandable={true}
           isExpanded={false}
           rowIndex={0}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />
       );
 
@@ -1178,7 +1181,7 @@ describe('Unified data table cell rendering', () => {
 
       const DataTableCellValue = getRenderCellValueFn({
         documentsDisplayMode: 'table',
-        closePopover: jest.fn(),
+        closePopover: vi.fn(),
         columnsMeta: columnsMetaOverridingBytesType,
         dataView: testDataView,
         fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -1195,7 +1198,7 @@ describe('Unified data table cell rendering', () => {
           isExpandable={true}
           isExpanded={false}
           rowIndex={0}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />
       );
 
@@ -1246,7 +1249,7 @@ describe('Unified data table cell rendering', () => {
     ) =>
       getRenderCellValueFn({
         documentsDisplayMode: 'table',
-        closePopover: jest.fn(),
+        closePopover: vi.fn(),
         columnsMeta: undefined,
         dataView: dataViewMock,
         externalCustomRenderers,
@@ -1258,7 +1261,7 @@ describe('Unified data table cell rendering', () => {
 
     const renderCellValue = (
       DataTableCellValue: ReturnType<typeof getRenderCellValueFn>,
-      setCellProps: jest.Mock
+      setCellProps: Mock
     ) => (
       <DataTableCellValue
         colIndex={0}
@@ -1272,7 +1275,7 @@ describe('Unified data table cell rendering', () => {
     );
 
     it('merges internal and custom cell props', async () => {
-      const setCellProps = jest.fn();
+      const setCellProps = vi.fn();
 
       renderWithI18n(renderCellValue(getDataTableCellValue(customCellRenderers), setCellProps));
 
@@ -1282,7 +1285,7 @@ describe('Unified data table cell rendering', () => {
     });
 
     it('clears custom cell props when the custom renderer is removed', async () => {
-      const setCellProps = jest.fn();
+      const setCellProps = vi.fn();
       const initialDataTableCellValue = getDataTableCellValue(customCellRenderers);
       const nextDataTableCellValue = getDataTableCellValue();
 
@@ -1300,7 +1303,7 @@ describe('Unified data table cell rendering', () => {
     });
 
     it('keeps custom cell props when the internal highlight is removed', async () => {
-      const setCellProps = jest.fn();
+      const setCellProps = vi.fn();
       const initialDataTableCellValue = getDataTableCellValue(customCellRenderers);
       const nextDataTableCellValue = getDataTableCellValue(customCellRenderers, plainRows);
 

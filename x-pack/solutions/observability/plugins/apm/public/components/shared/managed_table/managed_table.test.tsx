@@ -5,32 +5,44 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { shouldfetchServer, ManagedTable, type TableActions, type ITableColumn } from '.';
 
-jest.mock('../../../context/url_params_context/use_url_params', () => ({
-  useLegacyUrlParams: () => ({
-    urlParams: {},
-  }),
-}));
+vi.mock('../../../context/url_params_context/use_url_params', () => {
+      const mocked = {
+      useLegacyUrlParams: () => ({
+        urlParams: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
-    push: jest.fn(),
-    location: { search: '' },
-  }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: () => ({
+        push: vi.fn(),
+        location: { search: '' },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      uiSettings: {
-        get: jest.fn().mockReturnValue('off'),
-      },
-    },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          uiSettings: {
+            get: vi.fn().mockReturnValue('off'),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 interface TestItem {
   id: string;
@@ -105,7 +117,7 @@ describe('ManagedTable', () => {
   });
 
   describe('Actions column', () => {
-    const createTestActions = (onClickMock: jest.Mock): TableActions<TestItem> => [
+    const createTestActions = (onClickMock: Mock): TableActions<TestItem> => [
       {
         id: 'alerts',
         groupLabel: 'Alerts',
@@ -131,7 +143,7 @@ describe('ManagedTable', () => {
     const renderManagedTable = (
       props: Partial<React.ComponentProps<typeof ManagedTable<TestItem>>> = {}
     ) => {
-      const onClickMock = jest.fn();
+      const onClickMock = vi.fn();
       const actions = createTestActions(onClickMock);
 
       const result = render(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { callAssistantGraph } from '.';
 import { getDefaultAssistantGraph } from './graph';
@@ -23,16 +26,16 @@ import { promptDictionary } from '../../../prompt';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { HumanMessage } from '@langchain/core/messages';
 
-jest.mock('./graph');
-jest.mock('./helpers');
-jest.mock('@kbn/langchain/server/tracers/apm');
-jest.mock('@kbn/langchain/server/tracers/telemetry');
-jest.mock('@kbn/security-ai-prompts');
-const getDefaultAssistantGraphMock = getDefaultAssistantGraph as jest.Mock;
-const resolveProviderAndModelMock = resolveProviderAndModel as jest.Mock;
-const getPromptMock = getPrompt as jest.Mock;
-const telemetryTracerMock = TelemetryTracer as unknown as jest.Mock;
-const getTool = jest.fn();
+vi.mock('./graph');
+vi.mock('./helpers');
+vi.mock('@kbn/langchain/server/tracers/apm');
+vi.mock('@kbn/langchain/server/tracers/telemetry');
+vi.mock('@kbn/security-ai-prompts');
+const getDefaultAssistantGraphMock = getDefaultAssistantGraph as Mock;
+const resolveProviderAndModelMock = resolveProviderAndModel as Mock;
+const getPromptMock = getPrompt as Mock;
+const telemetryTracerMock = TelemetryTracer as unknown as Mock;
+const getTool = vi.fn();
 const mockTool: AssistantTool = {
   id: 'id',
   name: 'name',
@@ -44,12 +47,12 @@ const mockTool: AssistantTool = {
 describe('callAssistantGraph', () => {
   const mockDataClients = {
     anonymizationFieldsDataClient: {
-      findDocuments: jest.fn(),
+      findDocuments: vi.fn(),
     },
     kbDataClient: {
-      isInferenceEndpointExists: jest.fn(),
-      getAssistantTools: jest.fn().mockReturnValue([{ name: 'MyKBTool' }]),
-      getRequiredKnowledgeBaseDocumentEntries: jest.fn().mockResolvedValue([]),
+      isInferenceEndpointExists: vi.fn(),
+      getAssistantTools: vi.fn().mockReturnValue([{ name: 'MyKBTool' }]),
+      getRequiredKnowledgeBaseDocumentEntries: vi.fn().mockResolvedValue([]),
     },
   } as unknown as AssistantDataClients;
 
@@ -60,14 +63,14 @@ describe('callAssistantGraph', () => {
   };
 
   const savedObjectsClient = savedObjectsClientMock.create();
-  savedObjectsClient.find = jest.fn().mockResolvedValue({
+  savedObjectsClient.find = vi.fn().mockResolvedValue({
     page: 1,
     per_page: 20,
     total: 0,
     saved_objects: [],
   });
   const mockLogger = loggerMock.create();
-  const getChatModel = jest.fn();
+  const getChatModel = vi.fn();
   const defaultParams = {
     actionsClient: actionsClientMock.create(),
     alertsIndexPattern: 'test-pattern',
@@ -81,13 +84,13 @@ describe('callAssistantGraph', () => {
     },
     inferenceChatModelDisabled: true,
     langChainMessages: [new HumanMessage({ content: 'test message' })],
-    llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
+    llmTasks: { retrieveDocumentationAvailable: vi.fn(), retrieveDocumentation: vi.fn() },
     llmType: 'openai',
     isOssModel: false,
     logger: mockLogger,
     isStream: false,
-    onLlmResponse: jest.fn(),
-    onNewReplacements: jest.fn(),
+    onLlmResponse: vi.fn(),
+    onNewReplacements: vi.fn(),
     replacements: [],
     request: mockRequest,
     savedObjectsClient,
@@ -99,31 +102,31 @@ describe('callAssistantGraph', () => {
     responseLanguage: 'English',
     contentReferencesStore: newContentReferencesStoreMock(),
     assistantContext: {
-      getCheckpointSaver: jest.fn().mockResolvedValue(null),
+      getCheckpointSaver: vi.fn().mockResolvedValue(null),
     },
     core: {
       uiSettings: {
         client: {
-          get: jest.fn().mockResolvedValue('Browser'),
+          get: vi.fn().mockResolvedValue('Browser'),
         },
       },
     },
   } as unknown as AgentExecutorParams<boolean>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (mockDataClients?.kbDataClient?.isInferenceEndpointExists as jest.Mock).mockResolvedValue(true);
+    vi.clearAllMocks();
+    (mockDataClients?.kbDataClient?.isInferenceEndpointExists as Mock).mockResolvedValue(true);
     getDefaultAssistantGraphMock.mockReturnValue({});
     resolveProviderAndModelMock.mockResolvedValue({
       provider: 'bedrock',
     });
-    (invokeGraph as jest.Mock).mockResolvedValue({
+    (invokeGraph as Mock).mockResolvedValue({
       output: 'test-output',
       traceData: {},
       conversationId: 'new-conversation-id',
     });
-    (streamGraph as jest.Mock).mockResolvedValue({});
-    (mockDataClients?.anonymizationFieldsDataClient?.findDocuments as jest.Mock).mockResolvedValue(
+    (streamGraph as Mock).mockResolvedValue({});
+    (mockDataClients?.anonymizationFieldsDataClient?.findDocuments as Mock).mockResolvedValue(
       getFindAnonymizationFieldsResultWithSingleHit()
     );
     getPromptMock.mockResolvedValue('prompt');
@@ -178,14 +181,14 @@ describe('callAssistantGraph', () => {
 
     it('handles error when anonymizationFieldsDataClient.findDocuments fails', async () => {
       (
-        mockDataClients?.anonymizationFieldsDataClient?.findDocuments as jest.Mock
+        mockDataClients?.anonymizationFieldsDataClient?.findDocuments as Mock
       ).mockRejectedValue(new Error('test error'));
 
       await expect(callAssistantGraph(defaultParams)).rejects.toThrow('test error');
     });
 
     it('handles error when kbDataClient.isInferenceEndpointExists fails', async () => {
-      (mockDataClients?.kbDataClient?.isInferenceEndpointExists as jest.Mock).mockRejectedValue(
+      (mockDataClients?.kbDataClient?.isInferenceEndpointExists as Mock).mockRejectedValue(
         new Error('test error')
       );
 
@@ -193,7 +196,7 @@ describe('callAssistantGraph', () => {
     });
 
     it('returns correct response when no conversationId is returned', async () => {
-      (invokeGraph as jest.Mock).mockResolvedValue({ output: 'test-output', traceData: {} });
+      (invokeGraph as Mock).mockResolvedValue({ output: 'test-output', traceData: {} });
 
       const result = await callAssistantGraph(defaultParams);
 

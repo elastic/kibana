@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import { httpServiceMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
@@ -63,7 +65,7 @@ describe('action_type_model_utils', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('calls the connector spec API and returns the response', async () => {

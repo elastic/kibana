@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { CollapsedActivityPreview } from './collapsed_activity_preview';
@@ -12,7 +14,7 @@ import { CollapsedActivityPreview } from './collapsed_activity_preview';
 describe('CollapsedActivityPreview', () => {
   it('renders the activity body it is given', () => {
     render(
-      <CollapsedActivityPreview data-test-subj="preview" onExpand={jest.fn()}>
+      <CollapsedActivityPreview data-test-subj="preview" onExpand={vi.fn()}>
         <p>{'A comment body'}</p>
       </CollapsedActivityPreview>
     );
@@ -22,7 +24,7 @@ describe('CollapsedActivityPreview', () => {
 
   it('keeps the crop out of the accessibility tree and the tab order', () => {
     render(
-      <CollapsedActivityPreview data-test-subj="preview" onExpand={jest.fn()}>
+      <CollapsedActivityPreview data-test-subj="preview" onExpand={vi.fn()}>
         <button type="button">{'Clipped control'}</button>
       </CollapsedActivityPreview>
     );
@@ -38,7 +40,7 @@ describe('CollapsedActivityPreview', () => {
 
   it('offers no "Show more" when nothing is actually clipped', () => {
     render(
-      <CollapsedActivityPreview data-test-subj="preview" onExpand={jest.fn()}>
+      <CollapsedActivityPreview data-test-subj="preview" onExpand={vi.fn()}>
         <p>{'Short enough to fit'}</p>
       </CollapsedActivityPreview>
     );

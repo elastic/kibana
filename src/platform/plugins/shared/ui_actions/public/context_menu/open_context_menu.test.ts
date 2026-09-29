@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createInteractionPositionTracker } from './open_context_menu';
 import { fireEvent } from '@testing-library/react';
 
@@ -17,7 +19,7 @@ const right = 200;
 const bottom = 200;
 beforeEach(() => {
   targetEl = document.createElement('div');
-  jest.spyOn(targetEl, 'getBoundingClientRect').mockImplementation(() => ({
+  vi.spyOn(targetEl, 'getBoundingClientRect').mockImplementation(() => ({
     top,
     left,
     right,
@@ -61,7 +63,7 @@ test('should use position of previous element, if latest element is no longer in
   const { resolveLastPosition } = createInteractionPositionTracker();
 
   const detachedElement = document.createElement('div');
-  const spy = jest.spyOn(detachedElement, 'getBoundingClientRect');
+  const spy = vi.spyOn(detachedElement, 'getBoundingClientRect');
 
   fireEvent.click(targetEl);
   fireEvent.click(detachedElement);

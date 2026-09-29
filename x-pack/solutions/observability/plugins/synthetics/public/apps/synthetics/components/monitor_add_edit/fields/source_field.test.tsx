@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { SourceField } from './source_field';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
-  htmlIdGenerator: () => () => `id-${Math.random()}`,
-}));
+vi.mock('@elastic/eui/lib/services/accessibility/html_id_generator', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui/lib/services/accessibility/html_id_generator')),
+      htmlIdGenerator: () => () => `id-${Math.random()}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const onChange = jest.fn();
-const onBlur = jest.fn();
+const onChange = vi.fn();
+const onBlur = vi.fn();
 
 describe('<ScriptRecorderFields />', () => {
   const WrappedComponent = ({
@@ -46,7 +51,7 @@ describe('<ScriptRecorderFields />', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders ScriptRecorderFields as the default tab', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider, useQuery } from '@kbn/react-query';
@@ -15,16 +18,16 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import * as api from '../apis/get_muted_alerts_instances_by_rule';
 import { useGetAlertSnoozeStateQuery } from './use_get_alert_snooze_state_query';
 
-jest.mock('../apis/get_muted_alerts_instances_by_rule');
+vi.mock('../apis/get_muted_alerts_instances_by_rule');
 
 // Wrap useQuery in a call-through mock so we can assert the `context` option it
 // receives while the real query behaviour (api call, error toast) still runs.
-jest.mock('@kbn/react-query', () => {
-  const actual = jest.requireActual('@kbn/react-query');
-  return { __esModule: true, ...actual, useQuery: jest.fn(actual.useQuery) };
+vi.mock('@kbn/react-query', async () => {
+  const actual = (await vi.importActual('@kbn/react-query'));
+  return { __esModule: true, ...actual, useQuery: vi.fn(actual.useQuery) };
 });
 
-const useQueryMock = useQuery as jest.Mock;
+const useQueryMock = useQuery as Mock;
 
 const ruleIds = ['a', 'b'];
 
@@ -45,11 +48,11 @@ describe('useGetAlertSnoozeStateQuery', () => {
   const addErrorMock = notifications.toasts.addError;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'getAlertSnoozeStateByRule');
+    const spy = vi.spyOn(api, 'getAlertSnoozeStateByRule');
 
     renderHook(() => useGetAlertSnoozeStateQuery({ http, notifications, ruleIds }), {
       wrapper: Wrapper,
@@ -59,7 +62,7 @@ describe('useGetAlertSnoozeStateQuery', () => {
   });
 
   it('does not call the api if the enabled option is false', async () => {
-    const spy = jest.spyOn(api, 'getAlertSnoozeStateByRule');
+    const spy = vi.spyOn(api, 'getAlertSnoozeStateByRule');
 
     renderHook(
       () => useGetAlertSnoozeStateQuery({ http, notifications, ruleIds }, { enabled: false }),
@@ -70,7 +73,7 @@ describe('useGetAlertSnoozeStateQuery', () => {
   });
 
   it('shows a toast error when the api returns an error', async () => {
-    const spy = jest
+    const spy = vi
       .spyOn(api, 'getAlertSnoozeStateByRule')
       .mockRejectedValue(new Error('An error'));
 

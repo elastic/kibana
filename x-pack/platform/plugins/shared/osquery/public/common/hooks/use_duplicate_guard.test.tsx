@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -15,7 +17,7 @@ import { useDuplicateGuard } from './use_duplicate_guard';
 const createMockCopyMutation = (
   overrides: Partial<{ mutateAsync: () => Promise<unknown>; isLoading: boolean }> = {}
 ) => ({
-  mutateAsync: jest.fn().mockResolvedValue(undefined),
+  mutateAsync: vi.fn().mockResolvedValue(undefined),
   isLoading: false,
   ...overrides,
 });
@@ -52,7 +54,7 @@ const renderWithProviders = (props: TestComponentProps) =>
 
 describe('useDuplicateGuard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('handleDuplicateClick', () => {
@@ -151,7 +153,7 @@ describe('useDuplicateGuard', () => {
       fireEvent.click(screen.getByText('Duplicate'));
       expect(screen.queryByText('You have unsaved changes')).not.toBeInTheDocument();
       expect(copyMutation.mutateAsync).toHaveBeenCalledTimes(1);
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       // Become dirty — modal should appear
       fireEvent.click(screen.getByText('Make dirty'));

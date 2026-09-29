@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -14,13 +17,13 @@ import { useRiskEngineSettingsMutations } from './use_risk_engine_settings_mutat
 import { useRiskEngineSettingsState } from './use_risk_engine_settings_state';
 
 // Mock the individual hooks
-jest.mock('./use_risk_engine_settings_query');
-jest.mock('./use_risk_engine_settings_mutations');
-jest.mock('./use_risk_engine_settings_state');
+vi.mock('./use_risk_engine_settings_query');
+vi.mock('./use_risk_engine_settings_mutations');
+vi.mock('./use_risk_engine_settings_state');
 
-const mockUseRiskEngineSettingsQuery = useRiskEngineSettingsQuery as jest.Mock;
-const mockUseRiskEngineSettingsMutations = useRiskEngineSettingsMutations as jest.Mock;
-const mockUseRiskEngineSettingsState = useRiskEngineSettingsState as jest.Mock;
+const mockUseRiskEngineSettingsQuery = useRiskEngineSettingsQuery as Mock;
+const mockUseRiskEngineSettingsMutations = useRiskEngineSettingsMutations as Mock;
+const mockUseRiskEngineSettingsState = useRiskEngineSettingsState as Mock;
 
 // Mock React Query
 const createWrapper = () => {
@@ -68,12 +71,12 @@ describe('useConfigurableRiskEngineSettings', () => {
       ],
     },
     selectedSettingsMatchSavedSettings: true,
-    resetSelectedSettings: jest.fn(),
-    setSelectedDateSetting: jest.fn(),
-    toggleSelectedClosedAlertsSetting: jest.fn(),
-    toggleScoreRetainment: jest.fn(),
-    setAlertFilters: jest.fn(),
-    getUIAlertFilters: jest.fn().mockReturnValue([
+    resetSelectedSettings: vi.fn(),
+    setSelectedDateSetting: vi.fn(),
+    toggleSelectedClosedAlertsSetting: vi.fn(),
+    toggleScoreRetainment: vi.fn(),
+    setAlertFilters: vi.fn(),
+    getUIAlertFilters: vi.fn().mockReturnValue([
       {
         id: 'filter-0-1234567890',
         text: 'user.name: "test-user"',
@@ -86,7 +89,7 @@ describe('useConfigurableRiskEngineSettings', () => {
 
   const mockMutationsResult = {
     saveSelectedSettingsMutation: {
-      mutateAsync: jest.fn(),
+      mutateAsync: vi.fn(),
       isLoading: false,
     },
   };
@@ -98,7 +101,7 @@ describe('useConfigurableRiskEngineSettings', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should combine all hook results correctly', () => {

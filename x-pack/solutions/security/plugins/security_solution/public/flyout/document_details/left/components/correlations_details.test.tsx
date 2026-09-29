@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -14,19 +16,22 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import type { CorrelationsDetailsProps } from '../../../../flyout_v2/document/tools/correlations';
 
-jest.mock('@kbn/expandable-flyout');
+vi.mock('@kbn/expandable-flyout');
 
-jest.mock(
+vi.mock(
   '../../../../flyout_v2/document/tools/correlations/components/correlations_details_view',
-  () => ({
-    CorrelationsDetailsView: ({ scopeId, onShowAttack }: CorrelationsDetailsProps) => (
-      <div
-        data-test-subj="correlationsDetailsV2Mock"
-        data-scope-id={scopeId}
-        data-has-on-show-attack={String(typeof onShowAttack === 'function')}
-      />
-    ),
-  })
+  () => {
+      const mocked = {
+        CorrelationsDetailsView: ({ scopeId, onShowAttack }: CorrelationsDetailsProps) => (
+          <div
+            data-test-subj="correlationsDetailsV2Mock"
+            data-scope-id={scopeId}
+            data-has-on-show-attack={String(typeof onShowAttack === 'function')}
+          />
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 const renderCorrelationDetails = () =>
@@ -40,9 +45,9 @@ const renderCorrelationDetails = () =>
 
 describe('CorrelationsDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
-      openPreviewPanel: jest.fn(),
+    vi.clearAllMocks();
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue({
+      openPreviewPanel: vi.fn(),
     } as unknown as ReturnType<typeof useExpandableFlyoutApi>);
   });
 

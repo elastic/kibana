@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { ImageInputProps } from './image_input';
@@ -19,7 +21,7 @@ const name = 'Some image field';
 const id = 'some:image:field';
 
 describe('ImageInput', () => {
-  const onInputChange = jest.fn();
+  const onInputChange = vi.fn();
   const defaultProps: ImageInputProps = {
     onInputChange,
     field: {

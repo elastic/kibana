@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { splitByTerms } from './split_by_terms';
 
 describe('splitByTerms', () => {
@@ -41,7 +43,7 @@ describe('splitByTerms', () => {
   });
 
   test('calls next when finished', () => {
-    const next = jest.fn();
+    const next = vi.fn();
     splitByTerms(req, panel, series, config, seriesIndex)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
@@ -117,7 +119,7 @@ describe('splitByTerms', () => {
     series.terms_include = 'a';
     series.terms_exclude = 'b';
     series.terms_field = ['c', 'd'];
-    const next = jest.fn((doc) => doc);
+    const next = vi.fn((doc) => doc);
     const doc = splitByTerms(req, panel, series, config, seriesIndex)(next)({});
 
     expect(doc).toMatchInlineSnapshot(`
@@ -147,7 +149,7 @@ describe('splitByTerms', () => {
 
   test('calls next and does not add a terms agg', () => {
     series.split_mode = 'everything';
-    const next = jest.fn((doc) => doc);
+    const next = vi.fn((doc) => doc);
     const doc = splitByTerms(req, panel, series, config, seriesIndex)(next)({});
     expect(next.mock.calls.length).toEqual(1);
     expect(doc).toEqual({});

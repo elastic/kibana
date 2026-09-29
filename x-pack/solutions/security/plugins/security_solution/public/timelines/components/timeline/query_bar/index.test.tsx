@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -25,12 +27,12 @@ import { waitFor } from '@testing-library/react';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('Timeline QueryBar ', () => {
-  const mockSetFilters = jest.fn();
-  const mockSetSavedQueryId = jest.fn();
-  const mockUpdateReduxTime = jest.fn();
+  const mockSetFilters = vi.fn();
+  const mockSetSavedQueryId = vi.fn();
+  const mockUpdateReduxTime = vi.fn();
 
   beforeEach(() => {
     mockSetFilters.mockClear();

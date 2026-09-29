@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import {
@@ -14,19 +17,25 @@ import {
 import { ATTACK_FLYOUT_V2_URL_PARAM } from '../../../../../flyout_v2/attack/main/utils/attack_flyout_v2_url_param';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 
-const mockGetUrlForApp = jest.fn(
+const mockGetUrlForApp = vi.fn(
   (_appId: string, { path }: { path: string }) => `/app/securitySolutionUI/${path}`
 );
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(() => ({
-    services: { application: { getUrlForApp: mockGetUrlForApp } },
-  })),
-}));
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(() => ({
+        services: { application: { getUrlForApp: mockGetUrlForApp } },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => {
+      const mocked = {
+      useIsNewFlyoutEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createAttack = (overrides: Partial<AttackDiscoveryAlert> = {}): AttackDiscoveryAlert =>
   ({
@@ -37,16 +46,16 @@ const createAttack = (overrides: Partial<AttackDiscoveryAlert> = {}): AttackDisc
   } as AttackDiscoveryAlert);
 
 describe('useAttackExploreInAttacksContextMenuItems', () => {
-  const closePopover = jest.fn();
+  const closePopover = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
-    jest.spyOn(window, 'open').mockImplementation(() => null);
+    vi.clearAllMocks();
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.spyOn(window, 'open').mockImplementation(() => null);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns one item', () => {
@@ -107,29 +116,29 @@ describe('useAttackExploreInAttacksContextMenuItems', () => {
         })
       );
       (result.current.items[0].onClick as () => void)();
-      const calledUrl = (window.open as jest.Mock).mock.calls[0][0] as string;
+      const calledUrl = (window.open as Mock).mock.calls[0][0] as string;
       expect(calledUrl).toContain('my-attack-id');
     });
 
     it('encodes the legacy flyout URL state when v2 is disabled', () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+      vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
       const { result } = renderHook(() =>
         useAttackExploreInAttacksContextMenuItems({ attack: createAttack(), closePopover })
       );
       (result.current.items[0].onClick as () => void)();
-      const calledUrl = (window.open as jest.Mock).mock.calls[0][0] as string;
+      const calledUrl = (window.open as Mock).mock.calls[0][0] as string;
       const params = new URLSearchParams(calledUrl.split('?')[1]);
       expect(params.get('flyout')).not.toBeNull();
       expect(params.get(ATTACK_FLYOUT_V2_URL_PARAM)).toBeNull();
     });
 
     it('encodes the v2 attack flyout URL param when v2 is enabled', () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+      vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
       const { result } = renderHook(() =>
         useAttackExploreInAttacksContextMenuItems({ attack: createAttack(), closePopover })
       );
       (result.current.items[0].onClick as () => void)();
-      const calledUrl = (window.open as jest.Mock).mock.calls[0][0] as string;
+      const calledUrl = (window.open as Mock).mock.calls[0][0] as string;
       const params = new URLSearchParams(calledUrl.split('?')[1]);
       expect(params.get(ATTACK_FLYOUT_V2_URL_PARAM)).not.toBeNull();
       expect(params.get('flyout')).toBeNull();

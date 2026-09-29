@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -148,7 +150,7 @@ describe('getLegendActions', () => {
       const Component = getLegendActions(
         undefined,
         makeGetFilterEventData(visData),
-        jest.fn(),
+        vi.fn(),
         [],
         visParams,
         visData,
@@ -160,9 +162,9 @@ describe('getLegendActions', () => {
 
     it('renders the action button when the column is filterable', async () => {
       const Component = getLegendActions(
-        jest.fn().mockResolvedValue(true),
+        vi.fn().mockResolvedValue(true),
         makeGetFilterEventData(visData),
-        jest.fn(),
+        vi.fn(),
         [],
         visParams,
         visData,
@@ -178,7 +180,7 @@ describe('getLegendActions', () => {
       const Component = getLegendActions(
         undefined,
         makeGetFilterEventData(esqlVisDataWithComputedColumn),
-        jest.fn(),
+        vi.fn(),
         [],
         visParams,
         esqlVisDataWithComputedColumn,
@@ -192,7 +194,7 @@ describe('getLegendActions', () => {
       const Component = getLegendActions(
         undefined,
         makeGetFilterEventData(esqlVisDataWithComputedColumn),
-        jest.fn(),
+        vi.fn(),
         [],
         visParams,
         esqlVisDataWithComputedColumn,
@@ -209,7 +211,7 @@ describe('getLegendActions', () => {
       const Component = getLegendActions(
         undefined,
         makeGetFilterEventData(esqlVisDataWithComputedColumn),
-        jest.fn(),
+        vi.fn(),
         [],
         visParams,
         esqlVisDataWithComputedColumn,
@@ -229,7 +231,7 @@ describe('getLegendActions', () => {
       const Component = getLegendActions(
         undefined,
         makeGetFilterEventData(esqlVisDataWithComputedDateColumn),
-        jest.fn(),
+        vi.fn(),
         [],
         visParams,
         esqlVisDataWithComputedDateColumn,
@@ -243,9 +245,9 @@ describe('getLegendActions', () => {
       // A RENAME column has isComputedColumn=true but a different sourceField, meaning the
       // underlying index field is still addressable — filtering should work normally.
       const Component = getLegendActions(
-        jest.fn().mockResolvedValue(true),
+        vi.fn().mockResolvedValue(true),
         makeGetFilterEventData(esqlVisDataWithRenamedComputedColumn),
-        jest.fn(),
+        vi.fn(),
         [],
         visParams,
         esqlVisDataWithRenamedComputedColumn,
@@ -263,9 +265,9 @@ describe('getLegendActions', () => {
   describe('ES|QL mode with a non-computed column', () => {
     it('does not show the disabled-filter warning', async () => {
       const Component = getLegendActions(
-        jest.fn().mockResolvedValue(true),
+        vi.fn().mockResolvedValue(true),
         makeGetFilterEventData(esqlVisData),
-        jest.fn(),
+        vi.fn(),
         [],
         visParams,
         esqlVisData,
@@ -285,9 +287,9 @@ describe('getLegendActions', () => {
         ),
       };
       const Component = getLegendActions(
-        jest.fn().mockResolvedValue(true),
+        vi.fn().mockResolvedValue(true),
         makeGetFilterEventData(visDataWithComputedOutsideEsql),
-        jest.fn(),
+        vi.fn(),
         [],
         visParams,
         visDataWithComputedOutsideEsql,

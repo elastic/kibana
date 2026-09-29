@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
@@ -21,27 +24,27 @@ describe('fetchEntities', () => {
 
   beforeEach(() => {
     logger = {
-      trace: jest.fn(),
-      debug: jest.fn(),
-      info: jest.fn(),
-      error: jest.fn(),
+      trace: vi.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
     } as unknown as Logger;
 
-    const toRecordsMock = jest.fn().mockResolvedValue([{ entityId: 'entity-1' }]);
+    const toRecordsMock = vi.fn().mockResolvedValue([{ entityId: 'entity-1' }]);
     esClient.asCurrentUser.helpers.esql.mockReturnValue({
       toRecords: toRecordsMock,
-      toArrowTable: jest.fn(),
-      toArrowReader: jest.fn(),
+      toArrowTable: vi.fn(),
+      toArrowReader: vi.fn(),
     });
 
     // Default: index does not exist (no enrichment)
-    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
+    (esClient.asInternalUser.indices as Mocked<any>).exists = vi
       .fn()
       .mockResolvedValue(false);
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('uses the default index patterns and entity-id params when indexPatterns are not provided', async () => {
@@ -93,7 +96,7 @@ describe('fetchEntities', () => {
 
   it('uses lookup join when the entities index exists', async () => {
     // Mock index exists → enrichment via LOOKUP JOIN is enabled
-    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
+    (esClient.asInternalUser.indices as Mocked<any>).exists = vi
       .fn()
       .mockResolvedValueOnce(true);
 
@@ -129,6 +132,6 @@ describe('fetchEntities', () => {
     expect(esqlCallArgs.query).toContain('| EVAL entityName = TO_STRING(null)');
     expect(esqlCallArgs.query).toContain('| EVAL availableInEntityStore = false');
     expect(esqlCallArgs.query).not.toContain('ENRICH');
-    expect((esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy).not.toHaveBeenCalled();
+    expect((esClient.asInternalUser.enrich as Mocked<any>).getPolicy).not.toHaveBeenCalled();
   });
 });

@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { waitUntilClusterReady } from './wait_until_cluster_ready';
 
-jest.mock('@elastic/elasticsearch', () => {
+vi.mock('@elastic/elasticsearch', () => {
   return {
-    Client: jest.fn(),
+    Client: vi.fn(),
   };
 });
 
@@ -21,19 +23,18 @@ const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
 log.setWriters([logWriter]);
 
-const health = jest.fn();
+const health = vi.fn();
 
-beforeEach(() => {
-  jest.resetAllMocks();
-  jest
-    .requireMock('@elastic/elasticsearch')
+beforeEach(async () => {
+  vi.resetAllMocks();
+  (await vi.importMock('@elastic/elasticsearch'))
     .Client.mockImplementation(() => ({ cluster: { health } }));
   log.indent(-log.getIndent());
   logWriter.messages.length = 0;
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('waitUntilClusterReady', () => {

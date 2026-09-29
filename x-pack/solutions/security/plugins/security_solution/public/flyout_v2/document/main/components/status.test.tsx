@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -12,28 +14,31 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Status } from './status';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
 
-jest.mock('./status_popover_button', () => ({
-  StatusPopoverButton: ({
-    eventId,
-    contextId,
-    onStatusUpdated,
-    disabled,
-  }: {
-    eventId: string;
-    contextId: string;
-    onStatusUpdated?: () => void;
-    disabled?: boolean;
-  }) => (
-    <button
-      data-test-subj="mockStatusPopoverButton"
-      data-event-id={eventId}
-      data-context-id={contextId}
-      data-disabled={String(disabled ?? false)}
-      onClick={onStatusUpdated}
-      type="button"
-    />
-  ),
-}));
+vi.mock('./status_popover_button', () => {
+      const mocked = {
+      StatusPopoverButton: ({
+        eventId,
+        contextId,
+        onStatusUpdated,
+        disabled,
+      }: {
+        eventId: string;
+        contextId: string;
+        onStatusUpdated?: () => void;
+        disabled?: boolean;
+      }) => (
+        <button
+          data-test-subj="mockStatusPopoverButton"
+          data-event-id={eventId}
+          data-context-id={contextId}
+          data-disabled={String(disabled ?? false)}
+          onClick={onStatusUpdated}
+          type="button"
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockHit = (
   flattened: DataTableRecord['flattened'],
@@ -72,7 +77,7 @@ describe('<Status />', () => {
   });
 
   it('wraps the status button with the provided cell action renderer', () => {
-    const renderCellActions = jest.fn(({ children, field, value, scopeId }) => (
+    const renderCellActions = vi.fn(({ children, field, value, scopeId }) => (
       <div
         data-test-subj="wrappedCellActions"
         data-field={field}
@@ -95,7 +100,7 @@ describe('<Status />', () => {
   });
 
   it('calls the alert update callback after a status change', () => {
-    const onAlertUpdated = jest.fn();
+    const onAlertUpdated = vi.fn();
     const { getByTestId } = renderComponent({ onAlertUpdated });
 
     getByTestId('mockStatusPopoverButton').click();

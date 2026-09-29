@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { type Container } from 'inversify';
 import { KibanaContainerModule } from '@kbn/core-di';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
@@ -24,14 +27,14 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loadCapabilities } from './capabilities';
 
 describe('loadCapabilities', () => {
-  let injection: jest.Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
+  let injection: Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
   let container: Container;
   let capabilitiesSetup: ReturnType<typeof capabilitiesServiceMock.createSetupContract>;
   let capabilitiesStart: ReturnType<typeof capabilitiesServiceMock.createStartContract>;
   let request: KibanaRequest;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     injection = injectionServiceMock.createStartContract();
     capabilitiesSetup = capabilitiesServiceMock.createSetupContract();
     capabilitiesStart = capabilitiesServiceMock.createStartContract();

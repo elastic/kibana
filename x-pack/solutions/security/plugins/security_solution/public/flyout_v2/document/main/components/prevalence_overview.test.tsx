@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
@@ -27,11 +30,11 @@ import { usePrevalence } from '../../tools/prevalence/hooks/use_prevalence';
 import { useKibana } from '../../../../common/lib/kibana';
 import { mockSearchHit } from '../../../../flyout/document_details/shared/mocks/mock_search_hit';
 
-jest.mock('../../tools/prevalence/hooks/use_prevalence');
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../tools/prevalence/hooks/use_prevalence');
+vi.mock('../../../../common/lib/kibana');
 
-const mockNavigateToLeftPanel = jest.fn();
-const mockUiSettingsGet = jest.fn();
+const mockNavigateToLeftPanel = vi.fn();
+const mockUiSettingsGet = vi.fn();
 let mockServerless: unknown;
 
 const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(PREVALENCE_TEST_ID);
@@ -63,14 +66,14 @@ const renderPrevalenceOverview = (
 
 describe('<PrevalenceOverview />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (usePrevalence as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (usePrevalence as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
     });
     mockServerless = undefined;
-    (useKibana as jest.Mock).mockImplementation(() => ({
+    (useKibana as Mock).mockImplementation(() => ({
       services: {
         storage: {
           get: () => undefined,
@@ -100,7 +103,7 @@ describe('<PrevalenceOverview />', () => {
   });
 
   it('should show custom time range badge', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         storage: {
           get: () => ({ from: 'now-7d', to: 'now-3d' }),
@@ -150,7 +153,7 @@ describe('<PrevalenceOverview />', () => {
   });
 
   it('should render loading', () => {
-    (usePrevalence as jest.Mock).mockReturnValue({
+    (usePrevalence as Mock).mockReturnValue({
       loading: true,
       error: false,
       data: [],
@@ -163,7 +166,7 @@ describe('<PrevalenceOverview />', () => {
   });
 
   it('should render no-data message', () => {
-    (usePrevalence as jest.Mock).mockReturnValue({
+    (usePrevalence as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
@@ -177,7 +180,7 @@ describe('<PrevalenceOverview />', () => {
     const field1 = 'field1';
     const field2 = 'field2';
     const field3 = 'field3';
-    (usePrevalence as jest.Mock).mockReturnValue({
+    (usePrevalence as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [
@@ -231,7 +234,7 @@ describe('<PrevalenceOverview />', () => {
   });
 
   it('should navigate to left section Insights tab when clicking on button', () => {
-    (usePrevalence as jest.Mock).mockReturnValue({
+    (usePrevalence as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [
@@ -263,7 +266,7 @@ describe('<PrevalenceOverview />', () => {
   });
 
   it('should use values from local storage to fetch prevalence data', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         storage: {
           get: () => ({ start: 'now-7d', end: 'now-3d' }),

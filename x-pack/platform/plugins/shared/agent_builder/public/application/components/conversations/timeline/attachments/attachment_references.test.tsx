@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render as rtlRender, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -23,12 +25,15 @@ import { AttachmentReferences } from './attachment_references';
 // The pill styles read the theme from Emotion context, so renders need a provider.
 const render = (ui: React.ReactElement) => rtlRender(<EuiThemeProvider>{ui}</EuiThemeProvider>);
 
-const mockGetAttachmentUiDefinition = jest.fn();
-jest.mock('../../../../hooks/use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({
-    attachmentsService: { getAttachmentUiDefinition: mockGetAttachmentUiDefinition },
-  }),
-}));
+const mockGetAttachmentUiDefinition = vi.fn();
+vi.mock('../../../../hooks/use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: () => ({
+        attachmentsService: { getAttachmentUiDefinition: mockGetAttachmentUiDefinition },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeVersioned = (
   id: string,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -29,7 +31,7 @@ const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem
 const renderAiIndexCard = (
   aiIndex: AiIndexHttpItem,
   href = '/app/context_engine/ai_index/my-ai-index',
-  onDeleteClick = jest.fn()
+  onDeleteClick = vi.fn()
 ) =>
   render(
     <I18nProvider>
@@ -161,7 +163,7 @@ describe('AiIndexCard', () => {
   });
 
   it('calls onDeleteClick when the delete action is selected', () => {
-    const onDeleteClick = jest.fn();
+    const onDeleteClick = vi.fn();
     renderAiIndexCard(buildAiIndex({ managed: false }), undefined, onDeleteClick);
 
     const actionsButton = screen.getByTestId('contextAiIndexCardActionsButton');

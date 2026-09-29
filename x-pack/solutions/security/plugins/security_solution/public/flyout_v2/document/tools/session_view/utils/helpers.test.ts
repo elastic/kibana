@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Process } from '@kbn/session-view-plugin/common';
 import type { CustomProcess } from '../../../../../flyout/document_details/session_view/context';
 import { isCustomProcess, isProcess } from './helpers';
 
 const createProcess = (): Process =>
   ({
-    getAlerts: jest.fn(),
+    getAlerts: vi.fn(),
   } as unknown as Process);
 
 const createCustomProcess = (): CustomProcess =>

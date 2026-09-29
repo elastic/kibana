@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { DesignToolsButtonImpl } from './design_tools_button_impl';
 
-jest.mock('./edit/library/eui_icon_cache', () => ({
-  preloadAllEuiIcons: jest.fn().mockResolvedValue(undefined),
-  getIconTypes: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('./edit/library/eui_icon_cache', () => {
+      const mocked = {
+      preloadAllEuiIcons: vi.fn().mockResolvedValue(undefined),
+      getIconTypes: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DesignToolsButtonImpl', () => {
   it('should render the button', () => {
@@ -83,7 +88,7 @@ describe('DesignToolsButtonImpl', () => {
 
     const button = screen.getByTestId('designToolsButton');
     const mouseDownEvent = new MouseEvent('mousedown', { bubbles: true });
-    const preventDefaultSpy = jest.spyOn(mouseDownEvent, 'preventDefault');
+    const preventDefaultSpy = vi.spyOn(mouseDownEvent, 'preventDefault');
 
     fireEvent(button, mouseDownEvent);
 

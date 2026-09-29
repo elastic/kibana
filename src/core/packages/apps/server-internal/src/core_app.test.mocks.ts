@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const registerBundleRoutesMock = jest.fn();
-jest.doMock('./bundle_routes', () => ({
-  registerBundleRoutes: registerBundleRoutesMock,
-}));
+import { vi } from 'vitest';
+
+export const registerBundleRoutesMock = vi.fn();
+vi.doMock('./bundle_routes', () => {
+      const mocked = {
+      registerBundleRoutes: registerBundleRoutesMock,
+    };
+      return { ...mocked, default: mocked };
+    });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 
 import { getDefaultValidationStepDefinition } from './get_default_validation_step_definition';
@@ -16,51 +19,63 @@ import {
 } from './helpers/filter_and_validate_discoveries';
 import { transformDiscoveriesToOutputFormat } from './helpers/transform_discoveries_to_output_format';
 
-jest.mock('../../helpers/resolve_connector_details', () => ({
-  resolveConnectorDetails: jest.fn(),
-}));
+vi.mock('../../helpers/resolve_connector_details', () => {
+      const mocked = {
+      resolveConnectorDetails: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers/authenticate_and_get_space', () => ({
-  authenticateAndGetSpace: jest.fn(),
-}));
+vi.mock('./helpers/authenticate_and_get_space', () => {
+      const mocked = {
+      authenticateAndGetSpace: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers/filter_and_validate_discoveries', () => ({
-  filterAndValidateDiscoveries: jest.fn(),
-}));
+vi.mock('./helpers/filter_and_validate_discoveries', () => {
+      const mocked = {
+      filterAndValidateDiscoveries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers/transform_discoveries_to_output_format', () => ({
-  transformDiscoveriesToOutputFormat: jest.fn(),
-}));
+vi.mock('./helpers/transform_discoveries_to_output_format', () => {
+      const mocked = {
+      transformDiscoveriesToOutputFormat: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockResolveConnectorDetails = resolveConnectorDetails as jest.MockedFunction<
+const mockResolveConnectorDetails = resolveConnectorDetails as MockedFunction<
   typeof resolveConnectorDetails
 >;
-const mockAuthenticateAndGetSpace = authenticateAndGetSpace as jest.MockedFunction<
+const mockAuthenticateAndGetSpace = authenticateAndGetSpace as MockedFunction<
   typeof authenticateAndGetSpace
 >;
-const mockFilterAndValidateDiscoveries = filterAndValidateDiscoveries as jest.MockedFunction<
+const mockFilterAndValidateDiscoveries = filterAndValidateDiscoveries as MockedFunction<
   typeof filterAndValidateDiscoveries
 >;
 const mockTransformDiscoveriesToOutputFormat =
-  transformDiscoveriesToOutputFormat as jest.MockedFunction<
+  transformDiscoveriesToOutputFormat as MockedFunction<
     typeof transformDiscoveriesToOutputFormat
   >;
 
 describe('getDefaultValidationStepDefinition', () => {
   const mockLogger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
-  const mockActionsClient = { get: jest.fn() };
+  const mockActionsClient = { get: vi.fn() };
 
-  const mockGetStartServices = jest.fn().mockResolvedValue({
+  const mockGetStartServices = vi.fn().mockResolvedValue({
     coreStart: {},
     pluginsStart: {
       actions: {
-        getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
+        getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClient),
       },
     },
   });
@@ -69,11 +84,11 @@ describe('getDefaultValidationStepDefinition', () => {
 
   const mockContext = {
     contextManager: {
-      getContext: jest.fn().mockReturnValue({
+      getContext: vi.fn().mockReturnValue({
         execution: { id: 'workflow-run-1' },
         workflow: { id: 'workflow-1' },
       }),
-      getFakeRequest: jest.fn().mockReturnValue({
+      getFakeRequest: vi.fn().mockReturnValue({
         headers: {},
       }),
     },
@@ -99,8 +114,8 @@ describe('getDefaultValidationStepDefinition', () => {
       with_replacements: false,
     },
     logger: {
-      error: jest.fn(),
-      info: jest.fn(),
+      error: vi.fn(),
+      info: vi.fn(),
     },
   };
 
@@ -129,7 +144,7 @@ describe('getDefaultValidationStepDefinition', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockResolveConnectorDetails.mockResolvedValue({
       actionTypeId: '.gen-ai',

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { createStripAnsiSerializer, createRecursiveSerializer } from '@kbn/jest-serializers';
 import { Config } from './config';
@@ -14,7 +16,7 @@ import { createRunner } from './runner';
 import { Build } from './build';
 import { isErrorLogged, markErrorLogged } from './errors';
 
-jest.mock('./version_info');
+vi.mock('./version_info');
 
 const testWriter = new ToolingLogCollectingWriter();
 const log = new ToolingLog();
@@ -39,7 +41,7 @@ expect.addSnapshotSerializer(
 
 beforeEach(() => {
   testWriter.messages.length = 0;
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 const setup = async () => {
@@ -72,7 +74,7 @@ describe('default dist', () => {
   it('runs global task once, passing config and log', async () => {
     const { config, run } = await setup();
 
-    const mock = jest.fn();
+    const mock = vi.fn();
 
     await run({
       global: true,
@@ -87,7 +89,7 @@ describe('default dist', () => {
   it('calls local tasks once, passing the default build', async () => {
     const { config, run } = await setup();
 
-    const mock = jest.fn();
+    const mock = vi.fn();
 
     await run({
       description: 'foo',

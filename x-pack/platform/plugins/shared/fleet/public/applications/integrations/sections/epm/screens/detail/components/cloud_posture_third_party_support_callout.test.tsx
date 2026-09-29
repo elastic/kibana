@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -14,17 +17,17 @@ import type { PackageInfo } from '../../../../../../../../common';
 
 import { CloudPostureThirdPartySupportCallout } from './cloud_posture_third_party_support_callout';
 
-jest.mock('react-use/lib/useLocalStorage');
+vi.mock('react-use/lib/useLocalStorage');
 
 describe('CloudPostureThirdPartySupportCallout', () => {
   const mockPackageInfo = { name: 'wiz' } as PackageInfo;
 
   beforeEach(() => {
-    (useLocalStorage as jest.Mock).mockClear();
+    (useLocalStorage as Mock).mockClear();
   });
 
   it('renders callout when package is wiz and callout is not dismissed', () => {
-    (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
+    (useLocalStorage as Mock).mockReturnValue([false, vi.fn()]);
 
     render(<CloudPostureThirdPartySupportCallout packageInfo={mockPackageInfo} />);
 
@@ -39,7 +42,7 @@ describe('CloudPostureThirdPartySupportCallout', () => {
   });
 
   it('does not render callout when it has been dismissed', () => {
-    (useLocalStorage as jest.Mock).mockReturnValue([true, jest.fn()]);
+    (useLocalStorage as Mock).mockReturnValue([true, vi.fn()]);
 
     render(<CloudPostureThirdPartySupportCallout packageInfo={mockPackageInfo} />);
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
@@ -14,21 +16,30 @@ import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/ty
 import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import { AttachmentSummaryFlyoutOpener } from './open_flyout_on_mount';
 
-jest.mock('../../../flyout_v2/use_flyout_api');
-jest.mock('../../../flyout_v2/shared/url_state/use_flyout_v2_restore');
+vi.mock('../../../flyout_v2/use_flyout_api');
+vi.mock('../../../flyout_v2/shared/url_state/use_flyout_v2_restore');
 
 // The real bundle mounts the whole Security provider stack; the opener only needs to be inside it.
-jest.mock('../../../flyout_v2/shared/components/flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-const initDataViewManager = jest.fn();
+vi.mock('../../../flyout_v2/shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+const initDataViewManager = vi.fn();
 let dataViewStatus = 'ready';
-jest.mock('../../../data_view_manager/hooks/use_init_data_view_manager', () => ({
-  useInitDataViewManager: () => initDataViewManager,
-}));
-jest.mock('../../../data_view_manager/hooks/use_data_view_manager_status', () => ({
-  useDataViewManagerStatus: () => dataViewStatus,
-}));
+vi.mock('../../../data_view_manager/hooks/use_init_data_view_manager', () => {
+      const mocked = {
+      useInitDataViewManager: () => initDataViewManager,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../data_view_manager/hooks/use_data_view_manager_status', () => {
+      const mocked = {
+      useDataViewManagerStatus: () => dataViewStatus,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const descriptor: FlyoutDescriptor = {
   kind: 'document',
@@ -36,7 +47,7 @@ const descriptor: FlyoutDescriptor = {
   indexName: '.internal.alerts-1',
 };
 
-const resolveSecurityCanvasContext = jest.fn().mockResolvedValue({ store: {}, kibanaServices: {} });
+const resolveSecurityCanvasContext = vi.fn().mockResolvedValue({ store: {}, kibanaServices: {} });
 
 const renderOpener = (d: FlyoutDescriptor = descriptor) =>
   render(
@@ -48,9 +59,9 @@ const renderOpener = (d: FlyoutDescriptor = descriptor) =>
 
 describe('AttachmentSummaryFlyoutOpener', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     dataViewStatus = 'ready';
-    jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
+    vi.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
   });
 
   it('opens the flyout for the given descriptor, attributed to the summary', async () => {

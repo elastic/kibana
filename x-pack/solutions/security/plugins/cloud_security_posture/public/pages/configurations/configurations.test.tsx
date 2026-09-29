@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import {
   getMockServerDependencies,
@@ -27,9 +30,12 @@ import {
 } from './configurations.handlers.mock';
 import { useExpandableFlyoutCsp } from '../../common/hooks/use_expandable_flyout_csp';
 
-jest.mock('../../common/hooks/use_expandable_flyout_csp', () => ({
-  useExpandableFlyoutCsp: jest.fn(),
-}));
+vi.mock('../../common/hooks/use_expandable_flyout_csp', () => {
+      const mocked = {
+      useExpandableFlyoutCsp: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const server = setupMockServer();
 
@@ -45,8 +51,8 @@ const renderFindingsPage = (dependencies = getMockServerDependencies()) => {
 describe('<Findings />', () => {
   startMockServer(server);
 
-  (useExpandableFlyoutCsp as jest.Mock).mockReturnValue({
-    onExpandDocClick: jest.fn(),
+  (useExpandableFlyoutCsp as Mock).mockReturnValue({
+    onExpandDocClick: vi.fn(),
   });
 
   beforeEach(() => {

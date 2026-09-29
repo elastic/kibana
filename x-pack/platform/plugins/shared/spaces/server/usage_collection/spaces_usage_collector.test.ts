@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as Rx from 'rxjs';
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -70,7 +72,7 @@ function setup({
   } as LicensingPluginSetup;
 
   const featuresSetup = {
-    getKibanaFeatures: jest.fn().mockReturnValue(features),
+    getKibanaFeatures: vi.fn().mockReturnValue(features),
   } as unknown as SpacesPluginSetupDeps['features'];
 
   const usageStatsClient = usageStatsClientMock.create();

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { RequestHandlerContext, IRouter } from '@kbn/core/server';
@@ -18,7 +21,7 @@ async function runRequest(
   body?: { unencrypted?: boolean; refreshCache?: boolean }
 ) {
   expect(mockRouter.versioned.post).toHaveBeenCalled();
-  const [, handler] = (mockRouter.versioned.post as jest.Mock).mock.results[0].value.addVersion.mock
+  const [, handler] = (mockRouter.versioned.post as Mock).mock.results[0].value.addVersion.mock
     .calls[0];
   const mockResponse = httpServerMock.createResponseFactory();
   const mockRequest = httpServerMock.createKibanaRequest({ body });
@@ -31,7 +34,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
   const router = {
     handler: undefined,
     config: undefined,
-    post: jest.fn().mockImplementation((config, handler) => {
+    post: vi.fn().mockImplementation((config, handler) => {
       router.config = config;
       router.handler = handler;
     }),
@@ -41,7 +44,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
   const mockStats = [{ clusterUuid: 'text', stats: 'enc_str' }];
   telemetryCollectionManager.getStats.mockResolvedValue(mockStats);
   telemetryCollectionManager.shouldGetTelemetry.mockResolvedValue(true);
-  const getSecurity = jest.fn();
+  const getSecurity = vi.fn();
 
   let mockRouter: IRouter;
   beforeEach(() => {
@@ -52,7 +55,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
     it('registers _stats POST route and accepts body configs', () => {
       registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
       expect(mockRouter.versioned.post).toHaveBeenCalledTimes(1);
-      const [routeConfig, handler] = (mockRouter.versioned.post as jest.Mock).mock.results[0].value
+      const [routeConfig, handler] = (mockRouter.versioned.post as Mock).mock.results[0].value
         .addVersion.mock.calls[0];
       expect(routeConfig.version).toMatchInlineSnapshot(`"1"`);
       expect(handler).toBeInstanceOf(Function);
@@ -120,7 +123,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
     });
 
     it('returns 403 when the user does not have enough permissions to request unencrypted telemetry', async () => {
-      const getSecurityMock = jest.fn().mockImplementation(() => {
+      const getSecurityMock = vi.fn().mockImplementation(() => {
         const securityStartMock = securityMock.createStart();
         securityStartMock.authz.mode.useRbacForRequest.mockReturnValue(true);
         securityStartMock.authz.checkPrivilegesWithRequest.mockReturnValue({
@@ -157,7 +160,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
     });
 
     it('returns 200 when the user has enough permissions to request unencrypted telemetry', async () => {
-      const getSecurityMock = jest.fn().mockImplementation(() => {
+      const getSecurityMock = vi.fn().mockImplementation(() => {
         const securityStartMock = securityMock.createStart();
         securityStartMock.authz.checkPrivilegesWithRequest.mockReturnValue({
           globally: () => ({ hasAllRequested: true }),
@@ -178,7 +181,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
     });
 
     it('returns 200 when the user does not have enough permissions to request unencrypted telemetry but it requests encrypted', async () => {
-      const getSecurityMock = jest.fn().mockImplementation(() => {
+      const getSecurityMock = vi.fn().mockImplementation(() => {
         const securityStartMock = securityMock.createStart();
         securityStartMock.authz.checkPrivilegesWithRequest.mockReturnValue({
           globally: () => ({ hasAllRequested: false }),

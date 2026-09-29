@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
@@ -24,11 +26,11 @@ const Probe = ({ item }: { item: MatchedActionPolicy }) => {
 
 describe('useRerenderWhenSnoozeExpires', () => {
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('clears the snoozed state when the expiry is reached', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const item = buildItem(new Date(Date.now() + 5_000).toISOString());
 
     render(<Probe item={item} />);
@@ -36,7 +38,7 @@ describe('useRerenderWhenSnoozeExpires', () => {
     expect(screen.getByText('snoozed')).toBeInTheDocument();
 
     act(() => {
-      jest.advanceTimersByTime(5_000);
+      vi.advanceTimersByTime(5_000);
     });
 
     expect(screen.getByText('active')).toBeInTheDocument();

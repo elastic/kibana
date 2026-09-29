@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, screen } from '@testing-library/react';
@@ -32,7 +34,7 @@ describe('FrozenDefaultRepositoryRequiredCallout', () => {
   });
 
   it('calls onCreateDefaultRepository when the create button is clicked', () => {
-    const onCreateDefaultRepository = jest.fn();
+    const onCreateDefaultRepository = vi.fn();
 
     renderWithI18n(
       <FrozenDefaultRepositoryRequiredCallout
@@ -54,7 +56,7 @@ describe('FrozenDefaultRepositoryRequiredCallout', () => {
   });
 
   it('calls onRefresh when the refresh button is clicked', () => {
-    const onRefresh = jest.fn();
+    const onRefresh = vi.fn();
 
     renderWithI18n(
       <FrozenDefaultRepositoryRequiredCallout
@@ -68,7 +70,7 @@ describe('FrozenDefaultRepositoryRequiredCallout', () => {
   });
 
   it('disables refresh while refreshing', () => {
-    const onRefresh = jest.fn();
+    const onRefresh = vi.fn();
 
     renderWithI18n(
       <FrozenDefaultRepositoryRequiredCallout

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -15,17 +18,20 @@ import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/pub
 import { ResourceTypes } from '@kbn/product-doc-common';
 import { DocumentationSection } from './documentation_section';
 
-jest.mock('@kbn/react-kibana-mount', () => ({
-  // In unit tests we don't need a real MountPoint; returning the node allows us to assert on its contents.
-  toMountPoint: (node: unknown) => node,
-}));
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = {
+      // In unit tests we don't need a real MountPoint; returning the node allows us to assert on its contents.
+      toMountPoint: (node: unknown) => node,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DocumentationSection', () => {
   const coreStart = coreMock.createStart();
 
   const mockProductDocBase: ProductDocBasePluginStart = {
     installation: {
-      getStatus: jest.fn().mockImplementation(({ resourceType }) => {
+      getStatus: vi.fn().mockImplementation(({ resourceType }) => {
         if (resourceType === ResourceTypes.securityLabs) {
           return Promise.resolve({
             inferenceId: '.elser-2-elasticsearch',
@@ -39,9 +45,9 @@ describe('DocumentationSection', () => {
           perProducts: {},
         });
       }),
-      install: jest.fn().mockResolvedValue({ installed: true }),
-      uninstall: jest.fn().mockResolvedValue({ success: true }),
-      getDefaultInferenceId: jest.fn().mockResolvedValue('.elser-2-elasticsearch'),
+      install: vi.fn().mockResolvedValue({ installed: true }),
+      uninstall: vi.fn().mockResolvedValue({ success: true }),
+      getDefaultInferenceId: vi.fn().mockResolvedValue('.elser-2-elasticsearch'),
     },
   };
 
@@ -76,13 +82,13 @@ describe('DocumentationSection', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockProductDocBase.installation.install = jest.fn().mockResolvedValue({ installed: true });
-    mockProductDocBase.installation.uninstall = jest.fn().mockResolvedValue({ success: true });
-    mockProductDocBase.installation.getDefaultInferenceId = jest
+    vi.clearAllMocks();
+    mockProductDocBase.installation.install = vi.fn().mockResolvedValue({ installed: true });
+    mockProductDocBase.installation.uninstall = vi.fn().mockResolvedValue({ success: true });
+    mockProductDocBase.installation.getDefaultInferenceId = vi
       .fn()
       .mockResolvedValue('.elser-2-elasticsearch');
-    mockProductDocBase.installation.getStatus = jest.fn().mockImplementation(({ resourceType }) => {
+    mockProductDocBase.installation.getStatus = vi.fn().mockImplementation(({ resourceType }) => {
       if (resourceType === ResourceTypes.securityLabs) {
         return Promise.resolve({
           inferenceId: '.elser-2-elasticsearch',
@@ -132,7 +138,7 @@ describe('DocumentationSection', () => {
 
   describe('status display', () => {
     it('should show "Not installed" status when uninstalled', async () => {
-      mockProductDocBase.installation.getStatus = jest
+      mockProductDocBase.installation.getStatus = vi
         .fn()
         .mockImplementation(({ resourceType }) => {
           if (resourceType === ResourceTypes.securityLabs) {
@@ -158,7 +164,7 @@ describe('DocumentationSection', () => {
     });
 
     it('should show "Installed" status when installed', async () => {
-      mockProductDocBase.installation.getStatus = jest
+      mockProductDocBase.installation.getStatus = vi
         .fn()
         .mockImplementation(({ resourceType }) => {
           if (resourceType === ResourceTypes.securityLabs) {
@@ -185,7 +191,7 @@ describe('DocumentationSection', () => {
 
   describe('actions', () => {
     it('should show install action for uninstalled items', async () => {
-      mockProductDocBase.installation.getStatus = jest
+      mockProductDocBase.installation.getStatus = vi
         .fn()
         .mockImplementation(({ resourceType }) => {
           if (resourceType === ResourceTypes.securityLabs) {
@@ -216,10 +222,10 @@ describe('DocumentationSection', () => {
         resolveInferenceId = resolve;
       });
 
-      mockProductDocBase.installation.getDefaultInferenceId = jest
+      mockProductDocBase.installation.getDefaultInferenceId = vi
         .fn()
         .mockReturnValue(inferenceIdPromise);
-      mockProductDocBase.installation.getStatus = jest
+      mockProductDocBase.installation.getStatus = vi
         .fn()
         .mockImplementation(({ resourceType }) => {
           if (resourceType === ResourceTypes.securityLabs) {
@@ -265,7 +271,7 @@ describe('DocumentationSection', () => {
     });
 
     it('should show uninstall action for installed items', async () => {
-      mockProductDocBase.installation.getStatus = jest
+      mockProductDocBase.installation.getStatus = vi
         .fn()
         .mockImplementation(({ resourceType }) => {
           if (resourceType === ResourceTypes.securityLabs) {
@@ -291,7 +297,7 @@ describe('DocumentationSection', () => {
     });
 
     it('should call install when install action is clicked', async () => {
-      mockProductDocBase.installation.getStatus = jest
+      mockProductDocBase.installation.getStatus = vi
         .fn()
         .mockImplementation(({ resourceType }) => {
           if (resourceType === ResourceTypes.securityLabs) {
@@ -314,7 +320,7 @@ describe('DocumentationSection', () => {
         expect(screen.getByTestId('documentation-install-elastic_documents')).toBeInTheDocument();
       });
 
-      const initialCalls = (mockProductDocBase.installation.getStatus as jest.Mock).mock.calls
+      const initialCalls = (mockProductDocBase.installation.getStatus as Mock).mock.calls
         .length;
       fireEvent.click(screen.getByTestId('documentation-install-elastic_documents'));
 
@@ -327,18 +333,18 @@ describe('DocumentationSection', () => {
 
       // Regression: successful install should invalidate/refetch status without requiring a page refresh.
       await waitFor(() => {
-        const calls = (mockProductDocBase.installation.getStatus as jest.Mock).mock.calls.length;
+        const calls = (mockProductDocBase.installation.getStatus as Mock).mock.calls.length;
         expect(calls).toBeGreaterThan(initialCalls);
       });
     });
 
     it('should show a helpful toast (air-gapped hint + docs link) when install fails', async () => {
-      mockProductDocBase.installation.getStatus = jest.fn().mockResolvedValue({
+      mockProductDocBase.installation.getStatus = vi.fn().mockResolvedValue({
         inferenceId: '.elser-2-elasticsearch',
         overall: 'uninstalled',
         perProducts: {},
       });
-      mockProductDocBase.installation.install = jest.fn().mockRejectedValue(new Error('boom'));
+      mockProductDocBase.installation.install = vi.fn().mockRejectedValue(new Error('boom'));
 
       renderComponent(mockProductDocBase, true);
 
@@ -352,7 +358,7 @@ describe('DocumentationSection', () => {
         expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalled();
       });
 
-      const toastArg = (coreStart.notifications.toasts.addDanger as jest.Mock).mock.calls[0][0];
+      const toastArg = (coreStart.notifications.toasts.addDanger as Mock).mock.calls[0][0];
       expect(toastArg.title).toBe('Failed to install Elastic documentation');
 
       // toMountPoint is mocked to return a React node, so we can assert on its contents.
@@ -370,7 +376,7 @@ describe('DocumentationSection', () => {
     });
 
     it('should call install for Security Labs when install action is clicked', async () => {
-      mockProductDocBase.installation.getStatus = jest
+      mockProductDocBase.installation.getStatus = vi
         .fn()
         .mockImplementation(({ resourceType }) => {
           if (resourceType === ResourceTypes.securityLabs) {
@@ -406,7 +412,7 @@ describe('DocumentationSection', () => {
     it('keeps both rows in an installing UI state for back-to-back install clicks', async () => {
       // Make installs never resolve so the mutation stays "loading"
       const never = new Promise(() => {});
-      mockProductDocBase.installation.getStatus = jest
+      mockProductDocBase.installation.getStatus = vi
         .fn()
         .mockImplementation(({ resourceType }) => {
           if (resourceType === ResourceTypes.securityLabs) {
@@ -422,7 +428,7 @@ describe('DocumentationSection', () => {
             perProducts: {},
           });
         });
-      mockProductDocBase.installation.install = jest.fn().mockReturnValue(never as any);
+      mockProductDocBase.installation.install = vi.fn().mockReturnValue(never as any);
 
       renderComponent(mockProductDocBase, true);
 
@@ -443,7 +449,7 @@ describe('DocumentationSection', () => {
     });
 
     it('should show update action when Security Labs has an update available and call install on click', async () => {
-      mockProductDocBase.installation.getStatus = jest
+      mockProductDocBase.installation.getStatus = vi
         .fn()
         .mockImplementation(({ resourceType }) => {
           if (resourceType === ResourceTypes.securityLabs) {
@@ -479,7 +485,7 @@ describe('DocumentationSection', () => {
     });
 
     it('should call uninstall when uninstall action is clicked', async () => {
-      mockProductDocBase.installation.getStatus = jest
+      mockProductDocBase.installation.getStatus = vi
         .fn()
         .mockImplementation(({ resourceType }) => {
           if (resourceType === ResourceTypes.securityLabs) {
@@ -513,7 +519,7 @@ describe('DocumentationSection', () => {
     });
 
     it('should call uninstall for Security Labs when uninstall action is clicked', async () => {
-      mockProductDocBase.installation.getStatus = jest
+      mockProductDocBase.installation.getStatus = vi
         .fn()
         .mockImplementation(({ resourceType }) => {
           if (resourceType === ResourceTypes.securityLabs) {
@@ -549,7 +555,7 @@ describe('DocumentationSection', () => {
     it('keeps both rows in an uninstalling UI state for back-to-back uninstall clicks', async () => {
       // Make uninstalls never resolve so the mutation stays "loading"
       const never = new Promise(() => {});
-      mockProductDocBase.installation.getStatus = jest
+      mockProductDocBase.installation.getStatus = vi
         .fn()
         .mockImplementation(({ resourceType }) => {
           if (resourceType === ResourceTypes.securityLabs) {
@@ -565,7 +571,7 @@ describe('DocumentationSection', () => {
             perProducts: {},
           });
         });
-      mockProductDocBase.installation.uninstall = jest.fn().mockReturnValue(never as any);
+      mockProductDocBase.installation.uninstall = vi.fn().mockReturnValue(never as any);
 
       renderComponent(mockProductDocBase, true);
 
@@ -588,7 +594,7 @@ describe('DocumentationSection', () => {
 
   describe('RBAC - insufficient privileges', () => {
     it('should disable install button when user lacks manage privilege', async () => {
-      mockProductDocBase.installation.getStatus = jest
+      mockProductDocBase.installation.getStatus = vi
         .fn()
         .mockImplementation(({ resourceType }) => {
           if (resourceType === ResourceTypes.securityLabs) {
@@ -615,7 +621,7 @@ describe('DocumentationSection', () => {
     });
 
     it('should disable uninstall button when user lacks manage privilege', async () => {
-      mockProductDocBase.installation.getStatus = jest
+      mockProductDocBase.installation.getStatus = vi
         .fn()
         .mockImplementation(({ resourceType }) => {
           if (resourceType === ResourceTypes.securityLabs) {
@@ -642,7 +648,7 @@ describe('DocumentationSection', () => {
     });
 
     it('should not call install when install button is clicked without privilege', async () => {
-      mockProductDocBase.installation.getStatus = jest.fn().mockResolvedValue({
+      mockProductDocBase.installation.getStatus = vi.fn().mockResolvedValue({
         inferenceId: '.elser-2-elasticsearch',
         overall: 'uninstalled',
         perProducts: {},
@@ -663,7 +669,7 @@ describe('DocumentationSection', () => {
     });
 
     it('should not call uninstall when uninstall button is clicked without privilege', async () => {
-      mockProductDocBase.installation.getStatus = jest.fn().mockResolvedValue({
+      mockProductDocBase.installation.getStatus = vi.fn().mockResolvedValue({
         inferenceId: '.elser-2-elasticsearch',
         overall: 'installed',
         perProducts: {},

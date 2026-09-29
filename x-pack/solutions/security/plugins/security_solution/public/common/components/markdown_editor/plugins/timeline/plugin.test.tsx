@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import {
@@ -16,21 +19,27 @@ import { plugin } from './plugin';
 import { useKibana } from '../../../../lib/kibana';
 import { SELECT_TIMELINE_MODAL_TITLE, INSERT_TIMELINE_ATTACH_HINT } from './translations';
 
-jest.mock('../../../../lib/kibana');
-jest.mock('../../../link_to', () => ({
-  useFormatUrl: () => ({ formatUrl: jest.fn() }),
-  getTimelineUrl: jest.fn(),
-}));
-jest.mock('../../../../../cases/attachments/timeline/select_timeline_modal_body', () => ({
-  SelectTimelineModalBody: () => <div data-test-subj="select-timeline-modal-body-mock" />,
-}));
+vi.mock('../../../../lib/kibana');
+vi.mock('../../../link_to', () => {
+      const mocked = {
+      useFormatUrl: () => ({ formatUrl: vi.fn() }),
+      getTimelineUrl: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../cases/attachments/timeline/select_timeline_modal_body', () => {
+      const mocked = {
+      SelectTimelineModalBody: () => <div data-test-subj="select-timeline-modal-body-mock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('timeline markdown plugin', () => {
-  const reportEvent = jest.fn();
+  const reportEvent = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: { analytics: { reportEvent } },
     });
   });
@@ -41,7 +50,7 @@ describe('timeline markdown plugin', () => {
       throw new Error('Timeline markdown plugin editor is not defined');
     }
 
-    render(<Editor node={{} as never} onSave={jest.fn()} onCancel={jest.fn()} />);
+    render(<Editor node={{} as never} onSave={vi.fn()} onCancel={vi.fn()} />);
 
     expect(reportEvent).toHaveBeenCalledTimes(1);
     expect(reportEvent).toHaveBeenCalledWith(CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE, {
@@ -57,13 +66,13 @@ describe('timeline markdown plugin', () => {
       throw new Error('Timeline markdown plugin editor is not defined');
     }
 
-    render(<Editor node={{} as never} onSave={jest.fn()} onCancel={jest.fn()} />);
+    render(<Editor node={{} as never} onSave={vi.fn()} onCancel={vi.fn()} />);
 
     expect(screen.queryByText(INSERT_TIMELINE_ATTACH_HINT)).not.toBeInTheDocument();
   });
 
   it('shows the attach hint when attachments are enabled', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         analytics: { reportEvent },
         cases: { config: { attachmentsEnabled: true } },
@@ -74,7 +83,7 @@ describe('timeline markdown plugin', () => {
       throw new Error('Timeline markdown plugin editor is not defined');
     }
 
-    render(<Editor node={{} as never} onSave={jest.fn()} onCancel={jest.fn()} />);
+    render(<Editor node={{} as never} onSave={vi.fn()} onCancel={vi.fn()} />);
 
     expect(screen.getByText(INSERT_TIMELINE_ATTACH_HINT)).toBeInTheDocument();
   });

@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ExportModal } from './export_modal';
 
 describe('ExportModal', () => {
-  let onExport: jest.Mock;
-  let onCancel: jest.Mock;
-  let onSelectedOptionsChange: jest.Mock;
-  let onIncludeReferenceChange: jest.Mock;
+  let onExport: Mock;
+  let onCancel: Mock;
+  let onSelectedOptionsChange: Mock;
+  let onIncludeReferenceChange: Mock;
 
   const options = [
     { id: '1', label: 'option 1' },
@@ -27,10 +30,10 @@ describe('ExportModal', () => {
   };
 
   beforeEach(() => {
-    onExport = jest.fn();
-    onCancel = jest.fn();
-    onSelectedOptionsChange = jest.fn();
-    onIncludeReferenceChange = jest.fn();
+    onExport = vi.fn();
+    onCancel = vi.fn();
+    onSelectedOptionsChange = vi.fn();
+    onIncludeReferenceChange = vi.fn();
   });
 
   it('Displays a checkbox for each option', () => {

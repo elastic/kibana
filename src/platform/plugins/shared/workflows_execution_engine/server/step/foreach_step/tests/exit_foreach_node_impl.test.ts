@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ExitForeachNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { StepIoService } from '../../../workflow_context_manager/step_io_service';
@@ -32,24 +35,24 @@ describe('ExitForeachNodeImpl', () => {
       startNodeId: 'foreachStartNode',
     };
     wfExecutionRuntimeManager = {} as unknown as WorkflowExecutionRuntimeManager;
-    wfExecutionRuntimeManager.navigateToNextNode = jest.fn();
-    wfExecutionRuntimeManager.navigateToNode = jest.fn();
+    wfExecutionRuntimeManager.navigateToNextNode = vi.fn();
+    wfExecutionRuntimeManager.navigateToNode = vi.fn();
 
     stepExecutionRuntime = {} as unknown as StepExecutionRuntime;
-    stepExecutionRuntime.finishStep = jest.fn();
-    stepExecutionRuntime.getCurrentStepState = jest.fn();
-    stepExecutionRuntime.setCurrentStepState = jest.fn();
+    stepExecutionRuntime.finishStep = vi.fn();
+    stepExecutionRuntime.getCurrentStepState = vi.fn();
+    stepExecutionRuntime.setCurrentStepState = vi.fn();
 
     workflowLogger = {} as unknown as IWorkflowEventLogger;
-    workflowLogger.logDebug = jest.fn();
+    workflowLogger.logDebug = vi.fn();
 
     stepIoService = {
-      evictStaleLoopOutputs: jest.fn(),
-      unpinForeachScope: jest.fn(),
+      evictStaleLoopOutputs: vi.fn(),
+      unpinForeachScope: vi.fn(),
     } as unknown as StepIoService;
 
     workflowGraph = {
-      getInnerStepIds: jest.fn().mockReturnValue(new Set(['innerStep'])),
+      getInnerStepIds: vi.fn().mockReturnValue(new Set(['innerStep'])),
     } as unknown as WorkflowGraph;
 
     underTest = new ExitForeachNodeImpl(
@@ -64,7 +67,7 @@ describe('ExitForeachNodeImpl', () => {
 
   describe('when no foreach step', () => {
     beforeEach(() => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue(undefined);
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue(undefined);
     });
 
     it('should throw an error', () => {
@@ -76,7 +79,7 @@ describe('ExitForeachNodeImpl', () => {
 
   describe('when there are more items to process', () => {
     beforeEach(() => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         index: 1,
         total: 3,
       });
@@ -104,7 +107,7 @@ describe('ExitForeachNodeImpl', () => {
 
   describe('when no more items to process', () => {
     beforeEach(() => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         index: 2,
         total: 3,
       });
@@ -132,7 +135,7 @@ describe('ExitForeachNodeImpl', () => {
     });
 
     it('should throw an error if max-iterations limit is reached with on-limit fail', () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         index: 1,
         total: 5,
       });
@@ -144,7 +147,7 @@ describe('ExitForeachNodeImpl', () => {
     });
 
     it('should not finish the step when on-limit is fail', () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         index: 1,
         total: 5,
       });
@@ -159,7 +162,7 @@ describe('ExitForeachNodeImpl', () => {
     });
 
     it('should finish and navigate to next node when max-iterations reached with on-limit continue', async () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         index: 1,
         total: 5,
       });
@@ -173,7 +176,7 @@ describe('ExitForeachNodeImpl', () => {
     });
 
     it('should log that max-iterations limit was reached when on-limit is continue', async () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         index: 1,
         total: 5,
       });
@@ -189,7 +192,7 @@ describe('ExitForeachNodeImpl', () => {
     });
 
     it('should not navigate back to start node when max-iterations reached with on-limit continue', async () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         index: 1,
         total: 5,
       });
@@ -202,7 +205,7 @@ describe('ExitForeachNodeImpl', () => {
     });
 
     it('should evict stale loop outputs before throwing on max-iterations with on-limit fail', () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         index: 1,
         total: 5,
       });
@@ -227,7 +230,7 @@ describe('ExitForeachNodeImpl', () => {
     });
 
     it('should evict stale loop outputs when max-iterations reached with on-limit continue', async () => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         index: 1,
         total: 5,
       });

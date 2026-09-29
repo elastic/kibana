@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { DiskUsageRule } from './disk_usage_rule';
 import { RULE_DISK_USAGE } from '../../common/constants';
 import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
@@ -26,27 +29,36 @@ type IDiskUsageAlertMock = DiskUsageRule & {
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_disk_usage_node_stats', () => ({
-  fetchDiskUsageNodeStats: jest.fn(),
-}));
-jest.mock('../lib/alerts/fetch_clusters', () => ({
-  fetchClusters: jest.fn(),
-}));
+vi.mock('../lib/alerts/fetch_disk_usage_node_stats', () => {
+      const mocked = {
+      fetchDiskUsageNodeStats: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/alerts/fetch_clusters', () => {
+      const mocked = {
+      fetchClusters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../static_globals', () => ({
-  Globals: {
-    app: {
-      getLogger: () => ({ debug: jest.fn() }),
-      url: 'http://localhost:5601',
-      config: {
-        ui: {
-          ccs: { enabled: true },
-          container: { elasticsearch: { enabled: false } },
+vi.mock('../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          getLogger: () => ({ debug: vi.fn() }),
+          url: 'http://localhost:5601',
+          config: {
+            ui: {
+              ccs: { enabled: true },
+              container: { elasticsearch: { enabled: false } },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DiskUsageRule', () => {
   it('should have defaults', () => {
@@ -96,17 +108,17 @@ describe('DiskUsageRule', () => {
 
     beforeEach(() => {
       Date = FakeDate as DateConstructor;
-      (fetchDiskUsageNodeStats as jest.Mock).mockImplementation(() => {
+      (fetchDiskUsageNodeStats as Mock).mockImplementation(() => {
         return [stat];
       });
-      (fetchClusters as jest.Mock).mockImplementation(() => {
+      (fetchClusters as Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
       });
     });
 
     afterEach(() => {
       Date = RealDate;
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('should fire action', async () => {
@@ -250,7 +262,7 @@ describe('DiskUsageRule', () => {
 
     it('should handle ccs', async () => {
       const ccs = 'testCluster';
-      (fetchDiskUsageNodeStats as jest.Mock).mockImplementation(() => {
+      (fetchDiskUsageNodeStats as Mock).mockImplementation(() => {
         return [
           {
             ...stat,

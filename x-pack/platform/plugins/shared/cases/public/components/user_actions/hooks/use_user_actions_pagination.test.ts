@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useUserActionsPagination } from './use_user_actions_pagination';
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
 
-jest.mock('../../../containers/use_infinite_find_case_user_actions');
+vi.mock('../../../containers/use_infinite_find_case_user_actions');
 
-const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
+const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as Mock;
 
 describe('useUserActionsPagination', () => {
   const defaultParams = {
@@ -26,12 +29,12 @@ describe('useUserActionsPagination', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useInfiniteFindCaseUserActionsMock.mockReturnValue({
       data: undefined,
       isLoading: true,
       hasNextPage: false,
-      fetchNextPage: jest.fn(),
+      fetchNextPage: vi.fn(),
       isFetchingNextPage: false,
     });
   });
@@ -61,7 +64,7 @@ describe('useUserActionsPagination', () => {
       },
       isLoading: false,
       hasNextPage: true,
-      fetchNextPage: jest.fn(),
+      fetchNextPage: vi.fn(),
       isFetchingNextPage: false,
     });
 
@@ -80,7 +83,7 @@ describe('useUserActionsPagination', () => {
       },
       isLoading: false,
       hasNextPage: false,
-      fetchNextPage: jest.fn(),
+      fetchNextPage: vi.fn(),
       isFetchingNextPage: false,
     });
 
@@ -106,7 +109,7 @@ describe('useUserActionsPagination', () => {
       },
       isLoading: false,
       hasNextPage: false,
-      fetchNextPage: jest.fn(),
+      fetchNextPage: vi.fn(),
       isFetchingNextPage: false,
     });
 
@@ -122,7 +125,7 @@ describe('useUserActionsPagination', () => {
       },
       isLoading: false,
       hasNextPage: false,
-      fetchNextPage: jest.fn(),
+      fetchNextPage: vi.fn(),
       isFetchingNextPage: false,
     });
 

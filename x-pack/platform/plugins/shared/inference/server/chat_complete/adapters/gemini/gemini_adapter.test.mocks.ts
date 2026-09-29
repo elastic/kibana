@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-export const processVertexStreamMock = jest.fn();
-export const processVertexResponseMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./process_vertex_stream', () => {
-  const actual = jest.requireActual('./process_vertex_stream');
+export const processVertexStreamMock = vi.fn();
+export const processVertexResponseMock = vi.fn();
+
+vi.doMock('./process_vertex_stream', async () => {
+  const actual = (await vi.importActual('./process_vertex_stream'));
   return {
     ...actual,
     processVertexStream: processVertexStreamMock,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,30 +15,36 @@ import type { DataStreamResponse } from '../../../../../../common';
 import { UIStateProvider } from '../../../contexts';
 
 // Components are further tested in their own files. We just want to test if it renders.
-jest.mock('./input_types_badges', () => ({
-  InputTypesBadges: jest.fn(({ inputTypes }) => (
-    <div data-test-subj="mock-input-types-badges">
-      {inputTypes?.map((t: { name: string }) => t.name).join(', ')}
-    </div>
-  )),
-}));
+vi.mock('./input_types_badges', () => {
+      const mocked = {
+      InputTypesBadges: vi.fn(({ inputTypes }) => (
+        <div data-test-subj="mock-input-types-badges">
+          {inputTypes?.map((t: { name: string }) => t.name).join(', ')}
+        </div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./status', () => ({
-  Status: jest.fn(({ status, isDeleting }) => (
-    <div data-test-subj="mock-status">{isDeleting ? 'Deleting...' : status}</div>
-  )),
-}));
+vi.mock('./status', () => {
+      const mocked = {
+      Status: vi.fn(({ status, isDeleting }) => (
+        <div data-test-subj="mock-status">{isDeleting ? 'Deleting...' : status}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock useDeleteDataStream hook
-const mockMutate = jest.fn();
+const mockMutate = vi.fn();
 const mockDeleteDataStreamMutation = {
   mutate: mockMutate,
   isLoading: false,
   variables: undefined as { dataStreamId: string } | undefined,
 };
 
-const mockReanalyzeMutate = jest.fn();
-const mockReanalyzeMutateAsync = jest.fn().mockResolvedValue(undefined);
+const mockReanalyzeMutate = vi.fn();
+const mockReanalyzeMutateAsync = vi.fn().mockResolvedValue(undefined);
 const mockReanalyzeDataStreamMutation = {
   mutate: mockReanalyzeMutate,
   mutateAsync: mockReanalyzeMutateAsync,
@@ -46,36 +54,45 @@ const mockReanalyzeDataStreamMutation = {
     | undefined,
 };
 
-jest.mock('../../../../../common', () => ({
-  useDeleteDataStream: () => ({
-    deleteDataStreamMutation: mockDeleteDataStreamMutation,
-  }),
-  useReanalyzeDataStream: () => ({
-    reanalyzeDataStreamMutation: mockReanalyzeDataStreamMutation,
-  }),
-}));
+vi.mock('../../../../../common', () => {
+      const mocked = {
+      useDeleteDataStream: () => ({
+        deleteDataStreamMutation: mockDeleteDataStreamMutation,
+      }),
+      useReanalyzeDataStream: () => ({
+        reanalyzeDataStreamMutation: mockReanalyzeDataStreamMutation,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockReportEditDataStreamFlyoutOpened = jest.fn();
-const mockReportDataStreamDeleteConfirmed = jest.fn();
-const mockReportDataStreamRefreshConfirmed = jest.fn();
-jest.mock('../../../../telemetry_context', () => ({
-  useTelemetry: () => ({
-    reportEditDataStreamFlyoutOpened: mockReportEditDataStreamFlyoutOpened,
-    reportDataStreamDeleteConfirmed: mockReportDataStreamDeleteConfirmed,
-    reportDataStreamRefreshConfirmed: mockReportDataStreamRefreshConfirmed,
-  }),
-}));
+const mockReportEditDataStreamFlyoutOpened = vi.fn();
+const mockReportDataStreamDeleteConfirmed = vi.fn();
+const mockReportDataStreamRefreshConfirmed = vi.fn();
+vi.mock('../../../../telemetry_context', () => {
+      const mocked = {
+      useTelemetry: () => ({
+        reportEditDataStreamFlyoutOpened: mockReportEditDataStreamFlyoutOpened,
+        reportDataStreamDeleteConfirmed: mockReportDataStreamDeleteConfirmed,
+        reportDataStreamRefreshConfirmed: mockReportDataStreamRefreshConfirmed,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock useIntegrationForm hook
-jest.mock('../../../forms/integration_form', () => ({
-  useIntegrationForm: () => ({
-    formData: { connectorId: 'test-connector-id' },
-  }),
-}));
+vi.mock('../../../forms/integration_form', () => {
+      const mocked = {
+      useIntegrationForm: () => ({
+        formData: { connectorId: 'test-connector-id' },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock EUI theme provider
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     useEuiTheme: () => ({
@@ -109,7 +126,7 @@ describe('DataStreamsTable', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockDeleteDataStreamMutation.isLoading = false;
     mockDeleteDataStreamMutation.variables = undefined;
     mockReanalyzeDataStreamMutation.isLoading = false;

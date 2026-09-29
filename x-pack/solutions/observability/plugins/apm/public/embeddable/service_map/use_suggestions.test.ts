@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useSuggestions } from './use_suggestions';
 
 describe('useSuggestions', () => {
-  const mockHttpGet = jest.fn();
+  const mockHttpGet = vi.fn();
   const mockCore = {
     http: { get: mockHttpGet },
   } as unknown as CoreStart;
@@ -23,13 +25,13 @@ describe('useSuggestions', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
     mockHttpGet.mockResolvedValue({ terms: [] });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns initial state with empty terms and not loading', () => {
@@ -49,7 +51,7 @@ describe('useSuggestions', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     await waitFor(() => {
@@ -77,7 +79,7 @@ describe('useSuggestions', () => {
     expect(mockHttpGet).not.toHaveBeenCalled();
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     await waitFor(() => {
@@ -109,7 +111,7 @@ describe('useSuggestions', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     await waitFor(() => {
@@ -142,7 +144,7 @@ describe('useSuggestions', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     await waitFor(() => {
@@ -159,7 +161,7 @@ describe('useSuggestions', () => {
   });
 
   it('clears terms and sets isLoading to false on error', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockHttpGet.mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useSuggestions(defaultParams));
@@ -169,7 +171,7 @@ describe('useSuggestions', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     await waitFor(() => {
@@ -182,7 +184,7 @@ describe('useSuggestions', () => {
   });
 
   it('does not log error for AbortError', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const abortError = new Error('Aborted');
     abortError.name = 'AbortError';
     mockHttpGet.mockRejectedValue(abortError);
@@ -194,7 +196,7 @@ describe('useSuggestions', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     await waitFor(() => {
@@ -217,7 +219,7 @@ describe('useSuggestions', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     await waitFor(() => {

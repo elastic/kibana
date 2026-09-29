@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { Query } from '@elastic/eui';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -38,7 +40,7 @@ describe('SelectableFilterPopover', () => {
   });
 
   it('treats option keys as active query aliases', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     render(
       <SelectableFilterPopover
@@ -171,7 +173,7 @@ describe('SelectableFilterPopover', () => {
   });
 
   it('uses the captured modifier key to add an exclude filter', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     render(
       <SelectableFilterPopover

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { installWithTimeout } from './install_with_timeout';
@@ -16,12 +18,12 @@ describe('installWithTimeout', () => {
   let pluginStop$: Subject<void>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     pluginStop$ = new ReplaySubject(1);
   });
 
   it(`should call installFn`, async () => {
-    const installFn = jest.fn();
+    const installFn = vi.fn();
     await installWithTimeout({
       installFn,
       pluginStop$,

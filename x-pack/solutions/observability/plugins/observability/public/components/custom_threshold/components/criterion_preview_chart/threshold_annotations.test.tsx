@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { Color } from '../../../../../common/custom_threshold_rule/color_palette';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { render } from '@testing-library/react';
@@ -11,8 +13,8 @@ import React from 'react';
 
 import { ThresholdAnnotations } from './threshold_annotations';
 
-jest.mock('@elastic/charts', () => {
-  const original = jest.requireActual('@elastic/charts');
+vi.mock('@elastic/charts', () => {
+  const original = require('@elastic/charts');
 
   const mockComponent = (props: {}) => {
     return <div {...props} />;

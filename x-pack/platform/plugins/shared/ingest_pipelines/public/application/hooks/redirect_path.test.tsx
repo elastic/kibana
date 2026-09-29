@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { useRedirectPath } from './redirect_path';
 import { useKibana } from '../../shared_imports';
 
-const mockedUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-jest.mock('../../shared_imports');
+const mockedUseKibana = useKibana as MockedFunction<typeof useKibana>;
+vi.mock('../../shared_imports');
 
 describe('useRedirectPath', () => {
-  const mockedNavigateToUrl = jest.fn();
+  const mockedNavigateToUrl = vi.fn();
   beforeEach(() => {
     mockedNavigateToUrl.mockReset();
     mockedUseKibana.mockReturnValue({

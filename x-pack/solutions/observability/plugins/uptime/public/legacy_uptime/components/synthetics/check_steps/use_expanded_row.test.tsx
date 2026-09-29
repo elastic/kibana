@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import ReactRouterDom from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
@@ -18,10 +20,13 @@ import { SYNTHETIC_CHECK_STEPS_ROUTE } from '../../../../../common/constants';
 import { COLLAPSE_LABEL, EXPAND_LABEL } from '../translations';
 import { act } from 'react-dom/test-utils';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useExpandedROw', () => {
   let expandedRowsObj = {};
@@ -134,7 +139,7 @@ describe('useExpandedROw', () => {
   });
 
   beforeEach(() => {
-    jest.spyOn(ReactRouterDom, 'useParams').mockReturnValue({ checkGroupId: checkGroup });
+    vi.spyOn(ReactRouterDom, 'useParams').mockReturnValue({ checkGroupId: checkGroup });
   });
 
   it('it can expand both rows at same time', async () => {
@@ -202,7 +207,7 @@ describe('useExpandedROw', () => {
     expect(Object.keys(result.current.expandedRows)).toEqual(['0', '1']);
 
     // change checkGroupId to ensure that useEffect runs
-    jest.spyOn(ReactRouterDom, 'useParams').mockReturnValue({ checkGroupId: 'new-fake-group' });
+    vi.spyOn(ReactRouterDom, 'useParams').mockReturnValue({ checkGroupId: 'new-fake-group' });
 
     // rerender with new check group, with one step
     rerender({ steps: [defaultSteps[0]], allSteps: [defaultSteps[0]], loading: false });

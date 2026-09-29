@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { allowedExperimentalValues } from '../../common/experimental_features';
 import { registerConnectorTypes } from '.';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -25,7 +27,7 @@ const ACTION_TYPE_IDS = [
 const mockedActions = actionsMock.createSetup();
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('registers connectors', () => {

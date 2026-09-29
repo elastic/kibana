@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockLogger } from '../test_utils';
 import { coreMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { SCHEDULE_INTERVAL, taskRunner } from './mark_removed_tasks_as_unrecognized';
@@ -42,7 +44,7 @@ describe('markRemovedTasksAsUnrecognizedTask', () => {
   const esClient = elasticsearchServiceMock.createStart();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('marks removed tasks as unrecognized', async () => {

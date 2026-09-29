@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import {
@@ -22,55 +25,79 @@ import { useAIValueExportContext } from '../../providers/ai_value/export_provide
 import { useIsAlertsAndAttacksAlignmentEnabled } from '../../../common/hooks/use_is_alerts_and_attacks_alignment_enabled';
 import { useSecuritySolutionLinkProps } from '../../../common/components/links';
 
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_value_metrics', () => ({
-  useValueMetrics: jest.fn(),
-}));
+vi.mock('./hooks/use_value_metrics', () => {
+      const mocked = {
+      useValueMetrics: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_has_ever_used_attack_discovery', () => ({
-  useHasEverUsedAttackDiscovery: jest.fn(),
-}));
+vi.mock('./hooks/use_has_ever_used_attack_discovery', () => {
+      const mocked = {
+      useHasEverUsedAttackDiscovery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./ai_value_report_layout', () => ({
-  AIValueReportLayout: jest.fn(() => <div data-test-subj="mock-ai-value-report-layout" />),
-}));
+vi.mock('./ai_value_report_layout', () => {
+      const mocked = {
+      AIValueReportLayout: vi.fn(() => <div data-test-subj="mock-ai-value-report-layout" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/components/page_loader', () => ({
-  PageLoader: () => <div data-test-subj="mock-page-loader" />,
-}));
+vi.mock('../../../common/components/page_loader', () => {
+      const mocked = {
+      PageLoader: () => <div data-test-subj="mock-page-loader" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../providers/ai_value/export_provider', () => ({
-  useAIValueExportContext: jest.fn(),
-}));
+vi.mock('../../providers/ai_value/export_provider', () => {
+      const mocked = {
+      useAIValueExportContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/components/links', () => ({
-  useSecuritySolutionLinkProps: jest.fn(() => ({
-    href: '/mock-attack-discovery',
-    onClick: jest.fn(),
-  })),
-}));
+vi.mock('../../../common/components/links', () => {
+      const mocked = {
+      useSecuritySolutionLinkProps: vi.fn(() => ({
+        href: '/mock-attack-discovery',
+        onClick: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_is_alerts_and_attacks_alignment_enabled', () => ({
-  useIsAlertsAndAttacksAlignmentEnabled: jest.fn(),
-}));
+vi.mock('../../../common/hooks/use_is_alerts_and_attacks_alignment_enabled', () => {
+      const mocked = {
+      useIsAlertsAndAttacksAlignmentEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseValueMetrics = useValueMetrics as jest.MockedFunction<typeof useValueMetrics>;
-const mockuseHasEverUsedAttackDiscovery = useHasEverUsedAttackDiscovery as jest.MockedFunction<
+const mockUseKibana = useKibana as Mock;
+const mockUseValueMetrics = useValueMetrics as MockedFunction<typeof useValueMetrics>;
+const mockuseHasEverUsedAttackDiscovery = useHasEverUsedAttackDiscovery as MockedFunction<
   typeof useHasEverUsedAttackDiscovery
 >;
-const mockAIValueReportLayout = AIValueReportLayout as jest.MockedFunction<
+const mockAIValueReportLayout = AIValueReportLayout as MockedFunction<
   typeof AIValueReportLayout
 >;
-const useAIValueExportContextMock = useAIValueExportContext as jest.Mock;
+const useAIValueExportContextMock = useAIValueExportContext as Mock;
 
 const defaultProps = {
-  setHasReportData: jest.fn(),
-  setIsDatePickerDisabled: jest.fn(),
-  setIsSampleMode: jest.fn(),
+  setHasReportData: vi.fn(),
+  setIsDatePickerDisabled: vi.fn(),
+  setIsSampleMode: vi.fn(),
   isSourcererLoading: false,
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-31T23:59:59.999Z',
@@ -102,12 +129,12 @@ describe('AIValueReport', () => {
       services: {
         settings: {
           client: {
-            get: jest.fn((key: string) => {
+            get: vi.fn((key: string) => {
               if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES) return 10;
               if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE) return 50;
               return null;
             }),
-            set: jest.fn(),
+            set: vi.fn(),
           },
         },
         ...overrides,
@@ -115,13 +142,13 @@ describe('AIValueReport', () => {
     } as Partial<StartServices>);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockAIValueReportLayout.mockImplementation(() => (
       <div data-test-subj="mock-ai-value-report-layout" />
     ));
     useAIValueExportContextMock.mockReturnValue(undefined);
     mockUseKibana.mockReturnValue(createMockKibanaServices());
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(false);
+    (useIsAlertsAndAttacksAlignmentEnabled as Mock).mockReturnValue(false);
 
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: ['alert-1', 'alert-2'],
@@ -205,7 +232,7 @@ describe('AIValueReport', () => {
   });
 
   it('renders the sample layout with Attacks link when the advanced setting is enabled', () => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
+    (useIsAlertsAndAttacksAlignmentEnabled as Mock).mockReturnValue(true);
     mockUseValueMetrics.mockReturnValue({
       attackAlertIds: [],
       hasNoCurrentDiscoveries: true,
@@ -305,15 +332,15 @@ describe('AIValueReport', () => {
 
   describe('when exporting with a relative time range', () => {
     beforeAll(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     beforeEach(() => {
-      jest.setSystemTime(new Date('2025-12-19T00:00:00.000Z'));
+      vi.setSystemTime(new Date('2025-12-19T00:00:00.000Z'));
       useAIValueExportContextMock.mockReturnValue({
         forwardedState: {
           timeRange: {
@@ -338,7 +365,7 @@ describe('AIValueReport', () => {
   });
 
   it('sets the report input in the export context when live data is loaded', () => {
-    const setReportInputMock = jest.fn();
+    const setReportInputMock = vi.fn();
     useAIValueExportContextMock.mockReturnValue({
       setReportInput: setReportInputMock,
     });
@@ -355,7 +382,7 @@ describe('AIValueReport', () => {
   });
 
   it('does not set the report input in the export context in sample mode', () => {
-    const setReportInputMock = jest.fn();
+    const setReportInputMock = vi.fn();
     useAIValueExportContextMock.mockReturnValue({
       setReportInput: setReportInputMock,
     });
@@ -384,12 +411,12 @@ describe('AIValueReport', () => {
       createMockKibanaServices({
         settings: {
           client: {
-            get: jest.fn((key: string) => {
+            get: vi.fn((key: string) => {
               if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES) return 5;
               if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE) return 75;
               return null;
             }),
-            set: jest.fn(),
+            set: vi.fn(),
           },
         } as unknown as StartServices['settings'],
       })

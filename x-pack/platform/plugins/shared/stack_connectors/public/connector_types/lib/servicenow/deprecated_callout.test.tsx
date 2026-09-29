@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,7 +14,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { DeprecatedCallout } from './deprecated_callout';
 
 describe('DeprecatedCallout', () => {
-  const onMigrate = jest.fn();
+  const onMigrate = vi.fn();
 
   test('it renders correctly', () => {
     render(<DeprecatedCallout onMigrate={onMigrate} />, {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { percentile } from './percentile';
 
 describe('percentile(resp, panel, series)', () => {
@@ -71,7 +73,7 @@ describe('percentile(resp, panel, series)', () => {
   });
 
   test('calls next when finished', async () => {
-    const next = jest.fn();
+    const next = vi.fn();
 
     await percentile(resp, panel, series, {})(next)([]);
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -24,7 +26,7 @@ describe('<NotFoundPrompt />', () => {
     const goBackButton = component.find('EuiButtonEmpty');
     expect(goBackButton.text()).toBe('Go back');
 
-    const backSpy = jest.spyOn(history, 'back');
+    const backSpy = vi.spyOn(history, 'back');
     act(() => {
       goBackButton.simulate('click');
     });

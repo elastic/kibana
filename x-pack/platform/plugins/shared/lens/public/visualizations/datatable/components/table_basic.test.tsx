@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -25,11 +28,11 @@ import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { DataGridDensity } from '@kbn/unified-data-table';
 
-jest.mock('../../../shared_components/coloring/get_cell_color_fn', () => {
-  const mod = jest.requireActual('../../../shared_components/coloring/get_cell_color_fn');
+vi.mock('../../../shared_components/coloring/get_cell_color_fn', async () => {
+  const mod = (await vi.importActual('../../../shared_components/coloring/get_cell_color_fn'));
   return {
     ...mod,
-    getCellColorFn: jest.fn(mod.getCellColorFn),
+    getCellColorFn: vi.fn(mod.getCellColorFn),
   };
 });
 
@@ -38,7 +41,7 @@ jest.mock('../../../shared_components/coloring/get_cell_color_fn', () => {
 beforeAll(() => {
   // eslint-disable-next-line no-console
   const originalError = console.error;
-  jest.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
+  vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
     if (
       typeof args[0] === 'string' &&
       args[0].includes('NaN') &&
@@ -51,7 +54,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 const { theme: setUpMockTheme } = coreMock.createSetup();
@@ -129,20 +132,20 @@ function copyData<T>(data: T): T {
 }
 
 describe('DatatableComponent', () => {
-  let onDispatchEvent: jest.Mock;
-  let renderComplete: jest.Mock;
+  let onDispatchEvent: Mock;
+  let renderComplete: Mock;
 
   let { data, args } = sampleArgs();
   beforeEach(() => {
-    onDispatchEvent = jest.fn();
-    renderComplete = jest.fn();
+    onDispatchEvent = vi.fn();
+    renderComplete = vi.fn();
     const sample = sampleArgs();
     data = sample.data;
     args = sample.args;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderDatatableComponent = (propsOverrides: Partial<DatatableRenderProps> = {}) => {
@@ -151,7 +154,7 @@ describe('DatatableComponent', () => {
       args,
       formatFactory: () => ({ convertToText: (x) => x, convertToReact: (x) => x } as IFieldFormat),
       dispatchEvent: onDispatchEvent,
-      getType: jest.fn().mockReturnValue({
+      getType: vi.fn().mockReturnValue({
         type: 'buckets',
       }),
       paletteService: chartPluginMock.createPaletteRegistry(),
@@ -829,7 +832,7 @@ describe('DatatableComponent', () => {
         args.columns[0].palette = palette;
         args.columns[0].colorMode = 'cell';
 
-        (getCellColorFn as jest.Mock).mockReturnValue(() => color);
+        (getCellColorFn as Mock).mockReturnValue(() => color);
 
         renderDatatableComponent();
 
@@ -848,7 +851,7 @@ describe('DatatableComponent', () => {
         args.columns[2].palette = palette;
         args.columns[2].colorMode = 'cell';
 
-        (getCellColorFn as jest.Mock).mockReturnValue(() => color);
+        (getCellColorFn as Mock).mockReturnValue(() => color);
 
         renderDatatableComponent();
 

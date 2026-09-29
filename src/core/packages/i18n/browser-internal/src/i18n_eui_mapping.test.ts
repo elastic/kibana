@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/i18n');
+import { vi } from 'vitest';
+
+vi.mock('@kbn/i18n');
 
 import { i18n } from '@kbn/i18n';
 
@@ -22,9 +24,9 @@ type I18nTranslateCall = [
   { defaultMessage: string; values?: object; description?: string }
 ];
 
-describe('@elastic/eui i18n tokens', () => {
-  const i18nTranslateActual = jest.requireActual('@kbn/i18n').i18n.translate;
-  const i18nTranslateMock = jest
+describe('@elastic/eui i18n tokens', async () => {
+  const i18nTranslateActual = (await vi.importActual('@kbn/i18n')).i18n.translate;
+  const i18nTranslateMock = vi
     .fn()
     .mockImplementation((id, { defaultMessage }) => defaultMessage);
   i18n.translate = i18nTranslateMock;

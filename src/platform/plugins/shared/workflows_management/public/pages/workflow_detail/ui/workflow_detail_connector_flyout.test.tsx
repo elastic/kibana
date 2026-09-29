@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import { monaco } from '@kbn/monaco';
@@ -20,29 +23,38 @@ import { createMockStore } from '../../../entities/workflows/store/__mocks__/sto
 import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock hooks
-const mockUseKibana = jest.fn();
-const mockUseAsyncThunk = jest.fn();
-const mockUseFetchConnector = jest.fn();
+const mockUseKibana = vi.fn();
+const mockUseAsyncThunk = vi.fn();
+const mockUseFetchConnector = vi.fn();
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => mockUseKibana(),
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_async_thunk', () => ({
-  useAsyncThunk: (thunk: any) => mockUseAsyncThunk(thunk),
-}));
+vi.mock('../../../hooks/use_async_thunk', () => {
+      const mocked = {
+      useAsyncThunk: (thunk: any) => mockUseAsyncThunk(thunk),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../entities/connectors/model/use_available_connectors', () => ({
-  useFetchConnector: (connectorId?: string) => mockUseFetchConnector(connectorId),
-}));
+vi.mock('../../../entities/connectors/model/use_available_connectors', () => {
+      const mocked = {
+      useFetchConnector: (connectorId?: string) => mockUseFetchConnector(connectorId),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowDetailConnectorFlyout', () => {
   const mockEditorRef = {
     current: null,
   } as React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
-  const mockGetAddConnectorFlyout = jest.fn();
-  const mockGetEditConnectorFlyout = jest.fn();
-  const mockLoadConnectors = jest.fn();
+  const mockGetAddConnectorFlyout = vi.fn();
+  const mockGetEditConnectorFlyout = vi.fn();
+  const mockLoadConnectors = vi.fn();
 
   const mockConnector = {
     id: 'connector-123',
@@ -63,12 +75,12 @@ describe('WorkflowDetailConnectorFlyout', () => {
 
   const createMockEditor = (): monaco.editor.IStandaloneCodeEditor => {
     const mockModel = {
-      getLineMaxColumn: jest.fn((lineNumber: number) => 50),
-      pushEditOperations: jest.fn(),
+      getLineMaxColumn: vi.fn((lineNumber: number) => 50),
+      pushEditOperations: vi.fn(),
     } as any;
 
     return {
-      getModel: jest.fn(() => mockModel),
+      getModel: vi.fn(() => mockModel),
     } as any;
   };
 
@@ -83,7 +95,7 @@ describe('WorkflowDetailConnectorFlyout', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockEditorRef.current = createMockEditor() as monaco.editor.IStandaloneCodeEditor;
 
@@ -200,7 +212,7 @@ describe('WorkflowDetailConnectorFlyout', () => {
 
       const editorModel = mockEditorRef.current?.getModel();
       expect(editorModel?.pushEditOperations).toHaveBeenCalledTimes(1);
-      (editorModel?.pushEditOperations as jest.Mock).mockClear();
+      (editorModel?.pushEditOperations as Mock).mockClear();
       mockLoadConnectors.mockClear();
 
       act(() => {
@@ -517,13 +529,13 @@ describe('WorkflowDetailConnectorFlyout', () => {
 
     it('should handle errors gracefully when pushEditOperations fails', () => {
       const mockModel = {
-        getLineMaxColumn: jest.fn(() => 50),
-        pushEditOperations: jest.fn(() => {
+        getLineMaxColumn: vi.fn(() => 50),
+        pushEditOperations: vi.fn(() => {
           throw new Error('Edit operation failed');
         }),
       };
       mockEditorRef.current = {
-        getModel: jest.fn(() => mockModel),
+        getModel: vi.fn(() => mockModel),
       } as any;
 
       let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;

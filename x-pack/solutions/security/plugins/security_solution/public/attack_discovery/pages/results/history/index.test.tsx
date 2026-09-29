@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { Router } from '@kbn/shared-ux-router';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -21,100 +24,110 @@ import { useKibana as mockUseKibana } from '../../../../common/lib/kibana';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  matchPath: jest.fn(),
-  useLocation: jest.fn().mockReturnValue({
-    search: '',
-  }),
-  withRouter: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      matchPath: vi.fn(),
+      useLocation: vi.fn().mockReturnValue({
+        search: '',
+      }),
+      withRouter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/shared-ux-router', () => ({
-  ...jest.requireActual('@kbn/shared-ux-router'),
-  useSearchParams: jest.fn(() => [{ get: jest.fn() }]),
-}));
+vi.mock('@kbn/shared-ux-router', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/shared-ux-router')),
+      useSearchParams: vi.fn(() => [{ get: vi.fn() }]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useDateFormat: jest.fn(),
-  useKibana: jest.fn(() => ({
-    services: {
-      application: {
-        capabilities: {
-          siemV2: { crud_alerts: true, read_alerts: true },
-          siemV3: { configurations: true },
-          siemV4: { configurations: true },
-          siemV5: { configurations: true },
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useDateFormat: vi.fn(),
+      useKibana: vi.fn(() => ({
+        services: {
+          application: {
+            capabilities: {
+              siemV2: { crud_alerts: true, read_alerts: true },
+              siemV3: { configurations: true },
+              siemV4: { configurations: true },
+              siemV5: { configurations: true },
+            },
+            navigateToUrl: vi.fn(),
+          },
+          cases: {
+            helpers: {
+              canUseCases: vi.fn().mockReturnValue({
+                all: true,
+                connectors: true,
+                create: true,
+                delete: true,
+                push: true,
+                read: true,
+                settings: true,
+                update: true,
+              }),
+            },
+            hooks: {
+              useCasesAddToExistingCase: vi.fn(),
+              useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({ open: vi.fn() }),
+              useCasesAddToNewCaseFlyout: vi.fn(),
+            },
+            ui: { getCasesContext: mockCasesContext },
+          },
+          featureFlags: {
+            useBooleanValue: vi.fn().mockReturnValue(false),
+          },
+          uiSettings: {
+            get: vi.fn().mockReturnValue(false),
+          },
+          theme: {
+            getTheme: vi.fn().mockReturnValue({ darkMode: false }),
+          },
         },
-        navigateToUrl: jest.fn(),
-      },
-      cases: {
-        helpers: {
-          canUseCases: jest.fn().mockReturnValue({
-            all: true,
-            connectors: true,
-            create: true,
-            delete: true,
-            push: true,
-            read: true,
-            settings: true,
-            update: true,
-          }),
-        },
-        hooks: {
-          useCasesAddToExistingCase: jest.fn(),
-          useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
-          useCasesAddToNewCaseFlyout: jest.fn(),
-        },
-        ui: { getCasesContext: mockCasesContext },
-      },
-      featureFlags: {
-        useBooleanValue: jest.fn().mockReturnValue(false),
-      },
-      uiSettings: {
-        get: jest.fn().mockReturnValue(false),
-      },
-      theme: {
-        getTheme: jest.fn().mockReturnValue({ darkMode: false }),
-      },
-    },
-  })),
-  useToasts: jest.fn(() => ({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    addInfo: jest.fn(),
-    remove: jest.fn(),
-  })),
-}));
-jest.mock('../../../../flyout_v2/use_flyout_api');
+      })),
+      useToasts: vi.fn(() => ({
+        addError: vi.fn(),
+        addSuccess: vi.fn(),
+        addWarning: vi.fn(),
+        addInfo: vi.fn(),
+        remove: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../flyout_v2/use_flyout_api');
 
-jest.mock(
+vi.mock(
   '../attack_discovery_markdown_formatter/field_markdown_renderer/use_entity_euid_from_alerts',
-  () => ({
-    useEntityEuidFromAlerts: jest.fn(() => ({ euid: undefined, isLoading: false })),
-    ENTITY_TYPE_BY_FIELD: jest.requireActual(
-      '../attack_discovery_markdown_formatter/field_markdown_renderer/helpers'
-    ).ENTITY_TYPE_BY_FIELD,
-  })
+  async () => {
+      const mocked = {
+        useEntityEuidFromAlerts: vi.fn(() => ({ euid: undefined, isLoading: false })),
+        ENTITY_TYPE_BY_FIELD: (await vi.importActual('../attack_discovery_markdown_formatter/field_markdown_renderer/helpers')).ENTITY_TYPE_BY_FIELD,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-(mockUseKibana as jest.Mock).mockReturnValue({
+(mockUseKibana as Mock).mockReturnValue({
   services: {
     data: {
       search: {
-        search: jest.fn().mockReturnValue({ toPromise: jest.fn().mockResolvedValue({}) }),
+        search: vi.fn().mockReturnValue({ toPromise: vi.fn().mockResolvedValue({}) }),
       },
     },
     application: {
       capabilities: {
         [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true, configurations: true },
       },
-      navigateToUrl: jest.fn(),
+      navigateToUrl: vi.fn(),
     },
     cases: {
       helpers: {
-        canUseCases: jest.fn().mockReturnValue({
+        canUseCases: vi.fn().mockReturnValue({
           all: true,
           connectors: true,
           create: true,
@@ -126,76 +139,88 @@ jest.mock(
         }),
       },
       hooks: {
-        useCasesAddToExistingCase: jest.fn(),
-        useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
-        useCasesAddToNewCaseFlyout: jest.fn(),
+        useCasesAddToExistingCase: vi.fn(),
+        useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({ open: vi.fn() }),
+        useCasesAddToNewCaseFlyout: vi.fn(),
       },
       ui: { getCasesContext: mockCasesContext },
     },
     featureFlags: {
-      useBooleanValue: jest.fn().mockReturnValue(false),
+      useBooleanValue: vi.fn().mockReturnValue(false),
     },
     uiSettings: {
-      get: jest.fn().mockReturnValue(false),
+      get: vi.fn().mockReturnValue(false),
     },
     theme: {
-      getTheme: jest.fn().mockReturnValue({ darkMode: false }),
+      getTheme: vi.fn().mockReturnValue({ darkMode: false }),
     },
   },
 });
 
-jest.mock('../../use_dismiss_attack_discovery_generations', () => ({
-  useDismissAttackDiscoveryGeneration: jest.fn().mockReturnValue({
-    dismiss: jest.fn(),
-    mutateAsync: jest.fn(),
-  }),
-}));
+vi.mock('../../use_dismiss_attack_discovery_generations', () => {
+      const mocked = {
+      useDismissAttackDiscoveryGeneration: vi.fn().mockReturnValue({
+        dismiss: vi.fn(),
+        mutateAsync: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../use_find_attack_discoveries', () => ({
-  useFindAttackDiscoveries: jest.fn().mockReturnValue({
-    cancelRequest: jest.fn(),
-    data: { data: [], total: 0 },
-    isLoading: false,
-    refetch: jest.fn(),
-  }),
-  useInvalidateFindAttackDiscoveries: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('../../use_find_attack_discoveries', () => {
+      const mocked = {
+      useFindAttackDiscoveries: vi.fn().mockReturnValue({
+        cancelRequest: vi.fn(),
+        data: { data: [], total: 0 },
+        isLoading: false,
+        refetch: vi.fn(),
+      }),
+      useInvalidateFindAttackDiscoveries: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../use_get_attack_discovery_generations', () => ({
-  useGetAttackDiscoveryGenerations: jest.fn().mockReturnValue({
-    cancelRequest: jest.fn(),
-    data: {
-      generations: [
-        {
-          alerts_context_count: 84,
-          connector_id: 'claudeV3Haiku',
-          discoveries: 1,
-          end: '2025-05-02T17:46:43.486Z',
-          loading_message:
-            'AI is analyzing up to 100 alerts from now-30d to now to generate discoveries.',
-          execution_uuid: '27384b25-5fc0-4d11-a04f-42b2707092fa',
-          generation_start_time: '2025-05-02T17:45:25.426Z',
-          start: '2025-05-02T17:45:25.426Z',
-          status: 'succeeded',
-          connector_stats: {
-            average_successful_duration_nanoseconds: 78060000000,
-            successful_generations: 1,
-          },
+vi.mock('../../use_get_attack_discovery_generations', () => {
+      const mocked = {
+      useGetAttackDiscoveryGenerations: vi.fn().mockReturnValue({
+        cancelRequest: vi.fn(),
+        data: {
+          generations: [
+            {
+              alerts_context_count: 84,
+              connector_id: 'claudeV3Haiku',
+              discoveries: 1,
+              end: '2025-05-02T17:46:43.486Z',
+              loading_message:
+                'AI is analyzing up to 100 alerts from now-30d to now to generate discoveries.',
+              execution_uuid: '27384b25-5fc0-4d11-a04f-42b2707092fa',
+              generation_start_time: '2025-05-02T17:45:25.426Z',
+              start: '2025-05-02T17:45:25.426Z',
+              status: 'succeeded',
+              connector_stats: {
+                average_successful_duration_nanoseconds: 78060000000,
+                successful_generations: 1,
+              },
+            },
+          ],
         },
-      ],
-    },
-    isLoading: false,
-    refetch: jest.fn(),
-  }),
-  useInvalidateGetAttackDiscoveryGenerations: jest.fn().mockReturnValue(jest.fn()),
-}));
+        isLoading: false,
+        refetch: vi.fn(),
+      }),
+      useInvalidateGetAttackDiscoveryGenerations: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_ids_from_url', () => ({
-  useIdsFromUrl: jest.fn().mockReturnValue({
-    ids: ['alert-1'],
-    setIdsUrl: jest.fn(),
-  }),
-}));
+vi.mock('./use_ids_from_url', () => {
+      const mocked = {
+      useIdsFromUrl: vi.fn().mockReturnValue({
+        ids: ['alert-1'],
+        setIdsUrl: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const historyMock = {
   ...mockHistory,
@@ -210,26 +235,26 @@ const historyMock = {
 const defaultProps = {
   aiConnectors: [],
   localStorageAttackDiscoveryMaxAlerts: undefined,
-  onGenerate: jest.fn(),
-  onToggleShowAnonymized: jest.fn(),
+  onGenerate: vi.fn(),
+  onToggleShowAnonymized: vi.fn(),
   showAnonymized: false,
 };
 
 describe('History', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
+    vi.clearAllMocks();
+    vi.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
 
     // Reset mocks to their default state
-    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
-      cancelRequest: jest.fn(),
+    (useFindAttackDiscoveries as Mock).mockReturnValue({
+      cancelRequest: vi.fn(),
       data: { data: [], total: 0 },
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
-    (useGetAttackDiscoveryGenerations as jest.Mock).mockReturnValue({
-      cancelRequest: jest.fn(),
+    (useGetAttackDiscoveryGenerations as Mock).mockReturnValue({
+      cancelRequest: vi.fn(),
       data: {
         generations: [
           {
@@ -251,7 +276,7 @@ describe('History', () => {
         ],
       },
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
   });
 
@@ -280,9 +305,9 @@ describe('History', () => {
   });
 
   it('calls refetchFindAttackDiscoveries on refresh', async () => {
-    const refetchMock = jest.fn();
-    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
-      cancelRequest: jest.fn(),
+    const refetchMock = vi.fn();
+    (useFindAttackDiscoveries as Mock).mockReturnValue({
+      cancelRequest: vi.fn(),
       data: { data: [], total: 0 },
       isLoading: false,
       refetch: refetchMock,
@@ -304,11 +329,11 @@ describe('History', () => {
   });
 
   it('renders an empty prompt when data is empty', () => {
-    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
-      cancelRequest: jest.fn(),
+    (useFindAttackDiscoveries as Mock).mockReturnValue({
+      cancelRequest: vi.fn(),
       data: { data: [], total: 0 },
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -324,17 +349,17 @@ describe('History', () => {
 
   describe('refetching generations', () => {
     beforeAll(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('sets up interval to refetch generations every 10 seconds', () => {
-      const refetchGenerationsMock = jest.fn();
-      (useGetAttackDiscoveryGenerations as jest.Mock).mockReturnValue({
-        cancelRequest: jest.fn(),
+      const refetchGenerationsMock = vi.fn();
+      (useGetAttackDiscoveryGenerations as Mock).mockReturnValue({
+        cancelRequest: vi.fn(),
         data: { generations: [] },
         isLoading: false,
         refetch: refetchGenerationsMock,
@@ -349,30 +374,30 @@ describe('History', () => {
       );
 
       expect(refetchGenerationsMock).not.toHaveBeenCalled();
-      jest.advanceTimersByTime(10000);
+      vi.advanceTimersByTime(10000);
 
       expect(refetchGenerationsMock).toHaveBeenCalledTimes(1);
-      jest.advanceTimersByTime(10000);
+      vi.advanceTimersByTime(10000);
 
       expect(refetchGenerationsMock).toHaveBeenCalledTimes(2);
     });
 
     it('clears the interval and cancels requests on unmount', () => {
-      const cancelFindAttackDiscoveriesRequestMock = jest.fn();
-      const cancelGetAttackDiscoveryGenerationsMock = jest.fn();
+      const cancelFindAttackDiscoveriesRequestMock = vi.fn();
+      const cancelGetAttackDiscoveryGenerationsMock = vi.fn();
 
-      (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+      (useFindAttackDiscoveries as Mock).mockReturnValue({
         cancelRequest: cancelFindAttackDiscoveriesRequestMock,
         data: { data: [], total: 0 },
         isLoading: false,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
-      (useGetAttackDiscoveryGenerations as jest.Mock).mockReturnValue({
+      (useGetAttackDiscoveryGenerations as Mock).mockReturnValue({
         cancelRequest: cancelGetAttackDiscoveryGenerationsMock,
         data: { generations: [] },
         isLoading: false,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       const { unmount } = render(
@@ -391,7 +416,7 @@ describe('History', () => {
   });
 
   it('calls onToggleShowAnonymized when clicked', () => {
-    const onToggleMock = jest.fn();
+    const onToggleMock = vi.fn();
 
     render(
       <TestProviders>
@@ -421,14 +446,14 @@ describe('History', () => {
         })),
       ];
 
-      (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
-        cancelRequest: jest.fn(),
+      (useFindAttackDiscoveries as Mock).mockReturnValue({
+        cancelRequest: vi.fn(),
         data: {
           data: multiPageData.slice(0, 25), // First page
           total: multiPageData.length,
         },
         isLoading: false,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       render(
@@ -463,14 +488,14 @@ describe('History', () => {
       })),
     ];
 
-    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
-      cancelRequest: jest.fn(),
+    (useFindAttackDiscoveries as Mock).mockReturnValue({
+      cancelRequest: vi.fn(),
       data: {
         data: multiPageData,
         total: multiPageData.length,
       },
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -504,14 +529,14 @@ describe('History', () => {
         })),
       ];
 
-      (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
-        cancelRequest: jest.fn(),
+      (useFindAttackDiscoveries as Mock).mockReturnValue({
+        cancelRequest: vi.fn(),
         data: {
           data: multiPageData,
           total: multiPageData.length,
         },
         isLoading: false,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       render(
@@ -565,14 +590,14 @@ describe('History', () => {
   it('renders Attack discoveries', () => {
     const data = getMockAttackDiscoveryAlerts();
 
-    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
-      cancelRequest: jest.fn(),
+    (useFindAttackDiscoveries as Mock).mockReturnValue({
+      cancelRequest: vi.fn(),
       data: {
         data,
         total: data.length,
       },
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -581,8 +606,8 @@ describe('History', () => {
           <History
             aiConnectors={[]}
             localStorageAttackDiscoveryMaxAlerts={undefined}
-            onGenerate={jest.fn()}
-            onToggleShowAnonymized={jest.fn()}
+            onGenerate={vi.fn()}
+            onToggleShowAnonymized={vi.fn()}
             showAnonymized={false}
           />
         </Router>

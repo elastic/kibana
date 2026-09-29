@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { screen } from '@testing-library/react';
@@ -17,13 +19,13 @@ import type { ResponseError } from '../../../../common/types';
 import { EsDeprecations } from './es_deprecations';
 import { mockEsDeprecations } from './__fixtures__/es_deprecations';
 
-const mockBreadcrumbsSetBreadcrumbs = jest.fn();
+const mockBreadcrumbsSetBreadcrumbs = vi.fn();
 
-const mockUseLoadEsDeprecations = jest.fn();
-const mockUseLoadRemoteClusters = jest.fn();
+const mockUseLoadEsDeprecations = vi.fn();
+const mockUseLoadRemoteClusters = vi.fn();
 
-jest.mock('../../app_context', () => {
-  const actual = jest.requireActual('../../app_context');
+vi.mock('../../app_context', async () => {
+  const actual = (await vi.importActual('../../app_context'));
 
   return {
     ...actual,
@@ -61,9 +63,12 @@ jest.mock('../../app_context', () => {
   };
 });
 
-jest.mock('./es_deprecations_table', () => ({
-  EsDeprecationsTable: () => <div data-test-subj="esDeprecationsTableStub" />,
-}));
+vi.mock('./es_deprecations_table', () => {
+      const mocked = {
+      EsDeprecationsTable: () => <div data-test-subj="esDeprecationsTableStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EsDeprecations', () => {
   const renderPage = () => {
@@ -88,7 +93,7 @@ describe('EsDeprecations', () => {
       data: undefined,
       isLoading: true,
       error: undefined,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     });
     mockUseLoadRemoteClusters.mockReturnValue({ data: [] });
 
@@ -102,7 +107,7 @@ describe('EsDeprecations', () => {
       data: { ...mockEsDeprecations, migrationsDeprecations: [], totalCriticalDeprecations: 0 },
       isLoading: false,
       error: undefined,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     });
     mockUseLoadRemoteClusters.mockReturnValue({ data: [] });
 
@@ -116,7 +121,7 @@ describe('EsDeprecations', () => {
       data: mockEsDeprecations,
       isLoading: false,
       error: undefined,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     });
     mockUseLoadRemoteClusters.mockReturnValue({ data: ['test_remote_cluster'] });
 
@@ -134,7 +139,7 @@ describe('EsDeprecations', () => {
       data: mockEsDeprecations,
       isLoading: false,
       error: undefined,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     });
     mockUseLoadRemoteClusters.mockReturnValue({ data: [] });
 
@@ -154,7 +159,7 @@ describe('EsDeprecations', () => {
       data: undefined,
       isLoading: false,
       error,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     });
     mockUseLoadRemoteClusters.mockReturnValue({ data: [] });
 
@@ -178,7 +183,7 @@ describe('EsDeprecations', () => {
       data: undefined,
       isLoading: false,
       error,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     });
     mockUseLoadRemoteClusters.mockReturnValue({ data: [] });
 
@@ -202,7 +207,7 @@ describe('EsDeprecations', () => {
       data: undefined,
       isLoading: false,
       error,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     });
     mockUseLoadRemoteClusters.mockReturnValue({ data: [] });
 
@@ -223,7 +228,7 @@ describe('EsDeprecations', () => {
       data: undefined,
       isLoading: false,
       error,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     });
     mockUseLoadRemoteClusters.mockReturnValue({ data: [] });
 

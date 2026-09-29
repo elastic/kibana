@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mapFiltersToKql } from './map_filters_to_kql';
 
 describe('mapFiltersToKql', () => {
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   test('should handle no filters', () => {
     expect(mapFiltersToKql({})).toEqual([]);

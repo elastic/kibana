@@ -5,26 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { SuggestedPrompts } from './suggested_prompts';
 import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant';
 
 // Mock the custom hooks
-jest.mock('@kbn/elastic-assistant', () => ({
-  useAssistantContext: jest.fn(),
-  useAssistantOverlay: jest.fn(),
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      useAssistantContext: vi.fn(),
+      useAssistantOverlay: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SuggestedPrompts', () => {
-  const mockShowAssistantOverlay = jest.fn();
+  const mockShowAssistantOverlay = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAssistantContext as Mock).mockReturnValue({
       assistantAvailability: { isAssistantEnabled: true, isAssistantVisible: true },
     });
-    (useAssistantOverlay as jest.Mock).mockReturnValue({
+    (useAssistantOverlay as Mock).mockReturnValue({
       showAssistantOverlay: mockShowAssistantOverlay,
     });
   });
@@ -32,7 +38,7 @@ describe('SuggestedPrompts', () => {
   it('renders the suggested prompts', () => {
     const { container } = render(
       <SuggestedPrompts
-        getPromptContext={jest.fn()}
+        getPromptContext={vi.fn()}
         ruleName="Test Rule"
         timestamp="2023-01-01T00:00:00Z"
       />
@@ -43,7 +49,7 @@ describe('SuggestedPrompts', () => {
   it('calls showAssistantOverlay when a prompt is clicked', () => {
     const { container } = render(
       <SuggestedPrompts
-        getPromptContext={jest.fn()}
+        getPromptContext={vi.fn()}
         ruleName="Test Rule"
         timestamp="2023-01-01T00:00:00Z"
       />
@@ -58,7 +64,7 @@ describe('SuggestedPrompts', () => {
   it('displays the correct title and description in the overlay', () => {
     const { container } = render(
       <SuggestedPrompts
-        getPromptContext={jest.fn()}
+        getPromptContext={vi.fn()}
         ruleName="Test Rule"
         timestamp="2023-01-01T00:00:00Z"
       />

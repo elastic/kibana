@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ShowRequestTabs } from './show_request_tabs';
 
 describe('ShowRequestTabs', () => {
-  const onTabChangeMock = jest.fn();
+  const onTabChangeMock = vi.fn();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders both tabs', () => {

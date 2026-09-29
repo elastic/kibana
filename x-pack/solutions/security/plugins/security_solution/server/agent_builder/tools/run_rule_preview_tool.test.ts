@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -16,11 +19,14 @@ import { runRulePreview } from '../../lib/detection_engine/rule_preview/api/prev
 import type { RunRulePreviewDeps } from '../../lib/detection_engine/rule_preview/api/preview_rules/run_rule_preview';
 import { runRulePreviewTool, SECURITY_RUN_RULE_PREVIEW_TOOL_ID } from './run_rule_preview_tool';
 
-jest.mock('../../lib/detection_engine/rule_preview/api/preview_rules/run_rule_preview', () => ({
-  runRulePreview: jest.fn(),
-}));
+vi.mock('../../lib/detection_engine/rule_preview/api/preview_rules/run_rule_preview', () => {
+      const mocked = {
+      runRulePreview: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const runRulePreviewMock = runRulePreview as jest.Mock;
+const runRulePreviewMock = runRulePreview as Mock;
 
 const getResults = (ret: unknown) => {
   const standard = ret as { results?: Array<{ type: string }> };
@@ -33,10 +39,10 @@ const getResults = (ret: unknown) => {
 describe('runRulePreviewTool', () => {
   const { mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
 
-  const getActionsClientWithRequest = jest.fn().mockResolvedValue({});
-  const getLicense = jest.fn().mockResolvedValue({});
+  const getActionsClientWithRequest = vi.fn().mockResolvedValue({});
+  const getLicense = vi.fn().mockResolvedValue({});
   const mockCoreStart = coreMock.createStart();
-  const getStartServices = jest.fn().mockResolvedValue([
+  const getStartServices = vi.fn().mockResolvedValue([
     mockCoreStart,
     {
       actions: { getActionsClientWithRequest },
@@ -60,7 +66,7 @@ describe('runRulePreviewTool', () => {
   >;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     runRulePreviewMock.mockResolvedValue({
       previewId: 'preview-123',
       logs: [],
@@ -140,10 +146,10 @@ describe('runRulePreviewTool', () => {
 
   it('runs a valid esql preview and creates an attachment', async () => {
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-    (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+    (context.prompts.checkConfirmationStatus as Mock).mockReturnValue({
       status: ConfirmationStatus.accepted,
     });
-    (context.attachments.add as jest.Mock).mockResolvedValue({
+    (context.attachments.add as Mock).mockResolvedValue({
       id: 'security-rule-preview-preview-123',
       type: SecurityAgentBuilderAttachments.rulePreview,
       current_version: 1,
@@ -198,10 +204,10 @@ describe('runRulePreviewTool', () => {
 
   it('sets from to now-{interval} so per-invocation ES query window matches the interval', async () => {
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-    (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+    (context.prompts.checkConfirmationStatus as Mock).mockReturnValue({
       status: ConfirmationStatus.accepted,
     });
-    (context.attachments.add as jest.Mock).mockResolvedValue({
+    (context.attachments.add as Mock).mockResolvedValue({
       id: 'security-rule-preview-preview-123',
       type: SecurityAgentBuilderAttachments.rulePreview,
       current_version: 1,
@@ -228,10 +234,10 @@ describe('runRulePreviewTool', () => {
 
   it('runs a valid machine_learning preview', async () => {
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-    (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+    (context.prompts.checkConfirmationStatus as Mock).mockReturnValue({
       status: ConfirmationStatus.accepted,
     });
-    (context.attachments.add as jest.Mock).mockResolvedValue({
+    (context.attachments.add as Mock).mockResolvedValue({
       id: 'security-rule-preview-preview-123',
       type: SecurityAgentBuilderAttachments.rulePreview,
       current_version: 1,
@@ -268,10 +274,10 @@ describe('runRulePreviewTool', () => {
     it('returns a confirmation prompt when invocationCount exceeds the threshold', async () => {
       const mockPrompt = { prompt: { type: 'confirmation', id: 'test-prompt' } };
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (context.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.unprompted,
       });
-      (context.prompts.askForConfirmation as jest.Mock).mockReturnValue(mockPrompt);
+      (context.prompts.askForConfirmation as Mock).mockReturnValue(mockPrompt);
 
       const result = await tool.handler({ command: highInvocationCommand }, context);
 
@@ -287,10 +293,10 @@ describe('runRulePreviewTool', () => {
 
     it('proceeds after the user confirms the large preview', async () => {
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (context.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
-      (context.attachments.add as jest.Mock).mockResolvedValue({
+      (context.attachments.add as Mock).mockResolvedValue({
         id: 'security-rule-preview-preview-123',
         type: SecurityAgentBuilderAttachments.rulePreview,
         current_version: 1,
@@ -304,7 +310,7 @@ describe('runRulePreviewTool', () => {
 
     it('returns an error with the original command when the user cancels the large preview', async () => {
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (context.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.rejected,
       });
 
@@ -321,7 +327,7 @@ describe('runRulePreviewTool', () => {
 
     it('does not prompt when invocationCount is within the threshold', async () => {
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.add as jest.Mock).mockResolvedValue({
+      (context.attachments.add as Mock).mockResolvedValue({
         id: 'security-rule-preview-preview-123',
         type: SecurityAgentBuilderAttachments.rulePreview,
         current_version: 1,
@@ -372,10 +378,10 @@ describe('runRulePreviewTool', () => {
 
     it('succeeds when esqlRulesDisabled but rule type is eql', async () => {
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (context.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
-      (context.attachments.add as jest.Mock).mockResolvedValue({
+      (context.attachments.add as Mock).mockResolvedValue({
         id: 'security-rule-preview-preview-123',
         type: SecurityAgentBuilderAttachments.rulePreview,
         current_version: 1,
@@ -422,7 +428,7 @@ describe('runRulePreviewTool', () => {
     // also validates entry structure: type must be literal 'mapping'. This test proves
     // the tool validates the body before calling runRulePreview.
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-    (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+    (context.prompts.checkConfirmationStatus as Mock).mockReturnValue({
       status: ConfirmationStatus.accepted,
     });
 
@@ -464,7 +470,7 @@ describe('runRulePreviewTool', () => {
       isAborted: false,
     });
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-    (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+    (context.prompts.checkConfirmationStatus as Mock).mockReturnValue({
       status: ConfirmationStatus.accepted,
     });
 

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DeploymentMethodCard } from './deployment_method_card';
 
-function renderCard(props: { onChange?: jest.Mock } = {}) {
-  const onChange = props.onChange ?? jest.fn();
+function renderCard(props: { onChange?: Mock } = {}) {
+  const onChange = props.onChange ?? vi.fn();
   render(
     <I18nProvider>
       <DeploymentMethodCard selectedMethod="managed_integration" onChange={onChange} />
@@ -51,7 +54,7 @@ describe('DeploymentMethodCard', () => {
   });
 
   it('Edit button is disabled with tooltip when disabled=true, does not open modal', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <I18nProvider>
         <DeploymentMethodCard selectedMethod="managed_integration" onChange={onChange} disabled />

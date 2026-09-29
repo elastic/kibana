@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { RULE_SAVED_OBJECT_TYPE } from '../../../..';
 import { RecoveredActionGroup } from '@kbn/alerting-types';
 import { fromKueryExpression } from '@kbn/es-query';
@@ -128,10 +130,10 @@ const mockBulkQueueResult = [
 const mockCreatePointInTimeFinderAsInternalUser = (
   response = { saved_objects: [existingDecryptedRule1, existingDecryptedRule2] }
 ) => {
-  encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+  encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
     .fn()
     .mockResolvedValue({
-      close: jest.fn(),
+      close: vi.fn(),
       find: function* asyncGenerator() {
         yield response;
       },
@@ -157,11 +159,11 @@ describe('scheduleBackfill()', () => {
   let rulesClient: RulesClient;
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2023-12-16T08:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2023-12-16T08:00:00.000Z'));
   });
   beforeEach(async () => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     rulesClient = new RulesClient(rulesClientParams);
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       filter,
@@ -215,7 +217,7 @@ describe('scheduleBackfill()', () => {
     });
     backfillClient.bulkQueue.mockResolvedValue(mockBulkQueueResult);
   });
-  afterAll(() => jest.useRealTimers());
+  afterAll(() => vi.useRealTimers());
 
   test('should successfully schedule backfill', async () => {
     const mockData = [

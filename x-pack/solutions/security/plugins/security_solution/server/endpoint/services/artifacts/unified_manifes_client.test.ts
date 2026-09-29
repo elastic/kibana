@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { UNIFIED_MANIFEST_ALL_NAMESPACES, UnifiedManifestClient } from './unified_manifest_client';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { ManifestConstants } from '../../lib/artifacts';
@@ -45,7 +47,7 @@ describe('unified_manifest_client', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('can create UnifiedManifestClient', () => {
@@ -101,7 +103,7 @@ describe('unified_manifest_client', () => {
 
     test('can get all unified manifests', async () => {
       const getMockAgentPolicyFetchAllAgentPolicies = (items: InternalUnifiedManifestSchema[]) =>
-        jest.fn(async function* (soClient: SavedObjectsClientContract) {
+        vi.fn(async function* (soClient: SavedObjectsClientContract) {
           const chunkSize = 1000; // Emulate paginated response
           for (let i = 0; i < items.length; i += chunkSize) {
             yield items.slice(i, i + chunkSize);

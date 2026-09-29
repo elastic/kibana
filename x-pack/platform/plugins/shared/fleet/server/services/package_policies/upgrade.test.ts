@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
@@ -30,9 +33,9 @@ import {
   _packagePoliciesUpgrade,
 } from './upgrade';
 
-jest.mock('../spaces/helpers');
+vi.mock('../spaces/helpers');
 
-jest.mock('../license');
+vi.mock('../license');
 
 async function mockedGetInstallation(params: any) {
   let pkg;
@@ -136,54 +139,66 @@ async function mockedGetPackageInfo(params: any) {
   return Promise.resolve(pkg);
 }
 
-jest.mock('../epm/packages', () => {
+vi.mock('../epm/packages', () => {
   return {
-    getPackageInfo: jest.fn().mockImplementation(mockedGetPackageInfo),
+    getPackageInfo: vi.fn().mockImplementation(mockedGetPackageInfo),
     getInstallation: mockedGetInstallation,
-    ensureInstalledPackage: jest.fn(),
+    ensureInstalledPackage: vi.fn(),
   };
 });
 
-jest.mock('../../../common/services/package_to_package_policy', () => ({
-  ...jest.requireActual('../../../common/services/package_to_package_policy'),
-  packageToPackagePolicy: jest.fn(),
-}));
+vi.mock('../../../common/services/package_to_package_policy', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/services/package_to_package_policy')),
+      packageToPackagePolicy: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../epm/registry', () => ({
-  getPackage: jest.fn().mockResolvedValue({ assetsMap: [] }),
-}));
+vi.mock('../epm/registry', () => {
+      const mocked = {
+      getPackage: vi.fn().mockResolvedValue({ assetsMap: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../epm/packages/get', () => ({
-  getPackageAssetsMap: jest.fn().mockResolvedValue(new Map()),
-  getAgentTemplateAssetsMap: jest.fn().mockResolvedValue(new Map()),
-}));
+vi.mock('../epm/packages/get', () => {
+      const mocked = {
+      getPackageAssetsMap: vi.fn().mockResolvedValue(new Map()),
+      getAgentTemplateAssetsMap: vi.fn().mockResolvedValue(new Map()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../agent_policy');
-const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+vi.mock('../agent_policy');
+const mockAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
 
-jest.mock('../epm/packages/cleanup', () => {
+vi.mock('../epm/packages/cleanup', () => {
   return {
-    removeOldAssets: jest.fn(),
+    removeOldAssets: vi.fn(),
   };
 });
 
-jest.mock('../upgrade_sender', () => {
+vi.mock('../upgrade_sender', () => {
   return {
-    sendTelemetryEvents: jest.fn(),
+    sendTelemetryEvents: vi.fn(),
   };
 });
 
-jest.mock('../audit_logging');
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+vi.mock('../audit_logging');
+const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
 
-jest.mock('../secrets', () => ({
-  isSecretStorageEnabled: jest.fn(),
-}));
+vi.mock('../secrets', () => {
+      const mocked = {
+      isSecretStorageEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Upgrade', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+    vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
   });
 
   afterEach(() => {
@@ -195,7 +210,7 @@ describe('Upgrade', () => {
   });
 
   describe('_getUpgradePackagePolicyInfo', () => {
-    let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+    let savedObjectsClient: Mocked<SavedObjectsClientContract>;
     beforeEach(() => {
       savedObjectsClient = createSavedObjectClientMock();
     });
@@ -267,7 +282,7 @@ describe('Upgrade', () => {
   });
 
   describe('getUpgradeDryRunDiff', () => {
-    let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+    let savedObjectsClient: Mocked<SavedObjectsClientContract>;
     beforeEach(() => {
       savedObjectsClient = createSavedObjectClientMock();
     });
@@ -308,7 +323,7 @@ describe('Upgrade', () => {
     });
 
     it('should return errors if there is a conflict to upgrade', async () => {
-      jest
+      vi
         .mocked(getAgentTemplateAssetsMap)
         .mockResolvedValueOnce(
           new Map([
@@ -384,7 +399,7 @@ describe('Upgrade', () => {
   });
 
   describe('bulk upgrade', () => {
-    let soClient: jest.Mocked<SavedObjectsClientContract>;
+    let soClient: Mocked<SavedObjectsClientContract>;
     beforeEach(() => {
       soClient = createSavedObjectClientMock();
     });
@@ -463,7 +478,7 @@ describe('Upgrade', () => {
   });
 
   describe('upgrade', () => {
-    let soClient: jest.Mocked<SavedObjectsClientContract>;
+    let soClient: Mocked<SavedObjectsClientContract>;
     beforeEach(() => {
       soClient = createSavedObjectClientMock();
     });

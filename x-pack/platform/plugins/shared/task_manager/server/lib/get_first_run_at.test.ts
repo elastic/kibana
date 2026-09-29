@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockLogger } from '../test_utils';
 import { getFirstRunAt } from './get_first_run_at';
 
@@ -12,13 +14,13 @@ describe('getFirstRunAt', () => {
   const logger = mockLogger();
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-04-15T13:01:02Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-04-15T13:01:02Z'));
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.clearAllTimers();
+    vi.clearAllMocks();
+    vi.clearAllTimers();
   });
 
   test('should return runAt when provided', () => {

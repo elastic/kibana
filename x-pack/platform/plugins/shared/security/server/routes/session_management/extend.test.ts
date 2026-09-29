@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -14,7 +16,7 @@ import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types'
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Extend session routes', () => {
-  let router: jest.Mocked<SecurityRouter>;
+  let router: Mocked<SecurityRouter>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { AggTypesDependencies } from '.';
 import { getAggTypes } from '.';
 import { mockGetFieldFormatsStart } from './test_helpers';
@@ -18,8 +20,8 @@ describe('AggTypesComponent', () => {
   const aggTypes = getAggTypes();
   const { buckets, metrics } = aggTypes;
   const aggTypesDependencies: AggTypesDependencies = {
-    calculateBounds: jest.fn(),
-    getConfig: jest.fn(),
+    calculateBounds: vi.fn(),
+    getConfig: vi.fn(),
     getFieldFormatsStart: mockGetFieldFormatsStart,
   };
 

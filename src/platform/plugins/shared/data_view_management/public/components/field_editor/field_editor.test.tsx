@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import type { FieldEdiorProps } from './field_editor';
 import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
@@ -18,40 +20,52 @@ import { userEvent } from '@testing-library/user-event';
 
 const monacoModuleName = '@kbn/monaco';
 
-jest.doMock('@kbn/code-editor', () => ({
-  CodeEditor: ({
-    height: _height,
-    languageId: _languageId,
-    onChange,
-    value,
-    width: _width,
-    ...props
-  }: {
-    height: string;
-    languageId: string;
-    onChange: (value: string) => void;
-    value: string;
-    width: string;
-  }) => (
-    <textarea {...props} onChange={(event) => onChange(event.currentTarget.value)} value={value} />
-  ),
-}));
+vi.doMock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: ({
+        height: _height,
+        languageId: _languageId,
+        onChange,
+        value,
+        width: _width,
+        ...props
+      }: {
+        height: string;
+        languageId: string;
+        onChange: (value: string) => void;
+        value: string;
+        width: string;
+      }) => (
+        <textarea {...props} onChange={(event) => onChange(event.currentTarget.value)} value={value} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.doMock(monacoModuleName, () => ({
-  PainlessLang: {
-    ID: 'painless',
-  },
-}));
+vi.doMock(monacoModuleName, () => {
+      const mocked = {
+      PainlessLang: {
+        ID: 'painless',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/scripting_help', () => ({
-  ScriptingHelpFlyout: () => null,
-}));
+vi.mock('./components/scripting_help', () => {
+      const mocked = {
+      ScriptingHelpFlyout: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../scripting_languages', () => ({
-  getDeprecatedScriptingLanguages: () => ['testlang'],
-  getEnabledScriptingLanguages: () => ['painless', 'testlang'],
-  getSupportedScriptingLanguages: () => ['painless'],
-}));
+vi.mock('../../scripting_languages', () => {
+      const mocked = {
+      getDeprecatedScriptingLanguages: () => ['testlang'],
+      getEnabledScriptingLanguages: () => ['painless', 'testlang'],
+      getSupportedScriptingLanguages: () => ['painless'],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const DefaultFormat = FieldFormat.from((value: unknown) => String(value));
 DefaultFormat.fieldType = '*';
@@ -94,15 +108,15 @@ const createIndexPattern = (fields: FieldSpec[] = [existingField]): DataView => 
     },
   });
 
-  jest.spyOn(indexPattern, 'getFormatterForField').mockReturnValue(new DefaultFormat());
-  jest.spyOn(indexPattern, 'setFieldCustomLabel');
+  vi.spyOn(indexPattern, 'getFormatterForField').mockReturnValue(new DefaultFormat());
+  vi.spyOn(indexPattern, 'setFieldCustomLabel');
 
   return indexPattern;
 };
 
 const createServices = () => {
-  const updateSavedObject = jest.fn(() => Promise.resolve());
-  const redirectAway = jest.fn();
+  const updateSavedObject = vi.fn(() => Promise.resolve());
+  const redirectAway = vi.fn();
 
   return {
     redirectAway,
@@ -130,12 +144,12 @@ const createMockedContext = () => ({
     },
   },
   fieldFormats: {
-    getByFieldType: jest.fn(() => []),
-    getDefaultType: jest.fn(() => DefaultFormat),
+    getByFieldType: vi.fn(() => []),
+    getDefaultType: vi.fn(() => DefaultFormat),
   },
   notifications: {
     toasts: {
-      addSuccess: jest.fn(),
+      addSuccess: vi.fn(),
     },
   },
 });
@@ -145,9 +159,9 @@ type TestFieldEditorProps = Omit<FieldEdiorProps, 'services'> & {
   services: TestServices;
 };
 
-const FieldEditor = jest.requireActual<{
+const FieldEditor = (await vi.importActual<{
   FieldEditor: React.ComponentType<TestFieldEditorProps>;
-}>('./field_editor').FieldEditor;
+}>('./field_editor')).FieldEditor;
 
 describe('FieldEditor', () => {
   let mockedContext: ReturnType<typeof createMockedContext>;

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { SolutionType } from '../../../profiles';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createObservabilityRootProfileProvider } from './profile';
@@ -77,7 +79,7 @@ describe('observabilityRootProfileProvider', () => {
     });
 
     it('should return no default data views', async () => {
-      jest
+      vi
         .spyOn(mockServices.logsContextService, 'getAllLogsIndexPattern')
         .mockReturnValueOnce(undefined);
       const result = await observabilityRootProfileProvider.resolve({
@@ -112,7 +114,7 @@ describe('observabilityRootProfileProvider', () => {
     });
 
     it('should fall back to the previous profile return value when allLogsIndexPattern is undefined', async () => {
-      jest
+      vi
         .spyOn(mockServices.logsContextService, 'getAllLogsIndexPattern')
         .mockReturnValueOnce(undefined);
       const result = await observabilityRootProfileProvider.resolve({
@@ -123,7 +125,7 @@ describe('observabilityRootProfileProvider', () => {
       }
       expect(result.context.allLogsIndexPattern).toEqual(undefined);
       const prevValue = { query: 'FROM prev-pattern' };
-      const prev = jest.fn().mockReturnValue(prevValue);
+      const prev = vi.fn().mockReturnValue(prevValue);
       const defaultEsqlQuery = observabilityRootProfileProvider.profile.getDefaultEsqlQuery?.(
         prev,
         {

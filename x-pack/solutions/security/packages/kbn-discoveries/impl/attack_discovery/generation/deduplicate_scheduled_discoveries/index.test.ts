@@ -5,25 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { deduplicateScheduledDiscoveries } from '.';
 
-const mockDeduplicateAttackDiscoveries = jest.fn();
-const mockGetScheduledIndexPattern = jest.fn();
-const mockNormalizeAttackDiscovery = jest.fn();
+const mockDeduplicateAttackDiscoveries = vi.fn();
+const mockGetScheduledIndexPattern = vi.fn();
+const mockNormalizeAttackDiscovery = vi.fn();
 
-jest.mock('@kbn/attack-discovery-schedules-common', () => ({
-  deduplicateAttackDiscoveries: (...args: unknown[]) => mockDeduplicateAttackDiscoveries(...args),
-  getScheduledIndexPattern: (...args: unknown[]) => mockGetScheduledIndexPattern(...args),
-  normalizeAttackDiscovery: (...args: unknown[]) => mockNormalizeAttackDiscovery(...args),
-}));
+vi.mock('@kbn/attack-discovery-schedules-common', () => {
+      const mocked = {
+      deduplicateAttackDiscoveries: (...args: unknown[]) => mockDeduplicateAttackDiscoveries(...args),
+      getScheduledIndexPattern: (...args: unknown[]) => mockGetScheduledIndexPattern(...args),
+      normalizeAttackDiscovery: (...args: unknown[]) => mockNormalizeAttackDiscovery(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockLogger = {
-  debug: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 const mockEsClient = {} as unknown as ElasticsearchClient;
@@ -54,7 +59,7 @@ const TEST_GENERATION_SOURCE = 'test-producer';
 
 describe('deduplicateScheduledDiscoveries', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetScheduledIndexPattern.mockReturnValue(
       '.alerts-security.attack.discovery.alerts-default'
     );

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ResolvedIndexScope } from '@kbn/alertzero-common';
@@ -14,16 +17,19 @@ import { resolveIndexScope } from '../../services/watches/hunt/common/resolve_in
 import { huntForThreat } from '../../services/watches/hunt/tier1/hunt_for_threat';
 import type { HuntForThreatServiceResult } from '../../services/watches/hunt/tier1/types';
 
-jest.mock('../../services/watches/hunt/common/resolve_index_scope', () => {
-  const actual = jest.requireActual('../../services/watches/hunt/common/resolve_index_scope');
-  return { ...actual, resolveIndexScope: jest.fn() };
+vi.mock('../../services/watches/hunt/common/resolve_index_scope', async () => {
+  const actual = (await vi.importActual('../../services/watches/hunt/common/resolve_index_scope'));
+  return { ...actual, resolveIndexScope: vi.fn() };
 });
-jest.mock('../../services/watches/hunt/tier1/hunt_for_threat', () => ({
-  huntForThreat: jest.fn(),
-}));
+vi.mock('../../services/watches/hunt/tier1/hunt_for_threat', () => {
+      const mocked = {
+      huntForThreat: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const resolveIndexScopeMock = resolveIndexScope as jest.MockedFunction<typeof resolveIndexScope>;
-const huntForThreatMock = huntForThreat as jest.MockedFunction<typeof huntForThreat>;
+const resolveIndexScopeMock = resolveIndexScope as MockedFunction<typeof resolveIndexScope>;
+const huntForThreatMock = huntForThreat as MockedFunction<typeof huntForThreat>;
 
 const okScope: ResolvedIndexScope = {
   technology: 'aws_iam',
@@ -50,8 +56,8 @@ const tier1Result: HuntForThreatServiceResult = {
 };
 
 const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
-  const addVersion = jest.fn();
-  const router = { versioned: { post: jest.fn().mockReturnValue({ addVersion }) } };
+  const addVersion = vi.fn();
+  const router = { versioned: { post: vi.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
 
   registerHuntForThreatRoute({
@@ -60,8 +66,8 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
     getSpaceId: () => spaceId,
   } as unknown as RouteDependencies);
 
-  const asCurrentUser = { search: jest.fn() };
-  const asInternalUser = { search: jest.fn() };
+  const asCurrentUser = { search: vi.fn() };
+  const asInternalUser = { search: vi.fn() };
   const context = {
     core: Promise.resolve({ elasticsearch: { client: { asCurrentUser, asInternalUser } } }),
   };

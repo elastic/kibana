@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -22,19 +25,22 @@ import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app'
 import { useInvestigateInTimeline } from '../../../../threat_intelligence/hooks/use_investigate_in_timeline';
 import { extractTimelineCapabilities } from '../../../../common/utils/timeline_capabilities';
 
-jest.mock('../../../../common/hooks/is_in_security_app');
-jest.mock('../../../../threat_intelligence/hooks/use_investigate_in_timeline', () => ({
-  useInvestigateInTimeline: jest.fn(),
-}));
-jest.mock('../../../../common/utils/timeline_capabilities');
+vi.mock('../../../../common/hooks/is_in_security_app');
+vi.mock('../../../../threat_intelligence/hooks/use_investigate_in_timeline', () => {
+      const mocked = {
+      useInvestigateInTimeline: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/utils/timeline_capabilities');
 
 describe('TakeAction', () => {
   beforeEach(() => {
-    jest.mocked(useIsInSecurityApp).mockReturnValue(false);
-    jest.mocked(useInvestigateInTimeline).mockReturnValue({
-      investigateInTimelineFn: jest.fn(),
+    vi.mocked(useIsInSecurityApp).mockReturnValue(false);
+    vi.mocked(useInvestigateInTimeline).mockReturnValue({
+      investigateInTimelineFn: vi.fn(),
     } as ReturnType<typeof useInvestigateInTimeline>);
-    (extractTimelineCapabilities as jest.Mock).mockReturnValue({ read: true });
+    (extractTimelineCapabilities as Mock).mockReturnValue({ read: true });
   });
 
   it('should render an EuiContextMenuPanel', () => {
@@ -66,7 +72,7 @@ describe('TakeAction', () => {
   });
 
   it('renders icons for all three menu items when in the security app', async () => {
-    jest.mocked(useIsInSecurityApp).mockReturnValue(true);
+    vi.mocked(useIsInSecurityApp).mockReturnValue(true);
 
     render(
       <MemoryRouter>

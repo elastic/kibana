@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { bulkUnmuteAlertsRoute } from './bulk_unmute_alerts_route';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
@@ -17,16 +20,22 @@ import type { BulkMuteUnmuteAlertsRequestBodyV1 } from '../../../../../common/ro
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../validation', () => ({
-  validateMaxMuteUnmuteInstancesV1: jest.fn(),
-}));
+vi.mock('../../validation', () => {
+      const mocked = {
+      validateMaxMuteUnmuteInstancesV1: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('bulkUnmuteAlertsRoute', () => {
@@ -102,7 +111,7 @@ describe('bulkUnmuteAlertsRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyApiAccess as Mock).mockImplementation(() => {
       throw new Error('Failure');
     });
 

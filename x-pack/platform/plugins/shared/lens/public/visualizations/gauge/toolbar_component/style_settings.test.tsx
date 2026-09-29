@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { FramePublicAPI, VisualizationToolbarProps } from '@kbn/lens-common';
 import type { GaugeVisualizationState } from '../constants';
@@ -13,7 +16,7 @@ import { GaugeStyleSettings } from './style_settings';
 
 describe('gauge style settings', () => {
   const defaultProps: VisualizationToolbarProps<GaugeVisualizationState> = {
-    setState: jest.fn(),
+    setState: vi.fn(),
     frame: {} as FramePublicAPI,
     state: {
       layerId: 'layerId',
@@ -30,12 +33,12 @@ describe('gauge style settings', () => {
   };
 
   beforeEach(() => {
-    (defaultProps.setState as jest.Mock).mockClear();
-    jest.useFakeTimers();
+    (defaultProps.setState as Mock).mockClear();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   const renderGaugeStyleSettings = async (
@@ -106,7 +109,7 @@ describe('gauge style settings', () => {
         expect(getTitleLabel()).not.toBeDisabled();
 
         fireEvent.change(getTitleLabel(), { target: { value: 'labelMajor' } });
-        jest.advanceTimersByTime(256);
+        vi.advanceTimersByTime(256);
         expect(getTitleLabel()).toHaveValue('labelMajor');
         const updatedTitleSelect = getTitleSelectValue();
         expect(updatedTitleSelect).toHaveValue('custom');
@@ -146,7 +149,7 @@ describe('gauge style settings', () => {
         expect(getSubtitleLabel()).toBeDisabled();
 
         fireEvent.change(getSubtitleLabel(), { target: { value: 'labelMinor label' } });
-        jest.advanceTimersByTime(256);
+        vi.advanceTimersByTime(256);
 
         expect(defaultProps.setState).toHaveBeenCalledTimes(1);
         expect(defaultProps.setState).toHaveBeenNthCalledWith(

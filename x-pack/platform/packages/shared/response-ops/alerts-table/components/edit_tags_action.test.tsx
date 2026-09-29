@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,8 +16,8 @@ import { createPartialObjectMock } from '../utils/test';
 import type { AlertActionsProps } from '../types';
 
 describe('EditTagsAction', () => {
-  const mockOpenFlyout = jest.fn();
-  const mockOnActionExecuted = jest.fn();
+  const mockOpenFlyout = vi.fn();
+  const mockOnActionExecuted = vi.fn();
   const mockAlert = {
     _id: 'test-alert-id',
     _index: 'test-index',
@@ -23,7 +25,7 @@ describe('EditTagsAction', () => {
 
   const defaultProps = createPartialObjectMock<AlertActionsProps>({
     alert: mockAlert as any,
-    refresh: jest.fn(),
+    refresh: vi.fn(),
     onActionExecuted: mockOnActionExecuted,
   });
 
@@ -32,11 +34,11 @@ describe('EditTagsAction', () => {
       <IndividualTagsActionContextProvider
         value={{
           openFlyout: mockOpenFlyout,
-          onClose: jest.fn(),
+          onClose: vi.fn(),
           isFlyoutOpen: false,
-          onSaveTags: jest.fn(),
+          onSaveTags: vi.fn(),
           selectedAlerts: [],
-          getAction: jest.fn(),
+          getAction: vi.fn(),
         }}
       >
         <EditTagsAction {...props} />
@@ -45,7 +47,7 @@ describe('EditTagsAction', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the edit tags menu item', () => {
@@ -77,7 +79,7 @@ describe('EditTagsAction', () => {
   it('should not throw when onActionExecuted is not provided', async () => {
     const propsWithoutCallback = createPartialObjectMock<AlertActionsProps>({
       alert: mockAlert as any,
-      refresh: jest.fn(),
+      refresh: vi.fn(),
     });
 
     renderComponent(propsWithoutCallback);

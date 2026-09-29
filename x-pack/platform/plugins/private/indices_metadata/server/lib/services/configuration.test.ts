@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { firstValueFrom } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ArtifactService } from './artifact';
@@ -15,12 +18,12 @@ import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CdnConfig } from './artifact.types';
 import { createMockTelemetryConfigProvider } from '../__mocks__';
 
-jest.mock('./artifact');
+vi.mock('./artifact');
 
 describe('ConfigurationService', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let configurationService: ConfigurationService;
-  let artifactService: jest.Mocked<ArtifactService>;
+  let artifactService: Mocked<ArtifactService>;
   const telemetryConfigProvider = createMockTelemetryConfigProvider();
 
   const defaultConfiguration: IndicesMetadataConfiguration = {
@@ -55,8 +58,8 @@ describe('ConfigurationService', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
 
     logger = loggingSystemMock.createLogger();
     configurationService = new ConfigurationService(logger);
@@ -64,12 +67,12 @@ describe('ConfigurationService', () => {
       logger,
       fakeClusterInfo,
       fakeCdnConfig
-    ) as jest.Mocked<ArtifactService>;
+    ) as Mocked<ArtifactService>;
   });
 
   afterEach(() => {
     configurationService.stop();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('initialization', () => {
@@ -121,7 +124,7 @@ describe('ConfigurationService', () => {
         indices_threshold: 300,
       };
 
-      jest
+      vi
         .spyOn(artifactService, 'getArtifact')
         .mockResolvedValueOnce({
           data: defaultConfiguration,
@@ -145,13 +148,13 @@ describe('ConfigurationService', () => {
 
       expect(config).toEqual(defaultConfiguration);
 
-      await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+      await vi.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
       expect(config).toEqual(updatedConfig);
 
-      await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+      await vi.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
       expect(config).toEqual(updatedConfigTwo);
 
-      await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+      await vi.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
       expect(config).toEqual(updatedConfigTwo);
     });
   });
@@ -160,7 +163,7 @@ describe('ConfigurationService', () => {
     it('should skip configuration retrieval when telemetry is opted out', async () => {
       const optedOutProvider = createMockTelemetryConfigProvider(false);
 
-      jest.spyOn(artifactService, 'getArtifact').mockResolvedValue({
+      vi.spyOn(artifactService, 'getArtifact').mockResolvedValue({
         data: { ...defaultConfiguration, indices_threshold: 200 },
         modified: true,
       });
@@ -174,7 +177,7 @@ describe('ConfigurationService', () => {
 
       expect(config).toEqual(defaultConfiguration);
 
-      await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+      await vi.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
 
       expect(config).toEqual(defaultConfiguration);
       expect(artifactService.getArtifact).not.toHaveBeenCalled();
@@ -215,7 +218,7 @@ describe('ConfigurationService', () => {
         async ({ createError }) => {
           const error = createError();
 
-          jest
+          vi
             .spyOn(artifactService, 'getArtifact')
             .mockResolvedValueOnce({
               data: defaultConfiguration,
@@ -240,7 +243,7 @@ describe('ConfigurationService', () => {
           expect(config).toEqual(defaultConfiguration);
 
           for (let i = 0; i < 10; i++) {
-            await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+            await vi.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
             expect(config).toEqual(defaultConfiguration);
           }
 
@@ -305,7 +308,7 @@ describe('ConfigurationService', () => {
         async ({ createError, expectedLogLevel, expectedMessage, getExpectedMeta }) => {
           const error = createError();
 
-          jest.spyOn(artifactService, 'getArtifact').mockRejectedValue(error);
+          vi.spyOn(artifactService, 'getArtifact').mockRejectedValue(error);
 
           configurationService.start(
             artifactService,
@@ -314,7 +317,7 @@ describe('ConfigurationService', () => {
           );
           configurationService.getIndicesMetadataConfiguration$().subscribe();
 
-          await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+          await vi.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
 
           const message =
             typeof expectedMessage === 'function' ? expectedMessage(error) : expectedMessage;

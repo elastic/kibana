@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { collectorMock } from '@kbn/core-metrics-collectors-server-mocks';
 
 export const mockOsCollector = collectorMock.createMockWithRegisterMetrics();
@@ -14,11 +16,11 @@ export const mockProcessCollector = collectorMock.createMockWithRegisterMetrics(
 export const mockServerCollector = collectorMock.create();
 export const mockEsClientCollector = collectorMock.create();
 
-jest.doMock('@kbn/core-metrics-collectors-server-internal', () => {
+vi.doMock('@kbn/core-metrics-collectors-server-internal', () => {
   return {
-    OsMetricsCollector: jest.fn().mockImplementation(() => mockOsCollector),
-    ProcessMetricsCollector: jest.fn().mockImplementation(() => mockProcessCollector),
-    ServerMetricsCollector: jest.fn().mockImplementation(() => mockServerCollector),
-    ElasticsearchClientsMetricsCollector: jest.fn().mockImplementation(() => mockEsClientCollector),
+    OsMetricsCollector: vi.fn().mockImplementation(() => mockOsCollector),
+    ProcessMetricsCollector: vi.fn().mockImplementation(() => mockProcessCollector),
+    ServerMetricsCollector: vi.fn().mockImplementation(() => mockServerCollector),
+    ElasticsearchClientsMetricsCollector: vi.fn().mockImplementation(() => mockEsClientCollector),
   };
 });

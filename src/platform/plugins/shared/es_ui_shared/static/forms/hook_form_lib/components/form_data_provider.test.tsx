@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,10 +20,10 @@ import { UseField } from './use_field';
 import { FormDataProvider } from './form_data_provider';
 
 const user = userEvent.setup();
-const onFormData = jest.fn();
+const onFormData = vi.fn();
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('<FormDataProvider />', () => {

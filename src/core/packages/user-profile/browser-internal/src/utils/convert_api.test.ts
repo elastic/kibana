@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { of } from 'rxjs';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-browser';
 import type { InternalUserProfileServiceStart } from '../internal_contracts';
 import { convertUserProfileAPI } from './convert_api';
 
 describe('convertUserProfileAPI', () => {
-  let source: jest.Mocked<CoreUserProfileDelegateContract>;
+  let source: Mocked<CoreUserProfileDelegateContract>;
   let output: InternalUserProfileServiceStart;
 
   beforeEach(() => {
@@ -21,11 +24,11 @@ describe('convertUserProfileAPI', () => {
       userProfile$: of(null),
       enabled$: of(false),
       dataUpdates$: of({}),
-      getCurrent: jest.fn(),
-      bulkGet: jest.fn(),
-      suggest: jest.fn(),
-      update: jest.fn(),
-      partialUpdate: jest.fn(),
+      getCurrent: vi.fn(),
+      bulkGet: vi.fn(),
+      suggest: vi.fn(),
+      update: vi.fn(),
+      partialUpdate: vi.fn(),
     };
     output = convertUserProfileAPI(source);
   });

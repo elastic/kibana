@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -15,9 +18,9 @@ import FieldsPreview from './case_fields_preview';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { tableMatchesExpectedContent } from '../../../common/test_utils';
 
-jest.mock('./use_get_issue_types');
+vi.mock('./use_get_issue_types');
 
-const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
+const useGetIssueTypesMock = useGetIssueTypes as Mock;
 
 describe('Jira Fields: Preview', () => {
   const useGetIssueTypesResponse = {
@@ -46,7 +49,7 @@ describe('Jira Fields: Preview', () => {
 
   beforeEach(() => {
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders all fields correctly', () => {

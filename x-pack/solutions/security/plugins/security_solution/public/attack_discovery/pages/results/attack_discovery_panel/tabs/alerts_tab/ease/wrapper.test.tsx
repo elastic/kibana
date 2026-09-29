@@ -5,38 +5,44 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { CONTENT_TEST_ID, EaseAlertsTab, ERROR_TEST_ID, SKELETON_TEST_ID } from './wrapper';
 import { useFetchIntegrations } from '../../../../../../../detections/hooks/alert_summary/use_fetch_integrations';
 import { useCreateEaseAlertsDataView } from '../../../../../../../detections/hooks/alert_summary/use_create_data_view';
 
-jest.mock('./table', () => ({
-  Table: () => <div />,
-}));
-jest.mock('../../../../../../../common/lib/kibana');
-jest.mock('../../../../../../../detections/hooks/alert_summary/use_fetch_integrations');
-jest.mock('../../../../../../../detections/hooks/alert_summary/use_create_data_view');
+vi.mock('./table', () => {
+      const mocked = {
+      Table: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../../../common/lib/kibana');
+vi.mock('../../../../../../../detections/hooks/alert_summary/use_fetch_integrations');
+vi.mock('../../../../../../../detections/hooks/alert_summary/use_create_data_view');
 
 const id = 'id';
 const query = { ids: { values: ['abcdef'] } };
 
 describe('<EaseAlertsTab />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useFetchIntegrations as jest.Mock).mockReturnValue({
+    (useFetchIntegrations as Mock).mockReturnValue({
       installedPackages: [],
       isLoading: false,
     });
   });
 
   it('should render a loading skeleton while fetching packages (integrations)', async () => {
-    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
+    (useCreateEaseAlertsDataView as Mock).mockReturnValue({
       dataView: undefined,
       loading: false,
     });
-    (useFetchIntegrations as jest.Mock).mockReturnValue({
+    (useFetchIntegrations as Mock).mockReturnValue({
       installedPackages: [],
       isLoading: true,
     });
@@ -47,7 +53,7 @@ describe('<EaseAlertsTab />', () => {
   });
 
   it('should render a loading skeleton while creating the dataView', async () => {
-    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
+    (useCreateEaseAlertsDataView as Mock).mockReturnValue({
       dataView: undefined,
       loading: true,
     });
@@ -60,15 +66,18 @@ describe('<EaseAlertsTab />', () => {
   });
 
   it('should render an error if the dataView fail to be created correctly', async () => {
-    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
+    (useCreateEaseAlertsDataView as Mock).mockReturnValue({
       dataView: undefined,
       loading: false,
     });
 
-    jest.mock('react', () => ({
-      ...jest.requireActual('react'),
-      useEffect: jest.fn((f) => f()),
-    }));
+    vi.doMock('react', () => {
+          const mocked = {
+              ...require('react'),
+              useEffect: vi.fn((f) => f()),
+            };
+          return { ...mocked, default: mocked };
+        });
 
     render(<EaseAlertsTab id={id} query={query} />);
 
@@ -78,8 +87,8 @@ describe('<EaseAlertsTab />', () => {
   });
 
   it('should render the content', async () => {
-    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
-      dataView: { getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() },
+    (useCreateEaseAlertsDataView as Mock).mockReturnValue({
+      dataView: { getIndexPattern: vi.fn(), id: 'id', toSpec: vi.fn() },
       loading: false,
     });
 

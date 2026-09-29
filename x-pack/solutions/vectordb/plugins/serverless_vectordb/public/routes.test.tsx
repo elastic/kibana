@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
@@ -12,19 +14,25 @@ import { createMemoryHistory, type MemoryHistory } from 'history';
 import { GETTING_STARTED_PATH, hasSeenOnboarding } from '@kbn/vectordb-onboarding';
 import { AppRoutes } from './routes';
 
-jest.mock('@kbn/vectordb-onboarding', () => ({
-  ...jest.requireActual('@kbn/vectordb-onboarding'),
-  hasSeenOnboarding: jest.fn(),
-  OnboardingLandingPage: () => <div data-test-subj="onboardingLandingPage" />,
-  IngestStep: () => <div data-test-subj="ingestStep" />,
-  SearchStep: () => <div data-test-subj="searchStep" />,
-}));
+vi.mock('@kbn/vectordb-onboarding', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/vectordb-onboarding')),
+      hasSeenOnboarding: vi.fn(),
+      OnboardingLandingPage: () => <div data-test-subj="onboardingLandingPage" />,
+      IngestStep: () => <div data-test-subj="ingestStep" />,
+      SearchStep: () => <div data-test-subj="searchStep" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./home/home_page', () => ({
-  HomePage: () => <div data-test-subj="homePage" />,
-}));
+vi.mock('./home/home_page', () => {
+      const mocked = {
+      HomePage: () => <div data-test-subj="homePage" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockHasSeenOnboarding = jest.mocked(hasSeenOnboarding);
+const mockHasSeenOnboarding = vi.mocked(hasSeenOnboarding);
 
 const renderRoutes = (initialEntry: string): MemoryHistory => {
   const history = createMemoryHistory({ initialEntries: [initialEntry] });
@@ -37,7 +45,7 @@ const renderRoutes = (initialEntry: string): MemoryHistory => {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockHasSeenOnboarding.mockReturnValue(true);
 });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -19,9 +22,9 @@ import { createImprovementsClient } from './storage';
 const SPACE = 'default';
 const SPACE_FILTER = createSpaceDslFilter(SPACE);
 
-jest.mock('./storage');
+vi.mock('./storage');
 
-const createImprovementsClientMock = createImprovementsClient as jest.MockedFunction<
+const createImprovementsClientMock = createImprovementsClient as MockedFunction<
   typeof createImprovementsClient
 >;
 
@@ -70,12 +73,12 @@ const searchResponse = (hits: ReturnType<typeof hitOf>[], total = hits.length) =
 
 describe('ImprovementsService', () => {
   const client = {
-    bulk: jest.fn(),
-    search: jest.fn(),
+    bulk: vi.fn(),
+    search: vi.fn(),
   } as unknown as ReturnType<typeof createImprovementsClient>;
 
-  const bulk = client.bulk as jest.Mock;
-  const search = client.search as jest.Mock;
+  const bulk = client.bulk as Mock;
+  const search = client.search as Mock;
 
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggerMock.create();
@@ -83,7 +86,7 @@ describe('ImprovementsService', () => {
   let service: ImprovementsService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     createImprovementsClientMock.mockReturnValue(client);
     bulk.mockResolvedValue({ errors: false, items: [] });
     search.mockResolvedValue(searchResponse([]));

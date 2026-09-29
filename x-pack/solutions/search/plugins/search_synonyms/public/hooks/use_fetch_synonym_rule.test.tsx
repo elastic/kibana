@@ -5,38 +5,46 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
-const mockHttpGet = jest.fn();
+const mockHttpGet = vi.fn();
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn().mockImplementation(async ({ queryFn, opts }) => {
-    try {
-      const res = await queryFn();
-      return Promise.resolve(res);
-    } catch (e) {
-      // opts.onError(e);
-    }
-  }),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: vi.fn().mockImplementation(async ({ queryFn, opts }) => {
+        try {
+          const res = await queryFn();
+          return Promise.resolve(res);
+        } catch (e) {
+          // opts.onError(e);
+        }
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      http: {
-        get: mockHttpGet,
-      },
-      notifications: {
-        toasts: {
-          addError: jest.fn(),
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          http: {
+            get: mockHttpGet,
+          },
+          notifications: {
+            toasts: {
+              addError: vi.fn(),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useFetchSynonymRule Hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return synonym rule', async () => {
@@ -46,7 +54,7 @@ describe('useFetchSynonymRule Hook', () => {
     };
 
     mockHttpGet.mockReturnValue(synonymRule);
-    const { useFetchSynonymRule } = jest.requireActual('./use_fetch_synonym_rule');
+    const { useFetchSynonymRule } = (await vi.importActual('./use_fetch_synonym_rule'));
 
     const { result } = renderHook(() => useFetchSynonymRule('my_synonyms_set', '1'));
     await waitFor(() => expect(result.current).resolves.toStrictEqual(synonymRule));

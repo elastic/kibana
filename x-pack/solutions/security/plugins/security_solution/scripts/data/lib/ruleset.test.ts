@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import fs from 'fs';
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -97,7 +99,7 @@ describe('rule enable/disable/create wiring', () => {
   });
 
   it('posts enable bulk action with rule ids', async () => {
-    const request = jest.fn().mockResolvedValue({ data: {} });
+    const request = vi.fn().mockResolvedValue({ data: {} });
     await enableRules({ kbnClient: { request } as never, ids: ['a', 'b'] });
     expect(request).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -109,7 +111,7 @@ describe('rule enable/disable/create wiring', () => {
   });
 
   it('posts disable bulk action with rule ids', async () => {
-    const request = jest.fn().mockResolvedValue({ data: {} });
+    const request = vi.fn().mockResolvedValue({ data: {} });
     await disableRules({ kbnClient: { request } as never, ids: ['c'] });
     expect(request).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -119,7 +121,7 @@ describe('rule enable/disable/create wiring', () => {
   });
 
   it('creates a custom rule and returns refs', async () => {
-    const request = jest.fn().mockResolvedValue({
+    const request = vi.fn().mockResolvedValue({
       data: { id: 'so-1', rule_id: 'data-generator-pack-okta-x', name: 'Hunt X' },
     });
     const created = await createCustomRule({

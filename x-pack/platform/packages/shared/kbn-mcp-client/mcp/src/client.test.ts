@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedClass, MockedFunction } from 'vitest';
+
 /* eslint-disable max-classes-per-file */
 import { McpClient } from './client';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -65,9 +68,9 @@ interface MockCallToolError {
 type MockCallToolResponse = MockCallToolResult | MockCallToolError;
 
 // Mock the MCP SDK
-jest.mock('@modelcontextprotocol/sdk/client/index.js');
-jest.mock('@modelcontextprotocol/sdk/client/streamableHttp.js', () => {
-  const StreamableHTTPClientTransportMock = jest.fn();
+vi.mock('@modelcontextprotocol/sdk/client/index.js');
+vi.mock('@modelcontextprotocol/sdk/client/streamableHttp.js', () => {
+  const StreamableHTTPClientTransportMock = vi.fn();
   class MockStreamableHTTPError extends Error {
     public code: number;
     constructor(code: number, message?: string) {
@@ -81,8 +84,8 @@ jest.mock('@modelcontextprotocol/sdk/client/streamableHttp.js', () => {
     StreamableHTTPError: MockStreamableHTTPError,
   };
 });
-jest.mock('@modelcontextprotocol/sdk/client/auth.js', () => {
-  const actual = jest.requireActual('@modelcontextprotocol/sdk/client/auth.js');
+vi.mock('@modelcontextprotocol/sdk/client/auth.js', () => {
+  const actual = require('@modelcontextprotocol/sdk/client/auth.js');
   class MockUnauthorizedError extends Error {
     constructor(message?: string) {
       super(message);
@@ -97,19 +100,19 @@ jest.mock('@modelcontextprotocol/sdk/client/auth.js', () => {
 
 describe('McpClient', () => {
   let mockClient: {
-    connect: jest.MockedFunction<(transport: StreamableHTTPClientTransport) => Promise<void>>;
-    close: jest.MockedFunction<() => Promise<void>>;
-    listTools: jest.MockedFunction<
+    connect: MockedFunction<(transport: StreamableHTTPClientTransport) => Promise<void>>;
+    close: MockedFunction<() => Promise<void>>;
+    listTools: MockedFunction<
       (params?: { cursor?: string }) => Promise<MockListToolsResponse>
     >;
-    callTool: jest.MockedFunction<
+    callTool: MockedFunction<
       (params: {
         name: string;
         _meta: Record<string, unknown>;
         arguments: Record<string, unknown>;
       }) => Promise<MockCallToolResponse>
     >;
-    getServerCapabilities: jest.MockedFunction<() => ServerCapabilities | undefined>;
+    getServerCapabilities: MockedFunction<() => ServerCapabilities | undefined>;
   };
   let mockTransport: StreamableHTTPClientTransport;
   let clientDetails: ClientDetails;
@@ -128,20 +131,20 @@ describe('McpClient', () => {
     // Setup mocks
     mockLogger = loggerMock.create();
     mockClient = {
-      connect: jest.fn(),
-      close: jest.fn(),
-      listTools: jest.fn(),
-      callTool: jest.fn(),
-      getServerCapabilities: jest.fn(),
+      connect: vi.fn(),
+      close: vi.fn(),
+      listTools: vi.fn(),
+      callTool: vi.fn(),
+      getServerCapabilities: vi.fn(),
     };
 
     mockTransport = {} as StreamableHTTPClientTransport;
 
-    (Client as jest.MockedClass<typeof Client>).mockImplementation(
+    (Client as MockedClass<typeof Client>).mockImplementation(
       () => mockClient as unknown as Client
     );
     (
-      StreamableHTTPClientTransport as jest.MockedClass<typeof StreamableHTTPClientTransport>
+      StreamableHTTPClientTransport as MockedClass<typeof StreamableHTTPClientTransport>
     ).mockImplementation(() => mockTransport);
 
     clientDetails = {
@@ -152,7 +155,7 @@ describe('McpClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('constructor', () => {
@@ -200,7 +203,7 @@ describe('McpClient', () => {
     });
 
     it('creates transport with custom fetch when provided', () => {
-      const customFetch = jest.fn();
+      const customFetch = vi.fn();
       new McpClient(mockLogger, clientDetails, { fetch: customFetch });
 
       expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
@@ -214,7 +217,7 @@ describe('McpClient', () => {
     it('does not include fetch in transport options when not provided', () => {
       new McpClient(mockLogger, clientDetails);
 
-      const transportCallArgs = (StreamableHTTPClientTransport as jest.Mock).mock.calls[0][1];
+      const transportCallArgs = (StreamableHTTPClientTransport as Mock).mock.calls[0][1];
       expect(transportCallArgs).not.toHaveProperty('fetch');
     });
 
@@ -276,7 +279,7 @@ describe('McpClient', () => {
       mockClient.getServerCapabilities.mockReturnValue(undefined);
 
       await client.connect();
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockClient.getServerCapabilities.mockReturnValue(undefined);
 
       const result = await client.connect();

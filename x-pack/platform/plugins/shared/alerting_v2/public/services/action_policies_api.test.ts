@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ActionPoliciesApi } from './action_policies_api';
 
@@ -16,7 +18,7 @@ describe('ActionPoliciesApi', () => {
     }
   })();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('upsertActionPolicy', () => {
     it('sends a PUT request with the policy id in the path', async () => {

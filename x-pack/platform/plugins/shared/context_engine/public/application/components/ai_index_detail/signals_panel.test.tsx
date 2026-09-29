@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -19,24 +21,42 @@ import { useSignals } from '../../hooks/use_signals';
 import { SignalsPanel } from './signals_panel';
 import { buildSignal } from './signal_test_fixtures';
 
-jest.mock('../../hooks/use_feedback_loop_enabled', () => ({ useFeedbackLoopEnabled: jest.fn() }));
-jest.mock('../../hooks/use_signal_groups', () => ({ useSignalGroups: jest.fn() }));
-jest.mock('../../hooks/use_signals', () => ({ useSignals: jest.fn() }));
-jest.mock('../../hooks/use_agent_builder_agents', () => ({
-  useAgentBuilderAgents: () => ({ agents: [], isLoading: false, error: undefined }),
-}));
-jest.mock('../../hooks/use_update_feedback_agent', () => ({
-  useUpdateFeedbackAgent: () => ({ mutate: jest.fn(), isLoading: false }),
-}));
-jest.mock('@kbn/llm-trace-waterfall', () => ({
-  TraceWaterfall: () => <div />,
-  createEsTraceFetcher: () => async () => ({ spans: [], durationMs: 0 }),
-  useTraceSpans: () => ({ spans: [], durationMs: 0, isLoading: false, error: null }),
-}));
+vi.mock('../../hooks/use_feedback_loop_enabled', () => {
+      const mocked = { useFeedbackLoopEnabled: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_signal_groups', () => {
+      const mocked = { useSignalGroups: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_signals', () => {
+      const mocked = { useSignals: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_agent_builder_agents', () => {
+      const mocked = {
+      useAgentBuilderAgents: () => ({ agents: [], isLoading: false, error: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_update_feedback_agent', () => {
+      const mocked = {
+      useUpdateFeedbackAgent: () => ({ mutate: vi.fn(), isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/llm-trace-waterfall', () => {
+      const mocked = {
+      TraceWaterfall: () => <div />,
+      createEsTraceFetcher: () => async () => ({ spans: [], durationMs: 0 }),
+      useTraceSpans: () => ({ spans: [], durationMs: 0, isLoading: false, error: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFeedbackLoopEnabled = jest.mocked(useFeedbackLoopEnabled);
-const mockUseSignalGroups = jest.mocked(useSignalGroups);
-const mockUseSignals = jest.mocked(useSignals);
+const mockUseFeedbackLoopEnabled = vi.mocked(useFeedbackLoopEnabled);
+const mockUseSignalGroups = vi.mocked(useSignalGroups);
+const mockUseSignals = vi.mocked(useSignals);
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
@@ -53,7 +73,7 @@ const groupsResult = (overrides = {}) => ({
   groups: [],
   isLoading: false,
   error: undefined,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
   ...overrides,
 });
 
@@ -62,7 +82,7 @@ const signalsResult = (overrides = {}) => ({
   total: 0,
   isLoading: false,
   error: undefined,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
   ...overrides,
 });
 
@@ -73,7 +93,7 @@ const renderPanel = ({
 }: { isLoading?: boolean; chatOpener?: ChatOpener; index?: GetAiIndexResponse } = {}) => {
   const services = {
     ...coreMock.createStart(),
-    data: { search: { search: jest.fn() } },
+    data: { search: { search: vi.fn() } },
     getChatOpener: () => chatOpener,
   };
   render(
@@ -105,7 +125,7 @@ describe('SignalsPanel', () => {
     expect(screen.queryByTestId('contextSignalsPanel')).not.toBeInTheDocument();
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('shows the loading skeleton while the AI index loads', () => {
     renderPanel({ isLoading: true });
@@ -160,7 +180,7 @@ describe('SignalsPanel', () => {
   });
 
   it('shows the Analyze & improve button and invokes the registered opener without signals', () => {
-    const opener = jest.fn();
+    const opener = vi.fn();
     renderPanel({ chatOpener: opener, index: aiIndexWithAgent });
 
     fireEvent.click(screen.getByTestId('contextSignalsAnalyzeButton'));
@@ -170,7 +190,7 @@ describe('SignalsPanel', () => {
   });
 
   it('renders the agent selector and disables Analyze with a prompt when no agent is configured', () => {
-    const opener = jest.fn();
+    const opener = vi.fn();
     renderPanel({ chatOpener: opener });
 
     expect(screen.getByTestId('contextSignalsFeedbackAgentSelect')).toBeInTheDocument();
@@ -182,7 +202,7 @@ describe('SignalsPanel', () => {
   });
 
   it('enables Analyze and hides the prompt once an agent is configured', () => {
-    renderPanel({ chatOpener: jest.fn(), index: aiIndexWithAgent });
+    renderPanel({ chatOpener: vi.fn(), index: aiIndexWithAgent });
 
     expect(screen.getByTestId('contextSignalsAnalyzeButton')).toBeEnabled();
     expect(screen.queryByTestId('contextSignalsFeedbackAgentPrompt')).not.toBeInTheDocument();
@@ -194,7 +214,7 @@ describe('SignalsPanel', () => {
   });
 
   it('does not render the agent selector or prompt for a managed index', () => {
-    renderPanel({ chatOpener: jest.fn(), index: { ...aiIndex, managed: true } });
+    renderPanel({ chatOpener: vi.fn(), index: { ...aiIndex, managed: true } });
 
     expect(screen.queryByTestId('contextSignalsFeedbackAgentSelect')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextSignalsFeedbackAgentPrompt')).not.toBeInTheDocument();

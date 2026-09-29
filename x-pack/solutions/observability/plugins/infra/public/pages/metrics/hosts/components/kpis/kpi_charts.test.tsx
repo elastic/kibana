@@ -5,25 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KpiCharts } from './kpi_charts';
 import type { HostsKpis } from '../../hooks/use_hosts_kpis_esql';
 
-const mockUseHostsKpis = jest.fn();
-const mockUseHostCountContext = jest.fn();
-const mockUseUnifiedSearchContext = jest.fn();
+const mockUseHostsKpis = vi.fn();
+const mockUseHostCountContext = vi.fn();
+const mockUseUnifiedSearchContext = vi.fn();
 
-jest.mock('../../hooks/use_hosts_kpis_esql', () => ({
-  useHostsKpisEsql: () => mockUseHostsKpis(),
-}));
-jest.mock('../../hooks/use_host_count', () => ({
-  useHostCountContext: () => mockUseHostCountContext(),
-}));
-jest.mock('../../hooks/use_unified_search', () => ({
-  useUnifiedSearchContext: () => mockUseUnifiedSearchContext(),
-}));
+vi.mock('../../hooks/use_hosts_kpis_esql', () => {
+      const mocked = {
+      useHostsKpisEsql: () => mockUseHostsKpis(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_host_count', () => {
+      const mocked = {
+      useHostCountContext: () => mockUseHostCountContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_unified_search', () => {
+      const mocked = {
+      useUnifiedSearchContext: () => mockUseUnifiedSearchContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Must be a stable singleton: `KpiCharts` passes `inventoryModel.metrics` into
 // a `useAsync` dep array, so a fresh object per call would loop re-renders.
@@ -44,38 +55,47 @@ const mockInventoryModel = {
       ]),
   },
 };
-jest.mock('@kbn/metrics-data-access-plugin/common', () => ({
-  findInventoryModel: () => mockInventoryModel,
-  CPU_USAGE_LABEL: 'CPU Usage',
-  MEMORY_USAGE_LABEL: 'Memory Usage',
-  NORMALIZED_LOAD_LABEL: 'Normalized Load',
-  DISK_USAGE_LABEL: 'Disk Usage',
-}));
+vi.mock('@kbn/metrics-data-access-plugin/common', () => {
+      const mocked = {
+      findInventoryModel: () => mockInventoryModel,
+      CPU_USAGE_LABEL: 'CPU Usage',
+      MEMORY_USAGE_LABEL: 'Memory Usage',
+      NORMALIZED_LOAD_LABEL: 'Normalized Load',
+      DISK_USAGE_LABEL: 'Disk Usage',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../components/lens', () => ({
-  TooltipContent: () => <div data-test-subj="tooltip" />,
-}));
+vi.mock('../../../../../components/lens', () => {
+      const mocked = {
+      TooltipContent: () => <div data-test-subj="tooltip" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../chart/metric_chart_wrapper', () => ({
-  MetricChartWrapper: ({
-    id,
-    value,
-    valueFormatter,
-    subtitle,
-  }: {
-    id: string;
-    value: number | null;
-    valueFormatter?: (value: number) => string;
-    subtitle: string;
-  }) => (
-    <div
-      data-test-subj={id}
-      data-value={String(value)}
-      data-formatted={value == null ? '' : valueFormatter?.(value)}
-      data-subtitle={subtitle}
-    />
-  ),
-}));
+vi.mock('../chart/metric_chart_wrapper', () => {
+      const mocked = {
+      MetricChartWrapper: ({
+        id,
+        value,
+        valueFormatter,
+        subtitle,
+      }: {
+        id: string;
+        value: number | null;
+        valueFormatter?: (value: number) => string;
+        subtitle: string;
+      }) => (
+        <div
+          data-test-subj={id}
+          data-value={String(value)}
+          data-formatted={value == null ? '' : valueFormatter?.(value)}
+          data-subtitle={subtitle}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const KPIS: HostsKpis = {
   cpuUsage: 0.4567,
@@ -93,7 +113,7 @@ const renderKpiCharts = () =>
 
 describe('KpiCharts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseHostsKpis.mockReturnValue({ kpis: KPIS, loading: false, error: null });
     mockUseHostCountContext.mockReturnValue({ loading: false, count: 10 });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { ReactElement } from 'react';
 import { render as rtlRender, screen, within, act } from '@testing-library/react';
@@ -20,38 +23,44 @@ const POLL_INTERVAL_MS = 1000;
 const POLL_TIMEOUT_MS = 5000;
 
 // Routing mock
-jest.mock('../../../../../services/routing', () => {
+vi.mock('../../../../../services/routing', () => {
   return {
     routing: {
-      getFollowerIndexPath: jest.fn(() => '/follower-index-path'),
-      navigate: jest.fn(),
+      getFollowerIndexPath: vi.fn(() => '/follower-index-path'),
+      navigate: vi.fn(),
       reactRouter: {
-        getUrlForApp: jest.fn(() => '/mock-url'),
+        getUrlForApp: vi.fn(() => '/mock-url'),
       },
     },
   };
 });
 
 // getIndexListUri mock
-jest.mock('@kbn/index-management-plugin/public', () => ({
-  getIndexListUri: jest.fn((filter) => `/index-list?${filter}`),
-}));
+vi.mock('@kbn/index-management-plugin/public', () => {
+      const mocked = {
+      getIndexListUri: vi.fn((filter) => `/index-list?${filter}`),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ContextMenu mock
-jest.mock('../context_menu', () => ({
-  ContextMenu: ({ followerIndices, label, testSubj, isPollingStatus }: any) => (
-    <div data-test-subj={testSubj}>
-      <span>{label}</span>
-      <span data-test-subj="contextMenuFollowerIndices">
-        {JSON.stringify(followerIndices.map((fi: any) => fi.name))}
-      </span>
-      <span data-test-subj="contextMenuIsPollingStatus">{String(isPollingStatus)}</span>
-    </div>
-  ),
-}));
+vi.mock('../context_menu', () => {
+      const mocked = {
+      ContextMenu: ({ followerIndices, label, testSubj, isPollingStatus }: any) => (
+        <div data-test-subj={testSubj}>
+          <span>{label}</span>
+          <span data-test-subj="contextMenuFollowerIndices">
+            {JSON.stringify(followerIndices.map((fi: any) => fi.name))}
+          </span>
+          <span data-test-subj="contextMenuIsPollingStatus">{String(isPollingStatus)}</span>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // window.location.search mock
-const mockLocationSearch = jest.fn();
+const mockLocationSearch = vi.fn();
 
 const render = (ui: ReactElement) => {
   return rtlRender(<IntlProvider locale="en">{ui}</IntlProvider>);
@@ -113,14 +122,14 @@ const defaultProps = {
   followerIndexId: 'test-follower-index',
   followerIndex: createMockFollowerIndex({ name: 'test-follower-index' }),
   apiStatus: API_STATUS.IDLE,
-  closeDetailPanel: jest.fn(),
-  getFollowerIndex: jest.fn(),
+  closeDetailPanel: vi.fn(),
+  getFollowerIndex: vi.fn(),
 };
 
 describe('DetailPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (routing.navigate as jest.Mock).mockClear();
+    vi.clearAllMocks();
+    (routing.navigate as Mock).mockClear();
 
     mockLocationSearch.mockReturnValue('');
     Object.defineProperty(window, 'location', {
@@ -162,7 +171,7 @@ describe('DetailPanel', () => {
     });
 
     it('should call closeDetailPanel when flyout is closed', async () => {
-      const closeDetailPanel = jest.fn();
+      const closeDetailPanel = vi.fn();
       const user = userEvent.setup();
 
       render(<DetailPanel {...defaultProps} closeDetailPanel={closeDetailPanel} />);
@@ -348,7 +357,7 @@ describe('DetailPanel', () => {
     const followerIndex = createMockFollowerIndex({ name: 'test-index' });
 
     it('should render and handle close button click', async () => {
-      const closeDetailPanel = jest.fn();
+      const closeDetailPanel = vi.fn();
       const user = userEvent.setup();
 
       render(
@@ -506,16 +515,16 @@ describe('DetailPanel', () => {
 
   describe('Polling behavior', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should start polling when paused index is loaded with waitForActive param', async () => {
       mockLocationSearch.mockReturnValue('?waitForActive=true');
-      const getFollowerIndex = jest.fn();
+      const getFollowerIndex = vi.fn();
       const pausedFollowerIndex = createMockFollowerIndex({
         name: 'paused-index',
         isPaused: true,
@@ -533,7 +542,7 @@ describe('DetailPanel', () => {
 
       // First poll after POLL_INTERVAL_MS
       await act(async () => {
-        jest.advanceTimersByTime(POLL_INTERVAL_MS);
+        vi.advanceTimersByTime(POLL_INTERVAL_MS);
       });
 
       expect(getFollowerIndex).toHaveBeenCalledWith('paused-index');
@@ -541,14 +550,14 @@ describe('DetailPanel', () => {
 
       // Second poll after another POLL_INTERVAL_MS
       await act(async () => {
-        jest.advanceTimersByTime(POLL_INTERVAL_MS);
+        vi.advanceTimersByTime(POLL_INTERVAL_MS);
       });
 
       expect(getFollowerIndex).toHaveBeenCalledTimes(2);
     });
 
     it('should not start polling without waitForActive param', async () => {
-      const getFollowerIndex = jest.fn();
+      const getFollowerIndex = vi.fn();
       const pausedFollowerIndex = createMockFollowerIndex({
         name: 'paused-index',
         isPaused: true,
@@ -565,7 +574,7 @@ describe('DetailPanel', () => {
       );
 
       await act(async () => {
-        jest.advanceTimersByTime(POLL_TIMEOUT_MS);
+        vi.advanceTimersByTime(POLL_TIMEOUT_MS);
       });
 
       expect(getFollowerIndex).not.toHaveBeenCalled();
@@ -573,7 +582,7 @@ describe('DetailPanel', () => {
 
     it('should not start polling for active index even with waitForActive param', async () => {
       mockLocationSearch.mockReturnValue('?waitForActive=true');
-      const getFollowerIndex = jest.fn();
+      const getFollowerIndex = vi.fn();
       const activeFollowerIndex = createMockFollowerIndex({
         name: 'active-index',
         isPaused: false,
@@ -590,7 +599,7 @@ describe('DetailPanel', () => {
       );
 
       await act(async () => {
-        jest.advanceTimersByTime(POLL_TIMEOUT_MS);
+        vi.advanceTimersByTime(POLL_TIMEOUT_MS);
       });
 
       expect(getFollowerIndex).not.toHaveBeenCalled();
@@ -598,7 +607,7 @@ describe('DetailPanel', () => {
 
     it('should stop polling after timeout and clear URL param', async () => {
       mockLocationSearch.mockReturnValue('?waitForActive=true');
-      const getFollowerIndex = jest.fn();
+      const getFollowerIndex = vi.fn();
       const pausedFollowerIndex = createMockFollowerIndex({
         name: 'paused-index',
         isPaused: true,
@@ -616,7 +625,7 @@ describe('DetailPanel', () => {
 
       // Advance to timeout
       await act(async () => {
-        jest.advanceTimersByTime(POLL_TIMEOUT_MS);
+        vi.advanceTimersByTime(POLL_TIMEOUT_MS);
       });
 
       // Should have polled 5 times (at 1s, 2s, 3s, 4s, 5s)
@@ -630,7 +639,7 @@ describe('DetailPanel', () => {
       // No more polling after timeout
       getFollowerIndex.mockClear();
       await act(async () => {
-        jest.advanceTimersByTime(POLL_TIMEOUT_MS);
+        vi.advanceTimersByTime(POLL_TIMEOUT_MS);
       });
 
       expect(getFollowerIndex).not.toHaveBeenCalled();
@@ -638,7 +647,7 @@ describe('DetailPanel', () => {
 
     it('should stop polling when index becomes active', async () => {
       mockLocationSearch.mockReturnValue('?waitForActive=true');
-      const getFollowerIndex = jest.fn();
+      const getFollowerIndex = vi.fn();
       const pausedFollowerIndex = createMockFollowerIndex({
         name: 'paused-index',
         isPaused: true,
@@ -656,7 +665,7 @@ describe('DetailPanel', () => {
 
       // Poll once
       await act(async () => {
-        jest.advanceTimersByTime(POLL_INTERVAL_MS);
+        vi.advanceTimersByTime(POLL_INTERVAL_MS);
       });
 
       expect(getFollowerIndex).toHaveBeenCalledTimes(1);
@@ -687,7 +696,7 @@ describe('DetailPanel', () => {
       // No more polling
       getFollowerIndex.mockClear();
       await act(async () => {
-        jest.advanceTimersByTime(POLL_TIMEOUT_MS);
+        vi.advanceTimersByTime(POLL_TIMEOUT_MS);
       });
 
       expect(getFollowerIndex).not.toHaveBeenCalled();
@@ -711,7 +720,7 @@ describe('DetailPanel', () => {
 
       // Wait for polling to start
       await act(async () => {
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
       });
 
       // Verify checking status message

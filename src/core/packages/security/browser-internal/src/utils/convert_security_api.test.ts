@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-browser';
 import { convertSecurityApi } from './convert_security_api';
 
 describe('convertSecurityApi', () => {
   it('returns the API from the source', () => {
     const source: CoreSecurityDelegateContract = {
-      authc: { getCurrentUser: jest.fn() },
-      serviceAccounts: { isEnabled: jest.fn(), canCreate: jest.fn(), create: jest.fn() },
+      authc: { getCurrentUser: vi.fn() },
+      serviceAccounts: { isEnabled: vi.fn(), canCreate: vi.fn(), create: vi.fn() },
     };
     const output = convertSecurityApi(source);
     expect(output.authc.getCurrentUser).toBe(source.authc.getCurrentUser);

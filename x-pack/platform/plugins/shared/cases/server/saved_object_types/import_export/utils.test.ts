@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { stringify as yamlStringify } from 'yaml';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -80,7 +82,7 @@ const makeFieldDefSO = (
 describe('import_export utils', () => {
   describe('getAttachmentsAndUserActionsForCases', () => {
     it('always exports attachments from both legacy and unified attachment saved object types', async () => {
-      const createPointInTimeFinder = jest.fn().mockReturnValue({
+      const createPointInTimeFinder = vi.fn().mockReturnValue({
         async *find() {
           yield { saved_objects: [] };
         },
@@ -127,7 +129,7 @@ describe('import_export utils', () => {
       });
 
       // Only one find call expected — the field-def query. No template query should fire.
-      const find = jest
+      const find = vi
         .fn()
         .mockResolvedValueOnce({ saved_objects: [globalFieldDef, nonGlobalFieldDef] });
 
@@ -167,7 +169,7 @@ describe('import_export utils', () => {
         legacyKey: 'cf_environment',
       });
 
-      const find = jest.fn().mockResolvedValueOnce({ saved_objects: [globalFieldDef] });
+      const find = vi.fn().mockResolvedValueOnce({ saved_objects: [globalFieldDef] });
       const savedObjectsClient = { find } as unknown as SavedObjectsClientContract;
       const cases = [makeCaseSO('case-1', 'securitySolution')];
 
@@ -190,7 +192,7 @@ describe('import_export utils', () => {
         deletedAt: null,
       });
 
-      const find = jest
+      const find = vi
         .fn()
         .mockResolvedValueOnce({ saved_objects: [templateSO] }) // templates query
         .mockResolvedValueOnce({ saved_objects: [] }); // field defs query
@@ -229,7 +231,7 @@ describe('import_export utils', () => {
         deletedAt: '2024-01-01T00:00:00.000Z',
       });
 
-      const find = jest
+      const find = vi
         .fn()
         .mockResolvedValueOnce({ saved_objects: [softDeletedSO] })
         .mockResolvedValueOnce({ saved_objects: [] });
@@ -255,7 +257,7 @@ describe('import_export utils', () => {
         deletedAt: null,
       });
 
-      const find = jest
+      const find = vi
         .fn()
         .mockResolvedValueOnce({ saved_objects: [templateSO] }) // templates: single query for deduped ref
         .mockResolvedValueOnce({ saved_objects: [] });
@@ -298,7 +300,7 @@ describe('import_export utils', () => {
         isGlobal: false,
       });
 
-      const find = jest
+      const find = vi
         .fn()
         .mockResolvedValueOnce({ saved_objects: [templateSO] })
         .mockResolvedValueOnce({ saved_objects: [globalFieldDef, nonGlobalFieldDef] });
@@ -337,7 +339,7 @@ describe('import_export utils', () => {
         owner: 'securitySolution',
       });
 
-      const find = jest
+      const find = vi
         .fn()
         .mockResolvedValueOnce({ saved_objects: [templateSO] })
         .mockResolvedValueOnce({ saved_objects: [refFieldDef, unrelatedFieldDef] });
@@ -373,7 +375,7 @@ describe('import_export utils', () => {
         isGlobal: true,
       });
 
-      const find = jest
+      const find = vi
         .fn()
         .mockResolvedValueOnce({ saved_objects: [templateSO] })
         .mockResolvedValueOnce({ saved_objects: [globalAndRefFieldDef] });
@@ -402,7 +404,7 @@ describe('import_export utils', () => {
         deletedAt: null,
       });
 
-      const find = jest
+      const find = vi
         .fn()
         .mockResolvedValueOnce({ saved_objects: [templateWithBadDef] })
         .mockResolvedValueOnce({ saved_objects: [] });
@@ -426,7 +428,7 @@ describe('import_export utils', () => {
         deletedAt: null,
       });
 
-      const find = jest
+      const find = vi
         .fn()
         .mockResolvedValueOnce({ saved_objects: [templateSO] })
         .mockResolvedValueOnce({ saved_objects: [] });
@@ -457,7 +459,7 @@ describe('import_export utils', () => {
         deletedAt: null,
       });
 
-      const find = jest
+      const find = vi
         .fn()
         .mockResolvedValueOnce({ saved_objects: [templateSOSecurity, templateSOObs] })
         .mockResolvedValueOnce({ saved_objects: [] });
@@ -482,7 +484,7 @@ describe('import_export utils', () => {
         makeCaseSO(`case-${i}`, 'securitySolution', { id: `tmpl-${i}`, version: 1 })
       );
 
-      const find = jest.fn().mockResolvedValue({ saved_objects: [] });
+      const find = vi.fn().mockResolvedValue({ saved_objects: [] });
       const savedObjectsClient = { find } as unknown as SavedObjectsClientContract;
 
       await getTemplatesAndFieldDefinitionsForCases(savedObjectsClient, cases, logger);

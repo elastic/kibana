@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,11 +15,11 @@ import { useAlertsCount } from '../../../../../hooks/use_alerts_count';
 import { useAlertsQuery } from '../../hooks/use_alerts_query';
 import { AlertsTabBadge } from './alerts_tab_badge';
 
-jest.mock('../../../../../hooks/use_alerts_count');
-jest.mock('../../hooks/use_alerts_query');
+vi.mock('../../../../../hooks/use_alerts_count');
+vi.mock('../../hooks/use_alerts_query');
 
-const mockUseAlertsCount = useAlertsCount as jest.MockedFunction<typeof useAlertsCount>;
-const mockUseAlertsQuery = useAlertsQuery as jest.MockedFunction<typeof useAlertsQuery>;
+const mockUseAlertsCount = useAlertsCount as MockedFunction<typeof useAlertsCount>;
+const mockUseAlertsQuery = useAlertsQuery as MockedFunction<typeof useAlertsQuery>;
 
 const mockAlertsCount = (
   overrides: Partial<ReturnType<typeof useAlertsCount>> = {}
@@ -25,7 +28,7 @@ const mockAlertsCount = (
     alertsCount: { activeAlertCount: 0, recoveredAlertCount: 0 },
     loading: false,
     error: undefined,
-    refetch: jest.fn(),
+    refetch: vi.fn(),
     ...overrides,
   } as ReturnType<typeof useAlertsCount>);
 
@@ -38,11 +41,11 @@ const renderBadge = () =>
 
 describe('AlertsTabBadge', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const emptyAlertsQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
     mockUseAlertsQuery.mockReturnValue({
       alertStatus: 'all',
-      setAlertStatus: jest.fn(),
+      setAlertStatus: vi.fn(),
       alertsEsQuery: emptyAlertsQuery,
       alertsEsQueryByStatus: emptyAlertsQuery,
     });

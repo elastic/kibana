@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreSetup, CoreStart } from '@kbn/core/server';
 import type { ClusterClientMock } from '@kbn/core/server/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -27,7 +29,7 @@ describe('getApmEventClient', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('scopes the Elasticsearch client without space CPS project routing', async () => {
@@ -41,7 +43,7 @@ describe('getApmEventClient', () => {
       ) as unknown as MinimalAPMRouteHandlerResources['context'],
       core: { setup: {} as CoreSetup, start: async () => coreStart as unknown as CoreStart },
       params: { query: { _inspect: false } },
-      getApmIndices: jest.fn().mockResolvedValue(apmIndices),
+      getApmIndices: vi.fn().mockResolvedValue(apmIndices),
     });
 
     const { asScoped } = coreStart.elasticsearch.client as ClusterClientMock;

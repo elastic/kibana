@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
 import {
@@ -18,14 +21,14 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 const OPUS_5 = '.anthropic-claude-5-opus-chat_completion';
 
 const createSetupMock = (result: { ok: boolean; error?: string } = { ok: true }) => {
-  const register = jest.fn().mockReturnValue(result);
+  const register = vi.fn().mockReturnValue(result);
   return {
     setup: { features: { register } } as unknown as SearchInferenceEndpointsPluginSetup,
     register,
   };
 };
 
-const registeredTier = (register: jest.Mock, featureId: string) =>
+const registeredTier = (register: Mock, featureId: string) =>
   register.mock.calls.map(([arg]) => arg).find((arg) => arg.featureId === featureId);
 
 describe('registerAlertZeroInferenceFeatures', () => {
@@ -158,7 +161,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
   });
 
   it('registers every tier even when the parent is rejected', () => {
-    const register = jest
+    const register = vi
       .fn()
       .mockReturnValueOnce({ ok: false, error: 'boom' })
       .mockReturnValue({ ok: true });

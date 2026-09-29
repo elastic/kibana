@@ -7,23 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { findFirstEuiComponent } from './find_first_eui_component';
 import { getFiberType } from './get_fiber_type';
 import { isEuiMainComponent, isExcludedComponent } from '../utils';
 import type { ReactFiberNode } from './types';
 
-jest.mock('./get_fiber_type');
-jest.mock('../utils');
+vi.mock('./get_fiber_type');
+vi.mock('../utils');
 
-const mockGetFiberType = getFiberType as jest.MockedFunction<typeof getFiberType>;
-const mockIsEuiMainComponent = isEuiMainComponent as jest.MockedFunction<typeof isEuiMainComponent>;
-const mockIsExcludedComponent = isExcludedComponent as jest.MockedFunction<
+const mockGetFiberType = getFiberType as MockedFunction<typeof getFiberType>;
+const mockIsEuiMainComponent = isEuiMainComponent as MockedFunction<typeof isEuiMainComponent>;
+const mockIsExcludedComponent = isExcludedComponent as MockedFunction<
   typeof isExcludedComponent
 >;
 
 describe('findFirstEuiComponent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createMockFiberNode = (

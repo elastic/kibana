@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { FlowDirection } from '../../../../../common/search_strategy';
@@ -12,7 +14,7 @@ import { FlowDirection } from '../../../../../common/search_strategy';
 import { FlowDirectionSelect } from './flow_direction_select';
 
 describe('Select Flow Direction', () => {
-  const mockOnChange = jest.fn();
+  const mockOnChange = vi.fn();
 
   describe('rendering', () => {
     test('it renders the basic group button for uni-direction and bi-direction', () => {

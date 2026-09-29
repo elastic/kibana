@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { AIMessage } from '@langchain/core/messages';
 import { loggerMock } from '@kbn/logging-mocks';
 import { generateWorkflow } from './generate_workflow';
@@ -34,10 +36,10 @@ steps:
     request: {} as any,
     spaceId: 'default',
     workflowsApi: {
-      getAvailableConnectors: jest
+      getAvailableConnectors: vi
         .fn()
         .mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
-      validateWorkflow: jest.fn().mockResolvedValue({
+      validateWorkflow: vi.fn().mockResolvedValue({
         valid: true,
         diagnostics: [],
         parsedWorkflow: PARSED_WORKFLOW,
@@ -46,7 +48,7 @@ steps:
   });
 
   const buildChatModel = (responses: AIMessage[]) => {
-    const invoke = jest.fn().mockImplementation(() => Promise.resolve(responses.shift()));
+    const invoke = vi.fn().mockImplementation(() => Promise.resolve(responses.shift()));
     return {
       bindTools: () => ({ invoke }),
     };
@@ -133,7 +135,7 @@ steps:
     // Keyed off the YAML rather than call order: the tools node validates after
     // every edit, so a call-order mock would hand the "valid" answer to the
     // first attempt's per-edit check and the graph would never retry.
-    deps.workflowsApi.validateWorkflow = jest.fn().mockImplementation(async (yaml: string) =>
+    deps.workflowsApi.validateWorkflow = vi.fn().mockImplementation(async (yaml: string) =>
       yaml === VALID_YAML
         ? { valid: true, diagnostics: [], parsedWorkflow: PARSED_WORKFLOW }
         : {
@@ -168,7 +170,7 @@ steps:
     const chatModel = buildChatModel(responses);
 
     const deps = baseDeps(chatModel);
-    deps.workflowsApi.validateWorkflow = jest.fn().mockResolvedValue({
+    deps.workflowsApi.validateWorkflow = vi.fn().mockResolvedValue({
       valid: false,
       diagnostics: [{ severity: 'error', source: 's', message: 'bad' }],
     });
@@ -190,7 +192,7 @@ steps:
 
     const deps = baseDeps(chatModel);
     // Per-edit + post-loop validation will both call validateWorkflow.
-    deps.workflowsApi.validateWorkflow = jest.fn().mockResolvedValue({
+    deps.workflowsApi.validateWorkflow = vi.fn().mockResolvedValue({
       valid: true,
       diagnostics: [],
       parsedWorkflow: PARSED_WORKFLOW,
@@ -234,7 +236,7 @@ steps:
     const chatModel = buildChatModel(responses);
 
     const deps = baseDeps(chatModel);
-    deps.workflowsApi.validateWorkflow = jest.fn().mockResolvedValue({
+    deps.workflowsApi.validateWorkflow = vi.fn().mockResolvedValue({
       valid: true,
       diagnostics: [],
       parsedWorkflow: {

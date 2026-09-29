@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { of } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
@@ -14,7 +17,7 @@ import type { GenericEntityRecord } from '../../../../asset_inventory/types/gene
 import { fetchGenericEntity } from './use_get_generic_entity';
 
 describe('fetchGenericEntity', () => {
-  let mockDataService: jest.Mocked<DataPublicPluginStart>;
+  let mockDataService: Mocked<DataPublicPluginStart>;
   let mockSearchResponse: IKibanaSearchResponse<estypes.SearchResponse<GenericEntityRecord>>;
 
   beforeEach(() => {
@@ -72,13 +75,13 @@ describe('fetchGenericEntity', () => {
 
     mockDataService = {
       search: {
-        search: jest.fn().mockReturnValue(of(mockSearchResponse)),
+        search: vi.fn().mockReturnValue(of(mockSearchResponse)),
       },
-    } as unknown as jest.Mocked<DataPublicPluginStart>;
+    } as unknown as Mocked<DataPublicPluginStart>;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('query building logic with mandatory parameters', () => {

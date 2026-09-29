@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { logHealthCheck } from '.';
@@ -13,7 +15,7 @@ const mockLogger = loggingSystemMock.createLogger();
 
 describe('logHealthCheck', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls logger.debug with a lazy function', () => {

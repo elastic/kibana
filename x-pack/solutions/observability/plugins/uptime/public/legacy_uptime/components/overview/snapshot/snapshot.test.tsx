@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { SnapshotComponent } from './snapshot';
@@ -19,7 +21,7 @@ describe('Snapshot component', () => {
   };
 
   it('renders without errors', () => {
-    jest.spyOn(hook, 'useSnapShotCount').mockReturnValue({ count: snapshot, loading: false });
+    vi.spyOn(hook, 'useSnapShotCount').mockReturnValue({ count: snapshot, loading: false });
 
     const wrapper = shallowWithIntl(<SnapshotComponent />);
     expect(wrapper).toMatchSnapshot();

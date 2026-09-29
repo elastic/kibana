@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,9 +16,9 @@ import type { ConfigureCaseButtonProps, CaseDetailsLinkProps } from '.';
 import { ConfigureCaseButton, CaseDetailsLink } from '.';
 import { useCaseViewNavigation } from '../../common/navigation/hooks';
 
-jest.mock('../../common/navigation/hooks');
+vi.mock('../../common/navigation/hooks');
 
-const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
+const useCaseViewNavigationMock = useCaseViewNavigation as Mock;
 
 describe('Configuration button', () => {
   const props: ConfigureCaseButtonProps = {
@@ -36,10 +39,10 @@ describe('Configuration button', () => {
   });
 
   it('renders the tooltip correctly when hovering the button', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
+      advanceTimers: vi.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
 
@@ -58,20 +61,20 @@ describe('Configuration button', () => {
     expect(await screen.findByText('My title')).toBeInTheDocument();
     expect(await screen.findByText('My message tooltip')).toBeInTheDocument();
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });
 
 describe('CaseDetailsLink', () => {
-  const getCaseViewUrl = jest.fn().mockReturnValue('/cases/test');
-  const navigateToCaseView = jest.fn();
+  const getCaseViewUrl = vi.fn().mockReturnValue('/cases/test');
+  const navigateToCaseView = vi.fn();
 
   const props: CaseDetailsLinkProps = {
     detailName: 'test detail name',
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useCaseViewNavigationMock.mockReturnValue({ getCaseViewUrl, navigateToCaseView });
   });
 
@@ -103,9 +106,9 @@ describe('CaseDetailsLink', () => {
 
   it('calls navigateToCaseViewClick on click', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
+      advanceTimers: vi.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
 
@@ -117,7 +120,7 @@ describe('CaseDetailsLink', () => {
       detailName: props.detailName,
     });
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('sets the href correctly', async () => {

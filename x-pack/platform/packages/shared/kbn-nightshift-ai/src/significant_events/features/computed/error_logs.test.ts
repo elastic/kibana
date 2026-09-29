@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { esql } from '@elastic/esql';
 import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { errorLogsGenerator } from './error_logs';
 
-jest.mock('@kbn/ai-tools', () => ({
-  getSampleDocumentsEsql: jest.fn(),
-}));
+vi.mock('@kbn/ai-tools', () => {
+      const mocked = {
+      getSampleDocumentsEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getSampleDocumentsEsqlMock = jest.mocked(getSampleDocumentsEsql);
+const getSampleDocumentsEsqlMock = vi.mocked(getSampleDocumentsEsql);
 
 const target: AnalysisTarget = {
   id: 'logs.test-default',
@@ -29,7 +34,7 @@ const signal = new AbortController().signal;
 
 describe('errorLogsGenerator', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('wires the error filter through to the sampling helper', async () => {

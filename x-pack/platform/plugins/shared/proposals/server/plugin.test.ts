@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -29,13 +32,19 @@ import {
 } from './constants';
 import { registerRoutes } from './routes/register_routes';
 
-jest.mock('./managed_workflows/initialize_managed_workflows', () => ({
-  initializeManagedWorkflows: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./managed_workflows/initialize_managed_workflows', () => {
+      const mocked = {
+      initializeManagedWorkflows: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./routes/register_routes', () => ({
-  registerRoutes: jest.fn(),
-}));
+vi.mock('./routes/register_routes', () => {
+      const mocked = {
+      registerRoutes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createContext = () =>
   ({
@@ -45,15 +54,15 @@ const createContext = () =>
 const setupPlugin = () => {
   const plugin = new ProposalsPlugin(createContext());
   const coreSetup = coreMock.createSetup();
-  const features = { registerKibanaFeature: jest.fn() };
+  const features = { registerKibanaFeature: vi.fn() };
   const workflowsExtensions = {
-    registerStepDefinition: jest.fn(),
-    registerManagedWorkflowOwner: jest.fn(),
+    registerStepDefinition: vi.fn(),
+    registerManagedWorkflowOwner: vi.fn(),
   };
-  const workflowsManagement = { management: { getWorkflow: jest.fn() } };
+  const workflowsManagement = { management: { getWorkflow: vi.fn() } };
 
   const agentBuilder = {
-    attachments: { registerType: jest.fn() },
+    attachments: { registerType: vi.fn() },
   };
 
   plugin.setup(
@@ -71,7 +80,7 @@ const setupPlugin = () => {
 
 const startPlugin = (plugin: ProposalsPlugin) => {
   const coreStart = coreMock.createStart();
-  const workflowsExtensions = { initManagedWorkflowsClient: jest.fn() };
+  const workflowsExtensions = { initManagedWorkflowsClient: vi.fn() };
 
   const contract = plugin.start(
     coreStart as never,
@@ -85,12 +94,12 @@ const startPlugin = (plugin: ProposalsPlugin) => {
 };
 
 /** The single registered feature config, for assertions on its shape. */
-const registeredFeature = (features: { registerKibanaFeature: jest.Mock }) =>
+const registeredFeature = (features: { registerKibanaFeature: Mock }) =>
   features.registerKibanaFeature.mock.calls[0][0];
 
 describe('ProposalsPlugin', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('setup', () => {

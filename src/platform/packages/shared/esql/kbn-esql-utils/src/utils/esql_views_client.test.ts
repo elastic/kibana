@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { HttpStart } from '@kbn/core/public';
 import { VIEWS_BULK_DELETE_ROUTE, VIEWS_ROUTE } from '@kbn/esql-types';
 import {
@@ -30,10 +32,10 @@ const createHttpError = (status: number, message: string, errorType?: string) =>
 };
 
 const createHttpMock = () => {
-  const get = jest.fn();
-  const put = jest.fn();
-  const deleteRequest = jest.fn();
-  const post = jest.fn();
+  const get = vi.fn();
+  const put = vi.fn();
+  const deleteRequest = vi.fn();
+  const post = vi.fn();
   const http = {
     get,
     put,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { Subject } from 'rxjs';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -26,10 +29,10 @@ import { auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 
-const mockSessionIndexInitialize = jest.spyOn(SessionIndex.prototype, 'initialize');
+const mockSessionIndexInitialize = vi.spyOn(SessionIndex.prototype, 'initialize');
 mockSessionIndexInitialize.mockResolvedValue();
 
-const mockSessionIndexCleanUp = jest.spyOn(SessionIndex.prototype, 'cleanUp');
+const mockSessionIndexCleanUp = vi.spyOn(SessionIndex.prototype, 'cleanUp');
 mockSessionIndexCleanUp.mockResolvedValue({
   state: {
     shardMissingCounter: 0,
@@ -75,7 +78,7 @@ describe('SessionManagementService', () => {
   });
 
   describe('start()', () => {
-    let mockTaskManager: jest.Mocked<TaskManagerStartContract>;
+    let mockTaskManager: Mocked<TaskManagerStartContract>;
     let sessionCleanupTaskRunCreator: TaskRunCreatorFunction;
     beforeEach(() => {
       mockTaskManager = taskManagerMock.createStart();
@@ -147,7 +150,7 @@ describe('SessionManagementService', () => {
       expect(mockSessionIndexInitialize).not.toHaveBeenCalled();
       expect(mockTaskManager.ensureScheduled).not.toHaveBeenCalled();
 
-      const mockScheduleRetry = jest.fn();
+      const mockScheduleRetry = vi.fn();
       mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
       await nextTick();
       expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(1);
@@ -191,7 +194,7 @@ describe('SessionManagementService', () => {
         taskManager: mockTaskManager,
       });
 
-      const mockScheduleRetry = jest.fn();
+      const mockScheduleRetry = vi.fn();
       mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
       await nextTick();
 
@@ -213,7 +216,7 @@ describe('SessionManagementService', () => {
       // ES isn't online yet.
       expect(mockTaskManager.ensureScheduled).not.toHaveBeenCalled();
 
-      const mockScheduleRetry = jest.fn();
+      const mockScheduleRetry = vi.fn();
       mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
       await nextTick();
 
@@ -249,7 +252,7 @@ describe('SessionManagementService', () => {
       // ES isn't online yet.
       expect(mockTaskManager.ensureScheduled).not.toHaveBeenCalled();
 
-      const mockScheduleRetry = jest.fn();
+      const mockScheduleRetry = vi.fn();
       mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
       await nextTick();
 
@@ -273,7 +276,7 @@ describe('SessionManagementService', () => {
 
       mockSessionIndexInitialize.mockRejectedValue(new Error('ugh :/'));
 
-      const mockScheduleRetry = jest.fn();
+      const mockScheduleRetry = vi.fn();
       mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
       await nextTick();
       expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(1);
@@ -312,7 +315,7 @@ describe('SessionManagementService', () => {
 
       mockTaskManager.ensureScheduled.mockRejectedValue(new Error('ugh :/'));
 
-      const mockScheduleRetry = jest.fn();
+      const mockScheduleRetry = vi.fn();
       mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
       await nextTick();
       expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(1);
@@ -338,7 +341,7 @@ describe('SessionManagementService', () => {
   });
 
   describe('stop()', () => {
-    let mockTaskManager: jest.Mocked<TaskManagerStartContract>;
+    let mockTaskManager: Mocked<TaskManagerStartContract>;
     beforeEach(() => {
       mockTaskManager = taskManagerMock.createStart();
       mockTaskManager.ensureScheduled.mockResolvedValue(undefined as any);
@@ -365,7 +368,7 @@ describe('SessionManagementService', () => {
 
       service.stop();
 
-      const mockScheduleRetry = jest.fn();
+      const mockScheduleRetry = vi.fn();
       mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
 
       expect(mockSessionIndexInitialize).not.toHaveBeenCalled();

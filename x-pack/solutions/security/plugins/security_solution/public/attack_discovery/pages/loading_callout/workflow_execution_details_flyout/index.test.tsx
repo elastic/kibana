@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -17,18 +20,21 @@ import { WorkflowExecutionDetails } from './workflow_execution_details';
 // The flyout is a thin wrapper around `WorkflowExecutionDetails` (whose behavior
 // is covered by `workflow_execution_details.test.tsx`). These tests focus on the
 // wrapper's own responsibilities: the flyout chrome and prop pass-through.
-jest.mock('./workflow_execution_details', () => ({
-  WorkflowExecutionDetails: jest.fn(() => (
-    <div data-test-subj="workflowExecutionDetails">{'Mock WorkflowExecutionDetails'}</div>
-  )),
-}));
+vi.mock('./workflow_execution_details', () => {
+      const mocked = {
+      WorkflowExecutionDetails: vi.fn(() => (
+        <div data-test-subj="workflowExecutionDetails">{'Mock WorkflowExecutionDetails'}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MockWorkflowExecutionDetails = WorkflowExecutionDetails as jest.MockedFunction<
+const MockWorkflowExecutionDetails = WorkflowExecutionDetails as MockedFunction<
   typeof WorkflowExecutionDetails
 >;
 
 describe('WorkflowExecutionDetailsFlyout', () => {
-  const mockOnClose = jest.fn();
+  const mockOnClose = vi.fn();
   const mockHttp = {} as HttpSetup;
 
   const defaultProps = {
@@ -40,7 +46,7 @@ describe('WorkflowExecutionDetailsFlyout', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the flyout', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -20,20 +22,20 @@ import { QueryBarMenu } from './query_bar_menu';
 
 describe('Querybar Menu component', () => {
   const createMockWebStorage = () => ({
-    clear: jest.fn(),
-    getItem: jest.fn(),
-    key: jest.fn(),
-    removeItem: jest.fn(),
-    setItem: jest.fn(),
+    clear: vi.fn(),
+    getItem: vi.fn(),
+    key: vi.fn(),
+    removeItem: vi.fn(),
+    setItem: vi.fn(),
     length: 0,
   });
 
   const createMockStorage = () => ({
     storage: createMockWebStorage(),
-    get: jest.fn(),
-    set: jest.fn(),
-    remove: jest.fn(),
-    clear: jest.fn(),
+    get: vi.fn(),
+    set: vi.fn(),
+    remove: vi.fn(),
+    clear: vi.fn(),
   });
 
   const getStorage = (v: string) => {
@@ -74,7 +76,7 @@ describe('Querybar Menu component', () => {
       ...dataMock,
       dataViews: {
         ...dataMock.dataViews,
-        getIdsWithTitle: jest.fn(),
+        getIdsWithTitle: vi.fn(),
       },
     };
     const services = {
@@ -107,16 +109,16 @@ describe('Querybar Menu component', () => {
   beforeEach(() => {
     props = {
       language: 'kuery',
-      onQueryChange: jest.fn(),
-      onCloseFilterPopover: jest.fn(),
-      onLocalFilterUpdate: jest.fn(),
-      onLocalFilterCreate: jest.fn(),
-      onQueryBarSubmit: jest.fn(),
-      toggleFilterBarMenuPopover: jest.fn(),
+      onQueryChange: vi.fn(),
+      onCloseFilterPopover: vi.fn(),
+      onLocalFilterUpdate: vi.fn(),
+      onLocalFilterCreate: vi.fn(),
+      onQueryBarSubmit: vi.fn(),
+      toggleFilterBarMenuPopover: vi.fn(),
       openQueryBarMenu: false,
       savedQueryService: {
         ...dataMock.query.savedQueries,
-        findSavedQueries: jest.fn().mockResolvedValue({
+        findSavedQueries: vi.fn().mockResolvedValue({
           queries: [
             {
               id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',

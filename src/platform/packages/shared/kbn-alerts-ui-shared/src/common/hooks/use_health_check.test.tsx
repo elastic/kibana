@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -15,20 +17,22 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { useHealthCheck } from './use_health_check';
 import { healthCheckErrors } from '../apis';
 
-jest.mock('../apis/fetch_ui_health_status/fetch_ui_health_status', () => ({
-  fetchUiHealthStatus: jest.fn(),
-}));
+vi.mock('../apis/fetch_ui_health_status/fetch_ui_health_status', () => {
+      const mocked = {
+      fetchUiHealthStatus: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../apis/fetch_alerting_framework_health/fetch_alerting_framework_health', () => ({
-  fetchAlertingFrameworkHealth: jest.fn(),
-}));
+vi.mock('../apis/fetch_alerting_framework_health/fetch_alerting_framework_health', () => {
+      const mocked = {
+      fetchAlertingFrameworkHealth: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { fetchUiHealthStatus } = jest.requireMock(
-  '../apis/fetch_ui_health_status/fetch_ui_health_status'
-);
-const { fetchAlertingFrameworkHealth } = jest.requireMock(
-  '../apis/fetch_alerting_framework_health/fetch_alerting_framework_health'
-);
+const { fetchUiHealthStatus } = (await vi.importMock('../apis/fetch_ui_health_status/fetch_ui_health_status'));
+const { fetchAlertingFrameworkHealth } = (await vi.importMock('../apis/fetch_alerting_framework_health/fetch_alerting_framework_health'));
 
 const queryClient = new QueryClient();
 
@@ -36,11 +40,11 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-const httpMock = jest.fn();
+const httpMock = vi.fn();
 
 describe('useHealthCheck', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should return null if there are no errors', async () => {

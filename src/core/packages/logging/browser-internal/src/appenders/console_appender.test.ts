@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { LogRecord } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { unsafeConsole } from '@kbn/security-hardening';
 import { ConsoleAppender } from './console_appender';
 
 test('`append()` correctly formats records and pushes them to console.', () => {
-  jest.spyOn(unsafeConsole, 'log').mockImplementation(() => {
+  vi.spyOn(unsafeConsole, 'log').mockImplementation(() => {
     // noop
   });
 

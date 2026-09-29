@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type {
   DragDropOperation,
   OperationMetadata,
@@ -557,7 +559,7 @@ describe('FormBasedDimensionEditorPanel#getDropProps', () => {
         humanData: { label: 'Label' },
       };
 
-      (generateId as jest.Mock).mockReturnValue(`ref1Copy`);
+      (generateId as Mock).mockReturnValue(`ref1Copy`);
       props.state = {
         ...props.state,
         layers: {

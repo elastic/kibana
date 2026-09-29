@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
 import { convertScheduleActionsToAlertingActions } from './convert_schedule_actions_to_alerting_actions';
@@ -16,9 +19,9 @@ describe('convertScheduleActionsToAlertingActions', () => {
   const systemAction = getScheduleActions().find((action) => action.actionTypeId === '.cases');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (mockActionsClient.isSystemAction as jest.Mock).mockImplementation((connectorId: string) => {
+    (mockActionsClient.isSystemAction as Mock).mockImplementation((connectorId: string) => {
       return connectorId === systemAction?.id;
     });
   });

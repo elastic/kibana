@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
@@ -16,16 +18,16 @@ import {
 } from '../../../cases_test_utils';
 import { LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
 describe('useAddToExistingCase', () => {
   const mockedUseKibana = mockUseKibana();
-  const mockCanUseCases = jest.fn();
-  const mockUseCasesAddToExistingCaseModal = jest.fn().mockReturnValue({
-    open: jest.fn(),
-    close: jest.fn(),
+  const mockCanUseCases = vi.fn();
+  const mockUseCasesAddToExistingCaseModal = vi.fn().mockReturnValue({
+    open: vi.fn(),
+    close: vi.fn(),
   });
-  const mockOnAddToCaseClicked = jest.fn();
+  const mockOnAddToCaseClicked = vi.fn();
   const timeRange = {
     from: '2022-03-06T16:00:00.000Z',
     to: '2022-03-07T15:59:59.999Z',
@@ -109,8 +111,8 @@ describe('useAddToExistingCase', () => {
   });
 
   it('should open add to existing case modal', () => {
-    const mockOpenCaseModal = jest.fn();
-    const mockClick = jest.fn();
+    const mockOpenCaseModal = vi.fn();
+    const mockClick = vi.fn();
     const lensMetadata = {
       description: 'test_description',
     };

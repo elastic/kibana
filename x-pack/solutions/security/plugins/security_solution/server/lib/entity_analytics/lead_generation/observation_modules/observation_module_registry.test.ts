@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Observation } from '../../../../../common/entity_analytics/lead_generation';
 import type { ObservationModule, ObservationEntity } from './types';
@@ -19,8 +21,8 @@ const createMockModule = (
     priority: 50,
     ...overrides.config,
   },
-  isEnabled: jest.fn().mockReturnValue(true),
-  collect: jest.fn().mockResolvedValue([]),
+  isEnabled: vi.fn().mockReturnValue(true),
+  collect: vi.fn().mockResolvedValue([]),
   ...overrides,
 });
 
@@ -46,7 +48,7 @@ describe('ObservationModuleRegistry', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     registry = new ObservationModuleRegistry(logger);
   });
 
@@ -103,7 +105,7 @@ describe('ObservationModuleRegistry', () => {
     it('filters out disabled modules', () => {
       registry.register(createMockModule({ id: 'enabled' }));
       registry.register(
-        createMockModule({ id: 'disabled', isEnabled: jest.fn().mockReturnValue(false) })
+        createMockModule({ id: 'disabled', isEnabled: vi.fn().mockReturnValue(false) })
       );
 
       const result = registry.getEnabled();
@@ -118,10 +120,10 @@ describe('ObservationModuleRegistry', () => {
       const obs2 = createMockObservation('user:alice', 'mod_b');
 
       registry.register(
-        createMockModule({ id: 'mod_a', collect: jest.fn().mockResolvedValue([obs1]) })
+        createMockModule({ id: 'mod_a', collect: vi.fn().mockResolvedValue([obs1]) })
       );
       registry.register(
-        createMockModule({ id: 'mod_b', collect: jest.fn().mockResolvedValue([obs2]) })
+        createMockModule({ id: 'mod_b', collect: vi.fn().mockResolvedValue([obs2]) })
       );
 
       const results = await registry.evaluate([createMockEntity('alice')]);
@@ -134,13 +136,13 @@ describe('ObservationModuleRegistry', () => {
       registry.register(
         createMockModule({
           id: 'enabled',
-          collect: jest.fn().mockResolvedValue([createMockObservation('user:alice', 'enabled')]),
+          collect: vi.fn().mockResolvedValue([createMockObservation('user:alice', 'enabled')]),
         })
       );
       const disabled = createMockModule({
         id: 'disabled',
-        isEnabled: jest.fn().mockReturnValue(false),
-        collect: jest.fn(),
+        isEnabled: vi.fn().mockReturnValue(false),
+        collect: vi.fn(),
       });
       registry.register(disabled);
 
@@ -155,14 +157,14 @@ describe('ObservationModuleRegistry', () => {
         createMockModule({
           id: 'failing',
           config: { id: 'failing', name: 'Failing', priority: 100 },
-          collect: jest.fn().mockRejectedValue(new Error('module crash')),
+          collect: vi.fn().mockRejectedValue(new Error('module crash')),
         })
       );
       registry.register(
         createMockModule({
           id: 'working',
           config: { id: 'working', name: 'Working', priority: 50 },
-          collect: jest.fn().mockResolvedValue([createMockObservation('user:alice', 'working')]),
+          collect: vi.fn().mockResolvedValue([createMockObservation('user:alice', 'working')]),
         })
       );
 

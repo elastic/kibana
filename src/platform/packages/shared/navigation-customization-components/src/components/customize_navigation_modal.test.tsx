@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
@@ -23,14 +25,14 @@ describe('CustomizeNavigationModal', () => {
 
   const defaultProps = {
     items,
-    onSave: jest.fn(),
-    onReset: jest.fn(() => Promise.resolve(items)),
-    onChange: jest.fn(),
-    onClose: jest.fn(),
+    onSave: vi.fn(),
+    onReset: vi.fn(() => Promise.resolve(items)),
+    onChange: vi.fn(),
+    onClose: vi.fn(),
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the modal', () => {

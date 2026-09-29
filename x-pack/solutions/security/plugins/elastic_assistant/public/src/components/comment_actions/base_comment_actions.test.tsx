@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ClientMessage } from '@kbn/elastic-assistant';
 import { EuiCopy, EuiFlexItem } from '@elastic/eui';
 import { BaseCommentActions } from './base_comment_actions';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiCopy: jest.fn(),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiCopy: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CommentActions', () => {
   beforeEach(() => {
-    (EuiCopy as unknown as jest.Mock).mockClear();
+    (EuiCopy as unknown as Mock).mockClear();
   });
 
   it.each([
@@ -29,7 +35,7 @@ describe('CommentActions', () => {
     ],
     [`{reference(exampleReferenceId)}`, ''],
   ])("textToCopy is correct when input is '%s'", async (input, expected) => {
-    (EuiCopy as unknown as jest.Mock).mockReturnValue(null);
+    (EuiCopy as unknown as Mock).mockReturnValue(null);
     const message: ClientMessage = {
       content: input,
       role: 'assistant',

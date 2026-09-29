@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import type { UseFieldsMetadataParams } from './use_fields_metadata';
@@ -36,13 +39,13 @@ const fieldsMetadataService = createFieldsMetadataServiceStartMock();
 const useFieldsMetadata = createUseFieldsMetadataHook({ fieldsMetadataService });
 
 describe('useFieldsMetadata', () => {
-  let fieldsMetadataClient: jest.Mocked<IFieldsMetadataClient>;
+  let fieldsMetadataClient: Mocked<IFieldsMetadataClient>;
   beforeEach(async () => {
     fieldsMetadataClient = await fieldsMetadataService.getClient();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return the fieldsMetadata value from the API', async () => {

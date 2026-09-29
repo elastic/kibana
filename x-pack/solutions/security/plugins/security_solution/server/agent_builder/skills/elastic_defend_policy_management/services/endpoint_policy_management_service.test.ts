@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -18,30 +20,42 @@ import { countEndpoints } from './count_endpoints';
 import { readPolicyBaseline } from './read_policy_baseline';
 import { applyPolicyChange, previewApplyPolicyChange } from './apply_policy_change';
 
-jest.mock('./list_endpoint_policies', () => ({
-  listEndpointPolicies: jest.fn(),
-}));
+vi.mock('./list_endpoint_policies', () => {
+      const mocked = {
+      listEndpointPolicies: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./count_endpoints', () => ({
-  countEndpoints: jest.fn(),
-}));
+vi.mock('./count_endpoints', () => {
+      const mocked = {
+      countEndpoints: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./read_policy_baseline', () => ({
-  readPolicyBaseline: jest.fn(),
-}));
+vi.mock('./read_policy_baseline', () => {
+      const mocked = {
+      readPolicyBaseline: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./apply_policy_change', () => ({
-  previewApplyPolicyChange: jest.fn(),
-  applyPolicyChange: jest.fn(),
-}));
+vi.mock('./apply_policy_change', () => {
+      const mocked = {
+      previewApplyPolicyChange: vi.fn(),
+      applyPolicyChange: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SPACE_ID = 'space-marketing';
 const POLICY_ID = 'policy-1';
-const mockedlistEndpointPolicies = jest.mocked(listEndpointPolicies);
-const mockedCountEndpoints = jest.mocked(countEndpoints);
-const mockedReadPolicyBaseline = jest.mocked(readPolicyBaseline);
-const mockedPreviewApplyPolicyChange = jest.mocked(previewApplyPolicyChange);
-const mockedApplyPolicyChange = jest.mocked(applyPolicyChange);
+const mockedlistEndpointPolicies = vi.mocked(listEndpointPolicies);
+const mockedCountEndpoints = vi.mocked(countEndpoints);
+const mockedReadPolicyBaseline = vi.mocked(readPolicyBaseline);
+const mockedPreviewApplyPolicyChange = vi.mocked(previewApplyPolicyChange);
+const mockedApplyPolicyChange = vi.mocked(applyPolicyChange);
 
 const generator = new FleetPackagePolicyGenerator();
 
@@ -73,11 +87,11 @@ const createServiceDeps = (grants: Grants) => {
     })
   );
 
-  const getStartServices = jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
+  const getStartServices = vi.fn(async () => [
+    { savedObjects: { getScopedClient: vi.fn().mockReturnValue({}) } },
   ]) as unknown as StartServicesAccessor;
 
-  const getById = jest.spyOn(scopedFleet.packagePolicy, 'get');
+  const getById = vi.spyOn(scopedFleet.packagePolicy, 'get');
   getById.mockResolvedValue(createEndpointPolicy());
 
   const service = createEndpointPolicyManagementService({

@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-jest.mock('../../saved_object/notes', () => ({
-  persistNote: jest.fn(),
-}));
-jest.mock('../../utils/common', () => ({
-  buildFrameworkRequest: jest.fn().mockResolvedValue({}),
-}));
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('../../saved_object/notes', () => {
+      const mocked = {
+      persistNote: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../utils/common', () => {
+      const mocked = {
+      buildFrameworkRequest: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { NOTE_URL } from '../../../../../common/constants';
@@ -49,24 +58,24 @@ describe('persistNoteRoute', () => {
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     mockLogger = loggingSystemMock.createLogger();
-    (persistNote as jest.Mock).mockResolvedValue(makePersistNoteResponse('created-note-id'));
+    (persistNote as Mock).mockResolvedValue(makePersistNoteResponse('created-note-id'));
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('workflow trigger emission', () => {
-    let mockEventBus: { emitNoteCreated: jest.Mock; emitNoteUpdated: jest.Mock };
+    let mockEventBus: { emitNoteCreated: Mock; emitNoteUpdated: Mock };
 
     beforeEach(() => {
       server = serverMock.create();
-      mockEventBus = { emitNoteCreated: jest.fn(), emitNoteUpdated: jest.fn() };
+      mockEventBus = { emitNoteCreated: vi.fn(), emitNoteUpdated: vi.fn() };
       persistNoteRoute(
         server.router,
         mockLogger,
@@ -93,7 +102,7 @@ describe('persistNoteRoute', () => {
     });
 
     test('emits noteUpdated when updating a note linked to an event', async () => {
-      (persistNote as jest.Mock).mockResolvedValue(makePersistNoteResponse('existing-note-id'));
+      (persistNote as Mock).mockResolvedValue(makePersistNoteResponse('existing-note-id'));
       const request = requestMock.create({
         method: 'patch',
         path: NOTE_URL,
@@ -114,7 +123,7 @@ describe('persistNoteRoute', () => {
     test('emits noteUpdated using persisted eventId when update request omits eventId', async () => {
       // Simulates a text-only patch: the client sends noteId + note text but no eventId.
       // The route must fall back to res.note.eventId so the trigger still fires.
-      (persistNote as jest.Mock).mockResolvedValue(makePersistNoteResponse('existing-note-id'));
+      (persistNote as Mock).mockResolvedValue(makePersistNoteResponse('existing-note-id'));
       const request = requestMock.create({
         method: 'patch',
         path: NOTE_URL,
@@ -136,7 +145,7 @@ describe('persistNoteRoute', () => {
     });
 
     test('skips emit and logs warn when noteId is missing after persist', async () => {
-      (persistNote as jest.Mock).mockResolvedValue({ note: { createdBy: 'test-user' } });
+      (persistNote as Mock).mockResolvedValue({ note: { createdBy: 'test-user' } });
       const request = requestMock.create({
         method: 'patch',
         path: NOTE_URL,
@@ -152,7 +161,7 @@ describe('persistNoteRoute', () => {
     });
 
     test('skips noteCreated and logs warn when createdBy is missing after persist', async () => {
-      (persistNote as jest.Mock).mockResolvedValue({ note: { noteId: 'created-note-id' } });
+      (persistNote as Mock).mockResolvedValue({ note: { noteId: 'created-note-id' } });
       const request = requestMock.create({
         method: 'patch',
         path: NOTE_URL,
@@ -167,7 +176,7 @@ describe('persistNoteRoute', () => {
     });
 
     test('skips noteUpdated and logs warn when updatedBy and createdBy are both missing', async () => {
-      (persistNote as jest.Mock).mockResolvedValue({ note: { noteId: 'existing-note-id' } });
+      (persistNote as Mock).mockResolvedValue({ note: { noteId: 'existing-note-id' } });
       const request = requestMock.create({
         method: 'patch',
         path: NOTE_URL,

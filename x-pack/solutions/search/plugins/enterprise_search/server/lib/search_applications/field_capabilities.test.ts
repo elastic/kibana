@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
@@ -21,8 +23,8 @@ import {
 describe('search applications field_capabilities', () => {
   const mockClient = {
     asCurrentUser: {
-      fieldCaps: jest.fn(),
-      indices: { get: jest.fn(), getAlias: jest.fn() },
+      fieldCaps: vi.fn(),
+      indices: { get: vi.fn(), getAlias: vi.fn() },
     },
     asInternalUser: {},
   };
@@ -33,7 +35,7 @@ describe('search applications field_capabilities', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('fetchSearchApplicationFieldCapabilities', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -46,7 +48,7 @@ describe('SignificantEventItem', () => {
     );
 
   it('makes the whole row clickable when onClick is provided', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderItem({ onClick });
 
     const row = screen.getByTestId('nightshiftSignificantEventItem');
@@ -61,7 +63,7 @@ describe('SignificantEventItem', () => {
   });
 
   it('activates the row with Enter and Space keys', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderItem({ onClick });
 
     const row = screen.getByTestId('nightshiftSignificantEventItem');
@@ -71,7 +73,7 @@ describe('SignificantEventItem', () => {
   });
 
   it('does not activate the row for other keys', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderItem({ onClick });
 
     const row = screen.getByTestId('nightshiftSignificantEventItem');
@@ -81,8 +83,8 @@ describe('SignificantEventItem', () => {
   });
 
   it('ignores key presses bubbling from nested interactive elements', () => {
-    const onClick = jest.fn();
-    const onChatClick = jest.fn();
+    const onClick = vi.fn();
+    const onChatClick = vi.fn();
     renderItem({ onClick, onChatClick });
 
     fireEvent.keyDown(screen.getByTestId('nightshiftOpenEventInChatButton'), { key: 'Enter' });
@@ -90,10 +92,10 @@ describe('SignificantEventItem', () => {
   });
 
   it('does not open the flyout when the click ends a text selection', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderItem({ onClick });
 
-    const getSelectionSpy = jest
+    const getSelectionSpy = vi
       .spyOn(window, 'getSelection')
       .mockReturnValue({ toString: () => 'selected text' } as Selection);
 
@@ -112,8 +114,8 @@ describe('SignificantEventItem', () => {
   });
 
   it('opens chat without triggering the row click', () => {
-    const onClick = jest.fn();
-    const onChatClick = jest.fn();
+    const onClick = vi.fn();
+    const onChatClick = vi.fn();
     renderItem({ onClick, onChatClick });
 
     const chatButton = screen.getByTestId('nightshiftOpenEventInChatButton');
@@ -127,8 +129,8 @@ describe('SignificantEventItem', () => {
   });
 
   it('closes the event without triggering the row click', () => {
-    const onClick = jest.fn();
-    const onCloseClick = jest.fn();
+    const onClick = vi.fn();
+    const onCloseClick = vi.fn();
     renderItem({ onClick, onCloseClick });
 
     const closeButton = screen.getByTestId('nightshiftCloseSignificantEventButton');
@@ -142,19 +144,19 @@ describe('SignificantEventItem', () => {
   });
 
   it('shows progress while closing', () => {
-    renderItem({ onCloseClick: jest.fn(), isClosing: true });
+    renderItem({ onCloseClick: vi.fn(), isClosing: true });
 
     expect(screen.getByTestId('nightshiftCloseSignificantEventButton')).toBeDisabled();
   });
 
   it.each(['closed', 'dismissed'] as const)('hides the close action for %s events', (status) => {
-    renderItem({ event: { ...mockEvent, status }, onCloseClick: jest.fn() });
+    renderItem({ event: { ...mockEvent, status }, onCloseClick: vi.fn() });
 
     expect(screen.queryByTestId('nightshiftCloseSignificantEventButton')).not.toBeInTheDocument();
   });
 
   it('marks the row as selected when isSelected is true', () => {
-    renderItem({ onClick: jest.fn(), isSelected: true });
+    renderItem({ onClick: vi.fn(), isSelected: true });
 
     expect(screen.getByTestId('nightshiftSignificantEventItem')).toHaveAttribute(
       'aria-pressed',
@@ -163,7 +165,7 @@ describe('SignificantEventItem', () => {
   });
 
   it('marks the row as unselected when isSelected is false', () => {
-    renderItem({ onClick: jest.fn(), isSelected: false });
+    renderItem({ onClick: vi.fn(), isSelected: false });
 
     expect(screen.getByTestId('nightshiftSignificantEventItem')).toHaveAttribute(
       'aria-pressed',
@@ -172,7 +174,7 @@ describe('SignificantEventItem', () => {
   });
 
   it('renders the title as plain text, not a link or button', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderItem({ onClick });
 
     const title = screen.getByText(mockEvent.title);

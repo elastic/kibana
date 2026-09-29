@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -22,11 +25,14 @@ import {
 
 const LOADING_MESSAGE = 'Loading Machine Learning configuration...';
 
-const mockUseKibanaContextForPlugin = jest.fn();
+const mockUseKibanaContextForPlugin = vi.fn();
 
-jest.mock('./use_kibana', () => ({
-  useKibanaContextForPlugin: () => mockUseKibanaContextForPlugin(),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibanaContextForPlugin: () => mockUseKibanaContextForPlugin(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockServices = ({
   cps,
@@ -35,13 +41,13 @@ const mockServices = ({
 }: {
   cps: Partial<CPSPluginStart> | undefined;
   isFeatureFlagEnabled?: boolean;
-  mlInfo?: jest.Mock;
+  mlInfo?: Mock;
 }) => {
   mockUseKibanaContextForPlugin.mockReturnValue({
     services: {
       application: { currentAppId$: of('logs') },
       cps,
-      featureFlags: { useBooleanValue: jest.fn().mockReturnValue(isFeatureFlagEnabled) },
+      featureFlags: { useBooleanValue: vi.fn().mockReturnValue(isFeatureFlagEnabled) },
       ml: mlInfo ? { mlApi: { mlInfo } } : undefined,
       observabilityShared: {
         navigation: {
@@ -67,14 +73,14 @@ const createCpsManager = ({
   // mirrors the real manager, whose hasLinkedProjects() reports false until whenReady() resolves
   let ready = false;
   return {
-    whenReady: jest.fn(() =>
+    whenReady: vi.fn(() =>
       isReady
         ? Promise.resolve().then(() => {
             ready = true;
           })
         : new Promise<void>(() => {})
     ),
-    hasLinkedProjects: jest.fn(() => ready && hasLinkedProjects),
+    hasLinkedProjects: vi.fn(() => ready && hasLinkedProjects),
   } as unknown as ICPSManager;
 };
 
@@ -274,7 +280,7 @@ describe('MlCpsCapabilityProvider', () => {
     );
 
   it('renders children immediately without requesting ML info when the platform gate fails', () => {
-    const mlInfo = jest.fn();
+    const mlInfo = vi.fn();
     mockServices({ cps: undefined, mlInfo });
 
     renderProvider();
@@ -292,7 +298,7 @@ describe('MlCpsCapabilityProvider', () => {
   });
 
   it('renders children immediately without requesting ML info outside the ML pages', () => {
-    const mlInfo = jest.fn();
+    const mlInfo = vi.fn();
     mockServices({ cps: enabledCps(), mlInfo });
 
     renderProvider({ initialPath: '/stream' });
@@ -302,7 +308,7 @@ describe('MlCpsCapabilityProvider', () => {
   });
 
   it('fetches on the log categories page as well', async () => {
-    const mlInfo = jest.fn().mockResolvedValue({ isMlCpsEnabled: true });
+    const mlInfo = vi.fn().mockResolvedValue({ isMlCpsEnabled: true });
     mockServices({ cps: enabledCps(), mlInfo });
 
     renderProvider({ initialPath: '/log-categories' });
@@ -311,9 +317,9 @@ describe('MlCpsCapabilityProvider', () => {
   });
 
   it('holds rendering on a loading page while the capability is fetched', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
-      const mlInfo = jest.fn().mockReturnValue(new Promise(() => {}));
+      const mlInfo = vi.fn().mockReturnValue(new Promise(() => {}));
       mockServices({ cps: enabledCps(), mlInfo });
 
       renderProvider();
@@ -321,31 +327,31 @@ describe('MlCpsCapabilityProvider', () => {
       expect(screen.getByText(LOADING_MESSAGE)).toBeInTheDocument();
       expect(screen.queryByText(/cps-/)).not.toBeInTheDocument();
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 
   it('fails closed when the request never settles, once the timeout elapses', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
-      const mlInfo = jest.fn().mockReturnValue(new Promise(() => {}));
+      const mlInfo = vi.fn().mockReturnValue(new Promise(() => {}));
       mockServices({ cps: enabledCps(), mlInfo });
 
       renderProvider();
       expect(screen.getByText(LOADING_MESSAGE)).toBeInTheDocument();
 
       await act(async () => {
-        jest.advanceTimersByTime(35_000);
+        vi.advanceTimersByTime(35_000);
       });
 
       expect(screen.getByText('cps-disabled')).toBeInTheDocument();
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 
   it('provides an enabled capability to consumers once fetched', async () => {
-    const mlInfo = jest.fn().mockResolvedValue({ isMlCpsEnabled: true });
+    const mlInfo = vi.fn().mockResolvedValue({ isMlCpsEnabled: true });
     mockServices({ cps: enabledCps(), mlInfo });
 
     renderProvider();
@@ -355,7 +361,7 @@ describe('MlCpsCapabilityProvider', () => {
   });
 
   it('provides a disabled capability to consumers once fetched', async () => {
-    const mlInfo = jest.fn().mockResolvedValue({ isMlCpsEnabled: false });
+    const mlInfo = vi.fn().mockResolvedValue({ isMlCpsEnabled: false });
     mockServices({ cps: enabledCps(), mlInfo });
 
     renderProvider();
@@ -364,7 +370,7 @@ describe('MlCpsCapabilityProvider', () => {
   });
 
   it('fails closed on a fetch error', async () => {
-    const mlInfo = jest.fn().mockRejectedValue(new Error('network error'));
+    const mlInfo = vi.fn().mockRejectedValue(new Error('network error'));
     mockServices({ cps: enabledCps(), mlInfo });
 
     renderProvider();
@@ -380,7 +386,7 @@ describe('useInfraMlCpsPickerAccess', () => {
   }: {
     isMlCpsCapabilityEnabled: boolean;
   }) => {
-    const registerAppAccess = jest.fn();
+    const registerAppAccess = vi.fn();
     mockServices({
       cps: {
         isTierEligible: true,

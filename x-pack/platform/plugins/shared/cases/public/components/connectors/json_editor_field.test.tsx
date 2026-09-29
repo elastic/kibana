@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React, { type ComponentProps } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,8 +15,8 @@ import { MockedCodeEditor } from '@kbn/code-editor-mock';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { MockedMonacoEditor } from '@kbn/code-editor-mock/monaco_mock';
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
+vi.mock('@kbn/code-editor', async () => {
+  const original = (await vi.importActual('@kbn/code-editor'));
   return {
     ...original,
     CodeEditor: (props: ComponentProps<typeof MockedMonacoEditor>) => (
@@ -23,7 +25,7 @@ jest.mock('@kbn/code-editor', () => {
   };
 });
 
-const setXJson = jest.fn();
+const setXJson = vi.fn();
 const XJson = {
   useXJsonMode: (value: unknown) => ({
     convertToJson: (toJson: unknown) => toJson,
@@ -32,8 +34,8 @@ const XJson = {
   }),
 };
 
-jest.mock('@kbn/es-ui-shared-plugin/public', () => {
-  const original = jest.requireActual('@kbn/es-ui-shared-plugin/public');
+vi.mock('@kbn/es-ui-shared-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/es-ui-shared-plugin/public'));
   return {
     ...original,
     XJson,
@@ -41,7 +43,7 @@ jest.mock('@kbn/es-ui-shared-plugin/public', () => {
 });
 
 describe('JsonEditorField', () => {
-  const setValue = jest.fn();
+  const setValue = vi.fn();
   const props = {
     field: {
       label: 'my label',
@@ -55,7 +57,7 @@ describe('JsonEditorField', () => {
     dataTestSubj: 'foobarTestSubj',
   };
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   it('renders as expected', async () => {
     render(<JsonEditorField {...props} />);

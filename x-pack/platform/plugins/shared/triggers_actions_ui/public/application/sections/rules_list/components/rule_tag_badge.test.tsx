@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RuleTagBadge } from './rule_tag_badge';
 
-const onClickMock = jest.fn();
-const onCloseMock = jest.fn();
+const onClickMock = vi.fn();
+const onCloseMock = vi.fn();
 
 const tags = ['a', 'b', 'c'];
 

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`indexpattern_datasource utils cloneLayer should clone layer with renewing ids 1`] = `
 Object {

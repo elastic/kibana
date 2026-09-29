@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { DashboardsSelector } from './dashboards_selector';
@@ -31,13 +33,13 @@ const MOCK_SECOND_DASHBOARD = {
   title: MOCK_SECOND_DASHBOARD_TITLE,
 };
 
-const mockSearchExecute = jest.fn((context: any) => {
+const mockSearchExecute = vi.fn((context: any) => {
   if (context.onResults) {
     context.onResults([MOCK_FIRST_DASHBOARD, MOCK_SECOND_DASHBOARD]);
   }
 });
 
-const mockGetByIdExecute = jest.fn((context: any) => {
+const mockGetByIdExecute = vi.fn((context: any) => {
   if (context.onResults && context.ids) {
     const requestedDashboards = context.ids
       .map((id: string) => {
@@ -58,18 +60,18 @@ const mockGetDashboardsByIdsAction = {
   execute: mockGetByIdExecute,
 };
 
-const mockGetAction = jest.fn((actionId: string) => {
+const mockGetAction = vi.fn((actionId: string) => {
   if (actionId === 'getDashboardsByIdsAction') {
     return Promise.resolve(mockGetDashboardsByIdsAction);
   }
   return Promise.resolve(mockSearchAction);
 });
 
-const mockOnChange = jest.fn();
+const mockOnChange = vi.fn();
 
 describe('DashboardsSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetAction.mockImplementation((actionId: string) => {
       if (actionId === 'getDashboardsByIdsAction') {
         return Promise.resolve(mockGetDashboardsByIdsAction);
@@ -96,7 +98,7 @@ describe('DashboardsSelector', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const mockUiActions = {

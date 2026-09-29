@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { estypes } from '@elastic/elasticsearch';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { sampleDocSearchResultsNoSortId } from '../__mocks__/es_results';
@@ -19,7 +21,7 @@ describe('singleSearchAfter', () => {
   const mockSearchRequest = { query: { match_all: {} } };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('if singleSearchAfter works without a given sort id', async () => {

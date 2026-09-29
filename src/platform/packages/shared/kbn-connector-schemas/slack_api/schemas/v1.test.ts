@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { z } from '@kbn/zod/v4';
 import {
   validateBlockkit,
@@ -17,13 +19,13 @@ import {
 } from './v1';
 
 const ctx = {
-  addIssue: jest.fn(),
+  addIssue: vi.fn(),
 } as unknown as z.RefinementCtx;
 
 describe('Slack Api Schema validation', () => {
   describe('validateBlockkit', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('should add error for invalid json', () => {
@@ -72,7 +74,7 @@ describe('Slack Api Schema validation', () => {
 
   describe('Validate channel name', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('should add error if the channel name does not start with #', () => {

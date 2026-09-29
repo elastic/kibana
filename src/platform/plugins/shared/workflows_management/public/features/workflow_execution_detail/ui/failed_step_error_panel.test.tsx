@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,7 +22,7 @@ const renderPanel = (props: Partial<React.ComponentProps<typeof FailedStepErrorP
       <I18nProvider>
         <FailedStepErrorPanel
           error="Boom"
-          onViewInput={jest.fn()}
+          onViewInput={vi.fn()}
           ariaLabel="Error details for my_step"
           {...props}
         />
@@ -45,7 +47,7 @@ describe('FailedStepErrorPanel', () => {
   });
 
   it('state D: bordered View input + text Copy error, no AB strings', async () => {
-    const onViewInput = jest.fn();
+    const onViewInput = vi.fn();
     const { container } = renderPanel({ onViewInput, diagnoseState: 'd' });
     const viewBtn = screen.getByTestId('workflowFailedStepViewInput');
     expect(viewBtn).toHaveTextContent('View input');
@@ -58,8 +60,8 @@ describe('FailedStepErrorPanel', () => {
   });
 
   it('state A: Diagnose primary + View input secondary, no Copy error', async () => {
-    const onDiagnose = jest.fn();
-    const onViewInput = jest.fn();
+    const onDiagnose = vi.fn();
+    const onViewInput = vi.fn();
     renderPanel({ diagnoseState: 'a', onDiagnose, onViewInput });
 
     const diagnose = screen.getByTestId('workflowFailedStepDiagnose');
@@ -80,8 +82,8 @@ describe('FailedStepErrorPanel', () => {
   it('shows loading and disables Diagnose while handoff is in flight', () => {
     renderPanel({
       diagnoseState: 'a',
-      onDiagnose: jest.fn(),
-      onViewInput: jest.fn(),
+      onDiagnose: vi.fn(),
+      onViewInput: vi.fn(),
       isDiagnoseLoading: true,
     });
     const diagnose = screen.getByTestId('workflowFailedStepDiagnose');
@@ -89,7 +91,7 @@ describe('FailedStepErrorPanel', () => {
   });
 
   it('state B renders the same CTAs as state A', () => {
-    const shared = { onDiagnose: jest.fn(), onViewInput: jest.fn() };
+    const shared = { onDiagnose: vi.fn(), onViewInput: vi.fn() };
     renderPanel({ diagnoseState: 'a', ...shared });
     expect(screen.getByTestId('workflowFailedStepDiagnose')).toBeInTheDocument();
     expect(screen.getByTestId('workflowFailedStepViewInput')).toBeInTheDocument();
@@ -98,14 +100,14 @@ describe('FailedStepErrorPanel', () => {
   });
 
   it('state B Diagnose click invokes onDiagnose (routes via AB setup when no LLM)', async () => {
-    const onDiagnose = jest.fn();
-    renderPanel({ diagnoseState: 'b', onDiagnose, onViewInput: jest.fn() });
+    const onDiagnose = vi.fn();
+    renderPanel({ diagnoseState: 'b', onDiagnose, onViewInput: vi.fn() });
     await userEvent.click(screen.getByTestId('workflowFailedStepDiagnose'));
     expect(onDiagnose).toHaveBeenCalled();
     expect(screen.queryByTestId('workflowFailedStepCopyError')).not.toBeInTheDocument();
   });
   it('state C: View input + Copy error + license teaser link, no gated button', async () => {
-    const onOpenLicenseManagement = jest.fn();
+    const onOpenLicenseManagement = vi.fn();
     renderPanel({
       diagnoseState: 'c',
       requiredLicenseTier: 'enterprise',

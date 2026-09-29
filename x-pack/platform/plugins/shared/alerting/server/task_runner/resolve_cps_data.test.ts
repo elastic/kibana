@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { resolveCpsData } from './resolve_cps_data';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -14,7 +16,7 @@ const currentUserEsClient = elasticsearchServiceMock.createElasticsearchClient()
 const logger = loggingSystemMock.createLogger();
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('resolveCpsData', () => {

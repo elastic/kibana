@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { parse as parseYaml } from 'yaml';
 import { buildTemplateYaml } from './build_template_yaml';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
@@ -473,7 +475,7 @@ describe('buildTemplateYaml', () => {
     });
 
     it('skips unmatched custom field key and logs a warning', () => {
-      const warnSpy = jest.spyOn(logger, 'warn');
+      const warnSpy = vi.spyOn(logger, 'warn');
       const yaml = buildTemplateYaml(
         {
           key: 'k',

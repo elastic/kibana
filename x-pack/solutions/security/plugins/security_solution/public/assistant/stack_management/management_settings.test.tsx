@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -16,35 +19,50 @@ import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conve
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 // Mock the necessary hooks and components
-jest.mock('@kbn/elastic-assistant', () => ({
-  useAssistantContext: jest.fn(),
-  useFetchCurrentUserConversations: jest.fn(),
-  Welcome: 'Welcome Conversation',
-}));
-jest.mock('@kbn/elastic-assistant/impl/assistant/settings/assistant_settings_management', () => ({
-  AssistantSettingsManagement: jest.fn(() => <div data-test-subj="AssistantSettingsManagement" />),
-}));
-jest.mock('@kbn/elastic-assistant/impl/assistant/use_conversation', () => ({
-  useConversation: jest.fn(),
-}));
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
-jest.mock('../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn().mockReturnValue('default'),
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      useAssistantContext: vi.fn(),
+      useFetchCurrentUserConversations: vi.fn(),
+      Welcome: 'Welcome Conversation',
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/elastic-assistant/impl/assistant/settings/assistant_settings_management', () => {
+      const mocked = {
+      AssistantSettingsManagement: vi.fn(() => <div data-test-subj="AssistantSettingsManagement" />),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/elastic-assistant/impl/assistant/use_conversation', () => {
+      const mocked = {
+      useConversation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn().mockReturnValue('default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useAssistantContextMock = useAssistantContext as jest.Mock;
-const useFetchCurrentUserConversationsMock = useFetchCurrentUserConversations as jest.Mock;
-const useKibanaMock = useKibana as jest.Mock;
-const useConversationMock = useConversation as jest.Mock;
+const useAssistantContextMock = useAssistantContext as Mock;
+const useFetchCurrentUserConversationsMock = useFetchCurrentUserConversations as Mock;
+const useKibanaMock = useKibana as Mock;
+const useConversationMock = useConversation as Mock;
 
 describe('ManagementSettings', () => {
   const queryClient = new QueryClient();
   const http = {};
-  const getDefaultConversation = jest.fn();
-  const setCurrentUserAvatar = jest.fn();
-  const navigateToApp = jest.fn();
+  const getDefaultConversation = vi.fn();
+  const setCurrentUserAvatar = vi.fn();
+  const navigateToApp = vi.fn();
   const mockConversations = {
     Welcome: {
       title: 'Welcome',
@@ -82,18 +100,18 @@ describe('ManagementSettings', () => {
         },
         chrome: {
           docTitle: {
-            change: jest.fn(),
+            change: vi.fn(),
           },
-          setBreadcrumbs: jest.fn(),
+          setBreadcrumbs: vi.fn(),
         },
         data: {
           dataViews: {
-            getIndices: jest.fn(),
+            getIndices: vi.fn(),
           },
         },
         security: {
           userProfiles: {
-            getCurrent: jest.fn().mockResolvedValue({ data: { color: 'blue', initials: 'P' } }),
+            getCurrent: vi.fn().mockResolvedValue({ data: { color: 'blue', initials: 'P' } }),
           },
         },
       },
@@ -113,7 +131,7 @@ describe('ManagementSettings', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('navigates to home if securityAIAssistant is disabled', () => {

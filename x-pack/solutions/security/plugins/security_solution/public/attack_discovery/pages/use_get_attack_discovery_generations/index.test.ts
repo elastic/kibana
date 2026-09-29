@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core/public';
 import '@kbn/react-query/mock';
 import { QueryClient, QueryClientProvider, useQueryClient } from '@kbn/react-query';
@@ -15,24 +18,27 @@ import { useGetAttackDiscoveryGenerations, useInvalidateGetAttackDiscoveryGenera
 import { ATTACK_DISCOVERY_GENERATIONS } from '@kbn/elastic-assistant-common';
 import { ERROR_RETRIEVING_ATTACK_DISCOVERY_GENERATIONS } from './translations';
 
-const mockAddError = jest.fn();
-const useQueryClientMock = useQueryClient as unknown as jest.MockedFn<typeof useQueryClient>;
+const mockAddError = vi.fn();
+const useQueryClientMock = useQueryClient as unknown as MockedFunction<typeof useQueryClient>;
 
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addError: mockAddError,
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    addInfo: jest.fn(),
-    remove: jest.fn(),
-  }),
-  get mockAddError() {
-    return mockAddError;
-  },
-}));
+vi.mock('../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addError: mockAddError,
+        addSuccess: vi.fn(),
+        addWarning: vi.fn(),
+        addInfo: vi.fn(),
+        remove: vi.fn(),
+      }),
+      get mockAddError() {
+        return mockAddError;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockHttp: HttpSetup = {
-  fetch: jest.fn(),
+  fetch: vi.fn(),
 } as unknown as HttpSetup;
 
 let queryClient: QueryClient;
@@ -50,7 +56,7 @@ function wrapper(props: { children: React.ReactNode }) {
 
 describe('useGetAttackDiscoveryGenerations', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     queryClient = new QueryClient();
   });
@@ -58,7 +64,7 @@ describe('useGetAttackDiscoveryGenerations', () => {
   it('calls addError with the expected title', async () => {
     const errorBody = { message: 'Server error message' };
     const error = { body: errorBody };
-    (mockHttp.fetch as jest.Mock).mockRejectedValueOnce(error);
+    (mockHttp.fetch as Mock).mockRejectedValueOnce(error);
 
     renderHook(() => useGetAttackDiscoveryGenerations({ ...defaultProps }), {
       wrapper,
@@ -73,7 +79,7 @@ describe('useGetAttackDiscoveryGenerations', () => {
   it('returns an error when a server error body is present', async () => {
     const errorBody = { message: 'Server error message' };
     const error = { body: errorBody };
-    (mockHttp.fetch as jest.Mock).mockRejectedValueOnce(error);
+    (mockHttp.fetch as Mock).mockRejectedValueOnce(error);
 
     const { result } = renderHook(() => useGetAttackDiscoveryGenerations({ ...defaultProps }), {
       wrapper,
@@ -86,7 +92,7 @@ describe('useGetAttackDiscoveryGenerations', () => {
 
   it('returns data when the request succeeds', async () => {
     const mockData = { generations: [{ id: '1' }] };
-    (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(mockData);
+    (mockHttp.fetch as Mock).mockResolvedValueOnce(mockData);
 
     const { result } = renderHook(() => useGetAttackDiscoveryGenerations({ ...defaultProps }), {
       wrapper,
@@ -100,7 +106,7 @@ describe('useGetAttackDiscoveryGenerations', () => {
 
 describe('useInvalidateGetAttackDiscoveryGenerations', () => {
   it('calls invalidateQueries with public generations route', () => {
-    const invalidateQueries = jest.fn();
+    const invalidateQueries = vi.fn();
     useQueryClientMock.mockReturnValue({ invalidateQueries } as unknown as ReturnType<
       typeof useQueryClient
     >);

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 
@@ -20,7 +22,7 @@ const name = 'Some boolean field';
 const id = 'some:boolean:field';
 
 describe('BooleanInput', () => {
-  const onInputChange = jest.fn();
+  const onInputChange = vi.fn();
   const defaultProps: InputProps<'boolean'> = {
     onInputChange,
     field: {

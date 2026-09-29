@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
@@ -28,59 +30,68 @@ import { loadExecutionThunk } from '../../../entities/workflows/store/workflow_d
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 
-const mockNavigateToApp = jest.fn();
-const mockGetExecutionSteps = jest.fn();
-const mockGetExecution = jest.fn();
+const mockNavigateToApp = vi.fn();
+const mockGetExecutionSteps = vi.fn();
+const mockGetExecution = vi.fn();
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: jest.fn(),
-  WorkflowApi: jest.fn().mockImplementation(() => ({
-    getExecutionSteps: mockGetExecutionSteps,
-    getExecution: mockGetExecution,
-  })),
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      useWorkflowsCapabilities: vi.fn(),
+      WorkflowApi: vi.fn().mockImplementation(() => ({
+        getExecutionSteps: mockGetExecutionSteps,
+        getExecution: mockGetExecution,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock child components
-jest.mock('./cancel_execution_button', () => ({
-  CancelExecutionButton: ({ executionId }: { executionId: string }) => (
-    <div data-test-subj="cancel-execution-button">
-      {'Cancel Execution'} {executionId}
-    </div>
-  ),
-}));
+vi.mock('./cancel_execution_button', () => {
+      const mocked = {
+      CancelExecutionButton: ({ executionId }: { executionId: string }) => (
+        <div data-test-subj="cancel-execution-button">
+          {'Cancel Execution'} {executionId}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./workflow_step_execution_tree', () => ({
-  WorkflowStepExecutionTree: ({
-    definition,
-    execution,
-    error,
-    onStepExecutionClick,
-    selectedId,
-  }: {
-    definition: WorkflowYaml | null;
-    execution: WorkflowExecutionDto | null;
-    error: Error | null;
-    onStepExecutionClick: (stepExecutionId: string) => void;
-    selectedId: string | null;
-  }) => (
-    <div data-test-subj="workflow-step-execution-tree">
-      <div data-test-subj="tree-definition">{definition ? 'Has Definition' : 'No Definition'}</div>
-      <div data-test-subj="tree-execution">
-        {execution ? `Execution: ${execution.id}` : 'No Execution'}
-      </div>
-      <div data-test-subj="tree-error">{error ? `Error: ${error.message}` : 'No Error'}</div>
-      <div data-test-subj="tree-selected-id">{selectedId || 'No Selection'}</div>
-      <button
-        type="button"
-        data-test-subj="mock-step-click"
-        onClick={() => onStepExecutionClick('step-123')}
-      >
-        {'Click Step'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./workflow_step_execution_tree', () => {
+      const mocked = {
+      WorkflowStepExecutionTree: ({
+        definition,
+        execution,
+        error,
+        onStepExecutionClick,
+        selectedId,
+      }: {
+        definition: WorkflowYaml | null;
+        execution: WorkflowExecutionDto | null;
+        error: Error | null;
+        onStepExecutionClick: (stepExecutionId: string) => void;
+        selectedId: string | null;
+      }) => (
+        <div data-test-subj="workflow-step-execution-tree">
+          <div data-test-subj="tree-definition">{definition ? 'Has Definition' : 'No Definition'}</div>
+          <div data-test-subj="tree-execution">
+            {execution ? `Execution: ${execution.id}` : 'No Execution'}
+          </div>
+          <div data-test-subj="tree-error">{error ? `Error: ${error.message}` : 'No Error'}</div>
+          <div data-test-subj="tree-selected-id">{selectedId || 'No Selection'}</div>
+          <button
+            type="button"
+            data-test-subj="mock-step-click"
+            onClick={() => onStepExecutionClick('step-123')}
+          >
+            {'Click Step'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowExecutionPanel', () => {
   const mockExecution: WorkflowExecutionDto = {
@@ -117,19 +128,19 @@ describe('WorkflowExecutionPanel', () => {
     execution: mockExecution,
     definition: mockDefinition,
     error: null,
-    onStepExecutionClick: jest.fn(),
+    onStepExecutionClick: vi.fn(),
     selectedId: null,
     showBackButton: true,
-    onClose: jest.fn(),
+    onClose: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockNavigateToApp.mockReset();
     mockGetExecutionSteps.mockReset();
     mockGetExecution.mockReset();
     mockGetExecution.mockResolvedValue(mockExecution);
-    jest.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
+    vi.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
   });
 
   const renderComponent = (
@@ -382,7 +393,7 @@ describe('WorkflowExecutionPanel', () => {
     });
 
     it('should call onClose when back button is clicked', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderComponent({ onClose });
       const backLink = screen.getByLabelText('Back to executions');
       fireEvent.click(backLink);
@@ -494,7 +505,7 @@ describe('WorkflowExecutionPanel', () => {
     });
 
     it('should call onClose when done button is clicked', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderComponent({
         showBackButton: false,
         execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
@@ -513,7 +524,7 @@ describe('WorkflowExecutionPanel', () => {
     });
 
     it('should call onStepExecutionClick when step is clicked', () => {
-      const onStepExecutionClick = jest.fn();
+      const onStepExecutionClick = vi.fn();
       renderComponent({ onStepExecutionClick });
       const stepButton = screen.getByTestId('mock-step-click');
       fireEvent.click(stepButton);
@@ -553,7 +564,7 @@ describe('WorkflowExecutionPanel', () => {
     });
 
     it('should call onReRunExecution when provided', () => {
-      const onReRunExecution = jest.fn();
+      const onReRunExecution = vi.fn();
       renderComponent({
         showBackButton: false,
         execution: {
@@ -588,7 +599,7 @@ describe('WorkflowExecutionPanel', () => {
     });
 
     it('should disable replay button when user lacks execute capability', () => {
-      jest.mocked(useWorkflowsCapabilities).mockReturnValue({
+      vi.mocked(useWorkflowsCapabilities).mockReturnValue({
         ...createMockWorkflowsCapabilities(),
         canExecuteWorkflow: false,
       });

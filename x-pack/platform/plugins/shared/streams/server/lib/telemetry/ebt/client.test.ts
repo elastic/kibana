@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { EbtTelemetryClient } from './client';
 import {
@@ -14,17 +17,17 @@ import {
 } from './constants';
 
 describe('EbtTelemetryClient', () => {
-  let analyticsService: jest.Mocked<AnalyticsServiceSetup>;
+  let analyticsService: Mocked<AnalyticsServiceSetup>;
   let client: EbtTelemetryClient;
 
   beforeEach(() => {
     analyticsService = {
-      reportEvent: jest.fn(),
-      registerEventType: jest.fn(),
-      registerShipper: jest.fn(),
-      registerContextProvider: jest.fn(),
-      removeContextProvider: jest.fn(),
-      optIn: jest.fn(),
+      reportEvent: vi.fn(),
+      registerEventType: vi.fn(),
+      registerShipper: vi.fn(),
+      registerContextProvider: vi.fn(),
+      removeContextProvider: vi.fn(),
+      optIn: vi.fn(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       telemetryCounter$: {} as any,
     };
@@ -33,13 +36,13 @@ describe('EbtTelemetryClient', () => {
 
   describe('startTrackingEndpointLatency', () => {
     it('tracks endpoint latency for allowed endpoints', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const finishTracking = client.startTrackingEndpointLatency({
         name: 'test-stream',
         endpoint: 'POST /api/streams/{name}/processing/_simulate 2023-10-31',
       });
 
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
       finishTracking();
 
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(STREAMS_ENDPOINT_LATENCY_EVENT, {
@@ -47,7 +50,7 @@ describe('EbtTelemetryClient', () => {
         endpoint: 'POST /api/streams/{name}/processing/_simulate 2023-10-31',
         duration_ms: 100,
       });
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('does not track latency for non-allowed endpoints', () => {

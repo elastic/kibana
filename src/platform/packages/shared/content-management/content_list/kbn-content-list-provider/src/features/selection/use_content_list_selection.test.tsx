@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { ContentListProvider } from '../../context';
@@ -20,7 +22,7 @@ const mockItems = [
 ];
 
 describe('useContentListSelection', () => {
-  const mockFindItems = jest.fn(
+  const mockFindItems = vi.fn(
     async (_params: FindItemsParams): Promise<FindItemsResult> => ({
       items: mockItems,
       total: mockItems.length,
@@ -46,7 +48,7 @@ describe('useContentListSelection', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initial state', () => {
@@ -249,7 +251,7 @@ describe('useContentListSelection', () => {
 
   describe('error handling', () => {
     it('throws when used outside provider', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       expect(() => {
         renderHook(() => useContentListSelection());

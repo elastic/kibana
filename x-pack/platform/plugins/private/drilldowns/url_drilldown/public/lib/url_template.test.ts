@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { compile } from './url_template';
 import moment from 'moment-timezone';
 
@@ -102,10 +105,10 @@ describe('rison helper', () => {
 });
 
 describe('date helper', () => {
-  let spy: jest.SpyInstance;
+  let spy: MockInstance;
   const date = new Date('2020-08-18T14:45:00.000Z');
   beforeAll(() => {
-    spy = jest.spyOn(global.Date, 'now').mockImplementation(() => date.valueOf());
+    spy = vi.spyOn(global.Date, 'now').mockImplementation(() => date.valueOf());
     moment.tz.setDefault('UTC');
   });
   afterAll(() => {

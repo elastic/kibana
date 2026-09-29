@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as rt from 'io-ts';
 import type { RouteValidationResultFactory } from '@kbn/core/server';
 
@@ -40,12 +42,12 @@ describe('Route Validation with ', () => {
     type DeepSchema = rt.TypeOf<typeof deepSchema>;
 
     const validationResult: RouteValidationResultFactory = {
-      ok: jest.fn().mockImplementation((validatedInput) => validatedInput),
-      badRequest: jest.fn().mockImplementation((e) => e),
+      ok: vi.fn().mockImplementation((validatedInput) => validatedInput),
+      badRequest: vi.fn().mockImplementation((e) => e),
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('return validation error', () => {
@@ -109,15 +111,15 @@ describe('Route Validation with ', () => {
     type DeepSchema = rt.TypeOf<typeof deepSchema>;
 
     const validationResult: RouteValidationResultFactory = {
-      ok: jest.fn().mockImplementation((validatedInput) => validatedInput),
-      badRequest: jest.fn().mockImplementation((e) => e),
+      ok: vi.fn().mockImplementation((validatedInput) => validatedInput),
+      badRequest: vi.fn().mockImplementation((e) => e),
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('return validation error', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type {
   UseWithResponderActionDataFromAlertProps,
   ResponderActionData,
@@ -57,18 +59,18 @@ describe('use responder action data hooks', () => {
   // presence of `cps.cpsManager`. Tests exercising that path must enable it explicitly.
   const enableCps = () => {
     appContextMock.startServices.cps = {
-      cpsManager: { whenReady: jest.fn().mockResolvedValue(undefined) } as unknown as ICPSManager,
+      cpsManager: { whenReady: vi.fn().mockResolvedValue(undefined) } as unknown as ICPSManager,
       isTierEligible: true,
     };
   };
 
   beforeEach(() => {
     appContextMock = createAppRootMockRenderer();
-    onClickMock = jest.fn();
+    onClickMock = vi.fn();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('useWithResponderActionDataFromAlert() hook', () => {

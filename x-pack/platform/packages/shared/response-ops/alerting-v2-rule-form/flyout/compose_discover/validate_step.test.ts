@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { UseFormReturn } from 'react-hook-form';
 import type { FormValues } from '../../form/types';
 import { createInitialState } from './use_compose_discover_state';
@@ -25,7 +27,7 @@ describe('validateStep', () => {
       fields: ['metadata.name'],
     });
     const methods = {
-      trigger: jest.fn(),
+      trigger: vi.fn(),
     } as unknown as UseFormReturn<FormValues>;
 
     await expect(validateStep(step, methods, createInitialState({ mode: 'create' }))).resolves.toBe(
@@ -36,7 +38,7 @@ describe('validateStep', () => {
 
   it('delegates to validate when present', async () => {
     const step = createStep({
-      validate: jest.fn().mockReturnValue(true),
+      validate: vi.fn().mockReturnValue(true),
     });
     const methods = {} as UseFormReturn<FormValues>;
 
@@ -49,7 +51,7 @@ describe('validateStep', () => {
   it('runs meetsPrecondition before validate', async () => {
     const step = createStep({
       meetsPrecondition: () => false,
-      validate: jest.fn().mockReturnValue(true),
+      validate: vi.fn().mockReturnValue(true),
     });
     const methods = {} as UseFormReturn<FormValues>;
 
@@ -64,7 +66,7 @@ describe('validateStep', () => {
       fields: ['metadata.name'],
     });
     const methods = {
-      trigger: jest.fn().mockResolvedValue(true),
+      trigger: vi.fn().mockResolvedValue(true),
     } as unknown as UseFormReturn<FormValues>;
 
     await expect(validateStep(step, methods, createInitialState({ mode: 'create' }))).resolves.toBe(

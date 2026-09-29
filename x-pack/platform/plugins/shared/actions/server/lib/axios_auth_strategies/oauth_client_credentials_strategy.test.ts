@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-jest.mock('../get_oauth_client_credentials_access_token');
-jest.mock('../delete_token_axios_interceptor');
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
+vi.mock('../get_oauth_client_credentials_access_token');
+vi.mock('../delete_token_axios_interceptor');
 
 import type { AxiosInstance } from 'axios';
 import type { GetTokenOpts, OAuthGetTokenOpts } from '@kbn/connector-specs';
@@ -19,10 +22,10 @@ import { OAuthClientCredentialsStrategy } from './oauth_client_credentials_strat
 import type { AuthStrategyDeps } from './types';
 
 const mockGetOAuthClientCredentialsAccessToken =
-  getOAuthClientCredentialsAccessToken as jest.MockedFunction<
+  getOAuthClientCredentialsAccessToken as MockedFunction<
     typeof getOAuthClientCredentialsAccessToken
   >;
-const mockGetDeleteTokenAxiosInterceptor = getDeleteTokenAxiosInterceptor as jest.MockedFunction<
+const mockGetDeleteTokenAxiosInterceptor = getDeleteTokenAxiosInterceptor as MockedFunction<
   typeof getDeleteTokenAxiosInterceptor
 >;
 
@@ -45,17 +48,17 @@ const baseDeps: AuthStrategyDeps = {
 
 const createMockAxiosInstance = () =>
   ({
-    interceptors: { response: { use: jest.fn() } },
+    interceptors: { response: { use: vi.fn() } },
   } as unknown as AxiosInstance);
 
 describe('OAuthClientCredentialsStrategy', () => {
   let strategy: OAuthClientCredentialsStrategy;
 
-  const mockOnFulfilled = jest.fn();
-  const mockOnRejected = jest.fn();
+  const mockOnFulfilled = vi.fn();
+  const mockOnRejected = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     strategy = new OAuthClientCredentialsStrategy();
     mockGetDeleteTokenAxiosInterceptor.mockReturnValue({
       onFulfilled: mockOnFulfilled,

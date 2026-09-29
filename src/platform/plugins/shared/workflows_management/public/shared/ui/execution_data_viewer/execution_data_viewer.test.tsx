@@ -7,27 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { ExecutionDataViewer } from './execution_data_viewer';
 
-const mockJSONDataTable = jest.fn();
-const mockJsonDataCode = jest.fn();
+const mockJSONDataTable = vi.fn();
+const mockJsonDataCode = vi.fn();
 
-jest.mock('./json_data_table', () => ({
-  JSONDataTable: (props: any) => {
-    mockJSONDataTable(props);
-    return <div data-test-subj="mocked-json-data-table">{'Table View'}</div>;
-  },
-}));
+vi.mock('./json_data_table', () => {
+      const mocked = {
+      JSONDataTable: (props: any) => {
+        mockJSONDataTable(props);
+        return <div data-test-subj="mocked-json-data-table">{'Table View'}</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./json_data_code', () => ({
-  JsonDataCode: (props: any) => {
-    mockJsonDataCode(props);
-    return <div data-test-subj="mocked-json-data-code">{'JSON View'}</div>;
-  },
-}));
+vi.mock('./json_data_code', () => {
+      const mocked = {
+      JsonDataCode: (props: any) => {
+        mockJsonDataCode(props);
+        return <div data-test-subj="mocked-json-data-code">{'JSON View'}</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SEARCH_PLACEHOLDER = 'Search fields and values';
 
@@ -45,7 +53,7 @@ describe('ExecutionDataViewer', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { FlattenRecord } from '@kbn/streams-schema';
@@ -16,11 +19,14 @@ import { collectAncestorProcessing, getFailureStoreSamples } from './failure_sto
 import { simulateProcessing } from './simulation_handler';
 import type { ProcessingSimulationResponse } from '@kbn/streams-schema';
 
-jest.mock('./simulation_handler', () => ({
-  simulateProcessing: jest.fn(),
-}));
+vi.mock('./simulation_handler', () => {
+      const mocked = {
+      simulateProcessing: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSimulateProcessing = simulateProcessing as jest.MockedFunction<typeof simulateProcessing>;
+const mockSimulateProcessing = simulateProcessing as MockedFunction<typeof simulateProcessing>;
 
 const makeGrokStep = (field: string): StreamlangDSL['steps'][number] => ({
   action: 'grok' as const,
@@ -84,10 +90,10 @@ const makeDeps = ({
   ancestors?: Streams.WiredStream.Definition[];
 }) => ({
   esClient: {
-    search: jest.fn().mockResolvedValue(searchResponse),
+    search: vi.fn().mockResolvedValue(searchResponse),
   } as unknown as ElasticsearchClient,
   streamsClient: {
-    getAncestors: jest.fn().mockResolvedValue(ancestors),
+    getAncestors: vi.fn().mockResolvedValue(ancestors),
   } as unknown as StreamsClient,
   fieldsMetadataClient: {} as IFieldsMetadataClient,
 });
@@ -156,7 +162,7 @@ describe('getFailureStoreSamples', () => {
   const baseDoc: FlattenRecord = { message: 'failed log line', 'log.level': 'error' };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('direct child of root optimization', () => {
@@ -224,7 +230,7 @@ describe('getFailureStoreSamples', () => {
       const { esClient, streamsClient, fieldsMetadataClient } = makeDeps({
         searchResponse: makeEsSearchResponse([]),
       });
-      (esClient.search as jest.Mock).mockRejectedValue(notFoundError);
+      (esClient.search as Mock).mockRejectedValue(notFoundError);
 
       const result = await getFailureStoreSamples({
         params: { path: { name: 'logs.nginx.access' } },
@@ -403,7 +409,7 @@ describe('getFailureStoreSamples', () => {
         fieldsMetadataClient,
       });
 
-      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const searchCall = (esClient.search as Mock).mock.calls[0][0];
       expect(searchCall.query).toBeUndefined();
     });
   });

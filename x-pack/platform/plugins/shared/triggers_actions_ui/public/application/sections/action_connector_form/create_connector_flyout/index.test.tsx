@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { lazy } from 'react';
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
@@ -16,26 +19,29 @@ import { createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
 import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
 
-jest.mock('../../../lib/action_connector_api', () => ({
-  ...(jest.requireActual('../../../lib/action_connector_api') as any),
-  loadActionTypes: jest.fn(),
-  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
-}));
+vi.mock('../../../lib/action_connector_api', async () => {
+      const mocked = {
+      ...((await vi.importActual('../../../lib/action_connector_api')) as any),
+      loadActionTypes: vi.fn(),
+      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/connector-specs', () => {
-  const actual = jest.requireActual('@kbn/connector-specs');
+vi.mock('@kbn/connector-specs', async () => {
+  const actual = (await vi.importActual('@kbn/connector-specs'));
   return {
     ...actual,
-    connectorTypeIsDual: jest.fn((id: string) => id === '.dual'),
-    connectorTypeIsInboundOnly: jest.fn((id: string) => id === '.inboundWebhook'),
-    connectorTypeHasInboundEvents: jest.fn(
+    connectorTypeIsDual: vi.fn((id: string) => id === '.dual'),
+    connectorTypeIsInboundOnly: vi.fn((id: string) => id === '.inboundWebhook'),
+    connectorTypeHasInboundEvents: vi.fn(
       (id: string) =>
         id === '.dual' || id === '.inboundWebhook' || actual.connectorTypeHasInboundEvents(id)
     ),
   };
 });
 
-const { loadActionTypes } = jest.requireMock('../../../lib/action_connector_api');
+const { loadActionTypes } = (await vi.importMock('../../../lib/action_connector_api'));
 
 const createConnectorResponse = {
   connector_type_id: 'test',
@@ -49,21 +55,21 @@ const createConnectorResponse = {
 
 describe('CreateConnectorFlyout', () => {
   let appMockRenderer: AppMockRenderer;
-  const onClose = jest.fn();
-  const onConnectorCreated = jest.fn();
-  const onConnectorUpdated = jest.fn();
-  const onTestConnector = jest.fn();
+  const onClose = vi.fn();
+  const onConnectorCreated = vi.fn();
+  const onConnectorUpdated = vi.fn();
+  const onTestConnector = vi.fn();
 
   const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
     actionConnectorFields: lazy(() => import('../connector_mock')),
     // The in-place transition mounts TestConnectorForm, which validates action params on mount.
-    validateParams: jest.fn().mockResolvedValue({ errors: {} }),
+    validateParams: vi.fn().mockResolvedValue({ errors: {} }),
   });
 
   const actionTypeRegistry = actionTypeRegistryMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     loadActionTypes.mockResolvedValue([
       {
         id: actionTypeModel.id,
@@ -82,8 +88,8 @@ describe('CreateConnectorFlyout', () => {
       ...appMockRenderer.coreStart.application.capabilities,
       actions: { save: true, show: true },
     };
-    appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(createConnectorResponse);
-    appMockRenderer.coreStart.http.head = jest.fn().mockResolvedValue({});
+    appMockRenderer.coreStart.http.post = vi.fn().mockResolvedValue(createConnectorResponse);
+    appMockRenderer.coreStart.http.head = vi.fn().mockResolvedValue({});
   });
 
   it('renders', async () => {
@@ -711,7 +717,7 @@ describe('CreateConnectorFlyout', () => {
 
     it('keeps the flyout open and shows webhook URL and ingest token after inbound create', async () => {
       appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
-      appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
+      appMockRenderer.coreStart.http.post = vi.fn().mockImplementation((path: string) => {
         if (String(path).includes('_rotate_event_token')) {
           return Promise.resolve({ ingest_token: 'once-token' });
         }
@@ -762,7 +768,7 @@ describe('CreateConnectorFlyout', () => {
 
     it('edits the created connector when inbound rotate fails after create', async () => {
       appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
-      appMockRenderer.coreStart.http.post = jest.fn().mockImplementation((path: string) => {
+      appMockRenderer.coreStart.http.post = vi.fn().mockImplementation((path: string) => {
         if (String(path).includes('_rotate_event_token')) {
           return Promise.reject({ name: 'Error', body: { message: 'Cannot rotate' } });
         }
@@ -772,7 +778,7 @@ describe('CreateConnectorFlyout', () => {
           config: {},
         });
       });
-      appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue({
+      appMockRenderer.coreStart.http.put = vi.fn().mockResolvedValue({
         ...createConnectorResponse,
         connector_type_id: '.inboundWebhook',
         name: 'Renamed ingress',
@@ -810,7 +816,7 @@ describe('CreateConnectorFlyout', () => {
       expect(screen.queryByTestId('inbound-ingress-ingest-token')).not.toBeInTheDocument();
       expect(screen.queryByTestId('create-connector-flyout-save-btn')).not.toBeInTheDocument();
 
-      const createCalls = (appMockRenderer.coreStart.http.post as jest.Mock).mock.calls.filter(
+      const createCalls = (appMockRenderer.coreStart.http.post as Mock).mock.calls.filter(
         ([path]) => !String(path).includes('_rotate_event_token')
       );
       const nameInput = screen.getByTestId('nameInput');
@@ -826,7 +832,7 @@ describe('CreateConnectorFlyout', () => {
         expect(appMockRenderer.coreStart.http.put).toHaveBeenCalled();
       });
       expect(
-        (appMockRenderer.coreStart.http.post as jest.Mock).mock.calls.filter(
+        (appMockRenderer.coreStart.http.post as Mock).mock.calls.filter(
           ([path]) => !String(path).includes('_rotate_event_token')
         )
       ).toHaveLength(createCalls.length);
@@ -837,7 +843,7 @@ describe('CreateConnectorFlyout', () => {
       const inboundModel = actionTypeRegistryMock.createMockActionTypeModel({
         id: '.inboundWebhook',
         actionConnectorFields: lazy(() => import('../connector_mock')),
-        validateParams: jest.fn().mockResolvedValue({ errors: {} }),
+        validateParams: vi.fn().mockResolvedValue({ errors: {} }),
       });
       actionTypeRegistry.get.mockReturnValue(inboundModel);
       loadActionTypes.mockResolvedValue([
@@ -851,7 +857,7 @@ describe('CreateConnectorFlyout', () => {
           supportedFeatureIds: ['alerting'],
         },
       ]);
-      appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue({
+      appMockRenderer.coreStart.http.post = vi.fn().mockResolvedValue({
         ...createConnectorResponse,
         connector_type_id: '.inboundWebhook',
         config: {},
@@ -893,7 +899,7 @@ describe('CreateConnectorFlyout', () => {
     const dualActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       id: '.dual',
       actionConnectorFields: lazy(() => import('../connector_mock')),
-      validateParams: jest.fn().mockResolvedValue({ errors: {} }),
+      validateParams: vi.fn().mockResolvedValue({ errors: {} }),
     });
 
     beforeEach(() => {
@@ -910,7 +916,7 @@ describe('CreateConnectorFlyout', () => {
       ]);
       actionTypeRegistry.get.mockReturnValue(dualActionTypeModel);
       appMockRenderer.coreStart.actions.isInboundEventsEnabled = true;
-      appMockRenderer.coreStart.http.post = jest
+      appMockRenderer.coreStart.http.post = vi
         .fn()
         .mockImplementation((path: string, opts?: { body?: string }) => {
           if (String(path).includes('_rotate_event_token')) {
@@ -979,7 +985,7 @@ describe('CreateConnectorFlyout', () => {
     });
 
     it('updates the created connector when inbound events are turned off', async () => {
-      appMockRenderer.coreStart.http.put = jest
+      appMockRenderer.coreStart.http.put = vi
         .fn()
         .mockImplementation((_path: string, opts?: { body?: string }) => {
           const body = opts?.body ? JSON.parse(opts.body) : {};
@@ -996,7 +1002,7 @@ describe('CreateConnectorFlyout', () => {
       await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
 
       expect(await screen.findByTestId('inbound-ingress-ingest-token')).toHaveValue('once-token');
-      const createCalls = (appMockRenderer.coreStart.http.post as jest.Mock).mock.calls.filter(
+      const createCalls = (appMockRenderer.coreStart.http.post as Mock).mock.calls.filter(
         ([path]) => !String(path).includes('_rotate_event_token')
       );
 
@@ -1016,7 +1022,7 @@ describe('CreateConnectorFlyout', () => {
         );
       });
       expect(
-        (appMockRenderer.coreStart.http.post as jest.Mock).mock.calls.filter(
+        (appMockRenderer.coreStart.http.post as Mock).mock.calls.filter(
           ([path]) => !String(path).includes('_rotate_event_token')
         )
       ).toHaveLength(createCalls.length);
@@ -1135,7 +1141,7 @@ describe('CreateConnectorFlyout', () => {
     });
 
     it('keeps the saved connector in local state across tab remounts', async () => {
-      appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue({
+      appMockRenderer.coreStart.http.put = vi.fn().mockResolvedValue({
         ...createConnectorResponse,
         name: 'First edit',
       });

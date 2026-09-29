@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { RulesContainer } from './rules_container';
@@ -21,15 +24,21 @@ import { SECURITY_FEATURE_ID } from '../../test/constants';
 
 const chance = new Chance();
 
-jest.mock('./use_csp_benchmark_rules', () => ({
-  useFindCspBenchmarkRule: jest.fn(),
-  useBulkUpdateCspBenchmarkRule: jest.fn(),
-}));
+vi.mock('./use_csp_benchmark_rules', () => {
+      const mocked = {
+      useFindCspBenchmarkRule: vi.fn(),
+      useBulkUpdateCspBenchmarkRule: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -99,16 +108,16 @@ const params = {
 describe('<RulesContainer />', () => {
   beforeEach(() => {
     queryClient.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useParams as jest.Mock).mockReturnValue(params);
+    (useParams as Mock).mockReturnValue(params);
   });
 
   it('displays rules with their initial state', async () => {
     const Wrapper = getWrapper();
     const rule1 = getRuleMock();
 
-    (useFindCspBenchmarkRule as jest.Mock).mockReturnValue({
+    (useFindCspBenchmarkRule as Mock).mockReturnValue({
       status: 'success',
       data: {
         total: 1,

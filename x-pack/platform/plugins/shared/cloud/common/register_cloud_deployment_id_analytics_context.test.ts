@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { firstValueFrom, take, toArray } from 'rxjs';
 import { registerCloudDeploymentMetadataAnalyticsContext } from './register_cloud_deployment_id_analytics_context';
 
 describe('registerCloudDeploymentIdAnalyticsContext', () => {
-  let analytics: { registerContextProvider: jest.Mock };
+  let analytics: { registerContextProvider: Mock };
   beforeEach(() => {
     analytics = {
-      registerContextProvider: jest.fn(),
+      registerContextProvider: vi.fn(),
     };
   });
 

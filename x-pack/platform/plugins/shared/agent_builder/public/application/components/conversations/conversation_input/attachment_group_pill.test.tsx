@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -49,7 +51,7 @@ describe('AttachmentGroupPill', () => {
   });
 
   it('renders the remove button when onRemove is provided and calls it when clicked', () => {
-    const onRemove = jest.fn();
+    const onRemove = vi.fn();
     renderWithProviders(<AttachmentGroupPill group={makeGroup()} onRemove={onRemove} />);
 
     const removeButton = screen.getByRole('button', { name: 'Remove attachment group' });

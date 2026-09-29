@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import {
   loggingSystemMock,
   elasticsearchServiceMock,
@@ -50,21 +53,30 @@ const getEmptySavedObjectConfiguration = () => ({
   saved_objects: [],
 });
 
-jest.mock('@kbn/alerting-plugin/server', () => ({
-  createOrUpdateComponentTemplate: jest.fn(),
-  createOrUpdateIndexTemplate: jest.fn(),
-}));
+vi.mock('@kbn/alerting-plugin/server', () => {
+      const mocked = {
+      createOrUpdateComponentTemplate: vi.fn(),
+      createOrUpdateIndexTemplate: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils/create_datastream', () => ({
-  createDataStream: jest.fn(),
-}));
+vi.mock('../utils/create_datastream', () => {
+      const mocked = {
+      createDataStream: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils/create_or_update_index', () => ({
-  createOrUpdateIndex: jest.fn(),
-}));
+vi.mock('../utils/create_or_update_index', () => {
+      const mocked = {
+      createOrUpdateIndex: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.spyOn(transforms, 'createTransform').mockResolvedValue(Promise.resolve());
-jest.spyOn(transforms, 'scheduleTransformNow').mockResolvedValue(Promise.resolve());
+vi.spyOn(transforms, 'createTransform').mockResolvedValue(Promise.resolve());
+vi.spyOn(transforms, 'scheduleTransformNow').mockResolvedValue(Promise.resolve());
 
 describe('RiskEngineDataClient', () => {
   describe.each(['data streams', 'aliases'])(`using %s for alert indices`, () => {
@@ -90,11 +102,11 @@ describe('RiskEngineDataClient', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     afterAll(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     describe('#getConfiguration', () => {
@@ -210,14 +222,14 @@ describe('RiskEngineDataClient', () => {
 
     describe('init', () => {
       let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
-      let initRiskScore: jest.SpyInstance;
-      let initLegacyTransforms: jest.SpyInstance;
-      let enableRiskEngineMock: jest.SpyInstance;
+      let initRiskScore: MockInstance;
+      let initLegacyTransforms: MockInstance;
+      let enableRiskEngineMock: MockInstance;
 
       beforeEach(() => {
-        initRiskScore = jest.spyOn(RiskScoreDataClient.prototype, 'init');
-        initLegacyTransforms = jest.spyOn(RiskScoreDataClient.prototype, 'initLegacyTransforms');
-        enableRiskEngineMock = jest.spyOn(RiskEngineDataClient.prototype, 'enableRiskEngine');
+        initRiskScore = vi.spyOn(RiskScoreDataClient.prototype, 'init');
+        initLegacyTransforms = vi.spyOn(RiskScoreDataClient.prototype, 'initLegacyTransforms');
+        enableRiskEngineMock = vi.spyOn(RiskEngineDataClient.prototype, 'enableRiskEngine');
 
         mockTaskManagerStart = taskManagerMock.createStart();
 
@@ -232,7 +244,7 @@ describe('RiskEngineDataClient', () => {
           return Promise.resolve(getSavedObjectConfiguration().saved_objects[0]);
         });
 
-        jest
+        vi
           .spyOn(savedObjectConfig, 'initSavedObjects')
           .mockResolvedValue({} as unknown as SavedObject<RiskEngineConfiguration>);
       });
@@ -279,7 +291,7 @@ describe('RiskEngineDataClient', () => {
       });
 
       it('should catch error for initSavedObjects and stop', async () => {
-        jest.spyOn(savedObjectConfig, 'initSavedObjects').mockImplementationOnce(() => {
+        vi.spyOn(savedObjectConfig, 'initSavedObjects').mockImplementationOnce(() => {
           throw new Error('Error initSavedObjects');
         });
 

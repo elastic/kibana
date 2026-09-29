@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { PreviewControllerDependencies } from './preview_controller';
 import { PreviewController } from './preview_controller';
 import type { DebouncedFuncLeading } from 'lodash';
@@ -25,8 +27,8 @@ describe('PreviewController', () => {
 
     const mockDeps: PreviewControllerDependencies = {
       search: {
-        search: jest.fn(() => ({
-          toPromise: jest.fn().mockResolvedValue({ rawResponse: { hits: { hits: [] } } }),
+        search: vi.fn(() => ({
+          toPromise: vi.fn().mockResolvedValue({ rawResponse: { hits: { hits: [] } } }),
         })),
       } as unknown as ISearchStart,
       fieldFormats: fieldFormatsMock,
@@ -52,11 +54,11 @@ describe('PreviewController', () => {
         deps: mockDeps,
         dataView: mockDataView,
         dataViewToUpdate: mockDataView,
-        onSave: jest.fn(),
+        onSave: vi.fn(),
         fieldTypeToProcess: 'runtime' as InternalFieldType,
       });
 
-      const debouncedLoadDocumentMock = jest.fn();
+      const debouncedLoadDocumentMock = vi.fn();
       (controller as ControllerWithPrivate).debouncedLoadDocument =
         debouncedLoadDocumentMock as unknown as DebouncedFuncLeading<(id: string) => Promise<void>>;
       controller.setCustomDocIdToLoad(customDocIdToLoad);

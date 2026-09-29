@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { resolveGteLte } from './time_range';
 import { resolveRefreshWindow, useResolvedActivityWindow } from './use_resolved_activity_window';
@@ -22,28 +24,28 @@ describe('resolveRefreshWindow', () => {
   });
 
   it('reports changed bounds when a relative range slides forward', () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
     const current = resolveGteLte('now-7d', 'now');
 
-    jest.setSystemTime(new Date('2026-08-14T12:05:00.000Z'));
+    vi.setSystemTime(new Date('2026-08-14T12:05:00.000Z'));
     const result = resolveRefreshWindow('now-7d', 'now', current);
 
     expect(result.boundsChanged).toBe(true);
     expect(result.next.windowEndMs).toBe(Date.parse('2026-08-14T12:05:00.000Z'));
     expect(result.next.windowStartMs).toBe(Date.parse('2026-08-07T12:05:00.000Z'));
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });
 
 describe('useResolvedActivityWindow', () => {
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('refetches when refresh does not move the resolved bounds', () => {
-    const refetch = jest.fn();
+    const refetch = vi.fn();
     const { result } = renderHook(() => useResolvedActivityWindow(ABSOLUTE_FROM, ABSOLUTE_TO));
 
     act(() => {
@@ -56,14 +58,14 @@ describe('useResolvedActivityWindow', () => {
   });
 
   it('applies new bounds and skips refetch when a relative range moves', () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
-    const refetch = jest.fn();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
+    const refetch = vi.fn();
     const { result } = renderHook(() => useResolvedActivityWindow('now-7d', 'now'));
 
     expect(result.current.windowEndMs).toBe(Date.parse('2026-08-14T12:00:00.000Z'));
 
-    jest.setSystemTime(new Date('2026-08-14T12:05:00.000Z'));
+    vi.setSystemTime(new Date('2026-08-14T12:05:00.000Z'));
     act(() => {
       result.current.applyRefresh(refetch);
     });

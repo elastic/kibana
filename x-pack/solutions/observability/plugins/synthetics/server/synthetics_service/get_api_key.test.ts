@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   generateAPIKey,
   getAPIKeyForSyntheticsService,
@@ -38,9 +40,9 @@ describe('getAPIKeyTest', function () {
     syntheticsEsClient: getUptimeESMockClient().syntheticsEsClient,
   } as unknown as SyntheticsServerSetup;
 
-  security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValue(true);
-  security.authc.apiKeys.validate = jest.fn().mockReturnValue(true);
-  security.authc.apiKeys.create = jest.fn().mockReturnValue({
+  security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValue(true);
+  security.authc.apiKeys.validate = vi.fn().mockReturnValue(true);
+  security.authc.apiKeys.create = vi.fn().mockReturnValue({
     id: 'test',
     name: 'service-api-key',
     api_key: 'qwerty',
@@ -48,8 +50,8 @@ describe('getAPIKeyTest', function () {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(authUtils, 'checkHasPrivileges').mockResolvedValue({
+    vi.clearAllMocks();
+    vi.spyOn(authUtils, 'checkHasPrivileges').mockResolvedValue({
       index: {
         [syntheticsIndex]: {
           auto_configure: true,
@@ -62,11 +64,11 @@ describe('getAPIKeyTest', function () {
   });
 
   it('should return existing api key', async () => {
-    const getObject = jest
+    const getObject = vi
       .fn()
       .mockReturnValue({ attributes: { apiKey: 'qwerty', id: 'test', name: 'service-api-key' } });
 
-    encryptedSavedObjects.getClient = jest.fn().mockReturnValue({
+    encryptedSavedObjects.getClient = vi.fn().mockReturnValue({
       getDecryptedAsInternalUser: getObject,
     });
     const apiKey = await getAPIKeyForSyntheticsService({
@@ -102,7 +104,7 @@ describe('getAPIKeyTest', function () {
   );
 
   it('invalidates api keys with missing read permissions', async () => {
-    jest.spyOn(authUtils, 'checkHasPrivileges').mockResolvedValue({
+    vi.spyOn(authUtils, 'checkHasPrivileges').mockResolvedValue({
       index: {
         [syntheticsIndex]: {
           auto_configure: true,
@@ -113,11 +115,11 @@ describe('getAPIKeyTest', function () {
       },
     } as any);
 
-    const getObject = jest
+    const getObject = vi
       .fn()
       .mockReturnValue({ attributes: { apiKey: 'qwerty', id: 'test', name: 'service-api-key' } });
 
-    encryptedSavedObjects.getClient = jest.fn().mockReturnValue({
+    encryptedSavedObjects.getClient = vi.fn().mockReturnValue({
       getDecryptedAsInternalUser: getObject,
     });
     const apiKey = await getAPIKeyForSyntheticsService({
@@ -141,7 +143,7 @@ describe('getAPIKeyTest', function () {
   });
 
   it('marks new service API keys as Kibana-managed', async () => {
-    server.syntheticsEsClient.baseESClient.security.hasPrivileges = jest.fn().mockResolvedValue({
+    server.syntheticsEsClient.baseESClient.security.hasPrivileges = vi.fn().mockResolvedValue({
       cluster: {
         manage_security: true,
         monitor: true,
@@ -157,7 +159,7 @@ describe('getAPIKeyTest', function () {
         },
       },
     });
-    security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValue(null);
+    security.authc.apiKeys.grantAsInternalUser = vi.fn().mockResolvedValue(null);
 
     await generateAPIKey({ server, request });
 

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createManagedOtlpApiKeyHandler } from './handler';
 
 const makeEsClient = (hasAllRequested: boolean) => ({
   security: {
-    hasPrivileges: jest.fn().mockResolvedValue({ has_all_requested: hasAllRequested }),
-    createApiKey: jest.fn().mockResolvedValue({ encoded: 'encoded-key', id: 'key-id' }),
+    hasPrivileges: vi.fn().mockResolvedValue({ has_all_requested: hasAllRequested }),
+    createApiKey: vi.fn().mockResolvedValue({ encoded: 'encoded-key', id: 'key-id' }),
   },
 });
 
@@ -21,13 +23,13 @@ const makeContext = (esClient: ReturnType<typeof makeEsClient>) => ({
 });
 
 const mockResponse = {
-  ok: jest.fn().mockImplementation((options) => ({ ...options, statusCode: 200 })),
-  forbidden: jest.fn().mockImplementation((options) => ({ ...options, statusCode: 403 })),
+  ok: vi.fn().mockImplementation((options) => ({ ...options, statusCode: 200 })),
+  forbidden: vi.fn().mockImplementation((options) => ({ ...options, statusCode: 403 })),
 };
 
 const mockRequest = { body: { name: 'my-collector' } } as any;
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 describe('createManagedOtlpApiKeyHandler', () => {
   it('returns 403 when caller lacks required privileges', async () => {

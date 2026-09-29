@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import {
   getRulesSchemaMock,
@@ -20,22 +23,22 @@ import {
 } from './restore_telemetry';
 
 const mockAnalytics = (): AnalyticsServiceSetup =>
-  ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup);
+  ({ reportEvent: vi.fn() } as unknown as AnalyticsServiceSetup);
 
 const mockLogger = (): Logger =>
   ({
-    trace: jest.fn(),
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    trace: vi.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as unknown as Logger);
 
 describe('sendRuleRestoreTelemetryEvent', () => {
   const restoredRevisionTimestamp = '2020-02-19T03:57:54.037Z';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('reports isPrebuilt false and isCustomized false for an internal rule', () => {
@@ -45,7 +48,7 @@ describe('sendRuleRestoreTelemetryEvent', () => {
     sendRuleRestoreTelemetryEvent(analytics, { rule, restoredRevisionTimestamp });
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    const [eventType, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [eventType, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
     expect(eventType).toBe(DETECTION_RULE_RESTORE_EVENT.eventType);
     expect(payload).toEqual({
@@ -71,7 +74,7 @@ describe('sendRuleRestoreTelemetryEvent', () => {
 
     sendRuleRestoreTelemetryEvent(analytics, { rule, restoredRevisionTimestamp });
 
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(payload.isPrebuilt).toBe(true);
     expect(payload.isCustomized).toBe(false);
   });
@@ -90,7 +93,7 @@ describe('sendRuleRestoreTelemetryEvent', () => {
 
     sendRuleRestoreTelemetryEvent(analytics, { rule, restoredRevisionTimestamp });
 
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(payload.isPrebuilt).toBe(true);
     expect(payload.isCustomized).toBe(true);
   });
@@ -101,7 +104,7 @@ describe('sendRuleRestoreTelemetryEvent', () => {
 
     sendRuleRestoreTelemetryEvent(analytics, { rule, restoredRevisionTimestamp });
 
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(payload.ruleType).toBe('eql');
   });
 
@@ -111,7 +114,7 @@ describe('sendRuleRestoreTelemetryEvent', () => {
 
     sendRuleRestoreTelemetryEvent(analytics, { rule, restoredRevisionTimestamp });
 
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(Object.keys(payload).sort()).toEqual(
       ['isCustomized', 'isPrebuilt', 'restoredRevisionTimestamp', 'ruleId', 'ruleType'].sort()
     );
@@ -122,7 +125,7 @@ describe('sendRuleRestoreTelemetryEvent', () => {
     const logger = mockLogger();
     const rule = getRulesSchemaMock();
 
-    (analytics.reportEvent as jest.Mock).mockImplementation(() => {
+    (analytics.reportEvent as Mock).mockImplementation(() => {
       throw new Error('Analytics service error');
     });
 
@@ -140,7 +143,7 @@ describe('sendRuleRestoreTelemetryEvent', () => {
 
 describe('sendRuleRestoreErrorTelemetryEvent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('reports the conflict status and error details', () => {
@@ -154,7 +157,7 @@ describe('sendRuleRestoreErrorTelemetryEvent', () => {
     });
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    const [eventType, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [eventType, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
     expect(eventType).toBe(DETECTION_RULE_RESTORE_ERROR_EVENT.eventType);
     expect(payload).toEqual({
@@ -175,7 +178,7 @@ describe('sendRuleRestoreErrorTelemetryEvent', () => {
       errorMessage: 'cluster_block_exception',
     });
 
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(payload.status).toBe('error');
   });
 
@@ -183,7 +186,7 @@ describe('sendRuleRestoreErrorTelemetryEvent', () => {
     const analytics = mockAnalytics();
     const logger = mockLogger();
 
-    (analytics.reportEvent as jest.Mock).mockImplementation(() => {
+    (analytics.reportEvent as Mock).mockImplementation(() => {
       throw new Error('Analytics service error');
     });
 

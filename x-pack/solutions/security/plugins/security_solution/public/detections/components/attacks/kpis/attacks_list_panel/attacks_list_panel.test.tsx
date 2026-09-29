@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -18,22 +21,31 @@ import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_fl
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
-jest.mock('../../../../../flyout_v2/use_flyout_api');
-jest.mock('./use_attacks_list_data');
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../../entity_analytics/components/severity/severity_bar', () => ({
-  SeverityBar: () => <div data-test-subj="severity-bar" />,
-}));
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useStore: () => ({ getState: jest.fn(), dispatch: jest.fn(), subscribe: jest.fn() }),
-}));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: jest.fn() }),
-}));
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../../../../../flyout_v2/use_flyout_api');
+vi.mock('./use_attacks_list_data');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../../../../entity_analytics/components/severity/severity_bar', () => {
+      const mocked = {
+      SeverityBar: () => <div data-test-subj="severity-bar" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useStore: () => ({ getState: vi.fn(), dispatch: vi.fn(), subscribe: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => ({ push: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AttacksListPanel', () => {
   const mockDataView = {
@@ -41,20 +53,20 @@ describe('AttacksListPanel', () => {
     getIndexPattern: () => 'test-index-pattern',
   } as unknown as DataView;
 
-  const mockOpenFlyout = jest.fn();
-  const reportEvent = jest.fn();
+  const mockOpenFlyout = vi.fn();
+  const reportEvent = vi.fn();
 
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    (useExpandableFlyoutApi as Mock).mockReturnValue({
       openFlyout: mockOpenFlyout,
     });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         telemetry: {
           reportEvent,
@@ -64,15 +76,15 @@ describe('AttacksListPanel', () => {
   });
 
   it('renders loading state correctly', () => {
-    (useAttacksListData as jest.Mock).mockReturnValue({
+    (useAttacksListData as Mock).mockReturnValue({
       items: [],
       isLoading: true,
       pageIndex: 0,
       pageSize: 10,
       total: 0,
-      setPageIndex: jest.fn(),
-      setPageSize: jest.fn(),
-      refetch: jest.fn(),
+      setPageIndex: vi.fn(),
+      setPageSize: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(<AttacksListPanel dataView={mockDataView} />);
@@ -95,15 +107,15 @@ describe('AttacksListPanel', () => {
       },
     ];
 
-    (useAttacksListData as jest.Mock).mockReturnValue({
+    (useAttacksListData as Mock).mockReturnValue({
       items: mockItems,
       isLoading: false,
       pageIndex: 0,
       pageSize: 10,
       total: 2,
-      setPageIndex: jest.fn(),
-      setPageSize: jest.fn(),
-      refetch: jest.fn(),
+      setPageIndex: vi.fn(),
+      setPageSize: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(<AttacksListPanel dataView={mockDataView} />);
@@ -119,15 +131,15 @@ describe('AttacksListPanel', () => {
   it('calls openFlyout (legacy) when clicking on an attack name with flag off', () => {
     const mockItems = [{ id: 'attack-1', name: 'Attack 1', alertsCount: 5, severityCount: {} }];
 
-    (useAttacksListData as jest.Mock).mockReturnValue({
+    (useAttacksListData as Mock).mockReturnValue({
       items: mockItems,
       isLoading: false,
       pageIndex: 0,
       pageSize: 10,
       total: 1,
-      setPageIndex: jest.fn(),
-      setPageSize: jest.fn(),
-      refetch: jest.fn(),
+      setPageIndex: vi.fn(),
+      setPageSize: vi.fn(),
+      refetch: vi.fn(),
     });
 
     render(<AttacksListPanel dataView={mockDataView} />);
@@ -152,18 +164,18 @@ describe('AttacksListPanel', () => {
   });
 
   it('calls openAttackFlyout when enableNewFlyout setting is on', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-    const mockRefetch = jest.fn();
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    const mockRefetch = vi.fn();
     const mockItems = [{ id: 'attack-1', name: 'Attack 1', alertsCount: 5, severityCount: {} }];
 
-    (useAttacksListData as jest.Mock).mockReturnValue({
+    (useAttacksListData as Mock).mockReturnValue({
       items: mockItems,
       isLoading: false,
       pageIndex: 0,
       pageSize: 10,
       total: 1,
-      setPageIndex: jest.fn(),
-      setPageSize: jest.fn(),
+      setPageIndex: vi.fn(),
+      setPageSize: vi.fn(),
       refetch: mockRefetch,
     });
 
@@ -186,10 +198,10 @@ describe('AttacksListPanel', () => {
   });
 
   it('handles pagination changes', () => {
-    const setPageIndex = jest.fn();
-    const setPageSize = jest.fn();
+    const setPageIndex = vi.fn();
+    const setPageSize = vi.fn();
 
-    (useAttacksListData as jest.Mock).mockReturnValue({
+    (useAttacksListData as Mock).mockReturnValue({
       items: [],
       isLoading: false,
       pageIndex: 0,
@@ -197,7 +209,7 @@ describe('AttacksListPanel', () => {
       total: 20,
       setPageIndex,
       setPageSize,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(<AttacksListPanel dataView={mockDataView} />);

@@ -5,47 +5,62 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { WaffleOptionsState } from './use_waffle_options';
 import { useWaffleOptions } from './use_waffle_options';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 
-jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('../../../../alerting/use_alert_prefill');
-jest.mock('../../../../hooks/use_is_pod_schema_selector_enabled', () => ({
-  useIsPodSchemaSelectorEnabled: jest.fn(() => false),
-}));
+vi.mock('@kbn/observability-shared-plugin/public');
+vi.mock('../../../../alerting/use_alert_prefill');
+vi.mock('../../../../hooks/use_is_pod_schema_selector_enabled', () => {
+      const mocked = {
+      useIsPodSchemaSelectorEnabled: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const updateTopbarMenuVisibilityBySchema = jest.fn();
-jest.mock('../../../../containers/ml/infra_ml_capabilities', () => ({
-  useInfraMLCapabilitiesContext: () => ({
-    updateTopbarMenuVisibilityBySchema,
-  }),
-}));
+const updateTopbarMenuVisibilityBySchema = vi.fn();
+vi.mock('../../../../containers/ml/infra_ml_capabilities', () => {
+      const mocked = {
+      useInfraMLCapabilitiesContext: () => ({
+        updateTopbarMenuVisibilityBySchema,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseUrlState = useUrlState as jest.MockedFunction<typeof useUrlState>;
-const mockUseAlertPrefillContext = useAlertPrefillContext as jest.MockedFunction<
+const mockUseUrlState = useUrlState as MockedFunction<typeof useUrlState>;
+const mockUseAlertPrefillContext = useAlertPrefillContext as MockedFunction<
   typeof useAlertPrefillContext
 >;
 
 // Mock useUrlState hook
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
-    location: '',
-    replace: () => {},
-  }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: () => ({
+        location: '',
+        replace: () => {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_inventory_views', () => ({
-  useInventoryViewsContext: () => ({
-    currentView: undefined,
-  }),
-}));
+vi.mock('./use_inventory_views', () => {
+      const mocked = {
+      useInventoryViewsContext: () => ({
+        currentView: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderUseWaffleOptionsHook = () => renderHook(() => useWaffleOptions());
 
-const setPrefillState = jest.fn((args: Partial<WaffleOptionsState>) => args);
+const setPrefillState = vi.fn((args: Partial<WaffleOptionsState>) => args);
 
 describe('useWaffleOptions', () => {
   beforeEach(() => {
@@ -56,11 +71,11 @@ describe('useWaffleOptions', () => {
       },
     } as unknown as ReturnType<typeof useAlertPrefillContext>);
 
-    mockUseUrlState.mockReturnValue([{}, jest.fn()]);
+    mockUseUrlState.mockReturnValue([{}, vi.fn()]);
   });
 
   it('syncs Anomaly detection topbar visibility from preferredSchema on mount and change', () => {
-    mockUseUrlState.mockReturnValue([{ preferredSchema: 'semconv' }, jest.fn()]);
+    mockUseUrlState.mockReturnValue([{ preferredSchema: 'semconv' }, vi.fn()]);
 
     const { result } = renderUseWaffleOptionsHook();
 
@@ -91,7 +106,7 @@ describe('useWaffleOptions', () => {
       region: 'us-east-1',
     } as WaffleOptionsState;
     act(() => {
-      mockUseUrlState.mockReturnValue([newOptions, jest.fn()]);
+      mockUseUrlState.mockReturnValue([newOptions, vi.fn()]);
       result.current.changeNodeType(newOptions.nodeType);
     });
 
@@ -101,7 +116,7 @@ describe('useWaffleOptions', () => {
     );
 
     act(() => {
-      mockUseUrlState.mockReturnValue([newOptions, jest.fn()]);
+      mockUseUrlState.mockReturnValue([newOptions, vi.fn()]);
       result.current.changeMetric(newOptions.metric);
     });
 
@@ -111,7 +126,7 @@ describe('useWaffleOptions', () => {
     );
 
     act(() => {
-      mockUseUrlState.mockReturnValue([newOptions, jest.fn()]);
+      mockUseUrlState.mockReturnValue([newOptions, vi.fn()]);
       result.current.changeCustomMetrics(newOptions.customMetrics);
     });
 
@@ -121,7 +136,7 @@ describe('useWaffleOptions', () => {
     );
 
     act(() => {
-      mockUseUrlState.mockReturnValue([newOptions, jest.fn()]);
+      mockUseUrlState.mockReturnValue([newOptions, vi.fn()]);
       result.current.changeAccount(newOptions.accountId);
     });
 
@@ -131,7 +146,7 @@ describe('useWaffleOptions', () => {
     );
 
     act(() => {
-      mockUseUrlState.mockReturnValue([newOptions, jest.fn()]);
+      mockUseUrlState.mockReturnValue([newOptions, vi.fn()]);
       result.current.changeRegion(newOptions.region);
     });
 

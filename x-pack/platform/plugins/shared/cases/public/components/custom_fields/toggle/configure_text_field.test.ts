@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { configureToggleCustomFieldFactory } from './configure_toggle_field';
 
 describe('configureToggleCustomFieldFactory ', () => {
   const builder = configureToggleCustomFieldFactory();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

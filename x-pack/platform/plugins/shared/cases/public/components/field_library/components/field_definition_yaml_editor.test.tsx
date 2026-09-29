@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -12,7 +14,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 // Shared with the mock factory below; jest hoisting requires the `mock` prefix.
 const mockEditor = { fake: 'editor' };
 
-jest.mock('../../templates_v2/components/template_yaml_editor', () => {
+vi.mock('../../templates_v2/components/template_yaml_editor', () => {
   // jest.mock factories are hoisted above imports, so React must be required locally.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const ReactLocal = require('react');
@@ -49,23 +51,26 @@ jest.mock('../../templates_v2/components/template_yaml_editor', () => {
   };
 });
 
-const mockActionsMenu = jest.fn();
-jest.mock('../../templates_v2/components/template_actions_menu', () => ({
-  TemplateActionsMenu: (props: Record<string, unknown>) => {
-    mockActionsMenu(props);
-    return <div data-test-subj="mockActionsMenu" />;
-  },
-}));
+const mockActionsMenu = vi.fn();
+vi.mock('../../templates_v2/components/template_actions_menu', () => {
+      const mocked = {
+      TemplateActionsMenu: (props: Record<string, unknown>) => {
+        mockActionsMenu(props);
+        return <div data-test-subj="mockActionsMenu" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { FieldDefinitionYamlEditor } from './field_definition_yaml_editor';
 
 describe('FieldDefinitionYamlEditor', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('mounts the actions menu in fieldDefinition mode once the editor is available', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderWithI18n(
       <FieldDefinitionYamlEditor
         value="control: INPUT_TEXT"
@@ -89,7 +94,7 @@ describe('FieldDefinitionYamlEditor', () => {
     renderWithI18n(
       <FieldDefinitionYamlEditor
         value=""
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         data-test-subj="fieldDefinitionYamlInput"
       />
     );
@@ -104,7 +109,7 @@ describe('FieldDefinitionYamlEditor', () => {
       renderWithI18n(
         <FieldDefinitionYamlEditor
           value={dashedFieldYaml}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           data-test-subj="fieldDefinitionYamlInput"
         />
       );
@@ -119,7 +124,7 @@ describe('FieldDefinitionYamlEditor', () => {
       renderWithI18n(
         <FieldDefinitionYamlEditor
           value={dashedFieldYaml}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           isEditing
           data-test-subj="fieldDefinitionYamlInput"
         />
@@ -135,7 +140,7 @@ describe('FieldDefinitionYamlEditor', () => {
     renderWithI18n(
       <FieldDefinitionYamlEditor
         value="name: only_a_name"
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         data-test-subj="fieldDefinitionYamlInput"
       />
     );

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, cleanup } from '@testing-library/react';
 // eslint-disable-next-line no-restricted-imports
 import type { UseLegacyUrlRedirectParams } from './use_redirect_legacy_url';
@@ -14,11 +16,11 @@ import type { Rule } from '../../../rule_management/logic';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 
 const mockSpacesApi = spacesPluginMock.createStartContract();
-const mockRedirectLegacyUrl = jest.mocked(mockSpacesApi.ui.redirectLegacyUrl);
+const mockRedirectLegacyUrl = vi.mocked(mockSpacesApi.ui.redirectLegacyUrl);
 
 describe('useLegacyUrlRedirect', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(async () => {

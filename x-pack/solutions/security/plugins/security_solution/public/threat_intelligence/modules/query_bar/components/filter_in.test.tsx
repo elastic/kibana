@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
@@ -22,9 +25,9 @@ import {
 
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 
-jest.mock('../../indicators/hooks/use_filters_context');
+vi.mock('../../indicators/hooks/use_filters_context');
 
-const announceFn = jest.fn();
+const announceFn = vi.fn();
 
 const mockIndicator: Indicator = generateMockIndicator();
 const mockField: string = 'threat.feed.name';
@@ -34,7 +37,7 @@ const CHILD_COMPONENT_TEST_ID: string = 'component-test';
 describe('<FilterInButtonIcon /> <FilterInContextMenu /> <FilterInCellAction />', () => {
   beforeEach(() => {
     (
-      useIndicatorsFiltersContext as jest.MockedFunction<typeof useIndicatorsFiltersContext>
+      useIndicatorsFiltersContext as MockedFunction<typeof useIndicatorsFiltersContext>
     ).mockReturnValue(mockIndicatorsFiltersContext);
   });
 

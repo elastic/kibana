@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
@@ -18,16 +20,16 @@ import { OnboardingCardId } from '../../../../../../constants';
 import * as useGetMigrationTranslationStatsModule from '../../../../../../../siem_migrations/rules/logic/use_get_migration_translation_stats';
 import * as useGetMissingResourcesModule from '../../../../../../../siem_migrations/common/hooks/use_get_missing_resources';
 
-const useLatestStatsSpy = jest.spyOn(useLatestStatsModule, 'useLatestStats');
+const useLatestStatsSpy = vi.spyOn(useLatestStatsModule, 'useLatestStats');
 
-const useUpsellingComponentMock = jest.spyOn(useUpsellingComponentModule, 'useUpsellingComponent');
+const useUpsellingComponentMock = vi.spyOn(useUpsellingComponentModule, 'useUpsellingComponent');
 
-const useGetMigrationTranslationStatsSpy = jest.spyOn(
+const useGetMigrationTranslationStatsSpy = vi.spyOn(
   useGetMigrationTranslationStatsModule,
   'useGetMigrationTranslationStats'
 );
 
-const useGetMissingResourcesMock = jest.spyOn(
+const useGetMissingResourcesMock = vi.spyOn(
   useGetMissingResourcesModule,
   'useGetMissingResources'
 );
@@ -39,7 +41,7 @@ const MockUpsellingComponent = () => {
 const mockedLatestStats = {
   data: [],
   isLoading: false,
-  refreshStats: jest.fn(),
+  refreshStats: vi.fn(),
 };
 
 const mockTranslationStats = {
@@ -63,19 +65,19 @@ const mockTranslationStats = {
 >;
 
 const mockMissingResources = {
-  getMissingResources: jest.fn(() => []),
+  getMissingResources: vi.fn(() => []),
   isLoading: false,
 } as unknown as ReturnType<typeof useGetMissingResourcesModule.useGetMissingResources>;
 
 type TestComponentProps = ComponentProps<typeof StartMigrationCard>;
 
 const defaultProps: TestComponentProps = {
-  setComplete: jest.fn(),
-  isCardComplete: jest.fn(
+  setComplete: vi.fn(),
+  isCardComplete: vi.fn(
     (cardId: OnboardingCardId) => cardId === OnboardingCardId.siemMigrationsAiConnectors
   ),
-  setExpandedCardId: jest.fn(),
-  checkComplete: jest.fn(),
+  setExpandedCardId: vi.fn(),
+  checkComplete: vi.fn(),
   isCardAvailable: () => true,
   checkCompleteMetadata: {
     missingCapabilities: [],
@@ -103,7 +105,7 @@ describe('StartMigrationsBody', () => {
     useGetMissingResourcesMock.mockReturnValue(mockMissingResources);
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render upsell correctly when available', () => {

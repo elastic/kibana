@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, renderHook } from '@testing-library/react';
 import { buildDataTableRecord, type DataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
@@ -31,20 +34,23 @@ const hitWithoutAlertId = {
   },
 } as DataTableRecord;
 
-jest.mock('../../../../../common/components/user_privileges');
-jest.mock('../../../../../management/hooks/response_actions/use_get_automated_action_list');
-jest.mock(
+vi.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../management/hooks/response_actions/use_get_automated_action_list');
+vi.mock(
   '../../../../../common/components/response_actions/response_actions_empty_prompt',
-  () => ({
-    ResponseActionsEmptyPrompt: jest.fn(() => (
-      <div data-test-subj="responseActionsEmptyPromptMock" />
-    )),
-  })
+  () => {
+      const mocked = {
+        ResponseActionsEmptyPrompt: vi.fn(() => (
+          <div data-test-subj="responseActionsEmptyPromptMock" />
+        )),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const useGetAutomatedActionListMock = useGetAutomatedActionList as jest.Mock;
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
-const responseActionsEmptyPromptMock = jest.mocked(ResponseActionsEmptyPrompt);
+const useGetAutomatedActionListMock = useGetAutomatedActionList as Mock;
+const useUserPrivilegesMock = useUserPrivileges as Mock;
+const responseActionsEmptyPromptMock = vi.mocked(ResponseActionsEmptyPrompt);
 
 describe('useResponseActionsView', () => {
   beforeEach(() => {
@@ -60,7 +66,7 @@ describe('useResponseActionsView', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return the normal component', () => {

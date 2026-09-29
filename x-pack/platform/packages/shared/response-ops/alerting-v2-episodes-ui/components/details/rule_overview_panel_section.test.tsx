@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -19,13 +21,13 @@ import {
 } from '../../hooks/test_utils';
 import { AlertEpisodeRuleOverviewPanelSection } from './rule_overview_panel_section';
 
-jest.mock('../../utils/run_esql_async_search');
+vi.mock('../../utils/run_esql_async_search');
 
-const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
+const runEsqlAsyncSearchMock = vi.mocked(runEsqlAsyncSearch);
 
 const mockHttp = httpServiceMock.createStartContract();
 const mockServices = createMockServices({ http: mockHttp });
-const mockGetRuleDetailsHref = jest.fn((ruleId: string) => `/host-aware/rules/${ruleId}`);
+const mockGetRuleDetailsHref = vi.fn((ruleId: string) => `/host-aware/rules/${ruleId}`);
 
 const mockRule = createMockRule();
 
@@ -34,7 +36,7 @@ const wrapper = createQueryClientWrapper(queryClient);
 
 describe('AlertEpisodeRuleOverviewPanelSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 

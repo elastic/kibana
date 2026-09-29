@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { RulePageFooter } from './rule_page_footer';
@@ -15,24 +17,30 @@ import {
   RULE_PAGE_FOOTER_SHOW_REQUEST_TEXT,
 } from '../translations';
 
-jest.mock('../validation/validate_form', () => ({
-  hasRuleErrors: jest.fn(),
-}));
+vi.mock('../validation/validate_form', () => {
+      const mocked = {
+      hasRuleErrors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks', () => ({
-  useRuleFormState: jest.fn(),
-  useRuleFormScreenContext: jest.fn(),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useRuleFormState: vi.fn(),
+      useRuleFormScreenContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { hasRuleErrors } = jest.requireMock('../validation/validate_form');
-const { useRuleFormState, useRuleFormScreenContext } = jest.requireMock('../hooks');
+const { hasRuleErrors } = (await vi.importMock('../validation/validate_form'));
+const { useRuleFormState, useRuleFormScreenContext } = (await vi.importMock('../hooks'));
 
-const onSave = jest.fn();
-const onCancel = jest.fn();
+const onSave = vi.fn();
+const onCancel = vi.fn();
 
 hasRuleErrors.mockReturnValue(false);
 
-const mockSetIsShowRequestScreenVisible = jest.fn();
+const mockSetIsShowRequestScreenVisible = vi.fn();
 
 describe('rulePageFooter', () => {
   beforeEach(() => {
@@ -58,7 +66,7 @@ describe('rulePageFooter', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders create footer correctly', () => {

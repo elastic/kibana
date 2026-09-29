@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, within, waitFor, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,7 +15,7 @@ import { schema } from '../create/schema';
 import { FormTestComponent } from '../../common/test_utils';
 
 describe('SyncAlertsToggle', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
   const defaultFormProps = {
     onSubmit,
     formDefaultValue: { syncAlerts: true },
@@ -23,7 +25,7 @@ describe('SyncAlertsToggle', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('it renders', async () => {

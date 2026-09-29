@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,11 +17,11 @@ import { TemplateTags } from './template_tags';
 import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 
 describe('TemplateTags', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
   const formDefaultValue = { templateTags: [] };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders template tags', async () => {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedClass, MockedFunction } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   markExternalUiamCredential,
@@ -24,9 +27,9 @@ import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manage
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 // Mock fetch globally
-global.fetch = jest.fn();
-const mockedFetch = global.fetch as jest.MockedFunction<typeof fetch>;
-const mockGetInternalCallerAttestationHeaders = jest.fn();
+global.fetch = vi.fn();
+const mockedFetch = global.fetch as MockedFunction<typeof fetch>;
+const mockGetInternalCallerAttestationHeaders = vi.fn();
 
 const runStep = (
   step: KibanaActionStepImpl,
@@ -46,7 +49,7 @@ function createMockReadableStream(data: string) {
         return { done: false, value: encoded };
       },
       releaseLock: () => {},
-      cancel: jest.fn(),
+      cancel: vi.fn(),
     }),
   };
 }
@@ -61,7 +64,7 @@ function createMockBinaryStream(data: Uint8Array) {
         return { done: false, value: data };
       },
       releaseLock: () => {},
-      cancel: jest.fn(),
+      cancel: vi.fn(),
     }),
   };
 }
@@ -71,8 +74,8 @@ function createMockResponse(body: object, status = 200) {
   return {
     ok: status >= 200 && status < 300,
     status,
-    json: jest.fn().mockResolvedValue(body),
-    text: jest.fn().mockResolvedValue(json),
+    json: vi.fn().mockResolvedValue(body),
+    text: vi.fn().mockResolvedValue(json),
     body: createMockReadableStream(json),
     headers: new Headers({ 'content-type': 'application/json' }),
   } as any;
@@ -88,23 +91,26 @@ function createMockBinaryResponse(data: Uint8Array, contentType: string, status 
 }
 
 // Mock undici
-jest.mock('undici', () => ({
-  Agent: jest.fn().mockImplementation((options) => ({
-    _options: options, // Store options for testing
-  })),
-}));
+vi.mock('undici', () => {
+      const mocked = {
+      Agent: vi.fn().mockImplementation((options) => ({
+        _options: options, // Store options for testing
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('KibanaActionStepImpl - Fetcher Configuration', () => {
-  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
-  let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
-  let mockWorkflowLogger: jest.Mocked<IWorkflowEventLogger>;
-  let mockContextManager: jest.Mocked<WorkflowContextManager>;
+  let mockStepExecutionRuntime: Mocked<StepExecutionRuntime>;
+  let mockWorkflowRuntime: Mocked<WorkflowExecutionRuntimeManager>;
+  let mockWorkflowLogger: Mocked<IWorkflowEventLogger>;
+  let mockContextManager: Mocked<WorkflowContextManager>;
 
   beforeEach(() => {
     mockContextManager = {
-      renderValueAccordingToContext: jest.fn((value) => value),
-      getWorkflowSpaceId: jest.fn().mockReturnValue('default'),
-      getCoreStart: jest.fn().mockReturnValue({
+      renderValueAccordingToContext: vi.fn((value) => value),
+      getWorkflowSpaceId: vi.fn().mockReturnValue('default'),
+      getCoreStart: vi.fn().mockReturnValue({
         http: {
           basePath: { publicBaseUrl: 'https://localhost:5601' },
         },
@@ -118,40 +124,40 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
           },
         },
       }),
-      getFakeRequest: jest.fn().mockReturnValue({
+      getFakeRequest: vi.fn().mockReturnValue({
         headers: { authorization: 'ApiKey test-key' },
       }),
-      getDependencies: jest.fn().mockReturnValue({}),
+      getDependencies: vi.fn().mockReturnValue({}),
     } as any;
 
     mockStepExecutionRuntime = {
       contextManager: mockContextManager,
-      startStep: jest.fn().mockResolvedValue(undefined),
-      finishStep: jest.fn().mockResolvedValue(undefined),
-      failStep: jest.fn().mockResolvedValue(undefined),
-      setInput: jest.fn().mockResolvedValue(undefined),
+      startStep: vi.fn().mockResolvedValue(undefined),
+      finishStep: vi.fn().mockResolvedValue(undefined),
+      failStep: vi.fn().mockResolvedValue(undefined),
+      setInput: vi.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
       node: {},
     } as any;
 
     mockWorkflowRuntime = {
-      navigateToNextNode: jest.fn(),
+      navigateToNextNode: vi.fn(),
     } as any;
 
     mockWorkflowLogger = {
-      logInfo: jest.fn(),
-      logError: jest.fn(),
-      logDebug: jest.fn(),
+      logInfo: vi.fn(),
+      logError: vi.fn(),
+      logDebug: vi.fn(),
     } as any;
 
     // Mock successful fetch response with readable body stream
     mockedFetch.mockResolvedValue(createMockResponse({ success: true }));
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('attaches the UIAM internal-caller attestation to loopback requests', async () => {
@@ -376,7 +382,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
   describe('SSL verification', () => {
     it('should create undici Agent with rejectUnauthorized: false when skip_ssl_verification is true', async () => {
       const { Agent } = await import('undici');
-      const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
+      const MockedAgent = Agent as MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
       const stepWith = {
@@ -414,7 +420,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
     it('should not create Agent when skip_ssl_verification is false or undefined', async () => {
       const { Agent } = await import('undici');
-      const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
+      const MockedAgent = Agent as MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
       const stepWith = {
@@ -445,7 +451,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
   describe('other fetcher options', () => {
     it('should pass keep_alive option to Agent', async () => {
       const { Agent } = await import('undici');
-      const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
+      const MockedAgent = Agent as MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
       const stepWith = {
@@ -481,7 +487,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
     it('should set redirect mode when follow_redirects is false', async () => {
       const { Agent } = await import('undici');
-      const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
+      const MockedAgent = Agent as MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
       const stepWith = {
@@ -515,7 +521,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
     it('should pass max_redirects to Agent', async () => {
       const { Agent } = await import('undici');
-      const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
+      const MockedAgent = Agent as MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
       const stepWith = {
@@ -550,7 +556,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
     it('should pass through custom undici options', async () => {
       const { Agent } = await import('undici');
-      const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
+      const MockedAgent = Agent as MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
       const stepWith = {
@@ -592,9 +598,9 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         http: {
           basePath: {
             publicBaseUrl: 'https://public.kibana.example.com',
-            prepend: jest.fn((path: string) => `/base${path}`),
+            prepend: vi.fn((path: string) => `/base${path}`),
           },
-          getServerInfo: jest.fn(() => ({
+          getServerInfo: vi.fn(() => ({
             protocol: 'https',
             hostname: 'internal-host',
             port: 5601,
@@ -876,7 +882,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
   describe('combined fetcher options', () => {
     it('should handle multiple fetcher options together', async () => {
       const { Agent } = await import('undici');
-      const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
+      const MockedAgent = Agent as MockedClass<typeof Agent>;
       MockedAgent.mockClear();
 
       const stepWith = {
@@ -928,7 +934,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
   describe('response size limit enforcement (Layer 1)', () => {
     it('should abort fetch mid-stream when body exceeds max-step-size', async () => {
       const largeBody = JSON.stringify({ data: 'x'.repeat(500) });
-      const cancelFn = jest.fn();
+      const cancelFn = vi.fn();
       mockedFetch.mockResolvedValue({
         ok: true,
         status: 200,
@@ -994,7 +1000,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
                 return { done: false, value: new TextEncoder().encode(largeErrorBody) };
               },
               releaseLock: () => {},
-              cancel: jest.fn(),
+              cancel: vi.fn(),
             };
           },
         },
@@ -1109,7 +1115,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
                 return { done: false, value: new TextEncoder().encode(jsonBody) };
               },
               releaseLock: () => {},
-              cancel: jest.fn(),
+              cancel: vi.fn(),
             };
           },
         },

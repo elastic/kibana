@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { monaco } from '@kbn/code-editor';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
@@ -15,17 +18,23 @@ import type { FixWithAiTarget } from '../../lib/register_fix_with_ai_code_action
 import { registerFixWithAiCodeActionProvider } from '../../lib/register_fix_with_ai_code_action_provider';
 import { navigateToErrorPosition } from '../../lib/utils';
 
-jest.mock('../../lib/register_fix_with_ai_code_action_provider', () => ({
-  registerFixWithAiCodeActionProvider: jest.fn(),
-}));
-jest.mock('../../lib/utils', () => ({
-  navigateToErrorPosition: jest.fn(),
-}));
+vi.mock('../../lib/register_fix_with_ai_code_action_provider', () => {
+      const mocked = {
+      registerFixWithAiCodeActionProvider: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/utils', () => {
+      const mocked = {
+      navigateToErrorPosition: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const registerProviderMock = registerFixWithAiCodeActionProvider as jest.MockedFunction<
+const registerProviderMock = registerFixWithAiCodeActionProvider as MockedFunction<
   typeof registerFixWithAiCodeActionProvider
 >;
-const navigateMock = navigateToErrorPosition as jest.MockedFunction<typeof navigateToErrorPosition>;
+const navigateMock = navigateToErrorPosition as MockedFunction<typeof navigateToErrorPosition>;
 
 const validationError = {
   startLineNumber: 15,
@@ -37,8 +46,8 @@ const validationError = {
 describe('useFixWithAi', () => {
   const model = { uri: { toString: () => 'inmemory://workflow.yaml' } };
   const editor = { getModel: () => model } as unknown as monaco.editor.IStandaloneCodeEditor;
-  let dispose: jest.Mock;
-  let openAgentChat: jest.Mock;
+  let dispose: Mock;
+  let openAgentChat: Mock;
 
   const render = (
     overrides: { isAgentBuilderAvailable?: boolean; isReadOnlyYaml?: boolean } = {}
@@ -54,9 +63,9 @@ describe('useFixWithAi', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    dispose = jest.fn();
-    openAgentChat = jest.fn();
+    vi.clearAllMocks();
+    dispose = vi.fn();
+    openAgentChat = vi.fn();
     registerProviderMock.mockReturnValue({ dispose });
   });
 

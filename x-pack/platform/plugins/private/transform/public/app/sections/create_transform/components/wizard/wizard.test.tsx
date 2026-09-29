@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -25,38 +27,47 @@ let mockEmptyStepDefineFormProps: Record<string, any> = {};
 let mockProjectScopePickerProps: Record<string, any> = {};
 let mockStepDefineFormProps: Record<string, any> = {};
 let mockStepDetailsFormProps: Record<string, any> = {};
-const mockUseGetTransformCpsEnabled = jest.fn(
+const mockUseGetTransformCpsEnabled = vi.fn(
   (_args?: { enabled: boolean }) => ({ data: true } as { data: boolean | undefined })
 );
 
-jest.mock('../../../../app_dependencies');
+vi.mock('../../../../app_dependencies');
 
-jest.mock('../../../../hooks', () => ({
-  ...jest.requireActual('../../../../hooks'),
-  useGetTransformCpsEnabled: (args: { enabled: boolean }) => mockUseGetTransformCpsEnabled(args),
-}));
+vi.mock('../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../hooks')),
+      useGetTransformCpsEnabled: (args: { enabled: boolean }) => mockUseGetTransformCpsEnabled(args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../serverless_context', () => ({
-  useEnabledFeatures: () => ({ showNodeInfo: false }),
-}));
+vi.mock('../../../../serverless_context', () => {
+      const mocked = {
+      useEnabledFeatures: () => ({ showNodeInfo: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/unified-search-plugin/public', () => ({
-  DataViewPicker: (props: Record<string, any>) => {
-    mockDataViewPickerProps = props;
-    return (
-      <button
-        type="button"
-        data-test-subj={props.trigger['data-test-subj']}
-        onClick={() => props.onChangeDataView('next-data-view-id')}
-      >
-        {props.trigger.label}
-      </button>
-    );
-  },
-}));
+vi.mock('@kbn/unified-search-plugin/public', () => {
+      const mocked = {
+      DataViewPicker: (props: Record<string, any>) => {
+        mockDataViewPickerProps = props;
+        return (
+          <button
+            type="button"
+            data-test-subj={props.trigger['data-test-subj']}
+            onClick={() => props.onChangeDataView('next-data-view-id')}
+          >
+            {props.trigger.label}
+          </button>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/cps-utils', () => {
-  const actual = jest.requireActual('@kbn/cps-utils');
+vi.mock('@kbn/cps-utils', async () => {
+  const actual = (await vi.importActual('@kbn/cps-utils'));
   return {
     ...actual,
     ProjectScopePicker: (props: Record<string, any>) => {
@@ -74,12 +85,15 @@ jest.mock('@kbn/cps-utils', () => {
   };
 });
 
-jest.mock('@kbn/ml-field-stats-flyout', () => ({
-  FieldStatsFlyoutProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('@kbn/ml-field-stats-flyout', () => {
+      const mocked = {
+      FieldStatsFlyoutProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../step_define', () => {
-  const actual = jest.requireActual('../step_define/common');
+vi.mock('../step_define', async () => {
+  const actual = (await vi.importActual('../step_define/common'));
   return {
     ...actual,
     EmptyStepDefineForm: (props: Record<string, any>) => {
@@ -111,8 +125,8 @@ jest.mock('../step_define', () => {
   };
 });
 
-jest.mock('../step_details', () => {
-  const actual = jest.requireActual('../step_details/common');
+vi.mock('../step_details', async () => {
+  const actual = (await vi.importActual('../step_details/common'));
   return {
     ...actual,
     StepDetailsForm: (props: Record<string, any>) => {
@@ -123,11 +137,14 @@ jest.mock('../step_details', () => {
   };
 });
 
-jest.mock('../step_create', () => ({
-  getDefaultStepCreateState: () => ({ created: false, dataViewId: undefined, started: false }),
-  StepCreateForm: () => <div data-test-subj="mockStepCreateForm" />,
-  StepCreateSummary: () => <div data-test-subj="mockStepCreateSummary" />,
-}));
+vi.mock('../step_create', () => {
+      const mocked = {
+      getDefaultStepCreateState: () => ({ created: false, dataViewId: undefined, started: false }),
+      StepCreateForm: () => <div data-test-subj="mockStepCreateForm" />,
+      StepCreateSummary: () => <div data-test-subj="mockStepCreateSummary" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createSearchItems = (id: string, name: string): SearchItems => ({
   dataView: {
@@ -171,14 +188,14 @@ describe('Transform: <Wizard />', () => {
     mockUseGetTransformCpsEnabled.mockReturnValue({ data: true });
     const appDeps = appDependencies.useAppDependencies();
     appDeps.cps = undefined;
-    appDeps.data.dataViews.getIdsWithTitle = jest.fn().mockResolvedValue([
+    appDeps.data.dataViews.getIdsWithTitle = vi.fn().mockResolvedValue([
       { id: 'current-data-view-id', title: 'current-data-view' },
       { id: 'next-data-view-id', title: 'next-data-view' },
     ]);
   });
 
   test('renders empty source fields before a data view is selected', async () => {
-    const setSavedObjectId = jest.fn();
+    const setSavedObjectId = vi.fn();
 
     renderWizard({
       initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
@@ -206,9 +223,9 @@ describe('Transform: <Wizard />', () => {
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
-        whenReady: jest.fn().mockResolvedValue(undefined),
-        hasLinkedProjects: jest.fn(() => true),
-        fetchProjects: jest.fn().mockResolvedValue({
+        whenReady: vi.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: vi.fn(() => true),
+        fetchProjects: vi.fn().mockResolvedValue({
           origin: {
             _id: 'origin-id',
             _alias: 'local_project',
@@ -224,13 +241,13 @@ describe('Transform: <Wizard />', () => {
             },
           ],
         }),
-        getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
+        getDefaultProjectRouting: vi.fn(() => PROJECT_ROUTING.ALL),
       },
     } as any;
 
     renderWizard({
       initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
-      setSavedObjectId: jest.fn(),
+      setSavedObjectId: vi.fn(),
     });
 
     await waitFor(() => {
@@ -241,13 +258,13 @@ describe('Transform: <Wizard />', () => {
 
   test('does not render project scope or inject default routing when CPS tier is ineligible', async () => {
     const appDeps = appDependencies.useAppDependencies();
-    const getDefaultProjectRouting = jest.fn(() => '_id:linked-id');
+    const getDefaultProjectRouting = vi.fn(() => '_id:linked-id');
     appDeps.cps = {
       isTierEligible: false,
       cpsManager: {
-        whenReady: jest.fn().mockResolvedValue(undefined),
-        hasLinkedProjects: jest.fn(() => true),
-        fetchProjects: jest.fn(),
+        whenReady: vi.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: vi.fn(() => true),
+        fetchProjects: vi.fn(),
         getDefaultProjectRouting,
       },
     } as any;
@@ -255,7 +272,7 @@ describe('Transform: <Wizard />', () => {
     renderWizard({
       initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
       searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
-      setSavedObjectId: jest.fn(),
+      setSavedObjectId: vi.fn(),
     });
 
     await waitFor(() => {
@@ -268,14 +285,14 @@ describe('Transform: <Wizard />', () => {
 
   test('does not render project scope or inject default routing when Transform CPS is disabled', async () => {
     const appDeps = appDependencies.useAppDependencies();
-    const getDefaultProjectRouting = jest.fn(() => PROJECT_ROUTING.ALL);
+    const getDefaultProjectRouting = vi.fn(() => PROJECT_ROUTING.ALL);
     mockUseGetTransformCpsEnabled.mockReturnValue({ data: false });
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
-        whenReady: jest.fn().mockResolvedValue(undefined),
-        hasLinkedProjects: jest.fn(() => true),
-        fetchProjects: jest.fn(),
+        whenReady: vi.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: vi.fn(() => true),
+        fetchProjects: vi.fn(),
         getDefaultProjectRouting,
       },
     } as any;
@@ -283,7 +300,7 @@ describe('Transform: <Wizard />', () => {
     renderWizard({
       initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
       searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
-      setSavedObjectId: jest.fn(),
+      setSavedObjectId: vi.fn(),
     });
 
     await waitFor(() => {
@@ -296,14 +313,14 @@ describe('Transform: <Wizard />', () => {
 
   test('does not render project scope or inject default routing while Transform CPS support is loading', async () => {
     const appDeps = appDependencies.useAppDependencies();
-    const getDefaultProjectRouting = jest.fn(() => PROJECT_ROUTING.ALL);
+    const getDefaultProjectRouting = vi.fn(() => PROJECT_ROUTING.ALL);
     mockUseGetTransformCpsEnabled.mockReturnValue({ data: undefined });
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
-        whenReady: jest.fn().mockResolvedValue(undefined),
-        hasLinkedProjects: jest.fn(() => true),
-        fetchProjects: jest.fn(),
+        whenReady: vi.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: vi.fn(() => true),
+        fetchProjects: vi.fn(),
         getDefaultProjectRouting,
       },
     } as any;
@@ -311,7 +328,7 @@ describe('Transform: <Wizard />', () => {
     renderWizard({
       initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
       searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
-      setSavedObjectId: jest.fn(),
+      setSavedObjectId: vi.fn(),
     });
 
     await waitFor(() => {
@@ -324,14 +341,14 @@ describe('Transform: <Wizard />', () => {
 
   test('renders project scope and injects default routing when Transform CPS support finishes loading', async () => {
     const appDeps = appDependencies.useAppDependencies();
-    const getDefaultProjectRouting = jest.fn(() => PROJECT_ROUTING.ALL);
+    const getDefaultProjectRouting = vi.fn(() => PROJECT_ROUTING.ALL);
     mockUseGetTransformCpsEnabled.mockReturnValue({ data: undefined });
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
-        whenReady: jest.fn().mockResolvedValue(undefined),
-        hasLinkedProjects: jest.fn(() => true),
-        fetchProjects: jest.fn().mockResolvedValue({
+        whenReady: vi.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: vi.fn(() => true),
+        fetchProjects: vi.fn().mockResolvedValue({
           origin: {
             _id: 'origin-id',
             _alias: 'local_project',
@@ -353,7 +370,7 @@ describe('Transform: <Wizard />', () => {
     const { rerenderWizard } = renderWizard({
       initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
       searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
-      setSavedObjectId: jest.fn(),
+      setSavedObjectId: vi.fn(),
     });
 
     await waitFor(() => {
@@ -374,8 +391,8 @@ describe('Transform: <Wizard />', () => {
 
   test('does not render project scope or inject default routing when there are no linked projects', async () => {
     const appDeps = appDependencies.useAppDependencies();
-    const getDefaultProjectRouting = jest.fn(() => PROJECT_ROUTING.ALL);
-    const fetchProjects = jest.fn().mockResolvedValue({
+    const getDefaultProjectRouting = vi.fn(() => PROJECT_ROUTING.ALL);
+    const fetchProjects = vi.fn().mockResolvedValue({
       origin: {
         _id: 'origin-id',
         _alias: 'local_project',
@@ -387,8 +404,8 @@ describe('Transform: <Wizard />', () => {
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
-        whenReady: jest.fn().mockResolvedValue(undefined),
-        hasLinkedProjects: jest.fn(() => false),
+        whenReady: vi.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: vi.fn(() => false),
         fetchProjects,
         getDefaultProjectRouting,
       },
@@ -397,7 +414,7 @@ describe('Transform: <Wizard />', () => {
     renderWizard({
       initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
       searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
-      setSavedObjectId: jest.fn(),
+      setSavedObjectId: vi.fn(),
     });
 
     await waitFor(() => {
@@ -409,13 +426,13 @@ describe('Transform: <Wizard />', () => {
 
   test('shows a visible project scope error when project fetch fails', async () => {
     const appDeps = appDependencies.useAppDependencies();
-    const getDefaultProjectRouting = jest.fn(() => PROJECT_ROUTING.ALL);
+    const getDefaultProjectRouting = vi.fn(() => PROJECT_ROUTING.ALL);
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
-        whenReady: jest.fn().mockResolvedValue(undefined),
-        hasLinkedProjects: jest.fn(() => false),
-        fetchProjects: jest.fn().mockRejectedValue(new Error('Project fetch failed')),
+        whenReady: vi.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: vi.fn(() => false),
+        fetchProjects: vi.fn().mockRejectedValue(new Error('Project fetch failed')),
         getDefaultProjectRouting,
       },
     } as any;
@@ -423,7 +440,7 @@ describe('Transform: <Wizard />', () => {
     renderWizard({
       initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
       searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
-      setSavedObjectId: jest.fn(),
+      setSavedObjectId: vi.fn(),
     });
 
     await waitFor(() => {
@@ -435,7 +452,7 @@ describe('Transform: <Wizard />', () => {
   });
 
   test('shows confirmation before changing an existing data view', async () => {
-    const setSavedObjectId = jest.fn();
+    const setSavedObjectId = vi.fn();
 
     renderWizard({
       initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
@@ -468,9 +485,9 @@ describe('Transform: <Wizard />', () => {
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
-        whenReady: jest.fn().mockResolvedValue(undefined),
-        hasLinkedProjects: jest.fn(() => true),
-        fetchProjects: jest.fn().mockResolvedValue({
+        whenReady: vi.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: vi.fn(() => true),
+        fetchProjects: vi.fn().mockResolvedValue({
           origin: {
             _id: 'origin-id',
             _alias: 'local_project',
@@ -486,14 +503,14 @@ describe('Transform: <Wizard />', () => {
             },
           ],
         }),
-        getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
+        getDefaultProjectRouting: vi.fn(() => PROJECT_ROUTING.ALL),
       },
     } as any;
 
     renderWizard({
       initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
       searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
-      setSavedObjectId: jest.fn(),
+      setSavedObjectId: vi.fn(),
     });
 
     await waitFor(() => {
@@ -516,14 +533,14 @@ describe('Transform: <Wizard />', () => {
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
-        whenReady: jest.fn(
+        whenReady: vi.fn(
           () =>
             new Promise<void>((resolve) => {
               resolveWhenReady = resolve;
             })
         ),
-        hasLinkedProjects: jest.fn(() => true),
-        fetchProjects: jest.fn().mockResolvedValue({
+        hasLinkedProjects: vi.fn(() => true),
+        fetchProjects: vi.fn().mockResolvedValue({
           origin: {
             _id: 'origin-id',
             _alias: 'local_project',
@@ -539,14 +556,14 @@ describe('Transform: <Wizard />', () => {
             },
           ],
         }),
-        getDefaultProjectRouting: jest.fn(() => defaultProjectRouting),
+        getDefaultProjectRouting: vi.fn(() => defaultProjectRouting),
       },
     } as any;
 
     renderWizard({
       initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
       searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
-      setSavedObjectId: jest.fn(),
+      setSavedObjectId: vi.fn(),
     });
 
     await waitFor(() => {
@@ -566,7 +583,7 @@ describe('Transform: <Wizard />', () => {
     const appDeps = appDependencies.useAppDependencies();
     let resolveFetchProjects: (projects: unknown) => void = () => {};
     let resolveWhenReady: () => void = () => {};
-    const fetchProjects = jest.fn(
+    const fetchProjects = vi.fn(
       () =>
         new Promise((resolve) => {
           resolveFetchProjects = resolve;
@@ -575,22 +592,22 @@ describe('Transform: <Wizard />', () => {
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
-        whenReady: jest.fn(
+        whenReady: vi.fn(
           () =>
             new Promise<void>((resolve) => {
               resolveWhenReady = resolve;
             })
         ),
-        hasLinkedProjects: jest.fn(() => false),
+        hasLinkedProjects: vi.fn(() => false),
         fetchProjects,
-        getDefaultProjectRouting: jest.fn(() => '_id:linked-id'),
+        getDefaultProjectRouting: vi.fn(() => '_id:linked-id'),
       },
     } as any;
 
     renderWizard({
       initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
       searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
-      setSavedObjectId: jest.fn(),
+      setSavedObjectId: vi.fn(),
     });
 
     await waitFor(() => {

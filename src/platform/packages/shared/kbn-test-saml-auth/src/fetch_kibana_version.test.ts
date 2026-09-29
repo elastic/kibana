@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { fetchKibanaVersionHeaderString } from './fetch_kibana_version';
 
-const mockedFetch = jest.spyOn(global, 'fetch');
+const mockedFetch = vi.spyOn(global, 'fetch');
 
 describe('fetchKibanaVersionHeaderString', () => {
   const log = new ToolingLog();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('returns version.number and appends -SNAPSHOT when build_snapshot is true', async () => {

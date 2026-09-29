@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { TestProviders } from '../../../../../common/mock';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { mockObservedHostData } from '../../../../../flyout/entity_details/mocks';
 import { policyFields } from './endpoint_policy_fields';
 
-jest.mock('../../../../../management/hooks/agents/use_get_agent_status');
+vi.mock('../../../../../management/hooks/agents/use_get_agent_status');
 
 const TestWrapper = ({ el }: { el: JSX.Element | undefined }) => <>{el}</>;
 
-jest.mock(
+vi.mock(
   '../../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary',
-  () => {
-    const original = jest.requireActual(
-      '../../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary'
-    );
+  async () => {
+    const original = (await vi.importActual('../../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary'));
     return {
       ...original,
       useGetEndpointPendingActionsSummary: () => ({
@@ -28,7 +28,7 @@ jest.mock(
         isLoading: false,
         isError: false,
         isTimeout: false,
-        fetch: jest.fn(),
+        fetch: vi.fn(),
       }),
     };
   }

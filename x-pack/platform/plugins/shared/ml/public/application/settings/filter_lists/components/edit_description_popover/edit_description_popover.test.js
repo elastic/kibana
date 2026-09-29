@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
@@ -14,7 +16,7 @@ import { EditDescriptionPopover } from './edit_description_popover';
 describe('FilterListUsagePopover', () => {
   const defaultDescription = 'A list of known safe domains';
   test('renders the popover with no description', () => {
-    const updateDescription = jest.fn();
+    const updateDescription = vi.fn();
     const props = {
       updateDescription,
       canCreateFilter: true,
@@ -26,7 +28,7 @@ describe('FilterListUsagePopover', () => {
   });
 
   test('renders the popover with a description', () => {
-    const updateDescription = jest.fn();
+    const updateDescription = vi.fn();
     const props = {
       description: defaultDescription,
       updateDescription,
@@ -39,7 +41,7 @@ describe('FilterListUsagePopover', () => {
   });
 
   test('opens the popover when clicking the button', async () => {
-    const updateDescription = jest.fn();
+    const updateDescription = vi.fn();
     const props = {
       description: defaultDescription,
       updateDescription,
@@ -61,7 +63,7 @@ describe('FilterListUsagePopover', () => {
   });
 
   test('calls updateDescription when closing the popover', async () => {
-    const updateDescription = jest.fn();
+    const updateDescription = vi.fn();
     const props = {
       description: defaultDescription,
       updateDescription,

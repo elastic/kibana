@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import type { LatencyChartsResponse } from './latency_chart_selectors';
 import { getLatencyChartSelector } from './latency_chart_selectors';
@@ -23,7 +25,7 @@ const latencyChartData = {
 
 describe('getLatencyChartSelector', () => {
   beforeAll(() => {
-    jest.spyOn(timeSeriesColor, 'getTimeSeriesColor').mockImplementation(() => {
+    vi.spyOn(timeSeriesColor, 'getTimeSeriesColor').mockImplementation(() => {
       return {
         currentPeriodColor: 'green',
         previousPeriodColor: 'black',

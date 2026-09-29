@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { SecuritySolutionEventBus } from './event_bus';
 
@@ -35,7 +38,7 @@ describe('SecuritySolutionEventBus', () => {
           previousStatuses: [],
           truncated: false,
         }),
-      on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAlertStatusChanged(cb),
+      on: (b: SecuritySolutionEventBus, cb: Mock) => b.onAlertStatusChanged(cb),
       expectedPayload: {
         alertIds: ['a1'],
         status: 'acknowledged',
@@ -59,7 +62,7 @@ describe('SecuritySolutionEventBus', () => {
           tagsRemoved: [],
           truncated: false,
         }),
-      on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAlertTagsChanged(cb),
+      on: (b: SecuritySolutionEventBus, cb: Mock) => b.onAlertTagsChanged(cb),
       expectedPayload: { alertIds: ['a'], tagsAdded: ['t'], tagsRemoved: [], truncated: false },
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertStatusChanged(mockRequest, {
@@ -78,7 +81,7 @@ describe('SecuritySolutionEventBus', () => {
           assigneesRemoved: [],
           truncated: false,
         }),
-      on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAlertAssigneesChanged(cb),
+      on: (b: SecuritySolutionEventBus, cb: Mock) => b.onAlertAssigneesChanged(cb),
       expectedPayload: {
         alertIds: ['a'],
         assigneesAdded: ['uid'],
@@ -102,7 +105,7 @@ describe('SecuritySolutionEventBus', () => {
           previousStatuses: [],
           truncated: false,
         }),
-      on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAttackStatusChanged(cb),
+      on: (b: SecuritySolutionEventBus, cb: Mock) => b.onAttackStatusChanged(cb),
       expectedPayload: {
         attackIds: ['a'],
         status: 'closed',
@@ -126,7 +129,7 @@ describe('SecuritySolutionEventBus', () => {
           tagsRemoved: [],
           truncated: false,
         }),
-      on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAttackTagsChanged(cb),
+      on: (b: SecuritySolutionEventBus, cb: Mock) => b.onAttackTagsChanged(cb),
       expectedPayload: {
         attackIds: ['a'],
         tagsAdded: ['t'],
@@ -150,7 +153,7 @@ describe('SecuritySolutionEventBus', () => {
           assigneesRemoved: [],
           truncated: false,
         }),
-      on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAttackAssigneesChanged(cb),
+      on: (b: SecuritySolutionEventBus, cb: Mock) => b.onAttackAssigneesChanged(cb),
       expectedPayload: {
         attackIds: ['a'],
         assigneesAdded: ['uid'],
@@ -173,7 +176,7 @@ describe('SecuritySolutionEventBus', () => {
           createdBy: 'user',
           documentId: 'doc',
         }),
-      on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onNoteCreated(cb),
+      on: (b: SecuritySolutionEventBus, cb: Mock) => b.onNoteCreated(cb),
       expectedPayload: {
         noteId: 'n1',
         createdBy: 'user',
@@ -195,7 +198,7 @@ describe('SecuritySolutionEventBus', () => {
           updatedBy: 'user',
           documentId: 'doc',
         }),
-      on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onNoteUpdated(cb),
+      on: (b: SecuritySolutionEventBus, cb: Mock) => b.onNoteUpdated(cb),
       expectedPayload: {
         noteId: 'n1',
         updatedBy: 'user',
@@ -211,7 +214,7 @@ describe('SecuritySolutionEventBus', () => {
     },
   ])('$name', ({ emit, on, expectedPayload, otherEmit }) => {
     it('listener receives the correct event shape', () => {
-      const listener = jest.fn();
+      const listener = vi.fn();
       on(bus, listener);
       emit(bus);
       expect(listener).toHaveBeenCalledTimes(1);
@@ -221,7 +224,7 @@ describe('SecuritySolutionEventBus', () => {
     });
 
     it('does not call listener for other event types', () => {
-      const listener = jest.fn();
+      const listener = vi.fn();
       on(bus, listener);
       otherEmit(bus);
       expect(listener).not.toHaveBeenCalled();

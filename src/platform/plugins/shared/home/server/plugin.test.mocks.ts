@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { tutorialsRegistryMock } from './services/tutorials/tutorials_registry.mock';
 import { sampleDataRegistryMock } from './services/sample_data/sample_data_registry.mock';
 
 export const registryForTutorialsMock = tutorialsRegistryMock.create();
 export const registryForSampleDataMock = sampleDataRegistryMock.create();
-jest.doMock('./services', () => ({
-  TutorialsRegistry: jest.fn(() => registryForTutorialsMock),
-  SampleDataRegistry: jest.fn(() => registryForSampleDataMock),
-}));
+vi.doMock('./services', () => {
+      const mocked = {
+      TutorialsRegistry: vi.fn(() => registryForTutorialsMock),
+      SampleDataRegistry: vi.fn(() => registryForSampleDataMock),
+    };
+      return { ...mocked, default: mocked };
+    });

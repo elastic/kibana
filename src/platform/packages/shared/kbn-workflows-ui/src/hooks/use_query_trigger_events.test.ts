@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -18,14 +20,20 @@ import type { SearchTriggerEventLogResult } from '../api/types';
 import { createMockWorkflowApi } from '../api/workflows_api.mock';
 import { testQueryClientConfig } from '../test_utils';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockWorkflowApi = createMockWorkflowApi();
-jest.mock('../api/use_workflows_api', () => ({
-  useWorkflowsApi: () => mockWorkflowApi,
-}));
+vi.mock('../api/use_workflows_api', () => {
+      const mocked = {
+      useWorkflowsApi: () => mockWorkflowApi,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
@@ -68,7 +76,7 @@ describe('getWorkflowTriggerEventsLogQueryKey', () => {
 
 describe('useQueryTriggerEvents', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 

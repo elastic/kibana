@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { useCurrentWindowWidth } from '.';
 import { fireEvent, renderHook, act } from '@testing-library/react';
 
@@ -22,13 +24,13 @@ describe('useCurrentWidthWidth', () => {
   });
 
   it('return last-throttled value of window.innerWidth with interval of 250ms', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const { result } = renderHook(() => useCurrentWindowWidth());
 
     // first resize within throttle interval
     fireEvent.resize(window, { target: { innerWidth: 500 } });
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     expect(result.current).toBe(1024);
@@ -36,7 +38,7 @@ describe('useCurrentWidthWidth', () => {
     // second resize within throttle interval
     fireEvent.resize(window, { target: { innerWidth: 400 } });
     act(() => {
-      jest.advanceTimersByTime(49);
+      vi.advanceTimersByTime(49);
     });
 
     expect(result.current).toBe(1024);
@@ -44,18 +46,18 @@ describe('useCurrentWidthWidth', () => {
     // third and final resize after throttle interval
     fireEvent.resize(window, { target: { innerWidth: 600 } });
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     expect(result.current).toBe(600);
 
     // release all timers to confirm the final value
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(result.current).toBe(600);
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });

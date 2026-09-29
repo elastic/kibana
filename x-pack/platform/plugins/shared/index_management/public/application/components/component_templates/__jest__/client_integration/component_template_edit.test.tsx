@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, fireEvent, within, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -19,7 +21,7 @@ import {
   renderComponentTemplateEdit,
 } from './helpers/component_template_edit.helpers';
 
-jest.mock('@kbn/code-editor');
+vi.mock('@kbn/code-editor');
 
 describe('<ComponentTemplateEdit />', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
@@ -27,11 +29,11 @@ describe('<ComponentTemplateEdit />', () => {
   let coreStart: ReturnType<(typeof coreMock)['createStart']>;
 
   beforeAll(() => {
-    jest.spyOn(breadcrumbService, 'setBreadcrumbs');
+    vi.spyOn(breadcrumbService, 'setBreadcrumbs');
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const env = setupEnvironment();
     httpSetup = env.httpSetup;
     httpRequestsMockHelpers = env.httpRequestsMockHelpers;

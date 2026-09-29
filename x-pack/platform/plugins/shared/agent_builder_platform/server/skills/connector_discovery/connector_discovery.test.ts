@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
@@ -16,27 +19,30 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { createListConnectorsTool } from './list_connectors_tool';
 import { createGetConnectorSubActionsTool } from './get_connector_sub_actions_tool';
 
-jest.mock('@kbn/connector-specs', () => ({
-  getConnectorSpec: jest.fn(),
-  isToolAction: jest.fn(),
-}));
+vi.mock('@kbn/connector-specs', () => {
+      const mocked = {
+      getConnectorSpec: vi.fn(),
+      isToolAction: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agent-builder-server', () => {
-  const actual = jest.requireActual('@kbn/agent-builder-server');
+vi.mock('@kbn/agent-builder-server', async () => {
+  const actual = (await vi.importActual('@kbn/agent-builder-server'));
   return {
     ...actual,
-    getToolResultId: jest.fn().mockReturnValue('test-id'),
-    createErrorResult: jest.fn((opts: { message: string }) => ({
+    getToolResultId: vi.fn().mockReturnValue('test-id'),
+    createErrorResult: vi.fn((opts: { message: string }) => ({
       tool_result_id: 'err-id',
       type: 'error',
       data: { message: opts.message },
     })),
-    formatSchemaForLlm: jest.fn(() => '{ title: string }'),
+    formatSchemaForLlm: vi.fn(() => '{ title: string }'),
   };
 });
 
-const mockGetConnectorSpec = getConnectorSpec as jest.Mock;
-const mockIsToolAction = isToolAction as jest.Mock;
+const mockGetConnectorSpec = getConnectorSpec as Mock;
+const mockIsToolAction = isToolAction as Mock;
 
 const makeConnector = (
   overrides: Partial<{ id: string; name: string; actionTypeId: string }> = {}
@@ -53,14 +59,14 @@ const makeSpec = (description = 'GitHub connector', actions: Record<string, unkn
 });
 
 const makeActionsStart = (connectors: ReturnType<typeof makeConnector>[] = []) => {
-  const mockGetAll = jest.fn().mockResolvedValue(connectors);
-  const mockGet = jest.fn().mockImplementation(({ id }: { id: string }) => {
+  const mockGetAll = vi.fn().mockResolvedValue(connectors);
+  const mockGet = vi.fn().mockImplementation(({ id }: { id: string }) => {
     const c = connectors.find((x) => x.id === id);
     if (!c) throw new Error(`Connector '${id}' not found`);
     return Promise.resolve(c);
   });
   const actionsClient = { getAll: mockGetAll, get: mockGet };
-  const getActionsClientWithRequest = jest.fn().mockResolvedValue(actionsClient);
+  const getActionsClientWithRequest = vi.fn().mockResolvedValue(actionsClient);
   return {
     actionsStart: { getActionsClientWithRequest } as unknown as ActionsPluginStart,
     mockGetAll,
@@ -77,7 +83,7 @@ const makeContext = (connectorIds?: string[]) =>
 
 describe('connector-discovery inline tools', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetConnectorSpec.mockReturnValue(undefined);
     mockIsToolAction.mockReturnValue(false);
   });
@@ -142,8 +148,8 @@ describe('connector-discovery inline tools', () => {
     });
 
     it('returns an error result when getAll throws', async () => {
-      const getActionsClientWithRequest = jest.fn().mockResolvedValue({
-        getAll: jest.fn().mockRejectedValue(new Error('network error')),
+      const getActionsClientWithRequest = vi.fn().mockResolvedValue({
+        getAll: vi.fn().mockRejectedValue(new Error('network error')),
       });
       const actionsStart = { getActionsClientWithRequest } as unknown as ActionsPluginStart;
       const tool = createListConnectorsTool({ getActionsStart: async () => actionsStart });
@@ -287,8 +293,8 @@ describe('connector-discovery inline tools', () => {
     });
 
     it('returns an error result when actionsClient.get throws', async () => {
-      const getActionsClientWithRequest = jest.fn().mockResolvedValue({
-        get: jest.fn().mockRejectedValue(new Error('not found')),
+      const getActionsClientWithRequest = vi.fn().mockResolvedValue({
+        get: vi.fn().mockRejectedValue(new Error('not found')),
       });
       const actionsStart = { getActionsClientWithRequest } as unknown as ActionsPluginStart;
       const tool = createGetConnectorSubActionsTool({ getActionsStart: async () => actionsStart });

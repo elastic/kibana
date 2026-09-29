@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { EuiIconTip } from '@elastic/eui';
@@ -21,9 +23,9 @@ describe('SizeParamEditor', () => {
     defaultProps = {
       ...aggParamCommonPropsMock,
       value: '',
-      setValue: jest.fn(),
-      setValidity: jest.fn(),
-      setTouched: jest.fn(),
+      setValue: vi.fn(),
+      setValidity: vi.fn(),
+      setTouched: vi.fn(),
     };
   });
 

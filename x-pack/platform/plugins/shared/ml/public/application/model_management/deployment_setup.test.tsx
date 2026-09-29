@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -46,7 +48,7 @@ function renderDeploymentSetup(props: {
   config?: DeploymentParamsUI;
   onConfigChange?: (c: DeploymentParamsUI) => void;
 }) {
-  const onConfigChange = props.onConfigChange ?? jest.fn();
+  const onConfigChange = props.onConfigChange ?? vi.fn();
   const config = props.config ?? baseConfig;
 
   return render(

@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import type { ChangeHistoryCompareSpec } from '../types/change_history_compare';
 import { TEST_SNAPSHOT, TEST_SNAPSHOT_OLD } from '../test_utils/change_history_test_fixtures';
 import { useChangeHistoryDiffTelemetry } from './use_change_history_diff_telemetry';
 import { useChangeHistoryConfig } from '../provider/use_change_history_config';
 
-jest.mock('../provider/use_change_history_config', () => ({
-  useChangeHistoryConfig: jest.fn(),
-}));
+vi.mock('../provider/use_change_history_config', () => {
+      const mocked = {
+      useChangeHistoryConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseChangeHistoryConfig = useChangeHistoryConfig as jest.Mock;
+const mockUseChangeHistoryConfig = useChangeHistoryConfig as Mock;
 
 const compareSpec: ChangeHistoryCompareSpec = {
   comparisonType: 'vs_previous',
@@ -38,12 +44,12 @@ const compareSpec: ChangeHistoryCompareSpec = {
   },
 };
 
-const mockReportDiffViewed = jest.fn();
-const mockReportDiffChangeNavigated = jest.fn();
+const mockReportDiffViewed = vi.fn();
+const mockReportDiffChangeNavigated = vi.fn();
 
 describe('useChangeHistoryDiffTelemetry', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseChangeHistoryConfig.mockReturnValue({
       telemetry: {
         reportDiffViewed: mockReportDiffViewed,
@@ -70,7 +76,7 @@ describe('useChangeHistoryDiffTelemetry', () => {
 
   it('reports hasChangesSummaryTooltip when summary renderer and data are present', () => {
     mockUseChangeHistoryConfig.mockReturnValue({
-      renderChangesSummary: jest.fn(),
+      renderChangesSummary: vi.fn(),
       telemetry: {
         reportDiffViewed: mockReportDiffViewed,
         reportDiffChangeNavigated: mockReportDiffChangeNavigated,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { expectType } from 'tsd';
 import {
   z,
@@ -23,12 +25,15 @@ import {
 } from '..';
 import { reportStringLengthViolation } from '@kbn/schema-string-helpers';
 
-jest.mock('@kbn/schema-string-helpers', () => ({
-  ...jest.requireActual('@kbn/schema-string-helpers'),
-  reportStringLengthViolation: jest.fn(),
-}));
+vi.mock('@kbn/schema-string-helpers', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/schema-string-helpers')),
+      reportStringLengthViolation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 describe.each([
   ['savedObjectId', savedObjectId, 1, 512],

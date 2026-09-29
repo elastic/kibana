@@ -7,20 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { SplitByTermsUI } from './terms';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  htmlIdGenerator: jest.fn(() => () => '42'),
-  EuiFlexGroup: jest.requireActual('@elastic/eui').EuiFlexGroup,
-  EuiFlexItem: jest.requireActual('@elastic/eui').EuiFlexItem,
-  EuiFormRow: jest.requireActual('@elastic/eui').EuiFormRow,
-  EuiFieldNumber: jest.requireActual('@elastic/eui').EuiFieldNumber,
-  EuiComboBox: jest.requireActual('@elastic/eui').EuiComboBox,
-  EuiFieldText: jest.requireActual('@elastic/eui').EuiFieldText,
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      htmlIdGenerator: vi.fn(() => () => '42'),
+      EuiFlexGroup: (await vi.importActual('@elastic/eui')).EuiFlexGroup,
+      EuiFlexItem: (await vi.importActual('@elastic/eui')).EuiFlexItem,
+      EuiFormRow: (await vi.importActual('@elastic/eui')).EuiFormRow,
+      EuiFieldNumber: (await vi.importActual('@elastic/eui')).EuiFieldNumber,
+      EuiComboBox: (await vi.importActual('@elastic/eui')).EuiComboBox,
+      EuiFieldText: (await vi.importActual('@elastic/eui')).EuiFieldText,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('src/legacy/core_plugins/metrics/public/components/splits/terms.test.js', () => {
   let props;
@@ -28,7 +33,7 @@ describe('src/legacy/core_plugins/metrics/public/components/splits/terms.test.js
   beforeEach(() => {
     props = {
       intl: {
-        formatMessage: jest.fn(),
+        formatMessage: vi.fn(),
       },
       model: {
         id: 123,
@@ -37,7 +42,7 @@ describe('src/legacy/core_plugins/metrics/public/components/splits/terms.test.js
       seriesQuantity: {
         id123: 123,
       },
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       indexPattern: 'kibana_sample_data_flights',
       fields: {
         kibana_sample_data_flights: [

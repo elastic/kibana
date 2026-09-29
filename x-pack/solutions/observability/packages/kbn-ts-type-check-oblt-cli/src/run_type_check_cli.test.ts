@@ -5,47 +5,86 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { TsProject } from '@kbn/ts-projects';
 
-jest.mock('@kbn/dev-cli-runner', () => ({ run: jest.fn() }));
-jest.mock('@kbn/dev-cli-errors', () => ({
-  createFailError: jest.fn((msg: string) => new Error(msg)),
-}));
-jest.mock('@kbn/repo-info', () => ({ REPO_ROOT: '/repo' }));
-jest.mock('@kbn/std', () => ({
-  asyncForEachWithLimit: jest.fn().mockResolvedValue(undefined),
-  asyncMapWithLimit: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('@kbn/dev-cli-runner', () => {
+      const mocked = { run: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/dev-cli-errors', () => {
+      const mocked = {
+      createFailError: vi.fn((msg: string) => new Error(msg)),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/repo-info', () => {
+      const mocked = { REPO_ROOT: '/repo' };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/std', () => {
+      const mocked = {
+      asyncForEachWithLimit: vi.fn().mockResolvedValue(undefined),
+      asyncMapWithLimit: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./cache/restore_ts_build_artifacts', () => ({
-  restoreTSBuildArtifacts: jest.fn(),
-  resolveRestoreStrategy: jest.fn().mockResolvedValue({ shouldRestore: false, bestSha: undefined }),
-}));
-jest.mock('./cache/artifacts_state', () => ({
-  writeArtifactsState: jest.fn().mockResolvedValue(undefined),
-}));
-jest.mock('./cache/utils', () => ({
-  isCiEnvironment: jest.fn().mockReturnValue(false),
-  resolveCurrentCommitSha: jest.fn().mockResolvedValue('head-sha'),
-}));
-jest.mock('./tsc/run_tsc', () => ({
-  runTsc: jest.fn().mockResolvedValue(true),
-  runTscFastPass: jest.fn().mockResolvedValue(true),
-}));
-jest.mock('./tsc/root_refs_config', () => ({
-  updateRootRefsConfig: jest.fn(),
-  ROOT_REFS_CONFIG_PATH: '/repo/tsconfig.refs.json',
-}));
-jest.mock('./cache/clean_cache', () => ({
-  cleanCache: jest.fn(),
-}));
-jest.mock('./tsc/create_type_check_configs', () => ({
-  createTypeCheckConfigs: jest.fn().mockResolvedValue(new Set()),
-}));
-jest.mock('./tsc/normalize_project_path', () => ({
-  normalizeProjectPath: jest.fn((p: string | undefined) => p),
-}));
+vi.mock('./cache/restore_ts_build_artifacts', () => {
+      const mocked = {
+      restoreTSBuildArtifacts: vi.fn(),
+      resolveRestoreStrategy: vi.fn().mockResolvedValue({ shouldRestore: false, bestSha: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./cache/artifacts_state', () => {
+      const mocked = {
+      writeArtifactsState: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./cache/utils', () => {
+      const mocked = {
+      isCiEnvironment: vi.fn().mockReturnValue(false),
+      resolveCurrentCommitSha: vi.fn().mockResolvedValue('head-sha'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./tsc/run_tsc', () => {
+      const mocked = {
+      runTsc: vi.fn().mockResolvedValue(true),
+      runTscFastPass: vi.fn().mockResolvedValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./tsc/root_refs_config', () => {
+      const mocked = {
+      updateRootRefsConfig: vi.fn(),
+      ROOT_REFS_CONFIG_PATH: '/repo/tsconfig.refs.json',
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./cache/clean_cache', () => {
+      const mocked = {
+      cleanCache: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./tsc/create_type_check_configs', () => {
+      const mocked = {
+      createTypeCheckConfigs: vi.fn().mockResolvedValue(new Set()),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./tsc/normalize_project_path', () => {
+      const mocked = {
+      normalizeProjectPath: vi.fn((p: string | undefined) => p),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeProject = (name: string, dir: string): TsProject =>
   ({
@@ -59,20 +98,23 @@ const makeProject = (name: string, dir: string): TsProject =>
     getKbnRefs: () => [],
   } as unknown as TsProject);
 
-jest.mock('@kbn/ts-projects', () => ({
-  TS_PROJECTS: [
-    makeProject('streams_app', 'x-pack/plugins/streams_app'),
-    makeProject('kbn-std', 'src/packages/kbn-std'),
-    makeProject('kbn-utils', 'src/packages/kbn-utils'),
-  ],
-}));
+vi.mock('@kbn/ts-projects', () => {
+      const mocked = {
+      TS_PROJECTS: [
+        makeProject('streams_app', 'x-pack/plugins/streams_app'),
+        makeProject('kbn-std', 'src/packages/kbn-std'),
+        makeProject('kbn-utils', 'src/packages/kbn-utils'),
+      ],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Import the module AFTER all mocks are in place — this triggers the
 // top-level `run()` call which we intercept via the mock above.
 require('./run_type_check_cli');
 
-const { run } = jest.requireMock('@kbn/dev-cli-runner') as {
-  run: jest.MockedFunction<(fn: Function, opts: unknown) => void>;
+const { run } = (await vi.importMock('@kbn/dev-cli-runner')) as {
+  run: MockedFunction<(fn: Function, opts: unknown) => void>;
 };
 
 // `run` was called with (callback, options). Grab the callback.
@@ -82,21 +124,19 @@ const runCallback = run.mock.calls[0][0] as (ctx: {
   procRunner: ReturnType<typeof createProcRunner>;
 }) => Promise<void>;
 
-const { isCiEnvironment, resolveCurrentCommitSha } = jest.requireMock('./cache/utils') as {
-  isCiEnvironment: jest.MockedFunction<() => boolean>;
-  resolveCurrentCommitSha: jest.MockedFunction<() => Promise<string | undefined>>;
+const { isCiEnvironment, resolveCurrentCommitSha } = (await vi.importMock('./cache/utils')) as {
+  isCiEnvironment: MockedFunction<() => boolean>;
+  resolveCurrentCommitSha: MockedFunction<() => Promise<string | undefined>>;
 };
-const { restoreTSBuildArtifacts, resolveRestoreStrategy } = jest.requireMock(
-  './cache/restore_ts_build_artifacts'
-) as {
-  restoreTSBuildArtifacts: jest.MockedFunction<
+const { restoreTSBuildArtifacts, resolveRestoreStrategy } = (await vi.importMock('./cache/restore_ts_build_artifacts')) as {
+  restoreTSBuildArtifacts: MockedFunction<
     (
       log: SomeDevLog,
       sha?: string,
       options?: { skipExistingArtifactsCheck?: boolean }
     ) => Promise<void>
   >;
-  resolveRestoreStrategy: jest.MockedFunction<
+  resolveRestoreStrategy: MockedFunction<
     (
       log: SomeDevLog,
       projects: TsProject[]
@@ -113,18 +153,18 @@ const { restoreTSBuildArtifacts, resolveRestoreStrategy } = jest.requireMock(
     >
   >;
 };
-const { writeArtifactsState } = jest.requireMock('./cache/artifacts_state') as {
-  writeArtifactsState: jest.MockedFunction<(sha: string) => Promise<void>>;
+const { writeArtifactsState } = (await vi.importMock('./cache/artifacts_state')) as {
+  writeArtifactsState: MockedFunction<(sha: string) => Promise<void>>;
 };
-const { runTsc, runTscFastPass } = jest.requireMock('./tsc/run_tsc') as {
-  runTsc: jest.MockedFunction<(opts: Record<string, unknown>) => Promise<boolean>>;
-  runTscFastPass: jest.MockedFunction<(opts: Record<string, unknown>) => Promise<boolean>>;
+const { runTsc, runTscFastPass } = (await vi.importMock('./tsc/run_tsc')) as {
+  runTsc: MockedFunction<(opts: Record<string, unknown>) => Promise<boolean>>;
+  runTscFastPass: MockedFunction<(opts: Record<string, unknown>) => Promise<boolean>>;
 };
-const { cleanCache } = jest.requireMock('./cache/clean_cache') as {
-  cleanCache: jest.MockedFunction<() => Promise<void>>;
+const { cleanCache } = (await vi.importMock('./cache/clean_cache')) as {
+  cleanCache: MockedFunction<() => Promise<void>>;
 };
-const { createTypeCheckConfigs } = jest.requireMock('./tsc/create_type_check_configs') as {
-  createTypeCheckConfigs: jest.MockedFunction<
+const { createTypeCheckConfigs } = (await vi.importMock('./tsc/create_type_check_configs')) as {
+  createTypeCheckConfigs: MockedFunction<
     (
       log: SomeDevLog,
       projects: TsProject[],
@@ -136,26 +176,26 @@ const { createTypeCheckConfigs } = jest.requireMock('./tsc/create_type_check_con
 
 const createLog = (): SomeDevLog =>
   ({
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-    verbose: jest.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    verbose: vi.fn(),
   } as unknown as SomeDevLog);
 
 const createProcRunner = () => ({
-  run: jest.fn().mockResolvedValue(undefined),
+  run: vi.fn().mockResolvedValue(undefined),
 });
 
 const makeFlagsReader = (overrides: Record<string, unknown> = {}) => ({
-  boolean: jest.fn((name: string) => overrides[name] ?? false),
-  path: jest.fn((name: string) => (overrides[name] as string | undefined) ?? undefined),
-  string: jest.fn((name: string) => (overrides[name] as string | undefined) ?? undefined),
+  boolean: vi.fn((name: string) => overrides[name] ?? false),
+  path: vi.fn((name: string) => (overrides[name] as string | undefined) ?? undefined),
+  string: vi.fn((name: string) => (overrides[name] as string | undefined) ?? undefined),
 });
 
 describe('type_check orchestration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     isCiEnvironment.mockReturnValue(false);
     resolveCurrentCommitSha.mockResolvedValue('head-sha');
     restoreTSBuildArtifacts.mockResolvedValue(undefined);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import type { DatasourceMap, UserMessage, VisualizationMap } from '@kbn/lens-common';
 import { fireEvent, screen, act } from '@testing-library/react';
@@ -62,7 +65,7 @@ let mockVisualization2: ReturnType<typeof createMockVisualization>;
 let mockDatasource: ReturnType<typeof createMockDatasource>;
 
 let expressionRendererMock: ReturnType<typeof createExpressionRendererMock>;
-const trigger = { exec: jest.fn() } as unknown as jest.Mocked<Trigger>;
+const trigger = { exec: vi.fn() } as unknown as Mocked<Trigger>;
 const uiActionsMock = uiActionsPluginMock.createStartContract();
 uiActionsMock.getTrigger.mockReturnValue(trigger);
 
@@ -81,9 +84,9 @@ const defaultProps = {
   },
   getSuggestionForField: () => undefined,
   lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
-  toggleFullscreen: jest.fn(),
-  getUserMessages: jest.fn(() => []),
-  addUserMessages: jest.fn(() => () => {}),
+  toggleFullscreen: vi.fn(),
+  getUserMessages: vi.fn(() => []),
+  addUserMessages: vi.fn(() => () => {}),
 };
 
 const toExpr = (
@@ -107,7 +110,7 @@ const SELECTORS = {
 
 describe('workspace_panel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockVisualization = createMockVisualization();
     mockVisualization2 = createMockVisualization();
     mockDatasource = createMockDatasource();
@@ -637,7 +640,7 @@ describe('workspace_panel', () => {
         .mockReturnValueOnce('datasource')
         .mockReturnValueOnce('datasource second');
 
-      expressionRendererMock = jest.fn((_arg) => <span />);
+      expressionRendererMock = vi.fn((_arg) => <span />);
 
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
@@ -685,7 +688,7 @@ describe('workspace_panel', () => {
         .mockReturnValueOnce('datasource')
         .mockReturnValueOnce('datasource second');
 
-      expressionRendererMock = jest.fn((_arg) => <span />);
+      expressionRendererMock = vi.fn((_arg) => <span />);
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
@@ -745,7 +748,7 @@ describe('workspace_panel', () => {
         },
       ];
 
-      const getUserMessages = jest.fn(() => messages);
+      const getUserMessages = vi.fn(() => messages);
 
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
@@ -776,7 +779,7 @@ describe('workspace_panel', () => {
       // but not yet applied their changes
 
       let userMessages = [] as UserMessage[];
-      const getUserMessageFn = jest.fn(() => userMessages);
+      const getUserMessageFn = vi.fn(() => userMessages);
 
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
@@ -843,9 +846,9 @@ describe('workspace_panel', () => {
         first: mockDatasource.publicAPIMock,
       };
 
-      const mockRemoveUserMessages = jest.fn();
-      const mockAddUserMessages = jest.fn(() => mockRemoveUserMessages);
-      const mockGetUserMessages = jest.fn<UserMessage[], unknown[]>(() => []);
+      const mockRemoveUserMessages = vi.fn();
+      const mockAddUserMessages = vi.fn(() => mockRemoveUserMessages);
+      const mockGetUserMessages = vi.fn<UserMessage[], unknown[]>(() => []);
 
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
@@ -971,7 +974,7 @@ describe('workspace_panel', () => {
             <WorkspacePanel
               {...defaultProps}
               framePublicAPI={createMockFramePublicAPI()}
-              getSuggestionForField={jest.fn()}
+              getSuggestionForField={vi.fn()}
               {...propsOverrides}
             />
           </ChildDragDropProvider>
@@ -981,7 +984,7 @@ describe('workspace_panel', () => {
 
     it('should immediately transition if exactly one suggestion is returned', () => {
       const { store } = renderWithDndAndRedux({
-        getSuggestionForField: jest.fn().mockReturnValue({
+        getSuggestionForField: vi.fn().mockReturnValue({
           visualizationId: 'testVis',
           visualizationState: {},
           datasourceId: 'formBased',
@@ -1005,7 +1008,7 @@ describe('workspace_panel', () => {
 
     it('should allow to drop if there are suggestions', () => {
       renderWithDndAndRedux({
-        getSuggestionForField: jest.fn().mockReturnValue({
+        getSuggestionForField: vi.fn().mockReturnValue({
           visualizationId: 'testVis',
           visualizationState: {},
           datasourceId: 'formBased',

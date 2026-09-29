@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { EventActorType } from '@kbn/agent-builder-common';
 import { useConversationId } from '../context/conversation/use_conversation_id';
@@ -16,31 +18,46 @@ import type { TimelineItem } from '../components/conversations/timeline/types';
 import { createUserMessageEvent } from '../components/conversations/timeline/items/user_message_event.factory';
 import { useOnMessageFromOtherParticipant } from './use_on_message_from_other_participant';
 
-jest.mock('../context/conversation/use_conversation_id', () => ({
-  useConversationId: jest.fn(),
-}));
+vi.mock('../context/conversation/use_conversation_id', () => {
+      const mocked = {
+      useConversationId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../context/streaming/streaming_context', () => ({
-  useStreamingContext: jest.fn(),
-}));
+vi.mock('../context/streaming/streaming_context', () => {
+      const mocked = {
+      useStreamingContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_conversation', () => ({
-  useConversationStatus: jest.fn(),
-}));
+vi.mock('./use_conversation', () => {
+      const mocked = {
+      useConversationStatus: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_current_user', () => ({
-  useCurrentUser: jest.fn(),
-}));
+vi.mock('./use_current_user', () => {
+      const mocked = {
+      useCurrentUser: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/conversations/timeline/use_timeline_items', () => ({
-  useTimelineItems: jest.fn(),
-}));
+vi.mock('../components/conversations/timeline/use_timeline_items', () => {
+      const mocked = {
+      useTimelineItems: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseConversationId = jest.mocked(useConversationId);
-const mockUseStreamingContext = jest.mocked(useStreamingContext);
-const mockUseTimelineItems = jest.mocked(useTimelineItems);
-const mockUseConversationStatus = jest.mocked(useConversationStatus);
-const mockUseCurrentUser = jest.mocked(useCurrentUser);
+const mockUseConversationId = vi.mocked(useConversationId);
+const mockUseStreamingContext = vi.mocked(useStreamingContext);
+const mockUseTimelineItems = vi.mocked(useTimelineItems);
+const mockUseConversationStatus = vi.mocked(useConversationStatus);
+const mockUseCurrentUser = vi.mocked(useCurrentUser);
 
 interface State {
   conversationId: string | undefined;
@@ -83,7 +100,7 @@ const setState = ({
 };
 
 const render = (initial: State) => {
-  const onMessageFromOtherParticipant = jest.fn();
+  const onMessageFromOtherParticipant = vi.fn();
 
   setState(initial);
   const { rerender } = renderHook(() =>
@@ -101,7 +118,7 @@ const render = (initial: State) => {
 
 describe('useOnMessageFromOtherParticipant', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('reports a message that appeared without a local stream', () => {

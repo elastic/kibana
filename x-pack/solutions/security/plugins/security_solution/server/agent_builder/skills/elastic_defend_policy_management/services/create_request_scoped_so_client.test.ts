@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { StartServicesAccessor } from '@kbn/core/server';
@@ -19,8 +21,8 @@ const BLOCKED_METHODS = ['create', 'createPointInTimeFinder'] as const;
 const createDeps = () => {
   const request = httpServerMock.createKibanaRequest();
   const scopedClient = savedObjectsClientMock.create();
-  const getScopedClient = jest.fn().mockReturnValue(scopedClient);
-  const getStartServices = jest.fn(async () => [
+  const getScopedClient = vi.fn().mockReturnValue(scopedClient);
+  const getStartServices = vi.fn(async () => [
     { savedObjects: { getScopedClient } },
   ]) as unknown as StartServicesAccessor;
 

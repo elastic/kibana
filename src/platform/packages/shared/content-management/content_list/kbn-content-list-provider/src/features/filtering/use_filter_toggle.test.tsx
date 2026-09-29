@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { ContentListProvider } from '../../context';
@@ -21,7 +23,7 @@ import { getIncludeExcludeFilter } from '../../datasource';
 // Test setup
 // ─────────────────────────────────────────────────────────────────────────────
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({ items: [], total: 0 })
 );
 
@@ -67,7 +69,7 @@ const useHookState = () => {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

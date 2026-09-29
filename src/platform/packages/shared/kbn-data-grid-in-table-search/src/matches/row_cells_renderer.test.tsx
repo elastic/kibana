@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { RowCellsRenderer } from './row_cells_renderer';
@@ -19,17 +21,17 @@ describe('RowCellsRenderer', () => {
     ['bbb', 'abb'],
   ];
 
-  const originalRenderCellValue = jest.fn(getRenderCellValueMock(testData));
+  const originalRenderCellValue = vi.fn(getRenderCellValueMock(testData));
 
   const getRenderCellValueWrappedMock = () =>
-    jest.fn(wrapRenderCellValueWithInTableSearchSupport(originalRenderCellValue, 'black', 'green'));
+    vi.fn(wrapRenderCellValueWithInTableSearchSupport(originalRenderCellValue, 'black', 'green'));
 
   beforeEach(() => {
     originalRenderCellValue.mockClear();
   });
 
   it('renders cells in row 0', async () => {
-    const onRowProcessed = jest.fn();
+    const onRowProcessed = vi.fn();
     const renderCellValue = getRenderCellValueWrappedMock();
     const visibleColumns = ['columnA', 'columnB'];
     const rowIndex = 0;
@@ -61,7 +63,7 @@ describe('RowCellsRenderer', () => {
   });
 
   it('renders cells in row 1', async () => {
-    const onRowProcessed = jest.fn();
+    const onRowProcessed = vi.fn();
     const renderCellValue = getRenderCellValueWrappedMock();
     const visibleColumns = ['columnA', 'columnB'];
     const rowIndex = 1;
@@ -94,7 +96,7 @@ describe('RowCellsRenderer', () => {
   });
 
   it('should call onRowProcessed even in case of errors', async () => {
-    const onRowProcessed = jest.fn();
+    const onRowProcessed = vi.fn();
     const renderCellValue = getRenderCellValueWrappedMock();
     const visibleColumns = ['columnA', 'columnB'];
     const rowIndex = 3;

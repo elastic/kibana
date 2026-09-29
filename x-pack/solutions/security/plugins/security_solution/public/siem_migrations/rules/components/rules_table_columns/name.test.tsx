@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createNameColumn } from './name';
 
 describe('createNameColumn', () => {
   it('returns the correct column definition', () => {
     const column = createNameColumn({
-      openMigrationRuleDetails: jest.fn(),
+      openMigrationRuleDetails: vi.fn(),
     });
 
     expect(column).toEqual({

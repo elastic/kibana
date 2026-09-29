@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import type { EuiCommentProps } from '@elastic/eui';
@@ -27,7 +29,7 @@ describe('useCommentsList', () => {
     builtLastPageActions: [lastPageAction],
     hasNextPage: false,
     remainingActionCount: 0,
-    fetchNextPage: jest.fn(),
+    fetchNextPage: vi.fn(),
     isFetchingNextPage: false,
     shouldShowCommentEditor: false,
     currentUserProfile: undefined,

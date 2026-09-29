@@ -5,32 +5,41 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
 import { validateCustomFilterFields } from '@kbn/ml-anomaly-utils';
 
 import { validateKQLStringFilter } from '../common/utils';
 import { validateAnomalyDetectionCustomFilter } from './utils';
 
-jest.mock('../common/utils', () => ({
-  validateKQLStringFilter: jest.fn(),
-}));
+vi.mock('../common/utils', () => {
+      const mocked = {
+      validateKQLStringFilter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/ml-anomaly-utils', () => ({
-  validateCustomFilterFields: jest.fn(),
-}));
+vi.mock('@kbn/ml-anomaly-utils', () => {
+      const mocked = {
+      validateCustomFilterFields: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockResultType = 'record' as MlAnomalyResultType;
 
 describe('validateAnomalyDetectionCustomFilter', () => {
-  const mockValidateKQLStringFilter = validateKQLStringFilter as jest.MockedFunction<
+  const mockValidateKQLStringFilter = validateKQLStringFilter as MockedFunction<
     typeof validateKQLStringFilter
   >;
-  const mockValidateCustomFilterFields = validateCustomFilterFields as jest.MockedFunction<
+  const mockValidateCustomFilterFields = validateCustomFilterFields as MockedFunction<
     typeof validateCustomFilterFields
   >;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns undefined when no query is provided', () => {

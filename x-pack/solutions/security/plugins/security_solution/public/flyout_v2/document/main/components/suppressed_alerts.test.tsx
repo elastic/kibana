@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -17,12 +20,15 @@ import {
 import { SuppressedAlerts } from './suppressed_alerts';
 import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 
-jest.mock('../../../../flyout/document_details/shared/context');
-jest.mock('../../../../../common/detection_engine/utils', () => ({
-  isSuppressionRuleInGA: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../../flyout/document_details/shared/context');
+vi.mock('../../../../../common/detection_engine/utils', () => {
+      const mocked = {
+      isSuppressionRuleInGA: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOnShowCorrelationsDetails = jest.fn();
+const mockOnShowCorrelationsDetails = vi.fn();
 
 const TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
 const BUTTON_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
@@ -38,11 +44,11 @@ const renderSuppressedAlerts = (alertSuppressionCount: number) =>
     </IntlProvider>
   );
 
-const isSuppressionRuleInGAMock = isSuppressionRuleInGA as jest.Mock;
+const isSuppressionRuleInGAMock = isSuppressionRuleInGA as Mock;
 
 describe('<SuppressedAlerts />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render single suppressed alert correctly', () => {

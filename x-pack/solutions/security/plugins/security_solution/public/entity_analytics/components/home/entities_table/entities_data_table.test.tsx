@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
@@ -22,12 +25,12 @@ import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { TEST_SUBJ_DATA_GRID, TEST_SUBJ_EMPTY_STATE } from './constants';
 
-const mockUseFetchGridData = jest.mocked(useFetchGridData);
-const mockUseInvestigateInTimeline = jest.mocked(useInvestigateInTimeline);
-const mockUseUserPrivileges = jest.mocked(useUserPrivileges);
-const mockUseAlertsPrivileges = jest.mocked(useAlertsPrivileges);
-const mockUseGlobalTime = jest.mocked(useGlobalTime);
-const mockUseKibana = jest.mocked(useKibana);
+const mockUseFetchGridData = vi.mocked(useFetchGridData);
+const mockUseInvestigateInTimeline = vi.mocked(useInvestigateInTimeline);
+const mockUseUserPrivileges = vi.mocked(useUserPrivileges);
+const mockUseAlertsPrivileges = vi.mocked(useAlertsPrivileges);
+const mockUseGlobalTime = vi.mocked(useGlobalTime);
+const mockUseKibana = vi.mocked(useKibana);
 
 const capturedProps: {
   externalCustomRenderers?: CustomCellRenderer;
@@ -36,8 +39,8 @@ const capturedProps: {
   onFilter?: unknown;
 } = {};
 
-jest.mock('@kbn/unified-data-table', () => {
-  const actual = jest.requireActual('@kbn/unified-data-table');
+vi.mock('@kbn/unified-data-table', async () => {
+  const actual = (await vi.importActual('@kbn/unified-data-table'));
   return {
     ...actual,
     UnifiedDataTable: (props: {
@@ -55,49 +58,61 @@ jest.mock('@kbn/unified-data-table', () => {
   };
 });
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(() => ({
-    openRightPanel: jest.fn(),
-    openFlyout: jest.fn(),
-    closeFlyout: jest.fn(),
-  })),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(() => ({
+        openRightPanel: vi.fn(),
+        openFlyout: vi.fn(),
+        closeFlyout: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => false,
-}));
+vi.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => {
+      const mocked = {
+      useIsNewFlyoutEnabled: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
-  useFlyoutApi: () => ({
-    openEntityFlyout: jest.fn(),
-  }),
-}));
+vi.mock('../../../../flyout_v2/use_flyout_api', () => {
+      const mocked = {
+      useFlyoutApi: () => ({
+        openEntityFlyout: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/timeline/use_investigate_in_timeline');
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../../../common/containers/use_global_time');
-jest.mock('./hooks/use_fetch_grid_data');
-jest.mock('./hooks/use_styles', () => ({
-  useStyles: () => ({
-    gridContainer: 'gridContainer',
-    gridProgressBar: 'gridProgressBar',
-    gridStyle: 'gridStyle',
-  }),
-}));
+vi.mock('../../../../common/hooks/timeline/use_investigate_in_timeline');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../../common/containers/use_global_time');
+vi.mock('./hooks/use_fetch_grid_data');
+vi.mock('./hooks/use_styles', () => {
+      const mocked = {
+      useStyles: () => ({
+        gridContainer: 'gridContainer',
+        gridProgressBar: 'gridProgressBar',
+        gridStyle: 'gridStyle',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock('react-use/lib/useLocalStorage', () => ({
+vi.mock('react-use/lib/useLocalStorage', () => ({
   __esModule: true,
-  default: jest.fn((key: string, initial: unknown) => {
+  default: vi.fn((key: string, initial: unknown) => {
     if (key.includes('settings')) {
-      return [{ columns: {} }, jest.fn()];
+      return [{ columns: {} }, vi.fn()];
     }
     if (key.includes('columns')) {
-      return [['entity.name', 'entity.id', 'entity.source', 'alerts'], jest.fn()];
+      return [['entity.name', 'entity.id', 'entity.source', 'alerts'], vi.fn()];
     }
-    return [initial, jest.fn()];
+    return [initial, vi.fn()];
   }),
 }));
 
@@ -117,35 +132,35 @@ const createMockState = (overrides: Partial<EntityURLStateResult> = {}): EntityU
     query: { bool: { filter: [], must: [], must_not: [], should: [] } },
     queryError: undefined,
     pageSize: 25,
-    getRowsFromPages: jest.fn(
+    getRowsFromPages: vi.fn(
       (data: Array<{ page: unknown[] }> | undefined) => data?.flatMap((p) => p.page) ?? []
     ),
-    onChangeItemsPerPage: jest.fn(),
-    onResetFilters: jest.fn(),
-    onSort: jest.fn(),
-    setUrlQuery: jest.fn(),
+    onChangeItemsPerPage: vi.fn(),
+    onResetFilters: vi.fn(),
+    onSort: vi.fn(),
+    setUrlQuery: vi.fn(),
     filters: [],
     pageIndex: 0,
-    onChangePage: jest.fn(),
+    onChangePage: vi.fn(),
     ...overrides,
   } as EntityURLStateResult);
 
 const defaultKibanaServices = {
-  uiActions: { getTriggerCompatibleActions: jest.fn(() => []) },
-  uiSettings: { get: jest.fn(() => false) },
+  uiActions: { getTriggerCompatibleActions: vi.fn(() => []) },
+  uiSettings: { get: vi.fn(() => false) },
   dataViews: {},
   data: {
     query: {
       filterManager: {
-        addFilters: jest.fn(),
-        getFilters: jest.fn(() => []),
+        addFilters: vi.fn(),
+        getFilters: vi.fn(() => []),
       },
     },
   },
   application: { capabilities: {} },
   theme: {},
   fieldFormats: {},
-  notifications: { toasts: { addError: jest.fn() } },
+  notifications: { toasts: { addError: vi.fn() } },
   storage: {},
 };
 
@@ -165,10 +180,10 @@ const renderWithProviders = (
 
 describe('EntitiesDataTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseInvestigateInTimeline.mockReturnValue({
-      investigateInTimeline: jest.fn(),
+      investigateInTimeline: vi.fn(),
     });
 
     mockUseUserPrivileges.mockReturnValue({
@@ -182,8 +197,8 @@ describe('EntitiesDataTable', () => {
     } as unknown as ReturnType<typeof useAlertsPrivileges>);
 
     mockUseGlobalTime.mockReturnValue({
-      setQuery: jest.fn(),
-      deleteQuery: jest.fn(),
+      setQuery: vi.fn(),
+      deleteQuery: vi.fn(),
       isInitializing: false,
       from: 'now-15m',
       to: 'now',
@@ -197,16 +212,16 @@ describe('EntitiesDataTable', () => {
       data: {
         pages: [{ page: [], total: 1 }],
       },
-      fetchNextPage: jest.fn(),
+      fetchNextPage: vi.fn(),
       isFetching: false,
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useFetchGridData>);
   });
 
   it('renders the data grid wrapper', () => {
     const state = createMockState();
-    (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+    (state.getRowsFromPages as Mock).mockReturnValue([]);
 
     renderWithProviders(state);
 
@@ -215,14 +230,14 @@ describe('EntitiesDataTable', () => {
 
   it('shows loading progress bar when fetching', () => {
     const state = createMockState();
-    (state.getRowsFromPages as jest.Mock).mockReturnValue([{ id: '1' }]);
+    (state.getRowsFromPages as Mock).mockReturnValue([{ id: '1' }]);
 
     mockUseFetchGridData.mockReturnValue({
       data: { pages: [{ page: [{ id: '1' }], total: 1 }] },
-      fetchNextPage: jest.fn(),
+      fetchNextPage: vi.fn(),
       isFetching: true,
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useFetchGridData>);
 
     const { container } = renderWithProviders(state);
@@ -234,14 +249,14 @@ describe('EntitiesDataTable', () => {
 
   it('renders empty state when no results', () => {
     const state = createMockState();
-    (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+    (state.getRowsFromPages as Mock).mockReturnValue([]);
 
     mockUseFetchGridData.mockReturnValue({
       data: { pages: [{ page: [], total: 0 }] },
-      fetchNextPage: jest.fn(),
+      fetchNextPage: vi.fn(),
       isFetching: false,
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useFetchGridData>);
 
     renderWithProviders(state);
@@ -269,7 +284,7 @@ describe('EntitiesDataTable', () => {
   describe('entity.source column renderer', () => {
     const renderCell = (value: unknown) => {
       const state = createMockState();
-      (state.getRowsFromPages as jest.Mock).mockReturnValue([
+      (state.getRowsFromPages as Mock).mockReturnValue([
         { flattened: { 'entity.source': value } },
       ]);
 
@@ -287,7 +302,7 @@ describe('EntitiesDataTable', () => {
             columnId: 'entity.source',
             rowIndex: 0,
             colIndex: 0,
-            setCellProps: jest.fn(),
+            setCellProps: vi.fn(),
             isDetails: false,
             isExpanded: false,
             isExpandable: false,
@@ -321,7 +336,7 @@ describe('EntitiesDataTable', () => {
   describe('alerts column privilege', () => {
     it('includes the alerts column when the user has alerts read access', () => {
       const state = createMockState();
-      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+      (state.getRowsFromPages as Mock).mockReturnValue([]);
 
       renderWithProviders(state);
 
@@ -335,7 +350,7 @@ describe('EntitiesDataTable', () => {
       } as unknown as ReturnType<typeof useUserPrivileges>);
 
       const state = createMockState();
-      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+      (state.getRowsFromPages as Mock).mockReturnValue([]);
 
       renderWithProviders(state);
 
@@ -349,7 +364,7 @@ describe('EntitiesDataTable', () => {
       } as unknown as ReturnType<typeof useAlertsPrivileges>);
 
       const state = createMockState();
-      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+      (state.getRowsFromPages as Mock).mockReturnValue([]);
 
       renderWithProviders(state);
 
@@ -360,7 +375,7 @@ describe('EntitiesDataTable', () => {
   describe('supportsFieldFiltering', () => {
     it('passes onFilter to UnifiedDataTable when supportsFieldFiltering is not set', () => {
       const state = createMockState();
-      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+      (state.getRowsFromPages as Mock).mockReturnValue([]);
 
       renderWithProviders(state);
 
@@ -369,7 +384,7 @@ describe('EntitiesDataTable', () => {
 
     it('passes undefined onFilter to UnifiedDataTable when supportsFieldFiltering is false', () => {
       const state = createMockState();
-      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+      (state.getRowsFromPages as Mock).mockReturnValue([]);
 
       renderWithProviders(state, mockDataView, false, {
         ...DEFAULT_ENTITIES_TABLE_CONFIG,
@@ -383,7 +398,7 @@ describe('EntitiesDataTable', () => {
   describe('actions (leading control) column', () => {
     it('gives the timeline action an explicit width so the "Actions" header renders as text', () => {
       const state = createMockState();
-      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+      (state.getRowsFromPages as Mock).mockReturnValue([]);
 
       renderWithProviders(state);
 
@@ -402,7 +417,7 @@ describe('EntitiesDataTable', () => {
       } as unknown as ReturnType<typeof useUserPrivileges>);
 
       const state = createMockState();
-      (state.getRowsFromPages as jest.Mock).mockReturnValue([]);
+      (state.getRowsFromPages as Mock).mockReturnValue([]);
 
       renderWithProviders(state);
 

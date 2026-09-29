@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import YAML, { LineCounter } from 'yaml';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import { HIGHLIGHTED_STEP_TRIGGER, setCursorPosition, setWorkflow, setYamlString } from './slice';
@@ -19,17 +21,20 @@ import { createMockStore } from '../__mocks__/store.mock';
 import type { MockStore } from '../__mocks__/store.mock';
 
 // Mock the computation utility
-jest.mock('./utils/computation', () => ({
-  performComputation: jest.fn(),
-}));
+vi.mock('./utils/computation', () => {
+      const mocked = {
+      performComputation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { performComputation } = jest.requireMock('./utils/computation');
+const { performComputation } = (await vi.importMock('./utils/computation'));
 
 describe('workflowComputationMiddleware', () => {
   let store: MockStore;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     store = createMockStore();
   });
 
@@ -71,7 +76,7 @@ describe('workflowComputationMiddleware', () => {
   });
 
   it('should debounce computation when computed already exists', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const mockComputed: ComputedData = {
       yamlString: 'name: test',
@@ -92,11 +97,11 @@ describe('workflowComputationMiddleware', () => {
     expect(performComputation).not.toHaveBeenCalled();
 
     // Advance timers past the debounce window (500ms)
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(performComputation).toHaveBeenCalledWith('name: test2', undefined);
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should clear computed data when performComputation throws', () => {
@@ -113,7 +118,7 @@ describe('workflowComputationMiddleware', () => {
     expect(store.getState().detail.computed).toEqual(mockComputed);
 
     // Second call throws - since computed is defined, it will be debounced
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     performComputation.mockImplementationOnce(() => {
       throw new Error('parse error');
     });
@@ -121,13 +126,13 @@ describe('workflowComputationMiddleware', () => {
     store.dispatch(setYamlString('invalid: {{{'));
 
     // Advance past debounce
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     // computed should be cleared due to the error
     expect(store.getState().detail.computed).toEqual({});
     expect(store.getState().detail.focusedStepId).toBeUndefined();
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('setWorkflow — computed reset on workflow-id change (item 2 bug fix)', () => {
@@ -250,7 +255,7 @@ describe('workflowComputationMiddleware', () => {
   });
 
   it('should cancel pending debounced computation when a new yamlString is dispatched', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const mockComputed: ComputedData = {
       yamlString: 'name: test',
@@ -268,15 +273,15 @@ describe('workflowComputationMiddleware', () => {
 
     // Dispatch two rapid changes
     store.dispatch(setYamlString('name: second'));
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
     store.dispatch(setYamlString('name: third'));
 
     // Only the latest should be computed after the debounce
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(performComputation).toHaveBeenCalledTimes(1);
     expect(performComputation).toHaveBeenCalledWith('name: third', undefined);
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });

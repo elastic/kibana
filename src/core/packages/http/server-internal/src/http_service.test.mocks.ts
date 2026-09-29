@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockHttpServer = jest.fn();
+import { vi } from 'vitest';
 
-jest.mock('./http_server', () => {
-  const realHttpServer = jest.requireActual('./http_server');
+export const mockHttpServer = vi.fn();
+
+vi.mock('./http_server', async () => {
+  const realHttpServer = await vi.importActual('./http_server');
 
   return {
     ...realHttpServer,
@@ -18,6 +20,6 @@ jest.mock('./http_server', () => {
   };
 });
 
-jest.mock('./register_lifecycle_handlers', () => ({
-  registerCoreHandlers: jest.fn(),
+vi.mock('./register_lifecycle_handlers', () => ({
+  registerCoreHandlers: vi.fn(),
 }));

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { CreateTagModal } from './create_modal';
@@ -14,16 +16,19 @@ import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import { duplicateTagNameErrorMessage, managedTagConflictMessage } from './utils';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useGeneratedHtmlId: jest.fn(() => 'mockedId'),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useGeneratedHtmlId: vi.fn(() => 'mockedId'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('create modal', () => {
   const getMockTagClient = (findByNameResult: Tag | null = null) =>
     ({
-      findByName: jest.fn().mockResolvedValue(findByNameResult),
-      create: jest.fn().mockResolvedValue({
+      findByName: vi.fn().mockResolvedValue(findByNameResult),
+      create: vi.fn().mockResolvedValue({
         id: '1',
         name: 'tag1',
         description: 'description',
@@ -33,11 +38,11 @@ describe('create modal', () => {
     } as Partial<ITagsClient> as ITagsClient);
 
   const defaultProps: React.ComponentProps<typeof CreateTagModal> = {
-    onClose: jest.fn(),
-    onSave: jest.fn(),
+    onClose: vi.fn(),
+    onSave: vi.fn(),
     tagClient: getMockTagClient(),
     notifications: {
-      toasts: { addDanger: jest.fn() } as Partial<IToasts> as IToasts,
+      toasts: { addDanger: vi.fn() } as Partial<IToasts> as IToasts,
     } as Partial<NotificationsStart> as NotificationsStart,
   };
 

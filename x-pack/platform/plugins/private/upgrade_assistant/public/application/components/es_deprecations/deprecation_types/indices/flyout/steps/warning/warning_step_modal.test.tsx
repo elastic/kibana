@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -16,8 +18,8 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { WarningModalStep } from './warning_step_modal';
 
 // Mocks
-jest.mock('../../../../../../../app_context', () => {
-  const actual = jest.requireActual('../../../../../../../app_context');
+vi.mock('../../../../../../../app_context', async () => {
+  const actual = (await vi.importActual('../../../../../../../app_context'));
 
   return {
     ...actual,
@@ -34,54 +36,63 @@ jest.mock('../../../../../../../app_context', () => {
   };
 });
 
-jest.mock('./warning_step_checkbox', () => ({
-  DeprecatedSettingWarningCheckbox: ({
-    isChecked,
-    onChange,
-    id,
-  }: {
-    isChecked: boolean;
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    id: string;
-  }) => (
-    <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-test-subj={id} />
-  ),
-  ReplaceIndexWithAliasWarningCheckbox: ({
-    isChecked,
-    onChange,
-    id,
-  }: {
-    isChecked: boolean;
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    id: string;
-  }) => (
-    <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-test-subj={id} />
-  ),
-  MakeIndexReadonlyWarningCheckbox: ({
-    isChecked,
-    onChange,
-    id,
-  }: {
-    isChecked: boolean;
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    id: string;
-  }) => (
-    <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-test-subj={id} />
-  ),
-}));
+vi.mock('./warning_step_checkbox', () => {
+      const mocked = {
+      DeprecatedSettingWarningCheckbox: ({
+        isChecked,
+        onChange,
+        id,
+      }: {
+        isChecked: boolean;
+        onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+        id: string;
+      }) => (
+        <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-test-subj={id} />
+      ),
+      ReplaceIndexWithAliasWarningCheckbox: ({
+        isChecked,
+        onChange,
+        id,
+      }: {
+        isChecked: boolean;
+        onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+        id: string;
+      }) => (
+        <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-test-subj={id} />
+      ),
+      MakeIndexReadonlyWarningCheckbox: ({
+        isChecked,
+        onChange,
+        id,
+      }: {
+        isChecked: boolean;
+        onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+        id: string;
+      }) => (
+        <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-test-subj={id} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../callouts', () => ({
-  FollowerIndexCallout: () => <div data-test-subj="FollowerIndexCallout" />,
-  ESTransformsTargetCallout: () => <div data-test-subj="ESTransformsTargetCallout" />,
-  MlAnomalyCallout: () => <div data-test-subj="MlAnomalyCallout" />,
-  FetchFailedCallOut: ({ errorMessage }: { errorMessage: string }) => (
-    <div data-test-subj="FetchFailedCallOut">{errorMessage}</div>
-  ),
-}));
+vi.mock('../callouts', () => {
+      const mocked = {
+      FollowerIndexCallout: () => <div data-test-subj="FollowerIndexCallout" />,
+      ESTransformsTargetCallout: () => <div data-test-subj="ESTransformsTargetCallout" />,
+      MlAnomalyCallout: () => <div data-test-subj="MlAnomalyCallout" />,
+      FetchFailedCallOut: ({ errorMessage }: { errorMessage: string }) => (
+        <div data-test-subj="FetchFailedCallOut">{errorMessage}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/nodes_low_disk_space', () => ({
-  NodesLowSpaceCallOut: () => <div data-test-subj="NodesLowSpaceCallOut" />,
-}));
+vi.mock('../../../../../common/nodes_low_disk_space', () => {
+      const mocked = {
+      NodesLowSpaceCallOut: () => <div data-test-subj="NodesLowSpaceCallOut" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockReindexState = {
   status: ReindexStatus.inProgress,
@@ -115,8 +126,8 @@ const mockWarnings: IndexWarning[] = [
 ];
 
 const getBaseProps = () => ({
-  closeModal: jest.fn(),
-  confirm: jest.fn(),
+  closeModal: vi.fn(),
+  confirm: vi.fn(),
   meta: {
     indexName: 'test-index',
     reindexName: 'test-index-reindex',

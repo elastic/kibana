@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { useEffect } from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -22,12 +25,12 @@ import userEvent from '@testing-library/user-event';
 const analytics = analyticsServiceMock.createAnalyticsServiceStart();
 const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
 
-const mockSetLocalStorage = jest.fn();
+const mockSetLocalStorage = vi.fn();
 const mockLocalStorageKey = INITIAL_TAB;
 let mockTestInitialLocalStorageValue: string | undefined;
 
-jest.mock('react-use/lib/useLocalStorage', () => {
-  return jest.fn((key: string, initialValue: number) => {
+vi.mock('react-use/lib/useLocalStorage', () => {
+  return vi.fn((key: string, initialValue: number) => {
     if (key !== mockLocalStorageKey) {
       throw new Error(`Unexpected key: ${key}`);
     }
@@ -68,7 +71,7 @@ describe('<DocViewer />', () => {
       id: 'view1',
       order: 10,
       title: 'Render 1',
-      render: jest.fn(() => <></>),
+      render: vi.fn(() => <></>),
     });
     registry.add({
       id: 'view2',
@@ -141,13 +144,13 @@ describe('<DocViewer />', () => {
       id: 'test1',
       order: 10,
       title: 'Render function',
-      render: jest.fn(() => <></>),
+      render: vi.fn(() => <></>),
     });
     registry.add({
       id: 'test2',
       order: 20,
       title: 'Render function',
-      render: jest.fn(() => <></>),
+      render: vi.fn(() => <></>),
     });
 
     render(
@@ -180,13 +183,13 @@ describe('<DocViewer />', () => {
       id: 'test1',
       order: 10,
       title: 'Render function',
-      render: jest.fn(() => <></>),
+      render: vi.fn(() => <></>),
     });
     registry.add({
       id: 'test2',
       order: 20,
       title: 'Render function',
-      render: jest.fn(() => <></>),
+      render: vi.fn(() => <></>),
     });
 
     mockTestInitialLocalStorageValue = 'kbn_doc_viewer_tab_test2';
@@ -203,9 +206,9 @@ describe('<DocViewer />', () => {
 
   test('should prioritize the initialTabId prop over local storage value', () => {
     const registry = new DocViewsRegistry();
-    registry.add({ id: 'test1', order: 10, title: 'Render function', render: jest.fn() });
-    registry.add({ id: 'test2', order: 20, title: 'Render function', render: jest.fn() });
-    registry.add({ id: 'test3', order: 30, title: 'Render function', render: jest.fn() });
+    registry.add({ id: 'test1', order: 10, title: 'Render function', render: vi.fn() });
+    registry.add({ id: 'test2', order: 20, title: 'Render function', render: vi.fn() });
+    registry.add({ id: 'test3', order: 30, title: 'Render function', render: vi.fn() });
 
     mockTestInitialLocalStorageValue = 'kbn_doc_viewer_tab_test2';
 
@@ -229,13 +232,13 @@ describe('<DocViewer />', () => {
       id: 'test1',
       order: 10,
       title: 'Render function',
-      render: jest.fn(() => <></>),
+      render: vi.fn(() => <></>),
     });
     registry.add({
       id: 'test2',
       order: 20,
       title: 'Render function',
-      render: jest.fn(() => <></>),
+      render: vi.fn(() => <></>),
     });
 
     mockTestInitialLocalStorageValue = 'kbn_doc_viewer_tab_test3';
@@ -254,14 +257,14 @@ describe('<DocViewer />', () => {
     const initialTabId = 'test2';
 
     const registry = new DocViewsRegistry();
-    registry.add({ id: 'test1', order: 10, title: 'Render 1st Tab', render: jest.fn(() => <></>) });
+    registry.add({ id: 'test1', order: 10, title: 'Render 1st Tab', render: vi.fn(() => <></>) });
     registry.add({
       id: initialTabId,
       order: 20,
       title: 'Render 2nd Tab',
-      render: jest.fn(() => <></>),
+      render: vi.fn(() => <></>),
     });
-    registry.add({ id: 'test3', order: 30, title: 'Render 3rd Tab', render: jest.fn(() => <></>) });
+    registry.add({ id: 'test3', order: 30, title: 'Render 3rd Tab', render: vi.fn(() => <></>) });
 
     render(
       <WrappedDocViewer
@@ -278,10 +281,10 @@ describe('<DocViewer />', () => {
   });
 
   test('should call onUpdateSelectedTabId when tab selection changes', async () => {
-    const onUpdateSelectedTabId = jest.fn();
+    const onUpdateSelectedTabId = vi.fn();
     const registry = new DocViewsRegistry();
-    registry.add({ id: 'test1', order: 10, title: 'Tab 1', render: jest.fn() });
-    registry.add({ id: 'test2', order: 20, title: 'Tab 2', render: jest.fn() });
+    registry.add({ id: 'test1', order: 10, title: 'Tab 1', render: vi.fn() });
+    registry.add({ id: 'test2', order: 20, title: 'Tab 2', render: vi.fn() });
 
     render(
       <WrappedDocViewer
@@ -298,9 +301,9 @@ describe('<DocViewer />', () => {
   });
 
   test('should call onInitialDocViewerStateChange when tab state changes', () => {
-    const onInitialDocViewerStateChange = jest.fn();
+    const onInitialDocViewerStateChange = vi.fn();
     const initialState = { someState: 'value1' };
-    const renderFn = jest.fn(({ onInitialStateChange }) => {
+    const renderFn = vi.fn(({ onInitialStateChange }) => {
       return (
         <InitialStateReportingTab
           content="Tab 1 Content"
@@ -335,11 +338,11 @@ describe('<DocViewer />', () => {
   });
 
   test('should handle state for multiple tabs independently', async () => {
-    const onInitialDocViewerStateChange = jest.fn();
+    const onInitialDocViewerStateChange = vi.fn();
     const tab1State = { tab1State: 'value1' };
     const tab2State = { tab2State: 'value2' };
 
-    const renderTab1 = jest.fn(({ onInitialStateChange }) => {
+    const renderTab1 = vi.fn(({ onInitialStateChange }) => {
       return (
         <InitialStateReportingTab
           content="Tab 1 Content"
@@ -349,7 +352,7 @@ describe('<DocViewer />', () => {
       );
     });
 
-    const renderTab2 = jest.fn(({ onInitialStateChange }) => {
+    const renderTab2 = vi.fn(({ onInitialStateChange }) => {
       return (
         <InitialStateReportingTab
           content="Tab 2 Content"
@@ -406,13 +409,13 @@ describe('<DocViewer />', () => {
       order: 10,
       title: 'Tab 1',
       ebt: { action: 'viewGenAi', element: 'docViewerTabs' },
-      render: jest.fn(() => <></>),
+      render: vi.fn(() => <></>),
     });
     registry.add({
       id: 'doc_view_test_two',
       order: 20,
       title: 'Tab 2',
-      render: jest.fn(() => <></>),
+      render: vi.fn(() => <></>),
     });
 
     render(
@@ -429,12 +432,12 @@ describe('<DocViewer />', () => {
   });
 
   test('forwards originDocType to the unified_doc_viewer_viewed event', () => {
-    const reportEvent = analytics.reportEvent as jest.Mock;
+    const reportEvent = analytics.reportEvent as Mock;
     reportEvent.mockClear();
 
     const registry = new DocViewsRegistry();
-    registry.add({ id: 'test1', order: 10, title: 'Tab 1', render: jest.fn(() => <></>) });
-    registry.add({ id: 'test2', order: 20, title: 'Tab 2', render: jest.fn(() => <></>) });
+    registry.add({ id: 'test1', order: 10, title: 'Tab 1', render: vi.fn(() => <></>) });
+    registry.add({ id: 'test2', order: 20, title: 'Tab 2', render: vi.fn(() => <></>) });
 
     render(
       <WrappedDocViewer
@@ -457,7 +460,7 @@ describe('<DocViewer />', () => {
   test('should set initial state to initialTabState if both initialTabState and initialTabId provided', () => {
     const initialStateContent = 'Initial state content';
 
-    const renderTab = jest.fn(({ initialState }) => {
+    const renderTab = vi.fn(({ initialState }) => {
       return <div>{initialState.initialStateContent}</div>;
     });
 

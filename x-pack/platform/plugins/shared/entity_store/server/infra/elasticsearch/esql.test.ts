@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { esqlResponseToBulkObjects, executeEsqlQuery } from './esql';
@@ -12,9 +15,9 @@ import { esqlResponseToBulkObjects, executeEsqlQuery } from './esql';
 function createMockEsClient(response: ESQLSearchResponse) {
   return {
     esql: {
-      query: jest.fn().mockResolvedValue(response),
+      query: vi.fn().mockResolvedValue(response),
     },
-  } as unknown as jest.Mocked<ElasticsearchClient>;
+  } as unknown as Mocked<ElasticsearchClient>;
 }
 
 describe('executeEsqlQuery', () => {

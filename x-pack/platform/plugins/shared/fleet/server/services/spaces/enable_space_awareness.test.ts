@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
@@ -14,14 +16,14 @@ import { getSettingsOrUndefined, saveSettings } from '../settings';
 
 import { enableSpaceAwarenessMigration } from './enable_space_awareness';
 
-jest.mock('../app_context');
-jest.mock('../settings');
+vi.mock('../app_context');
+vi.mock('../settings');
 
 function mockGetSettingsOrUndefined(settings?: Partial<Settings>) {
   if (settings) {
-    jest.mocked(getSettingsOrUndefined).mockResolvedValue(settings as any);
+    vi.mocked(getSettingsOrUndefined).mockResolvedValue(settings as any);
   } else {
-    jest.mocked(getSettingsOrUndefined).mockResolvedValue(undefined);
+    vi.mocked(getSettingsOrUndefined).mockResolvedValue(undefined);
   }
 }
 
@@ -31,15 +33,15 @@ describe('enableSpaceAwarenessMigration', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     soClient = savedObjectsClientMock.create();
-    jest.mocked(appContextService.getExperimentalFeatures).mockReset();
-    jest.mocked(appContextService.getLogger).mockReturnValue(mockedLogger);
-    jest
+    vi.mocked(appContextService.getExperimentalFeatures).mockReset();
+    vi.mocked(appContextService.getLogger).mockReturnValue(mockedLogger);
+    vi
       .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension)
       .mockReturnValue(soClient);
-    jest.mocked(getSettingsOrUndefined).mockReset();
-    jest.mocked(saveSettings).mockReset();
+    vi.mocked(getSettingsOrUndefined).mockReset();
+    vi.mocked(saveSettings).mockReset();
 
-    jest.mocked(saveSettings).mockResolvedValue({} as any);
+    vi.mocked(saveSettings).mockResolvedValue({} as any);
   });
   it('should do nothing if migration is already done', async () => {
     mockGetSettingsOrUndefined({
@@ -64,7 +66,7 @@ describe('enableSpaceAwarenessMigration', () => {
     mockGetSettingsOrUndefined({});
 
     soClient.createPointInTimeFinder.mockReturnValueOnce({
-      find: jest.fn().mockImplementation(async function* () {
+      find: vi.fn().mockImplementation(async function* () {
         yield {
           saved_objects: [
             { id: 'agent-policy-1', attributes: {} },
@@ -72,11 +74,11 @@ describe('enableSpaceAwarenessMigration', () => {
           ],
         };
       }),
-      close: jest.fn(),
+      close: vi.fn(),
     });
 
     soClient.createPointInTimeFinder.mockReturnValueOnce({
-      find: jest.fn().mockImplementation(async function* () {
+      find: vi.fn().mockImplementation(async function* () {
         yield {
           saved_objects: [
             { id: 'package-policy-1', attributes: {} },
@@ -84,7 +86,7 @@ describe('enableSpaceAwarenessMigration', () => {
           ],
         };
       }),
-      close: jest.fn(),
+      close: vi.fn(),
     });
 
     soClient.bulkCreate.mockImplementation((objects) => {
@@ -158,7 +160,7 @@ describe('enableSpaceAwarenessMigration', () => {
         async *find() {
           throw new Error('unexpected error test');
         },
-        close: jest.fn(),
+        close: vi.fn(),
       } as any;
     });
 

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
@@ -26,12 +29,15 @@ import { UnifiedHistogramChart, type UnifiedHistogramChartProps } from './chart'
 import { lensSaveModalComponentMock, unifiedHistogramServicesMock } from '../../__mocks__/services';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('./hooks/use_edit_visualization', () => ({
-  useEditVisualization: () => mockUseEditVisualization,
-}));
+vi.mock('./hooks/use_edit_visualization', () => {
+      const mocked = {
+      useEditVisualization: () => mockUseEditVisualization,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-let mockUseEditVisualization: jest.Mock | undefined = jest.fn();
-const mockedSearchSourceInstanceMockFetch$ = jest.mocked(searchSourceInstanceMock.fetch$);
+let mockUseEditVisualization: Mock | undefined = vi.fn();
+const mockedSearchSourceInstanceMockFetch$ = vi.mocked(searchSourceInstanceMock.fetch$);
 
 interface MountComponentProps {
   noChart?: boolean;
@@ -44,7 +50,7 @@ interface MountComponentProps {
   hasDashboardPermissions?: boolean;
   isChartLoading?: boolean;
   isTransformationalESQL?: boolean;
-  mockEditVisualization?: jest.Mock | undefined;
+  mockEditVisualization?: Mock | undefined;
 }
 
 const toggleActionsTestId = 'default-chart-toggle-actions';
@@ -65,9 +71,9 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
 
   // Handle mockEditVisualization separately to distinguish between "not passed" and "passed as undefined"
   mockUseEditVisualization =
-    'mockEditVisualization' in mountProps ? mountProps.mockEditVisualization : jest.fn();
+    'mockEditVisualization' in mountProps ? mountProps.mockEditVisualization : vi.fn();
   mockedSearchSourceInstanceMockFetch$.mockImplementation(
-    jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: noHits ? 0 : 2 } } }))
+    vi.fn().mockReturnValue(of({ rawResponse: { hits: { total: noHits ? 0 : 2 } } }))
   );
 
   const services = {
@@ -134,8 +140,8 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
         },
     chart,
     isChartLoading: Boolean(isChartLoading),
-    onChartHiddenChange: jest.fn(),
-    onTimeIntervalChange: jest.fn(),
+    onChartHiddenChange: vi.fn(),
+    onTimeIntervalChange: vi.fn(),
     withDefaultActions: undefined,
     isChartAvailable: checkChartAvailability({ chart, dataView, isPlainRecord }),
     renderToggleActions: () => <span data-test-subj={toggleActionsTestId}>Toggle actions</span>,
@@ -288,12 +294,12 @@ describe('Chart', () => {
   });
 
   test('render progress bar when text based and request is loading', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     await mountComponent({ isPlainRecord: true, isChartLoading: true });
 
     act(() => {
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
     });
 
     const section = screen.getByTestId('unifiedHistogramRendered');
@@ -302,7 +308,7 @@ describe('Chart', () => {
     expect(progressBar).toBeVisible();
     expect(progressBar).toHaveClass('euiProgress');
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('triggers onEditVisualization on click', async () => {

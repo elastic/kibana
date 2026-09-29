@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -23,81 +25,99 @@ import type { RuleActionsItemProps } from './rule_actions_item';
 
 const http = httpServiceMock.createStartContract();
 
-jest.mock('../hooks', () => ({
-  useRuleFormState: jest.fn(),
-  useRuleFormDispatch: jest.fn(),
-  useRuleFormScreenContext: jest.fn(),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useRuleFormState: vi.fn(),
+      useRuleFormDispatch: vi.fn(),
+      useRuleFormScreenContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./rule_actions_system_actions_item', () => ({
-  RuleActionsSystemActionsItem: ({ action, producerId }: RuleActionsItemProps) => (
-    <div>
-      RuleActionsSystemActionsItem
-      <div>
-        {action.id} producerId: {producerId}
-      </div>
-    </div>
-  ),
-}));
+vi.mock('./rule_actions_system_actions_item', () => {
+      const mocked = {
+      RuleActionsSystemActionsItem: ({ action, producerId }: RuleActionsItemProps) => (
+        <div>
+          RuleActionsSystemActionsItem
+          <div>
+            {action.id} producerId: {producerId}
+          </div>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./rule_actions_item', () => ({
-  RuleActionsItem: ({ action, producerId }: RuleActionsItemProps) => (
-    <div>
-      RuleActionsItem
-      <div>
-        {action.id} producerId: {producerId}
-      </div>
-    </div>
-  ),
-}));
+vi.mock('./rule_actions_item', () => {
+      const mocked = {
+      RuleActionsItem: ({ action, producerId }: RuleActionsItemProps) => (
+        <div>
+          RuleActionsItem
+          <div>
+            {action.id} producerId: {producerId}
+          </div>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./rule_actions_connectors_modal', () => ({
-  RuleActionsConnectorsModal: ({
-    onSelectConnector,
-  }: {
-    onSelectConnector: (connector: ActionConnector) => void;
-  }) => (
-    <div>
-      RuleActionsConnectorsModal
-      <button
-        onClick={() =>
-          onSelectConnector({
-            id: 'connector-1',
-            secrets: { secret: 'secret' },
-            actionTypeId: 'actionType-1',
-            name: 'connector-1',
-            config: { config: 'config-1' },
-            isPreconfigured: false,
-            isSystemAction: false,
-            isDeprecated: false,
-            isConnectorTypeDeprecated: false,
-          })
-        }
-      >
-        select connector
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./rule_actions_connectors_modal', () => {
+      const mocked = {
+      RuleActionsConnectorsModal: ({
+        onSelectConnector,
+      }: {
+        onSelectConnector: (connector: ActionConnector) => void;
+      }) => (
+        <div>
+          RuleActionsConnectorsModal
+          <button
+            onClick={() =>
+              onSelectConnector({
+                id: 'connector-1',
+                secrets: { secret: 'secret' },
+                actionTypeId: 'actionType-1',
+                name: 'connector-1',
+                config: { config: 'config-1' },
+                isPreconfigured: false,
+                isSystemAction: false,
+                isDeprecated: false,
+                isConnectorTypeDeprecated: false,
+              })
+            }
+          >
+            select connector
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common/hooks', () => ({
-  useLoadConnectors: jest.fn(),
-  useLoadConnectorTypes: jest.fn(),
-  useLoadRuleTypeAadTemplateField: jest.fn(),
-}));
+vi.mock('../common/hooks', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn(),
+      useLoadConnectorTypes: vi.fn(),
+      useLoadRuleTypeAadTemplateField: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockValidate = jest.fn().mockResolvedValue({
+const mockValidate = vi.fn().mockResolvedValue({
   errors: {},
 });
 
 const { useRuleFormState, useRuleFormDispatch, useRuleFormScreenContext } =
-  jest.requireMock('../hooks');
+  (await vi.importMock('../hooks'));
 const { useLoadConnectors, useLoadConnectorTypes, useLoadRuleTypeAadTemplateField } =
-  jest.requireMock('../common/hooks');
+  (await vi.importMock('../common/hooks'));
 
 const mockConnectors = [getConnector('1')];
 const mockConnectorTypes = [
@@ -109,8 +129,8 @@ const mockConnectorTypes = [
 const mockActions = [getAction('1'), getAction('2')];
 const mockSystemActions = [getSystemAction('3')];
 
-const mockOnChange = jest.fn();
-const mockSetIsConnectorsScreenVisible = jest.fn();
+const mockOnChange = vi.fn();
+const mockSetIsConnectorsScreenVisible = vi.fn();
 
 describe('ruleActions', () => {
   beforeEach(() => {
@@ -175,7 +195,7 @@ describe('ruleActions', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders correctly', () => {

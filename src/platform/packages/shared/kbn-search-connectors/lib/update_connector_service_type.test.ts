@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { errors } from '@elastic/elasticsearch';
@@ -16,12 +18,12 @@ import { updateConnectorServiceType } from './update_connector_service_type';
 describe('updateConnectorServiceType lib function', () => {
   const mockClient = {
     transport: {
-      request: jest.fn(),
+      request: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should update connector service type', async () => {

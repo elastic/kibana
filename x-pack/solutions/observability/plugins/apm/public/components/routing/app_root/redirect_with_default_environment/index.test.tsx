@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { act, render, waitFor } from '@testing-library/react';
@@ -26,7 +28,7 @@ describe('RedirectWithDefaultEnvironment', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   function renderUrl(
@@ -35,7 +37,7 @@ describe('RedirectWithDefaultEnvironment', () => {
   ) {
     history.replace(location);
 
-    jest.spyOn(useApmPluginContextExports, 'useApmPluginContext').mockReturnValue({
+    vi.spyOn(useApmPluginContextExports, 'useApmPluginContext').mockReturnValue({
       core: {
         uiSettings: {
           get: () => defaultSetting,

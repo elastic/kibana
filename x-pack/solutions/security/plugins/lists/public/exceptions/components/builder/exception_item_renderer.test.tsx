@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
@@ -23,7 +25,7 @@ const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = kqlPluginMock.createStartContract();
 
 describe('BuilderExceptionListItemComponent', () => {
-  const getValueSuggestionsMock = jest.fn().mockResolvedValue(['value 1', 'value 2']);
+  const getValueSuggestionsMock = vi.fn().mockResolvedValue(['value 1', 'value 2']);
 
   afterEach(() => {
     getValueSuggestionsMock.mockClear();
@@ -51,10 +53,10 @@ describe('BuilderExceptionListItemComponent', () => {
             }}
             isOnlyItem={false}
             listType="detection"
-            onChangeExceptionItem={jest.fn()}
-            onDeleteExceptionItem={jest.fn()}
-            setErrorsExist={jest.fn()}
-            setWarningsExist={jest.fn()}
+            onChangeExceptionItem={vi.fn()}
+            onDeleteExceptionItem={vi.fn()}
+            setErrorsExist={vi.fn()}
+            setWarningsExist={vi.fn()}
             showValueListModal={MockedShowValueListModal}
           />
         </EuiProvider>
@@ -84,10 +86,10 @@ describe('BuilderExceptionListItemComponent', () => {
             }}
             isOnlyItem={false}
             listType="detection"
-            onChangeExceptionItem={jest.fn()}
-            onDeleteExceptionItem={jest.fn()}
-            setErrorsExist={jest.fn()}
-            setWarningsExist={jest.fn()}
+            onChangeExceptionItem={vi.fn()}
+            onDeleteExceptionItem={vi.fn()}
+            setErrorsExist={vi.fn()}
+            setWarningsExist={vi.fn()}
             showValueListModal={MockedShowValueListModal}
           />
         </EuiProvider>
@@ -115,10 +117,10 @@ describe('BuilderExceptionListItemComponent', () => {
             }}
             isOnlyItem={false}
             listType="detection"
-            onChangeExceptionItem={jest.fn()}
-            onDeleteExceptionItem={jest.fn()}
-            setErrorsExist={jest.fn()}
-            setWarningsExist={jest.fn()}
+            onChangeExceptionItem={vi.fn()}
+            onDeleteExceptionItem={vi.fn()}
+            setErrorsExist={vi.fn()}
+            setWarningsExist={vi.fn()}
             showValueListModal={MockedShowValueListModal}
           />
         </EuiProvider>
@@ -148,10 +150,10 @@ describe('BuilderExceptionListItemComponent', () => {
             }}
             isOnlyItem={false}
             listType="detection"
-            onChangeExceptionItem={jest.fn()}
-            onDeleteExceptionItem={jest.fn()}
-            setErrorsExist={jest.fn()}
-            setWarningsExist={jest.fn()}
+            onChangeExceptionItem={vi.fn()}
+            onDeleteExceptionItem={vi.fn()}
+            setErrorsExist={vi.fn()}
+            setWarningsExist={vi.fn()}
             showValueListModal={MockedShowValueListModal}
           />
         </EuiProvider>
@@ -188,10 +190,10 @@ describe('BuilderExceptionListItemComponent', () => {
           }}
           isOnlyItem={true}
           listType="detection"
-          onChangeExceptionItem={jest.fn()}
-          onDeleteExceptionItem={jest.fn()}
-          setErrorsExist={jest.fn()}
-          setWarningsExist={jest.fn()}
+          onChangeExceptionItem={vi.fn()}
+          onDeleteExceptionItem={vi.fn()}
+          setErrorsExist={vi.fn()}
+          setWarningsExist={vi.fn()}
           showValueListModal={MockedShowValueListModal}
         />
       );
@@ -220,10 +222,10 @@ describe('BuilderExceptionListItemComponent', () => {
           }}
           isOnlyItem={false}
           listType="detection"
-          onChangeExceptionItem={jest.fn()}
-          onDeleteExceptionItem={jest.fn()}
-          setErrorsExist={jest.fn()}
-          setWarningsExist={jest.fn()}
+          onChangeExceptionItem={vi.fn()}
+          onDeleteExceptionItem={vi.fn()}
+          setErrorsExist={vi.fn()}
+          setWarningsExist={vi.fn()}
           showValueListModal={MockedShowValueListModal}
         />
       );
@@ -253,10 +255,10 @@ describe('BuilderExceptionListItemComponent', () => {
           // this to be true, but done for testing purposes
           isOnlyItem={true}
           listType="detection"
-          onChangeExceptionItem={jest.fn()}
-          onDeleteExceptionItem={jest.fn()}
-          setErrorsExist={jest.fn()}
-          setWarningsExist={jest.fn()}
+          onChangeExceptionItem={vi.fn()}
+          onDeleteExceptionItem={vi.fn()}
+          setErrorsExist={vi.fn()}
+          setWarningsExist={vi.fn()}
           showValueListModal={MockedShowValueListModal}
         />
       );
@@ -284,10 +286,10 @@ describe('BuilderExceptionListItemComponent', () => {
           }}
           isOnlyItem={true}
           listType="detection"
-          onChangeExceptionItem={jest.fn()}
-          onDeleteExceptionItem={jest.fn()}
-          setErrorsExist={jest.fn()}
-          setWarningsExist={jest.fn()}
+          onChangeExceptionItem={vi.fn()}
+          onDeleteExceptionItem={vi.fn()}
+          setErrorsExist={vi.fn()}
+          setWarningsExist={vi.fn()}
           showValueListModal={MockedShowValueListModal}
         />
       );
@@ -299,7 +301,7 @@ describe('BuilderExceptionListItemComponent', () => {
     });
 
     test('it invokes "onChangeExceptionItem" when delete button clicked', () => {
-      const mockOnDeleteExceptionItem = jest.fn();
+      const mockOnDeleteExceptionItem = vi.fn();
       const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock(), getEntryMatchAnyMock()];
       const wrapper = mount(
@@ -317,10 +319,10 @@ describe('BuilderExceptionListItemComponent', () => {
           }}
           isOnlyItem={true}
           listType="detection"
-          onChangeExceptionItem={jest.fn()}
+          onChangeExceptionItem={vi.fn()}
           onDeleteExceptionItem={mockOnDeleteExceptionItem}
-          setErrorsExist={jest.fn()}
-          setWarningsExist={jest.fn()}
+          setErrorsExist={vi.fn()}
+          setWarningsExist={vi.fn()}
           showValueListModal={MockedShowValueListModal}
         />
       );

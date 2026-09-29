@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { INTERVAL, scheduleDispatcherTask } from './schedule_task';
 import { DISPATCHER_TASK_ID, DISPATCHER_TASK_TYPE } from './constants';
 
 describe('scheduleDispatcherTask', () => {
-  let taskManager: jest.Mocked<Pick<TaskManagerStartContract, 'ensureScheduled'>>;
+  let taskManager: Mocked<Pick<TaskManagerStartContract, 'ensureScheduled'>>;
 
   beforeEach(() => {
     taskManager = {
-      ensureScheduled: jest.fn().mockResolvedValue(undefined),
+      ensureScheduled: vi.fn().mockResolvedValue(undefined),
     };
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('schedules the dispatcher task', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { TanstackQueryClient } from '@kbn/react-query';
 import { waitFor } from '@testing-library/react';
 import { EntityType } from '../../../../common/entity_analytics/types';
@@ -17,29 +19,35 @@ import type { Entity } from './use_asset_criticality';
 import { useAssetCriticalityPrivileges, useAssetCriticalityData } from './use_asset_criticality';
 import { ENTITY_STORE_ENTITIES_LIST } from '../entity_store/hooks/use_entities_list_query';
 
-const mockFetchAssetCriticalityPrivileges = jest.fn().mockResolvedValue({});
-const mockFetchEntityStoreV2Privileges = jest.fn().mockResolvedValue({});
-const mockFetchAssetCriticality = jest.fn().mockResolvedValue({});
-const mockDeleteAssetCriticality = jest.fn().mockResolvedValue({});
-const mockCreateAssetCriticality = jest.fn().mockResolvedValue({});
-jest.mock('../../api/api', () => ({
-  useEntityAnalyticsRoutes: () => ({
-    fetchAssetCriticalityPrivileges: mockFetchAssetCriticalityPrivileges,
-    fetchEntityStoreV2Privileges: mockFetchEntityStoreV2Privileges,
-    fetchAssetCriticality: mockFetchAssetCriticality,
-    deleteAssetCriticality: mockDeleteAssetCriticality,
-    createAssetCriticality: mockCreateAssetCriticality,
-  }),
-}));
+const mockFetchAssetCriticalityPrivileges = vi.fn().mockResolvedValue({});
+const mockFetchEntityStoreV2Privileges = vi.fn().mockResolvedValue({});
+const mockFetchAssetCriticality = vi.fn().mockResolvedValue({});
+const mockDeleteAssetCriticality = vi.fn().mockResolvedValue({});
+const mockCreateAssetCriticality = vi.fn().mockResolvedValue({});
+vi.mock('../../api/api', () => {
+      const mocked = {
+      useEntityAnalyticsRoutes: () => ({
+        fetchAssetCriticalityPrivileges: mockFetchAssetCriticalityPrivileges,
+        fetchEntityStoreV2Privileges: mockFetchEntityStoreV2Privileges,
+        fetchAssetCriticality: mockFetchAssetCriticality,
+        deleteAssetCriticality: mockDeleteAssetCriticality,
+        createAssetCriticality: mockCreateAssetCriticality,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseHasSecurityCapability = jest.fn().mockReturnValue(false);
-jest.mock('../../../helper_hooks', () => ({
-  useHasSecurityCapability: () => mockUseHasSecurityCapability(),
-}));
+const mockUseHasSecurityCapability = vi.fn().mockReturnValue(false);
+vi.mock('../../../helper_hooks', () => {
+      const mocked = {
+      useHasSecurityCapability: () => mockUseHasSecurityCapability(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useAssetCriticality', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('useAssetCriticalityPrivileges', () => {
@@ -105,7 +113,7 @@ describe('useAssetCriticality', () => {
       mockFetchAssetCriticalityPrivileges.mockResolvedValue({ has_all_required: true });
       mockCreateAssetCriticality.mockResolvedValue({});
       const entity: Entity = { name: 'test_entity_name', type: EntityType.host };
-      const invalidateQueriesSpy = jest.spyOn(TanstackQueryClient.prototype, 'invalidateQueries');
+      const invalidateQueriesSpy = vi.spyOn(TanstackQueryClient.prototype, 'invalidateQueries');
 
       const { mutation } = await renderWrappedHook(() => useAssetCriticalityData({ entity }));
 

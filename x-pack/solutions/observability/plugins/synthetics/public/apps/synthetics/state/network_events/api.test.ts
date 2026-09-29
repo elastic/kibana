@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fetchNetworkEvents } from './api';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service';
 
-jest.mock('../../../../utils/api_service', () => ({
-  apiService: { get: jest.fn() },
-}));
+vi.mock('../../../../utils/api_service', () => {
+      const mocked = {
+      apiService: { get: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('fetchNetworkEvents remoteName plumbing', () => {
-  const mockGet = apiService.get as jest.Mock;
+  const mockGet = apiService.get as Mock;
 
   beforeEach(() => {
     mockGet.mockReset();

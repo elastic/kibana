@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /**
  * This test file references connector_id and connector.id. The connector_id is a field within the external_service
  * object. It holds the action connector's id that was used to push the case to the external service. The connector.id
@@ -184,7 +186,7 @@ describe('CasesService', () => {
   let service: CasesService;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     service = new CasesService({
       log: mockLogger,
       unsecuredSavedObjectsClient,
@@ -3609,7 +3611,7 @@ describe('CasesService', () => {
       const mockEmptySearchResponse = () => {
         // The SO mock doesn't include `search` by default, so wire it up here.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (unsecuredSavedObjectsClient as any).search = jest
+        (unsecuredSavedObjectsClient as any).search = vi
           .fn()
           .mockResolvedValue({ hits: { hits: [] } });
       };
@@ -3663,7 +3665,7 @@ describe('CasesService', () => {
       const namespaces = ['default'];
 
       const mockSearch = () => {
-        const searchMock = jest.fn().mockResolvedValue({
+        const searchMock = vi.fn().mockResolvedValue({
           hits: { hits: [], total: { value: 0 } },
           aggregations: {
             statuses: {
@@ -3679,7 +3681,7 @@ describe('CasesService', () => {
         // The SO mock doesn't include `search` by default, so wire it up here.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (unsecuredSavedObjectsClient as any).search = searchMock;
-        jest
+        vi
           .spyOn(attachmentService.getter, 'getCaseAttatchmentStats')
           .mockResolvedValue(new Map());
         return searchMock;
@@ -3752,25 +3754,25 @@ describe('CasesService', () => {
     // we need a writer we can spy on.
     const makeServiceWithMockWriter = () => {
       const analyticsV2Writer = {
-        upsertCase: jest.fn(),
-        deleteCase: jest.fn(),
-        bulkUpsertCases: jest.fn(),
-        bulkDeleteCases: jest.fn(),
-        bulkUpsertCasesAwait: jest.fn().mockResolvedValue(undefined),
+        upsertCase: vi.fn(),
+        deleteCase: vi.fn(),
+        bulkUpsertCases: vi.fn(),
+        bulkDeleteCases: vi.fn(),
+        bulkUpsertCasesAwait: vi.fn().mockResolvedValue(undefined),
       };
       const analyticsV2ActivityWriter = {
-        upsertAction: jest.fn(),
-        bulkUpsertActions: jest.fn(),
-        bulkDeleteActionsByCaseIds: jest.fn(),
-        bulkUpsertActionsAwait: jest.fn().mockResolvedValue(undefined),
+        upsertAction: vi.fn(),
+        bulkUpsertActions: vi.fn(),
+        bulkDeleteActionsByCaseIds: vi.fn(),
+        bulkUpsertActionsAwait: vi.fn().mockResolvedValue(undefined),
       };
       const analyticsV2AttachmentsWriter = {
-        upsertAttachment: jest.fn(),
-        deleteAttachment: jest.fn(),
-        bulkUpsertAttachments: jest.fn(),
-        bulkDeleteAttachments: jest.fn(),
-        bulkDeleteAttachmentsByCaseIds: jest.fn(),
-        bulkUpsertAttachmentsAwait: jest.fn().mockResolvedValue(undefined),
+        upsertAttachment: vi.fn(),
+        deleteAttachment: vi.fn(),
+        bulkUpsertAttachments: vi.fn(),
+        bulkDeleteAttachments: vi.fn(),
+        bulkDeleteAttachmentsByCaseIds: vi.fn(),
+        bulkUpsertAttachmentsAwait: vi.fn().mockResolvedValue(undefined),
       };
       const svc = new CasesService({
         log: mockLogger,

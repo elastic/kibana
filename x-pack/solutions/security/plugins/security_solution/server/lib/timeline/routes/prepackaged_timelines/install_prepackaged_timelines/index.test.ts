@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   serverMock,
   requestContextMock,
@@ -23,15 +26,18 @@ import { checkTimelinesStatus } from '../../../utils/check_timelines_status';
 import { installPrepackedTimelinesRoute } from '.';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../../detection_engine/routes/__mocks__/request_context';
 
-jest.mock('./helpers', () => ({
-  installPrepackagedTimelines: jest.fn(),
-}));
+vi.mock('./helpers', () => {
+      const mocked = {
+      installPrepackagedTimelines: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../utils/check_timelines_status', () => {
-  const actual = jest.requireActual('../../../utils/check_timelines_status');
+vi.mock('../../../utils/check_timelines_status', async () => {
+  const actual = (await vi.importActual('../../../utils/check_timelines_status'));
   return {
     ...actual,
-    checkTimelinesStatus: jest.fn(),
+    checkTimelinesStatus: vi.fn(),
   };
 });
 
@@ -40,8 +46,8 @@ describe('installPrepackagedTimelines', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     server = serverMock.create();
     context = requestContextMock.createTools().context;
@@ -50,12 +56,12 @@ describe('installPrepackagedTimelines', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('should call installPrepackagedTimelines ', async () => {
-    (checkTimelinesStatus as jest.Mock).mockReturnValue(
+    (checkTimelinesStatus as Mock).mockReturnValue(
       mockCheckTimelinesStatusBeforeInstallResult
     );
 
@@ -68,10 +74,10 @@ describe('installPrepackagedTimelines', () => {
   });
 
   test('should return installPrepackagedTimelines result ', async () => {
-    (checkTimelinesStatus as jest.Mock).mockReturnValue(
+    (checkTimelinesStatus as Mock).mockReturnValue(
       mockCheckTimelinesStatusBeforeInstallResult
     );
-    (installPrepackagedTimelines as jest.Mock).mockReturnValue({
+    (installPrepackagedTimelines as Mock).mockReturnValue({
       errors: [],
       success: true,
       success_count: 3,
@@ -94,7 +100,7 @@ describe('installPrepackagedTimelines', () => {
   });
 
   test('should not call installPrepackagedTimelines if it has nothing to install or update', async () => {
-    (checkTimelinesStatus as jest.Mock).mockReturnValue(mockCheckTimelinesStatusAfterInstallResult);
+    (checkTimelinesStatus as Mock).mockReturnValue(mockCheckTimelinesStatusAfterInstallResult);
 
     await server.inject(
       installPrepackedTimelinesRequest(),
@@ -105,7 +111,7 @@ describe('installPrepackagedTimelines', () => {
   });
 
   test('should return success if it has nothing to install or update', async () => {
-    (checkTimelinesStatus as jest.Mock).mockReturnValue(mockCheckTimelinesStatusAfterInstallResult);
+    (checkTimelinesStatus as Mock).mockReturnValue(mockCheckTimelinesStatusAfterInstallResult);
 
     const result = await server.inject(
       installPrepackedTimelinesRequest(),

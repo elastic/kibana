@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { DiscoverFlyouts, openAfterDismissingOtherFlyouts } from './dismiss_flyouts';
 
 const FLYOUT_TEST_SUBJS: Record<string, string> = {
@@ -49,7 +51,7 @@ describe('openAfterDismissingOtherFlyouts', () => {
   });
 
   it('opens right away when no other flyout is mounted', () => {
-    const open = jest.fn();
+    const open = vi.fn();
 
     openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricInsights, open);
 
@@ -58,7 +60,7 @@ describe('openAfterDismissingOtherFlyouts', () => {
 
   it('waits for a dismissed flyout to unmount before opening', async () => {
     mountFlyout(DiscoverFlyouts.inspectorPanel);
-    const open = jest.fn();
+    const open = vi.fn();
 
     openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricInsights, open);
 
@@ -72,7 +74,7 @@ describe('openAfterDismissingOtherFlyouts', () => {
 
   it('waits for a dismissed flyout that hides the EUI close button', async () => {
     mountFlyout(DiscoverFlyouts.lensEdit);
-    const open = jest.fn();
+    const open = vi.fn();
 
     openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricInsights, open);
 
@@ -86,7 +88,7 @@ describe('openAfterDismissingOtherFlyouts', () => {
 
   it('opens right away when only the excluded flyout is mounted', () => {
     mountFlyout(DiscoverFlyouts.metricInsights);
-    const open = jest.fn();
+    const open = vi.fn();
 
     openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricInsights, open);
 

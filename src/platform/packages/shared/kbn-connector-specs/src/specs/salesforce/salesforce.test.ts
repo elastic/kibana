@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { SalesforceConnector } from './salesforce';
 
 describe('SalesforceConnector', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
   };
 
   const baseUrl = 'https://myorg.my.salesforce.com';
@@ -21,11 +23,11 @@ describe('SalesforceConnector', () => {
     client: mockClient,
     config: {},
     secrets: { tokenUrl: `${baseUrl}/services/oauth2/token` },
-    log: { debug: jest.fn() },
+    log: { debug: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should define every action (except test) as a tool for agent exposure', () => {

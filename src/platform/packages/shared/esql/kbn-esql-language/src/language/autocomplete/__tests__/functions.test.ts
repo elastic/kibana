@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import { FunctionDefinitionTypes } from '../../../commands/definitions/types';
 import type { ISuggestionItem } from '../../../commands/registry/types';
 import { Location } from '../../../commands/registry/types';
@@ -901,7 +903,7 @@ describe('functions arg suggestions', () => {
 
       const basicLicenseCallbacks = {
         ...callbacks,
-        getLicense: jest.fn(async () =>
+        getLicense: vi.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() !== 'platinum',
           })
@@ -924,7 +926,7 @@ describe('functions arg suggestions', () => {
 
       const platinumLicenseCallbacks = {
         ...callbacks,
-        getLicense: jest.fn(async () =>
+        getLicense: vi.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
           })
@@ -947,7 +949,7 @@ describe('functions arg suggestions', () => {
 
       const basicLicenseCallbacks = {
         ...callbacks,
-        getLicense: jest.fn(async () =>
+        getLicense: vi.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() !== 'platinum',
           })
@@ -973,7 +975,7 @@ describe('functions arg suggestions', () => {
 
       const platinumLicenseCallbacks = {
         ...callbacks,
-        getLicense: jest.fn(async () =>
+        getLicense: vi.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
           })
@@ -1001,12 +1003,12 @@ describe('functions arg suggestions', () => {
 
       const platinumLicenseAndObservabilityTierCompleteCallbacks = {
         ...callbacks,
-        getLicense: jest.fn(async () =>
+        getLicense: vi.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
           })
         ),
-        getActiveProduct: jest.fn(
+        getActiveProduct: vi.fn(
           () => ({ type: 'observability', tier: 'complete' } as PricingProduct)
         ),
       };
@@ -1024,12 +1026,12 @@ describe('functions arg suggestions', () => {
 
       const platinumLicenseAndObservabilityTierCompleteCallbacks = {
         ...callbacks,
-        getLicense: jest.fn(async () =>
+        getLicense: vi.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() === 'basic',
           })
         ),
-        getActiveProduct: jest.fn(
+        getActiveProduct: vi.fn(
           () => ({ type: 'observability', tier: 'complete' } as PricingProduct)
         ),
       };
@@ -1047,12 +1049,12 @@ describe('functions arg suggestions', () => {
 
       const platinumLicenseAndObservabilityTierLogCallbacks = {
         ...callbacks,
-        getLicense: jest.fn(async () =>
+        getLicense: vi.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
           })
         ),
-        getActiveProduct: jest.fn(
+        getActiveProduct: vi.fn(
           () => ({ type: 'observability', tier: 'logs_essentials' } as PricingProduct)
         ),
       };
@@ -1070,12 +1072,12 @@ describe('functions arg suggestions', () => {
 
       const platinumLicenseAndObservabilityTierLogCallbacks = {
         ...callbacks,
-        getLicense: jest.fn(async () =>
+        getLicense: vi.fn(async () =>
           Promise.resolve({
             hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
           })
         ),
-        getActiveProduct: jest.fn(
+        getActiveProduct: vi.fn(
           () =>
             ({
               type: 'security',

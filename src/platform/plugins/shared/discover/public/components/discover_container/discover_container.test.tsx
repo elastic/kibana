@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import type { DiscoverServices } from '../../build_services';
@@ -19,19 +22,19 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const mockOverrideService = {};
-const getDiscoverServicesMock = jest.fn(() => discoverServiceMock);
+const getDiscoverServicesMock = vi.fn(() => discoverServiceMock);
 
-jest.mock('../../application/main', () => {
+vi.mock('../../application/main', () => {
   return {
     DiscoverMainRoute: () => <></>,
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public');
 
 const { getScopedHistory } = discoverServiceMock;
 
-const customizeMock = jest.fn();
+const customizeMock = vi.fn();
 
 const TestComponent = (props: Partial<DiscoverContainerInternalProps>) => {
   return (
@@ -50,10 +53,10 @@ const TEST_IDS = {
 
 describe('DiscoverContainerInternal should render properly', () => {
   beforeAll(() => {
-    (KibanaContextProvider as jest.Mock).mockImplementation(() => <></>);
+    (KibanaContextProvider as Mock).mockImplementation(() => <></>);
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('should render', async () => {
     const { getByTestId } = render(<TestComponent />);
@@ -76,7 +79,7 @@ describe('DiscoverContainerInternal should render properly', () => {
     render(<TestComponent overrideServices={overrideServices} />);
 
     await waitFor(() => {
-      expect(KibanaContextProvider as jest.Mock).toHaveBeenNthCalledWith(
+      expect(KibanaContextProvider as Mock).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
           services: expect.objectContaining({

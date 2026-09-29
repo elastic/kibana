@@ -5,33 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Settings } from '../../types';
 import { appContextService } from '../app_context';
 import { getSettingsOrUndefined } from '../settings';
 
 import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './helpers';
 
-jest.mock('../app_context');
-jest.mock('../settings');
+vi.mock('../app_context');
+vi.mock('../settings');
 
 function mockFeatureFlag(val: boolean) {
-  jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
+  vi.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
     useSpaceAwareness: val,
   } as any);
 }
 
 function mockGetSettings(settings?: Partial<Settings>) {
   if (settings) {
-    jest.mocked(getSettingsOrUndefined).mockResolvedValue(settings as any);
+    vi.mocked(getSettingsOrUndefined).mockResolvedValue(settings as any);
   } else {
-    jest.mocked(getSettingsOrUndefined).mockResolvedValue(undefined);
+    vi.mocked(getSettingsOrUndefined).mockResolvedValue(undefined);
   }
 }
 
 describe('isSpaceAwarenessEnabled', () => {
   beforeEach(() => {
-    jest.mocked(appContextService.getExperimentalFeatures).mockReset();
-    jest.mocked(getSettingsOrUndefined).mockReset();
+    vi.mocked(appContextService.getExperimentalFeatures).mockReset();
+    vi.mocked(getSettingsOrUndefined).mockReset();
   });
   it('should return false if feature flag is disabled', async () => {
     mockFeatureFlag(false);
@@ -69,8 +71,8 @@ describe('isSpaceAwarenessEnabled', () => {
 
 describe('isSpaceAwarenessMigrationPending', () => {
   beforeEach(() => {
-    jest.mocked(appContextService.getExperimentalFeatures).mockReset();
-    jest.mocked(getSettingsOrUndefined).mockReset();
+    vi.mocked(appContextService.getExperimentalFeatures).mockReset();
+    vi.mocked(getSettingsOrUndefined).mockReset();
   });
   it('should return false if feature flag is disabled', async () => {
     mockFeatureFlag(false);

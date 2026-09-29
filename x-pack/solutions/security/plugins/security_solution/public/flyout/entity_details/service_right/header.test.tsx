@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
@@ -17,7 +19,7 @@ const mockProps = {
   observedService: mockObservedService,
 };
 
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
+vi.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
 describe('ServicePanelHeader', () => {
   it('renders', () => {

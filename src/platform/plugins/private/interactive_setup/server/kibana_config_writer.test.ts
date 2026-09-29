@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('fs/promises');
-jest.mock('crypto');
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('fs/promises');
+vi.mock('crypto');
 import { constants } from 'fs';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -16,21 +19,21 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { KibanaConfigWriter } from './kibana_config_writer';
 
 describe('KibanaConfigWriter', () => {
-  let mockFsAccess: jest.Mock;
-  let mockWriteFile: jest.Mock;
-  let mockReadFile: jest.Mock;
+  let mockFsAccess: Mock;
+  let mockWriteFile: Mock;
+  let mockReadFile: Mock;
   let kibanaConfigWriter: KibanaConfigWriter;
-  beforeEach(() => {
-    jest.spyOn(Date, 'now').mockReturnValue(1234);
+  beforeEach(async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(1234);
 
-    const fsMocks = jest.requireMock('fs/promises');
+    const fsMocks = (await vi.importMock('fs/promises'));
     mockFsAccess = fsMocks.access;
     mockWriteFile = fsMocks.writeFile;
     mockReadFile = fsMocks.readFile;
 
     mockReadFile.mockResolvedValue('');
 
-    const mockCrypto = jest.requireMock('crypto');
+    const mockCrypto = (await vi.importMock('crypto'));
     mockCrypto.X509Certificate = function (cert: string) {
       if (cert === 'invalid-cert') {
         throw new Error('Invalid certificate');
@@ -48,7 +51,7 @@ describe('KibanaConfigWriter', () => {
     );
   });
 
-  afterEach(() => jest.resetAllMocks());
+  afterEach(() => vi.resetAllMocks());
 
   describe('#isConfigWritable()', () => {
     it('returns `false` if data directory is not writable even if kibana yml is writable', async () => {
@@ -290,7 +293,7 @@ describe('KibanaConfigWriter', () => {
 
     describe('with conflicts', () => {
       beforeEach(() => {
-        jest.spyOn(Date.prototype, 'toISOString').mockReturnValue('some date');
+        vi.spyOn(Date.prototype, 'toISOString').mockReturnValue('some date');
         mockReadFile.mockResolvedValue(
           '# Default Kibana configuration for docker target\nserver.host: "0.0.0.0"\nserver.shutdownTimeout: "5s"\nelasticsearch.hosts: [ "http://elasticsearch:9200" ]\n\nmonitoring.ui.container.elasticsearch.enabled: true'
         );

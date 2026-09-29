@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import {
   buildAuthHeader,
@@ -16,11 +18,11 @@ import {
   validateAuthFlags,
 } from './fetch';
 
-const mockedFetch = jest.spyOn(global, 'fetch');
+const mockedFetch = vi.spyOn(global, 'fetch');
 const log = new ToolingLog();
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('buildAuthHeader', () => {

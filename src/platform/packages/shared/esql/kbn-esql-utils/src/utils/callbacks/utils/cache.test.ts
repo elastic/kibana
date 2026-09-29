@@ -7,30 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { cacheParametrizedAsyncFunction } from './cache';
 
 describe('cacheParametrizedAsyncFunction', () => {
-  let mockNow: jest.Mock<number, []>; // Mock function for Date.now
+  let mockNow: Mock<number, []>; // Mock function for Date.now
 
   beforeEach(() => {
-    mockNow = jest.fn();
+    mockNow = vi.fn();
     mockNow.mockReturnValue(0);
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers(); // Clear any pending timers
-    jest.useRealTimers(); // Restore real timers
+    vi.runOnlyPendingTimers(); // Clear any pending timers
+    vi.useRealTimers(); // Restore real timers
   });
 
   // Helper to advance time in tests
   const advanceTime = (ms: number) => {
     mockNow.mockReturnValue(mockNow() + ms);
-    jest.advanceTimersByTime(ms);
+    vi.advanceTimersByTime(ms);
   };
 
   it('should call the function and cache the result on the first call', async () => {
-    const fn = jest.fn().mockResolvedValue('value');
+    const fn = vi.fn().mockResolvedValue('value');
     const cachedFn = cacheParametrizedAsyncFunction(fn);
 
     const value = await cachedFn();
@@ -39,7 +42,7 @@ describe('cacheParametrizedAsyncFunction', () => {
   });
 
   it('should return the cached value for subsequent calls with the same arguments within maxCacheDuration', async () => {
-    const fn = jest.fn().mockResolvedValue('first_value');
+    const fn = vi.fn().mockResolvedValue('first_value');
     const cachedFn = cacheParametrizedAsyncFunction(fn, undefined, undefined, undefined, mockNow);
 
     await cachedFn('argA', 1); // First call, caches 'first_value'
@@ -52,7 +55,7 @@ describe('cacheParametrizedAsyncFunction', () => {
   });
 
   it('should call the function again if maxCacheDuration expires', async () => {
-    const fn = jest.fn().mockResolvedValue('first_value');
+    const fn = vi.fn().mockResolvedValue('first_value');
     const maxCacheDuration = 1000; // 1 second
     const cachedFn = cacheParametrizedAsyncFunction(
       fn,
@@ -75,7 +78,7 @@ describe('cacheParametrizedAsyncFunction', () => {
   });
 
   it('should use the provided getKey function for caching', async () => {
-    const fn = jest.fn().mockResolvedValue('value_for_key');
+    const fn = vi.fn().mockResolvedValue('value_for_key');
     const customGetKey = (a: string, b: number) => `${a}-${b * 2}`;
     const cachedFn = cacheParametrizedAsyncFunction(
       fn,
@@ -97,7 +100,7 @@ describe('cacheParametrizedAsyncFunction', () => {
   });
 
   it('should trigger a background refresh if refreshAfter expires', async () => {
-    const fn = jest.fn().mockResolvedValue('initial_value');
+    const fn = vi.fn().mockResolvedValue('initial_value');
     const maxCacheDuration = 1000 * 60 * 5; // 5 minutes
     const refreshAfter = 1000 * 15; // 15 seconds
 
@@ -123,7 +126,7 @@ describe('cacheParametrizedAsyncFunction', () => {
     // Allow the background refresh promise to resolve
     await Promise.resolve(); // Resolves the `.then` callback
     await Promise.resolve(); // Resolves the async function itself
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     // Now, a subsequent call should reflect the refreshed value
     const thirdResult = await cachedFn('argC', 3);
@@ -132,7 +135,7 @@ describe('cacheParametrizedAsyncFunction', () => {
   });
 
   it('should bypass and update the cache when function context has force refresh set to true', async () => {
-    const fn = jest.fn().mockResolvedValue('initial_value');
+    const fn = vi.fn().mockResolvedValue('initial_value');
     const maxCacheDuration = 1000 * 60 * 5; // 5 minutes
     const refreshAfter = 1000 * 15; // 15 seconds
 

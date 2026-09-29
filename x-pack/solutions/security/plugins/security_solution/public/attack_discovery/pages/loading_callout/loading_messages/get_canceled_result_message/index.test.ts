@@ -5,17 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getCanceledResultMessage } from '.';
 import { getFormattedDate } from '../get_formatted_time';
 import * as i18n from '../../translations';
 
-jest.mock('../get_formatted_time', () => ({
-  getFormattedDate: jest.fn(),
-}));
+vi.mock('../get_formatted_time', () => {
+      const mocked = {
+      getFormattedDate: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../translations', () => ({
-  CANCELED_VIA: jest.fn(),
-}));
+vi.mock('../../translations', () => {
+      const mocked = {
+      CANCELED_VIA: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getCanceledResultMessage', () => {
   const mockConnectorName = 'Test Connector';
@@ -25,10 +34,10 @@ describe('getCanceledResultMessage', () => {
   const mockMessage = 'Canceled via Test Connector at May 2, 2025 @ 17:46:43.486';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (getFormattedDate as jest.Mock).mockReturnValue(mockFormattedDate);
-    (i18n.CANCELED_VIA as jest.Mock).mockReturnValue(mockMessage);
+    (getFormattedDate as Mock).mockReturnValue(mockFormattedDate);
+    (i18n.CANCELED_VIA as Mock).mockReturnValue(mockMessage);
   });
 
   it('invokes CANCELED_VIA with the connector name and formatted generation end time', () => {

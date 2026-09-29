@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
@@ -21,10 +23,13 @@ import { getTestProvider } from '../../../shared/mocks/test_providers';
 import { getIconBase64 } from '../../../shared/ui/step_icons/get_icon_base64';
 import { triggerSchemas } from '../../../trigger_schemas';
 
-jest.mock('../../../shared/ui/step_icons/get_icon_base64', () => ({
-  getIconBase64: jest.fn().mockResolvedValue('data:image/png;base64,xx'),
-  getTriggerBoltFallbackDataUrl: jest.fn().mockReturnValue('data:image/png;base64,bolt'),
-}));
+vi.mock('../../../shared/ui/step_icons/get_icon_base64', () => {
+      const mocked = {
+      getIconBase64: vi.fn().mockResolvedValue('data:image/png;base64,xx'),
+      getTriggerBoltFallbackDataUrl: vi.fn().mockReturnValue('data:image/png;base64,bolt'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function connectorTypeStub(actionTypeId: string): ConnectorTypeInfo {
   return {
@@ -41,17 +46,17 @@ function connectorTypeStub(actionTypeId: string): ConnectorTypeInfo {
 
 describe('useDynamicTypeIcons', () => {
   afterEach(() => {
-    jest.useRealTimers();
-    jest.restoreAllMocks();
-    jest.mocked(getIconBase64).mockResolvedValue('data:image/png;base64,xx');
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    vi.mocked(getIconBase64).mockResolvedValue('data:image/png;base64,xx');
   });
 
   it('does not call actionTypeRegistry.get for connector types missing from the UI registry', () => {
     const registeredId = '.registered';
     const unregisteredId = '.notInRegistry';
 
-    const has = jest.fn((id: string) => id === registeredId);
-    const get = jest.fn((id: string) => {
+    const has = vi.fn((id: string) => id === registeredId);
+    const get = vi.fn((id: string) => {
       if (id !== registeredId) {
         throw new Error(`get() must not be called for unregistered id: ${id}`);
       }
@@ -75,7 +80,7 @@ describe('useDynamicTypeIcons', () => {
       },
     };
 
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const { unmount } = renderHook(() => useDynamicTypeIcons(connectorsData, undefined, true), {
       wrapper: getTestProvider({ services }),
     });
@@ -96,7 +101,7 @@ describe('useDynamicTypeIcons', () => {
         '.sharepoint-server': connectorTypeStub('.sharepoint-server'),
       },
     };
-    const onShadowIconsCssReady = jest.fn();
+    const onShadowIconsCssReady = vi.fn();
 
     const { unmount } = renderHook(
       () => useDynamicTypeIcons(connectorsData, undefined, true, undefined, onShadowIconsCssReady),
@@ -127,13 +132,13 @@ describe('useDynamicTypeIcons', () => {
     const resolvedTriggerIcon = `data:image/svg+xml;base64,${btoa(
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#632CA6" d="M0 0h8v8H0z"/></svg>'
     )}`;
-    jest.mocked(getIconBase64).mockImplementation(async ({ actionTypeId, kind }) => {
+    vi.mocked(getIconBase64).mockImplementation(async ({ actionTypeId, kind }) => {
       if (kind === 'trigger' && actionTypeId === 'datadog.alert') {
         return resolvedTriggerIcon;
       }
       return 'data:image/png;base64,xx';
     });
-    jest
+    vi
       .spyOn(triggerSchemas, 'getTriggerDefinitions')
       .mockReturnValue([
         { id: 'datadog.alert', title: 'Datadog alert' } as PublicTriggerDefinition,
@@ -147,7 +152,7 @@ describe('useDynamicTypeIcons', () => {
         '.datadog': connectorTypeStub('.datadog'),
       },
     };
-    const onShadowIconsCssReady = jest.fn();
+    const onShadowIconsCssReady = vi.fn();
 
     const { unmount } = renderHook(
       () => useDynamicTypeIcons(connectorsData, undefined, true, undefined, onShadowIconsCssReady),
@@ -191,18 +196,18 @@ describe('useDynamicTypeIcons', () => {
       `data:image/png;base64,${'p'.repeat(40)}`,
     ],
   ])('keeps the currentColor mask for %s', async (_label, triggerId, iconUrl) => {
-    jest.mocked(getIconBase64).mockImplementation(async ({ actionTypeId, kind }) => {
+    vi.mocked(getIconBase64).mockImplementation(async ({ actionTypeId, kind }) => {
       if (kind === 'trigger' && actionTypeId === triggerId) {
         return iconUrl;
       }
       return 'data:image/png;base64,xx';
     });
-    jest
+    vi
       .spyOn(triggerSchemas, 'getTriggerDefinitions')
       .mockReturnValue([{ id: triggerId, title: triggerId } as PublicTriggerDefinition]);
 
     const services = createStartServicesMock();
-    const onShadowIconsCssReady = jest.fn();
+    const onShadowIconsCssReady = vi.fn();
     const { unmount } = renderHook(
       () =>
         useDynamicTypeIcons(

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { useEuiTheme } from '@elastic/eui';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
@@ -17,44 +20,53 @@ import { useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 
 // Mock dependencies
-jest.mock('./bar', () => ({
-  Bar: ({ width, left, color, segments }: any) => (
-    <div
-      data-test-subj="bar"
-      data-width={width}
-      data-left={left}
-      data-color={color}
-      data-segments={segments ? JSON.stringify(segments) : undefined}
-    />
-  ),
-}));
-jest.mock('./bar_details', () => ({
-  BarDetails: ({ item, left }: any) => (
-    <div data-test-subj="bar-details" data-item={item.id} data-left={left} />
-  ),
-}));
-jest.mock('./toggle_accordion_button', () => ({
-  TOGGLE_BUTTON_WIDTH: 10,
-  ToggleAccordionButton: ({ isOpen, childrenCount, onClick }: any) => (
-    <div
-      data-test-subj="toggle-btn"
-      data-open={isOpen}
-      data-count={childrenCount}
-      onClick={onClick}
-      onKeyDown={onClick}
-      role="button"
-      tabIndex={0}
-    />
-  ),
-}));
-jest.mock('./trace_waterfall_context');
+vi.mock('./bar', () => {
+      const mocked = {
+      Bar: ({ width, left, color, segments }: any) => (
+        <div
+          data-test-subj="bar"
+          data-width={width}
+          data-left={left}
+          data-color={color}
+          data-segments={segments ? JSON.stringify(segments) : undefined}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./bar_details', () => {
+      const mocked = {
+      BarDetails: ({ item, left }: any) => (
+        <div data-test-subj="bar-details" data-item={item.id} data-left={left} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./toggle_accordion_button', () => {
+      const mocked = {
+      TOGGLE_BUTTON_WIDTH: 10,
+      ToggleAccordionButton: ({ isOpen, childrenCount, onClick }: any) => (
+        <div
+          data-test-subj="toggle-btn"
+          data-open={isOpen}
+          data-count={childrenCount}
+          onClick={onClick}
+          onKeyDown={onClick}
+          role="button"
+          tabIndex={0}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./trace_waterfall_context');
 
-const MockEuiAccordion = jest.fn();
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+const MockEuiAccordion = vi.fn();
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    useEuiTheme: jest.fn(),
+    useEuiTheme: vi.fn(),
     EuiAccordion: (props: any) => {
       MockEuiAccordion(props);
       return <actual.EuiAccordion {...props} />;
@@ -62,10 +74,10 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const mockUseTraceWaterfallContext = useTraceWaterfallContext as jest.MockedFunction<
+const mockUseTraceWaterfallContext = useTraceWaterfallContext as MockedFunction<
   typeof useTraceWaterfallContext
 >;
-const mockUseEuiTheme = useEuiTheme as jest.MockedFunction<typeof useEuiTheme>;
+const mockUseEuiTheme = useEuiTheme as MockedFunction<typeof useEuiTheme>;
 
 const baseItem = {
   id: 'span-1',
@@ -91,8 +103,8 @@ describe('TraceItemRow', () => {
       duration: 100,
       margin: { left: 20, right: 10 },
       showAccordion: true,
-      onClick: jest.fn(),
-      onErrorClick: jest.fn(),
+      onClick: vi.fn(),
+      onErrorClick: vi.fn(),
       contextSpanIds: ['highlighted-id'],
       criticalPathSegmentsById: {},
       showCriticalPath: false,
@@ -113,11 +125,11 @@ describe('TraceItemRow', () => {
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('renders Bar and BarDetails with correct props', () => {
     const { getByTestId } = render(
-      <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={vi.fn()} />
     );
     expect(getByTestId('bar')).toHaveAttribute('data-width', '50');
     expect(getByTestId('bar')).toHaveAttribute('data-left', '10');
@@ -128,7 +140,7 @@ describe('TraceItemRow', () => {
 
   it('renders ToggleAccordionButton when hasToggle is true', () => {
     const { getByTestId } = render(
-      <TraceItemRow item={baseItem} childrenCount={2} state="open" onToggle={jest.fn()} />
+      <TraceItemRow item={baseItem} childrenCount={2} state="open" onToggle={vi.fn()} />
     );
     expect(getByTestId('toggle-btn')).toBeInTheDocument();
     expect(getByTestId('toggle-btn')).toHaveAttribute('data-open', 'true');
@@ -136,7 +148,7 @@ describe('TraceItemRow', () => {
   });
 
   it('calls onToggle when ToggleAccordionButton is clicked', () => {
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
     const { getByTestId } = render(
       <TraceItemRow item={baseItem} childrenCount={2} state="open" onToggle={onToggle} />
     );
@@ -145,7 +157,7 @@ describe('TraceItemRow', () => {
   });
 
   it('does not call onClick when clicking a data-prevent-row-click element', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     mockUseTraceWaterfallContext.mockReturnValue({
       duration: 100,
       margin: { left: 20, right: 10 },
@@ -157,7 +169,7 @@ describe('TraceItemRow', () => {
     } as unknown as TraceWaterfallContextProps);
 
     const { getByTestId } = render(
-      <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={vi.fn()} />
     );
 
     const badge = document.createElement('button');
@@ -171,7 +183,7 @@ describe('TraceItemRow', () => {
 
   it('renders EuiAccordion when showAccordion is true', () => {
     const { container } = render(
-      <TraceItemRow item={baseItem} childrenCount={2} state="open" onToggle={jest.fn()} />
+      <TraceItemRow item={baseItem} childrenCount={2} state="open" onToggle={vi.fn()} />
     );
     expect(container.querySelector('.euiAccordion')).toBeInTheDocument();
   });
@@ -181,14 +193,14 @@ describe('TraceItemRow', () => {
       duration: 100,
       margin: { left: 20, right: 10 },
       showAccordion: false,
-      onClick: jest.fn(),
-      onErrorClick: jest.fn(),
+      onClick: vi.fn(),
+      onErrorClick: vi.fn(),
       contextSpanIds: ['highlighted-id'],
       criticalPathSegmentsById: {},
       showCriticalPath: false,
     } as unknown as TraceWaterfallContextProps);
     const { container } = render(
-      <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={vi.fn()} />
     );
     expect(container.querySelector('.euiAccordion')).not.toBeInTheDocument();
   });
@@ -198,14 +210,14 @@ describe('TraceItemRow', () => {
       duration: 100,
       margin: { left: 20, right: 10 },
       showAccordion: true,
-      onClick: jest.fn(),
-      onErrorClick: jest.fn(),
+      onClick: vi.fn(),
+      onErrorClick: vi.fn(),
       contextSpanIds: ['span-1'],
       criticalPathSegmentsById: {},
       showCriticalPath: false,
     } as unknown as TraceWaterfallContextProps);
     const { getByTestId } = render(
-      <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={vi.fn()} />
     );
     expect(getByTestId('trace-item-container')).toHaveStyle('background-color: #fff7e2');
   });
@@ -215,15 +227,15 @@ describe('TraceItemRow', () => {
       duration: 100,
       margin: { left: 20, right: 10 },
       showAccordion: true,
-      onClick: jest.fn(),
-      onErrorClick: jest.fn(),
+      onClick: vi.fn(),
+      onErrorClick: vi.fn(),
       contextSpanIds: ['span-1'],
       selectedSpanId: 'span-1',
       criticalPathSegmentsById: {},
       showCriticalPath: false,
     } as unknown as TraceWaterfallContextProps);
     const { getByTestId } = render(
-      <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={vi.fn()} />
     );
     expect(getByTestId('trace-item-container')).toHaveStyle('background-color: #f1f6ff');
   });
@@ -250,13 +262,13 @@ describe('TraceItemRow', () => {
         duration: 100,
         margin: { left: 20, right: 10 },
         showAccordion: true,
-        onClick: jest.fn(),
+        onClick: vi.fn(),
         contextSpanIds: ['highlighted-id'],
         showCriticalPath: true,
         criticalPathSegmentsById: {},
       } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
-        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={vi.fn()} />
       );
       const bar = getByTestId('bar');
       expect(bar).not.toHaveAttribute('data-segments');
@@ -267,7 +279,7 @@ describe('TraceItemRow', () => {
         duration: 100,
         margin: { left: 20, right: 10 },
         showAccordion: true,
-        onClick: jest.fn(),
+        onClick: vi.fn(),
         contextSpanIds: ['highlighted-id'],
         showCriticalPath: true,
         criticalPathSegmentsById: {
@@ -275,7 +287,7 @@ describe('TraceItemRow', () => {
         },
       } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
-        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={vi.fn()} />
       );
       const bar = getByTestId('bar');
       expect(bar).not.toHaveAttribute('data-segments');
@@ -287,7 +299,7 @@ describe('TraceItemRow', () => {
         duration: 200,
         margin: { left: 20, right: 10 },
         showAccordion: true,
-        onClick: jest.fn(),
+        onClick: vi.fn(),
         contextSpanIds: ['highlighted-id'],
         showCriticalPath: true,
         criticalPathSegmentsById: {
@@ -299,7 +311,7 @@ describe('TraceItemRow', () => {
         },
       } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
-        <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={jest.fn()} />
+        <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={vi.fn()} />
       );
       const bar = getByTestId('bar');
       const segments = JSON.parse(bar.getAttribute('data-segments') || '[]');
@@ -312,7 +324,7 @@ describe('TraceItemRow', () => {
         duration: 200,
         margin: { left: 20, right: 10 },
         showAccordion: true,
-        onClick: jest.fn(),
+        onClick: vi.fn(),
         contextSpanIds: ['highlighted-id'],
         showCriticalPath: true,
         criticalPathSegmentsById: {
@@ -322,7 +334,7 @@ describe('TraceItemRow', () => {
         },
       } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
-        <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={jest.fn()} />
+        <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={vi.fn()} />
       );
       const bar = getByTestId('bar');
       const segments = JSON.parse(bar.getAttribute('data-segments') || '[]');
@@ -335,7 +347,7 @@ describe('TraceItemRow', () => {
         duration: 200,
         margin: { left: 20, right: 10 },
         showAccordion: true,
-        onClick: jest.fn(),
+        onClick: vi.fn(),
         contextSpanIds: ['highlighted-id'],
         showCriticalPath: true,
         criticalPathSegmentsById: {
@@ -345,7 +357,7 @@ describe('TraceItemRow', () => {
         },
       } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
-        <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={jest.fn()} />
+        <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={vi.fn()} />
       );
       const bar = getByTestId('bar');
       const segments = JSON.parse(bar.getAttribute('data-segments') || '[]');
@@ -358,7 +370,7 @@ describe('TraceItemRow', () => {
         duration: 200,
         margin: { left: 20, right: 10 },
         showAccordion: true,
-        onClick: jest.fn(),
+        onClick: vi.fn(),
         contextSpanIds: ['highlighted-id'],
         showCriticalPath: true,
         criticalPathSegmentsById: {
@@ -366,7 +378,7 @@ describe('TraceItemRow', () => {
         },
       } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
-        <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={jest.fn()} />
+        <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={vi.fn()} />
       );
       const bar = getByTestId('bar');
       const segments = JSON.parse(bar.getAttribute('data-segments') || '[]');
@@ -379,13 +391,13 @@ describe('TraceItemRow', () => {
         duration: 100,
         margin: { left: 20, right: 10 },
         showAccordion: true,
-        onClick: jest.fn(),
+        onClick: vi.fn(),
         contextSpanIds: ['highlighted-id'],
         showCriticalPath: true,
         criticalPathSegmentsById: {},
       } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
-        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={vi.fn()} />
       );
       const bar = getByTestId('bar');
       const color = bar.getAttribute('data-color');
@@ -398,13 +410,13 @@ describe('TraceItemRow', () => {
         duration: 100,
         margin: { left: 20, right: 10 },
         showAccordion: true,
-        onClick: jest.fn(),
+        onClick: vi.fn(),
         contextSpanIds: ['highlighted-id'],
         showCriticalPath: false,
         criticalPathSegmentsById: {},
       } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
-        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={vi.fn()} />
       );
       const bar = getByTestId('bar');
       expect(bar).toHaveAttribute('data-color', 'red');
@@ -417,15 +429,15 @@ describe('TraceItemRow', () => {
         duration: 100,
         margin: { left: 20, right: 10 },
         showAccordion: true,
-        onClick: jest.fn(),
-        onErrorClick: jest.fn(),
+        onClick: vi.fn(),
+        onErrorClick: vi.fn(),
         contextSpanIds: ['some-other-span'],
         criticalPathSegmentsById: {},
         showCriticalPath: false,
       } as unknown as TraceWaterfallContextProps);
 
       const { getByTestId } = render(
-        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={vi.fn()} />
       );
 
       expect(getByTestId('traceItemRowContent')).toHaveAttribute('role', 'button');
@@ -438,14 +450,14 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: undefined,
-        onErrorClick: jest.fn(),
+        onErrorClick: vi.fn(),
         contextSpanIds: undefined,
         criticalPathSegmentsById: {},
         showCriticalPath: false,
       } as unknown as TraceWaterfallContextProps);
 
       const { getByTestId } = render(
-        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={vi.fn()} />
       );
 
       expect(getByTestId('traceItemRowContent')).not.toHaveAttribute('role', 'button');
@@ -457,15 +469,15 @@ describe('TraceItemRow', () => {
         duration: 100,
         margin: { left: 20, right: 10 },
         showAccordion: true,
-        onClick: jest.fn(),
-        onErrorClick: jest.fn(),
+        onClick: vi.fn(),
+        onErrorClick: vi.fn(),
         contextSpanIds: ['span-1'],
         criticalPathSegmentsById: {},
         showCriticalPath: false,
       } as unknown as TraceWaterfallContextProps);
 
       const { getByTestId } = render(
-        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={vi.fn()} />
       );
 
       expect(getByTestId('traceItemRowContent')).toHaveAttribute('role', 'button');
@@ -478,7 +490,7 @@ describe('TraceItemRow', () => {
    * We hide it via arrowProps.css since we use our own ToggleAccordionButton.
    */
   it('passes arrowProps with display:none to hide EUI forced arrow', () => {
-    render(<TraceItemRow item={baseItem} childrenCount={2} state="open" onToggle={jest.fn()} />);
+    render(<TraceItemRow item={baseItem} childrenCount={2} state="open" onToggle={vi.fn()} />);
 
     expect(MockEuiAccordion).toHaveBeenCalledWith(
       expect.objectContaining({

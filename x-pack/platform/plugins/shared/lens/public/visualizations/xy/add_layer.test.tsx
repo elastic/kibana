@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AddLayerButton } from './add_layer';
@@ -16,7 +18,7 @@ import { IconChartBarAnnotations } from '@kbn/chart-icons';
 
 // Failing: See https://github.com/elastic/kibana/issues/255059
 describe.skip('AddLayerButton', () => {
-  const addLayer = jest.fn();
+  const addLayer = vi.fn();
 
   const renderAddLayerButton = () => {
     const state: XYVisualizationState = {
@@ -83,7 +85,7 @@ describe.skip('AddLayerButton', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders all compatible series types', async () => {

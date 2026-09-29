@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -21,22 +24,22 @@ import type { SignificantEventsAlertingContext } from '../../significant_events/
 import { ALERTS_READER_V2 } from '../../significant_events/alerting/alerts_reader';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 
-jest.mock('../../significant_events/latest_source_query', () => {
-  const actual = jest.requireActual('../../significant_events/latest_source_query');
+vi.mock('../../significant_events/latest_source_query', async () => {
+  const actual = (await vi.importActual('../../significant_events/latest_source_query'));
   return {
     ...actual,
-    executeAndDecodeSource: jest.fn(),
-    queryEsql: jest.fn(),
+    executeAndDecodeSource: vi.fn(),
+    queryEsql: vi.fn(),
   };
 });
 
-jest.mock('../../significant_events/run_esql_query');
+vi.mock('../../significant_events/run_esql_query');
 
-jest.mock('./bulk_with_inference_fallback', () => {
-  const actual = jest.requireActual('./bulk_with_inference_fallback');
+vi.mock('./bulk_with_inference_fallback', async () => {
+  const actual = (await vi.importActual('./bulk_with_inference_fallback'));
   return {
     ...actual,
-    bulkCreateWithInferenceFallback: jest.fn(async (_logger, attempt) =>
+    bulkCreateWithInferenceFallback: vi.fn(async (_logger, attempt) =>
       attempt({ includeEmbedding: true })
     ),
   };
@@ -100,12 +103,12 @@ function createAlertingContext(
 
 function makeClient(): {
   client: KnowledgeIndicatorClient;
-  create: jest.Mock;
-  runEsql: jest.Mock;
+  create: Mock;
+  runEsql: Mock;
   logger: Logger;
-  findStreamNamesWithOwnedRules: jest.Mock;
+  findStreamNamesWithOwnedRules: Mock;
 } {
-  const create = jest.fn().mockResolvedValue({ errors: false, items: [] });
+  const create = vi.fn().mockResolvedValue({ errors: false, items: [] });
   const dataStreamClient = {
     create,
   } as unknown as KnowledgeIndicatorClientDeps['dataStreamClient'];
@@ -116,18 +119,18 @@ function makeClient(): {
     soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
     logger,
   };
-  const findStreamNamesWithOwnedRules = jest.fn().mockResolvedValue([]);
+  const findStreamNamesWithOwnedRules = vi.fn().mockResolvedValue([]);
   const rulesManagementClient = {
-    createRule: jest.fn().mockResolvedValue(undefined),
-    bulkCreateRules: jest
+    createRule: vi.fn().mockResolvedValue(undefined),
+    bulkCreateRules: vi
       .fn()
       .mockImplementation((rules: Array<{ id: string }>) =>
         Promise.resolve({ createdIds: rules.map(({ id }) => id) })
       ),
-    updateRule: jest.fn().mockResolvedValue(undefined),
-    bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-    findExistingRuleIds: jest.fn().mockResolvedValue([]),
-    findOwnedRuleIds: jest.fn().mockResolvedValue([]),
+    updateRule: vi.fn().mockResolvedValue(undefined),
+    bulkDeleteRules: vi.fn().mockResolvedValue(undefined),
+    findExistingRuleIds: vi.fn().mockResolvedValue([]),
+    findOwnedRuleIds: vi.fn().mockResolvedValue([]),
     findStreamNamesWithOwnedRules,
   };
   const client = new KnowledgeIndicatorClient(
@@ -138,16 +141,16 @@ function makeClient(): {
   return {
     client,
     create,
-    runEsql: executeAndDecodeSource as jest.Mock,
+    runEsql: executeAndDecodeSource as Mock,
     logger,
     findStreamNamesWithOwnedRules,
   };
 }
 
 beforeEach(() => {
-  (executeAndDecodeSource as jest.Mock).mockReset();
-  (queryEsql as jest.Mock).mockReset();
-  (runEsqlQuery as jest.Mock).mockReset();
+  (executeAndDecodeSource as Mock).mockReset();
+  (queryEsql as Mock).mockReset();
+  (runEsqlQuery as Mock).mockReset();
 });
 
 describe('KnowledgeIndicatorClient.bulk', () => {
@@ -322,7 +325,7 @@ describe('KnowledgeIndicatorClient.deleteIndicators', () => {
 });
 
 describe('KnowledgeIndicatorClient.getStreamNamesWithKnowledgeIndicators', () => {
-  const runEsql = runEsqlQuery as jest.Mock;
+  const runEsql = runEsqlQuery as Mock;
 
   // ES|QL is columnar; the enumeration projects a single `streamName` column.
   const streamNameResponse = (names: unknown[]) => ({
@@ -373,7 +376,7 @@ describe('KnowledgeIndicatorClient.getStreamNamesWithKnowledgeIndicators', () =>
 });
 
 describe('KnowledgeIndicatorClient.getStreamNamesToReconcile', () => {
-  const runEsql = runEsqlQuery as jest.Mock;
+  const runEsql = runEsqlQuery as Mock;
 
   it('unions KI-bearing streams with owned-rule streams, deduped', async () => {
     const { client, findStreamNamesWithOwnedRules } = makeClient();
@@ -392,7 +395,7 @@ describe('KnowledgeIndicatorClient.getStreamNamesToReconcile', () => {
 });
 
 describe('KnowledgeIndicatorClient.getFeatures', () => {
-  const printedQueryFor = (runEsql: jest.Mock): string => {
+  const printedQueryFor = (runEsql: Mock): string => {
     const query = runEsql.mock.calls[0][1] as { print: () => string };
     return query.print();
   };
@@ -436,7 +439,7 @@ describe('KnowledgeIndicatorClient.getFeatures', () => {
 });
 
 describe('KnowledgeIndicatorClient.getLatestRevisionTimestamp', () => {
-  const printedQueryFor = (runEsql: jest.Mock): string => {
+  const printedQueryFor = (runEsql: Mock): string => {
     const query = runEsql.mock.calls[0][1] as { print: () => string };
     return query.print();
   };
@@ -492,7 +495,7 @@ describe('KnowledgeIndicatorClient.getLatestRevisionTimestamp', () => {
 });
 
 describe('KnowledgeIndicatorClient.getExcludedFeatures', () => {
-  const printedQueryFor = (runEsql: jest.Mock): string => {
+  const printedQueryFor = (runEsql: Mock): string => {
     const query = runEsql.mock.calls[0][1] as { print: () => string };
     return query.print();
   };
@@ -637,11 +640,11 @@ describe('KnowledgeIndicatorClient.bulk — lifecycle (expires_at)', () => {
 describe('KnowledgeIndicatorClient.findIndicators search', () => {
   function makeClientWithRanker(): {
     client: KnowledgeIndicatorClient;
-    runEsql: jest.Mock;
-    rankEsql: jest.Mock;
+    runEsql: Mock;
+    rankEsql: Mock;
     logger: Logger;
   } {
-    const create = jest.fn().mockResolvedValue({ errors: false, items: [] });
+    const create = vi.fn().mockResolvedValue({ errors: false, items: [] });
     const dataStreamClient = {
       create,
     } as unknown as KnowledgeIndicatorClientDeps['dataStreamClient'];
@@ -653,26 +656,26 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
       logger,
     };
     const rulesManagementClient = {
-      createRule: jest.fn().mockResolvedValue(undefined),
-      bulkCreateRules: jest
+      createRule: vi.fn().mockResolvedValue(undefined),
+      bulkCreateRules: vi
         .fn()
         .mockImplementation((rules: Array<{ id: string }>) =>
           Promise.resolve({ createdIds: rules.map(({ id }) => id) })
         ),
-      updateRule: jest.fn().mockResolvedValue(undefined),
-      bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-      findExistingRuleIds: jest.fn().mockResolvedValue([]),
-      findOwnedRuleIds: jest.fn().mockResolvedValue([]),
-      findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue([]),
+      updateRule: vi.fn().mockResolvedValue(undefined),
+      bulkDeleteRules: vi.fn().mockResolvedValue(undefined),
+      findExistingRuleIds: vi.fn().mockResolvedValue([]),
+      findOwnedRuleIds: vi.fn().mockResolvedValue([]),
+      findStreamNamesWithOwnedRules: vi.fn().mockResolvedValue([]),
     };
     const client = new KnowledgeIndicatorClient(
       deps,
       true,
       createAlertingContext(rulesManagementClient)
     );
-    const rankEsql = queryEsql as jest.Mock;
+    const rankEsql = queryEsql as Mock;
     rankEsql.mockResolvedValue({ columns: [], values: [] });
-    return { client, runEsql: executeAndDecodeSource as jest.Mock, rankEsql, logger };
+    return { client, runEsql: executeAndDecodeSource as Mock, rankEsql, logger };
   }
 
   const rankedResponse = (
@@ -692,7 +695,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     values: rows.map((row) => [row.id, row['stream.name'], row.type, row['@timestamp']]),
   });
 
-  const rankRequest = (rankEsql: jest.Mock): { query: string; params: unknown[] } => {
+  const rankRequest = (rankEsql: Mock): { query: string; params: unknown[] } => {
     const composerQuery = rankEsql.mock.calls[0][0].query as {
       toRequest: () => { query: string; params: unknown[] };
     };

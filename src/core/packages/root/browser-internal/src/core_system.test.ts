@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   ChromeServiceConstructor,
   FatalErrorsServiceConstructor,
@@ -66,9 +68,9 @@ import {
   LOAD_START_DONE,
 } from './events';
 
-jest.spyOn(CoreSystem.prototype, 'stop');
+vi.spyOn(CoreSystem.prototype, 'stop');
 (global.navigator as any).deviceMemory = 5;
-jest.spyOn(global.navigator as any, 'hardwareConcurrency', 'get').mockReturnValue(4);
+vi.spyOn(global.navigator as any, 'hardwareConcurrency', 'get').mockReturnValue(4);
 
 const defaultCoreSystemParams = {
   rootDomElement: document.createElement('div'),
@@ -99,12 +101,12 @@ const defaultCoreSystemParams = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   MockPluginsService.getOpaqueIds.mockReturnValue(new Map());
 
-  window.performance.mark = jest.fn();
-  window.performance.clearMarks = jest.fn();
-  window.performance.getEntriesByName = jest.fn().mockReturnValue([
+  window.performance.mark = vi.fn();
+  window.performance.clearMarks = vi.fn();
+  window.performance.getEntriesByName = vi.fn().mockReturnValue([
     {
       detail: LOAD_START,
       startTime: 111,

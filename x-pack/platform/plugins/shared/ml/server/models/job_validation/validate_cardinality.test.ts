@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cloneDeep } from 'lodash';
 
 import type { IScopedClusterClient } from '@kbn/core/server';
@@ -43,71 +45,99 @@ const mlClusterClientFactory = (
 };
 
 describe('ML - validateCardinality', () => {
-  it('called without arguments', (done) => {
-    validateCardinality(mlClusterClientFactory(mockResponses)).then(
-      () => done(new Error('Promise should not resolve for this test without job argument.')),
-      () => done()
-    );
-  });
+  it('called without arguments', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-  it('called with non-valid job argument #1, missing analysis_config', (done) => {
-    validateCardinality(mlClusterClientFactory(mockResponses), {} as CombinedJob).then(
-      () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-      () => done()
-    );
-  });
+          validateCardinality(mlClusterClientFactory(mockResponses)).then(
+            () => done(new Error('Promise should not resolve for this test without job argument.')),
+            () => done()
+          );
+        
+      }));
 
-  it('called with non-valid job argument #2, missing datafeed_config', (done) => {
-    validateCardinality(mlClusterClientFactory(mockResponses), {
-      analysis_config: {},
-    } as CombinedJob).then(
-      () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-      () => done()
-    );
-  });
+  it('called with non-valid job argument #1, missing analysis_config', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-  it('called with non-valid job argument #3, missing datafeed_config.indices', (done) => {
-    const job = { analysis_config: {}, datafeed_config: {} } as CombinedJob;
-    validateCardinality(mlClusterClientFactory(mockResponses), job).then(
-      () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-      () => done()
-    );
-  });
+          validateCardinality(mlClusterClientFactory(mockResponses), {} as CombinedJob).then(
+            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
+            () => done()
+          );
+        
+      }));
 
-  it('called with non-valid job argument #4, missing data_description', (done) => {
-    const job = {
-      analysis_config: {},
-      datafeed_config: { indices: [] },
-    } as unknown as CombinedJob;
-    validateCardinality(mlClusterClientFactory(mockResponses), job).then(
-      () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-      () => done()
-    );
-  });
+  it('called with non-valid job argument #2, missing datafeed_config', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-  it('called with non-valid job argument #5, missing data_description.time_field', (done) => {
-    const job = {
-      analysis_config: {},
-      data_description: {},
-      datafeed_config: { indices: [] },
-    } as unknown as CombinedJob;
-    validateCardinality(mlClusterClientFactory(mockResponses), job).then(
-      () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-      () => done()
-    );
-  });
+          validateCardinality(mlClusterClientFactory(mockResponses), {
+            analysis_config: {},
+          } as CombinedJob).then(
+            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
+            () => done()
+          );
+        
+      }));
 
-  it('called with non-valid job argument #6, missing analysis_config.influencers', (done) => {
-    const job = {
-      analysis_config: {},
-      datafeed_config: { indices: [] },
-      data_description: { time_field: '@timestamp' },
-    } as unknown as CombinedJob;
-    validateCardinality(mlClusterClientFactory(mockResponses), job).then(
-      () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-      () => done()
-    );
-  });
+  it('called with non-valid job argument #3, missing datafeed_config.indices', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+          const job = { analysis_config: {}, datafeed_config: {} } as CombinedJob;
+          validateCardinality(mlClusterClientFactory(mockResponses), job).then(
+            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
+            () => done()
+          );
+        
+      }));
+
+  it('called with non-valid job argument #4, missing data_description', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+          const job = {
+            analysis_config: {},
+            datafeed_config: { indices: [] },
+          } as unknown as CombinedJob;
+          validateCardinality(mlClusterClientFactory(mockResponses), job).then(
+            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
+            () => done()
+          );
+        
+      }));
+
+  it('called with non-valid job argument #5, missing data_description.time_field', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+          const job = {
+            analysis_config: {},
+            data_description: {},
+            datafeed_config: { indices: [] },
+          } as unknown as CombinedJob;
+          validateCardinality(mlClusterClientFactory(mockResponses), job).then(
+            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
+            () => done()
+          );
+        
+      }));
+
+  it('called with non-valid job argument #6, missing analysis_config.influencers', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+          const job = {
+            analysis_config: {},
+            datafeed_config: { indices: [] },
+            data_description: { time_field: '@timestamp' },
+          } as unknown as CombinedJob;
+          validateCardinality(mlClusterClientFactory(mockResponses), job).then(
+            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
+            () => done()
+          );
+        
+      }));
 
   it('minimum job configuration to pass cardinality check code', () => {
     const job = {
@@ -181,7 +211,7 @@ describe('ML - validateCardinality', () => {
   });
 
   it('forwards datafeed project_routing to fieldCaps and still validates cardinality', async () => {
-    const fieldCaps = jest.fn().mockResolvedValue(mockFieldCaps);
+    const fieldCaps = vi.fn().mockResolvedValue(mockFieldCaps);
     const client = {
       asCurrentUser: {
         search: () => Promise.resolve(mockFareQuoteCardinality),

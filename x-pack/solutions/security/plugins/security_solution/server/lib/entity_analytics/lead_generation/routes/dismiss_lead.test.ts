@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { APP_ID } from '../../../../../common';
 import { dismissLeadRoute } from './dismiss_lead';
@@ -15,10 +17,13 @@ import {
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 
-const mockDismissLead = jest.fn();
-jest.mock('../lead_data_client', () => ({
-  createLeadDataClient: () => ({ dismissLead: mockDismissLead }),
-}));
+const mockDismissLead = vi.fn();
+vi.mock('../lead_data_client', () => {
+      const mocked = {
+      createLeadDataClient: () => ({ dismissLead: mockDismissLead }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeEsSecurityException = () => ({
   statusCode: 403,
@@ -32,7 +37,7 @@ describe('dismissLeadRoute', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     const { clients } = requestContextMock.createTools();
     context = requestContextMock.convertContext(requestContextMock.create({ ...clients }));

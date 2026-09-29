@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, Subject } from 'rxjs';
 import type { OnPreAuthHandler } from '@kbn/core-http-server';
 import {
@@ -192,10 +194,10 @@ describe('HttpRateLimiterService', () => {
       it('should not reset timer on consecutive overload', () => {
         service.start();
         elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
-        jest.useFakeTimers().setSystemTime(Date.now() + 7 * 1000);
+        vi.useFakeTimers().setSystemTime(Date.now() + 7 * 1000);
         elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
         handler(request, response, toolkit);
-        jest.useRealTimers();
+        vi.useRealTimers();
 
         expect(response.customError).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -208,14 +210,14 @@ describe('HttpRateLimiterService', () => {
       });
 
       it('should reset timer when it is below collection interval', () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         service.start();
         for (let i = 0; i < 3; i++) {
-          jest.setSystemTime(Date.now() + 5 * 1000);
+          vi.setSystemTime(Date.now() + 5 * 1000);
           elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
         }
         handler(request, response, toolkit);
-        jest.useRealTimers();
+        vi.useRealTimers();
 
         expect(response.customError).toHaveBeenCalledWith(
           expect.objectContaining({

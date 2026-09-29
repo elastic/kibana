@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { preprocessAlertInputs } from './preprocess_alert_inputs';
 import type { WorkflowsRequestHandlerContext } from '../../../../types';
 
 describe('preprocessAlertInputs', () => {
-  let mockEsClient: { mget: jest.Mock };
+  let mockEsClient: { mget: Mock };
   let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockContext: WorkflowsRequestHandlerContext;
 
@@ -21,7 +24,7 @@ describe('preprocessAlertInputs', () => {
     id: ruleTypeId,
     name: 'Test Rule Type',
     alerts: {
-      formatAlert: jest.fn((source: Record<string, unknown>) => {
+      formatAlert: vi.fn((source: Record<string, unknown>) => {
         // Add signal property if signal-mappable fields are present
         const hasSignalFields =
           source['kibana.alert.depth'] ||
@@ -34,7 +37,7 @@ describe('preprocessAlertInputs', () => {
 
   beforeEach(() => {
     mockEsClient = {
-      mget: jest.fn(),
+      mget: vi.fn(),
     };
 
     mockLogger = loggerMock.create();
@@ -52,7 +55,7 @@ describe('preprocessAlertInputs', () => {
         },
       }),
       alerting: Promise.resolve({
-        listTypes: jest.fn(() => mockRuleTypeRegistryMap),
+        listTypes: vi.fn(() => mockRuleTypeRegistryMap),
       }),
     } as any;
   });
@@ -118,7 +121,7 @@ describe('preprocessAlertInputs', () => {
         'kibana.alert.rule.name': 'Test Rule 2',
       });
 
-      mockEsClient.mget = jest.fn().mockResolvedValue({
+      mockEsClient.mget = vi.fn().mockResolvedValue({
         docs: [
           {
             found: true,
@@ -180,7 +183,7 @@ describe('preprocessAlertInputs', () => {
         'kibana.alert.rule.name': 'Rule 2',
       });
 
-      mockEsClient.mget = jest.fn().mockResolvedValue({
+      mockEsClient.mget = vi.fn().mockResolvedValue({
         docs: [
           {
             found: true,
@@ -223,7 +226,7 @@ describe('preprocessAlertInputs', () => {
     });
 
     it('should throw error when no alerts are found', async () => {
-      mockEsClient.mget = jest.fn().mockResolvedValue({
+      mockEsClient.mget = vi.fn().mockResolvedValue({
         docs: [
           {
             found: false,
@@ -262,7 +265,7 @@ describe('preprocessAlertInputs', () => {
         // Missing rule fields
       };
 
-      mockEsClient.mget = jest.fn().mockResolvedValue({
+      mockEsClient.mget = vi.fn().mockResolvedValue({
         docs: [
           {
             found: true,
@@ -287,7 +290,7 @@ describe('preprocessAlertInputs', () => {
 
     it('should handle Elasticsearch errors', async () => {
       const esError = new Error('Elasticsearch connection failed');
-      mockEsClient.mget = jest.fn().mockRejectedValue(esError);
+      mockEsClient.mget = vi.fn().mockRejectedValue(esError);
 
       const inputs = {
         event: {
@@ -308,7 +311,7 @@ describe('preprocessAlertInputs', () => {
     it('should preserve other input fields when preprocessing', async () => {
       const alertSource = createMockAlertSource();
 
-      mockEsClient.mget = jest.fn().mockResolvedValue({
+      mockEsClient.mget = vi.fn().mockResolvedValue({
         docs: [
           {
             found: true,
@@ -341,7 +344,7 @@ describe('preprocessAlertInputs', () => {
       const alertSourceWithTags = createMockAlertSource();
       const { 'kibana.alert.rule.tags': _, ...alertSourceWithoutTags } = alertSourceWithTags;
 
-      mockEsClient.mget = jest.fn().mockResolvedValue({
+      mockEsClient.mget = vi.fn().mockResolvedValue({
         docs: [
           {
             found: true,
@@ -394,7 +397,7 @@ describe('preprocessAlertInputs', () => {
             delete (alertSource as Record<string, unknown>)[testCase.deleteField];
           }
 
-          mockEsClient.mget = jest.fn().mockResolvedValue({
+          mockEsClient.mget = vi.fn().mockResolvedValue({
             docs: [
               {
                 found: true,
@@ -430,7 +433,7 @@ describe('preprocessAlertInputs', () => {
           'kibana.alert.rule.name': 'Rule 2', // Different name
         });
 
-        mockEsClient.mget = jest.fn().mockResolvedValue({
+        mockEsClient.mget = vi.fn().mockResolvedValue({
           docs: [
             {
               found: true,
@@ -474,7 +477,7 @@ describe('preprocessAlertInputs', () => {
           // Missing rule fields
         };
 
-        mockEsClient.mget = jest.fn().mockResolvedValue({
+        mockEsClient.mget = vi.fn().mockResolvedValue({
           docs: [
             {
               found: true,
@@ -518,7 +521,7 @@ describe('preprocessAlertInputs', () => {
           'kibana.alert.reason': 'Test reason',
         });
 
-        mockEsClient.mget = jest.fn().mockResolvedValue({
+        mockEsClient.mget = vi.fn().mockResolvedValue({
           docs: [
             {
               found: true,
@@ -562,7 +565,7 @@ describe('preprocessAlertInputs', () => {
             },
           }),
           alerting: Promise.resolve({
-            listTypes: jest.fn(() => mockRuleTypeRegistryWithoutFormat),
+            listTypes: vi.fn(() => mockRuleTypeRegistryWithoutFormat),
           }),
         } as any;
 
@@ -578,7 +581,7 @@ describe('preprocessAlertInputs', () => {
           'kibana.alert.status': 'active',
         };
 
-        mockEsClient.mget = jest.fn().mockResolvedValue({
+        mockEsClient.mget = vi.fn().mockResolvedValue({
           docs: [
             {
               found: true,
@@ -618,7 +621,7 @@ describe('preprocessAlertInputs', () => {
       it('should handle mixed found/not found documents', async () => {
         const alertSource = createMockAlertSource();
 
-        mockEsClient.mget = jest.fn().mockResolvedValue({
+        mockEsClient.mget = vi.fn().mockResolvedValue({
           docs: [
             {
               found: true,

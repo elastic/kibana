@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { createDefaultUnit, createUnitRepository } from './unit_repository';
@@ -49,7 +51,7 @@ const storedUnit: StreamsUnit.GetResponse = {
 
 describe('unit repository', () => {
   it('loads a default unit when none is stored', async () => {
-    const fetch = jest.fn().mockRejectedValue(createNotFoundError());
+    const fetch = vi.fn().mockRejectedValue(createNotFoundError());
     const repository = createUnitRepository({
       streamsRepositoryClient: { fetch } as never,
     });
@@ -62,7 +64,7 @@ describe('unit repository', () => {
   });
 
   it('puts the unit as the request body', async () => {
-    const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
+    const fetch = vi.fn().mockResolvedValue({ acknowledged: true });
     const repository = createUnitRepository({
       streamsRepositoryClient: { fetch } as never,
     });

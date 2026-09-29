@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,11 +21,11 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 
-jest.mock('../hooks/use_cloud_setup_context');
+vi.mock('../hooks/use_cloud_setup_context');
 
-const mockUseCloudSetup = useCloudSetup as jest.Mock;
+const mockUseCloudSetup = useCloudSetup as Mock;
 
-const mockUpdatePolicy = jest.fn();
+const mockUpdatePolicy = vi.fn();
 
 const defaultInput: NewPackagePolicyInput = {
   type: 'aws-policy-type',
@@ -66,7 +69,7 @@ const SINGLE_ACCOUNT_TEXT = 'Single Account';
 
 describe('AwsAccountTypeSelect', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCloudSetup.mockReturnValue(
       createAwsCloudSetupMock({
         awsOrganizationEnabled: true,

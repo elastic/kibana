@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@kbn/code-editor-mock/jest_helper';
 
 import React from 'react';
@@ -16,8 +19,8 @@ import { ModalProvider } from './modal_provider';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
+vi.mock('lodash', () => {
+  const original = require('lodash');
 
   return {
     ...original,
@@ -42,10 +45,10 @@ const renderModalProvider = ({ onDone }: { onDone: OnDoneLoadJsonHandler }) => {
 };
 
 describe('Load from JSON ModalProvider', () => {
-  let onDone: jest.Mock;
+  let onDone: Mock;
 
   beforeEach(() => {
-    onDone = jest.fn();
+    onDone = vi.fn();
     renderModalProvider({ onDone });
   });
 

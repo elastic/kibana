@@ -5,35 +5,53 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  useGetPackageInfoByKeyQuery: jest.fn(),
-  getAnyCloudConnectorIacTemplateUrl: jest.fn(),
-  // Render as a simple div so we can fire onReadyChange without real fleet internals
-  LazyAwsIdentityFederationSetup: jest.fn(),
-  LazyAwsStaticKeysForm: jest.fn(),
-}));
+vi.mock('@kbn/fleet-plugin/public', () => {
+      const mocked = {
+      useGetPackageInfoByKeyQuery: vi.fn(),
+      getAnyCloudConnectorIacTemplateUrl: vi.fn(),
+      // Render as a simple div so we can fire onReadyChange without real fleet internals
+      LazyAwsIdentityFederationSetup: vi.fn(),
+      LazyAwsStaticKeysForm: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../onboarding_flow_context', () => ({
-  useOnboardingFlow: jest.fn(),
-}));
+vi.mock('../../onboarding_flow_context', () => {
+      const mocked = {
+      useOnboardingFlow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  useLocation: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useLocation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./static_keys_replace_view', () => ({
-  StaticKeysReplaceView: jest.fn(),
-}));
+vi.mock('./static_keys_replace_view', () => {
+      const mocked = {
+      StaticKeysReplaceView: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -47,15 +65,15 @@ import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useLocation } from 'react-router-dom';
 import { StaticKeysReplaceView } from './static_keys_replace_view';
 
-const mockUseLocation = useLocation as jest.Mock;
-const MockStaticKeysReplaceView = StaticKeysReplaceView as unknown as jest.Mock;
+const mockUseLocation = useLocation as Mock;
+const MockStaticKeysReplaceView = StaticKeysReplaceView as unknown as Mock;
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
-const mockGetAnyCloudConnectorIacTemplateUrl = getAnyCloudConnectorIacTemplateUrl as jest.Mock;
-const MockIdentityFederation = LazyAwsIdentityFederationSetup as unknown as jest.Mock;
-const MockStaticKeys = LazyAwsStaticKeysForm as unknown as jest.Mock;
-const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as Mock;
+const mockGetAnyCloudConnectorIacTemplateUrl = getAnyCloudConnectorIacTemplateUrl as Mock;
+const MockIdentityFederation = LazyAwsIdentityFederationSetup as unknown as Mock;
+const MockStaticKeys = LazyAwsStaticKeysForm as unknown as Mock;
+const mockUseOnboardingFlow = useOnboardingFlow as Mock;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -67,17 +85,17 @@ const IAC_INTEGRATIONS: RenderIacTemplateIntegration[] = [
 
 function setupMocks({
   cloud = undefined,
-  setConnectorId = jest.fn(),
-  setStaticKeys = jest.fn(),
-  setPendingIacTemplate = jest.fn(),
+  setConnectorId = vi.fn(),
+  setStaticKeys = vi.fn(),
+  setPendingIacTemplate = vi.fn(),
   connectorId = undefined,
   authMethod = undefined,
   searchParams = '',
 }: {
   cloud?: object;
-  setConnectorId?: jest.Mock;
-  setStaticKeys?: jest.Mock;
-  setPendingIacTemplate?: jest.Mock;
+  setConnectorId?: Mock;
+  setStaticKeys?: Mock;
+  setPendingIacTemplate?: Mock;
   connectorId?: string;
   authMethod?: 'identity_federation' | 'static_keys';
   searchParams?: string;
@@ -204,7 +222,7 @@ function renderSection(
           serviceCount={props.serviceCount ?? 3}
           showIdentityFederation={props.showIdentityFederation ?? true}
           iacIntegrations={props.iacIntegrations ?? IAC_INTEGRATIONS}
-          onDeploy={props.onDeploy ?? jest.fn()}
+          onDeploy={props.onDeploy ?? vi.fn()}
           isDeploying={props.isDeploying ?? false}
           isDone={props.isDone ?? false}
           hasFailed={props.hasFailed ?? false}
@@ -218,7 +236,7 @@ function renderSection(
 
 describe('ManagedIntegrationsSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupMocks();
   });
 
@@ -336,7 +354,7 @@ describe('ManagedIntegrationsSection', () => {
 
   describe('connector name propagation', () => {
     it('calls setConnectorId with id and name when identity federation fires onConnectorIdChange', () => {
-      const setConnectorId = jest.fn();
+      const setConnectorId = vi.fn();
       setupMocks({ setConnectorId });
       renderSection({ showIdentityFederation: true });
       act(() => {
@@ -346,7 +364,7 @@ describe('ManagedIntegrationsSection', () => {
     });
 
     it('calls setConnectorId(undefined) when switching to access keys', () => {
-      const setConnectorId = jest.fn();
+      const setConnectorId = vi.fn();
       setupMocks({ setConnectorId });
       renderSection({ showIdentityFederation: true });
       fireEvent.click(screen.getByRole('radio', { name: /access keys/i }));
@@ -362,7 +380,7 @@ describe('ManagedIntegrationsSection', () => {
       // inputs before it lands. The flow carries 'persisted-connector' now, but the details belong
       // to the identity and set whose Update started the render; Deploy only writes them when
       // both match.
-      const setPendingIacTemplate = jest.fn();
+      const setPendingIacTemplate = vi.fn();
       setupMocks({ setPendingIacTemplate, connectorId: 'persisted-connector' });
       renderSection({ showIdentityFederation: true });
 
@@ -410,7 +428,7 @@ describe('ManagedIntegrationsSection', () => {
 
   describe('deploy button interaction', () => {
     it('calls onDeploy when clicked after credentials ready', () => {
-      const onDeploy = jest.fn();
+      const onDeploy = vi.fn();
       renderSection({ onDeploy });
       act(() => {
         fireEvent.click(screen.getByText('mark-ready'));
@@ -443,7 +461,7 @@ describe('ManagedIntegrationsSection', () => {
     });
 
     it('calls onDeploy when Retry clicked', () => {
-      const onDeploy = jest.fn();
+      const onDeploy = vi.fn();
       renderSection({ hasFailed: true, onDeploy });
       fireEvent.click(screen.getByTestId('managedIntegrationsSection-retryButton'));
       expect(onDeploy).toHaveBeenCalledTimes(1);
@@ -469,7 +487,7 @@ describe('ManagedIntegrationsSection', () => {
                 serviceCount={3}
                 showIdentityFederation={true}
                 iacIntegrations={IAC_INTEGRATIONS}
-                onDeploy={jest.fn()}
+                onDeploy={vi.fn()}
                 isDeploying={false}
                 isDone={true}
                 hasFailed={false}
@@ -537,7 +555,7 @@ describe('ManagedIntegrationsSection', () => {
     });
 
     it('onFieldsChange on StaticKeysReplaceView calls setStaticKeys', () => {
-      const setStaticKeys = jest.fn();
+      const setStaticKeys = vi.fn();
       setupMocks({
         searchParams: '?deploymentId=dep-123',
         authMethod: 'static_keys',
@@ -552,7 +570,7 @@ describe('ManagedIntegrationsSection', () => {
     });
 
     it('onFieldsChange on LazyAwsStaticKeysForm calls setStaticKeys', () => {
-      const setStaticKeys = jest.fn();
+      const setStaticKeys = vi.fn();
       setupMocks({ searchParams: '', connectorId: undefined, setStaticKeys });
       renderSection({ showIdentityFederation: false });
       fireEvent.click(screen.getByText('fire-fields'));

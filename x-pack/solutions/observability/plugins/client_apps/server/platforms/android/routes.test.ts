@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { IRouter } from '@kbn/core/server';
 import {
@@ -16,7 +19,7 @@ import {
 import { registerAndroidRoutes } from './routes';
 import { RetraceMapNotFoundError, retrace } from './retrace';
 
-jest.mock('./retrace', () => {
+vi.mock('./retrace', () => {
   class MockRetraceMapNotFoundError extends Error {
     constructor(buildId: string) {
       super(`No R8 mapping found for build ID "${buildId}"`);
@@ -26,12 +29,12 @@ jest.mock('./retrace', () => {
 
   return {
     RetraceMapNotFoundError: MockRetraceMapNotFoundError,
-    retrace: jest.fn(),
+    retrace: vi.fn(),
   };
 });
 
 interface TestEsClient {
-  search: jest.Mock;
+  search: Mock;
 }
 
 interface TestContext {
@@ -45,10 +48,10 @@ interface TestContext {
 }
 
 interface TestResponse {
-  ok: jest.Mock;
-  notFound: jest.Mock;
-  badRequest: jest.Mock;
-  customError: jest.Mock;
+  ok: Mock;
+  notFound: Mock;
+  badRequest: Mock;
+  customError: Mock;
 }
 
 type TestHandler<Query = Record<string, unknown>, Body = Record<string, unknown>> = (
@@ -57,25 +60,25 @@ type TestHandler<Query = Record<string, unknown>, Body = Record<string, unknown>
   response: TestResponse
 ) => Promise<unknown>;
 
-const mockedRetrace = jest.mocked(retrace);
+const mockedRetrace = vi.mocked(retrace);
 
 function createRouterMock() {
   return {
-    get: jest.fn(),
-    post: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
   };
 }
 
 function createResponseMock(): TestResponse {
   return {
-    ok: jest.fn((value) => ({ type: 'ok', ...value })),
-    notFound: jest.fn((value) => ({ type: 'notFound', ...value })),
-    badRequest: jest.fn((value) => ({ type: 'badRequest', ...value })),
-    customError: jest.fn((value) => ({ type: 'customError', ...value })),
+    ok: vi.fn((value) => ({ type: 'ok', ...value })),
+    notFound: vi.fn((value) => ({ type: 'notFound', ...value })),
+    badRequest: vi.fn((value) => ({ type: 'badRequest', ...value })),
+    customError: vi.fn((value) => ({ type: 'customError', ...value })),
   };
 }
 
-function createContext(search: jest.Mock): TestContext {
+function createContext(search: Mock): TestContext {
   return {
     core: Promise.resolve({
       elasticsearch: {
@@ -145,7 +148,7 @@ describe('registerAndroidRoutes', () => {
     it('fetches stacktrace and build ID from the default crash index', async () => {
       const { router } = setupRoutes();
       const handler = getCrashDocumentHandler(router);
-      const search = jest.fn().mockResolvedValue({
+      const search = vi.fn().mockResolvedValue({
         hits: {
           hits: [
             {
@@ -189,7 +192,7 @@ describe('registerAndroidRoutes', () => {
     it('uses the free-form index pattern when provided', async () => {
       const { router } = setupRoutes();
       const handler = getCrashDocumentHandler(router);
-      const search = jest.fn().mockResolvedValue({
+      const search = vi.fn().mockResolvedValue({
         hits: {
           hits: [
             {
@@ -218,7 +221,7 @@ describe('registerAndroidRoutes', () => {
       const response = createResponseMock();
 
       await handler(
-        createContext(jest.fn().mockResolvedValue({ hits: { hits: [] } })),
+        createContext(vi.fn().mockResolvedValue({ hits: { hits: [] } })),
         { query: identityQuery, body: {} },
         response
       );
@@ -237,7 +240,7 @@ describe('registerAndroidRoutes', () => {
 
       await handler(
         createContext(
-          jest.fn().mockResolvedValue({
+          vi.fn().mockResolvedValue({
             hits: {
               hits: [
                 {
@@ -273,7 +276,7 @@ describe('registerAndroidRoutes', () => {
     it('returns the original and retraced stacktrace', async () => {
       const { logger, router } = setupRoutes();
       const handler = getRetraceHandler(router);
-      const search = jest.fn();
+      const search = vi.fn();
       const response = createResponseMock();
       mockedRetrace.mockResolvedValue('retraced stacktrace');
 
@@ -304,7 +307,7 @@ describe('registerAndroidRoutes', () => {
       mockedRetrace.mockRejectedValue(new RetraceMapNotFoundError('build-1'));
 
       await handler(
-        createContext(jest.fn()),
+        createContext(vi.fn()),
         { query: {}, body: { stacktrace: 'original stacktrace', build_id: 'build-1' } },
         response
       );

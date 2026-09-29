@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, renderHook } from '@testing-library/react';
 import { useGetLinkUrl, useGetLinkProps, withLink, formatPath, isModifiedEvent } from './links';
 import { mockGetAppUrl, mockNavigateTo } from '../mocks/navigation';
 
-jest.mock('./navigation');
+vi.mock('./navigation');
 
 const URL = '/the/mocked/url';
 mockGetAppUrl.mockReturnValue(URL);
@@ -48,7 +50,7 @@ describe('links', () => {
         id: 'testId',
         path: 'testPath',
         urlState: 'testState',
-        onClick: jest.fn(),
+        onClick: vi.fn(),
       });
 
       expect(linkProps).toEqual({
@@ -56,7 +58,7 @@ describe('links', () => {
         onClick: expect.any(Function),
       });
 
-      const mockEvent = { preventDefault: jest.fn() } as unknown as React.MouseEvent;
+      const mockEvent = { preventDefault: vi.fn() } as unknown as React.MouseEvent;
       linkProps.onClick(mockEvent);
 
       expect(mockGetAppUrl).toHaveBeenCalledWith({
@@ -72,7 +74,7 @@ describe('links', () => {
 
   describe('withLink', () => {
     it('should return a wrapped component with link functionality', () => {
-      const MockComponent = jest.fn(() => <div data-test-subj="mock-component" />);
+      const MockComponent = vi.fn(() => <div data-test-subj="mock-component" />);
       const WrappedComponent = withLink(MockComponent);
 
       const wrapper = render(<WrappedComponent id="testId" path="testPath" urlState="testState" />);
@@ -83,7 +85,7 @@ describe('links', () => {
         {}
       );
 
-      const mockEvent = { preventDefault: jest.fn() };
+      const mockEvent = { preventDefault: vi.fn() };
       // @ts-ignore-next-line
       const onClickProp = MockComponent.mock.calls[0][0].onClick;
       onClickProp?.(mockEvent);

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { inferTimeZone } from './infer_time_zone';
 
@@ -16,7 +18,7 @@ describe('inferTimeZone', () => {
       time_zone: 'CEST',
     };
     expect(
-      inferTimeZone(params, {} as DataView, 'date_histogram', jest.fn().mockReturnValue('UTC'))
+      inferTimeZone(params, {} as DataView, 'date_histogram', vi.fn().mockReturnValue('UTC'))
     ).toEqual('CEST');
   });
 
@@ -36,7 +38,7 @@ describe('inferTimeZone', () => {
           },
         } as unknown as DataView,
         'date_histogram',
-        jest.fn().mockReturnValue('CET')
+        vi.fn().mockReturnValue('CET')
       )
     ).toEqual('UTC');
   });
@@ -61,14 +63,14 @@ describe('inferTimeZone', () => {
           },
         } as unknown as DataView,
         'date_histogram',
-        jest.fn().mockReturnValue('CET')
+        vi.fn().mockReturnValue('CET')
       )
     ).toEqual('UTC');
   });
 
   it('reads time zone from config if not set to default', () => {
     expect(
-      inferTimeZone({}, {} as DataView, 'date_histogram', jest.fn().mockReturnValue('CET'))
+      inferTimeZone({}, {} as DataView, 'date_histogram', vi.fn().mockReturnValue('CET'))
     ).toEqual('CET');
   });
 });

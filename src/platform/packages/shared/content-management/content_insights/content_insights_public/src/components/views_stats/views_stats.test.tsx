@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -16,13 +18,13 @@ import { ContentInsightsProvider } from '../../services';
 import { ViewsStats } from './views_stats';
 
 beforeEach(() => {
-  jest.useFakeTimers();
-  jest.setSystemTime(new Date('2024-07-15T14:00:00.00Z'));
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2024-07-15T14:00:00.00Z'));
 });
-afterEach(() => jest.clearAllMocks());
-afterAll(() => jest.useRealTimers());
+afterEach(() => vi.clearAllMocks());
+afterAll(() => vi.useRealTimers());
 
-const mockStats = jest.fn().mockResolvedValue({
+const mockStats = vi.fn().mockResolvedValue({
   from: '2024-05-01T00:00:00.000Z',
   count: 10,
   daily: [
@@ -40,7 +42,7 @@ const mockStats = jest.fn().mockResolvedValue({
 const WrappedViewsStats = () => {
   const item = { id: '1' } as any;
   const client = {
-    track: jest.fn(),
+    track: vi.fn(),
     getStats: mockStats,
   };
   return (

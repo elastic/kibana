@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';
 import { useOnExpandableFlyoutClose } from './use_on_expandable_flyout_close';
 import { Flyouts } from '../../document_details/shared/constants/flyouts';
 import { TIMELINE_ON_CLOSE_EVENT } from '../..';
 
-jest.mock('../../document_details/shared/hooks/use_which_flyout');
+vi.mock('../../document_details/shared/hooks/use_which_flyout');
 
 describe('useOnExpandableFlyoutClose', () => {
-  const callbackFct = jest.fn().mockImplementation((id: string) => {});
+  const callbackFct = vi.fn().mockImplementation((id: string) => {});
 
   it('should run the callback function and remove the event listener from the window', () => {
-    (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.timeline);
+    (useWhichFlyout as Mock).mockReturnValue(Flyouts.timeline);
 
-    window.removeEventListener = jest.fn().mockImplementationOnce((event, callback) => {});
+    window.removeEventListener = vi.fn().mockImplementationOnce((event, callback) => {});
 
     const { unmount } = renderHook(() => useOnExpandableFlyoutClose({ callback: callbackFct }));
 
@@ -37,9 +40,9 @@ describe('useOnExpandableFlyoutClose', () => {
   });
 
   it('should add event listener to window', async () => {
-    (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.securitySolution);
+    (useWhichFlyout as Mock).mockReturnValue(Flyouts.securitySolution);
 
-    window.addEventListener = jest.fn().mockImplementationOnce((event, callback) => {});
+    window.addEventListener = vi.fn().mockImplementationOnce((event, callback) => {});
 
     renderHook(() => useOnExpandableFlyoutClose({ callback: callbackFct }));
 

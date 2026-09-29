@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, within } from '@testing-library/react';
 import React from 'react';
 
 import { renderWithTestingProviders } from '../../../common/mock';
 import { CasesMetrics } from './cases_metrics';
 
-jest.mock('pretty-ms', () => jest.fn().mockReturnValue('2ms'));
+vi.mock('pretty-ms', () => vi.fn().mockReturnValue('2ms'));
 
 describe('Cases metrics', () => {
   const props = {

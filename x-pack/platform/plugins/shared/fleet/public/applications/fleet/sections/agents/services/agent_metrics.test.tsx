@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
 import { formatAgentCPU } from './agent_metrics';
 
-jest.mock('../components/metric_non_available', () => {
+vi.mock('../components/metric_non_available', () => {
   return {
     MetricNonAvailable: () => <>N/A</>,
   };
 });
 
-jest.mock('@elastic/eui', () => {
+vi.mock('@elastic/eui', async () => {
   return {
-    ...jest.requireActual('@elastic/eui'),
+    ...(await vi.importActual('@elastic/eui')),
     EuiToolTip: (props: any) => <div data-tooltip-content={props.content}>{props.children}</div>,
   };
 });

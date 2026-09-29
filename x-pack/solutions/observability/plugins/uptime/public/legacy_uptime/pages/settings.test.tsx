@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 
 import { isValidCertVal, SettingsPage } from './settings';
@@ -16,7 +18,7 @@ import { createMockConnectorType } from '@kbn/actions-plugin/server/application/
 describe('settings', () => {
   describe('form', () => {
     beforeAll(() => {
-      jest.spyOn(alertApi, 'fetchActionTypes').mockImplementation(async () => [
+      vi.spyOn(alertApi, 'fetchActionTypes').mockImplementation(async () => [
         createMockConnectorType({
           id: '.slack',
           minimumLicenseRequired: 'gold',

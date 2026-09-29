@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
@@ -25,23 +28,29 @@ import type {
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/hooks/use_app_toasts');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/hooks/use_app_toasts');
 
-const mockFormatRule = jest.fn();
-jest.mock('../helpers', () => ({
-  formatRule: (...args: unknown[]) => mockFormatRule(...args),
-}));
+const mockFormatRule = vi.fn();
+vi.mock('../helpers', () => {
+      const mocked = {
+      formatRule: (...args: unknown[]) => mockFormatRule(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetStepsData = jest.fn();
-jest.mock('../../../../common/helpers', () => ({
-  getStepsData: (...args: unknown[]) => mockGetStepsData(...args),
-}));
+const mockGetStepsData = vi.fn();
+vi.mock('../../../../common/helpers', () => {
+      const mocked = {
+      getStepsData: (...args: unknown[]) => mockGetStepsData(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SYNC_DEBOUNCE_MS = 500;
 
 const makeForm = <T extends object>() =>
-  ({ updateFieldValues: jest.fn() } as unknown as FormHook<T, T>);
+  ({ updateFieldValues: vi.fn() } as unknown as FormHook<T, T>);
 
 /** Conversation attachment as delivered by activeConversation$ (versioned shape). */
 const makeRuleAttachment = ({ id = 'card-1', origin }: { id?: string; origin?: string } = {}) => ({
@@ -55,10 +64,10 @@ const makeRuleAttachment = ({ id = 'card-1', origin }: { id?: string; origin?: s
 describe('useAgentBuilderRuleCreation', () => {
   let aiRuleCreation: AiRuleCreationService;
   let activeConversation$: Subject<{ conversation?: { attachments: unknown[] } } | null>;
-  let addAttachment: jest.Mock;
-  let reportEvent: jest.Mock;
-  let addSuccess: jest.Mock;
-  let addWarning: jest.Mock;
+  let addAttachment: Mock;
+  let reportEvent: Mock;
+  let addSuccess: Mock;
+  let addWarning: Mock;
   let forms: {
     defineStepForm: FormHook<DefineStepRule, DefineStepRule>;
     aboutStepForm: FormHook<AboutStepRule, AboutStepRule>;
@@ -82,14 +91,14 @@ describe('useAgentBuilderRuleCreation', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
     aiRuleCreation = new AiRuleCreationService();
     activeConversation$ = new Subject();
-    addAttachment = jest.fn();
-    reportEvent = jest.fn();
-    addSuccess = jest.fn();
-    addWarning = jest.fn();
+    addAttachment = vi.fn();
+    reportEvent = vi.fn();
+    addSuccess = vi.fn();
+    addWarning = vi.fn();
     forms = {
       defineStepForm: makeForm<DefineStepRule>(),
       aboutStepForm: makeForm<AboutStepRule>(),
@@ -103,25 +112,25 @@ describe('useAgentBuilderRuleCreation', () => {
       scheduleRuleData: { s: 1 },
       ruleActionsData: { r: 1 },
     });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         aiRuleCreation,
         telemetry: { reportEvent },
         agentBuilder: { addAttachment, events: { ui: { activeConversation$ } } },
       },
     });
-    (useAppToasts as jest.Mock).mockReturnValue({ addSuccess, addWarning });
+    (useAppToasts as Mock).mockReturnValue({ addSuccess, addWarning });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('form → chat sync', () => {
     it('does not push while sync is inactive', () => {
       renderTestHook();
 
-      act(() => jest.advanceTimersByTime(SYNC_DEBOUNCE_MS));
+      act(() => vi.advanceTimersByTime(SYNC_DEBOUNCE_MS));
 
       expect(addAttachment).not.toHaveBeenCalled();
     });
@@ -130,7 +139,7 @@ describe('useAgentBuilderRuleCreation', () => {
       renderTestHook();
 
       act(() => aiRuleCreation.activateFormSync());
-      act(() => jest.advanceTimersByTime(SYNC_DEBOUNCE_MS));
+      act(() => vi.advanceTimersByTime(SYNC_DEBOUNCE_MS));
 
       expect(addAttachment).toHaveBeenCalledTimes(1);
       expect(addAttachment).toHaveBeenCalledWith(
@@ -153,7 +162,7 @@ describe('useAgentBuilderRuleCreation', () => {
           conversation: { attachments: [makeRuleAttachment({ id: 'card-9', origin: 'rule-1' })] },
         });
       });
-      act(() => jest.advanceTimersByTime(SYNC_DEBOUNCE_MS));
+      act(() => vi.advanceTimersByTime(SYNC_DEBOUNCE_MS));
 
       expect(addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -171,9 +180,9 @@ describe('useAgentBuilderRuleCreation', () => {
       });
 
       act(() => aiRuleCreation.activateFormSync());
-      act(() => jest.advanceTimersByTime(SYNC_DEBOUNCE_MS));
+      act(() => vi.advanceTimersByTime(SYNC_DEBOUNCE_MS));
       rerender({ defineStepData: { queryBar: 1 } as unknown as DefineStepRule });
-      act(() => jest.advanceTimersByTime(SYNC_DEBOUNCE_MS));
+      act(() => vi.advanceTimersByTime(SYNC_DEBOUNCE_MS));
 
       // Two failing syncs → a single warning
       expect(addWarning).toHaveBeenCalledTimes(1);
@@ -182,12 +191,12 @@ describe('useAgentBuilderRuleCreation', () => {
       // A successful sync re-arms the warning
       mockFormatRule.mockReturnValue({ name: 'ok' });
       rerender({ defineStepData: { queryBar: 2 } as unknown as DefineStepRule });
-      act(() => jest.advanceTimersByTime(SYNC_DEBOUNCE_MS));
+      act(() => vi.advanceTimersByTime(SYNC_DEBOUNCE_MS));
       mockFormatRule.mockImplementation(() => {
         throw new Error('boom again');
       });
       rerender({ defineStepData: { queryBar: 3 } as unknown as DefineStepRule });
-      act(() => jest.advanceTimersByTime(SYNC_DEBOUNCE_MS));
+      act(() => vi.advanceTimersByTime(SYNC_DEBOUNCE_MS));
 
       expect(addWarning).toHaveBeenCalledTimes(2);
     });
@@ -195,8 +204,8 @@ describe('useAgentBuilderRuleCreation', () => {
 
   describe('conversation changes', () => {
     it('deactivates sync and releases the bind when the conversation shows a different rule', () => {
-      const deactivateFormSync = jest.spyOn(aiRuleCreation, 'deactivateFormSync');
-      const releaseBind = jest.spyOn(aiRuleCreation, 'releaseBind');
+      const deactivateFormSync = vi.spyOn(aiRuleCreation, 'deactivateFormSync');
+      const releaseBind = vi.spyOn(aiRuleCreation, 'releaseBind');
       renderTestHook({ pageRuleId: 'rule-1' });
 
       act(() => {
@@ -249,8 +258,8 @@ describe('useAgentBuilderRuleCreation', () => {
 
   describe('cleanup', () => {
     it('deactivates sync and releases the bind on unmount', () => {
-      const deactivateFormSync = jest.spyOn(aiRuleCreation, 'deactivateFormSync');
-      const releaseBind = jest.spyOn(aiRuleCreation, 'releaseBind');
+      const deactivateFormSync = vi.spyOn(aiRuleCreation, 'deactivateFormSync');
+      const releaseBind = vi.spyOn(aiRuleCreation, 'releaseBind');
       const { unmount } = renderTestHook();
 
       unmount();

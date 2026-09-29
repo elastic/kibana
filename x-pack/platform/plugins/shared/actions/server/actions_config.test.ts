@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ActionsConfig } from './config';
 import {
@@ -25,7 +28,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import moment from 'moment';
 
-const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 
 const defaultActionsConfig: ActionsConfig = {
   allowedHosts: [],
@@ -466,13 +469,13 @@ describe('getProxySettings', () => {
   });
 });
 
-jest.mock('fs', () => {
-  const actual = jest.requireActual<typeof import('fs')>('fs');
-  return { ...actual, readFileSync: jest.fn().mockImplementation(actual.readFileSync) };
+vi.mock('fs', () => {
+  const actual = (require('fs') as typeof import('fs'));
+  return { ...actual, readFileSync: vi.fn().mockImplementation(actual.readFileSync) };
 });
 
 import { readFileSync } from 'fs';
-const mockReadFileSync = readFileSync as jest.MockedFunction<typeof readFileSync>;
+const mockReadFileSync = readFileSync as MockedFunction<typeof readFileSync>;
 
 describe('getSSLSettings', () => {
   beforeEach(() => {

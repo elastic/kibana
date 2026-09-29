@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useGetAllCaseConfigurations } from './use_get_all_case_configurations';
 import * as api from './api';
 import { TestProviders } from '../../common/mock';
 
-jest.mock('./api');
+vi.mock('./api');
 
 describe('Use get all case configurations hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns all available configurations', async () => {
-    const spy = jest.spyOn(api, 'getCaseConfigure');
+    const spy = vi.spyOn(api, 'getCaseConfigure');
     spy.mockResolvedValue([
       // @ts-expect-error: no need to define all properties
       { id: 'my-configuration-1', owner: '1' },
@@ -57,7 +59,7 @@ describe('Use get all case configurations hook', () => {
   });
 
   it('returns the initial configuration if none is available', async () => {
-    const spy = jest.spyOn(api, 'getCaseConfigure');
+    const spy = vi.spyOn(api, 'getCaseConfigure');
     spy.mockResolvedValue(null);
 
     const { result } = renderHook(() => useGetAllCaseConfigurations(), {

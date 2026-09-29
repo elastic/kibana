@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import { AIValueUpsellingPageESS } from '.';
 
-jest.mock('../attack_discovery/upgrade_actions', () => ({
-  UpgradeActions: () => <button type="button">{'Upgrade'}</button>,
-}));
+vi.mock('../attack_discovery/upgrade_actions', () => {
+      const mocked = {
+      UpgradeActions: () => <button type="button">{'Upgrade'}</button>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/shared-ux-page-kibana-template', () => {
+vi.mock('@kbn/shared-ux-page-kibana-template', () => {
   const KibanaPageTemplate = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
   // eslint-disable-next-line react/display-name
   KibanaPageTemplate.Section = ({ children }: { children: React.ReactNode }) => (

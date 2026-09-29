@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useInfiniteQuery, useQuery } from '@kbn/react-query';
 import { createChangeHistoryHookWrapper } from '../test_utils/create_change_history_hook_wrapper';
@@ -19,8 +21,8 @@ import {
 
 describe('useInvalidateChangeHistory', () => {
   it('invalidates list and detail queries for an object', async () => {
-    const listChanges = jest.fn().mockResolvedValue({ items: [], total: 0 });
-    const getChange = jest.fn().mockResolvedValue({
+    const listChanges = vi.fn().mockResolvedValue({ items: [], total: 0 });
+    const getChange = vi.fn().mockResolvedValue({
       id: 'evt-1',
       timestamp: '2026-01-01T00:00:00Z',
       actor: { name: 'Alice' },
@@ -65,7 +67,7 @@ describe('useInvalidateChangeHistory', () => {
     expect(listChanges).toHaveBeenCalledTimes(1);
     expect(getChange).toHaveBeenCalledTimes(1);
 
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result: invalidateResult } = renderHook(() => useInvalidateChangeHistory(), {
       wrapper,
@@ -86,8 +88,8 @@ describe('useInvalidateChangeHistory', () => {
 
   it('invalidates all queries for the provider scope when objectId is omitted', async () => {
     const adapter = {
-      listChanges: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-      getChange: jest.fn(),
+      listChanges: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+      getChange: vi.fn(),
     };
     const { wrapper, queryClient } = createChangeHistoryHookWrapper({
       adapter,
@@ -95,7 +97,7 @@ describe('useInvalidateChangeHistory', () => {
       scope: TEST_CHANGE_HISTORY_SCOPE,
     });
 
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result: invalidateResult } = renderHook(() => useInvalidateChangeHistory(), {
       wrapper,

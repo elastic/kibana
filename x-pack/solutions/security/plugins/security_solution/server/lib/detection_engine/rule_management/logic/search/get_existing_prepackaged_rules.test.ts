@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import {
   getRuleMock,
@@ -22,7 +24,7 @@ import { requestContextMock } from '../../../routes/__mocks__';
 
 describe('get_existing_prepackaged_rules', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('getExistingPrepackagedRules', () => {

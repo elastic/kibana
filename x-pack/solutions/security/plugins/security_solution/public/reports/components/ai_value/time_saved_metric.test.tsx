@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TimeSavedMetric } from './time_saved_metric';
@@ -15,30 +18,42 @@ import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_def
 import { PageScope } from '../../../data_view_manager/constants';
 import * as i18n from './translations';
 
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
-  VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
-}));
+vi.mock('../../../common/components/visualization_actions/visualization_embeddable', () => {
+      const mocked = {
+      VisualizationEmbeddable: vi.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../common/components/visualization_actions/lens_attributes/ai/time_saved_metric',
-  () => ({
-    getTimeSavedMetricLensAttributes: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        getTimeSavedMetricLensAttributes: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../hooks/use_signal_index_with_default', () => ({
-  useSignalIndexWithDefault: jest.fn(),
-}));
+vi.mock('../../hooks/use_signal_index_with_default', () => {
+      const mocked = {
+      useSignalIndexWithDefault: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./sample_metric', () => ({
-  SampleMetric: jest.fn(({ title }: { title: string }) => (
-    <div data-test-subj="mock-sample-metric">{title}</div>
-  )),
-}));
+vi.mock('./sample_metric', () => {
+      const mocked = {
+      SampleMetric: vi.fn(({ title }: { title: string }) => (
+        <div data-test-subj="mock-sample-metric">{title}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockGetTimeSavedMetricLensAttributes =
-  getTimeSavedMetricLensAttributes as jest.MockedFunction<typeof getTimeSavedMetricLensAttributes>;
-const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as jest.MockedFunction<
+  getTimeSavedMetricLensAttributes as MockedFunction<typeof getTimeSavedMetricLensAttributes>;
+const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as MockedFunction<
   typeof useSignalIndexWithDefault
 >;
 
@@ -51,7 +66,7 @@ const defaultProps = {
 
 describe('TimeSavedMetric', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseSignalIndexWithDefault.mockReturnValue('.alerts-security.alerts-default');
     mockGetTimeSavedMetricLensAttributes.mockReturnValue({
       description: '',
@@ -124,7 +139,7 @@ describe('TimeSavedMetric', () => {
   it('passes getLensAttributes function to VisualizationEmbeddable', () => {
     render(<TimeSavedMetric {...defaultProps} />);
 
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const callArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     expect(callArgs.getLensAttributes).toBeDefined();
     expect(callArgs.getLensAttributes).toEqual(expect.any(Function));
   });
@@ -132,7 +147,7 @@ describe('TimeSavedMetric', () => {
   it('getLensAttributes function calls getTimeSavedMetricLensAttributes with correct args', () => {
     render(<TimeSavedMetric {...defaultProps} />);
 
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const callArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     const mockArgs = {
       euiTheme: { colors: {} },
       extraOptions: { filters: [] },
@@ -155,12 +170,12 @@ describe('TimeSavedMetric', () => {
     ];
 
     testCases.forEach(({ minutesPerAlert }) => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       const props = { ...defaultProps, minutesPerAlert };
       render(<TimeSavedMetric {...props} />);
 
-      const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+      const callArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
       const mockArgs = {
         euiTheme: { colors: {} },
         extraOptions: { filters: [] },
@@ -188,7 +203,7 @@ describe('TimeSavedMetric', () => {
 
     render(<TimeSavedMetric {...defaultProps} />);
 
-    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const callArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     const mockArgs = {
       euiTheme: { colors: {} },
       extraOptions: { filters: [] },
@@ -204,16 +219,16 @@ describe('TimeSavedMetric', () => {
 
   it('memoizes timerange based on from and to props', () => {
     const { rerender } = render(<TimeSavedMetric {...defaultProps} />);
-    const initialCallCount = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls.length;
+    const initialCallCount = (VisualizationEmbeddable as unknown as Mock).mock.calls.length;
 
     rerender(<TimeSavedMetric {...defaultProps} />);
-    const finalCallCount = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls.length;
+    const finalCallCount = (VisualizationEmbeddable as unknown as Mock).mock.calls.length;
     expect(finalCallCount).toBe(initialCallCount);
   });
 
   it('recalculates timerange when from or to props change', () => {
     const { rerender } = render(<TimeSavedMetric {...defaultProps} />);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const newProps = {
       ...defaultProps,
       from: '2023-02-01T00:00:00.000Z',
@@ -235,12 +250,12 @@ describe('TimeSavedMetric', () => {
   it('memoizes getLensAttributes function based on minutesPerAlert', () => {
     const { rerender } = render(<TimeSavedMetric {...defaultProps} />);
 
-    const firstCallArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const firstCallArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     const firstGetLensAttributes = firstCallArgs.getLensAttributes;
     rerender(<TimeSavedMetric {...defaultProps} />);
-    const callCount = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls.length;
+    const callCount = (VisualizationEmbeddable as unknown as Mock).mock.calls.length;
     expect(callCount).toBe(1);
-    const secondCallArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const secondCallArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     const secondGetLensAttributes = secondCallArgs.getLensAttributes;
     expect(firstGetLensAttributes).toBe(secondGetLensAttributes);
   });
@@ -248,16 +263,16 @@ describe('TimeSavedMetric', () => {
   it('recalculates getLensAttributes function when minutesPerAlert changes', () => {
     const { rerender } = render(<TimeSavedMetric {...defaultProps} />);
 
-    const firstCallArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const firstCallArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     const firstGetLensAttributes = firstCallArgs.getLensAttributes;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const newProps = {
       ...defaultProps,
       minutesPerAlert: 15,
     };
     rerender(<TimeSavedMetric {...newProps} />);
 
-    const secondCallArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const secondCallArgs = (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0];
     const secondGetLensAttributes = secondCallArgs.getLensAttributes;
     expect(firstGetLensAttributes).not.toBe(secondGetLensAttributes);
   });

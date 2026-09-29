@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import sinon from 'sinon';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -12,9 +15,9 @@ import { SharedConnectorTokenClient } from './shared_connector_token_client';
 import type { Logger } from '@kbn/core/server';
 import type { ConnectorToken } from '../types';
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
+vi.mock('@kbn/core-saved-objects-utils-server', async () => {
+  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
   return {
     ...actual,
     SavedObjectsUtils: {
@@ -34,8 +37,8 @@ beforeAll(() => {
 });
 beforeEach(() => {
   clock.reset();
-  jest.resetAllMocks();
-  jest.restoreAllMocks();
+  vi.resetAllMocks();
+  vi.restoreAllMocks();
   sharedClient = new SharedConnectorTokenClient({
     unsecuredSavedObjectsClient,
     encryptedSavedObjectsClient,

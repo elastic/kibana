@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mockAlertTypeCounts } from '../../../common/mocks/constants/session_view_process.mock';
 import type { AppContextTestRender } from '../../test';
@@ -22,7 +24,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
     totalAlertsCount: 3,
     alertTypeCounts: mockAlertTypeCounts,
     filteredAlertsCount: 2,
-    onAlertEventCategorySelected: jest.fn(),
+    onAlertEventCategorySelected: vi.fn(),
   };
 
   beforeEach(() => {
@@ -69,7 +71,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
     });
 
     it('should call onAlertEventCategorySelected with alert category when filter item is clicked ', async () => {
-      const mockAlertEventCategorySelectedEvent = jest.fn();
+      const mockAlertEventCategorySelectedEvent = vi.fn();
       renderResult = mockedContext.render(
         <ProcessTreeAlertsFilter
           {...props}

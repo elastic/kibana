@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { FlyoutTitle } from './flyout_title';
@@ -14,8 +16,8 @@ import {
   TITLE_LINK_ICON_TEST_ID,
 } from './test_ids';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
 
   return {
     ...actual,

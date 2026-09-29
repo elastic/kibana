@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { usePendingFieldValue } from './use_pending_field_value';
 
 describe('usePendingFieldValue', () => {
   it('starts with no pending change, showing the committed value', () => {
     const { result } = renderHook(() =>
-      usePendingFieldValue<string>({ committedValue: 'a', onSubmit: jest.fn() })
+      usePendingFieldValue<string>({ committedValue: 'a', onSubmit: vi.fn() })
     );
 
     expect(result.current.currentValue).toBe('a');
@@ -19,7 +21,7 @@ describe('usePendingFieldValue', () => {
   });
 
   it('tracks a pending change without calling onSubmit', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
     const { result } = renderHook(() =>
       usePendingFieldValue<string>({ committedValue: 'a', onSubmit })
     );
@@ -33,7 +35,7 @@ describe('usePendingFieldValue', () => {
 
   it('has no pending change when the pending value equals the committed value', () => {
     const { result } = renderHook(() =>
-      usePendingFieldValue<string>({ committedValue: 'a', onSubmit: jest.fn() })
+      usePendingFieldValue<string>({ committedValue: 'a', onSubmit: vi.fn() })
     );
 
     act(() => result.current.setPendingValue('a'));
@@ -42,7 +44,7 @@ describe('usePendingFieldValue', () => {
   });
 
   it('calls onSubmit and clears the pending change on confirm', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
     const { result } = renderHook(() =>
       usePendingFieldValue<string>({ committedValue: 'a', onSubmit })
     );
@@ -56,7 +58,7 @@ describe('usePendingFieldValue', () => {
   });
 
   it('reverts to the committed value without calling onSubmit on cancel', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
     const { result } = renderHook(() =>
       usePendingFieldValue<string>({ committedValue: 'a', onSubmit })
     );
@@ -70,7 +72,7 @@ describe('usePendingFieldValue', () => {
   });
 
   it('supports a committed/pending value of null without confusing it for "no pending change"', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
     const { result } = renderHook(() =>
       usePendingFieldValue<string | null>({ committedValue: 'a', onSubmit })
     );
@@ -86,7 +88,7 @@ describe('usePendingFieldValue', () => {
   });
 
   it('blocks confirm and surfaces the validation error when the pending value is invalid', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
     const validate = (value: string) => (value.length > 3 ? 'too long' : null);
 
     const { result } = renderHook(() =>

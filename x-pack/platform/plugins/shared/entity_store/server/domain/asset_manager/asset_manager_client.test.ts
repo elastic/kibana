@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import type {
   ElasticsearchClient,
   KibanaRequest,
@@ -34,59 +37,65 @@ import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity
 import { stopAndRemoveV1, stopAndRemoveV1SharedTasks } from '../../infra/remove_v1';
 import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
 
-jest.mock('./install_assets');
-jest.mock('../../tasks/extract_entity_task');
-jest.mock('../../tasks/history_snapshot_task');
-jest.mock('../../tasks/status_report_task');
-jest.mock('../../tasks/resilience_task');
-jest.mock('../../tasks/entity_maintainers', () => ({
-  removeEntityMaintainer: jest.fn(),
-}));
-jest.mock('../../tasks/entity_maintainers/entity_maintainers_registry', () => ({
-  entityMaintainersRegistry: {
-    getAll: jest.fn(),
-  },
-}));
-jest.mock('../../infra/remove_v1');
+vi.mock('./install_assets');
+vi.mock('../../tasks/extract_entity_task');
+vi.mock('../../tasks/history_snapshot_task');
+vi.mock('../../tasks/status_report_task');
+vi.mock('../../tasks/resilience_task');
+vi.mock('../../tasks/entity_maintainers', () => {
+      const mocked = {
+      removeEntityMaintainer: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../tasks/entity_maintainers/entity_maintainers_registry', () => {
+      const mocked = {
+      entityMaintainersRegistry: {
+        getAll: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../infra/remove_v1');
 
 const mockInstallSharedElasticsearchAssets =
-  installSharedElasticsearchAssets as jest.MockedFunction<typeof installSharedElasticsearchAssets>;
-const mockInstallIndicesAndDataStreams = installIndicesAndDataStreams as jest.MockedFunction<
+  installSharedElasticsearchAssets as MockedFunction<typeof installSharedElasticsearchAssets>;
+const mockInstallIndicesAndDataStreams = installIndicesAndDataStreams as MockedFunction<
   typeof installIndicesAndDataStreams
 >;
-const mockUninstallElasticsearchAssets = uninstallElasticsearchAssets as jest.MockedFunction<
+const mockUninstallElasticsearchAssets = uninstallElasticsearchAssets as MockedFunction<
   typeof uninstallElasticsearchAssets
 >;
-const mockScheduleExtractEntityTask = scheduleExtractEntityTask as jest.MockedFunction<
+const mockScheduleExtractEntityTask = scheduleExtractEntityTask as MockedFunction<
   typeof scheduleExtractEntityTask
 >;
-const mockStopExtractEntityTask = stopExtractEntityTask as jest.MockedFunction<
+const mockStopExtractEntityTask = stopExtractEntityTask as MockedFunction<
   typeof stopExtractEntityTask
 >;
-const mockScheduleHistorySnapshotTasks = scheduleHistorySnapshotTasks as jest.MockedFunction<
+const mockScheduleHistorySnapshotTasks = scheduleHistorySnapshotTasks as MockedFunction<
   typeof scheduleHistorySnapshotTasks
 >;
-const mockStopHistorySnapshotTask = stopHistorySnapshotTask as jest.MockedFunction<
+const mockStopHistorySnapshotTask = stopHistorySnapshotTask as MockedFunction<
   typeof stopHistorySnapshotTask
 >;
-const mockScheduleStatusReportTask = scheduleStatusReportTask as jest.MockedFunction<
+const mockScheduleStatusReportTask = scheduleStatusReportTask as MockedFunction<
   typeof scheduleStatusReportTask
 >;
-const mockStopStatusReportTask = stopStatusReportTask as jest.MockedFunction<
+const mockStopStatusReportTask = stopStatusReportTask as MockedFunction<
   typeof stopStatusReportTask
 >;
-const mockScheduleResilienceTask = scheduleResilienceTask as jest.MockedFunction<
+const mockScheduleResilienceTask = scheduleResilienceTask as MockedFunction<
   typeof scheduleResilienceTask
 >;
-const mockStopResilienceTask = stopResilienceTask as jest.MockedFunction<typeof stopResilienceTask>;
-const mockRemoveEntityMaintainer = removeEntityMaintainer as jest.MockedFunction<
+const mockStopResilienceTask = stopResilienceTask as MockedFunction<typeof stopResilienceTask>;
+const mockRemoveEntityMaintainer = removeEntityMaintainer as MockedFunction<
   typeof removeEntityMaintainer
 >;
-const mockEntityMaintainersGetAll = entityMaintainersRegistry.getAll as jest.MockedFunction<
+const mockEntityMaintainersGetAll = entityMaintainersRegistry.getAll as MockedFunction<
   typeof entityMaintainersRegistry.getAll
 >;
-const mockStopAndRemoveV1 = stopAndRemoveV1 as jest.MockedFunction<typeof stopAndRemoveV1>;
-const mockStopAndRemoveV1SharedTasks = stopAndRemoveV1SharedTasks as jest.MockedFunction<
+const mockStopAndRemoveV1 = stopAndRemoveV1 as MockedFunction<typeof stopAndRemoveV1>;
+const mockStopAndRemoveV1SharedTasks = stopAndRemoveV1SharedTasks as MockedFunction<
   typeof stopAndRemoveV1SharedTasks
 >;
 
@@ -94,25 +103,25 @@ describe('AssetManagerClient', () => {
   const namespace = 'default';
 
   let client: AssetManagerClient;
-  let mockUserEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockInternalEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockUserEsClient: Mocked<ElasticsearchClient>;
+  let mockInternalEsClient: Mocked<ElasticsearchClient>;
   let mockEngineDescriptorClient: {
-    getAll: jest.Mock;
-    init: jest.Mock;
-    findOrThrow: jest.Mock;
-    update: jest.Mock;
-    delete: jest.Mock;
+    getAll: Mock;
+    init: Mock;
+    findOrThrow: Mock;
+    update: Mock;
+    delete: Mock;
   };
   let mockGlobalStateClient: {
-    init: jest.Mock;
-    findOrThrow: jest.Mock;
-    find: jest.Mock;
-    findLogExtractionOverrides: jest.Mock;
-    delete: jest.Mock;
+    init: Mock;
+    findOrThrow: Mock;
+    find: Mock;
+    findLogExtractionOverrides: Mock;
+    delete: Mock;
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockInstallSharedElasticsearchAssets.mockResolvedValue(undefined);
     mockInstallIndicesAndDataStreams.mockResolvedValue(undefined);
@@ -134,35 +143,35 @@ describe('AssetManagerClient', () => {
     mockStopAndRemoveV1SharedTasks.mockResolvedValue(undefined);
 
     mockEngineDescriptorClient = {
-      getAll: jest.fn().mockResolvedValue([]),
-      init: jest.fn().mockResolvedValue(undefined),
-      findOrThrow: jest.fn().mockResolvedValue({ type: 'user', status: 'started' }),
-      update: jest.fn().mockResolvedValue(undefined),
-      delete: jest.fn().mockResolvedValue(undefined),
+      getAll: vi.fn().mockResolvedValue([]),
+      init: vi.fn().mockResolvedValue(undefined),
+      findOrThrow: vi.fn().mockResolvedValue({ type: 'user', status: 'started' }),
+      update: vi.fn().mockResolvedValue(undefined),
+      delete: vi.fn().mockResolvedValue(undefined),
     };
 
     mockGlobalStateClient = {
-      init: jest.fn().mockResolvedValue({
+      init: vi.fn().mockResolvedValue({
         historySnapshot: { status: 'started', frequency: '24h' },
         logsExtraction: LATEST_LOG_EXTRACTION_DEFAULTS,
       }),
-      findOrThrow: jest.fn().mockResolvedValue({
+      findOrThrow: vi.fn().mockResolvedValue({
         historySnapshot: {},
         logsExtraction: {},
       }),
-      find: jest.fn().mockResolvedValue(undefined),
-      findLogExtractionOverrides: jest.fn().mockResolvedValue({}),
-      delete: jest.fn().mockResolvedValue(undefined),
+      find: vi.fn().mockResolvedValue(undefined),
+      findLogExtractionOverrides: vi.fn().mockResolvedValue({}),
+      delete: vi.fn().mockResolvedValue(undefined),
     };
 
-    mockUserEsClient = {} as jest.Mocked<ElasticsearchClient>;
-    mockInternalEsClient = {} as jest.Mocked<ElasticsearchClient>;
+    mockUserEsClient = {} as Mocked<ElasticsearchClient>;
+    mockInternalEsClient = {} as Mocked<ElasticsearchClient>;
 
     client = new AssetManagerClient({
       logger: loggerMock.create(),
       esClient: mockUserEsClient,
       internalEsClient: mockInternalEsClient,
-      taskManager: {} as jest.Mocked<TaskManagerStartContract>,
+      taskManager: {} as Mocked<TaskManagerStartContract>,
       engineDescriptorClient:
         mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
@@ -172,10 +181,10 @@ describe('AssetManagerClient', () => {
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
       security: {} as SecurityPluginStart,
       analytics: {
-        reportEvent: jest.fn(),
+        reportEvent: vi.fn(),
       } as unknown as import('../../telemetry/events').TelemetryReporter,
       savedObjectsClient: {
-        delete: jest.fn().mockResolvedValue({}),
+        delete: vi.fn().mockResolvedValue({}),
       } as unknown as SavedObjectsClientContract,
     });
   });
@@ -251,19 +260,19 @@ describe('AssetManagerClient', () => {
   });
 
   describe('getPrivileges', () => {
-    let checkPrivilegesWithRequestMock: jest.Mock;
-    let getLocalIndexPatternsMock: jest.Mock;
+    let checkPrivilegesWithRequestMock: Mock;
+    let getLocalIndexPatternsMock: Mock;
     let getPrivilegesClient: AssetManagerClient;
 
     beforeEach(() => {
-      checkPrivilegesWithRequestMock = jest.fn().mockResolvedValue({});
-      getLocalIndexPatternsMock = jest.fn();
+      checkPrivilegesWithRequestMock = vi.fn().mockResolvedValue({});
+      getLocalIndexPatternsMock = vi.fn();
 
       getPrivilegesClient = new AssetManagerClient({
         logger: loggerMock.create(),
-        esClient: {} as jest.Mocked<ElasticsearchClient>,
-        internalEsClient: {} as jest.Mocked<ElasticsearchClient>,
-        taskManager: {} as jest.Mocked<TaskManagerStartContract>,
+        esClient: {} as Mocked<ElasticsearchClient>,
+        internalEsClient: {} as Mocked<ElasticsearchClient>,
+        taskManager: {} as Mocked<TaskManagerStartContract>,
         engineDescriptorClient:
           mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
         globalStateClient:
@@ -275,18 +284,18 @@ describe('AssetManagerClient', () => {
         } as unknown as import('../logs_extraction').LogsExtractionClient,
         security: {
           authz: {
-            checkPrivilegesDynamicallyWithRequest: jest
+            checkPrivilegesDynamicallyWithRequest: vi
               .fn()
               .mockReturnValue(checkPrivilegesWithRequestMock),
             actions: {
               savedObject: {
-                get: jest.fn().mockReturnValue('some-kibana-privilege'),
+                get: vi.fn().mockReturnValue('some-kibana-privilege'),
               },
             },
           },
         } as unknown as SecurityPluginStart,
         analytics: {
-          reportEvent: jest.fn(),
+          reportEvent: vi.fn(),
         } as unknown as import('../../telemetry/events').TelemetryReporter,
         savedObjectsClient: {} as SavedObjectsClientContract,
       });
@@ -500,7 +509,7 @@ describe('AssetManagerClient', () => {
         logger: loggerMock.create(),
         esClient: mockUserEsClient,
         internalEsClient: mockInternalEsClient,
-        taskManager: {} as jest.Mocked<TaskManagerStartContract>,
+        taskManager: {} as Mocked<TaskManagerStartContract>,
         engineDescriptorClient:
           mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
         globalStateClient:
@@ -510,10 +519,10 @@ describe('AssetManagerClient', () => {
         logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
         security: {} as SecurityPluginStart,
         analytics: {
-          reportEvent: jest.fn(),
+          reportEvent: vi.fn(),
         } as unknown as import('../../telemetry/events').TelemetryReporter,
         savedObjectsClient: {
-          delete: jest.fn().mockResolvedValue({}),
+          delete: vi.fn().mockResolvedValue({}),
         } as unknown as SavedObjectsClientContract,
         isDualProcessEnabled: async () => true,
       });
@@ -649,7 +658,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   const namespace = 'default';
 
   let client: AssetManagerClient;
-  let mockUserEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockUserEsClient: Mocked<ElasticsearchClient>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
 
   const buildClient = (
@@ -662,46 +671,46 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
 
     mockUserEsClient = {
       indices: {
-        exists: jest.fn().mockResolvedValue(latestExists),
-        getDataStream: jest.fn().mockImplementation(async ({ name }: { name: string }) => {
+        exists: vi.fn().mockResolvedValue(latestExists),
+        getDataStream: vi.fn().mockImplementation(async ({ name }: { name: string }) => {
           return metadataExists ? { data_streams: [{ name }] } : { data_streams: [] };
         }),
       },
-    } as unknown as jest.Mocked<ElasticsearchClient>;
+    } as unknown as Mocked<ElasticsearchClient>;
 
     mockLogger = loggerMock.create();
 
     client = new AssetManagerClient({
       logger: mockLogger,
       esClient: mockUserEsClient,
-      internalEsClient: {} as jest.Mocked<ElasticsearchClient>,
-      taskManager: {} as jest.Mocked<TaskManagerStartContract>,
+      internalEsClient: {} as Mocked<ElasticsearchClient>,
+      taskManager: {} as Mocked<TaskManagerStartContract>,
       engineDescriptorClient: {
-        getAll: jest.fn().mockResolvedValue([]),
-        init: jest.fn(),
-        update: jest.fn(),
-        delete: jest.fn(),
+        getAll: vi.fn().mockResolvedValue([]),
+        init: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
       } as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient: {
-        init: jest.fn(),
-        findOrThrow: jest.fn(),
-        find: jest.fn(),
-        findLogExtractionOverrides: jest.fn().mockResolvedValue({}),
-        delete: jest.fn(),
+        init: vi.fn(),
+        findOrThrow: vi.fn(),
+        find: vi.fn(),
+        findLogExtractionOverrides: vi.fn().mockResolvedValue({}),
+        delete: vi.fn(),
       } as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
       security: {} as import('@kbn/security-plugin/server').SecurityPluginStart,
       analytics: {
-        reportEvent: jest.fn(),
+        reportEvent: vi.fn(),
       } as unknown as import('../../telemetry/events').TelemetryReporter,
       savedObjectsClient: {} as SavedObjectsClientContract,
     });
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockInstallSharedElasticsearchAssets.mockResolvedValue(undefined);
   });
 
@@ -746,7 +755,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   it('propagates non-404 errors from getDataStream instead of treating them as missing', async () => {
     buildClient();
 
-    mockUserEsClient.indices.getDataStream = jest
+    mockUserEsClient.indices.getDataStream = vi
       .fn()
       .mockRejectedValue({ statusCode: 503, message: 'Service Unavailable' });
 
@@ -789,7 +798,7 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
     updatesComponentTemplateExists: boolean;
     legacyUpdatesComponentTemplateExists: boolean;
   }) => {
-    const getIndexTemplate = jest.fn().mockImplementation(async ({ name }: { name: string }) => {
+    const getIndexTemplate = vi.fn().mockImplementation(async ({ name }: { name: string }) => {
       const exists =
         (name.includes('security_') && name.includes('latest') && legacyLatestTemplateExists) ||
         (!name.includes('security_') && name.includes('latest') && latestTemplateExists) ||
@@ -799,7 +808,7 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
       return {};
     });
 
-    const getComponentTemplate = jest
+    const getComponentTemplate = vi
       .fn()
       .mockImplementation(async ({ name }: { name: string }) => {
         const exists =
@@ -824,34 +833,34 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
     // so the index rows don't interfere with the assertions.
     const esClient = {
       indices: {
-        exists: jest.fn().mockResolvedValue(true),
+        exists: vi.fn().mockResolvedValue(true),
         getIndexTemplate,
-        getDataStream: jest.fn().mockResolvedValue({ data_streams: [{}] }),
+        getDataStream: vi.fn().mockResolvedValue({ data_streams: [{}] }),
       },
       cluster: { getComponentTemplate },
-    } as unknown as jest.Mocked<ElasticsearchClient>;
+    } as unknown as Mocked<ElasticsearchClient>;
 
     const taskManager = {
-      get: jest
+      get: vi
         .fn()
         .mockRejectedValue(
           SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'entity_store')
         ),
-    } as unknown as jest.Mocked<TaskManagerStartContract>;
+    } as unknown as Mocked<TaskManagerStartContract>;
 
     const engineDescriptorClient = {
-      getAll: jest.fn().mockResolvedValue([{ type: 'user', status: 'started' }]),
-      init: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
+      getAll: vi.fn().mockResolvedValue([{ type: 'user', status: 'started' }]),
+      init: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
     };
 
     const globalStateClient = {
-      findOrThrow: jest.fn().mockResolvedValue({ historySnapshot: {}, logsExtraction: {} }),
-      init: jest.fn(),
-      find: jest.fn(),
-      findLogExtractionOverrides: jest.fn().mockResolvedValue({}),
-      delete: jest.fn(),
+      findOrThrow: vi.fn().mockResolvedValue({ historySnapshot: {}, logsExtraction: {} }),
+      init: vi.fn(),
+      find: vi.fn(),
+      findLogExtractionOverrides: vi.fn().mockResolvedValue({}),
+      delete: vi.fn(),
     };
 
     return new AssetManagerClient({
@@ -868,7 +877,7 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
       security: {} as import('@kbn/security-plugin/server').SecurityPluginStart,
       analytics: {
-        reportEvent: jest.fn(),
+        reportEvent: vi.fn(),
       } as unknown as import('../../telemetry/events').TelemetryReporter,
       savedObjectsClient: {} as SavedObjectsClientContract,
     });

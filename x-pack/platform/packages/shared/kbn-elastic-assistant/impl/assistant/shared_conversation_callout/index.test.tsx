@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
@@ -15,8 +17,8 @@ import type { Conversation } from '../../..';
 import { DEFAULT_ASSISTANT_NAMESPACE } from '../../..';
 import { SHARED_CONVERSATION_CALLOUT } from '../../assistant_context/constants';
 
-const mockRefetchCurrentUserConversations = jest.fn();
-const mockSetCurrentConversation = jest.fn();
+const mockRefetchCurrentUserConversations = vi.fn();
+const mockSetCurrentConversation = vi.fn();
 
 const testProps = {
   refetchCurrentUserConversations:
@@ -29,7 +31,7 @@ const testProps = {
 
 describe('SharedConversationCallout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
   });
 

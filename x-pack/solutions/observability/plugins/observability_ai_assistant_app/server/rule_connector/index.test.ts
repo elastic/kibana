@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AlertHit } from '@kbn/alerting-plugin/server/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
@@ -103,14 +105,14 @@ describe('observabilityAIAssistant rule_connector', () => {
   });
 
   describe('Connector Type - getObsAIAssistantConnectorType', () => {
-    const completeMock = jest.fn().mockImplementation(() => ({
+    const completeMock = vi.fn().mockImplementation(() => ({
       response$: new Observable((subscriber) => {
         subscriber.complete();
       }),
       conversationPromise: Promise.resolve(undefined),
     }));
 
-    const initResources = jest.fn().mockResolvedValue({
+    const initResources = vi.fn().mockResolvedValue({
       service: {
         getClient: async () => ({ complete: completeMock }),
         getFunctionClient: async () => ({
@@ -123,7 +125,7 @@ describe('observabilityAIAssistant rule_connector', () => {
         core: Promise.resolve({
           uiSettings: {
             client: {
-              get: jest.fn().mockReturnValue(AIChatExperience.Classic),
+              get: vi.fn().mockReturnValue(AIChatExperience.Classic),
             },
           },
         }),
@@ -138,7 +140,7 @@ describe('observabilityAIAssistant rule_connector', () => {
         actions: {
           start: async () => {
             return {
-              getActionsClientWithRequest: jest.fn().mockResolvedValue({
+              getActionsClientWithRequest: vi.fn().mockResolvedValue({
                 async getAll() {
                   return [{ id: 'connector_1' }];
                 },
@@ -191,7 +193,7 @@ describe('observabilityAIAssistant rule_connector', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     it('should have the correct configuration', () => {
       const connectorType = getObsAIAssistantConnectorType(

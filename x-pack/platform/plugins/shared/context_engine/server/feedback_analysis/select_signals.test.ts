@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { AiIndexSource } from '../../common/http_api/ai_indices';
@@ -80,7 +82,7 @@ describe('selectSignals', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   const requestFor = (call: number): SearchRequest =>
-    (esClient.search as unknown as jest.Mock).mock.calls[call][0] as SearchRequest;
+    (esClient.search as unknown as Mock).mock.calls[call][0] as SearchRequest;
 
   const MAIN = 1;
 

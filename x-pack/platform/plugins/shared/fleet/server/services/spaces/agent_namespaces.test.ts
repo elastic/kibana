@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ALL_SPACES_ID } from '../../../common/constants';
 import type { Agent } from '../../types';
 
@@ -15,12 +17,12 @@ import {
 } from './agent_namespaces';
 import { isSpaceAwarenessEnabled } from './helpers';
 
-jest.mock('./helpers');
+vi.mock('./helpers');
 
 describe('isAgentInNamespace', () => {
   describe('with isSpaceAwarenessEnabled is false', () => {
     beforeEach(() => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
     });
 
     it('returns true even if the agent is in a different space', async () => {
@@ -31,7 +33,7 @@ describe('isAgentInNamespace', () => {
 
   describe('with the isSpaceAwarenessEnabled return true', () => {
     beforeEach(() => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
     });
 
     describe('when the namespace is defined', () => {
@@ -103,7 +105,7 @@ describe('isAgentInNamespace', () => {
 describe('agentsKueryNamespaceFilter', () => {
   describe('with isSpaceAwarenessEnabled returning false', () => {
     beforeEach(() => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
     });
 
     it('returns undefined', async () => {
@@ -113,7 +115,7 @@ describe('agentsKueryNamespaceFilter', () => {
 
   describe('with isSpaceAwarenessEnabled returning true', () => {
     beforeEach(() => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
     });
 
     it('returns undefined if the namespace is undefined', async () => {

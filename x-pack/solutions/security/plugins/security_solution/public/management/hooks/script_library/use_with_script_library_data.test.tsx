@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { EndpointScriptListApiResponse } from '../../../../common/endpoint/types';
 import type { UseQueryResult } from '@kbn/react-query';
@@ -20,11 +23,11 @@ import type {
   ScriptTagKey,
 } from '../../../../common/endpoint/service/script_library/constants';
 
-jest.mock('./use_get_scripts_list');
-jest.mock('../../../common/components/user_privileges');
+vi.mock('./use_get_scripts_list');
+vi.mock('../../../common/components/user_privileges');
 
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
-const mockUseGetEndpointScriptsList = useGetEndpointScriptsList as jest.MockedFunction<
+const useUserPrivilegesMock = useUserPrivileges as Mock;
+const mockUseGetEndpointScriptsList = useGetEndpointScriptsList as MockedFunction<
   typeof useGetEndpointScriptsList
 >;
 
@@ -61,7 +64,7 @@ describe('useWithScriptLibraryData', () => {
   let defaultGetEndpointScriptsListResponse: MockUseQueryResult;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useUserPrivilegesMock.mockReturnValue({
       endpointPrivileges: getEndpointAuthzInitialStateMock(),
@@ -72,7 +75,7 @@ describe('useWithScriptLibraryData', () => {
       isFetching: false,
       isFetched: true,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       isError: false,
       isPending: false,
       isLoading: false,
@@ -341,7 +344,7 @@ describe('useWithScriptLibraryData', () => {
 
   describe('refetch synch', () => {
     it('should refetch when list data becomes empty and not loading', async () => {
-      const mockRefetchFiltered = jest.fn();
+      const mockRefetchFiltered = vi.fn();
       let filteredTotal: number = 1;
 
       mockUseGetEndpointScriptsList.mockImplementation((queryParams) => {
@@ -374,7 +377,7 @@ describe('useWithScriptLibraryData', () => {
     });
 
     it('should NOT refetch when filters are active and list becomes empty', async () => {
-      const mockRefetchFiltered = jest.fn();
+      const mockRefetchFiltered = vi.fn();
 
       mockUseGetEndpointScriptsList.mockImplementation((queryParams) => {
         const isUnfiltered = queryParams.pageSize === 1;
@@ -402,7 +405,7 @@ describe('useWithScriptLibraryData', () => {
     });
 
     it('should refetch when not on page 1 and list becomes empty', async () => {
-      const mockRefetchFiltered = jest.fn();
+      const mockRefetchFiltered = vi.fn();
 
       mockUseGetEndpointScriptsList.mockImplementation((queryParams) => {
         const isUnfiltered = queryParams.pageSize === 1;
@@ -426,7 +429,7 @@ describe('useWithScriptLibraryData', () => {
     });
 
     it('should NOT refetch when list data is not empty', async () => {
-      const mockRefetchFiltered = jest.fn();
+      const mockRefetchFiltered = vi.fn();
 
       mockUseGetEndpointScriptsList.mockReturnValue({
         ...defaultGetEndpointScriptsListResponse,
@@ -447,7 +450,7 @@ describe('useWithScriptLibraryData', () => {
     });
 
     it('should fetch when list has data after first being empty', async () => {
-      const mockRefetchFiltered = jest.fn();
+      const mockRefetchFiltered = vi.fn();
       let filteredTotal: number = 0;
 
       mockUseGetEndpointScriptsList.mockImplementation((queryParams) => {

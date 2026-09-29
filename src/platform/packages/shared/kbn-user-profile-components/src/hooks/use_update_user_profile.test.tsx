@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject, first, lastValueFrom, of } from 'rxjs';
@@ -21,11 +23,11 @@ const security = {
   authc: {},
   navControlService: {},
   userProfiles: {
-    getCurrent: jest.fn(),
-    bulkGet: jest.fn(),
-    suggest: jest.fn(),
-    update: jest.fn(),
-    partialUpdate: jest.fn(),
+    getCurrent: vi.fn(),
+    bulkGet: vi.fn(),
+    suggest: vi.fn(),
+    update: vi.fn(),
+    partialUpdate: vi.fn(),
     userProfile$: of({}),
     userProfileLoaded$: of(true),
     enabled$: of(true),
@@ -46,7 +48,7 @@ const wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
 );
 
 describe('useUpdateUserProfile() hook', () => {
-  const partialUpdateUserProfiles = jest.fn();
+  const partialUpdateUserProfiles = vi.fn();
 
   beforeEach(() => {
     security.userProfiles = {
@@ -144,7 +146,7 @@ describe('useUpdateUserProfile() hook', () => {
   });
 
   test('should pass the previous and next user profile data to the pageReloadChecker', async () => {
-    const pageReloadChecker = jest.fn();
+    const pageReloadChecker = vi.fn();
 
     const initialValue = { foo: 'bar' };
 

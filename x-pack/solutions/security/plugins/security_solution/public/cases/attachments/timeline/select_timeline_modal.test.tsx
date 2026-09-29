@@ -5,41 +5,46 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { SelectTimelineModal } from './select_timeline_modal';
 
-jest.mock('../../../timelines/components/timeline/selectable_timeline', () => ({
-  SelectableTimeline: ({
-    onTimelineChange,
-  }: {
-    onTimelineChange: (title: string, id: string | null) => void;
-  }) => (
-    <div data-test-subj="selectable-timeline-mock">
-      <button
-        type="button"
-        data-test-subj="selectable-timeline-mock-pick"
-        onClick={() => onTimelineChange('Investigation', 'so-id-1')}
-      >
-        {'pick'}
-      </button>
-      <button
-        type="button"
-        data-test-subj="selectable-timeline-mock-pick-null"
-        onClick={() => onTimelineChange('Investigation', null)}
-      >
-        {'pick-null'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../../../timelines/components/timeline/selectable_timeline', () => {
+      const mocked = {
+      SelectableTimeline: ({
+        onTimelineChange,
+      }: {
+        onTimelineChange: (title: string, id: string | null) => void;
+      }) => (
+        <div data-test-subj="selectable-timeline-mock">
+          <button
+            type="button"
+            data-test-subj="selectable-timeline-mock-pick"
+            onClick={() => onTimelineChange('Investigation', 'so-id-1')}
+          >
+            {'pick'}
+          </button>
+          <button
+            type="button"
+            data-test-subj="selectable-timeline-mock-pick-null"
+            onClick={() => onTimelineChange('Investigation', null)}
+          >
+            {'pick-null'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SelectTimelineModal', () => {
   it('wraps the body in an EuiModal and emits { savedObjectId, title } on pick', async () => {
-    const onSelect = jest.fn();
-    render(<SelectTimelineModal onSelect={onSelect} onClose={jest.fn()} />);
+    const onSelect = vi.fn();
+    render(<SelectTimelineModal onSelect={onSelect} onClose={vi.fn()} />);
 
     expect(screen.getByTestId('select-timeline-modal')).toBeInTheDocument();
     expect(screen.getByTestId('selectable-timeline-mock')).toBeInTheDocument();
@@ -49,8 +54,8 @@ describe('SelectTimelineModal', () => {
   });
 
   it('does not call onSelect when the picked timeline id is null', async () => {
-    const onSelect = jest.fn();
-    render(<SelectTimelineModal onSelect={onSelect} onClose={jest.fn()} />);
+    const onSelect = vi.fn();
+    render(<SelectTimelineModal onSelect={onSelect} onClose={vi.fn()} />);
 
     await userEvent.click(screen.getByTestId('selectable-timeline-mock-pick-null'));
 

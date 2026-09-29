@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -17,26 +20,26 @@ import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import type { RuleConditionChartExpressions } from './rule_condition_chart';
 import { RuleConditionChart } from './rule_condition_chart';
 
-jest.mock('../../utils/kibana_react');
+vi.mock('../../utils/kibana_react');
 
-const mockBuild = jest.fn().mockResolvedValue({
+const mockBuild = vi.fn().mockResolvedValue({
   title: '',
   visualizationType: 'lnsXY',
   state: {},
   references: [],
 });
 
-jest.mock('@kbn/lens-embeddable-utils', () => {
-  const actual = jest.requireActual('@kbn/lens-embeddable-utils');
+vi.mock('@kbn/lens-embeddable-utils', async () => {
+  const actual = (await vi.importActual('@kbn/lens-embeddable-utils'));
   return {
     ...actual,
-    LensConfigBuilder: jest.fn().mockImplementation(() => ({
+    LensConfigBuilder: vi.fn().mockImplementation(() => ({
       build: mockBuild,
     })),
   };
 });
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -65,7 +68,7 @@ const dataView = {
 
 describe('Rule condition chart', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibana();
   });
 

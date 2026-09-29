@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -26,13 +28,13 @@ describe('NoDataViewsPrompt', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const renderComponent = (props = {}) => {
     return render(
       <NoDataViewsPromptProvider {...services}>
-        <NoDataViewsPrompt onDataViewCreated={jest.fn()} {...props} />
+        <NoDataViewsPrompt onDataViewCreated={vi.fn()} {...props} />
       </NoDataViewsPromptProvider>
     );
   };

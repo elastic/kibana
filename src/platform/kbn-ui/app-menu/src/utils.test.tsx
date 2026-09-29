@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { isValidElement } from 'react';
 import { render } from '@testing-library/react';
 import type { ReactElement } from 'react';
@@ -82,8 +84,8 @@ describe('utils', () => {
     it('should return full limit when items fit within limit', () => {
       const result = getDisplayedItemsAllowedAmount({
         items: [
-          { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
-          { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear', order: 2 },
+          { id: '1', label: 'Item 1', run: vi.fn(), iconType: 'gear', order: 1 },
+          { id: '2', label: 'Item 2', run: vi.fn(), iconType: 'gear', order: 2 },
         ],
       });
 
@@ -100,7 +102,7 @@ describe('utils', () => {
       const items = Array.from({ length: 5 }, (_, i) => ({
         id: `${i}`,
         label: `Item ${i}`,
-        run: jest.fn(),
+        run: vi.fn(),
         iconType: 'gear' as const,
         order: i,
       }));
@@ -113,11 +115,11 @@ describe('utils', () => {
     it('should reserve one slot when any item is marked as overflow', () => {
       const result = getDisplayedItemsAllowedAmount({
         items: [
-          { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
+          { id: '1', label: 'Item 1', run: vi.fn(), iconType: 'gear', order: 1 },
           {
             id: '2',
             label: 'Item 2',
-            run: jest.fn(),
+            run: vi.fn(),
             iconType: 'gear',
             order: 2,
             overflow: true,
@@ -132,14 +134,14 @@ describe('utils', () => {
       const items = Array.from({ length: 5 }, (_, i) => ({
         id: `${i}`,
         label: `Item ${i}`,
-        run: jest.fn(),
+        run: vi.fn(),
         iconType: 'gear' as const,
         order: i,
       }));
 
       const result = getDisplayedItemsAllowedAmount({
         items,
-        primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
+        primaryActionItem: { id: 'save', label: 'Save', run: vi.fn(), iconType: 'save' },
       });
 
       expect(result).toBe(APP_MENU_ITEM_LIMIT - 1);
@@ -160,8 +162,8 @@ describe('utils', () => {
       const result = getShouldOverflow({
         config: {
           items: [
-            { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
-            { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear', order: 2 },
+            { id: '1', label: 'Item 1', run: vi.fn(), iconType: 'gear', order: 1 },
+            { id: '2', label: 'Item 2', run: vi.fn(), iconType: 'gear', order: 2 },
           ],
         },
         displayedItemsAllowedAmount: 5,
@@ -174,7 +176,7 @@ describe('utils', () => {
       const items = Array.from({ length: 5 }, (_, i) => ({
         id: `${i}`,
         label: `Item ${i}`,
-        run: jest.fn(),
+        run: vi.fn(),
         iconType: 'gear' as const,
         order: i,
       }));
@@ -191,7 +193,7 @@ describe('utils', () => {
       const items = Array.from({ length: 6 }, (_, i) => ({
         id: `${i}`,
         label: `Item ${i}`,
-        run: jest.fn(),
+        run: vi.fn(),
         iconType: 'gear' as const,
         order: i,
       }));
@@ -208,11 +210,11 @@ describe('utils', () => {
       const result = getShouldOverflow({
         config: {
           items: [
-            { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
+            { id: '1', label: 'Item 1', run: vi.fn(), iconType: 'gear', order: 1 },
             {
               id: '2',
               label: 'Item 2',
-              run: jest.fn(),
+              run: vi.fn(),
               iconType: 'gear',
               order: 2,
               overflow: true,
@@ -239,8 +241,8 @@ describe('utils', () => {
 
     it('should return all items as displayed when under limit', () => {
       const items = [
-        { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear' as const },
-        { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear' as const },
+        { id: '1', label: 'Item 1', run: vi.fn(), iconType: 'gear' as const },
+        { id: '2', label: 'Item 2', run: vi.fn(), iconType: 'gear' as const },
       ];
 
       const result = getAppMenuItems({ config: { items } });
@@ -253,9 +255,9 @@ describe('utils', () => {
 
     it('should sort items by order', () => {
       const items = [
-        { id: '3', label: 'Item 3', run: jest.fn(), iconType: 'gear' as const, order: 3 },
-        { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear' as const, order: 1 },
-        { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear' as const, order: 2 },
+        { id: '3', label: 'Item 3', run: vi.fn(), iconType: 'gear' as const, order: 3 },
+        { id: '1', label: 'Item 1', run: vi.fn(), iconType: 'gear' as const, order: 1 },
+        { id: '2', label: 'Item 2', run: vi.fn(), iconType: 'gear' as const, order: 2 },
       ];
 
       const result = getAppMenuItems({ config: { items } });
@@ -267,9 +269,9 @@ describe('utils', () => {
 
     it('should use zero as the default order', () => {
       const items = [
-        { id: 'last', label: 'Last', run: jest.fn(), iconType: 'gear' as const, order: 1 },
-        { id: 'default', label: 'Default', run: jest.fn(), iconType: 'gear' as const },
-        { id: 'first', label: 'First', run: jest.fn(), iconType: 'gear' as const, order: -1 },
+        { id: 'last', label: 'Last', run: vi.fn(), iconType: 'gear' as const, order: 1 },
+        { id: 'default', label: 'Default', run: vi.fn(), iconType: 'gear' as const },
+        { id: 'first', label: 'First', run: vi.fn(), iconType: 'gear' as const, order: -1 },
       ];
 
       const result = getAppMenuItems({ config: { items } });
@@ -281,7 +283,7 @@ describe('utils', () => {
       const items = Array.from({ length: 7 }, (_, i) => ({
         id: `${i}`,
         label: `Item ${i}`,
-        run: jest.fn(),
+        run: vi.fn(),
         iconType: 'gear' as const,
         order: i,
       }));
@@ -298,7 +300,7 @@ describe('utils', () => {
       const items = Array.from({ length: APP_MENU_ITEM_LIMIT }, (_, i) => ({
         id: `${i}`,
         label: `Item ${i}`,
-        run: jest.fn(),
+        run: vi.fn(),
         iconType: 'gear' as const,
         order: i,
       }));
@@ -314,7 +316,7 @@ describe('utils', () => {
       const items = Array.from({ length: 5 }, (_, i) => ({
         id: `${i}`,
         label: `Item ${i}`,
-        run: jest.fn(),
+        run: vi.fn(),
         iconType: 'gear' as const,
         order: i,
       }));
@@ -322,7 +324,7 @@ describe('utils', () => {
       const result = getAppMenuItems({
         config: {
           items,
-          primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
+          primaryActionItem: { id: 'save', label: 'Save', run: vi.fn(), iconType: 'save' },
         },
       });
 
@@ -337,7 +339,7 @@ describe('utils', () => {
         {
           id: 'hiddenUnderOverflow',
           label: 'Hidden under overflow',
-          run: jest.fn(),
+          run: vi.fn(),
           iconType: 'gear' as const,
           order: 1,
           overflow: true,
@@ -357,14 +359,14 @@ describe('utils', () => {
         {
           id: 'third',
           label: 'Third',
-          run: jest.fn(),
+          run: vi.fn(),
           iconType: 'gear' as const,
           order: 3,
         },
         {
           id: 'firstForced',
           label: 'First forced',
-          run: jest.fn(),
+          run: vi.fn(),
           iconType: 'gear' as const,
           order: 1,
           overflow: true,
@@ -372,7 +374,7 @@ describe('utils', () => {
         {
           id: 'second',
           label: 'Second',
-          run: jest.fn(),
+          run: vi.fn(),
           iconType: 'gear' as const,
           order: 2,
         },
@@ -390,7 +392,7 @@ describe('utils', () => {
     const baseItem: AppMenuPopoverItem = {
       id: 'test',
       label: 'test item',
-      run: jest.fn(),
+      run: vi.fn(),
       order: 1,
     };
 
@@ -633,7 +635,7 @@ describe('utils', () => {
 
     it('should return items with separator when primary action item is provided', () => {
       const result = getPopoverActionItems({
-        primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
+        primaryActionItem: { id: 'save', label: 'Save', run: vi.fn(), iconType: 'save' },
       });
 
       expect(result).toHaveLength(2);
@@ -646,7 +648,7 @@ describe('utils', () => {
         primaryActionItem: {
           id: 'save',
           label: 'Save',
-          run: jest.fn(),
+          run: vi.fn(),
           iconType: 'save',
           hidden: 'all',
         },
@@ -660,7 +662,7 @@ describe('utils', () => {
         primaryActionItem: {
           id: 'save',
           label: 'Save',
-          run: jest.fn(),
+          run: vi.fn(),
           iconType: 'save',
           hidden: ['xl'],
         },
@@ -676,7 +678,7 @@ describe('utils', () => {
       label: 'Test switch',
       labelProps: {},
       checked: false,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
     };
 
     it('should return a separator and a switch item', () => {
@@ -717,13 +719,13 @@ describe('utils', () => {
       label: 'Test switch',
       labelProps: {},
       checked: false,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
     };
 
     it('should create single panel for flat items', () => {
       const items: AppMenuPopoverItem[] = [
-        { id: '1', label: 'Item 1', run: jest.fn() },
-        { id: '2', label: 'Item 2', run: jest.fn() },
+        { id: '1', label: 'Item 1', run: vi.fn() },
+        { id: '2', label: 'Item 2', run: vi.fn() },
       ];
 
       const panels = getPopoverPanels({ items });
@@ -740,7 +742,7 @@ describe('utils', () => {
           id: '1',
           label: 'Parent',
           order: 1,
-          items: [{ id: '1-1', label: 'Child', run: jest.fn(), order: 1 }],
+          items: [{ id: '1-1', label: 'Child', run: vi.fn(), order: 1 }],
         },
       ];
 
@@ -757,7 +759,7 @@ describe('utils', () => {
 
     it('should add separator above item when separator is "above"', () => {
       const items: AppMenuPopoverItem[] = [
-        { id: '1', label: 'Item 1', run: jest.fn(), order: 1, separator: 'above' },
+        { id: '1', label: 'Item 1', run: vi.fn(), order: 1, separator: 'above' },
       ];
 
       const panels = getPopoverPanels({ items });
@@ -769,7 +771,7 @@ describe('utils', () => {
 
     it('should add separator below item when separator is "below"', () => {
       const items: AppMenuPopoverItem[] = [
-        { id: '1', label: 'Item 1', run: jest.fn(), order: 1, separator: 'below' },
+        { id: '1', label: 'Item 1', run: vi.fn(), order: 1, separator: 'below' },
       ];
 
       const panels = getPopoverPanels({ items });
@@ -780,11 +782,11 @@ describe('utils', () => {
     });
 
     it('should append action items to main panel when provided', () => {
-      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: vi.fn(), order: 1 }];
 
       const panels = getPopoverPanels({
         items,
-        primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
+        primaryActionItem: { id: 'save', label: 'Save', run: vi.fn(), iconType: 'save' },
       });
 
       const mainPanel = panels[0];
@@ -796,7 +798,7 @@ describe('utils', () => {
     });
 
     it('should use custom startPanelId', () => {
-      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: vi.fn(), order: 1 }];
 
       const panels = getPopoverPanels({ items, startPanelId: 10 });
 
@@ -814,7 +816,7 @@ describe('utils', () => {
               id: '1-1',
               label: 'Level 2',
               order: 1,
-              items: [{ id: '1-1-1', label: 'Level 3', run: jest.fn(), order: 1 }],
+              items: [{ id: '1-1-1', label: 'Level 3', run: vi.fn(), order: 1 }],
             },
           ],
         },
@@ -836,7 +838,7 @@ describe('utils', () => {
             {
               id: '1-1',
               label: 'PDF',
-              run: jest.fn(),
+              run: vi.fn(),
               order: 1,
             },
           ],
@@ -850,7 +852,7 @@ describe('utils', () => {
             {
               id: '2-1',
               label: 'Link',
-              run: jest.fn(),
+              run: vi.fn(),
               order: 1,
             },
           ],
@@ -872,8 +874,8 @@ describe('utils', () => {
     it('should not show a separator when only static items are present', () => {
       const items: AppMenuPopoverItem[] = [];
       const staticItems: AppMenuPopoverItem[] = [
-        { id: 'static1', label: 'Static 1', run: jest.fn(), order: 1 },
-        { id: 'static2', label: 'Static 2', run: jest.fn(), order: 2 },
+        { id: 'static1', label: 'Static 1', run: vi.fn(), order: 1 },
+        { id: 'static2', label: 'Static 2', run: vi.fn(), order: 2 },
       ];
 
       const panels = getPopoverPanels({ items, staticItems });
@@ -886,11 +888,11 @@ describe('utils', () => {
 
     it('should add a separator between regular and static items', () => {
       const items: AppMenuPopoverItem[] = [
-        { id: '1', label: 'Item 1', run: jest.fn(), order: 2 },
-        { id: '2', label: 'Item 2', run: jest.fn(), order: 1 },
+        { id: '1', label: 'Item 1', run: vi.fn(), order: 2 },
+        { id: '2', label: 'Item 2', run: vi.fn(), order: 1 },
       ];
       const staticItems: AppMenuPopoverItem[] = [
-        { id: 'static1', label: 'Static 1', run: jest.fn(), order: 1 },
+        { id: 'static1', label: 'Static 1', run: vi.fn(), order: 1 },
       ];
 
       const panels = getPopoverPanels({ items, staticItems });
@@ -903,10 +905,10 @@ describe('utils', () => {
 
     it('should not re-sort staticItems together with regular items', () => {
       const items: AppMenuPopoverItem[] = [
-        { id: 'regular', label: 'Regular', run: jest.fn(), order: 10 },
+        { id: 'regular', label: 'Regular', run: vi.fn(), order: 10 },
       ];
       const staticItems: AppMenuPopoverItem[] = [
-        { id: 'static1', label: 'Static', run: jest.fn(), order: 1 },
+        { id: 'static1', label: 'Static', run: vi.fn(), order: 1 },
       ];
 
       const panels = getPopoverPanels({ items, staticItems });
@@ -918,13 +920,13 @@ describe('utils', () => {
     });
 
     it('should handle staticItems with nested sub-items', () => {
-      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: vi.fn(), order: 1 }];
       const staticItems: AppMenuPopoverItem[] = [
         {
           id: 'static-parent',
           label: 'Static Parent',
           order: 1,
-          items: [{ id: 'static-child', label: 'Static Child', run: jest.fn(), order: 1 }],
+          items: [{ id: 'static-child', label: 'Static Child', run: vi.fn(), order: 1 }],
         },
       ];
 
@@ -937,15 +939,15 @@ describe('utils', () => {
     });
 
     it('should place staticItems before action items', () => {
-      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: vi.fn(), order: 1 }];
       const staticItems: AppMenuPopoverItem[] = [
-        { id: 'static1', label: 'Static', run: jest.fn(), order: 1 },
+        { id: 'static1', label: 'Static', run: vi.fn(), order: 1 },
       ];
 
       const panels = getPopoverPanels({
         items,
         staticItems,
-        primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
+        primaryActionItem: { id: 'save', label: 'Save', run: vi.fn(), iconType: 'save' },
       });
 
       const panelItems = panels[0].items as Array<{ key?: string }>;
@@ -956,7 +958,7 @@ describe('utils', () => {
     });
 
     it('should append switch items as the very last items in the panel', () => {
-      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: vi.fn(), order: 1 }];
 
       const panels = getPopoverPanels({
         items,
@@ -971,11 +973,11 @@ describe('utils', () => {
     });
 
     it('should place switch after action items when both are present', () => {
-      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: vi.fn(), order: 1 }];
 
       const panels = getPopoverPanels({
         items,
-        primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
+        primaryActionItem: { id: 'save', label: 'Save', run: vi.fn(), iconType: 'save' },
         switchConfig: defaultSwitch,
       });
 
@@ -987,7 +989,7 @@ describe('utils', () => {
     });
 
     it('should keep a plain string name for items without a description', () => {
-      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: vi.fn(), order: 1 }];
 
       const panels = getPopoverPanels({ items });
       const panelItems = panels[0].items as Array<{ name?: unknown }>;
@@ -1000,7 +1002,7 @@ describe('utils', () => {
         {
           id: '1',
           label: 'Item 1',
-          run: jest.fn(),
+          run: vi.fn(),
           order: 1,
           testId: 'item-with-description',
           description: 'Supporting text',
@@ -1085,7 +1087,7 @@ describe('utils', () => {
         id: 'item1',
         order: 1,
         label: 'Item 1',
-        run: jest.fn(),
+        run: vi.fn(),
         iconType: 'gear',
         ...overrides,
       } as AppMenuItemType);

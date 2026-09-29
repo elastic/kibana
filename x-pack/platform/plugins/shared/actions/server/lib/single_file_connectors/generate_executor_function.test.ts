@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { generateExecutorFunction } from './generate_executor_function';
@@ -27,11 +30,11 @@ describe('generateExecutorFunction', () => {
   const connectorId = 'test-connector-id';
 
   let logger: MockedLogger;
-  let mockGetAxiosInstanceWithAuth: jest.MockedFunction<GetAxiosInstanceWithAuthFn>;
-  let mockGetCredential: jest.MockedFunction<GetCredentialFn>;
-  let mockCredential: { getAuthHeaders: jest.Mock };
+  let mockGetAxiosInstanceWithAuth: MockedFunction<GetAxiosInstanceWithAuthFn>;
+  let mockGetCredential: MockedFunction<GetCredentialFn>;
+  let mockCredential: { getAuthHeaders: Mock };
   let mockAxiosInstance: object;
-  let mockHandler: jest.Mock;
+  let mockHandler: Mock;
   let fakeLeasePool: LeasePool<unknown>;
   let mockNetwork: ConnectorNetworkSettings;
   let mockPlatform: PlatformServices;
@@ -56,31 +59,31 @@ describe('generateExecutorFunction', () => {
     } as Parameters<ReturnType<typeof generateExecutorFunction>>[0]);
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     logger = loggingSystemMock.createLogger();
-    mockAxiosInstance = { get: jest.fn() };
-    mockGetAxiosInstanceWithAuth = jest.fn().mockResolvedValue(mockAxiosInstance);
+    mockAxiosInstance = { get: vi.fn() };
+    mockGetAxiosInstanceWithAuth = vi.fn().mockResolvedValue(mockAxiosInstance);
     mockCredential = {
-      getAuthHeaders: jest.fn().mockResolvedValue({ Authorization: 'Bearer secret' }),
+      getAuthHeaders: vi.fn().mockResolvedValue({ Authorization: 'Bearer secret' }),
     };
-    mockGetCredential = jest.fn().mockReturnValue(mockCredential);
-    mockHandler = jest.fn().mockResolvedValue({ result: 'ok' });
+    mockGetCredential = vi.fn().mockReturnValue(mockCredential);
+    mockHandler = vi.fn().mockResolvedValue({ result: 'ok' });
     fakeLeasePool = new LeasePool<unknown>();
     mockNetwork = {
-      ensureUriAllowed: jest.fn(),
-      ensureHostnameAllowed: jest.fn(),
-      getSslSettings: jest.fn(),
-      getProxySettings: jest.fn(),
-      getCustomHostSettings: jest.fn(),
-      getResponseSettings: jest.fn(),
+      ensureUriAllowed: vi.fn(),
+      ensureHostnameAllowed: vi.fn(),
+      getSslSettings: vi.fn(),
+      getProxySettings: vi.fn(),
+      getCustomHostSettings: vi.fn(),
+      getResponseSettings: vi.fn(),
     };
     mockPlatform = {
-      resolveSrvHosts: jest.fn(),
-      buildTlsOptions: jest.fn(),
+      resolveSrvHosts: vi.fn(),
+      buildTlsOptions: vi.fn(),
     };
   });
 
-  const makeActions = (handler: jest.Mock = mockHandler): ConnectorSpec['actions'] => ({
+  const makeActions = (handler: Mock = mockHandler): ConnectorSpec['actions'] => ({
     testAction: {
       isTool: true,
       scope: 'read',
@@ -89,7 +92,7 @@ describe('generateExecutorFunction', () => {
     },
   });
 
-  const makeExecutor = (handler: jest.Mock = mockHandler) =>
+  const makeExecutor = (handler: Mock = mockHandler) =>
     generateExecutorFunction({
       actions: makeActions(handler),
       getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
@@ -141,7 +144,7 @@ describe('generateExecutorFunction', () => {
     });
 
     it('passes the Relay client in the handler context for relay-authenticated executions', async () => {
-      const relay = { trigger: jest.fn(), listBindings: jest.fn() };
+      const relay = { trigger: vi.fn(), listBindings: vi.fn() };
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
@@ -159,7 +162,7 @@ describe('generateExecutorFunction', () => {
     });
 
     it('leaves the Relay client undefined for non-relay auth types even when one is configured', async () => {
-      const relay = { trigger: jest.fn(), listBindings: jest.fn() };
+      const relay = { trigger: vi.fn(), listBindings: vi.fn() };
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
@@ -259,11 +262,11 @@ describe('generateExecutorFunction', () => {
   describe('ctx.getClient - build receives networkSettings and platform from generateExecutorFunction', () => {
     it('passes networkSettings and platform to clientType.build', async () => {
       const fakeClient = { id: 'x' };
-      const buildSpy = jest.fn().mockResolvedValue(fakeClient);
+      const buildSpy = vi.fn().mockResolvedValue(fakeClient);
       const fakeClientType = {
         id: 'typed',
         build: buildSpy,
-        terminate: jest.fn(),
+        terminate: vi.fn(),
       };
 
       const executor = generateExecutorFunction({
@@ -272,7 +275,7 @@ describe('generateExecutorFunction', () => {
             isTool: true,
             scope: 'read',
             input: {} as never,
-            handler: jest.fn(async (ctx: ActionContext) => {
+            handler: vi.fn(async (ctx: ActionContext) => {
               await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('typed');
               return {};
             }),
@@ -296,11 +299,11 @@ describe('generateExecutorFunction', () => {
 
     it('passes credential to clientType.build from getCredential', async () => {
       const fakeClient = { id: 'x' };
-      const buildSpy = jest.fn().mockResolvedValue(fakeClient);
+      const buildSpy = vi.fn().mockResolvedValue(fakeClient);
       const fakeClientType = {
         id: 'typed',
         build: buildSpy,
-        terminate: jest.fn(),
+        terminate: vi.fn(),
       };
 
       const executor = generateExecutorFunction({
@@ -309,7 +312,7 @@ describe('generateExecutorFunction', () => {
             isTool: true,
             scope: 'read',
             input: {} as never,
-            handler: jest.fn(async (ctx: ActionContext) => {
+            handler: vi.fn(async (ctx: ActionContext) => {
               await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('typed');
               return {};
             }),
@@ -346,15 +349,15 @@ describe('generateExecutorFunction', () => {
 
   describe('ctx.getClient — lease receives clientType.terminate as 3rd arg', () => {
     it('passes a clientType termination callback to pool.lease', async () => {
-      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+      const terminateSpy = vi.fn().mockResolvedValue(undefined);
       const fakeClient = { id: 'x' };
       const fakeClientType = {
         id: 'typed',
-        build: jest.fn().mockResolvedValue(fakeClient),
+        build: vi.fn().mockResolvedValue(fakeClient),
         terminate: terminateSpy,
       };
 
-      const leaseSpy = jest.spyOn(fakeLeasePool, 'lease');
+      const leaseSpy = vi.spyOn(fakeLeasePool, 'lease');
 
       const executor = generateExecutorFunction({
         actions: {
@@ -362,7 +365,7 @@ describe('generateExecutorFunction', () => {
             isTool: true,
             scope: 'read',
             input: {} as never,
-            handler: jest.fn(async (ctx: ActionContext) => {
+            handler: vi.fn(async (ctx: ActionContext) => {
               await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('typed');
               return {};
             }),
@@ -407,7 +410,7 @@ describe('generateExecutorFunction', () => {
             isTool: true,
             scope: 'read',
             input: {} as never,
-            handler: jest.fn(async (ctx: ActionContext) => {
+            handler: vi.fn(async (ctx: ActionContext) => {
               await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('mcp');
               return {};
             }),
@@ -436,15 +439,15 @@ describe('generateExecutorFunction', () => {
       const fakeClient = { id: 'fake-client' };
       const fakeClientType = {
         id: 'fake',
-        build: jest.fn(async () => {
+        build: vi.fn(async () => {
           buildCount++;
           return fakeClient;
         }),
-        terminate: jest.fn(),
+        terminate: vi.fn(),
       };
 
       const capturedGetClients: GetClient[] = [];
-      const handler = jest.fn(async (ctx: ActionContext) => {
+      const handler = vi.fn(async (ctx: ActionContext) => {
         capturedGetClients.push(ctx.getClient as unknown as GetClient);
         return {};
       });
@@ -476,11 +479,11 @@ describe('generateExecutorFunction', () => {
       let buildCount = 0;
       const fakeClientType = {
         id: 'unused',
-        build: jest.fn(async () => {
+        build: vi.fn(async () => {
           buildCount++;
           return {};
         }),
-        terminate: jest.fn(),
+        terminate: vi.fn(),
       };
 
       const pool = new LeasePool<unknown>();
@@ -504,14 +507,14 @@ describe('generateExecutorFunction', () => {
     it('surfaces a build rejection from getClient as a thrown FRAMEWORK-tagged error', async () => {
       const fakeClientType = {
         id: 'failing',
-        build: jest.fn(async () => {
+        build: vi.fn(async () => {
           throw new Error('build exploded');
         }),
-        terminate: jest.fn(),
+        terminate: vi.fn(),
       };
 
       const pool = new LeasePool<unknown>();
-      const handler = jest.fn(async (ctx: ActionContext) => {
+      const handler = vi.fn(async (ctx: ActionContext) => {
         await (ctx.getClient as unknown as GetClient)('failing'); // triggers build
         return {};
       });
@@ -538,13 +541,13 @@ describe('generateExecutorFunction', () => {
       const buildError = new Error('config.serverUrl is required');
       const fakeClientType = {
         id: 'typed',
-        build: jest.fn().mockRejectedValue(buildError),
-        terminate: jest.fn().mockResolvedValue(undefined),
-        isUserError: jest.fn().mockReturnValue(true),
+        build: vi.fn().mockRejectedValue(buildError),
+        terminate: vi.fn().mockResolvedValue(undefined),
+        isUserError: vi.fn().mockReturnValue(true),
       };
 
       const pool = new LeasePool<unknown>();
-      const handler = jest.fn(async (ctx: ActionContext) => {
+      const handler = vi.fn(async (ctx: ActionContext) => {
         await (ctx.getClient as unknown as GetClient)('typed');
         return {};
       });
@@ -578,8 +581,8 @@ describe('generateExecutorFunction', () => {
       );
       const fakeClientType = {
         id: 'mcp',
-        build: jest.fn().mockRejectedValue(mcpError),
-        terminate: jest.fn().mockResolvedValue(undefined),
+        build: vi.fn().mockRejectedValue(mcpError),
+        terminate: vi.fn().mockResolvedValue(undefined),
         isUserError: (err: unknown) => {
           const e = err as { httpStatus?: number };
           return (
@@ -589,7 +592,7 @@ describe('generateExecutorFunction', () => {
       };
 
       const pool = new LeasePool<unknown>();
-      const handler = jest.fn(async (ctx: ActionContext) => {
+      const handler = vi.fn(async (ctx: ActionContext) => {
         await (ctx.getClient as unknown as GetClient)('mcp');
         return {};
       });
@@ -622,8 +625,8 @@ describe('generateExecutorFunction', () => {
       });
       const fakeClientType = {
         id: 'mcp',
-        build: jest.fn().mockRejectedValue(mcpError),
-        terminate: jest.fn().mockResolvedValue(undefined),
+        build: vi.fn().mockRejectedValue(mcpError),
+        terminate: vi.fn().mockResolvedValue(undefined),
         isUserError: (err: unknown) => {
           const e = err as { httpStatus?: number };
           return (
@@ -633,7 +636,7 @@ describe('generateExecutorFunction', () => {
       };
 
       const pool = new LeasePool<unknown>();
-      const handler = jest.fn(async (ctx: ActionContext) => {
+      const handler = vi.fn(async (ctx: ActionContext) => {
         await (ctx.getClient as unknown as GetClient)('mcp');
         return {};
       });
@@ -676,17 +679,17 @@ describe('generateExecutorFunction', () => {
       const fakeClientType = {
         id: 'mcp',
         // build runs the allowlist check at connect time, like mcpClientType does.
-        build: jest.fn(async (ctx: BuildContext) => {
+        build: vi.fn(async (ctx: BuildContext) => {
           ctx.networkSettings.ensureUriAllowed('http://denied.example');
           return {};
         }),
-        terminate: jest.fn().mockResolvedValue(undefined),
+        terminate: vi.fn().mockResolvedValue(undefined),
         // No client-level isUserError on purpose: an allowlist denial must be
         // classified by the framework seam, not by each client string-matching a message.
       };
 
       const pool = new LeasePool<unknown>();
-      const handler = jest.fn(async (ctx: ActionContext) => {
+      const handler = vi.fn(async (ctx: ActionContext) => {
         await (ctx.getClient as unknown as GetClient)('mcp');
         return {};
       });
@@ -716,11 +719,11 @@ describe('generateExecutorFunction', () => {
       const connectionError = new Error('client connection failed');
       const fakeClientType = {
         id: 'wrapped',
-        build: jest.fn().mockRejectedValue(connectionError),
-        terminate: jest.fn().mockResolvedValue(undefined),
+        build: vi.fn().mockRejectedValue(connectionError),
+        terminate: vi.fn().mockResolvedValue(undefined),
       };
       const pool = new LeasePool<unknown>();
-      const handler = jest.fn(async (ctx: ActionContext) => {
+      const handler = vi.fn(async (ctx: ActionContext) => {
         await (ctx.getClient as unknown as GetClient)('wrapped');
         return {};
       });
@@ -758,7 +761,7 @@ describe('generateExecutorFunction', () => {
 
     it('surfaces a request for an unknown client type id as an error result', async () => {
       const pool = new LeasePool<unknown>();
-      const handler = jest.fn(async (ctx: ActionContext) => {
+      const handler = vi.fn(async (ctx: ActionContext) => {
         await (ctx.getClient as unknown as GetClient)('nope');
         return {};
       });
@@ -787,16 +790,16 @@ describe('generateExecutorFunction', () => {
       let buildCount = 0;
       const fakeClientType = {
         id: 'fake',
-        build: jest.fn(async () => {
+        build: vi.fn(async () => {
           buildCount++;
           return { buildNumber: buildCount };
         }),
-        terminate: jest.fn(),
+        terminate: vi.fn(),
       };
 
       const pool = new LeasePool<unknown>();
       const capturedGetClients: GetClient[] = [];
-      const handler = jest.fn(async (ctx: ActionContext) => {
+      const handler = vi.fn(async (ctx: ActionContext) => {
         capturedGetClients.push(ctx.getClient as unknown as GetClient);
         return {};
       });
@@ -844,12 +847,12 @@ describe('generateExecutorFunction', () => {
     ])('does not reuse clients across different %s', async (_identityPart, first, second) => {
       const fakeClientType = {
         id: 'fake',
-        build: jest.fn().mockResolvedValue({}),
-        terminate: jest.fn(),
+        build: vi.fn().mockResolvedValue({}),
+        terminate: vi.fn(),
       };
       const capturedGetClients: GetClient[] = [];
       const pool = new LeasePool<unknown>();
-      const handler = jest.fn(async (ctx: ActionContext) => {
+      const handler = vi.fn(async (ctx: ActionContext) => {
         capturedGetClients.push(ctx.getClient as unknown as GetClient);
         return {};
       });
@@ -879,12 +882,12 @@ describe('generateExecutorFunction', () => {
     it('reuses clients for the same connector identity accessed from different spaces', async () => {
       const fakeClientType = {
         id: 'fake',
-        build: jest.fn().mockResolvedValue({}),
-        terminate: jest.fn(),
+        build: vi.fn().mockResolvedValue({}),
+        terminate: vi.fn(),
       };
       const capturedGetClients: GetClient[] = [];
       const pool = new LeasePool<unknown>();
-      const handler = jest.fn(async (ctx: ActionContext) => {
+      const handler = vi.fn(async (ctx: ActionContext) => {
         capturedGetClients.push(ctx.getClient as unknown as GetClient);
         return {};
       });
@@ -910,10 +913,10 @@ describe('generateExecutorFunction', () => {
     it('does not build a per-user client without a profile UID', async () => {
       const fakeClientType = {
         id: 'fake',
-        build: jest.fn().mockResolvedValue({}),
-        terminate: jest.fn(),
+        build: vi.fn().mockResolvedValue({}),
+        terminate: vi.fn(),
       };
-      const handler = jest.fn(async (ctx: ActionContext) => {
+      const handler = vi.fn(async (ctx: ActionContext) => {
         await (ctx.getClient as unknown as GetClient)('fake');
         return {};
       });
@@ -944,10 +947,10 @@ describe('generateExecutorFunction', () => {
     it('refuses to lease when a per-user auth type resolves to a shared identity', async () => {
       const fakeClientType = {
         id: 'fake',
-        build: jest.fn().mockResolvedValue({}),
-        terminate: jest.fn(),
+        build: vi.fn().mockResolvedValue({}),
+        terminate: vi.fn(),
       };
-      const handler = jest.fn(async (ctx: ActionContext) => {
+      const handler = vi.fn(async (ctx: ActionContext) => {
         await (ctx.getClient as unknown as GetClient)('fake');
         return {};
       });
@@ -978,12 +981,12 @@ describe('generateExecutorFunction', () => {
     it('shares one client when a shared auth type carries a stray per-user authMode', async () => {
       const fakeClientType = {
         id: 'fake',
-        build: jest.fn().mockResolvedValue({}),
-        terminate: jest.fn(),
+        build: vi.fn().mockResolvedValue({}),
+        terminate: vi.fn(),
       };
       const capturedGetClients: GetClient[] = [];
       const pool = new LeasePool<unknown>();
-      const handler = jest.fn(async (ctx: ActionContext) => {
+      const handler = vi.fn(async (ctx: ActionContext) => {
         capturedGetClients.push(ctx.getClient as unknown as GetClient);
         return {};
       });
@@ -1019,10 +1022,10 @@ describe('generateExecutorFunction', () => {
     it('throws a framework error when connectorVersion is missing', async () => {
       const fakeClientType = {
         id: 'fake',
-        build: jest.fn().mockResolvedValue({}),
-        terminate: jest.fn(),
+        build: vi.fn().mockResolvedValue({}),
+        terminate: vi.fn(),
       };
-      const handler = jest.fn(async (ctx: ActionContext) => {
+      const handler = vi.fn(async (ctx: ActionContext) => {
         await (ctx.getClient as unknown as GetClient)('fake');
         return {};
       });
@@ -1213,7 +1216,7 @@ describe('generateExecutorFunction', () => {
         'target url "https://denied.example.com/api" is not added to the Kibana config xpack.actions.allowedHosts';
       const policyError = new Error(policyMessage);
 
-      const denyingClient = { get: jest.fn().mockRejectedValue(policyError) };
+      const denyingClient = { get: vi.fn().mockRejectedValue(policyError) };
       mockGetAxiosInstanceWithAuth.mockResolvedValue(denyingClient as never);
 
       mockHandler.mockImplementation(async (ctx: { client: typeof denyingClient }) => {
@@ -1237,7 +1240,7 @@ describe('generateExecutorFunction', () => {
 
   describe('_test subAction', () => {
     it('returns status ok when the test handler resolves', async () => {
-      const testHandler = jest.fn().mockResolvedValue({ message: 'connected' });
+      const testHandler = vi.fn().mockResolvedValue({ message: 'connected' });
       const actions: ConnectorSpec['actions'] = {
         [TEST_CONNECTOR_SUB_ACTION]: {
           isTool: false,
@@ -1268,7 +1271,7 @@ describe('generateExecutorFunction', () => {
     });
 
     it('returns status error when the test handler throws', async () => {
-      const testHandler = jest.fn().mockRejectedValue(new Error('connection failed'));
+      const testHandler = vi.fn().mockRejectedValue(new Error('connection failed'));
       const actions: ConnectorSpec['actions'] = {
         [TEST_CONNECTOR_SUB_ACTION]: {
           isTool: false,
@@ -1301,8 +1304,8 @@ describe('generateExecutorFunction', () => {
 
   describe('multiple registered actions', () => {
     it('dispatches to the correct handler based on subAction', async () => {
-      const handler1 = jest.fn().mockResolvedValue({ from: 'action1' });
-      const handler2 = jest.fn().mockResolvedValue({ from: 'action2' });
+      const handler1 = vi.fn().mockResolvedValue({ from: 'action1' });
+      const handler2 = vi.fn().mockResolvedValue({ from: 'action2' });
 
       const actions: ConnectorSpec['actions'] = {
         action1: { isTool: true, scope: 'read', input: {} as never, handler: handler1 },

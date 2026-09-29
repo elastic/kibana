@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import {
   getConnectorActionErrorMeta,
@@ -20,31 +22,34 @@ import {
   downloadAmazonS3BucketObject,
 } from './amazon_s3_api';
 
-const mockSha256Hash = jest.fn();
-const mockCalculateAWSA4Signature = jest.fn();
+const mockSha256Hash = vi.fn();
+const mockCalculateAWSA4Signature = vi.fn();
 
 require('../../auth_types/aws_crypto_helpers');
 
-jest.mock('../../auth_types/aws_crypto_helpers', () => ({
-  sha256Hash: () => mockSha256Hash,
-  calculateAWSA4Signature: () => mockCalculateAWSA4Signature,
-}));
+vi.mock('../../auth_types/aws_crypto_helpers', () => {
+      const mocked = {
+      sha256Hash: () => mockSha256Hash,
+      calculateAWSA4Signature: () => mockCalculateAWSA4Signature,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('amazon_s3_api exports', () => {
   const mockClient = {
-    get: jest.fn(),
-    head: jest.fn(),
+    get: vi.fn(),
+    head: vi.fn(),
   };
 
   const mockContext = {
     client: mockClient,
     config: { region: 'us-east-1' },
     secrets: { accessKeyId: 'test-access-key-id', secretAccessKey: 'test-secret-access-key' },
-    log: { debug: jest.fn() },
+    log: { debug: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSha256Hash.mockResolvedValue('mocked-hash');
     mockCalculateAWSA4Signature.mockResolvedValue('mocked-signature');
   });

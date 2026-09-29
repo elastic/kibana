@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { FieldTableHeaderProps } from './field_table_header';
 import { FieldTableHeader } from './field_table_header';
 
-const mockOnFilterSelectedChange = jest.fn();
+const mockOnFilterSelectedChange = vi.fn();
 const defaultProps: FieldTableHeaderProps = {
   fieldCount: 0,
   filterSelectedEnabled: false,

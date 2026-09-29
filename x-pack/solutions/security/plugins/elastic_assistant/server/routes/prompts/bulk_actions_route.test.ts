@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
@@ -36,7 +38,7 @@ describe('Perform bulk action route', () => {
       Promise.resolve(getFindPromptsResultWithSingleHit())
     );
     (
-      (await clients.elasticAssistant.getAIAssistantPromptsDataClient.getWriter()).bulk as jest.Mock
+      (await clients.elasticAssistant.getAIAssistantPromptsDataClient.getWriter()).bulk as Mock
     ).mockResolvedValue({
       docs_created: [mockPrompt, mockPrompt],
       docs_updated: [mockPrompt, mockPrompt],
@@ -81,7 +83,7 @@ describe('Perform bulk action route', () => {
     it('returns partial failure error if update of few prompts fail', async () => {
       (
         (await clients.elasticAssistant.getAIAssistantPromptsDataClient.getWriter())
-          .bulk as jest.Mock
+          .bulk as Mock
       ).mockResolvedValue({
         docs_created: [mockPrompt],
         docs_updated: [],

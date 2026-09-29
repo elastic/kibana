@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -25,7 +27,7 @@ describe('FeedbackSuccessToast', () => {
   });
 
   it('should render the research panel copy and participate link', () => {
-    renderWithI18n(<FeedbackSuccessToastBody onDismiss={jest.fn()} surveyUrl={SURVEY_URL} />);
+    renderWithI18n(<FeedbackSuccessToastBody onDismiss={vi.fn()} surveyUrl={SURVEY_URL} />);
 
     expect(screen.getByTestId('feedbackSuccessToastBody')).toHaveTextContent(
       'Want to help shape the future of Elastic? Sign up to join our research panel!'
@@ -37,7 +39,7 @@ describe('FeedbackSuccessToast', () => {
   });
 
   it('should call onDismiss when Maybe later is clicked', async () => {
-    const onDismiss = jest.fn();
+    const onDismiss = vi.fn();
     renderWithI18n(<FeedbackSuccessToastBody onDismiss={onDismiss} surveyUrl={SURVEY_URL} />);
 
     await userEvent.click(screen.getByTestId('feedbackSuccessToastMaybeLaterButton'));

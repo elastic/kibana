@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -12,9 +15,9 @@ import { useService } from '@kbn/core-di-browser';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { toListRuleExecutionsRequest, useFetchRuleExecutions } from './use_fetch_rule_executions';
 
-jest.mock('@kbn/core-di-browser');
+vi.mock('@kbn/core-di-browser');
 
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
+const mockUseService = useService as MockedFunction<typeof useService>;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -27,10 +30,10 @@ const createWrapper = () => {
 };
 
 describe('useFetchRuleExecutions', () => {
-  const mockListRuleExecutions = jest.fn();
+  const mockListRuleExecutions = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseService.mockImplementation((service: unknown) => {
       if (service === ExecutionHistoryApi) {
         return { listRuleExecutions: mockListRuleExecutions } as any;

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import WebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
@@ -16,20 +19,21 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AuthType, SSLCertType, WebhookMethods } from '@kbn/connector-schemas/common/auth';
 import { formDeserializer, formSerializer } from '../lib/webhook/form_serialization';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
-  const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
+vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/triggers-actions-ui-plugin/public'));
   return {
     ...original,
-    useKibana: jest.fn(),
-    useConnectorContext: jest.fn(),
+    useKibana: vi.fn(),
+    useConnectorContext: vi.fn(),
   };
 });
-jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
-  ...jest.requireActual(
-    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
-  ),
-  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
-}));
+vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api')),
+      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const customQueryProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -38,21 +42,21 @@ const customQueryProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ chi
 
 describe('WebhookActionConnectorFields renders', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: {
         http: {
-          get: jest.fn(),
-          post: jest.fn(),
+          get: vi.fn(),
+          post: vi.fn(),
         },
         notifications: {
           toasts: {
-            addError: jest.fn(),
+            addError: vi.fn(),
           },
         },
       },
     });
-    (useConnectorContext as jest.Mock).mockReturnValue({
+    (useConnectorContext as Mock).mockReturnValue({
       services: {
         isWebhookSslWithPfxEnabled: true,
       },
@@ -133,7 +137,7 @@ describe('WebhookActionConnectorFields renders', () => {
   });
 
   describe('Validation', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
     const actionConnector = {
       actionTypeId: '.webhook',
       name: 'webhook',
@@ -151,7 +155,7 @@ describe('WebhookActionConnectorFields renders', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it.each([

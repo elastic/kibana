@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { setNotebookParameter, removeNotebookParameter } from './notebook_query_param';
 
 const baseMockWindow = () => {
   return {
     history: {
-      pushState: jest.fn(),
+      pushState: vi.fn(),
     },
     location: {
       host: 'my-kibana.elastic.co',
@@ -21,13 +24,13 @@ const baseMockWindow = () => {
     },
   };
 };
-let windowSpy: jest.SpyInstance;
+let windowSpy: MockInstance;
 let mockWindow = baseMockWindow();
 
 describe('notebook query parameter utility', () => {
   beforeEach(() => {
     mockWindow = baseMockWindow();
-    windowSpy = jest.spyOn(globalThis, 'window', 'get');
+    windowSpy = vi.spyOn(globalThis, 'window', 'get');
     windowSpy.mockImplementation(() => mockWindow);
   });
 

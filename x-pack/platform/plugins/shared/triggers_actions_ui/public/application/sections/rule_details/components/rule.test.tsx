@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import * as React from 'react';
 import { Suspense } from 'react';
 import { render, screen } from '@testing-library/react';
@@ -27,55 +30,70 @@ import { useBulkGetMaintenanceWindowsQuery } from '@kbn/response-ops-alerts-tabl
 import { getMaintenanceWindowsMock } from '@kbn/response-ops-alerts-table/mocks/maintenance_windows.mock';
 import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
 
-jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types');
-jest.mocked(getRuleTypes).mockResolvedValue([]);
+vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types');
+vi.mocked(getRuleTypes).mockResolvedValue([]);
 
 const mockUseKibanaReturnValue = createStartServicesMock();
-jest.mock('../../../../common/lib/kibana', () => ({
+vi.mock('../../../../common/lib/kibana', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => ({
+  useKibana: vi.fn(() => ({
     services: mockUseKibanaReturnValue,
   })),
-  useSpacesData: jest.fn(() => ({
+  useSpacesData: vi.fn(() => ({
     spaces: [],
     spacesMap: new Map(),
     isLoading: false,
     activeSpaceId: 'default',
   })),
 }));
-jest.mock('../../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn(),
-}));
-jest.mock('@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows');
-jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
-  loadExecutionLogAggregations: jest.fn(),
-}));
+vi.mock('../../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows');
+vi.mock('../../../lib/rule_api/load_execution_log_aggregations', () => {
+      const mocked = {
+      loadExecutionLogAggregations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_multiple_spaces', () => ({
-  useMultipleSpaces: jest.fn(() => ({
-    onShowAllSpacesChange: jest.fn(),
-    canAccessMultipleSpaces: false,
-    namespaces: undefined,
-    activeSpace: undefined,
-  })),
-}));
+vi.mock('../../../hooks/use_multiple_spaces', () => {
+      const mocked = {
+      useMultipleSpaces: vi.fn(() => ({
+        onShowAllSpacesChange: vi.fn(),
+        canAccessMultipleSpaces: false,
+        namespaces: undefined,
+        activeSpace: undefined,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAlertSummaryWidget = jest.fn((_props: Record<string, unknown>) => (
+const mockAlertSummaryWidget = vi.fn((_props: Record<string, unknown>) => (
   <div data-test-subj="alertSummaryWidget" />
 ));
-jest.mock('../../alert_summary_widget', () => ({
-  AlertSummaryWidget: (props: Record<string, unknown>) => mockAlertSummaryWidget(props),
-}));
+vi.mock('../../alert_summary_widget', () => {
+      const mocked = {
+      AlertSummaryWidget: (props: Record<string, unknown>) => mockAlertSummaryWidget(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-utils-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-utils-plugin/public'),
-  setStateToKbnUrl: jest.fn(() => '/mocked-path'),
-}));
+vi.mock('@kbn/kibana-utils-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/kibana-utils-plugin/public')),
+      setStateToKbnUrl: vi.fn(() => '/mocked-path'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAlertsTable = jest.fn(() => {
+const mockAlertsTable = vi.fn(() => {
   return <div data-test-subj="alertsTable" />;
 });
-jest.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => ({
+vi.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => ({
   __esModule: true,
   AlertsTable: mockAlertsTable,
   default: mockAlertsTable,
@@ -84,8 +102,8 @@ jest.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => ({
 // Mock the rule-details alert search bar to immediately signal control readiness so the
 // rule details alerts table renders during these tests (the real search bar's readiness
 // depends on the control group initializing asynchronously, which doesn't happen in jsdom).
-jest.mock('./rule_alert_search_bar', () => {
-  const ReactLib = jest.requireActual('react');
+vi.mock('./rule_alert_search_bar', () => {
+  const ReactLib = require('react');
   return {
     RuleAlertSearchBar: ({
       onFilterControlsChange,
@@ -103,9 +121,7 @@ jest.mock('./rule_alert_search_bar', () => {
   };
 });
 
-const { loadExecutionLogAggregations } = jest.requireMock(
-  '../../../lib/rule_api/load_execution_log_aggregations'
-);
+const { loadExecutionLogAggregations } = (await vi.importMock('../../../lib/rule_api/load_execution_log_aggregations'));
 
 const mocks = coreMock.createSetup();
 
@@ -117,12 +133,12 @@ const ruleTypeR: RuleTypeModel = {
   validate: () => {
     return { errors: {} };
   },
-  ruleParamsExpression: jest.fn(),
+  ruleParamsExpression: vi.fn(),
   requiresAppContext: false,
 };
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const useBulkGetMaintenanceWindowsMock = useBulkGetMaintenanceWindowsQuery as jest.Mock;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+const useBulkGetMaintenanceWindowsMock = useBulkGetMaintenanceWindowsQuery as Mock;
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const solutionNavId$ = new BehaviorSubject<string | null>(null);
 
@@ -133,32 +149,32 @@ const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
 
 const mockAPIs = {
-  muteAlertInstance: jest.fn(),
-  unmuteAlertInstance: jest.fn(),
-  requestRefresh: jest.fn(),
+  muteAlertInstance: vi.fn(),
+  unmuteAlertInstance: vi.fn(),
+  requestRefresh: vi.fn(),
   numberOfExecutions: 60,
-  onChangeDuration: jest.fn(),
+  onChangeDuration: vi.fn(),
 };
 
 let capabilities: Capabilities;
 const maintenanceWindowsMap = getMaintenanceWindowsMock();
 
 beforeAll(async () => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
   useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
-  useKibanaMock().services.chrome.getActiveSolutionNavId$ = jest
+  useKibanaMock().services.chrome.getActiveSolutionNavId$ = vi
     .fn()
     .mockReturnValue(solutionNavId$);
 
   const services = await mocks.getStartServices();
   capabilities = services[0].application.capabilities;
 
-  global.Date.now = jest.fn(() => fakeNow.getTime());
+  global.Date.now = vi.fn(() => fakeNow.getTime());
 });
 
 beforeEach(() => {
-  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+  (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
   useKibanaMock().services.application.capabilities = {
     ...capabilities,
     maintenanceWindow: {
@@ -173,7 +189,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 const queryClient = new QueryClient({
@@ -361,7 +377,7 @@ describe('rules', () => {
   });
 
   it('requests a table refresh when the refresh token changes', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const rule = mockRule({
       enabled: false,
     });
@@ -369,7 +385,7 @@ describe('rules', () => {
       hasAlertsMappings: true,
     });
     const ruleSummary = mockRuleSummary();
-    jest.setSystemTime(fake2MinutesAgo);
+    vi.setSystemTime(fake2MinutesAgo);
 
     const { rerender } = renderWithProviders(
       <RuleComponent
@@ -383,7 +399,7 @@ describe('rules', () => {
 
     expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
 
-    jest.setSystemTime(fakeNow);
+    vi.setSystemTime(fakeNow);
 
     rerender(
       <MemoryRouter>
@@ -414,7 +430,7 @@ describe('rules', () => {
       expect.anything()
     );
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });
 
@@ -531,7 +547,7 @@ describe('alertToListItem', () => {
 
 describe('execution duration overview', () => {
   it('render last execution status', async () => {
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
 
     const rule = mockRule({
       executionStatus: { status: 'ok', lastExecutionDate: new Date('2020-08-20T19:23:38Z') },
@@ -604,7 +620,7 @@ describe('disable/enable functionality', () => {
 
 describe('tabbed content', () => {
   it('defaults to alerts tab when no tabId is in the URL', async () => {
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(
       (feature: string) => {
         if (feature === 'rulesDetailLogs') {
           return true;
@@ -633,7 +649,7 @@ describe('tabbed content', () => {
   });
 
   it('defaults to history tab when tabId=history is in the URL', async () => {
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(
       (feature: string) => {
         if (feature === 'rulesDetailLogs') {
           return true;
@@ -662,7 +678,7 @@ describe('tabbed content', () => {
   });
 
   it('tabbed content renders when the event log experiment is on', async () => {
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(
       (feature: string) => {
         if (feature === 'rulesDetailLogs') {
           return true;
@@ -863,14 +879,14 @@ describe('scrollAlertsIntoView', () => {
     );
 
     await screen.findByTestId('alertSummaryWidget');
-    Element.prototype.scrollIntoView = jest.fn();
+    Element.prototype.scrollIntoView = vi.fn();
 
     const { onClick } = mockAlertSummaryWidget.mock.calls[0][0] as unknown as {
       onClick: (status?: string) => void;
     };
     onClick('active');
 
-    const { controlConfigs } = (setStateToKbnUrl as jest.Mock).mock.calls[0][1] as {
+    const { controlConfigs } = (setStateToKbnUrl as Mock).mock.calls[0][1] as {
       controlConfigs: Array<{ field_name: string }>;
     };
     const controlFields = controlConfigs.map((c) => c.field_name);

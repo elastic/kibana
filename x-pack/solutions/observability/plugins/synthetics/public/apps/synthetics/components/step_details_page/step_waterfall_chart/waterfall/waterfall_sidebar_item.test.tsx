@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import 'jest-canvas-mock';
 import { fireEvent } from '@testing-library/react';
@@ -46,7 +48,7 @@ describe('waterfall filter', () => {
   });
 
   it('does not render screen reader text when renderFilterScreenReaderText is false', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     const { getByRole } = render(
       <WaterfallSidebarItem
         item={item}

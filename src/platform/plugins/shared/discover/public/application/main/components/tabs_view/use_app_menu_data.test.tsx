@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
@@ -32,7 +34,7 @@ describe('useAppMenuData', () => {
     await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
 
     // Ensure ENABLE_ESQL is controllable in these tests
-    const uiSettingsGetSpy = jest.spyOn(toolkit.services.uiSettings, 'get');
+    const uiSettingsGetSpy = vi.spyOn(toolkit.services.uiSettings, 'get');
     const originalGetImpl = uiSettingsGetSpy.getMockImplementation();
     uiSettingsGetSpy.mockImplementation((key: string) => {
       if (key === ENABLE_ESQL) return enableEsql;

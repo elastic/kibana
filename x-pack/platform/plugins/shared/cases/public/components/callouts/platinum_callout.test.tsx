@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -13,7 +15,7 @@ import { renderWithTestingProviders } from '../../common/mock';
 
 describe('PlatinumLicenseCallout ', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders', () => {

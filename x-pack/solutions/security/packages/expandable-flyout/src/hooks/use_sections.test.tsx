@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
@@ -12,13 +15,13 @@ import type { UseSectionsParams, UseSectionsResult } from './use_sections';
 import { useSections } from './use_sections';
 import { useExpandableFlyoutState } from '../..';
 
-jest.mock('../..');
+vi.mock('../..');
 
 describe('useSections', () => {
   let hookResult: RenderHookResult<UseSectionsResult, UseSectionsParams>;
 
   it('should return undefined for all values if no registeredPanels', () => {
-    (useExpandableFlyoutState as jest.Mock).mockReturnValue({
+    (useExpandableFlyoutState as Mock).mockReturnValue({
       left: undefined,
       right: undefined,
       preview: undefined,
@@ -41,7 +44,7 @@ describe('useSections', () => {
   });
 
   it('should return all sections', () => {
-    (useExpandableFlyoutState as jest.Mock).mockReturnValue({
+    (useExpandableFlyoutState as Mock).mockReturnValue({
       left: { id: 'left' },
       right: { id: 'right' },
       preview: [{ id: 'preview' }],
@@ -81,7 +84,7 @@ describe('useSections', () => {
   });
 
   it('should return preview banner', () => {
-    (useExpandableFlyoutState as jest.Mock).mockReturnValue({
+    (useExpandableFlyoutState as Mock).mockReturnValue({
       preview: [
         {
           id: 'preview',
@@ -116,7 +119,7 @@ describe('useSections', () => {
   });
 
   it('should return most recent preview', () => {
-    (useExpandableFlyoutState as jest.Mock).mockReturnValue({
+    (useExpandableFlyoutState as Mock).mockReturnValue({
       preview: [{ id: 'preview1' }, { id: 'preview2' }, { id: 'preview3' }],
     });
 

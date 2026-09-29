@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
 import 'jest-styled-components';
@@ -19,11 +22,11 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 
-jest.mock('../../../../../common/hooks/use_selector');
+vi.mock('../../../../../common/hooks/use_selector');
 
 const testDataRows = structuredClone(mockTimelineData);
 
-jest.mock('../../body/events/stateful_row_renderer/use_stateful_row_renderer');
+vi.mock('../../body/events/stateful_row_renderer/use_stateful_row_renderer');
 
 const MockCellComponent = ({
   colIndex,
@@ -46,7 +49,7 @@ const defaultProps: CustomTimelineDataGridBodyProps = {
   visibleRowData: { startRow: 0, endRow: 2, visibleRowCount: 2 },
   rows: testDataRows as Array<DataTableRecord & TimelineItem>,
   enabledRowRenderers: [],
-  setCustomGridBodyProps: jest.fn(),
+  setCustomGridBodyProps: vi.fn(),
   visibleColumns: mockVisibleColumns,
   headerRow: <></>,
   footerRow: null,
@@ -65,13 +68,13 @@ const renderTestComponents = (props?: Partial<CustomTimelineDataGridBodyProps>) 
 
 describe('CustomTimelineDataGridBody', () => {
   beforeEach(() => {
-    (useStatefulRowRenderer as jest.Mock).mockReturnValue({
+    (useStatefulRowRenderer as Mock).mockReturnValue({
       canShowRowRenderer: true,
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render exactly as snapshots', () => {
@@ -83,11 +86,11 @@ describe('CustomTimelineDataGridBody', () => {
 
   it('should render the additional Row when row Renderer is available', () => {
     // No additional row for first result
-    (useStatefulRowRenderer as jest.Mock).mockReturnValueOnce({
+    (useStatefulRowRenderer as Mock).mockReturnValueOnce({
       canShowRowRenderer: false,
     });
     // Additional row for second result
-    (useStatefulRowRenderer as jest.Mock).mockReturnValueOnce({
+    (useStatefulRowRenderer as Mock).mockReturnValueOnce({
       canShowRowRenderer: true,
     });
     const { getByTestId, getByText, queryByText } = renderTestComponents();

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
 
@@ -22,7 +25,7 @@ import type { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
 
 let content: string;
 let mockPdfExportType: PdfV1ExportType;
-let stream: jest.Mocked<Writable>;
+let stream: Mocked<Writable>;
 
 const cancellationToken = new CancellationToken();
 const taskInstanceFields = { startedAt: null, retryAt: null };
@@ -41,13 +44,13 @@ const fakeRawRequest: FakeRawRequest = {
 };
 
 const screenshottingMock = createMockScreenshottingStart();
-const getScreenshotsSpy = jest.spyOn(screenshottingMock, 'getScreenshots');
+const getScreenshotsSpy = vi.spyOn(screenshottingMock, 'getScreenshots');
 const testContent = 'raw string from get_screenhots';
 const getBasePayload = (baseObj: any) => baseObj as TaskPayloadPDF;
 
 beforeEach(async () => {
   content = '';
-  stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
+  stream = { write: vi.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
   const configType = createMockConfigSchema({ encryptionKey: mockEncryptionKey });
   const context = coreMock.createPluginInitializerContext(configType);
 
@@ -127,7 +130,7 @@ test(`returns buffer content base64 encoded`, async () => {
 });
 
 test(`screenshotting plugin uses the logger provided by the PDF export-type`, async () => {
-  const logSpy = jest.spyOn(mockLogger, 'get');
+  const logSpy = vi.spyOn(mockLogger, 'get');
 
   const encryptedHeaders = await encryptHeaders({});
   await mockPdfExportType.runTask({

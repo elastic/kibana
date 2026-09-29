@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -14,7 +16,7 @@ import { INVALIDATE_API_KEYS_TASK_ID, INVALIDATE_API_KEYS_TASK_INTERVAL } from '
 describe('scheduleApiKeyInvalidationTask', () => {
   const { loggerService, mockLogger } = createLoggerService();
   const taskManager = {
-    ensureScheduled: jest.fn().mockResolvedValue(undefined),
+    ensureScheduled: vi.fn().mockResolvedValue(undefined),
   };
 
   it('schedules the task as expected', async () => {

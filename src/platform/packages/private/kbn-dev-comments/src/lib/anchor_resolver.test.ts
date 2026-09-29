@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { anchorById, mockLayout, query, renderPage } from '../test_helpers';
 import { MISS_RETRY_MS, createAnchorResolver } from './anchor_resolver';
 
@@ -14,10 +17,10 @@ describe('anchor resolver', () => {
   mockLayout();
 
   /** Document-wide searches made by the resolver. */
-  let searches: jest.SpyInstance;
+  let searches: MockInstance;
 
   beforeEach(() => {
-    searches = jest.spyOn(document, 'querySelectorAll');
+    searches = vi.spyOn(document, 'querySelectorAll');
   });
 
   afterEach(() => {

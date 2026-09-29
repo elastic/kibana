@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -17,8 +19,8 @@ import { executeFeatureIdentificationAgent } from './identify_features_via_agent
 
 describe('executeFeatureIdentificationAgent', () => {
   it('persists into a pre-titled private conversation and returns finalized features', async () => {
-    const createConversation = jest.fn().mockResolvedValue({ id: 'conversation-1' });
-    const executeAgent = jest.fn().mockResolvedValue({
+    const createConversation = vi.fn().mockResolvedValue({ id: 'conversation-1' });
+    const executeAgent = vi.fn().mockResolvedValue({
       events$: of(
         {
           type: ChatEventType.toolCall,
@@ -71,7 +73,7 @@ describe('executeFeatureIdentificationAgent', () => {
     });
     const agentBuilder = {
       conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({ create: createConversation }),
+        getScopedClient: vi.fn().mockResolvedValue({ create: createConversation }),
       },
       execution: { executeAgent },
     } as unknown as AgentBuilderPluginStart;

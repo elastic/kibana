@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { retryEs } from './retry_es';
@@ -49,11 +51,11 @@ describe('retryEs', () => {
     });
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test.each([
@@ -80,7 +82,7 @@ describe('retryEs', () => {
     },
   ])('retries 429 $name errors indefinitely with capped exponential backoff', async (testCase) => {
     const logger = loggingSystemMock.createLogger();
-    const operation = jest
+    const operation = vi
       .fn()
       .mockRejectedValueOnce(testCase.error)
       .mockRejectedValueOnce(testCase.error)
@@ -90,10 +92,10 @@ describe('retryEs', () => {
 
     const promise = retryEs(operation, { logger, dataStreamName: 'my-data-stream' });
 
-    await jest.advanceTimersByTimeAsync(1_000);
-    await jest.advanceTimersByTimeAsync(2_000);
-    await jest.advanceTimersByTimeAsync(4_000);
-    await jest.advanceTimersByTimeAsync(8_000);
+    await vi.advanceTimersByTimeAsync(1_000);
+    await vi.advanceTimersByTimeAsync(2_000);
+    await vi.advanceTimersByTimeAsync(4_000);
+    await vi.advanceTimersByTimeAsync(8_000);
 
     await expect(promise).resolves.toBe('done');
     expect(operation).toHaveBeenCalledTimes(5);
@@ -110,7 +112,7 @@ describe('retryEs', () => {
       reason: '[parent] Data too large',
       withRequestMeta: true,
     });
-    const operation = jest
+    const operation = vi
       .fn()
       .mockRejectedValueOnce(error)
       .mockRejectedValueOnce(error)
@@ -124,14 +126,14 @@ describe('retryEs', () => {
 
     const promise = retryEs(operation, { logger, dataStreamName: 'my-data-stream' });
 
-    await jest.advanceTimersByTimeAsync(1_000);
-    await jest.advanceTimersByTimeAsync(2_000);
-    await jest.advanceTimersByTimeAsync(4_000);
-    await jest.advanceTimersByTimeAsync(8_000);
-    await jest.advanceTimersByTimeAsync(16_000);
-    await jest.advanceTimersByTimeAsync(32_000);
-    await jest.advanceTimersByTimeAsync(64_000);
-    await jest.advanceTimersByTimeAsync(64_000);
+    await vi.advanceTimersByTimeAsync(1_000);
+    await vi.advanceTimersByTimeAsync(2_000);
+    await vi.advanceTimersByTimeAsync(4_000);
+    await vi.advanceTimersByTimeAsync(8_000);
+    await vi.advanceTimersByTimeAsync(16_000);
+    await vi.advanceTimersByTimeAsync(32_000);
+    await vi.advanceTimersByTimeAsync(64_000);
+    await vi.advanceTimersByTimeAsync(64_000);
 
     await expect(promise).resolves.toBe('done');
     expect(logger.warn).toHaveBeenCalledTimes(8);
@@ -146,7 +148,7 @@ describe('retryEs', () => {
       statusCode: 503,
       type: 'service_unavailable',
     });
-    const operation = jest
+    const operation = vi
       .fn()
       .mockRejectedValueOnce(error)
       .mockRejectedValueOnce(error)
@@ -155,9 +157,9 @@ describe('retryEs', () => {
 
     const promise = retryEs(operation, { logger, dataStreamName: 'my-data-stream' });
 
-    await jest.advanceTimersByTimeAsync(1_000);
-    await jest.advanceTimersByTimeAsync(2_000);
-    await jest.advanceTimersByTimeAsync(4_000);
+    await vi.advanceTimersByTimeAsync(1_000);
+    await vi.advanceTimersByTimeAsync(2_000);
+    await vi.advanceTimersByTimeAsync(4_000);
 
     await expect(promise).resolves.toBe('done');
     expect(operation).toHaveBeenCalledTimes(4);
@@ -170,14 +172,14 @@ describe('retryEs', () => {
       statusCode: 503,
       type: 'service_unavailable',
     });
-    const operation = jest.fn().mockRejectedValue(error);
+    const operation = vi.fn().mockRejectedValue(error);
 
     const promise = retryEs(operation, { logger, dataStreamName: 'my-data-stream' });
     const assertion = expect(promise).rejects.toBe(error);
 
-    await jest.advanceTimersByTimeAsync(1_000);
-    await jest.advanceTimersByTimeAsync(2_000);
-    await jest.advanceTimersByTimeAsync(4_000);
+    await vi.advanceTimersByTimeAsync(1_000);
+    await vi.advanceTimersByTimeAsync(2_000);
+    await vi.advanceTimersByTimeAsync(4_000);
 
     await assertion;
     expect(operation).toHaveBeenCalledTimes(4);

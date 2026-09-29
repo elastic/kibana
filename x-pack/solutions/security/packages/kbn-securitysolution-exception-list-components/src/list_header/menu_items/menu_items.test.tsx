@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MenuItems } from '.';
 import { rules } from '../../mocks/rule_references.mock';
 import { securityLinkAnchorComponentMock } from '../../mocks/security_link_component.mock';
 
-const onExportList = jest.fn();
-const onDeleteList = jest.fn();
-const onManageRules = jest.fn();
-const onDuplicateList = jest.fn();
+const onExportList = vi.fn();
+const onDeleteList = vi.fn();
+const onManageRules = vi.fn();
+const onDuplicateList = vi.fn();
 describe('MenuItems', () => {
   it('should render linkedRules, manageRules and menuActions', () => {
     const wrapper = render(

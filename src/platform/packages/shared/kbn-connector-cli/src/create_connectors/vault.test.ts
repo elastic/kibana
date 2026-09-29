@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import execa from 'execa';
 import { vaultRead } from './vault';
 
-jest.mock('execa');
-const execaMock = execa as unknown as jest.MockedFunction<typeof execa>;
+vi.mock('execa');
+const execaMock = execa as unknown as MockedFunction<typeof execa>;
 
 describe('vaultRead', () => {
   let originalVaultAddr: string | undefined;
@@ -22,7 +25,7 @@ describe('vaultRead', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     if (originalVaultAddr !== undefined) {
       process.env.VAULT_ADDR = originalVaultAddr;
     } else {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -69,12 +71,12 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
 
 describe('Toggle', () => {
   it('renders the field label', () => {
-    render(<FormWrapper onSubmitResult={jest.fn()} />);
+    render(<FormWrapper onSubmitResult={vi.fn()} />);
     expect(screen.getByText('Requires escalation')).toBeInTheDocument();
   });
 
   it('uses metadata default true as checked', () => {
-    render(<FormWrapper defaultValue onSubmitResult={jest.fn()} />);
+    render(<FormWrapper defaultValue onSubmitResult={vi.fn()} />);
     expect(screen.getByRole('switch', { name: 'Requires escalation' })).toHaveAttribute(
       'aria-checked',
       'true'
@@ -82,7 +84,7 @@ describe('Toggle', () => {
   });
 
   it('uses metadata default false as unchecked', () => {
-    render(<FormWrapper defaultValue={false} onSubmitResult={jest.fn()} />);
+    render(<FormWrapper defaultValue={false} onSubmitResult={vi.fn()} />);
     expect(screen.getByRole('switch', { name: 'Requires escalation' })).toHaveAttribute(
       'aria-checked',
       'false'
@@ -90,7 +92,7 @@ describe('Toggle', () => {
   });
 
   it('submits true when toggled on', async () => {
-    const onSubmitResult = jest.fn();
+    const onSubmitResult = vi.fn();
     render(<FormWrapper defaultValue={false} onSubmitResult={onSubmitResult} />);
 
     await userEvent.click(screen.getByRole('switch', { name: 'Requires escalation' }));
@@ -107,7 +109,7 @@ describe('Toggle', () => {
   });
 
   it('submits false when toggled off', async () => {
-    const onSubmitResult = jest.fn();
+    const onSubmitResult = vi.fn();
     render(<FormWrapper defaultValue onSubmitResult={onSubmitResult} />);
 
     await userEvent.click(screen.getByRole('switch', { name: 'Requires escalation' }));
@@ -124,7 +126,7 @@ describe('Toggle', () => {
   });
 
   it('defaults required toggle to false when no metadata default is provided', async () => {
-    const onSubmitResult = jest.fn();
+    const onSubmitResult = vi.fn();
     render(<FormWrapper isRequired onSubmitResult={onSubmitResult} />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -142,7 +144,7 @@ describe('Toggle', () => {
 
   describe('inline confirm/cancel actions', () => {
     it('does not render the actions when onConfirm is not provided', async () => {
-      render(<FormWrapper defaultValue={false} onSubmitResult={jest.fn()} />);
+      render(<FormWrapper defaultValue={false} onSubmitResult={vi.fn()} />);
 
       await userEvent.click(screen.getByRole('switch', { name: 'Requires escalation' }));
 
@@ -152,7 +154,7 @@ describe('Toggle', () => {
     });
 
     it('shows the confirm/cancel actions only after the toggle changes', async () => {
-      render(<FormWrapper defaultValue={false} onConfirm={jest.fn()} onSubmitResult={jest.fn()} />);
+      render(<FormWrapper defaultValue={false} onConfirm={vi.fn()} onSubmitResult={vi.fn()} />);
 
       expect(
         screen.queryByTestId('template-field-confirm-requires_escalation')
@@ -165,8 +167,8 @@ describe('Toggle', () => {
     });
 
     it('calls onConfirm when the confirm action is clicked', async () => {
-      const onConfirm = jest.fn();
-      render(<FormWrapper defaultValue={false} onConfirm={onConfirm} onSubmitResult={jest.fn()} />);
+      const onConfirm = vi.fn();
+      render(<FormWrapper defaultValue={false} onConfirm={onConfirm} onSubmitResult={vi.fn()} />);
 
       await userEvent.click(screen.getByRole('switch', { name: 'Requires escalation' }));
       await userEvent.click(screen.getByTestId('template-field-confirm-requires_escalation'));
@@ -175,7 +177,7 @@ describe('Toggle', () => {
     });
 
     it('resets the toggle and hides the actions when cancelling', async () => {
-      render(<FormWrapper defaultValue={false} onConfirm={jest.fn()} onSubmitResult={jest.fn()} />);
+      render(<FormWrapper defaultValue={false} onConfirm={vi.fn()} onSubmitResult={vi.fn()} />);
 
       const toggle = screen.getByRole('switch', { name: 'Requires escalation' });
       await userEvent.click(toggle);
@@ -193,9 +195,9 @@ describe('Toggle', () => {
       render(
         <FormWrapper
           defaultValue={false}
-          onConfirm={jest.fn()}
+          onConfirm={vi.fn()}
           isSaving
-          onSubmitResult={jest.fn()}
+          onSubmitResult={vi.fn()}
         />
       );
 

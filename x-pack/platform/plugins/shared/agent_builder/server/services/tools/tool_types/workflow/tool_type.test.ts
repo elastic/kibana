@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { RunContext } from '@kbn/agent-builder-server';
 import {
@@ -21,21 +24,27 @@ import {
   hasWorkflowExecutePrivilege,
 } from '@kbn/agent-builder-tools-base/workflows';
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
-  executeWorkflow: jest.fn(),
-  hasWorkflowReadPrivilege: jest.fn(),
-  hasWorkflowExecutePrivilege: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-tools-base/workflows', () => {
+      const mocked = {
+      executeWorkflow: vi.fn(),
+      hasWorkflowReadPrivilege: vi.fn(),
+      hasWorkflowExecutePrivilege: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./validation', () => ({
-  validateWorkflowId: jest.fn(),
-}));
+vi.mock('./validation', () => {
+      const mocked = {
+      validateWorkflowId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const executeWorkflowMock = executeWorkflow as jest.MockedFunction<typeof executeWorkflow>;
-const hasReadMock = hasWorkflowReadPrivilege as jest.MockedFunction<
+const executeWorkflowMock = executeWorkflow as MockedFunction<typeof executeWorkflow>;
+const hasReadMock = hasWorkflowReadPrivilege as MockedFunction<
   typeof hasWorkflowReadPrivilege
 >;
-const hasExecuteMock = hasWorkflowExecutePrivilege as jest.MockedFunction<
+const hasExecuteMock = hasWorkflowExecutePrivilege as MockedFunction<
   typeof hasWorkflowExecutePrivilege
 >;
 
@@ -52,7 +61,7 @@ describe('workflow tool type', () => {
     hasExecuteMock.mockResolvedValue(true);
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('returns disabled when workflowsManagement is not provided', () => {
     const toolType = getWorkflowToolType({ workflowsManagement: undefined, security });
@@ -70,7 +79,7 @@ describe('workflow tool type', () => {
 
   it('checks the requesting user when loading a workflow input schema', async () => {
     const request = httpServerMock.createKibanaRequest();
-    const getWorkflow = jest.fn().mockResolvedValue(null);
+    const getWorkflow = vi.fn().mockResolvedValue(null);
     mockWorkflowsManagement.management.getWorkflow = getWorkflow;
     const toolType = getWorkflowToolType({
       workflowsManagement: mockWorkflowsManagement,

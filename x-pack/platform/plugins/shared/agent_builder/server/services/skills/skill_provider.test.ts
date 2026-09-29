@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ReadonlySkillProvider, WritableSkillProvider, SkillProvider } from './skill_provider';
 import { isReadonlySkillProvider, isWritableSkillProvider } from './skill_provider';
 
@@ -12,22 +14,22 @@ describe('skill_provider type guards', () => {
   const createReadonlyProvider = (): ReadonlySkillProvider => ({
     id: 'builtin',
     readonly: true,
-    has: jest.fn(),
-    get: jest.fn(),
-    bulkGet: jest.fn(),
-    list: jest.fn(),
+    has: vi.fn(),
+    get: vi.fn(),
+    bulkGet: vi.fn(),
+    list: vi.fn(),
   });
 
   const createWritableProvider = (): WritableSkillProvider => ({
     id: 'persisted',
     readonly: false,
-    has: jest.fn(),
-    get: jest.fn(),
-    bulkGet: jest.fn(),
-    list: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    has: vi.fn(),
+    get: vi.fn(),
+    bulkGet: vi.fn(),
+    list: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   });
 
   describe('isReadonlySkillProvider', () => {

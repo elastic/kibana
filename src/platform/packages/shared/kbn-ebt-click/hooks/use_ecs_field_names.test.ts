@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { useEcsFieldNames } from './use_ecs_field_names';
@@ -19,8 +21,8 @@ const makeFieldsMetadata = (
   ecsFields: Record<string, { short?: string } | undefined>
 ): FieldsMetadataPublicStart =>
   ({
-    getClient: jest.fn().mockResolvedValue({
-      find: jest.fn().mockImplementation(({ fieldNames }: { fieldNames: string[] }) =>
+    getClient: vi.fn().mockResolvedValue({
+      find: vi.fn().mockImplementation(({ fieldNames }: { fieldNames: string[] }) =>
         Promise.resolve({
           fields: Object.fromEntries(fieldNames.map((name) => [name, ecsFields[name]])),
         })
@@ -60,7 +62,7 @@ describe('useEcsFieldNames', () => {
   it('resolves to an empty Set when getClient rejects', async () => {
     const fieldNames = [SERVICE_NAME];
     const fieldsMetadata = {
-      getClient: jest.fn().mockRejectedValue(new Error('network error')),
+      getClient: vi.fn().mockRejectedValue(new Error('network error')),
     } as unknown as FieldsMetadataPublicStart;
 
     const { result } = renderHook(() => useEcsFieldNames(fieldNames, fieldsMetadata));
@@ -75,8 +77,8 @@ describe('useEcsFieldNames', () => {
   it('resolves to an empty Set when find rejects', async () => {
     const fieldNames = [SERVICE_NAME];
     const fieldsMetadata = {
-      getClient: jest.fn().mockResolvedValue({
-        find: jest.fn().mockRejectedValue(new Error('find error')),
+      getClient: vi.fn().mockResolvedValue({
+        find: vi.fn().mockRejectedValue(new Error('find error')),
       }),
     } as unknown as FieldsMetadataPublicStart;
 
@@ -97,13 +99,13 @@ describe('useEcsFieldNames', () => {
       fieldNames.map((name, i) => [name, i % 2 === 0 ? { short: `desc ${i}` } : undefined])
     );
 
-    const find = jest.fn().mockImplementation(({ fieldNames: names }: { fieldNames: string[] }) =>
+    const find = vi.fn().mockImplementation(({ fieldNames: names }: { fieldNames: string[] }) =>
       Promise.resolve({
         fields: Object.fromEntries(names.map((name) => [name, ecsFields[name]])),
       })
     );
     const fieldsMetadata = {
-      getClient: jest.fn().mockResolvedValue({ find }),
+      getClient: vi.fn().mockResolvedValue({ find }),
     } as unknown as FieldsMetadataPublicStart;
 
     const { result } = renderHook(() => useEcsFieldNames(fieldNames, fieldsMetadata));
@@ -123,7 +125,7 @@ describe('useEcsFieldNames', () => {
   it('keeps results from successful chunks when one chunk fails', async () => {
     const fieldNames = Array.from({ length: 150 }, (_, i) => `field.${i}`);
 
-    const find = jest.fn().mockImplementation(({ fieldNames: names }: { fieldNames: string[] }) => {
+    const find = vi.fn().mockImplementation(({ fieldNames: names }: { fieldNames: string[] }) => {
       // Fail the second chunk only; the first chunk should still contribute.
       if (names.includes('field.100')) {
         return Promise.reject(new Error('chunk failed'));
@@ -133,7 +135,7 @@ describe('useEcsFieldNames', () => {
       });
     });
     const fieldsMetadata = {
-      getClient: jest.fn().mockResolvedValue({ find }),
+      getClient: vi.fn().mockResolvedValue({ find }),
     } as unknown as FieldsMetadataPublicStart;
 
     const { result } = renderHook(() => useEcsFieldNames(fieldNames, fieldsMetadata));

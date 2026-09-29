@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import type { RegistryVarGroup } from '../../common';
@@ -12,7 +14,7 @@ import type { RegistryVarGroup } from '../../common';
 import { useVarGroupCloudConnector, type VarGroupSelection } from './use_var_group_cloud_connector';
 
 describe('useVarGroupCloudConnector hook', () => {
-  const mockUpdatePackagePolicy = jest.fn();
+  const mockUpdatePackagePolicy = vi.fn();
 
   const createMockPackagePolicy = (overrides?: Partial<{ inputs: any[] }>) => ({
     name: 'test-policy',
@@ -44,7 +46,7 @@ describe('useVarGroupCloudConnector hook', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return isSelected: false when varGroups is undefined', () => {

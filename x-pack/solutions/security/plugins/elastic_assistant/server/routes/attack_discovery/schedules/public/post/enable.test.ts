@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { performChecks } from '../../../../helpers';
 
-jest.mock('../../../../helpers', () => ({
-  performChecks: jest.fn(),
-}));
+vi.mock('../../../../helpers', () => {
+      const mocked = {
+      performChecks: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
@@ -23,25 +29,25 @@ const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();
 clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
 
-const enableAttackDiscoverySchedule = jest.fn();
+const enableAttackDiscoverySchedule = vi.fn();
 const mockSchedulingDataClient = {
-  findSchedules: jest.fn(),
-  getSchedule: jest.fn(),
-  createSchedule: jest.fn(),
-  updateSchedule: jest.fn(),
-  deleteSchedule: jest.fn(),
+  findSchedules: vi.fn(),
+  getSchedule: vi.fn(),
+  createSchedule: vi.fn(),
+  updateSchedule: vi.fn(),
+  deleteSchedule: vi.fn(),
   enableSchedule: enableAttackDiscoverySchedule,
-  disableSchedule: jest.fn(),
+  disableSchedule: vi.fn(),
 } as unknown as AttackDiscoveryScheduleDataClient;
 
 describe('enableAttackDiscoverySchedulesRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
       mockSchedulingDataClient
     );
     // Mock performChecks to return success by default
-    (performChecks as jest.Mock).mockResolvedValue({
+    (performChecks as Mock).mockResolvedValue({
       isSuccess: true,
     });
     enableAttackDiscoverySchedulesRoute(server.router);
@@ -71,7 +77,7 @@ describe('enableAttackDiscoverySchedulesRoute', () => {
   });
 
   it('should handle `dataClient.enableSchedule` error', async () => {
-    (enableAttackDiscoverySchedule as jest.Mock).mockRejectedValue(new Error('Oh no!'));
+    (enableAttackDiscoverySchedule as Mock).mockRejectedValue(new Error('Oh no!'));
     const response = await server.inject(
       enableAttackDiscoverySchedulesRequest('schedule-3'),
       requestContextMock.convertContext(context)

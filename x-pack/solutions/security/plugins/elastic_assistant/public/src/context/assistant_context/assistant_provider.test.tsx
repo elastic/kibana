@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import { AssistantProvider } from './assistant_provider';
 import React from 'react';
@@ -47,7 +49,7 @@ describe('AssistantProvider', () => {
               elasticAssistantSharedState,
               settings,
               featureFlags: {
-                getBooleanValue: jest.fn().mockReturnValue(false),
+                getBooleanValue: vi.fn().mockReturnValue(false),
               },
             }}
           >

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { securityServiceMock } from '@kbn/core/server/mocks';
 import { getPrebuiltRulesAndTimelinesStatusRoute } from './get_prebuilt_rules_and_timelines_status_route';
 
@@ -25,7 +28,7 @@ import {
   mockCheckTimelinesStatusAfterInstallResult,
 } from '../../../../timeline/__mocks__/import_timelines';
 
-jest.mock('../../logic/rule_assets/prebuilt_rule_assets_client', () => {
+vi.mock('../../logic/rule_assets/prebuilt_rule_assets_client', () => {
   return {
     createPrebuiltRuleAssetsClient: () => {
       return {
@@ -52,11 +55,11 @@ jest.mock('../../logic/rule_assets/prebuilt_rule_assets_client', () => {
   };
 });
 
-jest.mock('../../../../timeline/utils/check_timelines_status', () => {
-  const actual = jest.requireActual('../../../../timeline/utils/check_timelines_status');
+vi.mock('../../../../timeline/utils/check_timelines_status', async () => {
+  const actual = (await vi.importActual('../../../../timeline/utils/check_timelines_status'));
   return {
     ...actual,
-    checkTimelinesStatus: jest.fn(),
+    checkTimelinesStatus: vi.fn(),
   };
 });
 
@@ -73,16 +76,16 @@ describe('get_prepackaged_rule_status_route', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     securityCore = securityServiceMock.createStart();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    jest.spyOn(securityCore.authc, 'getCurrentUser').mockReturnValue(mockGetCurrentUser);
+    vi.spyOn(securityCore.authc, 'getCurrentUser').mockReturnValue(mockGetCurrentUser);
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
 
-    (checkTimelinesStatus as jest.Mock).mockResolvedValue({
+    (checkTimelinesStatus as Mock).mockResolvedValue({
       timelinesToInstall: [],
       timelinesToUpdate: [],
       prepackagedTimelines: [],
@@ -92,8 +95,8 @@ describe('get_prepackaged_rule_status_route', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('status codes', () => {
@@ -158,7 +161,7 @@ describe('get_prepackaged_rule_status_route', () => {
 
     test('0 timelines installed, 3 timelines not installed, 0 timelines not updated', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      (checkTimelinesStatus as jest.Mock).mockResolvedValue(
+      (checkTimelinesStatus as Mock).mockResolvedValue(
         mockCheckTimelinesStatusBeforeInstallResult
       );
       const request = getPrepackagedRulesStatusRequest();
@@ -178,7 +181,7 @@ describe('get_prepackaged_rule_status_route', () => {
 
     test('3 timelines installed, 0 timelines not installed, 0 timelines not updated', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      (checkTimelinesStatus as jest.Mock).mockResolvedValue(
+      (checkTimelinesStatus as Mock).mockResolvedValue(
         mockCheckTimelinesStatusAfterInstallResult
       );
       const request = getPrepackagedRulesStatusRequest();

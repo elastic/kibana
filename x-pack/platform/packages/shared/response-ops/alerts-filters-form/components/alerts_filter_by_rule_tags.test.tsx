@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -16,13 +18,13 @@ import { AlertsFilterByRuleTags, filterMetadata } from './alerts_filter_by_rule_
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
-jest.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query');
-const mockUseGetRuleTagsQuery = jest.mocked(useGetRuleTagsQuery);
+vi.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query');
+const mockUseGetRuleTagsQuery = vi.mocked(useGetRuleTagsQuery);
 
 const ruleTagsBaseQueryResult = {
   hasNextPage: false,
-  fetchNextPage: jest.fn(),
-  refetch: jest.fn(),
+  fetchNextPage: vi.fn(),
+  refetch: vi.fn(),
 };
 
 describe('AlertsFilterByRuleTags', () => {
@@ -37,7 +39,7 @@ describe('AlertsFilterByRuleTags', () => {
       <AlertsFiltersFormContextProvider
         value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
       >
-        <AlertsFilterByRuleTags value={[]} onChange={jest.fn()} />
+        <AlertsFilterByRuleTags value={[]} onChange={vi.fn()} />
       </AlertsFiltersFormContextProvider>
     );
     await userEvent.click(screen.getByRole('combobox'));
@@ -56,7 +58,7 @@ describe('AlertsFilterByRuleTags', () => {
       <AlertsFiltersFormContextProvider
         value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
       >
-        <AlertsFilterByRuleTags value={['tag1']} onChange={jest.fn()} />
+        <AlertsFilterByRuleTags value={['tag1']} onChange={vi.fn()} />
       </AlertsFiltersFormContextProvider>
     );
     const comboboxPills = screen.getAllByTestId('euiComboBoxPill');
@@ -75,7 +77,7 @@ describe('AlertsFilterByRuleTags', () => {
       <AlertsFiltersFormContextProvider
         value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
       >
-        <AlertsFilterByRuleTags value={[]} onChange={jest.fn()} />
+        <AlertsFilterByRuleTags value={[]} onChange={vi.fn()} />
       </AlertsFiltersFormContextProvider>
     );
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
@@ -92,7 +94,7 @@ describe('AlertsFilterByRuleTags', () => {
       <AlertsFiltersFormContextProvider
         value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
       >
-        <AlertsFilterByRuleTags value={[]} onChange={jest.fn()} />
+        <AlertsFilterByRuleTags value={[]} onChange={vi.fn()} />
       </AlertsFiltersFormContextProvider>
     );
     const comboboxInput = screen.getByTestId('comboBoxSearchInput');
@@ -111,7 +113,7 @@ describe('AlertsFilterByRuleTags', () => {
       <AlertsFiltersFormContextProvider
         value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
       >
-        <AlertsFilterByRuleTags value={[]} onChange={jest.fn()} />
+        <AlertsFilterByRuleTags value={[]} onChange={vi.fn()} />
       </AlertsFiltersFormContextProvider>
     );
     const comboboxInput = screen.getByTestId('comboBoxSearchInput');

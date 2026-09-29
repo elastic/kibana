@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_START } from '@kbn/rule-data-utils';
 import { formatCustomThresholdAlert } from './format_custom_threshold_alert';
 import { Aggregators } from '../../common/custom_threshold_rule/types';
 
-jest.mock('../../common/custom_threshold_rule/get_view_in_app_url', () => ({
-  getViewInAppUrl: jest.fn(() => 'mockedUrl'),
-}));
+vi.mock('../../common/custom_threshold_rule/get_view_in_app_url', () => {
+      const mocked = {
+      getViewInAppUrl: vi.fn(() => 'mockedUrl'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getViewInAppUrl } = jest.requireMock(
-  '../../common/custom_threshold_rule/get_view_in_app_url'
-);
+const { getViewInAppUrl } = (await vi.importMock('../../common/custom_threshold_rule/get_view_in_app_url'));
 
 describe('formatCustomThresholdAlert', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const baseCriterion = {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { EvidenceRound } from '../evidence/types';
@@ -48,7 +50,7 @@ const runJudge = async ({
   referenceData?: Record<string, unknown>;
   evidenceRound?: EvidenceRound;
 }) => {
-  const prompt = jest.fn().mockResolvedValue({ toolCalls: [{ function: { arguments: output } }] });
+  const prompt = vi.fn().mockResolvedValue({ toolCalls: [{ function: { arguments: output } }] });
   const definition = compileUserDefinedEvaluator(document(judge));
 
   const result = await definition.evaluate({

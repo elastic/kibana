@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -22,8 +24,8 @@ const renderSingleModal = (
     <I18nProvider>
       <UpdateApiKeyConfirmationModal
         ruleName={overrides.ruleName ?? 'Test Rule'}
-        onCancel={overrides.onCancel ?? jest.fn()}
-        onConfirm={overrides.onConfirm ?? jest.fn()}
+        onCancel={overrides.onCancel ?? vi.fn()}
+        onConfirm={overrides.onConfirm ?? vi.fn()}
         isLoading={overrides.isLoading ?? false}
       />
     </I18nProvider>
@@ -44,7 +46,7 @@ describe('UpdateApiKeyConfirmationModal', () => {
   });
 
   it('calls onCancel when the cancel button is clicked', () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
     renderSingleModal({ onCancel });
 
     fireEvent.click(screen.getByText('Cancel'));
@@ -53,7 +55,7 @@ describe('UpdateApiKeyConfirmationModal', () => {
   });
 
   it('calls onConfirm when the confirm button is clicked', () => {
-    const onConfirm = jest.fn();
+    const onConfirm = vi.fn();
     renderSingleModal({ onConfirm });
 
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
@@ -81,8 +83,8 @@ describe('UpdateApiKeyConfirmationModal', () => {
         <I18nProvider>
           <UpdateApiKeyConfirmationModal
             ruleCount={overrides.ruleCount ?? 5}
-            onCancel={overrides.onCancel ?? jest.fn()}
-            onConfirm={overrides.onConfirm ?? jest.fn()}
+            onCancel={overrides.onCancel ?? vi.fn()}
+            onConfirm={overrides.onConfirm ?? vi.fn()}
             isLoading={overrides.isLoading ?? false}
           />
         </I18nProvider>
@@ -115,7 +117,7 @@ describe('UpdateApiKeyConfirmationModal', () => {
     });
 
     it('calls onConfirm when the confirm button is clicked', () => {
-      const onConfirm = jest.fn();
+      const onConfirm = vi.fn();
       renderBulkModal({ onConfirm });
 
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));

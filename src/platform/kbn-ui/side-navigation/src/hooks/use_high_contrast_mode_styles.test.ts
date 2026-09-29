@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useHighContrastModeStyles } from './use_high_contrast_mode_styles';
 
-jest.mock('@elastic/eui', () => ({
-  useEuiTheme: jest.fn(),
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      useEuiTheme: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useEuiTheme } = jest.requireMock('@elastic/eui');
+const { useEuiTheme } = (await vi.importMock('@elastic/eui'));
 
 const themeMock = {
   euiTheme: {

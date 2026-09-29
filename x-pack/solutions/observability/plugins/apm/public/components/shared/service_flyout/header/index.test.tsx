@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -14,19 +17,22 @@ import { SERVICE_FLYOUT_DEFAULT_TAB_ID, SERVICE_FLYOUT_TABS } from '..';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import * as ServiceBadgesModule from './service_badges';
 
-const mockUseServiceFlyoutLinks = jest.fn();
-jest.mock('../hooks/use_service_flyout_links', () => ({
-  useServiceFlyoutLinks: (...args: unknown[]) => mockUseServiceFlyoutLinks(...args),
-}));
+const mockUseServiceFlyoutLinks = vi.fn();
+vi.mock('../hooks/use_service_flyout_links', () => {
+      const mocked = {
+      useServiceFlyoutLinks: (...args: unknown[]) => mockUseServiceFlyoutLinks(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockServiceBadges = jest.fn();
+const mockServiceBadges = vi.fn();
 
-const mockApmLocator = { getRedirectUrl: jest.fn() };
+const mockApmLocator = { getRedirectUrl: vi.fn() };
 
 const mockShare = {
   url: {
     locators: {
-      get: jest
+      get: vi
         .fn()
         .mockImplementation((id: string) =>
           id === APM_APP_LOCATOR_ID ? mockApmLocator : undefined
@@ -40,10 +46,13 @@ const mockCore = {
   http: { basePath: { prepend: (path: string) => path } },
 } as any;
 
-const mockUseServiceFlyoutContext = jest.fn();
-jest.mock('../service_flyout_context', () => ({
-  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
-}));
+const mockUseServiceFlyoutContext = vi.fn();
+vi.mock('../service_flyout_context', () => {
+      const mocked = {
+      useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseNodeData: ServiceFlyoutService = {
   name: 'opbeans-java',
@@ -52,10 +61,10 @@ const baseNodeData: ServiceFlyoutService = {
 
 function renderHeader({
   selectedTabId = SERVICE_FLYOUT_DEFAULT_TAB_ID,
-  onSelectedTabIdChange = jest.fn(),
+  onSelectedTabIdChange = vi.fn(),
 }: {
   selectedTabId?: (typeof SERVICE_FLYOUT_TABS)[number]['id'];
-  onSelectedTabIdChange?: jest.Mock;
+  onSelectedTabIdChange?: Mock;
 } = {}) {
   return render(
     <IntlProvider locale="en">
@@ -71,7 +80,7 @@ function renderHeader({
 
 describe('ServiceFlyoutHeader', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseServiceFlyoutContext.mockReturnValue({
       deps: { core: mockCore, share: mockShare, lens: undefined, dataViews: undefined },
@@ -86,20 +95,20 @@ describe('ServiceFlyoutHeader', () => {
       },
       filters: {
         environment: 'production',
-        setEnvironment: jest.fn(),
+        setEnvironment: vi.fn(),
         rangeFrom: 'now-15m',
         rangeTo: 'now',
         start: '2026-01-01T00:00:00.000Z',
         end: '2026-01-01T00:15:00.000Z',
-        setRange: jest.fn(),
+        setRange: vi.fn(),
         refreshToken: 0,
-        onRefresh: jest.fn(),
+        onRefresh: vi.fn(),
       },
     });
 
     // `ServiceBadges` is self-contained and covered by its own test; here we only assert that the
     // header renders it.
-    jest.spyOn(ServiceBadgesModule, 'ServiceBadges').mockImplementation(() => {
+    vi.spyOn(ServiceBadgesModule, 'ServiceBadges').mockImplementation(() => {
       mockServiceBadges();
       return React.createElement('div', { 'data-test-subj': 'serviceBadgesMock' });
     });
@@ -153,14 +162,14 @@ describe('ServiceFlyoutHeader', () => {
       },
       filters: {
         environment: 'production',
-        setEnvironment: jest.fn(),
+        setEnvironment: vi.fn(),
         rangeFrom: 'now-15m',
         rangeTo: 'now',
         start: '2026-01-01T00:00:00.000Z',
         end: '2026-01-01T00:15:00.000Z',
-        setRange: jest.fn(),
+        setRange: vi.fn(),
         refreshToken: 0,
-        onRefresh: jest.fn(),
+        onRefresh: vi.fn(),
       },
     });
     renderHeader();
@@ -190,7 +199,7 @@ describe('ServiceFlyoutHeader', () => {
   });
 
   it('calls onSelectedTabIdChange when a tab is clicked', () => {
-    const onSelectedTabIdChange = jest.fn();
+    const onSelectedTabIdChange = vi.fn();
     renderHeader({ onSelectedTabIdChange });
 
     const { id } = SERVICE_FLYOUT_TABS[0];

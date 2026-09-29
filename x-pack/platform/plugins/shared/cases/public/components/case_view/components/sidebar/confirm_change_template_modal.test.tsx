@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -23,21 +25,21 @@ const newTemplate = {
 };
 
 describe('ConfirmChangeTemplateModal', () => {
-  const onConfirm = jest.fn();
-  const onCancel = jest.fn();
+  const onConfirm = vi.fn();
+  const onCancel = vi.fn();
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
+    vi.clearAllMocks();
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime, pointerEventsCheck: 0 });
   });
 
   it('renders the modal title', () => {

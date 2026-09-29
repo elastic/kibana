@@ -5,45 +5,71 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { Content } from './content';
 import { mockUserEntityRiskScores } from '../../../../flyout/entity_details/mocks';
 
-jest.mock('../../../../entity_analytics/components/entity_resolution/resolution_section', () => ({
-  ResolutionSection: () => null,
-}));
-jest.mock('../../../../common/hooks/use_has_entity_resolution_license', () => ({
-  useHasEntityResolutionLicense: jest.fn(() => false),
-}));
-jest.mock('../../../../entity_analytics/components/risk_summary_flyout/risk_summary', () => ({
-  FlyoutRiskSummary: () => null,
-}));
-jest.mock(
+vi.mock('../../../../entity_analytics/components/entity_resolution/resolution_section', () => {
+      const mocked = {
+      ResolutionSection: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/hooks/use_has_entity_resolution_license', () => {
+      const mocked = {
+      useHasEntityResolutionLicense: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../entity_analytics/components/risk_summary_flyout/risk_summary', () => {
+      const mocked = {
+      FlyoutRiskSummary: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock(
   '../../../../flyout/entity_details/shared/components/right/visualizations_section',
-  () => ({
-    VisualizationsSection: () => null,
-  })
+  () => {
+      const mocked = {
+        VisualizationsSection: () => null,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock(
+vi.mock(
   '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector',
-  () => ({
-    AssetCriticalityAccordion: () => <div data-test-subj="assetCriticalityAccordionMock" />,
-  })
+  () => {
+      const mocked = {
+        AssetCriticalityAccordion: () => <div data-test-subj="assetCriticalityAccordionMock" />,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock(
+vi.mock(
   '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights',
-  () => ({
-    EntityHighlightsAccordion: () => null,
-  })
+  () => {
+      const mocked = {
+        EntityHighlightsAccordion: () => null,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock('../../../../cloud_security_posture/components/entity_insight', () => ({
-  EntityInsight: () => null,
-}));
-jest.mock('../../shared/components/observed_data_section', () => ({
-  ObservedDataSection: () => null,
-}));
+vi.mock('../../../../cloud_security_posture/components/entity_insight', () => {
+      const mocked = {
+      EntityInsight: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../shared/components/observed_data_section', () => {
+      const mocked = {
+      ObservedDataSection: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
   identityFields: { 'user.name': 'user-1' },

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux-v7';
@@ -27,13 +30,13 @@ import type { ComputedData } from '../../../../entities/workflows/store/workflow
 import { createStepInfo } from '../../../../shared/test_utils';
 
 // Mock Monaco Range
-jest.mock('@kbn/monaco', () => {
-  const actualMonaco = jest.requireActual('@kbn/monaco');
+vi.mock('@kbn/monaco', async () => {
+  const actualMonaco = (await vi.importActual('@kbn/monaco'));
   return {
     ...actualMonaco,
     monaco: {
       ...actualMonaco.monaco,
-      Range: jest.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
+      Range: vi.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
         startLineNumber: startLine,
         startColumn: startCol,
         endLineNumber: endLine,
@@ -44,11 +47,11 @@ jest.mock('@kbn/monaco', () => {
 });
 
 // Mock useEuiTheme
-jest.mock('@elastic/eui', () => {
-  const actualEui = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actualEui = (await vi.importActual('@elastic/eui'));
   return {
     ...actualEui,
-    useEuiTheme: jest.fn(() => ({
+    useEuiTheme: vi.fn(() => ({
       euiTheme: {
         colors: {
           backgroundBaseFormsControlDisabled: '#e0e0e0',
@@ -66,7 +69,7 @@ jest.mock('@elastic/eui', () => {
         },
       },
     })),
-    transparentize: jest.fn((color: string, opacity: number) => `${color}${opacity}`),
+    transparentize: vi.fn((color: string, opacity: number) => `${color}${opacity}`),
   };
 });
 
@@ -124,14 +127,14 @@ const createExecution = (
 // Helper function to create a mock editor
 const createMockEditor = () => {
   const decorationsCollection = {
-    clear: jest.fn(),
-    set: jest.fn(),
+    clear: vi.fn(),
+    set: vi.fn(),
   };
 
   return {
-    createDecorationsCollection: jest.fn(() => decorationsCollection),
-    getModel: jest.fn(() => ({
-      getValue: jest.fn(() => ''),
+    createDecorationsCollection: vi.fn(() => decorationsCollection),
+    getModel: vi.fn(() => ({
+      getValue: vi.fn(() => ''),
     })),
   } as unknown as monaco.editor.IStandaloneCodeEditor;
 };
@@ -186,7 +189,7 @@ const renderHookWithProviders = (
 
 describe('useStepDecorationsInExecution', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when editor is null', () => {
@@ -198,7 +201,7 @@ describe('useStepDecorationsInExecution', () => {
 
     it('should not call createDecorationsCollection', () => {
       const mockEditor = createMockEditor();
-      const spy = jest.spyOn(mockEditor, 'createDecorationsCollection');
+      const spy = vi.spyOn(mockEditor, 'createDecorationsCollection');
 
       renderHookWithProviders(null);
 
@@ -209,7 +212,7 @@ describe('useStepDecorationsInExecution', () => {
   describe('when editor is provided', () => {
     it('should create decorations collection', () => {
       const mockEditor = createMockEditor();
-      const spy = jest.spyOn(mockEditor, 'createDecorationsCollection');
+      const spy = vi.spyOn(mockEditor, 'createDecorationsCollection');
 
       renderHookWithProviders(mockEditor);
 
@@ -220,7 +223,7 @@ describe('useStepDecorationsInExecution', () => {
       const mockEditor = createMockEditor();
       renderHookWithProviders(mockEditor);
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as jest.Mock).mock
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
         .results[0].value;
 
       expect(decorationsCollection.clear).toHaveBeenCalled();
@@ -234,7 +237,7 @@ describe('useStepDecorationsInExecution', () => {
         store.dispatch(setExecution(createExecution([])));
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as jest.Mock).mock
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
         .results[0].value;
 
       expect(decorationsCollection.set).not.toHaveBeenCalled();
@@ -265,7 +268,7 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as jest.Mock).mock
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
         .results[0].value;
 
       expect(decorationsCollection.set).not.toHaveBeenCalled();
@@ -286,7 +289,7 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as jest.Mock).mock
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
         .results[0].value;
 
       await waitFor(() => {
@@ -330,7 +333,7 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as jest.Mock).mock
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
         .results[0].value;
 
       await waitFor(() => {
@@ -359,7 +362,7 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as jest.Mock).mock
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
         .results[0].value;
 
       await waitFor(() => {
@@ -398,7 +401,7 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as jest.Mock).mock
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
         .results[0].value;
 
       await waitFor(() => {
@@ -440,7 +443,7 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as jest.Mock).mock
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
         .results[0].value;
 
       await waitFor(() => {
@@ -470,7 +473,7 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as jest.Mock).mock
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
         .results[0].value;
 
       // Must not paint decorations on the editable YAML editor
@@ -495,7 +498,7 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as jest.Mock).mock
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
         .results[0].value;
 
       await waitFor(() => {
@@ -521,7 +524,7 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as jest.Mock).mock
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
         .results[0].value;
       const firstCallCount = decorationsCollection.set.mock.calls.length;
 
@@ -554,7 +557,7 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as jest.Mock).mock
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
         .results[0].value;
 
       await waitFor(() => {

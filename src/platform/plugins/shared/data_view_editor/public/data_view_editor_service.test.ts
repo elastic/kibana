@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { DataViewEditorService } from './data_view_editor_service';
 import type { HttpSetup } from '@kbn/core/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
 describe('DataViewEditorService', () => {
   it('should check for rollup indices when rolls are enabled', () => {
-    const get = jest.fn();
+    const get = vi.fn();
     const http = { get } as unknown as HttpSetup;
     new DataViewEditorService({
       services: {
         http,
         dataViews: {
-          getIdsWithTitle: jest.fn().mockResolvedValue([]),
-          getRollupsEnabled: jest.fn().mockReturnValue(true),
+          getIdsWithTitle: vi.fn().mockResolvedValue([]),
+          getRollupsEnabled: vi.fn().mockReturnValue(true),
         } as unknown as DataViewsServicePublic,
       },
       initialValues: {},
@@ -30,13 +32,13 @@ describe('DataViewEditorService', () => {
     expect(get.mock.calls[0][0]).toEqual('/api/rollup/indices');
   });
   it('should skip check for rollup indices when rollups are disabled', () => {
-    const http = { get: jest.fn() } as unknown as HttpSetup;
+    const http = { get: vi.fn() } as unknown as HttpSetup;
     new DataViewEditorService({
       services: {
         http,
         dataViews: {
-          getIdsWithTitle: jest.fn().mockResolvedValue([]),
-          getRollupsEnabled: jest.fn().mockReturnValue(false),
+          getIdsWithTitle: vi.fn().mockResolvedValue([]),
+          getRollupsEnabled: vi.fn().mockReturnValue(false),
         } as unknown as DataViewsServicePublic,
       },
       initialValues: {},

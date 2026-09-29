@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import Boom from '@hapi/boom';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -142,7 +144,7 @@ describe('GET all roles by space id', () => {
   it('correctly defines route.', () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     mockRouteDefinitionParams.authz.applicationName = application;
-    mockRouteDefinitionParams.getFeatures = jest.fn().mockResolvedValue([]);
+    mockRouteDefinitionParams.getFeatures = vi.fn().mockResolvedValue([]);
 
     defineGetAllRolesBySpaceRoutes(mockRouteDefinitionParams);
     const [[config]] = mockRouteDefinitionParams.router.get.mock.calls;
@@ -165,13 +167,13 @@ describe('GET all roles by space id', () => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
       mockRouteDefinitionParams.authz.applicationName = application;
-      mockRouteDefinitionParams.getFeatures = jest.fn().mockResolvedValue(features);
+      mockRouteDefinitionParams.getFeatures = vi.fn().mockResolvedValue(features);
       mockRouteDefinitionParams.subFeaturePrivilegeIterator =
         featuresPluginMock.createSetup().subFeaturePrivilegeIterator;
 
       const mockCoreContext = coreMock.createRequestHandlerContext();
       const mockLicensingContext = {
-        license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
+        license: { check: vi.fn().mockReturnValue(licenseCheckResult) },
       } as any;
       const mockContext = coreMock.createCustomRequestHandlerContext({
         core: mockCoreContext,

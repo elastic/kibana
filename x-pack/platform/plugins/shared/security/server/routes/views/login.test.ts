@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { URL } from 'url';
 
 import { Type } from '@kbn/config-schema';
@@ -25,9 +27,9 @@ import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types'
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Login view routes', () => {
-  let httpResources: jest.Mocked<HttpResources>;
-  let router: jest.Mocked<SecurityRouter>;
-  let license: jest.Mocked<SecurityLicense>;
+  let httpResources: Mocked<HttpResources>;
+  let router: Mocked<SecurityRouter>;
+  let license: Mocked<SecurityLicense>;
   let config: ConfigType;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();

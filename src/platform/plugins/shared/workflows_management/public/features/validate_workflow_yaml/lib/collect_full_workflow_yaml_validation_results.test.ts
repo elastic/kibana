@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { monaco } from '@kbn/code-editor';
 
 const structuralResult: YamlValidationResult = {
@@ -93,33 +96,54 @@ const esqlResult: YamlValidationResult = {
   afterMessage: null,
 };
 
-jest.mock('./run_workflow_yaml_validations', () => ({
-  runWorkflowYamlValidations: jest.fn(() => [structuralResult]),
-}));
+vi.mock('./run_workflow_yaml_validations', () => {
+      const mocked = {
+      runWorkflowYamlValidations: vi.fn(() => [structuralResult]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./validate_connector_ids', () => ({
-  validateConnectorIds: jest.fn(() => [connectorResult]),
-}));
+vi.mock('./validate_connector_ids', () => {
+      const mocked = {
+      validateConnectorIds: vi.fn(() => [connectorResult]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./validate_graph_build', () => ({
-  validateGraphBuild: jest.fn(() => [graphResult]),
-}));
+vi.mock('./validate_graph_build', () => {
+      const mocked = {
+      validateGraphBuild: vi.fn(() => [graphResult]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./collect_all_step_property_items', () => ({
-  collectAllStepPropertyItems: jest.fn(() => []),
-}));
+vi.mock('./collect_all_step_property_items', () => {
+      const mocked = {
+      collectAllStepPropertyItems: vi.fn(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./validate_step_properties', () => ({
-  validateStepProperties: jest.fn(async () => []),
-}));
+vi.mock('./validate_step_properties', () => {
+      const mocked = {
+      validateStepProperties: vi.fn(async () => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./validate_workflow_inputs', () => ({
-  validateWorkflowInputs: jest.fn(() => [workflowInputResult]),
-}));
+vi.mock('./validate_workflow_inputs', () => {
+      const mocked = {
+      validateWorkflowInputs: vi.fn(() => [workflowInputResult]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => ({
-  validateEsqlSteps: jest.fn(async () => [esqlResult]),
-}));
+vi.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => {
+      const mocked = {
+      validateEsqlSteps: vi.fn(async () => [esqlResult]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { collectAllStepPropertyItems } from './collect_all_step_property_items';
@@ -135,9 +159,9 @@ import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esq
 
 const emptyRegistry = createMockWorkflowContextRegistry();
 
-const mockValidateEsqlSteps = validateEsqlSteps as jest.Mock;
-const mockCollectAllStepPropertyItems = collectAllStepPropertyItems as jest.Mock;
-const mockValidateStepProperties = validateStepProperties as jest.Mock;
+const mockValidateEsqlSteps = validateEsqlSteps as Mock;
+const mockCollectAllStepPropertyItems = collectAllStepPropertyItems as Mock;
+const mockValidateStepProperties = validateStepProperties as Mock;
 
 describe('collectFullWorkflowYamlValidationResults', () => {
   const yaml = [
@@ -152,7 +176,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
   const computed = performComputation(yaml);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('layers contextual validators on top of structural validation', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -28,9 +31,9 @@ import type { FormState } from '../configure_cases/flyout';
 import { TemplateForm } from './form';
 import type { TemplateFormProps } from './types';
 
-jest.mock('../connectors/servicenow/use_get_choices');
+vi.mock('../connectors/servicenow/use_get_choices');
 
-const useGetChoicesMock = useGetChoices as jest.Mock;
+const useGetChoicesMock = useGetChoices as Mock;
 
 const SubmitButtonMock = ({ submit }: { submit: FormState<TemplateFormProps>['submit'] }) => (
   <button onClick={() => submit()} type="submit">
@@ -60,22 +63,22 @@ describe('TemplateForm', () => {
       observableTypes: [],
       extractObservables: true,
     },
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     initialValue: null,
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
   });
@@ -196,7 +199,7 @@ describe('TemplateForm', () => {
     await user.paste('bar');
     await user.keyboard('{enter}');
 
-    const submitSpy = jest.spyOn(formState!, 'submit');
+    const submitSpy = vi.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -250,7 +253,7 @@ describe('TemplateForm', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    const submitSpy = jest.spyOn(formState!, 'submit');
+    const submitSpy = vi.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -318,7 +321,7 @@ describe('TemplateForm', () => {
     const caseCategory = await screen.findByTestId('caseCategory');
     await user.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
 
-    const submitSpy = jest.spyOn(formState!, 'submit');
+    const submitSpy = vi.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -377,7 +380,7 @@ describe('TemplateForm', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    const submitSpy = jest.spyOn(formState!, 'submit');
+    const submitSpy = vi.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -442,7 +445,7 @@ describe('TemplateForm', () => {
 
     expect(formState!).not.toBeUndefined();
 
-    const submitSpy = jest.spyOn(formState!, 'submit');
+    const submitSpy = vi.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -520,7 +523,7 @@ describe('TemplateForm', () => {
 
     await user.selectOptions(await screen.findByTestId('categorySelect'), ['Denial of Service']);
 
-    const submitSpy = jest.spyOn(formState!, 'submit');
+    const submitSpy = vi.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -622,7 +625,7 @@ describe('TemplateForm', () => {
     await user.click(numberCustomField);
     await user.paste('765');
 
-    const submitSpy = jest.spyOn(formState!, 'submit');
+    const submitSpy = vi.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -731,7 +734,7 @@ describe('TemplateForm', () => {
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
 
-    const submitSpy = jest.spyOn(formState!, 'submit');
+    const submitSpy = vi.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -801,7 +804,7 @@ describe('TemplateForm', () => {
     await user.click(await screen.findByTestId('template-name-input'));
     await user.paste('');
 
-    const submitSpy = jest.spyOn(formState!, 'submit');
+    const submitSpy = vi.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -835,7 +838,7 @@ describe('TemplateForm', () => {
     await user.click(await screen.findByTestId('template-name-input'));
     await user.paste(name);
 
-    const submitSpy = jest.spyOn(formState!, 'submit');
+    const submitSpy = vi.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -869,7 +872,7 @@ describe('TemplateForm', () => {
     await user.click(await screen.findByTestId('template-description-input'));
     await user.paste(description);
 
-    const submitSpy = jest.spyOn(formState!, 'submit');
+    const submitSpy = vi.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -908,7 +911,7 @@ describe('TemplateForm', () => {
       await user.keyboard('{enter}');
     }
 
-    const submitSpy = jest.spyOn(formState!, 'submit');
+    const submitSpy = vi.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -945,7 +948,7 @@ describe('TemplateForm', () => {
     await user.paste(x);
     await user.keyboard('{enter}');
 
-    const submitSpy = jest.spyOn(formState!, 'submit');
+    const submitSpy = vi.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {

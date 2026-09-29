@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   LogicMounter,
   mockFlashMessageHelpers,
@@ -25,9 +27,12 @@ import { indexToViewIndex } from '../../utils/indices';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 
-jest.mock('../../../shared/kibana/kibana_logic', () => ({
-  KibanaLogic: { values: { productAccess: { hasDocumentLevelSecurityEnabled: true } } },
-}));
+vi.mock('../../../shared/kibana/kibana_logic', () => {
+      const mocked = {
+      KibanaLogic: { values: { productAccess: { hasDocumentLevelSecurityEnabled: true } } },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // We can't test fetchTimeOutId because this will get set whenever the logic is created
 // And the timeoutId is non-deterministic. We use expect.object.containing throughout this test file
@@ -85,8 +90,8 @@ describe('IndexViewLogic', () => {
   const { http } = mockHttpValues;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
     http.get.mockReturnValueOnce(Promise.resolve({}));
     const indexNameLogic = indexNameMount();
     apiLogicMount();
@@ -136,7 +141,7 @@ describe('IndexViewLogic', () => {
         );
       });
       it('should flash success if recheckFetchIndexLoading', () => {
-        IndexViewLogic.actions.resetRecheckIndexLoading = jest.fn();
+        IndexViewLogic.actions.resetRecheckIndexLoading = vi.fn();
         IndexNameLogic.actions.setIndexName('api');
         IndexViewLogic.actions.recheckIndex();
         CachedFetchIndexApiLogic.actions.apiSuccess(apiIndex);
@@ -150,7 +155,7 @@ describe('IndexViewLogic', () => {
         // TODO: replace with mounting connectorIndex to FetchIndexApiDirectly to avoid
         // needing to mock out actions unrelated to test called by listeners
         CachedFetchIndexApiLogic.actions.apiSuccess(connectorIndex);
-        IndexViewLogic.actions.makeStartSyncRequest = jest.fn();
+        IndexViewLogic.actions.makeStartSyncRequest = vi.fn();
 
         IndexViewLogic.actions.startSync();
         await nextTick();
@@ -201,7 +206,7 @@ describe('IndexViewLogic', () => {
 
   describe('listeners', () => {
     it('calls makeFetchIndexRequest on fetchIndex', () => {
-      IndexViewLogic.actions.makeFetchIndexRequest = jest.fn();
+      IndexViewLogic.actions.makeFetchIndexRequest = vi.fn();
       IndexNameLogic.actions.setIndexName('indexName');
       IndexViewLogic.actions.fetchIndex();
       expect(IndexViewLogic.actions.makeFetchIndexRequest).toHaveBeenCalledWith({

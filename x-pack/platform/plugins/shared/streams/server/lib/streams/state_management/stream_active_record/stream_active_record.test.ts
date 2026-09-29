@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Streams } from '@kbn/streams-schema';
 import { StreamActiveRecord } from './stream_active_record';
 
@@ -22,25 +24,25 @@ describe('StreamActiveRecord', () => {
       return new TestStream(this.definition, this.dependencies);
     }
 
-    doHandleUpsertChange = jest.fn().mockImplementation(() => ({
+    doHandleUpsertChange = vi.fn().mockImplementation(() => ({
       cascadingChanges: [cascadingUpsert],
       changeStatus: 'upserted',
     }));
-    doHandleDeleteChange = jest.fn().mockImplementation(() => ({
+    doHandleDeleteChange = vi.fn().mockImplementation(() => ({
       cascadingChanges: [cascadingDelete],
       changeStatus: 'deleted',
     }));
-    doValidateUpsertion = jest.fn().mockImplementation(() => ({
+    doValidateUpsertion = vi.fn().mockImplementation(() => ({
       isValid: false,
       errors: ['test_upserted'],
     }));
-    doValidateDeletion = jest.fn().mockImplementation(() => ({
+    doValidateDeletion = vi.fn().mockImplementation(() => ({
       isValid: false,
       errors: ['test_deleted'],
     }));
-    doDetermineCreateActions = jest.fn().mockImplementation(() => ['create_actions']);
-    doDetermineUpdateActions = jest.fn().mockImplementation(() => ['update_actions']);
-    doDetermineDeleteActions = jest.fn().mockImplementation(() => ['delete_actions']);
+    doDetermineCreateActions = vi.fn().mockImplementation(() => ['create_actions']);
+    doDetermineUpdateActions = vi.fn().mockImplementation(() => ['update_actions']);
+    doDetermineDeleteActions = vi.fn().mockImplementation(() => ['delete_actions']);
   }
 
   it('can be marked as created or deleted', () => {

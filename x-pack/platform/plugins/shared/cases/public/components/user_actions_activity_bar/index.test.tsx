@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { waitFor, fireEvent, screen } from '@testing-library/react';
@@ -15,7 +17,7 @@ import type { UserActivityParams } from './types';
 import { renderWithTestingProviders } from '../../common/mock';
 
 describe('UserActionsActivityBar ', () => {
-  const onUserActionsActivityChanged = jest.fn();
+  const onUserActionsActivityChanged = vi.fn();
 
   const params: UserActivityParams = {
     type: 'all',
@@ -30,7 +32,7 @@ describe('UserActionsActivityBar ', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', () => {

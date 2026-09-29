@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -13,45 +16,69 @@ import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_
 import { Content } from './content';
 import { mockHostEntityRiskScores } from '../../../../flyout/entity_details/mocks';
 
-const mockResolutionSection = jest.fn((_props: { openDetailsPanel?: unknown }) => (
+const mockResolutionSection = vi.fn((_props: { openDetailsPanel?: unknown }) => (
   <div data-test-subj="securitySolutionFlyoutResolutionSection" />
 ));
-const mockVisualizationsSection = jest.fn((_props: { openDetailsPanel?: unknown }) => null);
+const mockVisualizationsSection = vi.fn((_props: { openDetailsPanel?: unknown }) => null);
 
-jest.mock('../../../../entity_analytics/components/entity_resolution/resolution_section', () => ({
-  ResolutionSection: (props: { openDetailsPanel?: unknown }) => mockResolutionSection(props),
-}));
-jest.mock('../../../../common/hooks/use_has_entity_resolution_license', () => ({
-  useHasEntityResolutionLicense: jest.fn(() => false),
-}));
-jest.mock('../../../../entity_analytics/components/risk_summary_flyout/risk_summary', () => ({
-  FlyoutRiskSummary: () => null,
-}));
-jest.mock(
+vi.mock('../../../../entity_analytics/components/entity_resolution/resolution_section', () => {
+      const mocked = {
+      ResolutionSection: (props: { openDetailsPanel?: unknown }) => mockResolutionSection(props),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/hooks/use_has_entity_resolution_license', () => {
+      const mocked = {
+      useHasEntityResolutionLicense: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../entity_analytics/components/risk_summary_flyout/risk_summary', () => {
+      const mocked = {
+      FlyoutRiskSummary: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock(
   '../../../../flyout/entity_details/shared/components/right/visualizations_section',
-  () => ({
-    VisualizationsSection: (props: { openDetailsPanel?: unknown }) =>
-      mockVisualizationsSection(props),
-  })
+  () => {
+      const mocked = {
+        VisualizationsSection: (props: { openDetailsPanel?: unknown }) =>
+          mockVisualizationsSection(props),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock(
+vi.mock(
   '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector',
-  () => ({
-    AssetCriticalityAccordion: () => <div data-test-subj="assetCriticalityAccordionMock" />,
-  })
+  () => {
+      const mocked = {
+        AssetCriticalityAccordion: () => <div data-test-subj="assetCriticalityAccordionMock" />,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock(
+vi.mock(
   '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights',
-  () => ({
-    EntityHighlightsAccordion: () => null,
-  })
+  () => {
+      const mocked = {
+        EntityHighlightsAccordion: () => null,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock('../../../../cloud_security_posture/components/entity_insight', () => ({
-  EntityInsight: () => null,
-}));
-jest.mock('../../shared/components/observed_data_section', () => ({
-  ObservedDataSection: () => null,
-}));
+vi.mock('../../../../cloud_security_posture/components/entity_insight', () => {
+      const mocked = {
+      EntityInsight: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../shared/components/observed_data_section', () => {
+      const mocked = {
+      ObservedDataSection: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
   identityFields: { 'host.name': 'host-1' },
@@ -71,7 +98,7 @@ const defaultProps = {
 
 describe('Content — resolution license gating', () => {
   beforeEach(() => {
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(false);
   });
 
   it('does not render ResolutionSection when license is inactive', () => {
@@ -80,18 +107,18 @@ describe('Content — resolution license gating', () => {
   });
 
   it('renders ResolutionSection when license is active and entityStoreEntityId is set', () => {
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(true);
     render(<Content {...defaultProps} />, { wrapper: TestProviders });
     expect(screen.getByTestId(RESOLUTION_SECTION_TEST_ID)).toBeInTheDocument();
   });
 });
 
 describe('Content — graph/resolution navigation gating', () => {
-  const openDetailsPanel = jest.fn();
+  const openDetailsPanel = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+    vi.clearAllMocks();
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(true);
   });
 
   it('forwards openDetailsPanel to the graph and resolution sections by default', () => {
@@ -126,7 +153,7 @@ describe('Content — graph/resolution navigation gating', () => {
 
 describe('Content — legacy asset criticality accordion gating', () => {
   beforeEach(() => {
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(false);
   });
 
   it('renders the legacy accordion when entity store v2 is disabled', () => {

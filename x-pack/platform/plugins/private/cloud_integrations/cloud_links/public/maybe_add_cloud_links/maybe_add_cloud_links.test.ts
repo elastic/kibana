@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
@@ -38,7 +40,7 @@ describe('maybeAddCloudLinks', () => {
     const cloud = {
       ...cloudMock.createStart(),
       isCloudEnabled: true,
-      getPrivilegedUrls: jest.fn().mockResolvedValue({ billingUrl: 'billing-url' }),
+      getPrivilegedUrls: vi.fn().mockResolvedValue({ billingUrl: 'billing-url' }),
     };
     maybeAddCloudLinks({
       security,
@@ -125,7 +127,7 @@ describe('maybeAddCloudLinks', () => {
     const cloud = {
       ...cloudMock.createStart(),
       isCloudEnabled: true,
-      getPrivilegedUrls: jest.fn().mockResolvedValue({ billingUrl: 'billing-url' }),
+      getPrivilegedUrls: vi.fn().mockResolvedValue({ billingUrl: 'billing-url' }),
     };
     maybeAddCloudLinks({
       security,

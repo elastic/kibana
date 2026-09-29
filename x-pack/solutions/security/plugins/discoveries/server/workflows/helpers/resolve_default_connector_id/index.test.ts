@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
@@ -14,33 +16,33 @@ import { resolveDefaultConnectorId } from '.';
 
 describe('resolveDefaultConnectorId', () => {
   const mockLogger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
   const mockRequest = {} as KibanaRequest;
 
-  const mockUiSettingsGet = jest.fn();
+  const mockUiSettingsGet = vi.fn();
   const mockUiSettingsClient = {
     get: mockUiSettingsGet,
   } as unknown as IUiSettingsClient;
 
-  const mockGetDefaultConnector = jest.fn();
+  const mockGetDefaultConnector = vi.fn();
   const mockInference = {
     getDefaultConnector: mockGetDefaultConnector,
   } as unknown as InferenceServerStart;
 
-  const mockFeaturesGet = jest.fn();
-  const mockGetForFeature = jest.fn();
+  const mockFeaturesGet = vi.fn();
+  const mockGetForFeature = vi.fn();
   const mockSearchInferenceEndpoints = {
     endpoints: { getForFeature: mockGetForFeature },
     features: { get: mockFeaturesGet },
   } as unknown as SearchInferenceEndpointsPluginStart;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when featureId names a registered chat completion feature', () => {

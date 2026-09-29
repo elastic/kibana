@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { WorkflowDetailDto } from '@kbn/workflows/types/latest';
 import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
 
@@ -17,37 +20,49 @@ import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 import { setWorkflow, setYamlString } from '../slice';
 
 // Need to mock the loading states to avoid import issues with other mocks
-jest.mock('../utils/loading_states', () => ({
-  addLoadingStateReducers: jest.fn(),
-  initialLoadingState: { isSavingYaml: false },
-}));
+vi.mock('../utils/loading_states', () => {
+      const mocked = {
+      addLoadingStateReducers: vi.fn(),
+      initialLoadingState: { isSavingYaml: false },
+    };
+      return { ...mocked, default: mocked };
+    });
 // Mock the loadWorkflowThunk
-jest.mock('./load_workflow_thunk');
-const mockLoadWorkflowThunk = loadWorkflowThunk as jest.MockedFunction<typeof loadWorkflowThunk>;
+vi.mock('./load_workflow_thunk');
+const mockLoadWorkflowThunk = loadWorkflowThunk as MockedFunction<typeof loadWorkflowThunk>;
 
 const mockWorkflowApi = createMockWorkflowApi();
-jest.mock('@kbn/workflows-ui', () => ({
-  WorkflowApi: jest.fn().mockImplementation(() => mockWorkflowApi),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      WorkflowApi: vi.fn().mockImplementation(() => mockWorkflowApi),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the query client
-jest.mock('../../../../../shared/lib/query_client', () => ({
-  queryClient: {
-    invalidateQueries: jest.fn(),
-  },
-}));
-const { queryClient } = jest.requireMock('../../../../../shared/lib/query_client');
+vi.mock('../../../../../shared/lib/query_client', () => {
+      const mocked = {
+      queryClient: {
+        invalidateQueries: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+const { queryClient } = (await vi.importMock('../../../../../shared/lib/query_client'));
 
 // Mock AI integration side-effects — the thunk resolves pending diff decorations,
 // carries the create-time conversation onto the saved workflow's session tag,
 // and requests the sidebar to re-open on the destination if it was open at
 // save time (since navigateToApp remounts the app).
-jest.mock('../../../../../features/ai_integration', () => ({
-  acceptAllActiveProposals: jest.fn(),
-  carryConversationToWorkflow: jest.fn(),
-  isSidebarOpen: jest.fn().mockReturnValue(false),
-  requestSidebarRestore: jest.fn(),
-}));
+vi.mock('../../../../../features/ai_integration', () => {
+      const mocked = {
+      acceptAllActiveProposals: vi.fn(),
+      carryConversationToWorkflow: vi.fn(),
+      isSidebarOpen: vi.fn().mockReturnValue(false),
+      requestSidebarRestore: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type AiIntegrationModule = typeof import('../../../../../features/ai_integration');
 const {
@@ -55,13 +70,13 @@ const {
   carryConversationToWorkflow: mockCarryConversationToWorkflow,
   isSidebarOpen: mockIsSidebarOpen,
   requestSidebarRestore: mockRequestSidebarRestore,
-} = jest.requireMock('../../../../../features/ai_integration') as {
-  acceptAllActiveProposals: jest.MockedFunction<AiIntegrationModule['acceptAllActiveProposals']>;
-  carryConversationToWorkflow: jest.MockedFunction<
+} = (await vi.importMock('../../../../../features/ai_integration')) as {
+  acceptAllActiveProposals: MockedFunction<AiIntegrationModule['acceptAllActiveProposals']>;
+  carryConversationToWorkflow: MockedFunction<
     AiIntegrationModule['carryConversationToWorkflow']
   >;
-  isSidebarOpen: jest.MockedFunction<AiIntegrationModule['isSidebarOpen']>;
-  requestSidebarRestore: jest.MockedFunction<AiIntegrationModule['requestSidebarRestore']>;
+  isSidebarOpen: MockedFunction<AiIntegrationModule['isSidebarOpen']>;
+  requestSidebarRestore: MockedFunction<AiIntegrationModule['requestSidebarRestore']>;
 };
 
 // Set up initial state with workflow and yaml
@@ -83,7 +98,7 @@ describe('saveYamlThunk', () => {
   let mockServices: MockServices;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     store = createMockStore();
     mockServices = getMockServices(store);

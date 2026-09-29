@@ -5,26 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useKibana } from './use_kibana';
 import { useUsageTracker } from './use_usage_tracker';
 
-jest.mock('./use_kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useUsageTracker', () => {
-  let reportUiCounter: jest.Mock;
+  let reportUiCounter: Mock;
 
   beforeEach(() => {
-    reportUiCounter = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue({
+    reportUiCounter = vi.fn();
+    (useKibana as Mock).mockReturnValue({
       services: { usageCollection: { reportUiCounter } },
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns bound functions for tracking usage', () => {
@@ -60,8 +66,8 @@ describe('useUsageTracker', () => {
   });
 
   it('does not  reportUiCounter if usageCollection is not loaded properly', () => {
-    reportUiCounter = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue({
+    reportUiCounter = vi.fn();
+    (useKibana as Mock).mockReturnValue({
       services: { usageCollection: undefined },
     });
 

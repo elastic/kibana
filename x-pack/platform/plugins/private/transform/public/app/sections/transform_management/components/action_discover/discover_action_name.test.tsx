@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cloneDeep } from 'lodash';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -16,7 +18,7 @@ import { isDiscoverActionDisabled, DiscoverActionName } from './discover_action_
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 import type { TransformListRowWithStats } from '../../../../common/transform_list';
 
-jest.mock('../../../../app_dependencies');
+vi.mock('../../../../app_dependencies');
 
 // @ts-expect-error mock data is too loosely typed
 const item: TransformListRowWithStats = transformListRow;

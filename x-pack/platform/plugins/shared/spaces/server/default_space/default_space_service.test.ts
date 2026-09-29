@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import * as Rx from 'rxjs';
 
 import type { CoreStatus, SavedObjectsRepository, ServiceStatusLevel } from '@kbn/core/server';
@@ -28,7 +31,7 @@ const advanceRetry = async (initializeCount: number) => {
   if (duration > RETRY_DURATION_MAX) {
     duration = RETRY_DURATION_MAX;
   }
-  jest.advanceTimersByTime(duration);
+  vi.advanceTimersByTime(duration);
 };
 
 interface SetupOpts {
@@ -51,7 +54,7 @@ const setup = ({ elasticsearchStatus, savedObjectsStatus, license }: SetupOpts) 
   }) as unknown as Rx.Observable<CoreStatus>;
 
   const { savedObjects } = coreMock.createStart();
-  const repository = savedObjects.createInternalRepository() as jest.Mocked<SavedObjectsRepository>;
+  const repository = savedObjects.createInternalRepository() as Mocked<SavedObjectsRepository>;
   // simulate space not found
   repository.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
   repository.create.mockReturnValue(Promise.resolve({} as any));
@@ -214,7 +217,7 @@ test('maintains unavailable status if default space cannot be created', async ()
 });
 
 test('retries operation', async () => {
-  jest.useFakeTimers({ legacyFakeTimers: true });
+  vi.useFakeTimers({ legacyFakeTimers: true });
 
   const { repository, serviceStatus$ } = setup({
     elasticsearchStatus: ServiceStatusLevels.available,

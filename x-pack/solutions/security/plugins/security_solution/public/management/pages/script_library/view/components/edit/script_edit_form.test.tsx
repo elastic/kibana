@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { act, fireEvent } from '@testing-library/react';
@@ -22,13 +25,13 @@ describe('EndpointScriptEditForm', () => {
   let mockedContext: AppContextTestRender;
   let scriptsGenerator: EndpointScriptsGenerator;
   let defaultProps: EndpointScriptEditFormProps;
-  let onChangeMock: jest.Mock;
+  let onChangeMock: Mock;
 
   beforeEach(() => {
     scriptsGenerator = new EndpointScriptsGenerator('scripts-library-tests');
     mockedContext = createAppRootMockRenderer();
 
-    onChangeMock = jest.fn();
+    onChangeMock = vi.fn();
     defaultProps = {
       isUploading: false,
       onChange: onChangeMock,

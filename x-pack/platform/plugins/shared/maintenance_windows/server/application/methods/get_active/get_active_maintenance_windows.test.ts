@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { getActiveMaintenanceWindows } from './get_active_maintenance_windows';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import {
@@ -20,24 +23,24 @@ import { getMockMaintenanceWindow } from '../../../data/test_helpers';
 const savedObjectsClient = savedObjectsClientMock.create();
 const uiSettings = uiSettingsServiceMock.createClient();
 
-const mockContext: jest.Mocked<MaintenanceWindowClientContext> = {
+const mockContext: Mocked<MaintenanceWindowClientContext> = {
   logger: loggingSystemMock.create().get(),
-  getModificationMetadata: jest.fn(),
+  getModificationMetadata: vi.fn(),
   savedObjectsClient,
   uiSettings,
 };
 
 describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should return active maintenance windows', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     savedObjectsClient.find.mockResolvedValueOnce({
       saved_objects: [
@@ -102,7 +105,7 @@ describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
   });
 
   it('should use cacheInterval if provided', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     savedObjectsClient.find.mockResolvedValueOnce({
       saved_objects: [
@@ -186,7 +189,7 @@ describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
   });
 
   it('should return empty array if there are no active maintenance windows', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     savedObjectsClient.find.mockResolvedValueOnce({
       saved_objects: [],
@@ -233,7 +236,7 @@ describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
   });
 
   it('should return all active maintenance windows when SO find response is paginated', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     const firstPageSavedObjects = Array.from({ length: 2 }, (_, i) => ({
       attributes: getMockMaintenanceWindow({ expirationDate: new Date().toISOString() }),
@@ -277,7 +280,7 @@ describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
   });
 
   it('should log and throw if an error is thrown', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     savedObjectsClient.find.mockRejectedValueOnce('something went wrong');
 

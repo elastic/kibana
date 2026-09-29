@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { KbnClient } from '@kbn/test';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
@@ -13,32 +16,32 @@ import type { HostVm } from '../../common/types';
 import * as vmServices from '../../common/vm_services';
 import * as spaces from '../../common/spaces';
 
-jest.mock('../../common/vm_services');
-jest.mock('../../common/spaces');
+vi.mock('../../common/vm_services');
+vi.mock('../../common/spaces');
 
-const mockedVmServices = vmServices as jest.Mocked<typeof vmServices>;
-const mockedSpaces = spaces as jest.Mocked<typeof spaces>;
+const mockedVmServices = vmServices as Mocked<typeof vmServices>;
+const mockedSpaces = spaces as Mocked<typeof spaces>;
 
 describe('onboardVmHostWithCrowdStrike', () => {
-  let mockKbnClient: jest.Mocked<KbnClient>;
+  let mockKbnClient: Mocked<KbnClient>;
   let mockLog: ReturnType<typeof createToolingLogger>;
   let mockHostVm: HostVm;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockKbnClient = {
-      request: jest.fn(),
-    } as unknown as jest.Mocked<KbnClient>;
+      request: vi.fn(),
+    } as unknown as Mocked<KbnClient>;
 
     mockLog = createToolingLogger();
 
     mockHostVm = {
       type: 'multipass',
       name: 'test-vm',
-      upload: jest.fn().mockResolvedValue({ filePath: '/uploaded/path' }),
-      exec: jest.fn().mockResolvedValue({ stdout: 'success' }),
-      info: jest.fn().mockReturnValue('VM info'),
+      upload: vi.fn().mockResolvedValue({ filePath: '/uploaded/path' }),
+      exec: vi.fn().mockResolvedValue({ stdout: 'success' }),
+      info: vi.fn().mockReturnValue('VM info'),
     } as unknown as HostVm;
     mockedSpaces.fetchActiveSpace.mockResolvedValue({
       id: asSpaceId('default'),

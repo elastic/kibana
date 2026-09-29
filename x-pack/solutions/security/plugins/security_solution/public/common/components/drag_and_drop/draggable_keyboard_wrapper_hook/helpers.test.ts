@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { draggableKeyDownHandler } from './helpers';
 
-jest.mock('../../../lib/kibana');
+vi.mock('../../../lib/kibana');
 describe('draggableKeyDownHandler', () => {
   test('it calles the proper function cancelDragActions when Escape key was pressed', () => {
     const mockElement = document.createElement('div');
@@ -17,18 +19,18 @@ describe('draggableKeyDownHandler', () => {
       metaKey: false,
     }) as unknown as React.KeyboardEvent;
 
-    const cancelDragActions = jest.fn();
+    const cancelDragActions = vi.fn();
     draggableKeyDownHandler({
-      closePopover: jest.fn(),
-      openPopover: jest.fn(),
-      beginDrag: jest.fn(),
+      closePopover: vi.fn(),
+      openPopover: vi.fn(),
+      beginDrag: vi.fn(),
       cancelDragActions,
       draggableElement: mockElement,
       dragActions: null,
-      dragToLocation: jest.fn(),
-      endDrag: jest.fn(),
+      dragToLocation: vi.fn(),
+      endDrag: vi.fn(),
       keyboardEvent,
-      setDragActions: jest.fn(),
+      setDragActions: vi.fn(),
     });
     expect(cancelDragActions).toHaveBeenCalled();
   });

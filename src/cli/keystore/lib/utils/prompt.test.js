@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { PassThrough } from 'stream';
 
 import { confirm, question } from './prompt';
@@ -27,7 +29,7 @@ describe('prompt', () => {
 
   describe('confirm', () => {
     it('prompts for question', async () => {
-      const write = jest.spyOn(output, 'write');
+      const write = vi.spyOn(output, 'write');
 
       process.nextTick(() => input.write('Y\n'));
       await confirm('my question', { input, output });
@@ -36,7 +38,7 @@ describe('prompt', () => {
     });
 
     it('prompts for question with default true', async () => {
-      const write = jest.spyOn(output, 'write');
+      const write = vi.spyOn(output, 'write');
 
       process.nextTick(() => input.write('Y\n'));
       await confirm('my question', { input, output, default: true });
@@ -82,7 +84,7 @@ describe('prompt', () => {
 
   describe('question', () => {
     it('prompts for question', async () => {
-      const write = jest.spyOn(output, 'write');
+      const write = vi.spyOn(output, 'write');
 
       process.nextTick(() => input.write('my answer\n'));
       await question('my question', { input, output });

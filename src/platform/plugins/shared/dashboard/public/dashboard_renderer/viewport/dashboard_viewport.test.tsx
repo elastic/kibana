@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { EuiThemeProvider } from '@elastic/eui';
@@ -18,7 +20,7 @@ import { buildMockDashboardApi, getMockPanels } from '../../mocks';
 import { DashboardViewport } from './dashboard_viewport';
 import type { DashboardInternalApi } from '../../dashboard_api/types';
 
-jest.mock('../grid', () => {
+vi.mock('../grid', () => {
   return {
     DashboardGrid: () => <div data-test-subj="mockDashboardGrid" />,
   };

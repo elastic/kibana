@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { GoogleDocsConnector } from './google_docs';
 
@@ -16,17 +18,17 @@ const parse = <K extends keyof typeof GoogleDocsConnector.actions>(
 ) => GoogleDocsConnector.actions[action].input.parse(raw);
 
 describe('GoogleDocsConnector', () => {
-  const mockGet = jest.fn();
-  const mockPost = jest.fn();
+  const mockGet = vi.fn();
+  const mockPost = vi.fn();
 
   const mockContext = {
     client: { get: mockGet, post: mockPost },
-    log: { debug: jest.fn() },
+    log: { debug: vi.fn() },
     config: {},
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // =========================================================================

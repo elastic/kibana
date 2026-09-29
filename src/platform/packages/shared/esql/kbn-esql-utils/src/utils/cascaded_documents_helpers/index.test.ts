@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { EsqlQuery } from '@elastic/esql';
 import type { AggregateQuery } from '@kbn/es-query';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
@@ -164,10 +167,10 @@ describe('cascaded documents helpers utils', () => {
     });
 
     it('should return empty metadata instead of throwing when query metadata computation fails unexpectedly', () => {
-      const fromSrcSpy = jest.spyOn(EsqlQuery, 'fromSrc').mockImplementation(() => {
+      const fromSrcSpy = vi.spyOn(EsqlQuery, 'fromSrc').mockImplementation(() => {
         throw new Error('unexpected parse failure');
       });
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       try {
         expect(
@@ -504,7 +507,7 @@ describe('cascaded documents helpers utils', () => {
           const nodePathMap = { tags: 'some random pattern' };
 
           // apply this mock only for this test
-          jest.spyOn(dataViewMock.fields, 'getByName').mockReturnValueOnce({
+          vi.spyOn(dataViewMock.fields, 'getByName').mockReturnValueOnce({
             esTypes: ['text', 'keyword'],
             aggregatable: false,
           } as unknown as DataViewField);
@@ -535,7 +538,7 @@ describe('cascaded documents helpers utils', () => {
           const nodePath = ['agent.keyword'];
           const nodePathMap = { 'agent.keyword': 'Mozilla/5.0' };
 
-          jest.spyOn(dataViewMock.fields, 'getByName').mockReturnValueOnce({
+          vi.spyOn(dataViewMock.fields, 'getByName').mockReturnValueOnce({
             esTypes: ['text', 'keyword'],
             aggregatable: false,
           } as unknown as DataViewField);
@@ -565,7 +568,7 @@ describe('cascaded documents helpers utils', () => {
           const nodePath = ['tags.keyword'];
           const nodePathMap = { 'tags.keyword': 'some random pattern' };
 
-          const mockImpl: jest.Mocked<typeof dataViewMock.fields.getByName> = (fieldName) => {
+          const mockImpl: Mocked<typeof dataViewMock.fields.getByName> = (fieldName) => {
             return {
               esTypes: ['text', 'keyword'],
               aggregatable: fieldName === 'tags.keyword',
@@ -582,7 +585,7 @@ describe('cascaded documents helpers utils', () => {
           };
 
           // only apply this mock for this test
-          jest
+          vi
             .spyOn(dataViewMock.fields, 'getByName')
             .mockImplementationOnce(mockImpl) // satisfies first the call to getByName that marks the field as subType
             .mockImplementationOnce(mockImpl); // satisfies the call to getByName for the parent field
@@ -1221,7 +1224,7 @@ describe('cascaded documents helpers utils', () => {
     describe('handling for fields that are not aggregatable', () => {
       it('uses match phrase query when the selected column is a text or keyword field that is not aggregatable', () => {
         // only apply this mock for this test
-        jest.spyOn(dataViewMock.fields, 'getByName').mockReturnValueOnce({
+        vi.spyOn(dataViewMock.fields, 'getByName').mockReturnValueOnce({
           esTypes: ['text', 'keyword'],
           aggregatable: false,
         } as unknown as DataViewField);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -42,8 +44,8 @@ describe('DatasetTagBadges', () => {
   });
 
   it('reports the clicked tag without letting the click reach the row', async () => {
-    const onTagClick = jest.fn();
-    const onRowClick = jest.fn();
+    const onTagClick = vi.fn();
+    const onRowClick = vi.fn();
 
     render(
       <div role="button" tabIndex={0} onClick={onRowClick} onKeyDown={onRowClick}>

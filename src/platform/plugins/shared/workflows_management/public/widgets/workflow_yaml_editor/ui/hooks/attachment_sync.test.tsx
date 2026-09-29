@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { ActiveConversation, BrowserChatEvent } from '@kbn/agent-builder-browser';
@@ -20,40 +23,49 @@ import { useAgentBuilderIntegration } from './use_agent_builder_integration';
 import { carryConversationToWorkflow } from '../../../../features/ai_integration';
 import { useKibana } from '../../../../hooks/use_kibana';
 
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useDispatch: () => jest.fn(),
-}));
-jest.mock('../../../../hooks/use_telemetry', () => ({
-  useTelemetry: () => ({
-    reportWorkflowAiChatOpened: jest.fn(),
-    reportWorkflowAiSessionCompleted: jest.fn(),
-    reportAiProposalReceived: jest.fn(),
-    reportAiProposalResolved: jest.fn(),
-  }),
-}));
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useDispatch: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../hooks/use_telemetry', () => {
+      const mocked = {
+      useTelemetry: () => ({
+        reportWorkflowAiChatOpened: vi.fn(),
+        reportWorkflowAiSessionCompleted: vi.fn(),
+        reportAiProposalReceived: vi.fn(),
+        reportAiProposalResolved: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Everything but the Monaco-bound proposal manager stays real: this covers the
 // attachment and event wiring between the editor and agent_builder.
 const appliedYaml: string[] = [];
-jest.mock('../../../../features/ai_integration', () => ({
-  ...jest.requireActual('../../../../features/ai_integration'),
-  ProposalManager: jest.fn().mockImplementation(() => ({
-    initialize: jest.fn(),
-    dispose: jest.fn(),
-    getDiffHunks: () => [],
-    hasPendingProposals: () => false,
-    applyAfterYaml: (yaml: string) => appliedYaml.push(yaml),
-  })),
-}));
+vi.mock('../../../../features/ai_integration', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../features/ai_integration')),
+      ProposalManager: vi.fn().mockImplementation(() => ({
+        initialize: vi.fn(),
+        dispose: vi.fn(),
+        getDiffHunks: () => [],
+        hasPendingProposals: () => false,
+        applyAfterYaml: (yaml: string) => appliedYaml.push(yaml),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => {
+vi.mock('uuid', () => {
   let counter = 0;
   return { v4: () => `draft-uuid-${++counter}` };
 });
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 interface PendingAttachment {
   id: string;
@@ -104,7 +116,7 @@ const createFakeAgentBuilder = () => {
     `agentBuilder.lastConversation.${tag ?? 'default'}.default`;
 
   const contract = {
-    getAgentBuilderAccess: jest
+    getAgentBuilderAccess: vi
       .fn()
       .mockResolvedValue({ hasRequiredLicense: true, hasLlmConnector: true }),
     events: {
@@ -112,20 +124,20 @@ const createFakeAgentBuilder = () => {
       getChatEvents$: (conversationId: string) => stream$(conversationId).asObservable(),
       ui: { activeConversation$: activeConversation$.asObservable() },
     },
-    addAttachment: jest.fn((attachment: PendingAttachment) => {
+    addAttachment: vi.fn((attachment: PendingAttachment) => {
       if (!acceptsAttachments) return;
       pending = upsert(pending, [attachment]);
     }),
-    removeAttachment: jest.fn((attachmentId: string) => {
+    removeAttachment: vi.fn((attachmentId: string) => {
       if (!acceptsAttachments) return;
       pending = pending.filter((attachment) => attachment.id !== attachmentId);
     }),
-    setChatConfig: jest.fn((config: { sessionTag?: string; attachments?: PendingAttachment[] }) => {
+    setChatConfig: vi.fn((config: { sessionTag?: string; attachments?: PendingAttachment[] }) => {
       sessionTag = config.sessionTag;
       if (acceptsAttachments && config.attachments) pending = upsert(pending, config.attachments);
     }),
-    clearChatConfig: jest.fn(),
-    openChat: jest.fn((options: { sessionTag?: string; attachments?: PendingAttachment[] }) => {
+    clearChatConfig: vi.fn(),
+    openChat: vi.fn((options: { sessionTag?: string; attachments?: PendingAttachment[] }) => {
       sessionTag = options.sessionTag;
       pending = [...(options.attachments ?? [])];
 
@@ -156,7 +168,7 @@ const createFakeAgentBuilder = () => {
         },
       };
     }),
-    updateAttachmentOrigin: jest.fn(async (conversationId: string, id: string, origin: string) => {
+    updateAttachmentOrigin: vi.fn(async (conversationId: string, id: string, origin: string) => {
       const target = (conversations.get(conversationId) ?? []).find(
         (attachment) => attachment.id === id
       );
@@ -274,7 +286,7 @@ const createEditor = () =>
   ({
     getModel: () => ({
       getValue: () => 'name: test',
-      onDidChangeContent: () => ({ dispose: jest.fn() }),
+      onDidChangeContent: () => ({ dispose: vi.fn() }),
     }),
   } as never);
 

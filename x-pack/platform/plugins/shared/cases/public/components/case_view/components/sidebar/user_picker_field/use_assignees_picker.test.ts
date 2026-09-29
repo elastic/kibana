@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { userProfiles } from '../../../../../containers/user_profiles/api.mock';
 import { useAssigneesPicker } from './use_assignees_picker';
@@ -13,7 +15,7 @@ const currentUserProfile = userProfiles[0];
 
 describe('useAssigneesPicker', () => {
   it('calls onAssigneesChanged when assign yourself is clicked', async () => {
-    const onAssigneesChanged = jest.fn();
+    const onAssigneesChanged = vi.fn();
 
     const { result } = renderHook(() =>
       useAssigneesPicker({
@@ -36,7 +38,7 @@ describe('useAssigneesPicker', () => {
   });
 
   it('calls onAssigneesChanged when the popover closes after users change', async () => {
-    const onAssigneesChanged = jest.fn();
+    const onAssigneesChanged = vi.fn();
 
     const { result } = renderHook(() =>
       useAssigneesPicker({
@@ -61,7 +63,7 @@ describe('useAssigneesPicker', () => {
   });
 
   it('does not call onAssigneesChanged when the popover closes without changes', async () => {
-    const onAssigneesChanged = jest.fn();
+    const onAssigneesChanged = vi.fn();
 
     const { result } = renderHook(() =>
       useAssigneesPicker({
@@ -83,7 +85,7 @@ describe('useAssigneesPicker', () => {
   });
 
   it('preserves assignees without profiles when users are selected in the popover', async () => {
-    const onAssigneesChanged = jest.fn();
+    const onAssigneesChanged = vi.fn();
     const unknownAssignee = { uid: 'unknownId1' };
 
     const { result } = renderHook(() =>

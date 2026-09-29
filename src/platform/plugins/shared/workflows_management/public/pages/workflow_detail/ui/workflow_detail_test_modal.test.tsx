@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
@@ -25,66 +28,84 @@ import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_de
 import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock hooks
-const mockUseKibana = jest.fn();
-const mockUseWorkflowUrlState = jest.fn();
-const mockUseAsyncThunk = jest.fn();
+const mockUseKibana = vi.fn();
+const mockUseWorkflowUrlState = vi.fn();
+const mockUseAsyncThunk = vi.fn();
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => mockUseKibana(),
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: jest.fn(),
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      useWorkflowsCapabilities: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
 >;
 
-jest.mock('../../../hooks/use_workflow_url_state', () => ({
-  useWorkflowUrlState: () => mockUseWorkflowUrlState(),
-}));
+vi.mock('../../../hooks/use_workflow_url_state', () => {
+      const mocked = {
+      useWorkflowUrlState: () => mockUseWorkflowUrlState(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_async_thunk', () => ({
-  useAsyncThunk: (...args: unknown[]) => mockUseAsyncThunk(...args),
-}));
+vi.mock('../../../hooks/use_async_thunk', () => {
+      const mocked = {
+      useAsyncThunk: (...args: unknown[]) => mockUseAsyncThunk(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => ({
-  selectIsTestModalOpen: jest.fn(),
-  selectReplayExecutionId: jest.fn(),
-  selectWorkflowDefinition: jest.fn(),
-  selectWorkflowId: jest.fn(),
-  selectWorkflow: jest.fn(),
-  selectEditorYaml: jest.fn(),
-}));
+vi.mock('../../../entities/workflows/store/workflow_detail/selectors', () => {
+      const mocked = {
+      selectIsTestModalOpen: vi.fn(),
+      selectReplayExecutionId: vi.fn(),
+      selectWorkflowDefinition: vi.fn(),
+      selectWorkflowId: vi.fn(),
+      selectWorkflow: vi.fn(),
+      selectEditorYaml: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock WorkflowExecuteModal
-jest.mock('../../../features/run_workflow/ui/workflow_execute_modal', () => ({
-  WorkflowExecuteModal: ({
-    definition,
-    onClose,
-    onSubmit,
-  }: {
-    definition: any;
-    onClose: () => void;
-    onSubmit: (inputs: any, triggerTab: string) => void;
-  }) => (
-    <div data-test-subj="workflow-execute-modal">
-      <div data-test-subj="modal-definition">{JSON.stringify(definition)}</div>
-      <button type="button" data-test-subj="close-modal" onClick={onClose}>
-        {'Close'}
-      </button>
-      <button
-        type="button"
-        data-test-subj="submit-modal"
-        onClick={() => onSubmit({ test: 'input' }, 'manual')}
-      >
-        {'Run'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../../../features/run_workflow/ui/workflow_execute_modal', () => {
+      const mocked = {
+      WorkflowExecuteModal: ({
+        definition,
+        onClose,
+        onSubmit,
+      }: {
+        definition: any;
+        onClose: () => void;
+        onSubmit: (inputs: any, triggerTab: string) => void;
+      }) => (
+        <div data-test-subj="workflow-execute-modal">
+          <div data-test-subj="modal-definition">{JSON.stringify(definition)}</div>
+          <button type="button" data-test-subj="close-modal" onClick={onClose}>
+            {'Close'}
+          </button>
+          <button
+            type="button"
+            data-test-subj="submit-modal"
+            onClick={() => onSubmit({ test: 'input' }, 'manual')}
+          >
+            {'Run'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowDetailTestModal', () => {
   const mockDefinition = {
@@ -95,7 +116,7 @@ describe('WorkflowDetailTestModal', () => {
     steps: [],
   };
 
-  let mockTestWorkflow: jest.Mock;
+  let mockTestWorkflow: Mock;
 
   const renderModal = () => {
     const store = createMockStore();
@@ -108,15 +129,15 @@ describe('WorkflowDetailTestModal', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockTestWorkflow = jest.fn();
-    jest.mocked(selectWorkflow).mockReturnValue(undefined);
+    vi.clearAllMocks();
+    mockTestWorkflow = vi.fn();
+    vi.mocked(selectWorkflow).mockReturnValue(undefined);
 
-    (selectIsTestModalOpen as unknown as jest.Mock).mockReturnValue(true);
-    (selectReplayExecutionId as unknown as jest.Mock).mockReturnValue(null);
-    (selectWorkflowDefinition as unknown as jest.Mock).mockReturnValue(mockDefinition);
-    (selectWorkflowId as unknown as jest.Mock).mockReturnValue(null);
-    (selectEditorYaml as unknown as jest.Mock).mockReturnValue('');
+    (selectIsTestModalOpen as unknown as Mock).mockReturnValue(true);
+    (selectReplayExecutionId as unknown as Mock).mockReturnValue(null);
+    (selectWorkflowDefinition as unknown as Mock).mockReturnValue(mockDefinition);
+    (selectWorkflowId as unknown as Mock).mockReturnValue(null);
+    (selectEditorYaml as unknown as Mock).mockReturnValue('');
 
     mockUseAsyncThunk.mockImplementation((thunk) => {
       if (thunk === testWorkflowThunk) {
@@ -128,7 +149,7 @@ describe('WorkflowDetailTestModal', () => {
       services: {
         notifications: {
           toasts: {
-            addWarning: jest.fn(),
+            addWarning: vi.fn(),
           },
         },
       },
@@ -140,13 +161,13 @@ describe('WorkflowDetailTestModal', () => {
     });
 
     mockUseWorkflowUrlState.mockReturnValue({
-      setSelectedExecution: jest.fn(),
+      setSelectedExecution: vi.fn(),
     });
   });
 
   describe('modal rendering', () => {
     it('should not render when modal is closed', () => {
-      (selectIsTestModalOpen as unknown as jest.Mock).mockReturnValue(false);
+      (selectIsTestModalOpen as unknown as Mock).mockReturnValue(false);
 
       const { queryByTestId } = renderModal();
 
@@ -154,7 +175,7 @@ describe('WorkflowDetailTestModal', () => {
     });
 
     it('should not render when no definition', () => {
-      (selectWorkflowDefinition as unknown as jest.Mock).mockReturnValue(undefined);
+      (selectWorkflowDefinition as unknown as Mock).mockReturnValue(undefined);
       const { queryByTestId } = renderModal();
 
       expect(queryByTestId('workflow-execute-modal')).not.toBeInTheDocument();
@@ -201,7 +222,7 @@ describe('WorkflowDetailTestModal', () => {
     const expectedCalledFunction = mockTestWorkflow;
     expectedCalledFunction.mockResolvedValue({ workflowExecutionId: 'exec-123' });
 
-    const mockSetSelectedExecution = jest.fn();
+    const mockSetSelectedExecution = vi.fn();
     mockUseWorkflowUrlState.mockReturnValue({
       setSelectedExecution: mockSetSelectedExecution,
     });
@@ -220,7 +241,7 @@ describe('WorkflowDetailTestModal', () => {
   });
 
   it('opens a test run for an executor of a disabled workflow', async () => {
-    jest.mocked(selectWorkflow).mockReturnValue({
+    vi.mocked(selectWorkflow).mockReturnValue({
       id: 'saved-workflow',
       name: 'Saved workflow',
       enabled: false,
@@ -246,7 +267,7 @@ describe('WorkflowDetailTestModal', () => {
 
   describe('warnings', () => {
     it('should show warning and close modal when user lacks permissions', () => {
-      const addWarningSpy = jest.fn();
+      const addWarningSpy = vi.fn();
       mockUseKibana.mockReturnValue({
         services: {
           notifications: {
@@ -271,7 +292,7 @@ describe('WorkflowDetailTestModal', () => {
     });
 
     it('should show warning and close modal when definition is invalid', () => {
-      const addWarningSpy = jest.fn();
+      const addWarningSpy = vi.fn();
       mockUseKibana.mockReturnValue({
         services: {
           notifications: {
@@ -281,8 +302,8 @@ describe('WorkflowDetailTestModal', () => {
           },
         },
       });
-      (selectWorkflowDefinition as unknown as jest.Mock).mockReturnValue(undefined);
-      (selectEditorYaml as unknown as jest.Mock).mockReturnValue('name: invalid-workflow');
+      (selectWorkflowDefinition as unknown as Mock).mockReturnValue(undefined);
+      (selectEditorYaml as unknown as Mock).mockReturnValue('name: invalid-workflow');
 
       renderModal();
       expect(addWarningSpy).toHaveBeenCalledWith(

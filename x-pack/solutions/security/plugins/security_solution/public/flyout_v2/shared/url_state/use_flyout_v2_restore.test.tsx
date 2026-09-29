@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -27,33 +30,36 @@ import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/ty
 // Mocks
 // ---------------------------------------------------------------------------
 
-jest.mock('../../use_flyout_api');
-jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
-jest.mock('@kbn/unified-doc-viewer-plugin/public', () => ({
-  useEsDocSearch: jest.fn(),
-}));
-jest.mock('../../../data_view_manager/hooks/use_data_view');
+vi.mock('../../use_flyout_api');
+vi.mock('../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('@kbn/unified-doc-viewer-plugin/public', () => {
+      const mocked = {
+      useEsDocSearch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../data_view_manager/hooks/use_data_view');
 
 const mockFlyoutApi = createFlyoutApiMock();
-(useFlyoutApi as jest.Mock).mockReturnValue(mockFlyoutApi);
-(useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
+(useFlyoutApi as Mock).mockReturnValue(mockFlyoutApi);
+(useIsNewFlyoutEnabled as Mock).mockReturnValue(true);
 
 const mockDataView = {
-  getRuntimeMappings: jest.fn(() => ({})),
-  hasMatchedIndices: jest.fn(() => true),
+  getRuntimeMappings: vi.fn(() => ({})),
+  hasMatchedIndices: vi.fn(() => true),
 };
-(useDataView as jest.Mock).mockReturnValue({ dataView: mockDataView, status: 'ready' });
+(useDataView as Mock).mockReturnValue({ dataView: mockDataView, status: 'ready' });
 
 // useEsDocSearch returns [ElasticRequestState, DataTableRecord | null, refetch].
 // Settled with no hit → terminal NotFound; resolved → Found + record; in-flight → Loading.
 const noHit = () =>
-  (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.NotFound, null, jest.fn()]);
+  (useEsDocSearch as Mock).mockReturnValue([ElasticRequestState.NotFound, null, vi.fn()]);
 
 const withHit = (record: Record<string, unknown>) =>
-  (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, record, jest.fn()]);
+  (useEsDocSearch as Mock).mockReturnValue([ElasticRequestState.Found, record, vi.fn()]);
 
 const loadingHit = () =>
-  (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Loading, null, jest.fn()]);
+  (useEsDocSearch as Mock).mockReturnValue([ElasticRequestState.Loading, null, vi.fn()]);
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -92,16 +98,16 @@ const attackSearchHit = {
 
 describe('useFlyoutV2RestoreFromUrl', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
-    (useFlyoutApi as jest.Mock).mockReturnValue(mockFlyoutApi);
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
-    (useDataView as jest.Mock).mockReturnValue({ dataView: mockDataView, status: 'ready' });
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    (useFlyoutApi as Mock).mockReturnValue(mockFlyoutApi);
+    (useIsNewFlyoutEnabled as Mock).mockReturnValue(true);
+    (useDataView as Mock).mockReturnValue({ dataView: mockDataView, status: 'ready' });
     noHit();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   // -----------------------------------------------------------------------
@@ -109,10 +115,10 @@ describe('useFlyoutV2RestoreFromUrl', () => {
   // -----------------------------------------------------------------------
 
   it('does not open anything when the new flyout is disabled', () => {
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false);
+    (useIsNewFlyoutEnabled as Mock).mockReturnValue(false);
     renderRestore(buildUrl([{ kind: 'document', documentId: 'doc-1', indexName: 'x' }]));
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
   });
@@ -130,7 +136,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     renderHook(() => useFlyoutV2RestoreFromUrl(FLYOUT_V2_URL_PARAM), { wrapper });
 
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(new URLSearchParams(history.location.search).get(FLYOUT_V2_URL_PARAM)).toBeNull();
@@ -140,7 +146,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
   it('does nothing when the param is absent', () => {
     renderRestore('/');
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
   });
@@ -164,7 +170,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
 
     expect(mockFlyoutApi.openHostFlyout).not.toHaveBeenCalled();
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledWith({
@@ -201,7 +207,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     });
 
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledWith(
@@ -237,7 +243,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
 
     expect(mockFlyoutApi.openEntityResolution).not.toHaveBeenCalled();
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockFlyoutApi.openEntityResolution).toHaveBeenCalledWith(
@@ -272,7 +278,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     });
 
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockFlyoutApi.openHostFlyout).not.toHaveBeenCalled();
@@ -288,7 +294,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       history.push(buildUrl(descriptors));
     });
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledTimes(1);
 
@@ -302,7 +308,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       history.push(buildUrl(descriptors));
     });
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledTimes(2);
@@ -315,7 +321,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     const { history } = renderRestore(buildUrl(descriptors));
 
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledTimes(1);
 
@@ -334,7 +340,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       );
     });
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledTimes(1);
@@ -363,7 +369,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     act(() => {
       // Unrelated URL write that keeps the same flyoutV2 (e.g. useSyncGlobalQueryString).
       history.replace(`${buildUrl(stack)}&timerange=(global:(linkTo:!(),timerange:()))`);
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
@@ -373,7 +379,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     withHit(docSearchHit);
     rerender();
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockFlyoutApi.openDocumentCorrelations).toHaveBeenCalledTimes(1);
@@ -388,7 +394,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     );
 
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledTimes(1);
 
@@ -396,7 +402,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       history.push(buildUrl([{ kind: 'user', userName: 'alice', entityId: 'user:alice' }]));
     });
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockFlyoutApi.openUserFlyout).toHaveBeenCalledWith({
@@ -413,7 +419,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     const url = buildUrl([{ kind: 'document', documentId: 'doc-1', indexName: 'logs-*' }]);
     renderRestore(url);
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
       documentId: 'doc-1',
@@ -427,7 +433,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       buildUrl([{ kind: 'documentFromPattern', documentId: 'doc-1', indexName: '.siem-signals-*' }])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith({
       documentId: 'doc-1',
@@ -439,7 +445,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
   it('opens an attack flyout', () => {
     renderRestore(buildUrl([{ kind: 'attack', attackId: 'atk-1', indexName: '.alerts-*' }]));
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openAttackFlyout).toHaveBeenCalledWith({
       attackId: 'atk-1',
@@ -451,7 +457,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
   it('opens a host flyout', () => {
     renderRestore(buildUrl([{ kind: 'host', hostName: 'my-host', entityId: 'eid' }]));
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledWith(
       expect.objectContaining({ hostName: 'my-host', entityId: 'eid' })
@@ -461,7 +467,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
   it('opens a user flyout', () => {
     renderRestore(buildUrl([{ kind: 'user', userName: 'alice' }]));
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openUserFlyout).toHaveBeenCalledWith(
       expect.objectContaining({ userName: 'alice' })
@@ -480,7 +486,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockFlyoutApi.openGenericEntityFlyout).toHaveBeenCalledWith({
@@ -493,7 +499,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
   it('opens a rule flyout', () => {
     renderRestore(buildUrl([{ kind: 'rule', ruleId: 'rule-1' }]));
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openRuleFlyout).toHaveBeenCalledWith({
       ruleId: 'rule-1',
@@ -504,7 +510,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
   it('opens a network flyout', () => {
     renderRestore(buildUrl([{ kind: 'network', ip: '1.2.3.4', flowTarget: 'source' }]));
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openNetworkFlyout).toHaveBeenCalledWith({
       ip: '1.2.3.4',
@@ -518,7 +524,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       buildUrl([{ kind: 'cspMisconfiguration', resourceId: 'res-1', ruleId: 'csp-1' }])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openMisconfigurationFinding).toHaveBeenCalledWith({
       resourceId: 'res-1',
@@ -532,7 +538,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       buildUrl([{ kind: 'cspVulnerability', vulnerabilityId: 'CVE-1', resourceId: 'r1' }])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openVulnerabilityFinding).toHaveBeenCalledWith(
       expect.objectContaining({ vulnerabilityId: 'CVE-1' })
@@ -548,7 +554,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       buildUrl([{ kind: 'entityRiskInputs', entityType: 'host', entityName: 'h', entityId: 'eid' }])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openEntityRiskInputs).toHaveBeenCalledWith(
       expect.objectContaining({ entityType: 'host', entityName: 'h' })
@@ -568,7 +574,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openEntityRiskInputs).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -585,7 +591,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       buildUrl([{ kind: 'entityRiskInputs', entityType: 'host', entityName: 'h', entityId: 'eid' }])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     const { onShowEntity } = mockFlyoutApi.openEntityRiskInputs.mock.calls[0][0];
     expect(typeof onShowEntity).toBe('function');
@@ -606,7 +612,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     const { onOpenEntity } = mockFlyoutApi.openEntityAnomalyInsights.mock.calls[0][0];
     expect(typeof onOpenEntity).toBe('function');
@@ -630,7 +636,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openEntityEntraInsights).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -652,7 +658,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openEntityOktaInsights).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -670,7 +676,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     loadingHit();
     renderRestore(buildUrl([{ kind: 'analyzer', documentId: 'doc-1', indexName: 'logs-*' }]));
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openAnalyzer).not.toHaveBeenCalled();
   });
@@ -679,7 +685,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     withHit(docSearchHit);
     renderRestore(buildUrl([{ kind: 'analyzer', documentId: 'doc-1', indexName: 'logs-*' }]));
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openAnalyzer).toHaveBeenCalledWith(
       expect.objectContaining({ hit: expect.objectContaining({ id: 'doc-1' }) })
@@ -693,7 +699,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       buildUrl([{ kind: 'analyzer', documentId: 'doc-1', indexName: 'logs-*' }])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     // Still loading — must not fall back yet.
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
@@ -702,7 +708,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     noHit();
     rerender();
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openAnalyzer).not.toHaveBeenCalled();
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
@@ -716,23 +722,23 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     // Repro for the bug where refreshing on an open tools flyout reopened the document flyout.
     // While the data view is not ready the fetch is skipped, so useTimelineEventsDetails reports
     // loading=false with no hit — which previously looked (wrongly) like "fetch finished, no hit".
-    (useDataView as jest.Mock).mockReturnValue({ dataView: null, status: 'loading' });
+    (useDataView as Mock).mockReturnValue({ dataView: null, status: 'loading' });
     noHit();
     const { rerender } = renderRestore(
       buildUrl([{ kind: 'analyzer', documentId: 'doc-1', indexName: 'logs-*' }])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     // The fetch has not started — must NOT prematurely open the document main flyout.
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
 
     // Data view becomes ready and the fetch starts (loading, still no hit).
-    (useDataView as jest.Mock).mockReturnValue({ dataView: mockDataView, status: 'ready' });
+    (useDataView as Mock).mockReturnValue({ dataView: mockDataView, status: 'ready' });
     loadingHit();
     rerender();
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
 
@@ -740,7 +746,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     withHit(docSearchHit);
     rerender();
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openAnalyzer).toHaveBeenCalledWith(
       expect.objectContaining({ hit: expect.objectContaining({ id: 'doc-1' }) })
@@ -756,7 +762,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openSessionView).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -772,7 +778,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       buildUrl([{ kind: 'documentEntities', documentId: 'doc-1', indexName: 'i', scopeId: 's' }])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openDocumentEntities).toHaveBeenCalledWith(
       expect.objectContaining({ hit: expect.objectContaining({ id: 'doc-1' }), scopeId: 's' })
@@ -792,7 +798,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openDocumentCorrelations).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -817,7 +823,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openDocumentPrevalence).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -843,7 +849,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openDocumentPrevalence).not.toHaveBeenCalled();
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
@@ -857,7 +863,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     withHit(docSearchHit);
     renderRestore(buildUrl([{ kind: 'notes', documentId: 'doc-1', indexName: 'i' }]));
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openNotes).toHaveBeenCalledWith(
       expect.objectContaining({ hit: expect.objectContaining({ id: 'doc-1' }) })
@@ -876,7 +882,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openAttackCorrelations).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -894,14 +900,14 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openAttackFlyout).not.toHaveBeenCalled();
 
     noHit();
     rerender();
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openAttackCorrelations).not.toHaveBeenCalled();
     expect(mockFlyoutApi.openAttackFlyout).toHaveBeenCalledWith({
@@ -917,10 +923,10 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     // the attack main flyout on restore. Give each scope a distinct data view instance so we
     // can assert the attack fetch used the attacks-scoped one.
     const mockAttacksDataView = {
-      getRuntimeMappings: jest.fn(() => ({})),
-      hasMatchedIndices: jest.fn(() => true),
+      getRuntimeMappings: vi.fn(() => ({})),
+      hasMatchedIndices: vi.fn(() => true),
     };
-    (useDataView as jest.Mock).mockImplementation((scope: PageScope) =>
+    (useDataView as Mock).mockImplementation((scope: PageScope) =>
       scope === PageScope.attacks
         ? { dataView: mockAttacksDataView, status: 'ready' }
         : { dataView: mockDataView, status: 'ready' }
@@ -932,10 +938,10 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
-    const attackFetchCall = (useEsDocSearch as jest.Mock).mock.calls.find(
+    const attackFetchCall = (useEsDocSearch as Mock).mock.calls.find(
       ([params]) => params.id === 'atk-1'
     );
     expect(attackFetchCall?.[0].dataView).toBe(mockAttacksDataView);
@@ -947,7 +953,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
   it('waits for the attacks data view specifically, independent of the default one', () => {
     // Only an attack descriptor is present (no doc/ioc), so restore should gate on
     // PageScope.attacks readiness and must not hang waiting on PageScope.default.
-    (useDataView as jest.Mock).mockImplementation((scope: PageScope) =>
+    (useDataView as Mock).mockImplementation((scope: PageScope) =>
       scope === PageScope.attacks
         ? { dataView: null, status: 'loading' }
         : { dataView: mockDataView, status: 'ready' }
@@ -958,7 +964,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openAttackCorrelations).not.toHaveBeenCalled();
     expect(mockFlyoutApi.openAttackFlyout).not.toHaveBeenCalled();
@@ -977,7 +983,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     withHit(iocHit);
     renderRestore(buildUrl([{ kind: 'ioc', indicatorId: 'ioc-1', indicatorIndex: 'ti-*' }]));
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openIocFlyout).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -990,7 +996,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     noHit();
     renderRestore(buildUrl([{ kind: 'ioc', indicatorId: 'ioc-1', indicatorIndex: 'ti-*' }]));
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openIocFlyout).not.toHaveBeenCalled();
   });
@@ -1008,7 +1014,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     // tool (position 0): openAnalyzer with the resolved hit
     expect(mockFlyoutApi.openAnalyzer).toHaveBeenCalledWith(
@@ -1028,7 +1034,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledWith(
       expect.objectContaining({ hostName: 'my-host' })
@@ -1046,7 +1052,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openMisconfigurationFinding).toHaveBeenCalled();
     expect(mockFlyoutApi.openAttackFlyoutAsChild).toHaveBeenCalledWith(
@@ -1065,7 +1071,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       ])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openAnalyzer).toHaveBeenCalledWith(
       expect.objectContaining({ hit: expect.objectContaining({ id: 'doc-1' }) })
@@ -1084,12 +1090,12 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       buildUrl([{ kind: 'document', documentId: 'doc-1', indexName: 'i' }])
     );
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     rerender();
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledTimes(1);
@@ -1100,20 +1106,20 @@ describe('useFlyoutV2RestoreFromUrl', () => {
   // -----------------------------------------------------------------------
 
   it('waits for the data view to be ready before opening a fetch-dependent flyout', () => {
-    (useDataView as jest.Mock).mockReturnValue({ dataView: null, status: 'loading' });
+    (useDataView as Mock).mockReturnValue({ dataView: null, status: 'loading' });
     renderRestore(buildUrl([{ kind: 'analyzer', documentId: 'doc-1', indexName: 'i' }]));
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     expect(mockFlyoutApi.openAnalyzer).not.toHaveBeenCalled();
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
   });
 
   it('opens immediately (no data view wait) when no fetch is required', () => {
-    (useDataView as jest.Mock).mockReturnValue({ dataView: null, status: 'loading' });
+    (useDataView as Mock).mockReturnValue({ dataView: null, status: 'loading' });
     renderRestore(buildUrl([{ kind: 'document', documentId: 'doc-1', indexName: 'i' }]));
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
     // Non-fetch descriptor (document) opens immediately regardless of data view status
     expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
@@ -1147,7 +1153,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
         )
       );
       act(() => {
-        jest.runAllTimers();
+        vi.runAllTimers();
       });
       expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
         documentId: 'tl-doc-1',
@@ -1164,7 +1170,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
         )
       );
       act(() => {
-        jest.runAllTimers();
+        vi.runAllTimers();
       });
       expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
     });
@@ -1181,7 +1187,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
         )
       );
       act(() => {
-        jest.runAllTimers();
+        vi.runAllTimers();
       });
       expect(mockFlyoutApi.openAnalyzer).toHaveBeenCalledWith(
         expect.objectContaining({ hit: expect.objectContaining({ id: 'doc-1' }) })
@@ -1211,7 +1217,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
         { wrapper }
       );
       act(() => {
-        jest.runAllTimers();
+        vi.runAllTimers();
       });
 
       expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledWith(
@@ -1237,7 +1243,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
         { wrapper }
       );
       act(() => {
-        jest.runAllTimers();
+        vi.runAllTimers();
       });
 
       // Only the Timeline flyout (rule) should have been opened.

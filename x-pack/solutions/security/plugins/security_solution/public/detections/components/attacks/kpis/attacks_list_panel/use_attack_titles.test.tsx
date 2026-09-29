@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAttackTitles } from './use_attack_titles';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
@@ -13,23 +16,23 @@ import { fetchQueryAttacks } from '../../../../containers/detection_engine/alert
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useInspectButton } from '../../../alerts_kpis/common/hooks';
 
-jest.mock('../../../../containers/detection_engine/alerts/use_query');
-jest.mock('../../../../../common/containers/use_global_time');
-jest.mock('../../../alerts_kpis/common/hooks');
+vi.mock('../../../../containers/detection_engine/alerts/use_query');
+vi.mock('../../../../../common/containers/use_global_time');
+vi.mock('../../../alerts_kpis/common/hooks');
 
 describe('useAttackTitles', () => {
-  const mockSetQuery = jest.fn();
-  const mockDeleteQuery = jest.fn();
-  const mockSetGlobalQuery = jest.fn();
-  const mockRefetch = jest.fn();
+  const mockSetQuery = vi.fn();
+  const mockDeleteQuery = vi.fn();
+  const mockSetGlobalQuery = vi.fn();
+  const mockRefetch = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGlobalTime as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useGlobalTime as Mock).mockReturnValue({
       deleteQuery: mockDeleteQuery,
       setQuery: mockSetGlobalQuery,
     });
-    (useQueryAlerts as jest.Mock).mockReturnValue({
+    (useQueryAlerts as Mock).mockReturnValue({
       data: undefined,
       loading: false,
       refetch: mockRefetch,
@@ -72,7 +75,7 @@ describe('useAttackTitles', () => {
   });
 
   it('extracts titles from response data', () => {
-    (useQueryAlerts as jest.Mock).mockReturnValue({
+    (useQueryAlerts as Mock).mockReturnValue({
       data: {
         hits: {
           hits: [

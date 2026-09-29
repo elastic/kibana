@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getResearchAgentPrompt } from './research_agent';
 import { prepareMessages } from '../utils/to_langchain_messages';
 
-jest.mock('../utils/to_langchain_messages', () => ({
-  prepareMessages: jest.fn().mockResolvedValue([['human', 'history']]),
-}));
+vi.mock('../utils/to_langchain_messages', () => {
+      const mocked = {
+      prepareMessages: vi.fn().mockResolvedValue([['human', 'history']]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Unique marker present only in the injected notification, not in the static pointer prose.
 const NOTICE_MARKER = 'The following skills appear relevant';
@@ -50,7 +55,7 @@ describe('getResearchAgentPrompt', () => {
       experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       relevantSkillsEnabled: false,
       toolManager: {} as any,
-      resultTransformer: jest.fn(),
+      resultTransformer: vi.fn(),
       renderers: [],
       ...overrides,
     } as any);
@@ -248,7 +253,7 @@ describe('getResearchAgentPrompt', () => {
       },
       experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       toolManager: {} as any,
-      resultTransformer: jest.fn(),
+      resultTransformer: vi.fn(),
     } as any;
 
     const messages = await getResearchAgentPrompt(params);

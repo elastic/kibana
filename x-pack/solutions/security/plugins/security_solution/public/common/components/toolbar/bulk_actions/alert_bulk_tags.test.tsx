@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
@@ -15,7 +18,7 @@ import * as helpers from './helpers';
 import { BulkAlertTagsPanel } from './alert_bulk_tags';
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 
-jest.mock('../../../lib/kibana');
+vi.mock('../../../lib/kibana');
 
 const mockTagItems = [
   {
@@ -25,14 +28,14 @@ const mockTagItems = [
   },
 ];
 
-(useUiSetting$ as jest.Mock).mockReturnValue([['default-test-tag-1', 'default-test-tag-2']]);
-const createInitialTagsState = jest.spyOn(helpers, 'createInitialTagsState');
+(useUiSetting$ as Mock).mockReturnValue([['default-test-tag-1', 'default-test-tag-2']]);
+const createInitialTagsState = vi.spyOn(helpers, 'createInitialTagsState');
 
 const renderTagsMenu = (
   tags: TimelineItem[],
-  closePopover: () => void = jest.fn(),
-  onSubmit: () => Promise<void> = jest.fn(),
-  setIsLoading: () => void = jest.fn()
+  closePopover: () => void = vi.fn(),
+  onSubmit: () => Promise<void> = vi.fn(),
+  setIsLoading: () => void = vi.fn()
 ) => {
   return render(
     <TestProviders>
@@ -48,7 +51,7 @@ const renderTagsMenu = (
 
 describe('BulkAlertTagsPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it renders', () => {
@@ -92,9 +95,9 @@ describe('BulkAlertTagsPanel', () => {
   });
 
   test('it calls expected functions on submit when nothing has changed', () => {
-    const mockedClosePopover = jest.fn();
-    const mockedOnSubmit = jest.fn();
-    const mockedSetIsLoading = jest.fn();
+    const mockedClosePopover = vi.fn();
+    const mockedOnSubmit = vi.fn();
+    const mockedSetIsLoading = vi.fn();
 
     const mockTags = [
       {
@@ -154,9 +157,9 @@ describe('BulkAlertTagsPanel', () => {
   });
 
   test('it calls expected functions on submit when alerts have changed', () => {
-    const mockedClosePopover = jest.fn();
-    const mockedOnSubmit = jest.fn();
-    const mockedSetIsLoading = jest.fn();
+    const mockedClosePopover = vi.fn();
+    const mockedOnSubmit = vi.fn();
+    const mockedSetIsLoading = vi.fn();
 
     const mockTags = [
       {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -14,13 +17,16 @@ import { connectorTokenClientMock } from '../connector_token_client.mock';
 import { getEarsAccessToken } from './get_ears_access_token';
 import { requestEarsRefreshToken } from './request_ears_refresh_token';
 
-jest.mock('./request_ears_refresh_token', () => ({
-  requestEarsRefreshToken: jest.fn(),
-}));
+vi.mock('./request_ears_refresh_token', () => {
+      const mocked = {
+      requestEarsRefreshToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const NOW = new Date('2024-01-15T12:00:00.000Z');
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const configurationUtilities = actionsConfigMock.create();
 const connectorTokenClient = connectorTokenClientMock.create();
 
@@ -89,7 +95,7 @@ describe('getEarsAccessToken', () => {
   });
   beforeEach(() => {
     clock.reset();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   afterAll(() => clock.restore());
 
@@ -175,7 +181,7 @@ describe('getEarsAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestEarsRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
 
       const result = await getEarsAccessToken(baseOpts);
 
@@ -187,7 +193,7 @@ describe('getEarsAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestEarsRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
 
       await getEarsAccessToken(baseOpts);
 
@@ -204,7 +210,7 @@ describe('getEarsAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestEarsRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
 
       await getEarsAccessToken(baseOpts);
 
@@ -223,7 +229,7 @@ describe('getEarsAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce({
+      (requestEarsRefreshToken as Mock).mockResolvedValueOnce({
         ...refreshResponse,
         refreshToken: undefined,
       });
@@ -242,7 +248,7 @@ describe('getEarsAccessToken', () => {
         hasErrors: false,
         connectorToken: validToken,
       });
-      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestEarsRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
 
       const result = await getEarsAccessToken({ ...baseOpts, forceRefresh: true });
 
@@ -257,7 +263,7 @@ describe('getEarsAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestEarsRefreshToken as jest.Mock).mockRejectedValueOnce(
+      (requestEarsRefreshToken as Mock).mockRejectedValueOnce(
         new Error('EARS endpoint unreachable')
       );
 
@@ -276,7 +282,7 @@ describe('getEarsAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestEarsRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
       connectorTokenClient.updateWithRefreshToken.mockRejectedValueOnce(
         new Error('DB write failed')
       );
@@ -346,7 +352,7 @@ describe('getEarsAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredPerUserToken,
       });
-      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestEarsRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
 
       const result = await getEarsAccessToken({
         ...baseOpts,
@@ -396,7 +402,7 @@ describe('getEarsAccessToken', () => {
           hasErrors: false,
           connectorToken: { ...validToken, connectorId: lockedConnectorId },
         });
-      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestEarsRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
 
       const [result1, result2] = await Promise.all([
         getEarsAccessToken({ ...baseOpts, connectorId: lockedConnectorId }),

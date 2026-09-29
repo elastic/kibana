@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useGetServiceBadgeHrefFromRouter } from './use_get_service_badge_href_from_router';
 import * as useApmRouterModule from '../../../../../hooks/use_apm_router';
 import * as useApmParamsModule from '../../../../../hooks/use_apm_params';
 
 describe('useGetServiceBadgeHrefFromRouter', () => {
-  const mockLink = jest.fn();
+  const mockLink = vi.fn();
 
-  const mockUseApmRouter = jest.spyOn(useApmRouterModule, 'useApmRouter');
-  const mockUseAnyOfApmParams = jest.spyOn(useApmParamsModule, 'useAnyOfApmParams');
+  const mockUseApmRouter = vi.spyOn(useApmRouterModule, 'useApmRouter');
+  const mockUseAnyOfApmParams = vi.spyOn(useApmParamsModule, 'useAnyOfApmParams');
 
   const defaultQuery = {
     rangeFrom: 'now-15m',
@@ -26,7 +28,7 @@ describe('useGetServiceBadgeHrefFromRouter', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockLink.mockImplementation(
       (path: string, { path: { serviceName } }: any) => `/apm/services/${serviceName}/overview`

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createTimelines } from './helpers';
 import { savePinnedEvents } from '../../../saved_object/pinned_events';
 import { getNote } from '../../../saved_object/notes';
@@ -38,27 +41,39 @@ const notes: Note[] = [
 const existingNoteIds = undefined;
 const isImmutable = true;
 
-jest.mock('../../../saved_object/timelines', () => ({
-  persistTimeline: jest.fn().mockResolvedValue({
-    timeline: {
-      savedObjectId: 'eb2781c0-1df5-11eb-8589-2f13958b79f7',
-      version: 'xJs23==',
-    },
-  }),
-}));
+vi.mock('../../../saved_object/timelines', () => {
+      const mocked = {
+      persistTimeline: vi.fn().mockResolvedValue({
+        timeline: {
+          savedObjectId: 'eb2781c0-1df5-11eb-8589-2f13958b79f7',
+          version: 'xJs23==',
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../saved_object/pinned_events', () => ({
-  savePinnedEvents: jest.fn(),
-}));
+vi.mock('../../../saved_object/pinned_events', () => {
+      const mocked = {
+      savePinnedEvents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../saved_object/notes', () => ({
-  getNote: jest.fn(),
-  persistNote: jest.fn(),
-}));
+vi.mock('../../../saved_object/notes', () => {
+      const mocked = {
+      getNote: vi.fn(),
+      persistNote: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../saved_object/notes/persist_notes', () => ({
-  persistNotes: jest.fn(),
-}));
+vi.mock('../../../saved_object/notes/persist_notes', () => {
+      const mocked = {
+      persistNotes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('createTimelines', () => {
   let frameworkRequest: FrameworkRequest;
@@ -71,7 +86,7 @@ describe('createTimelines', () => {
       requestContextMock.convertContext(context),
       mockRequest
     );
-    Date.now = jest.fn().mockReturnValue(new Date('2020-11-04T11:37:31.655Z'));
+    Date.now = vi.fn().mockReturnValue(new Date('2020-11-04T11:37:31.655Z'));
   });
 
   describe('create timelines', () => {
@@ -89,27 +104,27 @@ describe('createTimelines', () => {
     });
 
     afterAll(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('respect input timerange - start', () => {
-      expect((persistTimeline as jest.Mock).mock.calls[0][3].dateRange.start).toEqual(
+      expect((persistTimeline as Mock).mock.calls[0][3].dateRange.start).toEqual(
         '2020-11-03T13:34:40.339Z'
       );
     });
 
     test('respect input timerange - end', () => {
-      expect((persistTimeline as jest.Mock).mock.calls[0][3].dateRange.end).toEqual(
+      expect((persistTimeline as Mock).mock.calls[0][3].dateRange.end).toEqual(
         '2020-11-04T13:34:40.339Z'
       );
     });
 
     test('savePinnedEvents', () => {
-      expect((savePinnedEvents as jest.Mock).mock.calls[0][2]).toEqual(['123']);
+      expect((savePinnedEvents as Mock).mock.calls[0][2]).toEqual(['123']);
     });
 
     test('persistNotes', () => {
-      expect((persistNotes as jest.Mock).mock.calls[0][3]).toEqual([
+      expect((persistNotes as Mock).mock.calls[0][3]).toEqual([
         {
           created: 1603885051655,
           createdBy: 'elastic',
@@ -124,7 +139,7 @@ describe('createTimelines', () => {
 
   describe('create immutable templates', () => {
     beforeAll(async () => {
-      (getNote as jest.Mock).mockReturnValue({
+      (getNote as Mock).mockReturnValue({
         ...notes[0],
       });
       await createTimelines({
@@ -141,16 +156,16 @@ describe('createTimelines', () => {
     });
 
     afterAll(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     test('override timerange - start', () => {
-      expect((persistTimeline as jest.Mock).mock.calls[0][3].dateRange.start).toEqual(
+      expect((persistTimeline as Mock).mock.calls[0][3].dateRange.start).toEqual(
         '2020-11-03T11:37:31.655Z'
       );
     });
 
     test('override timerange - end', () => {
-      expect((persistTimeline as jest.Mock).mock.calls[0][3].dateRange.end).toEqual(
+      expect((persistTimeline as Mock).mock.calls[0][3].dateRange.end).toEqual(
         '2020-11-04T11:37:31.655Z'
       );
     });
@@ -171,17 +186,17 @@ describe('createTimelines', () => {
     });
 
     afterAll(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('respect input timerange - start', () => {
-      expect((persistTimeline as jest.Mock).mock.calls[0][3].dateRange.start).toEqual(
+      expect((persistTimeline as Mock).mock.calls[0][3].dateRange.start).toEqual(
         '2020-10-01T11:37:31.655Z'
       );
     });
 
     test('respect input timerange - end', () => {
-      expect((persistTimeline as jest.Mock).mock.calls[0][3].dateRange.end).toEqual(
+      expect((persistTimeline as Mock).mock.calls[0][3].dateRange.end).toEqual(
         '2020-10-02T11:37:31.655Z'
       );
     });

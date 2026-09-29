@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { connectorSpecHasEvents, connectorsSpecs } from '@kbn/connector-specs';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
@@ -65,7 +67,7 @@ const createDualSpec = (): ConnectorSpec => ({
 
 describe('registerConnectorEventTriggers', () => {
   it('does not register spec.events when inbound events are disabled', () => {
-    const registerTriggerDefinition = jest.fn();
+    const registerTriggerDefinition = vi.fn();
 
     registerConnectorEventTriggers({
       inboundEventsEnabled: false,
@@ -77,7 +79,7 @@ describe('registerConnectorEventTriggers', () => {
   });
 
   it('does not register inboundWebhook.received from connector-specs when inbound events are disabled', () => {
-    const registerTriggerDefinition = jest.fn();
+    const registerTriggerDefinition = vi.fn();
 
     registerConnectorEventTriggers({
       inboundEventsEnabled: false,
@@ -88,7 +90,7 @@ describe('registerConnectorEventTriggers', () => {
   });
 
   it('registers events from specs that declare them when inbound events are enabled', () => {
-    const registerTriggerDefinition = jest.fn();
+    const registerTriggerDefinition = vi.fn();
 
     registerConnectorEventTriggers({
       inboundEventsEnabled: true,
@@ -109,7 +111,7 @@ describe('registerConnectorEventTriggers', () => {
   });
 
   it('registers inboundWebhook.received from the connector-specs book', () => {
-    const registerTriggerDefinition = jest.fn();
+    const registerTriggerDefinition = vi.fn();
 
     registerConnectorEventTriggers({
       inboundEventsEnabled: true,

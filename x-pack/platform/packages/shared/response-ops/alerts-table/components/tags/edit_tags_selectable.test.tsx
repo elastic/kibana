@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EditTagsSelectable } from './edit_tags_selectable';
@@ -21,7 +23,7 @@ describe('EditTagsSelectable', () => {
     selectedAlerts: [mockAlert],
     isLoading: false,
     tags: ['one', 'two', 'coke', 'pepsi'],
-    onChangeTags: jest.fn(),
+    onChangeTags: vi.fn(),
   };
 
   const propsMultipleAlerts = {
@@ -31,11 +33,11 @@ describe('EditTagsSelectable', () => {
     ],
     isLoading: false,
     tags: ['one', 'two', 'three', 'coke', 'pepsi'],
-    onChangeTags: jest.fn(),
+    onChangeTags: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

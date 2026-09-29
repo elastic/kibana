@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
@@ -23,7 +25,7 @@ describe('ConfirmDeleteModal', () => {
     };
 
     const spacesManager = spacesManagerMock.create();
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
 
     expect(
       shallowWithIntl(
@@ -81,8 +83,8 @@ describe('ConfirmDeleteModal', () => {
     };
 
     const spacesManager = spacesManagerMock.create();
-    const onCancel = jest.fn();
-    const onSuccess = jest.fn();
+    const onCancel = vi.fn();
+    const onSuccess = vi.fn();
 
     const wrapper = mountWithIntl(
       <ConfirmDeleteModal

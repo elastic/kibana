@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import {
@@ -26,16 +28,19 @@ import { ControlGroupRenderer } from './control_group_renderer';
 const mockServices = {
   services: {
     uiActions: {
-      getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
-      getFrequentlyChangingActionsForTrigger: jest.fn().mockResolvedValue([]),
-      getTrigger: jest.fn().mockResolvedValue({}),
+      getTriggerCompatibleActions: vi.fn().mockResolvedValue([]),
+      getFrequentlyChangingActionsForTrigger: vi.fn().mockResolvedValue([]),
+      getTrigger: vi.fn().mockResolvedValue({}),
     },
   },
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn().mockImplementation(() => mockServices),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn().mockImplementation(() => mockServices),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getTestEmbeddableFactory = () =>
   Promise.resolve({
@@ -46,7 +51,7 @@ const getTestEmbeddableFactory = () =>
           selection: initialState.selection,
         }),
         anyStateChange$: of(),
-        applySerializedState: jest.fn(),
+        applySerializedState: vi.fn(),
         latestState$: of(initialState),
       });
       return {
@@ -60,7 +65,7 @@ const getTestEmbeddableFactory = () =>
   } as EmbeddablePublicDefinition<{ selection?: string }>);
 
 // defined in the outer scope so that its reference doesn't change on rerender
-const mockGetCreationOptions = jest
+const mockGetCreationOptions = vi
   .fn()
   .mockResolvedValue({ initialState: { initialChildControlState: {} } });
 
@@ -93,7 +98,7 @@ describe('control group renderer', () => {
 
   test('calling `updateInput` applies the updated child state', async () => {
     const { api } = await mountControlGroupRenderer({
-      getCreationOptions: jest.fn().mockResolvedValue({
+      getCreationOptions: vi.fn().mockResolvedValue({
         initialState: {
           initialChildControlState: {
             test: {
@@ -103,7 +108,7 @@ describe('control group renderer', () => {
         },
       }),
     });
-    const applySpy = jest.spyOn(
+    const applySpy = vi.spyOn(
       api.children$.getValue().test as HasSerializableState,
       'applySerializedState'
     );
@@ -136,7 +141,7 @@ describe('control group renderer', () => {
     expect(api.filters$?.getValue()).toEqual(initialFilters);
     component.rerender(
       <ControlGroupRenderer
-        onApiAvailable={jest.fn()}
+        onApiAvailable={vi.fn()}
         getCreationOptions={mockGetCreationOptions}
         filters={updatedFilters}
       />
@@ -152,7 +157,7 @@ describe('control group renderer', () => {
     expect(api.query$?.getValue()).toEqual(initialQuery);
     component.rerender(
       <ControlGroupRenderer
-        onApiAvailable={jest.fn()}
+        onApiAvailable={vi.fn()}
         getCreationOptions={mockGetCreationOptions}
         query={updatedQuery}
       />
@@ -170,7 +175,7 @@ describe('control group renderer', () => {
     expect(api.projectRouting$.getValue()).toEqual(initialProjectRouting);
     component.rerender(
       <ControlGroupRenderer
-        onApiAvailable={jest.fn()}
+        onApiAvailable={vi.fn()}
         getCreationOptions={mockGetCreationOptions}
         projectRouting={updatedProjectRouting}
       />
@@ -186,7 +191,7 @@ describe('control group renderer', () => {
     expect(api.timeRange$?.getValue()).toEqual(initialTime);
     component.rerender(
       <ControlGroupRenderer
-        onApiAvailable={jest.fn()}
+        onApiAvailable={vi.fn()}
         getCreationOptions={mockGetCreationOptions}
         timeRange={updatedTime}
       />

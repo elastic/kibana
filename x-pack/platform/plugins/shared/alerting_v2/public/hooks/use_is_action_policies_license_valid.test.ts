@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import { useService } from '@kbn/core-di-browser';
@@ -12,9 +15,9 @@ import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { useIsActionPoliciesLicenseValid } from './use_is_action_policies_license_valid';
 
-jest.mock('@kbn/core-di-browser');
+vi.mock('@kbn/core-di-browser');
 
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
+const mockUseService = useService as MockedFunction<typeof useService>;
 
 const createLicense = (type: LicenseType, status: 'active' | 'expired' = 'active'): ILicense =>
   licensingMock.createLicense({ license: { type, status } });

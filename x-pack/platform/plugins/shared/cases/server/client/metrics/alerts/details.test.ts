@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CasesClientMock } from '../../mocks';
 import { createCasesClientMock } from '../../mocks';
 import type { CasesClientArgs } from '../../types';
@@ -46,7 +49,7 @@ describe('AlertDetails', () => {
   let clientArgs: ReturnType<typeof createMockClientArgs>['clientArgs'];
   let constructorOptions: SingleCaseBaseHandlerCommonOptions;
   let attachmentService: ReturnType<typeof createAttachmentServiceMock>;
-  let getAuthorizationFilter: jest.Mock;
+  let getAuthorizationFilter: Mock;
 
   beforeEach(() => {
     client = createMockClient();
@@ -56,7 +59,7 @@ describe('AlertDetails', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls getAllDocumentsAttachedToCase with alerts attachments filter', async () => {
@@ -68,7 +71,7 @@ describe('AlertDetails', () => {
     handler.setupFeature(CaseMetricsFeature.ALERTS_USERS);
     await handler.compute();
 
-    expect(jest.mocked(client.attachments.getAllDocumentsAttachedToCase)).toHaveBeenCalledWith({
+    expect(vi.mocked(client.attachments.getAllDocumentsAttachedToCase)).toHaveBeenCalledWith({
       attachmentTypes: ['alert'],
       caseId: '',
     });
@@ -532,7 +535,7 @@ function createMockClientArgs() {
   attachmentService.getter.getUnifiedAttachmentsByTypes.mockResolvedValue([]);
 
   const logger = loggingSystemMock.createLogger();
-  const getAuthorizationFilter = jest.fn().mockResolvedValue({
+  const getAuthorizationFilter = vi.fn().mockResolvedValue({
     authorizedOwners: ['securitySolution'],
   });
 

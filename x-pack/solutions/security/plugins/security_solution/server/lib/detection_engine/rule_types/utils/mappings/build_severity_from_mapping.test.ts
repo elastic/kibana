@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Severity, SeverityMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { sampleDocSeverity } from '../../__mocks__/es_results';
 import type { BuildSeverityFromMappingReturn } from './build_severity_from_mapping';
@@ -15,7 +17,7 @@ const ANY_FIELD = 'event.my_custom_severity';
 
 describe('buildSeverityFromMapping', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('base cases: when mapping is undefined', () => {

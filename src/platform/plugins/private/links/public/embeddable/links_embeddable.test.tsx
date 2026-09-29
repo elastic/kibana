@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -80,25 +82,25 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
   },
 ];
 
-jest.mock('../lib/resolve_links', () => {
+vi.mock('../lib/resolve_links', async () => {
   return {
-    ...jest.requireActual('../lib/resolve_links'),
-    resolveLinks: jest.fn().mockResolvedValue(getResolvedLinks()),
+    ...(await vi.importActual('../lib/resolve_links')),
+    resolveLinks: vi.fn().mockResolvedValue(getResolvedLinks()),
   };
 });
 
-jest.mock('../links_client', () => {
+vi.mock('../links_client', () => {
   return {
     linksClient: {
-      create: jest.fn().mockResolvedValue({ id: '333' }),
-      update: jest.fn().mockResolvedValue({ id: '123' }),
+      create: vi.fn().mockResolvedValue({ id: '333' }),
+      update: vi.fn().mockResolvedValue({ id: '123' }),
     },
   };
 });
 
-jest.mock('../links_client/load_from_library', () => {
+vi.mock('../links_client/load_from_library', () => {
   return {
-    loadFromLibrary: jest.fn((refId) => {
+    loadFromLibrary: vi.fn((refId) => {
       return Promise.resolve({
         title: 'links 001',
         description: 'some links',
@@ -114,7 +116,7 @@ async function buildLinksEmbeddable(state: LinksEmbeddableState) {
   const parentApi = getMockLinksParentApi(state);
   const uuid = '1234';
   return await factory.buildEmbeddable({
-    initializeDrilldownsManager: jest.fn(),
+    initializeDrilldownsManager: vi.fn(),
     initialState: state,
     finalizeApi: (api) => {
       return {
@@ -132,36 +134,44 @@ async function buildLinksEmbeddable(state: LinksEmbeddableState) {
 describe('getLinksEmbeddableFactory', () => {
   describe('anyStateChange$', () => {
     let embeddableApi: LinksApi;
-    beforeEach((done) => {
-      buildLinksEmbeddable({
-        title: 'my links',
-        description: 'just a few links',
-        hide_title: false,
-        hide_border: false,
-        ref_id: '123',
-      })
-        .then(({ api }) => {
-          embeddableApi = api;
-          done();
-        })
-        .catch(done);
-    });
+    beforeEach(() =>
+    new Promise<void>((resolve, reject) => {
+    const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-    test('should not emit on subscribe and emit when any state changes', (done) => {
-      embeddableApi.anyStateChange$.subscribe(() => {
-        try {
-          const { title } = embeddableApi.serializeState();
-          expect(title).toBe('cute puppies');
-        } catch (error) {
-          // title assertion fails when
-          // anyStateChange$ emits on subscribe
-          done(error);
-          return;
-        }
-        done();
-      });
-      embeddableApi.setTitle('cute puppies');
-    });
+          buildLinksEmbeddable({
+            title: 'my links',
+            description: 'just a few links',
+            hide_title: false,
+            hide_border: false,
+            ref_id: '123',
+          })
+            .then(({ api }) => {
+              embeddableApi = api;
+              done();
+            })
+            .catch(done);
+        
+    }));
+
+    test('should not emit on subscribe and emit when any state changes', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              embeddableApi.anyStateChange$.subscribe(() => {
+                try {
+                  const { title } = embeddableApi.serializeState();
+                  expect(title).toBe('cute puppies');
+                } catch (error) {
+                  // title assertion fails when
+                  // anyStateChange$ emits on subscribe
+                  done(error);
+                  return;
+                }
+                done();
+              });
+              embeddableApi.setTitle('cute puppies');
+            
+        }));
   });
 
   describe('by reference embeddable', () => {

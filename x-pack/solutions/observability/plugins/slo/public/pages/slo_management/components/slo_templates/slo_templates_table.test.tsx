@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import React from 'react';
 import { useFetchSloTemplates } from '../../../../hooks/use_fetch_slo_templates';
@@ -15,18 +18,18 @@ import { render } from '../../../../utils/test_helper';
 import { DEFAULT_STATE } from '../../hooks/use_templates_url_search_state';
 import { SloTemplatesTable } from './slo_templates_table';
 
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../hooks/use_permissions');
-jest.mock('../../../../hooks/use_fetch_slo_templates');
-jest.mock('../../../../hooks/use_fetch_slo_template_tags');
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../hooks/use_permissions');
+vi.mock('../../../../hooks/use_fetch_slo_templates');
+vi.mock('../../../../hooks/use_fetch_slo_template_tags');
 
-const useKibanaMock = useKibana as jest.Mock;
-const usePermissionsMock = usePermissions as jest.Mock;
-const useFetchSloTemplatesMock = useFetchSloTemplates as jest.Mock;
-const useFetchSloTemplateTagsMock = useFetchSloTemplateTags as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const usePermissionsMock = usePermissions as Mock;
+const useFetchSloTemplatesMock = useFetchSloTemplates as Mock;
+const useFetchSloTemplateTagsMock = useFetchSloTemplateTags as Mock;
 
-const mockNavigateToUrl = jest.fn();
-const mockOnStateChange = jest.fn();
+const mockNavigateToUrl = vi.fn();
+const mockOnStateChange = vi.fn();
 
 function MockSearchBar(props: Record<string, unknown>) {
   return (
@@ -44,7 +47,7 @@ const defaultProps = {
 
 describe('SloTemplatesTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: {
         http: { basePath: { prepend: (path: string) => path } },

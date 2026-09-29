@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SMART_FALLBACK_FIELDS } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
@@ -18,14 +20,17 @@ import type { DisplayOptions, ControlOptions } from './logs_explorer_schema_type
 import type { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/types';
 import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src/data_types';
 
-jest.mock('@kbn/discover-utils/src/data_types/logs/utils', () => ({
-  getAllLogsDataViewSpec: jest.fn(({ allLogsIndexPattern }) => ({
-    id: 'discover-observability-solution-all-logs',
-    name: 'All logs',
-    title: allLogsIndexPattern,
-    timeFieldName: '@timestamp',
-  })),
-}));
+vi.mock('@kbn/discover-utils/src/data_types/logs/utils', () => {
+      const mocked = {
+      getAllLogsDataViewSpec: vi.fn(({ allLogsIndexPattern }) => ({
+        id: 'discover-observability-solution-all-logs',
+        name: 'All logs',
+        title: allLogsIndexPattern,
+        timeFieldName: '@timestamp',
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('logs_explorer_url_schema', () => {
   const mockTime: TimeRange = { from: 'now-24h', to: 'now' };
@@ -33,7 +38,7 @@ describe('logs_explorer_url_schema', () => {
   const mockQuery: Query = { language: 'kuery', query: 'test query' };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('hydrateDataSourceSelection', () => {

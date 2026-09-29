@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { allSeriesKey, reportTypeKey, UrlStorageContextProvider } from './use_series_storage';
@@ -35,7 +37,7 @@ const mockSingleSeries = [
 describe('useExpViewTimeRange', function () {
   const storage = createKbnUrlStateStorage({ useHash: false });
   // @ts-ignore
-  jest.spyOn(useAppDataViewHook, 'useAppDataViewContext').mockReturnValue({
+  vi.spyOn(useAppDataViewHook, 'useAppDataViewContext').mockReturnValue({
     dataViews: {
       ux: mockDataView,
       apm: mockDataView,
@@ -47,14 +49,14 @@ describe('useExpViewTimeRange', function () {
       alerts: mockDataView,
     },
   });
-  jest.spyOn(theme, 'useTheme').mockReturnValue({
+  vi.spyOn(theme, 'useTheme').mockReturnValue({
     // @ts-ignore
     eui: {
       euiColorVis1: '#111111',
     },
   });
 
-  const lensAttributesSpy = jest
+  const lensAttributesSpy = vi
     .spyOn(lensAttributes, 'LensAttributes')
     .mockImplementation(function (...args) {
       return {

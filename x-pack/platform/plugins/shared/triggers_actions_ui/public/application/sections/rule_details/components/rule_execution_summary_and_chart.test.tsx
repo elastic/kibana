@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,12 +19,12 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { mockRule, mockRuleType, mockRuleSummary } from './test_helpers';
 import type { RuleType } from '../../../../types';
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-jest.mock('../../../../common/lib/kibana');
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+vi.mock('../../../../common/lib/kibana');
 
-const loadRuleSummaryMock = jest.fn();
+const loadRuleSummaryMock = vi.fn();
 
-const onChangeDurationMock = jest.fn();
+const onChangeDurationMock = vi.fn();
 
 const ruleMock = mockRule();
 
@@ -39,7 +42,7 @@ const ruleType: RuleType = mockRuleType({
 
 describe('rule_execution_summary_and_chart', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     loadRuleSummaryMock.mockResolvedValue(mockRuleSummary());
   });
 

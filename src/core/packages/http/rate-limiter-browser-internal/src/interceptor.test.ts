@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type {
   IHttpInterceptController,
   HttpFetchOptionsWithPath,
@@ -17,23 +20,23 @@ import { rateLimiterInterceptor } from './interceptor';
 
 describe('rateLimiterInterceptor', () => {
   describe('fetch', () => {
-    let controller: jest.Mocked<IHttpInterceptController>;
-    let next: jest.MockedFunction<Parameters<Required<HttpInterceptor>['fetch']>[0]>;
+    let controller: Mocked<IHttpInterceptController>;
+    let next: MockedFunction<Parameters<Required<HttpInterceptor>['fetch']>[0]>;
     let options: HttpFetchOptionsWithPath;
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       controller = {
         halted: false,
-        halt: jest.fn(),
+        halt: vi.fn(),
       };
-      next = jest.fn();
+      next = vi.fn();
       options = {} as typeof options;
     });
 
     afterEach(() => {
-      jest.useRealTimers();
-      jest.resetAllMocks();
+      vi.useRealTimers();
+      vi.resetAllMocks();
     });
 
     it('should retry throttled requests', async () => {
@@ -43,7 +46,7 @@ describe('rateLimiterInterceptor', () => {
       next.mockResolvedValueOnce(response);
 
       const result = rateLimiterInterceptor.fetch!(next, options, controller);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
       await expect(result).resolves.toBe(response);
       expect(next).toHaveBeenCalledTimes(2);
     });
@@ -56,9 +59,9 @@ describe('rateLimiterInterceptor', () => {
       next.mockResolvedValueOnce(response);
 
       const result = rateLimiterInterceptor.fetch!(next, options, controller);
-      await jest.advanceTimersByTimeAsync(5000);
+      await vi.advanceTimersByTimeAsync(5000);
       expect(next).toHaveBeenCalledTimes(1);
-      await jest.advanceTimersByTimeAsync(5000);
+      await vi.advanceTimersByTimeAsync(5000);
       expect(next).toHaveBeenCalledTimes(2);
       await expect(result).resolves.toBe(response);
     });
@@ -80,9 +83,9 @@ describe('rateLimiterInterceptor', () => {
       const result = expect(rateLimiterInterceptor.fetch!(next, options, controller)).rejects.toBe(
         error
       );
-      await jest.advanceTimersByTimeAsync(5000);
+      await vi.advanceTimersByTimeAsync(5000);
       controller.halted = true;
-      await jest.advanceTimersByTimeAsync(5000);
+      await vi.advanceTimersByTimeAsync(5000);
       await result;
 
       expect(next).toHaveBeenCalledTimes(1);
@@ -97,7 +100,7 @@ describe('rateLimiterInterceptor', () => {
       const result = expect(rateLimiterInterceptor.fetch!(next, options, controller)).rejects.toBe(
         error
       );
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
       await result;
 
       expect(next).toHaveBeenCalledTimes(3); // 3 attempts

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
@@ -16,16 +19,16 @@ const TOTAL_WORKFLOW_COUNT = 9;
 
 const createClientMock = () => {
   const client = {
-    install: jest.fn().mockResolvedValue(undefined),
-    uninstall: jest.fn().mockResolvedValue(undefined),
-    ready: jest.fn().mockResolvedValue(undefined),
-    getWorkflowStatus: jest.fn(),
-    execute: jest.fn(),
-  } as unknown as jest.Mocked<PluginScopedManagedWorkflowsApi>;
+    install: vi.fn().mockResolvedValue(undefined),
+    uninstall: vi.fn().mockResolvedValue(undefined),
+    ready: vi.fn().mockResolvedValue(undefined),
+    getWorkflowStatus: vi.fn(),
+    execute: vi.fn(),
+  } as unknown as Mocked<PluginScopedManagedWorkflowsApi>;
   return client;
 };
 
-const installedIds = (client: jest.Mocked<PluginScopedManagedWorkflowsApi>) =>
+const installedIds = (client: Mocked<PluginScopedManagedWorkflowsApi>) =>
   client.install.mock.calls.map((call) => call[0]);
 
 const createInstaller = (
@@ -33,8 +36,8 @@ const createInstaller = (
 ) => {
   const client = createClientMock();
   const installer = createManagedWorkflowsInstaller({
-    getClient: jest.fn().mockResolvedValue(client),
-    isAvailable: jest.fn().mockResolvedValue(true),
+    getClient: vi.fn().mockResolvedValue(client),
+    isAvailable: vi.fn().mockResolvedValue(true),
     logger: loggerMock.create(),
     ...overrides,
   });
@@ -43,10 +46,10 @@ const createInstaller = (
 
 describe('createManagedWorkflowsInstaller', () => {
   it('skips installation and never creates a client when availability is disabled', async () => {
-    const getClient = jest.fn();
+    const getClient = vi.fn();
     const { installer } = createInstaller({
       getClient,
-      isAvailable: jest.fn().mockResolvedValue(false),
+      isAvailable: vi.fn().mockResolvedValue(false),
     });
 
     await installer.install();
@@ -56,7 +59,7 @@ describe('createManagedWorkflowsInstaller', () => {
 
   it('installs nothing while unavailable, then installs and reconciles once the flag flips on', async () => {
     const { client, installer } = createInstaller({
-      isAvailable: jest.fn().mockResolvedValueOnce(false).mockResolvedValue(true),
+      isAvailable: vi.fn().mockResolvedValueOnce(false).mockResolvedValue(true),
     });
 
     await installer.install();

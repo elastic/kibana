@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import type { EventClient } from '../../lib/significant_events/events';
 import {
@@ -27,7 +29,7 @@ const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEven
 });
 
 const createEventClient = () => {
-  const emitTrigger = jest.fn();
+  const emitTrigger = vi.fn();
   const eventClient: Pick<EventClient, 'emitTrigger'> = { emitTrigger };
   return { eventClient, emitTrigger };
 };

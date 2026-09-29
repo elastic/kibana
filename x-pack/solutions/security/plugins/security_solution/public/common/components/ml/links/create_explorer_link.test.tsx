@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { mockAnomalies } from '../mock';
@@ -25,7 +27,7 @@ describe('create_explorer_link', () => {
     const urlService = new MockUrlService();
     const locator = urlService.locators.create(new MlLocatorDefinition());
     const ml = { locator };
-    const http = { basePath: { get: jest.fn(() => {}) } };
+    const http = { basePath: { get: vi.fn(() => {}) } };
 
     const { findByText } = render(
       <KibanaContextProvider services={{ ml, http }}>

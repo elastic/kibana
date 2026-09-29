@@ -5,34 +5,45 @@
  * 2.0.
  */
 
-const mockNavigateToUrl = jest.fn();
+import { vi } from 'vitest';
 
-jest.mock('.', () => ({
-  generateReactRouterProps: ({
-    to,
-    navigateToUrl: nav,
-  }: {
-    to: string;
-    navigateToUrl?: (path: string) => void;
-  }) => ({
-    href: `/app/content_connectors${to}`,
-    onClick: (e?: { preventDefault?: () => void }) => {
-      e?.preventDefault?.();
-      nav?.(`/app/content_connectors${to}`);
-    },
-  }),
-}));
+const mockNavigateToUrl = vi.fn();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: { http: {}, application: { navigateToUrl: mockNavigateToUrl } },
-  }),
-}));
+vi.mock('.', () => {
+      const mocked = {
+      generateReactRouterProps: ({
+        to,
+        navigateToUrl: nav,
+      }: {
+        to: string;
+        navigateToUrl?: (path: string) => void;
+      }) => ({
+        href: `/app/content_connectors${to}`,
+        onClick: (e?: { preventDefault?: () => void }) => {
+          e?.preventDefault?.();
+          nav?.(`/app/content_connectors${to}`);
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({}),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: { http: {}, application: { navigateToUrl: mockNavigateToUrl } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 
@@ -51,7 +62,7 @@ import {
 
 describe('React Router EUI component helpers', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders an EuiLink', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   FleetUnauthorizedError,
@@ -14,9 +17,9 @@ import {
 import type { PackageClient } from '@kbn/fleet-plugin/server';
 import { getIntegrations } from './get_integrations';
 
-const buildPackageClient = (getPackage: jest.Mock): PackageClient => {
+const buildPackageClient = (getPackage: Mock): PackageClient => {
   return {
-    getPackages: jest.fn().mockResolvedValue([
+    getPackages: vi.fn().mockResolvedValue([
       {
         name: 'apm',
         version: '9.3.0',
@@ -39,7 +42,7 @@ describe('getIntegrations / fetchDatasets error handling', () => {
 
   it('logs RegistryResponseError 404 at debug, not error', async () => {
     const packageClient = buildPackageClient(
-      jest
+      vi
         .fn()
         .mockRejectedValue(
           new RegistryResponseError(`'404 Not Found' error response from package registry`, 404)
@@ -56,7 +59,7 @@ describe('getIntegrations / fetchDatasets error handling', () => {
 
   it('logs FleetUnauthorizedError at debug, not error', async () => {
     const packageClient = buildPackageClient(
-      jest
+      vi
         .fn()
         .mockRejectedValue(
           new FleetUnauthorizedError(
@@ -73,7 +76,7 @@ describe('getIntegrations / fetchDatasets error handling', () => {
 
   it('keeps RegistryResponseError 5xx at error level', async () => {
     const packageClient = buildPackageClient(
-      jest.fn().mockRejectedValue(new RegistryResponseError('Bad Gateway', 502))
+      vi.fn().mockRejectedValue(new RegistryResponseError('Bad Gateway', 502))
     );
 
     await getIntegrations({ packageClient, logger });
@@ -85,7 +88,7 @@ describe('getIntegrations / fetchDatasets error handling', () => {
   it('logs RegistryResponseError without a status at error level (no silent silencing)', async () => {
     const err = new RegistryResponseError('Bad Gateway');
     (err as unknown as { status: number | undefined }).status = undefined;
-    const packageClient = buildPackageClient(jest.fn().mockRejectedValue(err));
+    const packageClient = buildPackageClient(vi.fn().mockRejectedValue(err));
 
     await getIntegrations({ packageClient, logger });
 
@@ -95,7 +98,7 @@ describe('getIntegrations / fetchDatasets error handling', () => {
 
   it('keeps unknown errors at error level', async () => {
     const packageClient = buildPackageClient(
-      jest.fn().mockRejectedValue(new Error('something else broke'))
+      vi.fn().mockRejectedValue(new Error('something else broke'))
     );
 
     await getIntegrations({ packageClient, logger });
@@ -106,7 +109,7 @@ describe('getIntegrations / fetchDatasets error handling', () => {
 
   it('treats PackageNotFoundError as a custom integration (no log, empty datasets filter)', async () => {
     const packageClient = buildPackageClient(
-      jest.fn().mockRejectedValue(new PackageNotFoundError('not found'))
+      vi.fn().mockRejectedValue(new PackageNotFoundError('not found'))
     );
 
     const result = await getIntegrations({ packageClient, logger });

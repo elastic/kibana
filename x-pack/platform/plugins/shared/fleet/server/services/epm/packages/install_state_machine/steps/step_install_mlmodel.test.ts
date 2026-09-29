@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
 import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
@@ -26,18 +29,18 @@ import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator'
 
 import { stepInstallMlModel, cleanUpMlModelStep } from './step_install_mlmodel';
 
-jest.mock('../../../elasticsearch/ml_model');
-jest.mock('../../remove', () => {
+vi.mock('../../../elasticsearch/ml_model');
+vi.mock('../../remove', async () => {
   return {
-    ...jest.requireActual('../../remove'),
-    deletePrerequisiteAssets: jest.fn(),
-    deleteMLModels: jest.fn(),
+    ...(await vi.importActual('../../remove')),
+    deletePrerequisiteAssets: vi.fn(),
+    deleteMLModels: vi.fn(),
   };
 });
 
-const mockedInstallMlModel = installMlModel as jest.MockedFunction<typeof installMlModel>;
-const mockDeleteMLModels = deleteMLModels as jest.MockedFunction<typeof deleteMLModels>;
-const mockDeletePrerequisiteAssets = deletePrerequisiteAssets as jest.MockedFunction<
+const mockedInstallMlModel = installMlModel as MockedFunction<typeof installMlModel>;
+const mockDeleteMLModels = deleteMLModels as MockedFunction<typeof deleteMLModels>;
+const mockDeletePrerequisiteAssets = deletePrerequisiteAssets as MockedFunction<
   typeof deletePrerequisiteAssets
 >;
 const packageInstallContext = {
@@ -57,8 +60,8 @@ const packageInstallContext = {
   assetsMap: new Map(),
   archiveIterator: createArchiveIteratorFromMap(new Map()),
 };
-let soClient: jest.Mocked<SavedObjectsClientContract>;
-let esClient: jest.Mocked<ElasticsearchClient>;
+let soClient: Mocked<SavedObjectsClientContract>;
+let esClient: Mocked<ElasticsearchClient>;
 
 describe('stepInstallMlModel', () => {
   const getMockInstalledPackageSo = (
@@ -88,7 +91,7 @@ describe('stepInstallMlModel', () => {
     appContextService.start(createAppContextStartContractMock());
   });
   afterEach(async () => {
-    jest.mocked(mockedInstallMlModel).mockReset();
+    vi.mocked(mockedInstallMlModel).mockReset();
   });
 
   appContextService.start(
@@ -116,11 +119,11 @@ describe('stepInstallMlModel', () => {
   };
 
   it('Should update esReferences', async () => {
-    jest.mocked(mockedInstallMlModel).mockResolvedValue([]);
+    vi.mocked(mockedInstallMlModel).mockResolvedValue([]);
     const res = await stepInstallMlModel({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -140,7 +143,7 @@ describe('stepInstallMlModel', () => {
   });
 
   it('Should call installTransforms and return updated esReferences', async () => {
-    jest.mocked(mockedInstallMlModel).mockResolvedValue([
+    vi.mocked(mockedInstallMlModel).mockResolvedValue([
       {
         id: 'something',
         type: ElasticsearchAssetType.ilmPolicy,
@@ -149,7 +152,7 @@ describe('stepInstallMlModel', () => {
     const res = await stepInstallMlModel({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -225,7 +228,7 @@ describe('cleanUpMlModelStep', () => {
     await cleanUpMlModelStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -283,7 +286,7 @@ describe('cleanUpMlModelStep', () => {
     await cleanUpMlModelStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -311,7 +314,7 @@ describe('cleanUpMlModelStep', () => {
     await cleanUpMlModelStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -337,7 +340,7 @@ describe('cleanUpMlModelStep', () => {
     await cleanUpMlModelStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -364,7 +367,7 @@ describe('cleanUpMlModelStep', () => {
     await cleanUpMlModelStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,

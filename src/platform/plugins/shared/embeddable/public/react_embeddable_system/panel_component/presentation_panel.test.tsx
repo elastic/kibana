@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
@@ -33,7 +35,7 @@ describe('Presentation panel', () => {
     },
   };
 
-  const editPanelSpy = jest.spyOn(openCustomizePanel, 'openCustomizePanelFlyout');
+  const editPanelSpy = vi.spyOn(openCustomizePanel, 'openCustomizePanelFlyout');
 
   const renderPresentationPanel = async (props: PresentationPanelProps) => {
     render(<PresentationPanel {...props} />);
@@ -63,7 +65,7 @@ describe('Presentation panel', () => {
   });
 
   it('renders error boundary when internal component throws during rendering', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => null);
+    vi.spyOn(console, 'error').mockImplementation(() => null);
     function ComponentThatThrows() {
       throw new Error('simulated error during rendering');
       return <div />;
@@ -74,14 +76,14 @@ describe('Presentation panel', () => {
 
   describe('actions', () => {
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     const mockAction = (id: string) => ({
-      isCompatible: jest.fn().mockResolvedValue(true),
+      isCompatible: vi.fn().mockResolvedValue(true),
       getDisplayName: () => id,
-      getIconType: jest.fn(),
-      execute: jest.fn(),
+      getIconType: vi.fn(),
+      execute: vi.fn(),
       id,
     });
 
@@ -103,7 +105,7 @@ describe('Presentation panel', () => {
     });
 
     it('calls the custom getActions function when one is provided', async () => {
-      const getActions = jest.fn().mockReturnValue([]);
+      const getActions = vi.fn().mockReturnValue([]);
       await renderPresentationPanel({
         ...defaultProps,
         getActions,
@@ -117,7 +119,7 @@ describe('Presentation panel', () => {
         uuid: 'test',
         disabledActionIds$: new BehaviorSubject<string[] | undefined>(['actionA']),
       };
-      const getActions = jest.fn().mockReturnValue([mockAction('actionA'), mockAction('actionB')]);
+      const getActions = vi.fn().mockReturnValue([mockAction('actionA'), mockAction('actionB')]);
       await renderPresentationPanel({
         ...defaultProps,
         getActions,
@@ -135,7 +137,7 @@ describe('Presentation panel', () => {
 
     it('shows badges', async () => {
       const testAction = mockAction('testAction');
-      const getActions = jest.fn().mockReturnValue([testAction]);
+      const getActions = vi.fn().mockReturnValue([testAction]);
       await renderPresentationPanel({
         ...defaultProps,
         getActions,
@@ -145,7 +147,7 @@ describe('Presentation panel', () => {
 
     it('does not show badges when showBadges is false', async () => {
       const testAction = mockAction('testAction');
-      const getActions = jest.fn().mockReturnValue([testAction]);
+      const getActions = vi.fn().mockReturnValue([testAction]);
       await renderPresentationPanel({
         ...defaultProps,
         getActions,

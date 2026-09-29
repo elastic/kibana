@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { FeatureUsageService } from './feature_usage_service';
 
 describe('FeatureUsageService', () => {
@@ -15,7 +17,7 @@ describe('FeatureUsageService', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('#setup', () => {
@@ -74,7 +76,7 @@ describe('FeatureUsageService', () => {
       });
 
       it('uses the current time when `usedAt` is unspecified', () => {
-        jest.spyOn(Date, 'now').mockReturnValue(42);
+        vi.spyOn(Date, 'now').mockReturnValue(42);
 
         const setup = service.setup();
         setup.register('feature', 'basic');

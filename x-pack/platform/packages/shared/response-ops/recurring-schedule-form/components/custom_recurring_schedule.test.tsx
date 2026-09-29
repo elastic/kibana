@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { fireEvent, render, within, screen } from '@testing-library/react';
@@ -40,7 +42,7 @@ const startDate = new Date().toISOString();
 
 describe('CustomRecurringSchedule', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders all form fields', async () => {

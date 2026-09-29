@@ -7,41 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useContextOverrideData } from './use_context_override_data';
 
-const mockSelectWorkflowGraph = jest.fn();
-const mockSelectWorkflowDefinition = jest.fn();
-const mockSelectYamlString = jest.fn();
-const mockUseSpaceId = jest.fn();
-const mockBuildContextOverride = jest.fn();
+const mockSelectWorkflowGraph = vi.fn();
+const mockSelectWorkflowDefinition = vi.fn();
+const mockSelectYamlString = vi.fn();
+const mockUseSpaceId = vi.fn();
+const mockBuildContextOverride = vi.fn();
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useSelector: (selector: any) => selector(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useSelector: (selector: any) => selector(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => ({
-  selectWorkflowGraph: () => mockSelectWorkflowGraph(),
-  selectWorkflowDefinition: () => mockSelectWorkflowDefinition(),
-  selectYamlString: () => mockSelectYamlString(),
-}));
+vi.mock('../../../entities/workflows/store/workflow_detail/selectors', () => {
+      const mocked = {
+      selectWorkflowGraph: () => mockSelectWorkflowGraph(),
+      selectWorkflowDefinition: () => mockSelectWorkflowDefinition(),
+      selectYamlString: () => mockSelectYamlString(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_space_id', () => ({
-  useSpaceId: () => mockUseSpaceId(),
-}));
+vi.mock('../../../hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: () => mockUseSpaceId(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/utils/build_step_context_override/build_step_context_override', () => ({
-  buildContextOverride: (...args: unknown[]) => mockBuildContextOverride(...args),
-}));
+vi.mock('../../../shared/utils/build_step_context_override/build_step_context_override', () => {
+      const mocked = {
+      buildContextOverride: (...args: unknown[]) => mockBuildContextOverride(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => ({
-  v4: () => 'mock-uuid-1234',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => 'mock-uuid-1234',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useContextOverrideData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return a function', () => {
@@ -68,7 +85,7 @@ describe('useContextOverrideData', () => {
   });
 
   it('should return null when workflowDefinition is not available', () => {
-    mockSelectWorkflowGraph.mockReturnValue({ getStepGraph: jest.fn() });
+    mockSelectWorkflowGraph.mockReturnValue({ getStepGraph: vi.fn() });
     mockSelectWorkflowDefinition.mockReturnValue(null);
     mockSelectYamlString.mockReturnValue('');
     mockUseSpaceId.mockReturnValue('default');
@@ -80,7 +97,7 @@ describe('useContextOverrideData', () => {
   });
 
   it('should return null when spaceId is not available', () => {
-    mockSelectWorkflowGraph.mockReturnValue({ getStepGraph: jest.fn() });
+    mockSelectWorkflowGraph.mockReturnValue({ getStepGraph: vi.fn() });
     mockSelectWorkflowDefinition.mockReturnValue({ name: 'test' });
     mockSelectYamlString.mockReturnValue('');
     mockUseSpaceId.mockReturnValue(undefined);
@@ -94,7 +111,7 @@ describe('useContextOverrideData', () => {
   it('should call buildContextOverride when all data is available', () => {
     const mockStepSubGraph = { steps: [] };
     const mockGraph = {
-      getStepGraph: jest.fn().mockReturnValue(mockStepSubGraph),
+      getStepGraph: vi.fn().mockReturnValue(mockStepSubGraph),
     };
     const mockDefinition = {
       name: 'test-workflow',
@@ -134,7 +151,7 @@ describe('useContextOverrideData', () => {
   it('should fallback to YAML parsing when inputs are not in workflowDefinition', () => {
     const mockStepSubGraph = { steps: [] };
     const mockGraph = {
-      getStepGraph: jest.fn().mockReturnValue(mockStepSubGraph),
+      getStepGraph: vi.fn().mockReturnValue(mockStepSubGraph),
     };
     const mockDefinition = {
       name: 'test-workflow',

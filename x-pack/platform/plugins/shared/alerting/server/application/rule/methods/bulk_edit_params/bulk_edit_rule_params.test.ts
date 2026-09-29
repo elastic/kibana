@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { RecoveredActionGroup } from '../../../../../common';
@@ -16,19 +19,22 @@ import { toKqlExpression } from '@kbn/es-query';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { getRulesClientMockParams } from '../../../../test_utils';
 
-jest.mock('uuid', () => {
+vi.mock('uuid', () => {
   let uuid = 100;
   return { v4: () => `${uuid++}` };
 });
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
-  bulkMarkApiKeysForInvalidation: jest.fn(),
-}));
+vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
+      const mocked = {
+      bulkMarkApiKeysForInvalidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const kibanaVersion = 'v8.2.0';
-const createAPIKeyMock = jest.fn();
-const isAuthenticationTypeApiKeyMock = jest.fn();
-const getAuthenticationApiKeyMock = jest.fn();
+const createAPIKeyMock = vi.fn();
+const isAuthenticationTypeApiKeyMock = vi.fn();
+const getAuthenticationApiKeyMock = vi.fn();
 
 const {
   rulesClientParams,
@@ -49,14 +55,14 @@ const MOCK_API_KEY = Buffer.from('123:abc').toString('base64');
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 setGlobalDate();
 
 describe('bulkEditRuleParamsWithReadAuth()', () => {
   let rulesClient: RulesClient;
-  let actionsClient: jest.Mocked<ActionsClient>;
+  let actionsClient: Mocked<ActionsClient>;
   const existingRule = {
     id: '1',
     type: RULE_SAVED_OBJECT_TYPE,
@@ -113,10 +119,10 @@ describe('bulkEditRuleParamsWithReadAuth()', () => {
   const mockCreatePointInTimeFinderAsInternalUser = (
     response = { saved_objects: [existingDecryptedRule] }
   ) => {
-    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
       .fn()
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield response;
         },
@@ -126,7 +132,7 @@ describe('bulkEditRuleParamsWithReadAuth()', () => {
   beforeEach(async () => {
     rulesClient = new RulesClient(rulesClientParams);
 
-    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    actionsClient = (await rulesClientParams.getActionsClient()) as Mocked<ActionsClient>;
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
       createMockConnector({
@@ -647,7 +653,7 @@ describe('bulkEditRuleParamsWithReadAuth()', () => {
         ],
       });
 
-      const paramsModifier = jest.fn().mockImplementation((rule) => {
+      const paramsModifier = vi.fn().mockImplementation((rule) => {
         const params = rule.params;
         params.index = ['test-index-*'];
 

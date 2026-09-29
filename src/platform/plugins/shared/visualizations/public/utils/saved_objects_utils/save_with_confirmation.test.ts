@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { saveWithConfirmation } from './save_with_confirmation';
 import type { VisSavedObject } from '../../types';
@@ -16,11 +18,11 @@ import type { VisualizationSavedObjectAttributes } from '../../../common';
 import type { CreateOptions } from '../../../common/content_management';
 
 const coreStart = coreMock.createStart();
-const mockFindContent = jest.fn(() => ({
+const mockFindContent = vi.fn(() => ({
   pagination: { total: 0 },
   hits: [],
 }));
-const mockGetContent = jest.fn(() => ({
+const mockGetContent = vi.fn(() => ({
   item: {
     id: 'test',
     references: [
@@ -42,28 +44,31 @@ const mockGetContent = jest.fn(() => ({
     alias_target_id: null,
   },
 }));
-const mockCreateContent = jest.fn(async (_input: any) => ({
+const mockCreateContent = vi.fn(async (_input: any) => ({
   item: {
     id: 'test',
   },
 }));
 
-const mockUpdateContent = jest.fn(() => ({
+const mockUpdateContent = vi.fn(() => ({
   item: {
     id: 'test',
   },
 }));
 
-jest.mock('../../services', () => ({
-  getContentManagement: jest.fn(() => ({
-    client: {
-      create: mockCreateContent,
-      update: mockUpdateContent,
-      get: mockGetContent,
-      search: mockFindContent,
-    },
-  })),
-}));
+vi.mock('../../services', () => {
+      const mocked = {
+      getContentManagement: vi.fn(() => ({
+        client: {
+          create: mockCreateContent,
+          update: mockUpdateContent,
+          get: mockGetContent,
+          search: mockFindContent,
+        },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('saveWithConfirmation', () => {
   const source: VisualizationSavedObjectAttributes = {} as VisualizationSavedObjectAttributes;
@@ -76,7 +81,7 @@ describe('saveWithConfirmation', () => {
 
   beforeEach(() => {
     mockCreateContent.mockClear();
-    jest.spyOn(deps, 'confirmModalPromise').mockReturnValue(Promise.resolve({} as any));
+    vi.spyOn(deps, 'confirmModalPromise').mockReturnValue(Promise.resolve({} as any));
   });
 
   test('should call create of savedObjectsClient', async () => {
@@ -124,7 +129,7 @@ describe('saveWithConfirmation', () => {
 
   test('should reject when overwriting denied', async () => {
     mockCreateContent.mockReturnValue(Promise.reject({ res: { status: 409 } }));
-    jest.spyOn(deps, 'confirmModalPromise').mockReturnValue(Promise.reject());
+    vi.spyOn(deps, 'confirmModalPromise').mockReturnValue(Promise.reject());
 
     expect.assertions(1);
     await expect(saveWithConfirmation(source, savedObject, options, coreStart)).rejects.toThrow(

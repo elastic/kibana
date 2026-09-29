@@ -5,21 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { VisualizationRenderer } from '@kbn/agent-builder-visualizations-common';
 import { InlineVisualization } from './inline_visualization';
 import type { VisualizationServices } from './services';
 
-jest.mock('./visualize_lens', () => ({
-  VisualizeLens: () => <span data-test-subj="lens-renderer" />,
-}));
-jest.mock('./visualize_vega', () => ({
-  VisualizeVega: () => <span data-test-subj="vega-renderer" />,
-}));
-jest.mock('./visualize_custom_content', () => ({
-  VisualizeCustomContent: () => <span data-test-subj="custom-content-renderer" />,
-}));
+vi.mock('./visualize_lens', () => {
+      const mocked = {
+      VisualizeLens: () => <span data-test-subj="lens-renderer" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./visualize_vega', () => {
+      const mocked = {
+      VisualizeVega: () => <span data-test-subj="vega-renderer" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./visualize_custom_content', () => {
+      const mocked = {
+      VisualizeCustomContent: () => <span data-test-subj="custom-content-renderer" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const services = {} as VisualizationServices;
 

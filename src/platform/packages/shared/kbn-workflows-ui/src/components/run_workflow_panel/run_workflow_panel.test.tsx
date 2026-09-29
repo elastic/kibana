@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
@@ -15,19 +17,19 @@ import type { RunWorkflowExecutor, RunWorkflowPanelProps } from './run_workflow_
 import * as i18n from './translations';
 import type { WorkflowSelectorConfig } from '../workflow_selector/workflow_utils';
 
-const mockMutate = jest.fn();
-const mockUseWorkflows = jest.fn((_params: unknown) => ({ data: { results: mockWorkflowsData } }));
-const mockUseWorkflowsCapabilities = jest.fn(() => ({ canReadManagedWorkflow: true }));
-const mockNavigateToApp = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
+const mockMutate = vi.fn();
+const mockUseWorkflows = vi.fn((_params: unknown) => ({ data: { results: mockWorkflowsData } }));
+const mockUseWorkflowsCapabilities = vi.fn(() => ({ canReadManagedWorkflow: true }));
+const mockNavigateToApp = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
 
 interface MockWorkflowSelectorProps {
   config: WorkflowSelectorConfig;
   onWorkflowChange: (id: string) => void;
 }
 
-const mockWorkflowSelector = jest.fn(({ onWorkflowChange }: MockWorkflowSelectorProps) => (
+const mockWorkflowSelector = vi.fn(({ onWorkflowChange }: MockWorkflowSelectorProps) => (
   <div data-test-subj="workflow-selector-mock">
     <button
       data-test-subj="select-workflow-option"
@@ -74,51 +76,69 @@ const requiredInputsWorkflow: WorkflowListItemDto = {
 
 let mockWorkflowsData: WorkflowListItemDto[] = [noInputsWorkflow];
 
-jest.mock('../../hooks/use_run_workflow', () => ({
-  useRunWorkflow: () => ({ mutate: mockMutate }),
-}));
+vi.mock('../../hooks/use_run_workflow', () => {
+      const mocked = {
+      useRunWorkflow: () => ({ mutate: mockMutate }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_workflows', () => ({
-  useWorkflows: (params: unknown) => mockUseWorkflows(params),
-}));
+vi.mock('../../hooks/use_workflows', () => {
+      const mocked = {
+      useWorkflows: (params: unknown) => mockUseWorkflows(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_workflows_capabilities', () => ({
-  useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
-}));
+vi.mock('../../hooks/use_workflows_capabilities', () => {
+      const mocked = {
+      useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../workflow_selector/workflow_selector', () => ({
-  WorkflowSelector: (props: MockWorkflowSelectorProps) => mockWorkflowSelector(props),
-}));
+vi.mock('../workflow_selector/workflow_selector', () => {
+      const mocked = {
+      WorkflowSelector: (props: MockWorkflowSelectorProps) => mockWorkflowSelector(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./run_workflow_inputs_modal', () => ({
-  RunWorkflowInputsModal: ({
-    onSubmit,
-    onCancel,
-  }: {
-    onSubmit: (v: Record<string, unknown>) => void;
-    onCancel: () => void;
-  }) => (
-    <div data-test-subj="run-workflow-inputs-modal">
-      <button
-        data-test-subj="inputs-modal-submit"
-        type="button"
-        onClick={() => onSubmit({ ticketId: 'ABC' })}
-      >
-        {'Run'}
-      </button>
-      <button data-test-subj="inputs-modal-cancel" type="button" onClick={onCancel}>
-        {'Cancel'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./run_workflow_inputs_modal', () => {
+      const mocked = {
+      RunWorkflowInputsModal: ({
+        onSubmit,
+        onCancel,
+      }: {
+        onSubmit: (v: Record<string, unknown>) => void;
+        onCancel: () => void;
+      }) => (
+        <div data-test-subj="run-workflow-inputs-modal">
+          <button
+            data-test-subj="inputs-modal-submit"
+            type="button"
+            onClick={() => onSubmit({ ticketId: 'ABC' })}
+          >
+            {'Run'}
+          </button>
+          <button data-test-subj="inputs-modal-cancel" type="button" onClick={onCancel}>
+            {'Cancel'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: (node: unknown) => node,
-}));
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = {
+      toMountPoint: (node: unknown) => node,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const actual = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...actual,
     useKibana: () => ({
@@ -141,7 +161,7 @@ const defaultProps: RunWorkflowPanelProps = {
   sortWorkflow: (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
     Number((b.definition?.triggers ?? []).some((t) => t.type === 'alert')) -
     Number((a.definition?.triggers ?? []).some((t) => t.type === 'alert')),
-  onClose: jest.fn(),
+  onClose: vi.fn(),
 };
 
 const renderComponent = (props: Partial<RunWorkflowPanelProps> = {}) =>
@@ -149,7 +169,7 @@ const renderComponent = (props: Partial<RunWorkflowPanelProps> = {}) =>
 
 describe('RunWorkflowPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockWorkflowsData = [noInputsWorkflow];
     mockUseWorkflowsCapabilities.mockReturnValue({ canReadManagedWorkflow: true });
   });
@@ -208,7 +228,7 @@ describe('RunWorkflowPanel', () => {
   });
 
   it('should call onClose on settled', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     renderComponent({ onClose });
 
     fireEvent.click(screen.getByTestId('select-workflow-option'));
@@ -221,7 +241,7 @@ describe('RunWorkflowPanel', () => {
   });
 
   it('should call onExecute when provided', () => {
-    const onExecute = jest.fn();
+    const onExecute = vi.fn();
     renderComponent({ onExecute });
 
     fireEvent.click(screen.getByTestId('select-workflow-option'));
@@ -419,7 +439,7 @@ describe('RunWorkflowPanel', () => {
 
   describe('with injected runWorkflow executor', () => {
     it('calls the injected executor instead of the default mutation', async () => {
-      const runWorkflow: RunWorkflowExecutor = jest
+      const runWorkflow: RunWorkflowExecutor = vi
         .fn()
         .mockResolvedValue({ workflowExecutionId: 'injected-exec-1' });
 
@@ -438,11 +458,11 @@ describe('RunWorkflowPanel', () => {
     });
 
     it('shows a success toast and closes the modal on success', async () => {
-      const runWorkflow: RunWorkflowExecutor = jest
+      const runWorkflow: RunWorkflowExecutor = vi
         .fn()
         .mockResolvedValue({ workflowExecutionId: 'exec-ok' });
-      const onClose = jest.fn();
-      const onExecutionSettled = jest.fn();
+      const onClose = vi.fn();
+      const onExecutionSettled = vi.fn();
 
       renderComponent({ runWorkflow, onClose, onExecutionSettled });
 
@@ -458,10 +478,10 @@ describe('RunWorkflowPanel', () => {
     });
 
     it('shows an error toast and closes the modal on rejection', async () => {
-      const runWorkflow: RunWorkflowExecutor = jest
+      const runWorkflow: RunWorkflowExecutor = vi
         .fn()
         .mockRejectedValue(new Error('executor failed'));
-      const onClose = jest.fn();
+      const onClose = vi.fn();
 
       renderComponent({ runWorkflow, onClose });
 
@@ -477,10 +497,10 @@ describe('RunWorkflowPanel', () => {
     });
 
     it('shows an error toast and closes the modal when the executor throws synchronously', async () => {
-      const runWorkflow: RunWorkflowExecutor = jest.fn(() => {
+      const runWorkflow: RunWorkflowExecutor = vi.fn(() => {
         throw new Error('executor threw');
       });
-      const onClose = jest.fn();
+      const onClose = vi.fn();
 
       renderComponent({ runWorkflow, onClose });
 
@@ -497,7 +517,7 @@ describe('RunWorkflowPanel', () => {
     });
 
     it('prefers the API error message in the error toast', async () => {
-      const runWorkflow: RunWorkflowExecutor = jest.fn().mockRejectedValue(
+      const runWorkflow: RunWorkflowExecutor = vi.fn().mockRejectedValue(
         Object.assign(new Error('Bad Request'), {
           body: { message: 'Select 10 or fewer cases', statusCode: 400 },
         })
@@ -518,14 +538,14 @@ describe('RunWorkflowPanel', () => {
 
     it('does not close a newly mounted panel when a dismissed execution settles', async () => {
       let resolveExecution: (value: { workflowExecutionId: string }) => void = () => {};
-      const runWorkflow: RunWorkflowExecutor = jest.fn(
+      const runWorkflow: RunWorkflowExecutor = vi.fn(
         () =>
           new Promise((resolve) => {
             resolveExecution = resolve;
           })
       );
-      const onClose = jest.fn();
-      const onExecutionSettled = jest.fn();
+      const onClose = vi.fn();
+      const onExecutionSettled = vi.fn();
 
       const { unmount } = renderComponent({ runWorkflow, onClose, onExecutionSettled });
       fireEvent.click(screen.getByTestId('select-workflow-option'));
@@ -543,7 +563,7 @@ describe('RunWorkflowPanel', () => {
 
     it('merges extra inputs from the inputs modal with the base inputs when using injected executor', async () => {
       mockWorkflowsData = [requiredInputsWorkflow];
-      const runWorkflow: RunWorkflowExecutor = jest
+      const runWorkflow: RunWorkflowExecutor = vi
         .fn()
         .mockResolvedValue({ workflowExecutionId: 'exec-merged' });
 

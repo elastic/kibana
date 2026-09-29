@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { useRulesTableFilers } from './use_rules_table_filters';
 
 describe('useRulesTableFilers', () => {
-  let mockUrlStateStorage: jest.Mocked<IKbnUrlStateStorage>;
-  let mockSetRefresh: jest.Mock;
+  let mockUrlStateStorage: Mocked<IKbnUrlStateStorage>;
+  let mockSetRefresh: Mock;
 
   beforeEach(() => {
-    mockSetRefresh = jest.fn();
+    mockSetRefresh = vi.fn();
     mockUrlStateStorage = {
-      get: jest.fn(),
-      set: jest.fn(),
-    } as unknown as jest.Mocked<IKbnUrlStateStorage>;
+      get: vi.fn(),
+      set: vi.fn(),
+    } as unknown as Mocked<IKbnUrlStateStorage>;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should initialize with state from urlStateStorage', () => {

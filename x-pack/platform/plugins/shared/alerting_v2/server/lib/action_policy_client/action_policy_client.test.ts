@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
@@ -30,22 +33,22 @@ import { ActionPolicyClient } from './action_policy_client';
 describe('ActionPolicyClient', () => {
   let client: ActionPolicyClient;
   let actionPolicySavedObjectService: ActionPolicySavedObjectService;
-  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockSavedObjectsClient: Mocked<SavedObjectsClientContract>;
   let userService: UserService;
-  let userProfileService: jest.Mocked<UserProfileServiceStart>;
-  let apiKeyService: jest.Mocked<ApiKeyServiceContract>;
+  let userProfileService: Mocked<UserProfileServiceStart>;
+  let apiKeyService: Mocked<ApiKeyServiceContract>;
   let loggerService: LoggerService;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
   let mockEncryptedSavedObjects: ReturnType<typeof createMockEncryptedSavedObjects>;
   let mockEsoClient: ReturnType<ReturnType<typeof createMockEncryptedSavedObjects>['getClient']>;
   let licenseService: ReturnType<typeof createMockLicenseService>;
 
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     ({ actionPolicySavedObjectService, mockSavedObjectsClient } =
       createActionPolicySavedObjectService());
@@ -94,7 +97,7 @@ describe('ActionPolicyClient', () => {
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('createActionPolicy', () => {
@@ -1104,7 +1107,7 @@ describe('ActionPolicyClient', () => {
         version: 'WzIsMV0=',
       });
       const esoClient = mockEncryptedSavedObjects.getClient();
-      (esoClient.getDecryptedAsInternalUser as jest.Mock).mockRejectedValueOnce(
+      (esoClient.getDecryptedAsInternalUser as Mock).mockRejectedValueOnce(
         new Error('cannot decrypt')
       );
 
@@ -1205,7 +1208,7 @@ describe('ActionPolicyClient', () => {
         version: 'WzIsMV0=',
       });
       const esoClient = mockEncryptedSavedObjects.getClient();
-      (esoClient.getDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce({
+      (esoClient.getDecryptedAsInternalUser as Mock).mockResolvedValueOnce({
         id: 'policy-id-update-1',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         attributes: {
@@ -1250,7 +1253,7 @@ describe('ActionPolicyClient', () => {
       });
       mockSavedObjectsClient.update.mockRejectedValueOnce(new Error('storage error'));
       const esoClient = mockEncryptedSavedObjects.getClient();
-      (esoClient.getDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce({
+      (esoClient.getDecryptedAsInternalUser as Mock).mockResolvedValueOnce({
         id: 'policy-id-update-throw',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         attributes: {
@@ -1302,7 +1305,7 @@ describe('ActionPolicyClient', () => {
         version: 'WzIsMV0=',
       });
       const esoClient = mockEncryptedSavedObjects.getClient();
-      (esoClient.getDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce({
+      (esoClient.getDecryptedAsInternalUser as Mock).mockResolvedValueOnce({
         id: 'policy-id-update-no-key',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         attributes: {
@@ -2316,7 +2319,7 @@ describe('ActionPolicyClient', () => {
       policies: Array<{ id: string; apiKey: string; createdByUser?: boolean }>
     ) => {
       const esoClient = mockEncryptedSavedObjects.getClient();
-      (esoClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce(
+      (esoClient.createPointInTimeFinderDecryptedAsInternalUser as Mock).mockResolvedValueOnce(
         {
           async *find() {
             yield {
@@ -2332,7 +2335,7 @@ describe('ActionPolicyClient', () => {
               })),
             };
           },
-          close: jest.fn(),
+          close: vi.fn(),
         }
       );
     };
@@ -2489,7 +2492,7 @@ describe('ActionPolicyClient', () => {
 
     it('does not throw when PIT finder fails during bulk delete', async () => {
       const esoClient = mockEncryptedSavedObjects.getClient();
-      (esoClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock).mockRejectedValueOnce(
+      (esoClient.createPointInTimeFinderDecryptedAsInternalUser as Mock).mockRejectedValueOnce(
         new Error('decryption failure')
       );
       mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
@@ -2743,7 +2746,7 @@ describe('ActionPolicyClient', () => {
 
     it('does not mark API key for invalidation when policy auth was createdByUser', async () => {
       const esoClient = mockEncryptedSavedObjects.getClient();
-      (esoClient.getDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce({
+      (esoClient.getDecryptedAsInternalUser as Mock).mockResolvedValueOnce({
         id: 'policy-id-del-user',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         attributes: {
@@ -2800,7 +2803,7 @@ describe('ActionPolicyClient', () => {
         },
       });
       const esoClient = mockEncryptedSavedObjects.getClient();
-      (esoClient.getDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce({
+      (esoClient.getDecryptedAsInternalUser as Mock).mockResolvedValueOnce({
         id: 'policy-id-del-no-key',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         attributes: {

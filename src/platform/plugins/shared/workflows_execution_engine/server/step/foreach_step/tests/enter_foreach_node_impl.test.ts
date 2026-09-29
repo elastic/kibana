@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ForEachStep } from '@kbn/workflows';
 import type { EnterForeachNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
@@ -36,26 +39,26 @@ describe('EnterForeachNodeImpl', () => {
       } as ForEachStep,
     };
     workflowExecutionRuntimeManager = {} as unknown as WorkflowExecutionRuntimeManager;
-    workflowExecutionRuntimeManager.navigateToNextNode = jest.fn();
-    workflowExecutionRuntimeManager.navigateToNode = jest.fn();
-    workflowExecutionRuntimeManager.navigateToSynthetic = jest.fn();
+    workflowExecutionRuntimeManager.navigateToNextNode = vi.fn();
+    workflowExecutionRuntimeManager.navigateToNode = vi.fn();
+    workflowExecutionRuntimeManager.navigateToSynthetic = vi.fn();
 
     stepExecutionRuntime = {} as unknown as StepExecutionRuntime;
-    stepExecutionRuntime.startStep = jest.fn();
-    stepExecutionRuntime.finishStep = jest.fn();
-    stepExecutionRuntime.getCurrentStepState = jest.fn();
-    stepExecutionRuntime.setCurrentStepState = jest.fn();
-    stepExecutionRuntime.setInput = jest.fn();
+    stepExecutionRuntime.startStep = vi.fn();
+    stepExecutionRuntime.finishStep = vi.fn();
+    stepExecutionRuntime.getCurrentStepState = vi.fn();
+    stepExecutionRuntime.setCurrentStepState = vi.fn();
+    stepExecutionRuntime.setInput = vi.fn();
     stepExecutionRuntime.contextManager = {
-      renderValueAccordingToContext: jest.fn().mockImplementation((input) => input),
-      evaluateExpressionInContext: jest.fn().mockImplementation((input) => input),
+      renderValueAccordingToContext: vi.fn().mockImplementation((input) => input),
+      evaluateExpressionInContext: vi.fn().mockImplementation((input) => input),
     } as any;
 
     workflowLogger = {} as unknown as IWorkflowEventLogger;
-    workflowLogger.logDebug = jest.fn();
+    workflowLogger.logDebug = vi.fn();
     stepIoService = {
-      pinForeachSource: jest.fn(),
-      unpinForeachScope: jest.fn(),
+      pinForeachSource: vi.fn(),
+      unpinForeachScope: vi.fn(),
     } as unknown as StepIoService;
     underTest = new EnterForeachNodeImpl(
       node,
@@ -68,7 +71,7 @@ describe('EnterForeachNodeImpl', () => {
 
   describe('on the first enter', () => {
     beforeEach(() => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue(undefined);
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue(undefined);
     });
 
     it('should enter the iteration scope', async () => {
@@ -83,7 +86,7 @@ describe('EnterForeachNodeImpl', () => {
     describe('when foreach configuration is an array with items', () => {
       beforeEach(() => {
         node.configuration.foreach = JSON.stringify(['item1', 'item2', 'item3']);
-        stepExecutionRuntime.contextManager.evaluateExpressionInContext = jest
+        stepExecutionRuntime.contextManager.evaluateExpressionInContext = vi
           .fn()
           .mockImplementation((input) => input);
       });
@@ -127,7 +130,7 @@ describe('EnterForeachNodeImpl', () => {
     describe('when foreach configuration is an expression', () => {
       beforeEach(() => {
         node.configuration.foreach = '{{steps.testStep.array}}';
-        stepExecutionRuntime.contextManager.evaluateExpressionInContext = jest
+        stepExecutionRuntime.contextManager.evaluateExpressionInContext = vi
           .fn()
           .mockReturnValue(['item1', 'item2', 'item3']);
       });
@@ -157,7 +160,7 @@ describe('EnterForeachNodeImpl', () => {
 
       it('should parse value returned by expression if it is a string', async () => {
         (
-          stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
+          stepExecutionRuntime.contextManager.evaluateExpressionInContext as Mock
         ).mockReturnValue('["item1", "item2", "item3"]');
         await underTest.run();
 
@@ -170,7 +173,7 @@ describe('EnterForeachNodeImpl', () => {
 
       it('should throw an error if expression evaluated to null', async () => {
         (
-          stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
+          stepExecutionRuntime.contextManager.evaluateExpressionInContext as Mock
         ).mockReturnValue(null);
         await expect(underTest.run()).rejects.toThrow(
           'Foreach expression must evaluate to an array. Expression "{{steps.testStep.array}}" resolved to object (null).'
@@ -185,7 +188,7 @@ describe('EnterForeachNodeImpl', () => {
 
       it('should throw an error if the expression evaluated to an object', async () => {
         (
-          stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
+          stepExecutionRuntime.contextManager.evaluateExpressionInContext as Mock
         ).mockReturnValue({
           key: 'value',
         });
@@ -196,7 +199,7 @@ describe('EnterForeachNodeImpl', () => {
 
       it('should throw an error if expression evaluates to string that could not be parsed', async () => {
         (
-          stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
+          stepExecutionRuntime.contextManager.evaluateExpressionInContext as Mock
         ).mockReturnValue('{"key": value }');
         await expect(underTest.run()).rejects.toThrow(
           'Unable to parse rendered value: {"key": value }'
@@ -207,7 +210,7 @@ describe('EnterForeachNodeImpl', () => {
     describe('when foreach configuration is renderable string', () => {
       beforeEach(() => {
         node.configuration.foreach = '[{ "object": {{steps.testStep.array}}}]';
-        stepExecutionRuntime.contextManager.renderValueAccordingToContext = jest
+        stepExecutionRuntime.contextManager.renderValueAccordingToContext = vi
           .fn()
           .mockReturnValue(JSON.stringify(['item1', 'item2', 'item3']));
       });
@@ -232,7 +235,7 @@ describe('EnterForeachNodeImpl', () => {
 
       it('should throw an error if rendering reurned not an array', async () => {
         (
-          stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+          stepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock
         ).mockReturnValue(JSON.stringify({ foo: 'bar' }));
         await expect(underTest.run()).rejects.toThrow(
           'Foreach expression must evaluate to an array.'
@@ -241,7 +244,7 @@ describe('EnterForeachNodeImpl', () => {
 
       it('should throw an error if expression evaluates to string that could not be parsed', async () => {
         (
-          stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+          stepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock
         ).mockReturnValue('{"key": value }');
         await expect(underTest.run()).rejects.toThrow(
           'Unable to parse rendered value: {"key": value }'
@@ -389,7 +392,7 @@ describe('EnterForeachNodeImpl', () => {
 
   describe('on next iterations', () => {
     beforeEach(() => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+      (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         index: 0,
         total: 3,
       });

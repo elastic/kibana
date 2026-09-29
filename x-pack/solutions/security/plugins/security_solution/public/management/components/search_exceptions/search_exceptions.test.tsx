@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -19,10 +22,10 @@ import { initialUserPrivilegesState } from '../../../common/components/user_priv
 import type { EndpointPrivileges } from '../../../../common/endpoint/types';
 import { allFleetHttpMocks } from '../../mocks';
 
-jest.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/components/user_privileges');
 
-let onSearchMock: jest.Mock;
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+let onSearchMock: Mock;
+const mockUseUserPrivileges = useUserPrivileges as Mock;
 
 describe('Search exceptions', () => {
   let appTestContext: AppContextTestRender;
@@ -43,7 +46,7 @@ describe('Search exceptions', () => {
   };
 
   beforeEach(() => {
-    onSearchMock = jest.fn();
+    onSearchMock = vi.fn();
     appTestContext = createAppRootMockRenderer();
 
     allFleetHttpMocks(appTestContext.coreStart.http);

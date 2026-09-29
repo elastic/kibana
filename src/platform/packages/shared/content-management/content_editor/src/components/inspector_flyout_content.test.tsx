@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,11 +20,11 @@ import type { Props as ContentEditorFlyoutContentProps } from './editor_flyout_c
 
 describe('<ContentEditorFlyoutContent />', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('metadata', () => {
@@ -55,7 +57,7 @@ describe('<ContentEditorFlyoutContent />', () => {
 
     const waitForValidationResults = async () => {
       await act(async () => {
-        jest.advanceTimersByTime(550); // There is a 500ms delay to display input errors + async validation
+        vi.advanceTimersByTime(550); // There is a 500ms delay to display input errors + async validation
       });
     };
 
@@ -103,7 +105,7 @@ describe('<ContentEditorFlyoutContent />', () => {
     });
 
     test('should save form only if something changes', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
 
       await act(async () => {
         testBed = await setup({ onSave, isReadonly: false });
@@ -121,7 +123,7 @@ describe('<ContentEditorFlyoutContent />', () => {
     });
 
     test('should send back the updated item to the onSave() handler', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
 
       await act(async () => {
         testBed = await setup({ onSave, isReadonly: false });
@@ -157,7 +159,7 @@ describe('<ContentEditorFlyoutContent />', () => {
     });
 
     test('should validate that the form is valid', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
 
       await act(async () => {
         testBed = await setup({ onSave, isReadonly: false });
@@ -190,7 +192,7 @@ describe('<ContentEditorFlyoutContent />', () => {
     });
 
     test('should notify saving errors', async () => {
-      const notifyError = jest.fn();
+      const notifyError = vi.fn();
       const onSave = async () => {
         throw new Error('Houston we got a problem');
       };
@@ -242,7 +244,7 @@ describe('<ContentEditorFlyoutContent />', () => {
     });
 
     test('should update the tag selection', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
 
       await act(async () => {
         testBed = await setup({ onSave, isReadonly: false });

@@ -5,25 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { AlertEpisodesStatusFilter } from './status_filter';
 import * as inlineFilterPopoverModule from './inline_filter_popover';
 import userEvent from '@testing-library/user-event';
 
-const InlineFilterPopoverSpy = jest.spyOn(inlineFilterPopoverModule, 'InlineFilterPopover');
+const InlineFilterPopoverSpy = vi.spyOn(inlineFilterPopoverModule, 'InlineFilterPopover');
 
 describe('StatusFilter', () => {
   const defaultProps = {
     selectedStatuses: null,
-    onStatusesChange: jest.fn(),
+    onStatusesChange: vi.fn(),
     'data-test-subj': 'test-status-filter',
   };
 
   const user = userEvent.setup({ delay: null });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {
@@ -147,7 +149,7 @@ describe('StatusFilter', () => {
 
   describe('selection callback', () => {
     it('calls onStatusesChange with the full array when values are provided', async () => {
-      const onStatusesChange = jest.fn();
+      const onStatusesChange = vi.fn();
       render(<AlertEpisodesStatusFilter {...defaultProps} onStatusesChange={onStatusesChange} />);
       await openPopover();
 
@@ -160,7 +162,7 @@ describe('StatusFilter', () => {
     });
 
     it('calls onStatusesChange with undefined when empty array is provided', async () => {
-      const onStatusesChange = jest.fn();
+      const onStatusesChange = vi.fn();
       render(<AlertEpisodesStatusFilter {...defaultProps} onStatusesChange={onStatusesChange} />);
       await openPopover();
 

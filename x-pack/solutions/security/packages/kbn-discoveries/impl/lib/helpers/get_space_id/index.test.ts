@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { getSpaceId } from '.';
 
@@ -29,7 +31,7 @@ describe('getSpaceId', () => {
 
   it('returns the space ID from the spaces service', () => {
     const request = httpServerMock.createKibanaRequest();
-    const spaces = { getSpaceId: jest.fn().mockReturnValue('custom-space') } as never;
+    const spaces = { getSpaceId: vi.fn().mockReturnValue('custom-space') } as never;
 
     expect(getSpaceId({ request, spaces })).toBe('custom-space');
   });

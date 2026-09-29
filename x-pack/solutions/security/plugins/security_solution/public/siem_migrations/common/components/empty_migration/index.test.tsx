@@ -5,26 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { EmptyMigration } from '.';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 
-jest.mock('../../../../common/components/links', () => ({
-  useGetSecuritySolutionLinkProps: jest.fn(),
-}));
+vi.mock('../../../../common/components/links', () => {
+      const mocked = {
+      useGetSecuritySolutionLinkProps: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EmptyMigration', () => {
-  const onClickMock = jest.fn();
+  const onClickMock = vi.fn();
 
   beforeEach(() => {
-    (useGetSecuritySolutionLinkProps as jest.Mock).mockReturnValue(() => ({
+    (useGetSecuritySolutionLinkProps as Mock).mockReturnValue(() => ({
       onClick: onClickMock,
     }));
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the empty prompt', () => {

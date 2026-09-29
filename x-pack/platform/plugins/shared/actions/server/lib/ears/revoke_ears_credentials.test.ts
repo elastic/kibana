@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-jest.mock('./request_ears_revoke');
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
+vi.mock('./request_ears_revoke');
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { requestEarsRevoke } from './request_ears_revoke';
 import { revokeEarsCredentials } from './revoke_ears_credentials';
 
-const mockRequestEarsRevoke = requestEarsRevoke as jest.MockedFunction<typeof requestEarsRevoke>;
+const mockRequestEarsRevoke = requestEarsRevoke as MockedFunction<typeof requestEarsRevoke>;
 
 describe('revokeEarsCredentials', () => {
   const logger = loggerMock.create();
   const configurationUtilities = actionsConfigMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockRequestEarsRevoke.mockResolvedValue(undefined);
   });
 

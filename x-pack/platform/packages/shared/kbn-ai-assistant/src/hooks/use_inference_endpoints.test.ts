@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useInferenceEndpoints } from './use_inference_endpoints';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 
-jest.mock('./use_ai_assistant_app_service');
+vi.mock('./use_ai_assistant_app_service');
 
 describe('useInferenceEndpoints', () => {
-  const mockCallApi = jest.fn();
+  const mockCallApi = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useAIAssistantAppService as jest.Mock).mockReturnValue({
+    (useAIAssistantAppService as Mock).mockReturnValue({
       callApi: mockCallApi,
     });
   });

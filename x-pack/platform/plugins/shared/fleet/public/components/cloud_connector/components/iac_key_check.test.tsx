@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -23,35 +26,39 @@ import { IacKeyCheck } from './iac_key_check';
 
 // ---------- module mocks ----------
 
-jest.mock('../hooks/use_verify_iac_key');
-jest.mock('../hooks/use_cloud_connector_template');
-jest.mock('../../../hooks', () => ({
-  useIacProvisioner: jest.fn(),
-  useStartServices: jest.fn(),
-}));
-jest.mock('../hooks/use_update_cloud_connector', () => ({
-  updateCloudConnector: jest.fn(() => Promise.resolve({})),
-}));
+vi.mock('../hooks/use_verify_iac_key');
+vi.mock('../hooks/use_cloud_connector_template');
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useIacProvisioner: vi.fn(),
+      useStartServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_update_cloud_connector', () => {
+      const mocked = {
+      updateCloudConnector: vi.fn(() => Promise.resolve({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ---------- typed references ----------
 
-const mockUseVerifyIacKey = useVerifyIacKey as jest.MockedFunction<typeof useVerifyIacKey>;
-const mockUseCloudConnectorTemplate = useCloudConnectorTemplate as jest.MockedFunction<
+const mockUseVerifyIacKey = useVerifyIacKey as MockedFunction<typeof useVerifyIacKey>;
+const mockUseCloudConnectorTemplate = useCloudConnectorTemplate as MockedFunction<
   typeof useCloudConnectorTemplate
 >;
 
-const { useIacProvisioner, useStartServices } = jest.requireMock('../../../hooks') as {
-  useIacProvisioner: jest.MockedFunction<() => { isIacProvisionerEnabled: boolean }>;
-  useStartServices: jest.MockedFunction<
-    () => { analytics: { reportEvent: jest.Mock }; http: typeof mockHttp; notifications?: unknown }
+const { useIacProvisioner, useStartServices } = (await vi.importMock('../../../hooks')) as {
+  useIacProvisioner: MockedFunction<() => { isIacProvisionerEnabled: boolean }>;
+  useStartServices: MockedFunction<
+    () => { analytics: { reportEvent: Mock }; http: typeof mockHttp; notifications?: unknown }
   >;
 };
 
-const { updateCloudConnector: mockUpdateCloudConnector } = jest.requireMock(
-  '../hooks/use_update_cloud_connector'
-) as { updateCloudConnector: jest.MockedFunction<(...args: unknown[]) => Promise<unknown>> };
+const { updateCloudConnector: mockUpdateCloudConnector } = (await vi.importMock('../hooks/use_update_cloud_connector')) as { updateCloudConnector: MockedFunction<(...args: unknown[]) => Promise<unknown>> };
 
-const mockHttp = { put: jest.fn() };
+const mockHttp = { put: vi.fn() };
 
 let queryClient: QueryClient;
 
@@ -64,8 +71,8 @@ const withProviders = (component: React.ReactElement) => (
 );
 const renderWithIntl = (component: React.ReactElement) => render(withProviders(component));
 
-const mockLaunchOnClick = jest.fn();
-const mockReportEvent = jest.fn();
+const mockLaunchOnClick = vi.fn();
+const mockReportEvent = vi.fn();
 
 const integrations: RenderIacTemplateIntegration[] = [
   { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
@@ -94,7 +101,7 @@ const RENDERED_BLUEPRINT = { blueprintId: 'federated-identity', blueprintVersion
 // ---------- shared before/after ----------
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 
   queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
@@ -112,7 +119,7 @@ beforeEach(() => {
     launchButtonProps: { onClick: mockLaunchOnClick },
     isDisabled: false,
     isGeneratingTemplate: false,
-    clearIacConfirm: jest.fn(),
+    clearIacConfirm: vi.fn(),
     isIacProvisionerEnabled: true,
   });
 
@@ -134,7 +141,7 @@ describe('IacKeyCheck', () => {
     });
 
     it('is disabled when there are no integrations, so no request is made', () => {
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       renderWithIntl(
         <IacKeyCheck {...defaultProps} integrations={[]} onValidityChange={onValidityChange} />
@@ -148,7 +155,7 @@ describe('IacKeyCheck', () => {
 
     it('is disabled when IaCP is off and does not report validity', () => {
       useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       renderWithIntl(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />);
 
@@ -168,7 +175,7 @@ describe('IacKeyCheck', () => {
 
     it('is hidden when the deployed template matches and reports valid', async () => {
       mockVerifyResult({ matches: true, integrations: [] });
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       renderWithIntl(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />);
 
@@ -180,7 +187,7 @@ describe('IacKeyCheck', () => {
 
     it('renders the callout on key_mismatch and reports invalid', async () => {
       mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       renderWithIntl(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />);
 
@@ -195,7 +202,7 @@ describe('IacKeyCheck', () => {
     it('renders the callout on no_key and blocks, like a mismatch', async () => {
       // A missing key means the deployed template is not known to cover the selection.
       mockVerifyResult({ matches: false, reason: 'no_key', integrations: [] });
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       renderWithIntl(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />);
 
@@ -222,7 +229,7 @@ describe('IacKeyCheck', () => {
         data: undefined,
         isError: true,
       } as unknown as ReturnType<typeof useVerifyIacKey>);
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       renderWithIntl(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />);
 
@@ -246,7 +253,7 @@ describe('IacKeyCheck', () => {
       // "invalid" would hand extension hosts (which only forward a block) a false they cannot
       // clear.
       pendingFirstCheck();
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       const { rerender } = renderWithIntl(
         <IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />
@@ -263,7 +270,7 @@ describe('IacKeyCheck', () => {
 
     it('reports invalid once, when the pending check resolves to key_mismatch', async () => {
       pendingFirstCheck();
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       const { rerender } = renderWithIntl(
         <IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />
@@ -281,7 +288,7 @@ describe('IacKeyCheck', () => {
 
     it('reports valid once a pending check fails open', async () => {
       pendingFirstCheck();
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       const { rerender } = renderWithIntl(
         <IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />
@@ -299,7 +306,7 @@ describe('IacKeyCheck', () => {
     it('reports nothing while pending even when the check is disabled', () => {
       useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
       pendingFirstCheck();
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       renderWithIntl(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />);
 
@@ -311,7 +318,7 @@ describe('IacKeyCheck', () => {
       // would loop: report → update → new callback → report …
       mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
 
-      const first = jest.fn();
+      const first = vi.fn();
       const { rerender } = renderWithIntl(
         <IacKeyCheck {...defaultProps} onValidityChange={first} />
       );
@@ -319,7 +326,7 @@ describe('IacKeyCheck', () => {
       expect(first).toHaveBeenCalledTimes(1);
 
       // Same blocking state, new callback identity (what a host does after each state update).
-      const second = jest.fn();
+      const second = vi.fn();
       rerender(withProviders(<IacKeyCheck {...defaultProps} onValidityChange={second} />));
       expect(second).not.toHaveBeenCalled();
       expect(first).toHaveBeenCalledTimes(1);
@@ -363,7 +370,7 @@ describe('IacKeyCheck', () => {
         integrations: [],
         deploymentId: undefined,
       });
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       renderWithIntl(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />);
 
@@ -376,7 +383,7 @@ describe('IacKeyCheck', () => {
     });
 
     it('onTemplateRendered stores the key, invalidates both query keys, and does not toast', async () => {
-      const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+      const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
       let capturedOnTemplateRendered: ((r: TemplateRendered) => void) | undefined;
       mockUseCloudConnectorTemplate.mockImplementation(({ onTemplateRendered }) => {
@@ -385,12 +392,12 @@ describe('IacKeyCheck', () => {
           launchButtonProps: { onClick: mockLaunchOnClick },
           isDisabled: false,
           isGeneratingTemplate: false,
-          clearIacConfirm: jest.fn(),
+          clearIacConfirm: vi.fn(),
           isIacProvisionerEnabled: true,
         };
       });
 
-      const mockAddSuccess = jest.fn();
+      const mockAddSuccess = vi.fn();
       useStartServices.mockReturnValue({
         analytics: { reportEvent: mockReportEvent },
         http: mockHttp,
@@ -428,7 +435,7 @@ describe('IacKeyCheck', () => {
           launchButtonProps: { onClick: mockLaunchOnClick },
           isDisabled: false,
           isGeneratingTemplate: false,
-          clearIacConfirm: jest.fn(),
+          clearIacConfirm: vi.fn(),
           isIacProvisionerEnabled: true,
         };
       });
@@ -454,7 +461,7 @@ describe('IacKeyCheck', () => {
           launchButtonProps: { onClick: mockLaunchOnClick },
           isDisabled: false,
           isGeneratingTemplate: false,
-          clearIacConfirm: jest.fn(),
+          clearIacConfirm: vi.fn(),
           isIacProvisionerEnabled: true,
         };
       });
@@ -471,7 +478,7 @@ describe('IacKeyCheck', () => {
       // Deploy.
       mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
       const getOnTemplateRendered = captureOnTemplateRendered();
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       renderWithIntl(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />);
       await waitFor(() => expect(onValidityChange).toHaveBeenCalledWith(false));
@@ -504,7 +511,7 @@ describe('IacKeyCheck', () => {
     it('forgets the launch when the connector changes: the new identity is blocked again', async () => {
       mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
       const getOnTemplateRendered = captureOnTemplateRendered();
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       const { rerender } = renderWithIntl(
         <IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />
@@ -531,7 +538,7 @@ describe('IacKeyCheck', () => {
     it('does not lift the block when the render produced no key', async () => {
       mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
       const getOnTemplateRendered = captureOnTemplateRendered();
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       renderWithIntl(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />);
       await waitFor(() => expect(onValidityChange).toHaveBeenCalledWith(false));
@@ -547,7 +554,7 @@ describe('IacKeyCheck', () => {
       // The template was rendered for the set at click time; a wider set is not covered by it.
       mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
       const getOnTemplateRendered = captureOnTemplateRendered();
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       const { rerender } = renderWithIntl(
         <IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />
@@ -583,7 +590,7 @@ describe('IacKeyCheck', () => {
       // Hosts rebuild the array on every render; only a real change of content resets the launch.
       mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
       const getOnTemplateRendered = captureOnTemplateRendered();
-      const onValidityChange = jest.fn();
+      const onValidityChange = vi.fn();
 
       const { rerender } = renderWithIntl(
         <IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />
@@ -611,8 +618,8 @@ describe('IacKeyCheck', () => {
       it('hands the template details to the host instead of writing the connector', async () => {
         mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
         const getOnTemplateRendered = captureOnTemplateRendered();
-        const onTemplateRecorded = jest.fn();
-        const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+        const onTemplateRecorded = vi.fn();
+        const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
         renderWithIntl(
           <IacKeyCheck
@@ -645,13 +652,13 @@ describe('IacKeyCheck', () => {
       it('still lifts the block and shows the launched state', async () => {
         mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
         const getOnTemplateRendered = captureOnTemplateRendered();
-        const onValidityChange = jest.fn();
+        const onValidityChange = vi.fn();
 
         renderWithIntl(
           <IacKeyCheck
             {...defaultProps}
             writeOnRender={false}
-            onTemplateRecorded={jest.fn()}
+            onTemplateRecorded={vi.fn()}
             onValidityChange={onValidityChange}
           />
         );
@@ -668,8 +675,8 @@ describe('IacKeyCheck', () => {
       it('uses the latest callback the host passed', async () => {
         mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
         const getOnTemplateRendered = captureOnTemplateRendered();
-        const first = jest.fn();
-        const second = jest.fn();
+        const first = vi.fn();
+        const second = vi.fn();
 
         const { rerender } = renderWithIntl(
           <IacKeyCheck {...defaultProps} writeOnRender={false} onTemplateRecorded={first} />
@@ -728,7 +735,7 @@ describe('IacKeyCheck', () => {
         launchButtonProps: { onClick: mockLaunchOnClick },
         isDisabled: false,
         isGeneratingTemplate: false,
-        clearIacConfirm: jest.fn(),
+        clearIacConfirm: vi.fn(),
         templateGenerationError: 'boom',
         isIacProvisionerEnabled: true,
       });
@@ -751,7 +758,7 @@ describe('IacKeyCheck', () => {
         launchButtonProps: { onClick: mockLaunchOnClick },
         isDisabled: false,
         isGeneratingTemplate: false,
-        clearIacConfirm: jest.fn(),
+        clearIacConfirm: vi.fn(),
         templateGenerationError: 'boom',
         isIacProvisionerEnabled: true,
       });

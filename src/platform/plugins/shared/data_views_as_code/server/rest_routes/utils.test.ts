@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
@@ -16,14 +18,20 @@ import { ValidationError } from '@kbn/config-schema';
 import { requestHandler } from './utils';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
-jest.mock('@kbn/as-code-shared-telemetry', () => ({
-  telemetryHandler: jest.fn(async (_request, _usageCounter, handler) => handler()),
-}));
+vi.mock('@kbn/as-code-shared-telemetry', () => {
+      const mocked = {
+      telemetryHandler: vi.fn(async (_request, _usageCounter, handler) => handler()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/as-code-utils', () => ({
-  logRequest: jest.fn(),
-  writeErrorHandler: jest.fn(),
-}));
+vi.mock('@kbn/as-code-utils', () => {
+      const mocked = {
+      logRequest: vi.fn(),
+      writeErrorHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('requestHandler', () => {
   const logger = loggerMock.create();
@@ -39,12 +47,12 @@ describe('requestHandler', () => {
   const response = httpServerMock.createResponseFactory();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('runs the handler inside telemetry handler', async () => {
     const handlerResult = response.ok({ body: { ok: true } });
-    const handler = jest.fn().mockResolvedValue(handlerResult);
+    const handler = vi.fn().mockResolvedValue(handlerResult);
 
     const wrapped = requestHandler({ logger, usageCounter }, handler);
     const result = await wrapped(context, request, response);
@@ -57,7 +65,7 @@ describe('requestHandler', () => {
 
   it('maps SavedObjectNotFound errors to notFound response', async () => {
     const error = new SavedObjectNotFound({ type: 'index-pattern', id: 'my-id' });
-    const handler = jest.fn().mockRejectedValue(error);
+    const handler = vi.fn().mockRejectedValue(error);
 
     const wrapped = requestHandler({ logger, usageCounter }, handler);
     await wrapped(context, request, response);
@@ -73,7 +81,7 @@ describe('requestHandler', () => {
       output: { statusCode: 404 },
       message: 'not found from boom',
     };
-    const handler = jest.fn().mockRejectedValue(error);
+    const handler = vi.fn().mockRejectedValue(error);
 
     const wrapped = requestHandler({ logger, usageCounter }, handler);
     await wrapped(context, request, response);
@@ -85,7 +93,7 @@ describe('requestHandler', () => {
 
   it('maps DuplicateDataViewError errors to conflict response', async () => {
     const error = new DuplicateDataViewError('already exists');
-    const handler = jest.fn().mockRejectedValue(error);
+    const handler = vi.fn().mockRejectedValue(error);
 
     const wrapped = requestHandler({ logger, usageCounter }, handler);
     await wrapped(context, request, response);
@@ -101,7 +109,7 @@ describe('requestHandler', () => {
       output: { statusCode: 409 },
       message: 'conflict from boom',
     };
-    const handler = jest.fn().mockRejectedValue(error);
+    const handler = vi.fn().mockRejectedValue(error);
 
     const wrapped = requestHandler({ logger, usageCounter }, handler);
     await wrapped(context, request, response);
@@ -117,7 +125,7 @@ describe('requestHandler', () => {
       output: { statusCode: 400 },
       message: 'bad request from boom',
     };
-    const handler = jest.fn().mockRejectedValue(error);
+    const handler = vi.fn().mockRejectedValue(error);
 
     const wrapped = requestHandler({ logger, usageCounter }, handler);
     await wrapped(context, request, response);
@@ -129,7 +137,7 @@ describe('requestHandler', () => {
 
   it('rethrows validation errors after warning log', async () => {
     const error = new ValidationError({ message: 'invalid payload', path: [] } as any);
-    const handler = jest.fn().mockRejectedValue(error);
+    const handler = vi.fn().mockRejectedValue(error);
 
     const wrapped = requestHandler({ logger, usageCounter }, handler);
 
@@ -141,8 +149,8 @@ describe('requestHandler', () => {
   it('delegates unknown errors to writeErrorHandler', async () => {
     const error = new Error('unexpected');
     const delegatedResponse = response.badRequest({ body: { message: 'mapped' } });
-    jest.mocked(writeErrorHandler).mockReturnValue(delegatedResponse);
-    const handler = jest.fn().mockRejectedValue(error);
+    vi.mocked(writeErrorHandler).mockReturnValue(delegatedResponse);
+    const handler = vi.fn().mockRejectedValue(error);
 
     const wrapped = requestHandler({ logger, usageCounter }, handler);
     const result = await wrapped(context, request, response);

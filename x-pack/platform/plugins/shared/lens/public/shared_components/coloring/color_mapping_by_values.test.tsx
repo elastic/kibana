@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ColorMappingByValues } from './color_mapping_by_values';
 
-jest.mock('./palette_panel_container', () => ({
-  PalettePanelContainer: ({ palette }: { palette: string[]; children?: React.ReactNode }) => (
-    <div data-test-subj="mock-palette-panel" data-palette={palette.join('|')} />
-  ),
-}));
+vi.mock('./palette_panel_container', () => {
+      const mocked = {
+      PalettePanelContainer: ({ palette }: { palette: string[]; children?: React.ReactNode }) => (
+        <div data-test-subj="mock-palette-panel" data-palette={palette.join('|')} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ColorMappingByValues', () => {
   const paletteService = chartPluginMock.createPaletteRegistry();
@@ -29,7 +34,7 @@ describe('ColorMappingByValues', () => {
     render(
       <ColorMappingByValues
         palette={palette}
-        setPalette={jest.fn()}
+        setPalette={vi.fn()}
         paletteService={paletteService}
         panelRef={{ current: null }}
         dataBounds={{ min: 0, max: 100 }}

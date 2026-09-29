@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { FilterStateStore } from '@kbn/es-query';
 import { defaultQuery, getSearchConfiguration } from './get_search_configuration';
 
 describe('getSearchConfiguration()', () => {
-  const onWarning = jest.fn();
+  const onWarning = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return the same query if query has the correct type', () => {

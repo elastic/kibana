@@ -7,43 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowOutputStepImpl } from './workflow_output_step_impl';
 
 const createRuntime = () => {
   const scopeStack = {
-    isEmpty: jest.fn().mockReturnValue(true),
+    isEmpty: vi.fn().mockReturnValue(true),
   };
   return {
-    startStep: jest.fn(),
-    flushEventLogs: jest.fn().mockResolvedValue(undefined),
-    failStep: jest.fn(),
-    finishStep: jest.fn(),
-    stepExecutionExists: jest.fn(() => true),
+    startStep: vi.fn(),
+    flushEventLogs: vi.fn().mockResolvedValue(undefined),
+    failStep: vi.fn(),
+    finishStep: vi.fn(),
+    stepExecutionExists: vi.fn(() => true),
     contextManager: {
-      renderValueAccordingToContext: jest.fn((v) => v),
+      renderValueAccordingToContext: vi.fn((v) => v),
     },
     scopeStack,
   };
 };
 
 const createWorkflowRuntime = (outputs?: unknown[]) => ({
-  getWorkflowExecution: jest.fn(() => ({
+  getWorkflowExecution: vi.fn(() => ({
     workflowDefinition: { outputs },
   })),
-  setWorkflowStatus: jest.fn(),
-  setWorkflowOutputs: jest.fn(),
-  setWorkflowCancelled: jest.fn(),
-  setWorkflowError: jest.fn(),
+  setWorkflowStatus: vi.fn(),
+  setWorkflowOutputs: vi.fn(),
+  setWorkflowCancelled: vi.fn(),
+  setWorkflowError: vi.fn(),
 });
 
 describe('WorkflowOutputStepImpl', () => {
   it('completes workflow with outputs on completed status', async () => {
     const stepExecutionRuntime = createRuntime();
     const workflowRuntime = createWorkflowRuntime();
-    const workflowLogger = { logError: jest.fn(), logInfo: jest.fn() };
+    const workflowLogger = { logError: vi.fn(), logInfo: vi.fn() };
     const stepExecutionRuntimeFactory = {
-      createStepExecutionRuntime: jest.fn(),
+      createStepExecutionRuntime: vi.fn(),
     };
     const step = new WorkflowOutputStepImpl(
       { configuration: { status: 'completed', with: { answer: 42 } } } as any,
@@ -63,7 +65,7 @@ describe('WorkflowOutputStepImpl', () => {
   it('marks workflow as cancelled and keeps explicit cancellation reason', async () => {
     const stepExecutionRuntime = createRuntime();
     const workflowRuntime = createWorkflowRuntime();
-    const workflowLogger = { logError: jest.fn(), logInfo: jest.fn() };
+    const workflowLogger = { logError: vi.fn(), logInfo: vi.fn() };
     const step = new WorkflowOutputStepImpl(
       {
         configuration: {
@@ -75,7 +77,7 @@ describe('WorkflowOutputStepImpl', () => {
       stepExecutionRuntime as any,
       workflowRuntime as any,
       workflowLogger as any,
-      { createStepExecutionRuntime: jest.fn() } as any
+      { createStepExecutionRuntime: vi.fn() } as any
     );
 
     await step.run();
@@ -87,7 +89,7 @@ describe('WorkflowOutputStepImpl', () => {
   it('marks workflow as failed when status is failed', async () => {
     const stepExecutionRuntime = createRuntime();
     const workflowRuntime = createWorkflowRuntime();
-    const workflowLogger = { logError: jest.fn(), logInfo: jest.fn() };
+    const workflowLogger = { logError: vi.fn(), logInfo: vi.fn() };
     const step = new WorkflowOutputStepImpl(
       {
         configuration: {
@@ -98,7 +100,7 @@ describe('WorkflowOutputStepImpl', () => {
       stepExecutionRuntime as any,
       workflowRuntime as any,
       workflowLogger as any,
-      { createStepExecutionRuntime: jest.fn() } as any
+      { createStepExecutionRuntime: vi.fn() } as any
     );
 
     await step.run();
@@ -110,7 +112,7 @@ describe('WorkflowOutputStepImpl', () => {
   it('falls back to completed status when no explicit status is provided', async () => {
     const stepExecutionRuntime = createRuntime();
     const workflowRuntime = createWorkflowRuntime();
-    const workflowLogger = { logError: jest.fn(), logInfo: jest.fn() };
+    const workflowLogger = { logError: vi.fn(), logInfo: vi.fn() };
     const step = new WorkflowOutputStepImpl(
       {
         configuration: {
@@ -120,7 +122,7 @@ describe('WorkflowOutputStepImpl', () => {
       stepExecutionRuntime as any,
       workflowRuntime as any,
       workflowLogger as any,
-      { createStepExecutionRuntime: jest.fn() } as any
+      { createStepExecutionRuntime: vi.fn() } as any
     );
 
     await step.run();
@@ -134,7 +136,7 @@ describe('WorkflowOutputStepImpl', () => {
     const workflowRuntime = createWorkflowRuntime([
       { name: 'answer', type: 'string', required: true },
     ]);
-    const workflowLogger = { logError: jest.fn(), logInfo: jest.fn() };
+    const workflowLogger = { logError: vi.fn(), logInfo: vi.fn() };
     const step = new WorkflowOutputStepImpl(
       {
         configuration: {
@@ -145,7 +147,7 @@ describe('WorkflowOutputStepImpl', () => {
       stepExecutionRuntime as any,
       workflowRuntime as any,
       workflowLogger as any,
-      { createStepExecutionRuntime: jest.fn() } as any
+      { createStepExecutionRuntime: vi.fn() } as any
     );
 
     await step.run();
@@ -162,7 +164,7 @@ describe('WorkflowOutputStepImpl', () => {
   it('uses empty object when with is not provided (workflow.fail case)', async () => {
     const stepExecutionRuntime = createRuntime();
     const workflowRuntime = createWorkflowRuntime();
-    const workflowLogger = { logError: jest.fn(), logInfo: jest.fn() };
+    const workflowLogger = { logError: vi.fn(), logInfo: vi.fn() };
     const step = new WorkflowOutputStepImpl(
       {
         configuration: {
@@ -172,7 +174,7 @@ describe('WorkflowOutputStepImpl', () => {
       stepExecutionRuntime as any,
       workflowRuntime as any,
       workflowLogger as any,
-      { createStepExecutionRuntime: jest.fn() } as any
+      { createStepExecutionRuntime: vi.fn() } as any
     );
 
     await step.run();
@@ -185,18 +187,18 @@ describe('WorkflowOutputStepImpl', () => {
 
   it('completes ancestor steps when scope stack is non-empty', async () => {
     const ancestorRuntime = {
-      stepExecutionExists: jest.fn().mockReturnValue(true),
-      finishStep: jest.fn(),
+      stepExecutionExists: vi.fn().mockReturnValue(true),
+      finishStep: vi.fn(),
     };
     const scopeStack = {
-      isEmpty: jest.fn().mockReturnValueOnce(false).mockReturnValueOnce(true),
-      getCurrentScope: jest.fn().mockReturnValue({
+      isEmpty: vi.fn().mockReturnValueOnce(false).mockReturnValueOnce(true),
+      getCurrentScope: vi.fn().mockReturnValue({
         nodeId: 'ancestor-node',
         stepId: 'ancestor-step',
         nodeType: 'enter-foreach',
       }),
-      exitScope: jest.fn().mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(true),
+      exitScope: vi.fn().mockReturnValue({
+        isEmpty: vi.fn().mockReturnValue(true),
         stackFrames: [],
       }),
     };
@@ -205,9 +207,9 @@ describe('WorkflowOutputStepImpl', () => {
       scopeStack,
     };
     const workflowRuntime = createWorkflowRuntime();
-    const workflowLogger = { logError: jest.fn(), logInfo: jest.fn() };
+    const workflowLogger = { logError: vi.fn(), logInfo: vi.fn() };
     const stepExecutionRuntimeFactory = {
-      createStepExecutionRuntime: jest.fn().mockReturnValue(ancestorRuntime),
+      createStepExecutionRuntime: vi.fn().mockReturnValue(ancestorRuntime),
     };
     const step = new WorkflowOutputStepImpl(
       { configuration: { status: 'completed', with: { ok: true } } } as any,
@@ -232,13 +234,13 @@ describe('WorkflowOutputStepImpl', () => {
     workflowRuntime.getWorkflowExecution.mockImplementation(() => {
       throw new Error('string error');
     });
-    const workflowLogger = { logError: jest.fn(), logInfo: jest.fn() };
+    const workflowLogger = { logError: vi.fn(), logInfo: vi.fn() };
     const step = new WorkflowOutputStepImpl(
       { configuration: { status: 'completed', with: { x: 1 } } } as any,
       stepExecutionRuntime as any,
       workflowRuntime as any,
       workflowLogger as any,
-      { createStepExecutionRuntime: jest.fn() } as any
+      { createStepExecutionRuntime: vi.fn() } as any
     );
 
     await step.run();
@@ -250,7 +252,7 @@ describe('WorkflowOutputStepImpl', () => {
   it('uses message from cancelled output as cancellation reason', async () => {
     const stepExecutionRuntime = createRuntime();
     const workflowRuntime = createWorkflowRuntime();
-    const workflowLogger = { logError: jest.fn(), logInfo: jest.fn() };
+    const workflowLogger = { logError: vi.fn(), logInfo: vi.fn() };
     const step = new WorkflowOutputStepImpl(
       {
         configuration: {
@@ -261,7 +263,7 @@ describe('WorkflowOutputStepImpl', () => {
       stepExecutionRuntime as any,
       workflowRuntime as any,
       workflowLogger as any,
-      { createStepExecutionRuntime: jest.fn() } as any
+      { createStepExecutionRuntime: vi.fn() } as any
     );
 
     await step.run();
@@ -272,7 +274,7 @@ describe('WorkflowOutputStepImpl', () => {
   it('uses default cancellation reason when no reason or message', async () => {
     const stepExecutionRuntime = createRuntime();
     const workflowRuntime = createWorkflowRuntime();
-    const workflowLogger = { logError: jest.fn(), logInfo: jest.fn() };
+    const workflowLogger = { logError: vi.fn(), logInfo: vi.fn() };
     const step = new WorkflowOutputStepImpl(
       {
         configuration: {
@@ -284,7 +286,7 @@ describe('WorkflowOutputStepImpl', () => {
       stepExecutionRuntime as any,
       workflowRuntime as any,
       workflowLogger as any,
-      { createStepExecutionRuntime: jest.fn() } as any
+      { createStepExecutionRuntime: vi.fn() } as any
     );
 
     await step.run();
@@ -295,7 +297,7 @@ describe('WorkflowOutputStepImpl', () => {
   it('uses reason from failed output for error message', async () => {
     const stepExecutionRuntime = createRuntime();
     const workflowRuntime = createWorkflowRuntime();
-    const workflowLogger = { logError: jest.fn(), logInfo: jest.fn() };
+    const workflowLogger = { logError: vi.fn(), logInfo: vi.fn() };
     const step = new WorkflowOutputStepImpl(
       {
         configuration: {
@@ -306,7 +308,7 @@ describe('WorkflowOutputStepImpl', () => {
       stepExecutionRuntime as any,
       workflowRuntime as any,
       workflowLogger as any,
-      { createStepExecutionRuntime: jest.fn() } as any
+      { createStepExecutionRuntime: vi.fn() } as any
     );
 
     await step.run();

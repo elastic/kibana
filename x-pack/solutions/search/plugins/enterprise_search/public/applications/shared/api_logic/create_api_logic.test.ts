@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter, mockFlashMessageHelpers } from '../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -24,13 +26,13 @@ const DEFAULT_VALUES = {
 };
 
 describe('CreateApiLogic', () => {
-  const apiCallMock = jest.fn();
+  const apiCallMock = vi.fn();
   const logic = createApiLogic(['path'], apiCallMock);
   const { mount } = new LogicMounter(logic);
   const { clearFlashMessages, flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mount({});
   });
 
@@ -147,8 +149,8 @@ describe('CreateApiLogic', () => {
   describe('listeners', () => {
     describe('makeRequest', () => {
       it('calls apiCall on success', async () => {
-        const apiSuccessMock = jest.spyOn(logic.actions, 'apiSuccess');
-        const apiErrorMock = jest.spyOn(logic.actions, 'apiError');
+        const apiSuccessMock = vi.spyOn(logic.actions, 'apiSuccess');
+        const apiErrorMock = vi.spyOn(logic.actions, 'apiError');
         apiCallMock.mockReturnValue(Promise.resolve('result'));
         logic.actions.makeRequest({ arg: 'argument1' });
         expect(apiCallMock).toHaveBeenCalledWith({ arg: 'argument1' });
@@ -157,8 +159,8 @@ describe('CreateApiLogic', () => {
         expect(apiSuccessMock).toHaveBeenCalledWith('result');
       });
       it('calls apiError on error', async () => {
-        const apiSuccessMock = jest.spyOn(logic.actions, 'apiSuccess');
-        const apiErrorMock = jest.spyOn(logic.actions, 'apiError');
+        const apiSuccessMock = vi.spyOn(logic.actions, 'apiSuccess');
+        const apiErrorMock = vi.spyOn(logic.actions, 'apiError');
         apiCallMock.mockReturnValue(
           Promise.reject({
             body: {

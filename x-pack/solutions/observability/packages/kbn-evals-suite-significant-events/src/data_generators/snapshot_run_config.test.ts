@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { GCS_BUCKET, OTEL_DEMO_GCS_BASE_PATH_PREFIX } from '../constants';
 
 describe('snapshot_run_config', () => {
@@ -12,12 +14,12 @@ describe('snapshot_run_config', () => {
 
   afterEach(() => {
     process.env.SIGEVENTS_SNAPSHOT_RUN = ORIGINAL;
-    jest.resetModules();
+    vi.resetModules();
   });
 
   it('defaults SIGEVENTS_SNAPSHOT_RUN to pinned date when env is unset', async () => {
     delete process.env.SIGEVENTS_SNAPSHOT_RUN;
-    jest.resetModules();
+    vi.resetModules();
 
     const mod = await import('./snapshot_run_config');
     expect(mod.SIGEVENTS_SNAPSHOT_RUN).toBe('2026-03-27');
@@ -25,7 +27,7 @@ describe('snapshot_run_config', () => {
 
   it('uses SIGEVENTS_SNAPSHOT_RUN from env when set', async () => {
     process.env.SIGEVENTS_SNAPSHOT_RUN = '2026-02-26-test';
-    jest.resetModules();
+    vi.resetModules();
 
     const mod = await import('./snapshot_run_config');
     expect(mod.SIGEVENTS_SNAPSHOT_RUN).toBe('2026-02-26-test');
@@ -33,7 +35,7 @@ describe('snapshot_run_config', () => {
 
   it('resolveBasePath prepends run id before basePathPrefix when SIGEVENTS_SNAPSHOT_RUN is set', async () => {
     process.env.SIGEVENTS_SNAPSHOT_RUN = '2026-02-26-test';
-    jest.resetModules();
+    vi.resetModules();
 
     const { resolveBasePath } = await import('./snapshot_run_config');
     expect(
@@ -43,7 +45,7 @@ describe('snapshot_run_config', () => {
 
   it('resolveBasePath uses basePathPrefix as-is when runScoped is false', async () => {
     process.env.SIGEVENTS_SNAPSHOT_RUN = '2026-02-26-test';
-    jest.resetModules();
+    vi.resetModules();
 
     const { resolveBasePath } = await import('./snapshot_run_config');
     expect(

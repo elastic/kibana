@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { PipelineEditor } from './pipeline_editor';
@@ -21,14 +23,14 @@ describe('PipelineEditor component', () => {
   let username;
 
   beforeEach(() => {
-    close = jest.fn();
+    close = vi.fn();
     isNewPipeline = false;
     licenseService = {
-      checkValidity: jest.fn(),
+      checkValidity: vi.fn(),
       isReadOnly: false,
       message: 'license service message',
     };
-    open = jest.fn();
+    open = vi.fn();
     pipeline = {
       id: 'pipelineId',
       description: 'pipeline description',
@@ -43,13 +45,13 @@ describe('PipelineEditor component', () => {
       },
     };
     pipelineService = {
-      deletePipeline: jest.fn(),
-      savePipeline: jest.fn(),
+      deletePipeline: vi.fn(),
+      savePipeline: vi.fn(),
     };
     toastNotifications = {
-      addWarning: jest.fn(),
-      addSuccess: jest.fn(),
-      addError: jest.fn(),
+      addWarning: vi.fn(),
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
     };
     username = 'elastic';
     props = {

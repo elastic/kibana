@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ensureLookupIndex } from './lookup_index';
@@ -26,7 +28,7 @@ describe('lookup index utilities', () => {
   });
 
   it('creates lookup index with expected mapping when missing', async () => {
-    (esClient.indices.exists as jest.Mock).mockResolvedValue(false);
+    (esClient.indices.exists as Mock).mockResolvedValue(false);
 
     const index = await ensureLookupIndex({
       esClient,
@@ -45,8 +47,8 @@ describe('lookup index utilities', () => {
   });
 
   it('ignores resource_already_exists_exception during concurrent create', async () => {
-    (esClient.indices.exists as jest.Mock).mockResolvedValue(false);
-    (esClient.indices.create as jest.Mock).mockRejectedValue(
+    (esClient.indices.exists as Mock).mockResolvedValue(false);
+    (esClient.indices.create as Mock).mockRejectedValue(
       new Error('resource_already_exists_exception')
     );
 
@@ -63,7 +65,7 @@ describe('lookup index utilities', () => {
   // require any change here. ES handles "is this a no-op or a new field?"
   // and rejects conflicting type changes.
   it('applies the full mapping when the index already exists', async () => {
-    (esClient.indices.exists as jest.Mock).mockResolvedValue(true);
+    (esClient.indices.exists as Mock).mockResolvedValue(true);
 
     await ensureLookupIndex({
       esClient,

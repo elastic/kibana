@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DEFAULT_KIBANAS_PER_PARTITION } from '../config';
 import {
   createDiscoveryServiceMock,
@@ -72,7 +74,7 @@ describe('getPartitions()', () => {
   ];
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     discoveryServiceMock.getActiveKibanaNodes.mockResolvedValue([
       createFindSO(POD_NAME, lastSeen),
       createFindSO('test-pod-2', lastSeen),
@@ -81,8 +83,8 @@ describe('getPartitions()', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.clearAllTimers();
+    vi.clearAllMocks();
+    vi.clearAllTimers();
   });
 
   test('correctly gets the partitons for this pod', async () => {
@@ -106,10 +108,10 @@ describe('getPartitions()', () => {
 
     await taskPartitioner.getPartitions();
 
-    jest.advanceTimersByTime(shorterInterval);
+    vi.advanceTimersByTime(shorterInterval);
     await taskPartitioner.getPartitions();
 
-    jest.advanceTimersByTime(shorterInterval);
+    vi.advanceTimersByTime(shorterInterval);
     await taskPartitioner.getPartitions();
 
     expect(discoveryServiceMock.getActiveKibanaNodes).toHaveBeenCalledTimes(2);
@@ -126,10 +128,10 @@ describe('getPartitions()', () => {
 
     await taskPartitioner.getPartitions();
 
-    jest.advanceTimersByTime(CACHE_INTERVAL);
+    vi.advanceTimersByTime(CACHE_INTERVAL);
     await taskPartitioner.getPartitions();
 
-    jest.advanceTimersByTime(CACHE_INTERVAL);
+    vi.advanceTimersByTime(CACHE_INTERVAL);
     await taskPartitioner.getPartitions();
 
     expect(discoveryServiceMock.getActiveKibanaNodes).toHaveBeenCalledTimes(3);
@@ -147,7 +149,7 @@ describe('getPartitions()', () => {
     expect(taskPartitioner.getPodPartitions()).toEqual(expectedPartitions);
 
     discoveryServiceMock.getActiveKibanaNodes.mockRejectedValueOnce(new Error('foo'));
-    jest.advanceTimersByTime(CACHE_INTERVAL);
+    vi.advanceTimersByTime(CACHE_INTERVAL);
     await taskPartitioner.getPartitions();
     expect(taskPartitioner.getPodPartitions()).toEqual(expectedPartitions);
     expect(logger.error).toHaveBeenCalledWith('Failed to load list of active kibana nodes: foo');

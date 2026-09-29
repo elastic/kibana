@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mockUuidv4, mockUuidv5 } from './saved_objects_utils.test.mock';
 
 import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
@@ -111,13 +113,13 @@ describe('SavedObjectsUtils', () => {
 
   describe('#getMigrationFunction', () => {
     it('should return the migration function when it is a function', () => {
-      const migration = jest.fn();
+      const migration = vi.fn();
 
       expect(SavedObjectsUtils.getMigrationFunction(migration)).toBe(migration);
     });
 
     it('should return the migration function when it is a migration object', () => {
-      const migration = { transform: jest.fn() };
+      const migration = { transform: vi.fn() };
 
       expect(SavedObjectsUtils.getMigrationFunction(migration)).toBe(migration.transform);
     });

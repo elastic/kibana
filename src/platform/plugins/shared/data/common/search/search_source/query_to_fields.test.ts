@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { EsQuerySortValue, SearchRequest } from '../..';
 import { queryToFields, SortDirection } from '../..';
 import type { DataViewLazy } from '@kbn/data-views-plugin/common';
@@ -16,9 +18,9 @@ describe('SearchSource#queryToFields', () => {
   it('should include time field', async () => {
     const dataView = {
       timeFieldName: '@timestamp',
-      getSourceFiltering: jest.fn(),
-      getFields: jest.fn().mockResolvedValue({
-        getFieldMapSorted: jest.fn(),
+      getSourceFiltering: vi.fn(),
+      getFields: vi.fn().mockResolvedValue({
+        getFieldMapSorted: vi.fn(),
       }),
     };
     const request: SearchRequest = { query: [] };
@@ -29,9 +31,9 @@ describe('SearchSource#queryToFields', () => {
 
   it('should include sort field', async () => {
     const dataView = {
-      getSourceFiltering: jest.fn(),
-      getFields: jest.fn().mockResolvedValue({
-        getFieldMapSorted: jest.fn(),
+      getSourceFiltering: vi.fn(),
+      getFields: vi.fn().mockResolvedValue({
+        getFieldMapSorted: vi.fn(),
       }),
     };
     const sort: EsQuerySortValue = { bytes: SortDirection.asc };
@@ -44,9 +46,9 @@ describe('SearchSource#queryToFields', () => {
   it('should include request KQL query fields', async () => {
     const dataView = {
       timeFieldName: '@timestamp',
-      getSourceFiltering: jest.fn(),
-      getFields: jest.fn().mockResolvedValue({
-        getFieldMapSorted: jest.fn(),
+      getSourceFiltering: vi.fn(),
+      getFields: vi.fn().mockResolvedValue({
+        getFieldMapSorted: vi.fn(),
       }),
     };
     const request: SearchRequest = {
@@ -65,9 +67,9 @@ describe('SearchSource#queryToFields', () => {
   it('should not include request Lucene query fields', async () => {
     const dataView = {
       timeFieldName: '@timestamp',
-      getSourceFiltering: jest.fn(),
-      getFields: jest.fn().mockResolvedValue({
-        getFieldMapSorted: jest.fn(),
+      getSourceFiltering: vi.fn(),
+      getFields: vi.fn().mockResolvedValue({
+        getFieldMapSorted: vi.fn(),
       }),
     };
     const request: SearchRequest = {
@@ -85,9 +87,9 @@ describe('SearchSource#queryToFields', () => {
 
   it('should include fields from nested combined filters', async () => {
     const dataView = {
-      getSourceFiltering: jest.fn().mockReturnValue({ excludes: [] }),
-      getFields: jest.fn().mockResolvedValue({
-        getFieldMapSorted: jest.fn(),
+      getSourceFiltering: vi.fn().mockReturnValue({ excludes: [] }),
+      getFields: vi.fn().mockResolvedValue({
+        getFieldMapSorted: vi.fn(),
       }),
     };
 

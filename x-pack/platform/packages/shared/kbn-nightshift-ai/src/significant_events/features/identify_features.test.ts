@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 
-jest.mock('@kbn/inference-prompt-utils', () => ({
-  executeAsReasoningAgent: jest.fn(),
-}));
+vi.mock('@kbn/inference-prompt-utils', () => {
+      const mocked = {
+      executeAsReasoningAgent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { AnalysisTarget } from '../../shared/analysis_target';
@@ -23,13 +29,13 @@ const target: AnalysisTarget = {
   samplingSource: 'logs.test',
 };
 
-const executeAsReasoningAgentMock = executeAsReasoningAgent as jest.MockedFunction<
+const executeAsReasoningAgentMock = executeAsReasoningAgent as MockedFunction<
   typeof executeAsReasoningAgent
 >;
 const inferenceClient = {} as BoundInferenceClient;
 const signal = new AbortController().signal;
 const logger = {
-  warn: jest.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 const createReasoningResponse = (arguments_: Record<string, unknown>) =>
@@ -55,7 +61,7 @@ const responseWithoutFinalTool = {
 
 describe('identifyFeatures', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('uses the reasoning-agent tools and validates finalized output', async () => {

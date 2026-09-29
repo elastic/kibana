@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import type { NumberInputProps } from './number_input';
@@ -18,7 +20,7 @@ const name = 'Some number field';
 const id = 'some:number:field';
 
 describe('NumberInput', () => {
-  const onInputChange = jest.fn();
+  const onInputChange = vi.fn();
   const defaultProps: NumberInputProps = {
     onInputChange,
     field: {

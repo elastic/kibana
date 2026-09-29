@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -68,13 +70,13 @@ describe('POST /internal/evals/online_scores', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    const getSpaceId = jest.fn().mockResolvedValue('space-a');
+    const getSpaceId = vi.fn().mockResolvedValue('space-a');
     registerIngestOnlineScoresRoute({
       router,
       logger,
       canEncrypt: false,
       evaluatorRegistry: createEvaluatorRegistry(),
-      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+      getInferenceStart: async () => ({ getClient: vi.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
       getSpaceId,
@@ -87,7 +89,7 @@ describe('POST /internal/evals/online_scores', () => {
     const { handler } = route;
 
     const onlineScoreService = {
-      bulkCreate: jest.fn().mockResolvedValue({ created: 2, skipped: 0, errors: [] }),
+      bulkCreate: vi.fn().mockResolvedValue({ created: 2, skipped: 0, errors: [] }),
     };
     const context = coreMock.createCustomRequestHandlerContext({
       evals: {

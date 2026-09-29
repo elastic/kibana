@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,22 +17,28 @@ import * as api from './api';
 import { casesQueriesKeys } from './constants';
 import { basicCaseFixture } from './test_fixtures';
 
-jest.mock('./api', () => ({
-  getCase: jest.fn(),
-  updateCases: jest.fn(),
-}));
-jest.mock('../common/use_cases_toast', () => ({
-  useCasesToast: jest.fn(),
-}));
+vi.mock('./api', () => {
+      const mocked = {
+      getCase: vi.fn(),
+      updateCases: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../common/use_cases_toast', () => {
+      const mocked = {
+      useCasesToast: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useUpdateCases', () => {
-  const showSuccessToast = jest.fn();
-  const showErrorToast = jest.fn();
+  const showSuccessToast = vi.fn();
+  const showErrorToast = vi.fn();
 
-  (useCasesToast as jest.Mock).mockReturnValue({ showSuccessToast, showErrorToast });
+  (useCasesToast as Mock).mockReturnValue({ showSuccessToast, showErrorToast });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createQueryClient = () =>
@@ -46,7 +55,7 @@ describe('useUpdateCases', () => {
     };
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'updateCases');
+    const spy = vi.spyOn(api, 'updateCases');
     const queryClient = createQueryClient();
     const { result } = renderHook(() => useUpdateCases(), {
       wrapper: getWrapper(queryClient),
@@ -69,7 +78,7 @@ describe('useUpdateCases', () => {
 
   it('invalidates the queries correctly', async () => {
     const queryClient = createQueryClient();
-    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const queryClientSpy = vi.spyOn(queryClient, 'invalidateQueries');
     const { result } = renderHook(() => useUpdateCases(), {
       wrapper: getWrapper(queryClient),
     });
@@ -121,11 +130,11 @@ describe('useUpdateCases', () => {
       { id: basicCaseFixture.id, version: basicCaseFixture.version, description: 'updated' },
     ];
 
-    const updateCasesSpy = jest
+    const updateCasesSpy = vi
       .spyOn(api, 'updateCases')
       .mockRejectedValueOnce(conflictError)
       .mockResolvedValueOnce([{ ...latestCase, description: 'updated' }]);
-    const getCaseSpy = jest.spyOn(api, 'getCase').mockResolvedValue(latestCase);
+    const getCaseSpy = vi.spyOn(api, 'getCase').mockResolvedValue(latestCase);
     const queryClient = createQueryClient();
 
     const { result } = renderHook(() => useUpdateCases(), {
@@ -149,7 +158,7 @@ describe('useUpdateCases', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    jest.spyOn(api, 'updateCases').mockRejectedValue(new Error('useUpdateCases: Test error'));
+    vi.spyOn(api, 'updateCases').mockRejectedValue(new Error('useUpdateCases: Test error'));
     const queryClient = createQueryClient();
 
     const { result } = renderHook(() => useUpdateCases(), {

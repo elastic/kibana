@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, renderHook } from '@testing-library/react';
 import React from 'react';
 import type { UseCreateFieldButtonProps } from '.';
@@ -12,8 +14,8 @@ import { useCreateFieldButton } from '.';
 
 import { TestProviders } from '../../../../common/mock';
 
-const mockOpenFieldEditor = jest.fn();
-const mockOnHide = jest.fn();
+const mockOpenFieldEditor = vi.fn();
+const mockOnHide = vi.fn();
 
 const renderUseCreateFieldButton = (props: Partial<UseCreateFieldButtonProps> = {}) =>
   renderHook(
@@ -31,7 +33,7 @@ const renderUseCreateFieldButton = (props: Partial<UseCreateFieldButtonProps> = 
 
 describe('useCreateFieldButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return the button component function when user has edit permissions', async () => {

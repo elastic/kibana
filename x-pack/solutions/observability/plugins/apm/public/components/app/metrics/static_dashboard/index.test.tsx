@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
@@ -27,12 +29,15 @@ import * as helper from './helper';
 
 let capturedGetCreationOptions: (() => Promise<DashboardCreationOptions>) | undefined;
 
-jest.mock('@kbn/dashboard-plugin/public', () => ({
-  DashboardRenderer: (props: { getCreationOptions: () => Promise<DashboardCreationOptions> }) => {
-    capturedGetCreationOptions = props.getCreationOptions;
-    return <div data-test-subj="dashboardRenderer" />;
-  },
-}));
+vi.mock('@kbn/dashboard-plugin/public', () => {
+      const mocked = {
+      DashboardRenderer: (props: { getCreationOptions: () => Promise<DashboardCreationOptions> }) => {
+        capturedGetCreationOptions = props.getCreationOptions;
+        return <div data-test-subj="dashboardRenderer" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const KibanaReactContext = createKibanaReactContext({
   settings: { client: { get: () => {} } },
@@ -47,7 +52,7 @@ const mockDataView = {
 const mockPanels = [{ type: 'lens', grid: { x: 0, y: 0, w: 24, h: 12 }, uid: '1', config: {} }];
 
 function renderDashboard() {
-  jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
+  vi.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
     agentName: 'java',
     serviceName: 'test-service',
     transactionTypeStatus: FETCH_STATUS.SUCCESS,
@@ -80,11 +85,11 @@ describe('JsonMetricsDashboard', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
   describe('getCreationOptions', () => {
     it('returns useControlsIntegration: true', async () => {
-      jest.spyOn(helper, 'convertSavedDashboardToPanels').mockResolvedValue(mockPanels as any);
+      vi.spyOn(helper, 'convertSavedDashboardToPanels').mockResolvedValue(mockPanels as any);
       renderDashboard();
 
       expect(capturedGetCreationOptions).toBeDefined();
@@ -94,7 +99,7 @@ describe('JsonMetricsDashboard', () => {
     });
 
     it('returns pinned_panels with an options list control for service.node.name', async () => {
-      jest.spyOn(helper, 'convertSavedDashboardToPanels').mockResolvedValue(mockPanels as any);
+      vi.spyOn(helper, 'convertSavedDashboardToPanels').mockResolvedValue(mockPanels as any);
       renderDashboard();
 
       expect(capturedGetCreationOptions).toBeDefined();
@@ -117,7 +122,7 @@ describe('JsonMetricsDashboard', () => {
     });
 
     it('passes panels from convertSavedDashboardToPanels in getInitialInput', async () => {
-      jest.spyOn(helper, 'convertSavedDashboardToPanels').mockResolvedValue(mockPanels as any);
+      vi.spyOn(helper, 'convertSavedDashboardToPanels').mockResolvedValue(mockPanels as any);
       renderDashboard();
 
       const options = await capturedGetCreationOptions!();
@@ -128,7 +133,7 @@ describe('JsonMetricsDashboard', () => {
     });
 
     it('shows a danger toast and returns empty options when panels fail to load', async () => {
-      jest.spyOn(helper, 'convertSavedDashboardToPanels').mockResolvedValue(undefined);
+      vi.spyOn(helper, 'convertSavedDashboardToPanels').mockResolvedValue(undefined);
       renderDashboard();
 
       const options = await capturedGetCreationOptions!();
@@ -142,9 +147,9 @@ describe('JsonMetricsDashboard', () => {
     });
 
     it('uses empty string for data_view_id when dataView.id is undefined', async () => {
-      jest.spyOn(helper, 'convertSavedDashboardToPanels').mockResolvedValue(mockPanels as any);
+      vi.spyOn(helper, 'convertSavedDashboardToPanels').mockResolvedValue(mockPanels as any);
 
-      jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
+      vi.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
         agentName: 'java',
         serviceName: 'test-service',
         transactionTypeStatus: FETCH_STATUS.SUCCESS,

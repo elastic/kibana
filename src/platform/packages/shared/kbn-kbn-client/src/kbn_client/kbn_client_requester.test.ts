@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClientRequester, pathWithSpace, redactUrl } from './kbn_client_requester';
 import { KbnClientRequesterError } from './kbn_client_requester_error';
@@ -49,10 +51,10 @@ describe('KBN Client Requester Functions', () => {
 
 describe('KbnClientRequester.request()', () => {
   const log = new ToolingLog();
-  const fetchMock = jest.spyOn(global, 'fetch');
+  const fetchMock = vi.spyOn(global, 'fetch');
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // Sibling FTR-test consumers read `error.status` on the caught error. Pin

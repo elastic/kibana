@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { COMPARATORS } from '@kbn/alerting-comparators';
@@ -13,11 +16,14 @@ import { Aggregators } from '../../../../../common/alerting/metrics';
 import { getData } from './get_data';
 import { getElasticsearchMetricQuery } from './metric_query';
 
-jest.mock('./metric_query', () => ({
-  getElasticsearchMetricQuery: jest.fn(),
-}));
+vi.mock('./metric_query', () => {
+      const mocked = {
+      getElasticsearchMetricQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedGetElasticsearchMetricQuery = getElasticsearchMetricQuery as jest.MockedFunction<
+const mockedGetElasticsearchMetricQuery = getElasticsearchMetricQuery as MockedFunction<
   typeof getElasticsearchMetricQuery
 >;
 
@@ -30,7 +36,7 @@ const params: MetricExpressionParams = {
   comparator: COMPARATORS.GREATER_THAN,
 };
 
-const logger = { debug: jest.fn(), trace: jest.fn() } as unknown as Logger;
+const logger = { debug: vi.fn(), trace: vi.fn() } as unknown as Logger;
 
 const callGetData = (search: ElasticsearchClient['search'], groupBy?: string | string[]) =>
   getData(
@@ -47,7 +53,7 @@ const callGetData = (search: ElasticsearchClient['search'], groupBy?: string | s
 
 describe('getData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedGetElasticsearchMetricQuery.mockReturnValue({
       track_total_hits: true,
       query: { bool: { filter: [] } },
@@ -58,7 +64,7 @@ describe('getData', () => {
 
   it('unflattens flat dotted additional context from top_hits _source', async () => {
     const response = await callGetData(
-      jest.fn().mockResolvedValue({
+      vi.fn().mockResolvedValue({
         aggregations: {
           groupings: {
             buckets: [
@@ -111,7 +117,7 @@ describe('getData', () => {
 
   it('keeps already-nested additional context from top_hits _source', async () => {
     const response = await callGetData(
-      jest.fn().mockResolvedValue({
+      vi.fn().mockResolvedValue({
         aggregations: {
           groupings: {
             buckets: [

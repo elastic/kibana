@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { RulesAdapterV2 } from '../../knowledge_indicators/knowledge_indicator_client/rules/v2_rules_adapter';
 import { ALERTS_READER_V2 } from './alerts_reader';
@@ -60,7 +62,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
   });
 
   it('caches context resolution within a request via the resolver factory', async () => {
-    const getAlertingV2RulesClient = jest.fn().mockResolvedValue(v2Client);
+    const getAlertingV2RulesClient = vi.fn().mockResolvedValue(v2Client);
     const resolveContext = createSignificantEventsAlertingContextResolver({
       getAlertingV2RulesClient,
       isServerless: false,
@@ -74,7 +76,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
   });
 
   it.each([true, false])('forwards isServerless=%s to the rules adapter', async (isServerless) => {
-    const createRule = jest.fn().mockResolvedValue({});
+    const createRule = vi.fn().mockResolvedValue({});
     const context = await createSignificantEventsAlertingContextResolver({
       getAlertingV2RulesClient: async () =>
         ({

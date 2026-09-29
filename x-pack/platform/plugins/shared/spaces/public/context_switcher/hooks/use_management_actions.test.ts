@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import type { ApplicationStart } from '@kbn/core/public';
@@ -12,10 +14,10 @@ import type { ApplicationStart } from '@kbn/core/public';
 import { useManagementActions } from './use_management_actions';
 
 describe('useManagementActions', () => {
-  const navigateToApp = jest.fn();
+  const navigateToApp = vi.fn();
   const application = { navigateToApp } as unknown as ApplicationStart;
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns headerAction and footerAction when canManageSpaces is true', () => {
     const { result } = renderHook(() =>

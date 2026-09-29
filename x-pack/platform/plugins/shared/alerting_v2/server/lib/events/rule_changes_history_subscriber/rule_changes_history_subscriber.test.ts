@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
@@ -55,11 +58,11 @@ const eventOf = (type: RuleEvent['type'], override = payload): RuleEvent =>
   ({ type, payload: override } as RuleEvent);
 
 describe('RuleChangesHistorySubscriber', () => {
-  let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
+  let bus: Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
   let changeHistory: ReturnType<typeof createRuleChangesHistoryServiceMock>;
-  let userProfile: jest.Mocked<UserProfileServiceStart>;
+  let userProfile: Mocked<UserProfileServiceStart>;
   let loggerService: LoggerService;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
   let subscriber: RuleChangesHistorySubscriber;
   let request: KibanaRequest;
 
@@ -206,9 +209,9 @@ describe('RuleChangesHistorySubscriber', () => {
 
   describe('stop()', () => {
     it('unsubscribes every active subscription and clears internal state', () => {
-      const unsubscribers: jest.Mock[] = [];
+      const unsubscribers: Mock[] = [];
       bus.subscribe.mockImplementation(() => {
-        const unsubscribe = jest.fn();
+        const unsubscribe = vi.fn();
         unsubscribers.push(unsubscribe);
         return { unsubscribe } satisfies Subscription;
       });

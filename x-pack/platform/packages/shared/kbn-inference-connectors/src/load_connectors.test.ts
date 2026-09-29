@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { InferenceConnectorType, type ApiInferenceConnector } from '@kbn/inference-common';
 import { loadConnectors, toAIConnector } from './load_connectors';
 import { fetchConnectorsForFeature } from './fetch_connectors_for_feature';
 
-jest.mock('./fetch_connectors_for_feature');
-const fetchConnectorsForFeatureMock = fetchConnectorsForFeature as jest.MockedFn<
+vi.mock('./fetch_connectors_for_feature');
+const fetchConnectorsForFeatureMock = fetchConnectorsForFeature as MockedFunction<
   typeof fetchConnectorsForFeature
 >;
 
@@ -107,7 +110,7 @@ describe('loadConnectors', () => {
   const http = {} as HttpSetup;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('fetches connectors for the feature and maps them to AIConnector', async () => {

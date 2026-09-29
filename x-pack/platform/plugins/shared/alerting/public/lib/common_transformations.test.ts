@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ApiRule } from './common_transformations';
 import { transformRule } from './common_transformations';
 import { RuleExecutionStatusErrorReasons, RuleLastRunOutcomeValues } from '../../common';
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 const dateFixed = Date.parse('2021-12-15T12:34:56.789Z');
 const dateCreated = new Date(dateFixed - 2000);

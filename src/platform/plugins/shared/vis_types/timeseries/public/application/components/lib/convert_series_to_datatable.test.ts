@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { PanelData } from '../../../../common/types';
 import type { TimeseriesVisParams } from '../../../types';
 import { convertSeriesToDataTable, addMetaToColumns } from './convert_series_to_datatable';
 
-jest.mock('../../../services', () => {
+vi.mock('../../../services', () => {
   return {
-    getDataStart: jest.fn(() => {
+    getDataStart: vi.fn(() => {
       return {
         query: {
           timefilter: {
             timefilter: {
-              getTime: jest.fn(() => {
+              getTime: vi.fn(() => {
                 return {
                   from: '2021-04-30T16:42:24.502Z',
                   to: '2021-05-05T14:42:24.502Z',
@@ -30,7 +32,7 @@ jest.mock('../../../services', () => {
         },
       };
     }),
-    getDataViewsStart: jest.fn(),
+    getDataViewsStart: vi.fn(),
   };
 });
 

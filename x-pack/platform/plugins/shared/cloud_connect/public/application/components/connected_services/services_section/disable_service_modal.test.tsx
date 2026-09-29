@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -22,13 +24,13 @@ const renderWithIntl = (component: React.ReactElement) => {
 describe('DisableServiceModal', () => {
   const defaultProps = {
     serviceName: 'Elastic Inference Service',
-    onClose: jest.fn(),
-    onConfirm: jest.fn().mockResolvedValue(undefined),
+    onClose: vi.fn(),
+    onConfirm: vi.fn().mockResolvedValue(undefined),
     isLoading: false,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render modal', () => {
@@ -52,7 +54,7 @@ describe('DisableServiceModal', () => {
 
   describe('User interactions', () => {
     it('should call onClose when Cancel button is clicked', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderWithIntl(<DisableServiceModal {...defaultProps} onClose={onClose} />);
 
       const cancelButton = screen.getByRole('button', { name: /cancel/i });
@@ -62,7 +64,7 @@ describe('DisableServiceModal', () => {
     });
 
     it('should call onConfirm when Disable service button is clicked', async () => {
-      const onConfirm = jest.fn().mockResolvedValue(undefined);
+      const onConfirm = vi.fn().mockResolvedValue(undefined);
       renderWithIntl(<DisableServiceModal {...defaultProps} onConfirm={onConfirm} />);
 
       const disableButton = screen.getByRole('button', { name: /disable service/i });

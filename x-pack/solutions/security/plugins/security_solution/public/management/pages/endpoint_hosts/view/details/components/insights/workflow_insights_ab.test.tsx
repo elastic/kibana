@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, act, fireEvent } from '@testing-library/react';
 import { WorkflowInsightsAB } from './workflow_insights_ab';
@@ -12,47 +15,59 @@ import { useFetchInsightsAB } from '../../../hooks/insights/use_fetch_insights_a
 import { useFetchPendingScans } from '../../../hooks/insights/use_fetch_pending_scans';
 import { useTriggerScanAB } from '../../../hooks/insights/use_trigger_scan_ab';
 
-jest.mock('../../../hooks/insights/use_fetch_insights_ab');
-jest.mock('../../../hooks/insights/use_fetch_pending_scans');
-jest.mock('../../../hooks/insights/use_trigger_scan_ab');
+vi.mock('../../../hooks/insights/use_fetch_insights_ab');
+vi.mock('../../../hooks/insights/use_fetch_pending_scans');
+vi.mock('../../../hooks/insights/use_trigger_scan_ab');
 
-const mockAddDanger = jest.fn();
-jest.mock('../../../../../../../common/lib/kibana', () => ({
-  useToasts: () => ({ addDanger: mockAddDanger }),
-}));
+const mockAddDanger = vi.fn();
+vi.mock('../../../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useToasts: () => ({ addDanger: mockAddDanger }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./workflow_insights_scan_ab', () => ({
-  WorkflowInsightsScanSectionAB: ({
-    onScanButtonClick,
-  }: {
-    onScanButtonClick: (connectorId: string) => void;
-  }) => (
-    <button type="button" onClick={() => onScanButtonClick('connector-1')}>
-      {'scan'}
-    </button>
-  ),
-}));
+vi.mock('./workflow_insights_scan_ab', () => {
+      const mocked = {
+      WorkflowInsightsScanSectionAB: ({
+        onScanButtonClick,
+      }: {
+        onScanButtonClick: (connectorId: string) => void;
+      }) => (
+        <button type="button" onClick={() => onScanButtonClick('connector-1')}>
+          {'scan'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/stale_endpoint_package_banner', () => ({
-  StaleEndpointPackageBanner: () => <div />,
-}));
+vi.mock('./components/stale_endpoint_package_banner', () => {
+      const mocked = {
+      StaleEndpointPackageBanner: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./workflow_insights_results', () => ({
-  WorkflowInsightsResults: ({
-    scanCompleted,
-    results,
-  }: {
-    scanCompleted: boolean;
-    results?: Array<unknown>;
-  }) =>
-    scanCompleted && (results ?? []).length === 0 ? (
-      <div data-test-subj="workflowInsightsEmptyResultsCallout" />
-    ) : null,
-}));
+vi.mock('./workflow_insights_results', () => {
+      const mocked = {
+      WorkflowInsightsResults: ({
+        scanCompleted,
+        results,
+      }: {
+        scanCompleted: boolean;
+        results?: Array<unknown>;
+      }) =>
+        scanCompleted && (results ?? []).length === 0 ? (
+          <div data-test-subj="workflowInsightsEmptyResultsCallout" />
+        ) : null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useFetchInsightsABMock = useFetchInsightsAB as jest.Mock;
-const useFetchPendingScansMock = useFetchPendingScans as jest.Mock;
-const useTriggerScanABMock = useTriggerScanAB as jest.Mock;
+const useFetchInsightsABMock = useFetchInsightsAB as Mock;
+const useFetchPendingScansMock = useFetchPendingScans as Mock;
+const useTriggerScanABMock = useTriggerScanAB as Mock;
 
 type TriggerScanConfig = Parameters<typeof useTriggerScanAB>[0];
 
@@ -65,7 +80,7 @@ const latestPendingConfig = () => {
 
 describe('WorkflowInsightsAB completion-time refresh', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useFetchPendingScansMock.mockReturnValue({ data: { pending: [] } });
     useTriggerScanABMock.mockImplementation(({ onSuccess }: TriggerScanConfig) => ({
       mutate: () =>
@@ -78,7 +93,7 @@ describe('WorkflowInsightsAB completion-time refresh', () => {
   });
 
   it('does not refetch on mount poll success but refetches after a user-triggered scan succeeds', async () => {
-    const refetch = jest.fn().mockResolvedValue({ data: [] });
+    const refetch = vi.fn().mockResolvedValue({ data: [] });
     useFetchInsightsABMock.mockReturnValue({ data: [], refetch });
 
     render(<WorkflowInsightsAB endpointId="ep-1" />);
@@ -99,7 +114,7 @@ describe('WorkflowInsightsAB completion-time refresh', () => {
   });
 
   it('refetches insights on user terminal failure and still surfaces a toast', async () => {
-    const refetch = jest.fn().mockResolvedValue({ data: [] });
+    const refetch = vi.fn().mockResolvedValue({ data: [] });
     useFetchInsightsABMock.mockReturnValue({ data: [], refetch });
 
     render(<WorkflowInsightsAB endpointId="ep-1" />);
@@ -118,7 +133,7 @@ describe('WorkflowInsightsAB completion-time refresh', () => {
 
   it('does not finalize the empty-results state until the completion refetch resolves', async () => {
     let resolveRefetch: (() => void) | undefined;
-    const refetch = jest.fn(
+    const refetch = vi.fn(
       () =>
         new Promise((resolve) => {
           resolveRefetch = () => resolve({ data: [] });
@@ -148,7 +163,7 @@ describe('WorkflowInsightsAB completion-time refresh', () => {
 
   it('stops pending polling before the completion refetch resolves so it cannot re-enter and duplicate the refetch', async () => {
     let resolveRefetch: (() => void) | undefined;
-    const refetch = jest.fn(
+    const refetch = vi.fn(
       () =>
         new Promise((resolve) => {
           resolveRefetch = () => resolve({ data: [] });
@@ -180,7 +195,7 @@ describe('WorkflowInsightsAB completion-time refresh', () => {
 
   it('stops pending polling before the failure refetch resolves and fires exactly one toast', async () => {
     let resolveRefetch: (() => void) | undefined;
-    const refetch = jest.fn(
+    const refetch = vi.fn(
       () =>
         new Promise((resolve) => {
           resolveRefetch = () => resolve({ data: [] });
@@ -213,7 +228,7 @@ describe('WorkflowInsightsAB completion-time refresh', () => {
 
 describe('WorkflowInsightsAB observer latch', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useFetchPendingScansMock.mockReturnValue({ data: { pending: [] } });
     useTriggerScanABMock.mockImplementation(({ onSuccess }: TriggerScanConfig) => ({
       mutate: () =>
@@ -226,7 +241,7 @@ describe('WorkflowInsightsAB observer latch', () => {
   });
 
   it('observer-latched on running scan: terminal success refetches and shows empty results callout', async () => {
-    const refetch = jest.fn().mockResolvedValue({ data: [] });
+    const refetch = vi.fn().mockResolvedValue({ data: [] });
     useFetchInsightsABMock.mockReturnValue({ data: [], refetch });
     useFetchPendingScansMock.mockReturnValue({ data: { pending: [{ status: 'running' }] } });
 
@@ -242,7 +257,7 @@ describe('WorkflowInsightsAB observer latch', () => {
   });
 
   it('observer-latched on running scan: terminal success with results refetches without empty callout', async () => {
-    const refetch = jest.fn().mockResolvedValue({});
+    const refetch = vi.fn().mockResolvedValue({});
     useFetchInsightsABMock.mockReturnValue({
       data: [
         {
@@ -266,7 +281,7 @@ describe('WorkflowInsightsAB observer latch', () => {
   });
 
   it('observer-latched on running scan: terminal failure refetches and shows danger toast', async () => {
-    const refetch = jest.fn().mockResolvedValue({ data: [] });
+    const refetch = vi.fn().mockResolvedValue({ data: [] });
     useFetchInsightsABMock.mockReturnValue({ data: [], refetch });
     useFetchPendingScansMock.mockReturnValue({ data: { pending: [{ status: 'running' }] } });
 
@@ -281,7 +296,7 @@ describe('WorkflowInsightsAB observer latch', () => {
   });
 
   it('stale terminal failure on mount without prior running scan stays silent', async () => {
-    const refetch = jest.fn().mockResolvedValue({ data: [] });
+    const refetch = vi.fn().mockResolvedValue({ data: [] });
     useFetchInsightsABMock.mockReturnValue({ data: [], refetch });
     useFetchPendingScansMock.mockReturnValue({ data: { pending: [{ status: 'failed' }] } });
 
@@ -296,7 +311,7 @@ describe('WorkflowInsightsAB observer latch', () => {
   });
 
   it('endpoint change resets observer latch so subsequent idle poll does not trigger feedback', async () => {
-    const refetch = jest.fn().mockResolvedValue({ data: [] });
+    const refetch = vi.fn().mockResolvedValue({ data: [] });
     useFetchInsightsABMock.mockReturnValue({ data: [], refetch });
     useFetchPendingScansMock.mockReturnValue({ data: { pending: [{ status: 'running' }] } });
 

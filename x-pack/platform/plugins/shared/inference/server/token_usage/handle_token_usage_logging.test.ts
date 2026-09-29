@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { Subject, toArray, firstValueFrom } from 'rxjs';
 import type { ChatCompletionEvent } from '@kbn/inference-common';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
@@ -14,16 +17,16 @@ import type { TokenUsageLogger } from './token_usage_logger';
 import type { TokenUsageContext } from './types';
 
 describe('handleTokenUsageLogging', () => {
-  let tokenUsageLogger: jest.Mocked<TokenUsageLogger>;
+  let tokenUsageLogger: Mocked<TokenUsageLogger>;
   let logger: MockedLogger;
   let context: TokenUsageContext;
   let getContext: () => TokenUsageContext;
 
   beforeEach(() => {
     tokenUsageLogger = {
-      log: jest.fn().mockResolvedValue(undefined),
-      setEsClient: jest.fn(),
-    } as unknown as jest.Mocked<TokenUsageLogger>;
+      log: vi.fn().mockResolvedValue(undefined),
+      setEsClient: vi.fn(),
+    } as unknown as Mocked<TokenUsageLogger>;
 
     logger = loggerMock.create();
 

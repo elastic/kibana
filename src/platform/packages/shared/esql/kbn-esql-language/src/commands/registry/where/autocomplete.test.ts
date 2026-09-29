@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
 import { Location } from '../types';
 import { autocomplete } from './autocomplete';
@@ -65,7 +68,7 @@ const whereExpectSuggestions = (
 describe('WHERE Autocomplete', () => {
   let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Reset mocks before each test to ensure isolation
     mockCallbacks = getMockCallbacks();
@@ -295,7 +298,7 @@ describe('WHERE Autocomplete', () => {
 
     test('suggests function arguments', async () => {
       const expectedFields = getFieldNamesByType(['double', 'integer', 'long', 'unsigned_long']);
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      (mockCallbacks.getByType as Mock).mockResolvedValue(
         expectedFields.map((name) => ({ label: name, text: name }))
       );
       // The editor automatically inject the final bracket, so it is not useful to test with just open bracket
@@ -500,7 +503,7 @@ describe('WHERE Autocomplete', () => {
     beforeEach(() => {
       mockCallbacks = {
         ...getMockCallbacks(),
-        getKqlSuggestions: jest.fn().mockImplementation((kqlQuery: string) =>
+        getKqlSuggestions: vi.fn().mockImplementation((kqlQuery: string) =>
           Promise.resolve(
             kqlSuggestions.map((suggestion) => ({
               ...suggestion,

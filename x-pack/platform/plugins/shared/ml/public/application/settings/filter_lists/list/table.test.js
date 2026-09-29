@@ -5,31 +5,42 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // Create a mock for the privilege check used within the table to
 // enable/disable the 'New Filter' button.
-jest.mock('../../../capabilities/check_capabilities', () => ({
-  checkPermission: () => true,
-}));
-jest.mock('../../../services/ml_api_service', () => 'ml');
+vi.mock('../../../capabilities/check_capabilities', () => {
+      const mocked = {
+      checkPermission: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../services/ml_api_service', () => 'ml');
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 // Mock the react-router-dom Link component
-jest.mock('react-router-dom', () => ({
-  Link: ({ to, children }) => <a href={to}>{children}</a>,
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      Link: ({ to, children }) => <a href={to}>{children}</a>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the useCreateAndNavigateToManagementMlLink hook
-jest.mock('../../../contexts/kibana/use_create_url', () => ({
-  useCreateAndNavigateToManagementMlLink: () => jest.fn(),
-}));
+vi.mock('../../../contexts/kibana/use_create_url', () => {
+      const mocked = {
+      useCreateAndNavigateToManagementMlLink: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { FilterListsTable } from './table';
 
 describe('Filter Lists Table', () => {
-  const setSelectedFilterLists = jest.fn(() => {});
-  const refreshFilterLists = jest.fn(() => {});
+  const setSelectedFilterLists = vi.fn(() => {});
+  const refreshFilterLists = vi.fn(() => {});
 
   const requiredProps = {
     setSelectedFilterLists,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
@@ -20,8 +22,8 @@ const renderCell = (flattened: Record<string, unknown>) => {
     isDetails: false,
     isExpanded: false,
     fieldFormats: {},
-    closePopover: jest.fn(),
-    setCellProps: jest.fn(),
+    closePopover: vi.fn(),
+    setCellProps: vi.fn(),
   } as unknown as DataGridCellValueElementProps;
 
   return render(<ChangePointPvalueCell {...props} context={{ pvalueColumnId: 'pvalue' }} />);

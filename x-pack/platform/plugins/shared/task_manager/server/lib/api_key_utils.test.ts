@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   isRequestApiKeyType,
   getApiKeyFromRequest,
@@ -124,10 +126,10 @@ describe('api_key_utils', () => {
         username: 'testUser',
       };
 
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValueOnce(mockUser);
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValueOnce(mockUser);
 
-      coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce({
+      coreStart.security.authc.apiKeys.grantAsInternalUser = vi.fn().mockResolvedValueOnce({
         id: 'apiKeyId',
         name: 'TaskManager: testUser',
         api_key: 'apiKey',
@@ -161,8 +163,8 @@ describe('api_key_utils', () => {
         username: 'testUser',
       };
 
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(mockUser);
 
       const result = await createApiKey([mockTask], request, coreStart.security);
       const apiKeyResult = result.get('task');
@@ -187,8 +189,8 @@ describe('api_key_utils', () => {
         username: 'testUser',
       };
 
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(mockUser);
 
       await expect(
         createApiKey([mockTask], request, coreStart.security)
@@ -213,9 +215,9 @@ describe('api_key_utils', () => {
         username: 'testUser',
       };
 
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
-      coreStart.security.authc.apiKeys.cloneAsInternalUser = jest.fn().mockResolvedValueOnce({
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(mockUser);
+      coreStart.security.authc.apiKeys.cloneAsInternalUser = vi.fn().mockResolvedValueOnce({
         id: 'clonedApiKeyId',
         name: 'TaskManager: report - testUser',
         api_key: 'clonedApiKey',
@@ -252,9 +254,9 @@ describe('api_key_utils', () => {
         username: 'testUser',
       };
 
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
-      coreStart.security.authc.apiKeys.cloneAsInternalUser = jest.fn().mockResolvedValueOnce({
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(mockUser);
+      coreStart.security.authc.apiKeys.cloneAsInternalUser = vi.fn().mockResolvedValueOnce({
         id: 'clonedApiKeyId',
         name: 'TaskManager: report - testUser',
         api_key: 'clonedApiKey',
@@ -288,9 +290,9 @@ describe('api_key_utils', () => {
         username: 'testUser',
       };
 
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
-      coreStart.security.authc.apiKeys.cloneAsInternalUser = jest.fn().mockResolvedValueOnce({
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(mockUser);
+      coreStart.security.authc.apiKeys.cloneAsInternalUser = vi.fn().mockResolvedValueOnce({
         id: 'clonedApiKeyId',
         name: 'TaskManager: report - testUser',
         api_key: 'clonedApiKey',
@@ -313,8 +315,8 @@ describe('api_key_utils', () => {
     test('should throw if API keys are not enabled', async () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = coreMock.createStart();
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(false);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(false);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(null);
 
       await expect(createApiKey([mockTask], request, coreStart.security)).rejects.toMatchObject({
         message: 'API keys are not enabled, cannot create API key.',
@@ -335,8 +337,8 @@ describe('api_key_utils', () => {
         username: 'testUser',
       };
 
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(mockUser);
 
       await expect(createApiKey([mockTask], request, coreStart.security)).rejects.toMatchObject({
         message: 'Could not extract API key from user request header.',
@@ -358,9 +360,9 @@ describe('api_key_utils', () => {
       const fakeRequest = kibanaRequestFactory(fakeRawRequest);
 
       const coreStart = coreMock.createStart();
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
-      coreStart.security.authc.apiKeys.cloneAsInternalUser = jest
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(null);
+      coreStart.security.authc.apiKeys.cloneAsInternalUser = vi
         .fn()
         .mockRejectedValueOnce(
           new Error('Unable to clone an API key, request does not contain an authorization header')
@@ -384,9 +386,9 @@ describe('api_key_utils', () => {
         authentication_type: 'basic',
         username: 'testUser',
       };
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValueOnce(mockUser);
-      coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce(null);
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValueOnce(mockUser);
+      coreStart.security.authc.apiKeys.grantAsInternalUser = vi.fn().mockResolvedValueOnce(null);
       await expect(createApiKey([mockTask], request, coreStart.security)).rejects.toMatchObject({
         message: 'Could not create API key.',
       });
@@ -395,13 +397,13 @@ describe('api_key_utils', () => {
     test('reports keys created before a later task type grant fails', async () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = coreMock.createStart();
-      const onApiKeyCreated = jest.fn();
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockResolvedValue(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue({
+      const onApiKeyCreated = vi.fn();
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockResolvedValue(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue({
         authentication_type: 'basic',
         username: 'testUser',
       });
-      coreStart.security.authc.apiKeys.grantAsInternalUser = jest
+      coreStart.security.authc.apiKeys.grantAsInternalUser = vi
         .fn()
         .mockResolvedValueOnce({ id: 'first-key-id', api_key: 'first-key-secret' })
         .mockRejectedValueOnce(new Error('second grant failed'));
@@ -430,10 +432,10 @@ describe('api_key_utils', () => {
         username: 'testUser',
       };
 
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(mockUser);
 
-      coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce({
+      coreStart.security.authc.apiKeys.grantAsInternalUser = vi.fn().mockResolvedValueOnce({
         id: 'apiKeyId',
         name: 'TaskManager: testUser',
         api_key: 'apiKey',
@@ -461,10 +463,10 @@ describe('api_key_utils', () => {
         username: 'testUser',
       };
 
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(mockUser);
 
-      coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce({
+      coreStart.security.authc.apiKeys.grantAsInternalUser = vi.fn().mockResolvedValueOnce({
         id: 'apiKeyId',
         name: 'TaskManager: testUser',
         api_key: 'apiKey',
@@ -497,8 +499,8 @@ describe('api_key_utils', () => {
         username: 'testUser',
       };
 
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(mockUser);
 
       const result = await getApiKeyAndUserScope([mockTask], request, coreStart.security);
 
@@ -528,9 +530,9 @@ describe('api_key_utils', () => {
         username: 'testUser',
       };
 
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
-      coreStart.security.authc.apiKeys.cloneAsInternalUser = jest.fn().mockResolvedValueOnce({
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(mockUser);
+      coreStart.security.authc.apiKeys.cloneAsInternalUser = vi.fn().mockResolvedValueOnce({
         id: 'clonedApiKeyId',
         name: 'TaskManager: report - testUser',
         api_key: 'clonedApiKey',
@@ -563,9 +565,9 @@ describe('api_key_utils', () => {
         username: 'testUser',
       };
 
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
-      coreStart.security.authc.apiKeys.cloneAsInternalUser = jest.fn().mockResolvedValueOnce({
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(mockUser);
+      coreStart.security.authc.apiKeys.cloneAsInternalUser = vi.fn().mockResolvedValueOnce({
         id: 'clonedApiKeyId',
         name: 'TaskManager: report - testUser',
         api_key: 'clonedApiKey',
@@ -622,9 +624,9 @@ describe('api_key_utils', () => {
       });
 
       const coreStart = coreMock.createStart();
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(enrichedUser);
-      coreStart.security.authc.apiKeys.cloneAsInternalUser = jest.fn().mockResolvedValueOnce({
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(enrichedUser);
+      coreStart.security.authc.apiKeys.cloneAsInternalUser = vi.fn().mockResolvedValueOnce({
         id: 'clonedApiKeyId',
         name: 'TaskManager: report',
         api_key: 'clonedApiKey',
@@ -654,10 +656,10 @@ describe('api_key_utils', () => {
         profile_uid: 'u_profile_12345',
       };
 
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(mockUser);
 
-      coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce({
+      coreStart.security.authc.apiKeys.grantAsInternalUser = vi.fn().mockResolvedValueOnce({
         id: 'apiKeyId',
         name: 'TaskManager: testUser',
         api_key: 'apiKey',
@@ -692,8 +694,8 @@ describe('api_key_utils', () => {
         profile_uid: 'u_profile_12345',
       };
 
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(mockUser);
 
       const result = await getApiKeyAndUserScope([mockTask], request, coreStart.security);
 
@@ -719,10 +721,10 @@ describe('api_key_utils', () => {
         profile_uid: 'u_profile_12345',
       };
 
-      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = vi.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = vi.fn().mockReturnValue(mockUser);
 
-      coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce({
+      coreStart.security.authc.apiKeys.grantAsInternalUser = vi.fn().mockResolvedValueOnce({
         id: 'apiKeyId',
         name: 'TaskManager: report',
         api_key: 'apiKey',

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Readable } from 'stream';
 
 import { concatStreamProviders } from './concat_stream_providers';
@@ -39,7 +41,7 @@ describe('concatStreamProviders() helper', () => {
         }),
     ]);
 
-    const errorListener = jest.fn();
+    const errorListener = vi.fn();
     dest.on('error', errorListener);
 
     await expect(createPromiseFromStreams([dest])).rejects.toThrowErrorMatchingInlineSnapshot(

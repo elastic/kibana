@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   WorkflowManagementAuditActions,
@@ -15,17 +17,17 @@ import {
 import type { WorkflowsService } from '../../workflows_management_service';
 
 async function createAuditHarness() {
-  const log = jest.fn();
-  const systemLog = jest.fn();
+  const log = vi.fn();
+  const systemLog = vi.fn();
   const audit = new WorkflowManagementAuditLog({
     service: {
-      getCoreStart: jest.fn().mockResolvedValue({
+      getCoreStart: vi.fn().mockResolvedValue({
         security: {
           audit: {
-            asScoped: jest.fn().mockReturnValue({ log }),
+            asScoped: vi.fn().mockReturnValue({ log }),
             withoutRequest: { log: systemLog },
           },
-          authc: { getCurrentUser: jest.fn() },
+          authc: { getCurrentUser: vi.fn() },
         },
       }),
     } as unknown as WorkflowsService,

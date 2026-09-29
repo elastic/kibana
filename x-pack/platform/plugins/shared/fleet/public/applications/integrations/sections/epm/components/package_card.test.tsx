@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, act } from '@testing-library/react';
 
@@ -16,23 +19,23 @@ import type { PackageCardProps } from './package_card';
 import { PackageCard } from './package_card';
 import { getLineClampStyles, shouldShowInstallationStatus } from './installation_status';
 
-jest.mock('../../../hooks', () => {
+vi.mock('../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../hooks'),
-    useConfirmForceInstall: jest.fn(),
-    useStartServices: jest.fn().mockReturnValue({
+    ...(await vi.importActual('../../../hooks')),
+    useConfirmForceInstall: vi.fn(),
+    useStartServices: vi.fn().mockReturnValue({
       application: {
-        navigateToApp: jest.fn(),
-        navigateToUrl: jest.fn(),
+        navigateToApp: vi.fn(),
+        navigateToUrl: vi.fn(),
       },
     }),
   };
 });
 
-jest.mock('./installation_status', () => {
+vi.mock('./installation_status', () => {
   return {
-    shouldShowInstallationStatus: jest.fn(),
-    getLineClampStyles: jest.fn(),
+    shouldShowInstallationStatus: vi.fn(),
+    getLineClampStyles: vi.fn(),
     InstallationStatus: () => {
       return <div data-test-subj="installation-status" />;
     },
@@ -71,16 +74,16 @@ describe('package card layout', () => {
 
 // FLAKY: https://github.com/elastic/kibana/issues/200848
 describe.skip('package card', () => {
-  let mockNavigateToApp: jest.Mock;
-  let mockNavigateToUrl: jest.Mock;
-  const mockGetLineClamp = getLineClampStyles as jest.Mock;
-  const mockShouldShowInstallationStatus = shouldShowInstallationStatus as jest.Mock;
+  let mockNavigateToApp: Mock;
+  let mockNavigateToUrl: Mock;
+  const mockGetLineClamp = getLineClampStyles as Mock;
+  const mockShouldShowInstallationStatus = shouldShowInstallationStatus as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    mockNavigateToApp = useStartServices().application.navigateToApp as jest.Mock;
-    mockNavigateToUrl = useStartServices().application.navigateToUrl as jest.Mock;
+    mockNavigateToApp = useStartServices().application.navigateToApp as Mock;
+    mockNavigateToUrl = useStartServices().application.navigateToUrl as Mock;
   });
 
   it('should navigate with state when integrations card', async () => {
@@ -117,7 +120,7 @@ describe.skip('package card', () => {
   });
 
   it('should navigate with window open when external url', async () => {
-    window.open = jest.fn();
+    window.open = vi.fn();
 
     const { utils } = renderPackageCard(cardProps());
 

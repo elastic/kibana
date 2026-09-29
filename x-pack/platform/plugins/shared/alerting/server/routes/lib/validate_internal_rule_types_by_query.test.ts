@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RulesClient } from '../../rules_client';
 import { rulesClientMock } from '../../mocks';
 import {
@@ -19,8 +21,8 @@ describe('internal rule types lib', () => {
   const operationText = 'edit';
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    rulesClient.getRuleTypesByQuery = jest.fn().mockResolvedValue({
+    vi.clearAllMocks();
+    rulesClient.getRuleTypesByQuery = vi.fn().mockResolvedValue({
       ruleTypes: ['internal'],
     });
 
@@ -43,7 +45,7 @@ describe('internal rule types lib', () => {
     });
 
     it('should not throw an error for valid rule types', async () => {
-      rulesClient.getRuleTypesByQuery = jest.fn().mockResolvedValue({
+      rulesClient.getRuleTypesByQuery = vi.fn().mockResolvedValue({
         ruleTypes: ['non-internal'],
       });
 
@@ -84,7 +86,7 @@ describe('internal rule types lib', () => {
 
     describe('validateInternalRuleTypesBulkOperation', () => {
       it('should throw an error for invalid rule types when passing ids', async () => {
-        rulesClient.getRuleTypesByQuery = jest.fn().mockResolvedValue({
+        rulesClient.getRuleTypesByQuery = vi.fn().mockResolvedValue({
           ruleTypes: ['internal'],
         });
 

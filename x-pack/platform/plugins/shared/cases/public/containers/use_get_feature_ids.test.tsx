@@ -5,27 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useToasts } from '../common/lib/kibana';
 import { useGetFeatureIds } from './use_get_feature_ids';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
 describe('useGetFeaturesIds', () => {
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
+  const addSuccess = vi.fn();
+  const addError = vi.fn();
 
-  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+  (useToasts as Mock).mockReturnValue({ addSuccess, addError });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the features ids correctly', async () => {
-    const spy = jest.spyOn(api, 'getFeatureIds').mockRejectedValue([]);
+    const spy = vi.spyOn(api, 'getFeatureIds').mockRejectedValue([]);
 
     renderHook(() => useGetFeatureIds(['alert-id-1'], true), {
       wrapper: TestProviders,
@@ -44,7 +47,7 @@ describe('useGetFeaturesIds', () => {
   });
 
   it('never call API if disable', async () => {
-    const spyMock = jest.spyOn(api, 'getFeatureIds');
+    const spyMock = vi.spyOn(api, 'getFeatureIds');
 
     renderHook(() => useGetFeatureIds(['alert-id-1'], false), {
       wrapper: TestProviders,
@@ -54,9 +57,9 @@ describe('useGetFeaturesIds', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    (useToasts as jest.Mock).mockReturnValue({ addError });
+    (useToasts as Mock).mockReturnValue({ addError });
 
-    const spy = jest
+    const spy = vi
       .spyOn(api, 'getFeatureIds')
       .mockRejectedValue(new Error('Something went wrong'));
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -21,26 +23,29 @@ import type {
   ChangePointSummarySeriesState,
 } from './change_point_summary_series';
 
-jest.mock('./change_point_summary_chart', () => ({
-  ChangePointSummaryChart: ({
-    points,
-    annotationTime,
-  }: {
-    points: Array<{ x: number; y: number }>;
-    annotationTime?: number;
-  }) => (
-    <div
-      data-test-subj="changePointSummaryChartMock"
-      data-points={points.length}
-      data-annotation={annotationTime ?? ''}
-    />
-  ),
-}));
+vi.mock('./change_point_summary_chart', () => {
+      const mocked = {
+      ChangePointSummaryChart: ({
+        points,
+        annotationTime,
+      }: {
+        points: Array<{ x: number; y: number }>;
+        annotationTime?: number;
+      }) => (
+        <div
+          data-test-subj="changePointSummaryChartMock"
+          data-points={points.length}
+          data-annotation={annotationTime ?? ''}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseChangePointSummarySeries = jest.fn();
+const mockUseChangePointSummarySeries = vi.fn();
 
-jest.mock('./change_point_summary_series', () => {
-  const actual = jest.requireActual('./change_point_summary_series');
+vi.mock('./change_point_summary_series', async () => {
+  const actual = (await vi.importActual('./change_point_summary_series'));
   return {
     ...actual,
     useChangePointSummarySeries: (...args: unknown[]) => mockUseChangePointSummarySeries(...args),
@@ -89,9 +94,9 @@ describe('ChangePointSummaryCell', () => {
   const charts = {
     theme: { useChartsBaseTheme: () => ({}) },
   } as unknown as ChartsPluginStart;
-  const data = { search: { esql: jest.fn() } } as unknown as DataPublicPluginStart;
+  const data = { search: { esql: vi.fn() } } as unknown as DataPublicPluginStart;
 
-  const setCellProps = jest.fn();
+  const setCellProps = vi.fn();
 
   const seriesPoints = [
     { x: Date.parse(SERIES_ROW.bucket), y: 12 },
@@ -106,7 +111,7 @@ describe('ChangePointSummaryCell', () => {
       isDetails: false,
       isExpanded: false,
       fieldFormats: {},
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       setCellProps,
     } as unknown as DataGridCellValueElementProps);
 
@@ -114,7 +119,7 @@ describe('ChangePointSummaryCell', () => {
     typeColumnId: 'type',
     pvalueColumnId: 'pvalue',
     summarySeriesCache: {
-      getSeries$: jest.fn(),
+      getSeries$: vi.fn(),
     } as ChangePointSummarySeriesCache,
   };
 

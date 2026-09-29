@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { textToTimeRange } from '../parse';
 import {
   timeRangeToDisplayText,
@@ -78,17 +80,17 @@ describe('timeRangeToDisplayText', () => {
   });
 
   it('handles relative to absolute', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2016-02-03T19:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2016-02-03T19:00:00.000Z'));
     expect(toDisplay('-15m to feb 3 2026, 19:00')).toBe('15 minutes ago → Feb 3, 2026, 19:00:00');
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('handles absolute to relative', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2016-02-03T19:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2016-02-03T19:00:00.000Z'));
     expect(toDisplay('feb 3 2016, 19:00 to +10y')).toBe(
       'Feb 3, 2016, 19:00:00 → 10 years from now'
     );
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('keeps natural language, capitalized', () => {
@@ -279,19 +281,19 @@ describe('timeRangeToFullFormattedText', () => {
 
   it('resolves relative dates to absolute formatted dates', () => {
     // Use local-time constructor to avoid timezone offset in assertions
-    jest.useFakeTimers().setSystemTime(new Date(2026, 1, 11, 12, 0, 0));
+    vi.useFakeTimers().setSystemTime(new Date(2026, 1, 11, 12, 0, 0));
     expect(toFullFormatted('-7d to now')).toBe(
       'Feb 4, 2026, 12:00:00.000 → Feb 11, 2026, 12:00:00.000'
     );
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('resolves both relative dates to absolute formatted dates', () => {
-    jest.useFakeTimers().setSystemTime(new Date(2026, 1, 11, 12, 0, 0));
+    vi.useFakeTimers().setSystemTime(new Date(2026, 1, 11, 12, 0, 0));
     expect(toFullFormatted('-1h to +1h')).toBe(
       'Feb 11, 2026, 11:00:00.000 → Feb 11, 2026, 13:00:00.000'
     );
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns raw text for invalid ranges', () => {

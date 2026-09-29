@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { TMSService } from '@elastic/ems-client';
 import type { LayerSpecification, Map as MbMap } from '@kbn/mapbox-gl';
 import { SOURCE_DATA_REQUEST_ID, SOURCE_TYPES } from '../../../../common/constants';
@@ -103,7 +105,7 @@ describe('EmsVectorTileLayer', () => {
     });
 
     test('_setColorFilter should look up the color operation for the loaded tileLayerId', () => {
-      const replacedColorOperationDefaults = jest.replaceProperty(
+      const replacedColorOperationDefaults = vi.replaceProperty(
         TMSService,
         'colorOperationDefaults',
         [
@@ -111,7 +113,7 @@ describe('EmsVectorTileLayer', () => {
           { style: 'newTheme', operation: 'newOperation', percentage: 0.2 },
         ] as unknown as typeof TMSService.colorOperationDefaults
       );
-      const transformColorPropertiesSpy = jest
+      const transformColorPropertiesSpy = vi
         .spyOn(TMSService, 'transformColorProperties')
         .mockReturnValue([]);
 
@@ -119,7 +121,7 @@ describe('EmsVectorTileLayer', () => {
         _setColorFilter: (mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) => void;
       };
       const mbLayer = { id: 'mbLayerId', type: 'symbol' } as unknown as LayerSpecification;
-      const mbMap = { setPaintProperty: jest.fn() } as unknown as MbMap;
+      const mbMap = { setPaintProperty: vi.fn() } as unknown as MbMap;
 
       layer._setColorFilter(mbMap, mbLayer, 'mbLayerId');
 

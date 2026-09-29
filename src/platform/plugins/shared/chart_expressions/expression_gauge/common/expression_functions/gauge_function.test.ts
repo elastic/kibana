@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { gaugeFunction } from './gauge_function';
 import type { GaugeArguments } from '..';
 import { GaugeShapes } from '..';
@@ -85,7 +87,7 @@ describe('interpreter/functions#gauge', () => {
           reset: () => {},
         },
       },
-      getExecutionContext: jest.fn(),
+      getExecutionContext: vi.fn(),
     } as unknown as ExecutionContext;
 
     await fn(context, args, handlers);
@@ -101,7 +103,7 @@ describe('interpreter/functions#gauge', () => {
     };
     const handlers = {
       variables: { overrides },
-      getExecutionContext: jest.fn(),
+      getExecutionContext: vi.fn(),
     } as unknown as ExecutionContext;
     const result = await fn(context, args, handlers);
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance, Mocked, MockedFunction } from 'vitest';
+
 import { LogsExtractionClient } from './logs_extraction_client';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -85,11 +88,11 @@ import { ENGINE_STATUS } from '../constants';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 import { entityStoreMetrics } from '../../monitor/metrics';
 
-jest.mock('../../infra/elasticsearch/esql');
-jest.mock('../../infra/elasticsearch/ingest');
+vi.mock('../../infra/elasticsearch/esql');
+vi.mock('../../infra/elasticsearch/ingest');
 
-const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
-const mockIngestEntities = ingestEntities as jest.MockedFunction<typeof ingestEntities>;
+const mockExecuteEsqlQuery = executeEsqlQuery as MockedFunction<typeof executeEsqlQuery>;
+const mockIngestEntities = ingestEntities as MockedFunction<typeof ingestEntities>;
 
 const NO_INGEST_CHANGES = { created: 0, updated: 0, noop: 0 };
 
@@ -141,7 +144,7 @@ type GlobalStateLogExtractionOverrides = Partial<{
 
 function createMockGlobalStateClient(
   logExtractionOverrides?: GlobalStateLogExtractionOverrides
-): jest.Mocked<
+): Mocked<
   Pick<
     EntityStoreGlobalStateClient,
     'find' | 'findOrThrow' | 'findLogExtractionOverrides' | 'update'
@@ -162,10 +165,10 @@ function createMockGlobalStateClient(
   });
   const state = { logsExtraction } as EntityStoreGlobalState;
   return {
-    find: jest.fn().mockResolvedValue(state),
-    findOrThrow: jest.fn().mockResolvedValue(state),
-    findLogExtractionOverrides: jest.fn().mockResolvedValue(logsExtraction),
-    update: jest.fn().mockImplementation(async (partial: EntityStoreGlobalStateOverrides) => ({
+    find: vi.fn().mockResolvedValue(state),
+    findOrThrow: vi.fn().mockResolvedValue(state),
+    findLogExtractionOverrides: vi.fn().mockResolvedValue(logsExtraction),
+    update: vi.fn().mockImplementation(async (partial: EntityStoreGlobalStateOverrides) => ({
       ...state,
       logsExtraction: LogExtractionConfig.parse({
         ...logsExtraction,
@@ -188,15 +191,15 @@ function setGlobalState(
 interface TestContext {
   client: LogsExtractionClient;
   mockLogger: ReturnType<typeof loggerMock.create>;
-  mockEsClient: jest.Mocked<ElasticsearchClient>;
-  mockDataViewsService: jest.Mocked<DataViewsService>;
-  mockEngineDescriptorClient: jest.Mocked<Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>>;
+  mockEsClient: Mocked<ElasticsearchClient>;
+  mockDataViewsService: Mocked<DataViewsService>;
+  mockEngineDescriptorClient: Mocked<Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>>;
   mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
 }
 
 /** Fresh mocks + client for one test. Shared by every top-level describe in this file. */
 function createTestContext(globalStateOverrides?: GlobalStateLogExtractionOverrides): TestContext {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   // clearAllMocks does NOT drain mockResolvedValueOnce queues — only mockReset does.
   // Cap tests consume fewer queued calls than were set up (cap fires early), leaving stale
   // Once values that would otherwise pollute the next test.
@@ -209,15 +212,15 @@ function createTestContext(globalStateOverrides?: GlobalStateLogExtractionOverri
   const mockLogger = loggerMock.create();
   const mockEsClient = {
     indices: {
-      resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+      resolveIndex: vi.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
     },
-  } as unknown as jest.Mocked<ElasticsearchClient>;
+  } as unknown as Mocked<ElasticsearchClient>;
   const mockDataViewsService = {
-    get: jest.fn(),
-  } as unknown as jest.Mocked<DataViewsService>;
+    get: vi.fn(),
+  } as unknown as Mocked<DataViewsService>;
   const mockEngineDescriptorClient: TestContext['mockEngineDescriptorClient'] = {
-    findOrThrow: jest.fn(),
-    update: jest.fn().mockResolvedValue({}),
+    findOrThrow: vi.fn(),
+    update: vi.fn().mockResolvedValue({}),
   };
   const mockGlobalStateClient = createMockGlobalStateClient(globalStateOverrides);
 
@@ -243,9 +246,9 @@ function createTestContext(globalStateOverrides?: GlobalStateLogExtractionOverri
 describe('LogsExtractionClient', () => {
   let client: LogsExtractionClient;
   let mockLogger: ReturnType<typeof loggerMock.create>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockDataViewsService: jest.Mocked<DataViewsService>;
-  let mockEngineDescriptorClient: jest.Mocked<
+  let mockEsClient: Mocked<ElasticsearchClient>;
+  let mockDataViewsService: Mocked<DataViewsService>;
+  let mockEngineDescriptorClient: Mocked<
     Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
   >;
   let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
@@ -278,7 +281,7 @@ describe('LogsExtractionClient', () => {
       };
 
       const mockDataView = {
-        getIndexPattern: jest
+        getIndexPattern: vi
           .fn()
           .mockReturnValue('logs-*,filebeat-*,.alerts-security.alerts-default'),
       };
@@ -340,7 +343,7 @@ describe('LogsExtractionClient', () => {
 
     it('threads excludedIndexPatterns into the extraction ES query as -pattern entries', async () => {
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
 
       mockGlobalStateClient = createMockGlobalStateClient({
@@ -371,7 +374,7 @@ describe('LogsExtractionClient', () => {
 
     it('excludes internal ES|QL views on origin and every remote cluster without naming linked projects', async () => {
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*,$.alert-actions'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*,$.alert-actions'),
       };
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -399,7 +402,7 @@ describe('LogsExtractionClient', () => {
         values: [['2024-01-02T10:00:00.000Z', 'hash1']],
       };
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
       const remoteViewError = {
         message:
@@ -449,7 +452,7 @@ describe('LogsExtractionClient', () => {
       // therefore represents a view the probe did not encounter (race condition), and it
       // propagates as a failure rather than being silently retried.
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
       const remoteViewError = {
         message: 'remote_resource_not_supported_exception',
@@ -481,7 +484,7 @@ describe('LogsExtractionClient', () => {
 
     it('should handle empty results from ESQL query', async () => {
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -533,7 +536,7 @@ describe('LogsExtractionClient', () => {
       };
 
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -581,7 +584,7 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue({
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       } as any);
       mockExecuteEsqlQuery.mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty());
 
@@ -598,10 +601,10 @@ describe('LogsExtractionClient', () => {
 
     it('should compute extraction window from lookbackPeriod and delay when no custom range', async () => {
       const fixedNow = new Date('2025-01-15T12:00:00.000Z');
-      jest.useFakeTimers({ now: fixedNow.getTime() });
+      vi.useFakeTimers({ now: fixedNow.getTime() });
 
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
 
       const globalStateWithDelay5s = {
@@ -639,15 +642,15 @@ describe('LogsExtractionClient', () => {
         })
       );
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('uses lookback as extraction window from when no checkpoint set', async () => {
       const fixedNow = new Date('2025-01-15T12:00:00.000Z');
-      jest.useFakeTimers({ now: fixedNow.getTime() });
+      vi.useFakeTimers({ now: fixedNow.getTime() });
 
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
 
       const globalStateWithDelay5s = {
@@ -673,18 +676,18 @@ describe('LogsExtractionClient', () => {
       const firstEsql = mockExecuteEsqlQuery.mock.calls[0][0].query;
       expect(firstEsql).toContain(lookbackFrom);
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('uses lastExecutionTimestamp as extraction window from when no checkpoint set', async () => {
       const fixedNow = new Date('2025-01-15T12:00:00.000Z');
-      jest.useFakeTimers({ now: fixedNow.getTime() });
+      vi.useFakeTimers({ now: fixedNow.getTime() });
 
       const lastExecutionTimestamp = '2025-01-15T11:00:00.000Z';
       const delayedLastExecution = moment.utc(fixedNow).subtract(5, 'seconds').toISOString();
 
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
 
       const globalStateWithDelay5s = {
@@ -709,17 +712,17 @@ describe('LogsExtractionClient', () => {
       const firstEsql = mockExecuteEsqlQuery.mock.calls[0][0].query;
       expect(firstEsql).toContain(delayedLastExecution);
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should use checkpointTimestamp as from and subtract delay for to', async () => {
       const fixedNow = new Date('2025-01-15T12:00:00.000Z');
-      jest.useFakeTimers({ now: fixedNow.getTime() });
+      vi.useFakeTimers({ now: fixedNow.getTime() });
 
       const checkpointTimestamp = '2025-01-15T10:30:00.000Z';
 
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -750,7 +753,7 @@ describe('LogsExtractionClient', () => {
         })
       );
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should return error when specificWindow has from date after to date', async () => {
@@ -760,7 +763,7 @@ describe('LogsExtractionClient', () => {
         >
       );
       mockDataViewsService.get.mockResolvedValue({
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       } as any);
 
       const fromDate = '2024-01-02T12:00:00.000Z';
@@ -786,7 +789,7 @@ describe('LogsExtractionClient', () => {
 
     it('should return error when computed extraction window has from date after to date', async () => {
       const fixedNow = new Date('2025-01-15T11:00:00.000Z');
-      jest.useFakeTimers({ now: fixedNow.getTime() });
+      vi.useFakeTimers({ now: fixedNow.getTime() });
 
       const checkpointTimestamp = '2025-01-15T12:00:00.000Z'; // after fixedNow
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -797,7 +800,7 @@ describe('LogsExtractionClient', () => {
         }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
       );
       mockDataViewsService.get.mockResolvedValue({
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       } as any);
 
       const result = await client.extractLogs('user');
@@ -815,12 +818,12 @@ describe('LogsExtractionClient', () => {
         },
       });
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should use custom date range when provided', async () => {
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -867,7 +870,7 @@ describe('LogsExtractionClient', () => {
       };
 
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -896,7 +899,7 @@ describe('LogsExtractionClient', () => {
 
     it('should handle errors from executeEsqlQuery', async () => {
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -928,7 +931,7 @@ describe('LogsExtractionClient', () => {
       };
 
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -963,7 +966,7 @@ describe('LogsExtractionClient', () => {
       };
 
       const mockDataView = {
-        getIndexPattern: jest
+        getIndexPattern: vi
           .fn()
           .mockReturnValue('logs-*,remote_cluster:logs-*,other:filebeat-*,metrics-*'),
       };
@@ -991,7 +994,7 @@ describe('LogsExtractionClient', () => {
 
     it('should clear a previous error after a successful extraction', async () => {
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue({
@@ -1039,7 +1042,7 @@ describe('LogsExtractionClient', () => {
       };
 
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -1100,7 +1103,7 @@ describe('LogsExtractionClient', () => {
         maxLogsPerWindow: number;
         maxLogsPerWindowCapBehavior?: 'defer' | 'drop';
       }) => {
-        jest.useFakeTimers({ now: fixedNow.getTime() });
+        vi.useFakeTimers({ now: fixedNow.getTime() });
         const globalState = {
           logsExtraction: LogExtractionConfig.parse({
             lookbackPeriod: '3h',
@@ -1117,12 +1120,12 @@ describe('LogsExtractionClient', () => {
           >
         );
         mockDataViewsService.get.mockResolvedValue({
-          getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+          getIndexPattern: vi.fn().mockReturnValue('logs-*'),
         } as any);
       };
 
       afterEach(() => {
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
       it('defer — stops early, preserves cursor, skips final logExtractionState clear', async () => {
@@ -1236,7 +1239,7 @@ describe('LogsExtractionClient', () => {
         });
 
         // No cap-related warnings
-        const warnCalls = (mockLogger.warn as jest.Mock).mock.calls.map(([msg]) => msg);
+        const warnCalls = (mockLogger.warn as Mock).mock.calls.map(([msg]) => msg);
         expect(warnCalls.some((m: string) => m.includes('volume cap'))).toBe(false);
       });
 
@@ -1332,7 +1335,7 @@ describe('LogsExtractionClient', () => {
           >
         );
         mockDataViewsService.get.mockResolvedValue({
-          getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+          getIndexPattern: vi.fn().mockReturnValue('logs-*'),
         } as any);
         mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
       };
@@ -1367,7 +1370,7 @@ describe('LogsExtractionClient', () => {
           )
         );
         // After the stall bump, a later update persists checkpointTimestamp = bumpedTs.
-        const updateCalls = (mockEngineDescriptorClient.update as jest.Mock).mock.calls;
+        const updateCalls = (mockEngineDescriptorClient.update as Mock).mock.calls;
         const persistedCheckpoints = updateCalls
           .map(([, patch]) => patch?.logExtractionState?.checkpointTimestamp)
           .filter((ts) => ts != null);
@@ -1447,7 +1450,7 @@ describe('LogsExtractionClient', () => {
         lastExecutionTimestamp: string;
         maxTimeWindowSize: string;
       }) => {
-        jest.useFakeTimers({ now: fixedNow.getTime() });
+        vi.useFakeTimers({ now: fixedNow.getTime() });
         const globalState = {
           logsExtraction: LogExtractionConfig.parse({
             lookbackPeriod: '3h',
@@ -1462,13 +1465,13 @@ describe('LogsExtractionClient', () => {
           }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
         );
         mockDataViewsService.get.mockResolvedValue({
-          getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+          getIndexPattern: vi.fn().mockReturnValue('logs-*'),
         } as any);
         mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
       };
 
       afterEach(() => {
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
       it('walks the time window in capped sub-windows when fromDateISO is far behind effectiveWindowEnd', async () => {
@@ -1546,7 +1549,7 @@ describe('LogsExtractionClient', () => {
           >
         );
         mockDataViewsService.get.mockResolvedValue({
-          getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+          getIndexPattern: vi.fn().mockReturnValue('logs-*'),
         } as any);
         mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
 
@@ -1596,7 +1599,7 @@ describe('LogsExtractionClient', () => {
   describe('getLocalAndRemoteIndexPatterns', () => {
     it('should split local and cluster-prefixed remote index patterns', async () => {
       const mockDataView = {
-        getIndexPattern: jest
+        getIndexPattern: vi
           .fn()
           .mockReturnValue('logs-*,remote_cluster:logs-*,metrics-*,other:filebeat-*'),
       };
@@ -1619,7 +1622,7 @@ describe('LogsExtractionClient', () => {
 
     it('drops internal ES|QL view includes from local and remote pattern lists', async () => {
       const mockDataView = {
-        getIndexPattern: jest
+        getIndexPattern: vi
           .fn()
           .mockReturnValue(
             'logs-*,$.alert-actions,kayak-f86d55:$.rule-events,remote_cluster:logs-*'
@@ -1638,7 +1641,7 @@ describe('LogsExtractionClient', () => {
 
     it('should exclude alerts index from both local and remote', async () => {
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*,.alerts-security.alerts-default'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*,.alerts-security.alerts-default'),
       };
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
 
@@ -1651,7 +1654,7 @@ describe('LogsExtractionClient', () => {
 
     it('adds an excluded pattern to localIndexPatterns', async () => {
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*,metrics-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*,metrics-*'),
       };
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
 
@@ -1665,7 +1668,7 @@ describe('LogsExtractionClient', () => {
 
     it('adds an excluded pattern to remoteIndexPatterns', async () => {
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('remote_cluster:logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('remote_cluster:logs-*'),
       };
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
 
@@ -1678,7 +1681,7 @@ describe('LogsExtractionClient', () => {
 
     it('adds an excluded pattern after the included ones', async () => {
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*'),
       };
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
 
@@ -1697,7 +1700,7 @@ describe('LogsExtractionClient', () => {
   describe('getLocalIndexPatterns', () => {
     it('forwards excludedIndexPatterns and includes local negations only', async () => {
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*,remote_cluster:logs-*'),
+        getIndexPattern: vi.fn().mockReturnValue('logs-*,remote_cluster:logs-*'),
       };
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
 
@@ -1798,18 +1801,18 @@ describe('LogsExtractionClient mid-slice resume', () => {
   const setup = (globalStateOverrides?: GlobalStateLogExtractionOverrides) => {
     ctx = createTestContext(globalStateOverrides);
     ctx.mockDataViewsService.get.mockResolvedValue({
-      getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      getIndexPattern: vi.fn().mockReturnValue('logs-*'),
     } as any);
     mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
   };
 
   beforeEach(() => {
-    jest.useFakeTimers({ now: fixedNow.getTime() });
+    vi.useFakeTimers({ now: fixedNow.getTime() });
     setup();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('resumes with the pinned slice end and id cursor, skipping the boundary probe', async () => {
@@ -1944,7 +1947,7 @@ describe('LogsExtractionClient mid-slice resume', () => {
     expect(persistedState.checkpointTimestamp).toBe(lookbackStartAtRun1);
 
     // Advance the clock: a re-derived now - lookbackPeriod would now be 09:02, not 09:00.
-    jest.setSystemTime(new Date('2025-01-15T12:02:00.000Z'));
+    vi.setSystemTime(new Date('2025-01-15T12:02:00.000Z'));
 
     // Run 2 resumes from the persisted state.
     ctx.mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -2060,7 +2063,7 @@ const extractionColumns: ESQLSearchResponse['columns'] = [
 ];
 
 function createContextWithMode(mode: ExtractionMode) {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockExecuteEsqlQuery.mockReset();
   mockIngestEntities.mockReset();
   // mockReset drops the implementation, so without a default the mock resolves to undefined and
@@ -2070,17 +2073,17 @@ function createContextWithMode(mode: ExtractionMode) {
   const mockLogger = loggerMock.create();
   const mockEsClient = {
     indices: {
-      resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+      resolveIndex: vi.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
     },
-  } as unknown as jest.Mocked<ElasticsearchClient>;
+  } as unknown as Mocked<ElasticsearchClient>;
   const mockDataViewsService = {
-    get: jest.fn().mockResolvedValue({ getIndexPattern: jest.fn().mockReturnValue('logs-*') }),
-  } as unknown as jest.Mocked<DataViewsService>;
-  const mockEngineDescriptorClient: jest.Mocked<
+    get: vi.fn().mockResolvedValue({ getIndexPattern: vi.fn().mockReturnValue('logs-*') }),
+  } as unknown as Mocked<DataViewsService>;
+  const mockEngineDescriptorClient: Mocked<
     Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
   > = {
-    findOrThrow: jest.fn(),
-    update: jest.fn().mockResolvedValue({}),
+    findOrThrow: vi.fn(),
+    update: vi.fn().mockResolvedValue({}),
   };
   const mockGlobalStateClient = createMockGlobalStateClient();
 
@@ -2099,11 +2102,11 @@ function createContextWithMode(mode: ExtractionMode) {
 
 describe('LogsExtractionClient extraction mode cursor routing', () => {
   beforeEach(() => {
-    jest.useFakeTimers({ now: fixedNow.getTime() });
+    vi.useFakeTimers({ now: fixedNow.getTime() });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('nonPriority mode writes nonPriorityLogExtractionState on mid-run and end-of-run persists', async () => {
@@ -2312,36 +2315,36 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
 });
 
 describe('LogsExtractionClient extraction metrics', () => {
-  let lagRecord: jest.SpyInstance;
-  let utilizationRecord: jest.SpyInstance;
-  let logsProcessedRecord: jest.SpyInstance;
-  let entitiesCreatedAdd: jest.SpyInstance;
-  let entitiesUpdatedAdd: jest.SpyInstance;
-  let entitiesNoopAdd: jest.SpyInstance;
+  let lagRecord: MockInstance;
+  let utilizationRecord: MockInstance;
+  let logsProcessedRecord: MockInstance;
+  let entitiesCreatedAdd: MockInstance;
+  let entitiesUpdatedAdd: MockInstance;
+  let entitiesNoopAdd: MockInstance;
 
   beforeEach(() => {
-    jest.useFakeTimers({ now: fixedNow.getTime() });
-    lagRecord = jest.spyOn(entityStoreMetrics.extractionLagMs, 'record').mockImplementation();
-    utilizationRecord = jest
+    vi.useFakeTimers({ now: fixedNow.getTime() });
+    lagRecord = vi.spyOn(entityStoreMetrics.extractionLagMs, 'record').mockImplementation();
+    utilizationRecord = vi
       .spyOn(entityStoreMetrics.extractionLogsCapUtilization, 'record')
       .mockImplementation();
-    logsProcessedRecord = jest
+    logsProcessedRecord = vi
       .spyOn(entityStoreMetrics.extractionLogsProcessed, 'record')
       .mockImplementation();
-    entitiesCreatedAdd = jest
+    entitiesCreatedAdd = vi
       .spyOn(entityStoreMetrics.extractionEntitiesCreated, 'add')
       .mockImplementation();
-    entitiesUpdatedAdd = jest
+    entitiesUpdatedAdd = vi
       .spyOn(entityStoreMetrics.extractionEntitiesUpdated, 'add')
       .mockImplementation();
-    entitiesNoopAdd = jest
+    entitiesNoopAdd = vi
       .spyOn(entityStoreMetrics.extractionEntitiesNoop, 'add')
       .mockImplementation();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.restoreAllMocks();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   const startedDescriptor = (overrides?: Parameters<typeof createMockEngineDescriptor>[1]) =>
@@ -2445,7 +2448,7 @@ describe('LogsExtractionClient extraction metrics', () => {
       EXTRACTION_MODE.single
     );
     mockDataViewsService.get.mockResolvedValue({
-      getIndexPattern: jest.fn().mockReturnValue('remote-cluster:logs-*'),
+      getIndexPattern: vi.fn().mockReturnValue('remote-cluster:logs-*'),
     } as unknown as Awaited<ReturnType<DataViewsService['get']>>);
     mockEngineDescriptorClient.findOrThrow.mockResolvedValue(startedDescriptor());
     mockIngestEntities.mockResolvedValue(NO_INGEST_CHANGES);
@@ -2573,7 +2576,7 @@ describe('LogsExtractionClient extraction metrics', () => {
       EXTRACTION_MODE.single
     );
     mockDataViewsService.get.mockResolvedValue({
-      getIndexPattern: jest.fn().mockReturnValue('remote-cluster:logs-*'),
+      getIndexPattern: vi.fn().mockReturnValue('remote-cluster:logs-*'),
     } as unknown as Awaited<ReturnType<DataViewsService['get']>>);
     mockEngineDescriptorClient.findOrThrow.mockResolvedValue(startedDescriptor());
     // Probe succeeds (index patterns resolved, isRemote set), main query throws.
@@ -2607,26 +2610,26 @@ describe('LogsExtractionClient sampling wiring', () => {
     mode: ExtractionMode,
     descriptorExtras: Record<string, unknown> = {}
   ) {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockExecuteEsqlQuery.mockReset();
     mockIngestEntities.mockReset();
 
     const mockEsClient = {
       indices: {
-        resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+        resolveIndex: vi.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
       },
-    } as unknown as jest.Mocked<ElasticsearchClient>;
+    } as unknown as Mocked<ElasticsearchClient>;
     const mockDataViewsService = {
-      get: jest.fn().mockResolvedValue({ getIndexPattern: jest.fn().mockReturnValue('logs-*') }),
-    } as unknown as jest.Mocked<DataViewsService>;
-    const mockEngineDescriptorClient: jest.Mocked<
+      get: vi.fn().mockResolvedValue({ getIndexPattern: vi.fn().mockReturnValue('logs-*') }),
+    } as unknown as Mocked<DataViewsService>;
+    const mockEngineDescriptorClient: Mocked<
       Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
     > = {
-      findOrThrow: jest.fn().mockResolvedValue({
+      findOrThrow: vi.fn().mockResolvedValue({
         ...createMockEngineDescriptor('user'),
         ...descriptorExtras,
       } as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>),
-      update: jest.fn().mockResolvedValue({}),
+      update: vi.fn().mockResolvedValue({}),
     };
 
     const client = new LogsExtractionClient({
@@ -2688,11 +2691,11 @@ describe('LogsExtractionClient sampling wiring', () => {
   const mockLowVolumeSequence = () => mockVolumeSequence(100, '2025-01-15T11:53:00.000Z');
 
   beforeEach(() => {
-    jest.useFakeTimers({ now: fixedNow.getTime() });
+    vi.useFakeTimers({ now: fixedNow.getTime() });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('nonPriority above the default cap samples the extraction query', async () => {
@@ -2983,10 +2986,10 @@ describe('LogsExtractionClient sampling wiring', () => {
   describe('sampling metrics', () => {
     // Spies must be created after createSamplingContext, whose clearAllMocks would wipe them.
     const spySampleMetrics = () => ({
-      probabilityRecord: jest
+      probabilityRecord: vi
         .spyOn(entityStoreMetrics.extractionSampleProbability, 'record')
         .mockImplementation(),
-      eligibleRunsAdd: jest
+      eligibleRunsAdd: vi
         .spyOn(entityStoreMetrics.extractionSampleEligibleRuns, 'add')
         .mockImplementation(),
     });

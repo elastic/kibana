@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { UserStorageService } from './user_storage_service';
 
-jest.mock('./routes', () => ({ registerRoutes: jest.fn() }));
+vi.mock('./routes', () => {
+      const mocked = { registerRoutes: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 const buildRegister = () => {
   const coreContext = {
@@ -22,13 +27,13 @@ const buildRegister = () => {
   const service = new UserStorageService(coreContext);
   const { register } = service.setup({
     http: {
-      createRouter: jest.fn().mockReturnValue({
-        get: jest.fn(),
-        put: jest.fn(),
-        delete: jest.fn(),
+      createRouter: vi.fn().mockReturnValue({
+        get: vi.fn(),
+        put: vi.fn(),
+        delete: vi.fn(),
       }),
     },
-    savedObjects: { registerType: jest.fn() },
+    savedObjects: { registerType: vi.fn() },
   } as any);
 
   return register;

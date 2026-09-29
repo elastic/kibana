@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { OpenTimelineButtonIcon } from './open_timeline_button';
@@ -13,9 +16,9 @@ import { OPEN_TIMELINE_BUTTON_TEST_ID } from './test_ids';
 import { useQueryTimelineById } from '../../timelines/components/open_timeline/helpers';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 
-jest.mock('../../common/hooks/use_experimental_features');
-jest.mock('../../timelines/components/open_timeline/helpers');
-jest.mock('../../common/components/user_privileges');
+vi.mock('../../common/hooks/use_experimental_features');
+vi.mock('../../timelines/components/open_timeline/helpers');
+vi.mock('../../common/components/user_privileges');
 
 const note: Note = {
   eventId: '1',
@@ -32,7 +35,7 @@ const index = 0;
 
 describe('OpenTimelineButtonIcon', () => {
   beforeEach(() => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: true } });
+    (useUserPrivileges as Mock).mockReturnValue({ timelinePrivileges: { read: true } });
   });
 
   it('should render the timeline icon', () => {
@@ -42,8 +45,8 @@ describe('OpenTimelineButtonIcon', () => {
   });
 
   it('should disable the button if the user does not have the correct privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: false } });
-    (useQueryTimelineById as jest.Mock).mockReturnValue(jest.fn());
+    (useUserPrivileges as Mock).mockReturnValue({ timelinePrivileges: { read: false } });
+    (useQueryTimelineById as Mock).mockReturnValue(vi.fn());
 
     const { getByTestId } = render(<OpenTimelineButtonIcon note={note} index={index} />);
 
@@ -51,8 +54,8 @@ describe('OpenTimelineButtonIcon', () => {
   });
 
   it('should call openTimeline with the correct values', () => {
-    const openTimeline = jest.fn();
-    (useQueryTimelineById as jest.Mock).mockReturnValue(openTimeline);
+    const openTimeline = vi.fn();
+    (useQueryTimelineById as Mock).mockReturnValue(openTimeline);
 
     const { getByTestId } = render(<OpenTimelineButtonIcon note={note} index={index} />);
 

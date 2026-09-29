@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import sinon from 'sinon';
 import { getFindFilter } from './get_find_filter';
 
@@ -15,7 +17,7 @@ describe('getFindFilter', () => {
   });
   afterAll(() => clock.restore());
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     clock.reset();
   });
 

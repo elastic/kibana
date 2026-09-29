@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux-v7';
@@ -15,13 +17,13 @@ import type { monaco } from '@kbn/monaco';
 import { useWorkflowIdDecorations } from './use_workflow_id_decorations';
 import { createMockStore } from '../../../../entities/workflows/store/__mocks__/store.mock';
 
-jest.mock('@kbn/monaco', () => {
-  const actualMonaco = jest.requireActual('@kbn/monaco');
+vi.mock('@kbn/monaco', async () => {
+  const actualMonaco = (await vi.importActual('@kbn/monaco'));
   return {
     ...actualMonaco,
     monaco: {
       ...actualMonaco.monaco,
-      Range: jest.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
+      Range: vi.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
         startLineNumber: startLine,
         startColumn: startCol,
         endLineNumber: endLine,
@@ -34,9 +36,9 @@ jest.mock('@kbn/monaco', () => {
 const createMockModel = (value: string) => {
   const lines = value.split('\n');
   return {
-    getValue: jest.fn(() => value),
-    getLineContent: jest.fn((lineNum: number) => lines[lineNum - 1] ?? ''),
-    getPositionAt: jest.fn((offset: number) => {
+    getValue: vi.fn(() => value),
+    getLineContent: vi.fn((lineNum: number) => lines[lineNum - 1] ?? ''),
+    getPositionAt: vi.fn((offset: number) => {
       let remaining = offset;
       for (let i = 0; i < lines.length; i++) {
         if (remaining <= lines[i].length) {
@@ -52,13 +54,13 @@ const createMockModel = (value: string) => {
 const createMockEditor = (value: string) => {
   const model = createMockModel(value);
   const decorationsCollection = {
-    clear: jest.fn(),
-    set: jest.fn(),
+    clear: vi.fn(),
+    set: vi.fn(),
   };
   return {
     editor: {
-      createDecorationsCollection: jest.fn(() => decorationsCollection),
-      getModel: jest.fn(() => model),
+      createDecorationsCollection: vi.fn(() => decorationsCollection),
+      getModel: vi.fn(() => model),
     } as unknown as monaco.editor.IStandaloneCodeEditor,
     decorationsCollection,
   };
@@ -90,12 +92,12 @@ const renderWithStore = (
 
 describe('useWorkflowIdDecorations', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   it('does not create decorations when editor is null', () => {
@@ -103,7 +105,7 @@ describe('useWorkflowIdDecorations', () => {
     const doc = parseDocument(yamlString, { keepSourceTokens: true });
 
     renderWithStore(null, doc, true);
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     // No errors, ref stays null
   });
@@ -113,7 +115,7 @@ describe('useWorkflowIdDecorations', () => {
     const { editor } = createMockEditor(yamlString);
 
     renderWithStore(editor, null, true);
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     expect(editor.createDecorationsCollection).not.toHaveBeenCalled();
   });
@@ -132,7 +134,7 @@ describe('useWorkflowIdDecorations', () => {
     const { editor } = createMockEditor(yamlString);
 
     renderWithStore(editor, doc, true);
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     // No decorations created because no workflow.execute steps
     expect(editor.createDecorationsCollection).not.toHaveBeenCalled();

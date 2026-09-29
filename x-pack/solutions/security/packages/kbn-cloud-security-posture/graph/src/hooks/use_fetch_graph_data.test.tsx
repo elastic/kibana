@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useFetchGraphData } from './use_fetch_graph_data';
 
-const mockUseQuery = jest.fn((...args: unknown[]) => ({
+const mockUseQuery = vi.fn((...args: unknown[]) => ({
   isLoading: true,
   data: null,
   isError: false,
   isFetching: true,
 }));
 
-jest.mock('@kbn/react-query', () => {
+vi.mock('@kbn/react-query', () => {
   return {
     useQuery: (...args: unknown[]) => mockUseQuery(...args),
-    useQueryClient: jest.fn(),
+    useQueryClient: vi.fn(),
   };
 });
 
@@ -30,7 +32,7 @@ const defaultOptions = {
 
 describe('useFetchGraphData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should pass default options when options are not provided', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { screen, render, renderHook } from '@testing-library/react';
@@ -20,11 +23,11 @@ import {
 } from './common';
 import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    useEuiTheme: jest.fn(),
+    useEuiTheme: vi.fn(),
   };
 });
 
@@ -168,7 +171,7 @@ describe('checkIfAllValuesAreZero', () => {
 
   describe('useThemes', () => {
     it('should return custom spacing theme', () => {
-      (useEuiTheme as jest.Mock).mockReturnValue({
+      (useEuiTheme as Mock).mockReturnValue({
         euiTheme: { themeName: 'borealis' },
         colorMode: 'LIGHT',
       });
@@ -178,7 +181,7 @@ describe('checkIfAllValuesAreZero', () => {
     });
 
     it('should return light baseTheme when isDarkMode false', () => {
-      (useEuiTheme as jest.Mock).mockReturnValue({
+      (useEuiTheme as Mock).mockReturnValue({
         euiTheme: { themeName: 'borealis' },
         colorMode: 'LIGHT',
       });
@@ -188,7 +191,7 @@ describe('checkIfAllValuesAreZero', () => {
     });
 
     it('should return dark baseTheme when isDarkMode true', () => {
-      (useEuiTheme as jest.Mock).mockReturnValue({
+      (useEuiTheme as Mock).mockReturnValue({
         euiTheme: { themeName: 'borealis' },
         colorMode: 'DARK',
       });

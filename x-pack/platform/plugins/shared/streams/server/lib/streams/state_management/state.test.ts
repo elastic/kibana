@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable max-classes-per-file */
 
 import { State } from './state';
@@ -40,7 +42,7 @@ const placeholderStreamDefinition: Streams.WiredStream.Definition = {
 };
 
 describe('State', () => {
-  const searchMock = jest.fn();
+  const searchMock = vi.fn();
   const storageClientMock = {
     search: searchMock,
   };
@@ -125,7 +127,7 @@ describe('State', () => {
       },
     }));
 
-    jest
+    vi
       .spyOn(streamFromDefinition, 'streamFromDefinition')
       .mockImplementation((definition) =>
         streamThatModifiesStartingState(definition.name, stateDependenciesMock)
@@ -153,7 +155,7 @@ describe('State', () => {
       },
     }));
 
-    jest
+    vi
       .spyOn(streamFromDefinition, 'streamFromDefinition')
       .mockImplementationOnce(() => streamThatCascadesTooMuch(stateDependenciesMock));
 
@@ -179,7 +181,7 @@ describe('State', () => {
       },
     }));
 
-    jest
+    vi
       .spyOn(streamFromDefinition, 'streamFromDefinition')
       .mockImplementation((definition) => failingStream(stateDependenciesMock));
 
@@ -207,20 +209,20 @@ describe('State', () => {
 
     const FlowStream = flowStream();
 
-    jest
+    vi
       .spyOn(streamFromDefinition, 'streamFromDefinition')
       .mockImplementation((definition) => new FlowStream(definition, stateDependenciesMock));
 
-    const applyChangeSpy = jest.spyOn(FlowStream.prototype, 'applyChange');
-    const validateSpy = jest.spyOn(FlowStream.prototype, 'validate');
-    const determineElasticsearchActionsSpy = jest.spyOn(
+    const applyChangeSpy = vi.spyOn(FlowStream.prototype, 'applyChange');
+    const validateSpy = vi.spyOn(FlowStream.prototype, 'validate');
+    const determineElasticsearchActionsSpy = vi.spyOn(
       FlowStream.prototype,
       'determineElasticsearchActions'
     );
-    const planSpy = jest.spyOn(ExecutionPlan.prototype, 'plan').mockImplementation(async () => {
+    const planSpy = vi.spyOn(ExecutionPlan.prototype, 'plan').mockImplementation(async () => {
       // Do nothing
     });
-    const executeSpy = jest
+    const executeSpy = vi
       .spyOn(ExecutionPlan.prototype, 'execute')
       .mockImplementation(async () => {
         // Do nothing

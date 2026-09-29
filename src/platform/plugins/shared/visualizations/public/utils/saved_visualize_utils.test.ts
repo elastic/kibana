@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
@@ -22,13 +25,13 @@ import type { VisTypeAlias, TypesStart } from '../vis_types';
 import type { VisSavedObject } from '../types';
 
 let visTypes = [] as VisTypeAlias[];
-const mockGetAliases = jest.fn(() => visTypes);
-const mockGetTypes = jest.fn((type: string) => type) as unknown as TypesStart['get'];
-const mockFindContent = jest.fn(() => ({
+const mockGetAliases = vi.fn(() => visTypes);
+const mockGetTypes = vi.fn((type: string) => type) as unknown as TypesStart['get'];
+const mockFindContent = vi.fn(() => ({
   pagination: { total: 0 },
   hits: [],
 }));
-const mockGetContent = jest.fn(() => ({
+const mockGetContent = vi.fn(() => ({
   item: {
     id: 'test',
     references: [
@@ -50,59 +53,71 @@ const mockGetContent = jest.fn(() => ({
     alias_target_id: null,
   },
 }));
-const mockCreateContent = jest.fn(() => ({
+const mockCreateContent = vi.fn(() => ({
   item: {
     id: 'test',
   },
 }));
 
-const mockUpdateContent = jest.fn(() => ({
+const mockUpdateContent = vi.fn(() => ({
   item: {
     id: 'test',
   },
 }));
 
-jest.mock('../services', () => ({
-  getSpaces: jest.fn(() => ({
-    getActiveSpace: () => ({
-      id: 'test',
-    }),
-  })),
-  getContentManagement: jest.fn(() => ({
-    client: {
-      create: mockCreateContent,
-      update: mockUpdateContent,
-      get: mockGetContent,
-      search: mockFindContent,
-      mSearch: mockFindContent,
-    },
-  })),
-  getEmbeddable: jest.fn(() => ({
-    getSavedObjects: mockFindContent,
-  })),
-}));
+vi.mock('../services', () => {
+      const mocked = {
+      getSpaces: vi.fn(() => ({
+        getActiveSpace: () => ({
+          id: 'test',
+        }),
+      })),
+      getContentManagement: vi.fn(() => ({
+        client: {
+          create: mockCreateContent,
+          update: mockUpdateContent,
+          get: mockGetContent,
+          search: mockFindContent,
+          mSearch: mockFindContent,
+        },
+      })),
+      getEmbeddable: vi.fn(() => ({
+        getSavedObjects: mockFindContent,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockParseSearchSourceJSON = jest.fn();
-const mockInjectSearchSourceReferences = jest.fn();
-const mockExtractSearchSourceReferences = jest.fn((..._args) => [{}, []]);
+const mockParseSearchSourceJSON = vi.fn();
+const mockInjectSearchSourceReferences = vi.fn();
+const mockExtractSearchSourceReferences = vi.fn((..._args) => [{}, []]);
 
-jest.mock('@kbn/data-plugin/public', () => ({
-  extractSearchSourceReferences: jest.fn((...args) => mockExtractSearchSourceReferences(...args)),
-  injectSearchSourceReferences: jest.fn((...args) => mockInjectSearchSourceReferences(...args)),
-  parseSearchSourceJSON: jest.fn((...args) => mockParseSearchSourceJSON(...args)),
-}));
+vi.mock('@kbn/data-plugin/public', () => {
+      const mocked = {
+      extractSearchSourceReferences: vi.fn((...args) => mockExtractSearchSourceReferences(...args)),
+      injectSearchSourceReferences: vi.fn((...args) => mockInjectSearchSourceReferences(...args)),
+      parseSearchSourceJSON: vi.fn((...args) => mockParseSearchSourceJSON(...args)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockInjectReferences = jest.fn();
-const mockExtractReferences = jest.fn((arg) => arg);
-jest.mock('./saved_visualization_references', () => ({
-  injectReferences: jest.fn((...args) => mockInjectReferences(...args)),
-  extractReferences: jest.fn((arg) => mockExtractReferences(arg)),
-}));
+const mockInjectReferences = vi.fn();
+const mockExtractReferences = vi.fn((arg) => arg);
+vi.mock('./saved_visualization_references', () => {
+      const mocked = {
+      injectReferences: vi.fn((...args) => mockInjectReferences(...args)),
+      extractReferences: vi.fn((arg) => mockExtractReferences(arg)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSaveWithConfirmation = jest.fn(() => ({ item: { id: 'test-after-confirm' } }));
-jest.mock('./saved_objects_utils/save_with_confirmation', () => ({
-  saveWithConfirmation: jest.fn(() => mockSaveWithConfirmation()),
-}));
+const mockSaveWithConfirmation = vi.fn(() => ({ item: { id: 'test-after-confirm' } }));
+vi.mock('./saved_objects_utils/save_with_confirmation', () => {
+      const mocked = {
+      saveWithConfirmation: vi.fn(() => mockSaveWithConfirmation()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('saved_visualize_utils', () => {
   const coreStart = coreMock.createStart();
@@ -172,7 +187,7 @@ describe('saved_visualize_utils', () => {
     });
 
     it('should call getTagIdsFromReferences if we provide savedObjectsTagging service', async () => {
-      const mockGetTagIdsFromReferences = jest.fn(() => ['test']);
+      const mockGetTagIdsFromReferences = vi.fn(() => ['test']);
       await getSavedVisualization(
         {
           ...coreStart,
@@ -233,14 +248,14 @@ describe('saved_visualize_utils', () => {
 
     it('should serialize searchSource', async () => {
       vis.searchSource = {
-        serialize: jest.fn(() => ({ searchSourceJSON: '{}', references: [] })),
+        serialize: vi.fn(() => ({ searchSourceJSON: '{}', references: [] })),
       } as unknown as ISearchSource;
       await saveVisualization(vis, {}, coreStart);
       expect(vis.searchSource?.serialize).toHaveBeenCalled();
     });
 
     it('should call updateTagsReferences if we provide savedObjectsTagging service', async () => {
-      const mockUpdateTagsReferences = jest.fn(() => []);
+      const mockUpdateTagsReferences = vi.fn(() => []);
       await saveVisualization(
         vis,
         {},
@@ -422,7 +437,7 @@ describe('saved_visualize_utils', () => {
           },
         } as VisTypeAlias,
       ];
-      (mockFindContent as jest.Mock).mockImplementationOnce(async () => ({
+      (mockFindContent as Mock).mockImplementationOnce(async () => ({
         total: 2,
         hits: [
           {

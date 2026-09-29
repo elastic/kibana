@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createReadStream } from 'fs';
 import Fs from 'fs/promises';
 import Os from 'os';
@@ -12,33 +14,42 @@ import Path from 'path';
 import { ProxyAgent } from 'undici';
 import { ArtifactNotFoundError, checkArtifactAvailable, downloadToDisk } from './download';
 
-jest.mock('@kbn/fs', () => ({
-  createWriteStream: jest.fn(() => ({
-    on: jest.fn((event, callback) => {
-      if (event === 'finish') {
-        callback();
-      }
-    }),
-    pipe: jest.fn(),
-  })),
-  getSafePath: jest.fn().mockReturnValue({
-    fullPath: 'artifacts/package_installer/file.txt',
-    alias: 'disk:artifacts/package_installer/file.txt',
-  }),
-}));
+vi.mock('@kbn/fs', () => {
+      const mocked = {
+      createWriteStream: vi.fn(() => ({
+        on: vi.fn((event, callback) => {
+          if (event === 'finish') {
+            callback();
+          }
+        }),
+        pipe: vi.fn(),
+      })),
+      getSafePath: vi.fn().mockReturnValue({
+        fullPath: 'artifacts/package_installer/file.txt',
+        alias: 'disk:artifacts/package_installer/file.txt',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('fs', () => ({
-  createReadStream: jest.fn().mockReturnValue({
-    on: jest.fn(),
-    pipe: jest.fn(),
-  }),
-}));
+vi.mock('fs', () => {
+      const mocked = {
+      createReadStream: vi.fn().mockReturnValue({
+        on: vi.fn(),
+        pipe: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('stream/promises', () => ({
-  pipeline: jest.fn(),
-}));
+vi.mock('stream/promises', () => {
+      const mocked = {
+      pipeline: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const fetchMock = jest.spyOn(global, 'fetch');
+const fetchMock = vi.spyOn(global, 'fetch');
 
 describe('downloadToDisk', () => {
   const mockFileUrl = 'http://example.com/file.txt';
@@ -46,7 +57,7 @@ describe('downloadToDisk', () => {
   const mockLocalPath = '/local/path/to/file.txt';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('passes a proxy dispatcher to fetch when a proxy URL is configured', async () => {
@@ -139,7 +150,7 @@ describe('checkArtifactAvailable', () => {
   const mockFileUrl = 'http://example.com/file.zip';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('issues a HEAD request and resolves when the artifact exists', async () => {

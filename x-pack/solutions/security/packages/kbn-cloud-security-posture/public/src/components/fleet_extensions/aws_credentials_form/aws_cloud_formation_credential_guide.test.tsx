@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,8 +15,8 @@ import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_crede
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 import { createAwsCloudSetupMock } from '../test/cloud_setup_mocks';
 
-jest.mock('../hooks/use_cloud_setup_context');
-const mockUseCloudSetup = useCloudSetup as jest.MockedFunction<typeof useCloudSetup>;
+vi.mock('../hooks/use_cloud_setup_context');
+const mockUseCloudSetup = useCloudSetup as MockedFunction<typeof useCloudSetup>;
 
 interface CloudFormationGuideProps {
   isOrganization?: boolean;
@@ -30,7 +33,7 @@ const renderComponent = (props: CloudFormationGuideProps) => {
 
 describe('CloudFormationCloudCredentialsGuide', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCloudSetup.mockReturnValue(createAwsCloudSetupMock({ shortName: 'Test' }));
   });
 

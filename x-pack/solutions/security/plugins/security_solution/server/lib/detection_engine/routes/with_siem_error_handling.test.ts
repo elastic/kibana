@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { responseMock } from './__mocks__';
 import { responseAdapter } from './__mocks__/test_adapters';
 import { withSiemErrorHandling } from './with_siem_error_handling';
 
 describe('withSiemErrorHandling', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns 200 with the operation result on success', async () => {

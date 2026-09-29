@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { DatatableColumn, Datatable } from '@kbn/expressions-plugin/public';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
@@ -35,7 +37,7 @@ const data: Datatable = {
 };
 
 describe('getSplitDimensionAccessor', () => {
-  const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const defaultFormatter = vi.fn((...args) => fieldFormatsMock.deserialize(...args));
 
   beforeEach(() => {
     defaultFormatter.mockClear();
@@ -68,7 +70,7 @@ describe('getSplitDimensionAccessor', () => {
     };
     const columns = [data.columns[0], column, data.columns[2]] as DatatableColumn[];
     const defaultFormatterReturnedVal = fieldFormatsMock.deserialize();
-    const spyOnDefaultFormatterConvert = jest.spyOn(defaultFormatterReturnedVal, 'convertToText');
+    const spyOnDefaultFormatterConvert = vi.spyOn(defaultFormatterReturnedVal, 'convertToText');
 
     defaultFormatter.mockReturnValueOnce(defaultFormatterReturnedVal);
     const accessor = getSplitDimensionAccessor(columns, splitDimension, defaultFormatter);
@@ -116,7 +118,7 @@ describe('getSplitDimensionAccessor', () => {
 });
 
 describe('createSplitPoint', () => {
-  const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const defaultFormatter = vi.fn((...args) => fieldFormatsMock.deserialize(...args));
 
   beforeEach(() => {
     defaultFormatter.mockClear();

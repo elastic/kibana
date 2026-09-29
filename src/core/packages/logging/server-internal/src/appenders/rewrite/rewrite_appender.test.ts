@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { createRewritePolicyMock, resetAllMocks } from './rewrite_appender.test.mocks';
 import { rewriteAppenderMocks } from './mocks';
@@ -20,8 +22,8 @@ const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];
 
 const createAppenderMock = (name: string) => {
   const appenderMock: MockedKeys<DisposableAppender> = {
-    append: jest.fn(),
-    dispose: jest.fn(),
+    append: vi.fn(),
+    dispose: vi.fn(),
   };
 
   return toTuple(name, appenderMock);
@@ -55,7 +57,7 @@ describe('RewriteAppender', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {

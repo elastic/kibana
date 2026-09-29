@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { getMcpToolType, listMcpTools, getNamedMcpTools } from './tool_type';
 
-jest.mock('@kbn/zod/v4/from_json_schema', () => ({
-  fromJSONSchema: jest.fn(),
-}));
+vi.mock('@kbn/zod/v4/from_json_schema', () => {
+      const mocked = {
+      fromJSONSchema: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 
-const mockFromJSONSchema = fromJSONSchema as jest.MockedFunction<typeof fromJSONSchema>;
+const mockFromJSONSchema = fromJSONSchema as MockedFunction<typeof fromJSONSchema>;
 
 describe('MCP tool_type', () => {
-  let mockActions: jest.Mocked<ActionsPluginStart>;
+  let mockActions: Mocked<ActionsPluginStart>;
   let mockActionsClient: {
-    execute: jest.Mock;
-    get: jest.Mock;
+    execute: Mock;
+    get: Mock;
   };
   let mockRequest: KibanaRequest;
   let mockLogger: MockedLogger;
@@ -55,16 +61,16 @@ describe('MCP tool_type', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockActionsClient = {
-      execute: jest.fn(),
-      get: jest.fn(),
+      execute: vi.fn(),
+      get: vi.fn(),
     };
 
     mockActions = {
-      getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
-    } as unknown as jest.Mocked<ActionsPluginStart>;
+      getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClient),
+    } as unknown as Mocked<ActionsPluginStart>;
 
     mockRequest = {} as KibanaRequest;
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,10 +17,8 @@ const WRITE_CAPABILITIES = { alerting_v2_action_policies: { read: true, all: tru
 const READ_ONLY_CAPABILITIES = { alerting_v2_action_policies: { read: true, all: false } };
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 
-jest.mock('@kbn/core-di-browser', () => {
-  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
-    '../services/user_capabilities'
-  );
+vi.mock('@kbn/core-di-browser', async () => {
+  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../services/user_capabilities'));
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -30,13 +30,19 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('../pages/list_action_policies_page/list_action_policies_page', () => ({
-  ListActionPoliciesPage: () => <div data-test-subj="listActionPoliciesPage">list</div>,
-}));
+vi.mock('../pages/list_action_policies_page/list_action_policies_page', () => {
+      const mocked = {
+      ListActionPoliciesPage: () => <div data-test-subj="listActionPoliciesPage">list</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../pages/action_policy_form_page/action_policy_form_page', () => ({
-  ActionPolicyFormPage: () => <div data-test-subj="actionPolicyFormPage">form</div>,
-}));
+vi.mock('../pages/action_policy_form_page/action_policy_form_page', () => {
+      const mocked = {
+      ActionPolicyFormPage: () => <div data-test-subj="actionPolicyFormPage">form</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderApp = (initialPath: string) =>
   render(

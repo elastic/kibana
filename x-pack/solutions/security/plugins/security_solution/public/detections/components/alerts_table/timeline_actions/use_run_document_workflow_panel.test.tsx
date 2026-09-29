@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, renderHook, waitFor } from '@testing-library/react';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
@@ -21,7 +24,7 @@ import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import * as i18n from '../translations';
 
-const mockCaseRunWorkflow = jest.fn();
+const mockCaseRunWorkflow = vi.fn();
 const OUTSIDE_CASE_RUN_PROPS = {
   runWorkflow: undefined,
   showSuccessToast: true,
@@ -30,17 +33,20 @@ const CASES_ROUTED_RUN_PROPS = {
   runWorkflow: mockCaseRunWorkflow,
   showSuccessToast: false,
 };
-const mockUseCaseAttachmentWorkflowRun = jest.fn();
-const mockUseCaseAttachmentWorkflowRouting = jest.fn();
+const mockUseCaseAttachmentWorkflowRun = vi.fn();
+const mockUseCaseAttachmentWorkflowRouting = vi.fn();
 
-jest.mock('@kbn/cases-plugin/public', () => ({
-  useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
-  useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
-}));
+vi.mock('@kbn/cases-plugin/public', () => {
+      const mocked = {
+      useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
+      useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockMutate = jest.fn();
-const mockUseRunWorkflow = jest.fn(() => ({ mutate: mockMutate }));
-const mockUseWorkflowsCapabilities = jest.fn(() => ({
+const mockMutate = vi.fn();
+const mockUseRunWorkflow = vi.fn(() => ({ mutate: mockMutate }));
+const mockUseWorkflowsCapabilities = vi.fn(() => ({
   canCreateWorkflow: true,
   canReadWorkflow: true,
   canUpdateWorkflow: true,
@@ -49,52 +55,55 @@ const mockUseWorkflowsCapabilities = jest.fn(() => ({
   canReadWorkflowExecution: true,
   canCancelWorkflowExecution: true,
 }));
-const mockUseWorkflowsUIEnabledSetting = jest.fn(() => true);
+const mockUseWorkflowsUIEnabledSetting = vi.fn(() => true);
 const mockRunWorkflowPanelProps: RunWorkflowPanelProps[] = [];
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const actual = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...actual,
-    useKibana: jest.fn(),
+    useKibana: vi.fn(),
   };
 });
-jest.mock('@kbn/workflows-ui', () => ({
-  useRunWorkflow: () => mockUseRunWorkflow(),
-  useWorkflows: () => ({ data: { results: [] } }),
-  useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
-  useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
-  WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
-    <div data-test-subj="workflow-selector-mock">
-      {'Workflow selector'}
-      <button
-        data-test-subj="select-workflow-option"
-        type="button"
-        onClick={() => onWorkflowChange('test-workflow-id')}
-      >
-        {'Select workflow'}
-      </button>
-    </div>
-  ),
-  // RunWorkflowPanel now lives in @kbn/workflows-ui.
-  // Its full behavior is tested in src/platform/packages/shared/kbn-workflows-ui.
-  // This stub captures caller-owned inputs and sorting.
-  RunWorkflowPanel: (props: RunWorkflowPanelProps) => {
-    mockRunWorkflowPanelProps.push(props);
-    return (
-      <div>
-        <div data-test-subj="workflow-selector-mock">{'Workflow selector stub'}</div>
-        <button data-test-subj="run-workflow-execute-button" type="button">
-          {'Run workflow'}
-        </button>
-      </div>
-    );
-  },
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useRunWorkflow: () => mockUseRunWorkflow(),
+      useWorkflows: () => ({ data: { results: [] } }),
+      useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
+      useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
+      WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
+        <div data-test-subj="workflow-selector-mock">
+          {'Workflow selector'}
+          <button
+            data-test-subj="select-workflow-option"
+            type="button"
+            onClick={() => onWorkflowChange('test-workflow-id')}
+          >
+            {'Select workflow'}
+          </button>
+        </div>
+      ),
+      // RunWorkflowPanel now lives in @kbn/workflows-ui.
+      // Its full behavior is tested in src/platform/packages/shared/kbn-workflows-ui.
+      // This stub captures caller-owned inputs and sorting.
+      RunWorkflowPanel: (props: RunWorkflowPanelProps) => {
+        mockRunWorkflowPanelProps.push(props);
+        return (
+          <div>
+            <div data-test-subj="workflow-selector-mock">{'Workflow selector stub'}</div>
+            <button data-test-subj="run-workflow-execute-button" type="button">
+              {'Run workflow'}
+            </button>
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = jest.requireMock('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
+const useKibanaMock = (await vi.importMock('@kbn/kibana-react-plugin/public')).useKibana as Mock;
 
 const defaultProps: UseRunDocumentWorkflowPanelProps = {
-  closePopover: jest.fn(),
+  closePopover: vi.fn(),
   documents: [
     {
       _id: 'doc-123',
@@ -118,7 +127,7 @@ const createMockWorkflow = (id: string, triggerType: 'alert' | 'manual'): Workfl
 
 const createMockKibana = (
   overrides: {
-    application?: { navigateToApp: jest.Mock };
+    application?: { navigateToApp: Mock };
     rendering?: object;
   } = {}
 ) => {
@@ -175,7 +184,7 @@ describe('useRunDocumentWorkflowPanel', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('originEventId and Cases executor', () => {

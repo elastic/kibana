@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { MAX_EMAIL_BODY_LENGTH } from '../common';
 import type { ActionsConfig } from './config';
 import { configSchema, getValidatedConfig } from './config';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 
 describe('config validation', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('action defaults', () => {

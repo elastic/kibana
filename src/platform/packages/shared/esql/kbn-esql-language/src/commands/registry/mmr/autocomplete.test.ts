@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
 import {
   expectSuggestions,
@@ -60,7 +63,7 @@ const expectMmrSuggestionsContains = async (
 
 describe('MMR Autocomplete', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('suggests query vector, dense-vector functions and ON after MMR keyword', async () => {
@@ -78,7 +81,7 @@ describe('MMR Autocomplete', () => {
   it('suggests only dense vector fields after ON', async () => {
     const context = buildContextWithDenseVector();
     const mockCallbacks = getMockCallbacks();
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue([
+    (mockCallbacks.getByType as Mock).mockResolvedValue([
       { label: 'denseField', text: 'denseField ' },
       { label: 'missingDense', text: 'missingDense ' },
     ]);
@@ -89,7 +92,7 @@ describe('MMR Autocomplete', () => {
   it('does not suggest ON while cursor is inside query vector function arguments', async () => {
     const context = buildContextWithDenseVector();
     const mockCallbacks = getMockCallbacks();
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue([
+    (mockCallbacks.getByType as Mock).mockResolvedValue([
       { label: 'denseField', text: 'denseField ' },
     ]);
 

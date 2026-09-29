@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-export const getInferenceAdapterMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./adapters', () => {
-  const actual = jest.requireActual('./adapters');
+export const getInferenceAdapterMock = vi.fn();
+
+vi.doMock('./adapters', async () => {
+  const actual = (await vi.importActual('./adapters'));
   return {
     ...actual,
     getInferenceAdapter: getInferenceAdapterMock,
@@ -16,19 +18,22 @@ jest.doMock('./adapters', () => {
 });
 
 export const inferenceEndpointAdapterMock = {
-  chatComplete: jest.fn(),
+  chatComplete: vi.fn(),
 };
 
-jest.doMock('./adapters/inference_endpoint', () => ({
-  inferenceEndpointAdapter: inferenceEndpointAdapterMock,
-}));
+vi.doMock('./adapters/inference_endpoint', () => {
+      const mocked = {
+      inferenceEndpointAdapter: inferenceEndpointAdapterMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const getInferenceExecutorMock = jest.fn();
-export const resolveInferenceEndpointMock = jest.fn();
-export const createInferenceEndpointExecutorMock = jest.fn();
+export const getInferenceExecutorMock = vi.fn();
+export const resolveInferenceEndpointMock = vi.fn();
+export const createInferenceEndpointExecutorMock = vi.fn();
 
-jest.doMock('./utils', () => {
-  const actual = jest.requireActual('./utils');
+vi.doMock('./utils', async () => {
+  const actual = (await vi.importActual('./utils'));
   return {
     ...actual,
     getInferenceExecutor: getInferenceExecutorMock,

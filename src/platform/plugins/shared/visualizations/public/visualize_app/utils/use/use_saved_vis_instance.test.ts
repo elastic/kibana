@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { EventEmitter } from 'events';
 
@@ -21,9 +23,9 @@ import type { VisualizeServices } from '../../types';
 import type { TypesStart } from '../../../vis_types';
 import { VisualizeConstants } from '@kbn/visualizations-common';
 
-const mockDefaultEditorControllerDestroy = jest.fn();
-const mockEmbeddableHandlerDestroy = jest.fn();
-const mockEmbeddableHandlerRender = jest.fn();
+const mockDefaultEditorControllerDestroy = vi.fn();
+const mockEmbeddableHandlerDestroy = vi.fn();
+const mockEmbeddableHandlerRender = vi.fn();
 const savedVisId = '9ca7aa90-b892-11e8-a6d9-e546fe2bba5f';
 const mockSavedVisInstance = {
   embeddableHandler: {
@@ -39,23 +41,27 @@ const mockSavedVisInstance = {
   },
 };
 
-jest.mock('../get_visualization_instance', () => ({
-  getVisualizationInstance: jest.fn(() => mockSavedVisInstance),
-}));
-const mockGetVisualizationInstance = jest.requireMock(
-  '../get_visualization_instance'
-).getVisualizationInstance;
+vi.mock('../get_visualization_instance', () => {
+      const mocked = {
+      getVisualizationInstance: vi.fn(() => mockSavedVisInstance),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockGetVisualizationInstance = (await vi.importMock('../get_visualization_instance')).getVisualizationInstance;
 
-jest.mock('../breadcrumbs', () => ({
-  getEditBreadcrumbs: jest.fn((args, title) => title),
-  getCreateBreadcrumbs: jest.fn((text) => text),
-}));
+vi.mock('../breadcrumbs', () => {
+      const mocked = {
+      getEditBreadcrumbs: vi.fn((args, title) => title),
+      getCreateBreadcrumbs: vi.fn((text) => text),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-utils-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/kibana-utils-plugin/public');
+vi.mock('@kbn/kibana-utils-plugin/public', async () => {
+  const actual = (await vi.importActual('@kbn/kibana-utils-plugin/public'));
   return {
     ...actual,
-    redirectWhenMissing: jest.fn(),
+    redirectWhenMissing: vi.fn(),
   };
 });
 
@@ -67,7 +73,7 @@ describe('useSavedVisInstance', () => {
 
   beforeAll(() => {
     setTypes({
-      all: jest
+      all: vi
         .fn()
         .mockReturnValue([
           { name: 'area', requiresSearch: true, options: { showIndexSelection: true } },
@@ -79,7 +85,7 @@ describe('useSavedVisInstance', () => {
     const visEditorsRegistry = createVisEditorsRegistry();
 
     visEditorsRegistry.registerDefault(
-      jest.fn().mockImplementation(() => ({ destroy: mockDefaultEditorControllerDestroy }))
+      vi.fn().mockImplementation(() => ({ destroy: mockDefaultEditorControllerDestroy }))
     );
 
     mockServices = {
@@ -88,9 +94,9 @@ describe('useSavedVisInstance', () => {
       visEditorsRegistry,
       stateTransferService: {
         ...createEmbeddableStateTransferMock(),
-        getAppNameFromId: jest.fn(),
+        getAppNameFromId: vi.fn(),
       },
-      chrome: { setBreadcrumbs: jest.fn(), docTitle: { change: jest.fn() } },
+      chrome: { setBreadcrumbs: vi.fn(), docTitle: { change: vi.fn() } },
       history: {
         location: {
           pathname: VisualizeConstants.EDIT_PATH,
@@ -98,7 +104,7 @@ describe('useSavedVisInstance', () => {
         replace: () => {},
       },
       visualizations: {
-        all: jest.fn(() => [
+        all: vi.fn(() => [
           {
             name: 'area',
             requiresSearch: true,
@@ -202,7 +208,7 @@ describe('useSavedVisInstance', () => {
     });
 
     test('should pass originating app context to breadcrumbs when navigating from another app', async () => {
-      mockServices.stateTransferService.getAppNameFromId = jest.fn().mockReturnValue('Dashboards');
+      mockServices.stateTransferService.getAppNameFromId = vi.fn().mockReturnValue('Dashboards');
       const incomingBreadcrumbs = [
         { text: 'Dashboards', href: '/app/dashboards' },
         { text: 'My Dashboard', href: '/app/dashboards#/view/abc123' },

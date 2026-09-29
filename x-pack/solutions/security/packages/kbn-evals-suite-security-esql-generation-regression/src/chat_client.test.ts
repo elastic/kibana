@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { EsqlRegressionAgentBuilderChatClient } from './chat_client';
 
@@ -16,7 +18,7 @@ const buildLog = (): ToolingLog => {
 
 describe('EsqlRegressionAgentBuilderChatClient', () => {
   it('returns the assistant message when the agent emits free-form text', async () => {
-    const fetch = jest.fn().mockResolvedValueOnce({
+    const fetch = vi.fn().mockResolvedValueOnce({
       conversation_id: 'conv-1',
       trace_id: 'trace-1',
       steps: [{ type: 'tool_call', tool_id: 'platform.core.generate_esql' }],
@@ -44,7 +46,7 @@ describe('EsqlRegressionAgentBuilderChatClient', () => {
     // undefined (reading 'message')`, which `pRetry` then retried two
     // more times before the outer catch dropped the `steps` payload —
     // exactly what the extractor needs to recover the ES|QL query.
-    const fetch = jest.fn().mockResolvedValueOnce({
+    const fetch = vi.fn().mockResolvedValueOnce({
       conversation_id: 'conv-2',
       trace_id: 'trace-2',
       steps: [
@@ -74,7 +76,7 @@ describe('EsqlRegressionAgentBuilderChatClient', () => {
   });
 
   it('returns an empty message when response exists but message is undefined', async () => {
-    const fetch = jest.fn().mockResolvedValueOnce({
+    const fetch = vi.fn().mockResolvedValueOnce({
       conversation_id: 'conv-3',
       steps: [],
       response: {}, // present but message-less

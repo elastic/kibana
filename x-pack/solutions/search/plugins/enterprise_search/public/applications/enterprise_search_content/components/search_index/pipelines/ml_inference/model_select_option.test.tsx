@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -41,7 +43,7 @@ const DEFAULT_PROPS: EuiSelectableOption<MlModel> = {
 
 describe('ModelSelectOption', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues({});
   });
 

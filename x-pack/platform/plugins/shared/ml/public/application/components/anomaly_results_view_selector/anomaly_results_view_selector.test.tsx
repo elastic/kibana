@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { render } from '@testing-library/react';
@@ -14,12 +16,12 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { AnomalyResultsViewSelector } from '.';
 
-jest.mock('../../contexts/kibana', () => {
+vi.mock('../../contexts/kibana', () => {
   return {
     useMlLocator: () =>
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@kbn/share-plugin/public/mocks').sharePluginMock.createLocator(),
-    useNavigateToPath: () => jest.fn(),
+    useNavigateToPath: () => vi.fn(),
   };
 });
 

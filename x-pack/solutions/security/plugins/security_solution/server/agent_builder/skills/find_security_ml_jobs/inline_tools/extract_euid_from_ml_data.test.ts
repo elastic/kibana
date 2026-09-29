@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { extractEuidFromMlDataTool } from './extract_euid_from_ml_data';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 
-jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
-  euid: { getEuidFromObject: jest.fn() },
-}));
+vi.mock('@kbn/entity-store/common/euid_helpers', () => {
+      const mocked = {
+      euid: { getEuidFromObject: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetEuidFromObject = euid.getEuidFromObject as jest.Mock;
+const mockGetEuidFromObject = euid.getEuidFromObject as Mock;
 
 const getEuids = (result: {
   results: Array<{ data: { euids: Array<string | string[] | undefined> } }>;
@@ -25,13 +31,10 @@ describe('extractEuidFromMlDataTool handler', () => {
   const callHandler = (anomalyRecords: unknown[]) => tool.handler({ anomalyRecords });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Default: delegate to the real implementation
-    mockGetEuidFromObject.mockImplementation((entityType: string, doc: unknown) =>
-      jest
-        .requireActual<typeof import('@kbn/entity-store/common/euid_helpers')>(
-          '@kbn/entity-store/common/euid_helpers'
-        )
+    mockGetEuidFromObject.mockImplementation(async (entityType: string, doc: unknown) =>
+      (await vi.importActual<typeof import('@kbn/entity-store/common/euid_helpers')>('@kbn/entity-store/common/euid_helpers'))
         .euid.getEuidFromObject(entityType as EntityType, doc)
     );
   });

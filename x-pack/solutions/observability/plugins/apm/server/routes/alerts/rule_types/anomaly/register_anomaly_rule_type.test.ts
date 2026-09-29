@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { registerAnomalyRuleType } from './register_anomaly_rule_type';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -17,7 +19,7 @@ import {
 
 describe('Transaction duration anomaly alert', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe("doesn't send alert", () => {
     it('ml is not defined', async () => {
@@ -41,13 +43,13 @@ describe('Transaction duration anomaly alert', () => {
     });
 
     it('ml jobs are not available', async () => {
-      jest.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(Promise.resolve([]));
+      vi.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(Promise.resolve([]));
 
       const { services, dependencies, executor } = createRuleTypeMocks();
 
       const ml = {
-        mlSystemProvider: () => ({ mlAnomalySearch: jest.fn() }),
-        anomalyDetectorsProvider: jest.fn(),
+        mlSystemProvider: () => ({ mlAnomalySearch: vi.fn() }),
+        anomalyDetectorsProvider: vi.fn(),
       } as unknown as MlPluginSetup;
 
       registerAnomalyRuleType({
@@ -67,7 +69,7 @@ describe('Transaction duration anomaly alert', () => {
     });
 
     it('anomaly is less than threshold', async () => {
-      jest.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(
+      vi.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(
         Promise.resolve([
           {
             jobId: '1',
@@ -107,7 +109,7 @@ describe('Transaction duration anomaly alert', () => {
             },
           }),
         }),
-        anomalyDetectorsProvider: jest.fn(),
+        anomalyDetectorsProvider: vi.fn(),
       } as unknown as MlPluginSetup;
 
       registerAnomalyRuleType({
@@ -131,13 +133,13 @@ describe('Transaction duration anomaly alert', () => {
 
   describe('anomaly query time filter', () => {
     function runWith(previousStartedAt?: Date | null) {
-      jest
+      vi
         .spyOn(GetServiceAnomalies, 'getMLJobs')
         .mockReturnValue(
           Promise.resolve([{ jobId: '1', environment: 'production' }] as unknown as ApmMlJob[])
         );
 
-      const mlAnomalySearch = jest
+      const mlAnomalySearch = vi
         .fn()
         .mockReturnValue({ aggregations: { anomaly_groups: { buckets: [] } } });
 
@@ -145,7 +147,7 @@ describe('Transaction duration anomaly alert', () => {
 
       const ml = {
         mlSystemProvider: () => ({ mlAnomalySearch }),
-        anomalyDetectorsProvider: jest.fn(),
+        anomalyDetectorsProvider: vi.fn(),
       } as unknown as MlPluginSetup;
 
       registerAnomalyRuleType({ ...dependencies, ml });
@@ -185,7 +187,7 @@ describe('Transaction duration anomaly alert', () => {
 
   describe('sends alert', () => {
     it('for all services that exceeded the threshold', async () => {
-      jest.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(
+      vi.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(
         Promise.resolve([
           {
             jobId: '1',
@@ -248,7 +250,7 @@ describe('Transaction duration anomaly alert', () => {
             },
           }),
         }),
-        anomalyDetectorsProvider: jest.fn(),
+        anomalyDetectorsProvider: vi.fn(),
       } as unknown as MlPluginSetup;
 
       registerAnomalyRuleType({
@@ -306,7 +308,7 @@ describe('Transaction duration anomaly alert', () => {
 
 describe('recovered alerts', () => {
   it('should returns the recovered alerts', async () => {
-    jest.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(
+    vi.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(
       Promise.resolve([
         {
           jobId: '1',
@@ -325,8 +327,8 @@ describe('recovered alerts', () => {
     services.alertsClient.getRecoveredAlerts.mockReturnValue([
       {
         alert: {
-          getId: jest.fn().mockReturnValue('test-id'),
-          getUuid: jest.fn().mockReturnValue('test-uuid'),
+          getId: vi.fn().mockReturnValue('test-id'),
+          getUuid: vi.fn().mockReturnValue('test-uuid'),
           scheduledExecutionOptions: undefined,
           meta: {},
           state: {},
@@ -396,7 +398,7 @@ describe('recovered alerts', () => {
           },
         }),
       }),
-      anomalyDetectorsProvider: jest.fn(),
+      anomalyDetectorsProvider: vi.fn(),
     } as unknown as MlPluginSetup;
 
     registerAnomalyRuleType({

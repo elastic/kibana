@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { DataSetGraphNode } from '@kbn/workflows/graph';
 import { DataSetStepImpl } from './data_set_step_impl';
@@ -17,13 +20,13 @@ import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 
 describe('DataSetStepImpl', () => {
   let dataSetStep: DataSetStepImpl;
-  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
-  let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
-  let mockWorkflowLogger: jest.Mocked<IWorkflowEventLogger>;
+  let mockStepExecutionRuntime: Mocked<StepExecutionRuntime>;
+  let mockWorkflowRuntime: Mocked<WorkflowExecutionRuntimeManager>;
+  let mockWorkflowLogger: Mocked<IWorkflowEventLogger>;
   let mockNode: DataSetGraphNode;
 
   let stepContextAbortController: AbortController;
-  let mockContextManager: jest.Mocked<
+  let mockContextManager: Mocked<
     Pick<WorkflowContextManager, 'renderValueAccordingToContext'>
   > & {
     abortController: AbortController;
@@ -32,38 +35,38 @@ describe('DataSetStepImpl', () => {
   beforeEach(() => {
     stepContextAbortController = new AbortController();
     mockContextManager = {
-      getContext: jest.fn().mockReturnValue({
+      getContext: vi.fn().mockReturnValue({
         workflow: { id: 'test', name: 'test', enabled: true, spaceId: 'default' },
       }),
-      getDependencies: jest.fn().mockReturnValue({
+      getDependencies: vi.fn().mockReturnValue({
         config: { maxResponseSize: new ByteSizeValue(10 * 1024 * 1024) },
       }),
-      renderValueAccordingToContext: jest.fn(<T>(value: T): T => value),
+      renderValueAccordingToContext: vi.fn(<T>(value: T): T => value),
       abortController: stepContextAbortController,
     } as any;
 
     mockStepExecutionRuntime = {
       contextManager: mockContextManager,
-      startStep: jest.fn().mockResolvedValue(undefined),
-      finishStep: jest.fn().mockResolvedValue(undefined),
-      failStep: jest.fn().mockResolvedValue(undefined),
-      setInput: jest.fn().mockResolvedValue(undefined),
-      getCurrentStepState: jest.fn(),
-      setCurrentStepState: jest.fn().mockResolvedValue(undefined),
+      startStep: vi.fn().mockResolvedValue(undefined),
+      finishStep: vi.fn().mockResolvedValue(undefined),
+      failStep: vi.fn().mockResolvedValue(undefined),
+      setInput: vi.fn().mockResolvedValue(undefined),
+      getCurrentStepState: vi.fn(),
+      setCurrentStepState: vi.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
       abortController: stepContextAbortController,
-      flushEventLogs: jest.fn().mockResolvedValue(undefined),
+      flushEventLogs: vi.fn().mockResolvedValue(undefined),
       node: {},
     } as any;
 
     mockWorkflowRuntime = {
-      navigateToNextNode: jest.fn(),
+      navigateToNextNode: vi.fn(),
     } as any;
 
     mockWorkflowLogger = {
-      logInfo: jest.fn(),
-      logError: jest.fn(),
-      logDebug: jest.fn(),
+      logInfo: vi.fn(),
+      logError: vi.fn(),
+      logDebug: vi.fn(),
     } as any;
 
     mockNode = {
@@ -91,7 +94,7 @@ describe('DataSetStepImpl', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getInput', () => {

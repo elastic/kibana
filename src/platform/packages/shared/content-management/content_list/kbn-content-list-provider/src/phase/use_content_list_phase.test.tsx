@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { ContentListProvider } from '../context';
@@ -23,7 +25,7 @@ const buildItems = (count: number) =>
   }));
 
 const createFindItems = (impl: (params: FindItemsParams) => Promise<FindItemsResult>) =>
-  jest.fn(impl);
+  vi.fn(impl);
 
 // Each test gets a unique provider id so concurrent/pending queries from a
 // prior test cannot be joined from this one via the module-level query
@@ -49,7 +51,7 @@ const renderWithProvider = <T,>(hook: () => T, findItems: ReturnType<typeof crea
 
 describe('useContentListPhase', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(async () => {

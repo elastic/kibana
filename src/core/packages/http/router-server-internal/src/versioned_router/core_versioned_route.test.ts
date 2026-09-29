@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ApiVersion } from '@kbn/core-http-common';
 import type {
   RequestHandler,
@@ -44,7 +47,7 @@ describe('Versioned route', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('#getRoutes', () => {
@@ -312,7 +315,7 @@ describe('Versioned route', () => {
       const { fooValidation, validateBodyFn, validateOutputFn, validateParamsFn, validateQueryFn } =
         testValidation;
 
-      (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+      (router.registerRoute as Mock).mockImplementation((opts) => (handler = opts.handler));
       versionedRouter
         .post({
           path: '/test/{id}',
@@ -350,21 +353,21 @@ describe('Versioned route', () => {
 
   it('maps request validation failures with the resolved version onRequestValidationError', async () => {
     let handler: InternalRouteHandler;
-    const onRequestValidationErrorV1 = jest.fn((error, request, response) =>
+    const onRequestValidationErrorV1 = vi.fn((error, request, response) =>
       response.custom({
         statusCode: 422,
         body: { version: request.apiVersion, source: error.source },
         headers: { 'x-custom': 'v1' },
       })
     );
-    const onRequestValidationErrorV2 = jest.fn((error, request, response) =>
+    const onRequestValidationErrorV2 = vi.fn((error, request, response) =>
       response.custom({
         statusCode: 409,
         body: { version: request.apiVersion, source: error.source },
       })
     );
 
-    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    (router.registerRoute as Mock).mockImplementation((opts) => (handler = opts.handler));
     versionedRouter
       .post({
         path: '/test/{id}',
@@ -443,7 +446,7 @@ describe('Versioned route', () => {
       log: loggingSystemMock.createLogger(),
       env: devEnv,
     });
-    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    (router.registerRoute as Mock).mockImplementation((opts) => (handler = opts.handler));
     versionedRouter
       .post({
         path: '/test',
@@ -481,7 +484,7 @@ describe('Versioned route', () => {
       log: loggingSystemMock.createLogger(),
       env: devEnv,
     });
-    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    (router.registerRoute as Mock).mockImplementation((opts) => (handler = opts.handler));
     versionedRouter
       .post({
         path: '/test',
@@ -512,8 +515,8 @@ describe('Versioned route', () => {
 
   it('does not instantiate mapped request validation response schemas outside dev mode', async () => {
     let handler: InternalRouteHandler;
-    const body = jest.fn(() => schema.object({ message: schema.string() }));
-    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    const body = vi.fn(() => schema.object({ message: schema.string() }));
+    (router.registerRoute as Mock).mockImplementation((opts) => (handler = opts.handler));
     versionedRouter
       .post({
         path: '/test',
@@ -541,7 +544,7 @@ describe('Versioned route', () => {
 
   it('preserves default request validation behavior for versions without onRequestValidationError', async () => {
     let handler: InternalRouteHandler;
-    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    (router.registerRoute as Mock).mockImplementation((opts) => (handler = opts.handler));
     versionedRouter
       .post({
         path: '/test/{id}',
@@ -573,11 +576,11 @@ describe('Versioned route', () => {
     let handler: InternalRouteHandler;
     const log = loggingSystemMock.createLogger();
     versionedRouter = CoreVersionedRouter.from({ router, log, env: devEnv });
-    const onRequestValidationError = jest.fn((error, request, response) =>
+    const onRequestValidationError = vi.fn((error, request, response) =>
       response.custom({ statusCode: 422, body: { version: request.apiVersion } })
     );
 
-    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+    (router.registerRoute as Mock).mockImplementation((opts) => (handler = opts.handler));
     versionedRouter
       .post({
         path: '/test/{id}',
@@ -651,15 +654,15 @@ describe('Versioned route', () => {
     const { fooValidation } = testValidation;
 
     const response200 = fooValidation.response[200].body;
-    const lazyResponse200 = jest.fn(() => response200());
+    const lazyResponse200 = vi.fn(() => response200());
     fooValidation.response[200].body = lazyResponse200;
 
     const response404 = fooValidation.response[404].body;
-    const lazyResponse404 = jest.fn(() => response404());
+    const lazyResponse404 = vi.fn(() => response404());
     fooValidation.response[404].body = lazyResponse404;
 
-    (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
-    const lazyValidation = jest.fn(() => fooValidation);
+    (router.registerRoute as Mock).mockImplementation((opts) => (handler = opts.handler));
+    const lazyValidation = vi.fn(() => fooValidation);
     versionedRouter
       .post({
         path: '/test/{id}',
@@ -744,7 +747,7 @@ describe('Versioned route', () => {
       const { fooValidation, validateBodyFn, validateOutputFn, validateParamsFn, validateQueryFn } =
         testValidation;
 
-      (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+      (router.registerRoute as Mock).mockImplementation((opts) => (handler = opts.handler));
       versionedRouter
         .post({
           path: '/test/{id}',
@@ -782,7 +785,7 @@ describe('Versioned route', () => {
     it('handles "undefined" response schemas', async () => {
       let handler: InternalRouteHandler;
 
-      (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+      (router.registerRoute as Mock).mockImplementation((opts) => (handler = opts.handler));
       versionedRouter = CoreVersionedRouter.from({
         router,
         env: devEnv,
@@ -823,9 +826,9 @@ describe('Versioned route', () => {
       const { fooValidation, validateBodyFn, validateOutputFn, validateParamsFn, validateQueryFn } =
         testValidation;
 
-      const custom = jest.fn(() => ({ value: 1 }));
+      const custom = vi.fn(() => ({ value: 1 }));
       fooValidation.response[200].body = { custom } as any;
-      (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+      (router.registerRoute as Mock).mockImplementation((opts) => (handler = opts.handler));
       versionedRouter = CoreVersionedRouter.from({
         router,
         env: devEnv,
@@ -876,7 +879,7 @@ describe('Versioned route', () => {
     });
 
     let bypassVersionHandler: InternalRouteHandler;
-    (router.registerRoute as jest.Mock).mockImplementation(
+    (router.registerRoute as Mock).mockImplementation(
       (opts) => (bypassVersionHandler = opts.handler)
     );
     versionedRouter
@@ -898,7 +901,7 @@ describe('Versioned route', () => {
       );
 
     let doNotBypassHandler1: InternalRouteHandler;
-    (router.registerRoute as jest.Mock).mockImplementation(
+    (router.registerRoute as Mock).mockImplementation(
       (opts) => (doNotBypassHandler1 = opts.handler)
     );
     versionedRouter
@@ -920,7 +923,7 @@ describe('Versioned route', () => {
       );
 
     let doNotBypassHandler2: InternalRouteHandler;
-    (router.registerRoute as jest.Mock).mockImplementation(
+    (router.registerRoute as Mock).mockImplementation(
       (opts) => (doNotBypassHandler2 = opts.handler)
     );
     versionedRouter
@@ -1197,7 +1200,7 @@ describe('Versioned route', () => {
 
     it('for routes with validation', async () => {
       const { fooValidation } = testValidation;
-      (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+      (router.registerRoute as Mock).mockImplementation((opts) => (handler = opts.handler));
       versionedRouter
         .post({
           path: '/test/{id}',
@@ -1264,7 +1267,7 @@ describe('Versioned route', () => {
     });
 
     it('for routes without validation', async () => {
-      (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+      (router.registerRoute as Mock).mockImplementation((opts) => (handler = opts.handler));
       versionedRouter
         .post({
           path: '/test/{id}',

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useDeleteList } from '@kbn/securitysolution-list-hooks';
 import * as Api from '@kbn/securitysolution-list-api';
@@ -12,7 +15,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
 
-jest.mock('@kbn/securitysolution-list-api');
+vi.mock('@kbn/securitysolution-list-api');
 
 // TODO: This test should be ported to the package: x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_delete_list/index.test.ts once we have mocks in kbn packages
 
@@ -21,7 +24,7 @@ describe('useDeleteList', () => {
 
   beforeEach(() => {
     httpMock = httpServiceMock.createStartContract();
-    (Api.deleteList as jest.Mock).mockResolvedValue(getListResponseMock());
+    (Api.deleteList as Mock).mockResolvedValue(getListResponseMock());
   });
 
   it('invokes Api.deleteList', async () => {

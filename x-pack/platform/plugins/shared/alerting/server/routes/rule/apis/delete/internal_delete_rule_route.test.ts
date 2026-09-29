@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ReservedPrivilegesSet } from '@kbn/core/server';
 import { internalDeleteRuleRoute } from './delete_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
@@ -15,9 +17,12 @@ import { rulesClientMock } from '../../../../rules_client.mock';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockedRule = {
   apiKeyOwner: 'api-key-owner',
@@ -38,8 +43,8 @@ const mockedRule = {
 
 describe('internalDeleteRuleRoute', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    rulesClient.get = jest.fn().mockResolvedValue(mockedRule);
+    vi.resetAllMocks();
+    rulesClient.get = vi.fn().mockResolvedValue(mockedRule);
   });
 
   it('registers the internal path, access, and superuser-only authz', () => {

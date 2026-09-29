@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -14,8 +16,8 @@ import { useKibana as mockUseKibana } from '../../../../../common/lib/kibana/__m
 const mockedUseKibana = mockUseKibana();
 const mockedTelemetry = createTelemetryServiceMock();
 
-jest.mock('../../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../../common/lib/kibana'));
 
   return {
     ...original,
@@ -34,8 +36,8 @@ describe('useFileValidation', () => {
   const invalidLine = 'user1,label,extra_field';
 
   test('should call onError when an error occurs', () => {
-    const onErrorMock = jest.fn();
-    const onCompleteMock = jest.fn();
+    const onErrorMock = vi.fn();
+    const onCompleteMock = vi.fn();
     const invalidFileType = 'invalid file type';
 
     const { result } = renderHook(
@@ -49,8 +51,8 @@ describe('useFileValidation', () => {
   });
 
   test('should call onComplete when file validation is complete', async () => {
-    const onErrorMock = jest.fn();
-    const onCompleteMock = jest.fn();
+    const onErrorMock = vi.fn();
+    const onCompleteMock = vi.fn();
     const fileName = 'test.csv';
 
     const { result } = renderHook(

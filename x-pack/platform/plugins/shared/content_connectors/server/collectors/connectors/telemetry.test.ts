@@ -5,28 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { registerTelemetryUsageCollector } from './telemetry';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { collectConnectorStats } from '@kbn/search-connectors';
 import type { ConnectorStats } from '@kbn/search-connectors';
 
-jest.mock('@kbn/search-connectors', () => ({
-  collectConnectorStats: jest.fn(),
-}));
+vi.mock('@kbn/search-connectors', () => {
+      const mocked = {
+      collectConnectorStats: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockLogger = loggingSystemMock.createLogger().get();
 
 describe('Connectors Serverless Telemetry Usage Collector', () => {
-  const makeUsageCollectorStub = jest.fn();
-  const registerStub = jest.fn();
+  const makeUsageCollectorStub = vi.fn();
+  const registerStub = vi.fn();
   const usageCollectionMock = {
     makeUsageCollector: makeUsageCollectorStub,
     registerCollector: registerStub,
   } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('registerTelemetryUsageCollector', () => {
@@ -46,7 +52,7 @@ describe('Connectors Serverless Telemetry Usage Collector', () => {
         id: '1',
         isDeleted: false,
       };
-      (collectConnectorStats as jest.Mock).mockImplementation(() => [connectorStats]);
+      (collectConnectorStats as Mock).mockImplementation(() => [connectorStats]);
       registerTelemetryUsageCollector(usageCollectionMock, mockLogger);
       const telemetryMetrics = await makeUsageCollectorStub.mock.calls[0][0].fetch(
         createCollectorFetchContextMock()
@@ -57,7 +63,7 @@ describe('Connectors Serverless Telemetry Usage Collector', () => {
       });
     });
     it('should return default telemetry when collectConnectorStats raises error', async () => {
-      (collectConnectorStats as jest.Mock).mockImplementation(() => {
+      (collectConnectorStats as Mock).mockImplementation(() => {
         throw new Error();
       });
       registerTelemetryUsageCollector(usageCollectionMock, mockLogger);

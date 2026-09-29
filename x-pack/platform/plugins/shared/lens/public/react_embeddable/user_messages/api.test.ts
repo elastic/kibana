@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { buildUserMessagesHelpers } from './api'; // Adjust the import path as necessary
 import {
   getLensApiMock,
@@ -83,7 +85,7 @@ function buildUserMessagesApi(
     activeVisualizationState: {},
     activeDatasourceState: {},
   });
-  const onBeforeBadgesRender = jest.fn((messages) => messages);
+  const onBeforeBadgesRender = vi.fn((messages) => messages);
   const userMessagesApi = buildUserMessagesHelpers(
     api,
     internalApi,
@@ -113,7 +115,7 @@ describe('User Messages API', () => {
   describe('updateValidationErrors', () => {
     it('should basically work', () => {
       const { userMessagesApi, internalApi } = buildUserMessagesApi();
-      internalApi.updateValidationMessages = jest.fn();
+      internalApi.updateValidationMessages = vi.fn();
       const messages = Array(3).fill(createUserMessage());
       userMessagesApi.updateValidationErrors(messages);
       expect(internalApi.updateValidationMessages).toHaveBeenCalledWith(messages);
@@ -169,7 +171,7 @@ describe('User Messages API', () => {
   describe('updateBlockingErrors', () => {
     it('should basically work with a regular Error', () => {
       const { userMessagesApi, internalApi } = buildUserMessagesApi();
-      internalApi.updateBlockingError = jest.fn();
+      internalApi.updateBlockingError = vi.fn();
       const error = new Error('Something went wrong');
       userMessagesApi.updateBlockingErrors(error);
       expect(internalApi.updateBlockingError).toHaveBeenCalledWith(error);
@@ -177,7 +179,7 @@ describe('User Messages API', () => {
 
     it('should work with user messages too', () => {
       const { userMessagesApi, internalApi } = buildUserMessagesApi();
-      internalApi.updateBlockingError = jest.fn();
+      internalApi.updateBlockingError = vi.fn();
       const userMessage = createUserMessage();
       userMessagesApi.updateBlockingErrors([userMessage]);
       expect(internalApi.updateBlockingError).toHaveBeenCalledWith(
@@ -187,7 +189,7 @@ describe('User Messages API', () => {
 
     it('should pick only the first error from a list of user messages', () => {
       const { userMessagesApi, internalApi } = buildUserMessagesApi();
-      internalApi.updateBlockingError = jest.fn();
+      internalApi.updateBlockingError = vi.fn();
       const userMessage = createUserMessage();
       userMessagesApi.updateBlockingErrors([userMessage, createUserMessage(), createUserMessage()]);
       expect(internalApi.updateBlockingError).toHaveBeenCalledWith(
@@ -197,7 +199,7 @@ describe('User Messages API', () => {
 
     it('should clear out the error when an empty error is passed', () => {
       const { userMessagesApi, internalApi } = buildUserMessagesApi();
-      internalApi.updateBlockingError = jest.fn();
+      internalApi.updateBlockingError = vi.fn();
       userMessagesApi.updateBlockingErrors(new Error(''));
       expect(internalApi.updateBlockingError).toHaveBeenCalledWith(undefined);
     });
@@ -272,8 +274,8 @@ describe('User Messages API', () => {
     });
 
     it('should return deeper validation messages from both datasource and visualization', () => {
-      const visGetUserMessages = jest.fn();
-      const datasourceGetUserMessages = jest.fn();
+      const visGetUserMessages = vi.fn();
+      const datasourceGetUserMessages = vi.fn();
       const { userMessagesApi } = buildUserMessagesApi(undefined, {
         visOverrides: { id: 'lnsXY', getUserMessages: visGetUserMessages },
         dataOverrides: { id: 'formBased', getUserMessages: datasourceGetUserMessages },
@@ -299,7 +301,7 @@ describe('User Messages API', () => {
     });
 
     it('should not add consumer messages when getConsumerMessages returns empty array', () => {
-      const getConsumerMessages = jest.fn(() => []);
+      const getConsumerMessages = vi.fn(() => []);
       const { userMessagesApi } = buildUserMessagesApi(undefined, {
         visOverrides: { id: 'lnsXY' },
         dataOverrides: { id: 'formBased' },
@@ -314,7 +316,7 @@ describe('User Messages API', () => {
 
     it('should filter consumer and internal messages based on severity', () => {
       const consumerMessage = createUserMessage(['embeddableBadge'], 'info');
-      const getConsumerMessages = jest.fn(() => [consumerMessage]);
+      const getConsumerMessages = vi.fn(() => [consumerMessage]);
       const { userMessagesApi } = buildUserMessagesApi(undefined, {
         visOverrides: { id: 'lnsXY' },
         dataOverrides: { id: 'formBased' },
@@ -334,7 +336,7 @@ describe('User Messages API', () => {
 
     it('should return only consumer messages when no internal messages', () => {
       const consumerMessage = createUserMessage(['embeddableBadge'], 'error');
-      const getConsumerMessages = jest.fn(() => [consumerMessage]);
+      const getConsumerMessages = vi.fn(() => [consumerMessage]);
       const { userMessagesApi } = buildUserMessagesApi(undefined, {
         visOverrides: { id: 'lnsXY' },
         dataOverrides: { id: 'formBased' },
@@ -349,7 +351,7 @@ describe('User Messages API', () => {
     it('when consumer and internal share the same uniqueId, both appear in the result (no dedupe)', () => {
       const sharedId = 'shared-message-id';
       const consumerMessage = createUserMessage(['embeddableBadge'], 'error', sharedId);
-      const getConsumerMessages = jest.fn(() => [consumerMessage]);
+      const getConsumerMessages = vi.fn(() => [consumerMessage]);
       const { userMessagesApi } = buildUserMessagesApi(undefined, {
         visOverrides: { id: 'lnsXY' },
         dataOverrides: { id: 'formBased' },
@@ -365,7 +367,7 @@ describe('User Messages API', () => {
     it('should return multiple consumer messages', () => {
       const msg1 = createUserMessage(['embeddableBadge'], 'info');
       const msg2 = createUserMessage(['embeddableBadge'], 'warning');
-      const getConsumerMessages = jest.fn(() => [msg1, msg2]);
+      const getConsumerMessages = vi.fn(() => [msg1, msg2]);
       const { userMessagesApi } = buildUserMessagesApi(undefined, {
         visOverrides: { id: 'lnsXY' },
         dataOverrides: { id: 'formBased' },

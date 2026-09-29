@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useSelectedTab, useTabs } from './hooks';
@@ -22,41 +25,53 @@ import type { HostDetailsPanelProps } from '.';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(() => ({
-    openLeftPanel: jest.fn(),
-  })),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(() => ({
+        openLeftPanel: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_has_entity_resolution_license', () => ({
-  useHasEntityResolutionLicense: jest.fn(() => false),
-}));
+vi.mock('../../../common/hooks/use_has_entity_resolution_license', () => {
+      const mocked = {
+      useHasEntityResolutionLicense: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../entity_analytics/components/entity_details_flyout', () => ({
-  getRiskInputTab: jest.fn(),
-  getInsightsInputTab: jest.fn(),
-  getResolutionGroupTab: jest.fn(),
-}));
+vi.mock('../../../entity_analytics/components/entity_details_flyout', () => {
+      const mocked = {
+      getRiskInputTab: vi.fn(),
+      getInsightsInputTab: vi.fn(),
+      getResolutionGroupTab: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../shared/components/left', () => ({
-  getGraphViewTab: jest.fn(),
-}));
+vi.mock('../shared/components/left', () => {
+      const mocked = {
+      getGraphViewTab: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // `useTabs` calls these factory functions to build the tab objects. The
 // mocks return placeholder shapes with the correct `id` so inclusion/order
 // assertions still work, while leaving the call arguments available for
 // shape verification via `toHaveBeenCalledWith`.
 const setupTabFactoryMocks = () => {
-  (getRiskInputTab as jest.Mock).mockImplementation(() => ({
+  (getRiskInputTab as Mock).mockImplementation(() => ({
     id: EntityDetailsLeftPanelTab.RISK_INPUTS,
   }));
-  (getInsightsInputTab as jest.Mock).mockImplementation(() => ({
+  (getInsightsInputTab as Mock).mockImplementation(() => ({
     id: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
   }));
-  (getGraphViewTab as jest.Mock).mockImplementation(() => ({
+  (getGraphViewTab as Mock).mockImplementation(() => ({
     id: EntityDetailsLeftPanelTab.GRAPH_VIEW,
   }));
-  (getResolutionGroupTab as jest.Mock).mockImplementation(() => ({
+  (getResolutionGroupTab as Mock).mockImplementation(() => ({
     id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP,
   }));
 };
@@ -85,11 +100,11 @@ const defaultTabs: LeftPanelTabsType = [
 
 describe('hooks', () => {
   describe('useSelectedTab', () => {
-    const mockOpenLeftPanel = jest.fn();
+    const mockOpenLeftPanel = vi.fn();
 
     beforeEach(() => {
-      jest.resetAllMocks();
-      (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
+      vi.resetAllMocks();
+      (useExpandableFlyoutApi as Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
     });
 
     it('should return the default tab when no path is provided', () => {
@@ -139,9 +154,9 @@ describe('hooks', () => {
 
   describe('useTabs', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
-      (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
-      (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: jest.fn() });
+      vi.resetAllMocks();
+      (useHasEntityResolutionLicense as Mock).mockReturnValue(false);
+      (useExpandableFlyoutApi as Mock).mockReturnValue({ openLeftPanel: vi.fn() });
       setupTabFactoryMocks();
     });
 
@@ -242,7 +257,7 @@ describe('hooks', () => {
     });
 
     it('includes Resolution tab when entityStoreEntityId is set and Entity Resolution license is active', () => {
-      (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+      (useHasEntityResolutionLicense as Mock).mockReturnValue(true);
       const { result } = renderHook(
         () =>
           useTabs({
@@ -267,7 +282,7 @@ describe('hooks', () => {
     });
 
     it('does not include Resolution tab when entityStoreEntityId is set but license is inactive', () => {
-      (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+      (useHasEntityResolutionLicense as Mock).mockReturnValue(false);
       const { result } = renderHook(
         () =>
           useTabs({
@@ -285,7 +300,7 @@ describe('hooks', () => {
     });
 
     it('does not include Resolution tab when license is active but entityStoreEntityId is missing', () => {
-      (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+      (useHasEntityResolutionLicense as Mock).mockReturnValue(true);
       const { result } = renderHook(() => useTabs(defaultParams), { wrapper: TestProviders });
 
       expect(result.current).toEqual([

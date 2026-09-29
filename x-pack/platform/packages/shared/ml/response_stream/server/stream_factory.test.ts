@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as zlib from 'zlib';
 
 import type { Logger } from '@kbn/logging';
@@ -29,7 +31,7 @@ describe('streamFactory', () => {
   let mockLogger: Logger;
 
   beforeEach(() => {
-    mockLogger = { debug: jest.fn(), error: jest.fn(), info: jest.fn() } as unknown as Logger;
+    mockLogger = { debug: vi.fn(), error: vi.fn(), info: vi.fn() } as unknown as Logger;
   });
 
   it('should encode and receive an uncompressed string based stream', async () => {
@@ -92,93 +94,101 @@ describe('streamFactory', () => {
   // decode the stream for the test and assert it. When used in actual code,
   // the browser on the client side will automatically take care of unzipping
   // without the need for additional custom code.
-  it('should encode and receive a compressed string based stream', (done) => {
-    void (async () => {
-      const { end, push, responseWithHeaders } = streamFactory(
-        {
-          'accept-encoding': 'gzip',
-        },
-        mockLogger
-      );
+  it('should encode and receive a compressed string based stream', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      push('push1');
-      push('push2');
-      end();
+          void (async () => {
+            const { end, push, responseWithHeaders } = streamFactory(
+              {
+                'accept-encoding': 'gzip',
+              },
+              mockLogger
+            );
 
-      const chunks = [];
-      for await (const chunk of responseWithHeaders.body) {
-        chunks.push(chunk);
-      }
+            push('push1');
+            push('push2');
+            end();
 
-      const buffer = Buffer.concat(chunks);
+            const chunks = [];
+            for await (const chunk of responseWithHeaders.body) {
+              chunks.push(chunk);
+            }
 
-      zlib.gunzip(buffer, function (err, decoded) {
-        expect(err).toBe(null);
+            const buffer = Buffer.concat(chunks);
 
-        const streamResult = decoded.toString('utf8');
+            zlib.gunzip(buffer, function (err, decoded) {
+              expect(err).toBe(null);
 
-        expect(responseWithHeaders.headers).toStrictEqual({
-          'Cache-Control': 'no-cache',
-          Connection: 'keep-alive',
-          'content-encoding': 'gzip',
-          'Transfer-Encoding': 'chunked',
-          'X-Accel-Buffering': 'no',
-          'X-Content-Type-Options': 'nosniff',
-        });
-        expect(streamResult).toBe('push1push2');
+              const streamResult = decoded.toString('utf8');
 
-        done();
-      });
-    })();
-  });
+              expect(responseWithHeaders.headers).toStrictEqual({
+                'Cache-Control': 'no-cache',
+                Connection: 'keep-alive',
+                'content-encoding': 'gzip',
+                'Transfer-Encoding': 'chunked',
+                'X-Accel-Buffering': 'no',
+                'X-Content-Type-Options': 'nosniff',
+              });
+              expect(streamResult).toBe('push1push2');
 
-  it('should encode and receive a compressed NDJSON based stream', (done) => {
-    void (async () => {
-      const { DELIMITER, end, push, responseWithHeaders } = streamFactory<MockItem>(
-        {
-          'accept-encoding': 'gzip',
-        },
-        mockLogger
-      );
+              done();
+            });
+          })();
+        
+      }));
 
-      push(mockItem1);
-      push(mockItem2);
-      end();
+  it('should encode and receive a compressed NDJSON based stream', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      const chunks = [];
-      for await (const chunk of responseWithHeaders.body) {
-        chunks.push(chunk);
-      }
+          void (async () => {
+            const { DELIMITER, end, push, responseWithHeaders } = streamFactory<MockItem>(
+              {
+                'accept-encoding': 'gzip',
+              },
+              mockLogger
+            );
 
-      const buffer = Buffer.concat(chunks);
+            push(mockItem1);
+            push(mockItem2);
+            end();
 
-      zlib.gunzip(buffer, function (err, decoded) {
-        expect(err).toBe(null);
+            const chunks = [];
+            for await (const chunk of responseWithHeaders.body) {
+              chunks.push(chunk);
+            }
 
-        const streamResult = decoded.toString('utf8');
+            const buffer = Buffer.concat(chunks);
 
-        const streamItems = streamResult.split(DELIMITER);
-        const lastItem = streamItems.pop();
+            zlib.gunzip(buffer, function (err, decoded) {
+              expect(err).toBe(null);
 
-        const parsedItems = streamItems.map((d) => JSON.parse(d));
+              const streamResult = decoded.toString('utf8');
 
-        expect(responseWithHeaders.headers).toStrictEqual({
-          'Cache-Control': 'no-cache',
-          Connection: 'keep-alive',
-          'content-encoding': 'gzip',
-          'Transfer-Encoding': 'chunked',
-          'X-Accel-Buffering': 'no',
-          'X-Content-Type-Options': 'nosniff',
-        });
-        expect(parsedItems).toHaveLength(2);
-        expect(parsedItems[0]).toStrictEqual(mockItem1);
-        expect(parsedItems[1]).toStrictEqual(mockItem2);
-        expect(lastItem).toBe('');
+              const streamItems = streamResult.split(DELIMITER);
+              const lastItem = streamItems.pop();
 
-        done();
-      });
-    })();
-  });
+              const parsedItems = streamItems.map((d) => JSON.parse(d));
+
+              expect(responseWithHeaders.headers).toStrictEqual({
+                'Cache-Control': 'no-cache',
+                Connection: 'keep-alive',
+                'content-encoding': 'gzip',
+                'Transfer-Encoding': 'chunked',
+                'X-Accel-Buffering': 'no',
+                'X-Content-Type-Options': 'nosniff',
+              });
+              expect(parsedItems).toHaveLength(2);
+              expect(parsedItems[0]).toStrictEqual(mockItem1);
+              expect(parsedItems[1]).toStrictEqual(mockItem2);
+              expect(lastItem).toBe('');
+
+              done();
+            });
+          })();
+        
+      }));
 
   it('should log an error when a string based stream receives a non-string chunk', async () => {
     const { push } = streamFactory({}, mockLogger);

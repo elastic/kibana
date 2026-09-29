@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { FormTestComponent } from '../../../common/test_utils';
@@ -15,10 +17,10 @@ import type { CaseCustomFieldNumber } from '../../../../common/types/domain';
 import { POPULATED_WITH_DEFAULT } from '../translations';
 
 describe('Edit ', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const customField = customFieldsMock[4] as CaseCustomFieldNumber;
@@ -511,10 +513,10 @@ describe('Edit ', () => {
 });
 
 describe('Edit inline variant', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const customField = customFieldsMock[4] as CaseCustomFieldNumber;
@@ -862,11 +864,11 @@ describe('Edit inline variant', () => {
 });
 
 describe('Edit inline variant, section not editing', () => {
-  const onSubmit = jest.fn();
-  const onRequestSectionEdit = jest.fn();
+  const onSubmit = vi.fn();
+  const onRequestSectionEdit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const customField = customFieldsMock[4] as CaseCustomFieldNumber;

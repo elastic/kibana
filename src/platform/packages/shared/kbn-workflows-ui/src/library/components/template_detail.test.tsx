@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import type { TemplateBody } from '@kbn/workflows-library';
@@ -14,13 +16,16 @@ import { TemplateDetail } from './template_detail';
 import { WorkflowsUiServicesProvider } from '../../context';
 import { createMockWorkflowsUiServices } from '../../context/__mocks__/mocks';
 
-const mockUseTemplate = jest.fn();
-jest.mock('../hooks/use_template', () => ({
-  useTemplate: (slug: string) => mockUseTemplate(slug),
-}));
+const mockUseTemplate = vi.fn();
+vi.mock('../hooks/use_template', () => {
+      const mocked = {
+      useTemplate: (slug: string) => mockUseTemplate(slug),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components', () => {
-  const actual = jest.requireActual('../../components');
+vi.mock('../../components', async () => {
+  const actual = (await vi.importActual('../../components'));
 
   return {
     ...actual,
@@ -84,43 +89,49 @@ jest.mock('../../components', () => {
 });
 
 // Stub the Monaco-backed preview so the test does not depend on the editor.
-jest.mock('./template_yaml_preview', () => ({
-  WorkflowYamlPreview: ({ yaml, 'data-test-subj': dataTestSubj }: any) => (
-    <pre data-test-subj={dataTestSubj}>{yaml}</pre>
-  ),
-}));
+vi.mock('./template_yaml_preview', () => {
+      const mocked = {
+      WorkflowYamlPreview: ({ yaml, 'data-test-subj': dataTestSubj }: any) => (
+        <pre data-test-subj={dataTestSubj}>{yaml}</pre>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The install section has its own test (it needs kibana services and a query
 // client); the stub exposes the preview-values and step callbacks and echoes
 // the `previewYaml` prop so their wiring through TemplateDetail can be asserted.
-jest.mock('./install_form', () => ({
-  TemplateInstallSection: ({
-    step,
-    onStepChange,
-    onPreviewValuesChange,
-    previewYaml,
-  }: {
-    step: string;
-    onStepChange: (step: 'details' | 'setup') => void;
-    onPreviewValuesChange?: (values: Record<string, unknown>) => void;
-    previewYaml: string;
-  }) => (
-    <div data-test-subj="mockInstallSection">
-      <button
-        type="button"
-        data-test-subj="mockInstallSectionCommit"
-        onClick={() => onPreviewValuesChange?.({ 'max-age': 42 })}
-      />
-      <button
-        type="button"
-        data-test-subj="mockInstallSectionSetup"
-        onClick={() => onStepChange('setup')}
-      />
-      <pre data-test-subj="mockInstallSectionStep">{step}</pre>
-      <pre data-test-subj="mockInstallSectionPreviewYaml">{previewYaml}</pre>
-    </div>
-  ),
-}));
+vi.mock('./install_form', () => {
+      const mocked = {
+      TemplateInstallSection: ({
+        step,
+        onStepChange,
+        onPreviewValuesChange,
+        previewYaml,
+      }: {
+        step: string;
+        onStepChange: (step: 'details' | 'setup') => void;
+        onPreviewValuesChange?: (values: Record<string, unknown>) => void;
+        previewYaml: string;
+      }) => (
+        <div data-test-subj="mockInstallSection">
+          <button
+            type="button"
+            data-test-subj="mockInstallSectionCommit"
+            onClick={() => onPreviewValuesChange?.({ 'max-age': 42 })}
+          />
+          <button
+            type="button"
+            data-test-subj="mockInstallSectionSetup"
+            onClick={() => onStepChange('setup')}
+          />
+          <pre data-test-subj="mockInstallSectionStep">{step}</pre>
+          <pre data-test-subj="mockInstallSectionPreviewYaml">{previewYaml}</pre>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const RAW = `template-metadata:
   slug: my-template
@@ -177,7 +188,7 @@ const renderGraphDetail = () =>
 
 describe('TemplateDetail', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseTemplate.mockReturnValue({ data: TEMPLATE_BODY, isLoading: false, isError: false });
   });
 
@@ -202,7 +213,7 @@ describe('TemplateDetail', () => {
   });
 
   it('should call onLoaded with the loaded template', () => {
-    const onLoaded = jest.fn();
+    const onLoaded = vi.fn();
     render(
       <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
         <TemplateDetail slug="my-template" onLoaded={onLoaded} />

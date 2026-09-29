@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -14,9 +17,9 @@ import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filteri
 
 import { fetchIndex, fetchSavedObjectNames, fetchSavedObjects, isIndexAllowedForDebug } from '.';
 
-jest.mock('../spaces/query_namespaces_filtering');
+vi.mock('../spaces/query_namespaces_filtering');
 
-const mockAddNamespaceFilteringToQuery = addNamespaceFilteringToQuery as jest.MockedFunction<
+const mockAddNamespaceFilteringToQuery = addNamespaceFilteringToQuery as MockedFunction<
   typeof addNamespaceFilteringToQuery
 >;
 
@@ -27,7 +30,7 @@ describe('Fleet debug service', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('isIndexAllowedForDebug', () => {

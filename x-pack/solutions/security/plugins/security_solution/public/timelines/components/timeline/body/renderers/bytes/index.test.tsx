@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { TestProviders } from '../../../../../../common/mock';
@@ -13,7 +15,7 @@ import { useMountAppended } from '../../../../../../common/utils/use_mount_appen
 
 import { Bytes } from '.';
 
-jest.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/lib/kibana');
 
 describe('Bytes', () => {
   const mount = useMountAppended();

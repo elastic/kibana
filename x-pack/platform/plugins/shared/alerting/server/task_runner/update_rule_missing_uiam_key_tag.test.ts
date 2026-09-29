@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
@@ -23,7 +25,7 @@ const savedObjects = savedObjectsServiceMock.createStartContract();
 const unsafeSavedObjectsClient = savedObjectsServiceMock
   .createStartContract()
   .getUnsafeInternalClient();
-const mockUpdate = jest.mocked(unsafeSavedObjectsClient.update);
+const mockUpdate = vi.mocked(unsafeSavedObjectsClient.update);
 const logger = loggingSystemMock.createLogger();
 
 const context = {
@@ -32,7 +34,7 @@ const context = {
   logger,
   savedObjects,
   shouldGrantUiam: true,
-  spaceIdToNamespace: jest.fn().mockReturnValue(spaceId),
+  spaceIdToNamespace: vi.fn().mockReturnValue(spaceId),
 } as unknown as TaskRunnerContext;
 
 const getRuleData = (overrides: Partial<RuleData['rawRule']> = {}): RuleData => ({
@@ -43,7 +45,7 @@ const getRuleData = (overrides: Partial<RuleData['rawRule']> = {}): RuleData => 
 
 describe('updateRuleMissingUiamKeyTag', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     savedObjects.getUnsafeInternalClient.mockReturnValue(unsafeSavedObjectsClient);
     mockUpdate.mockResolvedValue({
       attributes: {},

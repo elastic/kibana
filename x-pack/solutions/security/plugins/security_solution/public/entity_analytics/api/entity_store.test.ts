@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
 
@@ -12,20 +15,23 @@ import { useEntityStoreRoutes } from './entity_store';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { WATCHLISTS_PREBUILT_INSTALL_URL } from '../../../common/entity_analytics/watchlists/constants';
 
-jest.mock('../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFetch = jest.fn();
-const useKibanaMock = useKibana as jest.Mock;
+const mockFetch = vi.fn();
+const useKibanaMock = useKibana as Mock;
 
 describe('useEntityStoreRoutes — executionContext propagation to prebuilt watchlist install', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: {
         http: { fetch: mockFetch },
-        notifications: { toasts: { addWarning: jest.fn() } },
+        notifications: { toasts: { addWarning: vi.fn() } },
       },
     });
     mockFetch.mockResolvedValue({ acknowledged: true });

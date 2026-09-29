@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { TestScheduler } from 'rxjs/testing';
 import { renderHook } from '@testing-library/react';
 import type { Chart, PointerEvent } from '@elastic/charts';
@@ -36,7 +38,7 @@ describe('useActiveCursor', () => {
       testScheduler.run(({ cold }) => {
         const marble = `${Object.keys(events).join(`-`)} |`;
         const activeCursor$ = cold(marble, events);
-        const dispatchExternalPointerEvent: DispatchExternalPointerEventFn = jest.fn();
+        const dispatchExternalPointerEvent: DispatchExternalPointerEventFn = vi.fn();
 
         renderHook(() =>
           useActiveCursor(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useGraphPreview } from './use_graph_preview';
@@ -13,21 +16,21 @@ import { useIsEntityStoreV2Available } from '../../../../flyout/shared/hooks/use
 import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
-jest.mock('../../../../common/hooks/use_has_graph_visualization_license');
-jest.mock('../../../../flyout/shared/hooks/use_is_entity_store_v2_available');
-jest.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_store');
-jest.mock('@kbn/entity-store/public', () => {
-  const actual = jest.requireActual('@kbn/entity-store/public');
+vi.mock('../../../../common/hooks/use_has_graph_visualization_license');
+vi.mock('../../../../flyout/shared/hooks/use_is_entity_store_v2_available');
+vi.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_store');
+vi.mock('@kbn/entity-store/public', async () => {
+  const actual = (await vi.importActual('@kbn/entity-store/public'));
   return {
     ...actual,
-    useEntityStoreEuidApi: jest.fn(),
+    useEntityStoreEuidApi: vi.fn(),
   };
 });
 
-const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as jest.Mock;
-const mockUseIsEntityStoreV2Available = useIsEntityStoreV2Available as jest.Mock;
-const mockUseEntityStoreStatus = useEntityStoreStatus as jest.Mock;
-const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as jest.Mock;
+const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as Mock;
+const mockUseIsEntityStoreV2Available = useIsEntityStoreV2Available as Mock;
+const mockUseEntityStoreStatus = useEntityStoreStatus as Mock;
+const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as Mock;
 
 // Minimal stand-in for the euid module's `getEntityIdentifiersFromDocument` /
 // `getEuidSourceFields`: `getEntityIdentifiersFromDocument` returns a non-null object when any of
@@ -75,7 +78,7 @@ const baseAlert = {
 
 describe('useGraphPreview', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseHasGraphVisualizationLicense.mockReturnValue(true);
     mockUseIsEntityStoreV2Available.mockReturnValue({ data: { indexExists: true } });
     mockUseEntityStoreStatus.mockReturnValue({ data: { status: 'running' } });
@@ -179,7 +182,7 @@ describe('useGraphPreview', () => {
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: {
         ...mockEuid,
-        getEntityIdentifiersFromDocument: jest.fn(() => undefined),
+        getEntityIdentifiersFromDocument: vi.fn(() => undefined),
       },
     });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
@@ -15,7 +18,7 @@ describe('pciFieldMapperTool', () => {
   const tool = pciFieldMapperTool(mockCore, mockLogger);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('schema', () => {
@@ -143,7 +146,7 @@ describe('pciFieldMapperTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const searchCall = (mockEsClient.asCurrentUser.search as unknown as jest.Mock).mock
+      const searchCall = (mockEsClient.asCurrentUser.search as unknown as Mock).mock
         .calls[0][0];
       expect(searchCall.query).toEqual({
         range: {

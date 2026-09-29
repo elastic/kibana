@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createListStream } from '.';
 
 describe('listStream', () => {
   test('provides the values in the initial list', async () => {
     const str = createListStream([1, 2, 3, 4]);
-    const onData = jest.fn();
+    const onData = vi.fn();
     str.on('data', onData);
 
     await new Promise((resolve) => str.on('end', resolve));

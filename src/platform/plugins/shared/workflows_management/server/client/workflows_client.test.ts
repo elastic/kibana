@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { EXAMPLE_MANAGED_WORKFLOW_ID } from '@kbn/workflows/managed';
@@ -20,16 +23,16 @@ import type { WorkflowsManagementConfig } from '../config';
 const createMockWorkflowsService = (
   overrides: {
     hasAtLeast?: boolean;
-    emitEvent?: jest.Mock;
-    getManagedWorkflowStatus?: jest.Mock;
-    getInstalledManagedWorkflowState?: jest.Mock;
-    listInstalledManagedWorkflowStates?: jest.Mock;
+    emitEvent?: Mock;
+    getManagedWorkflowStatus?: Mock;
+    getInstalledManagedWorkflowState?: Mock;
+    listInstalledManagedWorkflowStates?: Mock;
   } = {}
 ) => {
-  const emitEvent = overrides.emitEvent ?? jest.fn().mockResolvedValue(undefined);
+  const emitEvent = overrides.emitEvent ?? vi.fn().mockResolvedValue(undefined);
   const getManagedWorkflowStatus =
     overrides.getManagedWorkflowStatus ??
-    jest.fn().mockResolvedValue({
+    vi.fn().mockResolvedValue({
       status: 'intact',
       workflowId: EXAMPLE_MANAGED_WORKFLOW_ID,
       definitionId: EXAMPLE_MANAGED_WORKFLOW_ID,
@@ -44,10 +47,10 @@ const createMockWorkflowsService = (
       registryHash: 'hash',
     });
   return {
-    getPluginsStart: jest.fn().mockResolvedValue({
+    getPluginsStart: vi.fn().mockResolvedValue({
       licensing: {
-        getLicense: jest.fn().mockResolvedValue({
-          hasAtLeast: jest.fn().mockReturnValue(overrides.hasAtLeast ?? true),
+        getLicense: vi.fn().mockResolvedValue({
+          hasAtLeast: vi.fn().mockReturnValue(overrides.hasAtLeast ?? true),
         }),
       },
       workflowsExecutionEngine: {
@@ -55,12 +58,12 @@ const createMockWorkflowsService = (
       },
     }),
     getManagedWorkflowStatus,
-    installManagedWorkflow: jest.fn().mockResolvedValue(undefined),
-    uninstallManagedWorkflow: jest.fn().mockResolvedValue(undefined),
+    installManagedWorkflow: vi.fn().mockResolvedValue(undefined),
+    uninstallManagedWorkflow: vi.fn().mockResolvedValue(undefined),
     getInstalledManagedWorkflowState:
-      overrides.getInstalledManagedWorkflowState ?? jest.fn().mockResolvedValue(null),
+      overrides.getInstalledManagedWorkflowState ?? vi.fn().mockResolvedValue(null),
     listInstalledManagedWorkflowStates:
-      overrides.listInstalledManagedWorkflowStates ?? jest.fn().mockResolvedValue([]),
+      overrides.listInstalledManagedWorkflowStates ?? vi.fn().mockResolvedValue([]),
   } as unknown as WorkflowsService;
 };
 
@@ -68,7 +71,7 @@ describe('createWorkflowsClientProvider', () => {
   const logger = loggingSystemMock.createLogger();
   const mockRequest = {} as KibanaRequest;
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('should return isWorkflowsAvailable true when license is sufficient and config.available is true', async () => {
     const service = createMockWorkflowsService({ hasAtLeast: true });
@@ -128,7 +131,7 @@ describe('createWorkflowsClientProvider', () => {
   });
 
   it('should delegate emitEvent to the execution engine when available', async () => {
-    const emitEvent = jest.fn().mockResolvedValue(undefined);
+    const emitEvent = vi.fn().mockResolvedValue(undefined);
     const service = createMockWorkflowsService({ emitEvent });
     const config = { available: true } as WorkflowsManagementConfig;
     const provider = createWorkflowsClientProvider(service, config, logger);
@@ -144,7 +147,7 @@ describe('createWorkflowsClientProvider', () => {
   });
 
   it('should silently drop emitEvent when workflows are unavailable', async () => {
-    const emitEvent = jest.fn();
+    const emitEvent = vi.fn();
     const service = createMockWorkflowsService({ hasAtLeast: false, emitEvent });
     const config = { available: true } as WorkflowsManagementConfig;
     const provider = createWorkflowsClientProvider(service, config, logger);
@@ -159,7 +162,7 @@ describe('createWorkflowsClientProvider', () => {
   });
 
   it('should delegate request-scoped managed workflow status checks when available', async () => {
-    const getManagedWorkflowStatus = jest.fn().mockResolvedValue({ status: 'intact' });
+    const getManagedWorkflowStatus = vi.fn().mockResolvedValue({ status: 'intact' });
     const service = createMockWorkflowsService({ getManagedWorkflowStatus });
     const config = { available: true } as WorkflowsManagementConfig;
     const provider = createWorkflowsClientProvider(service, config, logger);
@@ -177,7 +180,7 @@ describe('createWorkflowsClientProvider', () => {
   });
 
   it('should reject request-scoped managed workflow status checks when unavailable', async () => {
-    const getManagedWorkflowStatus = jest.fn();
+    const getManagedWorkflowStatus = vi.fn();
     const service = createMockWorkflowsService({ hasAtLeast: false, getManagedWorkflowStatus });
     const config = { available: true } as WorkflowsManagementConfig;
     const provider = createWorkflowsClientProvider(service, config, logger);
@@ -196,10 +199,10 @@ describe('createWorkflowsClientProvider', () => {
 describe('createManagedWorkflowsSystemApiProvider', () => {
   const logger = loggingSystemMock.createLogger();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('should delegate requestless managed workflow status checks when available', async () => {
-    const getManagedWorkflowStatus = jest.fn().mockResolvedValue({ status: 'intact' });
+    const getManagedWorkflowStatus = vi.fn().mockResolvedValue({ status: 'intact' });
     const service = createMockWorkflowsService({ getManagedWorkflowStatus });
     const config = { available: true } as WorkflowsManagementConfig;
     const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
@@ -215,7 +218,7 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
   });
 
   it('should reject requestless managed workflow status checks when unavailable', async () => {
-    const getManagedWorkflowStatus = jest.fn();
+    const getManagedWorkflowStatus = vi.fn();
     const service = createMockWorkflowsService({ hasAtLeast: false, getManagedWorkflowStatus });
     const config = { available: true } as WorkflowsManagementConfig;
     const provider = createManagedWorkflowsSystemApiProvider(service, config, logger);
@@ -229,10 +232,10 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
   });
 
   it('should delegate owner-scoped managed workflow state reads when available', async () => {
-    const getInstalledManagedWorkflowState = jest.fn().mockResolvedValue({
+    const getInstalledManagedWorkflowState = vi.fn().mockResolvedValue({
       workflowId: 'workflow-1',
     });
-    const listInstalledManagedWorkflowStates = jest
+    const listInstalledManagedWorkflowStates = vi
       .fn()
       .mockResolvedValue([{ workflowId: 'workflow-1' }]);
     const service = createMockWorkflowsService({

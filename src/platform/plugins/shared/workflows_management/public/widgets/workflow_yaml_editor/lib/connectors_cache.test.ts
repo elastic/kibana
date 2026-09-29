@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getCachedAllConnectors } from './connectors_cache';
 
-jest.mock('../../../../common/schema', () => ({
-  getAllConnectors: jest.fn(() => [{ type: 'static-connector' }]),
-  getAllConnectorsWithDynamic: jest.fn((dynamic: Record<string, unknown>) => [
-    { type: 'static-connector' },
-    { type: 'dynamic-connector' },
-  ]),
-}));
+vi.mock('../../../../common/schema', () => {
+      const mocked = {
+      getAllConnectors: vi.fn(() => [{ type: 'static-connector' }]),
+      getAllConnectorsWithDynamic: vi.fn((dynamic: Record<string, unknown>) => [
+        { type: 'static-connector' },
+        { type: 'dynamic-connector' },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getCachedAllConnectors', () => {
   it('returns static connectors when no dynamic types are provided', () => {

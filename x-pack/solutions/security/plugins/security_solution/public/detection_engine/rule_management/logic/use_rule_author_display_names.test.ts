@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useRuleAuthorDisplayNames } from './use_rule_author_display_names';
 import { useBulkGetUserProfiles } from '../../../common/components/user_profiles/use_bulk_get_user_profiles';
 
-jest.mock('../../../common/components/user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../../common/components/user_profiles/use_bulk_get_user_profiles');
 
-const mockUseBulkGetUserProfiles = useBulkGetUserProfiles as jest.Mock;
+const mockUseBulkGetUserProfiles = useBulkGetUserProfiles as Mock;
 
 describe('useRuleAuthorDisplayNames', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseBulkGetUserProfiles.mockReturnValue({ data: [] });
   });
 

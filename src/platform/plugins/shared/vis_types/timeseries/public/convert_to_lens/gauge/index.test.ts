@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -16,43 +18,55 @@ import { convertToLens } from '.';
 import { createPanel, createSeries } from '../lib/__mocks__';
 import type { AvgColumn } from '../lib/convert';
 
-const mockGetMetricsColumns = jest.fn();
-const mockGetBucketsColumns = jest.fn();
-const mockGetConfigurationForGauge = jest.fn();
-const mockIsValidMetrics = jest.fn();
-const mockGetDatasourceValue = jest
+const mockGetMetricsColumns = vi.fn();
+const mockGetBucketsColumns = vi.fn();
+const mockGetConfigurationForGauge = vi.fn();
+const mockIsValidMetrics = vi.fn();
+const mockGetDatasourceValue = vi
   .fn()
   .mockImplementation(() => Promise.resolve(stubLogstashDataView));
-const mockExtractOrGenerateDatasourceInfo = jest.fn();
-const mockGetSeriesAgg = jest.fn();
+const mockExtractOrGenerateDatasourceInfo = vi.fn();
+const mockGetSeriesAgg = vi.fn();
 
-jest.mock('../../services', () => ({
-  getDataViewsStart: jest.fn(() => mockGetDatasourceValue),
-}));
+vi.mock('../../services', () => {
+      const mocked = {
+      getDataViewsStart: vi.fn(() => mockGetDatasourceValue),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/series', () => ({
-  getMetricsColumns: jest.fn(() => mockGetMetricsColumns()),
-  getBucketsColumns: jest.fn(() => mockGetBucketsColumns()),
-  getSeriesAgg: jest.fn(() => mockGetSeriesAgg()),
-}));
+vi.mock('../lib/series', () => {
+      const mocked = {
+      getMetricsColumns: vi.fn(() => mockGetMetricsColumns()),
+      getBucketsColumns: vi.fn(() => mockGetBucketsColumns()),
+      getSeriesAgg: vi.fn(() => mockGetSeriesAgg()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/configurations/metric', () => ({
-  getConfigurationForGauge: jest.fn(() => mockGetConfigurationForGauge()),
-}));
+vi.mock('../lib/configurations/metric', () => {
+      const mocked = {
+      getConfigurationForGauge: vi.fn(() => mockGetConfigurationForGauge()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/metrics', () => {
-  const actual = jest.requireActual('../lib/metrics');
+vi.mock('../lib/metrics', async () => {
+  const actual = (await vi.importActual('../lib/metrics'));
   return {
-    isValidMetrics: jest.fn(() => mockIsValidMetrics()),
-    getReducedTimeRange: jest.fn().mockReturnValue('10'),
+    isValidMetrics: vi.fn(() => mockIsValidMetrics()),
+    getReducedTimeRange: vi.fn().mockReturnValue('10'),
     SUPPORTED_METRICS: actual.SUPPORTED_METRICS,
     getFormulaFromMetric: actual.getFormulaFromMetric,
   };
 });
 
-jest.mock('../lib/datasource', () => ({
-  extractOrGenerateDatasourceInfo: jest.fn(() => mockExtractOrGenerateDatasourceInfo()),
-}));
+vi.mock('../lib/datasource', () => {
+      const mocked = {
+      extractOrGenerateDatasourceInfo: vi.fn(() => mockExtractOrGenerateDatasourceInfo()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('convertToLens', () => {
   const metric = { id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' };
@@ -90,7 +104,7 @@ describe('convertToLens', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should return null for invalid metrics', async () => {

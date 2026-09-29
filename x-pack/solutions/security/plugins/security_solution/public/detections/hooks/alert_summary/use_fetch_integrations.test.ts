@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useFetchIntegrations } from './use_fetch_integrations';
 import { installationStatuses, useGetPackagesQuery } from '@kbn/fleet-plugin/public';
 
-jest.mock('@kbn/fleet-plugin/public');
+vi.mock('@kbn/fleet-plugin/public');
 
 describe('useFetchIntegrations', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return isLoading true', () => {
-    (useGetPackagesQuery as jest.Mock).mockReturnValue({
+    (useGetPackagesQuery as Mock).mockReturnValue({
       data: [],
       isLoading: true,
     });
@@ -30,7 +33,7 @@ describe('useFetchIntegrations', () => {
   });
 
   it('should return availablePackages and installedPackages', () => {
-    (useGetPackagesQuery as jest.Mock).mockReturnValue({
+    (useGetPackagesQuery as Mock).mockReturnValue({
       data: {
         items: [
           {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { Overview } from './overview';
 import { render } from '@testing-library/react';
@@ -21,34 +24,34 @@ import { useDataViewsContext } from '../../hooks/use_data_views';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../hooks/use_reload_request_time');
-jest.mock('../../../../containers/ml/infra_ml_capabilities');
-jest.mock('../../hooks/use_metadata_state');
-jest.mock('../../hooks/use_data_views');
-jest.mock('../../hooks/use_date_picker');
-jest.mock('../../hooks/use_asset_details_render_props');
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../hooks/use_reload_request_time');
+vi.mock('../../../../containers/ml/infra_ml_capabilities');
+vi.mock('../../hooks/use_metadata_state');
+vi.mock('../../hooks/use_data_views');
+vi.mock('../../hooks/use_date_picker');
+vi.mock('../../hooks/use_asset_details_render_props');
 
-const useKibanaMock = useKibanaContextForPlugin as jest.MockedFunction<
+const useKibanaMock = useKibanaContextForPlugin as MockedFunction<
   typeof useKibanaContextForPlugin
 >;
-const useRequestTimeContextMock = useReloadRequestTimeContext as jest.MockedFunction<
+const useRequestTimeContextMock = useReloadRequestTimeContext as MockedFunction<
   typeof useReloadRequestTimeContext
 >;
-const useInfraMLCapabilitiesContextMock = useInfraMLCapabilitiesContext as jest.MockedFunction<
+const useInfraMLCapabilitiesContextMock = useInfraMLCapabilitiesContext as MockedFunction<
   typeof useInfraMLCapabilitiesContext
 >;
-const useMetadataStateContextMock = useMetadataStateContext as jest.MockedFunction<
+const useMetadataStateContextMock = useMetadataStateContext as MockedFunction<
   typeof useMetadataStateContext
 >;
-const useDataViewsContextMock = useDataViewsContext as jest.MockedFunction<
+const useDataViewsContextMock = useDataViewsContext as MockedFunction<
   typeof useDataViewsContext
 >;
-const useDatePickerContextMock = useDatePickerContext as jest.MockedFunction<
+const useDatePickerContextMock = useDatePickerContext as MockedFunction<
   typeof useDatePickerContext
 >;
 const useAssetDetailsRenderPropsContextMock =
-  useAssetDetailsRenderPropsContext as jest.MockedFunction<
+  useAssetDetailsRenderPropsContext as MockedFunction<
     typeof useAssetDetailsRenderPropsContext
   >;
 
@@ -112,14 +115,14 @@ const mockUseKibana = () => {
 
 const mockRequestTimeContext = () => {
   useRequestTimeContextMock.mockReturnValue({
-    updateReloadRequestTime: jest.fn(),
+    updateReloadRequestTime: vi.fn(),
     reloadRequestTime: 0,
   });
 };
 
 const mockUseInfraMLCapabilitiesContext = () => {
   useInfraMLCapabilitiesContextMock.mockReturnValue({
-    updateTopbarMenuVisibilityBySchema: jest.fn(),
+    updateTopbarMenuVisibilityBySchema: vi.fn(),
   } as unknown as ReturnType<typeof useInfraMLCapabilitiesContext>);
 };
 
@@ -139,7 +142,7 @@ const mockUseMetadataStateContext = () => {
     },
     loading: false,
     error: null,
-    refresh: jest.fn(),
+    refresh: vi.fn(),
   });
 };
 
@@ -210,7 +213,7 @@ describe('Overview Tab', () => {
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render overview component structure', () => {

@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { useKibana } from './use_kibana';
 import { useAuthenticatedUser } from './use_authenticated_user';
 
-jest.mock('./use_kibana', () => ({ useKibana: jest.fn() }));
+vi.mock('./use_kibana', () => {
+      const mocked = { useKibana: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 const createUser = (overrides: Partial<AuthenticatedUser> = {}) =>
   ({
@@ -24,12 +30,12 @@ const createUser = (overrides: Partial<AuthenticatedUser> = {}) =>
   } as AuthenticatedUser);
 
 describe('useAuthenticatedUser', () => {
-  const getCurrentUser = jest.fn();
+  const getCurrentUser = vi.fn();
 
   const renderAuthenticatedUser = () => renderHook(() => useAuthenticatedUser()).result;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({ services: { security: { authc: { getCurrentUser } } } });
     getCurrentUser.mockResolvedValue(createUser());
   });

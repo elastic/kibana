@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -15,20 +17,23 @@ import type { ExploratoryEmbeddableProps } from './embeddable';
 // Capture props passed to Embeddable
 let capturedEmbeddableProps: ExploratoryEmbeddableProps | null = null;
 
-jest.mock('./embeddable', () => ({
+vi.mock('./embeddable', () => ({
   __esModule: true,
-  default: jest.fn((props) => {
+  default: vi.fn((props) => {
     capturedEmbeddableProps = props;
     return <div data-test-subj="mock-embeddable">mockEmbeddable</div>;
   }),
 }));
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useFetcher: jest.fn(() => ({
-    data: { formula: {} },
-    loading: false,
-  })),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useFetcher: vi.fn(() => ({
+        data: { formula: {} },
+        loading: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockTimeRange1 = {
   from: '2022-02-15T16:00:00.000Z',
@@ -41,9 +46,9 @@ const mockTimeRange2 = {
 };
 
 const mockLens = {
-  EmbeddableComponent: jest.fn(() => <div>mockEmbeddableComponent</div>),
-  SaveModalComponent: jest.fn(() => <div>mockSaveModalComponent</div>),
-  stateHelperApi: jest.fn().mockResolvedValue({ formula: {} }),
+  EmbeddableComponent: vi.fn(() => <div>mockEmbeddableComponent</div>),
+  SaveModalComponent: vi.fn(() => <div>mockSaveModalComponent</div>),
+  stateHelperApi: vi.fn().mockResolvedValue({ formula: {} }),
 } as unknown as LensPublicStart;
 
 const createMockAttributes = (time: { from: string; to: string }) => [
@@ -58,11 +63,11 @@ const createMockAttributes = (time: { from: string; to: string }) => [
 
 describe('getExploratoryViewEmbeddable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedEmbeddableProps = null;
 
     // Mock useAppDataView to return valid dataViews
-    jest.spyOn(useAppDataViewHook, 'useAppDataView').mockReturnValue({
+    vi.spyOn(useAppDataViewHook, 'useAppDataView').mockReturnValue({
       dataViews: { synthetics: {} },
       loading: false,
     } as any);
@@ -71,7 +76,7 @@ describe('getExploratoryViewEmbeddable', () => {
   it('should NOT use cached time when time range changes', async () => {
     const core = mockCore();
     core.lens = mockLens;
-    core.data!.search.session.getSessionId = jest.fn().mockReturnValue('test-session');
+    core.data!.search.session.getSessionId = vi.fn().mockReturnValue('test-session');
 
     const ExploratoryViewEmbeddable = getExploratoryViewEmbeddable(core as any);
 
@@ -109,7 +114,7 @@ describe('getExploratoryViewEmbeddable', () => {
   it('should update cached time when time range changes', async () => {
     const core = mockCore();
     core.lens = mockLens;
-    core.data!.search.session.getSessionId = jest.fn().mockReturnValue('test-session');
+    core.data!.search.session.getSessionId = vi.fn().mockReturnValue('test-session');
 
     const ExploratoryViewEmbeddable = getExploratoryViewEmbeddable(core as any);
 

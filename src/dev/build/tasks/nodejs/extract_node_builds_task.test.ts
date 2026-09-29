@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import Fs from 'fs';
 import Path from 'path';
 
@@ -16,10 +19,10 @@ import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { Config } from '../../lib';
 import { ExtractNodeBuilds } from './extract_node_builds_task';
 
-jest.mock('../../lib/fs');
-jest.mock('../../lib/get_build_number');
+vi.mock('../../lib/fs');
+vi.mock('../../lib/get_build_number');
 
-const BuildFs = jest.requireMock('../../lib/fs');
+const BuildFs = (await vi.importMock('../../lib/fs'));
 
 const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();
@@ -77,16 +80,16 @@ beforeAll(() => {
 
 beforeEach(() => {
   testWriter.messages.length = 0;
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   // Extraction is skipped if folder already exists
-  jest.spyOn(Fs, 'existsSync').mockImplementation(() => false);
+  vi.spyOn(Fs, 'existsSync').mockImplementation(() => false);
 
   delete process.env.CI_FORCE_NODE_GLIBC_217;
   delete process.env.CI_FORCE_NODE_POINTER_COMPRESSION;
 });
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 afterAll(() => {
@@ -110,14 +113,14 @@ async function runExtractNodeBuildsTask() {
 
   return Object.fromEntries(
     Object.entries(BuildFs)
-      .filter((entry): entry is [string, jest.Mock] => {
+      .filter((entry): entry is [string, Mock] => {
         const [, mock] = entry;
 
         if (typeof mock !== 'function') {
           return false;
         }
 
-        return (mock as jest.Mock).mock.calls.length > 0;
+        return (mock as Mock).mock.calls.length > 0;
       })
       .map(([name, mock]) => [name, mock.mock.calls])
   );

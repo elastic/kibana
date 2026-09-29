@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
@@ -13,23 +15,29 @@ import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { getTimelineAttachment } from '.';
 import { REMOVED_TIMELINE_LABEL, TIMELINE_DISPLAY_NAME } from './translations';
 
-jest.mock('./timeline_link', () => ({
-  TimelineLink: ({
-    savedObjectId,
-    timelineId,
-    title,
-  }: {
-    savedObjectId: string;
-    timelineId: string;
-    title: string;
-  }) => (
-    <div data-test-subj={`timeline-link-mock-${savedObjectId}`}>{`${title}|${timelineId}`}</div>
-  ),
-}));
+vi.mock('./timeline_link', () => {
+      const mocked = {
+      TimelineLink: ({
+        savedObjectId,
+        timelineId,
+        title,
+      }: {
+        savedObjectId: string;
+        timelineId: string;
+        title: string;
+      }) => (
+        <div data-test-subj={`timeline-link-mock-${savedObjectId}`}>{`${title}|${timelineId}`}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./case_view_timelines', () => ({
-  CaseViewTimelines: () => <div data-test-subj="case-view-timelines-mock" />,
-}));
+vi.mock('./case_view_timelines', () => {
+      const mocked = {
+      CaseViewTimelines: () => <div data-test-subj="case-view-timelines-mock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseProps = {
   savedObjectId: 'saved-object-id-1',

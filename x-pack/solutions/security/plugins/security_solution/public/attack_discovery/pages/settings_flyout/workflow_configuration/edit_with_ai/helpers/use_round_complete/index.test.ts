@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { Subject } from 'rxjs';
 
@@ -14,18 +17,21 @@ import type { RoundCompleteEventData } from '@kbn/agent-builder-common/chat/even
 
 import { useRoundComplete } from '.';
 
-jest.mock('@kbn/agent-builder-common', () => ({
-  isRoundCompleteEvent: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-common', () => {
+      const mocked = {
+      isRoundCompleteEvent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockIsRoundCompleteEvent = isRoundCompleteEvent as unknown as jest.Mock;
+const mockIsRoundCompleteEvent = isRoundCompleteEvent as unknown as Mock;
 
 describe('useRoundComplete', () => {
   let chatSubject$: Subject<unknown>;
   let eventsService: EventsServiceStartContract;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     chatSubject$ = new Subject<unknown>();
 
@@ -35,7 +41,7 @@ describe('useRoundComplete', () => {
   });
 
   it('calls onRoundComplete when a round_complete event is emitted', () => {
-    const onRoundComplete = jest.fn();
+    const onRoundComplete = vi.fn();
     const mockData = { round: { id: 'round-1' } } as unknown as RoundCompleteEventData;
 
     mockIsRoundCompleteEvent.mockReturnValue(true);
@@ -51,7 +57,7 @@ describe('useRoundComplete', () => {
   });
 
   it('does not call onRoundComplete for non-round-complete events', () => {
-    const onRoundComplete = jest.fn();
+    const onRoundComplete = vi.fn();
 
     mockIsRoundCompleteEvent.mockReturnValue(false);
 
@@ -65,7 +71,7 @@ describe('useRoundComplete', () => {
   });
 
   it('unsubscribes on unmount', () => {
-    const onRoundComplete = jest.fn();
+    const onRoundComplete = vi.fn();
     const mockData = { round: { id: 'round-1' } } as unknown as RoundCompleteEventData;
 
     mockIsRoundCompleteEvent.mockReturnValue(true);
@@ -82,7 +88,7 @@ describe('useRoundComplete', () => {
   });
 
   it('handles undefined eventsService gracefully', () => {
-    const onRoundComplete = jest.fn();
+    const onRoundComplete = vi.fn();
 
     expect(() => {
       renderHook(() => useRoundComplete({ eventsService: undefined, onRoundComplete }));
@@ -92,7 +98,7 @@ describe('useRoundComplete', () => {
   });
 
   it('calls onRoundComplete for each round in a multi-event stream', () => {
-    const onRoundComplete = jest.fn();
+    const onRoundComplete = vi.fn();
     const mockData1 = { round: { id: 'round-1' } } as unknown as RoundCompleteEventData;
     const mockData2 = { round: { id: 'round-2' } } as unknown as RoundCompleteEventData;
 
@@ -111,8 +117,8 @@ describe('useRoundComplete', () => {
   });
 
   it('uses the latest onRoundComplete callback without re-subscribing', () => {
-    const firstCallback = jest.fn();
-    const secondCallback = jest.fn();
+    const firstCallback = vi.fn();
+    const secondCallback = vi.fn();
     const mockData = { round: { id: 'round-1' } } as unknown as RoundCompleteEventData;
 
     mockIsRoundCompleteEvent.mockReturnValue(true);

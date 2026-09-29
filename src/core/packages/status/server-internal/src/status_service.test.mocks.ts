@@ -7,17 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const logOverallStatusChangesMock = jest.fn();
-jest.doMock('./log_overall_status', () => ({
-  logOverallStatusChanges: logOverallStatusChangesMock,
-}));
+import { vi } from 'vitest';
 
-export const logCoreStatusChangesMock = jest.fn();
-jest.doMock('./log_core_services_status', () => ({
-  logCoreStatusChanges: logCoreStatusChangesMock,
-}));
+export const logOverallStatusChangesMock = vi.fn();
+vi.doMock('./log_overall_status', () => {
+      const mocked = {
+      logOverallStatusChanges: logOverallStatusChangesMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const logPluginsStatusChangesMock = jest.fn();
-jest.doMock('./log_plugins_status', () => ({
-  logPluginsStatusChanges: logPluginsStatusChangesMock,
-}));
+export const logCoreStatusChangesMock = vi.fn();
+vi.doMock('./log_core_services_status', () => {
+      const mocked = {
+      logCoreStatusChanges: logCoreStatusChangesMock,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+export const logPluginsStatusChangesMock = vi.fn();
+vi.doMock('./log_plugins_status', () => {
+      const mocked = {
+      logPluginsStatusChanges: logPluginsStatusChangesMock,
+    };
+      return { ...mocked, default: mocked };
+    });

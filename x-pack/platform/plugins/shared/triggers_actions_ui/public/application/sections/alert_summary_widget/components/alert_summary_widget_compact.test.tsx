@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { AlertSummaryWidgetCompactProps } from './alert_summary_widget_compact';
@@ -26,7 +28,7 @@ describe('AlertSummaryWidgetCompact', () => {
       <IntlProvider locale="en">
         <AlertSummaryWidgetCompact
           chartProps={mockedChartProps}
-          onClick={jest.fn}
+          onClick={vi.fn}
           dependencyProps={dependencyProps}
           {...mockedAlertSummaryResponse}
           {...props}

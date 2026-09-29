@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -23,19 +26,19 @@ import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 const renderWithIntl = (component: React.ReactElement) => {
   return render(<I18nProvider>{component}</I18nProvider>);
 };
 
 describe('EmptyResultsPrompt', () => {
-  const openSchedulesFlyout = jest.fn();
-  const reportEvent = jest.fn();
+  const openSchedulesFlyout = vi.fn();
+  const reportEvent = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: {
         telemetry: {
           reportEvent,

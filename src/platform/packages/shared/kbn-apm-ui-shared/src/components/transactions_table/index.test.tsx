@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { useIsWithinMaxBreakpoint } from '@elastic/eui';
@@ -17,19 +20,25 @@ import type { TransactionGroup } from './types';
 const renderWithIntl = (ui: React.ReactElement) =>
   render(<IntlProvider locale="en">{ui}</IntlProvider>);
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useIsWithinMaxBreakpoint: jest.fn(),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useIsWithinMaxBreakpoint: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../sparkline', () => ({
-  Sparkline: ({ isLoading }: { isLoading?: boolean }) =>
-    isLoading ? (
-      <div data-test-subj="sparkline-loading" />
-    ) : (
-      <div data-test-subj="sparkline-chart" />
-    ),
-}));
+vi.mock('../sparkline', () => {
+      const mocked = {
+      Sparkline: ({ isLoading }: { isLoading?: boolean }) =>
+        isLoading ? (
+          <div data-test-subj="sparkline-loading" />
+        ) : (
+          <div data-test-subj="sparkline-chart" />
+        ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const items: TransactionGroup[] = [
   {
@@ -61,11 +70,11 @@ const itemsWithOther: TransactionGroup[] = [
 
 describe('TransactionsTable', () => {
   beforeEach(() => {
-    (useIsWithinMaxBreakpoint as jest.Mock).mockReturnValue(false);
+    (useIsWithinMaxBreakpoint as Mock).mockReturnValue(false);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the loading message when isLoading is true', () => {
@@ -180,7 +189,7 @@ describe('TransactionsTable', () => {
     });
 
     it('calls onClick when a header action with onClick is clicked', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       renderWithIntl(
         <TransactionsTable
           data-test-subj="transactions-table"
@@ -364,15 +373,15 @@ describe('TransactionsTable', () => {
 
   describe('search behavior', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('calls onSearchQueryChange after debounce when the new query does not include the previous one', () => {
-      const onSearchQueryChange = jest.fn();
+      const onSearchQueryChange = vi.fn();
       renderWithIntl(
         <TransactionsTable
           data-test-subj="transactions-table"
@@ -388,20 +397,20 @@ describe('TransactionsTable', () => {
       // Establish 'banana' as current query — extends '' so no server call
       fireEvent.change(searchInput, { target: { value: 'banana' } });
       act(() => {
-        jest.advanceTimersByTime(300);
+        vi.advanceTimersByTime(300);
       });
       expect(onSearchQueryChange).not.toHaveBeenCalled();
 
       // Change to 'cherry' — does not include 'banana', triggers server fetch
       fireEvent.change(searchInput, { target: { value: 'cherry' } });
       act(() => {
-        jest.advanceTimersByTime(300);
+        vi.advanceTimersByTime(300);
       });
       expect(onSearchQueryChange).toHaveBeenCalledWith('cherry');
     });
 
     it('does not call onSearchQueryChange when the new query extends the previous one', () => {
-      const onSearchQueryChange = jest.fn();
+      const onSearchQueryChange = vi.fn();
       renderWithIntl(
         <TransactionsTable
           data-test-subj="transactions-table"
@@ -416,19 +425,19 @@ describe('TransactionsTable', () => {
 
       fireEvent.change(searchInput, { target: { value: 'ban' } });
       act(() => {
-        jest.advanceTimersByTime(300);
+        vi.advanceTimersByTime(300);
       });
 
       fireEvent.change(searchInput, { target: { value: 'banana' } });
       act(() => {
-        jest.advanceTimersByTime(300);
+        vi.advanceTimersByTime(300);
       });
 
       expect(onSearchQueryChange).not.toHaveBeenCalled();
     });
 
     it('calls onSearchQueryChange when maxCountExceeded is true even if query extends the previous one', () => {
-      const onSearchQueryChange = jest.fn();
+      const onSearchQueryChange = vi.fn();
       renderWithIntl(
         <TransactionsTable
           data-test-subj="transactions-table"
@@ -443,12 +452,12 @@ describe('TransactionsTable', () => {
 
       fireEvent.change(searchInput, { target: { value: 'ban' } });
       act(() => {
-        jest.advanceTimersByTime(300);
+        vi.advanceTimersByTime(300);
       });
 
       fireEvent.change(searchInput, { target: { value: 'banana' } });
       act(() => {
-        jest.advanceTimersByTime(300);
+        vi.advanceTimersByTime(300);
       });
 
       expect(onSearchQueryChange).toHaveBeenCalledTimes(2);
@@ -457,7 +466,7 @@ describe('TransactionsTable', () => {
 
   describe('expand affordance', () => {
     it('renders a maximize expand button when name onClick is provided', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       renderWithIntl(
         <TransactionsTable
           data-test-subj="transactions-table"
@@ -486,7 +495,7 @@ describe('TransactionsTable', () => {
           maxCountExceeded={false}
           columnInteractions={{
             name: {
-              onClick: jest.fn(),
+              onClick: vi.fn(),
               isExpanded: () => true,
             },
           }}

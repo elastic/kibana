@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
@@ -30,13 +33,13 @@ import { packagePolicyRouteService, API_VERSIONS } from '@kbn/fleet-plugin/commo
 import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy';
 import { getDeferred } from '../../../../mocks/utils';
 
-jest.mock('../../../../../common/hooks/use_license');
-jest.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/hooks/use_license');
+vi.mock('../../../../../common/components/user_privileges');
 
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
 
 describe('When rendering PolicySettingsLayout', () => {
-  jest.setTimeout(15000);
+  vi.setConfig({ testTimeout: 15000 });
 
   const testSubj = getPolicySettingsFormTestSubjects();
 
@@ -54,7 +57,7 @@ describe('When rendering PolicySettingsLayout', () => {
     policyData = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy();
     render = () => {
       renderResult = mockedContext.render(
-        <PolicySettingsLayout policy={policyData} setUnsavedChanges={jest.fn()} />
+        <PolicySettingsLayout policy={policyData} setUnsavedChanges={vi.fn()} />
       );
       return renderResult;
     };

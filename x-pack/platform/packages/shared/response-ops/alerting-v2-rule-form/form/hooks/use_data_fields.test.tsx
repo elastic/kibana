@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -12,14 +14,14 @@ import { getESQLAdHocDataview, getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { createQueryClientWrapper } from '../../test_utils';
 import { useDataFields } from './use_data_fields';
 
-jest.mock('@kbn/esql-utils');
+vi.mock('@kbn/esql-utils');
 
-const mockGetESQLAdHocDataview = jest.mocked(getESQLAdHocDataview);
-const mockGetESQLQueryColumnsRaw = jest.mocked(getESQLQueryColumnsRaw);
+const mockGetESQLAdHocDataview = vi.mocked(getESQLAdHocDataview);
+const mockGetESQLQueryColumnsRaw = vi.mocked(getESQLQueryColumnsRaw);
 
 describe('useDataFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('fetches fields when query is provided', async () => {
@@ -110,7 +112,7 @@ describe('useDataFields', () => {
   });
 
   describe('with search service (ES|QL column introspection path)', () => {
-    const mockSearch = jest.fn();
+    const mockSearch = vi.fn();
 
     it('uses getESQLQueryColumnsRaw directly without dropNullColumns, skipping DataView', async () => {
       mockGetESQLQueryColumnsRaw.mockResolvedValue([

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { act, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useCallback, useState } from 'react';
@@ -26,17 +29,17 @@ import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../hooks/artifa
 import type { UseQueryResult } from '@kbn/react-query';
 import type { GetEndpointExceptionsPerPolicyOptInResponse } from '../../../../../../common/api/endpoint/endpoint_exceptions_per_policy_opt_in/endpoint_exceptions_per_policy_opt_in.gen';
 
-jest.setTimeout(15_000);
+vi.setConfig({ testTimeout: 15_000 });
 
-jest.mock('../../../../../common/components/user_privileges');
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/containers/source');
-jest.mock('../../../../../common/hooks/use_license');
-jest.mock('../../../../components/policy_selector/hooks/use_fetch_policy_data');
-jest.mock('../../../../hooks/artifacts/use_endpoint_per_policy_opt_in');
+vi.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/containers/source');
+vi.mock('../../../../../common/hooks/use_license');
+vi.mock('../../../../components/policy_selector/hooks/use_fetch_policy_data');
+vi.mock('../../../../hooks/artifacts/use_endpoint_per_policy_opt_in');
 
 const mockedUseGetEndpointExceptionsPerPolicyOptIn =
-  useGetEndpointExceptionsPerPolicyOptIn as jest.MockedFunction<
+  useGetEndpointExceptionsPerPolicyOptIn as MockedFunction<
     typeof useGetEndpointExceptionsPerPolicyOptIn
   >;
 
@@ -85,7 +88,7 @@ const expectReactNodeContainingMessage = (substring: string) =>
 describe('Endpoint exceptions form', () => {
   const formPrefix = 'endpointExceptions-form';
 
-  let formProps: jest.Mocked<EndpointExceptionsFormProps>;
+  let formProps: Mocked<EndpointExceptionsFormProps>;
   let mockedContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let latestUpdatedItem: EndpointExceptionsFormProps['item'];
@@ -147,13 +150,13 @@ describe('Endpoint exceptions form', () => {
   beforeEach(async () => {
     mockedContext = createAppRootMockRenderer();
     latestUpdatedItem = createItem();
-    (useFetchIndex as jest.Mock).mockImplementation(() => [
+    (useFetchIndex as Mock).mockImplementation(() => [
       false,
       {
         indexPatterns: stubIndexPattern,
       },
     ]);
-    (useFetchPolicyData as jest.MockedFunction<typeof useFetchPolicyData>).mockReturnValue({
+    (useFetchPolicyData as MockedFunction<typeof useFetchPolicyData>).mockReturnValue({
       isLoading: false,
       isFetching: false,
       error: null,
@@ -176,7 +179,7 @@ describe('Endpoint exceptions form', () => {
       mode: 'create',
       disabled: false,
       error: undefined,
-      onChange: jest.fn((updates) => {
+      onChange: vi.fn((updates) => {
         latestUpdatedItem = updates.item;
         isLatestUpdatedItemValid = updates.isValid;
       }),
@@ -640,7 +643,7 @@ describe('Endpoint exceptions form', () => {
   });
 
   describe('Policy assignment', () => {
-    const mockLicenseService = licenseService as jest.Mocked<typeof licenseService>;
+    const mockLicenseService = licenseService as Mocked<typeof licenseService>;
 
     beforeEach(() => {
       mockLicenseService.isPlatinumPlus.mockReturnValue(true);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import type { EffectedPolicySelectProps } from './effected_policy_select';
 import { EffectedPolicySelect } from './effected_policy_select';
 import React from 'react';
@@ -23,15 +26,15 @@ import { ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE } from '../../
 import { allFleetHttpMocks } from '../../mocks';
 import { policySelectorMocks } from '../policy_selector/mocks';
 
-jest.mock('../../../common/components/user_privileges');
-jest.mock('../../../common/hooks/use_license');
+vi.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/hooks/use_license');
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 
 describe('when using EffectedPolicySelect component', () => {
   let mockedContext: AppContextTestRender;
   let componentProps: EffectedPolicySelectProps;
-  let handleOnChange: jest.MockedFunction<EffectedPolicySelectProps['onChange']>;
+  let handleOnChange: MockedFunction<EffectedPolicySelectProps['onChange']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof allFleetHttpMocks>;
   let render: (
@@ -52,7 +55,7 @@ describe('when using EffectedPolicySelect component', () => {
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     apiMocks = allFleetHttpMocks(mockedContext.coreStart.http);
-    handleOnChange = jest.fn((updatedArtifact) => {
+    handleOnChange = vi.fn((updatedArtifact) => {
       componentProps.item = updatedArtifact;
       renderResult.rerender(<EffectedPolicySelect {...componentProps} />);
     });
@@ -84,7 +87,7 @@ describe('when using EffectedPolicySelect component', () => {
       return renderResult;
     };
 
-    (useLicenseMock() as jest.Mocked<LicenseService>).isPlatinumPlus.mockReturnValue(true);
+    (useLicenseMock() as Mocked<LicenseService>).isPlatinumPlus.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -185,7 +188,7 @@ describe('when using EffectedPolicySelect component', () => {
     let policyIdList: string[];
 
     beforeEach(() => {
-      (useLicenseMock() as jest.Mocked<LicenseService>).isPlatinumPlus.mockReturnValue(false);
+      (useLicenseMock() as Mocked<LicenseService>).isPlatinumPlus.mockReturnValue(false);
       componentProps.item.tags = [buildPerPolicyTag(policyId)];
 
       policyIdList = apiMocks.responseProvider.packagePolicies().items.map((policy) => policy.id);
@@ -249,7 +252,7 @@ describe('when using EffectedPolicySelect component', () => {
     });
 
     it('should disable global button if user has no global artifact privilege', async () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         ...initialUserPrivilegesState(),
         endpointPrivileges: {
           loading: false,

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { useEndpointActions } from './use_endpoint_actions';
 import { useKibana } from './use_kibana';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 const mockEndpoint = {
   inference_id: 'my-endpoint',
@@ -23,11 +26,11 @@ const mockEndpoint = {
 } as InferenceInferenceEndpointInfo;
 
 describe('useEndpointActions', () => {
-  const mockAddSuccess = jest.fn();
-  const mockAddDanger = jest.fn();
+  const mockAddSuccess = vi.fn();
+  const mockAddDanger = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         notifications: {
@@ -40,7 +43,7 @@ describe('useEndpointActions', () => {
     });
     Object.assign(navigator, {
       clipboard: {
-        writeText: jest.fn().mockResolvedValue(undefined),
+        writeText: vi.fn().mockResolvedValue(undefined),
       },
     });
   });
@@ -134,7 +137,7 @@ describe('useEndpointActions', () => {
     });
 
     it('should show danger toast when clipboard write fails', async () => {
-      (navigator.clipboard.writeText as jest.Mock).mockRejectedValue(new Error('denied'));
+      (navigator.clipboard.writeText as Mock).mockRejectedValue(new Error('denied'));
 
       const { result } = renderHook(() => useEndpointActions());
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
@@ -48,9 +51,9 @@ describe('executeCascadeListField', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
   let esClient: SecuritySolutionRequestHandlerContextMock['core']['elasticsearch']['client']['asCurrentUser'];
   let ruleDataClient: RuleDataClientMock;
-  let mutate: jest.Mock;
-  let emitAttack: jest.Mock;
-  let emitAlert: jest.Mock;
+  let mutate: Mock;
+  let emitAttack: Mock;
+  let emitAlert: Mock;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   const eventBus = {} as Parameters<typeof executeCascadeListField>[0]['eventBus'];
@@ -76,13 +79,13 @@ describe('executeCascadeListField', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ context } = requestContextMock.createTools());
     esClient = context.core.elasticsearch.client.asCurrentUser;
     ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
-    mutate = jest.fn().mockResolvedValue({ updated: 1 });
-    emitAttack = jest.fn();
-    emitAlert = jest.fn();
+    mutate = vi.fn().mockResolvedValue({ updated: 1 });
+    emitAttack = vi.fn();
+    emitAlert = vi.fn();
     logger = loggingSystemMock.createLogger();
   });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -12,29 +15,29 @@ import { QueryUtils } from './query_utils';
 
 describe('query_utils', () => {
   describe('QueryUtils', () => {
-    let esClient: jest.Mocked<ElasticsearchClient>;
-    let soClient: jest.Mocked<SavedObjectsClientContract>;
+    let esClient: Mocked<ElasticsearchClient>;
+    let soClient: Mocked<SavedObjectsClientContract>;
     let logger: MockedLogger;
     let queryUtils: QueryUtils;
 
     beforeEach(() => {
       esClient = {
-        search: jest.fn(),
-        count: jest.fn(),
-      } as unknown as jest.Mocked<ElasticsearchClient>;
+        search: vi.fn(),
+        count: vi.fn(),
+      } as unknown as Mocked<ElasticsearchClient>;
 
       soClient = {
-        find: jest.fn(),
-      } as unknown as jest.Mocked<SavedObjectsClientContract>;
+        find: vi.fn(),
+      } as unknown as Mocked<SavedObjectsClientContract>;
 
       logger = loggerMock.create();
       queryUtils = new QueryUtils(esClient, soClient, logger);
-      jest.useFakeTimers().setSystemTime(new Date('2024-01-02T00:00:00.000Z'));
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-02T00:00:00.000Z'));
     });
 
     afterEach(() => {
-      jest.useRealTimers();
-      jest.clearAllMocks();
+      vi.useRealTimers();
+      vi.clearAllMocks();
     });
 
     describe('getCountersByDomain', () => {

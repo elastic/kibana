@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import type { AlertFilterControlsProps } from './alert_filter_controls';
@@ -18,11 +20,11 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
-jest.mock('./filter_group');
-jest.mocked(FilterGroup).mockReturnValue(<span data-test-subj="filter-group" />);
+vi.mock('./filter_group');
+vi.mocked(FilterGroup).mockReturnValue(<span data-test-subj="filter-group" />);
 
-jest.mock('../common/hooks/use_alerts_data_view');
-jest.mocked(useAlertsDataView).mockReturnValue({
+vi.mock('../common/hooks/use_alerts_data_view');
+vi.mocked(useAlertsDataView).mockReturnValue({
   isLoading: false,
   dataView: {
     title: '.alerts-*',
@@ -42,13 +44,13 @@ const mockServices = {
   notifications: notificationServiceMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   storage: class {
-    get = jest.fn();
-    set = jest.fn();
+    get = vi.fn();
+    set = vi.fn();
   } as unknown as AlertFilterControlsProps['services']['storage'],
 };
-mockServices.dataViews.clearInstanceCache = jest.fn().mockResolvedValue(undefined);
+mockServices.dataViews.clearInstanceCache = vi.fn().mockResolvedValue(undefined);
 
-const setFilters = jest.fn();
+const setFilters = vi.fn();
 
 describe('AlertFilterControls', () => {
   const props: AlertFilterControlsProps = {
@@ -61,7 +63,7 @@ describe('AlertFilterControls', () => {
     services: mockServices,
   };
 
-  beforeEach(jest.clearAllMocks);
+  beforeEach(vi.clearAllMocks);
 
   it('renders the filter group', async () => {
     render(<AlertFilterControls {...props} />);

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -15,46 +18,52 @@ import type { ConcreteTaskInstance, TaskRegisterDefinition } from '@kbn/task-man
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 
-jest.mock('./repositories/data_access_layer', () => {
-  const actual = jest.requireActual('./repositories/data_access_layer');
-  const { createDataClientJestMock } = jest.requireActual('./test_utils/data_client_jest_mock');
+vi.mock('./repositories/data_access_layer', async () => {
+  const actual = (await vi.importActual('./repositories/data_access_layer'));
+  const { createDataClientJestMock } = (await vi.importActual('./test_utils/data_client_jest_mock'));
   return {
     ...actual,
-    createDataClientBundle: jest.fn(() => createDataClientJestMock()),
+    createDataClientBundle: vi.fn(() => createDataClientJestMock()),
   };
 });
-jest.mock('./lib/check_license', () => ({
-  checkLicense: jest.fn().mockResolvedValue(undefined),
-}));
-jest.mock('elastic-apm-node', () => ({
+vi.mock('./lib/check_license', () => {
+      const mocked = {
+      checkLicense: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('elastic-apm-node', () => ({
   __esModule: true,
   default: {
     currentTransaction: null,
-    startSpan: jest.fn().mockReturnValue({ end: jest.fn() }),
+    startSpan: vi.fn().mockReturnValue({ end: vi.fn() }),
   },
 }));
 
-const mockGetWorkflow = jest.fn();
-const mockIsWorkflowEnabledRealtime = jest.fn().mockResolvedValue(true);
-jest.mock('@kbn/workflows', () => {
-  const actual = jest.requireActual('@kbn/workflows');
+const mockGetWorkflow = vi.fn();
+const mockIsWorkflowEnabledRealtime = vi.fn().mockResolvedValue(true);
+vi.mock('@kbn/workflows', async () => {
+  const actual = (await vi.importActual('@kbn/workflows'));
   return {
     ...actual,
-    WorkflowRepository: jest.fn().mockImplementation(() => ({
+    WorkflowRepository: vi.fn().mockImplementation(() => ({
       getWorkflow: mockGetWorkflow,
       isWorkflowEnabledRealtime: mockIsWorkflowEnabledRealtime,
     })),
   };
 });
 
-jest.mock('./lib/get_user', () => ({
-  getAuthenticatedUser: jest.fn().mockResolvedValue('test-user'),
-}));
+vi.mock('./lib/get_user', () => {
+      const mocked = {
+      getAuthenticatedUser: vi.fn().mockResolvedValue('test-user'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRunWorkflow = jest.fn();
-const mockCheckAndSkipIfExistingScheduledExecution = jest.fn();
-jest.mock('./execution_functions', () => {
-  const actual = jest.requireActual('./execution_functions');
+const mockRunWorkflow = vi.fn();
+const mockCheckAndSkipIfExistingScheduledExecution = vi.fn();
+vi.mock('./execution_functions', async () => {
+  const actual = (await vi.importActual('./execution_functions'));
   return {
     ...actual,
     runWorkflow: (...args: unknown[]) => mockRunWorkflow(...args),
@@ -63,33 +72,45 @@ jest.mock('./execution_functions', () => {
   };
 });
 
-jest.mock('./concurrency/maybe_schedule_dormant_queued_run', () => ({
-  handleConcurrencyBlockedExecution: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./concurrency/maybe_schedule_dormant_queued_run', () => {
+      const mocked = {
+      handleConcurrencyBlockedExecution: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./concurrency/concurrency_queue_drainer', () => ({
-  maybeDrainConcurrencyQueueBeforeEnqueue: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./concurrency/concurrency_queue_drainer', () => {
+      const mocked = {
+      maybeDrainConcurrencyQueueBeforeEnqueue: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCheckConcurrency = jest.fn().mockResolvedValue(true);
-const mockEvaluateConcurrencyKey = jest.fn().mockReturnValue('group-1');
-jest.mock('./concurrency/concurrency_manager', () => ({
-  ConcurrencyManager: jest.fn().mockImplementation(() => ({
-    checkConcurrency: (...args: unknown[]) => mockCheckConcurrency(...args),
-    evaluateConcurrencyKey: (...args: unknown[]) => mockEvaluateConcurrencyKey(...args),
-  })),
-}));
+const mockCheckConcurrency = vi.fn().mockResolvedValue(true);
+const mockEvaluateConcurrencyKey = vi.fn().mockReturnValue('group-1');
+vi.mock('./concurrency/concurrency_manager', () => {
+      const mocked = {
+      ConcurrencyManager: vi.fn().mockImplementation(() => ({
+        checkConcurrency: (...args: unknown[]) => mockCheckConcurrency(...args),
+        evaluateConcurrencyKey: (...args: unknown[]) => mockEvaluateConcurrencyKey(...args),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDiscardUnstartedExecution = jest.fn().mockResolvedValue(undefined);
-const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
-const mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
-jest.mock('./repositories/workflow_execution_repository', () => ({
-  WorkflowExecutionRepository: jest.fn().mockImplementation(() => ({
-    createWorkflowExecution: mockCreateWorkflowExecution,
-    discardUnstartedExecution: mockDiscardUnstartedExecution,
-    getWorkflowExecutionById: mockGetWorkflowExecutionById,
-  })),
-}));
+const mockDiscardUnstartedExecution = vi.fn().mockResolvedValue(undefined);
+const mockCreateWorkflowExecution = vi.fn().mockResolvedValue(undefined);
+const mockGetWorkflowExecutionById = vi.fn().mockResolvedValue(null);
+vi.mock('./repositories/workflow_execution_repository', () => {
+      const mocked = {
+      WorkflowExecutionRepository: vi.fn().mockImplementation(() => ({
+        createWorkflowExecution: mockCreateWorkflowExecution,
+        discardUnstartedExecution: mockDiscardUnstartedExecution,
+        getWorkflowExecutionById: mockGetWorkflowExecutionById,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { UNKNOWN_EXECUTION_IDENTITY } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
@@ -154,7 +175,7 @@ describe('workflow:scheduled task runner', () => {
     plugin.setup(coreSetup as never, {
       taskManager: taskManagerSetup,
       cloud: {} as never,
-      workflowsExtensions: { registerConnectorAdapter: jest.fn() } as never,
+      workflowsExtensions: { registerConnectorAdapter: vi.fn() } as never,
     });
 
     plugin.start(coreStart, {
@@ -167,7 +188,7 @@ describe('workflow:scheduled task runner', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetWorkflow.mockResolvedValue(null);
     mockCheckAndSkipIfExistingScheduledExecution.mockResolvedValue({ skipped: false });
     mockCheckConcurrency.mockResolvedValue(true);
@@ -180,9 +201,9 @@ describe('workflow:scheduled task runner', () => {
   it('requests task deletion when the workflow document is missing', async () => {
     setupPlugin();
     const logger = initializerContext.logger.get();
-    const errorSpy = jest.spyOn(logger, 'error');
+    const errorSpy = vi.spyOn(logger, 'error');
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: createTaskInstance(),
@@ -224,9 +245,9 @@ describe('workflow:scheduled task runner', () => {
       },
     });
     const logger = initializerContext.logger.get();
-    const warnSpy = jest.spyOn(logger, 'warn');
+    const warnSpy = vi.spyOn(logger, 'warn');
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: createTaskInstance(),
@@ -296,7 +317,7 @@ describe('workflow:scheduled task runner', () => {
       workflowExecutionId: 'skipped-exec-1',
     });
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: createTaskInstance(),
@@ -341,7 +362,7 @@ describe('workflow:scheduled task runner', () => {
       });
     });
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: createTaskInstance(),
@@ -383,7 +404,7 @@ describe('workflow:scheduled task runner', () => {
       });
     });
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: createTaskInstance(),
@@ -422,7 +443,7 @@ describe('workflow:scheduled task runner', () => {
     });
     mockRunWorkflow.mockRejectedValue(new Error('run failed'));
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: createTaskInstance(),
@@ -459,7 +480,7 @@ describe('workflow:scheduled task runner', () => {
       createdId = execution.id;
     });
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: createTaskInstance(),
@@ -501,7 +522,7 @@ describe('workflow:scheduled task runner', () => {
       createdId = execution.id;
     });
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: createTaskInstance(),
@@ -528,7 +549,7 @@ describe('workflow:scheduled task runner', () => {
   it('stamps cancelled on cancel', async () => {
     setupPlugin();
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: createTaskInstance(),
@@ -549,7 +570,7 @@ describe('workflow:scheduled task runner', () => {
   it('completes without creating an execution when claimed without a Task Manager identity', async () => {
     setupPlugin();
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: createTaskInstance(),
@@ -571,7 +592,7 @@ describe('workflow:scheduled task runner', () => {
 
   it('persists a failed execution and does not run when no identity is resolved', async () => {
     setupPlugin();
-    (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(undefined);
+    (getAuthenticatedUser as Mock).mockResolvedValueOnce(undefined);
     mockGetWorkflow.mockResolvedValue({
       id: workflowId,
       enabled: true,
@@ -584,7 +605,7 @@ describe('workflow:scheduled task runner', () => {
       },
     });
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: createTaskInstance(),

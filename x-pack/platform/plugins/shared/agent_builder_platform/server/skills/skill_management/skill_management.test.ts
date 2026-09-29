@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type {
   ToolHandlerContext,
@@ -27,7 +29,7 @@ import { createPatchSkillTool } from './patch_skill';
 const stubToolProvider = (
   registry: Array<{ id: string; description?: string; type?: string; tags?: string[] }>
 ) => ({
-  list: jest.fn(async () =>
+  list: vi.fn(async () =>
     registry.map((t) => ({
       id: t.id,
       description: t.description ?? `Description for ${t.id}`,
@@ -40,8 +42,8 @@ const stubToolProvider = (
       execute: async () => ({} as any),
     }))
   ),
-  has: jest.fn(),
-  get: jest.fn(),
+  has: vi.fn(),
+  get: vi.fn(),
 });
 
 /**

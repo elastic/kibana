@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import type { SignificantEventsServer } from '../../../types';
@@ -13,23 +16,29 @@ import { assertSignificantEventsAccess } from '../../../routes/utils/assert_sign
 import { searchEventsToolHandler } from './handler';
 import { createSearchEventsTool, SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID } from './tool';
 
-jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn(),
-}));
+vi.mock('../../../routes/utils/assert_significant_events_access', () => {
+      const mocked = {
+      assertSignificantEventsAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./handler', () => ({
-  ...jest.requireActual('./handler'),
-  searchEventsToolHandler: jest.fn(),
-}));
+vi.mock('./handler', async () => {
+      const mocked = {
+      ...(await vi.importActual('./handler')),
+      searchEventsToolHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockTelemetry = () => ({
-  trackAgentToolEventSearch: jest.fn(),
+  trackAgentToolEventSearch: vi.fn(),
 });
 
 describe('event_search tool', () => {
   it('uses expected tool id', () => {
     const tool = createSearchEventsTool({
-      getScopedClients: jest.fn() as unknown as GetScopedClients,
+      getScopedClients: vi.fn() as unknown as GetScopedClients,
       server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
@@ -40,7 +49,7 @@ describe('event_search tool', () => {
 
   it('validates bounded filters and normalizes query', () => {
     const tool = createSearchEventsTool({
-      getScopedClients: jest.fn() as unknown as GetScopedClients,
+      getScopedClients: vi.fn() as unknown as GetScopedClients,
       server: {} as SignificantEventsServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
@@ -85,16 +94,16 @@ describe('event_search tool', () => {
   });
 
   it('returns events on success and tracks telemetry', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
-    (searchEventsToolHandler as jest.Mock).mockResolvedValue({
+    (assertSignificantEventsAccess as Mock).mockResolvedValue(undefined);
+    (searchEventsToolHandler as Mock).mockResolvedValue({
       events: [{ event_uuid: 'e1' }],
       view: 'compact',
       page: 1,
       total: 1,
     });
 
-    const getScopedClients = jest.fn().mockResolvedValue({
-      getEventClient: jest.fn().mockReturnValue({}),
+    const getScopedClients = vi.fn().mockResolvedValue({
+      getEventClient: vi.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
     });
@@ -141,16 +150,16 @@ describe('event_search tool', () => {
   });
 
   it('accepts cross-stream searches without stream_names', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
-    (searchEventsToolHandler as jest.Mock).mockResolvedValue({
+    (assertSignificantEventsAccess as Mock).mockResolvedValue(undefined);
+    (searchEventsToolHandler as Mock).mockResolvedValue({
       events: [{ event_uuid: 'e2' }],
       view: 'compact',
       page: 1,
       total: 1,
     });
 
-    const getScopedClients = jest.fn().mockResolvedValue({
-      getEventClient: jest.fn().mockReturnValue({}),
+    const getScopedClients = vi.fn().mockResolvedValue({
+      getEventClient: vi.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
     });

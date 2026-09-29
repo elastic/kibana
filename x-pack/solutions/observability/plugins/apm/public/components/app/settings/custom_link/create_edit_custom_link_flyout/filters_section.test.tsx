@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { fireEvent, render } from '@testing-library/react';
 import type { ReactNode } from 'react';
@@ -25,7 +27,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
 
 describe('FiltersSections', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the component', () => {
@@ -37,21 +39,24 @@ describe('FiltersSections', () => {
   });
 
   it('clears SuggestionsSelect value when EuiSelect value changes', async () => {
-    jest.mock('../../../../shared/suggestions_select', () => ({
-      SuggestionsSelect: (props: {
-        defaultValue: string | undefined;
-        onChange: (arg0: string | undefined) => void;
-      }) => (
-        <input
-          data-testid="comboBoxSearchInput"
-          value={props.defaultValue}
-          onChange={(e) => props.onChange(e.target.value)}
-        />
-      ),
-    }));
+    vi.doMock('../../../../shared/suggestions_select', () => {
+          const mocked = {
+              SuggestionsSelect: (props: {
+                defaultValue: string | undefined;
+                onChange: (arg0: string | undefined) => void;
+              }) => (
+                <input
+                  data-testid="comboBoxSearchInput"
+                  value={props.defaultValue}
+                  onChange={(e) => props.onChange(e.target.value)}
+                />
+              ),
+            };
+          return { ...mocked, default: mocked };
+        });
 
     const initialFilters: Filter[] = [{ key: 'service.name', value: 'foo', id: '123' }];
-    const setFilters = jest.fn();
+    const setFilters = vi.fn();
 
     const { getByLabelText, getByTestId, rerender } = render(
       <FiltersSection filters={initialFilters} setFilters={setFilters} />,
@@ -83,7 +88,7 @@ describe('FiltersSections', () => {
 
   it('empties the key and the value AND keeps the selects visible, when I have only 1 filter and I delete the filter.', async () => {
     const initialFilters: Filter[] = [{ key: 'service.name', value: 'foo' }];
-    const setFilters = jest.fn();
+    const setFilters = vi.fn();
     const { getAllByTestId } = render(
       <FiltersSection filters={initialFilters} setFilters={setFilters} />,
       { wrapper: Wrapper }
@@ -105,7 +110,7 @@ describe('FiltersSections', () => {
 
   it('has the Delete disabled, when I have 1 filter and the selects have no values', async () => {
     const initialFilters: Filter[] = [{ key: '', value: '' }];
-    const setFilters = jest.fn();
+    const setFilters = vi.fn();
     const { getAllByTestId } = render(
       <FiltersSection filters={initialFilters} setFilters={setFilters} />,
       { wrapper: Wrapper }
@@ -121,7 +126,7 @@ describe('FiltersSections', () => {
       { key: 'service.name', value: 'foo', id: '123' },
       { key: 'transaction.type', value: 'bar', id: '456' },
     ];
-    const setFilters = jest.fn();
+    const setFilters = vi.fn();
     const { getAllByTestId, rerender } = render(
       <FiltersSection filters={initialFilters} setFilters={setFilters} />,
       { wrapper: Wrapper }
@@ -175,7 +180,7 @@ describe('AddFilterButton isDisabled logic', () => {
     ];
     expect(getIsDisabled(filters)).toBe(true);
 
-    const clickHandler = jest.fn();
+    const clickHandler = vi.fn();
     const { getByTestId } = render(
       <AddFilterButton isDisabled={getIsDisabled(filters)} onClick={clickHandler} />,
       {

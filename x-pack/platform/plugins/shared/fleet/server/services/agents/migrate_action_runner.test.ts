@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { Agent } from '../../types';
 
 import { partitionAgentsForMigration } from './migrate_action_runner';
 
-jest.mock('./crud', () => ({
-  getAgentPolicyForAgents: jest.fn().mockResolvedValue([
-    { id: 'protected-policy', is_protected: true },
-    { id: 'open-policy', is_protected: false },
-  ]),
-}));
+vi.mock('./crud', () => {
+      const mocked = {
+      getAgentPolicyForAgents: vi.fn().mockResolvedValue([
+        { id: 'protected-policy', is_protected: true },
+        { id: 'open-policy', is_protected: false },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeAgent = (overrides: Partial<Agent>): Agent =>
   ({

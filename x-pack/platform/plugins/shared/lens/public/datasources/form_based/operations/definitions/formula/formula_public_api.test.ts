@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { insertOrReplaceFormulaColumn } from './parse';
 import type {
   FormulaPublicApi,
@@ -18,19 +20,22 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { convertDataViewIntoLensIndexPattern } from '../../../../../data_views_service/loader';
 import moment from 'moment';
 
-jest.mock('./parse', () => {
-  const original = jest.requireActual('./parse');
+vi.mock('./parse', async () => {
+  const original = (await vi.importActual('./parse'));
   return {
     ...original,
-    insertOrReplaceFormulaColumn: jest.fn((...args) =>
+    insertOrReplaceFormulaColumn: vi.fn((...args) =>
       original.insertOrReplaceFormulaColumn(...args)
     ),
   };
 });
 
-jest.mock('../../../../../data_views_service/loader', () => ({
-  convertDataViewIntoLensIndexPattern: jest.fn((v) => v),
-}));
+vi.mock('../../../../../data_views_service/loader', () => {
+      const mocked = {
+      convertDataViewIntoLensIndexPattern: vi.fn((v) => v),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getBaseLayer = (): PersistedIndexPatternLayer => ({
   columnOrder: ['col1'],
@@ -53,7 +58,7 @@ describe('createFormulaPublicApi', () => {
     publicApiHelper = createFormulaPublicApi();
     dataView = {} as DataView;
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should use cache for caching lens index patterns', () => {

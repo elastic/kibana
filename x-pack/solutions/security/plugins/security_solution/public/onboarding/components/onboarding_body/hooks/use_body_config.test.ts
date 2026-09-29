@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useBodyConfig } from './use_body_config';
 import { mockOnboardingContext, onboardingContext } from '../../__mocks__/mocks';
 
 const topicId = 'topic-id';
-const mockUseTopicId = jest.fn(() => topicId);
-jest.mock('../../hooks/use_topic_id', () => ({
-  useTopicId: () => mockUseTopicId(),
-}));
+const mockUseTopicId = vi.fn(() => topicId);
+vi.mock('../../hooks/use_topic_id', () => {
+      const mocked = {
+      useTopicId: () => mockUseTopicId(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultBodyConfig = [{ title: 'Default Group 1', cards: [] }];
 const bodyConfig = [{ title: 'Group 1', cards: [] }];
@@ -22,11 +27,11 @@ const config = new Map([
   [topicId, { body: bodyConfig }],
 ]);
 
-jest.mock('../../onboarding_context');
+vi.mock('../../onboarding_context');
 
 describe('useBodyConfig', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when the selected topic does not have a body config', () => {

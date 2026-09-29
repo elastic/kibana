@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { deleteDataViewFn } from '@kbn/ml-data-view-utils/actions/delete';
 
@@ -14,13 +17,16 @@ import type { DeleteTransformsResponseSchema } from '../../api_schemas/delete_tr
 
 import { deleteTransforms } from './delete_transforms';
 
-jest.mock('@kbn/ml-data-view-utils/actions/delete', () => ({
-  deleteDataViewFn: jest.fn(),
-}));
+vi.mock('@kbn/ml-data-view-utils/actions/delete', () => {
+      const mocked = {
+      deleteDataViewFn: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDeleteDataViewFn = deleteDataViewFn as jest.MockedFunction<typeof deleteDataViewFn>;
+const mockDeleteDataViewFn = deleteDataViewFn as MockedFunction<typeof deleteDataViewFn>;
 
-const createEsClient = (getTransform: jest.Mock, deleteTransform: jest.Mock) => ({
+const createEsClient = (getTransform: Mock, deleteTransform: Mock) => ({
   transform: { getTransform, deleteTransform },
 });
 
@@ -42,14 +48,14 @@ describe('deleteTransforms', () => {
   });
 
   it('returns nested timeout results when fetching the transform config times out', async () => {
-    const getTransform = jest
+    const getTransform = vi
       .fn()
       .mockResolvedValueOnce({
         transforms: [{ id: 'transform-1', dest: { index: 'transform-1-dest' } }],
       })
       .mockRejectedValueOnce(new EsErrors.TimeoutError('Request timed out'));
-    const deleteTransform = jest.fn().mockResolvedValueOnce({});
-    const response = { forbidden: jest.fn() };
+    const deleteTransform = vi.fn().mockResolvedValueOnce({});
+    const response = { forbidden: vi.fn() };
 
     const results = (await deleteTransforms(
       createRequest([
@@ -71,11 +77,11 @@ describe('deleteTransforms', () => {
   });
 
   it('returns a failure result with an error body when fetching the transform config fails without an ES error body', async () => {
-    const getTransform = jest
+    const getTransform = vi
       .fn()
       .mockRejectedValue(new EsErrors.ConnectionError('connection reset'));
-    const deleteTransform = jest.fn();
-    const response = { forbidden: jest.fn() };
+    const deleteTransform = vi.fn();
+    const response = { forbidden: vi.fn() };
 
     const results = (await deleteTransforms(
       createRequest(),
@@ -92,14 +98,14 @@ describe('deleteTransforms', () => {
   });
 
   it('returns nested timeout results when deleting the transform times out', async () => {
-    const getTransform = jest.fn().mockResolvedValue({
+    const getTransform = vi.fn().mockResolvedValue({
       transforms: [{ id: 'transform-1', dest: { index: 'transform-1-dest' } }],
     });
-    const deleteTransform = jest
+    const deleteTransform = vi
       .fn()
       .mockResolvedValueOnce({})
       .mockRejectedValueOnce(new EsErrors.TimeoutError('Request timed out'));
-    const response = { forbidden: jest.fn() };
+    const response = { forbidden: vi.fn() };
 
     const results = (await deleteTransforms(
       createRequest([
@@ -121,14 +127,14 @@ describe('deleteTransforms', () => {
   });
 
   it('preserves a completed data view deletion when deleting the transform times out', async () => {
-    const getTransform = jest.fn().mockResolvedValue({
+    const getTransform = vi.fn().mockResolvedValue({
       transforms: [{ id: 'transform-1', dest: { index: 'transform-1-dest' } }],
     });
-    const deleteTransform = jest
+    const deleteTransform = vi
       .fn()
       .mockResolvedValueOnce({})
       .mockRejectedValueOnce(new EsErrors.TimeoutError('Request timed out'));
-    const response = { forbidden: jest.fn() };
+    const response = { forbidden: vi.fn() };
     mockDeleteDataViewFn.mockResolvedValue({ success: true });
     const request = createRequest([
       { id: 'transform-1', state: TRANSFORM_STATE.STOPPED },
@@ -155,13 +161,13 @@ describe('deleteTransforms', () => {
   });
 
   it('returns a failure result with an error body when deleting the transform fails without an ES error body', async () => {
-    const getTransform = jest.fn().mockResolvedValue({
+    const getTransform = vi.fn().mockResolvedValue({
       transforms: [{ id: 'transform-1', dest: { index: 'transform-1-dest' } }],
     });
-    const deleteTransform = jest
+    const deleteTransform = vi
       .fn()
       .mockRejectedValue(new EsErrors.ConnectionError('connection reset'));
-    const response = { forbidden: jest.fn() };
+    const response = { forbidden: vi.fn() };
 
     const results = (await deleteTransforms(
       createRequest(),
@@ -178,11 +184,11 @@ describe('deleteTransforms', () => {
   });
 
   it('returns a forbidden response when deleting the transform fails with 403', async () => {
-    const getTransform = jest.fn().mockResolvedValue({
+    const getTransform = vi.fn().mockResolvedValue({
       transforms: [{ id: 'transform-1', dest: { index: 'transform-1-dest' } }],
     });
-    const deleteTransform = jest.fn().mockRejectedValue({ statusCode: 403 });
-    const response = { forbidden: jest.fn().mockReturnValue({ status: 403 }) };
+    const deleteTransform = vi.fn().mockRejectedValue({ statusCode: 403 });
+    const response = { forbidden: vi.fn().mockReturnValue({ status: 403 }) };
 
     const result = await deleteTransforms(
       createRequest(),

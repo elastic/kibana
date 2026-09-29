@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type {
   AlertEpisodeEsqlRow,
@@ -39,8 +42,8 @@ const createClient = ({
   lookupRows = [{ group_hash: GROUP_HASH }],
   episodeRows = [],
 }: CreateClientOptions = {}) => {
-  const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
-    executeQueryRows: jest
+  const queryService: Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
+    executeQueryRows: vi
       .fn()
       .mockResolvedValueOnce(lookupRows)
       .mockResolvedValueOnce(episodeRows),
@@ -114,8 +117,8 @@ describe('EpisodesClient', () => {
     };
 
     it('returns event rows from the shared episode events query', async () => {
-      const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
-        executeQueryRows: jest.fn().mockResolvedValueOnce([eventRow]),
+      const queryService: Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
+        executeQueryRows: vi.fn().mockResolvedValueOnce([eventRow]),
       };
       const client = new EpisodesClient(queryService as unknown as QueryServiceContract, SPACE_ID);
 
@@ -133,8 +136,8 @@ describe('EpisodesClient', () => {
     });
 
     it('forwards time-range, status, and limit filters to the shared query', async () => {
-      const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
-        executeQueryRows: jest.fn().mockResolvedValueOnce([]),
+      const queryService: Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
+        executeQueryRows: vi.fn().mockResolvedValueOnce([]),
       };
       const client = new EpisodesClient(queryService as unknown as QueryServiceContract, SPACE_ID);
 

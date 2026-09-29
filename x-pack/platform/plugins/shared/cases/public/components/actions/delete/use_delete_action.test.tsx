@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useDeleteAction } from './use_delete_action';
 
@@ -14,14 +16,14 @@ import { TestProviders } from '../../../common/mock';
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 
-jest.mock('../../../containers/api');
+vi.mock('../../../containers/api');
 
 describe('useDeleteAction', () => {
-  const onAction = jest.fn();
-  const onActionSuccess = jest.fn();
+  const onAction = vi.fn();
+  const onActionSuccess = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders an action with one case', async () => {
@@ -83,7 +85,7 @@ describe('useDeleteAction', () => {
   });
 
   it('deletes the selected cases', async () => {
-    const deleteSpy = jest.spyOn(api, 'deleteCases');
+    const deleteSpy = vi.spyOn(api, 'deleteCases');
 
     const { result } = renderHook(
       () => useDeleteAction({ onAction, onActionSuccess, isDisabled: false }),

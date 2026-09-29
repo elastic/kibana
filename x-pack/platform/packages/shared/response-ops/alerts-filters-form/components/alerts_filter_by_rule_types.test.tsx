@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -18,8 +21,8 @@ import { filterMetadata } from './alerts_filter_by_rule_types';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
-jest.mock('@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query');
-const mockUseGetInternalRuleTypesQuery = useGetInternalRuleTypesQuery as jest.Mock;
+vi.mock('@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query');
+const mockUseGetInternalRuleTypesQuery = useGetInternalRuleTypesQuery as Mock;
 
 const ruleTypeIds = ['.es-query', '.index-threshold'];
 
@@ -35,7 +38,7 @@ describe('AlertsFilterByRuleTypes', () => {
     });
     render(
       <AlertsFiltersFormContextProvider value={{ ruleTypeIds, services: { http, notifications } }}>
-        <AlertsFilterByRuleTypes value={[]} onChange={jest.fn()} />
+        <AlertsFilterByRuleTypes value={[]} onChange={vi.fn()} />
       </AlertsFiltersFormContextProvider>
     );
     await userEvent.click(screen.getByRole('combobox'));
@@ -54,7 +57,7 @@ describe('AlertsFilterByRuleTypes', () => {
     });
     render(
       <AlertsFiltersFormContextProvider value={{ ruleTypeIds, services: { http, notifications } }}>
-        <AlertsFilterByRuleTypes value={['.es-query']} onChange={jest.fn()} />
+        <AlertsFilterByRuleTypes value={['.es-query']} onChange={vi.fn()} />
       </AlertsFiltersFormContextProvider>
     );
     const comboboxPills = screen.getAllByTestId('euiComboBoxPill');
@@ -75,7 +78,7 @@ describe('AlertsFilterByRuleTypes', () => {
       <AlertsFiltersFormContextProvider
         value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
       >
-        <AlertsFilterByRuleTypes value={[]} onChange={jest.fn()} />
+        <AlertsFilterByRuleTypes value={[]} onChange={vi.fn()} />
       </AlertsFiltersFormContextProvider>
     );
     await userEvent.click(screen.getByRole('combobox'));
@@ -91,7 +94,7 @@ describe('AlertsFilterByRuleTypes', () => {
     });
     render(
       <AlertsFiltersFormContextProvider value={{ ruleTypeIds, services: { http, notifications } }}>
-        <AlertsFilterByRuleTypes value={[]} onChange={jest.fn()} />
+        <AlertsFilterByRuleTypes value={[]} onChange={vi.fn()} />
       </AlertsFiltersFormContextProvider>
     );
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
@@ -105,7 +108,7 @@ describe('AlertsFilterByRuleTypes', () => {
     });
     render(
       <AlertsFiltersFormContextProvider value={{ ruleTypeIds, services: { http, notifications } }}>
-        <AlertsFilterByRuleTypes value={[]} onChange={jest.fn()} />
+        <AlertsFilterByRuleTypes value={[]} onChange={vi.fn()} />
       </AlertsFiltersFormContextProvider>
     );
     const comboboxInput = screen.getByTestId('comboBoxSearchInput');
@@ -121,7 +124,7 @@ describe('AlertsFilterByRuleTypes', () => {
     });
     render(
       <AlertsFiltersFormContextProvider value={{ ruleTypeIds, services: { http, notifications } }}>
-        <AlertsFilterByRuleTypes value={[]} onChange={jest.fn()} />
+        <AlertsFilterByRuleTypes value={[]} onChange={vi.fn()} />
       </AlertsFiltersFormContextProvider>
     );
     const comboboxInput = screen.getByTestId('comboBoxSearchInput');

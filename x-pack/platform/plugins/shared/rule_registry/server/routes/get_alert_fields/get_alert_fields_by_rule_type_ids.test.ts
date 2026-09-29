@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { BASE_RAC_ALERTS_API_PATH } from '../../../common/constants';
 import { requestContextMock } from '../__mocks__/request_context';
 import { requestMock, serverMock } from '../__mocks__/server';
@@ -20,13 +22,13 @@ describe('getAlertFieldsByRuleTypeIds', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('route registered', async () => {
     // @ts-expect-error: mocking only necessary methods
-    jest.spyOn(await context.rac, 'getAlertsClient').mockResolvedValue({
-      getAlertFields: jest.fn().mockImplementation((ruleTypeIds: string[]) => {
+    vi.spyOn(await context.rac, 'getAlertsClient').mockResolvedValue({
+      getAlertFields: vi.fn().mockImplementation((ruleTypeIds: string[]) => {
         return Promise.resolve({
           fields: [],
         });
@@ -54,8 +56,8 @@ describe('getAlertFieldsByRuleTypeIds', () => {
     });
 
     // @ts-expect-error: mocking only necessary methods
-    jest.spyOn(await context.rac, 'getAlertsClient').mockResolvedValue({
-      getAlertFields: jest.fn().mockImplementation((ruleTypeIds: string[]) => {
+    vi.spyOn(await context.rac, 'getAlertsClient').mockResolvedValue({
+      getAlertFields: vi.fn().mockImplementation((ruleTypeIds: string[]) => {
         return Promise.resolve({
           fields: [
             { name: '@timestamp', type: 'date' },
@@ -105,8 +107,8 @@ describe('getAlertFieldsByRuleTypeIds', () => {
     });
 
     // @ts-expect-error: mocking only necessary methods
-    jest.spyOn(await context.rac, 'getAlertsClient').mockResolvedValue({
-      getAlertFields: jest.fn().mockImplementation((ruleTypeIds: string[]) => {
+    vi.spyOn(await context.rac, 'getAlertsClient').mockResolvedValue({
+      getAlertFields: vi.fn().mockImplementation((ruleTypeIds: string[]) => {
         return Promise.resolve({
           fields: [
             { name: '@timestamp', type: 'date' },
@@ -134,8 +136,8 @@ describe('getAlertFieldsByRuleTypeIds', () => {
 
   test('handles errors when fetching fields fails', async () => {
     // @ts-expect-error: mocking only necessary methods
-    jest.spyOn(await context.rac, 'getAlertsClient').mockResolvedValue({
-      getAlertFields: jest.fn().mockImplementation((ruleTypeIds: string[]) => {
+    vi.spyOn(await context.rac, 'getAlertsClient').mockResolvedValue({
+      getAlertFields: vi.fn().mockImplementation((ruleTypeIds: string[]) => {
         return Promise.reject(new Error('Failed to fetch fields'));
       }),
     });

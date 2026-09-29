@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getGraph, type GetGraphParams } from './v1';
 import { fetchGraph } from './fetch_graph';
 import { parseRecords } from './parse_records';
 
-jest.mock('./fetch_graph');
-jest.mock('./parse_records');
+vi.mock('./fetch_graph');
+vi.mock('./parse_records');
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
@@ -20,16 +23,16 @@ describe('getGraph', () => {
   let esClient: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient = {};
   });
 
   it('should call fetchGraph and parseRecords with correct parameters', async () => {
     const fakeFetchResult = { events: ['event1', 'event2'], relationships: [], entities: [] };
-    (fetchGraph as jest.Mock).mockResolvedValue(fakeFetchResult);
+    (fetchGraph as Mock).mockResolvedValue(fakeFetchResult);
 
     const parsedResult = { nodes: ['node1'], edges: ['edge1'], messages: ['msg1'] };
-    (parseRecords as jest.Mock).mockReturnValue(parsedResult);
+    (parseRecords as Mock).mockReturnValue(parsedResult);
 
     const params = {
       services: { esClient, logger: mockLogger },
@@ -77,10 +80,10 @@ describe('getGraph', () => {
 
   it('should use default indexPatterns if not provided', async () => {
     const fakeFetchResult = { events: [], relationships: [] };
-    (fetchGraph as jest.Mock).mockResolvedValue(fakeFetchResult);
+    (fetchGraph as Mock).mockResolvedValue(fakeFetchResult);
 
     const parsedResult = { nodes: [], edges: [], messages: [] };
-    (parseRecords as jest.Mock).mockReturnValue(parsedResult);
+    (parseRecords as Mock).mockReturnValue(parsedResult);
 
     const params = {
       services: { esClient, logger: mockLogger },

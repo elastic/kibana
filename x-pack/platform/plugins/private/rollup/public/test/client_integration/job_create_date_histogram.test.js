@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment-timezone';
 import { fireEvent, screen } from '@testing-library/react';
 
@@ -34,7 +36,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
   };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
     initDocumentation(docLinksServiceMock.createStartContract());

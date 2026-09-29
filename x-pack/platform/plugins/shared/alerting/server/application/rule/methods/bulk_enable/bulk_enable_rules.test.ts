@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
 import type { SavedObject } from '@kbn/core/server';
@@ -35,19 +38,25 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { alertsServiceMock } from '../../../../alerts_service/alerts_service.mock';
 import { RecoveredActionGroup } from '../../../../../common';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
-  bulkMarkApiKeysForInvalidation: jest.fn(),
-}));
+vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
+      const mocked = {
+      bulkMarkApiKeysForInvalidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../get_schedule_frequency', () => ({
-  validateScheduleLimit: jest.fn(),
-}));
+vi.mock('../get_schedule_frequency', () => {
+      const mocked = {
+      validateScheduleLimit: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const logger = loggerMock.create();
 const alertsService = alertsServiceMock.create();
 
 const kibanaVersion = 'v8.2.0';
-const createAPIKeyMock = jest.fn();
+const createAPIKeyMock = vi.fn();
 const {
   rulesClientParams,
   taskManager,
@@ -73,24 +82,24 @@ beforeEach(() => {
         errors: [],
       } as unknown as BulkUpdateTaskResult)
   );
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 setGlobalDate();
 
 describe('bulkEnableRules', () => {
   let rulesClient: RulesClient;
-  let actionsClient: jest.Mocked<ActionsClient>;
+  let actionsClient: Mocked<ActionsClient>;
 
   const mockCreatePointInTimeFinderAsInternalUser = (
     response: { saved_objects: Array<SavedObject<Partial<RawRule>>> } = {
       saved_objects: [disabledRule1, disabledRule2],
     }
   ) => {
-    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
       .fn()
       .mockResolvedValue({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield response;
         },
@@ -124,13 +133,13 @@ describe('bulkEnableRules', () => {
     });
     mockCreatePointInTimeFinderAsInternalUser();
     mockUnsecuredSavedObjectFind(2);
-    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    actionsClient = (await rulesClientParams.getActionsClient()) as Mocked<ActionsClient>;
     actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action:id');
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should enable two rules', async () => {
@@ -284,28 +293,28 @@ describe('bulkEnableRules', () => {
         saved_objects: [savedObjectWith409Error],
       });
 
-    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
       .fn()
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [disabledRule1, disabledRule2] };
         },
       })
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [disabledRule2] };
         },
       })
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [disabledRule2] };
         },
       })
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [disabledRule2] };
         },
@@ -331,22 +340,22 @@ describe('bulkEnableRules', () => {
         saved_objects: [enabledRuleForBulkOps2],
       });
 
-    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
       .fn()
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [disabledRule1, disabledRule2] };
         },
       })
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [disabledRule2] };
         },
       })
       .mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [disabledRule2] };
         },
@@ -528,12 +537,12 @@ describe('bulkEnableRules', () => {
 
     rulesClientParams.getAlertIndicesAlias.mockReturnValueOnce(['test-index-1', 'test-index-2']);
 
-    (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValueOnce({
+    (rulesClientParams.ruleTypeRegistry.get as Mock).mockReturnValueOnce({
       autoRecoverAlerts: true,
       id: 'fakeType1',
     });
 
-    (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValueOnce({
+    (rulesClientParams.ruleTypeRegistry.get as Mock).mockReturnValueOnce({
       autoRecoverAlerts: true,
       id: 'fakeType2',
     });
@@ -570,11 +579,11 @@ describe('bulkEnableRules', () => {
 
     rulesClientParams.getAlertIndicesAlias.mockReturnValue(['test-index']);
 
-    (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
+    (rulesClientParams.ruleTypeRegistry.get as Mock).mockReturnValue({
       autoRecoverAlerts: true,
     });
 
-    (rulesClientParams.alertsService?.clearAlertFlappingHistory as jest.Mock).mockRejectedValue(
+    (rulesClientParams.alertsService?.clearAlertFlappingHistory as Mock).mockRejectedValue(
       Error('something went wrong!')
     );
 
@@ -609,7 +618,7 @@ describe('bulkEnableRules', () => {
 
     rulesClientParams.getAlertIndicesAlias.mockReturnValue(['test-index']);
 
-    (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
+    (rulesClientParams.ruleTypeRegistry.get as Mock).mockReturnValue({
       autoRecoverAlerts: false,
     });
 
@@ -647,7 +656,7 @@ describe('bulkEnableRules', () => {
 
     rulesClientParams.getAlertIndicesAlias.mockReturnValue(['test-index']);
 
-    (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
+    (rulesClientParams.ruleTypeRegistry.get as Mock).mockReturnValue({
       autoRecoverAlerts: true,
     });
 
@@ -953,10 +962,10 @@ describe('bulkEnableRules', () => {
     });
 
     test('should schedule task when scheduledTaskId is not defined', async () => {
-      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
         .fn()
         .mockResolvedValueOnce({
-          close: jest.fn(),
+          close: vi.fn(),
           find: function* asyncGenerator() {
             yield {
               saved_objects: [
@@ -1101,7 +1110,7 @@ describe('bulkEnableRules', () => {
   });
 
   describe('auditLogger', () => {
-    jest.spyOn(auditLogger, 'log').mockImplementation();
+    vi.spyOn(auditLogger, 'log').mockImplementation();
 
     test('logs audit event when enabling rules', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
@@ -1149,9 +1158,9 @@ describe('bulkEnableRules', () => {
 
   describe('change tracking', () => {
     const createChangeTrackingService = () => ({
-      log: jest.fn().mockResolvedValue(undefined),
-      logBulk: jest.fn().mockResolvedValue(undefined),
-      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+      log: vi.fn().mockResolvedValue(undefined),
+      logBulk: vi.fn().mockResolvedValue(undefined),
+      getHistory: vi.fn().mockResolvedValue({ items: [], total: 0 }),
     });
 
     const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
@@ -1310,16 +1319,16 @@ describe('bulkEnableRules', () => {
           saved_objects: [enabledRuleForBulkOps2],
         });
 
-      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
         .fn()
         .mockResolvedValueOnce({
-          close: jest.fn(),
+          close: vi.fn(),
           find: function* asyncGenerator() {
             yield { saved_objects: [disabledRule1, disabledRule2] };
           },
         })
         .mockResolvedValueOnce({
-          close: jest.fn(),
+          close: vi.fn(),
           find: function* asyncGenerator() {
             yield { saved_objects: [disabledRule2] };
           },

@@ -5,25 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AdvancedMatchingAccordion } from './advanced_matching_accordion';
 
-jest.mock('../matcher_input', () => ({
-  MatcherInput: (props: {
-    value: string;
-    onChange: (v: string) => void;
-    'data-test-subj'?: string;
-  }) => (
-    <input
-      data-test-subj={props['data-test-subj'] ?? 'matcherInput'}
-      value={props.value}
-      onChange={(e) => props.onChange(e.target.value)}
-    />
-  ),
-}));
+vi.mock('../matcher_input', () => {
+      const mocked = {
+      MatcherInput: (props: {
+        value: string;
+        onChange: (v: string) => void;
+        'data-test-subj'?: string;
+      }) => (
+        <input
+          data-test-subj={props['data-test-subj'] ?? 'matcherInput'}
+          value={props.value}
+          onChange={(e) => props.onChange(e.target.value)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
@@ -32,28 +37,28 @@ const getAccordionButton = () =>
 
 describe('AdvancedMatchingAccordion', () => {
   it('renders the accordion with Advanced matching label', () => {
-    renderWithI18n(<AdvancedMatchingAccordion matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<AdvancedMatchingAccordion matcher={null} onChange={vi.fn()} />);
 
     expect(screen.getByText('Advanced matching')).toBeInTheDocument();
   });
 
   it('starts collapsed when matcher.expression is null', () => {
     renderWithI18n(
-      <AdvancedMatchingAccordion matcher={{ expression: null }} onChange={jest.fn()} />
+      <AdvancedMatchingAccordion matcher={{ expression: null }} onChange={vi.fn()} />
     );
 
     expect(getAccordionButton()).toHaveAttribute('aria-expanded', 'false');
   });
 
   it('starts collapsed when matcher is null', () => {
-    renderWithI18n(<AdvancedMatchingAccordion matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<AdvancedMatchingAccordion matcher={null} onChange={vi.fn()} />);
 
     expect(getAccordionButton()).toHaveAttribute('aria-expanded', 'false');
   });
 
   it('starts expanded when matcher.expression is set', () => {
     renderWithI18n(
-      <AdvancedMatchingAccordion matcher={{ expression: 'data.host:"x"' }} onChange={jest.fn()} />
+      <AdvancedMatchingAccordion matcher={{ expression: 'data.host:"x"' }} onChange={vi.fn()} />
     );
 
     expect(getAccordionButton()).toHaveAttribute('aria-expanded', 'true');
@@ -63,7 +68,7 @@ describe('AdvancedMatchingAccordion', () => {
     renderWithI18n(
       <AdvancedMatchingAccordion
         matcher={{ expression: '  rule.id:"abc"  ' }}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
       />
     );
 
@@ -72,7 +77,7 @@ describe('AdvancedMatchingAccordion', () => {
 
   it('calls onChange when input changes', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderWithI18n(
       <AdvancedMatchingAccordion matcher={{ expression: 'data.host:"x"' }} onChange={onChange} />
     );
@@ -86,7 +91,7 @@ describe('AdvancedMatchingAccordion', () => {
 
   it('calls onChange with expression: null when input is cleared', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderWithI18n(<AdvancedMatchingAccordion matcher={{ expression: 'x' }} onChange={onChange} />);
 
     await user.clear(screen.getByTestId('matcherInput'));
@@ -96,7 +101,7 @@ describe('AdvancedMatchingAccordion', () => {
 
   it('expands accordion when button is clicked', async () => {
     const user = userEvent.setup();
-    renderWithI18n(<AdvancedMatchingAccordion matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<AdvancedMatchingAccordion matcher={null} onChange={vi.fn()} />);
 
     expect(getAccordionButton()).toHaveAttribute('aria-expanded', 'false');
 

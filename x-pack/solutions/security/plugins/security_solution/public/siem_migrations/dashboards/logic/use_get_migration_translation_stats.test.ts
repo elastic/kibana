@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor, act } from '@testing-library/react';
 import '@kbn/react-query/mock';
 import { useQueryClient } from '@kbn/react-query';
@@ -15,11 +18,11 @@ import {
 import { getDashboardMigrationTranslationStats } from '../api';
 import { TestProviders } from '../../../common/mock/test_providers';
 
-jest.mock('../api');
+vi.mock('../api');
 
 describe('Get Migration Translation Stats Hooks', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('useGetMigrationTranslationStats', () => {
@@ -40,7 +43,7 @@ describe('Get Migration Translation Stats Hooks', () => {
           failed: 5,
         },
       };
-      (getDashboardMigrationTranslationStats as jest.Mock).mockResolvedValue(mockStats);
+      (getDashboardMigrationTranslationStats as Mock).mockResolvedValue(mockStats);
 
       const { result } = renderHook(() => useGetMigrationTranslationStats('1'), {
         wrapper: TestProviders,
@@ -55,7 +58,7 @@ describe('Get Migration Translation Stats Hooks', () => {
 
     it('handles API errors gracefully', async () => {
       const mockError = new Error('API error');
-      (getDashboardMigrationTranslationStats as jest.Mock).mockRejectedValue(mockError);
+      (getDashboardMigrationTranslationStats as Mock).mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useGetMigrationTranslationStats('1'), {
         wrapper: TestProviders,
@@ -70,10 +73,10 @@ describe('Get Migration Translation Stats Hooks', () => {
   });
 
   describe('useInvalidateGetMigrationTranslationStats', () => {
-    const invalidateQueries = jest.fn();
+    const invalidateQueries = vi.fn();
 
     beforeEach(() => {
-      (useQueryClient as jest.Mock).mockReturnValue({
+      (useQueryClient as Mock).mockReturnValue({
         invalidateQueries,
       });
     });

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
@@ -21,24 +24,24 @@ import type { KibanaTheme } from '@kbn/react-kibana-context-common';
 import { KibanaEuiProvider } from './eui_provider';
 
 // Mock the EuiProvider component to capture its props
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
-    EuiProvider: jest.fn(original.EuiProvider),
+    EuiProvider: vi.fn(original.EuiProvider),
   };
 });
 
 describe('KibanaEuiProvider', () => {
   let euiTheme: ReturnType<typeof useEuiTheme> | undefined;
   let userProfile: UserProfileService;
-  let consoleWarnMock: jest.SpyInstance;
+  let consoleWarnMock: MockInstance;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     euiTheme = undefined;
     userProfile = userProfileServiceMock.createStart();
-    consoleWarnMock = jest.spyOn(global.console, 'warn').mockImplementation(() => {});
-    (EuiProvider as jest.Mock).mockImplementation(jest.requireActual('@elastic/eui').EuiProvider);
+    consoleWarnMock = vi.spyOn(global.console, 'warn').mockImplementation(() => {});
+    (EuiProvider as Mock).mockImplementation((await vi.importActual('@elastic/eui')).EuiProvider);
   });
 
   const InnerComponent: FC = () => {

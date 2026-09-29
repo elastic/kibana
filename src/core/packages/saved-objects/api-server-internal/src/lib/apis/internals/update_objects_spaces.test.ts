@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   mockGetBulkOperationError,
   mockGetExpectedVersionProperties,
@@ -55,8 +58,8 @@ const SHAREABLE_HIDDEN_OBJ_TYPE = 'type-c';
 const mockCurrentTime = new Date('2021-05-01T10:20:30Z');
 
 beforeAll(() => {
-  jest.useFakeTimers();
-  jest.setSystemTime(mockCurrentTime);
+  vi.useFakeTimers();
+  vi.setSystemTime(mockCurrentTime);
 });
 
 beforeEach(() => {
@@ -68,7 +71,7 @@ beforeEach(() => {
 });
 
 afterAll(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 describe('#updateObjectsSpaces', () => {
@@ -645,7 +648,7 @@ describe('#updateObjectsSpaces', () => {
   });
 
   describe(`with security extension`, () => {
-    let mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>;
+    let mockSecurityExt: Mocked<ISavedObjectsSecurityExtension>;
     let params: UpdateObjectsSpacesParams;
 
     const otherSpace = 'space-to-add';

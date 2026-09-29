@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { UptimeDatePicker } from './uptime_date_picker';
 import { startPlugins } from '../../lib/__mocks__/uptime_plugin_start_mock';
@@ -13,10 +15,10 @@ import { render } from '../../lib/helper/rtl_helpers';
 import { fireEvent } from '@testing-library/react';
 
 describe('UptimeDatePicker component', () => {
-  jest.setTimeout(10_000);
+  vi.setConfig({ testTimeout: 10_000 });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders properly with mock data', async () => {
@@ -30,7 +32,7 @@ describe('UptimeDatePicker component', () => {
       initialEntries: ['/?dateRangeStart=now-15m&dateRangeEnd=now'],
     });
 
-    jest.spyOn(customHistory, 'push');
+    vi.spyOn(customHistory, 'push');
 
     const { findByText } = render(<UptimeDatePicker />, {
       history: customHistory,
@@ -52,7 +54,7 @@ describe('UptimeDatePicker component', () => {
       initialEntries: ['/?g=%22%22&dateRangeStart=now-10m&dateRangeEnd=now'],
     });
 
-    jest.spyOn(customHistory, 'push');
+    vi.spyOn(customHistory, 'push');
 
     const { findByText } = render(<UptimeDatePicker />, {
       history: customHistory,
@@ -74,7 +76,7 @@ describe('UptimeDatePicker component', () => {
       initialEntries: ['/?g=%22%22&dateRangeStart=now-10m&dateRangeEnd=now'],
     });
 
-    jest.spyOn(customHistory, 'push');
+    vi.spyOn(customHistory, 'push');
 
     const { findByText, getByTestId, findByTestId } = render(<UptimeDatePicker />, {
       history: customHistory,

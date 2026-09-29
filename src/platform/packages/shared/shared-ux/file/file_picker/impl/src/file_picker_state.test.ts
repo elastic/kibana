@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('rxjs', () => {
-  const rxjs = jest.requireActual('rxjs');
+import { vi } from 'vitest';
+
+vi.mock('rxjs', () => {
+  const rxjs = require('rxjs');
   return {
     ...rxjs,
     debounceTime: rxjs.tap,

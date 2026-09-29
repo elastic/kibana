@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { IncludeExpiredExceptionsModal } from '.';
 import { fireEvent, render } from '@testing-library/react';
 
 describe('IncludeExpiredExceptionsModal', () => {
-  const handleCloseModal = jest.fn();
-  const onModalConfirm = jest.fn();
+  const handleCloseModal = vi.fn();
+  const onModalConfirm = vi.fn();
 
   it('should call handleCloseModal on cancel click', () => {
     const wrapper = render(

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter } from '../../../../__mocks__/kea_logic';
 
 import type { RefreshInterval } from '@kbn/data-plugin/common';
@@ -15,28 +17,31 @@ import { KibanaLogic } from '../../../../shared/kibana/kibana_logic';
 import type { AnalyticsCollectionToolbarLogicValues } from './analytics_collection_toolbar_logic';
 import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar_logic';
 
-jest.mock('../../../../shared/kibana/kibana_logic', () => ({
-  KibanaLogic: {
-    values: {
-      data: {
-        dataViews: {
-          find: jest.fn(() => Promise.resolve([{ id: 'some-data-view-id' }])),
-        },
-        search: {
-          session: {
-            start: jest.fn(() => 'some-search-session-id'),
+vi.mock('../../../../shared/kibana/kibana_logic', () => {
+      const mocked = {
+      KibanaLogic: {
+        values: {
+          data: {
+            dataViews: {
+              find: vi.fn(() => Promise.resolve([{ id: 'some-data-view-id' }])),
+            },
+            search: {
+              session: {
+                start: vi.fn(() => 'some-search-session-id'),
+              },
+            },
           },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AnalyticsCollectionToolbarLogic', () => {
   const { mount } = new LogicMounter(AnalyticsCollectionToolbarLogic);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mount();
   });
@@ -74,7 +79,7 @@ describe('AnalyticsCollectionToolbarLogic', () => {
 
   describe('listeners', () => {
     it('should set searchSessionId when onTimeRefresh called', () => {
-      jest.spyOn(AnalyticsCollectionToolbarLogic.actions, 'setSearchSessionId');
+      vi.spyOn(AnalyticsCollectionToolbarLogic.actions, 'setSearchSessionId');
 
       AnalyticsCollectionToolbarLogic.actions.onTimeRefresh();
 
@@ -85,7 +90,7 @@ describe('AnalyticsCollectionToolbarLogic', () => {
     });
 
     it('should clear searchSessionId when refreshInterval is on pause', () => {
-      jest.spyOn(AnalyticsCollectionToolbarLogic.actions, 'setSearchSessionId');
+      vi.spyOn(AnalyticsCollectionToolbarLogic.actions, 'setSearchSessionId');
 
       AnalyticsCollectionToolbarLogic.actions.setRefreshInterval({ pause: true, value: 10000 });
 
@@ -93,7 +98,7 @@ describe('AnalyticsCollectionToolbarLogic', () => {
     });
 
     it('should call setSearchSessionId with null when setTimeRange called', () => {
-      jest.spyOn(AnalyticsCollectionToolbarLogic.actions, 'setSearchSessionId');
+      vi.spyOn(AnalyticsCollectionToolbarLogic.actions, 'setSearchSessionId');
 
       AnalyticsCollectionToolbarLogic.actions.setTimeRange({ from: 'now-7d', to: 'now' });
 

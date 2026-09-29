@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   loadIndexPatterns,
   setDataViewsService,
@@ -13,7 +15,7 @@ import {
 } from './data_apis';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
-const mockFind = jest.fn();
+const mockFind = vi.fn();
 const perPage = 1000;
 const http = httpServiceMock.createStartContract();
 const pattern = 'test-pattern';
@@ -70,7 +72,7 @@ describe('Data API', () => {
       });
     });
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('fetches the index patterns', async () => {

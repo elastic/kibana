@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -13,78 +15,103 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 import { AgentConnectors } from './agent_connectors';
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      plugins: {
-        triggersActionsUi: {
-          actionTypeRegistry: { has: () => false, get: () => ({}) },
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          plugins: {
+            triggersActionsUi: {
+              actionTypeRegistry: { has: () => false, get: () => ({}) },
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_navigation', () => ({
-  useNavigation: () => ({ createAgentBuilderUrl: () => '#' }),
-}));
+vi.mock('../../../hooks/use_navigation', () => {
+      const mocked = {
+      useNavigation: () => ({ createAgentBuilderUrl: () => '#' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_flyout_state', () => ({
-  useFlyoutState: () => ({ isOpen: false, openFlyout: jest.fn(), closeFlyout: jest.fn() }),
-}));
+vi.mock('../../../hooks/use_flyout_state', () => {
+      const mocked = {
+      useFlyoutState: () => ({ isOpen: false, openFlyout: vi.fn(), closeFlyout: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_query_state');
+vi.mock('../../../hooks/use_query_state');
 
-jest.mock('../common/page_wrapper', () => ({
-  PageWrapper: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+vi.mock('../common/page_wrapper', () => {
+      const mocked = {
+      PageWrapper: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common/styles', () => ({
-  useListDetailPageStyles: () => ({
-    loadingSpinner: {},
-    header: {},
-    body: {},
-    searchColumn: {},
-    searchInputWrapper: {},
-    scrollableList: {},
-    detailPanelWrapper: {},
-    noSelectionPlaceholder: {},
-  }),
-}));
+vi.mock('../common/styles', () => {
+      const mocked = {
+      useListDetailPageStyles: () => ({
+        loadingSpinner: {},
+        header: {},
+        body: {},
+        searchColumn: {},
+        searchInputWrapper: {},
+        scrollableList: {},
+        detailPanelWrapper: {},
+        noSelectionPlaceholder: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./active_connector_row', () => ({
-  ActiveConnectorRow: () => <div data-test-subj="activeConnectorRow" />,
-}));
+vi.mock('./active_connector_row', () => {
+      const mocked = {
+      ActiveConnectorRow: () => <div data-test-subj="activeConnectorRow" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./connector_detail_panel', () => ({
-  ConnectorDetailPanel: jest.fn(() => <div data-test-subj="connectorDetailPanel" />),
-}));
+vi.mock('./connector_detail_panel', () => {
+      const mocked = {
+      ConnectorDetailPanel: vi.fn(() => <div data-test-subj="connectorDetailPanel" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./connector_library_panel', () => ({
-  ConnectorLibraryPanel: () => <div data-test-subj="connectorLibraryPanel" />,
-}));
+vi.mock('./connector_library_panel', () => {
+      const mocked = {
+      ConnectorLibraryPanel: () => <div data-test-subj="connectorLibraryPanel" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./connectors_customize_empty_state', () => ({
-  ConnectorsCustomizeEmptyState: () => <div data-test-subj="connectorsCustomizeEmptyState" />,
-}));
+vi.mock('./connectors_customize_empty_state', () => {
+      const mocked = {
+      ConnectorsCustomizeEmptyState: () => <div data-test-subj="connectorsCustomizeEmptyState" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/agents/use_agent_by_id');
-jest.mock('../../../hooks/agents/use_can_update_agent');
-jest.mock('../../../hooks/connectors/use_agent_connectors');
-jest.mock('../../../hooks/use_has_connectors_all_privileges');
-jest.mock('../../../context/connectors_provider');
+vi.mock('../../../hooks/agents/use_agent_by_id');
+vi.mock('../../../hooks/agents/use_can_update_agent');
+vi.mock('../../../hooks/connectors/use_agent_connectors');
+vi.mock('../../../hooks/use_has_connectors_all_privileges');
+vi.mock('../../../context/connectors_provider');
 
-const { useAgentBuilderAgentById } = jest.requireMock('../../../hooks/agents/use_agent_by_id');
-const { useCanUpdateAgent } = jest.requireMock('../../../hooks/agents/use_can_update_agent');
-const { useAgentConnectors } = jest.requireMock('../../../hooks/connectors/use_agent_connectors');
-const { useHasConnectorsAllPrivileges } = jest.requireMock(
-  '../../../hooks/use_has_connectors_all_privileges'
-);
-const { useConnectorsActions } = jest.requireMock('../../../context/connectors_provider');
-const { useQueryState } = jest.requireMock('../../../hooks/use_query_state');
-const { ConnectorDetailPanel } = jest.requireMock('./connector_detail_panel');
+const { useAgentBuilderAgentById } = (await vi.importMock('../../../hooks/agents/use_agent_by_id'));
+const { useCanUpdateAgent } = (await vi.importMock('../../../hooks/agents/use_can_update_agent'));
+const { useAgentConnectors } = (await vi.importMock('../../../hooks/connectors/use_agent_connectors'));
+const { useHasConnectorsAllPrivileges } = (await vi.importMock('../../../hooks/use_has_connectors_all_privileges'));
+const { useConnectorsActions } = (await vi.importMock('../../../context/connectors_provider'));
+const { useQueryState } = (await vi.importMock('../../../hooks/use_query_state'));
+const { ConnectorDetailPanel } = (await vi.importMock('./connector_detail_panel'));
 
-const openCreateFlyout = jest.fn();
+const openCreateFlyout = vi.fn();
 
 const renderComponent = () =>
   render(
@@ -97,9 +124,9 @@ const renderComponent = () =>
 
 describe('AgentConnectors', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    useQueryState.mockReturnValue([undefined, jest.fn()]);
+    useQueryState.mockReturnValue([undefined, vi.fn()]);
 
     ConnectorDetailPanel.mockImplementation(() => <div data-test-subj="connectorDetailPanel" />);
 
@@ -120,8 +147,8 @@ describe('AgentConnectors', () => {
       allConnectors: [{ id: 'c1', name: 'Connector 1', actionTypeId: '.test' }],
       activeConnectorIdSet: new Set(['c1']),
       isLoading: false,
-      assign: jest.fn(),
-      unassign: jest.fn(),
+      assign: vi.fn(),
+      unassign: vi.fn(),
     });
 
     useHasConnectorsAllPrivileges.mockReturnValue(true);
@@ -151,8 +178,8 @@ describe('AgentConnectors', () => {
       allConnectors: [],
       activeConnectorIdSet: new Set(),
       isLoading: false,
-      assign: jest.fn(),
-      unassign: jest.fn(),
+      assign: vi.fn(),
+      unassign: vi.fn(),
     });
 
     renderComponent();
@@ -162,7 +189,7 @@ describe('AgentConnectors', () => {
   });
 
   it('shows detail panel when a connector is selected', () => {
-    useQueryState.mockReturnValue(['c1', jest.fn()]);
+    useQueryState.mockReturnValue(['c1', vi.fn()]);
 
     renderComponent();
 
@@ -170,15 +197,15 @@ describe('AgentConnectors', () => {
   });
 
   it('clears selection when the selected connector is removed', () => {
-    const setSelectedConnectorId = jest.fn();
+    const setSelectedConnectorId = vi.fn();
     useQueryState.mockReturnValue(['c1', setSelectedConnectorId]);
-    const unassign = jest.fn();
+    const unassign = vi.fn();
     useAgentConnectors.mockReturnValue({
       assignedConnectors: [{ id: 'c1', name: 'Connector 1', actionTypeId: '.test' }],
       allConnectors: [{ id: 'c1', name: 'Connector 1', actionTypeId: '.test' }],
       activeConnectorIdSet: new Set(['c1']),
       isLoading: false,
-      assign: jest.fn(),
+      assign: vi.fn(),
       unassign,
     });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -17,7 +19,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mockProviders } from '../utils/mock_providers';
 import type { InferenceProvider } from '../types/types';
 
-const mockMutationFn = jest.fn();
+const mockMutationFn = vi.fn();
 const httpMock = httpServiceMock.createStartContract();
 const notificationsMock = notificationServiceMock.createStartContract();
 
@@ -25,17 +27,23 @@ const notificationsMock = notificationServiceMock.createStartContract();
 // Note: Variable must be prefixed with 'mock' to be allowed in jest.mock()
 let mockClonedProviders: InferenceProvider[];
 
-jest.mock('../hooks/use_providers', () => ({
-  useProviders: jest.fn(() => ({
-    data: mockClonedProviders,
-  })),
-}));
+vi.mock('../hooks/use_providers', () => {
+      const mocked = {
+      useProviders: vi.fn(() => ({
+        data: mockClonedProviders,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_inference_endpoint_mutation', () => ({
-  useInferenceEndpointMutation: jest.fn(() => ({
-    mutate: mockMutationFn,
-  })),
-}));
+vi.mock('../hooks/use_inference_endpoint_mutation', () => {
+      const mocked = {
+      useInferenceEndpointMutation: vi.fn(() => ({
+        mutate: mockMutationFn,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('InferenceFlyout', () => {
   const Wrapper = ({ children }: { children: React.ReactElement }) => {
@@ -56,18 +64,18 @@ describe('InferenceFlyout', () => {
     return render(
       <Wrapper>
         <InferenceFlyoutWrapper
-          onFlyoutClose={jest.fn()}
+          onFlyoutClose={vi.fn()}
           http={httpMock}
           toasts={notificationsMock.toasts}
           isEdit={false}
-          onSubmitSuccess={jest.fn()}
+          onSubmitSuccess={vi.fn()}
           {...props}
         />
       </Wrapper>
     );
   };
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Reset cloned providers before each test to prevent mutation pollution
     mockClonedProviders = JSON.parse(JSON.stringify(mockProviders));
   });

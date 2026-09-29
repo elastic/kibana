@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 
@@ -15,40 +18,49 @@ import type { Conversation } from '../../..';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { MOCK_CURRENT_USER } from '../../assistant/use_conversation/sample_conversations';
 
-const setApiConfig = jest.fn();
+const setApiConfig = vi.fn();
 const mockConversation = {
   setApiConfig,
 };
 
-jest.mock('../../assistant/use_conversation', () => ({
-  useConversation: () => mockConversation,
-}));
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/constants', () => ({
-  loadActionTypes: jest.fn(() => {
-    return Promise.resolve([
-      {
-        id: '.gen-ai',
-        name: 'Gen AI',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-        minimumLicenseRequired: 'basic',
-      },
-    ]);
-  }),
-}));
-
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn(() => {
-    return {
-      data: mockConnectors,
-      error: null,
-      isSuccess: true,
+vi.mock('../../assistant/use_conversation', () => {
+      const mocked = {
+      useConversation: () => mockConversation,
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/constants', () => {
+      const mocked = {
+      loadActionTypes: vi.fn(() => {
+        return Promise.resolve([
+          {
+            id: '.gen-ai',
+            name: 'Gen AI',
+            enabled: true,
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
+          },
+        ]);
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-(useLoadConnectors as jest.Mock).mockReturnValue({
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn(() => {
+        return {
+          data: mockConnectors,
+          error: null,
+          isSuccess: true,
+        };
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+(useLoadConnectors as Mock).mockReturnValue({
   data: mockConnectors,
   error: null,
   isSuccess: true,
@@ -68,7 +80,7 @@ const defaultConvo: Conversation = {
 
 describe('ConnectorSelectorInline', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('renders empty view if no selected conversation is provided', () => {
     const { getByTestId } = render(
@@ -77,7 +89,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={undefined}
           selectedConversation={undefined}
-          onConnectorSelected={jest.fn()}
+          onConnectorSelected={vi.fn()}
         />
       </TestProviders>
     );
@@ -92,7 +104,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={defaultConvo}
-          onConnectorSelected={jest.fn()}
+          onConnectorSelected={vi.fn()}
         />
       </TestProviders>
     );
@@ -106,7 +118,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={mockConnectors[0].id}
           selectedConversation={defaultConvo}
-          onConnectorSelected={jest.fn()}
+          onConnectorSelected={vi.fn()}
         />
       </TestProviders>
     );
@@ -120,7 +132,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={mockConnectors[0].id}
           selectedConversation={defaultConvo}
-          onConnectorSelected={jest.fn()}
+          onConnectorSelected={vi.fn()}
         />
       </TestProviders>
     );
@@ -153,7 +165,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={mockConnectors[0].id}
           selectedConversation={defaultConvo}
-          onConnectorSelected={jest.fn()}
+          onConnectorSelected={vi.fn()}
           loadConnectorFeatureId="test-feature-id"
         />
       </TestProviders>
@@ -169,7 +181,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={mockConnectors[0].id}
           selectedConversation={defaultConvo}
-          onConnectorSelected={jest.fn()}
+          onConnectorSelected={vi.fn()}
         />
       </TestProviders>
     );

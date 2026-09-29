@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { matchedActionPoliciesQueryKey } from '@kbn/alerting-v2-rule-form';
@@ -19,10 +22,10 @@ import { useEnableActionPolicy } from './use_enable_action_policy';
 import { useSnoozeActionPolicy } from './use_snooze_action_policy';
 import { useUnsnoozeActionPolicy } from './use_unsnooze_action_policy';
 
-jest.mock('@kbn/core-di-browser');
+vi.mock('@kbn/core-di-browser');
 
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
-const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
+const mockUseService = useService as MockedFunction<typeof useService>;
+const mockCoreStart = CoreStart as MockedFunction<typeof CoreStart>;
 
 const createClient = () =>
   new QueryClient({
@@ -38,23 +41,23 @@ const wrap = (queryClient: QueryClient) => {
 
 describe('action policy mutations refresh matched policies', () => {
   const api = {
-    createActionPolicy: jest.fn(),
-    deleteActionPolicy: jest.fn(),
-    disableActionPolicy: jest.fn(),
-    enableActionPolicy: jest.fn(),
-    snoozeActionPolicy: jest.fn(),
-    unsnoozeActionPolicy: jest.fn(),
+    createActionPolicy: vi.fn(),
+    deleteActionPolicy: vi.fn(),
+    disableActionPolicy: vi.fn(),
+    enableActionPolicy: vi.fn(),
+    snoozeActionPolicy: vi.fn(),
+    unsnoozeActionPolicy: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCoreStart.mockImplementation((key: string) => key as never);
     mockUseService.mockImplementation((service: unknown) => {
       if (service === ActionPoliciesApi) {
         return api as never;
       }
       if (service === 'notifications') {
-        return { toasts: { addSuccess: jest.fn(), addError: jest.fn() } } as never;
+        return { toasts: { addSuccess: vi.fn(), addError: vi.fn() } } as never;
       }
       return undefined as never;
     });
@@ -109,7 +112,7 @@ describe('action policy mutations refresh matched policies', () => {
         queryKey: actionPolicyKeys.detail('policy-1'),
         queryFn: async () => ({ id: 'policy-1' }),
       });
-      const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+      const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
       const { result } = renderHook(() => useHook(), { wrapper: wrap(queryClient) });
 
       mutate(result.current.mutate as (value: never) => void);

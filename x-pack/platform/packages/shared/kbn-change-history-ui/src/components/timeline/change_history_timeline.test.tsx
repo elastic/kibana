@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
 import React from 'react';
@@ -19,9 +21,9 @@ import { TestProvider } from '../../test_utils/test_providers';
 import { ChangeHistoryTimeline } from './change_history_timeline';
 
 class IntersectionObserverMock {
-  observe = jest.fn();
-  disconnect = jest.fn();
-  unobserve = jest.fn();
+  observe = vi.fn();
+  disconnect = vi.fn();
+  unobserve = vi.fn();
 }
 
 beforeAll(() => {
@@ -33,8 +35,8 @@ beforeAll(() => {
 });
 
 const adapter: ChangeHistoryAdapter = {
-  listChanges: jest.fn(),
-  getChange: jest.fn(),
+  listChanges: vi.fn(),
+  getChange: vi.fn(),
 };
 
 const renderTimeline = (props: React.ComponentProps<typeof ChangeHistoryTimeline>) =>
@@ -69,7 +71,7 @@ describe('ChangeHistoryTimeline', () => {
   ];
 
   it('scrolls to the top when the newest item is selected', () => {
-    const scrollTo = jest.fn();
+    const scrollTo = vi.fn();
     Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
       configurable: true,
       value: scrollTo,

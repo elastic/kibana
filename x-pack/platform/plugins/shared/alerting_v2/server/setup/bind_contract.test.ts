@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Container, ContainerModule } from 'inversify';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ServiceToken } from '@kbn/core-di';
@@ -28,22 +31,22 @@ describe('bindContract', () => {
   let mockRulesClient: Partial<RulesClient>;
   let mockActionPolicyClient: Partial<ActionPolicyClient>;
   let mockAlertEventsClient: Partial<AlertEventsClient>;
-  let fork: jest.Mock;
+  let fork: Mock;
 
   beforeEach(() => {
     container = new Container();
     scope = new Container();
-    mockRulesClient = { getRule: jest.fn() };
-    mockActionPolicyClient = { getActionPolicy: jest.fn() };
-    mockAlertEventsClient = { createAlertEvent: jest.fn() };
+    mockRulesClient = { getRule: vi.fn() };
+    mockActionPolicyClient = { getActionPolicy: vi.fn() };
+    mockAlertEventsClient = { createAlertEvent: vi.fn() };
     scope.bind(RulesClient).toConstantValue(mockRulesClient as RulesClient);
     scope.bind(ActionPolicyClient).toConstantValue(mockActionPolicyClient as ActionPolicyClient);
     scope.bind(AlertEventsClient).toConstantValue(mockAlertEventsClient as AlertEventsClient);
 
-    fork = jest.fn(() => scope);
+    fork = vi.fn(() => scope);
     container.bind(CoreStart('injection')).toConstantValue({
       fork,
-      getContainer: jest.fn(() => container),
+      getContainer: vi.fn(() => container),
     } as never);
     container.bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
 

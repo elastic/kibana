@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { TableVisBasic } from './table_vis_basic';
@@ -16,16 +19,22 @@ import { createTableVisCell } from './table_vis_cell';
 import { createGridColumns } from './table_vis_columns';
 import type { EuiDataGridProps } from '@elastic/eui';
 
-jest.mock('./table_vis_columns', () => ({
-  createGridColumns: jest.fn(() => []),
-}));
-jest.mock('./table_vis_cell', () => ({
-  createTableVisCell: jest.fn(() => () => {}),
-}));
+vi.mock('./table_vis_columns', () => {
+      const mocked = {
+      createGridColumns: vi.fn(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./table_vis_cell', () => {
+      const mocked = {
+      createTableVisCell: vi.fn(() => () => {}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TableVisBasic', () => {
   const props = {
-    fireEvent: jest.fn(),
+    fireEvent: vi.fn(),
     table: {
       columns: [],
       rows: [],
@@ -42,8 +51,8 @@ describe('TableVisBasic', () => {
         direction: null,
       },
       columnsWidth: [],
-      setColumnsWidth: jest.fn(),
-      setSort: jest.fn(),
+      setColumnsWidth: vi.fn(),
+      setSort: vi.fn(),
     },
   };
 
@@ -69,7 +78,7 @@ describe('TableVisBasic', () => {
   });
 
   it('should sort rows by column and pass the sorted rows for consumers', () => {
-    (createTableVisCell as jest.Mock).mockClear();
+    (createTableVisCell as Mock).mockClear();
     const uiStateProps = {
       ...props.uiStateProps,
       sort: {

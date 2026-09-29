@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -13,18 +16,27 @@ import type { Index, PolicyFromES } from '../../../common/types';
 import { loadPolicies } from '../../application/services/api';
 import { AddLifecyclePolicyConfirmModal } from './add_lifecycle_confirm_modal';
 
-jest.mock('../../application/services/api', () => ({
-  loadPolicies: jest.fn(),
-  addLifecyclePolicyToIndex: jest.fn(),
-}));
+vi.mock('../../application/services/api', () => {
+      const mocked = {
+      loadPolicies: vi.fn(),
+      addLifecyclePolicyToIndex: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../application/services/api_errors', () => ({
-  showApiError: jest.fn(),
-}));
+vi.mock('../../application/services/api_errors', () => {
+      const mocked = {
+      showApiError: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../application/services/notification', () => ({
-  toasts: { addSuccess: jest.fn() },
-}));
+vi.mock('../../application/services/notification', () => {
+      const mocked = {
+      toasts: { addSuccess: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const rolloverPolicy: PolicyFromES = {
   name: 'rollover-policy',
@@ -49,8 +61,8 @@ const renderModal = (index: Index) =>
     <AddLifecyclePolicyConfirmModal
       indexName={index.name}
       index={index}
-      closeModal={jest.fn()}
-      reloadIndices={jest.fn()}
+      closeModal={vi.fn()}
+      reloadIndices={vi.fn()}
       getUrlForApp={getUrlForApp}
     />
   );
@@ -63,8 +75,8 @@ const selectRolloverPolicy = async () => {
 
 describe('AddLifecyclePolicyConfirmModal', () => {
   beforeEach(() => {
-    (loadPolicies as jest.Mock).mockReset();
-    (loadPolicies as jest.Mock).mockResolvedValue([rolloverPolicy]);
+    (loadPolicies as Mock).mockReset();
+    (loadPolicies as Mock).mockResolvedValue([rolloverPolicy]);
   });
 
   it('does not crash and warns when aliases is undefined and a rollover policy is selected', async () => {

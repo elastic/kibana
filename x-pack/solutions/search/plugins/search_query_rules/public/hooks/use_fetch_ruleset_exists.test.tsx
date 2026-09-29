@@ -5,26 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 
-const mockHttpGet = jest.fn();
+const mockHttpGet = vi.fn();
 
-jest.mock('./use_kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      http: {
-        get: mockHttpGet,
-      },
-    },
-  }),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          http: {
+            get: mockHttpGet,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useFetchQueryRulesetExist Hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => {
@@ -33,9 +38,9 @@ describe('useFetchQueryRulesetExist Hook', () => {
   };
 
   it('should run onNoConflict when ruleset does not exist', async () => {
-    const { useFetchQueryRulesetExist } = jest.requireActual('./use_fetch_ruleset_exists');
-    const onNoConflict = jest.fn();
-    const onConflict = jest.fn();
+    const { useFetchQueryRulesetExist } = (await vi.importActual('./use_fetch_ruleset_exists'));
+    const onNoConflict = vi.fn();
+    const onConflict = vi.fn();
 
     mockHttpGet.mockResolvedValue({ exists: false });
     const { result } = renderHook(
@@ -55,9 +60,9 @@ describe('useFetchQueryRulesetExist Hook', () => {
   });
 
   it('should run onConflict when ruleset exists', async () => {
-    const { useFetchQueryRulesetExist } = jest.requireActual('./use_fetch_ruleset_exists');
-    const onNoConflict = jest.fn();
-    const onConflict = jest.fn();
+    const { useFetchQueryRulesetExist } = (await vi.importActual('./use_fetch_ruleset_exists'));
+    const onNoConflict = vi.fn();
+    const onConflict = vi.fn();
 
     mockHttpGet.mockResolvedValue({ exists: true });
 

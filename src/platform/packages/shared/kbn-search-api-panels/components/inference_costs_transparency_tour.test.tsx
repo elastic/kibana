@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -15,20 +18,23 @@ import { InferenceCostsTransparencyTour } from './inference_costs_transparency_t
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
 import * as i18n from '../translations';
 
-jest.mock('../hooks/use_show_eis_promotional_content');
+vi.mock('../hooks/use_show_eis_promotional_content');
 
-const mockToursIsEnabled = jest.fn(() => true);
-jest.mock('../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      notifications: {
-        tours: {
-          isEnabled: mockToursIsEnabled,
+const mockToursIsEnabled = vi.fn(() => true);
+vi.mock('../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          notifications: {
+            tours: {
+              isEnabled: mockToursIsEnabled,
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('InferenceCostsTransparencyTour', () => {
   const promoId = 'tokenPromo';
@@ -50,14 +56,14 @@ describe('InferenceCostsTransparencyTour', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockToursIsEnabled.mockReturnValue(true);
   });
 
   it('renders children only when promo is not visible', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: false,
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
 
     renderComponent();
@@ -70,9 +76,9 @@ describe('InferenceCostsTransparencyTour', () => {
   });
 
   it('renders children and does not render the tour when isReady is false', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true, // would normally show the tour
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
 
     renderComponent({ isReady: false });
@@ -85,9 +91,9 @@ describe('InferenceCostsTransparencyTour', () => {
   });
 
   it('renders children and does not render the tour when tours is disabled', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
     mockToursIsEnabled.mockReturnValue(false);
 
@@ -101,9 +107,9 @@ describe('InferenceCostsTransparencyTour', () => {
   });
 
   it('renders the tour when promo is visible', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
 
     renderComponent();
@@ -118,9 +124,9 @@ describe('InferenceCostsTransparencyTour', () => {
   it('renders CTA button and passes href when ctaLink is provided', () => {
     const ctaLink = 'https://elastic.co/example';
 
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
 
     renderComponent({ ctaLink });
@@ -133,9 +139,9 @@ describe('InferenceCostsTransparencyTour', () => {
   });
 
   it('does not render CTA button when ctaLink is undefined', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
 
     renderComponent({ ctaLink: undefined });
@@ -146,11 +152,11 @@ describe('InferenceCostsTransparencyTour', () => {
 
   it('removes the tour from DOM after clicking close, children remain', () => {
     let visible = true;
-    const mockOnDismissPromo = jest.fn(() => {
+    const mockOnDismissPromo = vi.fn(() => {
       visible = false;
     });
 
-    (useShowEisPromotionalContent as jest.Mock).mockImplementation(() => ({
+    (useShowEisPromotionalContent as Mock).mockImplementation(() => ({
       get isPromoVisible() {
         return visible;
       },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { createCasesClientMockArgs } from '../../client/mocks';
 import { userProfiles } from '../../client/user_profiles.mock';
@@ -21,7 +23,7 @@ describe('EmailNotificationService', () => {
   let emailNotificationService: EmailNotificationService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     notifications.isEmailServiceAvailable.mockReturnValue(true);
     clientArgs.securityStartPlugin.userProfiles.bulkGet.mockResolvedValue(userProfiles);
 

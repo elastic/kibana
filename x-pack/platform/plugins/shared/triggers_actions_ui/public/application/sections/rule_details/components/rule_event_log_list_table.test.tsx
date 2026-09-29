@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { fireEvent, render, screen, waitFor, cleanup } from '@testing-library/react';
@@ -21,25 +24,35 @@ import { getJsDomPerformanceFix } from '../../test_utils';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../lib/rule_api/load_action_error_log', () => ({
-  loadActionErrorLog: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
-  loadExecutionLogAggregations: jest.fn(),
-}));
-jest.mock('../../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn(),
-}));
-jest.mock('../../../hooks/use_load_rule_event_logs', () => ({
-  useLoadRuleEventLogs: jest.fn(),
-}));
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../lib/rule_api/load_action_error_log', () => {
+      const mocked = {
+      loadActionErrorLog: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/load_execution_log_aggregations', () => {
+      const mocked = {
+      loadExecutionLogAggregations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_load_rule_event_logs', () => {
+      const mocked = {
+      useLoadRuleEventLogs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getIsExperimentalFeatureEnabled } = jest.requireMock(
-  '../../../../common/get_experimental_features'
-);
-const { useLoadRuleEventLogs } = jest.requireMock('../../../hooks/use_load_rule_event_logs');
+const { getIsExperimentalFeatureEnabled } = (await vi.importMock('../../../../common/get_experimental_features'));
+const { useLoadRuleEventLogs } = (await vi.importMock('../../../hooks/use_load_rule_event_logs'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,7 +73,7 @@ const RuleEventLogListWithProvider = (props: RuleEventLogListTableProps<'stackMa
   );
 };
 
-const loadActionErrorLogMock = loadActionErrorLog as unknown as jest.MockedFunction<
+const loadActionErrorLogMock = loadActionErrorLog as unknown as MockedFunction<
   typeof loadActionErrorLog
 >;
 const ruleMock = mockRule();
@@ -78,7 +91,7 @@ const mockErrorLogResponse = {
   ],
 };
 
-const mockLoadEventLog = jest.fn();
+const mockLoadEventLog = vi.fn();
 
 const { fix, cleanup: cleanupJsDomePerformanceFix } = getJsDomPerformanceFix();
 
@@ -93,7 +106,7 @@ afterAll(() => {
 describe('rule_event_log_list_table', () => {
   beforeEach(() => {
     getIsExperimentalFeatureEnabled.mockImplementation(() => true);
-    useKibanaMock().services.uiSettings.get = jest.fn().mockImplementation((value: string) => {
+    useKibanaMock().services.uiSettings.get = vi.fn().mockImplementation((value: string) => {
       if (value === 'timepicker:quickRanges') {
         return [
           {
@@ -114,7 +127,7 @@ describe('rule_event_log_list_table', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     cleanup();
   });
 

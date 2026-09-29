@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -14,7 +16,7 @@ import { handleWarnings } from './handle_warnings';
 
 describe('handleWarnings', () => {
   const coreStart = coreMock.createStart();
-  const addWarningSpy = jest.spyOn(coreStart.notifications.toasts, 'addWarning');
+  const addWarningSpy = vi.spyOn(coreStart.notifications.toasts, 'addWarning');
 
   beforeEach(() => {
     addWarningSpy.mockClear();
@@ -64,7 +66,7 @@ describe('handleWarnings', () => {
   });
 
   it('should show notifications for warnings not handled by callback', () => {
-    const callbackMock = jest.fn(() => false);
+    const callbackMock = vi.fn(() => false);
     handleWarnings({
       callback: callbackMock,
       request: {} as unknown as estypes.SearchRequest,
@@ -88,7 +90,7 @@ describe('handleWarnings', () => {
   });
 
   it('should not show notifications for warnings handled by callback', () => {
-    const callbackMock = jest.fn(() => true);
+    const callbackMock = vi.fn(() => true);
     handleWarnings({
       callback: callbackMock,
       request: {} as unknown as estypes.SearchRequest,

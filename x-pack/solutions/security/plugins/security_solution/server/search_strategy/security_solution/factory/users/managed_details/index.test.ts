@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import * as buildQuery from './query.managed_user_details.dsl';
 import { managedUserDetails } from '.';
@@ -141,7 +143,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<ManagedUserFields> = 
 };
 
 describe('userDetails search strategy', () => {
-  const buildManagedUserDetailsQuery = jest.spyOn(buildQuery, 'buildManagedUserDetailsQuery');
+  const buildManagedUserDetailsQuery = vi.spyOn(buildQuery, 'buildManagedUserDetailsQuery');
 
   afterEach(() => {
     buildManagedUserDetailsQuery.mockClear();

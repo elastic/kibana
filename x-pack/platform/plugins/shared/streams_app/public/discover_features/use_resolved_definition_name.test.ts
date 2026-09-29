@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
@@ -13,7 +16,7 @@ import {
   useResolvedDefinitionName,
 } from './use_resolved_definition_name';
 
-const buildClient = (fetchImpl: jest.Mock): StreamsRepositoryClient =>
+const buildClient = (fetchImpl: Mock): StreamsRepositoryClient =>
   ({ fetch: fetchImpl } as unknown as StreamsRepositoryClient);
 
 describe('adaptDocToResolverInputs', () => {
@@ -69,11 +72,11 @@ describe('adaptDocToResolverInputs', () => {
 
 describe('useResolvedDefinitionName', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('resolves the definition via _resolve_index when an index is provided', async () => {
-    const fetchMock = jest.fn().mockResolvedValue({ stream: { name: 'logs.resolved' } });
+    const fetchMock = vi.fn().mockResolvedValue({ stream: { name: 'logs.resolved' } });
     const streamsRepositoryClient = buildClient(fetchMock);
     const { result } = renderHook(() =>
       useResolvedDefinitionName({
@@ -94,7 +97,7 @@ describe('useResolvedDefinitionName', () => {
   });
 
   it('returns the fallback name without probing when CPS is disabled', async () => {
-    const fetchMock = jest.fn();
+    const fetchMock = vi.fn();
     const streamsRepositoryClient = buildClient(fetchMock);
     const { result } = renderHook(() =>
       useResolvedDefinitionName({
@@ -110,7 +113,7 @@ describe('useResolvedDefinitionName', () => {
   });
 
   it('marks the stream as locally existing when CPS probe succeeds', async () => {
-    const fetchMock = jest.fn().mockResolvedValue({});
+    const fetchMock = vi.fn().mockResolvedValue({});
     const streamsRepositoryClient = buildClient(fetchMock);
     const { result } = renderHook(() =>
       useResolvedDefinitionName({
@@ -132,7 +135,7 @@ describe('useResolvedDefinitionName', () => {
   });
 
   it('marks the stream as remote when CPS probe fails', async () => {
-    const fetchMock = jest.fn().mockRejectedValue(new Error('not found'));
+    const fetchMock = vi.fn().mockRejectedValue(new Error('not found'));
     const streamsRepositoryClient = buildClient(fetchMock);
     const { result } = renderHook(() =>
       useResolvedDefinitionName({
@@ -152,7 +155,7 @@ describe('useResolvedDefinitionName', () => {
   });
 
   it('returns undefined when neither index nor fallback are provided', async () => {
-    const fetchMock = jest.fn();
+    const fetchMock = vi.fn();
     const streamsRepositoryClient = buildClient(fetchMock);
     const { result } = renderHook(() =>
       useResolvedDefinitionName({

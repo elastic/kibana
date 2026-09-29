@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 /**
  * SiemMigrationsServiceBase.test.ts
  *
@@ -23,36 +26,51 @@ import { TASK_STATS_POLLING_SLEEP_SECONDS } from '../constants';
 
 // --- Mocks for external modules ---
 
-jest.mock('./capabilities', () => ({
-  getMissingCapabilitiesChecker: jest.fn(() => () => []),
-}));
+vi.mock('./capabilities', () => {
+      const mocked = {
+      getMissingCapabilitiesChecker: vi.fn(() => () => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/experimental_features_service', () => ({
-  ExperimentalFeaturesService: {
-    get: jest.fn(() => ({ siemMigrationsDisabled: false })),
-  },
-}));
+vi.mock('../../../common/experimental_features_service', () => {
+      const mocked = {
+      ExperimentalFeaturesService: {
+        get: vi.fn(() => ({ siemMigrationsDisabled: false })),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_license', () => ({
-  licenseService: {
-    isEnterprise: jest.fn(() => true),
-  },
-}));
+vi.mock('../../../common/hooks/use_license', () => {
+      const mocked = {
+      licenseService: {
+        isEnterprise: vi.fn(() => true),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./notifications/no_connector_notification', () => ({
-  getNoConnectorToast: jest.fn().mockReturnValue({ title: 'No Connector' }),
-}));
+vi.mock('./notifications/no_connector_notification', () => {
+      const mocked = {
+      getNoConnectorToast: vi.fn().mockReturnValue({ title: 'No Connector' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./notifications/missing_capabilities_notification', () => ({
-  getMissingCapabilitiesToast: jest.fn().mockReturnValue({ title: 'Missing Capabilities' }),
-}));
+vi.mock('./notifications/missing_capabilities_notification', () => {
+      const mocked = {
+      getMissingCapabilitiesToast: vi.fn().mockReturnValue({ title: 'Missing Capabilities' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetMissingCapabilitiesChecker = getMissingCapabilitiesChecker as jest.Mock;
+const mockGetMissingCapabilitiesChecker = getMissingCapabilitiesChecker as Mock;
 
-const mockStartMigrationFromStats = jest.fn();
-const mockFetchMigrationStats = jest.fn();
-const mockFetchMigrationsStatsAll = jest.fn();
-const mockSendFinishedMigrationNotification = jest.fn();
+const mockStartMigrationFromStats = vi.fn();
+const mockFetchMigrationStats = vi.fn();
+const mockFetchMigrationsStatsAll = vi.fn();
+const mockSendFinishedMigrationNotification = vi.fn();
 
 class TestMigrationsService extends SiemMigrationsServiceBase<MigrationTaskStats> {
   protected startMigrationFromStats = mockStartMigrationFromStats;
@@ -82,11 +100,11 @@ describe('SiemMigrationsServiceBase', () => {
   let mockNotifications: CoreStart['notifications'];
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create a fake notifications object to spy on toast calls
     mockNotifications = {
-      toasts: { add: jest.fn(), addError: jest.fn(), addSuccess: jest.fn() },
+      toasts: { add: vi.fn(), addError: vi.fn(), addSuccess: vi.fn() },
     } as unknown as CoreStart['notifications'];
 
     // Minimal core stub
@@ -98,7 +116,7 @@ describe('SiemMigrationsServiceBase', () => {
     // Minimal plugins stub with spaces.getActiveSpace returning a fake space
     mockPlugins = {
       spaces: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'test-space' }),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'test-space' }),
       },
     } as unknown as StartPluginsDependencies;
 
@@ -145,7 +163,7 @@ describe('SiemMigrationsServiceBase', () => {
   describe('Polling behavior', () => {
     it('should poll and send a success toast when a migration finishes', async () => {
       // Use fake timers to simulate delays inside the polling loop.
-      jest.useFakeTimers();
+      vi.useFakeTimers();
 
       // Simulate a migration that is first reported as RUNNING and then FINISHED.
       const runningMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.RUNNING };
@@ -153,7 +171,7 @@ describe('SiemMigrationsServiceBase', () => {
 
       // Override getMigrationsStats to return our sequence:
       // First call: running, then finished, then empty array.
-      const getStatsMock = jest
+      const getStatsMock = vi
         .fn()
         .mockResolvedValue([finishedMigration])
         .mockResolvedValueOnce([runningMigration]);
@@ -161,7 +179,7 @@ describe('SiemMigrationsServiceBase', () => {
       service.getMigrationsStats = getStatsMock;
 
       // Ensure a valid connector is present (so that a INTERRUPTED migration would be resumed, if needed)
-      jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
+      vi.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
 
       // Start polling
       service.startPolling();
@@ -170,7 +188,7 @@ describe('SiemMigrationsServiceBase', () => {
       await Promise.resolve();
 
       // Fast-forward the timer by the polling interval
-      jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
+      vi.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
       // Resolve the timeout promise
       await Promise.resolve();
       // Resolve the second getMigrationsStats promise
@@ -182,12 +200,12 @@ describe('SiemMigrationsServiceBase', () => {
       expect(mockSendFinishedMigrationNotification).toHaveBeenCalled();
 
       // Restore real timers.
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     describe('when a interrupted migration is found', () => {
       it('should not start a interrupted migration if migration had errors', async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         const interruptedMigration = {
           id: 'mig-1',
           status: SiemMigrationTaskStatus.INTERRUPTED,
@@ -197,13 +215,13 @@ describe('SiemMigrationsServiceBase', () => {
         };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 
-        service.getMigrationsStats = jest
+        service.getMigrationsStats = vi
           .fn()
           .mockResolvedValue([finishedMigration])
           .mockResolvedValueOnce([interruptedMigration]);
 
-        jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
-        jest.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(false);
+        vi.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
+        vi.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(false);
 
         // Start polling
         service.startPolling();
@@ -212,28 +230,28 @@ describe('SiemMigrationsServiceBase', () => {
         await Promise.resolve();
 
         // Fast-forward the timer by the polling interval
-        jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
+        vi.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
         // Resolve the timeout promise
         await Promise.resolve();
 
         expect(mockStartMigrationFromStats).not.toHaveBeenCalled();
 
         // Restore real timers.
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
       it('should not start a interrupted migration if no connector configured', async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         const interruptedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.INTERRUPTED };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 
-        service.getMigrationsStats = jest
+        service.getMigrationsStats = vi
           .fn()
           .mockResolvedValue([finishedMigration])
           .mockResolvedValueOnce([interruptedMigration]);
 
-        jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue(undefined);
-        jest.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(false);
+        vi.spyOn(service.connectorIdStorage, 'get').mockReturnValue(undefined);
+        vi.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(false);
 
         // Start polling
         service.startPolling();
@@ -242,7 +260,7 @@ describe('SiemMigrationsServiceBase', () => {
         await Promise.resolve();
 
         // Fast-forward the timer by the polling interval
-        jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
+        vi.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
         // Resolve the timeout promise
         await Promise.resolve();
 
@@ -250,19 +268,19 @@ describe('SiemMigrationsServiceBase', () => {
         expect(mockStartMigrationFromStats).not.toHaveBeenCalled();
 
         // Restore real timers.
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
       it('should not start a interrupted migration if user is missing capabilities', async () => {
         // Use fake timers to simulate delays inside the polling loop.
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         // Simulate a migration that is first reported as INTERRUPTED and then FINISHED.
         const interruptedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.INTERRUPTED };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 
         // Override getMigrationsStats to return our sequence:
         // First call: interrupted, then finished, then empty array.
-        const getStatsMock = jest
+        const getStatsMock = vi
           .fn()
           .mockResolvedValue([finishedMigration])
           .mockResolvedValueOnce([interruptedMigration]);
@@ -270,8 +288,8 @@ describe('SiemMigrationsServiceBase', () => {
         service.getMigrationsStats = getStatsMock;
 
         // Ensure a valid connector is present (so that a INTERRUPTED migration would be resumed, if needed)
-        jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
-        jest.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(true);
+        vi.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
+        vi.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(true);
 
         // Start polling
         service.startPolling();
@@ -280,7 +298,7 @@ describe('SiemMigrationsServiceBase', () => {
         await Promise.resolve();
 
         // Fast-forward the timer by the polling interval
-        jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
+        vi.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
         // Resolve the timeout promise
         await Promise.resolve();
 
@@ -288,11 +306,11 @@ describe('SiemMigrationsServiceBase', () => {
         expect(mockStartMigrationFromStats).not.toHaveBeenCalled();
 
         // Restore real timers.
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
       it('should automatically start the interrupted migration with last_execution values', async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         const interruptedMigration = {
           id: 'mig-1',
           status: SiemMigrationTaskStatus.INTERRUPTED,
@@ -303,13 +321,13 @@ describe('SiemMigrationsServiceBase', () => {
         };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 
-        service.getMigrationsStats = jest
+        service.getMigrationsStats = vi
           .fn()
           .mockResolvedValue([finishedMigration])
           .mockResolvedValueOnce([interruptedMigration]);
 
-        jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
-        jest.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(false);
+        vi.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
+        vi.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(false);
 
         // Start polling
         service.startPolling();
@@ -318,7 +336,7 @@ describe('SiemMigrationsServiceBase', () => {
         await Promise.resolve();
 
         // Fast-forward the timer by the polling interval
-        jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
+        vi.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
         // Resolve the timeout promise
         await Promise.resolve();
 
@@ -333,7 +351,7 @@ describe('SiemMigrationsServiceBase', () => {
         });
 
         // Restore real timers.
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
     });
   });

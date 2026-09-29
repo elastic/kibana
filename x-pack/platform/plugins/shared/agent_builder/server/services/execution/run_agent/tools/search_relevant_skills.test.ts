@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { internalTools, ToolResultType } from '@kbn/agent-builder-common';
 import type { ModelProvider } from '@kbn/agent-builder-server/runner';
@@ -26,7 +28,7 @@ describe('createSearchRelevantSkillsTool', () => {
 
   it('exposes the search_relevant_skills id and a query schema', () => {
     const tool = createSearchRelevantSkillsTool({
-      modelProvider: { selectModel: jest.fn() } as unknown as ModelProvider,
+      modelProvider: { selectModel: vi.fn() } as unknown as ModelProvider,
       filteredSkills: [],
       logger,
     });
@@ -35,7 +37,7 @@ describe('createSearchRelevantSkillsTool', () => {
   });
 
   it('returns matching skills as a normal "other" tool result', async () => {
-    const selectModel = jest.fn();
+    const selectModel = vi.fn();
     const tool = createSearchRelevantSkillsTool({
       modelProvider: { selectModel } as unknown as ModelProvider,
       // At/below the small threshold → resolved without a model call.

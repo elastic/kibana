@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -25,13 +27,13 @@ import {
 // TODO: Once these mocks are available, use them instead of hand mocking, https://github.com/elastic/kibana/issues/100715
 // const mockKibanaHttpService = coreMock.createStart().http;
 // import { coreMock } from '../../../../../../../../../../src/core/public/mocks';
-const mockKibanaHttpService = jest.fn();
-const mockShowValueListModal = jest.fn();
+const mockKibanaHttpService = vi.fn();
+const mockShowValueListModal = vi.fn();
 const MockedShowValueListModal = (props: unknown) => {
   mockShowValueListModal(props);
   return <></>;
 };
-const mockStart = jest.fn();
+const mockStart = vi.fn();
 const mockKeywordList: ListSchema = {
   ...getListResponseMock(),
   id: 'keyword_list',
@@ -41,8 +43,8 @@ const mockKeywordList: ListSchema = {
 const mockResult = { ...getFoundListsBySizeSchemaMock() };
 mockResult.smallLists = [...mockResult.smallLists, mockKeywordList];
 mockResult.largeLists = [];
-jest.mock('@kbn/securitysolution-list-hooks', () => {
-  const originalModule = jest.requireActual('@kbn/securitysolution-list-hooks');
+vi.mock('@kbn/securitysolution-list-hooks', async () => {
+  const originalModule = (await vi.importActual('@kbn/securitysolution-list-hooks'));
 
   return {
     ...originalModule,
@@ -63,7 +65,7 @@ describe('AutocompleteFieldListsComponent', () => {
         isClearable={true}
         isDisabled
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('ip')}
         selectedValue="some-list-id"
@@ -85,7 +87,7 @@ describe('AutocompleteFieldListsComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('@tags')}
         selectedValue=""
@@ -113,7 +115,7 @@ describe('AutocompleteFieldListsComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('ip')}
         selectedValue=""
@@ -134,7 +136,7 @@ describe('AutocompleteFieldListsComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('@tags')}
         selectedValue=""
@@ -158,7 +160,7 @@ describe('AutocompleteFieldListsComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('ip')}
         selectedValue=""
@@ -182,7 +184,7 @@ describe('AutocompleteFieldListsComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('ip')}
         selectedValue="some-list-id"
@@ -199,7 +201,7 @@ describe('AutocompleteFieldListsComponent', () => {
   });
 
   test('it invokes "onChange" when option selected', async () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const wrapper = mount(
       <AutocompleteFieldListsComponent
         httpService={mockKibanaHttpService}
@@ -250,7 +252,7 @@ describe('AutocompleteFieldListsComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         selectedField={getField('ip')}
         selectedValue="some-list-id"

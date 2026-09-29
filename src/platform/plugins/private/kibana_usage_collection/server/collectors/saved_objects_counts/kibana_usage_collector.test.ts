@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   Collector,
@@ -31,7 +33,7 @@ describe('kibana_usage', () => {
   const getIndicesForTypes = () => Promise.resolve([kibanaIndex]);
 
   beforeAll(() => registerKibanaUsageCollector(usageCollectionMock, getIndicesForTypes));
-  afterAll(() => jest.clearAllTimers());
+  afterAll(() => vi.clearAllTimers());
 
   afterEach(() => getSavedObjectsCountsMock.mockReset());
 

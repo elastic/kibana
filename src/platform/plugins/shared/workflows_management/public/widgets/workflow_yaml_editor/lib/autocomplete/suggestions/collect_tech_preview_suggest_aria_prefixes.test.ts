@@ -7,50 +7,68 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { collectTechPreviewSuggestAriaPrefixes } from './collect_tech_preview_suggest_aria_prefixes';
 
-jest.mock('../../connectors_cache', () => ({
-  getCachedAllConnectors: jest.fn(),
-}));
+vi.mock('../../connectors_cache', () => {
+      const mocked = {
+      getCachedAllConnectors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../trigger_schemas', () => ({
-  triggerSchemas: {
-    getTriggerDefinitions: jest.fn(),
-  },
-}));
+vi.mock('../../../../../trigger_schemas', () => {
+      const mocked = {
+      triggerSchemas: {
+        getTriggerDefinitions: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows', () => ({
-  builtInStepDefinitions: [
-    { id: 'workflow.execute' },
-    { id: 'workflow.executeAsync' },
-    { id: 'wait' },
-  ],
-  getBuiltInStepStability: jest.fn((type: string) => {
-    if (type === 'workflow.execute' || type === 'workflow.executeAsync') {
-      return 'tech_preview';
-    }
-    return undefined;
-  }),
-}));
+vi.mock('@kbn/workflows', () => {
+      const mocked = {
+      builtInStepDefinitions: [
+        { id: 'workflow.execute' },
+        { id: 'workflow.executeAsync' },
+        { id: 'wait' },
+      ],
+      getBuiltInStepStability: vi.fn((type: string) => {
+        if (type === 'workflow.execute' || type === 'workflow.executeAsync') {
+          return 'tech_preview';
+        }
+        return undefined;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../get_stability_note', () => {
-  const actual = jest.requireActual('../../get_stability_note');
+vi.mock('../../get_stability_note', async () => {
+  const actual = (await vi.importActual('../../get_stability_note'));
   return {
     getExtensionStability: actual.getExtensionStability,
   };
 });
 
-jest.mock('../../../../../../common/step_schemas', () => ({
-  stepSchemas: {
-    getAllRegisteredStepDefinitions: jest.fn(() => []),
-  },
-}));
+vi.mock('../../../../../../common/step_schemas', () => {
+      const mocked = {
+      stepSchemas: {
+        getAllRegisteredStepDefinitions: vi.fn(() => []),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../common/step_schemas', () => ({
-  stepSchemas: {
-    getAllRegisteredStepDefinitions: jest.fn(() => []),
-  },
-}));
+vi.mock('../../../../../../common/step_schemas', () => {
+      const mocked = {
+      stepSchemas: {
+        getAllRegisteredStepDefinitions: vi.fn(() => []),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { stepSchemas } from '../../../../../../common/step_schemas';
 import { triggerSchemas } from '../../../../../trigger_schemas';
@@ -58,11 +76,11 @@ import { getCachedAllConnectors } from '../../connectors_cache';
 
 describe('collectTechPreviewSuggestAriaPrefixes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (triggerSchemas.getTriggerDefinitions as jest.Mock).mockReturnValue([
+    vi.clearAllMocks();
+    (triggerSchemas.getTriggerDefinitions as Mock).mockReturnValue([
       { id: 'cases.caseCreated', title: 'Cases - Case created', stability: 'tech_preview' },
     ]);
-    (getCachedAllConnectors as jest.Mock).mockReturnValue([
+    (getCachedAllConnectors as Mock).mockReturnValue([
       {
         type: 'kibana.streams.list',
         summary: 'List Streams',
@@ -91,7 +109,7 @@ describe('collectTechPreviewSuggestAriaPrefixes', () => {
   });
 
   it('includes dynamic connector display name prefixes', () => {
-    (getCachedAllConnectors as jest.Mock).mockReturnValue([
+    (getCachedAllConnectors as Mock).mockReturnValue([
       {
         type: 'my.custom.connector',
         summary: 'My Custom connector',
@@ -106,7 +124,7 @@ describe('collectTechPreviewSuggestAriaPrefixes', () => {
   });
 
   it('includes extension step ids marked tech preview', () => {
-    (stepSchemas.getAllRegisteredStepDefinitions as jest.Mock).mockReturnValue([
+    (stepSchemas.getAllRegisteredStepDefinitions as Mock).mockReturnValue([
       { id: 'custom.stable', stability: 'stable' },
       { id: 'custom.experimental' },
     ]);

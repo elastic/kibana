@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { parseAndValidateSchedule } from './add_schedule';
 import { loggerMock } from '@kbn/logging-mocks';
 import { defaultSchedule } from '../state';
@@ -13,7 +15,7 @@ const mockLogger = loggerMock.create();
 
 describe('parseAndValidateSchedule', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('valid inputs', () => {

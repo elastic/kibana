@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, act, waitFor } from '@testing-library/react';
 import type { DataViewFieldBase } from '@kbn/es-query';
@@ -26,25 +29,28 @@ import {
 import { useUpdateRule } from '../../../../detection_engine/rule_management/logic/use_update_rule';
 import { useHighlightedFields } from '../hooks/use_highlighted_fields';
 
-jest.mock(
+vi.mock(
   '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message'
 );
-jest.mock('../../../../detection_engine/rule_creation_ui/pages/form');
-jest.mock('../../../../detection_engine/rule_management/logic/use_update_rule');
-jest.mock('../hooks/use_highlighted_fields');
-jest.mock('../../../rule/main/hooks/use_rule_details');
+vi.mock('../../../../detection_engine/rule_creation_ui/pages/form');
+vi.mock('../../../../detection_engine/rule_management/logic/use_update_rule');
+vi.mock('../hooks/use_highlighted_fields');
+vi.mock('../../../rule/main/hooks/use_rule_details');
 
-const mockAddSuccess = jest.fn();
-jest.mock('../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addSuccess: mockAddSuccess,
-  }),
-}));
+const mockAddSuccess = vi.fn();
+vi.mock('../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addSuccess: mockAddSuccess,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSetIsEditLoading = jest.fn();
-const mockSetIsModalVisible = jest.fn();
+const mockSetIsEditLoading = vi.fn();
+const mockSetIsModalVisible = vi.fn();
 const mockFieldOptions = [{ name: 'field1' }, { name: 'field2' }] as DataViewFieldBase[];
-const mockUpdateRule = jest.fn();
+const mockUpdateRule = vi.fn();
 const mockRule = { id: '123', name: 'test rule' } as RuleResponse;
 
 const defaultProps = {
@@ -66,20 +72,20 @@ const renderHighlighedFieldsModal = (props = defaultProps) =>
 
 describe('<HighlighedFieldsModal />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (usePrebuiltRuleCustomizationUpsellingMessage as jest.Mock).mockReturnValue('upsell message');
-    (useRuleIndexPattern as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (usePrebuiltRuleCustomizationUpsellingMessage as Mock).mockReturnValue('upsell message');
+    (useRuleIndexPattern as Mock).mockReturnValue({
       indexPattern: { fields: [{ name: 'option1' }, { name: 'option2' }] },
       isIndexPatternLoading: false,
     });
-    (useUpdateRule as jest.Mock).mockReturnValue({
-      mutateAsync: jest.fn(),
+    (useUpdateRule as Mock).mockReturnValue({
+      mutateAsync: vi.fn(),
     });
-    (useHighlightedFields as jest.Mock).mockReturnValue({
+    (useHighlightedFields as Mock).mockReturnValue({
       default1: { values: ['test'] },
       default2: { values: ['test2'] },
     });
-    (useRuleIndexPattern as jest.Mock).mockReturnValue({
+    (useRuleIndexPattern as Mock).mockReturnValue({
       indexPattern: { fields: mockFieldOptions },
       isIndexPatternLoading: false,
     });
@@ -123,7 +129,7 @@ describe('<HighlighedFieldsModal />', () => {
   });
 
   it('should update rule when save button is clicked', async () => {
-    (useUpdateRule as jest.Mock).mockReturnValue({ mutateAsync: mockUpdateRule });
+    (useUpdateRule as Mock).mockReturnValue({ mutateAsync: mockUpdateRule });
     mockUpdateRule.mockResolvedValue({
       name: 'updated rule',
     } as RuleResponse);

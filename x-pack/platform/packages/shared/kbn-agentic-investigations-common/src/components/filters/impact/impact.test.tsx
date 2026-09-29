@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -34,7 +36,7 @@ describe('Impact', () => {
       <Impact
         investigations={[investigation()]}
         entityFilter={null}
-        onEntityFilterChange={jest.fn()}
+        onEntityFilterChange={vi.fn()}
       />
     );
 
@@ -49,7 +51,7 @@ describe('Impact', () => {
           investigation({ id: 'inv-2', entityIds: ['alpha', 'zeta'] }),
         ]}
         entityFilter={null}
-        onEntityFilterChange={jest.fn()}
+        onEntityFilterChange={vi.fn()}
       />
     );
 
@@ -59,7 +61,7 @@ describe('Impact', () => {
   });
 
   it('selects a pill and clears it on the second click', () => {
-    const onEntityFilterChange = jest.fn();
+    const onEntityFilterChange = vi.fn();
     const investigations = [investigation({ entityIds: ['host-1'] })];
 
     const { unmount } = renderWithKibanaRenderContext(

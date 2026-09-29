@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { CreateOnlineEvalFlyout } from '.';
@@ -13,11 +15,11 @@ import { useEvaluators } from '../../hooks/use_experiments_api';
 import { useModelConnectors } from '../../hooks/use_model_connectors';
 import { parseOnlineEvalWorkflowYaml } from '../../../common/online_evals/workflow_yaml';
 
-jest.mock('../../hooks/use_online_eval_workflows');
-jest.mock('../../hooks/use_experiments_api');
-jest.mock('../../hooks/use_model_connectors');
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('../../hooks/use_online_eval_workflows');
+vi.mock('../../hooks/use_experiments_api');
+vi.mock('../../hooks/use_model_connectors');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
 
   const MockEuiComboBox = ({
     options = [],
@@ -81,13 +83,13 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const mockedUseCreateOnlineEvalWorkflow = jest.mocked(useCreateOnlineEvalWorkflow);
-const mockedUseEvaluators = jest.mocked(useEvaluators);
-const mockedUseModelConnectors = jest.mocked(useModelConnectors);
+const mockedUseCreateOnlineEvalWorkflow = vi.mocked(useCreateOnlineEvalWorkflow);
+const mockedUseEvaluators = vi.mocked(useEvaluators);
+const mockedUseModelConnectors = vi.mocked(useModelConnectors);
 
 describe('CreateOnlineEvalFlyout', () => {
-  const mutateAsync = jest.fn();
-  const onClose = jest.fn();
+  const mutateAsync = vi.fn();
+  const onClose = vi.fn();
   let container: HTMLElement;
 
   beforeEach(() => {

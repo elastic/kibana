@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedClass } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -13,13 +16,13 @@ import { EmailServiceProvider } from './connectors_email_service_provider';
 import { ConnectorsEmailService } from './connectors_email_service';
 import { PLUGIN_ID } from '../../common';
 
-jest.mock('./licensed_email_service');
-jest.mock('./connectors_email_service');
+vi.mock('./licensed_email_service');
+vi.mock('./connectors_email_service');
 
-const licensedEmailServiceMock = LicensedEmailService as jest.MockedClass<
+const licensedEmailServiceMock = LicensedEmailService as MockedClass<
   typeof LicensedEmailService
 >;
-const connectorsEmailServiceMock = ConnectorsEmailService as jest.MockedClass<
+const connectorsEmailServiceMock = ConnectorsEmailService as MockedClass<
   typeof ConnectorsEmailService
 >;
 

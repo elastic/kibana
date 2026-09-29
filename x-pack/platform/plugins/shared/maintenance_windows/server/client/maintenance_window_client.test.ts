@@ -5,41 +5,70 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-jest.mock('../application/methods/create/create_maintenance_window', () => ({
-  createMaintenanceWindow: jest.fn().mockResolvedValue({ id: 'mw-1' }),
-}));
-jest.mock('../application/methods/get/get_maintenance_window', () => ({
-  getMaintenanceWindow: jest.fn(),
-}));
-jest.mock('../application/methods/update/update_maintenance_window', () => ({
-  updateMaintenanceWindow: jest.fn().mockResolvedValue({ id: 'mw-1' }),
-}));
-jest.mock('../application/methods/find/find_maintenance_windows', () => ({
-  findMaintenanceWindows: jest.fn(),
-}));
-jest.mock('../application/methods/delete/delete_maintenance_window', () => ({
-  deleteMaintenanceWindow: jest.fn().mockResolvedValue({}),
-}));
-jest.mock('../application/methods/archive/archive_maintenance_window', () => ({
-  archiveMaintenanceWindow: jest.fn().mockResolvedValue({ id: 'mw-1' }),
-}));
-jest.mock('../application/methods/finish/finish_maintenance_window', () => ({
-  finishMaintenanceWindow: jest.fn().mockResolvedValue({ id: 'mw-1' }),
-}));
-jest.mock('../application/methods/get_active/get_active_maintenance_windows', () => ({
-  getActiveMaintenanceWindows: jest.fn(),
-}));
-jest.mock('../application/methods/bulk_get/bulk_get_maintenance_windows', () => ({
-  bulkGetMaintenanceWindows: jest.fn(),
-}));
+vi.mock('../application/methods/create/create_maintenance_window', () => {
+      const mocked = {
+      createMaintenanceWindow: vi.fn().mockResolvedValue({ id: 'mw-1' }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../application/methods/get/get_maintenance_window', () => {
+      const mocked = {
+      getMaintenanceWindow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../application/methods/update/update_maintenance_window', () => {
+      const mocked = {
+      updateMaintenanceWindow: vi.fn().mockResolvedValue({ id: 'mw-1' }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../application/methods/find/find_maintenance_windows', () => {
+      const mocked = {
+      findMaintenanceWindows: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../application/methods/delete/delete_maintenance_window', () => {
+      const mocked = {
+      deleteMaintenanceWindow: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../application/methods/archive/archive_maintenance_window', () => {
+      const mocked = {
+      archiveMaintenanceWindow: vi.fn().mockResolvedValue({ id: 'mw-1' }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../application/methods/finish/finish_maintenance_window', () => {
+      const mocked = {
+      finishMaintenanceWindow: vi.fn().mockResolvedValue({ id: 'mw-1' }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../application/methods/get_active/get_active_maintenance_windows', () => {
+      const mocked = {
+      getActiveMaintenanceWindows: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../application/methods/bulk_get/bulk_get_maintenance_windows', () => {
+      const mocked = {
+      bulkGetMaintenanceWindows: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { MaintenanceWindowClient } from './maintenance_window_client';
 
 describe('MaintenanceWindowClient notifyChange', () => {
   it('notifies after create, update, delete, archive, and finish', async () => {
-    const notifyChange = jest.fn();
+    const notifyChange = vi.fn();
     const client = new MaintenanceWindowClient({
       logger: loggingSystemMock.createLogger(),
       savedObjectsClient: savedObjectsClientMock.create(),
@@ -58,12 +87,10 @@ describe('MaintenanceWindowClient notifyChange', () => {
   });
 
   it('does not notify when create fails', async () => {
-    const { createMaintenanceWindow } = jest.requireMock(
-      '../application/methods/create/create_maintenance_window'
-    );
+    const { createMaintenanceWindow } = (await vi.importMock('../application/methods/create/create_maintenance_window'));
     createMaintenanceWindow.mockRejectedValueOnce(new Error('create failed'));
 
-    const notifyChange = jest.fn();
+    const notifyChange = vi.fn();
     const client = new MaintenanceWindowClient({
       logger: loggingSystemMock.createLogger(),
       savedObjectsClient: savedObjectsClientMock.create(),

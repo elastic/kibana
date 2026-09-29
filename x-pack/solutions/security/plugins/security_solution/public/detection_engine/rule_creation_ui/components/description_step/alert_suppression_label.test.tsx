@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { screen, render } from '@testing-library/react';
 import React from 'react';
 
@@ -12,12 +15,15 @@ import { AlertSuppressionLabel } from './alert_suppression_label';
 
 import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 
-jest.mock('../../../../common/hooks/use_upselling');
-jest.mock('../../../../../common/detection_engine/utils', () => ({
-  isSuppressionRuleInGA: jest.fn(),
-}));
+vi.mock('../../../../common/hooks/use_upselling');
+vi.mock('../../../../../common/detection_engine/utils', () => {
+      const mocked = {
+      isSuppressionRuleInGA: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const isSuppressionRuleInGAMock = isSuppressionRuleInGA as jest.Mock;
+const isSuppressionRuleInGAMock = isSuppressionRuleInGA as Mock;
 
 describe('component: AlertSuppressionLabel', () => {
   it('should render technical preview when rule type suppression is not in GA', () => {

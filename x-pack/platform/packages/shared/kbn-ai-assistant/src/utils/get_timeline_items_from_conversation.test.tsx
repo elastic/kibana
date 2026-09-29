@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { last, pick } from 'lodash';
 import { render } from '@testing-library/react';
@@ -43,7 +45,7 @@ describe('getTimelineItemsFromConversation', () => {
       hasConnector: true,
       messages: [],
       chatState: ChatState.Ready,
-      onActionClick: jest.fn(),
+      onActionClick: vi.fn(),
       isArchived: false,
     });
 
@@ -71,7 +73,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
-        onActionClick: jest.fn(),
+        onActionClick: vi.fn(),
         isArchived: false,
       });
     });
@@ -140,7 +142,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
-        onActionClick: jest.fn(),
+        onActionClick: vi.fn(),
         isArchived: false,
       });
     });
@@ -218,7 +220,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
-        onActionClick: jest.fn(),
+        onActionClick: vi.fn(),
         isArchived: false,
       });
     });
@@ -272,7 +274,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
-        onActionClick: jest.fn(),
+        onActionClick: vi.fn(),
         isArchived: false,
       });
     });
@@ -349,7 +351,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
-        onActionClick: jest.fn(),
+        onActionClick: vi.fn(),
         isArchived: false,
       });
     });
@@ -416,7 +418,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
-        onActionClick: jest.fn(),
+        onActionClick: vi.fn(),
         isArchived: false,
       });
     });
@@ -468,7 +470,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
-        onActionClick: jest.fn(),
+        onActionClick: vi.fn(),
         isArchived: false,
       });
     });
@@ -521,7 +523,7 @@ describe('getTimelineItemsFromConversation', () => {
           },
           ...extraMessages,
         ],
-        onActionClick: jest.fn(),
+        onActionClick: vi.fn(),
         isArchived: false,
       });
     };

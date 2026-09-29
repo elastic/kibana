@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Subject, ReplaySubject, of } from 'rxjs';
 import { ResourceInstaller } from './resource_installer';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -79,12 +81,12 @@ describe('resourceInstaller', () => {
       describe('if write is disabled', () => {
         it('should not install common resources', async () => {
           const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
             isWriteEnabled: false,
             disabledRegistrationContexts: [],
-            getResourceName: jest.fn(),
+            getResourceName: vi.fn(),
             getClusterClient,
             frameworkAlerts: frameworkAlertsService,
             pluginStop$,
@@ -97,13 +99,13 @@ describe('resourceInstaller', () => {
 
         it('should not install index level resources', async () => {
           const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
 
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
             isWriteEnabled: false,
             disabledRegistrationContexts: [],
-            getResourceName: jest.fn(),
+            getResourceName: vi.fn(),
             getClusterClient,
             frameworkAlerts: frameworkAlertsService,
             pluginStop$,
@@ -131,12 +133,12 @@ describe('resourceInstaller', () => {
       describe('if write is enabled', () => {
         it('should install common resources', async () => {
           const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
             isWriteEnabled: true,
             disabledRegistrationContexts: [],
-            getResourceName: jest.fn(),
+            getResourceName: vi.fn(),
             getClusterClient,
             frameworkAlerts: frameworkAlertsService,
             pluginStop$,
@@ -162,14 +164,14 @@ describe('resourceInstaller', () => {
 
         it('should not install common resources if ES is not ready', async () => {
           const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
           const test$ = new Subject<boolean>();
 
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
             isWriteEnabled: true,
             disabledRegistrationContexts: [],
-            getResourceName: jest.fn(),
+            getResourceName: vi.fn(),
             getClusterClient,
             frameworkAlerts: frameworkAlertsService,
             pluginStop$,
@@ -189,12 +191,12 @@ describe('resourceInstaller', () => {
 
         it('should install subset of common resources when framework alerts are enabled', async () => {
           const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
             isWriteEnabled: true,
             disabledRegistrationContexts: [],
-            getResourceName: jest.fn(),
+            getResourceName: vi.fn(),
             getClusterClient,
             frameworkAlerts: {
               ...frameworkAlertsService,
@@ -219,12 +221,12 @@ describe('resourceInstaller', () => {
 
         it('should install index level resources', async () => {
           const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
             isWriteEnabled: true,
             disabledRegistrationContexts: [],
-            getResourceName: jest.fn(),
+            getResourceName: vi.fn(),
             getClusterClient,
             frameworkAlerts: frameworkAlertsService,
             pluginStop$,
@@ -253,12 +255,12 @@ describe('resourceInstaller', () => {
 
         it('should not install index level component template when framework alerts are enabled', async () => {
           const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
             isWriteEnabled: true,
             disabledRegistrationContexts: [],
-            getResourceName: jest.fn(),
+            getResourceName: vi.fn(),
             getClusterClient,
             frameworkAlerts: {
               ...frameworkAlertsService,
@@ -306,12 +308,12 @@ describe('resourceInstaller', () => {
           mockClusterClient.indices.getDataStream.mockImplementation(async () => ({
             data_streams: [],
           }));
-          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
             isWriteEnabled: true,
             disabledRegistrationContexts: [],
-            getResourceName: jest.fn(),
+            getResourceName: vi.fn(),
             getClusterClient,
             frameworkAlerts: frameworkAlertsService,
             pluginStop$,
@@ -369,12 +371,12 @@ describe('resourceInstaller', () => {
 
         it('should not install namespace level resources for the default space when framework alerts are available', async () => {
           const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
             isWriteEnabled: true,
             disabledRegistrationContexts: [],
-            getResourceName: jest.fn(),
+            getResourceName: vi.fn(),
             getClusterClient,
             frameworkAlerts: {
               ...frameworkAlertsService,
@@ -408,12 +410,12 @@ describe('resourceInstaller', () => {
 
         it('should throw error if framework was unable to install namespace level resources', async () => {
           const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
             isWriteEnabled: true,
             disabledRegistrationContexts: [],
-            getResourceName: jest.fn(),
+            getResourceName: vi.fn(),
             getClusterClient,
             frameworkAlerts: {
               ...frameworkAlertsService,
@@ -450,12 +452,12 @@ describe('resourceInstaller', () => {
 
         it('should not install namespace level resources for non-default space when framework alerts are available', async () => {
           const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
             isWriteEnabled: true,
             disabledRegistrationContexts: [],
-            getResourceName: jest.fn(),
+            getResourceName: vi.fn(),
             getClusterClient,
             frameworkAlerts: {
               ...frameworkAlertsService,
@@ -525,12 +527,12 @@ describe('resourceInstaller', () => {
           mockClusterClient.indices.getDataStream.mockImplementation(async () => ({
             data_streams: [],
           }));
-          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
             isWriteEnabled: true,
             disabledRegistrationContexts: [],
-            getResourceName: jest.fn(),
+            getResourceName: vi.fn(),
             getClusterClient,
             frameworkAlerts: frameworkAlertsService,
             pluginStop$,
@@ -669,12 +671,12 @@ describe('resourceInstaller', () => {
           mockClusterClient.indices.getDataStream.mockImplementation(async () => ({
             data_streams: [],
           }));
-          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
           const installer = new ResourceInstaller({
             logger: loggerMock.create(),
             isWriteEnabled: true,
             disabledRegistrationContexts: [],
-            getResourceName: jest.fn(),
+            getResourceName: vi.fn(),
             getClusterClient,
             frameworkAlerts: frameworkAlertsService,
             pluginStop$,
@@ -827,7 +829,7 @@ describe('resourceInstaller', () => {
             logger,
             isWriteEnabled: true,
             disabledRegistrationContexts: [],
-            getResourceName: jest.fn(),
+            getResourceName: vi.fn(),
             getClusterClient: async () => mockClusterClient,
             frameworkAlerts: frameworkAlertsService,
             pluginStop$,

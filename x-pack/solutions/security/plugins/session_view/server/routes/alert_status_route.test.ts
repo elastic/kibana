@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
@@ -53,7 +55,7 @@ const getResponse = async () => {
 
 describe('alert_status_route.ts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('searchAlertByUuid(client, alertUuid)', () => {

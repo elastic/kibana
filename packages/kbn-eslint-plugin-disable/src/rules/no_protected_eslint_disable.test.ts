@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import dedent from 'dedent';
 import { RuleTester } from 'eslint';
 import {
@@ -14,7 +16,7 @@ import {
   PROTECTED_DISABLE_MSG_ID,
 } from './no_protected_eslint_disable';
 
-jest.mock('../helpers/protected_rules', () => {
+vi.mock('../helpers/protected_rules', () => {
   return {
     PROTECTED_RULES: new Set(['@kbn/disable/no_protected_eslint_disable', 'no-console']),
   };

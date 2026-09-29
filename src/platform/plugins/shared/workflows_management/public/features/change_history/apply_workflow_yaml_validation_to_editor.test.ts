@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { monaco } from '@kbn/code-editor';
 
-jest.mock('../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => ({
-  validateEsqlSteps: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => {
+      const mocked = {
+      validateEsqlSteps: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { BATCHED_CUSTOM_MARKER_OWNER } from '@kbn/workflows-yaml';
@@ -42,12 +48,12 @@ const testValidationContext: WorkflowYamlValidationContext = {
 
 const createMockEditor = (model: monaco.editor.ITextModel): monaco.editor.IStandaloneCodeEditor => {
   const decorationsCollection = {
-    clear: jest.fn(),
+    clear: vi.fn(),
   };
 
   return {
     getModel: () => model,
-    createDecorationsCollection: jest.fn(() => decorationsCollection),
+    createDecorationsCollection: vi.fn(() => decorationsCollection),
   } as unknown as monaco.editor.IStandaloneCodeEditor;
 };
 
@@ -205,7 +211,7 @@ describe('applyWorkflowYamlValidationToEditor', () => {
     expect(validationResults.length).toBeGreaterThan(0);
     expect(decorationsRef.current).not.toBeNull();
     expect(
-      (editor.createDecorationsCollection as jest.Mock).mock.calls[0][0].every(
+      (editor.createDecorationsCollection as Mock).mock.calls[0][0].every(
         (decoration: { options: { marginClassName?: string } }) =>
           decoration.options.marginClassName === undefined
       )
@@ -228,7 +234,7 @@ describe('applyWorkflowYamlValidationToEditor', () => {
     const model = monaco.editor.createModel(yaml, 'yaml');
     const editor = createMockEditor(model);
     const decorationsRef = { current: null as monaco.editor.IEditorDecorationsCollection | null };
-    const createSpy = jest.spyOn(createMarkersAndDecorationsModule, 'createMarkersAndDecorations');
+    const createSpy = vi.spyOn(createMarkersAndDecorationsModule, 'createMarkersAndDecorations');
 
     const { validationResults } = await applyWorkflowYamlValidationFromComputed(
       editor,

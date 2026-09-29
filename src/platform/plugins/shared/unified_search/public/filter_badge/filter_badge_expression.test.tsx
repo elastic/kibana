@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { FilterExpressionBadge } from './filter_badge_expression';
@@ -14,22 +17,31 @@ import { phraseFilter } from '@kbn/data-plugin/common/stubs';
 import { EMPTY_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 
-jest.mock('@kbn/data-plugin/public', () => ({
-  getDisplayValueFromFilter: jest.fn(),
-  getFieldDisplayValueFromFilter: jest.fn(() => ''),
-}));
+vi.mock('@kbn/data-plugin/public', () => {
+      const mocked = {
+      getDisplayValueFromFilter: vi.fn(),
+      getFieldDisplayValueFromFilter: vi.fn(() => ''),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./filter_badge_invalid', () => ({
-  FilterBadgeInvalidPlaceholder: () => <div data-test-subj="invalid-placeholder" />,
-}));
+vi.mock('./filter_badge_invalid', () => {
+      const mocked = {
+      FilterBadgeInvalidPlaceholder: () => <div data-test-subj="invalid-placeholder" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./filter_content', () => ({
-  FilterContent: ({ valueLabel }: { valueLabel: string }) => (
-    <div data-test-subj="filter-content">{valueLabel}</div>
-  ),
-}));
+vi.mock('./filter_content', () => {
+      const mocked = {
+      FilterContent: ({ valueLabel }: { valueLabel: string }) => (
+        <div data-test-subj="filter-content">{valueLabel}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetDisplayValue = getDisplayValueFromFilter as jest.Mock;
+const mockGetDisplayValue = getDisplayValueFromFilter as Mock;
 
 const renderBadge = (displayValue: string) => {
   mockGetDisplayValue.mockReturnValue(displayValue);

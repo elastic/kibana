@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,8 +21,8 @@ const mockLabelOverflow = ({
   clientWidth: number;
 }) => {
   const spies = [
-    jest.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(scrollWidth),
-    jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(clientWidth),
+    vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(scrollWidth),
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(clientWidth),
   ];
   return () => spies.forEach((spy) => spy.mockRestore());
 };
@@ -34,7 +36,7 @@ describe('AttachmentSummaryRow', () => {
   });
 
   describe('with onClick', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
 
     beforeEach(() => onClick.mockClear());
 

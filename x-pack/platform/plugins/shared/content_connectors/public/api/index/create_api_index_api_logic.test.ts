@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
@@ -13,7 +15,7 @@ import { createApiIndex } from './create_api_index_api_logic';
 describe('createApiIndexApiLogic', () => {
   const http = httpServiceMock.createSetupContract();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('createApiIndex', () => {
     it('calls correct api', async () => {

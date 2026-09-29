@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,15 +16,15 @@ import { ShowTableButton } from './show_table_button';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/navigation/hooks');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/navigation/hooks');
 
-const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
-const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
+const useCaseViewParamsMock = useCaseViewParams as Mock;
+const useCaseViewNavigationMock = useCaseViewNavigation as Mock;
 
 describe('case view alert table link', () => {
   it('calls navigateToCaseView with the correct params', async () => {
-    const navigateToCaseView = jest.fn();
+    const navigateToCaseView = vi.fn();
 
     useCaseViewParamsMock.mockReturnValue({ detailName: 'case-id' });
     useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView });

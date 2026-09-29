@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import { useResolutionGroup, RESOLUTION_GROUP_ROUTE } from './use_resolution_group';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
-jest.setTimeout(15000);
+vi.setConfig({ testTimeout: 15000 });
 
-jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFetch = jest.fn();
-(useKibana as jest.Mock).mockReturnValue({ services: { http: { fetch: mockFetch } } });
+const mockFetch = vi.fn();
+(useKibana as Mock).mockReturnValue({ services: { http: { fetch: mockFetch } } });
 
 const createWrapper = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -30,8 +36,8 @@ const createWrapper = () => {
 
 describe('useResolutionGroup', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({ services: { http: { fetch: mockFetch } } });
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({ services: { http: { fetch: mockFetch } } });
   });
 
   it('fetches resolution group with correct params', async () => {

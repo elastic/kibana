@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import {
   fetchObservabilityOverviewPageData,
@@ -13,9 +15,9 @@ import {
 import * as plugin from '../../plugin';
 
 describe('Observability dashboard data', () => {
-  const callApmApiMock = jest.fn();
+  const callApmApiMock = vi.fn();
 
-  jest.spyOn(plugin, 'getApmInternalServices').mockReturnValue({
+  vi.spyOn(plugin, 'getApmInternalServices').mockReturnValue({
     callApmApi: callApmApiMock as any,
   });
   const params = {

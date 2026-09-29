@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render, act, fireEvent, waitFor } from '@testing-library/react';
 import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
@@ -26,20 +28,23 @@ import {
 } from './test_helpers';
 
 // must match to the import in rules/related_integrations/use_integrations.tsx
-jest.mock('../../../fleet_integrations/api');
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      docLinks: {
-        links: {
-          securitySolution: {
-            createDetectionRules: 'http://link-to-docs',
+vi.mock('../../../fleet_integrations/api');
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          docLinks: {
+            links: {
+              securitySolution: {
+                createDetectionRules: 'http://link-to-docs',
+              },
+            },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const RELATED_INTEGRATION_ROW = 'relatedIntegrationRow';
 const COMBO_BOX_TOGGLE_BUTTON_TEST_ID = 'comboBoxToggleListButton';
@@ -334,7 +339,7 @@ describe('RelatedIntegrations form part', () => {
 
     it('shows saved earlier related integrations when API failed', async () => {
       // suppress expected API error messages
-      jest.spyOn(console, 'error').mockReturnValue();
+      vi.spyOn(console, 'error').mockReturnValue();
 
       fleetIntegrationsApi.fetchAllIntegrations.mockRejectedValue(new Error('some error'));
 
@@ -362,7 +367,7 @@ describe('RelatedIntegrations form part', () => {
 
   describe('valid form submitting', () => {
     it('returns undefined when no integrations are selected', async () => {
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm onSubmit={handleSubmit} />, { wrapper: createReactQueryWrapper() });
 
@@ -378,7 +383,7 @@ describe('RelatedIntegrations form part', () => {
     });
 
     it('returns empty integrations when submitting not filled form', async () => {
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm onSubmit={handleSubmit} />, { wrapper: createReactQueryWrapper() });
 
@@ -399,7 +404,7 @@ describe('RelatedIntegrations form part', () => {
     });
 
     it('returns a mix of filled and empty integrations', async () => {
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm onSubmit={handleSubmit} />, { wrapper: createReactQueryWrapper() });
 
@@ -425,7 +430,7 @@ describe('RelatedIntegrations form part', () => {
     });
 
     it('returns an empty integration after clearing selected integration', async () => {
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm onSubmit={handleSubmit} />, { wrapper: createReactQueryWrapper() });
 
@@ -461,7 +466,7 @@ describe('RelatedIntegrations form part', () => {
         ],
       });
 
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm onSubmit={handleSubmit} />, { wrapper: createReactQueryWrapper() });
 
@@ -494,7 +499,7 @@ describe('RelatedIntegrations form part', () => {
         ],
       });
 
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm onSubmit={handleSubmit} />, { wrapper: createReactQueryWrapper() });
 
@@ -544,7 +549,7 @@ describe('RelatedIntegrations form part', () => {
         { package: 'package-a', version: '1.2.3' },
         { package: 'package-b', integration: 'integration-a', version: '3.2.1' },
       ];
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm initialState={initialRelatedIntegrations} onSubmit={handleSubmit} />, {
         wrapper: createReactQueryWrapper(),
@@ -571,7 +576,7 @@ describe('RelatedIntegrations form part', () => {
       const initialRelatedIntegrations: RelatedIntegration[] = [
         { package: 'package-a', version: '1.2.3' },
       ];
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm initialState={initialRelatedIntegrations} onSubmit={handleSubmit} />, {
         wrapper: createReactQueryWrapper(),
@@ -589,14 +594,14 @@ describe('RelatedIntegrations form part', () => {
 
     it('returns a saved earlier integration when API failed', async () => {
       // suppress expected API error messages
-      jest.spyOn(console, 'error').mockReturnValue();
+      vi.spyOn(console, 'error').mockReturnValue();
 
       fleetIntegrationsApi.fetchAllIntegrations.mockRejectedValue(new Error('some error'));
 
       const initialRelatedIntegrations: RelatedIntegration[] = [
         { package: 'package-a', version: '^1.2.3' },
       ];
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm initialState={initialRelatedIntegrations} onSubmit={handleSubmit} />, {
         wrapper: createReactQueryWrapper(),
@@ -658,7 +663,7 @@ describe('RelatedIntegrations form part', () => {
       });
 
       it('submits an empty integration when just added integrations removed', async () => {
-        const handleSubmit = jest.fn();
+        const handleSubmit = vi.fn();
 
         render(<TestForm onSubmit={handleSubmit} />, { wrapper: createReactQueryWrapper() });
 

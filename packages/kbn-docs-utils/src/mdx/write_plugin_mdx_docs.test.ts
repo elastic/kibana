@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import Fsp from 'fs/promises';
 import { ToolingLog } from '@kbn/tooling-log';
 import { writePluginDocs, writePluginDoc } from './write_plugin_mdx_docs';
@@ -18,12 +21,15 @@ import {
   createMockPluginApi,
 } from '../__test_helpers__/mocks';
 
-jest.mock('fs/promises');
-jest.mock('./write_plugin_split_by_folder', () => ({
-  writePluginDocSplitByFolder: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('fs/promises');
+vi.mock('./write_plugin_split_by_folder', () => {
+      const mocked = {
+      writePluginDocSplitByFolder: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFsp = Fsp as jest.Mocked<typeof Fsp>;
+const mockFsp = Fsp as Mocked<typeof Fsp>;
 
 const log = new ToolingLog({
   level: 'debug',
@@ -32,7 +38,7 @@ const log = new ToolingLog({
 
 describe('writePluginMdxDocs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFsp.writeFile.mockResolvedValue(undefined);
   });
 

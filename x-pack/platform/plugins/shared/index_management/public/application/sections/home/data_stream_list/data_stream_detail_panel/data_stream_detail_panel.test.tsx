@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { waitFor, within } from '@testing-library/react';
@@ -28,29 +30,32 @@ import {
 } from './data_stream_detail_panel.test_helpers';
 
 // Mock dependencies
-jest.mock('../../../../services/api');
-jest.mock('../../../../app_context');
-jest.mock('../../../../services/use_ilm_locator');
-jest.mock('../../../../services/use_request');
-jest.mock('./streams_promotion', () => ({
-  StreamsPromotion: () => null,
-}));
+vi.mock('../../../../services/api');
+vi.mock('../../../../app_context');
+vi.mock('../../../../services/use_ilm_locator');
+vi.mock('../../../../services/use_request');
+vi.mock('./streams_promotion', () => {
+      const mocked = {
+      StreamsPromotion: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseLoadDataStream = jest.mocked(useLoadDataStream);
-const mockLoadSnapshotRepositories = jest.mocked(loadSnapshotRepositories);
-const mockUseAppContext = jest.mocked(useAppContext);
-const mockSendRequest = jest.mocked(sendRequest);
-const mockUpdateDataLifecycle = jest.mocked(updateDataLifecycle);
-const mockUpdateDSFailureStore = jest.mocked(updateDSFailureStore);
-const mockUpdateDataStreamSettings = jest.mocked(updateDataStreamSettings);
-const mockUpdateIndexSettings = jest.mocked(updateIndexSettings);
+const mockUseLoadDataStream = vi.mocked(useLoadDataStream);
+const mockLoadSnapshotRepositories = vi.mocked(loadSnapshotRepositories);
+const mockUseAppContext = vi.mocked(useAppContext);
+const mockSendRequest = vi.mocked(sendRequest);
+const mockUpdateDataLifecycle = vi.mocked(updateDataLifecycle);
+const mockUpdateDSFailureStore = vi.mocked(updateDSFailureStore);
+const mockUpdateDataStreamSettings = vi.mocked(updateDataStreamSettings);
+const mockUpdateIndexSettings = vi.mocked(updateIndexSettings);
 
 describe('DataStreamDetailPanel', () => {
-  const onCloseMock = jest.fn();
+  const onCloseMock = vi.fn();
   let mockAppContext: AppDependencies;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockAppContext = createMockAppContext();
     mockUseAppContext.mockReturnValue(mockAppContext);
     mockLoadSnapshotRepositories.mockResolvedValue({ data: undefined } as any);
@@ -72,7 +77,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -97,7 +102,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -119,7 +124,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -146,7 +151,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -181,7 +186,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -218,7 +223,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -243,7 +248,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -268,7 +273,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -294,7 +299,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -319,7 +324,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -349,7 +354,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -386,7 +391,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -421,7 +426,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -451,7 +456,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -515,7 +520,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -576,7 +581,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -636,7 +641,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -699,7 +704,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -751,7 +756,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -816,7 +821,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -867,7 +872,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -925,7 +930,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1024,7 +1029,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1073,7 +1078,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1142,7 +1147,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1232,7 +1237,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1281,7 +1286,7 @@ describe('DataStreamDetailPanel', () => {
         data: undefined,
         isLoading: true,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1302,7 +1307,7 @@ describe('DataStreamDetailPanel', () => {
         data: undefined,
         isLoading: false,
         error,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1324,7 +1329,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1351,7 +1356,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1377,7 +1382,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1399,7 +1404,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1421,7 +1426,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 
@@ -1443,7 +1448,7 @@ describe('DataStreamDetailPanel', () => {
         data: dataStream,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         isInitialRequest: false,
       } as unknown as ReturnType<typeof useLoadDataStream>);
 

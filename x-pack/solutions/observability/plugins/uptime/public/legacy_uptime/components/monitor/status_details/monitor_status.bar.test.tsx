@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import React from 'react';
 import { MonitorStatusBar } from './status_bar';
@@ -49,10 +51,10 @@ describe('MonitorStatusBar component', () => {
       ],
     };
 
-    const spy = jest.spyOn(redux, 'useDispatch');
-    spy.mockReturnValue(jest.fn());
+    const spy = vi.spyOn(redux, 'useDispatch');
+    spy.mockReturnValue(vi.fn());
 
-    jest.spyOn(redux, 'useSelector').mockImplementation((fn, d) => {
+    vi.spyOn(redux, 'useSelector').mockImplementation((fn, d) => {
       if (fn.name === ' monitorStatusSelector') {
         return monitorStatus;
       } else {

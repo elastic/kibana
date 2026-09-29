@@ -5,23 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 
 import type { WorkflowExecutionsTracking } from '../types';
 import { writeAlertRetrievalSucceededEvent } from '.';
 
-const mockGetDurationNanoseconds = jest.fn();
-const mockWriteAttackDiscoveryEvent = jest.fn();
+const mockGetDurationNanoseconds = vi.fn();
+const mockWriteAttackDiscoveryEvent = vi.fn();
 
-jest.mock('../../persistence/event_logging', () => ({
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED: 'alert-retrieval-succeeded',
-  writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
-}));
+vi.mock('../../persistence/event_logging', () => {
+      const mocked = {
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED: 'alert-retrieval-succeeded',
+      writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/persistence', () => ({
-  getDurationNanoseconds: (...args: unknown[]) => mockGetDurationNanoseconds(...args),
-}));
+vi.mock('../../../lib/persistence', () => {
+      const mocked = {
+      getDurationNanoseconds: (...args: unknown[]) => mockGetDurationNanoseconds(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('writeAlertRetrievalSucceededEvent', () => {
   const defaultProps = {
@@ -33,10 +41,10 @@ describe('writeAlertRetrievalSucceededEvent', () => {
     } as AuthenticatedUser,
     connectorId: 'connector-1',
     endTime: new Date('2024-01-01T00:00:01.000Z'),
-    eventLogger: { logEvent: jest.fn() } as unknown as IEventLogger,
+    eventLogger: { logEvent: vi.fn() } as unknown as IEventLogger,
     eventLogIndex: '.kibana-event-log-test',
     executionUuid: 'exec-1',
-    logger: { error: jest.fn() } as unknown as Logger,
+    logger: { error: vi.fn() } as unknown as Logger,
     spaceId: 'default',
     startTime: new Date('2024-01-01T00:00:00.000Z'),
     workflowExecutions: {
@@ -49,7 +57,7 @@ describe('writeAlertRetrievalSucceededEvent', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetDurationNanoseconds.mockReturnValue(123);
   });
 

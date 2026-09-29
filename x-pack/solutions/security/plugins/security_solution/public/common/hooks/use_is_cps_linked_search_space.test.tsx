@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ICPSManager } from '@kbn/cps-utils';
@@ -21,9 +23,9 @@ const createCpsManager = ({
   defaultProjectRouting?: string;
 }): ICPSManager =>
   ({
-    whenReady: jest.fn().mockResolvedValue(undefined),
-    hasLinkedProjects: jest.fn().mockReturnValue(hasLinkedProjects),
-    getDefaultProjectRouting: jest.fn().mockReturnValue(defaultProjectRouting),
+    whenReady: vi.fn().mockResolvedValue(undefined),
+    hasLinkedProjects: vi.fn().mockReturnValue(hasLinkedProjects),
+    getDefaultProjectRouting: vi.fn().mockReturnValue(defaultProjectRouting),
   } as unknown as ICPSManager);
 
 const startServicesWithCps = (

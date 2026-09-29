@@ -7,45 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { Tutorial } from './tutorial';
 import type { TutorialType } from '../../../services/tutorials/types';
 
-const mockSetBreadcrumbs = jest.fn();
+const mockSetBreadcrumbs = vi.fn();
 
-jest.mock('../../kibana_services', () => ({
-  getServices: () => ({
-    http: {
-      post: jest.fn().mockImplementation(async () => ({ count: 0 })),
-      basePath: { prepend: (path: string) => `/foo/${path}` },
-    },
-    getBasePath: jest.fn(() => 'path'),
-    application: {
-      getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
-    },
-    history: {
-      location: { hash: '#/tutorial/apm' },
-    },
-    chrome: {
-      setBreadcrumbs: mockSetBreadcrumbs,
-    },
-    tutorialService: {
-      getModuleNotices: () => [],
-      getCustomComponent: jest.fn(),
-      getCustomStatusCheck: (
-        name: 'custom_status_check_has_data' | 'custom_status_check_no_data'
-      ) => {
-        const customStatusCheckMock = {
-          custom_status_check_has_data: async () => true,
-          custom_status_check_no_data: async () => false,
-        };
-        return customStatusCheckMock[name];
-      },
-    },
-  }),
-}));
+vi.mock('../../kibana_services', () => {
+      const mocked = {
+      getServices: () => ({
+        http: {
+          post: vi.fn().mockImplementation(async () => ({ count: 0 })),
+          basePath: { prepend: (path: string) => `/foo/${path}` },
+        },
+        getBasePath: vi.fn(() => 'path'),
+        application: {
+          getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+        },
+        history: {
+          location: { hash: '#/tutorial/apm' },
+        },
+        chrome: {
+          setBreadcrumbs: mockSetBreadcrumbs,
+        },
+        tutorialService: {
+          getModuleNotices: () => [],
+          getCustomComponent: vi.fn(),
+          getCustomStatusCheck: (
+            name: 'custom_status_check_has_data' | 'custom_status_check_no_data'
+          ) => {
+            const customStatusCheckMock = {
+              custom_status_check_has_data: async () => true,
+              custom_status_check_no_data: async () => false,
+            };
+            return customStatusCheckMock[name];
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function buildInstructionSet(type: string) {
   return {

@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useDebouncedValue } from '../..';
 
 describe('useDebouncedValue hook', () => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 
   it('should return the initial value immediately', () => {
     const { result } = renderHook(() => useDebouncedValue('hello', 200));
@@ -37,7 +39,7 @@ describe('useDebouncedValue hook', () => {
     rerender({ value: 'world' });
 
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     expect(result.current).toBe('world');
@@ -53,7 +55,7 @@ describe('useDebouncedValue hook', () => {
     rerender({ value: 'd' });
 
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     expect(result.current).toBe('d');
@@ -67,13 +69,13 @@ describe('useDebouncedValue hook', () => {
     rerender({ value: 'world' });
 
     act(() => {
-      jest.advanceTimersByTime(299);
+      vi.advanceTimersByTime(299);
     });
 
     expect(result.current).toBe('hello');
 
     act(() => {
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
     });
 
     expect(result.current).toBe('world');
@@ -87,7 +89,7 @@ describe('useDebouncedValue hook', () => {
     rerender({ value: 99 });
 
     act(() => {
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
     });
 
     expect(result.current).toBe(99);
@@ -104,7 +106,7 @@ describe('useDebouncedValue hook', () => {
       rerender({ value: 'HELLO' });
 
       act(() => {
-        jest.advanceTimersByTime(200);
+        vi.advanceTimersByTime(200);
       });
 
       expect(result.current).toBe('Hello');
@@ -120,7 +122,7 @@ describe('useDebouncedValue hook', () => {
       rerender({ value: 'World' });
 
       act(() => {
-        jest.advanceTimersByTime(200);
+        vi.advanceTimersByTime(200);
       });
 
       expect(result.current).toBe('World');
@@ -136,7 +138,7 @@ describe('useDebouncedValue hook', () => {
       rerender({ value: { id: 1 } });
 
       act(() => {
-        jest.advanceTimersByTime(200);
+        vi.advanceTimersByTime(200);
       });
 
       expect(result.current).toEqual({ id: 1 });
@@ -144,7 +146,7 @@ describe('useDebouncedValue hook', () => {
       rerender({ value: { id: 2 } });
 
       act(() => {
-        jest.advanceTimersByTime(200);
+        vi.advanceTimersByTime(200);
       });
 
       expect(result.current).toEqual({ id: 2 });

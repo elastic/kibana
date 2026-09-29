@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { PanelFooter } from './footer';
@@ -17,26 +20,32 @@ import { useInvestigateInTimeline } from '../../../detections/components/alerts_
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { FooterAiActions } from '../../../flyout_v2/document/main/components/footer_ai_actions';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../flyout_v2/document/main/components/footer_ai_actions', () => ({
-  FooterAiActions: jest.fn(() => <div data-test-subj="footerAiActions" />),
-}));
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../flyout_v2/document/main/components/footer_ai_actions', () => {
+      const mocked = {
+      FooterAiActions: vi.fn(() => <div data-test-subj="footerAiActions" />),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
   return {
     ...original,
-    useLocation: jest.fn().mockReturnValue({ search: '' }),
+    useLocation: vi.fn().mockReturnValue({ search: '' }),
   };
 });
-jest.mock(
+vi.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
-jest.mock('../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
-jest.mock('../shared/components/take_action_button', () => ({
-  TakeActionButton: () => (
-    <button data-test-subj="securitySolutionFlyoutFooterDropdownButton" type="button" />
-  ),
-}));
+vi.mock('../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
+vi.mock('../shared/components/take_action_button', () => {
+      const mocked = {
+      TakeActionButton: () => (
+        <button data-test-subj="securitySolutionFlyoutFooterDropdownButton" type="button" />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderPanelFooter = (isPreview: boolean) =>
   render(
@@ -49,7 +58,7 @@ const renderPanelFooter = (isPreview: boolean) =>
 
 describe('PanelFooter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should not render the take action dropdown if preview mode', () => {
@@ -59,16 +68,16 @@ describe('PanelFooter', () => {
   });
 
   it('should render the take action dropdown', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
-        osquery: { isOsqueryAvailable: jest.fn() },
-        cases: { hooks: { useIsAddToCaseOpen: jest.fn().mockReturnValue(false) } },
+        osquery: { isOsqueryAvailable: vi.fn() },
+        cases: { hooks: { useIsAddToCaseOpen: vi.fn().mockReturnValue(false) } },
       },
     });
-    (useInvestigateInTimeline as jest.Mock).mockReturnValue({
-      investigateInTimelineActionItems: [{ name: 'test', onClick: jest.fn() }],
+    (useInvestigateInTimeline as Mock).mockReturnValue({
+      investigateInTimelineActionItems: [{ name: 'test', onClick: vi.fn() }],
     });
-    (useAddToCaseActions as jest.Mock).mockReturnValue({ addToCaseActionItems: [] });
+    (useAddToCaseActions as Mock).mockReturnValue({ addToCaseActionItems: [] });
 
     const { getByTestId } = renderPanelFooter(false);
 

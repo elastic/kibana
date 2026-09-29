@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 /**
  * This data blob has 3 key/values set:
  *  - foo: "turbo2000"
@@ -18,24 +20,27 @@ const mockKeystoreData =
   'MIYOYHvduos7NDOgw3TFAuh7xs6z9i0juEo1zFeJeIr8yoyIxdGi1J8GUCO0/' +
   'OeaKxvLjTjczwoxiy34kM6CzlnJhjwnALAMiBvbehMUaCVzxf3Fu/3Gk2qeux0OPhidJ4Pn/RPjdMA==';
 
-jest.mock('fs', () => ({
-  readFileSync: jest.fn().mockImplementation(() => JSON.stringify(mockKeystoreData)),
-  existsSync: jest.fn().mockImplementation((fileName) => {
-    if (fileName === 'non-existent-file.txt') {
-      return false;
-    } else {
-      return true;
-    }
-  }),
-  writeFileSync: jest.fn(),
-}));
+vi.mock('fs', () => {
+      const mocked = {
+      readFileSync: vi.fn().mockImplementation(() => JSON.stringify(mockKeystoreData)),
+      existsSync: vi.fn().mockImplementation((fileName) => {
+        if (fileName === 'non-existent-file.txt') {
+          return false;
+        } else {
+          return true;
+        }
+      }),
+      writeFileSync: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../logger');
+vi.mock('../logger');
 
 import { Logger } from '../logger';
-const mockLogFn = jest.fn();
+const mockLogFn = vi.fn();
 Logger.prototype.log = mockLogFn;
-const mockErrFn = jest.fn();
+const mockErrFn = vi.fn();
 Logger.prototype.error = mockErrFn;
 
 import { Keystore } from './lib';
@@ -101,6 +106,6 @@ describe('Kibana keystore: show', () => {
   afterEach(() => {
     mockLogFn.mockReset();
     mockErrFn.mockReset();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 });

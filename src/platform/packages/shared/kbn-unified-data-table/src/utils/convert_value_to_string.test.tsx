@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   dataTableContextComplexMock,
   dataTableContextComplexRowsMock,
@@ -17,7 +19,7 @@ import { servicesMock } from '../../__mocks__/services';
 import { convertValueToString, convertNameToString } from './convert_value_to_string';
 
 describe('convertValueToString', () => {
-  jest.spyOn(dataTableContextComplexMock.dataView.fields, 'create');
+  vi.spyOn(dataTableContextComplexMock.dataView.fields, 'create');
 
   it('should convert a keyword value to text', () => {
     const result = convertValueToString({

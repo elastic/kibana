@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -25,7 +27,7 @@ describe('OverrideSettingsModal', () => {
   });
 
   it('calls onCancel when cancel button is clicked', () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
     renderWithI18n(<OverrideSettingsModal onCancel={onCancel} onSave={() => {}} />);
 
     fireEvent.click(screen.getByTestId('overrideSettingsModal-cancelButton'));
@@ -33,7 +35,7 @@ describe('OverrideSettingsModal', () => {
   });
 
   it('calls onSave when override button is clicked', () => {
-    const onSave = jest.fn();
+    const onSave = vi.fn();
     renderWithI18n(<OverrideSettingsModal onCancel={() => {}} onSave={onSave} />);
 
     fireEvent.click(screen.getByTestId('overrideSettingsModal-overrideButton'));

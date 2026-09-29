@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useUnsavedChanges } from './use_unsaved_changes';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -22,13 +24,13 @@ import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
-const mockSelectHasUnsavedChanges = jest.mocked(selectHasUnsavedChanges);
+const mockSelectHasUnsavedChanges = vi.mocked(selectHasUnsavedChanges);
 
-jest.mock('../redux/selectors', () => {
-  const originalModule = jest.requireActual('../redux/selectors');
+vi.mock('../redux/selectors', async () => {
+  const originalModule = (await vi.importActual('../redux/selectors'));
   return {
     ...originalModule,
-    selectHasUnsavedChanges: jest.fn(originalModule.selectHasUnsavedChanges),
+    selectHasUnsavedChanges: vi.fn(originalModule.selectHasUnsavedChanges),
   };
 });
 
@@ -223,12 +225,12 @@ describe('useUnsavedChanges', () => {
 
   it('should call the onAppLeave default action when there are no unsaved changes', async () => {
     let onAppLeaveCallback: (actions: AppLeaveActionFactory) => void = () => {};
-    const onAppLeave = jest.fn().mockImplementation((callback: typeof onAppLeaveCallback) => {
+    const onAppLeave = vi.fn().mockImplementation((callback: typeof onAppLeaveCallback) => {
       onAppLeaveCallback = callback;
     });
     await setup({ onAppLeave });
-    const defaultFn = jest.fn();
-    const confirmFn = jest.fn();
+    const defaultFn = vi.fn();
+    const confirmFn = vi.fn();
     onAppLeaveCallback({
       default: defaultFn,
       confirm: confirmFn,
@@ -239,7 +241,7 @@ describe('useUnsavedChanges', () => {
 
   it('should call the onAppLeave confirm action when there are unsaved changes', async () => {
     let onAppLeaveCallback: (actions: AppLeaveActionFactory) => void = () => {};
-    const onAppLeave = jest.fn().mockImplementation((callback: typeof onAppLeaveCallback) => {
+    const onAppLeave = vi.fn().mockImplementation((callback: typeof onAppLeaveCallback) => {
       onAppLeaveCallback = callback;
     });
     const { internalState, getCurrentTab } = await setup({ onAppLeave });
@@ -251,8 +253,8 @@ describe('useUnsavedChanges', () => {
         },
       })
     );
-    const defaultFn = jest.fn();
-    const confirmFn = jest.fn();
+    const defaultFn = vi.fn();
+    const confirmFn = vi.fn();
     onAppLeaveCallback({
       default: defaultFn,
       confirm: confirmFn,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { KibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
@@ -26,21 +29,21 @@ import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { doesLogsEndpointActionsIndexExist } from '../../utils';
 import { getActionList, getActionListByStatus } from '../../services';
 
-jest.mock('../../utils');
-const mockDoesLogsEndpointActionsIndexExist = doesLogsEndpointActionsIndexExist as jest.Mock;
+vi.mock('../../utils');
+const mockDoesLogsEndpointActionsIndexExist = doesLogsEndpointActionsIndexExist as Mock;
 
-jest.mock('../../services');
-const mockGetActionList = getActionList as jest.Mock;
-const mockGetActionListByStatus = getActionListByStatus as jest.Mock;
+vi.mock('../../services');
+const mockGetActionList = getActionList as Mock;
+const mockGetActionListByStatus = getActionListByStatus as Mock;
 
 describe('Action List Handler', () => {
-  let mockResponse: jest.Mocked<KibanaResponseFactory>;
+  let mockResponse: Mocked<KibanaResponseFactory>;
   let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let apiTestSetup: HttpApiTestSetupMock;
 
   let actionListHandler: (
     query?: EndpointActionListRequestQuery
-  ) => Promise<jest.Mocked<KibanaResponseFactory>>;
+  ) => Promise<Mocked<KibanaResponseFactory>>;
 
   beforeEach(() => {
     const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
@@ -53,7 +56,7 @@ describe('Action List Handler', () => {
 
     actionListHandler = async (
       query?: EndpointActionListRequestQuery
-    ): Promise<jest.Mocked<KibanaResponseFactory>> => {
+    ): Promise<Mocked<KibanaResponseFactory>> => {
       mockRequest = httpServerMock.createKibanaRequest({
         query,
       });
@@ -94,7 +97,7 @@ describe('Action List Handler', () => {
     });
 
     it('should skip the index check under CPS, where the origin may hold no actions of its own', async () => {
-      (apiTestSetup.endpointAppContextMock.service.isCpsActive as jest.Mock).mockResolvedValue(
+      (apiTestSetup.endpointAppContextMock.service.isCpsActive as Mock).mockResolvedValue(
         true
       );
       mockDoesLogsEndpointActionsIndexExist.mockClear();

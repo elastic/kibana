@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 
@@ -22,7 +24,7 @@ describe('ScheduledActionsBadge', () => {
     const { queryByTestId } = render({
       scheduledActionsCount: 0,
       isCapped: false,
-      onClick: jest.fn(),
+      onClick: vi.fn(),
     });
     expect(queryByTestId('scheduledActionsBadge')).toBeNull();
   });
@@ -31,13 +33,13 @@ describe('ScheduledActionsBadge', () => {
     const { getByTestId } = render({
       scheduledActionsCount: 3,
       isCapped: false,
-      onClick: jest.fn(),
+      onClick: vi.fn(),
     });
     expect(getByTestId('scheduledActionsBadge')).toBeInTheDocument();
   });
 
   it('calls onClick when the badge is clicked', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     const { getByTestId } = render({ scheduledActionsCount: 1, isCapped: false, onClick });
     fireEvent.click(getByTestId('scheduledActionsBadge'));
     expect(onClick).toHaveBeenCalledTimes(1);
@@ -47,7 +49,7 @@ describe('ScheduledActionsBadge', () => {
     const { getByTestId } = render({
       scheduledActionsCount: 2,
       isCapped: false,
-      onClick: jest.fn(),
+      onClick: vi.fn(),
     });
     expect(getByTestId('scheduledActionsBadge')).toHaveAttribute(
       'aria-label',
@@ -59,7 +61,7 @@ describe('ScheduledActionsBadge', () => {
     const { getByTestId } = render({
       scheduledActionsCount: 100,
       isCapped: true,
-      onClick: jest.fn(),
+      onClick: vi.fn(),
     });
     expect(getByTestId('scheduledActionsBadge')).toBeInTheDocument();
   });

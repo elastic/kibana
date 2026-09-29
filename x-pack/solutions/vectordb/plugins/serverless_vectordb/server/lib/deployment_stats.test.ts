@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -25,7 +27,7 @@ describe('fetchMonitorPrivileges', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const mockHasPrivileges = ({
@@ -87,7 +89,7 @@ describe('countVectors', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const mockVectorStats = (denseCount: number, sparseCount = 0) => {
@@ -179,7 +181,7 @@ describe('fetchIndexStats', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const mockCatIndices = (indices: Array<{ index: string; 'creation.date': string }>) => {
@@ -492,7 +494,7 @@ describe('fetchNewIndex', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const mockIndexCount = (count: number) => {
@@ -636,7 +638,7 @@ describe('fetchApiKeysStats', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('counts the same keys as the Stack Management API keys list', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
@@ -12,15 +14,21 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { RuleTagsSelector } from './rule_tags_selector';
 
-const mockRefetch = jest.fn();
-const mockUseFetchRuleTags = jest.fn();
-jest.mock('../../../../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: (...args: unknown[]) => mockUseFetchRuleTags(...args),
-}));
+const mockRefetch = vi.fn();
+const mockUseFetchRuleTags = vi.fn();
+vi.mock('../../../../../hooks/use_fetch_rule_tags', () => {
+      const mocked = {
+      useFetchRuleTags: (...args: unknown[]) => mockUseFetchRuleTags(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-hooks', () => ({
-  useDebouncedValue: (value: unknown) => value,
-}));
+vi.mock('@kbn/react-hooks', () => {
+      const mocked = {
+      useDebouncedValue: (value: unknown) => value,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const MOCK_TAGS = ['production', 'staging', 'critical'];
 
@@ -47,7 +55,7 @@ describe('RuleTagsSelector', () => {
   let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     user = userEvent.setup(USER_EVENT_OPTIONS);
     mockUseFetchRuleTags.mockReturnValue({
       data: MOCK_TAGS,
@@ -59,19 +67,19 @@ describe('RuleTagsSelector', () => {
   });
 
   it('fetches rule tags eagerly on mount (enabled: true always)', () => {
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={vi.fn()} />);
 
     expect(mockUseFetchRuleTags).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
   });
 
   it('fetches only kind: alert tags', () => {
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={vi.fn()} />);
 
     expect(mockUseFetchRuleTags).toHaveBeenCalledWith(expect.objectContaining({ kind: 'alert' }));
   });
 
   it('shows API tags under Recommended group when dropdown is open', async () => {
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={vi.fn()} />);
 
     await user.click(getComboBoxInput());
 
@@ -89,7 +97,7 @@ describe('RuleTagsSelector', () => {
       isError: false,
       refetch: mockRefetch,
     });
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={vi.fn()} />);
 
     expect(screen.getByTestId('ruleTagsSelectorEmptyState')).toBeInTheDocument();
     expect(
@@ -99,14 +107,14 @@ describe('RuleTagsSelector', () => {
 
   it('does not show empty state when request failed', () => {
     mockUseFetchRuleTags.mockReturnValue(ERROR_MOCK);
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={vi.fn()} />);
 
     expect(screen.queryByTestId('ruleTagsSelectorEmptyState')).not.toBeInTheDocument();
   });
 
   it('shows error message when request failed', () => {
     mockUseFetchRuleTags.mockReturnValue(ERROR_MOCK);
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={vi.fn()} />);
 
     expect(screen.getByTestId('ruleTagsSelectorError')).toBeInTheDocument();
     expect(screen.getByText('Could not load rule tags.')).toBeInTheDocument();
@@ -114,7 +122,7 @@ describe('RuleTagsSelector', () => {
 
   it('calls refetch when retry is clicked after a failed request', async () => {
     mockUseFetchRuleTags.mockReturnValue(ERROR_MOCK);
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={vi.fn()} />);
 
     await user.click(screen.getByTestId('ruleTagsSelectorRetry'));
 
@@ -122,7 +130,7 @@ describe('RuleTagsSelector', () => {
   });
 
   it('calls onChange with the selected tag when a tag is selected', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderWithI18n(<RuleTagsSelector matcher={null} onChange={onChange} />);
 
     await user.click(getComboBoxInput());
@@ -133,7 +141,7 @@ describe('RuleTagsSelector', () => {
   });
 
   it('calls onChange with null tags when all tags are cleared', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderWithI18n(<RuleTagsSelector matcher={{ tags: ['production'] }} onChange={onChange} />);
 
     const clearButton = screen.getByLabelText('Clear input');
@@ -143,14 +151,14 @@ describe('RuleTagsSelector', () => {
   });
 
   it('shows pre-existing orphaned tags from matcher as selected pills', () => {
-    renderWithI18n(<RuleTagsSelector matcher={{ tags: ['legacy-tag'] }} onChange={jest.fn()} />);
+    renderWithI18n(<RuleTagsSelector matcher={{ tags: ['legacy-tag'] }} onChange={vi.fn()} />);
 
     const combobox = screen.getByTestId('ruleTagsSelector');
     expect(within(combobox).getByText('legacy-tag')).toBeInTheDocument();
   });
 
   it('adds a newly created tag and calls onChange with it', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderWithI18n(<RuleTagsSelector matcher={null} onChange={onChange} />);
 
     await user.type(getComboBoxInput(), 'my-new-tag');
@@ -162,7 +170,7 @@ describe('RuleTagsSelector', () => {
   });
 
   it('does not add a duplicate tag on onCreateOption', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderWithI18n(<RuleTagsSelector matcher={{ tags: ['existing-tag'] }} onChange={onChange} />);
 
     await user.type(getComboBoxInput(), 'existing-tag');
@@ -181,7 +189,7 @@ describe('RuleTagsSelector', () => {
       refetch: mockRefetch,
     });
 
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={vi.fn()} />);
 
     expect(
       screen.getByText(
@@ -191,7 +199,7 @@ describe('RuleTagsSelector', () => {
   });
 
   it('does not show cap guidance when apiTags length is below limit', () => {
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={vi.fn()} />);
 
     expect(
       screen.queryByText(
@@ -201,7 +209,7 @@ describe('RuleTagsSelector', () => {
   });
 
   it('passes search text to useFetchRuleTags when user types in the combobox', async () => {
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={vi.fn()} />);
 
     await user.type(getComboBoxInput(), 'prod');
 
@@ -218,7 +226,7 @@ describe('RuleTagsSelector', () => {
       refetch: mockRefetch,
     }));
 
-    renderWithI18n(<RuleTagsSelector matcher={null} onChange={jest.fn()} />);
+    renderWithI18n(<RuleTagsSelector matcher={null} onChange={vi.fn()} />);
 
     await user.type(getComboBoxInput(), 'beyond');
 

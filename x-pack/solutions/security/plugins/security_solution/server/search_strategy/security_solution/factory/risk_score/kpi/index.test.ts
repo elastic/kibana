@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { RiskSeverity, EntityType } from '../../../../../../common/search_strategy';
 import { kpiRiskScore } from '.';
@@ -13,7 +15,7 @@ import * as buildQuery from './query.kpi_risk_score.dsl';
 import { mockOptions } from './__mocks__';
 
 describe('buildKpiRiskScoreQuery search strategy', () => {
-  const buildKpiRiskScoreQuery = jest.spyOn(buildQuery, 'buildKpiRiskScoreQuery');
+  const buildKpiRiskScoreQuery = vi.spyOn(buildQuery, 'buildKpiRiskScoreQuery');
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {

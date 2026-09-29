@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { OpensearchAwsOpensearchService } from './opensearch_aws_opensearch_service';
 import { GetDetectorFindingsInputSchema, UpdateMonitorInputSchema } from './types';
@@ -14,19 +16,19 @@ import { GetDetectorFindingsInputSchema, UpdateMonitorInputSchema } from './type
 const ENDPOINT = 'https://search-my-domain-abc123.us-east-1.es.amazonaws.com';
 
 describe('OpenSearch (AWS OpenSearch Service) connector', () => {
-  const mockRequest = jest.fn();
+  const mockRequest = vi.fn();
   const mockClient = { request: mockRequest };
 
   const mockContext = {
     client: mockClient,
     config: { endpoint: ENDPOINT },
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   const jsonResponse = (data: unknown) => ({ data });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('metadata', () => {

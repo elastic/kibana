@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import { createApiKey } from './create_api_key';
@@ -23,13 +25,13 @@ describe('createApiKey lib function', () => {
   const mockClient = {
     asCurrentUser: {
       security: {
-        createApiKey: jest.fn().mockReturnValue(createResponse),
+        createApiKey: vi.fn().mockReturnValue(createResponse),
       },
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should create an api key via the security plugin', async () => {

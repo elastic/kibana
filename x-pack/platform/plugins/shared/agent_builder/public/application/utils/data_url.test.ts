@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { fetchAsDataUrl, parseDataUrl, readBlobAsDataUrl } from './data_url';
 
 const PNG_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB';
@@ -52,7 +55,7 @@ describe('readBlobAsDataUrl', () => {
 
   it('rejects with the FileReader error when reading fails', async () => {
     const fileReaderError = new Error('boom');
-    const spy = jest
+    const spy = vi
       .spyOn(FileReader.prototype, 'readAsDataURL')
       .mockImplementation(function mockedReadAsDataURL(this: FileReader) {
         queueMicrotask(() => {
@@ -69,7 +72,7 @@ describe('readBlobAsDataUrl', () => {
   });
 
   it('rejects when the FileReader yields a non-string result', async () => {
-    const spy = jest
+    const spy = vi
       .spyOn(FileReader.prototype, 'readAsDataURL')
       .mockImplementation(function mockedReadAsDataURL(this: FileReader) {
         queueMicrotask(() => {
@@ -96,7 +99,7 @@ describe('fetchAsDataUrl', () => {
   });
 
   it('returns the input unchanged when given a data URL', async () => {
-    const fetchSpy: jest.MockedFunction<typeof fetch> = jest.fn();
+    const fetchSpy: MockedFunction<typeof fetch> = vi.fn();
     globalThis.fetch = fetchSpy;
 
     const dataUrl = `data:image/png;base64,${PNG_BASE64}`;
@@ -106,7 +109,7 @@ describe('fetchAsDataUrl', () => {
 
   it('fetches the URL and returns a base64 data URL of the response body', async () => {
     const blob = new Blob(['hello'], { type: 'text/plain' });
-    const fetchSpy: jest.MockedFunction<typeof fetch> = jest
+    const fetchSpy: MockedFunction<typeof fetch> = vi
       .fn()
       .mockResolvedValue(new Response(blob, { headers: { 'content-type': 'text/plain' } }));
     globalThis.fetch = fetchSpy;
@@ -119,7 +122,7 @@ describe('fetchAsDataUrl', () => {
 
   it('forwards the abort signal to fetch', async () => {
     const blob = new Blob(['x'], { type: 'text/plain' });
-    const fetchSpy: jest.MockedFunction<typeof fetch> = jest
+    const fetchSpy: MockedFunction<typeof fetch> = vi
       .fn()
       .mockResolvedValue(new Response(blob, { headers: { 'content-type': 'text/plain' } }));
     globalThis.fetch = fetchSpy;
@@ -134,7 +137,7 @@ describe('fetchAsDataUrl', () => {
 
   it('propagates fetch errors', async () => {
     const fetchError = new Error('network down');
-    const fetchSpy: jest.MockedFunction<typeof fetch> = jest.fn().mockRejectedValue(fetchError);
+    const fetchSpy: MockedFunction<typeof fetch> = vi.fn().mockRejectedValue(fetchError);
     globalThis.fetch = fetchSpy;
 
     await expect(fetchAsDataUrl('https://example.com/file.txt')).rejects.toBe(fetchError);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { convertResultUrlMock } from './process_result.test.mocks';
 
 import type { IBasePath } from './utils';
@@ -23,11 +26,11 @@ const createResult = (parts: Partial<GlobalSearchProviderResult>): GlobalSearchP
 });
 
 describe('processProviderResult', () => {
-  let basePath: jest.Mocked<IBasePath>;
+  let basePath: Mocked<IBasePath>;
 
   beforeEach(() => {
     basePath = {
-      prepend: jest.fn(),
+      prepend: vi.fn(),
     };
 
     convertResultUrlMock.mockClear();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -36,7 +39,7 @@ const createMockServices = (): AlertingV2KibanaServices => {
     },
   };
   const uiSettings = uiSettingsServiceMock.createStartContract();
-  (uiSettings.get as jest.Mock).mockReturnValue(true);
+  (uiSettings.get as Mock).mockReturnValue(true);
 
   return {
     http: httpServiceMock.createStartContract(),
@@ -54,26 +57,32 @@ const createMockServices = (): AlertingV2KibanaServices => {
 };
 
 let capturedSelectorProps: Record<string, unknown> = {};
-jest.mock('./components/rule_create_options/rule_create_options_flyout', () => ({
-  RuleCreateOptionsFlyout: (props: Record<string, unknown>) => {
-    capturedSelectorProps = props;
-    return (
-      <div data-test-subj="mockRuleCreateOptionsFlyout">
-        <button data-test-subj="esqlBtn" onClick={props.onCreateEsqlRule as () => void} />
-        <button data-test-subj="agentBtn" onClick={props.onCreateWithAgent as () => void} />
-        <button data-test-subj="thresholdBtn" onClick={props.onCreateThresholdRule as () => void} />
-      </div>
-    );
-  },
-}));
+vi.mock('./components/rule_create_options/rule_create_options_flyout', () => {
+      const mocked = {
+      RuleCreateOptionsFlyout: (props: Record<string, unknown>) => {
+        capturedSelectorProps = props;
+        return (
+          <div data-test-subj="mockRuleCreateOptionsFlyout">
+            <button data-test-subj="esqlBtn" onClick={props.onCreateEsqlRule as () => void} />
+            <button data-test-subj="agentBtn" onClick={props.onCreateWithAgent as () => void} />
+            <button data-test-subj="thresholdBtn" onClick={props.onCreateThresholdRule as () => void} />
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let capturedComposeProps: Record<string, unknown> = {};
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  ComposeDiscoverFlyout: (props: Record<string, unknown>) => {
-    capturedComposeProps = props;
-    return <div data-test-subj="mockComposeDiscoverFlyout" />;
-  },
-}));
+vi.mock('@kbn/alerting-v2-rule-form', () => {
+      const mocked = {
+      ComposeDiscoverFlyout: (props: Record<string, unknown>) => {
+        capturedComposeProps = props;
+        return <div data-test-subj="mockComposeDiscoverFlyout" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Collects all pending resolvers from untilPluginStartServicesReady calls so the test
 // can resolve both the useAsync call and the currentAppId$ effect in one go.
@@ -82,18 +91,24 @@ const resolveServices = (services: AlertingV2KibanaServices) => {
   [...pendingResolvers].forEach((r) => r(services));
   pendingResolvers.length = 0;
 };
-jest.mock('./kibana_services', () => ({
-  untilPluginStartServicesReady: () =>
-    new Promise<AlertingV2KibanaServices>((resolve) => {
-      pendingResolvers.push(resolve);
-    }),
-}));
+vi.mock('./kibana_services', () => {
+      const mocked = {
+      untilPluginStartServicesReady: () =>
+        new Promise<AlertingV2KibanaServices>((resolve) => {
+          pendingResolvers.push(resolve);
+        }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./services/rules_api', () => ({
-  RulesApi: jest.fn().mockImplementation(() => ({
-    createRule: jest.fn(),
-  })),
-}));
+vi.mock('./services/rules_api', () => {
+      const mocked = {
+      RulesApi: vi.fn().mockImplementation(() => ({
+        createRule: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { CreateRuleOptionsFlyout } from './create_rule_options_flyout';
 import { RulesApi } from './services/rules_api';
@@ -101,7 +116,7 @@ import { RulesApi } from './services/rules_api';
 const renderFlyout = (props: Partial<React.ComponentProps<typeof CreateRuleOptionsFlyout>> = {}) =>
   render(
     <I18nProvider>
-      <CreateRuleOptionsFlyout onClose={props.onClose ?? jest.fn()} {...props} />
+      <CreateRuleOptionsFlyout onClose={props.onClose ?? vi.fn()} {...props} />
     </I18nProvider>
   );
 
@@ -109,7 +124,7 @@ describe('CreateRuleOptionsFlyout', () => {
   let mockServices: AlertingV2KibanaServices;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedSelectorProps = {};
     capturedComposeProps = {};
     pendingResolvers.length = 0;
@@ -137,7 +152,7 @@ describe('CreateRuleOptionsFlyout', () => {
 
   describe('selector → esql transition', () => {
     it('renders ComposeDiscoverFlyout when the ES|QL option is clicked', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderFlyout({ onClose, initialQuery: 'FROM logs-*' });
       resolveServices(mockServices);
 
@@ -194,7 +209,7 @@ describe('CreateRuleOptionsFlyout', () => {
 
   describe('selector → threshold transition', () => {
     it('renders ComposeDiscoverFlyout when the threshold option is clicked', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderFlyout({ onClose });
       resolveServices(mockServices);
 
@@ -215,7 +230,7 @@ describe('CreateRuleOptionsFlyout', () => {
 
   describe('selector → agent builder navigation', () => {
     it('navigates to agent builder and closes when the AI option is clicked', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderFlyout({ onClose });
       resolveServices(mockServices);
 
@@ -260,7 +275,7 @@ describe('CreateRuleOptionsFlyout', () => {
     });
 
     it('keeps experimental-setting resolution inside the Alerting V2 context', async () => {
-      (mockServices.uiSettings.get as jest.Mock).mockReturnValue(false);
+      (mockServices.uiSettings.get as Mock).mockReturnValue(false);
       renderFlyout();
       resolveServices(mockServices);
 
@@ -276,7 +291,7 @@ describe('CreateRuleOptionsFlyout', () => {
 
   describe('selector → legacy transition', () => {
     it('renders the legacy rule type when its option is clicked', async () => {
-      const legacyRender = jest.fn((_onClose: () => void) => (
+      const legacyRender = vi.fn((_onClose: () => void) => (
         <div data-test-subj="mockLegacyFlyout" />
       ));
 
@@ -309,7 +324,7 @@ describe('CreateRuleOptionsFlyout', () => {
 
   describe('navigation guard', () => {
     it('closes flyout when pathname changes', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const history = createMemoryHistory({ initialEntries: ['/app/discover'] });
       renderFlyout({ onClose, history });
 
@@ -321,7 +336,7 @@ describe('CreateRuleOptionsFlyout', () => {
     });
 
     it('does NOT close flyout when only query parameters change', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const history = createMemoryHistory({ initialEntries: ['/app/discover'] });
       renderFlyout({ onClose, history });
 
@@ -335,11 +350,11 @@ describe('CreateRuleOptionsFlyout', () => {
 
   describe('handleCreateRule', () => {
     it('shows a success toast and closes on successful rule creation', async () => {
-      const onClose = jest.fn();
-      const mockCreateRule = jest.fn().mockResolvedValue({
+      const onClose = vi.fn();
+      const mockCreateRule = vi.fn().mockResolvedValue({
         metadata: { name: 'My test rule' },
       });
-      (RulesApi as jest.Mock).mockImplementation(() => ({
+      (RulesApi as Mock).mockImplementation(() => ({
         createRule: mockCreateRule,
       }));
 
@@ -369,9 +384,9 @@ describe('CreateRuleOptionsFlyout', () => {
     });
 
     it('shows an error toast on failed rule creation', async () => {
-      const onClose = jest.fn();
-      const mockCreateRule = jest.fn().mockRejectedValue(new Error('network error'));
-      (RulesApi as jest.Mock).mockImplementation(() => ({
+      const onClose = vi.fn();
+      const mockCreateRule = vi.fn().mockRejectedValue(new Error('network error'));
+      (RulesApi as Mock).mockImplementation(() => ({
         createRule: mockCreateRule,
       }));
 

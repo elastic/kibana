@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
@@ -94,16 +97,16 @@ import * as secretsModule from './secrets';
 import { recompileInputsWithAgentVersion } from './agent_policies/package_policies_to_agent_inputs';
 import { getAgentVersionsForVersionSpecificPolicies } from './utils/version_specific_policies';
 
-jest.mock('./spaces/helpers', () => {
+vi.mock('./spaces/helpers', async () => {
   return {
-    ...jest.requireActual('./spaces/helpers'),
-    isSpaceAwarenessEnabled: jest.fn(),
+    ...(await vi.importActual('./spaces/helpers')),
+    isSpaceAwarenessEnabled: vi.fn(),
   };
 });
 
-jest.mock('./license');
+vi.mock('./license');
 
-const mockedSendTelemetryEvents = sendTelemetryEvents as jest.MockedFunction<
+const mockedSendTelemetryEvents = sendTelemetryEvents as MockedFunction<
   typeof sendTelemetryEvents
 >;
 
@@ -289,85 +292,103 @@ async function mockedGetPackageInfo(params: any) {
   return Promise.resolve(pkg);
 }
 
-jest.mock('./epm/packages', () => {
+vi.mock('./epm/packages', () => {
   return {
-    getPackageInfo: jest.fn().mockImplementation(mockedGetPackageInfo),
+    getPackageInfo: vi.fn().mockImplementation(mockedGetPackageInfo),
     getInstallation: mockedGetInstallation,
-    ensureInstalledPackage: jest.fn(),
+    ensureInstalledPackage: vi.fn(),
   };
 });
 
-jest.mock('../../common/services/package_to_package_policy', () => ({
-  ...jest.requireActual('../../common/services/package_to_package_policy'),
-  packageToPackagePolicy: jest.fn(),
-}));
+vi.mock('../../common/services/package_to_package_policy', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../common/services/package_to_package_policy')),
+      packageToPackagePolicy: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./epm/registry', () => ({
-  getPackage: jest.fn().mockResolvedValue({ assetsMap: [] }),
-}));
+vi.mock('./epm/registry', () => {
+      const mocked = {
+      getPackage: vi.fn().mockResolvedValue({ assetsMap: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./epm/packages/get', () => ({
-  getPackageAssetsMap: jest.fn().mockResolvedValue(new Map()),
-  getAgentTemplateAssetsMap: jest.fn().mockImplementation(async (params) => {
-    const assetsMap = new Map();
-    // Add mock template data for aws package
-    if (params.packageInfo.name === 'aws') {
-      assetsMap.set('test-template.yml', {
-        buffer: Buffer.from('mock template content'),
-        path: 'test-template.yml',
-      });
-    }
-    if (params.packageInfo.name === 'test') {
-      assetsMap.set(
-        'data_stream/cel.yml.hbs',
-        Buffer.from(
-          '{{#semverSatisfies _meta.agent.version "^9.3.0"}}mock template content{{/semverSatisfies}}'
-        )
-      );
-    }
-    return assetsMap;
-  }),
-}));
+vi.mock('./epm/packages/get', () => {
+      const mocked = {
+      getPackageAssetsMap: vi.fn().mockResolvedValue(new Map()),
+      getAgentTemplateAssetsMap: vi.fn().mockImplementation(async (params) => {
+        const assetsMap = new Map();
+        // Add mock template data for aws package
+        if (params.packageInfo.name === 'aws') {
+          assetsMap.set('test-template.yml', {
+            buffer: Buffer.from('mock template content'),
+            path: 'test-template.yml',
+          });
+        }
+        if (params.packageInfo.name === 'test') {
+          assetsMap.set(
+            'data_stream/cel.yml.hbs',
+            Buffer.from(
+              '{{#semverSatisfies _meta.agent.version "^9.3.0"}}mock template content{{/semverSatisfies}}'
+            )
+          );
+        }
+        return assetsMap;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./utils/version_specific_policies', () => ({
-  ...jest.requireActual('./utils/version_specific_policies'),
-  getAgentVersionsForVersionSpecificPolicies: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('./utils/version_specific_policies', async () => {
+      const mocked = {
+      ...(await vi.importActual('./utils/version_specific_policies')),
+      getAgentVersionsForVersionSpecificPolicies: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./agent_policies/package_policies_to_agent_inputs', () => ({
-  ...jest.requireActual('./agent_policies/package_policies_to_agent_inputs'),
-  recompileInputsWithAgentVersion: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('./agent_policies/package_policies_to_agent_inputs', async () => {
+      const mocked = {
+      ...(await vi.importActual('./agent_policies/package_policies_to_agent_inputs')),
+      recompileInputsWithAgentVersion: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./agent_policy');
-const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-jest.mock('./epm/packages/cleanup', () => {
+vi.mock('./agent_policy');
+const mockAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
+vi.mock('./epm/packages/cleanup', () => {
   return {
-    removeOldAssets: jest.fn(),
+    removeOldAssets: vi.fn(),
   };
 });
 
-jest.mock('./upgrade_sender', () => {
+vi.mock('./upgrade_sender', () => {
   return {
-    sendTelemetryEvents: jest.fn(),
+    sendTelemetryEvents: vi.fn(),
   };
 });
 
-jest.mock('./audit_logging');
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+vi.mock('./audit_logging');
+const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
 
-jest.mock('./secrets', () => ({
-  isSecretStorageEnabled: jest.fn(),
-  toCompiledSecretRef: jest.fn((id: string) => ({
-    id,
-    isSecretRef: true,
-  })),
-  extractAndWriteSecrets: jest.fn(),
-  extractAndUpdateSecrets: jest.fn(),
-  deleteSecretsIfNotReferenced: jest.fn(),
-}));
+vi.mock('./secrets', () => {
+      const mocked = {
+      isSecretStorageEnabled: vi.fn(),
+      toCompiledSecretRef: vi.fn((id: string) => ({
+        id,
+        isSecretRef: true,
+      })),
+      extractAndWriteSecrets: vi.fn(),
+      extractAndUpdateSecrets: vi.fn(),
+      deleteSecretsIfNotReferenced: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedSecretsModule = secretsModule as jest.Mocked<typeof secretsModule>;
+const mockedSecretsModule = secretsModule as Mocked<typeof secretsModule>;
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
@@ -428,8 +449,8 @@ const createEndpointPackagePolicyWithInputId = (
 describe('Package policy service', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
-    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+    vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+    vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
       enableVersionSpecificPolicies: true,
     } as any);
   });
@@ -444,7 +465,7 @@ describe('Package policy service', () => {
 
   describe('create', () => {
     beforeEach(() => {
-      jest.mocked(licenseService.hasAtLeast).mockReturnValue(true);
+      vi.mocked(licenseService.hasAtLeast).mockReturnValue(true);
     });
     it('should call audit logger', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -492,7 +513,7 @@ describe('Package policy service', () => {
     });
 
     it('should not allow to add a reusable integration policies to an agent policies belonging to multiple spaces', async () => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
 
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
@@ -618,7 +639,7 @@ describe('Package policy service', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should handle cloud connector variables when supports_cloud_connector is true', async () => {
@@ -979,7 +1000,7 @@ describe('Package policy service', () => {
 
       // Mock the cloudConnectorService.create method
       const originalCreate = cloudConnectorService.create;
-      cloudConnectorService.create = jest.fn().mockResolvedValue(mockCloudConnector);
+      cloudConnectorService.create = vi.fn().mockResolvedValue(mockCloudConnector);
 
       try {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
@@ -1088,8 +1109,8 @@ describe('Package policy service', () => {
       // Mock to ensure no service calls are made
       const originalCreate = cloudConnectorService.create;
       const originalUpdate = cloudConnectorService.update;
-      const createSpy = jest.fn();
-      const updateSpy = jest.fn();
+      const createSpy = vi.fn();
+      const updateSpy = vi.fn();
       cloudConnectorService.create = createSpy;
       cloudConnectorService.update = updateSpy;
 
@@ -1230,7 +1251,7 @@ describe('Package policy service', () => {
 
       // Mock the cloudConnectorService.update method
       const originalUpdate = cloudConnectorService.update;
-      cloudConnectorService.update = jest.fn().mockResolvedValue(updatedCloudConnector);
+      cloudConnectorService.update = vi.fn().mockResolvedValue(updatedCloudConnector);
 
       try {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
@@ -1311,7 +1332,7 @@ describe('Package policy service', () => {
 
       // Mock the cloudConnectorService.update method to throw an error
       const originalUpdate = cloudConnectorService.update;
-      cloudConnectorService.update = jest
+      cloudConnectorService.update = vi
         .fn()
         .mockRejectedValue(new Error('Cloud connector update failed'));
 
@@ -1523,7 +1544,7 @@ describe('Package policy service', () => {
 
       // Mock the cloudConnectorService.create method to throw an error
       const originalCreate = cloudConnectorService.create;
-      cloudConnectorService.create = jest
+      cloudConnectorService.create = vi
         .fn()
         .mockRejectedValue(new Error('Cloud connector creation failed'));
 
@@ -1613,7 +1634,7 @@ describe('Package policy service', () => {
 
       // Mock the cloudConnectorService.create method
       const originalCreate = cloudConnectorService.create;
-      cloudConnectorService.create = jest.fn().mockResolvedValue(mockCloudConnector);
+      cloudConnectorService.create = vi.fn().mockResolvedValue(mockCloudConnector);
 
       try {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
@@ -1723,7 +1744,7 @@ describe('Package policy service', () => {
 
       // Mock the cloudConnectorService.create method
       const originalCreate = cloudConnectorService.create;
-      cloudConnectorService.create = jest.fn().mockResolvedValue(mockCloudConnector);
+      cloudConnectorService.create = vi.fn().mockResolvedValue(mockCloudConnector);
 
       try {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
@@ -1832,7 +1853,7 @@ describe('Package policy service', () => {
 
       // Mock the cloudConnectorService.update method
       const originalUpdate = cloudConnectorService.update;
-      cloudConnectorService.update = jest.fn().mockResolvedValue(updatedCloudConnector);
+      cloudConnectorService.update = vi.fn().mockResolvedValue(updatedCloudConnector);
 
       try {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
@@ -1932,7 +1953,7 @@ describe('Package policy service', () => {
       soClient.get.mockResolvedValueOnce(packagePolicySO);
       mockAgentPolicyGet();
 
-      (getPackageInfo as jest.Mock).mockResolvedValueOnce({
+      (getPackageInfo as Mock).mockResolvedValueOnce({
         name: 'test',
         version: '0.0.1',
         policy_templates: [{ name: 'test', inputs: [] }],
@@ -1954,7 +1975,7 @@ describe('Package policy service', () => {
           { id: 'test-package-policy', skipUniqueNameVerification: true }
         );
       } finally {
-        (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+        (getPackageInfo as Mock).mockImplementation(mockedGetPackageInfo);
       }
 
       const createdAttributes = soClient.create.mock.calls[0][1] as any;
@@ -2073,7 +2094,7 @@ describe('Package policy service', () => {
       const setupBulkCreateMocks = (soClient: ReturnType<typeof createSavedObjectClientMock>) => {
         // getPackageInfo must return a name/version that matches the policy's package so the
         // package policy resolves and lands in the array passed to `soClient.bulkCreate`.
-        (getPackageInfo as jest.Mock).mockResolvedValue({
+        (getPackageInfo as Mock).mockResolvedValue({
           name: 'test',
           version: '0.0.1',
           policy_templates: [{ name: 'test', inputs: [] }],
@@ -2111,7 +2132,7 @@ describe('Package policy service', () => {
         mockedSecretsModule.isSecretStorageEnabled.mockReset();
         mockedSecretsModule.extractAndWriteSecrets.mockReset();
         // Restore the shared default so later tests are not affected.
-        (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+        (getPackageInfo as Mock).mockImplementation(mockedGetPackageInfo);
       });
 
       it('extracts secrets and stores secret_references when secret storage is enabled', async () => {
@@ -2162,7 +2183,7 @@ describe('Package policy service', () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
-      (getPackageInfo as jest.Mock).mockResolvedValue({
+      (getPackageInfo as Mock).mockResolvedValue({
         name: 'test',
         version: '0.0.1',
         policy_templates: [{ name: 'test', inputs: [] }],
@@ -2208,7 +2229,7 @@ describe('Package policy service', () => {
         const createdAttributes = (soClient.bulkCreate.mock.calls[0][0] as any)[0].attributes;
         expect(createdAttributes).not.toHaveProperty('spaceIds');
       } finally {
-        (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+        (getPackageInfo as Mock).mockImplementation(mockedGetPackageInfo);
       }
     });
   });
@@ -4160,7 +4181,7 @@ describe('Package policy service', () => {
         ...mockPackagePolicy,
         inputs: [],
       };
-      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+      (getPackageInfo as Mock).mockImplementation(async (params) => {
         return Promise.resolve({
           ...(await mockedGetPackageInfo(params)),
           elasticsearch: {
@@ -4389,7 +4410,7 @@ describe('Package policy service', () => {
         inputs: [],
       };
 
-      jest.spyOn(appContextService, 'getExternalCallbacks');
+      vi.spyOn(appContextService, 'getExternalCallbacks');
 
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [
@@ -4430,7 +4451,7 @@ describe('Package policy service', () => {
       const context = coreMock.createCustomRequestHandlerContext(
         xpackMocks.createRequestHandlerContext()
       );
-      const updateCallback = jest.fn(async (policy) => policy);
+      const updateCallback = vi.fn(async (policy) => policy);
 
       appContextService.addExternalCallback('packagePolicyUpdate', updateCallback);
 
@@ -4481,7 +4502,7 @@ describe('Package policy service', () => {
         inputs: [],
         version: 'caller-version',
       };
-      const updateCallback = jest.fn(async (policy) => policy);
+      const updateCallback = vi.fn(async (policy) => policy);
 
       appContextService.addExternalCallback('packagePolicyUpdate', updateCallback);
 
@@ -4528,7 +4549,7 @@ describe('Package policy service', () => {
       const callbackError = Object.assign(new Error('validation failed'), {
         apiPassThrough: true,
       });
-      const updateCallback = jest.fn(async () => {
+      const updateCallback = vi.fn(async () => {
         throw callbackError;
       });
 
@@ -4556,7 +4577,7 @@ describe('Package policy service', () => {
     describe('remove protections', () => {
       beforeEach(() => {
         mockAgentPolicyService.bumpRevision.mockReset();
-        jest.mocked(licenseService.hasAtLeast).mockReturnValue(true);
+        vi.mocked(licenseService.hasAtLeast).mockReturnValue(true);
       });
 
       const generateAttributes = (overrides: Record<string, unknown> = {}) => ({
@@ -4839,7 +4860,7 @@ describe('Package policy service', () => {
     describe('bumpRevision option', () => {
       beforeEach(() => {
         mockAgentPolicyService.bumpRevision.mockReset();
-        jest.mocked(licenseService.hasAtLeast).mockReturnValue(true);
+        vi.mocked(licenseService.hasAtLeast).mockReturnValue(true);
       });
 
       const generateAttributes = (overrides: Record<string, unknown> = {}) => ({
@@ -5696,7 +5717,7 @@ describe('Package policy service', () => {
         ...mockPackagePolicy,
         inputs: [],
       };
-      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+      (getPackageInfo as Mock).mockImplementation(async (params) => {
         return Promise.resolve({
           ...(await mockedGetPackageInfo(params)),
           elasticsearch: {
@@ -6147,9 +6168,9 @@ describe('Package policy service', () => {
     it('should call external callbacks', async () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const callbackOne = jest.fn().mockImplementation((p) => p);
+      const callbackOne = vi.fn().mockImplementation((p) => p);
       appContextService.addExternalCallback('packagePolicyPostUpdate', callbackOne);
-      const callbackTwo = jest.fn().mockImplementation((p) => p);
+      const callbackTwo = vi.fn().mockImplementation((p) => p);
       appContextService.addExternalCallback('packagePolicyPostUpdate', callbackTwo);
       const mockPackagePolicies = [
         {
@@ -6541,7 +6562,7 @@ describe('Package policy service', () => {
       const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
 
-      (getPackageInfo as jest.Mock).mockResolvedValue({
+      (getPackageInfo as Mock).mockResolvedValue({
         name: 'endpoint',
         version: '0.9.0',
         policy_templates: [{ name: 'endpoint', inputs: [] }],
@@ -6582,7 +6603,7 @@ describe('Package policy service', () => {
         { ...mockPackagePolicy, inputs: [], spaceIds: ['space-a'] } as any,
       ]);
 
-      (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+      (getPackageInfo as Mock).mockImplementation(mockedGetPackageInfo);
 
       const updatedAttributes = (savedObjectsClient.bulkUpdate.mock.calls[0][0] as any)[0]
         .attributes;
@@ -6597,7 +6618,7 @@ describe('Package policy service', () => {
       });
 
       it('defers deleteSecretsIfNotReferenced when the bump deployed asynchronously', async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         const soClient = createSavedObjectClientMock();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         const mockPackagePolicy = createPackagePolicyMock();
@@ -6647,12 +6668,12 @@ describe('Package policy service', () => {
         expect(mockedSecretsModule.deleteSecretsIfNotReferenced).not.toHaveBeenCalled();
 
         // After the delay, the deferred deletion fires.
-        await jest.runAllTimersAsync();
+        await vi.runAllTimersAsync();
         expect(mockedSecretsModule.deleteSecretsIfNotReferenced).toHaveBeenCalledWith(
           expect.objectContaining({ ids: ['old-secret'] })
         );
 
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
       it('passes agentPolicyIds to deleteSecretsIfNotReferenced so the .fleet-policies check is scoped', async () => {
@@ -6733,7 +6754,7 @@ describe('Package policy service', () => {
 
       mockAgentPolicyGet();
 
-      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+      (getPackageInfo as Mock).mockImplementation(async (params) => {
         return Promise.resolve({
           ...(await mockedGetPackageInfo(params)),
           elasticsearch: {
@@ -6875,7 +6896,7 @@ describe('Package policy service', () => {
         },
       ]);
 
-      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+      (getPackageInfo as Mock).mockImplementation(async (params) => {
         return Promise.resolve({
           ...(await mockedGetPackageInfo(params)),
           elasticsearch: {
@@ -6936,7 +6957,7 @@ describe('Package policy service', () => {
 
       mockAgentPolicyService.getByIds.mockResolvedValueOnce([managedAgentPolicy]);
 
-      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+      (getPackageInfo as Mock).mockImplementation(async (params) => {
         return Promise.resolve({
           ...(await mockedGetPackageInfo(params)),
           elasticsearch: {
@@ -7029,7 +7050,7 @@ describe('Package policy service', () => {
 
       mockAgentPolicyGet();
 
-      (getPackageInfo as jest.Mock).mockResolvedValue({
+      (getPackageInfo as Mock).mockResolvedValue({
         name: 'test',
         version: '1.0.0',
       } as PackageInfo);
@@ -7090,7 +7111,7 @@ describe('Package policy service', () => {
 
       mockAgentPolicyGet();
 
-      (getPackageInfo as jest.Mock).mockResolvedValue({
+      (getPackageInfo as Mock).mockResolvedValue({
         name: 'test',
         version: '1.0.0',
       } as PackageInfo);
@@ -7152,7 +7173,7 @@ describe('Package policy service', () => {
 
       mockAgentPolicyGet();
 
-      (getPackageInfo as jest.Mock).mockResolvedValue({
+      (getPackageInfo as Mock).mockResolvedValue({
         name: 'test',
         version: '1.0.0',
       } as PackageInfo);
@@ -7397,7 +7418,7 @@ describe('Package policy service', () => {
 
         mockAgentPolicyGet();
 
-        (getPackageInfo as jest.Mock).mockResolvedValue({
+        (getPackageInfo as Mock).mockResolvedValue({
           name: 'test',
           version: '1.0.0',
         } as PackageInfo);
@@ -7416,8 +7437,8 @@ describe('Package policy service', () => {
   });
 
   describe('runPostDeleteExternalCallbacks', () => {
-    let callbackOne: jest.MockedFunction<PostPackagePolicyPostDeleteCallback>;
-    let callbackTwo: jest.MockedFunction<PostPackagePolicyPostDeleteCallback>;
+    let callbackOne: MockedFunction<PostPackagePolicyPostDeleteCallback>;
+    let callbackTwo: MockedFunction<PostPackagePolicyPostDeleteCallback>;
     let callingOrder: string[];
     let deletedPackagePolicies: PostDeletePackagePoliciesResponse;
 
@@ -7427,10 +7448,10 @@ describe('Package policy service', () => {
         { id: 'a', success: true },
         { id: 'a', success: true },
       ];
-      callbackOne = jest.fn(async (deletedPolicies, soClient, esClient) => {
+      callbackOne = vi.fn(async (deletedPolicies, soClient, esClient) => {
         callingOrder.push('one');
       });
-      callbackTwo = jest.fn(async (deletedPolicies, soClient, esClient) => {
+      callbackTwo = vi.fn(async (deletedPolicies, soClient, esClient) => {
         callingOrder.push('two');
       });
       appContextService.addExternalCallback('packagePolicyPostDelete', callbackOne);
@@ -7514,18 +7535,18 @@ describe('Package policy service', () => {
   });
 
   describe('runDeleteExternalCallbacks', () => {
-    let callbackOne: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
-    let callbackTwo: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
+    let callbackOne: MockedFunction<PostPackagePolicyDeleteCallback>;
+    let callbackTwo: MockedFunction<PostPackagePolicyDeleteCallback>;
     let callingOrder: string[];
     let packagePolicies: DeletePackagePoliciesResponse;
 
     beforeEach(() => {
       callingOrder = [];
       packagePolicies = [{ id: 'a' }, { id: 'a' }] as DeletePackagePoliciesResponse;
-      callbackOne = jest.fn(async (deletedPolicies, soClient, esClient) => {
+      callbackOne = vi.fn(async (deletedPolicies, soClient, esClient) => {
         callingOrder.push('one');
       });
-      callbackTwo = jest.fn(async (deletedPolicies, soClient, esClient) => {
+      callbackTwo = vi.fn(async (deletedPolicies, soClient, esClient) => {
         callingOrder.push('two');
       });
       appContextService.addExternalCallback('packagePolicyDelete', callbackOne);
@@ -7607,7 +7628,7 @@ describe('Package policy service', () => {
     const callbackCallingOrder: string[] = [];
 
     // Callback one adds an input that includes a `config` property
-    const callbackOne: CombinedExternalCallback = jest.fn(async (ds) => {
+    const callbackOne: CombinedExternalCallback = vi.fn(async (ds) => {
       callbackCallingOrder.push('one');
       return {
         ...ds,
@@ -7627,7 +7648,7 @@ describe('Package policy service', () => {
     });
 
     // Callback two adds an additional `input[0].config` property
-    const callbackTwo: CombinedExternalCallback = jest.fn(async (ds) => {
+    const callbackTwo: CombinedExternalCallback = vi.fn(async (ds) => {
       callbackCallingOrder.push('two');
       return {
         ...ds,
@@ -7651,7 +7672,7 @@ describe('Package policy service', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       callbackCallingOrder.length = 0;
     });
 
@@ -7659,12 +7680,12 @@ describe('Package policy service', () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      const callbackA: CombinedExternalCallback = jest.fn(async (ds) => {
+      const callbackA: CombinedExternalCallback = vi.fn(async (ds) => {
         callbackCallingOrder.push('a');
         return ds;
       });
 
-      const callbackB: CombinedExternalCallback = jest.fn(async (ds) => {
+      const callbackB: CombinedExternalCallback = vi.fn(async (ds) => {
         callbackCallingOrder.push('b');
         return ds;
       });
@@ -7699,20 +7720,20 @@ describe('Package policy service', () => {
         request
       );
 
-      expect((callbackOne as jest.Mock).mock.calls[0][0].inputs).toHaveLength(0);
-      expect((callbackTwo as jest.Mock).mock.calls[0][0].inputs).toHaveLength(1);
-      expect((callbackTwo as jest.Mock).mock.calls[0][0].inputs[0].config.one.value).toEqual(
+      expect((callbackOne as Mock).mock.calls[0][0].inputs).toHaveLength(0);
+      expect((callbackTwo as Mock).mock.calls[0][0].inputs).toHaveLength(1);
+      expect((callbackTwo as Mock).mock.calls[0][0].inputs[0].config.one.value).toEqual(
         'inserted by callbackOne'
       );
     });
 
     describe('with a callback that throws an exception', () => {
-      const callbackThree: CombinedExternalCallback = jest.fn(async () => {
+      const callbackThree: CombinedExternalCallback = vi.fn(async () => {
         callbackCallingOrder.push('three');
         throw new Error('callbackThree threw error on purpose');
       });
 
-      const callbackFour: CombinedExternalCallback = jest.fn(async (ds) => {
+      const callbackFour: CombinedExternalCallback = vi.fn(async (ds) => {
         callbackCallingOrder.push('four');
         return {
           ...ds,
@@ -7755,10 +7776,10 @@ describe('Package policy service', () => {
         }
 
         expect(callbackCallingOrder).toEqual(['one', 'two', 'three']);
-        expect((callbackOne as jest.Mock).mock.calls.length).toBe(1);
-        expect((callbackTwo as jest.Mock).mock.calls.length).toBe(1);
-        expect((callbackThree as jest.Mock).mock.calls.length).toBe(1);
-        expect((callbackFour as jest.Mock).mock.calls.length).toBe(0);
+        expect((callbackOne as Mock).mock.calls.length).toBe(1);
+        expect((callbackTwo as Mock).mock.calls.length).toBe(1);
+        expect((callbackThree as Mock).mock.calls.length).toBe(1);
+        expect((callbackFour as Mock).mock.calls.length).toBe(0);
       });
 
       it('should fail to return the package policy', async () => {
@@ -7783,7 +7804,7 @@ describe('Package policy service', () => {
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
         // Create a callback that returns an invalid package policy (uppercase namespace)
-        const invalidCallback: CombinedExternalCallback = jest.fn(async (ds) => {
+        const invalidCallback: CombinedExternalCallback = vi.fn(async (ds) => {
           return {
             ...ds,
             namespace: 'InvalidNamespace', // This should cause a validation error
@@ -7883,7 +7904,7 @@ describe('Package policy service', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       callbackCallingOrder.length = 0;
     });
 
@@ -7891,12 +7912,12 @@ describe('Package policy service', () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      const callbackA: PostPackagePolicyPostCreateCallback = jest.fn(async (ds) => {
+      const callbackA: PostPackagePolicyPostCreateCallback = vi.fn(async (ds) => {
         callbackCallingOrder.push('a');
         return ds;
       });
 
-      const callbackB: PostPackagePolicyPostCreateCallback = jest.fn(async (ds) => {
+      const callbackB: PostPackagePolicyPostCreateCallback = vi.fn(async (ds) => {
         callbackCallingOrder.push('b');
         return ds;
       });
@@ -13669,7 +13690,7 @@ describe('Package policy service', () => {
 
   describe('Enrich package policy on create', () => {
     beforeEach(() => {
-      (packageToPackagePolicy as jest.Mock).mockReturnValue({
+      (packageToPackagePolicy as Mock).mockReturnValue({
         package: { name: 'apache', title: 'Apache', version: '1.0.0' },
         inputs: [
           {
@@ -13749,7 +13770,7 @@ describe('Package policy service', () => {
     });
 
     it('should enrich from epm with defaults using policy template', async () => {
-      (packageToPackagePolicy as jest.Mock).mockReturnValueOnce({
+      (packageToPackagePolicy as Mock).mockReturnValueOnce({
         package: { name: 'aws', title: 'AWS', version: '1.0.0' },
         inputs: [
           {
@@ -14010,7 +14031,7 @@ describe('Package policy service', () => {
     });
 
     it('should use space aware saved object type if user opt-in for space awareness', async () => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
       for await (const ids of await packagePolicyService.fetchAllItemIds(soClientMock)) {
         expect(ids);
       }
@@ -14053,8 +14074,8 @@ describe('Package policy service', () => {
     it('should update policies using deleted output', async () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const updateSpy = jest.spyOn(packagePolicyService, 'update').mockResolvedValue({} as any);
-      jest.spyOn(outputService, 'getDefaultDataOutputId').mockResolvedValue(null);
+      const updateSpy = vi.spyOn(packagePolicyService, 'update').mockResolvedValue({} as any);
+      vi.spyOn(outputService, 'getDefaultDataOutputId').mockResolvedValue(null);
 
       mockAgentPolicyGet();
       soClient.find.mockResolvedValue({
@@ -14445,7 +14466,7 @@ describe('Package policy service', () => {
 
     describe('rollback', () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('should create temporary saved objects to back up package policies before updating them', async () => {
@@ -14608,7 +14629,7 @@ describe('Package policy service', () => {
 
     describe('restoreRollback', () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         mockSoClient.bulkDelete.mockResolvedValue({
           statuses: [{ id, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true }],
         });
@@ -14723,7 +14744,7 @@ describe('Package policy service', () => {
 
     describe('cleanupRollbackSavedObjects', () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('should delete the temporary package policy copies', async () => {
@@ -15348,9 +15369,9 @@ describe('_getAssetForTemplatePath()', () => {
 
 describe('compilePackagePolicyForVersions()', () => {
   const mockRecompileInputsWithAgentVersion =
-    recompileInputsWithAgentVersion as jest.MockedFunction<typeof recompileInputsWithAgentVersion>;
+    recompileInputsWithAgentVersion as MockedFunction<typeof recompileInputsWithAgentVersion>;
   const mockGetAgentVersionsForVersionSpecificPolicies =
-    getAgentVersionsForVersionSpecificPolicies as jest.MockedFunction<
+    getAgentVersionsForVersionSpecificPolicies as MockedFunction<
       typeof getAgentVersionsForVersionSpecificPolicies
     >;
 
@@ -15367,16 +15388,16 @@ describe('compilePackagePolicyForVersions()', () => {
 
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+    vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
       enableVersionSpecificPolicies: true,
     } as any);
-    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+    vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
     mockRecompileInputsWithAgentVersion.mockResolvedValue([]);
   });
 
   afterEach(() => {
     appContextService.stop();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const makeSoClient = (existingInputsForVersions: Record<string, any> = {}) => {
@@ -15510,19 +15531,19 @@ describe('compilePackagePolicyForVersions()', () => {
 describe('getCompiledVersionsForAgentPolicy()', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+    vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
       enableVersionSpecificPolicies: true,
     } as any);
-    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+    vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
   });
 
   afterEach(() => {
     appContextService.stop();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty array when feature flag is disabled', async () => {
-    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+    vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
       enableVersionSpecificPolicies: false,
     } as any);
     const soClient = savedObjectsClientMock.create();

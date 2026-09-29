@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import {
@@ -13,24 +16,24 @@ import {
 } from '@kbn/significant-events-schema';
 import { getSignificantEventsTuningConfig } from './get_significant_events_tuning_config';
 
-const makeUiSettingsClient = (stored: unknown): jest.Mocked<IUiSettingsClient> =>
+const makeUiSettingsClient = (stored: unknown): Mocked<IUiSettingsClient> =>
   ({
-    get: jest.fn().mockResolvedValue(JSON.stringify(stored)),
-  } as unknown as jest.Mocked<IUiSettingsClient>);
+    get: vi.fn().mockResolvedValue(JSON.stringify(stored)),
+  } as unknown as Mocked<IUiSettingsClient>);
 
-const makeLogger = (): jest.Mocked<Logger> =>
+const makeLogger = (): Mocked<Logger> =>
   ({
-    warn: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-    info: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+  } as unknown as Mocked<Logger>);
 
 describe('getSignificantEventsTuningConfig', () => {
   it('returns defaults when uiSettings throws', async () => {
     const uiSettings = {
-      get: jest.fn().mockRejectedValue(new Error('not found')),
-    } as unknown as jest.Mocked<IUiSettingsClient>;
+      get: vi.fn().mockRejectedValue(new Error('not found')),
+    } as unknown as Mocked<IUiSettingsClient>;
     const logger = makeLogger();
 
     const result = await getSignificantEventsTuningConfig(uiSettings, logger);
@@ -41,8 +44,8 @@ describe('getSignificantEventsTuningConfig', () => {
 
   it('returns defaults when stored value is not valid JSON', async () => {
     const uiSettings = {
-      get: jest.fn().mockResolvedValue('{not-valid-json'),
-    } as unknown as jest.Mocked<IUiSettingsClient>;
+      get: vi.fn().mockResolvedValue('{not-valid-json'),
+    } as unknown as Mocked<IUiSettingsClient>;
     const logger = makeLogger();
 
     const result = await getSignificantEventsTuningConfig(uiSettings, logger);

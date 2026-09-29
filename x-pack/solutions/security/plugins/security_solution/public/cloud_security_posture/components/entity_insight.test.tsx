@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EntityInsight } from './entity_insight';
@@ -17,42 +19,57 @@ import {
   ENTITY_ANALYTICS_ALERTS_TO,
 } from '../../entity_analytics/components/home/constants';
 
-jest.mock('@kbn/entity-store/public', () => ({
-  ...jest.requireActual('@kbn/entity-store/public'),
-  useEntityStoreEuidApi: jest.fn().mockReturnValue({ euid: null }),
-}));
+vi.mock('@kbn/entity-store/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/entity-store/public')),
+      useEntityStoreEuidApi: vi.fn().mockReturnValue({ euid: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations', () => ({
-  useHasMisconfigurations: jest.fn().mockReturnValue({
-    hasMisconfigurationFindings: false,
-    passedFindings: 0,
-    failedFindings: 0,
-  }),
-}));
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations', () => {
+      const mocked = {
+      useHasMisconfigurations: vi.fn().mockReturnValue({
+        hasMisconfigurationFindings: false,
+        passedFindings: 0,
+        failedFindings: 0,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities', () => ({
-  useHasVulnerabilities: jest.fn().mockReturnValue({ hasVulnerabilitiesFindings: false }),
-}));
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities', () => {
+      const mocked = {
+      useHasVulnerabilities: vi.fn().mockReturnValue({ hasVulnerabilitiesFindings: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/containers/use_global_time', () => ({
-  useGlobalTime: jest.fn().mockReturnValue({ to: '2023-01-01', from: '2022-01-01' }),
-}));
+vi.mock('../../common/containers/use_global_time', () => {
+      const mocked = {
+      useGlobalTime: vi.fn().mockReturnValue({ to: '2023-01-01', from: '2022-01-01' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_non_closed_alerts', () => ({
-  useNonClosedAlerts: jest
-    .fn()
-    .mockReturnValue({ hasNonClosedAlerts: false, filteredAlertsData: null }),
-}));
+vi.mock('../hooks/use_non_closed_alerts', () => {
+      const mocked = {
+      useNonClosedAlerts: vi
+        .fn()
+        .mockReturnValue({ hasNonClosedAlerts: false, filteredAlertsData: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EntityInsight', () => {
   const defaultProps = {
     identityFields: { [EntityIdentifierFields.hostName]: 'my-host' },
     isPreviewMode: false,
-    openDetailsPanel: jest.fn(),
+    openDetailsPanel: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('time range', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -14,29 +17,35 @@ import { updateList } from './update_list';
 import { getList } from './get_list';
 import { getUpdateListOptionsMock } from './update_list.mock';
 
-jest.mock('../utils', () => ({
-  checkVersionConflict: jest.fn(),
-  waitUntilDocumentIndexed: jest.fn(),
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      checkVersionConflict: vi.fn(),
+      waitUntilDocumentIndexed: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./get_list', () => ({
-  getList: jest.fn(),
-}));
+vi.mock('./get_list', () => {
+      const mocked = {
+      getList: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('update_list', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it returns an updated list', async () => {
     const list: ListSchema = {
       ...getListResponseMock(),
     };
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
+    (getList as unknown as Mock).mockResolvedValueOnce(list);
     const options = getUpdateListOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.updateByQuery.mockResolvedValue({ updated: 1 });
@@ -49,7 +58,7 @@ describe('update_list', () => {
   });
 
   test('it returns null when there is not a list to update', async () => {
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(null);
+    (getList as unknown as Mock).mockResolvedValueOnce(null);
     const options = getUpdateListOptionsMock();
     const updatedList = await updateList(options);
     expect(updatedList).toEqual(null);
@@ -59,7 +68,7 @@ describe('update_list', () => {
     const list: ListSchema = {
       ...getListResponseMock(),
     };
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
+    (getList as unknown as Mock).mockResolvedValueOnce(list);
     const options = getUpdateListOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.updateByQuery.mockResolvedValue({ updated: 0 });

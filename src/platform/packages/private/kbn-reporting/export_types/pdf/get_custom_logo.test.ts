@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { getCustomLogo } from './get_custom_logo';
 
 test(`gets logo from uiSettings`, async () => {
-  const mockGet = jest.fn();
+  const mockGet = vi.fn();
   mockGet.mockImplementationOnce((...args: string[]) => {
     if (args[0] === 'xpackReporting:customPdfLogo') {
       return 'purple pony';

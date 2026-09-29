@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedClass, MockedFunction } from 'vitest';
+
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -36,65 +39,83 @@ import {
 import { createAgentAction } from './actions';
 import { RollbackActionRunner, rollbackBatch } from './rollback_action_runner';
 
-jest.mock('./crud', () => ({
-  getAgentPolicyForAgent: jest.fn(),
-  getAgentsById: jest.fn(),
-  getAgentsByKuery: jest.fn(),
-  openPointInTime: jest.fn(),
-  updateAgent: jest.fn(),
-}));
+vi.mock('./crud', () => {
+      const mocked = {
+      getAgentPolicyForAgent: vi.fn(),
+      getAgentsById: vi.fn(),
+      getAgentsByKuery: vi.fn(),
+      openPointInTime: vi.fn(),
+      updateAgent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./actions', () => ({
-  createAgentAction: jest.fn(),
-}));
+vi.mock('./actions', () => {
+      const mocked = {
+      createAgentAction: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./rollback_action_runner', () => ({
-  RollbackActionRunner: jest.fn(),
-  rollbackBatch: jest.fn(),
-}));
+vi.mock('./rollback_action_runner', () => {
+      const mocked = {
+      RollbackActionRunner: vi.fn(),
+      rollbackBatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../spaces/get_current_namespace', () => ({
-  getCurrentNamespace: jest.fn(),
-}));
+vi.mock('../spaces/get_current_namespace', () => {
+      const mocked = {
+      getCurrentNamespace: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../spaces/agent_namespaces', () => ({
-  agentsKueryNamespaceFilter: jest.fn(),
-  buildFilterWithNamespace: jest.requireActual('../spaces/agent_namespaces')
-    .buildFilterWithNamespace,
-}));
+vi.mock('../spaces/agent_namespaces', async () => {
+      const mocked = {
+      agentsKueryNamespaceFilter: vi.fn(),
+      buildFilterWithNamespace: (await vi.importActual('../spaces/agent_namespaces'))
+        .buildFilterWithNamespace,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../license', () => ({
-  licenseService: {
-    hasAtLeast: jest.fn(),
-  },
-}));
+vi.mock('../license', () => {
+      const mocked = {
+      licenseService: {
+        hasAtLeast: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetAgentPolicyForAgent = getAgentPolicyForAgent as jest.MockedFunction<
+const mockGetAgentPolicyForAgent = getAgentPolicyForAgent as MockedFunction<
   typeof getAgentPolicyForAgent
 >;
-const mockGetAgentsById = getAgentsById as jest.MockedFunction<typeof getAgentsById>;
-const mockGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
-const mockOpenPointInTime = openPointInTime as jest.MockedFunction<typeof openPointInTime>;
-const mockUpdateAgent = updateAgent as jest.MockedFunction<typeof updateAgent>;
-const mockCreateAgentAction = createAgentAction as jest.MockedFunction<typeof createAgentAction>;
-const mockRollbackBatch = rollbackBatch as jest.MockedFunction<typeof rollbackBatch>;
-const mockRollbackActionRunner = RollbackActionRunner as jest.MockedClass<
+const mockGetAgentsById = getAgentsById as MockedFunction<typeof getAgentsById>;
+const mockGetAgentsByKuery = getAgentsByKuery as MockedFunction<typeof getAgentsByKuery>;
+const mockOpenPointInTime = openPointInTime as MockedFunction<typeof openPointInTime>;
+const mockUpdateAgent = updateAgent as MockedFunction<typeof updateAgent>;
+const mockCreateAgentAction = createAgentAction as MockedFunction<typeof createAgentAction>;
+const mockRollbackBatch = rollbackBatch as MockedFunction<typeof rollbackBatch>;
+const mockRollbackActionRunner = RollbackActionRunner as MockedClass<
   typeof RollbackActionRunner
 >;
-const mockGetCurrentNamespace = getCurrentNamespace as jest.MockedFunction<
+const mockGetCurrentNamespace = getCurrentNamespace as MockedFunction<
   typeof getCurrentNamespace
 >;
-const mockAgentsKueryNamespaceFilter = agentsKueryNamespaceFilter as jest.MockedFunction<
+const mockAgentsKueryNamespaceFilter = agentsKueryNamespaceFilter as MockedFunction<
   typeof agentsKueryNamespaceFilter
 >;
 
 describe('rollback', () => {
-  let esClient: jest.Mocked<ElasticsearchClient>;
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockLicenseService: { hasAtLeast: jest.Mock };
+  let esClient: Mocked<ElasticsearchClient>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let mockLicenseService: { hasAtLeast: Mock };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
 
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     soClient = savedObjectsClientMock.create();
@@ -103,7 +124,7 @@ describe('rollback', () => {
     mockAgentsKueryNamespaceFilter.mockResolvedValue(undefined);
 
     // Get the mocked license service and default to having the required license
-    mockLicenseService = jest.requireMock('../license').licenseService;
+    mockLicenseService = (await vi.importMock('../license')).licenseService;
     mockLicenseService.hasAtLeast.mockReturnValue(true);
   });
 
@@ -722,8 +743,8 @@ describe('rollback', () => {
         const pitId = 'pit-123';
 
         const mockRunnerInstance = {
-          processAgentsInBatches: jest.fn().mockResolvedValue({ actionId: mockActionId1 }),
-          getAllActionIds: jest.fn().mockReturnValue([mockActionId1, mockActionId2]),
+          processAgentsInBatches: vi.fn().mockResolvedValue({ actionId: mockActionId1 }),
+          getAllActionIds: vi.fn().mockReturnValue([mockActionId1, mockActionId2]),
         };
 
         mockGetAgentsByKuery.mockResolvedValue({

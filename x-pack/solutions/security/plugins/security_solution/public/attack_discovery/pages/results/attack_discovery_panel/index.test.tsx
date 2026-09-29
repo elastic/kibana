@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -15,7 +17,7 @@ import { mockAttackDiscovery } from '../../mock/mock_attack_discovery';
 const defaultProps = {
   attackDiscovery: mockAttackDiscovery,
   isSelected: false,
-  setSelectedAttackDiscoveries: jest.fn(),
+  setSelectedAttackDiscoveries: vi.fn(),
 };
 
 describe('AttackDiscoveryPanel', () => {

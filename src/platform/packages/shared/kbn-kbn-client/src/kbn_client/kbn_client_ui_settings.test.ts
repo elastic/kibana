@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClientRequester } from './kbn_client_requester';
 import {
@@ -16,11 +18,11 @@ import {
 
 describe('KbnClientUiSettings', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('waits for the eventual cache refresh window', async () => {
@@ -35,10 +37,10 @@ describe('KbnClientUiSettings', () => {
       settled = true;
     });
 
-    await jest.advanceTimersByTimeAsync(MAX_UI_SETTINGS_EVENTUAL_CACHE_REFRESH_WAIT_MS - 1);
+    await vi.advanceTimersByTimeAsync(MAX_UI_SETTINGS_EVENTUAL_CACHE_REFRESH_WAIT_MS - 1);
     expect(settled).toBe(false);
 
-    await jest.advanceTimersByTimeAsync(1);
+    await vi.advanceTimersByTimeAsync(1);
     await promise;
 
     expect(settled).toBe(true);

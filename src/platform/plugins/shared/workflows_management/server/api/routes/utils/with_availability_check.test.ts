@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
@@ -45,12 +47,12 @@ function createWorkflowsContext({
     }),
     workflows: Promise.resolve({
       isWorkflowsAvailable,
-      emitEvent: jest.fn(),
+      emitEvent: vi.fn(),
       managedWorkflows: {
-        install: jest.fn(),
-        uninstall: jest.fn(),
-        getWorkflowStatus: jest.fn(),
-        execute: jest.fn(),
+        install: vi.fn(),
+        uninstall: vi.fn(),
+        getWorkflowStatus: vi.fn(),
+        execute: vi.fn(),
       },
     }),
     actions: {} as never,
@@ -64,7 +66,7 @@ describe('withAvailabilityCheck', () => {
 
   describe('license check', () => {
     it('calls the route handler when license is available, active, and enterprise', async () => {
-      const handler = jest.fn().mockResolvedValue(undefined);
+      const handler = vi.fn().mockResolvedValue(undefined);
       const wrapped = withAvailabilityCheck(handler);
       const response = httpServerMock.createResponseFactory();
       const context = createWorkflowsContext({ license: enterpriseLicense() });
@@ -77,7 +79,7 @@ describe('withAvailabilityCheck', () => {
     });
 
     it('returns forbidden when license information is not available', async () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       const wrapped = withAvailabilityCheck(handler);
       const response = httpServerMock.createResponseFactory();
 
@@ -95,7 +97,7 @@ describe('withAvailabilityCheck', () => {
     });
 
     it('returns forbidden when license is not active', async () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       const wrapped = withAvailabilityCheck(handler);
       const response = httpServerMock.createResponseFactory();
 
@@ -112,7 +114,7 @@ describe('withAvailabilityCheck', () => {
     });
 
     it('returns forbidden when license tier is below enterprise', async () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       const wrapped = withAvailabilityCheck(handler);
       const response = httpServerMock.createResponseFactory();
 
@@ -135,7 +137,7 @@ describe('withAvailabilityCheck', () => {
       const workflowsManagement = new Promise<void>((resolve) => {
         completeBootstrap = resolve;
       });
-      const handler = jest.fn().mockResolvedValue(undefined);
+      const handler = vi.fn().mockResolvedValue(undefined);
       const wrapped = withAvailabilityCheck(handler);
       const response = httpServerMock.createResponseFactory();
       const result = wrapped(
@@ -153,13 +155,13 @@ describe('withAvailabilityCheck', () => {
     });
 
     it('does not start the data-view bootstrap when it is disabled', async () => {
-      const handler = jest.fn().mockResolvedValue(undefined);
+      const handler = vi.fn().mockResolvedValue(undefined);
       const wrapped = withAvailabilityCheck(handler, {
         bootstrapExecutionDataViews: false,
       });
       const response = httpServerMock.createResponseFactory();
       const context = createWorkflowsContext({ license: enterpriseLicense() });
-      const getWorkflowsManagement = jest.fn().mockResolvedValue(undefined);
+      const getWorkflowsManagement = vi.fn().mockResolvedValue(undefined);
       Object.defineProperty(context, 'workflowsManagement', {
         get: getWorkflowsManagement,
       });
@@ -171,7 +173,7 @@ describe('withAvailabilityCheck', () => {
     });
 
     it('calls the route handler when workflows are available in this environment', async () => {
-      const handler = jest.fn().mockResolvedValue(undefined);
+      const handler = vi.fn().mockResolvedValue(undefined);
       const wrapped = withAvailabilityCheck(handler);
       const response = httpServerMock.createResponseFactory();
       const context = createWorkflowsContext({
@@ -187,7 +189,7 @@ describe('withAvailabilityCheck', () => {
     });
 
     it('returns forbidden when workflows are not available in this environment', async () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       const wrapped = withAvailabilityCheck(handler);
       const response = httpServerMock.createResponseFactory();
 
@@ -210,7 +212,7 @@ describe('withAvailabilityCheck', () => {
     });
 
     it('does not run the serverless availability check when the license check fails', async () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       const wrapped = withAvailabilityCheck(handler);
       const response = httpServerMock.createResponseFactory();
 

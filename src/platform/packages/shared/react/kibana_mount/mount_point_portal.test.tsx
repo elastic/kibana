@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FC } from 'react';
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
@@ -41,7 +43,7 @@ describe('MountPointPortal', () => {
   beforeEach(() => {
     portalTarget = document.createElement('div');
     document.body.append(portalTarget);
-    setMountPoint = jest.fn().mockImplementation((mp) => {
+    setMountPoint = vi.fn().mockImplementation((mp) => {
       mountPoint = mp;
     });
   });
@@ -149,7 +151,7 @@ describe('MountPointPortal', () => {
   });
 
   it('calls cleanup function when the component is unmounted', async () => {
-    const cleanup = jest.fn();
+    const cleanup = vi.fn();
     dom = mount(
       <MountPointPortal
         setMountPoint={(mp) => {
@@ -223,7 +225,7 @@ describe('MountPointPortal', () => {
 
     expect(portalTarget.innerHTML).toBe('<span>portal content</span>');
 
-    const newSetMountPoint = jest.fn();
+    const newSetMountPoint = vi.fn();
 
     dom.setProps({
       setMountPoint: newSetMountPoint,

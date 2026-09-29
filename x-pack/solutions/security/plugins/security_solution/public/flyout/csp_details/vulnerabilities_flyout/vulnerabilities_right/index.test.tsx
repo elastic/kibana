@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { FindingsVulnerabilityPanel } from '.';
@@ -17,25 +20,34 @@ import {
 } from '@kbn/expandable-flyout';
 import type { FindingsVulnerabilityPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-  useDateFormat: jest.fn(),
-  useTimeZone: jest.fn(),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+      useDateFormat: vi.fn(),
+      useTimeZone: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  useExpandableFlyoutHistory: jest.fn(),
-  useExpandableFlyoutState: jest.fn(),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+      useExpandableFlyoutHistory: vi.fn(),
+      useExpandableFlyoutState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params', () => ({
-  useGetNavigationUrlParams: () => () => 'mocked-nav-url',
-}));
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params', () => {
+      const mocked = {
+      useGetNavigationUrlParams: () => () => 'mocked-nav-url',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const renderComponent = (Component: any) => {
-  (useKibana as jest.Mock).mockReturnValue({
+  (useKibana as Mock).mockReturnValue({
     services: {
       cloudSecurityPosture: {
         getCloudSecurityPostureVulnerabilityFlyout: () => ({
@@ -68,7 +80,7 @@ const createMockFlyoutComponent =
         },
         '@timestamp': '2025-05-22T00:00:00.000Z',
       },
-      createRuleFn: jest.fn(),
+      createRuleFn: vi.fn(),
     });
 
 const baseProps: FindingsVulnerabilityPanelExpandableFlyoutProps['params'] = {
@@ -83,12 +95,12 @@ const baseProps: FindingsVulnerabilityPanelExpandableFlyoutProps['params'] = {
 const flyoutHistoryMock = [{ lastOpen: Date.now(), panel: { id: 'id_mock', params: {} } }];
 
 beforeEach(() => {
-  (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ closeLeftPanel: jest.fn() });
-  (useExpandableFlyoutHistory as jest.Mock).mockReturnValue(flyoutHistoryMock);
-  (useExpandableFlyoutState as jest.Mock).mockReturnValue({});
+  (useExpandableFlyoutApi as Mock).mockReturnValue({ closeLeftPanel: vi.fn() });
+  (useExpandableFlyoutHistory as Mock).mockReturnValue(flyoutHistoryMock);
+  (useExpandableFlyoutState as Mock).mockReturnValue({});
 
-  (useDateFormat as jest.Mock).mockReturnValue('MMM D, YYYY @ HH:mm:ss.SSS');
-  (useTimeZone as jest.Mock).mockReturnValue('UTC');
+  (useDateFormat as Mock).mockReturnValue('MMM D, YYYY @ HH:mm:ss.SSS');
+  (useTimeZone as Mock).mockReturnValue('UTC');
 });
 
 describe('FindingsVulnerabilityPanel', () => {

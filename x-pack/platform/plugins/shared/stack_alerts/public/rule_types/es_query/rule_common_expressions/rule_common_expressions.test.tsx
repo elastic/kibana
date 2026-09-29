@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
@@ -39,7 +41,7 @@ const errors = {
 };
 
 describe('RuleCommonExpressions', () => {
-  const onChangeExcludeHitsFromPreviousRunFn = jest.fn();
+  const onChangeExcludeHitsFromPreviousRunFn = vi.fn();
   function getCommonParams(overrides = {}) {
     return {
       thresholdComparator: '>',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { bulkUpdateAlertWorkflowStatus } from './bulk_update_alert_workflow_status';
 
@@ -12,7 +14,7 @@ const http = httpServiceMock.createStartContract();
 
 describe('bulkUpdateAlertWorkflowStatus', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should call bulk update API with correct parameters', async () => {

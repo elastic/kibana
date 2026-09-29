@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -72,12 +74,12 @@ const mockDeprecations: KibanaDeprecationDetails[] = [
   }),
 ];
 
-const mockReload = jest.fn();
-const mockToggleFlyout = jest.fn();
+const mockReload = vi.fn();
+const mockToggleFlyout = vi.fn();
 
 describe('KibanaDeprecationsTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('SHOULD render all deprecations as rows', () => {

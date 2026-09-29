@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 
@@ -15,13 +17,13 @@ import { useStartServices } from './use_core';
 import { useDismissableTour } from './use_dismissable_tour';
 import { TourManagerProvider, useTourManager } from './use_tour_manager';
 
-jest.mock('./use_core');
+vi.mock('./use_core');
 
 describe('useDismissableTour', () => {
   let startServices: ReturnType<typeof createStartServices>;
   beforeEach(() => {
     startServices = createStartServices('/app/fleet');
-    jest.mocked(useStartServices).mockReturnValue(startServices);
+    vi.mocked(useStartServices).mockReturnValue(startServices);
   });
   it('should display the tour by default', () => {
     const res = renderHook(() => useDismissableTour('GRANULAR_PRIVILEGES'));
@@ -42,7 +44,7 @@ describe('useDismissableTour', () => {
   });
 
   it('should not display the tour if tours are disabled', () => {
-    jest.mocked(startServices.notifications.tours.isEnabled).mockReturnValue(false);
+    vi.mocked(startServices.notifications.tours.isEnabled).mockReturnValue(false);
     const res = renderHook(() => useDismissableTour('GRANULAR_PRIVILEGES'));
 
     expect(res.result.current.isHidden).toBe(true);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AlertsSolutionSelector } from './alerts_solution_selector';
@@ -20,7 +22,7 @@ describe('AlertsSolutionSelector', () => {
       <AlertsSolutionSelector
         availableSolutions={availableSolutions}
         solution={undefined}
-        onSolutionChange={jest.fn()}
+        onSolutionChange={vi.fn()}
       />
     );
     expect(screen.queryByTestId(SOLUTION_SELECTOR_SUBJ)).toBeInTheDocument();
@@ -32,7 +34,7 @@ describe('AlertsSolutionSelector', () => {
   });
 
   it('should call onSolutionChange with the selected solution', async () => {
-    const onSolutionChange = jest.fn();
+    const onSolutionChange = vi.fn();
     render(
       <AlertsSolutionSelector
         availableSolutions={availableSolutions}

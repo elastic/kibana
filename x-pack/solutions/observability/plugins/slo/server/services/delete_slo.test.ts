@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
@@ -23,11 +25,11 @@ import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
 
 describe('DeleteSLO', () => {
-  let mockRepository: jest.Mocked<SLODefinitionRepository>;
-  let mockTransformManager: jest.Mocked<TransformManager>;
-  let mockSummaryTransformManager: jest.Mocked<TransformManager>;
+  let mockRepository: Mocked<SLODefinitionRepository>;
+  let mockTransformManager: Mocked<TransformManager>;
+  let mockSummaryTransformManager: Mocked<TransformManager>;
   let mockScopedClusterClient: ScopedClusterClientMock;
-  let mockRulesClient: jest.Mocked<RulesClientApi>;
+  let mockRulesClient: Mocked<RulesClientApi>;
   let mockLogger: MockedLogger;
   let deleteSLO: DeleteSLO;
 

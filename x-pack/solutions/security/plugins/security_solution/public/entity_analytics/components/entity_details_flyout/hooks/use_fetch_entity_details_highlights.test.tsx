@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { AnonymizationFieldResponse, Replacements } from '@kbn/elastic-assistant-common';
 import type {
@@ -15,29 +18,38 @@ import { useFetchEntityDetailsHighlights } from './use_fetch_entity_details_high
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { EntityHighlightsResponse } from '../types';
 
-const mockFetchEntityDetailsHighlights = jest.fn();
-const mockSaveEntityAiSummary = jest.fn();
-const mockAddError = jest.fn();
-const mockInferenceOutput = jest.fn();
+const mockFetchEntityDetailsHighlights = vi.fn();
+const mockSaveEntityAiSummary = vi.fn();
+const mockAddError = vi.fn();
+const mockInferenceOutput = vi.fn();
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
-jest.mock('../../../api/api', () => ({
-  useEntityAnalyticsRoutes: () => ({
-    fetchEntityDetailsHighlights: mockFetchEntityDetailsHighlights,
-    saveEntityAiSummary: mockSaveEntityAiSummary,
-  }),
-}));
+vi.mock('../../../api/api', () => {
+      const mocked = {
+      useEntityAnalyticsRoutes: () => ({
+        fetchEntityDetailsHighlights: mockFetchEntityDetailsHighlights,
+        saveEntityAiSummary: mockSaveEntityAiSummary,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addError: mockAddError,
-  }),
-}));
+vi.mock('../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addError: mockAddError,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockProps = {
   connectorId: 'test-connector-id',
@@ -87,7 +99,7 @@ const mockStoredSummary: PersistedEntityAiSummary = {
 
 describe('useFetchEntityDetailsHighlights', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSaveEntityAiSummary.mockResolvedValue({ created: true });
 
     mockUseKibana.mockReturnValue({
@@ -310,8 +322,8 @@ describe('useFetchEntityDetailsHighlights', () => {
     it('skips persistence when the user lacks metadata read access (canRead: false)', async () => {
       mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
       mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
-      const refetchEntityRecord = jest.fn();
-      const refetchPersistedSummary = jest.fn();
+      const refetchEntityRecord = vi.fn();
+      const refetchPersistedSummary = vi.fn();
 
       const { result } = renderHook(() =>
         useFetchEntityDetailsHighlights({
@@ -338,8 +350,8 @@ describe('useFetchEntityDetailsHighlights', () => {
     it('refreshes the entity record and persisted summary after a successful save', async () => {
       mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
       mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
-      const refetchEntityRecord = jest.fn();
-      const refetchPersistedSummary = jest.fn();
+      const refetchEntityRecord = vi.fn();
+      const refetchPersistedSummary = vi.fn();
 
       const { result } = renderHook(() =>
         useFetchEntityDetailsHighlights({

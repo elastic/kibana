@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useGetCaseConfiguration } from './use_get_case_configuration';
 import * as api from './api';
@@ -13,15 +15,15 @@ import { TestProviders, mockedTestProvidersOwner } from '../../common/mock';
 import { initialConfiguration } from './utils';
 import React from 'react';
 
-jest.mock('./api');
+vi.mock('./api');
 
 describe('Use get case configuration hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a configuration matching the owner', async () => {
-    const spy = jest.spyOn(api, 'getCaseConfigure');
+    const spy = vi.spyOn(api, 'getCaseConfigure');
     const targetConfiguration = {
       ...initialConfiguration,
       id: 'my-new-configuration-3',
@@ -44,7 +46,7 @@ describe('Use get case configuration hook', () => {
   });
 
   it('returns the initial configuration if none matches the owner', async () => {
-    const spy = jest.spyOn(api, 'getCaseConfigure');
+    const spy = vi.spyOn(api, 'getCaseConfigure');
     const targetConfiguration = {
       ...initialConfiguration,
       id: 'my-new-configuration-1',
@@ -72,7 +74,7 @@ describe('Use get case configuration hook', () => {
   });
 
   it('returns the initial configuration if none exists', async () => {
-    const spy = jest.spyOn(api, 'getCaseConfigure');
+    const spy = vi.spyOn(api, 'getCaseConfigure');
 
     spy.mockResolvedValue([]);
 
@@ -93,7 +95,7 @@ describe('Use get case configuration hook', () => {
   });
 
   it('returns the initial configuration if the owner is undefined', async () => {
-    const spy = jest.spyOn(api, 'getCaseConfigure');
+    const spy = vi.spyOn(api, 'getCaseConfigure');
 
     spy.mockResolvedValue([]);
 

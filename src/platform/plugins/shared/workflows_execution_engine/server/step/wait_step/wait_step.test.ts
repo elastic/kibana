@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { WaitStep } from '@kbn/workflows';
 import type { WaitGraphNode } from '@kbn/workflows/graph';
 import { WaitStepImpl } from './wait_step';
@@ -18,8 +21,8 @@ describe('WaitStepImpl', () => {
   let underTest: WaitStepImpl;
 
   let node: WaitGraphNode;
-  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
-  let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
+  let mockStepExecutionRuntime: Mocked<StepExecutionRuntime>;
+  let mockWorkflowRuntime: Mocked<WorkflowExecutionRuntimeManager>;
   let workflowLogger: IWorkflowEventLogger;
 
   beforeEach(() => {
@@ -36,22 +39,22 @@ describe('WaitStepImpl', () => {
     };
 
     mockStepExecutionRuntime = {
-      tryEnterDelay: jest.fn().mockReturnValue(true),
-      finishStep: jest.fn().mockResolvedValue(undefined),
-      setCurrentStepState: jest.fn(),
+      tryEnterDelay: vi.fn().mockReturnValue(true),
+      finishStep: vi.fn().mockResolvedValue(undefined),
+      setCurrentStepState: vi.fn(),
       stepExecution: undefined,
       stepExecutionId: 'test-step-exec-id',
       contextManager: {
-        renderValueAccordingToContext: jest.fn((value: unknown) => value),
+        renderValueAccordingToContext: vi.fn((value: unknown) => value),
       },
     } as any;
 
     mockWorkflowRuntime = {
-      navigateToNextNode: jest.fn(),
+      navigateToNextNode: vi.fn(),
     } as any;
 
     workflowLogger = {
-      logDebug: jest.fn(),
+      logDebug: vi.fn(),
     } as unknown as IWorkflowEventLogger;
 
     underTest = new WaitStepImpl(
@@ -141,7 +144,7 @@ describe('WaitStepImpl', () => {
     it('should render a Liquid duration before entering the delay', async () => {
       node.configuration.with.duration = '{{ inputs.waitFor }}';
       (
-        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock
       ).mockReturnValue('30m');
 
       await underTest.run();
@@ -156,7 +159,7 @@ describe('WaitStepImpl', () => {
     it('should trim whitespace around the rendered duration', async () => {
       node.configuration.with.duration = '{{ inputs.waitFor }}';
       (
-        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock
       ).mockReturnValue('  1h30m\n');
 
       await underTest.run();
@@ -167,7 +170,7 @@ describe('WaitStepImpl', () => {
     it('should freeze the rendered duration on step state when entering the delay', async () => {
       node.configuration.with.duration = '{{ inputs.waitFor }}';
       (
-        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock
       ).mockReturnValue('30m');
 
       await underTest.run();
@@ -197,7 +200,7 @@ describe('WaitStepImpl', () => {
     it('should throw when the rendered value is not a duration', async () => {
       node.configuration.with.duration = '{{ inputs.waitFor }}';
       (
-        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock
       ).mockReturnValue('not-a-duration');
 
       await expect(underTest.run()).rejects.toThrow('Invalid duration format: not-a-duration');

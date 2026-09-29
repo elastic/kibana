@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getEnvironmentContext } from '.';
 
 describe('getEnvironmentContext', () => {
   describe('when all services are available', () => {
     it('returns the kibana version and space id', async () => {
       const spaces = {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'test-space' }),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'test-space' }),
       };
 
       const result = await getEnvironmentContext({
@@ -43,7 +45,7 @@ describe('getEnvironmentContext', () => {
   describe('when kibanaVersion is unavailable', () => {
     it('returns only the space id', async () => {
       const spaces = {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'test-space' }),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'test-space' }),
       };
 
       const result = await getEnvironmentContext({

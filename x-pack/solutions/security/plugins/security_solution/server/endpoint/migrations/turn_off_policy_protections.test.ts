@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createMockEndpointAppContextServiceStartContract } from '../mocks';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -41,7 +44,7 @@ describe('Turn Off Policy Protections Migration', () => {
       items: [],
     }
   ) => {
-    const packagePolicyListSrv = fleetServices.packagePolicy.list as jest.Mock;
+    const packagePolicyListSrv = fleetServices.packagePolicy.list as Mock;
     return packagePolicyListSrv.mockResolvedValueOnce({
       total,
       page,
@@ -207,7 +210,7 @@ describe('Turn Off Policy Protections Migration', () => {
   describe('when merging policy updates for different product features', () => {
     beforeEach(() => {
       // We only check for the `bulkUpdate` call, so we mock it to avoid side effects
-      fleetServices.packagePolicy.bulkUpdate = jest.fn().mockResolvedValue({
+      fleetServices.packagePolicy.bulkUpdate = vi.fn().mockResolvedValue({
         updatedPolicies: [],
         failedPolicies: [],
       });
@@ -247,7 +250,7 @@ describe('Turn Off Policy Protections Migration', () => {
 
         await callTurnOffPolicyProtections();
 
-        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mock.calls;
+        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as Mock).mock.calls;
         expect(mockCalls.length).toBeGreaterThan(0);
         const mockArguments = mockCalls[0][2];
         expect(mockArguments.length).toBe(1); // Only one policy should be updated
@@ -262,7 +265,7 @@ describe('Turn Off Policy Protections Migration', () => {
       });
 
       it('should update properly if only `endpointPolicyProtections` changed across 2 result pages', async () => {
-        const packagePolicyListSrv = fleetServices.packagePolicy.list as jest.Mock;
+        const packagePolicyListSrv = fleetServices.packagePolicy.list as Mock;
 
         const allPolicies = [
           generatePolicyMock(false, false, false), // Custom protections, default manifest, default notifications set
@@ -276,7 +279,7 @@ describe('Turn Off Policy Protections Migration', () => {
         expect(packagePolicyListSrv).toHaveBeenCalledTimes(2);
         expect(fleetServices.packagePolicy.bulkUpdate).toHaveBeenCalledTimes(1);
 
-        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mock.calls;
+        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as Mock).mock.calls;
         const mockArguments = mockCalls[0][2];
         expect(mockArguments.length).toBe(2);
         expect(mockArguments[0].inputs[0].config.policy.value.global_manifest_version).toBe(
@@ -296,7 +299,7 @@ describe('Turn Off Policy Protections Migration', () => {
 
         await callTurnOffPolicyProtections();
 
-        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mock.calls;
+        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as Mock).mock.calls;
         expect(mockCalls.length).toBeGreaterThan(0);
         const mockArguments = mockCalls[0][2];
         expect(mockArguments.length).toBe(1); // Only one policy should be updated
@@ -320,7 +323,7 @@ describe('Turn Off Policy Protections Migration', () => {
 
         await callTurnOffPolicyProtections();
 
-        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mock.calls;
+        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as Mock).mock.calls;
         expect(mockCalls.length).toBeGreaterThan(0);
         const mockArguments = mockCalls[0][2];
         expect(mockArguments.length).toBe(1); // Only one policy should be updated
@@ -345,7 +348,7 @@ describe('Turn Off Policy Protections Migration', () => {
 
         await callTurnOffPolicyProtections();
 
-        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mock.calls;
+        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as Mock).mock.calls;
         expect(mockCalls.length).toBeGreaterThan(0);
         const mockArguments = mockCalls[0][2];
         expect(mockArguments.length).toBe(2); // Two policies should be updated

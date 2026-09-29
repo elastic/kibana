@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import type { TransformSelectorControlProps } from './transform_selector_control';
@@ -14,7 +16,7 @@ describe('TransformSelectorControl', () => {
   const defaultProps: TransformSelectorControlProps = {
     label: 'Select Transforms',
     errors: [],
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     selectedOptions: [],
     options: ['transform1', 'transform2'],
     allowSelectAll: true,

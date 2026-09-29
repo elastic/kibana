@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useGetMigrationPrebuiltRules } from './use_get_migration_prebuilt_rules';
 import { getRuleMigrationsPrebuiltRules } from '../api';
 import { TestProviders } from '../../../common/mock/test_providers';
 
-jest.mock('../api');
+vi.mock('../api');
 
 describe('useGetMigrationPrebuiltRules', () => {
   it('returns prebuilt rules', async () => {
@@ -26,7 +29,7 @@ describe('useGetMigrationPrebuiltRules', () => {
         },
       ],
     };
-    (getRuleMigrationsPrebuiltRules as jest.Mock).mockResolvedValue(mockResponse);
+    (getRuleMigrationsPrebuiltRules as Mock).mockResolvedValue(mockResponse);
 
     const { result } = renderHook(() => useGetMigrationPrebuiltRules('test-migration-1'), {
       wrapper: TestProviders,
@@ -41,7 +44,7 @@ describe('useGetMigrationPrebuiltRules', () => {
 
   it('handles API errors gracefully', async () => {
     const mockError = new Error('API error');
-    (getRuleMigrationsPrebuiltRules as jest.Mock).mockRejectedValue(mockError);
+    (getRuleMigrationsPrebuiltRules as Mock).mockRejectedValue(mockError);
 
     const { result } = renderHook(() => useGetMigrationPrebuiltRules('test-migration-1'), {
       wrapper: TestProviders,

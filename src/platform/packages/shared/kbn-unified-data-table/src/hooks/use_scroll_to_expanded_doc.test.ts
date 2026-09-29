@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { RefObject } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import type { EuiDataGridRefProps } from '@elastic/eui';
@@ -24,8 +26,8 @@ const rows = [
 ];
 
 let resizeObserverCallback: ResizeObserverCallback;
-const observe = jest.fn();
-const disconnect = jest.fn();
+const observe = vi.fn();
+const disconnect = vi.fn();
 
 class TestResizeObserver implements ResizeObserver {
   constructor(callback: ResizeObserverCallback) {
@@ -33,7 +35,7 @@ class TestResizeObserver implements ResizeObserver {
   }
 
   public observe = observe;
-  public unobserve = jest.fn();
+  public unobserve = vi.fn();
   public disconnect = disconnect;
 }
 
@@ -44,19 +46,19 @@ describe('useScrollToExpandedDoc', () => {
   const originalCancelAnimationFrame = window.cancelAnimationFrame;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
     animationFrames.length = 0;
     window.ResizeObserver = TestResizeObserver;
     window.requestAnimationFrame = (callback) => {
       animationFrames.push(callback);
       return animationFrames.length;
     };
-    window.cancelAnimationFrame = jest.fn();
+    window.cancelAnimationFrame = vi.fn();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
     window.ResizeObserver = originalResizeObserver;
     window.requestAnimationFrame = originalRequestAnimationFrame;
     window.cancelAnimationFrame = originalCancelAnimationFrame;
@@ -83,17 +85,17 @@ describe('useScrollToExpandedDoc', () => {
     isPaginationEnabled: false,
     pageIndex: 0,
     pageSize: 10,
-    onChangePageIndex: jest.fn(),
+    onChangePageIndex: vi.fn(),
     dataGridRef,
     dataGridWrapper,
   });
 
   it('retries until the grid is ready and keeps the row centered while it settles', () => {
     const gridApi: EuiDataGridRefProps = {
-      setIsFullScreen: jest.fn(),
-      setFocusedCell: jest.fn(),
-      openCellPopover: jest.fn(),
-      closeCellPopover: jest.fn(),
+      setIsFullScreen: vi.fn(),
+      setFocusedCell: vi.fn(),
+      openCellPopover: vi.fn(),
+      closeCellPopover: vi.fn(),
     };
     const dataGridRef: RefObject<EuiDataGridRefProps> = { current: gridApi };
     const dataGridWrapper = document.createElement('div');
@@ -106,18 +108,18 @@ describe('useScrollToExpandedDoc', () => {
     });
 
     runNextFrame();
-    const scrollToItem = jest.fn();
+    const scrollToItem = vi.fn();
     gridApi.scrollToItem = scrollToItem;
     runNextFrame();
 
     expect(scrollToItem).toHaveBeenCalledWith({ rowIndex: 1, align: 'center' });
     expect(observe).toHaveBeenCalledWith(scrollContainer);
 
-    act(() => resizeObserverCallback([], new TestResizeObserver(jest.fn())));
+    act(() => resizeObserverCallback([], new TestResizeObserver(vi.fn())));
     runNextFrame();
     expect(scrollToItem).toHaveBeenCalledTimes(2);
 
-    act(() => jest.advanceTimersByTime(500));
+    act(() => vi.advanceTimersByTime(500));
     expect(disconnect).toHaveBeenCalled();
 
     rerender({ hookProps: { ...props, displayedRows: [...rows] } });
@@ -129,10 +131,10 @@ describe('useScrollToExpandedDoc', () => {
   it('stops retrying when the document is removed', () => {
     const dataGridRef: RefObject<EuiDataGridRefProps> = {
       current: {
-        setIsFullScreen: jest.fn(),
-        setFocusedCell: jest.fn(),
-        openCellPopover: jest.fn(),
-        closeCellPopover: jest.fn(),
+        setIsFullScreen: vi.fn(),
+        setFocusedCell: vi.fn(),
+        openCellPopover: vi.fn(),
+        closeCellPopover: vi.fn(),
       },
     };
     const dataGridWrapper = document.createElement('div');
@@ -149,13 +151,13 @@ describe('useScrollToExpandedDoc', () => {
   });
 
   it('scrolls again when the same document is closed and reopened', () => {
-    const scrollToItem = jest.fn();
+    const scrollToItem = vi.fn();
     const dataGridRef: RefObject<EuiDataGridRefProps> = {
       current: {
-        setIsFullScreen: jest.fn(),
-        setFocusedCell: jest.fn(),
-        openCellPopover: jest.fn(),
-        closeCellPopover: jest.fn(),
+        setIsFullScreen: vi.fn(),
+        setFocusedCell: vi.fn(),
+        openCellPopover: vi.fn(),
+        closeCellPopover: vi.fn(),
         scrollToItem,
       },
     };
@@ -178,10 +180,10 @@ describe('useScrollToExpandedDoc', () => {
   it('stops retrying when the grid remains unavailable', () => {
     const dataGridRef: RefObject<EuiDataGridRefProps> = {
       current: {
-        setIsFullScreen: jest.fn(),
-        setFocusedCell: jest.fn(),
-        openCellPopover: jest.fn(),
-        closeCellPopover: jest.fn(),
+        setIsFullScreen: vi.fn(),
+        setFocusedCell: vi.fn(),
+        openCellPopover: vi.fn(),
+        closeCellPopover: vi.fn(),
       },
     };
     const dataGridWrapper = document.createElement('div');

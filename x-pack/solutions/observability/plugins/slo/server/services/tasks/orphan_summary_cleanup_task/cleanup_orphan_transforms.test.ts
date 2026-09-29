@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import {
   elasticsearchClientMock,
@@ -76,8 +79,8 @@ describe('parseSloTransformId', () => {
 
 describe('cleanupOrphanTransforms', () => {
   let esClient: ElasticsearchClientMock;
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let logger: jest.Mocked<MockedLogger>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let logger: Mocked<MockedLogger>;
   let abortController: AbortController;
   let signal: AbortSignal;
 
@@ -87,7 +90,7 @@ describe('cleanupOrphanTransforms', () => {
     logger = loggerMock.create();
     abortController = new AbortController();
     signal = abortController.signal;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should do nothing when no SLO transforms exist', async () => {

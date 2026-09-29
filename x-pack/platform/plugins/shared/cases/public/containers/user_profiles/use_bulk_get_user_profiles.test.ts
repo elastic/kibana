@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useToasts, useKibana } from '../../common/lib/kibana';
 
@@ -14,28 +17,28 @@ import { userProfilesIds } from './api.mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../common/mock';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('./api');
+vi.mock('../../common/lib/kibana');
+vi.mock('./api');
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
 describe('useBulkGetUserProfiles', () => {
   const props = {
     uids: userProfilesIds,
   };
 
-  const addSuccess = jest.fn();
-  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
+  const addSuccess = vi.fn();
+  (useToasts as Mock).mockReturnValue({ addSuccess, addError: vi.fn() });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: { ...createStartServicesMock() },
     });
   });
 
   it('calls bulkGetUserProfiles with correct arguments', async () => {
-    const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
+    const spyOnBulkGetUserProfiles = vi.spyOn(api, 'bulkGetUserProfiles');
 
     renderHook(() => useBulkGetUserProfiles(props), {
       wrapper: TestProviders,
@@ -94,14 +97,14 @@ describe('useBulkGetUserProfiles', () => {
   });
 
   it('shows a toast error message when an error occurs in the response', async () => {
-    const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
+    const spyOnBulkGetUserProfiles = vi.spyOn(api, 'bulkGetUserProfiles');
 
     spyOnBulkGetUserProfiles.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addSuccess, addError });
 
     renderHook(() => useBulkGetUserProfiles(props), {
       wrapper: TestProviders,
@@ -111,7 +114,7 @@ describe('useBulkGetUserProfiles', () => {
   });
 
   it('does not call the bulkGetUserProfiles if the array of uids is empty', async () => {
-    const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
+    const spyOnBulkGetUserProfiles = vi.spyOn(api, 'bulkGetUserProfiles');
 
     renderHook(() => useBulkGetUserProfiles({ uids: [] }), {
       wrapper: TestProviders,

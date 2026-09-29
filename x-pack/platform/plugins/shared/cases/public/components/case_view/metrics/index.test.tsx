@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
 import {
@@ -19,11 +22,11 @@ import { useGetCaseMetrics } from '../../../containers/use_get_case_metrics';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { CaseMetricsFeature } from '../../../../common/types/api';
 
-jest.mock('../../../containers/use_get_case_metrics');
-jest.mock('../../../common/use_cases_features');
+vi.mock('../../../containers/use_get_case_metrics');
+vi.mock('../../../common/use_cases_features');
 
-const useFetchCaseMetricsMock = useGetCaseMetrics as jest.Mock;
-const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
+const useFetchCaseMetricsMock = useGetCaseMetrics as Mock;
+const useCasesFeaturesMock = useCasesFeatures as Mock;
 
 const renderCaseMetrics = ({
   metrics = basicCaseMetrics,

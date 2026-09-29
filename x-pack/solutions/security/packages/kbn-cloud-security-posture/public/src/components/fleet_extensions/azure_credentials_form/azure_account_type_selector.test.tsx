@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,29 +16,32 @@ import * as cloudSetupContext from '../hooks/use_cloud_setup_context';
 import { ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT } from '@kbn/fleet-plugin/common';
 
 // Mock the cloud setup context
-const mockUseCloudSetup = jest.fn();
-jest.spyOn(cloudSetupContext, 'useCloudSetup').mockImplementation(mockUseCloudSetup);
+const mockUseCloudSetup = vi.fn();
+vi.spyOn(cloudSetupContext, 'useCloudSetup').mockImplementation(mockUseCloudSetup);
 
 // Mock the updatePolicyWithInputs utility
-jest.mock('../utils', () => ({
-  updatePolicyWithInputs: jest.fn((policy, policyType, inputs) => ({
-    ...policy,
-    inputs: [
-      {
-        ...policy.inputs[0],
-        streams: [
+vi.mock('../utils', () => {
+      const mocked = {
+      updatePolicyWithInputs: vi.fn((policy, policyType, inputs) => ({
+        ...policy,
+        inputs: [
           {
-            ...policy.inputs[0].streams[0],
-            vars: {
-              ...policy.inputs[0].streams[0].vars,
-              ...inputs,
-            },
+            ...policy.inputs[0],
+            streams: [
+              {
+                ...policy.inputs[0].streams[0],
+                vars: {
+                  ...policy.inputs[0].streams[0].vars,
+                  ...inputs,
+                },
+              },
+            ],
           },
         ],
-      },
-    ],
-  })),
-}));
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultMockCloudSetup = {
   isAwsCloudConnectorEnabled: false,
@@ -114,7 +119,7 @@ const defaultProps = {
     policy_template: 'cspm',
   },
   newPolicy: createMockNewPackagePolicy(),
-  updatePolicy: jest.fn(),
+  updatePolicy: vi.fn(),
   disabled: false,
 };
 
@@ -123,7 +128,7 @@ const renderWithIntl = (component: React.ReactElement) =>
 
 describe('AzureAccountTypeSelect', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCloudSetup.mockReturnValue(defaultMockCloudSetup);
   });
 
@@ -184,7 +189,7 @@ describe('AzureAccountTypeSelect', () => {
 
   describe('account type selection', () => {
     it('calls updatePolicy to set organization account type by default when no account type is set', () => {
-      const mockUpdatePolicy = jest.fn();
+      const mockUpdatePolicy = vi.fn();
       const props = {
         ...defaultProps,
         updatePolicy: mockUpdatePolicy,
@@ -350,7 +355,7 @@ describe('AzureAccountTypeSelect', () => {
 
   describe('policy updates', () => {
     it('calls updatePolicy when organization account type is selected', () => {
-      const mockUpdatePolicy = jest.fn();
+      const mockUpdatePolicy = vi.fn();
       const props = {
         ...defaultProps,
         updatePolicy: mockUpdatePolicy,
@@ -382,7 +387,7 @@ describe('AzureAccountTypeSelect', () => {
     });
 
     it('calls updatePolicy when single account type is selected', () => {
-      const mockUpdatePolicy = jest.fn();
+      const mockUpdatePolicy = vi.fn();
       const props = {
         ...defaultProps,
         updatePolicy: mockUpdatePolicy,
@@ -414,7 +419,7 @@ describe('AzureAccountTypeSelect', () => {
     });
 
     it('does not call updatePolicy when the same account type is selected', () => {
-      const mockUpdatePolicy = jest.fn();
+      const mockUpdatePolicy = vi.fn();
       const propsWithOrgAccount = {
         ...defaultProps,
         updatePolicy: mockUpdatePolicy,
@@ -468,7 +473,7 @@ describe('AzureAccountTypeSelect', () => {
     });
 
     it('handles missing stream vars gracefully', () => {
-      const mockUpdatePolicy = jest.fn();
+      const mockUpdatePolicy = vi.fn();
       const propsWithoutVars = {
         ...defaultProps,
         updatePolicy: mockUpdatePolicy,
@@ -492,7 +497,7 @@ describe('AzureAccountTypeSelect', () => {
     });
 
     it('handles invalid account type values gracefully', () => {
-      const mockUpdatePolicy = jest.fn();
+      const mockUpdatePolicy = vi.fn();
       const propsWithInvalidAccountType = {
         ...defaultProps,
         updatePolicy: mockUpdatePolicy,

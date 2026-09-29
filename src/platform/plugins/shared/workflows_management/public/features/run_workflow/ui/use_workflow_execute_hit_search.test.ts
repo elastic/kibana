@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import {
@@ -33,12 +35,12 @@ describe('useWorkflowExecuteHitSearch', () => {
   const baseOptions = {
     enabled: true,
     searchIdentityKey: 'identity-1',
-    setErrors: jest.fn(),
+    setErrors: vi.fn(),
     resolveFetchError: () => 'fetch failed',
   };
 
   it('fetches the first page when enabled', async () => {
-    const fetchPage = jest.fn().mockResolvedValue({ pageHits: [hit], total: 1 });
+    const fetchPage = vi.fn().mockResolvedValue({ pageHits: [hit], total: 1 });
 
     const { result } = renderHook(() =>
       useWorkflowExecuteHitSearch({
@@ -57,7 +59,7 @@ describe('useWorkflowExecuteHitSearch', () => {
   });
 
   it('resets results and refetches when the search identity changes', async () => {
-    const fetchPage = jest
+    const fetchPage = vi
       .fn()
       .mockResolvedValueOnce({ pageHits: [hit], total: 1 })
       .mockResolvedValueOnce({
@@ -94,7 +96,7 @@ describe('useWorkflowExecuteHitSearch', () => {
 
   it('loads the next page when onFetchMoreRecords is invoked', async () => {
     const secondHit: EsHitRecord = { _id: '2', _index: 'logs-*', _source: { message: 'more' } };
-    const fetchPage = jest
+    const fetchPage = vi
       .fn()
       .mockResolvedValueOnce({ pageHits: [hit], total: 2 })
       .mockResolvedValueOnce({ pageHits: [secondHit], total: 2 });

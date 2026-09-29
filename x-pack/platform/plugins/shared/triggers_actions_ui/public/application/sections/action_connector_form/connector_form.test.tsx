@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { lazy } from 'react';
 import { waitFor, act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,8 +17,8 @@ import { createAppMockRenderer } from '../test_utils';
 
 describe('ConnectorForm', () => {
   let appMockRenderer: AppMockRenderer;
-  const onChange = jest.fn();
-  const onFormModifiedChange = jest.fn();
+  const onChange = vi.fn();
+  const onFormModifiedChange = vi.fn();
 
   const connector = {
     id: 'test-connector',
@@ -29,7 +31,7 @@ describe('ConnectorForm', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
     appMockRenderer.coreStart.application.capabilities = {
       ...appMockRenderer.coreStart.application.capabilities,
@@ -166,8 +168,8 @@ describe('ConnectorForm', () => {
   });
 
   it('passes the serializers from the connector type model to the underlying form', async () => {
-    const formSerializer = jest.fn((data) => data);
-    const formDeserializer = jest.fn((data) => data);
+    const formSerializer = vi.fn((data) => data);
+    const formDeserializer = vi.fn((data) => data);
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       actionConnectorFields: lazy(() => import('./connector_mock')),
       connectorForm: {

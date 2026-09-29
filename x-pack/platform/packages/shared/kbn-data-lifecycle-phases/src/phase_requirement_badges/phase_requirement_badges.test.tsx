@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, screen } from '@testing-library/react';
@@ -16,7 +18,7 @@ import {
 
 describe('phase requirement badges', () => {
   it('renders EnterpriseLicenseRequiredBadge and calls onClick', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
 
     renderWithI18n(<EnterpriseLicenseRequiredBadge onClick={onClick} />);
 
@@ -26,7 +28,7 @@ describe('phase requirement badges', () => {
   });
 
   it('renders DefaultRepositoryRequiredBadge and calls onClick', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
 
     renderWithI18n(<DefaultRepositoryRequiredBadge onClick={onClick} />);
 

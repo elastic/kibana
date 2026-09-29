@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, render, waitFor } from '@testing-library/react';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
@@ -35,72 +38,90 @@ import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyou
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 
-jest.mock('../../../../common/components/local_storage', () => ({
-  useLocalStorage: jest.fn(),
-}));
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
-jest.mock('../../../../flyout_v2/use_flyout_api');
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../user_info');
-jest.mock('../../../containers/detection_engine/lists/use_lists_config');
-jest.mock('../../../hooks/attacks/use_get_default_group_title_renderers');
-jest.mock('../../../hooks/attacks/use_attack_group_handler');
-jest.mock('../../alerts_table/alerts_grouping', () => ({
-  ...jest.requireActual('../../alerts_table/alerts_grouping'),
-  GroupedAlertsTable: jest.fn(),
-}));
-jest.mock('./empty_results_prompt', () => ({
-  EmptyResultsPrompt: jest.fn(() => <div data-test-subj="mock-empty-results-prompt" />),
-}));
-jest.mock('./attacks_view_options_popover', () => ({
-  AttacksViewOptionsPopover: jest.fn(
-    ({ showAnonymized, onToggleShowAnonymized, showAttacksOnly, onToggleShowAttacksOnly }) => (
-      <div data-test-subj="mock-attacks-view-options-popover">
-        <button
-          type="button"
-          data-test-subj="mock-toggle-anonymized"
-          onClick={onToggleShowAnonymized}
-          role="switch"
-          aria-checked={showAnonymized}
-        >
-          {'Anonymized'}
-        </button>
-        <button
-          type="button"
-          data-test-subj="mock-toggle-attacks-only"
-          onClick={onToggleShowAttacksOnly}
-          role="switch"
-          aria-checked={showAttacksOnly}
-        >
-          {'Attacks Only'}
-        </button>
-      </div>
-    )
-  ),
-}));
-jest.mock('./grouping_settings/use_group_stats');
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useStore: () => ({ getState: jest.fn(), dispatch: jest.fn(), subscribe: jest.fn() }),
-}));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: jest.fn() }),
-}));
+vi.mock('../../../../common/components/local_storage', () => {
+      const mocked = {
+      useLocalStorage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../../../../flyout_v2/use_flyout_api');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../user_info');
+vi.mock('../../../containers/detection_engine/lists/use_lists_config');
+vi.mock('../../../hooks/attacks/use_get_default_group_title_renderers');
+vi.mock('../../../hooks/attacks/use_attack_group_handler');
+vi.mock('../../alerts_table/alerts_grouping', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../alerts_table/alerts_grouping')),
+      GroupedAlertsTable: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./empty_results_prompt', () => {
+      const mocked = {
+      EmptyResultsPrompt: vi.fn(() => <div data-test-subj="mock-empty-results-prompt" />),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./attacks_view_options_popover', () => {
+      const mocked = {
+      AttacksViewOptionsPopover: vi.fn(
+        ({ showAnonymized, onToggleShowAnonymized, showAttacksOnly, onToggleShowAttacksOnly }) => (
+          <div data-test-subj="mock-attacks-view-options-popover">
+            <button
+              type="button"
+              data-test-subj="mock-toggle-anonymized"
+              onClick={onToggleShowAnonymized}
+              role="switch"
+              aria-checked={showAnonymized}
+            >
+              {'Anonymized'}
+            </button>
+            <button
+              type="button"
+              data-test-subj="mock-toggle-attacks-only"
+              onClick={onToggleShowAttacksOnly}
+              role="switch"
+              aria-checked={showAttacksOnly}
+            >
+              {'Attacks Only'}
+            </button>
+          </div>
+        )
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./grouping_settings/use_group_stats');
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useStore: () => ({ getState: vi.fn(), dispatch: vi.fn(), subscribe: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => ({ push: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const dataView: DataView = createStubDataView({
   spec: { title: '.alerts-security.alerts-default' },
 });
 
-const mockUseGetDefaultGroupTitleRenderers = useGetDefaultGroupTitleRenderers as jest.Mock;
-const mockUseAttackGroupHandler = useAttackGroupHandler as jest.Mock;
-const mockGroupedAlertsTable = GroupedAlertsTable as unknown as jest.Mock;
-const mockEmptyResultsPrompt = EmptyResultsPrompt as unknown as jest.Mock;
-const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.Mock;
-const mockUseGroupStats = useGroupStats as jest.Mock;
+const mockUseGetDefaultGroupTitleRenderers = useGetDefaultGroupTitleRenderers as Mock;
+const mockUseAttackGroupHandler = useAttackGroupHandler as Mock;
+const mockGroupedAlertsTable = GroupedAlertsTable as unknown as Mock;
+const mockEmptyResultsPrompt = EmptyResultsPrompt as unknown as Mock;
+const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as Mock;
+const mockUseGroupStats = useGroupStats as Mock;
 
-const reportEvent = jest.fn();
+const reportEvent = vi.fn();
 
 const defaultProps: Parameters<typeof TableSection>[0] = {
   assignees: [],
@@ -109,22 +130,22 @@ const defaultProps: Parameters<typeof TableSection>[0] = {
   dataView,
   selectedConnectorNames: [],
   selectedTypes: [],
-  openSchedulesFlyout: jest.fn(),
+  openSchedulesFlyout: vi.fn(),
 };
 
 describe('<TableSection />', () => {
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
-    (useLocalStorage as jest.Mock).mockReturnValue([
+    (useLocalStorage as Mock).mockReturnValue([
       [{ latestTimestamp: { order: 'desc' } }],
-      jest.fn(),
+      vi.fn(),
     ]);
 
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    (useKibana as Mock).mockReturnValue({
       services: {
         telemetry: {
           reportEvent,
@@ -132,15 +153,15 @@ describe('<TableSection />', () => {
       },
     });
     mockUseGetDefaultGroupTitleRenderers.mockReturnValue({
-      defaultGroupTitleRenderers: jest.fn(),
+      defaultGroupTitleRenderers: vi.fn(),
     });
     mockUseAttackGroupHandler.mockReturnValue({
-      getAttack: jest.fn(),
+      getAttack: vi.fn(),
       isLoading: false,
     });
     mockUseGroupStats.mockReturnValue({
-      aggregations: jest.fn(),
-      renderer: jest.fn(),
+      aggregations: vi.fn(),
+      renderer: vi.fn(),
     });
     mockGroupedAlertsTable.mockImplementation((props) => (
       <div data-test-subj="mock-grouped-alerts-table">
@@ -151,20 +172,20 @@ describe('<TableSection />', () => {
       </div>
     ));
     mockUseExpandableFlyoutApi.mockReturnValue({
-      openFlyout: jest.fn(),
+      openFlyout: vi.fn(),
     });
-    (useUserData as jest.Mock).mockReturnValue([
+    (useUserData as Mock).mockReturnValue([
       {
         loading: false,
       },
     ]);
-    (useListsConfig as jest.Mock).mockReturnValue({
+    (useListsConfig as Mock).mockReturnValue({
       loading: false,
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render correctly', async () => {
@@ -182,7 +203,7 @@ describe('<TableSection />', () => {
 
   it('should pass isLoading from useAttackGroupHandler to useGetDefaultGroupTitleRenderers', async () => {
     mockUseAttackGroupHandler.mockReturnValue({
-      getAttack: jest.fn(),
+      getAttack: vi.fn(),
       isLoading: true,
     });
 
@@ -203,7 +224,7 @@ describe('<TableSection />', () => {
 
   it('should report telemetry when openAttackDetailsFlyout is called', async () => {
     mockUseAttackGroupHandler.mockReturnValue({
-      getAttack: jest.fn().mockReturnValue({ id: 'attack-1' }),
+      getAttack: vi.fn().mockReturnValue({ id: 'attack-1' }),
       isLoading: false,
     });
 
@@ -227,10 +248,10 @@ describe('<TableSection />', () => {
   });
 
   it('should call openFlyout (legacy) when enableNewFlyout is false', async () => {
-    const mockOpenFlyout = jest.fn();
+    const mockOpenFlyout = vi.fn();
     mockUseExpandableFlyoutApi.mockReturnValue({ openFlyout: mockOpenFlyout });
     mockUseAttackGroupHandler.mockReturnValue({
-      getAttack: jest.fn().mockReturnValue({ id: 'attack-1' }),
+      getAttack: vi.fn().mockReturnValue({ id: 'attack-1' }),
       isLoading: false,
     });
 
@@ -260,9 +281,9 @@ describe('<TableSection />', () => {
   });
 
   it('should call openAttackFlyout when enableNewFlyout is true', async () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
     mockUseAttackGroupHandler.mockReturnValue({
-      getAttack: jest.fn().mockReturnValue({ id: 'attack-1' }),
+      getAttack: vi.fn().mockReturnValue({ id: 'attack-1' }),
       isLoading: false,
     });
 
@@ -300,7 +321,7 @@ describe('<TableSection />', () => {
 
     await waitFor(() => {
       expect(GroupedAlertsTable).toHaveBeenCalled();
-      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      const [props] = (GroupedAlertsTable as unknown as Mock).mock.calls[0];
       expect(props.defaultGroupingOptions).toEqual(groupingOptions);
       expect(props.settings).toEqual(groupingSettings);
     });
@@ -406,12 +427,12 @@ describe('<TableSection />', () => {
   });
 
   it('should render the table while things user data is loading', async () => {
-    (useUserData as jest.Mock).mockReturnValue([
+    (useUserData as Mock).mockReturnValue([
       {
         loading: true,
       },
     ]);
-    (useListsConfig as jest.Mock).mockReturnValue({
+    (useListsConfig as Mock).mockReturnValue({
       loading: false,
     });
 
@@ -422,18 +443,18 @@ describe('<TableSection />', () => {
     );
 
     await waitFor(() => {
-      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      const [props] = (GroupedAlertsTable as unknown as Mock).mock.calls[0];
       expect(props.loading).toBe(true);
     });
   });
 
   it('should render the table while things list config is loading', async () => {
-    (useUserData as jest.Mock).mockReturnValue([
+    (useUserData as Mock).mockReturnValue([
       {
         loading: false,
       },
     ]);
-    (useListsConfig as jest.Mock).mockReturnValue({
+    (useListsConfig as Mock).mockReturnValue({
       loading: true,
     });
 
@@ -444,14 +465,14 @@ describe('<TableSection />', () => {
     );
 
     await waitFor(() => {
-      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      const [props] = (GroupedAlertsTable as unknown as Mock).mock.calls[0];
       expect(props.loading).toBe(true);
     });
   });
 
   it('should pass correct sort object to GroupedAlertsTable', async () => {
-    (useUserData as jest.Mock).mockReturnValue([{ loading: false }]);
-    (useListsConfig as jest.Mock).mockReturnValue({ loading: false });
+    (useUserData as Mock).mockReturnValue([{ loading: false }]);
+    (useListsConfig as Mock).mockReturnValue({ loading: false });
 
     render(
       <TestProviders>
@@ -460,15 +481,15 @@ describe('<TableSection />', () => {
     );
 
     await waitFor(() => {
-      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      const [props] = (GroupedAlertsTable as unknown as Mock).mock.calls[0];
       expect(props.sort).toEqual([{ latestTimestamp: { order: 'desc' } }]);
     });
   });
 
   describe('view options', () => {
     beforeEach(() => {
-      (useUserData as jest.Mock).mockReturnValue([{ loading: false }]);
-      (useListsConfig as jest.Mock).mockReturnValue({ loading: false });
+      (useUserData as Mock).mockReturnValue([{ loading: false }]);
+      (useListsConfig as Mock).mockReturnValue({ loading: false });
     });
 
     it('should render the view options popover', async () => {
@@ -582,8 +603,8 @@ describe('<TableSection />', () => {
 
         await waitFor(() => {
           expect(GroupedAlertsTable).toHaveBeenCalled();
-          const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[
-            (GroupedAlertsTable as unknown as jest.Mock).mock.calls.length - 1
+          const [props] = (GroupedAlertsTable as unknown as Mock).mock.calls[
+            (GroupedAlertsTable as unknown as Mock).mock.calls.length - 1
           ];
           const hasFilter = props.defaultFilters.some(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -610,8 +631,8 @@ describe('<TableSection />', () => {
         });
 
         await waitFor(() => {
-          const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[
-            (GroupedAlertsTable as unknown as jest.Mock).mock.calls.length - 1
+          const [props] = (GroupedAlertsTable as unknown as Mock).mock.calls[
+            (GroupedAlertsTable as unknown as Mock).mock.calls.length - 1
           ];
           const hasFilter = props.defaultFilters.some(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -648,7 +669,7 @@ describe('<TableSection />', () => {
 
       await waitFor(() => {
         expect(GroupedAlertsTable).toHaveBeenCalled();
-        const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+        const [props] = (GroupedAlertsTable as unknown as Mock).mock.calls[0];
         expect(props.settings).toMatchObject({
           hideNoneOption: true,
           hideCustomFieldOption: true,
@@ -660,7 +681,7 @@ describe('<TableSection />', () => {
     });
 
     it('passes correct accordionExtraActionGroupStats to GroupedAlertsTable', () => {
-      const mockStats = { aggregations: jest.fn(), renderer: jest.fn() };
+      const mockStats = { aggregations: vi.fn(), renderer: vi.fn() };
       mockUseGroupStats.mockReturnValue(mockStats);
 
       render(

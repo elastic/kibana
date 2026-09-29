@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { WorkflowGraphCanvasWithoutProvider } from './workflow_graph_canvas';
@@ -22,8 +25,8 @@ let mockCapturedOnMoveEnd:
 // can exercise the store-vs-DOM mismatch.
 let mockDomWidth = 0;
 let mockDomHeight = 0;
-let widthSpy: jest.SpyInstance;
-let heightSpy: jest.SpyInstance;
+let widthSpy: MockInstance;
+let heightSpy: MockInstance;
 
 // A minimal two-node layout (trigger + one step). graphBounds derived from this:
 // minX=0, minY=0, maxX=200, maxY=214 => centerX=100, centerY=107.
@@ -32,35 +35,41 @@ const mockNodes = [
   { id: 'step1', type: 'step', position: { x: 0, y: 150 }, width: 200, height: 64, data: {} },
 ];
 
-jest.mock('./use_workflow_layout', () => ({
-  useWorkflowLayout: () => ({ nodes: mockNodes, edges: [] }),
-}));
+vi.mock('./use_workflow_layout', () => {
+      const mocked = {
+      useWorkflowLayout: () => ({ nodes: mockNodes, edges: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Replace React Flow with light stand-ins: `ReactFlow` captures the `onInit`
 // and `onMoveEnd` callbacks; the store hooks return our controllable dimensions.
-jest.mock('@xyflow/react', () => ({
-  ...jest.requireActual('@xyflow/react'),
-  ReactFlow: ({
-    onInit,
-    onMoveEnd,
-    children,
-  }: {
-    onInit?: (i: unknown) => void;
-    onMoveEnd?: (event: MouseEvent | TouchEvent | null, viewport: unknown) => void;
-    children?: React.ReactNode;
-  }) => {
-    mockCapturedOnInit = onInit;
-    mockCapturedOnMoveEnd = onMoveEnd;
-    return <div data-test-subj="reactflow-mock">{children}</div>;
-  },
-  Background: () => null,
-  MiniMap: () => null,
-  Panel: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
-  Handle: () => null,
-  useReactFlow: () => ({ zoomIn: jest.fn(), zoomOut: jest.fn() }),
-  useStore: (selector: (s: { width: number; height: number }) => unknown) =>
-    selector({ width: mockStoreWidth, height: mockStoreHeight }),
-}));
+vi.mock('@xyflow/react', () => {
+      const mocked = {
+      ...require('@xyflow/react'),
+      ReactFlow: ({
+        onInit,
+        onMoveEnd,
+        children,
+      }: {
+        onInit?: (i: unknown) => void;
+        onMoveEnd?: (event: MouseEvent | TouchEvent | null, viewport: unknown) => void;
+        children?: React.ReactNode;
+      }) => {
+        mockCapturedOnInit = onInit;
+        mockCapturedOnMoveEnd = onMoveEnd;
+        return <div data-test-subj="reactflow-mock">{children}</div>;
+      },
+      Background: () => null,
+      MiniMap: () => null,
+      Panel: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+      Handle: () => null,
+      useReactFlow: () => ({ zoomIn: vi.fn(), zoomOut: vi.fn() }),
+      useStore: (selector: (s: { width: number; height: number }) => unknown) =>
+        selector({ width: mockStoreWidth, height: mockStoreHeight }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Simulate the React Flow store transforms so assertions can check the
 // *resulting screen position* rather than raw call arguments. This is the
@@ -70,16 +79,16 @@ const makeInstance = () => {
   let viewport = { x: 0, y: 0, zoom: 1 };
   return {
     // Mirrors store.setCenter (index.js:3605): divides by STORE dims.
-    setCenter: jest.fn((x: number, y: number, o?: { zoom?: number }) => {
+    setCenter: vi.fn((x: number, y: number, o?: { zoom?: number }) => {
       const z = o?.zoom ?? 2;
       viewport = { x: mockStoreWidth / 2 - x * z, y: mockStoreHeight / 2 - y * z, zoom: z };
     }),
     // Mirrors panZoom.setViewport: applied verbatim, no store-dim division.
-    setViewport: jest.fn((v: { x: number; y: number; zoom: number }) => {
+    setViewport: vi.fn((v: { x: number; y: number; zoom: number }) => {
       viewport = { ...v };
     }),
-    fitView: jest.fn(),
-    fitBounds: jest.fn(),
+    fitView: vi.fn(),
+    fitBounds: vi.fn(),
     getViewport: () => ({ ...viewport }),
   };
 };
@@ -97,7 +106,7 @@ const toScreen = (
 const baseProps = {
   workflow: undefined,
   isYamlValid: true,
-  onStepSelect: jest.fn(),
+  onStepSelect: vi.fn(),
 } as const;
 
 // Set the React Flow store dimensions (simulates the ResizeObserver firing).
@@ -120,10 +129,10 @@ beforeEach(() => {
   mockCapturedOnInit = undefined;
   mockCapturedOnMoveEnd = undefined;
 
-  widthSpy = jest
+  widthSpy = vi
     .spyOn(window.HTMLElement.prototype, 'clientWidth', 'get')
     .mockImplementation(() => mockDomWidth);
-  heightSpy = jest
+  heightSpy = vi
     .spyOn(window.HTMLElement.prototype, 'clientHeight', 'get')
     .mockImplementation(() => mockDomHeight);
 });
@@ -189,7 +198,7 @@ describe('WorkflowGraphCanvas initial centering', () => {
   });
 
   it('signals ready without manual centering when fitView is set', () => {
-    const onReady = jest.fn();
+    const onReady = vi.fn();
     const instance = makeInstance();
     measureStore();
     layoutDom(1200, 900);
@@ -202,7 +211,7 @@ describe('WorkflowGraphCanvas initial centering', () => {
   });
 
   it('does not re-center over a restored defaultViewport', () => {
-    const onReady = jest.fn();
+    const onReady = vi.fn();
     const instance = makeInstance();
     measureStore();
     layoutDom(1200, 900);
@@ -324,7 +333,7 @@ describe('WorkflowGraphCanvas nodesInitialized gate removed', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 describe('WorkflowGraphCanvas handleMoveEnd event gate', () => {
   it('does not call onViewportChange when event is null (programmatic viewport)', () => {
-    const onViewportChange = jest.fn();
+    const onViewportChange = vi.fn();
     render(
       <WorkflowGraphCanvasWithoutProvider {...baseProps} onViewportChange={onViewportChange} />
     );
@@ -333,7 +342,7 @@ describe('WorkflowGraphCanvas handleMoveEnd event gate', () => {
   });
 
   it('calls onViewportChange when event is a real MouseEvent (user gesture)', () => {
-    const onViewportChange = jest.fn();
+    const onViewportChange = vi.fn();
     render(
       <WorkflowGraphCanvasWithoutProvider {...baseProps} onViewportChange={onViewportChange} />
     );

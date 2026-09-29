@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
@@ -17,7 +19,7 @@ import { TestProviders } from '../../../../../common/mock';
 import type { TableItemType } from './types';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 
-const mockOpenRightPanel = jest.fn();
+const mockOpenRightPanel = vi.fn();
 
 const baseRecord: TableItemType = {
   _id: 'test-id',

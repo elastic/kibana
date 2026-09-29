@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { dropRight, last } from 'lodash';
 import { getTopHitMetricAgg } from './top_hit';
 import { AggConfigs } from '../agg_configs';
@@ -59,7 +61,7 @@ describe('Top hit metric', () => {
         getByName: () => field,
         filter: () => [field],
       },
-      flattenHit: jest.fn((x) => x!._source),
+      flattenHit: vi.fn((x) => x!._source),
     } as any;
 
     const aggConfigs = new AggConfigs(
@@ -73,7 +75,7 @@ describe('Top hit metric', () => {
         },
       ],
       { typesRegistry },
-      jest.fn()
+      vi.fn()
     );
 
     // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
@@ -81,9 +83,9 @@ describe('Top hit metric', () => {
     aggDsl = aggConfig.toDsl(aggConfigs);
   };
 
-  const flattenSpy = jest.spyOn(tabifyModule, 'flattenHit');
+  const flattenSpy = vi.spyOn(tabifyModule, 'flattenHit');
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return a label prefixed with Last if sorting in descending order', () => {

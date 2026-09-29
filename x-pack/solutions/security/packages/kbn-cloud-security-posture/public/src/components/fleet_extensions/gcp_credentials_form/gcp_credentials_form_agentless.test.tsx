@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -19,104 +21,125 @@ import { SetupTechnology } from '@kbn/fleet-plugin/common/types';
 import { GcpCredentialsFormAgentless } from './gcp_credentials_form_agentless';
 
 // Mock the hooks and utilities
-jest.mock('../hooks/use_cloud_setup_context');
-jest.mock('../utils');
+vi.mock('../hooks/use_cloud_setup_context');
+vi.mock('../utils');
 
-jest.mock('../utils', () => ({
-  getTemplateUrlFromPackageInfo: jest.fn(),
-  updatePolicyWithInputs: jest.fn(),
-  getCloudCredentialVarsConfig: jest.fn().mockReturnValue({}),
-  findVariableDef: jest.fn(),
-  gcpField: {
-    fields: {
-      'gcp.project_id': { label: 'Project ID', type: 'text' },
-      'gcp.organization_id': { label: 'Organization ID', type: 'text' },
-      'gcp.credentials.json': { label: 'Credentials JSON', type: 'password' },
-    },
-  },
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      getTemplateUrlFromPackageInfo: vi.fn(),
+      updatePolicyWithInputs: vi.fn(),
+      getCloudCredentialVarsConfig: vi.fn().mockReturnValue({}),
+      findVariableDef: vi.fn(),
+      gcpField: {
+        fields: {
+          'gcp.project_id': { label: 'Project ID', type: 'text' },
+          'gcp.organization_id': { label: 'Organization ID', type: 'text' },
+          'gcp.credentials.json': { label: 'Credentials JSON', type: 'password' },
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./gcp_setup_info', () => ({
-  GCPSetupInfoContent: ({ isAgentless }: { isAgentless: boolean }) => (
-    <div data-test-subj="gcp-setup-info">
-      <span data-test-subj="agentless-state">{isAgentless ? 'true' : 'false'}</span>
-    </div>
-  ),
-}));
+vi.mock('./gcp_setup_info', () => {
+      const mocked = {
+      GCPSetupInfoContent: ({ isAgentless }: { isAgentless: boolean }) => (
+        <div data-test-subj="gcp-setup-info">
+          <span data-test-subj="agentless-state">{isAgentless ? 'true' : 'false'}</span>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./gcp_input_var_fields', () => ({
-  GcpInputVarFields: ({
-    disabled,
-    onChange,
-    isOrganization,
-    isEditPage,
-  }: {
-    disabled: boolean;
-    onChange: (key: string, value: string) => void;
-    isOrganization: boolean;
-    isEditPage?: boolean;
-  }) => (
-    <div data-test-subj="gcp-input-var-fields">
-      <span data-test-subj="disabled-state">{disabled ? 'true' : 'false'}</span>
-      <span data-test-subj="organization-state">{isOrganization ? 'true' : 'false'}</span>
-      <span data-test-subj="edit-page-state">{isEditPage ? 'true' : 'false'}</span>
-      <button
-        data-test-subj="agentless-field-change"
-        type="button"
-        onClick={() => onChange('test.field', 'test-value')}
-      >
-        {'Change Field'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./gcp_input_var_fields', () => {
+      const mocked = {
+      GcpInputVarFields: ({
+        disabled,
+        onChange,
+        isOrganization,
+        isEditPage,
+      }: {
+        disabled: boolean;
+        onChange: (key: string, value: string) => void;
+        isOrganization: boolean;
+        isEditPage?: boolean;
+      }) => (
+        <div data-test-subj="gcp-input-var-fields">
+          <span data-test-subj="disabled-state">{disabled ? 'true' : 'false'}</span>
+          <span data-test-subj="organization-state">{isOrganization ? 'true' : 'false'}</span>
+          <span data-test-subj="edit-page-state">{isEditPage ? 'true' : 'false'}</span>
+          <button
+            data-test-subj="agentless-field-change"
+            type="button"
+            onClick={() => onChange('test.field', 'test-value')}
+          >
+            {'Change Field'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./gcp_credentials_guide', () => ({
-  GoogleCloudShellCredentialsGuide: ({
-    isOrganization,
-    commandText,
-  }: {
-    isOrganization: boolean;
-    commandText: string;
-  }) => (
-    <div data-test-subj="gcp-credentials-guide">
-      <span data-test-subj="guide-organization-state">{isOrganization ? 'true' : 'false'}</span>
-      <span data-test-subj="guide-command-text">{commandText}</span>
-    </div>
-  ),
-}));
+vi.mock('./gcp_credentials_guide', () => {
+      const mocked = {
+      GoogleCloudShellCredentialsGuide: ({
+        isOrganization,
+        commandText,
+      }: {
+        isOrganization: boolean;
+        commandText: string;
+      }) => (
+        <div data-test-subj="gcp-credentials-guide">
+          <span data-test-subj="guide-organization-state">{isOrganization ? 'true' : 'false'}</span>
+          <span data-test-subj="guide-command-text">{commandText}</span>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./gcp_credential_type_selector', () => ({
-  GcpCredentialTypeSelector: ({ type }: { type: string }) => (
-    <div data-test-subj="gcp-credential-type-selector-mock">
-      <span data-test-subj="credential-type">{type}</span>
-    </div>
-  ),
-}));
+vi.mock('./gcp_credential_type_selector', () => {
+      const mocked = {
+      GcpCredentialTypeSelector: ({ type }: { type: string }) => (
+        <div data-test-subj="gcp-credential-type-selector-mock">
+          <span data-test-subj="credential-type">{type}</span>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common', () => ({
-  ReadDocumentation: ({ url }: { url: string }) => (
-    <div data-test-subj="read-documentation">
-      <span data-test-subj="doc-url">{url}</span>
-    </div>
-  ),
-}));
+vi.mock('../common', () => {
+      const mocked = {
+      ReadDocumentation: ({ url }: { url: string }) => (
+        <div data-test-subj="read-documentation">
+          <span data-test-subj="doc-url">{url}</span>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCloudConnectorSetup = jest.fn((_props?: unknown) => (
+const mockCloudConnectorSetup = vi.fn((_props?: unknown) => (
   <div data-test-subj="cloud-connector-setup-mock" />
 ));
 
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  ...jest.requireActual('@kbn/fleet-plugin/public'),
-  LazyCloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(props),
-}));
+vi.mock('@kbn/fleet-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/fleet-plugin/public')),
+      LazyCloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Get mocked functions from jest modules
-const { useCloudSetup: mockUseCloudSetup } = jest.requireMock('../hooks/use_cloud_setup_context');
+const { useCloudSetup: mockUseCloudSetup } = (await vi.importMock('../hooks/use_cloud_setup_context'));
 const {
   getTemplateUrlFromPackageInfo: mockGetTemplateUrlFromPackageInfo,
   updatePolicyWithInputs: mockUpdatePolicyWithInputs,
-} = jest.requireMock('../utils');
+} = (await vi.importMock('../utils'));
 
 const renderWithIntl = (component: React.ReactElement) =>
   render(<I18nProvider>{component}</I18nProvider>);
@@ -195,7 +218,7 @@ const getDefaultGcpAgentlessCloudSetup = () => ({
 });
 
 describe('GcpCredentialsFormAgentless', () => {
-  const mockUpdatePolicy = jest.fn();
+  const mockUpdatePolicy = vi.fn();
   const mockInput = createMockGcpAgentlessInput();
   const mockPackageInfo = createMockGcpAgentlessPackageInfo();
   const mockNewPolicy = createMockGcpAgentlessPolicy(mockInput);
@@ -213,7 +236,7 @@ describe('GcpCredentialsFormAgentless', () => {
   const defaultCloudSetup = getDefaultGcpAgentlessCloudSetup();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCloudConnectorSetup.mockClear();
     mockUseCloudSetup.mockReturnValue(defaultCloudSetup);
     mockUpdatePolicyWithInputs.mockImplementation(

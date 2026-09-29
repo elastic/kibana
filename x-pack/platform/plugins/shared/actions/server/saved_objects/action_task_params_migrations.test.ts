@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 import { getActionTaskParamsMigrations, isInMemoryAction } from './action_task_params_migrations';
 import type { ActionTaskParams } from '../types';
@@ -28,7 +30,7 @@ const inMemoryConnectors = [
 
 describe('successful migrations', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     encryptedSavedObjectsSetup.createMigration.mockImplementation(({ migration }) => migration);
   });
 
@@ -358,7 +360,7 @@ describe('successful migrations', () => {
 
 describe('handles errors during migrations', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     encryptedSavedObjectsSetup.createMigration.mockImplementation(() => () => {
       throw new Error(`Can't migrate!`);
     });

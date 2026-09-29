@@ -5,34 +5,43 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useResolutionGroup } from '../../../../entity_analytics/components/entity_resolution/hooks/use_resolution_group';
 import { ResolutionMini } from './resolution_mini';
 
-jest.mock(
+vi.mock(
   '../../../../entity_analytics/components/entity_resolution/hooks/use_resolution_group',
-  () => ({
-    useResolutionGroup: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        useResolutionGroup: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock(
+vi.mock(
   '../../../../entity_analytics/components/entity_resolution/resolution_group_table',
-  () => ({
-    ResolutionGroupTable: (props: Record<string, unknown>) => (
-      <div
-        data-test-subj="resolutionGroupTableMock"
-        data-target-id={String(props.targetEntityId ?? '')}
-        data-show-actions={String(props.showActions)}
-        data-current-id={String(props.currentEntityId ?? '')}
-      />
-    ),
-  })
+  () => {
+      const mocked = {
+        ResolutionGroupTable: (props: Record<string, unknown>) => (
+          <div
+            data-test-subj="resolutionGroupTableMock"
+            data-target-id={String(props.targetEntityId ?? '')}
+            data-show-actions={String(props.showActions)}
+            data-current-id={String(props.currentEntityId ?? '')}
+          />
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const mockedUseResolutionGroup = useResolutionGroup as jest.Mock;
+const mockedUseResolutionGroup = useResolutionGroup as Mock;
 
 const renderMini = (props: Partial<React.ComponentProps<typeof ResolutionMini>> = {}) =>
   render(

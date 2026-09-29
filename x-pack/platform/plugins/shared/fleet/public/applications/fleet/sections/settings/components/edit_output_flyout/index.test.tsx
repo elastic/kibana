@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 
@@ -17,40 +20,52 @@ import { useStartServices, sendPutOutput, licenseService } from '../../../../hoo
 import { EditOutputFlyout } from '.';
 
 // mock yaml code editor
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: () => <>CODE EDITOR</>,
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: () => <>CODE EDITOR</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiIconTip: () => '',
-  useGeneratedHtmlId: () => 'mocked-id',
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiIconTip: () => '',
+      useGeneratedHtmlId: () => 'mocked-id',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../hooks/use_fleet_status', () => ({
-  FleetStatusProvider: (props: any) => {
-    return props.children;
-  },
-  useFleetStatus: jest.fn(),
-}));
+vi.mock('../../../../../../hooks/use_fleet_status', () => {
+      const mocked = {
+      FleetStatusProvider: (props: any) => {
+        return props.children;
+      },
+      useFleetStatus: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks', () => {
+vi.mock('../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../hooks'),
-    useBreadcrumbs: jest.fn(),
-    useStartServices: jest.fn(),
-    sendPutOutput: jest.fn(),
+    ...(await vi.importActual('../../../../hooks')),
+    useBreadcrumbs: vi.fn(),
+    useStartServices: vi.fn(),
+    sendPutOutput: vi.fn(),
   };
 });
 
-jest.mock('./confirm_update', () => ({
-  confirmUpdate: () => jest.fn().mockResolvedValue(true),
-}));
+vi.mock('./confirm_update', () => {
+      const mocked = {
+      confirmUpdate: () => vi.fn().mockResolvedValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSendPutOutput = sendPutOutput as jest.MockedFunction<typeof sendPutOutput>;
-const mockUseStartServices = useStartServices as jest.Mock;
+const mockSendPutOutput = sendPutOutput as MockedFunction<typeof sendPutOutput>;
+const mockUseStartServices = useStartServices as Mock;
 
-const mockedUseFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
+const mockedUseFleetStatus = useFleetStatus as MockedFunction<typeof useFleetStatus>;
 
 function renderFlyout(output?: Output, defaultOutput?: Output) {
   const renderer = createFleetTestRendererMock();
@@ -95,7 +110,7 @@ describe('EditOutputFlyout', () => {
     mockUseStartServices.mockReturnValue({
       notifications: {
         toasts: {
-          addError: jest.fn(),
+          addError: vi.fn(),
         },
       },
       docLinks: {
@@ -114,8 +129,8 @@ describe('EditOutputFlyout', () => {
 
   beforeEach(() => {
     mockStartServices(false);
-    jest.clearAllMocks();
-    jest.spyOn(licenseService, 'isEnterprise').mockClear();
+    vi.clearAllMocks();
+    vi.spyOn(licenseService, 'isEnterprise').mockClear();
 
     mockedUseFleetStatus.mockReturnValue({} as any);
   });
@@ -250,7 +265,7 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should populate secret input with plain text value when editing kafka output', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -320,7 +335,7 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should populate secret password input with plain text value when editing kafka output', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -361,7 +376,7 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should populate secret input with plain text value when editing logstash output', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -397,7 +412,7 @@ describe('EditOutputFlyout', () => {
   it('should save a logstash output with only server CA configured (no client cert or key)', async () => {
     // Regression test for https://github.com/elastic/kibana/issues/272243
     // Server-only TLS (one-way) must be saveable without a client certificate or key.
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -439,7 +454,7 @@ describe('EditOutputFlyout', () => {
 
   it('should block saving a logstash output when client cert is set but key is missing', async () => {
     // Regression guard: cert without key must not save — mTLS requires both fields.
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -471,7 +486,7 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should block saving a logstash output when key is set but client cert is missing', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -503,7 +518,7 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should block saving an elasticsearch output when client cert is set but key is missing', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -551,10 +566,10 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should render the flyout if the output provided is a remote ES output and license is at least enterprise', async () => {
-    jest
+    vi
       .spyOn(ExperimentalFeaturesService, 'get')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
-    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+    vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -610,10 +625,10 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should not render the flyout if the output is a remote ES output and the license is not at least enterprise', async () => {
-    jest
+    vi
       .spyOn(ExperimentalFeaturesService, 'get')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
-    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+    vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -647,10 +662,10 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should populate secret service token input with plain text value when editing remote ES output', async () => {
-    jest
+    vi
       .spyOn(ExperimentalFeaturesService, 'get')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
-    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+    vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -698,7 +713,7 @@ describe('EditOutputFlyout', () => {
   });
   it('should not disable hosts input for remote ES output in serverless', async () => {
     mockStartServices(true);
-    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+    vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -762,7 +777,7 @@ describe('EditOutputFlyout', () => {
 
   it('should show default ES hosts when switching from remote ES to ES in serverless', async () => {
     mockStartServices(true);
-    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+    vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -804,7 +819,7 @@ describe('EditOutputFlyout', () => {
 
   it('should show empty hosts when switching from ES to remote ES in serverless', async () => {
     mockStartServices(true);
-    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+    vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -889,8 +904,8 @@ describe('EditOutputFlyout', () => {
     });
 
     it('should show the OTel exporter configuration section for remote ES output', async () => {
-      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
-      jest
+      vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+      vi
         .spyOn(ExperimentalFeaturesService, 'get')
         .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
 
@@ -909,7 +924,7 @@ describe('EditOutputFlyout', () => {
     });
 
     it('should include otel_exporter_config_yaml in the save payload when creating an ES output', async () => {
-      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+      vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
       mockedUseFleetStatus.mockReturnValue({
         isLoading: false,
         isReady: true,
@@ -944,7 +959,7 @@ describe('EditOutputFlyout', () => {
     });
 
     it('should send null otel_exporter_config_yaml when the field is empty', async () => {
-      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+      vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
       mockedUseFleetStatus.mockReturnValue({
         isLoading: false,
         isReady: true,
@@ -993,8 +1008,8 @@ describe('EditOutputFlyout', () => {
     ])(
       'should block saving a $type output when otel_exporter_config_yaml is invalid YAML',
       async ({ type, outputId, outputName, extra }) => {
-        jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
-        jest
+        vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+        vi
           .spyOn(ExperimentalFeaturesService, 'get')
           .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
         mockedUseFleetStatus.mockReturnValue({
@@ -1036,8 +1051,8 @@ describe('EditOutputFlyout', () => {
     );
 
     it('should include otel_exporter_config_yaml in the save payload when editing a remote ES output', async () => {
-      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
-      jest
+      vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+      vi
         .spyOn(ExperimentalFeaturesService, 'get')
         .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
       mockedUseFleetStatus.mockReturnValue({

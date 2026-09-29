@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createMockStore, kibanaMock } from '../../../common/mock';
 import { selectTimelineById } from '../selectors';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -36,11 +39,11 @@ import {
 } from '../actions';
 import { timelineChangedTypes } from './timeline_changed';
 
-jest.mock('../actions', () => {
-  const actual = jest.requireActual('../actions');
+vi.mock('../actions', async () => {
+  const actual = (await vi.importActual('../actions'));
   return {
     ...actual,
-    setChanged: jest.fn().mockImplementation((...args) => actual.setChanged(...args)),
+    setChanged: vi.fn().mockImplementation((...args) => actual.setChanged(...args)),
   };
 });
 
@@ -76,7 +79,7 @@ const timelineChangedTypesCopy = [
   updateSavedSearch.type,
 ];
 
-const setChangedMock = setChanged as unknown as jest.Mock;
+const setChangedMock = setChanged as unknown as Mock;
 
 describe('Timeline changed middleware', () => {
   let store = createMockStore(undefined, undefined, kibanaMock);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { OnlyEsqlQueryRuleParams } from '../types';
 import { Comparator } from '../../../../common/comparator_types';
 import { fetchEsqlQuery, getEsqlQuery, generateLink } from './fetch_esql_query';
@@ -43,11 +46,11 @@ const defaultParams: OnlyEsqlQueryRuleParams = {
   timeField: 'time',
 };
 
-jest.mock('../../../../common', () => {
-  const original = jest.requireActual('../../../../common');
+vi.mock('../../../../common', async () => {
+  const original = (await vi.importActual('../../../../common'));
   return {
     ...original,
-    getEsqlQueryHits: jest.fn(),
+    getEsqlQueryHits: vi.fn(),
   };
 });
 
@@ -57,18 +60,18 @@ const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient()
 
 describe('fetchEsqlQuery', () => {
   afterAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 
   beforeAll(() => {
-    jest.resetAllMocks();
-    global.Date.now = jest.fn(() => fakeNow.getTime());
+    vi.resetAllMocks();
+    global.Date.now = vi.fn(() => fakeNow.getTime());
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('fetch', () => {
@@ -91,8 +94,8 @@ describe('fetchEsqlQuery', () => {
             share: {
               url: {
                 locators: {
-                  get: jest.fn().mockReturnValue({
-                    getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                  get: vi.fn().mockReturnValue({
+                    getRedirectUrl: vi.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
                   } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
                 },
               },
@@ -129,7 +132,7 @@ describe('fetchEsqlQuery', () => {
         } as unknown as EsqlEsqlClusterInfo,
       });
 
-      (getEsqlQueryHits as jest.Mock).mockReturnValue({
+      (getEsqlQueryHits as Mock).mockReturnValue({
         results: {
           esResult: {
             _shards: { failed: 0, successful: 0, total: 0 },
@@ -154,8 +157,8 @@ describe('fetchEsqlQuery', () => {
           share: {
             url: {
               locators: {
-                get: jest.fn().mockReturnValue({
-                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                get: vi.fn().mockReturnValue({
+                  getRedirectUrl: vi.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
                 } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
               },
             },
@@ -184,7 +187,7 @@ describe('fetchEsqlQuery', () => {
         } as unknown as EsqlEsqlClusterInfo,
       });
 
-      (getEsqlQueryHits as jest.Mock).mockReturnValue({
+      (getEsqlQueryHits as Mock).mockReturnValue({
         results: {
           esResult: {
             _shards: { failed: 0, successful: 0, total: 0 },
@@ -209,8 +212,8 @@ describe('fetchEsqlQuery', () => {
           share: {
             url: {
               locators: {
-                get: jest.fn().mockReturnValue({
-                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                get: vi.fn().mockReturnValue({
+                  getRedirectUrl: vi.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
                 } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
               },
             },
@@ -236,7 +239,7 @@ describe('fetchEsqlQuery', () => {
         is_partial: false,
       });
 
-      (getEsqlQueryHits as jest.Mock).mockReturnValue({
+      (getEsqlQueryHits as Mock).mockReturnValue({
         results: {
           esResult: {
             _shards: { failed: 0, successful: 0, total: 0 },
@@ -261,8 +264,8 @@ describe('fetchEsqlQuery', () => {
           share: {
             url: {
               locators: {
-                get: jest.fn().mockReturnValue({
-                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                get: vi.fn().mockReturnValue({
+                  getRedirectUrl: vi.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
                 } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
               },
             },
@@ -390,7 +393,7 @@ describe('fetchEsqlQuery', () => {
       values: [],
     });
 
-    (getEsqlQueryHits as jest.Mock).mockReturnValue({
+    (getEsqlQueryHits as Mock).mockReturnValue({
       results: {
         esResult: {
           _shards: { failed: 0, successful: 0, total: 0 },
@@ -468,8 +471,8 @@ describe('fetchEsqlQuery', () => {
         share: {
           url: {
             locators: {
-              get: jest.fn().mockReturnValue({
-                getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+              get: vi.fn().mockReturnValue({
+                getRedirectUrl: vi.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
               } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
             },
           },
@@ -494,7 +497,7 @@ describe('fetchEsqlQuery', () => {
     it('should generate a link', () => {
       const { dateStart, dateEnd } = getTimeRange();
       const locatorMock = {
-        getRedirectUrl: jest.fn(() => 'space1/app/r?l=DISCOVER_APP_LOCATOR'),
+        getRedirectUrl: vi.fn(() => 'space1/app/r?l=DISCOVER_APP_LOCATOR'),
       } as unknown as LocatorPublic<DiscoverAppLocatorParams>;
 
       const link = generateLink(defaultParams, locatorMock, dateStart, dateEnd, 'space1');

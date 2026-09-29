@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,27 +15,28 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyDetailsFlyoutContainer } from './action_policy_details_flyout_container';
 import { AlertingV2ActionPoliciesLocatorDefinition } from '../../../locators';
 
-const mockNavigateSync = jest.fn();
-const mockUseFetchActionPolicy = jest.fn();
-const mockCreateActionPolicy = jest.fn();
-const mockDeleteActionPolicy = jest.fn();
-const mockEnablePolicy = jest.fn();
-const mockDisablePolicy = jest.fn();
-const mockSnoozePolicy = jest.fn();
-const mockUnsnoozePolicy = jest.fn();
-const mockUpdateApiKey = jest.fn();
-const mockOnClose = jest.fn();
+const mockNavigateSync = vi.fn();
+const mockUseFetchActionPolicy = vi.fn();
+const mockCreateActionPolicy = vi.fn();
+const mockDeleteActionPolicy = vi.fn();
+const mockEnablePolicy = vi.fn();
+const mockDisablePolicy = vi.fn();
+const mockSnoozePolicy = vi.fn();
+const mockUnsnoozePolicy = vi.fn();
+const mockUpdateApiKey = vi.fn();
+const mockOnClose = vi.fn();
 
-jest.mock('../../../application/locator_context', () => ({
-  useAlertingLocators: () => ({
-    actionPolicyLocators: { navigateSync: mockNavigateSync },
-  }),
-}));
+vi.mock('../../../application/locator_context', () => {
+      const mocked = {
+      useAlertingLocators: () => ({
+        actionPolicyLocators: { navigateSync: mockNavigateSync },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di-browser', () => {
-  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
-    '../../../services/user_capabilities'
-  );
+vi.mock('@kbn/core-di-browser', async () => {
+  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../../../services/user_capabilities'));
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -41,90 +44,120 @@ jest.mock('@kbn/core-di-browser', () => {
           capabilities: { alerting_v2_action_policies: { read: true, all: true } },
         });
       }
-      if (token === 'application') return { navigateToUrl: jest.fn() };
-      if (token === 'http') return { basePath: { prepend: jest.fn((p: string) => p) } };
+      if (token === 'application') return { navigateToUrl: vi.fn() };
+      if (token === 'http') return { basePath: { prepend: vi.fn((p: string) => p) } };
       return {};
     },
     CoreStart: (key: string) => key,
   };
 });
 
-jest.mock('../../../hooks/use_fetch_action_policy', () => ({
-  useFetchActionPolicy: (...args: unknown[]) => mockUseFetchActionPolicy(...args),
-}));
-jest.mock('../../../hooks/use_create_action_policy', () => ({
-  useCreateActionPolicy: () => ({ mutate: mockCreateActionPolicy }),
-}));
-jest.mock('../../../hooks/use_delete_action_policy', () => ({
-  useDeleteActionPolicy: () => ({ mutate: mockDeleteActionPolicy, isLoading: false }),
-}));
-jest.mock('../../../hooks/use_enable_action_policy', () => ({
-  useEnableActionPolicy: () => ({
-    mutate: mockEnablePolicy,
-    isLoading: false,
-    variables: undefined,
-  }),
-}));
-jest.mock('../../../hooks/use_disable_action_policy', () => ({
-  useDisableActionPolicy: () => ({
-    mutate: mockDisablePolicy,
-    isLoading: false,
-    variables: undefined,
-  }),
-}));
-jest.mock('../../../hooks/use_snooze_action_policy', () => ({
-  useSnoozeActionPolicy: () => ({ mutate: mockSnoozePolicy }),
-}));
-jest.mock('../../../hooks/use_unsnooze_action_policy', () => ({
-  useUnsnoozeActionPolicy: () => ({ mutate: mockUnsnoozePolicy }),
-}));
-jest.mock('../../../hooks/use_update_action_policy_api_key', () => ({
-  useUpdateActionPolicyApiKey: () => ({ mutate: mockUpdateApiKey, isLoading: false }),
-}));
+vi.mock('../../../hooks/use_fetch_action_policy', () => {
+      const mocked = {
+      useFetchActionPolicy: (...args: unknown[]) => mockUseFetchActionPolicy(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_create_action_policy', () => {
+      const mocked = {
+      useCreateActionPolicy: () => ({ mutate: mockCreateActionPolicy }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_delete_action_policy', () => {
+      const mocked = {
+      useDeleteActionPolicy: () => ({ mutate: mockDeleteActionPolicy, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_enable_action_policy', () => {
+      const mocked = {
+      useEnableActionPolicy: () => ({
+        mutate: mockEnablePolicy,
+        isLoading: false,
+        variables: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_disable_action_policy', () => {
+      const mocked = {
+      useDisableActionPolicy: () => ({
+        mutate: mockDisablePolicy,
+        isLoading: false,
+        variables: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_snooze_action_policy', () => {
+      const mocked = {
+      useSnoozeActionPolicy: () => ({ mutate: mockSnoozePolicy }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_unsnooze_action_policy', () => {
+      const mocked = {
+      useUnsnoozeActionPolicy: () => ({ mutate: mockUnsnoozePolicy }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_update_action_policy_api_key', () => {
+      const mocked = {
+      useUpdateActionPolicyApiKey: () => ({ mutate: mockUpdateApiKey, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../loading_flyout', () => ({
-  LoadingFlyout: ({
-    type,
-    session,
-    ownFocus,
-  }: {
-    type?: string;
-    session?: string;
-    ownFocus?: boolean;
-  }) => (
-    <div
-      data-test-subj="loadingFlyout"
-      data-flyout-type={type}
-      data-session={session}
-      data-own-focus={String(ownFocus)}
-    />
-  ),
-}));
+vi.mock('../../loading_flyout', () => {
+      const mocked = {
+      LoadingFlyout: ({
+        type,
+        session,
+        ownFocus,
+      }: {
+        type?: string;
+        session?: string;
+        ownFocus?: boolean;
+      }) => (
+        <div
+          data-test-subj="loadingFlyout"
+          data-flyout-type={type}
+          data-session={session}
+          data-own-focus={String(ownFocus)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../entity_not_found_flyout', () => ({
-  EntityNotFoundFlyout: ({
-    type,
-    session,
-    ownFocus,
-    onClose,
-  }: {
-    type?: string;
-    session?: string;
-    ownFocus?: boolean;
-    onClose: () => void;
-  }) => (
-    <div
-      data-test-subj="entityNotFoundFlyout"
-      data-flyout-type={type}
-      data-session={session}
-      data-own-focus={String(ownFocus)}
-    >
-      <button type="button" data-test-subj="entityNotFoundFlyoutCloseButton" onClick={onClose}>
-        close
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../../entity_not_found_flyout', () => {
+      const mocked = {
+      EntityNotFoundFlyout: ({
+        type,
+        session,
+        ownFocus,
+        onClose,
+      }: {
+        type?: string;
+        session?: string;
+        ownFocus?: boolean;
+        onClose: () => void;
+      }) => (
+        <div
+          data-test-subj="entityNotFoundFlyout"
+          data-flyout-type={type}
+          data-session={session}
+          data-own-focus={String(ownFocus)}
+        >
+          <button type="button" data-test-subj="entityNotFoundFlyoutCloseButton" onClick={onClose}>
+            close
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 interface FlyoutMockProps {
   policy: ActionPolicyResponse;
@@ -140,102 +173,111 @@ interface FlyoutMockProps {
   onUpdateApiKey: (id: string) => void;
 }
 
-jest.mock('./action_policy_details_flyout', () => ({
-  ActionPolicyDetailsFlyout: (props: FlyoutMockProps) => (
-    <div data-test-subj="mockFlyout" data-session={props.session}>
-      <button
-        data-test-subj="flyout-edit"
-        onClick={() => props.onEdit(props.policy.id)}
-        type="button"
-      >
-        edit
-      </button>
-      <button
-        data-test-subj="flyout-clone"
-        onClick={() => props.onClone(props.policy)}
-        type="button"
-      >
-        clone
-      </button>
-      <button
-        data-test-subj="flyout-delete"
-        onClick={() => props.onDelete(props.policy)}
-        type="button"
-      >
-        delete
-      </button>
-      <button
-        data-test-subj="flyout-enable"
-        onClick={() => props.onEnable(props.policy.id)}
-        type="button"
-      >
-        enable
-      </button>
-      <button
-        data-test-subj="flyout-disable"
-        onClick={() => props.onDisable(props.policy.id)}
-        type="button"
-      >
-        disable
-      </button>
-      <button
-        data-test-subj="flyout-snooze"
-        onClick={() => props.onSnooze(props.policy.id, '2026-12-31T00:00:00Z')}
-        type="button"
-      >
-        snooze
-      </button>
-      <button
-        data-test-subj="flyout-cancel-snooze"
-        onClick={() => props.onCancelSnooze(props.policy.id)}
-        type="button"
-      >
-        cancel snooze
-      </button>
-      <button
-        data-test-subj="flyout-update-api-key"
-        onClick={() => props.onUpdateApiKey(props.policy.id)}
-        type="button"
-      >
-        update api key
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./action_policy_details_flyout', () => {
+      const mocked = {
+      ActionPolicyDetailsFlyout: (props: FlyoutMockProps) => (
+        <div data-test-subj="mockFlyout" data-session={props.session}>
+          <button
+            data-test-subj="flyout-edit"
+            onClick={() => props.onEdit(props.policy.id)}
+            type="button"
+          >
+            edit
+          </button>
+          <button
+            data-test-subj="flyout-clone"
+            onClick={() => props.onClone(props.policy)}
+            type="button"
+          >
+            clone
+          </button>
+          <button
+            data-test-subj="flyout-delete"
+            onClick={() => props.onDelete(props.policy)}
+            type="button"
+          >
+            delete
+          </button>
+          <button
+            data-test-subj="flyout-enable"
+            onClick={() => props.onEnable(props.policy.id)}
+            type="button"
+          >
+            enable
+          </button>
+          <button
+            data-test-subj="flyout-disable"
+            onClick={() => props.onDisable(props.policy.id)}
+            type="button"
+          >
+            disable
+          </button>
+          <button
+            data-test-subj="flyout-snooze"
+            onClick={() => props.onSnooze(props.policy.id, '2026-12-31T00:00:00Z')}
+            type="button"
+          >
+            snooze
+          </button>
+          <button
+            data-test-subj="flyout-cancel-snooze"
+            onClick={() => props.onCancelSnooze(props.policy.id)}
+            type="button"
+          >
+            cancel snooze
+          </button>
+          <button
+            data-test-subj="flyout-update-api-key"
+            onClick={() => props.onUpdateApiKey(props.policy.id)}
+            type="button"
+          >
+            update api key
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 interface ConfirmModalMockProps {
   onCancel: () => void;
   onConfirm: () => void;
 }
 
-jest.mock('../delete_confirmation_modal', () => ({
-  DeleteActionPolicyConfirmModal: (props: ConfirmModalMockProps & { policyName: string }) => (
-    <div data-test-subj="mockDeleteModal">
-      <span>{props.policyName}</span>
-      <button data-test-subj="confirmDelete" onClick={props.onConfirm} type="button">
-        confirm
-      </button>
-      <button data-test-subj="cancelDelete" onClick={props.onCancel} type="button">
-        cancel
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../delete_confirmation_modal', () => {
+      const mocked = {
+      DeleteActionPolicyConfirmModal: (props: ConfirmModalMockProps & { policyName: string }) => (
+        <div data-test-subj="mockDeleteModal">
+          <span>{props.policyName}</span>
+          <button data-test-subj="confirmDelete" onClick={props.onConfirm} type="button">
+            confirm
+          </button>
+          <button data-test-subj="cancelDelete" onClick={props.onCancel} type="button">
+            cancel
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../pages/list_action_policies_page/components/update_api_key_confirmation_modal',
-  () => ({
-    UpdateApiKeyConfirmationModal: (props: ConfirmModalMockProps) => (
-      <div data-test-subj="mockUpdateApiKeyModal">
-        <button data-test-subj="confirmUpdateApiKey" onClick={props.onConfirm} type="button">
-          confirm
-        </button>
-        <button data-test-subj="cancelUpdateApiKey" onClick={props.onCancel} type="button">
-          cancel
-        </button>
-      </div>
-    ),
-  })
+  () => {
+      const mocked = {
+        UpdateApiKeyConfirmationModal: (props: ConfirmModalMockProps) => (
+          <div data-test-subj="mockUpdateApiKeyModal">
+            <button data-test-subj="confirmUpdateApiKey" onClick={props.onConfirm} type="button">
+              confirm
+            </button>
+            <button data-test-subj="cancelUpdateApiKey" onClick={props.onCancel} type="button">
+              cancel
+            </button>
+          </div>
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse =>
@@ -265,7 +307,7 @@ const renderContainer = (session?: 'start' | 'inherit') =>
 
 describe('ActionPolicyDetailsFlyoutContainer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the loading flyout while the policy is loading', () => {

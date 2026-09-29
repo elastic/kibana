@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -22,13 +25,13 @@ import {
   getDownloadSourcesForAgentPolicy,
 } from './source_uri_utils';
 
-jest.mock('../../services/app_context');
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+vi.mock('../../services/app_context');
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 mockedAppContextService.getLogger.mockReturnValue({
-  get: () => ({ warn: jest.fn(), error: jest.fn(), info: jest.fn(), debug: jest.fn() }),
+  get: () => ({ warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() }),
 } as any);
 
 function getMockedSoClient() {
@@ -58,9 +61,9 @@ function getMockedSoClient() {
 }
 
 function getMockedEncryptedSoClient() {
-  const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
-    getDecryptedAsInternalUser: jest.fn(),
-    createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
+  const esoClientMock: Mocked<EncryptedSavedObjectsClient> = {
+    getDecryptedAsInternalUser: vi.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: vi.fn(),
   };
 
   esoClientMock.getDecryptedAsInternalUser.mockImplementation(async (type: string, id: string) => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act } from '@testing-library/react';
 import {
   getIndexPattern,
@@ -50,8 +52,8 @@ describe('getSessionViewLazy', () => {
   const baseProps = {
     sessionEntityId: 'test-entity-id',
     sessionStartTime: '2021-11-23T15:14:21.000Z',
-    openDetails: jest.fn(),
-    closeDetails: jest.fn(),
+    openDetails: vi.fn(),
+    closeDetails: vi.fn(),
   };
 
   it('renders the cross-project unsupported prompt when the session lives in a linked project', () => {

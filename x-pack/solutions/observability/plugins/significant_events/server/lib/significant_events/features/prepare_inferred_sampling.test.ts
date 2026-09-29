@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -16,11 +18,14 @@ import {
   prepareInferredSampling,
 } from './prepare_inferred_sampling';
 
-jest.mock('./fetch_sample_documents', () => ({
-  fetchSampleDocuments: jest.fn(),
-}));
+vi.mock('./fetch_sample_documents', () => {
+      const mocked = {
+      fetchSampleDocuments: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const fetchSampleDocumentsMock = jest.mocked(fetchSampleDocuments);
+const fetchSampleDocumentsMock = vi.mocked(fetchSampleDocuments);
 
 const createFeature = (runId: string): FeatureWithFilter =>
   ({
@@ -61,13 +66,13 @@ const createParams = (kiClient: KnowledgeIndicatorClient) => ({
 
 describe('prepareInferredSampling', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns sampled documents and sampling metadata', async () => {
     const feature = createFeature('run-1');
     const kiClient = {
-      getFeatures: jest.fn().mockResolvedValue({ hits: [feature, createFeature('another-run')] }),
+      getFeatures: vi.fn().mockResolvedValue({ hits: [feature, createFeature('another-run')] }),
     } as unknown as KnowledgeIndicatorClient;
     const sampledDocuments = [createHit('doc-1'), createHit('doc-2')];
     fetchSampleDocumentsMock.mockResolvedValue({
@@ -108,7 +113,7 @@ describe('prepareInferredSampling', () => {
 
   it('returns hasDocuments false for an empty sample', async () => {
     const kiClient = {
-      getFeatures: jest.fn().mockResolvedValue({ hits: [] }),
+      getFeatures: vi.fn().mockResolvedValue({ hits: [] }),
     } as unknown as KnowledgeIndicatorClient;
     fetchSampleDocumentsMock.mockResolvedValue({
       documents: [],
@@ -132,7 +137,7 @@ describe('prepareInferredSampling', () => {
 
   it('drops documents that would exceed the aggregate serialized payload cap', async () => {
     const kiClient = {
-      getFeatures: jest.fn().mockResolvedValue({ hits: [] }),
+      getFeatures: vi.fn().mockResolvedValue({ hits: [] }),
     } as unknown as KnowledgeIndicatorClient;
     fetchSampleDocumentsMock.mockResolvedValue({
       documents: Array.from({ length: 100 }, (_, index) => ({

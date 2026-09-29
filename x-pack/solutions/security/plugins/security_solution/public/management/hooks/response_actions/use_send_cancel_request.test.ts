@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useMutation as _useMutation } from '@kbn/react-query';
 import type { RenderHookResult } from '@testing-library/react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -18,14 +21,14 @@ import type {
 } from './use_send_cancel_request';
 import { useSendCancelRequest } from './use_send_cancel_request';
 
-const useMutationMock = _useMutation as jest.Mock;
+const useMutationMock = _useMutation as Mock;
 
-jest.mock('@kbn/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
+vi.mock('@kbn/react-query', async () => {
+  const actualReactQueryModule = (await vi.importActual('@kbn/react-query'));
 
   return {
     ...actualReactQueryModule,
-    useMutation: jest.fn((...args) => actualReactQueryModule.useMutation(...args)),
+    useMutation: vi.fn((...args) => actualReactQueryModule.useMutation(...args)),
   };
 });
 
@@ -159,9 +162,9 @@ describe('When using the `useSendCancelRequest()` hook', () => {
       mutationKey: ['custom-cancel-key'],
       retry: 3,
       retryDelay: 1000,
-      onSuccess: jest.fn(),
-      onError: jest.fn(),
-      onSettled: jest.fn(),
+      onSuccess: vi.fn(),
+      onError: vi.fn(),
+      onSettled: vi.fn(),
     };
 
     const testContext = createAppRootMockRenderer();

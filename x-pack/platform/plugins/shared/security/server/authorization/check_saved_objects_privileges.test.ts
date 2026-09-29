@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type {
   CheckPrivileges,
@@ -14,9 +17,9 @@ import type {
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 import type { SpacesService } from '../plugin';
 
-let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
-let mockCheckPrivilegesWithRequest: jest.Mocked<CheckPrivilegesWithRequest>;
-let mockSpacesService: jest.Mocked<SpacesService> | undefined;
+let mockCheckPrivileges: Mocked<CheckPrivileges>;
+let mockCheckPrivilegesWithRequest: Mocked<CheckPrivilegesWithRequest>;
+let mockSpacesService: Mocked<SpacesService> | undefined;
 const request = httpServerMock.createKibanaRequest();
 
 const createFactory = () =>
@@ -27,15 +30,15 @@ const createFactory = () =>
 
 beforeEach(() => {
   mockCheckPrivileges = {
-    atSpace: jest.fn(),
-    atSpaces: jest.fn(),
-    globally: jest.fn(),
+    atSpace: vi.fn(),
+    atSpaces: vi.fn(),
+    globally: vi.fn(),
   };
-  mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
+  mockCheckPrivilegesWithRequest = vi.fn().mockReturnValue(mockCheckPrivileges);
 
   mockSpacesService = {
-    getSpaceId: jest.fn(),
-    namespaceToSpaceId: jest
+    getSpaceId: vi.fn(),
+    namespaceToSpaceId: vi
       .fn()
       .mockImplementation((namespace: string = 'default') => `${namespace}-id`),
   };

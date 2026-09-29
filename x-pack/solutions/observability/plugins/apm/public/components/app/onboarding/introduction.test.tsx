@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,9 +14,12 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { Introduction } from './introduction';
 
-jest.mock('../../../hooks/use_kibana_url', () => ({
-  useKibanaUrl: (path: string) => `/base${path}`,
-}));
+vi.mock('../../../hooks/use_kibana_url', () => {
+      const mocked = {
+      useKibanaUrl: (path: string) => `/base${path}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function renderIntroduction(guideLink = 'https://example.com/guide') {
   return render(

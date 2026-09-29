@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createMockStore, kibanaMock } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import { updateColumnWidth } from '../actions';
@@ -21,7 +23,7 @@ describe('Timeline localStorage middleware', () => {
 
   beforeEach(() => {
     store = createMockStore(undefined, undefined, kibanaMock);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setStoredTimelineColumnsConfig(undefined);
   });
 

@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { StorageMock } from './storage.mock';
 import { EmbeddableConsoleInfo } from './embeddable_console';
 
 describe('EmbeddableConsoleInfo', () => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 
   let eConsole: EmbeddableConsoleInfo;
   let storage: StorageMock;
@@ -21,22 +23,22 @@ describe('EmbeddableConsoleInfo', () => {
   });
   describe('isEmbeddedConsoleAvailable', () => {
     it('returns true if dispatch has been set', () => {
-      eConsole.setDispatch(jest.fn());
+      eConsole.setDispatch(vi.fn());
       expect(eConsole.isEmbeddedConsoleAvailable()).toBe(true);
     });
     it('returns false if dispatch has not been set', () => {
       expect(eConsole.isEmbeddedConsoleAvailable()).toBe(false);
     });
     it('returns false if dispatch has been cleared', () => {
-      eConsole.setDispatch(jest.fn());
+      eConsole.setDispatch(vi.fn());
       eConsole.setDispatch(null);
       expect(eConsole.isEmbeddedConsoleAvailable()).toBe(false);
     });
   });
   describe('openEmbeddedConsole', () => {
-    const mockDispatch = jest.fn();
+    const mockDispatch = vi.fn();
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       eConsole.setDispatch(mockDispatch);
     });
@@ -64,9 +66,9 @@ describe('EmbeddableConsoleInfo', () => {
     });
   });
   describe('openEmbeddedConsoleAlternateView', () => {
-    const mockDispatch = jest.fn();
+    const mockDispatch = vi.fn();
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       eConsole.setDispatch(mockDispatch);
     });
@@ -80,8 +82,8 @@ describe('EmbeddableConsoleInfo', () => {
     });
     it('dispatches open alt view when alt view exists', () => {
       eConsole.registerAlternateView({
-        ActivationButton: jest.fn(),
-        ViewContent: jest.fn(),
+        ActivationButton: vi.fn(),
+        ViewContent: vi.fn(),
       });
 
       eConsole.openEmbeddedConsoleAlternateView();
@@ -117,7 +119,7 @@ describe('EmbeddableConsoleInfo', () => {
       eConsole.setConsoleHeight('110');
       eConsole.setConsoleHeight('100');
 
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(storage.set).toHaveBeenCalledTimes(1);
       expect(storage.set).toHaveBeenCalledWith('embeddedConsoleHeight', '100');

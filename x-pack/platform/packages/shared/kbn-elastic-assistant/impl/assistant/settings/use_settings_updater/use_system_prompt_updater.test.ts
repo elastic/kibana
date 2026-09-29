@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { SystemPromptSettings } from './use_system_prompt_updater';
 import { useSystemPromptUpdater } from './use_system_prompt_updater';
@@ -18,8 +20,8 @@ import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { WELCOME_CONVERSATION } from '../../use_conversation/sample_conversations';
 import type { FetchCurrentUserConversations } from '../../api';
 
-jest.mock('../../../..');
-const mockSetConversationsSettingsBulkActions = jest.fn();
+vi.mock('../../../..');
+const mockSetConversationsSettingsBulkActions = vi.fn();
 const defaultPrompt = {
   id: 'New Prompt',
   content: '',
@@ -66,17 +68,17 @@ const mockData = {
 
 describe('useSystemPromptUpdater', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+    vi.clearAllMocks();
+    vi.mocked(useFetchCurrentUserConversations).mockReturnValue({
       data: {},
       isLoading: true,
-      refetch: jest.fn().mockResolvedValue({
+      refetch: vi.fn().mockResolvedValue({
         isLoading: false,
         data: {},
       }),
       isFetched: false,
       isFetching: false,
-      setPaginationObserver: jest.fn(),
+      setPaginationObserver: vi.fn(),
     } as unknown as FetchCurrentUserConversations);
   });
 
@@ -99,10 +101,10 @@ describe('useSystemPromptUpdater', () => {
     expect(result.current.systemPromptSettings).toEqual(
       prompts.map((p) => ({ ...p, conversations: [] }))
     );
-    jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+    vi.mocked(useFetchCurrentUserConversations).mockReturnValue({
       data: mockData,
       isLoading: false,
-      refetch: jest.fn().mockResolvedValue({
+      refetch: vi.fn().mockResolvedValue({
         isLoading: false,
         data: {
           pages: [
@@ -117,7 +119,7 @@ describe('useSystemPromptUpdater', () => {
       }),
       isFetched: true,
       isFetching: false,
-      setPaginationObserver: jest.fn(),
+      setPaginationObserver: vi.fn(),
     } as unknown as FetchCurrentUserConversations);
 
     await act(async () => {

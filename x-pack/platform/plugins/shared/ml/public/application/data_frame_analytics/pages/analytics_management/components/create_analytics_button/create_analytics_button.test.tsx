@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,13 +15,13 @@ import { CreateAnalyticsButton } from './create_analytics_button';
 
 describe('Data Frame Analytics: <CreateAnalyticsButton />', () => {
   test('renders button with correct text', () => {
-    render(<CreateAnalyticsButton isDisabled={false} navigateToSourceSelection={jest.fn()} />);
+    render(<CreateAnalyticsButton isDisabled={false} navigateToSourceSelection={vi.fn()} />);
 
     expect(screen.getByText('Create job')).toBeInTheDocument();
   });
 
   test('calls navigateToSourceSelection when clicked', async () => {
-    const navigateToSourceSelection = jest.fn();
+    const navigateToSourceSelection = vi.fn();
     const user = userEvent.setup();
 
     render(

@@ -5,25 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useFailureStoreModal } from './use_failure_store_modal';
 
-jest.mock('./use_dataset_quality_details_state', () => ({
-  useDatasetQualityDetailsState: jest.fn(),
-}));
+vi.mock('./use_dataset_quality_details_state', () => {
+      const mocked = {
+      useDatasetQualityDetailsState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/failure-store-modal', () => ({
-  FailureStoreModal: jest.fn(),
-}));
+vi.mock('@kbn/failure-store-modal', () => {
+      const mocked = {
+      FailureStoreModal: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/streams-schema', () => ({
-  isRootStreamDefinition: jest.fn(),
-  isEnabledFailureStore: jest.fn(),
-  isInheritFailureStore: jest.fn(),
-  isDisabledLifecycleFailureStore: jest.fn(),
-  isEnabledLifecycleFailureStore: jest.fn(),
-}));
+vi.mock('@kbn/streams-schema', () => {
+      const mocked = {
+      isRootStreamDefinition: vi.fn(),
+      isEnabledFailureStore: vi.fn(),
+      isInheritFailureStore: vi.fn(),
+      isDisabledLifecycleFailureStore: vi.fn(),
+      isEnabledLifecycleFailureStore: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
 import { FailureStoreModal } from '@kbn/failure-store-modal';
@@ -36,15 +48,15 @@ import {
 } from '@kbn/streams-schema';
 
 describe('useFailureStoreModal', () => {
-  const mockUseDatasetQualityDetailsState = useDatasetQualityDetailsState as jest.Mock;
-  const mockFailureStoreModal = FailureStoreModal as jest.Mock;
-  const mockUpdateFailureStore = jest.fn();
-  const mockIsRootStreamDefinition = isRootStreamDefinition as unknown as jest.Mock;
-  const mockIsEnabledFailureStore = isEnabledFailureStore as unknown as jest.Mock;
-  const mockIsInheritFailureStore = isInheritFailureStore as unknown as jest.Mock;
+  const mockUseDatasetQualityDetailsState = useDatasetQualityDetailsState as Mock;
+  const mockFailureStoreModal = FailureStoreModal as Mock;
+  const mockUpdateFailureStore = vi.fn();
+  const mockIsRootStreamDefinition = isRootStreamDefinition as unknown as Mock;
+  const mockIsEnabledFailureStore = isEnabledFailureStore as unknown as Mock;
+  const mockIsInheritFailureStore = isInheritFailureStore as unknown as Mock;
   const mockIsDisabledLifecycleFailureStore =
-    isDisabledLifecycleFailureStore as unknown as jest.Mock;
-  const mockIsEnabledLifecycleFailureStore = isEnabledLifecycleFailureStore as unknown as jest.Mock;
+    isDisabledLifecycleFailureStore as unknown as Mock;
+  const mockIsEnabledLifecycleFailureStore = isEnabledLifecycleFailureStore as unknown as Mock;
 
   const defaultMockData = {
     canUserReadFailureStore: true,
@@ -59,7 +71,7 @@ describe('useFailureStoreModal', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseDatasetQualityDetailsState.mockReturnValue(defaultMockData);
     mockFailureStoreModal.mockImplementation(() =>
       React.createElement('div', { 'data-testid': 'failure-store-modal' })

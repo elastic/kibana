@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
@@ -17,12 +20,12 @@ import { TestWrapper } from '../../../shared/test_utils';
 
 // --- Mocks ---
 
-const mockDispatch = jest.fn();
-const mockSetSelectedExecution = jest.fn();
-const mockMutateAsync = jest.fn();
+const mockDispatch = vi.fn();
+const mockSetSelectedExecution = vi.fn();
+const mockMutateAsync = vi.fn();
 
-jest.mock('react-redux-v7', () => {
-  const actual = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const actual = require('react-redux-v7');
   return {
     ...actual,
     useDispatch: () => mockDispatch,
@@ -30,9 +33,9 @@ jest.mock('react-redux-v7', () => {
   };
 });
 
-jest.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_kibana');
 
-const mockAddError = jest.fn();
+const mockAddError = vi.fn();
 const mockKibanaValue = {
   services: {
     notifications: {
@@ -43,63 +46,81 @@ const mockKibanaValue = {
   },
 };
 
-jest.mock('../../../hooks/use_space_id', () => ({
-  useSpaceId: () => 'default',
-}));
+vi.mock('../../../hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: () => 'default',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_workflow_url_state', () => ({
-  useWorkflowUrlState: () => ({
-    setSelectedExecution: mockSetSelectedExecution,
-  }),
-}));
+vi.mock('../../../hooks/use_workflow_url_state', () => {
+      const mocked = {
+      useWorkflowUrlState: () => ({
+        setSelectedExecution: mockSetSelectedExecution,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_context_override_data', () => ({
-  useContextOverrideData: () => () => ({
-    contextOverride: { key: 'value' },
-    schema: null,
-  }),
-}));
+vi.mock('./use_context_override_data', () => {
+      const mocked = {
+      useContextOverrideData: () => () => ({
+        contextOverride: { key: 'value' },
+        schema: null,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({
-  useWorkflowActions: () => ({
-    runIndividualStep: {
-      mutateAsync: mockMutateAsync,
-    },
-  }),
-}));
+vi.mock('../../../entities/workflows/model/use_workflow_actions', () => {
+      const mocked = {
+      useWorkflowActions: () => ({
+        runIndividualStep: {
+          mutateAsync: mockMutateAsync,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../features/run_workflow/ui/step_execute_modal', () => ({
-  StepExecuteModal: ({
-    onSubmit,
-    onClose,
-    stepId,
-  }: {
-    onSubmit: (params: { stepInputs: Record<string, unknown> }) => void;
-    onClose: () => void;
-    stepId: string;
-  }) => (
-    <div data-test-subj="step-execute-modal">
-      <div data-test-subj="modal-step-id">{stepId}</div>
-      <button
-        type="button"
-        data-test-subj="submit-step"
-        onClick={() => onSubmit({ stepInputs: { input1: 'val1' } })}
-      >
-        {'Submit'}
-      </button>
-      <button type="button" data-test-subj="close-modal" onClick={onClose}>
-        {'Close'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../../../features/run_workflow/ui/step_execute_modal', () => {
+      const mocked = {
+      StepExecuteModal: ({
+        onSubmit,
+        onClose,
+        stepId,
+      }: {
+        onSubmit: (params: { stepInputs: Record<string, unknown> }) => void;
+        onClose: () => void;
+        stepId: string;
+      }) => (
+        <div data-test-subj="step-execute-modal">
+          <div data-test-subj="modal-step-id">{stepId}</div>
+          <button
+            type="button"
+            data-test-subj="submit-step"
+            onClick={() => onSubmit({ stepInputs: { input1: 'val1' } })}
+          >
+            {'Submit'}
+          </button>
+          <button type="button" data-test-subj="close-modal" onClick={onClose}>
+            {'Close'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: jest.fn(),
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      useWorkflowsCapabilities: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
 >;
 
@@ -123,13 +144,13 @@ const buildMockState = (detailOverrides: Record<string, unknown> = {}) => ({
 });
 
 describe('WorkflowDetailTestStepModal', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
 
     mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
 
-    const { useKibana } = jest.requireMock('../../../hooks/use_kibana') as {
-      useKibana: jest.Mock;
+    const { useKibana } = (await vi.importMock('../../../hooks/use_kibana')) as {
+      useKibana: Mock;
     };
     useKibana.mockReturnValue(mockKibanaValue);
 

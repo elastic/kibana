@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -19,10 +21,10 @@ export const defaultPointParameters = {
   ignore_z_value: true,
 };
 
-const onChangeHandler = jest.fn();
+const onChangeHandler = vi.fn();
 describe('Mappings editor: point datatype', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('initial view and default parameters values', async () => {

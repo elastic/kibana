@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
@@ -31,7 +33,7 @@ describe('Options list sorting button', () => {
     } as State;
   };
 
-  const updateState = jest.fn();
+  const updateState = vi.fn();
 
   const mountComponent = ({
     initialState,
@@ -52,7 +54,7 @@ describe('Options list sorting button', () => {
           initialState={initialState}
           field={field}
           updateState={updateState}
-          setControlEditorValid={jest.fn()}
+          setControlEditorValid={vi.fn()}
         />
       </OptionsListControlContext.Provider>
     );
@@ -160,7 +162,7 @@ describe('Options list sorting button', () => {
               initialState={initialState}
               field={{ type: 'string' } as DataViewField}
               updateState={updateState}
-              setControlEditorValid={jest.fn()}
+              setControlEditorValid={vi.fn()}
             />
           </OptionsListControlContext.Provider>
         );
@@ -176,8 +178,8 @@ describe('Options list sorting button', () => {
             <OptionsListEditorOptions
               initialState={initialState}
               field={{ type: 'ip' } as DataViewField} // initial search technique IS valid
-              updateState={jest.fn()}
-              setControlEditorValid={jest.fn()}
+              updateState={vi.fn()}
+              setControlEditorValid={vi.fn()}
             />
           </OptionsListControlContext.Provider>
         );
@@ -196,7 +198,7 @@ describe('Options list sorting button', () => {
               initialState={initialState}
               field={{ type: 'string' } as DataViewField}
               updateState={updateState}
-              setControlEditorValid={jest.fn()}
+              setControlEditorValid={vi.fn()}
             />{' '}
           </OptionsListControlContext.Provider>
         );
@@ -220,8 +222,8 @@ describe('Options list sorting button', () => {
             <OptionsListEditorOptions
               initialState={initialState}
               field={{ type: 'number' } as DataViewField} // current selected search technique IS valid, initial state is not
-              updateState={jest.fn()}
-              setControlEditorValid={jest.fn()}
+              updateState={vi.fn()}
+              setControlEditorValid={vi.fn()}
             />
           </OptionsListControlContext.Provider>
         );
@@ -237,7 +239,7 @@ describe('Options list sorting button', () => {
               initialState={initialState}
               field={{ type: 'string' } as DataViewField}
               updateState={updateState}
-              setControlEditorValid={jest.fn()}
+              setControlEditorValid={vi.fn()}
             />
           </OptionsListControlContext.Provider>
         );
@@ -253,8 +255,8 @@ describe('Options list sorting button', () => {
             <OptionsListEditorOptions
               initialState={initialState}
               field={{ type: 'number' } as DataViewField} // neither initial nor current search technique is valid
-              updateState={jest.fn()}
-              setControlEditorValid={jest.fn()}
+              updateState={vi.fn()}
+              setControlEditorValid={vi.fn()}
             />
           </OptionsListControlContext.Provider>
         );

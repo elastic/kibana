@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -43,7 +45,7 @@ describe('DataAnonymizationEditor', () => {
         <TestProviders>
           <DataAnonymizationEditor
             selectedPromptContext={mockSelectedPromptContext}
-            setSelectedPromptContexts={jest.fn()}
+            setSelectedPromptContexts={vi.fn()}
             currentReplacements={{}}
           />
         </TestProviders>
@@ -57,7 +59,7 @@ describe('DataAnonymizationEditor', () => {
         <TestProviders>
           <DataAnonymizationEditor
             selectedPromptContext={mockSelectedPromptContext}
-            setSelectedPromptContexts={jest.fn()}
+            setSelectedPromptContexts={vi.fn()}
             currentReplacements={{}}
           />
         </TestProviders>
@@ -68,7 +70,7 @@ describe('DataAnonymizationEditor', () => {
   });
 
   describe('when rawData is a `Record<string, string[]>` (anonymized data)', () => {
-    const setSelectedPromptContexts = jest.fn();
+    const setSelectedPromptContexts = vi.fn();
     const mockRawData: Record<string, string[]> = {
       field1: ['value1', 'value2'],
       field2: ['value3', 'value4', 'value5'],

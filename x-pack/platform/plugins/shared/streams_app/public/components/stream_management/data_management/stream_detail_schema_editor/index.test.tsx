@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,24 +19,30 @@ import {
 } from '../shared/mocks';
 import type { StreamsAppKibanaContext } from '../../../../hooks/use_kibana';
 
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../hooks/use_stream_detail');
-jest.mock('../../../../hooks/use_discard_confirm');
-jest.mock('../schema_editor/hooks/use_schema_fields', () => {
-  const actual = jest.requireActual('../schema_editor/hooks/use_schema_fields');
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../hooks/use_stream_detail');
+vi.mock('../../../../hooks/use_discard_confirm');
+vi.mock('../schema_editor/hooks/use_schema_fields', async () => {
+  const actual = (await vi.importActual('../schema_editor/hooks/use_schema_fields'));
   return {
     ...actual,
-    useSchemaFields: jest.fn(),
+    useSchemaFields: vi.fn(),
   };
 });
-jest.mock('@kbn/unsaved-changes-prompt', () => ({
-  useUnsavedChangesPrompt: jest.fn(),
-}));
-jest.mock('@kbn/ebt-tools', () => ({
-  usePerformanceContext: jest.fn(() => ({
-    onPageReady: jest.fn(),
-  })),
-}));
+vi.mock('@kbn/unsaved-changes-prompt', () => {
+      const mocked = {
+      useUnsavedChangesPrompt: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      usePerformanceContext: vi.fn(() => ({
+        onPageReady: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
@@ -41,29 +50,29 @@ import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseStreamDetail = useStreamDetail as jest.MockedFunction<typeof useStreamDetail>;
-const mockUseDiscardConfirm = useDiscardConfirm as jest.MockedFunction<typeof useDiscardConfirm>;
-const mockUseSchemaFields = useSchemaFields as jest.MockedFunction<typeof useSchemaFields>;
-const mockUseUnsavedChangesPrompt = useUnsavedChangesPrompt as jest.MockedFunction<
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseStreamDetail = useStreamDetail as MockedFunction<typeof useStreamDetail>;
+const mockUseDiscardConfirm = useDiscardConfirm as MockedFunction<typeof useDiscardConfirm>;
+const mockUseSchemaFields = useSchemaFields as MockedFunction<typeof useSchemaFields>;
+const mockUseUnsavedChangesPrompt = useUnsavedChangesPrompt as MockedFunction<
   typeof useUnsavedChangesPrompt
 >;
 
-const mockRefreshDefinition = jest.fn();
-const mockDiscardHandler = jest.fn();
+const mockRefreshDefinition = vi.fn();
+const mockDiscardHandler = vi.fn();
 
 describe('StreamDetailSchemaEditor', () => {
-  const mockOpenModal = jest.fn();
-  const mockOpenConfirm = jest.fn();
+  const mockOpenModal = vi.fn();
+  const mockOpenConfirm = vi.fn();
   const mockHistory: StreamsAppKibanaContext['appParams']['history'] = {
-    push: jest.fn(),
-    replace: jest.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
     location: { pathname: '/streams/logs.test', search: '', state: undefined, hash: '' },
   } as unknown as StreamsAppKibanaContext['appParams']['history'];
-  const mockNavigateToUrl = jest.fn();
+  const mockNavigateToUrl = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const kibanaContext: StreamsAppKibanaContext = {
       appParams: {
@@ -73,9 +82,9 @@ describe('StreamDetailSchemaEditor', () => {
         // Only properties actually used by this component are provided
         http: {
           basePath: {
-            get: jest.fn(),
-            prepend: jest.fn(),
-            remove: jest.fn(),
+            get: vi.fn(),
+            prepend: vi.fn(),
+            remove: vi.fn(),
           },
         } as unknown as StreamsAppKibanaContext['core']['http'],
         application: {
@@ -87,16 +96,16 @@ describe('StreamDetailSchemaEditor', () => {
         } as unknown as StreamsAppKibanaContext['core']['overlays'],
         notifications: {
           toasts: {
-            addError: jest.fn(),
-            addSuccess: jest.fn(),
+            addError: vi.fn(),
+            addSuccess: vi.fn(),
           },
         } as unknown as StreamsAppKibanaContext['core']['notifications'],
       } as unknown as StreamsAppKibanaContext['core'],
       dependencies: {
         start: {
           fieldsMetadata: {
-            getClient: jest.fn().mockResolvedValue({
-              find: jest.fn().mockResolvedValue({ fields: {} }),
+            getClient: vi.fn().mockResolvedValue({
+              find: vi.fn().mockResolvedValue({ fields: {} }),
             }),
           },
         } as unknown as StreamsAppKibanaContext['dependencies']['start'],
@@ -110,7 +119,7 @@ describe('StreamDetailSchemaEditor', () => {
             : never
         ),
         telemetryClient: {
-          trackSchemaUpdated: jest.fn(),
+          trackSchemaUpdated: vi.fn(),
         } as unknown as StreamsAppKibanaContext['services']['telemetryClient'],
         version: 'test-version',
       },
@@ -131,12 +140,12 @@ describe('StreamDetailSchemaEditor', () => {
       fields: [],
       storedFields: [],
       isLoadingFields: false,
-      refreshFields: jest.fn(),
-      addField: jest.fn(),
-      updateField: jest.fn(),
+      refreshFields: vi.fn(),
+      addField: vi.fn(),
+      updateField: vi.fn(),
       pendingChangesCount: 0,
-      discardChanges: jest.fn(),
-      submitChanges: jest.fn(),
+      discardChanges: vi.fn(),
+      submitChanges: vi.fn(),
     });
 
     mockUseUnsavedChangesPrompt.mockImplementation(() => {});
@@ -302,12 +311,12 @@ describe('StreamDetailSchemaEditor', () => {
         fields: [],
         storedFields: [],
         isLoadingFields: false,
-        refreshFields: jest.fn(),
-        addField: jest.fn(),
-        updateField: jest.fn(),
+        refreshFields: vi.fn(),
+        addField: vi.fn(),
+        updateField: vi.fn(),
         pendingChangesCount: 2,
-        discardChanges: jest.fn(),
-        submitChanges: jest.fn(),
+        discardChanges: vi.fn(),
+        submitChanges: vi.fn(),
       });
 
       const definition = createMockClassicStreamDefinition();
@@ -332,12 +341,12 @@ describe('StreamDetailSchemaEditor', () => {
         fields: [],
         storedFields: [],
         isLoadingFields: false,
-        refreshFields: jest.fn(),
-        addField: jest.fn(),
-        updateField: jest.fn(),
+        refreshFields: vi.fn(),
+        addField: vi.fn(),
+        updateField: vi.fn(),
         pendingChangesCount: 0,
-        discardChanges: jest.fn(),
-        submitChanges: jest.fn(),
+        discardChanges: vi.fn(),
+        submitChanges: vi.fn(),
       });
 
       const definition = createMockClassicStreamDefinition();
@@ -362,18 +371,18 @@ describe('StreamDetailSchemaEditor', () => {
   describe('Discard changes functionality', () => {
     it('calls discard handler when cancel button is clicked', async () => {
       const user = userEvent.setup();
-      const mockDiscardChanges = jest.fn();
+      const mockDiscardChanges = vi.fn();
 
       mockUseSchemaFields.mockReturnValue({
         fields: [],
         storedFields: [],
         isLoadingFields: false,
-        refreshFields: jest.fn(),
-        addField: jest.fn(),
-        updateField: jest.fn(),
+        refreshFields: vi.fn(),
+        addField: vi.fn(),
+        updateField: vi.fn(),
         pendingChangesCount: 1,
         discardChanges: mockDiscardChanges,
-        submitChanges: jest.fn(),
+        submitChanges: vi.fn(),
       });
 
       const definition = createMockClassicStreamDefinition();
@@ -396,10 +405,10 @@ describe('StreamDetailSchemaEditor', () => {
   describe('Submit changes flow', () => {
     it('opens confirmation modal when there are mapping-affecting changes', async () => {
       const user = userEvent.setup();
-      const mockCloseModal = jest.fn();
+      const mockCloseModal = vi.fn();
       mockOpenModal.mockReturnValue({ close: mockCloseModal });
 
-      const mockSubmitChanges = jest.fn().mockResolvedValue(undefined);
+      const mockSubmitChanges = vi.fn().mockResolvedValue(undefined);
       mockUseSchemaFields.mockReturnValue({
         fields: [
           {
@@ -411,11 +420,11 @@ describe('StreamDetailSchemaEditor', () => {
         ],
         storedFields: [],
         isLoadingFields: false,
-        refreshFields: jest.fn(),
-        addField: jest.fn(),
-        updateField: jest.fn(),
+        refreshFields: vi.fn(),
+        addField: vi.fn(),
+        updateField: vi.fn(),
         pendingChangesCount: 1,
-        discardChanges: jest.fn(),
+        discardChanges: vi.fn(),
         submitChanges: mockSubmitChanges,
       });
 
@@ -438,7 +447,7 @@ describe('StreamDetailSchemaEditor', () => {
     it('submits directly and skips the modal when changes are description-only', async () => {
       const user = userEvent.setup();
 
-      const mockSubmitChanges = jest.fn().mockResolvedValue(undefined);
+      const mockSubmitChanges = vi.fn().mockResolvedValue(undefined);
       mockUseSchemaFields.mockReturnValue({
         fields: [
           {
@@ -451,11 +460,11 @@ describe('StreamDetailSchemaEditor', () => {
         ],
         storedFields: [],
         isLoadingFields: false,
-        refreshFields: jest.fn(),
-        addField: jest.fn(),
-        updateField: jest.fn(),
+        refreshFields: vi.fn(),
+        addField: vi.fn(),
+        updateField: vi.fn(),
         pendingChangesCount: 1,
-        discardChanges: jest.fn(),
+        discardChanges: vi.fn(),
         submitChanges: mockSubmitChanges,
       });
 
@@ -499,12 +508,12 @@ describe('StreamDetailSchemaEditor', () => {
         fields: [],
         storedFields: [],
         isLoadingFields: false,
-        refreshFields: jest.fn(),
-        addField: jest.fn(),
-        updateField: jest.fn(),
+        refreshFields: vi.fn(),
+        addField: vi.fn(),
+        updateField: vi.fn(),
         pendingChangesCount: 1,
-        discardChanges: jest.fn(),
-        submitChanges: jest.fn(),
+        discardChanges: vi.fn(),
+        submitChanges: vi.fn(),
       });
 
       const definition = createMockClassicStreamDefinition();
@@ -534,12 +543,12 @@ describe('StreamDetailSchemaEditor', () => {
         fields: [],
         storedFields: [],
         isLoadingFields: false,
-        refreshFields: jest.fn(),
-        addField: jest.fn(),
-        updateField: jest.fn(),
+        refreshFields: vi.fn(),
+        addField: vi.fn(),
+        updateField: vi.fn(),
         pendingChangesCount: 0,
-        discardChanges: jest.fn(),
-        submitChanges: jest.fn(),
+        discardChanges: vi.fn(),
+        submitChanges: vi.fn(),
       });
 
       const definition = createMockClassicStreamDefinition();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { screen, render, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -15,10 +18,10 @@ import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { noCasesPermissions, readCasesPermissions } from '../../../cases_test_utils';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/components/user_privileges');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 describe('Sidebar', () => {
   let casesMock: CaseUiClientMock;
@@ -31,12 +34,12 @@ describe('Sidebar', () => {
         cases: casesMock,
         application: {
           // these are needed by the RecentCases component if it is rendered.
-          navigateToApp: jest.fn(),
-          getUrlForApp: jest.fn(() => ''),
+          navigateToApp: vi.fn(),
+          getUrlForApp: vi.fn(() => ''),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { read: true },
     });
   });
@@ -70,7 +73,7 @@ describe('Sidebar', () => {
   });
 
   it('does not render recent timelines for users with insufficient privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: {},
     });
 
@@ -84,7 +87,7 @@ describe('Sidebar', () => {
   });
 
   it('does render recent timelines for users with sufficient privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { read: true },
     });
 

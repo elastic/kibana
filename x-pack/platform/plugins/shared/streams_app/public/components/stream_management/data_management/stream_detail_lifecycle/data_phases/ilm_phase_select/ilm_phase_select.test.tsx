@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { IlmPhaseSelect } from './ilm_phase_select';
 
-jest.mock('../../hooks/use_ilm_phases_color_and_description', () => ({
-  useIlmPhasesColorAndDescription: () => ({
-    ilmPhases: {
-      hot: { color: '#FF0000', description: 'Hot desc' },
-      warm: { color: '#FFA500', description: 'Warm desc' },
-      cold: { color: '#0000FF', description: 'Cold desc' },
-      frozen: { color: '#00FFFF', description: 'Frozen desc' },
-      delete: { color: '#808080', description: 'Delete desc' },
-    },
-  }),
-}));
+vi.mock('../../hooks/use_ilm_phases_color_and_description', () => {
+      const mocked = {
+      useIlmPhasesColorAndDescription: () => ({
+        ilmPhases: {
+          hot: { color: '#FF0000', description: 'Hot desc' },
+          warm: { color: '#FFA500', description: 'Warm desc' },
+          cold: { color: '#0000FF', description: 'Cold desc' },
+          frozen: { color: '#00FFFF', description: 'Frozen desc' },
+          delete: { color: '#808080', description: 'Delete desc' },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('IlmPhaseSelect', () => {
   it('renders the trigger button label', () => {
@@ -39,7 +44,7 @@ describe('IlmPhaseSelect', () => {
   });
 
   it('opens the popover and calls onSelect when an option is selected (then closes)', async () => {
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     render(
       <IlmPhaseSelect
         renderButton={(props) => (
@@ -113,7 +118,7 @@ describe('IlmPhaseSelect', () => {
   });
 
   it('calls the original button onClick when the trigger is clicked', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     render(
       <IlmPhaseSelect
         renderButton={(props) => (
@@ -172,7 +177,7 @@ describe('IlmPhaseSelect', () => {
   });
 
   it('shows an Enterprise required badge for frozen', () => {
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     render(
       <IlmPhaseSelect
         renderButton={(props) => (
@@ -193,7 +198,7 @@ describe('IlmPhaseSelect', () => {
   });
 
   it('shows a Default repository required badge for frozen', () => {
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     render(
       <IlmPhaseSelect
         renderButton={(props) => (

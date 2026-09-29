@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useQuery } from '@kbn/react-query';
@@ -18,32 +21,32 @@ import { useCreateCloudFormationUrl } from '../../../../../../../../../component
 
 import { mockAgentPolicy, mockPackagePolicy } from './mockData';
 
-jest.mock('@kbn/react-query');
-jest.mock('../../../../../../../../../components/agent_enrollment_flyout/hooks');
-jest.mock('../../../../../../../../../hooks');
-jest.mock('../../../../../../../../../components/cloud_security_posture/hooks');
+vi.mock('@kbn/react-query');
+vi.mock('../../../../../../../../../components/agent_enrollment_flyout/hooks');
+vi.mock('../../../../../../../../../hooks');
+vi.mock('../../../../../../../../../components/cloud_security_posture/hooks');
 
 describe('PostInstallCloudFormationModal', () => {
-  const mockOnConfirm = jest.fn();
-  const mockOnCancel = jest.fn();
+  const mockOnConfirm = vi.fn();
+  const mockOnCancel = vi.fn();
 
   beforeAll(() => {
-    (useAgentPolicyWithPackagePolicies as jest.Mock).mockReturnValue({
+    (useAgentPolicyWithPackagePolicies as Mock).mockReturnValue({
       agentPolicyWithPackagePolicies: null,
     });
 
-    (useFleetServerHostsForPolicy as jest.Mock).mockReturnValue({
+    (useFleetServerHostsForPolicy as Mock).mockReturnValue({
       fleetServerHost: 'https://any-hostname:8220',
       isLoadingInitialRequest: false,
     });
 
-    (useCreateCloudFormationUrl as jest.Mock).mockReturnValue({
+    (useCreateCloudFormationUrl as Mock).mockReturnValue({
       cloudFormationUrl: 'console.aws.amazon.com/cloudformation',
     });
   });
 
   it('should render the modal with confirm button enabled', () => {
-    (useQuery as jest.Mock).mockReturnValueOnce({
+    (useQuery as Mock).mockReturnValueOnce({
       data: {
         data: {
           items: [{ api_key: 'test-api-key' }],
@@ -67,7 +70,7 @@ describe('PostInstallCloudFormationModal', () => {
   });
 
   it('should render the modal with confirm button disabled', () => {
-    (useQuery as jest.Mock).mockReturnValueOnce({
+    (useQuery as Mock).mockReturnValueOnce({
       data: {
         data: {
           items: [{ api_key: 'test-api-key' }],
@@ -92,10 +95,10 @@ describe('PostInstallCloudFormationModal', () => {
 
   it('should open correct cloudFormation URL', () => {
     // Mock window.open
-    const mockWindowOpen = jest.fn();
+    const mockWindowOpen = vi.fn();
     window.open = mockWindowOpen;
 
-    (useQuery as jest.Mock).mockReturnValueOnce({
+    (useQuery as Mock).mockReturnValueOnce({
       data: {
         data: {
           items: [{ api_key: 'test-api-key' }],

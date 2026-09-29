@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Case } from '../../../../common/types/domain';
 import { CaseMetricsFeature } from '../../../../common/types/api';
 import { createCasesClientMock } from '../../mocks';
@@ -18,7 +20,7 @@ const clientMock = createCasesClientMock();
 const caseService = createCaseServiceMock();
 
 const logger = loggingSystemMock.createLogger();
-const getAuthorizationFilter = jest.fn().mockResolvedValue({});
+const getAuthorizationFilter = vi.fn().mockResolvedValue({});
 
 const clientArgs = {
   logger,
@@ -37,7 +39,7 @@ describe('MTTR', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty values when no features set up', async () => {

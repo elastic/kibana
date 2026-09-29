@@ -4,15 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
 import { useKibana } from '../../common/lib/kibana';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,10 +30,10 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('useBulkGetUserProfiles', () => {
-  const bulkGet = jest.fn();
+  const bulkGet = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     useKibanaMock().services.userProfile.bulkGet = bulkGet;
   });

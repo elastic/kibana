@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { AuthenticatedUser } from '@kbn/core/server';
 import {
@@ -22,12 +25,12 @@ import { ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID } from '@kbn/workflows/managed'
  * Tests the implementation from dkv.1 (event log storage) and dkv.2 (API write).
  */
 describe('Generate API Workflow IDs Integration Tests', () => {
-  const mockEventLogger: jest.Mocked<IEventLogger> = {
-    logEvent: jest.fn(),
-  } as unknown as jest.Mocked<IEventLogger>;
+  const mockEventLogger: Mocked<IEventLogger> = {
+    logEvent: vi.fn(),
+  } as unknown as Mocked<IEventLogger>;
 
-  const mockDataClient: jest.Mocked<EventLogRefresher> = {
-    refreshEventLogIndex: jest.fn().mockResolvedValue(undefined),
+  const mockDataClient: Mocked<EventLogRefresher> = {
+    refreshEventLogIndex: vi.fn().mockResolvedValue(undefined),
   };
 
   const mockAuthenticatedUser: AuthenticatedUser = {
@@ -54,7 +57,7 @@ describe('Generate API Workflow IDs Integration Tests', () => {
   const spaceId = 'default';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Internal _generate API writes workflow IDs to event log', () => {

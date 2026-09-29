@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import type { History } from 'history';
 import { createMemoryHistory } from 'history';
@@ -17,9 +20,12 @@ import type { App, AppUpdater, ToastsSetup } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { unhashUrl } from './hash_unhash_url';
 
-jest.mock('./hash_unhash_url', () => ({
-  unhashUrl: jest.fn((x) => x),
-}));
+vi.mock('./hash_unhash_url', () => {
+      const mocked = {
+      unhashUrl: vi.fn((x) => x),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('kbnUrlTracker', () => {
   let storage: StubBrowserStorage;
@@ -28,8 +34,8 @@ describe('kbnUrlTracker', () => {
   let state1Subject: Subject<{ key1: string }>;
   let state2Subject: Subject<{ key2: string }>;
   let navLinkUpdaterSubject: BehaviorSubject<AppUpdater>;
-  let toastService: jest.Mocked<ToastsSetup>;
-  const onBeforeNavLinkSaved = jest.fn((url) => url);
+  let toastService: Mocked<ToastsSetup>;
+  const onBeforeNavLinkSaved = vi.fn((url) => url);
 
   function createTracker(shouldTrackUrlUpdate?: (pathname: string) => boolean) {
     urlTracker = createKbnUrlTracker({
@@ -60,7 +66,7 @@ describe('kbnUrlTracker', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     toastService = coreMock.createSetup().notifications.toasts;
     storage = new StubBrowserStorage();
     history = createMemoryHistory();
@@ -113,7 +119,7 @@ describe('kbnUrlTracker', () => {
   });
 
   test('unhash all urls that are recorded while app is mounted', () => {
-    (unhashUrl as jest.Mock).mockImplementation((x) => x + '?unhashed');
+    (unhashUrl as Mock).mockImplementation((x) => x + '?unhashed');
     createTracker();
     urlTracker.appMounted();
     history.push('#/start/deep/path/2');
@@ -124,8 +130,8 @@ describe('kbnUrlTracker', () => {
   });
 
   test('warn in console and use hashed url if unhashing does not work', () => {
-    const consoleWarnSpy = jest.spyOn(console, 'warn');
-    (unhashUrl as jest.Mock).mockImplementation(() => {
+    const consoleWarnSpy = vi.spyOn(console, 'warn');
+    (unhashUrl as Mock).mockImplementation(() => {
       throw new Error('unhash broke');
     });
     createTracker();

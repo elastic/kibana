@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { firstValueFrom } from 'rxjs';
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
@@ -20,11 +23,11 @@ describe('registerUserContext', () => {
   const username = '1234';
   const expectedHashedPlainUsername = new Sha256().update(username, 'utf8').digest('hex');
 
-  let analytics: jest.Mocked<AnalyticsServiceSetup>;
-  let authentication: jest.Mocked<AuthenticationServiceSetup>;
+  let analytics: Mocked<AnalyticsServiceSetup>;
+  let authentication: Mocked<AuthenticationServiceSetup>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     analytics = coreMock.createSetup().analytics;
     authentication = authenticationMock.createSetup();
     authentication.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());

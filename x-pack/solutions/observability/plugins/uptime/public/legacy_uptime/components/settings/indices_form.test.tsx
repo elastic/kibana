@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { IndicesForm } from './indices_form';
 import { shallowWithRouter } from '../../lib';
@@ -15,7 +17,7 @@ describe('CertificateForm', () => {
       shallowWithRouter(
         <IndicesForm
           loading={false}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           formFields={{
             heartbeatIndices: 'heartbeat-8*',
             certAgeThreshold: 36,

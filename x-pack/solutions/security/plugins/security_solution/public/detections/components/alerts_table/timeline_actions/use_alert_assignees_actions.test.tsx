@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { UseAlertAssigneesActionsProps } from './use_alert_assignees_actions';
 import { useAlertAssigneesActions } from './use_alert_assignees_actions';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
@@ -20,12 +23,12 @@ import { useBulkGetUserProfiles } from '../../../../common/components/user_profi
 import { useSuggestUsers } from '../../../../common/components/user_profiles/use_suggest_users';
 import { useLicense } from '../../../../common/hooks/use_license';
 
-jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
-jest.mock('../../../../common/components/user_profiles/use_get_current_user_profile');
-jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
-jest.mock('../../../../common/components/user_profiles/use_suggest_users');
-jest.mock('../../../../common/hooks/use_license');
+vi.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
+vi.mock('../../../../common/components/user_profiles/use_get_current_user_profile');
+vi.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../../../common/components/user_profiles/use_suggest_users');
+vi.mock('../../../../common/hooks/use_license');
 
 const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'fakeUser1' }, data: {} },
@@ -33,7 +36,7 @@ const mockUserProfiles = [
 ];
 
 const defaultProps: UseAlertAssigneesActionsProps = {
-  closePopover: jest.fn(),
+  closePopover: vi.fn(),
   ecsRowData: {
     _id: '123',
     kibana: {
@@ -42,7 +45,7 @@ const defaultProps: UseAlertAssigneesActionsProps = {
       },
     },
   },
-  refetch: jest.fn(),
+  refetch: vi.fn(),
 };
 
 const renderContextMenu = (
@@ -66,14 +69,14 @@ const renderContextMenu = (
 
 describe('useAlertAssigneesActions', () => {
   beforeEach(() => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({
+    (useAlertsPrivileges as Mock).mockReturnValue({
       hasAlertsUpdate: true,
     });
-    (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
+    (useLicense as Mock).mockReturnValue({ isPlatinumPlus: () => true });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render alert assignees actions', () => {
@@ -119,7 +122,7 @@ describe('useAlertAssigneesActions', () => {
   });
 
   it("should not render alert assignees actions if user doesn't have write permissions", () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({
+    (useAlertsPrivileges as Mock).mockReturnValue({
       hasAlertsUpdate: false,
     });
     const { result } = renderHook(() => useAlertAssigneesActions(defaultProps), {
@@ -129,7 +132,7 @@ describe('useAlertAssigneesActions', () => {
   });
 
   it('should not render alert assignees actions within Basic license', () => {
-    (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => false });
+    (useLicense as Mock).mockReturnValue({ isPlatinumPlus: () => false });
     const { result } = renderHook(() => useAlertAssigneesActions(defaultProps), {
       wrapper: TestProviders,
     });
@@ -177,16 +180,16 @@ describe('useAlertAssigneesActions', () => {
   });
 
   it('should render the nested panel', async () => {
-    (useSetAlertAssignees as jest.Mock).mockReturnValue(jest.fn());
-    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
+    (useSetAlertAssignees as Mock).mockReturnValue(vi.fn());
+    (useGetCurrentUserProfile as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles[0],
     });
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+    (useBulkGetUserProfiles as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles,
     });
-    (useSuggestUsers as jest.Mock).mockReturnValue({
+    (useSuggestUsers as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles,
     });

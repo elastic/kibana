@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { chartData as mockChartData } from './__mocks__/mock_chart_data_rare';
 import seriesConfig from './__mocks__/mock_series_config_rare.json';
 import { BehaviorSubject } from 'rxjs';
@@ -22,7 +24,7 @@ import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_contex
 const utilityProps = {
   timeBuckets: timeBucketsMock,
   chartTheme: kibanaContextMock.services.charts.theme.useChartsBaseTheme(),
-  onPointerUpdate: jest.fn(),
+  onPointerUpdate: vi.fn(),
   cursor$: new BehaviorSubject({ isDataHistorgram: true, cursor: { x: 10432423 } }),
   euiTheme: {
     colors: {
@@ -47,8 +49,8 @@ describe('ExplorerChart', () => {
 
   test('Initialize', () => {
     const mockTooltipService = {
-      show: jest.fn(),
-      hide: jest.fn(),
+      show: vi.fn(),
+      hide: vi.fn(),
     };
 
     const { container } = render(
@@ -79,8 +81,8 @@ describe('ExplorerChart', () => {
     };
 
     const mockTooltipService = {
-      show: jest.fn(),
-      hide: jest.fn(),
+      show: vi.fn(),
+      hide: vi.fn(),
     };
 
     const { container } = render(
@@ -118,8 +120,8 @@ describe('ExplorerChart', () => {
     };
 
     const mockTooltipService = {
-      show: jest.fn(),
-      hide: jest.fn(),
+      show: vi.fn(),
+      hide: vi.fn(),
     };
 
     // We create the element including a wrapper which sets the width:

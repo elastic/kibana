@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -25,32 +27,38 @@ import type { AppMenuExtension, AppMenuExtensionParams } from '../../../../conte
 import { useProfileAccessor } from '../../../../context_awareness/hooks/use_profile_accessor';
 import * as getAlerts from './app_menu_actions/get_alerts';
 
-jest.mock('@kbn/alerts-ui-shared', () => ({
-  ...jest.requireActual('@kbn/alerts-ui-shared'),
-  useGetRuleTypesPermissions: jest.fn(() => ({
-    authorizedRuleTypes: [
-      {
-        id: '.es-query',
-        authorizedConsumers: {
-          discover: { all: true, read: true },
-        },
-      },
-    ],
-  })),
-}));
+vi.mock('@kbn/alerts-ui-shared', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerts-ui-shared')),
+      useGetRuleTypesPermissions: vi.fn(() => ({
+        authorizedRuleTypes: [
+          {
+            id: '.es-query',
+            authorizedConsumers: {
+              discover: { all: true, read: true },
+            },
+          },
+        ],
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../context_awareness/hooks/use_profile_accessor', () => ({
-  useProfileAccessor: jest.fn((accessorId: string) => jest.fn((baseImpl) => baseImpl)),
-}));
+vi.mock('../../../../context_awareness/hooks/use_profile_accessor', () => {
+      const mocked = {
+      useProfileAccessor: vi.fn((accessorId: string) => vi.fn((baseImpl) => baseImpl)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseProfileAccessor = jest.mocked(useProfileAccessor);
+const mockUseProfileAccessor = vi.mocked(useProfileAccessor);
 
 const createTestServices = (overrides: Partial<DiscoverServices> = {}): DiscoverServices => {
   const services = createDiscoverServicesMock();
   const uiSettingsGetMock = services.uiSettings.get;
 
   services.share = sharePluginMock.createStartContract();
-  jest.mocked(services.share.availableIntegrations).mockReturnValue([]);
+  vi.mocked(services.share.availableIntegrations).mockReturnValue([]);
   services.application.currentAppId$ = new BehaviorSubject('discover');
   services.capabilities.discover_v2 = {
     save: true,
@@ -115,8 +123,8 @@ describe('useTopNavLinks', () => {
           adHocDataViews: [],
           persistedDiscoverSession: undefined,
           ...hookAttrs,
-          onOpenSaveModal: hookAttrs.onOpenSaveModal ?? jest.fn(),
-          onOpenSaveAsModal: hookAttrs.onOpenSaveAsModal ?? jest.fn(),
+          onOpenSaveModal: hookAttrs.onOpenSaveModal ?? vi.fn(),
+          onOpenSaveAsModal: hookAttrs.onOpenSaveAsModal ?? vi.fn(),
         }),
       {
         wrapper: ({ children }) => (
@@ -186,7 +194,7 @@ describe('useTopNavLinks', () => {
     it('should include the share menu item', async () => {
       const services = createTestServices();
 
-      jest.spyOn(services.share!, 'availableIntegrations').mockReturnValue([]);
+      vi.spyOn(services.share!, 'availableIntegrations').mockReturnValue([]);
 
       const appMenuConfig = await setup({ services });
 
@@ -201,7 +209,7 @@ describe('useTopNavLinks', () => {
     it('should include the export menu item', async () => {
       const services = createTestServices();
 
-      jest
+      vi
         .spyOn(services.share!, 'availableIntegrations')
         .mockImplementation((_objectType, groupId) => {
           if (groupId === 'export') {
@@ -242,7 +250,7 @@ describe('useTopNavLinks', () => {
     it('should include unknown export integrations with fallback presentation', async () => {
       const services = createTestServices();
 
-      jest
+      vi
         .spyOn(services.share!, 'availableIntegrations')
         .mockImplementation((_objectType, groupId) => {
           if (groupId === 'exportDerivatives') {
@@ -272,7 +280,7 @@ describe('useTopNavLinks', () => {
     it('includes Schedule export when CSV reporting is available', async () => {
       const services = createTestServices();
 
-      jest
+      vi
         .spyOn(services.share!, 'availableIntegrations')
         .mockImplementation((_objectType, groupId) => {
           if (groupId === 'export') {
@@ -309,7 +317,7 @@ describe('useTopNavLinks', () => {
     it('hides Schedule export when CSV reporting is not available', async () => {
       const services = createTestServices();
 
-      jest
+      vi
         .spyOn(services.share!, 'availableIntegrations')
         .mockImplementation((_objectType, groupId) => {
           if (groupId === 'exportDerivatives') {
@@ -535,8 +543,8 @@ describe('useTopNavLinks', () => {
             adHocDataViews: [],
             persistedDiscoverSession: undefined,
             ...hookAttrs,
-            onOpenSaveModal: hookAttrs.onOpenSaveModal ?? jest.fn(),
-            onOpenSaveAsModal: hookAttrs.onOpenSaveAsModal ?? jest.fn(),
+            onOpenSaveModal: hookAttrs.onOpenSaveModal ?? vi.fn(),
+            onOpenSaveAsModal: hookAttrs.onOpenSaveAsModal ?? vi.fn(),
           }),
         {
           wrapper: ({ children }) => (
@@ -575,7 +583,7 @@ describe('useTopNavLinks', () => {
       beforeEach(() => {
         mockUseProfileAccessor.mockImplementation((accessorId) => {
           if (accessorId === 'getAppMenu') {
-            return jest.fn(() => {
+            return vi.fn(() => {
               return (params: AppMenuExtensionParams): AppMenuExtension => {
                 return {
                   appMenuRegistry: (registry) => {
@@ -584,7 +592,7 @@ describe('useTopNavLinks', () => {
                       order: 2,
                       label: 'Create custom threshold rule',
                       testId: 'discoverAppMenuCustomThresholdRule',
-                      render: jest.fn(() => null),
+                      render: vi.fn(() => null),
                     });
 
                     return registry;
@@ -594,16 +602,16 @@ describe('useTopNavLinks', () => {
             });
           }
 
-          return jest.fn((baseImpl) => baseImpl);
+          return vi.fn((baseImpl) => baseImpl);
         });
       });
 
       afterEach(() => {
-        mockUseProfileAccessor.mockImplementation((accessorId) => jest.fn((baseImpl) => baseImpl));
+        mockUseProfileAccessor.mockImplementation((accessorId) => vi.fn((baseImpl) => baseImpl));
       });
 
       it('should apply profile popover items before replacing the ES|QL alerts menu', async () => {
-        const getCreateRuleOptionsSpy = jest.spyOn(getAlerts, 'getCreateRuleOptionsAppMenuItem');
+        const getCreateRuleOptionsSpy = vi.spyOn(getAlerts, 'getCreateRuleOptionsAppMenuItem');
 
         try {
           await setupWithAlertingV2({ isEsqlMode: true }, true);
@@ -673,14 +681,14 @@ describe('useTopNavLinks', () => {
       return v2OnlyServices;
     };
 
-    beforeEach(() => {
-      jest.requireMock('@kbn/alerts-ui-shared').useGetRuleTypesPermissions.mockReturnValue({
+    beforeEach(async () => {
+      (await vi.importMock('@kbn/alerts-ui-shared')).useGetRuleTypesPermissions.mockReturnValue({
         authorizedRuleTypes: [],
       });
     });
 
-    afterEach(() => {
-      jest.requireMock('@kbn/alerts-ui-shared').useGetRuleTypesPermissions.mockReturnValue({
+    afterEach(async () => {
+      (await vi.importMock('@kbn/alerts-ui-shared')).useGetRuleTypesPermissions.mockReturnValue({
         authorizedRuleTypes: [
           {
             id: '.es-query',

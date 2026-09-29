@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
@@ -14,9 +16,12 @@ import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workfl
 import { createStartServicesMock, type StartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 
-jest.mock('./workflow_execution_list_filters', () => ({
-  ExecutionListFilters: () => <div data-test-subj="executionListFilters">{'Filters'}</div>,
-}));
+vi.mock('./workflow_execution_list_filters', () => {
+      const mocked = {
+      ExecutionListFilters: () => <div data-test-subj="executionListFilters">{'Filters'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowExecutionList', () => {
   const defaultFilters = {
@@ -64,17 +69,17 @@ describe('WorkflowExecutionList', () => {
   const defaultProps: WorkflowExecutionListProps = {
     executions: mockExecutions,
     filters: defaultFilters,
-    onFiltersChange: jest.fn(),
+    onFiltersChange: vi.fn(),
     isInitialLoading: false,
     isLoadingMore: false,
     error: null,
-    onExecutionClick: jest.fn(),
+    onExecutionClick: vi.fn(),
     selectedId: null,
     lastViewedId: null,
-    setPaginationObserver: jest.fn(),
+    setPaginationObserver: vi.fn(),
     canCancel: true,
     isCancelInProgress: false,
-    onConfirmCancel: jest.fn().mockResolvedValue(undefined),
+    onConfirmCancel: vi.fn().mockResolvedValue(undefined),
     hasNextPage: false,
   };
 
@@ -90,7 +95,7 @@ describe('WorkflowExecutionList', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the execution history title', () => {
@@ -151,7 +156,7 @@ describe('WorkflowExecutionList', () => {
     });
 
     it('calls onExecutionClick when an execution row is clicked', () => {
-      const onExecutionClick = jest.fn();
+      const onExecutionClick = vi.fn();
       renderComponent({ onExecutionClick });
       const items = screen.getAllByTestId('workflowExecutionListItem');
       fireEvent.click(items[0]);
@@ -220,7 +225,7 @@ describe('WorkflowExecutionList', () => {
 
   describe('pagination observer', () => {
     it('calls setPaginationObserver for the last execution item', () => {
-      const setPaginationObserver = jest.fn();
+      const setPaginationObserver = vi.fn();
       renderComponent({ setPaginationObserver });
       expect(setPaginationObserver).toHaveBeenCalled();
     });
@@ -292,7 +297,7 @@ describe('WorkflowExecutionList', () => {
     });
 
     it('opens confirm modal and calls onConfirmCancel when confirmed', async () => {
-      const onConfirmCancel = jest.fn().mockResolvedValue(undefined);
+      const onConfirmCancel = vi.fn().mockResolvedValue(undefined);
       const withRunning: WorkflowExecutionListDto = {
         ...mockExecutions,
         results: [

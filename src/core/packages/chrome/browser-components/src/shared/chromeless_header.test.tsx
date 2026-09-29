@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -25,7 +27,7 @@ describe('ChromelessHeader', () => {
   });
 
   it('throws when rendered outside ChromeComponentsProvider', () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(() => render(<ChromelessHeader />)).toThrow(
       'useChromeComponentsDeps must be used within ChromeComponentsProvider'
     );

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import {
   ThreeWayDiffConflict,
@@ -21,15 +24,15 @@ import {
 } from './update_rule_telemetry';
 
 const mockAnalytics = (): AnalyticsServiceStart =>
-  ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceStart);
+  ({ reportEvent: vi.fn() } as unknown as AnalyticsServiceStart);
 
 const mockLogger = (): Logger =>
   ({
-    trace: jest.fn(),
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    trace: vi.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as unknown as Logger);
 
 const createMockRuleUpdateContext = (
@@ -50,7 +53,7 @@ const createMockRuleUpdateContext = (
 
 describe('sendRuleUpdateTelemetryEvents', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('emits SUCCESS with calculated updated fields for processed rule', () => {
@@ -75,7 +78,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    const [eventType, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [eventType, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
     expect(eventType).toBe(DETECTION_RULE_UPGRADE_EVENT.eventType);
 
@@ -132,7 +135,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
         logger
       );
 
-      const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+      const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
       expect(payload.hasRuleTypeChange).toBe(expected);
     });
 
@@ -162,7 +165,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
         logger
       );
 
-      const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+      const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
       expect(payload.hasRuleTypeChange).toBe(false);
     });
 
@@ -193,7 +196,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
       );
 
       expect(analytics.reportEvent).toHaveBeenCalledTimes(3);
-      const payloads = (analytics.reportEvent as jest.Mock).mock.calls.map(([, p]) => p);
+      const payloads = (analytics.reportEvent as Mock).mock.calls.map(([, p]) => p);
 
       for (const payload of payloads) {
         expect(payload.hasRuleTypeChange).toBe(true);
@@ -228,7 +231,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
     expect(payload.updatedFieldsSummary).toEqual({
       count: 0,
@@ -264,7 +267,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(payload.finalResult).toBe('ERROR');
     expect(payload.ruleId).toBe('r1');
     expect(payload.ruleName).toBe('Rule r1');
@@ -303,7 +306,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(payload.finalResult).toBe('SKIP');
     expect(payload.ruleId).toBe('r1');
     expect(payload.ruleName).toBe('Rule r1');
@@ -398,7 +401,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(4);
 
-    const payloads = (analytics.reportEvent as jest.Mock).mock.calls.map(([, p]) => p);
+    const payloads = (analytics.reportEvent as Mock).mock.calls.map(([, p]) => p);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payloadsMap = new Map(payloads.map((payload: any) => [payload.ruleId, payload]));
 
@@ -446,7 +449,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
 
 describe('sendRuleBulkUpgradeTelemetryEvent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('sends bulk upgrade telemetry with correct structure for successful updates', () => {
@@ -490,7 +493,7 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    const [eventType, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [eventType, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
     expect(eventType).toBe(DETECTION_RULE_BULK_UPGRADE_EVENT.eventType);
     expect(payload).toEqual({
@@ -585,7 +588,7 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
     // Rule r1 has NON_SOLVABLE conflict (highest priority), so it counts as non-solvable
     // Rule r2 has SOLVABLE conflict (no non-solvable), so it counts as solvable
@@ -654,7 +657,7 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
     expect(payload).toEqual({
       successfulUpdates: {
@@ -694,7 +697,7 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
     sendRuleBulkUpgradeTelemetryEvent(analytics, new Map(), [], [], [], logger);
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    const [eventType, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [eventType, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
     expect(eventType).toBe(DETECTION_RULE_BULK_UPGRADE_EVENT.eventType);
     expect(payload).toEqual({
@@ -757,7 +760,7 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
     // Should count only rules that exist in the context map, non-existing rules are skipped
     expect(payload).toEqual({
@@ -801,7 +804,7 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
     const logger = mockLogger();
 
     // Mock analytics.reportEvent to throw an error
-    (analytics.reportEvent as jest.Mock).mockImplementation(() => {
+    (analytics.reportEvent as Mock).mockImplementation(() => {
       throw new Error('Analytics service error');
     });
 
@@ -909,7 +912,7 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
     expect(payload).toEqual({
       successfulUpdates: {
@@ -998,7 +1001,7 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
     expect(payload).toEqual({
       successfulUpdates: {
@@ -1084,7 +1087,7 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
         logger
       );
 
-      const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+      const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
       expect(payload.successfulUpdates.totalNumberOfRules).toBe(3);
       expect(payload.successfulUpdates.numOfRulesWithRuleTypeChange).toBe(1);
@@ -1122,7 +1125,7 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
         logger
       );
 
-      const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+      const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
       expect(payload.successfulUpdates.numOfNonSolvableConflicts).toBe(1);
       expect(payload.successfulUpdates.numOfRulesWithRuleTypeChange).toBe(1);
@@ -1134,7 +1137,7 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
 
       sendRuleBulkUpgradeTelemetryEvent(analytics, new Map(), [], [], [], logger);
 
-      const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+      const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
       expect(payload.successfulUpdates.numOfRulesWithRuleTypeChange).toBe(0);
       expect(payload.errorUpdates.numOfRulesWithRuleTypeChange).toBe(0);

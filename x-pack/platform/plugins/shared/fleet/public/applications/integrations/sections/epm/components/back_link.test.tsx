@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,11 +17,11 @@ import { useStartServices } from '../../../../../hooks';
 
 import { BackLink } from './back_link';
 
-jest.mock('../../../../../hooks', () => {
+vi.mock('../../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../../hooks'),
-    useStartServices: jest.fn().mockReturnValue({
-      application: { navigateToApp: jest.fn() },
+    ...(await vi.importActual('../../../../../hooks')),
+    useStartServices: vi.fn().mockReturnValue({
+      application: { navigateToApp: vi.fn() },
     }),
   };
 });
@@ -36,7 +38,7 @@ const renderBackLink = (
 
 describe('BackLink', () => {
   beforeEach(() => {
-    jest.mocked(useStartServices().application.navigateToApp).mockReset();
+    vi.mocked(useStartServices().application.navigateToApp).mockReset();
   });
 
   it('renders back to selection link when returnAppId and returnPath are present', async () => {
@@ -158,7 +160,7 @@ describe('BackLink', () => {
   it('suppresses the chrome back button when return params are present', () => {
     const chrome = coreMock.createStart().chrome;
     chrome.getChromeStyle.mockReturnValue('project');
-    chrome.appHeader.set.mockReturnValue(jest.fn());
+    chrome.appHeader.set.mockReturnValue(vi.fn());
 
     const queryParams = new URLSearchParams();
     queryParams.set('returnAppId', 'observabilityOnboarding');
@@ -172,7 +174,7 @@ describe('BackLink', () => {
   it('does not suppress the chrome back button when return params are absent', () => {
     const chrome = coreMock.createStart().chrome;
     chrome.getChromeStyle.mockReturnValue('project');
-    chrome.appHeader.set.mockReturnValue(jest.fn());
+    chrome.appHeader.set.mockReturnValue(vi.fn());
 
     renderBackLink(
       <BackLink queryParams={new URLSearchParams()} integrationsPath="/browse" />,

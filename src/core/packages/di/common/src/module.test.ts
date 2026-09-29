@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Container, LazyServiceIdentifier, type ServiceIdentifier } from 'inversify';
 import { OnSetup, OnStart } from './services/plugin';
 import { KibanaContainerModule, type KibanaContainerModuleLoadOptions } from './module';
@@ -37,10 +40,10 @@ describe('KibanaContainerModule', () => {
     { name: 'onSetup' as const, hook: OnSetup },
     { name: 'onStart' as const, hook: OnStart },
   ])('$name', ({ hook, name }) => {
-    let handler: jest.Mock;
+    let handler: Mock;
 
     beforeEach(() => {
-      handler = jest.fn();
+      handler = vi.fn();
       options[name](token, handler);
       container.bind(dependencyToken).toConstantValue('something');
     });
@@ -171,8 +174,8 @@ describe('KibanaContainerModule', () => {
 
   describe('onStart', () => {
     it('should invoke the registered handler on start only', () => {
-      const onSetupHandler = jest.fn();
-      const onStartHandler = jest.fn();
+      const onSetupHandler = vi.fn();
+      const onStartHandler = vi.fn();
 
       options.onSetup(token, onSetupHandler);
       options.onStart(token, onStartHandler);
@@ -187,9 +190,9 @@ describe('KibanaContainerModule', () => {
     });
 
     it('should not throw when there are dependencies available after start', () => {
-      const onStartHandler = jest.fn();
+      const onStartHandler = vi.fn();
       const startDependency = Symbol.for('core.start.service');
-      options.onSetup(token, jest.fn());
+      options.onSetup(token, vi.fn());
       options.onStart(token, startDependency, onStartHandler);
       container.bind(token).toConstantValue('value');
 
@@ -205,7 +208,7 @@ describe('KibanaContainerModule', () => {
 
   describe('inject', () => {
     it('should not resolve dependencies until Kibana is started', async () => {
-      const factory = jest.fn(() => 'something');
+      const factory = vi.fn(() => 'something');
 
       options.bind(dependencyToken).toResolvedValue(factory);
       options
@@ -325,7 +328,7 @@ describe('KibanaContainerModule', () => {
       it('should inject in the `toFactory` context', async () => {
         options
           .bind(token as ServiceIdentifier<() => string>)
-          .toFactory(({ inject }) => inject(dependencyToken, (value) => jest.fn(() => value))());
+          .toFactory(({ inject }) => inject(dependencyToken, (value) => vi.fn(() => value))());
 
         expect(() => trigger(OnSetup, child)).not.toThrow();
         expect(() => trigger(OnStart, child)).not.toThrow();

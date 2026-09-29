@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { externalServiceSIRMock, sirParams } from '../lib/servicenow/mocks';
 import type { ExternalServiceSIR } from '../lib/servicenow/types';
@@ -13,11 +16,11 @@ import { api, combineObservables, formatObservables, prepareParams } from './api
 const mockedLogger = loggerMock.create();
 
 describe('api_sir', () => {
-  let externalService: jest.Mocked<ExternalServiceSIR>;
+  let externalService: Mocked<ExternalServiceSIR>;
 
   beforeEach(() => {
     externalService = externalServiceSIRMock.create();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('combineObservables', () => {

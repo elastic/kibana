@@ -7,23 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { createImageAction } from './create_image_action';
 
-jest.mock('@kbn/presentation-util', () => ({
-  openLazyFlyout: jest.fn(),
-}));
+vi.mock('@kbn/presentation-util', () => {
+      const mocked = {
+      openLazyFlyout: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../services/kibana_services', () => ({
-  coreServices: {},
-}));
+vi.mock('../services/kibana_services', () => {
+      const mocked = {
+      coreServices: {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('createImageAction', () => {
   it('returns focus to Add when the image editor closes', async () => {
-    const returnFocus = jest.fn();
+    const returnFocus = vi.fn();
     await createImageAction.execute({
-      embeddable: { addNewPanel: jest.fn() },
+      embeddable: { addNewPanel: vi.fn() },
       returnFocus,
     } as unknown as EmbeddableApiContext);
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { Logger } from '@kbn/core/server';
@@ -13,29 +16,32 @@ import type { EventClient } from './event_client';
 import { cleanupStaleEvents, STALE_EVENT_ASSESSMENT_NOTE } from './cleanup_stale_events';
 import { updateSignificantEventStatus } from './update_event_status';
 
-jest.mock('./update_event_status', () => ({
-  updateSignificantEventStatus: jest.fn(),
-}));
+vi.mock('./update_event_status', () => {
+      const mocked = {
+      updateSignificantEventStatus: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const updateStatusMock = updateSignificantEventStatus as jest.MockedFunction<
+const updateStatusMock = updateSignificantEventStatus as MockedFunction<
   typeof updateSignificantEventStatus
 >;
 
 const makeAlertEventsClient = (
-  overrides: Partial<jest.Mocked<AlertEventsClientApi>> = {}
-): jest.Mocked<AlertEventsClientApi> =>
+  overrides: Partial<Mocked<AlertEventsClientApi>> = {}
+): Mocked<AlertEventsClientApi> =>
   ({
-    createAlertEvent: jest.fn().mockResolvedValue(undefined),
+    createAlertEvent: vi.fn().mockResolvedValue(undefined),
     ...overrides,
-  } as jest.Mocked<AlertEventsClientApi>);
+  } as Mocked<AlertEventsClientApi>);
 
-const makeLogger = (): jest.Mocked<Logger> =>
+const makeLogger = (): Mocked<Logger> =>
   ({
-    error: jest.fn(),
-    warn: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+  } as unknown as Mocked<Logger>);
 
 const createEvent = (eventUuid: string, ruleIds: string[]): SignificantEventResponse =>
   ({
@@ -49,7 +55,7 @@ const createEvent = (eventUuid: string, ruleIds: string[]): SignificantEventResp
 
 const createEventClient = (pages: SignificantEventResponse[][]): EventClient =>
   ({
-    findLatestByCurrentStateBatch: jest
+    findLatestByCurrentStateBatch: vi
       .fn()
       .mockImplementation(({ afterEventId }: { afterEventId?: string }) => {
         const previousPageIndex =
@@ -62,12 +68,12 @@ const createEventClient = (pages: SignificantEventResponse[][]): EventClient =>
 
 const createRulesClient = (existingIds: string[]): IRulesManagementClient =>
   ({
-    findExistingRuleIds: jest.fn().mockResolvedValue(existingIds),
+    findExistingRuleIds: vi.fn().mockResolvedValue(existingIds),
   } as unknown as IRulesManagementClient);
 
 describe('cleanupStaleEvents', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     updateStatusMock.mockResolvedValue({
       event_uuid: 'next-event',
       updated: 1,
@@ -155,7 +161,7 @@ describe('cleanupStaleEvents', () => {
   it('does not write when checking live rules fails', async () => {
     const eventClient = createEventClient([[createEvent('event-1', ['rule-1'])]]);
     const rulesClient = createRulesClient([]);
-    jest
+    vi
       .mocked(rulesClient.findExistingRuleIds)
       .mockRejectedValueOnce(new Error('rule lookup failed'));
 
@@ -176,7 +182,7 @@ describe('cleanupStaleEvents', () => {
     );
     const eventClient = createEventClient([firstBatch, [createEvent('event-1000', ['rule-2'])]]);
     const rulesClient = createRulesClient([]);
-    jest
+    vi
       .mocked(rulesClient.findExistingRuleIds)
       .mockResolvedValueOnce([])
       .mockRejectedValueOnce(new Error('later lookup failed'));

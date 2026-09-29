@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 import { act, fireEvent, render, renderHook } from '@testing-library/react';
@@ -24,12 +27,12 @@ import { useAlertsPrivileges } from '../../../../detections/containers/detection
 import { useLicense } from '../../../hooks/use_license';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 
-jest.mock('./use_set_alert_assignees');
-jest.mock('../../user_profiles/use_get_current_user_profile');
-jest.mock('../../user_profiles/use_bulk_get_user_profiles');
-jest.mock('../../user_profiles/use_suggest_users');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../../hooks/use_license');
+vi.mock('./use_set_alert_assignees');
+vi.mock('../../user_profiles/use_get_current_user_profile');
+vi.mock('../../user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../user_profiles/use_suggest_users');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../hooks/use_license');
 
 const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'fakeUser1' }, data: {} },
@@ -51,8 +54,8 @@ const mockAssigneeItems = [
 
 const renderPanel = (panel: UseBulkAlertAssigneesPanel) => {
   const content = panel.renderContent({
-    closePopoverMenu: jest.fn(),
-    setIsBulkActionsLoading: jest.fn(),
+    closePopoverMenu: vi.fn(),
+    setIsBulkActionsLoading: vi.fn(),
     alertItems: mockAssigneeItems,
   });
   return render(content);
@@ -60,25 +63,25 @@ const renderPanel = (panel: UseBulkAlertAssigneesPanel) => {
 
 describe('useBulkAlertAssigneesItems', () => {
   beforeEach(() => {
-    (useSetAlertAssignees as jest.Mock).mockReturnValue(jest.fn());
-    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
+    (useSetAlertAssignees as Mock).mockReturnValue(vi.fn());
+    (useGetCurrentUserProfile as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles[0],
     });
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+    (useBulkGetUserProfiles as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles,
     });
-    (useSuggestUsers as jest.Mock).mockReturnValue({
+    (useSuggestUsers as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles,
     });
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
-    (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsUpdate: true });
+    (useLicense as Mock).mockReturnValue({ isPlatinumPlus: () => true });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return two alert assignees action items and one panel', () => {
@@ -109,7 +112,7 @@ describe('useBulkAlertAssigneesItems', () => {
   });
 
   it('should still render alert assignees panel when useSetAlertAssignees is null', () => {
-    (useSetAlertAssignees as jest.Mock).mockReturnValue(null);
+    (useSetAlertAssignees as Mock).mockReturnValue(null);
     const { result } = renderHook(() => useBulkAlertAssigneesItems(defaultProps), {
       wrapper: TestProviders,
     });
@@ -122,8 +125,8 @@ describe('useBulkAlertAssigneesItems', () => {
   });
 
   it('should call setAlertAssignees on submit', () => {
-    const mockSetAlertAssignees = jest.fn();
-    (useSetAlertAssignees as jest.Mock).mockReturnValue(mockSetAlertAssignees);
+    const mockSetAlertAssignees = vi.fn();
+    (useSetAlertAssignees as Mock).mockReturnValue(mockSetAlertAssignees);
     const { result } = renderHook(() => useBulkAlertAssigneesItems(defaultProps), {
       wrapper: TestProviders,
     });
@@ -140,8 +143,8 @@ describe('useBulkAlertAssigneesItems', () => {
   });
 
   it('should call setAlertAssignees with the correct parameters on `Unassign alert` button click', () => {
-    const mockSetAlertAssignees = jest.fn();
-    (useSetAlertAssignees as jest.Mock).mockReturnValue(mockSetAlertAssignees);
+    const mockSetAlertAssignees = vi.fn();
+    (useSetAlertAssignees as Mock).mockReturnValue(mockSetAlertAssignees);
     const { result } = renderHook(() => useBulkAlertAssigneesItems(defaultProps), {
       wrapper: TestProviders,
     });
@@ -164,10 +167,10 @@ describe('useBulkAlertAssigneesItems', () => {
       },
     ];
 
-    const setAlertLoadingMock = jest.fn();
+    const setAlertLoadingMock = vi.fn();
     (
       result.current.alertAssigneesItems[1] as unknown as { onClick: BulkActionsConfig['onClick'] }
-    ).onClick?.(items, true, setAlertLoadingMock, jest.fn(), jest.fn());
+    ).onClick?.(items, true, setAlertLoadingMock, vi.fn(), vi.fn());
 
     expect(mockSetAlertAssignees).toHaveBeenCalled();
     expect(mockSetAlertAssignees).toHaveBeenCalledWith(
@@ -179,8 +182,8 @@ describe('useBulkAlertAssigneesItems', () => {
   });
 
   it('should set unnasign alert action to disabled if no assignees exist', () => {
-    const mockSetAlertAssignees = jest.fn();
-    (useSetAlertAssignees as jest.Mock).mockReturnValue(mockSetAlertAssignees);
+    const mockSetAlertAssignees = vi.fn();
+    (useSetAlertAssignees as Mock).mockReturnValue(mockSetAlertAssignees);
     const { result } = renderHook(
       () =>
         useBulkAlertAssigneesItems({
@@ -209,8 +212,8 @@ describe('useBulkAlertAssigneesItems', () => {
   });
 
   it('should set unnasign alert action to enabled if assignees exist', () => {
-    const mockSetAlertAssignees = jest.fn();
-    (useSetAlertAssignees as jest.Mock).mockReturnValue(mockSetAlertAssignees);
+    const mockSetAlertAssignees = vi.fn();
+    (useSetAlertAssignees as Mock).mockReturnValue(mockSetAlertAssignees);
     const { result } = renderHook(
       () =>
         useBulkAlertAssigneesItems({
@@ -239,7 +242,7 @@ describe('useBulkAlertAssigneesItems', () => {
   });
 
   it('should return 0 items for the VIEWER role', () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: false });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsUpdate: false });
 
     const { result } = renderHook(() => useBulkAlertAssigneesItems(defaultProps), {
       wrapper: TestProviders,
@@ -249,7 +252,7 @@ describe('useBulkAlertAssigneesItems', () => {
   });
 
   it('should return 0 items for the Basic license', () => {
-    (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => false });
+    (useLicense as Mock).mockReturnValue({ isPlatinumPlus: () => false });
 
     const { result } = renderHook(() => useBulkAlertAssigneesItems(defaultProps), {
       wrapper: TestProviders,

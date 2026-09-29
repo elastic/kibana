@@ -5,20 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable max-classes-per-file */
 
-jest.mock('../../../../../../kibana_services', () => ({
-  getEMSSettings() {
-    return {
-      isEMSUrlSet() {
-        return false;
+vi.mock('../../../../../../kibana_services', () => {
+      const mocked = {
+      getEMSSettings() {
+        return {
+          isEMSUrlSet() {
+            return false;
+          },
+        };
+      },
+      getMapsCapabilities() {
+        return { save: true };
       },
     };
-  },
-  getMapsCapabilities() {
-    return { save: true };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 import { shallow } from 'enzyme';

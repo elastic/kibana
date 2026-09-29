@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   mockSingleIndexWithAliasesResponse,
   mockMultiIndexResponse,
@@ -23,10 +25,10 @@ import * as mapIndexStatsModule from './map_index_stats';
 // if we re-shape the response accordingly
 describe('getIndexData util function', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   const mockClient = {
-    asCurrentUser: { indices: { get: jest.fn() } },
+    asCurrentUser: { indices: { get: vi.fn() } },
   };
 
   it('returns index data with for non-hidden indices', async () => {
@@ -253,7 +255,7 @@ describe('getIndexData util function', () => {
 
 describe('getIndexDataMapper util function', () => {
   it('returns a function that calls mapIndexStats with parameters set', () => {
-    jest.spyOn(mapIndexStatsModule, 'mapIndexStats');
+    vi.spyOn(mapIndexStatsModule, 'mapIndexStats');
 
     const mockIndexData: TotalIndexData = {
       allIndexMatches: { 'index-name': { aliases: {} } },

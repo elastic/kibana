@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/commands/autocomplete';
@@ -32,7 +35,7 @@ const fuseExpectSuggestions = (
 
 describe('FUSE Autocomplete', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('FUSE arguments', () => {
@@ -93,7 +96,7 @@ describe('FUSE Autocomplete', () => {
     it('suggests double fields after SCORE BY', async () => {
       const expectedDoubleFields = getFieldNamesByType('double');
       const mockCallbacks = getMockCallbacks();
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      (mockCallbacks.getByType as Mock).mockResolvedValue(
         expectedDoubleFields.map((name) => ({ label: name, text: name }))
       );
       await fuseExpectSuggestions(
@@ -106,7 +109,7 @@ describe('FUSE Autocomplete', () => {
     it('suggests partial double fields after SCORE BY', async () => {
       const expectedDoubleFields = getFieldNamesByType('double');
       const mockCallbacks = getMockCallbacks();
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      (mockCallbacks.getByType as Mock).mockResolvedValue(
         expectedDoubleFields.map((name) => ({ label: name, text: name }))
       );
       await fuseExpectSuggestions(
@@ -121,7 +124,7 @@ describe('FUSE Autocomplete', () => {
     it('suggests string fields after GROUP BY', async () => {
       const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
       const mockCallbacks = getMockCallbacks();
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      (mockCallbacks.getByType as Mock).mockResolvedValue(
         expectedStringFields.map((name) => ({ label: name, text: name }))
       );
       await fuseExpectSuggestions(
@@ -134,7 +137,7 @@ describe('FUSE Autocomplete', () => {
     it('suggests partial string fields after GROUP BY', async () => {
       const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
       const mockCallbacks = getMockCallbacks();
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      (mockCallbacks.getByType as Mock).mockResolvedValue(
         expectedStringFields.map((name) => ({ label: name, text: name }))
       );
       await fuseExpectSuggestions(
@@ -149,7 +152,7 @@ describe('FUSE Autocomplete', () => {
     it('suggests string fields after KEY BY', async () => {
       const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
       const mockCallbacks = getMockCallbacks();
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      (mockCallbacks.getByType as Mock).mockResolvedValue(
         expectedStringFields.map((name) => ({ label: name, text: name }))
       );
       await fuseExpectSuggestions(
@@ -162,7 +165,7 @@ describe('FUSE Autocomplete', () => {
     it('suggests partial string fields after KEY BY', async () => {
       const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
       const mockCallbacks = getMockCallbacks();
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      (mockCallbacks.getByType as Mock).mockResolvedValue(
         expectedStringFields.map((name) => ({ label: name, text: name }))
       );
       await fuseExpectSuggestions(
@@ -175,7 +178,7 @@ describe('FUSE Autocomplete', () => {
     it('suggests string fields after a comma following KEY BY', async () => {
       const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
       const mockCallbacks = getMockCallbacks();
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      (mockCallbacks.getByType as Mock).mockResolvedValue(
         expectedStringFields.map((name) => ({ label: name, text: name }))
       );
       await fuseExpectSuggestions(
@@ -188,7 +191,7 @@ describe('FUSE Autocomplete', () => {
     it('suggests partial string fields after a comma following KEY BY', async () => {
       const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
       const mockCallbacks = getMockCallbacks();
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      (mockCallbacks.getByType as Mock).mockResolvedValue(
         expectedStringFields.map((name) => ({ label: name, text: name }))
       );
       await fuseExpectSuggestions(
@@ -201,7 +204,7 @@ describe('FUSE Autocomplete', () => {
     it('does not suggest already used fields after a comma following KEY BY', async () => {
       const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
       const mockCallbacks = getMockCallbacks();
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      (mockCallbacks.getByType as Mock).mockResolvedValue(
         expectedStringFields.map((name) => ({ label: name, text: name }))
       );
       await fuseExpectSuggestions(
@@ -229,7 +232,7 @@ describe('FUSE Autocomplete', () => {
     it('suggests other config arguments and a comma immediately after a field', async () => {
       const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
       const mockCallbacks = getMockCallbacks();
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      (mockCallbacks.getByType as Mock).mockResolvedValue(
         expectedStringFields.map((name) => ({ label: name, text: name }))
       );
       await fuseExpectSuggestions(
@@ -249,7 +252,7 @@ describe('FUSE Autocomplete', () => {
     it('works properly if its preceded by other configs', async () => {
       const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
       const mockCallbacks = getMockCallbacks();
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      (mockCallbacks.getByType as Mock).mockResolvedValue(
         expectedStringFields.map((name) => ({ label: name, text: name }))
       );
       await fuseExpectSuggestions(

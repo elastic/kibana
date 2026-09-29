@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
 import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mocks';
@@ -17,18 +20,18 @@ import { agentServiceMocks as mockAgentService } from '../../services/agent/mock
 import { getAgentStatusClient as _getAgentStatusClient } from '../../services';
 import type { DeepMutable } from '../../../../common/endpoint/types';
 
-jest.mock('../../services', () => {
-  const realModule = jest.requireActual('../../services');
+vi.mock('../../services', async () => {
+  const realModule = (await vi.importActual('../../services'));
 
   return {
     ...realModule,
-    getAgentStatusClient: jest.fn((agentType: ResponseActionAgentType) => {
+    getAgentStatusClient: vi.fn((agentType: ResponseActionAgentType) => {
       return mockAgentService.createClient(agentType);
     }),
   };
 });
 
-const getAgentStatusClientMock = _getAgentStatusClient as jest.Mock;
+const getAgentStatusClientMock = _getAgentStatusClient as Mock;
 
 describe('Agent Status API route handler', () => {
   let apiTestSetup: HttpApiTestSetupMock<never, DeepMutable<EndpointAgentStatusRequestQueryParams>>;
@@ -56,7 +59,7 @@ describe('Agent Status API route handler', () => {
     });
 
     (
-      (await apiTestSetup.httpHandlerContextMock.actions).getActionsClient as jest.Mock
+      (await apiTestSetup.httpHandlerContextMock.actions).getActionsClient as Mock
     ).mockReturnValue(sentinelOneMock.createConnectorActionsClient());
 
     registerAgentStatusRoute(apiTestSetup.routerMock, apiTestSetup.endpointAppContextMock);
@@ -122,7 +125,7 @@ describe('Agent Status API route handler', () => {
   });
 
   it('should use a scoped SO client when spaces awareness feature is enabled', async () => {
-    ((await httpHandlerContextMock.securitySolution).getSpaceId as jest.Mock).mockReturnValue(
+    ((await httpHandlerContextMock.securitySolution).getSpaceId as Mock).mockReturnValue(
       'foo'
     );
 

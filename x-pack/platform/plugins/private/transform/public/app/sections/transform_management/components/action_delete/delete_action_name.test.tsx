@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -18,7 +20,7 @@ import {
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 import { isDeletionProtectedTransform } from '../../../../common/managed_transforms_utils';
 
-jest.mock('../../../../app_dependencies');
+vi.mock('../../../../app_dependencies');
 
 const deletionProtectedTransformItem = {
   id: 'deletion-protected-transform',

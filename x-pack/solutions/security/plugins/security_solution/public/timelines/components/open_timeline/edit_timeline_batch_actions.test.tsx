@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type React from 'react';
 import { render, screen, renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,36 +16,48 @@ import { useEditTimelineBatchActions } from './edit_timeline_batch_actions';
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
-const mockHandleOpen = jest.fn();
-const mockUseSuperTimelineGate = jest.fn();
+const mockHandleOpen = vi.fn();
+const mockUseSuperTimelineGate = vi.fn();
 
-jest.mock('./use_super_timeline_gate', () => ({
-  useSuperTimelineGate: (...args: unknown[]) => mockUseSuperTimelineGate(...args),
-}));
+vi.mock('./use_super_timeline_gate', () => {
+      const mocked = {
+      useSuperTimelineGate: (...args: unknown[]) => mockUseSuperTimelineGate(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./edit_timeline_actions', () => ({
-  useEditTimelineActions: () => ({
-    enableExportTimelineDownloader: jest.fn(),
-    disableExportTimelineDownloader: jest.fn(),
-    isEnableDownloader: false,
-    isDeleteTimelineModalOpen: false,
-    onOpenDeleteTimelineModal: jest.fn(),
-    onCloseDeleteTimelineModal: jest.fn(),
-  }),
-}));
+vi.mock('./edit_timeline_actions', () => {
+      const mocked = {
+      useEditTimelineActions: () => ({
+        enableExportTimelineDownloader: vi.fn(),
+        disableExportTimelineDownloader: vi.fn(),
+        isEnableDownloader: false,
+        isDeleteTimelineModalOpen: false,
+        onOpenDeleteTimelineModal: vi.fn(),
+        onCloseDeleteTimelineModal: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./export_timeline', () => ({
-  EditTimelineActions: () => null,
-}));
+vi.mock('./export_timeline', () => {
+      const mocked = {
+      EditTimelineActions: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('.', () => ({
-  getSelectedTimelineIdsAndSearchIds: (items: OpenTimelineResult[]) =>
-    items.map((i) => ({ savedObjectId: i.savedObjectId, searchId: undefined })),
-  getRequestIds: (items: Array<{ savedObjectId?: string }>) => ({
-    timelineIds: items.map((i) => i.savedObjectId).filter(Boolean),
-    searchIds: undefined,
-  }),
-}));
+vi.mock('.', () => {
+      const mocked = {
+      getSelectedTimelineIdsAndSearchIds: (items: OpenTimelineResult[]) =>
+        items.map((i) => ({ savedObjectId: i.savedObjectId, searchId: undefined })),
+      getRequestIds: (items: Array<{ savedObjectId?: string }>) => ({
+        timelineIds: items.map((i) => i.savedObjectId).filter(Boolean),
+        searchIds: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -72,7 +86,7 @@ const renderPopoverContent = (selectedItems: OpenTimelineResult[]) => {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseSuperTimelineGate.mockReturnValue({
     isEnabled: true,
     tooltip: undefined,

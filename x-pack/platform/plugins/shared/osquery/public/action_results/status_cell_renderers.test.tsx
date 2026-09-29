@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
@@ -12,7 +14,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 
 import { getStatusCellRenderers } from './status_cell_renderers';
 
-const mockGetFleetAppUrl = jest.fn((agentId: string) => `/app/fleet/agents/${agentId}`);
+const mockGetFleetAppUrl = vi.fn((agentId: string) => `/app/fleet/agents/${agentId}`);
 
 const createMockRow = (flattened: Record<string, unknown>): DataTableRecord =>
   ({
@@ -27,7 +29,7 @@ const createCellProps = (row: DataTableRecord): DataGridCellValueElementProps =>
     isDetails: false,
     isExpanded: false,
     columnId: '',
-    setCellProps: jest.fn(),
+    setCellProps: vi.fn(),
     colIndex: 0,
     rowIndex: 0,
     isExpandable: false,

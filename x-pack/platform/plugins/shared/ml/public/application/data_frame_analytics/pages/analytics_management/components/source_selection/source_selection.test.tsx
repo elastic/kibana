@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 
@@ -17,7 +20,7 @@ import {
 
 import { SourceSelection } from './source_selection';
 
-jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
+vi.mock('@kbn/saved-objects-finder-plugin/public', () => {
   const SavedObjectFinder = ({
     onChoose,
   }: {
@@ -70,33 +73,36 @@ jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
   };
 });
 
-const mockNavigateToPath = jest.fn();
-const mockLocatorNavigate = jest.fn();
-jest.mock('../../../../../contexts/kibana', () => ({
-  useMlKibana: () => ({
-    services: {
-      uiSettings: {},
-      http: {},
-      savedObjectsManagement: {},
-      data: { dataViews: jest.fn() },
-      savedSearch: jest.fn(),
-      contentManagement: {},
-    },
-  }),
-  useNavigateToPath: () => mockNavigateToPath,
-  useNotifications: () => {
-    return {
-      toasts: { addSuccess: jest.fn(), addDanger: jest.fn(), addError: jest.fn() },
+const mockNavigateToPath = vi.fn();
+const mockLocatorNavigate = vi.fn();
+vi.mock('../../../../../contexts/kibana', () => {
+      const mocked = {
+      useMlKibana: () => ({
+        services: {
+          uiSettings: {},
+          http: {},
+          savedObjectsManagement: {},
+          data: { dataViews: vi.fn() },
+          savedSearch: vi.fn(),
+          contentManagement: {},
+        },
+      }),
+      useNavigateToPath: () => mockNavigateToPath,
+      useNotifications: () => {
+        return {
+          toasts: { addSuccess: vi.fn(), addDanger: vi.fn(), addError: vi.fn() },
+        };
+      },
+      useMlManagementLocator: () => ({
+        navigate: mockLocatorNavigate,
+      }),
     };
-  },
-  useMlManagementLocator: () => ({
-    navigate: mockLocatorNavigate,
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../util/index_utils', () => {
+vi.mock('../../../../../util/index_utils', () => {
   return {
-    getDataViewAndSavedSearchCallback: jest
+    getDataViewAndSavedSearchCallback: vi
       .fn()
       .mockReturnValue(async (id: string): Promise<DataViewAndSavedSearch> => {
         return {
@@ -115,7 +121,7 @@ jest.mock('../../../../../util/index_utils', () => {
   };
 });
 
-const mockGetDataViewAndSavedSearchCallback = getDataViewAndSavedSearchCallback as jest.Mock;
+const mockGetDataViewAndSavedSearchCallback = getDataViewAndSavedSearchCallback as Mock;
 
 describe('Data Frame Analytics: <SourceSelection />', () => {
   afterEach(() => {

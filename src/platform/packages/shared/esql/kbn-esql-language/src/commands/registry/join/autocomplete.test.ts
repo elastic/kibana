@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import {
   mockContext,
   lookupIndexFields,
@@ -52,9 +55,9 @@ describe('JOIN Autocomplete', () => {
   let mockCallbacks: MockedICommandCallbacks;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCallbacks = getMockCallbacks();
-    (mockCallbacks.getColumnsForQuery as jest.Mock).mockResolvedValue([...lookupIndexFields]);
+    (mockCallbacks.getColumnsForQuery as Mock).mockResolvedValue([...lookupIndexFields]);
   });
   describe('<type> JOIN ...', () => {
     test('suggests command on first character', async () => {
@@ -164,7 +167,7 @@ describe('JOIN Autocomplete', () => {
     });
 
     test('does not suggest the create index command when a user does not have required privileges', async () => {
-      (mockCallbacks.canCreateLookupIndex as jest.Mock).mockResolvedValueOnce(false);
+      (mockCallbacks.canCreateLookupIndex as Mock).mockResolvedValueOnce(false);
       await joinExpectSuggestions(
         'FROM index | LEFT JOIN ',
         { notContains: ['Create lookup index'] },

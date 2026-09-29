@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { CPSManager, getManageCrossProjectSearchUrl } from './cps_manager';
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
@@ -18,12 +21,15 @@ import { BehaviorSubject } from 'rxjs';
 
 const DEFAULT_NPRE_VALUE = '_alias:*';
 
-jest.mock('./async_services', () => ({
-  ...jest.requireActual('./async_services'),
-}));
+vi.mock('./async_services', async () => {
+      const mocked = {
+      ...(await vi.importActual('./async_services')),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CPSManager', () => {
-  let mockHttp: jest.Mocked<HttpSetup>;
+  let mockHttp: Mocked<HttpSetup>;
   const mockLogger = loggingSystemMock.createLogger();
   let mockApplication: ApplicationStart;
   let cpsManager: CPSManager;
@@ -66,14 +72,14 @@ describe('CPSManager', () => {
 
   beforeEach(() => {
     mockHttp = {
-      post: jest.fn().mockResolvedValue(mockResponse),
-      get: jest.fn().mockResolvedValue(undefined),
+      post: vi.fn().mockResolvedValue(mockResponse),
+      get: vi.fn().mockResolvedValue(undefined),
       basePath: {
-        get: jest.fn().mockReturnValue(''),
+        get: vi.fn().mockReturnValue(''),
         serverBasePath: '',
       },
       spaceId: 'default',
-    } as unknown as jest.Mocked<HttpSetup>;
+    } as unknown as Mocked<HttpSetup>;
 
     mockApplication = {
       currentAppId$: new BehaviorSubject<string | undefined>('discover'),
@@ -88,8 +94,8 @@ describe('CPSManager', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   describe('fetchProjects', () => {
@@ -98,7 +104,7 @@ describe('CPSManager', () => {
       expect(mockHttp.post).toHaveBeenCalledWith('/internal/cps/projects_tags', {
         body: JSON.stringify({ project_routing: '_alias:*' }),
       });
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const result = await cpsManager.fetchProjects();
       expect(mockHttp.post).not.toHaveBeenCalled();
       expect(result).toEqual({
@@ -118,16 +124,16 @@ describe('CPSManager', () => {
   describe('retry logic', () => {
     it('should retry on failure with exponential backoff', async () => {
       await cpsManager.whenReady();
-      jest.clearAllMocks();
-      jest.useFakeTimers();
-      jest.clearAllMocks();
+      vi.clearAllMocks();
+      vi.useFakeTimers();
+      vi.clearAllMocks();
       mockHttp.post
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockResolvedValueOnce(mockResponse);
 
       const promise = cpsManager.fetchProjects('_alias:_origin');
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       const result = await promise;
 
@@ -137,12 +143,12 @@ describe('CPSManager', () => {
 
     it('should throw error after max retries exceeded', async () => {
       await cpsManager.whenReady();
-      jest.clearAllMocks();
-      jest.useFakeTimers();
+      vi.clearAllMocks();
+      vi.useFakeTimers();
       mockHttp.post.mockRejectedValue(new Error('Persistent error'));
 
       const promise = cpsManager.fetchProjects('_alias:_origin');
-      const timerPromise = jest.runAllTimersAsync();
+      const timerPromise = vi.runAllTimersAsync();
 
       await expect(Promise.all([promise, timerPromise])).rejects.toThrow('Persistent error');
 
@@ -151,12 +157,12 @@ describe('CPSManager', () => {
 
     it('should throw error on final failure', async () => {
       await cpsManager.whenReady();
-      jest.clearAllMocks();
-      jest.useFakeTimers();
+      vi.clearAllMocks();
+      vi.useFakeTimers();
       mockHttp.post.mockRejectedValue(new Error('Error'));
 
       const promise = cpsManager.fetchProjects('_alias:_origin');
-      const timerPromise = jest.runAllTimersAsync();
+      const timerPromise = vi.runAllTimersAsync();
 
       await expect(Promise.all([promise, timerPromise])).rejects.toThrow();
     });
@@ -168,9 +174,9 @@ describe('CPSManager', () => {
       shouldError = false
     ) => {
       if (shouldError) {
-        mockHttp.get = jest.fn().mockRejectedValue(new Error('Network error'));
+        mockHttp.get = vi.fn().mockRejectedValue(new Error('Network error'));
       } else {
-        mockHttp.get = jest.fn().mockResolvedValue(projectRoutingValue);
+        mockHttp.get = vi.fn().mockResolvedValue(projectRoutingValue);
       }
 
       const manager = new CPSManager({
@@ -209,9 +215,9 @@ describe('CPSManager', () => {
 
         const customMockHttp = {
           ...mockHttp,
-          get: jest.fn().mockResolvedValue(spaceProjectRoutingValue),
+          get: vi.fn().mockResolvedValue(spaceProjectRoutingValue),
           spaceId: 'test-space',
-        } as unknown as jest.Mocked<HttpSetup>;
+        } as unknown as Mocked<HttpSetup>;
 
         const manager = new CPSManager({
           http: customMockHttp,
@@ -252,7 +258,7 @@ describe('CPSManager', () => {
     const flushAsync = () => new Promise((resolve) => setTimeout(resolve, 0));
 
     beforeEach(() => {
-      mockHttp.get = jest.fn().mockResolvedValue(DEFAULT_NPRE_VALUE);
+      mockHttp.get = vi.fn().mockResolvedValue(DEFAULT_NPRE_VALUE);
       cpsManager = new CPSManager({
         http: mockHttp,
         logger: mockLogger,
@@ -372,7 +378,7 @@ describe('CPSManager', () => {
     };
 
     beforeEach(() => {
-      mockHttp.get = jest.fn().mockResolvedValue(DEFAULT_NPRE_VALUE);
+      mockHttp.get = vi.fn().mockResolvedValue(DEFAULT_NPRE_VALUE);
 
       cpsManager = new CPSManager({
         http: mockHttp,
@@ -411,13 +417,13 @@ describe('CPSManager', () => {
     const createManager = (cloud?: CloudStart, spaceId = 'default') => {
       const application = {
         ...mockApplication,
-        getUrlForApp: jest.fn().mockReturnValue(`/app/management/kibana/spaces/edit/${spaceId}`),
+        getUrlForApp: vi.fn().mockReturnValue(`/app/management/kibana/spaces/edit/${spaceId}`),
       } as unknown as ApplicationStart;
 
       const http = {
         ...mockHttp,
         spaceId,
-      } as unknown as jest.Mocked<HttpSetup>;
+      } as unknown as Mocked<HttpSetup>;
 
       return new CPSManager({
         http,

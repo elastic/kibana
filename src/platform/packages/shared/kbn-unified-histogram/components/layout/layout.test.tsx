@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type {
   UnifiedHistogramChartContext,
   UnifiedHistogramFetchParamsExternal,
@@ -28,8 +30,8 @@ import React, { useEffect } from 'react';
 
 let mockBreakpoint = 'l';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   return {
     ...original,
@@ -39,7 +41,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const mockedSearchSourceInstanceMockFetch$ = jest.mocked(searchSourceInstanceMock.fetch$);
+const mockedSearchSourceInstanceMockFetch$ = vi.mocked(searchSourceInstanceMock.fetch$);
 
 interface MountComponentProps extends Partial<UseUnifiedHistogramProps> {
   hits?: UnifiedHistogramHitsContext | null;
@@ -58,7 +60,7 @@ describe('Layout', () => {
     ...rest
   }: MountComponentProps = {}) => {
     mockedSearchSourceInstanceMockFetch$.mockImplementation(
-      jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
+      vi.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
     );
 
     const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {

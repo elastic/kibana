@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SyntheticsServerSetup } from '../../types';
 import { getAgentInfo } from './get_agent_info';
 
@@ -26,19 +29,19 @@ const agent = (over: FakeAgent = {}): FakeAgent => ({
 
 /** listAgents that serves the given pages by 1-based `page`, reporting `total`. */
 const pagedListAgents = (pages: FakeAgent[][], total?: number) =>
-  jest.fn(async ({ page }: { page: number }) => ({
+  vi.fn(async ({ page }: { page: number }) => ({
     agents: pages[page - 1] ?? [],
     total: total ?? pages.flat().length,
   }));
 
-const makeServer = (listAgents: jest.Mock): SyntheticsServerSetup =>
+const makeServer = (listAgents: Mock): SyntheticsServerSetup =>
   ({
     fleet: { agentService: { asInternalUser: { listAgents } } },
   } as unknown as SyntheticsServerSetup);
 
 const openSignal = () => new AbortController().signal;
 
-const getInfo = (listAgents: jest.Mock, signal: AbortSignal = openSignal()) =>
+const getInfo = (listAgents: Mock, signal: AbortSignal = openSignal()) =>
   getAgentInfo(makeServer(listAgents), 'policy-1', signal);
 
 describe('getAgentInfo', () => {
@@ -156,7 +159,7 @@ describe('getAgentInfo', () => {
 
   it('caps pagination at MAX_PAGES (10) so a misbehaving paginator cannot spin', async () => {
     // Always a full page with a total far larger than we will ever fetch.
-    const listAgents = jest.fn(async ({ page }: { page: number }) => ({
+    const listAgents = vi.fn(async ({ page }: { page: number }) => ({
       agents: Array.from({ length: 1000 }, (_, i) => agent({ id: `p${page}-a${i}` })),
       total: 1_000_000,
     }));
@@ -169,7 +172,7 @@ describe('getAgentInfo', () => {
 
   it('stops paginating when the task signal aborts', async () => {
     const abortController = new AbortController();
-    const listAgents = jest.fn(async ({ page }: { page: number }) => {
+    const listAgents = vi.fn(async ({ page }: { page: number }) => {
       if (page === 1) {
         abortController.abort();
       }

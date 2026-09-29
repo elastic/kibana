@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 
 import type { LooseLensAttributes } from './lens_client';
@@ -12,7 +15,7 @@ import { LensClient } from './lens_client';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import { getLensBuilder } from '../lazy_builder';
 
-jest.mock('../lazy_builder');
+vi.mock('../lazy_builder');
 
 const mockResponse = {
   data: {},
@@ -38,7 +41,7 @@ describe('LensClient', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     httpMock.get.mockResolvedValue(mockResponse);
     httpMock.post.mockResolvedValue(mockResponse);
     httpMock.put.mockResolvedValue(mockResponse);
@@ -83,16 +86,16 @@ describe('LensClient', () => {
 
     const mockBuilder = {
       isEnabled: true,
-      isSupported: jest.fn().mockReturnValue(true),
-      getType: jest.fn().mockReturnValue('lnsMetric'),
-      toAPIFormat: jest.fn().mockReturnValue(mockApiConfig),
-      fromAPIFormat: jest.fn().mockReturnValue(mockBuilderAttributes),
+      isSupported: vi.fn().mockReturnValue(true),
+      getType: vi.fn().mockReturnValue('lnsMetric'),
+      toAPIFormat: vi.fn().mockReturnValue(mockApiConfig),
+      fromAPIFormat: vi.fn().mockReturnValue(mockBuilderAttributes),
     };
 
     let builderClient: LensClient;
 
     beforeAll(() => {
-      (getLensBuilder as jest.Mock).mockReturnValue(mockBuilder);
+      (getLensBuilder as Mock).mockReturnValue(mockBuilder);
       builderClient = new LensClient(httpMock);
     });
 

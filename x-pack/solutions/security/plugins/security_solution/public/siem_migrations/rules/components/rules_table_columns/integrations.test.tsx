@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createIntegrationsColumn } from './integrations';
 
 describe('createIntegrationsColumn', () => {
   it('returns the correct column definition', () => {
     const column = createIntegrationsColumn({
-      getMigrationRuleData: jest.fn(),
+      getMigrationRuleData: vi.fn(),
     });
 
     expect(column).toEqual({

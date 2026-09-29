@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of } from 'rxjs';
 import type { ElasticsearchClient, ISavedObjectsRepository } from '@kbn/core/server';
 import { createSandbox } from 'sinon';
@@ -68,17 +71,17 @@ describe('File', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     sandbox.restore();
   });
 
   it('deletes file content when an upload fails', async () => {
     const createBlobSpy = sandbox.spy(blobStorageService, 'createBlobStorageClient');
 
-    (esClient.index as jest.Mock).mockRejectedValue(new Error('test'));
+    (esClient.index as Mock).mockRejectedValue(new Error('test'));
     const fileSO = { attributes: { Status: 'AWAITING_UPLOAD' } };
-    (soClient.create as jest.Mock).mockResolvedValue(fileSO);
-    (soClient.update as jest.Mock).mockResolvedValue(fileSO);
+    (soClient.create as Mock).mockResolvedValue(fileSO);
+    (soClient.update as Mock).mockResolvedValue(fileSO);
 
     const file = await fileService.createFile({ name: 'test', fileKind });
     const [{ returnValue: blobStore }] = createBlobSpy.getCalls();
@@ -93,8 +96,8 @@ describe('File', () => {
 
   it('updates file data after upload', async () => {
     const fileSO = { attributes: { Status: 'AWAITING_UPLOAD' } };
-    (soClient.create as jest.Mock).mockResolvedValue(fileSO);
-    (soClient.update as jest.Mock).mockResolvedValue(fileSO);
+    (soClient.create as Mock).mockResolvedValue(fileSO);
+    (soClient.update as Mock).mockResolvedValue(fileSO);
 
     const file = await fileService.createFile({ name: 'test', fileKind });
     await file.uploadContent(Readable.from(['test']));
@@ -104,8 +107,8 @@ describe('File', () => {
   it('sets file status and deletes content if aborted', async () => {
     const createBlobSpy = sandbox.spy(blobStorageService, 'createBlobStorageClient');
     const fileSO = { attributes: { Status: 'AWAITING_UPLOAD' } };
-    (soClient.create as jest.Mock).mockResolvedValue(fileSO);
-    (soClient.update as jest.Mock).mockResolvedValue(fileSO);
+    (soClient.create as Mock).mockResolvedValue(fileSO);
+    (soClient.update as Mock).mockResolvedValue(fileSO);
     const file = await fileService.createFile({ name: 'test', fileKind });
     const [{ returnValue: blobStore }] = createBlobSpy.getCalls();
     const blobStoreSpy = sandbox.spy(blobStore, 'delete');
@@ -123,9 +126,9 @@ describe('File', () => {
 
     beforeEach(async () => {
       const fileSO = { attributes: { Status: 'AWAITING_UPLOAD' } };
-      (soClient.create as jest.Mock).mockResolvedValue(fileSO);
-      (soClient.update as jest.Mock).mockResolvedValue(fileSO);
-      (soClient.get as jest.Mock).mockResolvedValue({
+      (soClient.create as Mock).mockResolvedValue(fileSO);
+      (soClient.update as Mock).mockResolvedValue(fileSO);
+      (soClient.get as Mock).mockResolvedValue({
         attributes: {
           created: '2023-04-27T19:57:19.640Z',
           Updated: '2023-04-27T19:57:19.640Z',

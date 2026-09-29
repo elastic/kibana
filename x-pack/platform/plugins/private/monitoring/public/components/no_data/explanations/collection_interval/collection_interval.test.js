@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ExplainCollectionInterval } from './collection_interval';
@@ -19,7 +21,7 @@ const reason = {
 
 describe('ExplainCollectionInterval', () => {
   beforeEach(() => {
-    enabler.enableCollectionInterval = jest.fn();
+    enabler.enableCollectionInterval = vi.fn();
   });
 
   test('should explain about xpack.monitoring.collection.interval setting', () => {

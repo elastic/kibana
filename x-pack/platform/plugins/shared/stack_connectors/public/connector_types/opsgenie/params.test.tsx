@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,7 +17,7 @@ import type { Params as OpsgenieActionParams } from '@kbn/connector-schemas/opsg
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('OpsgenieParamFields', () => {
-  const editAction = jest.fn();
+  const editAction = vi.fn();
   const createAlertActionParams: OpsgenieActionParams = {
     subAction: SUB_ACTION.CreateAlert,
     subActionParams: { message: 'hello', alias: '123' },
@@ -61,7 +63,7 @@ describe('OpsgenieParamFields', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the create alert component', async () => {

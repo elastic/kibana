@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ScoutTestConfig, ScoutTestConfigStatsEntry } from '@kbn/scout-reporting';
 import { ScoutTestConfigStats } from '@kbn/scout-reporting';
 import type { ScoutTestChannel } from '@kbn/scout-info';
@@ -21,8 +24,8 @@ import {
   type ScoutCITestLoad,
 } from './create_test_tracks';
 
-jest.mock('@kbn/scout-reporting', () => {
-  const actual = jest.requireActual('@kbn/scout-reporting');
+vi.mock('@kbn/scout-reporting', async () => {
+  const actual = (await vi.importActual('@kbn/scout-reporting'));
   return {
     ...actual,
     testConfigs: {
@@ -33,22 +36,25 @@ jest.mock('@kbn/scout-reporting', () => {
   };
 });
 
-jest.mock('@kbn/repo-packages', () => ({
-  findPackageForPath: jest.fn(),
-}));
+vi.mock('@kbn/repo-packages', () => {
+      const mocked = {
+      findPackageForPath: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFindPackageForPath = findPackageForPath as jest.Mock;
+const mockFindPackageForPath = findPackageForPath as Mock;
 
 let mockTestConfigs: ScoutTestConfig[] = [];
 
 const createMockLog = (): ToolingLog =>
   ({
-    info: jest.fn(),
-    warning: jest.fn(),
-    debug: jest.fn(),
-    write: jest.fn(),
-    error: jest.fn(),
-    success: jest.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    debug: vi.fn(),
+    write: vi.fn(),
+    error: vi.fn(),
+    success: vi.fn(),
   } as unknown as ToolingLog);
 
 const createMockConfig = (overrides: Partial<ScoutTestConfig> = {}): ScoutTestConfig => ({

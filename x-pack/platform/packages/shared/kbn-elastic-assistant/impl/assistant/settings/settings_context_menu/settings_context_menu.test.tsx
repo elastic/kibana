@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { userEvent } from '@testing-library/user-event';
@@ -21,7 +23,7 @@ import { KNOWLEDGE_BASE_TAB } from '../const';
 const props = {};
 describe('AssistantSettingsContextMenu', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('renders an accessible menu button icon', () => {
     render(
@@ -48,7 +50,7 @@ describe('AssistantSettingsContextMenu', () => {
   });
 
   it('Navigates to AI settings for non-AI4SOC', async () => {
-    const mockNavigateToApp = jest.fn();
+    const mockNavigateToApp = vi.fn();
     render(
       <TestProviders providerContext={{ navigateToApp: mockNavigateToApp }}>
         <AssistantSettingsContextMenu {...props} />
@@ -64,7 +66,7 @@ describe('AssistantSettingsContextMenu', () => {
   });
 
   it('Navigates to AI settings for AI4SOC', async () => {
-    const mockNavigateToApp = jest.fn();
+    const mockNavigateToApp = vi.fn();
     render(
       <TestProviders
         assistantAvailability={{
@@ -87,7 +89,7 @@ describe('AssistantSettingsContextMenu', () => {
   });
 
   it('Navigates to Knowledge Base for non-AI4SOC', async () => {
-    const mockNavigateToApp = jest.fn();
+    const mockNavigateToApp = vi.fn();
     render(
       <TestProviders providerContext={{ navigateToApp: mockNavigateToApp }}>
         <AssistantSettingsContextMenu {...props} />
@@ -104,7 +106,7 @@ describe('AssistantSettingsContextMenu', () => {
   });
 
   it('Navigates to Knowledge Base for AI4SOC', async () => {
-    const mockNavigateToApp = jest.fn();
+    const mockNavigateToApp = vi.fn();
     render(
       <TestProviders
         assistantAvailability={{

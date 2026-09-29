@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { firstValueFrom, Observable, of, Subject } from 'rxjs';
@@ -25,7 +28,7 @@ describe('useDataSearch hook', () => {
       data: dataMock,
     });
 
-    const getRequest = jest.fn((_firstArgument: string, _secondArgument: string) => null);
+    const getRequest = vi.fn((_firstArgument: string, _secondArgument: string) => null);
 
     const { result } = renderHook(
       () =>
@@ -62,7 +65,7 @@ describe('useDataSearch hook', () => {
       data: dataMock,
     });
 
-    const getRequest = jest.fn((firstArgument: string, secondArgument: string) => ({
+    const getRequest = vi.fn((firstArgument: string, secondArgument: string) => ({
       request: {
         params: {
           firstArgument,
@@ -133,7 +136,7 @@ describe('useDataSearch hook', () => {
       data: dataMock,
     });
 
-    const getRequest = jest.fn((firstArgument: string, secondArgument: string) => ({
+    const getRequest = vi.fn((firstArgument: string, secondArgument: string) => ({
       request: {
         params: {
           firstArgument,
@@ -172,7 +175,7 @@ describe('useDataSearch hook', () => {
 
     // execute requests$ observable
     const firstResponseSubscription = firstRequest.response$.subscribe({
-      next: jest.fn(),
+      next: vi.fn(),
     });
 
     // get the abort signal
@@ -189,7 +192,7 @@ describe('useDataSearch hook', () => {
 
 const createDataPluginMock = () => {
   const dataMock = dataPluginMock.createStartContract() as DataPublicPluginStart & {
-    search: ISearchStart & { search: jest.MockedFunction<ISearchGeneric> };
+    search: ISearchStart & { search: MockedFunction<ISearchGeneric> };
   };
   return dataMock;
 };

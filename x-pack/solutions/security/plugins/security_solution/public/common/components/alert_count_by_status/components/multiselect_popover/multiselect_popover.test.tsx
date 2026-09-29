@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { fireEvent, render } from '@testing-library/react';
@@ -12,7 +14,7 @@ import { fireEvent, render } from '@testing-library/react';
 import type { MultiSelectPopoverProps } from './multiselect_popover';
 import { MultiSelectPopover } from './multiselect_popover';
 
-const mockSelectedItemsChange = jest.fn();
+const mockSelectedItemsChange = vi.fn();
 
 const defaultProps = {
   title: 'title',
@@ -26,7 +28,7 @@ const renderComponent = (overrides?: Partial<MultiSelectPopoverProps>) =>
 
 describe('MultiSelectPopOver', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders all items', () => {

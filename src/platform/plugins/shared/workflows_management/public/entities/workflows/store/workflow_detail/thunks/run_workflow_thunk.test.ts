@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
 
@@ -15,9 +17,12 @@ import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 
 const mockWorkflowApi = createMockWorkflowApi();
-jest.mock('@kbn/workflows-ui', () => ({
-  WorkflowApi: jest.fn().mockImplementation(() => mockWorkflowApi),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      WorkflowApi: vi.fn().mockImplementation(() => mockWorkflowApi),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('runWorkflowThunk', () => {
   let store: MockStore;
@@ -28,7 +33,7 @@ describe('runWorkflowThunk', () => {
   } as WorkflowDetailDto;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     store = createMockStore();
     mockServices = getMockServices(store);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { createDefaultCloudSetupState } from '../../../common/cloud_setup';
 import { createDefaultSetupState, mergePartialSetupStates } from '../../../common/setup';
@@ -12,17 +14,20 @@ import type { RegisterServicesParams } from '../register_services';
 import { getSetupState } from '../setup_state';
 import { createGetStatusService } from '.';
 
-jest.mock('../setup_state', () => ({
-  getSetupState: jest.fn(),
-}));
+vi.mock('../setup_state', () => {
+      const mocked = {
+      getSetupState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedGetSetupState = jest.mocked(getSetupState);
+const mockedGetSetupState = vi.mocked(getSetupState);
 
 describe('createGetStatusService', () => {
   const registerServicesParams = {
-    createProfilingEsClient: jest.fn(),
+    createProfilingEsClient: vi.fn(),
     logger: {
-      debug: jest.fn(),
+      debug: vi.fn(),
     },
     deps: {},
   } as unknown as RegisterServicesParams;
@@ -31,7 +36,7 @@ describe('createGetStatusService', () => {
   const esClient = {} as IScopedClusterClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns expected status for cloud setup state', async () => {

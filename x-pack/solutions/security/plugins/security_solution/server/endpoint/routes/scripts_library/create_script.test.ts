@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
 import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
@@ -39,7 +41,7 @@ describe('POST: create script API route', () => {
       body: ScriptsLibraryMock.generateCreateScriptBody(),
     });
 
-    ((await httpHandlerContextMock.securitySolution).getSpaceId as jest.Mock).mockReturnValue(
+    ((await httpHandlerContextMock.securitySolution).getSpaceId as Mock).mockReturnValue(
       'space_a'
     );
 
@@ -61,7 +63,7 @@ describe('POST: create script API route', () => {
 
     it('should error if user has no authz to api', async () => {
       (
-        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
+        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock
       ).mockResolvedValue(
         getEndpointAuthzInitialStateMock({
           canWriteScriptsLibrary: false,

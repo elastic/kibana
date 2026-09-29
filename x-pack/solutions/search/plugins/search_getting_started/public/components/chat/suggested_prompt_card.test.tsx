@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -25,19 +27,19 @@ const wrap = (ui: React.ReactElement) =>
 
 describe('SuggestedPromptCard', () => {
   it('renders with the data-test-subj derived from the prompt id', () => {
-    wrap(<SuggestedPromptCard prompt={PROMPT} onClick={jest.fn()} />);
+    wrap(<SuggestedPromptCard prompt={PROMPT} onClick={vi.fn()} />);
     expect(
       screen.getByTestId(`searchGettingStartedSuggestedPrompt-${PROMPT.id}`)
     ).toBeInTheDocument();
   });
 
   it('displays the prompt text', () => {
-    wrap(<SuggestedPromptCard prompt={PROMPT} onClick={jest.fn()} />);
+    wrap(<SuggestedPromptCard prompt={PROMPT} onClick={vi.fn()} />);
     expect(screen.getByText(PROMPT.prompt)).toBeInTheDocument();
   });
 
   it('calls onClick with the full prompt object when clicked', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     wrap(<SuggestedPromptCard prompt={PROMPT} onClick={onClick} />);
     fireEvent.click(screen.getByTestId(`searchGettingStartedSuggestedPrompt-${PROMPT.id}`));
     expect(onClick).toHaveBeenCalledWith(PROMPT);

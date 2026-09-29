@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -25,7 +27,7 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
       logger,
       canEncrypt: false,
       evaluatorRegistry: createEvaluatorRegistryMock(),
-      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+      getInferenceStart: async () => ({ getClient: vi.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
     });
@@ -36,7 +38,7 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
     ];
 
     const evaluationScoreService = {
-      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+      search: vi.fn().mockResolvedValue({ hits: { hits: [] } }),
     };
     const context = coreMock.createCustomRequestHandlerContext({
       evals: {

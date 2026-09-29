@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import { clone } from 'lodash/fp';
 import React from 'react';
@@ -13,7 +15,7 @@ import { FlowDirection, FlowTarget } from '../../../../../common/search_strategy
 import { FlowTargetSelect } from './flow_target_select';
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('FlowTargetSelect Component', () => {
@@ -24,7 +26,7 @@ describe('FlowTargetSelect Component', () => {
     selectedDirection: FlowDirection.uniDirectional,
     isLoading: false,
     selectedTarget: FlowTarget.source,
-    updateFlowTargetAction: jest.fn(),
+    updateFlowTargetAction: vi.fn(),
   };
 
   test('it renders the FlowTargetSelect', () => {

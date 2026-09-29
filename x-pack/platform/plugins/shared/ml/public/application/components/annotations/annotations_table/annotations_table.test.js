@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import jobConfig from '@kbn/ml-common-types/__mocks__/job_config_farequote.json';
 import mockAnnotations from './__mocks__/mock_annotations.json';
 import { AnnotationsTable } from './annotations_table';
@@ -12,38 +14,38 @@ import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 const mockAnnotationUpdatesService = {
-  subscribe: jest.fn(),
-  unsubscribe: jest.fn(),
+  subscribe: vi.fn(),
+  unsubscribe: vi.fn(),
 };
 
 const mockReact = React;
 
-jest.mock('../../../services/job_service', () => {
+vi.mock('../../../services/job_service', () => {
   const mockMlJobService = {
-    getJob: jest.fn(),
+    getJob: vi.fn(),
   };
   return {
-    mlJobServiceFactory: jest.fn().mockReturnValue(mockMlJobService),
+    mlJobServiceFactory: vi.fn().mockReturnValue(mockMlJobService),
   };
 });
 
-jest.mock('../../../services/ml_api_service', () => {
+vi.mock('../../../services/ml_api_service', () => {
   const { of } = require('rxjs');
   const mockAnnotations$ = of({ annotations: [] });
   return {
     ml: {
       annotations: {
-        getAnnotations$: jest.fn().mockReturnValue(mockAnnotations$),
+        getAnnotations$: vi.fn().mockReturnValue(mockAnnotations$),
       },
     },
   };
 });
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
-    EuiInMemoryTable: jest.fn().mockImplementation(({ items }) => {
+    EuiInMemoryTable: vi.fn().mockImplementation(({ items }) => {
       return mockReact.createElement(
         'div',
         { 'data-test-subj': 'mockEuiInMemoryTable' },
@@ -62,7 +64,7 @@ const mockKibanaContext = {
 };
 
 // Mock withKibana HOC
-jest.mock('@kbn/kibana-react-plugin/public', () => {
+vi.mock('@kbn/kibana-react-plugin/public', () => {
   return {
     withKibana: (Component) => {
       const EnhancedComponent = (props) => {

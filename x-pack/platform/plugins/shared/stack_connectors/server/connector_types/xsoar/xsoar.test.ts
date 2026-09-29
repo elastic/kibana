@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { XSOARConnector } from './xsoar';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -41,25 +44,25 @@ describe('XSOARConnector', () => {
     services: actionsMock.createServices(),
   });
 
-  let mockRequest: jest.Mock;
-  let mockCloudRequest: jest.Mock;
-  let mockError: jest.Mock;
+  let mockRequest: Mock;
+  let mockCloudRequest: Mock;
+  let mockError: Mock;
   let connectorUsageCollector: ConnectorUsageCollector;
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(mockTime);
+    vi.useFakeTimers();
+    vi.setSystemTime(mockTime);
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    mockError = jest.fn().mockImplementation(() => {
+    mockError = vi.fn().mockImplementation(() => {
       throw new Error('API Error');
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
@@ -203,13 +206,13 @@ describe('XSOARConnector', () => {
     };
 
     beforeEach(() => {
-      mockRequest = jest.fn().mockResolvedValue(mockResponse);
-      mockCloudRequest = jest.fn().mockResolvedValue(mockResponse);
+      mockRequest = vi.fn().mockResolvedValue(mockResponse);
+      mockCloudRequest = vi.fn().mockResolvedValue(mockResponse);
       // @ts-ignore
       connector.request = mockRequest;
       // @ts-ignore
       cloudConnector.request = mockCloudRequest;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('XSOAR API call is successful with correct parameters', async () => {
@@ -463,13 +466,13 @@ describe('XSOARConnector', () => {
     };
 
     beforeEach(() => {
-      mockRequest = jest.fn().mockResolvedValue(mockResponse);
-      mockCloudRequest = jest.fn().mockResolvedValue(mockResponse);
+      mockRequest = vi.fn().mockResolvedValue(mockResponse);
+      mockCloudRequest = vi.fn().mockResolvedValue(mockResponse);
       // @ts-ignore
       connector.request = mockRequest;
       // @ts-ignore
       cloudConnector.request = mockCloudRequest;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     const incident: XSOARRunActionParams = {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { TimelineTabs } from '../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import React from 'react';
@@ -15,9 +18,9 @@ import { UnifiedTimelineBody } from './unified_timeline_body';
 import { render } from '@testing-library/react';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 
-jest.mock('../unified_components', () => {
+vi.mock('../unified_components', () => {
   return {
-    UnifiedTimeline: jest.fn(),
+    UnifiedTimeline: vi.fn(),
   };
 });
 
@@ -32,14 +35,14 @@ const defaultProps: UnifiedTimelineBodyProps = {
   isTextBasedQuery: false,
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50],
-  onFetchMoreRecords: jest.fn(),
-  refetch: jest.fn(),
+  onFetchMoreRecords: vi.fn(),
+  refetch: vi.fn(),
   rowRenderers: [],
   sort: [],
   timelineId: 'timeline-1',
   totalCount: 0,
   updatedAt: 0,
-  onUpdatePageIndex: jest.fn(),
+  onUpdatePageIndex: vi.fn(),
 };
 
 const renderTestComponents = (props?: UnifiedTimelineBodyProps) => {
@@ -48,11 +51,11 @@ const renderTestComponents = (props?: UnifiedTimelineBodyProps) => {
   });
 };
 
-const MockUnifiedTimelineComponent = jest.fn(() => <div />);
+const MockUnifiedTimelineComponent = vi.fn(() => <div />);
 
 describe('UnifiedTimelineBody', () => {
   beforeEach(() => {
-    (UnifiedTimeline as unknown as jest.Mock).mockImplementation(MockUnifiedTimelineComponent);
+    (UnifiedTimeline as unknown as Mock).mockImplementation(MockUnifiedTimelineComponent);
   });
 
   it('should pass default columns when empty column list is supplied', () => {

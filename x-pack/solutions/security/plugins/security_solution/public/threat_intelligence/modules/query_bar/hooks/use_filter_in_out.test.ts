@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
@@ -17,12 +19,18 @@ import type { UseFilterInValue } from './use_filter_in_out';
 import { useFilterInOut } from './use_filter_in_out';
 import { FilterIn, updateFiltersArray } from '../utils/filter';
 
-jest.mock('../utils/filter', () => ({ updateFiltersArray: jest.fn() }));
-jest.mock('../../indicators/hooks/use_ti_data_view', () => ({
-  useTIDataView: jest
-    .fn()
-    .mockReturnValue({ sourcererDataView: { id: 'security-solution-default' } }),
-}));
+vi.mock('../utils/filter', () => {
+      const mocked = { updateFiltersArray: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../indicators/hooks/use_ti_data_view', () => {
+      const mocked = {
+      useTIDataView: vi
+        .fn()
+        .mockReturnValue({ sourcererDataView: { id: 'security-solution-default' } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useFilterInOut()', () => {
   let hookResult: RenderHookResult<UseFilterInValue, unknown>;
@@ -77,7 +85,7 @@ describe('useFilterInOut()', () => {
 
       hookResult.result.current.filterFn?.();
 
-      expect(jest.mocked(updateFiltersArray)).toHaveBeenCalledWith(
+      expect(vi.mocked(updateFiltersArray)).toHaveBeenCalledWith(
         [],
         'threat.indicator.name',
         '0.0.0.0',

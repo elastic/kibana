@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { CCRReadExceptionsRule } from './ccr_read_exceptions_rule';
 import { RULE_CCR_READ_EXCEPTIONS } from '../../common/constants';
 import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';
@@ -25,27 +28,36 @@ type ICCRReadExceptionsRuleMock = CCRReadExceptionsRule & {
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_ccr_read_exceptions', () => ({
-  fetchCCRReadExceptions: jest.fn(),
-}));
-jest.mock('../lib/alerts/fetch_clusters', () => ({
-  fetchClusters: jest.fn(),
-}));
+vi.mock('../lib/alerts/fetch_ccr_read_exceptions', () => {
+      const mocked = {
+      fetchCCRReadExceptions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/alerts/fetch_clusters', () => {
+      const mocked = {
+      fetchClusters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../static_globals', () => ({
-  Globals: {
-    app: {
-      getLogger: () => ({ debug: jest.fn() }),
-      url: 'http://localhost:5601',
-      config: {
-        ui: {
-          ccs: { enabled: true },
-          container: { elasticsearch: { enabled: false } },
+vi.mock('../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          getLogger: () => ({ debug: vi.fn() }),
+          url: 'http://localhost:5601',
+          config: {
+            ui: {
+              ccs: { enabled: true },
+              container: { elasticsearch: { enabled: false } },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CCRReadExceptionsRule', () => {
   it('should have defaults', () => {
@@ -120,17 +132,17 @@ describe('CCRReadExceptionsRule', () => {
 
     beforeEach(() => {
       Date = FakeDate as DateConstructor;
-      (fetchCCRReadExceptions as jest.Mock).mockImplementation(() => {
+      (fetchCCRReadExceptions as Mock).mockImplementation(() => {
         return [stat];
       });
-      (fetchClusters as jest.Mock).mockImplementation(() => {
+      (fetchClusters as Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
       });
     });
 
     afterEach(() => {
       Date = RealDate;
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('should fire action', async () => {
@@ -299,7 +311,7 @@ describe('CCRReadExceptionsRule', () => {
 
     it('should handle ccs', async () => {
       const ccs = 'testCluster';
-      (fetchCCRReadExceptions as jest.Mock).mockImplementation(() => {
+      (fetchCCRReadExceptions as Mock).mockImplementation(() => {
         return [
           {
             ...stat,

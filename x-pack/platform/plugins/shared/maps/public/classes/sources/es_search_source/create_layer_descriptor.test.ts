@@ -5,26 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createLayerDescriptor } from './create_layer_descriptor';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 
-jest.mock('../../../kibana_services', () => {
+vi.mock('../../../kibana_services', () => {
   return {
     getIsDarkMode() {
       return false;
     },
   };
 });
-jest.mock('../../../licensed_features', () => {
+vi.mock('../../../licensed_features', () => {
   return {
     getIsGoldPlus() {
       return true;
     },
   };
 });
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('12345'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('12345'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 test('Should create layer descriptor', () => {
   const layerDescriptor = createLayerDescriptor({

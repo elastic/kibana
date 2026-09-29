@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { WaitForApprovalStep } from '@kbn/workflows';
 import type { WaitForApprovalGraphNode } from '@kbn/workflows/graph';
 import type { ExecutionError } from '@kbn/workflows/server';
@@ -22,43 +25,48 @@ import {
   sendWaitForApprovalNotifications,
 } from '../hitl_notifications/send_wait_for_approval_notifications';
 
-jest.mock('../wait_for_input_step/hitl_external_resume_helpers', () => ({
-  invalidateHitlExternalResumeTokenIfPresent: jest.fn(),
-  mintHitlExternalResumeToken: jest.fn().mockReturnValue({
-    token: 'resume-token',
-    tokenHash: 'resume-token-hash',
-    expiresAt: '2999-01-01T00:00:00.000Z',
-  }),
-}));
+vi.mock('../wait_for_input_step/hitl_external_resume_helpers', () => {
+      const mocked = {
+      invalidateHitlExternalResumeTokenIfPresent: vi.fn(),
+      mintHitlExternalResumeToken: vi.fn().mockReturnValue({
+        token: 'resume-token',
+        tokenHash: 'resume-token-hash',
+        expiresAt: '2999-01-01T00:00:00.000Z',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockMintHitlExternalResumeToken = jest.requireMock(
-  '../wait_for_input_step/hitl_external_resume_helpers'
-).mintHitlExternalResumeToken as jest.Mock;
-const mockInvalidateHitlExternalResumeTokenIfPresent = jest.requireMock(
-  '../wait_for_input_step/hitl_external_resume_helpers'
-).invalidateHitlExternalResumeTokenIfPresent as jest.Mock;
+const mockMintHitlExternalResumeToken = (await vi.importMock('../wait_for_input_step/hitl_external_resume_helpers')).mintHitlExternalResumeToken as Mock;
+const mockInvalidateHitlExternalResumeTokenIfPresent = (await vi.importMock('../wait_for_input_step/hitl_external_resume_helpers')).invalidateHitlExternalResumeTokenIfPresent as Mock;
 
-jest.mock('../hitl_notifications/has_external_hitl_channels', () => ({
-  hasExternalHitlChannels: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../hitl_notifications/has_external_hitl_channels', () => {
+      const mocked = {
+      hasExternalHitlChannels: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hitl_notifications/send_wait_for_approval_notifications', () => ({
-  buildWaitForApprovalResumeLinks: jest.fn().mockReturnValue({
-    approveUrl: 'https://kibana/approve',
-    rejectUrl: 'https://kibana/reject',
-  }),
-  sendWaitForApprovalNotifications: jest.fn(),
-}));
+vi.mock('../hitl_notifications/send_wait_for_approval_notifications', () => {
+      const mocked = {
+      buildWaitForApprovalResumeLinks: vi.fn().mockReturnValue({
+        approveUrl: 'https://kibana/approve',
+        rejectUrl: 'https://kibana/reject',
+      }),
+      sendWaitForApprovalNotifications: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockHasExternalHitlChannels = jest.mocked(hasExternalHitlChannels);
-const mockBuildWaitForApprovalResumeLinks = buildWaitForApprovalResumeLinks as jest.Mock;
-const mockSendWaitForApprovalNotifications = sendWaitForApprovalNotifications as jest.Mock;
+const mockHasExternalHitlChannels = vi.mocked(hasExternalHitlChannels);
+const mockBuildWaitForApprovalResumeLinks = buildWaitForApprovalResumeLinks as Mock;
+const mockSendWaitForApprovalNotifications = sendWaitForApprovalNotifications as Mock;
 
 describe('WaitForApprovalStepImpl', () => {
   let underTest: WaitForApprovalStepImpl;
   let node: WaitForApprovalGraphNode;
-  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
-  let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
+  let mockStepExecutionRuntime: Mocked<StepExecutionRuntime>;
+  let mockWorkflowRuntime: Mocked<WorkflowExecutionRuntimeManager>;
   let workflowLogger: IWorkflowEventLogger;
   let connectorExecutor: ConnectorExecutor;
   let dependencies: ContextDependencies;
@@ -88,37 +96,37 @@ describe('WaitForApprovalStepImpl', () => {
     };
 
     mockStepExecutionRuntime = {
-      tryEnterWaitUntil: jest.fn().mockReturnValue(true),
-      finishStep: jest.fn(),
-      failStep: jest.fn(),
-      stampHitlAudit: jest.fn(),
-      setInput: jest.fn(),
-      setCurrentStepState: jest.fn(),
-      updateWorkflowExecution: jest.fn(),
+      tryEnterWaitUntil: vi.fn().mockReturnValue(true),
+      finishStep: vi.fn(),
+      failStep: vi.fn(),
+      stampHitlAudit: vi.fn(),
+      setInput: vi.fn(),
+      setCurrentStepState: vi.fn(),
+      updateWorkflowExecution: vi.fn(),
       stepExecutionId: 'test-step-exec-id',
       abortController: new AbortController(),
       contextManager: {
-        renderValueAccordingToContext: jest.fn(<T>(v: T): T => v),
-        getEsClientAsUser: jest.fn().mockReturnValue({ security: { createApiKey: jest.fn() } }),
+        renderValueAccordingToContext: vi.fn(<T>(v: T): T => v),
+        getEsClientAsUser: vi.fn().mockReturnValue({ security: { createApiKey: vi.fn() } }),
       },
-    } as unknown as jest.Mocked<StepExecutionRuntime>;
+    } as unknown as Mocked<StepExecutionRuntime>;
 
     mockWorkflowRuntime = {
-      navigateToNextNode: jest.fn(),
-      getWorkflowExecution: jest.fn().mockReturnValue({
+      navigateToNextNode: vi.fn(),
+      getWorkflowExecution: vi.fn().mockReturnValue({
         id: 'exec-abc',
         workflowId: 'wf-1',
         spaceId: 'default',
         context: {},
       }),
-    } as unknown as jest.Mocked<WorkflowExecutionRuntimeManager>;
+    } as unknown as Mocked<WorkflowExecutionRuntimeManager>;
 
     workflowLogger = {
-      logDebug: jest.fn(),
-      logWarn: jest.fn(),
+      logDebug: vi.fn(),
+      logWarn: vi.fn(),
     } as unknown as IWorkflowEventLogger;
 
-    connectorExecutor = { execute: jest.fn() } as unknown as ConnectorExecutor;
+    connectorExecutor = { execute: vi.fn() } as unknown as ConnectorExecutor;
     dependencies = {
       spaceId: 'default',
       coreStart: {},
@@ -160,7 +168,7 @@ describe('WaitForApprovalStepImpl', () => {
       timeout: "{{ inputs.expiresIn | default: '72h' }}",
     } as WaitForApprovalStep;
     (
-      mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+      mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock
     ).mockImplementation((value: unknown) => (value === node.configuration.timeout ? '1h' : value));
 
     await underTest.run();
@@ -181,7 +189,7 @@ describe('WaitForApprovalStepImpl', () => {
       },
     } as WaitForApprovalStep;
     (
-      mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+      mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock
     ).mockImplementation((value: unknown) =>
       value === node.configuration.timeout ? 'soon' : value
     );
@@ -340,9 +348,9 @@ describe('WaitForApprovalStepImpl', () => {
   });
 
   it('uses the persisted timeout on resume, not the YAML template', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
-      jest.setSystemTime(new Date('2025-06-01T12:01:00.000Z'));
+      vi.setSystemTime(new Date('2025-06-01T12:01:00.000Z'));
       node.configuration = {
         ...node.configuration,
         timeout: "{{ inputs.expiresIn | default: '72h' }}",
@@ -360,21 +368,21 @@ describe('WaitForApprovalStepImpl', () => {
 
       await underTest.run();
 
-      const timeoutError = (mockStepExecutionRuntime.failStep as jest.Mock).mock
+      const timeoutError = (mockStepExecutionRuntime.failStep as Mock).mock
         .calls[0][0] as ExecutionError;
       expect(timeoutError.toSerializableObject()).toEqual({
         type: 'TimeoutError',
         message: 'Approval wait exceeded the configured timeout of 30s.',
       });
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 
   it('fails with TimeoutError when approval wait expires', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
-      jest.setSystemTime(new Date('2025-06-01T12:01:00.000Z'));
+      vi.setSystemTime(new Date('2025-06-01T12:01:00.000Z'));
       node.configuration = {
         ...node.configuration,
         timeout: '30s',
@@ -411,7 +419,7 @@ describe('WaitForApprovalStepImpl', () => {
           respondedAt: '2025-06-01T12:01:00.000Z',
         }
       );
-      const timeoutError = (mockStepExecutionRuntime.failStep as jest.Mock).mock
+      const timeoutError = (mockStepExecutionRuntime.failStep as Mock).mock
         .calls[0][0] as ExecutionError;
       expect(timeoutError.toSerializableObject()).toEqual({
         type: 'TimeoutError',
@@ -419,7 +427,7 @@ describe('WaitForApprovalStepImpl', () => {
       });
       expect(mockStepExecutionRuntime.finishStep).not.toHaveBeenCalled();
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ApiKeyBtn } from './api_key_btn';
 
 describe('<APIKeyButton />', () => {
-  const clickCallback = jest.fn();
+  const clickCallback = vi.fn();
 
   it('calls delete monitor on monitor deletion', () => {
     render(<ApiKeyBtn apiKey="" loading={false} onClick={clickCallback} />);

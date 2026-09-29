@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { cloneDeep } from 'lodash/fp';
 import {
   addAssigneesSpecsToSecurityDataTableIfNeeded,
@@ -26,9 +29,9 @@ import type { DataTableModel, DataTableState } from '@kbn/securitysolution-data-
 import { TableId } from '@kbn/securitysolution-data-table';
 import { v88xAlertOrignalData, v89xAlertsOriginalData } from './test.data';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 const getExpectedColumns = (model: DataTableModel) =>
   model.columns.map(migrateColumnWidthToInitialWidth).map(migrateColumnLabelToDisplayAsText);

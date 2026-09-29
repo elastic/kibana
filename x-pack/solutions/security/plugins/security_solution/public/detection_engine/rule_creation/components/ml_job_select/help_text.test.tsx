@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { HelpText } from './help_text';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 
-jest.mock('../../../../common/lib/kibana', () => {
+vi.mock('../../../../common/lib/kibana', () => {
   return {
-    useKibana: jest.fn().mockReturnValue({
+    useKibana: vi.fn().mockReturnValue({
       services: {
         application: {
           getUrlForApp: () => '/app/ml',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { indexDocuments } from './index_documents';
@@ -12,10 +14,10 @@ import type { ExtractedDocument } from './extract_documentation';
 
 const createLog = (): ToolingLog =>
   ({
-    info: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-    warning: jest.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    warning: vi.fn(),
   } as unknown as ToolingLog);
 
 const createDocuments = (count: number): ExtractedDocument[] =>
@@ -35,7 +37,7 @@ const createDocuments = (count: number): ExtractedDocument[] =>
 
 describe('indexDocuments', () => {
   it('resolves when bulk indexing succeeds', async () => {
-    const bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
+    const bulk = vi.fn().mockResolvedValue({ errors: false, items: [] });
     const client = { bulk } as unknown as Client;
     const log = createLog();
 
@@ -53,7 +55,7 @@ describe('indexDocuments', () => {
   });
 
   it('throws a summarized error and stops subsequent chunks on bulk failures', async () => {
-    const bulk = jest
+    const bulk = vi
       .fn()
       .mockResolvedValueOnce({
         errors: true,

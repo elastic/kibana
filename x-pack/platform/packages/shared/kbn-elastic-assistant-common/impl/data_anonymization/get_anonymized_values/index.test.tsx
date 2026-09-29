@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getAnonymizedValues } from '.';
 import { mockGetAnonymizedValue } from '../../mock/get_anonymized_value';
 
@@ -14,7 +16,7 @@ describe('getAnonymizedValues', () => {
       anonymizationFields: [],
       currentReplacements: {},
       field: 'test.field',
-      getAnonymizedValue: jest.fn(),
+      getAnonymizedValue: vi.fn(),
       rawData: {},
     });
 

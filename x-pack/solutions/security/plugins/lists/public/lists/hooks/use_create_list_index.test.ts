@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useCreateListIndex } from '@kbn/securitysolution-list-hooks';
 import * as Api from '@kbn/securitysolution-list-api';
@@ -13,7 +16,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getAcknowledgeSchemaResponseMock } from '../../../common/schemas/response/acknowledge_schema.mock';
 import { createQueryWrapperMock } from '../mocks/query_wrapper';
 
-jest.mock('@kbn/securitysolution-list-api');
+vi.mock('@kbn/securitysolution-list-api');
 
 // TODO: This test should be ported to the package: x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_create_list_index/index.test.ts once we have mocks in kbn packages
 
@@ -24,7 +27,7 @@ describe('useCreateListIndex', () => {
 
   beforeEach(() => {
     httpMock = httpServiceMock.createStartContract();
-    (Api.createListIndex as jest.Mock).mockResolvedValue(getAcknowledgeSchemaResponseMock());
+    (Api.createListIndex as Mock).mockResolvedValue(getAcknowledgeSchemaResponseMock());
   });
 
   it('should call Api.createListIndex when start() executes', async () => {
@@ -40,8 +43,8 @@ describe('useCreateListIndex', () => {
   });
 
   it('should call onError callback when Api.createListIndex fails', async () => {
-    const onError = jest.fn();
-    jest.spyOn(Api, 'createListIndex').mockRejectedValue(new Error('Mocked error'));
+    const onError = vi.fn();
+    vi.spyOn(Api, 'createListIndex').mockRejectedValue(new Error('Mocked error'));
 
     const { result } = renderHook(() => useCreateListIndex({ http: httpMock, onError }), {
       wrapper: queryWrapper,
@@ -56,8 +59,8 @@ describe('useCreateListIndex', () => {
   });
 
   it('should not invalidate read index query on failure', async () => {
-    jest.spyOn(Api, 'createListIndex').mockRejectedValue(new Error('Mocked error'));
-    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    vi.spyOn(Api, 'createListIndex').mockRejectedValue(new Error('Mocked error'));
+    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useCreateListIndex({ http: httpMock }), {
       wrapper: queryWrapper,
@@ -73,7 +76,7 @@ describe('useCreateListIndex', () => {
     const { result } = renderHook(() => useCreateListIndex({ http: httpMock }), {
       wrapper: queryWrapper,
     });
-    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     act(() => {
       result.current.start();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import * as api from './api';
@@ -13,18 +16,18 @@ import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { useGetCategories } from './use_get_categories';
 import { useToasts } from '../common/lib/kibana';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
 // Failing: See https://github.com/elastic/kibana/issues/207999
 describe('useGetCategories', () => {
   const abortCtrl = new AbortController();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls getCategories api', async () => {
-    const spyOnGetCategories = jest.spyOn(api, 'getCategories');
+    const spyOnGetCategories = vi.spyOn(api, 'getCategories');
     renderHook(() => useGetCategories(), {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => (
         <TestProviders>{children}</TestProviders>
@@ -40,13 +43,13 @@ describe('useGetCategories', () => {
   });
 
   it('displays an error toast when an error occurs', async () => {
-    const spyOnGetCategories = jest.spyOn(api, 'getCategories');
+    const spyOnGetCategories = vi.spyOn(api, 'getCategories');
     spyOnGetCategories.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addError });
 
     renderHook(() => useGetCategories(), {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => (

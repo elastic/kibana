@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, render, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
@@ -12,12 +15,15 @@ import { useGroupTakeActionsItems } from './use_group_take_action_items';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 
-jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: jest.fn(),
-}));
-jest.mock('../../../common/components/toolbar/bulk_actions/update_alerts');
+vi.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => {
+      const mocked = {
+      useAlertsPrivileges: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/components/toolbar/bulk_actions/update_alerts');
 
-const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
+const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;
 
 describe('useGroupTakeActionsItems', () => {
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
@@ -38,7 +44,7 @@ describe('useGroupTakeActionsItems', () => {
 
   beforeEach(() => {
     mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
-    (updateAlertStatus as jest.Mock).mockResolvedValue({ updated: 5, version_conflicts: 0 });
+    (updateAlertStatus as Mock).mockResolvedValue({ updated: 5, version_conflicts: 0 });
   });
 
   it('returns all take actions items if showAlertStatusActions is true and currentStatus is undefined', async () => {

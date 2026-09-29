@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, waitFor } from '@testing-library/react';
@@ -12,29 +15,27 @@ import { GraphInvestigation } from '@kbn/cloud-security-posture-graph';
 import { GraphVisualization, GRAPH_VISUALIZATION_TEST_ID } from './graph_visualization';
 
 const mockToasts = {
-  addDanger: jest.fn(),
-  addError: jest.fn(),
-  addSuccess: jest.fn(),
-  addWarning: jest.fn(),
-  addInfo: jest.fn(),
-  remove: jest.fn(),
+  addDanger: vi.fn(),
+  addError: vi.fn(),
+  addSuccess: vi.fn(),
+  addWarning: vi.fn(),
+  addInfo: vi.fn(),
+  remove: vi.fn(),
 };
 
 const mockInvestigateInTimeline = {
-  investigateInTimeline: jest.fn(),
+  investigateInTimeline: vi.fn(),
 };
 
 const GRAPH_INVESTIGATION_TEST_ID = 'cloudSecurityPostureGraphGraphInvestigation';
 
-jest.mock('@kbn/cloud-security-posture-graph', () => {
-  const { getNodeDocumentMode, getSingleDocumentData } = jest.requireActual(
-    '@kbn/cloud-security-posture-graph/src/components/utils'
-  );
+vi.mock('@kbn/cloud-security-posture-graph', async () => {
+  const { getNodeDocumentMode, getSingleDocumentData } = (await vi.importActual('@kbn/cloud-security-posture-graph/src/components/utils'));
 
   return {
-    GraphInvestigation: jest.fn(),
-    getNodeDocumentMode: jest.fn().mockImplementation(getNodeDocumentMode),
-    getSingleDocumentData: jest.fn().mockImplementation(getSingleDocumentData),
+    GraphInvestigation: vi.fn(),
+    getNodeDocumentMode: vi.fn().mockImplementation(getNodeDocumentMode),
+    getSingleDocumentData: vi.fn().mockImplementation(getSingleDocumentData),
   };
 });
 
@@ -45,43 +46,52 @@ const mockCapabilities = {
   },
 };
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useToasts: () => mockToasts,
-  useKibana: () => ({
-    services: {
-      application: {
-        capabilities: mockCapabilities,
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useToasts: () => mockToasts,
+      useKibana: () => ({
+        services: {
+          application: {
+            capabilities: mockCapabilities,
+          },
+        },
+      }),
+      KibanaServices: {
+        get: () => ({
+          uiSettings: {
+            get: vi.fn().mockReturnValue(true),
+          },
+        }),
       },
-    },
-  }),
-  KibanaServices: {
-    get: () => ({
-      uiSettings: {
-        get: jest.fn().mockReturnValue(true),
-      },
-    }),
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
-  useInvestigateInTimeline: () => mockInvestigateInTimeline,
-}));
+vi.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline', () => {
+      const mocked = {
+      useInvestigateInTimeline: () => mockInvestigateInTimeline,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: () => ({
-    dataView: {
-      id: 'experimental-data-view',
-      getIndexPattern: jest.fn().mockReturnValue('experimental-data-view-pattern'),
-    },
-    status: 'ready',
-  }),
-}));
+vi.mock('../../../../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: () => ({
+        dataView: {
+          id: 'experimental-data-view',
+          getIndexPattern: vi.fn().mockReturnValue('experimental-data-view-pattern'),
+        },
+        status: 'ready',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const callbacks = {
-  onShowDocument: jest.fn(),
-  onShowEntity: jest.fn(),
-  onShowGrouped: jest.fn(),
-  onShowNetwork: jest.fn(),
+  onShowDocument: vi.fn(),
+  onShowEntity: vi.fn(),
+  onShowGrouped: vi.fn(),
+  onShowNetwork: vi.fn(),
 };
 
 const EVENT_PROPS = {
@@ -102,14 +112,14 @@ const ENTITY_PROPS = {
 
 describe('GraphVisualization', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (GraphInvestigation as unknown as jest.Mock).mockReturnValue(
+    vi.clearAllMocks();
+    (GraphInvestigation as unknown as Mock).mockReturnValue(
       <div data-test-subj={GRAPH_INVESTIGATION_TEST_ID} />
     );
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('event mode', () => {
@@ -129,7 +139,7 @@ describe('GraphVisualization', () => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
       });
 
-      const { initialState } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+      const { initialState } = vi.mocked(GraphInvestigation).mock.calls[0][0];
       expect(initialState.originEventIds).toEqual([
         { id: 'event-1', isAlert: false },
         { id: 'event-2', isAlert: false },
@@ -145,7 +155,7 @@ describe('GraphVisualization', () => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
       });
 
-      const { initialState } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+      const { initialState } = vi.mocked(GraphInvestigation).mock.calls[0][0];
       expect(initialState.timeRange).toEqual({
         from: `${timestamp}||-30m`,
         to: `${timestamp}||+30m`,
@@ -170,7 +180,7 @@ describe('GraphVisualization', () => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
       });
 
-      const { initialState } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+      const { initialState } = vi.mocked(GraphInvestigation).mock.calls[0][0];
       expect(initialState.entityIds).toEqual([{ id: 'entity-1', isOrigin: true }]);
       expect(initialState.originEventIds).toBeUndefined();
     });
@@ -182,7 +192,7 @@ describe('GraphVisualization', () => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
       });
 
-      const { initialState } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+      const { initialState } = vi.mocked(GraphInvestigation).mock.calls[0][0];
       expect(initialState.timeRange).toEqual({ from: 'now-30d', to: 'now' });
     });
   });
@@ -196,7 +206,7 @@ describe('GraphVisualization', () => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
       });
 
-      expect(jest.mocked(GraphInvestigation).mock.calls[0][0].showInvestigateInTimeline).toBe(true);
+      expect(vi.mocked(GraphInvestigation).mock.calls[0][0].showInvestigateInTimeline).toBe(true);
     });
 
     it('passes showInvestigateInTimeline as false when user has no timeline read access', async () => {
@@ -207,7 +217,7 @@ describe('GraphVisualization', () => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
       });
 
-      expect(jest.mocked(GraphInvestigation).mock.calls[0][0].showInvestigateInTimeline).toBe(
+      expect(vi.mocked(GraphInvestigation).mock.calls[0][0].showInvestigateInTimeline).toBe(
         false
       );
     });
@@ -215,9 +225,7 @@ describe('GraphVisualization', () => {
 
   describe('node dispatch', () => {
     it('routes a single-event node to onShowDocument', async () => {
-      const { getNodeDocumentMode, getSingleDocumentData } = jest.requireMock(
-        '@kbn/cloud-security-posture-graph'
-      );
+      const { getNodeDocumentMode, getSingleDocumentData } = (await vi.importMock('@kbn/cloud-security-posture-graph'));
       getNodeDocumentMode.mockReturnValueOnce('single-event');
       getSingleDocumentData.mockReturnValueOnce({ id: 'doc-id', index: 'logs-*' });
 
@@ -227,7 +235,7 @@ describe('GraphVisualization', () => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
       });
 
-      const { onOpenEventPreview } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+      const { onOpenEventPreview } = vi.mocked(GraphInvestigation).mock.calls[0][0];
       onOpenEventPreview?.({} as never);
 
       expect(callbacks.onShowDocument).toHaveBeenCalledWith('doc-id', 'logs-*', true);
@@ -240,7 +248,7 @@ describe('GraphVisualization', () => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
       });
 
-      expect(jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenNetworkPreview).toBe(
+      expect(vi.mocked(GraphInvestigation).mock.calls[0][0].onOpenNetworkPreview).toBe(
         callbacks.onShowNetwork
       );
     });
@@ -254,7 +262,7 @@ describe('GraphVisualization', () => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
       });
 
-      const { onInvestigateInTimeline } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+      const { onInvestigateInTimeline } = vi.mocked(GraphInvestigation).mock.calls[0][0];
       onInvestigateInTimeline?.(undefined, [], { from: '', to: '' });
 
       expect(mockInvestigateInTimeline.investigateInTimeline).not.toHaveBeenCalled();
@@ -268,7 +276,7 @@ describe('GraphVisualization', () => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
       });
 
-      const { onInvestigateInTimeline } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+      const { onInvestigateInTimeline } = vi.mocked(GraphInvestigation).mock.calls[0][0];
       onInvestigateInTimeline?.(undefined, [], { from: 'now-15m', to: 'now' });
 
       expect(mockInvestigateInTimeline.investigateInTimeline).toHaveBeenCalled();

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { normalizeSettings } from './normalize_settings';
 import type { UiSettingsType } from '@kbn/core-ui-settings-common';
 
@@ -88,7 +90,7 @@ describe('normalizeSettings', () => {
   });
 
   it('skips incompatible object values and keeps the rest', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation();
     const settings = {
       foo: { name: 'foo', value: { bar: 'baz' } },
       bar: { name: 'bar', value: 'ok' },

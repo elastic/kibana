@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useReducer } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { ruleFormStateReducer } from './rule_form_state_reducer';
 import type { RuleFormState } from '../types';
 import { getAction } from '../common/test_utils/actions_test_utils';
 
-jest.mock('../validation/validate_form', () => ({
-  validateRuleBase: jest.fn(),
-  validateRuleParams: jest.fn(),
-}));
+vi.mock('../validation/validate_form', () => {
+      const mocked = {
+      validateRuleBase: vi.fn(),
+      validateRuleParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { validateRuleBase, validateRuleParams } = jest.requireMock('../validation/validate_form');
+const { validateRuleBase, validateRuleParams } = (await vi.importMock('../validation/validate_form'));
 
 validateRuleBase.mockReturnValue({});
 validateRuleParams.mockReturnValue({});
@@ -82,7 +87,7 @@ const initialState: RuleFormState = {
 
 describe('ruleFormStateReducer', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should initialize properly', () => {

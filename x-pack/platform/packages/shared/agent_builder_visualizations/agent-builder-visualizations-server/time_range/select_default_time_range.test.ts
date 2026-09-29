@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { selectDefaultTimeRange } from './select_default_time_range';
@@ -17,20 +20,20 @@ const Q_TIME_BOUND =
 
 const createMockLogger = (): Logger =>
   ({
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 const createEsClient = (overrides: {
-  search?: jest.Mock;
-  fieldCaps?: jest.Mock;
+  search?: Mock;
+  fieldCaps?: Mock;
 }): IScopedClusterClient =>
   ({
     asCurrentUser: {
-      search: overrides.search ?? jest.fn(),
-      fieldCaps: overrides.fieldCaps ?? jest.fn(),
+      search: overrides.search ?? vi.fn(),
+      fieldCaps: overrides.fieldCaps ?? vi.fn(),
     },
   } as unknown as IScopedClusterClient);
 
@@ -40,7 +43,7 @@ const minMaxResponse = (minMs: number | null, maxMs: number | null) => ({
 
 describe('selectDefaultTimeRange', () => {
   it('returns undefined without calling ES when there are no queries', async () => {
-    const search = jest.fn();
+    const search = vi.fn();
     const result = await selectDefaultTimeRange({
       esqlQueries: [],
       esClient: createEsClient({ search }),
@@ -53,8 +56,8 @@ describe('selectDefaultTimeRange', () => {
   });
 
   it('sets a 24h relative range from the probed min/max for live data', async () => {
-    const search = jest.fn().mockResolvedValue(minMaxResponse(NOW - 5 * DAY_MS, NOW));
-    const fieldCaps = jest.fn();
+    const search = vi.fn().mockResolvedValue(minMaxResponse(NOW - 5 * DAY_MS, NOW));
+    const fieldCaps = vi.fn();
 
     const result = await selectDefaultTimeRange({
       esqlQueries: [Q_TIME_BOUND],
@@ -72,7 +75,7 @@ describe('selectDefaultTimeRange', () => {
   it('isolates a failing dataset and still computes from the healthy ones', async () => {
     const Q_METRICS =
       'FROM metrics-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS count = COUNT(*)';
-    const search = jest
+    const search = vi
       .fn()
       .mockImplementation((params: { index: string }) =>
         params.index === 'logs-*'
@@ -92,7 +95,7 @@ describe('selectDefaultTimeRange', () => {
   });
 
   it('returns undefined when the only dataset probe errors', async () => {
-    const search = jest.fn().mockRejectedValue(new Error('cluster_block_exception'));
+    const search = vi.fn().mockRejectedValue(new Error('cluster_block_exception'));
 
     const result = await selectDefaultTimeRange({
       esqlQueries: [Q_TIME_BOUND],

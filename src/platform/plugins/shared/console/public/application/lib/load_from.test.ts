@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { compressToEncodedURIComponent } from 'lz-string';
 import { setLoadFromParameter, removeLoadFromParameter } from './load_from';
 
 const baseMockWindow = () => {
   return {
     history: {
-      pushState: jest.fn(),
-      replaceState: jest.fn(),
+      pushState: vi.fn(),
+      replaceState: vi.fn(),
     },
     location: {
       host: 'my-kibana.elastic.co',
@@ -25,13 +28,13 @@ const baseMockWindow = () => {
     },
   };
 };
-let windowSpy: jest.SpyInstance;
+let windowSpy: MockInstance;
 let mockWindow = baseMockWindow();
 
 describe('load from lib', () => {
   beforeEach(() => {
     mockWindow = baseMockWindow();
-    windowSpy = jest.spyOn(globalThis, 'window', 'get');
+    windowSpy = vi.spyOn(globalThis, 'window', 'get');
     windowSpy.mockImplementation(() => mockWindow);
   });
 

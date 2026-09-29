@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -21,14 +23,20 @@ import { TestProviders, useFormFieldMock } from '../../../../common/mock';
 // Ghost options, "renamed from" hints, and form-row errors are gated behind
 // the mitreAttackUpdatesUIEnabled feature flag, which is off by default.
 // Force it on for this test suite.
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseMitreConfiguration = jest.fn();
-jest.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => ({
-  useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
-}));
+const mockUseMitreConfiguration = vi.fn();
+vi.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => {
+      const mocked = {
+      useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const testTactics = [
   buildMockMitreTacticSummary({

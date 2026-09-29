@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { UserProfilesSearch } from './user_profiles_search';
@@ -20,19 +22,25 @@ const mockSecondUser = {
     username: 'test_guy_stevens',
   },
 };
-jest.mock('./use_user_profiles', () => ({
-  useUserProfiles: () => ({
-    data: [MOCK_USER_PROFILE],
-  }),
-}));
-jest.mock('./use_suggest_user_profiles', () => ({
-  useSuggestUserProfiles: () => ({
-    data: [MOCK_USER_PROFILE, mockSecondUser],
-  }),
-}));
+vi.mock('./use_user_profiles', () => {
+      const mocked = {
+      useUserProfiles: () => ({
+        data: [MOCK_USER_PROFILE],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_suggest_user_profiles', () => {
+      const mocked = {
+      useSuggestUserProfiles: () => ({
+        data: [MOCK_USER_PROFILE, mockSecondUser],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 const testProps = {
   forbiddenUsers: ['user-2'],
-  onUsersSelect: jest.fn(),
+  onUsersSelect: vi.fn(),
   selectedUsers: [MOCK_USER_PROFILE],
 };
 

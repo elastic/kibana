@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { nightshiftInvestigationsRouteRepository } from '.';
 import {
@@ -20,10 +22,10 @@ const mockRequest = {} as KibanaRequest;
 const parseBody = (body: Record<string, unknown>) =>
   params.parse({ path: { id: 'exec-1' }, body }).body;
 
-const makeResources = (body: Record<string, unknown>, update = jest.fn()) => ({
+const makeResources = (body: Record<string, unknown>, update = vi.fn()) => ({
   request: mockRequest,
   params: { path: { id: 'exec-1' }, body },
-  getInvestigationsClient: jest.fn().mockReturnValue({ update }),
+  getInvestigationsClient: vi.fn().mockReturnValue({ update }),
 });
 
 describe('updateInvestigation body schema', () => {
@@ -124,7 +126,7 @@ describe('updateInvestigation body schema', () => {
 
 describe('updateInvestigation handler', () => {
   it('forwards the validated body to the client', async () => {
-    const update = jest.fn();
+    const update = vi.fn();
     const body = { status: 'failed', error: 'Agent timed out' };
 
     await expect(handler(makeResources(body, update) as never)).resolves.toEqual({
@@ -146,7 +148,7 @@ describe('updateInvestigation handler', () => {
       () => InvestigationConflictError.settled('exec-1', 'completed'),
     ],
   ])('reports %s as %i', async (_label, statusCode, makeError) => {
-    const update = jest.fn().mockRejectedValue(makeError());
+    const update = vi.fn().mockRejectedValue(makeError());
 
     await expect(
       handler(makeResources({ status: 'completed' }, update) as never)

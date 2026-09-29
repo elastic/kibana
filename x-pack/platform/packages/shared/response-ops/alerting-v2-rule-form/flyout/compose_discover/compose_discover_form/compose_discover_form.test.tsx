@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -27,13 +29,19 @@ import type { FormValues } from '../../../form/types';
 import type { ComposeDiscoverState } from '../types';
 import { createInitialState } from '../use_compose_discover_state';
 
-jest.mock('./alert_condition_step', () => ({
-  AlertConditionStep: () => <div data-test-subj="mockAlertConditionStep" />,
-}));
+vi.mock('./alert_condition_step', () => {
+      const mocked = {
+      AlertConditionStep: () => <div data-test-subj="mockAlertConditionStep" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: () => ({ mgetWorkflows: jest.fn().mockResolvedValue([]) }),
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: () => ({ mgetWorkflows: vi.fn().mockResolvedValue([]) }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDiscoverState => ({
   ...createInitialState({ mode: 'create' }),
@@ -56,7 +64,7 @@ const BASE_COMPOSE_VALUES: FormValues = {
 const DASHBOARD_ID = 'dashboard-123';
 const DASHBOARD_TITLE = 'Dashboard 123';
 
-const mockFindByIds = jest.fn(async (ids: string[]) =>
+const mockFindByIds = vi.fn(async (ids: string[]) =>
   ids.map((id) =>
     id === DASHBOARD_ID
       ? { id, status: 'success', attributes: { title: DASHBOARD_TITLE } }
@@ -64,14 +72,14 @@ const mockFindByIds = jest.fn(async (ids: string[]) =>
   )
 );
 
-const mockFindDashboardsService = jest.fn(async () => ({
-  search: jest.fn(async () => ({
+const mockFindDashboardsService = vi.fn(async () => ({
+  search: vi.fn(async () => ({
     data: [],
     meta: { page: 1, per_page: 100, total: 0 },
   })),
-  findById: jest.fn(),
+  findById: vi.fn(),
   findByIds: mockFindByIds,
-  findByTitle: jest.fn(),
+  findByTitle: vi.fn(),
 }));
 
 const mockDashboard = {
@@ -105,10 +113,10 @@ const renderComposeDiscoverDetailsStep = (defaultValues: FormValues = BASE_COMPO
   render(
     <ComposeDiscoverForm
       state={createState({ step: 2 })}
-      dispatch={jest.fn()}
+      dispatch={vi.fn()}
       services={{ ...createMockServices(), dashboard: mockDashboard }}
-      onRecoveryTypeChange={jest.fn()}
-      onKindChange={jest.fn()}
+      onRecoveryTypeChange={vi.fn()}
+      onKindChange={vi.fn()}
       isEditing={false}
     />,
     { wrapper: createComposeFormWrapper(defaultValues) }
@@ -116,7 +124,7 @@ const renderComposeDiscoverDetailsStep = (defaultValues: FormValues = BASE_COMPO
 
 describe('step validation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('alertCondition step validation', () => {
@@ -132,7 +140,7 @@ describe('step validation', () => {
     it('delegates to methods.trigger with query when meetsPrecondition passes', async () => {
       const state = createState({ queryCommitted: true });
       const methods = {
-        trigger: jest.fn().mockResolvedValue(true),
+        trigger: vi.fn().mockResolvedValue(true),
       } as unknown as UseFormReturn<FormValues>;
 
       const result = await validateStep(alertStep, methods, state);
@@ -144,7 +152,7 @@ describe('step validation', () => {
     it('returns false when queryCommitted is false without calling trigger', async () => {
       const state = createState({ queryCommitted: false });
       const methods = {
-        trigger: jest.fn(),
+        trigger: vi.fn(),
       } as unknown as UseFormReturn<FormValues>;
 
       expect(await validateStep(alertStep, methods, state)).toBe(false);
@@ -154,7 +162,7 @@ describe('step validation', () => {
     it('returns false when trigger rejects query validation', async () => {
       const state = createState({ queryCommitted: true });
       const methods = {
-        trigger: jest.fn().mockResolvedValue(false),
+        trigger: vi.fn().mockResolvedValue(false),
       } as unknown as UseFormReturn<FormValues>;
 
       expect(await validateStep(alertStep, methods, state)).toBe(false);
@@ -172,7 +180,7 @@ describe('step validation', () => {
     it('delegates to methods.trigger with metadata.name', async () => {
       const state = createState();
       const methods = {
-        trigger: jest.fn().mockResolvedValue(true),
+        trigger: vi.fn().mockResolvedValue(true),
       } as unknown as UseFormReturn<FormValues>;
 
       const result = await validateStep(detailsStep, methods, state);
@@ -184,7 +192,7 @@ describe('step validation', () => {
     it('returns false when trigger rejects validation', async () => {
       const state = createState();
       const methods = {
-        trigger: jest.fn().mockResolvedValue(false),
+        trigger: vi.fn().mockResolvedValue(false),
       } as unknown as UseFormReturn<FormValues>;
 
       const result = await validateStep(detailsStep, methods, state);
@@ -290,7 +298,7 @@ describe('step validation', () => {
     it('returns true without calling trigger when no fields are declared', async () => {
       const state = createState();
       const methods = {
-        trigger: jest.fn().mockResolvedValue(true),
+        trigger: vi.fn().mockResolvedValue(true),
       } as unknown as UseFormReturn<FormValues>;
 
       const result = await validateStep(notificationsStep, methods, state);
@@ -305,10 +313,10 @@ describe('step validation', () => {
       render(
         <ComposeDiscoverForm
           state={createState({ step: 3 })}
-          dispatch={jest.fn()}
+          dispatch={vi.fn()}
           services={{ ...createMockServices(), dashboard: mockDashboard }}
-          onRecoveryTypeChange={jest.fn()}
-          onKindChange={jest.fn()}
+          onRecoveryTypeChange={vi.fn()}
+          onKindChange={vi.fn()}
           isEditing={ruleId !== undefined}
         />,
         { wrapper: createComposeFormWrapper() }
@@ -354,10 +362,10 @@ describe('shell shared fields', () => {
     return render(
       <ComposeDiscoverForm
         state={createState({ queryCommitted: true, ...stateOverrides })}
-        dispatch={jest.fn()}
+        dispatch={vi.fn()}
         services={services}
-        onRecoveryTypeChange={jest.fn()}
-        onKindChange={jest.fn()}
+        onRecoveryTypeChange={vi.fn()}
+        onKindChange={vi.fn()}
         isEditing={isEditing}
       />,
       { wrapper: createComposeFormWrapper({ ...BASE_COMPOSE_VALUES, ...formOverrides }, services) }
@@ -401,13 +409,13 @@ describe('shell shared fields', () => {
     const services = { ...createMockServices(), dashboard: mockDashboard };
     const builderState = DEFAULT_THRESHOLD_FORM_VALUES;
     render(
-      <BuilderStateProvider builderState={builderState} setBuilderState={jest.fn()}>
+      <BuilderStateProvider builderState={builderState} setBuilderState={vi.fn()}>
         <ComposeDiscoverForm
           state={createState({ queryCommitted: true, step: 0 })}
-          dispatch={jest.fn()}
+          dispatch={vi.fn()}
           services={services}
-          onRecoveryTypeChange={jest.fn()}
-          onKindChange={jest.fn()}
+          onRecoveryTypeChange={vi.fn()}
+          onKindChange={vi.fn()}
           isEditing={false}
           builderType="threshold"
         />

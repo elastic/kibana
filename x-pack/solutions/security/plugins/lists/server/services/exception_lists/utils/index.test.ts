@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import sinon from 'sinon';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 
 import { transformCreateCommentsToComments, transformUpdateCommentsToComments } from '.';
 
-jest.mock('uuid');
+vi.mock('uuid');
 
 describe('utils', () => {
   const oldDate = '2020-03-17T20:34:51.337Z';
@@ -20,7 +23,7 @@ describe('utils', () => {
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
-    (uuidv4 as unknown as jest.Mock)
+    (uuidv4 as unknown as Mock)
       .mockImplementationOnce(() => '123')
       .mockImplementationOnce(() => '456');
 
@@ -29,9 +32,9 @@ describe('utils', () => {
 
   afterEach(() => {
     clock.restore();
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
-    jest.resetAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('#transformUpdateCommentsToComments', () => {

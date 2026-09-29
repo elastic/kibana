@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -13,18 +16,18 @@ import { useAssistantAvailability } from '../../../../../assistant/use_assistant
 import { useHasWorkflowsPrivileges } from '../../../hooks/use_has_workflows_privileges';
 import { TestProviders } from '../../../../../common/mock';
 
-jest.mock('../../../../../assistant/use_assistant_availability');
-jest.mock('../../../hooks/use_has_workflows_privileges');
+vi.mock('../../../../../assistant/use_assistant_availability');
+vi.mock('../../../hooks/use_has_workflows_privileges');
 
-const mockUseHasWorkflowsPrivileges = useHasWorkflowsPrivileges as jest.Mock;
+const mockUseHasWorkflowsPrivileges = useHasWorkflowsPrivileges as Mock;
 
 describe('EmptyPrompt', () => {
   const aiConnectorsCount = 2;
   const attackDiscoveriesCount = 0;
-  const onGenerate = jest.fn();
+  const onGenerate = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseHasWorkflowsPrivileges.mockReturnValue({
       hasWorkflowsExecute: true,
       hasWorkflowsRead: true,
@@ -34,7 +37,7 @@ describe('EmptyPrompt', () => {
 
   describe('when the user has the assistant privilege', () => {
     beforeEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
+      (useAssistantAvailability as Mock).mockReturnValue({
         hasAssistantPrivilege: true,
         isAssistantEnabled: true,
       });
@@ -69,7 +72,7 @@ describe('EmptyPrompt', () => {
 
   describe('when loading is true', () => {
     beforeEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
+      (useAssistantAvailability as Mock).mockReturnValue({
         hasAssistantPrivilege: true,
         isAssistantEnabled: true,
       });
@@ -96,7 +99,7 @@ describe('EmptyPrompt', () => {
 
   describe('when aiConnectorsCount is null', () => {
     beforeEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
+      (useAssistantAvailability as Mock).mockReturnValue({
         hasAssistantPrivilege: true,
         isAssistantEnabled: true,
       });
@@ -123,7 +126,7 @@ describe('EmptyPrompt', () => {
 
   describe('when there are attack discoveries', () => {
     beforeEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
+      (useAssistantAvailability as Mock).mockReturnValue({
         hasAssistantPrivilege: true,
         isAssistantEnabled: true,
       });
@@ -152,7 +155,7 @@ describe('EmptyPrompt', () => {
     const isDisabled = true;
 
     beforeEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
+      (useAssistantAvailability as Mock).mockReturnValue({
         hasAssistantPrivilege: true,
         isAssistantEnabled: true,
       });
@@ -179,7 +182,7 @@ describe('EmptyPrompt', () => {
 
   describe('when the user lacks the workflows execute privilege', () => {
     beforeEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
+      (useAssistantAvailability as Mock).mockReturnValue({
         hasAssistantPrivilege: true,
         isAssistantEnabled: true,
       });
@@ -223,15 +226,15 @@ describe('EmptyPrompt', () => {
       attackDiscoveriesCount: 0,
       isLoading: false,
       isDisabled: false,
-      onGenerate: jest.fn(),
+      onGenerate: vi.fn(),
     };
 
     beforeEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
+      (useAssistantAvailability as Mock).mockReturnValue({
         hasAssistantPrivilege: true,
         isAssistantEnabled: true,
       });
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       render(
         <TestProviders>
           <EmptyPrompt {...defaultProps} />

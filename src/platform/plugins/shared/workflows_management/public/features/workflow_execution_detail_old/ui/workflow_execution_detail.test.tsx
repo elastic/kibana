@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { useQueryClient } from '@kbn/react-query';
@@ -19,13 +22,16 @@ import {
   TestWrapper,
 } from '../../../shared/test_utils';
 
-jest.mock('@kbn/react-query', () => ({
-  ...jest.requireActual('@kbn/react-query'),
-  useQueryClient: jest.fn(),
-}));
-const mockUseQueryClient = useQueryClient as jest.MockedFunction<typeof useQueryClient>;
+vi.mock('@kbn/react-query', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/react-query')),
+      useQueryClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockUseQueryClient = useQueryClient as MockedFunction<typeof useQueryClient>;
 
-const mockSetSelectedStepExecution = jest.fn();
+const mockSetSelectedStepExecution = vi.fn();
 const mockUrlState: {
   selectedStepExecutionId: string | undefined;
   shouldAutoResume: boolean;
@@ -34,50 +40,59 @@ const mockUrlState: {
   shouldAutoResume: false,
 };
 
-const mockUseWorkflowUrlState = jest.fn(() => ({
+const mockUseWorkflowUrlState = vi.fn(() => ({
   activeTab: 'executions',
   setSelectedStepExecution: mockSetSelectedStepExecution,
   selectedStepExecutionId: mockUrlState.selectedStepExecutionId,
   shouldAutoResume: mockUrlState.shouldAutoResume,
 }));
-jest.mock('../../../hooks/use_workflow_url_state', () => ({
-  useWorkflowUrlState: () => mockUseWorkflowUrlState(),
-}));
+vi.mock('../../../hooks/use_workflow_url_state', () => {
+      const mocked = {
+      useWorkflowUrlState: () => mockUseWorkflowUrlState(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Track step execution details props
 const mockStepExecutionDetailsProps: { current: Record<string, unknown> } = {
   current: {},
 };
 
-jest.mock('./workflow_execution_panel', () => ({
-  WorkflowExecutionPanel: ({
-    execution,
-    error,
-    showBackButton,
-  }: {
-    execution: WorkflowExecutionDto | null;
-    error: Error | null;
-    showBackButton: boolean;
-  }) => (
-    <div data-test-subj="execution-panel">
-      <div data-test-subj="show-back-button">{String(showBackButton)}</div>
-      <div data-test-subj="panel-execution-status">{execution?.status ?? 'no-execution'}</div>
-    </div>
-  ),
-}));
+vi.mock('./workflow_execution_panel', () => {
+      const mocked = {
+      WorkflowExecutionPanel: ({
+        execution,
+        error,
+        showBackButton,
+      }: {
+        execution: WorkflowExecutionDto | null;
+        error: Error | null;
+        showBackButton: boolean;
+      }) => (
+        <div data-test-subj="execution-panel">
+          <div data-test-subj="show-back-button">{String(showBackButton)}</div>
+          <div data-test-subj="panel-execution-status">{execution?.status ?? 'no-execution'}</div>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./workflow_step_execution_details', () => ({
-  WorkflowStepExecutionDetails: (props: Record<string, unknown>) => {
-    mockStepExecutionDetailsProps.current = props;
-    return (
-      <div data-test-subj="step-details">
-        <div data-test-subj="step-resume-message">{String(props.resumeMessage ?? '')}</div>
-        <div data-test-subj="step-auto-resume">{String(props.shouldAutoResume)}</div>
-        <div data-test-subj="step-loading">{String(props.isLoadingStepData)}</div>
-      </div>
-    );
-  },
-}));
+vi.mock('./workflow_step_execution_details', () => {
+      const mocked = {
+      WorkflowStepExecutionDetails: (props: Record<string, unknown>) => {
+        mockStepExecutionDetailsProps.current = props;
+        return (
+          <div data-test-subj="step-details">
+            <div data-test-subj="step-resume-message">{String(props.resumeMessage ?? '')}</div>
+            <div data-test-subj="step-auto-resume">{String(props.shouldAutoResume)}</div>
+            <div data-test-subj="step-loading">{String(props.isLoadingStepData)}</div>
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type UseStepExecutionParams = Parameters<
   typeof import('../../workflow_execution_detail/model/use_step_execution').useStepExecution
@@ -88,22 +103,28 @@ interface UseStepExecutionQueryStub {
   isLoading: boolean;
 }
 
-const mockUseStepExecution = jest.fn<UseStepExecutionQueryStub, UseStepExecutionParams>(() => ({
+const mockUseStepExecution = vi.fn<UseStepExecutionQueryStub, UseStepExecutionParams>(() => ({
   data: undefined,
   isLoading: false,
 }));
 
-jest.mock('../../workflow_execution_detail/model/use_step_execution', () => ({
-  useStepExecution: (...args: UseStepExecutionParams) => mockUseStepExecution(...args),
-}));
+vi.mock('../../workflow_execution_detail/model/use_step_execution', () => {
+      const mocked = {
+      useStepExecution: (...args: UseStepExecutionParams) => mockUseStepExecution(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockChildExecutions = new Map();
-jest.mock('../../workflow_execution_detail/model/use_child_workflow_executions', () => ({
-  useChildWorkflowExecutions: jest.fn(() => ({
-    childExecutions: mockChildExecutions,
-    isLoading: false,
-  })),
-}));
+vi.mock('../../workflow_execution_detail/model/use_child_workflow_executions', () => {
+      const mocked = {
+      useChildWorkflowExecutions: vi.fn(() => ({
+        childExecutions: mockChildExecutions,
+        isLoading: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockPollingResult: {
   workflowExecution: WorkflowExecutionDto | undefined;
@@ -114,16 +135,22 @@ const mockPollingResult: {
   error: null,
 };
 
-const mockUseWorkflowExecutionPolling = jest.fn((): typeof mockPollingResult => mockPollingResult);
-jest.mock('../../../entities/workflows/model/use_workflow_execution_polling', () => ({
-  useWorkflowExecutionPolling: () => mockUseWorkflowExecutionPolling(),
-}));
+const mockUseWorkflowExecutionPolling = vi.fn((): typeof mockPollingResult => mockPollingResult);
+vi.mock('../../../entities/workflows/model/use_workflow_execution_polling', () => {
+      const mocked = {
+      useWorkflowExecutionPolling: () => mockUseWorkflowExecutionPolling(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The component reads the polled execution from the store; mirror the mocked poll result there.
-jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => ({
-  ...jest.requireActual('../../../entities/workflows/store/workflow_detail/selectors'),
-  selectExecution: () => mockUseWorkflowExecutionPolling().workflowExecution,
-}));
+vi.mock('../../../entities/workflows/store/workflow_detail/selectors', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../entities/workflows/store/workflow_detail/selectors')),
+      selectExecution: () => mockUseWorkflowExecutionPolling().workflowExecution,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockExecution = (
   overrides: Partial<WorkflowExecutionDto> = {}
@@ -147,11 +174,11 @@ const createMockExecution = (
 });
 
 describe('WorkflowExecutionDetail', () => {
-  let mockRemoveQueries: jest.Mock;
+  let mockRemoveQueries: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockRemoveQueries = jest.fn();
+    vi.clearAllMocks();
+    mockRemoveQueries = vi.fn();
     mockUseQueryClient.mockReturnValue({
       removeQueries: mockRemoveQueries,
     } as unknown as ReturnType<typeof useQueryClient>);
@@ -170,7 +197,7 @@ describe('WorkflowExecutionDetail', () => {
 
       const { unmount } = render(
         <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+          <WorkflowExecutionDetail executionId="exec-1" onClose={vi.fn()} />
         </TestWrapper>
       );
 
@@ -189,7 +216,7 @@ describe('WorkflowExecutionDetail', () => {
 
       const { rerender } = render(
         <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+          <WorkflowExecutionDetail executionId="exec-1" onClose={vi.fn()} />
         </TestWrapper>
       );
 
@@ -199,7 +226,7 @@ describe('WorkflowExecutionDetail', () => {
 
       rerender(
         <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-2" onClose={jest.fn()} />
+          <WorkflowExecutionDetail executionId="exec-2" onClose={vi.fn()} />
         </TestWrapper>
       );
 
@@ -222,7 +249,7 @@ describe('WorkflowExecutionDetail', () => {
 
       render(
         <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-fail" onClose={jest.fn()} />
+          <WorkflowExecutionDetail executionId="exec-fail" onClose={vi.fn()} />
         </TestWrapper>
       );
 
@@ -237,7 +264,7 @@ describe('WorkflowExecutionDetail', () => {
 
       render(
         <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+          <WorkflowExecutionDetail executionId="exec-1" onClose={vi.fn()} />
         </TestWrapper>
       );
 
@@ -252,7 +279,7 @@ describe('WorkflowExecutionDetail', () => {
 
       render(
         <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+          <WorkflowExecutionDetail executionId="exec-1" onClose={vi.fn()} />
         </TestWrapper>
       );
 
@@ -295,7 +322,7 @@ describe('WorkflowExecutionDetail', () => {
 
       render(
         <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+          <WorkflowExecutionDetail executionId="exec-1" onClose={vi.fn()} />
         </TestWrapper>
       );
 
@@ -317,7 +344,7 @@ describe('WorkflowExecutionDetail', () => {
 
       render(
         <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+          <WorkflowExecutionDetail executionId="exec-1" onClose={vi.fn()} />
         </TestWrapper>
       );
 
@@ -331,7 +358,7 @@ describe('WorkflowExecutionDetail', () => {
 
       render(
         <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+          <WorkflowExecutionDetail executionId="exec-1" onClose={vi.fn()} />
         </TestWrapper>
       );
 
@@ -361,7 +388,7 @@ describe('WorkflowExecutionDetail', () => {
 
       render(
         <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+          <WorkflowExecutionDetail executionId="exec-1" onClose={vi.fn()} />
         </TestWrapper>
       );
 
@@ -376,7 +403,7 @@ describe('WorkflowExecutionDetail', () => {
 
       render(
         <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+          <WorkflowExecutionDetail executionId="exec-1" onClose={vi.fn()} />
         </TestWrapper>
       );
 
@@ -390,7 +417,7 @@ describe('WorkflowExecutionDetail', () => {
 
       render(
         <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+          <WorkflowExecutionDetail executionId="exec-1" onClose={vi.fn()} />
         </TestWrapper>
       );
 
@@ -430,7 +457,7 @@ describe('WorkflowExecutionDetail', () => {
 
       render(
         <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+          <WorkflowExecutionDetail executionId="exec-1" onClose={vi.fn()} />
         </TestWrapper>
       );
 
@@ -456,7 +483,7 @@ describe('WorkflowExecutionDetail', () => {
 
       render(
         <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+          <WorkflowExecutionDetail executionId="exec-1" onClose={vi.fn()} />
         </TestWrapper>
       );
 
@@ -473,7 +500,7 @@ describe('WorkflowExecutionDetail', () => {
 
       render(
         <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+          <WorkflowExecutionDetail executionId="exec-1" onClose={vi.fn()} />
         </TestWrapper>
       );
 
@@ -483,7 +510,7 @@ describe('WorkflowExecutionDetail', () => {
 });
 
 describe('WorkflowExecutionDetail - resume input resolution', () => {
-  let mockRemoveQueries: jest.Mock;
+  let mockRemoveQueries: Mock;
 
   const defaultWaitingLightweightStep = {
     id: 'step-exec-1',
@@ -539,9 +566,9 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockStepExecutionDetailsProps.current = {};
-    mockRemoveQueries = jest.fn();
+    mockRemoveQueries = vi.fn();
     mockUseQueryClient.mockReturnValue({ removeQueries: mockRemoveQueries } as any);
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'executions',
@@ -586,7 +613,7 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
 
     render(
       <TestWrapper>
-        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
+        <WorkflowExecutionDetail executionId="exec-waiting" onClose={vi.fn()} />
       </TestWrapper>
     );
 
@@ -601,7 +628,7 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
 
     render(
       <TestWrapper>
-        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
+        <WorkflowExecutionDetail executionId="exec-waiting" onClose={vi.fn()} />
       </TestWrapper>
     );
 
@@ -648,7 +675,7 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
 
     render(
       <TestWrapper>
-        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
+        <WorkflowExecutionDetail executionId="exec-waiting" onClose={vi.fn()} />
       </TestWrapper>
     );
 
@@ -698,7 +725,7 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
 
     render(
       <TestWrapper>
-        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
+        <WorkflowExecutionDetail executionId="exec-waiting" onClose={vi.fn()} />
       </TestWrapper>
     );
 
@@ -718,7 +745,7 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
 
     render(
       <TestWrapper>
-        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
+        <WorkflowExecutionDetail executionId="exec-waiting" onClose={vi.fn()} />
       </TestWrapper>
     );
 
@@ -781,7 +808,7 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
 
     render(
       <TestWrapper>
-        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
+        <WorkflowExecutionDetail executionId="exec-waiting" onClose={vi.fn()} />
       </TestWrapper>
     );
 
@@ -792,11 +819,11 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
 });
 
 describe('WorkflowExecutionDetail - auto-select overview on failed before steps', () => {
-  let mockRemoveQueries: jest.Mock;
+  let mockRemoveQueries: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockRemoveQueries = jest.fn();
+    vi.clearAllMocks();
+    mockRemoveQueries = vi.fn();
     mockUseQueryClient.mockReturnValue({
       removeQueries: mockRemoveQueries,
     } as any);
@@ -825,7 +852,7 @@ describe('WorkflowExecutionDetail - auto-select overview on failed before steps'
 
     render(
       <TestWrapper>
-        <WorkflowExecutionDetail executionId="exec-fail" onClose={jest.fn()} />
+        <WorkflowExecutionDetail executionId="exec-fail" onClose={vi.fn()} />
       </TestWrapper>
     );
 

@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useOverviewDisplayOptions } from './use_overview_display_options';
 
-jest.mock('../../../../../hooks/use_kibana_space', () => ({
-  useKibanaSpace: () => ({ space: { id: 'default' } }),
-}));
+vi.mock('../../../../../hooks/use_kibana_space', () => {
+      const mocked = {
+      useKibanaSpace: () => ({ space: { id: 'default' } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const STORAGE_KEY = 'synthetics.overview.displayOptions.v1.default';
 

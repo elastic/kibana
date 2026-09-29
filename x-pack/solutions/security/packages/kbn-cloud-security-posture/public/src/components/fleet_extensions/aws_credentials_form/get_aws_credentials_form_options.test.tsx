@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   getAwsCredentialsFormOptions,
   getAwsCredentialsFormManualOptions,
 } from './get_aws_credentials_form_options';
 
-jest.mock('../utils', () => ({
-  isAgentlessSupported: jest.fn(() => true),
-  getInputTypesFromPackageInfo: jest.fn(() => [
-    { type: 'cloudbeat/cis_aws', policy_template: 'cspm' },
-  ]),
-  getPosturePolicy: jest.fn(() => 'cspm'),
-  getAwsCredentialsType: jest.fn(() => 'direct_access_keys'),
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      isAgentlessSupported: vi.fn(() => true),
+      getInputTypesFromPackageInfo: vi.fn(() => [
+        { type: 'cloudbeat/cis_aws', policy_template: 'cspm' },
+      ]),
+      getPosturePolicy: vi.fn(() => 'cspm'),
+      getAwsCredentialsType: vi.fn(() => 'direct_access_keys'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('get_aws_credentials_form_options', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns AWS credential options with consistent structure and properties', () => {

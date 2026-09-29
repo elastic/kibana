@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
@@ -21,9 +24,12 @@ import {
   SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
 } from './set_asset_criticality_tool';
 
-jest.mock('../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score', () => ({
-  recalculateEntityRiskScore: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score', () => {
+      const mocked = {
+      recalculateEntityRiskScore: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ENTITY_ID = 'host:server1';
 const ENTITY_TYPE = 'host' as const;
@@ -36,8 +42,8 @@ const mockExperimentalFeatures = {
 describe('setAssetCriticalityTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
 
-  let mockBulkUpdateEntity: jest.Mock;
-  let mockCreateCRUDClient: jest.Mock;
+  let mockBulkUpdateEntity: Mock;
+  let mockCreateCRUDClient: Mock;
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   const handlerContext = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
@@ -63,19 +69,19 @@ describe('setAssetCriticalityTool', () => {
       ],
     },
   };
-  const mockCheckPrivileges = jest.fn().mockResolvedValue(allowedPrivilegesResponse);
+  const mockCheckPrivileges = vi.fn().mockResolvedValue(allowedPrivilegesResponse);
   const mockSecurity = {
     authz: {
-      checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+      checkPrivilegesDynamicallyWithRequest: vi.fn().mockReturnValue(mockCheckPrivileges),
       actions: { api: { get: (privilege: string) => `api:${privilege}` } },
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCheckPrivileges.mockResolvedValue(allowedPrivilegesResponse);
-    mockBulkUpdateEntity = jest.fn().mockResolvedValue([]);
-    mockCreateCRUDClient = jest.fn().mockReturnValue({
+    mockBulkUpdateEntity = vi.fn().mockResolvedValue([]);
+    mockCreateCRUDClient = vi.fn().mockReturnValue({
       bulkUpdateEntity: mockBulkUpdateEntity,
     });
 
@@ -208,10 +214,10 @@ describe('setAssetCriticalityTool', () => {
   describe('handler — HITL', () => {
     it('returns confirmation prompt when status is unprompted', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.unprompted,
       });
-      (ctx.prompts.askForConfirmation as jest.Mock).mockReturnValue({ type: 'confirmation' });
+      (ctx.prompts.askForConfirmation as Mock).mockReturnValue({ type: 'confirmation' });
 
       const result = await tool.handler(
         { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: CRITICALITY },
@@ -224,10 +230,10 @@ describe('setAssetCriticalityTool', () => {
 
     it('includes the entity id in the confirmation message', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.unprompted,
       });
-      (ctx.prompts.askForConfirmation as jest.Mock).mockReturnValue({ type: 'confirmation' });
+      (ctx.prompts.askForConfirmation as Mock).mockReturnValue({ type: 'confirmation' });
 
       await tool.handler(
         { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: CRITICALITY },
@@ -243,10 +249,10 @@ describe('setAssetCriticalityTool', () => {
 
     it('includes the criticality level in the confirmation message', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.unprompted,
       });
-      (ctx.prompts.askForConfirmation as jest.Mock).mockReturnValue({ type: 'confirmation' });
+      (ctx.prompts.askForConfirmation as Mock).mockReturnValue({ type: 'confirmation' });
 
       await tool.handler(
         { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: CRITICALITY },
@@ -262,10 +268,10 @@ describe('setAssetCriticalityTool', () => {
 
     it('uses "unassigned" wording in message when removing criticality', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.unprompted,
       });
-      (ctx.prompts.askForConfirmation as jest.Mock).mockReturnValue({ type: 'confirmation' });
+      (ctx.prompts.askForConfirmation as Mock).mockReturnValue({ type: 'confirmation' });
 
       await tool.handler(
         { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: 'unassigned' },
@@ -281,7 +287,7 @@ describe('setAssetCriticalityTool', () => {
 
     it('returns cancelled error when status is rejected', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.rejected,
       });
 
@@ -301,7 +307,7 @@ describe('setAssetCriticalityTool', () => {
   describe('handler — accepted', () => {
     const acceptedCtx = () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
       return ctx;
@@ -364,9 +370,7 @@ describe('setAssetCriticalityTool', () => {
     });
 
     it('includes the updated risk score in the response when recalculation returns a score', async () => {
-      const { recalculateEntityRiskScore: mockRecalculate } = jest.requireMock(
-        '../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score'
-      );
+      const { recalculateEntityRiskScore: mockRecalculate } = (await vi.importMock('../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score'));
       mockRecalculate.mockResolvedValueOnce({ baseScore: 75.5, resolutionScore: undefined });
 
       const ctx = acceptedCtx();
@@ -390,9 +394,7 @@ describe('setAssetCriticalityTool', () => {
     });
 
     it('omits riskScore from the response when recalculation fails', async () => {
-      const { recalculateEntityRiskScore: mockRecalculate } = jest.requireMock(
-        '../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score'
-      );
+      const { recalculateEntityRiskScore: mockRecalculate } = (await vi.importMock('../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score'));
       mockRecalculate.mockRejectedValueOnce(new Error('No Risk engine configuration found'));
 
       const ctx = acceptedCtx();
@@ -447,10 +449,10 @@ describe('setAssetCriticalityTool', () => {
   describe('handler — telemetry', () => {
     it('does not report telemetry while only asking for confirmation', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.unprompted,
       });
-      (ctx.prompts.askForConfirmation as jest.Mock).mockReturnValue({ type: 'confirmation' });
+      (ctx.prompts.askForConfirmation as Mock).mockReturnValue({ type: 'confirmation' });
 
       await tool.handler(
         { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: CRITICALITY },
@@ -462,7 +464,7 @@ describe('setAssetCriticalityTool', () => {
 
     it('reports userConfirmationOutcome=rejected and success=true when the user declines the prompt', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.rejected,
       });
 
@@ -486,7 +488,7 @@ describe('setAssetCriticalityTool', () => {
 
     it('reports userConfirmationOutcome=accepted and success=true after a successful update', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
 
@@ -561,7 +563,7 @@ describe('setAssetCriticalityTool', () => {
         },
       ]);
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
 
@@ -586,7 +588,7 @@ describe('setAssetCriticalityTool', () => {
     it('reports success=false and errorMessage when bulkUpdateEntity throws', async () => {
       mockBulkUpdateEntity.mockRejectedValueOnce(new Error('ES unavailable'));
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
 

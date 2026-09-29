@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import {
   createToolHandlerContext,
@@ -18,11 +20,14 @@ import {
 } from './get_installed_rules_mitre_coverage_tool';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
 
-jest.mock('../../../lib/detection_engine/rule_management/logic/search/find_rules', () => ({
-  findRules: jest.fn(),
-}));
+vi.mock('../../../lib/detection_engine/rule_management/logic/search/find_rules', () => {
+      const mocked = {
+      findRules: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFindRules = jest.mocked(findRules);
+const mockFindRules = vi.mocked(findRules);
 
 // ---- Threat fixture builders (mirror the structured `params.threat` shape) ----
 
@@ -59,7 +64,7 @@ const createMockDeps = () => {
 
   const mockRulesClientInstance = {};
   const alertingPlugin = {
-    getRulesClientWithRequest: jest.fn().mockResolvedValue(mockRulesClientInstance),
+    getRulesClientWithRequest: vi.fn().mockResolvedValue(mockRulesClientInstance),
   };
 
   mockCore.getStartServices.mockResolvedValue([
@@ -215,7 +220,7 @@ describe('buildMitreCoverageFromRules', () => {
 
 describe('createGetInstalledRulesMitreCoverageTool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('tool definition', () => {

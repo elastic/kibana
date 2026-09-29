@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -16,21 +19,27 @@ import {
   createPopulatedMitreConfiguration,
 } from '../../../../common/hooks/mitre/use_mitre_configuration.mock';
 
-jest.mock('../../../../common/hooks/mitre/use_mitre_configuration');
-jest.mock('../api', () => ({
-  fetchCoverageOverview: jest.fn(),
-}));
-jest.mock('../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({ addError: jest.fn() }),
-}));
+vi.mock('../../../../common/hooks/mitre/use_mitre_configuration');
+vi.mock('../api', () => {
+      const mocked = {
+      fetchCoverageOverview: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({ addError: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseMitreConfiguration = useMitreConfiguration as jest.Mock;
-const mockFetchCoverageOverview = fetchCoverageOverview as jest.Mock;
+const mockUseMitreConfiguration = useMitreConfiguration as Mock;
+const mockFetchCoverageOverview = fetchCoverageOverview as Mock;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
-    logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    logger: { log: vi.fn(), warn: vi.fn(), error: vi.fn() },
   });
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children);
@@ -40,7 +49,7 @@ const createWrapper = () => {
 
 describe('useFetchCoverageOverviewQuery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetchCoverageOverview.mockResolvedValue({ coverage: {} });
   });
 

@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreStart } from '@kbn/core/server';
 import type { DiscoveriesPluginStartDeps } from '../../types';
 import { withWorkflowsEnabledGuard } from '.';
 
 const buildGetStartServices = (enabled: boolean) => async () => ({
   coreStart: {
-    featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(enabled) },
+    featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(enabled) },
   } as unknown as CoreStart,
   pluginsStart: {} as unknown as DiscoveriesPluginStartDeps,
 });
 
 describe('withWorkflowsEnabledGuard', () => {
   it('preserves the original step definition fields', () => {
-    const stepDefinition = { handler: jest.fn(), id: 'step-1' };
+    const stepDefinition = { handler: vi.fn(), id: 'step-1' };
 
     const guarded = withWorkflowsEnabledGuard(stepDefinition, buildGetStartServices(true));
 
@@ -26,7 +28,7 @@ describe('withWorkflowsEnabledGuard', () => {
   });
 
   it('invokes the wrapped handler when the feature flag is ON', async () => {
-    const handler = jest.fn().mockResolvedValue('result');
+    const handler = vi.fn().mockResolvedValue('result');
     const stepDefinition = { handler, id: 'step-1' };
 
     const guarded = withWorkflowsEnabledGuard(stepDefinition, buildGetStartServices(true));
@@ -37,7 +39,7 @@ describe('withWorkflowsEnabledGuard', () => {
   });
 
   it('throws before running the wrapped handler when the feature flag is OFF', async () => {
-    const handler = jest.fn().mockResolvedValue('result');
+    const handler = vi.fn().mockResolvedValue('result');
     const stepDefinition = { handler, id: 'step-1' };
 
     const guarded = withWorkflowsEnabledGuard(stepDefinition, buildGetStartServices(false));

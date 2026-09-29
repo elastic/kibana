@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { mount } from 'enzyme';
 import { repeat } from 'lodash/fp';
 import React from 'react';
@@ -50,13 +53,13 @@ describe('LineClamp', () => {
   describe('overflow', () => {
     const clientHeight = 400;
     const scrollHeight = clientHeight + 100; // scrollHeight is > clientHeight
-    let spyClientHeight: jest.SpyInstance<number, []>;
-    let spyScrollHeight: jest.SpyInstance<number, []>;
+    let spyClientHeight: MockInstance<number, []>;
+    let spyScrollHeight: MockInstance<number, []>;
 
     beforeAll(() => {
-      spyClientHeight = jest.spyOn(window.HTMLElement.prototype, 'clientHeight', 'get');
+      spyClientHeight = vi.spyOn(window.HTMLElement.prototype, 'clientHeight', 'get');
       spyClientHeight.mockReturnValue(clientHeight);
-      spyScrollHeight = jest.spyOn(window.HTMLElement.prototype, 'scrollHeight', 'get');
+      spyScrollHeight = vi.spyOn(window.HTMLElement.prototype, 'scrollHeight', 'get');
       spyScrollHeight.mockReturnValue(scrollHeight);
     });
 

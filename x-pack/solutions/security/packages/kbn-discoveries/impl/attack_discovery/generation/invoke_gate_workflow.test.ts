@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
@@ -12,37 +15,46 @@ import type { WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
 import { invokeGateWorkflow, type InvokeGateWorkflowParams } from './invoke_gate_workflow';
 import type { WorkflowsManagementApi } from './invoke_alert_retrieval_workflow';
 
-const mockWriteAttackDiscoveryEvent = jest.fn();
+const mockWriteAttackDiscoveryEvent = vi.fn();
 
-jest.mock('../persistence/event_logging', () => ({
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED: 'alert-retrieval-failed',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED: 'alert-retrieval-started',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED: 'alert-retrieval-succeeded',
-  writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
-}));
+vi.mock('../persistence/event_logging', () => {
+      const mocked = {
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED: 'alert-retrieval-failed',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED: 'alert-retrieval-started',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED: 'alert-retrieval-succeeded',
+      writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/persistence', () => ({
-  getDurationNanoseconds: jest.fn().mockReturnValue(1000000),
-}));
+vi.mock('../../lib/persistence', () => {
+      const mocked = {
+      getDurationNanoseconds: vi.fn().mockReturnValue(1000000),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockPollForWorkflowCompletion = jest.fn();
+const mockPollForWorkflowCompletion = vi.fn();
 
-jest.mock('./poll_for_workflow_completion', () => ({
-  pollForWorkflowCompletion: (...args: unknown[]) => mockPollForWorkflowCompletion(...args),
-}));
+vi.mock('./poll_for_workflow_completion', () => {
+      const mocked = {
+      pollForWorkflowCompletion: (...args: unknown[]) => mockPollForWorkflowCompletion(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockLogger = {
-  debug: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 const mockWorkflowsManagementApi: WorkflowsManagementApi = {
-  getWorkflow: jest.fn(),
-  getWorkflowExecution: jest.fn(),
-  runWorkflow: jest.fn(),
-  scheduleWorkflow: jest.fn(),
+  getWorkflow: vi.fn(),
+  getWorkflowExecution: vi.fn(),
+  runWorkflow: vi.fn(),
+  scheduleWorkflow: vi.fn(),
 };
 
 const workflowId = 'system-attack-discovery-skill-alert-retrieval';
@@ -94,7 +106,7 @@ const defaultProps: InvokeGateWorkflowParams = {
   },
   authenticatedUser: {} as AuthenticatedUser,
   candidateAlerts: ['_id,id-1\nhost.name,web-01', '_id,id-2\nhost.name,web-02'],
-  eventLogger: { logEvent: jest.fn() } as unknown as IEventLogger,
+  eventLogger: { logEvent: vi.fn() } as unknown as IEventLogger,
   eventLogIndex: '.kibana-event-log-test',
   executionUuid: 'test-execution-uuid',
   logger: mockLogger,
@@ -108,9 +120,9 @@ const defaultProps: InvokeGateWorkflowParams = {
 
 describe('invokeGateWorkflow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
-    (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('gate-run-id');
+    vi.clearAllMocks();
+    (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
+    (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('gate-run-id');
     mockPollForWorkflowCompletion.mockResolvedValue(completedExecution);
   });
 

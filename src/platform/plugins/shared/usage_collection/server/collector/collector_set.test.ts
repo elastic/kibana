@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { noop } from 'lodash';
 import { Collector } from './collector';
 import type { CollectorSetConfig } from './collector_set';
@@ -22,8 +25,8 @@ import {
 import type { ExecutionContextSetup, Logger } from '@kbn/core/server';
 
 describe('CollectorSet', () => {
-  let logger: jest.Mocked<Logger>;
-  let executionContext: jest.Mocked<ExecutionContextSetup>;
+  let logger: Mocked<Logger>;
+  let executionContext: Mocked<ExecutionContextSetup>;
 
   let collectorSetConfig: CollectorSetConfig;
 
@@ -364,10 +367,10 @@ describe('CollectorSet', () => {
     });
 
     it('skips collectors that are not ready', async () => {
-      const mockIsReady = jest.fn().mockReturnValue(true);
-      const mockIsNotReady = jest.fn().mockResolvedValue(false);
-      const mockNonReadyFetch = jest.fn().mockResolvedValue({});
-      const mockReadyFetch = jest.fn().mockResolvedValue({});
+      const mockIsReady = vi.fn().mockReturnValue(true);
+      const mockIsNotReady = vi.fn().mockResolvedValue(false);
+      const mockNonReadyFetch = vi.fn().mockResolvedValue({});
+      const mockReadyFetch = vi.fn().mockResolvedValue({});
       collectorSet.registerCollector(
         collectorSet.makeUsageCollector({
           type: 'ready_col',
@@ -446,18 +449,18 @@ describe('CollectorSet', () => {
     });
 
     it('skips collectors that have timed out', async () => {
-      const mockFastReady = jest.fn().mockImplementation(async () => {
+      const mockFastReady = vi.fn().mockImplementation(async () => {
         return new Promise((res) => {
           setTimeout(() => res(true), 0.5 * 1000);
         });
       });
-      const mockTimedOutReady = jest.fn().mockImplementation(async () => {
+      const mockTimedOutReady = vi.fn().mockImplementation(async () => {
         return new Promise((res) => {
           setTimeout(() => res(true), 2 * 1000);
         });
       });
-      const mockNonReadyFetch = jest.fn().mockResolvedValue({});
-      const mockReadyFetch = jest.fn().mockResolvedValue({});
+      const mockNonReadyFetch = vi.fn().mockResolvedValue({});
+      const mockReadyFetch = vi.fn().mockResolvedValue({});
       collectorSet.registerCollector(
         collectorSet.makeUsageCollector({
           type: 'ready_col',
@@ -536,7 +539,7 @@ describe('CollectorSet', () => {
     });
 
     it('passes context to fetch', async () => {
-      const mockReadyFetch = jest.fn().mockResolvedValue({});
+      const mockReadyFetch = vi.fn().mockResolvedValue({});
       collectorSet.registerCollector(
         collectorSet.makeUsageCollector({
           type: 'ready_col',
@@ -623,7 +626,7 @@ describe('CollectorSet', () => {
     });
 
     it('reuses ongoing collectors for subsequent calls', async () => {
-      const fetchMock = jest.fn(
+      const fetchMock = vi.fn(
         () => new Promise((resolve) => setTimeout(() => resolve({ test: 1000 }), 100))
       );
 
@@ -650,7 +653,7 @@ describe('CollectorSet', () => {
     });
 
     it('calls completed collectors on subsequent calls', async () => {
-      const fetchMock = jest.fn(
+      const fetchMock = vi.fn(
         () => new Promise((resolve) => setTimeout(() => resolve({ test: 1000 }), 100))
       );
 

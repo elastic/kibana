@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedClass } from 'vitest';
+
 import { ProductFeaturesService } from './product_features_service';
 import { ProductFeatures } from './product_features';
 import type {
@@ -25,8 +28,8 @@ import type {
 import type { SecuritySolutionPluginSetupDependencies } from '../../plugin_contract';
 import { coreLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 
-jest.mock('./product_features');
-const MockedProductFeatures = ProductFeatures as unknown as jest.MockedClass<
+vi.mock('./product_features');
+const MockedProductFeatures = ProductFeatures as unknown as MockedClass<
   typeof ProductFeatures
 >;
 
@@ -35,27 +38,30 @@ const productFeature = {
   baseKibanaFeature: {} as BaseKibanaFeatureConfig,
   baseKibanaSubFeatureIds: [],
 };
-const mockGetFeature = jest.fn().mockReturnValue(productFeature);
-jest.mock('@kbn/security-solution-features/product_features', () => ({
-  getSecurityFeature: () => mockGetFeature(),
-  getSecurityV2Feature: () => mockGetFeature(),
-  getSecurityV3Feature: () => mockGetFeature(),
-  getSecurityV4Feature: () => mockGetFeature(),
-  getSecurityV5Feature: () => mockGetFeature(),
-  getRulesFeature: () => mockGetFeature(),
-  getRulesV2Feature: () => mockGetFeature(),
-  getRulesV3Feature: () => mockGetFeature(),
-  getRulesV4Feature: () => mockGetFeature(),
-  getAlertsFeature: () => mockGetFeature(),
-  getCasesFeature: () => mockGetFeature(),
-  getCasesV2Feature: () => mockGetFeature(),
-  getCasesV3Feature: () => mockGetFeature(),
-  getAttackDiscoveryFeature: () => mockGetFeature(),
-  getAssistantFeature: () => mockGetFeature(),
-  getTimelineFeature: () => mockGetFeature(),
-  getNotesFeature: () => mockGetFeature(),
-  getSiemMigrationsFeature: () => mockGetFeature(),
-}));
+const mockGetFeature = vi.fn().mockReturnValue(productFeature);
+vi.mock('@kbn/security-solution-features/product_features', () => {
+      const mocked = {
+      getSecurityFeature: () => mockGetFeature(),
+      getSecurityV2Feature: () => mockGetFeature(),
+      getSecurityV3Feature: () => mockGetFeature(),
+      getSecurityV4Feature: () => mockGetFeature(),
+      getSecurityV5Feature: () => mockGetFeature(),
+      getRulesFeature: () => mockGetFeature(),
+      getRulesV2Feature: () => mockGetFeature(),
+      getRulesV3Feature: () => mockGetFeature(),
+      getRulesV4Feature: () => mockGetFeature(),
+      getAlertsFeature: () => mockGetFeature(),
+      getCasesFeature: () => mockGetFeature(),
+      getCasesV2Feature: () => mockGetFeature(),
+      getCasesV3Feature: () => mockGetFeature(),
+      getAttackDiscoveryFeature: () => mockGetFeature(),
+      getAssistantFeature: () => mockGetFeature(),
+      getTimelineFeature: () => mockGetFeature(),
+      getNotesFeature: () => mockGetFeature(),
+      getSiemMigrationsFeature: () => mockGetFeature(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const coreSetup = coreLifecycleMock.createCoreSetup();
 const featuresSetup = featuresPluginMock.createSetup();
@@ -65,7 +71,7 @@ const pluginsSetup = {
 
 describe('ProductFeaturesService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should create ProductFeatureService instance', () => {
@@ -259,7 +265,7 @@ describe('ProductFeaturesService', () => {
       productFeaturesService.setup(coreSetup, pluginsSetup);
 
       const mockIsActionRegistered = MockedProductFeatures.mock.instances[0]
-        .isActionRegistered as jest.Mock;
+        .isActionRegistered as Mock;
 
       // Set up mock return values
       mockIsActionRegistered.mockReturnValueOnce(true).mockReturnValueOnce(false);
@@ -280,11 +286,11 @@ describe('ProductFeaturesService', () => {
       lastRegisteredFn = fn;
     });
 
-    const res = { notFound: jest.fn() } as unknown as LifecycleResponseFactory;
+    const res = { notFound: vi.fn() } as unknown as LifecycleResponseFactory;
     const toolkit = httpServiceMock.createOnPostAuthToolkit();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should register api authorization http route interceptor', () => {
@@ -313,7 +319,7 @@ describe('ProductFeaturesService', () => {
         );
         productFeaturesService.setup(coreSetup, pluginsSetup);
 
-        productFeaturesService.isEnabled = jest.fn().mockReturnValueOnce(false);
+        productFeaturesService.isEnabled = vi.fn().mockReturnValueOnce(false);
 
         await lastRegisteredFn(getReq(['securitySolutionProductFeature:foo']), res, toolkit);
 
@@ -330,7 +336,7 @@ describe('ProductFeaturesService', () => {
         );
         productFeaturesService.setup(coreSetup, pluginsSetup);
 
-        productFeaturesService.isEnabled = jest.fn().mockReturnValueOnce(true);
+        productFeaturesService.isEnabled = vi.fn().mockReturnValueOnce(true);
 
         await lastRegisteredFn(getReq(['securitySolutionProductFeature:foo']), res, toolkit);
 
@@ -343,7 +349,7 @@ describe('ProductFeaturesService', () => {
     // Documentation: https://docs.elastic.dev/kibana-dev-docs/key-concepts/security-api-authorization
     describe('when using authorization', () => {
       let productFeaturesService: ProductFeaturesService;
-      let mockIsActionRegistered: jest.Mock;
+      let mockIsActionRegistered: Mock;
 
       beforeEach(() => {
         const experimentalFeatures = {} as ExperimentalFeatures;
@@ -353,7 +359,7 @@ describe('ProductFeaturesService', () => {
         );
         productFeaturesService.setup(coreSetup, pluginsSetup);
         mockIsActionRegistered = MockedProductFeatures.mock.instances[0]
-          .isActionRegistered as jest.Mock;
+          .isActionRegistered as Mock;
       });
 
       describe('when using security authz', () => {

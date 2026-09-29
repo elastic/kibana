@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render as rtlRender, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,19 +15,22 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { RuleDetails } from './rule_details';
 
-jest.mock('../hooks', () => ({
-  useRuleFormState: jest.fn(),
-  useRuleFormDispatch: jest.fn(),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useRuleFormState: vi.fn(),
+      useRuleFormDispatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
+const { useRuleFormState, useRuleFormDispatch } = (await vi.importMock('../hooks'));
 
 const render = (toRender: React.ReactElement) =>
   rtlRender(toRender, {
     wrapper: ({ children }) => <IntlProvider>{children}</IntlProvider>,
   });
 
-const mockOnChange = jest.fn();
+const mockOnChange = vi.fn();
 
 describe('RuleDetails', () => {
   beforeEach(() => {
@@ -42,7 +47,7 @@ describe('RuleDetails', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('Renders correctly', () => {

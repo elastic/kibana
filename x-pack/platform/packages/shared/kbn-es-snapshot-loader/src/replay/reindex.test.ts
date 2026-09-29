@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -25,12 +28,12 @@ const log = new ToolingLog({
 const createMockEsClient = (esqlResponse?: { values: unknown[][] }): Client =>
   ({
     ingest: {
-      putPipeline: jest.fn().mockResolvedValue({}),
-      deletePipeline: jest.fn().mockResolvedValue({}),
+      putPipeline: vi.fn().mockResolvedValue({}),
+      deletePipeline: vi.fn().mockResolvedValue({}),
     },
-    reindex: jest.fn(),
+    reindex: vi.fn(),
     esql: {
-      query: jest.fn().mockResolvedValue(esqlResponse ?? { columns: [], values: [] }),
+      query: vi.fn().mockResolvedValue(esqlResponse ?? { columns: [], values: [] }),
     },
   } as unknown as Client);
 
@@ -83,7 +86,7 @@ describe('createTimestampPipeline', () => {
 describe('reindexAllIndices', () => {
   it('uses reindex API with correct parameters', async () => {
     const esClient = createMockEsClient();
-    (esClient.reindex as unknown as jest.Mock).mockResolvedValue({
+    (esClient.reindex as unknown as Mock).mockResolvedValue({
       timed_out: false,
       total: 10,
       created: 10,
@@ -117,7 +120,7 @@ describe('reindexAllIndices', () => {
 
   it('treats any failures as an error and does not count as successful', async () => {
     const esClient = createMockEsClient();
-    (esClient.reindex as unknown as jest.Mock).mockResolvedValue({
+    (esClient.reindex as unknown as Mock).mockResolvedValue({
       timed_out: false,
       total: 10,
       created: 9,
@@ -139,7 +142,7 @@ describe('reindexAllIndices', () => {
 
   it('treats timed_out=true as an error and does not count as successful', async () => {
     const esClient = createMockEsClient();
-    (esClient.reindex as unknown as jest.Mock).mockResolvedValue({
+    (esClient.reindex as unknown as Mock).mockResolvedValue({
       timed_out: true,
       total: 10,
       created: 10,
@@ -194,20 +197,20 @@ describe('replaySnapshot', () => {
   const createFullMockEsClient = () =>
     ({
       ingest: {
-        putPipeline: jest.fn().mockResolvedValue({}),
-        deletePipeline: jest.fn().mockResolvedValue({}),
+        putPipeline: vi.fn().mockResolvedValue({}),
+        deletePipeline: vi.fn().mockResolvedValue({}),
       },
-      reindex: jest.fn().mockResolvedValue({
+      reindex: vi.fn().mockResolvedValue({
         timed_out: false,
         total: 5,
         created: 5,
         failures: [],
       }),
       esql: {
-        query: jest.fn().mockResolvedValue({ columns: [], values: [['2024-01-15T12:00:00.000Z']] }),
+        query: vi.fn().mockResolvedValue({ columns: [], values: [['2024-01-15T12:00:00.000Z']] }),
       },
       snapshot: {
-        get: jest.fn().mockResolvedValue({
+        get: vi.fn().mockResolvedValue({
           snapshots: [
             {
               snapshot: 'test-snap',
@@ -218,19 +221,19 @@ describe('replaySnapshot', () => {
             },
           ],
         }),
-        restore: jest.fn().mockResolvedValue({
+        restore: vi.fn().mockResolvedValue({
           snapshot: {
             indices: ['snapshot-loader-temp-.ds-logs-app-default-2024.01.01-000001'],
           },
         }),
-        deleteRepository: jest.fn().mockResolvedValue({}),
+        deleteRepository: vi.fn().mockResolvedValue({}),
       },
       cluster: {
-        health: jest.fn().mockResolvedValue({ timed_out: false }),
+        health: vi.fn().mockResolvedValue({ timed_out: false }),
       },
       indices: {
-        delete: jest.fn().mockResolvedValue({}),
-        getDataStream: jest
+        delete: vi.fn().mockResolvedValue({}),
+        getDataStream: vi
           .fn()
           .mockResolvedValue({ data_streams: [{ name: 'logs-app-default' }] }),
       },
@@ -238,15 +241,15 @@ describe('replaySnapshot', () => {
 
   const mockRepo = {
     type: 'gcs' as const,
-    validate: jest.fn(),
-    register: jest.fn().mockResolvedValue(undefined),
+    validate: vi.fn(),
+    register: vi.fn().mockResolvedValue(undefined),
   };
 
   it('calls shouldUseInlineScript callback to determine reindex mode per index', async () => {
     const esClient = createFullMockEsClient();
-    const shouldUseInlineScript = jest.fn((destIndex: string) => destIndex === 'logs.otel');
+    const shouldUseInlineScript = vi.fn((destIndex: string) => destIndex === 'logs.otel');
 
-    (esClient.snapshot.get as unknown as jest.Mock).mockResolvedValue({
+    (esClient.snapshot.get as unknown as Mock).mockResolvedValue({
       snapshots: [
         {
           snapshot: 'test-snap',
@@ -257,7 +260,7 @@ describe('replaySnapshot', () => {
         },
       ],
     });
-    (esClient.snapshot.restore as unknown as jest.Mock).mockResolvedValue({
+    (esClient.snapshot.restore as unknown as Mock).mockResolvedValue({
       snapshot: {
         indices: ['snapshot-loader-temp-logs.otel', 'snapshot-loader-temp-logs-nginx-default'],
       },
@@ -275,7 +278,7 @@ describe('replaySnapshot', () => {
     expect(shouldUseInlineScript).toHaveBeenCalledWith('logs.otel');
     expect(shouldUseInlineScript).toHaveBeenCalledWith('logs-nginx-default');
 
-    const calls = (esClient.reindex as unknown as jest.Mock).mock.calls;
+    const calls = (esClient.reindex as unknown as Mock).mock.calls;
     const otelCall = calls.find(
       ([req]: [{ dest: { index: string } }]) => req.dest.index === 'logs.otel'
     );
@@ -300,7 +303,7 @@ describe('replaySnapshot', () => {
       patterns: ['logs-*'],
     });
 
-    const reindexCall = (esClient.reindex as unknown as jest.Mock).mock.calls[0][0];
+    const reindexCall = (esClient.reindex as unknown as Mock).mock.calls[0][0];
     expect(reindexCall.dest.pipeline).toBeDefined();
     expect(reindexCall.script).toBeUndefined();
     expect(esClient.snapshot.restore).toHaveBeenCalledWith(
@@ -312,7 +315,7 @@ describe('replaySnapshot', () => {
 
   it('invokes beforeReindex with correct params after restore and before reindex', async () => {
     const esClient = createFullMockEsClient();
-    const beforeReindex = jest.fn();
+    const beforeReindex = vi.fn();
 
     await replaySnapshot({
       esClient,
@@ -334,15 +337,15 @@ describe('replaySnapshot', () => {
       })
     );
 
-    const restoreOrder = (esClient.snapshot.restore as unknown as jest.Mock).mock
+    const restoreOrder = (esClient.snapshot.restore as unknown as Mock).mock
       .invocationCallOrder[0];
-    const reindexOrder = (esClient.reindex as unknown as jest.Mock).mock.invocationCallOrder[0];
+    const reindexOrder = (esClient.reindex as unknown as Mock).mock.invocationCallOrder[0];
     expect(restoreOrder).toBeLessThan(reindexOrder);
   });
 
   it('passes index settings to restore and cleans up restored names after a health timeout', async () => {
     const esClient = createFullMockEsClient();
-    (esClient.cluster.health as unknown as jest.Mock).mockResolvedValue({ timed_out: true });
+    (esClient.cluster.health as unknown as Mock).mockResolvedValue({ timed_out: true });
     const indexSettings = {
       'index.number_of_replicas': 0,
       'index.auto_expand_replicas': '0-1',
@@ -376,7 +379,7 @@ describe('replaySnapshot', () => {
 
   it('does not delete a pre-existing temp index when restore fails', async () => {
     const esClient = createFullMockEsClient();
-    (esClient.snapshot.restore as unknown as jest.Mock).mockRejectedValue(
+    (esClient.snapshot.restore as unknown as Mock).mockRejectedValue(
       new Error('resource_already_exists_exception: temp index already exists')
     );
 
@@ -397,7 +400,7 @@ describe('replaySnapshot', () => {
 
   it('cleans up restored indices when the health request fails', async () => {
     const esClient = createFullMockEsClient();
-    (esClient.cluster.health as unknown as jest.Mock).mockRejectedValue(
+    (esClient.cluster.health as unknown as Mock).mockRejectedValue(
       new Error('health request failed')
     );
 

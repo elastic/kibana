@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { mockCase, mockObservables } from '../../containers/mock';
@@ -12,24 +15,24 @@ import { ObservablesUtilityBar } from './observables_utility_bar';
 import { renderWithTestingProviders } from '../../common/mock';
 import { useCasesFeatures } from '../../common/use_cases_features';
 
-jest.mock('../../common/use_cases_features');
+vi.mock('../../common/use_cases_features');
 
 describe('ObservablesUtilityBar', () => {
   const props = {
     caseData: { ...mockCase, observables: mockObservables },
     isLoading: false,
     isEnabled: true,
-    onExtractObservablesChanged: jest.fn(),
+    onExtractObservablesChanged: vi.fn(),
     selectedObservables: [],
     canRunWorkflow: false,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', () => {
-    (useCasesFeatures as jest.Mock).mockReturnValue({
+    (useCasesFeatures as Mock).mockReturnValue({
       isExtractObservablesEnabled: true,
       observablesAuthorized: true,
     });
@@ -44,7 +47,7 @@ describe('ObservablesUtilityBar', () => {
   });
 
   it('does not render auto extract observable section without platinum+ license', () => {
-    (useCasesFeatures as jest.Mock).mockReturnValue({
+    (useCasesFeatures as Mock).mockReturnValue({
       isExtractObservablesEnabled: true,
       observablesAuthorized: false,
     });
@@ -58,7 +61,7 @@ describe('ObservablesUtilityBar', () => {
   });
 
   it('does not render auto extract observable section when extract observables is disabled', () => {
-    (useCasesFeatures as jest.Mock).mockReturnValue({
+    (useCasesFeatures as Mock).mockReturnValue({
       isExtractObservablesEnabled: false,
       observablesAuthorized: true,
     });

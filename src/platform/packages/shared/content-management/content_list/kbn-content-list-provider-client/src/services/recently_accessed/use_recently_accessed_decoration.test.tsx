@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { render, screen } from '@testing-library/react';
@@ -18,22 +20,25 @@ import { RECENT_FIELD } from './recents_filter_renderer';
 // returns a unique component whose `resolve` is closure-bound to that call.
 // This mirrors the fix in `@kbn/ui-react-assembly` where resolvers are
 // keyed by component function rather than stored in a shared slot.
-jest.mock('@kbn/content-list-toolbar', () => ({
-  filter: {
-    createComponent: jest.fn((options?: { resolve?: () => { component: React.FC } }) => {
-      const resolve = options?.resolve;
-      const Component = (props: Record<string, unknown>) => {
-        if (!resolve) {
-          return null;
-        }
-        const { component: Inner } = resolve();
-        return <Inner {...props} />;
-      };
-      Component.displayName = 'MockRecentsFilter';
-      return Component;
-    }),
-  },
-}));
+vi.mock('@kbn/content-list-toolbar', () => {
+      const mocked = {
+      filter: {
+        createComponent: vi.fn((options?: { resolve?: () => { component: React.FC } }) => {
+          const resolve = options?.resolve;
+          const Component = (props: Record<string, unknown>) => {
+            if (!resolve) {
+              return null;
+            }
+            const { component: Inner } = resolve();
+            return <Inner {...props} />;
+          };
+          Component.displayName = 'MockRecentsFilter';
+          return Component;
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useRecentlyAccessedDecoration', () => {
   const buildSource = (entries: Array<{ id: string }>): RecentlyAccessedHistorySource => ({

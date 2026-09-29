@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { SandboxCallContext } from './tool_utils';
@@ -42,12 +45,12 @@ const createConnector = ({
 
 describe('listAgentConnectors', () => {
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
-  let getActionsClient: jest.Mock;
+  let getActionsClient: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     actionsClient = actionsClientMock.create();
-    getActionsClient = jest.fn().mockResolvedValue(actionsClient);
+    getActionsClient = vi.fn().mockResolvedValue(actionsClient);
     actionsClient.getAll.mockResolvedValue([
       createConnector({
         id: 'slack-1',

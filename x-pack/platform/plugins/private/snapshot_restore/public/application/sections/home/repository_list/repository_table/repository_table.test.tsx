@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@kbn/code-editor-mock/jest_helper';
 
 import React from 'react';
@@ -14,26 +16,29 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { Repository } from '../../../../../../common/types';
 import { RepositoryTable } from './repository_table';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  reactRouterNavigate: (_history: unknown, path: string, onClick?: () => void) => ({
-    href: path,
-    onClick: (event: any) => {
-      if (typeof event?.preventDefault === 'function') {
-        event.preventDefault();
-      }
-      onClick?.();
-    },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      reactRouterNavigate: (_history: unknown, path: string, onClick?: () => void) => ({
+        href: path,
+        onClick: (event: any) => {
+          if (typeof event?.preventDefault === 'function') {
+            event.preventDefault();
+          }
+          onClick?.();
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockToastNotifications = {
-  addSuccess: jest.fn(),
-  addDanger: jest.fn(),
+  addSuccess: vi.fn(),
+  addDanger: vi.fn(),
 };
 
-jest.mock('../../../../app_context', () => {
+vi.mock('../../../../app_context', async () => {
   const actual =
-    jest.requireActual<typeof import('../../../../app_context')>('../../../../app_context');
+    (await vi.importActual<typeof import('../../../../app_context')>('../../../../app_context'));
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { createMemoryHistory: createHistory } = require('history');
   const history = createHistory();
@@ -43,7 +48,7 @@ jest.mock('../../../../app_context', () => {
     useToastNotifications: () => mockToastNotifications,
     useServices: () => ({
       history,
-      uiMetricService: { trackUiMetric: jest.fn() },
+      uiMetricService: { trackUiMetric: vi.fn() },
       i18n: {
         translate: (_key: string, { defaultMessage, values }: any) => {
           if (!values) return defaultMessage;
@@ -57,7 +62,7 @@ jest.mock('../../../../app_context', () => {
   };
 });
 
-jest.mock('../../../../components', () => {
+vi.mock('../../../../components', () => {
   return {
     ConfirmDefaultRepositoryModal: ({
       onCancel,
@@ -71,13 +76,13 @@ jest.mock('../../../../components', () => {
         </div>
       );
     },
-    RepositoryDeleteProvider: ({ children }: any) => children(jest.fn()),
+    RepositoryDeleteProvider: ({ children }: any) => children(vi.fn()),
   };
 });
 
 describe('<RepositoryTable /> default repository actions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderTable = (props: Partial<React.ComponentProps<typeof RepositoryTable>> = {}) => {
@@ -85,7 +90,7 @@ describe('<RepositoryTable /> default repository actions', () => {
       { name: 'repo1', type: 'fs', settings: { location: '/tmp' } } as any,
     ];
 
-    const onSetDefaultRepository = props.onSetDefaultRepository ?? jest.fn().mockResolvedValue({});
+    const onSetDefaultRepository = props.onSetDefaultRepository ?? vi.fn().mockResolvedValue({});
 
     const renderResult = render(
       <I18nProvider>
@@ -96,9 +101,9 @@ describe('<RepositoryTable /> default repository actions', () => {
           canSetDefaultRepository={props.canSetDefaultRepository}
           isDefaultRepositoryFeatureAvailable={props.isDefaultRepositoryFeatureAvailable}
           onSetDefaultRepository={onSetDefaultRepository}
-          reload={jest.fn()}
+          reload={vi.fn()}
           openRepositoryDetailsUrl={(name) => `/repositories/${encodeURIComponent(name)}`}
-          onRepositoryDeleted={jest.fn()}
+          onRepositoryDeleted={vi.fn()}
         />
       </I18nProvider>
     );
@@ -182,7 +187,7 @@ describe('<RepositoryTable /> default repository actions', () => {
     const { onSetDefaultRepository } = renderTable({
       repositories: [{ name: 'repo2', type: 'fs', settings: { location: '/tmp' } } as any],
       defaultRepository: 'repo1',
-      onSetDefaultRepository: jest.fn().mockResolvedValue({ data: null, error: null }),
+      onSetDefaultRepository: vi.fn().mockResolvedValue({ data: null, error: null }),
     });
 
     fireEvent.click(screen.getByTestId('repositoryActionsMenuButton-repo2'));
@@ -230,10 +235,10 @@ describe('<RepositoryTable /> default repository actions', () => {
           repositories={[{ name: 'repo1', type: 'fs', settings: { location: '/tmp' } } as any]}
           defaultRepository="repo1"
           managedRepository={undefined}
-          onSetDefaultRepository={jest.fn().mockResolvedValue({})}
-          reload={jest.fn()}
+          onSetDefaultRepository={vi.fn().mockResolvedValue({})}
+          reload={vi.fn()}
           openRepositoryDetailsUrl={(name) => `/repositories/${encodeURIComponent(name)}`}
-          onRepositoryDeleted={jest.fn()}
+          onRepositoryDeleted={vi.fn()}
         />
       </I18nProvider>
     );

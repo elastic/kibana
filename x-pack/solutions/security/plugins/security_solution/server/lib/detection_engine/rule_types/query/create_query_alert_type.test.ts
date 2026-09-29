@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import { createQueryAlertType } from './create_query_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
@@ -22,36 +25,48 @@ import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { hasTimestampFields } from '../utils/utils';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 
-jest.mock('@kbn/data-views-plugin/server', () => ({
-  ...jest.requireActual('@kbn/data-views-plugin/server'),
-  IndexPatternsFetcher: jest.fn().mockImplementation(() => ({
-    getIndexPatternMatches: jest.fn().mockResolvedValue({ matchedIndexPatterns: ['some-index'] }),
-  })),
-}));
-
-jest.mock('../utils/utils', () => ({
-  ...jest.requireActual('../utils/utils'),
-  getExceptions: () => [],
-  hasTimestampFields: jest.fn(async () => {
-    return {
-      foundNoIndices: false,
-      warningMessage: undefined,
+vi.mock('@kbn/data-views-plugin/server', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/data-views-plugin/server')),
+      IndexPatternsFetcher: vi.fn().mockImplementation(() => ({
+        getIndexPatternMatches: vi.fn().mockResolvedValue({ matchedIndexPatterns: ['some-index'] }),
+      })),
     };
-  }),
-  checkForFrozenIndices: jest.fn(async () => []),
-}));
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-plugin/server', () => ({
-  ...jest.requireActual('@kbn/alerting-plugin/server'),
-  shouldCreateAlertsInAllSpaces: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../utils/utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('../utils/utils')),
+      getExceptions: () => [],
+      hasTimestampFields: vi.fn(async () => {
+        return {
+          foundNoIndices: false,
+          warningMessage: undefined,
+        };
+      }),
+      checkForFrozenIndices: vi.fn(async () => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils/get_list_client', () => ({
-  getListClient: jest.fn().mockReturnValue({
-    listClient: jest.fn(),
-    exceptionsClient: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/alerting-plugin/server', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerting-plugin/server')),
+      shouldCreateAlertsInAllSpaces: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../utils/get_list_client', () => {
+      const mocked = {
+      getListClient: vi.fn().mockReturnValue({
+        listClient: vi.fn(),
+        exceptionsClient: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Custom Query Alerts', () => {
   const mocks = createRuleTypeMocks();
@@ -82,16 +97,16 @@ describe('Custom Query Alerts', () => {
     licensing,
     scheduleNotificationResponseActionsService: () => null,
     endpointAppContextService: createMockEndpointAppContextService(),
-    getEntityStore: jest.fn().mockResolvedValue({
-      createCRUDClient: jest.fn().mockReturnValue({ listEntities: jest.fn() }),
+    getEntityStore: vi.fn().mockResolvedValue({
+      createCRUDClient: vi.fn().mockReturnValue({ listEntities: vi.fn() }),
     }),
-    getRulesAuthz: jest.fn().mockResolvedValue({}),
+    getRulesAuthz: vi.fn().mockResolvedValue({}),
   };
 
   const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(wrapperOptions);
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not send an alert when no events found', async () => {
@@ -133,8 +148,8 @@ describe('Custom Query Alerts', () => {
   });
 
   it('short-circuits and writes a warning if no indices are found', async () => {
-    (IndexPatternsFetcher as jest.Mock).mockImplementationOnce(() => ({
-      getIndexPatternMatches: jest.fn().mockResolvedValue({ matchedIndexPatterns: [] }),
+    (IndexPatternsFetcher as Mock).mockImplementationOnce(() => ({
+      getIndexPatternMatches: vi.fn().mockResolvedValue({ matchedIndexPatterns: [] }),
     }));
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
@@ -248,7 +263,7 @@ describe('Custom Query Alerts', () => {
   });
 
   it('sends an alert when events are found and logs a warning when hasTimestampFields throws an error', async () => {
-    (hasTimestampFields as jest.Mock).mockImplementationOnce(async () => {
+    (hasTimestampFields as Mock).mockImplementationOnce(async () => {
       throw Error('hastTimestampFields test error');
     });
 
@@ -301,7 +316,7 @@ describe('Custom Query Alerts', () => {
   });
 
   describe('response actions', () => {
-    const buildWrapper = (isPreview: boolean, scheduleService: jest.Mock) =>
+    const buildWrapper = (isPreview: boolean, scheduleService: Mock) =>
       createSecurityRuleTypeWrapper({
         ...wrapperOptions,
         isPreview,
@@ -309,7 +324,7 @@ describe('Custom Query Alerts', () => {
       });
 
     const runRule = async ({ isPreview }: { isPreview: boolean }) => {
-      const scheduleService = jest.fn();
+      const scheduleService = vi.fn();
       const queryAlertType = buildWrapper(
         isPreview,
         scheduleService

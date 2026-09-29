@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -47,7 +49,7 @@ const discoveryHit = {
 };
 
 const adhocAttackDiscoveryDataClient = {
-  indexNameWithNamespace: jest.fn(
+  indexNameWithNamespace: vi.fn(
     (namespace: string) => `.adhoc.alerts-security.attack.discovery.alerts-${namespace}`
   ),
 } as unknown as IRuleDataClient;
@@ -75,7 +77,7 @@ const defaultDeps = () => ({
 
 describe('createAttackDiscoveryAttachmentType', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('id', () => {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
@@ -18,19 +21,25 @@ import { BuildBundles } from './build_bundles_task';
 import { Build, write } from '../lib';
 import { getMockConfig } from '../lib/__mocks__/get_config';
 
-jest.mock('@kbn/rspack-optimizer', () => ({
-  runBuild: jest.fn(),
-  reportOptimizerTimings: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('@kbn/rspack-optimizer', () => {
+      const mocked = {
+      runBuild: vi.fn(),
+      reportOptimizerTimings: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('globby', () => ({ globby: jest.fn() }));
+vi.mock('globby', () => {
+      const mocked = { globby: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const mockReadFile = jest.fn();
-const mockWriteFile = jest.fn();
-const mockUnlink = jest.fn();
-const mockRm = jest.fn();
+const mockReadFile = vi.fn();
+const mockWriteFile = vi.fn();
+const mockUnlink = vi.fn();
+const mockRm = vi.fn();
 
-jest.mock('fs/promises', () => ({
+vi.mock('fs/promises', () => ({
   __esModule: true,
   default: {
     readFile: (...args: unknown[]) => mockReadFile(...args),
@@ -40,19 +49,19 @@ jest.mock('fs/promises', () => ({
   },
 }));
 
-jest.mock('../lib', () => {
-  const actual = jest.requireActual('../lib');
+vi.mock('../lib', async () => {
+  const actual = (await vi.importActual('../lib'));
   return {
     ...actual,
-    write: jest.fn().mockResolvedValue(undefined),
+    write: vi.fn().mockResolvedValue(undefined),
   };
 });
 
-const mockedRunBuild = runBuild as jest.MockedFunction<typeof runBuild>;
-const { globby: mockedGlobby } = jest.requireMock('globby') as {
-  globby: jest.MockedFunction<(patterns: string | string[], options?: object) => Promise<string[]>>;
+const mockedRunBuild = runBuild as MockedFunction<typeof runBuild>;
+const { globby: mockedGlobby } = (await vi.importMock('globby')) as {
+  globby: MockedFunction<(patterns: string | string[], options?: object) => Promise<string[]>>;
 };
-const mockedWrite = write as jest.MockedFunction<typeof write>;
+const mockedWrite = write as MockedFunction<typeof write>;
 
 describe('BuildBundles', () => {
   const log = new ToolingLog();
@@ -62,15 +71,15 @@ describe('BuildBundles', () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     tmpDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'rspack-bundles-task-test-'));
-    jest
+    vi
       .spyOn(build, 'resolvePath')
       .mockImplementation((...segments: string[]) => Path.resolve(tmpDir, ...segments));
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
     try {
       Fs.rmSync(tmpDir, { recursive: true, force: true });
     } catch {

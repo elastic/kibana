@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EuiThemeComputed } from '@elastic/eui';
 
 import { getExecutionStatusHealthColor, getExecutionStatusLabel } from './execution_status';
@@ -19,12 +21,12 @@ const mockEuiTheme = {
 
 describe('Execution Status Utils', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getExecutionStatusHealthColor', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should return `success` color for the `active` status', () => {
@@ -55,7 +57,7 @@ describe('Execution Status Utils', () => {
 
   describe('getExecutionStatusLabel', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should return `Success` label for the `active` status', () => {

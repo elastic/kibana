@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import type { InvestigationQuotaCallback, NightshiftInvestigationsSetupDeps } from './types';
 import { NightshiftInvestigationsPlugin } from './plugin';
@@ -22,21 +24,21 @@ const createPlugin = () =>
 const createSetupDeps = () =>
   ({
     taskManager: {
-      registerTaskDefinitions: jest.fn(),
+      registerTaskDefinitions: vi.fn(),
     },
   } as unknown as NightshiftInvestigationsSetupDeps);
 
 describe('NightshiftInvestigationsPlugin setup', () => {
   it('accepts one investigation quota callback', () => {
     const setup = createPlugin().setup(coreMock.createSetup(), createSetupDeps());
-    const callback: InvestigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
+    const callback: InvestigationQuotaCallback = vi.fn().mockResolvedValue({ allowed: true });
 
     expect(() => setup.registerInvestigationQuota(callback)).not.toThrow();
   });
 
   it('rejects a second investigation quota callback registration', () => {
     const setup = createPlugin().setup(coreMock.createSetup(), createSetupDeps());
-    const callback: InvestigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
+    const callback: InvestigationQuotaCallback = vi.fn().mockResolvedValue({ allowed: true });
 
     setup.registerInvestigationQuota(callback);
 

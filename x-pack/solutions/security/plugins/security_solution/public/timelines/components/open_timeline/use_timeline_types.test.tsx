@@ -5,35 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, waitFor, screen, renderHook } from '@testing-library/react';
 import { useTimelineTypes } from './use_timeline_types';
 import { TestProviders } from '../../../common/mock';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
   return {
     ...original,
-    useParams: jest.fn().mockReturnValue('default'),
-    useHistory: jest.fn().mockReturnValue([]),
+    useParams: vi.fn().mockReturnValue('default'),
+    useHistory: vi.fn().mockReturnValue([]),
   };
 });
 
-jest.mock('../../../common/components/link_to', () => {
+vi.mock('../../../common/components/link_to', () => {
   return {
-    getTimelineTabsUrl: jest.fn(),
-    useFormatUrl: jest.fn().mockReturnValue({
-      formatUrl: jest.fn(),
+    getTimelineTabsUrl: vi.fn(),
+    useFormatUrl: vi.fn().mockReturnValue({
+      formatUrl: vi.fn(),
       search: '',
     }),
   };
 });
 
-const mockNavigateToUrl = jest.fn();
+const mockNavigateToUrl = vi.fn();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/kibana-react-plugin/public');
-  const useKibana = jest.fn().mockImplementation(() => ({
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const originalModule = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const useKibana = vi.fn().mockImplementation(() => ({
     services: {
       application: {
         navigateToUrl: mockNavigateToUrl,
@@ -49,7 +51,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 
 describe('useTimelineTypes', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('init', async () => {

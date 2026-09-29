@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import fs from 'fs';
 import os from 'os';
 import Path from 'path';
@@ -84,7 +86,7 @@ describe('loadSchemaDocuments', () => {
   it('loads from an http(s) source via fetch', async () => {
     writeBundle(dir);
     const originalFetch = global.fetch;
-    global.fetch = jest.fn(async (input: RequestInfo | URL) => {
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       const relative = url.replace('https://cdn.example/bundle/', '');
       const body = fs.readFileSync(Path.join(dir, relative), 'utf8');
@@ -105,7 +107,7 @@ describe('loadSchemaDocuments', () => {
   it('falls back to the CDN url when no explicit schema and no local match', async () => {
     writeBundle(dir);
     const originalFetch = global.fetch;
-    global.fetch = jest.fn(async (input: RequestInfo | URL) => {
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       const relative = url.replace('https://cdn.example/', '');
       const body = fs.readFileSync(Path.join(dir, relative), 'utf8');

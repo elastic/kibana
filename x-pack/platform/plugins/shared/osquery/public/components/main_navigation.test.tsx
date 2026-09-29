@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -16,37 +18,46 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 
 // --- Kibana services ---
-jest.mock('../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        capabilities: {
-          osquery: {
-            writeLiveQueries: true,
-            runSavedQueries: true,
-            readSavedQueries: true,
-            readPacks: true,
+vi.mock('../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            capabilities: {
+              osquery: {
+                writeLiveQueries: true,
+                runSavedQueries: true,
+                readSavedQueries: true,
+                readPacks: true,
+              },
+            },
+            getUrlForApp: () => '/app/integrations/osquery_manager/policies',
+            navigateToApp: vi.fn(),
           },
         },
-        getUrlForApp: () => '/app/integrations/osquery_manager/policies',
-        navigateToApp: jest.fn(),
+      }),
+      useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
+      isModifiedEvent: () => false,
+      isLeftClickEvent: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../actions/history_filter_storage', () => {
+      const mocked = {
+      getHistoryFilters: () => '',
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/fleet-plugin/public', () => {
+      const mocked = {
+      pagePathGetters: {
+        integration_details_policies: () => ['', '/integrations/osquery_manager/policies'],
       },
-    },
-  }),
-  useRouterNavigate: (path: string) => ({ onClick: jest.fn(), href: path }),
-  isModifiedEvent: () => false,
-  isLeftClickEvent: () => true,
-}));
-
-jest.mock('../actions/history_filter_storage', () => ({
-  getHistoryFilters: () => '',
-}));
-
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  pagePathGetters: {
-    integration_details_policies: () => ['', '/integrations/osquery_manager/policies'],
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { MainNavigation } from './main_navigation';
 import { OsqueryPageHeaderProvider, useOsquerySubpageTitle } from './osquery_page_header_context';
@@ -88,7 +99,7 @@ describe('MainNavigation', () => {
 
   it('does not call history.push when a tab is clicked', () => {
     const history = createMemoryHistory({ initialEntries: ['/history'] });
-    const pushSpy = jest.spyOn(history, 'push');
+    const pushSpy = vi.spyOn(history, 'push');
 
     render(
       <EuiProvider>

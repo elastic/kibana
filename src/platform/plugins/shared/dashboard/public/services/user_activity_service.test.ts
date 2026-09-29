@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { waitFor } from '@testing-library/react';
 import { buildMockDashboardApi } from '../mocks';
 import { coreServices } from './kibana_services';
@@ -15,7 +17,7 @@ import { BehaviorSubject } from 'rxjs';
 
 describe(`user activity service`, () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('tracks view', async () => {
@@ -164,7 +166,7 @@ describe(`user activity service`, () => {
 
   it('reports panel errors for refresh events', async () => {
     const { api } = buildMockDashboardApi();
-    const childrenSpy = jest.spyOn(api.children$, 'getValue');
+    const childrenSpy = vi.spyOn(api.children$, 'getValue');
     childrenSpy.mockReturnValue({
       child1: {},
       child2: { blockingError$: new BehaviorSubject(new Error('this is an error')) },

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -17,7 +20,7 @@ import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable
 import userEvent from '@testing-library/user-event';
 import { RELATED_INTEGRATION } from '../../../constants';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 const integrations: EuiSelectableOption[] = [
   {
@@ -35,8 +38,8 @@ const integrations: EuiSelectableOption[] = [
 
 describe('<IntegrationFilterButton />', () => {
   it('should render the component', async () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: { data: { query: { filterManager: jest.fn() } } },
+    (useKibana as Mock).mockReturnValue({
+      services: { data: { query: { filterManager: vi.fn() } } },
     });
 
     const { getByTestId, findByTestId } = render(
@@ -58,9 +61,9 @@ describe('<IntegrationFilterButton />', () => {
   });
 
   it('should add a negated filter to filterManager', async () => {
-    const getFilters = jest.fn().mockReturnValue([]);
-    const setFilters = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue({
+    const getFilters = vi.fn().mockReturnValue([]);
+    const setFilters = vi.fn();
+    (useKibana as Mock).mockReturnValue({
       services: { data: { query: { filterManager: { getFilters, setFilters } } } },
     });
 
@@ -91,7 +94,7 @@ describe('<IntegrationFilterButton />', () => {
   });
 
   it('should remove the negated filter from filterManager', async () => {
-    const getFilters = jest.fn().mockReturnValue([
+    const getFilters = vi.fn().mockReturnValue([
       {
         meta: {
           alias: null,
@@ -105,8 +108,8 @@ describe('<IntegrationFilterButton />', () => {
         query: { match_phrase: { [RELATED_INTEGRATION]: 'secondKey' } },
       },
     ]);
-    const setFilters = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue({
+    const setFilters = vi.fn();
+    (useKibana as Mock).mockReturnValue({
       services: { data: { query: { filterManager: { getFilters, setFilters } } } },
     });
 

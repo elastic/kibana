@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,12 +16,12 @@ import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
-jest.mock('./use_get_incident_types');
-jest.mock('./use_get_severity');
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('./use_get_incident_types');
+vi.mock('./use_get_severity');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
-const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
-const useGetSeverityMock = useGetSeverity as jest.Mock;
+const useGetIncidentTypesMock = useGetIncidentTypes as Mock;
+const useGetSeverityMock = useGetSeverity as Mock;
 
 const actionParams = {
   subAction: 'pushToService',
@@ -40,7 +43,7 @@ const connector = createMockActionConnector({
   name: 'Test',
 });
 
-const editAction = jest.fn();
+const editAction = vi.fn();
 const defaultProps = {
   actionParams,
   errors: { 'subActionParams.incident.name': [] },
@@ -69,7 +72,7 @@ describe('ResilientParamsFields renders', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
   });

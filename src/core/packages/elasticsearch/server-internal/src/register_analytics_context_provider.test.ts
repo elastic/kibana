@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import { firstValueFrom, of } from 'rxjs';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 
 describe('registerAnalyticsContextProvider', () => {
-  let analyticsMock: jest.Mocked<AnalyticsServiceSetup>;
+  let analyticsMock: Mocked<AnalyticsServiceSetup>;
 
   beforeEach(() => {
     analyticsMock = analyticsServiceMock.createAnalyticsServiceSetup();

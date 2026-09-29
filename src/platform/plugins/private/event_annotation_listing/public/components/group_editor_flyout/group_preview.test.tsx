@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getDefaultManualAnnotation } from '@kbn/event-annotation-common';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import React from 'react';
@@ -59,7 +61,7 @@ describe('group editor preview', () => {
             table: {} as Datatable,
             range: BRUSH_RANGE,
             column: 0,
-            preventDefault: jest.fn(),
+            preventDefault: vi.fn(),
           })
         }
       />
@@ -90,7 +92,7 @@ describe('group editor preview', () => {
         title: 'My Data View',
         timeFieldName: '@timestamp',
         fields: {
-          getByType: jest.fn<DataViewField[], []>(() => [
+          getByType: vi.fn<DataViewField[], []>(() => [
             {
               type: 'date',
               name: '@timestamp',
@@ -107,7 +109,7 @@ describe('group editor preview', () => {
         title: 'My Data View',
         timeFieldName: 'other-time-field',
         fields: {
-          getByType: jest.fn<DataViewField[], []>(() => [
+          getByType: vi.fn<DataViewField[], []>(() => [
             {
               type: 'date',
               name: '@timestamp',
@@ -122,7 +124,7 @@ describe('group editor preview', () => {
     ],
     LensEmbeddableComponent,
     searchSessionId: 'some-search-session-id',
-    refreshSearchSession: jest.fn(),
+    refreshSearchSession: vi.fn(),
     timePickerQuickRanges: [{ from: 'now/d', to: 'now/d', display: 'Today' }],
   };
 

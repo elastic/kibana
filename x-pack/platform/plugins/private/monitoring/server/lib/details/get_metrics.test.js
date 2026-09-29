@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getMetrics } from './get_metrics';
 import sinon from 'sinon';
 
@@ -16,17 +18,20 @@ import aggMetricsBuckets from './__fixtures__/agg_metrics_buckets.json';
 const min = 1498968000000; // 2017-07-02T04:00:00.000Z
 const max = 1499054399999; // 2017-07-03T03:59:59.999Z
 
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      config: {
-        ui: {
-          ccs: { enabled: true },
+vi.mock('../../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          config: {
+            ui: {
+              ccs: { enabled: true },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function getMockReq(metricsBuckets = []) {
   return {

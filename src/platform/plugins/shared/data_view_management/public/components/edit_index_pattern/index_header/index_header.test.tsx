@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -48,7 +50,7 @@ describe('IndexHeader', () => {
   });
 
   it('renders Edit as the primary action when the handler is provided', async () => {
-    const editIndexPatternClick = jest.fn();
+    const editIndexPatternClick = vi.fn();
     renderHeader({ editIndexPatternClick });
 
     await waitFor(() => {
@@ -57,7 +59,7 @@ describe('IndexHeader', () => {
   });
 
   it('does not render Edit when canSave is false', async () => {
-    renderHeader({ canSave: false, editIndexPatternClick: jest.fn() });
+    renderHeader({ canSave: false, editIndexPatternClick: vi.fn() });
 
     await waitFor(() => {
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
@@ -68,7 +70,7 @@ describe('IndexHeader', () => {
 
   it('deletes the data view from the AppHeader menu', async () => {
     const user = userEvent.setup();
-    const deleteIndexPatternClick = jest.fn();
+    const deleteIndexPatternClick = vi.fn();
     renderHeader({ deleteIndexPatternClick });
 
     await waitFor(() => {
@@ -84,7 +86,7 @@ describe('IndexHeader', () => {
   it('hides delete for managed data views', async () => {
     renderHeader({
       deleteIndexPatternClick: undefined,
-      editIndexPatternClick: jest.fn(),
+      editIndexPatternClick: vi.fn(),
     });
 
     await waitFor(() => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React, { useEffect } from 'react';
 import { waitFor, render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
@@ -15,14 +18,17 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { licenseService } from '../../hooks/use_license';
 import type { EventsViewerProps } from '../events_viewer';
 
-jest.mock('../../lib/kibana');
-jest.mock('../../utils/normalize_time_range');
+vi.mock('../../lib/kibana');
+vi.mock('../../utils/normalize_time_range');
 
-jest.mock(
+vi.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline',
-  () => ({
-    useAddBulkToTimelineAction: jest.fn().mockReturnValue([]),
-  })
+  () => {
+      const mocked = {
+        useAddBulkToTimelineAction: vi.fn().mockReturnValue([]),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 const startDate = '2022-03-22T22:10:56.794Z';
@@ -46,19 +52,22 @@ type Props = Partial<EventsViewerProps> & {
   entityType: EntityType;
 };
 
-const mockGetDefaultControlColumn = jest.fn();
-jest.mock('../../../timelines/components/timeline/body/control_columns', () => ({
-  getDefaultControlColumn: (props: number) => mockGetDefaultControlColumn(props),
-}));
+const mockGetDefaultControlColumn = vi.fn();
+vi.mock('../../../timelines/components/timeline/body/control_columns', () => {
+      const mocked = {
+      getDefaultControlColumn: (props: number) => mockGetDefaultControlColumn(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TEST_PREFIX = 'security_solution:sessions_viewer:sessions_view';
 
-const callFilters = jest.fn();
+const callFilters = vi.fn();
 
-jest.mock('../../hooks/use_license', () => {
+vi.mock('../../hooks/use_license', () => {
   const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
-    isEnterprise: jest.fn(() => false),
+    isPlatinumPlus: vi.fn(),
+    isEnterprise: vi.fn(() => false),
   };
   return {
     licenseService: licenseServiceInstance,
@@ -95,7 +104,7 @@ const SessionsViewerEventsViewer: React.FC<Props> = ({
   );
 };
 
-jest.mock('../events_viewer', () => {
+vi.mock('../events_viewer', () => {
   return {
     StatefulEventsViewer: SessionsViewerEventsViewer,
   };
@@ -105,8 +114,8 @@ mockGetDefaultControlColumn.mockReturnValue([
   {
     headerCellRender: () => <></>,
     id: 'default-timeline-control-column',
-    rowCellRender: jest.fn(),
-    width: jest.fn(),
+    rowCellRender: vi.fn(),
+    width: vi.fn(),
   },
 ]);
 
@@ -185,7 +194,7 @@ describe('SessionsView', () => {
   });
 
   it('Action tab should have 6 columns for Enterprise or above users', async () => {
-    const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+    const licenseServiceMock = licenseService as Mocked<typeof licenseService>;
 
     licenseServiceMock.isEnterprise.mockReturnValue(true);
     render(

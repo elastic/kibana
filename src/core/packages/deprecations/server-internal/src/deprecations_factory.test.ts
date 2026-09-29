@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 import type { DeprecationsFactoryConfig } from './deprecations_factory';
 import { DeprecationsFactory } from './deprecations_factory';
@@ -47,8 +49,8 @@ describe('DeprecationsFactory', () => {
       const deprecationsFactory = new DeprecationsFactory({ logger, config });
       const mockRegistry = 'mock-reg';
       const mockRegistries = {
-        set: jest.fn(),
-        get: jest.fn().mockReturnValue(mockRegistry),
+        set: vi.fn(),
+        get: vi.fn().mockReturnValue(mockRegistry),
       };
 
       // @ts-expect-error
@@ -64,8 +66,8 @@ describe('DeprecationsFactory', () => {
 
   describe('getAllDeprecations', () => {
     const mockDependencies = {
-      esClient: jest.fn(),
-      savedObjectsClient: jest.fn(),
+      esClient: vi.fn(),
+      savedObjectsClient: vi.fn(),
     } as unknown as GetDeprecationsContext;
 
     it('returns a flattened array of deprecations', async () => {
@@ -99,10 +101,10 @@ describe('DeprecationsFactory', () => {
       const mockPluginRegistry = deprecationsFactory.getRegistry('mockPlugin');
       const anotherMockPluginRegistry = deprecationsFactory.getRegistry('anotherMockPlugin');
       mockPluginRegistry.registerDeprecations({
-        getDeprecations: jest.fn().mockResolvedValue(mockPluginDeprecationsInfo),
+        getDeprecations: vi.fn().mockResolvedValue(mockPluginDeprecationsInfo),
       });
       anotherMockPluginRegistry.registerDeprecations({
-        getDeprecations: jest.fn().mockResolvedValue(anotherMockPluginDeprecationsInfo),
+        getDeprecations: vi.fn().mockResolvedValue(anotherMockPluginDeprecationsInfo),
       });
 
       const deprecations = await deprecationsFactory.getAllDeprecations(mockDependencies);
@@ -124,7 +126,7 @@ describe('DeprecationsFactory', () => {
 
       const deprecationsRegistry = deprecationsFactory.getRegistry(domainId);
       deprecationsRegistry.registerDeprecations({
-        getDeprecations: jest.fn().mockRejectedValue(mockError),
+        getDeprecations: vi.fn().mockRejectedValue(mockError),
       });
       const derpecations = await deprecationsFactory.getAllDeprecations(mockDependencies);
       expect(logger.warn).toHaveBeenCalledTimes(1);
@@ -164,10 +166,10 @@ describe('DeprecationsFactory', () => {
         },
       ];
       mockPluginRegistry.registerDeprecations({
-        getDeprecations: jest.fn().mockResolvedValue(mockPluginDeprecationsInfo),
+        getDeprecations: vi.fn().mockResolvedValue(mockPluginDeprecationsInfo),
       });
       anotherMockPluginRegistry.registerDeprecations({
-        getDeprecations: jest.fn().mockRejectedValue(mockError),
+        getDeprecations: vi.fn().mockRejectedValue(mockError),
       });
       const deprecations = await deprecationsFactory.getAllDeprecations(mockDependencies);
 
@@ -246,12 +248,12 @@ describe('DeprecationsFactory', () => {
 
       const mockPluginRegistry = deprecationsFactory.getRegistry('mockPlugin');
       mockPluginRegistry.registerDeprecations({
-        getDeprecations: jest.fn().mockResolvedValue(mockPluginDeprecationsInfo),
+        getDeprecations: vi.fn().mockResolvedValue(mockPluginDeprecationsInfo),
       });
 
       const anotherMockPluginRegistry = deprecationsFactory.getRegistry('anotherMockPlugin');
       anotherMockPluginRegistry.registerDeprecations({
-        getDeprecations: jest.fn().mockResolvedValue(anotherMockPluginDeprecationsInfo),
+        getDeprecations: vi.fn().mockResolvedValue(anotherMockPluginDeprecationsInfo),
       });
 
       const deprecations = await deprecationsFactory.getAllDeprecations(mockDependencies);
@@ -301,7 +303,7 @@ describe('DeprecationsFactory', () => {
 
       const mockPluginRegistry = deprecationsFactory.getRegistry('mockPlugin');
       mockPluginRegistry.registerDeprecations({
-        getDeprecations: jest.fn().mockResolvedValue(mockPluginDeprecationsInfo),
+        getDeprecations: vi.fn().mockResolvedValue(mockPluginDeprecationsInfo),
       });
 
       await expect(deprecationsFactory.getAllDeprecations(mockDependencies)).resolves.toBeDefined();
@@ -310,8 +312,8 @@ describe('DeprecationsFactory', () => {
 
   describe('getDeprecations', () => {
     const mockDependencies = {
-      esClient: jest.fn(),
-      savedObjectsClient: jest.fn(),
+      esClient: vi.fn(),
+      savedObjectsClient: vi.fn(),
     } as unknown as GetDeprecationsContext;
 
     it('returns a flattened array of DeprecationInfo', async () => {
@@ -337,7 +339,7 @@ describe('DeprecationsFactory', () => {
       ];
 
       deprecationsRegistry.registerDeprecations({
-        getDeprecations: jest.fn().mockResolvedValue(deprecationsBody),
+        getDeprecations: vi.fn().mockResolvedValue(deprecationsBody),
       });
 
       const deprecations = await deprecationsFactory.getDeprecations(
@@ -381,7 +383,7 @@ describe('DeprecationsFactory', () => {
       ];
 
       deprecationsRegistry.registerDeprecations({
-        getDeprecations: jest.fn().mockResolvedValue(deprecationsBody),
+        getDeprecations: vi.fn().mockResolvedValue(deprecationsBody),
       });
 
       const deprecations = await deprecationsFactory.getDeprecations(

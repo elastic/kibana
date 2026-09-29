@@ -5,41 +5,53 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useDispatch } from 'react-redux-v7';
 import { fetchNotesByDocumentIds } from '../store/notes.slice';
 import { useFetchNotes } from './use_fetch_notes';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 
-jest.mock('react-redux-v7', () => ({
-  useDispatch: jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useDispatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../store/notes.slice', () => ({
-  fetchNotesByDocumentIds: jest.fn(),
-}));
+vi.mock('../store/notes.slice', () => {
+      const mocked = {
+      fetchNotesByDocumentIds: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/user_privileges');
+vi.mock('../../common/components/user_privileges');
 
-const mockedUseDispatch = useDispatch as jest.MockedFunction<typeof useDispatch>;
+const mockedUseDispatch = useDispatch as MockedFunction<typeof useDispatch>;
 
 describe('useFetchNotes', () => {
-  let mockDispatch: jest.Mock;
+  let mockDispatch: Mock;
 
   beforeEach(() => {
-    mockDispatch = jest.fn();
+    mockDispatch = vi.fn();
     mockedUseDispatch.mockReturnValue(mockDispatch);
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       notesPrivileges: { read: true },
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return onLoad function', () => {
@@ -56,7 +68,7 @@ describe('useFetchNotes', () => {
   });
 
   it('should not dispatch action when user has insufficient privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       notesPrivileges: { read: false },
     });
     const { result } = renderHook(() => useFetchNotes());

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -28,7 +30,7 @@ const createMockEsClient = () => {
   return esClient;
 };
 
-const createMockSoClient = (existingIds?: string[]): jest.Mocked<SavedObjectsClientContract> => {
+const createMockSoClient = (existingIds?: string[]): Mocked<SavedObjectsClientContract> => {
   const soClient = savedObjectsClientMock.create();
   soClient.bulkGet.mockImplementation(async (objects) => ({
     saved_objects: objects.map((obj) =>

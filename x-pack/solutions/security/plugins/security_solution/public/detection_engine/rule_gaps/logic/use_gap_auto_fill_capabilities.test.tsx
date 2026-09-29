@@ -5,34 +5,48 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { useGapAutoFillCapabilities } from './use_gap_auto_fill_capabilities';
 
-const mockUseLicense = jest.fn();
-const mockUseUserPrivileges = jest.fn();
-const mockUseIsExperimentalFeatureEnabled = jest.fn();
-const mockUseProductFeatureKeys = jest.fn();
+const mockUseLicense = vi.fn();
+const mockUseUserPrivileges = vi.fn();
+const mockUseIsExperimentalFeatureEnabled = vi.fn();
+const mockUseProductFeatureKeys = vi.fn();
 
-jest.mock('../../../common/hooks/use_license', () => ({
-  useLicense: () => mockUseLicense(),
-}));
+vi.mock('../../../common/hooks/use_license', () => {
+      const mocked = {
+      useLicense: () => mockUseLicense(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/components/user_privileges', () => ({
-  useUserPrivileges: () => mockUseUserPrivileges(),
-}));
+vi.mock('../../../common/components/user_privileges', () => {
+      const mocked = {
+      useUserPrivileges: () => mockUseUserPrivileges(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
-}));
+vi.mock('../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_product_feature_keys', () => ({
-  useProductFeatureKeys: () => mockUseProductFeatureKeys(),
-}));
+vi.mock('../../../common/hooks/use_product_feature_keys', () => {
+      const mocked = {
+      useProductFeatureKeys: () => mockUseProductFeatureKeys(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useGapAutoFillCapabilities', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseUserPrivileges.mockReturnValue({
       rulesPrivileges: {
         rules: { read: true, edit: false },

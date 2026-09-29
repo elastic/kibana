@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { PipelinesTable } from './pipelines_table';
@@ -18,10 +20,10 @@ describe('PipelinesTable component', () => {
   let openPipeline;
 
   beforeEach(() => {
-    clonePipeline = jest.fn();
-    onDeleteSelectedPipelines = jest.fn();
-    onSelectionChange = jest.fn();
-    openPipeline = jest.fn();
+    clonePipeline = vi.fn();
+    onDeleteSelectedPipelines = vi.fn();
+    onSelectionChange = vi.fn();
+    openPipeline = vi.fn();
 
     props = {
       clonePipeline,

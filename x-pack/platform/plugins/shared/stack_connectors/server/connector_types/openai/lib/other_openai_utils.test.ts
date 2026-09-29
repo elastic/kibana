@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/logging';
 import {
   sanitizeRequest,
@@ -280,7 +282,7 @@ describe('Other (OpenAI Compatible Service) Utils', () => {
     });
 
     describe('getPKISSLOverrides', () => {
-      const logger = { error: jest.fn() } as unknown as Logger;
+      const logger = { error: vi.fn() } as unknown as Logger;
       const validCert = Buffer.from(
         '-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----'
       ).toString('base64');

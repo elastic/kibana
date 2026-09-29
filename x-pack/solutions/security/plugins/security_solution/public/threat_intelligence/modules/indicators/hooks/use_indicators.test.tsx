@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import type { UseIndicatorsParams } from './use_indicators';
 import { useIndicators } from './use_indicators';
@@ -12,7 +15,7 @@ import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { createFetchIndicators } from '../services/fetch_indicators';
 import { mockTimeRange } from '../../../mocks/mock_indicators_filters_context';
 
-jest.mock('../services/fetch_indicators');
+vi.mock('../services/fetch_indicators');
 
 const useIndicatorsParams: UseIndicatorsParams = {
   filters: [],
@@ -30,13 +33,13 @@ const renderUseIndicators = (initialProps = useIndicatorsParams) =>
   });
 
 describe('useIndicators()', () => {
-  type MockedCreateFetchIndicators = jest.MockedFunction<typeof createFetchIndicators>;
-  let indicatorsQuery: jest.MockedFunction<ReturnType<typeof createFetchIndicators>>;
+  type MockedCreateFetchIndicators = MockedFunction<typeof createFetchIndicators>;
+  let indicatorsQuery: MockedFunction<ReturnType<typeof createFetchIndicators>>;
 
-  beforeEach(jest.clearAllMocks);
+  beforeEach(vi.clearAllMocks);
 
   beforeEach(() => {
-    indicatorsQuery = jest.fn();
+    indicatorsQuery = vi.fn();
     (createFetchIndicators as MockedCreateFetchIndicators).mockReturnValue(indicatorsQuery);
   });
 

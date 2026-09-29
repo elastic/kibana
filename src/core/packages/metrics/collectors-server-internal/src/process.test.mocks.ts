@@ -7,14 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { collectorMock } from './mocks_internal';
 
 export const mockEventLoopDelayMonitor = collectorMock.create();
-jest.doMock('./event_loop_delays_monitor', () => ({
-  EventLoopDelaysMonitor: jest.fn().mockImplementation(() => mockEventLoopDelayMonitor),
-}));
+vi.doMock('./event_loop_delays_monitor', () => {
+      const mocked = {
+      EventLoopDelaysMonitor: vi.fn().mockImplementation(() => mockEventLoopDelayMonitor),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockEventLoopUtilizationMonitor = collectorMock.create();
-jest.doMock('./event_loop_utilization_monitor', () => ({
-  EventLoopUtilizationMonitor: jest.fn().mockImplementation(() => mockEventLoopUtilizationMonitor),
-}));
+vi.doMock('./event_loop_utilization_monitor', () => {
+      const mocked = {
+      EventLoopUtilizationMonitor: vi.fn().mockImplementation(() => mockEventLoopUtilizationMonitor),
+    };
+      return { ...mocked, default: mocked };
+    });

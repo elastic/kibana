@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
@@ -13,8 +15,8 @@ import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 
 const mockSpacesApi = spacesPluginMock.createStartContract();
 
-const mockRedirectLegacyUrl = jest.mocked(mockSpacesApi.ui.redirectLegacyUrl);
-const mockGetLegacyUrlConflict = jest.mocked(mockSpacesApi.ui.components.getLegacyUrlConflict);
+const mockRedirectLegacyUrl = vi.mocked(mockSpacesApi.ui.redirectLegacyUrl);
+const mockGetLegacyUrlConflict = vi.mocked(mockSpacesApi.ui.components.getLegacyUrlConflict);
 
 describe('<LegacyUrlConflictCallOut />', () => {
   beforeEach(() => {

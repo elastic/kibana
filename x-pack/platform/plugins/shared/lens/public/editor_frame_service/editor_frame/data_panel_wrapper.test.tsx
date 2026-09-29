@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { DataPanelWrapper } from './data_panel_wrapper';
@@ -25,13 +27,13 @@ describe('Data Panel Wrapper', () => {
     let store: LensRootStore;
 
     beforeEach(async () => {
-      const DataPanelComponent = jest.fn().mockImplementation(() => <div />);
+      const DataPanelComponent = vi.fn().mockImplementation(() => <div />);
 
       const datasourceMap = {
         activeDatasource: {
           DataPanelComponent,
-          getUsedDataViews: jest.fn(),
-          getLayers: jest.fn(() => []),
+          getUsedDataViews: vi.fn(),
+          getLayers: vi.fn(() => []),
         } as unknown as Datasource,
       };
       const renderResult = renderWithReduxStore(

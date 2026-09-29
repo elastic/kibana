@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   loggingSystemMock,
   savedObjectsClientMock as mockSavedObjectsClient,
@@ -21,33 +24,42 @@ import type { ExperimentalFeatures } from '../../../../../common/experimental_fe
 // Must match watchlistConfigTypeName in the source
 const WATCHLIST_CONFIG_TYPE_NAME = 'watchlist-config';
 
-const mockWatchlistGet = jest.fn();
-const mockWatchlistCreate = jest.fn();
-const mockAddEntitySourceReference = jest.fn();
-const mockEntitySourceCreate = jest.fn();
-const mockEntitySourceList = jest.fn();
+const mockWatchlistGet = vi.fn();
+const mockWatchlistCreate = vi.fn();
+const mockAddEntitySourceReference = vi.fn();
+const mockEntitySourceCreate = vi.fn();
+const mockEntitySourceList = vi.fn();
 
-jest.mock('../entity_sources/infra', () => ({
-  WatchlistEntitySourceClient: jest.fn().mockImplementation(() => ({
-    create: (...args: unknown[]) => mockEntitySourceCreate(...args),
-    list: (...args: unknown[]) => mockEntitySourceList(...args),
-  })),
-}));
+vi.mock('../entity_sources/infra', () => {
+      const mocked = {
+      WatchlistEntitySourceClient: vi.fn().mockImplementation(() => ({
+        create: (...args: unknown[]) => mockEntitySourceCreate(...args),
+        list: (...args: unknown[]) => mockEntitySourceList(...args),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../management/watchlist_config', () => ({
-  WatchlistConfigClient: jest.fn().mockImplementation(() => ({
-    get: (...args: unknown[]) => mockWatchlistGet(...args),
-    create: (...args: unknown[]) => mockWatchlistCreate(...args),
-    addEntitySourceReference: (...args: unknown[]) => mockAddEntitySourceReference(...args),
-  })),
-}));
+vi.mock('../management/watchlist_config', () => {
+      const mocked = {
+      WatchlistConfigClient: vi.fn().mockImplementation(() => ({
+        get: (...args: unknown[]) => mockWatchlistGet(...args),
+        create: (...args: unknown[]) => mockWatchlistCreate(...args),
+        addEntitySourceReference: (...args: unknown[]) => mockAddEntitySourceReference(...args),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Captured reference so tests can control soClient behaviour (e.g. cleanup checks)
 let mockScopedSoClient: ReturnType<typeof mockSavedObjectsClient.create>;
 
-jest.mock('../../risk_score/tasks/helpers', () => ({
-  buildScopedInternalSavedObjectsClientUnsafe: jest.fn(() => mockScopedSoClient),
-}));
+vi.mock('../../risk_score/tasks/helpers', () => {
+      const mocked = {
+      buildScopedInternalSavedObjectsClientUnsafe: vi.fn(() => mockScopedSoClient),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const buildSpacesResponse = (spaceIds: string[]) => ({
   page: 1,
@@ -70,12 +82,12 @@ const buildEmptySpacesResponse = () => ({
 });
 
 describe('installPrebuiltWatchlists', function () {
-  const mockGetStartServices = jest.fn();
+  const mockGetStartServices = vi.fn();
   const mockAuditLogger = auditLoggerMock.create();
   const mockLogger = loggingSystemMock.createLogger();
   const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   const mockSoClient = mockSavedObjectsClient.create();
-  let mockCreateInternalRepository: jest.Mock;
+  let mockCreateInternalRepository: Mock;
 
   const callInstall = () =>
     installPrebuiltWatchlists({
@@ -97,7 +109,7 @@ describe('installPrebuiltWatchlists', function () {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockScopedSoClient = mockSavedObjectsClient.create();
     // Default: find returns nothing, so the fast-path (canonical ID check via watchlistClient.get)
     // is the only lookup that matters for existing tests.
@@ -115,7 +127,7 @@ describe('installPrebuiltWatchlists', function () {
     // Mirror core `find` behavior: the hidden `space` type is only queryable when
     // it is explicitly passed via `includedHiddenTypes`; otherwise `find` returns
     // an empty result. This guards against regressing back to an un-scoped repo.
-    mockCreateInternalRepository = jest
+    mockCreateInternalRepository = vi
       .fn()
       .mockImplementation((includedHiddenTypes?: string[]) => {
         if (includedHiddenTypes?.includes('space')) {

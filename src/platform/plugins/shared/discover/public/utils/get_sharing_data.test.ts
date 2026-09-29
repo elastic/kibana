@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import type { RangeFilter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -401,8 +404,8 @@ describe('getSharingData', () => {
     } as RangeFilter;
     searchSourceMock.setField('filter', [appFilter]);
     const servicesMock = createDiscoverServicesMock();
-    servicesMock.data.query.timefilter.timefilter.createFilter = jest.fn(() => absoluteTimeFilter);
-    servicesMock.data.query.timefilter.timefilter.createRelativeFilter = jest.fn(
+    servicesMock.data.query.timefilter.timefilter.createFilter = vi.fn(() => absoluteTimeFilter);
+    servicesMock.data.query.timefilter.timefilter.createRelativeFilter = vi.fn(
       () => relativeTimeFilter
     );
 
@@ -462,9 +465,9 @@ describe('getSharingData', () => {
       to: '2024-01-01T00:15:00.000Z',
     };
 
-    servicesMock.data.query.timefilter.timefilter.createFilter = jest.fn((index, timeRange) => {
+    servicesMock.data.query.timefilter.timefilter.createFilter = vi.fn((index, timeRange) => {
       return timeRange ? lastFetchAbsoluteFilter : defaultAbsoluteFilter;
-    }) as jest.MockedFunction<typeof servicesMock.data.query.timefilter.timefilter.createFilter>;
+    }) as MockedFunction<typeof servicesMock.data.query.timefilter.timefilter.createFilter>;
 
     const result = await getSharingData(
       searchSourceMock,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -12,47 +14,68 @@ import { Footer } from './footer';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { ADD_TO_CASE_TEST_ID } from '../../../../../common/cases/attachments/entity/test_ids';
 
-jest.mock('@kbn/entity-store/public', () => ({
-  useEntityStoreEuidApi: jest.fn(() => null),
-}));
+vi.mock('@kbn/entity-store/public', () => {
+      const mocked = {
+      useEntityStoreEuidApi: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: jest.fn(() => true),
-}));
+vi.mock('../../../../common/hooks/is_in_security_app', () => {
+      const mocked = {
+      useIsInSecurityApp: vi.fn(() => true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseIsExperimentalFeatureEnabled = jest.fn();
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
-}));
+const mockUseIsExperimentalFeatureEnabled = vi.fn();
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = jest.fn();
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => mockUseKibana(),
-}));
+const mockUseKibana = vi.fn();
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Render additionalItems inline so tests can assert on them without opening the popover.
-jest.mock('../../../../flyout/entity_details/shared/components/take_action', () => ({
-  TakeAction: ({
-    additionalItems,
-  }: {
-    additionalItems?: (close: () => void) => React.ReactElement[];
-  }) => <div data-test-subj="mockTakeAction">{additionalItems?.(() => {}) ?? []}</div>,
-}));
+vi.mock('../../../../flyout/entity_details/shared/components/take_action', () => {
+      const mocked = {
+      TakeAction: ({
+        additionalItems,
+      }: {
+        additionalItems?: (close: () => void) => React.ReactElement[];
+      }) => <div data-test-subj="mockTakeAction">{additionalItems?.(() => {}) ?? []}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../entity_analytics/components/ai_assistant_button/ai_assistant_button',
-  () => ({
-    AiAssistantButton: ({ entityName }: { entityName: string }) => (
-      <div data-test-subj="mockAiAssistantButton">{entityName}</div>
-    ),
-  })
+  () => {
+      const mocked = {
+        AiAssistantButton: ({ entityName }: { entityName: string }) => (
+          <div data-test-subj="mockAiAssistantButton">{entityName}</div>
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../../../cases/attachments/entity/components/add_to_case', () => ({
-  AddToCase: ({ 'data-test-subj': testSubj }: { 'data-test-subj': string }) => (
-    <div data-test-subj={testSubj} />
-  ),
-}));
+vi.mock('../../../../cases/attachments/entity/components/add_to_case', () => {
+      const mocked = {
+      AddToCase: ({ 'data-test-subj': testSubj }: { 'data-test-subj': string }) => (
+        <div data-test-subj={testSubj} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const USER_IDENTITY_FIELDS = { 'user.name': 'alice' };
 const ENTITY_STORE_RECORD = {
@@ -86,7 +109,7 @@ const renderFooter = (
 };
 
 describe('Footer – entity attachment actions', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders the Add to case action when all conditions are met', () => {
     renderFooter(true, true, ENTITY_STORE_RECORD);
@@ -120,7 +143,7 @@ describe('Footer – entity attachment actions', () => {
 });
 
 describe('Footer – AiAssistantButton entity name', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('passes the raw userName prop, not a value derived from identityFields', () => {
     // Regression for security-team/kibana#277619: for non-local users, identityFields can

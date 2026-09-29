@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { range } from 'lodash';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -60,7 +62,7 @@ const getContextInitialized = async (
 
 describe('createResourceInstallationHelper', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test(`should wait for commonInitFunction to resolve before calling initFns for registered contexts`, async () => {
@@ -216,7 +218,7 @@ describe('createResourceInstallationHelper', () => {
   });
 
   test(`should retry context init function`, async () => {
-    const initFnErrorOnce = jest
+    const initFnErrorOnce = vi
       .fn()
       .mockImplementationOnce(() => {
         throw new Error('first error');
@@ -263,7 +265,7 @@ describe('createResourceInstallationHelper', () => {
   });
 
   test(`should throttle retry`, async () => {
-    const initFnErrorOnce = jest
+    const initFnErrorOnce = vi
       .fn()
       .mockImplementationOnce(() => {
         throw new Error('first error');
@@ -322,7 +324,7 @@ describe('createResourceInstallationHelper', () => {
     const numContexts = 3 * MAX_CONCURRENT_RESOURCE_INSTALLATIONS;
     let inFlight = 0;
     let maxInFlight = 0;
-    const slowInitFn = jest.fn(async () => {
+    const slowInitFn = vi.fn(async () => {
       inFlight++;
       maxInFlight = Math.max(maxInFlight, inFlight);
       await new Promise((r) => setTimeout(r, 10));

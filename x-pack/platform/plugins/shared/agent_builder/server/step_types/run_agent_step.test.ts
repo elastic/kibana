@@ -5,18 +5,26 @@
  * 2.0.
  */
 
-jest.mock('@elastic/schemas/es/tools/manifest.js', () => ({
-  esManifest: [
-    { id: 'indices.create' },
-    { id: 'indices.delete' },
-    { id: 'indices.update_aliases' },
-    { id: 'bulk' },
-  ],
-}));
+import { vi } from 'vitest';
 
-jest.mock('@elastic/schemas/kibana/tools/manifest.js', () => ({
-  kibanaManifest: [{ id: 'alerting.delete-alerting-rule-id' }],
-}));
+vi.mock('@elastic/schemas/es/tools/manifest.js', () => {
+      const mocked = {
+      esManifest: [
+        { id: 'indices.create' },
+        { id: 'indices.delete' },
+        { id: 'indices.update_aliases' },
+        { id: 'bulk' },
+      ],
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@elastic/schemas/kibana/tools/manifest.js', () => {
+      const mocked = {
+      kibanaManifest: [{ id: 'alerting.delete-alerting-rule-id' }],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { of, throwError } from 'rxjs';
@@ -75,17 +83,17 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       config: {},
       rawInput: {},
       contextManager: {
-        getFakeRequest: jest.fn().mockReturnValue(fakeRequest),
-        getContext: jest.fn().mockReturnValue({ execution: { id: 'exec-1' } }),
-        getScopedEsClient: jest.fn(),
-        renderInputTemplate: jest.fn(),
-        callKibanaApi: jest.fn(),
+        getFakeRequest: vi.fn().mockReturnValue(fakeRequest),
+        getContext: vi.fn().mockReturnValue({ execution: { id: 'exec-1' } }),
+        getScopedEsClient: vi.fn(),
+        renderInputTemplate: vi.fn(),
+        callKibanaApi: vi.fn(),
       },
       logger: {
-        debug: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
-        error: jest.fn(),
+        debug: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
       },
       abortSignal: new AbortController().signal,
       stepId: 'test-step',
@@ -95,7 +103,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
   };
 
   const createExecutionMock = (events$: any) => ({
-    executeAgent: jest.fn().mockResolvedValue({ executionId: 'exec-1', events$ }),
+    executeAgent: vi.fn().mockResolvedValue({ executionId: 'exec-1', events$ }),
   });
 
   it('creates and persists a conversation when create_conversation is true, and emits conversation_id', async () => {
@@ -707,10 +715,10 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     ) => ({
       searchInferenceEndpoints: {
         features: {
-          get: jest.fn().mockReturnValue(feature),
+          get: vi.fn().mockReturnValue(feature),
         },
         endpoints: {
-          getForFeature: jest
+          getForFeature: vi
             .fn()
             .mockResolvedValue({ endpoints, warnings: [], soEntryFound: false }),
         },
@@ -1088,7 +1096,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
 
     it('preserves partial token counts when the event stream errors mid-execution', async () => {
       const { concat, throwError: rxThrowError } =
-        jest.requireActual<typeof import('rxjs')>('rxjs');
+        (require('rxjs') as typeof import('rxjs'));
 
       // Cold observable: emits one round with tokens, then errors
       const events$ = concat(

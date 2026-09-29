@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 
 import { IndexPatternsMissingPromptComponent } from './index_patterns_missing_prompt';
 import { TestProviders } from '../../../../common/mock';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('IndexPatternsMissingPrompt', () => {
   test('renders correctly against snapshot', () => {

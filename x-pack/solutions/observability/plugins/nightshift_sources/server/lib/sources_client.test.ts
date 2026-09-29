@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { forbidden } from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -90,10 +93,10 @@ const emptyFind = {
 const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
   const soClient = savedObjectsClientMock.create();
   const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
-  const viewsClient: jest.Mocked<SourceViewsClient> = {
-    putView: jest.fn().mockResolvedValue(undefined),
-    getView: jest.fn().mockResolvedValue(undefined),
-    deleteView: jest.fn().mockResolvedValue(undefined),
+  const viewsClient: Mocked<SourceViewsClient> = {
+    putView: vi.fn().mockResolvedValue(undefined),
+    getView: vi.fn().mockResolvedValue(undefined),
+    deleteView: vi.fn().mockResolvedValue(undefined),
   };
   const logger = loggingSystemMock.createLogger();
 
@@ -593,8 +596,8 @@ describe('SourcesClient', () => {
     });
 
     it('moves esql_updated_at forward when the clock does not', async () => {
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date('2026-09-01T00:00:00.000Z'));
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-09-01T00:00:00.000Z'));
       try {
         const { client, soClient } = setup();
         soClient.get.mockResolvedValue(makeSavedObject());
@@ -606,7 +609,7 @@ describe('SourcesClient', () => {
         });
         expect(sameMs.esql_updated_at).toBe('2026-09-01T00:00:00.001Z');
 
-        jest.setSystemTime(new Date('2026-08-01T00:00:00.000Z'));
+        vi.setSystemTime(new Date('2026-08-01T00:00:00.000Z'));
         const behind = await client.update('source-1', {
           title: 'nginx errors',
           tags: ['nginx'],
@@ -614,7 +617,7 @@ describe('SourcesClient', () => {
         });
         expect(behind.esql_updated_at).toBe('2026-09-01T00:00:00.001Z');
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 

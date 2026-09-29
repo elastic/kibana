@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
 import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
@@ -28,15 +31,15 @@ import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator'
 
 import { stepRemoveLegacyTemplates } from './step_remove_legacy_templates';
 
-jest.mock('../../../elasticsearch/template/remove_legacy');
+vi.mock('../../../elasticsearch/template/remove_legacy');
 
-const mockedRemoveLegacyTemplates = removeLegacyTemplates as jest.MockedFunction<
+const mockedRemoveLegacyTemplates = removeLegacyTemplates as MockedFunction<
   typeof removeLegacyTemplates
 >;
 
 describe('stepRemoveLegacyTemplates', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let esClient: Mocked<ElasticsearchClient>;
   const logger = loggingSystemMock.createLogger();
 
   const getMockInstalledPackageSo = (
@@ -66,7 +69,7 @@ describe('stepRemoveLegacyTemplates', () => {
     appContextService.start(createAppContextStartContractMock());
   });
   afterEach(async () => {
-    jest.mocked(mockedRemoveLegacyTemplates).mockReset();
+    vi.mocked(mockedRemoveLegacyTemplates).mockReset();
   });
 
   const packageInstallContext = {
@@ -114,7 +117,7 @@ describe('stepRemoveLegacyTemplates', () => {
     await stepRemoveLegacyTemplates({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger,
       packageInstallContext,
@@ -133,11 +136,11 @@ describe('stepRemoveLegacyTemplates', () => {
   });
 
   it('Should catch the error when removeLegacyTemplates fails', async () => {
-    jest.mocked(mockedRemoveLegacyTemplates).mockRejectedValue(Error('Error!'));
+    vi.mocked(mockedRemoveLegacyTemplates).mockRejectedValue(Error('Error!'));
     await stepRemoveLegacyTemplates({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger,
       packageInstallContext,

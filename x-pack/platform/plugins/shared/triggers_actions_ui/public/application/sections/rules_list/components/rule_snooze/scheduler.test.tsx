@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { RuleSnoozeScheduler, hiddenCalendarClassName } from './scheduler';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  const ReactMock = jest.requireActual('react');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
+  const ReactMock = require('react');
 
   return {
     ...actual,
@@ -23,9 +25,12 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting: jest.fn(() => 'UTC'),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useUiSetting: vi.fn(() => 'UTC'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('RuleSnoozeScheduler', () => {
   test('uses an owned class instead of the legacy Bootstrap hidden class', () => {
@@ -33,9 +38,9 @@ describe('RuleSnoozeScheduler', () => {
 
     const { container } = renderWithI18n(
       <RuleSnoozeScheduler
-        onClose={jest.fn()}
-        onSaveSchedule={jest.fn()}
-        onCancelSchedules={jest.fn()}
+        onClose={vi.fn()}
+        onSaveSchedule={vi.fn()}
+        onCancelSchedules={vi.fn()}
         initialSchedule={null}
         isLoading={false}
         hasTitle={false}

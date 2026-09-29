@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import sinon from 'sinon';
 import type { TransportResult, estypes } from '@elastic/elasticsearch';
@@ -80,8 +82,8 @@ describe('utils', () => {
 
   afterEach(() => {
     clock.restore();
-    jest.clearAllMocks();
-    jest.resetAllMocks();
+    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('generateId', () => {
@@ -335,7 +337,7 @@ describe('utils', () => {
 
     beforeEach(() => {
       alerting = alertsMock.createSetup();
-      alerting.getConfig = jest.fn().mockReturnValue({ run: { alerts: { max: 1000 } } });
+      alerting.getConfig = vi.fn().mockReturnValue({ run: { alerts: { max: 1000 } } });
     });
 
     test('should return a single tuple if no gap', async () => {
@@ -496,7 +498,7 @@ describe('utils', () => {
     });
 
     test('should use alerting framework max alerts value if maxSignals is greater than limit', async () => {
-      alerting.getConfig = jest.fn().mockReturnValue({ run: { alerts: { max: 10 } } });
+      alerting.getConfig = vi.fn().mockReturnValue({ run: { alerts: { max: 10 } } });
       const { tuples, warningStatusMessage } = await getRuleRangeTuples({
         previousStartedAt: moment().subtract(30, 's').toDate(),
         startedAt: moment().subtract(30, 's').toDate(),
@@ -600,7 +602,7 @@ describe('utils', () => {
     test('it successfully returns array of exception list items', async () => {
       listMock.getExceptionListClient = () =>
         ({
-          findExceptionListsItemPointInTimeFinder: jest
+          findExceptionListsItemPointInTimeFinder: vi
             .fn()
             .mockImplementationOnce(({ executeFunctionOnStream }) => {
               executeFunctionOnStream({ data: [getExceptionListItemSchemaMock()] });
@@ -631,7 +633,7 @@ describe('utils', () => {
       const err = new Error('error fetching list');
       listMock.getExceptionListClient = () =>
         ({
-          findExceptionListsItemPointInTimeFinder: jest.fn().mockRejectedValue(err),
+          findExceptionListsItemPointInTimeFinder: vi.fn().mockRejectedValue(err),
         } as unknown as ExceptionListClient);
 
       await expect(() =>
@@ -648,7 +650,7 @@ describe('utils', () => {
     test('it returns empty array if "findExceptionListsItem" returns null', async () => {
       listMock.getExceptionListClient = () =>
         ({
-          findExceptionListsItem: jest.fn().mockResolvedValue(null),
+          findExceptionListsItem: vi.fn().mockResolvedValue(null),
         } as unknown as ExceptionListClient);
 
       const exceptions = await getExceptions({

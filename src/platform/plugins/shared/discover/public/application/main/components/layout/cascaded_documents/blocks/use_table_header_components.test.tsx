@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -21,7 +23,7 @@ import {
 } from './use_table_header_components';
 
 describe('useTableHeaderComponents', () => {
-  const mockCascadeGroupingChangeHandler = jest.fn();
+  const mockCascadeGroupingChangeHandler = vi.fn();
 
   it('returns a function to render the group by selector', () => {
     const { result } = renderHook(() =>
@@ -136,11 +138,11 @@ describe('useTableHeaderComponents', () => {
 });
 
 describe('useEsqlDataCascadeHeaderComponent', () => {
-  const mockCascadeGroupingChangeHandler = jest.fn();
+  const mockCascadeGroupingChangeHandler = vi.fn();
 
   // Renders the hits-counter-variant option it's called with, so the test can assert
   // on it, in place of the real hit-count toggle (which owns its own total-hits number).
-  const renderToggleProbe = jest.fn((options?: RenderViewModeToggleOptions) => (
+  const renderToggleProbe = vi.fn((options?: RenderViewModeToggleOptions) => (
     <div data-test-subj="toggle-probe">{options?.hitsCounterVariant}</div>
   ));
 
@@ -158,7 +160,7 @@ describe('useEsqlDataCascadeHeaderComponent', () => {
       result.current({
         currentSelectedColumns: ['category'],
         availableColumns: ['category'],
-        onGroupSelection: jest.fn(),
+        onGroupSelection: vi.fn(),
         selectedRows: [],
       });
 

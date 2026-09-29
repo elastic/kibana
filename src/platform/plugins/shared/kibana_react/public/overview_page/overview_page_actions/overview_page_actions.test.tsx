@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { overviewPageActions } from './overview_page_actions';
 import type { ApplicationStart } from '@kbn/core/public';
 
-afterAll(() => jest.clearAllMocks());
+afterAll(() => vi.clearAllMocks());
 
 const applicationStartMock = {
   capabilities: { navLinks: { management: true, dev_tools: true } },

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Capabilities } from '@kbn/core/public';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -40,16 +43,16 @@ describe('getDiscoverTimeRangeAroundTimestamp', () => {
 
 describe('getDiscoverHrefForRuleQuery', () => {
   const timeRange = { from: 'now-7d', to: 'now' };
-  const getRedirectUrl = jest.fn(() => '/app/discover#/?_a=...');
+  const getRedirectUrl = vi.fn(() => '/app/discover#/?_a=...');
   const share = sharePluginMock.createStartContract();
   const uiSettings = uiSettingsServiceMock.createStartContract();
-  (uiSettings.get as jest.Mock).mockImplementation((key: string) =>
+  (uiSettings.get as Mock).mockImplementation((key: string) =>
     key === ENABLE_ESQL ? true : false
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    share.url.locators.get = jest.fn().mockReturnValue({
+    vi.clearAllMocks();
+    share.url.locators.get = vi.fn().mockReturnValue({
       getRedirectUrl,
     });
   });
@@ -94,7 +97,7 @@ describe('getDiscoverHrefForRuleQuery', () => {
   });
 
   it('returns undefined when ES|QL is disabled in UI settings', () => {
-    (uiSettings.get as jest.Mock).mockImplementation((key: string) =>
+    (uiSettings.get as Mock).mockImplementation((key: string) =>
       key === ENABLE_ESQL ? false : defaultUiSettingsGet(key)
     );
 
@@ -125,16 +128,16 @@ describe('getDiscoverHrefForRuleQuery', () => {
 });
 
 describe('getDiscoverHrefForRuleAndEpisodeTimestamp', () => {
-  const getRedirectUrl = jest.fn(() => '/app/discover#/?_a=...');
+  const getRedirectUrl = vi.fn(() => '/app/discover#/?_a=...');
   const share = sharePluginMock.createStartContract();
   const uiSettings = uiSettingsServiceMock.createStartContract();
-  (uiSettings.get as jest.Mock).mockImplementation((key: string) =>
+  (uiSettings.get as Mock).mockImplementation((key: string) =>
     key === ENABLE_ESQL ? true : false
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    share.url.locators.get = jest.fn().mockReturnValue({
+    vi.clearAllMocks();
+    share.url.locators.get = vi.fn().mockReturnValue({
       getRedirectUrl,
     });
   });

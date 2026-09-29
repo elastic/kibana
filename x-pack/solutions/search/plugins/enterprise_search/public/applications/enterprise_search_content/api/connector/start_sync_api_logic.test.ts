@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -14,7 +16,7 @@ import { startSync } from './start_sync_api_logic';
 describe('startSync', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('generateApiKey', () => {
     it('calls correct api', async () => {

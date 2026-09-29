@@ -5,128 +5,163 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import type { PackageListItem } from '../../../../../types';
 
-const mockUseAgentless = jest.fn();
-const mockUseGetPackageVerificationKeyId = jest.fn();
-const mockUseGetPackagesQuery = jest.fn();
-const mockUseGetCategoriesQuery = jest.fn();
-const mockUseGetAppendCustomIntegrationsQuery = jest.fn();
-const mockUseGetReplacementCustomIntegrationsQuery = jest.fn();
-const mockUseMergeEprPackagesWithReplacements = jest.fn();
-const mockUseBuildIntegrationsUrl = jest.fn();
+const mockUseAgentless = vi.fn();
+const mockUseGetPackageVerificationKeyId = vi.fn();
+const mockUseGetPackagesQuery = vi.fn();
+const mockUseGetCategoriesQuery = vi.fn();
+const mockUseGetAppendCustomIntegrationsQuery = vi.fn();
+const mockUseGetReplacementCustomIntegrationsQuery = vi.fn();
+const mockUseMergeEprPackagesWithReplacements = vi.fn();
+const mockUseBuildIntegrationsUrl = vi.fn();
 
-jest.mock(
+vi.mock(
   '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology',
-  () => ({
-    useAgentless: () => mockUseAgentless(),
-  })
+  () => {
+      const mocked = {
+        useAgentless: () => mockUseAgentless(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../../../../hooks', () => ({
-  useGetPackagesQuery: (params: any) => mockUseGetPackagesQuery(params),
-  useGetCategoriesQuery: (params: any) => mockUseGetCategoriesQuery(params),
-  useGetAppendCustomIntegrationsQuery: () => mockUseGetAppendCustomIntegrationsQuery(),
-  useGetReplacementCustomIntegrationsQuery: () => mockUseGetReplacementCustomIntegrationsQuery(),
-  useGetPackageVerificationKeyId: () => mockUseGetPackageVerificationKeyId(),
-  useStartServices: () => ({
-    featureFlags: { useBooleanValue: jest.fn().mockReturnValue(false) },
-    application: {
-      navigateToApp: jest.fn(),
-      getUrlForApp: jest.fn().mockReturnValue('/app/onboarding/aws'),
-    },
-  }),
-}));
+vi.mock('../../../../../hooks', () => {
+      const mocked = {
+      useGetPackagesQuery: (params: any) => mockUseGetPackagesQuery(params),
+      useGetCategoriesQuery: (params: any) => mockUseGetCategoriesQuery(params),
+      useGetAppendCustomIntegrationsQuery: () => mockUseGetAppendCustomIntegrationsQuery(),
+      useGetReplacementCustomIntegrationsQuery: () => mockUseGetReplacementCustomIntegrationsQuery(),
+      useGetPackageVerificationKeyId: () => mockUseGetPackageVerificationKeyId(),
+      useStartServices: () => ({
+        featureFlags: { useBooleanValue: vi.fn().mockReturnValue(false) },
+        application: {
+          navigateToApp: vi.fn(),
+          getUrlForApp: vi.fn().mockReturnValue('/app/onboarding/aws'),
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_merge_epr_with_replacements', () => ({
-  useMergeEprPackagesWithReplacements: (epr: any, custom: any) =>
-    mockUseMergeEprPackagesWithReplacements(epr, custom),
-}));
+vi.mock('../../../../../hooks/use_merge_epr_with_replacements', () => {
+      const mocked = {
+      useMergeEprPackagesWithReplacements: (epr: any, custom: any) =>
+        mockUseMergeEprPackagesWithReplacements(epr, custom),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_build_integrations_url', () => ({
-  useBuildIntegrationsUrl: () => mockUseBuildIntegrationsUrl(),
-}));
+vi.mock('./use_build_integrations_url', () => {
+      const mocked = {
+      useBuildIntegrationsUrl: () => mockUseBuildIntegrationsUrl(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./apply_grouping', () => ({
-  applyGrouping: (params: any) => mockApplyGrouping(params),
-}));
+vi.mock('./apply_grouping', () => {
+      const mocked = {
+      applyGrouping: (params: any) => mockApplyGrouping(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockExperimentalFeaturesServiceGet = jest.fn();
-const mockApplyGrouping = jest.fn();
+const mockExperimentalFeaturesServiceGet = vi.fn();
+const mockApplyGrouping = vi.fn();
 
-jest.mock('../../../../../services', () => ({
-  doesPackageHaveIntegrations: (pkg: any) => {
-    return pkg.policy_templates && pkg.policy_templates.length > 0;
-  },
-  ExperimentalFeaturesService: {
-    get: () => mockExperimentalFeaturesServiceGet(),
-  },
-}));
+vi.mock('../../../../../services', () => {
+      const mocked = {
+      doesPackageHaveIntegrations: (pkg: any) => {
+        return pkg.policy_templates && pkg.policy_templates.length > 0;
+      },
+      ExperimentalFeaturesService: {
+        get: () => mockExperimentalFeaturesServiceGet(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../../common/services', () => ({
-  isInputOnlyPolicyTemplate: (template: any) => template.type === 'input',
-  isIntegrationPolicyTemplate: (template: any) => template.type === 'integration',
-  filterPolicyTemplatesTiles: (_behavior: any, topPackage: any, integrations: any[]) => {
-    if (integrations.length > 0) {
-      return integrations;
-    }
-    return [topPackage];
-  },
-}));
+vi.mock('../../../../../../../../common/services', () => {
+      const mocked = {
+      isInputOnlyPolicyTemplate: (template: any) => template.type === 'input',
+      isIntegrationPolicyTemplate: (template: any) => template.type === 'integration',
+      filterPolicyTemplatesTiles: (_behavior: any, topPackage: any, integrations: any[]) => {
+        if (integrations.length > 0) {
+          return integrations;
+        }
+        return [topPackage];
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../../common/services/agentless_policy_helper', () => ({
-  isOnlyAgentlessPolicyTemplate: (template: any) =>
-    template.deployment_modes?.agentless?.enabled === true &&
-    template.deployment_modes?.default?.enabled !== true,
-  isOnlyAgentlessIntegration: (pkg: any) => {
-    const templates = pkg.policy_templates || [];
-    return (
-      templates.length > 0 &&
-      templates.every(
-        (t: any) =>
-          t.deployment_modes?.agentless?.enabled === true &&
-          t.deployment_modes?.default?.enabled !== true
-      )
-    );
-  },
-  isAgentlessIntegration: (pkg: any, integration?: string) => {
-    if (!integration) return false;
-    const template = pkg.policy_templates?.find((t: any) => t.name === integration);
-    return template?.deployment_modes?.agentless?.enabled === true;
-  },
-}));
+vi.mock('../../../../../../../../common/services/agentless_policy_helper', () => {
+      const mocked = {
+      isOnlyAgentlessPolicyTemplate: (template: any) =>
+        template.deployment_modes?.agentless?.enabled === true &&
+        template.deployment_modes?.default?.enabled !== true,
+      isOnlyAgentlessIntegration: (pkg: any) => {
+        const templates = pkg.policy_templates || [];
+        return (
+          templates.length > 0 &&
+          templates.every(
+            (t: any) =>
+              t.deployment_modes?.agentless?.enabled === true &&
+              t.deployment_modes?.default?.enabled !== true
+          )
+        );
+      },
+      isAgentlessIntegration: (pkg: any, integration?: string) => {
+        if (!integration) return false;
+        const template = pkg.policy_templates?.find((t: any) => t.name === integration);
+        return template?.deployment_modes?.agentless?.enabled === true;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../category_facets', () => ({
-  ALL_CATEGORY: { id: '', title: 'All', count: 0 },
-}));
+vi.mock('../category_facets', () => {
+      const mocked = {
+      ALL_CATEGORY: { id: '', title: 'All', count: 0 },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../util', () => ({
-  mergeCategoriesAndCount: jest.fn((categories, cards) => categories),
-}));
+vi.mock('../util', () => {
+      const mocked = {
+      mergeCategoriesAndCount: vi.fn((categories, cards) => categories),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('..', () => ({
-  mapToCard: ({ item }: any) => ({
-    id: item.id,
-    title: item.title || item.name,
-    description: item.description || '',
-    categories: item.categories || [],
-    url: `/detail/${item.name}`,
-    supportsAgentless: item.supportsAgentless,
-  }),
-}));
+vi.mock('..', () => {
+      const mocked = {
+      mapToCard: ({ item }: any) => ({
+        id: item.id,
+        title: item.title || item.name,
+        description: item.description || '',
+        categories: item.categories || [],
+        url: `/detail/${item.name}`,
+        supportsAgentless: item.supportsAgentless,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Import after mocks are set up
 import { useAvailablePackages } from './use_available_packages';
 
 describe('useAvailablePackages', () => {
   const mockPackageVerificationKeyId = 'test-key-id';
-  const mockGetAbsolutePath = jest.fn((path: string) => path);
-  const mockGetHref = jest.fn((path: string) => path);
-  const mockAddBasePath = jest.fn((path: string) => path);
-  const mockSetUrlandPushHistory = jest.fn();
-  const mockSetUrlandReplaceHistory = jest.fn();
+  const mockGetAbsolutePath = vi.fn((path: string) => path);
+  const mockGetHref = vi.fn((path: string) => path);
+  const mockAddBasePath = vi.fn((path: string) => path);
+  const mockSetUrlandPushHistory = vi.fn();
+  const mockSetUrlandReplaceHistory = vi.fn();
 
   const mockBasicPackage: PackageListItem = {
     id: 'nginx-1.0.0',
@@ -173,7 +208,7 @@ describe('useAvailablePackages', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockExperimentalFeaturesServiceGet.mockReturnValue({
       enableIntegrationCollectionTiles: false,
@@ -722,16 +757,19 @@ describe('useAvailablePackages', () => {
       mockUseMergeEprPackagesWithReplacements.mockReturnValue([nonAgentlessPkg, agentlessPkg]);
 
       // mapToCard mock preserves supportsAgentless from the item
-      jest.mock('..', () => ({
-        mapToCard: ({ item }: any) => ({
-          id: item.id,
-          title: item.title || item.name,
-          description: item.description || '',
-          categories: item.categories || [],
-          url: `/detail/${item.name}`,
-          supportsAgentless: item.supportsAgentless,
-        }),
-      }));
+      vi.doMock('..', () => {
+            const mocked = {
+                  mapToCard: ({ item }: any) => ({
+                    id: item.id,
+                    title: item.title || item.name,
+                    description: item.description || '',
+                    categories: item.categories || [],
+                    url: `/detail/${item.name}`,
+                    supportsAgentless: item.supportsAgentless,
+                  }),
+                };
+            return { ...mocked, default: mocked };
+          });
 
       const { result } = renderHook(() =>
         useAvailablePackages({ prereleaseIntegrationsEnabled: false })
@@ -897,12 +935,12 @@ describe('useAvailablePackages', () => {
         initialSelectedCategory: 'observability',
         initialSubcategory: undefined,
         initialOnlyAgentless: false,
-        setUrlandPushHistory: jest.fn(),
-        setUrlandReplaceHistory: jest.fn(),
-        getHref: jest.fn(),
-        getAbsolutePath: jest.fn((p: string) => p),
+        setUrlandPushHistory: vi.fn(),
+        setUrlandReplaceHistory: vi.fn(),
+        getHref: vi.fn(),
+        getAbsolutePath: vi.fn((p: string) => p),
         searchParam: '',
-        addBasePath: jest.fn((p: string) => p),
+        addBasePath: vi.fn((p: string) => p),
       });
 
       const { result } = renderHook(() =>
@@ -923,12 +961,12 @@ describe('useAvailablePackages', () => {
         initialSelectedCategory: 'web',
         initialSubcategory: undefined,
         initialOnlyAgentless: false,
-        setUrlandPushHistory: jest.fn(),
-        setUrlandReplaceHistory: jest.fn(),
-        getHref: jest.fn(),
-        getAbsolutePath: jest.fn((p: string) => p),
+        setUrlandPushHistory: vi.fn(),
+        setUrlandReplaceHistory: vi.fn(),
+        getHref: vi.fn(),
+        getAbsolutePath: vi.fn((p: string) => p),
         searchParam: '',
-        addBasePath: jest.fn((p: string) => p),
+        addBasePath: vi.fn((p: string) => p),
       });
 
       const { result } = renderHook(() =>
@@ -949,12 +987,12 @@ describe('useAvailablePackages', () => {
         initialSelectedCategory: 'security',
         initialSubcategory: undefined,
         initialOnlyAgentless: false,
-        setUrlandPushHistory: jest.fn(),
-        setUrlandReplaceHistory: jest.fn(),
-        getHref: jest.fn(),
-        getAbsolutePath: jest.fn((p: string) => p),
+        setUrlandPushHistory: vi.fn(),
+        setUrlandReplaceHistory: vi.fn(),
+        getHref: vi.fn(),
+        getAbsolutePath: vi.fn((p: string) => p),
         searchParam: '',
-        addBasePath: jest.fn((p: string) => p),
+        addBasePath: vi.fn((p: string) => p),
       });
 
       const { result } = renderHook(() =>
@@ -1021,12 +1059,12 @@ describe('useAvailablePackages', () => {
         initialSelectedCategory: 'observability',
         initialSubcategory: undefined,
         initialOnlyAgentless: false,
-        setUrlandPushHistory: jest.fn(),
-        setUrlandReplaceHistory: jest.fn(),
-        getHref: jest.fn(),
-        getAbsolutePath: jest.fn((p: string) => p),
+        setUrlandPushHistory: vi.fn(),
+        setUrlandReplaceHistory: vi.fn(),
+        getHref: vi.fn(),
+        getAbsolutePath: vi.fn((p: string) => p),
         searchParam: '',
-        addBasePath: jest.fn((p: string) => p),
+        addBasePath: vi.fn((p: string) => p),
       });
 
       const { result } = renderHook(() =>
@@ -1044,12 +1082,12 @@ describe('useAvailablePackages', () => {
         initialSelectedCategory: 'web',
         initialSubcategory: 'observability',
         initialOnlyAgentless: false,
-        setUrlandPushHistory: jest.fn(),
-        setUrlandReplaceHistory: jest.fn(),
-        getHref: jest.fn(),
-        getAbsolutePath: jest.fn((p: string) => p),
+        setUrlandPushHistory: vi.fn(),
+        setUrlandReplaceHistory: vi.fn(),
+        getHref: vi.fn(),
+        getAbsolutePath: vi.fn((p: string) => p),
         searchParam: '',
-        addBasePath: jest.fn((p: string) => p),
+        addBasePath: vi.fn((p: string) => p),
       });
 
       const { result } = renderHook(() =>
@@ -1117,12 +1155,12 @@ describe('useAvailablePackages', () => {
         initialSelectedCategory: '',
         initialSubcategory: undefined,
         initialOnlyAgentless: true,
-        setUrlandPushHistory: jest.fn(),
-        setUrlandReplaceHistory: jest.fn(),
-        getHref: jest.fn(),
-        getAbsolutePath: jest.fn((p: string) => p),
+        setUrlandPushHistory: vi.fn(),
+        setUrlandReplaceHistory: vi.fn(),
+        getHref: vi.fn(),
+        getAbsolutePath: vi.fn((p: string) => p),
         searchParam: '',
-        addBasePath: jest.fn((p: string) => p),
+        addBasePath: vi.fn((p: string) => p),
       });
     });
 

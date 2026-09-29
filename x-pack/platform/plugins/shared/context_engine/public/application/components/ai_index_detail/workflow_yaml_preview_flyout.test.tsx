@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -12,24 +14,30 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { WorkflowYamlPreviewFlyout } from './workflow_yaml_preview_flyout';
 
-const mockUseWorkflow = jest.fn();
+const mockUseWorkflow = vi.fn();
 
-jest.mock('../../hooks/use_workflow', () => ({
-  ...jest.requireActual('../../hooks/use_workflow'),
-  useWorkflow: (...args: unknown[]) => mockUseWorkflow(...args),
-}));
+vi.mock('../../hooks/use_workflow', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../hooks/use_workflow')),
+      useWorkflow: (...args: unknown[]) => mockUseWorkflow(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({
-    value,
-    'data-test-subj': dataTestSubj,
-  }: {
-    value: string;
-    'data-test-subj'?: string;
-  }) => <pre data-test-subj={dataTestSubj}>{value}</pre>,
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: ({
+        value,
+        'data-test-subj': dataTestSubj,
+      }: {
+        value: string;
+        'data-test-subj'?: string;
+      }) => <pre data-test-subj={dataTestSubj}>{value}</pre>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const renderFlyout = (onClose = jest.fn()) => {
+const renderFlyout = (onClose = vi.fn()) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -58,7 +66,7 @@ const createNotFoundError = () =>
 
 describe('WorkflowYamlPreviewFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseWorkflow.mockReturnValue({
       data: undefined,
       isLoading: true,

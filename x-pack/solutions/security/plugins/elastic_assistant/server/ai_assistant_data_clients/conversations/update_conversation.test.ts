@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ConversationUpdateProps } from '@kbn/elastic-assistant-common';
 
@@ -94,23 +97,23 @@ const getNothingToUpdateErrorResponseMock = () => {
 };
 
 const dataWriterMock = {
-  bulk: jest.fn(),
+  bulk: vi.fn(),
 } as unknown as DocumentsDataWriter;
 
 describe('updateConversation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it calls a `dataWriter.bulk` with the correct parameters', async () => {
     const conversation: ConversationUpdateProps = getUpdateConversationOptionsMock();
     const updatedESConversation = getEsConversationMock();
 
-    (dataWriterMock.bulk as jest.Mock).mockResolvedValue({
+    (dataWriterMock.bulk as Mock).mockResolvedValue({
       errors: [],
       docs_updated: [updatedESConversation],
     });
@@ -149,7 +152,7 @@ describe('updateConversation', () => {
     const conversation: ConversationUpdateProps = getUpdateConversationOptionsMock();
     const updatedESConversation = getEsConversationMock();
 
-    (dataWriterMock.bulk as jest.Mock).mockResolvedValue({
+    (dataWriterMock.bulk as Mock).mockResolvedValue({
       errors: [],
       docs_updated: [updatedESConversation],
     });
@@ -206,7 +209,7 @@ describe('updateConversation', () => {
 
   test('it returns null when there is not a conversation to update', async () => {
     const conversation = getUpdateConversationOptionsMock();
-    (dataWriterMock.bulk as jest.Mock).mockResolvedValue(getNothingToUpdateErrorResponseMock());
+    (dataWriterMock.bulk as Mock).mockResolvedValue(getNothingToUpdateErrorResponseMock());
 
     const mockedLogger = loggerMock.create();
     const updatedList = await updateConversation({
@@ -224,7 +227,7 @@ describe('updateConversation', () => {
 
 describe('transformToUpdateScheme', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it returns a transformed conversation with converted string datetime to ISO from the client', async () => {

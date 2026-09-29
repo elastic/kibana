@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -24,13 +26,13 @@ function getMockContext(
   licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
 ) {
   return {
-    licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
+    licensing: { license: { check: vi.fn().mockReturnValue(licenseCheckResult) } },
   } as unknown as SecurityRequestHandlerContext;
 }
 
 describe('POST /internal/security/analytics/_record_auth_type', () => {
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(FAKE_TIMESTAMP);
+    vi.useFakeTimers().setSystemTime(FAKE_TIMESTAMP);
   });
 
   let routeHandler: RequestHandler<any, any, any, any>;

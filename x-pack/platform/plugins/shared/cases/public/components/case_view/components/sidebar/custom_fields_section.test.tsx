@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,14 +23,14 @@ import { SidebarAccordionSection } from './sidebar_accordion_section';
  * bar of its own any more, both come from the provider and are rendered by the accordion's pinned
  * header — the same combination the template fields section uses.
  */
-const renderSection = (onSave: jest.Mock) =>
+const renderSection = (onSave: Mock) =>
   renderWithTestingProviders(
     <SectionEditProvider onSave={onSave}>
       <SidebarAccordionSection
         id="legacyCustomFields"
         title="Legacy custom fields"
         isOpen
-        onToggle={jest.fn()}
+        onToggle={vi.fn()}
       >
         <CustomFieldsSection
           isLoading={false}
@@ -39,10 +42,10 @@ const renderSection = (onSave: jest.Mock) =>
   );
 
 describe('CustomFieldsSection', () => {
-  let onSave: jest.Mock;
+  let onSave: Mock;
 
   beforeEach(() => {
-    onSave = jest.fn();
+    onSave = vi.fn();
   });
 
   it('renders every field as a label/value row, not an editable form', async () => {

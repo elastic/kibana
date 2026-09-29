@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { Position } from '@elastic/charts';
 import type {
@@ -56,7 +58,7 @@ describe('Appearance settings', () => {
   ) => {
     const state = testState();
     return render(
-      <XyAppearanceSettings setState={jest.fn()} state={state} frame={frame} {...overrideProps} />
+      <XyAppearanceSettings setState={vi.fn()} state={state} frame={frame} {...overrideProps} />
     );
   };
 
@@ -134,7 +136,7 @@ describe('Appearance settings', () => {
   it('hides missing values fitting controls for text-based (ES|QL) datasource', () => {
     frame.datasourceLayers = {
       first: createMockDatasource('textBased', {
-        isTextBasedLanguage: jest.fn(() => true),
+        isTextBasedLanguage: vi.fn(() => true),
       }).publicAPIMock,
     };
     const state = testState();

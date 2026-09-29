@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import {
@@ -15,31 +18,34 @@ import {
 
 import { generateApiKey } from './generate_api_key';
 
-jest.mock('@kbn/search-connectors', () => ({
-  CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX: '.search-acl-filter-',
-  CONNECTORS_INDEX: '.elastic-connectors',
-  createConnectorSecret: jest.fn(),
-  updateConnectorSecret: jest.fn(),
-}));
+vi.mock('@kbn/search-connectors', () => {
+      const mocked = {
+      CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX: '.search-acl-filter-',
+      CONNECTORS_INDEX: '.elastic-connectors',
+      createConnectorSecret: vi.fn(),
+      updateConnectorSecret: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('generateApiKey lib function for connector clients', () => {
   const mockClient = {
     asCurrentUser: {
-      index: jest.fn(),
+      index: vi.fn(),
       indices: {
-        create: jest.fn(),
+        create: vi.fn(),
       },
-      search: jest.fn(),
+      search: vi.fn(),
       security: {
-        createApiKey: jest.fn(),
-        invalidateApiKey: jest.fn(),
+        createApiKey: vi.fn(),
+        invalidateApiKey: vi.fn(),
       },
     },
     asInternalUser: {},
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should create an API key if index does not have a connector', async () => {
@@ -58,8 +64,8 @@ describe('generateApiKey lib function for connector clients', () => {
       encoded: 'encoded',
       id: 'apiKeyId',
     }));
-    (createConnectorSecret as jest.Mock).mockImplementation(() => undefined);
-    (updateConnectorSecret as jest.Mock).mockImplementation(() => undefined);
+    (createConnectorSecret as Mock).mockImplementation(() => undefined);
+    (updateConnectorSecret as Mock).mockImplementation(() => undefined);
 
     await expect(
       generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name', false)
@@ -98,8 +104,8 @@ describe('generateApiKey lib function for connector clients', () => {
       encoded: 'encoded',
       id: 'apiKeyId',
     }));
-    (createConnectorSecret as jest.Mock).mockImplementation(() => undefined);
-    (updateConnectorSecret as jest.Mock).mockImplementation(() => undefined);
+    (createConnectorSecret as Mock).mockImplementation(() => undefined);
+    (updateConnectorSecret as Mock).mockImplementation(() => undefined);
 
     await expect(
       generateApiKey(mockClient as unknown as IScopedClusterClient, 'search-test', false)
@@ -149,8 +155,8 @@ describe('generateApiKey lib function for connector clients', () => {
       encoded: 'encoded',
       id: 'apiKeyId',
     }));
-    (createConnectorSecret as jest.Mock).mockImplementation(() => undefined);
-    (updateConnectorSecret as jest.Mock).mockImplementation(() => undefined);
+    (createConnectorSecret as Mock).mockImplementation(() => undefined);
+    (updateConnectorSecret as Mock).mockImplementation(() => undefined);
 
     await expect(
       generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name', false)
@@ -185,21 +191,21 @@ describe('generateApiKey lib function for connector clients', () => {
 describe('generateApiKey lib function for native connectors', () => {
   const mockClient = {
     asCurrentUser: {
-      index: jest.fn(),
+      index: vi.fn(),
       indices: {
-        create: jest.fn(),
+        create: vi.fn(),
       },
-      search: jest.fn(),
+      search: vi.fn(),
       security: {
-        createApiKey: jest.fn(),
-        invalidateApiKey: jest.fn(),
+        createApiKey: vi.fn(),
+        invalidateApiKey: vi.fn(),
       },
     },
     asInternalUser: {},
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should create an API key if index does not have a connector', async () => {
@@ -218,8 +224,8 @@ describe('generateApiKey lib function for native connectors', () => {
       encoded: 'encoded',
       id: 'apiKeyId',
     }));
-    (createConnectorSecret as jest.Mock).mockImplementation(() => undefined);
-    (updateConnectorSecret as jest.Mock).mockImplementation(() => undefined);
+    (createConnectorSecret as Mock).mockImplementation(() => undefined);
+    (updateConnectorSecret as Mock).mockImplementation(() => undefined);
 
     await expect(
       generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name', true)
@@ -258,10 +264,10 @@ describe('generateApiKey lib function for native connectors', () => {
       encoded: 'encoded',
       id: 'apiKeyId',
     }));
-    (createConnectorSecret as jest.Mock).mockImplementation(() => ({
+    (createConnectorSecret as Mock).mockImplementation(() => ({
       id: '1234',
     }));
-    (updateConnectorSecret as jest.Mock).mockImplementation(() => undefined);
+    (updateConnectorSecret as Mock).mockImplementation(() => undefined);
 
     await expect(
       generateApiKey(mockClient as unknown as IScopedClusterClient, 'search-test', true)
@@ -311,8 +317,8 @@ describe('generateApiKey lib function for native connectors', () => {
       encoded: 'encoded',
       id: 'apiKeyId',
     }));
-    (createConnectorSecret as jest.Mock).mockImplementation(() => undefined);
-    (updateConnectorSecret as jest.Mock).mockImplementation(() => ({
+    (createConnectorSecret as Mock).mockImplementation(() => undefined);
+    (updateConnectorSecret as Mock).mockImplementation(() => ({
       result: 'updated',
     }));
 

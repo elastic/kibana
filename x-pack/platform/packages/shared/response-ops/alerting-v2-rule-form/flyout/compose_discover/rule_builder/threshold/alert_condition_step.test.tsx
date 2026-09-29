@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { useForm, FormProvider } from 'react-hook-form';
@@ -28,35 +31,47 @@ import type { FormValues } from '../../../../form/types';
 import type { ComposeDiscoverState } from '../../types';
 import { createInitialState } from '../../use_compose_discover_state';
 
-jest.mock('../../../../form/hooks/use_index_sources', () => ({
-  useIndexSources: jest.fn(() => ({
-    data: [{ label: 'logs-*' }],
-    isLoading: false,
-  })),
-}));
+vi.mock('../../../../form/hooks/use_index_sources', () => {
+      const mocked = {
+      useIndexSources: vi.fn(() => ({
+        data: [{ label: 'logs-*' }],
+        isLoading: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../form/hooks/use_data_fields', () => ({
-  useDataFields: jest.fn(() => ({
-    data: {
-      '@timestamp': { name: '@timestamp', type: 'date' },
-      'service.name': { name: 'service.name', type: 'keyword' },
-    },
-    isError: false,
-    isLoading: false,
-  })),
-}));
+vi.mock('../../../../form/hooks/use_data_fields', () => {
+      const mocked = {
+      useDataFields: vi.fn(() => ({
+        data: {
+          '@timestamp': { name: '@timestamp', type: 'date' },
+          'service.name': { name: 'service.name', type: 'keyword' },
+        },
+        isError: false,
+        isLoading: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-utils', () => ({
-  getDatasets: jest.fn(() => Promise.resolve({ datasets: [] })),
-  getESQLTimeFieldFromQuery: jest.fn(() => Promise.resolve(undefined)),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getDatasets: vi.fn(() => Promise.resolve({ datasets: [] })),
+      getESQLTimeFieldFromQuery: vi.fn(() => Promise.resolve(undefined)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../use_resolve_time_field', () => ({
-  useResolveTimeField: jest.fn(() => ({
-    timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
-    isTimeFieldResolved: true,
-  })),
-}));
+vi.mock('../../use_resolve_time_field', () => {
+      const mocked = {
+      useResolveTimeField: vi.fn(() => ({
+        timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
+        isTimeFieldResolved: true,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeBuilderState = (overrides: Partial<ThresholdFormValues> = {}): ThresholdFormValues => ({
   ...DEFAULT_THRESHOLD_FORM_VALUES,
@@ -113,15 +128,15 @@ const Wrapper: React.FC<{
 };
 
 describe('RuleBuilderAlertConditionStep', () => {
-  const dispatch = jest.fn();
+  const dispatch = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('keeps alert condition metric when removing a duplicate-label stat', () => {
     let builderState = makeBuilderState();
-    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+    const onBuilderStateChange = vi.fn((next: ThresholdFormValues) => {
       builderState = next;
     });
 
@@ -164,7 +179,7 @@ describe('RuleBuilderAlertConditionStep', () => {
         { id: 'stat-2', label: 'count', aggregation: Aggregation.COUNT },
       ],
     });
-    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+    const onBuilderStateChange = vi.fn((next: ThresholdFormValues) => {
       builderState = next;
     });
 
@@ -210,7 +225,7 @@ describe('RuleBuilderAlertConditionStep', () => {
         { id: 'cond-1', metric: 'errors', comparator: Comparator.GT, threshold: [100] },
       ],
     });
-    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+    const onBuilderStateChange = vi.fn((next: ThresholdFormValues) => {
       builderState = next;
     });
 
@@ -236,7 +251,7 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
 
     render(
-      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+      <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
         <RuleBuilderAlertConditionStep
           state={createState()}
           dispatch={dispatch}
@@ -254,7 +269,7 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
 
     render(
-      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+      <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
         <RuleBuilderAlertConditionStep
           state={createState()}
           dispatch={dispatch}
@@ -268,7 +283,7 @@ describe('RuleBuilderAlertConditionStep', () => {
 
   it('adds a second stat and shows remove buttons for both', () => {
     let builderState = makeBuilderState();
-    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+    const onBuilderStateChange = vi.fn((next: ThresholdFormValues) => {
       builderState = next;
     });
 
@@ -307,7 +322,7 @@ describe('RuleBuilderAlertConditionStep', () => {
 
   it('adds and removes alert conditions with operator toggle', () => {
     let builderState = makeBuilderState();
-    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+    const onBuilderStateChange = vi.fn((next: ThresholdFormValues) => {
       builderState = next;
     });
 
@@ -361,7 +376,7 @@ describe('RuleBuilderAlertConditionStep', () => {
 
   it('seeds a newly added condition with a currently valid metric after a stat rename', () => {
     let builderState = makeBuilderState();
-    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+    const onBuilderStateChange = vi.fn((next: ThresholdFormValues) => {
       builderState = next;
     });
 
@@ -399,7 +414,7 @@ describe('RuleBuilderAlertConditionStep', () => {
 
   it('adds and removes evaluations and reflects label in condition metric dropdown', () => {
     let builderState = makeBuilderState();
-    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+    const onBuilderStateChange = vi.fn((next: ThresholdFormValues) => {
       builderState = next;
     });
 
@@ -458,7 +473,7 @@ describe('RuleBuilderAlertConditionStep', () => {
 
   it('updates evaluation expression suggestions when a stat is renamed, added, or removed', async () => {
     let builderState = makeBuilderState();
-    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+    const onBuilderStateChange = vi.fn((next: ThresholdFormValues) => {
       builderState = next;
     });
 
@@ -560,7 +575,7 @@ describe('RuleBuilderAlertConditionStep', () => {
     const builderState = makeBuilderState();
 
     render(
-      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+      <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
         <RuleBuilderAlertConditionStep
           state={createState()}
           dispatch={dispatch}
@@ -577,7 +592,7 @@ describe('RuleBuilderAlertConditionStep', () => {
   });
 
   it('sets and displays filter input value', () => {
-    const onBuilderStateChange = jest.fn();
+    const onBuilderStateChange = vi.fn();
     const builderState = makeBuilderState();
 
     render(
@@ -606,7 +621,7 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
 
     render(
-      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+      <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
         <RuleBuilderAlertConditionStep
           state={createState()}
           dispatch={dispatch}
@@ -622,7 +637,7 @@ describe('RuleBuilderAlertConditionStep', () => {
     const builderState = makeBuilderState();
 
     render(
-      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+      <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
         <RuleBuilderAlertConditionStep
           state={createState()}
           dispatch={dispatch}
@@ -642,7 +657,7 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
 
     const { rerender } = render(
-      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+      <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
         <RuleBuilderAlertConditionStep
           state={createState()}
           dispatch={dispatch}
@@ -660,7 +675,7 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
 
     rerender(
-      <Wrapper builderState={singleComparator} onBuilderStateChange={jest.fn()}>
+      <Wrapper builderState={singleComparator} onBuilderStateChange={vi.fn()}>
         <RuleBuilderAlertConditionStep
           state={createState()}
           dispatch={dispatch}
@@ -674,7 +689,7 @@ describe('RuleBuilderAlertConditionStep', () => {
 
   describe('hook wiring', () => {
     beforeEach(() => {
-      (useDataFields as jest.Mock).mockReturnValue({
+      (useDataFields as Mock).mockReturnValue({
         data: {
           '@timestamp': { name: '@timestamp', type: 'date' },
           'service.name': { name: 'service.name', type: 'keyword' },
@@ -682,7 +697,7 @@ describe('RuleBuilderAlertConditionStep', () => {
         isError: false,
         isLoading: false,
       });
-      (useResolveTimeField as jest.Mock).mockReturnValue({
+      (useResolveTimeField as Mock).mockReturnValue({
         timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
         isTimeFieldResolved: true,
       });
@@ -693,7 +708,7 @@ describe('RuleBuilderAlertConditionStep', () => {
       const builderState = makeBuilderState();
 
       render(
-        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
           <RuleBuilderAlertConditionStep
             state={createState()}
             dispatch={dispatch}
@@ -712,7 +727,7 @@ describe('RuleBuilderAlertConditionStep', () => {
       const builderState = makeBuilderState();
 
       render(
-        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
           <RuleBuilderAlertConditionStep
             state={createState()}
             dispatch={dispatch}
@@ -721,7 +736,7 @@ describe('RuleBuilderAlertConditionStep', () => {
         </Wrapper>
       );
 
-      const { getDatasets: passedGetDatasets } = (useIndexSources as jest.Mock).mock.calls.at(
+      const { getDatasets: passedGetDatasets } = (useIndexSources as Mock).mock.calls.at(
         -1
       )?.[0] as { getDatasets: () => Promise<unknown> };
       expect(typeof passedGetDatasets).toBe('function');
@@ -731,7 +746,7 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
 
     it('shows a warning callout when field discovery fails', () => {
-      (useDataFields as jest.Mock).mockReturnValue({
+      (useDataFields as Mock).mockReturnValue({
         data: {},
         isError: true,
         isLoading: false,
@@ -740,7 +755,7 @@ describe('RuleBuilderAlertConditionStep', () => {
       const builderState = makeBuilderState();
 
       render(
-        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
           <RuleBuilderAlertConditionStep
             state={createState()}
             dispatch={dispatch}
@@ -756,7 +771,7 @@ describe('RuleBuilderAlertConditionStep', () => {
       const builderState = makeBuilderState();
 
       render(
-        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
           <RuleBuilderAlertConditionStep
             state={createState()}
             dispatch={dispatch}
@@ -771,13 +786,13 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
 
     it('does not auto-correct timeField while field map is loading', async () => {
-      (useDataFields as jest.Mock).mockReturnValue({
+      (useDataFields as Mock).mockReturnValue({
         data: {},
         isError: false,
         isLoading: true,
       });
 
-      const onBuilderStateChange = jest.fn();
+      const onBuilderStateChange = vi.fn();
       const builderState = makeBuilderState({ timeField: 'event.start' });
 
       render(
@@ -803,7 +818,7 @@ describe('RuleBuilderAlertConditionStep', () => {
       const builderState = makeBuilderState({ indexPattern: 'logs-*', timeField: '@timestamp' });
 
       render(
-        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
           <RuleBuilderAlertConditionStep
             state={createState()}
             dispatch={dispatch}
@@ -824,7 +839,7 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
 
     it('renders time-field options from useResolveTimeField', () => {
-      (useResolveTimeField as jest.Mock).mockReturnValue({
+      (useResolveTimeField as Mock).mockReturnValue({
         timeFieldOptions: [
           { value: 'event_time', text: 'event_time' },
           { value: '@timestamp', text: '@timestamp' },
@@ -838,7 +853,7 @@ describe('RuleBuilderAlertConditionStep', () => {
       });
 
       render(
-        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
           <RuleBuilderAlertConditionStep
             state={createState()}
             dispatch={dispatch}
@@ -867,7 +882,7 @@ describe('RuleBuilderAlertConditionStep', () => {
 
     it('updates recovery condition metric when a stat is renamed', () => {
       let builderState = makeStateWithRecovery();
-      const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+      const onBuilderStateChange = vi.fn((next: ThresholdFormValues) => {
         builderState = next;
       });
 
@@ -906,7 +921,7 @@ describe('RuleBuilderAlertConditionStep', () => {
           ],
         },
       });
-      const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+      const onBuilderStateChange = vi.fn((next: ThresholdFormValues) => {
         builderState = next;
       });
 
@@ -939,7 +954,7 @@ describe('RuleBuilderAlertConditionStep', () => {
           conditions: [{ id: 'rec-1', metric: 'rate', comparator: Comparator.LT, threshold: [1] }],
         },
       });
-      const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+      const onBuilderStateChange = vi.fn((next: ThresholdFormValues) => {
         builderState = next;
       });
 
@@ -973,7 +988,7 @@ describe('RuleBuilderAlertConditionStep', () => {
           conditions: [{ id: 'rec-1', metric: 'rate', comparator: Comparator.LT, threshold: [1] }],
         },
       });
-      const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+      const onBuilderStateChange = vi.fn((next: ThresholdFormValues) => {
         builderState = next;
       });
 
@@ -1003,7 +1018,7 @@ describe('RuleBuilderAlertConditionStep', () => {
       });
 
       render(
-        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
           <RuleBuilderAlertConditionStep
             state={createState()}
             dispatch={dispatch}
@@ -1025,7 +1040,7 @@ describe('RuleBuilderAlertConditionStep', () => {
       });
 
       render(
-        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
           <RuleBuilderAlertConditionStep
             state={createState()}
             dispatch={dispatch}
@@ -1041,7 +1056,7 @@ describe('RuleBuilderAlertConditionStep', () => {
       let builderState = makeBuilderState({
         evaluations: [{ id: 'eval-1', label: 'rate', expression: 'renamed_count' }],
       });
-      const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+      const onBuilderStateChange = vi.fn((next: ThresholdFormValues) => {
         builderState = next;
       });
 
@@ -1076,12 +1091,12 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
 
     it('debounces the warning while the user is still typing the expression', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       try {
         let builderState = makeBuilderState({
           evaluations: [{ id: 'eval-1', label: 'rate', expression: 'count' }],
         });
-        const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+        const onBuilderStateChange = vi.fn((next: ThresholdFormValues) => {
           builderState = next;
         });
 
@@ -1113,19 +1128,19 @@ describe('RuleBuilderAlertConditionStep', () => {
         expect(screen.queryByText(/References unknown/)).not.toBeInTheDocument();
 
         act(() => {
-          jest.advanceTimersByTime(500);
+          vi.advanceTimersByTime(500);
         });
 
         expect(screen.getByText('References unknown label: unknown_field')).toBeInTheDocument();
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
   });
 
   describe('severity', () => {
     it('shows the single-condition callout and hides severity for multiple conditions', () => {
-      const onBuilderStateChange = jest.fn();
+      const onBuilderStateChange = vi.fn();
       const builderState = makeBuilderState({
         alertConditions: [
           { id: 'cond-1', metric: 'count', comparator: Comparator.GT, threshold: [100] },
@@ -1155,7 +1170,7 @@ describe('RuleBuilderAlertConditionStep', () => {
         severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
       });
       render(
-        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
           <RuleBuilderAlertConditionStep
             state={createState()}
             dispatch={dispatch}
@@ -1175,7 +1190,7 @@ describe('RuleBuilderAlertConditionStep', () => {
         severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
       });
       render(
-        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <Wrapper builderState={builderState} onBuilderStateChange={vi.fn()}>
           <RuleBuilderAlertConditionStep
             state={createState()}
             dispatch={dispatch}
@@ -1189,7 +1204,7 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
 
     it('clears severity when a stat is renamed to severity', () => {
-      const onBuilderStateChange = jest.fn();
+      const onBuilderStateChange = vi.fn();
       const builderState = makeBuilderState({
         severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
       });
@@ -1212,7 +1227,7 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
 
     it('enables single severity from the step UI', () => {
-      const onBuilderStateChange = jest.fn();
+      const onBuilderStateChange = vi.fn();
       render(
         <Wrapper builderState={makeBuilderState()} onBuilderStateChange={onBuilderStateChange}>
           <RuleBuilderAlertConditionStep
@@ -1229,7 +1244,7 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
 
     it('leaves the condition threshold unchanged when a severity band is edited', () => {
-      const onBuilderStateChange = jest.fn();
+      const onBuilderStateChange = vi.fn();
       const builderState = makeBuilderState({
         severity: {
           mode: 'multi',
@@ -1260,7 +1275,7 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
 
     it('leaves severity band thresholds unchanged when the condition threshold is edited', () => {
-      const onBuilderStateChange = jest.fn();
+      const onBuilderStateChange = vi.fn();
       const builderState = makeBuilderState({
         severity: {
           mode: 'multi',
@@ -1291,7 +1306,7 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
 
     it('keeps the stored level order when a row severity changes (no auto-reorder)', () => {
-      const onBuilderStateChange = jest.fn();
+      const onBuilderStateChange = vi.fn();
       const builderState = makeBuilderState({
         severity: {
           mode: 'multi',

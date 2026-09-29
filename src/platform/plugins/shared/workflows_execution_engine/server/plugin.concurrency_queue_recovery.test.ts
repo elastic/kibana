@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -15,34 +18,40 @@ import type { ConcreteTaskInstance, TaskRegisterDefinition } from '@kbn/task-man
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 
-jest.mock('./repositories/data_access_layer', () => {
-  const actual = jest.requireActual('./repositories/data_access_layer');
-  const { createDataClientJestMock } = jest.requireActual('./test_utils/data_client_jest_mock');
+vi.mock('./repositories/data_access_layer', async () => {
+  const actual = (await vi.importActual('./repositories/data_access_layer'));
+  const { createDataClientJestMock } = (await vi.importActual('./test_utils/data_client_jest_mock'));
   return {
     ...actual,
-    createDataClientBundle: jest.fn(() => createDataClientJestMock()),
+    createDataClientBundle: vi.fn(() => createDataClientJestMock()),
   };
 });
-jest.mock('./lib/check_license', () => ({
-  checkLicense: jest.fn().mockResolvedValue(undefined),
-}));
-jest.mock('elastic-apm-node', () => ({
+vi.mock('./lib/check_license', () => {
+      const mocked = {
+      checkLicense: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('elastic-apm-node', () => ({
   default: {
     currentTransaction: null,
-    startSpan: jest.fn(),
+    startSpan: vi.fn(),
   },
 }));
 
-const mockHandlePostExecutionLoop = jest.fn().mockResolvedValue(undefined);
-jest.mock('./execution_functions/handle_post_execution_loop', () => ({
-  handlePostExecutionLoop: (...args: unknown[]) => mockHandlePostExecutionLoop(...args),
-}));
+const mockHandlePostExecutionLoop = vi.fn().mockResolvedValue(undefined);
+vi.mock('./execution_functions/handle_post_execution_loop', () => {
+      const mocked = {
+      handlePostExecutionLoop: (...args: unknown[]) => mockHandlePostExecutionLoop(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockResolveInterruptedWorkflowRunTask = jest.fn();
-const mockResolveExhaustedWorkflowRunTask = jest.fn().mockResolvedValue(undefined);
-const mockFailExecutionMissingIdentity = jest.fn().mockResolvedValue(undefined);
-jest.mock('./lib/task_recovery', () => {
-  const actual = jest.requireActual('./lib/task_recovery');
+const mockResolveInterruptedWorkflowRunTask = vi.fn();
+const mockResolveExhaustedWorkflowRunTask = vi.fn().mockResolvedValue(undefined);
+const mockFailExecutionMissingIdentity = vi.fn().mockResolvedValue(undefined);
+vi.mock('./lib/task_recovery', async () => {
+  const actual = (await vi.importActual('./lib/task_recovery'));
   return {
     ...actual,
     resolveInterruptedWorkflowRunTask: (...args: unknown[]) =>
@@ -53,21 +62,24 @@ jest.mock('./lib/task_recovery', () => {
   };
 });
 
-const mockRunWorkflow = jest.fn();
-jest.mock('./execution_functions', () => {
-  const actual = jest.requireActual('./execution_functions');
+const mockRunWorkflow = vi.fn();
+vi.mock('./execution_functions', async () => {
+  const actual = (await vi.importActual('./execution_functions'));
   return {
     ...actual,
     runWorkflow: (...args: unknown[]) => mockRunWorkflow(...args),
   };
 });
 
-const mockGetWorkflowExecutionById = jest.fn();
-jest.mock('./repositories/workflow_execution_repository', () => ({
-  WorkflowExecutionRepository: jest.fn().mockImplementation(() => ({
-    getWorkflowExecutionById: mockGetWorkflowExecutionById,
-  })),
-}));
+const mockGetWorkflowExecutionById = vi.fn();
+vi.mock('./repositories/workflow_execution_repository', () => {
+      const mocked = {
+      WorkflowExecutionRepository: vi.fn().mockImplementation(() => ({
+        getWorkflowExecutionById: mockGetWorkflowExecutionById,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { WorkflowsExecutionEnginePlugin } from './plugin';
 import { WORKFLOW_RUN_TASK_TYPE } from './workflow_task_manager/types';
@@ -103,14 +115,14 @@ describe('concurrency queue recovery wiring', () => {
     plugin.setup(coreSetup as never, {
       taskManager: taskManagerSetup,
       cloud: {} as never,
-      workflowsExtensions: { registerConnectorAdapter: jest.fn() } as never,
+      workflowsExtensions: { registerConnectorAdapter: vi.fn() } as never,
     });
 
     return { plugin };
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockResolveInterruptedWorkflowRunTask.mockResolvedValue({ action: 'run_workflow' });
     mockResolveExhaustedWorkflowRunTask.mockResolvedValue(undefined);
     mockFailExecutionMissingIdentity.mockResolvedValue(undefined);
@@ -122,12 +134,12 @@ describe('concurrency queue recovery wiring', () => {
     workflowRunId,
     spaceId = 'default',
     attempts = 1,
-    setCustomTaskRunEventFields = jest.fn(),
+    setCustomTaskRunEventFields = vi.fn(),
   }: {
     workflowRunId: string;
     spaceId?: string;
     attempts?: number;
-    setCustomTaskRunEventFields?: jest.Mock;
+    setCustomTaskRunEventFields?: Mock;
   }) =>
     taskManagerMock.createRunContext({
       taskInstance: {
@@ -163,7 +175,7 @@ describe('concurrency queue recovery wiring', () => {
       },
     });
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_RUN_TASK_TYPE]!.createTaskRunner(
       createRunContext({ workflowRunId, spaceId, attempts: 2, setCustomTaskRunEventFields })
     );
@@ -201,7 +213,7 @@ describe('concurrency queue recovery wiring', () => {
       },
     });
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_RUN_TASK_TYPE]!.createTaskRunner(
       createRunContext({ workflowRunId, attempts: 2, setCustomTaskRunEventFields })
     );
@@ -230,7 +242,7 @@ describe('concurrency queue recovery wiring', () => {
       },
     });
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_RUN_TASK_TYPE]!.createTaskRunner(
       createRunContext({ workflowRunId, attempts: 2, setCustomTaskRunEventFields })
     );
@@ -252,7 +264,7 @@ describe('concurrency queue recovery wiring', () => {
       status: ExecutionStatus.QUEUED,
     });
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_RUN_TASK_TYPE]!.createTaskRunner(
       createRunContext({ workflowRunId, setCustomTaskRunEventFields })
     );
@@ -279,7 +291,7 @@ describe('concurrency queue recovery wiring', () => {
       status: ExecutionStatus.COMPLETED,
     });
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_RUN_TASK_TYPE]!.createTaskRunner(
       createRunContext({ workflowRunId, setCustomTaskRunEventFields })
     );
@@ -306,7 +318,7 @@ describe('concurrency queue recovery wiring', () => {
       status: ExecutionStatus.FAILED,
     });
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_RUN_TASK_TYPE]!.createTaskRunner(
       createRunContext({ workflowRunId, attempts: 1, setCustomTaskRunEventFields })
     );
@@ -332,7 +344,7 @@ describe('concurrency queue recovery wiring', () => {
       status: ExecutionStatus.FAILED,
     });
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_RUN_TASK_TYPE]!.createTaskRunner(
       createRunContext({ workflowRunId, attempts: 3, setCustomTaskRunEventFields })
     );
@@ -351,7 +363,7 @@ describe('concurrency queue recovery wiring', () => {
 
     const workflowRunId = 'exec-cancel';
     const spaceId = 'default';
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_RUN_TASK_TYPE]!.createTaskRunner(
       createRunContext({ workflowRunId, spaceId, setCustomTaskRunEventFields })
     );
@@ -378,7 +390,7 @@ describe('concurrency queue recovery wiring', () => {
       status: ExecutionStatus.FAILED,
     });
 
-    const setCustomTaskRunEventFields = jest.fn();
+    const setCustomTaskRunEventFields = vi.fn();
     const runner = taskDefinitions[WORKFLOW_RUN_TASK_TYPE]!.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: {

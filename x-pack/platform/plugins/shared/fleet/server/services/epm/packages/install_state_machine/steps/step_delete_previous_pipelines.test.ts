@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
 import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
@@ -28,18 +31,18 @@ import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator'
 
 import { stepDeletePreviousPipelines } from './step_delete_previous_pipelines';
 
-jest.mock('../../../elasticsearch/ingest_pipeline');
+vi.mock('../../../elasticsearch/ingest_pipeline');
 
-const mockedDeletePreviousPipelines = deletePreviousPipelines as jest.MockedFunction<
+const mockedDeletePreviousPipelines = deletePreviousPipelines as MockedFunction<
   typeof deletePreviousPipelines
 >;
-const mockedIsTopLevelPipeline = isTopLevelPipeline as jest.MockedFunction<
+const mockedIsTopLevelPipeline = isTopLevelPipeline as MockedFunction<
   typeof isTopLevelPipeline
 >;
 
 describe('stepDeletePreviousPipelines', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let esClient: Mocked<ElasticsearchClient>;
   const getMockInstalledPackageSo = (
     installedEs: EsAssetReference[] = []
   ): SavedObject<Installation> => {
@@ -67,8 +70,8 @@ describe('stepDeletePreviousPipelines', () => {
     appContextService.start(createAppContextStartContractMock());
   });
   afterEach(async () => {
-    jest.mocked(mockedDeletePreviousPipelines).mockReset();
-    jest.mocked(mockedIsTopLevelPipeline).mockReset();
+    vi.mocked(mockedDeletePreviousPipelines).mockReset();
+    vi.mocked(mockedIsTopLevelPipeline).mockReset();
   });
 
   describe('Should call deletePreviousPipelines', () => {
@@ -113,7 +116,7 @@ describe('stepDeletePreviousPipelines', () => {
       },
     };
     beforeEach(async () => {
-      jest.mocked(mockedDeletePreviousPipelines).mockResolvedValue([
+      vi.mocked(mockedDeletePreviousPipelines).mockResolvedValue([
         {
           id: 'something',
           type: ElasticsearchAssetType.ilmPolicy,
@@ -129,7 +132,7 @@ describe('stepDeletePreviousPipelines', () => {
       const res = await stepDeletePreviousPipelines({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext,
@@ -175,7 +178,7 @@ describe('stepDeletePreviousPipelines', () => {
       const res = await stepDeletePreviousPipelines({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext,
@@ -221,7 +224,7 @@ describe('stepDeletePreviousPipelines', () => {
       const res = await stepDeletePreviousPipelines({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext,
@@ -298,7 +301,7 @@ describe('stepDeletePreviousPipelines', () => {
       })
     );
     beforeEach(async () => {
-      jest.mocked(mockedDeletePreviousPipelines).mockResolvedValue([
+      vi.mocked(mockedDeletePreviousPipelines).mockResolvedValue([
         {
           id: 'something',
           type: ElasticsearchAssetType.ilmPolicy,
@@ -314,7 +317,7 @@ describe('stepDeletePreviousPipelines', () => {
       const res = await stepDeletePreviousPipelines({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext,
@@ -344,7 +347,7 @@ describe('stepDeletePreviousPipelines', () => {
       const res = await stepDeletePreviousPipelines({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext,
@@ -374,7 +377,7 @@ describe('stepDeletePreviousPipelines', () => {
       const res = await stepDeletePreviousPipelines({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext,
@@ -409,12 +412,12 @@ describe('stepDeletePreviousPipelines', () => {
           install_started_at: new Date(Date.now() - 1000).toISOString(),
         },
       };
-      jest.mocked(mockedIsTopLevelPipeline).mockImplementation(() => true);
+      vi.mocked(mockedIsTopLevelPipeline).mockImplementation(() => true);
 
       const res = await stepDeletePreviousPipelines({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext: { ...packageInstallContext, paths: ['some/path/1', 'some/path/2'] },
@@ -450,12 +453,12 @@ describe('stepDeletePreviousPipelines', () => {
           install_started_at: new Date(Date.now() - 1000).toISOString(),
         },
       };
-      jest.mocked(mockedIsTopLevelPipeline).mockImplementation(() => true);
+      vi.mocked(mockedIsTopLevelPipeline).mockImplementation(() => true);
 
       const res = await stepDeletePreviousPipelines({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext: { ...packageInstallContext, paths: ['some/path/1', 'some/path/2'] },

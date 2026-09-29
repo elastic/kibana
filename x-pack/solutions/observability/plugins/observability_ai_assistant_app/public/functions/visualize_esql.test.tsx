@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -24,15 +26,15 @@ describe('VisualizeESQL', () => {
     const lensService = newLensService ?? lensPluginMock.createStartContract();
     const dataViewsService = {
       ...dataViewPluginMocks.createStartContract(),
-      create: jest.fn().mockReturnValue(
+      create: vi.fn().mockReturnValue(
         Promise.resolve({
           title: 'foo',
           id: 'foo',
-          toSpec: jest.fn(),
-          toMinimalSpec: jest.fn(),
-          isPersisted: jest.fn().mockReturnValue(false),
+          toSpec: vi.fn(),
+          toMinimalSpec: vi.fn(),
+          isPersisted: vi.fn().mockReturnValue(false),
           fields: {
-            getByName: jest.fn(),
+            getByName: vi.fn(),
           },
         })
       ),
@@ -61,7 +63,7 @@ describe('VisualizeESQL', () => {
       <ObservabilityAIAssistantMultipaneFlyoutContext.Provider
         value={{
           container: document.createElement('div'),
-          setVisibility: setVisibilitySpy ?? jest.fn(),
+          setVisibility: setVisibilitySpy ?? vi.fn(),
         }}
       >
         <VisualizeESQL
@@ -70,7 +72,7 @@ describe('VisualizeESQL', () => {
           uiActions={uiActionsService}
           columns={columns}
           query={'from foo | keep bytes, destination'}
-          onActionClick={jest.fn()}
+          onActionClick={vi.fn()}
           userOverrides={userOverrides}
           errorMessages={errorMessages}
           ObservabilityAIAssistantMultipaneFlyoutContext={
@@ -99,11 +101,11 @@ describe('VisualizeESQL', () => {
   });
 
   it('should run the suggestions api if no initial input is given', async () => {
-    const suggestionsApiSpy = jest.fn();
+    const suggestionsApiSpy = vi.fn();
     const lensService = {
       ...lensPluginMock.createStartContract(),
-      stateHelperApi: jest.fn().mockResolvedValue({
-        formula: jest.fn(),
+      stateHelperApi: vi.fn().mockResolvedValue({
+        formula: vi.fn(),
         suggestions: suggestionsApiSpy,
       }),
     };
@@ -112,11 +114,11 @@ describe('VisualizeESQL', () => {
   });
 
   it('should not run the suggestions api if no initial input is given', async () => {
-    const suggestionsApiSpy = jest.fn();
+    const suggestionsApiSpy = vi.fn();
     const lensService = {
       ...lensPluginMock.createStartContract(),
-      stateHelperApi: jest.fn().mockResolvedValue({
-        formula: jest.fn(),
+      stateHelperApi: vi.fn().mockResolvedValue({
+        formula: vi.fn(),
         suggestions: suggestionsApiSpy,
       }),
     };
@@ -125,7 +127,7 @@ describe('VisualizeESQL', () => {
   });
 
   it('should run the setVisibility callback if edit button is clicked', async () => {
-    const setVisibilitySpy = jest.fn();
+    const setVisibilitySpy = vi.fn();
     renderComponent({}, undefined, setVisibilitySpy);
     await waitFor(() => {
       expect(screen.getByTestId('observabilityAiAssistantLensESQLEditButton')).toBeInTheDocument();
@@ -139,9 +141,9 @@ describe('VisualizeESQL', () => {
   it('should display the errors if given', async () => {
     const lensService = {
       ...lensPluginMock.createStartContract(),
-      stateHelperApi: jest.fn().mockResolvedValue({
-        formula: jest.fn(),
-        suggestions: jest.fn(),
+      stateHelperApi: vi.fn().mockResolvedValue({
+        formula: vi.fn(),
+        suggestions: vi.fn(),
       }),
     };
     renderComponent({}, lensService, undefined, ['There is an error mate']);
@@ -152,9 +154,9 @@ describe('VisualizeESQL', () => {
   it('should not display the table on first render', async () => {
     const lensService = {
       ...lensPluginMock.createStartContract(),
-      stateHelperApi: jest.fn().mockResolvedValue({
-        formula: jest.fn(),
-        suggestions: jest.fn(),
+      stateHelperApi: vi.fn().mockResolvedValue({
+        formula: vi.fn(),
+        suggestions: vi.fn(),
       }),
     };
 
@@ -172,9 +174,9 @@ describe('VisualizeESQL', () => {
   it('should display the table when user clicks the table button', async () => {
     const lensService = {
       ...lensPluginMock.createStartContract(),
-      stateHelperApi: jest.fn().mockResolvedValue({
-        formula: jest.fn(),
-        suggestions: jest.fn(),
+      stateHelperApi: vi.fn().mockResolvedValue({
+        formula: vi.fn(),
+        suggestions: vi.fn(),
       }),
     };
 
@@ -190,9 +192,9 @@ describe('VisualizeESQL', () => {
   it('should render the ESQLDataGrid if Lens returns a table', async () => {
     const lensService = {
       ...lensPluginMock.createStartContract(),
-      stateHelperApi: jest.fn().mockResolvedValue({
-        formula: jest.fn(),
-        suggestions: jest.fn(),
+      stateHelperApi: vi.fn().mockResolvedValue({
+        formula: vi.fn(),
+        suggestions: vi.fn(),
       }),
     };
     renderComponent(

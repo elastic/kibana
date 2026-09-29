@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
@@ -97,15 +99,15 @@ describe('transformAttackDiscoveryAlertDocumentToApi', () => {
   });
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns the current time for timestamp when alert start is missing', () => {
-    jest.setSystemTime(new Date('2025-12-15T00:00:00.000Z'));
+    vi.setSystemTime(new Date('2025-12-15T00:00:00.000Z'));
 
     const { [ALERT_START]: _ignored, ...docWithoutStart } = baseDoc;
     const result = transformAttackDiscoveryAlertDocumentToApi({

@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('./log_query_and_deprecation', () => ({
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('./log_query_and_deprecation', () => ({
   __esModule: true,
-  instrumentEsQueryAndDeprecationLogger: jest.fn(),
+  instrumentEsQueryAndDeprecationLogger: vi.fn(),
 }));
 
 import { Agent } from 'http';
@@ -38,7 +41,7 @@ const createFakeConfig = (
 };
 
 const createFakeClient = () => {
-  const actualEs = jest.requireActual('@elastic/elasticsearch');
+  const actualEs = require('@elastic/elasticsearch');
   const client = new actualEs.Client({
     nodes: ['http://localhost'], // Enforcing `nodes` because it's mandatory
   });
@@ -49,12 +52,12 @@ describe('configureClient', () => {
   let logger: MockedLogger;
   let config: ElasticsearchClientConfig;
   let agentFactoryProvider: AgentFactoryProvider;
-  let onRequest: jest.Mock;
+  let onRequest: Mock;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     config = createFakeConfig();
-    onRequest = jest.fn();
+    onRequest = vi.fn();
     parseClientOptionsMock.mockReturnValue({});
     ClientMock.mockImplementation(() => createFakeClient());
     agentFactoryProvider = new AgentManager(logger, { dnsCacheTtlInSeconds: 0 });
@@ -63,7 +66,7 @@ describe('configureClient', () => {
   afterEach(() => {
     parseClientOptionsMock.mockReset();
     ClientMock.mockReset();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls `parseClientOptions` with the correct parameters', () => {
@@ -135,7 +138,7 @@ describe('configureClient', () => {
   });
 
   it('calls `createTransport` with the correct parameters', () => {
-    const getExecutionContext = jest.fn();
+    const getExecutionContext = vi.fn();
     configureClient(config, {
       logger,
       type: 'test',
@@ -176,7 +179,7 @@ describe('configureClient', () => {
   });
 
   it('passes `onRequest` handler to `createTransport`', () => {
-    const getExecutionContext = jest.fn();
+    const getExecutionContext = vi.fn();
 
     configureClient(config, {
       logger,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { RuleActionsOverflow } from '.';
@@ -21,20 +24,20 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 const showBulkDuplicateExceptionsConfirmation = () => Promise.resolve(null);
 const showManualRuleRunConfirmation = () => Promise.resolve(null);
 
-jest.mock('../../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../rule_management/logic/bulk_actions/use_execute_bulk_action');
-jest.mock('../../../../rule_management/logic/bulk_actions/use_bulk_export');
-jest.mock(
+vi.mock('../../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../rule_management/logic/bulk_actions/use_execute_bulk_action');
+vi.mock('../../../../rule_management/logic/bulk_actions/use_bulk_export');
+vi.mock(
   '../../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context'
 );
-jest.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/components/user_privileges');
 
-const mockReportEvent = jest.fn();
-jest.mock('../../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../../common/lib/kibana');
+const mockReportEvent = vi.fn();
+vi.mock('../../../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../../../common/lib/kibana'));
   return {
     ...actual,
-    useKibana: jest.fn().mockImplementation(() => {
+    useKibana: vi.fn().mockImplementation(() => {
       const useKibana = actual.useKibana();
       return {
         ...useKibana,
@@ -52,17 +55,17 @@ jest.mock('../../../../../common/lib/kibana', () => {
   };
 });
 
-const useExecuteBulkActionMock = useExecuteBulkAction as jest.Mock;
-const useBulkExportMock = useBulkExport as jest.Mock;
-const useRuleCustomizationsContextMock = useRuleCustomizationsContext as jest.Mock;
+const useExecuteBulkActionMock = useExecuteBulkAction as Mock;
+const useBulkExportMock = useBulkExport as Mock;
+const useRuleCustomizationsContextMock = useRuleCustomizationsContext as Mock;
 
 describe('RuleActionsOverflow', () => {
   beforeEach(() => {
     useRuleCustomizationsContextMock.mockReturnValue({
-      actions: { openCustomizationsRevertFlyout: jest.fn() },
+      actions: { openCustomizationsRevertFlyout: vi.fn() },
       state: { doesBaseVersionExist: true },
     });
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         rules: { read: true, edit: true },
@@ -157,7 +160,7 @@ describe('RuleActionsOverflow', () => {
 
   describe('rules details export rule', () => {
     test('should call export actions and display toast when export option is clicked', async () => {
-      const bulkExport = jest.fn();
+      const bulkExport = vi.fn();
       useBulkExportMock.mockReturnValue({ bulkExport });
 
       const { getByTestId } = render(
@@ -199,7 +202,7 @@ describe('RuleActionsOverflow', () => {
     });
 
     test('should be enabled when user only has rule read permissions', async () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         ...initialUserPrivilegesState(),
         rulesPrivileges: {
           rules: { read: true, edit: false },
@@ -247,7 +250,7 @@ describe('RuleActionsOverflow', () => {
     });
 
     test('it calls deleteRulesAction when rules-details-delete-rule is clicked', async () => {
-      const executeBulkAction = jest.fn();
+      const executeBulkAction = vi.fn();
       useExecuteBulkActionMock.mockReturnValue({ executeBulkAction });
 
       const { getByTestId } = render(
@@ -271,7 +274,7 @@ describe('RuleActionsOverflow', () => {
     });
 
     test('it calls deleteRulesAction with the rule.id when rules-details-delete-rule is clicked', async () => {
-      const executeBulkAction = jest.fn();
+      const executeBulkAction = vi.fn();
       useExecuteBulkActionMock.mockReturnValue({ executeBulkAction });
 
       const rule = mockRule('id');
@@ -345,7 +348,7 @@ describe('RuleActionsOverflow', () => {
     });
 
     it('should be disabled when the user does not have permissions for the subfeature', async () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         ...initialUserPrivilegesState(),
         rulesPrivileges: {
           rules: { read: true, edit: true }, // all rule permissions
@@ -401,7 +404,7 @@ describe('RuleActionsOverflow', () => {
 
     test('it disabled the revert action when isRevertBaseVersionDisabled is true', async () => {
       useRuleCustomizationsContextMock.mockReturnValue({
-        actions: { openCustomizationsRevertFlyout: jest.fn() },
+        actions: { openCustomizationsRevertFlyout: vi.fn() },
         state: { doesBaseVersionExist: false },
       });
       const { getByTestId } = render(

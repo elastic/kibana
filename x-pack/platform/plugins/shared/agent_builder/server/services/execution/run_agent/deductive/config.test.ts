@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getDeductiveConfig, resolveDeductiveConfig, shouldUseDeductive } from './config';
 
 describe('getDeductiveConfig', () => {
@@ -15,11 +17,11 @@ describe('getDeductiveConfig', () => {
     registerEnabled?: boolean;
     settings?: Record<string, unknown>;
   } = {}) => {
-    const get = jest.fn((key: string) => Promise.resolve(settings[key]));
+    const get = vi.fn((key: string) => Promise.resolve(settings[key]));
     return {
       request: {} as any,
-      uiSettings: { globalAsScopedToClient: jest.fn(() => ({ get })) } as any,
-      savedObjects: { getScopedClient: jest.fn(() => ({})) } as any,
+      uiSettings: { globalAsScopedToClient: vi.fn(() => ({ get })) } as any,
+      savedObjects: { getScopedClient: vi.fn(() => ({})) } as any,
       registerEnabled,
     };
   };

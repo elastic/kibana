@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Feature, QueryLink, StreamQuery } from '@kbn/significant-events-schema';
 import { DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE, searchKnowledgeIndicators } from './search';
 
@@ -55,8 +57,8 @@ describe('searchKnowledgeIndicators', () => {
   });
 
   it('supports kind=[query] (queries-only)', async () => {
-    const getFeatures = jest.fn();
-    const getQueries = jest.fn(
+    const getFeatures = vi.fn();
+    const getQueries = vi.fn(
       async (): Promise<QueryLink[]> => [
         {
           query: makeStreamQuery({ id: 'q1' }),
@@ -80,8 +82,8 @@ describe('searchKnowledgeIndicators', () => {
   });
 
   it('supports kind=[feature] (features-only)', async () => {
-    const getFeatures = jest.fn(async () => [makeFeature({ id: 'f1' })]);
-    const getQueries = jest.fn();
+    const getFeatures = vi.fn(async () => [makeFeature({ id: 'f1' })]);
+    const getQueries = vi.fn();
 
     const res = await searchKnowledgeIndicators({
       params: { kind: ['feature'] },
@@ -96,8 +98,8 @@ describe('searchKnowledgeIndicators', () => {
   });
 
   it('filters requested stream_names against accessible streams', async () => {
-    const getFeatures = jest.fn(async () => []);
-    const getQueries = jest.fn(async () => []);
+    const getFeatures = vi.fn(async () => []);
+    const getQueries = vi.fn(async () => []);
 
     await searchKnowledgeIndicators({
       params: { stream_names: ['logs.allowed', 'logs.denied'] },
@@ -115,8 +117,8 @@ describe('searchKnowledgeIndicators', () => {
   });
 
   it('returns empty when requested stream_names are not accessible', async () => {
-    const getFeatures = jest.fn(async () => []);
-    const getQueries = jest.fn(async () => []);
+    const getFeatures = vi.fn(async () => []);
+    const getQueries = vi.fn(async () => []);
 
     const res = await searchKnowledgeIndicators({
       params: { stream_names: ['logs.missing'] },
@@ -167,7 +169,7 @@ describe('searchKnowledgeIndicators', () => {
   });
 
   it('filters before paginating and returns stable page metadata', async () => {
-    const getFeatures = jest.fn(async () => [
+    const getFeatures = vi.fn(async () => [
       makeFeature({
         id: 'entity-b',
         uuid: 'entity-b-uuid',
@@ -222,7 +224,7 @@ describe('searchKnowledgeIndicators', () => {
   });
 
   it('passes query filters through and excludes non-matching results defensively', async () => {
-    const getQueries = jest.fn(
+    const getQueries = vi.fn(
       async (): Promise<QueryLink[]> => [
         {
           query: makeStreamQuery({ id: 'matching', type: 'match' }),
@@ -408,7 +410,7 @@ describe('searchKnowledgeIndicators', () => {
   });
 
   it('calls onFeatureFetchError when a stream feature fetch fails', async () => {
-    const onFeatureFetchError = jest.fn();
+    const onFeatureFetchError = vi.fn();
 
     const res = await searchKnowledgeIndicators({
       params: { kind: ['feature'] },

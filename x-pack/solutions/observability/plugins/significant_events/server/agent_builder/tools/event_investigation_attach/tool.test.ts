@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -14,23 +17,32 @@ import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import { attachEventInvestigationToolHandler } from './handler';
 import { createEventInvestigationAttachTool } from './tool';
 
-jest.mock('../../../routes/utils/assert_can_manage_significant_events', () => ({
-  assertCanManageSignificantEvents: jest.fn(),
-}));
+vi.mock('../../../routes/utils/assert_can_manage_significant_events', () => {
+      const mocked = {
+      assertCanManageSignificantEvents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn(),
-}));
+vi.mock('../../../routes/utils/assert_significant_events_access', () => {
+      const mocked = {
+      assertSignificantEventsAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./handler', () => ({
-  attachEventInvestigationToolHandler: jest.fn(),
-}));
+vi.mock('./handler', () => {
+      const mocked = {
+      attachEventInvestigationToolHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('event_investigation_attach tool', () => {
   it('requires manage privilege and passes its logger to the handler', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
-    (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
-    (attachEventInvestigationToolHandler as jest.Mock).mockResolvedValue({
+    (assertSignificantEventsAccess as Mock).mockResolvedValue(undefined);
+    (assertCanManageSignificantEvents as Mock).mockResolvedValue(undefined);
+    (attachEventInvestigationToolHandler as Mock).mockResolvedValue({
       event_uuid: 'event-uuid',
       updated: 1,
       ignored: 0,
@@ -38,14 +50,14 @@ describe('event_investigation_attach tool', () => {
 
     const logger = loggingSystemMock.createLogger();
     const tool = createEventInvestigationAttachTool({
-      getScopedClients: jest.fn().mockResolvedValue({
-        getEventClient: jest.fn().mockResolvedValue({}),
-        getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
+      getScopedClients: vi.fn().mockResolvedValue({
+        getEventClient: vi.fn().mockResolvedValue({}),
+        getAlertEventsClient: vi.fn().mockResolvedValue(undefined),
         licensing: {},
       }) as unknown as GetScopedClients,
       server: {} as SignificantEventsServer,
       logger,
-      telemetry: { trackAgentToolEventInvestigationAttach: jest.fn() } as never,
+      telemetry: { trackAgentToolEventInvestigationAttach: vi.fn() } as never,
     });
 
     await invokeHandler(

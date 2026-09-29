@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { useNavigateToAlertsPageWithFilters } from './use_navigate_to_alerts_page_with_filters';
 
-const mockNavigateTo = jest.fn();
-jest.mock('@kbn/security-solution-navigation', () => ({
-  ...jest.requireActual('@kbn/security-solution-navigation'),
-  useNavigation: () => ({ navigateTo: mockNavigateTo }),
-}));
+const mockNavigateTo = vi.fn();
+vi.mock('@kbn/security-solution-navigation', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/security-solution-navigation')),
+      useNavigation: () => ({ navigateTo: mockNavigateTo }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useNavigateToAlertsPageWithFilters', () => {
   it('navigates to alerts page with single filter', () => {

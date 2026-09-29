@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -20,14 +23,14 @@ import { valueAxis, seriesParam } from './mocks';
 import { ChartType } from '../../../../../common';
 
 describe('ChartOptions component', () => {
-  let setParamByIndex: jest.Mock;
-  let changeValueAxis: jest.Mock;
+  let setParamByIndex: Mock;
+  let changeValueAxis: Mock;
   let defaultProps: ChartOptionsParams;
   let chart: SeriesParam;
 
   beforeEach(() => {
-    setParamByIndex = jest.fn();
-    changeValueAxis = jest.fn();
+    setParamByIndex = vi.fn();
+    changeValueAxis = vi.fn();
     chart = { ...seriesParam };
 
     defaultProps = {

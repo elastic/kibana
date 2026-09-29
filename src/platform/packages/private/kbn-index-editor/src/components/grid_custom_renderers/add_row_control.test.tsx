@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { EuiDataGridRefProps } from '@elastic/eui';
 import {
   analyticsServiceMock,
@@ -39,13 +41,13 @@ describe('getAddRowControl', () => {
       telemetryService,
       true
     );
-    const addEmptyRow = jest.spyOn(indexUpdateService, 'addEmptyRow');
+    const addEmptyRow = vi.spyOn(indexUpdateService, 'addEmptyRow');
     const dataTableRef: RefObject<EuiDataGridRefProps> = {
       current: {
-        setIsFullScreen: jest.fn(),
-        openCellPopover: jest.fn(),
-        closeCellPopover: jest.fn(),
-        setFocusedCell: jest.fn(),
+        setIsFullScreen: vi.fn(),
+        openCellPopover: vi.fn(),
+        closeCellPopover: vi.fn(),
+        setFocusedCell: vi.fn(),
       },
     };
     const Control: RowControlComponent = () => null;

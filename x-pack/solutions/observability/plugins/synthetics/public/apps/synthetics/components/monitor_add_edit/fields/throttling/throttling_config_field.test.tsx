@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { PROFILE_OPTIONS, ThrottlingConfigField } from './throttling_config_field';
@@ -11,7 +13,7 @@ import { render } from '../../../../utils/testing';
 import { PROFILES_MAP } from '../../../../../../../common/constants/monitor_defaults';
 
 describe('ThrottlingConfigField', () => {
-  jest.setTimeout(10_000);
+  vi.setConfig({ testTimeout: 10_000 });
 
   it('renders', async () => {
     render(
@@ -28,7 +30,7 @@ describe('ThrottlingConfigField', () => {
   });
 
   it('selects custom values', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <ThrottlingConfigField
         ariaLabel={'ariaLabel'}
@@ -53,7 +55,7 @@ describe('ThrottlingConfigField', () => {
   });
 
   it('changes custom values', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const customValue = {
       id: 'custom',
       label: 'Custom',

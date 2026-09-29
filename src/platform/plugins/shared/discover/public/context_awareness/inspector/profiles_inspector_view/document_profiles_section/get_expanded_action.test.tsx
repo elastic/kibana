@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { MouseEvent } from 'react';
 import { getExpandAction } from './get_expand_action';
 
 const setup = (params: Partial<Parameters<typeof getExpandAction>[0]>) => {
-  const onClick = jest.fn();
+  const onClick = vi.fn();
 
   const data = getExpandAction({
     name: 'Test expand action',

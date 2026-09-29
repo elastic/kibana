@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
@@ -16,35 +19,41 @@ import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import { getMockTheme } from '../../common/lib/kibana/kibana_react.mock';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'), // use actual for all non-hook parts
-  useParams: () => ({
-    detailName: 'testId',
-  }),
-}));
-jest.mock('../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../common/lib/kibana');
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'), // use actual for all non-hook parts
+      useParams: () => ({
+        detailName: 'testId',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../common/lib/kibana'));
   return {
     ...original,
-    useToasts: jest.fn().mockReturnValue({
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-      addWarning: jest.fn(),
-      addInfo: jest.fn(),
-      remove: jest.fn(),
+    useToasts: vi.fn().mockReturnValue({
+      addError: vi.fn(),
+      addSuccess: vi.fn(),
+      addWarning: vi.fn(),
+      addInfo: vi.fn(),
+      remove: vi.fn(),
     }),
   };
 });
 
-jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
+vi.mock('../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import * as rules from '../rule_management/logic/use_rule';
 // @ts-expect-error we don't really care about thr useRule return value
-jest.spyOn(rules, 'useRule').mockReturnValue({});
+vi.spyOn(rules, 'useRule').mockReturnValue({});
 
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as Mock;
 useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
 
 const mockTheme = getMockTheme({ eui: { euiColorLightestShade: '#F5F7FA' } });
@@ -62,7 +71,7 @@ describe('ResponseActionsForm', () => {
     const { form } = useForm();
     return (
       <Form form={form}>
-        <ResponseActionsForm addItem={jest.fn()} removeItem={jest.fn()} {...props} form={form} />
+        <ResponseActionsForm addItem={vi.fn()} removeItem={vi.fn()} {...props} form={form} />
       </Form>
     );
   };
@@ -104,7 +113,7 @@ describe('ResponseActionsForm', () => {
       items,
       fields,
       errors = [],
-      removeItem = jest.fn(),
+      removeItem = vi.fn(),
     }: {
       items: ArrayItem[];
       fields: Record<string, MockField>;
@@ -121,7 +130,7 @@ describe('ResponseActionsForm', () => {
       return (
         <Form form={realForm}>
           <ResponseActionsForm
-            addItem={jest.fn()}
+            addItem={vi.fn()}
             removeItem={removeItem}
             items={items}
             form={form}
@@ -235,7 +244,7 @@ describe('ResponseActionsForm', () => {
     });
 
     it('invokes removeItem with the clicked item id, not its rendered index', () => {
-      const removeItem = jest.fn();
+      const removeItem = vi.fn();
       const { getAllByTestId } = renderWithContext(
         <HarnessComponent
           items={[makeItem(10), makeItem(20), makeItem(30)]}

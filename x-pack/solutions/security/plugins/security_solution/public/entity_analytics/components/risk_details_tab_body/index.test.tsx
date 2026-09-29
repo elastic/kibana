@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -13,13 +16,13 @@ import { RiskDetailsTabBody } from '.';
 import { EntityType } from '../../../../common/search_strategy';
 import { useEntityRiskScores } from '../../api/hooks/use_entity_risk_scores';
 
-jest.mock('../../api/hooks/use_entity_risk_scores');
-jest.mock('../../../common/containers/query_toggle');
+vi.mock('../../api/hooks/use_entity_risk_scores');
+vi.mock('../../../common/containers/query_toggle');
 
 describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s', (riskEntity) => {
   const defaultProps = {
     entityId: 'entity-123',
-    setQuery: jest.fn(),
+    setQuery: vi.fn(),
     riskEntity,
   };
 
@@ -32,15 +35,15 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
     isInspected: false,
     totalCount: 0,
     data: [],
-    refetch: jest.fn(),
+    refetch: vi.fn(),
     hasEngineBeenInstalled: true,
   };
 
-  const mockUseEntityRiskScores = useEntityRiskScores as jest.Mock;
-  const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  const mockUseEntityRiskScores = useEntityRiskScores as Mock;
+  const mockUseQueryToggle = useQueryToggle as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseEntityRiskScores.mockReturnValue({
       base: riskScoreState,
@@ -49,9 +52,9 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
         hasResolutionGroup: false,
         resolutionTargetEntityId: undefined,
       },
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: vi.fn() });
   });
 
   it('reads risk scores by entity id', () => {
@@ -64,7 +67,7 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
   });
 
   it('skips the read when the contributors toggle is off', () => {
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: vi.fn() });
     render(
       <TestProviders>
         <RiskDetailsTabBody {...defaultProps} />

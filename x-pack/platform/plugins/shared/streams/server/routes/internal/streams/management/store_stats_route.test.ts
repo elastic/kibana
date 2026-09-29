@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -23,20 +25,20 @@ const callHandler = ({
   statsResult?: IndicesStatsResponse;
   statsError?: Error;
 }) => {
-  const stats = jest.fn();
+  const stats = vi.fn();
   if (statsError) {
     stats.mockRejectedValue(statsError);
   } else {
     stats.mockResolvedValue(statsResult);
   }
 
-  const getScopedClients = jest.fn().mockResolvedValue({
+  const getScopedClients = vi.fn().mockResolvedValue({
     scopedClusterClient: { asCurrentUser: { indices: { stats } } },
   });
 
   const telemetry = {
-    startTrackingEndpointLatency: jest.fn().mockReturnValue(jest.fn()),
-    reportStreamsStateError: jest.fn(),
+    startTrackingEndpointLatency: vi.fn().mockReturnValue(vi.fn()),
+    reportStreamsStateError: vi.fn(),
   };
 
   const handlerParams = {
@@ -44,7 +46,7 @@ const callHandler = ({
     request: {},
     getScopedClients,
     response: {},
-    logger: { error: jest.fn() },
+    logger: { error: vi.fn() },
     context: {},
     telemetry,
   } as unknown as HandlerParams;

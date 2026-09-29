@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
 import { AddToTimelineButton, SECURITY_APP_NAME } from './add_to_timeline_button';
 import { TestProvidersWithServices } from '../__test_helpers__/create_mock_kibana_services';
 
-const mockUseKibana = jest.fn();
+const mockUseKibana = vi.fn();
 
-jest.mock('../common/lib/kibana', () => ({
-  ...jest.requireActual('../common/lib/kibana'),
-  useKibana: () => mockUseKibana(),
-}));
+vi.mock('../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../common/lib/kibana')),
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const setupKibana = (appName: string = SECURITY_APP_NAME) => {
   mockUseKibana.mockReturnValue({
@@ -39,10 +44,10 @@ const setupKibana = (appName: string = SECURITY_APP_NAME) => {
 };
 
 describe('AddToTimelineButton', () => {
-  const mockAddToTimeline = jest.fn();
+  const mockAddToTimeline = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupKibana();
   });
 

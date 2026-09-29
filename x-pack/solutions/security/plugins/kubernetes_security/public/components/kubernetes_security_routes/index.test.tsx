@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import type { MemoryRouterProps } from 'react-router';
@@ -13,32 +15,44 @@ import { MemoryRouter } from 'react-router-dom';
 import { KubernetesSecurityRoutes } from '.';
 import { createAppRootMockRenderer } from '../../test';
 
-jest.mock('../percent_widget', () => ({
-  PercentWidget: () => <div>{'Mock percent widget'}</div>,
-}));
+vi.mock('../percent_widget', () => {
+      const mocked = {
+      PercentWidget: () => <div>{'Mock percent widget'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_last_updated', () => ({
-  useLastUpdated: () => <div>{'Mock updated now'}</div>,
-}));
+vi.mock('../../hooks/use_last_updated', () => {
+      const mocked = {
+      useLastUpdated: () => <div>{'Mock updated now'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../count_widget', () => ({
-  CountWidget: () => <div>{'Mock count widget'}</div>,
-}));
+vi.mock('../count_widget', () => {
+      const mocked = {
+      CountWidget: () => <div>{'Mock count widget'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../container_name_widget', () => ({
-  ContainerNameWidget: () => <div>{'Mock Container Name widget'}</div>,
-}));
+vi.mock('../container_name_widget', () => {
+      const mocked = {
+      ContainerNameWidget: () => <div>{'Mock Container Name widget'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const dataViewId = 'dataViewId';
 
 const renderWithRouter = (
   initialEntries: MemoryRouterProps['initialEntries'] = ['/kubernetes']
 ) => {
-  const useGlobalFullScreen = jest.fn();
+  const useGlobalFullScreen = vi.fn();
   useGlobalFullScreen.mockImplementation(() => {
     return { globalFullScreen: false };
   });
-  const useSourcererDataView = jest.fn();
+  const useSourcererDataView = vi.fn();
   useSourcererDataView.mockImplementation(() => {
     return {
       indexPattern: {
@@ -65,7 +79,7 @@ const renderWithRouter = (
           startDate: '2022-03-08T18:52:15.532Z',
           endDate: '2022-06-09T17:52:15.532Z',
         }}
-        renderSessionsView={jest.fn()}
+        renderSessionsView={vi.fn()}
         dataViewId={dataViewId}
       />
     </MemoryRouter>

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { filter, lastValueFrom, of, throwError } from 'rxjs';
 import type { ChatCompleteResponse } from '@kbn/inference-common';
 import type { Message } from '../../../../common';
@@ -53,13 +55,13 @@ describe('getGeneratedTitle', () => {
     const options = rest.length === 1 ? {} : rest[0];
     const chunks = rest.length === 1 ? rest[0] : rest[1];
 
-    const chatSpy = jest.fn().mockImplementation(() => of(...chunks));
+    const chatSpy = vi.fn().mockImplementation(() => of(...chunks));
 
     const title$ = getGeneratedTitle({
       chat: chatSpy,
       logger: {
-        debug: jest.fn(),
-        error: jest.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
       },
       messages,
       ...options,
@@ -135,13 +137,13 @@ describe('getGeneratedTitle', () => {
   });
 
   it('handles errors in chat and falls back to the default title', async () => {
-    const chatSpy = jest
+    const chatSpy = vi
       .fn()
       .mockImplementation(() => throwError(() => new Error('Error generating title')));
 
     const logger = {
-      debug: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      error: vi.fn(),
     };
 
     const title$ = getGeneratedTitle({
@@ -165,14 +167,14 @@ describe('getGeneratedTitle', () => {
         arguments: { title: 'My title' },
       },
     });
-    const chatSpy = jest.fn().mockImplementation(() => of(response));
+    const chatSpy = vi.fn().mockImplementation(() => of(response));
 
     const scopes = ['observability'] as AssistantScope[];
     getGeneratedTitle({
       chat: chatSpy,
       logger: {
-        debug: jest.fn(),
-        error: jest.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
       },
       messages,
       scopes,
@@ -194,14 +196,14 @@ describe('getGeneratedTitle', () => {
         arguments: { title: 'My title' },
       },
     });
-    const chatSpy = jest.fn().mockImplementation(() => of(response));
+    const chatSpy = vi.fn().mockImplementation(() => of(response));
 
     const scopes = ['search'] as AssistantScope[];
     getGeneratedTitle({
       chat: chatSpy,
       logger: {
-        debug: jest.fn(),
-        error: jest.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
       },
       messages,
       scopes,

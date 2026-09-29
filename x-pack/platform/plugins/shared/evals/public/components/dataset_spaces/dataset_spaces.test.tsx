@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,9 +21,9 @@ import { DatasetSpacesPicker } from './dataset_spaces_picker';
 import { SharedChangeConfirmModal } from './shared_change_confirm_modal';
 import { getRemovedSpaceIds } from './use_dataset_sharing';
 
-jest.mock('../../hooks/use_spaces');
+vi.mock('../../hooks/use_spaces');
 
-const mockUseAccessibleSpaces = useAccessibleSpaces as jest.MockedFunction<
+const mockUseAccessibleSpaces = useAccessibleSpaces as MockedFunction<
   typeof useAccessibleSpaces
 >;
 
@@ -113,7 +116,7 @@ describe('DatasetSpacesPicker', () => {
   it('is hidden when there is nowhere else to put a dataset', () => {
     setSpaces({ isEnabled: false, spaces: [], activeSpaceId: undefined });
 
-    const { container } = render(<DatasetSpacesPicker value={['default']} onChange={jest.fn()} />, {
+    const { container } = render(<DatasetSpacesPicker value={['default']} onChange={vi.fn()} />, {
       wrapper: Wrapper,
     });
 
@@ -121,13 +124,13 @@ describe('DatasetSpacesPicker', () => {
   });
 
   it('marks which space is the current one', () => {
-    render(<DatasetSpacesPicker value={['default']} onChange={jest.fn()} />, { wrapper: Wrapper });
+    render(<DatasetSpacesPicker value={['default']} onChange={vi.fn()} />, { wrapper: Wrapper });
 
     expect(screen.getByText('Default (current)')).toBeInTheDocument();
   });
 
   it('offers the spaces themselves and no wildcard among them', async () => {
-    render(<DatasetSpacesPicker value={[]} onChange={jest.fn()} />, { wrapper: Wrapper });
+    render(<DatasetSpacesPicker value={[]} onChange={vi.fn()} />, { wrapper: Wrapper });
 
     await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
 
@@ -141,7 +144,7 @@ describe('DatasetSpacesPicker', () => {
   });
 
   it('keeps spaces the caller cannot see attached to the dataset, and counted', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <DatasetSpacesPicker value={['default', UNKNOWN_SPACE, UNKNOWN_SPACE]} onChange={onChange} />,
       { wrapper: Wrapper }
@@ -172,8 +175,8 @@ describe('SharedChangeConfirmModal', () => {
       <SharedChangeConfirmModal
         spaceIds={['default', 'marketing']}
         action="edit-dataset"
-        onConfirm={jest.fn()}
-        onCancel={jest.fn()}
+        onConfirm={vi.fn()}
+        onCancel={vi.fn()}
         {...props}
       />,
       { wrapper: Wrapper }

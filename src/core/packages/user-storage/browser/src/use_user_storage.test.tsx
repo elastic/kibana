@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -33,12 +35,12 @@ const buildClient = (initial: Record<string, unknown> = {}): IUserStorageClient 
         cache[key] !== undefined ? cache[key] : defaultValue
       ).asObservable();
     }) as IUserStorageClient['get$'],
-    set: jest.fn(async (key: string, value: unknown) => {
+    set: vi.fn(async (key: string, value: unknown) => {
       cache[key] = value;
       subject$.next({ ...cache });
       return value;
     }) as IUserStorageClient['set'],
-    remove: jest.fn(async (key: string) => {
+    remove: vi.fn(async (key: string) => {
       delete cache[key];
       subject$.next({ ...cache });
     }) as IUserStorageClient['remove'],
@@ -55,7 +57,7 @@ const wrapper =
 // React surfaces render-time errors via console.error; suppress to keep
 // expected-throw tests from polluting test output.
 const expectThrowsFromRender = (fn: () => unknown, pattern: RegExp) => {
-  const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
   try {
     expect(fn).toThrow(pattern);
   } finally {
@@ -101,7 +103,7 @@ describe('useUserStorage', () => {
   it('uses the peeked value for a preloaded key, without awaiting a subscription emit', () => {
     const client = buildClient({ 'navigation:layout': { hidden: ['discover'] } });
     // A get$ that never emits isolates the pre-subscription initial value.
-    client.get$ = jest.fn().mockReturnValue(new Subject()) as IUserStorageClient['get$'];
+    client.get$ = vi.fn().mockReturnValue(new Subject()) as IUserStorageClient['get$'];
 
     const { result } = renderHook(() => useUserStorage<{ hidden: string[] }>('navigation:layout'), {
       wrapper: wrapper(client),
@@ -138,7 +140,7 @@ describe('useUserStorage', () => {
   it('shows the default until a lazy key hydrates, then the fetched value', () => {
     const client = buildClient();
     const value$ = new Subject<string>();
-    client.get$ = jest.fn().mockReturnValue(value$) as IUserStorageClient['get$'];
+    client.get$ = vi.fn().mockReturnValue(value$) as IUserStorageClient['get$'];
 
     const { result } = renderHook(() => useUserStorage<string>('lazy', 'default'), {
       wrapper: wrapper(client),
@@ -153,7 +155,7 @@ describe('useUserStorage', () => {
 
   it('does not re-subscribe when re-rendered with a fresh-but-equal defaultValue literal', () => {
     const client = buildClient();
-    const get$ = jest.spyOn(client, 'get$');
+    const get$ = vi.spyOn(client, 'get$');
 
     const { rerender } = renderHook(
       // A new object literal each render — reference changes, value does not.
@@ -170,7 +172,7 @@ describe('useUserStorage', () => {
   it('stays on the default when the lazy fetch fails (get$ neither errors nor completes)', () => {
     const client = buildClient();
     const value$ = new Subject<string>();
-    client.get$ = jest.fn().mockReturnValue(value$) as IUserStorageClient['get$'];
+    client.get$ = vi.fn().mockReturnValue(value$) as IUserStorageClient['get$'];
 
     const { result } = renderHook(() => useUserStorage<string>('lazy', 'default'), {
       wrapper: wrapper(client),

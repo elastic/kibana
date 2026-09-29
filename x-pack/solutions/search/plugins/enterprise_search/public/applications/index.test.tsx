@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { searchConnectorsMock } from '@kbn/content-connectors-plugin/public/plugin.mock';
 
 import React from 'react';
@@ -41,7 +43,7 @@ describe('renderApp', () => {
       contentConnectors: searchConnectorsMock.createStart(),
       data: dataPluginMock.createStartContract(),
       indexManagement: {
-        getIndexMappingComponent: jest.fn(),
+        getIndexMappingComponent: vi.fn(),
       },
       lens: lensPluginMock.createStartContract(),
       licensing: licensingMock.createStart(),
@@ -53,7 +55,7 @@ describe('renderApp', () => {
       uiActions: uiActionsPluginMock.createStartContract(),
       user: {},
     },
-    updateSideNavDefinition: jest.fn(),
+    updateSideNavDefinition: vi.fn(),
   } as any;
   const pluginData = {
     config: {},
@@ -61,7 +63,7 @@ describe('renderApp', () => {
   } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const mockContainer = kibanaDeps.params.element;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,7 +18,7 @@ import { FormTestComponent } from '../../common/test_utils';
 
 // Failing: See https://github.com/elastic/kibana/issues/177791
 describe('Category', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   it('renders the category field correctly', async () => {
     render(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { act, fireEvent, waitFor, within } from '@testing-library/react';
@@ -20,34 +23,34 @@ import {
 import { AgentUpgradeAgentModal } from '.';
 import type { AgentUpgradeAgentModalProps } from '.';
 
-jest.mock('../../../../hooks', () => {
+vi.mock('../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../hooks'),
-    sendGetAgentsAvailableVersions: jest.fn().mockResolvedValue({
+    ...(await vi.importActual('../../../../hooks')),
+    sendGetAgentsAvailableVersions: vi.fn().mockResolvedValue({
       data: {
         items: ['8.10.2', '8.7.0'],
       },
     }),
-    sendGetAgentStatus: jest.fn().mockResolvedValue({
+    sendGetAgentStatus: vi.fn().mockResolvedValue({
       data: { results: { updating: 2 } },
     }),
-    sendPostBulkAgentUpgrade: jest.fn(),
-    useAgentVersion: jest.fn().mockReturnValue('8.10.2'),
-    useKibanaVersion: jest.fn().mockReturnValue('8.10.2'),
-    sendGetAllFleetServerAgents: jest.fn(),
+    sendPostBulkAgentUpgrade: vi.fn(),
+    useAgentVersion: vi.fn().mockReturnValue('8.10.2'),
+    useKibanaVersion: vi.fn().mockReturnValue('8.10.2'),
+    sendGetAllFleetServerAgents: vi.fn(),
   };
 });
 
-jest.mock('./hooks', () => {
+vi.mock('./hooks', async () => {
   return {
-    ...jest.requireActual('./hooks'),
+    ...(await vi.importActual('./hooks')),
   };
 });
 
-const mockSendPostBulkAgentUpgrade = sendPostBulkAgentUpgrade as jest.Mock;
+const mockSendPostBulkAgentUpgrade = sendPostBulkAgentUpgrade as Mock;
 
-const mockSendGetAgentsAvailableVersions = sendGetAgentsAvailableVersions as jest.Mock;
-const mockSendAllFleetServerAgents = sendGetAllFleetServerAgents as jest.Mock;
+const mockSendGetAgentsAvailableVersions = sendGetAgentsAvailableVersions as Mock;
+const mockSendAllFleetServerAgents = sendGetAllFleetServerAgents as Mock;
 
 function renderAgentUpgradeAgentModal(props: Partial<AgentUpgradeAgentModalProps>) {
   const renderer = createFleetTestRendererMock();

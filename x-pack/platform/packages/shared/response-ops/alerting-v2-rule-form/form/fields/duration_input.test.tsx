@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { DurationInput, type DurationInputProps } from './duration_input';
 
 const defaultProps: DurationInputProps = {
   value: '5m',
-  onChange: jest.fn(),
+  onChange: vi.fn(),
   numberLabel: 'Every',
   unitAriaLabel: 'Unit',
   dataTestSubj: 'testDuration',
@@ -19,13 +21,13 @@ const defaultProps: DurationInputProps = {
 };
 
 const renderDurationInput = (overrides: Partial<DurationInputProps> = {}) => {
-  const props = { ...defaultProps, ...overrides, onChange: jest.fn() };
+  const props = { ...defaultProps, ...overrides, onChange: vi.fn() };
   const result = render(<DurationInput {...props} />);
   return { ...result, onChange: props.onChange };
 };
 
 describe('DurationInput', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   describe('rendering', () => {
     it('renders the number input with the parsed value', () => {
@@ -171,7 +173,7 @@ describe('DurationInput', () => {
       const input = screen.getByTestId('testDurationNumberInput');
 
       const event = new KeyboardEvent('keydown', { key, bubbles: true });
-      const preventDefaultSpy = jest.spyOn(event, 'preventDefault');
+      const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
 
       input.dispatchEvent(event);
 
@@ -183,7 +185,7 @@ describe('DurationInput', () => {
       const input = screen.getByTestId('testDurationNumberInput');
 
       const event = new KeyboardEvent('keydown', { key: '3', bubbles: true });
-      const preventDefaultSpy = jest.spyOn(event, 'preventDefault');
+      const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
 
       input.dispatchEvent(event);
 

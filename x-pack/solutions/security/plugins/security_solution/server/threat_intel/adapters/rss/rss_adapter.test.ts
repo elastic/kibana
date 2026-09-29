@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { CATALOG_SOURCE_URLS } from '../../../../common/threat_intel';
 import { extractIocs } from '../../services/extract_iocs';
@@ -60,7 +62,7 @@ const okResponse = (body: string): Response =>
 
 describe('rssAdapter', () => {
   it('emits one normalized report per RSS item', async () => {
-    const fetchMock = jest.fn().mockResolvedValue(okResponse(FEED_BODY));
+    const fetchMock = vi.fn().mockResolvedValue(okResponse(FEED_BODY));
     const reports = await rssAdapter.run(buildSource(), buildContext(fetchMock));
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -94,7 +96,7 @@ describe('rssAdapter', () => {
   });
 
   it('stores only plain text — never the raw markup fragment', async () => {
-    const fetchMock = jest.fn().mockResolvedValue(okResponse(FEED_BODY));
+    const fetchMock = vi.fn().mockResolvedValue(okResponse(FEED_BODY));
     const reports = await rssAdapter.run(buildSource(), buildContext(fetchMock));
 
     for (const report of reports) {
@@ -113,7 +115,7 @@ describe('rssAdapter', () => {
     );
     const reports = await rssAdapter.run(
       buildSource(),
-      buildContext(jest.fn().mockResolvedValue(okResponse(structuredFeed)))
+      buildContext(vi.fn().mockResolvedValue(okResponse(structuredFeed)))
     );
 
     const extracted = extractIocs({ text: reports[0].content.body_text });
@@ -138,7 +140,7 @@ describe('rssAdapter', () => {
   // Load-bearing invariant: an entry link is provenance metadata only. The adapter fetches
   // the configured feed URL and nothing else — it must never fetch each item's link.
   it('never fetches an entry link, only the configured feed URL', async () => {
-    const fetchMock = jest.fn().mockResolvedValue(okResponse(FEED_BODY));
+    const fetchMock = vi.fn().mockResolvedValue(okResponse(FEED_BODY));
     await rssAdapter.run(buildSource(), buildContext(fetchMock));
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -155,7 +157,7 @@ describe('rssAdapter', () => {
     );
     const reports = await rssAdapter.run(
       buildSource(),
-      buildContext(jest.fn().mockResolvedValue(okResponse(feed)))
+      buildContext(vi.fn().mockResolvedValue(okResponse(feed)))
     );
 
     expect(reports[0].source.url).toBe('https://acme.example/1');
@@ -167,7 +169,7 @@ describe('rssAdapter', () => {
       const feed = FEED_BODY.replace('https://acme.example/1', entryLink);
       const reports = await rssAdapter.run(
         buildSource(),
-        buildContext(jest.fn().mockResolvedValue(okResponse(feed)))
+        buildContext(vi.fn().mockResolvedValue(okResponse(feed)))
       );
 
       expect(reports[0].source.url).toBe(FEED_URL);
@@ -193,7 +195,7 @@ describe('rssAdapter', () => {
     const fingerprintFor = async (feed: string) => {
       const reports = await rssAdapter.run(
         buildSource(),
-        buildContext(jest.fn().mockResolvedValue(okResponse(feed)))
+        buildContext(vi.fn().mockResolvedValue(okResponse(feed)))
       );
       return reports[0].content_fingerprint;
     };
@@ -216,7 +218,7 @@ describe('rssAdapter', () => {
   });
 
   it('stamps space_id from the source when set', async () => {
-    const fetchMock = jest.fn().mockResolvedValue(okResponse(FEED_BODY));
+    const fetchMock = vi.fn().mockResolvedValue(okResponse(FEED_BODY));
     const reports = await rssAdapter.run(
       buildSource({ space_id: 'team-a' }),
       buildContext(fetchMock)
@@ -225,7 +227,7 @@ describe('rssAdapter', () => {
   });
 
   it('returns [] when the source id has no catalog URL', async () => {
-    const fetchMock = jest.fn();
+    const fetchMock = vi.fn();
     const reports = await rssAdapter.run(
       { _id: 'rss:unknown', _source: { adapter_type: 'rss', name: 'Unknown' } },
       buildContext(fetchMock)
@@ -235,7 +237,7 @@ describe('rssAdapter', () => {
   });
 
   it('throws on a non-2xx response so the workflow surfaces the failure', async () => {
-    const fetchMock = jest
+    const fetchMock = vi
       .fn()
       .mockResolvedValue(new Response('boom', { status: 503, statusText: 'Service Unavailable' }));
     await expect(rssAdapter.run(buildSource(), buildContext(fetchMock))).rejects.toThrow(
@@ -245,7 +247,7 @@ describe('rssAdapter', () => {
 
   it('returns [] when the feed contains no parseable items', async () => {
     const empty = `<?xml version="1.0"?><rss version="2.0"><channel><title>Empty</title></channel></rss>`;
-    const fetchMock = jest.fn().mockResolvedValue(okResponse(empty));
+    const fetchMock = vi.fn().mockResolvedValue(okResponse(empty));
     const reports = await rssAdapter.run(buildSource(), buildContext(fetchMock));
     expect(reports).toEqual([]);
   });

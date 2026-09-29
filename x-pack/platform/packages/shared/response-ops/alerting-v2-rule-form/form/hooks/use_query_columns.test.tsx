@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { createQueryClientWrapper } from '../../test_utils';
 import { useQueryColumns } from './use_query_columns';
 
-jest.mock('@kbn/esql-utils');
+vi.mock('@kbn/esql-utils');
 
-const mockGetESQLQueryColumnsRaw = jest.mocked(getESQLQueryColumnsRaw);
+const mockGetESQLQueryColumnsRaw = vi.mocked(getESQLQueryColumnsRaw);
 
 const createMockSearch = () => dataPluginMock.createStartContract().search.search;
 
 describe('useQueryColumns', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty columns when query is empty', async () => {

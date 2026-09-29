@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createMockStore, kibanaMock } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 
 import { showTimeline } from '../actions';
 
-jest.mock('../actions', () => {
-  const actual = jest.requireActual('../actions');
-  const showTL = jest.fn((...args) => actual.showTimeline(...args));
+vi.mock('../actions', async () => {
+  const actual = (await vi.importActual('../actions'));
+  const showTL = vi.fn((...args) => actual.showTimeline(...args));
   (showTL as unknown as { match: Function }).match = () => false;
   (showTL as unknown as { type: string }).type = actual.showTimeline.type;
   return {
@@ -21,7 +24,7 @@ jest.mock('../actions', () => {
   };
 });
 
-const showTimelineMock = showTimeline as unknown as jest.Mock;
+const showTimelineMock = showTimeline as unknown as Mock;
 
 describe('Timeline privileges middleware', () => {
   let store = createMockStore(undefined, undefined, kibanaMock);
@@ -32,7 +35,7 @@ describe('Timeline privileges middleware', () => {
   });
 
   it('should not show a toast when a timeline should be shown to a user with sufficient timeline privileges', async () => {
-    const addWarningMock = jest.spyOn(kibanaMock.notifications.toasts, 'addWarning');
+    const addWarningMock = vi.spyOn(kibanaMock.notifications.toasts, 'addWarning');
 
     await store.dispatch(showTimeline({ id: TimelineId.test, show: true }));
 
@@ -40,7 +43,7 @@ describe('Timeline privileges middleware', () => {
   });
 
   it('should show a toast when a timeline should be shown to a user with insufficient timeline privileges', async () => {
-    const addWarningMock = jest.spyOn(kibanaMock.notifications.toasts, 'addWarning');
+    const addWarningMock = vi.spyOn(kibanaMock.notifications.toasts, 'addWarning');
     store = createMockStore(undefined, undefined, {
       ...kibanaMock,
       application: {

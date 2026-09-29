@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -14,42 +16,57 @@ import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { EntitiesOverview } from './entities_overview';
 import { CorrelationsOverview } from './correlations_overview';
 
-jest.mock('@kbn/i18n-react', () => ({
-  FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
-}));
+vi.mock('@kbn/i18n-react', () => {
+      const mocked = {
+      FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
+vi.mock('../../../shared/hooks/use_expand_section', () => {
+      const mocked = {
+      useExpandSection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/components/expandable_section', () => ({
-  ExpandableSection: ({
-    title,
-    children,
-    'data-test-subj': dataTestSubj,
-  }: {
-    title: React.ReactNode;
-    children: React.ReactNode;
-    'data-test-subj'?: string;
-  }) => (
-    <section data-test-subj={dataTestSubj}>
-      <div>{title}</div>
-      {children}
-    </section>
-  ),
-}));
+vi.mock('../../../shared/components/expandable_section', () => {
+      const mocked = {
+      ExpandableSection: ({
+        title,
+        children,
+        'data-test-subj': dataTestSubj,
+      }: {
+        title: React.ReactNode;
+        children: React.ReactNode;
+        'data-test-subj'?: string;
+      }) => (
+        <section data-test-subj={dataTestSubj}>
+          <div>{title}</div>
+          {children}
+        </section>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./entities_overview', () => ({
-  EntitiesOverview: jest.fn(() => <div data-test-subj="entities-overview" />),
-}));
+vi.mock('./entities_overview', () => {
+      const mocked = {
+      EntitiesOverview: vi.fn(() => <div data-test-subj="entities-overview" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./correlations_overview', () => ({
-  CorrelationsOverview: jest.fn(() => <div data-test-subj="correlations-overview" />),
-}));
+vi.mock('./correlations_overview', () => {
+      const mocked = {
+      CorrelationsOverview: vi.fn(() => <div data-test-subj="correlations-overview" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseExpandSection = jest.mocked(useExpandSection);
-const mockedEntitiesOverview = jest.mocked(EntitiesOverview);
-const mockedCorrelationsOverview = jest.mocked(CorrelationsOverview);
+const mockedUseExpandSection = vi.mocked(useExpandSection);
+const mockedEntitiesOverview = vi.mocked(EntitiesOverview);
+const mockedCorrelationsOverview = vi.mocked(CorrelationsOverview);
 
 const buildHit = (alertIds: string[]): DataTableRecord =>
   ({
@@ -61,11 +78,11 @@ const buildHit = (alertIds: string[]): DataTableRecord =>
   } as unknown as DataTableRecord);
 
 const renderSection = (hit: DataTableRecord) =>
-  render(<InsightsSection hit={hit} onShowEntities={jest.fn()} onShowCorrelations={jest.fn()} />);
+  render(<InsightsSection hit={hit} onShowEntities={vi.fn()} onShowCorrelations={vi.fn()} />);
 
 describe('InsightsSection (v2)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseExpandSection.mockReturnValue(true);
   });
 
@@ -97,12 +114,12 @@ describe('InsightsSection (v2)', () => {
   });
 
   it('forwards onShowEntities to EntitiesOverview', () => {
-    const onShowEntities = jest.fn();
+    const onShowEntities = vi.fn();
     render(
       <InsightsSection
         hit={buildHit(['a'])}
         onShowEntities={onShowEntities}
-        onShowCorrelations={jest.fn()}
+        onShowCorrelations={vi.fn()}
       />
     );
 
@@ -113,11 +130,11 @@ describe('InsightsSection (v2)', () => {
   });
 
   it('forwards onShowCorrelations to CorrelationsOverview', () => {
-    const onShowCorrelations = jest.fn();
+    const onShowCorrelations = vi.fn();
     render(
       <InsightsSection
         hit={buildHit(['a'])}
-        onShowEntities={jest.fn()}
+        onShowEntities={vi.fn()}
         onShowCorrelations={onShowCorrelations}
       />
     );

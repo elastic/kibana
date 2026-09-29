@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useSystemFlyoutSize } from '@kbn/core-overlays-browser';
@@ -12,16 +15,19 @@ import { getStoredFlyoutWidth, setStoredFlyoutWidth, useFlyoutSize } from './use
 import { FLYOUT_WIDTH_LOCAL_STORAGE } from '../constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('@kbn/core-overlays-browser', () => ({
-  useSystemFlyoutSize: jest.fn(),
-}));
+vi.mock('../../../common/lib/kibana');
+vi.mock('@kbn/core-overlays-browser', () => {
+      const mocked = {
+      useSystemFlyoutSize: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockStorage = { get: jest.fn(), set: jest.fn(), remove: jest.fn() };
+const mockStorage = { get: vi.fn(), set: vi.fn(), remove: vi.fn() };
 const storage = mockStorage as unknown as Storage;
 
 describe('getStoredFlyoutWidth', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns the stored positive number', () => {
     mockStorage.get.mockReturnValue(640);
@@ -43,7 +49,7 @@ describe('getStoredFlyoutWidth', () => {
 });
 
 describe('setStoredFlyoutWidth', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('persists the width', () => {
     setStoredFlyoutWidth(storage, 720);
@@ -52,12 +58,12 @@ describe('setStoredFlyoutWidth', () => {
 });
 
 describe('useFlyoutSize', () => {
-  const mockResetSize = jest.fn();
+  const mockResetSize = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({ services: { storage: mockStorage } });
-    (useSystemFlyoutSize as jest.Mock).mockReturnValue({ size: 's', resetSize: mockResetSize });
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({ services: { storage: mockStorage } });
+    (useSystemFlyoutSize as Mock).mockReturnValue({ size: 's', resetSize: mockResetSize });
     mockStorage.get.mockReturnValue(undefined);
   });
 
@@ -84,7 +90,7 @@ describe('useFlyoutSize', () => {
   });
 
   it('still clears the stored width when there is no open flyout context', () => {
-    (useSystemFlyoutSize as jest.Mock).mockReturnValue(undefined);
+    (useSystemFlyoutSize as Mock).mockReturnValue(undefined);
     const { result } = renderHook(() => useFlyoutSize());
 
     act(() => result.current.resetSize());

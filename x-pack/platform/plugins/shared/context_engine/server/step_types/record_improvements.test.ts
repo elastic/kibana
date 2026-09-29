@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AuditLogger } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
@@ -16,9 +18,9 @@ import { recordImprovements } from '../feedback_analysis/record_improvements';
 import { getRecordImprovementsStepDefinition } from './record_improvements';
 import { createMockStepContext, mockKiStepTelemetry } from './test_utils';
 
-jest.mock('../feedback_analysis/record_improvements');
+vi.mock('../feedback_analysis/record_improvements');
 
-const recordImprovementsMock = jest.mocked(recordImprovements);
+const recordImprovementsMock = vi.mocked(recordImprovements);
 
 const RESULT: RecordImprovementsResponse = {
   recorded: [{ improvement_id: 'imp-1', action: 'add_ki', title: 'Add a KI for refunds' }],
@@ -48,7 +50,7 @@ const buildStep = ({
   feedbackLoopEnabled?: boolean;
   canWrite?: boolean;
 } = {}) => {
-  const get = jest.fn().mockResolvedValue(aiIndex);
+  const get = vi.fn().mockResolvedValue(aiIndex);
   const definition = getRecordImprovementsStepDefinition({
     getAiIndexService: () => ({ get } as unknown as AiIndexService),
     getImprovementsService: () => improvementsService,
@@ -62,7 +64,7 @@ const buildStep = ({
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   recordImprovementsMock.mockResolvedValue(RESULT);
 });
 
@@ -117,7 +119,7 @@ describe('getRecordImprovementsStepDefinition', () => {
   });
 
   it('writes as the workflow owner and carries the run provenance through', async () => {
-    const esClient = { bulk: jest.fn() };
+    const esClient = { bulk: vi.fn() };
     const context = createMockStepContext({ input: INPUT, esClient });
 
     await buildStep().handler(context);
@@ -136,7 +138,7 @@ describe('getRecordImprovementsStepDefinition', () => {
   });
 
   it('audits the write', async () => {
-    const auditLogger = { log: jest.fn() } as unknown as AuditLogger;
+    const auditLogger = { log: vi.fn() } as unknown as AuditLogger;
     const context = createMockStepContext({ input: INPUT, esClient: {} });
 
     await buildStep({ auditLogger }).handler(context);
@@ -152,7 +154,7 @@ describe('getRecordImprovementsStepDefinition', () => {
   });
 
   it('audits a failed write before letting it surface', async () => {
-    const auditLogger = { log: jest.fn() } as unknown as AuditLogger;
+    const auditLogger = { log: vi.fn() } as unknown as AuditLogger;
     recordImprovementsMock.mockRejectedValue(new Error('bulk rejected'));
     const context = createMockStepContext({ input: INPUT, esClient: {} });
 
@@ -168,7 +170,7 @@ describe('getRecordImprovementsStepDefinition', () => {
     const context = createMockStepContext({ input: INPUT, esClient: {} });
     const definition = getRecordImprovementsStepDefinition({
       getAiIndexService: () =>
-        ({ get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('orders')) } as never),
+        ({ get: vi.fn().mockRejectedValue(new AiIndexNotFoundError('orders')) } as never),
       getImprovementsService: () => improvementsService,
       getAuditLogger: async () => undefined,
       isContextEngineEnabled: async () => true,
@@ -211,12 +213,12 @@ describe('getRecordImprovementsStepDefinition', () => {
   });
 
   it('uses the workflow space for the feature flag, privilege check, AI index lookup, and improvements service', async () => {
-    const esClient = { bulk: jest.fn() };
+    const esClient = { bulk: vi.fn() };
     const context = createMockStepContext({ input: INPUT, esClient, spaceId: 'marketing' });
-    const isContextEngineEnabled = jest.fn().mockResolvedValue(true);
-    const checkWritePrivilege = jest.fn().mockResolvedValue(true);
-    const getImprovementsService = jest.fn().mockReturnValue(improvementsService);
-    const get = jest.fn().mockResolvedValue({ id: 'orders' });
+    const isContextEngineEnabled = vi.fn().mockResolvedValue(true);
+    const checkWritePrivilege = vi.fn().mockResolvedValue(true);
+    const getImprovementsService = vi.fn().mockReturnValue(improvementsService);
+    const get = vi.fn().mockResolvedValue({ id: 'orders' });
 
     const { handler } = getRecordImprovementsStepDefinition({
       getAiIndexService: () => ({ get } as never),

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { hasUserDataView } from './has_user_data_view';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -14,7 +16,7 @@ describe('hasUserDataView', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
   const soClient = savedObjectsClientMock.create();
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   it('returns false when there are no data views', async () => {
     soClient.find.mockResolvedValue({

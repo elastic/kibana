@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { MAX_PROMOTED_LEADS } from '../../../../common/entity_analytics/lead_generation/constants';
@@ -13,26 +15,27 @@ import type { RelatedEntity } from './types';
 
 let mockChainInvokeResult: unknown;
 
-jest.mock('@langchain/core/prompts', () => ({
-  ChatPromptTemplate: {
-    fromTemplate: jest.fn().mockReturnValue({
-      pipe: jest.fn().mockReturnValue({
-        invoke: jest.fn().mockImplementation(() => Promise.resolve(mockChainInvokeResult)),
-      }),
-    }),
-  },
-}));
+vi.mock('@langchain/core/prompts', () => {
+      const mocked = {
+      ChatPromptTemplate: {
+        fromTemplate: vi.fn().mockReturnValue({
+          pipe: vi.fn().mockReturnValue({
+            invoke: vi.fn().mockImplementation(() => Promise.resolve(mockChainInvokeResult)),
+          }),
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { buildExploratoryLeads, POOL_SIZE, MAX_POOL_PAYLOAD_CHARS } = jest.requireActual(
-  './exploratory_leads'
-) as {
+const { buildExploratoryLeads, POOL_SIZE, MAX_POOL_PAYLOAD_CHARS } = (await vi.importActual('./exploratory_leads')) as {
   buildExploratoryLeads: typeof import('./exploratory_leads').buildExploratoryLeads;
   POOL_SIZE: typeof import('./exploratory_leads').POOL_SIZE;
   MAX_POOL_PAYLOAD_CHARS: typeof import('./exploratory_leads').MAX_POOL_PAYLOAD_CHARS;
 };
 
 const logger = loggingSystemMock.createLogger();
-const withStructuredOutput = jest.fn().mockReturnValue({});
+const withStructuredOutput = vi.fn().mockReturnValue({});
 const fakeChatModel = { withStructuredOutput } as unknown as InferenceChatModel;
 
 let nextId = 0;
@@ -108,7 +111,7 @@ const denseCandidate = ({
 
 describe('buildExploratoryLeads', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockChainInvokeResult = undefined;
   });
 

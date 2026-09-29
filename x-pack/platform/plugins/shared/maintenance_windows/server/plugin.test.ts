@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { MaintenanceWindowsPlugin } from './plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -24,7 +26,7 @@ describe('Maintenance Windows Plugin', () => {
     let plugin: MaintenanceWindowsPlugin;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const context = coreMock.createPluginInitializerContext();
       plugin = new MaintenanceWindowsPlugin(context);
     });
@@ -85,7 +87,7 @@ describe('Maintenance Windows Plugin', () => {
             url: '/',
           },
         },
-        getSavedObjectsClient: jest.fn(),
+        getSavedObjectsClient: vi.fn(),
       } as unknown as KibanaRequest;
 
       const client = startContract.getMaintenanceWindowClientWithAuth(fakeRequest);
@@ -119,7 +121,7 @@ describe('Maintenance Windows Plugin', () => {
             url: '/',
           },
         },
-        getSavedObjectsClient: jest.fn(),
+        getSavedObjectsClient: vi.fn(),
       } as unknown as KibanaRequest;
 
       const client = startContract.getMaintenanceWindowClientWithoutAuth(fakeRequest);
@@ -153,7 +155,7 @@ describe('Maintenance Windows Plugin', () => {
             url: '/',
           },
         },
-        getSavedObjectsClient: jest.fn(),
+        getSavedObjectsClient: vi.fn(),
       } as unknown as KibanaRequest;
 
       const client = startContract.getMaintenanceWindowClientInternal(fakeRequest);

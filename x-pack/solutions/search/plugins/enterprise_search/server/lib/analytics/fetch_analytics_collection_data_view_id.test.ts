@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -14,30 +17,33 @@ import { ErrorCode } from '../../../common/types/error_codes';
 import { fetchAnalyticsCollections } from './fetch_analytics_collection';
 import { fetchAnalyticsCollectionDataViewId } from './fetch_analytics_collection_data_view_id';
 
-jest.mock('./fetch_analytics_collection', () => ({
-  fetchAnalyticsCollections: jest.fn(),
-}));
+vi.mock('./fetch_analytics_collection', () => {
+      const mocked = {
+      fetchAnalyticsCollections: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('fetch analytics collection data view id', () => {
   const mockClient = {
     asCurrentUser: {
       transport: {
-        request: jest.fn(),
+        request: vi.fn(),
       },
     },
     asInternalUser: {},
   };
-  const dataViewService = { find: jest.fn() };
+  const dataViewService = { find: vi.fn() };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return data view id of analytics collection by Id', async () => {
     const mockCollectionId = 'collectionId';
     const mockDataViewId = 'dataViewId';
     const mockCollection = [{ name: 'example', events_datastream: 'log-collection-data-stream' }];
-    (fetchAnalyticsCollections as jest.Mock).mockImplementationOnce(() =>
+    (fetchAnalyticsCollections as Mock).mockImplementationOnce(() =>
       Promise.resolve(mockCollection)
     );
 
@@ -57,7 +63,7 @@ describe('fetch analytics collection data view id', () => {
   it('should return null when data view not found', async () => {
     const mockCollectionId = 'collectionId';
     const mockCollection = [{ events_datastream: 'log-collection-data-stream' }];
-    (fetchAnalyticsCollections as jest.Mock).mockImplementationOnce(() =>
+    (fetchAnalyticsCollections as Mock).mockImplementationOnce(() =>
       Promise.resolve(mockCollection)
     );
 
@@ -77,7 +83,7 @@ describe('fetch analytics collection data view id', () => {
   it('should throw an error when analytics collection not found', async () => {
     const mockCollectionId = 'collectionId';
 
-    (fetchAnalyticsCollections as jest.Mock).mockImplementation(() => {
+    (fetchAnalyticsCollections as Mock).mockImplementation(() => {
       throw new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
     });
 

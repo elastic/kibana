@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Gap } from '../../../../lib/rule_gaps/gap';
 import type { StringInterval } from '../../types/intervals';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
@@ -13,13 +16,13 @@ import { processGapsBatch } from './process_gaps_batch';
 import { backfillInitiator } from '../../../../../common/constants';
 import { SCHEDULE_TRUNCATED_WARNING } from '../../../../backfill_client/lib/calculate_schedule';
 
-jest.mock('../../../backfill/methods/schedule', () => {
+vi.mock('../../../backfill/methods/schedule', () => {
   return {
-    scheduleBackfill: jest.fn(),
+    scheduleBackfill: vi.fn(),
   };
 });
 
-const scheduleBackfillMock = scheduleBackfill as jest.Mock;
+const scheduleBackfillMock = scheduleBackfill as Mock;
 
 describe('processGapsBatch', () => {
   const context = rulesClientContextMock.create();
@@ -60,7 +63,7 @@ describe('processGapsBatch', () => {
   let result: Awaited<ReturnType<typeof processGapsBatch>>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const callProcessGapsBatch = async (

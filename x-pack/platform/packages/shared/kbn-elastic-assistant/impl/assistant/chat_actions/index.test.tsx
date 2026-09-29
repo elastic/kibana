@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, within } from '@testing-library/react';
 import { ChatActions } from '.';
 
-const onSendMessage = jest.fn();
+const onSendMessage = vi.fn();
 const testProps = {
   isDisabled: false,
   isLoading: false,
@@ -19,7 +21,7 @@ const testProps = {
 
 describe('ChatActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('the component renders with all props', () => {
     const { getByTestId } = render(<ChatActions {...testProps} />);

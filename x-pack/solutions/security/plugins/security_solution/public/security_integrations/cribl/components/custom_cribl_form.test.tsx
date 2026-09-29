@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,8 +15,8 @@ import { TestProviders } from '../../../common/mock';
 import { getFleetManagedIndexTemplates } from '../api/api';
 import { CustomCriblForm } from './custom_cribl_form';
 
-jest.mock('../api/api');
-const onChange = jest.fn();
+vi.mock('../api/api');
+const onChange = vi.fn();
 
 describe('<CustomCriblForm />', () => {
   const mockPackagePolicy = {
@@ -46,7 +49,7 @@ describe('<CustomCriblForm />', () => {
   const datastreamOpts = ['logs-destination1.cloud', 'logs-destination2'];
 
   it('renders dataId and datastream; updates dataId', async () => {
-    (getFleetManagedIndexTemplates as jest.Mock).mockReturnValue({
+    (getFleetManagedIndexTemplates as Mock).mockReturnValue({
       indexTemplates: datastreamOpts,
       permissionsError: false,
       generalError: false,
@@ -90,7 +93,7 @@ describe('<CustomCriblForm />', () => {
   });
 
   it('rejects invalid dataId input without rewriting it', async () => {
-    (getFleetManagedIndexTemplates as jest.Mock).mockReturnValue({
+    (getFleetManagedIndexTemplates as Mock).mockReturnValue({
       indexTemplates: datastreamOpts,
       permissionsError: false,
       generalError: false,

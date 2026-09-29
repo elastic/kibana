@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { prepareQueryDslFilter } from '../utils';
@@ -62,14 +65,14 @@ const emptyHitsResponse = {
 };
 
 describe('fetchLatestVersions', () => {
-  let searchMock: jest.Mock;
+  let searchMock: Mock;
   let savedObjectsClient: SavedObjectsClientContract;
 
   beforeEach(() => {
-    searchMock = jest.fn();
+    searchMock = vi.fn();
     savedObjectsClient = {
       search: searchMock,
-      find: jest.fn().mockResolvedValue({ saved_objects: [], total: 0, per_page: 0, page: 1 }),
+      find: vi.fn().mockResolvedValue({ saved_objects: [], total: 0, per_page: 0, page: 1 }),
       getCurrentNamespace: () => 'default',
     } as unknown as SavedObjectsClientContract;
   });

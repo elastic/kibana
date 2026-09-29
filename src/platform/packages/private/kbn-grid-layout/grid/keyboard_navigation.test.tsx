@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,7 +17,7 @@ import { GridLayout } from './grid_layout';
 import { gridSettings, mockRenderPanelContents } from './test_utils/mocks';
 import { EuiThemeProvider } from '@elastic/eui';
 
-const onLayoutChange = jest.fn();
+const onLayoutChange = vi.fn();
 
 const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
   const props = {
@@ -45,8 +47,8 @@ const getPanelHandle = (panelId: string, interactionType: 'resize' | 'drag' = 'd
 };
 
 describe('Keyboard navigation', () => {
-  window.HTMLElement.prototype.scrollIntoView = jest.fn();
-  window.HTMLElement.prototype.scrollTo = jest.fn();
+  window.HTMLElement.prototype.scrollIntoView = vi.fn();
+  window.HTMLElement.prototype.scrollTo = vi.fn();
   Object.defineProperty(document.documentElement, 'scrollTop', { value: 0, writable: false });
   Object.defineProperty(document.body, 'scrollHeight', { value: 2000, writable: false });
 

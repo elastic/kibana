@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ComponentType } from 'react';
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
@@ -46,12 +49,12 @@ const documentationUrl = 'https://www.elastic.co/docs/reference/query-languages/
 const createClientError = (message: string, statusCode: number) =>
   Object.assign(new Error(message), { statusCode });
 
-const createClient = (): jest.Mocked<EsqlViewsClient> => ({
-  getViews: jest.fn(),
-  getView: jest.fn(),
-  createView: jest.fn(),
-  updateView: jest.fn(),
-  deleteViews: jest.fn(),
+const createClient = (): Mocked<EsqlViewsClient> => ({
+  getViews: vi.fn(),
+  getView: vi.fn(),
+  createView: vi.fn(),
+  updateView: vi.fn(),
+  deleteViews: vi.fn(),
 });
 
 const createDiscoverLocator = () => sharePluginMock.createLocator<DiscoverEsqlLocatorParams>();

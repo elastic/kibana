@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EasePanel, FLYOUT_BODY_TEST_ID } from '.';
@@ -22,30 +25,39 @@ import { TAKE_ACTION_BUTTON_TEST_ID } from './components/take_action_button';
 import { mockDataAsNestedObject } from '../document_details/shared/mocks/mock_data_as_nested_object';
 import { mockSearchHit } from '../document_details/shared/mocks/mock_search_hit';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn().mockReturnValue({ closeLeftPanel: jest.fn() }),
-  useExpandableFlyoutHistory: jest.fn(),
-  useExpandableFlyoutState: jest.fn().mockReturnValue({ left: {} }),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn().mockReturnValue({ closeLeftPanel: vi.fn() }),
+      useExpandableFlyoutHistory: vi.fn(),
+      useExpandableFlyoutState: vi.fn().mockReturnValue({ left: {} }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/hooks/use_ai_connectors', () => ({
-  useAIConnectors: jest.fn().mockReturnValue({
-    aiConnectors: [
-      {
-        id: 'test-connector-id',
-        name: 'Test Connector',
-        actionTypeId: '.gen-ai',
-      },
-    ],
-    isLoading: false,
-    error: null,
-  }),
-}));
+vi.mock('../../common/hooks/use_ai_connectors', () => {
+      const mocked = {
+      useAIConnectors: vi.fn().mockReturnValue({
+        aiConnectors: [
+          {
+            id: 'test-connector-id',
+            name: 'Test Connector',
+            actionTypeId: '.gen-ai',
+          },
+        ],
+        isLoading: false,
+        error: null,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./context');
-jest.mock('./components/attack_discovery_widget', () => ({
-  AttackDiscoveryWidget: jest.fn(),
-}));
+vi.mock('./context');
+vi.mock('./components/attack_discovery_widget', () => {
+      const mocked = {
+      AttackDiscoveryWidget: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockedUseKibana = {
   ...mockUseKibana(),
@@ -62,32 +74,32 @@ const mockedUseKibana = {
       },
     },
     uiSettings: {
-      get: jest.fn().mockReturnValue('default-connector-id'),
+      get: vi.fn().mockReturnValue('default-connector-id'),
     },
   },
 };
-jest.mock('../../common/lib/kibana', () => {
+vi.mock('../../common/lib/kibana', async () => {
   return {
-    ...jest.requireActual('../../common/lib/kibana'),
+    ...(await vi.importActual('../../common/lib/kibana')),
     useKibana: () => mockedUseKibana,
   };
 });
 
 describe('EasePanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const flyoutHistory: FlyoutPanelHistory[] = [
       { lastOpen: Date.now(), panel: { id: 'id1', params: {} } },
     ];
-    (useExpandableFlyoutHistory as jest.Mock).mockReturnValue(flyoutHistory);
+    (useExpandableFlyoutHistory as Mock).mockReturnValue(flyoutHistory);
   });
 
   it('renders the EasePanel component', () => {
-    (useEaseDetailsContext as jest.Mock).mockReturnValue({
+    (useEaseDetailsContext as Mock).mockReturnValue({
       dataAsNestedObject: mockDataAsNestedObject,
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-      getFieldsData: jest.fn(),
+      getFieldsData: vi.fn(),
       investigationFields: [],
       searchHit: mockSearchHit,
     });

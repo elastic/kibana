@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AttacksVolumePanel } from './attacks_volume_panel';
@@ -14,35 +17,41 @@ import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana
 
 const kibanaContextMock = createStartServicesMock();
 
-jest.mock('./use_attacks_volume_data');
-jest.mock('../../../../../common/components/charts/common', () => ({
-  useThemes: jest.fn(() => ({
-    theme: {},
-    baseTheme: {},
-  })),
-}));
-jest.mock('@elastic/charts', () => ({
-  Chart: (props: { children: React.ReactNode }) => (
-    <div data-test-subj="mock-chart">{props.children}</div>
-  ),
-  Settings: () => null,
-  LineSeries: () => <div data-test-subj="mock-line-series" />,
-  Axis: () => null,
-  Position: { Bottom: 'bottom', Left: 'left' },
-  ScaleType: { Time: 'time' },
-  CurveType: { CURVE_MONOTONE_X: 'monotone_x' },
-  timeFormatter: () => jest.fn(),
-}));
+vi.mock('./use_attacks_volume_data');
+vi.mock('../../../../../common/components/charts/common', () => {
+      const mocked = {
+      useThemes: vi.fn(() => ({
+        theme: {},
+        baseTheme: {},
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@elastic/charts', () => {
+      const mocked = {
+      Chart: (props: { children: React.ReactNode }) => (
+        <div data-test-subj="mock-chart">{props.children}</div>
+      ),
+      Settings: () => null,
+      LineSeries: () => <div data-test-subj="mock-line-series" />,
+      Axis: () => null,
+      Position: { Bottom: 'bottom', Left: 'left' },
+      ScaleType: { Time: 'time' },
+      CurveType: { CURVE_MONOTONE_X: 'monotone_x' },
+      timeFormatter: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AttacksVolumePanel', () => {
-  const mockUseAttacksVolumeData = Hook.useAttacksVolumeData as jest.Mock;
+  const mockUseAttacksVolumeData = Hook.useAttacksVolumeData as Mock;
 
   beforeEach(() => {
     mockUseAttacksVolumeData.mockReturnValue({
       items: [],
       isLoading: false,
       intervalMs: 1000,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
   });
 
@@ -64,7 +73,7 @@ describe('AttacksVolumePanel', () => {
       items: [],
       isLoading: true,
       intervalMs: 1000,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     renderComponent();
     // EuiLoadingChart renders a div with specific class usually, or check absence of chart
@@ -76,7 +85,7 @@ describe('AttacksVolumePanel', () => {
       items: [{ x: 1600000000000, y: 5 }],
       isLoading: false,
       intervalMs: 1000,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     renderComponent();
     expect(screen.getByTestId('mock-chart')).toBeInTheDocument();

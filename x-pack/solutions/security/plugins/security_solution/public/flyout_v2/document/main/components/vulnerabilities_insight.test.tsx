@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { VulnerabilitiesInsight } from './vulnerabilities_insight';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
 
 const hostName = 'test host';
 const identityFields = { 'host.name': hostName };
 const testId = 'test';
-const onShowVulnerabilitiesDetails = jest.fn();
+const onShowVulnerabilitiesDetails = vi.fn();
 
 const renderVulnerabilitiesInsight = () => {
   return render(
@@ -32,7 +35,7 @@ const renderVulnerabilitiesInsight = () => {
 
 describe('VulnerabilitiesInsight', () => {
   it('renders', () => {
-    (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({
+    (useVulnerabilitiesPreview as Mock).mockReturnValue({
       data: { count: { CRITICAL: 0, HIGH: 1, MEDIUM: 1, LOW: 0, NONE: 0 } },
     });
 
@@ -42,7 +45,7 @@ describe('VulnerabilitiesInsight', () => {
   });
 
   it('open entity details panel when clicking on the count', () => {
-    (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({
+    (useVulnerabilitiesPreview as Mock).mockReturnValue({
       data: { count: { CRITICAL: 1, HIGH: 2, MEDIUM: 1, LOW: 2, NONE: 2 } },
     });
     const { getByTestId } = renderVulnerabilitiesInsight();
@@ -51,7 +54,7 @@ describe('VulnerabilitiesInsight', () => {
   });
 
   it('renders null when data is not available', () => {
-    (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({});
+    (useVulnerabilitiesPreview as Mock).mockReturnValue({});
 
     const { container } = renderVulnerabilitiesInsight();
     expect(container).toBeEmptyDOMElement();

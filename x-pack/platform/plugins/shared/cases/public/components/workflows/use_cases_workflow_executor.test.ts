@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core/public';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
@@ -13,25 +15,28 @@ import { useCasesWorkflowExecutor } from './use_cases_workflow_executor';
 import * as api from './api';
 
 // Mock dependencies injected via useKibana hooks
-jest.mock('../../common/lib/kibana');
-const mockRefreshCaseViewPage = jest.fn();
-jest.mock('../case_view/use_on_refresh_case_view_page', () => ({
-  useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
-}));
+vi.mock('../../common/lib/kibana');
+const mockRefreshCaseViewPage = vi.fn();
+vi.mock('../case_view/use_on_refresh_case_view_page', () => {
+      const mocked = {
+      useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRunCaseWorkflow = jest.spyOn(api, 'runCaseWorkflow');
+const mockRunCaseWorkflow = vi.spyOn(api, 'runCaseWorkflow');
 
-describe('useCasesWorkflowExecutor', () => {
+describe('useCasesWorkflowExecutor', async () => {
   const mockHttp = {} as HttpStart;
   const mockToasts = notificationServiceMock.createStartContract().toasts;
-  const mockGetAppUrl = jest
+  const mockGetAppUrl = vi
     .fn()
     .mockReturnValue('/app/workflows/wf-1?tab=executions&executionId=exec-1');
 
-  const { useAppUrl, useHttp, useKibana, useToasts } = jest.requireMock('../../common/lib/kibana');
+  const { useAppUrl, useHttp, useKibana, useToasts } = (await vi.importMock('../../common/lib/kibana'));
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useHttp.mockReturnValue(mockHttp);
     useToasts.mockReturnValue(mockToasts);
     useAppUrl.mockReturnValue({ getAppUrl: mockGetAppUrl });

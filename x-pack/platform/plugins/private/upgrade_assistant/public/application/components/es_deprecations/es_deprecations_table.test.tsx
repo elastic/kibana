@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
@@ -14,8 +16,8 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { EnrichedDeprecationInfo } from '../../../../common/types';
 import { createEsDeprecations } from './__fixtures__/es_deprecations';
 
-jest.mock('../../app_context', () => {
-  const actual = jest.requireActual('../../app_context');
+vi.mock('../../app_context', async () => {
+  const actual = (await vi.importActual('../../app_context'));
 
   return {
     ...actual,
@@ -34,7 +36,7 @@ jest.mock('../../app_context', () => {
   };
 });
 
-jest.mock('./deprecation_types', () => {
+vi.mock('./deprecation_types', () => {
   const TestRow = ({
     deprecation,
     index,
@@ -59,7 +61,7 @@ jest.mock('./deprecation_types', () => {
 });
 
 describe('EsDeprecationsTable', () => {
-  const reloadMock = jest.fn();
+  const reloadMock = vi.fn();
 
   const renderTable = async (deprecations: EnrichedDeprecationInfo[]) => {
     const { EsDeprecationsTable } = await import('./es_deprecations_table');

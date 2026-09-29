@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -13,7 +15,7 @@ import { TestProviders } from '../../../../common/mock';
 
 describe('LoadingMessages', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a special-case loading message for the default relative range (of the last 24 hours)', () => {

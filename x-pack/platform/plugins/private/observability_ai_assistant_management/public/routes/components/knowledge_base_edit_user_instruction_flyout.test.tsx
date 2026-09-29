@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { KnowledgeBaseEditUserInstructionFlyout } from './knowledge_base_edit_user_instruction_flyout';
@@ -13,19 +16,19 @@ import { useCreateKnowledgeBaseUserInstruction } from '../../hooks/use_create_kn
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
 import { renderWithI18n } from '@kbn/test-jest-helpers'; // Add this import
 import { fireEvent } from '@testing-library/react';
-jest.mock('../../hooks/use_get_user_instructions');
-jest.mock('../../hooks/use_create_knowledge_base_user_instruction');
-jest.mock('../../hooks/use_delete_knowledge_base_entry');
+vi.mock('../../hooks/use_get_user_instructions');
+vi.mock('../../hooks/use_create_knowledge_base_user_instruction');
+vi.mock('../../hooks/use_delete_knowledge_base_entry');
 
-const useGetUserInstructionsMock = useGetUserInstructions as jest.Mock;
+const useGetUserInstructionsMock = useGetUserInstructions as Mock;
 const useCreateKnowledgeBaseUserInstructionMock =
-  useCreateKnowledgeBaseUserInstruction as jest.Mock;
-const useDeleteKnowledgeBaseEntryMock = useDeleteKnowledgeBaseEntry as jest.Mock;
+  useCreateKnowledgeBaseUserInstruction as Mock;
+const useDeleteKnowledgeBaseEntryMock = useDeleteKnowledgeBaseEntry as Mock;
 
-const getUserInstructionsMock = jest.fn(() => Promise.resolve([]));
-const createOrUpdateMock = jest.fn(() => Promise.resolve());
-const deleteMock = jest.fn(() => Promise.resolve());
-const mockOnClose = jest.fn();
+const getUserInstructionsMock = vi.fn(() => Promise.resolve([]));
+const createOrUpdateMock = vi.fn(() => Promise.resolve());
+const deleteMock = vi.fn(() => Promise.resolve());
+const mockOnClose = vi.fn();
 
 const getBaseMutationResult = () => ({
   isLoading: false,
@@ -39,7 +42,7 @@ const getBaseMutationResult = () => ({
 
 describe('KnowledgeBaseEditUserInstructionFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useGetUserInstructionsMock.mockReturnValue({
       userInstructions: [],

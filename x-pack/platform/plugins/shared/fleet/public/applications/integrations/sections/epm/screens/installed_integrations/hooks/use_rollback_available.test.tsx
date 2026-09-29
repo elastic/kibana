@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 
 import type { useLicense } from '../../../../../../../hooks';
@@ -12,14 +14,14 @@ import type { InstalledPackageUIPackageListItem } from '../types';
 
 import { checkRollbackAvailability, useRollbackAvailablePackages } from './use_rollback_available';
 
-jest.mock('../../../../../../../hooks', () => {
-  const originalModule = jest.requireActual('../../../../../../../hooks');
+vi.mock('../../../../../../../hooks', async () => {
+  const originalModule = (await vi.importActual('../../../../../../../hooks'));
   return {
     ...originalModule,
-    useLicense: jest.fn().mockReturnValue({
+    useLicense: vi.fn().mockReturnValue({
       isEnterprise: () => true,
     }),
-    useGetBulkRollbackAvailableCheck: jest.fn().mockReturnValue({
+    useGetBulkRollbackAvailableCheck: vi.fn().mockReturnValue({
       'package-1': { isAvailable: true },
     }),
   };

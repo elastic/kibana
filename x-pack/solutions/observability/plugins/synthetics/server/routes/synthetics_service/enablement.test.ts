@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { disableSyntheticsRoute, getSyntheticsEnablementRoute } from './enablement';
 import * as serviceApiKeyModule from '../../synthetics_service/get_api_key';
@@ -20,7 +22,7 @@ const enablement = {
 
 const createContext = () => ({
   savedObjectsClient: {
-    delete: jest.fn(),
+    delete: vi.fn(),
   },
   request: {},
   server: {
@@ -29,7 +31,7 @@ const createContext = () => ({
     security: {
       authc: {
         apiKeys: {
-          invalidateAsInternalUser: jest.fn(),
+          invalidateAsInternalUser: vi.fn(),
         },
       },
     },
@@ -37,22 +39,22 @@ const createContext = () => ({
   syntheticsMonitorClient: {
     syntheticsService: {
       isAllowed: true,
-      deleteAllConfigs: jest.fn(),
+      deleteAllConfigs: vi.fn(),
     },
   },
 });
 
 describe('getSyntheticsEnablementRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(serviceApiKeyModule, 'getSyntheticsEnablement').mockResolvedValue(enablement);
-    jest
+    vi.clearAllMocks();
+    vi.spyOn(serviceApiKeyModule, 'getSyntheticsEnablement').mockResolvedValue(enablement);
+    vi
       .spyOn(serviceApiKeyModule, 'getAPIKeyForSyntheticsService')
       .mockResolvedValue({ isValid: false });
-    jest
+    vi
       .spyOn(shardingApiKeyModule, 'getPrivateLocationShardingApiKey')
       .mockResolvedValue({ isValid: false });
-    jest
+    vi
       .spyOn(shardingApiKeyModule, 'generateAndSavePrivateLocationShardingApiKey')
       .mockResolvedValue({
         id: 'sharding-key',
@@ -74,7 +76,7 @@ describe('getSyntheticsEnablementRoute', () => {
   });
 
   it('reuses a valid service key instead of creating a dedicated sharding key', async () => {
-    jest.spyOn(serviceApiKeyModule, 'getAPIKeyForSyntheticsService').mockResolvedValue({
+    vi.spyOn(serviceApiKeyModule, 'getAPIKeyForSyntheticsService').mockResolvedValue({
       apiKey: { id: 'service-key', name: 'synthetics-service', apiKey: 'secret' },
       isValid: true,
     });
@@ -88,7 +90,7 @@ describe('getSyntheticsEnablementRoute', () => {
   });
 
   it('does not block self-managed enablement when the sharding key cannot be created', async () => {
-    jest
+    vi
       .spyOn(shardingApiKeyModule, 'generateAndSavePrivateLocationShardingApiKey')
       .mockRejectedValue(new Error('insufficient privileges'));
 
@@ -102,8 +104,8 @@ describe('getSyntheticsEnablementRoute', () => {
 
   it('invalidates the dedicated sharding key when Synthetics is disabled', async () => {
     const context = createContext();
-    const ok = jest.fn().mockReturnValue({ status: 200 });
-    jest.spyOn(shardingApiKeyModule, 'getPrivateLocationShardingApiKey').mockResolvedValue({
+    const ok = vi.fn().mockReturnValue({ status: 200 });
+    vi.spyOn(shardingApiKeyModule, 'getPrivateLocationShardingApiKey').mockResolvedValue({
       apiKey: {
         id: 'sharding-key',
         name: 'synthetics-private-location-sharding',

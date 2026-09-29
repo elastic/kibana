@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,24 +20,30 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { mockFlyoutApi } from '../../../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { getColumns, TIMESTAMP_DATE_FORMAT } from './get_columns';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../../common/components/user_privileges');
-jest.mock('../../../../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: () => false,
-}));
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      telemetry: { reportEvent: jest.fn() },
-    },
-  }),
-  useUiSetting: jest.fn(() => false),
-}));
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/hooks/is_in_security_app', () => {
+      const mocked = {
+      useIsInSecurityApp: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          telemetry: { reportEvent: vi.fn() },
+        },
+      }),
+      useUiSetting: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const scopeId = 'test-scope';
 const dataTestSubj = 'TEST';
-const mockOnShowAlert = jest.fn();
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+const mockOnShowAlert = vi.fn();
+const useUserPrivilegesMock = useUserPrivileges as Mock;
 
 const renderColumn = (element: React.ReactElement) =>
   render(
@@ -45,8 +54,8 @@ const renderColumn = (element: React.ReactElement) =>
 
 describe('getColumns', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.clearAllMocks();
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     useUserPrivilegesMock.mockReturnValue({
       timelinePrivileges: {
         read: true,

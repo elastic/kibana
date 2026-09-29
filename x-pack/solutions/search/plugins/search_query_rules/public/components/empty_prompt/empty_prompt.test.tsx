@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { EmptyPrompt } from './empty_prompt';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('../../../common/doc_links', () => ({
-  docLinks: {
-    queryRulesApi: 'documentation-url',
-  },
-}));
+vi.mock('../../../common/doc_links', () => {
+      const mocked = {
+      docLinks: {
+        queryRulesApi: 'documentation-url',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 const Wrapper = ({ children }: { children?: React.ReactNode }) => (
   <I18nProvider>{children}</I18nProvider>
 );
-const mockGetStartedAction = jest.fn();
+const mockGetStartedAction = vi.fn();
 
 const TEST_IDS = {
   getStartedButton: 'searchQueryRulesEmptyPromptGetStartedButton',

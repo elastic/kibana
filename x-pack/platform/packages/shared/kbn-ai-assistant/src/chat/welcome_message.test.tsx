@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
@@ -27,9 +29,9 @@ const mockConnectors: UseGenAIConnectorsResult = {
   ],
   loading: false,
   selectedConnector: 'test-connector',
-  selectConnector: jest.fn(),
-  reloadConnectors: jest.fn(),
-  getConnector: jest.fn(),
+  selectConnector: vi.fn(),
+  reloadConnectors: vi.fn(),
+  getConnector: vi.fn(),
   isConnectorSelectionRestricted: false,
 };
 
@@ -37,43 +39,46 @@ const mockEmptyConnectors: UseGenAIConnectorsResult = {
   connectors: [],
   loading: false,
   selectedConnector: undefined,
-  selectConnector: jest.fn(),
-  reloadConnectors: jest.fn(),
-  getConnector: jest.fn(),
+  selectConnector: vi.fn(),
+  reloadConnectors: vi.fn(),
+  getConnector: vi.fn(),
   isConnectorSelectionRestricted: false,
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: jest.fn(),
-      },
-      triggersActionsUi: {
-        getAddConnectorFlyout: jest.fn(() => null),
-      },
-      observabilityAIAssistant: {
-        service: {
-          getScreenContexts: jest.fn(() => []),
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            navigateToApp: vi.fn(),
+          },
+          triggersActionsUi: {
+            getAddConnectorFlyout: vi.fn(() => null),
+          },
+          observabilityAIAssistant: {
+            service: {
+              getScreenContexts: vi.fn(() => []),
+            },
+            useGenAIConnectors: vi.fn(() => mockConnectors),
+          },
         },
-        useGenAIConnectors: jest.fn(() => mockConnectors),
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockKnowledgeBase = (
   partial: Partial<UseKnowledgeBaseResult> = {}
 ): UseKnowledgeBaseResult => ({
   isInstalling: false,
   isPolling: false,
-  install: jest.fn(),
-  warmupModel: jest.fn(),
+  install: vi.fn(),
+  warmupModel: vi.fn(),
   isWarmingUpModel: false,
   isProductDocInstalling: false,
   isProductDocUninstalling: false,
-  installProductDoc: jest.fn(),
-  uninstallProductDoc: jest.fn(),
+  installProductDoc: vi.fn(),
+  uninstallProductDoc: vi.fn(),
   status: {
     value: {
       enabled: true,
@@ -86,7 +91,7 @@ const createMockKnowledgeBase = (
     },
     loading: false,
     error: undefined,
-    refresh: jest.fn(),
+    refresh: vi.fn(),
   },
   ...partial,
 });
@@ -97,7 +102,7 @@ describe('WelcomeMessage', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Knowledge base re-indexing', () => {
@@ -114,7 +119,7 @@ describe('WelcomeMessage', () => {
           },
           loading: false,
           error: undefined,
-          refresh: jest.fn(),
+          refresh: vi.fn(),
         },
       });
 
@@ -122,7 +127,7 @@ describe('WelcomeMessage', () => {
         <WelcomeMessage
           knowledgeBase={knowledgeBase}
           connectors={mockConnectors}
-          onSelectPrompt={jest.fn()}
+          onSelectPrompt={vi.fn()}
           showElasticLlmCalloutInChat={false}
           showKnowledgeBaseReIndexingCallout={true}
         />
@@ -147,7 +152,7 @@ describe('WelcomeMessage', () => {
           },
           loading: false,
           error: undefined,
-          refresh: jest.fn(),
+          refresh: vi.fn(),
         },
       });
 
@@ -156,7 +161,7 @@ describe('WelcomeMessage', () => {
           <WelcomeMessage
             knowledgeBase={updatedKnowledgeBase}
             connectors={mockConnectors}
-            onSelectPrompt={jest.fn()}
+            onSelectPrompt={vi.fn()}
             showElasticLlmCalloutInChat={false}
             showKnowledgeBaseReIndexingCallout={false}
           />
@@ -179,7 +184,7 @@ describe('WelcomeMessage', () => {
         <WelcomeMessage
           knowledgeBase={knowledgeBase}
           connectors={mockEmptyConnectors}
-          onSelectPrompt={jest.fn()}
+          onSelectPrompt={vi.fn()}
           showElasticLlmCalloutInChat={false}
           showKnowledgeBaseReIndexingCallout={false}
         />
@@ -210,7 +215,7 @@ describe('WelcomeMessage', () => {
           },
           loading: false,
           error: undefined,
-          refresh: jest.fn(),
+          refresh: vi.fn(),
         },
       });
 
@@ -218,7 +223,7 @@ describe('WelcomeMessage', () => {
         <WelcomeMessage
           knowledgeBase={knowledgeBase}
           connectors={mockConnectors}
-          onSelectPrompt={jest.fn()}
+          onSelectPrompt={vi.fn()}
           showElasticLlmCalloutInChat={false}
           showKnowledgeBaseReIndexingCallout={false}
         />
@@ -241,7 +246,7 @@ describe('WelcomeMessage', () => {
         <WelcomeMessage
           knowledgeBase={knowledgeBase}
           connectors={mockEmptyConnectors}
-          onSelectPrompt={jest.fn()}
+          onSelectPrompt={vi.fn()}
           showElasticLlmCalloutInChat={false}
           showKnowledgeBaseReIndexingCallout={false}
         />

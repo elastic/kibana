@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 
@@ -16,18 +19,21 @@ import { getCase } from '../../../../../containers/api';
 import { useReplaceCustomField } from '../../../../../containers/use_replace_custom_field';
 import type { CaseUI } from '../../../../../../common';
 
-jest.mock('../../../../../common/navigation/hooks');
-jest.mock('../../../use_on_update_field');
-jest.mock('../../../../../containers/use_replace_custom_field');
-jest.mock('../../../../../containers/api', () => ({ getCase: jest.fn() }));
+vi.mock('../../../../../common/navigation/hooks');
+vi.mock('../../../use_on_update_field');
+vi.mock('../../../../../containers/use_replace_custom_field');
+vi.mock('../../../../../containers/api', () => {
+      const mocked = { getCase: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const onUpdateField = jest.fn();
-const replaceCustomField = jest.fn();
-const replaceCustomFieldAsync = jest.fn();
+const onUpdateField = vi.fn();
+const replaceCustomField = vi.fn();
+const replaceCustomFieldAsync = vi.fn();
 
-const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
-const useReplaceCustomFieldMock = useReplaceCustomField as jest.Mock;
-const getCaseMock = getCase as jest.Mock;
+const useOnUpdateFieldMock = useOnUpdateField as Mock;
+const useReplaceCustomFieldMock = useReplaceCustomField as Mock;
+const getCaseMock = getCase as Mock;
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(TestProviders, null, children);
@@ -36,7 +42,7 @@ const caseData: CaseUI = basicCase;
 
 describe('useTemplateFieldsActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useOnUpdateFieldMock.mockReturnValue({ onUpdateField, isLoading: false, loadingKey: null });
     useReplaceCustomFieldMock.mockReturnValue({
       isLoading: false,
@@ -113,8 +119,8 @@ describe('useTemplateFieldsActions', () => {
   describe('onSaveCustomFields', () => {
     it('saves a single changed field without refetching the case', async () => {
       replaceCustomFieldAsync.mockResolvedValue({ key: 'field-1', value: 'foo' });
-      const onSuccess = jest.fn();
-      const onError = jest.fn();
+      const onSuccess = vi.fn();
+      const onError = vi.fn();
 
       const { result } = renderHook(() => useTemplateFieldsActions({ caseData }), { wrapper });
 
@@ -142,8 +148,8 @@ describe('useTemplateFieldsActions', () => {
       const refetchedCase = { ...caseData, version: 'refetched-version' };
       replaceCustomFieldAsync.mockResolvedValue({});
       getCaseMock.mockResolvedValue(refetchedCase);
-      const onSuccess = jest.fn();
-      const onError = jest.fn();
+      const onSuccess = vi.fn();
+      const onError = vi.fn();
 
       const { result } = renderHook(() => useTemplateFieldsActions({ caseData }), { wrapper });
 
@@ -180,8 +186,8 @@ describe('useTemplateFieldsActions', () => {
 
     it('calls onError and stops the batch when a write fails', async () => {
       replaceCustomFieldAsync.mockRejectedValueOnce(new Error('conflict'));
-      const onSuccess = jest.fn();
-      const onError = jest.fn();
+      const onSuccess = vi.fn();
+      const onError = vi.fn();
 
       const { result } = renderHook(() => useTemplateFieldsActions({ caseData }), { wrapper });
 

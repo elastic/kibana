@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -25,7 +27,7 @@ const renderServices = (selectedServiceKey?: string) =>
       <EuiProvider>
         <ImpactedServices
           services={buildServices(MAX_VISIBLE_IMPACTED_SERVICES + 2)}
-          onSelect={jest.fn()}
+          onSelect={vi.fn()}
           selectedServiceKey={selectedServiceKey}
         />
       </EuiProvider>
@@ -36,7 +38,7 @@ const renderState = (props: Partial<React.ComponentProps<typeof ImpactedServices
   render(
     <I18nProvider>
       <EuiProvider>
-        <ImpactedServices services={[]} onSelect={jest.fn()} {...props} />
+        <ImpactedServices services={[]} onSelect={vi.fn()} {...props} />
       </EuiProvider>
     </I18nProvider>
   );

@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@octokit/rest', () => ({
-  Octokit: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('@octokit/rest', () => {
+      const mocked = {
+      Octokit: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { Octokit } from '@octokit/rest';
 import {
@@ -39,29 +45,29 @@ describe('isTransientHttpError', () => {
 
 describe('withTransientHttpRetry', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('retries transient HTTP failures before succeeding', async () => {
-    const fn = jest
+    const fn = vi
       .fn()
       .mockRejectedValueOnce(createHttpError(502, 'bad gateway'))
       .mockRejectedValueOnce(createHttpError(502, 'bad gateway'))
       .mockResolvedValueOnce('success');
 
     const resultPromise = withTransientHttpRetry(fn);
-    await jest.runAllTimersAsync();
+    await vi.runAllTimersAsync();
 
     await expect(resultPromise).resolves.toBe('success');
     expect(fn).toHaveBeenCalledTimes(3);
   });
 
   it('does not retry non-transient HTTP failures', async () => {
-    const fn = jest.fn().mockRejectedValue(createHttpError(404, 'not found'));
+    const fn = vi.fn().mockRejectedValue(createHttpError(404, 'not found'));
 
     await expect(withTransientHttpRetry(fn)).rejects.toThrow('not found');
     expect(fn).toHaveBeenCalledTimes(1);
@@ -72,13 +78,13 @@ describe('fetchServerlessReleaseShaFromGitHub', () => {
   const qaSha = 'abc123def456';
   const versionsYaml = `qa-ds-1: "${qaSha}"`;
 
-  const createOctokit = (request: jest.Mock) =>
+  const createOctokit = (request: Mock) =>
     ({
       request,
     } as unknown as Octokit);
 
   it('returns the qa-ds-1 SHA from versions.yaml', async () => {
-    const request = jest.fn().mockResolvedValue({
+    const request = vi.fn().mockResolvedValue({
       data: {
         content: Buffer.from(versionsYaml, 'utf8').toString('base64'),
       },
@@ -93,7 +99,7 @@ describe('fetchServerlessReleaseShaFromGitHub', () => {
   });
 
   it('throws when qa-ds-1 is missing from versions.yaml', async () => {
-    const request = jest.fn().mockResolvedValue({
+    const request = vi.fn().mockResolvedValue({
       data: {
         content: Buffer.from('other-field: "value"', 'utf8').toString('base64'),
       },

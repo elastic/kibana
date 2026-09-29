@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import {
   loggingSystemMock,
   elasticsearchServiceMock,
@@ -25,8 +27,8 @@ import type {
 } from '../common/types';
 import type { KibanaRequest } from '@kbn/core/server';
 
-jest.mock('./data/rule_migrations_data_service');
-jest.mock('./task/rule_migrations_task_service');
+vi.mock('./data/rule_migrations_data_service');
+vi.mock('./task/rule_migrations_task_service');
 
 const dependencies = {} as SiemMigrationsClientDependencies;
 
@@ -41,7 +43,7 @@ describe('SiemRuleMigrationsService', () => {
   const pluginStop$ = new Subject<void>();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ruleMigrationsService = new SiemRuleMigrationsService(loggerFactory, kibanaVersion);
   });
 

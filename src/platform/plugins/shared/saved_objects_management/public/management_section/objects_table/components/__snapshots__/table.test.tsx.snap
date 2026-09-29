@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Table should render normally 1`] = `
+exports[`Table > should render normally 1`] = `
 <Fragment>
   <EuiSearchBar
     box={

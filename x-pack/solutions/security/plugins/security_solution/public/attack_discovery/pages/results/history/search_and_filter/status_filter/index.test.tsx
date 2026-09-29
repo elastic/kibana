@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { EuiSelectableOption } from '@elastic/eui';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -13,11 +16,11 @@ import { StatusFilter } from '.';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import * as useFindAttackDiscoveriesModule from '../../../../use_find_attack_discoveries';
 
-jest.mock('../../../../use_find_attack_discoveries', () => {
-  const actual = jest.requireActual('../../../../use_find_attack_discoveries');
+vi.mock('../../../../use_find_attack_discoveries', async () => {
+  const actual = (await vi.importActual('../../../../use_find_attack_discoveries'));
   return {
     ...actual,
-    useInvalidateFindAttackDiscoveries: jest.fn(() => jest.fn()),
+    useInvalidateFindAttackDiscoveries: vi.fn(() => vi.fn()),
   };
 });
 
@@ -29,12 +32,12 @@ const defaultStatusItems: EuiSelectableOption[] = [
 
 const defaultProps = {
   statusItems: defaultStatusItems,
-  setStatusItems: jest.fn(),
+  setStatusItems: vi.fn(),
 };
 
 describe('StatusFilter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the expected number of options', () => {
@@ -92,14 +95,14 @@ describe('StatusFilter', () => {
   });
 
   describe('when an option is changed', () => {
-    let setStatusItems: jest.Mock;
-    let invalidateFindAttackDiscoveries: jest.Mock;
+    let setStatusItems: Mock;
+    let invalidateFindAttackDiscoveries: Mock;
 
     beforeEach(() => {
-      setStatusItems = jest.fn();
-      invalidateFindAttackDiscoveries = jest.fn();
+      setStatusItems = vi.fn();
+      invalidateFindAttackDiscoveries = vi.fn();
       (
-        useFindAttackDiscoveriesModule.useInvalidateFindAttackDiscoveries as jest.Mock
+        useFindAttackDiscoveriesModule.useInvalidateFindAttackDiscoveries as Mock
       ).mockImplementation(() => invalidateFindAttackDiscoveries);
 
       render(

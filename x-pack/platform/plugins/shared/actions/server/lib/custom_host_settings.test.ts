@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { readFileSync as fsReadFileSync } from 'fs';
 import { resolve as pathResolve, join as pathJoin } from 'path';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -36,7 +38,7 @@ function warningLogs() {
 
 describe('custom_host_settings', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockLogger = loggingSystemMock.create().get();
   });
 

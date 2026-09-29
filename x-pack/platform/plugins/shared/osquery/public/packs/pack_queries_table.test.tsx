@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -165,7 +167,7 @@ describe('PackQueriesTable', () => {
     });
 
     it('calls onToggleEnabled with correct args when switch is toggled', () => {
-      const onToggleEnabled = jest.fn();
+      const onToggleEnabled = vi.fn();
       // isReadOnly must be false so the switch is not disabled.
       renderTable({ data: [baseQuery({ enabled: true })], onToggleEnabled, isReadOnly: false });
       const switchEl = screen.getByTestId('query-enabled-switch-query-1');

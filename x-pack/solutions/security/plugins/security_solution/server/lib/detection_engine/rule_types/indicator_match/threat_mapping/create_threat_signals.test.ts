@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
@@ -21,39 +24,66 @@ import { getSharedParamsMock } from '../../__mocks__/shared_params';
 import { getThreatRuleParams } from '../../../rule_schema/mocks';
 import type { SearchAfterAndBulkCreateReturnType } from '../../types';
 
-jest.mock('./get_threat_list', () => ({
-  getThreatList: jest.fn(),
-  getThreatListCount: jest.fn(),
-}));
-jest.mock('./get_event_count', () => ({
-  ...jest.requireActual('./get_event_count'),
-  getEventCount: jest.fn(),
-  getEventList: jest.fn(),
-}));
-jest.mock('./create_event_signal', () => ({ createEventSignal: jest.fn() }));
-jest.mock('./create_threat_signal', () => ({ createThreatSignal: jest.fn() }));
-jest.mock('./get_allowed_fields_for_terms_query', () => ({
-  getAllowedFieldsForTermQuery: jest.fn(),
-}));
-jest.mock('./utils', () => ({
-  ...jest.requireActual('./utils'),
-  getMaxClauseCountErrorValue: jest.fn(),
-}));
-jest.mock('../../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
-jest.mock('../../utils/get_data_stream_namespace_filter', () => ({
-  getDataStreamNamespaceFilter: jest.fn(),
-}));
-jest.mock('../../utils/get_query_fields', () => ({ getQueryFields: jest.fn() }));
+vi.mock('./get_threat_list', () => {
+      const mocked = {
+      getThreatList: vi.fn(),
+      getThreatListCount: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./get_event_count', async () => {
+      const mocked = {
+      ...(await vi.importActual('./get_event_count')),
+      getEventCount: vi.fn(),
+      getEventList: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./create_event_signal', () => {
+      const mocked = { createEventSignal: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./create_threat_signal', () => {
+      const mocked = { createThreatSignal: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./get_allowed_fields_for_terms_query', () => {
+      const mocked = {
+      getAllowedFieldsForTermQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('./utils')),
+      getMaxClauseCountErrorValue: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../utils/get_data_tier_filter', () => {
+      const mocked = { getDataTierFilter: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../utils/get_data_stream_namespace_filter', () => {
+      const mocked = {
+      getDataStreamNamespaceFilter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../utils/get_query_fields', () => {
+      const mocked = { getQueryFields: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const getEventCountMock = getEventCount as jest.Mock;
-const getEventListMock = getEventList as jest.Mock;
-const getThreatListCountMock = getThreatListCount as jest.Mock;
-const createEventSignalMock = createEventSignal as jest.Mock;
-const getAllowedFieldsForTermQueryMock = getAllowedFieldsForTermQuery as jest.Mock;
-const getMaxClauseCountErrorValueMock = getMaxClauseCountErrorValue as jest.Mock;
-const getDataTierFilterMock = getDataTierFilter as jest.Mock;
-const getDataStreamNamespaceFilterMock = getDataStreamNamespaceFilter as jest.Mock;
-const getQueryFieldsMock = getQueryFields as jest.Mock;
+const getEventCountMock = getEventCount as Mock;
+const getEventListMock = getEventList as Mock;
+const getThreatListCountMock = getThreatListCount as Mock;
+const createEventSignalMock = createEventSignal as Mock;
+const getAllowedFieldsForTermQueryMock = getAllowedFieldsForTermQuery as Mock;
+const getMaxClauseCountErrorValueMock = getMaxClauseCountErrorValue as Mock;
+const getDataTierFilterMock = getDataTierFilter as Mock;
+const getDataStreamNamespaceFilterMock = getDataStreamNamespaceFilter as Mock;
+const getQueryFieldsMock = getQueryFields as Mock;
 
 const PER_PAGE = 2;
 
@@ -100,9 +130,9 @@ describe('createThreatSignals', () => {
       sharedParams,
       services,
       eventsTelemetry: undefined,
-      wrapSuppressedHits: jest.fn(),
+      wrapSuppressedHits: vi.fn(),
       licensing: licensingMock.createSetup(),
-      scheduleNotificationResponseActionsService: jest.fn(),
+      scheduleNotificationResponseActionsService: vi.fn(),
     });
   };
 
@@ -112,7 +142,7 @@ describe('createThreatSignals', () => {
   beforeEach(() => {
     // reset rather than clear: queued `mockResolvedValueOnce` pages would otherwise leak
     // into the next test and shift every cursor assertion
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     services = createPersistenceExecutorOptionsMock();
     services.scopedClusterClient.asCurrentUser.openPointInTime.mockResolvedValue({
       id: 'pit-id',

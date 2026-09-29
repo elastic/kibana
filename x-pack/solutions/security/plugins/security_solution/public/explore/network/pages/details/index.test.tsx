@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
@@ -18,26 +21,29 @@ import {
   withIndices,
 } from '../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('../../../../common/containers/use_search_strategy', () => ({
-  useSearchStrategy: jest.fn().mockReturnValue({
-    loading: false,
-    result: {
-      edges: [],
-      pageInfo: {
-        activePage: 0,
-        fakeTotalCount: 0,
-        showMorePagesIndicator: false,
-      },
-      totalCount: -1,
-    },
-    search: jest.fn(),
-    refetch: jest.fn(),
-    inspect: {},
-  }),
-}));
+vi.mock('../../../../common/containers/use_search_strategy', () => {
+      const mocked = {
+      useSearchStrategy: vi.fn().mockReturnValue({
+        loading: false,
+        result: {
+          edges: [],
+          pageInfo: {
+            activePage: 0,
+            fakeTotalCount: 0,
+            showMorePagesIndicator: false,
+          },
+          totalCount: -1,
+        },
+        search: vi.fn(),
+        refetch: vi.fn(),
+        inspect: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
@@ -47,41 +53,47 @@ jest.mock('@elastic/eui', () => {
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
 
   return {
     ...original,
-    useParams: jest.fn(),
+    useParams: vi.fn(),
   };
 });
-jest.mock('../../containers/details', () => ({
-  useNetworkDetails: jest.fn().mockReturnValue([true, { networkDetails: {} }]),
-}));
-jest.mock('../../../../common/containers/use_global_time', () => ({
-  useGlobalTime: jest.fn().mockReturnValue({
-    from: '2020-07-07T08:20:18.966Z',
-    isInitializing: false,
-    to: '2020-07-08T08:20:18.966Z',
-    setQuery: jest.fn(),
-  }),
-}));
+vi.mock('../../containers/details', () => {
+      const mocked = {
+      useNetworkDetails: vi.fn().mockReturnValue([true, { networkDetails: {} }]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/containers/use_global_time', () => {
+      const mocked = {
+      useGlobalTime: vi.fn().mockReturnValue({
+        from: '2020-07-07T08:20:18.966Z',
+        isInitializing: false,
+        to: '2020-07-08T08:20:18.966Z',
+        setQuery: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const useAddToTimeline = () => ({
-  beginDrag: jest.fn(),
-  cancelDrag: jest.fn(),
-  dragToLocation: jest.fn(),
-  endDrag: jest.fn(),
-  hasDraggableLock: jest.fn(),
-  startDragToTimeline: jest.fn(),
+  beginDrag: vi.fn(),
+  cancelDrag: vi.fn(),
+  dragToLocation: vi.fn(),
+  endDrag: vi.fn(),
+  hasDraggableLock: vi.fn(),
+  startDragToTimeline: vi.fn(),
 });
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...original,
     useNavigation: () => ({
-      getAppUrl: jest.fn(),
+      getAppUrl: vi.fn(),
     }),
     useKibana: () => ({
       services: {
@@ -96,13 +108,19 @@ jest.mock('../../../../common/lib/kibana', () => {
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
-jest.mock('../../../../common/components/search_bar', () => ({
-  SiemSearchBar: () => null,
-}));
-jest.mock('../../../../common/components/query_bar', () => ({
-  QueryBar: () => null,
-}));
-jest.mock('../../../../common/components/empty_prompt');
+vi.mock('../../../../common/components/search_bar', () => {
+      const mocked = {
+      SiemSearchBar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/components/query_bar', () => {
+      const mocked = {
+      QueryBar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/components/empty_prompt');
 
 const getMockHistory = (ip: string) => ({
   length: 2,
@@ -113,19 +131,19 @@ const getMockHistory = (ip: string) => ({
     hash: '',
   },
   action: pop,
-  push: jest.fn(),
-  replace: jest.fn(),
-  go: jest.fn(),
-  goBack: jest.fn(),
-  goForward: jest.fn(),
-  block: jest.fn(),
-  createHref: jest.fn(),
-  listen: jest.fn(),
+  push: vi.fn(),
+  replace: vi.fn(),
+  go: vi.fn(),
+  goBack: vi.fn(),
+  goForward: vi.fn(),
+  block: vi.fn(),
+  createHref: vi.fn(),
+  listen: vi.fn(),
 });
 
 describe('Network Details', () => {
   beforeAll(() => {
-    global.fetch = jest.fn().mockImplementationOnce(() =>
+    global.fetch = vi.fn().mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
         json: () => {
@@ -136,12 +154,12 @@ describe('Network Details', () => {
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it renders', () => {
     const ip = '123.456.78.90';
-    (useParams as jest.Mock).mockReturnValue({
+    (useParams as Mock).mockReturnValue({
       detailName: ip,
       flowTarget: FlowTargetSourceDest.source,
     });
@@ -156,10 +174,10 @@ describe('Network Details', () => {
   });
 
   test('it renders ipv6 headline', async () => {
-    jest.mocked(useDataView).mockReturnValue(withIndices(['test-index']));
+    vi.mocked(useDataView).mockReturnValue(withIndices(['test-index']));
 
     const ip = 'fe80--24ce-f7ff-fede-a571';
-    (useParams as jest.Mock).mockReturnValue({
+    (useParams as Mock).mockReturnValue({
       detailName: ip,
       flowTarget: FlowTargetSourceDest.source,
     });
@@ -176,10 +194,10 @@ describe('Network Details', () => {
   });
 
   test('it renders landing page component when no indices exist', () => {
-    jest.mocked(useDataView).mockReturnValue(defaultImplementation());
+    vi.mocked(useDataView).mockReturnValue(defaultImplementation());
 
     const ip = '123.456.78.90';
-    (useParams as jest.Mock).mockReturnValue({
+    (useParams as Mock).mockReturnValue({
       detailName: ip,
       flowTarget: FlowTargetSourceDest.source,
     });

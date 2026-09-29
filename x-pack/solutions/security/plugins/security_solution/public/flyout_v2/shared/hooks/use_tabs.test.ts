@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useTabs } from './use_tabs';
 import { useKibana } from '../../../common/lib/kibana';
 import { FlyoutV2EventTypes, FLYOUT_TYPE } from '../../../common/lib/telemetry';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 const mockStorage = {
-  get: jest.fn(),
-  set: jest.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
 };
-const mockReportEvent = jest.fn();
+const mockReportEvent = vi.fn();
 
 const validTabIds = ['overview', 'table', 'json'] as const;
 type TabId = (typeof validTabIds)[number];
@@ -24,8 +27,8 @@ const STORAGE_KEY = 'test.selectedTab';
 
 describe('useTabs (shared)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: { storage: mockStorage, telemetry: { reportEvent: mockReportEvent } },
     });
   });

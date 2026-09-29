@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 
@@ -14,7 +16,7 @@ import * as engineModule from '../engine/run_relationship_maintainer';
 type Ctx = Parameters<typeof communicatesWithMaintainer.run>[0];
 
 describe('communicatesWithMaintainer', () => {
-  const makeTelemetry = () => ({ report: jest.fn() });
+  const makeTelemetry = () => ({ report: vi.fn() });
 
   const makeContext = (overrides: Partial<Ctx> = {}): Ctx =>
     ({
@@ -38,14 +40,14 @@ describe('communicatesWithMaintainer', () => {
     } as unknown as Ctx);
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('calls telemetry.report with funnel and sources but no breakdown', async () => {
     const telemetry = makeTelemetry();
     const ctx = makeContext({ telemetry: telemetry as unknown as Ctx['telemetry'] });
 
-    jest
+    vi
       .spyOn(engineModule, 'runRelationshipMaintainer')
       .mockImplementation(async ({ telemetryCollector }) => {
         if (telemetryCollector) {

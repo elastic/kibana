@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import fs from 'fs/promises';
 import type { Logger } from '@kbn/logging';
 
 // Mocking dependencies
-jest.mock('fs/promises');
+vi.mock('fs/promises');
 
-const fetchMock = jest.spyOn(global, 'fetch');
+const fetchMock = vi.spyOn(global, 'fetch');
 
 const mockLogger: Logger = {
-  warn: jest.fn(),
-  error: jest.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
 } as Partial<Logger> as Logger;
 
 import type { NotebookCatalogFetchOptions } from './notebook_catalog';
@@ -52,12 +54,12 @@ const dynamicOptions: NotebookCatalogFetchOptions = {
 describe('Notebook Catalog', () => {
   const fakeNow = new Date('1999-12-31T23:59:59.999Z');
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(fakeNow);
+    vi.useFakeTimers();
+    vi.setSystemTime(fakeNow);
   });
   beforeEach(() => {
     // Reset mocks and cache before each test
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     // Reset the notebook cache
     dynamicOptions.cache = createNotebooksCache();
   });
@@ -98,7 +100,7 @@ describe('Notebook Catalog', () => {
           status: 200,
           statusText: 'OK',
           ok: true,
-          json: jest.fn().mockResolvedValue(mockCatalog),
+          json: vi.fn().mockResolvedValue(mockCatalog),
         };
         fetchMock.mockResolvedValue(mockResp as unknown as Response);
         await expect(getNotebookCatalog(dynamicOptions)).resolves.toEqual({
@@ -132,7 +134,7 @@ describe('Notebook Catalog', () => {
           status: 200,
           statusText: 'OK',
           ok: true,
-          json: jest.fn().mockResolvedValue(mockCatalog),
+          json: vi.fn().mockResolvedValue(mockCatalog),
         };
         fetchMock.mockResolvedValue(mockResp as unknown as Response);
 
@@ -169,7 +171,7 @@ describe('Notebook Catalog', () => {
           status: 200,
           statusText: 'OK',
           ok: true,
-          json: jest.fn().mockResolvedValue(mockBadCatalog),
+          json: vi.fn().mockResolvedValue(mockBadCatalog),
         };
         fetchMock.mockResolvedValue(mockResp as unknown as Response);
         await expect(getNotebookCatalog(dynamicOptions)).resolves.toEqual(DEFAULT_NOTEBOOKS);
@@ -216,7 +218,7 @@ describe('Notebook Catalog', () => {
           status: 200,
           statusText: 'OK',
           ok: true,
-          json: jest.fn().mockResolvedValue(mockCatalog),
+          json: vi.fn().mockResolvedValue(mockCatalog),
         };
         fetchMock.mockResolvedValue(mockResp as unknown as Response);
         dynamicOptions.cache.catalog = {
@@ -303,7 +305,7 @@ describe('Notebook Catalog', () => {
           status: 200,
           statusText: 'OK',
           ok: true,
-          json: jest.fn().mockResolvedValue(mockCatalog),
+          json: vi.fn().mockResolvedValue(mockCatalog),
         };
         fetchMock.mockResolvedValue(mockResp as unknown as Response);
 
@@ -350,7 +352,7 @@ describe('Notebook Catalog', () => {
             status: 200,
             statusText: 'OK',
             ok: true,
-            json: jest.fn().mockResolvedValue(mockCatalog),
+            json: vi.fn().mockResolvedValue(mockCatalog),
           };
           fetchMock.mockResolvedValue(mockResp as unknown as Response);
         });
@@ -474,7 +476,7 @@ describe('Notebook Catalog', () => {
 
       it('throws an error if the file is not found', async () => {
         const notebookId = DEFAULT_NOTEBOOKS.notebooks[0].id;
-        jest.mocked(fs.access).mockReset().mockRejectedValue(new Error('Boom'));
+        vi.mocked(fs.access).mockReset().mockRejectedValue(new Error('Boom'));
 
         await expect(getNotebook(notebookId, staticOptions)).rejects.toThrow(
           'Failed to fetch notebook.'
@@ -484,7 +486,7 @@ describe('Notebook Catalog', () => {
       it('Reads notebook', async () => {
         const notebookId = DEFAULT_NOTEBOOKS.notebooks[0].id;
 
-        jest.mocked(fs.access).mockReset().mockResolvedValue(undefined);
+        vi.mocked(fs.access).mockReset().mockResolvedValue(undefined);
 
         await expect(getNotebook(notebookId, staticOptions)).resolves.toMatchObject({
           cells: expect.anything(),
@@ -526,7 +528,7 @@ describe('Notebook Catalog', () => {
           status: 200,
           statusText: 'OK',
           ok: true,
-          json: jest.fn().mockResolvedValue(mockNotebook),
+          json: vi.fn().mockResolvedValue(mockNotebook),
         };
         fetchMock.mockResolvedValue(mockResp as unknown as Response);
 
@@ -571,7 +573,7 @@ describe('Notebook Catalog', () => {
           status: 200,
           statusText: 'OK',
           ok: true,
-          json: jest.fn().mockResolvedValue(mockNotebook),
+          json: vi.fn().mockResolvedValue(mockNotebook),
         };
         fetchMock.mockResolvedValue(mockResp as unknown as Response);
 

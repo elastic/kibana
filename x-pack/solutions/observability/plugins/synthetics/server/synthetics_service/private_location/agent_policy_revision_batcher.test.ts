@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -15,15 +17,15 @@ import {
 
 describe('AgentPolicyRevisionBatcher', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('coalesces concurrent requests for one policy into one revision bump', async () => {
-    const bumpRevision = jest.fn().mockResolvedValue(undefined);
+    const bumpRevision = vi.fn().mockResolvedValue(undefined);
     const batcher = new AgentPolicyRevisionBatcher({
       logger: loggerMock.create(),
       bumpRevision,
@@ -32,7 +34,7 @@ describe('AgentPolicyRevisionBatcher', () => {
 
     const requests = Array.from({ length: 20 }, () => batcher.schedule(['policy-1']));
 
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await vi.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await Promise.all(requests);
 
     expect(bumpRevision).toHaveBeenCalledTimes(1);
@@ -40,7 +42,7 @@ describe('AgentPolicyRevisionBatcher', () => {
   });
 
   it('keeps separate policies in separate batches', async () => {
-    const bumpRevision = jest.fn().mockResolvedValue(undefined);
+    const bumpRevision = vi.fn().mockResolvedValue(undefined);
     const batcher = new AgentPolicyRevisionBatcher({
       logger: loggerMock.create(),
       bumpRevision,
@@ -49,7 +51,7 @@ describe('AgentPolicyRevisionBatcher', () => {
 
     const request = batcher.schedule(['policy-1', 'policy-1', 'policy-2']);
 
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await vi.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await request;
 
     expect(bumpRevision).toHaveBeenCalledTimes(2);
@@ -58,7 +60,7 @@ describe('AgentPolicyRevisionBatcher', () => {
   });
 
   it('coalesces independent callers of the same policy into one bump', async () => {
-    const bumpRevision = jest.fn().mockResolvedValue(undefined);
+    const bumpRevision = vi.fn().mockResolvedValue(undefined);
     const batcher = new AgentPolicyRevisionBatcher({
       logger: loggerMock.create(),
       bumpRevision,
@@ -70,7 +72,7 @@ describe('AgentPolicyRevisionBatcher', () => {
     // PackagePolicyService resolves the space from the agent policy itself.
     const requests = [batcher.schedule(['policy-1']), batcher.schedule(['policy-1'])];
 
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await vi.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await Promise.all(requests);
 
     expect(bumpRevision).toHaveBeenCalledTimes(1);
@@ -78,7 +80,7 @@ describe('AgentPolicyRevisionBatcher', () => {
 
   it('schedules a follow-up bump for writes that arrive while a bump is running', async () => {
     let finishFirstBump: () => void = () => {};
-    const bumpRevision = jest
+    const bumpRevision = vi
       .fn()
       .mockImplementationOnce(() => new Promise<void>((resolve) => (finishFirstBump = resolve)))
       .mockResolvedValue(undefined);
@@ -89,20 +91,20 @@ describe('AgentPolicyRevisionBatcher', () => {
     });
 
     const firstRequest = batcher.schedule(['policy-1']);
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await vi.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     expect(bumpRevision).toHaveBeenCalledTimes(1);
 
     const secondRequest = batcher.schedule(['policy-1']);
     finishFirstBump();
     await firstRequest;
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await vi.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await secondRequest;
 
     expect(bumpRevision).toHaveBeenCalledTimes(2);
   });
 
   it('retries version conflicts with bounded backoff', async () => {
-    const bumpRevision = jest
+    const bumpRevision = vi
       .fn()
       .mockRejectedValueOnce(SavedObjectsErrorHelpers.createConflictError('agent-policy', '1'))
       .mockResolvedValue(undefined);
@@ -113,7 +115,7 @@ describe('AgentPolicyRevisionBatcher', () => {
     });
     const request = batcher.schedule(['policy-1']);
 
-    await jest.advanceTimersByTimeAsync(
+    await vi.advanceTimersByTimeAsync(
       AGENT_POLICY_REVISION_BATCH_WINDOW_MS + AGENT_POLICY_REVISION_RETRY_DELAY_MS
     );
     await request;
@@ -123,7 +125,7 @@ describe('AgentPolicyRevisionBatcher', () => {
 
   describe('flushPending', () => {
     it('bumps a pending batch without waiting out the debounce window', async () => {
-      const bumpRevision = jest.fn().mockResolvedValue(undefined);
+      const bumpRevision = vi.fn().mockResolvedValue(undefined);
       const batcher = new AgentPolicyRevisionBatcher({
         logger: loggerMock.create(),
         bumpRevision,
@@ -143,7 +145,7 @@ describe('AgentPolicyRevisionBatcher', () => {
 
     it('drains a follow-up batch queued while the first bump was running', async () => {
       let finishFirstBump: () => void = () => {};
-      const bumpRevision = jest
+      const bumpRevision = vi
         .fn()
         .mockImplementationOnce(() => new Promise<void>((resolve) => (finishFirstBump = resolve)))
         .mockResolvedValue(undefined);
@@ -154,7 +156,7 @@ describe('AgentPolicyRevisionBatcher', () => {
       });
 
       const firstRequest = batcher.schedule(['policy-1']);
-      await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+      await vi.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
       expect(bumpRevision).toHaveBeenCalledTimes(1);
 
       // Arrives mid-bump, so it is queued behind the running batch.
@@ -162,7 +164,7 @@ describe('AgentPolicyRevisionBatcher', () => {
       finishFirstBump();
 
       const drained = batcher.flushPending();
-      await jest.runOnlyPendingTimersAsync();
+      await vi.runOnlyPendingTimersAsync();
       await drained;
       await Promise.all([firstRequest, secondRequest]);
 
@@ -170,7 +172,7 @@ describe('AgentPolicyRevisionBatcher', () => {
     });
 
     it('keeps draining other policies when one batch fails', async () => {
-      const bumpRevision = jest
+      const bumpRevision = vi
         .fn()
         .mockImplementation(async (policyId: string) =>
           policyId === 'policy-1' ? Promise.reject(new Error('deployment failed')) : undefined
@@ -193,7 +195,7 @@ describe('AgentPolicyRevisionBatcher', () => {
     });
 
     it('is a no-op when nothing is pending', async () => {
-      const bumpRevision = jest.fn().mockResolvedValue(undefined);
+      const bumpRevision = vi.fn().mockResolvedValue(undefined);
       const batcher = new AgentPolicyRevisionBatcher({
         logger: loggerMock.create(),
         bumpRevision,
@@ -207,7 +209,7 @@ describe('AgentPolicyRevisionBatcher', () => {
   });
 
   it('does not retry non-conflict errors', async () => {
-    const bumpRevision = jest.fn().mockRejectedValue(new Error('deployment failed'));
+    const bumpRevision = vi.fn().mockRejectedValue(new Error('deployment failed'));
     const batcher = new AgentPolicyRevisionBatcher({
       logger: loggerMock.create(),
       bumpRevision,
@@ -216,7 +218,7 @@ describe('AgentPolicyRevisionBatcher', () => {
     const request = batcher.schedule(['policy-1']);
     const rejection = expect(request).rejects.toThrow('deployment failed');
 
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await vi.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await rejection;
 
     expect(bumpRevision).toHaveBeenCalledTimes(1);

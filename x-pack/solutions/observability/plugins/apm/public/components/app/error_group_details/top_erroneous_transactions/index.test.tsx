@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import React from 'react';
@@ -14,40 +16,55 @@ import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 // Mock the hooks
-const mockUseFetcher = jest.fn();
-const mockUseApmParams = jest.fn();
-const mockUseApmRouter = jest.fn();
-const mockUseTimeRange = jest.fn();
+const mockUseFetcher = vi.fn();
+const mockUseApmParams = vi.fn();
+const mockUseApmRouter = vi.fn();
+const mockUseTimeRange = vi.fn();
 
-jest.mock('../../../../hooks/use_fetcher', () => ({
-  useFetcher: () => mockUseFetcher(),
-  FETCH_STATUS: {
-    LOADING: 'loading',
-    SUCCESS: 'success',
-    FAILURE: 'failure',
-    NOT_INITIATED: 'not_initiated',
-  },
-  isPending: jest.fn((status) => status === 'loading'),
-}));
+vi.mock('../../../../hooks/use_fetcher', () => {
+      const mocked = {
+      useFetcher: () => mockUseFetcher(),
+      FETCH_STATUS: {
+        LOADING: 'loading',
+        SUCCESS: 'success',
+        FAILURE: 'failure',
+        NOT_INITIATED: 'not_initiated',
+      },
+      isPending: vi.fn((status) => status === 'loading'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_apm_params', () => ({
-  useApmParams: () => mockUseApmParams(),
-}));
+vi.mock('../../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useApmParams: () => mockUseApmParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_apm_router', () => ({
-  useApmRouter: () => mockUseApmRouter(),
-}));
+vi.mock('../../../../hooks/use_apm_router', () => {
+      const mocked = {
+      useApmRouter: () => mockUseApmRouter(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_time_range', () => ({
-  useTimeRange: () => mockUseTimeRange(),
-}));
+vi.mock('../../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => mockUseTimeRange(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock SparkPlot to simplify testing
-jest.mock('../../../shared/charts/spark_plot', () => ({
-  SparkPlot: ({ valueLabel }: { valueLabel: string }) => (
-    <div data-test-subj="spark-plot">{valueLabel}</div>
-  ),
-}));
+vi.mock('../../../shared/charts/spark_plot', () => {
+      const mocked = {
+      SparkPlot: ({ valueLabel }: { valueLabel: string }) => (
+        <div data-test-subj="spark-plot">{valueLabel}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -80,11 +97,11 @@ describe('TopErroneousTransactions', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseApmParams.mockReturnValue(defaultParams);
     mockUseTimeRange.mockReturnValue(defaultTimeRange);
     mockUseApmRouter.mockReturnValue({
-      link: jest.fn(() => '/test-link'),
+      link: vi.fn(() => '/test-link'),
     });
   });
 

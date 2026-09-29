@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FC, PropsWithChildren } from 'react';
@@ -19,26 +22,26 @@ import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_prov
 import { KibanaErrorBoundary } from './error_boundary';
 import { errorMessageStrings as strings } from './message_strings';
 
-jest.mock('@elastic/apm-rum');
+vi.mock('@elastic/apm-rum');
 
 describe('<KibanaErrorBoundary>', () => {
   let services: KibanaErrorBoundaryServices;
   let user: ReturnType<typeof userEvent.setup>;
   beforeEach(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     // Use fake timers for all tests so userEvent can drive microtasks deterministically.
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     services = getServicesMock();
-    (apm.captureError as jest.Mock).mockClear();
+    (apm.captureError as Mock).mockClear();
     user = userEvent.setup({
       advanceTimers: async (ms) => {
-        await jest.advanceTimersByTimeAsync(ms);
+        await vi.advanceTimersByTimeAsync(ms);
       },
     });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   const Template: FC<PropsWithChildren<unknown>> = ({ children }) => {
@@ -56,7 +59,7 @@ describe('<KibanaErrorBoundary>', () => {
   });
 
   it('renders a "soft" callout when an unknown error is caught', async () => {
-    const reloadSpy = jest.spyOn(services, 'onClickRefresh');
+    const reloadSpy = vi.spyOn(services, 'onClickRefresh');
 
     const { findByTestId, findByText } = render(
       <Template>
@@ -74,7 +77,7 @@ describe('<KibanaErrorBoundary>', () => {
   });
 
   it('renders a fatal callout when an unknown error is caught', async () => {
-    const reloadSpy = jest.spyOn(services, 'onClickRefresh');
+    const reloadSpy = vi.spyOn(services, 'onClickRefresh');
 
     const { findByTestId, findByText } = render(
       <Template>

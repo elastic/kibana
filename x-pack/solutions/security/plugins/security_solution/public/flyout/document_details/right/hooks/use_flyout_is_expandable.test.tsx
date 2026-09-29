@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useFlyoutIsExpandable } from './use_flyout_is_expandable';
 import { renderHook } from '@testing-library/react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
-const getFieldsData = jest.fn();
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+const getFieldsData = vi.fn();
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as Mock;
 
 describe('useFlyoutIsExpandable', () => {
   it('always return ture when event.kind is signal (alert document)', () => {

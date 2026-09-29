@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Observable } from 'rxjs';
 import fetchMock from 'fetch-mock';
 
@@ -27,11 +29,11 @@ describe('interceptors', () => {
     const httpService = new HttpService();
 
     const setup = httpService.setup({ fatalErrors, injectedMetadata, executionContext });
-    const setupInterceptor = jest.fn();
+    const setupInterceptor = vi.fn();
     setup.intercept({ request: setupInterceptor });
 
     const start = httpService.start();
-    const startInterceptor = jest.fn();
+    const startInterceptor = vi.fn();
     start.intercept({ request: startInterceptor });
 
     await setup.get('/blah');

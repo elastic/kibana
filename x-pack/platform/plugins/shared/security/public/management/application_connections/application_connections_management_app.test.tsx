@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
@@ -15,9 +17,12 @@ import { applicationConnectionsManagementApp } from './application_connections_m
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 
-jest.mock('./application_connections_page', () => ({
-  ApplicationConnectionsPage: () => 'Application Connections Page',
-}));
+vi.mock('./application_connections_page', () => {
+      const mocked = {
+      ApplicationConnectionsPage: () => 'Application Connections Page',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const element = document.body.appendChild(document.createElement('div'));
 
@@ -28,7 +33,7 @@ describe('applicationConnectionsManagementApp', () => {
     getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
     const { authc } = securityMock.createSetup();
     authc.getCurrentUser.mockResolvedValue(mockAuthenticatedUser());
-    const setBreadcrumbs = jest.fn();
+    const setBreadcrumbs = vi.fn();
     const history = scopedHistoryMock.create({ pathname: '/' });
 
     let unmount: Unmount = noop;

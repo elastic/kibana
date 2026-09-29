@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import type { ReactWrapper, ComponentType } from 'enzyme';
 import { mount } from 'enzyme';
@@ -14,13 +17,13 @@ import { useKibana } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
 import { UserActionCopyLink } from './copy_link';
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
-jest.mock('../../common/navigation/hooks');
-jest.mock('copy-to-clipboard', () => jest.fn());
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/navigation/hooks');
+vi.mock('copy-to-clipboard', () => vi.fn());
+vi.mock('../../common/lib/kibana');
 
-const mockGetUrlForApp = jest.fn(
+const mockGetUrlForApp = vi.fn(
   (appId: string, options?: { path?: string; absolute?: boolean }) =>
     `${appId}${options?.path ?? ''}`
 );
@@ -39,7 +42,7 @@ describe('UserActionCopyLink ', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock().services.application.getUrlForApp = mockGetUrlForApp;
   });
 

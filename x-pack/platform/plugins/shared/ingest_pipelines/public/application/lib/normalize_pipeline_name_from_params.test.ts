@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { normalizePipelineNameFromParams } from './normalize_pipeline_name_from_params';
 
 describe('normalizePipelineNameFromParams', () => {
@@ -25,7 +27,7 @@ describe('normalizePipelineNameFromParams', () => {
       value: originalLocation,
     });
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when pathname ends with unencoded route param', () => {

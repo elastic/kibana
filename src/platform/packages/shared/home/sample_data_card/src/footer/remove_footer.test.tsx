@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
@@ -18,20 +20,23 @@ import { SampleDataCardProvider } from '../services';
 import { getMockServices } from '../mocks';
 
 // Mock the polling functions to resolve immediately in tests
-jest.mock('../hooks/poll_sample_data_status', () => ({
-  pollForInstallation: jest.fn(async () => Promise.resolve()),
-  pollForRemoval: jest.fn(async () => Promise.resolve()),
-}));
+vi.mock('../hooks/poll_sample_data_status', () => {
+      const mocked = {
+      pollForInstallation: vi.fn(async () => Promise.resolve()),
+      pollForRemoval: vi.fn(async () => Promise.resolve()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('remove footer', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const id = 'data-set-id';
-  const onRemove = jest.fn();
-  const notifyError = jest.fn();
-  const notifySuccess = jest.fn();
+  const onRemove = vi.fn();
+  const notifyError = vi.fn();
+  const notifySuccess = vi.fn();
 
   const props: Props = {
     id,
@@ -72,7 +77,7 @@ describe('remove footer', () => {
   });
 
   test('should not invoke onRemove when remove button is clicked and an error is thrown', async () => {
-    const removeSampleDataSet = jest.fn(async () => {
+    const removeSampleDataSet = vi.fn(async () => {
       throw new Error('error');
     });
     const component = mount(<RemoveFooter {...props} />, {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { type PropsWithChildren } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -29,7 +31,7 @@ const createWrapper = (dataSource?: ReturnType<typeof createTestEpisodeSource>) 
 
 const createHttp = () => {
   const http = httpServiceMock.createStartContract();
-  http.basePath.prepend = jest.fn((path: string) => `/base${path}`);
+  http.basePath.prepend = vi.fn((path: string) => `/base${path}`);
   return http;
 };
 
@@ -37,7 +39,7 @@ describe('useFetchSourceRule', () => {
   it('resolves a rule from the data source', async () => {
     const http = createHttp();
     const source = createTestEpisodeSource({
-      resolveRules: jest.fn().mockResolvedValue([mockRule]),
+      resolveRules: vi.fn().mockResolvedValue([mockRule]),
       getRuleDetailsHref: (ruleId) => `/app/management/rule/${ruleId}`,
     });
     const { Wrapper } = createWrapper(source);
@@ -59,7 +61,7 @@ describe('useFetchSourceRule', () => {
   it('returns undefined rule when the source returns no matches', async () => {
     const http = createHttp();
     const source = createTestEpisodeSource({
-      resolveRules: jest.fn().mockResolvedValue([]),
+      resolveRules: vi.fn().mockResolvedValue([]),
     });
     const { Wrapper } = createWrapper(source);
 
@@ -75,7 +77,7 @@ describe('useFetchSourceRule', () => {
   it('does not call resolveRules when ruleId is undefined', () => {
     const http = createHttp();
     const source = createTestEpisodeSource({
-      resolveRules: jest.fn().mockResolvedValue([mockRule]),
+      resolveRules: vi.fn().mockResolvedValue([mockRule]),
     });
     const { Wrapper } = createWrapper(source);
 
@@ -103,7 +105,7 @@ describe('useFetchSourceRule', () => {
   it('returns null ruleDetailsHref when the source does not provide getRuleDetailsHref', async () => {
     const http = createHttp();
     const source = createTestEpisodeSource({
-      resolveRules: jest.fn().mockResolvedValue([mockRule]),
+      resolveRules: vi.fn().mockResolvedValue([mockRule]),
     });
     const { Wrapper } = createWrapper(source);
 
@@ -121,7 +123,7 @@ describe('useFetchSourceRule', () => {
     const initialRule = { id: 'r1', metadata: { name: 'Cached Rule' } } as unknown as RuleResponse;
     const fetchedRule = { id: 'r1', metadata: { name: 'Fetched Rule' } } as unknown as RuleResponse;
     const source = createTestEpisodeSource({
-      resolveRules: jest.fn().mockResolvedValue([fetchedRule]),
+      resolveRules: vi.fn().mockResolvedValue([fetchedRule]),
     });
     const { Wrapper } = createWrapper(source);
 
@@ -144,11 +146,11 @@ describe('useFetchSourceRule', () => {
     const ruleB = { id: 'r1', metadata: { name: 'Source B' } } as unknown as RuleResponse;
     const sourceA = createTestEpisodeSource({
       id: 'source-a',
-      resolveRules: jest.fn().mockResolvedValue([ruleA]),
+      resolveRules: vi.fn().mockResolvedValue([ruleA]),
     });
     const sourceB = createTestEpisodeSource({
       id: 'source-b',
-      resolveRules: jest.fn().mockResolvedValue([ruleB]),
+      resolveRules: vi.fn().mockResolvedValue([ruleB]),
     });
     const queryClient = createTestQueryClient();
     let dataSource = sourceA;

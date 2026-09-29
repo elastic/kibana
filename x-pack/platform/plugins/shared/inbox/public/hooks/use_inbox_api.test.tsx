@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -20,9 +23,9 @@ import {
 import { useInboxActions, useInboxActionsHistory } from './use_inbox_api';
 import { createStubInboxAction } from '../../common/test_helpers';
 
-jest.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createWrapper = (): FC<PropsWithChildren<{}>> => {
   const queryClient = new QueryClient({
@@ -37,7 +40,7 @@ const createWrapper = (): FC<PropsWithChildren<{}>> => {
 };
 
 describe('useInboxActions', () => {
-  let httpGet: jest.Mock;
+  let httpGet: Mock;
 
   const mockResponse: ListInboxActionsResponse = {
     actions: [createStubInboxAction()],
@@ -45,7 +48,7 @@ describe('useInboxActions', () => {
   };
 
   beforeEach(() => {
-    httpGet = jest.fn().mockResolvedValue(mockResponse);
+    httpGet = vi.fn().mockResolvedValue(mockResponse);
     useKibanaMock.mockReturnValue({
       services: {
         http: { get: httpGet },
@@ -110,7 +113,7 @@ describe('useInboxActions', () => {
 });
 
 describe('useInboxActionsHistory', () => {
-  let httpGet: jest.Mock;
+  let httpGet: Mock;
 
   const mockResponse: ListInboxActionsHistoryResponse = {
     actions: [
@@ -124,7 +127,7 @@ describe('useInboxActionsHistory', () => {
   };
 
   beforeEach(() => {
-    httpGet = jest.fn().mockResolvedValue(mockResponse);
+    httpGet = vi.fn().mockResolvedValue(mockResponse);
     useKibanaMock.mockReturnValue({
       services: { http: { get: httpGet } },
     } as unknown as ReturnType<typeof useKibana>);

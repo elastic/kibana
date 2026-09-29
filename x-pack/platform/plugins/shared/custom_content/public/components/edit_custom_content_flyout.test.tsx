@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { ComponentProps } from 'react';
 import { render, screen } from '@testing-library/react';
@@ -12,8 +15,8 @@ import userEvent from '@testing-library/user-event';
 import { MockedCodeEditor } from '@kbn/code-editor-mock';
 import type { MockedMonacoEditor } from '@kbn/code-editor-mock/monaco_mock';
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
+vi.mock('@kbn/code-editor', async () => {
+  const original = (await vi.importActual('@kbn/code-editor'));
   return {
     ...original,
     CodeEditor: (props: ComponentProps<typeof MockedMonacoEditor>) => (
@@ -22,37 +25,43 @@ jest.mock('@kbn/code-editor', () => {
   };
 });
 
-jest.mock('../hooks/use_edit_flyout_state');
-jest.mock('../services');
-jest.mock('./esql_preview_section', () => ({
-  EsqlPreviewSection: () => <div data-test-subj="mockEsqlPreviewSection" />,
-}));
+vi.mock('../hooks/use_edit_flyout_state');
+vi.mock('../services');
+vi.mock('./esql_preview_section', () => {
+      const mocked = {
+      EsqlPreviewSection: () => <div data-test-subj="mockEsqlPreviewSection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { getServices } from '../services';
 import { EditCustomContentFlyout } from './edit_custom_content_flyout';
 
-const mockUseEditFlyoutState = useEditFlyoutState as jest.Mock;
+const mockUseEditFlyoutState = useEditFlyoutState as Mock;
 
 const mockTelemetry = {
-  trackPanelSaved: jest.fn(),
-  trackGenerateWithChatClicked: jest.fn(),
+  trackPanelSaved: vi.fn(),
+  trackGenerateWithChatClicked: vi.fn(),
 };
 
-jest.mock('../telemetry', () => ({ getTelemetry: () => mockTelemetry }));
+vi.mock('../telemetry', () => {
+      const mocked = { getTelemetry: () => mockTelemetry };
+      return { ...mocked, default: mocked };
+    });
 
 const baseFlyoutState = {
   draftEsqlQuery: '',
-  setDraftEsqlQuery: jest.fn(),
+  setDraftEsqlQuery: vi.fn(),
   draftTemplate: '',
-  setDraftTemplate: jest.fn(),
+  setDraftTemplate: vi.fn(),
   isAiAvailable: true,
   isDataLoading: false,
   esqlData: null,
   esqlDataError: null,
-  handleFetchData: jest.fn(),
+  handleFetchData: vi.fn(),
   isRenderLoading: false,
-  handleRender: jest.fn(),
+  handleRender: vi.fn(),
 };
 
 const defaultProps = {
@@ -64,16 +73,16 @@ const defaultProps = {
   query: undefined,
   filters: undefined,
   esqlVariables: undefined,
-  onSave: jest.fn(),
-  onClose: jest.fn(),
-  onRunPreview: jest.fn(),
-  onGenerateWithChat: jest.fn(),
+  onSave: vi.fn(),
+  onClose: vi.fn(),
+  onRunPreview: vi.fn(),
+  onGenerateWithChat: vi.fn(),
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseEditFlyoutState.mockReturnValue(baseFlyoutState);
-  (getServices as jest.Mock).mockReturnValue({
+  (getServices as Mock).mockReturnValue({
     core: {
       docLinks: { links: { visualize: { customPanels: 'https://docs.example/custom-panels' } } },
     },
@@ -110,8 +119,8 @@ describe('EditCustomContentFlyout', () => {
     });
 
     it('calls onSave with the draft values', async () => {
-      const onSave = jest.fn();
-      const onClose = jest.fn();
+      const onSave = vi.fn();
+      const onClose = vi.fn();
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
         draftEsqlQuery: 'FROM logs',
@@ -143,8 +152,8 @@ describe('EditCustomContentFlyout', () => {
 
   describe('Cancel', () => {
     it('calls onClose without saving', async () => {
-      const onSave = jest.fn();
-      const onClose = jest.fn();
+      const onSave = vi.fn();
+      const onClose = vi.fn();
       render(<EditCustomContentFlyout {...defaultProps} onSave={onSave} onClose={onClose} />);
 
       await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
@@ -183,7 +192,7 @@ describe('EditCustomContentFlyout', () => {
     });
 
     it('calls handleRender when clicked', async () => {
-      const handleRender = jest.fn();
+      const handleRender = vi.fn();
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
         draftEsqlQuery: 'FROM logs',
@@ -221,7 +230,7 @@ describe('EditCustomContentFlyout', () => {
     });
 
     it('calls onGenerateWithChat with the draft template and esqlQuery when clicked', async () => {
-      const onGenerateWithChat = jest.fn();
+      const onGenerateWithChat = vi.fn();
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
         draftEsqlQuery: 'FROM logs',
@@ -239,7 +248,7 @@ describe('EditCustomContentFlyout', () => {
     });
 
     it('calls onGenerateWithChat when clicked with an empty template', async () => {
-      const onGenerateWithChat = jest.fn();
+      const onGenerateWithChat = vi.fn();
       render(<EditCustomContentFlyout {...defaultProps} onGenerateWithChat={onGenerateWithChat} />);
 
       await userEvent.click(screen.getByRole('button', { name: 'Generate with chat' }));

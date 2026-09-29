@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EuiSelectableOption } from '@elastic/eui';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -12,22 +14,28 @@ import React from 'react';
 import { SearchAndFilter } from '.';
 import { TestProviders } from '../../../../../common/mock';
 
-jest.mock('../../../use_get_attack_discovery_generations', () => ({
-  useInvalidateGetAttackDiscoveryGenerations: jest.fn().mockReturnValue(jest.fn()),
-}));
-jest.mock('../../../use_find_attack_discoveries', () => ({
-  useInvalidateFindAttackDiscoveries: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('../../../use_get_attack_discovery_generations', () => {
+      const mocked = {
+      useInvalidateGetAttackDiscoveryGenerations: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../use_find_attack_discoveries', () => {
+      const mocked = {
+      useInvalidateFindAttackDiscoveries: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSetQuery = jest.fn();
-const mockSetStart = jest.fn();
-const mockSetEnd = jest.fn();
-const mockSetFilterByAlertIds = jest.fn();
-const mockSetSelectedAttackDiscoveries = jest.fn();
-const mockOnRefresh = jest.fn();
-const mockSetSelectedConnectorNames = jest.fn();
-const mockSetShared = jest.fn();
-const mockSetStatusItems = jest.fn();
+const mockSetQuery = vi.fn();
+const mockSetStart = vi.fn();
+const mockSetEnd = vi.fn();
+const mockSetFilterByAlertIds = vi.fn();
+const mockSetSelectedAttackDiscoveries = vi.fn();
+const mockOnRefresh = vi.fn();
+const mockSetSelectedConnectorNames = vi.fn();
+const mockSetShared = vi.fn();
+const mockSetStatusItems = vi.fn();
 
 const defaultProps = {
   aiConnectors: [],
@@ -53,7 +61,7 @@ const defaultProps = {
 
 describe('SearchAndFilter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the search bar', () => {

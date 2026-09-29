@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import 'jest-canvas-mock';
 
 import { VegaMapView } from './view';
@@ -33,10 +36,10 @@ import { initVegaLayer, initTmsRasterLayer } from './layers';
 import { maplibregl } from '@kbn/mapbox-gl';
 import { DEFAULT_EMS_ROADMAP_DESATURATED_ID } from '@kbn/maps-ems-plugin/common';
 
-jest.mock('@kbn/mapbox-gl', () => {
-  const zoomTo = jest.fn();
-  const setCenter = jest.fn();
-  const fitBounds = jest.fn();
+vi.mock('@kbn/mapbox-gl', () => {
+  const zoomTo = vi.fn();
+  const setCenter = vi.fn();
+  const fitBounds = vi.fn();
   return {
     maplibregl: {
       mocks: {
@@ -44,37 +47,40 @@ jest.mock('@kbn/mapbox-gl', () => {
         setCenter,
         fitBounds,
       },
-      setRTLTextPlugin: jest.fn(),
-      Map: jest.fn().mockImplementation(() => ({
+      setRTLTextPlugin: vi.fn(),
+      Map: vi.fn().mockImplementation(() => ({
         getLayer: () => '',
-        removeLayer: jest.fn(),
+        removeLayer: vi.fn(),
         once: (eventName: string, handler: Function) => handler(),
-        remove: () => jest.fn(),
+        remove: () => vi.fn(),
         getCanvas: () => ({ clientWidth: 512, clientHeight: 512 }),
         getCenter: () => ({ lat: 20, lng: 20 }),
         getZoom: () => 3,
         zoomTo,
         setCenter,
         fitBounds,
-        addControl: jest.fn(),
-        addLayer: jest.fn(),
+        addControl: vi.fn(),
+        addLayer: vi.fn(),
         dragRotate: {
-          disable: jest.fn(),
+          disable: vi.fn(),
         },
         touchZoomRotate: {
-          disableRotation: jest.fn(),
+          disableRotation: vi.fn(),
         },
       })),
-      MapboxOptions: jest.fn(),
-      NavigationControl: jest.fn(),
+      MapboxOptions: vi.fn(),
+      NavigationControl: vi.fn(),
     },
   };
 });
 
-jest.mock('./layers', () => ({
-  initVegaLayer: jest.fn(),
-  initTmsRasterLayer: jest.fn(),
-}));
+vi.mock('./layers', () => {
+      const mocked = {
+      initVegaLayer: vi.fn(),
+      initTmsRasterLayer: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('vega_map_view/view', () => {
   describe('VegaMapView', () => {
@@ -135,14 +141,14 @@ describe('vega_map_view/view', () => {
         fireEvent: (event: any) => {},
         parentEl: document.createElement('div'),
         vegaStateRestorer: {
-          save: jest.fn(),
-          restore: jest.fn(),
-          clear: jest.fn(),
+          save: vi.fn(),
+          restore: vi.fn(),
+          clear: vi.fn(),
         },
       } as unknown as VegaViewParams);
     }
 
-    let mockedConsoleLog: jest.SpyInstance;
+    let mockedConsoleLog: MockInstance;
 
     beforeEach(() => {
       vegaParser = new VegaParser(
@@ -157,12 +163,12 @@ describe('vega_map_view/view', () => {
         mockGetServiceSettings,
         { darkMode: false, name: 'borealis' }
       );
-      mockedConsoleLog = jest.spyOn(console, 'log'); // mocked console.log to avoid messages in the console when running tests
+      mockedConsoleLog = vi.spyOn(console, 'log'); // mocked console.log to avoid messages in the console when running tests
       mockedConsoleLog.mockImplementation(() => {}); //  comment this line when console logging for debugging
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockedConsoleLog.mockRestore();
     });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { esql as esqlComposer } from '@elastic/esql';
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
 import { operationDefinitionMap } from '.';
@@ -130,7 +132,7 @@ describe('count operation', () => {
         column as unknown as FormBasedLayer['columns'][0],
         '1',
         {
-          getFieldByName: jest.fn().mockImplementation((field) => {
+          getFieldByName: vi.fn().mockImplementation((field) => {
             if (field) return { type: 'number', name: field };
           }),
         } as unknown as IndexPattern,

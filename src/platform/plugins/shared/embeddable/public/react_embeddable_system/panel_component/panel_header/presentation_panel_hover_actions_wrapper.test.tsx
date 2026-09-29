@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useEffect } from 'react';
 import '@testing-library/jest-dom';
 import { render, screen, act } from '@testing-library/react';
@@ -15,11 +17,14 @@ import { BehaviorSubject } from 'rxjs';
 import type { DefaultPresentationPanelApi } from '../types';
 import { PresentationPanelHoverActionsWrapper } from './presentation_panel_hover_actions_wrapper';
 
-jest.mock('./presentation_panel_hover_actions', () => ({
-  PresentationPanelHoverActions: () => (
-    <div data-test-subj="default-hover-actions">Default hover actions</div>
-  ),
-}));
+vi.mock('./presentation_panel_hover_actions', () => {
+      const mocked = {
+      PresentationPanelHoverActions: () => (
+        <div data-test-subj="default-hover-actions">Default hover actions</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('PresentationPanelHoverActionsWrapper', () => {
   const renderWithTheme = (component: React.ReactElement) => {
@@ -58,8 +63,8 @@ describe('PresentationPanelHoverActionsWrapper', () => {
     renderWithTheme(
       <PresentationPanelHoverActionsWrapper
         api={api}
-        getActions={jest.fn()}
-        setDragHandle={jest.fn()}
+        getActions={vi.fn()}
+        setDragHandle={vi.fn()}
       >
         <Child />
       </PresentationPanelHoverActionsWrapper>

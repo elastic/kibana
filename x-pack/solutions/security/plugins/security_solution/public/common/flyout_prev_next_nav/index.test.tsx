@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { FlyoutPrevNextNav } from '.';
@@ -12,8 +14,8 @@ import { FlyoutPrevNextNav } from '.';
 const baseNavigation = {
   hasPrevious: true,
   hasNext: true,
-  goToPrevious: jest.fn(),
-  goToNext: jest.fn(),
+  goToPrevious: vi.fn(),
+  goToNext: vi.fn(),
 };
 
 const renderNav = (navigationOverrides = {}, isDisabled = false) =>
@@ -26,14 +28,14 @@ const renderNav = (navigationOverrides = {}, isDisabled = false) =>
 
 describe('FlyoutPrevNextNav', () => {
   it('should move the user to the previous item on click', () => {
-    const goToPrevious = jest.fn();
+    const goToPrevious = vi.fn();
     const { getByTestId } = renderNav({ goToPrevious });
     fireEvent.click(getByTestId('flyoutPrevNextNavPreviousButton'));
     expect(goToPrevious).toHaveBeenCalled();
   });
 
   it('should move the user to the next item on click', () => {
-    const goToNext = jest.fn();
+    const goToNext = vi.fn();
     const { getByTestId } = renderNav({ goToNext });
     fireEvent.click(getByTestId('flyoutPrevNextNavNextButton'));
     expect(goToNext).toHaveBeenCalled();

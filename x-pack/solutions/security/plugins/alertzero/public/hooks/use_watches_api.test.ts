@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { notifyWorkerUpdateError } from './use_workers_api';
 
@@ -19,7 +21,7 @@ describe('notifyWorkerUpdateError', () => {
   const toasts = coreMock.createStart().notifications.toasts;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('warns on 409 without a stack toast', () => {

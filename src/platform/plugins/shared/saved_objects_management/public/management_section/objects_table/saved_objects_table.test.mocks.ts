@@ -7,15 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const saveAsMock = jest.fn();
-jest.doMock('@elastic/filesaver', () => ({
+import { vi } from 'vitest';
+import type { LoDashStatic } from 'lodash';
+
+export const saveAsMock = vi.fn();
+vi.doMock('@elastic/filesaver', () => ({
   saveAs: saveAsMock,
 }));
 
-jest.doMock('lodash', () => {
-  const original = jest.requireActual('lodash');
+vi.doMock('lodash', async () => {
+  // lodash is CommonJS: its namespace only exposes `default`, so spreading it would drop every helper.
+  const { default: original } = await vi.importActual<{ default: LoDashStatic }>('lodash');
 
-  return {
+  const mocked = {
     ...original,
     debounce: (func: Function) => {
       function debounced(this: any, ...args: any[]) {
@@ -24,48 +28,49 @@ jest.doMock('lodash', () => {
       return debounced;
     },
   };
+  return { ...mocked, default: mocked };
 });
 
-export const findObjectsMock = jest.fn();
-jest.doMock('../../lib/find_objects', () => ({
+export const findObjectsMock = vi.fn();
+vi.doMock('../../lib/find_objects', () => ({
   findObjects: findObjectsMock,
 }));
 
-export const fetchExportObjectsMock = jest.fn();
-jest.doMock('../../lib/fetch_export_objects', () => ({
+export const fetchExportObjectsMock = vi.fn();
+vi.doMock('../../lib/fetch_export_objects', () => ({
   fetchExportObjects: fetchExportObjectsMock,
 }));
 
-export const fetchExportByTypeAndSearchMock = jest.fn();
-jest.doMock('../../lib/fetch_export_by_type_and_search', () => ({
+export const fetchExportByTypeAndSearchMock = vi.fn();
+vi.doMock('../../lib/fetch_export_by_type_and_search', () => ({
   fetchExportByTypeAndSearch: fetchExportByTypeAndSearchMock,
 }));
 
-export const extractExportDetailsMock = jest.fn();
-jest.doMock('../../lib/extract_export_details', () => ({
+export const extractExportDetailsMock = vi.fn();
+vi.doMock('../../lib/extract_export_details', () => ({
   extractExportDetails: extractExportDetailsMock,
 }));
 
-jest.doMock('./components/header', () => ({
+vi.doMock('./components/header', () => ({
   Header: () => 'Header',
 }));
 
-export const getSavedObjectCountsMock = jest.fn();
-jest.doMock('../../lib/get_saved_object_counts', () => ({
+export const getSavedObjectCountsMock = vi.fn();
+vi.doMock('../../lib/get_saved_object_counts', () => ({
   getSavedObjectCounts: getSavedObjectCountsMock,
 }));
 
-export const getRelationshipsMock = jest.fn();
-jest.doMock('../../lib/get_relationships', () => ({
+export const getRelationshipsMock = vi.fn();
+vi.doMock('../../lib/get_relationships', () => ({
   getRelationships: getRelationshipsMock,
 }));
 
-export const bulkGetObjectsMock = jest.fn();
-jest.doMock('../../lib/bulk_get_objects', () => ({
+export const bulkGetObjectsMock = vi.fn();
+vi.doMock('../../lib/bulk_get_objects', () => ({
   bulkGetObjects: bulkGetObjectsMock,
 }));
 
-export const bulkDeleteObjectsMock = jest.fn();
-jest.doMock('../../lib/bulk_delete_objects', () => ({
+export const bulkDeleteObjectsMock = vi.fn();
+vi.doMock('../../lib/bulk_delete_objects', () => ({
   bulkDeleteObjects: bulkDeleteObjectsMock,
 }));

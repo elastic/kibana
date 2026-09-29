@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getByTestId, fireEvent, getByText, act, waitFor } from '@testing-library/react';
 import type { MemoryHistory } from 'history';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
@@ -64,17 +66,17 @@ function setup({
   } as Partial<CoreStart>);
 
   // mock transaction types
-  jest.spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher').mockReturnValue({
+  vi.spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher').mockReturnValue({
     transactionTypes: serviceTransactionTypes,
     status: useFetcherHook.FETCH_STATUS.SUCCESS,
   });
 
   // mock transaction types
-  jest
+  vi
     .spyOn(useApmDataViewHook, 'useAdHocApmDataView')
     .mockReturnValue({ dataView: undefined, apmIndices: undefined });
 
-  jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
+  vi.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   return renderWithTheme(
     <KibanaReactContext.Provider>
@@ -97,8 +99,8 @@ describe('when transactionType is selected and multiple transaction types are gi
   let history: MemoryHistory;
   beforeEach(() => {
     history = createMemoryHistory();
-    jest.spyOn(history, 'push');
-    jest.spyOn(history, 'replace');
+    vi.spyOn(history, 'push');
+    vi.spyOn(history, 'replace');
   });
 
   it('renders a radio group with transaction types', async () => {

@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAttackInvestigateInTimelineContextMenuItems } from './use_attack_investigate_in_timeline_context_menu_items';
 import { useBulkAttackInvestigateInTimelineItems } from '../bulk_action_items/use_bulk_attack_investigate_in_timeline_items';
 
-jest.mock('../bulk_action_items/use_bulk_attack_investigate_in_timeline_items');
+vi.mock('../bulk_action_items/use_bulk_attack_investigate_in_timeline_items');
 
 const mockUseBulkAttackInvestigateInTimelineItems =
-  useBulkAttackInvestigateInTimelineItems as jest.MockedFunction<
+  useBulkAttackInvestigateInTimelineItems as MockedFunction<
     typeof useBulkAttackInvestigateInTimelineItems
   >;
 
 describe('useAttackInvestigateInTimelineContextMenuItems', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseBulkAttackInvestigateInTimelineItems.mockReturnValue({
       items: [
@@ -27,7 +30,7 @@ describe('useAttackInvestigateInTimelineContextMenuItems', () => {
           key: 'attack-investigate-in-timeline-action-item',
           'data-test-subj': 'attack-investigate-in-timeline-action-item',
           disableOnQuery: true,
-          onClick: jest.fn(),
+          onClick: vi.fn(),
         },
       ],
       panels: [],
@@ -67,7 +70,7 @@ describe('useAttackInvestigateInTimelineContextMenuItems', () => {
   });
 
   it('should pass closePopover to useBulkAttackInvestigateInTimelineItems', () => {
-    const closePopover = jest.fn();
+    const closePopover = vi.fn();
 
     renderHook(() =>
       useAttackInvestigateInTimelineContextMenuItems({

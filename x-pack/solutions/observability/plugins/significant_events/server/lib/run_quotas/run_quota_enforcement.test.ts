@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RunQuotaGroup } from '../../../common/run_quotas';
 import { consumeRunQuota } from './consume';
@@ -137,11 +139,11 @@ const createRepository = () => {
 
 describe('run quota admission behavior', () => {
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('counts allowed attempts while enforcement is disabled', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
     const repository = createRepository();
 
     await expect(
@@ -155,7 +157,7 @@ describe('run quota admission behavior', () => {
   });
 
   it('does not lose concurrent increments when a limit is unlimited', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
     const repository = createRepository();
     await patchRunQuotaSettings(repository.client, {
       enabled: true,
@@ -176,7 +178,7 @@ describe('run quota admission behavior', () => {
   });
 
   it('allows below a finite limit and denies at the limit without incrementing', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
     const repository = createRepository();
     await patchRunQuotaSettings(repository.client, {
       enabled: true,
@@ -197,7 +199,7 @@ describe('run quota admission behavior', () => {
   });
 
   it('denies investigations at a finite limit without incrementing', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
     const repository = createRepository();
     await patchRunQuotaSettings(repository.client, {
       enabled: true,
@@ -221,7 +223,7 @@ describe('run quota admission behavior', () => {
   });
 
   it('never over-grants concurrent attempts competing for the final slot', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
     const repository = createRepository();
     await patchRunQuotaSettings(repository.client, {
       enabled: true,
@@ -239,10 +241,10 @@ describe('run quota admission behavior', () => {
   });
 
   it('keeps the captured UTC date stable across a conflict retry', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-08-31T23:59:59.999Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2026-08-31T23:59:59.999Z'));
     const repository = createRepository();
     repository.onNextCreate((type, id) => {
-      jest.setSystemTime(new Date('2026-09-01T00:00:00.000Z'));
+      vi.setSystemTime(new Date('2026-09-01T00:00:00.000Z'));
       expect(type).toBe(RUN_QUOTA_LEDGER_SO_TYPE);
       expect(id).toBe(getRunQuotaLedgerId('2026-08-31', 'detection'));
       repository.seedLedger('2026-08-31', 'detection', 0);
@@ -257,11 +259,11 @@ describe('run quota admission behavior', () => {
   });
 
   it('starts a new ledger after UTC rollover', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-08-31T23:59:59.999Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2026-08-31T23:59:59.999Z'));
     const repository = createRepository();
 
     await consumeRunQuota({ internalRepository: repository.client, group: 'detection' });
-    jest.setSystemTime(new Date('2026-09-01T00:00:00.000Z'));
+    vi.setSystemTime(new Date('2026-09-01T00:00:00.000Z'));
     await consumeRunQuota({ internalRepository: repository.client, group: 'detection' });
 
     await expect(repository.count('2026-08-31', 'detection')).resolves.toBe(1);
@@ -269,7 +271,7 @@ describe('run quota admission behavior', () => {
   });
 
   it('increments ledger counts beyond 10,000', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
     const repository = createRepository();
     await patchRunQuotaSettings(repository.client, {
       enabled: true,
@@ -284,7 +286,7 @@ describe('run quota admission behavior', () => {
   });
 
   it('propagates settings reads and ledger write failures', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2026-08-31T12:00:00.000Z'));
     const settingsFailure = createRepository();
     settingsFailure.failNextGet(new Error('settings unavailable'));
 

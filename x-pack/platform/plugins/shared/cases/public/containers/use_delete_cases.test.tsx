@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 
@@ -14,21 +17,21 @@ import { useToasts } from '../common/lib/kibana';
 import { casesQueriesKeys } from './constants';
 import { TestProviders, createTestQueryClient } from '../common/mock';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
 describe('useDeleteCases', () => {
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
+  const addSuccess = vi.fn();
+  const addError = vi.fn();
 
-  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+  (useToasts as Mock).mockReturnValue({ addSuccess, addError });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'deleteCases');
+    const spy = vi.spyOn(api, 'deleteCases');
     const { result } = renderHook(() => useDeleteCases(), {
       wrapper: TestProviders,
     });
@@ -42,7 +45,7 @@ describe('useDeleteCases', () => {
 
   it('invalidates the queries correctly', async () => {
     const queryClient = createTestQueryClient();
-    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const queryClientSpy = vi.spyOn(queryClient, 'invalidateQueries');
     const { result } = renderHook(() => useDeleteCases(), {
       wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
     });
@@ -77,7 +80,7 @@ describe('useDeleteCases', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    jest.spyOn(api, 'deleteCases').mockRejectedValue(new Error('useDeleteCases: Test error'));
+    vi.spyOn(api, 'deleteCases').mockRejectedValue(new Error('useDeleteCases: Test error'));
 
     const { result } = renderHook(() => useDeleteCases(), {
       wrapper: TestProviders,

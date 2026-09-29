@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EsqlEditorField } from './esql_editor_field';
@@ -17,7 +19,7 @@ const mockField = {
     query: { query: 'initial query', language: 'esql' },
     saved_id: null,
   },
-  setValue: jest.fn(),
+  setValue: vi.fn(),
 } as unknown as FieldHook<FieldValueQueryBar>;
 
 describe('EsqlEditorField', () => {

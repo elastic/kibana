@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { DestinationRow } from './destination_row';
 
-jest.mock('../workflow_destination_link', () => ({
-  WorkflowDestinationLink: ({ id }: { id: string }) => (
-    <span data-test-subj="mockWorkflowLink">{id}</span>
-  ),
-}));
+vi.mock('../workflow_destination_link', () => {
+      const mocked = {
+      WorkflowDestinationLink: ({ id }: { id: string }) => (
+        <span data-test-subj="mockWorkflowLink">{id}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DestinationRow', () => {
   it('renders a workflow destination with WorkflowDestinationLink', () => {

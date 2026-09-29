@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { mockEncryptedSO } from '../synthetics_service/utils/mocks';
@@ -12,7 +15,7 @@ import { DeployPrivateLocationMonitors } from './deploy_private_location_monitor
 import type { SyntheticsServerSetup } from '../types';
 import { MonitorConfigRepository } from '../services/monitor_config_repository';
 
-jest.mock('../services/monitor_config_repository');
+vi.mock('../services/monitor_config_repository');
 
 const mockSoClient = savedObjectsRepositoryMock.create();
 const mockEncryptedSo = mockEncryptedSO();
@@ -20,8 +23,8 @@ const mockLogger = loggerMock.create();
 
 const mockSyntheticsMonitorClient: any = {
   syntheticsService: {
-    getSyntheticsParams: jest.fn().mockResolvedValue({}),
-    getMaintenanceWindows: jest.fn().mockResolvedValue([]),
+    getSyntheticsParams: vi.fn().mockResolvedValue({}),
+    getMaintenanceWindows: vi.fn().mockResolvedValue([]),
   },
 };
 
@@ -40,7 +43,7 @@ const mockServerSetup = {
 
 describe('DeployPrivateLocationMonitors.getAllMonitorConfigs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call MonitorConfigRepository.findDecryptedMonitors with filter when privateLocationId provided', async () => {
@@ -52,9 +55,9 @@ describe('DeployPrivateLocationMonitors.getAllMonitorConfigs', () => {
       },
     ];
     // Mock MonitorConfigRepository implementation
-    (MonitorConfigRepository as unknown as jest.Mock).mockImplementation(() => {
+    (MonitorConfigRepository as unknown as Mock).mockImplementation(() => {
       return {
-        findDecryptedMonitors: jest.fn().mockResolvedValue(monitorsMock),
+        findDecryptedMonitors: vi.fn().mockResolvedValue(monitorsMock),
       };
     });
 
@@ -72,7 +75,7 @@ describe('DeployPrivateLocationMonitors.getAllMonitorConfigs', () => {
 
     // Ensure MonitorConfigRepository was constructed and its finder was called with filter containing the privateLocationId
     expect(MonitorConfigRepository).toHaveBeenCalledWith(mockSoClient, mockEncryptedSo.getClient());
-    const repoInstance = (MonitorConfigRepository as unknown as jest.Mock).mock.results[0].value;
+    const repoInstance = (MonitorConfigRepository as unknown as Mock).mock.results[0].value;
     expect(repoInstance.findDecryptedMonitors).toHaveBeenCalledWith(
       expect.objectContaining({
         spaceId: 'space1',
@@ -102,14 +105,14 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
     editMonitors,
   }: {
     pages: string[][];
-    editMonitors: jest.Mock;
+    editMonitors: Mock;
   }) => {
-    const close = jest.fn().mockResolvedValue(undefined);
+    const close = vi.fn().mockResolvedValue(undefined);
     // one finder per maintenance window; monitor ids are unique per finder because
     // the production code skips monitors already handled for an earlier window
     let finderCount = 0;
     const encryptedClient = {
-      createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockImplementation(() => {
+      createPointInTimeFinderDecryptedAsInternalUser: vi.fn().mockImplementation(() => {
         const finderId = finderCount++;
         return Promise.resolve({
           find: () =>
@@ -134,11 +137,11 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
     } as any);
 
     // keep the test focused on the failed-create control flow, not on monitor formatting
-    jest.spyOn(deployer, 'mixParamsWithMonitors').mockImplementation((monitors: any) => ({
+    vi.spyOn(deployer, 'mixParamsWithMonitors').mockImplementation((monitors: any) => ({
       configsBySpaces: { space1: monitors },
       monitorSpaceIds: new Set(['space1']),
     }));
-    jest
+    vi
       .spyOn(deployer, 'parseLocations')
       .mockReturnValue({ privateLocations, publicLocations: [] } as any);
 
@@ -149,16 +152,16 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
   const withoutFailures = { failedUpdates: [], failedCreates: [] };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSoClient.bulkUpdate.mockResolvedValue({ saved_objects: [] } as any);
   });
 
   describe('syncAllPackagePolicies', () => {
     it('reports failed creates to the caller instead of throwing', async () => {
-      const editMonitors = jest.fn().mockResolvedValue(withFailedCreates);
+      const editMonitors = vi.fn().mockResolvedValue(withFailedCreates);
       const { deployer } = buildDeployer({ pages: [], editMonitors });
 
-      jest.spyOn(deployer, 'getAllMonitorConfigs').mockResolvedValue({
+      vi.spyOn(deployer, 'getAllMonitorConfigs').mockResolvedValue({
         configsBySpaces: { space1: [{ id: 'm1' }] },
         monitorSpaceIds: new Set(['space1']),
         paramsBySpace: {},
@@ -175,10 +178,10 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
     });
 
     it('reports no failures when every create succeeds', async () => {
-      const editMonitors = jest.fn().mockResolvedValue(withoutFailures);
+      const editMonitors = vi.fn().mockResolvedValue(withoutFailures);
       const { deployer } = buildDeployer({ pages: [], editMonitors });
 
-      jest.spyOn(deployer, 'getAllMonitorConfigs').mockResolvedValue({
+      vi.spyOn(deployer, 'getAllMonitorConfigs').mockResolvedValue({
         configsBySpaces: { space1: [{ id: 'm1' }] },
         monitorSpaceIds: new Set(['space1']),
         paramsBySpace: {},
@@ -205,7 +208,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
       });
 
     it('keeps syncing later pages when an earlier page has failed creates', async () => {
-      const editMonitors = jest
+      const editMonitors = vi
         .fn()
         .mockResolvedValueOnce(withFailedCreates)
         .mockResolvedValueOnce(withoutFailures);
@@ -220,7 +223,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
     });
 
     it('closes the point-in-time finder when a page has failed creates', async () => {
-      const editMonitors = jest.fn().mockResolvedValue(withFailedCreates);
+      const editMonitors = vi.fn().mockResolvedValue(withFailedCreates);
       const { deployer, close } = buildDeployer({ pages: [['m1']], editMonitors });
 
       await syncForMws(deployer, ['mw-1']);
@@ -229,7 +232,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
     });
 
     it('keeps processing later maintenance windows when one has failed creates', async () => {
-      const editMonitors = jest
+      const editMonitors = vi
         .fn()
         .mockResolvedValueOnce(withFailedCreates)
         .mockResolvedValueOnce(withoutFailures);
@@ -241,7 +244,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
     });
 
     it('still strips a missing maintenance window from monitors when creates fail', async () => {
-      const editMonitors = jest.fn().mockResolvedValue(withFailedCreates);
+      const editMonitors = vi.fn().mockResolvedValue(withFailedCreates);
       const { deployer } = buildDeployer({ pages: [['m1']], editMonitors });
 
       await deployer.syncPackagePoliciesForMws({
@@ -255,7 +258,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
     });
 
     it('logs the failed creates so they are still visible', async () => {
-      const editMonitors = jest.fn().mockResolvedValue(withFailedCreates);
+      const editMonitors = vi.fn().mockResolvedValue(withFailedCreates);
       const { deployer } = buildDeployer({ pages: [['m1']], editMonitors });
 
       await syncForMws(deployer, ['mw-1']);
@@ -269,7 +272,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
 
 describe('DeployPrivateLocationMonitors.mixParamsWithMonitors', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('injects params shared across all spaces into monitors whose space has no space-specific params', () => {

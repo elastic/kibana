@@ -5,31 +5,43 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { getDefaultValidationStepDefinition } from './default_validation_step';
 import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 import { filterHallucinatedAlerts } from '@kbn/discoveries/impl/attack_discovery/hallucination_detection';
 
-jest.mock('@kbn/discoveries/impl/lib/helpers/get_space_id', () => ({
-  getSpaceId: jest.fn(),
-}));
+vi.mock('@kbn/discoveries/impl/lib/helpers/get_space_id', () => {
+      const mocked = {
+      getSpaceId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/discoveries/impl/attack_discovery/hallucination_detection', () => ({
-  ...jest.requireActual('@kbn/discoveries/impl/attack_discovery/hallucination_detection'),
-  filterHallucinatedAlerts: jest.fn(),
-}));
+vi.mock('@kbn/discoveries/impl/attack_discovery/hallucination_detection', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/discoveries/impl/attack_discovery/hallucination_detection')),
+      filterHallucinatedAlerts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockUuid = 'mock-generated-uuid';
-jest.mock('uuid', () => ({
-  v4: () => mockUuid,
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => mockUuid,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getDefaultValidationStepDefinition', () => {
   let mockLogger: ReturnType<typeof loggerMock.create>;
-  let mockAuthenticate: jest.Mock;
-  let mockAsScoped: jest.Mock;
-  let mockGetStartServices: jest.Mock;
+  let mockAuthenticate: Mock;
+  let mockAsScoped: Mock;
+  let mockGetStartServices: Mock;
   let stepDefinition: ReturnType<typeof getDefaultValidationStepDefinition>;
 
   const mockRequest = { headers: { authorization: 'ApiKey abc' } };
@@ -68,28 +80,28 @@ describe('getDefaultValidationStepDefinition', () => {
         getFakeRequest: () => mockRequest,
       },
       input,
-      logger: { error: jest.fn(), info: jest.fn() },
+      logger: { error: vi.fn(), info: vi.fn() },
     } as unknown as StepHandlerContext<unknown>);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockLogger = loggerMock.create();
-    mockAuthenticate = jest.fn().mockResolvedValue({ profile_uid: 'p1', username: 'u1' });
-    mockAsScoped = jest.fn().mockReturnValue({
+    mockAuthenticate = vi.fn().mockResolvedValue({ profile_uid: 'p1', username: 'u1' });
+    mockAsScoped = vi.fn().mockReturnValue({
       asCurrentUser: {
         security: { authenticate: mockAuthenticate },
-        search: jest.fn(),
+        search: vi.fn(),
       },
     });
-    mockGetStartServices = jest.fn().mockResolvedValue({
+    mockGetStartServices = vi.fn().mockResolvedValue({
       coreStart: {
         elasticsearch: { client: { asScoped: mockAsScoped } },
       } as unknown,
       pluginsStart: {
         actions: {
-          getActionsClientWithRequest: jest.fn().mockResolvedValue({
-            get: jest.fn().mockResolvedValue({
+          getActionsClientWithRequest: vi.fn().mockResolvedValue({
+            get: vi.fn().mockResolvedValue({
               actionTypeId: '.gen',
               name: 'Connector 1',
             }),
@@ -104,9 +116,9 @@ describe('getDefaultValidationStepDefinition', () => {
       logger: mockLogger,
     });
 
-    (getSpaceId as jest.Mock).mockReturnValue('default');
+    (getSpaceId as Mock).mockReturnValue('default');
 
-    (filterHallucinatedAlerts as jest.Mock).mockImplementation(({ attackDiscoveries }) =>
+    (filterHallucinatedAlerts as Mock).mockImplementation(({ attackDiscoveries }) =>
       Promise.resolve(attackDiscoveries)
     );
   });
@@ -348,7 +360,7 @@ describe('getDefaultValidationStepDefinition', () => {
     });
 
     it('returns empty array when all discoveries are filtered out', async () => {
-      (filterHallucinatedAlerts as jest.Mock).mockResolvedValue([]);
+      (filterHallucinatedAlerts as Mock).mockResolvedValue([]);
 
       const context = createContext();
 
@@ -358,7 +370,7 @@ describe('getDefaultValidationStepDefinition', () => {
     });
 
     it('returns hallucinated_alert_ids filter_reason when all filtered', async () => {
-      (filterHallucinatedAlerts as jest.Mock).mockResolvedValue([]);
+      (filterHallucinatedAlerts as Mock).mockResolvedValue([]);
 
       const context = createContext();
 
@@ -369,7 +381,7 @@ describe('getDefaultValidationStepDefinition', () => {
     });
 
     it('logs info message when all discoveries are filtered out', async () => {
-      (filterHallucinatedAlerts as jest.Mock).mockResolvedValue([]);
+      (filterHallucinatedAlerts as Mock).mockResolvedValue([]);
 
       const context = createContext();
 

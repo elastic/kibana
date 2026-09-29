@@ -5,21 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useStreamingContext } from '../context/streaming/streaming_context';
 import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
 
-jest.mock('../context/conversation/use_conversation_id', () => ({
-  useConversationId: jest.fn(),
-}));
+vi.mock('../context/conversation/use_conversation_id', () => {
+      const mocked = {
+      useConversationId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../context/streaming/streaming_context', () => ({
-  useStreamingContext: jest.fn(),
-}));
+vi.mock('../context/streaming/streaming_context', () => {
+      const mocked = {
+      useStreamingContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseConversationId = jest.mocked(useConversationId);
-const mockUseStreamingContext = jest.mocked(useStreamingContext);
+const mockUseConversationId = vi.mocked(useConversationId);
+const mockUseStreamingContext = vi.mocked(useStreamingContext);
 
 const setStreamingConversationIds = (ids: string[]) => {
   mockUseStreamingContext.mockReturnValue({
@@ -29,7 +37,7 @@ const setStreamingConversationIds = (ids: string[]) => {
 
 describe('useIsCurrentConversationStreaming', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('is streaming when the current conversation has a stream in flight', () => {

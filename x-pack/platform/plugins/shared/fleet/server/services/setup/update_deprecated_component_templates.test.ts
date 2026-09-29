@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { updateDeprecatedComponentTemplates } from './update_deprecated_component_templates';
 
-jest.mock('..', () => ({
-  appContextService: {
-    getLogger: () => ({
-      debug: jest.fn(),
-    }),
-  },
-}));
+vi.mock('..', () => {
+      const mocked = {
+      appContextService: {
+        getLogger: () => ({
+          debug: vi.fn(),
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('updateDeprecatedComponentTemplates', () => {
   it('should update deprecated component templates', async () => {
     const esClientMock: any = {
       cluster: {
-        getComponentTemplate: jest.fn().mockResolvedValue({
+        getComponentTemplate: vi.fn().mockResolvedValue({
           component_templates: [
             {
               name: 'metrics-apm.app@package',
@@ -54,7 +59,7 @@ describe('updateDeprecatedComponentTemplates', () => {
             },
           ],
         }),
-        putComponentTemplate: jest.fn(),
+        putComponentTemplate: vi.fn(),
       },
     };
 

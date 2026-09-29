@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type {
   SavedObjectsModelVersion,
   SavedObjectsModelChange,
@@ -29,7 +31,7 @@ describe('getVersionAddedMappings', () => {
     const version = createVersion([
       {
         type: 'data_backfill',
-        backfillFn: jest.fn(),
+        backfillFn: vi.fn(),
       },
     ]);
     expect(getVersionAddedMappings(version)).toEqual({});
@@ -39,7 +41,7 @@ describe('getVersionAddedMappings', () => {
     const version = createVersion([
       {
         type: 'data_backfill',
-        backfillFn: jest.fn(),
+        backfillFn: vi.fn(),
       },
       {
         type: 'mappings_addition',
@@ -76,7 +78,7 @@ describe('getVersionAddedMappings', () => {
       },
       {
         type: 'data_backfill',
-        backfillFn: jest.fn(),
+        backfillFn: vi.fn(),
       },
       {
         type: 'mappings_addition',
@@ -111,7 +113,7 @@ describe('getVersionAddedFields', () => {
     const version = createVersion([
       {
         type: 'data_backfill',
-        backfillFn: jest.fn(),
+        backfillFn: vi.fn(),
       },
     ]);
     expect(getVersionAddedFields(version)).toEqual([]);
@@ -121,7 +123,7 @@ describe('getVersionAddedFields', () => {
     const version = createVersion([
       {
         type: 'data_backfill',
-        backfillFn: jest.fn(),
+        backfillFn: vi.fn(),
       },
       {
         type: 'mappings_addition',
@@ -152,7 +154,7 @@ describe('getVersionAddedFields', () => {
       },
       {
         type: 'data_backfill',
-        backfillFn: jest.fn(),
+        backfillFn: vi.fn(),
       },
       {
         type: 'mappings_addition',

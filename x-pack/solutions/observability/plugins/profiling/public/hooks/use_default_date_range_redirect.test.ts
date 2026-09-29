@@ -5,49 +5,55 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import qs from 'query-string';
 
-jest.mock('react-router-dom', () => ({
-  useHistory: jest.fn(),
-  useLocation: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: vi.fn(),
+      useLocation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/contexts/profiling_dependencies/use_profiling_dependencies');
+vi.mock('../components/contexts/profiling_dependencies/use_profiling_dependencies');
 
 import { useHistory, useLocation } from 'react-router-dom';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { useDateRangeRedirect } from './use_default_date_range_redirect';
 
 describe('useDateRangeRedirect', () => {
-  const mockReplace = jest.fn();
+  const mockReplace = vi.fn();
   const mockTimePickerTimeDefaults = { from: 'now-15m', to: 'now' };
   const mockTimePickerSharedState = { from: null, to: null };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useHistory as jest.Mock).mockReturnValue({
+    (useHistory as Mock).mockReturnValue({
       replace: mockReplace,
       location: { pathname: '/flamegraphs/flamegraph' },
     });
 
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as Mock).mockReturnValue({
       search: '',
       pathname: '/flamegraphs/flamegraph',
     });
 
-    (useProfilingDependencies as jest.Mock).mockReturnValue({
+    (useProfilingDependencies as Mock).mockReturnValue({
       start: {
         core: {
           uiSettings: {
-            get: jest.fn(() => mockTimePickerTimeDefaults),
+            get: vi.fn(() => mockTimePickerTimeDefaults),
           },
         },
         data: {
           query: {
             timefilter: {
               timefilter: {
-                getTime: jest.fn(() => mockTimePickerSharedState),
+                getTime: vi.fn(() => mockTimePickerSharedState),
               },
             },
           },
@@ -57,7 +63,7 @@ describe('useDateRangeRedirect', () => {
   });
 
   it('should return isDateRangeSet=true when date range is valid', () => {
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as Mock).mockReturnValue({
       search: qs.stringify({
         rangeFrom: '2023-04-18T00:00:00.000Z',
         rangeTo: '2023-04-18T00:05:00.000Z',
@@ -72,7 +78,7 @@ describe('useDateRangeRedirect', () => {
   });
 
   it('should return isDateRangeSet=false when from date is greater than to date', () => {
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as Mock).mockReturnValue({
       search: qs.stringify({
         rangeFrom: '2023-04-18T00:05:00.000Z',
         rangeTo: '2023-04-18T00:00:00.000Z',
@@ -93,7 +99,7 @@ describe('useDateRangeRedirect', () => {
   });
 
   it('should return isDateRangeSet as falsy when date range is not set', () => {
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as Mock).mockReturnValue({
       search: qs.stringify({}),
       pathname: '/flamegraphs/flamegraph',
     });
@@ -104,12 +110,12 @@ describe('useDateRangeRedirect', () => {
   });
 
   it('should return skipDataRangeSet=true when pathname is add-data-instructions', () => {
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as Mock).mockReturnValue({
       search: '',
       pathname: '/add-data-instructions',
     });
 
-    (useHistory as jest.Mock).mockReturnValue({
+    (useHistory as Mock).mockReturnValue({
       replace: mockReplace,
       location: { pathname: '/add-data-instructions' },
     });
@@ -120,7 +126,7 @@ describe('useDateRangeRedirect', () => {
   });
 
   it('should preserve other query parameters when redirecting', () => {
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as Mock).mockReturnValue({
       search: qs.stringify({
         rangeFrom: '2023-04-18T00:05:00.000Z',
         rangeTo: '2023-04-18T00:00:00.000Z',
@@ -145,18 +151,18 @@ describe('useDateRangeRedirect', () => {
 
   it('should use timePickerSharedState when available', () => {
     const mockSharedState = { from: 'now-30m', to: 'now-10m' };
-    (useProfilingDependencies as jest.Mock).mockReturnValue({
+    (useProfilingDependencies as Mock).mockReturnValue({
       start: {
         core: {
           uiSettings: {
-            get: jest.fn(() => mockTimePickerTimeDefaults),
+            get: vi.fn(() => mockTimePickerTimeDefaults),
           },
         },
         data: {
           query: {
             timefilter: {
               timefilter: {
-                getTime: jest.fn(() => mockSharedState),
+                getTime: vi.fn(() => mockSharedState),
               },
             },
           },
@@ -164,7 +170,7 @@ describe('useDateRangeRedirect', () => {
       },
     });
 
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as Mock).mockReturnValue({
       search: qs.stringify({
         rangeFrom: '2023-04-18T00:05:00.000Z',
         rangeTo: '2023-04-18T00:00:00.000Z',

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
@@ -17,7 +20,7 @@ describe('ExecutionContextService', () => {
   let execContext: ExecutionContextSetup;
   let curApp$: BehaviorSubject<string>;
   let execService: ExecutionContextService;
-  let analytics: jest.Mocked<AnalyticsServiceSetup>;
+  let analytics: Mocked<AnalyticsServiceSetup>;
 
   beforeEach(() => {
     analytics = analyticsServiceMock.createAnalyticsServiceSetup();
@@ -165,7 +168,7 @@ describe('ExecutionContextService', () => {
   });
 
   it('context observable fires the context each time it changes', () => {
-    const sub = jest.fn();
+    const sub = vi.fn();
 
     execContext.set({
       type: 'ghf',
@@ -206,7 +209,7 @@ describe('ExecutionContextService', () => {
   });
 
   it('context observable doesnt fires if the context did not change', () => {
-    const sub = jest.fn();
+    const sub = vi.fn();
 
     execContext.set({
       type: 'ghf',
@@ -236,7 +239,7 @@ describe('ExecutionContextService', () => {
   });
 
   it('clear resets context and triggers context observable', () => {
-    const sub = jest.fn();
+    const sub = vi.fn();
 
     execContext.set({
       type: 'ghf',
@@ -338,7 +341,7 @@ describe('ExecutionContextService', () => {
   });
 
   it('stop clears subscriptions', () => {
-    const sub = jest.fn();
+    const sub = vi.fn();
     execContext.context$.subscribe(sub);
     sub.mockReset();
 

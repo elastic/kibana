@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { PluginInitializerContext } from '@kbn/core/server';
 import {} from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -32,13 +35,22 @@ import type { CasesServerSetupDependencies, CasesServerStartDependencies } from 
 import { CasesClientFactory } from './client/factory';
 import { createCasesClientMock } from './client/mocks';
 
-jest.mock('./connectors', () => ({ registerConnectorTypes: jest.fn() }));
-jest.mock('./workflows', () => ({ registerCaseWorkflowSteps: jest.fn() }));
-jest.mock('./agent_builder', () => ({ registerCasesAgentBuilderTools: jest.fn() }));
+vi.mock('./connectors', () => {
+      const mocked = { registerConnectorTypes: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./workflows', () => {
+      const mocked = { registerCaseWorkflowSteps: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./agent_builder', () => {
+      const mocked = { registerCasesAgentBuilderTools: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const { registerConnectorTypes } = jest.requireMock('./connectors');
-const { registerCaseWorkflowSteps } = jest.requireMock('./workflows');
-const { registerCasesAgentBuilderTools } = jest.requireMock('./agent_builder');
+const { registerConnectorTypes } = (await vi.importMock('./connectors'));
+const { registerCaseWorkflowSteps } = (await vi.importMock('./workflows'));
+const { registerCasesAgentBuilderTools } = (await vi.importMock('./agent_builder'));
 
 function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
   return {
@@ -69,8 +81,8 @@ describe('Cases Plugin', () => {
   let plugin: CasePlugin;
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
-  let pluginsSetup: jest.Mocked<CasesServerSetupDependencies>;
-  let pluginsStart: jest.Mocked<CasesServerStartDependencies>;
+  let pluginsSetup: Mocked<CasesServerSetupDependencies>;
+  let pluginsStart: Mocked<CasesServerStartDependencies>;
 
   beforeEach(() => {
     context = coreMock.createPluginInitializerContext<ConfigType>(getConfig());
@@ -90,7 +102,7 @@ describe('Cases Plugin', () => {
           () => ({}),
           {}
         ),
-        registerVisualizationMigration: jest.fn(),
+        registerVisualizationMigration: vi.fn(),
       },
       security: securityMock.createSetup(),
       licensing: licensingMock.createSetup(),
@@ -105,14 +117,14 @@ describe('Cases Plugin', () => {
       features: featuresPluginMock.createStart(),
       security: securityMock.createStart(),
       notifications: notificationsMock.createStart(),
-      ruleRegistry: { getRacClientWithRequest: jest.fn(), alerting: alertsMock.createStart() },
+      ruleRegistry: { getRacClientWithRequest: vi.fn(), alerting: alertsMock.createStart() },
       taskManager: taskManagerMock.createStart(),
       // Cases-analyticsV2 needs the dataViews plugin at start to manage the
       // Cases data view + runtime fields. The flag is off in the test
       // fixture so this mock is never actually called.
       dataViews: {
-        dataViewsServiceFactory: jest.fn(),
-        getScriptedFieldsEnabled: jest.fn().mockReturnValue(false),
+        dataViewsServiceFactory: vi.fn(),
+        getScriptedFieldsEnabled: vi.fn().mockReturnValue(false),
       } as unknown as CasesServerStartDependencies['dataViews'],
     };
   });
@@ -376,7 +388,7 @@ describe('Cases Plugin', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       pluginsSetup.agentBuilder = {} as NonNullable<CasesServerSetupDependencies['agentBuilder']>;
       delete pluginsSetup.cloud;
     });
@@ -432,13 +444,13 @@ describe('Cases Plugin', () => {
 
   describe('client source propagation', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     const request = httpServerMock.createKibanaRequest();
 
     it('passes the correct source for each client path', async () => {
-      const createClient = jest
+      const createClient = vi
         .spyOn(CasesClientFactory.prototype, 'create')
         .mockResolvedValue(createCasesClientMock());
 

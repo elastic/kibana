@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BoolFormat } from './boolean';
 import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 
@@ -14,7 +16,7 @@ describe('Boolean Format', () => {
   let boolean: BoolFormat;
 
   beforeEach(() => {
-    boolean = new BoolFormat({}, jest.fn());
+    boolean = new BoolFormat({}, vi.fn());
   });
 
   [

@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 
 import { EuiThemeProvider } from '@elastic/eui';
@@ -23,7 +25,7 @@ import type { CollapsibleSection } from './types';
 
 describe('GridSectionHeader', () => {
   beforeAll(() => {
-    Element.prototype.scrollIntoView = jest.fn();
+    Element.prototype.scrollIntoView = vi.fn();
   });
 
   const renderGridSectionHeader = (

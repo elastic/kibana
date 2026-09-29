@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/esql/public/kibana_services', () => ({
-  useKibanaServices: jest.fn(() => ({})),
-  untilPluginStartServicesReady: jest.fn(() => new Promise(() => {})),
-}));
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('@kbn/esql/public/kibana_services', () => {
+      const mocked = {
+      useKibanaServices: vi.fn(() => ({})),
+      untilPluginStartServicesReady: vi.fn(() => new Promise(() => {})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 import type { SearchBarProps, SearchBarState } from './search_bar';
@@ -34,7 +40,7 @@ import { kqlPluginMock } from '@kbn/kql/public/mocks';
 const startMock = coreMock.createStart();
 startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
 
-const noop = jest.fn();
+const noop = vi.fn();
 
 const kqlQuery = {
   query: 'response:200',
@@ -61,7 +67,7 @@ function wrapSearchBarInContext(
   };
 
   const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
-  (dataViewEditorMock.userPermissions.editDataView as jest.Mock).mockReturnValue(true);
+  (dataViewEditorMock.userPermissions.editDataView as Mock).mockReturnValue(true);
 
   const backgroundSearchEnabled = options?.backgroundSearch?.enabled ?? false;
   const initialSessionState = options?.backgroundSearch?.initialState ?? SearchSessionState.None;
@@ -83,7 +89,7 @@ function wrapSearchBarInContext(
     },
     chrome: {
       ...startMock.chrome,
-      getActiveSolutionNavId$: jest.fn().mockReturnValue(new BehaviorSubject('oblt')),
+      getActiveSolutionNavId$: vi.fn().mockReturnValue(new BehaviorSubject('oblt')),
     },
     kql: kqlPluginMock.createStartContract(),
     uiSettings: startMock.uiSettings,
@@ -120,12 +126,12 @@ function wrapSearchBarInContext(
                 },
               ],
             }),
-          getSavedQueryCount: jest.fn(),
+          getSavedQueryCount: vi.fn(),
         },
       },
       dataViewEditor: dataViewEditorMock,
       dataViews: {
-        getIdsWithTitle: jest.fn(() => []),
+        getIdsWithTitle: vi.fn(() => []),
       },
     },
   };
@@ -143,7 +149,7 @@ function wrapSearchBarInContext(
 
 describe('SearchBar', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Should render query bar when no options provided (in reality - timepicker)', async () => {
@@ -359,7 +365,7 @@ describe('SearchBar', () => {
 
   it('Should call onQuerySubmit with isUpdate prop as false when dateRange is provided', async () => {
     const user = userEvent.setup();
-    const mockedOnQuerySubmit = jest.fn();
+    const mockedOnQuerySubmit = vi.fn();
     render(
       wrapSearchBarInContext({
         indexPatterns: [stubIndexPattern],
@@ -388,7 +394,7 @@ describe('SearchBar', () => {
 
   it('Should call onQuerySubmit with isUpdate prop as true when dateRange is not provided', async () => {
     const user = userEvent.setup();
-    const mockedOnQuerySubmit = jest.fn();
+    const mockedOnQuerySubmit = vi.fn();
     render(
       wrapSearchBarInContext({
         indexPatterns: [stubIndexPattern],
@@ -461,11 +467,11 @@ describe('SearchBar', () => {
 
   describe('draft', () => {
     beforeAll(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should prefill with the draft query if provided', async () => {
@@ -474,7 +480,7 @@ describe('SearchBar', () => {
         dateRangeFrom: 'now-30m',
         dateRangeTo: 'now-10m',
       };
-      const onDraftChange = jest.fn();
+      const onDraftChange = vi.fn();
       render(
         wrapSearchBarInContext({
           indexPatterns: [stubIndexPattern],
@@ -491,7 +497,7 @@ describe('SearchBar', () => {
         expect(textarea).toHaveValue(draft.query.query);
       });
 
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
       expect(onDraftChange).not.toHaveBeenCalled(); // no change to draft
     });
 
@@ -501,7 +507,7 @@ describe('SearchBar', () => {
         dateRangeFrom: 'now-30m',
         dateRangeTo: 'now-10m',
       };
-      const onDraftChange = jest.fn();
+      const onDraftChange = vi.fn();
       render(
         wrapSearchBarInContext({
           indexPatterns: [stubIndexPattern],
@@ -518,7 +524,7 @@ describe('SearchBar', () => {
         expect(textarea).toHaveValue(kqlQuery.query);
       });
 
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
       expect(onDraftChange).toHaveBeenCalledWith(undefined);
     });
   });

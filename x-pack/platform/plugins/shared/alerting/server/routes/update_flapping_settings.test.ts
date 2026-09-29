@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
@@ -14,12 +17,15 @@ import { updateFlappingSettingsRoute } from './update_flapping_settings';
 
 let rulesSettingsClient: RulesSettingsClientMock;
 
-jest.mock('../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   rulesSettingsClient = rulesSettingsClientMock.create();
 });
 
@@ -49,8 +55,8 @@ describe('updateFlappingSettingsRoute', () => {
       }
     `);
 
-    (rulesSettingsClient.flapping().get as jest.Mock).mockResolvedValue(mockFlappingSettings);
-    (rulesSettingsClient.flapping().update as jest.Mock).mockResolvedValue(mockFlappingSettings);
+    (rulesSettingsClient.flapping().get as Mock).mockResolvedValue(mockFlappingSettings);
+    (rulesSettingsClient.flapping().update as Mock).mockResolvedValue(mockFlappingSettings);
 
     const updateResult = {
       enabled: false,
@@ -69,7 +75,7 @@ describe('updateFlappingSettingsRoute', () => {
     await handler(context, req, res);
 
     expect(rulesSettingsClient.flapping().update).toHaveBeenCalledTimes(1);
-    expect((rulesSettingsClient.flapping().update as jest.Mock).mock.calls[0])
+    expect((rulesSettingsClient.flapping().update as Mock).mock.calls[0])
       .toMatchInlineSnapshot(`
       Array [
         Object {

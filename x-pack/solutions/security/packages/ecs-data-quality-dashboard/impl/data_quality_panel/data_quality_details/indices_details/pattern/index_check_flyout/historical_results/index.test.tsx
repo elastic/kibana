@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { HistoricalResults } from '.';
 import { screen, render, within, act, waitFor } from '@testing-library/react';
@@ -77,7 +79,7 @@ describe('HistoricalResults', () => {
     it(`should invoke fetchHistoricalResults with ${outcome} outcome, from: 0 and remaining fetch query opts`, async () => {
       const indexName = 'test';
       const historicalResult = getHistoricalResultStub(indexName);
-      const fetchHistoricalResults = jest.fn();
+      const fetchHistoricalResults = vi.fn();
       render(
         <TestExternalProviders>
           <TestDataQualityProviders>
@@ -155,7 +157,7 @@ describe('HistoricalResults', () => {
       it('should invoke fetchHistoricalResults with new start and end dates, from: 0 and remaining fetch query opts', async () => {
         const indexName = 'test';
         const historicalResult = getHistoricalResultStub(indexName);
-        const fetchHistoricalResults = jest.fn();
+        const fetchHistoricalResults = vi.fn();
         render(
           <TestExternalProviders>
             <TestDataQualityProviders>
@@ -325,7 +327,7 @@ describe('HistoricalResults', () => {
       it('should invoke fetchHistoricalResults with new from and remaining fetch query opts', async () => {
         const indexName = 'test';
         const results = generateHistoricalResultsStub(indexName, 11);
-        const fetchHistoricalResults = jest.fn();
+        const fetchHistoricalResults = vi.fn();
         render(
           <TestExternalProviders>
             <TestDataQualityProviders>
@@ -369,7 +371,7 @@ describe('HistoricalResults', () => {
       it('should invoke fetchHistoricalResults with new size, from: 0 and remaining fetch query opts', async () => {
         const indexName = 'test';
         const results = generateHistoricalResultsStub(indexName, 11);
-        const fetchHistoricalResults = jest.fn();
+        const fetchHistoricalResults = vi.fn();
         render(
           <TestExternalProviders>
             <TestDataQualityProviders>

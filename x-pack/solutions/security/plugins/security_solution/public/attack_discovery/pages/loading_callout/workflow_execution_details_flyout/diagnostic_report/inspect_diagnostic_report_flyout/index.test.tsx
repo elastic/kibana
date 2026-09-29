@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { InspectDiagnosticReportFlyout } from '.';
 
-const mockOnClose = jest.fn();
+const mockOnClose = vi.fn();
 
 const testReport = `# Attack Discovery Diagnostic Report
 
@@ -23,7 +25,7 @@ const defaultProps = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('InspectDiagnosticReportFlyout', () => {

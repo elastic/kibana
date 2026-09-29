@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { rulesClientContextMock } from '../../../../rules_client/rules_client.mock';
 import { RulesClient } from '../../../../rules_client';
 
@@ -13,20 +15,20 @@ describe('listRuleTypes', () => {
   let rulesClient: RulesClient;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     rulesClient = new RulesClient(rulesClientContext);
 
-    rulesClientContext.ruleTypeRegistry.list = jest.fn().mockReturnValue(
+    rulesClientContext.ruleTypeRegistry.list = vi.fn().mockReturnValue(
       new Map([
         ['apm.anomaly', { name: 'Anomaly' }],
         ['.es-query', { name: 'ES rule type' }],
       ])
     );
-    rulesClientContext.ruleTypeRegistry.has = jest
+    rulesClientContext.ruleTypeRegistry.has = vi
       .fn()
       .mockImplementation((ruleTypeId: string) => ruleTypeId === '.es-query');
 
-    rulesClientContext.authorization.getAuthorizedRuleTypes = jest.fn().mockResolvedValue(
+    rulesClientContext.authorization.getAuthorizedRuleTypes = vi.fn().mockResolvedValue(
       new Map([
         ['.es-query', { authorizedConsumers: { all: true, read: true } }],
         ['.not-exist', { authorizedConsumers: { all: true, read: true } }],
@@ -79,9 +81,9 @@ describe('listRuleTypes', () => {
     });
 
     it('returns rule types authorized only via the alert entity', async () => {
-      rulesClientContext.ruleTypeRegistry.has = jest.fn().mockReturnValue(true);
+      rulesClientContext.ruleTypeRegistry.has = vi.fn().mockReturnValue(true);
 
-      rulesClientContext.authorization.getAuthorizedRuleTypes = jest
+      rulesClientContext.authorization.getAuthorizedRuleTypes = vi
         .fn()
         .mockResolvedValueOnce(new Map())
         .mockResolvedValueOnce(
@@ -106,9 +108,9 @@ describe('listRuleTypes', () => {
     });
 
     it('merges the authorized consumers of overlapping rule types', async () => {
-      rulesClientContext.ruleTypeRegistry.has = jest.fn().mockReturnValue(true);
+      rulesClientContext.ruleTypeRegistry.has = vi.fn().mockReturnValue(true);
 
-      rulesClientContext.authorization.getAuthorizedRuleTypes = jest
+      rulesClientContext.authorization.getAuthorizedRuleTypes = vi
         .fn()
         .mockResolvedValueOnce(
           new Map([['.es-query', { authorizedConsumers: { alerts: { all: false, read: true } } }]])
@@ -133,9 +135,9 @@ describe('listRuleTypes', () => {
     });
 
     it('returns a single entry when both entities authorize the same consumers', async () => {
-      rulesClientContext.ruleTypeRegistry.has = jest.fn().mockReturnValue(true);
+      rulesClientContext.ruleTypeRegistry.has = vi.fn().mockReturnValue(true);
 
-      rulesClientContext.authorization.getAuthorizedRuleTypes = jest
+      rulesClientContext.authorization.getAuthorizedRuleTypes = vi
         .fn()
         .mockResolvedValueOnce(
           new Map([

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
@@ -24,7 +26,7 @@ import type { FormServices } from './types';
 const settingsMock = getSettingsMock();
 const fields: FieldDefinition[] = getFieldDefinitions(settingsMock, uiSettingsClientMock);
 const categoryCounts = {};
-const onClearQuery = jest.fn();
+const onClearQuery = vi.fn();
 
 const defaultFormParams: FormProps = {
   fields,
@@ -36,7 +38,7 @@ const defaultFormParams: FormProps = {
 
 describe('Form', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders without errors', () => {
@@ -125,7 +127,7 @@ describe('Form', () => {
 
   it('fires showError when saving is unsuccessful', async () => {
     const services: FormServices = createFormServicesMock();
-    const saveChangesWithError = jest.fn(() => {
+    const saveChangesWithError = vi.fn(() => {
       throw new Error('Unable to save');
     });
     const testServices = { ...services, saveChanges: saveChangesWithError };
@@ -149,9 +151,9 @@ describe('Form', () => {
   });
 
   it('does not let a slow validation clobber a change made to another field', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const services: FormServices = createFormServicesMock();
-    services.validateChange = jest.fn().mockResolvedValue({
+    services.validateChange = vi.fn().mockResolvedValue({
       successfulValidation: true,
       valid: false,
       errorMessage: 'Invalid value',
@@ -171,14 +173,14 @@ describe('Form', () => {
 
     // Let the string field's debounced validation resolve and report its (invalid) result.
     await act(async () => {
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
     });
 
     // The string validation result must not overwrite the concurrent boolean change: the
     // boolean switch still reflects its toggled (unsaved) value rather than reverting.
     expect(booleanSwitch).not.toBeChecked();
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('fires showReloadPagePrompt when changing a reloadPageRequired setting', async () => {

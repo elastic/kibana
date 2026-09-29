@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -13,7 +15,7 @@ import { AlertsTableFilterGroup } from '.';
 describe('AlertsTableFilterGroup', () => {
   it('renders correctly', () => {
     const wrapper = shallow(
-      <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
+      <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={vi.fn()} />
     );
 
     expect(wrapper.find('EuiFilterButton')).toBeTruthy();

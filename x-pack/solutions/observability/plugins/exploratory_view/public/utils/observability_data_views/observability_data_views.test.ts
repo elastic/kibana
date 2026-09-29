@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { dataViewList, ObservabilityDataViews } from './observability_data_views';
 import { mockCore, mockDataView } from '../../components/shared/exploratory_view/rtl_helpers';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
@@ -69,10 +71,10 @@ const fieldFormats = {
 
 describe('ObservabilityDataViews', function () {
   const { dataViews } = mockCore();
-  dataViews!.get = jest.fn().mockReturnValue({ title: 'index-*' });
-  dataViews!.createAndSave = jest.fn().mockReturnValue({ id: dataViewList.ux });
-  dataViews!.create = jest.fn().mockReturnValue({ id: dataViewList.ux });
-  dataViews!.updateSavedObject = jest.fn();
+  dataViews!.get = vi.fn().mockReturnValue({ title: 'index-*' });
+  dataViews!.createAndSave = vi.fn().mockReturnValue({ id: dataViewList.ux });
+  dataViews!.create = vi.fn().mockReturnValue({ id: dataViewList.ux });
+  dataViews!.updateSavedObject = vi.fn();
 
   it('should return index pattern for app', async function () {
     const obsv = new ObservabilityDataViews(dataViews!);
@@ -88,11 +90,11 @@ describe('ObservabilityDataViews', function () {
   });
 
   it('should creates missing index pattern', async function () {
-    dataViews!.get = jest.fn().mockImplementation(() => {
+    dataViews!.get = vi.fn().mockImplementation(() => {
       throw new SavedObjectNotFound({ type: 'index_pattern' });
     });
 
-    dataViews!.createAndSave = jest.fn().mockReturnValue({ id: dataViewList.ux });
+    dataViews!.createAndSave = vi.fn().mockReturnValue({ id: dataViewList.ux });
 
     const obsv = new ObservabilityDataViews(dataViews!);
 
@@ -119,7 +121,7 @@ describe('ObservabilityDataViews', function () {
   });
 
   it('should validate field formats', async function () {
-    mockDataView.getFormatterForField = jest.fn().mockReturnValue({ params: () => {} });
+    mockDataView.getFormatterForField = vi.fn().mockReturnValue({ params: () => {} });
 
     const obsv = new ObservabilityDataViews(dataViews!);
 

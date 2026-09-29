@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
@@ -14,113 +17,167 @@ import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significa
 import { useSignificantEventsUrlState } from './use_significant_events_url_state';
 import { useTimeRangeUpdate } from '../../../../hooks/use_time_range_update';
 
-const mockUpdateTimeRange = jest.fn();
+const mockUpdateTimeRange = vi.fn();
 
-jest.mock('../../../../hooks/use_fetch_significant_event_lifecycle', () => ({
-  useFetchSignificantEventLifecycle: jest.fn(() => ({
-    data: undefined,
-    isLoading: false,
-    isSuccess: false,
-    isError: false,
-    refetch: jest.fn(),
-  })),
-}));
+vi.mock('../../../../hooks/use_fetch_significant_event_lifecycle', () => {
+      const mocked = {
+      useFetchSignificantEventLifecycle: vi.fn(() => ({
+        data: undefined,
+        isLoading: false,
+        isSuccess: false,
+        isError: false,
+        refetch: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(() => ({
-    services: {
-      focusedSignificantEventService: {
-        setFocusedEvent: jest.fn(),
-        clearFocusedEvent: jest.fn(),
-      },
-    },
-    core: {
-      notifications: { toasts: { addSuccess: jest.fn() } },
-      application: {
-        capabilities: {
-          nightshift: {
-            manage: true,
+vi.mock('../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(() => ({
+        services: {
+          focusedSignificantEventService: {
+            setFocusedEvent: vi.fn(),
+            clearFocusedEvent: vi.fn(),
           },
         },
-      },
-    },
-    dependencies: {
-      start: {
-        share: {
-          url: {
-            locators: { get: jest.fn(() => ({ getRedirectUrl: jest.fn(() => undefined) })) },
+        core: {
+          notifications: { toasts: { addSuccess: vi.fn() } },
+          application: {
+            capabilities: {
+              nightshift: {
+                manage: true,
+              },
+            },
           },
         },
-        significantEvents: {
-          significantEventsRepositoryClient: { fetch: jest.fn() },
+        dependencies: {
+          start: {
+            share: {
+              url: {
+                locators: { get: vi.fn(() => ({ getRedirectUrl: vi.fn(() => undefined) })) },
+              },
+            },
+            significantEvents: {
+              significantEventsRepositoryClient: { fetch: vi.fn() },
+            },
+          },
         },
-      },
-    },
-  })),
-}));
-jest.mock('../../../../hooks/use_trigger_investigation', () => ({
-  useTriggerInvestigation: jest.fn(() => ({
-    triggerInvestigation: jest.fn(),
-    isTriggering: false,
-  })),
-}));
-jest.mock('../../../../hooks/use_update_significant_event', () => ({
-  useUpdateSignificantEvent: jest.fn(() => ({ updateEventStatus: jest.fn(), isUpdating: false })),
-}));
-jest.mock('../../../../hooks/use_significant_events_maintenance', () => ({
-  useBlocksNewActivity: jest.fn(() => ({ blocksActivity: false })),
-}));
-jest.mock('../../../../util/formatters', () => ({
-  formatTimestamp: jest.fn((timestamp: string) => `formatted:${timestamp}`),
-}));
-jest.mock('../../../../components/flyout_components/flyout_toolbar_header', () => ({
-  FlyoutToolbarHeader: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('./lifecycle_timeline', () => ({
-  LifecycleTimeline: () => null,
-}));
-jest.mock('./event_investigations', () => ({
-  EventInvestigations: () => null,
-}));
-jest.mock('../../../../hooks/use_fetch_significant_events', () => ({
-  useFetchSignificantEvents: jest.fn(),
-}));
-jest.mock('./use_significant_events_url_state', () => ({
-  useSignificantEventsUrlState: jest.fn(),
-}));
-jest.mock('../../../../hooks/use_timefilter', () => ({
-  useTimefilter: jest.fn(() => ({
-    timeState: {
-      start: Date.parse('2026-01-01T00:00:00.000Z'),
-      end: Date.parse('2026-01-03T00:00:00.000Z'),
-    },
-  })),
-}));
-jest.mock('../../../../hooks/use_time_range_update', () => ({
-  useTimeRangeUpdate: jest.fn(() => ({ updateTimeRange: mockUpdateTimeRange })),
-}));
-jest.mock('../../hooks/use_fetch_streams', () => ({
-  useFetchStreams: jest.fn(() => ({ data: { streams: [] } })),
-}));
-jest.mock('../../context/significant_events_page_context', () => ({
-  useSignificantEventsPageContext: jest.fn(() => ({
-    isRunning: false,
-    isCanceling: false,
-    handleRun: jest.fn(),
-    handleCancel: jest.fn(),
-  })),
-}));
-jest.mock('../../../../components/search_bar', () => ({
-  SignificantEventsSearchBar: ({ query }: { query?: { query?: string } }) => (
-    <div data-test-subj="searchBarQuery">{query?.query}</div>
-  ),
-}));
-jest.mock('../streams_view/find_significant_events_button', () => ({
-  FindSignificantEventsButton: () => null,
-}));
-jest.mock('./filter_popover', () => ({
-  FilterPopover: () => null,
-}));
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../hooks/use_trigger_investigation', () => {
+      const mocked = {
+      useTriggerInvestigation: vi.fn(() => ({
+        triggerInvestigation: vi.fn(),
+        isTriggering: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../hooks/use_update_significant_event', () => {
+      const mocked = {
+      useUpdateSignificantEvent: vi.fn(() => ({ updateEventStatus: vi.fn(), isUpdating: false })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../hooks/use_significant_events_maintenance', () => {
+      const mocked = {
+      useBlocksNewActivity: vi.fn(() => ({ blocksActivity: false })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../util/formatters', () => {
+      const mocked = {
+      formatTimestamp: vi.fn((timestamp: string) => `formatted:${timestamp}`),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../components/flyout_components/flyout_toolbar_header', () => {
+      const mocked = {
+      FlyoutToolbarHeader: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./lifecycle_timeline', () => {
+      const mocked = {
+      LifecycleTimeline: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./event_investigations', () => {
+      const mocked = {
+      EventInvestigations: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../hooks/use_fetch_significant_events', () => {
+      const mocked = {
+      useFetchSignificantEvents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_significant_events_url_state', () => {
+      const mocked = {
+      useSignificantEventsUrlState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../hooks/use_timefilter', () => {
+      const mocked = {
+      useTimefilter: vi.fn(() => ({
+        timeState: {
+          start: Date.parse('2026-01-01T00:00:00.000Z'),
+          end: Date.parse('2026-01-03T00:00:00.000Z'),
+        },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../hooks/use_time_range_update', () => {
+      const mocked = {
+      useTimeRangeUpdate: vi.fn(() => ({ updateTimeRange: mockUpdateTimeRange })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_fetch_streams', () => {
+      const mocked = {
+      useFetchStreams: vi.fn(() => ({ data: { streams: [] } })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../context/significant_events_page_context', () => {
+      const mocked = {
+      useSignificantEventsPageContext: vi.fn(() => ({
+        isRunning: false,
+        isCanceling: false,
+        handleRun: vi.fn(),
+        handleCancel: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../components/search_bar', () => {
+      const mocked = {
+      SignificantEventsSearchBar: ({ query }: { query?: { query?: string } }) => (
+        <div data-test-subj="searchBarQuery">{query?.query}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../streams_view/find_significant_events_button', () => {
+      const mocked = {
+      FindSignificantEventsButton: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./filter_popover', () => {
+      const mocked = {
+      FilterPopover: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const event: SignificantEventResponse = {
   '@timestamp': '2026-01-02T00:00:00.000Z',
@@ -138,7 +195,7 @@ const event: SignificantEventResponse = {
 describe('Significant Events timestamp rendering', () => {
   it('sorts the Timestamp column by the lineage creation timestamp', () => {
     const columns = getSignificantEventTableColumns({
-      onToggleEvent: jest.fn(),
+      onToggleEvent: vi.fn(),
     });
     expect(columns.find((column) => 'field' in column && column.field === 'created_at')).toEqual(
       expect.objectContaining({ field: 'created_at' })
@@ -146,7 +203,7 @@ describe('Significant Events timestamp rendering', () => {
   });
 
   it('renders the lineage creation timestamp in general information', () => {
-    render(<SignificantEventFlyout event={event} onClose={jest.fn()} />);
+    render(<SignificantEventFlyout event={event} onClose={vi.fn()} />);
 
     expect(screen.getByText(`formatted:${event.created_at}`)).toBeInTheDocument();
     expect(screen.queryByText(`formatted:${event['@timestamp']}`)).not.toBeInTheDocument();
@@ -155,7 +212,7 @@ describe('Significant Events timestamp rendering', () => {
 
 describe('SignificantEventFlyout actions menu', () => {
   it('shows Dismiss and Close for an open event and opens the dismiss modal', () => {
-    render(<SignificantEventFlyout event={event} onClose={jest.fn()} />);
+    render(<SignificantEventFlyout event={event} onClose={vi.fn()} />);
 
     fireEvent.click(screen.getByTestId('sigEventFlyoutActionsButton'));
 
@@ -169,7 +226,7 @@ describe('SignificantEventFlyout actions menu', () => {
 
   it('does not expose actions for an already dismissed event', () => {
     render(
-      <SignificantEventFlyout event={{ ...event, status: 'dismissed' }} onClose={jest.fn()} />
+      <SignificantEventFlyout event={{ ...event, status: 'dismissed' }} onClose={vi.fn()} />
     );
 
     expect(screen.queryByTestId('sigEventFlyoutActionsButton')).not.toBeInTheDocument();
@@ -177,17 +234,17 @@ describe('SignificantEventFlyout actions menu', () => {
 });
 
 describe('selectedEvent deep link', () => {
-  const mockUseFetchSignificantEvents = useFetchSignificantEvents as jest.Mock;
-  const mockUseSignificantEventsUrlState = useSignificantEventsUrlState as jest.Mock;
+  const mockUseFetchSignificantEvents = useFetchSignificantEvents as Mock;
+  const mockUseSignificantEventsUrlState = useSignificantEventsUrlState as Mock;
 
   const emptyListResult = {
     data: { hits: [], total: 0 },
     isLoading: false,
     isSuccess: true,
     isError: false,
-    refetch: jest.fn(),
+    refetch: vi.fn(),
     pagination: { page: 1, perPage: 25 },
-    setPagination: jest.fn(),
+    setPagination: vi.fn(),
   };
 
   const lastFetchArgs = () =>
@@ -198,10 +255,10 @@ describe('selectedEvent deep link', () => {
   const defaultUrlState = {
     selectedEventId: event.event_id,
     openEventId: event.event_id,
-    openEvent: jest.fn(),
-    closeEvent: jest.fn(),
-    clearSelectedEvent: jest.fn(),
-    toggleEvent: jest.fn(),
+    openEvent: vi.fn(),
+    closeEvent: vi.fn(),
+    clearSelectedEvent: vi.fn(),
+    toggleEvent: vi.fn(),
   };
 
   beforeEach(() => {
@@ -254,8 +311,8 @@ describe('selectedEvent deep link', () => {
   });
 
   it('closing the flyout calls closeEvent, not clearSelectedEvent — selection context stays', () => {
-    const clearSelectedEvent = jest.fn();
-    const closeEvent = jest.fn();
+    const clearSelectedEvent = vi.fn();
+    const closeEvent = vi.fn();
     mockUseSignificantEventsUrlState.mockReturnValue({
       ...defaultUrlState,
       clearSelectedEvent,
@@ -293,7 +350,7 @@ describe('selectedEvent deep link', () => {
   });
 
   it('dismissing the not-found callout calls clearSelectedEvent', () => {
-    const clearSelectedEvent = jest.fn();
+    const clearSelectedEvent = vi.fn();
     mockUseSignificantEventsUrlState.mockReturnValue({
       ...defaultUrlState,
       clearSelectedEvent,
@@ -341,8 +398,8 @@ describe('selectedEvent deep link', () => {
   });
 
   it('adapts the date range to the linked event lineage window', () => {
-    const updateTimeRange = jest.fn();
-    (useTimeRangeUpdate as jest.Mock).mockReturnValue({ updateTimeRange });
+    const updateTimeRange = vi.fn();
+    (useTimeRangeUpdate as Mock).mockReturnValue({ updateTimeRange });
     mockUseFetchSignificantEvents.mockReturnValue({
       ...emptyListResult,
       data: { hits: [event], total: 1 },
@@ -357,9 +414,9 @@ describe('selectedEvent deep link', () => {
   });
 
   it('restores the prior date range when filters are reset', () => {
-    const updateTimeRange = jest.fn();
-    const clearSelectedEvent = jest.fn();
-    (useTimeRangeUpdate as jest.Mock).mockReturnValue({ updateTimeRange });
+    const updateTimeRange = vi.fn();
+    const clearSelectedEvent = vi.fn();
+    (useTimeRangeUpdate as Mock).mockReturnValue({ updateTimeRange });
     mockUseSignificantEventsUrlState.mockReturnValue({
       ...defaultUrlState,
       clearSelectedEvent,
@@ -380,7 +437,7 @@ describe('selectedEvent deep link', () => {
   });
 
   it('retains adapted filters after selectedEvent is cleared (no jarring reset)', () => {
-    const clearSelectedEvent = jest.fn();
+    const clearSelectedEvent = vi.fn();
     mockUseSignificantEventsUrlState.mockReturnValue({
       ...defaultUrlState,
       clearSelectedEvent,
@@ -453,7 +510,7 @@ describe('selectedEvent deep link', () => {
     });
 
     it('does not close the flyout when openEvent is missing from the current page', () => {
-      const closeEvent = jest.fn();
+      const closeEvent = vi.fn();
       mockUseSignificantEventsUrlState.mockReturnValue({
         ...defaultUrlState,
         selectedEventId: undefined,

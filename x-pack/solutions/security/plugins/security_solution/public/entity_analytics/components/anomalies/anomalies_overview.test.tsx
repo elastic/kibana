@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -21,19 +23,22 @@ import {
 } from './translations';
 import { ANOMALIES_RECENT_TABLE_TEST_ID } from './test_ids';
 
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        getUrlForApp: (appId: string, options?: { path?: string }) =>
-          `/base-path/app/${appId}${options?.path ?? ''}`,
-      },
-    },
-  }),
-}));
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            getUrlForApp: (appId: string, options?: { path?: string }) =>
+              `/base-path/app/${appId}${options?.path ?? ''}`,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -46,67 +51,82 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('./mitre/components/mitre_attack_chain', () => ({
-  MitreAttackChain: ({
-    triggeredTactics,
-    anomalyCountByTactic,
-  }: {
-    triggeredTactics: string[];
-    anomalyCountByTactic: Record<string, number>;
-  }) => (
-    <div
-      data-test-subj="mock-mitre-attack-chain"
-      data-triggered-tactics={JSON.stringify(triggeredTactics)}
-      data-tactic-counts={JSON.stringify(anomalyCountByTactic)}
-    />
-  ),
-}));
+vi.mock('./mitre/components/mitre_attack_chain', () => {
+      const mocked = {
+      MitreAttackChain: ({
+        triggeredTactics,
+        anomalyCountByTactic,
+      }: {
+        triggeredTactics: string[];
+        anomalyCountByTactic: Record<string, number>;
+      }) => (
+        <div
+          data-test-subj="mock-mitre-attack-chain"
+          data-triggered-tactics={JSON.stringify(triggeredTactics)}
+          data-tactic-counts={JSON.stringify(anomalyCountByTactic)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./mitre/components/mitre_attack_chain_placeholder', () => ({
-  MitreAttackChainPlaceholder: ({ children }: { children?: React.ReactNode }) => (
-    <div data-test-subj="mock-mitre-attack-chain-placeholder">{children}</div>
-  ),
-}));
+vi.mock('./mitre/components/mitre_attack_chain_placeholder', () => {
+      const mocked = {
+      MitreAttackChainPlaceholder: ({ children }: { children?: React.ReactNode }) => (
+        <div data-test-subj="mock-mitre-attack-chain-placeholder">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./table/anomaly_job_name', () => ({
-  AnomalyJobName: ({
-    jobId,
-    jobName,
-    timeRange,
-  }: {
-    jobId: string;
-    jobName: string;
-    timeRange: { from: string; to: string };
-  }) => (
-    <span
-      data-test-subj="mock-anomaly-job-name"
-      data-job-id={jobId}
-      data-job-name={jobName}
-      data-time-range={JSON.stringify(timeRange)}
-    />
-  ),
-}));
+vi.mock('./table/anomaly_job_name', () => {
+      const mocked = {
+      AnomalyJobName: ({
+        jobId,
+        jobName,
+        timeRange,
+      }: {
+        jobId: string;
+        jobName: string;
+        timeRange: { from: string; to: string };
+      }) => (
+        <span
+          data-test-subj="mock-anomaly-job-name"
+          data-job-id={jobId}
+          data-job-name={jobName}
+          data-time-range={JSON.stringify(timeRange)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./table/anomaly_timestamp', () => ({
-  AnomalyTimestamp: ({ timestamp }: { timestamp: string }) => (
-    <span data-test-subj="mock-anomaly-timestamp" data-timestamp={timestamp} />
-  ),
-}));
+vi.mock('./table/anomaly_timestamp', () => {
+      const mocked = {
+      AnomalyTimestamp: ({ timestamp }: { timestamp: string }) => (
+        <span data-test-subj="mock-anomaly-timestamp" data-timestamp={timestamp} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../flyout_v2/shared/components/expandable_panel', () => ({
-  ExpandablePanel: ({
-    children,
-    header,
-  }: {
-    children: React.ReactNode;
-    header: { link: { callback: () => void } };
-  }) => (
-    <div>
-      <button type="button" data-test-subj="expandable-panel-link" onClick={header.link.callback} />
-      {children}
-    </div>
-  ),
-}));
+vi.mock('../../../flyout_v2/shared/components/expandable_panel', () => {
+      const mocked = {
+      ExpandablePanel: ({
+        children,
+        header,
+      }: {
+        children: React.ReactNode;
+        header: { link: { callback: () => void } };
+      }) => (
+        <div>
+          <button type="button" data-test-subj="expandable-panel-link" onClick={header.link.callback} />
+          {children}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeHit = (overrides: Partial<AnomalyOverviewHit> = {}): AnomalyOverviewHit => ({
   jobId: 'security-job-1',
@@ -131,7 +151,7 @@ const makeData = (
   ...overrides,
 });
 
-const openDetailsPanel = jest.fn();
+const openDetailsPanel = vi.fn();
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -139,7 +159,7 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 describe('AnomaliesOverview', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows the total anomaly count in the stat heading', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useCasePageViewEbt } from './use_case_page_view_ebt';
 import { CASE_PAGE_VIEW_EVENT_TYPE, OBSERVABILITY_OWNER } from '../../../common/constants';
@@ -12,15 +15,21 @@ import { useKibana } from '../../common/lib/kibana';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 // Mocks
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../cases_context/use_cases_context', () => ({
-  useCasesContext: jest.fn(),
-}));
+vi.mock('../cases_context/use_cases_context', () => {
+      const mocked = {
+      useCasesContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getMockServices = (reportEvent: jest.Mock) => ({
+const getMockServices = (reportEvent: Mock) => ({
   services: {
     analytics: {
       reportEvent,
@@ -30,9 +39,9 @@ const getMockServices = (reportEvent: jest.Mock) => ({
 
 describe('useCasePageViewEbt', () => {
   it('reports analytics event with valid owner', () => {
-    const reportEvent = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue(getMockServices(reportEvent));
-    (useCasesContext as jest.Mock).mockReturnValue({ owner: [OBSERVABILITY_OWNER] });
+    const reportEvent = vi.fn();
+    (useKibana as Mock).mockReturnValue(getMockServices(reportEvent));
+    (useCasesContext as Mock).mockReturnValue({ owner: [OBSERVABILITY_OWNER] });
 
     renderHook(() => useCasePageViewEbt());
 
@@ -42,9 +51,9 @@ describe('useCasePageViewEbt', () => {
   });
 
   it('reports analytics event with invalid owner', () => {
-    const reportEvent = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue(getMockServices(reportEvent));
-    (useCasesContext as jest.Mock).mockReturnValue({ owner: ['invalid'] });
+    const reportEvent = vi.fn();
+    (useKibana as Mock).mockReturnValue(getMockServices(reportEvent));
+    (useCasesContext as Mock).mockReturnValue({ owner: ['invalid'] });
 
     renderHook(() => useCasePageViewEbt());
 

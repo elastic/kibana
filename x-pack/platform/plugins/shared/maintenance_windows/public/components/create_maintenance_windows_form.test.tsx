@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { within, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,37 +17,52 @@ import type { CreateMaintenanceWindowFormProps } from './create_maintenance_wind
 import { CreateMaintenanceWindowForm } from './create_maintenance_windows_form';
 import moment from 'moment';
 
-jest.mock('../utils/kibana_react');
-jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
-  getRuleTypes: jest.fn(),
-}));
-jest.mock('@kbn/alerts-ui-shared', () => ({
-  ...jest.requireActual('@kbn/alerts-ui-shared'),
-  AlertsSearchBar: () => <div data-test-subj="mockAlertsSearchBar" />,
-}));
-jest.mock('../hooks/use_create_maintenance_window', () => ({
-  useCreateMaintenanceWindow: jest.fn(),
-}));
-jest.mock('../hooks/use_update_maintenance_window', () => ({
-  useUpdateMaintenanceWindow: jest.fn(),
-}));
-jest.mock('./episode_matcher_input', () => ({
-  EpisodeMatcherInput: () => <div data-test-subj="mockEpisodeMatcherInput" />,
-}));
+vi.mock('../utils/kibana_react');
+vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => {
+      const mocked = {
+      getRuleTypes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/alerts-ui-shared', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerts-ui-shared')),
+      AlertsSearchBar: () => <div data-test-subj="mockAlertsSearchBar" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_create_maintenance_window', () => {
+      const mocked = {
+      useCreateMaintenanceWindow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_update_maintenance_window', () => {
+      const mocked = {
+      useUpdateMaintenanceWindow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./episode_matcher_input', () => {
+      const mocked = {
+      EpisodeMatcherInput: () => <div data-test-subj="mockEpisodeMatcherInput" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
-const { useKibana, useUiSetting } = jest.requireMock('../utils/kibana_react');
-const { useCreateMaintenanceWindow } = jest.requireMock('../hooks/use_create_maintenance_window');
-const { useUpdateMaintenanceWindow } = jest.requireMock('../hooks/use_update_maintenance_window');
+const { getRuleTypes } = (await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types'));
+const { useKibana, useUiSetting } = (await vi.importMock('../utils/kibana_react'));
+const { useCreateMaintenanceWindow } = (await vi.importMock('../hooks/use_create_maintenance_window'));
+const { useUpdateMaintenanceWindow } = (await vi.importMock('../hooks/use_update_maintenance_window'));
 
 const formProps: CreateMaintenanceWindowFormProps = {
-  onCancel: jest.fn(),
-  onSuccess: jest.fn(),
+  onCancel: vi.fn(),
+  onSuccess: vi.fn(),
 };
 
 const formPropsForEditMode: CreateMaintenanceWindowFormProps = {
-  onCancel: jest.fn(),
-  onSuccess: jest.fn(),
+  onCancel: vi.fn(),
+  onSuccess: vi.fn(),
   initialValue: {
     title: 'test',
     startDate: '2023-03-24',
@@ -63,13 +81,13 @@ const formPropsForEditMode: CreateMaintenanceWindowFormProps = {
 
 describe('CreateMaintenanceWindowForm', () => {
   let appMockRenderer: AppMockRenderer;
-  let createMutate: jest.Mock;
-  let updateMutate: jest.Mock;
+  let createMutate: Mock;
+  let updateMutate: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    createMutate = jest.fn();
-    updateMutate = jest.fn();
+    vi.clearAllMocks();
+    createMutate = vi.fn();
+    updateMutate = vi.fn();
     getRuleTypes.mockResolvedValue([
       { category: 'observability' },
       { category: 'management' },
@@ -83,8 +101,8 @@ describe('CreateMaintenanceWindowForm', () => {
       services: {
         notifications: {
           toasts: {
-            addSuccess: jest.fn(),
-            addDanger: jest.fn(),
+            addSuccess: vi.fn(),
+            addDanger: vi.fn(),
           },
         },
         unifiedSearch: {
@@ -94,9 +112,9 @@ describe('CreateMaintenanceWindowForm', () => {
         },
         data: {
           dataViews: {
-            get: jest.fn(),
-            getIdsWithTitle: jest.fn().mockResolvedValue([]),
-            getDefaultDataView: jest.fn(),
+            get: vi.fn(),
+            getIdsWithTitle: vi.fn().mockResolvedValue([]),
+            getDefaultDataView: vi.fn(),
           },
         },
       },
@@ -154,7 +172,7 @@ describe('CreateMaintenanceWindowForm', () => {
 
   it('should render the guessed timezone when kibana timezone is undefined', async () => {
     useUiSetting.mockReturnValue(undefined);
-    jest.spyOn(moment.tz, 'guess').mockReturnValue('America/Los_Angeles');
+    vi.spyOn(moment.tz, 'guess').mockReturnValue('America/Los_Angeles');
     appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
     expect(await screen.findByTestId('title-field')).toBeInTheDocument();

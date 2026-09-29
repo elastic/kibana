@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithTestingProviders } from '../../common/mock';
@@ -15,12 +17,12 @@ describe('SimilarCasesTable', () => {
   const props: SimilarCasesTableProps = {
     cases: [{ ...mockCase, similarities: { observables: mockSimilarObservables } }],
     isLoading: false,
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     pagination: { pageIndex: 0, totalItemCount: 1 },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

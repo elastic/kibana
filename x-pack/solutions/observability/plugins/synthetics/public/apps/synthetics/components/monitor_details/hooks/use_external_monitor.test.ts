@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { useExternalMonitor } from './use_external_monitor';
@@ -15,18 +18,24 @@ import {
   HEARTBEAT_UNMAPPED_LOCATION_LABEL,
 } from '../../../../../../common/runtime_types';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useEsSearch: jest.fn().mockReturnValue({ data: undefined, loading: false, error: undefined }),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useEsSearch: vi.fn().mockReturnValue({ data: undefined, loading: false, error: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../contexts', () => ({
-  useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
-}));
+vi.mock('../../../contexts', () => {
+      const mocked = {
+      useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useEsSearchMock = observabilitySharedPublic.useEsSearch as jest.Mock;
+const useEsSearchMock = observabilitySharedPublic.useEsSearch as Mock;
 
 describe('useExternalMonitor', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   describe('query construction', () => {
     it('uses an empty index when neither remoteName nor origin is provided so useEsSearch short-circuits', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core/public';
 import '@kbn/react-query/mock';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,20 +17,23 @@ import React from 'react';
 import { useGetScheduleExecutionLogs } from '.';
 import { ERROR_RETRIEVING_SCHEDULE_EXECUTION_LOGS } from './translations';
 
-const mockAddError = jest.fn();
+const mockAddError = vi.fn();
 
-jest.mock('../../../../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addError: mockAddError,
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    addInfo: jest.fn(),
-    remove: jest.fn(),
-  }),
-}));
+vi.mock('../../../../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addError: mockAddError,
+        addSuccess: vi.fn(),
+        addWarning: vi.fn(),
+        addInfo: vi.fn(),
+        remove: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockHttp: HttpSetup = {
-  get: jest.fn(),
+  get: vi.fn(),
 } as unknown as HttpSetup;
 
 let queryClient: QueryClient;
@@ -43,13 +49,13 @@ function wrapper(props: { children: React.ReactNode }) {
 
 describe('useGetScheduleExecutionLogs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   });
 
   it('requests the rule execution log for the provided ruleId', async () => {
-    (mockHttp.get as jest.Mock).mockResolvedValueOnce({ data: [], total: 0 });
+    (mockHttp.get as Mock).mockResolvedValueOnce({ data: [], total: 0 });
 
     renderHook(() => useGetScheduleExecutionLogs({ ...defaultProps }), {
       wrapper,
@@ -65,7 +71,7 @@ describe('useGetScheduleExecutionLogs', () => {
 
   it('returns the execution log data when the request succeeds', async () => {
     const mockData = [{ id: 'exec-1', status: 'failure', timestamp: '2026-04-07T12:00:00.000Z' }];
-    (mockHttp.get as jest.Mock).mockResolvedValueOnce({ data: mockData, total: 1 });
+    (mockHttp.get as Mock).mockResolvedValueOnce({ data: mockData, total: 1 });
 
     const { result } = renderHook(() => useGetScheduleExecutionLogs({ ...defaultProps }), {
       wrapper,
@@ -78,7 +84,7 @@ describe('useGetScheduleExecutionLogs', () => {
 
   it('calls addError with the expected title on failure', async () => {
     const error = { body: { message: 'Server error message' } };
-    (mockHttp.get as jest.Mock).mockRejectedValueOnce(error);
+    (mockHttp.get as Mock).mockRejectedValueOnce(error);
 
     renderHook(() => useGetScheduleExecutionLogs({ ...defaultProps }), {
       wrapper,
@@ -92,7 +98,7 @@ describe('useGetScheduleExecutionLogs', () => {
 
   it('returns an error when a server error body is present', async () => {
     const error = { body: { message: 'Server error message' } };
-    (mockHttp.get as jest.Mock).mockRejectedValueOnce(error);
+    (mockHttp.get as Mock).mockRejectedValueOnce(error);
 
     const { result } = renderHook(() => useGetScheduleExecutionLogs({ ...defaultProps }), {
       wrapper,

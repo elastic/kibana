@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { alertsClientMock } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client.mock';
 import { AlertService } from '../../services';
@@ -19,7 +21,7 @@ describe('getAlerts', () => {
 
   beforeEach(async () => {
     alertsService = new AlertService(esClient, logger, alertsClient);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const docs = [

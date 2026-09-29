@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
@@ -26,29 +28,32 @@ import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
 import { VegaPlugin, type VegaPluginStartDependencies } from './plugin';
 
-const mockCreateVegaFn = jest.fn();
-const mockGetVegaVisRenderer = jest.fn();
+const mockCreateVegaFn = vi.fn();
+const mockGetVegaVisRenderer = vi.fn();
 
-jest.mock('./async_module', () => ({
-  createVegaFn: mockCreateVegaFn,
-  getVegaVisRenderer: mockGetVegaVisRenderer,
-  vegaVisType: {},
-}));
+vi.mock('./async_module', () => {
+      const mocked = {
+      createVegaFn: mockCreateVegaFn,
+      getVegaVisRenderer: mockGetVegaVisRenderer,
+      vegaVisType: {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('VegaPlugin', () => {
   const setup = () => {
     const core = coreMock.createSetup();
     const startCore = coreMock.createStart();
     const startDeps = {
-      expressions: { getFunction: jest.fn() },
-      uiActions: { executeTriggerActions: jest.fn() },
+      expressions: { getFunction: vi.fn() },
+      uiActions: { executeTriggerActions: vi.fn() },
     };
     core.getStartServices.mockResolvedValue([startCore, startDeps, {}]);
 
     const embeddable = embeddablePluginMock.createSetupContract();
     const expressions = expressionsPluginMock.createSetupContract();
     const visualizations = visualizationsPluginMock.createSetupContract();
-    embeddable.registerEmbeddablePublicDefinition = jest.fn();
+    embeddable.registerEmbeddablePublicDefinition = vi.fn();
     const plugin = new VegaPlugin(
       coreMock.createPluginInitializerContext({ enableExternalUrls: false })
     );
@@ -65,7 +70,7 @@ describe('VegaPlugin', () => {
 
   it('registers the Vega embeddable definition', async () => {
     const { embeddable } = setup();
-    const embeddableLoader = jest.mocked(embeddable.registerEmbeddablePublicDefinition).mock
+    const embeddableLoader = vi.mocked(embeddable.registerEmbeddablePublicDefinition).mock
       .calls[0][1];
 
     await embeddableLoader();
@@ -78,7 +83,7 @@ describe('VegaPlugin', () => {
 
   it('registers the expression runtime once for the legacy visualization', async () => {
     const { expressions, visualizations } = setup();
-    const legacyLoader = jest.mocked(visualizations.createBaseVisualizationAsync).mock.calls[0][1];
+    const legacyLoader = vi.mocked(visualizations.createBaseVisualizationAsync).mock.calls[0][1];
 
     await legacyLoader();
 
@@ -89,7 +94,7 @@ describe('VegaPlugin', () => {
   describe('Vega add action feature flag', () => {
     const startPlugin = (flag$: BehaviorSubject<boolean>) => {
       const core = coreMock.createStart();
-      core.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(flag$);
+      core.featureFlags.getBooleanValue$ = vi.fn().mockReturnValue(flag$);
 
       const uiActions = uiActionsPluginMock.createStartContract();
       const deps: VegaPluginStartDependencies = {

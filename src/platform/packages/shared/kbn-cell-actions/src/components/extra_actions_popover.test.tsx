@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { makeAction, makeActionContext } from '../mocks/helpers';
@@ -29,8 +31,8 @@ describe('ExtraActionsPopOver', () => {
   });
 
   it('executes action and close popover when menu item is clicked', async () => {
-    const executeAction = jest.fn();
-    const closePopOver = jest.fn();
+    const executeAction = vi.fn();
+    const closePopOver = vi.fn();
     const action = { ...makeAction('test-action'), execute: executeAction };
     const { getByTestId } = render(
       <ExtraActionsPopOver
@@ -63,8 +65,8 @@ describe('ExtraActionsPopOverWithAnchor', () => {
   });
 
   it('executes action and close popover when menu item is clicked', () => {
-    const executeAction = jest.fn();
-    const closePopOver = jest.fn();
+    const executeAction = vi.fn();
+    const closePopOver = vi.fn();
     const action = { ...makeAction('test-action'), execute: executeAction };
     const { getByTestId } = render(
       <ExtraActionsPopOverWithAnchor

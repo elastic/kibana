@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
 import 'jest-styled-components';
@@ -16,11 +18,11 @@ import { NetworkTopNFlowTable } from '.';
 import { mockData, mockCount } from './mock';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/components/link_to');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/components/link_to');
 
 describe('NetworkTopNFlow Table Component', () => {
-  const loadPage = jest.fn();
+  const loadPage = vi.fn();
   let store = createMockStore();
   const defaultProps = {
     data: mockData.edges,
@@ -30,7 +32,7 @@ describe('NetworkTopNFlow Table Component', () => {
     isInspect: false,
     loading: false,
     loadPage,
-    setQuerySkip: jest.fn(),
+    setQuerySkip: vi.fn(),
     showMorePagesIndicator: true,
     totalCount: mockCount.totalCount,
     type: networkModel.NetworkType.page,

@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { ModelDetailFlyout } from './model_detail_flyout';
 import { useKibana } from '../../hooks/use_kibana';
 
-jest.mock('../../hooks/use_kibana');
+vi.mock('../../hooks/use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 const MODEL_ID = 'test-model';
 
@@ -26,13 +29,13 @@ const createEndpoint = (overrides: Partial<EisInferenceEndpoint> = {}): EisInfer
 });
 
 describe('ModelDetailFlyout', () => {
-  const onClose = jest.fn();
-  const onSaveEndpoint = jest.fn();
-  const onDeleteEndpoint = jest.fn();
-  const onCopyEndpointId = jest.fn();
+  const onClose = vi.fn();
+  const onSaveEndpoint = vi.fn();
+  const onDeleteEndpoint = vi.fn();
+  const onCopyEndpointId = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({ services: {} });
   });
 

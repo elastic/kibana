@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { act, fireEvent } from '@testing-library/react';
 
@@ -19,17 +21,17 @@ import {
 } from '../../waterfall/components/translations';
 
 describe('waterfall filter', () => {
-  jest.useFakeTimers({ legacyFakeTimers: true });
+  vi.useFakeTimers({ legacyFakeTimers: true });
 
   it('renders correctly', () => {
     const { getByLabelText, getByTitle } = render(
       <WaterfallFilter
         query={''}
-        setQuery={jest.fn()}
+        setQuery={vi.fn()}
         activeFilters={[]}
         onlyHighlighted={false}
-        setActiveFilters={jest.fn()}
-        setOnlyHighlighted={jest.fn()}
+        setActiveFilters={vi.fn()}
+        setOnlyHighlighted={vi.fn()}
       />
     );
 
@@ -47,11 +49,11 @@ describe('waterfall filter', () => {
       return (
         <WaterfallFilter
           query={''}
-          setQuery={jest.fn()}
+          setQuery={vi.fn()}
           activeFilters={activeFilters}
           onlyHighlighted={false}
           setActiveFilters={setActiveFilters}
-          setOnlyHighlighted={jest.fn()}
+          setOnlyHighlighted={vi.fn()}
         />
       );
     };
@@ -74,7 +76,7 @@ describe('waterfall filter', () => {
   });
 
   it('search input is working properly', () => {
-    const setQuery = jest.fn();
+    const setQuery = vi.fn();
 
     const Component = () => {
       return (
@@ -83,8 +85,8 @@ describe('waterfall filter', () => {
           setQuery={setQuery}
           activeFilters={[]}
           onlyHighlighted={false}
-          setActiveFilters={jest.fn()}
-          setOnlyHighlighted={jest.fn()}
+          setActiveFilters={vi.fn()}
+          setOnlyHighlighted={vi.fn()}
         />
       );
     };
@@ -96,7 +98,7 @@ describe('waterfall filter', () => {
 
     // inout has debounce effect so hence the timer
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     expect(setQuery).toHaveBeenCalledWith(testText);
@@ -129,7 +131,7 @@ describe('waterfall filter', () => {
 
     // input has debounce effect so hence the timer
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     const collapseCheckbox = getByLabelText(FILTER_COLLAPSE_REQUESTS_LABEL) as HTMLInputElement;
@@ -143,7 +145,7 @@ describe('waterfall filter', () => {
 
     // input has debounce effect so hence the timer
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     // expect the checkbox to reset to disabled and unchecked

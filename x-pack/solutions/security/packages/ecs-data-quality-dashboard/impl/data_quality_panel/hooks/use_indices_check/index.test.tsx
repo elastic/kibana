@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 
 import { useIndicesCheck } from '.';
@@ -21,18 +23,18 @@ import { getInitialCheckStateValue } from './reducer';
 
 const getSpies = () => {
   return {
-    checkIndexSpy: jest.spyOn(utilsCheckIndex, 'checkIndex').mockImplementation(jest.fn()),
+    checkIndexSpy: vi.spyOn(utilsCheckIndex, 'checkIndex').mockImplementation(vi.fn()),
   };
 };
 
 describe('useIndicesCheck', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return checkIndex and checkState', () => {
-    const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
+    const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: vi.fn() }));
 
     expect(result.current).toEqual({
       checkIndex: expect.any(Function),
@@ -44,15 +46,15 @@ describe('useIndicesCheck', () => {
     it('should call checkIndex with the correct arguments', () => {
       const { checkIndexSpy } = getSpies();
 
-      const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
+      const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: vi.fn() }));
 
       const props = {
         abortController: new AbortController(),
-        formatBytes: jest.fn(),
-        formatNumber: jest.fn(),
+        formatBytes: vi.fn(),
+        formatNumber: vi.fn(),
         indexName: 'indexName',
         pattern: 'pattern',
-        httpFetch: jest.fn(),
+        httpFetch: vi.fn(),
       };
 
       act(() => {
@@ -75,16 +77,16 @@ describe('useIndicesCheck', () => {
 
   describe('checkState', () => {
     it('should be empty by default', () => {
-      const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
+      const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: vi.fn() }));
 
       expect(result.current.checkState).toEqual({});
     });
 
     describe('when checkIndex completes', () => {
       it('should set correct data', async () => {
-        const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
+        const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: vi.fn() }));
 
-        const httpFetchMock = jest.fn((route) => {
+        const httpFetchMock = vi.fn((route) => {
           if (route.startsWith('/internal/ecs_data_quality_dashboard/mappings')) {
             return Promise.resolve(mockMappingsResponse);
           }
@@ -97,8 +99,8 @@ describe('useIndicesCheck', () => {
         act(() => {
           result.current.checkIndex({
             abortController: new AbortController(),
-            formatBytes: jest.fn(),
-            formatNumber: jest.fn(),
+            formatBytes: vi.fn(),
+            formatNumber: vi.fn(),
             indexName: 'auditbeat-custom-index-1',
             pattern: 'auditbeat-*',
             httpFetch: httpFetchMock as unknown as HttpHandler,
@@ -122,9 +124,9 @@ describe('useIndicesCheck', () => {
     describe('errors', () => {
       describe('when mappings request errors', () => {
         it('should set mappingsError', async () => {
-          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
+          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: vi.fn() }));
 
-          const httpFetchMock = jest.fn((route) => {
+          const httpFetchMock = vi.fn((route) => {
             if (route.startsWith('/internal/ecs_data_quality_dashboard/mappings')) {
               return Promise.reject(new Error('mappings error'));
             }
@@ -137,8 +139,8 @@ describe('useIndicesCheck', () => {
           act(() =>
             result.current.checkIndex({
               abortController: new AbortController(),
-              formatBytes: jest.fn(),
-              formatNumber: jest.fn(),
+              formatBytes: vi.fn(),
+              formatNumber: vi.fn(),
               indexName: 'auditbeat-custom-index-1',
               pattern: 'auditbeat-*',
               httpFetch: httpFetchMock as unknown as HttpHandler,
@@ -156,9 +158,9 @@ describe('useIndicesCheck', () => {
 
       describe('when unallowed values request errors', () => {
         it('should set unallowedValuesError', async () => {
-          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
+          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: vi.fn() }));
 
-          const httpFetchMock = jest.fn((route) => {
+          const httpFetchMock = vi.fn((route) => {
             if (route.startsWith('/internal/ecs_data_quality_dashboard/mappings')) {
               return Promise.resolve(mockMappingsResponse);
             }
@@ -171,8 +173,8 @@ describe('useIndicesCheck', () => {
           act(() =>
             result.current.checkIndex({
               abortController: new AbortController(),
-              formatBytes: jest.fn(),
-              formatNumber: jest.fn(),
+              formatBytes: vi.fn(),
+              formatNumber: vi.fn(),
               indexName: 'auditbeat-custom-index-1',
               pattern: 'auditbeat-*',
               httpFetch: httpFetchMock as unknown as HttpHandler,
@@ -196,16 +198,16 @@ describe('useIndicesCheck', () => {
             onError?.(new Error('generic error'));
           });
 
-          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
+          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: vi.fn() }));
 
           act(() =>
             result.current.checkIndex({
               abortController: new AbortController(),
-              formatBytes: jest.fn(),
-              formatNumber: jest.fn(),
+              formatBytes: vi.fn(),
+              formatNumber: vi.fn(),
               indexName: 'auditbeat-custom-index-1',
               pattern: 'auditbeat-*',
-              httpFetch: jest.fn(),
+              httpFetch: vi.fn(),
             })
           );
 
@@ -226,16 +228,16 @@ describe('useIndicesCheck', () => {
             onStart?.();
           });
 
-          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
+          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: vi.fn() }));
 
           act(() =>
             result.current.checkIndex({
               abortController: new AbortController(),
-              formatBytes: jest.fn(),
-              formatNumber: jest.fn(),
+              formatBytes: vi.fn(),
+              formatNumber: vi.fn(),
               indexName: 'auditbeat-custom-index-1',
               pattern: 'auditbeat-*',
-              httpFetch: jest.fn(),
+              httpFetch: vi.fn(),
             })
           );
 
@@ -257,16 +259,16 @@ describe('useIndicesCheck', () => {
             onLoadMappingsStart?.();
           });
 
-          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
+          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: vi.fn() }));
 
           act(() =>
             result.current.checkIndex({
               abortController: new AbortController(),
-              formatBytes: jest.fn(),
-              formatNumber: jest.fn(),
+              formatBytes: vi.fn(),
+              formatNumber: vi.fn(),
               indexName: 'auditbeat-custom-index-1',
               pattern: 'auditbeat-*',
-              httpFetch: jest.fn(),
+              httpFetch: vi.fn(),
             })
           );
 
@@ -289,16 +291,16 @@ describe('useIndicesCheck', () => {
             onLoadUnallowedValuesStart?.();
           });
 
-          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
+          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: vi.fn() }));
 
           act(() =>
             result.current.checkIndex({
               abortController: new AbortController(),
-              formatBytes: jest.fn(),
-              formatNumber: jest.fn(),
+              formatBytes: vi.fn(),
+              formatNumber: vi.fn(),
               indexName: 'auditbeat-custom-index-1',
               pattern: 'auditbeat-*',
-              httpFetch: jest.fn(),
+              httpFetch: vi.fn(),
             })
           );
 
@@ -321,16 +323,16 @@ describe('useIndicesCheck', () => {
             );
           });
 
-          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
+          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: vi.fn() }));
 
           act(() =>
             result.current.checkIndex({
               abortController: new AbortController(),
-              formatBytes: jest.fn(),
-              formatNumber: jest.fn(),
+              formatBytes: vi.fn(),
+              formatNumber: vi.fn(),
               indexName: 'auditbeat-custom-index-1',
               pattern: 'auditbeat-*',
-              httpFetch: jest.fn(),
+              httpFetch: vi.fn(),
             })
           );
 
@@ -352,16 +354,16 @@ describe('useIndicesCheck', () => {
             );
           });
 
-          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: jest.fn() }));
+          const { result } = renderHook(() => useIndicesCheck({ onCheckCompleted: vi.fn() }));
 
           act(() =>
             result.current.checkIndex({
               abortController: new AbortController(),
-              formatBytes: jest.fn(),
-              formatNumber: jest.fn(),
+              formatBytes: vi.fn(),
+              formatNumber: vi.fn(),
               indexName: 'auditbeat-custom-index-1',
               pattern: 'auditbeat-*',
-              httpFetch: jest.fn(),
+              httpFetch: vi.fn(),
             })
           );
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 
@@ -16,40 +18,46 @@ import { ScatterplotMatrix } from './scatterplot_matrix';
 
 const mockFilterManager = createFilterManagerMock();
 
-const mockEsSearch = jest.fn((body) => ({
+const mockEsSearch = vi.fn((body) => ({
   hits: { hits: [{ fields: { x: [1], y: [2] } }, { fields: { x: [2], y: [3] } }] },
 }));
 
-jest.mock('../../contexts/kibana', () => ({
-  useMlApi: () => ({
-    esSearch: mockEsSearch,
-  }),
-  useMlKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: jest.fn(),
-      },
-      data: {
-        query: {
-          filterManager: mockFilterManager,
-          timefilter: {
-            timefilter: {
-              getTime: jest.fn(() => {
-                return { from: '', to: '' };
-              }),
-              getRefreshInterval: jest.fn(),
+vi.mock('../../contexts/kibana', () => {
+      const mocked = {
+      useMlApi: () => ({
+        esSearch: mockEsSearch,
+      }),
+      useMlKibana: () => ({
+        services: {
+          application: {
+            navigateToApp: vi.fn(),
+          },
+          data: {
+            query: {
+              filterManager: mockFilterManager,
+              timefilter: {
+                timefilter: {
+                  getTime: vi.fn(() => {
+                    return { from: '', to: '' };
+                  }),
+                  getRefreshInterval: vi.fn(),
+                },
+              },
             },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mocking VegaChart to avoid a jest/canvas related error
-jest.mock('../vega_chart', () => ({
-  VegaChart: () => <div data-test-subj="mlVegaChart" />,
-}));
+vi.mock('../vega_chart', () => {
+      const mocked = {
+      VegaChart: () => <div data-test-subj="mlVegaChart" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Data Frame Analytics: <ScatterplotMatrix />', () => {
   it('renders the scatterplot matrix wrapper with options but not the chart itself', async () => {

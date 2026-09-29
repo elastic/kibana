@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useDeleteEndpointScript } from './use_delete_script_by_id';
 import { scriptsLibraryHttpMocks } from '../../mocks/scripts_library_http_mocks';
 import {
@@ -17,11 +20,11 @@ import { resolvePathVariables } from '../../../common/utils/resolve_path_variabl
 import { renderMutation } from '../test_utils';
 import { act } from '@testing-library/react';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 describe('useDeleteEndpointScript hook', () => {
   let response: ReturnType<typeof useDeleteEndpointScript>;
-  const useHttpMock = useHttp as jest.Mock;
+  const useHttpMock = useHttp as Mock;
   let http: AppContextTestRender['coreStart']['http'];
 
   let apiMocks: ReturnType<typeof scriptsLibraryHttpMocks>;
@@ -48,7 +51,7 @@ describe('useDeleteEndpointScript hook', () => {
   });
 
   it('should call onSuccess when successful', async () => {
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     response = await renderMutation(() =>
       useDeleteEndpointScript({
@@ -74,7 +77,7 @@ describe('useDeleteEndpointScript hook', () => {
         statusCode: 503,
       },
     });
-    const onError = jest.fn();
+    const onError = vi.fn();
 
     response = await renderMutation(() =>
       useDeleteEndpointScript({

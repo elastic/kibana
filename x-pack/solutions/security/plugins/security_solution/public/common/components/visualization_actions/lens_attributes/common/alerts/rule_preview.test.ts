@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { mockRulePreviewFilter, wrapper } from '../../../mocks';
 
@@ -14,22 +16,28 @@ import { getRulePreviewLensAttributes } from './rule_preview';
 const mockInternalReferenceId = 'internal-reference-id-generated-uuid';
 const mockRuleId = 'rule-id-generated-uuid';
 
-jest.mock('uuid', () => ({
-  ...jest.requireActual('uuid'),
-  v4: jest.fn().mockReturnValue('generated-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      ...require('uuid'),
+      v4: vi.fn().mockReturnValue('generated-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../utils/route/use_route_spy', () => ({
-  useRouteSpy: jest.fn().mockReturnValue([
-    {
-      pageName: 'alerts',
-    },
-  ]),
-}));
+vi.mock('../../../../../utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: vi.fn().mockReturnValue([
+        {
+          pageName: 'alerts',
+        },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getRulePreviewLensAttributes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should render without extra options', () => {
     const { result } = renderHook(

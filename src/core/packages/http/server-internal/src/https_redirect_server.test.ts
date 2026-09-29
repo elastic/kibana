@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as net from 'node:net';
 
-jest.mock('fs', () => ({
-  readFileSync: jest.fn(),
+vi.mock('fs', () => ({
+  readFileSync: vi.fn(),
 }));
 
 import Chance from 'chance';
@@ -94,7 +96,7 @@ test('throws if [redirectHttpFromPort] is not specified', async () => {
 });
 
 test('throws if [redirectHttpFromPort] is in use', async () => {
-  const mockListen = jest.spyOn(Server.prototype, 'listen').mockImplementation(() => {
+  const mockListen = vi.spyOn(Server.prototype, 'listen').mockImplementation(function () {
     // eslint-disable-next-line no-throw-literal
     throw { code: 'EADDRINUSE' };
   });

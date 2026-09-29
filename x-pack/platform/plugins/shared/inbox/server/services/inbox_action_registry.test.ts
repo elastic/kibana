@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { InboxAction } from '@kbn/inbox-common';
@@ -31,13 +34,13 @@ const fakeProvider = (
     withListProcessed?: boolean | InboxAction[];
     withFacets?: InboxActionProviderFacetsResult;
   } = { withListProcessed: false }
-): jest.Mocked<InboxActionProvider> => {
-  const provider: jest.Mocked<InboxActionProvider> = {
+): Mocked<InboxActionProvider> => {
+  const provider: Mocked<InboxActionProvider> = {
     sourceApp,
-    list: jest.fn<ReturnType<InboxActionProvider['list']>, Parameters<InboxActionProvider['list']>>(
+    list: vi.fn<ReturnType<InboxActionProvider['list']>, Parameters<InboxActionProvider['list']>>(
       async () => ({ actions, total: actions.length })
     ),
-    respond: jest.fn<
+    respond: vi.fn<
       ReturnType<InboxActionProvider['respond']>,
       Parameters<InboxActionProvider['respond']>
     >(async () => {}),
@@ -46,14 +49,14 @@ const fakeProvider = (
     const historyActions = Array.isArray(options.withListProcessed)
       ? options.withListProcessed
       : actions.map((action) => ({ ...action, status: 'approved' as const }));
-    provider.listProcessed = jest.fn(async () => ({
+    provider.listProcessed = vi.fn(async () => ({
       actions: historyActions,
       total: historyActions.length,
     }));
   }
   if (options.withFacets) {
     const facets = options.withFacets;
-    provider.listProcessedFacets = jest.fn(async () => facets);
+    provider.listProcessedFacets = vi.fn(async () => facets);
   }
   return provider;
 };
@@ -171,11 +174,11 @@ describe('InboxActionRegistry', () => {
     it('requests enough provider rows for the requested merged page and preserves totals', async () => {
       const paged: InboxActionProvider = {
         sourceApp: 'workflows',
-        list: jest.fn(async ({ perPage }) => ({
+        list: vi.fn(async ({ perPage }) => ({
           actions: createStubInboxActions(perPage ?? 0, { source_app: 'workflows' }),
           total: 50,
         })),
-        respond: jest.fn(async () => {}),
+        respond: vi.fn(async () => {}),
       };
       registry.register(paged);
 
@@ -323,7 +326,7 @@ describe('InboxActionRegistry', () => {
 
     it('treats a single provider failure as empty and does not short-circuit other providers', async () => {
       const failing = fakeProvider('workflows', [], { withListProcessed: true });
-      (failing.listProcessed as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+      (failing.listProcessed as Mock).mockRejectedValueOnce(new Error('boom'));
       const healthy = fakeProvider('evals', [], {
         withListProcessed: [
           createStubInboxAction({ id: 'healthy-1', source_app: 'evals', status: 'approved' }),
@@ -474,7 +477,7 @@ describe('InboxActionRegistry', () => {
       const failing = fakeProvider('workflows', [], {
         withFacets: { channel: [], respondedBy: [] },
       });
-      (failing.listProcessedFacets as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+      (failing.listProcessedFacets as Mock).mockRejectedValueOnce(new Error('boom'));
       const healthy = fakeProvider('evals', [], {
         withFacets: {
           channel: [{ value: 'inbox', count: 2 }],

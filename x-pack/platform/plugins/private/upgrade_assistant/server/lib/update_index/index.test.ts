@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { updateIndex } from '.';
 import type { IndicesPutSettingsRequest } from '@elastic/elasticsearch/lib/api/types';
@@ -14,9 +17,12 @@ import { getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server/src/index_
 const versionService = { getMajorVersion: () => 8 } as unknown as Version;
 
 // Mock the getReindexWarnings function
-jest.mock('@kbn/upgrade-assistant-pkg-server/src/index_settings', () => ({
-  getReindexWarnings: jest.fn(),
-}));
+vi.mock('@kbn/upgrade-assistant-pkg-server/src/index_settings', () => {
+      const mocked = {
+      getReindexWarnings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ackResponseMock = {
   acknowledged: true,
@@ -27,7 +33,7 @@ const ackResponseMock = {
 // const versionService = getMockVersionInfo();
 
 describe('updateIndex', () => {
-  const mockGetReindexWarnings = getReindexWarnings as jest.Mock;
+  const mockGetReindexWarnings = getReindexWarnings as Mock;
   const mockLogger = loggingSystemMock.create().get();
   const mockClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
   mockClient.rollup.getRollupIndexCaps.mockResponse({
@@ -57,7 +63,7 @@ describe('updateIndex', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('blockWrite operation', () => {

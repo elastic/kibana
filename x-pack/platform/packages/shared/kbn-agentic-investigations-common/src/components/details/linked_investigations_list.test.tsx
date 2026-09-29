@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -25,7 +27,7 @@ const renderList = (props: Partial<React.ComponentProps<typeof LinkedInvestigati
       items={undefined}
       isLoading={false}
       isError={false}
-      onClickItem={jest.fn()}
+      onClickItem={vi.fn()}
       {...props}
     />,
     { wrapper }
@@ -80,14 +82,14 @@ describe('LinkedInvestigationsList', () => {
   });
 
   it('calls onClickItem with the row id when clicked', () => {
-    const onClickItem = jest.fn();
+    const onClickItem = vi.fn();
     renderList({ items: ITEMS, onClickItem });
     fireEvent.click(screen.getByTestId('linkedInvestigationRow-inv-1'));
     expect(onClickItem).toHaveBeenCalledWith('inv-1');
   });
 
   it('calls onClickItem when Enter is pressed on a row', async () => {
-    const onClickItem = jest.fn();
+    const onClickItem = vi.fn();
     renderList({ items: ITEMS, onClickItem });
     const row = screen.getByTestId('linkedInvestigationRow-inv-2');
     row.focus();
@@ -96,7 +98,7 @@ describe('LinkedInvestigationsList', () => {
   });
 
   it('calls onClickItem when Space is pressed on a row', async () => {
-    const onClickItem = jest.fn();
+    const onClickItem = vi.fn();
     renderList({ items: ITEMS, onClickItem });
     const row = screen.getByTestId('linkedInvestigationRow-inv-1');
     row.focus();

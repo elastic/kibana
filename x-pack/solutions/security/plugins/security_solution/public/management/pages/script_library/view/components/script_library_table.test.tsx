@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 
@@ -22,8 +25,8 @@ import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/c
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import { EndpointScriptsGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
 
-jest.mock('../../../../../common/components/user_privileges');
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+vi.mock('../../../../../common/components/user_privileges');
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
 
 describe('ScriptLibraryTable', () => {
   let render: (props?: ScriptLibraryTableProps) => ReturnType<AppContextTestRender['render']>;
@@ -52,8 +55,8 @@ describe('ScriptLibraryTable', () => {
           updatedAt: '2026-01-13T10:15:00Z',
         }),
       ],
-      onChange: jest.fn(),
-      onClickAction: jest.fn(),
+      onChange: vi.fn(),
+      onClickAction: vi.fn(),
       queryParams: {
         page: 1,
         pageSize: 10,
@@ -79,7 +82,7 @@ describe('ScriptLibraryTable', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useUserPrivilegesMock.mockReset();
   });
 

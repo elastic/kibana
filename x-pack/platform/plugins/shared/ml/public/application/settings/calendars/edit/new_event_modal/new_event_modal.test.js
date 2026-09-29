@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { fireEvent } from '@testing-library/react';
@@ -12,8 +14,8 @@ import { fireEvent } from '@testing-library/react';
 import { NewEventModal } from './new_event_modal';
 
 const testProps = {
-  closeModal: jest.fn(),
-  addEvent: jest.fn(),
+  closeModal: vi.fn(),
+  addEvent: vi.fn(),
 };
 
 describe('NewEventModal', () => {

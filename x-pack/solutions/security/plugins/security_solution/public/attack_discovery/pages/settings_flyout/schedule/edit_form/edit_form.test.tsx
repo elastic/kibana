@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -31,75 +34,93 @@ const mockConnectors: unknown[] = [
   },
 ];
 
-jest.mock('react-router', () => ({
-  matchPath: jest.fn(),
-  useLocation: jest.fn().mockReturnValue({
-    search: '',
-  }),
-  withRouter: jest.fn(),
-}));
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/hooks/use_connectors');
-jest.mock('../../workflow_configuration/hooks/use_list_workflows');
-jest.mock('../../workflow_configuration/hooks/use_generate_workflow');
-jest.mock('../../../use_workflow_editor_link', () => ({
-  useWorkflowEditorLink: jest.fn().mockReturnValue({
-    editorUrl: null,
-    navigateToEditor: jest.fn(),
-    resolvedWorkflowId: null,
-  }),
-}));
-jest.mock('../../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn().mockReturnValue('default'),
-}));
-jest.mock('../../../../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: jest.fn().mockReturnValue({
-    dataView: undefined,
-    status: 'ready',
-  }),
-}));
-jest.mock('../../workflow_settings_view/alert_retrieval_step/alert_retrieval_content', () => ({
-  AlertRetrievalContent: ({
-    alertRetrievalHasError,
-    connectorId,
-    workflowConfiguration,
-  }: {
-    alertRetrievalHasError: boolean;
-    connectorId: string | undefined;
-    workflowConfiguration: { alertRetrievalMode: string; esqlQuery?: string };
-  }) => (
-    <div
-      data-test-subj="alertRetrievalContent"
-      data-alert-retrieval-has-error={String(alertRetrievalHasError)}
-      data-connector-id={connectorId ?? ''}
-      data-default-alert-retrieval-mode={workflowConfiguration.alertRetrievalMode}
-      data-esql-query={workflowConfiguration.esqlQuery ?? ''}
-    />
-  ),
-}));
+vi.mock('react-router', () => {
+      const mocked = {
+      matchPath: vi.fn(),
+      useLocation: vi.fn().mockReturnValue({
+        search: '',
+      }),
+      withRouter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/hooks/use_connectors');
+vi.mock('../../workflow_configuration/hooks/use_list_workflows');
+vi.mock('../../workflow_configuration/hooks/use_generate_workflow');
+vi.mock('../../../use_workflow_editor_link', () => {
+      const mocked = {
+      useWorkflowEditorLink: vi.fn().mockReturnValue({
+        editorUrl: null,
+        navigateToEditor: vi.fn(),
+        resolvedWorkflowId: null,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn().mockReturnValue('default'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: vi.fn().mockReturnValue({
+        dataView: undefined,
+        status: 'ready',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../workflow_settings_view/alert_retrieval_step/alert_retrieval_content', () => {
+      const mocked = {
+      AlertRetrievalContent: ({
+        alertRetrievalHasError,
+        connectorId,
+        workflowConfiguration,
+      }: {
+        alertRetrievalHasError: boolean;
+        connectorId: string | undefined;
+        workflowConfiguration: { alertRetrievalMode: string; esqlQuery?: string };
+      }) => (
+        <div
+          data-test-subj="alertRetrievalContent"
+          data-alert-retrieval-has-error={String(alertRetrievalHasError)}
+          data-connector-id={connectorId ?? ''}
+          data-default-alert-retrieval-mode={workflowConfiguration.alertRetrievalMode}
+          data-esql-query={workflowConfiguration.esqlQuery ?? ''}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 // Stub the heavy AlertSelection subtree (lens embeddable, unified-search bar,
 // alert-preview tabs) that otherwise blows the 5s render budget under jsdom. The
 // stub keeps the `alertSelection` marker and an `alertsRange` control wired to
 // `onSettingsChanged` so the settings-change assertion still exercises it.
-jest.mock('../../alert_selection', () => ({
-  AlertSelection: ({
-    settings,
-    onSettingsChanged,
-  }: {
-    settings: Record<string, unknown>;
-    onSettingsChanged?: (settings: Record<string, unknown>) => void;
-  }) => (
-    <div data-test-subj="alertSelection">
-      <input
-        data-test-subj="alertsRange"
-        onChange={(e) => onSettingsChanged?.({ ...settings, size: e.target.value })}
-      />
-    </div>
-  ),
-}));
+vi.mock('../../alert_selection', () => {
+      const mocked = {
+      AlertSelection: ({
+        settings,
+        onSettingsChanged,
+      }: {
+        settings: Record<string, unknown>;
+        onSettingsChanged?: (settings: Record<string, unknown>) => void;
+      }) => (
+        <div data-test-subj="alertSelection">
+          <input
+            data-test-subj="alertsRange"
+            onChange={(e) => onSettingsChanged?.({ ...settings, size: e.target.value })}
+          />
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const onChangeMock = jest.fn();
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const onChangeMock = vi.fn();
 
 const defaultProps = {
   initialValue: {
@@ -131,7 +152,7 @@ describe('EditForm', () => {
   const mockTriggersActionsUi = triggersActionsUiMock.createStart();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Stub the heavy `triggers_actions_ui` ActionForm that `RuleActionsField`
     // mounts via `getActionForm` -> `getActionFormLazy` (a `React.lazy`/`Suspense`
@@ -142,21 +163,21 @@ describe('EditForm', () => {
     // `create_flyout` suite, we cannot blanket-stub `RuleActionsField` here
     // because tests below assert that `getActionForm` is invoked with specific
     // props, so we keep `RuleActionsField` live and stub `getActionForm` itself.
-    mockTriggersActionsUi.getActionForm = jest
+    mockTriggersActionsUi.getActionForm = vi
       .fn()
       .mockReturnValue(<div data-test-subj="mockActionForm" />);
 
     mockUseKibana.mockReturnValue({
       services: {
         featureFlags: {
-          useBooleanValue: jest.fn().mockReturnValue(false),
+          useBooleanValue: vi.fn().mockReturnValue(false),
         },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },
         triggersActionsUi: mockTriggersActionsUi,
         uiSettings: {
-          get: jest.fn(),
+          get: vi.fn(),
         },
         unifiedSearch: {
           ui: {
@@ -164,25 +185,25 @@ describe('EditForm', () => {
           },
         },
       },
-    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+    } as unknown as Mocked<ReturnType<typeof useKibana>>);
 
-    (useConnectors as jest.Mock).mockReturnValue({
+    (useConnectors as Mock).mockReturnValue({
       connectors: mockConnectors,
-      setCurrentConnector: jest.fn(),
+      setCurrentConnector: vi.fn(),
     });
 
-    (useListWorkflows as jest.Mock).mockReturnValue({
+    (useListWorkflows as Mock).mockReturnValue({
       data: [],
       isLoading: false,
       isSuccess: true,
       status: 'success' as const,
     });
 
-    (useGenerateWorkflow as jest.Mock).mockReturnValue({
-      cancelGeneration: jest.fn(),
+    (useGenerateWorkflow as Mock).mockReturnValue({
+      cancelGeneration: vi.fn(),
       generatedWorkflow: null,
       isGenerating: false,
-      startGeneration: jest.fn(),
+      startGeneration: vi.fn(),
     });
   });
 
@@ -249,7 +270,7 @@ describe('EditForm', () => {
   });
 
   it('should override default action frequency to `for each alert` instead of `summary of alerts`', async () => {
-    mockTriggersActionsUi.getActionForm = jest.fn();
+    mockTriggersActionsUi.getActionForm = vi.fn();
 
     await renderComponent();
 
@@ -265,7 +286,7 @@ describe('EditForm', () => {
   });
 
   it('calls onFormMutated when settings change', async () => {
-    const onFormMutatedMock = jest.fn();
+    const onFormMutatedMock = vi.fn();
 
     render(
       <TestProviders>
@@ -356,16 +377,16 @@ describe('EditForm', () => {
 
   // Failing: See https://github.com/elastic/kibana/issues/277801
   describe.skip('when isWorkflowsEnabled is true', () => {
-    const mockUseListWorkflows = useListWorkflows as jest.MockedFunction<typeof useListWorkflows>;
-    const mockUseGenerateWorkflow = useGenerateWorkflow as jest.MockedFunction<
+    const mockUseListWorkflows = useListWorkflows as MockedFunction<typeof useListWorkflows>;
+    const mockUseGenerateWorkflow = useGenerateWorkflow as MockedFunction<
       typeof useGenerateWorkflow
     >;
 
     const defaultGenerateWorkflowResult: UseGenerateWorkflowResult = {
-      cancelGeneration: jest.fn(),
+      cancelGeneration: vi.fn(),
       generatedWorkflow: null,
       isGenerating: false,
-      startGeneration: jest.fn(),
+      startGeneration: vi.fn(),
     };
 
     const workflowProps = {
@@ -412,8 +433,8 @@ describe('EditForm', () => {
         isRefetching: false,
         isStale: false,
         isSuccess: true,
-        refetch: jest.fn(),
-        remove: jest.fn(),
+        refetch: vi.fn(),
+        remove: vi.fn(),
         status: 'success' as const,
       } as ReturnType<typeof useListWorkflows>);
 
@@ -562,7 +583,7 @@ describe('EditForm', () => {
       // Simulate a legacy schedule (created with FF-off, no workflowConfig)
       // opened for editing under FF-on. The form must submit DEFAULT_WORKFLOW_CONFIGURATION
       // so that the server persists workflowConfig and the schedule migrates.
-      const onChange = jest.fn();
+      const onChange = vi.fn();
 
       await act(() => {
         render(
@@ -712,8 +733,8 @@ describe('EditForm', () => {
 // Failing: See https://github.com/elastic/kibana/issues/277801
 describe.skip('EditForm — empty alert retrieval workflows (deferred validation)', () => {
   const mockTriggersActionsUi = triggersActionsUiMock.createStart();
-  const mockUseListWorkflows = useListWorkflows as jest.MockedFunction<typeof useListWorkflows>;
-  const mockUseGenerateWorkflow = useGenerateWorkflow as jest.MockedFunction<
+  const mockUseListWorkflows = useListWorkflows as MockedFunction<typeof useListWorkflows>;
+  const mockUseGenerateWorkflow = useGenerateWorkflow as MockedFunction<
     typeof useGenerateWorkflow
   >;
 
@@ -727,19 +748,19 @@ describe.skip('EditForm — empty alert retrieval workflows (deferred validation
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {
         featureFlags: {
-          useBooleanValue: jest.fn().mockReturnValue(true),
+          useBooleanValue: vi.fn().mockReturnValue(true),
         },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },
         triggersActionsUi: mockTriggersActionsUi,
         uiSettings: {
-          get: jest.fn(),
+          get: vi.fn(),
         },
         unifiedSearch: {
           ui: {
@@ -747,11 +768,11 @@ describe.skip('EditForm — empty alert retrieval workflows (deferred validation
           },
         },
       },
-    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+    } as unknown as Mocked<ReturnType<typeof useKibana>>);
 
-    (useConnectors as jest.Mock).mockReturnValue({
+    (useConnectors as Mock).mockReturnValue({
       connectors: mockConnectors,
-      setCurrentConnector: jest.fn(),
+      setCurrentConnector: vi.fn(),
     });
 
     mockUseListWorkflows.mockReturnValue({
@@ -762,15 +783,15 @@ describe.skip('EditForm — empty alert retrieval workflows (deferred validation
     } as unknown as ReturnType<typeof useListWorkflows>);
 
     mockUseGenerateWorkflow.mockReturnValue({
-      cancelGeneration: jest.fn(),
+      cancelGeneration: vi.fn(),
       generatedWorkflow: null,
       isGenerating: false,
-      startGeneration: jest.fn(),
+      startGeneration: vi.fn(),
     } as UseGenerateWorkflowResult);
   });
 
   const renderWith = async (workflowConfig: Record<string, unknown>) => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     await act(() => {
       render(
@@ -792,7 +813,7 @@ describe.skip('EditForm — empty alert retrieval workflows (deferred validation
     return onChange;
   };
 
-  const latestSubmit = (onChange: jest.Mock) =>
+  const latestSubmit = (onChange: Mock) =>
     onChange.mock.calls[onChange.mock.calls.length - 1][0].submit as () => Promise<{
       isValid: boolean;
       data: Record<string, unknown>;

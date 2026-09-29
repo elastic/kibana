@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { PropsWithChildren } from 'react';
 import { renderHook } from '@testing-library/react';
@@ -16,11 +18,11 @@ import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_fil
 import { DataViewContext } from '..';
 import { useBaseEsQuery } from './use_base_es_query';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/hooks/use_global_filter_query');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/hooks/use_global_filter_query');
 
-const mockUseKibana = jest.mocked(useKibana);
-const mockUseGlobalFilterQuery = jest.mocked(useGlobalFilterQuery);
+const mockUseKibana = vi.mocked(useKibana);
+const mockUseGlobalFilterQuery = vi.mocked(useGlobalFilterQuery);
 
 const mockDataView = {
   id: 'entities-latest',
@@ -68,12 +70,12 @@ const flattenFilters = (filters: Array<Record<string, unknown>>): Array<Record<s
 
 describe('useBaseEsQuery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {
-        notifications: { toasts: { addError: jest.fn() } },
-        uiSettings: { get: jest.fn(() => false) },
+        notifications: { toasts: { addError: vi.fn() } },
+        uiSettings: { get: vi.fn(() => false) },
       },
     } as unknown as ReturnType<typeof useKibana>);
 

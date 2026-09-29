@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -14,29 +17,35 @@ import type { Index } from '../../../common/types';
 import { sendGet } from '../../application/services/http';
 import { IndexLifecycleSummary } from './index_lifecycle_summary';
 
-jest.mock('../../application/services/http', () => ({
-  sendGet: jest.fn(),
-}));
+vi.mock('../../application/services/http', () => {
+      const mocked = {
+      sendGet: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock useEuiTheme so the badge colors hook has a stable theme.
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: () => ({
-    euiTheme: {
-      colors: {
-        vis: {
-          euiColorVis3: '#BFDBFF',
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiTheme: () => ({
+        euiTheme: {
+          colors: {
+            vis: {
+              euiColorVis3: '#BFDBFF',
+            },
+            severity: {
+              risk: '#FF995E',
+              warning: '#FCD883',
+              neutral: '#B5E5F2',
+            },
+            backgroundBaseSubdued: '#CAD3E2',
+          },
         },
-        severity: {
-          risk: '#FF995E',
-          warning: '#FCD883',
-          neutral: '#B5E5F2',
-        },
-        backgroundBaseSubdued: '#CAD3E2',
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const flushMicrotasks = async () => {
   await Promise.resolve();
@@ -48,12 +57,12 @@ const getUrlForApp = (appId: string, options?: { path?: string }) => {
 
 describe('IndexLifecycleSummary polling', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    (sendGet as jest.Mock).mockReset();
+    vi.useFakeTimers();
+    (sendGet as Mock).mockReset();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('shows refreshing callout and then renders action/step when explain returns full data', async () => {
@@ -61,7 +70,7 @@ describe('IndexLifecycleSummary polling', () => {
     const deferred = new Promise((resolve) => {
       resolveSendGet = resolve;
     });
-    (sendGet as jest.Mock).mockReturnValue(deferred);
+    (sendGet as Mock).mockReturnValue(deferred);
 
     const indexName = 'testy_polling';
     const index: Index = {
@@ -116,11 +125,11 @@ describe('IndexLifecycleSummary polling', () => {
     expect(screen.getByText('Current step')).toBeInTheDocument();
 
     await act(async () => {
-      jest.advanceTimersByTime(10_000);
+      vi.advanceTimersByTime(10_000);
       await flushMicrotasks();
     });
 
-    expect((sendGet as jest.Mock).mock.calls.length).toBe(1);
+    expect((sendGet as Mock).mock.calls.length).toBe(1);
   });
 
   test('polls until exhausted when explain stays incomplete', async () => {
@@ -149,7 +158,7 @@ describe('IndexLifecycleSummary polling', () => {
       },
     } as IlmExplainLifecycleResponse;
 
-    (sendGet as jest.Mock).mockResolvedValue(response);
+    (sendGet as Mock).mockResolvedValue(response);
 
     renderWithI18n(<IndexLifecycleSummary index={index} getUrlForApp={getUrlForApp} />);
 
@@ -158,23 +167,23 @@ describe('IndexLifecycleSummary polling', () => {
     await act(async () => {
       await flushMicrotasks();
     });
-    expect((sendGet as jest.Mock).mock.calls.length).toBe(1);
+    expect((sendGet as Mock).mock.calls.length).toBe(1);
     expect(screen.getByTestId('ilmExplainPendingPanel')).toBeInTheDocument();
 
     for (let i = 0; i < 5; i++) {
       await act(async () => {
-        jest.advanceTimersByTime(1_000);
+        vi.advanceTimersByTime(1_000);
         await flushMicrotasks();
       });
     }
-    expect((sendGet as jest.Mock).mock.calls.length).toBe(6);
+    expect((sendGet as Mock).mock.calls.length).toBe(6);
 
     expect(screen.queryByTestId('ilmExplainPendingPanel')).not.toBeInTheDocument();
     expect(screen.getByTestId('ilmExplainFailedPanel')).toBeInTheDocument();
   });
 
   test('stops showing refreshing panel after polling is exhausted', async () => {
-    (sendGet as jest.Mock).mockRejectedValue(new Error('boom'));
+    (sendGet as Mock).mockRejectedValue(new Error('boom'));
 
     const indexName = 'testy_polling_exhausted';
     const index: Index = {
@@ -198,15 +207,15 @@ describe('IndexLifecycleSummary polling', () => {
       // First poll is immediate; flush so the rejection is handled + next poll is scheduled.
       await flushMicrotasks();
     });
-    expect((sendGet as jest.Mock).mock.calls.length).toBe(1);
+    expect((sendGet as Mock).mock.calls.length).toBe(1);
 
     for (let i = 0; i < 5; i++) {
       await act(async () => {
-        jest.advanceTimersByTime(1_000);
+        vi.advanceTimersByTime(1_000);
         await flushMicrotasks();
       });
     }
-    expect((sendGet as jest.Mock).mock.calls.length).toBe(6);
+    expect((sendGet as Mock).mock.calls.length).toBe(6);
 
     expect(screen.queryByTestId('ilmExplainPendingPanel')).not.toBeInTheDocument();
     expect(screen.getByTestId('ilmExplainFailedPanel')).toBeInTheDocument();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { createMockEndpointAppContext, getRegisteredVersionedRouteMock } from '../../mocks';
 import { registerGetInsightsRoute } from './get_insights';
@@ -13,14 +16,17 @@ import { NotFoundError } from '../../errors';
 import type { EndpointAppContext } from '../../types';
 import type { SecuritySolutionPluginRouterMock } from '../../../mocks';
 
-jest.mock('../../services', () => ({
-  securityWorkflowInsightsService: {
-    fetch: jest.fn(),
-  },
-}));
+vi.mock('../../services', () => {
+      const mocked = {
+      securityWorkflowInsightsService: {
+        fetch: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const fetchMock = jest.requireMock('../../services').securityWorkflowInsightsService
-  .fetch as jest.Mock;
+const fetchMock = (await vi.importMock('../../services')).securityWorkflowInsightsService
+  .fetch as Mock;
 
 describe('Get Insights Route Handler', () => {
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
@@ -42,7 +48,7 @@ describe('Get Insights Route Handler', () => {
     registerGetInsightsRoute(router, mockEndpointContext);
 
     (
-      mockEndpointContext.service.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      mockEndpointContext.service.getInternalFleetServices().ensureInCurrentSpace as Mock
     ).mockResolvedValue(undefined);
 
     fetchMock.mockClear();
@@ -52,15 +58,15 @@ describe('Get Insights Route Handler', () => {
         core: {
           security: {
             authc: {
-              getCurrentUser: jest
+              getCurrentUser: vi
                 .fn()
                 .mockReturnValue({ username: 'test-user', roles: ['admin'] }),
             },
           },
         },
         securitySolution: {
-          getEndpointAuthz: jest.fn().mockResolvedValue(authz),
-          getSpaceId: jest.fn().mockReturnValue('default'),
+          getEndpointAuthz: vi.fn().mockResolvedValue(authz),
+          getSpaceId: vi.fn().mockReturnValue('default'),
         },
       };
 
@@ -301,11 +307,11 @@ describe('Get Insights Route Handler', () => {
     });
     describe('with space awareness enabled', () => {
       const enableSpaceAwareness: () => {
-        mockEnsureInCurrentSpace: jest.Mock;
+        mockEnsureInCurrentSpace: Mock;
       } = () => {
         return {
           mockEnsureInCurrentSpace: mockEndpointContext.service.getInternalFleetServices()
-            .ensureInCurrentSpace as jest.Mock,
+            .ensureInCurrentSpace as Mock,
         };
       };
 

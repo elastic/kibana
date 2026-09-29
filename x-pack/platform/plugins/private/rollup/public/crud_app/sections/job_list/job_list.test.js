@@ -5,45 +5,53 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { JobListUi } from './job_list';
 
-jest.mock('../../services', () => {
-  const services = jest.requireActual('../../services');
+vi.mock('../../services', async () => {
+  const services = (await vi.importActual('../../services'));
   return {
     ...services,
     getRouterLinkProps: (link) => ({ href: link }),
   };
 });
 
-jest.mock('../../services/documentation_links', () => {
-  const coreMocks = jest.requireActual('@kbn/core/public/mocks');
+vi.mock('../../services/documentation_links', async () => {
+  const coreMocks = (await vi.importActual('@kbn/core/public/mocks'));
 
   return {
-    init: jest.fn(),
+    init: vi.fn(),
     documentationLinks: coreMocks.docLinksServiceMock.createStartContract().links,
   };
 });
 
-jest.mock('./job_table', () => ({
-  JobTable: () => <div data-test-subj="jobTableStub" />,
-}));
+vi.mock('./job_table', () => {
+      const mocked = {
+      JobTable: () => <div data-test-subj="jobTableStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./detail_panel', () => ({
-  DetailPanel: () => <div data-test-subj="detailPanelStub" />,
-}));
+vi.mock('./detail_panel', () => {
+      const mocked = {
+      DetailPanel: () => <div data-test-subj="detailPanelStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const startMock = coreMock.createStart();
 
 const defaultProps = {
   history: { location: { search: '' } },
-  loadJobs: jest.fn(),
-  refreshJobs: jest.fn(),
-  openDetailPanel: jest.fn(),
-  closeDetailPanel: jest.fn(),
+  loadJobs: vi.fn(),
+  refreshJobs: vi.fn(),
+  openDetailPanel: vi.fn(),
+  closeDetailPanel: vi.fn(),
   hasJobs: false,
   isLoading: false,
   kibana: { services: { setBreadcrumbs: startMock.chrome.setBreadcrumbs } },
@@ -54,7 +62,7 @@ const renderComponent = (overrides = {}) =>
 
 describe('<JobList />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render deprecated prompt when loading is complete and there are no rollup jobs', () => {

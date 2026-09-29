@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { autocomplete } from './autocomplete';
 import {
@@ -55,7 +57,7 @@ const sortExpectSuggestions = (
 
 describe('SORT Autocomplete', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // @TODO — test for replacement ranges when we support that.

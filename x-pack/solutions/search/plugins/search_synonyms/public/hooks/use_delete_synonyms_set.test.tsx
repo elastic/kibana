@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { renderHook, waitFor } from '@testing-library/react';
@@ -12,12 +15,12 @@ import { useKibana } from './use_kibana';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDeleteSynonymsSet } from './use_delete_synonyms_set';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockDelete = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
+const mockUseKibana = useKibana as Mock;
+const mockDelete = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
 
 describe('useDeleteSynonymsSet hook', () => {
   beforeEach(() => {

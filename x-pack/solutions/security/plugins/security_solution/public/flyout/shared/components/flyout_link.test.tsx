@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { FLYOUT_LINK_TEST_ID, FLYOUT_PREVIEW_LINK_TEST_ID } from './test_ids';
@@ -21,7 +23,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import type { IdentityFields } from '../../document_details/shared/utils';
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../common/lib/kibana', () => {
+vi.mock('../../../common/lib/kibana', () => {
   return {
     useKibana: () => ({
       services: {
@@ -32,26 +34,35 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../entity_details/shared/hooks/use_entity_from_store', () => ({
-  useEntityFromStore: jest.fn().mockReturnValue({
-    entity: null,
-    entityRecord: null,
-    firstSeen: null,
-    lastSeen: null,
-    isLoading: false,
-    error: null,
-    refetch: jest.fn(),
-  }),
-}));
+vi.mock('../../entity_details/shared/hooks/use_entity_from_store', () => {
+      const mocked = {
+      useEntityFromStore: vi.fn().mockReturnValue({
+        entity: null,
+        entityRecord: null,
+        firstSeen: null,
+        lastSeen: null,
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+      ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../document_details/shared/hooks/use_which_flyout', () => ({
-  useWhichFlyout: jest.fn(),
-}));
+vi.mock('../../document_details/shared/hooks/use_which_flyout', () => {
+      const mocked = {
+      useWhichFlyout: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderFlyoutLink = (
   field: string,
@@ -76,7 +87,7 @@ const renderFlyoutLink = (
 
 describe('<FlyoutLink />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
   describe('when flyout is currently open', () => {
@@ -90,7 +101,7 @@ describe('<FlyoutLink />', () => {
     });
 
     it('should render a preview link if useWhichFlyout is not null', () => {
-      jest.mocked(useWhichFlyout).mockReturnValue('flyout');
+      vi.mocked(useWhichFlyout).mockReturnValue('flyout');
       const { getByTestId } = renderFlyoutLink('user.name', 'user', undefined, false);
 
       expect(getByTestId(FLYOUT_PREVIEW_LINK_TEST_ID)).toBeInTheDocument();
@@ -102,7 +113,7 @@ describe('<FlyoutLink />', () => {
 
   describe('when flyout is not currently open', () => {
     beforeEach(() => {
-      jest.mocked(useWhichFlyout).mockReturnValue(null);
+      vi.mocked(useWhichFlyout).mockReturnValue(null);
     });
 
     it('should not render a link if field does not have flyout', () => {

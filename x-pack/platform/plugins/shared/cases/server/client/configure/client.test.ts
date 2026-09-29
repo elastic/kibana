@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
@@ -33,7 +35,7 @@ describe('client', () => {
   const casesClientInternal = createCasesClientInternalMock();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getConnectors', () => {
@@ -90,7 +92,7 @@ describe('client', () => {
     ];
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('remove unsupported connectors', async () => {

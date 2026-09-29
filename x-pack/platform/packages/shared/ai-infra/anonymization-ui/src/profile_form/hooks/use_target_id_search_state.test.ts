@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { TARGET_LOOKUP_DEBOUNCE_MS } from '../constants';
 import { useTargetIdSearchState } from './use_target_id_search_state';
 
 describe('useTargetIdSearchState', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('syncs search values from target id and debounces updates', () => {
@@ -34,7 +36,7 @@ describe('useTargetIdSearchState', () => {
     expect(result.current.debouncedTargetSearchValue).toBe('initial');
 
     act(() => {
-      jest.advanceTimersByTime(TARGET_LOOKUP_DEBOUNCE_MS);
+      vi.advanceTimersByTime(TARGET_LOOKUP_DEBOUNCE_MS);
     });
     expect(result.current.debouncedTargetSearchValue).toBe('logs');
 

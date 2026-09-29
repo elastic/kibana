@@ -5,19 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import Fsp from 'fs/promises';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { TsProject } from '@kbn/ts-projects';
 import { createTypeCheckConfigs } from './create_type_check_configs';
 
-jest.mock('@kbn/std', () => ({
-  asyncMapWithLimit: jest
-    .fn()
-    .mockImplementation(
-      async <T, R>(items: T[], _limit: number, mapper: (item: T) => Promise<R>): Promise<R[]> =>
-        Promise.all(items.map(mapper))
-    ),
-}));
+vi.mock('@kbn/std', () => {
+      const mocked = {
+      asyncMapWithLimit: vi
+        .fn()
+        .mockImplementation(
+          async <T, R>(items: T[], _limit: number, mapper: (item: T) => Promise<R>): Promise<R[]> =>
+            Promise.all(items.map(mapper))
+        ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeProject = (dir: string): TsProject =>
   ({
@@ -32,7 +38,7 @@ const makeProject = (dir: string): TsProject =>
   } as unknown as TsProject);
 
 const makeLog = (): SomeDevLog =>
-  ({ verbose: jest.fn(), info: jest.fn() } as unknown as SomeDevLog);
+  ({ verbose: vi.fn(), info: vi.fn() } as unknown as SomeDevLog);
 
 // Content that createTypeCheckConfigs generates for a project with empty config and no refs.
 const expectedContent = JSON.stringify(
@@ -50,22 +56,22 @@ const expectedContent = JSON.stringify(
 );
 
 describe('createTypeCheckConfigs', () => {
-  let readFileSpy: jest.SpyInstance;
-  let writeFileSpy: jest.SpyInstance;
-  let statSpy: jest.SpyInstance;
-  let utimesSpy: jest.SpyInstance;
+  let readFileSpy: MockInstance;
+  let writeFileSpy: MockInstance;
+  let statSpy: MockInstance;
+  let utimesSpy: MockInstance;
 
   const ARCHIVE_MTIME = new Date('2024-01-01T00:00:00Z');
 
   beforeEach(() => {
-    readFileSpy = jest.spyOn(Fsp, 'readFile');
-    writeFileSpy = jest.spyOn(Fsp, 'writeFile').mockResolvedValue(undefined as never);
-    statSpy = jest.spyOn(Fsp, 'stat').mockResolvedValue({ mtime: ARCHIVE_MTIME } as never);
-    utimesSpy = jest.spyOn(Fsp, 'utimes').mockResolvedValue(undefined);
+    readFileSpy = vi.spyOn(Fsp, 'readFile');
+    writeFileSpy = vi.spyOn(Fsp, 'writeFile').mockResolvedValue(undefined as never);
+    statSpy = vi.spyOn(Fsp, 'stat').mockResolvedValue({ mtime: ARCHIVE_MTIME } as never);
+    utimesSpy = vi.spyOn(Fsp, 'utimes').mockResolvedValue(undefined);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('onlyCreateMissing: false (default) — always keep tsconfigs up-to-date', () => {

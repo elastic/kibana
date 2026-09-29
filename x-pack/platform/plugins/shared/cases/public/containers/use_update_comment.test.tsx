@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { basicCase } from './mock';
@@ -14,8 +17,8 @@ import { casesQueriesKeys } from './constants';
 import { useUpdateComment } from './use_update_comment';
 import { TestProviders, createTestQueryClient } from '../common/mock';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
 describe('useUpdateComment', () => {
   const sampleUpdate = {
@@ -25,17 +28,17 @@ describe('useUpdateComment', () => {
     version: basicCase.comments[0].version,
   };
 
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
-  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+  const addSuccess = vi.fn();
+  const addError = vi.fn();
+  (useToasts as Mock).mockReturnValue({ addSuccess, addError });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('patch case and refresh the case page', async () => {
     const queryClient = createTestQueryClient();
-    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const queryClientSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useUpdateComment(), {
       wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
@@ -53,7 +56,7 @@ describe('useUpdateComment', () => {
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const patchCommentSpy = jest.spyOn(api, 'patchComment');
+    const patchCommentSpy = vi.spyOn(api, 'patchComment');
     const { result } = renderHook(() => useUpdateComment(), {
       wrapper: TestProviders,
     });
@@ -71,7 +74,7 @@ describe('useUpdateComment', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    jest.spyOn(api, 'patchComment').mockRejectedValue(new Error('useUpdateComment: Test error'));
+    vi.spyOn(api, 'patchComment').mockRejectedValue(new Error('useUpdateComment: Test error'));
 
     const { result } = renderHook(() => useUpdateComment(), {
       wrapper: TestProviders,

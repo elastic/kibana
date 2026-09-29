@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { set } from '@kbn/safer-lodash-set/fp';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { renderParameterTemplates } from './render';
@@ -95,7 +97,7 @@ describe('Tines body render', () => {
 
     it('should render error body', () => {
       const errorMessage = 'test error';
-      jest.spyOn(JSON, 'stringify').mockImplementationOnce(() => {
+      vi.spyOn(JSON, 'stringify').mockImplementationOnce(() => {
         throw new Error(errorMessage);
       });
       const result = renderParameterTemplates(logger, params, variables);

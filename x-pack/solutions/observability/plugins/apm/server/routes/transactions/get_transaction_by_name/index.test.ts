@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getTransactionByName } from '.';
 
 const requiredFieldsForHit = {
@@ -20,7 +22,7 @@ const requiredFieldsForHit = {
 function createMockApmEventClient(esResponse: {
   hits: { hits: Array<{ fields?: Record<string, unknown[]> }> };
 }) {
-  const search = jest.fn().mockResolvedValue(esResponse);
+  const search = vi.fn().mockResolvedValue(esResponse);
   return { search } as any;
 }
 

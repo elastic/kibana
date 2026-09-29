@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,8 +19,8 @@ import { renderWithTestingProviders } from '../../../common/mock';
 import { getMockCommentRenderingContext } from '../../user_actions/mock';
 import type { CommentActionsProps } from './comment_actions';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/navigation/hooks');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/navigation/hooks');
 
 const defaultProps: CommentActionsProps = {
   commentId: 'comment-1',
@@ -42,7 +44,7 @@ const renderComponent = (
 
 describe('CommentActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the property actions toolbar', async () => {

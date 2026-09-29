@@ -5,25 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { TransformColumnsProps } from './transform_control_columns';
 import { transformControlColumns } from './transform_control_columns';
 
 describe('transformControlColumns', () => {
   const defaultProps: TransformColumnsProps = {
-    onRowSelected: jest.fn(),
+    onRowSelected: vi.fn(),
     loadingEventIds: [],
     showCheckboxes: true,
     data: [],
     timelineId: 'test-timelineId',
-    setEventsLoading: jest.fn(),
-    setEventsDeleted: jest.fn(),
+    setEventsLoading: vi.fn(),
+    setEventsDeleted: vi.fn(),
     columnHeaders: [],
     controlColumns: [],
     selectedEventIds: {},
     tabType: '',
     isSelectAllChecked: false,
     browserFields: {},
-    onSelectPage: jest.fn(),
+    onSelectPage: vi.fn(),
     pageSize: 0,
     sort: [],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

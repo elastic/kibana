@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ACTION_STATE_ROUTE } from '../../../../common/endpoint/constants';
 import { act, fireEvent } from '@testing-library/react';
 import React from 'react';
@@ -52,7 +54,7 @@ describe('Missing encryption key callout', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be visible when encryption key not set', async () => {

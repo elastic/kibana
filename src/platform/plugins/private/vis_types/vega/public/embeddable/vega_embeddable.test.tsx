@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -28,11 +30,20 @@ import { reportVegaRender } from '../lib/vega_render_telemetry';
 import type { VegaByValueState } from '../../server';
 import { vegaEmbeddableFactory } from './vega_embeddable';
 
-jest.mock('@kbn/presentation-util', () => ({ openLazyFlyout: jest.fn() }));
-jest.mock('../lib/vega_render_telemetry', () => ({ reportVegaRender: jest.fn() }));
-jest.mock('../lib/extract_index_pattern', () => ({
-  extractIndexPatternsFromSpec: jest.fn(async (): Promise<never[]> => []),
-}));
+vi.mock('@kbn/presentation-util', () => {
+      const mocked = { openLazyFlyout: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/vega_render_telemetry', () => {
+      const mocked = { reportVegaRender: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/extract_index_pattern', () => {
+      const mocked = {
+      extractIndexPatternsFromSpec: vi.fn(async (): Promise<never[]> => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 interface MockVegaVisComponentProps {
   fireEvent: VegaEventHandler;
@@ -41,26 +52,29 @@ interface MockVegaVisComponentProps {
   visData: VegaParser;
 }
 
-const mockVegaRequestHandler = jest.fn();
-const mockCreateVegaRequestHandler = jest.fn(
+const mockVegaRequestHandler = vi.fn();
+const mockCreateVegaRequestHandler = vi.fn(
   (_deps: unknown, _context: { abortSignal: AbortSignal; inspectorAdapters: unknown }) =>
     mockVegaRequestHandler
 );
 let mockVegaVisComponentProps: MockVegaVisComponentProps | undefined;
 
-jest.mock('../async_services', () => ({
-  createVegaRequestHandler: mockCreateVegaRequestHandler,
-  VegaVisComponent: (props: MockVegaVisComponentProps): null => {
-    mockVegaVisComponentProps = props;
-    return null;
-  },
-}));
+vi.mock('../async_services', () => {
+      const mocked = {
+      createVegaRequestHandler: mockCreateVegaRequestHandler,
+      VegaVisComponent: (props: MockVegaVisComponentProps): null => {
+        mockVegaVisComponentProps = props;
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenLazyFlyout = jest.mocked(openLazyFlyout);
-const mockReportVegaRender = jest.mocked(reportVegaRender);
+const mockOpenLazyFlyout = vi.mocked(openLazyFlyout);
+const mockReportVegaRender = vi.mocked(reportVegaRender);
 
 describe('vegaEmbeddableFactory', () => {
-  const executeTriggerActions = jest.fn();
+  const executeTriggerActions = vi.fn();
 
   /**
    * Built fresh per test. The embeddable subscribes to these when it is built but only unsubscribes
@@ -111,7 +125,7 @@ describe('vegaEmbeddableFactory', () => {
   const visualizationDependencies = {
     core: coreMock.createSetup(),
     plugins: { data: dataPluginMock.createSetupContract() },
-    getServiceSettings: jest.fn(),
+    getServiceSettings: vi.fn(),
   } as unknown as VegaVisualizationDependencies;
 
   const visData = { isVegaLite: false, useMap: false } as unknown as VegaParser;
@@ -353,7 +367,7 @@ describe('vegaEmbeddableFactory', () => {
 
   it('gives the flyout the focus targets to restore when it closes', async () => {
     const { api } = await buildEmbeddable();
-    const returnFocus = jest.fn();
+    const returnFocus = vi.fn();
 
     api.onEdit({ isNewPanel: true, returnFocus });
     expect(mockOpenLazyFlyout.mock.calls[0][0]).toEqual(
@@ -366,7 +380,7 @@ describe('vegaEmbeddableFactory', () => {
 
   it('restores the original spec when editing is cancelled', async () => {
     const { api } = await buildEmbeddable();
-    const closeFlyout = jest.fn();
+    const closeFlyout = vi.fn();
 
     api.onEdit();
     const flyout = mockOpenLazyFlyout.mock.calls[0][0];
@@ -382,7 +396,7 @@ describe('vegaEmbeddableFactory', () => {
     expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: bar }' });
     content.props.onRevert();
     expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: point }' });
-    expect(jest.mocked(parentApi.removePanel)).not.toHaveBeenCalled();
+    expect(vi.mocked(parentApi.removePanel)).not.toHaveBeenCalled();
   });
 
   it('removes the panel when editing is cancelled on a brand-new one', async () => {
@@ -392,18 +406,18 @@ describe('vegaEmbeddableFactory', () => {
     const flyout = mockOpenLazyFlyout.mock.calls[0][0];
     const content = (await flyout.loadContent({
       ariaLabelledBy: 'vega-flyout-title',
-      closeFlyout: jest.fn(),
+      closeFlyout: vi.fn(),
     })) as React.ReactElement<{ onRevert: () => void }>;
 
     // A new panel has no spec worth reverting to, so cancelling drops it from the dashboard.
     content.props.onRevert();
 
-    expect(jest.mocked(parentApi.removePanel)).toHaveBeenCalledWith(api.uuid);
+    expect(vi.mocked(parentApi.removePanel)).toHaveBeenCalledWith(api.uuid);
   });
 
   it('keeps the edited spec when saving', async () => {
     const { api } = await buildEmbeddable();
-    const closeFlyout = jest.fn();
+    const closeFlyout = vi.fn();
 
     api.onEdit();
     const flyout = mockOpenLazyFlyout.mock.calls[0][0];

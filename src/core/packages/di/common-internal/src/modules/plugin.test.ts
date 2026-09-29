@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Container } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
@@ -238,8 +240,8 @@ describe('PluginModule', () => {
     });
 
     it('should call the related hook functions', () => {
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
 
       plugin.bind(hook).toConstantValue(handler1);
       plugin.bind(hook).toConstantValue(handler2);
@@ -251,10 +253,10 @@ describe('PluginModule', () => {
 
     it('should call the hook function from the parent scope', () => {
       let lastCalled = '';
-      const handler1 = jest.fn(() => {
+      const handler1 = vi.fn(() => {
         lastCalled = 'handler1';
       });
-      const handler2 = jest.fn(() => {
+      const handler2 = vi.fn(() => {
         lastCalled = 'handler2';
       });
 
@@ -269,9 +271,9 @@ describe('PluginModule', () => {
 
     it('should call the hook function only once per scope', () => {
       const plugin2 = root.get(Plugin)(token2);
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
-      const handler3 = jest.fn();
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
+      const handler3 = vi.fn();
 
       root.bind(hook).toConstantValue(handler1);
       plugin.bind(hook).toConstantValue(handler2);

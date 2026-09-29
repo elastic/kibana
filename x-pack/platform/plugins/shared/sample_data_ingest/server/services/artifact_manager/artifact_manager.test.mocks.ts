@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-export const fetchArtifactVersionsMock = jest.fn();
-export const validateArtifactArchiveMock = jest.fn();
-export const downloadMock = jest.fn();
-export const openZipArchiveMock = jest.fn();
-export const loadMappingFileMock = jest.fn();
-export const loadManifestFileMock = jest.fn();
-export const deleteFileMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./utils', () => {
-  const actual = jest.requireActual('./utils');
+export const fetchArtifactVersionsMock = vi.fn();
+export const validateArtifactArchiveMock = vi.fn();
+export const downloadMock = vi.fn();
+export const openZipArchiveMock = vi.fn();
+export const loadMappingFileMock = vi.fn();
+export const loadManifestFileMock = vi.fn();
+export const deleteFileMock = vi.fn();
+
+vi.doMock('./utils', async () => {
+  const actual = (await vi.importActual('./utils'));
   return {
     ...actual,
     fetchArtifactVersions: fetchArtifactVersionsMock,
@@ -26,11 +28,11 @@ jest.doMock('./utils', () => {
   };
 });
 
-export const majorMinorMock = jest.fn();
-export const latestVersionMock = jest.fn();
+export const majorMinorMock = vi.fn();
+export const latestVersionMock = vi.fn();
 
-jest.doMock('./utils/semver', () => {
-  const actual = jest.requireActual('./utils/semver');
+vi.doMock('./utils/semver', async () => {
+  const actual = (await vi.importActual('./utils/semver'));
   return {
     ...actual,
     majorMinor: majorMinorMock,
@@ -38,6 +40,9 @@ jest.doMock('./utils/semver', () => {
   };
 });
 
-jest.doMock('@kbn/fs', () => ({
-  deleteFile: deleteFileMock,
-}));
+vi.doMock('@kbn/fs', () => {
+      const mocked = {
+      deleteFile: deleteFileMock,
+    };
+      return { ...mocked, default: mocked };
+    });

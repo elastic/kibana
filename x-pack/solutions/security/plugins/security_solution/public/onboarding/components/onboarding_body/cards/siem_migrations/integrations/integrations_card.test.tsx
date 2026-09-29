@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import IntegrationsCard from './integrations_card';
 import { render } from '@testing-library/react';
@@ -14,33 +16,36 @@ import {
   getDefaultAvailablePackages,
 } from '../../../../../../common/lib/integrations/components/__mocks__/with_available_packages';
 
-jest.mock('../../../../onboarding_context');
-jest.mock('../../../../../../common/lib/integrations/components/security_integrations_grid_tabs');
-jest.mock('../../../../../../common/lib/integrations/components/with_available_packages');
+vi.mock('../../../../onboarding_context');
+vi.mock('../../../../../../common/lib/integrations/components/security_integrations_grid_tabs');
+vi.mock('../../../../../../common/lib/integrations/components/with_available_packages');
 
 const props = {
-  setComplete: jest.fn(),
-  checkComplete: jest.fn(),
-  setExpandedCardId: jest.fn(),
-  isCardAvailable: jest.fn(),
-  isCardComplete: jest.fn(),
+  setComplete: vi.fn(),
+  checkComplete: vi.fn(),
+  setExpandedCardId: vi.fn(),
+  isCardAvailable: vi.fn(),
+  isCardComplete: vi.fn(),
 };
 
-const mockUseGetIntegrationsStats = jest.fn((_: Function) => ({
-  getIntegrationsStats: jest.fn(),
+const mockUseGetIntegrationsStats = vi.fn((_: Function) => ({
+  getIntegrationsStats: vi.fn(),
   isLoading: false,
 }));
-jest.mock(
+vi.mock(
   '../../../../../../siem_migrations/rules/service/hooks/use_get_integrations_stats',
-  () => ({ useGetIntegrationsStats: (params: Function) => mockUseGetIntegrationsStats(params) })
+  () => {
+      const mocked = { useGetIntegrationsStats: (params: Function) => mockUseGetIntegrationsStats(params) };
+      return { ...mocked, default: mocked };
+    }
 );
 
 describe('IntegrationsCard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseGetIntegrationsStats.mockImplementation((_: Function) => ({
-      getIntegrationsStats: jest.fn(),
+      getIntegrationsStats: vi.fn(),
       isLoading: false,
     }));
     mockAvailablePackages.mockReturnValue(getDefaultAvailablePackages());

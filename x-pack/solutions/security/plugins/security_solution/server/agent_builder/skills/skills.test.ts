@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { createMockEndpointAppContext } from '../../endpoint/mocks';
@@ -22,7 +24,7 @@ import {
 import { createElasticDefendPolicyManagementSkill } from './elastic_defend_policy_management';
 
 const endpointAppContextService = createMockEndpointAppContext().service;
-const getStartServices = jest.fn();
+const getStartServices = vi.fn();
 const elasticDefendPolicyManagementSkill = createElasticDefendPolicyManagementSkill({
   endpointAppContextService,
   getStartServices,

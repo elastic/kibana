@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ProfileCache } from './profile_cache';
 import type { UserProfileEntry } from './types';
 
@@ -32,7 +34,7 @@ const diego: UserProfileEntry = {
 };
 
 const createBulkResolve = (profiles: UserProfileEntry[] = [jane, diego]) =>
-  jest.fn(async (uids: string[]) => profiles.filter((p) => uids.includes(p.uid)));
+  vi.fn(async (uids: string[]) => profiles.filter((p) => uids.includes(p.uid)));
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tests.
@@ -76,7 +78,7 @@ describe('ProfileCache', () => {
     });
 
     it('removes UIDs from requested on failure so retries work', async () => {
-      const bulkResolve = jest
+      const bulkResolve = vi
         .fn()
         .mockRejectedValueOnce(new Error('network'))
         .mockResolvedValueOnce([jane]);
@@ -91,7 +93,7 @@ describe('ProfileCache', () => {
     });
 
     it('retries UIDs omitted by a partial bulkResolve response', async () => {
-      const bulkResolve = jest
+      const bulkResolve = vi
         .fn()
         .mockResolvedValueOnce([]) // First call returns nothing for u_jane
         .mockResolvedValueOnce([jane]); // Second call succeeds
@@ -188,7 +190,7 @@ describe('ProfileCache', () => {
 
     it('notifies subscribers when entries are merged', async () => {
       const cache = new ProfileCache(createBulkResolve());
-      const listener = jest.fn();
+      const listener = vi.fn();
 
       cache.subscribe(listener);
       await cache.ensureLoaded(['u_jane']);
@@ -198,7 +200,7 @@ describe('ProfileCache', () => {
 
     it('stops notifying after unsubscribe', async () => {
       const cache = new ProfileCache(createBulkResolve());
-      const listener = jest.fn();
+      const listener = vi.fn();
 
       const unsubscribe = cache.subscribe(listener);
       unsubscribe();

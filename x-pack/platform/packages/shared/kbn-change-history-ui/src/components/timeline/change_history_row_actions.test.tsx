@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
@@ -21,8 +23,8 @@ const historicalItem: ChangeHistoryListItem = {
 
 describe('renderDefaultChangeHistoryRowActions', () => {
   it('invokes compare and restore callbacks from the menu', () => {
-    const requestCompareToVersion = jest.fn();
-    const requestRestoreVersion = jest.fn();
+    const requestCompareToVersion = vi.fn();
+    const requestRestoreVersion = vi.fn();
 
     render(
       renderDefaultChangeHistoryRowActions({
@@ -46,7 +48,7 @@ describe('renderDefaultChangeHistoryRowActions', () => {
     render(
       renderDefaultChangeHistoryRowActions({
         item: historicalItem,
-        requestCompareToVersion: jest.fn(),
+        requestCompareToVersion: vi.fn(),
       }),
       { wrapper: TestProvider }
     );
@@ -58,7 +60,7 @@ describe('renderDefaultChangeHistoryRowActions', () => {
   });
 
   it('omits compare when compare callback is not provided', () => {
-    const requestRestoreVersion = jest.fn();
+    const requestRestoreVersion = vi.fn();
 
     render(
       renderDefaultChangeHistoryRowActions({

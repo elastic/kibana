@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -20,9 +22,9 @@ describe('ExceptionsAddToRulesOrLists', () => {
         rules={null}
         isBulkAction={false}
         selectedRadioOption="add_to_rule"
-        onListSelectionChange={jest.fn()}
-        onRuleSelectionChange={jest.fn()}
-        onRadioChange={jest.fn()}
+        onListSelectionChange={vi.fn()}
+        onRuleSelectionChange={vi.fn()}
+        onRadioChange={vi.fn()}
       />
     );
 
@@ -43,9 +45,9 @@ describe('ExceptionsAddToRulesOrLists', () => {
         ]}
         isBulkAction={false}
         selectedRadioOption="add_to_rule"
-        onListSelectionChange={jest.fn()}
-        onRuleSelectionChange={jest.fn()}
-        onRadioChange={jest.fn()}
+        onListSelectionChange={vi.fn()}
+        onRuleSelectionChange={vi.fn()}
+        onRadioChange={vi.fn()}
       />
     );
 
@@ -86,9 +88,9 @@ describe('ExceptionsAddToRulesOrLists', () => {
         ]}
         isBulkAction={false}
         selectedRadioOption="add_to_rule"
-        onListSelectionChange={jest.fn()}
-        onRuleSelectionChange={jest.fn()}
-        onRadioChange={jest.fn()}
+        onListSelectionChange={vi.fn()}
+        onRuleSelectionChange={vi.fn()}
+        onRadioChange={vi.fn()}
       />
     );
 
@@ -128,9 +130,9 @@ describe('ExceptionsAddToRulesOrLists', () => {
         ]}
         isBulkAction={false}
         selectedRadioOption="add_to_rule"
-        onListSelectionChange={jest.fn()}
-        onRuleSelectionChange={jest.fn()}
-        onRadioChange={jest.fn()}
+        onListSelectionChange={vi.fn()}
+        onRuleSelectionChange={vi.fn()}
+        onRadioChange={vi.fn()}
       />
     );
 

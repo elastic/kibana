@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as Rx from 'rxjs';
 
 import type { RouteValidatorConfig } from '@kbn/core/server';
@@ -43,7 +45,7 @@ describe('_disable_legacy_url_aliases', () => {
 
     const log = loggingSystemMock.create().get('spaces');
 
-    const clientService = new SpacesClientService(jest.fn(), 'traditional');
+    const clientService = new SpacesClientService(vi.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);

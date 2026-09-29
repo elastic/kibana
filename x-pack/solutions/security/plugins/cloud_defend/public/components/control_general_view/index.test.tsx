@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { parse } from 'yaml';
 import { render, waitFor } from '@testing-library/react';
@@ -21,7 +23,7 @@ import { INPUT_CONTROL } from '../../../common/constants';
 
 // FLAKY: https://github.com/elastic/kibana/issues/214268
 describe.skip('<ControlGeneralView />', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   // defining this here to avoid a warning in testprovider with params.history changing on rerender.
   const params = coreMock.createAppMountParameters();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -16,7 +18,7 @@ describe('RulesListPrompts', () => {
     showNoAuthPrompt: false,
     showCreateFirstRulePrompt: false,
     showCreateRuleButtonInPrompt: false,
-    onCreateRulesClick: jest.fn(),
+    onCreateRulesClick: vi.fn(),
   };
 
   it('shows the rules-specific missing privileges title when unauthorized', () => {

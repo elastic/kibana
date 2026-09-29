@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act } from '@testing-library/react';
 
@@ -47,14 +49,14 @@ const fields = [
   },
 ] as FieldSpec[];
 
-jest.mock('../hooks', () => {
+vi.mock('../hooks', async () => {
   return {
-    ...jest.requireActual('../hooks'),
-    useStartServices: jest.fn().mockReturnValue({
+    ...(await vi.importActual('../hooks')),
+    useStartServices: vi.fn().mockReturnValue({
       notifications: {
         toasts: {
-          addError: jest.fn(),
-          addSuccess: jest.fn(),
+          addError: vi.fn(),
+          addSuccess: vi.fn(),
         },
       },
       http: {
@@ -65,14 +67,14 @@ jest.mock('../hooks', () => {
       },
       data: {
         dataViews: {
-          create: jest.fn().mockResolvedValue({
+          create: vi.fn().mockResolvedValue({
             fields,
           }),
         },
       },
       kql: {
         autocomplete: {
-          getQuerySuggestions: jest.fn().mockResolvedValue([
+          getQuerySuggestions: vi.fn().mockResolvedValue([
             {
               type: 'field',
               field: {
@@ -114,34 +116,34 @@ jest.mock('../hooks', () => {
               },
             },
           ]),
-          hasQuerySuggestions: jest.fn().mockReturnValue(true),
+          hasQuerySuggestions: vi.fn().mockReturnValue(true),
         },
       },
       unifiedSearch: {
         ui: {
-          IndexPatternSelect: jest.fn(),
-          SearchBar: jest.fn().mockReturnValue(null),
-          AggregateQuerySearchBar: jest.fn().mockReturnValue(null),
-          FiltersBuilderLazy: jest.fn(),
+          IndexPatternSelect: vi.fn(),
+          SearchBar: vi.fn().mockReturnValue(null),
+          AggregateQuerySearchBar: vi.fn().mockReturnValue(null),
+          FiltersBuilderLazy: vi.fn(),
         },
       },
       storage: {
         storage: {
-          clear: jest.fn(),
-          getItem: jest.fn(),
-          key: jest.fn(),
-          removeItem: jest.fn(),
-          setItem: jest.fn(),
+          clear: vi.fn(),
+          getItem: vi.fn(),
+          key: vi.fn(),
+          removeItem: vi.fn(),
+          setItem: vi.fn(),
           length: 0,
         },
-        get: jest.fn(),
-        set: jest.fn(),
-        remove: jest.fn(),
-        clear: jest.fn(),
+        get: vi.fn(),
+        set: vi.fn(),
+        remove: vi.fn(),
+        clear: vi.fn(),
       },
       docLinks: {},
       uiSettings: {
-        get: jest.fn(),
+        get: vi.fn(),
       },
       usageCollection: { reportUiCounter: () => {} },
       appName: 'test',

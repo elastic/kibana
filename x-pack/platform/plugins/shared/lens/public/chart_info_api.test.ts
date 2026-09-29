@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 import { createChartInfoApi } from './chart_info_api';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { LensDocument, DatasourceMap, VisualizationMap } from '@kbn/lens-common';
 
-const mockGetVisualizationInfo = jest.fn().mockReturnValue({
+const mockGetVisualizationInfo = vi.fn().mockReturnValue({
   layers: [
     {
       layerId: 'test',
@@ -23,7 +25,7 @@ const mockGetVisualizationInfo = jest.fn().mockReturnValue({
     },
   ],
 });
-const mockGetDatasourceInfo = jest.fn().mockResolvedValue([
+const mockGetDatasourceInfo = vi.fn().mockResolvedValue([
   {
     layerId: 'test',
     columns: [

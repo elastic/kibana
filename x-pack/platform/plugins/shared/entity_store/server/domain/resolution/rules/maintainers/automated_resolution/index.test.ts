@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityMaintainerTaskMethodContext } from '../../../../../tasks/entity_maintainers/types';
@@ -22,17 +25,26 @@ const EMAIL_RULE = RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH;
 const ALIAS_RESOLUTION_RULE = RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION;
 const NAMESPACE = 'default';
 
-jest.mock('../related_user_alias_resolution', () => ({
-  runRelatedUserAliasResolution: jest.fn(),
-}));
+vi.mock('../related_user_alias_resolution', () => {
+      const mocked = {
+      runRelatedUserAliasResolution: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../matcher', () => ({
-  runEsqlMatcherRule: jest.fn(),
-}));
+vi.mock('../../matcher', () => {
+      const mocked = {
+      runEsqlMatcherRule: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../asset_manager/resolve_entity_store_indices', () => ({
-  resolveLatestEntitiesIndexName: jest.fn().mockResolvedValue('.entities.v2.latest.default'),
-}));
+vi.mock('../../../../asset_manager/resolve_entity_store_indices', () => {
+      const mocked = {
+      resolveLatestEntitiesIndexName: vi.fn().mockResolvedValue('.entities.v2.latest.default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const matcherState = {
   lastProcessedTimestamp: '2026-03-10T00:00:00Z',
@@ -66,10 +78,10 @@ const watermarkedRules = Object.fromEntries(MATCHER_RULE_IDS.map((id) => [id, ma
 
 const createEsClient = () =>
   ({
-    search: jest.fn(),
-    esql: { query: jest.fn() },
-    indices: { refresh: jest.fn().mockResolvedValue({}) },
-  } as unknown as jest.Mocked<ElasticsearchClient>);
+    search: vi.fn(),
+    esql: { query: vi.fn() },
+    indices: { refresh: vi.fn().mockResolvedValue({}) },
+  } as unknown as Mocked<ElasticsearchClient>);
 
 const runConfig = async (
   esClient: ElasticsearchClient,
@@ -93,9 +105,9 @@ const runConfig = async (
     esClient,
     cpsEsClient: esClient,
     resolutionRulesClient: {
-      getEffectiveRules: jest.fn().mockResolvedValue(effectiveRules),
+      getEffectiveRules: vi.fn().mockResolvedValue(effectiveRules),
     },
-    telemetry: { report: jest.fn() },
+    telemetry: { report: vi.fn() },
   } as unknown as EntityMaintainerTaskMethodContext;
 
   const result = await automatedResolutionMaintainerConfig.run(context);
@@ -104,9 +116,9 @@ const runConfig = async (
 
 describe('automatedResolutionMaintainerConfig', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (runEsqlMatcherRule as jest.Mock).mockResolvedValue(matcherState);
-    (runRelatedUserAliasResolution as jest.Mock).mockResolvedValue({
+    vi.clearAllMocks();
+    (runEsqlMatcherRule as Mock).mockResolvedValue(matcherState);
+    (runRelatedUserAliasResolution as Mock).mockResolvedValue({
       lastProcessedTimestamp: null,
       lastRun: null,
     });
@@ -155,17 +167,17 @@ describe('automatedResolutionMaintainerConfig', () => {
     });
 
     expect(runEsqlMatcherRule).toHaveBeenCalledTimes(1);
-    expect((runEsqlMatcherRule as jest.Mock).mock.calls[0][0].ruleId).toBe(EMAIL_RULE);
+    expect((runEsqlMatcherRule as Mock).mock.calls[0][0].ruleId).toBe(EMAIL_RULE);
     expect(first.rules[RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE]).toBeUndefined();
 
-    (runEsqlMatcherRule as jest.Mock).mockClear();
+    (runEsqlMatcherRule as Mock).mockClear();
     await runConfig(esClient, {
       version: AUTOMATED_RESOLUTION_STATE_VERSION,
       rules: { [EMAIL_RULE]: matcherState },
     });
 
     expect(runEsqlMatcherRule).toHaveBeenCalledTimes(2);
-    expect((runEsqlMatcherRule as jest.Mock).mock.calls.map((call) => call[0].ruleId)).toEqual([
+    expect((runEsqlMatcherRule as Mock).mock.calls.map((call) => call[0].ruleId)).toEqual([
       EMAIL_RULE,
       RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
     ]);
@@ -194,7 +206,7 @@ describe('automatedResolutionMaintainerConfig', () => {
       lastRun: null,
     });
 
-    const emailCall = (runEsqlMatcherRule as jest.Mock).mock.calls.find(
+    const emailCall = (runEsqlMatcherRule as Mock).mock.calls.find(
       (call) => call[0].ruleId === EMAIL_RULE
     );
     expect(emailCall[0].state.lastProcessedTimestamp).toBeNull();
@@ -224,7 +236,7 @@ describe('automatedResolutionMaintainerConfig', () => {
         )
       );
 
-      const ruleCalls = (runEsqlMatcherRule as jest.Mock).mock.calls.filter(
+      const ruleCalls = (runEsqlMatcherRule as Mock).mock.calls.filter(
         (call) => call[0].ruleId === ruleId
       );
       expect(ruleCalls).toHaveLength(0);
@@ -265,7 +277,7 @@ describe('automatedResolutionMaintainerConfig', () => {
     await runConfig(esClient, { version: AUTOMATED_RESOLUTION_STATE_VERSION, rules: {} }, enabled);
 
     expect(runEsqlMatcherRule).toHaveBeenCalledTimes(1);
-    expect((runEsqlMatcherRule as jest.Mock).mock.calls[0][0].ruleId).toBe(EMAIL_RULE);
+    expect((runEsqlMatcherRule as Mock).mock.calls[0][0].ruleId).toBe(EMAIL_RULE);
     expect(runRelatedUserAliasResolution).toHaveBeenCalledTimes(1);
   });
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Observable } from 'rxjs';
 import { interval, of, throwError } from 'rxjs';
 import { shareReplay, switchMap, take } from 'rxjs';
@@ -107,7 +109,7 @@ describe('SearchResponseCache', () => {
       cache.set('123', wrapWithAbortController(err$));
       cache.set('234', wrapWithAbortController(res$));
 
-      const errHandler = jest.fn();
+      const errHandler = vi.fn();
       await err$.toPromise().catch(errHandler);
       await res$.toPromise().catch(errHandler);
 
@@ -129,7 +131,7 @@ describe('SearchResponseCache', () => {
       ]);
       cache.set('123', wrapWithAbortController(err$));
 
-      const errHandler = jest.fn();
+      const errHandler = vi.fn();
       await err$.toPromise().catch(errHandler);
 
       expect(errHandler).toHaveBeenCalledTimes(1);
@@ -231,7 +233,7 @@ describe('SearchResponseCache', () => {
       const s$ = getSearchObservable$();
       cache.set('123', wrapWithAbortController(s$));
 
-      const next = jest.fn();
+      const next = vi.fn();
       const cached$ = cache.get('123');
 
       cached$!.response$.subscribe({
@@ -251,7 +253,7 @@ describe('SearchResponseCache', () => {
       const s$ = getSearchObservable$();
       cache.set('123', wrapWithAbortController(s$));
 
-      const next = jest.fn();
+      const next = vi.fn();
       let cached$: Observable<IKibanaSearchResponse<any>> | undefined;
       s$.subscribe({
         next: (res) => {
@@ -281,7 +283,7 @@ describe('SearchResponseCache', () => {
       // wait for original search to complete
       await s$!.response$.toPromise();
 
-      const next = jest.fn();
+      const next = vi.fn();
       const cached$ = cache.get('123');
       cached$!.response$.subscribe({
         next,
@@ -300,7 +302,7 @@ describe('SearchResponseCache', () => {
       // wait for original search to complete
       await s$!.toPromise();
 
-      const next = jest.fn();
+      const next = vi.fn();
       const cached$ = cache.get('123');
       cached$!.response$.subscribe({
         next,

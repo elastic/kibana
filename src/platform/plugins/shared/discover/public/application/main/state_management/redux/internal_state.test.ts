@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ExistenceFetchStatus } from '@kbn/unified-field-list';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import {
@@ -734,14 +736,14 @@ describe('InternalStateStore', () => {
     const setupFakeFlyouts = () => {
       const lensEditFlyout = document.createElement('div');
       lensEditFlyout.id = 'lnsCancelEditOnFlyFlyout';
-      const lensEditClick = jest.fn();
+      const lensEditClick = vi.fn();
       lensEditFlyout.addEventListener('click', lensEditClick);
 
       const metricsFlyout = document.createElement('div');
       metricsFlyout.setAttribute('data-test-subj', 'metricsExperienceFlyout');
       const metricsCloseButton = document.createElement('button');
       metricsCloseButton.setAttribute('data-test-subj', 'euiFlyoutCloseButton');
-      const metricsClick = jest.fn();
+      const metricsClick = vi.fn();
       metricsCloseButton.addEventListener('click', metricsClick);
       metricsFlyout.appendChild(metricsCloseButton);
 

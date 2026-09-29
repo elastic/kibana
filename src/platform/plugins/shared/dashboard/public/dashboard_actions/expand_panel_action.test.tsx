@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject, take } from 'rxjs';
 import type { ExpandPanelActionApi } from './expand_panel_action';
 import { ExpandPanelAction } from './expand_panel_action';
@@ -24,7 +26,7 @@ describe('Expand panel action', () => {
         isExpandable: true,
         uuid: 'superId',
         parentApi: {
-          expandPanel: jest.fn(),
+          expandPanel: vi.fn(),
           expandedPanelId$,
         },
       },
@@ -42,13 +44,17 @@ describe('Expand panel action', () => {
     expect(await action.isCompatible(emptyContext)).toBe(false);
   });
 
-  it('getCompatibilityChangesSubject emits when expandedPanelId changes', (done) => {
-    const subject = action.getCompatibilityChangesSubject(context);
-    subject?.pipe(take(1)).subscribe(() => {
-      done();
-    });
-    expandedPanelId$.next('superPanelId');
-  });
+  it('getCompatibilityChangesSubject emits when expandedPanelId changes', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+          const subject = action.getCompatibilityChangesSubject(context);
+          subject?.pipe(take(1)).subscribe(() => {
+            done();
+          });
+          expandedPanelId$.next('superPanelId');
+        
+      }));
 
   it('returns the correct icon based on expanded panel id', async () => {
     expect(await action.getIconType(context)).toBe('maximize');

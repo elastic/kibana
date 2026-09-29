@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { EuiEmptyPrompt } from '@elastic/eui';
 import type { TestBed } from '@kbn/test-jest-helpers';
 import { registerTestBed } from '@kbn/test-jest-helpers';
@@ -28,8 +30,8 @@ import type { CustomSortingOptions } from './components/table_sort_select';
 
 const mockUseEffect = useEffect;
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
+vi.mock('lodash', () => {
+  const original = require('lodash');
 
   return {
     ...original,
@@ -37,7 +39,7 @@ jest.mock('lodash', () => {
   };
 });
 
-jest.mock('react-use/lib/useDebounce', () => {
+vi.mock('react-use/lib/useDebounce', () => {
   return (cb: () => void, ms: number, deps: any[]) => {
     mockUseEffect(() => {
       cb();
@@ -63,7 +65,7 @@ describe('TableListView', () => {
     entityNamePlural: 'tests',
     initialFilter: '',
     initialPageSize: 20,
-    findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
+    findItems: vi.fn().mockResolvedValue({ total: 0, hits: [] }),
     getDetailViewLink: () => 'http://elastic.co',
     urlStateEnabled: false,
     onFetchSuccess: () => {},
@@ -72,7 +74,7 @@ describe('TableListView', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
 
   beforeEach(() => {
@@ -80,7 +82,7 @@ describe('TableListView', () => {
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   const setup = (
@@ -159,8 +161,8 @@ describe('TableListView', () => {
         },
       ];
 
-      const findItems = jest.fn().mockResolvedValue({ total: 1, hits });
-      const deleteItems = jest.fn();
+      const findItems = vi.fn().mockResolvedValue({ total: 1, hits });
+      const deleteItems = vi.fn();
 
       let testBed: TestBed;
 
@@ -223,7 +225,7 @@ describe('TableListView', () => {
 
       await act(async () => {
         testBed = await setup({
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits }),
         });
       });
 
@@ -257,7 +259,7 @@ describe('TableListView', () => {
 
       await act(async () => {
         testBed = await setup({
-          findItems: jest.fn().mockResolvedValue({
+          findItems: vi.fn().mockResolvedValue({
             total: updatedHits.length,
             hits: updatedHits,
           }),
@@ -281,7 +283,7 @@ describe('TableListView', () => {
 
       await act(async () => {
         testBed = await setup({
-          findItems: jest.fn().mockResolvedValue({
+          findItems: vi.fn().mockResolvedValue({
             total: hits.length,
             // Not including the "updatedAt" metadata
             hits: hits.map(({ attributes, references }) => ({ attributes, references })),
@@ -305,7 +307,7 @@ describe('TableListView', () => {
 
       await act(async () => {
         testBed = await setup({
-          findItems: jest.fn().mockResolvedValue({
+          findItems: vi.fn().mockResolvedValue({
             total: hits.length + 1,
             hits: [
               ...hits,
@@ -359,7 +361,7 @@ describe('TableListView', () => {
       await act(async () => {
         testBed = await setup({
           initialPageSize,
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
         });
       });
 
@@ -382,7 +384,7 @@ describe('TableListView', () => {
       await act(async () => {
         testBed = await setup({
           initialPageSize,
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
         });
       });
 
@@ -412,7 +414,7 @@ describe('TableListView', () => {
       await act(async () => {
         testBed = await setup({
           initialPageSize,
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
         });
       });
 
@@ -446,7 +448,7 @@ describe('TableListView', () => {
       await act(async () => {
         testBed = await setup({
           initialPageSize,
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
           id: tableId,
         });
       });
@@ -474,7 +476,7 @@ describe('TableListView', () => {
         await act(async () => {
           testBed = await setup({
             initialPageSize,
-            findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+            findItems: vi.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
             id: tableId,
           });
         });
@@ -524,7 +526,7 @@ describe('TableListView', () => {
 
       await act(async () => {
         testBed = await setupColumnSorting({
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits }),
         });
       });
 
@@ -544,7 +546,7 @@ describe('TableListView', () => {
 
       await act(async () => {
         testBed = await setupColumnSorting({
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits }),
         });
       });
       const { openSortSelect } = getActions(testBed!);
@@ -572,7 +574,7 @@ describe('TableListView', () => {
 
       await act(async () => {
         testBed = await setupColumnSorting({
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits }),
         });
       });
 
@@ -616,7 +618,7 @@ describe('TableListView', () => {
       component.unmount();
       await act(async () => {
         testBed = await setupColumnSorting({
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits }),
         });
       });
 
@@ -651,7 +653,7 @@ describe('TableListView', () => {
 
       await act(async () => {
         testBed = await setupColumnSorting({
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits }),
         });
       });
 
@@ -770,7 +772,7 @@ describe('TableListView', () => {
 
       await act(async () => {
         testBed = await setupCustomColumnSorting({
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits }),
         });
       });
 
@@ -814,7 +816,7 @@ describe('TableListView', () => {
       component.unmount();
       await act(async () => {
         testBed = await setupCustomColumnSorting({
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits }),
         });
       });
 
@@ -849,7 +851,7 @@ describe('TableListView', () => {
 
       await act(async () => {
         testBed = await setupCustomColumnSorting({
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits }),
         });
       });
 
@@ -960,7 +962,7 @@ describe('TableListView', () => {
 
       await act(async () => {
         testBed = await setupColumnSorting({
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits }),
         });
       });
 
@@ -980,7 +982,7 @@ describe('TableListView', () => {
 
       await act(async () => {
         testBed = await setupColumnSorting({
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits }),
         });
       });
       const { openSortSelect } = getActions(testBed!);
@@ -1042,7 +1044,7 @@ describe('TableListView', () => {
 
       await act(async () => {
         testBed = await setupInspector({
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits }),
           contentEditor: { enabled: true },
         });
       });
@@ -1129,7 +1131,7 @@ describe('TableListView', () => {
     test('should filter by tag from the table', async () => {
       let testBed: TestBed;
 
-      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits });
+      const findItems = vi.fn().mockResolvedValue({ total: hits.length, hits });
 
       await act(async () => {
         testBed = await setupTagFiltering({
@@ -1186,7 +1188,7 @@ describe('TableListView', () => {
 
     test('should filter by tag from the search bar filter', async () => {
       let testBed: TestBed;
-      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits });
+      const findItems = vi.fn().mockResolvedValue({ total: hits.length, hits });
 
       await act(async () => {
         testBed = await setupTagFiltering({
@@ -1237,7 +1239,7 @@ describe('TableListView', () => {
 
     test('should not have the tag filter if tagging is disabled', async () => {
       let testBed: TestBed;
-      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits });
+      const findItems = vi.fn().mockResolvedValue({ total: hits.length, hits });
 
       await act(async () => {
         testBed = await setup(
@@ -1279,7 +1281,7 @@ describe('TableListView', () => {
       let testBed: TestBed;
 
       const initialFilter = 'tag:(tag-1)';
-      const findItems = jest.fn().mockResolvedValue({
+      const findItems = vi.fn().mockResolvedValue({
         total: 1,
         hits: [
           {
@@ -1342,7 +1344,7 @@ describe('TableListView', () => {
       },
     ];
 
-    const findItems = jest.fn();
+    const findItems = vi.fn();
 
     const setupSearch = async (...args: Parameters<ReturnType<typeof registerTestBed>>) => {
       let testBed: TestBed;
@@ -1561,7 +1563,7 @@ describe('TableListView', () => {
     test('should read the initial search term from URL', async () => {
       let testBed: TestBed;
 
-      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+      const findItems = vi.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
 
       await act(async () => {
         testBed = await setupInitialUrl('?s=hello')({
@@ -1597,7 +1599,7 @@ describe('TableListView', () => {
     test('should update the URL when changing the search term', async () => {
       let testBed: TestBed;
 
-      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+      const findItems = vi.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
 
       await act(async () => {
         testBed = await setupTagFiltering({
@@ -1623,7 +1625,7 @@ describe('TableListView', () => {
     test('should filter by initial tag from the URL', async () => {
       let testBed: TestBed;
 
-      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+      const findItems = vi.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
 
       await act(async () => {
         testBed = await setupInitialUrl(
@@ -1666,7 +1668,7 @@ describe('TableListView', () => {
     test('should update the URL when changing a tag from the filter dropdown', async () => {
       let testBed: TestBed;
 
-      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+      const findItems = vi.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
 
       await act(async () => {
         testBed = await setupTagFiltering({
@@ -1700,7 +1702,7 @@ describe('TableListView', () => {
     test('should set initial sort column and direction from URL', async () => {
       let testBed: TestBed;
 
-      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+      const findItems = vi.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
 
       await act(async () => {
         testBed = await setupInitialUrl(
@@ -1741,7 +1743,7 @@ describe('TableListView', () => {
     test('should update the URL when changing the sort from the dropdown', async () => {
       let testBed: TestBed;
 
-      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+      const findItems = vi.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
 
       await act(async () => {
         testBed = await setupTagFiltering({
@@ -1818,10 +1820,10 @@ describe('TableListView', () => {
 
     const setupTest = async (props?: Partial<TableListViewTableProps>) => {
       let testBed: TestBed | undefined;
-      const deleteItems = jest.fn();
+      const deleteItems = vi.fn();
       await act(async () => {
         testBed = await setup({
-          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          findItems: vi.fn().mockResolvedValue({ total: hits.length, hits }),
           deleteItems,
           ...props,
         });
@@ -1897,8 +1899,8 @@ describe('TableList', () => {
     entityName: 'test',
     entityNamePlural: 'tests',
     initialPageSize: 20,
-    findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
-    onFetchSuccess: jest.fn(),
+    findItems: vi.fn().mockResolvedValue({ total: 0, hits: [] }),
+    onFetchSuccess: vi.fn(),
     tableCaption: 'test title',
     getDetailViewLink: () => '',
     setPageDataTestSubject: () => {},
@@ -1926,7 +1928,7 @@ describe('TableList', () => {
         references: [],
       },
     ];
-    const findItems = jest
+    const findItems = vi
       .fn()
       .mockResolvedValue({ total: originalHits.length, hits: originalHits });
 
@@ -1968,7 +1970,7 @@ describe('TableList', () => {
   });
 
   it('reports successful fetches', async () => {
-    const onFetchSuccess = jest.fn();
+    const onFetchSuccess = vi.fn();
 
     await act(async () => {
       setup({ onFetchSuccess });
@@ -1978,7 +1980,7 @@ describe('TableList', () => {
   });
 
   it('reports the page data test subject', async () => {
-    const setPageDataTestSubject = jest.fn();
+    const setPageDataTestSubject = vi.fn();
 
     await act(async () => {
       setup({ setPageDataTestSubject });

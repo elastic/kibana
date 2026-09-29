@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import type { StyleProperties } from './vector_style_editor';
@@ -19,7 +21,7 @@ import type { IField } from '../../../fields/field';
 import { AbstractField } from '../../../fields/field';
 import { VectorStyle } from '../vector_style';
 
-jest.mock('../../../../kibana_services', () => {
+vi.mock('../../../../kibana_services', () => {
   return {
     getIsDarkMode() {
       return false;

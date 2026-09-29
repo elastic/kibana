@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of } from 'rxjs';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
@@ -15,13 +18,19 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getLiveQueryDetailsRoute } from './get_live_query_details_route';
 import { getActionResponses } from './utils';
 
-jest.mock('./utils', () => ({
-  getActionResponses: jest.fn(),
-}));
+vi.mock('./utils', () => {
+      const mocked = {
+      getActionResponses: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/get_internal_saved_object_client', () => ({
-  createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
-}));
+vi.mock('../../utils/get_internal_saved_object_client', () => {
+      const mocked = {
+      createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getLiveQueryDetailsRoute', () => {
   let routeHandler: RequestHandler;
@@ -33,19 +42,19 @@ describe('getLiveQueryDetailsRoute', () => {
     return httpService.createRouter();
   };
 
-  const createMockContext = (mockSearchFn: jest.Mock) => {
+  const createMockContext = (mockSearchFn: Mock) => {
     const mockCoreContext = coreMock.createRequestHandlerContext();
 
     return {
       core: Promise.resolve(mockCoreContext),
       search: Promise.resolve({
         search: mockSearchFn,
-        saveSession: jest.fn(),
-        getSession: jest.fn(),
-        findSessions: jest.fn(),
-        updateSession: jest.fn(),
-        cancelSession: jest.fn(),
-        deleteSession: jest.fn(),
+        saveSession: vi.fn(),
+        getSession: vi.fn(),
+        findSessions: vi.fn(),
+        updateSession: vi.fn(),
+        cancelSession: vi.fn(),
+        deleteSession: vi.fn(),
       }),
     };
   };
@@ -61,11 +70,11 @@ describe('getLiveQueryDetailsRoute', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns action details with completed status', async () => {
-    const mockSearchFn = jest.fn().mockReturnValue(
+    const mockSearchFn = vi.fn().mockReturnValue(
       of({
         actionDetails: {
           _source: {
@@ -85,7 +94,7 @@ describe('getLiveQueryDetailsRoute', () => {
       })
     );
 
-    (getActionResponses as jest.Mock).mockReturnValue(
+    (getActionResponses as Mock).mockReturnValue(
       of({
         action_id: 'query-1',
         pending: 0,
@@ -97,11 +106,11 @@ describe('getLiveQueryDetailsRoute', () => {
     );
 
     mockOsqueryContext = {
-      isCpsActive: jest.fn().mockResolvedValue(false),
+      isCpsActive: vi.fn().mockResolvedValue(false),
       service: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'space-a' }),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'space-a' }),
       },
-      logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
+      logFactory: { get: vi.fn().mockReturnValue({ debug: vi.fn() }) },
     } as unknown as OsqueryAppContext;
 
     const mockRouter = createMockRouter();
@@ -146,7 +155,7 @@ describe('getLiveQueryDetailsRoute', () => {
   });
 
   const setupActionDetailsSearch = () =>
-    jest.fn().mockReturnValue(
+    vi.fn().mockReturnValue(
       of({
         actionDetails: {
           _source: {
@@ -159,7 +168,7 @@ describe('getLiveQueryDetailsRoute', () => {
     );
 
   const mockActionResponse = () =>
-    (getActionResponses as jest.Mock).mockReturnValue(
+    (getActionResponses as Mock).mockReturnValue(
       of({
         action_id: 'query-1',
         pending: 0,
@@ -175,14 +184,14 @@ describe('getLiveQueryDetailsRoute', () => {
     mockActionResponse();
 
     mockOsqueryContext = {
-      isCpsActive: jest.fn().mockResolvedValue(false),
+      isCpsActive: vi.fn().mockResolvedValue(false),
       service: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'custom-space' }),
-        getIntegrationNamespaces: jest
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'custom-space' }),
+        getIntegrationNamespaces: vi
           .fn()
           .mockResolvedValue({ [OSQUERY_INTEGRATION_NAME]: ['team.a'] }),
       },
-      logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
+      logFactory: { get: vi.fn().mockReturnValue({ debug: vi.fn() }) },
     } as unknown as OsqueryAppContext;
 
     const mockRouter = createMockRouter();
@@ -211,12 +220,12 @@ describe('getLiveQueryDetailsRoute', () => {
     mockActionResponse();
 
     mockOsqueryContext = {
-      isCpsActive: jest.fn().mockResolvedValue(false),
+      isCpsActive: vi.fn().mockResolvedValue(false),
       service: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'custom-space' }),
-        getIntegrationNamespaces: jest.fn().mockResolvedValue({ [OSQUERY_INTEGRATION_NAME]: [] }),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'custom-space' }),
+        getIntegrationNamespaces: vi.fn().mockResolvedValue({ [OSQUERY_INTEGRATION_NAME]: [] }),
       },
-      logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
+      logFactory: { get: vi.fn().mockReturnValue({ debug: vi.fn() }) },
     } as unknown as OsqueryAppContext;
 
     const mockRouter = createMockRouter();
@@ -244,16 +253,16 @@ describe('getLiveQueryDetailsRoute', () => {
     it('uses the CPS-scoped search client for action details', async () => {
       const mockCpsSearchFn = setupActionDetailsSearch();
       mockActionResponse();
-      const mockCpsSearch = jest.fn().mockReturnValue({ search: mockCpsSearchFn });
-      const contextSearchFn = jest.fn();
+      const mockCpsSearch = vi.fn().mockReturnValue({ search: mockCpsSearchFn });
+      const contextSearchFn = vi.fn();
 
       mockOsqueryContext = {
-        isCpsActive: jest.fn().mockResolvedValue(true),
+        isCpsActive: vi.fn().mockResolvedValue(true),
         service: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
         },
-        logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
-        getStartServices: jest
+        logFactory: { get: vi.fn().mockReturnValue({ debug: vi.fn() }) },
+        getStartServices: vi
           .fn()
           .mockResolvedValue([
             { elasticsearch: { client: { asInternalUser: {} } } },

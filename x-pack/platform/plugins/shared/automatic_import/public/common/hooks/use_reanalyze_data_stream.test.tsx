@@ -5,32 +5,38 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useReanalyzeDataStream } from './use_reanalyze_data_stream';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import * as api from '../lib/api';
 
-jest.mock('../lib/api');
-const mockReanalyzeDataStream = api.reanalyzeDataStream as jest.Mock;
+vi.mock('../lib/api');
+const mockReanalyzeDataStream = api.reanalyzeDataStream as Mock;
 
-const mockToastsAddSuccess = jest.fn();
-const mockToastsAddError = jest.fn();
-const mockInvalidateQueries = jest.fn();
+const mockToastsAddSuccess = vi.fn();
+const mockToastsAddError = vi.fn();
+const mockInvalidateQueries = vi.fn();
 
-jest.mock('./use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: {},
-      notifications: {
-        toasts: {
-          addSuccess: mockToastsAddSuccess,
-          addError: mockToastsAddError,
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: {},
+          notifications: {
+            toasts: {
+              addSuccess: mockToastsAddSuccess,
+              addError: mockToastsAddError,
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -57,7 +63,7 @@ const createWrapper = () => {
 
 describe('useReanalyzeDataStream', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initial state', () => {
@@ -144,7 +150,7 @@ describe('useReanalyzeDataStream', () => {
 
   describe('failed mutation', () => {
     it('should show error toast on failure', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const error = new Error('Server error');
       mockReanalyzeDataStream.mockRejectedValue(error);
@@ -176,7 +182,7 @@ describe('useReanalyzeDataStream', () => {
     });
 
     it('should set error state on failure', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const error = new Error('Server error');
       mockReanalyzeDataStream.mockRejectedValue(error);
@@ -205,7 +211,7 @@ describe('useReanalyzeDataStream', () => {
     });
 
     it('should not invalidate queries on failure', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       mockReanalyzeDataStream.mockRejectedValue(new Error('Server error'));
 

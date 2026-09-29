@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,17 +14,26 @@ import type { RuleApiResponse } from '../../../services/rules_api';
 import { RuleProvider } from '../rule_context';
 import { RuleSidebar } from './rule_sidebar';
 
-jest.mock('./rule_sidebar_conditions_tab', () => ({
-  RuleSidebarConditionsTab: () => <div data-test-subj="mockConditionsTab" />,
-}));
+vi.mock('./rule_sidebar_conditions_tab', () => {
+      const mocked = {
+      RuleSidebarConditionsTab: () => <div data-test-subj="mockConditionsTab" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./rule_sidebar_preview_tab', () => ({
-  RuleSidebarPreviewTab: () => <div data-test-subj="mockPreviewTab" />,
-}));
+vi.mock('./rule_sidebar_preview_tab', () => {
+      const mocked = {
+      RuleSidebarPreviewTab: () => <div data-test-subj="mockPreviewTab" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./rule_sidebar_runbook_tab', () => ({
-  RuleSidebarRunbookTab: () => <div data-test-subj="mockRunbookTab" />,
-}));
+vi.mock('./rule_sidebar_runbook_tab', () => {
+      const mocked = {
+      RuleSidebarRunbookTab: () => <div data-test-subj="mockRunbookTab" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',

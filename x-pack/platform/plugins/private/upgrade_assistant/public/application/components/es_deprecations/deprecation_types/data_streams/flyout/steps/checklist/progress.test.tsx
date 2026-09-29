@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { screen } from '@testing-library/react';
@@ -16,9 +18,12 @@ import { LoadingState } from '../../../../../../types';
 import type { MigrationState } from '../../../use_migration_state';
 import { MigrationProgress } from './progress';
 
-jest.mock('./progress_title', () => ({
-  MigrateDocumentsStepTitle: () => <span data-test-subj="migrateDocumentsTitle" />,
-}));
+vi.mock('./progress_title', () => {
+      const mocked = {
+      MigrateDocumentsStepTitle: () => <span data-test-subj="migrateDocumentsTitle" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MigrationProgress', () => {
   it('renders the per-status counts for reindex resolution type', () => {

@@ -5,32 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import type { Props } from '.';
 import { useLoadActionTypes } from '.';
 import { mockActionTypes } from '../../mock/connectors';
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn().mockImplementation(async (queryKey, fn, opts) => {
-    try {
-      const res = await fn();
-      return Promise.resolve(res);
-    } catch (e) {
-      opts.onError(e);
-    }
-  }),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: vi.fn().mockImplementation(async (queryKey, fn, opts) => {
+        try {
+          const res = await fn();
+          return Promise.resolve(res);
+        } catch (e) {
+          opts.onError(e);
+        }
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const http = {
-  get: jest.fn().mockResolvedValue(mockActionTypes),
+  get: vi.fn().mockResolvedValue(mockActionTypes),
 };
 const toasts = {
-  addError: jest.fn(),
+  addError: vi.fn(),
 };
 const defaultProps = { http, toasts } as unknown as Props;
 describe('useLoadActionTypes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should call api to load action types', async () => {
     renderHook(() => useLoadActionTypes(defaultProps));
@@ -52,7 +57,7 @@ describe('useLoadActionTypes', () => {
   });
   it('should display error toast when api throws error', async () => {
     const mockHttp = {
-      get: jest.fn().mockRejectedValue(new Error('this is an error')),
+      get: vi.fn().mockRejectedValue(new Error('this is an error')),
     } as unknown as Props['http'];
     renderHook(() => useLoadActionTypes({ ...defaultProps, http: mockHttp }));
     await waitFor(() => expect(toasts.addError).toHaveBeenCalled());

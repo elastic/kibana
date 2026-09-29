@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type {
   ISavedObjectsRepository,
   ISavedObjectTypeRegistry,
@@ -32,9 +35,9 @@ describe('#setupSavedObjects', () => {
   let setupContract: ClientInstanciator;
   let coreStartMock: ReturnType<typeof coreMock.createStart>;
   let coreSetupMock: ReturnType<typeof coreMock.createSetup>;
-  let mockSavedObjectsRepository: jest.Mocked<ISavedObjectsRepository>;
-  let mockSavedObjectTypeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
-  let mockEncryptedSavedObjectsService: jest.Mocked<EncryptedSavedObjectsService>;
+  let mockSavedObjectsRepository: Mocked<ISavedObjectsRepository>;
+  let mockSavedObjectTypeRegistry: Mocked<ISavedObjectTypeRegistry>;
+  let mockEncryptedSavedObjectsService: Mocked<EncryptedSavedObjectsService>;
 
   beforeEach(() => {
     coreStartMock = coreMock.createStart();
@@ -170,8 +173,8 @@ describe('#setupSavedObjects', () => {
         references: [],
         namespaces: ['some-ns'],
       };
-      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
-        close: jest.fn(),
+      mockSavedObjectsRepository.createPointInTimeFinder = vi.fn().mockReturnValue({
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [mockSavedObject] };
         },
@@ -215,8 +218,8 @@ describe('#setupSavedObjects', () => {
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
       };
-      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
-        close: jest.fn(),
+      mockSavedObjectsRepository.createPointInTimeFinder = vi.fn().mockReturnValue({
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [mockSavedObject] };
         },
@@ -262,8 +265,8 @@ describe('#setupSavedObjects', () => {
         score: 0,
         error: errorContent(createUnsupportedEncryptedTypeError('not-known-type')),
       };
-      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
-        close: jest.fn(),
+      mockSavedObjectsRepository.createPointInTimeFinder = vi.fn().mockReturnValue({
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [mockSavedObject] };
         },
@@ -293,8 +296,8 @@ describe('#setupSavedObjects', () => {
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
       };
-      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
-        close: jest.fn(),
+      mockSavedObjectsRepository.createPointInTimeFinder = vi.fn().mockReturnValue({
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [mockSavedObject] };
         },
@@ -318,8 +321,8 @@ describe('#setupSavedObjects', () => {
       // The finder that underlying repository returns is an instance of a `PointInTimeFinder` class that cannot, and
       // unlike object literal it cannot be "copied" with the spread operator. We should make sure we properly re-expose
       // `close` function.
-      const mockClose = jest.fn();
-      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockImplementation(() => {
+      const mockClose = vi.fn();
+      mockSavedObjectsRepository.createPointInTimeFinder = vi.fn().mockImplementation(() => {
         class MockPointInTimeFinder {
           async close() {
             mockClose();
@@ -349,8 +352,8 @@ describe('#setupSavedObjects', () => {
         references: [],
         namespaces: ['some-ns'],
       };
-      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
-        close: jest.fn(),
+      mockSavedObjectsRepository.createPointInTimeFinder = vi.fn().mockReturnValue({
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [mockSavedObject] };
         },

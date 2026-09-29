@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/commands/autocomplete';
@@ -31,15 +34,15 @@ const grokExpectSuggestions = (
 describe('GROK Autocomplete', () => {
   let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Reset mocks before each test to ensure isolation
     mockCallbacks = {
-      getByType: jest.fn(),
+      getByType: vi.fn(),
     };
 
     const expectedFields = getFieldNamesByType(ESQL_STRING_TYPES);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    (mockCallbacks.getByType as Mock).mockResolvedValue(
       expectedFields.map((name) => ({ label: name, text: name }))
     );
   });

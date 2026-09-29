@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { ON_OPEN_PANEL_MENU } from '../../common/trigger_ids';
 import type { ActionDefinition } from '../actions';
 import { openContextMenu } from '../context_menu';
 import { uiActionsPluginMock } from '../mocks';
 import { waitFor } from '@testing-library/react';
 
-jest.mock('../context_menu');
+vi.mock('../context_menu');
 
-const executeFn = jest.fn();
-const openContextMenuSpy = openContextMenu as unknown as jest.SpyInstance;
+const executeFn = vi.fn();
+const openContextMenuSpy = openContextMenu as unknown as MockInstance;
 
 function createTestAction<C extends object>(
   type: string,
@@ -38,7 +41,7 @@ const reset = () => {
 
   executeFn.mockReset();
   openContextMenuSpy.mockReset();
-  jest.useFakeTimers({ legacyFakeTimers: true });
+  vi.useFakeTimers({ legacyFakeTimers: true });
 };
 beforeEach(reset);
 
@@ -52,7 +55,7 @@ test('executes a single action mapped to a trigger', async () => {
   const start = doStart();
   await start.executeTriggerActions(ON_OPEN_PANEL_MENU, context);
 
-  jest.runAllTimers();
+  vi.runAllTimers();
 
   expect(executeFn).toHaveBeenCalledTimes(1);
   expect(executeFn).toHaveBeenCalledWith(expect.objectContaining(context));
@@ -82,7 +85,7 @@ test('does not execute an incompatible action', async () => {
   };
   await start.executeTriggerActions(ON_OPEN_PANEL_MENU, context);
 
-  jest.runAllTimers();
+  vi.runAllTimers();
 
   expect(executeFn).toHaveBeenCalledTimes(1);
 });
@@ -102,7 +105,7 @@ test('shows a context menu when more than one action is mapped to a trigger', as
   const context = {};
   await start.executeTriggerActions(ON_OPEN_PANEL_MENU, context);
 
-  jest.runAllTimers();
+  vi.runAllTimers();
 
   await waitFor(() => {
     expect(executeFn).toHaveBeenCalledTimes(0);
@@ -123,7 +126,7 @@ test('shows a context menu when there is only one action mapped to a trigger and
   const context = {};
   await start.executeTriggerActions(ON_OPEN_PANEL_MENU, context, true);
 
-  jest.runAllTimers();
+  vi.runAllTimers();
 
   await waitFor(() => {
     expect(executeFn).toHaveBeenCalledTimes(0);
@@ -145,7 +148,7 @@ test('passes whole action context to isCompatible()', async () => {
 
   const context = { foo: 'bar' };
   await start.executeTriggerActions(ON_OPEN_PANEL_MENU, context);
-  jest.runAllTimers();
+  vi.runAllTimers();
 });
 
 test("doesn't show a context menu for auto executable actions", async () => {
@@ -163,7 +166,7 @@ test("doesn't show a context menu for auto executable actions", async () => {
   const context = {};
   await start.executeTriggerActions(ON_OPEN_PANEL_MENU, context);
 
-  jest.runAllTimers();
+  vi.runAllTimers();
 
   await waitFor(() => {
     expect(executeFn).toHaveBeenCalledTimes(2);
@@ -182,7 +185,7 @@ test('passes trigger into execute', async () => {
 
   const context = { foo: 'bar' };
   await start.executeTriggerActions(ON_OPEN_PANEL_MENU, context);
-  jest.runAllTimers();
+  vi.runAllTimers();
   expect(executeFn).toHaveBeenCalledWith({
     ...context,
     trigger: start.getTrigger(ON_OPEN_PANEL_MENU),

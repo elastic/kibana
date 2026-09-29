@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -20,11 +22,14 @@ import { FiltersNotificationPopover } from './filters_notification_popover';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
 // Mock FilterItems to avoid expensive rendering and lazy-loading delays in tests
-jest.mock('@kbn/unified-search-plugin/public', () => ({
-  FilterItems: () => <div data-test-subj="mocked-filter-items">Mocked FilterItems</div>,
-}));
+vi.mock('@kbn/unified-search-plugin/public', () => {
+      const mocked = {
+      FilterItems: () => <div data-test-subj="mocked-filter-items">Mocked FilterItems</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const canEditUnifiedSearch = jest.fn().mockReturnValue(true);
+const canEditUnifiedSearch = vi.fn().mockReturnValue(true);
 
 const getMockPhraseFilter = (key: string, value: string): Filter => {
   return {
@@ -47,14 +52,17 @@ const getMockPhraseFilter = (key: string, value: string): Filter => {
 };
 
 const mockedEditPanelAction = {
-  execute: jest.fn(),
-  isCompatible: jest.fn().mockResolvedValue(true),
+  execute: vi.fn(),
+  isCompatible: vi.fn().mockResolvedValue(true),
 };
-jest.mock('../services/kibana_services', () => ({
-  uiActionsService: {
-    getAction: async () => mockedEditPanelAction,
-  },
-}));
+vi.mock('../services/kibana_services', () => {
+      const mocked = {
+      uiActionsService: {
+        getAction: async () => mockedEditPanelAction,
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('filters notification popover', () => {
   let api: FiltersNotificationActionApi;
@@ -160,7 +168,7 @@ describe('filters notification popover', () => {
   });
 
   it('if supported, locks hover actions when opening the popover', async () => {
-    const lockHoverActions = jest.fn();
+    const lockHoverActions = vi.fn();
     api = { ...api, lockHoverActions, hasLockedHoverActions$: new BehaviorSubject(false) };
 
     await renderAndOpenPopover();
@@ -170,7 +178,7 @@ describe('filters notification popover', () => {
 
   it('if supported, unlocks hover actions when closing the popover via the toggle button', async () => {
     const hasLockedHoverActions$ = new BehaviorSubject(false);
-    const lockHoverActions = jest.fn().mockImplementation((lock: boolean) => {
+    const lockHoverActions = vi.fn().mockImplementation((lock: boolean) => {
       hasLockedHoverActions$.next(lock);
     });
     api = { ...api, lockHoverActions, hasLockedHoverActions$ };
@@ -182,7 +190,7 @@ describe('filters notification popover', () => {
   });
 
   it('if supported, unlocks hover actions after executing the edit action', async () => {
-    const lockHoverActions = jest.fn();
+    const lockHoverActions = vi.fn();
     api = { ...api, lockHoverActions, hasLockedHoverActions$: new BehaviorSubject(false) };
     updateViewMode('edit');
     updateFilters([getMockPhraseFilter('ay', 'oh')]);

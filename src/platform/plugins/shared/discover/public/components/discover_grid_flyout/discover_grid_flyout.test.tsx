@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -27,8 +29,8 @@ import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../context_awareness';
 
 let mockRenderCustomHeader: UnifiedDocViewerFlyoutProps['renderCustomHeader'] | undefined;
 
-jest.mock('@kbn/unified-doc-viewer-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/unified-doc-viewer-plugin/public');
+vi.mock('@kbn/unified-doc-viewer-plugin/public', async () => {
+  const actual = (await vi.importActual('@kbn/unified-doc-viewer-plugin/public'));
   const OriginalFlyout = actual.UnifiedDocViewerFlyout;
   return {
     ...actual,
@@ -52,10 +54,10 @@ describe('Discover flyout', function () {
   const getServices = () => {
     return {
       ...discoverServiceMock,
-      contextLocator: { getRedirectUrl: jest.fn(() => 'mock-context-redirect-url') },
-      singleDocLocator: { getRedirectUrl: jest.fn(() => 'mock-doc-redirect-url') },
+      contextLocator: { getRedirectUrl: vi.fn(() => 'mock-context-redirect-url') },
+      singleDocLocator: { getRedirectUrl: vi.fn(() => 'mock-doc-redirect-url') },
       toastNotifications: {
-        addSuccess: jest.fn(),
+        addSuccess: vi.fn(),
       },
     } as unknown as DiscoverServices;
   };
@@ -73,7 +75,7 @@ describe('Discover flyout', function () {
     query?: Query | AggregateQuery;
     services?: DiscoverServices;
   }) => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
     const user = userEvent.setup();
 
@@ -89,11 +91,11 @@ describe('Discover flyout', function () {
         : currentRecords[0],
       hits: currentRecords,
       query,
-      onAddColumn: jest.fn(),
+      onAddColumn: vi.fn(),
       onClose,
-      onFilter: jest.fn(),
-      onRemoveColumn: jest.fn(),
-      setExpandedDoc: jest.fn(),
+      onFilter: vi.fn(),
+      onRemoveColumn: vi.fn(),
+      setExpandedDoc: vi.fn(),
     };
 
     render(
@@ -111,7 +113,7 @@ describe('Discover flyout', function () {
 
   beforeEach(() => {
     mockRenderCustomHeader = undefined;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be rendered correctly using an data view without timefield', async () => {

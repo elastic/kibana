@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { firstValueFrom, Subject } from 'rxjs';
 import {
   registerAddDataExperienceContext,
@@ -12,12 +15,12 @@ import {
 } from './register_add_data_experience_context';
 
 describe('registerAddDataExperienceContext', () => {
-  let analytics: { registerContextProvider: jest.Mock };
+  let analytics: { registerContextProvider: Mock };
   let experience$: Subject<AddDataExperience>;
 
   beforeEach(() => {
     analytics = {
-      registerContextProvider: jest.fn(),
+      registerContextProvider: vi.fn(),
     };
     experience$ = new Subject<AddDataExperience>();
     registerAddDataExperienceContext(analytics, experience$);

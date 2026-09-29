@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 import type { AttackDiscoveryDataClient } from '../../../../lib/attack_discovery/persistence';
@@ -29,31 +31,31 @@ describe('postAttackDiscoveryGenerationsDismissRoute', () => {
   const mockDataClient = attackDiscoveryDataClientMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     context.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(
       mockDataClient as unknown as AttackDiscoveryDataClient
     );
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.logger = {
-      debug: jest.fn(),
-      error: jest.fn(),
-      fatal: jest.fn(),
-      get: jest.fn().mockReturnThis(),
-      info: jest.fn(),
-      isLevelEnabled: jest.fn().mockReturnValue(true),
-      log: jest.fn(),
-      trace: jest.fn(),
-      warn: jest.fn(),
+      debug: vi.fn(),
+      error: vi.fn(),
+      fatal: vi.fn(),
+      get: vi.fn().mockReturnThis(),
+      info: vi.fn(),
+      isLevelEnabled: vi.fn().mockReturnValue(true),
+      log: vi.fn(),
+      trace: vi.fn(),
+      warn: vi.fn(),
     };
     context.elasticAssistant.eventLogIndex = 'event-log-index';
     context.elasticAssistant.eventLogger = {
-      logEvent: jest.fn().mockResolvedValue(undefined),
-      startTiming: jest.fn(),
-      stopTiming: jest.fn(),
-      updateEvents: jest.fn(),
+      logEvent: vi.fn().mockResolvedValue(undefined),
+      startTiming: vi.fn(),
+      stopTiming: vi.fn(),
+      updateEvents: vi.fn(),
     };
-    context.elasticAssistant.getSpaceId = jest.fn().mockReturnValue('default');
-    context.core.featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
+    context.elasticAssistant.getSpaceId = vi.fn().mockReturnValue('default');
+    context.core.featureFlags.getBooleanValue = vi.fn().mockResolvedValue(true);
 
     const mockGeneration = {
       alerts_context_count: 10,

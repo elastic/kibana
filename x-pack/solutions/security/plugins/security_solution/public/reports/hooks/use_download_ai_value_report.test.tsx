@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { noop } from 'lodash';
@@ -13,17 +16,23 @@ import { useAIValueExportContext } from '../providers/ai_value/export_provider';
 import { useDownloadAIValueReport } from './use_download_ai_value_report';
 import type { TimeRange } from '../../common/store/inputs/model';
 
-jest.mock('../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
-const useKibanaMock = useKibana as jest.Mock;
+vi.mock('../../common/lib/kibana', () => {
+      const mocked = { useKibana: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+const useKibanaMock = useKibana as Mock;
 
-jest.mock('../providers/ai_value/export_provider', () => ({ useAIValueExportContext: jest.fn() }));
-const useAIValueExportContextMock = useAIValueExportContext as jest.Mock;
+vi.mock('../providers/ai_value/export_provider', () => {
+      const mocked = { useAIValueExportContext: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+const useAIValueExportContextMock = useAIValueExportContext as Mock;
 
 const shareServiceMock = {
-  toggleShareContextMenu: jest.fn(),
+  toggleShareContextMenu: vi.fn(),
 };
 
-const buildForwardedStateMock = jest.fn();
+const buildForwardedStateMock = vi.fn();
 
 const anchorElementMock = { someAnchorElementProp: 'baz' } as unknown as HTMLElement;
 
@@ -41,7 +50,7 @@ const mockKibana = (share: typeof shareServiceMock | undefined, serverless: bool
       share,
       serverless,
       uiSettings: {
-        get: jest.fn(() => reportTitle),
+        get: vi.fn(() => reportTitle),
       },
     },
   });
@@ -67,7 +76,7 @@ const TestComponent = ({
 
 describe('useDownloadAIValueReport', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     // We set all the conditions so that the report is enabled.
     // Then we toggle each condition off in the subsequent describe statements as needed

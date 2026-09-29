@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
 import type { RequestHandlerContext } from '@kbn/core/server';
@@ -13,21 +16,24 @@ import { fetchSearchResults } from '@kbn/search-index-documents/lib';
 
 import { registerSearchRoute } from './search';
 
-jest.mock('@kbn/search-index-documents/lib', () => ({
-  fetchSearchResults: jest.fn(),
-}));
+vi.mock('@kbn/search-index-documents/lib', () => {
+      const mocked = {
+      fetchSearchResults: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Elasticsearch Search', () => {
   let mockRouter: MockRouter;
   const mockClient = {
-    asCurrentUser: jest.fn(),
+    asCurrentUser: vi.fn(),
   };
   beforeEach(() => {
     const context = {
       core: Promise.resolve({
         elasticsearch: { client: mockClient },
       }),
-    } as unknown as jest.Mocked<RequestHandlerContext>;
+    } as unknown as Mocked<RequestHandlerContext>;
 
     mockRouter = new MockRouter({
       context,
@@ -67,7 +73,7 @@ describe('Elasticsearch Search', () => {
         ],
       };
 
-      (fetchSearchResults as jest.Mock).mockImplementationOnce(() => {
+      (fetchSearchResults as Mock).mockImplementationOnce(() => {
         return Promise.resolve(mockData);
       });
 
@@ -93,7 +99,7 @@ describe('Elasticsearch Search', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve({ elasticsearch: { client: mockClient } }),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouterNoQuery = new MockRouter({
         context,
@@ -131,7 +137,7 @@ describe('Elasticsearch Search', () => {
         ],
       };
 
-      (fetchSearchResults as jest.Mock).mockImplementationOnce(() => {
+      (fetchSearchResults as Mock).mockImplementationOnce(() => {
         return Promise.resolve(mockData);
       });
 

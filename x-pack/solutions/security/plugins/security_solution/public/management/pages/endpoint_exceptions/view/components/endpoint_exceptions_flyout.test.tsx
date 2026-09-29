@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import type { EndpointExceptionsFlyoutProps } from './endpoint_exceptions_flyout';
 import { EndpointExceptionsFlyout } from './endpoint_exceptions_flyout';
@@ -31,28 +34,28 @@ import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../hooks/artifa
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { licenseService } from '../../../../../common/hooks/use_license';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/containers/source');
-jest.mock('../../../../components/artifact_list_page/hooks/use_artifact_update_or_create');
-jest.mock('../../../../../detection_engine/rule_exceptions/logic/use_close_alerts');
-jest.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../../../hooks/artifacts/use_endpoint_per_policy_opt_in');
-jest.mock('../../../../../common/components/user_privileges');
-jest.mock('../../../../../common/hooks/use_license');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/containers/source');
+vi.mock('../../../../components/artifact_list_page/hooks/use_artifact_update_or_create');
+vi.mock('../../../../../detection_engine/rule_exceptions/logic/use_close_alerts');
+vi.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
+vi.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../../hooks/artifacts/use_endpoint_per_policy_opt_in');
+vi.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/hooks/use_license');
 
 describe('Endpoint exceptions flyout', () => {
-  jest.setTimeout(10000);
+  vi.setConfig({ testTimeout: 10000 });
 
   let mockedContext: AppContextTestRender;
   let render: (
     props?: Partial<EndpointExceptionsFlyoutProps>
   ) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
-  let mockOnCancel: jest.Mock;
-  let mockOnConfirm: jest.Mock;
-  let mockCreateOrUpdateArtifact: jest.MockedFunction<CreateOrUpdateArtifactsFunction>;
-  let mockCloseAlerts: jest.MockedFunction<AddOrUpdateExceptionItemsFunc>;
+  let mockOnCancel: Mock;
+  let mockOnConfirm: Mock;
+  let mockCreateOrUpdateArtifact: MockedFunction<CreateOrUpdateArtifactsFunction>;
+  let mockCloseAlerts: MockedFunction<AddOrUpdateExceptionItemsFunc>;
   let alertData: AlertData;
 
   beforeEach(async () => {
@@ -68,28 +71,28 @@ describe('Endpoint exceptions flyout', () => {
     } as AlertData;
 
     mockedContext = createAppRootMockRenderer();
-    mockOnCancel = jest.fn();
-    mockOnConfirm = jest.fn();
+    mockOnCancel = vi.fn();
+    mockOnConfirm = vi.fn();
 
-    (useToasts as jest.Mock).mockReturnValue({
-      addSuccess: jest.fn(),
-      addError: jest.fn(),
-      addWarning: jest.fn(),
-      remove: jest.fn(),
+    (useToasts as Mock).mockReturnValue({
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
+      addWarning: vi.fn(),
+      remove: vi.fn(),
     });
 
-    mockCreateOrUpdateArtifact = jest.fn().mockImplementation((exception) => [exception]);
-    (useCreateOrUpdateArtifact as jest.Mock).mockImplementation(() => {
+    mockCreateOrUpdateArtifact = vi.fn().mockImplementation((exception) => [exception]);
+    (useCreateOrUpdateArtifact as Mock).mockImplementation(() => {
       return {
         isLoading: false,
         createOrUpdateArtifact: mockCreateOrUpdateArtifact,
       };
     });
 
-    mockCloseAlerts = jest.fn();
-    (useCloseAlertsFromExceptions as jest.Mock).mockImplementation(() => [false, mockCloseAlerts]);
+    mockCloseAlerts = vi.fn();
+    (useCloseAlertsFromExceptions as Mock).mockImplementation(() => [false, mockCloseAlerts]);
 
-    (useFetchIndex as jest.Mock).mockImplementation(() => [
+    (useFetchIndex as Mock).mockImplementation(() => [
       false,
       {
         indexPatterns: {
@@ -111,27 +114,27 @@ describe('Endpoint exceptions flyout', () => {
       },
     ]);
 
-    (useSignalIndex as jest.Mock).mockReturnValue({
+    (useSignalIndex as Mock).mockReturnValue({
       loading: false,
       signalIndexExists: true,
       signalIndexName: 'mock-signal-index',
       signalIndexMappingOutdated: false,
-      createDeSignalIndex: jest.fn(),
+      createDeSignalIndex: vi.fn(),
     });
 
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({
+    (useAlertsPrivileges as Mock).mockReturnValue({
       hasAlertsUpdate: true,
     });
 
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       endpointPrivileges: { canManageGlobalArtifacts: true },
     });
 
-    (useGetEndpointExceptionsPerPolicyOptIn as jest.Mock).mockReturnValue({
+    (useGetEndpointExceptionsPerPolicyOptIn as Mock).mockReturnValue({
       data: { status: true },
     });
 
-    (licenseService as jest.Mocked<typeof licenseService>).isPlatinumPlus.mockReturnValue(true);
+    (licenseService as Mocked<typeof licenseService>).isPlatinumPlus.mockReturnValue(true);
 
     render = (props) => {
       renderResult = mockedContext.render(
@@ -148,7 +151,7 @@ describe('Endpoint exceptions flyout', () => {
 
   afterEach(() => {
     cleanup();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('On initial render', () => {
@@ -197,7 +200,7 @@ describe('Endpoint exceptions flyout', () => {
     });
 
     it('should default to global artifact when user has global artifact management privileges', async () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         endpointPrivileges: { canManageGlobalArtifacts: true },
       });
 
@@ -219,7 +222,7 @@ describe('Endpoint exceptions flyout', () => {
     });
 
     it('should default to per-policy artifact when user does not have global artifact management privileges', async () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         endpointPrivileges: { canManageGlobalArtifacts: false },
       });
 
@@ -270,8 +273,8 @@ describe('Endpoint exceptions flyout', () => {
     });
 
     it('should disable submit button while saving artifact', async () => {
-      (useCreateOrUpdateArtifact as jest.Mock).mockImplementation(() => {
-        return { isLoading: true, mutateAsync: jest.fn() };
+      (useCreateOrUpdateArtifact as Mock).mockImplementation(() => {
+        return { isLoading: true, mutateAsync: vi.fn() };
       });
 
       render({ alertData, isAlertDataLoading: false });
@@ -281,7 +284,7 @@ describe('Endpoint exceptions flyout', () => {
     });
 
     it('should disable submit button while closing alerts', async () => {
-      (useCloseAlertsFromExceptions as jest.Mock).mockImplementation(() => [true, jest.fn()]);
+      (useCloseAlertsFromExceptions as Mock).mockImplementation(() => [true, vi.fn()]);
 
       render({ alertData, isAlertDataLoading: false });
       await userEvent.clear(renderResult.getByTestId('endpointExceptions-form-name-input'));

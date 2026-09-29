@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -20,10 +22,10 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('GroupBySelect', () => {
-  const mockOnChange = jest.fn();
+  const mockOnChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the filter button with "None" as default selection', () => {

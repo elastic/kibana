@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -51,7 +53,7 @@ describe('<ChangePasswordForm>', () => {
         roles: [],
       };
 
-      const callback = jest.fn();
+      const callback = vi.fn();
 
       const apiClientMock = userAPIClientMock.create();
 

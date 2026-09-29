@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -24,46 +27,52 @@ import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test
 import { MAX_OPEN_CASES_DEFAULT_MAXIMUM } from '../../../../common/constants';
 import { KibanaServices } from '../../../common/lib/kibana/services';
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
-jest.mock('../../../common/lib/kibana/use_application');
-jest.mock('../../../common/lib/kibana/kibana_react');
-jest.mock('../../../containers/configure/use_get_all_case_configurations');
-jest.mock('../../templates_v2/hooks/use_get_templates', () => ({
-  useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
+vi.mock('../../../common/lib/kibana/use_application');
+vi.mock('../../../common/lib/kibana/kibana_react');
+vi.mock('../../../containers/configure/use_get_all_case_configurations');
+vi.mock('../../templates_v2/hooks/use_get_templates', () => {
+      const mocked = {
+      useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock TemplateSelectorV2 to control its onChange callback in isolation tests.
 // Use requireActual so the real findV2Template implementation is available to cases_params.tsx.
-jest.mock('./template_selector_v2', () => ({
-  ...jest.requireActual('./template_selector_v2'),
-  TemplateSelectorV2: ({
-    onChange,
-    isDisabled,
-    templateId,
-  }: {
-    onChange: (p: { templateId: string | null; templateVersion: string | null }) => void;
-    isDisabled?: boolean;
-    templateId: string | null;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="cases-connector-template-v2-select"
-      disabled={isDisabled}
-      onClick={() => onChange({ templateId: 'tmpl-v2', templateVersion: '1' })}
-    >
-      {`V2 Selector templateId=${templateId}`}
-    </button>
-  ),
-}));
+vi.mock('./template_selector_v2', async () => {
+      const mocked = {
+      ...(await vi.importActual('./template_selector_v2')),
+      TemplateSelectorV2: ({
+        onChange,
+        isDisabled,
+        templateId,
+      }: {
+        onChange: (p: { templateId: string | null; templateVersion: string | null }) => void;
+        isDisabled?: boolean;
+        templateId: string | null;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="cases-connector-template-v2-select"
+          disabled={isDisabled}
+          onClick={() => onChange({ templateId: 'tmpl-v2', templateVersion: '1' })}
+        >
+          {`V2 Selector templateId=${templateId}`}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetTemplates = jest
+const mockUseGetTemplates = vi
   .fn()
   .mockReturnValue({ data: { templates: [] }, isLoading: false });
 
-const useKibanaMock = jest.mocked(useKibana);
-const useAlertsDataViewMock = jest.mocked(useAlertsDataView);
-const useApplicationMock = useApplication as jest.Mock;
-const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
+const useKibanaMock = vi.mocked(useKibana);
+const useAlertsDataViewMock = vi.mocked(useAlertsDataView);
+const useApplicationMock = useApplication as Mock;
+const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as Mock;
 
 const actionParams = {
   subAction: 'run',
@@ -80,7 +89,7 @@ const connector: ActionConnector = createMockActionConnector({
   name: 'Test',
 });
 
-const editAction = jest.fn();
+const editAction = vi.fn();
 const defaultProps = {
   actionConnector: connector,
   actionParams,
@@ -94,17 +103,17 @@ describe('CasesParamsFields renders', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
+      advanceTimers: vi.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     useApplicationMock.mockReturnValueOnce({ appId: 'management' });
@@ -133,7 +142,7 @@ describe('CasesParamsFields renders', () => {
       services: {
         ...createStartServicesMock(),
         uiSettings: {
-          get: jest.fn().mockReturnValue(MAX_OPEN_CASES_DEFAULT_MAXIMUM),
+          get: vi.fn().mockReturnValue(MAX_OPEN_CASES_DEFAULT_MAXIMUM),
         },
         data: { dataViews: {} },
       },
@@ -141,7 +150,7 @@ describe('CasesParamsFields renders', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('all params fields are rendered', async () => {
@@ -230,7 +239,7 @@ describe('CasesParamsFields renders', () => {
       services: {
         ...createStartServicesMock(),
         uiSettings: {
-          get: jest.fn().mockReturnValue(30),
+          get: vi.fn().mockReturnValue(30),
         },
         data: { dataViews: {} },
       },
@@ -417,7 +426,7 @@ describe('CasesParamsFields renders', () => {
         ...useGetAllCaseConfigurationsResponse,
         data: [configuration],
       }));
-      const getConfigurationByOwnerSpy = jest
+      const getConfigurationByOwnerSpy = vi
         .spyOn(utils, 'getConfigurationByOwner')
         .mockImplementation(() => configuration);
 
@@ -465,7 +474,7 @@ describe('CasesParamsFields renders', () => {
         ...useGetAllCaseConfigurationsResponse,
         data: [configuration],
       }));
-      const getConfigurationByOwnerSpy = jest
+      const getConfigurationByOwnerSpy = vi
         .spyOn(utils, 'getConfigurationByOwner')
         .mockImplementation(() => configuration);
 
@@ -642,14 +651,14 @@ describe('CasesParamsFields renders', () => {
 
   describe('Templates v2 (templates.enabled=true)', () => {
     const enableTemplatesV2 = () =>
-      jest
+      vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig
         >);
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
       mockUseGetTemplates.mockReturnValue({ data: { templates: [] }, isLoading: false });
     });
 

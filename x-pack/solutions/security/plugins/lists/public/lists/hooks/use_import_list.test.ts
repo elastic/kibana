@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useImportList } from '@kbn/securitysolution-list-hooks';
 import * as Api from '@kbn/securitysolution-list-api';
@@ -12,7 +15,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
 
-jest.mock('@kbn/securitysolution-list-api');
+vi.mock('@kbn/securitysolution-list-api');
 
 // TODO: Port this test over to: x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_import_list/index.ts once mocks are moved to packages
 
@@ -21,7 +24,7 @@ describe('useImportList', () => {
 
   beforeEach(() => {
     httpMock = httpServiceMock.createStartContract();
-    (Api.importList as jest.Mock).mockResolvedValue(getListResponseMock());
+    (Api.importList as Mock).mockResolvedValue(getListResponseMock());
   });
 
   it('does not invoke importList if start was not called', () => {
@@ -71,7 +74,7 @@ describe('useImportList', () => {
 
   it('error is populated if importList rejects', async () => {
     const fileMock = 'my file' as unknown as File;
-    (Api.importList as jest.Mock).mockRejectedValue(new Error('whoops'));
+    (Api.importList as Mock).mockRejectedValue(new Error('whoops'));
     const { result } = renderHook(() => useImportList());
 
     act(() => {

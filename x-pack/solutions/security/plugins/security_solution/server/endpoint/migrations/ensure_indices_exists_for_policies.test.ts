@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createMockEndpointAppContextService } from '../mocks';
 import { ensureIndicesExistsForPolicies } from './ensure_indices_exists_for_policies';
 import { createPolicyDataStreamsIfNeeded as _createPolicyDataStreamsIfNeeded } from '../../fleet_integration/handlers/create_policy_datastreams';
 
-jest.mock('../../fleet_integration/handlers/create_policy_datastreams');
+vi.mock('../../fleet_integration/handlers/create_policy_datastreams');
 const createPolicyDataStreamsIfNeededMock =
-  _createPolicyDataStreamsIfNeeded as unknown as jest.Mock;
+  _createPolicyDataStreamsIfNeeded as unknown as Mock;
 
 describe('Ensure indices exists for policies migration', () => {
   let endpointAppContextServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
@@ -20,7 +23,7 @@ describe('Ensure indices exists for policies migration', () => {
     endpointAppContextServicesMock = createMockEndpointAppContextService();
 
     (
-      endpointAppContextServicesMock.getInternalFleetServices().packagePolicy.listIds as jest.Mock
+      endpointAppContextServicesMock.getInternalFleetServices().packagePolicy.listIds as Mock
     ).mockResolvedValue({
       items: ['foo-1', 'foo-2', 'foo-3'],
     });

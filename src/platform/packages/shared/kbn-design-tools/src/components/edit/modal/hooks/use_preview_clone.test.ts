@@ -7,48 +7,65 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { usePreviewClone } from './use_preview_clone';
 
-jest.mock('../../../../edit_engine/create_preview_clone', () => ({
-  createPreviewClone: (target: HTMLElement) => {
-    const clone = target.cloneNode(true) as HTMLElement;
-    const elementMap = new Map<Element, Element>([[target, clone]]);
-    return { clone, elementMap };
-  },
-}));
-
-jest.mock('../../../../edit_engine/collect_text_nodes', () => ({
-  collectAllTextNodes: (root: HTMLElement) => {
-    const nodes: Text[] = [];
-    const walk = (el: globalThis.Node) => {
-      const children = Array.from(el.childNodes);
-      children.forEach((child) => {
-        if (child.nodeType === 3) nodes.push(child as Text);
-        else walk(child);
-      });
+vi.mock('../../../../edit_engine/create_preview_clone', () => {
+      const mocked = {
+      createPreviewClone: (target: HTMLElement) => {
+        const clone = target.cloneNode(true) as HTMLElement;
+        const elementMap = new Map<Element, Element>([[target, clone]]);
+        return { clone, elementMap };
+      },
     };
-    walk(root);
-    return nodes;
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../edit_engine/collect_media_elements', () => ({
-  collectMediaElements: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('../../../../edit_engine/collect_text_nodes', () => {
+      const mocked = {
+      collectAllTextNodes: (root: HTMLElement) => {
+        const nodes: Text[] = [];
+        const walk = (el: globalThis.Node) => {
+          const children = Array.from(el.childNodes);
+          children.forEach((child) => {
+            if (child.nodeType === 3) nodes.push(child as Text);
+            else walk(child);
+          });
+        };
+        walk(root);
+        return nodes;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../edit_engine/managed_element', () => ({
-  getContentRoot: (el: HTMLElement) => el,
-}));
+vi.mock('../../../../edit_engine/collect_media_elements', () => {
+      const mocked = {
+      collectMediaElements: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_element_selection', () => ({
-  useElementSelection: () => ({
-    selectedElement: null,
-    color: '',
-    setColor: jest.fn(),
-    handleSelect: jest.fn(),
-  }),
-}));
+vi.mock('../../../../edit_engine/managed_element', () => {
+      const mocked = {
+      getContentRoot: (el: HTMLElement) => el,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('./use_element_selection', () => {
+      const mocked = {
+      useElementSelection: () => ({
+        selectedElement: null,
+        color: '',
+        setColor: vi.fn(),
+        handleSelect: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('usePreviewClone', () => {
   const createTarget = () => {

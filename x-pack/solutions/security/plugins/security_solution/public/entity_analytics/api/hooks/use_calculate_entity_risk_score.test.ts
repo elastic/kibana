@@ -5,36 +5,44 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useCalculateEntityRiskScore } from './use_calculate_entity_risk_score';
 
-const mockCalculateEntityRiskScoreV2 = jest.fn();
-jest.mock('../api', () => ({
-  useEntityAnalyticsRoutes: () => ({
-    calculateEntityRiskScoreV2: mockCalculateEntityRiskScoreV2,
-  }),
-}));
+const mockCalculateEntityRiskScoreV2 = vi.fn();
+vi.mock('../api', () => {
+      const mocked = {
+      useEntityAnalyticsRoutes: () => ({
+        calculateEntityRiskScoreV2: mockCalculateEntityRiskScoreV2,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAddError = jest.fn();
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: jest.fn().mockReturnValue({
-    addError: () => mockAddError(),
-  }),
-}));
+const mockAddError = vi.fn();
+vi.mock('../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: vi.fn().mockReturnValue({
+        addError: () => mockAddError(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const identifierType = EntityType.user;
 const identifier = 'test-user';
 const params = {
   identifierType,
   identifier,
-  onSuccess: jest.fn(),
+  onSuccess: vi.fn(),
 };
 
 describe('useCalculateEntityRiskScore', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCalculateEntityRiskScoreV2.mockResolvedValue({});
   });
 

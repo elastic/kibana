@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { EuiContextMenu } from '@elastic/eui';
 import { fireEvent, render, waitFor } from '@testing-library/react';
@@ -15,24 +18,24 @@ import type { VisualizationActionsProps } from './types';
 import * as useLensAttributesModule from './use_lens_attributes';
 import { PageScope } from '../../../data_view_manager/constants';
 
-jest.mock('./use_actions');
+vi.mock('./use_actions');
 
-jest.mock('../inspect/use_inspect', () => {
+vi.mock('../inspect/use_inspect', () => {
   return {
-    useInspect: jest.fn().mockReturnValue({}),
+    useInspect: vi.fn().mockReturnValue({}),
   };
 });
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
-    EuiContextMenu: jest.fn(() => <div data-test-subj="viz-actions-menu" />),
+    EuiContextMenu: vi.fn(() => <div data-test-subj="viz-actions-menu" />),
   };
 });
 
 describe('VisualizationActions', () => {
-  const spyUseLensAttributes = jest.spyOn(useLensAttributesModule, 'useLensAttributes');
+  const spyUseLensAttributes = vi.spyOn(useLensAttributesModule, 'useLensAttributes');
   const props: VisualizationActionsProps = {
     getLensAttributes: getDnsTopDomainsLensAttributes,
     queryId: 'networkDnsHistogramQuery',
@@ -44,10 +47,10 @@ describe('VisualizationActions', () => {
     extraOptions: { dnsIsPtrIncluded: true },
     stackByField: 'dns.question.registered_domain',
   };
-  const mockContextMenu = EuiContextMenu as unknown as jest.Mock;
+  const mockContextMenu = EuiContextMenu as unknown as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Should generate attributes', () => {

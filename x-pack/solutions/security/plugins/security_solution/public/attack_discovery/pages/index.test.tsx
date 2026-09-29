@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
@@ -34,68 +37,83 @@ const mockConnectors: unknown[] = [
   },
 ];
 
-jest.mock('react-use/lib/useLocalStorage', () =>
-  jest.fn().mockImplementation((key, defaultValue) => {
+vi.mock('react-use/lib/useLocalStorage', () =>
+  vi.fn().mockImplementation((key, defaultValue) => {
     // Return different values based on the localStorage key
     if (key.includes('START_LOCAL_STORAGE_KEY')) {
-      return ['now-24h', jest.fn()];
+      return ['now-24h', vi.fn()];
     }
     if (key.includes('END_LOCAL_STORAGE_KEY')) {
-      return ['now', jest.fn()];
+      return ['now', vi.fn()];
     }
     if (key.includes('CONNECTOR_ID_LOCAL_STORAGE_KEY')) {
-      return ['test-id', jest.fn()];
+      return ['test-id', vi.fn()];
     }
     // For other keys, return the default value or 'test-id'
-    return [defaultValue || 'test-id', jest.fn()];
+    return [defaultValue || 'test-id', vi.fn()];
   })
 );
 
-jest.mock('react-use/lib/useSessionStorage', () =>
-  jest.fn().mockReturnValue([undefined, jest.fn()])
+vi.mock('react-use/lib/useSessionStorage', () =>
+  vi.fn().mockReturnValue([undefined, vi.fn()])
 );
 
-jest.mock(
+vi.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields',
-  () => ({
-    useFetchAnonymizationFields: jest.fn(() => mockFindAnonymizationFieldsResponse),
-  })
+  () => {
+      const mocked = {
+        useFetchAnonymizationFields: vi.fn(() => mockFindAnonymizationFieldsResponse),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn(() => ({
-    isFetched: true,
-    data: mockConnectors,
-  })),
-}));
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn(() => ({
+        isFetched: true,
+        data: mockConnectors,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '@kbn/elastic-assistant/impl/connectorland/connector_selector_inline/connector_selector_inline',
-  () => ({
-    ConnectorSelectorInline: () => null,
-  })
+  () => {
+      const mocked = {
+        ConnectorSelectorInline: () => null,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 const mockSecurityCapabilities = [SECURITY_UI_SHOW_PRIVILEGE];
 
-jest.mock('../../common/links', () => ({
-  useLinkInfo: () =>
-    jest.fn().mockReturnValue({
-      capabilities: mockSecurityCapabilities,
-      globalNavPosition: 4,
-      globalSearchKeywords: ['Attack discovery'],
-      id: 'attack_discovery',
-      path: '/attack_discovery',
-      title: 'Attack discovery',
-    }),
-}));
+vi.mock('../../common/links', () => {
+      const mocked = {
+      useLinkInfo: () =>
+        vi.fn().mockReturnValue({
+          capabilities: mockSecurityCapabilities,
+          globalNavPosition: 4,
+          globalSearchKeywords: ['Attack discovery'],
+          id: 'attack_discovery',
+          path: '/attack_discovery',
+          title: 'Attack discovery',
+        }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_attack_discovery', () => ({
-  useAttackDiscovery: jest.fn().mockReturnValue({
-    fetchAttackDiscoveries: jest.fn(),
-    isLoading: false,
-  }),
-}));
+vi.mock('./use_attack_discovery', () => {
+      const mocked = {
+      useAttackDiscovery: vi.fn().mockReturnValue({
+        fetchAttackDiscoveries: vi.fn(),
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockFilterManager = createFilterManagerMock();
 
@@ -109,11 +127,11 @@ const mockUseKibanaReturnValue = {
       capabilities: {
         [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
       },
-      navigateToUrl: jest.fn(),
+      navigateToUrl: vi.fn(),
     },
     cases: {
       helpers: {
-        canUseCases: jest.fn().mockReturnValue({
+        canUseCases: vi.fn().mockReturnValue({
           all: true,
           connectors: true,
           create: true,
@@ -125,9 +143,9 @@ const mockUseKibanaReturnValue = {
         }),
       },
       hooks: {
-        useCasesAddToExistingCase: jest.fn(),
-        useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
-        useCasesAddToNewCaseFlyout: jest.fn(),
+        useCasesAddToExistingCase: vi.fn(),
+        useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({ open: vi.fn() }),
+        useCasesAddToNewCaseFlyout: vi.fn(),
       },
       ui: { getCasesContext: mockCasesContext },
     },
@@ -145,27 +163,27 @@ const mockUseKibanaReturnValue = {
       },
     },
     featureFlags: {
-      useBooleanValue: jest.fn().mockReturnValue(false),
+      useBooleanValue: vi.fn().mockReturnValue(false),
     },
     lens: {
       EmbeddableComponent: () => null,
     },
-    notifications: jest.fn().mockReturnValue({
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-      addWarning: jest.fn(),
-      remove: jest.fn(),
+    notifications: vi.fn().mockReturnValue({
+      addError: vi.fn(),
+      addSuccess: vi.fn(),
+      addWarning: vi.fn(),
+      remove: vi.fn(),
     }),
     sessionView: {
-      getSessionView: jest.fn(() => <div />),
+      getSessionView: vi.fn(() => <div />),
     },
     storage: {
-      get: jest.fn(),
-      set: jest.fn(),
+      get: vi.fn(),
+      set: vi.fn(),
     },
-    telemetry: { reportEvent: jest.fn() },
+    telemetry: { reportEvent: vi.fn() },
     theme: {
-      getTheme: jest.fn().mockReturnValue({ darkMode: false }),
+      getTheme: vi.fn().mockReturnValue({ darkMode: false }),
     },
     timelines: { ...mockTimelines },
     triggersActionsUi: {
@@ -173,7 +191,7 @@ const mockUseKibanaReturnValue = {
       getAlertsStateTable: () => <></>,
     },
     uiSettings: {
-      get: jest.fn(),
+      get: vi.fn(),
     },
     unifiedSearch: {
       ui: {
@@ -182,20 +200,20 @@ const mockUseKibanaReturnValue = {
     },
   },
 };
-jest.mock('../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../common/lib/kibana'));
 
   return {
     ...original,
     useKibana: () => mockUseKibanaReturnValue,
-    useToasts: jest.fn().mockReturnValue({
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-      addWarning: jest.fn(),
-      addInfo: jest.fn(),
-      remove: jest.fn(),
+    useToasts: vi.fn().mockReturnValue({
+      addError: vi.fn(),
+      addSuccess: vi.fn(),
+      addWarning: vi.fn(),
+      addInfo: vi.fn(),
+      remove: vi.fn(),
     }),
-    useUiSetting$: jest.fn().mockReturnValue([]),
+    useUiSetting$: vi.fn().mockReturnValue([]),
   };
 });
 
@@ -211,9 +229,9 @@ const historyMock = {
 
 describe('AttackDiscovery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useLoadConnectors as jest.Mock).mockReturnValue({
+    (useLoadConnectors as Mock).mockReturnValue({
       isFetched: true,
       data: mockConnectors,
     });
@@ -256,26 +274,26 @@ describe('AttackDiscovery', () => {
   });
 
   describe('Generating ad hoc attack discoveries', () => {
-    let fetchAttackDiscoveriesMock: jest.Mock;
+    let fetchAttackDiscoveriesMock: Mock;
     beforeEach(() => {
-      fetchAttackDiscoveriesMock = jest.fn();
-      (useAttackDiscovery as jest.Mock).mockReturnValue({
+      fetchAttackDiscoveriesMock = vi.fn();
+      (useAttackDiscovery as Mock).mockReturnValue({
         fetchAttackDiscoveries: fetchAttackDiscoveriesMock,
         isLoading: false,
       });
 
       // Override the localStorage mock to return proper values for this test
-      (useLocalStorage as jest.Mock).mockImplementation((key: string) => {
+      (useLocalStorage as Mock).mockImplementation((key: string) => {
         if (key.includes('attackDiscovery.start')) {
-          return ['now-24h', jest.fn()];
+          return ['now-24h', vi.fn()];
         }
         if (key.includes('attackDiscovery.end')) {
-          return ['now', jest.fn()];
+          return ['now', vi.fn()];
         }
         if (key.includes('attackDiscovery.connectorId')) {
-          return ['test-id', jest.fn()];
+          return ['test-id', vi.fn()];
         }
-        return [undefined, jest.fn()];
+        return [undefined, vi.fn()];
       });
 
       render(

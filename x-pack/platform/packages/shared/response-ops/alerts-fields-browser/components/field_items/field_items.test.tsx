@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { omit } from 'lodash/fp';
 import { render } from '@testing-library/react';
@@ -192,7 +194,7 @@ describe('field_items', () => {
   });
 
   describe('getFieldColumns', () => {
-    const onToggleColumn = jest.fn();
+    const onToggleColumn = vi.fn();
     const getFieldColumnsParams = {
       onToggleColumn,
       onHide: () => {},

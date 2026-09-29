@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
 import { of } from 'rxjs';
 import type { ISearchGeneric, IKibanaSearchResponse } from '@kbn/search-types';
 import type { ESQLSearchResponse } from '@kbn/es-types';
@@ -220,10 +223,10 @@ describe('run query helpers', () => {
   });
 
   describe('column metadata request setting', () => {
-    let search: jest.MockedFunction<ISearchGeneric>;
+    let search: MockedFunction<ISearchGeneric>;
 
     beforeEach(() => {
-      search = jest.fn();
+      search = vi.fn();
     });
 
     it('getESQLQueryColumnsRaw does not request column_metadata by default', async () => {

@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render, fireEvent, waitFor } from '@testing-library/react';
 import { LanguageDocumentationFlyout } from '.';
 
-jest.mock('../../sections', () => {
-  const module = jest.requireActual('../../sections');
+vi.mock('../../sections', async () => {
+  const module = (await vi.importActual('../../sections'));
   return {
     ...module,
     getESQLDocsSections: () => ({
@@ -59,7 +61,7 @@ describe('###Documentation flyout component', () => {
     return render(
       <LanguageDocumentationFlyout
         isHelpMenuOpen={true}
-        onHelpMenuVisibilityChange={jest.fn()}
+        onHelpMenuVisibilityChange={vi.fn()}
         linkToDocumentation={linkToDocumentation}
       />
     );

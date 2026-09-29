@@ -7,16 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('./api/routes', () => ({ defineRoutes: jest.fn() }));
-jest.mock('./api/workflows_management_api', () => ({
-  WorkflowsManagementApi: jest.fn().mockImplementation(() => ({
-    setAuditLog: jest.fn(),
-  })),
-}));
-jest.mock('./api/workflows_management_service');
-jest.mock('@kbn/workflows-execution-engine/server', () => ({
-  registerHitlLifecycleAuditor: jest.fn(() => jest.fn()),
-}));
+import { vi } from 'vitest';
+import type { Mock, MockedClass, MockedFunction } from 'vitest';
+
+vi.mock('./api/routes', () => {
+      const mocked = { defineRoutes: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./api/workflows_management_api', () => {
+      const mocked = {
+      WorkflowsManagementApi: vi.fn().mockImplementation(() => ({
+        setAuditLog: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./api/workflows_management_service');
+vi.mock('@kbn/workflows-execution-engine/server', () => {
+      const mocked = {
+      registerHitlLifecycleAuditor: vi.fn(() => vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -27,23 +39,23 @@ import { WorkflowsService } from './api/workflows_management_service';
 import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import { WorkflowsPlugin } from './plugin';
 
-const MockedWorkflowsService = WorkflowsService as jest.MockedClass<typeof WorkflowsService>;
-const mockRegisterHitlLifecycleAuditor = registerHitlLifecycleAuditor as jest.MockedFunction<
+const MockedWorkflowsService = WorkflowsService as MockedClass<typeof WorkflowsService>;
+const mockRegisterHitlLifecycleAuditor = registerHitlLifecycleAuditor as MockedFunction<
   typeof registerHitlLifecycleAuditor
 >;
 
 describe('WorkflowsPlugin', () => {
-  const setStopping = jest.fn();
-  const cleanupUnregisteredOrphans = jest.fn().mockResolvedValue(undefined);
-  const unregisterHitlLifecycleAuditor = jest.fn();
+  const setStopping = vi.fn();
+  const cleanupUnregisteredOrphans = vi.fn().mockResolvedValue(undefined);
+  const unregisterHitlLifecycleAuditor = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockRegisterHitlLifecycleAuditor.mockReturnValue(unregisterHitlLifecycleAuditor);
     MockedWorkflowsService.mockImplementation(
       () =>
         ({
-          getCoreStart: jest.fn().mockResolvedValue({ security: { authc: {} } }),
+          getCoreStart: vi.fn().mockResolvedValue({ security: { authc: {} } }),
           cleanupUnregisteredOrphans,
           setStopping,
         } as unknown as WorkflowsService)
@@ -51,7 +63,7 @@ describe('WorkflowsPlugin', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns an empty start contract and clears the stopping flag', () => {
@@ -66,7 +78,7 @@ describe('WorkflowsPlugin', () => {
     const coreSetup = coreMock.createSetup();
 
     plugin.setup(coreSetup, {
-      spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
+      spaces: { spacesService: { getActiveSpace: vi.fn() } } as any,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     });
 
@@ -95,7 +107,7 @@ describe('WorkflowsPlugin', () => {
 
     const plugin = new WorkflowsPlugin(initializerContext);
     plugin.setup(coreMock.createSetup(), {
-      spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
+      spaces: { spacesService: { getActiveSpace: vi.fn() } } as any,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     });
     plugin.start(coreMock.createStart(), {
@@ -125,15 +137,15 @@ describe('WorkflowsPlugin', () => {
     const plugin = new WorkflowsPlugin(initializerContext);
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
-    const dataViews = { dataViewsServiceFactory: jest.fn() };
+    const dataViews = { dataViewsServiceFactory: vi.fn() };
     coreSetup.getStartServices.mockResolvedValue([coreStart, { dataViews }, {}] as never);
     const spaces = {
       spacesService: {
-        getActiveSpace: jest.fn(),
-        getSpaceId: jest.fn().mockReturnValue('marketing'),
+        getActiveSpace: vi.fn(),
+        getSpaceId: vi.fn().mockReturnValue('marketing'),
       },
     };
-    const ensureForSpace = jest
+    const ensureForSpace = vi
       .spyOn(ExecutionDataViewsBootstrap.prototype, 'ensureForSpaceFireAndForget')
       .mockImplementation();
 
@@ -142,7 +154,7 @@ describe('WorkflowsPlugin', () => {
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     });
 
-    const registerRouteHandlerContext = coreSetup.http.registerRouteHandlerContext as jest.Mock;
+    const registerRouteHandlerContext = coreSetup.http.registerRouteHandlerContext as Mock;
     const contextProvider = registerRouteHandlerContext.mock.calls.find(
       ([contextName]: [string]) => contextName === 'workflowsManagement'
     )?.[1];
@@ -168,7 +180,7 @@ describe('WorkflowsPlugin', () => {
   it('does not register connector-event triggers when inbound events are disabled', () => {
     const actions = actionsMock.createSetup();
     (
-      actions.getActionsConfigurationUtilities().isInboundEventsEnabled as jest.Mock
+      actions.getActionsConfigurationUtilities().isInboundEventsEnabled as Mock
     ).mockReturnValue(false);
     const workflowsExtensions = workflowsExtensionsMock.createSetup();
     const plugin = new WorkflowsPlugin(
@@ -182,7 +194,7 @@ describe('WorkflowsPlugin', () => {
 
     plugin.setup(coreMock.createSetup(), {
       actions,
-      spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
+      spaces: { spacesService: { getActiveSpace: vi.fn() } } as any,
       workflowsExtensions,
     });
 
@@ -196,7 +208,7 @@ describe('WorkflowsPlugin', () => {
   it('registers inboundWebhook.received when inbound events are enabled', () => {
     const actions = actionsMock.createSetup();
     (
-      actions.getActionsConfigurationUtilities().isInboundEventsEnabled as jest.Mock
+      actions.getActionsConfigurationUtilities().isInboundEventsEnabled as Mock
     ).mockReturnValue(true);
     const workflowsExtensions = workflowsExtensionsMock.createSetup();
     const plugin = new WorkflowsPlugin(
@@ -210,7 +222,7 @@ describe('WorkflowsPlugin', () => {
 
     plugin.setup(coreMock.createSetup(), {
       actions,
-      spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
+      spaces: { spacesService: { getActiveSpace: vi.fn() } } as any,
       workflowsExtensions,
     });
 

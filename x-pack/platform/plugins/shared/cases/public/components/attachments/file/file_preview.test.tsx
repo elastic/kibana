@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
@@ -19,28 +21,28 @@ describe('FilePreview', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
   });
 
   it('FilePreview rendered correctly', async () => {
     const filesClient = createMockFilesClient();
 
     renderWithTestingProviders(
-      <FilePreview closePreview={jest.fn()} selectedFile={basicFileMock} />,
+      <FilePreview closePreview={vi.fn()} selectedFile={basicFileMock} />,
       { wrapperProps: { filesClient } }
     );
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     await waitFor(() =>
       expect(filesClient.getDownloadHref).toHaveBeenCalledWith({
@@ -53,7 +55,7 @@ describe('FilePreview', () => {
   });
 
   it('pressing escape calls closePreview', async () => {
-    const closePreview = jest.fn();
+    const closePreview = vi.fn();
     const filesClient = createMockFilesClient();
 
     renderWithTestingProviders(
@@ -72,7 +74,7 @@ describe('FilePreview', () => {
 
     await user.keyboard('{Escape}');
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     await waitFor(() => expect(closePreview).toHaveBeenCalled());
   });

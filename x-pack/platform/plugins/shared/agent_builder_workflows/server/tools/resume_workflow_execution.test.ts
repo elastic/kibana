@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -12,18 +14,21 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
-  ...jest.requireActual('@kbn/agent-builder-tools-base/workflows'),
-  getExecutionState: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-tools-base/workflows', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/agent-builder-tools-base/workflows')),
+      getExecutionState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getExecutionState } = jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+const { getExecutionState } = (await vi.importMock('@kbn/agent-builder-tools-base/workflows'));
 
 describe('resumeWorkflowExecutionTool', () => {
   const createWorkflowsManagement = () => ({
     management: {
-      resumeWorkflowExecution: jest.fn().mockResolvedValue(undefined),
-      getWorkflowExecution: jest.fn(),
+      resumeWorkflowExecution: vi.fn().mockResolvedValue(undefined),
+      getWorkflowExecution: vi.fn(),
     },
   });
 
@@ -35,7 +40,7 @@ describe('resumeWorkflowExecutionTool', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should have the correct tool id', () => {
@@ -50,13 +55,13 @@ describe('resumeWorkflowExecutionTool', () => {
     'does not expose execution data without readExecution (execute allowed=%s)',
     async (canExecute) => {
       const wm = createWorkflowsManagement();
-      const atSpace = jest.fn(async (_spaceId, { kibana }: { kibana: string[] }) => ({
+      const atSpace = vi.fn(async (_spaceId, { kibana }: { kibana: string[] }) => ({
         hasAllRequested: canExecute && !kibana.includes('api:workflowsManagement:readExecution'),
       }));
       const security = {
         authz: {
           actions: { api: { get: (action: string) => `api:${action}` } },
-          checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpace }),
+          checkPrivilegesWithRequest: vi.fn().mockReturnValue({ atSpace }),
         },
       } as unknown as SecurityPluginStart;
       const tool = resumeWorkflowExecutionTool({

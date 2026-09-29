@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mockStorage } from '../../storage/hashed_item_store/mock';
 import type { IKbnUrlStateStorage } from './create_kbn_url_state_storage';
 import { createKbnUrlStateStorage } from './create_kbn_url_state_storage';
@@ -97,7 +99,7 @@ describe('KbnUrlStateStorage', () => {
     });
 
     it('should notify about errors', () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       urlStateStorage = createKbnUrlStateStorage({ useHash: false, history, onGetError: cb });
       const key = '_s';
       history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
@@ -106,7 +108,7 @@ describe('KbnUrlStateStorage', () => {
     });
 
     it('should notify about errors throttled', () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       urlStateStorage = createKbnUrlStateStorage({ useHash: false, history, onGetError: cb });
       const key = '_s';
       history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
@@ -184,7 +186,7 @@ describe('KbnUrlStateStorage', () => {
       });
 
       it('should notify about errors', async () => {
-        const cb = jest.fn();
+        const cb = vi.fn();
         urlStateStorage = createKbnUrlStateStorage({ useHash: true, history, onSetError: cb });
         await expect(urlStateStorage.set('_s', { test: 'test' })).resolves; // not rejects
         expect(cb).toHaveBeenCalledWith(expect.any(Error));
@@ -283,7 +285,7 @@ describe('KbnUrlStateStorage', () => {
     });
 
     it('should notify about errors', () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       urlStateStorage = createKbnUrlStateStorage({
         useHash: false,
         useHashQuery: false,

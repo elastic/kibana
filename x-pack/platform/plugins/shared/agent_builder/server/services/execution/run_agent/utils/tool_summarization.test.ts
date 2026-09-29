@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
@@ -37,14 +40,14 @@ const createMockToolManager = (
   > = new Map()
 ): ToolManager =>
   ({
-    getSummarizer: jest.fn((toolId: string) => summarizers.get(toolId)),
+    getSummarizer: vi.fn((toolId: string) => summarizers.get(toolId)),
   } as unknown as ToolManager);
 
 const createMockToolRegistry = (
   tools: Map<string, { summarizeToolReturn?: (step: ToolCallWithResult) => ToolResult[] | null }>
 ): ToolRegistry =>
   ({
-    get: jest.fn(async (toolId: string) => tools.get(toolId)),
+    get: vi.fn(async (toolId: string) => tools.get(toolId)),
   } as unknown as ToolRegistry);
 
 describe('tool_summarization markers', () => {
@@ -89,7 +92,7 @@ describe('tryToolSummarization', () => {
   });
 
   it('falls back to the registry when the manager has no summarizer', async () => {
-    const registrySummarizer = jest.fn(() => [otherResult('s', { summary: 'registry' })]);
+    const registrySummarizer = vi.fn(() => [otherResult('s', { summary: 'registry' })]);
     const registry = createMockToolRegistry(
       new Map([['search', { summarizeToolReturn: registrySummarizer }]])
     );
@@ -114,7 +117,7 @@ describe('tryToolSummarization', () => {
 
   it('returns undefined and does not throw when registry lookup fails', async () => {
     const registry = createMockToolRegistry(new Map());
-    (registry.get as jest.Mock).mockRejectedValueOnce(new Error('not found'));
+    (registry.get as Mock).mockRejectedValueOnce(new Error('not found'));
 
     const out = await tryToolSummarization(
       makeToolCall('evicted', [otherResult('r', {})]),
@@ -149,7 +152,7 @@ describe('createSummarizationTransformer', () => {
   });
 
   it('skips already-cleaned results without invoking the summarizer', async () => {
-    const summarizer = jest.fn(() => [otherResult('s', { summary: 'x' })]);
+    const summarizer = vi.fn(() => [otherResult('s', { summary: 'x' })]);
     const transformer = createSummarizationTransformer({
       toolManager: createMockToolManager(new Map([['search', summarizer]])),
       toolRegistry: createMockToolRegistry(new Map()),

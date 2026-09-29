@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getLinkActionProps } from '.';
 
 describe('link_action_utils', () => {
@@ -20,7 +22,7 @@ describe('link_action_utils', () => {
     });
 
     it('returns only onClick when onClick is provided without href', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const props = getLinkActionProps({ onClick });
       expect(props.href).toBeUndefined();
       expect(typeof props.onClick).toBe('function');
@@ -30,10 +32,10 @@ describe('link_action_utils', () => {
     });
 
     it('prefers onClick over href on plain left click', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const props = getLinkActionProps({ href: '/app/discover', onClick });
 
-      const preventDefault = jest.fn();
+      const preventDefault = vi.fn();
       props.onClick?.({
         button: 0,
         metaKey: false,
@@ -48,10 +50,10 @@ describe('link_action_utils', () => {
     });
 
     it('does not intercept modifier click when href is present', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const props = getLinkActionProps({ href: '/app/discover', onClick });
 
-      const preventDefault = jest.fn();
+      const preventDefault = vi.fn();
       props.onClick?.({
         button: 0,
         ctrlKey: true,
@@ -66,10 +68,10 @@ describe('link_action_utils', () => {
     });
 
     it('does not intercept middle click when href is present', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const props = getLinkActionProps({ href: '/app/discover', onClick });
 
-      const preventDefault = jest.fn();
+      const preventDefault = vi.fn();
       props.onClick?.({
         button: 1,
         metaKey: false,

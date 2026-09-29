@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -13,9 +15,9 @@ import type { AISummarySectionSettingsProps } from './ai_summary_section_setting
 
 const defaultProps: AISummarySectionSettingsProps = {
   showAnonymized: false,
-  onChangeShowAnonymized: jest.fn(),
-  closePopover: jest.fn(),
-  openPopover: jest.fn(),
+  onChangeShowAnonymized: vi.fn(),
+  closePopover: vi.fn(),
+  openPopover: vi.fn(),
   isPopoverOpen: false,
   hasAnonymizedContent: true,
 };
@@ -29,7 +31,7 @@ const renderComponent = (props: Partial<AISummarySectionSettingsProps> = {}) =>
 
 describe('AISummarySectionSettings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the settings menu button', () => {

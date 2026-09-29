@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { useESQLQueryStats } from './use_esql_query_stats';
@@ -101,7 +103,7 @@ describe('useESQLQueryStats', () => {
   it('should unsubscribe from request adapter on unmount', () => {
     const { unmount } = renderHook(() => useESQLQueryStats(true, mockRequestAdapter));
 
-    const offSpy = jest.spyOn(mockRequestAdapter, 'off');
+    const offSpy = vi.spyOn(mockRequestAdapter, 'off');
 
     unmount();
 

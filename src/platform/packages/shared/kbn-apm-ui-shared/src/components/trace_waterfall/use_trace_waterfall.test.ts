@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { Error, TraceItem } from '@kbn/apm-types';
 import { useTraceWaterfall } from './use_trace_waterfall';
@@ -38,7 +40,7 @@ function buildError(overrides: Partial<Error>): Error {
 
 describe('useTraceWaterfall error marks', () => {
   it('forwards both transaction.id and span.id to getErrorMarkerHref', () => {
-    const getErrorMarkerHref = jest.fn().mockReturnValue('/href');
+    const getErrorMarkerHref = vi.fn().mockReturnValue('/href');
 
     renderHook(() =>
       useTraceWaterfall({
@@ -59,7 +61,7 @@ describe('useTraceWaterfall error marks', () => {
 
   // OTel-native error documents only carry `span.id`.
   it('forwards span.id with an undefined transactionId for OTel errors', () => {
-    const getErrorMarkerHref = jest.fn().mockReturnValue('/href');
+    const getErrorMarkerHref = vi.fn().mockReturnValue('/href');
 
     renderHook(() =>
       useTraceWaterfall({
@@ -75,7 +77,7 @@ describe('useTraceWaterfall error marks', () => {
   });
 
   it('does not build an errorMarkerHref when the error has no grouping key', () => {
-    const getErrorMarkerHref = jest.fn().mockReturnValue('/href');
+    const getErrorMarkerHref = vi.fn().mockReturnValue('/href');
 
     const { result } = renderHook(() =>
       useTraceWaterfall({

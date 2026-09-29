@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-jest.mock('uuid', () => {
+import { vi } from 'vitest';
+
+vi.mock('uuid', () => {
   let counter = 1;
   return {
     v4: () => `uuid-module-v4-called-${counter++}`,
@@ -26,7 +28,7 @@ describe('logAlerts', () => {
   let ruleRunMetricsStore: RuleRunMetricsStore;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     logger.isLevelEnabled.mockReturnValue(true);
     ruleRunMetricsStore = new RuleRunMetricsStore();
   });
@@ -136,7 +138,7 @@ describe('logAlerts', () => {
   });
 
   test('should correctly set values in ruleRunMetricsStore and call alertingEventLogger.logAlert if shouldPersistAlerts is true', () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     logAlerts({
       logger,
@@ -273,7 +275,7 @@ describe('logAlerts', () => {
   });
 
   test('should not call alertingEventLogger.logAlert but still update ruleRunMetricsStore if autoRecoverAlerts is false', () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     logAlerts({
       logger,
@@ -406,7 +408,7 @@ describe('logAlerts', () => {
   });
 
   test('should correctly set maintenance window in ruleRunMetricsStore and call alertingEventLogger.logAlert', () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logAlerts({
       logger,
       alertingEventLogger,

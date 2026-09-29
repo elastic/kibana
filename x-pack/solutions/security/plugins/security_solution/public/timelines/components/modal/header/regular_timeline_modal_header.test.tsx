@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,17 +22,17 @@ import { timelineActions } from '../../../store';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import * as i18n from '../translations';
 
-jest.mock('../../../hooks/use_create_timeline');
-jest.mock('../../../../common/components/inspect/use_inspect');
-jest.mock('./use_is_inspect_disabled');
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../hooks/use_create_timeline');
+vi.mock('../../../../common/components/inspect/use_inspect');
+vi.mock('./use_is_inspect_disabled');
+vi.mock('../../../../common/lib/kibana');
 
-const mockGetState = jest.fn().mockReturnValue({});
-jest.mock('react-redux-v7', () => {
-  const actual = jest.requireActual('react-redux-v7');
+const mockGetState = vi.fn().mockReturnValue({});
+vi.mock('react-redux-v7', () => {
+  const actual = require('react-redux-v7');
   return {
     ...actual,
-    useDispatch: jest.fn(),
+    useDispatch: vi.fn(),
     useSelector: (selector: (s: unknown) => unknown) =>
       selector({
         timeline: {
@@ -55,10 +58,10 @@ const renderComponent = () =>
 describe('RegularTimelineModalHeader', () => {
   beforeEach(() => {
     mockGetState.mockReturnValue({ timelineType: TimelineTypeEnum.default });
-    (useDispatch as jest.Mock).mockReturnValue(jest.fn());
-    (useCreateTimeline as jest.Mock).mockReturnValue(jest.fn());
-    (useInspect as jest.Mock).mockReturnValue(jest.fn());
-    (useIsInspectDisabled as jest.Mock).mockReturnValue(false);
+    (useDispatch as Mock).mockReturnValue(vi.fn());
+    (useCreateTimeline as Mock).mockReturnValue(vi.fn());
+    (useInspect as Mock).mockReturnValue(vi.fn());
+    (useIsInspectDisabled as Mock).mockReturnValue(false);
   });
 
   it('renders all regular timeline elements', () => {
@@ -76,20 +79,20 @@ describe('RegularTimelineModalHeader', () => {
   });
 
   it('shows Attach to Case button when user has the correct permissions', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
-        application: { navigateToApp: jest.fn() },
+        application: { navigateToApp: vi.fn() },
         cases: {
           helpers: {
-            canUseCases: jest.fn().mockReturnValue({ createComment: true, read: true }),
+            canUseCases: vi.fn().mockReturnValue({ createComment: true, read: true }),
           },
           hooks: {
-            useCasesAddToNewCaseFlyout: jest.fn().mockReturnValue({ open: jest.fn() }),
-            useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
+            useCasesAddToNewCaseFlyout: vi.fn().mockReturnValue({ open: vi.fn() }),
+            useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({ open: vi.fn() }),
           },
           config: { attachmentsEnabled: false },
         },
-        uiSettings: { get: jest.fn() },
+        uiSettings: { get: vi.fn() },
       },
     });
 
@@ -119,9 +122,9 @@ describe('RegularTimelineModalHeader', () => {
   });
 
   it('dispatches showTimeline(false) when close button is clicked', async () => {
-    const mockDispatch = jest.fn();
-    (useDispatch as jest.Mock).mockReturnValue(mockDispatch);
-    const spy = jest.spyOn(timelineActions, 'showTimeline');
+    const mockDispatch = vi.fn();
+    (useDispatch as Mock).mockReturnValue(mockDispatch);
+    const spy = vi.spyOn(timelineActions, 'showTimeline');
 
     renderComponent();
     await userEvent.click(screen.getByTestId('timeline-modal-header-close-button'));

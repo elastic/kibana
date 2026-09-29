@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import {
   httpServerMock,
   elasticsearchServiceMock,
@@ -23,28 +26,28 @@ import { AgentNotFoundError, FleetUnauthorizedError } from '../../errors';
 import { migrateSingleAgentHandler, bulkMigrateAgentsHandler } from './migrate_handlers';
 
 // Mock the agent service functions
-jest.mock('../../services/agents', () => {
+vi.mock('../../services/agents', () => {
   return {
-    getAgentById: jest.fn(),
-    getAgentPolicyForAgent: jest.fn(),
-    migrateSingleAgent: jest.fn(),
-    getByIds: jest.fn(),
-    getAgentPolicyForAgents: jest.fn(),
-    bulkMigrateAgents: jest.fn(),
+    getAgentById: vi.fn(),
+    getAgentPolicyForAgent: vi.fn(),
+    migrateSingleAgent: vi.fn(),
+    getByIds: vi.fn(),
+    getAgentPolicyForAgents: vi.fn(),
+    bulkMigrateAgents: vi.fn(),
   };
 });
 
 // Mock the license service
-jest.mock('../../services', () => {
+vi.mock('../../services', () => {
   return {
     licenseService: {
-      hasAtLeast: jest.fn(),
+      hasAtLeast: vi.fn(),
     },
   };
 });
 
-jest.mock('../../services/app_context', () => {
-  const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
+vi.mock('../../services/app_context', async () => {
+  const { loggerMock } = (await vi.importActual('@kbn/logging-mocks'));
   return {
     appContextService: {
       getLogger: () => loggerMock.create(),
@@ -55,19 +58,19 @@ jest.mock('../../services/app_context', () => {
 describe('Migrate handlers', () => {
   let mockLicenseService: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Get the mocked license service
-    mockLicenseService = jest.requireMock('../../services').licenseService;
+    mockLicenseService = (await vi.importMock('../../services')).licenseService;
     // Default to having the required license
     mockLicenseService.hasAtLeast.mockReturnValue(true);
   });
 
   describe('migrateSingleAgentHandler', () => {
-    let mockResponse: jest.Mocked<KibanaResponseFactory>;
+    let mockResponse: Mocked<KibanaResponseFactory>;
 
     let mockRequest: any;
-    let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-    let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
+    let mockSavedObjectsClient: Mocked<SavedObjectsClientContract>;
+    let mockElasticsearchClient: Mocked<ElasticsearchClient>;
     let mockContext: any;
 
     const agentId = 'agent-id';
@@ -77,7 +80,7 @@ describe('Migrate handlers', () => {
     const mockActionResponse = { id: 'action-id' };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       mockResponse = httpServerMock.createResponseFactory();
       mockSavedObjectsClient = savedObjectsClientMock.create();
@@ -103,9 +106,9 @@ describe('Migrate handlers', () => {
       };
 
       // Default mock returns
-      (AgentService.getAgentById as jest.Mock).mockResolvedValue(mockAgent);
-      (AgentService.getAgentPolicyForAgent as jest.Mock).mockResolvedValue(mockAgentPolicy);
-      (AgentService.migrateSingleAgent as jest.Mock).mockResolvedValue({
+      (AgentService.getAgentById as Mock).mockResolvedValue(mockAgent);
+      (AgentService.getAgentPolicyForAgent as Mock).mockResolvedValue(mockAgentPolicy);
+      (AgentService.migrateSingleAgent as Mock).mockResolvedValue({
         actionId: mockActionResponse.id,
       });
     });
@@ -146,12 +149,12 @@ describe('Migrate handlers', () => {
 
     it('returns error when agent belongs to a protected policy', async () => {
       // Mock agent policy as protected
-      (AgentService.getAgentPolicyForAgent as jest.Mock).mockResolvedValue({
+      (AgentService.getAgentPolicyForAgent as Mock).mockResolvedValue({
         ...mockAgentPolicy,
         is_protected: true,
       });
       // Change the migrateSingleAgent mock to be an error
-      (AgentService.migrateSingleAgent as jest.Mock).mockRejectedValue(
+      (AgentService.migrateSingleAgent as Mock).mockRejectedValue(
         new FleetUnauthorizedError('Agent is protected and cannot be migrated')
       );
       await expect(
@@ -161,12 +164,12 @@ describe('Migrate handlers', () => {
 
     it('returns error when agent is a fleet-server agent', async () => {
       // Mock agent as fleet-server agent
-      (AgentService.getAgentById as jest.Mock).mockResolvedValue({
+      (AgentService.getAgentById as Mock).mockResolvedValue({
         ...mockAgent,
         components: [{ type: 'fleet-server' }],
       });
       // Change the migrateSingleAgent mock to be an error
-      (AgentService.migrateSingleAgent as jest.Mock).mockRejectedValue(
+      (AgentService.migrateSingleAgent as Mock).mockRejectedValue(
         new FleetUnauthorizedError('Agent is protected and cannot be migrated')
       );
       await expect(
@@ -176,7 +179,7 @@ describe('Migrate handlers', () => {
 
     it('returns error when agent is containerized', async () => {
       // Mock agent as containerized agent
-      (AgentService.getAgentById as jest.Mock).mockResolvedValue({
+      (AgentService.getAgentById as Mock).mockResolvedValue({
         ...mockAgent,
         local_metadata: {
           elastic: {
@@ -188,7 +191,7 @@ describe('Migrate handlers', () => {
         },
       });
       // Change the migrateSingleAgent mock to be an error
-      (AgentService.migrateSingleAgent as jest.Mock).mockRejectedValue(
+      (AgentService.migrateSingleAgent as Mock).mockRejectedValue(
         new Error('Containerized agents cannot be migrated')
       );
       await expect(
@@ -198,7 +201,7 @@ describe('Migrate handlers', () => {
 
     it('returns error when agent is not found', async () => {
       const agentError = new AgentNotFoundError('Agent not found');
-      (AgentService.getAgentById as jest.Mock).mockRejectedValue(agentError);
+      (AgentService.getAgentById as Mock).mockRejectedValue(agentError);
       await expect(
         migrateSingleAgentHandler(mockContext, mockRequest, mockResponse)
       ).rejects.toThrow(agentError.message);
@@ -208,7 +211,7 @@ describe('Migrate handlers', () => {
       // Mock license as not having the required level
       mockLicenseService.hasAtLeast.mockReturnValue(false);
       // Mock the service to throw FleetUnauthorizedError when license is insufficient
-      (AgentService.migrateSingleAgent as jest.Mock).mockRejectedValue(
+      (AgentService.migrateSingleAgent as Mock).mockRejectedValue(
         new FleetUnauthorizedError(
           'Agent migration requires an enterprise license. Please upgrade your license.'
         )
@@ -241,11 +244,11 @@ describe('Migrate handlers', () => {
 
   // Bulk migrate
   describe('migrateBulkAgentsHandler', () => {
-    let mockResponse: jest.Mocked<KibanaResponseFactory>;
+    let mockResponse: Mocked<KibanaResponseFactory>;
 
     let mockRequest: any;
-    let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-    let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
+    let mockSavedObjectsClient: Mocked<SavedObjectsClientContract>;
+    let mockElasticsearchClient: Mocked<ElasticsearchClient>;
     let mockContext: any;
 
     const agentIds = ['agent-id-1', 'agent-id-2'];
@@ -257,7 +260,7 @@ describe('Migrate handlers', () => {
     const mockActionResponse = { id: 'action-id' };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       mockResponse = httpServerMock.createResponseFactory();
       mockSavedObjectsClient = savedObjectsClientMock.create();
@@ -278,7 +281,7 @@ describe('Migrate handlers', () => {
         fleet: {},
       };
 
-      (AgentService.bulkMigrateAgents as jest.Mock).mockResolvedValue({
+      (AgentService.bulkMigrateAgents as Mock).mockResolvedValue({
         actionId: mockActionResponse.id,
       });
     });
@@ -333,7 +336,7 @@ describe('Migrate handlers', () => {
       // Mock license as not having the required level
       mockLicenseService.hasAtLeast.mockReturnValue(false);
       // Mock the service to throw FleetUnauthorizedError when license is insufficient
-      (AgentService.bulkMigrateAgents as jest.Mock).mockRejectedValue(
+      (AgentService.bulkMigrateAgents as Mock).mockRejectedValue(
         new FleetUnauthorizedError(
           'Agent migration requires an enterprise license. Please upgrade your license.'
         )

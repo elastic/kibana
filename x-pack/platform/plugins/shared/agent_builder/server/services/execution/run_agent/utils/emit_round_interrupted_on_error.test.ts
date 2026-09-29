@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { concat, lastValueFrom, of, throwError, toArray } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ChatEventType, type RoundInterruptedEvent } from '@kbn/agent-builder-common';
@@ -24,7 +26,7 @@ const interrupted: RoundInterruptedEvent = {
 
 describe('emitRoundInterruptedOnError', () => {
   it('passes events through untouched and completes when the source completes', async () => {
-    const buildEvent = jest.fn(() => interrupted);
+    const buildEvent = vi.fn(() => interrupted);
     const logger = loggingSystemMock.createLogger();
 
     const seen = await lastValueFrom(
@@ -62,7 +64,7 @@ describe('emitRoundInterruptedOnError', () => {
   });
 
   it('builds the event only when the source errors, at that moment', async () => {
-    const buildEvent = jest.fn(() => interrupted);
+    const buildEvent = vi.fn(() => interrupted);
     const source$ = concat(
       of(1),
       throwError(() => new Error('boom'))

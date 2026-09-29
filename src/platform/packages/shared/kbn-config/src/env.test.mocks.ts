@@ -7,18 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const realFs = jest.requireActual('fs');
+import { vi } from 'vitest';
+
+const realFs = require('fs');
 
 export const mockPackage = {
   raw: {} as any,
 };
 
-jest.doMock('fs', () => ({
-  ...realFs,
-  readFileSync: (filePath: string, options?: unknown) => {
-    if (filePath === '/test/kibanaRoot/package.json') {
-      return JSON.stringify(mockPackage.raw);
-    }
-    return realFs.readFileSync(filePath, options);
-  },
-}));
+vi.doMock('fs', () => {
+      const mocked = {
+      ...realFs,
+      readFileSync: (filePath: string, options?: unknown) => {
+        if (filePath === '/test/kibanaRoot/package.json') {
+          return JSON.stringify(mockPackage.raw);
+        }
+        return realFs.readFileSync(filePath, options);
+      },
+    };
+      return { ...mocked, default: mocked };
+    });

@@ -5,21 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { RelatedAlertsGraphOutput } from './types';
 
-jest.mock('./graph_builder', () => ({
-  buildRelatedAlertsGraph: jest.fn(),
-}));
+vi.mock('./graph_builder', () => {
+      const mocked = {
+      buildRelatedAlertsGraph: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./time_window', () => ({
-  parseTimeWindowToMs: jest.fn((v: string) => {
-    const match = v.match(/^(\d+)([hmd])$/);
-    if (!match) return 3600000;
-    const [, num, unit] = match;
-    const multipliers: Record<string, number> = { h: 3600000, m: 60000, d: 86400000 };
-    return Number(num) * (multipliers[unit] ?? 3600000);
-  }),
-}));
+vi.mock('./time_window', () => {
+      const mocked = {
+      parseTimeWindowToMs: vi.fn((v: string) => {
+        const match = v.match(/^(\d+)([hmd])$/);
+        if (!match) return 3600000;
+        const [, num, unit] = match;
+        const multipliers: Record<string, number> = { h: 3600000, m: 60000, d: 86400000 };
+        return Number(num) * (multipliers[unit] ?? 3600000);
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   buildAlertEntityGraphInputSchema,
@@ -28,26 +37,26 @@ import {
 import { buildRelatedAlertsGraph } from './graph_builder';
 import { parseTimeWindowToMs } from './time_window';
 
-const mockBuildGraph = buildRelatedAlertsGraph as jest.MockedFunction<
+const mockBuildGraph = buildRelatedAlertsGraph as MockedFunction<
   typeof buildRelatedAlertsGraph
 >;
-const mockParseWindow = parseTimeWindowToMs as jest.MockedFunction<typeof parseTimeWindowToMs>;
+const mockParseWindow = parseTimeWindowToMs as MockedFunction<typeof parseTimeWindowToMs>;
 
 const createMockContext = (input: Record<string, unknown>) => ({
   input,
   config: {},
   rawInput: input,
   contextManager: {
-    getContext: jest.fn().mockReturnValue({ workflow: { spaceId: 'default' } }),
-    getScopedEsClient: jest.fn().mockReturnValue({ search: jest.fn() }),
-    renderInputTemplate: jest.fn(),
-    getFakeRequest: jest.fn(),
+    getContext: vi.fn().mockReturnValue({ workflow: { spaceId: 'default' } }),
+    getScopedEsClient: vi.fn().mockReturnValue({ search: vi.fn() }),
+    renderInputTemplate: vi.fn(),
+    getFakeRequest: vi.fn(),
   },
   logger: {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   },
   abortSignal: new AbortController().signal,
   stepId: 'test-step',
@@ -84,7 +93,7 @@ const GRAPH_RESULT: RelatedAlertsGraphOutput = {
 
 describe('buildAlertEntityGraph step', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('input schema', () => {

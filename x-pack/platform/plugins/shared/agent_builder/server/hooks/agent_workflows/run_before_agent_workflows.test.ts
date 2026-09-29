@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { AgentBuilderErrorCode } from '@kbn/agent-builder-common';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -16,16 +18,22 @@ import { runBeforeAgentWorkflows } from './run_before_agent_workflows';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import { getCurrentSpaceId } from '../../utils/spaces';
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
-  executeWorkflow: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-tools-base/workflows', () => {
+      const mocked = {
+      executeWorkflow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/spaces', () => ({
-  getCurrentSpaceId: jest.fn(() => 'default'),
-}));
+vi.mock('../../utils/spaces', () => {
+      const mocked = {
+      getCurrentSpaceId: vi.fn(() => 'default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const executeWorkflowMock = jest.mocked(executeWorkflow);
-const getCurrentSpaceIdMock = jest.mocked(getCurrentSpaceId);
+const executeWorkflowMock = vi.mocked(executeWorkflow);
+const getCurrentSpaceIdMock = vi.mocked(getCurrentSpaceId);
 type RunBeforeAgentWorkflowParams = Parameters<typeof runBeforeAgentWorkflows>[0];
 type WorkflowApi = RunBeforeAgentWorkflowParams['workflowApi'];
 type GetInternalServices = RunBeforeAgentWorkflowParams['getInternalServices'];
@@ -51,20 +59,20 @@ describe('runBeforeAgentWorkflows', () => {
     uiSettings.asScopedToClient.mockReturnValue(uiSettingsClient);
 
     const registry = {
-      get: jest.fn().mockResolvedValue({ id: 'agent-1', type: 'chat', configuration: {} }),
+      get: vi.fn().mockResolvedValue({ id: 'agent-1', type: 'chat', configuration: {} }),
     };
-    const resolveAgentConfiguration = jest.fn().mockResolvedValue({ workflow_ids: ['wf-1'] });
+    const resolveAgentConfiguration = vi.fn().mockResolvedValue({ workflow_ids: ['wf-1'] });
 
     return {
       workflowApi: {} as WorkflowApi,
-      getInternalServices: jest.fn(() => ({
+      getInternalServices: vi.fn(() => ({
         agents: {
-          getRegistry: jest.fn().mockResolvedValue(registry),
+          getRegistry: vi.fn().mockResolvedValue(registry),
           resolveAgentConfiguration,
         },
         spaces: {},
         featureFlags: {
-          getBooleanValue: jest.fn().mockResolvedValue(true),
+          getBooleanValue: vi.fn().mockResolvedValue(true),
         },
         uiSettings,
         savedObjects,
@@ -76,7 +84,7 @@ describe('runBeforeAgentWorkflows', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getCurrentSpaceIdMock.mockReturnValue('default');
   });
 

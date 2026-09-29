@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React from 'react';
 import type { DataBoundsObject } from './axis_extent_settings';
@@ -21,7 +23,7 @@ describe('AxisBoundsControl', () => {
     defaultProps = {
       type: 'metric',
       extent: { mode: 'full' },
-      setExtent: jest.fn(),
+      setExtent: vi.fn(),
       dataBounds: { min: 0, max: 1000 },
       hasBarOrArea: false,
       disableCustomRange: false,

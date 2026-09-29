@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useContext } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
@@ -24,8 +26,8 @@ import { ExternalServicesProvider } from '../../../../../context/external_servic
 import { createFeatureFlagsMock } from '../../../../../test_utils/create_feature_flags_mock';
 import type { MetricsSort } from '../../../../../types';
 
-jest.mock('../../../../../restorable_state', () => {
-  const { useState, useCallback } = jest.requireActual('react');
+vi.mock('../../../../../restorable_state', () => {
+  const { useState, useCallback } = require('react');
   return {
     useRestorableState: <T,>(_key: string, initialValue: T) => {
       const [value, _setValue] = useState(initialValue);
@@ -177,7 +179,7 @@ describe('MetricsExperienceStateProvider', () => {
     });
 
     it('forwards only dimension names to onGridSettingsChange, dropping `type`', () => {
-      const onGridSettingsChange = jest.fn();
+      const onGridSettingsChange = vi.fn();
       const customWrapper = ({ children }: { children: React.ReactNode }) => (
         <MetricsExperienceStateProvider
           profileId="test-profile"
@@ -301,7 +303,7 @@ describe('MetricsExperienceStateProvider', () => {
     });
 
     it('forwards updates to the onGridSettingsChange prop', () => {
-      const onGridSettingsChange = jest.fn();
+      const onGridSettingsChange = vi.fn();
       const customWrapper = ({ children }: { children: React.ReactNode }) => (
         <MetricsExperienceStateProvider
           profileId="test-profile"
@@ -375,7 +377,7 @@ describe('MetricsExperienceStateProvider', () => {
     });
 
     it('forwards sort changes to the host onMetricsSortChange prop', () => {
-      const onMetricsSortChange = jest.fn();
+      const onMetricsSortChange = vi.fn();
       const { result } = renderHook(() => useMetricsExperienceState(), {
         wrapper: createSortWrapper({
           metricsSort: METRICS_GRID_SORT_DEFAULTS,
@@ -395,7 +397,7 @@ describe('MetricsExperienceStateProvider', () => {
     });
 
     it('resets currentPage to 0 when the sort changes (parity with #277184)', () => {
-      const onMetricsSortChange = jest.fn();
+      const onMetricsSortChange = vi.fn();
       const { result } = renderHook(() => useMetricsExperienceState(), {
         wrapper: createSortWrapper({
           metricsSort: METRICS_GRID_SORT_DEFAULTS,
@@ -418,7 +420,7 @@ describe('MetricsExperienceStateProvider', () => {
     });
 
     it('does not reset currentPage when the sort is unchanged', () => {
-      const onMetricsSortChange = jest.fn();
+      const onMetricsSortChange = vi.fn();
       const { result } = renderHook(() => useMetricsExperienceState(), {
         wrapper: createSortWrapper({
           metricsSort: METRICS_GRID_SORT_DEFAULTS,
@@ -442,7 +444,7 @@ describe('MetricsExperienceStateProvider', () => {
     });
 
     it('defaults to enabled when the host provides no featureFlags service', () => {
-      const onMetricsSortChange = jest.fn();
+      const onMetricsSortChange = vi.fn();
       const { result } = renderHook(() => useMetricsExperienceState(), {
         wrapper: ({ children }: { children: React.ReactNode }) => (
           <MetricsExperienceStateProvider
@@ -489,7 +491,7 @@ describe('MetricsExperienceStateProvider', () => {
       });
 
       it('swallows sort change requests without forwarding or resetting the page', () => {
-        const onMetricsSortChange = jest.fn();
+        const onMetricsSortChange = vi.fn();
         const { result } = renderHook(() => useMetricsExperienceState(), {
           wrapper: createSortWrapper(
             { metricsSort: METRICS_GRID_SORT_DEFAULTS, onMetricsSortChange },

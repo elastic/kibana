@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -19,44 +21,59 @@ import {
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { FLYOUT_DESCRIPTOR_KIND } from '../url_state/flyout_v2_url_param';
 
-jest.mock('../components/table_field_name_cell', () => ({
-  getEcsField: (field: string) => {
-    const ecsMap: Record<string, { type: string }> = {
-      'source.ip': { type: 'ip' },
-      'destination.ip': { type: 'ip' },
-      'host.name': { type: 'keyword' },
+vi.mock('../components/table_field_name_cell', () => {
+      const mocked = {
+      getEcsField: (field: string) => {
+        const ecsMap: Record<string, { type: string }> = {
+          'source.ip': { type: 'ip' },
+          'destination.ip': { type: 'ip' },
+          'host.name': { type: 'keyword' },
+        };
+        return ecsMap[field];
+      },
     };
-    return ecsMap[field];
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../network/main', () => ({
-  Network: ({ ip, flowTarget }: { ip: string; flowTarget: string }) => (
-    <div data-test-subj="mockNetwork">{`${ip}-${flowTarget}`}</div>
-  ),
-}));
+vi.mock('../../network/main', () => {
+      const mocked = {
+      Network: ({ ip, flowTarget }: { ip: string; flowTarget: string }) => (
+        <div data-test-subj="mockNetwork">{`${ip}-${flowTarget}`}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../entity/host/main', () => ({
-  Host: ({ hostName, hit }: { hostName: string; hit?: { flattened: Record<string, unknown> } }) => (
-    <div data-test-subj="mockHost" data-has-hit={hit ? 'true' : 'false'}>
-      {hostName}
-    </div>
-  ),
-}));
+vi.mock('../../entity/host/main', () => {
+      const mocked = {
+      Host: ({ hostName, hit }: { hostName: string; hit?: { flattened: Record<string, unknown> } }) => (
+        <div data-test-subj="mockHost" data-has-hit={hit ? 'true' : 'false'}>
+          {hostName}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../entity/user/main', () => ({
-  User: ({ userName, hit }: { userName: string; hit?: { flattened: Record<string, unknown> } }) => (
-    <div data-test-subj="mockUser" data-has-hit={hit ? 'true' : 'false'}>
-      {userName}
-    </div>
-  ),
-}));
+vi.mock('../../entity/user/main', () => {
+      const mocked = {
+      User: ({ userName, hit }: { userName: string; hit?: { flattened: Record<string, unknown> } }) => (
+        <div data-test-subj="mockUser" data-has-hit={hit ? 'true' : 'false'}>
+          {userName}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../one_discover/alert_flyout_overview_tab_component/data_view_manager_bootstrap',
-  () => ({
-    DataViewManagerBootstrap: () => null,
-  })
+  () => {
+      const mocked = {
+        DataViewManagerBootstrap: () => null,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 describe('buildFlyoutContent', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useKibana } from '../../../common/lib/kibana';
@@ -14,28 +17,28 @@ import { useAlertsPrivileges } from '../../../detections/containers/detection_en
 import { useEaseDetailsContext } from '../context';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../context');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../context');
 
 describe('TakeActionButton', () => {
   it('should render component with all options', async () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsUpdate: true });
+    (useKibana as Mock).mockReturnValue({
       services: {
         cases: {
           ...mockCasesContract(),
           helpers: {
-            canUseCases: jest.fn().mockReturnValue({
+            canUseCases: vi.fn().mockReturnValue({
               read: true,
               createComment: true,
             }),
-            getRuleIdFromEvent: jest.fn(),
+            getRuleIdFromEvent: vi.fn(),
           },
         },
       },
     });
-    (useEaseDetailsContext as jest.Mock).mockReturnValue({
+    (useEaseDetailsContext as Mock).mockReturnValue({
       dataAsNestedObject: {
         _id: '_id',
         _index: '_index',
@@ -56,22 +59,22 @@ describe('TakeActionButton', () => {
   });
 
   it('should not show cases actions if user is not authorized', async () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasIndexWrite: true });
+    (useKibana as Mock).mockReturnValue({
       services: {
         cases: {
           ...mockCasesContract(),
           helpers: {
-            canUseCases: jest.fn().mockReturnValue({
+            canUseCases: vi.fn().mockReturnValue({
               read: false,
               createComment: false,
             }),
-            getRuleIdFromEvent: jest.fn(),
+            getRuleIdFromEvent: vi.fn(),
           },
         },
       },
     });
-    (useEaseDetailsContext as jest.Mock).mockReturnValue({
+    (useEaseDetailsContext as Mock).mockReturnValue({
       dataAsNestedObject: {
         _id: '_id',
         _index: '_index',
@@ -91,22 +94,22 @@ describe('TakeActionButton', () => {
   });
 
   it('should not show tags actions if user is not authorized', async () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasIndexWrite: false });
+    (useKibana as Mock).mockReturnValue({
       services: {
         cases: {
           ...mockCasesContract(),
           helpers: {
-            canUseCases: jest.fn().mockReturnValue({
+            canUseCases: vi.fn().mockReturnValue({
               read: true,
               createComment: true,
             }),
-            getRuleIdFromEvent: jest.fn(),
+            getRuleIdFromEvent: vi.fn(),
           },
         },
       },
     });
-    (useEaseDetailsContext as jest.Mock).mockReturnValue({
+    (useEaseDetailsContext as Mock).mockReturnValue({
       dataAsNestedObject: {
         _id: '_id',
         _index: '_index',

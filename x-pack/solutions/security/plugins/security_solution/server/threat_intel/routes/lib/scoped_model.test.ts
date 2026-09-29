@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { IUiSettingsClient, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
@@ -16,23 +19,23 @@ const FEATURE_ID = 'alertzero_fast';
 
 const request = {} as KibanaRequest;
 
-const createInference = (): jest.Mocked<InferenceServerStart> =>
+const createInference = (): Mocked<InferenceServerStart> =>
   ({
-    getChatModel: jest.fn().mockResolvedValue({ chatModel: true }),
-    getClient: jest.fn().mockReturnValue({ client: true }),
-    getConnectorById: jest
+    getChatModel: vi.fn().mockResolvedValue({ chatModel: true }),
+    getClient: vi.fn().mockReturnValue({ client: true }),
+    getConnectorById: vi
       .fn()
       .mockImplementation(async (connectorId: string) => ({ connectorId })),
-    getDefaultConnector: jest.fn().mockResolvedValue(undefined),
-  } as unknown as jest.Mocked<InferenceServerStart>);
+    getDefaultConnector: vi.fn().mockResolvedValue(undefined),
+  } as unknown as Mocked<InferenceServerStart>);
 
 const createSearchInferenceEndpoints = (
   connectorId: string | undefined
 ): SearchInferenceEndpointsPluginStart =>
   ({
-    features: { get: jest.fn().mockReturnValue({ featureId: FEATURE_ID }) },
+    features: { get: vi.fn().mockReturnValue({ featureId: FEATURE_ID }) },
     endpoints: {
-      getForFeature: jest.fn().mockResolvedValue({
+      getForFeature: vi.fn().mockResolvedValue({
         endpoints: connectorId ? [{ connectorId }] : [],
         warnings: [],
         soEntryFound: true,
@@ -42,7 +45,7 @@ const createSearchInferenceEndpoints = (
 
 const createUiSettingsClient = (defaultConnector?: string): IUiSettingsClient =>
   ({
-    get: jest
+    get: vi
       .fn()
       .mockImplementation(async (key: string) =>
         key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR ? defaultConnector : undefined
@@ -52,7 +55,7 @@ const createUiSettingsClient = (defaultConnector?: string): IUiSettingsClient =>
 describe('resolveScopedModel', () => {
   const logger = loggingSystemMock.createLogger();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns no_inference_plugin when the inference plugin is missing', async () => {
     const outcome = await resolveScopedModel({
@@ -90,7 +93,7 @@ describe('resolveScopedModel', () => {
     async (featureId) => {
       const inference = createInference();
       const searchInferenceEndpoints = createSearchInferenceEndpoints('genai-default');
-      jest.mocked(searchInferenceEndpoints.features.get).mockReturnValue(undefined);
+      vi.mocked(searchInferenceEndpoints.features.get).mockReturnValue(undefined);
 
       const outcome = await resolveScopedModel({
         inference,
@@ -151,7 +154,7 @@ describe('resolveScopedModel', () => {
     // a misconfiguration is diagnosable rather than looking like "no connector".
     const inference = createInference();
     const uiSettingsClient = {
-      get: jest.fn().mockRejectedValue(new Error('ui settings unavailable')),
+      get: vi.fn().mockRejectedValue(new Error('ui settings unavailable')),
     } as unknown as IUiSettingsClient;
 
     await resolveScopedModel({
@@ -208,9 +211,9 @@ describe('resolveScopedModel', () => {
 // endpoint skipped straight past the alternative to a hard failure.
 describe('resolveScopedModel — endpoint fallback within a feature', () => {
   const twoEndpoints = {
-    features: { get: jest.fn().mockReturnValue({ featureId: FEATURE_ID }) },
+    features: { get: vi.fn().mockReturnValue({ featureId: FEATURE_ID }) },
     endpoints: {
-      getForFeature: jest.fn().mockResolvedValue({
+      getForFeature: vi.fn().mockResolvedValue({
         endpoints: [{ connectorId: '.preferred' }, { connectorId: '.alternative' }],
       }),
     },
@@ -218,19 +221,19 @@ describe('resolveScopedModel — endpoint fallback within a feature', () => {
 
   it('falls through to the next registered endpoint when the first cannot build', async () => {
     const inference = {
-      getChatModel: jest.fn(async ({ connectorId }: { connectorId: string }) => {
+      getChatModel: vi.fn(async ({ connectorId }: { connectorId: string }) => {
         if (connectorId === '.preferred') throw new Error('endpoint unavailable');
         return {};
       }),
-      getClient: jest.fn(() => ({})),
-      getConnectorById: jest.fn(async () => ({ connectorId: '.alternative' })),
+      getClient: vi.fn(() => ({})),
+      getConnectorById: vi.fn(async () => ({ connectorId: '.alternative' })),
     };
 
     const result = await resolveScopedModel({
       inference: inference as never,
       searchInferenceEndpoints: twoEndpoints as never,
       request: {} as never,
-      uiSettingsClient: { get: jest.fn() } as never,
+      uiSettingsClient: { get: vi.fn() } as never,
       featureId: 'alertzero_fast',
       logger: loggingSystemMock.createLogger(),
     });
@@ -242,16 +245,16 @@ describe('resolveScopedModel — endpoint fallback within a feature', () => {
 
   it('stops at the first endpoint that builds', async () => {
     const inference = {
-      getChatModel: jest.fn(async () => ({})),
-      getClient: jest.fn(() => ({})),
-      getConnectorById: jest.fn(async () => ({ connectorId: '.preferred' })),
+      getChatModel: vi.fn(async () => ({})),
+      getClient: vi.fn(() => ({})),
+      getConnectorById: vi.fn(async () => ({ connectorId: '.preferred' })),
     };
 
     const result = await resolveScopedModel({
       inference: inference as never,
       searchInferenceEndpoints: twoEndpoints as never,
       request: {} as never,
-      uiSettingsClient: { get: jest.fn() } as never,
+      uiSettingsClient: { get: vi.fn() } as never,
       featureId: 'alertzero_fast',
       logger: loggingSystemMock.createLogger(),
     });

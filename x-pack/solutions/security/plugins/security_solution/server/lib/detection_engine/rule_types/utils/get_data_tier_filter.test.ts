@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getDataTierFilter } from './get_data_tier_filter';
 import type { IUiSettingsClient } from '@kbn/core/server';
 
 const uiSettingsClientMock = {
-  get: jest.fn(),
+  get: vi.fn(),
 } as unknown as IUiSettingsClient;
 
 describe('getDataTierFilter', () => {
   it('should return empty array if ui settings empty', async () => {
-    (uiSettingsClientMock.get as jest.Mock).mockResolvedValueOnce([]);
+    (uiSettingsClientMock.get as Mock).mockResolvedValueOnce([]);
     const filters = await getDataTierFilter({ uiSettingsClient: uiSettingsClientMock });
 
     expect(filters).toEqual([]);
   });
   it('should return filters array if ui settings populated with single value', async () => {
-    (uiSettingsClientMock.get as jest.Mock).mockResolvedValueOnce(['data_cold']);
+    (uiSettingsClientMock.get as Mock).mockResolvedValueOnce(['data_cold']);
     const filters = await getDataTierFilter({ uiSettingsClient: uiSettingsClientMock });
 
     expect(filters).toEqual([
@@ -36,7 +39,7 @@ describe('getDataTierFilter', () => {
   });
 
   it('should return filters array if ui settings populated with multiple values', async () => {
-    (uiSettingsClientMock.get as jest.Mock).mockResolvedValueOnce(['data_cold', 'data_frozen']);
+    (uiSettingsClientMock.get as Mock).mockResolvedValueOnce(['data_cold', 'data_frozen']);
     const filters = await getDataTierFilter({ uiSettingsClient: uiSettingsClientMock });
 
     expect(filters).toEqual([

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract, ISavedObjectsRepository } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { PartiallyUpdateableRuleAttributes } from './partially_update_rule';
@@ -20,12 +23,12 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { RuleExecutionStatuses } from '@kbn/alerting-types';
 const MockSavedObjectsClientContract = savedObjectsClientMock.create();
 const MockISavedObjectsRepository =
-  MockSavedObjectsClientContract as unknown as jest.Mocked<ISavedObjectsRepository>;
+  MockSavedObjectsClientContract as unknown as Mocked<ISavedObjectsRepository>;
 const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 describe('partiallyUpdateRule', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   for (const [soClientName, soClient] of Object.entries(getMockSavedObjectClients()))
@@ -110,8 +113,8 @@ describe('partiallyUpdateRule', () => {
 
 describe('partiallyUpdateRuleWithEs', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should work with no options', async () => {
@@ -205,8 +208,8 @@ describe('partiallyUpdateRuleWithEs', () => {
 
 describe('atomicRemoveSnoozedInstancesWithEs', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should call update with a Painless script (not a doc) and retry_on_conflict', async () => {
@@ -339,7 +342,7 @@ describe('atomicRemoveSnoozedInstancesWithEs', () => {
 
 function getMockSavedObjectClients(): Record<
   string,
-  jest.Mocked<SavedObjectsClientContract | ISavedObjectsRepository>
+  Mocked<SavedObjectsClientContract | ISavedObjectsRepository>
 > {
   return {
     SavedObjectsClientContract: MockSavedObjectsClientContract,

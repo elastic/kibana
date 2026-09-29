@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { SavedObjectsClientWrapper } from './saved_objects_client_wrapper';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { DataViewSavedObjectConflictError } from '../common';
 
 describe('SavedObjectsClientPublicToCommon', () => {
-  const soClient = { resolve: jest.fn() } as unknown as SavedObjectsClientContract;
+  const soClient = { resolve: vi.fn() } as unknown as SavedObjectsClientContract;
 
   test('get saved object - exactMatch', async () => {
     const mockedSavedObject = {
       version: 'abc',
     };
-    soClient.resolve = jest
+    soClient.resolve = vi
       .fn()
       .mockResolvedValue({ outcome: 'exactMatch', saved_object: mockedSavedObject });
     const service = new SavedObjectsClientWrapper(soClient);
@@ -31,7 +33,7 @@ describe('SavedObjectsClientPublicToCommon', () => {
     const mockedSavedObject = {
       version: 'def',
     };
-    soClient.resolve = jest
+    soClient.resolve = vi
       .fn()
       .mockResolvedValue({ outcome: 'aliasMatch', saved_object: mockedSavedObject });
     const service = new SavedObjectsClientWrapper(soClient);
@@ -44,7 +46,7 @@ describe('SavedObjectsClientPublicToCommon', () => {
       version: 'ghi',
     };
 
-    soClient.resolve = jest
+    soClient.resolve = vi
       .fn()
       .mockResolvedValue({ outcome: 'conflict', saved_object: mockedSavedObject });
     const service = new SavedObjectsClientWrapper(soClient);

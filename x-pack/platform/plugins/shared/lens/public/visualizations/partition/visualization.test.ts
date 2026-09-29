@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getPieVisualization } from './visualization';
 import type {
   LensPartitionVisualizationState,
@@ -29,7 +32,7 @@ import type { PaletteOutput } from '@kbn/coloring';
 import { LegendValue } from '@elastic/charts';
 import type { DeprecatedLegendValueLensPartitionVisualizationState } from './runtime_state/converters/legend_stats';
 
-jest.mock('../../id_generator');
+vi.mock('../../id_generator');
 
 const LAYER_ID = 'l1';
 
@@ -79,7 +82,7 @@ function mockFrame(): FramePublicAPI {
 
 // Just a basic bootstrap here to kickstart the tests
 describe('pie_visualization', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('#getUserMessages', () => {
     describe('too many dimensions', () => {
@@ -415,7 +418,7 @@ describe('pie_visualization', () => {
         ]);
 
         const palette = paletteServiceMock.get('default');
-        expect((palette.getCategoricalColor as jest.Mock).mock.calls).toEqual([
+        expect((palette.getCategoricalColor as Mock).mock.calls).toEqual([
           [
             [
               {

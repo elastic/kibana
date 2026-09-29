@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
 import { createProposalStepInputSchema } from '@kbn/proposals-common';
@@ -30,13 +33,13 @@ const resolvedUser = {
   email: null,
   profileUid: 'worker-uid',
 };
-const resolveUser = jest.fn().mockResolvedValue(resolvedUser);
+const resolveUser = vi.fn().mockResolvedValue(resolvedUser);
 
 /** Allows everything by default; a test overrides the one call it exercises. */
-const allowAll = (): jest.Mocked<ProposalPrivilegesChecker> => ({
-  assertCanManage: jest.fn().mockResolvedValue(undefined),
-  assertCanRead: jest.fn().mockResolvedValue(undefined),
-  canManage: jest.fn().mockResolvedValue(true),
+const allowAll = (): Mocked<ProposalPrivilegesChecker> => ({
+  assertCanManage: vi.fn().mockResolvedValue(undefined),
+  assertCanRead: vi.fn().mockResolvedValue(undefined),
+  canManage: vi.fn().mockResolvedValue(true),
 });
 
 const createContext = (input: Record<string, unknown>): StepHandlerContext<never, never> =>
@@ -45,16 +48,16 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     rawInput: input,
     config: {},
     contextManager: {
-      getContext: jest.fn().mockReturnValue({
+      getContext: vi.fn().mockReturnValue({
         execution: { id: EXECUTION_ID, executedBy: 'worker-user' },
         workflow: { spaceId: SPACE_ID },
       }),
-      getScopedEsClient: jest.fn(),
-      getFakeRequest: jest.fn().mockReturnValue(FAKE_REQUEST),
-      renderInputTemplate: jest.fn((value) => value),
-      callKibanaApi: jest.fn(),
+      getScopedEsClient: vi.fn(),
+      getFakeRequest: vi.fn().mockReturnValue(FAKE_REQUEST),
+      renderInputTemplate: vi.fn((value) => value),
+      callKibanaApi: vi.fn(),
     },
-    logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
     abortSignal: new AbortController().signal,
     stepId: 'create_proposal',
     stepType: 'proposals.createProposal',
@@ -186,10 +189,10 @@ describe('proposals.updateProposal input schema', () => {
 
 describe('proposals.createProposal step', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  const createDefinition = (create: jest.Mock, privileges = allowAll()) => ({
+  const createDefinition = (create: Mock, privileges = allowAll()) => ({
     definition: getCreateProposalStepDefinition({
       getProposalsService: () => ({ create } as unknown as ProposalsService),
       resolveUser,
@@ -199,7 +202,7 @@ describe('proposals.createProposal step', () => {
   });
 
   it('should take the workflow execution id from the step context rather than the caller', async () => {
-    const create = jest.fn().mockResolvedValue({
+    const create = vi.fn().mockResolvedValue({
       id: 'proposal-1',
       status: 'pending',
       category: 'tune',
@@ -235,7 +238,7 @@ describe('proposals.createProposal step', () => {
   });
 
   it('should report alwaysGate when the action refuses to be auto-approved', async () => {
-    const create = jest.fn().mockResolvedValue({
+    const create = vi.fn().mockResolvedValue({
       id: 'p',
       status: 'pending',
       action: { name: 'Isolate host', approvalPolicy: 'always-gate' },
@@ -259,7 +262,7 @@ describe('proposals.createProposal step', () => {
   ])('should leave alwaysGate false for an action with %s', async (_label, action) => {
     // Only `always-gate` overrides the caller; a resolved action that declares
     // anything else leaves the decision to the autonomy already resolved.
-    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending', action });
+    const create = vi.fn().mockResolvedValue({ id: 'p', status: 'pending', action });
     const { definition } = createDefinition(create);
 
     const result = await definition.handler(
@@ -278,7 +281,7 @@ describe('proposals.createProposal step', () => {
     // alike, so both reach the handler as no metadata at all. Reading that as
     // "no always-gate policy" would run an action whose author forbade it on
     // nothing more than a transient lookup error.
-    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending', action: undefined });
+    const create = vi.fn().mockResolvedValue({ id: 'p', status: 'pending', action: undefined });
     const { definition } = createDefinition(create);
 
     const result = await definition.handler(
@@ -299,7 +302,7 @@ describe('proposals.createProposal step', () => {
     // the input itself, which is the only thing that makes `optionalStepInput`
     // take effect; without it the service stores empty strings where a
     // category, an impact and a confidence should be.
-    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending' });
+    const create = vi.fn().mockResolvedValue({ id: 'p', status: 'pending' });
     const { definition } = createDefinition(create);
 
     await definition.handler(
@@ -326,7 +329,7 @@ describe('proposals.createProposal step', () => {
   });
 
   it('should emit expiresAt so the gate loop can derive each attempt from it', async () => {
-    const create = jest
+    const create = vi
       .fn()
       .mockResolvedValue({ id: 'p', status: 'pending', expiresAt: '2026-09-04T00:00:00.000Z' });
     const { definition } = createDefinition(create);
@@ -339,7 +342,7 @@ describe('proposals.createProposal step', () => {
   });
 
   it('should pass the caller impact straight through for the service to prefer', async () => {
-    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending' });
+    const create = vi.fn().mockResolvedValue({ id: 'p', status: 'pending' });
     const { definition } = createDefinition(create);
 
     await definition.handler(
@@ -353,7 +356,7 @@ describe('proposals.createProposal step', () => {
   });
 
   it('should leave impact undefined when the caller omits it', async () => {
-    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending' });
+    const create = vi.fn().mockResolvedValue({ id: 'p', status: 'pending' });
     const { definition } = createDefinition(create);
 
     await definition.handler(
@@ -369,7 +372,7 @@ describe('proposals.createProposal step', () => {
   });
 
   it('should assert manage before writing anything', async () => {
-    const create = jest.fn();
+    const create = vi.fn();
     const privileges = allowAll();
     privileges.assertCanManage.mockRejectedValue(new ProposalForbiddenError('nope'));
     const { definition } = createDefinition(create, privileges);
@@ -381,7 +384,7 @@ describe('proposals.createProposal step', () => {
   });
 
   it('should fail the step with a typed error when the service fails', async () => {
-    const create = jest.fn().mockRejectedValue(new Error('index unavailable'));
+    const create = vi.fn().mockRejectedValue(new Error('index unavailable'));
     const { definition } = createDefinition(create);
 
     // A distinct type is the only thing a workflow can branch on, since
@@ -394,10 +397,10 @@ describe('proposals.createProposal step', () => {
 
 describe('proposals.updateProposal step', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  const updateDefinition = (update: jest.Mock, privileges = allowAll()) =>
+  const updateDefinition = (update: Mock, privileges = allowAll()) =>
     getUpdateProposalStepDefinition({
       getProposalsService: () => ({ update } as unknown as ProposalsService),
       resolveUser,
@@ -405,7 +408,7 @@ describe('proposals.updateProposal step', () => {
     });
 
   it('should record the outcome against the space from the step context', async () => {
-    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'succeeded' });
+    const update = vi.fn().mockResolvedValue({ id: 'proposal-1', status: 'succeeded' });
 
     const result = await updateDefinition(update).handler(
       createContext({ proposalId: 'proposal-1', status: 'succeeded' })
@@ -423,7 +426,7 @@ describe('proposals.updateProposal step', () => {
   });
 
   it('should resolve the decider from the execution request, not the passed username', async () => {
-    const update = jest
+    const update = vi
       .fn()
       .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' });
 
@@ -445,7 +448,7 @@ describe('proposals.updateProposal step', () => {
   });
 
   it('should fall back to the gate username when the request yields no identity', async () => {
-    const update = jest
+    const update = vi
       .fn()
       .mockResolvedValue({ id: 'proposal-1', status: 'no_action', decision: 'dismissed' });
     resolveUser.mockResolvedValueOnce(undefined);
@@ -468,7 +471,7 @@ describe('proposals.updateProposal step', () => {
   });
 
   it('should leave the decider unset when only the status moves', async () => {
-    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'succeeded' });
+    const update = vi.fn().mockResolvedValue({ id: 'proposal-1', status: 'succeeded' });
 
     await updateDefinition(update).handler(
       createContext({ proposalId: 'proposal-1', status: 'succeeded' })
@@ -482,7 +485,7 @@ describe('proposals.updateProposal step', () => {
   });
 
   it('should return the decision so the workflow can read back what it wrote', async () => {
-    const update = jest
+    const update = vi
       .fn()
       .mockResolvedValue({ id: 'proposal-1', status: 'no_action', decision: 'dismissed' });
 
@@ -494,7 +497,7 @@ describe('proposals.updateProposal step', () => {
   });
 
   it('should pass the failure detail through', async () => {
-    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'failed' });
+    const update = vi.fn().mockResolvedValue({ id: 'proposal-1', status: 'failed' });
 
     await updateDefinition(update).handler(
       createContext({
@@ -511,7 +514,7 @@ describe('proposals.updateProposal step', () => {
   });
 
   it('should assert manage before writing', async () => {
-    const update = jest.fn();
+    const update = vi.fn();
     const privileges = allowAll();
     privileges.assertCanManage.mockRejectedValue(new ProposalForbiddenError('nope'));
 
@@ -526,7 +529,7 @@ describe('proposals.updateProposal step', () => {
 
 describe('proposals.checkDecidePrivileges step', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should report a refusal without failing the step', async () => {
@@ -593,17 +596,17 @@ describe('proposals.checkDecidePrivileges step', () => {
 
 describe('proposals.getProposal step', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  const getDefinition = (get: jest.Mock, privileges = allowAll()) =>
+  const getDefinition = (get: Mock, privileges = allowAll()) =>
     getGetProposalStepDefinition({
       getProposalsService: () => ({ get } as unknown as ProposalsService),
       privileges,
     });
 
   it('should return only the fields a gating workflow branches on', async () => {
-    const get = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue({
       id: 'proposal-1',
       status: 'failed',
       decision: 'approved',
@@ -638,7 +641,7 @@ describe('proposals.getProposal step', () => {
   });
 
   it('should leave decidedBy undefined when the stored proposal has no decider', async () => {
-    const get = jest.fn().mockResolvedValue({ status: 'pending' });
+    const get = vi.fn().mockResolvedValue({ status: 'pending' });
 
     const result = await getDefinition(get).handler(createContext({ proposalId: 'proposal-1' }));
 
@@ -646,7 +649,7 @@ describe('proposals.getProposal step', () => {
   });
 
   it('should assert read rather than manage', async () => {
-    const get = jest.fn().mockResolvedValue({ status: 'pending' });
+    const get = vi.fn().mockResolvedValue({ status: 'pending' });
     const privileges = allowAll();
 
     await getDefinition(get, privileges).handler(createContext({ proposalId: 'proposal-1' }));
@@ -656,7 +659,7 @@ describe('proposals.getProposal step', () => {
   });
 
   it('should fail the step when the reader lacks the privilege', async () => {
-    const get = jest.fn();
+    const get = vi.fn();
     const privileges = allowAll();
     privileges.assertCanRead.mockRejectedValue(new ProposalForbiddenError('nope'));
 
@@ -669,17 +672,17 @@ describe('proposals.getProposal step', () => {
 
 describe('proposals.cloneProposal step', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  const cloneDefinition = (clone: jest.Mock, privileges = allowAll()) =>
+  const cloneDefinition = (clone: Mock, privileges = allowAll()) =>
     getCloneProposalStepDefinition({
       getProposalsService: () => ({ clone } as unknown as ProposalsService),
       privileges,
     });
 
   it('should return the new proposal id and pass the failure detail on', async () => {
-    const clone = jest.fn().mockResolvedValue('proposal-2');
+    const clone = vi.fn().mockResolvedValue('proposal-2');
 
     const result = await cloneDefinition(clone).handler(
       createContext({ proposalId: 'proposal-1', executionError: 'action exploded' })
@@ -693,7 +696,7 @@ describe('proposals.cloneProposal step', () => {
   });
 
   it('should assert manage before superseding anything', async () => {
-    const clone = jest.fn();
+    const clone = vi.fn();
     const privileges = allowAll();
     privileges.assertCanManage.mockRejectedValue(new ProposalForbiddenError('nope'));
 
@@ -706,13 +709,13 @@ describe('proposals.cloneProposal step', () => {
 
 describe('proposals.settleIncompleteProposal step', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const settleDefinition = (service: {
-    getLatestRevision: jest.Mock;
-    get: jest.Mock;
-    update: jest.Mock;
+    getLatestRevision: Mock;
+    get: Mock;
+    update: Mock;
   }) =>
     getSettleIncompleteProposalStepDefinition({
       getProposalsService: () => service as unknown as ProposalsService,
@@ -720,9 +723,9 @@ describe('proposals.settleIncompleteProposal step', () => {
 
   it('should adopt the live head before writing', async () => {
     const service = {
-      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 }),
-      get: jest.fn().mockResolvedValue({ id: 'proposal-2', status: 'pending' }),
-      update: jest.fn().mockResolvedValue({ id: 'proposal-2', status: 'expired' }),
+      getLatestRevision: vi.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 }),
+      get: vi.fn().mockResolvedValue({ id: 'proposal-2', status: 'pending' }),
+      update: vi.fn().mockResolvedValue({ id: 'proposal-2', status: 'expired' }),
     };
 
     const result = await settleDefinition(service).handler(
@@ -748,9 +751,9 @@ describe('proposals.settleIncompleteProposal step', () => {
 
   it('should expire an undecided proposal when status is omitted', async () => {
     const service = {
-      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
-      get: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' }),
-      update: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'expired' }),
+      getLatestRevision: vi.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
+      get: vi.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' }),
+      update: vi.fn().mockResolvedValue({ id: 'proposal-1', status: 'expired' }),
     };
 
     await settleDefinition(service).handler(
@@ -765,11 +768,11 @@ describe('proposals.settleIncompleteProposal step', () => {
 
   it('should fail a decided proposal when status is omitted', async () => {
     const service = {
-      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
-      get: jest
+      getLatestRevision: vi.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
+      get: vi
         .fn()
         .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' }),
-      update: jest
+      update: vi
         .fn()
         .mockResolvedValue({ id: 'proposal-1', status: 'failed', decision: 'approved' }),
     };
@@ -788,11 +791,11 @@ describe('proposals.settleIncompleteProposal step', () => {
 
   it('should honour an explicit status over discrimination', async () => {
     const service = {
-      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
-      get: jest
+      getLatestRevision: vi.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
+      get: vi
         .fn()
         .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' }),
-      update: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'failed' }),
+      update: vi.fn().mockResolvedValue({ id: 'proposal-1', status: 'failed' }),
     };
 
     await settleDefinition(service).handler(
@@ -807,9 +810,9 @@ describe('proposals.settleIncompleteProposal step', () => {
 
   it('should not check manage privileges', async () => {
     const service = {
-      getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
-      get: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' }),
-      update: jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'expired' }),
+      getLatestRevision: vi.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
+      get: vi.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' }),
+      update: vi.fn().mockResolvedValue({ id: 'proposal-1', status: 'expired' }),
     };
 
     // No privileges object is injected — a denied resumer's key on the task

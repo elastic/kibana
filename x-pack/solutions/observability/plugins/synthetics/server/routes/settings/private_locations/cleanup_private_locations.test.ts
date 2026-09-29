@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { cleanupPrivateLocationRoute } from './cleanup_private_locations';
 import { resetSyncPrivateCleanUpState } from '../../../tasks/sync_private_locations_monitors_task';
 
-jest.mock('../../../tasks/sync_private_locations_monitors_task', () => ({
-  resetSyncPrivateCleanUpState: jest.fn(),
-}));
+vi.mock('../../../tasks/sync_private_locations_monitors_task', () => {
+      const mocked = {
+      resetSyncPrivateCleanUpState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const resetSyncPrivateCleanUpStateMock = resetSyncPrivateCleanUpState as jest.MockedFunction<
+const resetSyncPrivateCleanUpStateMock = resetSyncPrivateCleanUpState as MockedFunction<
   typeof resetSyncPrivateCleanUpState
 >;
 
 describe('cleanupPrivateLocationRoute', () => {
-  const server = { logger: { debug: jest.fn(), error: jest.fn() } };
+  const server = { logger: { debug: vi.fn(), error: vi.fn() } };
 
   const callRoute = async () => {
     const response = httpServerMock.createResponseFactory();
@@ -31,7 +37,7 @@ describe('cleanupPrivateLocationRoute', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('reports success once cleanup has been scheduled', async () => {

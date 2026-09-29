@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as Rx from 'rxjs';
 import { toArray, takeUntil } from 'rxjs';
 
@@ -58,7 +60,7 @@ describe('#get/setWriters()', () => {
 describe('#indent()', () => {
   it('changes the indent on each written msg', () => {
     const log = new ToolingLog();
-    const write = jest.fn();
+    const write = vi.fn();
     log.setWriters([{ write }]);
 
     log.indent(1);
@@ -123,8 +125,8 @@ describe('#indent()', () => {
     describe(`#${method}()`, () => {
       it(`sends a msg of type "${method}" to each writer with indent and arguments`, () => {
         const log = new ToolingLog();
-        const writeA = jest.fn();
-        const writeB = jest.fn();
+        const writeA = vi.fn();
+        const writeB = vi.fn();
 
         log.setWriters([{ write: writeA }, { write: writeB }]);
 
@@ -165,15 +167,15 @@ describe('#getWritten$()', () => {
   });
 
   it('emits msg if all writers return true', async () => {
-    await testWrittenMsgs([{ write: jest.fn(() => true) }, { write: jest.fn(() => true) }]);
+    await testWrittenMsgs([{ write: vi.fn(() => true) }, { write: vi.fn(() => true) }]);
   });
 
   it('emits msg if some writers return true', async () => {
-    await testWrittenMsgs([{ write: jest.fn(() => true) }, { write: jest.fn(() => false) }]);
+    await testWrittenMsgs([{ write: vi.fn(() => true) }, { write: vi.fn(() => false) }]);
   });
 
   it('does not emit msg if all writers return false', async () => {
-    await testWrittenMsgs([{ write: jest.fn(() => false) }, { write: jest.fn(() => false) }]);
+    await testWrittenMsgs([{ write: vi.fn(() => false) }, { write: vi.fn(() => false) }]);
   });
 });
 

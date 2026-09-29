@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { TransactionDetailFlyoutHeader } from './header';
 
-const mockUseTransactionDetailFlyoutLinks = jest.fn();
-jest.mock('./hooks/use_transaction_detail_flyout_links', () => ({
-  useTransactionDetailFlyoutLinks: () => mockUseTransactionDetailFlyoutLinks(),
-}));
+const mockUseTransactionDetailFlyoutLinks = vi.fn();
+vi.mock('./hooks/use_transaction_detail_flyout_links', () => {
+      const mocked = {
+      useTransactionDetailFlyoutLinks: () => mockUseTransactionDetailFlyoutLinks(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function renderHeader(isFiltersPending = false) {
   return render(

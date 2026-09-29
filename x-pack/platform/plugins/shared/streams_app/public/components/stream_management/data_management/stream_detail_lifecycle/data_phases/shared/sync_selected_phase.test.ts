@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { syncSelectedPhase } from './sync_selected_phase';
 
 describe('syncSelectedPhase', () => {
@@ -22,7 +24,7 @@ describe('syncSelectedPhase', () => {
   });
 
   it('returns none when selectedPhase is already enabled', () => {
-    const ensure = jest.fn(() => false);
+    const ensure = vi.fn(() => false);
 
     const res = syncSelectedPhase({
       selectedPhase: 'frozen',
@@ -36,8 +38,8 @@ describe('syncSelectedPhase', () => {
   });
 
   it('tries to enable the selected phase and returns none when it succeeds', () => {
-    const ensure = jest.fn(() => true);
-    const fallback = jest.fn(() => 'delete');
+    const ensure = vi.fn(() => true);
+    const fallback = vi.fn(() => 'delete');
 
     const res = syncSelectedPhase({
       selectedPhase: 'delete',
@@ -52,8 +54,8 @@ describe('syncSelectedPhase', () => {
   });
 
   it('falls back when enabling the selected phase is blocked', () => {
-    const ensure = jest.fn(() => false);
-    const fallback = jest.fn(() => 'delete');
+    const ensure = vi.fn(() => false);
+    const fallback = vi.fn(() => 'delete');
 
     const res = syncSelectedPhase({
       selectedPhase: 'frozen',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import {
   expectIsViewOnly,
@@ -25,7 +27,7 @@ import userEvent from '@testing-library/user-event';
 import { cloneDeep } from 'lodash';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
-jest.mock('../../../../../common/hooks/use_license');
+vi.mock('../../../../../common/hooks/use_license');
 
 describe('Endpoint Policy Settings Form', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test');
@@ -46,7 +48,7 @@ describe('Endpoint Policy Settings Form', () => {
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
         .config.policy.value,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': 'test',
     };

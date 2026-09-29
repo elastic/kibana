@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { AxiosInstance, AxiosResponse, AxiosStatic } from 'axios';
 import { AxiosError } from 'axios';
 import axios from 'axios';
@@ -29,16 +32,16 @@ import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 const TestUrl = 'https://elastic.co/foo/bar/baz';
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 let configurationUtilities = actionsConfigMock.create();
-jest.mock('axios', () => {
-  const originalAxios = jest.requireActual('axios');
-  const mock = jest.createMockFromModule('axios') as jest.Mocked<AxiosStatic>;
+vi.mock('axios', () => {
+  const originalAxios = require('axios');
+  const mock = jest.createMockFromModule('axios') as Mocked<AxiosStatic>;
   mock.isAxiosError = originalAxios.isAxiosError;
   mock.AxiosError = originalAxios.AxiosError;
   return mock;
 });
-const axiosMock = jest.mocked(axios);
+const axiosMock = vi.mocked(axios);
 
 describe('addTimeZoneToDate', () => {
   test('adds timezone with default', () => {
@@ -54,7 +57,7 @@ describe('addTimeZoneToDate', () => {
 
 describe('request', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     axiosMock.mockResolvedValue({
       status: 200,
       headers: { 'content-type': 'application/json' },
@@ -68,7 +71,7 @@ describe('request', () => {
   });
 
   test('throws when URL is not in allowedHosts', async () => {
-    configurationUtilities.ensureUriAllowed = jest.fn().mockImplementation(() => {
+    configurationUtilities.ensureUriAllowed = vi.fn().mockImplementation(() => {
       throw new Error(
         'target url "https://disallowed.host/path" is not added to the Kibana config xpack.actions.allowedHosts'
       );
@@ -598,7 +601,7 @@ describe('request', () => {
 
 describe('patch', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     axiosMock.mockResolvedValue({
       status: 200,
       headers: { 'content-type': 'application/json' },
@@ -626,7 +629,7 @@ describe('patch', () => {
 
   test('caller-provided maxContentLength overrides the global default', async () => {
     await request({
-      axios: axiosMock as jest.Mocked<AxiosInstance>,
+      axios: axiosMock as Mocked<AxiosInstance>,
       url: TestUrl,
       logger,
       configurationUtilities,
@@ -643,7 +646,7 @@ describe('patch', () => {
 
   test('global default maxContentLength is used when caller does not provide one', async () => {
     await request({
-      axios: axiosMock as jest.Mocked<AxiosInstance>,
+      axios: axiosMock as Mocked<AxiosInstance>,
       url: TestUrl,
       logger,
       configurationUtilities,

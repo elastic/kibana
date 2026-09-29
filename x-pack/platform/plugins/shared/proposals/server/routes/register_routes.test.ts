@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { PROPOSALS_INTERNAL_URL } from '@kbn/proposals-common';
@@ -44,10 +47,10 @@ const registerAndCollect = (service: Partial<ProposalsService>) => {
   const posts: RegisteredRoute[] = [];
   const gets: RegisteredRoute[] = [];
 
-  (router.versioned.post as jest.Mock).mockImplementation((config) => ({
+  (router.versioned.post as Mock).mockImplementation((config) => ({
     addVersion: (_version: unknown, handler: Handler) => posts.push({ config, handler }),
   }));
-  (router.versioned.get as jest.Mock).mockImplementation((config) => ({
+  (router.versioned.get as Mock).mockImplementation((config) => ({
     addVersion: (_version: unknown, handler: Handler) => gets.push({ config, handler }),
   }));
 
@@ -67,7 +70,7 @@ const registerAndCollect = (service: Partial<ProposalsService>) => {
 
 describe('proposals routes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should gate reads on the read privilege and decisions on the manage privilege', () => {
@@ -86,8 +89,8 @@ describe('proposals routes', () => {
 
   it('should never expose a create route, even indirectly, over HTTP', () => {
     const router = httpServiceMock.createRouter();
-    (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
+    (router.versioned.post as Mock).mockReturnValue({ addVersion: vi.fn() });
+    (router.versioned.get as Mock).mockReturnValue({ addVersion: vi.fn() });
 
     registerRoutes({
       router,
@@ -103,13 +106,13 @@ describe('proposals routes', () => {
     // so one created without a gate execution could never be decided. The
     // `proposals.createProposal` step is the only caller that knows the
     // execution id to stamp.
-    expect((router.versioned.post as jest.Mock).mock.calls.map(([{ path }]) => path)).not.toContain(
+    expect((router.versioned.post as Mock).mock.calls.map(([{ path }]) => path)).not.toContain(
       PROPOSALS_INTERNAL_URL
     );
   });
 
   it('should release the gate with the submitted action input and the rationale', async () => {
-    const releaseGate = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' });
+    const releaseGate = vi.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' });
     const { posts, byPath } = registerAndCollect({ releaseGate });
     const response = httpServerMock.createResponseFactory();
 
@@ -140,7 +143,7 @@ describe('proposals routes', () => {
   });
 
   it('should never pass a caller-supplied decider through to the service', async () => {
-    const releaseGate = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' });
+    const releaseGate = vi.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' });
     const { posts, byPath } = registerAndCollect({ releaseGate });
     const response = httpServerMock.createResponseFactory();
 
@@ -159,7 +162,7 @@ describe('proposals routes', () => {
   });
 
   it('should map a conflicting decision to 409', async () => {
-    const releaseGate = jest.fn().mockRejectedValue(new ProposalConflictError('already decided'));
+    const releaseGate = vi.fn().mockRejectedValue(new ProposalConflictError('already decided'));
     const { posts, byPath } = registerAndCollect({ releaseGate });
     const response = httpServerMock.createResponseFactory();
 
@@ -173,7 +176,7 @@ describe('proposals routes', () => {
   });
 
   it('should map an expired proposal to 410', async () => {
-    const releaseGate = jest.fn().mockRejectedValue(new ProposalExpiredError('proposal-1'));
+    const releaseGate = vi.fn().mockRejectedValue(new ProposalExpiredError('proposal-1'));
     const { posts, byPath } = registerAndCollect({ releaseGate });
     const response = httpServerMock.createResponseFactory();
 
@@ -187,7 +190,7 @@ describe('proposals routes', () => {
   });
 
   it('should map a missing privilege to 403', async () => {
-    const releaseGate = jest.fn().mockRejectedValue(new ProposalForbiddenError('no privilege'));
+    const releaseGate = vi.fn().mockRejectedValue(new ProposalForbiddenError('no privilege'));
     const { posts, byPath } = registerAndCollect({ releaseGate });
     const response = httpServerMock.createResponseFactory();
 
@@ -209,7 +212,7 @@ describe('proposals routes', () => {
   });
 
   it('should pass the params id and body overrides straight through to revise()', async () => {
-    const revise = jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 });
+    const revise = vi.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 });
     const { posts, byPath } = registerAndCollect({ revise });
     const response = httpServerMock.createResponseFactory();
 
@@ -230,7 +233,7 @@ describe('proposals routes', () => {
   });
 
   it('should map a conflicting revision (already superseded or decided) to 409', async () => {
-    const revise = jest.fn().mockRejectedValue(new ProposalConflictError('already superseded'));
+    const revise = vi.fn().mockRejectedValue(new ProposalConflictError('already superseded'));
     const { posts, byPath } = registerAndCollect({ revise });
     const response = httpServerMock.createResponseFactory();
 
@@ -244,7 +247,7 @@ describe('proposals routes', () => {
   });
 
   it('should map revising an expired proposal to 410', async () => {
-    const revise = jest.fn().mockRejectedValue(new ProposalExpiredError('proposal-1'));
+    const revise = vi.fn().mockRejectedValue(new ProposalExpiredError('proposal-1'));
     const { posts, byPath } = registerAndCollect({ revise });
     const response = httpServerMock.createResponseFactory();
 
@@ -258,7 +261,7 @@ describe('proposals routes', () => {
   });
 
   it('should map an action input the action can never accept to 400', async () => {
-    const revise = jest
+    const revise = vi
       .fn()
       .mockRejectedValue(new ProposalInvalidActionInputError('missing required field: ruleId'));
     const { posts, byPath } = registerAndCollect({ revise });
@@ -279,7 +282,7 @@ describe('proposals routes', () => {
   });
 
   it('should map revising a missing proposal to 404', async () => {
-    const revise = jest.fn().mockRejectedValue(new ProposalNotFoundError('proposal-1'));
+    const revise = vi.fn().mockRejectedValue(new ProposalNotFoundError('proposal-1'));
     const { posts, byPath } = registerAndCollect({ revise });
     const response = httpServerMock.createResponseFactory();
 
@@ -293,7 +296,7 @@ describe('proposals routes', () => {
   });
 
   it('should map a missing proposal to 404', async () => {
-    const get = jest.fn().mockRejectedValue(new ProposalNotFoundError('missing'));
+    const get = vi.fn().mockRejectedValue(new ProposalNotFoundError('missing'));
     const { gets, byPath } = registerAndCollect({ get });
     const response = httpServerMock.createResponseFactory();
 
@@ -307,7 +310,7 @@ describe('proposals routes', () => {
   });
 
   it('should hand the dismiss reason to the gate release, which the gate itself discards', async () => {
-    const releaseGate = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' });
+    const releaseGate = vi.fn().mockResolvedValue({ id: 'proposal-1', status: 'pending' });
     const { posts, byPath } = registerAndCollect({ releaseGate });
     const response = httpServerMock.createResponseFactory();
 
@@ -332,7 +335,7 @@ describe('proposals routes', () => {
   });
 
   it('should return a record that is still undecided, since the write is asynchronous', async () => {
-    const releaseGate = jest
+    const releaseGate = vi
       .fn()
       .mockResolvedValue({ id: 'proposal-1', status: 'pending', decision: undefined });
     const { posts, byPath } = registerAndCollect({ releaseGate });

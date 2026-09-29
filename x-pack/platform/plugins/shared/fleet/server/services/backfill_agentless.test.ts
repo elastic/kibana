@@ -5,34 +5,42 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
 import { packagePolicyService } from './package_policy';
 
-jest.mock('./audit_logging', () => ({
-  auditLoggingService: {
-    writeCustomSoAuditLog: jest.fn(),
-  },
-}));
+vi.mock('./audit_logging', () => {
+      const mocked = {
+      auditLoggingService: {
+        writeCustomSoAuditLog: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./settings', () => ({
-  getSettingsOrUndefined: () => ({
-    use_space_awareness_migration_status: 'success',
-  }),
-}));
+vi.mock('./settings', () => {
+      const mocked = {
+      getSettingsOrUndefined: () => ({
+        use_space_awareness_migration_status: 'success',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./app_context', () => {
+vi.mock('./app_context', () => {
   return {
     appContextService: {
       getExperimentalFeatures: () => ({
         useSpaceAwareness: true,
       }),
       getLogger: () => ({
-        debug: jest.fn(),
+        debug: vi.fn(),
       }),
-      getInternalUserSOClient: jest.fn(),
-      getInternalUserSOClientForSpaceId: jest.fn(),
+      getInternalUserSOClient: vi.fn(),
+      getInternalUserSOClientForSpaceId: vi.fn(),
       getInternalUserSOClientWithoutSpaceExtension: () => ({
-        find: jest.fn().mockImplementation((options) => {
+        find: vi.fn().mockImplementation((options) => {
           if (options.type === 'ingest-agent-policies') {
             return {
               saved_objects: [{ id: 'agent_policy_1' }, { id: 'agent_policy_2' }],
@@ -61,12 +69,15 @@ jest.mock('./app_context', () => {
   };
 });
 
-jest.mock('./package_policy', () => ({
-  packagePolicyService: {
-    update: jest.fn(),
-  },
-  getPackagePolicySavedObjectType: jest.fn().mockResolvedValue('ingest-package-policies'),
-}));
+vi.mock('./package_policy', () => {
+      const mocked = {
+      packagePolicyService: {
+        update: vi.fn(),
+      },
+      getPackagePolicySavedObjectType: vi.fn().mockResolvedValue('ingest-package-policies'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('backfill agentless package policies', () => {
   it('should backfill package policies missing supports_agentless', async () => {

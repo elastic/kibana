@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loadingCountServiceMock } from './loading_count_service.mock';
 
 export const loadingServiceMock = loadingCountServiceMock.create();
-jest.doMock('./loading_count_service', () => ({
-  LoadingCountService: jest.fn(() => loadingServiceMock),
-}));
+vi.doMock('./loading_count_service', () => {
+      const mocked = {
+      LoadingCountService: vi.fn(() => loadingServiceMock),
+    };
+      return { ...mocked, default: mocked };
+    });

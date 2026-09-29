@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type { AgentExecutionClient } from '../persistence';
 import { HeartbeatReporter } from './heartbeat_reporter';
@@ -12,31 +15,31 @@ import { EXECUTION_HEARTBEAT_INTERVAL_MS } from '../constants';
 
 const createMockExecutionClient = (
   overrides: Partial<AgentExecutionClient> = {}
-): jest.Mocked<AgentExecutionClient> =>
+): Mocked<AgentExecutionClient> =>
   ({
-    create: jest.fn(),
-    get: jest.fn(),
-    updateStatus: jest.fn(),
-    appendEvents: jest.fn(),
-    updateHeartbeat: jest.fn().mockResolvedValue(undefined),
-    peek: jest.fn(),
-    readEvents: jest.fn(),
-    find: jest.fn(),
+    create: vi.fn(),
+    get: vi.fn(),
+    updateStatus: vi.fn(),
+    appendEvents: vi.fn(),
+    updateHeartbeat: vi.fn().mockResolvedValue(undefined),
+    peek: vi.fn(),
+    readEvents: vi.fn(),
+    find: vi.fn(),
     ...overrides,
-  } as jest.Mocked<AgentExecutionClient>);
+  } as Mocked<AgentExecutionClient>);
 
 describe('HeartbeatReporter', () => {
   let logger: MockedLogger;
-  let executionClient: jest.Mocked<AgentExecutionClient>;
+  let executionClient: Mocked<AgentExecutionClient>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     logger = loggerMock.create();
     executionClient = createMockExecutionClient();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('writes an initial heartbeat immediately on start', () => {
@@ -56,10 +59,10 @@ describe('HeartbeatReporter', () => {
     reporter.start();
     expect(executionClient.updateHeartbeat).toHaveBeenCalledTimes(1);
 
-    await jest.advanceTimersByTimeAsync(EXECUTION_HEARTBEAT_INTERVAL_MS);
+    await vi.advanceTimersByTimeAsync(EXECUTION_HEARTBEAT_INTERVAL_MS);
     expect(executionClient.updateHeartbeat).toHaveBeenCalledTimes(2);
 
-    await jest.advanceTimersByTimeAsync(EXECUTION_HEARTBEAT_INTERVAL_MS);
+    await vi.advanceTimersByTimeAsync(EXECUTION_HEARTBEAT_INTERVAL_MS);
     expect(executionClient.updateHeartbeat).toHaveBeenCalledTimes(3);
 
     reporter.stop();
@@ -73,7 +76,7 @@ describe('HeartbeatReporter', () => {
 
     reporter.stop();
 
-    await jest.advanceTimersByTimeAsync(EXECUTION_HEARTBEAT_INTERVAL_MS * 3);
+    await vi.advanceTimersByTimeAsync(EXECUTION_HEARTBEAT_INTERVAL_MS * 3);
     expect(executionClient.updateHeartbeat).toHaveBeenCalledTimes(1);
   });
 
@@ -93,11 +96,11 @@ describe('HeartbeatReporter', () => {
 
     reporter.start();
     // Flush the rejected leading-edge write's microtasks so the .catch handler runs.
-    await jest.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(0);
     expect(logger.warn).toHaveBeenCalled();
 
     // A failed write must not stop the interval.
-    await jest.advanceTimersByTimeAsync(EXECUTION_HEARTBEAT_INTERVAL_MS);
+    await vi.advanceTimersByTimeAsync(EXECUTION_HEARTBEAT_INTERVAL_MS);
     expect(executionClient.updateHeartbeat).toHaveBeenCalledTimes(2);
 
     reporter.stop();

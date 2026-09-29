@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EMPTY, Subject, forkJoin, of, throwError } from 'rxjs';
 
 import { createContextChartZoomSubscription } from './context_chart_zoom_pipeline';
@@ -16,7 +18,7 @@ describe('createContextChartZoomSubscription', () => {
   };
 
   const baseHandlers = {
-    onZoomPreview: jest.fn(),
+    onZoomPreview: vi.fn(),
     getChartState: () => ({
       contextChartData: [{}],
       contextForecastData: undefined,
@@ -25,18 +27,18 @@ describe('createContextChartZoomSubscription', () => {
       zoomToFocusLoaded: undefined as Date | undefined,
     }),
     shouldTriggerFocusLoad: () => true,
-    onFocusLoadInit: jest.fn(),
-    onFocusLoadStart: jest.fn(),
+    onFocusLoadInit: vi.fn(),
+    onFocusLoadStart: vi.fn(),
   };
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('with includeAnomaliesTable false, maps focus-only observable to [focus, empty table]', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const contextChart$ = new Subject<typeof selection>();
-    const onFocusPipelineResult = jest.fn();
+    const onFocusPipelineResult = vi.fn();
 
     const sub = createContextChartZoomSubscription(contextChart$, {
       ...baseHandlers,
@@ -46,7 +48,7 @@ describe('createContextChartZoomSubscription', () => {
     });
 
     contextChart$.next(selection);
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(onFocusPipelineResult).toHaveBeenCalledTimes(1);
     const [tuple, sel] = onFocusPipelineResult.mock.calls[0];
@@ -57,9 +59,9 @@ describe('createContextChartZoomSubscription', () => {
   });
 
   it('with includeAnomaliesTable true, passes through forkJoin tuple', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const contextChart$ = new Subject<typeof selection>();
-    const onFocusPipelineResult = jest.fn();
+    const onFocusPipelineResult = vi.fn();
 
     const sub = createContextChartZoomSubscription(contextChart$, {
       ...baseHandlers,
@@ -69,7 +71,7 @@ describe('createContextChartZoomSubscription', () => {
     });
 
     contextChart$.next(selection);
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(onFocusPipelineResult).toHaveBeenCalledWith(
       [{ focus: 1 }, { tableData: { rows: [] } }],
@@ -80,11 +82,11 @@ describe('createContextChartZoomSubscription', () => {
   });
 
   it('calls onFocusPipelineEmpty when getFocusPipeline returns null after focus load starts', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const contextChart$ = new Subject<typeof selection>();
-    const onFocusPipelineResult = jest.fn();
-    const onFocusPipelineEmpty = jest.fn();
-    const onFocusPipelineError = jest.fn();
+    const onFocusPipelineResult = vi.fn();
+    const onFocusPipelineEmpty = vi.fn();
+    const onFocusPipelineError = vi.fn();
 
     const sub = createContextChartZoomSubscription(contextChart$, {
       ...baseHandlers,
@@ -96,7 +98,7 @@ describe('createContextChartZoomSubscription', () => {
     });
 
     contextChart$.next(selection);
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(onFocusPipelineResult).not.toHaveBeenCalled();
     expect(onFocusPipelineEmpty).toHaveBeenCalledWith(selection);
@@ -106,11 +108,11 @@ describe('createContextChartZoomSubscription', () => {
   });
 
   it('does not call terminal handlers when pipeline is null and focus load did not start', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const contextChart$ = new Subject<typeof selection>();
-    const onFocusPipelineResult = jest.fn();
-    const onFocusPipelineEmpty = jest.fn();
-    const onFocusPipelineError = jest.fn();
+    const onFocusPipelineResult = vi.fn();
+    const onFocusPipelineEmpty = vi.fn();
+    const onFocusPipelineError = vi.fn();
 
     const sub = createContextChartZoomSubscription(contextChart$, {
       ...baseHandlers,
@@ -123,7 +125,7 @@ describe('createContextChartZoomSubscription', () => {
     });
 
     contextChart$.next(selection);
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(onFocusPipelineResult).not.toHaveBeenCalled();
     expect(onFocusPipelineEmpty).not.toHaveBeenCalled();
@@ -133,11 +135,11 @@ describe('createContextChartZoomSubscription', () => {
   });
 
   it('calls onFocusPipelineError when focus pipeline errors', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const contextChart$ = new Subject<typeof selection>();
-    const onFocusPipelineResult = jest.fn();
-    const onFocusPipelineEmpty = jest.fn();
-    const onFocusPipelineError = jest.fn();
+    const onFocusPipelineResult = vi.fn();
+    const onFocusPipelineEmpty = vi.fn();
+    const onFocusPipelineError = vi.fn();
     const boom = new Error('focus failed');
 
     const sub = createContextChartZoomSubscription(contextChart$, {
@@ -150,7 +152,7 @@ describe('createContextChartZoomSubscription', () => {
     });
 
     contextChart$.next(selection);
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(onFocusPipelineResult).not.toHaveBeenCalled();
     expect(onFocusPipelineEmpty).not.toHaveBeenCalled();
@@ -160,11 +162,11 @@ describe('createContextChartZoomSubscription', () => {
   });
 
   it('calls onFocusPipelineEmpty when focus pipeline completes without a result', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const contextChart$ = new Subject<typeof selection>();
-    const onFocusPipelineResult = jest.fn();
-    const onFocusPipelineEmpty = jest.fn();
-    const onFocusPipelineError = jest.fn();
+    const onFocusPipelineResult = vi.fn();
+    const onFocusPipelineEmpty = vi.fn();
+    const onFocusPipelineError = vi.fn();
 
     const sub = createContextChartZoomSubscription(contextChart$, {
       ...baseHandlers,
@@ -176,7 +178,7 @@ describe('createContextChartZoomSubscription', () => {
     });
 
     contextChart$.next(selection);
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     expect(onFocusPipelineResult).not.toHaveBeenCalled();
     expect(onFocusPipelineEmpty).toHaveBeenCalledWith(selection);

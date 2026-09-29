@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core/public';
 import '@kbn/react-query/mock';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -15,7 +18,7 @@ import { usePipelineData } from '.';
 import type { PipelineDataResponse } from '.';
 
 const mockHttp: HttpSetup = {
-  fetch: jest.fn(),
+  fetch: vi.fn(),
 } as unknown as HttpSetup;
 
 let queryClient: QueryClient;
@@ -60,7 +63,7 @@ function wrapper(props: { children: React.ReactNode }) {
 
 describe('usePipelineData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     queryClient = new QueryClient({
       defaultOptions: {
@@ -73,7 +76,7 @@ describe('usePipelineData', () => {
 
   describe('when isEnabled is true', () => {
     it('fetches pipeline data from the correct endpoint', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(mockPipelineDataResponse);
+      (mockHttp.fetch as Mock).mockResolvedValueOnce(mockPipelineDataResponse);
 
       renderHook(() => usePipelineData({ ...defaultProps }), { wrapper });
 
@@ -88,7 +91,7 @@ describe('usePipelineData', () => {
     });
 
     it('returns data when the request succeeds', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(mockPipelineDataResponse);
+      (mockHttp.fetch as Mock).mockResolvedValueOnce(mockPipelineDataResponse);
 
       const { result } = renderHook(() => usePipelineData({ ...defaultProps }), { wrapper });
 
@@ -98,7 +101,7 @@ describe('usePipelineData', () => {
     });
 
     it('returns isLoading as true while fetching', () => {
-      (mockHttp.fetch as jest.Mock).mockReturnValueOnce(new Promise(() => {})); // never resolves
+      (mockHttp.fetch as Mock).mockReturnValueOnce(new Promise(() => {})); // never resolves
 
       const { result } = renderHook(() => usePipelineData({ ...defaultProps }), { wrapper });
 
@@ -106,7 +109,7 @@ describe('usePipelineData', () => {
     });
 
     it('returns isError as true when the request fails', async () => {
-      (mockHttp.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+      (mockHttp.fetch as Mock).mockRejectedValueOnce(new Error('Network error'));
 
       const { result } = renderHook(() => usePipelineData({ ...defaultProps }), { wrapper });
 
@@ -117,7 +120,7 @@ describe('usePipelineData', () => {
 
     it('returns the error when the request fails', async () => {
       const error = new Error('Network error');
-      (mockHttp.fetch as jest.Mock).mockRejectedValueOnce(error);
+      (mockHttp.fetch as Mock).mockRejectedValueOnce(error);
 
       const { result } = renderHook(() => usePipelineData({ ...defaultProps }), { wrapper });
 
@@ -127,7 +130,7 @@ describe('usePipelineData', () => {
     });
 
     it('does not include custom headers (handled by Kibana HTTP service)', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(mockPipelineDataResponse);
+      (mockHttp.fetch as Mock).mockResolvedValueOnce(mockPipelineDataResponse);
 
       renderHook(() => usePipelineData({ ...defaultProps }), { wrapper });
 
@@ -142,7 +145,7 @@ describe('usePipelineData', () => {
     });
 
     it('includes version in the request', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(mockPipelineDataResponse);
+      (mockHttp.fetch as Mock).mockResolvedValueOnce(mockPipelineDataResponse);
 
       renderHook(() => usePipelineData({ ...defaultProps }), { wrapper });
 
@@ -193,7 +196,7 @@ describe('usePipelineData', () => {
 
   describe('caching by execution_id', () => {
     it('uses execution_id in the query key for caching', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(mockPipelineDataResponse);
+      (mockHttp.fetch as Mock).mockResolvedValueOnce(mockPipelineDataResponse);
 
       const { result, rerender } = renderHook(
         (props: { isEnabled: boolean }) =>
@@ -223,7 +226,7 @@ describe('usePipelineData', () => {
         },
       };
 
-      (mockHttp.fetch as jest.Mock)
+      (mockHttp.fetch as Mock)
         .mockResolvedValueOnce(mockPipelineDataResponse)
         .mockResolvedValueOnce(secondResponse);
 
@@ -255,7 +258,7 @@ describe('usePipelineData', () => {
         },
       };
 
-      (mockHttp.fetch as jest.Mock)
+      (mockHttp.fetch as Mock)
         .mockResolvedValueOnce(mockPipelineDataResponse)
         .mockResolvedValueOnce(secondResponse);
 
@@ -279,7 +282,7 @@ describe('usePipelineData', () => {
 
   describe('refetch', () => {
     it('exposes a refetch function in the return value', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(mockPipelineDataResponse);
+      (mockHttp.fetch as Mock).mockResolvedValueOnce(mockPipelineDataResponse);
 
       const { result } = renderHook(() => usePipelineData({ ...defaultProps }), { wrapper });
 
@@ -293,7 +296,7 @@ describe('usePipelineData', () => {
 
   describe('response typing', () => {
     it('returns all snake_case fields in the response', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(mockPipelineDataResponse);
+      (mockHttp.fetch as Mock).mockResolvedValueOnce(mockPipelineDataResponse);
 
       const { result } = renderHook(() => usePipelineData({ ...defaultProps }), { wrapper });
 
@@ -309,7 +312,7 @@ describe('usePipelineData', () => {
     });
 
     it('returns alert_retrieval with snake_case fields', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(mockPipelineDataResponse);
+      (mockHttp.fetch as Mock).mockResolvedValueOnce(mockPipelineDataResponse);
 
       const { result } = renderHook(() => usePipelineData({ ...defaultProps }), { wrapper });
 
@@ -323,7 +326,7 @@ describe('usePipelineData', () => {
     });
 
     it('returns generation with snake_case fields', async () => {
-      (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(mockPipelineDataResponse);
+      (mockHttp.fetch as Mock).mockResolvedValueOnce(mockPipelineDataResponse);
 
       const { result } = renderHook(() => usePipelineData({ ...defaultProps }), { wrapper });
 

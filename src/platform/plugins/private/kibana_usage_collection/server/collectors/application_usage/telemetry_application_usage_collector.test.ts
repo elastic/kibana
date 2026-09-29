@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -28,9 +31,9 @@ describe('telemetry_application_usage', () => {
   let collector: Collector<unknown>;
   let usageCollectionMock: ReturnType<typeof createUsageCollectionSetupMock>;
   let savedObjectClient: ReturnType<typeof savedObjectsRepositoryMock.create>;
-  let getSavedObjectClient: jest.MockedFunction<() => undefined | typeof savedObjectClient>;
+  let getSavedObjectClient: MockedFunction<() => undefined | typeof savedObjectClient>;
 
-  const registerType = jest.fn();
+  const registerType = vi.fn();
   const mockedFetchContext = createCollectorFetchContextMock();
 
   let pluginStop$: Subject<void>;
@@ -39,7 +42,7 @@ describe('telemetry_application_usage', () => {
     logger = loggingSystemMock.createLogger();
     usageCollectionMock = createUsageCollectionSetupMock();
     savedObjectClient = savedObjectsRepositoryMock.create();
-    getSavedObjectClient = jest.fn().mockReturnValue(savedObjectClient);
+    getSavedObjectClient = vi.fn().mockReturnValue(savedObjectClient);
     usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
       collector = new Collector(logger, config);
       return createUsageCollectionSetupMock().makeUsageCollector(config);

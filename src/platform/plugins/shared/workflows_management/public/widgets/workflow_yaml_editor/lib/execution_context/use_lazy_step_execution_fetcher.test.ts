@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
 import { ExecutionStatus } from '@kbn/workflows/types/v1';
@@ -18,23 +21,29 @@ import {
   createTestQueryClient,
 } from '../../../../shared/test_utils/query_client_wrapper';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsApi: jest.fn(),
-}));
-const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useWorkflowsApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockUseWorkflowsApi = useWorkflowsApi as MockedFunction<typeof useWorkflowsApi>;
 
-jest.mock('@kbn/workflows', () => ({
-  isTerminalStatus: jest.fn((status: ExecutionStatus) =>
-    ['completed', 'failed', 'skipped'].includes(status)
-  ),
-}));
+vi.mock('@kbn/workflows', () => {
+      const mocked = {
+      isTerminalStatus: vi.fn((status: ExecutionStatus) =>
+        ['completed', 'failed', 'skipped'].includes(status)
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useLazyStepExecutionFetcher', () => {
-  let mockGetStepExecution: jest.Mock;
+  let mockGetStepExecution: Mock;
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    mockGetStepExecution = jest.fn();
+    mockGetStepExecution = vi.fn();
     mockUseWorkflowsApi.mockReturnValue({
       getStepExecution: mockGetStepExecution,
     } as any);
@@ -42,7 +51,7 @@ describe('useLazyStepExecutionFetcher', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns null when executionId is undefined', async () => {

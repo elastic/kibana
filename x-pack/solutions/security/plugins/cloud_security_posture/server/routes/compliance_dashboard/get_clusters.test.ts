@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ClusterBucket } from './get_clusters';
@@ -84,20 +86,20 @@ describe('getClustersQuery', () => {
 });
 
 describe('getClusters', () => {
-  const logger = { warn: jest.fn(), error: jest.fn(), info: jest.fn(), debug: jest.fn() };
+  const logger = { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() };
   const pit: OpenPointInTimeResponse = {
     id: 'pit-0',
     _shards: { total: 1, successful: 1, failed: 0 },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('throws a 413 with an actionable message when ES exceeds max response size', async () => {
     // isMaximumResponseSizeExceededError checks for RequestAbortedError with 'content length'
     const sizeError = new errors.RequestAbortedError('Response content length exceeded');
-    const esClient = { search: jest.fn().mockRejectedValue(sizeError) };
+    const esClient = { search: vi.fn().mockRejectedValue(sizeError) };
 
     await expect(getClusters(esClient as any, {}, pit, {}, logger as any)).rejects.toMatchObject({
       statusCode: 413,
@@ -111,7 +113,7 @@ describe('getClusters', () => {
 
   it('logs at error and re-throws for unexpected errors', async () => {
     const unexpectedError = new Error('unexpected ES error');
-    const esClient = { search: jest.fn().mockRejectedValue(unexpectedError) };
+    const esClient = { search: vi.fn().mockRejectedValue(unexpectedError) };
 
     await expect(getClusters(esClient as any, {}, pit, {}, logger as any)).rejects.toThrow(
       'unexpected ES error'

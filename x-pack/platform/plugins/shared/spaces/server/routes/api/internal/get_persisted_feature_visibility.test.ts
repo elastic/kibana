@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as Rx from 'rxjs';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -34,7 +36,7 @@ describe('GET /internal/spaces/space/{id}/persisted_feature_visibility', () => {
       options?.spacesSavedObjects ?? createSpaces()
     );
 
-    const clientService = new SpacesClientService(jest.fn(), 'traditional');
+    const clientService = new SpacesClientService(vi.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
@@ -29,7 +31,7 @@ const makeDeps = () => ({
 });
 
 describe('createResolveAction', () => {
-  beforeEach(() => jest.restoreAllMocks());
+  beforeEach(() => vi.restoreAllMocks());
 
   it('compatible when at least one episode is not already INACTIVE', () => {
     expect(
@@ -64,10 +66,10 @@ describe('createResolveAction', () => {
 
   it('execute: POSTs per-episode DEACTIVATE items with reason, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest
+    vi
       .spyOn(bulk, 'bulkDeactivateEpisodeActions')
       .mockResolvedValue({ affected_count: 2, errors: [] });
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     await createResolveAction(deps).execute({
       episodes: [makeEpisode(), makeEpisode({ 'episode.id': 'e2' })],
       onSuccess,
@@ -82,10 +84,10 @@ describe('createResolveAction', () => {
 
   it('execute: on a mixed selection only POSTs items for the non-INACTIVE episodes', async () => {
     const deps = makeDeps();
-    jest
+    vi
       .spyOn(bulk, 'bulkDeactivateEpisodeActions')
       .mockResolvedValue({ affected_count: 1, errors: [] });
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     await createResolveAction(deps).execute({
       episodes: [
         makeEpisode({ 'episode.status': ALERT_EPISODE_STATUS.ACTIVE }),
@@ -101,8 +103,8 @@ describe('createResolveAction', () => {
 
   it('execute: an all-INACTIVE selection is a no-op', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkDeactivateEpisodeActions');
-    const onSuccess = jest.fn();
+    vi.spyOn(bulk, 'bulkDeactivateEpisodeActions');
+    const onSuccess = vi.fn();
     await createResolveAction(deps).execute({
       episodes: [
         makeEpisode({ 'episode.status': ALERT_EPISODE_STATUS.INACTIVE }),
@@ -116,8 +118,8 @@ describe('createResolveAction', () => {
 
   it('execute: error path calls notifications.toasts.addDanger with BULK_ERROR_TOAST', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkDeactivateEpisodeActions').mockRejectedValue(new Error('network error'));
-    const onSuccess = jest.fn();
+    vi.spyOn(bulk, 'bulkDeactivateEpisodeActions').mockRejectedValue(new Error('network error'));
+    const onSuccess = vi.fn();
     await createResolveAction(deps).execute({
       episodes: [makeEpisode()],
       onSuccess,

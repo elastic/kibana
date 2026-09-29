@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -31,57 +34,66 @@ import {
 import type { UpdatePolicy } from '../types';
 
 // Mock the hooks and utilities
-jest.mock('../hooks/use_cloud_setup_context');
-jest.mock('../utils');
-jest.mock('./gcp_input_var_fields', () => ({
-  GcpInputVarFields: ({
-    disabled,
-    onChange,
-    isOrganization,
-  }: {
-    disabled: boolean;
-    onChange: (key: string, value: string) => void;
-    isOrganization: boolean;
-  }) => (
-    <div data-test-subj="gcp-input-var-fields">
-      <span data-test-subj="disabled-state">{disabled ? 'true' : 'false'}</span>
-      <span data-test-subj="organization-state">{isOrganization ? 'true' : 'false'}</span>
-      <button
-        data-test-subj="manual-field-change"
-        type="button"
-        onClick={() => onChange('test.field', 'test-value')}
-      >
-        {'Change Field'}
-      </button>
-    </div>
-  ),
-}));
-jest.mock('./gcp_setup_info', () => ({
-  GCPSetupInfoContent: ({ isAgentless }: { isAgentless: boolean }) => (
-    <div data-test-subj="gcp-setup-info">
-      <span data-test-subj="agentless-state">{isAgentless ? 'true' : 'false'}</span>
-    </div>
-  ),
-}));
-jest.mock('../common', () => ({
-  ReadDocumentation: ({ url }: { url: string }) => (
-    <div data-test-subj="read-documentation">
-      <span data-test-subj="doc-url">{url}</span>
-    </div>
-  ),
-}));
+vi.mock('../hooks/use_cloud_setup_context');
+vi.mock('../utils');
+vi.mock('./gcp_input_var_fields', () => {
+      const mocked = {
+      GcpInputVarFields: ({
+        disabled,
+        onChange,
+        isOrganization,
+      }: {
+        disabled: boolean;
+        onChange: (key: string, value: string) => void;
+        isOrganization: boolean;
+      }) => (
+        <div data-test-subj="gcp-input-var-fields">
+          <span data-test-subj="disabled-state">{disabled ? 'true' : 'false'}</span>
+          <span data-test-subj="organization-state">{isOrganization ? 'true' : 'false'}</span>
+          <button
+            data-test-subj="manual-field-change"
+            type="button"
+            onClick={() => onChange('test.field', 'test-value')}
+          >
+            {'Change Field'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./gcp_setup_info', () => {
+      const mocked = {
+      GCPSetupInfoContent: ({ isAgentless }: { isAgentless: boolean }) => (
+        <div data-test-subj="gcp-setup-info">
+          <span data-test-subj="agentless-state">{isAgentless ? 'true' : 'false'}</span>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../common', () => {
+      const mocked = {
+      ReadDocumentation: ({ url }: { url: string }) => (
+        <div data-test-subj="read-documentation">
+          <span data-test-subj="doc-url">{url}</span>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseCloudSetup = useCloudSetup as jest.MockedFunction<typeof useCloudSetup>;
-const mockGetCloudShellDefaultValue = getCloudShellDefaultValue as jest.MockedFunction<
+const mockUseCloudSetup = useCloudSetup as MockedFunction<typeof useCloudSetup>;
+const mockGetCloudShellDefaultValue = getCloudShellDefaultValue as MockedFunction<
   typeof getCloudShellDefaultValue
 >;
-const mockUpdatePolicyWithInputs = updatePolicyWithInputs as jest.MockedFunction<
+const mockUpdatePolicyWithInputs = updatePolicyWithInputs as MockedFunction<
   typeof updatePolicyWithInputs
 >;
-const mockGetGcpCredentialsType = getGcpCredentialsType as jest.MockedFunction<
+const mockGetGcpCredentialsType = getGcpCredentialsType as MockedFunction<
   typeof getGcpCredentialsType
 >;
-const mockGetGcpInputVarsFields = getGcpInputVarsFields as jest.MockedFunction<
+const mockGetGcpInputVarsFields = getGcpInputVarsFields as MockedFunction<
   typeof getGcpInputVarsFields
 >;
 
@@ -136,7 +148,7 @@ const createMockGcpPolicy = (input: NewPackagePolicyInput): NewPackagePolicy => 
 });
 
 const getDefaultGcpCloudSetup = () => ({
-  getCloudSetupProviderByInputType: jest.fn(),
+  getCloudSetupProviderByInputType: vi.fn(),
   config: {},
   showCloudTemplates: true,
   defaultProvider: 'aws' as const,
@@ -177,7 +189,7 @@ const getMockGcpFields = () => [
 ];
 
 describe('GcpCredentialsForm', () => {
-  const mockUpdatePolicy: UpdatePolicy = jest.fn();
+  const mockUpdatePolicy: UpdatePolicy = vi.fn();
   const mockInput = createMockGcpInput();
   const mockPackageInfo = createMockGcpPackageInfo();
   const mockNewPolicy = createMockGcpPolicy(mockInput);
@@ -195,7 +207,7 @@ describe('GcpCredentialsForm', () => {
   const mockFields = getMockGcpFields();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockUseCloudSetup.mockReturnValue(defaultCloudSetup as any);
     mockUpdatePolicyWithInputs.mockImplementation((policy) => policy);
@@ -382,7 +394,7 @@ describe('GcpCredentialsForm', () => {
       const { rerender } = renderWithIntl(<GcpCredentialsForm {...defaultProps} />);
 
       // Clear any initial calls
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       // Initially should be cloud shell - switching to manual
       const manualOption = screen.getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL);
@@ -413,7 +425,7 @@ describe('GcpCredentialsForm', () => {
       );
 
       // Clear previous calls
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       // Click already selected option
       fireEvent.click(cloudShellOption);

@@ -5,28 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { BehaviorSubject } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
 import { coreServices } from '../../../services/kibana_services';
 import { useThemeRefresh } from './use_theme_refresh';
 
-const mockDispatch = jest.fn();
+const mockDispatch = vi.fn();
 const refreshAction = { type: 'fetchAllRenderables' };
 
 const lightTheme: CoreTheme = { darkMode: false, name: 'borealis' };
 const darkTheme: CoreTheme = { darkMode: true, name: 'borealis' };
 
-jest.mock('react-redux-v7', () => ({
-  useDispatch: () => mockDispatch,
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useDispatch: () => mockDispatch,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../state/actions/elements', () => ({
-  fetchAllRenderables: () => refreshAction,
-}));
+vi.mock('../../../state/actions/elements', () => {
+      const mocked = {
+      fetchAllRenderables: () => refreshAction,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../services/kibana_services', () => {
-  const { BehaviorSubject: MockBehaviorSubject } = jest.requireActual('rxjs');
+vi.mock('../../../services/kibana_services', () => {
+  const { BehaviorSubject: MockBehaviorSubject } = require('rxjs');
   return {
     coreServices: {
       theme: {
@@ -40,7 +48,7 @@ const theme$ = coreServices.theme.theme$ as BehaviorSubject<CoreTheme>;
 
 describe('useThemeRefresh', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     theme$.next(lightTheme);
   });
 

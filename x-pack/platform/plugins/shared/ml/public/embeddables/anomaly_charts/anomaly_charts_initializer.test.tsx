@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { MlApi } from '../../application/services/ml_api_service';
@@ -16,11 +18,11 @@ import { getDefaultExplorerChartsPanelTitle } from './utils';
 import { kibanaContextMock } from '../../application/contexts/kibana/__mocks__/kibana_context';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public/context/context';
 const defaultOptions = { wrapper: I18nProvider };
-jest.mock('../../application/services/anomaly_detector_service', () => {
+vi.mock('../../application/services/anomaly_detector_service', () => {
   return {
-    AnomalyDetectorService: jest.fn().mockImplementation(() => {
+    AnomalyDetectorService: vi.fn().mockImplementation(() => {
       return {
-        getJobs$: jest.fn(),
+        getJobs$: vi.fn(),
       };
     }),
   };
@@ -28,9 +30,9 @@ jest.mock('../../application/services/anomaly_detector_service', () => {
 
 describe('AnomalyChartsInitializer', () => {
   test('should render anomaly charts initializer', async () => {
-    const onCreate = jest.fn();
-    const onCancel = jest.fn();
-    const adJobsApiService = jest.fn();
+    const onCreate = vi.fn();
+    const onCancel = vi.fn();
+    const adJobsApiService = vi.fn();
 
     const jobIds = ['job1', 'job2'];
     const defaultTitle = getDefaultExplorerChartsPanelTitle(jobIds);

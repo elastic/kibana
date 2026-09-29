@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import axios from 'axios';
 import type { AuthContext } from '../connector_spec';
 import { ApiKeyQueryAuth } from './api_key_query';
 
 const mockCtx = {
-  logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   getCustomHostSettings: () => undefined,
   getToken: async () => null,
   proxySettings: undefined,

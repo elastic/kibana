@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RuleCustomizationsFlyout } from './rule_customizations_flyout';
@@ -12,11 +14,14 @@ import { TestProviders } from '../../../../../common/mock';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 
-jest.mock('../../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: jest.fn().mockReturnValue({
-    addWarning: jest.fn(),
-  }),
-}));
+vi.mock('../../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: vi.fn().mockReturnValue({
+        addWarning: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('RuleCustomizationsFlyout', () => {
   describe('concurrency control', () => {
@@ -37,7 +42,7 @@ describe('RuleCustomizationsFlyout', () => {
               currentRule={currentRule}
               baseRule={baseRule}
               isReverting={false}
-              closeFlyout={jest.fn()}
+              closeFlyout={vi.fn()}
             />
           </KibanaErrorBoundaryProvider>
         </TestProviders>
@@ -58,7 +63,7 @@ describe('RuleCustomizationsFlyout', () => {
               currentRule={{ ...currentRule, revision: 2 }}
               baseRule={baseRule}
               isReverting={false}
-              closeFlyout={jest.fn()}
+              closeFlyout={vi.fn()}
             />
           </KibanaErrorBoundaryProvider>
         </TestProviders>

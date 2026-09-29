@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -16,26 +18,32 @@ import { DOCUMENT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID } from './document_summary
 import { HEADER_TEST_ID } from '../../../shared/components/expandable_section';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 
-jest.mock('../../../../common/hooks/use_ai_connectors', () => ({
-  useAIConnectors: jest.fn().mockReturnValue({
-    aiConnectors: [
-      {
-        id: 'test-connector-id',
-        name: 'Test Connector',
-        actionTypeId: '.gen-ai',
-      },
-    ],
-    isLoading: false,
-    error: null,
-  }),
-}));
+vi.mock('../../../../common/hooks/use_ai_connectors', () => {
+      const mocked = {
+      useAIConnectors: vi.fn().mockReturnValue({
+        aiConnectors: [
+          {
+            id: 'test-connector-id',
+            name: 'Test Connector',
+            actionTypeId: '.gen-ai',
+          },
+        ],
+        isLoading: false,
+        error: null,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_anonymization_toggle', () => ({
-  useAnonymizationToggle: () => ({
-    showAnonymizedValues: false,
-    setShowAnonymizedValues: jest.fn(),
-  }),
-}));
+vi.mock('../hooks/use_anonymization_toggle', () => {
+      const mocked = {
+      useAnonymizationToggle: () => ({
+        showAnonymizedValues: false,
+        setShowAnonymizedValues: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockedUseKibana = {
   ...mockUseKibana(),
@@ -52,23 +60,23 @@ const mockedUseKibana = {
       },
     },
     uiSettings: {
-      get: jest.fn().mockReturnValue('default-connector-id'),
+      get: vi.fn().mockReturnValue('default-connector-id'),
     },
     featureFlags: {
-      getBooleanValue: jest.fn().mockReturnValue(false),
+      getBooleanValue: vi.fn().mockReturnValue(false),
     },
   },
 };
-jest.mock('../../../../common/lib/kibana', () => {
+vi.mock('../../../../common/lib/kibana', async () => {
   return {
-    ...jest.requireActual('../../../../common/lib/kibana'),
+    ...(await vi.importActual('../../../../common/lib/kibana')),
     useKibana: () => mockedUseKibana,
   };
 });
 
 describe('DocumentSummarySection', () => {
   it('should render the AI summary section with title, sparkles icon, and options menu', () => {
-    const getPromptContext = jest.fn();
+    const getPromptContext = vi.fn();
 
     const { getByTestId } = render(
       <TestProviders>
@@ -83,7 +91,7 @@ describe('DocumentSummarySection', () => {
   });
 
   it('should render with custom data-test-subj', () => {
-    const getPromptContext = jest.fn();
+    const getPromptContext = vi.fn();
 
     const { getByTestId } = render(
       <TestProviders>

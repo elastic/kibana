@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 
 import type { ScopeableRequest } from '@kbn/core/server';
@@ -491,7 +493,7 @@ describe('HTTPAuthenticationProvider', () => {
           credential
         ),
       }));
-      const mintToken = jest
+      const mintToken = vi
         .fn()
         .mockResolvedValueOnce('essu_service_account_initial')
         .mockResolvedValueOnce('essu_service_account_replacement');

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createAnalytics, type AnalyticsClient } from '@elastic/ebt/client';
 import { loggerMock } from '@kbn/logging-mocks';
 import { changeHistoryTelemetryEvents } from './events';
@@ -22,7 +24,7 @@ describe('registerChangeHistoryTelemetryEvents', () => {
   });
 
   it('registers every change-history event type', () => {
-    const registerEventType = jest.spyOn(analyticsClient, 'registerEventType');
+    const registerEventType = vi.spyOn(analyticsClient, 'registerEventType');
 
     registerChangeHistoryTelemetryEvents(analyticsClient);
 
@@ -41,7 +43,7 @@ describe('registerChangeHistoryTelemetryEvents', () => {
   });
 
   it('rethrows unexpected registration errors', () => {
-    const registerEventType = jest
+    const registerEventType = vi
       .spyOn(analyticsClient, 'registerEventType')
       .mockImplementation(() => {
         throw new Error('Unexpected registration failure');

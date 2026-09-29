@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { CopyExportQuery } from './copy_export_query';
@@ -14,7 +16,7 @@ describe('CopyExportQuery', () => {
   it('renders the description', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <CopyExportQuery onCopied={jest.fn()} />
+        <CopyExportQuery onCopied={vi.fn()} />
       </TestProviders>
     );
 
@@ -27,7 +29,7 @@ describe('CopyExportQuery', () => {
   it('renders the query', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <CopyExportQuery onCopied={jest.fn()} />
+        <CopyExportQuery onCopied={vi.fn()} />
       </TestProviders>
     );
 
@@ -40,7 +42,7 @@ describe('CopyExportQuery', () => {
   it('renders the disclaimer', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <CopyExportQuery onCopied={jest.fn()} />
+        <CopyExportQuery onCopied={vi.fn()} />
       </TestProviders>
     );
 

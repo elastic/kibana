@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { feedbackBodySchema, registerSendFeedbackRoute } from './send_feedback';
 import { httpServerMock, analyticsServiceMock, coreMock } from '@kbn/core/server/mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
@@ -17,7 +19,7 @@ const mockUserProfileId = 'test-user-id';
 
 describe('registerSendFeedbackRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should register POST route with correct path and validation', () => {
@@ -205,7 +207,7 @@ describe('registerSendFeedbackRoute', () => {
     const [, handler] = router.post.mock.calls[0];
 
     const mockError = new Error('Analytics service error');
-    mockAnalytics.reportEvent = jest.fn().mockImplementation(() => {
+    mockAnalytics.reportEvent = vi.fn().mockImplementation(() => {
       throw mockError;
     });
 

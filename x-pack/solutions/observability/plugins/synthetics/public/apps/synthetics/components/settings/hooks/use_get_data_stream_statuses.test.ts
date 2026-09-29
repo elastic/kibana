@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
@@ -12,25 +15,31 @@ import { useGetDataStreamStatuses } from './use_get_data_stream_statuses';
 import { policyLabels } from '../data_retention/policy_labels';
 import type { DataStream } from '@kbn/index-management-plugin/common';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
-  useFetcher: jest.fn(),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+      useFetcher: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./api', () => ({
-  getDslPolicies: jest.fn(),
-}));
+vi.mock('./api', () => {
+      const mocked = {
+      getDslPolicies: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useGetDataStreamStatuses', () => {
   it('filters and formats the data returned by the data streams API', () => {
-    (useFetcher as jest.Mock).mockImplementation((callback) => {
+    (useFetcher as Mock).mockImplementation((callback) => {
       callback();
       return {
         error: undefined,
         loading: false,
         status: FETCH_STATUS.SUCCESS,
         refetch: () => {},
-        fetch: jest.fn(),
+        fetch: vi.fn(),
         data: exampleData,
       };
     });
@@ -54,14 +63,14 @@ describe('useGetDataStreamStatuses', () => {
   });
 
   it('falls back to metering storage size when data stream stats are disabled (serverless)', () => {
-    (useFetcher as jest.Mock).mockImplementation((callback) => {
+    (useFetcher as Mock).mockImplementation((callback) => {
       callback();
       return {
         error: undefined,
         loading: false,
         status: FETCH_STATUS.SUCCESS,
         refetch: () => {},
-        fetch: jest.fn(),
+        fetch: vi.fn(),
         data: serverlessExampleData,
       };
     });
@@ -80,14 +89,14 @@ describe('useGetDataStreamStatuses', () => {
   });
 
   it('returns a undefined set for no data', () => {
-    (useFetcher as jest.Mock).mockImplementation((callback) => {
+    (useFetcher as Mock).mockImplementation((callback) => {
       callback();
       return {
         error: undefined,
         loading: false,
         status: FETCH_STATUS.SUCCESS,
         refetch: () => {},
-        fetch: jest.fn(),
+        fetch: vi.fn(),
         data: undefined,
       };
     });
@@ -101,14 +110,14 @@ describe('useGetDataStreamStatuses', () => {
   });
 
   it('returns a undefined set for error', () => {
-    (useFetcher as jest.Mock).mockImplementation((callback) => {
+    (useFetcher as Mock).mockImplementation((callback) => {
       callback();
       return {
         error: new Error('A sample error message'),
         loading: false,
         status: 'success' as FETCH_STATUS.SUCCESS,
         refetch: () => {},
-        fetch: jest.fn(),
+        fetch: vi.fn(),
         data: undefined,
       };
     });

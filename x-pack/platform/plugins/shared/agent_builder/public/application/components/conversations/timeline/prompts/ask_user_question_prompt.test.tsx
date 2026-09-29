@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,19 +19,28 @@ import type {
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import { AskUserQuestionPrompt } from './ask_user_question_prompt';
 
-const mockReportEvent = jest.fn();
+const mockReportEvent = vi.fn();
 
-jest.mock('../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({ services: { analytics: { reportEvent: mockReportEvent } } }),
-}));
+vi.mock('../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({ services: { analytics: { reportEvent: mockReportEvent } } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_conversation', () => ({
-  useAgentId: () => 'agent-1',
-}));
+vi.mock('../../../../hooks/use_conversation', () => {
+      const mocked = {
+      useAgentId: () => 'agent-1',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../context/conversation/use_conversation_id', () => ({
-  useConversationId: () => 'conv-1',
-}));
+vi.mock('../../../../context/conversation/use_conversation_id', () => {
+      const mocked = {
+      useConversationId: () => 'conv-1',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
@@ -82,21 +93,21 @@ describe('AskUserQuestionPrompt', () => {
   describe('Keyboard focus', () => {
     it('focuses the first option on mount', () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={vi.fn()} />
       );
       expect(screen.getByLabelText('Red')).toHaveFocus();
     });
 
     it('focuses the first option of the next question after auto-advancing', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={vi.fn()} />
       );
       await userEvent.click(screen.getByLabelText('A'));
       expect(screen.getByLabelText('X')).toHaveFocus();
     });
 
     it('ArrowDown moves focus without checking the option or auto-advancing', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
       );
@@ -111,7 +122,7 @@ describe('AskUserQuestionPrompt', () => {
 
     it('wraps focus around to the custom row and back with arrow keys', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={vi.fn()} />
       );
       await userEvent.keyboard('{ArrowUp}');
       expect(getCustomCheckable().querySelector('input')).toHaveFocus();
@@ -122,7 +133,7 @@ describe('AskUserQuestionPrompt', () => {
 
     it('moves focus to the custom text input once the custom row is selected via keyboard', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={vi.fn()} />
       );
       await userEvent.keyboard('{ArrowUp}'); // focus the custom row, not checked yet
       expect(screen.getByRole('textbox')).not.toHaveFocus();
@@ -133,7 +144,7 @@ describe('AskUserQuestionPrompt', () => {
 
     it('re-focuses the custom text input when re-selecting an already-checked custom row', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={vi.fn()} />
       );
       await userEvent.keyboard('{ArrowUp}');
       await userEvent.keyboard(' '); // first select — focuses the textbox
@@ -150,7 +161,7 @@ describe('AskUserQuestionPrompt', () => {
 
     it('Tab from the options group skips the custom text field, landing on Skip', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={vi.fn()} />
       );
       // Red is focused automatically when the component loads
       await userEvent.tab();
@@ -160,7 +171,7 @@ describe('AskUserQuestionPrompt', () => {
 
     it('Tab from the options group on a non-final question also lands on Skip', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={vi.fn()} />
       );
       await userEvent.tab();
       expect(screen.getByRole('button', { name: 'Skip question' })).toHaveFocus();
@@ -168,7 +179,7 @@ describe('AskUserQuestionPrompt', () => {
 
     it('focuses the Submit button after picking an option on the final question', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={vi.fn()} />
       );
       await userEvent.click(screen.getByLabelText('Red'));
       await waitFor(() => expect(screen.getByRole('button', { name: 'Submit' })).toHaveFocus());
@@ -176,7 +187,7 @@ describe('AskUserQuestionPrompt', () => {
 
     it('does not steal focus to Submit when picking an option on a non-final question', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={vi.fn()} />
       );
       await userEvent.click(screen.getByLabelText('A'));
       expect(screen.getByLabelText('X')).toHaveFocus();
@@ -184,7 +195,7 @@ describe('AskUserQuestionPrompt', () => {
 
     it('Tab from the custom field jumps straight to Submit once it is usable', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={vi.fn()} />
       );
       await userEvent.type(screen.getByRole('textbox'), 'teal');
       await userEvent.tab();
@@ -193,7 +204,7 @@ describe('AskUserQuestionPrompt', () => {
 
     it('Tab from an empty, unselected custom field falls back to native order', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={vi.fn()} />
       );
       screen.getByRole('textbox').focus();
       await userEvent.tab();
@@ -205,7 +216,7 @@ describe('AskUserQuestionPrompt', () => {
   describe('Confirm gating', () => {
     it('Confirm is disabled until the current question is answered', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={vi.fn()} />
       );
       const confirm = screen.getByRole('button', { name: 'Submit' });
       expect(confirm).toBeDisabled();
@@ -216,7 +227,7 @@ describe('AskUserQuestionPrompt', () => {
 
     it('Confirm becomes enabled when only "Other" text is provided', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={vi.fn()} />
       );
       const confirm = screen.getByRole('button', { name: 'Submit' });
       expect(confirm).toBeDisabled();
@@ -228,7 +239,7 @@ describe('AskUserQuestionPrompt', () => {
 
   describe('single-select submission', () => {
     it('Confirm on the only question fires onSubmit with { choice: [N] }', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
       );
@@ -242,7 +253,7 @@ describe('AskUserQuestionPrompt', () => {
 
   describe('single-select auto-advance', () => {
     it('advances to the next question immediately on pick, without clicking Continue', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={onSubmit} />
       );
@@ -252,7 +263,7 @@ describe('AskUserQuestionPrompt', () => {
     });
 
     it('does not auto-submit when the picked option is on the final question', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
       );
@@ -269,7 +280,7 @@ describe('AskUserQuestionPrompt', () => {
 
   describe('multi-select selection', () => {
     it('encodes multiple checked options as a sorted choice array', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={multiQuestion} onSubmit={onSubmit} />
       );
@@ -282,7 +293,7 @@ describe('AskUserQuestionPrompt', () => {
     });
 
     it('combines choice + custom in multi-select mode', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={multiQuestion} onSubmit={onSubmit} />
       );
@@ -295,7 +306,7 @@ describe('AskUserQuestionPrompt', () => {
     });
 
     it('drops custom from the payload when the "Other" checkbox is unchecked', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={multiQuestion} onSubmit={onSubmit} />
       );
@@ -314,7 +325,7 @@ describe('AskUserQuestionPrompt', () => {
 
   describe('custom option selection + validation', () => {
     it('shows an error and blocks submit when custom is selected but empty', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
       );
@@ -328,7 +339,7 @@ describe('AskUserQuestionPrompt', () => {
     });
 
     it('clears the error and submits once text is entered', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
       );
@@ -350,7 +361,7 @@ describe('AskUserQuestionPrompt', () => {
     });
 
     it('errors when the custom checkbox stays checked but its text is cleared (multi-select)', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={multiQuestion} onSubmit={onSubmit} />
       );
@@ -368,7 +379,7 @@ describe('AskUserQuestionPrompt', () => {
 
   describe('single-select "Other" exclusivity', () => {
     it('typing into "Other" clears the predefined radio', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
       );
@@ -381,7 +392,7 @@ describe('AskUserQuestionPrompt', () => {
     });
 
     it('clicking a predefined radio deselects custom but keeps its text', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
       );
@@ -399,7 +410,7 @@ describe('AskUserQuestionPrompt', () => {
     });
 
     it('preserves the custom text across a deselect → reselect round-trip', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
       );
@@ -419,7 +430,7 @@ describe('AskUserQuestionPrompt', () => {
 
   describe('Skip', () => {
     it('Skip on a non-final question advances and records { skipped: true }', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={onSubmit} />
       );
@@ -430,7 +441,7 @@ describe('AskUserQuestionPrompt', () => {
     });
 
     it('Skip on the final question submits immediately', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={onSubmit} />
       );
@@ -444,13 +455,13 @@ describe('AskUserQuestionPrompt', () => {
   describe('Back navigation', () => {
     it('Back is disabled on the first question', () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={vi.fn()} />
       );
       expect(screen.getByRole('button', { name: 'Back' })).toBeDisabled();
     });
 
     it('returns to the previous question with its prior answer preserved', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={onSubmit} />
       );
@@ -466,7 +477,7 @@ describe('AskUserQuestionPrompt', () => {
 
     it('focuses the previously selected answer, not the first option', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={vi.fn()} />
       );
       // Q1: pick B (not the first option) → auto-advances to Q2
       await userEvent.click(screen.getByLabelText('B'));
@@ -476,7 +487,7 @@ describe('AskUserQuestionPrompt', () => {
 
     it('Tab from an already-answered question (after Back) goes to Continue, not Back', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={vi.fn()} />
       );
       await userEvent.click(screen.getByLabelText('A'));
       await userEvent.click(screen.getByRole('button', { name: 'Back' }));
@@ -489,7 +500,7 @@ describe('AskUserQuestionPrompt', () => {
 
   describe('Confirm advance vs submit', () => {
     it('Confirm on a non-final question advances without calling onSubmit', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={onSubmit} />
       );
@@ -500,7 +511,7 @@ describe('AskUserQuestionPrompt', () => {
     });
 
     it('Confirm on the final question submits the assembled answers array', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       renderWithProviders(
         <AskUserQuestionPrompt promptId="p1" questions={threeQuestions} onSubmit={onSubmit} />
       );
@@ -522,7 +533,7 @@ describe('AskUserQuestionPrompt', () => {
   describe('Telemetry', () => {
     it('fires HitlPromptShown on mount', () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={vi.fn()} />
       );
       expect(mockReportEvent).toHaveBeenCalledWith(
         AGENT_BUILDER_EVENT_TYPES.HitlPromptShown,
@@ -532,7 +543,7 @@ describe('AskUserQuestionPrompt', () => {
 
     it('fires HitlQuestionAnswered with outcome=answered on Submit', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={vi.fn()} />
       );
       await userEvent.click(screen.getByLabelText('Red'));
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -551,7 +562,7 @@ describe('AskUserQuestionPrompt', () => {
 
     it('fires HitlQuestionAnswered with outcome=skipped on Skip', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={vi.fn()} />
       );
       await userEvent.click(screen.getByRole('button', { name: 'Skip question' }));
       expect(mockReportEvent).toHaveBeenCalledWith(
@@ -562,7 +573,7 @@ describe('AskUserQuestionPrompt', () => {
 
     it('fires HitlQuestionAnswered with used_custom_text=true when Other is filled', async () => {
       renderWithProviders(
-        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={jest.fn()} />
+        <AskUserQuestionPrompt promptId="p1" questions={singleQuestion} onSubmit={vi.fn()} />
       );
       await userEvent.type(screen.getByRole('textbox'), 'magenta');
       await userEvent.click(screen.getByRole('button', { name: 'Submit' }));

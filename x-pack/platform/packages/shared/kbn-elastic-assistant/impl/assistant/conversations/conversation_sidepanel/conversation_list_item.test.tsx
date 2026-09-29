@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -13,11 +15,11 @@ import { MOCK_CURRENT_USER, welcomeConvo } from '../../../mock/conversation';
 import { getSharedIcon } from '../../share_conversation/utils';
 import { ConversationSharedState } from '@kbn/elastic-assistant-common';
 
-const mockCopyUrl = jest.fn();
-const mockDuplicate = jest.fn();
-const mockDelete = jest.fn();
-const mockSelect = jest.fn();
-const mockPaginationObserver = jest.fn();
+const mockCopyUrl = vi.fn();
+const mockDuplicate = vi.fn();
+const mockDelete = vi.fn();
+const mockSelect = vi.fn();
+const mockPaginationObserver = vi.fn();
 const ownerConvo = { ...welcomeConvo, isConversationOwner: true };
 const testProps = {
   conversation: ownerConvo,
@@ -33,7 +35,7 @@ const testProps = {
 
 describe('ConversationListItem', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Private convo: renders conversation title and icon', () => {

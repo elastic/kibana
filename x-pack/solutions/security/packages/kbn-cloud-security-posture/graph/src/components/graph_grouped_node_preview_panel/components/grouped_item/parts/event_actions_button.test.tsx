@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EventActionsButton } from './event_actions_button';
@@ -29,10 +31,10 @@ describe('EventActionsButton', () => {
   };
 
   const scopeId = 'test-scope-id';
-  const mockOnShowDocument = jest.fn();
+  const mockOnShowDocument = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the actions button', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { MAX_AI_INDICES } from '../../common/constants';
@@ -29,10 +31,10 @@ const makeResponseError = (statusCode: number) =>
   });
 
 describe('deleteBackingStoreResource', () => {
-  const deleteDataStream = jest.fn();
-  const deleteIndex = jest.fn();
-  const warn = jest.fn();
-  const registrySearch = jest.fn();
+  const deleteDataStream = vi.fn();
+  const deleteIndex = vi.fn();
+  const warn = vi.fn();
+  const registrySearch = vi.fn();
   const esClient = {
     asCurrentUser: {
       indices: { deleteDataStream, delete: deleteIndex },

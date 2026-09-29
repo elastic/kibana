@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -15,60 +18,72 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { renderWorkflowChangeHistoryPreview } from './workflow_change_history_preview';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useDefineWorkflowsMonacoTheme: jest.fn(),
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      useDefineWorkflowsMonacoTheme: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_workflow_change_history_preview_validation', () => ({
-  useWorkflowChangeHistoryPreviewValidation: jest.fn(() => ({
-    validationResults: [],
-    isValidationLoading: false,
-    validationError: null,
-    handleValidationErrorClick: jest.fn(),
-  })),
-}));
-
-jest.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion', () => ({
-  WorkflowYamlValidationAccordion: () => (
-    <div data-test-subj="workflowYamlEditorValidationErrorsList" />
-  ),
-}));
-
-jest.mock('@kbn/code-editor', () => ({
-  monaco: {
-    MarkerSeverity: { Error: 8 },
-    editor: {
-      createModel: jest.fn((value: string) => ({ value, dispose: jest.fn() })),
-      create: jest.fn(() => ({
-        dispose: jest.fn(),
-        layout: jest.fn(),
-        getModel: jest.fn(() => ({ dispose: jest.fn() })),
-        updateOptions: jest.fn(),
-        createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
+vi.mock('./use_workflow_change_history_preview_validation', () => {
+      const mocked = {
+      useWorkflowChangeHistoryPreviewValidation: vi.fn(() => ({
+        validationResults: [],
+        isValidationLoading: false,
+        validationError: null,
+        handleValidationErrorClick: vi.fn(),
       })),
-      createDiffEditor: jest.fn(() => ({
-        setModel: jest.fn(),
-        dispose: jest.fn(),
-        layout: jest.fn(),
-        updateOptions: jest.fn(),
-        getLineChanges: jest.fn(() => []),
-        onDidUpdateDiff: jest.fn(() => ({ dispose: jest.fn() })),
-        getOriginalEditor: jest.fn(() => ({ updateOptions: jest.fn() })),
-        getModifiedEditor: jest.fn(() => ({
-          updateOptions: jest.fn(),
-          getModel: jest.fn(() => ({ dispose: jest.fn() })),
-          createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
-        })),
-      })),
-      setModelMarkers: jest.fn(),
-      onDidChangeMarkers: jest.fn(() => ({ dispose: jest.fn() })),
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCreateEditor = monaco.editor.create as jest.Mock;
-const mockCreateDiffEditor = monaco.editor.createDiffEditor as jest.Mock;
+vi.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion', () => {
+      const mocked = {
+      WorkflowYamlValidationAccordion: () => (
+        <div data-test-subj="workflowYamlEditorValidationErrorsList" />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      monaco: {
+        MarkerSeverity: { Error: 8 },
+        editor: {
+          createModel: vi.fn((value: string) => ({ value, dispose: vi.fn() })),
+          create: vi.fn(() => ({
+            dispose: vi.fn(),
+            layout: vi.fn(),
+            getModel: vi.fn(() => ({ dispose: vi.fn() })),
+            updateOptions: vi.fn(),
+            createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
+          })),
+          createDiffEditor: vi.fn(() => ({
+            setModel: vi.fn(),
+            dispose: vi.fn(),
+            layout: vi.fn(),
+            updateOptions: vi.fn(),
+            getLineChanges: vi.fn(() => []),
+            onDidUpdateDiff: vi.fn(() => ({ dispose: vi.fn() })),
+            getOriginalEditor: vi.fn(() => ({ updateOptions: vi.fn() })),
+            getModifiedEditor: vi.fn(() => ({
+              updateOptions: vi.fn(),
+              getModel: vi.fn(() => ({ dispose: vi.fn() })),
+              createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
+            })),
+          })),
+          setModelMarkers: vi.fn(),
+          onDidChangeMarkers: vi.fn(() => ({ dispose: vi.fn() })),
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+
+const mockCreateEditor = monaco.editor.create as Mock;
+const mockCreateDiffEditor = monaco.editor.createDiffEditor as Mock;
 
 const makeDetail = (yaml: string) => ({
   id: 'evt-3',
@@ -87,7 +102,7 @@ const renderPreview = (props: Parameters<typeof renderWorkflowChangeHistoryPrevi
 
 describe('workflow change history preview', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the selected version yaml in the monaco preview', () => {

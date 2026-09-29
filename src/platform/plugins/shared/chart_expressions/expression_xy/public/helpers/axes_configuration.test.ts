@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { DataLayerConfig, YAxisConfigResult, DataDecorationConfigResult } from '../../common';
 import { LayerTypes } from '../../common/constants';
@@ -287,7 +289,7 @@ describe('axes_configuration', () => {
   };
 
   it('should map auto series to left axis', () => {
-    const formatFactory = jest.fn();
+    const formatFactory = vi.fn();
     const groups = getAxesConfiguration([sampleLayer], false, formatFactory, fieldFormats, []);
     expect(groups.length).toEqual(1);
     expect(groups[0].groupId).toEqual('left');
@@ -297,7 +299,7 @@ describe('axes_configuration', () => {
   });
 
   it('should map auto series to defined left axis if formatters match', () => {
-    const formatFactory = jest.fn();
+    const formatFactory = vi.fn();
     const groups = getAxesConfiguration(
       [
         {
@@ -320,7 +322,7 @@ describe('axes_configuration', () => {
   });
 
   it('should map auto series to right axis if formatters do not match', () => {
-    const formatFactory = jest.fn();
+    const formatFactory = vi.fn();
     const twoSeriesLayer = { ...sampleLayer, accessors: ['yAccessorId', 'yAccessorId2'] };
     const groups = getAxesConfiguration([twoSeriesLayer], false, formatFactory, fieldFormats, []);
     expect(groups.length).toEqual(2);
@@ -331,7 +333,7 @@ describe('axes_configuration', () => {
   });
 
   it('should map auto series to left axis if formatters do not match with defined left axis', () => {
-    const formatFactory = jest.fn();
+    const formatFactory = vi.fn();
     const groups = getAxesConfiguration(
       [
         {
@@ -357,7 +359,7 @@ describe('axes_configuration', () => {
   });
 
   it('should map auto series to defined left axis if defined left and right are already filled with non-matching series', () => {
-    const formatFactory = jest.fn();
+    const formatFactory = vi.fn();
     const threeSeriesLayer = {
       ...sampleLayer,
       accessors: ['yAccessorId', 'yAccessorId2', 'yAccessorId3'],
@@ -384,7 +386,7 @@ describe('axes_configuration', () => {
   });
 
   it('should map auto series to left if not-defined left and right are already filled with non-matching series', () => {
-    const formatFactory = jest.fn();
+    const formatFactory = vi.fn();
     const threeSeriesLayer = {
       ...sampleLayer,
       accessors: ['yAccessorId', 'yAccessorId2', 'yAccessorId3'],
@@ -405,7 +407,7 @@ describe('axes_configuration', () => {
   });
 
   it('should map right series to right axis', () => {
-    const formatFactory = jest.fn();
+    const formatFactory = vi.fn();
     const groups = getAxesConfiguration(
       [
         {
@@ -425,7 +427,7 @@ describe('axes_configuration', () => {
   });
 
   it('should map series with matching formatters to same axis', () => {
-    const formatFactory = jest.fn();
+    const formatFactory = vi.fn();
     const groups = getAxesConfiguration(
       [
         {
@@ -450,7 +452,7 @@ describe('axes_configuration', () => {
   });
 
   it('should create one formatter per series group', () => {
-    const formatFactory = jest.fn();
+    const formatFactory = vi.fn();
     getAxesConfiguration(
       [
         {

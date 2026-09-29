@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuditLogger } from '@kbn/core-security-server';
@@ -15,12 +18,12 @@ import { describeAiIndex } from './describe';
 import { AiIndexNotFoundError, AiIndexNotReadableError } from './errors';
 import { filterReadableAiIndices, probeAiIndices } from './filter_readable_ai_indices';
 
-jest.mock('./describe');
-jest.mock('./filter_readable_ai_indices');
+vi.mock('./describe');
+vi.mock('./filter_readable_ai_indices');
 
-const describeAiIndexMock = jest.mocked(describeAiIndex);
-const filterReadableAiIndicesMock = jest.mocked(filterReadableAiIndices);
-const probeAiIndicesMock = jest.mocked(probeAiIndices);
+const describeAiIndexMock = vi.mocked(describeAiIndex);
+const filterReadableAiIndicesMock = vi.mocked(filterReadableAiIndices);
+const probeAiIndicesMock = vi.mocked(probeAiIndices);
 
 const aiIndex: AiIndexHttpItem = {
   id: 'support',
@@ -36,10 +39,10 @@ const aiIndex: AiIndexHttpItem = {
 const contextBlock = 'AI index: support\nQuery with ES|QL against: ai-index-idx-support';
 
 describe('AiIndexDataReadService', () => {
-  const esqlQuery = jest.fn();
+  const esqlQuery = vi.fn();
   const esClient = { esql: { query: esqlQuery } } as unknown as ElasticsearchClient;
-  const auditLogger = { log: jest.fn() } as unknown as jest.Mocked<AuditLogger>;
-  const aiIndexService = { get: jest.fn(), list: jest.fn() };
+  const auditLogger = { log: vi.fn() } as unknown as Mocked<AuditLogger>;
+  const aiIndexService = { get: vi.fn(), list: vi.fn() };
   const logger = loggingSystemMock.createLogger();
   const service = new AiIndexDataReadService({
     esClient,

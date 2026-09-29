@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { cloneDeep } from 'lodash';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -25,8 +27,8 @@ import { setEndpointPackagePolicyServerlessBillingFlags } from './set_package_po
 
 describe.skip('setEndpointPackagePolicyServerlessBillingFlags', () => {
   let esClientMock: ElasticsearchClientMock;
-  let soClientMock: jest.Mocked<SavedObjectsClientContract>;
-  let packagePolicyServiceMock: jest.Mocked<PackagePolicyClient>;
+  let soClientMock: Mocked<SavedObjectsClientContract>;
+  let packagePolicyServiceMock: Mocked<PackagePolicyClient>;
 
   function generatePackagePolicy(policy = policyFactory()): PackagePolicy {
     return {

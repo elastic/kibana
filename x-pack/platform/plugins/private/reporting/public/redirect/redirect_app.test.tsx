@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { RedirectApp } from './redirect_app';
@@ -14,11 +16,11 @@ import { scopedHistoryMock } from '@kbn/core/public/mocks';
 import { AI_VALUE_REPORT_LOCATOR } from '@kbn/deeplinks-analytics';
 
 const mockApiClient = {
-  getInfo: jest.fn(),
-  getScheduledReportInfo: jest.fn(),
+  getInfo: vi.fn(),
+  getScheduledReportInfo: vi.fn(),
 };
 const mockScreenshotMode = {
-  getScreenshotContext: jest.fn(),
+  getScreenshotContext: vi.fn(),
 };
 const mockShare = sharePluginMock.createSetupContract();
 const historyMock = scopedHistoryMock.create();
@@ -28,7 +30,7 @@ function setLocationSearch(search: string) {
 
 describe('RedirectApp', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -118,7 +120,7 @@ describe('RedirectApp', () => {
     const error = new Error('API failure');
     mockApiClient.getInfo.mockRejectedValue(error);
 
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     render(
       <EuiProvider>
@@ -148,7 +150,7 @@ describe('RedirectApp', () => {
     const error = new Error('API failure');
     mockApiClient.getScheduledReportInfo.mockRejectedValue(error);
 
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     render(
       <EuiProvider>
@@ -180,7 +182,7 @@ describe('RedirectApp', () => {
         locatorParams: [{ id: 'LEGACY_SHORT_URL_LOCATOR' }],
       });
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       render(
         <EuiProvider>
@@ -226,7 +228,7 @@ describe('RedirectApp', () => {
         id: 'LEGACY_SHORT_URL_LOCATOR',
       });
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       render(
         <EuiProvider>

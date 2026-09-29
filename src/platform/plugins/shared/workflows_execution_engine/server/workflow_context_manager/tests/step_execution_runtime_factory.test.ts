@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { StepExecutionRuntimeFactory } from '../step_execution_runtime_factory';
 
 const createParams = () => {
@@ -19,21 +21,21 @@ const createParams = () => {
 
   return {
     workflowExecutionState: {
-      getWorkflowExecution: jest.fn(() => ({
+      getWorkflowExecution: vi.fn(() => ({
         id: 'exec-1',
         spaceId: 'default',
       })),
     },
     workflowExecutionGraph: {
-      getNode: jest.fn(() => node),
+      getNode: vi.fn(() => node),
     },
     workflowLogger: {
-      createStepLogger: jest.fn(() => ({
-        logInfo: jest.fn(),
-        logError: jest.fn(),
-        logDebug: jest.fn(),
-        logWarn: jest.fn(),
-        flushEvents: jest.fn(),
+      createStepLogger: vi.fn(() => ({
+        logInfo: vi.fn(),
+        logError: vi.fn(),
+        logDebug: vi.fn(),
+        logWarn: vi.fn(),
+        flushEvents: vi.fn(),
       })),
     },
     esClient: {},

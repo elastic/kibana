@@ -5,28 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { fetchAnonymizationFields } from '.';
 
 const mockLogger = {
-  debug: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 const mockEsClient = {
-  search: jest.fn(),
+  search: vi.fn(),
 } as unknown as ElasticsearchClient;
 
 describe('fetchAnonymizationFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns anonymization fields from the space-specific index', async () => {
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [
           {
@@ -96,7 +99,7 @@ describe('fetchAnonymizationFields', () => {
   });
 
   it('queries the correct space-specific index', async () => {
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [
           {
@@ -125,7 +128,7 @@ describe('fetchAnonymizationFields', () => {
   });
 
   it('throws when the index does not exist', async () => {
-    (mockEsClient.search as jest.Mock).mockRejectedValue(new Error('index_not_found_exception'));
+    (mockEsClient.search as Mock).mockRejectedValue(new Error('index_not_found_exception'));
 
     await expect(
       fetchAnonymizationFields({
@@ -137,7 +140,7 @@ describe('fetchAnonymizationFields', () => {
   });
 
   it('throws when there are no hits (empty index)', async () => {
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: { hits: [] },
     });
 
@@ -151,7 +154,7 @@ describe('fetchAnonymizationFields', () => {
   });
 
   it('includes the space ID in the error message when fields are not found', async () => {
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: { hits: [] },
     });
 
@@ -165,7 +168,7 @@ describe('fetchAnonymizationFields', () => {
   });
 
   it('throws with a user-actionable message when no fields are configured', async () => {
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: { hits: [] },
     });
 
@@ -179,7 +182,7 @@ describe('fetchAnonymizationFields', () => {
   });
 
   it('throws when all fields have allowed set to false', async () => {
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [
           {
@@ -212,7 +215,7 @@ describe('fetchAnonymizationFields', () => {
   });
 
   it('filters out hits without _source', async () => {
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [
           {
@@ -242,7 +245,7 @@ describe('fetchAnonymizationFields', () => {
   });
 
   it('uses a fallback id of empty string when _id is undefined', async () => {
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [
           {

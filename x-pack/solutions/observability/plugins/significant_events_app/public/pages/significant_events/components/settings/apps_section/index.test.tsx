@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,33 +17,36 @@ import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_rel
 
 // Mock the hooks that depend on Kibana context — keep the component under test
 // isolated so we can drive its UI purely through controlled bindings.
-jest.mock('./use_relay_app_bindings');
-const mockDisconnectWorkspace = jest.fn().mockResolvedValue(undefined);
-jest.mock('./use_relay_app_connection', () => ({
-  useRelayAppConnection: () => ({
-    isLoading: false,
-    available: true,
-    status: 'connected',
-    error: undefined,
-    isMutating: false,
-    connect: jest.fn(),
-    disconnect: mockDisconnectWorkspace,
-  }),
-  RELAY_APP_CONNECTION_STATUS_QUERY_KEY: ['relayAppConnectionStatus'],
-}));
+vi.mock('./use_relay_app_bindings');
+const mockDisconnectWorkspace = vi.fn().mockResolvedValue(undefined);
+vi.mock('./use_relay_app_connection', () => {
+      const mocked = {
+      useRelayAppConnection: () => ({
+        isLoading: false,
+        available: true,
+        status: 'connected',
+        error: undefined,
+        isMutating: false,
+        connect: vi.fn(),
+        disconnect: mockDisconnectWorkspace,
+      }),
+      RELAY_APP_CONNECTION_STATUS_QUERY_KEY: ['relayAppConnectionStatus'],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRelayAppBindings = useRelayAppBindings as jest.MockedFunction<
+const mockUseRelayAppBindings = useRelayAppBindings as MockedFunction<
   typeof useRelayAppBindings
 >;
-const mockUseBindChannel = useBindChannel as jest.MockedFunction<typeof useBindChannel>;
-const mockUseUnbindChannel = useUnbindChannel as jest.MockedFunction<typeof useUnbindChannel>;
+const mockUseBindChannel = useBindChannel as MockedFunction<typeof useBindChannel>;
+const mockUseUnbindChannel = useUnbindChannel as MockedFunction<typeof useUnbindChannel>;
 
 // AppsSection pulls the whole card + bindings together.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { AppsSection } = require('.');
 
-const bindChannel = jest.fn().mockResolvedValue(undefined);
-const unbindChannel = jest.fn().mockResolvedValue(undefined);
+const bindChannel = vi.fn().mockResolvedValue(undefined);
+const unbindChannel = vi.fn().mockResolvedValue(undefined);
 
 function makeBindings(bindings: SlackChannelBinding[], nextCursor?: string) {
   mockUseRelayAppBindings.mockReturnValue({
@@ -72,7 +78,7 @@ const revealChannels = () =>
 
 describe('AppsSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('binds a channel by entering an id and clicking the Bind button', async () => {

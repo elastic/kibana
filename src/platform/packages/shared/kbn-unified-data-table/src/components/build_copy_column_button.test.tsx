@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
@@ -16,11 +18,11 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 import { servicesMock } from '../../__mocks__/services';
 
-const execCommandMock = (global.document.execCommand = jest.fn());
+const execCommandMock = (global.document.execCommand = vi.fn());
 const originalClipboard = global.window.navigator.clipboard;
 
 const mockClipboard = () => {
-  const writeText = jest.fn();
+  const writeText = vi.fn();
 
   Object.assign(navigator, {
     clipboard: { writeText },
@@ -31,11 +33,11 @@ const mockClipboard = () => {
 
 describe('Build a column button to copy to clipboard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
     Object.assign(navigator, {
       clipboard: originalClipboard,
     });
@@ -114,7 +116,7 @@ describe('Build a column button to copy to clipboard', () => {
       toastNotifications: servicesMock.toastNotifications,
     });
     execCommandMock.mockImplementationOnce(() => false);
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     renderWithI18n(
       <EuiButton iconType={iconType} onClick={onClick}>

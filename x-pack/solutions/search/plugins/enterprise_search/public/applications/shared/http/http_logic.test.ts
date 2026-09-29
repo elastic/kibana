@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { resetContext } from 'kea';
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -17,7 +19,7 @@ describe('HttpLogic', () => {
   const mount = (values: Partial<HttpValues> = {}) => mountHttpLogic({ http: mockHttp, ...values });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resetContext({});
   });
 
@@ -77,7 +79,7 @@ describe('HttpLogic', () => {
     describe('initializeHttpInterceptors()', () => {
       beforeEach(() => {
         mount();
-        jest.spyOn(HttpLogic.actions, 'setHttpInterceptors');
+        vi.spyOn(HttpLogic.actions, 'setHttpInterceptors');
       });
 
       it('calls http.intercept and sets an array of interceptors', () => {
@@ -98,7 +100,7 @@ describe('HttpLogic', () => {
 
         beforeEach(() => {
           interceptedResponse = mockHttp.intercept.mock.calls[0][0].responseError;
-          jest.spyOn(HttpLogic.actions, 'onConnectionError');
+          vi.spyOn(HttpLogic.actions, 'onConnectionError');
         });
 
         it('sets the connection error message if the response header is true', async () => {
@@ -153,7 +155,7 @@ describe('HttpLogic', () => {
 
         beforeEach(() => {
           interceptedResponse = mockHttp.intercept.mock.calls[1][0].response;
-          jest.spyOn(HttpLogic.actions, 'setReadOnlyMode');
+          vi.spyOn(HttpLogic.actions, 'setReadOnlyMode');
         });
 
         it('sets readOnlyMode to true if the response header is true', async () => {
@@ -201,7 +203,7 @@ describe('HttpLogic', () => {
 
     it('sets httpInterceptors and calls all valid remove functions on unmount', () => {
       const unmount = mount();
-      const httpInterceptors = [jest.fn(), undefined, jest.fn()] as any;
+      const httpInterceptors = [vi.fn(), undefined, vi.fn()] as any;
 
       HttpLogic.actions.setHttpInterceptors(httpInterceptors);
       expect(HttpLogic.values.httpInterceptors).toEqual(httpInterceptors);

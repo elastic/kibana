@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DeepPartial } from '@kbn/utility-types';
 import { mockDeprecationsRegistry, mockDeprecationsFactory } from '../../mocks';
 import {
@@ -37,18 +39,18 @@ describe('#registerApiDeprecationsInfo', () => {
   let coreUsageData: ReturnType<typeof coreUsageDataServiceMock.createSetupContract>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     usageClientMock = coreUsageStatsClientMock.create();
     http = httpServiceMock.createInternalSetupContract();
     coreUsageData = coreUsageDataServiceMock.createSetupContract(usageClientMock);
   });
 
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2024-10-17T12:06:41.224Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2024-10-17T12:06:41.224Z'));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('registers api deprecations', async () => {

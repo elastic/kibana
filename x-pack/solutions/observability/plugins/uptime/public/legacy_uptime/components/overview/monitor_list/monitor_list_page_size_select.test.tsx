@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { MonitorListPageSizeSelectComponent } from './monitor_list_page_size_select';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 describe('MonitorListPageSizeSelect', () => {
   it('updates the state when selection changes', () => {
-    const setSize = jest.fn();
-    const setUrlParams = jest.fn();
+    const setSize = vi.fn();
+    const setUrlParams = vi.fn();
     const wrapper = mountWithIntl(
       <MonitorListPageSizeSelectComponent size={10} setSize={setSize} setUrlParams={setUrlParams} />
     );

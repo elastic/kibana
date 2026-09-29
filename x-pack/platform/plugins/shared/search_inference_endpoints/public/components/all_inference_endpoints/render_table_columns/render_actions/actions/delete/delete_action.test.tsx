@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -28,7 +30,7 @@ describe('Delete Action', () => {
     const queryClient = new QueryClient();
     return (
       <QueryClientProvider client={queryClient}>
-        <DeleteAction selectedEndpoint={item} onCancel={jest.fn()} displayModal={true} />
+        <DeleteAction selectedEndpoint={item} onCancel={vi.fn()} displayModal={true} />
       </QueryClientProvider>
     );
   };

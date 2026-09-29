@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { WithMissingPrivilegesTooltip } from './with_missing_privileges_tooltip';
@@ -13,8 +16,8 @@ import { render, fireEvent, waitFor } from '@testing-library/react';
 import type { SiemMigrationsService } from '../../../service';
 import type { MigrationType } from '../../../../../common/siem_migrations/types';
 
-jest.mock('../../../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+vi.mock('../../../../common/lib/kibana');
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const mockedMissingCapabilities = [
   {
@@ -25,12 +28,12 @@ const mockedMissingCapabilities = [
 
 const mockSiemMigrationsService = {
   rules: {
-    getMissingCapabilities: jest.fn(),
+    getMissingCapabilities: vi.fn(),
   },
   dashboards: {
-    getMissingCapabilities: jest.fn(),
+    getMissingCapabilities: vi.fn(),
   },
-} as unknown as jest.MockedObjectDeep<SiemMigrationsService>;
+} as unknown as Mocked<SiemMigrationsService>;
 
 const TestComponent = ({ isAuthorized }: { isAuthorized: boolean }) => {
   return <EuiButton isDisabled={!isAuthorized} data-test-subj="test-component" />;

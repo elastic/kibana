@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -17,10 +19,13 @@ import {
 } from '../../../shared/components/json_tab';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiCopy: jest.fn(({ children: functionAsChild }) => functionAsChild(jest.fn())),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiCopy: vi.fn(({ children: functionAsChild }) => functionAsChild(vi.fn())),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const hit = buildDataTableRecord({
   _id: '1',

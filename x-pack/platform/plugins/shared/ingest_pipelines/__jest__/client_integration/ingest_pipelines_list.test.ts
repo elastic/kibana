@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { API_BASE_PATH } from '../../common/constants';
 import type { Pipeline } from '../../common/types';
 
@@ -93,7 +95,7 @@ describe('<PipelinesList />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('With pipelines', () => {

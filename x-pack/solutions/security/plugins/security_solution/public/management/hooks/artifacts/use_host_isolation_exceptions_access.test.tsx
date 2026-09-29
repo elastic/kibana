@@ -5,23 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useHostIsolationExceptionsAccess } from './use_host_isolation_exceptions_access';
 import { checkArtifactHasData } from '../../services/exceptions_list/check_artifact_has_data';
 
-jest.mock('../../services/exceptions_list/check_artifact_has_data', () => ({
-  checkArtifactHasData: jest.fn(),
-}));
+vi.mock('../../services/exceptions_list/check_artifact_has_data', () => {
+      const mocked = {
+      checkArtifactHasData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockArtifactHasData = (hasData = true) => {
-  (checkArtifactHasData as jest.Mock).mockResolvedValueOnce(hasData);
+  (checkArtifactHasData as Mock).mockResolvedValueOnce(hasData);
 };
 
 describe('useHostIsolationExceptionsAccess', () => {
-  const mockApiClient = jest.fn();
+  const mockApiClient = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const setupHook = (canAccess: boolean, canRead: boolean) => {

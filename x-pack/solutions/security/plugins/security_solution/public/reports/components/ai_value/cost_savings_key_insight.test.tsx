@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
@@ -22,48 +25,66 @@ import type { StartServices } from '../../../types';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-  useToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    addInfo: jest.fn(),
-    remove: jest.fn(),
-  }),
-}));
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+      useToasts: vi.fn().mockReturnValue({
+        addError: vi.fn(),
+        addSuccess: vi.fn(),
+        addWarning: vi.fn(),
+        addInfo: vi.fn(),
+        remove: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_license', () => ({
-  licenseService: {
-    isEnterprise: jest.fn(),
-  },
-}));
+vi.mock('../../../common/hooks/use_license', () => {
+      const mocked = {
+      licenseService: {
+        isEnterprise: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../assistant/use_assistant_availability', () => ({
-  useAssistantAvailability: jest.fn(),
-}));
+vi.mock('../../../assistant/use_assistant_availability', () => {
+      const mocked = {
+      useAssistantAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_find_cost_savings_prompts', () => ({
-  useFindCostSavingsPrompts: jest.fn(),
-}));
+vi.mock('../../hooks/use_find_cost_savings_prompts', () => {
+      const mocked = {
+      useFindCostSavingsPrompts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn(),
-}));
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../providers/ai_value/export_provider', () => ({
-  useAIValueExportContext: jest.fn(),
-}));
+vi.mock('../../providers/ai_value/export_provider', () => {
+      const mocked = {
+      useAIValueExportContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockLicenseService = licenseService as jest.Mocked<typeof licenseService>;
-const mockUseAssistantAvailability = useAssistantAvailability as jest.Mock;
-const mockUseAIValueExportContext = useAIValueExportContext as jest.Mock;
-const mockSetInsightInExportContext = jest.fn();
-const mockUseFindCostSavingsPrompts = useFindCostSavingsPrompts as jest.MockedFunction<
+const mockUseKibana = useKibana as Mock;
+const mockLicenseService = licenseService as Mocked<typeof licenseService>;
+const mockUseAssistantAvailability = useAssistantAvailability as Mock;
+const mockUseAIValueExportContext = useAIValueExportContext as Mock;
+const mockSetInsightInExportContext = vi.fn();
+const mockUseFindCostSavingsPrompts = useFindCostSavingsPrompts as MockedFunction<
   typeof useFindCostSavingsPrompts
 >;
-const mockUseLoadConnectors = useLoadConnectors as jest.Mock;
+const mockUseLoadConnectors = useLoadConnectors as Mock;
 
 const mockLensResponse = {
   tables: [],
@@ -90,39 +111,39 @@ describe('CostSavingsKeyInsight', () => {
     ({
       services: {
         http: {
-          fetch: jest.fn(),
+          fetch: vi.fn(),
         },
         notifications: {
           toasts: {
-            addError: jest.fn(),
-            addSuccess: jest.fn(),
-            addWarning: jest.fn(),
+            addError: vi.fn(),
+            addSuccess: vi.fn(),
+            addWarning: vi.fn(),
           },
         },
         inference: {
-          chatComplete: jest.fn(),
+          chatComplete: vi.fn(),
         },
         uiSettings: {
-          get: jest.fn().mockReturnValue('test-connector-id'),
+          get: vi.fn().mockReturnValue('test-connector-id'),
         },
         settings: {
           client: {
-            get: jest.fn(),
+            get: vi.fn(),
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(false),
+          getBooleanValue: vi.fn().mockReturnValue(false),
         },
         ...overrides,
       },
     } as Partial<StartServices>);
   const chatCompleteResult = 'Test result';
 
-  const mockChatComplete = jest.fn().mockResolvedValue({
+  const mockChatComplete = vi.fn().mockResolvedValue({
     content: chatCompleteResult,
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAIValueExportContext.mockReturnValue({
       setInsight: mockSetInsightInExportContext,
     });
@@ -242,7 +263,7 @@ describe('CostSavingsKeyInsight', () => {
   });
 
   it('handles chatComplete errors correctly', async () => {
-    const mockChatCompleteError = jest.fn().mockRejectedValue(new Error('API Error'));
+    const mockChatCompleteError = vi.fn().mockRejectedValue(new Error('API Error'));
     mockUseKibana.mockReturnValue(
       createMockKibanaServices({
         // @ts-ignore
@@ -395,7 +416,7 @@ describe('CostSavingsKeyInsight', () => {
 
   describe('render complete signaling for reporting', () => {
     it('should transition data-render-complete from false to true and dispatch renderComplete event when Markdown finishes rendering', async () => {
-      const renderCompleteHandler = jest.fn();
+      const renderCompleteHandler = vi.fn();
 
       mockUseAIValueExportContext.mockReturnValue({
         forwardedState: { insight: 'Test insight content' },

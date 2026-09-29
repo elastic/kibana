@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { useHostIpToName } from './use_host_ip_to_name';
 import { waitFor, renderHook } from '@testing-library/react';
 
@@ -13,9 +15,9 @@ const renderUseHostIpToNameHook = () =>
     initialProps: { ipAddress: '127.0.0.1', indexPattern: 'metricbest-*' },
   });
 
-const mockedFetch = jest.fn();
+const mockedFetch = vi.fn();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
+vi.mock('@kbn/kibana-react-plugin/public', () => {
   return {
     useKibana: () => {
       return {

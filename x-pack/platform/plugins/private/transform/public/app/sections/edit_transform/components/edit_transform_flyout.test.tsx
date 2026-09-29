@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { type ReactNode } from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -15,56 +17,77 @@ import { getTransformConfigMock } from '../state_management/__mocks__/transform_
 
 import { EditTransformFlyout } from './edit_transform_flyout';
 
-jest.mock('../state_management/edit_transform_flyout_state', () => ({
-  EditTransformFlyoutProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
-}));
+vi.mock('../state_management/edit_transform_flyout_state', () => {
+      const mocked = {
+      EditTransformFlyoutProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./edit_transform_flyout_form', () => ({
-  EditTransformFlyoutForm: ({
-    onOpenProjectScope,
-  }: {
-    onOpenProjectScope: (projects: { originProject: null; linkedProjects: [] }) => void;
-  }) => (
-    <button
-      data-test-subj="openProjectScopeButton"
-      onClick={() => onOpenProjectScope({ originProject: null, linkedProjects: [] })}
-    >
-      Open project scope
-    </button>
-  ),
-}));
+vi.mock('./edit_transform_flyout_form', () => {
+      const mocked = {
+      EditTransformFlyoutForm: ({
+        onOpenProjectScope,
+      }: {
+        onOpenProjectScope: (projects: { originProject: null; linkedProjects: [] }) => void;
+      }) => (
+        <button
+          data-test-subj="openProjectScopeButton"
+          onClick={() => onOpenProjectScope({ originProject: null, linkedProjects: [] })}
+        >
+          Open project scope
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./edit_transform_project_scope_flyout', () => ({
-  EditTransformProjectScopeFlyout: () => (
-    <div data-test-subj="transformEditProjectScopeFlyout">Project scope flyout</div>
-  ),
-}));
+vi.mock('./edit_transform_project_scope_flyout', () => {
+      const mocked = {
+      EditTransformProjectScopeFlyout: () => (
+        <div data-test-subj="transformEditProjectScopeFlyout">Project scope flyout</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./edit_transform_api_error_callout', () => ({
-  EditTransformApiErrorCallout: () => null,
-}));
+vi.mock('./edit_transform_api_error_callout', () => {
+      const mocked = {
+      EditTransformApiErrorCallout: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./edit_transform_flyout_callout', () => ({
-  EditTransformFlyoutCallout: () => null,
-}));
+vi.mock('./edit_transform_flyout_callout', () => {
+      const mocked = {
+      EditTransformFlyoutCallout: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./edit_transform_update_button', () => ({
-  EditTransformUpdateButton: () => (
-    <button data-test-subj="editTransformUpdateButton">Update</button>
-  ),
-}));
+vi.mock('./edit_transform_update_button', () => {
+      const mocked = {
+      EditTransformUpdateButton: () => (
+        <button data-test-subj="editTransformUpdateButton">Update</button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../transform_management/components/managed_transforms_callout/managed_transforms_callout',
-  () => ({
-    ManagedTransformsWarningCallout: () => null,
-  })
+  () => {
+      const mocked = {
+        ManagedTransformsWarningCallout: () => null,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 describe('EditTransformFlyout', () => {
   const defaultProps = {
     action: {} as EditAction['action'],
-    closeFlyout: jest.fn(),
+    closeFlyout: vi.fn(),
     config: getTransformConfigMock(),
     dataViewId: 'data-view-id',
     isFlyoutVisible: true,

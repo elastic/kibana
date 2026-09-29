@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { esql } from '@elastic/esql';
 import objectHash from 'object-hash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getSampleDocumentsEsql } from './get_sample_documents';
 
 const createEsClient = () => {
-  const query = jest.fn();
+  const query = vi.fn();
   return {
     esClient: { esql: { query } } as unknown as ElasticsearchClient,
     query,
@@ -34,7 +36,7 @@ const createResponse = ({
 
 describe('getSampleDocumentsEsql', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('builds a simple ES|QL sample query with a time range filter', async () => {
@@ -194,7 +196,7 @@ describe('getSampleDocumentsEsql', () => {
           ],
         })
       );
-    jest.spyOn(Math, 'random').mockReturnValue(0);
+    vi.spyOn(Math, 'random').mockReturnValue(0);
 
     const result = await getSampleDocumentsEsql({
       esClient,

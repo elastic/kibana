@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,10 +16,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { FavoritesFilterButton } from '../components/favorites_filter_panel';
 
 describe('FavoritesFilterButton', () => {
-  const mockOnToggleFavorites = jest.fn();
+  const mockOnToggleFavorites = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderComponent = (isFavoritesOnly: boolean) => {

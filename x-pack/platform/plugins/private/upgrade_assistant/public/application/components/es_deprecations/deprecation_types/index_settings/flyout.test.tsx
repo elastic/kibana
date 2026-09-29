@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, screen } from '@testing-library/react';
@@ -14,21 +16,21 @@ import type { ResponseError } from '../../../../../../common/types';
 import { mockIndexSettingDeprecation } from '../../__fixtures__/es_deprecations';
 import { RemoveIndexSettingsFlyout } from './flyout';
 
-jest.mock('../../../../lib/ui_metric', () => {
-  const actual = jest.requireActual('../../../../lib/ui_metric');
+vi.mock('../../../../lib/ui_metric', async () => {
+  const actual = (await vi.importActual('../../../../lib/ui_metric'));
 
   return {
     ...actual,
     uiMetricService: {
       ...actual.uiMetricService,
-      trackUiMetric: jest.fn(),
+      trackUiMetric: vi.fn(),
     },
   };
 });
 
 describe('RemoveIndexSettingsFlyout', () => {
-  const closeFlyout = jest.fn();
-  const removeIndexSettings = jest.fn<Promise<void>, [index: string, settings: string[]]>();
+  const closeFlyout = vi.fn();
+  const removeIndexSettings = vi.fn<Promise<void>, [index: string, settings: string[]]>();
 
   beforeEach(() => {
     closeFlyout.mockClear();

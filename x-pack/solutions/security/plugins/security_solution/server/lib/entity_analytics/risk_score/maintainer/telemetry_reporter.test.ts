@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import { RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT } from '../../../telemetry/event_based/events';
 import { createRiskScoreMaintainerTelemetryReporter } from './telemetry_reporter';
 
 describe('createRiskScoreMaintainerTelemetryReporter', () => {
-  const reportEvent = jest.fn();
+  const reportEvent = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('sums base, resolution, and reset-to-zero counters into scoresWrittenTotal', () => {

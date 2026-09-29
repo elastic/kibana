@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { MetricsAPIRequest } from '../../../../common/http_api';
 import { queryTotalGroupings } from './query_total_groupings';
 
 describe('queryTotalGroupings', () => {
-  const ESSearchClientMock = jest.fn().mockReturnValue({});
+  const ESSearchClientMock = vi.fn().mockReturnValue({});
   const defaultOptions: MetricsAPIRequest = {
     timerange: {
       from: 1615972672011,
@@ -24,7 +26,7 @@ describe('queryTotalGroupings', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return 0 when there is no groupBy', async () => {
@@ -103,7 +105,7 @@ describe('queryTotalGroupings', () => {
   });
 
   it('should return 0 when there are no aggregations in the response', async () => {
-    const clientMock = jest.fn().mockReturnValue({});
+    const clientMock = vi.fn().mockReturnValue({});
 
     const response = await queryTotalGroupings(clientMock, defaultOptions);
 
@@ -111,7 +113,7 @@ describe('queryTotalGroupings', () => {
   });
 
   it('should return the value of the aggregation in the response', async () => {
-    const clientMock = jest.fn().mockReturnValue({
+    const clientMock = vi.fn().mockReturnValue({
       aggregations: {
         count: {
           value: 10,

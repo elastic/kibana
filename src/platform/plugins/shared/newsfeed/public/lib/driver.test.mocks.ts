@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const convertItemsMock = jest.fn();
-jest.doMock('./convert_items', () => ({
-  convertItems: convertItemsMock,
-}));
+import { vi } from 'vitest';
+
+export const convertItemsMock = vi.fn();
+vi.doMock('./convert_items', () => {
+      const mocked = {
+      convertItems: convertItemsMock,
+    };
+      return { ...mocked, default: mocked };
+    });

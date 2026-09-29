@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import {
   pointInTimeFinderMock,
   mockGetCurrentTime,
@@ -70,10 +73,10 @@ describe('SavedObjectsRepository Spaces Extension', () => {
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let serializer: jest.Mocked<SavedObjectsSerializer>;
-  let mockSpacesExt: jest.Mocked<ISavedObjectsSpacesExtension>;
-  let mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>;
-  let mockEncryptionExt: jest.Mocked<ISavedObjectsEncryptionExtension>;
+  let serializer: Mocked<SavedObjectsSerializer>;
+  let mockSpacesExt: Mocked<ISavedObjectsSpacesExtension>;
+  let mockSecurityExt: Mocked<ISavedObjectsSecurityExtension>;
+  let mockEncryptionExt: Mocked<ISavedObjectsEncryptionExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -121,8 +124,8 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         client = elasticsearchClientMock.createElasticsearchClient();
         migrator = kibanaMigratorMock.create();
         documentMigrator.prepareMigrations();
-        migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
-        migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+        migrator.migrateDocument = vi.fn().mockImplementation(documentMigrator.migrate);
+        migrator.runMigrations = vi.fn().mockResolvedValue([{ status: 'skipped' }]);
         logger = loggerMock.create();
 
         // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
@@ -886,8 +889,8 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       client = elasticsearchClientMock.createElasticsearchClient();
       migrator = kibanaMigratorMock.create();
       documentMigrator.prepareMigrations();
-      migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
-      migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+      migrator.migrateDocument = vi.fn().mockImplementation(documentMigrator.migrate);
+      migrator.runMigrations = vi.fn().mockResolvedValue([{ status: 'skipped' }]);
       logger = loggerMock.create();
       // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
       serializer = createSpySerializer(registry);
@@ -949,7 +952,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
     describe(`#create`, () => {
       test(`calls authorizeCreate with the current namespace`, async () => {
         const type = CUSTOM_INDEX_TYPE;
-        setupAuthorizeFunc(mockSecurityExt.authorizeCreate as jest.Mock, 'fully_authorized');
+        setupAuthorizeFunc(mockSecurityExt.authorizeCreate as Mock, 'fully_authorized');
         await repository.create(type, { attr: 'value' });
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
@@ -1244,8 +1247,8 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       client = elasticsearchClientMock.createElasticsearchClient();
       migrator = kibanaMigratorMock.create();
       documentMigrator.prepareMigrations();
-      migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
-      migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+      migrator.migrateDocument = vi.fn().mockImplementation(documentMigrator.migrate);
+      migrator.runMigrations = vi.fn().mockResolvedValue([{ status: 'skipped' }]);
       logger = loggerMock.create();
       serializer = createSpySerializer(registry);
       mockSpacesExt = savedObjectsExtensionsMock.createSpacesExtension();

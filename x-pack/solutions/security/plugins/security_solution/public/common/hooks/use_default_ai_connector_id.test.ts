@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useDefaultAIConnectorId } from './use_default_ai_connector_id';
 import { useKibana } from '../lib/kibana';
 import { useAIConnectors } from './use_ai_connectors';
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 
-jest.mock('../lib/kibana');
-jest.mock('./use_ai_connectors');
-jest.mock('@kbn/elastic-assistant/impl/assistant/helpers');
+vi.mock('../lib/kibana');
+vi.mock('./use_ai_connectors');
+vi.mock('@kbn/elastic-assistant/impl/assistant/helpers');
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseAIConnectors = useAIConnectors as jest.Mock;
-const mockGetDefaultConnector = getDefaultConnector as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseAIConnectors = useAIConnectors as Mock;
+const mockGetDefaultConnector = getDefaultConnector as Mock;
 
 describe('useDefaultAIConnectorId', () => {
   const mockSettings = {};
@@ -27,7 +30,7 @@ describe('useDefaultAIConnectorId', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {

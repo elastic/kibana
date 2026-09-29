@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loadAiConnectors } from './ai_connectors';
 import { loadAllActions } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
@@ -12,26 +15,32 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/constants', () => ({
-  loadAllActions: jest.fn(),
-}));
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/constants', () => {
+      const mocked = {
+      loadAllActions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/inference-endpoint-ui-common', () => ({
-  isInferenceEndpointExists: jest.fn(),
-}));
+vi.mock('@kbn/inference-endpoint-ui-common', () => {
+      const mocked = {
+      isInferenceEndpointExists: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockHttp = {} as HttpSetup;
 const settings = {
   client: {
-    get: jest.fn(),
+    get: vi.fn(),
   },
 } as unknown as SettingsStart;
-const mockLoadAllActions = loadAllActions as jest.Mock;
-const mockIsInferenceEndpointExists = isInferenceEndpointExists as jest.Mock;
+const mockLoadAllActions = loadAllActions as Mock;
+const mockIsInferenceEndpointExists = isInferenceEndpointExists as Mock;
 
 describe('loadAiConnectors', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return only valid external AI connectors', async () => {

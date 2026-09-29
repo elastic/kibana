@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { act, fireEvent, render, screen } from '@testing-library/react';
@@ -13,11 +16,14 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CreateSynonymsSetModal } from './create_new_set_modal';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('../../hooks/use_put_synonyms_set', () => ({
-  usePutSynonymsSet: jest.fn().mockReturnValue({
-    mutate: jest.fn(),
-  }),
-}));
+vi.mock('../../hooks/use_put_synonyms_set', () => {
+      const mocked = {
+      usePutSynonymsSet: vi.fn().mockReturnValue({
+        mutate: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CreateNewSetModal', () => {
   const conflictError = new Error('Conflict') as unknown as {
@@ -48,11 +54,11 @@ describe('CreateNewSetModal', () => {
       fireEvent.click(screen.getByTestId(TEST_IDS.CancelButton));
     },
     SimulateConflictError: () => {
-      const onErrorCallback = (usePutSynonymsSet as jest.Mock).mock.calls[0][1];
+      const onErrorCallback = (usePutSynonymsSet as Mock).mock.calls[0][1];
       onErrorCallback(conflictError);
     },
     SimulateSuccess: () => {
-      const onSuccessCallback = (usePutSynonymsSet as jest.Mock).mock.calls[0][0];
+      const onSuccessCallback = (usePutSynonymsSet as Mock).mock.calls[0][0];
       onSuccessCallback();
     },
     PressForceWriteCheckbox: () => {
@@ -66,13 +72,13 @@ describe('CreateNewSetModal', () => {
     </I18nProvider>
   );
 
-  let onClose: jest.Mock;
-  let mutate: jest.Mock;
+  let onClose: Mock;
+  let mutate: Mock;
   beforeEach(() => {
-    jest.clearAllMocks();
-    onClose = jest.fn();
-    mutate = jest.fn();
-    (usePutSynonymsSet as unknown as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    onClose = vi.fn();
+    mutate = vi.fn();
+    (usePutSynonymsSet as unknown as Mock).mockReturnValue({
       mutate,
     });
   });

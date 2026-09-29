@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
@@ -17,12 +19,15 @@ import { InspectButton } from '.';
 import { cloneDeep } from 'lodash/fp';
 import { InputsModelId } from '../../store/inputs/constants';
 
-jest.mock('./modal', () => ({
-  ModalInspectQuery: jest.fn(() => <div data-test-subj="mocker-modal" />),
-}));
+vi.mock('./modal', () => {
+      const mocked = {
+      ModalInspectQuery: vi.fn(() => <div data-test-subj="mocker-modal" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Inspect Button', () => {
-  const refetch = jest.fn();
+  const refetch = vi.fn();
   const state: State = mockGlobalState;
   const newQuery: UpdateQueryParams = {
     inputId: InputsModelId.global,

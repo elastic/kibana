@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ConversationDateDivider } from './conversation_date_divider';
@@ -14,12 +16,12 @@ const NOW = new Date('2026-06-15T12:00:00.000Z');
 
 describe('ConversationDateDivider', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(NOW);
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('labels the current day as "Today"', () => {

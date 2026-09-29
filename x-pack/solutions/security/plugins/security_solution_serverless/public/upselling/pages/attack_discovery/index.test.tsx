@@ -5,28 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import * as i18n from './translations';
 
-jest.mock('../../../common/services', () => ({
-  useKibana: jest.fn(() => ({
-    services: {
-      http: {
-        basePath: {
-          get: () => 'some-base-path',
+vi.mock('../../../common/services', () => {
+      const mocked = {
+      useKibana: vi.fn(() => ({
+        services: {
+          http: {
+            basePath: {
+              get: () => 'some-base-path',
+            },
+          },
         },
-      },
-    },
-  })),
-}));
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { AttackDiscoveryUpsellingPageServerless } from '.';
 
 describe('AttackDiscoveryUpsellingPageServerless', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     render(<AttackDiscoveryUpsellingPageServerless />);
   });

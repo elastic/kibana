@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -16,8 +18,8 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import DataGrid from './data_grid';
 
-jest.mock('@kbn/unified-data-table', () => {
-  const actual = jest.requireActual('@kbn/unified-data-table');
+vi.mock('@kbn/unified-data-table', async () => {
+  const actual = (await vi.importActual('@kbn/unified-data-table'));
   return {
     ...actual,
     UnifiedDataTable: (props: { columns: string[] }) => (
@@ -28,7 +30,7 @@ jest.mock('@kbn/unified-data-table', () => {
 
 describe('DataGrid', () => {
   const data = dataPluginMock.createStartContract();
-  const dataView = { toSpec: jest.fn() } as unknown as DataView;
+  const dataView = { toSpec: vi.fn() } as unknown as DataView;
   const core = coreMock.createStart();
   const fieldFormats = fieldFormatsServiceMock.createStartContract();
   const query = { esql: 'from foo' };

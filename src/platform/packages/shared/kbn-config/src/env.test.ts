@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mockPackage } from './env.test.mocks';
 
 import type { RawPackageInfo } from './env';
@@ -27,8 +29,8 @@ const packageInfos: RawPackageInfo = {
 };
 
 beforeAll(() => {
-  jest.useFakeTimers();
-  jest.setSystemTime(new Date(BUILD_DATE));
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date(BUILD_DATE));
 });
 
 beforeEach(() => {
@@ -36,7 +38,7 @@ beforeEach(() => {
 });
 
 afterAll(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 test('correctly creates default environment in dev mode.', () => {

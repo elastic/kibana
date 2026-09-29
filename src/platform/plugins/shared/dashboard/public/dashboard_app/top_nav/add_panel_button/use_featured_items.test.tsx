@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { useFeaturedItems } from './use_featured_items';
 
-const mockGetTriggerCompatibleActions = jest.fn();
+const mockGetTriggerCompatibleActions = vi.fn();
 
-jest.mock('../../../services/kibana_services', () => {
-  const actual = jest.requireActual('../../../services/kibana_services');
+vi.mock('../../../services/kibana_services', async () => {
+  const actual = (await vi.importActual('../../../services/kibana_services'));
   return {
     ...actual,
     uiActionsService: {
-      getTriggerCompatibleActions: jest
+      getTriggerCompatibleActions: vi
         .fn()
         .mockImplementation(() => mockGetTriggerCompatibleActions()),
     },
@@ -32,7 +35,7 @@ describe('useFeaturedItems', () => {
     getDisplayName: () => 'Create visualization',
     getIconType: () => 'lensApp',
     getDisplayNameTooltip: () => 'Build with the point-and-click editor',
-    execute: jest.fn(),
+    execute: vi.fn(),
   };
 
   const esqlAction = {
@@ -41,16 +44,16 @@ describe('useFeaturedItems', () => {
     getDisplayName: () => 'Create visualization (query)',
     getIconType: () => 'code',
     getDisplayNameTooltip: () => 'Build with the ES|QL editor',
-    execute: jest.fn(),
+    execute: vi.fn(),
   };
 
   const dashboardApi = {
-    clearOverlays: jest.fn(),
+    clearOverlays: vi.fn(),
   } as unknown as DashboardApi;
 
   beforeEach(() => {
     mockGetTriggerCompatibleActions.mockReset().mockResolvedValue([featuredAction, esqlAction]);
-    (dashboardApi.clearOverlays as jest.Mock).mockClear();
+    (dashboardApi.clearOverlays as Mock).mockClear();
   });
 
   it('returns compatible featured trigger actions', async () => {

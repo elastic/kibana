@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AppMenuPopoverActionButtons } from './app_menu_popover_action_buttons';
@@ -16,12 +18,12 @@ describe('AppMenuPopoverActionButtons', () => {
   const primaryActionItem = {
     id: 'save',
     label: 'Save',
-    run: jest.fn(),
+    run: vi.fn(),
     iconType: 'save',
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return null when neither primary nor secondary action item is provided', () => {

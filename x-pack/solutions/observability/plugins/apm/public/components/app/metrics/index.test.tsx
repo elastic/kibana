@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { render } from '@testing-library/react';
@@ -28,7 +30,7 @@ const KibanaReactContext = createKibanaReactContext({
 } as unknown as Partial<CoreStart>);
 
 function MetricsWithWrapper() {
-  jest.spyOn(useApmDataViewHook, 'useAdHocApmDataView').mockReturnValue({
+  vi.spyOn(useApmDataViewHook, 'useAdHocApmDataView').mockReturnValue({
     dataView: { id: 'id-1', name: 'apm-data-view' } as DataView,
     apmIndices: { metric: 'metrics*' } as APMIndices,
   });
@@ -56,7 +58,7 @@ function MetricsWithWrapper() {
 
 describe('Metrics', () => {
   beforeEach(() => {
-    jest.spyOn(useMixedIngestionHook, 'useServiceMixedIngestionFetcher').mockReturnValue({
+    vi.spyOn(useMixedIngestionHook, 'useServiceMixedIngestionFetcher').mockReturnValue({
       data: { hasMultipleAgentTypes: false, ingestionTimeRanges: undefined },
       status: FETCH_STATUS.SUCCESS,
       error: undefined,
@@ -64,13 +66,13 @@ describe('Metrics', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('render the correct metrics content for', () => {
     describe('APM agent / server service', () => {
       beforeEach(() => {
-        jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
+        vi.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
           agentName: 'java',
           serviceName: 'testServiceName',
           transactionTypeStatus: FETCH_STATUS.SUCCESS,
@@ -91,7 +93,7 @@ describe('Metrics', () => {
 
     describe('APM agent / EDOT sdk with dashboard', () => {
       beforeEach(() => {
-        jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
+        vi.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
           agentName: 'opentelemetry/nodejs/elastic',
           serviceName: 'testServiceName',
           transactionTypeStatus: FETCH_STATUS.SUCCESS,
@@ -112,7 +114,7 @@ describe('Metrics', () => {
 
     describe('APM agent / otel sdk with no dashboard', () => {
       beforeEach(() => {
-        jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
+        vi.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
           agentName: 'opentelemetry/erlang',
           serviceName: 'testServiceName',
           transactionTypeStatus: FETCH_STATUS.SUCCESS,
@@ -131,7 +133,7 @@ describe('Metrics', () => {
 
     describe('no data for the selected time range', () => {
       beforeEach(() => {
-        jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
+        vi.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
           agentName: undefined,
           serviceName: 'testServiceName',
           transactionTypeStatus: FETCH_STATUS.SUCCESS,
@@ -155,7 +157,7 @@ describe('Metrics', () => {
     };
 
     it('shows mixed agent callout when multiple agent types are detected', () => {
-      jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
+      vi.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
         agentName: 'java',
         serviceName: 'testServiceName',
         transactionTypeStatus: FETCH_STATUS.SUCCESS,
@@ -164,7 +166,7 @@ describe('Metrics', () => {
         serviceAgentStatus: FETCH_STATUS.SUCCESS,
       });
 
-      jest.spyOn(useMixedIngestionHook, 'useServiceMixedIngestionFetcher').mockReturnValue({
+      vi.spyOn(useMixedIngestionHook, 'useServiceMixedIngestionFetcher').mockReturnValue({
         data: { hasMultipleAgentTypes: true, ingestionTimeRanges: mixedIngestionTimeRanges },
         status: FETCH_STATUS.SUCCESS,
         error: undefined,
@@ -175,7 +177,7 @@ describe('Metrics', () => {
     });
 
     it('does not show mixed agent callout when there is a single agent type', () => {
-      jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
+      vi.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
         agentName: 'java',
         serviceName: 'testServiceName',
         transactionTypeStatus: FETCH_STATUS.SUCCESS,
@@ -184,7 +186,7 @@ describe('Metrics', () => {
         serviceAgentStatus: FETCH_STATUS.SUCCESS,
       });
 
-      jest.spyOn(useMixedIngestionHook, 'useServiceMixedIngestionFetcher').mockReturnValue({
+      vi.spyOn(useMixedIngestionHook, 'useServiceMixedIngestionFetcher').mockReturnValue({
         data: { hasMultipleAgentTypes: false, ingestionTimeRanges: undefined },
         status: FETCH_STATUS.SUCCESS,
         error: undefined,
@@ -196,7 +198,7 @@ describe('Metrics', () => {
     });
 
     it('shows overlap callout when time ranges overlap', () => {
-      jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
+      vi.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
         agentName: 'java',
         serviceName: 'testServiceName',
         transactionTypeStatus: FETCH_STATUS.SUCCESS,
@@ -210,7 +212,7 @@ describe('Metrics', () => {
         otelNative: { from: 1715100000000, to: 1715200000000 },
       };
 
-      jest.spyOn(useMixedIngestionHook, 'useServiceMixedIngestionFetcher').mockReturnValue({
+      vi.spyOn(useMixedIngestionHook, 'useServiceMixedIngestionFetcher').mockReturnValue({
         data: { hasMultipleAgentTypes: true, ingestionTimeRanges: overlappingRanges },
         status: FETCH_STATUS.SUCCESS,
         error: undefined,

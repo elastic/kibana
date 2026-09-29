@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import type { FileUploadProps } from '@kbn/shared-ux-file-upload';
@@ -20,16 +23,16 @@ import { useToasts } from '../../../common/lib/kibana';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { basicCaseId, basicFileMock } from '../../../containers/mock';
 
-jest.mock('../../../containers/api');
-jest.mock('../../../containers/use_create_attachments');
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../containers/api');
+vi.mock('../../../containers/use_create_attachments');
+vi.mock('../../../common/lib/kibana');
 
-const useToastsMock = useToasts as jest.Mock;
-const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+const useToastsMock = useToasts as Mock;
+const useCreateAttachmentsMock = useCreateAttachments as Mock;
 
 const mockedFileId = 'fileAttachmentId';
-const validateMetadata = jest.fn();
-const mockFileUpload = jest
+const validateMetadata = vi.fn();
+const mockFileUpload = vi
   .fn()
   .mockImplementation(
     ({
@@ -99,8 +102,8 @@ const mockFileUpload = jest
     )
   );
 
-jest.mock('@kbn/shared-ux-file-upload', () => {
-  const original = jest.requireActual('@kbn/shared-ux-file-upload');
+vi.mock('@kbn/shared-ux-file-upload', async () => {
+  const original = (await vi.importActual('@kbn/shared-ux-file-upload'));
   return {
     ...original,
     FileUpload: (props: unknown) => mockFileUpload(props),
@@ -108,9 +111,9 @@ jest.mock('@kbn/shared-ux-file-upload', () => {
 });
 
 describe('UploadFileModal', () => {
-  const successMock = jest.fn();
-  const errorMock = jest.fn();
-  const dangerMock = jest.fn();
+  const successMock = vi.fn();
+  const errorMock = vi.fn();
+  const dangerMock = vi.fn();
 
   useToastsMock.mockImplementation(() => ({
     addSuccess: successMock,
@@ -118,8 +121,8 @@ describe('UploadFileModal', () => {
     addDanger: dangerMock,
   }));
 
-  const createAttachmentsMock = jest.fn();
-  const onCloseMock = jest.fn();
+  const createAttachmentsMock = vi.fn();
+  const onCloseMock = vi.fn();
 
   useCreateAttachmentsMock.mockReturnValue({
     isLoading: false,
@@ -127,7 +130,7 @@ describe('UploadFileModal', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the modal', async () => {
@@ -229,7 +232,7 @@ describe('UploadFileModal', () => {
   });
 
   it('rolls back the orphan file SO when createAttachments fails', async () => {
-    const spyOnDeleteFileAttachments = jest.spyOn(api, 'deleteFileAttachments');
+    const spyOnDeleteFileAttachments = vi.spyOn(api, 'deleteFileAttachments');
 
     createAttachmentsMock.mockImplementation(() => {
       throw new Error();

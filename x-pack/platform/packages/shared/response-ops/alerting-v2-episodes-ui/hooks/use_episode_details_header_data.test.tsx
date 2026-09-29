@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { RuleStateStatus } from '../types/rule_state';
@@ -16,17 +18,17 @@ import { useFetchRule } from './use_fetch_rule';
 import { useEpisodeFlapping } from './use_episode_flapping';
 import { useEpisodeDetailsHeaderData } from './use_episode_details_header_data';
 
-jest.mock('./use_fetch_episode_query');
-jest.mock('./use_fetch_episode_actions');
-jest.mock('./use_fetch_group_actions');
-jest.mock('./use_fetch_rule');
-jest.mock('./use_episode_flapping');
+vi.mock('./use_fetch_episode_query');
+vi.mock('./use_fetch_episode_actions');
+vi.mock('./use_fetch_group_actions');
+vi.mock('./use_fetch_rule');
+vi.mock('./use_episode_flapping');
 
-const mockUseFetchEpisodeQuery = jest.mocked(useFetchEpisodeQuery);
-const mockUseFetchEpisodeActions = jest.mocked(useFetchEpisodeActions);
-const mockUseFetchGroupActions = jest.mocked(useFetchGroupActions);
-const mockUseFetchRule = jest.mocked(useFetchRule);
-const mockUseEpisodeFlapping = jest.mocked(useEpisodeFlapping);
+const mockUseFetchEpisodeQuery = vi.mocked(useFetchEpisodeQuery);
+const mockUseFetchEpisodeActions = vi.mocked(useFetchEpisodeActions);
+const mockUseFetchGroupActions = vi.mocked(useFetchGroupActions);
+const mockUseFetchRule = vi.mocked(useFetchRule);
+const mockUseEpisodeFlapping = vi.mocked(useEpisodeFlapping);
 const mockServices = createMockServices();
 
 describe('useEpisodeDetailsHeaderData', () => {

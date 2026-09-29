@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ComponentOpts } from './rule_enabled_switch';
 import { RuleEnabledSwitch } from './rule_enabled_switch';
 
 describe('RuleEnabledSwitch', () => {
-  const enableRule = jest.fn();
+  const enableRule = vi.fn();
   const props: ComponentOpts = {
-    disableRule: jest.fn(),
+    disableRule: vi.fn(),
     enableRule,
     item: {
       id: '1',
@@ -46,10 +48,10 @@ describe('RuleEnabledSwitch', () => {
       updatedAt: new Date('2020-08-20T19:23:38Z'),
       revision: 0,
     },
-    onRuleChanged: jest.fn(),
+    onRuleChanged: vi.fn(),
   };
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   test('renders switch control as disabled when rule is not editable', () => {
     render(<RuleEnabledSwitch {...props} />);

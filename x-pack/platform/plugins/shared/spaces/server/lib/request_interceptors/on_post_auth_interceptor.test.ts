@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import Boom from '@hapi/boom';
 
 import {
@@ -37,35 +40,35 @@ const space = (id: string, overrides: Partial<Omit<Space, 'id'>> = {}): Space =>
 
 describe('initSpacesOnPostAuthRequestInterceptor', () => {
   let postAuthHandler: OnPostAuthHandler;
-  let getSpacesService: jest.Mock;
-  let createSpacesClient: jest.Mock;
-  let getCurrent: jest.Mock;
-  let getCurrentProfileId: jest.Mock;
-  let update: jest.Mock;
-  let getAll: jest.Mock;
-  let getSpaceId: jest.Mock;
+  let getSpacesService: Mock;
+  let createSpacesClient: Mock;
+  let getCurrent: Mock;
+  let getCurrentProfileId: Mock;
+  let update: Mock;
+  let getAll: Mock;
+  let getSpaceId: Mock;
   let initialSolutionSetup: InitialSolutionSetupService;
-  let isRequired: jest.SpiedFunction<InitialSolutionSetupService['isRequired']>;
+  let isRequired: MockInstance<InitialSolutionSetupService['isRequired']>;
   let log: ReturnType<typeof loggingSystemMock.createLogger>;
   let response: ReturnType<typeof httpServerMock.createLifecycleResponseFactory>;
   let toolkit: ReturnType<typeof httpServiceMock.createOnPostAuthToolkit>;
 
   const setup = (options: { eligible?: boolean } = {}) => {
-    getCurrent = jest.fn();
-    getCurrentProfileId = jest.fn();
-    update = jest.fn().mockResolvedValue(undefined);
-    getAll = jest.fn();
-    getSpaceId = jest.fn();
+    getCurrent = vi.fn();
+    getCurrentProfileId = vi.fn();
+    update = vi.fn().mockResolvedValue(undefined);
+    getAll = vi.fn();
+    getSpaceId = vi.fn();
     initialSolutionSetup = new InitialSolutionSetupService(options.eligible ?? true);
-    isRequired = jest.spyOn(initialSolutionSetup, 'isRequired').mockResolvedValue(false);
+    isRequired = vi.spyOn(initialSolutionSetup, 'isRequired').mockResolvedValue(false);
     log = loggingSystemMock.createLogger();
 
     const coreStart = coreMock.createStart();
     coreStart.userProfile = {
       getCurrent,
       getCurrentProfileId,
-      bulkGet: jest.fn(),
-      suggest: jest.fn(),
+      bulkGet: vi.fn(),
+      suggest: vi.fn(),
       update,
     } as typeof coreStart.userProfile;
 
@@ -82,11 +85,11 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
       {},
     ]);
 
-    createSpacesClient = jest.fn().mockReturnValue({
+    createSpacesClient = vi.fn().mockReturnValue({
       getAll,
-      get: jest.fn(),
+      get: vi.fn(),
     });
-    getSpacesService = jest.fn().mockReturnValue({
+    getSpacesService = vi.fn().mockReturnValue({
       getSpaceId,
       createSpacesClient,
     });
@@ -107,7 +110,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setup();
   });
 
@@ -498,7 +501,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
 
     it('passes the request-scoped spaces client to the setup service', async () => {
       getSpaceId.mockReturnValue(DEFAULT_SPACE_ID);
-      const spacesClient = { getAll, get: jest.fn() };
+      const spacesClient = { getAll, get: vi.fn() };
       createSpacesClient.mockReturnValue(spacesClient);
 
       const request = httpServerMock.createKibanaRequest({

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -15,65 +18,80 @@ import { isRumOrMobileAgentName } from '@kbn/elastic-agent-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 // Mock the dependencies
-jest.mock('../../../../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => ({
-    core: {
-      notifications: {
-        toasts: {
-          addSuccess: jest.fn(),
-          addError: jest.fn(),
+vi.mock('../../../../../../context/apm_plugin/use_apm_plugin_context', () => {
+      const mocked = {
+      useApmPluginContext: () => ({
+        core: {
+          notifications: {
+            toasts: {
+              addSuccess: vi.fn(),
+              addError: vi.fn(),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  BottomBarActions: ({ children, ...props }: any) => (
-    <div data-test-subj="bottom-bar-actions" {...props}>
-      {children}
-    </div>
-  ),
-  useUiTracker: () => jest.fn(),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      BottomBarActions: ({ children, ...props }: any) => (
+        <div data-test-subj="bottom-bar-actions" {...props}>
+          {children}
+        </div>
+      ),
+      useUiTracker: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./save_config', () => ({
-  saveConfig: jest.fn(),
-}));
+vi.mock('./save_config', () => {
+      const mocked = {
+      saveConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock setting definitions to provide test data
-jest.mock('../../../../../../../common/agent_configuration/setting_definitions', () => ({
-  settingDefinitions: [
-    {
-      key: 'transaction_sample_rate',
-      type: 'float',
-      category: 'Performance',
-      label: 'Transaction sample rate',
-    },
-    {
-      key: 'span_compression_enabled',
-      type: 'boolean',
-      category: 'Performance',
-      label: 'Span compression enabled',
-    },
-  ],
-  filterByAgent: () => (setting: any) => true,
-  validateSetting: () => ({ isValid: true }),
-}));
+vi.mock('../../../../../../../common/agent_configuration/setting_definitions', () => {
+      const mocked = {
+      settingDefinitions: [
+        {
+          key: 'transaction_sample_rate',
+          type: 'float',
+          category: 'Performance',
+          label: 'Transaction sample rate',
+        },
+        {
+          key: 'span_compression_enabled',
+          type: 'boolean',
+          category: 'Performance',
+          label: 'Span compression enabled',
+        },
+      ],
+      filterByAgent: () => (setting: any) => true,
+      validateSetting: () => ({ isValid: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/elastic-agent-utils', () => ({
-  ...jest.requireActual('@kbn/elastic-agent-utils'),
-  isRumOrMobileAgentName: jest.fn(),
-}));
+vi.mock('@kbn/elastic-agent-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/elastic-agent-utils')),
+      isRumOrMobileAgentName: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedIsRumOrMobileAgentName = isRumOrMobileAgentName as jest.MockedFunction<
+const mockedIsRumOrMobileAgentName = isRumOrMobileAgentName as MockedFunction<
   typeof isRumOrMobileAgentName
 >;
 
 describe('SettingsPage - Advanced Configuration', () => {
-  const mockSetNewConfig = jest.fn();
-  const mockResetSettings = jest.fn();
-  const mockOnClickEdit = jest.fn();
+  const mockSetNewConfig = vi.fn();
+  const mockResetSettings = vi.fn();
+  const mockOnClickEdit = vi.fn();
 
   const defaultProps = {
     initialConfig: {
@@ -109,7 +127,7 @@ describe('SettingsPage - Advanced Configuration', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedIsRumOrMobileAgentName.mockReturnValue(false);
   });
 

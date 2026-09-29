@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -28,10 +31,10 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
   </I18nProvider>
 );
 
-let setValue: jest.MockedFunction<any>;
+let setValue: MockedFunction<any>;
 
 beforeEach(() => {
-  setValue = jest.fn();
+  setValue = vi.fn();
   props = {
     deps: getDepsMock(),
     vis: {
@@ -131,7 +134,7 @@ describe('behavior', () => {
       'controls',
       expect.arrayContaining(props.stateParams.controls)
     );
-    expect((setValue as jest.Mock).mock.calls[0][1].length).toEqual(3);
+    expect((setValue as Mock).mock.calls[0][1].length).toEqual(3);
   });
 
   test('remove control button', async () => {

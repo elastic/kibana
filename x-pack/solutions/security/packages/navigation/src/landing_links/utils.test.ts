@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { getKibanaLinkProps } from './utils';
 import type { NavigationLink } from '../types';
 
@@ -14,11 +16,11 @@ const item: NavigationLink = {
 };
 
 const urlState = 'example-url-state';
-const onLinkClick = jest.fn();
+const onLinkClick = vi.fn();
 
 describe('getWrappedLinkProps', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the correct WrappedLinkProps when id is not external and skipUrlState is false', () => {

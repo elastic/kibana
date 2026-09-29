@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createLoggerService } from '../../lib/services/logger_service/logger_service.mock';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import Boom from '@hapi/boom';
@@ -70,12 +73,12 @@ const createResolveContext = (spaceId: string = SPACE_ID) => ({
 describe('createRuleAttachmentType', () => {
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
-  let getRule: jest.Mock;
+  let getRule: Mock;
   let definition: AttachmentTypeDefinition<typeof RULE_ATTACHMENT_TYPE, RuleAttachmentData>;
 
   beforeEach(() => {
     ({ loggerService, mockLogger } = createLoggerService());
-    getRule = jest.fn();
+    getRule = vi.fn();
     const rulesClient = { getRule } as unknown as RulesClient;
     definition = createRuleAttachmentType({
       logger: loggerService,

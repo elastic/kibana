@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { ProjectMonitorFormatter } from './project_monitor_formatter';
@@ -24,9 +26,12 @@ import { mockEncryptedSO } from '../utils/mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 
-jest.mock('@kbn/fleet-plugin/server/services/package_policy', () => ({
-  getPackagePolicySavedObjectType: jest.fn().mockResolvedValue('fleet-package-policies'),
-}));
+vi.mock('@kbn/fleet-plugin/server/services/package_policy', () => {
+      const mocked = {
+      getPackagePolicySavedObjectType: vi.fn().mockResolvedValue('fleet-package-policies'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const testMonitors = [
   {
@@ -94,7 +99,7 @@ const privateLocations = times(1).map((n) => {
 
 describe('ProjectMonitorFormatter', () => {
   const mockEsClient = {
-    search: jest.fn(),
+    search: vi.fn(),
   };
   const logger = loggerMock.create();
 
@@ -118,7 +123,7 @@ describe('ProjectMonitorFormatter', () => {
     },
     spaces: {
       spacesService: {
-        getSpaceId: jest.fn().mockReturnValue('test-space'),
+        getSpaceId: vi.fn().mockReturnValue('test-space'),
       },
     },
     encryptedSavedObjects: mockEncryptedSO(),
@@ -130,10 +135,10 @@ describe('ProjectMonitorFormatter', () => {
 
   const syntheticsService = new SyntheticsService(serverMock);
 
-  syntheticsService.addConfigs = jest.fn();
-  syntheticsService.editConfig = jest.fn();
-  syntheticsService.deleteConfigs = jest.fn();
-  syntheticsService.getMaintenanceWindows = jest.fn();
+  syntheticsService.addConfigs = vi.fn();
+  syntheticsService.editConfig = vi.fn();
+  syntheticsService.deleteConfigs = vi.fn();
+  syntheticsService.getMaintenanceWindows = vi.fn();
 
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createStart().getClient();
 
@@ -161,7 +166,7 @@ describe('ProjectMonitorFormatter', () => {
     monitorConfigRepository: new MonitorConfigRepository(soClient, encryptedSavedObjectsClient),
   } as any;
 
-  jest.spyOn(locationsUtil, 'getAllLocations').mockImplementation(
+  vi.spyOn(locationsUtil, 'getAllLocations').mockImplementation(
     async () =>
       ({
         publicLocations,
@@ -179,7 +184,7 @@ describe('ProjectMonitorFormatter', () => {
       monitors: [testMonitors[0]],
     });
 
-    pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+    pushMonitorFormatter.getProjectMonitorsForProject = vi.fn().mockResolvedValue([]);
 
     await pushMonitorFormatter.configureAllProjectMonitors();
 
@@ -212,7 +217,7 @@ describe('ProjectMonitorFormatter', () => {
       monitors: [invalidMonitor],
     });
 
-    pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+    pushMonitorFormatter.getProjectMonitorsForProject = vi.fn().mockResolvedValue([]);
 
     await pushMonitorFormatter.configureAllProjectMonitors();
 
@@ -249,7 +254,7 @@ describe('ProjectMonitorFormatter', () => {
       monitors: [invalidLocationMonitor],
     });
 
-    pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+    pushMonitorFormatter.getProjectMonitorsForProject = vi.fn().mockResolvedValue([]);
 
     await pushMonitorFormatter.configureAllProjectMonitors();
 
@@ -288,7 +293,7 @@ describe('ProjectMonitorFormatter', () => {
       routeContext,
     });
 
-    pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+    pushMonitorFormatter.getProjectMonitorsForProject = vi.fn().mockResolvedValue([]);
 
     await pushMonitorFormatter.configureAllProjectMonitors();
 
@@ -310,7 +315,7 @@ describe('ProjectMonitorFormatter', () => {
   });
 
   it('configures project monitors when there are errors', async () => {
-    soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: [] });
+    soClient.bulkCreate = vi.fn().mockResolvedValue({ saved_objects: [] });
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
@@ -319,7 +324,7 @@ describe('ProjectMonitorFormatter', () => {
       routeContext,
     });
 
-    pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+    pushMonitorFormatter.getProjectMonitorsForProject = vi.fn().mockResolvedValue([]);
 
     await pushMonitorFormatter.configureAllProjectMonitors();
 
@@ -341,7 +346,7 @@ describe('ProjectMonitorFormatter', () => {
   });
 
   it('shows errors thrown by fleet api', async () => {
-    soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: soResult });
+    soClient.bulkCreate = vi.fn().mockResolvedValue({ saved_objects: soResult });
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
@@ -350,7 +355,7 @@ describe('ProjectMonitorFormatter', () => {
       routeContext,
     });
 
-    pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+    pushMonitorFormatter.getProjectMonitorsForProject = vi.fn().mockResolvedValue([]);
 
     await pushMonitorFormatter.configureAllProjectMonitors();
 
@@ -372,13 +377,13 @@ describe('ProjectMonitorFormatter', () => {
   });
 
   it('creates project monitors when no errors', async () => {
-    soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: soResult });
+    soClient.bulkCreate = vi.fn().mockResolvedValue({ saved_objects: soResult });
 
-    monitorClient.addMonitors = jest.fn().mockReturnValue([]);
+    monitorClient.addMonitors = vi.fn().mockReturnValue([]);
 
-    const telemetrySpy = jest
+    const telemetrySpy = vi
       .spyOn(telemetryHooks, 'sendTelemetryEvents')
-      .mockImplementation(jest.fn());
+      .mockImplementation(vi.fn());
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
@@ -387,7 +392,7 @@ describe('ProjectMonitorFormatter', () => {
       routeContext,
     });
 
-    pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+    pushMonitorFormatter.getProjectMonitorsForProject = vi.fn().mockResolvedValue([]);
 
     await pushMonitorFormatter.configureAllProjectMonitors();
 
@@ -447,7 +452,7 @@ describe('ProjectMonitorFormatter', () => {
         monitors: [],
         routeContext: serverlessRouteContext,
       });
-      pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+      pushMonitorFormatter.getProjectMonitorsForProject = vi.fn().mockResolvedValue([]);
       await pushMonitorFormatter.init();
 
       const result = pushMonitorFormatter.validateProjectMonitor({
@@ -473,7 +478,7 @@ describe('ProjectMonitorFormatter', () => {
         monitors: [],
         routeContext: serverlessRouteContext,
       });
-      pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+      pushMonitorFormatter.getProjectMonitorsForProject = vi.fn().mockResolvedValue([]);
       await pushMonitorFormatter.init();
 
       const result = pushMonitorFormatter.validateProjectMonitor({

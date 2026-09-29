@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { EuiStepStatus } from '@elastic/eui';
 import { useCheckResourcesStep } from '.';
@@ -13,12 +16,12 @@ import { useGetMissingResources } from '../../../../../../common/hooks/use_get_m
 import { getDashboardMigrationStatsMock } from '../../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../../common/siem_migrations/constants';
 
-jest.mock('../../../../../../common/hooks/use_get_missing_resources');
-const mockUseGetMissingResources = useGetMissingResources as jest.Mock;
+vi.mock('../../../../../../common/hooks/use_get_missing_resources');
+const mockUseGetMissingResources = useGetMissingResources as Mock;
 
 describe('useCheckResourcesStep', () => {
-  const mockGetMissingResources = jest.fn();
-  const onMissingResourcesFetched = jest.fn();
+  const mockGetMissingResources = vi.fn();
+  const onMissingResourcesFetched = vi.fn();
 
   const defaultProps = {
     status: 'incomplete' as EuiStepStatus,
@@ -27,7 +30,7 @@ describe('useCheckResourcesStep', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns step props', () => {

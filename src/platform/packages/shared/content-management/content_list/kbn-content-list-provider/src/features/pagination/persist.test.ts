@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getPersistedPageSize, setPersistedPageSize } from './persist';
 
 describe('pagination persist', () => {
@@ -40,13 +42,13 @@ describe('pagination persist', () => {
     });
 
     it('returns fallback when localStorage throws', () => {
-      jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
         throw new Error('localStorage unavailable');
       });
 
       expect(getPersistedPageSize('my-list', 20)).toBe(20);
 
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
   });
 
@@ -63,13 +65,13 @@ describe('pagination persist', () => {
     });
 
     it('does not throw when localStorage is unavailable', () => {
-      jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
         throw new Error('localStorage unavailable');
       });
 
       expect(() => setPersistedPageSize('my-list', 50)).not.toThrow();
 
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
   });
 });

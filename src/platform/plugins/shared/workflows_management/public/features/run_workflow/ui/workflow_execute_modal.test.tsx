@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
@@ -17,13 +20,16 @@ import { WorkflowExecuteModal } from './workflow_execute_modal';
 
 type UseFetchAlertsIndexNamesQueryArgs = Parameters<typeof useFetchAlertsIndexNamesQuery>;
 
-const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
 >;
 
-jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsCapabilities: jest.fn(),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useWorkflowsCapabilities: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultWorkflowsCapabilities = {
   canCreateWorkflow: true,
@@ -37,15 +43,15 @@ const defaultWorkflowsCapabilities = {
   canCancelWorkflowExecution: true,
 };
 
-const mockUseFetchAlertsIndexNamesQuery = jest.fn(
+const mockUseFetchAlertsIndexNamesQuery = vi.fn(
   (..._args: UseFetchAlertsIndexNamesQueryArgs) => ({
     data: ['.alerts-security.alerts-default'],
     isError: false,
   })
 );
 
-jest.mock('@kbn/alerts-ui-shared', () => {
-  const actual = jest.requireActual('@kbn/alerts-ui-shared');
+vi.mock('@kbn/alerts-ui-shared', async () => {
+  const actual = (await vi.importActual('@kbn/alerts-ui-shared'));
   return {
     ...actual,
     useFetchAlertsIndexNamesQuery: (
@@ -63,63 +69,90 @@ const baseWorkflowDefinition = {
 } as WorkflowYaml;
 
 // Mock the form components
-const mockWorkflowExecuteAlertForm = jest.fn((_props?: Record<string, unknown>) => null);
-jest.mock('./workflow_execute_alert_form', () => ({
-  WorkflowExecuteAlertForm: (props: Record<string, unknown>) => mockWorkflowExecuteAlertForm(props),
-}));
-const mockWorkflowExecuteIndexForm = jest.fn((_props?: Record<string, unknown>) => null);
-jest.mock('./workflow_execute_index_form', () => ({
-  WorkflowExecuteIndexForm: (props: Record<string, unknown>) => mockWorkflowExecuteIndexForm(props),
-}));
-const mockWorkflowExecuteManualForm = jest.fn(() => null);
-jest.mock('./workflow_execute_manual_form', () => ({
-  WorkflowExecuteManualForm: () => mockWorkflowExecuteManualForm(),
-}));
-const mockWorkflowExecuteHistoricalForm = jest.fn(() => null);
-jest.mock('./workflow_execute_historical_form', () => ({
-  WorkflowExecuteHistoricalForm: () => mockWorkflowExecuteHistoricalForm(),
-}));
-const mockWorkflowExecuteEventForm = jest.fn((_props?: Record<string, unknown>) => null);
-jest.mock('./workflow_execute_event_form', () => ({
-  WorkflowExecuteEventForm: (props: Record<string, unknown>) => mockWorkflowExecuteEventForm(props),
-}));
+const mockWorkflowExecuteAlertForm = vi.fn((_props?: Record<string, unknown>) => null);
+vi.mock('./workflow_execute_alert_form', () => {
+      const mocked = {
+      WorkflowExecuteAlertForm: (props: Record<string, unknown>) => mockWorkflowExecuteAlertForm(props),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockWorkflowExecuteIndexForm = vi.fn((_props?: Record<string, unknown>) => null);
+vi.mock('./workflow_execute_index_form', () => {
+      const mocked = {
+      WorkflowExecuteIndexForm: (props: Record<string, unknown>) => mockWorkflowExecuteIndexForm(props),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockWorkflowExecuteManualForm = vi.fn(() => null);
+vi.mock('./workflow_execute_manual_form', () => {
+      const mocked = {
+      WorkflowExecuteManualForm: () => mockWorkflowExecuteManualForm(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockWorkflowExecuteHistoricalForm = vi.fn(() => null);
+vi.mock('./workflow_execute_historical_form', () => {
+      const mocked = {
+      WorkflowExecuteHistoricalForm: () => mockWorkflowExecuteHistoricalForm(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockWorkflowExecuteEventForm = vi.fn((_props?: Record<string, unknown>) => null);
+vi.mock('./workflow_execute_event_form', () => {
+      const mocked = {
+      WorkflowExecuteEventForm: (props: Record<string, unknown>) => mockWorkflowExecuteEventForm(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../workflow_list/ui/use_event_driven_execution_status', () => ({
-  useEventDrivenExecutionStatus: () => ({
-    eventDrivenExecutionEnabled: true,
-    isLoading: false,
-    error: false,
-  }),
-}));
+vi.mock('../../workflow_list/ui/use_event_driven_execution_status', () => {
+      const mocked = {
+      useEventDrivenExecutionStatus: () => ({
+        eventDrivenExecutionEnabled: true,
+        isLoading: false,
+        error: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../entities/workflows/model/use_workflow_execution', () => ({
-  useWorkflowExecution: () => ({ data: null, isLoading: false }),
-}));
+vi.mock('../../../entities/workflows/model/use_workflow_execution', () => {
+      const mocked = {
+      useWorkflowExecution: () => ({ data: null, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = jest.fn();
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => mockUseKibana(),
-}));
+const mockUseKibana = vi.fn();
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the translations
-jest.mock('../../../../common/translations', () => ({
-  MANUAL_TRIGGERS_DESCRIPTIONS: {
-    manual: 'Manual trigger description',
-    index: 'Index trigger description',
-    alert: 'Alert trigger description',
-  },
-}));
+vi.mock('../../../../common/translations', () => {
+      const mocked = {
+      MANUAL_TRIGGERS_DESCRIPTIONS: {
+        manual: 'Manual trigger description',
+        index: 'Index trigger description',
+        alert: 'Alert trigger description',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (component: React.ReactElement) => {
   return render(component, { wrapper: I18nProvider });
 };
 
 describe('WorkflowExecuteModal', () => {
-  let mockOnClose: jest.Mock;
-  let mockOnSubmit: jest.Mock;
+  let mockOnClose: Mock;
+  let mockOnSubmit: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseWorkflowsCapabilities.mockReturnValue(defaultWorkflowsCapabilities);
     mockUseFetchAlertsIndexNamesQuery.mockImplementation(
       (..._args: UseFetchAlertsIndexNamesQueryArgs) => ({
@@ -133,8 +166,8 @@ describe('WorkflowExecuteModal', () => {
         http: {},
       },
     });
-    mockOnClose = jest.fn();
-    mockOnSubmit = jest.fn();
+    mockOnClose = vi.fn();
+    mockOnSubmit = vi.fn();
     mockWorkflowExecuteAlertForm.mockClear();
     mockWorkflowExecuteIndexForm.mockClear();
     mockWorkflowExecuteManualForm.mockClear();
@@ -566,8 +599,8 @@ describe('WorkflowExecuteModal', () => {
         <WorkflowExecuteModal
           isTestRun={false}
           definition={definition}
-          onClose={jest.fn()}
-          onSubmit={jest.fn()}
+          onClose={vi.fn()}
+          onSubmit={vi.fn()}
         />
       );
 

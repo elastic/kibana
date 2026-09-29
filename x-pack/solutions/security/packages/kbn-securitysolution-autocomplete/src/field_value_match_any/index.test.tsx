@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
@@ -17,25 +20,28 @@ import { getField, fields } from '../fields/index.mock';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
 import { autocompleteStartMock } from '../autocomplete/index.mock';
 
-jest.mock('../hooks/use_field_value_autocomplete', () => {
-  const actual = jest.requireActual('../hooks/use_field_value_autocomplete');
+vi.mock('../hooks/use_field_value_autocomplete', async () => {
+  const actual = (await vi.importActual('../hooks/use_field_value_autocomplete'));
   return {
     ...actual,
-    useFieldValueAutocomplete: jest.fn(),
+    useFieldValueAutocomplete: vi.fn(),
   };
 });
-jest.mock('../translations', () => ({
-  FIELD_SPACE_WARNING: 'Warning: there is a space',
-}));
+vi.mock('../translations', () => {
+      const mocked = {
+      FIELD_SPACE_WARNING: 'Warning: there is a space',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AutocompleteFieldMatchAnyComponent', () => {
   let wrapper: ReactWrapper;
-  const getValueSuggestionsMock = jest
+  const getValueSuggestionsMock = vi
     .fn()
-    .mockResolvedValue([false, true, ['value 3', 'value 4'], jest.fn()]);
+    .mockResolvedValue([false, true, ['value 3', 'value 4'], vi.fn()]);
 
   beforeEach(() => {
-    (useFieldValueAutocomplete as jest.Mock).mockReturnValue([
+    (useFieldValueAutocomplete as Mock).mockReturnValue([
       false,
       true,
       ['value 1', 'value 2'],
@@ -44,7 +50,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     wrapper.unmount();
   });
 
@@ -63,8 +69,8 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         isClearable={false}
         isDisabled={true}
         isLoading={false}
-        onChange={jest.fn()}
-        onError={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
         selectedField={getField('ip')}
@@ -92,8 +98,8 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={true}
-        onChange={jest.fn()}
-        onError={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
         selectedField={getField('ip')}
@@ -123,8 +129,8 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         isClearable={true}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
-        onError={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
         selectedField={getField('ip')}
@@ -150,8 +156,8 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
-        onError={jest.fn()}
+        onChange={vi.fn()}
+        onError={vi.fn()}
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
         selectedField={getField('ip')}
@@ -165,7 +171,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
   });
 
   test('it invokes "onChange" when new value created', async () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     wrapper = mount(
       <AutocompleteFieldMatchAnyComponent
         autocompleteService={{
@@ -181,7 +187,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         isDisabled={false}
         isLoading={false}
         onChange={mockOnChange}
-        onError={jest.fn()}
+        onError={vi.fn()}
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
         selectedField={getField('ip')}
@@ -199,7 +205,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
   });
 
   test('it invokes "onChange" when new value selected', async () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     wrapper = mount(
       <AutocompleteFieldMatchAnyComponent
         autocompleteService={{
@@ -215,7 +221,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         isClearable={false}
         isDisabled={false}
         onChange={mockOnChange}
-        onError={jest.fn()}
+        onError={vi.fn()}
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
         selectedField={getField('machine.os.raw')}
@@ -246,7 +252,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
         selectedField={getField('machine.os.raw')}
@@ -274,13 +280,13 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
     });
   });
   test('should show the warning helper text if the new value contains spaces when change', async () => {
-    (useFieldValueAutocomplete as jest.Mock).mockReturnValue([
+    (useFieldValueAutocomplete as Mock).mockReturnValue([
       false,
       true,
       [' value 1 ', 'value 2'],
       getValueSuggestionsMock,
     ]);
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     wrapper = mount(
       <AutocompleteFieldMatchAnyComponent
         autocompleteService={{
@@ -328,7 +334,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
         selectedField={getField('machine.os.raw')}
@@ -362,7 +368,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
         selectedField={getField('machine.os.raw')}
@@ -387,7 +393,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
         isClearable={false}
         isDisabled={false}
         isLoading={false}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
         selectedField={getField('machine.os.raw')}

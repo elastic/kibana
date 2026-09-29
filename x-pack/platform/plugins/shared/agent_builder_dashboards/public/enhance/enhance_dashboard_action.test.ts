@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { EmbeddableChatAccess } from '@kbn/agent-builder-browser';
@@ -71,8 +73,8 @@ const createDraftAttachmentId = (id = 'draft-attachment-id'): IdGenerator => ({
 });
 
 const createAction = ({
-  openChat = jest.fn(),
-  getAgentBuilderAccess = jest.fn(
+  openChat = vi.fn(),
+  getAgentBuilderAccess = vi.fn(
     async (): Promise<EmbeddableChatAccess> => ({
       hasRequiredLicense: true,
       hasLlmConnector: true,
@@ -175,7 +177,7 @@ describe('createEnhanceDashboardAction', () => {
 
   it('is incompatible without a required license', async () => {
     const { action } = createAction({
-      getAgentBuilderAccess: jest.fn(async () => ({
+      getAgentBuilderAccess: vi.fn(async () => ({
         hasRequiredLicense: false,
         hasLlmConnector: true,
       })),
@@ -190,7 +192,7 @@ describe('createEnhanceDashboardAction', () => {
 
   it('is incompatible without an LLM connector', async () => {
     const { action } = createAction({
-      getAgentBuilderAccess: jest.fn(async () => ({
+      getAgentBuilderAccess: vi.fn(async () => ({
         hasRequiredLicense: true,
         hasLlmConnector: false,
       })),
@@ -257,7 +259,7 @@ describe('createEnhanceDashboardAction', () => {
   it('getCompatibilityChangesSubject emits when layout$.panels length changes', () => {
     const { action } = createAction();
     const dashboardApi = createDashboardApi();
-    const next = jest.fn();
+    const next = vi.fn();
     const subscription = action.getCompatibilityChangesSubject!({ dashboardApi })?.subscribe(next);
 
     (dashboardApi.layout$ as BehaviorSubject<ReturnType<typeof createLayout>>).next(
@@ -271,7 +273,7 @@ describe('createEnhanceDashboardAction', () => {
   it('getCompatibilityChangesSubject does not emit when a panel is only repositioned', () => {
     const { action } = createAction();
     const dashboardApi = createDashboardApi();
-    const next = jest.fn();
+    const next = vi.fn();
     const subscription = action.getCompatibilityChangesSubject!({ dashboardApi })?.subscribe(next);
 
     (dashboardApi.layout$ as BehaviorSubject<ReturnType<typeof createLayout>>).next({

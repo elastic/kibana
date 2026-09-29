@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import Boom from '@hapi/boom';
 import getAnnotationsRequestMock from './__mocks__/get_annotations_request.json';
 import getAnnotationsResponseMock from './__mocks__/get_annotations_response.json';
@@ -30,15 +33,15 @@ describe('annotation_service', () => {
   let mlClusterClientSpy = {} as any;
   let mlClientSpy: Pick<MlClient, 'getJobs'>;
   let annotationService: ReturnType<typeof annotationServiceProvider>;
-  let internalGetJobs: jest.Mock;
+  let internalGetJobs: Mock;
 
   beforeEach(() => {
-    internalGetJobs = jest.fn().mockResolvedValue({ jobs: [{ job_id: jobIdMock }] });
+    internalGetJobs = vi.fn().mockResolvedValue({ jobs: [{ job_id: jobIdMock }] });
 
     const callAs = {
-      delete: jest.fn(() => Promise.resolve(acknowledgedResponseMock)),
-      index: jest.fn(() => Promise.resolve(acknowledgedResponseMock)),
-      search: jest.fn(() => Promise.resolve(getAnnotationsResponseMock)),
+      delete: vi.fn(() => Promise.resolve(acknowledgedResponseMock)),
+      index: vi.fn(() => Promise.resolve(acknowledgedResponseMock)),
+      search: vi.fn(() => Promise.resolve(getAnnotationsResponseMock)),
       ml: {
         getJobs: internalGetJobs,
       },
@@ -50,7 +53,7 @@ describe('annotation_service', () => {
     };
 
     mlClientSpy = {
-      getJobs: jest.fn().mockResolvedValue({ jobs: [{ job_id: jobIdMock }] }),
+      getJobs: vi.fn().mockResolvedValue({ jobs: [{ job_id: jobIdMock }] }),
     };
 
     annotationService = annotationServiceProvider(
@@ -110,7 +113,7 @@ describe('annotation_service', () => {
 
       const mlClusterClientSpyError: any = {
         asInternalUser: {
-          search: jest.fn(() => Promise.resolve(mockEsError)),
+          search: vi.fn(() => Promise.resolve(mockEsError)),
           ml: {
             getJobs: internalGetJobs,
           },
@@ -238,7 +241,7 @@ describe('annotation_service', () => {
 
     it('should deny access when the job exists but is inaccessible to the user', async () => {
       const accessError = Object.assign(new Error('job not found in space'), { statusCode: 404 });
-      (mlClientSpy.getJobs as jest.Mock).mockRejectedValue(accessError);
+      (mlClientSpy.getJobs as Mock).mockRejectedValue(accessError);
       internalGetJobs.mockResolvedValue({ jobs: [{ job_id: jobIdMock }] });
 
       await expect(annotationService.getAnnotations(indexAnnotationArgs([jobIdMock]))).rejects.toBe(
@@ -249,7 +252,7 @@ describe('annotation_service', () => {
 
     it('should allow access when the job is missing for both the user and internal client', async () => {
       const notFoundError = Object.assign(new Error('job not found'), { statusCode: 404 });
-      (mlClientSpy.getJobs as jest.Mock).mockRejectedValue(notFoundError);
+      (mlClientSpy.getJobs as Mock).mockRejectedValue(notFoundError);
       internalGetJobs.mockRejectedValue(notFoundError);
 
       const response = await annotationService.getAnnotations(indexAnnotationArgs([jobIdMock]));
@@ -263,7 +266,7 @@ describe('annotation_service', () => {
       const serviceUnavailable = Object.assign(new Error('service unavailable'), {
         statusCode: 503,
       });
-      (mlClientSpy.getJobs as jest.Mock).mockRejectedValue(accessError);
+      (mlClientSpy.getJobs as Mock).mockRejectedValue(accessError);
       internalGetJobs.mockRejectedValue(serviceUnavailable);
 
       await expect(annotationService.getAnnotations(indexAnnotationArgs([jobIdMock]))).rejects.toBe(
@@ -297,7 +300,7 @@ describe('annotation_service', () => {
       const accessError = Object.assign(new Error('job not found in space'), { statusCode: 404 });
       const notFoundError = Object.assign(new Error('job not found'), { statusCode: 404 });
 
-      (mlClientSpy.getJobs as jest.Mock).mockImplementation(({ job_id: jobId }) => {
+      (mlClientSpy.getJobs as Mock).mockImplementation(({ job_id: jobId }) => {
         if (jobId === victimJobId || jobId === missingJobId) {
           return Promise.reject(accessError);
         }

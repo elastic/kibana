@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import path from 'path';
 import fs from 'fs';
 import { createHash } from 'crypto';
@@ -21,8 +23,8 @@ function loadSnapshot(filename: string): MigrationSnapshot {
 }
 
 describe('validateChangesExistingType', () => {
-  const log = jest.fn();
-  beforeEach(() => jest.clearAllMocks());
+  const log = vi.fn();
+  beforeEach(() => vi.clearAllMocks());
 
   const validateChangesWrapper = ({
     from,

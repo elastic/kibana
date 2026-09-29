@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useExportList } from '@kbn/securitysolution-list-hooks';
 import * as Api from '@kbn/securitysolution-list-api';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
-jest.mock('@kbn/securitysolution-list-api');
+vi.mock('@kbn/securitysolution-list-api');
 
 // TODO: Move this test to the kbn package: x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_export_list/index.ts once Mocks are ported from Kibana
 
@@ -19,7 +22,7 @@ describe('useExportList', () => {
 
   beforeEach(() => {
     httpMock = httpServiceMock.createStartContract();
-    (Api.exportList as jest.Mock).mockResolvedValue(new Blob());
+    (Api.exportList as Mock).mockResolvedValue(new Blob());
   });
 
   it('invokes Api.exportList', async () => {

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createGetServiceTopologyTool } from './tool';
 import { getToolHandler } from './handler';
 
-jest.mock('./handler');
+vi.mock('./handler');
 
-const mockGetToolHandler = getToolHandler as jest.MockedFunction<typeof getToolHandler>;
+const mockGetToolHandler = getToolHandler as MockedFunction<typeof getToolHandler>;
 
 const SERVICE_TO_SERVICE = {
   source: { 'service.name': 'checkout' },
@@ -31,8 +34,8 @@ const SERVICE_TO_EXTERNAL = {
 };
 
 function setup() {
-  const getData = jest.fn().mockResolvedValue({ payment: { alertsCount: 2 } });
-  const logger = { debug: jest.fn(), error: jest.fn() } as any;
+  const getData = vi.fn().mockResolvedValue({ payment: { alertsCount: 2 } });
+  const logger = { debug: vi.fn(), error: vi.fn() } as any;
 
   const tool = createGetServiceTopologyTool({
     core: {} as any,
@@ -150,7 +153,7 @@ describe('get_service_topology tool — schema', () => {
       core: {} as any,
       plugins: {} as any,
       dataRegistry: {} as any,
-      logger: { debug: jest.fn(), error: jest.fn() } as any,
+      logger: { debug: vi.fn(), error: vi.fn() } as any,
     }) as BuiltinToolDefinition;
 
     const parsed = tool.schema.parse({

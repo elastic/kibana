@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import type {
@@ -21,7 +24,7 @@ import { registerRoutes } from './register_routes';
 
 type WrappedHandler = RequestHandler<unknown, unknown, unknown, RequestHandlerContext>;
 
-const buildRouteHandler = (handler: jest.Mock) => {
+const buildRouteHandler = (handler: Mock) => {
   const repository = {
     'GET /internal/dataset_quality/__test': {
       endpoint: 'GET /internal/dataset_quality/__test' as const,
@@ -40,13 +43,13 @@ const buildRouteHandler = (handler: jest.Mock) => {
     repository: repository as unknown as Parameters<typeof registerRoutes>[0]['repository'],
     logger,
     plugins: {} as Parameters<typeof registerRoutes>[0]['plugins'],
-    getEsCapabilities: jest.fn(),
-    getIsSecurityEnabled: jest.fn(),
+    getEsCapabilities: vi.fn(),
+    getIsSecurityEnabled: vi.fn(),
   });
 
-  const createRouterMock = coreSetup.http.createRouter as jest.Mock;
+  const createRouterMock = coreSetup.http.createRouter as Mock;
   expect(createRouterMock).toHaveBeenCalledTimes(1);
-  const router = createRouterMock.mock.results[0].value as { get: jest.Mock };
+  const router = createRouterMock.mock.results[0].value as { get: Mock };
   expect(router.get).toHaveBeenCalledTimes(1);
   const [, wrappedHandler] = router.get.mock.calls[0] as [unknown, WrappedHandler];
 
@@ -56,7 +59,7 @@ const buildRouteHandler = (handler: jest.Mock) => {
 const invoke = async (wrappedHandler: WrappedHandler) => {
   const request = httpServerMock.createKibanaRequest() as unknown as KibanaRequest;
   const response =
-    httpServerMock.createResponseFactory() as unknown as jest.Mocked<KibanaResponseFactory>;
+    httpServerMock.createResponseFactory() as unknown as Mocked<KibanaResponseFactory>;
   const context = {} as unknown as RequestHandlerContext;
   await wrappedHandler(context, request, response);
   return response;
@@ -64,7 +67,7 @@ const invoke = async (wrappedHandler: WrappedHandler) => {
 
 describe('registerRoutes error handling', () => {
   it('returns the upstream status and logs at debug for an ES ResponseError 4xx', async () => {
-    const handler = jest.fn().mockRejectedValue(
+    const handler = vi.fn().mockRejectedValue(
       new errors.ResponseError({
         statusCode: 431,
         body: '<html><body><h1>431 Request Header Fields Too Large</h1></body></html>',
@@ -84,12 +87,12 @@ describe('registerRoutes error handling', () => {
     expect(logger.debug).toHaveBeenCalledTimes(1);
     expect(logger.error).not.toHaveBeenCalled();
     // The HTML body must not be propagated to the client.
-    const customErrorArg = (response.customError as jest.Mock).mock.calls[0][0];
+    const customErrorArg = (response.customError as Mock).mock.calls[0][0];
     expect(customErrorArg.body.message).not.toMatch(/<html>/);
   });
 
   it('uses the structured ES reason when the body is parsed JSON', async () => {
-    const handler = jest.fn().mockRejectedValue(
+    const handler = vi.fn().mockRejectedValue(
       new errors.ResponseError({
         statusCode: 400,
         body: {
@@ -120,7 +123,7 @@ describe('registerRoutes error handling', () => {
       warnings: [],
       meta: {} as never,
     });
-    const handler = jest.fn().mockRejectedValue(cause);
+    const handler = vi.fn().mockRejectedValue(cause);
 
     const { wrappedHandler, logger } = buildRouteHandler(handler);
     const response = await invoke(wrappedHandler);
@@ -132,12 +135,12 @@ describe('registerRoutes error handling', () => {
     expect(logger.error).toHaveBeenCalledTimes(1);
     expect(logger.debug).not.toHaveBeenCalled();
     // Error instance survives so BaseLogger emits ECS error.stack_trace / error.type.
-    const [firstArg] = (logger.error as jest.Mock).mock.calls[0];
+    const [firstArg] = (logger.error as Mock).mock.calls[0];
     expect(firstArg).toBe(cause);
   });
 
   it('logs HTTP 429 (rate limit) at warn so capacity signals stay visible', async () => {
-    const handler = jest.fn().mockRejectedValue(
+    const handler = vi.fn().mockRejectedValue(
       new errors.ResponseError({
         statusCode: 429,
         body: {
@@ -162,7 +165,7 @@ describe('registerRoutes error handling', () => {
   });
 
   it('falls back to caused_by.reason when the top-level reason is missing', async () => {
-    const handler = jest.fn().mockRejectedValue(
+    const handler = vi.fn().mockRejectedValue(
       new errors.ResponseError({
         statusCode: 400,
         body: {
@@ -192,7 +195,7 @@ describe('registerRoutes error handling', () => {
   });
 
   it('falls back to root_cause[0].reason when both top-level reason and caused_by are missing', async () => {
-    const handler = jest.fn().mockRejectedValue(
+    const handler = vi.fn().mockRejectedValue(
       new errors.ResponseError({
         statusCode: 400,
         body: {
@@ -219,7 +222,7 @@ describe('registerRoutes error handling', () => {
   });
 
   it('returns 499 with a generic message for RequestAbortedError', async () => {
-    const handler = jest.fn().mockRejectedValue(new errors.RequestAbortedError('aborted'));
+    const handler = vi.fn().mockRejectedValue(new errors.RequestAbortedError('aborted'));
 
     const { wrappedHandler, logger } = buildRouteHandler(handler);
     const response = await invoke(wrappedHandler);
@@ -233,7 +236,7 @@ describe('registerRoutes error handling', () => {
   });
 
   it('returns 500 and logs at error for a generic Error', async () => {
-    const handler = jest.fn().mockRejectedValue(new Error('boom'));
+    const handler = vi.fn().mockRejectedValue(new Error('boom'));
 
     const { wrappedHandler, logger } = buildRouteHandler(handler);
     const response = await invoke(wrappedHandler);
@@ -246,7 +249,7 @@ describe('registerRoutes error handling', () => {
   });
 
   it('uses Boom statusCode for Boom errors and logs by severity', async () => {
-    const handler = jest.fn().mockRejectedValue(Boom.badRequest('bad input'));
+    const handler = vi.fn().mockRejectedValue(Boom.badRequest('bad input'));
 
     const { wrappedHandler, logger } = buildRouteHandler(handler);
     const response = await invoke(wrappedHandler);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import fs from 'fs';
 import { configSchema, createConfig } from './config';
 
@@ -119,7 +121,7 @@ describe('createConfig()', () => {
   ];
 
   beforeEach(() => {
-    jest.spyOn(fs, 'readFileSync').mockImplementation((path, enc) => {
+    vi.spyOn(fs, 'readFileSync').mockImplementation((path, enc) => {
       if (typeof path === 'string' && MOCKED_PATHS.includes(path) && enc === 'utf8') {
         return `contents-of-${path}`;
       }

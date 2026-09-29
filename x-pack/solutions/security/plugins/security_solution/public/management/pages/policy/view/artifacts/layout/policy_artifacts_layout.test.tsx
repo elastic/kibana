@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
@@ -26,7 +29,7 @@ import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../.
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
-jest.mock('../../../../../../common/components/user_privileges');
+vi.mock('../../../../../../common/components/user_privileges');
 
 interface MockedAPIArgs {
   query: { filter: string };
@@ -40,7 +43,7 @@ const generator = new EndpointDocGenerator();
 let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
 let history: AppContextTestRender['history'];
 let setExperimentalFlag: AppContextTestRender['setExperimentalFlag'];
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+const useUserPrivilegesMock = useUserPrivileges as Mock;
 
 const getEventFiltersLabels = () => ({
   ...POLICY_ARTIFACT_EVENT_FILTERS_LABELS,

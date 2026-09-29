@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import 'jest-canvas-mock';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
@@ -32,12 +34,15 @@ const testImageDataResult = {
     maxSteps: 2,
   },
 };
-jest.mock('../monitor_test_result/use_retrieve_step_image', () => ({
-  useRetrieveStepImage: () => testImageDataResult,
-}));
+vi.mock('../monitor_test_result/use_retrieve_step_image', () => {
+      const mocked = {
+      useRetrieveStepImage: () => testImageDataResult,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('JourneyScreenshotDialog', () => {
-  const onCloseMock = jest.fn();
+  const onCloseMock = vi.fn();
 
   const testProps = {
     checkGroup: testCheckGroup,
@@ -49,7 +54,7 @@ describe('JourneyScreenshotDialog', () => {
   };
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders without errors', () => {

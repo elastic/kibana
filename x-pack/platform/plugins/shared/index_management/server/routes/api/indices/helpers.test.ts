@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import { executeAsyncByChunks } from './helpers';
@@ -22,14 +24,14 @@ const generateIndices = (count: number) => {
 const mockClient = {
   asCurrentUser: {
     indices: {
-      delete: jest.fn(),
+      delete: vi.fn(),
     },
   },
 } as unknown as IScopedClusterClient;
 
 describe('executeAsyncByChunks', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should make just one request for one index', async () => {

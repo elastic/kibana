@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ReactElement } from 'react';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -19,10 +21,9 @@ import { createPartialObjectMock } from '../utils/test';
 import AlertDetailFlyout from './alert_detail_flyout';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions');
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions');
 
-jest
-  .requireMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions')
+(await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'))
   .useGetRuleTypesPermissions.mockReturnValue({ authorizedToReadRuleType: () => true });
 
 const mockColumns = [
@@ -68,7 +69,7 @@ const tabsData = [
   { name: 'Table', subj: 'alertFlyoutTableTab' },
 ];
 
-const mockOnExpandedAlertIndexChange = jest.fn();
+const mockOnExpandedAlertIndexChange = vi.fn();
 
 const props = createPartialObjectMock<
   Omit<RenderContext<AdditionalContext>, 'expandedAlertIndex'> & { expandedAlertIndex: number }
@@ -101,7 +102,7 @@ const renderWithContext = (ui: ReactElement) =>
 
 describe('AlertDetailFlyout', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render high level details from the alert', async () => {

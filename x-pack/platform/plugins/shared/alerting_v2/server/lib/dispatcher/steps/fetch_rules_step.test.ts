@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { MockInstance } from 'vitest';
+
 import { FetchRulesStep } from './fetch_rules_step';
 import type { RulesSavedObjectService } from '../../services/rules_saved_object_service/rules_saved_object_service';
 import { createRulesSavedObjectService } from '../../services/rules_saved_object_service/rules_saved_object_service.mock';
@@ -19,7 +21,7 @@ const logger = createStepLogger();
 
 describe('FetchRulesStep', () => {
   let rulesSoService: RulesSavedObjectService;
-  let mockFindByIds: jest.SpyInstance;
+  let mockFindByIds: MockInstance;
 
   beforeEach(() => {
     ({ rulesSavedObjectService: rulesSoService, mockFindByIds } = createRulesSavedObjectService());

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IBasePath } from '@kbn/core/server';
 import {
   getTLSCertAlertId,
@@ -117,22 +119,22 @@ describe('setTLSRecoveredAlertsContext', () => {
 
   it('sets context correctly when monitor cert has been updated', async () => {
     const alertsClientMock = {
-      report: jest.fn(),
-      getAlertLimitValue: jest.fn().mockReturnValue(10),
-      setAlertLimitReached: jest.fn(),
-      getRecoveredAlerts: jest.fn().mockReturnValue([
+      report: vi.fn(),
+      getAlertLimitValue: vi.fn().mockReturnValue(10),
+      setAlertLimitReached: vi.fn(),
+      getRecoveredAlerts: vi.fn().mockReturnValue([
         {
           alert: {
             getId: () => alertUuid,
             getState: () => alertState,
-            setContext: jest.fn(),
+            setContext: vi.fn(),
             getUuid: () => alertUuid,
             getStart: () => new Date().toISOString(),
           },
         },
       ]),
-      setAlertData: jest.fn(),
-      isTrackedAlert: jest.fn(),
+      setAlertData: vi.fn(),
+      isTrackedAlert: vi.fn(),
     };
     await setTLSRecoveredAlertsContext({
       alertsClient: alertsClientMock,
@@ -182,22 +184,22 @@ describe('setTLSRecoveredAlertsContext', () => {
 
   it('sets context correctly when monitor cert expiry/age threshold has been updated', async () => {
     const alertsClientMock = {
-      report: jest.fn(),
-      getAlertLimitValue: jest.fn().mockReturnValue(10),
-      setAlertLimitReached: jest.fn(),
-      getRecoveredAlerts: jest.fn().mockReturnValue([
+      report: vi.fn(),
+      getAlertLimitValue: vi.fn().mockReturnValue(10),
+      setAlertLimitReached: vi.fn(),
+      getRecoveredAlerts: vi.fn().mockReturnValue([
         {
           alert: {
             getId: () => alertUuid,
             getState: () => alertState,
-            setContext: jest.fn(),
+            setContext: vi.fn(),
             getUuid: () => alertUuid,
             getStart: () => new Date().toISOString(),
           },
         },
       ]),
-      setAlertData: jest.fn(),
-      isTrackedAlert: jest.fn(),
+      setAlertData: vi.fn(),
+      isTrackedAlert: vi.fn(),
     };
     await setTLSRecoveredAlertsContext({
       alertsClient: alertsClientMock,
@@ -250,22 +252,22 @@ describe('setTLSRecoveredAlertsContext', () => {
     // against a summary ping and emits a generic message instead.
     const browserAlertState = { ...alertState, sha256: '', commonName: 'browser-cert-cn' };
     const alertsClientMock = {
-      report: jest.fn(),
-      getAlertLimitValue: jest.fn().mockReturnValue(10),
-      setAlertLimitReached: jest.fn(),
-      getRecoveredAlerts: jest.fn().mockReturnValue([
+      report: vi.fn(),
+      getAlertLimitValue: vi.fn().mockReturnValue(10),
+      setAlertLimitReached: vi.fn(),
+      getRecoveredAlerts: vi.fn().mockReturnValue([
         {
           alert: {
             getId: () => alertUuid,
             getState: () => browserAlertState,
-            setContext: jest.fn(),
+            setContext: vi.fn(),
             getUuid: () => alertUuid,
             getStart: () => new Date().toISOString(),
           },
         },
       ]),
-      setAlertData: jest.fn(),
-      isTrackedAlert: jest.fn(),
+      setAlertData: vi.fn(),
+      isTrackedAlert: vi.fn(),
     };
     await setTLSRecoveredAlertsContext({
       alertsClient: alertsClientMock,

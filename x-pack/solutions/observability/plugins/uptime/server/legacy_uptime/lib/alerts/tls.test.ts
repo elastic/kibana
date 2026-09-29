@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
 import moment from 'moment';
 import { tlsAlertFactory, getCertSummary } from './tls';
 import type { CertResult } from '../../../../common/runtime_types';
@@ -114,24 +117,24 @@ const mockOptions = (state = {}, recoveredAlerts: typeof mockRecoveredAlerts = [
 };
 
 describe('tls alert', () => {
-  let toISOStringSpy: jest.SpyInstance<string, []>;
-  let savedObjectsAdapterSpy: jest.SpyInstance<
+  let toISOStringSpy: MockInstance<string, []>;
+  let savedObjectsAdapterSpy: MockInstance<
     ReturnType<UMSavedObjectsAdapter['getUptimeDynamicSettings']>
   >;
   const mockDate = 'date';
   beforeAll(() => {
-    Date.now = jest.fn().mockReturnValue(new Date('2021-05-13T12:33:37.000Z'));
+    Date.now = vi.fn().mockReturnValue(new Date('2021-05-13T12:33:37.000Z'));
   });
 
   describe('alert executor', () => {
     beforeEach(() => {
-      toISOStringSpy = jest.spyOn(Date.prototype, 'toISOString');
-      savedObjectsAdapterSpy = jest.spyOn(savedObjectsAdapter, 'getUptimeDynamicSettings');
+      toISOStringSpy = vi.spyOn(Date.prototype, 'toISOString');
+      savedObjectsAdapterSpy = vi.spyOn(savedObjectsAdapter, 'getUptimeDynamicSettings');
     });
 
     it('triggers when aging or expiring alerts are found', async () => {
       toISOStringSpy.mockImplementation(() => mockDate);
-      const mockGetter: jest.Mock<CertResult> = jest.fn();
+      const mockGetter: Mock<CertResult> = vi.fn();
 
       mockGetter.mockReturnValue(mockCertResult);
       const { server, libs, plugins } = bootstrapDependencies({ getCerts: mockGetter });
@@ -186,7 +189,7 @@ describe('tls alert', () => {
 
     it('does not trigger when cert is not considered aging or expiring', async () => {
       toISOStringSpy.mockImplementation(() => mockDate);
-      const mockGetter: jest.Mock<CertResult> = jest.fn();
+      const mockGetter: Mock<CertResult> = vi.fn();
 
       mockGetter.mockReturnValue({
         certs: [
@@ -255,7 +258,7 @@ describe('tls alert', () => {
         defaultConnectors: [],
       };
       savedObjectsAdapterSpy.mockImplementation(() => certSettings);
-      const mockGetter: jest.Mock<CertResult> = jest.fn();
+      const mockGetter: Mock<CertResult> = vi.fn();
 
       mockGetter.mockReturnValue(mockCertResult);
       const { server, libs, plugins } = bootstrapDependencies({ getCerts: mockGetter });
@@ -273,7 +276,7 @@ describe('tls alert', () => {
 
     it('sets alert recovery context for recovered alerts', async () => {
       toISOStringSpy.mockImplementation(() => 'foo date string');
-      const mockGetter: jest.Mock<CertResult> = jest.fn();
+      const mockGetter: Mock<CertResult> = vi.fn();
 
       mockGetter.mockReturnValue(mockCertResult);
       const { server, libs, plugins } = bootstrapDependencies({ getCerts: mockGetter });
@@ -295,14 +298,14 @@ describe('tls alert', () => {
   });
 
   describe('getCertSummary', () => {
-    let diffSpy: jest.SpyInstance<any, unknown[]>;
+    let diffSpy: MockInstance<any, unknown[]>;
 
     beforeEach(() => {
-      diffSpy = jest.spyOn(moment.prototype, 'diff');
+      diffSpy = vi.spyOn(moment.prototype, 'diff');
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('handles positive diffs for expired certs appropriately', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FullTraceWaterfallProps } from '@kbn/apm-types';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { render, screen } from '@testing-library/react';
@@ -25,28 +27,31 @@ const renderWithHistoryKey = (ui: React.ReactElement) =>
 
 let capturedDocFlyoutHasAnimation: boolean | undefined;
 
-jest.mock('./waterfall_flyout/document_detail_flyout', () => ({
-  DocumentDetailFlyout: ({
-    type,
-    docId,
-    traceId,
-    activeSection,
-    dataTestSubj,
-    hasAnimation,
-  }: any) => {
-    capturedDocFlyoutHasAnimation = hasAnimation;
-    return (
-      <div
-        data-test-subj={type === 'span' ? 'spanFlyout' : 'logsFlyout'}
-        data-trace-id={traceId}
-        data-span-id={docId}
-        data-id={docId}
-        data-active-section={activeSection}
-        data-flyout-test-subj={dataTestSubj}
-      />
-    );
-  },
-}));
+vi.mock('./waterfall_flyout/document_detail_flyout', () => {
+      const mocked = {
+      DocumentDetailFlyout: ({
+        type,
+        docId,
+        traceId,
+        activeSection,
+        dataTestSubj,
+        hasAnimation,
+      }: any) => {
+        capturedDocFlyoutHasAnimation = hasAnimation;
+        return (
+          <div
+            data-test-subj={type === 'span' ? 'spanFlyout' : 'logsFlyout'}
+            data-trace-id={traceId}
+            data-span-id={docId}
+            data-id={docId}
+            data-active-section={activeSection}
+            data-flyout-test-subj={dataTestSubj}
+          />
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let capturedWaterfallProps: {
   contextSpanIds?: string[];
@@ -65,10 +70,10 @@ describe('FullScreenWaterfall', () => {
     docIndex: undefined,
     activeFlyoutType: null,
     activeSection: undefined,
-    onNodeClick: jest.fn(),
-    onErrorClick: jest.fn(),
-    onCloseFlyout: jest.fn(),
-    onExitFullScreen: jest.fn(),
+    onNodeClick: vi.fn(),
+    onErrorClick: vi.fn(),
+    onCloseFlyout: vi.fn(),
+    onExitFullScreen: vi.fn(),
   };
 
   beforeAll(() => {
@@ -88,14 +93,14 @@ describe('FullScreenWaterfall', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
     capturedWaterfallProps = {};
     capturedDocFlyoutHasAnimation = undefined;
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should not display nested flyouts initially', () => {

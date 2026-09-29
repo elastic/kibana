@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
@@ -39,7 +41,7 @@ const defaultProps: Props = {
       isXAxisTitleVisible: false,
     },
   },
-  setState: jest.fn(),
+  setState: vi.fn(),
   frame: createMockFramePublicAPI(),
 };
 
@@ -54,11 +56,11 @@ const clickButtonByName = (name: string | RegExp, container?: HTMLElement) => {
 
 describe('heatmap style settings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should disable the x-axis sort order for a time-based horizontal axis', async () => {
-    const setState = jest.fn();
+    const setState = vi.fn();
     const state: HeatmapVisualizationState = {
       ...defaultProps.state,
       gridConfig: {

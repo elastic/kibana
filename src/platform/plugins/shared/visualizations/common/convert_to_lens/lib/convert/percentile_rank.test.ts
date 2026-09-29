@@ -7,22 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { SchemaConfig } from '../../..';
 import { convertToPercentileRankColumn } from './percentile_rank';
 import type { PercentileRanksColumn } from './types';
 
-const mockGetFieldNameFromField = jest.fn();
-const mockGetFieldByName = jest.fn();
-const mockGetLabel = jest.fn();
-const mockGetLabelForPercentile = jest.fn();
+const mockGetFieldNameFromField = vi.fn();
+const mockGetFieldByName = vi.fn();
+const mockGetLabel = vi.fn();
+const mockGetLabelForPercentile = vi.fn();
 
-jest.mock('../utils', () => ({
-  getFieldNameFromField: jest.fn(() => mockGetFieldNameFromField()),
-  getLabel: jest.fn(() => mockGetLabel()),
-  getLabelForPercentile: jest.fn(() => mockGetLabelForPercentile()),
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      getFieldNameFromField: vi.fn(() => mockGetFieldNameFromField()),
+      getLabel: vi.fn(() => mockGetLabel()),
+      getLabelForPercentile: vi.fn(() => mockGetLabelForPercentile()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('convertToPercentileRankColumn', () => {
   const visType = 'heatmap';
@@ -58,7 +63,7 @@ describe('convertToPercentileRankColumn', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetFieldNameFromField.mockReturnValue(dataView.fields[0]);
     mockGetFieldByName.mockReturnValue(dataView.fields[0]);
     mockGetLabel.mockReturnValue('someLabel');

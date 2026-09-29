@@ -5,31 +5,39 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { LeadEntity, Observation, RelatedEntity, ScoredEntity } from '../types';
 
 let mockChainInvokeResult: unknown;
 
-jest.mock('@langchain/core/output_parsers', () => ({
-  JsonOutputParser: jest.fn().mockImplementation(() => ({
-    pipe: jest.fn(),
-  })),
-}));
+vi.mock('@langchain/core/output_parsers', () => {
+      const mocked = {
+      JsonOutputParser: vi.fn().mockImplementation(() => ({
+        pipe: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@langchain/core/prompts', () => ({
-  ChatPromptTemplate: {
-    fromTemplate: jest.fn().mockReturnValue({
-      pipe: jest.fn().mockReturnValue({
-        pipe: jest.fn().mockReturnValue({
-          invoke: jest.fn().mockImplementation(() => Promise.resolve(mockChainInvokeResult)),
+vi.mock('@langchain/core/prompts', () => {
+      const mocked = {
+      ChatPromptTemplate: {
+        fromTemplate: vi.fn().mockReturnValue({
+          pipe: vi.fn().mockReturnValue({
+            pipe: vi.fn().mockReturnValue({
+              invoke: vi.fn().mockImplementation(() => Promise.resolve(mockChainInvokeResult)),
+            }),
+          }),
         }),
-      }),
-    }),
-  },
-}));
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { llmSynthesizeBatch, __testables } = jest.requireActual('./llm_synthesize') as {
+const { llmSynthesizeBatch, __testables } = (await vi.importActual('./llm_synthesize')) as {
   llmSynthesizeBatch: typeof import('./llm_synthesize').llmSynthesizeBatch;
   __testables: typeof import('./llm_synthesize').__testables;
 };
@@ -80,7 +88,7 @@ describe('llmSynthesizeBatch', () => {
   const fakeChatModel = {} as unknown as InferenceChatModel;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockChainInvokeResult = undefined;
   });
 

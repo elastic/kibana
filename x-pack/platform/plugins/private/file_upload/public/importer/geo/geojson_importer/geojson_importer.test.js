@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { GeoJsonImporter } from './geojson_importer';
 
 const FEATURE_COLLECTION = {
@@ -54,8 +56,8 @@ describe('previewFile', () => {
   );
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
+    vi.resetAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('should stop reading when importer is destroyed', async () => {

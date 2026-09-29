@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
@@ -15,8 +18,8 @@ import {
 import { KibanaServices } from '../../../lib/kibana';
 import * as api from '.';
 
-jest.mock('../../../lib/kibana');
-const mockKibanaServices = KibanaServices.get as jest.Mock;
+vi.mock('../../../lib/kibana');
+const mockKibanaServices = KibanaServices.get as Mock;
 
 const signal = {} as AbortSignal;
 
@@ -30,7 +33,7 @@ describe('Unified Alerts API', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('searchUnifiedAlerts', () => {

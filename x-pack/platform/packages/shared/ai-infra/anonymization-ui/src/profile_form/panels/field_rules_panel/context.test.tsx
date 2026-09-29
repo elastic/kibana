@@ -5,33 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { FieldRulesPanelContextProvider, useFieldRulesPanelContext } from './context';
 
 const contextValue = {
   fieldSearchQuery: '',
-  setFieldSearchQuery: jest.fn(),
+  setFieldSearchQuery: vi.fn(),
   fieldActionFilter: 'all' as const,
-  setFieldActionFilter: jest.fn(),
+  setFieldActionFilter: vi.fn(),
   fieldPageIndex: 0,
-  setFieldPageIndex: jest.fn(),
+  setFieldPageIndex: vi.fn(),
   bulkAction: 'allow' as const,
-  setBulkAction: jest.fn(),
+  setBulkAction: vi.fn(),
   bulkEntityClass: '',
-  setBulkEntityClass: jest.fn(),
+  setBulkEntityClass: vi.fn(),
   pagedRules: [],
   filteredRules: [],
   allRules: [],
   selectedFields: [],
-  setSelectedFields: jest.fn(),
+  setSelectedFields: vi.fn(),
   allFieldsSelected: false,
   hasActiveFieldFilters: false,
   selectedCount: 0,
-  toggleSelectAllFields: jest.fn(),
-  onRuleActionChange: jest.fn(),
-  onRuleEntityClassChange: jest.fn(),
-  applyBulkAction: jest.fn(),
+  toggleSelectAllFields: vi.fn(),
+  onRuleActionChange: vi.fn(),
+  onRuleEntityClassChange: vi.fn(),
+  applyBulkAction: vi.fn(),
   policyCounters: { allow: 0, anonymize: 0, deny: 0 },
   isManageMode: true,
   isSubmitting: false,

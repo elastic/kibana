@@ -6,25 +6,28 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { IndexPatternsFetcher } from './fetcher';
 import { coreMock } from '@kbn/core/server/mocks';
 
-jest.mock('./fetcher');
+vi.mock('./fetcher');
 
 describe('IndexPatternsApiServer', () => {
   const coreRequestHandler = coreMock.createRequestHandlerContext();
-  let getFieldsForWildcard: jest.Mock;
+  let getFieldsForWildcard: Mock;
   let indexPatternsApiServer: IndexPatternsApiServer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    getFieldsForWildcard = jest.fn().mockResolvedValue({
+    vi.clearAllMocks();
+    getFieldsForWildcard = vi.fn().mockResolvedValue({
       fields: [{ name: 'field1', type: 'string' }],
       indices: ['index1'],
     });
 
-    (IndexPatternsFetcher as jest.Mock).mockImplementation(() => ({
+    (IndexPatternsFetcher as Mock).mockImplementation(() => ({
       getFieldsForWildcard,
     }));
 

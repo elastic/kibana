@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { INITIALIZATION_FLOW_INIT_PREBUILT_RULES } from '../../../../../common/api/initialization';
 import { useSecuritySolutionInitialization } from '../../../../common/components/initialization/use_security_solution_initialization';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { useInvalidatePrebuiltRulesStatusOnInit } from './use_invalidate_prebuilt_rules_status_on_init';
 
-jest.mock('../../../../common/components/initialization/use_security_solution_initialization');
-jest.mock('../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query');
+vi.mock('../../../../common/components/initialization/use_security_solution_initialization');
+vi.mock('../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query');
 
 const useSecuritySolutionInitializationMock =
-  useSecuritySolutionInitialization as jest.MockedFunction<
+  useSecuritySolutionInitialization as MockedFunction<
     typeof useSecuritySolutionInitialization
   >;
 
-const mockInvalidate = jest.fn();
+const mockInvalidate = vi.fn();
 
 const mockInitState = ({ loading }: { loading: boolean }) => {
   useSecuritySolutionInitializationMock.mockReturnValue({
@@ -31,8 +34,8 @@ const mockInitState = ({ loading }: { loading: boolean }) => {
 
 describe('useInvalidatePrebuiltRulesStatusOnInit', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useInvalidateFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(mockInvalidate);
+    vi.clearAllMocks();
+    (useInvalidateFetchPrebuiltRulesStatusQuery as Mock).mockReturnValue(mockInvalidate);
   });
 
   it('invalidates the status query when package installation completes', () => {

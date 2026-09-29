@@ -5,60 +5,86 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { AgentAccessControlRole, AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { useAgentEdit, type AgentEditState } from './use_agent_edit';
 
-const mockCreate = jest.fn();
-const mockUpdate = jest.fn();
-const mockUpdateAccessControl = jest.fn();
+const mockCreate = vi.fn();
+const mockUpdate = vi.fn();
+const mockUpdateAccessControl = vi.fn();
 type MockAgent = AgentEditState & {
   permissions?: { update_agent: boolean; update_access_control: boolean };
 };
 let mockAgent: MockAgent | undefined;
 
-jest.mock('@kbn/react-query', () => ({
-  // Run the mutationFn directly so the payload passed to the service is observable.
-  useMutation: (options: { mutationFn: (data: unknown) => Promise<unknown> }) => ({
-    mutateAsync: options.mutationFn,
-    isLoading: false,
-  }),
-  useQueryClient: () => ({ invalidateQueries: jest.fn() }),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      // Run the mutationFn directly so the payload passed to the service is observable.
+      useMutation: (options: { mutationFn: (data: unknown) => Promise<unknown> }) => ({
+        mutateAsync: options.mutationFn,
+        isLoading: false,
+      }),
+      useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/shared-ux-router', () => ({
-  useSearchParams: () => [new URLSearchParams(), jest.fn()],
-}));
+vi.mock('@kbn/shared-ux-router', () => {
+      const mocked = {
+      useSearchParams: () => [new URLSearchParams(), vi.fn()],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({
-    agentService: {
-      create: mockCreate,
-      update: mockUpdate,
-      updateAccessControl: mockUpdateAccessControl,
-    },
-  }),
-}));
+vi.mock('../use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: () => ({
+        agentService: {
+          create: mockCreate,
+          update: mockUpdate,
+          updateAccessControl: mockUpdateAccessControl,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_agent_by_id', () => ({
-  useAgentBuilderAgentById: () => ({ agent: mockAgent, isLoading: false, error: undefined }),
-}));
+vi.mock('./use_agent_by_id', () => {
+      const mocked = {
+      useAgentBuilderAgentById: () => ({ agent: mockAgent, isLoading: false, error: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../tools/use_tools', () => ({
-  useToolsService: () => ({ tools: [], isLoading: false, error: undefined }),
-}));
+vi.mock('../tools/use_tools', () => {
+      const mocked = {
+      useToolsService: () => ({ tools: [], isLoading: false, error: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../skills/use_skills', () => ({
-  useSkillsService: () => ({ skills: [], isLoading: false, error: undefined }),
-}));
+vi.mock('../skills/use_skills', () => {
+      const mocked = {
+      useSkillsService: () => ({ skills: [], isLoading: false, error: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../plugins/use_plugins', () => ({
-  usePluginsService: () => ({ plugins: [], isLoading: false, error: undefined }),
-}));
+vi.mock('../plugins/use_plugins', () => {
+      const mocked = {
+      usePluginsService: () => ({ plugins: [], isLoading: false, error: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../use_experimental_features', () => ({
-  useExperimentalFeatures: () => false,
-}));
+vi.mock('../use_experimental_features', () => {
+      const mocked = {
+      useExperimentalFeatures: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseConfiguration: AgentEditState['configuration'] = {
   instructions: '',
@@ -70,7 +96,7 @@ const baseConfiguration: AgentEditState['configuration'] = {
 
 describe('useAgentEdit submit (create/clone branch)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockAgent = undefined;
     mockCreate.mockResolvedValue({ id: 'cloned-agent' });
     mockUpdate.mockResolvedValue({ id: 'existing-agent' });
@@ -82,7 +108,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
 
   it('defaults a brand-new agent to private', () => {
     const { result } = renderHook(() =>
-      useAgentEdit({ onSaveSuccess: jest.fn(), onSaveError: jest.fn() })
+      useAgentEdit({ onSaveSuccess: vi.fn(), onSaveError: vi.fn() })
     );
 
     expect(result.current.state.access_control).toEqual({
@@ -93,7 +119,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
 
   it('defaults a brand-new agent to no connectors', () => {
     const { result } = renderHook(() =>
-      useAgentEdit({ onSaveSuccess: jest.fn(), onSaveError: jest.fn() })
+      useAgentEdit({ onSaveSuccess: vi.fn(), onSaveError: vi.fn() })
     );
 
     expect(result.current.state.configuration.connector_ids).toEqual([]);
@@ -117,7 +143,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     };
 
     const { result } = renderHook(() =>
-      useAgentEdit({ onSaveSuccess: jest.fn(), onSaveError: jest.fn() })
+      useAgentEdit({ onSaveSuccess: vi.fn(), onSaveError: vi.fn() })
     );
 
     await act(async () => {
@@ -153,7 +179,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     };
 
     const { result } = renderHook(() =>
-      useAgentEdit({ onSaveSuccess: jest.fn(), onSaveError: jest.fn() })
+      useAgentEdit({ onSaveSuccess: vi.fn(), onSaveError: vi.fn() })
     );
 
     await act(async () => {
@@ -187,8 +213,8 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     const { result } = renderHook(() =>
       useAgentEdit({
         editingAgentId: 'existing-agent',
-        onSaveSuccess: jest.fn(),
-        onSaveError: jest.fn(),
+        onSaveSuccess: vi.fn(),
+        onSaveError: vi.fn(),
       })
     );
 
@@ -234,8 +260,8 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     const { result } = renderHook(() =>
       useAgentEdit({
         editingAgentId: 'existing-agent',
-        onSaveSuccess: jest.fn(),
-        onSaveError: jest.fn(),
+        onSaveSuccess: vi.fn(),
+        onSaveError: vi.fn(),
       })
     );
 
@@ -297,8 +323,8 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     const { result } = renderHook(() =>
       useAgentEdit({
         editingAgentId: 'existing-agent',
-        onSaveSuccess: jest.fn(),
-        onSaveError: jest.fn(),
+        onSaveSuccess: vi.fn(),
+        onSaveError: vi.fn(),
       })
     );
 
@@ -328,8 +354,8 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     const { result } = renderHook(() =>
       useAgentEdit({
         editingAgentId: 'existing-agent',
-        onSaveSuccess: jest.fn(),
-        onSaveError: jest.fn(),
+        onSaveSuccess: vi.fn(),
+        onSaveError: vi.fn(),
       })
     );
 

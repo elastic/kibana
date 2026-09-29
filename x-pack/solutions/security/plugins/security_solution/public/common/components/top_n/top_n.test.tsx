@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
@@ -16,28 +18,28 @@ import { TopN } from './top_n';
 import { InputsModelId } from '../../store/inputs/constants';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
-jest.mock('../visualization_actions/visualization_embeddable');
+vi.mock('../visualization_actions/visualization_embeddable');
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
 
   return {
     ...original,
-    useLocation: jest.fn().mockReturnValue({ pathname: '' }),
+    useLocation: vi.fn().mockReturnValue({ pathname: '' }),
     useHistory: () => ({
-      useHistory: jest.fn(),
+      useHistory: vi.fn(),
     }),
   };
 });
 
-jest.mock('../../lib/kibana');
-jest.mock('../link_to');
-jest.mock('../visualization_actions/actions');
+vi.mock('../../lib/kibana');
+vi.mock('../link_to');
+vi.mock('../visualization_actions/actions');
 
-jest.mock('uuid', () => {
+vi.mock('uuid', () => {
   return {
-    v1: jest.fn(() => 'uuidv1()'),
-    v4: jest.fn(() => 'uuidv4()'),
+    v1: vi.fn(() => 'uuidv1()'),
+    v4: vi.fn(() => 'uuidv4()'),
   };
 });
 
@@ -95,7 +97,7 @@ const filterQuery = {
 describe('TopN', () => {
   const query = { query: '', language: 'kuery' };
 
-  const toggleTopN = jest.fn();
+  const toggleTopN = vi.fn();
   const eventTypes: { [id: string]: TopNProps['defaultView'] } = {
     raw: 'raw',
     alert: 'alert',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 import { connectorIndex } from '../../../../__mocks__/view_index.mock';
 
@@ -30,9 +32,9 @@ const DEFAULT_VALUES = {
 
 describe('CopyAndCustomizePipelinePanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues({ ...DEFAULT_VALUES });
-    setMockActions({ makeRequest: jest.fn() });
+    setMockActions({ makeRequest: vi.fn() });
   });
 
   it('renders callout with default pipeline', () => {

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import Chance from 'chance';
 import { render, screen } from '@testing-library/react';
@@ -18,38 +21,38 @@ import { useCloudDefendSetupStatusApi } from '../../common/api/use_setup_status_
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_links';
 
-jest.mock('./use_cloud_defend_policies');
-jest.mock('../../common/api/use_setup_status_api');
-jest.mock('../../common/hooks/use_subscription_status');
-jest.mock('../../common/navigation/use_cloud_defend_integration_links');
+vi.mock('./use_cloud_defend_policies');
+vi.mock('../../common/api/use_setup_status_api');
+vi.mock('../../common/hooks/use_subscription_status');
+vi.mock('../../common/navigation/use_cloud_defend_integration_links');
 
 const chance = new Chance();
 
 describe('<Policies />', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    (useCloudDefendSetupStatusApi as jest.Mock).mockImplementation(() =>
+    vi.resetAllMocks();
+    (useCloudDefendSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: { status: 'indexed' },
       })
     );
 
-    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+    (useSubscriptionStatus as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: true,
       })
     );
 
-    (useCloudDefendIntegrationLinks as jest.Mock).mockImplementation(() => ({
+    (useCloudDefendIntegrationLinks as Mock).mockImplementation(() => ({
       addIntegrationLink: chance.url(),
       docsLink: chance.url(),
     }));
   });
 
   const renderPolicies = (queryResponse: Partial<UseQueryResult> = createReactQueryResponse()) => {
-    (useCloudDefendPolicies as jest.Mock).mockImplementation(() => queryResponse);
+    (useCloudDefendPolicies as Mock).mockImplementation(() => queryResponse);
 
     return render(
       <TestProvider>

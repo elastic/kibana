@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { TraceWaterfallFlyoutFooter } from './flyout_footer';
 
-const mockGetRedirectUrl = jest.fn();
+const mockGetRedirectUrl = vi.fn();
 const mockShare = {
   url: {
     locators: {
@@ -20,13 +23,19 @@ const mockShare = {
 };
 const mockHttp = {} as any;
 
-jest.mock('../../../../shared/service_flyout/hooks/use_apm_indices', () => ({
-  useApmIndices: () => ({ indices: { transaction: 'traces-*' }, loading: false }),
-}));
+vi.mock('../../../../shared/service_flyout/hooks/use_apm_indices', () => {
+      const mocked = {
+      useApmIndices: () => ({ indices: { transaction: 'traces-*' }, loading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../shared/service_flyout/utils/get_flyout_discover_navigation', () => ({
-  getFlyoutDiscoverNavigation: jest.fn(),
-}));
+vi.mock('../../../../shared/service_flyout/utils/get_flyout_discover_navigation', () => {
+      const mocked = {
+      getFlyoutDiscoverNavigation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { getFlyoutDiscoverNavigation } from '../../../../shared/service_flyout/utils/get_flyout_discover_navigation';
 
@@ -40,7 +49,7 @@ const defaultProps = {
 
 describe('TraceWaterfallFlyoutFooter', () => {
   beforeEach(() => {
-    (getFlyoutDiscoverNavigation as jest.Mock).mockReturnValue({
+    (getFlyoutDiscoverNavigation as Mock).mockReturnValue({
       href: 'https://discover-url',
       esqlQuery: 'FROM traces',
     });
@@ -48,7 +57,7 @@ describe('TraceWaterfallFlyoutFooter', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the Open button', () => {
@@ -88,7 +97,7 @@ describe('TraceWaterfallFlyoutFooter', () => {
   });
 
   it('does not render "In Discover" when discoverHref is undefined', async () => {
-    (getFlyoutDiscoverNavigation as jest.Mock).mockReturnValue({
+    (getFlyoutDiscoverNavigation as Mock).mockReturnValue({
       href: undefined,
       esqlQuery: null,
     });
@@ -111,7 +120,7 @@ describe('TraceWaterfallFlyoutFooter', () => {
   });
 
   it('does not render the footer when both hrefs are undefined', () => {
-    (getFlyoutDiscoverNavigation as jest.Mock).mockReturnValue({
+    (getFlyoutDiscoverNavigation as Mock).mockReturnValue({
       href: undefined,
       esqlQuery: null,
     });

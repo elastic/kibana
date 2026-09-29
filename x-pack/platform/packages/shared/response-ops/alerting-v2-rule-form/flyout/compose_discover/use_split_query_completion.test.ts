@@ -5,48 +5,59 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { suggest } from '@kbn/esql-language';
 import { getEsqlColumns } from '@kbn/esql-utils';
 import { ESQL_LANG_ID, monaco } from '@kbn/code-editor';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 
-const mockDispose = jest.fn();
+const mockDispose = vi.fn();
 
-jest.mock('@kbn/code-editor', () => ({
-  ESQL_LANG_ID: 'esql',
-  monaco: {
-    languages: {
-      CompletionItemInsertTextRule: {
-        InsertAsSnippet: 4,
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      ESQL_LANG_ID: 'esql',
+      monaco: {
+        languages: {
+          CompletionItemInsertTextRule: {
+            InsertAsSnippet: 4,
+          },
+          CompletionItemKind: {
+            Field: 5,
+          },
+          registerCompletionItemProvider: vi.fn(),
+        },
       },
-      CompletionItemKind: {
-        Field: 5,
-      },
-      registerCompletionItemProvider: jest.fn(),
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-language', () => ({
-  suggest: jest.fn(),
-}));
+vi.mock('@kbn/esql-language', () => {
+      const mocked = {
+      suggest: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-utils', () => ({
-  getEsqlColumns: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getEsqlColumns: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useSplitQueryCompletion', () => {
   const baseQuery = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
-  const search = jest.fn();
+  const search = vi.fn();
   const editor = {
     getModel: () => ({ id: 'editor-model' }),
   } as unknown as monaco.editor.IStandaloneCodeEditor;
   const model = {
     id: 'editor-model',
     getValue: () => '| WHERE co',
-    getOffsetAt: jest.fn((_position: monaco.Position) => 10),
-    getWordUntilPosition: jest.fn((_position: monaco.Position) => ({
+    getOffsetAt: vi.fn((_position: monaco.Position) => 10),
+    getWordUntilPosition: vi.fn((_position: monaco.Position) => ({
       startColumn: 9,
       endColumn: 11,
     })),
@@ -61,11 +72,11 @@ describe('useSplitQueryCompletion', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest
+    vi.clearAllMocks();
+    vi
       .mocked(monaco.languages.registerCompletionItemProvider)
       .mockReturnValue({ dispose: mockDispose });
-    jest.mocked(suggest).mockResolvedValue([
+    vi.mocked(suggest).mockResolvedValue([
       {
         label: 'count',
         text: 'count',
@@ -84,7 +95,7 @@ describe('useSplitQueryCompletion', () => {
     });
     return {
       ...hook,
-      provider: jest.mocked(monaco.languages.registerCompletionItemProvider).mock.calls[0][1],
+      provider: vi.mocked(monaco.languages.registerCompletionItemProvider).mock.calls[0][1],
     };
   };
 
@@ -129,11 +140,11 @@ describe('useSplitQueryCompletion', () => {
 
   it('uses getEsqlColumns with the full query supplied by ES|QL suggest callbacks', async () => {
     const columns = [{ name: 'count', type: 'long', userDefined: false as const }];
-    jest.mocked(getEsqlColumns).mockResolvedValue(columns);
+    vi.mocked(getEsqlColumns).mockResolvedValue(columns);
     const { provider } = mountProvider();
 
     await getCompletionItems(provider);
-    const callbacks = jest.mocked(suggest).mock.calls[0][2]!;
+    const callbacks = vi.mocked(suggest).mock.calls[0][2]!;
     const result = await callbacks.getColumnsFor?.({ query: `${baseQuery} | WHERE co` });
 
     expect(getEsqlColumns).toHaveBeenCalledWith({

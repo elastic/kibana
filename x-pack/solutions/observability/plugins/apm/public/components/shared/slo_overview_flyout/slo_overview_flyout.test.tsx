@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -16,47 +19,62 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { mockTelemetryClient } from '../../../services/telemetry/__mocks__/telemetry_client_mock';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_apm_router', () => ({
-  useApmRouter: jest.fn(),
-}));
+vi.mock('../../../hooks/use_apm_router', () => {
+      const mocked = {
+      useApmRouter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_apm_params', () => ({
-  useApmParams: jest.fn(),
-  useAnyOfApmParams: jest.fn(),
-}));
+vi.mock('../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useApmParams: vi.fn(),
+      useAnyOfApmParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_manage_slos_url', () => ({
-  useManageSlosUrl: () => '/app/slo',
-}));
+vi.mock('../../../hooks/use_manage_slos_url', () => {
+      const mocked = {
+      useManageSlosUrl: () => '/app/slo',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetcher = jest.fn();
-jest.mock('../../../hooks/use_fetcher', () => ({
-  useFetcher: () => mockUseFetcher(),
-  FETCH_STATUS: {
-    LOADING: 'loading',
-    SUCCESS: 'success',
-    FAILURE: 'failure',
-    NOT_INITIATED: 'not_initiated',
-  },
-  isPending: (status: string) => status === 'loading' || status === 'not_initiated',
-}));
+const mockUseFetcher = vi.fn();
+vi.mock('../../../hooks/use_fetcher', () => {
+      const mocked = {
+      useFetcher: () => mockUseFetcher(),
+      FETCH_STATUS: {
+        LOADING: 'loading',
+        SUCCESS: 'success',
+        FAILURE: 'failure',
+        NOT_INITIATED: 'not_initiated',
+      },
+      isPending: (status: string) => status === 'loading' || status === 'not_initiated',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     useGeneratedHtmlId: () => 'test-id',
   };
 });
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseApmRouter = useApmRouter as jest.Mock;
-const mockUseApmParams = useApmParams as jest.Mock;
-const mockUseAnyOfApmParams = useAnyOfApmParams as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseApmRouter = useApmRouter as Mock;
+const mockUseApmParams = useApmParams as Mock;
+const mockUseAnyOfApmParams = useAnyOfApmParams as Mock;
 
 const createMockSlo = (overrides: Partial<SLOWithSummaryResponse> = {}): SLOWithSummaryResponse =>
   ({
@@ -82,25 +100,25 @@ const renderWithIntl = (component: React.ReactElement) => {
 };
 
 describe('SloOverviewFlyout', () => {
-  const mockOnClose = jest.fn();
-  const mockLink = jest.fn().mockReturnValue('/services/test-service/overview');
-  const mockGetRedirectUrl = jest.fn().mockReturnValue('/app/slo');
+  const mockOnClose = vi.fn();
+  const mockLink = vi.fn().mockReturnValue('/services/test-service/overview');
+  const mockGetRedirectUrl = vi.fn().mockReturnValue('/app/slo');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {
         uiSettings: {
-          get: jest.fn().mockReturnValue('0.00%'),
+          get: vi.fn().mockReturnValue('0.00%'),
         },
         slo: {
-          getSLODetailsFlyout: jest.fn(),
+          getSLODetailsFlyout: vi.fn(),
         },
         share: {
           url: {
             locators: {
-              get: jest.fn().mockReturnValue({
+              get: vi.fn().mockReturnValue({
                 getRedirectUrl: mockGetRedirectUrl,
               }),
             },
@@ -140,7 +158,7 @@ describe('SloOverviewFlyout', () => {
         statusCounts: { violated: 0, degrading: 0, healthy: 0, noData: 0 },
       },
       status: FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
   });
 
@@ -166,7 +184,7 @@ describe('SloOverviewFlyout', () => {
     mockUseFetcher.mockReturnValue({
       data: undefined,
       status: FETCH_STATUS.LOADING,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
@@ -212,7 +230,7 @@ describe('SloOverviewFlyout', () => {
         statusCounts: { violated: 1, degrading: 0, healthy: 1, noData: 0 },
       },
       status: FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
@@ -232,7 +250,7 @@ describe('SloOverviewFlyout', () => {
         statusCounts: { violated: 0, degrading: 0, healthy: 0, noData: 0 },
       },
       status: FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
@@ -295,7 +313,7 @@ describe('SloOverviewFlyout', () => {
         statusCounts: { violated: 0, degrading: 0, healthy: 1, noData: 0 },
       },
       status: FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
@@ -337,7 +355,7 @@ describe('SloOverviewFlyout', () => {
         statusCounts: { violated: 0, degrading: 0, healthy: 25, noData: 0 },
       },
       status: FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
@@ -358,7 +376,7 @@ describe('SloOverviewFlyout', () => {
         statusCounts: { violated: 0, degrading: 0, healthy: 1, noData: 0 },
       },
       status: FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
@@ -386,7 +404,7 @@ describe('SloOverviewFlyout', () => {
         statusCounts: { violated: 0, degrading: 0, healthy: 1, noData: 0 },
       },
       status: FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
@@ -408,7 +426,7 @@ describe('SloOverviewFlyout', () => {
         statusCounts: { violated: 0, degrading: 0, healthy: 1, noData: 0 },
       },
       status: FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
@@ -428,16 +446,16 @@ describe('SloOverviewFlyout', () => {
 
   it('toggles the expand button between maximize and minimize when clicked', async () => {
     const mockSlos = [createMockSlo({ id: 'slo-1', name: 'Test SLO', instanceId: '*' })];
-    const getSLODetailsFlyoutMock = jest.fn(() => null);
+    const getSLODetailsFlyoutMock = vi.fn(() => null);
 
     mockUseKibana.mockReturnValue({
       services: {
-        uiSettings: { get: jest.fn().mockReturnValue('0.00%') },
+        uiSettings: { get: vi.fn().mockReturnValue('0.00%') },
         slo: { getSLODetailsFlyout: getSLODetailsFlyoutMock },
         share: {
           url: {
             locators: {
-              get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }),
+              get: vi.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }),
             },
           },
         },
@@ -455,7 +473,7 @@ describe('SloOverviewFlyout', () => {
         statusCounts: { violated: 0, degrading: 0, healthy: 1, noData: 0 },
       },
       status: FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
@@ -490,7 +508,7 @@ describe('SloOverviewFlyout', () => {
       data: undefined,
       status: FETCH_STATUS.FAILURE,
       error: new Error('API Error'),
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);

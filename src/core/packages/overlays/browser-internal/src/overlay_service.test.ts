@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import './overlay.test.mocks';
 import React from 'react';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
@@ -16,14 +18,14 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { OverlayService } from './overlay_service';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    getFlyoutManagerStore: jest.fn(() => ({
-      subscribeToEvents: jest.fn(() => () => {}),
-      subscribe: jest.fn(() => () => {}),
-      getState: jest.fn(() => ({ containerElement: null })),
+    getFlyoutManagerStore: vi.fn(() => ({
+      subscribeToEvents: vi.fn(() => () => {}),
+      subscribe: vi.fn(() => () => {}),
+      getState: vi.fn(() => ({ containerElement: null })),
     })),
   };
 });
@@ -53,7 +55,7 @@ describe('OverlayService', () => {
     it('closes an open legacy flyout', async () => {
       const { service, overlays } = getService();
       const ref = overlays.openFlyout(mountText('Flyout content'));
-      const onCloseComplete = jest.fn();
+      const onCloseComplete = vi.fn();
       ref.onClose.then(onCloseComplete);
 
       service.closeAllFlyouts();
@@ -65,7 +67,7 @@ describe('OverlayService', () => {
     it('closes an open system flyout', async () => {
       const { service, overlays } = getService();
       const ref = overlays.openSystemFlyout(React.createElement('div', null, 'System flyout'));
-      const onCloseComplete = jest.fn();
+      const onCloseComplete = vi.fn();
       ref.onClose.then(onCloseComplete);
 
       service.closeAllFlyouts();

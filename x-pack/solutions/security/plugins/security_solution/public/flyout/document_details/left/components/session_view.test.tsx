@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -25,8 +28,8 @@ import { useSessionViewConfig } from '../../../../flyout_v2/document/tools/sessi
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useLicense } from '../../../../common/hooks/use_license';
 
-jest.mock('../../../../flyout_v2/document/tools/session_view/hooks/use_session_view_config');
-jest.mock('../../../../common/hooks/use_license');
+vi.mock('../../../../flyout_v2/document/tools/session_view/hooks/use_session_view_config');
+vi.mock('../../../../common/hooks/use_license');
 
 const NO_DATA_MESSAGE =
   'You can only view Linux session details if you’ve enabled the Include session data setting in your Elastic Defend integration policy. Refer to Enable Session View data(external, opens in a new tab or window) for more information.';
@@ -49,14 +52,14 @@ const mockFieldsData = (prop: string) => {
   return mockData[prop];
 };
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const originalModule = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
+    useKibana: vi.fn().mockReturnValue({
       services: {
         sessionView: {
-          getSessionView: jest.fn(() => <div />),
+          getSessionView: vi.fn(() => <div />),
         },
       },
     }),
@@ -74,8 +77,8 @@ const renderSessionView = (contextValue: DocumentDetailsContext = mockContextVal
 
 describe('<SessionView />', () => {
   beforeEach(() => {
-    (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
-    (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
+    (useSessionViewConfig as Mock).mockReturnValue(sessionViewConfig);
+    (useLicense as Mock).mockReturnValue({ isEnterprise: () => true });
   });
   it('renders session view correctly', () => {
     const contextValue = {
@@ -100,15 +103,15 @@ describe('<SessionView />', () => {
   });
 
   it('should render upsell message in header if no correct license', () => {
-    (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => false });
+    (useLicense as Mock).mockReturnValue({ isEnterprise: () => false });
 
     const { getByTestId } = renderSessionView();
     expect(getByTestId(SESSION_VIEW_UPSELL_TEST_ID)).toHaveTextContent(UPSELL_TEXT);
   });
 
   it('should render error message and text in header if no sessionConfig', () => {
-    (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
-    (useSessionViewConfig as jest.Mock).mockReturnValue(null);
+    (useLicense as Mock).mockReturnValue({ isEnterprise: () => true });
+    (useSessionViewConfig as Mock).mockReturnValue(null);
 
     const { getByTestId } = renderSessionView();
     expect(getByTestId(SESSION_VIEW_NO_DATA_TEST_ID)).toHaveTextContent(NO_DATA_MESSAGE);

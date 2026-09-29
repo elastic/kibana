@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -29,73 +31,109 @@ import {
 } from '../../hooks/test_utils';
 import { AlertEpisodeDetailsFlyout } from './details_flyout';
 
-jest.mock('../../hooks/use_episode_details_header_data');
-jest.mock('../../hooks/use_invalidate_episode_queries', () => ({
-  useInvalidateEpisodeQueries: () => jest.fn(),
-}));
+vi.mock('../../hooks/use_episode_details_header_data');
+vi.mock('../../hooks/use_invalidate_episode_queries', () => {
+      const mocked = {
+      useInvalidateEpisodeQueries: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Renders children so containment assertions still work, while recording props
 // so the border can be asserted without depending on the accordion's own DOM.
-jest.mock('@kbn/flyout-sections', () => ({
-  FlyoutAccordion: jest.fn(
-    ({ children, 'data-test-subj': testSubj }: Record<string, React.ReactNode>) => (
-      <div data-test-subj={testSubj as string}>{children}</div>
-    )
-  ),
-}));
+vi.mock('@kbn/flyout-sections', () => {
+      const mocked = {
+      FlyoutAccordion: vi.fn(
+        ({ children, 'data-test-subj': testSubj }: Record<string, React.ReactNode>) => (
+          <div data-test-subj={testSubj as string}>{children}</div>
+        )
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./grouping_section', () => ({
-  AlertEpisodeGroupingSection: () => <div data-test-subj="groupingSectionStub" />,
-}));
-jest.mock('./trend_chart_section', () => ({
-  AlertEpisodeTrendChartSection: () => <div data-test-subj="trendChartSectionStub" />,
-}));
-jest.mock('./timeline_heatmaps_section', () => ({
-  AlertEpisodeTimelineHeatmapsSection: () => <div data-test-subj="timelineHeatmapsSectionStub" />,
-}));
-jest.mock('./rule_overview_panel_section', () => ({
-  AlertEpisodeRuleOverviewPanelSection: () => <div data-test-subj="ruleOverviewPanelSectionStub" />,
-}));
-jest.mock('./related_section', () => ({
-  AlertEpisodesRelatedSection: jest.fn(() => <div data-test-subj="relatedSectionStub" />),
-}));
-jest.mock('./runbook_section', () => ({
-  AlertEpisodeRunbookSection: jest.fn(() => <div data-test-subj="runbookSectionStub" />),
-}));
-jest.mock('./timeline_section', () => ({
-  AlertEpisodeTimelineSection: () => <div data-test-subj="timelineSectionStub" />,
-}));
-jest.mock('./metadata_section', () => ({
-  AlertEpisodeMetadataSection: jest.fn(() => (
-    <div data-test-subj="metadataSectionStub">
-      <div>
-        <input type="search" />
-      </div>
-      <div>
-        <input type="checkbox" role="switch" aria-checked={false} />
-      </div>
-    </div>
-  )),
-}));
-jest.mock('../assignee_cell', () => ({
-  AlertEpisodeAssigneeCell: ({ assigneeUid }: { assigneeUid: string | null | undefined }) => (
-    <div data-test-subj="alertingV2EpisodeAssigneeCell">{assigneeUid ?? 'No assignee'}</div>
-  ),
-}));
-jest.mock('../user_profile_display', () => ({
-  UserProfileDisplay: ({
-    userProfileUid,
-    emptyState = '—',
-  }: {
-    userProfileUid: string | null | undefined;
-    emptyState?: React.ReactNode;
-  }) => <div data-test-subj="alertingV2UserProfileDisplay">{userProfileUid ?? emptyState}</div>,
-}));
+vi.mock('./grouping_section', () => {
+      const mocked = {
+      AlertEpisodeGroupingSection: () => <div data-test-subj="groupingSectionStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./trend_chart_section', () => {
+      const mocked = {
+      AlertEpisodeTrendChartSection: () => <div data-test-subj="trendChartSectionStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./timeline_heatmaps_section', () => {
+      const mocked = {
+      AlertEpisodeTimelineHeatmapsSection: () => <div data-test-subj="timelineHeatmapsSectionStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./rule_overview_panel_section', () => {
+      const mocked = {
+      AlertEpisodeRuleOverviewPanelSection: () => <div data-test-subj="ruleOverviewPanelSectionStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./related_section', () => {
+      const mocked = {
+      AlertEpisodesRelatedSection: vi.fn(() => <div data-test-subj="relatedSectionStub" />),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./runbook_section', () => {
+      const mocked = {
+      AlertEpisodeRunbookSection: vi.fn(() => <div data-test-subj="runbookSectionStub" />),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./timeline_section', () => {
+      const mocked = {
+      AlertEpisodeTimelineSection: () => <div data-test-subj="timelineSectionStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./metadata_section', () => {
+      const mocked = {
+      AlertEpisodeMetadataSection: vi.fn(() => (
+        <div data-test-subj="metadataSectionStub">
+          <div>
+            <input type="search" />
+          </div>
+          <div>
+            <input type="checkbox" role="switch" aria-checked={false} />
+          </div>
+        </div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../assignee_cell', () => {
+      const mocked = {
+      AlertEpisodeAssigneeCell: ({ assigneeUid }: { assigneeUid: string | null | undefined }) => (
+        <div data-test-subj="alertingV2EpisodeAssigneeCell">{assigneeUid ?? 'No assignee'}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../user_profile_display', () => {
+      const mocked = {
+      UserProfileDisplay: ({
+        userProfileUid,
+        emptyState = '—',
+      }: {
+        userProfileUid: string | null | undefined;
+        emptyState?: React.ReactNode;
+      }) => <div data-test-subj="alertingV2UserProfileDisplay">{userProfileUid ?? emptyState}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseEpisodeDetailsHeaderData = jest.mocked(useEpisodeDetailsHeaderData);
-const mockFlyoutAccordion = jest.mocked(FlyoutAccordion);
-const mockRunbookSection = jest.mocked(AlertEpisodeRunbookSection);
-const mockMetadataSection = jest.mocked(AlertEpisodeMetadataSection);
+const mockUseEpisodeDetailsHeaderData = vi.mocked(useEpisodeDetailsHeaderData);
+const mockFlyoutAccordion = vi.mocked(FlyoutAccordion);
+const mockRunbookSection = vi.mocked(AlertEpisodeRunbookSection);
+const mockMetadataSection = vi.mocked(AlertEpisodeMetadataSection);
 
 const mockHttp = httpServiceMock.createStartContract();
 const mockServices = createMockServices({ http: mockHttp });
@@ -125,7 +163,7 @@ const baseHeaderData = {
 const baseProps = {
   episodeId: 'ep-1',
   groupHash: 'gh-1',
-  onClose: jest.fn(),
+  onClose: vi.fn(),
   services: mockServices,
   getRuleDetailsHref: mockGetRuleDetailsHref,
   getEpisodeDetailsHref: mockGetEpisodeDetailsHref,
@@ -134,20 +172,20 @@ const baseProps = {
 const mockEpisode = { 'episode.id': 'ep-1', group_hash: 'gh-1' } as AlertEpisode;
 
 /** Stands in for the real edit assignee action, which owns its own picker popover. */
-const mockRenderInlineControl = jest.fn(() => <div data-test-subj="assigneeInlineControlStub" />);
+const mockRenderInlineControl = vi.fn(() => <div data-test-subj="assigneeInlineControlStub" />);
 const mockEditAssigneeAction = {
   id: EDIT_EPISODE_ASSIGNEE_ACTION_ID,
   order: 50,
   displayName: 'Edit assignee',
   iconType: 'user',
   isCompatible: () => true,
-  execute: jest.fn(),
+  execute: vi.fn(),
   renderInlineControl: mockRenderInlineControl,
 } as unknown as EpisodeAction;
 
 describe('AlertEpisodeDetailsFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseEpisodeDetailsHeaderData.mockReturnValue(baseHeaderData);
   });
 
@@ -212,14 +250,14 @@ describe('AlertEpisodeDetailsFlyout', () => {
   });
 
   it('calls onClose when the footer close button is clicked', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     render(<AlertEpisodeDetailsFlyout {...baseProps} onClose={onClose} />, { wrapper: Wrapper });
     fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutCloseButton'));
     expect(onClose).toHaveBeenCalled();
   });
 
   it('calls onClose when the header close icon is clicked', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     render(<AlertEpisodeDetailsFlyout {...baseProps} onClose={onClose} />, { wrapper: Wrapper });
     fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
     expect(onClose).toHaveBeenCalled();
@@ -292,7 +330,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
   });
 
   it('closes only the runbook flyout, leaving the host to react to its own close', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     render(<AlertEpisodeDetailsFlyout {...baseProps} onClose={onClose} />, { wrapper: Wrapper });
 
     const { onShowFullGuide } = mockRunbookSection.mock.calls.at(-1)![0];

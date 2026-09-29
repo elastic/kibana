@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -12,18 +15,18 @@ import { NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY } from './use_fetch_investigations'
 import { useKibana } from './use_kibana';
 import { useStartInvestigation } from './use_start_investigation';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
-const investigationsFetch = jest.fn();
-const addSuccess = jest.fn();
-const addError = jest.fn();
+const mockUseKibana = useKibana as Mock;
+const investigationsFetch = vi.fn();
+const addSuccess = vi.fn();
+const addError = vi.fn();
 
 const renderStartInvestigation = (onStarted?: () => void) => {
   const queryClient = new QueryClient({
     defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
   });
-  const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+  const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
@@ -33,7 +36,7 @@ const renderStartInvestigation = (onStarted?: () => void) => {
 
 describe('useStartInvestigation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     investigationsFetch.mockResolvedValue({ investigation_id: 'investigation-1' });
     mockUseKibana.mockReturnValue({
       services: {
@@ -44,7 +47,7 @@ describe('useStartInvestigation', () => {
   });
 
   it('starts a manual investigation and refreshes the investigations list', async () => {
-    const onStarted = jest.fn();
+    const onStarted = vi.fn();
     const { result, invalidateQueries } = renderStartInvestigation(onStarted);
 
     act(() => result.current.startInvestigation('Why is checkout slow?'));
@@ -64,7 +67,7 @@ describe('useStartInvestigation', () => {
 
   it('surfaces start failures as toast errors and keeps the panel open', async () => {
     investigationsFetch.mockRejectedValueOnce(new Error('start failed'));
-    const onStarted = jest.fn();
+    const onStarted = vi.fn();
     const { result } = renderStartInvestigation(onStarted);
 
     act(() => result.current.startInvestigation('Why is checkout slow?'));

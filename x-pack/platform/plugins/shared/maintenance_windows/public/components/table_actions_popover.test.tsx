@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
@@ -14,9 +16,9 @@ import { createAppMockRenderer } from '../lib/test_utils';
 import { TableActionsPopover } from './table_actions_popover';
 import { MaintenanceWindowStatus } from '../../common';
 
-const mockAddSuccess = jest.fn();
-jest.mock('../utils/kibana_react', () => {
-  const originalModule = jest.requireActual('../utils/kibana_react');
+const mockAddSuccess = vi.fn();
+vi.mock('../utils/kibana_react', async () => {
+  const originalModule = (await vi.importActual('../utils/kibana_react'));
   return {
     ...originalModule,
     useKibana: () => {
@@ -35,7 +37,7 @@ describe('TableActionsPopover', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
   });
 
@@ -135,7 +137,7 @@ describe('TableActionsPopover', () => {
   test('it shows the success toast when maintenance window id is copied', async () => {
     Object.assign(navigator, {
       clipboard: {
-        writeText: jest.fn().mockResolvedValue(''),
+        writeText: vi.fn().mockResolvedValue(''),
       },
     });
 
@@ -163,7 +165,7 @@ describe('TableActionsPopover', () => {
   });
 
   test('it calls onDelete function when maintenance window is deleted', async () => {
-    const onDelete = jest.fn();
+    const onDelete = vi.fn();
     const user = userEvent.setup();
     const result = appMockRenderer.render(
       <TableActionsPopover

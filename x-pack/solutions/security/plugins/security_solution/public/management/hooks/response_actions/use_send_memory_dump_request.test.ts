@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useMutation as _useMutation } from '@kbn/react-query';
 import type { MemoryDumpActionRequestBody } from '../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -18,14 +21,14 @@ import type {
 import { useSendMemoryDumpRequest } from './use_send_memory_dump_request';
 import { MEMORY_DUMP_ROUTE } from '../../../../common/endpoint/constants';
 
-const useMutationMock = _useMutation as jest.Mock;
+const useMutationMock = _useMutation as Mock;
 
-jest.mock('@kbn/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
+vi.mock('@kbn/react-query', async () => {
+  const actualReactQueryModule = (await vi.importActual('@kbn/react-query'));
 
   return {
     ...actualReactQueryModule,
-    useMutation: jest.fn((...args) => actualReactQueryModule.useMutation(...args)),
+    useMutation: vi.fn((...args) => actualReactQueryModule.useMutation(...args)),
   };
 });
 

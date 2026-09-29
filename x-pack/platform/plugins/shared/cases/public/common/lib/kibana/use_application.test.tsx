@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PublicAppInfo } from '@kbn/core-application-browser';
 import { AppStatus } from '@kbn/core-application-browser';
 import { renderHook } from '@testing-library/react';
@@ -16,7 +18,7 @@ import React from 'react';
 
 describe('useApplication', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the appId and the appTitle correctly', () => {

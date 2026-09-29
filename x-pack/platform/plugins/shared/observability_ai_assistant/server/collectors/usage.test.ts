@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   Collector,
@@ -18,7 +21,7 @@ describe('observability_ai_assistant usage collector', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let collector: Collector<unknown>;
   let usageCollectionMock: ReturnType<typeof createUsageCollectionSetupMock>;
-  let mockCoreSetup: jest.Mocked<CoreSetup>;
+  let mockCoreSetup: Mocked<CoreSetup>;
   let mockEsClient: any;
   const mockedFetchContext = createCollectorFetchContextMock();
 
@@ -27,11 +30,11 @@ describe('observability_ai_assistant usage collector', () => {
     usageCollectionMock = createUsageCollectionSetupMock();
 
     mockEsClient = {
-      search: jest.fn(),
+      search: vi.fn(),
     };
 
     mockCoreSetup = {
-      getStartServices: jest.fn().mockResolvedValue([
+      getStartServices: vi.fn().mockResolvedValue([
         {
           elasticsearch: {
             client: {
@@ -51,7 +54,7 @@ describe('observability_ai_assistant usage collector', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('registers the collector with usageCollection', () => {

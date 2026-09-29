@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { estypes } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -18,7 +20,7 @@ describe('filterHallucinatedAlerts', () => {
   const alertsIndexPattern = '.alerts-security.alerts-*';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const mockDiscovery1: DiscoveryWithAlertIds = {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -14,15 +17,15 @@ import {
 import { useUserData } from '../../../../detections/components/user_info';
 import { TestProviders } from '../../../../common/mock';
 
-jest.mock('../../../../detections/components/user_info');
+vi.mock('../../../../detections/components/user_info');
 
 describe('NeedAdminForUpdateRulesCallOut', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should show callout', () => {
-    (useUserData as jest.Mock).mockReturnValue([
+    (useUserData as Mock).mockReturnValue([
       {
         signalIndexMappingOutdated: true,
         hasIndexManage: false,
@@ -45,7 +48,7 @@ describe('NeedAdminForUpdateRulesCallOut', () => {
   });
 
   it('should hide callout if signalIndexMappingOutdated is false', () => {
-    (useUserData as jest.Mock).mockReturnValue([
+    (useUserData as Mock).mockReturnValue([
       {
         signalIndexMappingOutdated: false,
         hasIndexManage: false,
@@ -58,7 +61,7 @@ describe('NeedAdminForUpdateRulesCallOut', () => {
   });
 
   it('should hide callout if hasIndexManage is true', () => {
-    (useUserData as jest.Mock).mockReturnValue([
+    (useUserData as Mock).mockReturnValue([
       {
         signalIndexMappingOutdated: true,
         hasIndexManage: true,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
@@ -20,42 +23,48 @@ import {
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { createVisualizationTool } from './create_visualization';
 
-jest.mock('@kbn/agent-builder-visualizations-server', () => ({
-  buildLensConfig: jest.fn(),
-  buildVegaConfig: jest.fn(),
-  generateVisualizationEsql: jest.fn(),
-  selectDefaultTimeRange: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-visualizations-server', () => {
+      const mocked = {
+      buildLensConfig: vi.fn(),
+      buildVegaConfig: vi.fn(),
+      generateVisualizationEsql: vi.fn(),
+      selectDefaultTimeRange: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/custom-content-server', () => ({
-  createCustomContentTemplateResolver: jest.fn(),
-}));
+vi.mock('@kbn/custom-content-server', () => {
+      const mocked = {
+      createCustomContentTemplateResolver: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockBuildLens = buildLensConfig as jest.Mock;
-const mockBuildVega = buildVegaConfig as jest.Mock;
-const mockSelectDefaultTimeRange = selectDefaultTimeRange as jest.Mock;
-const mockGenerateEsql = generateVisualizationEsql as jest.Mock;
-const mockCreateTemplateResolver = createCustomContentTemplateResolver as jest.Mock;
-const mockResolveTemplate = jest.fn();
+const mockBuildLens = buildLensConfig as Mock;
+const mockBuildVega = buildVegaConfig as Mock;
+const mockSelectDefaultTimeRange = selectDefaultTimeRange as Mock;
+const mockGenerateEsql = generateVisualizationEsql as Mock;
+const mockCreateTemplateResolver = createCustomContentTemplateResolver as Mock;
+const mockResolveTemplate = vi.fn();
 
 const createLogger = (): Logger =>
   ({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as unknown as Logger);
 
 interface MockAttachments {
-  getAttachmentRecord: jest.Mock;
-  add: jest.Mock;
-  update: jest.Mock;
+  getAttachmentRecord: Mock;
+  add: Mock;
+  update: Mock;
 }
 
 const createAttachments = (): MockAttachments => ({
-  getAttachmentRecord: jest.fn().mockReturnValue(undefined),
-  add: jest.fn().mockResolvedValue({ id: 'att-new', current_version: 1 }),
-  update: jest.fn().mockResolvedValue({ current_version: 2 }),
+  getAttachmentRecord: vi.fn().mockReturnValue(undefined),
+  add: vi.fn().mockResolvedValue({ id: 'att-new', current_version: 1 }),
+  update: vi.fn().mockResolvedValue({ current_version: 2 }),
 });
 
 const lensTarget = (chartType: SupportedChartType = SupportedChartType.XY) => ({
@@ -274,7 +283,7 @@ describe('createVisualizationTool schema', () => {
 
 describe('createVisualizationTool handler', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockBuildLens.mockResolvedValue({
       selectedChartType: SupportedChartType.XY,
       validatedConfig: { title: 'Errors over time' },

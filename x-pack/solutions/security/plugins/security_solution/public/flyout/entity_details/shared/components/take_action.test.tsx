@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -13,26 +16,32 @@ import { TestProviders } from '../../../../common/mock';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/timeline/use_investigate_in_timeline');
+vi.mock('../../../../common/hooks/timeline/use_investigate_in_timeline');
 
-jest.mock('../../../../common/utils/timeline/use_show_timeline', () => ({
-  useShowTimeline: jest.fn(() => [true]),
-}));
+vi.mock('../../../../common/utils/timeline/use_show_timeline', () => {
+      const mocked = {
+      useShowTimeline: vi.fn(() => [true]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('<TakeAction />', () => {
   const kqlQuery = 'host.name: "test-host"';
-  const closeFlyout = jest.fn();
-  const investigateInTimeline = jest.fn();
+  const closeFlyout = vi.fn();
+  const investigateInTimeline = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ closeFlyout });
-    (useInvestigateInTimeline as jest.Mock).mockReturnValue({ investigateInTimeline });
-    (useShowTimeline as jest.Mock).mockReturnValue([true]);
+    vi.clearAllMocks();
+    (useExpandableFlyoutApi as Mock).mockReturnValue({ closeFlyout });
+    (useInvestigateInTimeline as Mock).mockReturnValue({ investigateInTimeline });
+    (useShowTimeline as Mock).mockReturnValue([true]);
   });
 
   it('renders the Take Action button', () => {
@@ -51,7 +60,7 @@ describe('<TakeAction />', () => {
   });
 
   it('hides Take Action when Timeline is unavailable and there are no additional items', () => {
-    (useShowTimeline as jest.Mock).mockReturnValue([false]);
+    (useShowTimeline as Mock).mockReturnValue([false]);
 
     const { queryByTestId } = render(<TakeAction kqlQuery={kqlQuery} />, {
       wrapper: TestProviders,
@@ -61,7 +70,7 @@ describe('<TakeAction />', () => {
   });
 
   it('keeps Take Action when Timeline is unavailable but additional items exist', () => {
-    (useShowTimeline as jest.Mock).mockReturnValue([false]);
+    (useShowTimeline as Mock).mockReturnValue([false]);
 
     const { getByRole, queryByTestId, getByTestId } = render(
       <TakeAction

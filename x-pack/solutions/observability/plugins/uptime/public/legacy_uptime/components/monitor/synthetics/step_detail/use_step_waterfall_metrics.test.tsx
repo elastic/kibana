@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import {
   BROWSER_TRACE_NAME,
@@ -16,13 +18,13 @@ import * as reduxHooks from 'react-redux-v7';
 import * as searchHooks from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
 
 describe('useStepWaterfallMetrics', () => {
-  jest
+  vi
     .spyOn(reduxHooks, 'useSelector')
     .mockReturnValue({ settings: { heartbeatIndices: 'heartbeat-*' } });
 
   it('returns result as expected', () => {
     // @ts-ignore
-    const searchHook = jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
+    const searchHook = vi.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
       loading: false,
       data: {
         hits: {

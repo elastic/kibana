@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import { type SpanLinks as SpanLinksType } from '@kbn/apm-types';
 import { render } from '@testing-library/react';
 import React from 'react';
@@ -19,31 +21,46 @@ import {
   SPAN_LINKS_SPAN_ID,
 } from '@kbn/discover-utils';
 // Mock dependencies
-jest.mock('../../../../../hooks/use_data_sources', () => ({
-  useDataSourcesContext: () => ({
-    indexes: { apm: { traces: 'apm-traces-*' } },
-  }),
-}));
-jest.mock('../../../../../hooks/use_generate_discover_link', () => ({
-  useGetGenerateDiscoverLink: () => ({
-    generateDiscoverLink: jest.fn(() => 'http://discover/link'),
-  }),
-}));
-jest.mock('./get_columns', () => ({
-  getColumns: jest.fn(() => [{ field: 'duration', name: 'Duration' }]),
-}));
-jest.mock('./use_fetch_span_links', () => ({
-  useFetchSpanLinks: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_data_sources', () => {
+      const mocked = {
+      useDataSourcesContext: () => ({
+        indexes: { apm: { traces: 'apm-traces-*' } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../hooks/use_generate_discover_link', () => {
+      const mocked = {
+      useGetGenerateDiscoverLink: () => ({
+        generateDiscoverLink: vi.fn(() => 'http://discover/link'),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./get_columns', () => {
+      const mocked = {
+      getColumns: vi.fn(() => [{ field: 'duration', name: 'Duration' }]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_fetch_span_links', () => {
+      const mocked = {
+      useFetchSpanLinks: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../content_framework/lazy_content_framework_section', () => ({
-  ContentFrameworkSection: ({ children, title, ...rest }: any) => (
-    <div data-test-subj="ContentFrameworkSection" {...rest}>
-      <h2>{title}</h2>
-      {children}
-    </div>
-  ),
-}));
+vi.mock('../../../../content_framework/lazy_content_framework_section', () => {
+      const mocked = {
+      ContentFrameworkSection: ({ children, title, ...rest }: any) => (
+        <div data-test-subj="ContentFrameworkSection" {...rest}>
+          <h2>{title}</h2>
+          {children}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockUseFetchSpanLinks = require('./use_fetch_span_links').useFetchSpanLinks;
@@ -52,7 +69,7 @@ describe('SpanLinks', () => {
   const defaultProps = { docId: 'doc1', traceId: 'trace1' };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns null when loading', () => {

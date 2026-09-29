@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -39,13 +42,13 @@ import { packagePolicyService } from './package_policy';
 import { getBundledPackages } from './epm/packages/bundled_packages';
 import { installPackage, type InstallPackageParams } from './epm/packages/install';
 
-jest.mock('./agent_policy_update');
-jest.mock('./output');
-jest.mock('./epm/packages/bundled_packages');
-jest.mock('./epm/archive');
+vi.mock('./agent_policy_update');
+vi.mock('./output');
+vi.mock('./epm/packages/bundled_packages');
+vi.mock('./epm/archive');
 
-const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
-const mockedGetBundledPackages = getBundledPackages as jest.MockedFunction<
+const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
+const mockedGetBundledPackages = getBundledPackages as MockedFunction<
   typeof getBundledPackages
 >;
 
@@ -142,216 +145,234 @@ function getPutPreconfiguredPackagesMock() {
   return soClient;
 }
 
-jest.mock('./epm/registry', () => ({
-  ...jest.requireActual('./epm/registry'),
-  async fetchFindLatestPackageOrThrow(
-    packageName: string,
-    options?: { prerelease?: boolean }
-  ): Promise<RegistrySearchResult> {
-    let latestVersion = '1.0.0';
-    if (options?.prerelease && packageName === 'test_package') {
-      latestVersion = '3.0.1-beta.1';
-    }
-
-    return {
-      name: packageName,
-      version: latestVersion,
-      description: '',
-      release: 'experimental',
-      title: '',
-      path: '',
-      download: '',
-    };
-  },
-}));
-
-jest.mock('./epm/packages/install', () => ({
-  installPackage: jest.fn(
-    async (args: InstallPackageParams): Promise<InstallResult | undefined> => {
-      if (args.installSource === 'registry') {
-        const [pkgName, pkgVersion] = args.pkgkey.split('-');
-        const installError = mockInstallPackageErrors.get(pkgName);
-        if (installError) {
-          return {
-            error: new Error(installError),
-            installType: 'install',
-            installSource: 'registry',
-            pkgName,
-          };
+vi.mock('./epm/registry', async () => {
+      const mocked = {
+      ...(await vi.importActual('./epm/registry')),
+      async fetchFindLatestPackageOrThrow(
+        packageName: string,
+        options?: { prerelease?: boolean }
+      ): Promise<RegistrySearchResult> {
+        let latestVersion = '1.0.0';
+        if (options?.prerelease && packageName === 'test_package') {
+          latestVersion = '3.0.1-beta.1';
         }
-
-        const installedPackage = mockInstalledPackages.get(pkgName);
-        if (installedPackage) {
-          if (installedPackage.version === pkgVersion) return installedPackage;
-        }
-
-        const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
-        mockInstalledPackages.set(pkgName, packageInstallation);
 
         return {
-          status: 'installed',
-          installType: 'install',
-          installSource: 'registry',
-          pkgName,
+          name: packageName,
+          version: latestVersion,
+          description: '',
+          release: 'experimental',
+          title: '',
+          path: '',
+          download: '',
         };
-      } else if (args.installSource === 'upload') {
-        const { archiveBuffer } = args;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-        // Treat the buffer value passed in tests as the package's name for simplicity
-        const pkgName = archiveBuffer.toString('utf8');
+vi.mock('./epm/packages/install', () => {
+      const mocked = {
+      installPackage: vi.fn(
+        async (args: InstallPackageParams): Promise<InstallResult | undefined> => {
+          if (args.installSource === 'registry') {
+            const [pkgName, pkgVersion] = args.pkgkey.split('-');
+            const installError = mockInstallPackageErrors.get(pkgName);
+            if (installError) {
+              return {
+                error: new Error(installError),
+                installType: 'install',
+                installSource: 'registry',
+                pkgName,
+              };
+            }
 
-        // Just install every bundled package at version '1.0.0'
-        const packageInstallation = { name: pkgName, version: '1.0.0', title: pkgName };
-        mockInstalledPackages.set(pkgName, packageInstallation);
+            const installedPackage = mockInstalledPackages.get(pkgName);
+            if (installedPackage) {
+              if (installedPackage.version === pkgVersion) return installedPackage;
+            }
 
-        return { status: 'installed', installType: 'install', installSource: 'upload', pkgName };
-      }
-    }
-  ),
-  ensurePackagesCompletedInstall() {
-    return [];
-  },
-  isPackageVersionOrLaterInstalled({
-    soClient,
-    pkgName,
-    pkgVersion,
-  }: {
-    soClient: any;
-    pkgName: string;
-    pkgVersion: string;
-  }) {
-    const installedPackage = mockInstalledPackages.get(pkgName);
+            const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
+            mockInstalledPackages.set(pkgName, packageInstallation);
 
-    if (installedPackage) {
-      if (installedPackage.version === pkgVersion) {
-        return { package: installedPackage, installType: 'reinstall' };
-      }
+            return {
+              status: 'installed',
+              installType: 'install',
+              installSource: 'registry',
+              pkgName,
+            };
+          } else if (args.installSource === 'upload') {
+            const { archiveBuffer } = args;
 
-      // Importing semver methods throws an error in jest, so just use a rough check instead
-      if (installedPackage.version < pkgVersion) {
+            // Treat the buffer value passed in tests as the package's name for simplicity
+            const pkgName = archiveBuffer.toString('utf8');
+
+            // Just install every bundled package at version '1.0.0'
+            const packageInstallation = { name: pkgName, version: '1.0.0', title: pkgName };
+            mockInstalledPackages.set(pkgName, packageInstallation);
+
+            return { status: 'installed', installType: 'install', installSource: 'upload', pkgName };
+          }
+        }
+      ),
+      ensurePackagesCompletedInstall() {
+        return [];
+      },
+      isPackageVersionOrLaterInstalled({
+        soClient,
+        pkgName,
+        pkgVersion,
+      }: {
+        soClient: any;
+        pkgName: string;
+        pkgVersion: string;
+      }) {
+        const installedPackage = mockInstalledPackages.get(pkgName);
+
+        if (installedPackage) {
+          if (installedPackage.version === pkgVersion) {
+            return { package: installedPackage, installType: 'reinstall' };
+          }
+
+          // Importing semver methods throws an error in jest, so just use a rough check instead
+          if (installedPackage.version < pkgVersion) {
+            return false;
+          }
+          if (installedPackage.version > pkgVersion) {
+            return { package: installedPackage, installType: 'rollback' };
+          }
+        }
+
         return false;
-      }
-      if (installedPackage.version > pkgVersion) {
-        return { package: installedPackage, installType: 'rollback' };
-      }
-    }
+      },
+      getInstallType: vi.fn(),
+      async updateInstallStatus(soClient: any, pkgName: string, status: string) {
+        const installedPackage = mockInstalledPackages.get(pkgName);
 
-    return false;
-  },
-  getInstallType: jest.fn(),
-  async updateInstallStatus(soClient: any, pkgName: string, status: string) {
-    const installedPackage = mockInstalledPackages.get(pkgName);
+        if (!installedPackage) {
+          return;
+        }
 
-    if (!installedPackage) {
-      return;
-    }
+        installedPackage.install_status = status;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-    installedPackage.install_status = status;
-  },
-}));
-
-jest.mock('./epm/packages/get', () => ({
-  getPackageInfo({ pkgName }: { pkgName: string }) {
-    const installedPackage = mockInstalledPackages.get(pkgName);
-    if (!installedPackage) return { status: 'not_installed' };
-    return {
-      status: 'installed',
-      ...installedPackage,
-      policy_templates: [
-        {
-          name: 'test_template',
-          inputs: [
+vi.mock('./epm/packages/get', () => {
+      const mocked = {
+      getPackageInfo({ pkgName }: { pkgName: string }) {
+        const installedPackage = mockInstalledPackages.get(pkgName);
+        if (!installedPackage) return { status: 'not_installed' };
+        return {
+          status: 'installed',
+          ...installedPackage,
+          policy_templates: [
             {
-              type: 'foo',
-              vars: [
+              name: 'test_template',
+              inputs: [
                 {
-                  name: 'bar',
-                  type: 'text',
+                  type: 'foo',
+                  vars: [
+                    {
+                      name: 'bar',
+                      type: 'text',
+                    },
+                  ],
                 },
               ],
             },
           ],
-        },
-      ],
-    };
-  },
-  getInstallation({ pkgName }: { pkgName: string }) {
-    return mockInstalledPackages.get(pkgName) ?? false;
-  },
-  getInstallationObject({ pkgName }: { pkgName: string }) {
-    return mockInstalledPackages.get(pkgName) ?? false;
-  },
-}));
-
-jest.mock('./epm/kibana/index_pattern/install');
-
-jest.mock('./package_policy', () => ({
-  ...jest.requireActual('./package_policy'),
-  packagePolicyService: {
-    ...jest.requireActual('./package_policy').packagePolicyService,
-    findAllForAgentPolicy: jest.fn().mockReturnValue([]),
-    listIds: jest.fn().mockReturnValue({ items: [] }),
-    create: jest
-      .fn()
-      .mockImplementation((soClient: any, esClient: any, newPackagePolicy: NewPackagePolicy) => {
-        return {
-          id: 'mocked',
-          version: 'mocked',
-          ...newPackagePolicy,
         };
-      }),
-    get(soClient: any, id: string) {
-      return {
-        id: 'mocked',
-        version: 'mocked',
-      };
-    },
-  },
-}));
+      },
+      getInstallation({ pkgName }: { pkgName: string }) {
+        return mockInstalledPackages.get(pkgName) ?? false;
+      },
+      getInstallationObject({ pkgName }: { pkgName: string }) {
+        return mockInstalledPackages.get(pkgName) ?? false;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./app_context', () => ({
-  appContextService: {
-    getLogger: jest.fn(
-      () =>
-        new Proxy(
-          {},
-          {
-            get() {
-              return jest.fn();
-            },
-          }
-        )
-    ),
-    getUninstallTokenService: () => ({
-      generateTokenForPolicyId: jest.fn(),
-      scoped: jest.fn().mockReturnValue({
-        generateTokenForPolicyId: jest.fn(),
-      }),
-    }),
-    getExternalCallbacks: jest.fn(),
-    getCloud: jest.fn(),
-    getConfig: jest.fn(),
-    getExperimentalFeatures: jest.fn().mockReturnValue({}),
-    getInternalUserSOClientForSpaceId: jest.fn(),
-  },
-}));
+vi.mock('./epm/kibana/index_pattern/install');
 
-jest.mock('./audit_logging');
+vi.mock('./package_policy', async () => {
+      const mocked = {
+      ...(await vi.importActual('./package_policy')),
+      packagePolicyService: {
+        ...(await vi.importActual('./package_policy')).packagePolicyService,
+        findAllForAgentPolicy: vi.fn().mockReturnValue([]),
+        listIds: vi.fn().mockReturnValue({ items: [] }),
+        create: vi
+          .fn()
+          .mockImplementation((soClient: any, esClient: any, newPackagePolicy: NewPackagePolicy) => {
+            return {
+              id: 'mocked',
+              version: 'mocked',
+              ...newPackagePolicy,
+            };
+          }),
+        get(soClient: any, id: string) {
+          return {
+            id: 'mocked',
+            version: 'mocked',
+          };
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./secrets', () => ({
-  isActionSecretStorageEnabled: jest.fn(),
-}));
+vi.mock('./app_context', () => {
+      const mocked = {
+      appContextService: {
+        getLogger: vi.fn(
+          () =>
+            new Proxy(
+              {},
+              {
+                get() {
+                  return vi.fn();
+                },
+              }
+            )
+        ),
+        getUninstallTokenService: () => ({
+          generateTokenForPolicyId: vi.fn(),
+          scoped: vi.fn().mockReturnValue({
+            generateTokenForPolicyId: vi.fn(),
+          }),
+        }),
+        getExternalCallbacks: vi.fn(),
+        getCloud: vi.fn(),
+        getConfig: vi.fn(),
+        getExperimentalFeatures: vi.fn().mockReturnValue({}),
+        getInternalUserSOClientForSpaceId: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const spyAgentPolicyServiceUpdate = jest.spyOn(agentPolicy.agentPolicyService, 'update');
-const spyAgentPolicyServiceBumpAllAgentPoliciesForOutput = jest.spyOn(
+vi.mock('./audit_logging');
+
+vi.mock('./secrets', () => {
+      const mocked = {
+      isActionSecretStorageEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+const spyAgentPolicyServiceUpdate = vi.spyOn(agentPolicy.agentPolicyService, 'update');
+const spyAgentPolicyServiceBumpAllAgentPoliciesForOutput = vi.spyOn(
   agentPolicy.agentPolicyService,
   'bumpAllAgentPoliciesForOutput'
 );
 
 describe('policy preconfiguration', () => {
   beforeEach(() => {
-    jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReset();
-    jest.mocked(appContextService).getLogger.mockReturnValue(loggingSystemMock.create().get());
+    vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReset();
+    vi.mocked(appContextService).getLogger.mockReturnValue(loggingSystemMock.create().get());
 
     mockedPackagePolicyService.create.mockReset();
     mockedPackagePolicyService.findAllForAgentPolicy.mockReset();
@@ -369,7 +390,7 @@ describe('policy preconfiguration', () => {
     it('should perform a no-op when passed no policies or packages', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
         soClient,
@@ -389,7 +410,7 @@ describe('policy preconfiguration', () => {
     it('should install packages successfully', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
         soClient,
@@ -409,7 +430,7 @@ describe('policy preconfiguration', () => {
     it('should install packages and configure agent policies successfully', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
         soClient,
@@ -442,7 +463,7 @@ describe('policy preconfiguration', () => {
     it('should install packages and configure agent policies successfully if using simplified package policy', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
         soClient,
@@ -512,7 +533,7 @@ describe('policy preconfiguration', () => {
     it('should install packages and configure agent policies successfully for deleted managed policies', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
         soClient,
@@ -583,7 +604,7 @@ describe('policy preconfiguration', () => {
     it('should install prerelease packages if needed', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
         soClient,
@@ -603,7 +624,7 @@ describe('policy preconfiguration', () => {
     it('should pass skipDatastreamRollover flag if configured', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
         soClient,
@@ -618,7 +639,7 @@ describe('policy preconfiguration', () => {
       expect(policies.length).toEqual(0);
       expect(packages).toEqual(expect.arrayContaining(['test_package-1.0.0']));
       expect(nonFatalErrors.length).toBe(0);
-      expect(jest.mocked(installPackage)).toHaveBeenCalledWith(
+      expect(vi.mocked(installPackage)).toHaveBeenCalledWith(
         expect.objectContaining({
           skipDataStreamRollover: true,
         })
@@ -628,7 +649,7 @@ describe('policy preconfiguration', () => {
     it('should not add new package policy to existing non managed policies', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
         { name: 'test_package1' } as PackagePolicy,
       ]);
@@ -679,7 +700,7 @@ describe('policy preconfiguration', () => {
     it('should add new package policy to existing managed policies', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
         { name: 'test_package1' } as PackagePolicy,
       ]);
@@ -739,7 +760,7 @@ describe('policy preconfiguration', () => {
     it('should update keep_monitoring_enabled for existing managed policies', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
         { name: 'test_package1' } as PackagePolicy,
       ]);
@@ -802,7 +823,7 @@ describe('policy preconfiguration', () => {
     it('should update keep_monitoring_enabled for existing managed policies (even is the SO is out-of-sync)', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
         { name: 'test_package1' } as PackagePolicy,
       ]);
@@ -865,7 +886,7 @@ describe('policy preconfiguration', () => {
     it('should not try to recreate preconfigure package policy that has been renamed', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
         { name: 'Renamed package policy', id: 'test_package1' } as PackagePolicy,
       ]);
@@ -915,7 +936,7 @@ describe('policy preconfiguration', () => {
     it('should throw an error when trying to install duplicate packages', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       await expect(
         ensurePreconfiguredPackagesAndPolicies(
@@ -938,7 +959,7 @@ describe('policy preconfiguration', () => {
     it('should not create a policy and throw an error if install fails for required package', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       const policies: PreconfiguredAgentPolicy[] = [
         {
           name: 'Test policy',
@@ -972,7 +993,7 @@ describe('policy preconfiguration', () => {
     it('should not create a policy and throw an error if package is not installed for an unknown reason', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const policies: PreconfiguredAgentPolicy[] = [
         {
@@ -1007,7 +1028,7 @@ describe('policy preconfiguration', () => {
     it('should not attempt to recreate or modify an agent policy if its ID is unchanged', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies: policiesA, nonFatalErrors: nonFatalErrorsA } =
         await ensurePreconfiguredPackagesAndPolicies(
@@ -1063,7 +1084,7 @@ describe('policy preconfiguration', () => {
     it('should update a managed policy if top level fields are changed', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       mockConfiguredPolicies.set('test-id', {
         name: 'Test policy',
@@ -1117,7 +1138,7 @@ describe('policy preconfiguration', () => {
     it('should not update a managed policy if a top level field has not changed', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       const policy: PreconfiguredAgentPolicy = {
         name: 'Test policy',
         namespace: 'default',
@@ -1149,7 +1170,7 @@ describe('policy preconfiguration', () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      jest
+      vi
         .mocked(appContextService)
         .getInternalUserSOClientForSpaceId.mockReturnValue(namespacedSOClient);
 
@@ -1228,7 +1249,7 @@ describe('policy preconfiguration', () => {
 
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
         soClient,
@@ -1267,7 +1288,7 @@ describe('policy preconfiguration', () => {
 
           const soClient = getPutPreconfiguredPackagesMock();
           const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-          jest
+          vi
             .mocked(appContextService)
             .getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
@@ -1311,7 +1332,7 @@ describe('policy preconfiguration', () => {
 
           const soClient = getPutPreconfiguredPackagesMock();
           const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-          jest
+          vi
             .mocked(appContextService)
             .getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 

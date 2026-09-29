@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -26,7 +28,7 @@ describe('SidebarSectionSettingsButton', () => {
   });
 
   it('calls onClick when clicked', async () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
 
     render(<SidebarSectionSettingsButton onClick={onClick} />);
 

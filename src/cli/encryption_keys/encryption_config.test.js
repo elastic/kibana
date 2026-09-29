@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { EncryptionConfig } from './encryption_config';
 import crypto from 'crypto';
 import fs from 'fs';
@@ -15,8 +17,8 @@ describe('encryption key configuration', () => {
   let encryptionConfig = null;
 
   beforeEach(() => {
-    jest.spyOn(fs, 'readFileSync').mockReturnValueOnce('xpack.security.encryptionKey: foo');
-    jest.spyOn(crypto, 'randomBytes').mockReturnValue('random-key');
+    vi.spyOn(fs, 'readFileSync').mockReturnValueOnce('xpack.security.encryptionKey: foo');
+    vi.spyOn(crypto, 'randomBytes').mockReturnValue('random-key');
     encryptionConfig = new EncryptionConfig();
   });
   it('should be able to check for encryption keys', () => {

@@ -5,23 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useGetIntegrations } from './use_get_integrations';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
-jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
 describe('useGetIntegrations', () => {
-  const getIntegrations = jest.fn();
-  const addError = jest.fn();
-  const onSuccess = jest.fn();
+  const getIntegrations = vi.fn();
+  const addError = vi.fn();
+  const onSuccess = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: {
         siemMigrations: {

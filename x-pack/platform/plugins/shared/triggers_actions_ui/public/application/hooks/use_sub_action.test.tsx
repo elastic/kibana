@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import type { UseSubActionParams } from './use_sub_action';
 import { useSubAction } from './use_sub_action';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 describe('useSubAction', () => {
   const params: UseSubActionParams<unknown> = {
@@ -20,13 +23,13 @@ describe('useSubAction', () => {
     subAction: 'test',
     subActionParams: { foo: 'bar' },
   };
-  const mockHttpPost = (useKibanaMock().services.http.post = jest
+  const mockHttpPost = (useKibanaMock().services.http.post = vi
     .fn()
     .mockImplementation(() => Promise.resolve({ status: 'ok', data: {} })));
-  let abortSpy = jest.spyOn(window, 'AbortController');
+  let abortSpy = vi.spyOn(window, 'AbortController');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     abortSpy.mockRestore();
   });
 
@@ -125,7 +128,7 @@ describe('useSubAction', () => {
 
   it('should abort on unmount', async () => {
     const firstAbortCtrl = new AbortController();
-    abortSpy = jest.spyOn(window, 'AbortController').mockReturnValueOnce(firstAbortCtrl);
+    abortSpy = vi.spyOn(window, 'AbortController').mockReturnValueOnce(firstAbortCtrl);
 
     const { unmount, result } = renderHook(useSubAction, { initialProps: params });
 
@@ -137,7 +140,7 @@ describe('useSubAction', () => {
 
   it('should abort on disabled change', async () => {
     const firstAbortCtrl = new AbortController();
-    abortSpy = jest.spyOn(window, 'AbortController').mockImplementation(() => {
+    abortSpy = vi.spyOn(window, 'AbortController').mockImplementation(() => {
       abortSpy.mockRestore();
       return firstAbortCtrl;
     });
@@ -159,7 +162,7 @@ describe('useSubAction', () => {
 
   it('should abort on parameter change', async () => {
     const firstAbortCtrl = new AbortController();
-    abortSpy = jest.spyOn(window, 'AbortController').mockImplementation(() => {
+    abortSpy = vi.spyOn(window, 'AbortController').mockImplementation(() => {
       abortSpy.mockRestore();
       return firstAbortCtrl;
     });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { act, fireEvent, waitFor } from '@testing-library/react';
@@ -15,28 +18,31 @@ import { sendPostRemoveCollector, sendPostBulkRemoveCollectors } from '../../../
 
 import { AgentRemoveCollectorModal } from '.';
 
-jest.mock('../../../../hooks', () => ({
-  ...jest.requireActual('../../../../hooks'),
-  sendPostRemoveCollector: jest.fn().mockResolvedValue({}),
-  sendPostBulkRemoveCollectors: jest.fn().mockResolvedValue({}),
-  useStartServices: jest.fn().mockReturnValue({
-    notifications: {
-      toasts: {
-        addSuccess: jest.fn(),
-        addError: jest.fn(),
-      },
-    },
-  }),
-}));
+vi.mock('../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../hooks')),
+      sendPostRemoveCollector: vi.fn().mockResolvedValue({}),
+      sendPostBulkRemoveCollectors: vi.fn().mockResolvedValue({}),
+      useStartServices: vi.fn().mockReturnValue({
+        notifications: {
+          toasts: {
+            addSuccess: vi.fn(),
+            addError: vi.fn(),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSendPostRemoveCollector = sendPostRemoveCollector as jest.Mock;
-const mockSendPostBulkRemoveCollectors = sendPostBulkRemoveCollectors as jest.Mock;
+const mockSendPostRemoveCollector = sendPostRemoveCollector as Mock;
+const mockSendPostBulkRemoveCollectors = sendPostBulkRemoveCollectors as Mock;
 
 describe('AgentRemoveCollectorModal', () => {
-  const mockOnClose = jest.fn();
+  const mockOnClose = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   function render(props: Partial<React.ComponentProps<typeof AgentRemoveCollectorModal>> = {}) {
@@ -157,10 +163,10 @@ describe('AgentRemoveCollectorModal', () => {
   });
 
   it('shows error toast and does not close on API failure', async () => {
-    const mockAddError = jest.fn();
-    const { useStartServices } = jest.requireMock('../../../../hooks');
+    const mockAddError = vi.fn();
+    const { useStartServices } = (await vi.importMock('../../../../hooks'));
     useStartServices.mockReturnValue({
-      notifications: { toasts: { addSuccess: jest.fn(), addError: mockAddError } },
+      notifications: { toasts: { addSuccess: vi.fn(), addError: mockAddError } },
     });
     mockSendPostRemoveCollector.mockRejectedValueOnce(new Error('network error'));
 

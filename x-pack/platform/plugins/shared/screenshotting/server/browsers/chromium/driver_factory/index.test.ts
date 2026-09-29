@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
@@ -14,7 +16,7 @@ import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs';
 import { DEFAULT_VIEWPORT, HeadlessChromiumDriverFactory } from '.';
 
-jest.mock('puppeteer');
+vi.mock('puppeteer');
 
 describe('HeadlessChromiumDriverFactory', () => {
   const path = 'path/to/headless_shell';
@@ -38,29 +40,29 @@ describe('HeadlessChromiumDriverFactory', () => {
     let pageClosed = false;
 
     mockBrowser = {
-      newPage: jest.fn().mockResolvedValue({
-        target: jest.fn(() => ({
-          createCDPSession: jest.fn().mockResolvedValue({
-            send: jest.fn(),
+      newPage: vi.fn().mockResolvedValue({
+        target: vi.fn(() => ({
+          createCDPSession: vi.fn().mockResolvedValue({
+            send: vi.fn(),
           }),
         })),
-        emulateTimezone: jest.fn(),
-        setDefaultTimeout: jest.fn(),
-        isClosed: jest.fn(() => {
+        emulateTimezone: vi.fn(),
+        setDefaultTimeout: vi.fn(),
+        isClosed: vi.fn(() => {
           return pageClosed;
         }),
       }),
-      close: jest.fn(() => {
+      close: vi.fn(() => {
         pageClosed = true;
       }),
-      process: jest.fn(),
+      process: vi.fn(),
     } as unknown as puppeteer.Browser;
-    jest.spyOn(puppeteer, 'launch').mockResolvedValue(mockBrowser);
+    vi.spyOn(puppeteer, 'launch').mockResolvedValue(mockBrowser);
 
     factory = new HeadlessChromiumDriverFactory(screenshotMode, config, logger, path, '');
-    jest.spyOn(factory, 'getBrowserLogger').mockReturnValue(Rx.EMPTY);
-    jest.spyOn(factory, 'getProcessLogger').mockReturnValue(Rx.EMPTY);
-    jest.spyOn(factory, 'getPageExit').mockReturnValue(Rx.EMPTY);
+    vi.spyOn(factory, 'getBrowserLogger').mockReturnValue(Rx.EMPTY);
+    vi.spyOn(factory, 'getProcessLogger').mockReturnValue(Rx.EMPTY);
+    vi.spyOn(factory, 'getPageExit').mockReturnValue(Rx.EMPTY);
   });
 
   describe('createPage', () => {
@@ -80,7 +82,7 @@ describe('HeadlessChromiumDriverFactory', () => {
     });
 
     it('rejects if Puppeteer launch fails', async () => {
-      jest.spyOn(puppeteer, 'launch').mockRejectedValue(`Puppeteer Launch mock fail.`);
+      vi.spyOn(puppeteer, 'launch').mockRejectedValue(`Puppeteer Launch mock fail.`);
 
       await expect(() =>
         factory

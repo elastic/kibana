@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -14,22 +17,25 @@ import { TestProviders } from '../../../../../common/mock';
 import { useWorkflowEditorLink } from '../../../use_workflow_editor_link';
 import type { StepExecutionWithLink } from '../../types';
 
-jest.mock('../../../use_workflow_editor_link');
-jest.mock('../../live_timer', () => ({
-  LiveTimer: jest.fn(({ render: renderProp, startedAt }) => {
-    if (renderProp != null) {
-      return (
-        <span data-test-subj="liveTimer" data-started-at={startedAt ?? ''}>
-          {renderProp({ formattedDuration: '5s', liveTimeMs: 5000 })}
-        </span>
-      );
-    }
+vi.mock('../../../use_workflow_editor_link');
+vi.mock('../../live_timer', () => {
+      const mocked = {
+      LiveTimer: vi.fn(({ render: renderProp, startedAt }) => {
+        if (renderProp != null) {
+          return (
+            <span data-test-subj="liveTimer" data-started-at={startedAt ?? ''}>
+              {renderProp({ formattedDuration: '5s', liveTimeMs: 5000 })}
+            </span>
+          );
+        }
 
-    return <span data-test-subj="liveTimer" data-started-at={startedAt ?? ''} />;
-  }),
-}));
+        return <span data-test-subj="liveTimer" data-started-at={startedAt ?? ''} />;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWorkflowEditorLink = useWorkflowEditorLink as jest.Mock;
+const mockUseWorkflowEditorLink = useWorkflowEditorLink as Mock;
 
 const createMockStep = (overrides: Partial<StepExecutionWithLink> = {}): StepExecutionWithLink => ({
   error: undefined,
@@ -56,10 +62,10 @@ const createMockStep = (overrides: Partial<StepExecutionWithLink> = {}): StepExe
 
 describe('GroupedAlertRetrievalContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: 'http://localhost:5601/app/workflows/workflow-123',
-      navigateToEditor: jest.fn(),
+      navigateToEditor: vi.fn(),
       resolvedWorkflowId: null,
     });
   });

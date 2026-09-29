@@ -5,63 +5,78 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import React from 'react';
 import { HostLinuxAutoDetectPage } from '../linux_auto_detect_page';
 import { buildFetchError, renderWithHostPageProviders } from './test_helpers';
 
-jest.mock('../../../quickstart_flows/auto_detect/steps', () => ({
-  AutoDetectInstallStep: () => <div data-test-subj="autoDetectInstallStep" />,
-  AutoDetectVisualizeStep: () => <div data-test-subj="autoDetectVisualizeStep" />,
-}));
+vi.mock('../../../quickstart_flows/auto_detect/steps', () => {
+      const mocked = {
+      AutoDetectInstallStep: () => <div data-test-subj="autoDetectInstallStep" />,
+      AutoDetectVisualizeStep: () => <div data-test-subj="autoDetectVisualizeStep" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../quickstart_flows/shared/empty_prompt', () => ({
-  EmptyPrompt: ({
-    onboardingFlowType,
-    inline,
-  }: {
-    onboardingFlowType: string;
-    inline?: boolean;
-  }) => (
-    <div
-      data-test-subj="emptyPromptStub"
-      data-onboarding-flow-type={onboardingFlowType}
-      data-inline={inline ? 'true' : 'false'}
-    />
-  ),
-}));
+vi.mock('../../../quickstart_flows/shared/empty_prompt', () => {
+      const mocked = {
+      EmptyPrompt: ({
+        onboardingFlowType,
+        inline,
+      }: {
+        onboardingFlowType: string;
+        inline?: boolean;
+      }) => (
+        <div
+          data-test-subj="emptyPromptStub"
+          data-onboarding-flow-type={onboardingFlowType}
+          data-inline={inline ? 'true' : 'false'}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../quickstart_flows/auto_detect/use_onboarding_flow', () => ({
-  useOnboardingFlow: jest.fn().mockReturnValue({
-    status: 'notStarted',
-    data: undefined,
-    error: undefined,
-    refetch: jest.fn(),
-    installedIntegrations: [],
-  }),
-  DASHBOARDS: {},
-}));
+vi.mock('../../../quickstart_flows/auto_detect/use_onboarding_flow', () => {
+      const mocked = {
+      useOnboardingFlow: vi.fn().mockReturnValue({
+        status: 'notStarted',
+        data: undefined,
+        error: undefined,
+        refetch: vi.fn(),
+        installedIntegrations: [],
+      }),
+      DASHBOARDS: {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useOnboardingFlow: useOnboardingFlowMock } = jest.requireMock(
-  '../../../quickstart_flows/auto_detect/use_onboarding_flow'
-);
+const { useOnboardingFlow: useOnboardingFlowMock } = (await vi.importMock('../../../quickstart_flows/auto_detect/use_onboarding_flow'));
 
-jest.mock('../../../shared/use_flow_breadcrumbs', () => ({
-  useFlowBreadcrumb: jest.fn(),
-}));
+vi.mock('../../../shared/use_flow_breadcrumbs', () => {
+      const mocked = {
+      useFlowBreadcrumb: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/ebt-tools', () => ({
-  usePerformanceContext: () => ({
-    onPageReady: jest.fn(),
-    onPageRefreshStart: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      usePerformanceContext: () => ({
+        onPageReady: vi.fn(),
+        onPageRefreshStart: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const DEFAULT_FLOW_STATE = {
   status: 'notStarted',
   data: undefined,
   error: undefined,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
   installedIntegrations: [],
 };
 

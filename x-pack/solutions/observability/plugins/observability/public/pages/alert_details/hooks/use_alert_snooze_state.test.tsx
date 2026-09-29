@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,18 +17,18 @@ import type { TopAlert } from '../../../typings/alerts';
 import { useKibana } from '../../../utils/kibana_react';
 import { useAlertSnoozeState } from './use_alert_snooze_state';
 
-jest.mock('../../../utils/kibana_react');
-jest.mock('@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule');
+vi.mock('../../../utils/kibana_react');
+vi.mock('@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule');
 
-const mockGetAlertSnoozeStateByRule = getAlertSnoozeStateByRule as jest.MockedFunction<
+const mockGetAlertSnoozeStateByRule = getAlertSnoozeStateByRule as MockedFunction<
   typeof getAlertSnoozeStateByRule
 >;
 
 const RULE_ID = 'rule-1';
 const INSTANCE_ID = 'instance-1';
 
-const http = { post: jest.fn() };
-const notifications = { toasts: { addError: jest.fn(), addSuccess: jest.fn() } };
+const http = { post: vi.fn() };
+const notifications = { toasts: { addError: vi.fn(), addSuccess: vi.fn() } };
 
 const buildAlert = (ruleId?: string, instanceId?: string): TopAlert =>
   ({
@@ -50,8 +53,8 @@ const snoozedInstance = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  (useKibana as jest.Mock).mockReturnValue({ services: { http, notifications } });
+  vi.clearAllMocks();
+  (useKibana as Mock).mockReturnValue({ services: { http, notifications } });
 });
 
 describe('useAlertSnoozeState', () => {

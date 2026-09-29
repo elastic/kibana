@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -21,34 +23,46 @@ let mockAgentBuilderSkillsRequirements = {
 };
 let mockIsLicenseValid = true;
 
-jest.mock('@kbn/content-list-provider', () => {
-  const actual = jest.requireActual('@kbn/content-list-provider');
+vi.mock('@kbn/content-list-provider', async () => {
+  const actual = (await vi.importActual('@kbn/content-list-provider'));
   return {
     ...actual,
     useContentListPhase: () => mockPhase,
   };
 });
 
-jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
-  useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
-}));
+vi.mock('../../hooks/use_alerting_v2_experimental_features', () => {
+      const mocked = {
+      useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
-  useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
-  useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
-}));
+vi.mock('../../hooks/use_are_agent_builder_skills_available', () => {
+      const mocked = {
+      useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
+      useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_is_action_policies_license_valid', () => ({
-  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
-}));
+vi.mock('../../hooks/use_is_action_policies_license_valid', () => {
+      const mocked = {
+      useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di-browser', () => ({
-  ...jest.requireActual('@kbn/core-di-browser'),
-  useService: () => ({ capabilities: {}, getUrlForApp: jest.fn() }),
-}));
+vi.mock('@kbn/core-di-browser', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/core-di-browser')),
+      useService: () => ({ capabilities: {}, getUrlForApp: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const onCreatePolicy = jest.fn();
-const onCreateWithAgent = jest.fn();
+const onCreatePolicy = vi.fn();
+const onCreateWithAgent = vi.fn();
 
 const renderHeader = (props?: Partial<React.ComponentProps<typeof ActionPoliciesListHeader>>) =>
   render(
@@ -64,7 +78,7 @@ const renderHeader = (props?: Partial<React.ComponentProps<typeof ActionPolicies
 
 describe('ActionPoliciesListHeader', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockPhase = 'populated';
     mockExperimentalFeaturesEnabled = true;
     mockAreAgentBuilderSkillsAvailable = true;

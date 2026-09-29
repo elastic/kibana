@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -35,12 +37,12 @@ describe('[CCR API] Unfollow follower index/indices', () => {
   it('unfollows a single item', async () => {
     const routeContextMock = mockRouteContext({
       ccr: {
-        pauseFollow: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
-        unfollow: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+        pauseFollow: vi.fn().mockResolvedValueOnce({ acknowledge: true }),
+        unfollow: vi.fn().mockResolvedValueOnce({ acknowledge: true }),
       },
       indices: {
-        close: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
-        open: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+        close: vi.fn().mockResolvedValueOnce({ acknowledge: true }),
+        open: vi.fn().mockResolvedValueOnce({ acknowledge: true }),
       },
     });
 
@@ -56,24 +58,24 @@ describe('[CCR API] Unfollow follower index/indices', () => {
   it('unfollows multiple items', async () => {
     const routeContextMock = mockRouteContext({
       ccr: {
-        pauseFollow: jest
+        pauseFollow: vi
           .fn()
           .mockResolvedValueOnce({ acknowledge: true }) // a
           .mockResolvedValueOnce({ acknowledge: true }) // b
           .mockResolvedValueOnce({ acknowledge: true }), // c
-        unfollow: jest
+        unfollow: vi
           .fn()
           .mockResolvedValueOnce({ acknowledge: true }) // a
           .mockResolvedValueOnce({ acknowledge: true }) // b
           .mockResolvedValueOnce({ acknowledge: true }), // c
       },
       indices: {
-        close: jest
+        close: vi
           .fn()
           .mockResolvedValueOnce({ acknowledge: true }) // a
           .mockResolvedValueOnce({ acknowledge: true }) // b
           .mockResolvedValueOnce({ acknowledge: true }), // c
-        open: jest
+        open: vi
           .fn()
           .mockResolvedValueOnce({ acknowledge: true }) // a
           .mockResolvedValueOnce({ acknowledge: true }) // b
@@ -93,18 +95,18 @@ describe('[CCR API] Unfollow follower index/indices', () => {
   it('returns partial errors', async () => {
     const routeContextMock = mockRouteContext({
       ccr: {
-        pauseFollow: jest
+        pauseFollow: vi
           .fn()
           .mockResolvedValueOnce({ acknowledge: true }) // a
           .mockResolvedValueOnce({ acknowledge: true }), // B
-        unfollow: jest.fn().mockResolvedValueOnce({ acknowledge: true }), // a
+        unfollow: vi.fn().mockResolvedValueOnce({ acknowledge: true }), // a
       },
       indices: {
-        close: jest
+        close: vi
           .fn()
           .mockResolvedValueOnce({ acknowledge: true }) // a
           .mockRejectedValueOnce(mockError), // b
-        open: jest.fn().mockResolvedValueOnce({ acknowledge: true }), // a
+        open: vi.fn().mockResolvedValueOnce({ acknowledge: true }), // a
       },
     });
 

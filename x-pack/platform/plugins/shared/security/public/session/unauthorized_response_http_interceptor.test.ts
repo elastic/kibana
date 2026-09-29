@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import fetchMock from 'fetch-mock';
 
 import type { HttpSetup } from '@kbn/core/public';
@@ -16,7 +18,7 @@ import { UnauthorizedResponseHttpInterceptor } from './unauthorized_response_htt
 import { SESSION_ERROR_REASON_HEADER } from '../../common/constants';
 import { LogoutReason } from '../../common/types';
 
-jest.mock('./session_expired');
+vi.mock('./session_expired');
 
 const drainPromiseQueue = () => {
   return new Promise((resolve) => {
@@ -60,7 +62,7 @@ for (const reason of [
     const http = setupHttp('/foo');
     const sessionExpired = new SessionExpired(application, `${http.basePath}/logout`, tenant);
     const logoutPromise = new Promise<void>((resolve) => {
-      jest.spyOn(sessionExpired, 'logout').mockImplementation(() => resolve());
+      vi.spyOn(sessionExpired, 'logout').mockImplementation(() => resolve());
     });
     const interceptor = new UnauthorizedResponseHttpInterceptor(
       sessionExpired,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { UserProfilesProvider } from '@kbn/content-management-user-profiles';
@@ -15,7 +17,7 @@ import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import type { ActivityViewProps } from './activity_view';
 import { ActivityView as ActivityViewComponent } from './activity_view';
 
-const mockGetUserProfile = jest.fn(async (uid: string) => ({
+const mockGetUserProfile = vi.fn(async (uid: string) => ({
   uid,
   enabled: true,
   data: {},
@@ -27,7 +29,7 @@ const ActivityView = (props: ActivityViewProps) => {
   return (
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
-        <UserProfilesProvider bulkGetUserProfiles={jest.fn()} getUserProfile={mockGetUserProfile}>
+        <UserProfilesProvider bulkGetUserProfiles={vi.fn()} getUserProfile={mockGetUserProfile}>
           <ActivityViewComponent {...props} />
         </UserProfilesProvider>
       </QueryClientProvider>

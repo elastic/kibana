@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, Subject } from 'rxjs';
 import { createEsqlDataSource } from '../../../common/data_sources';
 import { addLog } from '../../utils/add_log';
@@ -15,7 +17,7 @@ import { createContextAwarenessMocks } from '../__mocks__';
 import type { ComposableProfile } from '../composable_profile';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../toolkit';
 
-jest.mock('../../utils/add_log');
+vi.mock('../../utils/add_log');
 
 let mocks = createContextAwarenessMocks();
 
@@ -35,10 +37,10 @@ const esqlProfileParams = {
 
 describe('ProfilesManager', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mocks = createContextAwarenessMocks();
-    jest.spyOn(mocks.scopedEbtManagerMock, 'updateProfilesContextWith');
-    jest.spyOn(mocks.scopedEbtManagerMock, 'trackContextualProfileResolvedEvent');
+    vi.spyOn(mocks.scopedEbtManagerMock, 'updateProfilesContextWith');
+    vi.spyOn(mocks.scopedEbtManagerMock, 'trackContextualProfileResolvedEvent');
   });
 
   it('should return default profiles', () => {
@@ -72,7 +74,7 @@ describe('ProfilesManager', () => {
   });
 
   it('should report a profile change on the first data source resolution even when it resolves to the default context', async () => {
-    jest
+    vi
       .spyOn(mocks.dataSourceProfileProviderMock, 'resolve')
       .mockResolvedValueOnce({ isMatch: false });
 
@@ -131,12 +133,12 @@ describe('ProfilesManager', () => {
 
   it('should expose profiles as an observable', async () => {
     const scopedProfilesManager = createScopedProfilesManager();
-    const getProfilesSpy = jest.spyOn(scopedProfilesManager, 'getProfiles');
+    const getProfilesSpy = vi.spyOn(scopedProfilesManager, 'getProfiles');
     const record = scopedProfilesManager.resolveDocumentProfile({
       record: mocks.contextRecordMock,
     });
     const profiles$ = scopedProfilesManager.getProfiles$({ record });
-    const next = jest.fn();
+    const next = vi.fn();
     profiles$.subscribe(next);
     expect(getProfilesSpy).toHaveBeenCalledTimes(1);
     expect(next).toHaveBeenCalledWith([
@@ -205,7 +207,7 @@ describe('ProfilesManager', () => {
     });
     let profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([toAppliedProfile(mocks.rootProfileProviderMock.profile), {}, {}]);
-    const resolveSpy = jest.spyOn(mocks.rootProfileProviderMock, 'resolve');
+    const resolveSpy = vi.spyOn(mocks.rootProfileProviderMock, 'resolve');
     resolveSpy.mockRejectedValue(new Error('Failed to resolve'));
     await mocks.profilesManagerMock.resolveRootProfile({ solutionNavId: 'newSolutionNavId' });
     expect(addLog).toHaveBeenCalledWith(
@@ -225,7 +227,7 @@ describe('ProfilesManager', () => {
       toAppliedProfile(mocks.dataSourceProfileProviderMock.profile),
       {},
     ]);
-    const resolveSpy = jest.spyOn(mocks.dataSourceProfileProviderMock, 'resolve');
+    const resolveSpy = vi.spyOn(mocks.dataSourceProfileProviderMock, 'resolve');
     resolveSpy.mockRejectedValue(new Error('Failed to resolve'));
     await scopedProfilesManager.resolveDataSourceProfile({
       dataSource: createEsqlDataSource(),
@@ -246,7 +248,7 @@ describe('ProfilesManager', () => {
     });
     let profiles = scopedProfilesManager.getProfiles({ record });
     expect(profiles).toEqual([{}, {}, toAppliedProfile(mocks.documentProfileProviderMock.profile)]);
-    const resolveSpy = jest.spyOn(mocks.documentProfileProviderMock, 'resolve');
+    const resolveSpy = vi.spyOn(mocks.documentProfileProviderMock, 'resolve');
     resolveSpy.mockImplementation(() => {
       throw new Error('Failed to resolve');
     });
@@ -270,7 +272,7 @@ describe('ProfilesManager', () => {
     const newContext = await mocks.rootProfileProviderMock.resolve({
       solutionNavId: 'newSolutionNavId',
     });
-    const resolveSpy = jest.spyOn(mocks.rootProfileProviderMock, 'resolve');
+    const resolveSpy = vi.spyOn(mocks.rootProfileProviderMock, 'resolve');
     resolveSpy.mockClear();
     const resolvedDeferredResult$ = new Subject();
     const deferredResult = firstValueFrom(resolvedDeferredResult$).then(() => context);
@@ -314,7 +316,7 @@ describe('ProfilesManager', () => {
       dataSource: createEsqlDataSource(),
       query: { esql: 'from logs-*' },
     });
-    const resolveSpy = jest.spyOn(mocks.dataSourceProfileProviderMock, 'resolve');
+    const resolveSpy = vi.spyOn(mocks.dataSourceProfileProviderMock, 'resolve');
     resolveSpy.mockClear();
     const resolvedDeferredResult$ = new Subject();
     const deferredResult = firstValueFrom(resolvedDeferredResult$).then(() => context);

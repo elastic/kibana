@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -19,10 +21,10 @@ import { Status } from '../../../../../../common/types/api';
 import { SyncsContextMenu } from './syncs_context_menu';
 
 describe('SyncsContextMenu', () => {
-  const startSync = jest.fn();
-  const startIncrementalSync = jest.fn();
-  const startAccessControlSync = jest.fn();
-  const cancelSyncs = jest.fn();
+  const startSync = vi.fn();
+  const startIncrementalSync = vi.fn();
+  const startAccessControlSync = vi.fn();
+  const cancelSyncs = vi.fn();
 
   const mockValues = {
     hasDocumentLevelSecurityFeature: false,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
 
@@ -43,33 +46,39 @@ import { EsApiKeyStrategy } from './api_key_strategy';
 import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
 import { taskExecutionControlServiceMock } from './execution_control/task_execution_control_service.mock';
 
-const resetInFlightTasksMock = resetInFlightTasksOwnedByThisNode as jest.MockedFunction<
+const resetInFlightTasksMock = resetInFlightTasksOwnedByThisNode as MockedFunction<
   typeof resetInFlightTasksOwnedByThisNode
 >;
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
-jest.mock('./queries/task_claiming', () => {
+vi.mock('./queries/task_claiming', () => {
   return {
-    TaskClaiming: jest.fn().mockImplementation(() => {
+    TaskClaiming: vi.fn().mockImplementation(() => {
       return mockTaskClaiming;
     }),
   };
 });
 
-jest.mock('./constants', () => ({
-  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report', 'quickReport'],
-}));
+vi.mock('./constants', () => {
+      const mocked = {
+      CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report', 'quickReport'],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./lib/task_reconciliation', () => ({
-  resetInFlightTasksOwnedByThisNode: jest.fn(),
-}));
+vi.mock('./lib/task_reconciliation', () => {
+      const mocked = {
+      resetInFlightTasksOwnedByThisNode: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./task_running', () => {
-  const actual = jest.requireActual('./task_running');
+vi.mock('./task_running', async () => {
+  const actual = (await vi.importActual('./task_running'));
   return {
     ...actual,
-    TaskManagerRunner: jest.fn(),
+    TaskManagerRunner: vi.fn(),
   };
 });
 
@@ -85,7 +94,7 @@ interface EsError extends Error {
   };
 }
 
-const eventLoggerMock = { logEvent: jest.fn() } as unknown as TaskEventLogger;
+const eventLoggerMock = { logEvent: vi.fn() } as unknown as TaskEventLogger;
 
 describe('TaskPollingLifecycle', () => {
   let clock: sinon.SinonFakeTimers;
@@ -164,8 +173,8 @@ describe('TaskPollingLifecycle', () => {
 
   beforeEach(() => {
     mockTaskClaiming = taskClaimingMock.create({});
-    (TaskClaiming as jest.Mock<TaskClaimingClass>).mockClear();
-    (TaskManagerRunner as jest.Mock).mockClear();
+    (TaskClaiming as Mock<TaskClaimingClass>).mockClear();
+    (TaskManagerRunner as Mock).mockClear();
     resetInFlightTasksMock.mockReset().mockResolvedValue(undefined);
     clock = sinon.useFakeTimers();
   });
@@ -178,12 +187,12 @@ describe('TaskPollingLifecycle', () => {
         title: 'report',
         maxConcurrency: 1,
         cost: TaskCost.ExtraLarge,
-        createTaskRunner: jest.fn(),
+        createTaskRunner: vi.fn(),
       },
       quickReport: {
         title: 'quickReport',
         maxConcurrency: 5,
-        createTaskRunner: jest.fn(),
+        createTaskRunner: vi.fn(),
       },
     });
 
@@ -274,7 +283,7 @@ describe('TaskPollingLifecycle', () => {
         startingCapacity: 40,
       });
 
-      const taskClaimingGetCapacity = (TaskClaiming as jest.Mock<TaskClaimingClass>).mock
+      const taskClaimingGetCapacity = (TaskClaiming as Mock<TaskClaimingClass>).mock
         .calls[0][0].getAvailableCapacity;
 
       expect(taskClaimingGetCapacity()).toEqual(80);
@@ -350,7 +359,7 @@ describe('TaskPollingLifecycle', () => {
         executionControlService,
         elasticsearchAndSOAvailability$,
       });
-      const cancelSpy = jest.spyOn(pollingLifecycle.pool, 'cancelRunningTasks');
+      const cancelSpy = vi.spyOn(pollingLifecycle.pool, 'cancelRunningTasks');
 
       executionControlService.state.next({ paused: true, pausedTaskTypes: [] });
 
@@ -365,7 +374,7 @@ describe('TaskPollingLifecycle', () => {
         executionControlService,
         elasticsearchAndSOAvailability$,
       });
-      const cancelByTypesSpy = jest.spyOn(pollingLifecycle.pool, 'cancelRunningTasksByTypes');
+      const cancelByTypesSpy = vi.spyOn(pollingLifecycle.pool, 'cancelRunningTasksByTypes');
 
       executionControlService.state.next({ paused: false, pausedTaskTypes: ['foo'] });
 
@@ -383,7 +392,7 @@ describe('TaskPollingLifecycle', () => {
         executionControlService,
         elasticsearchAndSOAvailability$,
       });
-      const cancelSpy = jest.spyOn(pollingLifecycle.pool, 'cancelRunningTasks');
+      const cancelSpy = vi.spyOn(pollingLifecycle.pool, 'cancelRunningTasks');
 
       executionControlService.state.next({ paused: false, pausedTaskTypes: [] });
 
@@ -738,8 +747,8 @@ describe('TaskPollingLifecycle', () => {
 
       elasticsearchAndSOAvailability$.next(true);
 
-      const capacitySubscription = jest.fn();
-      const pollIntervalSubscription = jest.fn();
+      const capacitySubscription = vi.fn();
+      const pollIntervalSubscription = vi.fn();
 
       taskPollingLifecycle.capacityConfiguration$.subscribe(capacitySubscription);
       taskPollingLifecycle.pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
@@ -767,7 +776,7 @@ describe('TaskPollingLifecycle', () => {
     });
 
     test('stores the enrichFakeRequest option on the lifecycle instance', () => {
-      const enrichFakeRequest = jest.fn();
+      const enrichFakeRequest = vi.fn();
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       const lifecycle = new TaskPollingLifecycle({
         ...taskManagerOpts,
@@ -781,7 +790,7 @@ describe('TaskPollingLifecycle', () => {
     });
 
     test('forwards enrichFakeRequest to TaskManagerRunner when creating a runner for a task', () => {
-      const enrichFakeRequest = jest.fn();
+      const enrichFakeRequest = vi.fn();
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       const lifecycle = new TaskPollingLifecycle({
         ...taskManagerOpts,

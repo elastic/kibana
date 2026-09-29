@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@testing-library/jest-dom';
 
 import React from 'react';
@@ -133,17 +136,20 @@ const inferenceEndpoints = [
 const elasticDescription = 'Runs on GPUs (token-based billing)';
 const elasticsearchDescription = 'Runs on ML Nodes (resource-based billing)';
 
-jest.mock('../../hooks/use_delete_endpoint', () => ({
-  useDeleteEndpoint: () => ({
-    mutate: jest.fn().mockImplementation(() => Promise.resolve()), // Mock implementation of the mutate function
-  }),
-}));
+vi.mock('../../hooks/use_delete_endpoint', () => {
+      const mocked = {
+      useDeleteEndpoint: () => ({
+        mutate: vi.fn().mockImplementation(() => Promise.resolve()), // Mock implementation of the mutate function
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const actual = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...actual,
-    useKibana: jest.fn(() => ({
+    useKibana: vi.fn(() => ({
       services: {
         cloud: { isCloudEnabled: false },
         application: {
@@ -151,15 +157,15 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
             cloudConnect: { show: true, configure: true },
             searchInferenceEndpoints: { show: true, manage: true },
           },
-          navigateToApp: jest.fn(),
+          navigateToApp: vi.fn(),
         },
-        uiSettings: { get: jest.fn().mockReturnValue(true) },
+        uiSettings: { get: vi.fn().mockReturnValue(true) },
       },
     })),
   };
 });
 
-const mockUseKibana = jest.requireMock('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
+const mockUseKibana = (await vi.importMock('@kbn/kibana-react-plugin/public')).useKibana as Mock;
 
 const renderTabularPageWithProviders = () => {
   return render(
@@ -431,9 +437,9 @@ describe('When the tabular page is loaded', () => {
               cloudConnect: { show: true, configure: true },
               searchInferenceEndpoints: { show: true, manage: false },
             },
-            navigateToApp: jest.fn(),
+            navigateToApp: vi.fn(),
           },
-          uiSettings: { get: jest.fn().mockReturnValue(true) },
+          uiSettings: { get: vi.fn().mockReturnValue(true) },
         },
       });
       window.history.pushState({}, '', '?groupBy=none');

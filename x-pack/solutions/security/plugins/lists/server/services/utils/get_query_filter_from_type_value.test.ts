@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { QueryFilterType } from './get_query_filter_from_type_value';
 import {
   getEmptyQuery,
@@ -16,11 +18,11 @@ import {
 
 describe('get_query_filter_from_type_value', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getQueryFilterFromTypeValue', () => {

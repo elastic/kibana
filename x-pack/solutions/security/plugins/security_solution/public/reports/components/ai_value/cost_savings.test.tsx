@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { CostSavings } from './cost_savings';
@@ -13,21 +16,30 @@ import { ComparePercentageBadge } from './compare_percentage_badge';
 import { getTimeRangeAsDays, formatDollars } from './metrics';
 
 // Mock dependencies
-jest.mock('./cost_savings_metric', () => ({
-  CostSavingsMetric: jest.fn(() => <div data-test-subj="mock-cost-savings-metric" />),
-}));
+vi.mock('./cost_savings_metric', () => {
+      const mocked = {
+      CostSavingsMetric: vi.fn(() => <div data-test-subj="mock-cost-savings-metric" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./compare_percentage_badge', () => ({
-  ComparePercentageBadge: jest.fn(() => <div data-test-subj="mock-compare-percentage-badge" />),
-}));
+vi.mock('./compare_percentage_badge', () => {
+      const mocked = {
+      ComparePercentageBadge: vi.fn(() => <div data-test-subj="mock-compare-percentage-badge" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./metrics', () => ({
-  getTimeRangeAsDays: jest.fn(),
-  formatDollars: jest.fn(),
-}));
+vi.mock('./metrics', () => {
+      const mocked = {
+      getTimeRangeAsDays: vi.fn(),
+      formatDollars: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetTimeRangeAsDays = getTimeRangeAsDays as jest.MockedFunction<typeof getTimeRangeAsDays>;
-const mockFormatDollars = formatDollars as jest.MockedFunction<typeof formatDollars>;
+const mockGetTimeRangeAsDays = getTimeRangeAsDays as MockedFunction<typeof getTimeRangeAsDays>;
+const mockFormatDollars = formatDollars as MockedFunction<typeof formatDollars>;
 
 const defaultProps = {
   isSample: false as const,
@@ -41,7 +53,7 @@ const defaultProps = {
 
 describe('CostSavings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockGetTimeRangeAsDays.mockReturnValue('30');
     mockFormatDollars.mockReturnValue('$4,000');
@@ -91,7 +103,7 @@ describe('CostSavings', () => {
 
   it('memoizes timerange calculation based on from and to props', () => {
     const { rerender } = render(<CostSavings {...defaultProps} />);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     rerender(<CostSavings {...defaultProps} />);
     expect(mockGetTimeRangeAsDays).not.toHaveBeenCalled();
     rerender(

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -34,7 +36,7 @@ const mockRequest = {
 };
 describe('getDefendInsight', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should get defend insight by id successfully', async () => {

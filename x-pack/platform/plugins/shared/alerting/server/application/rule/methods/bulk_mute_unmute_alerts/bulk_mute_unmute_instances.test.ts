@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { RulesClientContext } from '../../../../rules_client';
 import { bulkGetRulesSo, bulkUpdateRuleSo } from '../../../../data/rule';
@@ -12,45 +15,57 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { retryIfBulkEditConflicts } from '../../../../rules_client/common';
 import { bulkMuteUnmuteInstances } from './bulk_mute_unmute_instances';
 
-jest.mock('../../../../data/rule', () => ({
-  bulkGetRulesSo: jest.fn(),
-  bulkUpdateRuleSo: jest.fn(),
-}));
-const bulkGetRulesSoMock = bulkGetRulesSo as jest.Mock;
-const bulkUpdateRuleSoMock = bulkUpdateRuleSo as jest.Mock;
+vi.mock('../../../../data/rule', () => {
+      const mocked = {
+      bulkGetRulesSo: vi.fn(),
+      bulkUpdateRuleSo: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const bulkGetRulesSoMock = bulkGetRulesSo as Mock;
+const bulkUpdateRuleSoMock = bulkUpdateRuleSo as Mock;
 
-jest.mock('../../../../rules_client/common', () => ({
-  ...jest.requireActual('../../../../rules_client/common'),
-  retryIfBulkEditConflicts: jest.fn(),
-}));
-const retryIfBulkEditConflictsMock = retryIfBulkEditConflicts as jest.Mock;
+vi.mock('../../../../rules_client/common', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../rules_client/common')),
+      retryIfBulkEditConflicts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const retryIfBulkEditConflictsMock = retryIfBulkEditConflicts as Mock;
 
-jest.mock('./transforms/transform_rule_mute_instance_ids', () => ({
-  transformMuteRequestToRuleAttributes: jest.fn(),
-}));
+vi.mock('./transforms/transform_rule_mute_instance_ids', () => {
+      const mocked = {
+      transformMuteRequestToRuleAttributes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./transforms/transform_rule_unmute_instance_ids', () => ({
-  transformUnmuteRequestToRuleAttributes: jest.fn(),
-}));
+vi.mock('./transforms/transform_rule_unmute_instance_ids', () => {
+      const mocked = {
+      transformUnmuteRequestToRuleAttributes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('bulkMuteUnmuteInstances', () => {
-  const loggerErrorMock = jest.fn();
+  const loggerErrorMock = vi.fn();
   const unsecuredSavedObjectsClient = savedObjectsRepositoryMock.create();
-  const auditLoggerMock = { log: jest.fn() };
-  const authorizationMock = { bulkEnsureAuthorized: jest.fn() };
-  const actionsAuthorizationMock = { ensureAuthorized: jest.fn() };
-  const ruleTypeRegistryMock = { ensureRuleTypeEnabled: jest.fn() };
-  const getAlertIndicesAliasMock = jest.fn().mockReturnValue(['.alerts-default']);
-  const muteAlertInstancesMock = jest.fn();
-  const unmuteAlertInstancesMock = jest.fn();
+  const auditLoggerMock = { log: vi.fn() };
+  const authorizationMock = { bulkEnsureAuthorized: vi.fn() };
+  const actionsAuthorizationMock = { ensureAuthorized: vi.fn() };
+  const ruleTypeRegistryMock = { ensureRuleTypeEnabled: vi.fn() };
+  const getAlertIndicesAliasMock = vi.fn().mockReturnValue(['.alerts-default']);
+  const muteAlertInstancesMock = vi.fn();
+  const unmuteAlertInstancesMock = vi.fn();
   const alertsServiceMock = {
-    isExistingAlert: jest.fn(),
+    isExistingAlert: vi.fn(),
     muteAlertInstances: muteAlertInstancesMock,
     unmuteAlertInstances: unmuteAlertInstancesMock,
   };
 
   const context = {
-    logger: { error: loggerErrorMock, debug: jest.fn() },
+    logger: { error: loggerErrorMock, debug: vi.fn() },
     unsecuredSavedObjectsClient,
     authorization: authorizationMock,
     actionsAuthorization: actionsAuthorizationMock,
@@ -63,7 +78,7 @@ describe('bulkMuteUnmuteInstances', () => {
   } as unknown as RulesClientContext;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     getAlertIndicesAliasMock.mockReturnValue(['.alerts-default']);
     retryIfBulkEditConflictsMock.mockImplementation(async (logger, description, thing) => thing());
   });

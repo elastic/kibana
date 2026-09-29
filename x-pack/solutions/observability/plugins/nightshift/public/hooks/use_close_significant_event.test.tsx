@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -16,12 +19,12 @@ import {
 } from './use_fetch_significant_events';
 import { useCloseSignificantEvent } from './use_close_significant_event';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
-const significantEventsFetch = jest.fn();
-const addSuccess = jest.fn();
-const addError = jest.fn();
+const mockUseKibana = useKibana as Mock;
+const significantEventsFetch = vi.fn();
+const addSuccess = vi.fn();
+const addError = vi.fn();
 
 const event: SignificantEvent = {
   '@timestamp': '2026-07-24T09:42:00.000Z',
@@ -37,7 +40,7 @@ const event: SignificantEvent = {
 
 describe('useCloseSignificantEvent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     significantEventsFetch.mockResolvedValue({
       event_uuid: 'event-1-v2',
       updated: 1,

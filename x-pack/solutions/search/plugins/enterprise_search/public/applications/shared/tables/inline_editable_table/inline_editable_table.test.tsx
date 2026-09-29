@@ -5,16 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-jest.mock('./get_updated_columns', () => ({
-  getUpdatedColumns: jest.fn(),
-}));
-jest.mock('../reorderable_table', () => ({
-  ReorderableTable: jest.fn(() => null),
-}));
+vi.mock('./get_updated_columns', () => {
+      const mocked = {
+      getUpdatedColumns: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../reorderable_table', () => {
+      const mocked = {
+      ReorderableTable: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { screen } from '@testing-library/react';
 
@@ -39,24 +48,24 @@ interface Foo {
 
 describe('InlineEditableTable', () => {
   const mockValues = {};
-  const mockActions = { editNewItem: jest.fn(), reorderItems: jest.fn() };
+  const mockActions = { editNewItem: vi.fn(), reorderItems: vi.fn() };
 
-  const MockReorderableTable = jest.mocked(ReorderableTable);
+  const MockReorderableTable = vi.mocked(ReorderableTable);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues(mockValues);
     setMockActions(mockActions);
   });
 
   it('wraps the table in a bound logic, and passes through only required props to the underlying component', () => {
     const instanceId = 'MyInstance';
-    const onAdd = jest.fn();
-    const onDelete = jest.fn();
-    const onReorder = jest.fn();
-    const onUpdate = jest.fn();
-    const transformItem = jest.fn();
-    const validateItem = jest.fn();
+    const onAdd = vi.fn();
+    const onDelete = vi.fn();
+    const onReorder = vi.fn();
+    const onUpdate = vi.fn();
+    const transformItem = vi.fn();
+    const validateItem = vi.fn();
 
     renderWithKibanaRenderContext(
       <InlineEditableTable
@@ -203,7 +212,7 @@ describe('InlineEditableTable', () => {
     const lastItemWarning = 'A warning';
     const uneditableItems: Foo[] = [];
 
-    (getUpdatedColumns as jest.Mock).mockReturnValue(updatedColumns);
+    (getUpdatedColumns as Mock).mockReturnValue(updatedColumns);
     renderWithKibanaRenderContext(
       <InlineEditableTableContents
         {...requiredParams}

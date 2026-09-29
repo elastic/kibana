@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
@@ -14,9 +17,9 @@ import { API_VERSIONS, buildRespondToActionUrl } from '@kbn/inbox-common';
 import { queryKeys } from '../query_keys';
 import { useRespondToInboxAction } from './use_respond_to_inbox_action';
 
-jest.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createClient = () => new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
@@ -27,10 +30,10 @@ const createWrapper = (queryClient: QueryClient = createClient()): FC<PropsWithC
 };
 
 describe('useRespondToInboxAction', () => {
-  let httpPost: jest.Mock;
+  let httpPost: Mock;
 
   beforeEach(() => {
-    httpPost = jest.fn().mockResolvedValue({ ok: true });
+    httpPost = vi.fn().mockResolvedValue({ ok: true });
     useKibanaMock.mockReturnValue({
       services: { http: { post: httpPost } },
     } as unknown as ReturnType<typeof useKibana>);
@@ -104,7 +107,7 @@ describe('useRespondToInboxAction', () => {
     // (pending row gone, history row added with `response_mode:
     // 'responded'`) — no client-side optimistic shuffling needed.
     const queryClient = createClient();
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useRespondToInboxAction(), {
       wrapper: createWrapper(queryClient),
@@ -128,7 +131,7 @@ describe('useRespondToInboxAction', () => {
     // from the step doc — better than holding a stale local cache.
     httpPost.mockRejectedValueOnce(new Error('boom'));
     const queryClient = createClient();
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useRespondToInboxAction(), {
       wrapper: createWrapper(queryClient),

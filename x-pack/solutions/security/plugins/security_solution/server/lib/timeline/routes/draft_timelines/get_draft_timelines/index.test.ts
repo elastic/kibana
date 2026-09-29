@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { TimelineTypeEnum } from '../../../../../../common/api/timeline';
 
@@ -26,59 +29,68 @@ describe('get draft timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
   let securitySetup: SecurityPluginSetup;
   let context: SecuritySolutionRequestHandlerContextMock;
-  let mockGetTimeline: jest.Mock;
-  let mockGetDraftTimeline: jest.Mock;
-  let mockPersistTimeline: jest.Mock;
-  let mockPersistPinnedEventOnTimeline: jest.Mock;
-  let mockPersistNote: jest.Mock;
+  let mockGetTimeline: Mock;
+  let mockGetDraftTimeline: Mock;
+  let mockPersistTimeline: Mock;
+  let mockPersistPinnedEventOnTimeline: Mock;
+  let mockPersistNote: Mock;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     server = serverMock.create();
     context = requestContextMock.createTools().context;
 
     securitySetup = {
       authc: {
-        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
+        getCurrentUser: vi.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
     } as unknown as SecurityPluginSetup;
 
-    mockGetTimeline = jest.fn();
-    mockGetDraftTimeline = jest.fn();
-    mockPersistTimeline = jest.fn();
-    mockPersistPinnedEventOnTimeline = jest.fn();
-    mockPersistNote = jest.fn();
+    mockGetTimeline = vi.fn();
+    mockGetDraftTimeline = vi.fn();
+    mockPersistTimeline = vi.fn();
+    mockPersistPinnedEventOnTimeline = vi.fn();
+    mockPersistNote = vi.fn();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('Manipulate timeline', () => {
     describe('Create a new timeline', () => {
       beforeEach(async () => {
-        jest.doMock('../../../saved_object/timelines', () => ({
-          getTimeline: mockGetTimeline,
-          getDraftTimeline: mockGetDraftTimeline,
-          persistTimeline: mockPersistTimeline.mockReturnValue({
-            code: 200,
-            timeline: createTimelineWithTimelineId,
-          }),
-        }));
+        vi.doMock('../../../saved_object/timelines', () => {
+              const mocked = {
+                      getTimeline: mockGetTimeline,
+                      getDraftTimeline: mockGetDraftTimeline,
+                      persistTimeline: mockPersistTimeline.mockReturnValue({
+                        code: 200,
+                        timeline: createTimelineWithTimelineId,
+                      }),
+                    };
+              return { ...mocked, default: mocked };
+            });
 
-        jest.doMock('../../../saved_object/pinned_events', () => ({
-          persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
-        }));
+        vi.doMock('../../../saved_object/pinned_events', () => {
+              const mocked = {
+                      persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
+                    };
+              return { ...mocked, default: mocked };
+            });
 
-        jest.doMock('../../../saved_object/notes', () => ({
-          persistNote: mockPersistNote,
-        }));
+        vi.doMock('../../../saved_object/notes', () => {
+              const mocked = {
+                      persistNote: mockPersistNote,
+                    };
+              return { ...mocked, default: mocked };
+            });
 
-        const getDraftTimelinesRoute = jest.requireActual('.').getDraftTimelinesRoute;
+        const getDraftTimelinesRoute = (await vi.importActual('.')).getDraftTimelinesRoute;
         getDraftTimelinesRoute(server.router, createMockConfig(), securitySetup);
       });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
@@ -14,18 +17,21 @@ import {
   createCalibratedEsqlEquivalenceEvaluator,
 } from './esql_functional_equivalence';
 
-jest.mock('@kbn/inference-prompt-utils', () => ({
-  executeUntilValid: jest.fn(),
-}));
+vi.mock('@kbn/inference-prompt-utils', () => {
+      const mocked = {
+      executeUntilValid: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockExecuteUntilValid = executeUntilValid as jest.MockedFunction<typeof executeUntilValid>;
+const mockExecuteUntilValid = executeUntilValid as MockedFunction<typeof executeUntilValid>;
 
 const makeLog = (): ToolingLog =>
   ({
-    error: jest.fn(),
-    warning: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
+    error: vi.fn(),
+    warning: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
   } as unknown as ToolingLog);
 
 const params = (output: string, expected: string) => ({

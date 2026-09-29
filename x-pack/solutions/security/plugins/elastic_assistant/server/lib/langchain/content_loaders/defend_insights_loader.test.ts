@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { Document } from '@langchain/core/documents';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -12,15 +15,15 @@ import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_d
 import { appContextService } from '../../../services/app_context';
 import { getDefendInsightsDocsCount, loadDefendInsights } from './defend_insights_loader';
 
-jest.mock('../../../services/app_context');
+vi.mock('../../../services/app_context');
 
 const mockKbDataClient = {
-  addKnowledgeBaseDocuments: jest.fn().mockResolvedValue([{ foo: 'bar' }]),
+  addKnowledgeBaseDocuments: vi.fn().mockResolvedValue([{ foo: 'bar' }]),
 } as unknown as AIAssistantKnowledgeBaseDataClient;
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
-mockedAppContextService.getRegisteredFeatures.mockImplementation(() => {
-  const original = jest.requireActual('../../../services/app_context');
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
+mockedAppContextService.getRegisteredFeatures.mockImplementation(async () => {
+  const original = (await vi.importActual('../../../services/app_context'));
   return {
     ...original.appContextService.getRegisteredFeatures(),
     defendInsightsPolicyResponseFailure: true,
@@ -29,7 +32,7 @@ mockedAppContextService.getRegisteredFeatures.mockImplementation(() => {
 
 describe('defend_insights_loader', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('loadDefendInsights loads documents', async () => {
@@ -38,7 +41,7 @@ describe('defend_insights_loader', () => {
     expect(result).toBe(true);
     expect(mockKbDataClient.addKnowledgeBaseDocuments).toHaveBeenCalled();
 
-    const args = (mockKbDataClient.addKnowledgeBaseDocuments as jest.Mock).mock.calls as Array<
+    const args = (mockKbDataClient.addKnowledgeBaseDocuments as Mock).mock.calls as Array<
       Array<{
         documents: Document[];
       }>

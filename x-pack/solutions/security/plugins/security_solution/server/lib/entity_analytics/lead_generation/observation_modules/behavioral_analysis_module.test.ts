@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createBehavioralAnalysisModule } from './behavioral_analysis_module';
@@ -79,7 +81,7 @@ describe('BehavioralAnalysisModule', () => {
   const alertsIndexPattern = '.alerts-security.alerts-default';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient.search.mockResolvedValue(createAlertAggResponse() as never);
   });
 

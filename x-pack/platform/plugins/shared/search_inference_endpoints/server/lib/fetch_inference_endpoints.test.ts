@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { fetchInferenceEndpoints } from './fetch_inference_endpoints';
@@ -41,13 +43,13 @@ describe('fetch indices', () => {
     },
   ];
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const mockClient = {
     asCurrentUser: {
       inference: {
-        get: jest.fn(),
+        get: vi.fn(),
       },
     },
   };

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { updateConnectorSecret } from './update_connector_secret';
@@ -14,13 +16,13 @@ import { updateConnectorSecret } from './update_connector_secret';
 describe('updateConnectorSecret lib function', () => {
   const mockClient = {
     transport: {
-      request: jest.fn(),
+      request: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   it('should update a connector secret', async () => {
@@ -38,6 +40,6 @@ describe('updateConnectorSecret lib function', () => {
         value: 'my-secret',
       },
     });
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });

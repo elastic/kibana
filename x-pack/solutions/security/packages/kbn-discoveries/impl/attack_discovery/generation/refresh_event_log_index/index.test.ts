@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 
 import { refreshEventLogIndex } from '.';
 
 describe('refreshEventLogIndex', () => {
   it('refreshes the event log index', async () => {
-    const refresh = jest.fn().mockResolvedValue(undefined);
+    const refresh = vi.fn().mockResolvedValue(undefined);
 
     const coreStart = {
       elasticsearch: {
@@ -31,8 +33,8 @@ describe('refreshEventLogIndex', () => {
       coreStart,
       eventLogIndex: '.kibana-event-log-test',
       logger: {
-        error: jest.fn(),
-        info: jest.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
       } as unknown as Logger,
       request: {} as KibanaRequest,
     });
@@ -45,12 +47,12 @@ describe('refreshEventLogIndex', () => {
   });
 
   it('uses the provided esClient instead of creating one from request', async () => {
-    const refresh = jest.fn().mockResolvedValue(undefined);
+    const refresh = vi.fn().mockResolvedValue(undefined);
     const preAuthenticatedEsClient = {
       indices: { refresh },
     };
 
-    const asScopedMock = jest.fn();
+    const asScopedMock = vi.fn();
     const coreStart = {
       elasticsearch: {
         client: {
@@ -66,8 +68,8 @@ describe('refreshEventLogIndex', () => {
       >[0]['esClient'],
       eventLogIndex: '.kibana-event-log-test',
       logger: {
-        error: jest.fn(),
-        info: jest.fn(),
+        error: vi.fn(),
+        info: vi.fn(),
       } as unknown as Logger,
       request: {} as KibanaRequest,
     });
@@ -83,7 +85,7 @@ describe('refreshEventLogIndex', () => {
   });
 
   it('logs an error when refreshing fails', async () => {
-    const loggerError = jest.fn();
+    const loggerError = vi.fn();
 
     const coreStart = {
       elasticsearch: {
@@ -91,7 +93,7 @@ describe('refreshEventLogIndex', () => {
           asScoped: () => ({
             asCurrentUser: {
               indices: {
-                refresh: jest.fn().mockRejectedValue(new Error('nope')),
+                refresh: vi.fn().mockRejectedValue(new Error('nope')),
               },
             },
           }),
@@ -104,7 +106,7 @@ describe('refreshEventLogIndex', () => {
       eventLogIndex: '.kibana-event-log-test',
       logger: {
         error: loggerError,
-        info: jest.fn(),
+        info: vi.fn(),
       } as unknown as Logger,
       request: {} as KibanaRequest,
     });

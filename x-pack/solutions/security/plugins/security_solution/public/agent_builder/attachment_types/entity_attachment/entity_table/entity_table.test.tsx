@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -20,22 +23,25 @@ import {
 import { EntityAnalyticsAgentNavigationProvider } from '../../entity_analytics_agent_navigation_context';
 import { EntityTable } from './entity_table';
 
-jest.mock('../use_entity_for_attachment', () => ({
-  useEntityForAttachment: jest.fn(),
-}));
+vi.mock('../use_entity_for_attachment', () => {
+      const mocked = {
+      useEntityForAttachment: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../entity_explore_navigation', () => {
-  const actual = jest.requireActual('../../entity_explore_navigation');
+vi.mock('../../entity_explore_navigation', async () => {
+  const actual = (await vi.importActual('../../entity_explore_navigation'));
   return {
     ...actual,
-    navigateToEntityAnalyticsWithFlyoutInApp: jest.fn(),
-    navigateToEntityAnalyticsHomePageInApp: jest.fn(),
+    navigateToEntityAnalyticsWithFlyoutInApp: vi.fn(),
+    navigateToEntityAnalyticsHomePageInApp: vi.fn(),
   };
 });
 
-const mockedUseEntityForAttachment = useEntityForAttachment as jest.Mock;
-const mockedNavigateToFlyout = navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock;
-const mockedNavigateToHome = navigateToEntityAnalyticsHomePageInApp as jest.Mock;
+const mockedUseEntityForAttachment = useEntityForAttachment as Mock;
+const mockedNavigateToFlyout = navigateToEntityAnalyticsWithFlyoutInApp as Mock;
+const mockedNavigateToHome = navigateToEntityAnalyticsHomePageInApp as Mock;
 
 const baseEntityData = (override: Partial<EntityForAttachment> = {}): EntityForAttachment => ({
   entityType: EntityType.host,
@@ -79,12 +85,12 @@ const renderTable = (
 
 describe('EntityTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseEntityForAttachment.mockReturnValue({
       data: baseEntityData(),
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
   });
 
@@ -107,7 +113,7 @@ describe('EntityTable', () => {
     });
 
     it('renders when application is provided to the navigation provider', () => {
-      const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
+      const application = { navigateToApp: vi.fn() } as unknown as ApplicationStart;
       renderTable({ application });
       const buttons = screen.getAllByTestId('entityAttachmentTableOpenEntity');
       expect(buttons.length).toBeGreaterThan(0);
@@ -121,9 +127,9 @@ describe('EntityTable', () => {
         }),
         isLoading: false,
         error: null,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
-      const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
+      const application = { navigateToApp: vi.fn() } as unknown as ApplicationStart;
 
       renderTable({
         entities: [{ identifierType: 'host', identifier: 'host-1' }],
@@ -159,9 +165,9 @@ describe('EntityTable', () => {
         }),
         isLoading: false,
         error: null,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
-      const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
+      const application = { navigateToApp: vi.fn() } as unknown as ApplicationStart;
 
       renderTable({
         entities: [{ identifierType: 'user', identifier: 'bob' }],
@@ -195,9 +201,9 @@ describe('EntityTable', () => {
         }),
         isLoading: false,
         error: null,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
-      const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
+      const application = { navigateToApp: vi.fn() } as unknown as ApplicationStart;
 
       renderTable({
         entities: [{ identifierType: 'service', identifier: 'auth-svc' }],
@@ -222,8 +228,8 @@ describe('EntityTable', () => {
     });
 
     it('forwards the searchSession prop to navigateToEntityAnalyticsWithFlyoutInApp when clicked', () => {
-      const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
-      const searchSession = { clear: jest.fn() } as unknown as ISessionService;
+      const application = { navigateToApp: vi.fn() } as unknown as ApplicationStart;
+      const searchSession = { clear: vi.fn() } as unknown as ISessionService;
 
       renderTable({
         entities: [{ identifierType: 'host', identifier: 'host-1' }],
@@ -242,9 +248,9 @@ describe('EntityTable', () => {
         data: null,
         isLoading: true,
         error: null,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
-      const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
+      const application = { navigateToApp: vi.fn() } as unknown as ApplicationStart;
 
       renderTable({
         entities: [{ identifierType: 'user', identifier: 'bob', entityStoreId: 'user:bob@local' }],
@@ -271,10 +277,10 @@ describe('EntityTable', () => {
         data: null,
         isLoading: false,
         error: null,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
-      const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
-      const searchSession = { clear: jest.fn() } as unknown as ISessionService;
+      const application = { navigateToApp: vi.fn() } as unknown as ApplicationStart;
+      const searchSession = { clear: vi.fn() } as unknown as ISessionService;
 
       renderTable({
         entities: [{ identifierType: 'host', identifier: 'orphan-host' }],
@@ -295,9 +301,9 @@ describe('EntityTable', () => {
         data: null,
         isLoading: false,
         error: null,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
-      const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
+      const application = { navigateToApp: vi.fn() } as unknown as ApplicationStart;
 
       renderTable({
         entities: [
@@ -340,7 +346,7 @@ describe('EntityTable', () => {
           }),
           isLoading: false,
           error: null,
-          refetch: jest.fn(),
+          refetch: vi.fn(),
         },
         [storeIdB]: {
           data: baseEntityData({
@@ -350,7 +356,7 @@ describe('EntityTable', () => {
           }),
           isLoading: false,
           error: null,
-          refetch: jest.fn(),
+          refetch: vi.fn(),
         },
       };
 
@@ -360,11 +366,11 @@ describe('EntityTable', () => {
             data: null,
             isLoading: false,
             error: null,
-            refetch: jest.fn(),
+            refetch: vi.fn(),
           }
       );
 
-      const application = { navigateToApp: jest.fn() } as unknown as ApplicationStart;
+      const application = { navigateToApp: vi.fn() } as unknown as ApplicationStart;
 
       renderTable({
         entities: [
@@ -402,7 +408,7 @@ describe('EntityTable', () => {
         data: null,
         isLoading: true,
         error: null,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       renderTable({ entities: identifiers });

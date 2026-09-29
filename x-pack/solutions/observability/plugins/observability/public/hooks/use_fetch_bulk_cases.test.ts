@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { useFetchBulkCases } from './use_fetch_bulk_cases';
 import { waitFor, renderHook } from '@testing-library/react';
 import { kibanaStartMock } from '../utils/kibana_react.mock';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
-jest.mock('../utils/kibana_react', () => ({
+vi.mock('../utils/kibana_react', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+  useKibana: vi.fn(() => mockUseKibanaReturnValue),
 }));
 
 describe('Bulk Get Cases API hook', () => {

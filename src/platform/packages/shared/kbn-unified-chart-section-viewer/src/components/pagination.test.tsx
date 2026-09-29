@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { Pagination } from './pagination';
@@ -15,7 +17,7 @@ import { METRICS_GRID_PAGINATION_DATA_TEST_SUBJ } from '../common/constants';
 
 describe('Pagination', () => {
   it('renders EuiPagination when totalPages > 1', () => {
-    const onPageChange = jest.fn();
+    const onPageChange = vi.fn();
     const { getByTestId } = render(
       <Pagination totalPages={3} currentPage={0} onPageChange={onPageChange} />,
       { wrapper: IntlProvider }
@@ -25,7 +27,7 @@ describe('Pagination', () => {
   });
 
   it('does not render when totalPages <= 1', () => {
-    const onPageChange = jest.fn();
+    const onPageChange = vi.fn();
     const { queryByTestId: queryByTestId1 } = render(
       <Pagination totalPages={1} currentPage={0} onPageChange={onPageChange} />,
       { wrapper: IntlProvider }
@@ -42,7 +44,7 @@ describe('Pagination', () => {
   });
 
   it('calls onPageChange to correct out-of-range page on mount', () => {
-    const onPageChange = jest.fn();
+    const onPageChange = vi.fn();
     render(<Pagination totalPages={3} currentPage={5} onPageChange={onPageChange} />, {
       wrapper: IntlProvider,
     });
@@ -51,7 +53,7 @@ describe('Pagination', () => {
   });
 
   it('calls onPageChange to correct out-of-range page when totalPages changes', () => {
-    const onPageChange = jest.fn();
+    const onPageChange = vi.fn();
     const { rerender } = render(
       <Pagination totalPages={5} currentPage={4} onPageChange={onPageChange} />,
       { wrapper: IntlProvider }
@@ -65,7 +67,7 @@ describe('Pagination', () => {
   });
 
   it('does not call onPageChange when currentPage is within range', () => {
-    const onPageChange = jest.fn();
+    const onPageChange = vi.fn();
     render(<Pagination totalPages={3} currentPage={1} onPageChange={onPageChange} />, {
       wrapper: IntlProvider,
     });
@@ -74,7 +76,7 @@ describe('Pagination', () => {
   });
 
   it('does not call onPageChange when totalPages is 0', () => {
-    const onPageChange = jest.fn();
+    const onPageChange = vi.fn();
     render(<Pagination totalPages={0} currentPage={5} onPageChange={onPageChange} />, {
       wrapper: IntlProvider,
     });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
@@ -25,7 +27,7 @@ describe('AnalyticsNoDataPageComponent', () => {
     hasDataView: async () => false,
     kibanaGuideDocLink: 'http://www.test.com',
   };
-  const onDataViewCreated = jest.fn();
+  const onDataViewCreated = vi.fn();
 
   it('renders correctly', async () => {
     const component = renderWithI18n(

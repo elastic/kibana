@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getSuitableIcon } from '../helpers/style_choices';
 import { fetchTopNodes } from './fetch_top_nodes';
 
@@ -12,7 +14,7 @@ const icon = getSuitableIcon('');
 
 describe('fetch_top_nodes', () => {
   it('should build terms agg', async () => {
-    const postMock = jest.fn(() => Promise.resolve({ resp: {} }));
+    const postMock = vi.fn(() => Promise.resolve({ resp: {} }));
     await fetchTopNodes(postMock as any, 'test', [
       {
         color: '',
@@ -65,7 +67,7 @@ describe('fetch_top_nodes', () => {
   });
 
   it('should map result to nodes', async () => {
-    const postMock = jest.fn(() =>
+    const postMock = vi.fn(() =>
       Promise.resolve({
         resp: {
           aggregations: {

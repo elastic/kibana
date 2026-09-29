@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, within } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -29,8 +31,8 @@ const mockServices = {
     },
   },
   application: {
-    navigateToUrl: jest.fn(),
-    navigateToApp: jest.fn(),
+    navigateToUrl: vi.fn(),
+    navigateToApp: vi.fn(),
     getUrlForApp: () => '#',
   },
 };

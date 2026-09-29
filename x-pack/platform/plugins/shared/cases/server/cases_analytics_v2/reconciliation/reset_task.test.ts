@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -25,8 +28,8 @@ import {
   scheduleResetTask,
 } from './reset_task';
 
-jest.mock('./reset_runner');
-const mockRunFullReset = runFullReset as jest.MockedFunction<typeof runFullReset>;
+vi.mock('./reset_runner');
+const mockRunFullReset = runFullReset as MockedFunction<typeof runFullReset>;
 
 // Minimal successful result shape; individual tests override the slots
 // they care about. `processed` counts and cursors flow into the final
@@ -69,7 +72,7 @@ const setupRunner = (tmStart: TaskManagerStartContract, signal = new AbortContro
     }),
   });
 
-  const registerFn = (taskManager as unknown as { registerTaskDefinitions: jest.Mock })
+  const registerFn = (taskManager as unknown as { registerTaskDefinitions: Mock })
     .registerTaskDefinitions;
   const definitions = registerFn.mock.calls[0][0];
   const definition = definitions[RESET_TASK_TYPE];
@@ -83,7 +86,7 @@ const setupRunner = (tmStart: TaskManagerStartContract, signal = new AbortContro
 
 describe('reset_task', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('registerResetTask', () => {
@@ -111,7 +114,7 @@ describe('reset_task', () => {
 
       // Initial leading-edge flush so /state shows `running` immediately.
       expect(tmStart.bulkUpdateState).toHaveBeenCalled();
-      const [ids, updater] = (tmStart.bulkUpdateState as jest.Mock).mock.calls[0];
+      const [ids, updater] = (tmStart.bulkUpdateState as Mock).mock.calls[0];
       expect(ids).toEqual([RESET_TASK_ID]);
       const initial = (updater as (s: unknown) => Record<string, unknown>)({});
       expect(initial.phase).toBe('running');
@@ -226,7 +229,7 @@ describe('reset_task', () => {
     it('treats a progress-write failure as non-fatal and still completes the walk', async () => {
       const tmStart = taskManagerMock.createStart();
       // A 404/409 on the advisory progress write must not fail the reset.
-      (tmStart.bulkUpdateState as jest.Mock).mockRejectedValue(new Error('version conflict'));
+      (tmStart.bulkUpdateState as Mock).mockRejectedValue(new Error('version conflict'));
       mockRunFullReset.mockResolvedValue(successResult());
 
       const { run, logger } = setupRunner(tmStart);
@@ -244,7 +247,7 @@ describe('reset_task', () => {
     it('removes any in-flight reset then schedules a fresh one-shot on the singleton id', async () => {
       const taskManager = taskManagerMock.createStart();
       const logger = loggerMock.create();
-      (taskManager.schedule as jest.Mock).mockResolvedValue({ id: RESET_TASK_ID });
+      (taskManager.schedule as Mock).mockResolvedValue({ id: RESET_TASK_ID });
 
       const result = await scheduleResetTask({ taskManager, logger });
 
@@ -263,8 +266,8 @@ describe('reset_task', () => {
     it('warns but still schedules when removing the prior reset fails', async () => {
       const taskManager = taskManagerMock.createStart();
       const logger = loggerMock.create();
-      (taskManager.removeIfExists as jest.Mock).mockRejectedValue(new Error('remove failed'));
-      (taskManager.schedule as jest.Mock).mockResolvedValue({ id: RESET_TASK_ID });
+      (taskManager.removeIfExists as Mock).mockRejectedValue(new Error('remove failed'));
+      (taskManager.schedule as Mock).mockResolvedValue({ id: RESET_TASK_ID });
 
       await scheduleResetTask({ taskManager, logger });
 
@@ -278,7 +281,7 @@ describe('reset_task', () => {
       const taskManager = taskManagerMock.createStart();
       const logger = loggerMock.create();
       const instance = { id: RESET_TASK_ID, taskType: RESET_TASK_TYPE };
-      (taskManager.get as jest.Mock).mockResolvedValue(instance);
+      (taskManager.get as Mock).mockResolvedValue(instance);
 
       await expect(fetchResetTask({ taskManager, logger })).resolves.toBe(instance);
     });
@@ -286,7 +289,7 @@ describe('reset_task', () => {
     it('maps a 404 to null (no reset scheduled) without warning', async () => {
       const taskManager = taskManagerMock.createStart();
       const logger = loggerMock.create();
-      (taskManager.get as jest.Mock).mockRejectedValue(
+      (taskManager.get as Mock).mockRejectedValue(
         Object.assign(new Error('not found'), { statusCode: 404 })
       );
 
@@ -297,7 +300,7 @@ describe('reset_task', () => {
     it('warns and returns null on a non-404 fetch failure', async () => {
       const taskManager = taskManagerMock.createStart();
       const logger = loggerMock.create();
-      (taskManager.get as jest.Mock).mockRejectedValue(new Error('cluster unavailable'));
+      (taskManager.get as Mock).mockRejectedValue(new Error('cluster unavailable'));
 
       await expect(fetchResetTask({ taskManager, logger })).resolves.toBeNull();
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));

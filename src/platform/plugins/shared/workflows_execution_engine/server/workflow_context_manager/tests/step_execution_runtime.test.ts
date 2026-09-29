@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -40,10 +43,10 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
         sizes.set(id, sizeBytes);
       }
     },
-    getStepInput: jest.fn((id: string) => inputs.get(id)),
-    getStepOutput: jest.fn((id: string) => outputs.get(id)),
-    getStepError: jest.fn((id: string) => state.getStepExecution(id)?.error),
-    getLatestStepIO: jest.fn((stepId: string) => {
+    getStepInput: vi.fn((id: string) => inputs.get(id)),
+    getStepOutput: vi.fn((id: string) => outputs.get(id)),
+    getStepError: vi.fn((id: string) => state.getStepExecution(id)?.error),
+    getLatestStepIO: vi.fn((stepId: string) => {
       const latest = state.getLatestStepExecution(stepId);
       if (!latest) return undefined;
       return {
@@ -52,18 +55,18 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
         error: latest.error,
       };
     }),
-    getDataSetVariables: jest.fn(() => ({} as Record<string, unknown>)),
-    getOutputSizeStats: jest.fn(() => {
+    getDataSetVariables: vi.fn(() => ({} as Record<string, unknown>)),
+    getOutputSizeStats: vi.fn(() => {
       let totalBytes = 0;
       for (const bytes of sizes.values()) totalBytes += bytes;
       return { totalBytes, stepCount: sizes.size };
     }),
-    hasEvictedOutputs: jest.fn().mockReturnValue(false),
-    pinOutputsForRead: jest.fn(),
-    rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
-    prepareForRead: jest.fn().mockResolvedValue(undefined),
-    releaseReadPins: jest.fn(),
-    releaseTransientlyRehydratedOutputs: jest.fn(),
+    hasEvictedOutputs: vi.fn().mockReturnValue(false),
+    pinOutputsForRead: vi.fn(),
+    rehydrateOutputs: vi.fn().mockResolvedValue(undefined),
+    prepareForRead: vi.fn().mockResolvedValue(undefined),
+    releaseReadPins: vi.fn(),
+    releaseTransientlyRehydratedOutputs: vi.fn(),
   } as unknown as StepIoService;
 }
 
@@ -92,7 +95,7 @@ describe('StepExecutionRuntime', () => {
   let mockDateNow: Date;
 
   beforeAll(() => {
-    jest.spyOn(global, 'Date').mockImplementation((...args) => {
+    vi.spyOn(global, 'Date').mockImplementation((...args) => {
       if (args.length) {
         return new originalDateCtor(...args);
       }
@@ -101,7 +104,7 @@ describe('StepExecutionRuntime', () => {
     });
   });
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   beforeEach(() => {
@@ -121,26 +124,26 @@ describe('StepExecutionRuntime', () => {
     } as EsWorkflowExecution;
 
     workflowExecutionState = {
-      getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
-      updateWorkflowExecution: jest.fn(),
-      getStepExecution: jest.fn(),
-      getLatestStepExecution: jest.fn(),
-      getStepExecutionsByStepId: jest.fn(),
-      upsertStep: jest.fn(),
-      load: jest.fn(),
-      flush: jest.fn(),
-      flushStepChanges: jest.fn(),
-      setLastFailedStepContext: jest.fn(),
-      getLastFailedStepContext: jest.fn(),
-      accumulateUsage: jest.fn(),
-      recordStepUsage: jest.fn(),
+      getWorkflowExecution: vi.fn().mockReturnValue(workflowExecution),
+      updateWorkflowExecution: vi.fn(),
+      getStepExecution: vi.fn(),
+      getLatestStepExecution: vi.fn(),
+      getStepExecutionsByStepId: vi.fn(),
+      upsertStep: vi.fn(),
+      load: vi.fn(),
+      flush: vi.fn(),
+      flushStepChanges: vi.fn(),
+      setLastFailedStepContext: vi.fn(),
+      getLastFailedStepContext: vi.fn(),
+      accumulateUsage: vi.fn(),
+      recordStepUsage: vi.fn(),
     } as unknown as WorkflowExecutionState;
 
     workflowExecutionGraph = {
       topologicalOrder: ['node1', 'node2', 'node3'],
     } as unknown as WorkflowGraph;
 
-    workflowExecutionGraph.getNode = jest.fn().mockImplementation((nodeId) => {
+    workflowExecutionGraph.getNode = vi.fn().mockImplementation((nodeId) => {
       switch (nodeId) {
         case 'node1':
           return {
@@ -179,7 +182,7 @@ describe('StepExecutionRuntime', () => {
 
   describe('step result management', () => {
     beforeEach(() => {
-      workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         id: 'testWorkflowExecutionId',
         scopeStack: [
           { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
@@ -190,7 +193,7 @@ describe('StepExecutionRuntime', () => {
     });
 
     it('should be able to retrieve the step result', () => {
-      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+      (workflowExecutionState.getStepExecution as Mock).mockReturnValue({
         stepId: 'node1',
         error: { type: 'Error', message: 'Fake error' },
       } as Partial<EsWorkflowStepExecution>);
@@ -212,7 +215,7 @@ describe('StepExecutionRuntime', () => {
 
   describe('step state management', () => {
     beforeEach(() => {
-      workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         id: 'testWorkflowExecutionId',
         scopeStack: [
           { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
@@ -232,7 +235,7 @@ describe('StepExecutionRuntime', () => {
     });
 
     it('should update the step execution with the state and be able to retrieve it', () => {
-      (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
+      (workflowExecutionState.getLatestStepExecution as Mock).mockReturnValue({
         stepId: 'node1',
         state: { success: true, data: {} },
       } as Partial<EsWorkflowStepExecution>);
@@ -248,7 +251,7 @@ describe('StepExecutionRuntime', () => {
     });
 
     it('should be able to retrieve the step state', () => {
-      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+      (workflowExecutionState.getStepExecution as Mock).mockReturnValue({
         stepId: 'fakeStepId1',
         state: { success: true, data: {} },
       } as Partial<EsWorkflowStepExecution>);
@@ -262,8 +265,8 @@ describe('StepExecutionRuntime', () => {
 
   describe('startStep', () => {
     beforeEach(() => {
-      (workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockReturnValue([]);
-      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+      (workflowExecutionState.getStepExecutionsByStepId as Mock).mockReturnValue([]);
+      (workflowExecutionState.getWorkflowExecution as Mock).mockReturnValue({
         id: 'testWorkflowExecutionId',
         currentNodeId: 'node1',
       } as Partial<EsWorkflowExecution>);
@@ -350,7 +353,7 @@ describe('StepExecutionRuntime', () => {
 
     it('should preserve startedAt when step execution already exists (e.g. poll resume)', () => {
       const originalStartedAt = '2025-08-05T00:00:00.000Z';
-      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+      (workflowExecutionState.getStepExecution as Mock).mockReturnValue({
         id: 'fake_step_execution_id',
         stepId: 'fakeStepId1',
         startedAt: originalStartedAt,
@@ -370,7 +373,7 @@ describe('StepExecutionRuntime', () => {
   describe('finishStep', () => {
     beforeEach(() => {
       mockDateNow = new Date('2025-08-06T00:00:00.000Z');
-      (workflowExecutionState.getStepExecution as jest.Mock).mockImplementation(
+      (workflowExecutionState.getStepExecution as Mock).mockImplementation(
         (stepExecutionId) => {
           if (stepExecutionId === 'fake_step_execution_id') {
             return {
@@ -380,7 +383,7 @@ describe('StepExecutionRuntime', () => {
           }
         }
       );
-      workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         id: 'testWorkflowExecutionId',
         currentNodeId: 'node1',
         scopeStack: [
@@ -405,7 +408,7 @@ describe('StepExecutionRuntime', () => {
 
     describe('step execution succeeds', () => {
       beforeEach(() => {
-        (workflowExecutionState.getStepExecution as jest.Mock).mockImplementation(
+        (workflowExecutionState.getStepExecution as Mock).mockImplementation(
           (stepExecutionId) => {
             if (stepExecutionId === 'fake_step_execution_id') {
               return {
@@ -545,7 +548,7 @@ describe('StepExecutionRuntime', () => {
 
   describe('tryEnterWaitUntil', () => {
     beforeEach(() => {
-      workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         ...workflowExecution,
         currentNodeId: 'node1',
       });
@@ -553,7 +556,7 @@ describe('StepExecutionRuntime', () => {
 
     describe('timer-based wait (resumeDate provided)', () => {
       it('should enter wait state and store resumeAt on first call', () => {
-        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+        (workflowExecutionState.getStepExecution as Mock).mockReturnValue(undefined);
 
         const resumeDate = new Date('2025-12-31T00:00:00.000Z');
         const entered = underTest.tryEnterWaitUntil(resumeDate);
@@ -568,7 +571,7 @@ describe('StepExecutionRuntime', () => {
       });
 
       it('should exit wait state and clear resumeAt when step already has resumeAt in state', () => {
-        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+        (workflowExecutionState.getStepExecution as Mock).mockReturnValue({
           status: ExecutionStatus.WAITING,
           state: { resumeAt: '2025-12-31T00:00:00.000Z' },
         } as Partial<EsWorkflowStepExecution>);
@@ -584,7 +587,7 @@ describe('StepExecutionRuntime', () => {
       it('should enter wait state even when status is WAITING but resumeAt is absent', () => {
         // Guards against the broad-detection bug: status alone must not trigger exit
         // for timer-based waits — only resumeAt is authoritative.
-        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+        (workflowExecutionState.getStepExecution as Mock).mockReturnValue({
           status: ExecutionStatus.WAITING,
           state: {},
         } as Partial<EsWorkflowStepExecution>);
@@ -597,7 +600,7 @@ describe('StepExecutionRuntime', () => {
 
     describe('indefinite wait (resumeDate omitted)', () => {
       it('should enter wait state with WAITING_FOR_INPUT status on first call', () => {
-        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+        (workflowExecutionState.getStepExecution as Mock).mockReturnValue(undefined);
 
         const entered = underTest.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
 
@@ -611,7 +614,7 @@ describe('StepExecutionRuntime', () => {
         // Simulates the resume run: stepExecution already has WAITING_FOR_INPUT status
         // and no resumeAt in state. Without the status-based check this would return true
         // (re-entering wait) instead of false (exiting wait) — the core bug being tested.
-        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+        (workflowExecutionState.getStepExecution as Mock).mockReturnValue({
           status: ExecutionStatus.WAITING_FOR_INPUT,
           state: {},
         } as Partial<EsWorkflowStepExecution>);
@@ -622,7 +625,7 @@ describe('StepExecutionRuntime', () => {
       });
 
       it('should not store resumeAt in state for indefinite waits', () => {
-        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+        (workflowExecutionState.getStepExecution as Mock).mockReturnValue(undefined);
 
         underTest.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
 
@@ -636,7 +639,7 @@ describe('StepExecutionRuntime', () => {
       it('should strip a residual resumeAt from prior state when entering an indefinite wait', () => {
         // Guards against a prior timer-based run leaving a resumeAt that leaks into
         // a subsequent indefinite wait record and confuses the scheduler.
-        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+        (workflowExecutionState.getStepExecution as Mock).mockReturnValue({
           status: ExecutionStatus.RUNNING,
           state: { resumeAt: '2025-12-31T00:00:00.000Z', otherKey: 'kept' },
         } as Partial<EsWorkflowStepExecution>);
@@ -652,7 +655,7 @@ describe('StepExecutionRuntime', () => {
 
   describe('failStep', () => {
     beforeEach(() => {
-      workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+      workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         id: 'testWorkflowExecutionId',
         scopeStack: [
           { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
@@ -724,7 +727,7 @@ describe('StepExecutionRuntime', () => {
       };
 
       // Persisted on the step execution: type + message + details:{status}; no body/headers.
-      const [persistedStep] = (workflowExecutionState.upsertStep as jest.Mock).mock.calls.at(
+      const [persistedStep] = (workflowExecutionState.upsertStep as Mock).mock.calls.at(
         -1
       ) as [EsWorkflowStepExecution];
       expect(persistedStep.error).toEqual(expectedSerializedError);
@@ -855,10 +858,10 @@ describe('StepExecutionRuntime', () => {
   describe('rehydrateStepOutputs', () => {
     it('pins the requested ids BEFORE awaiting rehydration', async () => {
       const calls: string[] = [];
-      jest.spyOn(stepIoService, 'pinOutputsForRead').mockImplementation(() => {
+      vi.spyOn(stepIoService, 'pinOutputsForRead').mockImplementation(() => {
         calls.push('pin');
       });
-      jest.spyOn(stepIoService, 'rehydrateOutputs').mockImplementation(async () => {
+      vi.spyOn(stepIoService, 'rehydrateOutputs').mockImplementation(async () => {
         calls.push('rehydrate');
       });
 
@@ -868,8 +871,8 @@ describe('StepExecutionRuntime', () => {
     });
 
     it('pins the whole requested set, not just the evicted subset', async () => {
-      const pin = jest.spyOn(stepIoService, 'pinOutputsForRead').mockImplementation(() => {});
-      jest.spyOn(stepIoService, 'rehydrateOutputs').mockImplementation(async () => {});
+      const pin = vi.spyOn(stepIoService, 'pinOutputsForRead').mockImplementation(() => {});
+      vi.spyOn(stepIoService, 'rehydrateOutputs').mockImplementation(async () => {});
 
       await underTest.rehydrateStepOutputs(['a', 'b']);
 
@@ -877,7 +880,7 @@ describe('StepExecutionRuntime', () => {
     });
 
     it('releases the pins under the same consumer id', () => {
-      const release = jest.spyOn(stepIoService, 'releaseReadPins').mockImplementation(() => {});
+      const release = vi.spyOn(stepIoService, 'releaseReadPins').mockImplementation(() => {});
 
       underTest.releaseReadOutputPins();
 

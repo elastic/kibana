@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as Rx from 'rxjs';
 
 import type { SavedObjectsRepository } from '@kbn/core/server';
@@ -23,7 +25,7 @@ const createService = () => {
   const coreStart = coreMock.createStart();
 
   const respositoryMock = {
-    get: jest.fn().mockImplementation((type, id) => {
+    get: vi.fn().mockImplementation((type, id) => {
       if (type === 'space' && id === 'foo') {
         return Promise.resolve({
           id: 'space:foo',
@@ -52,7 +54,7 @@ const createService = () => {
 
   const spacesServiceSetup = spacesService.setup();
 
-  const spacesClientService = new SpacesClientService(jest.fn(), 'traditional');
+  const spacesClientService = new SpacesClientService(vi.fn(), 'traditional');
   spacesClientService.setup({
     config$: Rx.of(spacesConfig),
   });

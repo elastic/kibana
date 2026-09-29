@@ -5,26 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useKnowledgeBase } from './use_knowledge_base';
 import { useKibana } from './use_kibana';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 
-jest.mock('./use_kibana');
-jest.mock('./use_ai_assistant_app_service');
-jest.mock('p-retry', () => {
+vi.mock('./use_kibana');
+vi.mock('./use_ai_assistant_app_service');
+vi.mock('p-retry', () => {
   return (fn: () => Promise<any>) => fn();
 });
 
 describe('useKnowledgeBase', () => {
-  const mockCallApi = jest.fn();
-  const mockSyncSavedObjects = jest.fn();
-  const mockAddError = jest.fn();
+  const mockCallApi = vi.fn();
+  const mockSyncSavedObjects = vi.fn();
+  const mockAddError = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         notifications: {
           toasts: {
@@ -41,7 +44,7 @@ describe('useKnowledgeBase', () => {
       },
     });
 
-    (useAIAssistantAppService as jest.Mock).mockReturnValue({
+    (useAIAssistantAppService as Mock).mockReturnValue({
       callApi: mockCallApi,
     });
   });

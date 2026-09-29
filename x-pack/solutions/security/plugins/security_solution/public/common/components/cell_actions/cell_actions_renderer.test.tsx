@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -14,20 +16,26 @@ import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/com
 
 import { CellActionsRenderer } from './cell_actions_renderer';
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
-const MockSecurityCellActions = jest.fn(({ children }: { children: React.ReactNode }) => (
+const MockSecurityCellActions = vi.fn(({ children }: { children: React.ReactNode }) => (
   <div data-test-subj="mockSecurityCellActions">{children}</div>
 ));
-jest.mock('.', () => ({
-  ...jest.requireActual('.'),
-  SecurityCellActions: (params: { children: React.ReactNode }) => MockSecurityCellActions(params),
-}));
+vi.mock('.', async () => {
+      const mocked = {
+      ...(await vi.importActual('.')),
+      SecurityCellActions: (params: { children: React.ReactNode }) => MockSecurityCellActions(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockSourcererScopeId = 'testSourcererScopeId';
-jest.mock('../../../helpers', () => ({
-  getSourcererScopeId: jest.fn(() => mockSourcererScopeId),
-}));
+vi.mock('../../../helpers', () => {
+      const mocked = {
+      getSourcererScopeId: vi.fn(() => mockSourcererScopeId),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('cell actions renderer', () => {
   describe('rendering', () => {
@@ -136,7 +144,7 @@ describe('cell actions renderer', () => {
     const scopeIdsNoHoverActions = [TableId.rulePreview, ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID];
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should render cell actions with the content', () => {

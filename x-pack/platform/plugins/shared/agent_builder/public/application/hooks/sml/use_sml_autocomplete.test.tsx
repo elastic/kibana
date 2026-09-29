@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -12,30 +14,39 @@ import { SmlSearchFilterType } from '@kbn/agent-builder-sml-plugin/public';
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../services/sml/constants';
 import { useSmlAutocomplete } from './use_sml_autocomplete';
 
-const mockAddError = jest.fn();
-const mockAutocomplete = jest.fn();
+const mockAddError = vi.fn();
+const mockAutocomplete = vi.fn();
 
-jest.mock('../use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      notifications: {
-        toasts: {
-          addError: mockAddError,
+vi.mock('../use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          notifications: {
+            toasts: {
+              addError: mockAddError,
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({
-    smlService: { autocomplete: mockAutocomplete },
-  }),
-}));
+vi.mock('../use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: () => ({
+        smlService: { autocomplete: mockAutocomplete },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-hooks', () => ({
-  useDebouncedValue: (value: string) => value,
-}));
+vi.mock('@kbn/react-hooks', () => {
+      const mocked = {
+      useDebouncedValue: (value: string) => value,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createWrapper = () => {
   const queryClient = new QueryClient({

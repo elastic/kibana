@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -27,24 +30,27 @@ import { updateScheduleReport } from '../apis/update_schedule_report';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { transformScheduledReport } from '../utils';
 
-jest.mock('@kbn/kibana-react-plugin/public');
-jest.mock('@kbn/reporting-public', () => ({
-  useKibana: jest.fn(),
-  ReportingAPIClient: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/reporting-public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+      ReportingAPIClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_get_user_profile_query');
-jest.mock('../apis/get_reporting_health');
-jest.mock('../apis/update_schedule_report');
+vi.mock('../hooks/use_get_user_profile_query');
+vi.mock('../apis/get_reporting_health');
+vi.mock('../apis/update_schedule_report');
 
-const mockValidateEmailAddresses = jest.fn().mockReturnValue([]);
-const mockReportingHealth = jest.mocked(getReportingHealth);
-const mockGetUserProfileQuery = jest.mocked(useGetUserProfileQuery);
-const mockedUseUiSetting = jest.mocked(useUiSetting);
-const mockUpdateScheduleReport = jest.mocked(updateScheduleReport);
+const mockValidateEmailAddresses = vi.fn().mockReturnValue([]);
+const mockReportingHealth = vi.mocked(getReportingHealth);
+const mockGetUserProfileQuery = vi.mocked(useGetUserProfileQuery);
+const mockedUseUiSetting = vi.mocked(useUiSetting);
+const mockUpdateScheduleReport = vi.mocked(updateScheduleReport);
 
 describe('EditScheduledReportFlyout', () => {
-  const onClose = jest.fn();
+  const onClose = vi.fn();
   const application = applicationServiceMock.createStartContract();
   const http = httpServiceMock.createSetupContract();
   const queryClient = new QueryClient();
@@ -74,7 +80,7 @@ describe('EditScheduledReportFlyout', () => {
   });
 
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: { ...application.capabilities, manageReporting: { show: true } },
@@ -110,12 +116,12 @@ describe('EditScheduledReportFlyout', () => {
       } as any,
     });
 
-    jest.spyOn(Date, 'now').mockReturnValue(today.getTime());
+    vi.spyOn(Date, 'now').mockReturnValue(today.getTime());
   });
 
   afterEach(() => {
     queryClient.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {

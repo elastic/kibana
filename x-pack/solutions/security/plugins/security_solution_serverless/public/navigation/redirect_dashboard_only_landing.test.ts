@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import {
@@ -16,11 +19,14 @@ import {
   subscribeDashboardOnlyLanding,
 } from './redirect_dashboard_only_landing';
 
-jest.mock('@kbn/security-solution-plugin/common', () => ({
-  ...jest.requireActual('@kbn/security-solution-plugin/common'),
-  isSecuritySolutionAccessible: ({ siemV5 }: { siemV5?: { show?: boolean } }) =>
-    Boolean(siemV5?.show),
-}));
+vi.mock('@kbn/security-solution-plugin/common', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/security-solution-plugin/common')),
+      isSecuritySolutionAccessible: ({ siemV5 }: { siemV5?: { show?: boolean } }) =>
+        Boolean(siemV5?.show),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const setCapabilities = (overrides: {
   navLinks?: Record<string, boolean>;
@@ -158,10 +164,10 @@ describe('shouldRedirectDashboardOnlyLanding', () => {
 });
 
 describe('redirectDashboardOnlyLanding', () => {
-  const navigateToApp = mockServices.application.navigateToApp as jest.Mock;
+  const navigateToApp = mockServices.application.navigateToApp as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setCapabilities({
       navLinks: {},
       siemV5: {},
@@ -233,11 +239,11 @@ describe('redirectDashboardOnlyLanding', () => {
 });
 
 describe('subscribeDashboardOnlyLanding', () => {
-  const navigateToApp = mockServices.application.navigateToApp as jest.Mock;
+  const navigateToApp = mockServices.application.navigateToApp as Mock;
   const currentLocation$ = new Subject<string>();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockServices.application.currentLocation$ = currentLocation$;
     setCapabilities({
       navLinks: {

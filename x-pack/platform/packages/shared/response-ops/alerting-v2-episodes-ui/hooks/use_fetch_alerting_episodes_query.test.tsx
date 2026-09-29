@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -21,21 +23,21 @@ import type { EpisodeDataSource } from '../types/episode_data_source';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 
-jest.mock('../apis/fetch_alerting_episodes');
+vi.mock('../apis/fetch_alerting_episodes');
 
-const fetchAlertingEpisodesMock = jest.mocked(fetchAlertingEpisodes);
+const fetchAlertingEpisodesMock = vi.mocked(fetchAlertingEpisodes);
 
 const sourceWithEpisodes = (fetchEpisodes: EpisodeDataSource['fetchEpisodes']) =>
   createTestEpisodeSource({ fetchEpisodes });
 
-jest.mock('./use_alerting_episodes_data_view');
+vi.mock('./use_alerting_episodes_data_view');
 const mockDataView = {
   fields: [{ name: '@timestamp' }, { name: 'episode.id' }],
-  setFieldCustomLabel: jest.fn(),
-  setFieldFormat: jest.fn(),
-  addRuntimeField: jest.fn(),
+  setFieldCustomLabel: vi.fn(),
+  setFieldFormat: vi.fn(),
+  addRuntimeField: vi.fn(),
 };
-const mockUseAlertingEpisodesDataView = jest
+const mockUseAlertingEpisodesDataView = vi
   .mocked(useAlertingEpisodesDataView)
   .mockReturnValue(mockDataView as unknown as DataView);
 
@@ -72,7 +74,7 @@ const wrapper = createQueryClientWrapper(queryClient);
 
 describe('useFetchAlertingEpisodesQuery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -226,7 +228,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
 
     fetchAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
 
-    const dataSource = sourceWithEpisodes(jest.fn().mockResolvedValue(sourceEpisodes));
+    const dataSource = sourceWithEpisodes(vi.fn().mockResolvedValue(sourceEpisodes));
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
       <EpisodeDataSourceProvider dataSource={dataSource}>
         {wrapper({ children })}
@@ -257,7 +259,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
 
     fetchAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
 
-    const dataSource = sourceWithEpisodes(jest.fn().mockRejectedValue(new Error('source failure')));
+    const dataSource = sourceWithEpisodes(vi.fn().mockRejectedValue(new Error('source failure')));
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
       <EpisodeDataSourceProvider dataSource={dataSource}>
         {wrapper({ children })}
@@ -304,7 +306,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
 
     fetchAlertingEpisodesMock.mockRejectedValue(v2Error);
 
-    const dataSource = sourceWithEpisodes(jest.fn().mockResolvedValue(sourceEpisodes));
+    const dataSource = sourceWithEpisodes(vi.fn().mockResolvedValue(sourceEpisodes));
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
       <EpisodeDataSourceProvider dataSource={dataSource}>
         {wrapper({ children })}
@@ -332,7 +334,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
     const sourceEpisodes: AlertEpisode[] = [
       { ...mockEpisodesData[0], 'episode.id': 'source-episode-1', supports_actions: false },
     ];
-    const dataSource = sourceWithEpisodes(jest.fn().mockResolvedValue(sourceEpisodes));
+    const dataSource = sourceWithEpisodes(vi.fn().mockResolvedValue(sourceEpisodes));
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
       <EpisodeDataSourceProvider dataSource={dataSource} queryV2Source={false}>
         {wrapper({ children })}

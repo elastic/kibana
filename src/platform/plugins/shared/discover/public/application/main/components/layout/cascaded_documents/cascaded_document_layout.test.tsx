@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { type ComponentProps, type ForwardedRef, type ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -29,14 +31,14 @@ const mockDataCascadeProps: Array<
   Pick<ComponentProps<typeof DataCascade<ESQLDataGroupNode, DataTableRecord>>, 'initialState'>
 > = [];
 
-const mockGetUISnapshotStore = jest.fn().mockReturnValue(null);
+const mockGetUISnapshotStore = vi.fn().mockReturnValue(null);
 
 const mockDataCascadeRefObject = { getUISnapshotStore: mockGetUISnapshotStore };
 
-jest.mock('@kbn/shared-ux-document-data-cascade', () => {
+vi.mock('@kbn/shared-ux-document-data-cascade', async () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const ReactLib = require('react');
-  const actual = jest.requireActual('@kbn/shared-ux-document-data-cascade');
+  const actual = (await vi.importActual('@kbn/shared-ux-document-data-cascade'));
   const MockDataCascade = ReactLib.forwardRef(function MockDataCascade(
     props: ComponentProps<typeof DataCascade<ESQLDataGroupNode, DataTableRecord>>,
     ref: ForwardedRef<DataCascadeImplRef<ESQLDataGroupNode, DataTableRecord>>
@@ -61,20 +63,26 @@ jest.mock('@kbn/shared-ux-document-data-cascade', () => {
   };
 });
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLStatsQueryMeta: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getESQLStatsQueryMeta: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils', () => ({
-  getStatsCommandToOperateOn: jest.fn().mockReturnValue(null),
-}));
+vi.mock('@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils', () => {
+      const mocked = {
+      getStatsCommandToOperateOn: vi.fn().mockReturnValue(null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-language', () => {
-  const { FunctionNames } = jest.requireActual('@kbn/esql-language');
+vi.mock('@kbn/esql-language', async () => {
+  const { FunctionNames } = (await vi.importActual('@kbn/esql-language'));
 
   return {
     EsqlQuery: {
-      fromSrc: jest.fn().mockReturnValue({}),
+      fromSrc: vi.fn().mockReturnValue({}),
     },
     FunctionNames,
     // @kbn/monaco's Console ES|QL lexer reads this eagerly at module-load time to build its
@@ -83,42 +91,45 @@ jest.mock('@kbn/esql-language', () => {
   };
 });
 
-const mockGetESQLStatsQueryMeta = jest.requireMock('@kbn/esql-utils').getESQLStatsQueryMeta;
+const mockGetESQLStatsQueryMeta = (await vi.importMock('@kbn/esql-utils')).getESQLStatsQueryMeta;
 
 const defaultQueryMeta: ESQLStatsQueryMeta = {
   groupByFields: [{ field: 'category', type: 'column' }],
   appliedFunctions: [{ identifier: 'count', aggregation: 'count' }],
 };
 
-jest.mock('./blocks', () => {
+vi.mock('./blocks', async () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const ReactLib = require('react');
-  const actual = jest.requireActual('./blocks');
+  const actual = (await vi.importActual('./blocks'));
   return {
     ...actual,
-    useEsqlDataCascadeRowHeaderComponents: jest.fn().mockReturnValue({
+    useEsqlDataCascadeRowHeaderComponents: vi.fn().mockReturnValue({
       rowActions: [],
       rowHeaderMeta: [],
       rowHeaderTitle: null,
     }),
-    useEsqlDataCascadeHeaderComponent: jest.fn().mockReturnValue(null),
+    useEsqlDataCascadeHeaderComponent: vi.fn().mockReturnValue(null),
     ESQLDataCascadeLeafCell: function MockESQLDataCascadeLeafCell() {
       return ReactLib.createElement('div', { 'data-testid': 'mock-cascade-leaf-cell' });
     },
   };
 });
 
-jest.mock('./blocks/use_row_header_components', () => ({
-  useEsqlDataCascadeRowActionHelpers: jest.fn().mockReturnValue({
-    renderRowActionPopover: () => null,
-    togglePopover: jest.fn(),
-  }),
-}));
+vi.mock('./blocks/use_row_header_components', () => {
+      const mocked = {
+      useEsqlDataCascadeRowActionHelpers: vi.fn().mockReturnValue({
+        renderRowActionPopover: () => null,
+        togglePopover: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockFetcher = (): CascadedDocumentsFetcher =>
   ({
-    fetchCascadedDocuments: jest.fn().mockResolvedValue([]),
-    cancelFetch: jest.fn(),
+    fetchCascadedDocuments: vi.fn().mockResolvedValue([]),
+    cancelFetch: vi.fn(),
   } as unknown as CascadedDocumentsFetcher);
 
 const createWrapper = async (overrides?: Partial<CascadedDocumentsContext>) => {
@@ -136,15 +147,15 @@ const createWrapper = async (overrides?: Partial<CascadedDocumentsContext>) => {
     renderViewModeToggle: undefined,
     expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(undefined),
     expandedDocOwner$: new BehaviorSubject<string | undefined>(undefined),
-    getExpandedDocSetter: jest.fn(),
-    getRenderDocumentViewMetaSetter: jest.fn(),
-    getDataCascadeUiState: jest.fn(),
-    getDataGridUiStateMap: jest.fn().mockReturnValue(undefined),
-    setDataCascadeUiState: jest.fn(),
-    setDataGridUiState: jest.fn(),
-    cascadeGroupingChangeHandler: jest.fn(),
-    onUpdateESQLQuery: jest.fn(),
-    openInNewTab: jest.fn(),
+    getExpandedDocSetter: vi.fn(),
+    getRenderDocumentViewMetaSetter: vi.fn(),
+    getDataCascadeUiState: vi.fn(),
+    getDataGridUiStateMap: vi.fn().mockReturnValue(undefined),
+    setDataCascadeUiState: vi.fn(),
+    setDataGridUiState: vi.fn(),
+    cascadeGroupingChangeHandler: vi.fn(),
+    onUpdateESQLQuery: vi.fn(),
+    openInNewTab: vi.fn(),
     ...overrides,
   };
 
@@ -189,14 +200,14 @@ const defaultLayoutProps = {
 
 describe('CascadedDocumentsLayout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockDataCascadeProps.length = 0;
     mockGetESQLStatsQueryMeta.mockReturnValue(defaultQueryMeta);
   });
 
   describe('when persistedCascadeUiState does not exist (getDataCascadeUiState returns undefined)', () => {
     it('renders the layout and DataCascade without throwing', async () => {
-      const getDataCascadeUiState = jest.fn().mockReturnValue(undefined);
+      const getDataCascadeUiState = vi.fn().mockReturnValue(undefined);
       const { Wrapper } = await createWrapper({ getDataCascadeUiState });
 
       expect(() => {
@@ -209,7 +220,7 @@ describe('CascadedDocumentsLayout', () => {
     });
 
     it('renders the cascade wrapper and mock DataCascade', async () => {
-      const getDataCascadeUiState = jest.fn().mockReturnValue(undefined);
+      const getDataCascadeUiState = vi.fn().mockReturnValue(undefined);
       const { Wrapper } = await createWrapper({ getDataCascadeUiState });
 
       render(
@@ -222,7 +233,7 @@ describe('CascadedDocumentsLayout', () => {
     });
 
     it('passes undefined initialState to DataCascade when no persisted state', async () => {
-      const getDataCascadeUiState = jest.fn().mockReturnValue(undefined);
+      const getDataCascadeUiState = vi.fn().mockReturnValue(undefined);
       const { Wrapper } = await createWrapper({ getDataCascadeUiState });
 
       render(
@@ -246,7 +257,7 @@ describe('CascadedDocumentsLayout', () => {
         rowSelection: {},
         connectedChildren: {},
       };
-      const getDataCascadeUiState = jest.fn().mockReturnValue(persistedState);
+      const getDataCascadeUiState = vi.fn().mockReturnValue(persistedState);
       const { Wrapper } = await createWrapper({ getDataCascadeUiState });
 
       render(

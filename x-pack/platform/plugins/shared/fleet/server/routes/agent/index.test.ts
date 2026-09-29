@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { FleetRequestHandlerContext } from '../..';
@@ -63,37 +66,49 @@ import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 
 import { bulkMigrateAgentsHandler, migrateSingleAgentHandler } from './migrate_handlers';
 import { changeAgentPrivilegeLevelHandler } from './change_privilege_level_handlers';
-jest.mock('./handlers', () => ({
-  ...jest.requireActual('./handlers'),
-  getAgentHandler: jest.fn(),
-  deleteAgentHandler: jest.fn(),
-  getAgentsHandler: jest.fn(),
-  getAgentTagsHandler: jest.fn(),
-  getAgentStatusForAgentPolicyHandler: jest.fn(),
-  postBulkAgentReassignHandler: jest.fn(),
-  getAgentDataHandler: jest.fn(),
-  bulkUpdateAgentTagsHandler: jest.fn(),
-  getAvailableVersionsHandler: jest.fn(),
-  getActionStatusHandler: jest.fn(),
-  getAgentUploadsHandler: jest.fn(),
-  getAgentUploadFileHandler: jest.fn(),
-  deleteAgentUploadFileHandler: jest.fn(),
-  postAgentReassignHandler: jest.fn(),
-  postRetrieveAgentsByActionsHandler: jest.fn(),
-}));
+vi.mock('./handlers', async () => {
+      const mocked = {
+      ...(await vi.importActual('./handlers')),
+      getAgentHandler: vi.fn(),
+      deleteAgentHandler: vi.fn(),
+      getAgentsHandler: vi.fn(),
+      getAgentTagsHandler: vi.fn(),
+      getAgentStatusForAgentPolicyHandler: vi.fn(),
+      postBulkAgentReassignHandler: vi.fn(),
+      getAgentDataHandler: vi.fn(),
+      bulkUpdateAgentTagsHandler: vi.fn(),
+      getAvailableVersionsHandler: vi.fn(),
+      getActionStatusHandler: vi.fn(),
+      getAgentUploadsHandler: vi.fn(),
+      getAgentUploadFileHandler: vi.fn(),
+      deleteAgentUploadFileHandler: vi.fn(),
+      postAgentReassignHandler: vi.fn(),
+      postRetrieveAgentsByActionsHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./migrate_handlers', () => ({
-  migrateSingleAgentHandler: jest.fn(),
-  bulkMigrateAgentsHandler: jest.fn(),
-}));
+vi.mock('./migrate_handlers', () => {
+      const mocked = {
+      migrateSingleAgentHandler: vi.fn(),
+      bulkMigrateAgentsHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./change_privilege_level_handlers', () => ({
-  changeAgentPrivilegeLevelHandler: jest.fn(),
-}));
+vi.mock('./change_privilege_level_handlers', () => {
+      const mocked = {
+      changeAgentPrivilegeLevelHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./actions_handlers', () => ({
-  postNewAgentActionHandlerBuilder: jest.fn(),
-}));
+vi.mock('./actions_handlers', () => {
+      const mocked = {
+      postNewAgentActionHandlerBuilder: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;
@@ -191,7 +206,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       item: agent,
     };
-    (getAgentHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getAgentHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getAgentHandler(context, {} as any, response);
@@ -207,7 +222,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       action: 'deleted',
     };
-    (deleteAgentHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (deleteAgentHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await deleteAgentHandler(context, {} as any, response);
@@ -223,7 +238,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       actionId: 'id',
     };
-    (bulkUpdateAgentTagsHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (bulkUpdateAgentTagsHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await bulkUpdateAgentTagsHandler(context, {} as any, response);
@@ -255,7 +270,7 @@ describe('schema validation', () => {
         uninstalled: 1,
       },
     };
-    (getAgentsHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getAgentsHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getAgentsHandler(context, {} as any, response);
@@ -271,7 +286,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       items: ['tag'],
     };
-    (getAgentTagsHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getAgentTagsHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getAgentTagsHandler(context, {} as any, response);
@@ -302,7 +317,7 @@ describe('schema validation', () => {
         total: 1,
       },
     };
-    (postNewAgentActionHandlerBuilder as jest.Mock).mockImplementation(
+    (postNewAgentActionHandlerBuilder as Mock).mockImplementation(
       () => (ctx: any, req: any, res: any) => {
         return res.ok({ body: expectedResponse });
       }
@@ -320,7 +335,7 @@ describe('schema validation', () => {
     const expectedResponse: PostRetrieveAgentsByActionsResponse = {
       items: ['id'],
     };
-    (postRetrieveAgentsByActionsHandler as jest.Mock).mockImplementation(
+    (postRetrieveAgentsByActionsHandler as Mock).mockImplementation(
       (ctx: any, req: any, res: any) => {
         return res.ok({ body: expectedResponse });
       }
@@ -348,7 +363,7 @@ describe('schema validation', () => {
         },
       ],
     };
-    (getAgentUploadsHandler as jest.Mock).mockImplementation((ctx: any, req: any, res: any) => {
+    (getAgentUploadsHandler as Mock).mockImplementation((ctx: any, req: any, res: any) => {
       return res.ok({ body: expectedResponse });
     });
     await getAgentUploadsHandler(context, {} as any, response);
@@ -365,7 +380,7 @@ describe('schema validation', () => {
       id: 'id',
       deleted: true,
     };
-    (deleteAgentUploadFileHandler as jest.Mock).mockImplementation(
+    (deleteAgentUploadFileHandler as Mock).mockImplementation(
       (ctx: any, req: any, res: any) => {
         return res.ok({ body: expectedResponse });
       }
@@ -394,7 +409,7 @@ describe('schema validation', () => {
         active: 1,
       },
     };
-    (getAgentStatusForAgentPolicyHandler as jest.Mock).mockImplementation(
+    (getAgentStatusForAgentPolicyHandler as Mock).mockImplementation(
       (ctx: any, req: any, res: any) => {
         return res.ok({ body: expectedResponse });
       }
@@ -419,7 +434,7 @@ describe('schema validation', () => {
       ],
       dataPreview: [{}],
     };
-    (getAgentDataHandler as jest.Mock).mockImplementation((ctx: any, req: any, res: any) => {
+    (getAgentDataHandler as Mock).mockImplementation((ctx: any, req: any, res: any) => {
       return res.ok({ body: expectedResponse });
     });
     await getAgentDataHandler(context, {} as any, response);
@@ -463,7 +478,7 @@ describe('schema validation', () => {
         },
       ],
     };
-    (getActionStatusHandler as jest.Mock).mockImplementation((ctx: any, req: any, res: any) => {
+    (getActionStatusHandler as Mock).mockImplementation((ctx: any, req: any, res: any) => {
       return res.ok({ body: expectedResponse });
     });
     await getActionStatusHandler(context, {} as any, response);
@@ -479,7 +494,7 @@ describe('schema validation', () => {
     const expectedResponse: GetAvailableVersionsResponse = {
       items: ['8.15.0'],
     };
-    (getAvailableVersionsHandler as jest.Mock).mockImplementation(
+    (getAvailableVersionsHandler as Mock).mockImplementation(
       (ctx: any, req: any, res: any) => {
         return res.ok({ body: expectedResponse });
       }
@@ -497,7 +512,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       actionId: 'migrate-action-123',
     };
-    (migrateSingleAgentHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (migrateSingleAgentHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await migrateSingleAgentHandler(context, {} as any, response);
@@ -513,7 +528,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       actionId: 'migrate-action-123',
     };
-    (bulkMigrateAgentsHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (bulkMigrateAgentsHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await bulkMigrateAgentsHandler(context, {} as any, response);
@@ -529,7 +544,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       actionId: 'change-privilege-action-123',
     };
-    (changeAgentPrivilegeLevelHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (changeAgentPrivilegeLevelHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await changeAgentPrivilegeLevelHandler(context, {} as any, response);

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '../../storage/hashed_item_store/mock';
 import type { History } from 'history';
 import { createBrowserHistory, createHashHistory, createMemoryHistory, createPath } from 'history';
@@ -155,7 +157,7 @@ describe('kbn_url_storage', () => {
     });
 
     it('should listen for url updates', async () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       urlControls.listen(cb);
       const pr1 = urlControls.updateAsync(() => '/1', true);
       const pr2 = urlControls.updateAsync(() => '/2', true);

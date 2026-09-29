@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { enumerateSpaceIds } from './enumerate_space_ids';
 
 describe('enumerateSpaceIds', () => {
   it('returns default plus every space saved-object id', async () => {
     const spaceRepository = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [{ id: 'space-a' }, { id: 'space-b' }],
       }),
     };
@@ -25,7 +27,7 @@ describe('enumerateSpaceIds', () => {
 
   it('always includes default even when no space documents exist', async () => {
     const spaceRepository = {
-      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
     };
 
     await expect(enumerateSpaceIds(spaceRepository)).resolves.toEqual(['default']);
@@ -33,7 +35,7 @@ describe('enumerateSpaceIds', () => {
 
   it('does not duplicate default when a default space document exists', async () => {
     const spaceRepository = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [{ id: 'default' }, { id: 'space-a' }],
       }),
     };
@@ -43,7 +45,7 @@ describe('enumerateSpaceIds', () => {
 
   it('paginates when a page comes back full, stopping once a short page is seen', async () => {
     const fullPage = Array.from({ length: 1000 }, (_, i) => ({ id: `space-${i}` }));
-    const find = jest
+    const find = vi
       .fn()
       .mockResolvedValueOnce({ saved_objects: fullPage })
       .mockResolvedValueOnce({ saved_objects: [{ id: 'space-last' }] });

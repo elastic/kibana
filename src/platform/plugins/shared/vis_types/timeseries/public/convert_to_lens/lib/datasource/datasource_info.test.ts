@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import { extractOrGenerateDatasourceInfo } from './datasource_info';
@@ -26,10 +28,10 @@ const dataViewsMap: Record<string, DataView> = {
   } as DataView,
 };
 
-const mockCreateDataView = jest.fn();
+const mockCreateDataView = vi.fn();
 
-jest.mock('../../../../common/index_patterns_utils', () => {
-  const originalModule = jest.requireActual('../../../../common/index_patterns_utils');
+vi.mock('../../../../common/index_patterns_utils', async () => {
+  const originalModule = (await vi.importActual('../../../../common/index_patterns_utils'));
   return {
     isStringTypeIndexPattern: originalModule.isStringTypeIndexPattern,
   };
@@ -41,7 +43,7 @@ describe('extractOrGenerateDatasourceInfo', () => {
   let dataViews: DataViewsPublicPluginStart;
   beforeAll(() => {
     dataViews = {
-      getDefault: jest.fn(async () => {
+      getDefault: vi.fn(async () => {
         return { id: '12345', title: 'default', timeFieldName: '@timestamp' };
       }),
       get: getDataview,
@@ -54,7 +56,7 @@ describe('extractOrGenerateDatasourceInfo', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should return ad-hoc dataview if model_indexpattern is string and no corresponding dataview found by string', async () => {

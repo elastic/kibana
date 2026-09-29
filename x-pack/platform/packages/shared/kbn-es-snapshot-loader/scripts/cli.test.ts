@@ -5,33 +5,48 @@
  * 2.0.
  */
 
-jest.mock('@elastic/elasticsearch', () => ({
-  Client: jest.fn().mockImplementation(() => ({})),
-}));
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
 
-jest.mock('@kbn/dev-cli-runner', () => ({
-  run: jest.fn(),
-}));
+vi.mock('@elastic/elasticsearch', () => {
+      const mocked = {
+      Client: vi.fn().mockImplementation(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../src/restore', () => ({
-  restoreSnapshot: jest.fn().mockResolvedValue({
-    success: true,
-    snapshotName: 'snapshot',
-    restoredIndices: [],
-    errors: [],
-  }),
-}));
+vi.mock('@kbn/dev-cli-runner', () => {
+      const mocked = {
+      run: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../src/replay', () => ({
-  replaySnapshot: jest.fn().mockResolvedValue({
-    success: true,
-    snapshotName: 'snapshot',
-    restoredIndices: [],
-    reindexedIndices: [],
-    maxTimestamp: '2024-01-15T12:00:00.000Z',
-    errors: [],
-  }),
-}));
+vi.mock('../src/restore', () => {
+      const mocked = {
+      restoreSnapshot: vi.fn().mockResolvedValue({
+        success: true,
+        snapshotName: 'snapshot',
+        restoredIndices: [],
+        errors: [],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../src/replay', () => {
+      const mocked = {
+      replaySnapshot: vi.fn().mockResolvedValue({
+        success: true,
+        snapshotName: 'snapshot',
+        restoredIndices: [],
+        reindexedIndices: [],
+        maxTimestamp: '2024-01-15T12:00:00.000Z',
+        errors: [],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { run } from '@kbn/dev-cli-runner';
 import type { RunContext } from '@kbn/dev-cli-runner';
@@ -40,17 +55,17 @@ import { restoreSnapshot } from '../src/restore';
 import { replaySnapshot } from '../src/replay';
 import { runCli } from './cli';
 
-const mockClient = jest.requireMock('@elastic/elasticsearch').Client as jest.Mock;
-const mockRun = run as jest.MockedFunction<typeof run>;
-const mockRestoreSnapshot = restoreSnapshot as jest.MockedFunction<typeof restoreSnapshot>;
-const mockReplaySnapshot = replaySnapshot as jest.MockedFunction<typeof replaySnapshot>;
+const mockClient = (await vi.importMock('@elastic/elasticsearch')).Client as Mock;
+const mockRun = run as MockedFunction<typeof run>;
+const mockRestoreSnapshot = restoreSnapshot as MockedFunction<typeof restoreSnapshot>;
+const mockReplaySnapshot = replaySnapshot as MockedFunction<typeof replaySnapshot>;
 
 const createLog = (): ToolingLog =>
   ({
-    info: jest.fn(),
-    warning: jest.fn(),
-    success: jest.fn(),
-    error: jest.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    success: vi.fn(),
+    error: vi.fn(),
   } as unknown as ToolingLog);
 
 const createRunContext = (flags: Record<string, unknown>): RunContext =>
@@ -70,7 +85,7 @@ const createRunContext = (flags: Record<string, unknown>): RunContext =>
 
 describe('runCli', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const getRestoreHandler = () => {

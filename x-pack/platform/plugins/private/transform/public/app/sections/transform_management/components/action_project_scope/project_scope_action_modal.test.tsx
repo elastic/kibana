@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -42,14 +45,14 @@ const availableProjects: CPSProject[] = [
 
 const renderModal = ({
   availableProjectsOverride = availableProjects,
-  closeModal = jest.fn(),
-  confirmAndCloseModal = jest.fn(),
+  closeModal = vi.fn(),
+  confirmAndCloseModal = vi.fn(),
   items = [transformItem],
   targetProjectRouting = '_id:linked-project',
 }: {
   availableProjectsOverride?: CPSProject[];
-  closeModal?: jest.Mock;
-  confirmAndCloseModal?: jest.Mock;
+  closeModal?: Mock;
+  confirmAndCloseModal?: Mock;
   items?: TransformListRow[];
   targetProjectRouting?: string;
 } = {}) => {

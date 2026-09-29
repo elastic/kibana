@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useQuery } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
@@ -19,17 +22,17 @@ import type {
   StepExecutionWithLink,
 } from '../../loading_callout/types';
 
-jest.mock('@kbn/react-query');
-jest.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('@kbn/react-query');
+vi.mock('../../../../common/hooks/use_app_toasts');
 
 describe('useWorkflowExecutionDetails', () => {
   const mockHttp = {
-    fetch: jest.fn(),
+    fetch: vi.fn(),
   } as unknown as HttpSetup;
 
-  const mockAddError = jest.fn();
-  const mockUseQuery = useQuery as jest.Mock;
-  const mockUseAppToasts = useAppToasts as jest.Mock;
+  const mockAddError = vi.fn();
+  const mockUseQuery = useQuery as Mock;
+  const mockUseAppToasts = useAppToasts as Mock;
 
   const mockWorkflowExecution: WorkflowExecutionDto = {
     context: undefined,
@@ -100,7 +103,7 @@ describe('useWorkflowExecutionDetails', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAppToasts.mockReturnValue({ addError: mockAddError });
   });
 
@@ -513,7 +516,7 @@ describe('useWorkflowExecutionDetails', () => {
         };
       });
 
-      mockHttp.fetch = jest.fn().mockResolvedValue(mockWorkflowExecution);
+      mockHttp.fetch = vi.fn().mockResolvedValue(mockWorkflowExecution);
 
       renderHook(() =>
         useWorkflowExecutionDetails({
@@ -547,7 +550,7 @@ describe('useWorkflowExecutionDetails', () => {
         };
       });
 
-      mockHttp.fetch = jest.fn().mockResolvedValue(mockWorkflowExecution);
+      mockHttp.fetch = vi.fn().mockResolvedValue(mockWorkflowExecution);
 
       renderHook(() =>
         useWorkflowExecutionDetails({
@@ -711,7 +714,7 @@ describe('useWorkflowExecutionDetails', () => {
         workflowId: 'workflow-validation',
       };
 
-      mockHttp.fetch = jest.fn().mockImplementation(async (path: string) => {
+      mockHttp.fetch = vi.fn().mockImplementation(async (path: string) => {
         if (path.endsWith('/alert-retrieval-run')) {
           return alertRetrievalExecution;
         }
@@ -794,7 +797,7 @@ describe('useWorkflowExecutionDetails', () => {
         workflowName: 'Alert Retrieval Workflow',
       };
 
-      mockHttp.fetch = jest.fn().mockResolvedValue(executionWithMetadata);
+      mockHttp.fetch = vi.fn().mockResolvedValue(executionWithMetadata);
 
       renderHook(() =>
         useWorkflowExecutionDetails({
@@ -856,7 +859,7 @@ describe('useWorkflowExecutionDetails', () => {
         workflowName: undefined,
       };
 
-      mockHttp.fetch = jest.fn().mockResolvedValue(executionWithDefinitionOnly);
+      mockHttp.fetch = vi.fn().mockResolvedValue(executionWithDefinitionOnly);
 
       renderHook(() =>
         useWorkflowExecutionDetails({
@@ -922,7 +925,7 @@ describe('useWorkflowExecutionDetails', () => {
         workflowName: 'My Workflow',
       };
 
-      mockHttp.fetch = jest.fn().mockResolvedValue(executionWithOnlyOneStep);
+      mockHttp.fetch = vi.fn().mockResolvedValue(executionWithOnlyOneStep);
 
       renderHook(() =>
         useWorkflowExecutionDetails({
@@ -1009,7 +1012,7 @@ describe('useWorkflowExecutionDetails', () => {
         },
       };
 
-      mockHttp.fetch = jest.fn().mockResolvedValue(executionWithWait);
+      mockHttp.fetch = vi.fn().mockResolvedValue(executionWithWait);
 
       renderHook(() =>
         useWorkflowExecutionDetails({
@@ -1074,7 +1077,7 @@ describe('useWorkflowExecutionDetails', () => {
         },
       };
 
-      mockHttp.fetch = jest.fn().mockResolvedValue(execution);
+      mockHttp.fetch = vi.fn().mockResolvedValue(execution);
 
       renderHook(() =>
         useWorkflowExecutionDetails({
@@ -1139,7 +1142,7 @@ describe('useWorkflowExecutionDetails', () => {
         },
       };
 
-      mockHttp.fetch = jest.fn().mockResolvedValue(execution);
+      mockHttp.fetch = vi.fn().mockResolvedValue(execution);
 
       renderHook(() =>
         useWorkflowExecutionDetails({
@@ -1249,7 +1252,7 @@ describe('useWorkflowExecutionDetails', () => {
         workflowId: 'workflow-generation',
       };
 
-      mockHttp.fetch = jest.fn().mockImplementation(async (path: string) => {
+      mockHttp.fetch = vi.fn().mockImplementation(async (path: string) => {
         if (path.endsWith('/alert-retrieval-run')) {
           return alertRetrievalExecution;
         }
@@ -1422,7 +1425,7 @@ describe('useWorkflowExecutionDetails', () => {
         workflowId: 'workflow-validation',
       };
 
-      mockHttp.fetch = jest.fn().mockImplementation(async (path: string) => {
+      mockHttp.fetch = vi.fn().mockImplementation(async (path: string) => {
         if (path.endsWith('/custom-alert-retrieval-run')) {
           return customAlertRetrievalExecution;
         }
@@ -1536,7 +1539,7 @@ describe('useWorkflowExecutionDetails', () => {
         workflowId,
       });
 
-      mockHttp.fetch = jest.fn().mockImplementation(async (path: string) => {
+      mockHttp.fetch = vi.fn().mockImplementation(async (path: string) => {
         if (path.endsWith('/legacy-run')) {
           return createSimpleExecution({
             executionId: 'legacy-run',
@@ -1689,7 +1692,7 @@ describe('useWorkflowExecutionDetails', () => {
         workflowId,
       });
 
-      mockHttp.fetch = jest.fn().mockImplementation(async (path: string) => {
+      mockHttp.fetch = vi.fn().mockImplementation(async (path: string) => {
         if (path.endsWith('/legacy-run')) {
           return createSimpleExecution({
             executionId: 'legacy-run',
@@ -1857,7 +1860,7 @@ describe('useWorkflowExecutionDetails', () => {
         workflowName: 'Closed Alerts Last 7 Days',
       };
 
-      mockHttp.fetch = jest.fn().mockImplementation(async (path: string) => {
+      mockHttp.fetch = vi.fn().mockImplementation(async (path: string) => {
         if (path.endsWith('/esql-example-run')) {
           return esqlExampleExecution;
         }
@@ -2005,7 +2008,7 @@ describe('useWorkflowExecutionDetails', () => {
         workflowId: 'workflow-validation',
       };
 
-      mockHttp.fetch = jest.fn().mockImplementation(async (path: string) => {
+      mockHttp.fetch = vi.fn().mockImplementation(async (path: string) => {
         if (path.endsWith('/real-alert-retrieval-run')) {
           return alertRetrievalExecution;
         }
@@ -2073,7 +2076,7 @@ describe('useWorkflowExecutionDetails', () => {
         validation: null,
       };
 
-      mockHttp.fetch = jest.fn().mockImplementation(async (path: string) => {
+      mockHttp.fetch = vi.fn().mockImplementation(async (path: string) => {
         if (path.endsWith('/good-alert-run')) {
           return {
             ...mockWorkflowExecution,
@@ -2203,7 +2206,7 @@ describe('useWorkflowExecutionDetails', () => {
         workflowId: 'workflow-generation',
       };
 
-      mockHttp.fetch = jest.fn().mockImplementation(async (path: string) => {
+      mockHttp.fetch = vi.fn().mockImplementation(async (path: string) => {
         if (path.endsWith('/alert-retrieval-run')) {
           return alertRetrievalExecution;
         }

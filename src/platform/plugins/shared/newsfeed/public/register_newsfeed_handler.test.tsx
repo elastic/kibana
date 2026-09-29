@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject, of } from 'rxjs';
 import moment from 'moment';
 import type { CoreStart } from '@kbn/core/public';
@@ -35,15 +37,15 @@ const createFetchResult = (): FetchResult => ({
 
 describe('registerNewsfeedHandler', () => {
   it('registers a chrome newsfeed handler and returns its cleanup callback', () => {
-    const unregister = jest.fn();
-    const registerNewsfeedHandlerMock = jest.fn().mockReturnValue(unregister);
+    const unregister = vi.fn();
+    const registerNewsfeedHandlerMock = vi.fn().mockReturnValue(unregister);
     const fetchResults$ = new BehaviorSubject<FetchResult | null | void>(createFetchResult());
-    const api: NewsfeedApi = { fetchResults$, markAsRead: jest.fn() };
+    const api: NewsfeedApi = { fetchResults$, markAsRead: vi.fn() };
 
     const sidebarController: NewsfeedSidebarController = {
       isOpen$: of(false),
-      open: jest.fn(),
-      toggle: jest.fn(),
+      open: vi.fn(),
+      toggle: vi.fn(),
     };
 
     const core = {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Metric, LIGHT_THEME } from '@elastic/charts';
 import { render } from '@testing-library/react';
@@ -12,11 +15,11 @@ import React from 'react';
 import type { Props } from './threshold';
 import { Threshold } from './threshold';
 
-jest.mock('@elastic/charts', () => {
-  const actual = jest.requireActual('@elastic/charts');
+vi.mock('@elastic/charts', () => {
+  const actual = require('@elastic/charts');
   return {
     ...actual,
-    Metric: jest.fn(() => 'mocked Metric'),
+    Metric: vi.fn(() => 'mocked Metric'),
   };
 });
 
@@ -45,7 +48,7 @@ describe('Threshold', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows component', () => {
@@ -63,7 +66,7 @@ describe('Threshold', () => {
       },
     });
 
-    expect((Metric as jest.Mock).mock.calls[0][0].data[0][0]).toMatchInlineSnapshot(`
+    expect((Metric as Mock).mock.calls[0][0].data[0][0]).toMatchInlineSnapshot(`
       Object {
         "color": "#FFF3F1",
         "extra": <React.Fragment>

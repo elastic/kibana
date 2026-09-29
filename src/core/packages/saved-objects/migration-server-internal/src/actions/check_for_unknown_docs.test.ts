@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as Either from 'fp-ts/Either';
 import * as errorHandlers from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
@@ -22,7 +24,7 @@ describe('checkForUnknownDocs', () => {
   const knownTypes = ['foo', 'bar'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
@@ -37,8 +39,8 @@ describe('checkForUnknownDocs', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
     );
 
-    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
-    const catchSearchPhaseExceptionSpy = jest.spyOn(
+    const catchClientErrorsSpy = vi.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseExceptionSpy = vi.spyOn(
       errorHandlers,
       'catchRetryableSearchPhaseExecutionException'
     );
@@ -81,8 +83,8 @@ describe('checkForUnknownDocs', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
     );
 
-    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
-    const catchSearchPhaseExceptionSpy = jest.spyOn(
+    const catchClientErrorsSpy = vi.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseExceptionSpy = vi.spyOn(
       errorHandlers,
       'catchRetryableSearchPhaseExecutionException'
     );
@@ -118,8 +120,8 @@ describe('checkForUnknownDocs', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
     );
 
-    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
-    const catchSearchPhaseExceptionSpy = jest.spyOn(
+    const catchClientErrorsSpy = vi.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseExceptionSpy = vi.spyOn(
       errorHandlers,
       'catchRetryableSearchPhaseExecutionException'
     );

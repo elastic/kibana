@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
@@ -18,25 +21,25 @@ import { duplicateExceptionListAndItems } from './duplicate_exception_list';
 import { getExceptionList } from './get_exception_list';
 import { createExceptionList } from './create_exception_list';
 
-jest.mock('./get_exception_list');
-jest.mock('./create_exception_list');
-jest.mock('./bulk_create_exception_list_items');
-jest.mock('./find_exception_list_items_point_in_time_finder');
+vi.mock('./get_exception_list');
+vi.mock('./create_exception_list');
+vi.mock('./bulk_create_exception_list_items');
+vi.mock('./find_exception_list_items_point_in_time_finder');
 
 const mockCurrentTime = new Date('2023-02-01T10:20:30Z');
 
 describe('duplicateExceptionListAndItems', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(mockCurrentTime);
+    vi.useFakeTimers();
+    vi.setSystemTime(mockCurrentTime);
   });
   afterEach(() => {
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
+    vi.resetAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('should return null exception list is not of type "detection" or "rule_default"', async () => {
-    (getExceptionList as jest.Mock).mockResolvedValue(getTrustedAppsListSchemaMock());
+    (getExceptionList as Mock).mockResolvedValue(getTrustedAppsListSchemaMock());
 
     const result = await duplicateExceptionListAndItems({
       includeExpiredExceptions: true,
@@ -50,13 +53,13 @@ describe('duplicateExceptionListAndItems', () => {
   });
 
   test('should duplicate a list with expired exceptions', async () => {
-    (getExceptionList as jest.Mock).mockResolvedValue(getDetectionsExceptionListSchemaMock());
-    (createExceptionList as jest.Mock).mockResolvedValue({
+    (getExceptionList as Mock).mockResolvedValue(getDetectionsExceptionListSchemaMock());
+    (createExceptionList as Mock).mockResolvedValue({
       ...getDetectionsExceptionListSchemaMock(),
       list_id: 'exception_list_id_dupe',
       name: 'Test [Duplicate]',
     });
-    (findExceptionListsItemPointInTimeFinder as jest.Mock).mockImplementationOnce(
+    (findExceptionListsItemPointInTimeFinder as Mock).mockImplementationOnce(
       ({ executeFunctionOnStream }) => {
         executeFunctionOnStream({ data: [getExceptionListItemSchemaMock()] });
       }
@@ -84,13 +87,13 @@ describe('duplicateExceptionListAndItems', () => {
   });
 
   test('should duplicate a list without expired exceptions', async () => {
-    (getExceptionList as jest.Mock).mockResolvedValue(getDetectionsExceptionListSchemaMock());
-    (createExceptionList as jest.Mock).mockResolvedValue({
+    (getExceptionList as Mock).mockResolvedValue(getDetectionsExceptionListSchemaMock());
+    (createExceptionList as Mock).mockResolvedValue({
       ...getDetectionsExceptionListSchemaMock(),
       list_id: 'exception_list_id_dupe',
       name: 'Test [Duplicate]',
     });
-    (findExceptionListsItemPointInTimeFinder as jest.Mock).mockImplementationOnce(
+    (findExceptionListsItemPointInTimeFinder as Mock).mockImplementationOnce(
       ({ executeFunctionOnStream }) => {
         executeFunctionOnStream({ data: [getExceptionListItemSchemaMock()] });
       }

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { PingTimestamp } from './ping_timestamp';
@@ -16,7 +18,7 @@ import moment from 'moment';
 import '../../../../../lib/__mocks__/legacy_use_composite_image.mock';
 import { mockRef } from '../../../../../lib/__mocks__/legacy_screenshot_ref.mock';
 
-jest.mock('@kbn/observability-shared-plugin/public');
+vi.mock('@kbn/observability-shared-plugin/public');
 
 mockReduxHooks();
 
@@ -33,7 +35,7 @@ describe('Ping Timestamp component', () => {
   it.each([[FETCH_STATUS.PENDING], [FETCH_STATUS.LOADING]])(
     'displays spinner when loading step image',
     (fetchStatus) => {
-      jest
+      vi
         .spyOn(observabilitySharedPublic, 'useFetcher')
         .mockReturnValue({ status: fetchStatus, data: null, refetch: () => null, loading: true });
       const { getByTestId } = render(
@@ -44,7 +46,7 @@ describe('Ping Timestamp component', () => {
   );
 
   it('displays no image available when img src is unavailable and fetch status is successful', () => {
-    jest
+    vi
       .spyOn(observabilitySharedPublic, 'useFetcher')
       .mockReturnValue({ status: FETCH_STATUS.SUCCESS, data: null, refetch: () => null });
     const { getByTestId } = render(
@@ -59,7 +61,7 @@ describe('Ping Timestamp component', () => {
 
   it('displays image when img src is available from useFetcher', () => {
     const src = 'http://sample.com/sampleImageSrc.png';
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+    vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: { maxSteps: 2, stepName: 'test', src },
       refetch: () => null,
@@ -72,7 +74,7 @@ describe('Ping Timestamp component', () => {
 
   it('displays popover image when mouse enters img caption, and hides onLeave', async () => {
     const src = 'http://sample.com/sampleImageSrc.png';
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+    vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: { maxSteps: 1, stepName: null, src },
       refetch: () => null,
@@ -94,7 +96,7 @@ describe('Ping Timestamp component', () => {
   });
 
   it('handles screenshot ref data', async () => {
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+    vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: mockRef,
       refetch: () => null,

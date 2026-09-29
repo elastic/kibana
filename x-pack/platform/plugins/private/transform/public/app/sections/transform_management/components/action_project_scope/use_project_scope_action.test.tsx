@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { PROJECT_ROUTING, useFetchProjects } from '@kbn/cps-utils';
 
@@ -13,34 +16,40 @@ import * as appDependencies from '../../../../app_dependencies';
 import { useTransformCapabilities, useUpdateTransformsProjectScope } from '../../../../hooks';
 import { useProjectScopeAction } from './use_project_scope_action';
 
-const mockUseGetTransformCpsEnabled = jest.fn(
+const mockUseGetTransformCpsEnabled = vi.fn(
   (_args?: { enabled: boolean }) => ({ data: true } as { data: boolean | undefined })
 );
 
-jest.mock('../../../../app_dependencies');
+vi.mock('../../../../app_dependencies');
 
-jest.mock('../../../../hooks', () => ({
-  useTransformCapabilities: jest.fn(),
-  useUpdateTransformsProjectScope: jest.fn(),
-}));
+vi.mock('../../../../hooks', () => {
+      const mocked = {
+      useTransformCapabilities: vi.fn(),
+      useUpdateTransformsProjectScope: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_get_transform_cps_enabled', () => ({
-  useGetTransformCpsEnabled: (args: { enabled: boolean }) => mockUseGetTransformCpsEnabled(args),
-}));
+vi.mock('../../../../hooks/use_get_transform_cps_enabled', () => {
+      const mocked = {
+      useGetTransformCpsEnabled: (args: { enabled: boolean }) => mockUseGetTransformCpsEnabled(args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/cps-utils', () => {
-  const actual = jest.requireActual('@kbn/cps-utils');
+vi.mock('@kbn/cps-utils', async () => {
+  const actual = (await vi.importActual('@kbn/cps-utils'));
   return {
     ...actual,
-    useFetchProjects: jest.fn(),
+    useFetchProjects: vi.fn(),
   };
 });
 
-const mockUseFetchProjects = useFetchProjects as jest.MockedFunction<typeof useFetchProjects>;
-const mockUseTransformCapabilities = useTransformCapabilities as jest.MockedFunction<
+const mockUseFetchProjects = useFetchProjects as MockedFunction<typeof useFetchProjects>;
+const mockUseTransformCapabilities = useTransformCapabilities as MockedFunction<
   typeof useTransformCapabilities
 >;
-const mockUseUpdateTransformsProjectScope = useUpdateTransformsProjectScope as jest.MockedFunction<
+const mockUseUpdateTransformsProjectScope = useUpdateTransformsProjectScope as MockedFunction<
   typeof useUpdateTransformsProjectScope
 >;
 
@@ -58,16 +67,16 @@ const transformItem = createTransformItem('transform-1');
 const secondTransformItem = createTransformItem('transform-2');
 
 describe('Transform: Transform List Actions <useProjectScopeAction />', () => {
-  const updateTransformsProjectScope = jest.fn();
+  const updateTransformsProjectScope = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseGetTransformCpsEnabled.mockReturnValue({ data: true });
     appDependencies.useAppDependencies().cps = {
       isTierEligible: true,
       cpsManager: {
-        fetchProjects: jest.fn(),
-        getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
+        fetchProjects: vi.fn(),
+        getDefaultProjectRouting: vi.fn(() => PROJECT_ROUTING.ALL),
       },
     } as any;
     mockUseFetchProjects.mockReturnValue({
@@ -109,7 +118,7 @@ describe('Transform: Transform List Actions <useProjectScopeAction />', () => {
   });
 
   it('calls the success callback and clears action items when all updates succeed', () => {
-    const onUpdateSuccess = jest.fn();
+    const onUpdateSuccess = vi.fn();
     const { result } = renderHook(() => useProjectScopeAction({ onUpdateSuccess }));
 
     act(() => {
@@ -141,7 +150,7 @@ describe('Transform: Transform List Actions <useProjectScopeAction />', () => {
   });
 
   it('keeps the selection callback untouched when any update fails', () => {
-    const onUpdateSuccess = jest.fn();
+    const onUpdateSuccess = vi.fn();
     const { result } = renderHook(() => useProjectScopeAction({ onUpdateSuccess }));
 
     act(() => {
@@ -169,7 +178,7 @@ describe('Transform: Transform List Actions <useProjectScopeAction />', () => {
   });
 
   it('does not clear a newer action selection when an earlier update succeeds', () => {
-    const onUpdateSuccess = jest.fn();
+    const onUpdateSuccess = vi.fn();
     const { result } = renderHook(() => useProjectScopeAction({ onUpdateSuccess }));
 
     act(() => {

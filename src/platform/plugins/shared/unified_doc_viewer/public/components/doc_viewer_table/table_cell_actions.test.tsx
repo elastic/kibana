@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import {
@@ -24,16 +26,19 @@ import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { copyToClipboard } from '@elastic/eui';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  copyToClipboard: jest.fn(),
-}));
-const mockCopyToClipboard = jest.mocked(copyToClipboard);
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      copyToClipboard: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockCopyToClipboard = vi.mocked(copyToClipboard);
 
 const toastsMock = notificationServiceMock.createSetupContract().toasts;
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('TableActions', () => {
@@ -75,7 +80,7 @@ describe('TableActions', () => {
           rows: getRows(),
           isEsqlMode: false,
           onFilter: undefined,
-          onToggleColumn: jest.fn(),
+          onToggleColumn: vi.fn(),
         }).map((item) => item(EuiCellParams))
       ).toMatchSnapshot();
 
@@ -94,8 +99,8 @@ describe('TableActions', () => {
         getFieldCellActions({
           rows: getRows(),
           isEsqlMode: false,
-          onFilter: jest.fn(),
-          onToggleColumn: jest.fn(),
+          onFilter: vi.fn(),
+          onToggleColumn: vi.fn(),
         }).map((item) => item(EuiCellParams))
       ).toMatchSnapshot();
     });
@@ -129,7 +134,7 @@ describe('TableActions', () => {
         getFieldValueCellActions({
           rows: rowsWithComputedColumn,
           isEsqlMode: false,
-          onFilter: jest.fn(),
+          onFilter: vi.fn(),
           toasts: toastsMock,
           hideFilteringOnComputedColumns: true,
         }).map((item) => item(EuiCellParams))
@@ -141,7 +146,7 @@ describe('TableActions', () => {
         getFieldValueCellActions({
           rows: getRows(),
           isEsqlMode: false,
-          onFilter: jest.fn(),
+          onFilter: vi.fn(),
           toasts: toastsMock,
         }).map((item) => item(EuiCellParams))
       ).toMatchSnapshot();
@@ -208,7 +213,7 @@ describe('TableActions', () => {
         rows: getRows('extension'),
         isEsqlMode: true,
         toasts: toastsMock,
-        onFilter: jest.fn(),
+        onFilter: vi.fn(),
       }).map((Action, i) => (
         <Action
           key={i}
@@ -234,7 +239,7 @@ describe('TableActions', () => {
         rows: getRows('extension', ['foo', 'bar']),
         isEsqlMode: true,
         toasts: toastsMock,
-        onFilter: jest.fn(),
+        onFilter: vi.fn(),
       }).map((Action, i) => (
         <Action
           key={i}
@@ -257,7 +262,7 @@ describe('TableActions', () => {
 
     describe('when clicking filter actions', () => {
       it('should call onFilter with correct params for FilterIn action', async () => {
-        const onFilterMock = jest.fn();
+        const onFilterMock = vi.fn();
         const actions = getFieldValueCellActions({
           rows: getRows('extension', 'test-value'),
           isEsqlMode: false,
@@ -285,7 +290,7 @@ describe('TableActions', () => {
       });
 
       it('should call onFilter with correct params for FilterOut action', async () => {
-        const onFilterMock = jest.fn();
+        const onFilterMock = vi.fn();
         const actions = getFieldValueCellActions({
           rows: getRows('extension', 'test-value'),
           isEsqlMode: false,
@@ -320,7 +325,7 @@ describe('TableActions', () => {
           rows: [undefined as any],
           isEsqlMode: false,
           toasts: toastsMock,
-          onFilter: jest.fn(),
+          onFilter: vi.fn(),
         }).map((Action, i) => (
           <Action
             key={i}
@@ -341,12 +346,12 @@ describe('TableActions', () => {
 
   describe('getFieldCellActions filter exists action', () => {
     it('should call onFilter with "_exists_" when clicking filter exists', async () => {
-      const onFilterMock = jest.fn();
+      const onFilterMock = vi.fn();
       const actions = getFieldCellActions({
         rows: getRows('extension'),
         isEsqlMode: false,
         onFilter: onFilterMock,
-        onToggleColumn: jest.fn(),
+        onToggleColumn: vi.fn(),
       }).map((Action, i) => (
         <Action
           key={i}
@@ -376,8 +381,8 @@ describe('TableActions', () => {
       const actions = getFieldCellActions({
         rows: rowsWithScriptedField,
         isEsqlMode: false,
-        onFilter: jest.fn(),
-        onToggleColumn: jest.fn(),
+        onFilter: vi.fn(),
+        onToggleColumn: vi.fn(),
       }).map((Action, i) => (
         <Action
           key={i}
@@ -397,7 +402,7 @@ describe('TableActions', () => {
     it('should return undefined when row is undefined', () => {
       const warning = getFilterInOutPairDisabledWarning({
         row: undefined,
-        onFilter: jest.fn(),
+        onFilter: vi.fn(),
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBeUndefined();
@@ -413,7 +418,7 @@ describe('TableActions', () => {
 
       const warning = getFilterInOutPairDisabledWarning({
         row: rows[0],
-        onFilter: jest.fn(),
+        onFilter: vi.fn(),
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBe('Ignored values cannot be searched');
@@ -429,7 +434,7 @@ describe('TableActions', () => {
 
       const warning = getFilterInOutPairDisabledWarning({
         row: rows[0],
-        onFilter: jest.fn(),
+        onFilter: vi.fn(),
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBe('Unindexed fields cannot be searched');
@@ -439,7 +444,7 @@ describe('TableActions', () => {
       const rows = getRows();
       const warning = getFilterInOutPairDisabledWarning({
         row: rows[0],
-        onFilter: jest.fn(),
+        onFilter: vi.fn(),
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBeUndefined();
@@ -460,7 +465,7 @@ describe('TableActions', () => {
     it('should return undefined when row is undefined', () => {
       const warning = getFilterExistsDisabledWarning({
         row: undefined,
-        onFilter: jest.fn(),
+        onFilter: vi.fn(),
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBeUndefined();
@@ -479,7 +484,7 @@ describe('TableActions', () => {
 
       const warning = getFilterExistsDisabledWarning({
         row: rows[0],
-        onFilter: jest.fn(),
+        onFilter: vi.fn(),
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBe('Unable to filter for presence of scripted fields');
@@ -489,7 +494,7 @@ describe('TableActions', () => {
       const rows = getRows();
       const warning = getFilterExistsDisabledWarning({
         row: rows[0],
-        onFilter: jest.fn(),
+        onFilter: vi.fn(),
         hideFilteringOnComputedColumns: false,
       });
       expect(warning).toBeUndefined();

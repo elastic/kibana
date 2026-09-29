@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { Query } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
@@ -57,7 +59,7 @@ describe('filter utilities', () => {
     });
 
     it('replaces the current value in single-selection mode and clears it when toggled again', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const query = Query.parse('').addOrFieldValue('tag', 'Production', true, 'eq');
 
       const { result, rerender } = renderHook(
@@ -92,7 +94,7 @@ describe('filter utilities', () => {
     });
 
     it('flips a simple include clause to exclude in multi-select mode', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
 
       const { result } = renderHook(() =>
         useFieldQueryFilter({
@@ -111,7 +113,7 @@ describe('filter utilities', () => {
     });
 
     it('clears both OR-field and simple clauses', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const query = Query.parse('tag:Archived').addOrFieldValue('tag', 'Production', true, 'eq');
 
       const { result } = renderHook(() =>

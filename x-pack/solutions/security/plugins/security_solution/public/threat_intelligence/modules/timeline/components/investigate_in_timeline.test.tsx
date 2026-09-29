@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -23,18 +26,21 @@ import { extractTimelineCapabilities } from '../../../../common/utils/timeline_c
 
 const TEST_ID = 'test';
 
-jest.mock('../../../../common/utils/timeline_capabilities');
-jest.mock('../../../hooks/use_investigate_in_timeline', () => ({
-  useInvestigateInTimeline: jest.fn(),
-}));
+vi.mock('../../../../common/utils/timeline_capabilities');
+vi.mock('../../../hooks/use_investigate_in_timeline', () => {
+      const mocked = {
+      useInvestigateInTimeline: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('<InvestigateInTimelineContextMenu /> <InvestigateInTimelineButtonIcon />', () => {
   beforeEach(() => {
-    (extractTimelineCapabilities as jest.Mock).mockReturnValue({ read: true });
+    (extractTimelineCapabilities as Mock).mockReturnValue({ read: true });
 
-    jest
+    vi
       .mocked(useInvestigateInTimeline)
-      .mockReturnValue({ investigateInTimelineFn: jest.fn() } as ReturnType<
+      .mockReturnValue({ investigateInTimelineFn: vi.fn() } as ReturnType<
         typeof useInvestigateInTimeline
       >);
   });
@@ -60,7 +66,7 @@ describe('<InvestigateInTimelineContextMenu /> <InvestigateInTimelineButtonIcon 
     const mockData: Indicator = generateMockIndicator();
     mockData.fields['threat.indicator.first_seen'] = [''];
 
-    jest.mocked(useInvestigateInTimeline).mockReturnValue({
+    vi.mocked(useInvestigateInTimeline).mockReturnValue({
       investigateInTimelineActionItems: [],
     } as unknown as ReturnType<typeof useInvestigateInTimeline>);
 
@@ -90,7 +96,7 @@ describe('<InvestigateInTimelineContextMenu /> <InvestigateInTimelineButtonIcon 
     const mockData: Indicator = generateMockIndicator();
     mockData.fields['threat.indicator.first_seen'] = [''];
 
-    jest.mocked(useInvestigateInTimeline).mockReturnValue({
+    vi.mocked(useInvestigateInTimeline).mockReturnValue({
       investigateInTimelineActionItems: [],
     } as unknown as ReturnType<typeof useInvestigateInTimeline>);
 
@@ -106,7 +112,7 @@ describe('<InvestigateInTimelineContextMenu /> <InvestigateInTimelineButtonIcon 
   it('should render an empty component when the user does not have access to timeline', () => {
     const mockData: Indicator = generateMockUrlIndicator();
 
-    (extractTimelineCapabilities as jest.Mock).mockReturnValue({ read: false });
+    (extractTimelineCapabilities as Mock).mockReturnValue({ read: false });
 
     const { container } = render(
       <TestProvidersComponent>

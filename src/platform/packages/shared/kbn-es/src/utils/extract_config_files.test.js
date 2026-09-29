@@ -7,26 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('fs', () => ({
-  readFileSync: jest.fn(),
-  existsSync: jest.fn().mockImplementation(() => true),
-  writeFileSync: jest.fn(),
-  statSync: jest.fn((fileName) => {
-    return {
-      isFile: () => fileName.endsWith('.yml'),
+import { vi } from 'vitest';
+
+vi.mock('fs', () => {
+      const mocked = {
+      readFileSync: vi.fn(),
+      existsSync: vi.fn().mockImplementation(() => true),
+      writeFileSync: vi.fn(),
+      statSync: vi.fn((fileName) => {
+        return {
+          isFile: () => fileName.endsWith('.yml'),
+        };
+      }),
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
 const { extractConfigFiles } = require('./extract_config_files');
 const fs = require('fs');
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 afterAll(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 test('returns config with local paths', () => {

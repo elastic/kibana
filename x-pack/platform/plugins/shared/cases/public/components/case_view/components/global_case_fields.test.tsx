@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -15,22 +17,31 @@ import { renderWithTestingProviders } from '../../../common/mock';
 
 const render = (ui: React.ReactElement) => renderWithTestingProviders(ui);
 
-const mockUseGetTemplate = jest.fn();
-jest.mock('../../templates_v2/hooks/use_get_template', () => ({
-  useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
-}));
+const mockUseGetTemplate = vi.fn();
+vi.mock('../../templates_v2/hooks/use_get_template', () => {
+      const mocked = {
+      useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetFieldDefinitions = jest.fn();
-jest.mock('../../field_library/hooks/use_get_field_definitions', () => ({
-  useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
-}));
+const mockUseGetFieldDefinitions = vi.fn();
+vi.mock('../../field_library/hooks/use_get_field_definitions', () => {
+      const mocked = {
+      useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../field_library/hooks/use_resolved_fields', () => ({
-  useResolvedFields: (fields: unknown[]) => ({
-    resolvedFields: fields,
-    isLoading: false,
-  }),
-}));
+vi.mock('../../field_library/hooks/use_resolved_fields', () => {
+      const mocked = {
+      useResolvedFields: (fields: unknown[]) => ({
+        resolvedFields: fields,
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('GlobalCaseFields', () => {
   const caseData = {
@@ -47,10 +58,10 @@ describe('GlobalCaseFields', () => {
     description: '',
   });
 
-  const globalOnUpdateField = jest.fn();
+  const globalOnUpdateField = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Default: no active template, not loading
     mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
   });

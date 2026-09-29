@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { EcsVersion } from '@elastic/ecs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
@@ -37,48 +40,72 @@ import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
 import * as transforms from '../../persistence/transforms/transform_to_alert_documents';
 import { isInvalidAnonymizationError } from '../../../../routes/attack_discovery/public/post/helpers/throw_if_invalid_anonymization';
 
-jest.mock('../../../../ai_assistant_data_clients/find', () => ({
-  ...jest.requireActual('../../../../ai_assistant_data_clients/find'),
-  findDocuments: jest.fn(),
-}));
-jest.mock('../../../../routes/attack_discovery/helpers/generate_discoveries', () => ({
-  ...jest.requireActual('../../../../routes/attack_discovery/helpers/generate_discoveries'),
-  generateAttackDiscoveries: jest.fn(),
-}));
-jest.mock('../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts', () => ({
-  filterHallucinatedAlerts: jest.fn().mockImplementation(({ attackDiscoveries }) => {
-    // By default, pass through all discoveries (no filtering)
-    return Promise.resolve(attackDiscoveries);
-  }),
-}));
-jest.mock('../../../../routes/attack_discovery/helpers/telemetry', () => ({
-  ...jest.requireActual('../../../../routes/attack_discovery/helpers/telemetry'),
-  reportAttackDiscoveryGenerationFailure: jest.fn(),
-  reportAttackDiscoveryGenerationSuccess: jest.fn(),
-}));
-jest.mock('../../persistence/deduplication', () => ({
-  ...jest.requireActual('../../persistence/deduplication'),
-  deduplicateAttackDiscoveries: jest.fn(),
-}));
-jest.mock('../../persistence/transforms/transform_to_alert_documents', () => ({
-  ...jest.requireActual('../../persistence/transforms/transform_to_alert_documents'),
-  transformToBaseAlertDocument: jest.fn(
-    jest.requireActual('../../persistence/transforms/transform_to_alert_documents')
-      .transformToBaseAlertDocument
-  ),
-}));
+vi.mock('../../../../ai_assistant_data_clients/find', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../ai_assistant_data_clients/find')),
+      findDocuments: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../routes/attack_discovery/helpers/generate_discoveries', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../routes/attack_discovery/helpers/generate_discoveries')),
+      generateAttackDiscoveries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts', () => {
+      const mocked = {
+      filterHallucinatedAlerts: vi.fn().mockImplementation(({ attackDiscoveries }) => {
+        // By default, pass through all discoveries (no filtering)
+        return Promise.resolve(attackDiscoveries);
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../routes/attack_discovery/helpers/telemetry', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../routes/attack_discovery/helpers/telemetry')),
+      reportAttackDiscoveryGenerationFailure: vi.fn(),
+      reportAttackDiscoveryGenerationSuccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../persistence/deduplication', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../persistence/deduplication')),
+      deduplicateAttackDiscoveries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../persistence/transforms/transform_to_alert_documents', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../persistence/transforms/transform_to_alert_documents')),
+      transformToBaseAlertDocument: vi.fn(
+        (await vi.importActual('../../persistence/transforms/transform_to_alert_documents'))
+          .transformToBaseAlertDocument
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../routes/attack_discovery/public/post/helpers/throw_if_invalid_anonymization',
-  () => ({
-    isInvalidAnonymizationError: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        isInvalidAnonymizationError: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('@kbn/task-manager-plugin/server', () => ({
-  createTaskRunError: jest.fn((error, source) => ({ message: error.message, source })),
-  TaskErrorSource: { USER: 'USER' },
-}));
+vi.mock('@kbn/task-manager-plugin/server', () => {
+      const mocked = {
+      createTaskRunError: vi.fn((error, source) => ({ message: error.message, source })),
+      TaskErrorSource: { USER: 'USER' },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('attackDiscoveryScheduleExecutor', () => {
   const date = '2025-05-20T15:18:21.000Z';
@@ -159,17 +186,17 @@ describe('attackDiscoveryScheduleExecutor', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.setSystemTime(new Date(date));
+    vi.clearAllMocks();
+    vi.setSystemTime(new Date(date));
 
-    (services.alertsClient.report as jest.Mock).mockReturnValue({ uuid: 'fake-alert' });
+    (services.alertsClient.report as Mock).mockReturnValue({ uuid: 'fake-alert' });
 
     // Mock inference.getConnectorByIdWithoutClientRequest to resolve the connector for the executor
     mockInference.getConnectorByIdWithoutClientRequest.mockResolvedValue({
@@ -182,16 +209,16 @@ describe('attackDiscoveryScheduleExecutor', () => {
       isPreconfigured: false,
     });
     mockInference.getClientWithoutRequest.mockReturnValue({
-      chatComplete: jest.fn(),
+      chatComplete: vi.fn(),
     } as unknown as InferenceClient);
 
-    (findDocuments as jest.Mock).mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit());
-    (generateAttackDiscoveries as jest.Mock).mockResolvedValue({
+    (findDocuments as Mock).mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit());
+    (generateAttackDiscoveries as Mock).mockResolvedValue({
       anonymizedAlerts: mockAnonymizedAlerts,
       attackDiscoveries: mockAttackDiscoveries,
       replacements: mockReplacements,
     });
-    (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue(mockAttackDiscoveries);
+    (deduplicateAttackDiscoveries as Mock).mockResolvedValue(mockAttackDiscoveries);
 
     services.shouldStopExecution = () => false;
   });
@@ -297,7 +324,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
   it('should call `reportAttackDiscoveryGenerationFailure` with the correct arguments', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
-    (generateAttackDiscoveries as jest.Mock).mockRejectedValue(new Error('Big time failure'));
+    (generateAttackDiscoveries as Mock).mockRejectedValue(new Error('Big time failure'));
 
     await expect(async () => {
       await attackDiscoveryScheduleExecutor({
@@ -349,9 +376,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
   });
 
   it('calls filterHallucinatedAlerts with the expected parameters', async () => {
-    const { filterHallucinatedAlerts } = jest.requireMock(
-      '../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts'
-    );
+    const { filterHallucinatedAlerts } = (await vi.importMock('../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts'));
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
@@ -540,7 +565,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
   it('should not report duplicate attack discoveries as alerts', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
-    (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue([]);
+    (deduplicateAttackDiscoveries as Mock).mockResolvedValue([]);
 
     await attackDiscoveryScheduleExecutor({
       getInference: () => mockInference,
@@ -556,7 +581,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
   it('should report only non-duplicate attack discoveries as alerts and log correct duplicate count', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
-    (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue([
+    (deduplicateAttackDiscoveries as Mock).mockResolvedValue([
       ...mockAttackDiscoveries.slice(1),
     ]);
 
@@ -590,7 +615,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
   it('should report all attack discoveries as alerts if there are no duplicates', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
-    (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue(mockAttackDiscoveries);
+    (deduplicateAttackDiscoveries as Mock).mockResolvedValue(mockAttackDiscoveries);
 
     await attackDiscoveryScheduleExecutor({
       getInference: () => mockInference,
@@ -621,7 +646,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
   it('should call transformToBaseAlertDocument with alertsParams.withReplacements set to false', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
-    const mockTransform = transforms.transformToBaseAlertDocument as jest.Mock;
+    const mockTransform = transforms.transformToBaseAlertDocument as Mock;
     mockTransform.mockClear();
 
     await attackDiscoveryScheduleExecutor({
@@ -641,7 +666,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
   it('should call transformToBaseAlertDocument with alertsParams.enableFieldRendering set to true', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
-    const mockTransform = transforms.transformToBaseAlertDocument as jest.Mock;
+    const mockTransform = transforms.transformToBaseAlertDocument as Mock;
     mockTransform.mockClear();
 
     await attackDiscoveryScheduleExecutor({
@@ -661,8 +686,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
   it('throws TaskRunError when isInvalidAnonymizationError returns true', async () => {
     const error = new Error('Invalid Anonymization');
-    (generateAttackDiscoveries as jest.Mock).mockRejectedValue(error);
-    (isInvalidAnonymizationError as jest.Mock).mockReturnValue(true);
+    (generateAttackDiscoveries as Mock).mockRejectedValue(error);
+    (isInvalidAnonymizationError as Mock).mockReturnValue(true);
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await expect(

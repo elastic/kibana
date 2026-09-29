@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ZodObject, z } from '@kbn/zod/v4';
@@ -32,17 +35,17 @@ interface FirstResult {
 const firstResult = (ret: unknown): FirstResult => (ret as { results: FirstResult[] }).results[0];
 
 interface DatasetClientMock {
-  get: jest.Mock;
-  getMetadata: jest.Mock;
-  getExamplesPage: jest.Mock;
-  datasetExists: jest.Mock;
-  create: jest.Mock;
-  upsert: jest.Mock;
-  addExamples: jest.Mock;
-  deleteExamples: jest.Mock;
-  resolveByName: jest.Mock;
-  copy: jest.Mock;
-  delete: jest.Mock;
+  get: Mock;
+  getMetadata: Mock;
+  getExamplesPage: Mock;
+  datasetExists: Mock;
+  create: Mock;
+  upsert: Mock;
+  addExamples: Mock;
+  deleteExamples: Mock;
+  resolveByName: Mock;
+  copy: Mock;
+  delete: Mock;
 }
 
 const datasetDocument = {
@@ -62,23 +65,23 @@ const createDeps = (
   startDependencies: Record<string, unknown> | undefined = undefined
 ): { deps: EvalDatasetManagementToolDeps; datasetClient: DatasetClientMock } => {
   const datasetClient: DatasetClientMock = {
-    get: jest.fn(),
-    getMetadata: jest.fn(),
-    getExamplesPage: jest.fn(),
-    datasetExists: jest.fn().mockResolvedValue(true),
-    create: jest.fn(),
-    upsert: jest.fn(),
-    addExamples: jest.fn(),
-    deleteExamples: jest.fn().mockResolvedValue({ deleted: [], notFound: [] }),
-    resolveByName: jest.fn(),
-    copy: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    getMetadata: vi.fn(),
+    getExamplesPage: vi.fn(),
+    datasetExists: vi.fn().mockResolvedValue(true),
+    create: vi.fn(),
+    upsert: vi.fn(),
+    addExamples: vi.fn(),
+    deleteExamples: vi.fn().mockResolvedValue({ deleted: [], notFound: [] }),
+    resolveByName: vi.fn(),
+    copy: vi.fn(),
+    delete: vi.fn(),
   };
   const deps: EvalDatasetManagementToolDeps = {
     logger: loggingSystemMock.createLogger(),
-    getStartDependencies: jest.fn().mockResolvedValue(
+    getStartDependencies: vi.fn().mockResolvedValue(
       startDependencies ?? {
-        evals: { datasetService: { getClient: jest.fn().mockReturnValue(datasetClient) } },
+        evals: { datasetService: { getClient: vi.fn().mockReturnValue(datasetClient) } },
       }
     ),
   };
@@ -89,7 +92,7 @@ const securityWith = (hasAllRequested: boolean, datasetClient?: DatasetClientMoc
   ({
     evals: {
       datasetService: datasetClient
-        ? { getClient: jest.fn().mockReturnValue(datasetClient) }
+        ? { getClient: vi.fn().mockReturnValue(datasetClient) }
         : undefined,
     },
     security: {

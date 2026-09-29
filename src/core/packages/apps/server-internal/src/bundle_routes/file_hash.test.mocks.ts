@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const generateFileHashMock = jest.fn();
-export const getFileCacheKeyMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./utils', () => ({
-  generateFileHash: generateFileHashMock,
-  getFileCacheKey: getFileCacheKeyMock,
-}));
+export const generateFileHashMock = vi.fn();
+export const getFileCacheKeyMock = vi.fn();
+
+vi.doMock('./utils', () => {
+      const mocked = {
+      generateFileHash: generateFileHashMock,
+      getFileCacheKey: getFileCacheKeyMock,
+    };
+      return { ...mocked, default: mocked };
+    });

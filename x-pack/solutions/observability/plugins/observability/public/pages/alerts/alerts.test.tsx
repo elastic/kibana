@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/maintenance-windows-plugin/common';
@@ -31,10 +34,13 @@ import { createObservabilityRuleTypeRegistryMock } from '../../rules/observabili
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { AlertsPage } from './alerts';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 const license$ = new BehaviorSubject(
@@ -50,7 +56,7 @@ mockUseKibanaReturnValue.services.application.capabilities = {
     show: true,
   },
 };
-mockUseKibanaReturnValue.services.spaces.getActiveSpace = jest
+mockUseKibanaReturnValue.services.spaces.getActiveSpace = vi
   .fn()
   .mockImplementation(() =>
     Promise.resolve({ id: 'space-id', name: 'space-name', disabledFeatures: [] })
@@ -58,9 +64,9 @@ mockUseKibanaReturnValue.services.spaces.getActiveSpace = jest
 
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 
-jest.mock('../../utils/kibana_react', () => ({
+vi.mock('../../utils/kibana_react', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => ({
+  useKibana: vi.fn(() => ({
     ...mockUseKibanaReturnValue,
     services: {
       ...mockUseKibanaReturnValue.services,
@@ -69,25 +75,28 @@ jest.mock('../../utils/kibana_react', () => ({
   })),
 }));
 
-const useLocationMock = useLocation as jest.Mock;
+const useLocationMock = useLocation as Mock;
 
-jest.mock('@kbn/ebt-tools');
+vi.mock('@kbn/ebt-tools');
 
-const usePerformanceContextMock = usePerformanceContext as jest.Mock;
-usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
+const usePerformanceContextMock = usePerformanceContext as Mock;
+usePerformanceContextMock.mockReturnValue({ onPageReady: vi.fn() });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
+vi.mock('@kbn/kibana-react-plugin/public', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+  useKibana: vi.fn(() => mockUseKibanaReturnValue),
 }));
-jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('../../hooks/create_use_rules_link', () => ({
-  createUseRulesLink: jest.fn(() => () => ({
-    href: '/app/rules',
-    onClick: jest.fn(),
-  })),
-}));
-jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
+vi.mock('@kbn/observability-shared-plugin/public');
+vi.mock('../../hooks/create_use_rules_link', () => {
+      const mocked = {
+      createUseRulesLink: vi.fn(() => () => ({
+        href: '/app/rules',
+        onClick: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {
     setHeaderActionMenu: () => {},
   } as unknown as AppMountParameters,
@@ -115,41 +124,53 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   isAllRequestsComplete: true,
 }));
 
-jest.spyOn(dataContext, 'useHasData').mockImplementation(() => ({
+vi.spyOn(dataContext, 'useHasData').mockImplementation(() => ({
   hasDataMap: {},
   hasAnyData: true,
   isAllRequestsComplete: true,
-  onRefreshTimeRange: jest.fn(),
+  onRefreshTimeRange: vi.fn(),
   forceUpdate: 'false',
 }));
 
-jest.mock('@kbn/alerts-ui-shared/src/maintenance_window_callout/api', () => ({
-  fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
-}));
-const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as jest.Mock;
+vi.mock('@kbn/alerts-ui-shared/src/maintenance_window_callout/api', () => {
+      const mocked = {
+      fetchActiveMaintenanceWindows: vi.fn(() => Promise.resolve([])),
+    };
+      return { ...mocked, default: mocked };
+    });
+const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as Mock;
 
-jest.mock('../../hooks/use_time_buckets', () => ({
-  useTimeBuckets: jest.fn(),
-}));
+vi.mock('../../hooks/use_time_buckets', () => {
+      const mocked = {
+      useTimeBuckets: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_has_data', () => ({
-  useHasData: jest.fn(),
-}));
+vi.mock('../../hooks/use_has_data', () => {
+      const mocked = {
+      useHasData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useTimeBuckets } = jest.requireMock('../../hooks/use_time_buckets');
-const { useHasData } = jest.requireMock('../../hooks/use_has_data');
+const { useTimeBuckets } = (await vi.importMock('../../hooks/use_time_buckets'));
+const { useHasData } = (await vi.importMock('../../hooks/use_has_data'));
 
-jest.mock('../../hooks/use_get_available_rules_with_descriptions');
+vi.mock('../../hooks/use_get_available_rules_with_descriptions');
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public');
+vi.mock('@kbn/triggers-actions-ui-plugin/public');
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
-  ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
-  useGetRuleTypesPermissions: jest.fn(() => ({
-    authorizedToReadAnyRules: true,
-    authorizedToReadRuleType: () => true,
-  })),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
+      useGetRuleTypesPermissions: vi.fn(() => ({
+        authorizedToReadAnyRules: true,
+        authorizedToReadRuleType: () => true,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ruleDescriptions = [
   {
@@ -158,7 +179,7 @@ const ruleDescriptions = [
     description: 'Alert when any Observability data type reaches or exceeds a given value.',
   },
 ];
-const useGetAvailableRulesWithDescriptionsMock = useGetAvailableRulesWithDescriptions as jest.Mock;
+const useGetAvailableRulesWithDescriptionsMock = useGetAvailableRulesWithDescriptions as Mock;
 useGetAvailableRulesWithDescriptionsMock.mockReturnValue(ruleDescriptions);
 
 const queryClient = new QueryClient({

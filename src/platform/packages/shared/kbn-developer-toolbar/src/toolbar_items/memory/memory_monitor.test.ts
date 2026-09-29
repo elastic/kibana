@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { MemoryMonitor, type MemoryInfo } from './memory_monitor';
 
 const MIB = 1024 * 1024;
@@ -24,10 +26,10 @@ describe('MemoryMonitor', () => {
   let usedMiB: number;
   let limitMiB: number;
   let hidden: boolean;
-  const readMemory = jest.fn();
+  const readMemory = vi.fn();
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     usedMiB = 100;
     limitMiB = 4096;
     hidden = false;
@@ -38,15 +40,15 @@ describe('MemoryMonitor', () => {
       jsHeapSizeLimit: limitMiB * MIB,
     }));
     Object.defineProperty(performance, 'memory', { configurable: true, get: readMemory });
-    jest.spyOn(document, 'hidden', 'get').mockImplementation(() => hidden);
+    vi.spyOn(document, 'hidden', 'get').mockImplementation(() => hidden);
     monitor = new MemoryMonitor();
     monitor.subscribe((info) => snapshots.push(info));
   });
 
   afterEach(() => {
     monitor.destroy();
-    jest.useRealTimers();
-    jest.restoreAllMocks();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
     if (originalMemory) Object.defineProperty(performance, 'memory', originalMemory);
     else Reflect.deleteProperty(performance, 'memory');
   });
@@ -54,7 +56,7 @@ describe('MemoryMonitor', () => {
   const sampleAfter = (delay: number, nextUsedMiB: number) => {
     hidden = true;
     document.dispatchEvent(new Event('visibilitychange'));
-    jest.advanceTimersByTime(delay);
+    vi.advanceTimersByTime(delay);
     usedMiB = nextUsedMiB;
     hidden = false;
     document.dispatchEvent(new Event('visibilitychange'));
@@ -64,7 +66,7 @@ describe('MemoryMonitor', () => {
     monitor.startMonitoring();
     for (let sample = 1; sample <= 3; sample++) {
       usedMiB = 100 + sample * 20;
-      jest.advanceTimersByTime(20_000);
+      vi.advanceTimersByTime(20_000);
     }
     expect(lastMeasured(snapshots)?.sampleCount).toBe(4);
 
@@ -99,7 +101,7 @@ describe('MemoryMonitor', () => {
     });
     monitor.startMonitoring();
     expect(snapshots).toEqual([null]);
-    jest.advanceTimersByTime(20_000);
+    vi.advanceTimersByTime(20_000);
     expect(snapshots).toEqual([null, null]);
 
     Object.defineProperty(performance, 'memory', { configurable: true, get: readMemory });
@@ -107,7 +109,7 @@ describe('MemoryMonitor', () => {
     expect(lastMeasured(snapshots)?.memoryUsage).toBe(100);
 
     readMemory.mockReturnValue(undefined);
-    jest.advanceTimersByTime(20_000);
+    vi.advanceTimersByTime(20_000);
     expect(snapshots.at(-1)).toBeNull();
 
     const replayed: Snapshot[] = [];
@@ -119,20 +121,20 @@ describe('MemoryMonitor', () => {
     monitor.startMonitoring();
     for (let sample = 1; sample <= 2; sample++) {
       usedMiB = 100 + sample * 20;
-      jest.advanceTimersByTime(20_000);
+      vi.advanceTimersByTime(20_000);
     }
     expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
 
     for (let sample = 3; sample <= 10; sample++) {
       usedMiB = 100 + sample * 20;
-      jest.advanceTimersByTime(20_000);
+      vi.advanceTimersByTime(20_000);
     }
     expect(lastMeasured(snapshots)?.growthDetected).toBe(true);
     expect(lastMeasured(snapshots)?.heapUsageRatio).toBeLessThan(0.85);
 
     usedMiB = 300;
     for (let sample = 0; sample < 20; sample++) {
-      jest.advanceTimersByTime(20_000);
+      vi.advanceTimersByTime(20_000);
     }
     expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
   });

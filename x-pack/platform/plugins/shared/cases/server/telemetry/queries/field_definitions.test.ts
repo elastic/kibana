@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { getFieldLibraryTelemetryData } from './field_definitions';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
@@ -54,7 +56,7 @@ describe('field definitions', () => {
     beforeEach(() => {
       // `resetAllMocks`, not `clearAllMocks`: the latter would leave the rejection queued by the
       // failure case below as the default for every test declared after it.
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('returns the correct res', async () => {

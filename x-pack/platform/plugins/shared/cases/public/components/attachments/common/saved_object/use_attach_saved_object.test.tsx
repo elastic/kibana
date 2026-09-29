@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
@@ -13,20 +16,23 @@ import { useRefreshCaseViewPage as getRefreshCaseViewPageMock } from '../../../c
 import { useAttachSavedObject } from './use_attach_saved_object';
 import type { FoundSavedObject } from './types';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../containers/use_create_attachments');
-jest.mock('../../../case_view/use_on_refresh_case_view_page');
-jest.mock('@kbn/agent-builder-dashboards-common', () => ({
-  dashboardStateToAttachmentData: jest.fn((attrs) => ({
-    panels: attrs?.panels ?? [],
-    fromConverter: true,
-  })),
-}));
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../containers/use_create_attachments');
+vi.mock('../../../case_view/use_on_refresh_case_view_page');
+vi.mock('@kbn/agent-builder-dashboards-common', () => {
+      const mocked = {
+      dashboardStateToAttachmentData: vi.fn((attrs) => ({
+        panels: attrs?.panels ?? [],
+        fromConverter: true,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mock;
-const useToastsMock = useToasts as jest.Mock;
-const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
-const refreshCaseViewPage = getRefreshCaseViewPageMock() as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useToastsMock = useToasts as Mock;
+const useCreateAttachmentsMock = useCreateAttachments as Mock;
+const refreshCaseViewPage = getRefreshCaseViewPageMock() as Mock;
 
 const buildSO = (overrides: Partial<FoundSavedObject> = {}): FoundSavedObject => ({
   id: 'so-1',
@@ -36,19 +42,19 @@ const buildSO = (overrides: Partial<FoundSavedObject> = {}): FoundSavedObject =>
 });
 
 describe('useAttachSavedObject', () => {
-  const mutateAsync = jest.fn().mockResolvedValue(undefined);
-  const onAttached = jest.fn();
-  const addSuccess = jest.fn();
-  const findById = jest.fn();
-  const cmGet = jest.fn();
+  const mutateAsync = vi.fn().mockResolvedValue(undefined);
+  const onAttached = vi.fn();
+  const addSuccess = vi.fn();
+  const findById = vi.fn();
+  const cmGet = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useCreateAttachmentsMock.mockReturnValue({ mutateAsync, isLoading: false });
-    useToastsMock.mockReturnValue({ addSuccess, addError: jest.fn() });
+    useToastsMock.mockReturnValue({ addSuccess, addError: vi.fn() });
     useKibanaMock.mockReturnValue({
       services: {
-        dashboard: { findDashboardsService: jest.fn().mockResolvedValue({ findById }) },
+        dashboard: { findDashboardsService: vi.fn().mockResolvedValue({ findById }) },
         contentManagement: { client: { get: cmGet } },
       },
     });

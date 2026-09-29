@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -29,11 +31,11 @@ const makeServices = ({
   readError?: Error;
 }) => {
   const readWorkspaceFile = readError
-    ? jest.fn().mockRejectedValue(readError)
-    : jest.fn().mockResolvedValue({ path: '/workspace/x.json', content });
+    ? vi.fn().mockRejectedValue(readError)
+    : vi.fn().mockResolvedValue({ path: '/workspace/x.json', content });
   const conversationsService = { readWorkspaceFile } as any;
   const renderersService = {
-    getRendererUiDefinition: jest.fn().mockReturnValue(renderer),
+    getRendererUiDefinition: vi.fn().mockReturnValue(renderer),
   } as any;
   return { conversationsService, renderersService };
 };
@@ -74,7 +76,7 @@ describe('createRenderRenderer', () => {
   });
 
   it('validates the raw payload and mounts the renderer selected by the tag type', async () => {
-    const renderImpl = jest.fn(() => <div>RENDERED</div>);
+    const renderImpl = vi.fn(() => <div>RENDERED</div>);
     const services = makeServices({
       content: JSON.stringify({ ok: true }),
       renderer: okRenderer(renderImpl),

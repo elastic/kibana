@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -18,7 +21,7 @@ import {
 import { mockContextValue } from '../../../../flyout/document_details/shared/mocks/mock_context';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
-jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
+vi.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 
 const NO_DATA_MESSAGE = "Investigation guideThere's no investigation guide for this rule.";
 const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.';
@@ -26,7 +29,7 @@ const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.'
 const renderInvestigationGuide = ({
   hit = buildDataTableRecord(mockContextValue.searchHit as EsHitRecord),
   isAvailable = true,
-  onShowInvestigationGuide = jest.fn(),
+  onShowInvestigationGuide = vi.fn(),
 }: {
   hit?: ReturnType<typeof buildDataTableRecord>;
   isAvailable?: boolean;
@@ -44,11 +47,11 @@ const renderInvestigationGuide = ({
 
 describe('<InvestigationGuide />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render investigation guide button correctly', () => {
-    (useRuleWithFallback as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as Mock).mockReturnValue({
       loading: false,
       error: false,
       rule: { note: 'test note' },
@@ -64,7 +67,7 @@ describe('<InvestigationGuide />', () => {
   });
 
   it('should render loading', () => {
-    (useRuleWithFallback as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as Mock).mockReturnValue({
       loading: true,
       error: false,
       rule: null,
@@ -77,7 +80,7 @@ describe('<InvestigationGuide />', () => {
   });
 
   it('should render no data message when there is no ruleId', () => {
-    (useRuleWithFallback as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as Mock).mockReturnValue({
       loading: false,
       error: false,
       rule: { note: 'test note' },
@@ -92,7 +95,7 @@ describe('<InvestigationGuide />', () => {
   });
 
   it('should render no data message when there is no rule note', () => {
-    (useRuleWithFallback as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as Mock).mockReturnValue({
       loading: false,
       error: false,
       rule: { note: undefined },
@@ -103,7 +106,7 @@ describe('<InvestigationGuide />', () => {
   });
 
   it('should render no data message when useRuleWithFallback errors out', () => {
-    (useRuleWithFallback as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as Mock).mockReturnValue({
       loading: false,
       error: true,
       rule: null,
@@ -115,7 +118,7 @@ describe('<InvestigationGuide />', () => {
   });
 
   it('should render preview message when flyout is in preview', () => {
-    (useRuleWithFallback as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as Mock).mockReturnValue({
       loading: false,
       error: false,
       rule: { note: 'test note' },
@@ -127,13 +130,13 @@ describe('<InvestigationGuide />', () => {
   });
 
   it('should navigate to investigation guide when clicking on button', () => {
-    (useRuleWithFallback as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as Mock).mockReturnValue({
       loading: false,
       error: false,
       rule: { note: 'test note' },
     });
 
-    const onShowInvestigationGuide = jest.fn();
+    const onShowInvestigationGuide = vi.fn();
     const { getByTestId } = renderInvestigationGuide({ onShowInvestigationGuide });
     getByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID).click();
 

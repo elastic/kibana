@@ -7,23 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { shallow } from 'enzyme';
 import React from 'react';
 import { ElasticAgentCard } from './elastic_agent_card';
 
-jest.mock('../../../context', () => ({
-  ...jest.requireActual('../../../context'),
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      http: {
-        basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) },
-      },
-      application: { capabilities: { navLinks: { integrations: true } } },
-      uiSettings: { get: jest.fn() },
-      theme: { theme$: jest.fn() },
-    },
-  }),
-}));
+vi.mock('../../../context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../context')),
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          http: {
+            basePath: { prepend: vi.fn((path: string) => (path ? path : 'path')) },
+          },
+          application: { capabilities: { navLinks: { integrations: true } } },
+          uiSettings: { get: vi.fn() },
+          theme: { theme$: vi.fn() },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ElasticAgentCard', () => {
   test('renders', () => {

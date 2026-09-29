@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { safeJsonStringify } from './safe_json_stringify';
 
 describe('safeJsonStringify', () => {
@@ -67,7 +69,7 @@ describe('safeJsonStringify', () => {
   it('does not call handleError when circular references are handled', () => {
     const obj: Record<string, unknown> = { a: 1 };
     obj.self = obj;
-    const handleError = jest.fn(() => 'error occurred');
+    const handleError = vi.fn(() => 'error occurred');
     const result = safeJsonStringify(obj, handleError);
     // Circular references are handled gracefully, no error
     expect(result).toBe('{"a":1}');

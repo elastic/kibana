@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useDelayedVisibility } from './use_delayed_visibility';
 import { HEIGHT_ANIMATION_DURATION } from '../onboarding_card_panel.styles';
 
-jest.useFakeTimers();
+vi.useFakeTimers();
 
 describe('useDelayedVisibility Hook', () => {
   it('should return true immediately when isExpanded is true', () => {
@@ -36,7 +38,7 @@ describe('useDelayedVisibility Hook', () => {
     expect(result.current).toBe(true); // Still true due to delay
 
     act(() => {
-      jest.advanceTimersByTime(HEIGHT_ANIMATION_DURATION);
+      vi.advanceTimersByTime(HEIGHT_ANIMATION_DURATION);
     });
 
     expect(result.current).toBe(false); // Now false after delay
@@ -55,7 +57,7 @@ describe('useDelayedVisibility Hook', () => {
   });
 
   it('should clean up the timeout when unmounting', () => {
-    const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+    const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
     const { unmount, rerender } = renderHook(
       ({ isExpanded }) => useDelayedVisibility({ isExpanded }),
       { initialProps: { isExpanded: true } }

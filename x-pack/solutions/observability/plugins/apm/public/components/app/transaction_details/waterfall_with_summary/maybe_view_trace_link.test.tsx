@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -58,7 +60,7 @@ function buildTransaction(id: string): Transaction {
   } as Transaction;
 }
 
-const mockOnViewFullTrace = jest.fn();
+const mockOnViewFullTrace = vi.fn();
 
 function renderLink(props: Partial<React.ComponentProps<typeof MaybeViewTraceLink>> = {}) {
   return render(
@@ -76,7 +78,7 @@ function renderLink(props: Partial<React.ComponentProps<typeof MaybeViewTraceLin
 
 describe('MaybeViewTraceLink', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a button and no link when isLoading is true', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { coreMock, elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -24,38 +27,51 @@ import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/pe
 import { handleGraphError } from '../public/post/helpers/handle_graph_error';
 import { reportAttackDiscoveryGenerationSuccess } from './telemetry';
 
-jest.mock('./generate_discoveries', () => ({
-  ...jest.requireActual('./generate_discoveries'),
-  generateAttackDiscoveries: jest.fn(),
-}));
-jest.mock('./report_attack_discovery_success_telemetry', () => ({
-  ...jest.requireActual('./report_attack_discovery_success_telemetry'),
-  reportAttackDiscoverySuccessTelemetry: jest.fn(),
-}));
-jest.mock('./filter_hallucinated_alerts', () => ({
-  filterHallucinatedAlerts: jest.fn().mockImplementation(({ attackDiscoveries }) => {
-    // By default, pass through all discoveries (no filtering)
-    return Promise.resolve(attackDiscoveries);
-  }),
-}));
-jest.mock('../../../lib/attack_discovery/persistence/deduplication', () => ({
-  deduplicateAttackDiscoveries: jest
-    .fn()
-    .mockResolvedValue(
-      jest.requireActual(
-        '../../../lib/attack_discovery/evaluation/__mocks__/mock_attack_discoveries'
-      ).mockAttackDiscoveries
-    ),
-}));
-jest.mock('../public/post/helpers/handle_graph_error', () => ({
-  ...jest.requireActual('../public/post/helpers/handle_graph_error'),
-  handleGraphError: jest.fn(),
-}));
-jest.mock('./telemetry', () => {
-  const actual = jest.requireActual('./telemetry');
+vi.mock('./generate_discoveries', async () => {
+      const mocked = {
+      ...(await vi.importActual('./generate_discoveries')),
+      generateAttackDiscoveries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./report_attack_discovery_success_telemetry', async () => {
+      const mocked = {
+      ...(await vi.importActual('./report_attack_discovery_success_telemetry')),
+      reportAttackDiscoverySuccessTelemetry: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./filter_hallucinated_alerts', () => {
+      const mocked = {
+      filterHallucinatedAlerts: vi.fn().mockImplementation(({ attackDiscoveries }) => {
+        // By default, pass through all discoveries (no filtering)
+        return Promise.resolve(attackDiscoveries);
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/attack_discovery/persistence/deduplication', async () => {
+      const mocked = {
+      deduplicateAttackDiscoveries: vi
+        .fn()
+        .mockResolvedValue(
+          (await vi.importActual('../../../lib/attack_discovery/evaluation/__mocks__/mock_attack_discoveries')).mockAttackDiscoveries
+        ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../public/post/helpers/handle_graph_error', async () => {
+      const mocked = {
+      ...(await vi.importActual('../public/post/helpers/handle_graph_error')),
+      handleGraphError: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./telemetry', async () => {
+  const actual = (await vi.importActual('./telemetry'));
   return {
     ...actual,
-    reportAttackDiscoveryGenerationSuccess: jest.fn(actual.reportAttackDiscoveryGenerationSuccess),
+    reportAttackDiscoveryGenerationSuccess: vi.fn(actual.reportAttackDiscoveryGenerationSuccess),
   };
 });
 
@@ -111,8 +127,8 @@ const createMockAttackDiscoveryAlerts = (): AttackDiscoveryApiAlert[] => {
   });
 };
 
-const createAttackDiscoveryAlerts = jest.fn().mockResolvedValue(createMockAttackDiscoveryAlerts());
-const getAdHocAlertsIndexPattern = jest.fn();
+const createAttackDiscoveryAlerts = vi.fn().mockResolvedValue(createMockAttackDiscoveryAlerts());
+const getAdHocAlertsIndexPattern = vi.fn();
 const mockDataClient = {
   createAttackDiscoveryAlerts,
   getAdHocAlertsIndexPattern,
@@ -138,8 +154,8 @@ describe('generateAndUpdateAttackDiscoveries', () => {
   const testUpdateError = new Error('Failed to update attack discoveries.');
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (generateAttackDiscoveries as jest.Mock).mockResolvedValue({
+    vi.clearAllMocks();
+    (generateAttackDiscoveries as Mock).mockResolvedValue({
       anonymizedAlerts: mockAnonymizedAlerts,
       attackDiscoveries: mockAttackDiscoveries,
       replacements: mockConfig.replacements,
@@ -304,7 +320,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
     );
 
     it('calls filterHallucinatedAlerts with the expected parameters', async () => {
-      const { filterHallucinatedAlerts } = jest.requireMock('./filter_hallucinated_alerts');
+      const { filterHallucinatedAlerts } = (await vi.importMock('./filter_hallucinated_alerts'));
       const executionUuid = 'test-1';
 
       await generateAndUpdateAttackDiscoveries({
@@ -332,7 +348,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
 
   describe('when `generateAttackDiscoveries` throws an error', () => {
     it('should call `handleGraphError`', async () => {
-      (generateAttackDiscoveries as jest.Mock).mockRejectedValue(testInvokeError);
+      (generateAttackDiscoveries as Mock).mockRejectedValue(testInvokeError);
 
       const executionUuid = 'test-1';
       await generateAndUpdateAttackDiscoveries({
@@ -360,7 +376,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
     });
 
     it('should not call `reportAttackDiscoverySuccessTelemetry`', async () => {
-      (generateAttackDiscoveries as jest.Mock).mockRejectedValue(testInvokeError);
+      (generateAttackDiscoveries as Mock).mockRejectedValue(testInvokeError);
 
       const executionUuid = 'test-1';
       await generateAndUpdateAttackDiscoveries({
@@ -381,7 +397,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
     });
 
     it('should return an error', async () => {
-      (generateAttackDiscoveries as jest.Mock).mockRejectedValue(testInvokeError);
+      (generateAttackDiscoveries as Mock).mockRejectedValue(testInvokeError);
 
       const executionUuid = 'test-1';
       const results = await generateAndUpdateAttackDiscoveries({
@@ -404,7 +420,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
 
   describe('when `reportAttackDiscoveryGenerationSuccess` throws an error', () => {
     beforeEach(() => {
-      (reportAttackDiscoveryGenerationSuccess as jest.Mock).mockImplementation(() => {
+      (reportAttackDiscoveryGenerationSuccess as Mock).mockImplementation(() => {
         throw testUpdateError;
       });
     });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { suggestEMSTermJoinConfig } from './ems_autosuggest';
 
 class MockFileLayer {
@@ -33,7 +35,7 @@ class MockFileLayer {
   }
 }
 
-jest.mock('../util', () => {
+vi.mock('../util', () => {
   return {
     async getEmsFileLayers() {
       return [

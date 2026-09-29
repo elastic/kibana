@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import apmAgent from 'elastic-apm-node';
 import { trace } from '@opentelemetry/api';
 import type { Span } from '@opentelemetry/api';
@@ -19,20 +22,20 @@ const context = LoggingConfig.getLoggerContext(['context', 'parent', 'child']);
 let appenderMocks: Appender[];
 let logger: BaseLogger;
 const factory = {
-  get: jest.fn().mockImplementation(() => logger),
+  get: vi.fn().mockImplementation(() => logger),
 };
 
 const timestamp = new Date(2012, 1, 1);
 beforeEach(() => {
-  jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
+  vi.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
 
-  appenderMocks = [{ append: jest.fn() }, { append: jest.fn() }];
+  appenderMocks = [{ append: vi.fn() }, { append: vi.fn() }];
   logger = new BaseLogger(context, LogLevel.All, appenderMocks, factory);
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
-  jest.restoreAllMocks();
+  vi.resetAllMocks();
+  vi.restoreAllMocks();
 });
 
 test('`trace()` correctly forms `LogRecord` and passes it to all appenders.', () => {
@@ -463,7 +466,7 @@ describe('trace context in log records', () => {
       spanContext: () => ({ traceId, spanId, traceFlags: 1 }),
     } as unknown as Span);
 
-  const getLastLogRecord = (): LogRecord => (appenderMocks[0].append as jest.Mock).mock.calls[0][0];
+  const getLastLogRecord = (): LogRecord => (appenderMocks[0].append as Mock).mock.calls[0][0];
 
   // currentTraceIds is a getter defined on Agent.prototype; we override it on the
   // instance directly so each test can control what APM reports.
@@ -518,7 +521,7 @@ describe('trace context in log records', () => {
     });
 
     it('falls back to OTel span context for traceId and spanId', () => {
-      jest
+      vi
         .spyOn(trace, 'getActiveSpan')
         .mockReturnValue(createMockOtelSpan(otelTraceId, otelSpanId));
 
@@ -530,7 +533,7 @@ describe('trace context in log records', () => {
     });
 
     it('does not populate transactionId (no OTel equivalent)', () => {
-      jest
+      vi
         .spyOn(trace, 'getActiveSpan')
         .mockReturnValue(createMockOtelSpan(otelTraceId, otelSpanId));
 
@@ -540,7 +543,7 @@ describe('trace context in log records', () => {
     });
 
     it('produces no trace IDs when OTel also has no active span', () => {
-      jest.spyOn(trace, 'getActiveSpan').mockReturnValue(undefined);
+      vi.spyOn(trace, 'getActiveSpan').mockReturnValue(undefined);
 
       logger.info('test message');
 

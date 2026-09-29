@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { getMigrationHash } from './get_migration_hash';
@@ -54,7 +56,7 @@ describe('getMigrationHash', () => {
     });
     it('returns different hashes if `excludeOnUpgrade` is defined or not', () => {
       expect(getMigrationHash(createType({ excludeOnUpgrade: undefined }))).not.toEqual(
-        getMigrationHash(createType({ excludeOnUpgrade: jest.fn() }))
+        getMigrationHash(createType({ excludeOnUpgrade: vi.fn() }))
       );
     });
   });
@@ -63,14 +65,14 @@ describe('getMigrationHash', () => {
     it('returns same hash if same migration versions are registered', () => {
       const typeA = createType({
         migrations: {
-          '7.17.1': jest.fn(),
-          '8.4.2': jest.fn(),
+          '7.17.1': vi.fn(),
+          '8.4.2': vi.fn(),
         },
       });
       const typeB = createType({
         migrations: {
-          '7.17.1': jest.fn(),
-          '8.4.2': jest.fn(),
+          '7.17.1': vi.fn(),
+          '8.4.2': vi.fn(),
         },
       });
 
@@ -80,16 +82,16 @@ describe('getMigrationHash', () => {
     it('returns same hash if same migration versions are registered in different order', () => {
       const typeA = createType({
         migrations: {
-          '9.1.3': jest.fn(),
-          '7.17.1': jest.fn(),
-          '8.4.2': jest.fn(),
+          '9.1.3': vi.fn(),
+          '7.17.1': vi.fn(),
+          '8.4.2': vi.fn(),
         },
       });
       const typeB = createType({
         migrations: {
-          '8.4.2': jest.fn(),
-          '9.1.3': jest.fn(),
-          '7.17.1': jest.fn(),
+          '8.4.2': vi.fn(),
+          '9.1.3': vi.fn(),
+          '7.17.1': vi.fn(),
         },
       });
 
@@ -99,16 +101,16 @@ describe('getMigrationHash', () => {
     it('returns same hash if same migration versions are registered using record + function', () => {
       const typeA = createType({
         migrations: {
-          '9.1.3': jest.fn(),
-          '7.17.1': jest.fn(),
-          '8.4.2': jest.fn(),
+          '9.1.3': vi.fn(),
+          '7.17.1': vi.fn(),
+          '8.4.2': vi.fn(),
         },
       });
       const typeB = createType({
         migrations: () => ({
-          '8.4.2': jest.fn(),
-          '9.1.3': jest.fn(),
-          '7.17.1': jest.fn(),
+          '8.4.2': vi.fn(),
+          '9.1.3': vi.fn(),
+          '7.17.1': vi.fn(),
         }),
       });
 
@@ -118,14 +120,14 @@ describe('getMigrationHash', () => {
     it('returns different hashes if different migration versions are registered', () => {
       const typeA = createType({
         migrations: {
-          '7.17.1': jest.fn(),
-          '8.4.2': jest.fn(),
+          '7.17.1': vi.fn(),
+          '8.4.2': vi.fn(),
         },
       });
       const typeB = createType({
         migrations: {
-          '7.17.69': jest.fn(),
-          '42.0.0': jest.fn(),
+          '7.17.69': vi.fn(),
+          '42.0.0': vi.fn(),
         },
       });
 
@@ -331,7 +333,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                backfillFn: jest.fn(),
+                backfillFn: vi.fn(),
               },
             ],
           },
@@ -353,7 +355,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                backfillFn: jest.fn(),
+                backfillFn: vi.fn(),
               },
             ],
           },
@@ -380,7 +382,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                backfillFn: jest.fn(),
+                backfillFn: vi.fn(),
               },
             ],
           },
@@ -412,7 +414,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                backfillFn: jest.fn(),
+                backfillFn: vi.fn(),
               },
             ],
           },
@@ -429,7 +431,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                backfillFn: jest.fn(),
+                backfillFn: vi.fn(),
               },
             ],
           },
@@ -451,7 +453,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                backfillFn: jest.fn(),
+                backfillFn: vi.fn(),
               },
             ],
           },
@@ -478,7 +480,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                backfillFn: jest.fn(),
+                backfillFn: vi.fn(),
               },
             ],
           },
@@ -500,7 +502,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                backfillFn: jest.fn(),
+                backfillFn: vi.fn(),
               },
             ],
           },
@@ -526,7 +528,7 @@ describe('getMigrationHash', () => {
           1: {
             changes: [],
             schemas: {
-              forwardCompatibility: jest.fn(),
+              forwardCompatibility: vi.fn(),
             },
           },
         },

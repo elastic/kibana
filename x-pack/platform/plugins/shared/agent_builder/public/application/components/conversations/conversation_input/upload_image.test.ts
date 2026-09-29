@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getUniqueName, processImageFile, rejectIfTooManyImages } from './upload_image';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import {
@@ -13,10 +16,10 @@ import {
   MAX_IMAGES_PER_ROUND,
 } from '@kbn/agent-builder-common/attachments';
 
-(global as unknown as { createImageBitmap: jest.Mock }).createImageBitmap = jest
+(global as unknown as { createImageBitmap: Mock }).createImageBitmap = vi
   .fn()
-  .mockResolvedValue({ close: jest.fn() });
-const mockCreateImageBitmap = (global as unknown as { createImageBitmap: jest.Mock })
+  .mockResolvedValue({ close: vi.fn() });
+const mockCreateImageBitmap = (global as unknown as { createImageBitmap: Mock })
   .createImageBitmap;
 
 describe('getUniqueName', () => {
@@ -41,8 +44,8 @@ describe('getUniqueName', () => {
 
 describe('rejectIfTooManyImages', () => {
   it('allows the image when under the limit', () => {
-    const addErrorToast = jest.fn();
-    const reportEvent = jest.fn();
+    const addErrorToast = vi.fn();
+    const reportEvent = vi.fn();
 
     const rejected = rejectIfTooManyImages({
       currentImageCount: MAX_IMAGES_PER_ROUND - 1,
@@ -56,8 +59,8 @@ describe('rejectIfTooManyImages', () => {
   });
 
   it('blocks the image and reports telemetry once the limit is reached', () => {
-    const addErrorToast = jest.fn();
-    const reportEvent = jest.fn();
+    const addErrorToast = vi.fn();
+    const reportEvent = vi.fn();
 
     const rejected = rejectIfTooManyImages({
       currentImageCount: MAX_IMAGES_PER_ROUND,
@@ -79,25 +82,25 @@ const makeFile = (name: string, type: string, size: number): File => {
 };
 
 const makeFilesClient = (overrides?: Record<string, unknown>) => ({
-  create: jest.fn().mockResolvedValue({ file: { id: 'file-abc' } }),
-  upload: jest.fn().mockResolvedValue(undefined),
+  create: vi.fn().mockResolvedValue({ file: { id: 'file-abc' } }),
+  upload: vi.fn().mockResolvedValue(undefined),
   ...overrides,
 });
 
-const makeAddErrorToast = () => jest.fn();
-const makeReportEvent = () => jest.fn();
+const makeAddErrorToast = () => vi.fn();
+const makeReportEvent = () => vi.fn();
 
 describe('processImageFile', () => {
   afterEach(() => {
-    (global as unknown as { createImageBitmap: jest.Mock }).createImageBitmap.mockReset();
-    (global as unknown as { createImageBitmap: jest.Mock }).createImageBitmap.mockResolvedValue({
-      close: jest.fn(),
+    (global as unknown as { createImageBitmap: Mock }).createImageBitmap.mockReset();
+    (global as unknown as { createImageBitmap: Mock }).createImageBitmap.mockResolvedValue({
+      close: vi.fn(),
     });
   });
 
   it('calls create then upload then upsertAttachments on success', async () => {
     const filesClient = makeFilesClient();
-    const upsertAttachments = jest.fn();
+    const upsertAttachments = vi.fn();
     const addErrorToast = makeAddErrorToast();
     const reportEvent = makeReportEvent();
 
@@ -129,11 +132,11 @@ describe('processImageFile', () => {
   });
 
   it('shows an error toast and returns false when the file does not actually decode as an image', async () => {
-    (global as unknown as { createImageBitmap: jest.Mock }).createImageBitmap.mockRejectedValue(
+    (global as unknown as { createImageBitmap: Mock }).createImageBitmap.mockRejectedValue(
       new Error('not an image')
     );
     const filesClient = makeFilesClient();
-    const upsertAttachments = jest.fn();
+    const upsertAttachments = vi.fn();
     const addErrorToast = makeAddErrorToast();
     const reportEvent = makeReportEvent();
 
@@ -158,7 +161,7 @@ describe('processImageFile', () => {
 
   it('shows an error toast and skips upload for unsupported mime type', async () => {
     const filesClient = makeFilesClient();
-    const upsertAttachments = jest.fn();
+    const upsertAttachments = vi.fn();
     const addErrorToast = makeAddErrorToast();
     const reportEvent = makeReportEvent();
 
@@ -183,7 +186,7 @@ describe('processImageFile', () => {
 
   it('shows an error toast and skips upload when file is too large', async () => {
     const filesClient = makeFilesClient();
-    const upsertAttachments = jest.fn();
+    const upsertAttachments = vi.fn();
     const addErrorToast = makeAddErrorToast();
     const reportEvent = makeReportEvent();
 
@@ -213,13 +216,13 @@ describe('processImageFile', () => {
     controller.abort();
 
     const filesClient = makeFilesClient({
-      create: jest.fn().mockResolvedValue({ file: { id: 'file-xyz' } }),
-      upload: jest.fn().mockImplementation(() => {
+      create: vi.fn().mockResolvedValue({ file: { id: 'file-xyz' } }),
+      upload: vi.fn().mockImplementation(() => {
         const err = new DOMException('aborted', 'AbortError');
         return Promise.reject(err);
       }),
     });
-    const upsertAttachments = jest.fn();
+    const upsertAttachments = vi.fn();
     const addErrorToast = makeAddErrorToast();
     const reportEvent = makeReportEvent();
 
@@ -241,10 +244,10 @@ describe('processImageFile', () => {
 
   it('shows an error toast when upload rejects for a non-abort reason', async () => {
     const filesClient = makeFilesClient({
-      create: jest.fn().mockResolvedValue({ file: { id: 'file-xyz' } }),
-      upload: jest.fn().mockRejectedValue(new Error('network error')),
+      create: vi.fn().mockResolvedValue({ file: { id: 'file-xyz' } }),
+      upload: vi.fn().mockRejectedValue(new Error('network error')),
     });
-    const upsertAttachments = jest.fn();
+    const upsertAttachments = vi.fn();
     const addErrorToast = makeAddErrorToast();
     const reportEvent = makeReportEvent();
 

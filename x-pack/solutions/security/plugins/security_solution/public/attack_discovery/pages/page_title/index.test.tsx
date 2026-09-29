@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -12,14 +15,14 @@ import { PageTitle } from '.';
 import { ATTACK_DISCOVERY_PAGE_TITLE } from './translations';
 import { useKibana } from '../../../common/lib/kibana';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 describe('PageTitle', () => {
-  const mockGetSetting = jest.fn();
+  const mockGetSetting = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: {
         uiSettings: { get: mockGetSetting },
       },

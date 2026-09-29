@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -24,9 +26,9 @@ describe(`GET ${API_BASE_PATH}/queries/{taskId}`, () => {
     const coreContext = coreMock.createRequestHandlerContext();
     const context = coreMock.createCustomRequestHandlerContext({ core: coreContext });
     const esClient = coreContext.elasticsearch.client.asInternalUser;
-    const hasPrivileges = jest.fn().mockResolvedValue({ cluster: { monitor: true } });
+    const hasPrivileges = vi.fn().mockResolvedValue({ cluster: { monitor: true } });
     const asCurrentUser = coreContext.elasticsearch.client.asCurrentUser as any;
-    jest.spyOn(asCurrentUser, 'security', 'get').mockReturnValue({ hasPrivileges });
+    vi.spyOn(asCurrentUser, 'security', 'get').mockReturnValue({ hasPrivileges });
 
     return { handler, context, esClient, hasPrivileges, logger };
   };

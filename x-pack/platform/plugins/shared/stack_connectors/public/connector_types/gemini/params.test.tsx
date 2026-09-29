@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import GeminiParamsFields from './params';
@@ -46,7 +48,7 @@ describe('Gemini Params Fields renders', () => {
       subAction: undefined,
       subActionParams: undefined,
     };
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     render(
       <GeminiParamsFields
@@ -71,7 +73,7 @@ describe('Gemini Params Fields renders', () => {
         body: '{"key": "value"}',
       },
     };
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     render(
       <GeminiParamsFields
@@ -90,7 +92,7 @@ describe('Gemini Params Fields renders', () => {
   });
 
   it('calls editAction function with the body argument', () => {
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     const { getByTestId } = render(
       <GeminiParamsFields
@@ -119,7 +121,7 @@ describe('Gemini Params Fields renders', () => {
   });
 
   it('removes trailing spaces from the body argument', () => {
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     const { getByTestId } = render(
       <GeminiParamsFields
@@ -148,7 +150,7 @@ describe('Gemini Params Fields renders', () => {
   });
 
   it('calls editAction function with the model argument', () => {
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     const { getByTestId } = render(
       <GeminiParamsFields

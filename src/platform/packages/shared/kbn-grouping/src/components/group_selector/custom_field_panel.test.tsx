@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { CustomFieldPanel } from './custom_field_panel';
@@ -62,7 +64,7 @@ const openCombobox = () => {
 
 describe('CustomFieldPanel field type filtering', () => {
   it('shows string and ip fields, excludes number and non-aggregatable fields by default', () => {
-    render(<CustomFieldPanel fields={baseFields} currentOptions={[]} onSubmit={jest.fn()} />);
+    render(<CustomFieldPanel fields={baseFields} currentOptions={[]} onSubmit={vi.fn()} />);
     openCombobox();
 
     expect(screen.getByText('host.name')).toBeInTheDocument();
@@ -78,7 +80,7 @@ describe('CustomFieldPanel field type filtering', () => {
       <CustomFieldPanel
         fields={baseFields}
         currentOptions={[]}
-        onSubmit={jest.fn()}
+        onSubmit={vi.fn()}
         allowedFieldTypes={['number']}
       />
     );
@@ -95,7 +97,7 @@ describe('CustomFieldPanel field type filtering', () => {
       <CustomFieldPanel
         fields={baseFields}
         currentOptions={[{ text: 'Source IP', field: 'source.ip' }]}
-        onSubmit={jest.fn()}
+        onSubmit={vi.fn()}
       />
     );
     openCombobox();

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useFetchAlerts } from './use_fetch_alerts';
 import { usePagination, useSorting } from './use_pagination_and_sorting';
 import { usePaginatedAlerts } from './use_paginated_alerts';
 
-jest.mock('./use_fetch_alerts');
-jest.mock('./use_pagination_and_sorting');
+vi.mock('./use_fetch_alerts');
+vi.mock('./use_pagination_and_sorting');
 
-const mockSetPagination = jest.fn();
-const mockSetSorting = jest.fn();
+const mockSetPagination = vi.fn();
+const mockSetSorting = vi.fn();
 
 const mockPagination = { pageIndex: 0, pageSize: 5 };
 const mockSorting = {
@@ -25,19 +27,19 @@ const mockSortConfig: Array<Record<string, 'asc' | 'desc'>> = [{ '@timestamp': '
 
 describe('usePaginatedAlerts', () => {
   beforeEach(() => {
-    jest.mocked(usePagination).mockReturnValue({
+    vi.mocked(usePagination).mockReturnValue({
       pagination: mockPagination,
       setPagination: mockSetPagination,
       pageSizeOptions: [5, 10, 20],
     });
 
-    jest.mocked(useSorting).mockReturnValue({
+    vi.mocked(useSorting).mockReturnValue({
       sorting: mockSorting,
       setSorting: mockSetSorting,
       sortConfig: mockSortConfig,
     });
 
-    jest.mocked(useFetchAlerts).mockReturnValue({
+    vi.mocked(useFetchAlerts).mockReturnValue({
       data: [],
       totalItemCount: 0,
       loading: false,
@@ -64,7 +66,7 @@ describe('usePaginatedAlerts', () => {
   it('passes alertIds and index to useFetchAlerts', () => {
     renderHook(() => usePaginatedAlerts(['alert-1'], 'my-index'));
 
-    expect(jest.mocked(useFetchAlerts)).toHaveBeenCalledWith(
+    expect(vi.mocked(useFetchAlerts)).toHaveBeenCalledWith(
       expect.objectContaining({
         alertIds: ['alert-1'],
         index: 'my-index',
@@ -76,7 +78,7 @@ describe('usePaginatedAlerts', () => {
   });
 
   it('computes from as pageIndex * pageSize', () => {
-    jest.mocked(usePagination).mockReturnValue({
+    vi.mocked(usePagination).mockReturnValue({
       pagination: { pageIndex: 2, pageSize: 10 },
       setPagination: mockSetPagination,
       pageSizeOptions: [5, 10, 20],
@@ -84,13 +86,13 @@ describe('usePaginatedAlerts', () => {
 
     renderHook(() => usePaginatedAlerts(['alert-1']));
 
-    expect(jest.mocked(useFetchAlerts)).toHaveBeenCalledWith(
+    expect(vi.mocked(useFetchAlerts)).toHaveBeenCalledWith(
       expect.objectContaining({ from: 20, size: 10 })
     );
   });
 
   it('includes totalItemCount in paginationConfig', () => {
-    jest.mocked(useFetchAlerts).mockReturnValue({
+    vi.mocked(useFetchAlerts).mockReturnValue({
       data: [],
       totalItemCount: 42,
       loading: false,

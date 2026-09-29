@@ -7,22 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { PaletteService } from './service';
 import { buildPalettes } from './palettes';
 
-jest.mock('./palettes', () => ({
-  buildPalettes: jest.fn((theme: CoreTheme) => ({
-    default: {
-      id: 'default',
-      title: `default-${theme.darkMode ? 'dark' : 'light'}`,
-    },
-  })),
-}));
+vi.mock('./palettes', () => {
+      const mocked = {
+      buildPalettes: vi.fn((theme: CoreTheme) => ({
+        default: {
+          id: 'default',
+          title: `default-${theme.darkMode ? 'dark' : 'light'}`,
+        },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const buildPalettesMock = buildPalettes as jest.MockedFunction<typeof buildPalettes>;
+const buildPalettesMock = buildPalettes as MockedFunction<typeof buildPalettes>;
 
 const lightTheme: CoreTheme = { darkMode: false, name: 'borealis' };
 const darkTheme: CoreTheme = { darkMode: true, name: 'borealis' };

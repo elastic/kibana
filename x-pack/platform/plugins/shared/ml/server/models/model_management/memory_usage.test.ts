@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { MemoryUsageService } from './memory_usage';
 import type { MlClient } from '../../lib/ml_client';
 import mockResponse from './__mocks__/mock_deployment_response.json';
@@ -12,12 +15,12 @@ import type { MemoryStatsResponse } from '@kbn/ml-common-types/trained_models';
 
 describe('Model service', () => {
   const mlClient = {
-    getTrainedModelsStats: jest.fn(() => {
+    getTrainedModelsStats: vi.fn(() => {
       return Promise.resolve({
         trained_model_stats: mockResponse,
       });
     }),
-    getMemoryStats: jest.fn(() => {
+    getMemoryStats: vi.fn(() => {
       return Promise.resolve({
         _nodes: {
           total: 4,
@@ -131,7 +134,7 @@ describe('Model service', () => {
         },
       } as MemoryStatsResponse);
     }),
-  } as unknown as jest.Mocked<MlClient>;
+  } as unknown as Mocked<MlClient>;
 
   const mlFeatures = {
     ad: true,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -23,51 +26,63 @@ import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
 import { AWS_PROVIDER, ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT } from './constants';
 
 // Mock child components
-jest.mock('./form/new_cloud_connector_form', () => ({
-  NewCloudConnectorForm: jest.fn(() => (
-    <div data-testid="new-cloud-connector-form">{'MockedNewForm'}</div>
-  )),
-}));
+vi.mock('./form/new_cloud_connector_form', () => {
+      const mocked = {
+      NewCloudConnectorForm: vi.fn(() => (
+        <div data-testid="new-cloud-connector-form">{'MockedNewForm'}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./form/reusable_cloud_connector_form', () => ({
-  ReusableCloudConnectorForm: jest.fn(() => (
-    <div data-testid="reusable-cloud-connector-form">{'MockedReusableForm'}</div>
-  )),
-}));
+vi.mock('./form/reusable_cloud_connector_form', () => {
+      const mocked = {
+      ReusableCloudConnectorForm: vi.fn(() => (
+        <div data-testid="reusable-cloud-connector-form">{'MockedReusableForm'}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./cloud_connector_tabs', () => ({
-  CloudConnectorTabs: jest.fn(() => <div data-testid="cloud-connector-tabs">{'MockedTabs'}</div>),
-}));
+vi.mock('./cloud_connector_tabs', () => {
+      const mocked = {
+      CloudConnectorTabs: vi.fn(() => <div data-testid="cloud-connector-tabs">{'MockedTabs'}</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock hooks
-jest.mock('./hooks/use_get_cloud_connectors');
-jest.mock('./hooks/use_cloud_connector_setup');
-jest.mock('./utils', () => ({
-  ...jest.requireActual('./utils'),
-  isCloudConnectorReusableEnabled: jest.fn(),
-}));
+vi.mock('./hooks/use_get_cloud_connectors');
+vi.mock('./hooks/use_cloud_connector_setup');
+vi.mock('./utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('./utils')),
+      isCloudConnectorReusableEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Get typed references to mocked components and hooks
-const mockCloudConnectorTabs = CloudConnectorTabs as jest.MockedFunction<typeof CloudConnectorTabs>;
-const mockNewCloudConnectorForm = NewCloudConnectorForm as jest.MockedFunction<
+const mockCloudConnectorTabs = CloudConnectorTabs as MockedFunction<typeof CloudConnectorTabs>;
+const mockNewCloudConnectorForm = NewCloudConnectorForm as MockedFunction<
   typeof NewCloudConnectorForm
 >;
-const mockUseGetCloudConnectors = useGetCloudConnectors as jest.MockedFunction<
+const mockUseGetCloudConnectors = useGetCloudConnectors as MockedFunction<
   typeof useGetCloudConnectors
 >;
-const mockUseCloudConnectorSetup = useCloudConnectorSetup as jest.MockedFunction<
+const mockUseCloudConnectorSetup = useCloudConnectorSetup as MockedFunction<
   typeof useCloudConnectorSetup
 >;
-const mockIsCloudConnectorReusableEnabled = isCloudConnectorReusableEnabled as jest.MockedFunction<
+const mockIsCloudConnectorReusableEnabled = isCloudConnectorReusableEnabled as MockedFunction<
   typeof isCloudConnectorReusableEnabled
 >;
 
 // Mock hook functions
-const mockSetNewConnectionCredentials = jest.fn();
-const mockSetExistingConnectionCredentials = jest.fn();
-const mockUpdatePolicyWithNewCredentials = jest.fn();
-const mockUpdatePolicyWithExistingCredentials = jest.fn();
-const mockUpdatePolicy = jest.fn();
+const mockSetNewConnectionCredentials = vi.fn();
+const mockSetExistingConnectionCredentials = vi.fn();
+const mockUpdatePolicyWithNewCredentials = vi.fn();
+const mockUpdatePolicyWithExistingCredentials = vi.fn();
+const mockUpdatePolicy = vi.fn();
 
 describe('CloudConnectorSetup', () => {
   const mockPackageInfo = getMockPackageInfoAWS();
@@ -125,7 +140,7 @@ describe('CloudConnectorSetup', () => {
     } as UseQueryResult<CloudConnector[], unknown>);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Mock version checking to return true by default
     mockIsCloudConnectorReusableEnabled.mockReturnValue(true);
   });

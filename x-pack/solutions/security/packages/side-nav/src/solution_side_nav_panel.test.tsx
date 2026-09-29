@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { SolutionSideNavPanel, type SolutionSideNavPanelProps } from './solution_side_nav_panel';
@@ -14,16 +16,16 @@ import { TelemetryContextProvider } from './telemetry/telemetry_context';
 import type { SolutionSideNavItem } from './types';
 import { type LinkCategories, LinkCategoryType } from '@kbn/security-solution-navigation';
 
-const mockUseIsWithinMinBreakpoint = jest.fn(() => true);
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+const mockUseIsWithinMinBreakpoint = vi.fn(() => true);
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     useIsWithinMinBreakpoint: () => mockUseIsWithinMinBreakpoint(),
   };
 });
 
-const mockTrack = jest.fn();
+const mockTrack = vi.fn();
 
 const mockItems: SolutionSideNavItem[] = [
   {
@@ -64,8 +66,8 @@ const mockCategories: LinkCategories = [
 
 const bottomNavOffset = '10px';
 const PANEL_TITLE = 'test title';
-const mockOnClose = jest.fn();
-const mockOnOutsideClick = jest.fn();
+const mockOnClose = vi.fn();
+const mockOnOutsideClick = vi.fn();
 const renderNavPanel = (props: Partial<SolutionSideNavPanelProps> = {}) =>
   render(
     <>
@@ -84,7 +86,7 @@ const renderNavPanel = (props: Partial<SolutionSideNavPanelProps> = {}) =>
 
 describe('SolutionSideNavPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render all main items', () => {
@@ -132,7 +134,7 @@ describe('SolutionSideNavPanel', () => {
     });
 
     it('should call onClick callback if link clicked', () => {
-      const mockOnClick = jest.fn((ev) => {
+      const mockOnClick = vi.fn((ev) => {
         ev.preventDefault();
       });
       const items = [
@@ -150,7 +152,7 @@ describe('SolutionSideNavPanel', () => {
     });
 
     it('should send telemetry if link clicked', () => {
-      const mockOnClick = jest.fn((ev) => {
+      const mockOnClick = vi.fn((ev) => {
         ev.preventDefault();
       });
       const items = [

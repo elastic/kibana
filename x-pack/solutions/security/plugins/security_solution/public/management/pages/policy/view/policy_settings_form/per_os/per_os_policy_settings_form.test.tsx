@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -26,16 +29,16 @@ import type { PerOsPolicySettingsFormProps } from './per_os_policy_settings_form
 import { PerOsPolicySettingsForm } from './per_os_policy_settings_form';
 import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
-jest.mock('../../../../../../common/hooks/use_license');
-jest.mock('../hooks/use_get_protections_unavailable_component');
-jest.mock('../hooks/use_get_device_control_component');
+vi.mock('../../../../../../common/hooks/use_license');
+vi.mock('../hooks/use_get_protections_unavailable_component');
+vi.mock('../hooks/use_get_device_control_component');
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 const useGetProtectionsUnavailableComponentMock =
-  _useGetProtectionsUnavailableComponent as jest.Mock;
-const useGetDeviceControlUpsellComponentMock = _useGetDeviceControlUpsellComponent as jest.Mock;
+  _useGetProtectionsUnavailableComponent as Mock;
+const useGetDeviceControlUpsellComponentMock = _useGetDeviceControlUpsellComponent as Mock;
 
 describe('PerOsPolicySettingsForm', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test');
@@ -58,7 +61,7 @@ describe('PerOsPolicySettingsForm', () => {
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
         .config.policy.value,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': 'test',
     };
@@ -129,7 +132,7 @@ describe('PerOsPolicySettingsForm', () => {
     };
 
     const getUpdatedPolicy = () =>
-      (formProps.onChange as jest.Mock).mock.calls.at(-1)[0].updatedPolicy;
+      (formProps.onChange as Mock).mock.calls.at(-1)[0].updatedPolicy;
 
     it('syncs antivirus registration with Windows malware when the AV mode is sync', async () => {
       setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, true);

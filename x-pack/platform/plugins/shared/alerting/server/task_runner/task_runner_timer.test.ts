@@ -5,28 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 
-const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 
 describe('TaskRunnerTimer', () => {
   let timer: TaskRunnerTimer;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     timer = new TaskRunnerTimer({ logger: mockLogger });
   });
 
   describe('setDuration', () => {
     beforeAll(() => {
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date('2020-03-09').getTime());
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2020-03-09').getTime());
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
     test('should calculate duration as now - given start date for given timer span', () => {
       timer.setDuration(TaskRunnerTimerSpan.StartTaskRun, new Date('2020-03-06'));

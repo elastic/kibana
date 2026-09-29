@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { Plugin } from './plugin';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { StreamsRepositoryClient } from './api';
 
 describe('Streams Plugin', () => {
   let plugin: Plugin;
-  let mockRepositoryClient: jest.Mocked<StreamsRepositoryClient>;
+  let mockRepositoryClient: Mocked<StreamsRepositoryClient>;
 
   beforeEach(() => {
     plugin = new Plugin({
@@ -25,14 +28,14 @@ describe('Streams Plugin', () => {
       },
       logger: {
         get: () => ({
-          error: jest.fn(),
+          error: vi.fn(),
         }),
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     mockRepositoryClient = {
-      fetch: jest.fn(),
+      fetch: vi.fn(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
 
@@ -42,7 +45,7 @@ describe('Streams Plugin', () => {
 
   afterEach(() => {
     plugin.stop();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('setup', () => {
@@ -173,7 +176,7 @@ describe('Streams Plugin', () => {
     it('should log errors when fetch fails', async () => {
       const mockError = new Error('Network failure');
       const mockLogger = {
-        error: jest.fn(),
+        error: vi.fn(),
       };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       plugin.logger = mockLogger as any;
@@ -245,7 +248,7 @@ describe('Streams Plugin', () => {
     it('should log errors when fetch fails', async () => {
       const mockError = new Error('Network failure');
       const mockLogger = {
-        error: jest.fn(),
+        error: vi.fn(),
       };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       plugin.logger = mockLogger as any;

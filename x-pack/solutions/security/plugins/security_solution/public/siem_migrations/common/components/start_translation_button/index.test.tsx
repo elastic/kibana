@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { StartTranslationButton } from '.';
@@ -12,7 +14,7 @@ import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/c
 import { MigrationSource } from '../../types';
 
 describe('StartTranslationButton', () => {
-  const startMigration = jest.fn();
+  const startMigration = vi.fn();
   const defaultMigrationStats = {
     id: '1',
     status: SiemMigrationTaskStatus.READY,
@@ -24,7 +26,7 @@ describe('StartTranslationButton', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders button component', () => {

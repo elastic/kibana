@@ -5,29 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useMigrationRulesTableColumns } from './use_migration_rules_table_columns';
 import * as columns from '../components/rules_table_columns';
 import { createIntegrationsColumn } from '../components/rules_table_columns/integrations';
 
-jest.mock('../components/rules_table_columns', () => ({
-  createUpdatedColumn: jest.fn(),
-  createNameColumn: jest.fn(),
-  createStatusColumn: jest.fn(),
-  createRiskScoreColumn: jest.fn(),
-  createSeverityColumn: jest.fn(),
-  createAuthorColumn: jest.fn(),
-  createActionsColumn: jest.fn(),
-}));
+vi.mock('../components/rules_table_columns', () => {
+      const mocked = {
+      createUpdatedColumn: vi.fn(),
+      createNameColumn: vi.fn(),
+      createStatusColumn: vi.fn(),
+      createRiskScoreColumn: vi.fn(),
+      createSeverityColumn: vi.fn(),
+      createAuthorColumn: vi.fn(),
+      createActionsColumn: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/rules_table_columns/integrations', () => ({
-  createIntegrationsColumn: jest.fn(),
-}));
+vi.mock('../components/rules_table_columns/integrations', () => {
+      const mocked = {
+      createIntegrationsColumn: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useMigrationRulesTableColumns', () => {
-  const mockOpenMigrationRuleDetails = jest.fn();
-  const mockInstallMigrationRule = jest.fn();
-  const mockGetMigrationRuleData = jest.fn();
+  const mockOpenMigrationRuleDetails = vi.fn();
+  const mockInstallMigrationRule = vi.fn();
+  const mockGetMigrationRuleData = vi.fn();
 
   it('should call all create column functions with the correct arguments', () => {
     const { result } = renderHook(() =>

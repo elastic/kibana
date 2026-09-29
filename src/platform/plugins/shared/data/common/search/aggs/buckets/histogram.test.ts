@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry, mockAggTypesDependencies } from '../test_helpers';
 import type { AggTypesDependencies } from '../agg_types';
@@ -51,7 +53,7 @@ describe('Histogram Agg', () => {
       {
         typesRegistry: mockAggTypesRegistry(aggTypesDependencies),
       },
-      jest.fn()
+      vi.fn()
     );
   };
 

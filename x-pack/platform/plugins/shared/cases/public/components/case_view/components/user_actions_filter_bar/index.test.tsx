@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
@@ -16,9 +19,9 @@ import type { UserActivityParams } from '../../../user_actions_activity_bar/type
 import type { CaseUserActionsStats } from '../../../../containers/types';
 import { UserActionsFilterBar } from '.';
 
-jest.mock('../../../../containers/use_get_case_users');
+vi.mock('../../../../containers/use_get_case_users');
 
-const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
+const useGetCaseUsersMock = useGetCaseUsers as Mock;
 
 const userActionsStats: CaseUserActionsStats = {
   total: 21,
@@ -39,7 +42,7 @@ const defaultParams: UserActivityParams = {
 };
 
 describe('UserActionsFilterBar', () => {
-  const onParamsChange = jest.fn();
+  const onParamsChange = vi.fn();
   const caseUsers = getCaseUsersMockResponse();
   // eslint-disable-next-line prefer-object-spread
   const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
@@ -74,7 +77,7 @@ describe('UserActionsFilterBar', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
   });
 

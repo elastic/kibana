@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { columnsMetaWithCustomField, generateEsHits } from '@kbn/discover-utils/src/__mocks__';
@@ -30,7 +32,7 @@ import {
 } from './use_comparison_css';
 import * as CalculateDiff from './calculate_diff';
 
-const calculateDiff = jest.spyOn(CalculateDiff, 'calculateDiff');
+const calculateDiff = vi.spyOn(CalculateDiff, 'calculateDiff');
 
 const docs = generateEsHits(dataViewWithTimefieldMock, 3).map((hit, i) => {
   switch (i) {

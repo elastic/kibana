@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import type { ChromeNavLink } from '@kbn/core/public';
 import { getAppDetails } from './get_app_details';
@@ -47,7 +49,7 @@ const discoverNavLink = (overrides: Partial<ChromeNavLink> = {}): ChromeNavLink 
 
 describe('getAppDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should match by exact URL', () => {

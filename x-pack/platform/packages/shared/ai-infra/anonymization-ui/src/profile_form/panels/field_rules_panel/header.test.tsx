@@ -5,40 +5,45 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { FieldRulesPanelHeader } from './header';
 import { useFieldRulesPanelContext } from './context';
 
-jest.mock('./context', () => ({
-  useFieldRulesPanelContext: jest.fn(),
-}));
+vi.mock('./context', () => {
+      const mocked = {
+      useFieldRulesPanelContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('FieldRulesPanelHeader', () => {
   it('renders rule policy counters', () => {
-    jest.mocked(useFieldRulesPanelContext).mockReturnValue({
+    vi.mocked(useFieldRulesPanelContext).mockReturnValue({
       fieldSearchQuery: '',
-      setFieldSearchQuery: jest.fn(),
+      setFieldSearchQuery: vi.fn(),
       fieldActionFilter: 'all',
-      setFieldActionFilter: jest.fn(),
+      setFieldActionFilter: vi.fn(),
       fieldPageIndex: 0,
-      setFieldPageIndex: jest.fn(),
+      setFieldPageIndex: vi.fn(),
       bulkAction: 'allow',
-      setBulkAction: jest.fn(),
+      setBulkAction: vi.fn(),
       bulkEntityClass: '',
-      setBulkEntityClass: jest.fn(),
+      setBulkEntityClass: vi.fn(),
       pagedRules: [],
       filteredRules: [],
       allRules: [],
       selectedFields: [],
-      setSelectedFields: jest.fn(),
+      setSelectedFields: vi.fn(),
       allFieldsSelected: false,
       hasActiveFieldFilters: false,
       selectedCount: 0,
-      toggleSelectAllFields: jest.fn(),
-      onRuleActionChange: jest.fn(),
-      onRuleEntityClassChange: jest.fn(),
-      applyBulkAction: jest.fn(),
+      toggleSelectAllFields: vi.fn(),
+      onRuleActionChange: vi.fn(),
+      onRuleEntityClassChange: vi.fn(),
+      applyBulkAction: vi.fn(),
       policyCounters: { allow: 10, anonymize: 3, deny: 2 },
       isManageMode: true,
       isSubmitting: false,

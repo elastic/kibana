@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { EndpointActionCallout } from './callout';
 import { renderWithI18n as render } from '@kbn/test-jest-helpers';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib');
+vi.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib');
 
-const useFormDataMock = useFormData as jest.MockedFunction<typeof useFormData>;
+const useFormDataMock = useFormData as MockedFunction<typeof useFormData>;
 
 const mockFormData = (data: Record<string, string>) => {
-  (useFormDataMock as jest.MockedFunction<typeof useFormData>).mockReturnValue([
+  (useFormDataMock as MockedFunction<typeof useFormData>).mockReturnValue([
     data,
-    jest.fn(),
+    vi.fn(),
     false,
   ]);
 };

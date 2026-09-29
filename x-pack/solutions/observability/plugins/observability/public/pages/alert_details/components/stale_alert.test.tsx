@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '../../../utils/test_helper';
 import { alert } from '../mock/alert';
@@ -15,27 +18,27 @@ import StaleAlert from './stale_alert';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TopAlert } from '../../../typings/alerts';
 
-jest.mock('../../../utils/kibana_react');
-jest.mock('../hooks/use_bulk_untrack_alerts');
+vi.mock('../../../utils/kibana_react');
+vi.mock('../hooks/use_bulk_untrack_alerts');
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       ...kibanaStartMock.startContract().services,
       http: {
         basePath: {
-          prepend: jest.fn(),
+          prepend: vi.fn(),
         },
       },
     },
   });
 };
 
-const useBulkUntrackAlertsMock = useBulkUntrackAlerts as jest.Mock;
+const useBulkUntrackAlertsMock = useBulkUntrackAlerts as Mock;
 
 useBulkUntrackAlertsMock.mockReturnValue({
-  mutateAsync: jest.fn(),
+  mutateAsync: vi.fn(),
 });
 
 const ruleMock = {
@@ -43,7 +46,7 @@ const ruleMock = {
 } as unknown as Rule;
 describe('Stale alert', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibana();
   });
 

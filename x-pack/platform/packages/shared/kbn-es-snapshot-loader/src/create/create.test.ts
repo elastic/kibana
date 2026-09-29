@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { RepositoryStrategy } from '../repository/types';
@@ -19,8 +21,8 @@ const log = new ToolingLog({
 
 describe('createSnapshot', () => {
   const createRepositoryStrategy = () => {
-    const validate = jest.fn();
-    const register = jest.fn().mockResolvedValue(undefined);
+    const validate = vi.fn();
+    const register = vi.fn().mockResolvedValue(undefined);
 
     const repository: RepositoryStrategy = {
       type: 'gcs',
@@ -32,12 +34,12 @@ describe('createSnapshot', () => {
   };
 
   it('creates a snapshot successfully and cleans up repository registration', async () => {
-    const create = jest.fn().mockResolvedValue({
+    const create = vi.fn().mockResolvedValue({
       snapshot: {
         indices: ['logs-app-1', 'metrics-host-1'],
       },
     });
-    const deleteRepository = jest.fn().mockResolvedValue(undefined);
+    const deleteRepository = vi.fn().mockResolvedValue(undefined);
     const esClient = {
       snapshot: {
         create,
@@ -79,8 +81,8 @@ describe('createSnapshot', () => {
   });
 
   it('returns a failure result when snapshot creation fails and still cleans up', async () => {
-    const create = jest.fn().mockRejectedValue(new Error('snapshot create failed'));
-    const deleteRepository = jest.fn().mockResolvedValue(undefined);
+    const create = vi.fn().mockRejectedValue(new Error('snapshot create failed'));
+    const deleteRepository = vi.fn().mockResolvedValue(undefined);
     const esClient = {
       snapshot: {
         create,
@@ -106,8 +108,8 @@ describe('createSnapshot', () => {
   });
 
   it('fails when snapshot response contains no indices', async () => {
-    const create = jest.fn().mockResolvedValue({ snapshot: { indices: [] } });
-    const deleteRepository = jest.fn().mockResolvedValue(undefined);
+    const create = vi.fn().mockResolvedValue({ snapshot: { indices: [] } });
+    const deleteRepository = vi.fn().mockResolvedValue(undefined);
     const esClient = {
       snapshot: { create, deleteRepository },
     } as unknown as Client;
@@ -127,12 +129,12 @@ describe('createSnapshot', () => {
   });
 
   it('forwards index filters to Elasticsearch snapshot.create', async () => {
-    const create = jest.fn().mockResolvedValue({
+    const create = vi.fn().mockResolvedValue({
       snapshot: {
         indices: ['logs-app-1'],
       },
     });
-    const deleteRepository = jest.fn().mockResolvedValue(undefined);
+    const deleteRepository = vi.fn().mockResolvedValue(undefined);
     const esClient = {
       snapshot: {
         create,

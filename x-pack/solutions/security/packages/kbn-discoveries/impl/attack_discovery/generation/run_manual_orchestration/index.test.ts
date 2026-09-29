@@ -5,42 +5,63 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
 import { runManualOrchestration } from '.';
 import { PipelineStepError } from './helpers/pipeline_step_error';
 
-const mockRunRetrievalStep = jest.fn();
-const mockRunGatePhase = jest.fn();
-const mockRunGenerationStep = jest.fn();
-const mockRunValidationStep = jest.fn();
-const mockInvokeSkillReportWorkflow = jest.fn();
-const mockHandleNoAlerts = jest.fn();
+const mockRunRetrievalStep = vi.fn();
+const mockRunGatePhase = vi.fn();
+const mockRunGenerationStep = vi.fn();
+const mockRunValidationStep = vi.fn();
+const mockInvokeSkillReportWorkflow = vi.fn();
+const mockHandleNoAlerts = vi.fn();
 
-jest.mock('./steps/retrieval_step', () => ({
-  runRetrievalStep: (...args: unknown[]) => mockRunRetrievalStep(...args),
-}));
+vi.mock('./steps/retrieval_step', () => {
+      const mocked = {
+      runRetrievalStep: (...args: unknown[]) => mockRunRetrievalStep(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../run_gate_phase', () => ({
-  runGatePhase: (...args: unknown[]) => mockRunGatePhase(...args),
-}));
+vi.mock('../run_gate_phase', () => {
+      const mocked = {
+      runGatePhase: (...args: unknown[]) => mockRunGatePhase(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./steps/generation_step', () => ({
-  runGenerationStep: (...args: unknown[]) => mockRunGenerationStep(...args),
-}));
+vi.mock('./steps/generation_step', () => {
+      const mocked = {
+      runGenerationStep: (...args: unknown[]) => mockRunGenerationStep(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./steps/validation_step', () => ({
-  runValidationStep: (...args: unknown[]) => mockRunValidationStep(...args),
-}));
+vi.mock('./steps/validation_step', () => {
+      const mocked = {
+      runValidationStep: (...args: unknown[]) => mockRunValidationStep(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../invoke_skill_report_workflow', () => ({
-  invokeSkillReportWorkflow: (...args: unknown[]) => mockInvokeSkillReportWorkflow(...args),
-}));
+vi.mock('../invoke_skill_report_workflow', () => {
+      const mocked = {
+      invokeSkillReportWorkflow: (...args: unknown[]) => mockInvokeSkillReportWorkflow(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers/handle_no_alerts', () => ({
-  handleNoAlerts: (...args: unknown[]) => mockHandleNoAlerts(...args),
-}));
+vi.mock('./helpers/handle_no_alerts', () => {
+      const mocked = {
+      handleNoAlerts: (...args: unknown[]) => mockHandleNoAlerts(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAnonymizationFields: AnonymizationFieldResponse[] = [
   {
@@ -118,10 +139,10 @@ const baseParams = {
   eventLogIndex: '.kibana-event-log-test',
   executionUuid: 'test-execution-uuid',
   logger: {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger,
   request: {} as never,
   spaceId: 'default',
@@ -139,7 +160,7 @@ const baseParams = {
 
 describe('runManualOrchestration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockRunRetrievalStep.mockResolvedValue(mockAlertRetrievalResult);
     // Default gate behavior: pass the candidate set through unchanged.
@@ -535,7 +556,7 @@ describe('runManualOrchestration', () => {
     it('includes workflow links in the summary', async () => {
       await runManualOrchestration(baseParams);
 
-      const infoCall = (baseParams.logger.info as jest.Mock).mock.calls.find(
+      const infoCall = (baseParams.logger.info as Mock).mock.calls.find(
         ([msg]: [string]) => typeof msg === 'string' && msg.includes('Orchestration summary')
       );
 
@@ -583,7 +604,7 @@ describe('runManualOrchestration', () => {
     it('prepends basePath to workflow links', async () => {
       await runManualOrchestration({ ...baseParams, basePath: '/s/my-space' });
 
-      const infoCall = (baseParams.logger.info as jest.Mock).mock.calls.find(
+      const infoCall = (baseParams.logger.info as Mock).mock.calls.find(
         ([msg]: [string]) => typeof msg === 'string' && msg.includes('Orchestration summary')
       );
 
@@ -594,7 +615,7 @@ describe('runManualOrchestration', () => {
 
   describe('step failure telemetry', () => {
     const createAnalytics = (): AnalyticsServiceSetup =>
-      ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup);
+      ({ reportEvent: vi.fn() } as unknown as AnalyticsServiceSetup);
 
     it('reports the resolved default validation workflow id when validation_workflow_id is the empty-string sentinel', async () => {
       const analytics = createAnalytics();
@@ -644,17 +665,17 @@ describe('runManualOrchestration', () => {
 
   describe('pipeline timeout', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('throws PipelineStepError when budget is exceeded before generation step', async () => {
       mockRunRetrievalStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(11 * 60 * 1000);
+        vi.advanceTimersByTime(11 * 60 * 1000);
         return mockAlertRetrievalResult;
       });
 
@@ -668,12 +689,12 @@ describe('runManualOrchestration', () => {
 
     it('throws PipelineStepError when budget is exceeded before validation step', async () => {
       mockRunRetrievalStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(3 * 60 * 1000);
+        vi.advanceTimersByTime(3 * 60 * 1000);
         return mockAlertRetrievalResult;
       });
 
       mockRunGenerationStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(8 * 60 * 1000);
+        vi.advanceTimersByTime(8 * 60 * 1000);
         return mockGenerationResult;
       });
 
@@ -686,7 +707,7 @@ describe('runManualOrchestration', () => {
 
     it('passes remaining pipeline budget as maxWaitMs to the generation step', async () => {
       mockRunRetrievalStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(2 * 60 * 1000);
+        vi.advanceTimersByTime(2 * 60 * 1000);
         return mockAlertRetrievalResult;
       });
 
@@ -701,12 +722,12 @@ describe('runManualOrchestration', () => {
 
     it('passes remaining pipeline budget as maxWaitMs to the validation step', async () => {
       mockRunRetrievalStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(2 * 60 * 1000);
+        vi.advanceTimersByTime(2 * 60 * 1000);
         return mockAlertRetrievalResult;
       });
 
       mockRunGenerationStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(5 * 60 * 1000);
+        vi.advanceTimersByTime(5 * 60 * 1000);
         return mockGenerationResult;
       });
 
@@ -721,7 +742,7 @@ describe('runManualOrchestration', () => {
 
     it('uses a default pipeline timeout of 30 minutes (ADR-008)', async () => {
       mockRunRetrievalStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(31 * 60 * 1000);
+        vi.advanceTimersByTime(31 * 60 * 1000);
         return mockAlertRetrievalResult;
       });
 
@@ -732,7 +753,7 @@ describe('runManualOrchestration', () => {
 
     it('does not exceed the budget after 11 minutes of retrieval under the default timeout', async () => {
       mockRunRetrievalStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(11 * 60 * 1000);
+        vi.advanceTimersByTime(11 * 60 * 1000);
         return mockAlertRetrievalResult;
       });
 
@@ -753,7 +774,7 @@ describe('runManualOrchestration', () => {
 
     it('includes the pipeline timeout in the error message', async () => {
       mockRunRetrievalStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(11 * 60 * 1000);
+        vi.advanceTimersByTime(11 * 60 * 1000);
         return mockAlertRetrievalResult;
       });
 
@@ -763,10 +784,10 @@ describe('runManualOrchestration', () => {
     });
 
     it('reports a sane telemetry duration when the budget is exceeded before the generation step', async () => {
-      const analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup;
+      const analytics = { reportEvent: vi.fn() } as unknown as AnalyticsServiceSetup;
 
       mockRunRetrievalStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(11 * 60 * 1000);
+        vi.advanceTimersByTime(11 * 60 * 1000);
         return mockAlertRetrievalResult;
       });
 
@@ -774,7 +795,7 @@ describe('runManualOrchestration', () => {
         runManualOrchestration({ ...baseParams, analytics, pipelineTimeoutMs: 10 * 60 * 1000 })
       ).rejects.toThrow(PipelineStepError);
 
-      const failureCall = (analytics.reportEvent as jest.Mock).mock.calls.find(
+      const failureCall = (analytics.reportEvent as Mock).mock.calls.find(
         ([eventType]: [string]) => eventType === 'attack_discovery_step_failure'
       );
 
@@ -784,15 +805,15 @@ describe('runManualOrchestration', () => {
     });
 
     it('reports a sane telemetry duration when the budget is exceeded before the validation step', async () => {
-      const analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup;
+      const analytics = { reportEvent: vi.fn() } as unknown as AnalyticsServiceSetup;
 
       mockRunRetrievalStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(3 * 60 * 1000);
+        vi.advanceTimersByTime(3 * 60 * 1000);
         return mockAlertRetrievalResult;
       });
 
       mockRunGenerationStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(8 * 60 * 1000);
+        vi.advanceTimersByTime(8 * 60 * 1000);
         return mockGenerationResult;
       });
 
@@ -800,7 +821,7 @@ describe('runManualOrchestration', () => {
         runManualOrchestration({ ...baseParams, analytics, pipelineTimeoutMs: 10 * 60 * 1000 })
       ).rejects.toThrow(PipelineStepError);
 
-      const failureCall = (analytics.reportEvent as jest.Mock).mock.calls.find(
+      const failureCall = (analytics.reportEvent as Mock).mock.calls.find(
         ([eventType]: [string]) => eventType === 'attack_discovery_step_failure'
       );
 
@@ -811,17 +832,17 @@ describe('runManualOrchestration', () => {
 
     it('succeeds when all steps complete within the pipeline budget', async () => {
       mockRunRetrievalStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(1 * 60 * 1000);
+        vi.advanceTimersByTime(1 * 60 * 1000);
         return mockAlertRetrievalResult;
       });
 
       mockRunGenerationStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(3 * 60 * 1000);
+        vi.advanceTimersByTime(3 * 60 * 1000);
         return mockGenerationResult;
       });
 
       mockRunValidationStep.mockImplementation(async () => {
-        jest.advanceTimersByTime(1 * 60 * 1000);
+        vi.advanceTimersByTime(1 * 60 * 1000);
         return mockValidationOutcome;
       });
 

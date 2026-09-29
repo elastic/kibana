@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { AgentBuilderClient } from '@kbn/evals';
 import { converseQuestionToTaskOutput } from './converse_task';
@@ -12,13 +14,13 @@ import { converseQuestionToTaskOutput } from './converse_task';
 describe('converse_task', () => {
   it('converseQuestionToTaskOutput uses the default agent and maps eval task shape', async () => {
     const agentBuilderClient: AgentBuilderClient = {
-      createConversation: jest.fn(),
-      converse: jest.fn().mockResolvedValue({
+      createConversation: vi.fn(),
+      converse: vi.fn().mockResolvedValue({
         message: 'assistant answer',
         steps: [{ type: 'tool_call', tool_id: 'platform.core.execute_esql' }],
         traceId: 'trace-abc',
       }),
-      getConversation: jest.fn(),
+      getConversation: vi.fn(),
     };
 
     const result = await converseQuestionToTaskOutput(agentBuilderClient, 'who is patient zero?');

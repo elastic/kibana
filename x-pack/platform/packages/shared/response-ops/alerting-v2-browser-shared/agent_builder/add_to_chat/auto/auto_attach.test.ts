@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -41,18 +44,18 @@ describe('registerAutoAttach', () => {
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
   let focusedItem$: BehaviorSubject<TestItem | undefined>;
-  let addAttachment: jest.Mock;
-  let removeAttachment: jest.Mock;
+  let addAttachment: Mock;
+  let removeAttachment: Mock;
   let cleanup: () => void;
   let chatEventsByConversationId: Map<string, Subject<ChatEvent>>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     currentAppId$ = new BehaviorSubject<string | null>(null);
     activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     focusedItem$ = new BehaviorSubject<TestItem | undefined>(undefined);
-    addAttachment = jest.fn();
-    removeAttachment = jest.fn();
+    addAttachment = vi.fn();
+    removeAttachment = vi.fn();
     chatEventsByConversationId = new Map();
 
     const chrome = {
@@ -66,7 +69,7 @@ describe('registerAutoAttach', () => {
       removeAttachment,
       events: {
         ui: { activeConversation$: activeConversation$.asObservable() },
-        getChatEvents$: jest.fn((conversationId: string) => {
+        getChatEvents$: vi.fn((conversationId: string) => {
           let chatEvents$ = chatEventsByConversationId.get(conversationId);
 
           if (!chatEvents$) {
@@ -89,13 +92,13 @@ describe('registerAutoAttach', () => {
 
   afterEach(() => {
     cleanup();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('does not attach when the Agent Builder sidebar is closed', () => {
     focusedItem$.next(createItem());
     activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
@@ -104,7 +107,7 @@ describe('registerAutoAttach', () => {
     focusedItem$.next(createItem({ id: 'item-1', label: 'My item' }));
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith({
       id: 'test:item-1',
@@ -118,7 +121,7 @@ describe('registerAutoAttach', () => {
     focusedItem$.next(createItem());
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'item-1' }));
   });
@@ -127,12 +130,12 @@ describe('registerAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
     focusedItem$.next(createItem({ id: 'item-1' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
   });
@@ -140,12 +143,12 @@ describe('registerAutoAttach', () => {
   it('attaches when navigating to an item while an existing conversation is open', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
 
     focusedItem$.next(createItem({ id: 'item-1' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'item-1' }));
   });
@@ -154,17 +157,17 @@ describe('registerAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
     focusedItem$.next(createItem({ id: 'item-1' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
     focusedItem$.next(createItem({ id: 'item-2' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenLastCalledWith(
@@ -177,9 +180,9 @@ describe('registerAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     focusedItem$.next(createItem({ id: 'item-1' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
     focusedItem$.next(createItem({ id: 'item-2' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenNthCalledWith(
@@ -197,12 +200,12 @@ describe('registerAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     focusedItem$.next(createItem({ id: 'item-1' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(removeAttachment).not.toHaveBeenCalled();
 
     focusedItem$.next(createItem({ id: 'item-2' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(removeAttachment).toHaveBeenCalledTimes(1);
     expect(removeAttachment).toHaveBeenCalledWith('test:item-1');
@@ -214,7 +217,7 @@ describe('registerAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     focusedItem$.next(createItem({ id: 'item-1' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(removeAttachment).not.toHaveBeenCalled();
     expect(addAttachment).toHaveBeenCalledTimes(1);
@@ -225,7 +228,7 @@ describe('registerAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     focusedItem$.next(createItem({ id: 'item-1' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
@@ -240,7 +243,7 @@ describe('registerAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     focusedItem$.next(createItem({ id: 'item-1' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
@@ -250,7 +253,7 @@ describe('registerAutoAttach', () => {
     expect(removeAttachment).toHaveBeenCalledWith('test:item-1');
 
     focusedItem$.next(createItem({ id: 'item-2' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'test:item-2' }));
@@ -262,7 +265,7 @@ describe('registerAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     focusedItem$.next(createItem({ id: 'item-1' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     currentAppId$.next(null);
     focusedItem$.next(undefined);
@@ -275,7 +278,7 @@ describe('registerAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     focusedItem$.next(createItem({ id: 'item-1' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
@@ -290,7 +293,7 @@ describe('registerAutoAttach', () => {
     activeConversation$.next({ id: undefined });
 
     focusedItem$.next(createItem({ id: 'item-1' }));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     currentAppId$.next(null);
 
@@ -305,7 +308,7 @@ describe('registerAutoAttach', () => {
     focusedItem$.next(createItem());
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });

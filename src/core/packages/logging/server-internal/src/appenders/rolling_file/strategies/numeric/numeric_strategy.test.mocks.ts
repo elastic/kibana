@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getOrderedRolledFilesMock = jest.fn();
-export const rollPreviousFilesInOrderMock = jest.fn();
-export const rollCurrentFileMock = jest.fn();
-export const shouldSkipRolloutMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./rolling_tasks', () => ({
-  getOrderedRolledFiles: getOrderedRolledFilesMock,
-  rollPreviousFilesInOrder: rollPreviousFilesInOrderMock,
-  rollCurrentFile: rollCurrentFileMock,
-  shouldSkipRollout: shouldSkipRolloutMock,
-}));
+export const getOrderedRolledFilesMock = vi.fn();
+export const rollPreviousFilesInOrderMock = vi.fn();
+export const rollCurrentFileMock = vi.fn();
+export const shouldSkipRolloutMock = vi.fn();
+
+vi.doMock('./rolling_tasks', () => {
+      const mocked = {
+      getOrderedRolledFiles: getOrderedRolledFilesMock,
+      rollPreviousFilesInOrder: rollPreviousFilesInOrderMock,
+      rollCurrentFile: rollCurrentFileMock,
+      shouldSkipRollout: shouldSkipRolloutMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const resetAllMock = () => {
   shouldSkipRolloutMock.mockReset();

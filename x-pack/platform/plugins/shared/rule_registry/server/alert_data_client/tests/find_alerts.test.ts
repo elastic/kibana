@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
@@ -25,16 +28,16 @@ describe('find()', () => {
   const esClientMock = elasticsearchClientMock.createElasticsearchClient();
   const auditLogger = auditLoggerMock.create();
 
-  const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+  const alertsClientParams: Mocked<ConstructorOptions> = {
     logger: loggingSystemMock.create().get(),
     authorization: alertingAuthMock,
     esClient: esClientMock,
     esClientScoped: esClientMock,
     auditLogger,
     ruleDataService: ruleDataServiceMock.create(),
-    getRuleType: jest.fn(),
-    getRuleList: jest.fn(),
-    getAlertIndicesAlias: jest.fn(),
+    getRuleType: vi.fn(),
+    getRuleList: vi.fn(),
+    getAlertIndicesAlias: vi.fn(),
   };
 
   const DEFAULT_SPACE = 'test_default_space_id';
@@ -100,11 +103,11 @@ describe('find()', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     alertingAuthMock.getSpaceId.mockImplementation(() => DEFAULT_SPACE);
     alertingAuthMock.getAuthorizationFilter.mockResolvedValue({
       filter: filter as unknown as JsonObject,
-      ensureRuleTypeIsAuthorized: jest.fn(),
+      ensureRuleTypeIsAuthorized: vi.fn(),
     });
     alertingAuthMock.getAllAuthorizedRuleTypes.mockResolvedValue({
       hasAllRequested: true,
@@ -121,8 +124,8 @@ describe('find()', () => {
 
   test('calls ES client with given params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    const searchAlertsSpy = jest.spyOn(alertsClient as any, 'searchAlerts');
-    alertsClient.getAuthorizedAlertsIndices = jest.fn().mockResolvedValue([]);
+    const searchAlertsSpy = vi.spyOn(alertsClient as any, 'searchAlerts');
+    alertsClient.getAuthorizedAlertsIndices = vi.fn().mockResolvedValue([]);
     esClientMock.search.mockResponseOnce({
       took: 5,
       timed_out: false,

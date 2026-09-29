@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   DeprecationsFactoryMock,
   registerConfigDeprecationsInfoMock,
@@ -45,7 +47,7 @@ describe('DeprecationsService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     DeprecationsFactoryMock.mockClear();
     registerConfigDeprecationsInfoMock.mockClear();
   });

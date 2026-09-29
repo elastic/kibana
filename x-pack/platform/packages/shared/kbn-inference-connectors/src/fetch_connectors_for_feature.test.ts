@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core-http-browser';
 import {
   INFERENCE_CONNECTORS_INTERNAL_API_PATH,
@@ -27,7 +29,7 @@ describe('fetchConnectorsForFeature', () => {
   it('calls the shared internal path with featureId and returns the response as-is', async () => {
     const rec = { ...inferenceConnector('rec'), isRecommended: true };
     const other = inferenceConnector('other');
-    const httpGet = jest.fn().mockResolvedValue({
+    const httpGet = vi.fn().mockResolvedValue({
       connectors: [rec, other],
       soEntryFound: false,
     });
@@ -47,7 +49,7 @@ describe('fetchConnectorsForFeature', () => {
 
   it('returns SO-configured connectors with soEntryFound true', async () => {
     const a = inferenceConnector('a');
-    const httpGet = jest.fn().mockResolvedValue({
+    const httpGet = vi.fn().mockResolvedValue({
       connectors: [a],
       soEntryFound: true,
     });

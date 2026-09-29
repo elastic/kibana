@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import numeral from '@elastic/numeral';
 import { get } from 'lodash/fp';
 import React from 'react';
@@ -47,9 +50,9 @@ import {
 } from './field_names';
 import { SecurityCellActions } from '../../../../common/components/cell_actions';
 
-jest.mock('../../../../common/components/cell_actions', () => {
+vi.mock('../../../../common/components/cell_actions', () => {
   return {
-    SecurityCellActions: jest.fn(),
+    SecurityCellActions: vi.fn(),
     CellActionsMode: {
       HOVER_DOWN: 'hover-down',
       HOVER_RIGHT: 'hover-right',
@@ -61,14 +64,14 @@ jest.mock('../../../../common/components/cell_actions', () => {
   };
 });
 
-const MockedSecurityCellActions = jest.fn(({ children }) => {
+const MockedSecurityCellActions = vi.fn(({ children }) => {
   return <div data-test-subj="mock-security-cell-actions">{children}</div>;
 });
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
@@ -125,21 +128,21 @@ const getSourceDestinationInstance = () => (
   />
 );
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
 
   return {
     ...original,
     useHistory: () => ({
-      createHref: jest.fn(),
-      push: jest.fn(),
+      createHref: vi.fn(),
+      push: vi.fn(),
     }),
   };
 });
 
 describe('SourceDestination', () => {
   beforeEach(() => {
-    (SecurityCellActions as unknown as jest.Mock).mockImplementation(MockedSecurityCellActions);
+    (SecurityCellActions as unknown as Mock).mockImplementation(MockedSecurityCellActions);
   });
 
   test('renders correctly against snapshot', () => {

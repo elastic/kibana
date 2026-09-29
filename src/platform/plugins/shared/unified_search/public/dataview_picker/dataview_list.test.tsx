@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { DataViewListItemEnhanced, DataViewsListProps } from './dataview_list';
 import { DataViewsList } from './dataview_list';
@@ -41,7 +43,7 @@ describe('DataView list component', () => {
       title: 'dataview-2',
     },
   ];
-  const changeDataViewSpy = jest.fn();
+  const changeDataViewSpy = vi.fn();
   let props: DataViewsListProps;
 
   // Helper to render with proper container dimensions
@@ -50,7 +52,7 @@ describe('DataView list component', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     props = {
       currentDataViewId: 'dataview-1',
       onChangeDataView: changeDataViewSpy,

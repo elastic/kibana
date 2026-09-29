@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -13,24 +15,30 @@ import { InferenceConnectorType } from '@kbn/inference-common';
 
 import { getEvaluatorLlm } from '.';
 
-jest.mock('@kbn/langchain/server', () => ({
-  ...jest.requireActual('@kbn/langchain/server'),
-  ActionsClientLlm: jest.fn(),
-  getLangSmithTracer: jest.fn().mockReturnValue(['mock-tracer']),
-}));
+vi.mock('@kbn/langchain/server', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/langchain/server')),
+      ActionsClientLlm: vi.fn(),
+      getLangSmithTracer: vi.fn().mockReturnValue(['mock-tracer']),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../routes/utils', () => ({
-  getLlmType: (actionTypeId: string) => {
-    switch (actionTypeId) {
-      case '.gen-ai':
-        return 'openai';
-      case '.gemini':
-        return 'gemini';
-      default:
-        return 'unknown';
-    }
-  },
-}));
+vi.mock('../../../../../routes/utils', () => {
+      const mocked = {
+      getLlmType: (actionTypeId: string) => {
+        switch (actionTypeId) {
+          case '.gen-ai':
+            return 'openai';
+          case '.gemini':
+            return 'gemini';
+          default:
+            return 'unknown';
+        }
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const connectorTimeout = 1500;
 const evaluatorConnectorId = 'evaluator-connector-id';
@@ -59,13 +67,13 @@ const logger = loggerMock.create();
 
 describe('getEvaluatorLlm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('evaluator connector resolution', () => {
     it('uses the provided evaluatorConnectorId if available', async () => {
       const actionsClient = {} as unknown as ActionsClient;
-      const getInferenceConnectorById = jest.fn().mockResolvedValue(evaluatorConnector);
+      const getInferenceConnectorById = vi.fn().mockResolvedValue(evaluatorConnector);
 
       await getEvaluatorLlm({
         actionsClient,
@@ -82,7 +90,7 @@ describe('getEvaluatorLlm', () => {
 
     it('falls back to experimentConnector.connectorId if no evaluatorConnectorId is provided', async () => {
       const actionsClient = {} as unknown as ActionsClient;
-      const getInferenceConnectorById = jest.fn().mockResolvedValue(experimentConnector);
+      const getInferenceConnectorById = vi.fn().mockResolvedValue(experimentConnector);
 
       await getEvaluatorLlm({
         actionsClient,
@@ -99,7 +107,7 @@ describe('getEvaluatorLlm', () => {
 
     it('uses the experimentConnector if getInferenceConnectorById throws', async () => {
       const actionsClient = {} as unknown as ActionsClient;
-      const getInferenceConnectorById = jest.fn().mockRejectedValue(new Error('Not found'));
+      const getInferenceConnectorById = vi.fn().mockRejectedValue(new Error('Not found'));
 
       await getEvaluatorLlm({
         actionsClient,
@@ -121,7 +129,7 @@ describe('getEvaluatorLlm', () => {
 
   it('logs a message with connector names and llm types', async () => {
     const actionsClient = {} as unknown as ActionsClient;
-    const getInferenceConnectorById = jest.fn().mockResolvedValue(evaluatorConnector);
+    const getInferenceConnectorById = vi.fn().mockResolvedValue(evaluatorConnector);
 
     await getEvaluatorLlm({
       actionsClient,
@@ -140,7 +148,7 @@ describe('getEvaluatorLlm', () => {
 
   it('passes expected traceOptions and config to ActionsClientLlm', async () => {
     const actionsClient = {} as unknown as ActionsClient;
-    const getInferenceConnectorById = jest.fn().mockResolvedValue(evaluatorConnector);
+    const getInferenceConnectorById = vi.fn().mockResolvedValue(evaluatorConnector);
 
     await getEvaluatorLlm({
       actionsClient,

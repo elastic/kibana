@@ -7,25 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { GoogleCloudMonitoring } from './google_cloud_monitoring';
 
 describe('GoogleCloudMonitoring', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-    patch: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
   };
 
   const mockContext = {
     client: mockClient,
     config: { projectId: 'my-gcp-project' },
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('metadata and wiring', () => {

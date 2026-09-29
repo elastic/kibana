@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -13,15 +16,18 @@ import { useUpdateTags } from '../hooks';
 
 import { TagOptions } from './tag_options';
 
-jest.mock('../hooks', () => ({
-  useUpdateTags: jest.fn().mockReturnValue({
-    bulkUpdateTags: jest.fn(),
-  }),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useUpdateTags: vi.fn().mockReturnValue({
+        bulkUpdateTags: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TagOptions', () => {
-  const mockBulkUpdateTags = useUpdateTags().bulkUpdateTags as jest.Mock;
-  const onTagsUpdated = jest.fn();
+  const mockBulkUpdateTags = useUpdateTags().bulkUpdateTags as Mock;
+  const onTagsUpdated = vi.fn();
   let isTagHovered: boolean;
 
   beforeEach(() => {

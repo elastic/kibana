@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import type { FeatureFlagsStart } from '@kbn/core/server';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
@@ -12,7 +14,7 @@ import { isSignificantEventsFeatureFlagEnabled } from './is_significant_events_f
 
 describe('isSignificantEventsFeatureFlagEnabled', () => {
   it('returns false when the feature flag is not enabled', async () => {
-    const getBooleanValue$ = jest.fn().mockReturnValue(of(false));
+    const getBooleanValue$ = vi.fn().mockReturnValue(of(false));
     const featureFlags = { getBooleanValue$ } as unknown as FeatureFlagsStart;
 
     await expect(isSignificantEventsFeatureFlagEnabled(featureFlags)).resolves.toBe(false);
@@ -20,7 +22,7 @@ describe('isSignificantEventsFeatureFlagEnabled', () => {
   });
 
   it('returns true when the feature flag is enabled', async () => {
-    const getBooleanValue$ = jest.fn().mockReturnValue(of(true));
+    const getBooleanValue$ = vi.fn().mockReturnValue(of(true));
     const featureFlags = { getBooleanValue$ } as unknown as FeatureFlagsStart;
 
     await expect(isSignificantEventsFeatureFlagEnabled(featureFlags)).resolves.toBe(true);

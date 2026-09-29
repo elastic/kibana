@@ -5,31 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CreateIntegrationSideCardButton } from './create_integration_card_button';
 import { AutomaticImportTelemetryEventType } from '../../../common';
 
-const mockNavigateToUrl = jest.fn();
-const mockGetUrlForApp = jest.fn(
+const mockNavigateToUrl = vi.fn();
+const mockGetUrlForApp = vi.fn(
   (app: string, options?: { path?: string }) => `/${app}${options?.path ?? ''}`
 );
-const mockReportEvent = jest.fn();
+const mockReportEvent = vi.fn();
 
-jest.mock('../../common/hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        navigateToUrl: mockNavigateToUrl,
-        getUrlForApp: mockGetUrlForApp,
-      },
-      telemetry: {
-        reportEvent: mockReportEvent,
-      },
-    },
-  }),
-}));
+vi.mock('../../common/hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            navigateToUrl: mockNavigateToUrl,
+            getUrlForApp: mockGetUrlForApp,
+          },
+          telemetry: {
+            reportEvent: mockReportEvent,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderComponent = () =>
   render(
@@ -40,7 +45,7 @@ const renderComponent = () =>
 
 describe('CreateIntegrationSideCardButton telemetry', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls reportEvent with UploadIntegrationClicked when upload link is clicked', () => {

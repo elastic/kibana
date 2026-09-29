@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -16,8 +18,8 @@ import { createKQLCustomIndicator, createSLO } from './fixtures/slo';
 import { DefaultSLODefinitionRepository } from './slo_definition_repository';
 
 describe('DefaultSLODefinitionRepository', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let logger: jest.Mocked<MockedLogger>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let logger: Mocked<MockedLogger>;
   let repository: DefaultSLODefinitionRepository;
 
   beforeEach(() => {

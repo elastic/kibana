@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -12,22 +15,31 @@ import { loadGlobalConnectorExecutionLogAggregations } from '../../../lib/action
 import { ConnectorEventLogListTable } from './actions_connectors_event_log_list_table';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../../../common/lib/kibana'),
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      notifications: { toasts: { addDanger: jest.fn() } },
-    },
-  }),
-}));
+vi.mock('../../../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../common/lib/kibana')),
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          notifications: { toasts: { addDanger: vi.fn() } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/action_connector_api/load_execution_log_aggregations', () => ({
-  loadGlobalConnectorExecutionLogAggregations: jest.fn(),
-}));
+vi.mock('../../../lib/action_connector_api/load_execution_log_aggregations', () => {
+      const mocked = {
+      loadGlobalConnectorExecutionLogAggregations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockResponse = {
   total: 1,
@@ -49,12 +61,12 @@ const mockResponse = {
 };
 
 const loadGlobalExecutionLogAggregationsMock =
-  loadGlobalConnectorExecutionLogAggregations as unknown as jest.MockedFunction<any>;
+  loadGlobalConnectorExecutionLogAggregations as unknown as MockedFunction<any>;
 
 describe('actions_connectors_event_log_list_table', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    vi.clearAllMocks();
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
     loadGlobalExecutionLogAggregationsMock.mockResolvedValue(mockResponse);
   });
 

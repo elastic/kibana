@@ -7,18 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLAdHocDataview: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/esql-utils')),
+      getESQLAdHocDataview: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetESQLAdHocDataview = getESQLAdHocDataview as jest.MockedFunction<
+const mockGetESQLAdHocDataview = getESQLAdHocDataview as MockedFunction<
   typeof getESQLAdHocDataview
 >;
 
@@ -40,7 +46,7 @@ const mockField = {
 describe('createFiltersFromClickEvent', () => {
   const dataStart = dataPluginMock.createStartContract();
   const dataViews = dataViewPluginMocks.createStartContract();
-  dataViews.get = jest.fn().mockResolvedValue({
+  dataViews.get = vi.fn().mockResolvedValue({
     id: 'logstash-*',
     fields: {
       getByName: () => mockField,
@@ -222,7 +228,7 @@ describe('createFiltersFromClickEvent', () => {
     });
 
     describe('raw columns (createFilterFromRawColumnsESQL)', () => {
-      const mockFieldByName = jest.fn();
+      const mockFieldByName = vi.fn();
       const mockDataView = createStubDataView({
         spec: {
           id: 'mock-dataview-id',

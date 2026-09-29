@@ -7,34 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { FeedbackTriggerButton } from './feedback_trigger_button';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('./feedback_container', () => ({
-  FeedbackContainer: () => <div data-test-subj="feedbackContainer">Feedback Container</div>,
-}));
+vi.mock('./feedback_container', () => {
+      const mocked = {
+      FeedbackContainer: () => <div data-test-subj="feedbackContainer">Feedback Container</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockProps = ({
   isTelemetryGlobalSettingEnabled,
 }: {
   isTelemetryGlobalSettingEnabled: boolean;
 }) => ({
-  getQuestions: jest.fn().mockResolvedValue([]),
-  getAppDetails: jest
+  getQuestions: vi.fn().mockResolvedValue([]),
+  getAppDetails: vi
     .fn()
     .mockReturnValue({ title: 'Test App', id: 'testApp', url: 'http://testapp.com' }),
-  getCurrentUserEmail: jest.fn().mockResolvedValue('capybara@elastic.co'),
-  sendFeedback: jest.fn().mockResolvedValue(undefined),
-  showToast: jest.fn(),
-  checkTelemetryOptIn: jest.fn().mockResolvedValue(isTelemetryGlobalSettingEnabled),
+  getCurrentUserEmail: vi.fn().mockResolvedValue('capybara@elastic.co'),
+  sendFeedback: vi.fn().mockResolvedValue(undefined),
+  showToast: vi.fn(),
+  checkTelemetryOptIn: vi.fn().mockResolvedValue(isTelemetryGlobalSettingEnabled),
 });
 
 describe('FeedbackButton', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render feedback trigger button when opted in', async () => {

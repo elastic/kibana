@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import moment from 'moment';
 import { useKibana } from '../../../common/lib/kibana';
@@ -13,31 +16,34 @@ import { TestProviders } from '../../../common/mock';
 import { useScheduleRuleRun } from './use_schedule_rule_run';
 import { ManualRuleRunEventTypes } from '../../../common/lib/telemetry';
 
-const mockUseScheduleRuleRunMutation = jest.fn();
+const mockUseScheduleRuleRunMutation = vi.fn();
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../api/hooks/use_schedule_rule_run_mutation', () => ({
-  useScheduleRuleRunMutation: () => {
-    return {
-      mutateAsync: mockUseScheduleRuleRunMutation,
+vi.mock('../../../common/lib/kibana');
+vi.mock('../api/hooks/use_schedule_rule_run_mutation', () => {
+      const mocked = {
+      useScheduleRuleRunMutation: () => {
+        return {
+          mutateAsync: mockUseScheduleRuleRunMutation,
+        };
+      },
     };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
 const mockedUseKibana = {
   ...mockUseKibana(),
   services: {
     ...mockUseKibana().services,
     telemetry: {
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     },
   },
 };
 
 describe('When using the `useScheduleRuleRun()` hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue(mockedUseKibana);
   });
 
   it('should send schedule rule run request', async () => {

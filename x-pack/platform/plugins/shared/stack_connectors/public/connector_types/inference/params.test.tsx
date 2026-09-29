@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
@@ -12,11 +15,14 @@ import { SUB_ACTION } from '@kbn/connector-schemas/inference/constants';
 import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
-const mockedIsInferenceEndpointExists = isInferenceEndpointExists as jest.Mock;
+const mockedIsInferenceEndpointExists = isInferenceEndpointExists as Mock;
 
-jest.mock('@kbn/inference-endpoint-ui-common', () => ({
-  isInferenceEndpointExists: jest.fn(),
-}));
+vi.mock('@kbn/inference-endpoint-ui-common', () => {
+      const mocked = {
+      isInferenceEndpointExists: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Inference Params Fields renders', () => {
   mockedIsInferenceEndpointExists.mockResolvedValue(true);
@@ -54,7 +60,7 @@ describe('Inference Params Fields renders', () => {
         subAction: undefined,
         subActionParams: undefined,
       };
-      const editAction = jest.fn();
+      const editAction = vi.fn();
       const errors = {};
       const actionConnector = createMockActionConnector({
         secrets: {
@@ -107,7 +113,7 @@ describe('Inference Params Fields renders', () => {
         input: '{"key": "value"}',
       },
     };
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     render(
       <ParamsFields
@@ -130,7 +136,7 @@ describe('Inference Params Fields renders', () => {
   });
 
   it('calls editAction function with the correct arguments ', () => {
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     const { getByTestId } = render(
       <ParamsFields

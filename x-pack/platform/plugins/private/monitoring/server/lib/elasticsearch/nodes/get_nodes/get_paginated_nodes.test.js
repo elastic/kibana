@@ -5,39 +5,47 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getPaginatedNodes } from './get_paginated_nodes';
 
-jest.mock('./get_node_ids', () => ({
-  getNodeIds: () => [
-    {
-      name: 'one',
-      uuid: 1,
-    },
-    {
-      name: 'two',
-      uuid: 2,
-    },
-  ],
-}));
-
-jest.mock('../../../details/get_metrics', () => ({
-  getMetrics: () => {
-    return {
-      foo: [
-        [
-          {
-            groupedBy: 1,
-            data: [[1, 10]],
-          },
-          {
-            groupedBy: 2,
-            data: [[1, 12]],
-          },
-        ],
+vi.mock('./get_node_ids', () => {
+      const mocked = {
+      getNodeIds: () => [
+        {
+          name: 'one',
+          uuid: 1,
+        },
+        {
+          name: 'two',
+          uuid: 2,
+        },
       ],
     };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../details/get_metrics', () => {
+      const mocked = {
+      getMetrics: () => {
+        return {
+          foo: [
+            [
+              {
+                groupedBy: 1,
+                data: [[1, 10]],
+              },
+              {
+                groupedBy: 2,
+                data: [[1, 12]],
+              },
+            ],
+          ],
+        };
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getPaginatedNodes', () => {
   const req = {

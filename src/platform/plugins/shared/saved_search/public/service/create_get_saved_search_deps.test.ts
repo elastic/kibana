@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -20,7 +22,7 @@ describe('createGetSavedSearchDeps', () => {
       contentManagement: contentManagementMock.createStartContract().client,
     });
 
-    jest
+    vi
       .spyOn(getSavedSearchDeps, 'getSavedSrch')
       .mockRejectedValue(
         new HttpFetchError(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { WorkflowListDto, WorkflowListItemDto } from '@kbn/workflows';
@@ -15,8 +18,8 @@ const logger = loggingSystemMock.create().get('alertzero');
 
 const makeManagement = (
   pages: WorkflowListDto[]
-): { client: WatchWorkflowsManagementClient; getWorkflows: jest.Mock } => {
-  const getWorkflows = jest.fn();
+): { client: WatchWorkflowsManagementClient; getWorkflows: Mock } => {
+  const getWorkflows = vi.fn();
   pages.forEach((page, index) => {
     getWorkflows.mockResolvedValueOnce(page);
     // Any further call falls through with the last page (defensive: service must stop paging).

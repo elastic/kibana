@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import {
   SYNTHETICS_STATUS_RULE,
@@ -17,31 +19,43 @@ import * as spaceHook from '../../../../../hooks/use_kibana_space';
 
 const mockAlertsDataView = { id: 'alerts-data-view', title: '.alerts-observability*' };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({ services: { dataViews: {} } }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({ services: { dataViews: {} } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetcher = jest.fn();
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useFetcher: () => mockUseFetcher(),
-}));
+const mockUseFetcher = vi.fn();
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useFetcher: () => mockUseFetcher(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/exploratory-view-plugin/public', () => ({
-  ObservabilityDataViews: jest.fn(),
-}));
+vi.mock('@kbn/exploratory-view-plugin/public', () => {
+      const mocked = {
+      ObservabilityDataViews: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: () => ({ euiTheme: { colors: { accent: '#F04E98' } } }),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiTheme: () => ({ euiTheme: { colors: { accent: '#F04E98' } } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useOverviewAlertsAnnotations', () => {
-  const paramSpy = jest.spyOn(paramHook, 'useGetUrlParams');
-  const filtersSpy = jest.spyOn(filtersHook, 'useMonitorFilters');
-  const spaceSpy = jest.spyOn(spaceHook, 'useKibanaSpace');
+  const paramSpy = vi.spyOn(paramHook, 'useGetUrlParams');
+  const filtersSpy = vi.spyOn(filtersHook, 'useMonitorFilters');
+  const spaceSpy = vi.spyOn(spaceHook, 'useKibanaSpace');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseFetcher.mockReturnValue({ data: mockAlertsDataView });
     filtersSpy.mockReturnValue([]);
     paramSpy.mockReturnValue({} as any);

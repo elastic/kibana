@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { RegexRulesPanel } from './regex_rules_panel';
 import { useProfileFormContext } from '../../profile_form_context';
 import { buildProfileFormContextValue } from '../../test_fixtures/profile_form_context_value';
 
-jest.mock('../../profile_form_context', () => ({
-  useProfileFormContext: jest.fn(),
-}));
+vi.mock('../../profile_form_context', () => {
+      const mocked = {
+      useProfileFormContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const setContext = (overrides = {}) => {
-  const onRegexRulesChange = jest.fn();
-  jest.mocked(useProfileFormContext).mockReturnValue({
+  const onRegexRulesChange = vi.fn();
+  vi.mocked(useProfileFormContext).mockReturnValue({
     ...buildProfileFormContextValue({
       regexRules: [
         {
@@ -38,7 +43,7 @@ const setContext = (overrides = {}) => {
 
 describe('RegexRulesPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows regex example placeholder', () => {

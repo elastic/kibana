@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { SampleInput } from '../../types';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
@@ -18,13 +20,13 @@ import { screen } from '@testing-library/react';
 const fieldType = 'number';
 
 const format = createFieldFormatMock({
-  convertToReact: jest.fn().mockImplementation(() => null),
+  convertToReact: vi.fn().mockImplementation(() => null),
 });
 
 const formatParams = {};
 
-const onChange = jest.fn();
-const onError = jest.fn();
+const onChange = vi.fn();
+const onError = vi.fn();
 
 class TestDefaultFormatEditor extends DefaultFormatEditor {
   state = {
@@ -115,7 +117,7 @@ describe('DefaultFormatEditor', () => {
 
   it('should call prop onError() if converter throws an error', () => {
     const newFormat = createFieldFormatMock({
-      convertToReact: jest.fn().mockImplementation(() => {
+      convertToReact: vi.fn().mockImplementation(() => {
         throw new Error('Test error message');
       }),
     });

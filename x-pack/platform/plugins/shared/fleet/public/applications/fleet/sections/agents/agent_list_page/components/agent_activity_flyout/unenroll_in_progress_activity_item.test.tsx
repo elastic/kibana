@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent } from '@testing-library/react';
 
@@ -35,13 +37,13 @@ describe('UnenrollInProgressActivityItem', () => {
 
   const renderComponent = (
     action: ActionStatus,
-    abortUnenroll = jest.fn().mockResolvedValue(undefined)
+    abortUnenroll = vi.fn().mockResolvedValue(undefined)
   ) =>
     testRenderer.render(
       <UnenrollInProgressActivityItem
         action={action}
         abortUnenroll={abortUnenroll}
-        onClickViewAgents={jest.fn()}
+        onClickViewAgents={vi.fn()}
       />
     );
 
@@ -82,7 +84,7 @@ describe('UnenrollInProgressActivityItem', () => {
     });
 
     it('calls abortUnenroll when the cancel button is clicked', async () => {
-      const abortUnenroll = jest.fn().mockResolvedValue(undefined);
+      const abortUnenroll = vi.fn().mockResolvedValue(undefined);
       const result = renderComponent(baseAction, abortUnenroll);
 
       await act(async () => {
@@ -94,7 +96,7 @@ describe('UnenrollInProgressActivityItem', () => {
 
     it('disables the button while aborting', async () => {
       let resolveAbort!: () => void;
-      const abortUnenroll = jest.fn(() => new Promise<void>((resolve) => (resolveAbort = resolve)));
+      const abortUnenroll = vi.fn(() => new Promise<void>((resolve) => (resolveAbort = resolve)));
       const result = renderComponent(baseAction, abortUnenroll);
 
       act(() => {

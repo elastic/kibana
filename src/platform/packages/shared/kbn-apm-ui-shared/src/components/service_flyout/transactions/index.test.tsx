@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -18,7 +21,7 @@ import { ServiceFlyoutTransactionsSection } from '.';
 import { useServiceFlyoutTransactionData } from './hooks/use_service_flyout_transaction_data';
 import * as TransactionsTableModule from '../../transactions_table';
 
-jest.mock('./hooks/use_service_flyout_transaction_data');
+vi.mock('./hooks/use_service_flyout_transaction_data');
 
 const FIXTURE_ITEMS = [
   {
@@ -70,7 +73,7 @@ const docLinks = {
 const BASE_PROPS = {
   docLinks,
   http: {} as unknown as HttpStart,
-  notifications: { toasts: { addDanger: jest.fn() } } as any,
+  notifications: { toasts: { addDanger: vi.fn() } } as any,
   serviceName: 'frontend-node',
   environment: 'production',
   start: START,
@@ -80,7 +83,7 @@ const BASE_PROPS = {
   locators,
 };
 
-const mockedUseServiceFlyoutTransactionData = useServiceFlyoutTransactionData as jest.Mock;
+const mockedUseServiceFlyoutTransactionData = useServiceFlyoutTransactionData as Mock;
 
 describe('ServiceFlyoutTransactionsSection', () => {
   beforeEach(() => {
@@ -98,7 +101,7 @@ describe('ServiceFlyoutTransactionsSection', () => {
   });
 
   it('calls onTransactionClick instead of navigating when provided', () => {
-    const onTransactionClick = jest.fn();
+    const onTransactionClick = vi.fn();
     render(
       <ServiceFlyoutTransactionsSection {...BASE_PROPS} onTransactionClick={onTransactionClick} />
     );
@@ -114,7 +117,7 @@ describe('ServiceFlyoutTransactionsSection', () => {
   });
 
   it('notifies onTransactionsChange when items settle', () => {
-    const onTransactionsChange = jest.fn();
+    const onTransactionsChange = vi.fn();
     render(
       <ServiceFlyoutTransactionsSection
         {...BASE_PROPS}
@@ -141,7 +144,7 @@ describe('ServiceFlyoutTransactionsSection', () => {
       isLoading: true,
       items: [],
     });
-    const onTransactionsChange = jest.fn();
+    const onTransactionsChange = vi.fn();
     render(
       <ServiceFlyoutTransactionsSection
         {...BASE_PROPS}
@@ -168,7 +171,7 @@ describe('ServiceFlyoutTransactionsSection', () => {
       ...DEFAULT_HOOK_RESULT,
       mainError,
     });
-    const onTransactionsChange = jest.fn();
+    const onTransactionsChange = vi.fn();
     render(
       <ServiceFlyoutTransactionsSection
         {...BASE_PROPS}
@@ -196,7 +199,7 @@ describe('ServiceFlyoutTransactionsSection', () => {
       presenceItems: FIXTURE_ITEMS,
       isServerSearch: false,
     });
-    const onTransactionsChange = jest.fn();
+    const onTransactionsChange = vi.fn();
     render(
       <ServiceFlyoutTransactionsSection
         {...BASE_PROPS}
@@ -217,7 +220,7 @@ describe('ServiceFlyoutTransactionsSection', () => {
       presenceItems: [FIXTURE_ITEMS[0]],
       isServerSearch: true,
     });
-    const onTransactionsChange = jest.fn();
+    const onTransactionsChange = vi.fn();
     render(
       <ServiceFlyoutTransactionsSection
         {...BASE_PROPS}
@@ -320,11 +323,11 @@ describe('ServiceFlyoutTransactionsSection', () => {
 
   describe('sparkline loading state', () => {
     let capturedIsSparklineLoading: boolean | undefined;
-    let tableSpy: jest.SpyInstance;
+    let tableSpy: MockInstance;
 
     beforeEach(() => {
       capturedIsSparklineLoading = undefined;
-      tableSpy = jest
+      tableSpy = vi
         .spyOn(TransactionsTableModule, 'TransactionsTable')
         .mockImplementation(({ isSparklineLoading }) => {
           capturedIsSparklineLoading = isSparklineLoading;
@@ -356,11 +359,11 @@ describe('ServiceFlyoutTransactionsSection', () => {
 
   describe('items passthrough', () => {
     let capturedItems: unknown[] = [];
-    let tableSpy: jest.SpyInstance;
+    let tableSpy: MockInstance;
 
     beforeEach(() => {
       capturedItems = [];
-      tableSpy = jest
+      tableSpy = vi
         .spyOn(TransactionsTableModule, 'TransactionsTable')
         .mockImplementation(({ items }) => {
           capturedItems = items;

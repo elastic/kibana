@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { EndpointScriptEditFlyout, type EndpointScriptEditFlyoutProps } from './script_edit_flyout';
@@ -27,9 +29,9 @@ describe('EndpointScriptEditFlyout', () => {
       isDisabled: false,
       isSubmittingData: false,
       show: 'edit',
-      onChange: jest.fn(),
-      onClose: jest.fn(),
-      onSubmit: jest.fn(),
+      onChange: vi.fn(),
+      onClose: vi.fn(),
+      onSubmit: vi.fn(),
       'data-test-subj': 'test',
     };
 
@@ -42,7 +44,7 @@ describe('EndpointScriptEditFlyout', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render correctly', () => {
@@ -58,7 +60,7 @@ describe('EndpointScriptEditFlyout', () => {
   it.each(['edit', 'create'])(
     'should call `onSubmit` with correct type, when save button is clicked in `%s` mode',
     async (show) => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       // @ts-ignore type checks for show
       render({ ...defaultProps, onSubmit, show });
 
@@ -93,7 +95,7 @@ describe('EndpointScriptEditFlyout', () => {
     });
 
     it('should call `onClose` when cancel button is clicked', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       render({ ...defaultProps, onClose });
 
       await userEvent.click(renderResult.getByTestId('test-footer-cancel-button'));

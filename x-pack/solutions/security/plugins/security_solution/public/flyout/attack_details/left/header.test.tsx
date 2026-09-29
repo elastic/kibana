@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,11 +17,14 @@ import { INSIGHTS_TAB_ID, NOTES_TAB_ID } from '../constants/left_panel_paths';
 import { INSIGHTS_TAB_TEST_ID } from '../constants/test_ids';
 import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/shared/tools/notes/test_ids';
 
-jest.mock('../../shared/components/flyout_header', () => ({
-  FlyoutHeader: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="flyout-header">{children}</div>
-  ),
-}));
+vi.mock('../../shared/components/flyout_header', () => {
+      const mocked = {
+      FlyoutHeader: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="flyout-header">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockTabs: LeftPanelTabType[] = [
   {
@@ -38,7 +43,7 @@ const mockTabs: LeftPanelTabType[] = [
 
 const renderPanelHeader = (
   selectedTabId: typeof INSIGHTS_TAB_ID | typeof NOTES_TAB_ID,
-  setSelectedTabId: (id: typeof INSIGHTS_TAB_ID | typeof NOTES_TAB_ID) => void = jest.fn()
+  setSelectedTabId: (id: typeof INSIGHTS_TAB_ID | typeof NOTES_TAB_ID) => void = vi.fn()
 ) =>
   render(
     <TestProviders>
@@ -73,7 +78,7 @@ describe('PanelHeader', () => {
 
   it('calls setSelectedTabId with the tab id when a tab is clicked', async () => {
     const user = userEvent.setup();
-    const setSelectedTabId = jest.fn();
+    const setSelectedTabId = vi.fn();
     renderPanelHeader(INSIGHTS_TAB_ID, setSelectedTabId);
 
     await user.click(screen.getByTestId(NOTES_DETAILS_TEST_ID));
@@ -84,7 +89,7 @@ describe('PanelHeader', () => {
 
   it('calls setSelectedTabId with Insights tab id when Insights tab is clicked', async () => {
     const user = userEvent.setup();
-    const setSelectedTabId = jest.fn();
+    const setSelectedTabId = vi.fn();
     renderPanelHeader(NOTES_TAB_ID, setSelectedTabId);
 
     await user.click(screen.getByTestId(INSIGHTS_TAB_TEST_ID));
@@ -98,7 +103,7 @@ describe('PanelHeader', () => {
       <TestProviders>
         <PanelHeader
           selectedTabId={INSIGHTS_TAB_ID}
-          setSelectedTabId={jest.fn()}
+          setSelectedTabId={vi.fn()}
           tabs={singleTab}
         />
       </TestProviders>

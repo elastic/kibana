@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  LazyPackagePolicyInputVarField: jest.fn(() => null),
-  DataStreamTypeSelector: jest.fn(() => null),
-  useGetDataStreams: jest.fn(() => ({ data: undefined })),
-}));
+vi.mock('@kbn/fleet-plugin/public', () => {
+      const mocked = {
+      LazyPackagePolicyInputVarField: vi.fn(() => null),
+      DataStreamTypeSelector: vi.fn(() => null),
+      useGetDataStreams: vi.fn(() => ({ data: undefined })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { ServiceFieldsForm } from './service_fields_form';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
@@ -23,8 +29,8 @@ function renderForm(
   service: AwsServiceMatrixEntry,
   props: Partial<React.ComponentProps<typeof ServiceFieldsForm>> = {}
 ) {
-  const onFieldChange = jest.fn();
-  const onInputToggle = jest.fn();
+  const onFieldChange = vi.fn();
+  const onInputToggle = vi.fn();
   const result = render(
     <I18nProvider>
       <ServiceFieldsForm
@@ -201,7 +207,7 @@ describe('ServiceFieldsForm — ECF single-DS multi-input trigger vars', () => {
   };
 
   beforeEach(() => {
-    (LazyPackagePolicyInputVarField as unknown as jest.Mock).mockClear();
+    (LazyPackagePolicyInputVarField as unknown as Mock).mockClear();
   });
 
   it('shows both ECF inputs enabled by default for a single data stream', () => {
@@ -212,7 +218,7 @@ describe('ServiceFieldsForm — ECF single-DS multi-input trigger vars', () => {
 
   it('forces ECF trigger vars to multi-value fields for the no-duplicate flow', () => {
     renderForm(ECF_SERVICE);
-    const varDefs = (LazyPackagePolicyInputVarField as unknown as jest.Mock).mock.calls.map(
+    const varDefs = (LazyPackagePolicyInputVarField as unknown as Mock).mock.calls.map(
       ([props]) => props.varDef
     );
 

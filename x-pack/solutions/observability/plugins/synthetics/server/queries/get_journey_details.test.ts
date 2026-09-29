@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { getJourneyDetails } from './get_journey_details';
 import { getUptimeESMockClient } from './test_helpers';
 
@@ -115,7 +117,7 @@ describe('getJourneyDetails', () => {
         remoteName: 'cluster1',
       });
 
-      const allCalls = (mockEsClient.search as unknown as jest.Mock).mock.calls;
+      const allCalls = (mockEsClient.search as unknown as Mock).mock.calls;
       expect(allCalls).toHaveLength(3);
       const expectedIndex = `cluster1:${syntheticsEsClient.heartbeatIndices}`;
       expect(allCalls[0][0].index).toBe(expectedIndex);

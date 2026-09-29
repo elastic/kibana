@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  executeEsql: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      executeEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
@@ -15,14 +21,14 @@ import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
 import { PCI_COMPLIANCE_TOOL_ID, pciComplianceTool } from './pci_compliance_tool';
 
-const mockExecuteEsql = executeEsql as jest.MockedFunction<typeof executeEsql>;
+const mockExecuteEsql = executeEsql as MockedFunction<typeof executeEsql>;
 
 describe('pciComplianceTool (consolidated)', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const tool = pciComplianceTool(mockCore, mockLogger);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Default: coverage returns 1 matching event so we exit layer 2 cleanly.
     mockExecuteEsql.mockResolvedValue({
       columns: [{ name: 'matching_events', type: 'long' }],

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EntitiesEmptyState } from './empty_state';
@@ -12,10 +14,10 @@ import { TEST_SUBJ_EMPTY_STATE } from './constants';
 import { TestProviders } from '../../../../common/mock';
 
 describe('EntitiesEmptyState', () => {
-  const onResetFilters = jest.fn();
+  const onResetFilters = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with the correct data-test-subj', () => {

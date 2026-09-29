@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type {
   DefaultEvaluators,
   Direction,
@@ -157,7 +159,7 @@ function createDefaultEvaluators(): DefaultEvaluators {
 }
 
 function createTestSetup() {
-  const runExperiment = jest.fn(async (config: unknown, selectedEvaluators: Evaluator[]) => ({
+  const runExperiment = vi.fn(async (config: unknown, selectedEvaluators: Evaluator[]) => ({
     selectedEvaluators,
   }));
 
@@ -169,10 +171,10 @@ function createTestSetup() {
     } as unknown as AgentBuilderEvaluationChatClient,
     traceEsClient: {} as unknown as EsClient,
     log: {
-      info: jest.fn(),
-      debug: jest.fn(),
-      warning: jest.fn(),
-      error: jest.fn(),
+      info: vi.fn(),
+      debug: vi.fn(),
+      warning: vi.fn(),
+      error: vi.fn(),
     } as unknown as ToolingLog,
   };
 

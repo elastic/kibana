@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ReactNode } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -89,7 +91,7 @@ describe('useDeleteDataset', () => {
 describe('useCopyDataset', () => {
   it('URL-encodes the dataset ID, posts the body, and invalidates list queries only', async () => {
     const { http, queryClient, wrapper } = setup();
-    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
     const { result } = renderHook(() => useCopyDataset(), { wrapper });
     const body = { name: 'Copied dataset', description: 'A separate copy' };
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 
@@ -55,11 +57,11 @@ const createApiResponse = <T>({
 };
 
 const createFakeClient = () => {
-  const actualEs = jest.requireActual('@elastic/elasticsearch');
+  const actualEs = require('@elastic/elasticsearch');
   const client = new actualEs.Client({
     nodes: ['http://localhost'], // Enforcing `nodes` because it's mandatory
   });
-  jest.spyOn(client.diagnostic, 'on');
+  vi.spyOn(client.diagnostic, 'on');
   return client as Client;
 };
 
@@ -77,7 +79,7 @@ describe('instrumentQueryAndDeprecationLogger', () => {
   afterEach(() => {
     parseClientOptionsMock.mockReset();
     ClientMock.mockReset();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   function createResponseWithBody(

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { FavoriteButton } from './favorite_button';
@@ -16,7 +18,7 @@ describe('FavoriteButton', () => {
   const removeLabel = 'Remove from Starred';
 
   it('renders unfavorited state with empty star and add label', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     render(
       <FavoriteButton
         status="unfavorited"
@@ -39,7 +41,7 @@ describe('FavoriteButton', () => {
     render(
       <FavoriteButton
         status="favorited"
-        onClick={jest.fn()}
+        onClick={vi.fn()}
         addLabel={addLabel}
         removeLabel={removeLabel}
       />
@@ -53,7 +55,7 @@ describe('FavoriteButton', () => {
     render(
       <FavoriteButton
         status="adding"
-        onClick={jest.fn()}
+        onClick={vi.fn()}
         addLabel={addLabel}
         removeLabel={removeLabel}
       />
@@ -71,7 +73,7 @@ describe('FavoriteButton', () => {
     const { container } = render(
       <FavoriteButton
         status="removing"
-        onClick={jest.fn()}
+        onClick={vi.fn()}
         addLabel={addLabel}
         removeLabel={removeLabel}
       />

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useHighlightedFieldsPrivilege } from './use_highlighted_fields_privilege';
 import type { UseHighlightedFieldsPrivilegeParams } from './use_highlighted_fields_privilege';
@@ -19,14 +22,14 @@ import {
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
 
-jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
-jest.mock(
+vi.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
+vi.mock(
   '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message'
 );
-jest.mock('../../../../../common/machine_learning/has_ml_license');
-jest.mock('../../../../../common/machine_learning/has_ml_admin_permissions');
-jest.mock('../../../../detections/components/user_info');
-jest.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../../common/machine_learning/has_ml_license');
+vi.mock('../../../../../common/machine_learning/has_ml_admin_permissions');
+vi.mock('../../../../detections/components/user_info');
+vi.mock('../../../../common/components/user_privileges');
 
 const defaultProps = {
   rule: {} as RuleResponse,
@@ -38,14 +41,14 @@ const renderUseHighlightedFieldsPrivilege = (props: UseHighlightedFieldsPrivileg
 
 describe('useHighlightedFieldsPrivilege', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useUserPrivileges as Mock).mockReturnValue({
       ...getUserPrivilegesMockDefaultValue(),
       rulesPrivileges: { rules: { read: true, edit: true } },
     });
-    (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
-    (hasMlLicense as jest.Mock).mockReturnValue(false);
-    (usePrebuiltRuleCustomizationUpsellingMessage as jest.Mock).mockReturnValue(undefined);
+    (hasMlAdminPermissions as Mock).mockReturnValue(false);
+    (hasMlLicense as Mock).mockReturnValue(false);
+    (usePrebuiltRuleCustomizationUpsellingMessage as Mock).mockReturnValue(undefined);
   });
 
   it('should return isDisabled as true when rule is null', () => {
@@ -69,7 +72,7 @@ describe('useHighlightedFieldsPrivilege', () => {
   });
 
   it('should return isDisabled as true when user does not have CRUD privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...getUserPrivilegesMockDefaultValue(),
       rulesPrivileges: { rules: { read: true, edit: false } },
     });
@@ -80,7 +83,7 @@ describe('useHighlightedFieldsPrivilege', () => {
 
   describe('when rule is machine learning rule', () => {
     it('should return isDisabled as true when user does not have ml permissions', () => {
-      (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
+      (hasMlAdminPermissions as Mock).mockReturnValue(false);
       const { result } = renderUseHighlightedFieldsPrivilege({
         ...defaultProps,
         rule: { type: 'machine_learning' } as RuleResponse,
@@ -90,7 +93,7 @@ describe('useHighlightedFieldsPrivilege', () => {
     });
 
     it('should return isDisabled as true when user does not have ml license', () => {
-      (hasMlLicense as jest.Mock).mockReturnValue(false);
+      (hasMlLicense as Mock).mockReturnValue(false);
       const { result } = renderUseHighlightedFieldsPrivilege({
         ...defaultProps,
         rule: { type: 'machine_learning' } as RuleResponse,
@@ -100,8 +103,8 @@ describe('useHighlightedFieldsPrivilege', () => {
     });
 
     it('should return isDisabled as false when user has ml permissions and proper license', () => {
-      (hasMlAdminPermissions as jest.Mock).mockReturnValue(true);
-      (hasMlLicense as jest.Mock).mockReturnValue(true);
+      (hasMlAdminPermissions as Mock).mockReturnValue(true);
+      (hasMlLicense as Mock).mockReturnValue(true);
       const { result } = renderUseHighlightedFieldsPrivilege({
         ...defaultProps,
         rule: { type: 'machine_learning' } as RuleResponse,
@@ -122,7 +125,7 @@ describe('useHighlightedFieldsPrivilege', () => {
     });
 
     it('should return isDisabled as false when rule is immutable (prebuilt rule) and upselling message is undefined', () => {
-      (usePrebuiltRuleCustomizationUpsellingMessage as jest.Mock).mockReturnValue(undefined);
+      (usePrebuiltRuleCustomizationUpsellingMessage as Mock).mockReturnValue(undefined);
       const { result } = renderUseHighlightedFieldsPrivilege({
         ...defaultProps,
         rule: { type: 'query', immutable: true } as RuleResponse,
@@ -132,7 +135,7 @@ describe('useHighlightedFieldsPrivilege', () => {
     });
 
     it('should return isDisabled as true when rule is immutable (prebuilt rule) and upselling message is available', () => {
-      (usePrebuiltRuleCustomizationUpsellingMessage as jest.Mock).mockReturnValue(
+      (usePrebuiltRuleCustomizationUpsellingMessage as Mock).mockReturnValue(
         'upselling message'
       );
       const { result } = renderUseHighlightedFieldsPrivilege({

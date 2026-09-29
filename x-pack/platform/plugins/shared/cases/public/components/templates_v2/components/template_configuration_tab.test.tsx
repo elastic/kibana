@@ -5,34 +5,42 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { TemplateConfigurationTab } from './template_configuration_tab';
 
-const mockMetadataForm = jest.fn((_props?: unknown) => <div data-test-subj="mockMetadataForm" />);
-const mockSettingsForm = jest.fn((_props?: unknown) => <div data-test-subj="mockSettingsForm" />);
+const mockMetadataForm = vi.fn((_props?: unknown) => <div data-test-subj="mockMetadataForm" />);
+const mockSettingsForm = vi.fn((_props?: unknown) => <div data-test-subj="mockSettingsForm" />);
 
-jest.mock('./template_metadata_form', () => ({
-  TemplateMetadataForm: (props: unknown) => mockMetadataForm(props),
-}));
-jest.mock('./template_settings_form', () => ({
-  TemplateSettingsForm: (props: unknown) => mockSettingsForm(props),
-}));
+vi.mock('./template_metadata_form', () => {
+      const mocked = {
+      TemplateMetadataForm: (props: unknown) => mockMetadataForm(props),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./template_settings_form', () => {
+      const mocked = {
+      TemplateSettingsForm: (props: unknown) => mockSettingsForm(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TemplateConfigurationTab', () => {
   const defaultProps = {
     metadata: { name: 'Template', description: '', tags: [] },
     metadataErrors: {},
-    onMetadataChange: jest.fn(),
+    onMetadataChange: vi.fn(),
     settings: { syncAlerts: true, extractObservables: true },
     connector: undefined,
-    onSettingsChange: jest.fn(),
-    onConnectorChange: jest.fn(),
+    onSettingsChange: vi.fn(),
+    onConnectorChange: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the identity (metadata) and settings/connector forms', () => {

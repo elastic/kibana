@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import {
@@ -49,7 +51,7 @@ const buildProps = (customProps: any = {}) => {
     },
     features: kibanaFeatures,
     editable: true,
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     validator: new RoleValidator(),
     kibanaPrivileges: createKibanaPrivileges(kibanaFeatures),
     canCustomizeSubFeaturePrivileges: true,

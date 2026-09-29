@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -35,7 +37,7 @@ describe('[CCR API] Pause follower index/indices', () => {
   it('pauses a single item', async () => {
     const routeContextMock = mockRouteContext({
       ccr: {
-        pauseFollow: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+        pauseFollow: vi.fn().mockResolvedValueOnce({ acknowledge: true }),
       },
     });
 
@@ -51,7 +53,7 @@ describe('[CCR API] Pause follower index/indices', () => {
   it('pauses multiple items', async () => {
     const routeContextMock = mockRouteContext({
       ccr: {
-        pauseFollow: jest
+        pauseFollow: vi
           .fn()
           .mockResolvedValueOnce({ acknowledge: true })
           .mockResolvedValueOnce({ acknowledge: true })
@@ -71,7 +73,7 @@ describe('[CCR API] Pause follower index/indices', () => {
   it('returns partial errors', async () => {
     const routeContextMock = mockRouteContext({
       ccr: {
-        pauseFollow: jest
+        pauseFollow: vi
           .fn()
           .mockResolvedValueOnce({ acknowledge: true })
           .mockRejectedValueOnce(mockError),

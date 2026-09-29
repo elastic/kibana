@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
@@ -13,18 +16,21 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('react-router-dom', () => ({
-  matchPath: jest.fn(),
-  useLocation: jest.fn().mockReturnValue({
-    search: '',
-  }),
-  withRouter: jest.fn(),
-}));
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      matchPath: vi.fn(),
+      useLocation: vi.fn().mockReturnValue({
+        search: '',
+      }),
+      withRouter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSignalIndex = useSignalIndex as jest.MockedFunction<typeof useSignalIndex>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseSignalIndex = useSignalIndex as MockedFunction<typeof useSignalIndex>;
 
 /** Captures the most recent props passed to the Lens EmbeddableComponent */
 let lastEmbeddableProps: Record<string, unknown> = {};
@@ -39,17 +45,17 @@ describe('PreviewTab', () => {
     embeddableId: 'test-embeddable-id',
     end: '2024-09-01T00:00:00.000Z',
     filters: [],
-    getLensAttributes: jest.fn().mockReturnValue({ visualizationType: 'lnsDatatable' }),
-    getPreviewEsqlQuery: jest.fn().mockReturnValue('mock esql query'),
+    getLensAttributes: vi.fn().mockReturnValue({ visualizationType: 'lnsDatatable' }),
+    getPreviewEsqlQuery: vi.fn().mockReturnValue('mock esql query'),
     maxAlerts: 100,
     query: { query: '', language: 'kuery' },
-    setTableStackBy0: jest.fn(),
+    setTableStackBy0: vi.fn(),
     start: '2024-08-01T00:00:00.000Z',
     tableStackBy0: 'kibana.alert.rule.name',
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     lastEmbeddableProps = {};
 
     mockUseKibana.mockReturnValue({
@@ -63,14 +69,14 @@ describe('PreviewTab', () => {
           },
         },
       },
-    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+    } as unknown as Mocked<ReturnType<typeof useKibana>>);
 
     mockUseSignalIndex.mockReturnValue({
       loading: false,
       signalIndexExists: true,
       signalIndexName: 'mock-signal-index',
       signalIndexMappingOutdated: false,
-      createDeSignalIndex: jest.fn(),
+      createDeSignalIndex: vi.fn(),
     });
   });
 
@@ -142,7 +148,7 @@ describe('PreviewTab', () => {
       signalIndexExists: false,
       signalIndexName: null, // <-- signalIndexName is null
       signalIndexMappingOutdated: false,
-      createDeSignalIndex: jest.fn(),
+      createDeSignalIndex: vi.fn(),
     });
 
     const { container } = render(

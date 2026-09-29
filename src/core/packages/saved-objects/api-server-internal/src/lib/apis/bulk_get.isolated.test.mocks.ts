@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getSavedObjectFromSourceMock = jest.fn();
-export const rawDocExistsInNamespaceMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./utils', () => {
-  const actual = jest.requireActual('./utils');
+export const getSavedObjectFromSourceMock = vi.fn();
+export const rawDocExistsInNamespaceMock = vi.fn();
+
+vi.doMock('./utils', async () => {
+  const actual = (await vi.importActual('./utils'));
   return {
     ...actual,
     getSavedObjectFromSource: getSavedObjectFromSourceMock,

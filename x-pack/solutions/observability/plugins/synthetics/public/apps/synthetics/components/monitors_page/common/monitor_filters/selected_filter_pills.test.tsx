@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import React from 'react';
 import * as URL from '../../../../hooks/use_url_params';
 import { fireEvent } from '@testing-library/react';
@@ -21,22 +24,22 @@ const mockUrlParams = (overrides: Partial<SyntheticsUrlParams> = {}): Synthetics
 });
 
 describe('SelectedFilterPills', () => {
-  let useUrlParamsSpy: jest.SpyInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
-  let useGetUrlParamsSpy: jest.SpyInstance<SyntheticsUrlParams>;
-  let updateUrlParamsMock: jest.Mock;
-  const handleFilterChange = jest.fn();
+  let useUrlParamsSpy: MockInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
+  let useGetUrlParamsSpy: MockInstance<SyntheticsUrlParams>;
+  let updateUrlParamsMock: Mock;
+  const handleFilterChange = vi.fn();
 
   beforeEach(() => {
     handleFilterChange.mockReset();
-    useUrlParamsSpy = jest.spyOn(URL, 'useUrlParams');
-    useGetUrlParamsSpy = jest.spyOn(URL, 'useGetUrlParams');
-    updateUrlParamsMock = jest.fn();
+    useUrlParamsSpy = vi.spyOn(URL, 'useUrlParams');
+    useGetUrlParamsSpy = vi.spyOn(URL, 'useGetUrlParams');
+    updateUrlParamsMock = vi.fn();
 
-    useUrlParamsSpy.mockImplementation(() => [jest.fn().mockReturnValue({}), updateUrlParamsMock]);
+    useUrlParamsSpy.mockImplementation(() => [vi.fn().mockReturnValue({}), updateUrlParamsMock]);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('is hidden when no filters are selected', () => {

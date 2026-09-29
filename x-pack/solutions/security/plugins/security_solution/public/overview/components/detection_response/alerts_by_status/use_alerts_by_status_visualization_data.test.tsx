@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visualization_data';
 
-jest.mock('../../../../common/components/visualization_actions/use_visualization_response', () => ({
-  ...jest.requireActual(
-    '../../../../common/components/visualization_actions/use_visualization_response'
-  ),
-  useVisualizationResponse: jest
-    .requireActual(
-      '../../../../common/components/visualization_actions/use_visualization_response.mock'
-    )
-    .useVisualizationResponseMock.create(),
-}));
+vi.mock('../../../../common/components/visualization_actions/use_visualization_response', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../common/components/visualization_actions/use_visualization_response')),
+      useVisualizationResponse: (await vi.importActual('../../../../common/components/visualization_actions/use_visualization_response.mock'))
+        .useVisualizationResponseMock.create(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useAlertsByStatusVisualizationData', () => {
   it('should return visualization alerts count', () => {

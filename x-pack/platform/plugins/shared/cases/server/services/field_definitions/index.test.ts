@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import {
@@ -35,12 +38,12 @@ const definitionWithDefault = (defaultValue: string): string =>
 
 describe('FieldDefinitionsService', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
-  let refreshAnalyticsV2DataView: jest.Mock;
+  let refreshAnalyticsV2DataView: Mock;
   let service: FieldDefinitionsService;
 
   beforeEach(() => {
     soClient = savedObjectsClientMock.create();
-    refreshAnalyticsV2DataView = jest.fn();
+    refreshAnalyticsV2DataView = vi.fn();
     service = new FieldDefinitionsService({
       unsecuredSavedObjectsClient: soClient,
       refreshAnalyticsV2DataView,

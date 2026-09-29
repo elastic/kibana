@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { QueryClient } from '@kbn/react-query';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationsService } from '../../../services/conversations';
@@ -16,7 +18,7 @@ const queryKey = queryKeys.conversations.byId(conversationId);
 
 const buildActions = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  const get = jest.fn().mockResolvedValue({ id: conversationId, rounds: [] });
+  const get = vi.fn().mockResolvedValue({ id: conversationId, rounds: [] });
   const conversationsService = { get } as unknown as ConversationsService;
   const actions = createConversationActions({
     conversationId,
@@ -35,7 +37,7 @@ const cachedConversation = {
 describe('createConversationActions execution lifecycle', () => {
   it('onExecutionStarted refreshes the list only', () => {
     const { queryClient, actions, get } = buildActions();
-    const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries');
 
     actions.onExecutionStarted();
 
@@ -45,7 +47,7 @@ describe('createConversationActions execution lifecycle', () => {
 
   it('onExecutionTerminated refreshes the list only', () => {
     const { queryClient, actions, get } = buildActions();
-    const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries');
 
     actions.onExecutionTerminated();
 

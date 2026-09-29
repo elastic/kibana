@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { MemoryHistory } from 'history';
@@ -24,46 +26,52 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/telemetry_client_mock';
 import { EuiThemeProvider } from '@elastic/eui';
 
-jest.mock('../../../../hooks/use_breakpoints', () => ({
-  useBreakpoints: () => ({
-    isSmall: false,
-    isLarge: false,
-    isXl: false,
-  }),
-}));
+vi.mock('../../../../hooks/use_breakpoints', () => {
+      const mocked = {
+      useBreakpoints: () => ({
+        isSmall: false,
+        isLarge: false,
+        isXl: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_fallback_to_transactions_fetcher', () => ({
-  useFallbackToTransactionsFetcher: () => ({
-    fallbackToTransactions: false,
-  }),
-}));
+vi.mock('../../../../hooks/use_fallback_to_transactions_fetcher', () => {
+      const mocked = {
+      useFallbackToTransactionsFetcher: () => ({
+        fallbackToTransactions: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockKibanaServices = {
   triggersActionsUi: {
     ruleTypeRegistry: {
-      get: jest.fn(),
-      list: jest.fn().mockReturnValue([]),
+      get: vi.fn(),
+      list: vi.fn().mockReturnValue([]),
     },
     actionTypeRegistry: {
-      get: jest.fn(),
-      list: jest.fn().mockReturnValue([]),
+      get: vi.fn(),
+      list: vi.fn().mockReturnValue([]),
     },
-    getAddRuleFlyout: jest.fn().mockReturnValue(null),
+    getAddRuleFlyout: vi.fn().mockReturnValue(null),
   },
   slo: {
-    getCreateSLOFormFlyout: jest.fn().mockReturnValue(null),
+    getCreateSLOFormFlyout: vi.fn().mockReturnValue(null),
   },
   uiSettings: {
-    get: jest.fn().mockReturnValue(false),
+    get: vi.fn().mockReturnValue(false),
   },
   apmSourcesAccess: {
-    getApmIndexSettings: jest.fn().mockResolvedValue({ apmIndexSettings: [] }),
+    getApmIndexSettings: vi.fn().mockResolvedValue({ apmIndexSettings: [] }),
   },
   telemetry: mockTelemetryClient,
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...original,
     useKibana: () => ({
@@ -72,21 +80,30 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-jest.mock('../../../alerting/ui_components/alerting_flyout', () => ({
-  AlertingFlyout: () => null,
-}));
+vi.mock('../../../alerting/ui_components/alerting_flyout', () => {
+      const mocked = {
+      AlertingFlyout: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/slo_overview_flyout', () => ({
-  ...jest.requireActual('../../../shared/slo_overview_flyout'),
-  SloOverviewFlyout: ({ serviceName }: { serviceName: string }) => (
-    <div data-test-subj="sloOverviewFlyout">SLO Overview Flyout for {serviceName}</div>
-  ),
-}));
+vi.mock('../../../shared/slo_overview_flyout', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../shared/slo_overview_flyout')),
+      SloOverviewFlyout: ({ serviceName }: { serviceName: string }) => (
+        <div data-test-subj="sloOverviewFlyout">SLO Overview Flyout for {serviceName}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseServiceActions = jest.fn();
-jest.mock('./service_actions', () => ({
-  useServiceActions: () => mockUseServiceActions(),
-}));
+const mockUseServiceActions = vi.fn();
+vi.mock('./service_actions', () => {
+      const mocked = {
+      useServiceActions: () => mockUseServiceActions(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultQuery = {
   rangeFrom: 'now-15m',
@@ -138,12 +155,12 @@ function createMockServiceActions({
         {
           id: 'servicesTable-openTracesInDiscover',
           name: 'Open traces in Discover',
-          href: jest.fn().mockReturnValue('http://discover/traces'),
+          href: vi.fn().mockReturnValue('http://discover/traces'),
         },
         {
           id: 'servicesTable-openLogsInDiscover',
           name: 'Open logs in Discover',
-          href: jest.fn().mockReturnValue('http://discover/logs'),
+          href: vi.fn().mockReturnValue('http://discover/logs'),
         },
       ],
     });
@@ -158,17 +175,17 @@ function createMockServiceActions({
           id: 'createThresholdRule',
           name: 'Create threshold rule',
           items: [
-            { id: 'createLatencyRule', name: 'Latency', onClick: jest.fn() },
+            { id: 'createLatencyRule', name: 'Latency', onClick: vi.fn() },
             {
               id: 'createFailedTransactionRateRule',
               name: 'Failed transaction rate',
-              onClick: jest.fn(),
+              onClick: vi.fn(),
             },
           ],
         },
-        { id: 'createAnomalyRule', name: 'Create anomaly rule', onClick: jest.fn() },
-        { id: 'createErrorCountRule', name: 'Create error count rule', onClick: jest.fn() },
-        { id: 'manageRules', name: 'Manage rules', icon: 'tableOfContents', onClick: jest.fn() },
+        { id: 'createAnomalyRule', name: 'Create anomaly rule', onClick: vi.fn() },
+        { id: 'createErrorCountRule', name: 'Create error count rule', onClick: vi.fn() },
+        { id: 'manageRules', name: 'Manage rules', icon: 'tableOfContents', onClick: vi.fn() },
       ],
     });
   }
@@ -178,9 +195,9 @@ function createMockServiceActions({
       id: 'slos',
       groupLabel: 'SLOs',
       actions: [
-        { id: 'createLatencySlo', name: 'Create APM latency SLO', onClick: jest.fn() },
-        { id: 'createAvailabilitySlo', name: 'Create APM availability SLO', onClick: jest.fn() },
-        { id: 'manageSlos', name: 'Manage SLOs', icon: 'tableOfContents', onClick: jest.fn() },
+        { id: 'createLatencySlo', name: 'Create APM latency SLO', onClick: vi.fn() },
+        { id: 'createAvailabilitySlo', name: 'Create APM availability SLO', onClick: vi.fn() },
+        { id: 'manageSlos', name: 'Manage SLOs', icon: 'tableOfContents', onClick: vi.fn() },
       ],
     });
   }
@@ -234,7 +251,7 @@ describe('ApmServicesTable', () => {
   let history: MemoryHistory;
 
   beforeAll(() => {
-    jest.spyOn(timeSeriesColor, 'getTimeSeriesColor').mockImplementation(() => ({
+    vi.spyOn(timeSeriesColor, 'getTimeSeriesColor').mockImplementation(() => ({
       currentPeriodColor: 'green',
       previousPeriodColor: 'black',
     }));
@@ -250,7 +267,7 @@ describe('ApmServicesTable', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {
@@ -318,7 +335,7 @@ describe('ApmServicesTable', () => {
         showSlosColumn: true,
         link: apmRouter.link,
         serviceOverflowCount: 0,
-        onSloBadgeClick: jest.fn(),
+        onSloBadgeClick: vi.fn(),
         locators: undefined,
       });
 
@@ -336,7 +353,7 @@ describe('ApmServicesTable', () => {
         showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
-        onSloBadgeClick: jest.fn(),
+        onSloBadgeClick: vi.fn(),
         locators: undefined,
       });
 
@@ -355,7 +372,7 @@ describe('ApmServicesTable', () => {
         showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
-        onSloBadgeClick: jest.fn(),
+        onSloBadgeClick: vi.fn(),
         locators: undefined,
       });
 
@@ -374,7 +391,7 @@ describe('ApmServicesTable', () => {
         showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
-        onSloBadgeClick: jest.fn(),
+        onSloBadgeClick: vi.fn(),
         locators: undefined,
       });
 
@@ -393,7 +410,7 @@ describe('ApmServicesTable', () => {
         showSlosColumn: true,
         link: apmRouter.link,
         serviceOverflowCount: 0,
-        onSloBadgeClick: jest.fn(),
+        onSloBadgeClick: vi.fn(),
         locators: undefined,
       });
 
@@ -412,7 +429,7 @@ describe('ApmServicesTable', () => {
         showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
-        onSloBadgeClick: jest.fn(),
+        onSloBadgeClick: vi.fn(),
         locators: undefined,
       });
 
@@ -431,7 +448,7 @@ describe('ApmServicesTable', () => {
         showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
-        onSloBadgeClick: jest.fn(),
+        onSloBadgeClick: vi.fn(),
         locators: undefined,
       });
 
@@ -441,12 +458,12 @@ describe('ApmServicesTable', () => {
 
     describe('anomaly badge navigation', () => {
       it('renders anomaly badge with href when locators is provided and service has anomaly score', async () => {
-        const mockGetUrl = jest.fn().mockResolvedValue('/app/apm/services/opbeans-python/overview');
-        const mockGetRedirectUrl = jest
+        const mockGetUrl = vi.fn().mockResolvedValue('/app/apm/services/opbeans-python/overview');
+        const mockGetRedirectUrl = vi
           .fn()
           .mockReturnValue('/app/r?l=APM_LOCATOR&lz=compressed-payload');
         const mockLocators = {
-          get: jest.fn().mockReturnValue({
+          get: vi.fn().mockReturnValue({
             getUrl: mockGetUrl,
             getRedirectUrl: mockGetRedirectUrl,
           }),
@@ -462,7 +479,7 @@ describe('ApmServicesTable', () => {
           showSlosColumn: false,
           link: apmRouter.link,
           serviceOverflowCount: 0,
-          onSloBadgeClick: jest.fn(),
+          onSloBadgeClick: vi.fn(),
           locators: mockLocators,
         });
 
@@ -542,7 +559,7 @@ describe('ApmServicesTable', () => {
             showSlosColumn: false,
             link: apmRouter.link,
             serviceOverflowCount: 0,
-            onSloBadgeClick: jest.fn(),
+            onSloBadgeClick: vi.fn(),
             locators: undefined,
           }).map((c) =>
             c.render
@@ -588,7 +605,7 @@ describe('ApmServicesTable', () => {
             showSlosColumn: false,
             link: apmRouter.link,
             serviceOverflowCount: 0,
-            onSloBadgeClick: jest.fn(),
+            onSloBadgeClick: vi.fn(),
             locators: undefined,
           }).map((c) =>
             c.render
@@ -624,7 +641,7 @@ describe('ApmServicesTable', () => {
             showSlosColumn: false,
             link: apmRouter.link,
             serviceOverflowCount: 0,
-            onSloBadgeClick: jest.fn(),
+            onSloBadgeClick: vi.fn(),
             locators: undefined,
           }).map((c) =>
             c.render
@@ -669,7 +686,7 @@ describe('ApmServicesTable', () => {
             showSlosColumn: false,
             link: apmRouter.link,
             serviceOverflowCount: 0,
-            onSloBadgeClick: jest.fn(),
+            onSloBadgeClick: vi.fn(),
             locators: undefined,
           }).map((c) =>
             c.render

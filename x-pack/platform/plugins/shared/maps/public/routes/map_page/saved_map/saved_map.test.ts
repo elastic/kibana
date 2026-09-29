@@ -5,23 +5,31 @@
  * 2.0.
  */
 
-jest.mock('../../../kibana_services', () => ({
-  getMapsCapabilities: () => ({ save: true }),
-  getEMSSettings: () => ({ isEMSEnabled: () => false, isEMSUrlSet: () => false }),
-  getMapsEmsStart: () => ({ config: {} }),
-  getShowMapsInspectorAdapter: () => false,
-  getTimeFilter: () => ({
-    getTime: () => ({ from: 'now-15m', to: 'now' }),
-    getRefreshInterval: () => undefined,
-  }),
-  getUsageCollection: () => null,
-}));
+import { vi } from 'vitest';
 
-jest.mock('../../../licensed_features', () => ({
-  whenLicenseInitialized: jest.fn().mockResolvedValue(undefined),
-  notifyLicensedFeatureUsage: jest.fn(),
-  getLicenseId: jest.fn().mockReturnValue('basic'),
-}));
+vi.mock('../../../kibana_services', () => {
+      const mocked = {
+      getMapsCapabilities: () => ({ save: true }),
+      getEMSSettings: () => ({ isEMSEnabled: () => false, isEMSUrlSet: () => false }),
+      getMapsEmsStart: () => ({ config: {} }),
+      getShowMapsInspectorAdapter: () => false,
+      getTimeFilter: () => ({
+        getTime: () => ({ from: 'now-15m', to: 'now' }),
+        getRefreshInterval: () => undefined,
+      }),
+      getUsageCollection: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../licensed_features', () => {
+      const mocked = {
+      whenLicenseInitialized: vi.fn().mockResolvedValue(undefined),
+      notifyLicensedFeatureUsage: vi.fn(),
+      getLicenseId: vi.fn().mockReturnValue('basic'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { SavedMap } from './saved_map';
 import { getMapCenter, getMapZoom } from '../../../selectors/map_selectors';

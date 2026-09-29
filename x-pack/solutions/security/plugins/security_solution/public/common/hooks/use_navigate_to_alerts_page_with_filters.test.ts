@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { SecurityPageName } from '../../app/types';
 import { useNavigateToAlertsPageWithFilters } from './use_navigate_to_alerts_page_with_filters';
 
-const mockNavigateTo = jest.fn();
-jest.mock('../lib/kibana', () => ({
-  useNavigation: () => ({ navigateTo: mockNavigateTo }),
-}));
+const mockNavigateTo = vi.fn();
+vi.mock('../lib/kibana', () => {
+      const mocked = {
+      useNavigation: () => ({ navigateTo: mockNavigateTo }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useNavigateToAlertsPageWithFilters', () => {
   it('navigates to alerts page with single filter', () => {

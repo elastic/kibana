@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -27,7 +29,7 @@ import { StepDefineForm } from './step_define_form';
 
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 
-jest.mock('../../../../app_dependencies');
+vi.mock('../../../../app_dependencies');
 
 const startMock = coreMock.createStart();
 
@@ -43,20 +45,20 @@ const getMockedDatePickerDependencies = () => {
 };
 
 const createMockWebStorage = () => ({
-  clear: jest.fn(),
-  getItem: jest.fn(),
-  key: jest.fn(),
-  removeItem: jest.fn(),
-  setItem: jest.fn(),
+  clear: vi.fn(),
+  getItem: vi.fn(),
+  key: vi.fn(),
+  removeItem: vi.fn(),
+  setItem: vi.fn(),
   length: 0,
 });
 
 const createMockStorage = () => ({
   storage: createMockWebStorage(),
-  get: jest.fn(),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
+  remove: vi.fn(),
+  clear: vi.fn(),
 });
 
 describe('Transform: <DefinePivotForm />', () => {
@@ -80,7 +82,7 @@ describe('Transform: <DefinePivotForm />', () => {
       storage: createMockStorage(),
     };
 
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
 
     const { getByText } = render(
       <I18nProvider>

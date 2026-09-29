@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -21,21 +23,21 @@ import { ruleTypesIndex } from '../../../mock/rule_types_index';
 import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
 import { getInternalRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 
-jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types');
-const mockLoadRuleTypes = jest
+vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types');
+const mockLoadRuleTypes = vi
   .mocked(getRuleTypes)
   .mockResolvedValue(Array.from(ruleTypesIndex.values()));
 
-jest.mock('@kbn/response-ops-rules-apis/apis/get_internal_rule_types');
-const mockLoadInternalRuleTypes = jest
+vi.mock('@kbn/response-ops-rules-apis/apis/get_internal_rule_types');
+const mockLoadInternalRuleTypes = vi
   .mocked(getInternalRuleTypes)
   .mockResolvedValue(Array.from(ruleTypesIndex.values()) as never);
 
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields');
-jest.mocked(fetchAlertsFields).mockResolvedValue({ browserFields: {}, fields: [] });
+vi.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields');
+vi.mocked(fetchAlertsFields).mockResolvedValue({ browserFields: {}, fields: [] });
 
-jest.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => {
-  const ReactLib = jest.requireActual('react');
+vi.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => {
+  const ReactLib = require('react');
   return {
     UrlSyncedAlertsSearchBar: ({
       onFilterControlsChange,
@@ -62,17 +64,20 @@ jest.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => {
 
 // Not using `jest.mocked` here because the `AlertsTable` component is manually typed to ensure
 // correct type inference, but it's actually a `memo(forwardRef())` component, which is hard to mock
-const mockAlertsTable = jest.fn(({ ruleTypeIds }: { ruleTypeIds?: string[] }) => (
+const mockAlertsTable = vi.fn(({ ruleTypeIds }: { ruleTypeIds?: string[] }) => (
   <div data-test-subj="alertsTable" data-rule-type-ids={JSON.stringify(ruleTypeIds)}>
     Alerts table
   </div>
 ));
-jest.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => ({
-  AlertsTable: (props: { ruleTypeIds?: string[] }) => mockAlertsTable(props),
-}));
+vi.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => {
+      const mocked = {
+      AlertsTable: (props: { ruleTypeIds?: string[] }) => mockAlertsTable(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/get_experimental_features');
-jest.mocked(getIsExperimentalFeatureEnabled).mockReturnValue(false);
+vi.mock('../../../../common/get_experimental_features');
+vi.mocked(getIsExperimentalFeatureEnabled).mockReturnValue(false);
 
 describe('StackAlertsPage', () => {
   const appMockRender = createAppMockRenderer({

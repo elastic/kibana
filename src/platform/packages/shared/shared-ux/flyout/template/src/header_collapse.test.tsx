@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { FlyoutTemplate } from './flyout_template';
@@ -17,27 +20,27 @@ const noop = () => {};
 describe('FlyoutTemplate header collapse on scroll', () => {
   let resizeObservers: Array<{
     callback: ResizeObserverCallback;
-    observe: jest.Mock;
+    observe: Mock;
   }>;
   let originalResizeObserver: typeof ResizeObserver;
 
   beforeEach(() => {
     resizeObservers = [];
     originalResizeObserver = global.ResizeObserver;
-    jest.spyOn(global, 'requestAnimationFrame').mockImplementation((cb) => {
+    vi.spyOn(global, 'requestAnimationFrame').mockImplementation((cb) => {
       cb(0);
       return 0;
     });
-    global.ResizeObserver = jest.fn().mockImplementation((cb: ResizeObserverCallback) => {
-      const observer = { callback: cb, observe: jest.fn() };
+    global.ResizeObserver = vi.fn().mockImplementation((cb: ResizeObserverCallback) => {
+      const observer = { callback: cb, observe: vi.fn() };
       resizeObservers.push(observer);
-      return { observe: observer.observe, unobserve: jest.fn(), disconnect: jest.fn() };
+      return { observe: observer.observe, unobserve: vi.fn(), disconnect: vi.fn() };
     });
   });
 
   afterEach(() => {
     global.ResizeObserver = originalResizeObserver;
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   /** The element the hook measures: the inner div of the collapsible region. */
@@ -373,7 +376,7 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     renderCollapsibleFlyout();
     const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
     const headerEl = document.querySelector(`.${FLYOUT_HEADER_CLASS_NAME}`) as HTMLElement;
-    const scrollBy = jest.fn();
+    const scrollBy = vi.fn();
     Object.defineProperty(overflowEl, 'scrollBy', { value: scrollBy, configurable: true });
     // Page mode derives its pixel delta from the viewport height.
     setScrollState(overflowEl, scrollState);
@@ -528,7 +531,7 @@ describe('FlyoutTemplate header collapse on scroll', () => {
 
 describe('FlyoutTemplate Header collapsed prop', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const renderCollapsedHeader = () =>
@@ -599,7 +602,7 @@ describe('FlyoutTemplate Header collapsed prop', () => {
   const trackScrollListenerTargets = (renderFlyout: () => void): HTMLElement[] => {
     const targets: HTMLElement[] = [];
     const original = HTMLElement.prototype.addEventListener;
-    jest
+    vi
       .spyOn(HTMLElement.prototype, 'addEventListener')
       .mockImplementation(function (this: HTMLElement, type, listener, options) {
         if (type === 'scroll') targets.push(this);

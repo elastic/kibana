@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -35,15 +37,16 @@ const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } 
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 let mockCanReadExecutionHistory = true;
 
-jest.mock('@kbn/alerting-v2-browser-shared', () => ({
-  ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
-  useEpisodeAutoAttach: jest.fn(),
-}));
+vi.mock('@kbn/alerting-v2-browser-shared', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerting-v2-browser-shared')),
+      useEpisodeAutoAttach: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di-browser', () => {
-  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
-    '../../services/user_capabilities'
-  );
+vi.mock('@kbn/core-di-browser', async () => {
+  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../../services/user_capabilities'));
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -63,90 +66,141 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query', () => ({
-  useFetchEpisodeQuery: jest.fn(),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query', () => {
+      const mocked = {
+      useFetchEpisodeQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions', () => ({
-  useFetchEpisodeActions: jest.fn(),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions', () => {
+      const mocked = {
+      useFetchEpisodeActions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions', () => ({
-  ...jest.requireActual('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions'),
-  useFetchGroupActions: jest.fn(),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions')),
+      useFetchGroupActions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule', () => ({
-  useFetchRule: jest.fn(),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule', () => {
+      const mocked = {
+      useFetchRule: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping', () => ({
-  useEpisodeFlapping: jest.fn(() => ({ isFlapping: false, isLoading: false })),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping', () => {
+      const mocked = {
+      useEpisodeFlapping: vi.fn(() => ({ isFlapping: false, isLoading: false })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
-  createEpisodeActions: jest.fn(),
-  READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/actions', () => {
+      const mocked = {
+      createEpisodeActions: vi.fn(),
+      READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Sections that call useFetchEpisodeQuery independently are mocked to keep the
 // test focused on the page-level layout and sidebar.
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/overview_list_section', () => ({
-  AlertEpisodeOverviewListSection: () => <div data-test-subj="stubOverviewListSection" />,
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/components/details/overview_list_section', () => {
+      const mocked = {
+      AlertEpisodeOverviewListSection: () => <div data-test-subj="stubOverviewListSection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/related_section', () => ({
-  AlertEpisodesRelatedSection: () => null,
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/components/details/related_section', () => {
+      const mocked = {
+      AlertEpisodesRelatedSection: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section', () => ({
-  AlertEpisodeRuleOverviewPanelSection: jest.fn(() => (
-    <div data-test-subj="stubRuleOverviewPanelSection" />
-  )),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section', () => {
+      const mocked = {
+      AlertEpisodeRuleOverviewPanelSection: vi.fn(() => (
+        <div data-test-subj="stubRuleOverviewPanelSection" />
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/runbook_section', () => ({
-  AlertEpisodeRunbookSection: () => <div data-test-subj="stubRunbookSection" />,
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/components/details/runbook_section', () => {
+      const mocked = {
+      AlertEpisodeRunbookSection: () => <div data-test-subj="stubRunbookSection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/trend_chart_section', () => ({
-  AlertEpisodeTrendChartSection: () => <div data-test-subj="stubTrendChartSection" />,
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/components/details/trend_chart_section', () => {
+      const mocked = {
+      AlertEpisodeTrendChartSection: () => <div data-test-subj="stubTrendChartSection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/timeline_heatmaps_section', () => ({
-  AlertEpisodeTimelineHeatmapsSection: () => <div data-test-subj="stubTimelineHeatmapsSection" />,
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/components/details/timeline_heatmaps_section', () => {
+      const mocked = {
+      AlertEpisodeTimelineHeatmapsSection: () => <div data-test-subj="stubTimelineHeatmapsSection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/metadata_section', () => ({
-  AlertEpisodeMetadataSection: jest.fn(() => <div data-test-subj="stubMetadataSection" />),
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/components/details/metadata_section', () => {
+      const mocked = {
+      AlertEpisodeMetadataSection: vi.fn(() => <div data-test-subj="stubMetadataSection" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/components/details/timeline_section', () => ({
-  AlertEpisodeTimelineSection: () => <div data-test-subj="stubTimelineSection" />,
-}));
+vi.mock('@kbn/alerting-v2-episodes-ui/components/details/timeline_section', () => {
+      const mocked = {
+      AlertEpisodeTimelineSection: () => <div data-test-subj="stubTimelineSection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/episode_action_policy_history_tab', () => ({
-  EpisodeActionPolicyHistoryTab: () => <div data-test-subj="stubEpisodeActionPolicyHistoryTab" />,
-}));
+vi.mock('./components/episode_action_policy_history_tab', () => {
+      const mocked = {
+      EpisodeActionPolicyHistoryTab: () => <div data-test-subj="stubEpisodeActionPolicyHistoryTab" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_breadcrumbs', () => ({
-  useBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../hooks/use_breadcrumbs', () => {
+      const mocked = {
+      useBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseParams = jest.mocked(useParams);
-const mockUseFetchEpisodeQuery = jest.mocked(useFetchEpisodeQuery);
-const mockUseFetchEpisodeActions = jest.mocked(useFetchEpisodeActions);
-const mockUseFetchGroupActions = jest.mocked(useFetchGroupActions);
-const mockUseFetchRule = jest.mocked(useFetchRule);
-const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
-const mockMetadataSection = jest.mocked(AlertEpisodeMetadataSection);
-const mockUseEpisodeAutoAttach = jest.mocked(useEpisodeAutoAttach);
-const mockRuleOverviewPanelSection = jest.mocked(AlertEpisodeRuleOverviewPanelSection);
+const mockUseParams = vi.mocked(useParams);
+const mockUseFetchEpisodeQuery = vi.mocked(useFetchEpisodeQuery);
+const mockUseFetchEpisodeActions = vi.mocked(useFetchEpisodeActions);
+const mockUseFetchGroupActions = vi.mocked(useFetchGroupActions);
+const mockUseFetchRule = vi.mocked(useFetchRule);
+const mockCreateEpisodeActions = vi.mocked(createEpisodeActions);
+const mockMetadataSection = vi.mocked(AlertEpisodeMetadataSection);
+const mockUseEpisodeAutoAttach = vi.mocked(useEpisodeAutoAttach);
+const mockRuleOverviewPanelSection = vi.mocked(AlertEpisodeRuleOverviewPanelSection);
 
 type EpisodeQueryResult = ReturnType<typeof useFetchEpisodeQuery>;
 type FetchRuleResult = ReturnType<typeof useFetchRule>;
@@ -212,7 +266,7 @@ const renderPage = () =>
   );
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockCanReadExecutionHistory = true;
   mockCapabilities = WRITE_CAPABILITIES;
   mockUseParams.mockReturnValue({ episodeId });
@@ -257,7 +311,7 @@ beforeEach(() => {
       displayName: 'Acknowledge',
       iconType: 'checkCircle',
       isCompatible: () => true,
-      execute: jest.fn(async () => {}),
+      execute: vi.fn(async () => {}),
     },
     {
       id: 'ALERTING_V2_EDIT_EPISODE_TAGS',
@@ -265,7 +319,7 @@ beforeEach(() => {
       displayName: 'Edit tags',
       iconType: 'tag',
       isCompatible: () => true,
-      execute: jest.fn(async () => {}),
+      execute: vi.fn(async () => {}),
     },
   ]);
 });
@@ -454,7 +508,7 @@ describe('EpisodeDetailsPage', () => {
   });
 
   it('runs an app header menu action when clicked', async () => {
-    const execute = jest.fn(async () => {});
+    const execute = vi.fn(async () => {});
     mockCreateEpisodeActions.mockReturnValue([
       {
         id: 'ALERTING_V2_ACK_EPISODE',
@@ -487,7 +541,7 @@ describe('EpisodeDetailsPage', () => {
       displayName: 'Acknowledge',
       iconType: 'checkCircle',
       isCompatible: () => true,
-      execute: jest.fn(async () => {}),
+      execute: vi.fn(async () => {}),
     };
     const discoverAction = {
       id: OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
@@ -495,7 +549,7 @@ describe('EpisodeDetailsPage', () => {
       displayName: 'Open in Discover',
       iconType: 'discoverApp',
       isCompatible: () => true,
-      execute: jest.fn(async () => {}),
+      execute: vi.fn(async () => {}),
     };
 
     it('renders mutating actions in the header menu when the user has write privilege', async () => {

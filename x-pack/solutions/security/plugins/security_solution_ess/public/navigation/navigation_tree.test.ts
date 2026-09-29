@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
@@ -19,7 +21,7 @@ describe('createNavigationTree', () => {
       ...mockServices,
       featureFlags: {
         ...mockServices.featureFlags,
-        getBooleanValue$: jest.fn((flag: string, defaultValue?: boolean) => {
+        getBooleanValue$: vi.fn((flag: string, defaultValue?: boolean) => {
           if (flag === AGENT_BUILDER_NAV_AT_TOP_FLAG) {
             return of(options?.agentBuilderNavAtTop ?? defaultValue ?? false);
           }
@@ -29,7 +31,7 @@ describe('createNavigationTree', () => {
       },
       uiSettings: {
         ...mockServices.uiSettings,
-        get: jest.fn(<T>(_key: string, defaultValue?: T) => defaultValue as T),
+        get: vi.fn(<T>(_key: string, defaultValue?: T) => defaultValue as T),
       },
     };
 

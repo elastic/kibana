@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -15,9 +17,9 @@ import type { Response, Selector } from '../../../common';
 import * as i18n from '../control_general_view/translations';
 
 describe('<ControlGeneralViewSelector />', () => {
-  const onChange = jest.fn();
-  const onRemove = jest.fn();
-  const onDuplicate = jest.fn();
+  const onChange = vi.fn();
+  const onRemove = vi.fn();
+  const onDuplicate = vi.fn();
 
   // defining this here to avoid a warning in testprovider with params.history changing on rerender.
   const params = coreMock.createAppMountParameters();

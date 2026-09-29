@@ -5,56 +5,73 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { VisualizationsSection } from './visualizations_section';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 
-jest.mock('@kbn/i18n-react', () => ({
-  FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
-}));
+vi.mock('@kbn/i18n-react', () => {
+      const mocked = {
+      FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
+vi.mock('../../../shared/hooks/use_expand_section', () => {
+      const mocked = {
+      useExpandSection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/components/expandable_section', () => ({
-  ExpandableSection: ({
-    title,
-    children,
-    'data-test-subj': dataTestSubj,
-  }: {
-    title: React.ReactNode;
-    children: React.ReactNode;
-    'data-test-subj'?: string;
-  }) => (
-    <section data-test-subj={dataTestSubj}>
-      <div>{title}</div>
-      {children}
-    </section>
-  ),
-}));
+vi.mock('../../../shared/components/expandable_section', () => {
+      const mocked = {
+      ExpandableSection: ({
+        title,
+        children,
+        'data-test-subj': dataTestSubj,
+      }: {
+        title: React.ReactNode;
+        children: React.ReactNode;
+        'data-test-subj'?: string;
+      }) => (
+        <section data-test-subj={dataTestSubj}>
+          <div>{title}</div>
+          {children}
+        </section>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain',
-  () => ({
-    AttackChain: ({ attackTactics }: { attackTactics: string[] | undefined }) => (
-      <div data-test-subj="attack-chain" data-tactics={JSON.stringify(attackTactics)} />
-    ),
-  })
+  () => {
+      const mocked = {
+        AttackChain: ({ attackTactics }: { attackTactics: string[] | undefined }) => (
+          <div data-test-subj="attack-chain" data-tactics={JSON.stringify(attackTactics)} />
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('./section_panel', () => ({
-  SectionPanel: ({ title, children }: { title: React.ReactNode; children: React.ReactNode }) => (
-    <div data-test-subj="section-panel">
-      <div>{title}</div>
-      {children}
-    </div>
-  ),
-}));
+vi.mock('./section_panel', () => {
+      const mocked = {
+      SectionPanel: ({ title, children }: { title: React.ReactNode; children: React.ReactNode }) => (
+        <div data-test-subj="section-panel">
+          <div>{title}</div>
+          {children}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseExpandSection = jest.mocked(useExpandSection);
+const mockedUseExpandSection = vi.mocked(useExpandSection);
 
 const buildHit = (overrides: Record<string, unknown> = {}): DataTableRecord =>
   ({
@@ -70,7 +87,7 @@ const KEY = 'visualizations';
 
 describe('VisualizationsSection (v2)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseExpandSection.mockReturnValue(true);
   });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React, { useEffect } from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
@@ -37,38 +40,50 @@ import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 const SPECIAL_TEST_TIMEOUT = 30000;
 
-jest.mock('../../../../containers', () => ({
-  useTimelineEvents: jest.fn(),
-}));
-jest.mock('../../../../containers/details', () => ({
-  useTimelineEventsDetails: jest.fn(),
-}));
-jest.mock('../../../fields_browser', () => ({
-  useFieldBrowserOptions: jest.fn(),
-}));
+vi.mock('../../../../containers', () => {
+      const mocked = {
+      useTimelineEvents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../containers/details', () => {
+      const mocked = {
+      useTimelineEventsDetails: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../fields_browser', () => {
+      const mocked = {
+      useFieldBrowserOptions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/hooks/use_experimental_features');
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+vi.mock('../../../../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as Mock;
 
-const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer/polyfilled');
+const mockUseResizeObserver: Mock = useResizeObserver as Mock;
+vi.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
-jest.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/components/user_privileges');
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../../../../flyout_v2/use_flyout_api');
+vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
 
-jest.mock('../../body/unified_timeline_body', () => ({
-  UnifiedTimelineBody: ({ header }: { header: React.ReactNode }) => header,
-}));
+vi.mock('../../body/unified_timeline_body', () => {
+      const mocked = {
+      UnifiedTimelineBody: ({ header }: { header: React.ReactNode }) => header,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-let useTimelineEventsMock = jest.fn();
+let useTimelineEventsMock = vi.fn();
 
-const loadPageMock = jest.fn();
+const loadPageMock = vi.fn();
 
 const mockState = {
   ...structuredClone(mockGlobalState),
@@ -103,8 +118,8 @@ const TestComponent = (props: Partial<ComponentProps<typeof EqlTabContentCompone
 
 describe('EQL partial results callout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    useTimelineEventsMock = jest.fn(() => [
+    vi.clearAllMocks();
+    useTimelineEventsMock = vi.fn(() => [
       false,
       {
         events: mockTimelineData.slice(0, 1),
@@ -118,25 +133,25 @@ describe('EQL partial results callout', () => {
         },
       },
     ]);
-    (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
-    (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
+    (useTimelineEvents as Mock).mockImplementation(useTimelineEventsMock);
+    (useTimelineEventsDetails as Mock).mockReturnValue([false, {}]);
 
-    (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
+    (useIsExperimentalFeatureEnabledMock as Mock).mockImplementation(
       (feature: keyof ExperimentalFeatures) => {
         return allowedExperimentalValues[feature];
       }
     );
 
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       notesPrivileges: { read: true },
     });
 
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(createExpandableFlyoutApiMock());
-    jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(createExpandableFlyoutApiMock());
+    vi.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
 
-    HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
+    HTMLElement.prototype.getBoundingClientRect = vi.fn(() => {
       return {
         width: 1000,
         height: 1000,
@@ -149,7 +164,7 @@ describe('EQL partial results callout', () => {
   it(
     'renders the incomplete results callout when the EQL response is partial',
     async () => {
-      (useTimelineEvents as jest.Mock).mockReturnValue([
+      (useTimelineEvents as Mock).mockReturnValue([
         false,
         {
           events: mockTimelineData.slice(0, 1),
@@ -182,7 +197,7 @@ describe('EQL partial results callout', () => {
   it(
     'renders shard failure details when the EQL response is partial',
     async () => {
-      (useTimelineEvents as jest.Mock).mockReturnValue([
+      (useTimelineEvents as Mock).mockReturnValue([
         false,
         {
           events: mockTimelineData.slice(0, 1),
@@ -217,7 +232,7 @@ describe('EQL partial results callout', () => {
   it(
     'hides the incomplete results callout when the EQL response is complete',
     async () => {
-      (useTimelineEvents as jest.Mock).mockReturnValue([
+      (useTimelineEvents as Mock).mockReturnValue([
         false,
         {
           events: mockTimelineData.slice(0, 1),
@@ -246,7 +261,7 @@ describe('EQL partial results callout', () => {
 // Failing: See https://github.com/elastic/kibana/issues/277361
 describe.skip('EQL Tab', () => {
   const props = {} as EqlTabContentComponentProps;
-  const mockOpenFlyout = jest.fn();
+  const mockOpenFlyout = vi.fn();
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeAll(() => {
@@ -262,8 +277,8 @@ describe.skip('EQL Tab', () => {
     // Clear call history between tests. `mockOpenFlyout` is declared once at describe scope, so
     // without this a legacy `openFlyout` call from one test leaks into the next and trips the
     // `expect(mockOpenFlyout).not.toHaveBeenCalled()` assertions.
-    jest.clearAllMocks();
-    useTimelineEventsMock = jest.fn(() => [
+    vi.clearAllMocks();
+    useTimelineEventsMock = vi.fn(() => [
       false,
       {
         events: mockTimelineData.slice(0, 1),
@@ -277,29 +292,29 @@ describe.skip('EQL Tab', () => {
         },
       },
     ]);
-    (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
-    (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
+    (useTimelineEvents as Mock).mockImplementation(useTimelineEventsMock);
+    (useTimelineEventsDetails as Mock).mockReturnValue([false, {}]);
 
-    (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
+    (useIsExperimentalFeatureEnabledMock as Mock).mockImplementation(
       (feature: keyof ExperimentalFeatures) => {
         return allowedExperimentalValues[feature];
       }
     );
 
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       notesPrivileges: { read: true },
     });
 
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
     });
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
 
-    HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
+    HTMLElement.prototype.getBoundingClientRect = vi.fn(() => {
       return {
         width: 1000,
         height: 1000,
@@ -310,11 +325,11 @@ describe.skip('EQL Tab', () => {
   });
 
   describe('rendering', () => {
-    const fetchNotesMock = jest.spyOn(notesApi, 'fetchNotesByDocumentIds');
+    const fetchNotesMock = vi.spyOn(notesApi, 'fetchNotesByDocumentIds');
     test(
       'should render the timeline table',
       async () => {
-        fetchNotesMock.mockImplementation(jest.fn());
+        fetchNotesMock.mockImplementation(vi.fn());
         render(
           <TestProviders store={createMockStore(mockState)}>
             <TestComponent />
@@ -343,7 +358,7 @@ describe.skip('EQL Tab', () => {
     test(
       'should render correct placeholder when there are not results',
       async () => {
-        (useTimelineEvents as jest.Mock).mockReturnValue([
+        (useTimelineEvents as Mock).mockReturnValue([
           false,
           {
             events: [],
@@ -374,7 +389,7 @@ describe.skip('EQL Tab', () => {
       beforeEach(() => {
         // pagination tests need more than 1 record so here
         // we return 5 records instead of just 1.
-        useTimelineEventsMock = jest.fn(() => [
+        useTimelineEventsMock = vi.fn(() => [
           false,
           {
             events: structuredClone(mockTimelineData.slice(0, 5)),
@@ -399,11 +414,11 @@ describe.skip('EQL Tab', () => {
           },
         ]);
 
-        (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
+        (useTimelineEvents as Mock).mockImplementation(useTimelineEventsMock);
       });
 
       afterEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it(
@@ -542,7 +557,7 @@ describe.skip('EQL Tab', () => {
     beforeEach(() => {
       // The notes control column only renders when the corresponding rawEvent is present,
       // so we provide a rawEvent that matches the first (and only) event.
-      (useTimelineEvents as jest.Mock).mockReturnValue([
+      (useTimelineEvents as Mock).mockReturnValue([
         false,
         {
           events: mockTimelineData.slice(0, 1),
@@ -597,7 +612,7 @@ describe.skip('EQL Tab', () => {
     it(
       'should open the new notes flyout when the new flyout is enabled',
       async () => {
-        jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+        vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
         render(
           <TestProviders store={createMockStore(mockState)}>

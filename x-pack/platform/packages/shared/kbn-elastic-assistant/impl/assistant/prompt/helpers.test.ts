@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ClientMessage } from '../../assistant_context/types';
 import { getCombinedMessage } from './helpers';
 import { mockGetAnonymizedValue } from '../../mock/get_anonymized_value';
@@ -18,7 +20,7 @@ const mockSelectedAlertPromptContext: SelectedPromptContext = {
 };
 
 describe('helpers', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('getCombinedMessage', () => {
     it('returns correct content for a chat', async () => {

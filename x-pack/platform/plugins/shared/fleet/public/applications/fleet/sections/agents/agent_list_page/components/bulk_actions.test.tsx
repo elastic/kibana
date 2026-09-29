@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, act } from '@testing-library/react';
 
@@ -19,20 +22,23 @@ import { useStartServices } from '../../../../../../hooks/use_core';
 
 import { AgentBulkActions } from './bulk_actions';
 
-jest.mock('../../../../../../services/experimental_features');
-jest.mock('../../../../../../hooks/use_license');
-jest.mock('../../../../../../hooks/use_authz');
-jest.mock('../../../../../../hooks/use_core');
-jest.mock('../../components/agent_reassign_policy_modal');
-jest.mock('../hooks/export_csv', () => ({
-  useExportCSV: jest.fn().mockReturnValue({
-    generateReportingJobCSV: jest.fn(),
-  }),
-}));
+vi.mock('../../../../../../services/experimental_features');
+vi.mock('../../../../../../hooks/use_license');
+vi.mock('../../../../../../hooks/use_authz');
+vi.mock('../../../../../../hooks/use_core');
+vi.mock('../../components/agent_reassign_policy_modal');
+vi.mock('../hooks/export_csv', () => {
+      const mocked = {
+      useExportCSV: vi.fn().mockReturnValue({
+        generateReportingJobCSV: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
-const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
-const mockUseStartServices = useStartServices as jest.Mock;
+const mockedUseLicence = useLicense as MockedFunction<typeof useLicense>;
+const mockedExperimentalFeaturesService = vi.mocked(ExperimentalFeaturesService);
+const mockUseStartServices = useStartServices as Mock;
 
 const defaultProps = {
   nAgentsInTable: 10,
@@ -71,7 +77,7 @@ describe('AgentBulkActions', () => {
     mockUseStartServices.mockReturnValue({
       notifications: {
         toasts: {
-          addError: jest.fn(),
+          addError: vi.fn(),
         },
       },
       docLinks: {
@@ -93,7 +99,7 @@ describe('AgentBulkActions', () => {
     mockedExperimentalFeaturesService.get.mockReturnValue({
       enableAgentPrivilegeLevelChange: true,
     } as any);
-    jest.mocked(useAuthz).mockReturnValue({
+    vi.mocked(useAuthz).mockReturnValue({
       fleet: {
         allAgents: true,
         readAgents: true,
@@ -107,8 +113,8 @@ describe('AgentBulkActions', () => {
     mockedUseLicence.mockReturnValue({
       hasAtLeast: () => false,
     } as unknown as LicenseService);
-    jest.mocked(AgentReassignAgentPolicyModal).mockReset();
-    jest.mocked(AgentReassignAgentPolicyModal).mockReturnValue(null);
+    vi.mocked(AgentReassignAgentPolicyModal).mockReset();
+    vi.mocked(AgentReassignAgentPolicyModal).mockReturnValue(null);
   });
 
   afterEach(() => {
@@ -237,7 +243,7 @@ describe('AgentBulkActions', () => {
     });
     it('should show disabled CSV action if user does not have generateAgentReports permission', async () => {
       mockStartServices(false);
-      jest.mocked(useAuthz).mockReturnValue({
+      vi.mocked(useAuthz).mockReturnValue({
         fleet: {
           allAgents: true,
           readAgents: true,
@@ -266,7 +272,7 @@ describe('AgentBulkActions', () => {
 
     it('should show enabled CSV action if user has generateAgentReports permission', async () => {
       mockStartServices(true);
-      jest.mocked(useAuthz).mockReturnValue({
+      vi.mocked(useAuthz).mockReturnValue({
         fleet: {
           allAgents: true,
           readAgents: true,
@@ -384,7 +390,7 @@ describe('AgentBulkActions', () => {
         fireEvent.click(results.getByText('Assign to new policy').closest('button')!);
       });
 
-      expect(jest.mocked(AgentReassignAgentPolicyModal)).toHaveBeenCalledWith(
+      expect(vi.mocked(AgentReassignAgentPolicyModal)).toHaveBeenCalledWith(
         expect.objectContaining({
           agents: '(Base query)',
         }),
@@ -410,7 +416,7 @@ describe('AgentBulkActions', () => {
         fireEvent.click(results.getByText('Assign to new policy').closest('button')!);
       });
 
-      expect(jest.mocked(AgentReassignAgentPolicyModal)).toHaveBeenCalledWith(
+      expect(vi.mocked(AgentReassignAgentPolicyModal)).toHaveBeenCalledWith(
         expect.objectContaining({
           agents: '((Base query)) AND NOT (fleet-agents.agent.id : ("agentId1" or "agentId2"))',
         }),
@@ -441,7 +447,7 @@ describe('AgentBulkActions', () => {
 
     it('should show enabled CSV action if user has generateAgentReports permission', async () => {
       mockStartServices(false);
-      jest.mocked(useAuthz).mockReturnValue({
+      vi.mocked(useAuthz).mockReturnValue({
         fleet: {
           allAgents: true,
           readAgents: true,
@@ -470,7 +476,7 @@ describe('AgentBulkActions', () => {
 
     it('should show disabled CSV action if user does not have generateAgentReports permission', async () => {
       mockStartServices(true);
-      jest.mocked(useAuthz).mockReturnValue({
+      vi.mocked(useAuthz).mockReturnValue({
         fleet: {
           allAgents: true,
           readAgents: true,

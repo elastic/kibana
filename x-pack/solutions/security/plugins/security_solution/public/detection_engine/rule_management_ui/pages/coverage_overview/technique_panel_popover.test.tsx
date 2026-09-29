@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
 
@@ -16,10 +19,10 @@ import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboa
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 
-jest.mock('./coverage_overview_dashboard_context');
-jest.mock('../../../../common/components/user_privileges');
+vi.mock('./coverage_overview_dashboard_context');
+vi.mock('../../../../common/components/user_privileges');
 
-const mockEnableAllDisabled = jest.fn();
+const mockEnableAllDisabled = vi.fn();
 
 const renderTechniquePanelPopover = (
   technique: CoverageOverviewMitreTechnique = getMockCoverageOverviewMitreTechnique()
@@ -33,11 +36,11 @@ const renderTechniquePanelPopover = (
 
 describe('CoverageOverviewMitreTechniquePanelPopover', () => {
   beforeEach(() => {
-    (useCoverageOverviewDashboardContext as jest.Mock).mockReturnValue({
+    (useCoverageOverviewDashboardContext as Mock).mockReturnValue({
       state: { showExpandedCells: false, filter: {} },
       actions: { enableAllDisabled: mockEnableAllDisabled },
     });
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         ...initialUserPrivilegesState().rulesPrivileges,
@@ -47,7 +50,7 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it renders panel with collapsed view', () => {
@@ -58,7 +61,7 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
   });
 
   test('it renders panel with expanded view', () => {
-    (useCoverageOverviewDashboardContext as jest.Mock).mockReturnValue({
+    (useCoverageOverviewDashboardContext as Mock).mockReturnValue({
       state: { showExpandedCells: true, filter: {} },
       actions: { enableAllDisabled: mockEnableAllDisabled },
     });
@@ -115,7 +118,7 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
   });
 
   test('"Enable all disabled" button is disabled when user does not have CRUD permissions', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         ...initialUserPrivilegesState().rulesPrivileges,

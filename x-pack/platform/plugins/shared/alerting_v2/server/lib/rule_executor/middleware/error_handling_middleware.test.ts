@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/logging';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
@@ -17,7 +20,7 @@ import { createExecutionContext, RuleExecutionCancellationError } from '../../ex
 
 describe('ErrorHandlingMiddleware', () => {
   let middleware: ErrorHandlingMiddleware;
-  let logger: jest.Mocked<Logger>;
+  let logger: Mocked<Logger>;
 
   beforeEach(() => {
     const { loggerService, mockLogger } = createLoggerService();
@@ -27,7 +30,7 @@ describe('ErrorHandlingMiddleware', () => {
 
   it('calls next and returns result on success', async () => {
     const expectedState = createRulePipelineState();
-    const next = jest.fn().mockReturnValue(createPipelineStream([expectedState]));
+    const next = vi.fn().mockReturnValue(createPipelineStream([expectedState]));
 
     const context = createRuleExecutionMiddlewareContext();
     const result = await collectStreamResults(
@@ -41,7 +44,7 @@ describe('ErrorHandlingMiddleware', () => {
 
   it('logs error and rethrows on failure', async () => {
     const error = new Error('Step failed');
-    const next = jest.fn().mockReturnValue(
+    const next = vi.fn().mockReturnValue(
       (async function* () {
         throw error;
       })()
@@ -72,7 +75,7 @@ describe('ErrorHandlingMiddleware', () => {
         },
       },
     } as DiagnosticResult);
-    const next = jest.fn().mockReturnValue(
+    const next = vi.fn().mockReturnValue(
       (async function* () {
         throw error;
       })()
@@ -95,7 +98,7 @@ describe('ErrorHandlingMiddleware', () => {
         }),
       })
     );
-    const loggedMessage = (logger.error as jest.Mock).mock.calls[0][0] as string;
+    const loggedMessage = (logger.error as Mock).mock.calls[0][0] as string;
     expect(loggedMessage).not.toContain('secret_field');
   });
 
@@ -104,7 +107,7 @@ describe('ErrorHandlingMiddleware', () => {
     abortController.abort();
     const executionContext = createExecutionContext(abortController.signal);
 
-    const next = jest.fn().mockReturnValue(
+    const next = vi.fn().mockReturnValue(
       (async function* () {
         executionContext.throwIfAborted();
       })()

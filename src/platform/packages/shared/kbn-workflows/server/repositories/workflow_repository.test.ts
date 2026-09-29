@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowRepository } from './workflow_repository';
 import { WORKFLOW_INDEX_NAME } from '../constants';
@@ -109,10 +112,10 @@ describe('stored workflow ACLs', () => {
 
 describe('WorkflowRepository.areWorkflowsEnabled', () => {
   let repository: WorkflowRepository;
-  let esClient: { search: jest.Mock };
+  let esClient: { search: Mock };
 
   beforeEach(() => {
-    esClient = { search: jest.fn() };
+    esClient = { search: vi.fn() };
     repository = new WorkflowRepository({
       esClient: esClient as any,
       logger: loggingSystemMock.create().get(),
@@ -379,7 +382,7 @@ describe('WorkflowRepository.getWorkflow', () => {
 
   it('maps snake_case timestamps from the workflow index to EsWorkflow dates', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         _shards: { total: 1, successful: 1, failed: 0 },
         hits: {
           hits: [
@@ -408,7 +411,7 @@ describe('WorkflowRepository.getWorkflow', () => {
 
   it('maps managed workflow metadata when present', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         _shards: { total: 1, successful: 1, failed: 0 },
         hits: {
           hits: [
@@ -447,7 +450,7 @@ describe('WorkflowRepository.getWorkflow', () => {
 
   it('applies managed filter in getWorkflow when managedFilter is managed', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         _shards: { total: 1, successful: 1, failed: 0 },
         hits: {
           hits: [
@@ -476,7 +479,7 @@ describe('WorkflowRepository.getWorkflow', () => {
 
   it('applies unmanaged filter in getWorkflow when managedFilter is unmanaged', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         _shards: { total: 1, successful: 1, failed: 0 },
         hits: {
           hits: [
@@ -509,7 +512,7 @@ describe('WorkflowRepository.getWorkflow', () => {
 describe('WorkflowRepository.isWorkflowEnabled', () => {
   it('delegates to areWorkflowsEnabled and reads the keyed flag', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         _shards: { total: 1, successful: 1, failed: 0 },
         hits: {
           hits: [{ _id: 'wf-a', _source: { enabled: true, spaceId: 'default' } }],
@@ -527,7 +530,7 @@ describe('WorkflowRepository.isWorkflowEnabled', () => {
 
   it('returns false when the workflow is missing', async () => {
     const esClient = {
-      search: jest
+      search: vi
         .fn()
         .mockResolvedValue({ _shards: { total: 1, successful: 1, failed: 0 }, hits: { hits: [] } }),
     };
@@ -541,7 +544,7 @@ describe('WorkflowRepository.isWorkflowEnabled', () => {
 
   it('returns true for global workflow when includeGlobal is true', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         _shards: { total: 1, successful: 1, failed: 0 },
         hits: {
           hits: [{ _id: 'wf-a', _source: { enabled: true, spaceId: '*' } }],

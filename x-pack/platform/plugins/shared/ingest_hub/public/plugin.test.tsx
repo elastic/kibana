@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { AppUpdater, PluginInitializerContext } from '@kbn/core/public';
@@ -26,16 +29,16 @@ const createPluginContext = (buildFlavor: 'traditional' | 'serverless' = 'tradit
   } as unknown as PluginInitializerContext);
 
 const enableFeatureFlag = (coreStart: ReturnType<typeof coreMock.createStart>) => {
-  (coreStart.featureFlags.getBooleanValue$ as jest.Mock).mockReturnValue(of(true));
+  (coreStart.featureFlags.getBooleanValue$ as Mock).mockReturnValue(of(true));
 };
 
 const disableFeatureFlag = (coreStart: ReturnType<typeof coreMock.createStart>) => {
-  (coreStart.featureFlags.getBooleanValue$ as jest.Mock).mockReturnValue(of(false));
+  (coreStart.featureFlags.getBooleanValue$ as Mock).mockReturnValue(of(false));
 };
 
 describe('IngestHubPlugin', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('navigationAvailable$', () => {
@@ -166,7 +169,7 @@ describe('IngestHubPlugin', () => {
 
     describe('mount', () => {
       it('redirects to discover when feature flag is disabled', async () => {
-        (coreStart.featureFlags.getBooleanValue$ as jest.Mock).mockReturnValue(of(false));
+        (coreStart.featureFlags.getBooleanValue$ as Mock).mockReturnValue(of(false));
         plugin.setup(coreSetup);
 
         const { mount } = coreSetup.application.register.mock.calls[0][0];

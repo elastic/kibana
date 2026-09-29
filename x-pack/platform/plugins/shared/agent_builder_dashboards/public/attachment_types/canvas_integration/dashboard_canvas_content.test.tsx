@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, act, waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -19,20 +22,23 @@ import { DashboardCanvasAttachment } from './dashboard_canvas_attachment';
 import * as agentBuilderDashboardsCommon from '@kbn/agent-builder-dashboards-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 
-jest.mock('@kbn/dashboard-plugin/public', () => ({
-  DashboardRenderer: jest.fn(() => <div data-test-subj="dashboardRenderer" />),
-}));
+vi.mock('@kbn/dashboard-plugin/public', () => {
+      const mocked = {
+      DashboardRenderer: vi.fn(() => <div data-test-subj="dashboardRenderer" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agent-builder-dashboards-common', () => {
-  const actual = jest.requireActual('@kbn/agent-builder-dashboards-common');
+vi.mock('@kbn/agent-builder-dashboards-common', async () => {
+  const actual = (await vi.importActual('@kbn/agent-builder-dashboards-common'));
 
   return {
     ...actual,
-    attachmentDataToDashboardState: jest.fn(actual.attachmentDataToDashboardState),
+    attachmentDataToDashboardState: vi.fn(actual.attachmentDataToDashboardState),
   };
 });
 
-const MockSearchBar = jest.fn(() => <div data-test-subj="searchBar" />);
+const MockSearchBar = vi.fn(() => <div data-test-subj="searchBar" />);
 
 describe('DashboardCanvasAttachment', () => {
   const createMockDashboardApi = (
@@ -52,23 +58,23 @@ describe('DashboardCanvasAttachment', () => {
     return {
       children$,
       locator: {
-        navigate: jest.fn().mockResolvedValue(undefined),
+        navigate: vi.fn().mockResolvedValue(undefined),
       },
       dataViews$,
       filters$,
-      forceRefresh: jest.fn(),
+      forceRefresh: vi.fn(),
       isApproximate$,
       query$,
       isEditableByUser: true,
       isManaged: false,
-      runQuickSave: jest.fn().mockResolvedValue(undefined),
-      runInteractiveSave: jest.fn().mockResolvedValue({ id: 'new-dashboard-id' }),
+      runQuickSave: vi.fn().mockResolvedValue(undefined),
+      runInteractiveSave: vi.fn().mockResolvedValue({ id: 'new-dashboard-id' }),
       savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
-      setFilters: jest.fn((nextFilters?: Filter[]) => filters$.next(nextFilters ?? [])),
-      setEsqlApproximation: jest.fn((isApproximate: boolean) => isApproximate$.next(isApproximate)),
-      setQuery: jest.fn((nextQuery?: Query) => query$.next(nextQuery)),
-      setViewMode: jest.fn(),
-      setTimeRange: jest.fn((nextTimeRange?: { from: string; to: string }) => {
+      setFilters: vi.fn((nextFilters?: Filter[]) => filters$.next(nextFilters ?? [])),
+      setEsqlApproximation: vi.fn((isApproximate: boolean) => isApproximate$.next(isApproximate)),
+      setQuery: vi.fn((nextQuery?: Query) => query$.next(nextQuery)),
+      setViewMode: vi.fn(),
+      setTimeRange: vi.fn((nextTimeRange?: { from: string; to: string }) => {
         if (nextTimeRange) {
           timeRange$.next(nextTimeRange);
         }
@@ -87,9 +93,9 @@ describe('DashboardCanvasAttachment', () => {
     const updates$ = new Subject<void>();
 
     return {
-      getFilters: jest.fn(() => currentFilters),
-      getUpdates$: jest.fn(() => updates$.asObservable()),
-      setFilters: jest.fn((nextFilters: Filter[]) => {
+      getFilters: vi.fn(() => currentFilters),
+      getUpdates$: vi.fn(() => updates$.asObservable()),
+      setFilters: vi.fn((nextFilters: Filter[]) => {
         currentFilters = nextFilters;
         updates$.next();
       }),
@@ -105,9 +111,9 @@ describe('DashboardCanvasAttachment', () => {
     const timeUpdate$ = new Subject<void>();
 
     return {
-      getTime: jest.fn(() => currentTime),
-      getTimeUpdate$: jest.fn(() => timeUpdate$.asObservable()),
-      setTime: jest.fn((nextTime: TimeRange) => {
+      getTime: vi.fn(() => currentTime),
+      getTimeUpdate$: vi.fn(() => timeUpdate$.asObservable()),
+      setTime: vi.fn((nextTime: TimeRange) => {
         currentTime = nextTime;
         timeUpdate$.next();
       }),
@@ -147,11 +153,11 @@ describe('DashboardCanvasAttachment', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const simulateDashboardApiAvailable = (mockApi: DashboardApi) => {
-    const mockDashboardRenderer = DashboardRenderer as jest.Mock;
+    const mockDashboardRenderer = DashboardRenderer as Mock;
     const onApiAvailable = mockDashboardRenderer.mock.calls[0]?.[0]?.onApiAvailable;
     if (onApiAvailable) {
       act(() => {
@@ -161,7 +167,7 @@ describe('DashboardCanvasAttachment', () => {
   };
 
   const getLatestSearchBarProps = (): Record<string, any> | undefined =>
-    (MockSearchBar as jest.Mock).mock.calls.at(-1)?.[0] as Record<string, any> | undefined;
+    (MockSearchBar as Mock).mock.calls.at(-1)?.[0] as Record<string, any> | undefined;
 
   type DashboardCanvasAttachmentProps = React.ComponentProps<typeof DashboardCanvasAttachment>;
 
@@ -175,22 +181,22 @@ describe('DashboardCanvasAttachment', () => {
       mockApiOverrides?: Partial<Pick<DashboardApi, 'isManaged' | 'isEditableByUser'>>;
     } = {}
   ) => {
-    const registerActionButtons: jest.MockedFunction<
+    const registerActionButtons: MockedFunction<
       DashboardCanvasAttachmentProps['registerActionButtons']
-    > = jest.fn();
-    const updateOrigin: jest.MockedFunction<DashboardCanvasAttachmentProps['updateOrigin']> = jest
+    > = vi.fn();
+    const updateOrigin: MockedFunction<DashboardCanvasAttachmentProps['updateOrigin']> = vi
       .fn()
       .mockResolvedValue(undefined);
-    const closeCanvas: jest.MockedFunction<DashboardCanvasAttachmentProps['closeCanvas']> =
-      jest.fn();
-    const checkSavedDashboardExist: jest.MockedFunction<
+    const closeCanvas: MockedFunction<DashboardCanvasAttachmentProps['closeCanvas']> =
+      vi.fn();
+    const checkSavedDashboardExist: MockedFunction<
       DashboardCanvasAttachmentProps['checkSavedDashboardExist']
-    > = jest.fn().mockResolvedValue(false);
+    > = vi.fn().mockResolvedValue(false);
     const mockFilterManager = createMockFilterManager();
     const mockTimefilter = createMockTimefilter();
     const mockData = createMockData(mockFilterManager, mockTimefilter);
     const mockApi = createMockDashboardApi(mockApiOverrides);
-    const openSidebarConversation = jest.fn();
+    const openSidebarConversation = vi.fn();
 
     const props: DashboardCanvasAttachmentProps = {
       ...defaultProps,
@@ -276,7 +282,7 @@ describe('DashboardCanvasAttachment', () => {
     const { registerActionButtons } = await renderDashboardCanvasAttachment(
       {
         attachment: attachmentWithOrigin,
-        checkSavedDashboardExist: jest.fn().mockResolvedValue(true),
+        checkSavedDashboardExist: vi.fn().mockResolvedValue(true),
       },
       { mockApiOverrides: { isManaged: true } }
     );
@@ -306,7 +312,7 @@ describe('DashboardCanvasAttachment', () => {
     const { registerActionButtons } = await renderDashboardCanvasAttachment(
       {
         attachment: attachmentWithOrigin,
-        checkSavedDashboardExist: jest.fn().mockResolvedValue(true),
+        checkSavedDashboardExist: vi.fn().mockResolvedValue(true),
       },
       { mockApiOverrides: { isEditableByUser: false } }
     );
@@ -337,7 +343,7 @@ describe('DashboardCanvasAttachment', () => {
         await renderDashboardCanvasAttachment(
           {
             attachment: attachmentWithOrigin,
-            checkSavedDashboardExist: jest.fn().mockResolvedValue(true),
+            checkSavedDashboardExist: vi.fn().mockResolvedValue(true),
           },
           { mockApiOverrides: { isManaged: true } }
         );
@@ -363,7 +369,7 @@ describe('DashboardCanvasAttachment', () => {
         await renderDashboardCanvasAttachment(
           {
             attachment: attachmentWithOrigin,
-            checkSavedDashboardExist: jest.fn().mockResolvedValue(true),
+            checkSavedDashboardExist: vi.fn().mockResolvedValue(true),
           },
           { mockApiOverrides: { isEditableByUser: false } }
         );
@@ -500,7 +506,7 @@ describe('DashboardCanvasAttachment', () => {
     const { mockApi, mockFilterManager } = await renderDashboardCanvasAttachment();
     const nextFilters = [{ meta: { key: 'host.name' } }] as Filter[];
 
-    (mockApi.setFilters as jest.MockedFunction<typeof mockApi.setFilters>).mockClear();
+    (mockApi.setFilters as MockedFunction<typeof mockApi.setFilters>).mockClear();
     act(() => {
       getLatestSearchBarProps()?.onFiltersUpdated(nextFilters);
     });
@@ -534,7 +540,7 @@ describe('DashboardCanvasAttachment', () => {
   it('updates the preview filter pills when filters are created through the filter manager API', async () => {
     const { mockApi, mockFilterManager } = await renderDashboardCanvasAttachment();
     const nextFilters = [{ meta: { key: 'extension' } }] as Filter[];
-    const setFiltersMock = mockApi.setFilters as jest.Mock;
+    const setFiltersMock = mockApi.setFilters as Mock;
 
     setFiltersMock.mockClear();
     act(() => {
@@ -553,7 +559,7 @@ describe('DashboardCanvasAttachment', () => {
   it('updates the preview time range when timefilter emits (e.g. chart brush)', async () => {
     const { mockApi, mockTimefilter } = await renderDashboardCanvasAttachment();
     const nextTimeRange = { from: '2026-04-01T00:00:00Z', to: '2026-04-02T00:00:00Z' };
-    const setTimeRangeMock = mockApi.setTimeRange as jest.Mock;
+    const setTimeRangeMock = mockApi.setTimeRange as Mock;
 
     setTimeRangeMock.mockClear();
     act(() => {
@@ -652,7 +658,7 @@ describe('DashboardCanvasAttachment', () => {
       const { registerActionButtons, mockApi, checkSavedDashboardExist } =
         await renderDashboardCanvasAttachment({
           attachment: attachmentWithOrigin,
-          checkSavedDashboardExist: jest.fn().mockResolvedValue(true),
+          checkSavedDashboardExist: vi.fn().mockResolvedValue(true),
         });
 
       expect(checkSavedDashboardExist).toHaveBeenCalledWith('existing-dashboard-id');
@@ -679,7 +685,7 @@ describe('DashboardCanvasAttachment', () => {
       const { registerActionButtons, mockApi, checkSavedDashboardExist } =
         await renderDashboardCanvasAttachment({
           attachment: attachmentWithOrigin,
-          checkSavedDashboardExist: jest.fn().mockResolvedValue(false),
+          checkSavedDashboardExist: vi.fn().mockResolvedValue(false),
         });
 
       expect(checkSavedDashboardExist).toHaveBeenCalledWith('deleted-dashboard-id');
@@ -704,12 +710,12 @@ describe('DashboardCanvasAttachment', () => {
         ...mockAttachment,
         origin: 'managed-dashboard-id',
       };
-      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+      const updateOrigin = vi.fn().mockResolvedValue(undefined);
       const { registerActionButtons, mockApi } = await renderDashboardCanvasAttachment(
         {
           attachment: attachmentWithOrigin,
           updateOrigin,
-          checkSavedDashboardExist: jest.fn().mockResolvedValue(true),
+          checkSavedDashboardExist: vi.fn().mockResolvedValue(true),
         },
         { mockApiOverrides: { isManaged: true } }
       );
@@ -731,12 +737,12 @@ describe('DashboardCanvasAttachment', () => {
         ...mockAttachment,
         origin: 'read-only-dashboard-id',
       };
-      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+      const updateOrigin = vi.fn().mockResolvedValue(undefined);
       const { registerActionButtons, mockApi } = await renderDashboardCanvasAttachment(
         {
           attachment: attachmentWithOrigin,
           updateOrigin,
-          checkSavedDashboardExist: jest.fn().mockResolvedValue(true),
+          checkSavedDashboardExist: vi.fn().mockResolvedValue(true),
         },
         { mockApiOverrides: { isEditableByUser: false } }
       );
@@ -754,7 +760,7 @@ describe('DashboardCanvasAttachment', () => {
     });
 
     it('should not run save handlers when dashboard write access is unavailable', async () => {
-      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+      const updateOrigin = vi.fn().mockResolvedValue(undefined);
       const { registerActionButtons, mockApi } = await renderDashboardCanvasAttachment(
         {
           updateOrigin,
@@ -783,7 +789,7 @@ describe('DashboardCanvasAttachment', () => {
       const { registerActionButtons, mockApi, updateOrigin } =
         await renderDashboardCanvasAttachment({
           attachment: attachmentWithOrigin,
-          checkSavedDashboardExist: jest.fn().mockResolvedValue(true),
+          checkSavedDashboardExist: vi.fn().mockResolvedValue(true),
         });
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
@@ -804,11 +810,11 @@ describe('DashboardCanvasAttachment', () => {
         origin: 'deleted-dashboard-id',
       };
 
-      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+      const updateOrigin = vi.fn().mockResolvedValue(undefined);
       const { registerActionButtons, mockApi } = await renderDashboardCanvasAttachment({
         attachment: attachmentWithOrigin,
         updateOrigin,
-        checkSavedDashboardExist: jest.fn().mockResolvedValue(false),
+        checkSavedDashboardExist: vi.fn().mockResolvedValue(false),
       });
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
@@ -824,7 +830,7 @@ describe('DashboardCanvasAttachment', () => {
     });
 
     it('should run interactive save and update origin for new dashboard', async () => {
-      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+      const updateOrigin = vi.fn().mockResolvedValue(undefined);
       const { registerActionButtons, mockApi } = await renderDashboardCanvasAttachment({
         updateOrigin,
       });
@@ -850,7 +856,7 @@ describe('DashboardCanvasAttachment', () => {
 
       await renderDashboardCanvasAttachment({
         attachment: attachmentWithOrigin,
-        checkSavedDashboardExist: jest.fn().mockResolvedValue(true),
+        checkSavedDashboardExist: vi.fn().mockResolvedValue(true),
       });
 
       expect(DashboardRenderer).toHaveBeenCalledWith(
@@ -869,7 +875,7 @@ describe('DashboardCanvasAttachment', () => {
 
       await renderDashboardCanvasAttachment({
         attachment: attachmentWithOrigin,
-        checkSavedDashboardExist: jest.fn().mockResolvedValue(false),
+        checkSavedDashboardExist: vi.fn().mockResolvedValue(false),
       });
 
       expect(DashboardRenderer).toHaveBeenCalledWith(
@@ -881,15 +887,15 @@ describe('DashboardCanvasAttachment', () => {
     });
 
     it('renders a fallback callout when the dashboard renderer throws', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      (DashboardRenderer as jest.Mock).mockImplementation(() => {
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      (DashboardRenderer as Mock).mockImplementation(() => {
         throw new Error('invalid dashboard state');
       });
 
-      const registerActionButtons = jest.fn();
-      const updateOrigin = jest.fn().mockResolvedValue(undefined);
-      const closeCanvas = jest.fn();
-      const checkSavedDashboardExist = jest.fn().mockResolvedValue(false);
+      const registerActionButtons = vi.fn();
+      const updateOrigin = vi.fn().mockResolvedValue(undefined);
+      const closeCanvas = vi.fn();
+      const checkSavedDashboardExist = vi.fn().mockResolvedValue(false);
       const filterManager = createMockFilterManager();
       const timefilter = createMockTimefilter();
       const data = createMockData(filterManager, timefilter);
@@ -902,7 +908,7 @@ describe('DashboardCanvasAttachment', () => {
           updateOrigin={updateOrigin}
           closeCanvas={closeCanvas}
           checkSavedDashboardExist={checkSavedDashboardExist}
-          openSidebarConversation={jest.fn()}
+          openSidebarConversation={vi.fn()}
           canWriteDashboards
         />
       );
@@ -915,17 +921,17 @@ describe('DashboardCanvasAttachment', () => {
     });
 
     it('renders a fallback callout when dashboard state conversion fails', async () => {
-      const attachmentDataToDashboardStateMock = jest.mocked(
+      const attachmentDataToDashboardStateMock = vi.mocked(
         agentBuilderDashboardsCommon.attachmentDataToDashboardState
       );
       attachmentDataToDashboardStateMock.mockImplementation(() => {
         throw new Error('unsupported chart type');
       });
 
-      const registerActionButtons = jest.fn();
-      const updateOrigin = jest.fn().mockResolvedValue(undefined);
-      const closeCanvas = jest.fn();
-      const checkSavedDashboardExist = jest.fn().mockResolvedValue(false);
+      const registerActionButtons = vi.fn();
+      const updateOrigin = vi.fn().mockResolvedValue(undefined);
+      const closeCanvas = vi.fn();
+      const checkSavedDashboardExist = vi.fn().mockResolvedValue(false);
       const filterManager = createMockFilterManager();
       const timefilter = createMockTimefilter();
       const data = createMockData(filterManager, timefilter);
@@ -938,7 +944,7 @@ describe('DashboardCanvasAttachment', () => {
           updateOrigin={updateOrigin}
           closeCanvas={closeCanvas}
           checkSavedDashboardExist={checkSavedDashboardExist}
-          openSidebarConversation={jest.fn()}
+          openSidebarConversation={vi.fn()}
           canWriteDashboards
         />
       );

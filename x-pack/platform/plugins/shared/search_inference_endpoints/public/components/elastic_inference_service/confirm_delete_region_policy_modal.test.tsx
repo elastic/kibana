@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -18,11 +20,11 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('ConfirmDeleteRegionPolicyModal', () => {
-  const onConfirm = jest.fn();
-  const onCancel = jest.fn();
+  const onConfirm = vi.fn();
+  const onCancel = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderModal = (overrides: { isDeleting?: boolean } = {}) =>

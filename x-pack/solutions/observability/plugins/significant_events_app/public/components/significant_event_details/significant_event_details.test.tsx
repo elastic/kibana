@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,27 +15,30 @@ import type { SignificantEvent, SignalEntry } from '@kbn/significant-events-sche
 import { SignificantEventDetails } from './significant_event_details';
 
 const DISCOVER_HREF = '/app/discover#sig-event-query';
-const mockGetRedirectUrl = jest.fn(
+const mockGetRedirectUrl = vi.fn(
   (_params: DiscoverAppLocatorParams): string | undefined => DISCOVER_HREF
 );
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(() => ({
-    core: { http: {} },
-    services: {},
-    dependencies: {
-      start: {
-        share: {
-          url: {
-            locators: {
-              get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(() => ({
+        core: { http: {} },
+        services: {},
+        dependencies: {
+          start: {
+            share: {
+              url: {
+                locators: {
+                  get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+                },
+              },
             },
           },
         },
-      },
-    },
-  })),
-}));
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ESQL_QUERY =
   'FROM logs.checkout | WHERE @timestamp >= "2026-06-11T15:03:00Z" AND @timestamp <= "2026-06-11T15:10:00.000Z"';
@@ -87,7 +92,7 @@ const renderDetails = (event: SignificantEvent) =>
 
 describe('SignificantEventDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetRedirectUrl.mockReturnValue(DISCOVER_HREF);
   });
 

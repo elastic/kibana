@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useSelector } from 'react-redux-v7';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { useIsExperimentalFeatureEnabled } from './use_experimental_features';
 
-jest.mock('react-redux-v7');
-const useSelectorMock = useSelector as jest.Mock;
+vi.mock('react-redux-v7');
+const useSelectorMock = useSelector as Mock;
 const mockAppState = {
   app: {
     enableExperimental: {

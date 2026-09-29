@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { createUnsnoozeAction } from './unsnooze';
@@ -28,7 +30,7 @@ const makeDeps = () => ({
 });
 
 describe('createUnsnoozeAction', () => {
-  beforeEach(() => jest.restoreAllMocks());
+  beforeEach(() => vi.restoreAllMocks());
 
   it('compatible when at least one episode is snoozed', () => {
     expect(
@@ -65,10 +67,10 @@ describe('createUnsnoozeAction', () => {
 
   it('execute: POSTs unique-by-group UNSNOOZE items, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest
+    vi
       .spyOn(bulk, 'bulkUnsnoozeSeriesActions')
       .mockResolvedValue({ affected_count: 2, errors: [] });
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     await createUnsnoozeAction(deps).execute({
       episodes: [
         makeEpisode({ last_snooze_action: 'snooze' }),
@@ -86,8 +88,8 @@ describe('createUnsnoozeAction', () => {
 
   it('execute: error path calls notifications.toasts.addDanger with BULK_ERROR_TOAST', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkUnsnoozeSeriesActions').mockRejectedValue(new Error('network error'));
-    const onSuccess = jest.fn();
+    vi.spyOn(bulk, 'bulkUnsnoozeSeriesActions').mockRejectedValue(new Error('network error'));
+    const onSuccess = vi.fn();
     await createUnsnoozeAction(deps).execute({
       episodes: [makeEpisode({ last_snooze_action: 'snooze' })],
       onSuccess,

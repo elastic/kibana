@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { of } from 'rxjs';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 
-export const hasDataView = jest.fn();
-export const hasESData = jest.fn();
+export const hasDataView = vi.fn();
+export const hasESData = vi.fn();
 
 export const applicationStartMock = applicationServiceMock.createStartContract();
 applicationStartMock.capabilities = {
@@ -32,43 +34,49 @@ const locatorUrls: Record<string, string> = {
   MANAGEMENT_APP_LOCATOR: '/app/management',
 };
 
-jest.doMock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: applicationStartMock,
-      http: httpServiceMock.createStartContract(),
-      dataViews: {
-        hasData: {
-          hasESData,
-          hasDataView,
-        },
-      },
-      dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
-      share: {
-        url: {
-          locators: {
-            get: (id: string) => ({
-              useUrl: () => locatorUrls[id] ?? '',
-            }),
+vi.doMock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          application: applicationStartMock,
+          http: httpServiceMock.createStartContract(),
+          dataViews: {
+            hasData: {
+              hasESData,
+              hasDataView,
+            },
+          },
+          dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
+          share: {
+            url: {
+              locators: {
+                get: (id: string) => ({
+                  useUrl: () => locatorUrls[id] ?? '',
+                }),
+              },
+            },
+          },
+          uiSettings: { get: vi.fn() },
+          docLinks: {
+            links: {
+              kibana: {
+                guide: 'kibana_docs_url',
+              },
+            },
+          },
+          theme: {
+            theme$: of({ darkMode: false }),
           },
         },
-      },
-      uiSettings: { get: jest.fn() },
-      docLinks: {
-        links: {
-          kibana: {
-            guide: 'kibana_docs_url',
-          },
-        },
-      },
-      theme: {
-        theme$: of({ darkMode: false }),
-      },
-    },
-  }),
-  OverviewPageFooter: jest.fn().mockReturnValue(React.createElement(React.Fragment)),
-}));
+      }),
+      OverviewPageFooter: vi.fn().mockReturnValue(React.createElement(React.Fragment)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.doMock('../../lib/ui_metric', () => ({
-  trackUiMetric: jest.fn(),
-}));
+vi.doMock('../../lib/ui_metric', () => {
+      const mocked = {
+      trackUiMetric: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { MlApi } from './ml_api_service';
 import {
   loadMlServerInfo,
@@ -18,7 +20,7 @@ import {
 import mockMlInfoResponse from './__mocks__/ml_info_response.json';
 
 const mlApiServicesMock = {
-  mlInfo: jest.fn(() => Promise.resolve(mockMlInfoResponse)),
+  mlInfo: vi.fn(() => Promise.resolve(mockMlInfoResponse)),
 } as unknown as MlApi;
 
 describe('ml_server_info initial state', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import { fetchIndexCounts } from './fetch_index_counts';
@@ -12,7 +14,7 @@ import { fetchIndexCounts } from './fetch_index_counts';
 describe('fetchIndexCounts lib function', () => {
   const mockClient = {
     asCurrentUser: {
-      count: jest.fn().mockReturnValue({ count: 100 }),
+      count: vi.fn().mockReturnValue({ count: 100 }),
     },
   };
 

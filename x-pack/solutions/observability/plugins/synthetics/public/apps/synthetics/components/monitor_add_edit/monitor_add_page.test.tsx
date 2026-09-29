@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { render } from '../../utils/testing/rtl_helpers';
@@ -83,14 +85,14 @@ describe('MonitorAddPage', () => {
   });
 
   it('redirects to getting started page when no locations are available', async () => {
-    const useCloneMonitorSpy = jest
+    const useCloneMonitorSpy = vi
       .spyOn(useCloneMonitorModule, 'useCloneMonitor')
       .mockReturnValue({
         data: undefined,
         status: 'success' as any,
         loading: false,
         error: undefined,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
     let history: ReturnType<typeof render>['history'];
 
@@ -111,14 +113,14 @@ describe('MonitorAddPage', () => {
   });
 
   it('preserves return params when redirecting to getting started', async () => {
-    const useCloneMonitorSpy = jest
+    const useCloneMonitorSpy = vi
       .spyOn(useCloneMonitorModule, 'useCloneMonitor')
       .mockReturnValue({
         data: undefined,
         status: 'success' as any,
         loading: false,
         error: undefined,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
     const history = createMemoryHistory({
       initialEntries: ['/add-monitor?returnAppId=observabilityOnboarding&returnPath=%3F'],

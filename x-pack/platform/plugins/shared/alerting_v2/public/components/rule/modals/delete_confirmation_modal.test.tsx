@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -22,8 +24,8 @@ const renderModal = (
     <I18nProvider>
       <DeleteConfirmationModal
         ruleName={overrides.ruleName ?? 'Test Rule'}
-        onCancel={overrides.onCancel ?? jest.fn()}
-        onConfirm={overrides.onConfirm ?? jest.fn()}
+        onCancel={overrides.onCancel ?? vi.fn()}
+        onConfirm={overrides.onConfirm ?? vi.fn()}
         isLoading={overrides.isLoading ?? false}
       />
     </I18nProvider>
@@ -38,7 +40,7 @@ describe('DeleteConfirmationModal', () => {
   });
 
   it('calls onCancel when the cancel button is clicked', () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
     renderModal({ onCancel });
 
     fireEvent.click(screen.getByText('Cancel'));
@@ -47,7 +49,7 @@ describe('DeleteConfirmationModal', () => {
   });
 
   it('calls onConfirm when the confirm button is clicked', () => {
-    const onConfirm = jest.fn();
+    const onConfirm = vi.fn();
     renderModal({ onConfirm });
 
     fireEvent.click(screen.getByText('Delete'));
@@ -75,8 +77,8 @@ describe('DeleteConfirmationModal', () => {
         <I18nProvider>
           <DeleteConfirmationModal
             ruleCount={overrides.ruleCount ?? 5}
-            onCancel={overrides.onCancel ?? jest.fn()}
-            onConfirm={overrides.onConfirm ?? jest.fn()}
+            onCancel={overrides.onCancel ?? vi.fn()}
+            onConfirm={overrides.onConfirm ?? vi.fn()}
             isLoading={overrides.isLoading ?? false}
           />
         </I18nProvider>
@@ -102,7 +104,7 @@ describe('DeleteConfirmationModal', () => {
     });
 
     it('calls onConfirm when Delete button is clicked', () => {
-      const onConfirm = jest.fn();
+      const onConfirm = vi.fn();
       renderBulkModal({ onConfirm });
 
       fireEvent.click(screen.getByText('Delete'));
@@ -111,7 +113,7 @@ describe('DeleteConfirmationModal', () => {
     });
 
     it('calls onCancel when Cancel button is clicked', () => {
-      const onCancel = jest.fn();
+      const onCancel = vi.fn();
       renderBulkModal({ onCancel });
 
       fireEvent.click(screen.getByText('Cancel'));

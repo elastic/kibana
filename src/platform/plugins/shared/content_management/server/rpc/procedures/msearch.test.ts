@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
@@ -19,13 +21,13 @@ import { MSearchService } from '../../core/msearch';
 import { getMSearch } from './msearch';
 
 disableTransformsCache();
-const storageContextGetTransforms = jest.fn();
+const storageContextGetTransforms = vi.fn();
 const spy = () => storageContextGetTransforms;
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
 
-jest.mock('@kbn/object-versioning', () => {
-  const original = jest.requireActual('@kbn/object-versioning');
+vi.mock('@kbn/object-versioning', async () => {
+  const original = (await vi.importActual('@kbn/object-versioning'));
   return {
     ...original,
     getContentManagementServicesTransforms: (...args: any[]) => {
@@ -149,7 +151,7 @@ describe('RPC -> mSearch()', () => {
         },
       });
 
-      const mSearchSpy = jest.spyOn(mSearchService, 'search');
+      const mSearchSpy = vi.spyOn(mSearchService, 'search');
 
       const requestHandlerContext = 'mockedRequestHandlerContext';
       const ctx: any = {

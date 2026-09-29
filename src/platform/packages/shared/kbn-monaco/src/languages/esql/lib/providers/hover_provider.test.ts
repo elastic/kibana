@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { monaco } from '../../../../monaco_imports';
 import { ESQLLang, type ESQLDependencies } from '../../language';
 import { createDisposedTextModel, createField, createTextModel } from './test_helpers';
@@ -24,16 +27,16 @@ describe('hover_provider', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('basic hover functionality', () => {
     it('should return hover content from the language service', async () => {
       const queryText = 'from a | eval round(numberField)';
       const mockDeps: ESQLDependencies = {
-        getColumnsFor: jest.fn(async () => [createField('numberField', 'double')]),
+        getColumnsFor: vi.fn(async () => [createField('numberField', 'double')]),
         telemetry: {
-          onDecorationHoverShown: jest.fn(),
+          onDecorationHoverShown: vi.fn(),
         },
       };
 
@@ -54,7 +57,7 @@ describe('hover_provider', () => {
 
   describe('telemetry tracking', () => {
     it('should track decoration hover when word changes and decorations have hover messages', async () => {
-      const mockOnDecorationHoverShown = jest.fn();
+      const mockOnDecorationHoverShown = vi.fn();
       const mockDeps: ESQLDependencies = {
         telemetry: {
           onDecorationHoverShown: mockOnDecorationHoverShown,
@@ -75,8 +78,8 @@ describe('hover_provider', () => {
         },
       ];
 
-      (mockModel.getWordAtPosition as jest.Mock).mockReturnValue(mockWordAtPosition);
-      (mockModel.getDecorationsInRange as jest.Mock).mockReturnValue(mockDecorations);
+      (mockModel.getWordAtPosition as Mock).mockReturnValue(mockWordAtPosition);
+      (mockModel.getDecorationsInRange as Mock).mockReturnValue(mockDecorations);
 
       const hoverProvider = ESQLLang.getHoverProvider!(mockDeps);
       await hoverProvider.provideHover(mockModel, mockPosition, mockToken);
@@ -85,7 +88,7 @@ describe('hover_provider', () => {
     });
 
     it('should not track decoration hover when word has not changed', async () => {
-      const mockOnDecorationHoverShown = jest.fn();
+      const mockOnDecorationHoverShown = vi.fn();
       const mockDeps: ESQLDependencies = {
         telemetry: {
           onDecorationHoverShown: mockOnDecorationHoverShown,
@@ -106,8 +109,8 @@ describe('hover_provider', () => {
         },
       ];
 
-      (mockModel.getWordAtPosition as jest.Mock).mockReturnValue(mockWordAtPosition);
-      (mockModel.getDecorationsInRange as jest.Mock).mockReturnValue(mockDecorations);
+      (mockModel.getWordAtPosition as Mock).mockReturnValue(mockWordAtPosition);
+      (mockModel.getDecorationsInRange as Mock).mockReturnValue(mockDecorations);
 
       const hoverProvider = ESQLLang.getHoverProvider!(mockDeps);
 
@@ -121,7 +124,7 @@ describe('hover_provider', () => {
     });
 
     it('should track decoration hover when word changes to different word', async () => {
-      const mockOnDecorationHoverShown = jest.fn();
+      const mockOnDecorationHoverShown = vi.fn();
       const mockDeps: ESQLDependencies = {
         telemetry: {
           onDecorationHoverShown: mockOnDecorationHoverShown,
@@ -148,23 +151,23 @@ describe('hover_provider', () => {
         },
       ];
 
-      (mockModel.getDecorationsInRange as jest.Mock).mockReturnValue(mockDecorations);
+      (mockModel.getDecorationsInRange as Mock).mockReturnValue(mockDecorations);
 
       const hoverProvider = ESQLLang.getHoverProvider!(mockDeps);
 
       // First hover
-      (mockModel.getWordAtPosition as jest.Mock).mockReturnValue(mockWordAtPosition1);
+      (mockModel.getWordAtPosition as Mock).mockReturnValue(mockWordAtPosition1);
       await hoverProvider.provideHover(mockModel, mockPosition, mockToken);
       expect(mockOnDecorationHoverShown).toHaveBeenCalledTimes(1);
 
       // Second hover on different word
-      (mockModel.getWordAtPosition as jest.Mock).mockReturnValue(mockWordAtPosition2);
+      (mockModel.getWordAtPosition as Mock).mockReturnValue(mockWordAtPosition2);
       await hoverProvider.provideHover(mockModel, mockPosition, mockToken);
       expect(mockOnDecorationHoverShown).toHaveBeenCalledTimes(2);
     });
 
     it('should not track decoration hover when no decorations exist', async () => {
-      const mockOnDecorationHoverShown = jest.fn();
+      const mockOnDecorationHoverShown = vi.fn();
       const mockDeps: ESQLDependencies = {
         telemetry: {
           onDecorationHoverShown: mockOnDecorationHoverShown,
@@ -177,8 +180,8 @@ describe('hover_provider', () => {
         endColumn: 13,
       };
 
-      (mockModel.getWordAtPosition as jest.Mock).mockReturnValue(mockWordAtPosition);
-      (mockModel.getDecorationsInRange as jest.Mock).mockReturnValue([]);
+      (mockModel.getWordAtPosition as Mock).mockReturnValue(mockWordAtPosition);
+      (mockModel.getDecorationsInRange as Mock).mockReturnValue([]);
 
       const hoverProvider = ESQLLang.getHoverProvider!(mockDeps);
       await hoverProvider.provideHover(mockModel, mockPosition, mockToken);
@@ -187,7 +190,7 @@ describe('hover_provider', () => {
     });
 
     it('should not track decoration hover when decorations have no hover messages', async () => {
-      const mockOnDecorationHoverShown = jest.fn();
+      const mockOnDecorationHoverShown = vi.fn();
       const mockDeps: ESQLDependencies = {
         telemetry: {
           onDecorationHoverShown: mockOnDecorationHoverShown,
@@ -206,8 +209,8 @@ describe('hover_provider', () => {
         },
       ];
 
-      (mockModel.getWordAtPosition as jest.Mock).mockReturnValue(mockWordAtPosition);
-      (mockModel.getDecorationsInRange as jest.Mock).mockReturnValue(mockDecorations);
+      (mockModel.getWordAtPosition as Mock).mockReturnValue(mockWordAtPosition);
+      (mockModel.getDecorationsInRange as Mock).mockReturnValue(mockDecorations);
 
       const hoverProvider = ESQLLang.getHoverProvider!(mockDeps);
       await hoverProvider.provideHover(mockModel, mockPosition, mockToken);

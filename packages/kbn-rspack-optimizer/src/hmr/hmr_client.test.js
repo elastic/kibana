@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 /** @jest-environment jsdom */
 
 const Fs = require('fs');
@@ -38,7 +40,7 @@ const HMR_CLIENT_PATH = Path.resolve(__dirname, 'hmr_client.js');
 function loadHmrClient(overrides = {}) {
   const hot = {
     // Non-empty so the client does not fall through to window.location.reload()
-    check: jest.fn().mockResolvedValue(['./some-module.js']),
+    check: vi.fn().mockResolvedValue(['./some-module.js']),
     ...overrides.hot,
   };
 
@@ -61,7 +63,7 @@ describe('hmr_client', () => {
   let OriginalEventSource;
 
   beforeEach(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
 
     global.__KBN_HMR_PORT__ = 12345;
     global.__webpack_hash__ = 'hash-a';
@@ -77,31 +79,31 @@ describe('hmr_client', () => {
 
     eventSourceInstances = [];
     OriginalEventSource = global.EventSource;
-    global.EventSource = jest.fn().mockImplementation(() => {
+    global.EventSource = vi.fn().mockImplementation(() => {
       const inst = {
         onmessage: null,
         onerror: null,
-        close: jest.fn(),
+        close: vi.fn(),
       };
       eventSourceInstances.push(inst);
       return inst;
     });
 
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
 
     global.EventSource = OriginalEventSource;
     delete global.__KBN_HMR_PORT__;
     delete global.__webpack_hash__;
     delete global.window.__kbnHmrActive__;
 
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
 
     document.getElementById('__kbn_hmr_indicator__')?.remove();
     document.getElementById('__kbn_hmr_indicator_styles__')?.remove();

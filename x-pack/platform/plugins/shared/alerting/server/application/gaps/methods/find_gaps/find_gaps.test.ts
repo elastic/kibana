@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
@@ -29,9 +32,9 @@ import { RulesClient } from '../../../../rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { getRule } from '../../../rule/methods/get/get_rule';
-jest.mock('../../../rule/methods/get/get_rule');
+vi.mock('../../../rule/methods/get/get_rule');
 
-const mockedGetRule = getRule as jest.MockedFunction<typeof getRule>;
+const mockedGetRule = getRule as MockedFunction<typeof getRule>;
 
 const mockRule = {
   id: '1',
@@ -63,7 +66,7 @@ const mockRule = {
 describe('findGaps', () => {
   let rulesClient: RulesClient;
   let eventLogClient: ReturnType<typeof eventLogClientMock.create>;
-  let rulesClientParams: jest.Mocked<ConstructorOptions>;
+  let rulesClientParams: Mocked<ConstructorOptions>;
 
   const kibanaVersion = 'v8.0.0';
   const taskManager = taskManagerMock.createStart();
@@ -98,32 +101,32 @@ describe('findGaps', () => {
       actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
       spaceId: 'default',
       namespace: 'default',
-      getUserName: jest.fn(),
-      getProfileUid: jest.fn(),
-      createAPIKey: jest.fn(),
-      cloneAPIKey: jest.fn(),
+      getUserName: vi.fn(),
+      getProfileUid: vi.fn(),
+      createAPIKey: vi.fn(),
+      cloneAPIKey: vi.fn(),
       logger,
       internalSavedObjectsRepository,
       encryptedSavedObjectsClient: encryptedSavedObjects,
-      getActionsClient: jest.fn(),
-      getEventLogClient: jest.fn(),
+      getActionsClient: vi.fn(),
+      getEventLogClient: vi.fn(),
       kibanaVersion,
       auditLogger,
       maxScheduledPerMinute: 10000,
       minimumScheduleInterval: { value: '1m', enforce: false },
-      isAuthenticationTypeAPIKey: jest.fn(),
-      getAuthenticationAPIKey: jest.fn(),
-      getAlertIndicesAlias: jest.fn(),
+      isAuthenticationTypeAPIKey: vi.fn(),
+      getAuthenticationAPIKey: vi.fn(),
+      getAlertIndicesAlias: vi.fn(),
       alertsService: null,
       backfillClient,
-      isSystemAction: jest.fn(),
+      isSystemAction: vi.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       eventLogger,
       isServerless: false,
-    } as jest.Mocked<ConstructorOptions>;
+    } as Mocked<ConstructorOptions>;
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     rulesClient = new RulesClient(rulesClientParams);
     rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
 
@@ -140,7 +143,7 @@ describe('findGaps', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('authorization', () => {

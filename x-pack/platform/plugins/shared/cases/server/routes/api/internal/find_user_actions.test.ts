@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { findUserActionsRoute } from './find_user_actions';
 
 const userActionsMockData = {
@@ -161,22 +163,22 @@ const attachmentsMockData = {
 };
 
 describe('findUserActionsRoute', () => {
-  const response = { ok: jest.fn() };
+  const response = { ok: vi.fn() };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return user actions and latest attachments', async () => {
     const casesClientMock = {
       userActions: {
-        find: jest.fn().mockResolvedValue(userActionsMockData),
+        find: vi.fn().mockResolvedValue(userActionsMockData),
       },
       attachments: {
-        bulkGet: jest.fn().mockResolvedValue(attachmentsMockData),
+        bulkGet: vi.fn().mockResolvedValue(attachmentsMockData),
       },
     };
-    const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(casesClientMock) } };
+    const context = { cases: { getCasesClient: vi.fn().mockResolvedValue(casesClientMock) } };
     const request = {
       params: {
         case_id: 'my_fake_case_id',
@@ -231,16 +233,16 @@ describe('findUserActionsRoute', () => {
   describe('query param decoding', () => {
     const casesClientMock = () => ({
       userActions: {
-        find: jest.fn().mockResolvedValue({ userActions: [], page: 1, perPage: 10, total: 0 }),
+        find: vi.fn().mockResolvedValue({ userActions: [], page: 1, perPage: 10, total: 0 }),
       },
       attachments: {
-        bulkGet: jest.fn().mockResolvedValue({ attachments: [], errors: [] }),
+        bulkGet: vi.fn().mockResolvedValue({ attachments: [], errors: [] }),
       },
     });
 
     it('passes a single `types` query value through as an array', async () => {
       const client = casesClientMock();
-      const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(client) } };
+      const context = { cases: { getCasesClient: vi.fn().mockResolvedValue(client) } };
       const request = {
         params: { case_id: 'my_fake_case_id' },
         query: { types: 'action' },
@@ -256,7 +258,7 @@ describe('findUserActionsRoute', () => {
 
     it('passes multiple `types` query values through unchanged', async () => {
       const client = casesClientMock();
-      const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(client) } };
+      const context = { cases: { getCasesClient: vi.fn().mockResolvedValue(client) } };
       const request = {
         params: { case_id: 'my_fake_case_id' },
         query: { types: ['action', 'alert'] },
@@ -274,7 +276,7 @@ describe('findUserActionsRoute', () => {
 
     it('passes a single `authors` query value through as an array', async () => {
       const client = casesClientMock();
-      const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(client) } };
+      const context = { cases: { getCasesClient: vi.fn().mockResolvedValue(client) } };
       const request = {
         params: { case_id: 'my_fake_case_id' },
         // supertest/query-string encode a single-entry array as a plain string
@@ -291,7 +293,7 @@ describe('findUserActionsRoute', () => {
 
     it('passes multiple `authors` query values through unchanged', async () => {
       const client = casesClientMock();
-      const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(client) } };
+      const context = { cases: { getCasesClient: vi.fn().mockResolvedValue(client) } };
       const request = {
         params: { case_id: 'my_fake_case_id' },
         query: { authors: ['elastic', 'other'] },
@@ -309,7 +311,7 @@ describe('findUserActionsRoute', () => {
 
     it('omits `authors` from the decoded params when not provided', async () => {
       const client = casesClientMock();
-      const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(client) } };
+      const context = { cases: { getCasesClient: vi.fn().mockResolvedValue(client) } };
       const request = {
         params: { case_id: 'my_fake_case_id' },
         query: {},
@@ -327,13 +329,13 @@ describe('findUserActionsRoute', () => {
     const casesClientMock = {
       userActions: {
         // userActionsMockData.userActions[0] must have no commentId
-        find: jest.fn().mockResolvedValue({ userActions: [userActionsMockData.userActions[0]] }),
+        find: vi.fn().mockResolvedValue({ userActions: [userActionsMockData.userActions[0]] }),
       },
       attachments: {
-        bulkGet: jest.fn().mockResolvedValue(attachmentsMockData),
+        bulkGet: vi.fn().mockResolvedValue(attachmentsMockData),
       },
     };
-    const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(casesClientMock) } };
+    const context = { cases: { getCasesClient: vi.fn().mockResolvedValue(casesClientMock) } };
     const request = {
       params: {
         case_id: 'my_fake_case_id',
@@ -357,13 +359,13 @@ describe('findUserActionsRoute', () => {
     userActionsMockData.userActions[1].comment_id = userActionsMockData.userActions[2].comment_id;
     const casesClientMock = {
       userActions: {
-        find: jest.fn().mockResolvedValue(userActionsMockData),
+        find: vi.fn().mockResolvedValue(userActionsMockData),
       },
       attachments: {
-        bulkGet: jest.fn().mockResolvedValue(attachmentsMockData),
+        bulkGet: vi.fn().mockResolvedValue(attachmentsMockData),
       },
     };
-    const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(casesClientMock) } };
+    const context = { cases: { getCasesClient: vi.fn().mockResolvedValue(casesClientMock) } };
     const request = {
       params: {
         case_id: 'my_fake_case_id',

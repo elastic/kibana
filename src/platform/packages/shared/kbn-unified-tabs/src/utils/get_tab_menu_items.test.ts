@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getTabMenuItemsFn } from './get_tab_menu_items';
 import { getNewTabPropsForIndex } from '../hooks/use_new_tab_props';
 import type { TabMenuItem } from '../types';
@@ -26,9 +28,9 @@ describe('getTabMenuItemsFn', () => {
     const getTabMenuItems = getTabMenuItemsFn({
       tabsState: { items: [items[0]], selectedItem: items[0] },
       maxItemsCount: 10,
-      onDuplicate: jest.fn(),
-      onCloseOtherTabs: jest.fn(),
-      onCloseTabsToTheRight: jest.fn(),
+      onDuplicate: vi.fn(),
+      onCloseOtherTabs: vi.fn(),
+      onCloseTabsToTheRight: vi.fn(),
     });
     const menuItems = getTabMenuItems(items[0]);
     expect(menuItems.map(mapMenuItem)).toEqual([
@@ -41,9 +43,9 @@ describe('getTabMenuItemsFn', () => {
     const getTabMenuItems = getTabMenuItemsFn({
       tabsState: { items, selectedItem: items[0] },
       maxItemsCount: 10,
-      onDuplicate: jest.fn(),
-      onCloseOtherTabs: jest.fn(),
-      onCloseTabsToTheRight: jest.fn(),
+      onDuplicate: vi.fn(),
+      onCloseOtherTabs: vi.fn(),
+      onCloseTabsToTheRight: vi.fn(),
     });
     const menuItems = getTabMenuItems(items[0]);
     expect(menuItems.map(mapMenuItem)).toEqual([
@@ -59,9 +61,9 @@ describe('getTabMenuItemsFn', () => {
     const getTabMenuItems = getTabMenuItemsFn({
       tabsState: { items, selectedItem: items[0] },
       maxItemsCount: items.length,
-      onDuplicate: jest.fn(),
-      onCloseOtherTabs: jest.fn(),
-      onCloseTabsToTheRight: jest.fn(),
+      onDuplicate: vi.fn(),
+      onCloseOtherTabs: vi.fn(),
+      onCloseTabsToTheRight: vi.fn(),
     });
     const menuItems = getTabMenuItems(items[2]);
     expect(menuItems.map(mapMenuItem)).toEqual([
@@ -76,9 +78,9 @@ describe('getTabMenuItemsFn', () => {
     const getTabMenuItems = getTabMenuItemsFn({
       tabsState: { items, selectedItem: items[0] },
       maxItemsCount: 10,
-      onDuplicate: jest.fn(),
-      onCloseOtherTabs: jest.fn(),
-      onCloseTabsToTheRight: jest.fn(),
+      onDuplicate: vi.fn(),
+      onCloseOtherTabs: vi.fn(),
+      onCloseTabsToTheRight: vi.fn(),
     });
     const menuItems = getTabMenuItems(items[items.length - 1]);
     expect(menuItems.map(mapMenuItem)).toEqual([

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 
 import { buildResolveConnector } from '.';
@@ -14,14 +16,14 @@ const mockRequest = {} as KibanaRequest;
 describe('buildResolveConnector', () => {
   describe('when inference plugin is available', () => {
     it('uses inference.getConnectorById for EIS endpoint connectors (ids starting with .)', async () => {
-      const mockGetConnectorById = jest
+      const mockGetConnectorById = vi
         .fn()
         .mockResolvedValue({ name: 'EIS Connector', type: '.openai' });
-      const mockGetStartServices = jest.fn().mockResolvedValue({
+      const mockGetStartServices = vi.fn().mockResolvedValue({
         coreStart: {},
         pluginsStart: {
           actions: {
-            getActionsClientWithRequest: jest
+            getActionsClientWithRequest: vi
               .fn()
               .mockRejectedValue(new Error('should not be called')),
           },
@@ -44,14 +46,14 @@ describe('buildResolveConnector', () => {
     });
 
     it('uses inference.getConnectorById for regular stack connectors too', async () => {
-      const mockGetConnectorById = jest
+      const mockGetConnectorById = vi
         .fn()
         .mockResolvedValue({ name: 'Stack Connector', type: '.gen-ai' });
-      const mockGetStartServices = jest.fn().mockResolvedValue({
+      const mockGetStartServices = vi.fn().mockResolvedValue({
         coreStart: {},
         pluginsStart: {
           actions: {
-            getActionsClientWithRequest: jest
+            getActionsClientWithRequest: vi
               .fn()
               .mockRejectedValue(new Error('should not be called')),
           },
@@ -71,14 +73,14 @@ describe('buildResolveConnector', () => {
     });
 
     it('does not call actionsClient.get when inference is available', async () => {
-      const mockActionsClientGet = jest.fn().mockResolvedValue({ id: 'conn-1' });
-      const mockGetActionsClientWithRequest = jest
+      const mockActionsClientGet = vi.fn().mockResolvedValue({ id: 'conn-1' });
+      const mockGetActionsClientWithRequest = vi
         .fn()
         .mockResolvedValue({ get: mockActionsClientGet });
-      const mockGetConnectorById = jest
+      const mockGetConnectorById = vi
         .fn()
         .mockResolvedValue({ name: 'EIS Connector', type: '.openai' });
-      const mockGetStartServices = jest.fn().mockResolvedValue({
+      const mockGetStartServices = vi.fn().mockResolvedValue({
         coreStart: {},
         pluginsStart: {
           actions: { getActionsClientWithRequest: mockGetActionsClientWithRequest },
@@ -100,13 +102,13 @@ describe('buildResolveConnector', () => {
 
   describe('when inference plugin is not available', () => {
     it('falls back to actionsClient.get', async () => {
-      const mockActionsClientGet = jest
+      const mockActionsClientGet = vi
         .fn()
         .mockResolvedValue({ id: 'conn-1', name: 'Connector 1' });
-      const mockGetActionsClientWithRequest = jest
+      const mockGetActionsClientWithRequest = vi
         .fn()
         .mockResolvedValue({ get: mockActionsClientGet });
-      const mockGetStartServices = jest.fn().mockResolvedValue({
+      const mockGetStartServices = vi.fn().mockResolvedValue({
         coreStart: {},
         pluginsStart: {
           actions: { getActionsClientWithRequest: mockGetActionsClientWithRequest },
@@ -125,13 +127,13 @@ describe('buildResolveConnector', () => {
     });
 
     it('calls getActionsClientWithRequest with request', async () => {
-      const mockActionsClientGet = jest
+      const mockActionsClientGet = vi
         .fn()
         .mockResolvedValue({ id: 'conn-1', name: 'Connector 1' });
-      const mockGetActionsClientWithRequest = jest
+      const mockGetActionsClientWithRequest = vi
         .fn()
         .mockResolvedValue({ get: mockActionsClientGet });
-      const mockGetStartServices = jest.fn().mockResolvedValue({
+      const mockGetStartServices = vi.fn().mockResolvedValue({
         coreStart: {},
         pluginsStart: {
           actions: { getActionsClientWithRequest: mockGetActionsClientWithRequest },
@@ -151,11 +153,11 @@ describe('buildResolveConnector', () => {
 
     it('returns the connector from actionsClient.get', async () => {
       const expectedConnector = { id: 'conn-1', name: 'My Connector', actionTypeId: '.gen-ai' };
-      const mockActionsClientGet = jest.fn().mockResolvedValue(expectedConnector);
-      const mockGetActionsClientWithRequest = jest
+      const mockActionsClientGet = vi.fn().mockResolvedValue(expectedConnector);
+      const mockGetActionsClientWithRequest = vi
         .fn()
         .mockResolvedValue({ get: mockActionsClientGet });
-      const mockGetStartServices = jest.fn().mockResolvedValue({
+      const mockGetStartServices = vi.fn().mockResolvedValue({
         coreStart: {},
         pluginsStart: {
           actions: { getActionsClientWithRequest: mockGetActionsClientWithRequest },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { AddFilterButton } from './add_filter_btn';
@@ -13,7 +15,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 describe('AddFilterButton component', () => {
   it('provides all filter choices', () => {
     const component = shallowWithIntl(
-      <AddFilterButton newFilters={[]} onNewFilter={jest.fn()} alertFilters={{}} />
+      <AddFilterButton newFilters={[]} onNewFilter={vi.fn()} alertFilters={{}} />
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiPopover
@@ -79,7 +81,7 @@ describe('AddFilterButton component', () => {
       <AddFilterButton
         newFilters={['observer.geo.name', 'tags']}
         alertFilters={{ 'url.port': ['443', '80'] }}
-        onNewFilter={jest.fn()}
+        onNewFilter={vi.fn()}
       />
     );
     expect(component).toMatchInlineSnapshot(`
@@ -133,7 +135,7 @@ describe('AddFilterButton component', () => {
           'url.port': ['80'],
           'monitor.type': ['http'],
         }}
-        onNewFilter={jest.fn()}
+        onNewFilter={vi.fn()}
       />
     );
     expect(component).toMatchInlineSnapshot(`
@@ -169,7 +171,7 @@ describe('AddFilterButton component', () => {
   });
 
   it('filter select', () => {
-    const mockOnNewFilter = jest.fn();
+    const mockOnNewFilter = vi.fn();
     const component = mountWithIntl(
       <AddFilterButton newFilters={[]} alertFilters={{}} onNewFilter={mockOnNewFilter} />
     );

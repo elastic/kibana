@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   typicalSignalsQuery,
   typicalSignalsQueryAggs,
@@ -23,7 +25,7 @@ describe('searchAlerts', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ context } = requestContextMock.createTools());
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,8 +34,8 @@ describe('searchAlerts', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns the search response', async () => {

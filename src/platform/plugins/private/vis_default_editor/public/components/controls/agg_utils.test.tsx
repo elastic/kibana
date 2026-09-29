@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
@@ -71,9 +74,9 @@ const aggFilter = ['!top_hits', '!percentiles'];
 
 describe('Aggregations utils', () => {
   describe('useFallbackMetric', () => {
-    let setValue: jest.Mock;
+    let setValue: Mock;
     beforeEach(() => {
-      setValue = jest.fn();
+      setValue = vi.fn();
     });
 
     describe('should not call setValue', () => {
@@ -181,9 +184,9 @@ describe('Aggregations utils', () => {
   });
 
   describe('useValidation', () => {
-    let setValidity: jest.Mock;
+    let setValidity: Mock;
     beforeEach(() => {
-      setValidity = jest.fn();
+      setValidity = vi.fn();
     });
 
     test('should call setValidity', () => {

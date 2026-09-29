@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import type { Pagination } from '@elastic/eui';
@@ -21,10 +23,10 @@ import { mockGetFormattedComments } from '../mocks/comments.mock';
 import { securityLinkAnchorComponentMock } from '../mocks/security_link_component.mock';
 import { MockedShowValueListModal } from '../mocks/value_list_modal.mock';
 
-const onCreateExceptionListItem = jest.fn();
-const onDeleteException = jest.fn();
-const onEditExceptionItem = jest.fn();
-const onPaginationChange = jest.fn();
+const onCreateExceptionListItem = vi.fn();
+const onDeleteException = vi.fn();
+const onEditExceptionItem = vi.fn();
+const onPaginationChange = vi.fn();
 
 const pagination = { pageIndex: 0, pageSize: 0, totalItemCount: 0 };
 

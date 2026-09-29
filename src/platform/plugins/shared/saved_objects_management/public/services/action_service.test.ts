@@ -60,7 +60,7 @@ describe('SavedObjectsManagementActionRegistry', () => {
       const action = createAction('my-action');
       setup.register(action);
       expect(() => setup.register(action)).toThrowErrorMatchingInlineSnapshot(
-        `"Saved Objects Management Action with id 'my-action' already exists"`
+        `[Error: Saved Objects Management Action with id 'my-action' already exists]`
       );
     });
 

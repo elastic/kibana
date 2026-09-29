@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
@@ -26,21 +29,27 @@ import { withWorkflowExecutionIdentity } from '../service_account_execution';
 import { generateExecutionTaskScope } from '../utils';
 
 // Mock uuid
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mocked-uuid'),
-}));
-jest.mock('../utils', () => ({
-  generateExecutionTaskScope: jest.fn(() => [
-    'workflow',
-    'workflow:test-workflow-id',
-    'workflow:execution:test-execution-id',
-  ]),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn(() => 'mocked-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../utils', () => {
+      const mocked = {
+      generateExecutionTaskScope: vi.fn(() => [
+        'workflow',
+        'workflow:test-workflow-id',
+        'workflow:execution:test-execution-id',
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowTaskManager', () => {
-  let mockTaskManager: jest.Mocked<TaskManagerStartContract>;
+  let mockTaskManager: Mocked<TaskManagerStartContract>;
   let workflowTaskManager: WorkflowTaskManager;
-  let fakeRequest: jest.Mocked<KibanaRequest>;
+  let fakeRequest: Mocked<KibanaRequest>;
 
   const createMockWorkflowExecution = (
     overrides?: Partial<EsWorkflowExecution>
@@ -72,22 +81,22 @@ describe('WorkflowTaskManager', () => {
 
   beforeEach(() => {
     mockTaskManager = {
-      schedule: jest.fn(),
-      ensureScheduled: jest.fn(),
-      fetch: jest.fn(),
-      runSoon: jest.fn().mockResolvedValue({ id: 'resume-task', forced: false }),
-      removeIfExists: jest.fn().mockResolvedValue(undefined),
-      get: jest
+      schedule: vi.fn(),
+      ensureScheduled: vi.fn(),
+      fetch: vi.fn(),
+      runSoon: vi.fn().mockResolvedValue({ id: 'resume-task', forced: false }),
+      removeIfExists: vi.fn().mockResolvedValue(undefined),
+      get: vi
         .fn()
         .mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'missing')),
     } as any;
-    fakeRequest = jest.mocked({} as KibanaRequest);
+    fakeRequest = vi.mocked({} as KibanaRequest);
 
     workflowTaskManager = new WorkflowTaskManager(mockTaskManager);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it.each(['delay', 'idle timeout', 'immediate', 'wake', 'queued'] as const)(
@@ -418,7 +427,7 @@ describe('WorkflowTaskManager', () => {
         { request: fakeRequest, cloneApiKey: true }
       );
       // runAt must not be set — task runs at the next available slot
-      const scheduledTask = (mockTaskManager.ensureScheduled as jest.Mock).mock.calls[0][0];
+      const scheduledTask = (mockTaskManager.ensureScheduled as Mock).mock.calls[0][0];
       expect(scheduledTask.runAt).toBeUndefined();
     });
 
@@ -455,7 +464,7 @@ describe('WorkflowTaskManager', () => {
         fakeRequest,
       });
 
-      const scheduledTask = (mockTaskManager.ensureScheduled as jest.Mock).mock.calls[0][0];
+      const scheduledTask = (mockTaskManager.ensureScheduled as Mock).mock.calls[0][0];
       expect(scheduledTask.scope).toEqual([`workflow:execution:${executionId}`]);
       expect(scheduledTask.params.spaceId).toBe('space-x');
     });
@@ -509,7 +518,7 @@ describe('WorkflowTaskManager', () => {
         }),
       ]);
 
-      const scheduledIds = (mockTaskManager.ensureScheduled as jest.Mock).mock.calls.map(
+      const scheduledIds = (mockTaskManager.ensureScheduled as Mock).mock.calls.map(
         ([taskDef]) => taskDef.id
       );
       // Both calls must target the same stable id — never a random uuid
@@ -949,7 +958,7 @@ describe('WorkflowTaskManager', () => {
 
   describe('queued workflow run tasks', () => {
     it('scheduleDormantQueuedRunTask schedules workflow:run with queue TTL runAt and trigger request', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2025-08-05T20:00:00.000Z'));
+      vi.useFakeTimers().setSystemTime(new Date('2025-08-05T20:00:00.000Z'));
       const workflowExecution = createMockWorkflowExecution({
         triggeredBy: 'alert',
       });
@@ -971,7 +980,7 @@ describe('WorkflowTaskManager', () => {
         }),
         { request: fakeRequest, cloneApiKey: true }
       );
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('promoteQueuedRunTask calls runSoon on the dormant task id', async () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../../context_awareness/toolkit';
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 import {
@@ -92,7 +94,7 @@ const setup = async () => {
 
 describe('tabs actions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('openInNewTabExtPointAction', () => {
@@ -176,10 +178,10 @@ describe('tabs actions', () => {
       };
       const expectedToolkit = EMPTY_CONTEXT_AWARENESS_TOOLKIT;
 
-      jest
+      vi
         .spyOn(contextAwarenessToolkitModule, 'createContextAwarenessToolkit')
         .mockReturnValue(expectedToolkit);
-      const createTabRuntimeStateSpy = jest.spyOn(runtimeStateModule, 'createTabRuntimeState');
+      const createTabRuntimeStateSpy = vi.spyOn(runtimeStateModule, 'createTabRuntimeState');
 
       internalState.dispatch(
         internalStateActions.setTabs({
@@ -239,7 +241,7 @@ describe('tabs actions', () => {
     it('preserves auto-refresh when duplicating a tab', async () => {
       const { internalState, getCurrentTab, services } = await setup();
       const activeRefreshInterval = { pause: false, value: 5000 };
-      services.timefilter.getRefreshInterval = jest.fn(() => activeRefreshInterval);
+      services.timefilter.getRefreshInterval = vi.fn(() => activeRefreshInterval);
 
       const currentTab = getCurrentTab();
       const allTabs = selectAllTabs(internalState.getState());
@@ -264,7 +266,7 @@ describe('tabs actions', () => {
     it('pauses auto-refresh on a fresh tab', async () => {
       const { internalState, getCurrentTab, services } = await setup();
       const activeRefreshInterval = { pause: false, value: 5000 };
-      services.timefilter.getRefreshInterval = jest.fn(() => activeRefreshInterval);
+      services.timefilter.getRefreshInterval = vi.fn(() => activeRefreshInterval);
 
       const sourceTabId = getCurrentTab().id;
       const allTabs = selectAllTabs(internalState.getState());
@@ -325,7 +327,7 @@ describe('tabs actions', () => {
       await addNewTab({ tab: otherTab });
       await initializeSingleTab({ tabId: otherTab.id });
 
-      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      const setUrlStateSpy = vi.spyOn(stateStorageContainer, 'set');
 
       await switchToTab({ tabId: currentTab.id });
 

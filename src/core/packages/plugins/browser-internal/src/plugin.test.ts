@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.mocks';
 
 import { ContainerModule } from 'inversify';
@@ -37,7 +40,7 @@ function createManifest(
   } as DiscoveredPlugin;
 }
 
-let mockContainerModuleCallback: jest.MockedFunction<
+let mockContainerModuleCallback: MockedFunction<
   ConstructorParameters<typeof ContainerModule>[0]
 >;
 let pluginModule: ContainerModule;
@@ -50,21 +53,21 @@ beforeEach(() => {
   mockPlugin.setup.mockClear();
   mockPlugin.start.mockClear();
   mockPlugin.stop.mockClear();
-  mockContainerModuleCallback = jest.fn();
+  mockContainerModuleCallback = vi.fn();
   pluginModule = new ContainerModule(mockContainerModuleCallback);
   plugin = new PluginWrapper(createManifest('plugin-a'), opaqueId, initializerContext);
 });
 
 describe('PluginWrapper', () => {
   test('`setup` fails if plugin.setup is not a function', () => {
-    mockInitializer.mockReturnValueOnce({ start: jest.fn() } as any);
+    mockInitializer.mockReturnValueOnce({ start: vi.fn() } as any);
     expect(() => plugin.setup({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
       `"Instance of plugin \\"plugin-a\\" does not define \\"setup\\" function."`
     );
   });
 
   test('`setup` fails if plugin.start is not a function', () => {
-    mockInitializer.mockReturnValueOnce({ setup: jest.fn() } as any);
+    mockInitializer.mockReturnValueOnce({ setup: vi.fn() } as any);
     expect(() => plugin.setup({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
       `"Instance of plugin \\"plugin-a\\" does not define \\"start\\" function."`
     );
@@ -122,12 +125,12 @@ describe('PluginWrapper', () => {
 
     let startDependenciesResolved = false;
     mockInitializer.mockReturnValueOnce({
-      setup: jest.fn(),
-      start: jest.fn(() => {
+      setup: vi.fn(),
+      start: vi.fn(() => {
         expect(startDependenciesResolved).toBe(false);
         return pluginStartContract;
       }),
-      stop: jest.fn(),
+      stop: vi.fn(),
     });
     await plugin.setup({} as any, {} as any);
     const context = { any: 'thing' } as any;
@@ -172,7 +175,7 @@ describe('PluginWrapper', () => {
   });
 
   test('`stop` does not fail if plugin.stop does not exist', async () => {
-    mockInitializer.mockReturnValueOnce({ setup: jest.fn(), start: jest.fn() } as any);
+    mockInitializer.mockReturnValueOnce({ setup: vi.fn(), start: vi.fn() } as any);
     await plugin.setup({} as any, {} as any);
     await expect(plugin.stop()).resolves.toBeUndefined();
   });

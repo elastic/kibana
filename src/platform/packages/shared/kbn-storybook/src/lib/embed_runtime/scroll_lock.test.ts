@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { isHostScrollLock, preventHostScrollLock } from './scroll_lock';
 
 // Verbatim from `react-remove-scroll-bar`, which `EuiFocusTrap` mounts for `scrollLock`. A rename
@@ -49,7 +51,7 @@ describe('isHostScrollLock', () => {
 });
 
 describe('preventHostScrollLock', () => {
-  const observe = jest.fn();
+  const observe = vi.fn();
   let notify: MutationCallback | undefined;
 
   beforeEach(() => {

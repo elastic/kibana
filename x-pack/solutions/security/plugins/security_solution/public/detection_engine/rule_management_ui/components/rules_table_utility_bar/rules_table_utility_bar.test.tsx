@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 
@@ -13,7 +16,7 @@ import { TestProviders } from '../../../../common/mock';
 import { useRulesTableContextMock } from '../rules_table/rules_table/__mocks__/rules_table_context';
 import { useRulesTableContext } from '../rules_table/rules_table/rules_table_context';
 
-jest.mock('../rules_table/rules_table/rules_table_context');
+vi.mock('../rules_table/rules_table/rules_table_context');
 
 describe('RulesTableUtilityBar', () => {
   it('renders RulesTableUtilityBar total rules and selected rules', () => {
@@ -24,14 +27,14 @@ describe('RulesTableUtilityBar', () => {
       total: 21,
     };
     rulesTableContext.state.selectedRuleIds = ['testId'];
-    (useRulesTableContext as jest.Mock).mockReturnValue(rulesTableContext);
+    (useRulesTableContext as Mock).mockReturnValue(rulesTableContext);
 
     const wrapper = mount(
       <TestProviders>
         <RulesTableUtilityBar
           canBulkEdit
-          onGetBulkItemsPopoverContent={jest.fn()}
-          onToggleSelectAll={jest.fn()}
+          onGetBulkItemsPopoverContent={vi.fn()}
+          onToggleSelectAll={vi.fn()}
         />
       </TestProviders>
     );
@@ -49,8 +52,8 @@ describe('RulesTableUtilityBar', () => {
       <TestProviders>
         <RulesTableUtilityBar
           canBulkEdit
-          onGetBulkItemsPopoverContent={jest.fn()}
-          onToggleSelectAll={jest.fn()}
+          onGetBulkItemsPopoverContent={vi.fn()}
+          onToggleSelectAll={vi.fn()}
         />
       </TestProviders>
     );
@@ -63,8 +66,8 @@ describe('RulesTableUtilityBar', () => {
       <TestProviders>
         <RulesTableUtilityBar
           canBulkEdit={false}
-          onGetBulkItemsPopoverContent={jest.fn()}
-          onToggleSelectAll={jest.fn()}
+          onGetBulkItemsPopoverContent={vi.fn()}
+          onToggleSelectAll={vi.fn()}
         />
       </TestProviders>
     );
@@ -74,14 +77,14 @@ describe('RulesTableUtilityBar', () => {
 
   it('invokes rules refetch on refresh action click', () => {
     const rulesTableContext = useRulesTableContextMock.create();
-    (useRulesTableContext as jest.Mock).mockReturnValue(rulesTableContext);
+    (useRulesTableContext as Mock).mockReturnValue(rulesTableContext);
 
     const wrapper = mount(
       <TestProviders>
         <RulesTableUtilityBar
           canBulkEdit
-          onGetBulkItemsPopoverContent={jest.fn()}
-          onToggleSelectAll={jest.fn()}
+          onGetBulkItemsPopoverContent={vi.fn()}
+          onToggleSelectAll={vi.fn()}
         />
       </TestProviders>
     );

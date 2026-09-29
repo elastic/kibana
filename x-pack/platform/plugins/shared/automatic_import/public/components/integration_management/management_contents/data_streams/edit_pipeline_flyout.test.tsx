@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,83 +14,95 @@ import { EditPipelineFlyout } from './edit_pipeline_flyout';
 import type { DataStreamResponse } from '../../../../../common';
 import type { GetDataStreamResultsResponse } from '../../../../common/lib/api';
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: jest.fn(({ value, onChange }) => (
-    <div>
-      <div data-test-subj="code-editor">{value}</div>
-      <button
-        type="button"
-        data-test-subj="code-editor-change"
-        onClick={() =>
-          onChange?.(
-            JSON.stringify(
-              {
-                processors: [
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: vi.fn(({ value, onChange }) => (
+        <div>
+          <div data-test-subj="code-editor">{value}</div>
+          <button
+            type="button"
+            data-test-subj="code-editor-change"
+            onClick={() =>
+              onChange?.(
+                JSON.stringify(
                   {
-                    set: {
-                      field: 'test.field',
-                      value: 'updated',
-                    },
+                    processors: [
+                      {
+                        set: {
+                          field: 'test.field',
+                          value: 'updated',
+                        },
+                      },
+                    ],
                   },
-                ],
-              },
-              null,
-              2
-            )
-          )
-        }
-      >
-        {'Change editor value'}
-      </button>
-      <button
-        type="button"
-        className="euiCodeBlock__copyButton"
-        data-test-subj="code-editor-copy"
-        aria-label="Copy"
-      >
-        {'Copy'}
-      </button>
-    </div>
-  )),
-}));
+                  null,
+                  2
+                )
+              )
+            }
+          >
+            {'Change editor value'}
+          </button>
+          <button
+            type="button"
+            className="euiCodeBlock__copyButton"
+            data-test-subj="code-editor-copy"
+            aria-label="Copy"
+          >
+            {'Copy'}
+          </button>
+        </div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetDataStreamResults = jest.fn();
-const mockMutateAsync = jest.fn();
-jest.mock('../../../../common', () => ({
-  useGetDataStreamResults: (integrationId: string, dataStreamId: string) =>
-    mockUseGetDataStreamResults(integrationId, dataStreamId),
-  useUpdateDataStreamPipeline: () => ({
-    updateDataStreamPipelineMutation: {
-      mutateAsync: mockMutateAsync,
-      isLoading: false,
-    },
-  }),
-}));
+const mockUseGetDataStreamResults = vi.fn();
+const mockMutateAsync = vi.fn();
+vi.mock('../../../../common', () => {
+      const mocked = {
+      useGetDataStreamResults: (integrationId: string, dataStreamId: string) =>
+        mockUseGetDataStreamResults(integrationId, dataStreamId),
+      useUpdateDataStreamPipeline: () => ({
+        updateDataStreamPipelineMutation: {
+          mutateAsync: mockMutateAsync,
+          isLoading: false,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSelectPipelineTab = jest.fn();
+const mockSelectPipelineTab = vi.fn();
 const mockUIState = {
   selectedPipelineTab: 'table' as 'table' | 'pipeline',
   selectPipelineTab: mockSelectPipelineTab,
 };
 
-jest.mock('../../contexts', () => ({
-  useUIState: () => mockUIState,
-}));
+vi.mock('../../contexts', () => {
+      const mocked = {
+      useUIState: () => mockUIState,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockReportCodeEditorCopyClicked = jest.fn();
-const mockReportPipelineEdited = jest.fn();
-const mockReportEditPipelineTabOpened = jest.fn();
-jest.mock('../../../telemetry_context', () => ({
-  useTelemetry: () => ({
-    sessionId: 'test-session-id',
-    reportDataStreamFlyoutOpened: jest.fn(),
-    reportEditDataStreamFlyoutOpened: jest.fn(),
-    reportAnalyzeLogsTriggered: jest.fn(),
-    reportEditPipelineTabOpened: mockReportEditPipelineTabOpened,
-    reportCodeEditorCopyClicked: mockReportCodeEditorCopyClicked,
-    reportPipelineEdited: mockReportPipelineEdited,
-  }),
-}));
+const mockReportCodeEditorCopyClicked = vi.fn();
+const mockReportPipelineEdited = vi.fn();
+const mockReportEditPipelineTabOpened = vi.fn();
+vi.mock('../../../telemetry_context', () => {
+      const mocked = {
+      useTelemetry: () => ({
+        sessionId: 'test-session-id',
+        reportDataStreamFlyoutOpened: vi.fn(),
+        reportEditDataStreamFlyoutOpened: vi.fn(),
+        reportAnalyzeLogsTriggered: vi.fn(),
+        reportEditPipelineTabOpened: mockReportEditPipelineTabOpened,
+        reportCodeEditorCopyClicked: mockReportCodeEditorCopyClicked,
+        reportPipelineEdited: mockReportPipelineEdited,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockDataStream = (overrides: Partial<DataStreamResponse> = {}): DataStreamResponse => ({
   dataStreamId: 'ds-1',
@@ -137,11 +151,11 @@ describe('EditPipelineFlyout', () => {
     integrationId: 'integration-123',
     integrationName: 'Test Integration',
     dataStream: createMockDataStream(),
-    onClose: jest.fn(),
+    onClose: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockMutateAsync.mockResolvedValue(createMockResults());
     mockReportCodeEditorCopyClicked.mockClear();
     mockUIState.selectedPipelineTab = 'table';
@@ -150,7 +164,7 @@ describe('EditPipelineFlyout', () => {
       isLoading: false,
       isError: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
   });
 
@@ -182,7 +196,7 @@ describe('EditPipelineFlyout', () => {
         isLoading: false,
         isError: false,
         error: null,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       render(<EditPipelineFlyout {...defaultProps} />);
@@ -207,7 +221,7 @@ describe('EditPipelineFlyout', () => {
         isLoading: true,
         isError: false,
         error: null,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       render(<EditPipelineFlyout {...defaultProps} />);
@@ -223,7 +237,7 @@ describe('EditPipelineFlyout', () => {
         isLoading: false,
         isError: true,
         error: new Error('Test error'),
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       render(<EditPipelineFlyout {...defaultProps} />);
@@ -320,7 +334,7 @@ describe('EditPipelineFlyout', () => {
         isLoading: false,
         isError: false,
         error: null,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       render(<EditPipelineFlyout {...defaultProps} />);
@@ -430,7 +444,7 @@ describe('EditPipelineFlyout', () => {
 
   describe('flyout controls', () => {
     it('should call onClose when flyout is closed', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       render(<EditPipelineFlyout {...defaultProps} onClose={onClose} />);
 
       const closeButton = screen.getByRole('button', { name: /close/i });
@@ -441,7 +455,7 @@ describe('EditPipelineFlyout', () => {
 
     it('should warn before closing when pipeline has unsaved changes', async () => {
       mockUIState.selectedPipelineTab = 'pipeline';
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       render(<EditPipelineFlyout {...defaultProps} onClose={onClose} />);
 
       await userEvent.click(screen.getByTestId('code-editor-change'));

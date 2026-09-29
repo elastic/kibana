@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import {
@@ -16,11 +18,11 @@ import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { MANAGEMENT_APP_ID, MAINTENANCE_WINDOWS_APP_ID } from '../../common';
 
-const mockNavigateTo = jest.fn();
-const mockGetAppUrl = jest.fn();
+const mockNavigateTo = vi.fn();
+const mockGetAppUrl = vi.fn();
 
-jest.mock('../utils/kibana_react', () => {
-  const originalModule = jest.requireActual('../utils/kibana_react');
+vi.mock('../utils/kibana_react', async () => {
+  const originalModule = (await vi.importActual('../utils/kibana_react'));
   return {
     ...originalModule,
     useKibana: () => {
@@ -39,7 +41,7 @@ let appMockRenderer: AppMockRenderer;
 
 describe('useNavigation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
   });
 

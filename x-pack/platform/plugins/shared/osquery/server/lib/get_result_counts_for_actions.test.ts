@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getResultCountsForActions } from './get_result_counts_for_actions';
 
@@ -19,7 +22,7 @@ const actionDataFallback = (spaceId: string) => ({
 
 const createMockEsClient = (searchResponse: object): ElasticsearchClient =>
   ({
-    search: jest.fn().mockResolvedValue(searchResponse),
+    search: vi.fn().mockResolvedValue(searchResponse),
   } as unknown as ElasticsearchClient);
 
 describe('getResultCountsForActions', () => {
@@ -189,10 +192,10 @@ describe('getResultCountsForActions', () => {
 
     expect(esClient.search).toHaveBeenCalledTimes(2);
 
-    const firstCallArgs = (esClient.search as jest.Mock).mock.calls[0][0];
+    const firstCallArgs = (esClient.search as Mock).mock.calls[0][0];
     expect(firstCallArgs.aggs.action_ids.terms.size).toBe(1000);
 
-    const secondCallArgs = (esClient.search as jest.Mock).mock.calls[1][0];
+    const secondCallArgs = (esClient.search as Mock).mock.calls[1][0];
     expect(secondCallArgs.aggs.action_ids.terms.size).toBe(500);
   });
 
@@ -200,7 +203,7 @@ describe('getResultCountsForActions', () => {
     const actionIds = Array.from({ length: 1500 }, (_, i) => `action-${i}`);
 
     const esClient = {
-      search: jest
+      search: vi
         .fn()
         .mockResolvedValueOnce({
           aggregations: {
@@ -285,7 +288,7 @@ describe('getResultCountsForActions', () => {
 
       await getResultCountsForActions(esClient, ['action-1'], 'my-space');
 
-      const query = (esClient.search as jest.Mock).mock.calls[0][0].query;
+      const query = (esClient.search as Mock).mock.calls[0][0].query;
       expect(query.bool.filter).toContainEqual({ terms: { action_id: ['action-1'] } });
       expect(query.bool.filter).toContainEqual({
         bool: {
@@ -301,7 +304,7 @@ describe('getResultCountsForActions', () => {
 
       await getResultCountsForActions(esClient, ['action-1'], 'default');
 
-      const query = (esClient.search as jest.Mock).mock.calls[0][0].query;
+      const query = (esClient.search as Mock).mock.calls[0][0].query;
       expect(query.bool.filter).toContainEqual({
         bool: {
           should: [
@@ -329,7 +332,7 @@ describe('getResultCountsForActions', () => {
 
       await getResultCountsForActions(esClient, ['action-1'], 'my-space');
 
-      const query = (esClient.search as jest.Mock).mock.calls[0][0].query;
+      const query = (esClient.search as Mock).mock.calls[0][0].query;
       expect(JSON.stringify(query)).toContain('space_id');
     });
   });

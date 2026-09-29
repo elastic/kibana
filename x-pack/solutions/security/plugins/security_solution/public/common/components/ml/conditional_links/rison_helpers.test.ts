@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { decodeRison, isRisonObject, isRegularString } from './rison_helpers';
 
 describe('rison_helpers', () => {
@@ -13,7 +15,7 @@ describe('rison_helpers', () => {
   const originalError = console.log;
   describe('#decodeRison', () => {
     beforeAll(() => {
-      console.log = jest.fn();
+      console.log = vi.fn();
     });
 
     afterAll(() => {

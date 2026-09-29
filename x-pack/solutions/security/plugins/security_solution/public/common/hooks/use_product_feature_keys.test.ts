@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useProductFeatureKeys } from './use_product_feature_keys';
 import { useKibana } from '../lib/kibana';
 import { BehaviorSubject } from 'rxjs';
 import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 
-jest.mock('../lib/kibana');
+vi.mock('../lib/kibana');
 
 describe('useProductFeatureKeys', () => {
-  const mockUseKibana = useKibana as jest.Mock;
+  const mockUseKibana = useKibana as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return empty Set when productFeatureKeys is null', () => {

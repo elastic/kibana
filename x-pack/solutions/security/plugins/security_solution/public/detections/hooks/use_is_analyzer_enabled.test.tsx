@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { useIsAnalyzerEnabled } from './use_is_analyzer_enabled';
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
@@ -18,7 +20,7 @@ const createHit = (flattened: Record<string, unknown>): DataTableRecord => ({
 
 describe('InvestigateInResolverAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('useIsAnalyzerEnabled', () => {

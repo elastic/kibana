@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
@@ -16,9 +19,9 @@ import { mockAttackDiscoverySchedule } from '../../../../mock/mock_attack_discov
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../../common/constants';
 
-jest.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/lib/kibana');
 
-const onSwitchChangeMock = jest.fn();
+const onSwitchChangeMock = vi.fn();
 
 const renderEnabledSchedule = (enabled = true) => {
   const column = createEnableColumn({
@@ -36,9 +39,9 @@ const renderEnabledSchedule = (enabled = true) => {
 
 describe('Enable Column', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -48,10 +51,10 @@ describe('Enable Column', () => {
           },
         },
         featureFlags: {
-          useBooleanValue: jest.fn().mockReturnValue(false),
+          useBooleanValue: vi.fn().mockReturnValue(false),
         },
         uiSettings: {
-          get: jest.fn().mockReturnValue(false),
+          get: vi.fn().mockReturnValue(false),
         },
       },
     });
@@ -92,7 +95,7 @@ describe('Enable Column', () => {
 
   describe('when disabled update capability', () => {
     beforeEach(() => {
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           application: {
             capabilities: {
@@ -102,10 +105,10 @@ describe('Enable Column', () => {
             },
           },
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(false),
+            useBooleanValue: vi.fn().mockReturnValue(false),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(false),
+            get: vi.fn().mockReturnValue(false),
           },
         },
       });
@@ -138,7 +141,7 @@ describe('Enable Column', () => {
 
   describe('when the workflows execute privilege is missing', () => {
     beforeEach(() => {
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           application: {
             capabilities: {
@@ -151,10 +154,10 @@ describe('Enable Column', () => {
             },
           },
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(true),
+            useBooleanValue: vi.fn().mockReturnValue(true),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(true),
+            get: vi.fn().mockReturnValue(true),
           },
         },
       });

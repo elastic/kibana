@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /**
  * Spike tests gating the io-ts → zod migration: they prove the platform tooling
  * that every zod route schema flows through handles `z.codec()`-based schemas
@@ -117,7 +119,7 @@ describe('OAS conversion × z.codec', () => {
   const buildRouters = (routes: Array<Record<string, unknown>>) => {
     const withDefaults = routes.map((route) => ({
       isVersioned: false,
-      handler: jest.fn(),
+      handler: vi.fn(),
       ...route,
     }));
     return [{ getRoutes: () => withDefaults }] as unknown as Parameters<

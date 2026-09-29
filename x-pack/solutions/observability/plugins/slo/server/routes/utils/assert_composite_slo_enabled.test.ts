@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { assertCompositeSloEnabled } from './assert_composite_slo_enabled';
 import type { FeatureFlagsRequestHandlerContext } from '@kbn/core-feature-flags-server';
 
@@ -13,7 +15,7 @@ describe('assertCompositeSloEnabled', () => {
     await expect(
       assertCompositeSloEnabled({
         featureFlags: {
-          getBooleanValue: jest.fn().mockResolvedValue(true),
+          getBooleanValue: vi.fn().mockResolvedValue(true),
         },
       } as unknown as { featureFlags: FeatureFlagsRequestHandlerContext })
     ).resolves.not.toThrow();
@@ -23,7 +25,7 @@ describe('assertCompositeSloEnabled', () => {
     await expect(
       assertCompositeSloEnabled({
         featureFlags: {
-          getBooleanValue: jest.fn().mockResolvedValue(false),
+          getBooleanValue: vi.fn().mockResolvedValue(false),
         },
       } as unknown as { featureFlags: FeatureFlagsRequestHandlerContext })
     ).rejects.toMatchObject({ output: { statusCode: 404 } });

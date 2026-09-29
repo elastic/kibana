@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AttacksTreemapPanel } from './attacks_treemap_panel';
@@ -13,41 +16,53 @@ import { useEuiComboBoxReset } from '../../../../common/components/use_combo_box
 import { useUserData } from '../../user_info';
 
 // Mock dependencies
-jest.mock('./common/use_attacks_kpi_state', () => ({
-  useAttacksKpiState: jest.fn(),
-}));
+vi.mock('./common/use_attacks_kpi_state', () => {
+      const mocked = {
+      useAttacksKpiState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/components/use_combo_box_reset', () => ({
-  useEuiComboBoxReset: jest.fn(),
-}));
+vi.mock('../../../../common/components/use_combo_box_reset', () => {
+      const mocked = {
+      useEuiComboBoxReset: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../alerts_kpis/alerts_treemap_panel', () => ({
-  AlertsTreemapPanel: jest.fn(() => <div data-test-subj="alerts-treemap-panel" />),
-}));
+vi.mock('../../alerts_kpis/alerts_treemap_panel', () => {
+      const mocked = {
+      AlertsTreemapPanel: vi.fn(() => <div data-test-subj="alerts-treemap-panel" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../user_info', () => ({
-  useUserData: jest.fn(),
-}));
+vi.mock('../../user_info', () => {
+      const mocked = {
+      useUserData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AttacksTreemapPanel', () => {
-  const mockSetStackBy0 = jest.fn();
-  const mockSetStackBy1 = jest.fn();
-  const mockSetIsExpanded = jest.fn();
-  const mockUseUserData = useUserData as jest.Mock;
+  const mockSetStackBy0 = vi.fn();
+  const mockSetStackBy1 = vi.fn();
+  const mockSetIsExpanded = vi.fn();
+  const mockUseUserData = useUserData as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useAttacksKpiState as jest.Mock).mockReturnValue({
+    (useAttacksKpiState as Mock).mockReturnValue({
       stackBy0: 'test.field.0',
       setStackBy0: mockSetStackBy0,
       stackBy1: 'test.field.1',
       setStackBy1: mockSetStackBy1,
     });
 
-    (useEuiComboBoxReset as jest.Mock).mockReturnValue({
+    (useEuiComboBoxReset as Mock).mockReturnValue({
       comboboxRef: { current: null },
-      setComboboxInputRef: jest.fn(),
+      setComboboxInputRef: vi.fn(),
     });
 
     mockUseUserData.mockReturnValue([{ signalIndexName: 'test-index' }]);

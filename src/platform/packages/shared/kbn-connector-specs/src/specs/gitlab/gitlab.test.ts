@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { Gitlab } from './gitlab';
 
-const mockGet = jest.fn();
-const mockPost = jest.fn();
-const mockPut = jest.fn();
-const mockDelete = jest.fn();
+const mockGet = vi.fn();
+const mockPost = vi.fn();
+const mockPut = vi.fn();
+const mockDelete = vi.fn();
 
 const mockContext = {
   client: { get: mockGet, post: mockPost, put: mockPut, delete: mockDelete },
@@ -44,7 +46,7 @@ const pageResponse = <T>(items: T[], total?: number) => ({
 
 describe('Gitlab connector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGet.mockResolvedValue(pageResponse([]));
     mockPost.mockResolvedValue({ data: {} });
     mockPut.mockResolvedValue({ data: {} });

@@ -5,39 +5,47 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 
-const mockHttpGet = jest.fn();
+const mockHttpGet = vi.fn();
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn().mockImplementation(async ({ queryKey, queryFn, opts }) => {
-    try {
-      const res = await queryFn();
-      return Promise.resolve(res);
-    } catch (e) {
-      // opts.onError(e);
-    }
-  }),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: vi.fn().mockImplementation(async ({ queryKey, queryFn, opts }) => {
+        try {
+          const res = await queryFn();
+          return Promise.resolve(res);
+        } catch (e) {
+          // opts.onError(e);
+        }
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      http: {
-        get: mockHttpGet,
-      },
-      notifications: {
-        toasts: {
-          addError: jest.fn(),
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          http: {
+            get: mockHttpGet,
+          },
+          notifications: {
+            toasts: {
+              addError: vi.fn(),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useFetchSynonymsSet Hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return synonyms set', async () => {
@@ -56,7 +64,7 @@ describe('useFetchSynonymsSet Hook', () => {
       ],
     };
     mockHttpGet.mockReturnValue(synonyms);
-    const { useFetchSynonymsSets } = jest.requireActual('./use_fetch_synonyms_sets');
+    const { useFetchSynonymsSets } = (await vi.importActual('./use_fetch_synonyms_sets'));
 
     const { result } = renderHook(() => useFetchSynonymsSets());
     await waitFor(() => expect(result.current).resolves.toStrictEqual(synonyms));

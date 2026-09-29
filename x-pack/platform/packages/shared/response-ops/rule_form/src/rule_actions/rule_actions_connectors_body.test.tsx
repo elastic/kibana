@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,24 +20,30 @@ import {
   getConnector,
 } from '../common/test_utils/actions_test_utils';
 
-jest.mock('../hooks', () => ({
-  useRuleFormState: jest.fn(),
-  useRuleFormDispatch: jest.fn(),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useRuleFormState: vi.fn(),
+      useRuleFormDispatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils', () => ({
-  getDefaultParams: jest.fn(),
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      getDefaultParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
+const { useRuleFormState, useRuleFormDispatch } = (await vi.importMock('../hooks'));
 
 const mockConnectors: ActionConnector[] = [getConnector('1'), getConnector('2')];
 
 const mockActionTypes: ActionType[] = [getActionType('1'), getActionType('2')];
 
-const mockOnSelectConnector = jest.fn();
+const mockOnSelectConnector = vi.fn();
 
-const mockOnChange = jest.fn();
+const mockOnChange = vi.fn();
 
 describe('ruleActionsConnectorsBody', () => {
   beforeEach(() => {
@@ -61,7 +69,7 @@ describe('ruleActionsConnectorsBody', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call onSelectConnector when connector is clicked', async () => {

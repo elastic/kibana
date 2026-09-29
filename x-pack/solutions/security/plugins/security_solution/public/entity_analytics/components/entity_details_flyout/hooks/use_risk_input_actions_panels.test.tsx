@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
@@ -19,7 +22,7 @@ import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 
 const casesServiceMock = casesPluginMock.createStartContract();
-const mockCanUseCases = jest.fn();
+const mockCanUseCases = vi.fn();
 
 const mockedCasesServices = {
   ...casesServiceMock,
@@ -29,9 +32,9 @@ const mockedCasesServices = {
   },
 };
 
-const mockReportEvent = jest.fn();
-jest.mock('../../../../common/lib/kibana/kibana_react', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana/kibana_react');
+const mockReportEvent = vi.fn();
+vi.mock('../../../../common/lib/kibana/kibana_react', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana/kibana_react'));
   return {
     ...original,
     useKibana: () => ({
@@ -47,15 +50,15 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => {
   };
 });
 
-jest.mock(
+vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_send_bulk_to_timeline'
 );
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../common/hooks/is_in_security_app');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/hooks/is_in_security_app');
 
-const mockUseSendBulkToTimeline = useSendBulkToTimeline as jest.Mock;
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
-const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
+const mockUseSendBulkToTimeline = useSendBulkToTimeline as Mock;
+const mockUseUserPrivileges = useUserPrivileges as Mock;
+const mockUseIsInSecurityApp = useIsInSecurityApp as Mock;
 
 const TestMenu = ({ panels }: { panels: EuiContextMenuPanelDescriptor[] }) => (
   <EuiContextMenu initialPanelId={0} panels={panels} />
@@ -75,7 +78,7 @@ const customRender = (alerts = [alertInputDataMock]) => {
 
 describe('useRiskInputActionsPanels', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCanUseCases.mockReturnValue({
       create: true,
       createComment: true,
@@ -83,7 +86,7 @@ describe('useRiskInputActionsPanels', () => {
       update: false,
     });
     mockUseSendBulkToTimeline.mockReturnValue({
-      sendBulkEventsToTimelineHandler: jest.fn(),
+      sendBulkEventsToTimelineHandler: vi.fn(),
     });
     mockUseUserPrivileges.mockReturnValue({
       timelinePrivileges: { read: false },
@@ -162,7 +165,7 @@ describe('useRiskInputActionsPanels', () => {
   });
 
   it('calls sendBulkEventsToTimelineHandler when timeline action is clicked', () => {
-    const mockSendBulkEvents = jest.fn();
+    const mockSendBulkEvents = vi.fn();
     mockUseSendBulkToTimeline.mockReturnValue({
       sendBulkEventsToTimelineHandler: mockSendBulkEvents,
     });
@@ -170,7 +173,7 @@ describe('useRiskInputActionsPanels', () => {
       timelinePrivileges: { read: true },
     });
 
-    const closePopover = jest.fn();
+    const closePopover = vi.fn();
     const { result } = renderHook(
       () => useRiskInputActionsPanels([alertInputDataMock], closePopover),
       {

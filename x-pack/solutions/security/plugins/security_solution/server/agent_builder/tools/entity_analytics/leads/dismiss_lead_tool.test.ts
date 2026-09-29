@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
@@ -20,11 +23,11 @@ import { dismissLeadTool, SECURITY_DISMISS_LEAD_TOOL_ID } from './dismiss_lead_t
 import { createLeadDataClient } from '../../../../lib/entity_analytics/lead_generation/lead_data_client';
 import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
 
-jest.mock('../../../../lib/entity_analytics/lead_generation/lead_data_client');
-jest.mock('../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges');
+vi.mock('../../../../lib/entity_analytics/lead_generation/lead_data_client');
+vi.mock('../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges');
 
-const mockCreateLeadDataClient = createLeadDataClient as jest.Mock;
-const mockGetUserLeadPrivileges = getUserLeadPrivileges as jest.Mock;
+const mockCreateLeadDataClient = createLeadDataClient as Mock;
+const mockGetUserLeadPrivileges = getUserLeadPrivileges as Mock;
 
 const mockExperimentalFeatures = { leadGenerationEnabled: true } as ExperimentalFeatures;
 
@@ -35,15 +38,15 @@ describe('dismissLeadTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const tool = dismissLeadTool(mockCore, mockLogger, mockExperimentalFeatures);
 
-  let mockDismissLead: jest.Mock;
+  let mockDismissLead: Mock;
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   const handlerContext = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
-    mockDismissLead = jest.fn().mockResolvedValue(true);
+    mockDismissLead = vi.fn().mockResolvedValue(true);
     mockCreateLeadDataClient.mockReturnValue({ dismissLead: mockDismissLead });
     mockGetUserLeadPrivileges.mockResolvedValue({
       has_read_permissions: true,
@@ -94,10 +97,10 @@ describe('dismissLeadTool', () => {
   describe('handler — HITL', () => {
     it('shows lead title in confirmation message when title is provided', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.unprompted,
       });
-      (ctx.prompts.askForConfirmation as jest.Mock).mockReturnValue({ type: 'confirmation' });
+      (ctx.prompts.askForConfirmation as Mock).mockReturnValue({ type: 'confirmation' });
 
       await tool.handler({ id: LEAD_ID, title: LEAD_TITLE }, ctx);
 
@@ -111,10 +114,10 @@ describe('dismissLeadTool', () => {
 
     it('falls back to lead id in confirmation message when title is not provided', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.unprompted,
       });
-      (ctx.prompts.askForConfirmation as jest.Mock).mockReturnValue({ type: 'confirmation' });
+      (ctx.prompts.askForConfirmation as Mock).mockReturnValue({ type: 'confirmation' });
 
       await tool.handler({ id: LEAD_ID }, ctx);
 
@@ -127,10 +130,10 @@ describe('dismissLeadTool', () => {
 
     it('returns a confirmation prompt when status is unprompted', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.unprompted,
       });
-      (ctx.prompts.askForConfirmation as jest.Mock).mockReturnValue({ type: 'confirmation' });
+      (ctx.prompts.askForConfirmation as Mock).mockReturnValue({ type: 'confirmation' });
 
       const result = await tool.handler({ id: LEAD_ID }, ctx);
 
@@ -140,7 +143,7 @@ describe('dismissLeadTool', () => {
 
     it('returns cancelled error when status is rejected', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.rejected,
       });
 
@@ -157,7 +160,7 @@ describe('dismissLeadTool', () => {
   describe('handler — accepted', () => {
     const acceptedCtx = () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
       return ctx;
@@ -199,10 +202,10 @@ describe('dismissLeadTool', () => {
   describe('handler — telemetry', () => {
     it('does not report telemetry while only asking for confirmation', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.unprompted,
       });
-      (ctx.prompts.askForConfirmation as jest.Mock).mockReturnValue({ type: 'confirmation' });
+      (ctx.prompts.askForConfirmation as Mock).mockReturnValue({ type: 'confirmation' });
 
       await tool.handler({ id: LEAD_ID }, ctx);
 
@@ -211,7 +214,7 @@ describe('dismissLeadTool', () => {
 
     it('reports userConfirmationOutcome=accepted and success=true after a successful dismiss', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
 
@@ -232,7 +235,7 @@ describe('dismissLeadTool', () => {
 
     it('reports userConfirmationOutcome=rejected when the user declines the prompt', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.rejected,
       });
 
@@ -277,7 +280,7 @@ describe('dismissLeadTool', () => {
     it('reports success=false when the lead is not found', async () => {
       mockDismissLead.mockResolvedValue(false);
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
 
@@ -299,7 +302,7 @@ describe('dismissLeadTool', () => {
     it('reports success=false and errorMessage when the dismiss call throws', async () => {
       mockDismissLead.mockRejectedValue(new Error('boom'));
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
 

@@ -7,27 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 /* eslint-disable dot-notation */
 import * as rxOp from 'rxjs';
 import moment from 'moment';
 import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
 import { UsageCountersService } from './usage_counters_service';
 
-jest.mock('./rollups', () => ({
-  ...jest.requireActual('./rollups'),
-  // used by `rollUsageCountersIndices` to determine if a counter is beyond the retention period
-  registerUsageCountersRollups: jest.fn(),
-}));
+vi.mock('./rollups', async () => {
+      const mocked = {
+      ...(await vi.importActual('./rollups')),
+      // used by `rollUsageCountersIndices` to determine if a counter is beyond the retention period
+      registerUsageCountersRollups: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { registerUsageCountersRollups } from './rollups';
 
-const registerUsageCountersRollupsMock = registerUsageCountersRollups as jest.MockedFunction<
+const registerUsageCountersRollupsMock = registerUsageCountersRollups as MockedFunction<
   typeof registerUsageCountersRollups
 >;
 
 // optionally advance test timers after a delay
 const tickWithDelay = (delay = 1) => {
-  jest.useRealTimers();
+  vi.useRealTimers();
   return new Promise((resolve) => setTimeout(resolve, delay));
 };
 
@@ -40,11 +46,11 @@ describe('UsageCountersService', () => {
   const coreStart = coreMock.createStart();
 
   beforeEach(() => {
-    jest.spyOn(moment, 'now').mockReturnValue(mockNow);
+    vi.spyOn(moment, 'now').mockReturnValue(mockNow);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('stores data in cache during setup', async () => {
@@ -88,7 +94,7 @@ describe('UsageCountersService', () => {
     const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDurationMs });
 
     const mockRepository = coreStart.savedObjects.createInternalRepository();
-    const mockIncrementCounter = jest.fn();
+    const mockIncrementCounter = vi.fn();
     mockRepository.incrementCounter = mockIncrementCounter;
 
     coreStart.savedObjects.createInternalRepository.mockReturnValue(mockRepository);
@@ -130,12 +136,12 @@ describe('UsageCountersService', () => {
     const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDurationMs });
 
     const mockRepository = coreStart.savedObjects.createInternalRepository();
-    const mockIncrementCounter = jest.fn().mockResolvedValue('success');
+    const mockIncrementCounter = vi.fn().mockResolvedValue('success');
     mockRepository.incrementCounter = mockIncrementCounter;
 
     coreStart.savedObjects.createInternalRepository.mockReturnValue(mockRepository);
     const { createUsageCounter } = usageCountersService.setup(coreSetup);
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const usageCounter = createUsageCounter('test-counter');
 
     usageCounter.incrementCounter({ counterName: 'counterA' });
@@ -144,7 +150,7 @@ describe('UsageCountersService', () => {
     usageCountersService.start(coreStart);
     usageCounter.incrementCounter({ counterName: 'counterA' });
     usageCounter.incrementCounter({ counterName: 'counterB' });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
     expect(mockIncrementCounter).toHaveBeenCalledTimes(2);
     expect(mockIncrementCounter.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -202,7 +208,7 @@ describe('UsageCountersService', () => {
 
       const mockRepository = coreStart.savedObjects.createInternalRepository();
       const mockError = new Error('failed');
-      const mockIncrementCounter = jest.fn().mockImplementation((_, key) => {
+      const mockIncrementCounter = vi.fn().mockImplementation((_, key) => {
         switch (key) {
           case 'test-counter:counterA:count:server:20210409':
             throw mockError;
@@ -217,13 +223,13 @@ describe('UsageCountersService', () => {
 
       coreStart.savedObjects.createInternalRepository.mockReturnValue(mockRepository);
       const { createUsageCounter } = usageCountersService.setup(coreSetup);
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       const usageCounter = createUsageCounter('test-counter');
 
       usageCountersService.start(coreStart);
       usageCounter.incrementCounter({ counterName: 'counterA' });
       usageCounter.incrementCounter({ counterName: 'counterB' });
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
 
       // wait for retries to kick in on next scheduler call
       await tickWithDelay(5000);
@@ -254,7 +260,7 @@ describe('UsageCountersService', () => {
     });
 
     const mockRepository = coreStart.savedObjects.createInternalRepository();
-    const mockIncrementCounter = jest.fn().mockImplementation((_data, key, counter) => {
+    const mockIncrementCounter = vi.fn().mockImplementation((_data, key, counter) => {
       expect(counter).toHaveLength(1);
       return { key, incrementBy: counter[0].incrementBy };
     });
@@ -264,16 +270,16 @@ describe('UsageCountersService', () => {
     coreStart.savedObjects.createInternalRepository.mockReturnValue(mockRepository);
 
     const { createUsageCounter } = usageCountersService.setup(coreSetup);
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const usageCounter = createUsageCounter('test-counter');
 
     usageCountersService.start(coreStart);
     usageCounter.incrementCounter({ counterName: 'counterA' });
     usageCounter.incrementCounter({ counterName: 'counterA' });
-    jest.advanceTimersByTime(30000);
+    vi.advanceTimersByTime(30000);
 
     usageCounter.incrementCounter({ counterName: 'counterA' });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     // wait for debounce to kick in on next scheduler call
     await tickWithDelay();

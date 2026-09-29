@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { CasesConnectorExecutor } from './cases_connector_executor';
@@ -53,24 +56,24 @@ import type { CasesConnectorRunParams } from './types';
 import { INITIAL_ORACLE_RECORD_COUNTER } from './constants';
 import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
-jest.mock('./cases_oracle_service');
-jest.mock('./cases_service');
-jest.mock('@kbn/datemath');
+vi.mock('./cases_oracle_service');
+vi.mock('./cases_service');
+vi.mock('@kbn/datemath');
 
-const CasesOracleServiceMock = CasesOracleService as jest.Mock<CasesOracleService>;
-const CasesServiceMock = CasesService as jest.Mock<CasesService>;
-const dateMathMock = dateMath as jest.Mocked<typeof dateMath>;
+const CasesOracleServiceMock = CasesOracleService as Mock<CasesOracleService>;
+const CasesServiceMock = CasesService as Mock<CasesService>;
+const dateMathMock = dateMath as Mocked<typeof dateMath>;
 
 describe('CasesConnectorExecutor', () => {
-  const mockGetRecordId = jest.fn();
-  const mockBulkGetRecords = jest.fn();
-  const mockBulkCreateRecords = jest.fn();
-  const mockBulkUpdateRecord = jest.fn();
-  const mockGetCaseId = jest.fn();
+  const mockGetRecordId = vi.fn();
+  const mockBulkGetRecords = vi.fn();
+  const mockBulkCreateRecords = vi.fn();
+  const mockBulkUpdateRecord = vi.fn();
+  const mockGetCaseId = vi.fn();
 
-  const getCasesClient = jest.fn();
+  const getCasesClient = vi.fn();
   const casesClientMock = createCasesClientMock();
-  const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
   const actionsClient = actionsClientMock.create();
 
   let connectorExecutor: CasesConnectorExecutor;
@@ -98,7 +101,7 @@ describe('CasesConnectorExecutor', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resetCounters();
 
     // @ts-expect-error: other properties are not required
@@ -124,7 +127,7 @@ describe('CasesConnectorExecutor', () => {
     casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [] });
     casesClientMock.cases.bulkUpdate.mockResolvedValue([]);
     casesClientMock.attachments.bulkCreate.mockResolvedValue(cases[0]);
-    casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+    casesClientMock.configure.get = vi.fn().mockResolvedValue([]);
     casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
       fieldDefinitions: [],
       total: 0,
@@ -1075,7 +1078,7 @@ describe('CasesConnectorExecutor', () => {
           ];
 
           it('creates new case with template', async () => {
-            casesClientMock.configure.get = jest.fn().mockResolvedValue(mockConfiguration);
+            casesClientMock.configure.get = vi.fn().mockResolvedValue(mockConfiguration);
 
             casesClientMock.cases.bulkGet.mockResolvedValue({
               cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
@@ -1183,7 +1186,7 @@ describe('CasesConnectorExecutor', () => {
               },
             ];
 
-            casesClientMock.configure.get = jest.fn().mockResolvedValue(newConfiguration);
+            casesClientMock.configure.get = vi.fn().mockResolvedValue(newConfiguration);
 
             casesClientMock.cases.bulkGet.mockResolvedValue({
               cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
@@ -1270,7 +1273,7 @@ fields: []
           };
 
           beforeEach(() => {
-            casesClientMock.templates.getTemplate = jest.fn().mockResolvedValue(v2TemplateSO);
+            casesClientMock.templates.getTemplate = vi.fn().mockResolvedValue(v2TemplateSO);
           });
 
           it('creates a new case using v2 template fields when templateVersion is set', async () => {
@@ -1331,7 +1334,7 @@ fields: []
 `,
               },
             };
-            casesClientMock.templates.getTemplate = jest
+            casesClientMock.templates.getTemplate = vi
               .fn()
               .mockResolvedValue(v2TemplateWithConnectorSettingsAssignees);
             actionsClient.get.mockResolvedValue({ name: 'My Jira' } as Awaited<
@@ -1384,7 +1387,7 @@ fields: []
 `,
               },
             };
-            casesClientMock.templates.getTemplate = jest
+            casesClientMock.templates.getTemplate = vi
               .fn()
               .mockResolvedValue(v2TemplateWithAssignees);
 
@@ -1430,7 +1433,7 @@ fields: []
 `,
               },
             };
-            casesClientMock.templates.getTemplate = jest
+            casesClientMock.templates.getTemplate = vi
               .fn()
               .mockResolvedValue(v2TemplateWithEmptyUid);
 
@@ -1464,7 +1467,7 @@ fields: []
 `,
               },
             };
-            casesClientMock.templates.getTemplate = jest
+            casesClientMock.templates.getTemplate = vi
               .fn()
               .mockResolvedValue(v2TemplateWithPartialSettings);
 
@@ -1503,7 +1506,7 @@ fields: []
 `,
               },
             };
-            casesClientMock.templates.getTemplate = jest
+            casesClientMock.templates.getTemplate = vi
               .fn()
               .mockResolvedValue(v2TemplateWithDeletedConnector);
             // actionsClient.get rejects by default (see beforeEach).
@@ -1674,7 +1677,7 @@ fields: []
               isTemplatesEnabled: false,
             });
 
-            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+            casesClientMock.configure.get = vi.fn().mockResolvedValue([
               {
                 owner: params.owner,
                 customFields: [],
@@ -1736,7 +1739,7 @@ fields: []
           });
 
           it('falls back to default fields when v2 template is not found, logs warn', async () => {
-            casesClientMock.templates.getTemplate = jest.fn().mockResolvedValue(undefined);
+            casesClientMock.templates.getTemplate = vi.fn().mockResolvedValue(undefined);
 
             casesClientMock.cases.bulkGet.mockResolvedValue({
               cases: [],
@@ -1757,7 +1760,7 @@ fields: []
           });
 
           it('does not call templates.getTemplate when templateVersion is null (v1 path)', async () => {
-            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+            casesClientMock.configure.get = vi.fn().mockResolvedValue([
               {
                 owner: params.owner,
                 customFields: [],
@@ -1782,7 +1785,7 @@ fields: []
           });
 
           it('populates required custom fields with defaults on the v2 path', async () => {
-            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+            casesClientMock.configure.get = vi.fn().mockResolvedValue([
               {
                 owner: params.owner,
                 customFields: [
@@ -1851,7 +1854,7 @@ fields:
 `,
               },
             };
-            casesClientMock.templates.getTemplate = jest
+            casesClientMock.templates.getTemplate = vi
               .fn()
               .mockResolvedValue(v2TemplateWithInlineFields);
 
@@ -1889,7 +1892,7 @@ fields:
 `,
               },
             };
-            casesClientMock.templates.getTemplate = jest
+            casesClientMock.templates.getTemplate = vi
               .fn()
               .mockResolvedValue(v2TemplateWithRefField);
 
@@ -1987,7 +1990,7 @@ metadata:
             };
 
             beforeEach(() => {
-              casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              casesClientMock.configure.get = vi.fn().mockResolvedValue([
                 {
                   owner: params.owner,
                   customFields: [linkedLegacyField, unlinkedLegacyField],
@@ -2152,7 +2155,7 @@ fields:
             };
 
             beforeEach(() => {
-              casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              casesClientMock.configure.get = vi.fn().mockResolvedValue([
                 {
                   owner: params.owner,
                   customFields: [],
@@ -2263,7 +2266,7 @@ fields: []
 
           it('uses extractObservables from the space configuration', async () => {
             mockCaseNotFound();
-            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+            casesClientMock.configure.get = vi.fn().mockResolvedValue([
               {
                 owner: SECURITY_SOLUTION_OWNER,
                 customFields: [],
@@ -2286,7 +2289,7 @@ fields: []
 
           it('falls back to the owner default when no space configuration exists', async () => {
             mockCaseNotFound();
-            casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+            casesClientMock.configure.get = vi.fn().mockResolvedValue([]);
 
             await connectorExecutor.execute({
               ...params,
@@ -2302,7 +2305,7 @@ fields: []
 
           it('falls back to true for securitySolution when no space configuration exists', async () => {
             mockCaseNotFound();
-            casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+            casesClientMock.configure.get = vi.fn().mockResolvedValue([]);
 
             await connectorExecutor.execute({
               ...params,
@@ -2318,7 +2321,7 @@ fields: []
 
           it('uses space config extractObservables: false when explicitly set', async () => {
             mockCaseNotFound();
-            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+            casesClientMock.configure.get = vi.fn().mockResolvedValue([
               {
                 owner: SECURITY_SOLUTION_OWNER,
                 customFields: [],
@@ -2379,7 +2382,7 @@ fields: []
           ];
 
           it('creates non existing cases with required custom fields correctly', async () => {
-            casesClientMock.configure.get = jest.fn().mockResolvedValue(mockConfiguration);
+            casesClientMock.configure.get = vi.fn().mockResolvedValue(mockConfiguration);
 
             casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[2]] });
             casesClientMock.cases.bulkGet.mockResolvedValue({
@@ -2453,7 +2456,7 @@ fields: []
           });
 
           it('creates new cases with required custom fields if reopenClosedCases=false and there are closed cases', async () => {
-            casesClientMock.configure.get = jest.fn().mockResolvedValue(mockConfiguration);
+            casesClientMock.configure.get = vi.fn().mockResolvedValue(mockConfiguration);
 
             casesClientMock.cases.bulkGet.mockResolvedValue({
               cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
@@ -2946,7 +2949,7 @@ fields: []
         });
 
         it('throws an error if there is an error when fetching configurations', async () => {
-          casesClientMock.configure.get = jest
+          casesClientMock.configure.get = vi
             .fn()
             .mockRejectedValue(new CaseError('get configuration error'));
 
@@ -3106,7 +3109,7 @@ fields: []
    */
   describe('Without grouping', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       // @ts-expect-error: other properties are not required
       CasesOracleServiceMock.mockImplementation(() => {

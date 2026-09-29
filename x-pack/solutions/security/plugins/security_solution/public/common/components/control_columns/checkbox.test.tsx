@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import type { RowCheckBoxProps } from './checkbox';
 import { HeaderCheckBox, RowCheckBox } from './checkbox';
@@ -18,7 +20,7 @@ describe('checkbox control column', () => {
       ariaRowindex: 1,
       checked: false,
       columnValues: 'test-columnValues',
-      onRowSelected: jest.fn(),
+      onRowSelected: vi.fn(),
       eventId: 'test-event-id',
       loadingEventIds: [],
     };
@@ -30,7 +32,7 @@ describe('checkbox control column', () => {
     });
 
     test('calls onRowSelected when checked', () => {
-      const onRowSelected = jest.fn();
+      const onRowSelected = vi.fn();
       const { getByTestId } = render(
         <RowCheckBox {...defaultProps} onRowSelected={onRowSelected} />
       );
@@ -46,7 +48,7 @@ describe('checkbox control column', () => {
       browserFields: {},
       columnHeaders: [],
       isSelectAllChecked: true,
-      onSelectAll: jest.fn(),
+      onSelectAll: vi.fn(),
       showEventsSelect: true,
       showSelectAllCheckbox: true,
       sort: [],
@@ -55,7 +57,7 @@ describe('checkbox control column', () => {
     };
 
     test('calls onSelectAll when checked', () => {
-      const onSelectAll = jest.fn();
+      const onSelectAll = vi.fn();
       const { getByTestId } = render(
         <HeaderCheckBox {...defaultProps} onSelectAll={onSelectAll} />
       );

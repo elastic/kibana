@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -14,7 +16,7 @@ import { CaseCallouts } from './case_callouts';
 
 describe('CaseCallouts ', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders', () => {

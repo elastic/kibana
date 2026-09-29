@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fromKueryExpression } from '@kbn/es-query';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
@@ -25,7 +27,7 @@ describe('getGapsSummaryByRuleIds', () => {
   let rulesClient: RulesClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     rulesClient = new RulesClient(rulesClientParams);
     rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
     authorization.getFindAuthorizationFilter.mockResolvedValue({

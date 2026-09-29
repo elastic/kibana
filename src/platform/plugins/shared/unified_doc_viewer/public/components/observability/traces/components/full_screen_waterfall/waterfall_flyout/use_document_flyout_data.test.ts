@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useDocumentFlyoutData } from './use_document_flyout_data';
 import type { TraceDocFlyoutType } from '../../../common/types';
@@ -31,16 +33,22 @@ const mockLogHit = buildDataTableRecord(
   dataViewMock
 );
 
-const mockUseSpanFlyoutData = jest.fn();
-const mockUseLogFlyoutData = jest.fn();
+const mockUseSpanFlyoutData = vi.fn();
+const mockUseLogFlyoutData = vi.fn();
 
-jest.mock('./span_flyout', () => ({
-  useSpanFlyoutData: (params: any) => mockUseSpanFlyoutData(params),
-}));
+vi.mock('./span_flyout', () => {
+      const mocked = {
+      useSpanFlyoutData: (params: any) => mockUseSpanFlyoutData(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./logs_flyout', () => ({
-  useLogFlyoutData: (params: any) => mockUseLogFlyoutData(params),
-}));
+vi.mock('./logs_flyout', () => {
+      const mocked = {
+      useLogFlyoutData: (params: any) => mockUseLogFlyoutData(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useDocumentFlyoutData', () => {
   const traceId = 'test-trace-id';
@@ -48,7 +56,7 @@ describe('useDocumentFlyoutData', () => {
   const docIndex = 'logs-*';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseSpanFlyoutData.mockReturnValue({
       hit: null,

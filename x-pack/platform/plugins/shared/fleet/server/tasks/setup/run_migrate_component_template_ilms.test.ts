@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 
 import {
@@ -17,28 +20,28 @@ import { appContextService } from '../../services';
 
 import { runMigrateComponentTemplateILMs } from './run_migrate_component_template_ilms';
 
-jest.mock('../../services/epm/elasticsearch/template/default_settings', () => {
+vi.mock('../../services/epm/elasticsearch/template/default_settings', () => {
   return {
     DATA_STREAM_TYPES_DEPRECATED_ILMS: ['logs', 'metrics', 'synthetics'],
-    getILMMigrationStatus: jest.fn(),
-    getILMPolicies: jest.fn(),
-    saveILMMigrationChanges: jest.fn(),
+    getILMMigrationStatus: vi.fn(),
+    getILMPolicies: vi.fn(),
+    saveILMMigrationChanges: vi.fn(),
   };
 });
 
 describe('runMigrateComponentTemplateILMs', () => {
   const { signal } = new AbortController();
   const logger = {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   } as unknown as Logger;
-  const getILMMigrationStatusMock = getILMMigrationStatus as jest.Mock;
-  const saveILMMigrationChangesMock = saveILMMigrationChanges as jest.Mock;
-  const getILMPoliciesMock = getILMPolicies as jest.Mock;
-  const getComponentTemplateMock = jest.fn();
-  const putComponentTemplateMock = jest.fn();
+  const getILMMigrationStatusMock = getILMMigrationStatus as Mock;
+  const saveILMMigrationChangesMock = saveILMMigrationChanges as Mock;
+  const getILMPoliciesMock = getILMPolicies as Mock;
+  const getComponentTemplateMock = vi.fn();
+  const putComponentTemplateMock = vi.fn();
   const esClientMock = {
     cluster: {
       getComponentTemplate: getComponentTemplateMock,
@@ -47,15 +50,15 @@ describe('runMigrateComponentTemplateILMs', () => {
   } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    jest.spyOn(appContextService, 'getInternalUserESClient').mockReturnValue(esClientMock);
+    vi.spyOn(appContextService, 'getInternalUserESClient').mockReturnValue(esClientMock);
 
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({} as any);
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue({} as any);
   });
 
   it('should do nothing if ILM policies are disabled', async () => {
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue({
       internal: {
         disableILMPolicies: true,
       },

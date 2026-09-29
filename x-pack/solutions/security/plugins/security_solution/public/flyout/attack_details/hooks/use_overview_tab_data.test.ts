@@ -5,25 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useOverviewTabData } from './use_overview_tab_data';
 import { useAttackDetailsContext } from '../context';
 import { getField } from '../../document_details/shared/utils';
 
-jest.mock('../context', () => ({
-  useAttackDetailsContext: jest.fn(),
-}));
+vi.mock('../context', () => {
+      const mocked = {
+      useAttackDetailsContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../document_details/shared/utils', () => ({
-  getField: jest.fn(),
-}));
+vi.mock('../../document_details/shared/utils', () => {
+      const mocked = {
+      getField: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useOverviewTabData', () => {
-  const getFieldsDataMock = jest.fn();
+  const getFieldsDataMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAttackDetailsContext as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAttackDetailsContext as Mock).mockReturnValue({
       getFieldsData: getFieldsDataMock,
     });
   });
@@ -44,7 +53,7 @@ describe('useOverviewTabData', () => {
       }
     });
 
-    (getField as jest.Mock).mockImplementation((value) => value);
+    (getField as Mock).mockImplementation((value) => value);
 
     const { result } = renderHook(() => useOverviewTabData());
 
@@ -56,7 +65,7 @@ describe('useOverviewTabData', () => {
 
   it('should default to empty strings when getField returns null/undefined', () => {
     getFieldsDataMock.mockReturnValue(null);
-    (getField as jest.Mock).mockReturnValue(undefined);
+    (getField as Mock).mockReturnValue(undefined);
 
     const { result } = renderHook(() => useOverviewTabData());
 
@@ -78,7 +87,7 @@ describe('useOverviewTabData', () => {
       return null;
     });
 
-    (getField as jest.Mock).mockImplementation((value) => value);
+    (getField as Mock).mockImplementation((value) => value);
 
     const { result } = renderHook(() => useOverviewTabData());
 
@@ -90,7 +99,7 @@ describe('useOverviewTabData', () => {
 
   it('should call getFieldsData with the expected field names', () => {
     getFieldsDataMock.mockReturnValue(null);
-    (getField as jest.Mock).mockImplementation((value) => value);
+    (getField as Mock).mockImplementation((value) => value);
 
     renderHook(() => useOverviewTabData());
 
@@ -110,8 +119,8 @@ describe('useOverviewTabData', () => {
 
   it('should return originalAlertIds when attack is provided', () => {
     getFieldsDataMock.mockReturnValue(null);
-    (getField as jest.Mock).mockReturnValue(undefined);
-    (useAttackDetailsContext as jest.Mock).mockReturnValue({
+    (getField as Mock).mockReturnValue(undefined);
+    (useAttackDetailsContext as Mock).mockReturnValue({
       getFieldsData: getFieldsDataMock,
       attack: {
         alertIds: ['alert-1', 'alert-2'],

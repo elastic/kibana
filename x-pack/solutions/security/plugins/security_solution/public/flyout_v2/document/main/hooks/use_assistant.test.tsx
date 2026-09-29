@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import type { UseAssistantParams, UseAssistantResult } from './use_assistant';
@@ -13,8 +16,8 @@ import { mockDataFormattedForFieldBrowser } from '../../../../flyout/document_de
 import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 
-jest.mock('../../../../assistant/use_assistant_availability');
-jest.mock('@kbn/elastic-assistant');
+vi.mock('../../../../assistant/use_assistant_availability');
+vi.mock('@kbn/elastic-assistant');
 
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 const isAlert = true;
@@ -23,12 +26,12 @@ const renderUseAssistant = () =>
   renderHook((props: UseAssistantParams) => useAssistant(props), {
     initialProps: { dataFormattedForFieldBrowser, isAlert },
   });
-const useAssistantOverlayMock = useAssistantOverlay as jest.Mock;
+const useAssistantOverlayMock = useAssistantOverlay as Mock;
 
 describe('useAssistant', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useAssistantAvailability).mockReturnValue({
+    vi.clearAllMocks();
+    vi.mocked(useAssistantAvailability).mockReturnValue({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: true,
       hasConnectorsAllPrivilege: true,
@@ -39,11 +42,11 @@ describe('useAssistant', () => {
       isAssistantVisible: true,
     });
     useAssistantOverlayMock.mockReturnValue({
-      showAssistantOverlay: jest.fn,
+      showAssistantOverlay: vi.fn,
       promptContextId: '123',
     });
 
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    (useAssistantContext as Mock).mockReturnValue({
       basePromptContexts: [
         {
           category: 'alert',
@@ -81,7 +84,7 @@ describe('useAssistant', () => {
   });
 
   it(`should return showAssistant false if isAssistantEnabled is false`, () => {
-    jest.mocked(useAssistantAvailability).mockReturnValue({
+    vi.mocked(useAssistantAvailability).mockReturnValue({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: true,
       hasConnectorsAllPrivilege: true,
@@ -98,7 +101,7 @@ describe('useAssistant', () => {
   });
 
   it(`should return showAssistant false if hasAssistantPrivilege is false`, () => {
-    jest.mocked(useAssistantAvailability).mockReturnValue({
+    vi.mocked(useAssistantAvailability).mockReturnValue({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: false,
       hasConnectorsAllPrivilege: true,
@@ -118,7 +121,7 @@ describe('useAssistant', () => {
   it('returns anonymized prompt context data', async () => {
     hookResult = renderUseAssistant();
 
-    const getPromptContext = (useAssistantOverlay as jest.Mock).mock.calls[0][3];
+    const getPromptContext = (useAssistantOverlay as Mock).mock.calls[0][3];
 
     expect(await getPromptContext()).toEqual({
       '@timestamp': ['2023-01-01T01:01:01.000Z'],

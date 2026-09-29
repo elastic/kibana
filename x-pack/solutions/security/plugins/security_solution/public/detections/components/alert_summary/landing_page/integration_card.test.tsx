@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
@@ -12,7 +15,7 @@ import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 import { IntegrationCard } from './integration_card';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-jest.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public');
 
 const dataTestSubj = 'test-id';
 const integration: PackageListItem = {
@@ -26,13 +29,13 @@ const integration: PackageListItem = {
 
 describe('<IntegrationCard />', () => {
   it('should render the card and navigate to the integration details page', () => {
-    const navigateToApp = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue({
+    const navigateToApp = vi.fn();
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: { navigateToApp },
         http: {
           basePath: {
-            prepend: jest.fn().mockReturnValue('/app/integrations/detail/splunk-0.1.0/overview'),
+            prepend: vi.fn().mockReturnValue('/app/integrations/detail/splunk-0.1.0/overview'),
           },
         },
       },

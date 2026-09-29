@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useCallback, useState } from 'react';
 import { render, screen, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -40,12 +42,12 @@ const RoundTrippingParent: React.FC<{ roundTripMs: number; commitOnChange?: bool
 
 describe('DebouncedTemplateTextField', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   /**
@@ -65,14 +67,14 @@ describe('DebouncedTemplateTextField', () => {
 
     // t=50: type "e" before that echo has landed.
     act(() => {
-      jest.advanceTimersByTime(50);
+      vi.advanceTimersByTime(50);
     });
     fireEvent.change(input, { target: { value: 'Se' } });
 
     // t=110: the echo of "S" arrives, but the input already holds "Se". Adopting it here is
     // precisely the bug — the word would visibly lose its last character and the caret would jump.
     act(() => {
-      jest.advanceTimersByTime(60);
+      vi.advanceTimersByTime(60);
     });
 
     expect(input).toHaveValue('Se');
@@ -85,19 +87,19 @@ describe('DebouncedTemplateTextField', () => {
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: 'S' } });
     act(() => {
-      jest.advanceTimersByTime(50);
+      vi.advanceTimersByTime(50);
     });
     fireEvent.change(input, { target: { value: 'Sev1' } });
 
     act(() => {
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
     });
 
     expect(input).toHaveValue('Sev1');
   });
 
   it('adopts an outside change while the field is not focused', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const { rerender } = render(
       <DebouncedTemplateTextField
         label="Name"
@@ -122,8 +124,8 @@ describe('DebouncedTemplateTextField', () => {
   });
 
   it('commits the pending value on blur', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    const onChange = jest.fn();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const onChange = vi.fn();
 
     render(
       <DebouncedTemplateTextField

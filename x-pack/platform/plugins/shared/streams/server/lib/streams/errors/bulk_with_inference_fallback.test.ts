@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -14,9 +17,12 @@ import {
   isInferenceRelatedBulkError,
 } from './bulk_with_inference_fallback';
 
-jest.mock('timers/promises', () => ({
-  setTimeout: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('timers/promises', () => {
+      const mocked = {
+      setTimeout: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { setTimeout as mockedSetTimeout } from 'timers/promises';
 
@@ -276,11 +282,11 @@ describe('isInferenceRelatedBulkError', () => {
 
 describe('bulkWithInferenceFallback', () => {
   beforeEach(() => {
-    (mockedSetTimeout as jest.Mock).mockClear();
+    (mockedSetTimeout as Mock).mockClear();
   });
 
   it('runs attempt once with includeEmbedding=true on success', async () => {
-    const attempt = jest.fn().mockResolvedValue('ok');
+    const attempt = vi.fn().mockResolvedValue('ok');
 
     const result = await bulkWithInferenceFallback(createLogger(), attempt);
 
@@ -296,7 +302,7 @@ describe('bulkWithInferenceFallback', () => {
       inferenceErrorResponse('Unable to find model deployment task [elser-endpoint]')
     );
     const logger = createLogger();
-    const attempt = jest.fn().mockRejectedValueOnce(bulkError).mockResolvedValueOnce('retried');
+    const attempt = vi.fn().mockRejectedValueOnce(bulkError).mockResolvedValueOnce('retried');
 
     const result = await bulkWithInferenceFallback(logger, attempt);
 
@@ -316,7 +322,7 @@ describe('bulkWithInferenceFallback', () => {
       'inference unavailable',
       inferenceErrorResponse('Unable to find model deployment task [elser-endpoint]')
     );
-    const attempt = jest
+    const attempt = vi
       .fn()
       .mockRejectedValueOnce(bulkError)
       .mockRejectedValueOnce(bulkError)
@@ -337,7 +343,7 @@ describe('bulkWithInferenceFallback', () => {
       inferenceErrorResponse('Unable to find model deployment task [elser-endpoint]')
     );
     const logger = createLogger();
-    const attempt = jest
+    const attempt = vi
       .fn()
       .mockRejectedValueOnce(bulkError)
       .mockRejectedValueOnce(bulkError)
@@ -369,7 +375,7 @@ describe('bulkWithInferenceFallback', () => {
       )
     );
     const fallbackError = new Error('mapping conflict');
-    const attempt = jest
+    const attempt = vi
       .fn()
       .mockRejectedValueOnce(bulkError)
       .mockRejectedValueOnce(bulkError)
@@ -382,7 +388,7 @@ describe('bulkWithInferenceFallback', () => {
 
   it('does not retry when a non-BulkOperationError is thrown', async () => {
     const error = new Error('network failure');
-    const attempt = jest.fn().mockRejectedValue(error);
+    const attempt = vi.fn().mockRejectedValue(error);
 
     await expect(bulkWithInferenceFallback(createLogger(), attempt)).rejects.toBe(error);
     expect(attempt).toHaveBeenCalledTimes(1);
@@ -391,7 +397,7 @@ describe('bulkWithInferenceFallback', () => {
 
   it('does not retry when BulkOperationError items contain only non-inference errors', async () => {
     const error = new BulkOperationError('mapping conflict', nonInferenceErrorResponse());
-    const attempt = jest.fn().mockRejectedValueOnce(error);
+    const attempt = vi.fn().mockRejectedValueOnce(error);
 
     await expect(bulkWithInferenceFallback(createLogger(), attempt)).rejects.toBe(error);
     expect(attempt).toHaveBeenCalledTimes(1);
@@ -401,7 +407,7 @@ describe('bulkWithInferenceFallback', () => {
   it('does not retry when BulkOperationError has mixed inference and non-inference item failures', async () => {
     const error = new BulkOperationError('mixed errors', mixedErrorResponse());
     const logger = createLogger();
-    const attempt = jest.fn().mockRejectedValueOnce(error);
+    const attempt = vi.fn().mockRejectedValueOnce(error);
 
     await expect(bulkWithInferenceFallback(logger, attempt)).rejects.toBe(error);
     expect(attempt).toHaveBeenCalledTimes(1);

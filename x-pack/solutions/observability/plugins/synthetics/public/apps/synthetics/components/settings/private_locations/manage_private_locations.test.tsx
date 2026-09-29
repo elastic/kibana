@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render } from '../../../utils/testing/rtl_helpers';
@@ -15,37 +17,40 @@ import type { SyntheticsSettingsContextValues } from '../../../contexts';
 import { ManagePrivateLocations } from './manage_private_locations';
 import { fireEvent } from '@testing-library/react';
 
-jest.mock('../../../hooks');
-jest.mock('./hooks/use_locations_api');
-jest.mock('../../../contexts/synthetics_settings_context');
+vi.mock('../../../hooks');
+vi.mock('./hooks/use_locations_api');
+vi.mock('../../../contexts/synthetics_settings_context');
 
 let mockHasEnterprise = false;
-jest.mock('../../../hooks/use_license', () => ({
-  useLicense: () => ({ hasAtLeast: () => mockHasEnterprise, getLicense: () => null }),
-}));
+vi.mock('../../../hooks/use_license', () => {
+      const mocked = {
+      useLicense: () => ({ hasAtLeast: () => mockHasEnterprise, getLicense: () => null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const queryClient = new QueryClient();
 
 describe('<ManagePrivateLocations />', () => {
   beforeEach(() => {
     mockHasEnterprise = false;
-    jest.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(true);
-    jest.spyOn(permissionsHooks, 'useFleetPermissions').mockReturnValue({
+    vi.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(true);
+    vi.spyOn(permissionsHooks, 'useFleetPermissions').mockReturnValue({
       canReadAgentPolicies: true,
       canReadAgents: true,
       canSaveIntegrations: false,
       canCreateAgentPolicies: false,
     });
-    jest.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
+    vi.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
       loading: false,
-      onCreateLocationAPI: jest.fn(),
-      onEditLocationAPI: jest.fn(),
+      onCreateLocationAPI: vi.fn(),
+      onEditLocationAPI: vi.fn(),
       privateLocations: [],
-      onDeleteLocationAPI: jest.fn(),
+      onDeleteLocationAPI: vi.fn(),
       deleteLoading: false,
       createLoading: false,
     });
-    jest.spyOn(permissionsHooks, 'useEnablement').mockReturnValue({
+    vi.spyOn(permissionsHooks, 'useEnablement').mockReturnValue({
       isServiceAllowed: true,
       areApiKeysEnabled: true,
       canManageApiKeys: true,
@@ -60,7 +65,7 @@ describe('<ManagePrivateLocations />', () => {
   it.each([true, false])(
     'handles no agent found when the user does and does not have permissions',
     async (canSave) => {
-      jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
+      vi.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
         canSave,
       } as SyntheticsSettingsContextValues);
       const { getByText, getByRole, findByText } = render(
@@ -100,7 +105,7 @@ describe('<ManagePrivateLocations />', () => {
   it.each([true, false])(
     'handles create first location when the user does and does not have permissions',
     async (canSave) => {
-      jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
+      vi.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
         canSave,
       } as SyntheticsSettingsContextValues);
       const { getByText, getByRole, findByText } = render(
@@ -137,15 +142,15 @@ describe('<ManagePrivateLocations />', () => {
 
   it('handles location table when locations exist', async () => {
     const privateLocationName = 'Test private location';
-    jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
+    vi.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
       canSave: true,
       canManagePrivateLocations: true,
     } as SyntheticsSettingsContextValues);
 
-    jest.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
+    vi.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
       loading: false,
-      onCreateLocationAPI: jest.fn(),
-      onEditLocationAPI: jest.fn(),
+      onCreateLocationAPI: vi.fn(),
+      onEditLocationAPI: vi.fn(),
       privateLocations: [
         {
           label: privateLocationName,
@@ -154,7 +159,7 @@ describe('<ManagePrivateLocations />', () => {
           isServiceManaged: false,
         },
       ],
-      onDeleteLocationAPI: jest.fn(),
+      onDeleteLocationAPI: vi.fn(),
       deleteLoading: false,
       createLoading: false,
     });
@@ -182,15 +187,15 @@ describe('<ManagePrivateLocations />', () => {
 
   it('shows a Scalable badge with an Enterprise license', () => {
     mockHasEnterprise = true;
-    jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
+    vi.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
       canSave: true,
       canManagePrivateLocations: true,
     } as SyntheticsSettingsContextValues);
 
-    jest.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
+    vi.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
       loading: false,
-      onCreateLocationAPI: jest.fn(),
-      onEditLocationAPI: jest.fn(),
+      onCreateLocationAPI: vi.fn(),
+      onEditLocationAPI: vi.fn(),
       privateLocations: [
         {
           label: 'Scalable location',
@@ -199,7 +204,7 @@ describe('<ManagePrivateLocations />', () => {
           isServiceManaged: false,
         },
       ],
-      onDeleteLocationAPI: jest.fn(),
+      onDeleteLocationAPI: vi.fn(),
       deleteLoading: false,
       createLoading: false,
     });

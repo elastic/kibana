@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { VisualizeInput, VisSavedObject, Vis } from '../..';
 import {
   getVisualizationInstance,
@@ -23,28 +26,29 @@ const commonSerializedVisMock = {
   aggs: [],
 };
 
-jest.mock('../../utils/saved_visualize_utils', () => {
-  const actual = jest.requireActual('../../utils/saved_visualize_utils');
+vi.mock('../../utils/saved_visualize_utils', async () => {
+  const actual = (await vi.importActual('../../utils/saved_visualize_utils'));
   return {
     ...actual,
-    getSavedVisualization: jest.fn(),
-    convertToSerializedVis: jest.fn().mockReturnValue(commonSerializedVisMock),
+    getSavedVisualization: vi.fn(),
+    convertToSerializedVis: vi.fn().mockReturnValue(commonSerializedVisMock),
   };
 });
-const { getSavedVisualization, convertToSerializedVis } = jest.requireMock(
-  '../../utils/saved_visualize_utils'
-);
+const { getSavedVisualization, convertToSerializedVis } = (await vi.importMock('../../utils/saved_visualize_utils'));
 
-jest.mock('../../vis_async', () => ({
-  createVisAsync: jest.fn(),
-}));
-const { createVisAsync } = jest.requireMock('../../vis_async');
+vi.mock('../../vis_async', () => {
+      const mocked = {
+      createVisAsync: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const { createVisAsync } = (await vi.importMock('../../vis_async'));
 
 let savedVisMock: VisSavedObject;
 
 describe('getVisualizationInstance', () => {
   let visMock: Vis<VisParams>;
-  let mockServices: jest.Mocked<VisualizeServices>;
+  let mockServices: Mocked<VisualizeServices>;
   let subj: BehaviorSubject<any>;
 
   beforeEach(() => {
@@ -58,13 +62,13 @@ describe('getVisualizationInstance', () => {
 
     getSavedVisualization.mockImplementation((opts: unknown) => savedVisMock);
     createVisAsync.mockImplementation(() => visMock);
-    mockServices.data.search.showError = jest.fn().mockImplementation(() => {});
-    mockServices.createVisEmbeddableFromObject = jest.fn().mockImplementation(() => ({
-      getOutput$: jest.fn(() => subj.asObservable()),
+    mockServices.data.search.showError = vi.fn().mockImplementation(() => {});
+    mockServices.createVisEmbeddableFromObject = vi.fn().mockImplementation(() => ({
+      getOutput$: vi.fn(() => subj.asObservable()),
     }));
     mockServices.savedSearch = {
       ...savedSearchPluginMock.createStartContract(),
-      get: jest.fn().mockImplementation(() => ({
+      get: vi.fn().mockImplementation(() => ({
         id: 'savedSearch',
         searchSource: {},
         title: 'savedSearchTitle',
@@ -108,7 +112,7 @@ describe('getVisualizationInstance', () => {
   test('should load existing vis by id and call vis type setup if exists', async () => {
     const newVisObj = { data: {} };
     // @ts-expect-error
-    visMock.type.setup = jest.fn(() => newVisObj);
+    visMock.type.setup = vi.fn(() => newVisObj);
     const { vis } = await getVisualizationInstance(mockServices, 'saved_vis_id');
 
     expect(getSavedVisualization.mock.calls[1][1]).toBe('saved_vis_id');
@@ -146,7 +150,7 @@ describe('getVisualizationInstanceInput', () => {
     type: 'pie',
   };
   let visMock: Vis<VisParams>;
-  let mockServices: jest.Mocked<VisualizeServices>;
+  let mockServices: Mocked<VisualizeServices>;
   let subj: BehaviorSubject<any>;
 
   beforeEach(() => {
@@ -160,8 +164,8 @@ describe('getVisualizationInstanceInput', () => {
 
     createVisAsync.mockImplementation(() => visMock);
     getSavedVisualization.mockImplementation((opts: unknown) => savedVisMock);
-    mockServices.createVisEmbeddableFromObject = jest.fn().mockImplementation(() => ({
-      getOutput$: jest.fn(() => subj.asObservable()),
+    mockServices.createVisEmbeddableFromObject = vi.fn().mockImplementation(() => ({
+      getOutput$: vi.fn(() => subj.asObservable()),
     }));
   });
 

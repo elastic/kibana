@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { getAgentLogsTopErrors } from './agent_logs_top_errors';
@@ -12,7 +14,7 @@ import { getAgentLogsTopErrors } from './agent_logs_top_errors';
 describe('getAgentLogsTopErrors', () => {
   it('should return top 3 errors from 100 hits', async () => {
     const esClientMock = {
-      search: jest.fn().mockImplementation((params) => {
+      search: vi.fn().mockImplementation((params) => {
         if (params.index === 'logs-elastic_agent-*')
           return {
             hits: {

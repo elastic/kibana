@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type {
   CustomItemAction,
   EuiTableActionsColumnType,
@@ -63,8 +65,8 @@ describe('helpers', () => {
         formatNumber,
         isILMAvailable,
         pattern: 'auditbeat-*',
-        onCheckNowAction: jest.fn(),
-        onViewHistoryAction: jest.fn(),
+        onCheckNowAction: vi.fn(),
+        onViewHistoryAction: vi.fn(),
         dangerColor: testColor,
       }).map((x) => omit('render', x));
 
@@ -125,8 +127,8 @@ describe('helpers', () => {
           formatNumber,
           isILMAvailable,
           pattern: 'auditbeat-*',
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
+          onCheckNowAction: vi.fn(),
+          onViewHistoryAction: vi.fn(),
           dangerColor: testColor,
         });
         const checkNowRender = (
@@ -144,7 +146,7 @@ describe('helpers', () => {
       });
 
       test('it invokes the `onCheckNowAction` with the index name when the check now button is clicked', async () => {
-        const onCheckNowAction = jest.fn();
+        const onCheckNowAction = vi.fn();
 
         const columns = getSummaryTableColumns({
           formatBytes,
@@ -152,7 +154,7 @@ describe('helpers', () => {
           isILMAvailable,
           pattern: 'auditbeat-*',
           onCheckNowAction,
-          onViewHistoryAction: jest.fn(),
+          onViewHistoryAction: vi.fn(),
           dangerColor: testColor,
         });
         const checkNowRender = (
@@ -173,14 +175,14 @@ describe('helpers', () => {
       });
 
       test('it invokes the `onViewHistoryAction` with the index name when the view history button is clicked', async () => {
-        const onViewHistoryAction = jest.fn();
+        const onViewHistoryAction = vi.fn();
 
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
           isILMAvailable,
           pattern: 'auditbeat-*',
-          onCheckNowAction: jest.fn(),
+          onCheckNowAction: vi.fn(),
           onViewHistoryAction,
           dangerColor: testColor,
         });
@@ -215,8 +217,8 @@ describe('helpers', () => {
           formatNumber,
           isILMAvailable,
           pattern: 'auditbeat-*',
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
+          onCheckNowAction: vi.fn(),
+          onViewHistoryAction: vi.fn(),
           dangerColor: testColor,
         });
         const incompatibleRender = (
@@ -239,8 +241,8 @@ describe('helpers', () => {
           formatNumber,
           isILMAvailable,
           pattern: 'auditbeat-*',
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
+          onCheckNowAction: vi.fn(),
+          onViewHistoryAction: vi.fn(),
           dangerColor: testColor,
         });
         const incompatibleRender = (
@@ -267,8 +269,8 @@ describe('helpers', () => {
           formatNumber,
           isILMAvailable,
           pattern: 'auditbeat-*',
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
+          onCheckNowAction: vi.fn(),
+          onViewHistoryAction: vi.fn(),
           dangerColor: testColor,
         });
         const incompatibleRender = (
@@ -292,8 +294,8 @@ describe('helpers', () => {
           formatNumber,
           isILMAvailable,
           pattern: 'auditbeat-*',
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
+          onCheckNowAction: vi.fn(),
+          onViewHistoryAction: vi.fn(),
           dangerColor: testColor,
         });
         const indexNameRender = (columns[2] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
@@ -317,8 +319,8 @@ describe('helpers', () => {
           formatNumber,
           isILMAvailable,
           pattern: 'auditbeat-*',
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
+          onCheckNowAction: vi.fn(),
+          onViewHistoryAction: vi.fn(),
           dangerColor: testColor,
         });
         const docsCountRender = (columns[3] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
@@ -353,8 +355,8 @@ describe('helpers', () => {
           formatNumber,
           isILMAvailable,
           pattern: 'auditbeat-*',
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
+          onCheckNowAction: vi.fn(),
+          onViewHistoryAction: vi.fn(),
           dangerColor: testColor,
         });
         const incompatibleRender = (
@@ -376,8 +378,8 @@ describe('helpers', () => {
           formatNumber,
           isILMAvailable,
           pattern: 'auditbeat-*',
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
+          onCheckNowAction: vi.fn(),
+          onViewHistoryAction: vi.fn(),
           dangerColor: testColor,
         });
         const incompatibleRender = (
@@ -412,7 +414,7 @@ describe('helpers', () => {
       test('it returns the expected column configuration when `isILMAvailable` is true', () => {
         const column = getSummaryTableSizeInBytesColumn({
           isILMAvailable: true,
-          formatBytes: jest.fn(),
+          formatBytes: vi.fn(),
         });
         expect(column.length).toEqual(1);
         expect(column[0].name).toEqual('Size');
@@ -421,7 +423,7 @@ describe('helpers', () => {
       test('it returns an emptry array when `isILMAvailable` is false', () => {
         const column = getSummaryTableSizeInBytesColumn({
           isILMAvailable: false,
-          formatBytes: jest.fn(),
+          formatBytes: vi.fn(),
         });
         expect(column.length).toEqual(0);
       });
@@ -434,8 +436,8 @@ describe('helpers', () => {
           formatNumber,
           isILMAvailable,
           pattern: 'auditbeat-*',
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
+          onCheckNowAction: vi.fn(),
+          onViewHistoryAction: vi.fn(),
           dangerColor: testColor,
         });
         const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
@@ -461,8 +463,8 @@ describe('helpers', () => {
           formatNumber,
           isILMAvailable,
           pattern: 'auditbeat-*',
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
+          onCheckNowAction: vi.fn(),
+          onViewHistoryAction: vi.fn(),
           dangerColor: testColor,
         });
         const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
@@ -487,8 +489,8 @@ describe('helpers', () => {
           formatNumber,
           isILMAvailable: false,
           pattern: 'auditbeat-*',
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
+          onCheckNowAction: vi.fn(),
+          onViewHistoryAction: vi.fn(),
           dangerColor: testColor,
         });
         const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
@@ -511,8 +513,8 @@ describe('helpers', () => {
           formatNumber,
           isILMAvailable,
           pattern: 'auditbeat-*',
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
+          onCheckNowAction: vi.fn(),
+          onViewHistoryAction: vi.fn(),
           dangerColor: testColor,
         });
 
@@ -536,8 +538,8 @@ describe('helpers', () => {
           formatNumber,
           isILMAvailable,
           pattern: 'auditbeat-*',
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
+          onCheckNowAction: vi.fn(),
+          onViewHistoryAction: vi.fn(),
           dangerColor: testColor,
         });
 

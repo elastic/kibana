@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockActions, setMockValues } from '../../../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -26,9 +28,9 @@ const DEFAULT_VALUES = {
 
 describe('DeployModel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues(DEFAULT_VALUES);
-    setMockActions({ createTextExpansionModel: jest.fn() });
+    setMockActions({ createTextExpansionModel: vi.fn() });
   });
   it('renders deploy button', () => {
     renderWithKibanaRenderContext(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { queryByLabelText } from '@testing-library/react';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
@@ -26,11 +29,14 @@ import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range
 import { MockTimeRangeContextProvider } from '../../../context/time_range_metadata/mock_time_range_metadata_context_provider';
 
 // Mock the usePerformanceContext hook
-jest.mock('@kbn/ebt-tools', () => ({
-  usePerformanceContext: () => ({
-    onPageReady: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      usePerformanceContext: () => ({
+        onPageReady: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const KibanaReactContext = createKibanaReactContext({
   uiSettings: { get: () => true },
@@ -47,8 +53,8 @@ function setup({
   serviceTransactionTypes: string[];
 }) {
   history = createMemoryHistory();
-  jest.spyOn(history, 'push');
-  jest.spyOn(history, 'replace');
+  vi.spyOn(history, 'push');
+  vi.spyOn(history, 'replace');
 
   history.replace({
     pathname: '/services/foo/transactions',
@@ -56,13 +62,13 @@ function setup({
   });
 
   // mock transaction types
-  jest.spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher').mockReturnValue({
+  vi.spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher').mockReturnValue({
     transactionTypes: serviceTransactionTypes,
     status: useFetcherHook.FETCH_STATUS.SUCCESS,
   });
 
   // mock agent
-  jest.spyOn(useServiceAgentNameHook, 'useServiceAgentFetcher').mockReturnValue({
+  vi.spyOn(useServiceAgentNameHook, 'useServiceAgentFetcher').mockReturnValue({
     agentName: 'nodejs',
     runtimeName: 'node',
     serverlessType: undefined,
@@ -70,7 +76,7 @@ function setup({
     status: useFetcherHook.FETCH_STATUS.SUCCESS,
   });
 
-  jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
+  vi.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   return renderWithTheme(
     <IntlProvider locale="en">
@@ -92,7 +98,7 @@ function setup({
 }
 
 describe('TransactionOverview', () => {
-  let consoleMock: jest.SpyInstance;
+  let consoleMock: MockInstance;
 
   beforeAll(() => {
     consoleMock = disableConsoleWarning('Warning: componentWillReceiveProps');
@@ -103,7 +109,7 @@ describe('TransactionOverview', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when no transaction type is given in urlParams', () => {

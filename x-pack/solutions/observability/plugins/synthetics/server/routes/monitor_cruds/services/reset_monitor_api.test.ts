@@ -5,16 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ResetMonitorAPI } from './reset_monitor_api';
 
-jest.mock('../../../synthetics_service/get_private_locations', () => ({
-  getPrivateLocations: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('../../../synthetics_service/get_private_locations', () => {
+      const mocked = {
+      getPrivateLocations: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../edit_monitor', () => ({
-  validatePermissions: jest.fn().mockResolvedValue(null),
-}));
+vi.mock('../edit_monitor', () => {
+      const mocked = {
+      validatePermissions: vi.fn().mockResolvedValue(null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockMonitorPairWithLocations = (
   id: string,
@@ -61,36 +69,36 @@ const mockMonitorPair = (id: string) => ({
 
 const createMockRouteContextWithFleet = (existingAgentPolicyIds: string[]) => {
   const base = createMockRouteContext();
-  const getByIds = jest.fn().mockResolvedValue(existingAgentPolicyIds.map((id) => ({ id })));
+  const getByIds = vi.fn().mockResolvedValue(existingAgentPolicyIds.map((id) => ({ id })));
   base.routeContext.server = {
     ...base.routeContext.server,
     fleet: { agentPolicyService: { getByIds } },
-    coreStart: { savedObjects: { createInternalRepository: jest.fn().mockReturnValue({}) } },
+    coreStart: { savedObjects: { createInternalRepository: vi.fn().mockReturnValue({}) } },
   } as any;
   return { ...base, mocks: { ...base.mocks, getByIds } };
 };
 
 const createMockRouteContext = () => {
-  const editMonitors = jest.fn().mockResolvedValue({
+  const editMonitors = vi.fn().mockResolvedValue({
     failedPolicyUpdates: [],
     publicSyncErrors: [],
   });
-  const deleteMonitors = jest.fn().mockResolvedValue([]);
-  const addMonitors = jest.fn().mockResolvedValue([[], []]);
-  const getDecrypted = jest.fn();
+  const deleteMonitors = vi.fn().mockResolvedValue([]);
+  const addMonitors = vi.fn().mockResolvedValue([[], []]);
+  const getDecrypted = vi.fn();
 
   return {
     routeContext: {
       request: {} as any,
       response: {
-        forbidden: jest.fn((opts: any) => opts),
-        ok: jest.fn((opts: any) => opts),
-        notFound: jest.fn((opts: any) => opts),
-        customError: jest.fn((opts: any) => opts),
+        forbidden: vi.fn((opts: any) => opts),
+        ok: vi.fn((opts: any) => opts),
+        notFound: vi.fn((opts: any) => opts),
+        customError: vi.fn((opts: any) => opts),
       } as any,
       spaceId: 'default',
       server: {
-        logger: { error: jest.fn() },
+        logger: { error: vi.fn() },
       } as any,
       savedObjectsClient: {} as any,
       syntheticsMonitorClient: {
@@ -212,7 +220,7 @@ describe('ResetMonitorAPI', () => {
 
   describe('authorization', () => {
     it('skips unauthorized monitors and records per-item errors', async () => {
-      const { validatePermissions } = jest.requireMock('../edit_monitor');
+      const { validatePermissions } = (await vi.importMock('../edit_monitor'));
       const { routeContext, mocks } = createMockRouteContext();
       mocks.getDecrypted
         .mockResolvedValueOnce(mockMonitorPair('allowed'))
@@ -234,7 +242,7 @@ describe('ResetMonitorAPI', () => {
     });
 
     it('returns empty results when all monitors are unauthorized', async () => {
-      const { validatePermissions } = jest.requireMock('../edit_monitor');
+      const { validatePermissions } = (await vi.importMock('../edit_monitor'));
       const { routeContext, mocks } = createMockRouteContext();
       mocks.getDecrypted.mockResolvedValue(mockMonitorPair('blocked'));
       validatePermissions.mockResolvedValue('Insufficient permissions');
@@ -248,13 +256,11 @@ describe('ResetMonitorAPI', () => {
     });
   });
 
-  describe('location filtering — getLocationIdsWithExistingAgentPolicy', () => {
-    const { getPrivateLocations } = jest.requireMock(
-      '../../../synthetics_service/get_private_locations'
-    );
+  describe('location filtering — getLocationIdsWithExistingAgentPolicy', async () => {
+    const { getPrivateLocations } = (await vi.importMock('../../../synthetics_service/get_private_locations'));
 
-    beforeEach(() => {
-      const { validatePermissions } = jest.requireMock('../edit_monitor');
+    beforeEach(async () => {
+      const { validatePermissions } = (await vi.importMock('../edit_monitor'));
       validatePermissions.mockResolvedValue(null);
     });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fromKueryExpression } from '@kbn/es-query';
 import { KibanaServices } from '../../../common/lib/kibana';
 
@@ -38,10 +41,10 @@ import {
   fetchRulesSnoozeSettings,
 } from './api';
 
-const mockKibanaServices = KibanaServices.get as jest.Mock;
-jest.mock('../../../common/lib/kibana');
+const mockKibanaServices = KibanaServices.get as Mock;
+vi.mock('../../../common/lib/kibana');
 
-const fetchMock = jest.fn();
+const fetchMock = vi.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
 describe('Detections Rules API', () => {
@@ -611,10 +614,10 @@ describe('Detections Rules API', () => {
       size: 89,
       type: 'json',
       webkitRelativePath: '/webkitRelativePath',
-      arrayBuffer: jest.fn(),
-      slice: jest.fn(),
-      stream: jest.fn(),
-      text: jest.fn(),
+      arrayBuffer: vi.fn(),
+      slice: vi.fn(),
+      stream: vi.fn(),
+      text: vi.fn(),
     } as unknown as File;
     const formData = new FormData();
     formData.append('file', fileToImport);
@@ -697,10 +700,10 @@ describe('Detections Rules API', () => {
     const blob: Blob = {
       size: 89,
       type: 'json',
-      arrayBuffer: jest.fn(),
-      slice: jest.fn(),
-      stream: jest.fn(),
-      text: jest.fn(),
+      arrayBuffer: vi.fn(),
+      slice: vi.fn(),
+      stream: vi.fn(),
+      text: vi.fn(),
     } as unknown as Blob;
 
     beforeEach(() => {

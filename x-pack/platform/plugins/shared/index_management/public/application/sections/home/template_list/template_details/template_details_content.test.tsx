@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -18,23 +21,32 @@ import { useLoadIndexTemplate } from '../../../../services/api';
 import { TemplateDetailsContent } from './template_details_content';
 import type { UseRequestResponse, Error as EsUiSharedError } from '../../../../../shared_imports';
 
-jest.mock('../../../../services/api', () => ({
-  useLoadIndexTemplate: jest.fn(),
-}));
+vi.mock('../../../../services/api', () => {
+      const mocked = {
+      useLoadIndexTemplate: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../app_context', () => ({
-  useServices: jest.fn(),
-  useAppContext: jest.fn(),
-}));
+vi.mock('../../../../app_context', () => {
+      const mocked = {
+      useServices: vi.fn(),
+      useAppContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/i18n-react', () => ({
-  FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => (
-    <span>{defaultMessage}</span>
-  ),
-}));
+vi.mock('@kbn/i18n-react', () => {
+      const mocked = {
+      FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => (
+        <span>{defaultMessage}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../shared_imports', () => {
-  const actual = jest.requireActual('../../../../../shared_imports');
+vi.mock('../../../../../shared_imports', async () => {
+  const actual = (await vi.importActual('../../../../../shared_imports'));
   return {
     ...actual,
     SectionLoading: ({ children }: { children: React.ReactNode }) => (
@@ -43,39 +55,51 @@ jest.mock('../../../../../shared_imports', () => {
   };
 });
 
-jest.mock('../../../../components', () => ({
-  TemplateDeleteModal: ({ templatesToDelete }: { templatesToDelete: Array<{ name: string }> }) =>
-    templatesToDelete?.length ? (
-      <div
-        data-test-subj="templateDeleteModal"
-        data-template-names={templatesToDelete.map((t) => t.name).join(',')}
-      />
-    ) : null,
-  SectionError: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
-    <div data-test-subj={dataTestSubj ?? 'sectionError'} />
-  ),
-}));
+vi.mock('../../../../components', () => {
+      const mocked = {
+      TemplateDeleteModal: ({ templatesToDelete }: { templatesToDelete: Array<{ name: string }> }) =>
+        templatesToDelete?.length ? (
+          <div
+            data-test-subj="templateDeleteModal"
+            data-template-names={templatesToDelete.map((t) => t.name).join(',')}
+          />
+        ) : null,
+      SectionError: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
+        <div data-test-subj={dataTestSubj ?? 'sectionError'} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../components/shared', () => ({
-  TabAliases: () => <div data-test-subj="tabAliasesPanel" />,
-  TabMappings: () => <div data-test-subj="tabMappingsPanel" />,
-  TabSettings: () => <div data-test-subj="tabSettingsPanel" />,
-}));
+vi.mock('../../../../components/shared', () => {
+      const mocked = {
+      TabAliases: () => <div data-test-subj="tabAliasesPanel" />,
+      TabMappings: () => <div data-test-subj="tabMappingsPanel" />,
+      TabSettings: () => <div data-test-subj="tabSettingsPanel" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components', () => ({
-  TemplateTypeIndicator: ({ templateType }: { templateType: string }) => (
-    <span data-test-subj={`templateType-${templateType}`} />
-  ),
-  TemplateDeprecatedBadge: () => <span data-test-subj="templateDeprecatedBadge" />,
-}));
+vi.mock('../components', () => {
+      const mocked = {
+      TemplateTypeIndicator: ({ templateType }: { templateType: string }) => (
+        <span data-test-subj={`templateType-${templateType}`} />
+      ),
+      TemplateDeprecatedBadge: () => <span data-test-subj="templateDeprecatedBadge" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./tabs', () => ({
-  TabSummary: () => <div data-test-subj="tabSummaryPanel" />,
-  TabPreview: () => <div data-test-subj="tabPreviewPanel" />,
-}));
+vi.mock('./tabs', () => {
+      const mocked = {
+      TabSummary: () => <div data-test-subj="tabSummaryPanel" />,
+      TabPreview: () => <div data-test-subj="tabPreviewPanel" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiPopover: ({
@@ -139,7 +163,7 @@ jest.mock('@elastic/eui', () => {
 
 import { useAppContext, useServices } from '../../../../app_context';
 
-const mockTrackMetric = jest.fn();
+const mockTrackMetric = vi.fn();
 
 const createRequestError = (message: string): EsUiSharedError => ({ error: message, message });
 
@@ -158,7 +182,7 @@ const getUseRequestMock = ({
   isLoading,
   error,
   data,
-  resendRequest: jest.fn(),
+  resendRequest: vi.fn(),
 });
 
 const makeTemplate = (overrides: Partial<TemplateDeserialized> = {}): TemplateDeserialized => ({
@@ -183,21 +207,21 @@ const makeTemplate = (overrides: Partial<TemplateDeserialized> = {}): TemplateDe
 
 const defaultProps = {
   template: { name: 'my_template' as const, isLegacy: false as boolean | undefined },
-  onClose: jest.fn(),
-  editTemplate: jest.fn(),
-  cloneTemplate: jest.fn(),
-  reload: jest.fn(),
+  onClose: vi.fn(),
+  editTemplate: vi.fn(),
+  cloneTemplate: vi.fn(),
+  reload: vi.fn(),
 };
 
 describe('TemplateDetailsContent', () => {
-  const mockedUseLoadIndexTemplate = useLoadIndexTemplate as jest.MockedFunction<
+  const mockedUseLoadIndexTemplate = useLoadIndexTemplate as MockedFunction<
     typeof useLoadIndexTemplate
   >;
-  const mockedUseServices = useServices as jest.MockedFunction<typeof useServices>;
-  const mockedUseAppContext = useAppContext as jest.MockedFunction<typeof useAppContext>;
+  const mockedUseServices = useServices as MockedFunction<typeof useServices>;
+  const mockedUseAppContext = useAppContext as MockedFunction<typeof useAppContext>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockTrackMetric.mockClear();
     mockedUseServices.mockReturnValue({
       uiMetricService: { trackMetric: mockTrackMetric },
@@ -367,7 +391,7 @@ describe('TemplateDetailsContent', () => {
     mockedUseLoadIndexTemplate.mockReturnValue(
       getUseRequestMock({ isLoading: false, error: null, data: template })
     );
-    const onClose = jest.fn();
+    const onClose = vi.fn();
 
     render(<TemplateDetailsContent {...defaultProps} onClose={onClose} />);
 
@@ -380,7 +404,7 @@ describe('TemplateDetailsContent', () => {
     mockedUseLoadIndexTemplate.mockReturnValue(
       getUseRequestMock({ isLoading: false, error: null, data: template })
     );
-    const editTemplate = jest.fn();
+    const editTemplate = vi.fn();
 
     render(<TemplateDetailsContent {...defaultProps} editTemplate={editTemplate} />);
 
@@ -400,8 +424,8 @@ describe('TemplateDetailsContent', () => {
       <TemplateDetailsContent
         {...defaultProps}
         template={{ name: 'del-me', isLegacy: false }}
-        editTemplate={jest.fn()}
-        cloneTemplate={jest.fn()}
+        editTemplate={vi.fn()}
+        cloneTemplate={vi.fn()}
       />
     );
 

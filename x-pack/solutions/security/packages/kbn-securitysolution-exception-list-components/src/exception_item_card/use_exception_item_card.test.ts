@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { renderHook, act } from '@testing-library/react';
 import { getExceptionListItemSchemaMock } from '../mocks/exception_list_item_schema.mock';
@@ -12,9 +14,9 @@ import { useExceptionItemCard } from './use_exception_item_card';
 import * as i18n from './translations';
 import { mockGetFormattedComments } from '../mocks/comments.mock';
 
-const onEditException = jest.fn();
-const onDeleteException = jest.fn();
-const getFormattedComments = jest.fn();
+const onEditException = vi.fn();
+const onDeleteException = vi.fn();
+const getFormattedComments = vi.fn();
 const exceptionItem = getExceptionListItemSchemaMock();
 describe('useExceptionItemCard', () => {
   it('should call onEditException with the correct params', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
 import { fireEvent, screen, act } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
@@ -23,15 +25,15 @@ describe('Create Follower index', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
@@ -60,7 +62,7 @@ describe('Create Follower index', () => {
     beforeEach(async () => {
       ({ user } = setup());
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 
@@ -96,7 +98,7 @@ describe('Create Follower index', () => {
       ]);
       ({ user } = setup());
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 
@@ -186,7 +188,7 @@ describe('Create Follower index', () => {
 
           // Wait for debounced validation (500ms)
           await act(async () => {
-            await jest.advanceTimersByTimeAsync(550);
+            await vi.advanceTimersByTimeAsync(550);
           });
 
           expect(httpSetup.get).toHaveBeenCalledWith(
@@ -205,7 +207,7 @@ describe('Create Follower index', () => {
 
           // Wait for debounced validation
           await act(async () => {
-            await jest.advanceTimersByTimeAsync(550);
+            await vi.advanceTimersByTimeAsync(550);
           });
 
           expect(

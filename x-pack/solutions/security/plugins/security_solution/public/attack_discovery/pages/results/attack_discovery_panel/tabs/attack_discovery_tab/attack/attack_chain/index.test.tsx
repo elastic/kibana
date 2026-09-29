@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -12,15 +15,18 @@ import { AttackChain } from '.';
 import { getTacticMetadata } from '@kbn/elastic-assistant-common/impl/utils/attack_discovery_helpers';
 import { mockAttackDiscovery } from '../../../../../../mock/mock_attack_discovery';
 
-jest.mock('@kbn/elastic-assistant-common/impl/utils/attack_discovery_helpers', () => ({
-  getTacticMetadata: jest.fn(),
-}));
+vi.mock('@kbn/elastic-assistant-common/impl/utils/attack_discovery_helpers', () => {
+      const mocked = {
+      getTacticMetadata: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedGetTacticMetadata = getTacticMetadata as jest.Mock;
+const mockedGetTacticMetadata = getTacticMetadata as Mock;
 
 describe('AttackChain', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the expected detected tactics from attack discovery', () => {

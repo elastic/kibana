@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ChangeHistoryDocument } from '@kbn/change-history';
 import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -56,13 +59,13 @@ const makeChangeHistoryService = (
   overrides: Partial<IWorkflowChangeHistoryService> = {}
 ): IWorkflowChangeHistoryService => ({
   isInitialized: () => true,
-  initialize: jest.fn(),
-  getHistory: jest.fn().mockResolvedValue({
+  initialize: vi.fn(),
+  getHistory: vi.fn().mockResolvedValue({
     total: 1,
     items: [makeHistoryEvent()],
   }),
-  asScoped: jest.fn(),
-  asSystemUser: jest.fn(),
+  asScoped: vi.fn(),
+  asSystemUser: vi.fn(),
   ...overrides,
 });
 
@@ -131,7 +134,7 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
   const makeService = (depsOverrides: RestoreTestDepsOverrides = {}) => {
     const { changeHistoryService: changeHistoryOverrides, ...restOverrides } = depsOverrides;
     const changeHistoryService = makeChangeHistoryService(changeHistoryOverrides);
-    const getHistory = changeHistoryService.getHistory as jest.Mock;
+    const getHistory = changeHistoryService.getHistory as Mock;
 
     const deps = {
       changeHistoryService,
@@ -139,7 +142,7 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
     } as WorkflowCrudDeps;
 
     const service = new WorkflowCrudService(deps);
-    const applyWorkflowUpdate = jest
+    const applyWorkflowUpdate = vi
       .spyOn(service as unknown as WorkflowCrudServiceWithApplyUpdate, 'applyWorkflowUpdate')
       .mockResolvedValue(makeApplyWorkflowUpdateResult());
 
@@ -186,7 +189,7 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
   it('throws when history event is not found', async () => {
     const { service } = makeService({
       changeHistoryService: {
-        getHistory: jest.fn().mockResolvedValue({ total: 0, items: [] }),
+        getHistory: vi.fn().mockResolvedValue({ total: 0, items: [] }),
       },
     });
 
@@ -198,7 +201,7 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
   it('throws when snapshot yaml is missing', async () => {
     const { service } = makeService({
       changeHistoryService: {
-        getHistory: jest.fn().mockResolvedValue({
+        getHistory: vi.fn().mockResolvedValue({
           total: 1,
           items: [
             makeHistoryEvent({
@@ -224,7 +227,7 @@ describe('WorkflowCrudService.restoreWorkflowVersion', () => {
     const { service } = makeService({
       changeHistoryService: {
         isInitialized: () => false,
-        getHistory: jest.fn(),
+        getHistory: vi.fn(),
       },
     });
 
@@ -289,16 +292,16 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
   });
 
   const makeStorageClient = () => ({
-    search: jest.fn(),
-    index: jest.fn().mockResolvedValue({ result: 'updated', _seq_no: 8, _primary_term: 1 }),
-    bulk: jest.fn(),
+    search: vi.fn(),
+    index: vi.fn().mockResolvedValue({ result: 'updated', _seq_no: 8, _primary_term: 1 }),
+    bulk: vi.fn(),
   });
 
   const makeIntegrationService = (snapshotYaml: string) => {
     const client = makeStorageClient();
-    const scopedChangeHistory = { logBulk: jest.fn().mockResolvedValue(undefined) };
+    const scopedChangeHistory = { logBulk: vi.fn().mockResolvedValue(undefined) };
     const changeHistoryService = makeChangeHistoryService({
-      getHistory: jest.fn().mockResolvedValue({
+      getHistory: vi.fn().mockResolvedValue({
         total: 1,
         items: [
           makeHistoryEvent({
@@ -313,11 +316,11 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
           }),
         ],
       }),
-      asScoped: jest.fn().mockReturnValue(scopedChangeHistory),
+      asScoped: vi.fn().mockReturnValue(scopedChangeHistory),
     });
 
     const validationService = {
-      getWorkflowZodSchema: jest.fn().mockResolvedValue(zodSchema),
+      getWorkflowZodSchema: vi.fn().mockResolvedValue(zodSchema),
     } as unknown as WorkflowValidationService;
 
     const deps: WorkflowCrudDeps = {
@@ -328,22 +331,22 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
       getSecurity: () =>
         ({
           authc: {
-            getCurrentUser: jest.fn().mockReturnValue({ username: 'alice' }),
+            getCurrentUser: vi.fn().mockReturnValue({ username: 'alice' }),
           },
         } as any),
       workflowsExtensions: { getAllTriggerDefinitions: () => [] } as any,
       getTaskScheduler: () => null,
       executionQueryService: {
-        getWorkflowExecutions: jest.fn().mockResolvedValue({ total: 0, results: [] }),
+        getWorkflowExecutions: vi.fn().mockResolvedValue({ total: 0, results: [] }),
       } as unknown as WorkflowExecutionQueryService,
       validationService,
       getCoreStart: () => coreMock.createStart(),
       changeHistoryService,
       workflowExecutionsDataClient: {
-        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+        deleteByQuery: vi.fn().mockResolvedValue({ deleted: 0 }),
       } as any,
       stepExecutionsDataClient: {
-        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+        deleteByQuery: vi.fn().mockResolvedValue({ deleted: 0 }),
       } as any,
     };
 

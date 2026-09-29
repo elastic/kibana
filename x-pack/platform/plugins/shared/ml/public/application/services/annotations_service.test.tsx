@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import mockAnnotations from '../components/annotations/annotations_table/__mocks__/mock_annotations.json';
 
 import type { Annotation } from '@kbn/ml-common-types/annotations';
@@ -21,7 +23,7 @@ describe('annotations_service', () => {
   });
 
   test('annotationUpdatesService', () => {
-    const subscriber = jest.fn();
+    const subscriber = vi.fn();
 
     annotationUpdatesService!.update$().subscribe(subscriber);
 
@@ -38,7 +40,7 @@ describe('annotations_service', () => {
   });
 
   test('annotationsRefresh$', () => {
-    const subscriber = jest.fn();
+    const subscriber = vi.fn();
 
     annotationsRefresh$.subscribe(subscriber);
 

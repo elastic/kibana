@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useDefaultModelValidation } from './use_default_model_validation';
 import { useConnectors } from './use_connectors';
 import { NO_DEFAULT_MODEL } from '../../common/constants';
 
-jest.mock('./use_connectors');
+vi.mock('./use_connectors');
 
-const mockUseConnectors = useConnectors as jest.Mock;
+const mockUseConnectors = useConnectors as Mock;
 
 describe('useDefaultModelValidation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseConnectors.mockReturnValue({ data: [], isLoading: false });
   });
 

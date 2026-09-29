@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook, act } from '@testing-library/react';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { TableVisUiState } from '../../types';
@@ -17,10 +19,10 @@ describe('useUiState', () => {
 
   beforeEach(() => {
     uiState = {
-      get: jest.fn(),
-      on: jest.fn(),
-      off: jest.fn(),
-      set: jest.fn(),
+      get: vi.fn(),
+      on: vi.fn(),
+      off: vi.fn(),
+      set: vi.fn(),
     } as any;
   });
 
@@ -43,9 +45,9 @@ describe('useUiState', () => {
 
     expect(uiState.on).toHaveBeenCalledWith('change', expect.any(Function));
 
-    const updateOnChange = jest.mocked(uiState.on).mock.calls[0][1];
+    const updateOnChange = vi.mocked(uiState.on).mock.calls[0][1];
 
-    uiState.getChanges = jest.fn(() => ({
+    uiState.getChanges = vi.fn(() => ({
       vis: {
         params: {
           sort: {
@@ -96,7 +98,7 @@ describe('useUiState', () => {
 
   describe('updating uiState through callbacks', () => {
     beforeAll(() => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
     });
 
     it('should update the uiState with new sort', async () => {
@@ -112,7 +114,7 @@ describe('useUiState', () => {
 
       expect(result.current.sort).toEqual(newSort);
 
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(uiState.set).toHaveBeenCalledTimes(1);
       expect(uiState.set).toHaveBeenCalledWith('vis.params.sort', newSort);
@@ -130,7 +132,7 @@ describe('useUiState', () => {
 
       expect(result.current.columnsWidth).toEqual([col1]);
 
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(uiState.set).toHaveBeenCalledTimes(1);
       expect(uiState.set).toHaveBeenLastCalledWith('vis.params.colWidth', [col1]);
@@ -140,7 +142,7 @@ describe('useUiState', () => {
         result.current.setColumnsWidth(col2);
       });
 
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(uiState.set).toHaveBeenCalledTimes(2);
       expect(uiState.set).toHaveBeenLastCalledWith('vis.params.colWidth', [col1, col2]);
@@ -151,7 +153,7 @@ describe('useUiState', () => {
         result.current.setColumnsWidth(updatedCol1);
       });
 
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(uiState.set).toHaveBeenCalledTimes(3);
       expect(uiState.set).toHaveBeenCalledWith('vis.params.colWidth', [updatedCol1, col2]);
@@ -168,7 +170,7 @@ describe('useUiState', () => {
 
       expect(result.current.sort).toEqual(validSort);
 
-      uiState.getChanges = jest.fn(() => ({
+      uiState.getChanges = vi.fn(() => ({
         vis: {
           params: {
             sort: undefined,
@@ -177,18 +179,18 @@ describe('useUiState', () => {
         },
       }));
 
-      const updateOnChange = jest.mocked(uiState.on).mock.calls[0][1];
+      const updateOnChange = vi.mocked(uiState.on).mock.calls[0][1];
 
       act(() => {
         updateOnChange();
-        jest.runAllTimers();
+        vi.runAllTimers();
       });
 
       expect(result.current.sort).toEqual(validSort);
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 });

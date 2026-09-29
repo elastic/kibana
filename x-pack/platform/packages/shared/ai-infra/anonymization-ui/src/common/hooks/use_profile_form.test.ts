@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import {
   NER_MODEL_ID,
@@ -18,26 +21,35 @@ import { useUpdateProfile } from '../services/profiles/hooks/use_update_profile'
 import { TARGET_TYPE_DATA_VIEW, TARGET_TYPE_INDEX } from '../target_types';
 import { useProfileForm } from './use_profile_form';
 
-jest.mock('../services/profiles/hooks/use_create_profile', () => ({
-  useCreateProfile: jest.fn(),
-}));
-jest.mock('../services/profiles/hooks/use_update_profile', () => ({
-  useUpdateProfile: jest.fn(),
-}));
-jest.mock('../services/profiles/hooks/get_conflict_state', () => ({
-  getConflictState: jest.fn(),
-}));
+vi.mock('../services/profiles/hooks/use_create_profile', () => {
+      const mocked = {
+      useCreateProfile: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../services/profiles/hooks/use_update_profile', () => {
+      const mocked = {
+      useUpdateProfile: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../services/profiles/hooks/get_conflict_state', () => {
+      const mocked = {
+      getConflictState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createUseCreateProfileMutationMock = ({
-  mutateAsync = jest.fn(),
+  mutateAsync = vi.fn(),
   error = null,
   isLoading = false,
-  reset = jest.fn(),
+  reset = vi.fn(),
 }: {
-  mutateAsync?: jest.Mock;
+  mutateAsync?: Mock;
   error?: unknown;
   isLoading?: boolean;
-  reset?: jest.Mock;
+  reset?: Mock;
 } = {}): ReturnType<typeof useCreateProfile> =>
   ({
     mutateAsync,
@@ -47,15 +59,15 @@ const createUseCreateProfileMutationMock = ({
   } as unknown as ReturnType<typeof useCreateProfile>);
 
 const createUseUpdateProfileMutationMock = ({
-  mutateAsync = jest.fn(),
+  mutateAsync = vi.fn(),
   error = null,
   isLoading = false,
-  reset = jest.fn(),
+  reset = vi.fn(),
 }: {
-  mutateAsync?: jest.Mock;
+  mutateAsync?: Mock;
   error?: unknown;
   isLoading?: boolean;
-  reset?: jest.Mock;
+  reset?: Mock;
 } = {}): ReturnType<typeof useUpdateProfile> =>
   ({
     mutateAsync,
@@ -79,25 +91,25 @@ const createProfile = (id: string): AnonymizationProfile => ({
 });
 
 const client = {
-  findProfiles: jest.fn(),
-  getProfile: jest.fn(),
-  createProfile: jest.fn(),
-  updateProfile: jest.fn(),
-  deleteProfile: jest.fn(),
+  findProfiles: vi.fn(),
+  getProfile: vi.fn(),
+  createProfile: vi.fn(),
+  updateProfile: vi.fn(),
+  deleteProfile: vi.fn(),
 };
 
 describe('useProfileForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(getConflictState).mockReturnValue({ isConflict: false, error: undefined });
+    vi.clearAllMocks();
+    vi.mocked(getConflictState).mockReturnValue({ isConflict: false, error: undefined });
   });
 
   it('validates required fields before submit', async () => {
-    const mutateAsync = jest.fn();
-    jest
+    const mutateAsync = vi.fn();
+    vi
       .mocked(useCreateProfile)
       .mockReturnValue(createUseCreateProfileMutationMock({ mutateAsync }));
-    jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
+    vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
 
     const { result } = renderHook(() =>
       useProfileForm({
@@ -116,11 +128,11 @@ describe('useProfileForm', () => {
   });
 
   it('requires entity class when anonymized field is empty', async () => {
-    const mutateAsync = jest.fn();
-    jest
+    const mutateAsync = vi.fn();
+    vi
       .mocked(useCreateProfile)
       .mockReturnValue(createUseCreateProfileMutationMock({ mutateAsync }));
-    jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
+    vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
 
     const { result } = renderHook(() =>
       useProfileForm({
@@ -154,11 +166,11 @@ describe('useProfileForm', () => {
   });
 
   it('requires regex pattern and entity class for regex rules', async () => {
-    const mutateAsync = jest.fn();
-    jest
+    const mutateAsync = vi.fn();
+    vi
       .mocked(useCreateProfile)
       .mockReturnValue(createUseCreateProfileMutationMock({ mutateAsync }));
-    jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
+    vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
 
     const { result } = renderHook(() =>
       useProfileForm({
@@ -193,11 +205,11 @@ describe('useProfileForm', () => {
   });
 
   it('requires ner model id and allowed entities for ner rules', async () => {
-    const mutateAsync = jest.fn();
-    jest
+    const mutateAsync = vi.fn();
+    vi
       .mocked(useCreateProfile)
       .mockReturnValue(createUseCreateProfileMutationMock({ mutateAsync }));
-    jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
+    vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
 
     const { result } = renderHook(() =>
       useProfileForm({
@@ -233,11 +245,11 @@ describe('useProfileForm', () => {
 
   it('submits create form values through create mutation', async () => {
     const created = createProfile('new');
-    const createMutateAsync = jest.fn().mockResolvedValue(created);
-    jest
+    const createMutateAsync = vi.fn().mockResolvedValue(created);
+    vi
       .mocked(useCreateProfile)
       .mockReturnValue(createUseCreateProfileMutationMock({ mutateAsync: createMutateAsync }));
-    jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
+    vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
 
     const { result } = renderHook(() =>
       useProfileForm({
@@ -270,9 +282,9 @@ describe('useProfileForm', () => {
   it('uses update mutation in edit mode', async () => {
     const initialProfile = createProfile('existing');
     const updated = { ...initialProfile, name: 'Updated Name' };
-    const updateMutateAsync = jest.fn().mockResolvedValue(updated);
-    jest.mocked(useCreateProfile).mockReturnValue(createUseCreateProfileMutationMock());
-    jest
+    const updateMutateAsync = vi.fn().mockResolvedValue(updated);
+    vi.mocked(useCreateProfile).mockReturnValue(createUseCreateProfileMutationMock());
+    vi
       .mocked(useUpdateProfile)
       .mockReturnValue(createUseUpdateProfileMutationMock({ mutateAsync: updateMutateAsync }));
 
@@ -305,15 +317,15 @@ describe('useProfileForm', () => {
       statusCode: 409,
       body: { message: 'profile already exists' },
     });
-    const createMutateAsync = jest.fn().mockRejectedValue(createError);
-    jest.mocked(useCreateProfile).mockReturnValue(
+    const createMutateAsync = vi.fn().mockRejectedValue(createError);
+    vi.mocked(useCreateProfile).mockReturnValue(
       createUseCreateProfileMutationMock({
         mutateAsync: createMutateAsync,
         error: createError,
       })
     );
-    jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
-    jest.mocked(getConflictState).mockReturnValue({
+    vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
+    vi.mocked(getConflictState).mockReturnValue({
       isConflict: true,
       error: createError,
     });
@@ -339,14 +351,14 @@ describe('useProfileForm', () => {
   });
 
   it('returns undefined when submit fails without conflict details', async () => {
-    const createMutateAsync = jest.fn().mockRejectedValue(new Error('boom'));
-    jest.mocked(useCreateProfile).mockReturnValue(
+    const createMutateAsync = vi.fn().mockRejectedValue(new Error('boom'));
+    vi.mocked(useCreateProfile).mockReturnValue(
       createUseCreateProfileMutationMock({
         mutateAsync: createMutateAsync,
       })
     );
-    jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
-    jest.mocked(getConflictState).mockReturnValue({ isConflict: false, error: undefined });
+    vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
+    vi.mocked(getConflictState).mockReturnValue({ isConflict: false, error: undefined });
 
     const { result } = renderHook(() =>
       useProfileForm({
@@ -372,15 +384,15 @@ describe('useProfileForm', () => {
       statusCode: 409,
       body: { message: 'profile already exists' },
     });
-    const createMutateAsync = jest.fn().mockRejectedValue(createError);
-    jest.mocked(useCreateProfile).mockReturnValue(
+    const createMutateAsync = vi.fn().mockRejectedValue(createError);
+    vi.mocked(useCreateProfile).mockReturnValue(
       createUseCreateProfileMutationMock({
         mutateAsync: createMutateAsync,
         error: createError,
       })
     );
-    jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
-    jest.mocked(getConflictState).mockReturnValue({ isConflict: false, error: undefined });
+    vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
+    vi.mocked(getConflictState).mockReturnValue({ isConflict: false, error: undefined });
 
     const { result } = renderHook(() =>
       useProfileForm({
@@ -402,12 +414,12 @@ describe('useProfileForm', () => {
   });
 
   it('normalizes non-API submit errors for display', () => {
-    jest.mocked(useCreateProfile).mockReturnValue(
+    vi.mocked(useCreateProfile).mockReturnValue(
       createUseCreateProfileMutationMock({
         error: new Error('invalid profile response payload'),
       })
     );
-    jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
+    vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
 
     const { result } = renderHook(() =>
       useProfileForm({
@@ -422,18 +434,18 @@ describe('useProfileForm', () => {
 
   it('clears mutation error state on reset', () => {
     let createError: unknown = new Error('invalid profile response payload');
-    const createReset = jest.fn(() => {
+    const createReset = vi.fn(() => {
       createError = null;
     });
-    const updateReset = jest.fn();
+    const updateReset = vi.fn();
 
-    jest.mocked(useCreateProfile).mockImplementation(() =>
+    vi.mocked(useCreateProfile).mockImplementation(() =>
       createUseCreateProfileMutationMock({
         error: createError,
         reset: createReset,
       })
     );
-    jest.mocked(useUpdateProfile).mockImplementation(() =>
+    vi.mocked(useUpdateProfile).mockImplementation(() =>
       createUseUpdateProfileMutationMock({
         reset: updateReset,
       })
@@ -458,8 +470,8 @@ describe('useProfileForm', () => {
   });
 
   it('hydrates form values when initialProfile arrives after mount', async () => {
-    jest.mocked(useCreateProfile).mockReturnValue(createUseCreateProfileMutationMock());
-    jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
+    vi.mocked(useCreateProfile).mockReturnValue(createUseCreateProfileMutationMock());
+    vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
 
     const initialProps: { initialProfile?: AnonymizationProfile } = {
       initialProfile: undefined,
@@ -490,8 +502,8 @@ describe('useProfileForm', () => {
   });
 
   it('clears target selection and rules when target type changes', () => {
-    jest.mocked(useCreateProfile).mockReturnValue(createUseCreateProfileMutationMock());
-    jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
+    vi.mocked(useCreateProfile).mockReturnValue(createUseCreateProfileMutationMock());
+    vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
 
     const { result } = renderHook(() =>
       useProfileForm({
@@ -535,8 +547,8 @@ describe('useProfileForm', () => {
   });
 
   it('normalizes missing NER modelId to default constant when hydrating initial profile', async () => {
-    jest.mocked(useCreateProfile).mockReturnValue(createUseCreateProfileMutationMock());
-    jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
+    vi.mocked(useCreateProfile).mockReturnValue(createUseCreateProfileMutationMock());
+    vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
 
     const profileWithLegacyNer = {
       ...createProfile('legacy'),
@@ -579,9 +591,9 @@ describe('useProfileForm', () => {
         nerRules: [],
       },
     };
-    const updateMutateAsync = jest.fn().mockResolvedValue(initialProfile);
-    jest.mocked(useCreateProfile).mockReturnValue(createUseCreateProfileMutationMock());
-    jest
+    const updateMutateAsync = vi.fn().mockResolvedValue(initialProfile);
+    vi.mocked(useCreateProfile).mockReturnValue(createUseCreateProfileMutationMock());
+    vi
       .mocked(useUpdateProfile)
       .mockReturnValue(createUseUpdateProfileMutationMock({ mutateAsync: updateMutateAsync }));
 

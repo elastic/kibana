@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { LegendSettingsProps } from './legend_settings';
 import { LegendSettingsPopover } from './legend_settings';
@@ -38,9 +40,9 @@ describe('Legend Settings', () => {
       ],
       mode: 'auto',
       showAutoLegendSizeOption: true,
-      onDisplayChange: jest.fn(),
-      onPositionChange: jest.fn(),
-      onLegendSizeChange: jest.fn(),
+      onDisplayChange: vi.fn(),
+      onPositionChange: vi.fn(),
+      onLegendSizeChange: vi.fn(),
     };
   });
 
@@ -100,7 +102,7 @@ describe('Legend Settings', () => {
   });
 
   it('should have called the onTruncateLegendChange function on truncate switch change', async () => {
-    const onTruncateLegendChange = jest.fn();
+    const onTruncateLegendChange = vi.fn();
     await renderLegendSettingsPopover({ onTruncateLegendChange });
     const switchElement = screen.getByRole('switch', { name: 'Label truncation' });
     fireEvent.click(switchElement);
@@ -118,7 +120,7 @@ describe('Legend Settings', () => {
   });
 
   it('should have called the onNestedLegendChange function on switch change', async () => {
-    const onNestedLegendChange = jest.fn();
+    const onNestedLegendChange = vi.fn();
     await renderLegendSettingsPopover({ renderNestedLegendSwitch: true, onNestedLegendChange });
     const switchElement = screen.getByRole('switch', { name: 'Nested' });
     fireEvent.click(switchElement);
@@ -131,7 +133,7 @@ describe('Legend Settings', () => {
   });
 
   it('should display allowed legend stats', async () => {
-    const onLegendStatsChange = jest.fn();
+    const onLegendStatsChange = vi.fn();
     await renderLegendSettingsPopover({
       allowedLegendStats: [
         {
@@ -157,7 +159,7 @@ describe('Legend Settings', () => {
   });
 
   it('should show Layout setting for top/bottom outside legends and call onLayoutChange', async () => {
-    const onLayoutChange = jest.fn();
+    const onLayoutChange = vi.fn();
     await renderLegendSettingsPopover({
       position: Position.Bottom,
       location: 'outside',
@@ -171,7 +173,7 @@ describe('Legend Settings', () => {
   });
 
   it('should allow switching between Grid and List layouts', async () => {
-    const onLayoutChange = jest.fn();
+    const onLayoutChange = vi.fn();
 
     const StatefulLayout = () => {
       const [layout, setLayout] = React.useState<LegendLayout | undefined>(undefined);
@@ -208,7 +210,7 @@ describe('Legend Settings', () => {
       position: Position.Bottom,
       location: 'outside',
       layout: LegendLayout.List,
-      onLayoutChange: jest.fn(),
+      onLayoutChange: vi.fn(),
     });
 
     expect(screen.queryByRole('switch', { name: 'Label truncation' })).toBeNull();
@@ -219,7 +221,7 @@ describe('Legend Settings', () => {
       position: Position.Bottom,
       location: 'inside',
       layout: LegendLayout.List,
-      onLayoutChange: jest.fn(),
+      onLayoutChange: vi.fn(),
     });
 
     expect(screen.getByRole('spinbutton', { name: 'Line limit' })).toBeInTheDocument();
@@ -230,7 +232,7 @@ describe('Legend Settings', () => {
       position: Position.Right,
       location: 'outside',
       layout: LegendLayout.List,
-      onLayoutChange: jest.fn(),
+      onLayoutChange: vi.fn(),
     });
 
     expect(screen.queryByTestId('lens-legend-layout-btn')).toBeNull();

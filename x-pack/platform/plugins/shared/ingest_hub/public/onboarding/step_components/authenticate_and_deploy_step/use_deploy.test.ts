@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import {
@@ -27,33 +30,43 @@ function makeVarDef(
   return { name, type, title: name, ...opts } as RegistryVarsEntry;
 }
 
-jest.mock('react-router-dom', () => ({
-  useHistory: jest.fn(),
-  useParams: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: vi.fn(),
+      useParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  sendCreateAgentlessPolicy: jest.fn(),
-  sendGetPackageInfoByKey: jest.fn(),
-  sendCreateCloudOnboardingDeployment: jest.fn(),
-  sendUpdateCloudOnboardingDeployment: jest.fn(),
-  sendGetAgentlessPolicy: jest.fn(),
-  sendUpdateCloudConnector: jest.fn(),
-  sendVerifyCloudConnectorIacKey: jest.fn(),
-}));
+vi.mock('@kbn/fleet-plugin/public', () => {
+      const mocked = {
+      sendCreateAgentlessPolicy: vi.fn(),
+      sendGetPackageInfoByKey: vi.fn(),
+      sendCreateCloudOnboardingDeployment: vi.fn(),
+      sendUpdateCloudOnboardingDeployment: vi.fn(),
+      sendGetAgentlessPolicy: vi.fn(),
+      sendUpdateCloudConnector: vi.fn(),
+      sendVerifyCloudConnectorIacKey: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./policy_cleanup_managed_integrations', () => ({
-  cleanupManagedIntegrationsPolicies: jest.fn(),
-}));
+vi.mock('./policy_cleanup_managed_integrations', () => {
+      const mocked = {
+      cleanupManagedIntegrationsPolicies: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../use_aws_service_matrix', () => {
-  const { AWS_SERVICES_STATIC, buildAwsServiceMatrix } = jest.requireActual(
-    '../../aws_service_matrix'
-  ) as any;
+vi.mock('../../use_aws_service_matrix', async () => {
+  const { AWS_SERVICES_STATIC, buildAwsServiceMatrix } = (await vi.importActual('../../aws_service_matrix')) as any;
   const policyTemplates = (AWS_SERVICES_STATIC as any[])
     .filter((e: any) => e.packageName === 'aws')
     .map((e: any) => ({
@@ -138,16 +151,19 @@ jest.mock('../../use_aws_service_matrix', () => {
   const matrix = buildAwsServiceMatrix(mockPackages, AWS_SERVICES_STATIC);
   const servicesMap = new Map(matrix.map((s: any) => [s.id, s]));
   return {
-    useAwsServiceMatrix: jest.fn().mockReturnValue({ matrix, isError: false, refetch: jest.fn() }),
-    useAwsServicesMap: jest.fn().mockReturnValue(servicesMap),
+    useAwsServiceMatrix: vi.fn().mockReturnValue({ matrix, isError: false, refetch: vi.fn() }),
+    useAwsServicesMap: vi.fn().mockReturnValue(servicesMap),
   };
 });
 
-jest.mock('../../onboarding_flow_context', () => ({
-  useOnboardingFlow: jest.fn(),
-}));
+vi.mock('../../onboarding_flow_context', () => {
+      const mocked = {
+      useOnboardingFlow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
+vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
 
 import {
   sendCreateAgentlessPolicy,
@@ -165,18 +181,18 @@ import { useHistory, useParams } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { cleanupManagedIntegrationsPolicies } from './policy_cleanup_managed_integrations';
 
-const mockSendCreateAgentlessPolicy = sendCreateAgentlessPolicy as jest.Mock;
-const mockCleanupManagedIntegrationsPolicies = cleanupManagedIntegrationsPolicies as jest.Mock;
-const mockSendGetPackageInfoByKey = sendGetPackageInfoByKey as jest.Mock;
-const mockSendCreateCloudOnboardingDeployment = sendCreateCloudOnboardingDeployment as jest.Mock;
-const mockSendUpdateCloudOnboardingDeployment = sendUpdateCloudOnboardingDeployment as jest.Mock;
-const mockSendUpdateCloudConnector = sendUpdateCloudConnector as jest.Mock;
-const mockSendVerifyCloudConnectorIacKey = sendVerifyCloudConnectorIacKey as jest.Mock;
-const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
-const mockUseSessionStorage = useSessionStorage as jest.Mock;
-const mockUseHistory = useHistory as jest.Mock;
-const mockUseParams = useParams as jest.Mock;
-const mockUseKibana = useKibana as jest.Mock;
+const mockSendCreateAgentlessPolicy = sendCreateAgentlessPolicy as Mock;
+const mockCleanupManagedIntegrationsPolicies = cleanupManagedIntegrationsPolicies as Mock;
+const mockSendGetPackageInfoByKey = sendGetPackageInfoByKey as Mock;
+const mockSendCreateCloudOnboardingDeployment = sendCreateCloudOnboardingDeployment as Mock;
+const mockSendUpdateCloudOnboardingDeployment = sendUpdateCloudOnboardingDeployment as Mock;
+const mockSendUpdateCloudConnector = sendUpdateCloudConnector as Mock;
+const mockSendVerifyCloudConnectorIacKey = sendVerifyCloudConnectorIacKey as Mock;
+const mockUseOnboardingFlow = useOnboardingFlow as Mock;
+const mockUseSessionStorage = useSessionStorage as Mock;
+const mockUseHistory = useHistory as Mock;
+const mockUseParams = useParams as Mock;
+const mockUseKibana = useKibana as Mock;
 
 // ─── Fixtures ───────────────────────────────────────────────────────────────
 
@@ -728,16 +744,16 @@ function setupMocks({
   latestFailedInstances?: string[];
   instances?: Array<{ instanceId: string; serviceId: string; name: string; isDuplicate: boolean }>;
 } = {}) {
-  mockUseHistory.mockReturnValue({ location: { search: '', hash: '' }, replace: jest.fn() });
+  mockUseHistory.mockReturnValue({ location: { search: '', hash: '' }, replace: vi.fn() });
   mockUseParams.mockReturnValue({ integrationId: 'aws' });
   mockUseKibana.mockReturnValue({
-    services: { notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } } },
+    services: { notifications: { toasts: { addDanger: vi.fn(), addWarning: vi.fn() } } },
   });
 
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
     authenticateAndDeployStep: { connectorId, staticKeys, pendingIacTemplate },
-    setPendingIacTemplate: jest.fn(),
+    setPendingIacTemplate: vi.fn(),
     detectAndReviewStep: {
       isDeploying: false,
       serviceStatuses: {},
@@ -745,13 +761,13 @@ function setupMocks({
       failedInstances: [],
       ...detectAndReviewStep,
     },
-    awsServicesMap: (useAwsServicesMap as jest.Mock)(),
-    updateDetectAndReviewStep: jest.fn(),
-    removeDeployInstances: jest.fn(),
-    getLatestFailedInstances: jest.fn().mockReturnValue(latestFailedInstances),
+    awsServicesMap: (useAwsServicesMap as Mock)(),
+    updateDetectAndReviewStep: vi.fn(),
+    removeDeployInstances: vi.fn(),
+    getLatestFailedInstances: vi.fn().mockReturnValue(latestFailedInstances),
   });
 
-  mockUseSessionStorage.mockReturnValue([{ globalRegion, serviceVars: {}, instances }, jest.fn()]);
+  mockUseSessionStorage.mockReturnValue([{ globalRegion, serviceVars: {}, instances }, vi.fn()]);
   mockSendUpdateCloudConnector.mockResolvedValue({ data: { item: {} }, error: undefined });
   mockSendVerifyCloudConnectorIacKey.mockResolvedValue({ data: {}, error: undefined });
 
@@ -775,13 +791,13 @@ function setupMocks({
 
 describe('useDeploy', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCleanupManagedIntegrationsPolicies.mockResolvedValue({ toDelete: [], toUpdate: [] });
   });
 
   it('initializes with default namespace and idle state', () => {
     setupMocks();
-    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
     expect(result.current.namespace).toBe('default');
     expect(result.current.isDeploying).toBe(false);
@@ -799,14 +815,14 @@ describe('useDeploy', () => {
         failedInstances: ['ec2'],
       },
     });
-    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
     expect(result.current.failedInstances).toEqual(['ec2']);
   });
 
   it('navigates immediately and completes API call on success', async () => {
     setupMocks({ selectedServiceIds: ['ec2'] });
-    const onContinue = jest.fn();
+    const onContinue = vi.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
 
     await act(async () => {
@@ -820,7 +836,7 @@ describe('useDeploy', () => {
   it('navigates immediately even when deployment fails', async () => {
     setupMocks({ selectedServiceIds: ['ec2'] });
     mockSendCreateAgentlessPolicy.mockRejectedValue(new Error('API error'));
-    const onContinue = jest.fn();
+    const onContinue = vi.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
 
     await act(async () => {
@@ -833,7 +849,7 @@ describe('useDeploy', () => {
 
   it('is not loading after deployment finishes', async () => {
     setupMocks();
-    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
     await act(async () => {
       await result.current.handleDeploy();
@@ -847,7 +863,7 @@ describe('useDeploy', () => {
     mockSendCreateAgentlessPolicy
       .mockRejectedValueOnce(new Error('first fail'))
       .mockResolvedValueOnce({ data: {} });
-    const onContinue = jest.fn();
+    const onContinue = vi.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
 
     await act(async () => {
@@ -865,7 +881,7 @@ describe('useDeploy', () => {
 
   it('passes cloud_connector when connectorId is set (identity federation path)', async () => {
     setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-123' });
-    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
     await act(async () => {
       await result.current.handleDeploy();
@@ -884,7 +900,7 @@ describe('useDeploy', () => {
       connectorId: undefined,
       staticKeys: { access_key_id: 'AKID', secret_access_key: 'SECRET' },
     });
-    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
     await act(async () => {
       await result.current.handleDeploy();
@@ -902,7 +918,7 @@ describe('useDeploy', () => {
 
   it('calls onContinue immediately when no managed_integration services are selected', async () => {
     setupMocks({ selectedServiceIds: [] });
-    const onContinue = jest.fn();
+    const onContinue = vi.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
 
     await act(async () => {
@@ -916,7 +932,7 @@ describe('useDeploy', () => {
   it('adds to failedInstances when package version cannot be resolved', async () => {
     setupMocks({ selectedServiceIds: ['ec2'] });
     mockSendGetPackageInfoByKey.mockResolvedValue({ data: { item: { version: undefined } } });
-    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
     await act(async () => {
       await result.current.handleDeploy();
@@ -930,7 +946,7 @@ describe('useDeploy', () => {
       selectedServiceIds: ['ec2'],
       detectAndReviewStep: { serviceStatuses: { ec2: 'detecting' } },
     });
-    const onContinue = jest.fn();
+    const onContinue = vi.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
 
     await act(async () => {
@@ -946,7 +962,7 @@ describe('useDeploy', () => {
       selectedServiceIds: ['ec2'],
       detectAndReviewStep: { isDeploying: true, serviceStatuses: { ec2: 'instantiating' } },
     });
-    const onContinue = jest.fn();
+    const onContinue = vi.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
 
     await act(async () => {
@@ -965,7 +981,7 @@ describe('useDeploy', () => {
       selectedServiceIds: ['ec2', 'lambda'],
       detectAndReviewStep: { serviceStatuses: { ec2: 'instantiating' } },
     });
-    const onContinue = jest.fn();
+    const onContinue = vi.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
 
     await act(async () => {
@@ -1002,7 +1018,7 @@ describe('useDeploy', () => {
       selectedServiceIds: ['ec2'],
       instances,
     });
-    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
     await act(async () => {
       await result.current.handleDeploy();
@@ -1039,7 +1055,7 @@ describe('useDeploy', () => {
         },
       },
     });
-    const onContinue = jest.fn();
+    const onContinue = vi.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
 
     await act(async () => {
@@ -1068,7 +1084,7 @@ describe('useDeploy', () => {
       selectedServiceIds: ['cloudtrail', 'ec2'],
       instances,
     });
-    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
     await act(async () => {
       await result.current.handleDeploy();
@@ -1096,7 +1112,7 @@ describe('useDeploy', () => {
       selectedServiceIds: ['ec2'],
       instances,
     });
-    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
     await act(async () => {
       await result.current.handleDeploy();
@@ -1118,7 +1134,7 @@ describe('useDeploy', () => {
         selectedServiceIds: ['ec2'],
         detectAndReviewStep: { serviceStatuses: {} },
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(false);
     });
 
@@ -1127,7 +1143,7 @@ describe('useDeploy', () => {
         selectedServiceIds: ['ec2'],
         detectAndReviewStep: { serviceStatuses: { ec2: 'instantiating' } },
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(false);
     });
 
@@ -1136,7 +1152,7 @@ describe('useDeploy', () => {
         selectedServiceIds: ['ec2'],
         detectAndReviewStep: { serviceStatuses: { ec2: 'error' } },
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(false);
     });
 
@@ -1145,7 +1161,7 @@ describe('useDeploy', () => {
         selectedServiceIds: ['ec2'],
         detectAndReviewStep: { serviceStatuses: { ec2: 'receiving' } },
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(true);
     });
 
@@ -1154,7 +1170,7 @@ describe('useDeploy', () => {
         selectedServiceIds: ['ec2'],
         detectAndReviewStep: { serviceStatuses: { ec2: 'detecting' } },
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(true);
     });
 
@@ -1163,7 +1179,7 @@ describe('useDeploy', () => {
         selectedServiceIds: ['ec2'],
         detectAndReviewStep: { serviceStatuses: { ec2: 'timeout' } },
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(true);
     });
 
@@ -1172,7 +1188,7 @@ describe('useDeploy', () => {
         selectedServiceIds: ['ec2', 'guardduty'],
         detectAndReviewStep: { serviceStatuses: { ec2: 'receiving', guardduty: 'detecting' } },
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(true);
     });
 
@@ -1181,7 +1197,7 @@ describe('useDeploy', () => {
         selectedServiceIds: ['ec2', 'guardduty'],
         detectAndReviewStep: { serviceStatuses: { ec2: 'detecting', guardduty: 'instantiating' } },
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(false);
     });
   });
@@ -1189,7 +1205,7 @@ describe('useDeploy', () => {
   it('includes non-managed_integration services as gray instantiating chips without deploying them', async () => {
     // ec2 is managed_integration; cloudtrail is ecf
     setupMocks({ selectedServiceIds: ['ec2', 'cloudtrail'] });
-    const onContinue = jest.fn();
+    const onContinue = vi.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
 
     await act(async () => {
@@ -1197,7 +1213,7 @@ describe('useDeploy', () => {
     });
 
     const updateDetectAndReviewStep = mockUseOnboardingFlow.mock.results[0].value
-      .updateDetectAndReviewStep as jest.Mock;
+      .updateDetectAndReviewStep as Mock;
     const initialUpdate = updateDetectAndReviewStep.mock.calls[0][0];
 
     // Both services appear in the initial status update
@@ -1213,7 +1229,7 @@ describe('useDeploy', () => {
   describe('cloud-onboarding-deployment SO', () => {
     it('creates SO before dispatch when connectorId is set', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1232,7 +1248,7 @@ describe('useDeploy', () => {
         connectorId: undefined,
         staticKeys: { access_key_id: 'AKIA', secret_access_key: 'secret' },
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1248,7 +1264,7 @@ describe('useDeploy', () => {
 
     it('passes authMethod: identity_federation when connectorId is set', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
       await act(async () => {
         await result.current.handleDeploy();
       });
@@ -1263,7 +1279,7 @@ describe('useDeploy', () => {
         connectorId: undefined,
         staticKeys: { access_key_id: 'AKIA', secret_access_key: 'secret' },
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
       await act(async () => {
         await result.current.handleDeploy();
       });
@@ -1276,14 +1292,14 @@ describe('useDeploy', () => {
 
     it('saves onboardingDeploymentId to session via updateDetectAndReviewStep', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
       });
 
       const updateDetectAndReviewStep = mockUseOnboardingFlow.mock.results[0].value
-        .updateDetectAndReviewStep as jest.Mock;
+        .updateDetectAndReviewStep as Mock;
       const idUpdate = updateDetectAndReviewStep.mock.calls.find(
         ([u]: [Record<string, unknown>]) => 'onboardingDeploymentId' in u
       )?.[0];
@@ -1293,7 +1309,7 @@ describe('useDeploy', () => {
     it('updates SO with packagePolicyIds and succeeded status after successful deploy', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
       mockSendCreateAgentlessPolicy.mockResolvedValue({ item: { id: 'p-1' } });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1308,7 +1324,7 @@ describe('useDeploy', () => {
     it('updates SO with failed status when deploy fails', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
       mockSendCreateAgentlessPolicy.mockRejectedValue(new Error('API error'));
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1323,7 +1339,7 @@ describe('useDeploy', () => {
     it('SO creation failure is non-fatal — deploy still proceeds', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
       mockSendCreateCloudOnboardingDeployment.mockRejectedValue(new Error('SO create failed'));
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1343,7 +1359,7 @@ describe('useDeploy', () => {
           onboardingDeploymentId: 'existing-dep-id',
         },
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy(['ec2']);
@@ -1369,7 +1385,7 @@ describe('useDeploy', () => {
         },
       });
       mockSendCreateAgentlessPolicy.mockResolvedValue({ item: { id: 'policy-ec2' } });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         // Retry — instanceIds provided — so no new SO create, uses existing dep id.
@@ -1387,7 +1403,7 @@ describe('useDeploy', () => {
     it('shows addDanger toast when SO create fails (best-effort — deploy still proceeds)', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
       mockSendCreateCloudOnboardingDeployment.mockRejectedValue(new Error('SO create failed'));
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1403,7 +1419,7 @@ describe('useDeploy', () => {
     it('shows addDanger toast when SO update fails after deploy completes', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
       mockSendUpdateCloudOnboardingDeployment.mockRejectedValue(new Error('SO update failed'));
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1421,7 +1437,7 @@ describe('useDeploy', () => {
     it('updates SO with services: selectedServiceIds after successful deploy', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
       mockSendCreateAgentlessPolicy.mockResolvedValue({ item: { id: 'p-1' } });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1450,7 +1466,7 @@ describe('useDeploy', () => {
       });
       mockSendCreateAgentlessPolicy.mockResolvedValue({ item: { id: 'policy-ec2' } });
 
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1475,7 +1491,7 @@ describe('useDeploy', () => {
     const deployedIntegrationsKey = () =>
       JSON.stringify(
         buildIacIntegrations(
-          buildDeployGroups([], ['ec2'], (useAwsServicesMap as jest.Mock)()).flatMap(
+          buildDeployGroups([], ['ec2'], (useAwsServicesMap as Mock)()).flatMap(
             (group) => group.members
           ),
           {}
@@ -1489,14 +1505,14 @@ describe('useDeploy', () => {
       iac_blueprint_version: '1.0.0',
     };
     const setPendingIacMock = () =>
-      mockUseOnboardingFlow.mock.results[0].value.setPendingIacTemplate as jest.Mock;
+      mockUseOnboardingFlow.mock.results[0].value.setPendingIacTemplate as Mock;
     const addWarningMock = () =>
       mockUseKibana.mock.results[0]?.value?.services?.notifications?.toasts
-        ?.addWarning as jest.Mock;
+        ?.addWarning as Mock;
 
     it('writes the key and blueprint to the connector after a fully successful run, then clears the pending template details', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc', pendingIacTemplate });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1519,7 +1535,7 @@ describe('useDeploy', () => {
       // The re-check is best-effort: the key is stored, so the daily task will derive the status.
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc', pendingIacTemplate });
       mockSendVerifyCloudConnectorIacKey.mockRejectedValue(new Error('network down'));
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1533,7 +1549,7 @@ describe('useDeploy', () => {
     it('does not write when any integration failed to deploy', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc', pendingIacTemplate });
       mockSendCreateAgentlessPolicy.mockRejectedValue(new Error('API error'));
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1558,7 +1574,7 @@ describe('useDeploy', () => {
         },
         latestFailedInstances: ['ec2', 'lambda'],
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy(['ec2']);
@@ -1579,7 +1595,7 @@ describe('useDeploy', () => {
           onboardingDeploymentId: 'existing-dep-id',
         },
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy(['ec2']);
@@ -1601,7 +1617,7 @@ describe('useDeploy', () => {
         pendingIacTemplate,
         detectAndReviewStep: { serviceStatuses: { ec2: 'detecting' } },
       });
-      const onContinue = jest.fn();
+      const onContinue = vi.fn();
       const { result } = renderHook(() => useDeploy({ onContinue }));
 
       await act(async () => {
@@ -1626,7 +1642,7 @@ describe('useDeploy', () => {
         pendingIacTemplate,
         detectAndReviewStep: { serviceStatuses: { ec2: 'detecting' } },
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1638,7 +1654,7 @@ describe('useDeploy', () => {
 
     it('does not write when nothing is pending', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc' });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1654,7 +1670,7 @@ describe('useDeploy', () => {
         connectorId: 'connector-other',
         pendingIacTemplate,
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1678,7 +1694,7 @@ describe('useDeploy', () => {
           ]),
         },
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1696,7 +1712,7 @@ describe('useDeploy', () => {
         staticKeys: { access_key_id: 'AKID', secret_access_key: 'SECRET' },
         pendingIacTemplate,
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1711,7 +1727,7 @@ describe('useDeploy', () => {
         data: undefined,
         error: new Error('403 Forbidden'),
       });
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1734,7 +1750,7 @@ describe('useDeploy', () => {
     it('warns and keeps the pending template details when the request throws', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc', pendingIacTemplate });
       mockSendUpdateCloudConnector.mockRejectedValue(new Error('network down'));
-      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
       await act(async () => {
         await result.current.handleDeploy();
@@ -1856,7 +1872,7 @@ describe('toSOServiceVars', () => {
 
 describe('useDeploy — cleanup orchestration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Default: cleanup returns no-op ops.
     mockCleanupManagedIntegrationsPolicies.mockResolvedValue({ toDelete: [], toUpdate: [] });
   });
@@ -1876,10 +1892,10 @@ describe('useDeploy — cleanup orchestration', () => {
         failedInstances: [],
       },
     });
-    const onContinue = jest.fn();
+    const onContinue = vi.fn();
     const updateDetectAndReviewStep = (
       mockUseOnboardingFlow() as ReturnType<typeof mockUseOnboardingFlow>
-    ).updateDetectAndReviewStep as jest.Mock;
+    ).updateDetectAndReviewStep as Mock;
 
     const { result } = renderHook(() => useDeploy({ onContinue }));
 
@@ -1903,7 +1919,7 @@ describe('useDeploy — cleanup orchestration', () => {
       detectAndReviewStep: { pendingCleanupPolicyIds: {}, policyIdsByInstance: {} },
     });
 
-    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
     await act(async () => {
       await result.current.handleDeploy();
@@ -1928,7 +1944,7 @@ describe('useDeploy — cleanup orchestration', () => {
       },
     });
 
-    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
     await act(async () => {
       await result.current.handleDeploy();
@@ -1958,7 +1974,7 @@ describe('useDeploy — cleanup orchestration', () => {
 
     mockSendCreateAgentlessPolicy.mockResolvedValue({ item: { id: 'policy-EC2' } });
 
-    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
     await act(async () => {
       await result.current.handleDeploy();
@@ -1990,9 +2006,9 @@ describe('useDeploy — cleanup orchestration', () => {
 
     const removeDeployInstances = (
       mockUseOnboardingFlow() as ReturnType<typeof mockUseOnboardingFlow>
-    ).removeDeployInstances as jest.Mock;
+    ).removeDeployInstances as Mock;
 
-    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
     await act(async () => {
       await result.current.handleDeploy();
@@ -2017,7 +2033,7 @@ describe('useDeploy — cleanup orchestration', () => {
     });
     mockSendCreateAgentlessPolicy.mockResolvedValue({ data: { item: { id: 'policy-EC2' } } });
 
-    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useDeploy({ onContinue: vi.fn() }));
 
     await act(async () => {
       await result.current.handleDeploy(['ec2']);

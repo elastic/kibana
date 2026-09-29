@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -28,16 +31,19 @@ import { GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY } from './use_pagination';
 import { getOrCreateFilterStore, destroyFilterStore } from '../filters/filter_store';
 
 // Mock the hook
-jest.mock('./use_fetch_document_details');
+vi.mock('./use_fetch_document_details');
 
 // Mock expandable flyout API
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openPreviewPanel: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: () => ({
+        openPreviewPanel: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchDocumentDetails = useFetchDocumentDetails as jest.MockedFunction<
+const mockUseFetchDocumentDetails = useFetchDocumentDetails as MockedFunction<
   typeof useFetchDocumentDetails
 >;
 const createMockHookResult = (
@@ -48,7 +54,7 @@ const createMockHookResult = (
   isFetching: false,
   isError: false,
   error: null,
-  refresh: jest.fn(),
+  refresh: vi.fn(),
   ...overrides,
 });
 
@@ -95,11 +101,11 @@ describe('GraphGroupedNodePreviewPanel', () => {
       dataViewId: TEST_DATA_VIEW_ID,
       documentIds: ['doc-1', 'doc-2', 'doc-3'],
       entityItems: [] as EntityItem[],
-      onShowDocument: jest.fn(),
-      onShowEntity: jest.fn(),
+      onShowDocument: vi.fn(),
+      onShowEntity: vi.fn(),
     };
     getOrCreateFilterStore(TEST_SCOPE_ID);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
     entityIdCounter = 0;
     mockUseFetchDocumentDetails.mockReturnValue(

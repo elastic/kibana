@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { featureCatalogueRegistryMock } from './services/feature_catalogue/feature_catalogue_registry.mock';
 import { environmentServiceMock } from './services/environment/environment.mock';
 import { tutorialServiceMock } from './services/tutorials/tutorial_service.mock';
@@ -18,10 +20,13 @@ export const environmentMock = environmentServiceMock.create();
 export const tutorialMock = tutorialServiceMock.create();
 export const addDataMock = addDataServiceMock.create();
 export const welcomeMock = welcomeServiceMock.create();
-jest.doMock('./services', () => ({
-  FeatureCatalogueRegistry: jest.fn(() => registryMock),
-  EnvironmentService: jest.fn(() => environmentMock),
-  TutorialService: jest.fn(() => tutorialMock),
-  AddDataService: jest.fn(() => addDataMock),
-  WelcomeService: jest.fn(() => welcomeMock),
-}));
+vi.doMock('./services', () => {
+      const mocked = {
+      FeatureCatalogueRegistry: vi.fn(() => registryMock),
+      EnvironmentService: vi.fn(() => environmentMock),
+      TutorialService: vi.fn(() => tutorialMock),
+      AddDataService: vi.fn(() => addDataMock),
+      WelcomeService: vi.fn(() => welcomeMock),
+    };
+      return { ...mocked, default: mocked };
+    });

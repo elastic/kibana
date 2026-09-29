@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ConnectionConfig } from '../lib/get_connection_config';
@@ -12,7 +14,7 @@ import { kibanaRequest } from '../lib/kibana';
 import type { SeedContext, SeededQuery } from '../types';
 import { runDiscovery } from './run_discovery';
 
-jest.mock('../lib/kibana');
+vi.mock('../lib/kibana');
 
 const config: ConnectionConfig = {
   esUrl: 'http://elasticsearch.test',
@@ -44,15 +46,15 @@ const seededQueries: SeededQuery[] = [
     severityScore: 4,
   },
 ];
-const log = { info: jest.fn() } as unknown as ToolingLog;
-const request = jest.mocked(kibanaRequest);
+const log = { info: vi.fn() } as unknown as ToolingLog;
+const request = vi.mocked(kibanaRequest);
 
 function createEsClient(): Client {
   return {
     indices: {
-      refresh: jest.fn().mockResolvedValue({}),
+      refresh: vi.fn().mockResolvedValue({}),
     },
-    search: jest.fn().mockResolvedValue({
+    search: vi.fn().mockResolvedValue({
       hits: {
         hits: [
           {
@@ -66,19 +68,19 @@ function createEsClient(): Client {
       },
     }),
     esql: {
-      query: jest.fn().mockResolvedValue({
+      query: vi.fn().mockResolvedValue({
         columns: [{ name: '_index' }, { name: '_id' }],
         values: [['.ds-logs-synth-default-000001', 'source-log']],
       }),
     },
-    get: jest.fn().mockResolvedValue({
+    get: vi.fn().mockResolvedValue({
       _source: {
         '@timestamp': '2026-08-27T09:59:00.000Z',
         message: 'Redis connection timeout after 5000ms',
         service: { name: 'fraud-check' },
       },
     }),
-    bulk: jest.fn().mockResolvedValue({ errors: false, items: [] }),
+    bulk: vi.fn().mockResolvedValue({ errors: false, items: [] }),
   } as unknown as Client;
 }
 
@@ -109,7 +111,7 @@ function mockCompletedWorkflows(event: Record<string, unknown>): void {
 describe('runDiscovery', () => {
   beforeEach(() => {
     request.mockReset();
-    jest.mocked(log.info).mockClear();
+    vi.mocked(log.info).mockClear();
   });
 
   it('adds post-detection evidence and verifies an open event for the critical rule', async () => {

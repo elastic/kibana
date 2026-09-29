@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { sampleDocNoSortId } from '../../__mocks__/es_results';
 import { buildRuleNameFromMapping } from './build_rule_name_from_mapping';
 
 describe('buildRuleNameFromMapping', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('rule name defaults to provided if mapping is incomplete', () => {

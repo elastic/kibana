@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
@@ -17,7 +19,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('QuickSnoozePopover', () => {
   it('renders header, subtitle and apply button', () => {
-    const onApplySnooze = jest.fn();
+    const onApplySnooze = vi.fn();
 
     render(<QuickSnoozePopover onApplySnooze={onApplySnooze} />, { wrapper });
 
@@ -30,7 +32,7 @@ describe('QuickSnoozePopover', () => {
 
   it('applies selected quick snooze when clicking Apply', async () => {
     const user = userEvent.setup();
-    const onApplySnooze = jest.fn();
+    const onApplySnooze = vi.fn();
 
     render(<QuickSnoozePopover onApplySnooze={onApplySnooze} />, { wrapper });
 

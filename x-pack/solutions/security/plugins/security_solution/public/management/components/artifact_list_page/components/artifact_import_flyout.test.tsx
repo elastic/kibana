@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ArtifactListPageProps } from '../artifact_list_page';
 import { waitFor } from '@testing-library/react';
@@ -45,9 +47,9 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     props = {
       labels: artifactListPageLabels,
       apiClient,
-      onCancel: jest.fn(),
-      onSuccess: jest.fn(),
-      onShowErrors: jest.fn(),
+      onCancel: vi.fn(),
+      onSuccess: vi.fn(),
+      onShowErrors: vi.fn(),
     };
 
     render = async () => {

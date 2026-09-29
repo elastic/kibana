@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 
-jest.mock('../components/contexts/profiling_dependencies/use_profiling_dependencies');
+vi.mock('../components/contexts/profiling_dependencies/use_profiling_dependencies');
 
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { useDefaultTimeRange } from './use_default_time_range';
 
 describe('useDefaultTimeRange', () => {
   const mockTimePickerTimeDefaults = { from: 'now-15m', to: 'now' };
-  const mockGetUiSetting = jest.fn(() => mockTimePickerTimeDefaults);
+  const mockGetUiSetting = vi.fn(() => mockTimePickerTimeDefaults);
 
   const mockDependencies = (timePickerSharedState: { from: unknown; to: unknown }) => {
-    (useProfilingDependencies as jest.Mock).mockReturnValue({
+    (useProfilingDependencies as Mock).mockReturnValue({
       start: {
         core: {
           uiSettings: {
@@ -28,7 +31,7 @@ describe('useDefaultTimeRange', () => {
           query: {
             timefilter: {
               timefilter: {
-                getTime: jest.fn(() => timePickerSharedState),
+                getTime: vi.fn(() => timePickerSharedState),
               },
             },
           },
@@ -38,7 +41,7 @@ describe('useDefaultTimeRange', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return the shared time picker state when it is set', () => {

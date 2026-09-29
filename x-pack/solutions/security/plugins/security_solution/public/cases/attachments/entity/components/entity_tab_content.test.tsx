@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
@@ -23,32 +26,41 @@ import { useEntityEnginePrivileges } from '../../../../entity_analytics/componen
 import { useMissingRiskEnginePrivileges } from '../../../../entity_analytics/hooks/use_missing_risk_engine_privileges';
 import { useEntityLastSeen } from '../hooks/use_entity_last_seen';
 
-jest.mock('../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: () => 'default',
-}));
+vi.mock('../../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: () => 'default',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_store');
-jest.mock('../../../../entity_analytics/components/home/use_entity_store_data_view');
-jest.mock(
+vi.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_store');
+vi.mock('../../../../entity_analytics/components/home/use_entity_store_data_view');
+vi.mock(
   '../../../../entity_analytics/components/entity_store/hooks/use_entity_engine_privileges'
 );
-jest.mock('../../../../entity_analytics/hooks/use_missing_risk_engine_privileges');
-jest.mock('../hooks/use_entity_last_seen');
+vi.mock('../../../../entity_analytics/hooks/use_missing_risk_engine_privileges');
+vi.mock('../hooks/use_entity_last_seen');
 
-jest.mock('../hooks/use_entity_local_table_state', () => ({
-  useEntityLocalTableState: () => ({}),
-}));
+vi.mock('../hooks/use_entity_local_table_state', () => {
+      const mocked = {
+      useEntityLocalTableState: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../entity_analytics/components/home/entities_table', () => ({
-  DataViewContext: { Provider: ({ children }: { children: React.ReactNode }) => <>{children}</> },
-  EntitiesTableSection: () => <div data-test-subj="mockEntitiesTableSection" />,
-}));
+vi.mock('../../../../entity_analytics/components/home/entities_table', () => {
+      const mocked = {
+      DataViewContext: { Provider: ({ children }: { children: React.ReactNode }) => <>{children}</> },
+      EntitiesTableSection: () => <div data-test-subj="mockEntitiesTableSection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useEntityStoreStatusMock = useEntityStoreStatus as jest.Mock;
-const useEntityStoreDataViewMock = useEntityStoreDataView as jest.Mock;
-const useEntityEnginePrivilegesMock = useEntityEnginePrivileges as jest.Mock;
-const useMissingRiskEnginePrivilegesMock = useMissingRiskEnginePrivileges as jest.Mock;
-const useEntityLastSeenMock = useEntityLastSeen as jest.Mock;
+const useEntityStoreStatusMock = useEntityStoreStatus as Mock;
+const useEntityStoreDataViewMock = useEntityStoreDataView as Mock;
+const useEntityEnginePrivilegesMock = useEntityEnginePrivileges as Mock;
+const useMissingRiskEnginePrivilegesMock = useMissingRiskEnginePrivileges as Mock;
+const useEntityLastSeenMock = useEntityLastSeen as Mock;
 
 // Full entity store privileges payload with all read access granted. The
 // reused privileges callout reads `privileges.privileges.elasticsearch.index`,
@@ -86,7 +98,7 @@ const renderTab = (props?: Partial<CommonAttachmentListViewProps>) =>
 
 describe('EntityTabContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useEntityStoreStatusMock.mockReturnValue({ data: { status: 'running' }, isLoading: false });
     useEntityStoreDataViewMock.mockReturnValue({ dataView: {}, isLoading: false });
     useEntityEnginePrivilegesMock.mockReturnValue({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -32,10 +34,10 @@ const fakeProviderWithFacets = (
   facets: InboxActionProviderFacetsResult
 ): InboxActionProvider => ({
   sourceApp,
-  list: jest.fn(async () => ({ actions: [], total: 0 })),
-  listProcessed: jest.fn(async () => ({ actions: [], total: 0 })),
-  listProcessedFacets: jest.fn(async () => facets),
-  respond: jest.fn(async () => {}),
+  list: vi.fn(async () => ({ actions: [], total: 0 })),
+  listProcessed: vi.fn(async () => ({ actions: [], total: 0 })),
+  listProcessedFacets: vi.fn(async () => facets),
+  respond: vi.fn(async () => {}),
 });
 
 const getHandler = (router: Router) => {
@@ -134,7 +136,7 @@ describe('GET /internal/inbox/actions/history/facets', () => {
     });
 
     it('forwards source_app to the registry fan-out', async () => {
-      const spy = jest.spyOn(registry, 'listFacets');
+      const spy = vi.spyOn(registry, 'listFacets');
       await invokeHandler(router, { source_app: 'workflows' });
       expect(spy).toHaveBeenCalledWith(
         { sourceApp: 'workflows' },
@@ -147,8 +149,8 @@ describe('GET /internal/inbox/actions/history/facets', () => {
     it('returns empty buckets without failing the request', async () => {
       const legacy: InboxActionProvider = {
         sourceApp: 'legacy',
-        list: jest.fn(async () => ({ actions: [], total: 0 })),
-        respond: jest.fn(async () => {}),
+        list: vi.fn(async () => ({ actions: [], total: 0 })),
+        respond: vi.fn(async () => {}),
       };
       registry.register(legacy);
 
@@ -160,7 +162,7 @@ describe('GET /internal/inbox/actions/history/facets', () => {
   describe('error handling', () => {
     it('returns a 500 when the registry throws unexpectedly', async () => {
       const registryThatThrows = new InboxActionRegistry(logger);
-      jest.spyOn(registryThatThrows, 'listFacets').mockRejectedValueOnce(new Error('boom'));
+      vi.spyOn(registryThatThrows, 'listFacets').mockRejectedValueOnce(new Error('boom'));
 
       const dedicatedRouter = httpServiceMock.createRouter();
       registerListInboxActionsHistoryFacetsRoute({

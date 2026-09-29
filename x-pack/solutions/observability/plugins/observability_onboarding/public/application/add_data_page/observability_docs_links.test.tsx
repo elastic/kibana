@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { of } from 'rxjs';
 import React from 'react';
@@ -15,11 +17,14 @@ const mockServices = {
   chrome: { getHelpSupportUrl$: () => of('https://support.example/hub') },
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({ services: mockServices }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({ services: mockServices }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui-illustrations', () => {
+vi.mock('@elastic/eui-illustrations', () => {
   const stub = (id: string, title: string) => ({
     id,
     title,

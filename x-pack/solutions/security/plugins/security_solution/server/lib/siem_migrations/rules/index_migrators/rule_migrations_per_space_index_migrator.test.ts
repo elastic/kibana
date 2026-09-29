@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RuleMigrationAdapters, StoredRuleMigration } from '../types';
 import { RuleMigrationSpaceIndexMigrator } from './rule_migrations_per_space_index_migrator';
@@ -41,7 +44,7 @@ const getMockedESSearchFunction = (
   rulesIndexAggResult: typeof mockRuleIndexAggregationsResult = mockRuleIndexAggregationsResult,
   migrationIndexResult: typeof mockMigrationsIndexResult = mockMigrationsIndexResult
 ) =>
-  jest.fn((args) => {
+  vi.fn((args) => {
     if (args.index === '.kibana-siem-rule-migrations-rules-space1') {
       return Promise.resolve(rulesIndexAggResult);
     } else if (args.index === '.kibana-siem-rule-migrations-migrations-space1') {
@@ -51,15 +54,15 @@ const getMockedESSearchFunction = (
   });
 
 const esClientMock = {
-  search: jest.fn(),
-  bulk: jest.fn(),
-} as unknown as jest.Mocked<ElasticsearchClient>;
+  search: vi.fn(),
+  bulk: vi.fn(),
+} as unknown as Mocked<ElasticsearchClient>;
 
 const loggerMock = {
-  info: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  warn: jest.fn(),
+  info: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 const ruleMigrationIndexAdapters = {
@@ -70,13 +73,13 @@ const ruleMigrationIndexAdapters = {
     getIndexName: (spaceId: string) => `.kibana-siem-rule-migrations-migrations-${spaceId}`,
     getInstalledIndexName: (spaceId: string) =>
       `.kibana-siem-rule-migrations-migrations-${spaceId}`,
-    createIndex: jest.fn(),
+    createIndex: vi.fn(),
   },
 } as unknown as RuleMigrationAdapters;
 
 describe('RuleMigrationSpaceIndexMigrator', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClientMock.search.mockImplementation(
       getMockedESSearchFunction() as unknown as ElasticsearchClient['search']
     );

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { TestProvider } from '../../common/test_utils';
 import { render, type RenderResult } from '@testing-library/react';
@@ -13,15 +16,15 @@ import { useGetDataUsageMetrics } from '../hooks/use_get_usage_metrics';
 import { useGetDataUsageDataStreams } from '../hooks/use_get_data_streams';
 import { mockUseKibana } from './mocks';
 
-jest.mock('../hooks/use_get_usage_metrics');
-jest.mock('../hooks/use_get_data_streams');
+vi.mock('../hooks/use_get_usage_metrics');
+vi.mock('../hooks/use_get_data_streams');
 const mockServices = mockCore.createStart();
-jest.mock('../utils/use_breadcrumbs', () => {
+vi.mock('../utils/use_breadcrumbs', () => {
   return {
-    useBreadcrumbs: jest.fn(),
+    useBreadcrumbs: vi.fn(),
   };
 });
-jest.mock('../utils/use_kibana', () => {
+vi.mock('../utils/use_kibana', () => {
   return {
     useKibanaContextForPlugin: () => ({
       services: mockServices,
@@ -29,41 +32,44 @@ jest.mock('../utils/use_kibana', () => {
   };
 });
 
-const mockUseLocation = jest.fn(() => ({ pathname: '/' }));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: () => mockUseLocation(),
-  useHistory: jest.fn().mockReturnValue({
-    push: jest.fn(),
-    listen: jest.fn(),
-    location: {
-      search: '',
-    },
-  }),
-}));
+const mockUseLocation = vi.fn(() => ({ pathname: '/' }));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: () => mockUseLocation(),
+      useHistory: vi.fn().mockReturnValue({
+        push: vi.fn(),
+        listen: vi.fn(),
+        location: {
+          search: '',
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...original,
     useKibana: () => mockUseKibana,
   };
 });
 
-const mockUseGetDataUsageMetrics = useGetDataUsageMetrics as jest.Mock;
-const mockUseGetDataUsageDataStreams = useGetDataUsageDataStreams as jest.Mock;
+const mockUseGetDataUsageMetrics = useGetDataUsageMetrics as Mock;
+const mockUseGetDataUsageDataStreams = useGetDataUsageDataStreams as Mock;
 
 const getBaseMockedDataStreams = () => ({
   error: undefined,
   data: undefined,
   isFetching: false,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
 });
 const getBaseMockedDataUsageMetrics = () => ({
   error: undefined,
   data: undefined,
   isFetching: false,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
 });
 
 describe('DataUsageMetrics Page', () => {
@@ -71,15 +77,15 @@ describe('DataUsageMetrics Page', () => {
   let renderComponent: () => RenderResult;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     renderComponent = () =>
       render(
         <TestProvider>

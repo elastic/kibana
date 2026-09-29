@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { CustomMonacoStepHandler } from './custom_monaco_step_handler';
 import { createMockHoverContext, createMockStepContext } from './test_utils/mock_factories';
@@ -30,19 +32,22 @@ const mockStepDefinitions: PublicStepDefinition[] = [
   } as unknown as PublicStepDefinition,
 ];
 
-jest.mock('../../../../../common/step_schemas', () => ({
-  stepSchemas: {
-    getAllRegisteredStepDefinitions: jest.fn().mockReturnValue([]),
-  },
-}));
+vi.mock('../../../../../common/step_schemas', () => {
+      const mocked = {
+      stepSchemas: {
+        getAllRegisteredStepDefinitions: vi.fn().mockReturnValue([]),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { stepSchemas } = jest.requireMock('../../../../../common/step_schemas');
+const { stepSchemas } = (await vi.importMock('../../../../../common/step_schemas'));
 
 describe('CustomMonacoStepHandler', () => {
   let handler: CustomMonacoStepHandler;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockStabilityBadgeThemeForTests();
     stepSchemas.getAllRegisteredStepDefinitions.mockReturnValue(mockStepDefinitions);
     handler = new CustomMonacoStepHandler();

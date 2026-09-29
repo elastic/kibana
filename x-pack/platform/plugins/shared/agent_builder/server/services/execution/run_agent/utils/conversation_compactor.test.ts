@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { HumanMessage, SystemMessage, type BaseMessage } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
@@ -172,11 +175,11 @@ const summary = (parts: Partial<CompactionSummary>): CompactionSummary => ({
 
 const createMockChatModel = () =>
   ({
-    withStructuredOutput: jest.fn().mockReturnValue({
-      invoke: jest.fn().mockResolvedValue(defaultLlmOutput),
+    withStructuredOutput: vi.fn().mockReturnValue({
+      invoke: vi.fn().mockResolvedValue(defaultLlmOutput),
     }),
   } as unknown as InferenceChatModel & {
-    withStructuredOutput: jest.Mock;
+    withStructuredOutput: Mock;
   });
 
 /**
@@ -196,7 +199,7 @@ const compact = (
   });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('extractProgrammaticSummary', () => {
@@ -593,10 +596,10 @@ describe('compactConversation', () => {
       triggerThreshold: 72000,
     };
 
-    let mockEventEmitter: jest.MockedFunction<AgentEventEmitterFn>;
+    let mockEventEmitter: MockedFunction<AgentEventEmitterFn>;
 
     beforeEach(() => {
-      mockEventEmitter = jest.fn();
+      mockEventEmitter = vi.fn();
     });
 
     it('should not emit events when compaction is not triggered', async () => {
@@ -757,8 +760,8 @@ describe('compactConversation', () => {
       const conversation = conversationOf(timeline);
       const perRoundTokenCounts = countsFor(conversation);
       const failingChatModel = {
-        withStructuredOutput: jest.fn().mockReturnValue({
-          invoke: jest.fn().mockRejectedValue(new Error('llm down')),
+        withStructuredOutput: vi.fn().mockReturnValue({
+          invoke: vi.fn().mockRejectedValue(new Error('llm down')),
         }),
       } as unknown as InferenceChatModel;
 
@@ -821,8 +824,8 @@ describe('compactConversation', () => {
       Array.from(new Set(timeline.map((event) => event.id.split('::')[0])));
     const failingChatModel = () =>
       ({
-        withStructuredOutput: jest.fn().mockReturnValue({
-          invoke: jest.fn().mockRejectedValue(new Error('llm down')),
+        withStructuredOutput: vi.fn().mockReturnValue({
+          invoke: vi.fn().mockRejectedValue(new Error('llm down')),
         }),
       } as unknown as InferenceChatModel);
     // Over budget even at the floor, so truncation drops every round it is allowed to.
@@ -922,15 +925,15 @@ describe('compactConversation', () => {
       discussion_summary: 'FIRST-SUMMARY-MARKER',
     };
 
-    let invoke: jest.Mock;
+    let invoke: Mock;
     let chatModel: InferenceChatModel;
     let emitted: Array<Parameters<AgentEventEmitterFn>[0]>;
     let options: CompactConversationOptions;
 
     beforeEach(() => {
-      invoke = jest.fn().mockResolvedValue(defaultLlmOutput);
+      invoke = vi.fn().mockResolvedValue(defaultLlmOutput);
       chatModel = {
-        withStructuredOutput: jest.fn().mockReturnValue({ invoke }),
+        withStructuredOutput: vi.fn().mockReturnValue({ invoke }),
       } as unknown as InferenceChatModel;
       emitted = [];
       options = {

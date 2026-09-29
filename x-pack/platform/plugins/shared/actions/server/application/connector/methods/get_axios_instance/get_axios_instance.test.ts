@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 
 import { loggerMock } from '@kbn/logging-mocks';
@@ -46,16 +48,16 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
-const bulkExecutionEnqueuer = jest.fn();
+const bulkExecutionEnqueuer = vi.fn();
 const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditLoggerMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const taskManager = taskManagerMock.createSetup();
 const eventLogClient = eventLogClientMock.create();
-const getEventLogClient = jest.fn();
+const getEventLogClient = vi.fn();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
-const getAxiosInstanceWithAuth = jest.fn();
+const getAxiosInstanceWithAuth = vi.fn();
 const isESOCanEncrypt = true;
 const licenseState = licenseStateMock.create();
 const licensing = licensingMock.createSetup();
@@ -104,7 +106,7 @@ const inMemoryConnectors = [
 
 describe('getAxiosInstance()', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     actionTypeRegistry = new ActionTypeRegistry({
       licensing,
       taskManager,

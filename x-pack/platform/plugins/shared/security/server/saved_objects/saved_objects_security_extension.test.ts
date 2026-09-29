@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type {
   SavedObjectReferenceWithContext,
   SavedObjectsClient,
@@ -31,32 +34,32 @@ import { SecurityAction } from './types';
 import { auditLoggerMock } from '../audit/mocks';
 import { Actions } from '../authorization';
 
-const checkAuthorizationSpy = jest.spyOn(
+const checkAuthorizationSpy = vi.spyOn(
   SavedObjectsSecurityExtension.prototype as any,
   'checkAuthorization'
 );
-const enforceAuthorizationSpy = jest.spyOn(
+const enforceAuthorizationSpy = vi.spyOn(
   SavedObjectsSecurityExtension.prototype as any,
   'enforceAuthorization'
 );
-const redactNamespacesSpy = jest.spyOn(
+const redactNamespacesSpy = vi.spyOn(
   SavedObjectsSecurityExtension.prototype as any,
   'redactNamespaces'
 );
-const authorizeSpy = jest.spyOn(SavedObjectsSecurityExtension.prototype as any, 'authorize');
-const auditHelperSpy = jest.spyOn(SavedObjectsSecurityExtension.prototype as any, 'auditHelper');
-const addAuditEventSpy = jest.spyOn(
+const authorizeSpy = vi.spyOn(SavedObjectsSecurityExtension.prototype as any, 'authorize');
+const auditHelperSpy = vi.spyOn(SavedObjectsSecurityExtension.prototype as any, 'auditHelper');
+const addAuditEventSpy = vi.spyOn(
   SavedObjectsSecurityExtension.prototype as any,
   'addAuditEvent'
 );
-const getCurrentUser = jest.fn();
+const getCurrentUser = vi.fn();
 
 const accessControlServiceMock = {
-  setUserForOperation: jest.fn(),
-  getTypesRequiringPrivilegeCheck: jest
+  setUserForOperation: vi.fn(),
+  getTypesRequiringPrivilegeCheck: vi
     .fn()
     .mockReturnValue({ typesRequiringAccessControl: new Set() }),
-  enforceAccessControl: jest.fn(),
+  enforceAccessControl: vi.fn(),
 };
 
 Object.defineProperty(SavedObjectsSecurityExtension.prototype, 'accessControlService', {
@@ -97,7 +100,7 @@ const obj4 = {
 };
 
 function setupSimpleCheckPrivsMockResolve(
-  checkPrivileges: jest.MockedFunction<CheckSavedObjectsPrivileges>,
+  checkPrivileges: MockedFunction<CheckSavedObjectsPrivileges>,
   type: string,
   action: string,
   authorized: boolean
@@ -115,17 +118,17 @@ function setupSimpleCheckPrivsMockResolve(
 
 function setup({ includeSavedObjectNames = true }: { includeSavedObjectNames?: boolean } = {}) {
   const actions = new Actions();
-  jest
+  vi
     .spyOn(actions.savedObject, 'get')
     .mockImplementation((type: string, action: string) => `mock-saved_object:${type}/${action}`);
   const auditLogger = auditLoggerMock.create();
   // @ts-expect-error
   auditLogger.includeSavedObjectNames = includeSavedObjectNames;
   const errors = {
-    decorateForbiddenError: jest.fn().mockImplementation((err) => err),
-    decorateGeneralError: jest.fn().mockImplementation((err) => err),
-  } as unknown as jest.Mocked<SavedObjectsClient['errors']>;
-  const checkPrivileges: jest.MockedFunction<CheckSavedObjectsPrivileges> = jest.fn();
+    decorateForbiddenError: vi.fn().mockImplementation((err) => err),
+    decorateGeneralError: vi.fn().mockImplementation((err) => err),
+  } as unknown as Mocked<SavedObjectsClient['errors']>;
+  const checkPrivileges: MockedFunction<CheckSavedObjectsPrivileges> = vi.fn();
 
   const typeRegistryMocked = typeRegistryMock.create();
   typeRegistryMocked.supportsAccessControl.mockImplementation((type) => type === 'dashboard');

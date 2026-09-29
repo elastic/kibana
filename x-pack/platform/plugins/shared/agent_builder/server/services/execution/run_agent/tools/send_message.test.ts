@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ReplaySubject } from 'rxjs';
 import { ChatEventType, SELF_AGENT_ID } from '@kbn/agent-builder-common';
 import type { ChatEvent, ConversationRound } from '@kbn/agent-builder-common';
@@ -24,7 +26,7 @@ const createMockContext = (selectedConnectorId = 'selected-connector') => {
 
   return {
     context: {
-      events: { reportProgress: jest.fn(), sendUiEvent: jest.fn() },
+      events: { reportProgress: vi.fn(), sendUiEvent: vi.fn() },
       modelProvider,
     } as any,
     modelProvider,
@@ -70,10 +72,10 @@ describe('createSendMessageTool', () => {
       agentId: 'test-agent',
       executionId: 'parent-exec',
       subAgentExecutor: {
-        executeSubAgent: jest.fn(),
-        createSubAgent: jest.fn(),
-        sendToSubAgent: jest.fn(),
-        getExecution: jest.fn(),
+        executeSubAgent: vi.fn(),
+        createSubAgent: vi.fn(),
+        sendToSubAgent: vi.fn(),
+        getExecution: vi.fn(),
       },
       allowedIds: new Set(['test-agent']),
     });
@@ -99,10 +101,10 @@ describe('createSendMessageTool', () => {
       agentId: 'test-agent',
       executionId: 'parent-exec',
       subAgentExecutor: {
-        executeSubAgent: jest.fn(),
-        createSubAgent: jest.fn(),
-        sendToSubAgent: jest.fn(),
-        getExecution: jest.fn(),
+        executeSubAgent: vi.fn(),
+        createSubAgent: vi.fn(),
+        sendToSubAgent: vi.fn(),
+        getExecution: vi.fn(),
       },
       subagentTracker,
       allowedIds: new Set(['test-agent']),
@@ -125,10 +127,10 @@ describe('createSendMessageTool', () => {
       agentId: 'test-agent',
       executionId: 'parent-exec',
       subAgentExecutor: {
-        executeSubAgent: jest.fn(),
-        createSubAgent: jest.fn(),
-        sendToSubAgent: jest.fn(),
-        getExecution: jest.fn(),
+        executeSubAgent: vi.fn(),
+        createSubAgent: vi.fn(),
+        sendToSubAgent: vi.fn(),
+        getExecution: vi.fn(),
       },
       subagentTracker,
       allowedIds: new Set(['test-agent']),
@@ -145,7 +147,7 @@ describe('createSendMessageTool', () => {
 
   it('sends to a known sub-agent (foreground) and returns the final response', async () => {
     const events$ = roundCompleteEvents({ response: { message: 'reply from researcher' } });
-    const sendToSubAgent = jest.fn().mockResolvedValue({
+    const sendToSubAgent = vi.fn().mockResolvedValue({
       executionId: 'sub-exec',
       events$: events$.asObservable(),
     });
@@ -157,10 +159,10 @@ describe('createSendMessageTool', () => {
       agentId: 'test-agent',
       executionId: 'parent-exec',
       subAgentExecutor: {
-        executeSubAgent: jest.fn(),
-        createSubAgent: jest.fn(),
+        executeSubAgent: vi.fn(),
+        createSubAgent: vi.fn(),
         sendToSubAgent,
-        getExecution: jest.fn(),
+        getExecution: vi.fn(),
       },
       subagentTracker,
       allowedIds: new Set(['test-agent']),
@@ -187,8 +189,8 @@ describe('createSendMessageTool', () => {
 
   it('registers with backgroundExecutionService and returns queued when run_in_background is true', async () => {
     const events$ = new ReplaySubject<ChatEvent>();
-    const registerExecution = jest.fn();
-    const sendToSubAgent = jest.fn().mockResolvedValue({
+    const registerExecution = vi.fn();
+    const sendToSubAgent = vi.fn().mockResolvedValue({
       executionId: 'bg-sub-exec',
       events$: events$.asObservable(),
     });
@@ -200,17 +202,17 @@ describe('createSendMessageTool', () => {
       agentId: 'test-agent',
       executionId: 'parent-exec',
       subAgentExecutor: {
-        executeSubAgent: jest.fn(),
-        createSubAgent: jest.fn(),
+        executeSubAgent: vi.fn(),
+        createSubAgent: vi.fn(),
         sendToSubAgent,
-        getExecution: jest.fn(),
+        getExecution: vi.fn(),
       },
       subagentTracker,
       backgroundExecutionService: {
         registerExecution,
-        getState: jest.fn(),
-        hasPending: jest.fn(),
-        checkForCompletions: jest.fn(),
+        getState: vi.fn(),
+        hasPending: vi.fn(),
+        checkForCompletions: vi.fn(),
       } as any,
       allowedIds: new Set(['test-agent']),
     });
@@ -235,7 +237,7 @@ describe('createSendMessageTool', () => {
 
   describe('allowlist gating', () => {
     it('rejects with a specific error when the backing agent_id is no longer allowed', async () => {
-      const sendToSubAgent = jest.fn();
+      const sendToSubAgent = vi.fn();
       const subagentTracker = new SubagentTracker({
         researcher: { conversation_id: 'child-convo', agent_id: 'agent-b' },
       });
@@ -243,10 +245,10 @@ describe('createSendMessageTool', () => {
         agentId: 'test-agent',
         executionId: 'parent-exec',
         subAgentExecutor: {
-          executeSubAgent: jest.fn(),
-          createSubAgent: jest.fn(),
+          executeSubAgent: vi.fn(),
+          createSubAgent: vi.fn(),
           sendToSubAgent,
-          getExecution: jest.fn(),
+          getExecution: vi.fn(),
         },
         subagentTracker,
         allowedIds: new Set(['agent-a']), // 'agent-b' is no longer in the allowlist
@@ -264,7 +266,7 @@ describe('createSendMessageTool', () => {
 
     it('allows a message when the backing agent_id is in the allowlist', async () => {
       const events$ = roundCompleteEvents({ response: { message: 'ok' } });
-      const sendToSubAgent = jest.fn().mockResolvedValue({
+      const sendToSubAgent = vi.fn().mockResolvedValue({
         executionId: 'sub-exec',
         events$: events$.asObservable(),
       });
@@ -275,10 +277,10 @@ describe('createSendMessageTool', () => {
         agentId: 'test-agent',
         executionId: 'parent-exec',
         subAgentExecutor: {
-          executeSubAgent: jest.fn(),
-          createSubAgent: jest.fn(),
+          executeSubAgent: vi.fn(),
+          createSubAgent: vi.fn(),
           sendToSubAgent,
-          getExecution: jest.fn(),
+          getExecution: vi.fn(),
         },
         subagentTracker,
         allowedIds: new Set(['agent-b']),
@@ -294,7 +296,7 @@ describe('createSendMessageTool', () => {
 
     it('matches _self exactly (sentinel-to-sentinel)', async () => {
       const events$ = roundCompleteEvents({ response: { message: 'ok' } });
-      const sendToSubAgent = jest.fn().mockResolvedValue({
+      const sendToSubAgent = vi.fn().mockResolvedValue({
         executionId: 'sub-exec',
         events$: events$.asObservable(),
       });
@@ -305,10 +307,10 @@ describe('createSendMessageTool', () => {
         agentId: 'test-agent',
         executionId: 'parent-exec',
         subAgentExecutor: {
-          executeSubAgent: jest.fn(),
-          createSubAgent: jest.fn(),
+          executeSubAgent: vi.fn(),
+          createSubAgent: vi.fn(),
           sendToSubAgent,
-          getExecution: jest.fn(),
+          getExecution: vi.fn(),
         },
         subagentTracker,
         allowedIds: new Set([SELF_AGENT_ID]),
@@ -324,7 +326,7 @@ describe('createSendMessageTool', () => {
   });
 
   it('returns an error result when sendToSubAgent throws', async () => {
-    const sendToSubAgent = jest.fn().mockRejectedValue(new Error('inference offline'));
+    const sendToSubAgent = vi.fn().mockRejectedValue(new Error('inference offline'));
     const subagentTracker = new SubagentTracker({
       researcher: { conversation_id: 'child-convo', agent_id: 'test-agent' },
     });
@@ -333,10 +335,10 @@ describe('createSendMessageTool', () => {
       agentId: 'test-agent',
       executionId: 'parent-exec',
       subAgentExecutor: {
-        executeSubAgent: jest.fn(),
-        createSubAgent: jest.fn(),
+        executeSubAgent: vi.fn(),
+        createSubAgent: vi.fn(),
         sendToSubAgent,
-        getExecution: jest.fn(),
+        getExecution: vi.fn(),
       },
       subagentTracker,
       allowedIds: new Set(['test-agent']),

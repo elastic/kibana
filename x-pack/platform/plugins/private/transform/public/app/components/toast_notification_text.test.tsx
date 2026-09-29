@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, renderHook } from '@testing-library/react';
 
@@ -14,10 +16,13 @@ import { themeServiceMock } from '@kbn/core/public/mocks';
 import { useAppDependencies } from '../app_dependencies';
 import { ToastNotificationText, useToastNotificationText } from './toast_notification_text';
 
-jest.mock('../app_dependencies');
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: jest.fn((element: React.ReactElement) => element),
-}));
+vi.mock('../app_dependencies');
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = {
+      toMountPoint: vi.fn((element: React.ReactElement) => element),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ToastNotificationText', () => {
   test('should render the text as plain text', () => {
@@ -50,7 +55,7 @@ describe('useToastNotificationText', () => {
   const BOUNDARY_TEXT = 'a'.repeat(140);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('returns plain string for short text', () => {

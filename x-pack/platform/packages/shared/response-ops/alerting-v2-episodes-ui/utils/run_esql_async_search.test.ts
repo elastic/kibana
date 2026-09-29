@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -17,7 +19,7 @@ describe('runEsqlAsyncSearch', () => {
       columns: [{ name: 'count', type: 'long' }],
       values: [[42]],
     };
-    const search = jest.fn().mockReturnValue(of({ rawResponse }));
+    const search = vi.fn().mockReturnValue(of({ rawResponse }));
     const data = { search: { search } } as unknown as DataPublicPluginStart;
 
     const result = await runEsqlAsyncSearch({
@@ -41,7 +43,7 @@ describe('runEsqlAsyncSearch', () => {
       columns: [{ name: 'count', type: 'long' }],
       values: [[99]],
     };
-    const search = jest
+    const search = vi
       .fn()
       .mockReturnValue(
         of({ rawResponse: intermediateResponse, isRunning: true }, { rawResponse: finalResponse })
@@ -55,7 +57,7 @@ describe('runEsqlAsyncSearch', () => {
 
   it('forwards abortSignal to search', async () => {
     const rawResponse: ESQLSearchResponse = { columns: [], values: [] };
-    const search = jest.fn().mockReturnValue(of({ rawResponse }));
+    const search = vi.fn().mockReturnValue(of({ rawResponse }));
     const data = { search: { search } } as unknown as DataPublicPluginStart;
     const abortController = new AbortController();
 

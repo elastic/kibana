@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
 
 const mockStorageClient = {
-  index: jest.fn(),
+  index: vi.fn(),
 };
 
-jest.mock('./agent_execution_storage', () => ({
-  ...jest.requireActual('./agent_execution_storage'),
-  createStorage: () => ({ getClient: () => mockStorageClient }),
-}));
+vi.mock('./agent_execution_storage', async () => {
+      const mocked = {
+      ...(await vi.importActual('./agent_execution_storage')),
+      createStorage: () => ({ getClient: () => mockStorageClient }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { createAgentExecutionClient } from './agent_execution_client';
 
@@ -35,7 +40,7 @@ describe('AgentExecutionClient', () => {
   } as const;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockStorageClient.index.mockResolvedValue({});
   });
 

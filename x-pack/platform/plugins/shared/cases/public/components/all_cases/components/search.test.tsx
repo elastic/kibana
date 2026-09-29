@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
@@ -13,10 +15,10 @@ import { TableSearch } from './search';
 import { renderWithTestingProviders } from '../../../common/mock';
 
 describe('TableSearch', () => {
-  const onFilterOptionsChange = jest.fn();
+  const onFilterOptionsChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with empty value correctly', async () => {

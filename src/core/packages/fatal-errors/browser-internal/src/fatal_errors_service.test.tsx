@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React, { type ReactElement, type ReactNode } from 'react';
 import ReactDOM from 'react-dom';
 import { render } from '@testing-library/react';
@@ -24,7 +27,7 @@ describe('FatalErrorsService', () => {
   let i18n: ReturnType<typeof i18nServiceMock.createStartContract>;
   let injectedMetadata: ReturnType<typeof injectedMetadataServiceMock.createSetupContract>;
   let rootDomElement: HTMLElement;
-  let stopCoreSystem: jest.Mock;
+  let stopCoreSystem: Mock;
   let theme: ReturnType<typeof themeServiceMock.createSetupContract>;
 
   beforeEach(() => {
@@ -33,7 +36,7 @@ describe('FatalErrorsService', () => {
     i18n = i18nServiceMock.createStartContract();
     injectedMetadata = injectedMetadataServiceMock.createSetupContract();
     theme = themeServiceMock.createSetupContract();
-    stopCoreSystem = jest.fn();
+    stopCoreSystem = vi.fn();
 
     const fatalErrorsService = new FatalErrorsService(rootDomElement, stopCoreSystem);
 
@@ -49,8 +52,8 @@ describe('FatalErrorsService', () => {
 
     describe('when rendering', () => {
       let element: ReactElement;
-      let condition: jest.MockedFunction<() => boolean>;
-      let handler: jest.MockedFunction<() => ReactNode>;
+      let condition: MockedFunction<() => boolean>;
+      let handler: MockedFunction<() => ReactNode>;
 
       beforeEach(() => {
         rootDomElement.innerHTML = `
@@ -58,17 +61,17 @@ describe('FatalErrorsService', () => {
           <div class="someSpinner"></div>
         `;
 
-        condition = jest.fn();
-        handler = jest.fn(() => <div data-test-subj="customError" />);
+        condition = vi.fn();
+        handler = vi.fn(() => <div data-test-subj="customError" />);
         fatalErrorsSetup.catch(condition, handler);
 
-        const renderSpy = jest.spyOn(ReactDOM, 'render').mockImplementation(() => {});
+        const renderSpy = vi.spyOn(ReactDOM, 'render').mockImplementation(() => {});
         expect(() => fatalErrorsSetup.add(new Error('foo'))).toThrow();
         [element] = renderSpy.mock.lastCall as unknown as [ReactElement];
       });
 
       afterEach(() => {
-        jest.resetAllMocks();
+        vi.resetAllMocks();
       });
 
       it('should clean up the root element', async () => {

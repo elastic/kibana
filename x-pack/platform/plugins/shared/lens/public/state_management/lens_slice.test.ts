@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { EnhancedStore } from 'redux-toolkit-v1';
 import type { Query } from '@kbn/es-query';
 import type { LensRootStore } from '.';
@@ -47,7 +50,7 @@ describe('lensSlice', () => {
   let store: EnhancedStore<{ lens: LensAppState }>;
   beforeEach(() => {
     store = makeLensStore().store;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   const customQuery = { query: 'custom' } as Query;
 
@@ -145,7 +148,7 @@ describe('lensSlice', () => {
       datasource.getPublicAPI.mockImplementation(({ state }) => ({
         ...datasource.publicAPIMock,
         datasourceId: 'formBased',
-        getOperationForColumnId: jest
+        getOperationForColumnId: vi
           .fn()
           .mockReturnValue(state === 'new-datasource-state' ? newOperation : undefined),
       }));
@@ -327,8 +330,8 @@ describe('lensSlice', () => {
           id: datasourceId,
           getPublicAPI: () => ({
             datasourceId,
-            getOperationForColumnId: jest.fn(),
-            getTableSpec: jest.fn(),
+            getOperationForColumnId: vi.fn(),
+            getTableSpec: vi.fn(),
           }),
           getLayers: () => ['layer1'],
           clearLayer: (layerIds: unknown, layerId: string) => ({
@@ -346,8 +349,8 @@ describe('lensSlice', () => {
             layerId,
             ...layersToLinkTo,
           ],
-          getCurrentIndexPatternId: jest.fn(() => 'indexPattern1'),
-          getUsedDataView: jest.fn(() => 'indexPattern1'),
+          getCurrentIndexPatternId: vi.fn(() => 'indexPattern1'),
+          getUsedDataView: vi.fn(() => 'indexPattern1'),
         };
       };
       const datasourceStates = {
@@ -372,13 +375,13 @@ describe('lensSlice', () => {
             (layerIds as string[]).map((id: string) =>
               id === layerId ? `vis_clear_${layerId}` : id
             ),
-          removeLayer: jest.fn((layerIds: unknown, layerId: string) =>
+          removeLayer: vi.fn((layerIds: unknown, layerId: string) =>
             (layerIds as string[]).filter((id: string) => id !== layerId)
           ),
           getLayerIds: (layerIds: unknown) => layerIds as string[],
           getLayersToLinkTo: (state, newLayerId) => ['linked-layer-id'],
           appendLayer: (layerIds: unknown, layerId: string) => [...(layerIds as string[]), layerId],
-          getSupportedLayers: jest.fn(() => [{ type: LENS_LAYER_TYPES.DATA, label: 'Data Layer' }]),
+          getSupportedLayers: vi.fn(() => [{ type: LENS_LAYER_TYPES.DATA, label: 'Data Layer' }]),
         } as Partial<Visualization>,
       };
 
@@ -432,7 +435,7 @@ describe('lensSlice', () => {
       it('addLayer: syncs linked dimensions', () => {
         const activeVisualization = visualizationMap[activeVisId];
 
-        activeVisualization.getLinkedDimensions = jest.fn(() => [
+        activeVisualization.getLinkedDimensions = vi.fn(() => [
           {
             from: {
               layerId: 'from-layer',
@@ -446,11 +449,11 @@ describe('lensSlice', () => {
             },
           },
         ]);
-        activeVisualization.getConfiguration = jest.fn(() => ({
+        activeVisualization.getConfiguration = vi.fn(() => ({
           groups: [{ groupId: 'to-group' } as VisualizationDimensionGroupConfig],
         }));
-        activeVisualization.onDrop = jest.fn(({ prevState }) => prevState);
-        (datasourceMap.formBased as unknown as Datasource).syncColumns = jest.fn(
+        activeVisualization.onDrop = vi.fn(({ prevState }) => prevState);
+        (datasourceMap.formBased as unknown as Datasource).syncColumns = vi.fn(
           ({ state }) => state
         );
 
@@ -464,7 +467,7 @@ describe('lensSlice', () => {
 
         expect(
           (
-            (datasourceMap.formBased as unknown as Datasource).syncColumns as jest.Mock<
+            (datasourceMap.formBased as unknown as Datasource).syncColumns as Mock<
               Datasource['syncColumns']
             >
           ).mock.calls[0][0]
@@ -496,7 +499,7 @@ describe('lensSlice', () => {
 
         expect(activeVisualization.onDrop).toHaveBeenCalledTimes(1);
         expect({
-          ...(activeVisualization.onDrop as jest.Mock<Visualization['onDrop']>).mock.calls[0][0],
+          ...(activeVisualization.onDrop as Mock<Visualization['onDrop']>).mock.calls[0][0],
           frame: undefined,
         }).toMatchInlineSnapshot(`
           Object {
@@ -536,9 +539,9 @@ describe('lensSlice', () => {
           const activeVisualization = visualizationMap[activeVisId] as Visualization;
           const formBasedWithInit = {
             ...datasourceMap.formBased,
-            initializeDimension: jest.fn((state) => state),
+            initializeDimension: vi.fn((state) => state),
           };
-          const setDimensionMock = jest.fn(({ prevState }) => prevState);
+          const setDimensionMock = vi.fn(({ prevState }) => prevState);
 
           const customStoreWithInit = makeLensStore({
             preloadedState: {
@@ -554,7 +557,7 @@ describe('lensSlice', () => {
               visualizationMap: {
                 [activeVisId]: {
                   ...activeVisualization,
-                  getSupportedLayers: jest.fn(() => [
+                  getSupportedLayers: vi.fn(() => [
                     {
                       type: LayerTypes.ANNOTATIONS,
                       label: 'Annotations',
@@ -568,9 +571,9 @@ describe('lensSlice', () => {
                       ],
                     },
                   ]),
-                  getLayerType: jest.fn(() => LayerTypes.ANNOTATIONS),
+                  getLayerType: vi.fn(() => LayerTypes.ANNOTATIONS),
                   setDimension: setDimensionMock,
-                  getConfiguration: jest.fn(() => ({ groups: [] })),
+                  getConfiguration: vi.fn(() => ({ groups: [] })),
                 },
               } as unknown as VisualizationMap,
               datasourceMap: {
@@ -595,7 +598,7 @@ describe('lensSlice', () => {
           const activeVisualization = visualizationMap[activeVisId] as Visualization;
           const formBasedWithInit = {
             ...datasourceMap.formBased,
-            initializeDimension: jest.fn((state) => state),
+            initializeDimension: vi.fn((state) => state),
           };
 
           const customStoreWithInit = makeLensStore({
@@ -612,7 +615,7 @@ describe('lensSlice', () => {
               visualizationMap: {
                 [activeVisId]: {
                   ...activeVisualization,
-                  getSupportedLayers: jest.fn(() => [
+                  getSupportedLayers: vi.fn(() => [
                     {
                       type: LayerTypes.DATA,
                       label: 'Data Layer',
@@ -625,9 +628,9 @@ describe('lensSlice', () => {
                       ],
                     },
                   ]),
-                  getLayerType: jest.fn(() => LayerTypes.DATA),
-                  setDimension: jest.fn(({ prevState }) => prevState),
-                  getConfiguration: jest.fn(() => ({ groups: [] })),
+                  getLayerType: vi.fn(() => LayerTypes.DATA),
+                  setDimension: vi.fn(({ prevState }) => prevState),
+                  getConfiguration: vi.fn(() => ({ groups: [] })),
                 },
               } as unknown as VisualizationMap,
               datasourceMap: {
@@ -651,7 +654,7 @@ describe('lensSlice', () => {
           const activeVisualization = visualizationMap[activeVisId] as Visualization;
           const formBasedWithInit = {
             ...datasourceMap.formBased,
-            initializeDimension: jest.fn((state) => state),
+            initializeDimension: vi.fn((state) => state),
           };
 
           const customStoreWithInit = makeLensStore({
@@ -668,16 +671,16 @@ describe('lensSlice', () => {
               visualizationMap: {
                 [activeVisId]: {
                   ...activeVisualization,
-                  getSupportedLayers: jest.fn(() => [
+                  getSupportedLayers: vi.fn(() => [
                     {
                       type: LayerTypes.REFERENCELINE,
                       label: 'Reference Layer',
                       // No initialDimensions specified
                     },
                   ]),
-                  getLayerType: jest.fn(() => LayerTypes.REFERENCELINE),
-                  setDimension: jest.fn(({ prevState }) => prevState),
-                  getConfiguration: jest.fn(() => ({ groups: [] })),
+                  getLayerType: vi.fn(() => LayerTypes.REFERENCELINE),
+                  setDimension: vi.fn(({ prevState }) => prevState),
+                  getConfiguration: vi.fn(() => ({ groups: [] })),
                 },
               } as unknown as VisualizationMap,
               datasourceMap: {
@@ -787,7 +790,7 @@ describe('lensSlice', () => {
       const datasourceMap = {
         [datasourceId]: {
           id: datasourceId,
-          removeColumn: jest.fn(({ prevState: state, columnId }) => ({
+          removeColumn: vi.fn(({ prevState: state, columnId }) => ({
             ...(state as DatasourceState),
             cols: (state as DatasourceState).cols.filter((id) => id !== columnId),
           })),
@@ -799,7 +802,7 @@ describe('lensSlice', () => {
 
       const visualizationMap = {
         [activeVisId]: {
-          removeDimension: jest.fn(({ prevState, columnId }) =>
+          removeDimension: vi.fn(({ prevState, columnId }) =>
             (prevState as string[]).filter((id) => id !== columnId)
           ),
         } as Partial<Visualization>,
@@ -885,7 +888,7 @@ describe('lensSlice', () => {
       });
 
       it('removes linked dimensions', () => {
-        visualizationMap[activeVisId].getLinkedDimensions = jest.fn(() => [
+        visualizationMap[activeVisId].getLinkedDimensions = vi.fn(() => [
           {
             from: {
               columnId: colToRemove,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ResizeChecker } from './resize_checker';
 import { EventEmitter } from 'events';
 
@@ -45,106 +47,130 @@ describe('Resize Checker', () => {
       expect(checker).toBeInstanceOf(EventEmitter);
     });
 
-    it('emits a "resize" event', (done) => {
-      const el = new MockElement();
-      const checker = new ResizeChecker(el as any);
-      const listener = jest.fn();
+    it('emits a "resize" event', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      checker.on('resize', listener);
-      el.clientHeight = 100;
-      el.dispatchEvent('resize');
-      setTimeout(() => {
-        expect(listener.mock.calls.length).toBe(1);
-        done();
-      }, 100);
-    });
+              const el = new MockElement();
+              const checker = new ResizeChecker(el as any);
+              const listener = vi.fn();
+
+              checker.on('resize', listener);
+              el.clientHeight = 100;
+              el.dispatchEvent('resize');
+              setTimeout(() => {
+                expect(listener.mock.calls.length).toBe(1);
+                done();
+              }, 100);
+            
+        }));
   });
 
   describe('enable/disabled state', () => {
-    it('should not trigger events while disabled', (done) => {
-      const el = new MockElement();
-      const checker = new ResizeChecker(el as any, { disabled: true });
-      const listener = jest.fn();
-      checker.on('resize', listener);
+    it('should not trigger events while disabled', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      expect(listener).not.toHaveBeenCalled();
-      el.clientHeight = 100;
-      el.dispatchEvent('resize');
-      setTimeout(() => {
-        expect(listener).not.toHaveBeenCalled();
-        done();
-      }, 100);
-    });
+              const el = new MockElement();
+              const checker = new ResizeChecker(el as any, { disabled: true });
+              const listener = vi.fn();
+              checker.on('resize', listener);
 
-    it('should trigger resize events after calling enable', (done) => {
-      const el = new MockElement();
-      const checker = new ResizeChecker(el as any, { disabled: true });
-      const listener = jest.fn();
-      checker.on('resize', listener);
+              expect(listener).not.toHaveBeenCalled();
+              el.clientHeight = 100;
+              el.dispatchEvent('resize');
+              setTimeout(() => {
+                expect(listener).not.toHaveBeenCalled();
+                done();
+              }, 100);
+            
+        }));
 
-      expect(listener).not.toHaveBeenCalled();
-      checker.enable();
-      el.clientHeight = 100;
-      el.dispatchEvent('resize');
-      setTimeout(() => {
-        expect(listener).toHaveBeenCalled();
-        done();
-      }, 100);
-    });
+    it('should trigger resize events after calling enable', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-    it('should not trigger the first time after enable when the size does not change', (done) => {
-      const el = new MockElement();
-      const checker = new ResizeChecker(el as any, { disabled: true });
-      const listener = jest.fn();
-      checker.on('resize', listener);
+              const el = new MockElement();
+              const checker = new ResizeChecker(el as any, { disabled: true });
+              const listener = vi.fn();
+              checker.on('resize', listener);
 
-      expect(listener).not.toHaveBeenCalled();
-      el.clientHeight = 100;
-      checker.enable();
-      el.clientHeight = 100;
-      setTimeout(() => {
-        expect(listener).not.toHaveBeenCalled();
-        done();
-      }, 100);
-    });
+              expect(listener).not.toHaveBeenCalled();
+              checker.enable();
+              el.clientHeight = 100;
+              el.dispatchEvent('resize');
+              setTimeout(() => {
+                expect(listener).toHaveBeenCalled();
+                done();
+              }, 100);
+            
+        }));
+
+    it('should not trigger the first time after enable when the size does not change', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              const el = new MockElement();
+              const checker = new ResizeChecker(el as any, { disabled: true });
+              const listener = vi.fn();
+              checker.on('resize', listener);
+
+              expect(listener).not.toHaveBeenCalled();
+              el.clientHeight = 100;
+              checker.enable();
+              el.clientHeight = 100;
+              setTimeout(() => {
+                expect(listener).not.toHaveBeenCalled();
+                done();
+              }, 100);
+            
+        }));
   });
 
   describe('#modifySizeWithoutTriggeringResize()', () => {
-    it(`does not emit "resize" events caused by the block`, (done) => {
-      const el = new MockElement();
-      const checker = new ResizeChecker(el as any, { disabled: true });
-      const listener = jest.fn();
-      checker.on('resize', listener);
+    it(`does not emit "resize" events caused by the block`, () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      checker.modifySizeWithoutTriggeringResize(() => {
-        el.clientHeight = 100;
-      });
-      el.dispatchEvent('resize');
-      setTimeout(() => {
-        expect(listener).not.toHaveBeenCalled();
-        done();
-      }, 1000);
-    });
+              const el = new MockElement();
+              const checker = new ResizeChecker(el as any, { disabled: true });
+              const listener = vi.fn();
+              checker.on('resize', listener);
 
-    it('does emit "resize" when modification is made between the block and resize notification', (done) => {
-      const el = new MockElement();
-      const checker = new ResizeChecker(el as any, { disabled: true });
-      const listener = jest.fn();
-      checker.on('resize', listener);
+              checker.modifySizeWithoutTriggeringResize(() => {
+                el.clientHeight = 100;
+              });
+              el.dispatchEvent('resize');
+              setTimeout(() => {
+                expect(listener).not.toHaveBeenCalled();
+                done();
+              }, 1000);
+            
+        }));
 
-      checker.modifySizeWithoutTriggeringResize(() => {
-        el.clientHeight = 100;
-      });
-      el.dispatchEvent('resize');
-      expect(listener).not.toHaveBeenCalled();
+    it('does emit "resize" when modification is made between the block and resize notification', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      el.clientHeight = 200;
-      el.dispatchEvent('resize');
-      setTimeout(() => {
-        expect(listener).not.toHaveBeenCalled();
-        done();
-      }, 100);
-    });
+              const el = new MockElement();
+              const checker = new ResizeChecker(el as any, { disabled: true });
+              const listener = vi.fn();
+              checker.on('resize', listener);
+
+              checker.modifySizeWithoutTriggeringResize(() => {
+                el.clientHeight = 100;
+              });
+              el.dispatchEvent('resize');
+              expect(listener).not.toHaveBeenCalled();
+
+              el.clientHeight = 200;
+              el.dispatchEvent('resize');
+              setTimeout(() => {
+                expect(listener).not.toHaveBeenCalled();
+                done();
+              }, 100);
+            
+        }));
   });
 
   describe('#destroy()', () => {
@@ -156,20 +182,24 @@ describe('Resize Checker', () => {
       expect(!(checker as any).observer).toBe(true);
     });
 
-    it('does not emit future resize events', (done) => {
-      const el = new MockElement();
-      const checker = new ResizeChecker(el as any, { disabled: true });
-      const listener = jest.fn();
-      checker.on('resize', listener);
+    it('does not emit future resize events', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      checker.destroy();
+              const el = new MockElement();
+              const checker = new ResizeChecker(el as any, { disabled: true });
+              const listener = vi.fn();
+              checker.on('resize', listener);
 
-      el.clientHeight = 100;
-      el.dispatchEvent('resize');
-      setTimeout(() => {
-        expect(listener).not.toHaveBeenCalled();
-        done();
-      }, 100);
-    });
+              checker.destroy();
+
+              el.clientHeight = 100;
+              el.dispatchEvent('resize');
+              setTimeout(() => {
+                expect(listener).not.toHaveBeenCalled();
+                done();
+              }, 100);
+            
+        }));
   });
 });

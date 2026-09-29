@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,7 +17,7 @@ import { ColumnsPopover } from './columns_popover';
 
 describe('ColumnsPopover', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const selectedColumns = [
@@ -45,7 +47,7 @@ describe('ColumnsPopover', () => {
   });
 
   it('clicking a switch calls onSelectedColumnsChange with the right params', async () => {
-    const onSelectedColumnsChange = jest.fn();
+    const onSelectedColumnsChange = vi.fn();
 
     renderWithTestingProviders(
       <ColumnsPopover
@@ -70,7 +72,7 @@ describe('ColumnsPopover', () => {
   });
 
   it('clicking Show All calls onSelectedColumnsChange with the right params', async () => {
-    const onSelectedColumnsChange = jest.fn();
+    const onSelectedColumnsChange = vi.fn();
 
     renderWithTestingProviders(
       <ColumnsPopover
@@ -95,7 +97,7 @@ describe('ColumnsPopover', () => {
   });
 
   it('clicking Hide All calls onSelectedColumnsChange with the right params', async () => {
-    const onSelectedColumnsChange = jest.fn();
+    const onSelectedColumnsChange = vi.fn();
 
     renderWithTestingProviders(
       <ColumnsPopover
@@ -132,7 +134,7 @@ describe('ColumnsPopover', () => {
   });
 
   it('searching for text does not change the list of selected columns', async () => {
-    const onSelectedColumnsChange = jest.fn();
+    const onSelectedColumnsChange = vi.fn();
 
     renderWithTestingProviders(
       <ColumnsPopover

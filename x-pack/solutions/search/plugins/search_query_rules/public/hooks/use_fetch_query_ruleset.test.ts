@@ -5,41 +5,49 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { MOCK_QUERY_RULESET_RESPONSE_FIXTURE } from '../../common/__fixtures__/query_rules_ruleset';
 
-const mockHttpGet = jest.fn();
+const mockHttpGet = vi.fn();
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn().mockImplementation(async ({ queryKey, queryFn, opts }) => {
-    try {
-      const res = await queryFn();
-      return Promise.resolve(res);
-    } catch (_) {
-      // silent fail as we don't handle error yet
-    }
-  }),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: vi.fn().mockImplementation(async ({ queryKey, queryFn, opts }) => {
+        try {
+          const res = await queryFn();
+          return Promise.resolve(res);
+        } catch (_) {
+          // silent fail as we don't handle error yet
+        }
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      http: {
-        get: mockHttpGet,
-      },
-    },
-  }),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          http: {
+            get: mockHttpGet,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useFetchQueryRuleset hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return query ruleset', async () => {
     mockHttpGet.mockReturnValue(MOCK_QUERY_RULESET_RESPONSE_FIXTURE);
 
-    const { useFetchQueryRuleset } = jest.requireActual('./use_fetch_query_ruleset');
+    const { useFetchQueryRuleset } = (await vi.importActual('./use_fetch_query_ruleset'));
 
     const { result } = renderHook(() => useFetchQueryRuleset('my-ruleset'));
     await waitFor(() => {

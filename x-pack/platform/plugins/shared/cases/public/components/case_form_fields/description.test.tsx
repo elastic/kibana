@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,7 +20,7 @@ import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form
 import { renderWithTestingProviders } from '../../common/mock';
 
 describe('Description', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
   const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
   const defaultProps = {
     draftStorageKey,
@@ -26,7 +28,7 @@ describe('Description', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     window.sessionStorage.clear();
   });

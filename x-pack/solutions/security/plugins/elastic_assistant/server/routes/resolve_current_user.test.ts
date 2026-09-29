@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -25,7 +27,7 @@ describe('resolveCurrentUser', () => {
   let security: ReturnType<typeof securityMock.createStart>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     security = securityMock.createStart();
   });
 

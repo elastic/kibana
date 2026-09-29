@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getServerListenerMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./get_listener', () => {
-  const actual = jest.requireActual('./get_listener');
+export const getServerListenerMock = vi.fn();
+
+vi.doMock('./get_listener', async () => {
+  const actual = (await vi.importActual('./get_listener'));
   return {
     ...actual,
     getServerListener: getServerListenerMock,

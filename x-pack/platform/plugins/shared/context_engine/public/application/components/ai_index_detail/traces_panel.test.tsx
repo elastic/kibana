@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,16 +17,22 @@ import React, { useState } from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { TracesPanel } from './traces_panel';
 
-const mockUseAgentBuilderAgents = jest.fn();
-const mockUseIndices = jest.fn();
+const mockUseAgentBuilderAgents = vi.fn();
+const mockUseIndices = vi.fn();
 
-jest.mock('../../hooks/use_agent_builder_agents', () => ({
-  useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
-}));
+vi.mock('../../hooks/use_agent_builder_agents', () => {
+      const mocked = {
+      useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_indices', () => ({
-  useIndices: () => mockUseIndices(),
-}));
+vi.mock('../../hooks/use_indices', () => {
+      const mocked = {
+      useIndices: () => mockUseIndices(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
@@ -71,12 +79,12 @@ describe('TracesPanel', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the empty fallback when no trace is configured', () => {
     renderWithProviders(
-      <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
+      <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={vi.fn()} isManaged={false} />
     );
 
     expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
@@ -85,7 +93,7 @@ describe('TracesPanel', () => {
 
   it('renders read-only empty fallback for managed AI indexes', () => {
     renderWithProviders(
-      <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged />
+      <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={vi.fn()} isManaged />
     );
 
     expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
@@ -100,7 +108,7 @@ describe('TracesPanel', () => {
           ...aiIndex,
           traces: [{ type: 'elastic_agent', value: 'agent-1', query: 'FROM traces' }],
         }}
-        onSaved={jest.fn()}
+        onSaved={vi.fn()}
         isManaged={false}
       />
     );
@@ -119,7 +127,7 @@ describe('TracesPanel', () => {
           ...aiIndex,
           traces: [{ type: 'index', value: 'logs-genai-default', query: 'FROM logs' }],
         }}
-        onSaved={jest.fn()}
+        onSaved={vi.fn()}
         isManaged={false}
       />
     );
@@ -132,7 +140,7 @@ describe('TracesPanel', () => {
 
   it('does not render the edit button while loading', () => {
     renderWithProviders(
-      <TracesPanel isLoading aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
+      <TracesPanel isLoading aiIndex={aiIndex} onSaved={vi.fn()} isManaged={false} />
     );
 
     expect(screen.queryByTestId('contextEditTracesButton')).not.toBeInTheDocument();
@@ -146,7 +154,7 @@ describe('TracesPanel', () => {
           ...aiIndex,
           traces: [{ type: 'elastic_agent', value: 'agent-1', query: 'FROM traces' }],
         }}
-        onSaved={jest.fn()}
+        onSaved={vi.fn()}
         isManaged={false}
       />
     );
@@ -157,14 +165,14 @@ describe('TracesPanel', () => {
 
   it('hides the edit button for managed AI indexes', () => {
     renderWithProviders(
-      <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged />
+      <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={vi.fn()} isManaged />
     );
 
     expect(screen.queryByTestId('contextEditTracesButton')).not.toBeInTheDocument();
   });
 
   it('treats an esql trace as empty, shows Edit, and replaces it on save', async () => {
-    const onSaved = jest.fn();
+    const onSaved = vi.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
 
@@ -213,7 +221,7 @@ describe('TracesPanel', () => {
   });
 
   it('saves the edited trace, exits edit mode, and calls onSaved', async () => {
-    const onSaved = jest.fn();
+    const onSaved = vi.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
 
@@ -254,7 +262,7 @@ describe('TracesPanel', () => {
   });
 
   it('drops additional traces beyond the first when saving', async () => {
-    const onSaved = jest.fn();
+    const onSaved = vi.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
 
@@ -304,7 +312,7 @@ describe('TracesPanel', () => {
   });
 
   it('keeps the editor open and does not call onSaved when the save fails', async () => {
-    const onSaved = jest.fn();
+    const onSaved = vi.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockRejectedValue(new Error('save failed'));
 
@@ -354,7 +362,7 @@ describe('TracesPanel', () => {
           ...aiIndex,
           traces: [{ type: 'elastic_agent', value: 'agent-1', query: 'FROM traces' }],
         }}
-        onSaved={jest.fn()}
+        onSaved={vi.fn()}
         isManaged={false}
       />,
       testServices
@@ -382,7 +390,7 @@ describe('TracesPanel', () => {
           ...aiIndex,
           traces: [{ type: 'elastic_agent', value: 'agent-1', query: 'FROM traces' }],
         }}
-        onSaved={jest.fn()}
+        onSaved={vi.fn()}
         isManaged={false}
       />,
       testServices
@@ -409,7 +417,7 @@ describe('TracesPanel', () => {
           ...aiIndex,
           traces: [{ type: 'elastic_agent', value: 'agent-1', query: 'FROM traces' }],
         }}
-        onSaved={jest.fn()}
+        onSaved={vi.fn()}
         isManaged={false}
       />,
       testServices
@@ -424,7 +432,7 @@ describe('TracesPanel', () => {
   });
 
   it('clears the trace when saving an empty draft', async () => {
-    const onSaved = jest.fn();
+    const onSaved = vi.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
 
@@ -462,7 +470,7 @@ describe('TracesPanel', () => {
 
   it('enables Save immediately when opening the editor with no traces', () => {
     renderWithProviders(
-      <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
+      <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={vi.fn()} isManaged={false} />
     );
 
     fireEvent.click(screen.getByTestId('contextEditTracesButton'));

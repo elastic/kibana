@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { DrilldownTableItem } from './drilldown_table';
@@ -24,7 +26,7 @@ test('Render list of drilldowns', () => {
 });
 
 test('Emit onEdit() when clicking on edit drilldown', () => {
-  const fn = jest.fn();
+  const fn = vi.fn();
   const screen = render(<DrilldownTable items={drilldowns} onEdit={fn} />);
 
   const editButtons = screen.getAllByText('Edit');
@@ -34,21 +36,21 @@ test('Emit onEdit() when clicking on edit drilldown', () => {
 });
 
 test('Emit onCreate() when clicking on create drilldown', () => {
-  const fn = jest.fn();
+  const fn = vi.fn();
   const screen = render(<DrilldownTable items={drilldowns} onCreate={fn} />);
   fireEvent.click(screen.getByText('Create new'));
   expect(fn).toHaveBeenCalled();
 });
 
 test('Delete button is not visible when non is selected', () => {
-  const fn = jest.fn();
+  const fn = vi.fn();
   const screen = render(<DrilldownTable items={drilldowns} onCreate={fn} />);
   expect(screen.queryByText(/Delete/i)).not.toBeInTheDocument();
   expect(screen.queryByText(/Create/i)).toBeInTheDocument();
 });
 
 test('Can delete drilldowns', () => {
-  const fn = jest.fn();
+  const fn = vi.fn();
   const screen = render(<DrilldownTable items={drilldowns} onDelete={fn} />);
 
   const checkboxes = screen.getAllByLabelText(/Select this drilldown/i);

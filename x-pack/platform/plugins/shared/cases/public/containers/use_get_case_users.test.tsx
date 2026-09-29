@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useGetCaseUsers } from './use_get_case_users';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
 import { TestProviders } from '../common/mock';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
 describe('useGetCaseUsers', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'getCaseUsers');
+    const spy = vi.spyOn(api, 'getCaseUsers');
 
     renderHook(() => useGetCaseUsers('case-1'), {
       wrapper: TestProviders,
@@ -32,10 +35,10 @@ describe('useGetCaseUsers', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addError });
 
-    jest.spyOn(api, 'getCaseUsers').mockRejectedValue(new Error("C'est la vie"));
+    vi.spyOn(api, 'getCaseUsers').mockRejectedValue(new Error("C'est la vie"));
     renderHook(() => useGetCaseUsers('case-1'), {
       wrapper: TestProviders,
     });

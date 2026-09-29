@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { dataViewMock } from '../__mocks__';
@@ -14,7 +17,7 @@ import { formatFieldValueReact, formatFieldValueText } from './format_value';
 
 const services = {
   fieldFormats: {
-    getDefaultInstance: jest.fn<FieldFormat, [string]>(
+    getDefaultInstance: vi.fn<FieldFormat, [string]>(
       () =>
         ({
           convertToText: (value: unknown) => value,
@@ -34,12 +37,12 @@ const hit = {
 
 describe('formatFieldValueReact', () => {
   afterEach(() => {
-    (dataViewMock.getFormatterForField as jest.Mock).mockReset();
+    (dataViewMock.getFormatterForField as Mock).mockReset();
   });
 
   it('should call convertToReact on the correct field formatter', () => {
-    const formatterForFieldMock = dataViewMock.getFormatterForField as jest.Mock;
-    const convertToReactMock = jest.fn((value: unknown) => `field-formatted:${value}`);
+    const formatterForFieldMock = dataViewMock.getFormatterForField as Mock;
+    const convertToReactMock = vi.fn((value: unknown) => `field-formatted:${value}`);
     formatterForFieldMock.mockReturnValue({ convertToReact: convertToReactMock });
     const field = dataViewMock.fields.getByName('message');
 
@@ -57,8 +60,8 @@ describe('formatFieldValueReact', () => {
   });
 
   it('should call convertToReact on default string formatter if no field specified', () => {
-    const convertToReactMock = jest.fn((value: unknown) => `default-formatted:${value}`);
-    (services.fieldFormats.getDefaultInstance as jest.Mock).mockReturnValue({
+    const convertToReactMock = vi.fn((value: unknown) => `default-formatted:${value}`);
+    (services.fieldFormats.getDefaultInstance as Mock).mockReturnValue({
       convertToReact: convertToReactMock,
     });
 
@@ -75,8 +78,8 @@ describe('formatFieldValueReact', () => {
   });
 
   it('should call convertToReact on default string formatter if no dataView is specified', () => {
-    const convertToReactMock = jest.fn((value: unknown) => `default-formatted:${value}`);
-    (services.fieldFormats.getDefaultInstance as jest.Mock).mockReturnValue({
+    const convertToReactMock = vi.fn((value: unknown) => `default-formatted:${value}`);
+    (services.fieldFormats.getDefaultInstance as Mock).mockReturnValue({
       convertToReact: convertToReactMock,
     });
 
@@ -94,12 +97,12 @@ describe('formatFieldValueReact', () => {
 
 describe('formatFieldValueText', () => {
   afterEach(() => {
-    (dataViewMock.getFormatterForField as jest.Mock).mockReset();
+    (dataViewMock.getFormatterForField as Mock).mockReset();
   });
 
   it('should call convertToText on the correct field formatter', () => {
-    const formatterForFieldMock = dataViewMock.getFormatterForField as jest.Mock;
-    const convertToTextMock = jest.fn((value: unknown) => `field-formatted:${value}`);
+    const formatterForFieldMock = dataViewMock.getFormatterForField as Mock;
+    const convertToTextMock = vi.fn((value: unknown) => `field-formatted:${value}`);
     formatterForFieldMock.mockReturnValue({ convertToText: convertToTextMock });
     const field = dataViewMock.fields.getByName('message');
 
@@ -116,8 +119,8 @@ describe('formatFieldValueText', () => {
   });
 
   it('should call convertToText on default string formatter if no field specified', () => {
-    const convertToTextMock = jest.fn((value: unknown) => `default-formatted:${value}`);
-    (services.fieldFormats.getDefaultInstance as jest.Mock).mockReturnValue({
+    const convertToTextMock = vi.fn((value: unknown) => `default-formatted:${value}`);
+    (services.fieldFormats.getDefaultInstance as Mock).mockReturnValue({
       convertToText: convertToTextMock,
     });
 
@@ -133,8 +136,8 @@ describe('formatFieldValueText', () => {
   });
 
   it('should call convertToText on default string formatter if no dataView is specified', () => {
-    const convertToTextMock = jest.fn((value: unknown) => `default-formatted:${value}`);
-    (services.fieldFormats.getDefaultInstance as jest.Mock).mockReturnValue({
+    const convertToTextMock = vi.fn((value: unknown) => `default-formatted:${value}`);
+    (services.fieldFormats.getDefaultInstance as Mock).mockReturnValue({
       convertToText: convertToTextMock,
     });
 

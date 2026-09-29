@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { WorkflowExecutionsDataClient } from '@kbn/workflows-execution-engine/server';
@@ -17,14 +20,14 @@ import {
 } from './search_workflow_executions';
 
 describe('searchWorkflowExecutions', () => {
-  let mockWorkflowDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
+  let mockWorkflowDataClient: Mocked<WorkflowExecutionsDataClient>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
 
   beforeEach(() => {
     mockWorkflowDataClient = createMockWorkflowDataClient();
 
     mockLogger = loggerMock.create();
-    mockLogger.error = jest.fn();
+    mockLogger.error = vi.fn();
   });
 
   describe('response transformation', () => {

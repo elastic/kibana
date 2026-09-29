@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { type FC, type PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, screen, waitFor, renderHook } from '@testing-library/react';
@@ -20,7 +22,7 @@ import { useAppDependencies } from '../app_dependencies';
 import type { SearchItems } from './use_search_items';
 import { useIndexData } from './use_index_data';
 
-jest.mock('../app_dependencies');
+vi.mock('../app_dependencies');
 
 const query: SimpleQuery = {
   query_string: {
@@ -48,7 +50,7 @@ class DataViewFields extends Array<{ name: string }> {
 
 describe('Transform: useIndexData()', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('empty populatedFields does not trigger loading', async () => {

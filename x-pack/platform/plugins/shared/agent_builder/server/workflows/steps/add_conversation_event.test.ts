@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   createBadRequestError,
   createConversationNotFoundError,
@@ -40,11 +42,11 @@ describe('addConversationEventStepDefinition', () => {
   ) => {
     const conv = createWorkflowStepConversationClientMock(convOverrides);
     const agents = createWorkflowStepAgentRegistryMock();
-    const isExperimentalEnabled = jest.fn().mockResolvedValue(experimental);
+    const isExperimentalEnabled = vi.fn().mockResolvedValue(experimental);
     const definition = addConversationEventStepDefinition({
       getConversationClient: conv.getConversationClient,
       getAgentRegistry: agents.getAgentRegistry,
-      getExecutionService: jest.fn(),
+      getExecutionService: vi.fn(),
       isExperimentalEnabled,
     });
     return { conv, isExperimentalEnabled, definition };
@@ -60,7 +62,7 @@ describe('addConversationEventStepDefinition', () => {
 
   it('appends the event and returns the server-assigned fields', async () => {
     const { conv, definition } = buildDefinition({
-      addCustomEvents: jest.fn().mockResolvedValue([appendedEvent]),
+      addCustomEvents: vi.fn().mockResolvedValue([appendedEvent]),
     });
 
     const result = await definition.handler(createStepHandlerContext({ input: baseInput }));
@@ -81,7 +83,7 @@ describe('addConversationEventStepDefinition', () => {
 
   it('sends an empty payload when data is omitted', async () => {
     const { conv, definition } = buildDefinition({
-      addCustomEvents: jest.fn().mockResolvedValue([{ ...appendedEvent, data: {} }]),
+      addCustomEvents: vi.fn().mockResolvedValue([{ ...appendedEvent, data: {} }]),
     });
 
     await definition.handler(
@@ -109,7 +111,7 @@ describe('addConversationEventStepDefinition', () => {
 
   it('propagates validation errors for unknown event types', async () => {
     const { definition } = buildDefinition({
-      addCustomEvents: jest
+      addCustomEvents: vi
         .fn()
         .mockRejectedValue(createBadRequestError('Unknown conversation event type "nope"')),
     });
@@ -125,7 +127,7 @@ describe('addConversationEventStepDefinition', () => {
 
   it('propagates a not-found error for a missing conversation', async () => {
     const { definition } = buildDefinition({
-      addCustomEvents: jest
+      addCustomEvents: vi
         .fn()
         .mockRejectedValue(createConversationNotFoundError({ conversationId: 'missing' })),
     });

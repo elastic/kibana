@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KueryNode } from '@kbn/es-query';
@@ -23,7 +26,7 @@ describe('runActivityReconciliation', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('re-emits every user action created since lastRunAt in a single bulk', async () => {
@@ -104,7 +107,7 @@ describe('runActivityReconciliation', () => {
       CASE_USER_ACTION_SAVED_OBJECT,
       expect.objectContaining({ namespaces: ['*'] })
     );
-    for (const call of (client.find as jest.Mock).mock.calls) {
+    for (const call of (client.find as Mock).mock.calls) {
       expect((call[0] as { namespaces?: string[] }).namespaces).toEqual(['*']);
     }
   });

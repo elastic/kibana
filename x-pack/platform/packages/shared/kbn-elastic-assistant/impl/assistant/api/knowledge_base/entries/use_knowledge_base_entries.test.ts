@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useKnowledgeBaseEntries } from './use_knowledge_base_entries';
 import type { HttpSetup } from '@kbn/core/public';
@@ -13,14 +16,14 @@ import { TestProviders } from '../../../../mock/test_providers/test_providers';
 
 describe('useKnowledgeBaseEntries', () => {
   const httpMock: HttpSetup = {
-    fetch: jest.fn(),
+    fetch: vi.fn(),
   } as unknown as HttpSetup;
   const toastsMock: IToasts = {
-    addError: jest.fn(),
+    addError: vi.fn(),
   } as unknown as IToasts;
 
   it('fetches knowledge base entries successfully', async () => {
-    (httpMock.fetch as jest.Mock).mockResolvedValue({
+    (httpMock.fetch as Mock).mockResolvedValue({
       page: 1,
       perPage: 100,
       total: 1,
@@ -47,7 +50,7 @@ describe('useKnowledgeBaseEntries', () => {
 
   it('handles fetch error', async () => {
     const error = new Error('Fetch error');
-    (httpMock.fetch as jest.Mock).mockRejectedValue(error);
+    (httpMock.fetch as Mock).mockRejectedValue(error);
 
     renderHook(
       () => useKnowledgeBaseEntries({ http: httpMock, toasts: toastsMock, enabled: true }),

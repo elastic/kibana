@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getRRuleRequestSchema, rRuleRequestSchema } from './v1';
 
 describe('rRuleRequestSchema', () => {
@@ -21,12 +23,12 @@ describe('rRuleRequestSchema', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2021-01-01T00:00:00Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2021-01-01T00:00:00Z'));
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   test('no errors on proper request', () => {

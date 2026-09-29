@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import { createRouteContextMock } from './route_context.mock';
@@ -12,7 +14,7 @@ import { withAlertZeroEnabled } from './with_alertzero_enabled';
 
 describe('withAlertZeroEnabled', () => {
   const invoke = async (settingEnabled: boolean) => {
-    const handler = jest.fn().mockResolvedValue('handled');
+    const handler = vi.fn().mockResolvedValue('handled');
     const context = createRouteContextMock({ settingEnabled });
     const request = httpServerMock.createKibanaRequest();
     const response = httpServerMock.createResponseFactory();
@@ -39,7 +41,7 @@ describe('withAlertZeroEnabled', () => {
   it('reads the per-space AlertZero setting', async () => {
     const context = createRouteContextMock({ settingEnabled: true });
 
-    await withAlertZeroEnabled(jest.fn())(
+    await withAlertZeroEnabled(vi.fn())(
       context,
       httpServerMock.createKibanaRequest(),
       httpServerMock.createResponseFactory()

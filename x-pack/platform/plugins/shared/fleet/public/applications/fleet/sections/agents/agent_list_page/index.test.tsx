@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import type { RenderResult } from '@testing-library/react';
@@ -16,75 +19,84 @@ import { sendGetAgentsForRq, sendGetAgentStatus } from '../../../hooks';
 
 import { AgentListPage } from '.';
 
-jest.mock('../../../../integrations/hooks/use_confirm_force_install', () => ({
-  useConfirmForceInstall: jest.fn(),
-}));
+vi.mock('../../../../integrations/hooks/use_confirm_force_install', () => {
+      const mocked = {
+      useConfirmForceInstall: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_missing_encryption_key_callout', () => ({
-  useMissingEncryptionKeyCallout: jest.fn().mockReturnValue([true, jest.fn()]),
-}));
+vi.mock('./hooks/use_missing_encryption_key_callout', () => {
+      const mocked = {
+      useMissingEncryptionKeyCallout: vi.fn().mockReturnValue([true, vi.fn()]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks', () => ({
-  ...jest.requireActual('../../../hooks'),
-  UIExtensionsContext: {
-    Provider: (props: any) => {
-      return props.children;
-    },
-  },
-  sendGetAgentsForRq: jest.fn(),
-  useGetAgentPolicies: jest.fn().mockReturnValue({
-    data: {
-      items: [
-        { id: 'policy1', is_managed: false },
-        { id: 'managed_policy', is_managed: true },
-      ],
-    } as GetAgentPoliciesResponse,
-    isLoading: false,
-    resendRequest: jest.fn(),
-  }),
-  FleetStatusProvider: (props: any) => {
-    return props.children;
-  },
-  useFleetStatus: jest.fn().mockReturnValue({}),
-  sendGetAgentStatus: jest.fn(),
-  sendBulkGetAgentPoliciesForRq: jest.fn().mockResolvedValue({
-    items: [
-      { id: 'policy1', is_managed: false },
-      { id: 'managed_policy', is_managed: true },
-    ],
-  }),
-  sendGetAgentPolicies: jest.fn().mockResolvedValue({ data: { items: [] } }),
-  sendGetAgentTagsForRq: jest.fn().mockReturnValue({ items: ['tag1', 'tag2'] }),
-  useAuthz: jest
-    .fn()
-    .mockReturnValue({ fleet: { all: true, allAgents: true, readAgents: true }, integrations: {} }),
-  useStartServices: jest.fn().mockReturnValue({
-    notifications: {
-      toasts: {
-        addError: jest.fn(),
+vi.mock('../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../hooks')),
+      UIExtensionsContext: {
+        Provider: (props: any) => {
+          return props.children;
+        },
       },
-    },
-    cloud: {},
-    data: { dataViews: { getFieldsForWildcard: jest.fn() } },
-    docLinks: { links: { kibana: { secureSavedObject: 'my-link' } } },
-    uiSettings: {
-      get: jest.fn(),
-    },
-    storage: {
-      get: jest.fn(),
-    },
-  }),
-  useBreadcrumbs: jest.fn(),
-  useLink: jest.fn().mockReturnValue({ getHref: jest.fn() }),
-  useUrlParams: jest
-    .fn()
-    .mockReturnValue({ urlParams: { kuery: '' }, toUrlParams: jest.fn(() => '') }),
-  useKibanaVersion: jest.fn().mockReturnValue('8.3.0'),
-  useFleetServerUnhealthy: jest.fn().mockReturnValue({
-    isUnhealthy: false,
-    isLoading: false,
-  }),
-}));
+      sendGetAgentsForRq: vi.fn(),
+      useGetAgentPolicies: vi.fn().mockReturnValue({
+        data: {
+          items: [
+            { id: 'policy1', is_managed: false },
+            { id: 'managed_policy', is_managed: true },
+          ],
+        } as GetAgentPoliciesResponse,
+        isLoading: false,
+        resendRequest: vi.fn(),
+      }),
+      FleetStatusProvider: (props: any) => {
+        return props.children;
+      },
+      useFleetStatus: vi.fn().mockReturnValue({}),
+      sendGetAgentStatus: vi.fn(),
+      sendBulkGetAgentPoliciesForRq: vi.fn().mockResolvedValue({
+        items: [
+          { id: 'policy1', is_managed: false },
+          { id: 'managed_policy', is_managed: true },
+        ],
+      }),
+      sendGetAgentPolicies: vi.fn().mockResolvedValue({ data: { items: [] } }),
+      sendGetAgentTagsForRq: vi.fn().mockReturnValue({ items: ['tag1', 'tag2'] }),
+      useAuthz: vi
+        .fn()
+        .mockReturnValue({ fleet: { all: true, allAgents: true, readAgents: true }, integrations: {} }),
+      useStartServices: vi.fn().mockReturnValue({
+        notifications: {
+          toasts: {
+            addError: vi.fn(),
+          },
+        },
+        cloud: {},
+        data: { dataViews: { getFieldsForWildcard: vi.fn() } },
+        docLinks: { links: { kibana: { secureSavedObject: 'my-link' } } },
+        uiSettings: {
+          get: vi.fn(),
+        },
+        storage: {
+          get: vi.fn(),
+        },
+      }),
+      useBreadcrumbs: vi.fn(),
+      useLink: vi.fn().mockReturnValue({ getHref: vi.fn() }),
+      useUrlParams: vi
+        .fn()
+        .mockReturnValue({ urlParams: { kuery: '' }, toUrlParams: vi.fn(() => '') }),
+      useKibanaVersion: vi.fn().mockReturnValue('8.3.0'),
+      useFleetServerUnhealthy: vi.fn().mockReturnValue({
+        isUnhealthy: false,
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Create a stateful mock for useSessionAgentListState
 const mockSessionState = {
@@ -97,9 +109,9 @@ const mockSessionState = {
   page: { index: 0, size: 20 },
 };
 
-const mockUpdateTableState = jest.fn();
+const mockUpdateTableState = vi.fn();
 
-const mockOnTableChange = jest.fn((changes: any) => {
+const mockOnTableChange = vi.fn((changes: any) => {
   if (changes.sort) {
     mockSessionState.sort = changes.sort;
   }
@@ -108,35 +120,38 @@ const mockOnTableChange = jest.fn((changes: any) => {
   }
 });
 
-jest.mock('./hooks/use_session_agent_list_state', () => ({
-  useSessionAgentListState: jest.fn(() => ({
-    ...mockSessionState,
-    updateTableState: mockUpdateTableState,
-    onTableChange: mockOnTableChange,
-    clearFilters: jest.fn(),
-    resetToDefaults: jest.fn(),
-  })),
-  getDefaultAgentListState: jest.fn(() => ({
-    search: '',
-    selectedAgentPolicies: [],
-    selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
-    selectedTags: [],
-    showUpgradeable: false,
-    sort: { field: 'enrolled_at', direction: 'desc' },
-    page: { index: 0, size: 20 },
-  })),
-  defaultAgentListState: {
-    search: '',
-    selectedAgentPolicies: [],
-    selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
-    selectedTags: [],
-    showUpgradeable: false,
-    sort: { field: 'enrolled_at', direction: 'desc' },
-    page: { index: 0, size: 20 },
-  },
-}));
+vi.mock('./hooks/use_session_agent_list_state', () => {
+      const mocked = {
+      useSessionAgentListState: vi.fn(() => ({
+        ...mockSessionState,
+        updateTableState: mockUpdateTableState,
+        onTableChange: mockOnTableChange,
+        clearFilters: vi.fn(),
+        resetToDefaults: vi.fn(),
+      })),
+      getDefaultAgentListState: vi.fn(() => ({
+        search: '',
+        selectedAgentPolicies: [],
+        selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
+        selectedTags: [],
+        showUpgradeable: false,
+        sort: { field: 'enrolled_at', direction: 'desc' },
+        page: { index: 0, size: 20 },
+      })),
+      defaultAgentListState: {
+        search: '',
+        selectedAgentPolicies: [],
+        selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
+        selectedTags: [],
+        showUpgradeable: false,
+        sort: { field: 'enrolled_at', direction: 'desc' },
+        page: { index: 0, size: 20 },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/search_and_filter_bar', () => {
+vi.mock('./components/search_and_filter_bar', () => {
   return {
     SearchAndFilterBar: ({ onClickAddCollector }: { onClickAddCollector: () => void }) => (
       <>
@@ -149,25 +164,28 @@ jest.mock('./components/search_and_filter_bar', () => {
   };
 });
 
-jest.mock('./components/add_collector_flyout', () => ({
-  AddCollectorFlyout: ({
-    onClose,
-    onClickViewAgents,
-  }: {
-    onClose: () => void;
-    onClickViewAgents: () => void;
-  }) => (
-    <div data-test-subj="addCollectorFlyout">
-      <button data-test-subj="mockViewCollectorsButton" onClick={onClickViewAgents}>
-        View connected collectors
-      </button>
-      <button onClick={onClose}>Close</button>
-    </div>
-  ),
-}));
+vi.mock('./components/add_collector_flyout', () => {
+      const mocked = {
+      AddCollectorFlyout: ({
+        onClose,
+        onClickViewAgents,
+      }: {
+        onClose: () => void;
+        onClickViewAgents: () => void;
+      }) => (
+        <div data-test-subj="addCollectorFlyout">
+          <button data-test-subj="mockViewCollectorsButton" onClick={onClickViewAgents}>
+            View connected collectors
+          </button>
+          <button onClick={onClose}>Close</button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedSendGetAgentsForRq = sendGetAgentsForRq as jest.Mock;
-const mockedSendGetAgentStatus = sendGetAgentStatus as jest.Mock;
+const mockedSendGetAgentsForRq = sendGetAgentsForRq as Mock;
+const mockedSendGetAgentStatus = sendGetAgentStatus as Mock;
 
 function renderAgentList() {
   const renderer = createFleetTestRendererMock();
@@ -205,11 +223,11 @@ describe('agent_list_page', () => {
             online: 6,
           },
         });
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should not send another agents status request if first one takes longer', () => {
@@ -231,7 +249,7 @@ describe('agent_list_page', () => {
       ({ utils } = renderAgentList());
 
       act(() => {
-        jest.advanceTimersByTime(65000);
+        vi.advanceTimersByTime(65000);
       });
 
       expect(mockedSendGetAgentStatus).toHaveBeenCalledTimes(1);
@@ -255,7 +273,7 @@ describe('agent_list_page', () => {
           totalInactive: 0,
         },
       });
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
 
       await act(async () => {
         ({ utils } = renderAgentList());
@@ -282,12 +300,12 @@ describe('agent_list_page', () => {
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should not set selection mode when agent selection changed automatically', async () => {
       act(() => {
-        jest.runOnlyPendingTimers();
+        vi.runOnlyPendingTimers();
       });
 
       await waitFor(() => {

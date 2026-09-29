@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { fireEvent, render } from '@testing-library/react';
@@ -27,7 +29,7 @@ describe('RangeSliderControl', () => {
     uuid: 'test-uuid',
     value: undefined,
     fieldFormatter: undefined,
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     isEdit: false,
     isPinned: true,
     label: 'Test',

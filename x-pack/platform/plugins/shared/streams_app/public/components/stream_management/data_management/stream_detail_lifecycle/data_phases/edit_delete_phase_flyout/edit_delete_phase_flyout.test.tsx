@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,14 +14,17 @@ import { EditDeletePhaseFlyout } from './edit_delete_phase_flyout';
 
 const DATA_TEST_SUBJ = 'streamsEditDeletePhaseFlyout';
 
-jest.mock('../../../../../../hooks/use_streams_privileges', () => ({
-  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
-}));
+vi.mock('../../../../../../hooks/use_streams_privileges', () => {
+      const mocked = {
+      useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderFlyout = (props: Partial<React.ComponentProps<typeof EditDeletePhaseFlyout>> = {}) => {
-  const onSave = jest.fn();
-  const onClose = jest.fn();
-  const onChange = jest.fn();
+  const onSave = vi.fn();
+  const onClose = vi.fn();
+  const onChange = vi.fn();
 
   render(
     <I18nProvider>
@@ -154,17 +159,17 @@ describe('EditDeletePhaseFlyout', () => {
   });
 
   it('does not emit preview changes on initial mount', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
       const { onChange } = renderFlyout({ onChangeDebounceMs: 0 });
 
       act(() => {
-        jest.runOnlyPendingTimers();
+        vi.runOnlyPendingTimers();
       });
 
       expect(onChange).not.toHaveBeenCalled();
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 
@@ -206,7 +211,7 @@ describe('EditDeletePhaseFlyout', () => {
   });
 
   it('debounces rapid draft changes for preview', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
       const { onChange } = renderFlyout({ onChangeDebounceMs: 100 });
       onChange.mockClear();
@@ -219,12 +224,12 @@ describe('EditDeletePhaseFlyout', () => {
       fireEvent.blur(valueInput);
 
       act(() => {
-        jest.advanceTimersByTime(99);
+        vi.advanceTimersByTime(99);
       });
       expect(onChange).toHaveBeenCalledTimes(0);
 
       act(() => {
-        jest.advanceTimersByTime(1);
+        vi.advanceTimersByTime(1);
       });
 
       await waitFor(() =>
@@ -239,7 +244,7 @@ describe('EditDeletePhaseFlyout', () => {
       );
       expect(onChange).toHaveBeenCalledTimes(1);
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 
@@ -295,7 +300,7 @@ describe('EditDeletePhaseFlyout', () => {
     const pendingSave = new Promise<void>((resolve) => {
       resolveSave = resolve;
     });
-    const onSave = jest.fn(() => pendingSave);
+    const onSave = vi.fn(() => pendingSave);
 
     render(
       <I18nProvider>
@@ -306,8 +311,8 @@ describe('EditDeletePhaseFlyout', () => {
             isDefaultRetention: false,
           }}
           onSave={onSave}
-          onClose={jest.fn()}
-          onChange={jest.fn()}
+          onClose={vi.fn()}
+          onChange={vi.fn()}
           onChangeDebounceMs={0}
         />
       </I18nProvider>

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getFormattedTime } from './helpers';
 
 describe('helper', () => {
   describe('getCurrentTimeForPrompt', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
-      jest
+      vi.clearAllMocks();
+      vi
         .useFakeTimers()
         .setSystemTime(new Date('Fri Feb 14 2025 07:33:12 UTC+0000 (Greenwich Mean Time)'));
     });

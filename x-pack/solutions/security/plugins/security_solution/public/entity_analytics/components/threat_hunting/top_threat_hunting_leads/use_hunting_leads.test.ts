@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 
@@ -13,32 +16,32 @@ import type { ApiLead } from './types';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
-jest.mock('@kbn/react-query');
-jest.mock('../../../api/api');
-jest.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('@kbn/react-query');
+vi.mock('../../../api/api');
+vi.mock('../../../../common/hooks/use_app_toasts');
 
-const mockUseQuery = useQuery as jest.Mock;
-const mockUseMutation = useMutation as jest.Mock;
-const mockUseQueryClient = useQueryClient as jest.Mock;
-const mockUseEntityAnalyticsRoutes = useEntityAnalyticsRoutes as jest.Mock;
-const mockUseAppToasts = useAppToasts as jest.Mock;
+const mockUseQuery = useQuery as Mock;
+const mockUseMutation = useMutation as Mock;
+const mockUseQueryClient = useQueryClient as Mock;
+const mockUseEntityAnalyticsRoutes = useEntityAnalyticsRoutes as Mock;
+const mockUseAppToasts = useAppToasts as Mock;
 
-const mockFetchLeads = jest.fn();
-const mockGenerateLeads = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
-const mockInvalidateQueries = jest.fn();
+const mockFetchLeads = vi.fn();
+const mockGenerateLeads = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
+const mockInvalidateQueries = vi.fn();
 
 describe('useHuntingLeads', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseEntityAnalyticsRoutes.mockReturnValue({
       fetchLeads: mockFetchLeads,
       generateLeads: mockGenerateLeads,
-      fetchLeadGenerationStatus: jest.fn().mockResolvedValue({ isEnabled: false }),
-      enableLeadGeneration: jest.fn().mockResolvedValue({ success: true }),
-      disableLeadGeneration: jest.fn().mockResolvedValue({ success: true }),
-      fetchLeadGenerationPrivileges: jest
+      fetchLeadGenerationStatus: vi.fn().mockResolvedValue({ isEnabled: false }),
+      enableLeadGeneration: vi.fn().mockResolvedValue({ success: true }),
+      disableLeadGeneration: vi.fn().mockResolvedValue({ success: true }),
+      fetchLeadGenerationPrivileges: vi
         .fn()
         .mockResolvedValue({ has_read_permissions: true, has_write_permissions: true }),
     });
@@ -48,15 +51,15 @@ describe('useHuntingLeads', () => {
     });
     mockUseQueryClient.mockReturnValue({
       invalidateQueries: mockInvalidateQueries,
-      setQueryData: jest.fn(),
+      setQueryData: vi.fn(),
     });
     mockUseQuery.mockReturnValue({
       data: undefined,
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     mockUseMutation.mockReturnValue({
-      mutate: jest.fn(),
+      mutate: vi.fn(),
       isLoading: false,
     });
   });
@@ -74,7 +77,7 @@ describe('useHuntingLeads', () => {
         return {
           data: undefined,
           isLoading: false,
-          refetch: jest.fn(),
+          refetch: vi.fn(),
         };
       }
     );
@@ -103,7 +106,7 @@ describe('useHuntingLeads', () => {
     mockUseQuery.mockReturnValue({
       data: undefined,
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
@@ -138,7 +141,7 @@ describe('useHuntingLeads', () => {
     mockUseQuery.mockReturnValue({
       data: { leads: apiLeads, total: 1 },
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
@@ -169,7 +172,7 @@ describe('useHuntingLeads', () => {
     mockUseQuery.mockReturnValue({
       data: { leads: [], total: 150 },
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
@@ -178,7 +181,7 @@ describe('useHuntingLeads', () => {
   });
 
   it('generate function triggers mutation when called', () => {
-    const mockMutate = jest.fn();
+    const mockMutate = vi.fn();
     mockUseMutation.mockReturnValue({
       mutate: mockMutate,
       isLoading: false,
@@ -197,7 +200,7 @@ describe('useHuntingLeads', () => {
     mockUseQuery.mockReturnValue({
       data: undefined,
       isLoading: true,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
@@ -207,7 +210,7 @@ describe('useHuntingLeads', () => {
 
   it('returns isGenerating from useMutation isLoading', () => {
     mockUseMutation.mockReturnValue({
-      mutate: jest.fn(),
+      mutate: vi.fn(),
       isLoading: true,
     });
 
@@ -222,10 +225,10 @@ describe('useHuntingLeads', () => {
         return {
           data: { has_read_permissions: false, has_write_permissions: false },
           isLoading: false,
-          refetch: jest.fn(),
+          refetch: vi.fn(),
         };
       }
-      return { data: undefined, isLoading: false, refetch: jest.fn() };
+      return { data: undefined, isLoading: false, refetch: vi.fn() };
     });
 
     const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
@@ -239,10 +242,10 @@ describe('useHuntingLeads', () => {
         return {
           data: { has_read_permissions: true, has_write_permissions: false },
           isLoading: false,
-          refetch: jest.fn(),
+          refetch: vi.fn(),
         };
       }
-      return { data: undefined, isLoading: false, refetch: jest.fn() };
+      return { data: undefined, isLoading: false, refetch: vi.fn() };
     });
 
     const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
@@ -260,21 +263,21 @@ describe('useHuntingLeads', () => {
           return {
             data: { isEnabled: false, lastExecutionUuid },
             isLoading: false,
-            refetch: jest.fn(),
+            refetch: vi.fn(),
           };
         }
-        return { data: undefined, isLoading: false, refetch: jest.fn() };
+        return { data: undefined, isLoading: false, refetch: vi.fn() };
       });
     };
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       localStorage.clear();
     });
 
     afterEach(() => {
-      jest.clearAllTimers();
-      jest.useRealTimers();
+      vi.clearAllTimers();
+      vi.useRealTimers();
       localStorage.clear();
     });
 
@@ -291,16 +294,16 @@ describe('useHuntingLeads', () => {
         IN_FLIGHT_KEY,
         JSON.stringify({ executionUuid: 'uuid-in-progress', startedAt: Date.now() })
       );
-      const mockFetchStatus = jest
+      const mockFetchStatus = vi
         .fn()
         .mockResolvedValue({ isEnabled: false, lastExecutionUuid: 'uuid-in-progress' });
       mockUseEntityAnalyticsRoutes.mockReturnValue({
         fetchLeads: mockFetchLeads.mockResolvedValue({ leads: [], total: 0 }),
         generateLeads: mockGenerateLeads,
         fetchLeadGenerationStatus: mockFetchStatus,
-        enableLeadGeneration: jest.fn().mockResolvedValue({ success: true }),
-        disableLeadGeneration: jest.fn().mockResolvedValue({ success: true }),
-        fetchLeadGenerationPrivileges: jest
+        enableLeadGeneration: vi.fn().mockResolvedValue({ success: true }),
+        disableLeadGeneration: vi.fn().mockResolvedValue({ success: true }),
+        fetchLeadGenerationPrivileges: vi
           .fn()
           .mockResolvedValue({ has_read_permissions: true, has_write_permissions: true }),
       });
@@ -315,7 +318,7 @@ describe('useHuntingLeads', () => {
       // Let the poll's delay elapse so it observes the now-matching status
       // and resolves, clearing the stored execution.
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(2_000);
+        await vi.advanceTimersByTimeAsync(2_000);
       });
 
       expect(result.current.isGenerating).toBe(false);

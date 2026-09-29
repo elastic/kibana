@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -38,7 +40,7 @@ const patternRollups: Record<string, PatternRollup> = {
   'packetbeat-*': packetbeatNoResults,
 };
 
-const onIndexSelected = jest.fn();
+const onIndexSelected = vi.fn();
 
 const defaultProps: Props = {
   onIndexSelected,
@@ -46,7 +48,7 @@ const defaultProps: Props = {
 
 describe('StorageDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     render(
       <TestExternalProviders>

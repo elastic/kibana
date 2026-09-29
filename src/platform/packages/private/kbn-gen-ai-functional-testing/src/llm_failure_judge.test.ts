@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Readable } from 'stream';
 
 import type { Client } from '@elastic/elasticsearch';
@@ -77,11 +80,11 @@ describe('parseJudgeVerdict', () => {
 });
 
 describe('judgeLlmSmokeFailure', () => {
-  const clientWith = (request: jest.Mock): Client =>
+  const clientWith = (request: Mock): Client =>
     ({ transport: { request } } as unknown as Client);
 
   it('returns the verdict from the first reachable judge', async () => {
-    const request = jest
+    const request = vi
       .fn()
       .mockResolvedValue(
         Readable.from([sseChunk('{"verdict":"provider","reason":"quota exceeded"}')])
@@ -106,7 +109,7 @@ describe('judgeLlmSmokeFailure', () => {
   });
 
   it('falls back to the next judge when the first fails', async () => {
-    const request = jest
+    const request = vi
       .fn()
       .mockRejectedValueOnce(new Error('endpoint unavailable'))
       .mockResolvedValueOnce(
@@ -128,7 +131,7 @@ describe('judgeLlmSmokeFailure', () => {
   });
 
   it('falls back when a judge returns an unparsable reply', async () => {
-    const request = jest
+    const request = vi
       .fn()
       .mockResolvedValueOnce(Readable.from([sseChunk('no json here')]))
       .mockResolvedValueOnce(
@@ -146,7 +149,7 @@ describe('judgeLlmSmokeFailure', () => {
   });
 
   it('returns unknown when every judge fails', async () => {
-    const request = jest.fn().mockRejectedValue(new Error('down'));
+    const request = vi.fn().mockRejectedValue(new Error('down'));
 
     const judgement = await judgeLlmSmokeFailure({
       esClient: clientWith(request),
@@ -161,7 +164,7 @@ describe('judgeLlmSmokeFailure', () => {
   });
 
   it('returns unknown without calling ES when no judges are configured', async () => {
-    const request = jest.fn();
+    const request = vi.fn();
 
     const judgement = await judgeLlmSmokeFailure({
       esClient: clientWith(request),

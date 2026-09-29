@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -16,17 +19,23 @@ import { useAssistant } from '../hooks/use_assistant';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 
-jest.mock('../../../../flyout/document_details/shared/hooks/use_event_details');
-jest.mock('../hooks/use_assistant');
-jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability');
-jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment');
+vi.mock('../../../../flyout/document_details/shared/hooks/use_event_details');
+vi.mock('../hooks/use_assistant');
+vi.mock('../../../../agent_builder/hooks/use_agent_builder_availability');
+vi.mock('../../../../agent_builder/hooks/use_agent_builder_attachment');
 // Mock leaf UI components with their known data-test-subj values
-jest.mock('../../../../agent_builder/components/new_agent_builder_attachment', () => ({
-  NewAgentBuilderAttachment: () => <div data-test-subj="newAgentBuilderAttachment" />,
-}));
-jest.mock('@kbn/elastic-assistant', () => ({
-  NewChatByTitle: () => <div data-test-subj="newChatByTitle" />,
-}));
+vi.mock('../../../../agent_builder/components/new_agent_builder_attachment', () => {
+      const mocked = {
+      NewAgentBuilderAttachment: () => <div data-test-subj="newAgentBuilderAttachment" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      NewChatByTitle: () => <div data-test-subj="newChatByTitle" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const AGENT_BUTTON_TEST_ID = 'newAgentBuilderAttachment';
 const CHAT_BUTTON_TEST_ID = 'newChatByTitle';
@@ -50,28 +59,28 @@ const renderFooterAiActions = (props: FooterAiActionsProps) =>
 
 describe('<FooterAiActions />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useEventDetails as jest.Mock).mockReturnValue({
+    (useEventDetails as Mock).mockReturnValue({
       dataFormattedForFieldBrowser: [],
       loading: false,
     });
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: false,
     });
-    (useAgentBuilderAttachment as jest.Mock).mockReturnValue({
-      openAgentBuilderFlyout: jest.fn(),
+    (useAgentBuilderAttachment as Mock).mockReturnValue({
+      openAgentBuilderFlyout: vi.fn(),
     });
-    (useAssistant as jest.Mock).mockReturnValue({
+    (useAssistant as Mock).mockReturnValue({
       showAssistant: false,
-      showAssistantOverlay: jest.fn(),
+      showAssistantOverlay: vi.fn(),
       promptContextId: '',
     });
   });
 
   describe('loading state', () => {
     it('renders null while data is loading and no prop is provided', () => {
-      (useEventDetails as jest.Mock).mockReturnValue({
+      (useEventDetails as Mock).mockReturnValue({
         dataFormattedForFieldBrowser: null,
         loading: true,
       });
@@ -82,13 +91,13 @@ describe('<FooterAiActions />', () => {
     });
 
     it('does not return null while loading when dataFormattedForFieldBrowser prop is provided', () => {
-      (useEventDetails as jest.Mock).mockReturnValue({
+      (useEventDetails as Mock).mockReturnValue({
         dataFormattedForFieldBrowser: null,
         loading: true,
       });
-      (useAssistant as jest.Mock).mockReturnValue({
+      (useAssistant as Mock).mockReturnValue({
         showAssistant: true,
-        showAssistantOverlay: jest.fn(),
+        showAssistantOverlay: vi.fn(),
         promptContextId: '123',
       });
 
@@ -125,7 +134,7 @@ describe('<FooterAiActions />', () => {
 
   describe('agent builder button', () => {
     it('renders the agent builder button when isAgentChatExperienceEnabled is true', () => {
-      (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+      (useAgentBuilderAvailability as Mock).mockReturnValue({
         isAgentChatExperienceEnabled: true,
       });
 
@@ -135,12 +144,12 @@ describe('<FooterAiActions />', () => {
     });
 
     it('does not render the assistant button when agent builder is enabled', () => {
-      (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+      (useAgentBuilderAvailability as Mock).mockReturnValue({
         isAgentChatExperienceEnabled: true,
       });
-      (useAssistant as jest.Mock).mockReturnValue({
+      (useAssistant as Mock).mockReturnValue({
         showAssistant: true,
-        showAssistantOverlay: jest.fn(),
+        showAssistantOverlay: vi.fn(),
         promptContextId: '123',
       });
 
@@ -152,9 +161,9 @@ describe('<FooterAiActions />', () => {
 
   describe('assistant button', () => {
     it('renders the assistant button when showAssistant is true and agent builder is disabled', () => {
-      (useAssistant as jest.Mock).mockReturnValue({
+      (useAssistant as Mock).mockReturnValue({
         showAssistant: true,
-        showAssistantOverlay: jest.fn(),
+        showAssistantOverlay: vi.fn(),
         promptContextId: '123',
       });
 
@@ -164,9 +173,9 @@ describe('<FooterAiActions />', () => {
     });
 
     it('does not render the agent builder button when only the assistant is shown', () => {
-      (useAssistant as jest.Mock).mockReturnValue({
+      (useAssistant as Mock).mockReturnValue({
         showAssistant: true,
-        showAssistantOverlay: jest.fn(),
+        showAssistantOverlay: vi.fn(),
         promptContextId: '123',
       });
 
@@ -186,9 +195,9 @@ describe('<FooterAiActions />', () => {
 
   describe('alert vs event', () => {
     it('renders for an alert hit', () => {
-      (useAssistant as jest.Mock).mockReturnValue({
+      (useAssistant as Mock).mockReturnValue({
         showAssistant: true,
-        showAssistantOverlay: jest.fn(),
+        showAssistantOverlay: vi.fn(),
         promptContextId: '123',
       });
 
@@ -198,9 +207,9 @@ describe('<FooterAiActions />', () => {
     });
 
     it('renders for an event hit', () => {
-      (useAssistant as jest.Mock).mockReturnValue({
+      (useAssistant as Mock).mockReturnValue({
         showAssistant: true,
-        showAssistantOverlay: jest.fn(),
+        showAssistantOverlay: vi.fn(),
         promptContextId: '123',
       });
 

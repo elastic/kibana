@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { PassThrough } from 'stream';
 import { NEVER } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -20,33 +23,42 @@ import type { ExportFormat } from '../../lib/format_results';
 import { createExportRouteHandler, type ExportRouteParams } from './create_export_route_handler';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 
-jest.mock('../../lib/export_results_to_stream', () => ({
-  exportResultsToStream: jest.fn(),
-}));
+vi.mock('../../lib/export_results_to_stream', () => {
+      const mocked = {
+      exportResultsToStream: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/get_user_info', () => ({
-  getUserInfo: jest.fn().mockResolvedValue({ username: 'test-user' }),
-}));
+vi.mock('../../lib/get_user_info', () => {
+      const mocked = {
+      getUserInfo: vi.fn().mockResolvedValue({ username: 'test-user' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/get_internal_saved_object_client', () => ({
-  createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
-}));
+vi.mock('../../utils/get_internal_saved_object_client', () => {
+      const mocked = {
+      createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/ccs_utils', () => {
-  const actual = jest.requireActual('../../utils/ccs_utils');
+vi.mock('../../utils/ccs_utils', async () => {
+  const actual = (await vi.importActual('../../utils/ccs_utils'));
 
   return {
     ...actual,
-    hasConnectedRemoteClusters: jest.fn().mockResolvedValue(false),
+    hasConnectedRemoteClusters: vi.fn().mockResolvedValue(false),
   };
 });
 
-jest.mock('../../lib/format_results', () => {
-  const actual = jest.requireActual('../../lib/format_results');
+vi.mock('../../lib/format_results', async () => {
+  const actual = (await vi.importActual('../../lib/format_results'));
 
   return {
     ...actual,
-    createFormatter: jest.fn(actual.createFormatter),
+    createFormatter: vi.fn(actual.createFormatter),
   };
 });
 
@@ -54,13 +66,13 @@ import { exportResultsToStream } from '../../lib/export_results_to_stream';
 import { getUserInfo } from '../../lib/get_user_info';
 import { createFormatter } from '../../lib/format_results';
 
-const mockExportResultsToStream = exportResultsToStream as jest.MockedFunction<
+const mockExportResultsToStream = exportResultsToStream as MockedFunction<
   typeof exportResultsToStream
 >;
-const mockGetUserInfo = getUserInfo as jest.MockedFunction<typeof getUserInfo>;
-const mockCreateFormatter = createFormatter as jest.MockedFunction<typeof createFormatter>;
+const mockGetUserInfo = getUserInfo as MockedFunction<typeof getUserInfo>;
+const mockCreateFormatter = createFormatter as MockedFunction<typeof createFormatter>;
 
-const auditLoggerLog = jest.fn();
+const auditLoggerLog = vi.fn();
 
 const baseParams: ExportRouteParams = {
   baseFilter: 'action_id: "abc"',
@@ -68,15 +80,15 @@ const baseParams: ExportRouteParams = {
   fileNamePrefix: 'osquery-results-test',
 };
 
-const mockInternalOpenPointInTime = jest.fn().mockResolvedValue({ id: 'mock-pit-id' });
-const mockInternalClosePointInTime = jest.fn().mockResolvedValue({});
-const mockScopedOpenPointInTime = jest.fn().mockResolvedValue({ id: 'mock-pit-id' });
-const mockScopedClosePointInTime = jest.fn().mockResolvedValue({});
-const mockSearchSearch = jest.fn();
-const mockSearch: jest.Mocked<IScopedSearchClient> = {
+const mockInternalOpenPointInTime = vi.fn().mockResolvedValue({ id: 'mock-pit-id' });
+const mockInternalClosePointInTime = vi.fn().mockResolvedValue({});
+const mockScopedOpenPointInTime = vi.fn().mockResolvedValue({ id: 'mock-pit-id' });
+const mockScopedClosePointInTime = vi.fn().mockResolvedValue({});
+const mockSearchSearch = vi.fn();
+const mockSearch: Mocked<IScopedSearchClient> = {
   search: mockSearchSearch,
-} as unknown as jest.Mocked<IScopedSearchClient>;
-const mockCpsSearch = jest.fn().mockReturnValue(mockSearch);
+} as unknown as Mocked<IScopedSearchClient>;
+const mockCpsSearch = vi.fn().mockReturnValue(mockSearch);
 const mockInternalEsClient = {
   openPointInTime: mockInternalOpenPointInTime,
   closePointInTime: mockInternalClosePointInTime,
@@ -92,7 +104,7 @@ const createContext = () =>
       elasticsearch: {
         client: {
           asInternalUser: mockInternalEsClient,
-          asScoped: jest.fn().mockReturnValue({
+          asScoped: vi.fn().mockReturnValue({
             asCurrentUser: mockScopedEsClient,
           }),
         },
@@ -134,10 +146,10 @@ const createSecurityMock = (options?: { useRbac?: boolean; authorizedPrivileges?
 
   return {
     authz: {
-      mode: { useRbacForRequest: jest.fn().mockReturnValue(useRbac) },
+      mode: { useRbacForRequest: vi.fn().mockReturnValue(useRbac) },
       actions: { api: { get: (privilege: string) => `api:${privilege}` } },
-      checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(
-        jest.fn(({ kibana }: { kibana: string[] }) =>
+      checkPrivilegesDynamicallyWithRequest: vi.fn().mockReturnValue(
+        vi.fn(({ kibana }: { kibana: string[] }) =>
           Promise.resolve({
             privileges: {
               kibana: kibana.map((privilege) => ({
@@ -153,7 +165,7 @@ const createSecurityMock = (options?: { useRbac?: boolean; authorizedPrivileges?
 };
 
 const createOsqueryContext = (options?: {
-  getIntegrationNamespaces?: jest.Mock;
+  getIntegrationNamespaces?: Mock;
   useRbac?: boolean;
   authorizedPrivileges?: string[];
   cpsActive?: boolean;
@@ -162,16 +174,16 @@ const createOsqueryContext = (options?: {
     logFactory: { get: () => loggingSystemMock.createLogger() },
     experimentalFeatures: allowedExperimentalValues,
     security: createSecurityMock(options),
-    isCpsActive: jest.fn().mockResolvedValue(options?.cpsActive ?? false),
+    isCpsActive: vi.fn().mockResolvedValue(options?.cpsActive ?? false),
     service: {
       getIntegrationNamespaces: options?.getIntegrationNamespaces,
     },
-    getStartServices: jest.fn().mockResolvedValue([
+    getStartServices: vi.fn().mockResolvedValue([
       {
         elasticsearch: {
           client: {
             asInternalUser: mockInternalEsClient,
-            asScoped: jest.fn().mockReturnValue({
+            asScoped: vi.fn().mockReturnValue({
               asCurrentUser: mockScopedEsClient,
               asInternalUser: mockInternalEsClient,
               asSecondaryAuthUser: mockInternalEsClient,
@@ -187,14 +199,14 @@ const createOsqueryContext = (options?: {
         },
       },
     ]),
-    config: jest.fn(),
+    config: vi.fn(),
     telemetryEventsSender: {},
     licensing: {},
   } as unknown as OsqueryAppContext);
 
 describe('createExportRouteHandler', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     auditLoggerLog.mockClear();
     mockInternalOpenPointInTime.mockResolvedValue({ id: 'mock-pit-id' });
     mockScopedOpenPointInTime.mockResolvedValue({ id: 'mock-pit-id' });
@@ -350,7 +362,7 @@ describe('createExportRouteHandler', () => {
   });
 
   it('passes integrationNamespaces to baseRequest when getIntegrationNamespaces returns namespaces', async () => {
-    const getIntegrationNamespaces = jest.fn().mockResolvedValue({
+    const getIntegrationNamespaces = vi.fn().mockResolvedValue({
       [OSQUERY_INTEGRATION_NAME]: ['team.a'],
     });
     const handler = createExportRouteHandler(createOsqueryContext({ getIntegrationNamespaces }));
@@ -469,7 +481,7 @@ describe('createExportRouteHandler', () => {
   });
 
   it('scopes the PIT to resolved integration namespaces (matches the factory targets)', async () => {
-    const getIntegrationNamespaces = jest.fn().mockResolvedValue({
+    const getIntegrationNamespaces = vi.fn().mockResolvedValue({
       [OSQUERY_INTEGRATION_NAME]: ['team.a', 'team.b'],
     });
     const handler = createExportRouteHandler(createOsqueryContext({ getIntegrationNamespaces }));
@@ -495,7 +507,7 @@ describe('createExportRouteHandler', () => {
   });
 
   it('returns a 400 (not 500) and opens no PIT when a resolved namespace is invalid', async () => {
-    const getIntegrationNamespaces = jest.fn().mockResolvedValue({
+    const getIntegrationNamespaces = vi.fn().mockResolvedValue({
       // A colon is not valid in a namespace; the index builder rejects it and
       // the route surfaces a 400 rather than a masked 500.
       [OSQUERY_INTEGRATION_NAME]: ['bad:namespace'],
@@ -643,7 +655,7 @@ describe('createExportRouteHandler', () => {
 
     await handler(createContext(), request, response, params);
 
-    const disposition: string = (response.ok as jest.Mock).mock.calls[0][0].headers[
+    const disposition: string = (response.ok as Mock).mock.calls[0][0].headers[
       'Content-Disposition'
     ];
     // The embedded double-quote must be replaced so the header value is valid

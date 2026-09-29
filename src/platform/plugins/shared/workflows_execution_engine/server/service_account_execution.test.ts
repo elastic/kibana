@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   coreMock,
   elasticsearchServiceMock,
@@ -40,7 +42,7 @@ describe('workflow service account execution', () => {
       elasticsearch: elasticsearchServiceMock.createStart(),
     };
     const request = httpServerMock.createKibanaRequest();
-    const run = jest.fn().mockResolvedValue('done');
+    const run = vi.fn().mockResolvedValue('done');
     await expect(withWorkflowExecutionIdentity(core, execution(), request, run)).resolves.toBe(
       'done'
     );
@@ -60,7 +62,7 @@ describe('workflow service account execution', () => {
     core.security.serviceAccounts.withScopedRequestForWorkload.mockImplementation(
       async (params, fn) => fn(scoped)
     );
-    const child = jest.fn().mockResolvedValue('child');
+    const child = vi.fn().mockResolvedValue('child');
     await withWorkflowExecutionIdentity(core, execution('account-a'), request, async (actual) => {
       expect(actual).toBe(scoped);
       expect(getWorkflowOriginalRequest(actual)).toBe(request);
@@ -86,7 +88,7 @@ describe('workflow service account execution', () => {
       elasticsearch: elasticsearchServiceMock.createStart(),
     };
     const request = httpServerMock.createKibanaRequest();
-    const run = jest.fn();
+    const run = vi.fn();
     core.security.serviceAccounts.isEnabled.mockReturnValue(false);
     await expect(withWorkflowExecutionIdentity(core, execution('a'), request, run)).rejects.toThrow(
       'disabled'

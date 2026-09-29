@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { AppliedProfile } from '../composable_profile';
 import { getMergedAccessor } from '../composable_profile';
@@ -18,15 +20,18 @@ import { DataGridDensity } from '@kbn/unified-data-table';
 
 let mockProfiles: AppliedProfile[] = [];
 
-jest.mock('./use_profiles', () => ({
-  useProfiles: jest.fn(() => mockProfiles),
-}));
+vi.mock('./use_profiles', () => {
+      const mocked = {
+      useProfiles: vi.fn(() => mockProfiles),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../composable_profile', () => {
-  const originalModule = jest.requireActual('../composable_profile');
+vi.mock('../composable_profile', async () => {
+  const originalModule = (await vi.importActual('../composable_profile'));
   return {
     ...originalModule,
-    getMergedAccessor: jest.fn(originalModule.getMergedAccessor),
+    getMergedAccessor: vi.fn(originalModule.getMergedAccessor),
   };
 });
 
@@ -40,10 +45,10 @@ const getCellRenderersParams = {
 
 describe('useProfileAccessor', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockProfiles = [
-      { getCellRenderers: (prev) => (params) => ({ ...prev(params), profile1: jest.fn() }) },
-      { getCellRenderers: (prev) => (params) => ({ ...prev(params), profile2: jest.fn() }) },
+      { getCellRenderers: (prev) => (params) => ({ ...prev(params), profile1: vi.fn() }) },
+      { getCellRenderers: (prev) => (params) => ({ ...prev(params), profile2: vi.fn() }) },
     ];
   });
 
@@ -51,7 +56,7 @@ describe('useProfileAccessor', () => {
     const { result } = renderHook(() => useProfileAccessor('getCellRenderers', { record }));
     expect(useProfiles).toHaveBeenCalledTimes(1);
     expect(useProfiles).toHaveBeenCalledWith({ record });
-    const base = () => ({ base: jest.fn() });
+    const base = () => ({ base: vi.fn() });
     const accessor = result.current(base);
     expect(getMergedAccessor).toHaveBeenCalledTimes(1);
     expect(getMergedAccessor).toHaveBeenCalledWith(mockProfiles, 'getCellRenderers', base);
@@ -81,7 +86,7 @@ describe('useProfileAccessor', () => {
     );
     const prevResult = result.current;
     mockProfiles = [
-      { getCellRenderers: (prev) => (params) => ({ ...prev(params), profile3: jest.fn() }) },
+      { getCellRenderers: (prev) => (params) => ({ ...prev(params), profile3: vi.fn() }) },
     ];
     rerender();
     expect(result.current).not.toBe(prevResult);

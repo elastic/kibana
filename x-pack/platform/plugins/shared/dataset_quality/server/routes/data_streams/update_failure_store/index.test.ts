@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { updateFailureStore } from '.';
 
@@ -16,7 +18,7 @@ describe('updateFailureStore', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('success scenarios', () => {

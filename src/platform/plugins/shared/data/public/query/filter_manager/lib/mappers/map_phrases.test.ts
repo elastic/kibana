@@ -30,19 +30,23 @@ describe('filter manager utilities', () => {
       expect(result).toHaveProperty('value', ['hello', 1, 'world']);
     });
 
-    test('should return undefined for none matching', (done) => {
-      const filter = {
-        meta: { index: 'logstash-*' },
-        query: { query_string: { query: 'foo:bar' } },
-      } as Filter;
+    test('should return undefined for none matching', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      try {
-        mapPhrases(filter);
-      } catch (e) {
-        expect(e).toBe(filter);
-        done();
-      }
-    });
+              const filter = {
+                meta: { index: 'logstash-*' },
+                query: { query_string: { query: 'foo:bar' } },
+              } as Filter;
+
+              try {
+                mapPhrases(filter);
+              } catch (e) {
+                expect(e).toBe(filter);
+                done();
+              }
+            
+        }));
   });
 
   describe('getPhrasesDisplayValue()', () => {

@@ -7,23 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Action, ActionReducerMapBuilder } from 'redux-toolkit-v1';
 import { addLoadingStateReducers, initialLoadingState } from './loading_states';
 import type { WorkflowDetailState } from '../types';
 
 // Mock transitive dependencies required by saveYamlThunk -> slice -> schema/trigger_schemas
-jest.mock('../../../../../../common/schema', () => ({
-  getWorkflowZodSchema: jest.fn(() => ({})),
-}));
-jest.mock('../../../../../trigger_schemas', () => ({
-  triggerSchemas: {
-    getRegisteredIds: jest.fn(() => []),
-    getRegisteredTriggersForSchema: jest.fn(() => []),
-  },
-}));
-jest.mock('../../../../../shared/lib/query_client', () => ({
-  queryClient: { invalidateQueries: jest.fn() },
-}));
+vi.mock('../../../../../../common/schema', () => {
+      const mocked = {
+      getWorkflowZodSchema: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../trigger_schemas', () => {
+      const mocked = {
+      triggerSchemas: {
+        getRegisteredIds: vi.fn(() => []),
+        getRegisteredTriggersForSchema: vi.fn(() => []),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../shared/lib/query_client', () => {
+      const mocked = {
+      queryClient: { invalidateQueries: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type MatcherEntry = [
   (action: Action) => boolean,
@@ -31,13 +43,13 @@ type MatcherEntry = [
 ];
 
 interface MockBuilder {
-  addMatcher: jest.Mock<MockBuilder, [MatcherEntry[0], MatcherEntry[1]]>;
+  addMatcher: Mock<MockBuilder, [MatcherEntry[0], MatcherEntry[1]]>;
 }
 
 const createMockBuilder = () => {
   const matchers: MatcherEntry[] = [];
   const builder: MockBuilder = {
-    addMatcher: jest.fn((predicate: MatcherEntry[0], reducer: MatcherEntry[1]) => {
+    addMatcher: vi.fn((predicate: MatcherEntry[0], reducer: MatcherEntry[1]) => {
       matchers.push([predicate, reducer]);
       return builder;
     }),
@@ -58,7 +70,7 @@ const createMockBuilder = () => {
 
 describe('loading_states', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initialLoadingState', () => {

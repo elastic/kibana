@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { ShareMenuTabs } from './share_tabs';
 import { ShareProvider, type IShareContext } from './context';
@@ -20,8 +22,8 @@ import type {
 } from '../url_service/short_urls/short_url_client';
 import type { BrowserShortUrlClientFactoryCreateParams } from '../url_service/short_urls/short_url_client_factory';
 import { BrowserShortUrlClientFactory } from '../url_service/short_urls/short_url_client_factory';
-const navigate = jest.fn(async () => {});
-const getUrl = jest.fn(
+const navigate = vi.fn(async () => {});
+const getUrl = vi.fn(
   async (location: KibanaLocation, params: LocatorGetUrlParams): Promise<string> => {
     return `${params.absolute ? 'https://example.com' : ''}/xyz/${location.app}/${location.path}`;
   }
@@ -30,7 +32,7 @@ const http: BrowserShortUrlClientHttp = {
   basePath: {
     get: () => '/xyz',
   },
-  fetch: jest.fn(async () => {
+  fetch: vi.fn(async () => {
     return {} as any;
   }),
 };
@@ -58,7 +60,7 @@ const mockShareContext: IShareContext = {
       shareType: 'embed',
       config: {
         shortUrlService: service.shortUrls.get(null),
-        anonymousAccess: { getCapabilities: jest.fn(), getState: jest.fn() },
+        anonymousAccess: { getCapabilities: vi.fn(), getState: vi.fn() },
       },
     },
     {
@@ -83,7 +85,7 @@ const mockShareContext: IShareContext = {
   objectType: 'type',
   sharingData: { title: 'title', url: 'url', locatorParams: { id: 'test', params: {} } },
   isDirty: false,
-  onClose: jest.fn(),
+  onClose: vi.fn(),
 };
 
 describe('Share modal tabs', () => {

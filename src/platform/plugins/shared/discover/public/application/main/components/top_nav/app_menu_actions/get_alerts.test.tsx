@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { isValidElement, type ReactElement } from 'react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
@@ -234,8 +236,8 @@ describe('getAlertsAppMenuItem', () => {
   describe('Manage rules and connectors link', () => {
     it('should link to the unified rules page when rules app is registered', async () => {
       const services = createDiscoverServicesMock();
-      jest.mocked(services.application.isAppRegistered).mockReturnValue(true);
-      jest.mocked(services.application.getUrlForApp).mockImplementation((appId) => `/app/${appId}`);
+      vi.mocked(services.application.isAppRegistered).mockReturnValue(true);
+      vi.mocked(services.application.getUrlForApp).mockImplementation((appId) => `/app/${appId}`);
       const alertsMenuItem = await getAlertsMenuItem({ services });
       const manageAlertsItem = alertsMenuItem.items?.find(
         (item) => item.testId === 'discoverManageAlertsButton'
@@ -267,23 +269,23 @@ describe('getAlertsAppMenuItem', () => {
   });
 
   describe('createRuleOptionsAppMenuItem.render', () => {
-    const createRunParams = (onFinishAction = jest.fn()) => ({
+    const createRunParams = (onFinishAction = vi.fn()) => ({
       triggerElement: document.createElement('button'),
-      returnFocus: jest.fn(),
+      returnFocus: vi.fn(),
       context: { onFinishAction },
     });
 
     it('should render CreateRuleOptionsFlyout with the current ES|QL query and subscribe handler', async () => {
-      const createRuleOptionsFlyoutMock = jest.fn(() => null);
+      const createRuleOptionsFlyoutMock = vi.fn(() => null);
       const services = createDiscoverServicesMock();
       services.alertingVTwo = {
         CreateRuleOptionsFlyout: createRuleOptionsFlyoutMock,
-        RulesPage: jest.fn(() => null),
-        RuleLibraryPage: jest.fn(() => null),
-        EpisodesPage: jest.fn(() => null),
-        ActionPoliciesPage: jest.fn(() => null),
-        ExecutionHistoryPage: jest.fn(() => null),
-        createAlertingV2HostApp: jest.fn(),
+        RulesPage: vi.fn(() => null),
+        RuleLibraryPage: vi.fn(() => null),
+        EpisodesPage: vi.fn(() => null),
+        ActionPoliciesPage: vi.fn(() => null),
+        ExecutionHistoryPage: vi.fn(() => null),
+        createAlertingV2HostApp: vi.fn(),
       };
       const { createRuleOptionsAppMenuItem } = await setupCreateRuleOptionsMenuItem({
         services,
@@ -291,7 +293,7 @@ describe('getAlertsAppMenuItem', () => {
         esqlQuery: 'FROM test-index | WHERE message != ""',
       });
 
-      const onFinishAction = jest.fn();
+      const onFinishAction = vi.fn();
       const flyoutElement = renderCreateRuleOptionsFlyout(
         createRuleOptionsAppMenuItem,
         createRunParams(onFinishAction)
@@ -307,7 +309,7 @@ describe('getAlertsAppMenuItem', () => {
     });
 
     it('should map renderable popover items into legacy rule types', async () => {
-      const customRuleRender = jest.fn(() => null);
+      const customRuleRender = vi.fn(() => null);
       const customRuleItem: DiscoverAppMenuPopoverItem = {
         id: 'custom-threshold-rule',
         order: 2,
@@ -352,7 +354,7 @@ describe('getAlertsAppMenuItem', () => {
         },
       ]);
 
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       expect(legacyRuleType.render(onClose)).toBeNull();
       expect(customRuleRender).toHaveBeenCalledWith({
         ...runParams,
@@ -368,20 +370,20 @@ describe('getAlertsAppMenuItem', () => {
         id: 'action-only-rule',
         order: 1,
         label: 'Action-only rule',
-        run: jest.fn(),
+        run: vi.fn(),
       };
       const disabledRuleItem: DiscoverAppMenuPopoverItem = {
         id: 'disabled-rule',
         order: 2,
         label: 'Disabled rule',
-        render: jest.fn(() => null),
+        render: vi.fn(() => null),
         disableButton: true,
       };
       const enabledRuleItem: DiscoverAppMenuPopoverItem = {
         id: 'enabled-rule',
         order: 3,
         label: 'Enabled rule',
-        render: jest.fn(() => null),
+        render: vi.fn(() => null),
       };
 
       const { createRuleOptionsAppMenuItem } = await setupCreateRuleOptionsMenuItem({

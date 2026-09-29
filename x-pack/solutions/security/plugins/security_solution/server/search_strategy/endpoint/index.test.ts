@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { lastValueFrom, of } from 'rxjs';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
@@ -19,9 +22,9 @@ import { fetchActionRequestById } from '../../endpoint/services/actions/utils/fe
 import { endpointFactory } from './factory';
 import { endpointSearchStrategyProvider } from '.';
 
-jest.mock('../../endpoint/services/actions/utils/fetch_action_request_by_id');
+vi.mock('../../endpoint/services/actions/utils/fetch_action_request_by_id');
 
-const fetchActionRequestByIdMock = fetchActionRequestById as jest.Mock;
+const fetchActionRequestByIdMock = fetchActionRequestById as Mock;
 
 describe('endpointSearchStrategyProvider', () => {
   type SearchArgs = Parameters<ReturnType<typeof endpointSearchStrategyProvider>['search']>;
@@ -31,24 +34,24 @@ describe('endpointSearchStrategyProvider', () => {
     { cpsActive = false, ccsEnabled = false }: { cpsActive?: boolean; ccsEnabled?: boolean } = {}
   ) => {
     const searchResponse = of({ rawResponse: { hits: { total: 0, hits: [] } } });
-    const search = jest.fn().mockReturnValue(searchResponse);
-    const scopedSearch = jest.fn().mockReturnValue(searchResponse);
+    const search = vi.fn().mockReturnValue(searchResponse);
+    const scopedSearch = vi.fn().mockReturnValue(searchResponse);
     const data = {
       search: { searchAsInternalUser: { search } },
     } as unknown as PluginStart;
-    const getEndpointAuthz = jest
+    const getEndpointAuthz = vi
       .fn()
       .mockResolvedValue(getEndpointAuthzInitialStateMock(authzOverrides));
-    const isCcsEnabled = jest.fn().mockResolvedValue(ccsEnabled);
+    const isCcsEnabled = vi.fn().mockResolvedValue(ccsEnabled);
     const endpointContext = {
       service: {
         getEndpointAuthz,
         isCcsEnabled,
-        isCpsActive: jest.fn().mockResolvedValue(cpsActive),
-        isCpsRead: jest.fn(async (req) => cpsActive && req != null),
-        getActiveSpaceId: jest.fn().mockReturnValue('default'),
-        getScopedSearchClient: jest.fn().mockResolvedValue({ search: scopedSearch }),
-        asScoped: jest.fn(async (req) => ({
+        isCpsActive: vi.fn().mockResolvedValue(cpsActive),
+        isCpsRead: vi.fn(async (req) => cpsActive && req != null),
+        getActiveSpaceId: vi.fn().mockReturnValue('default'),
+        getScopedSearchClient: vi.fn().mockResolvedValue({ search: scopedSearch }),
+        asScoped: vi.fn(async (req) => ({
           isCpsRead: () => cpsActive && req != null,
           getEsClient: () => {
             throw new Error('not used in search strategy tests');
@@ -72,7 +75,7 @@ describe('endpointSearchStrategyProvider', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const deps = {
@@ -204,7 +207,7 @@ describe('endpointSearchStrategyProvider', () => {
     });
 
     it('keeps a query that reads a Fleet-owned index on the internal user', async () => {
-      jest
+      vi
         .spyOn(endpointFactory[ResponseActionsQueries.actions], 'buildDsl')
         .mockReturnValue({ index: ['.fleet-actions-results', '.logs-endpoint.actions-default'] });
       const { provider, search, scopedSearch } = buildProvider(
@@ -219,11 +222,11 @@ describe('endpointSearchStrategyProvider', () => {
     });
 
     it('cancels through the client that issued the search', async () => {
-      const cancel = jest.fn();
+      const cancel = vi.fn();
       const service = {
-        isCpsRead: jest.fn().mockReturnValue(true),
-        getScopedSearchClient: jest.fn().mockReturnValue({ cancel }),
-        asScoped: jest.fn(async () => ({
+        isCpsRead: vi.fn().mockReturnValue(true),
+        getScopedSearchClient: vi.fn().mockReturnValue({ cancel }),
+        asScoped: vi.fn(async () => ({
           isCpsRead: () => true,
           getEsClient: () => {
             throw new Error('not used');
@@ -234,7 +237,7 @@ describe('endpointSearchStrategyProvider', () => {
       };
       const provider = endpointSearchStrategyProvider(
         {
-          search: { searchAsInternalUser: { search: jest.fn(), cancel: jest.fn() } },
+          search: { searchAsInternalUser: { search: vi.fn(), cancel: vi.fn() } },
         } as unknown as PluginStart,
         { service } as unknown as EndpointAppContext
       );
@@ -245,11 +248,11 @@ describe('endpointSearchStrategyProvider', () => {
     });
 
     it('overrides the strategy name and drops projectRouting when cancelling through the scoped client', async () => {
-      const cancel = jest.fn();
+      const cancel = vi.fn();
       const service = {
-        isCpsRead: jest.fn().mockReturnValue(true),
-        getScopedSearchClient: jest.fn().mockReturnValue({ cancel }),
-        asScoped: jest.fn(async () => ({
+        isCpsRead: vi.fn().mockReturnValue(true),
+        getScopedSearchClient: vi.fn().mockReturnValue({ cancel }),
+        asScoped: vi.fn(async () => ({
           isCpsRead: () => true,
           getEsClient: () => {
             throw new Error('not used');
@@ -260,7 +263,7 @@ describe('endpointSearchStrategyProvider', () => {
       };
       const provider = endpointSearchStrategyProvider(
         {
-          search: { searchAsInternalUser: { search: jest.fn(), cancel: jest.fn() } },
+          search: { searchAsInternalUser: { search: vi.fn(), cancel: vi.fn() } },
         } as unknown as PluginStart,
         { service } as unknown as EndpointAppContext
       );

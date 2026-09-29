@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Subject, of, throwError } from 'rxjs';
 import type { CoreStart } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -34,8 +37,8 @@ function buildCoreStart(
   flagOnStartup?: boolean
 ): CoreStart {
   const mockInternalRepo = {
-    find: jest.fn().mockResolvedValue(savedObjects),
-    update: jest.fn().mockResolvedValue({}),
+    find: vi.fn().mockResolvedValue(savedObjects),
+    update: vi.fn().mockResolvedValue({}),
   };
 
   const startupFlag$ =
@@ -46,13 +49,13 @@ function buildCoreStart(
   return {
     featureFlags: {
       // First subscription is the startup snapshot; later ones drive in-session transitions.
-      getBooleanValue$: jest
+      getBooleanValue$: vi
         .fn()
         .mockImplementationOnce(() => startupFlag$)
         .mockReturnValue(flagSubject.asObservable()),
     },
     savedObjects: {
-      createInternalRepository: jest.fn().mockReturnValue(mockInternalRepo),
+      createInternalRepository: vi.fn().mockReturnValue(mockInternalRepo),
     },
   } as unknown as CoreStart;
 }
@@ -65,7 +68,7 @@ describe('subscribeToDualProcessFlag', () => {
   let logger: ReturnType<typeof loggerMock.create>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     stop$ = new Subject<void>();
     logger = loggerMock.create();
   });
@@ -83,7 +86,7 @@ describe('subscribeToDualProcessFlag', () => {
       });
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] }, false);
       const mockUpdate = (
-        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: Mock }
       ).update;
 
       subscribeToDualProcessFlag({ coreStart, logger, stop$ });
@@ -108,7 +111,7 @@ describe('subscribeToDualProcessFlag', () => {
       });
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] }, true);
       const mockUpdate = (
-        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: Mock }
       ).update;
 
       subscribeToDualProcessFlag({ coreStart, logger, stop$ });
@@ -129,7 +132,7 @@ describe('subscribeToDualProcessFlag', () => {
       const soRow = makeEngineDescriptorSo('user', 'default');
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
       const mockUpdate = (
-        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: Mock }
       ).update;
 
       subscribeToDualProcessFlag({ coreStart, logger, stop$ });
@@ -155,7 +158,7 @@ describe('subscribeToDualProcessFlag', () => {
       const soRow = makeEngineDescriptorSo('user', 'default', { nonPriorityStatus: null });
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
       const mockUpdate = (
-        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: Mock }
       ).update;
 
       subscribeToDualProcessFlag({ coreStart, logger, stop$ });
@@ -177,7 +180,7 @@ describe('subscribeToDualProcessFlag', () => {
         ],
       });
       const mockUpdate = (
-        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: Mock }
       ).update;
 
       subscribeToDualProcessFlag({ coreStart, logger, stop$ });
@@ -198,7 +201,7 @@ describe('subscribeToDualProcessFlag', () => {
       });
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
       const mockUpdate = (
-        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: Mock }
       ).update;
 
       subscribeToDualProcessFlag({ coreStart, logger, stop$ });
@@ -222,7 +225,7 @@ describe('subscribeToDualProcessFlag', () => {
       });
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
       const mockUpdate = (
-        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: Mock }
       ).update;
 
       subscribeToDualProcessFlag({ coreStart, logger, stop$ });
@@ -242,7 +245,7 @@ describe('subscribeToDualProcessFlag', () => {
       });
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
       const mockUpdate = (
-        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: Mock }
       ).update;
 
       subscribeToDualProcessFlag({ coreStart, logger, stop$ });
@@ -261,7 +264,7 @@ describe('subscribeToDualProcessFlag', () => {
       const soRow = makeEngineDescriptorSo('user', 'default');
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
       const mockUpdate = (
-        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: Mock }
       ).update;
 
       subscribeToDualProcessFlag({ coreStart, logger, stop$ });
@@ -278,7 +281,7 @@ describe('subscribeToDualProcessFlag', () => {
       const soRow = makeEngineDescriptorSo('user', 'default');
       const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
       const mockUpdate = (
-        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: Mock }
       ).update;
 
       subscribeToDualProcessFlag({ coreStart, logger, stop$ });
@@ -304,7 +307,7 @@ describe('subscribeToDualProcessFlag', () => {
         nonPriorityStatus: ENGINE_STATUS.STOPPED,
       });
 
-      const mockFind = jest
+      const mockFind = vi
         .fn()
         // teardown: findAllEngineDescriptors, then findOrThrow inside EngineDescriptorClient.update
         .mockResolvedValueOnce({ saved_objects: [soRowStarted] })
@@ -313,11 +316,11 @@ describe('subscribeToDualProcessFlag', () => {
         .mockResolvedValueOnce({ saved_objects: [soRowStopped] })
         .mockResolvedValueOnce({ saved_objects: [soRowStopped] });
 
-      const mockUpdate = jest.fn().mockResolvedValue({});
+      const mockUpdate = vi.fn().mockResolvedValue({});
       const mockInternalRepo = { find: mockFind, update: mockUpdate };
       const coreStart = {
         featureFlags: {
-          getBooleanValue$: jest
+          getBooleanValue$: vi
             .fn()
             .mockImplementationOnce(() =>
               throwError(() => new Error('startup flag read not mocked for this test'))
@@ -325,7 +328,7 @@ describe('subscribeToDualProcessFlag', () => {
             .mockReturnValue(flagSubject.asObservable()),
         },
         savedObjects: {
-          createInternalRepository: jest.fn().mockReturnValue(mockInternalRepo),
+          createInternalRepository: vi.fn().mockReturnValue(mockInternalRepo),
         },
       } as unknown as CoreStart;
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { useEuiTheme } from '@elastic/eui';
 import { renderHook } from '@testing-library/react';
 import type { monaco } from '@kbn/code-editor';
@@ -14,15 +16,15 @@ import { ReviewActionsWidget } from './review_actions_widget';
 
 const buildEditor = () =>
   ({
-    changeViewZones: jest.fn((cb: (accessor: monaco.editor.IViewZoneChangeAccessor) => void) => {
+    changeViewZones: vi.fn((cb: (accessor: monaco.editor.IViewZoneChangeAccessor) => void) => {
       cb({
-        addZone: jest.fn(() => 'zone-id'),
-        removeZone: jest.fn(),
-        layoutZone: jest.fn(),
+        addZone: vi.fn(() => 'zone-id'),
+        removeZone: vi.fn(),
+        layoutZone: vi.fn(),
       });
     }),
-    addContentWidget: jest.fn(),
-    removeContentWidget: jest.fn(),
+    addContentWidget: vi.fn(),
+    removeContentWidget: vi.fn(),
   } as unknown as monaco.editor.ICodeEditor);
 
 describe('ReviewActionsWidget', () => {
@@ -32,8 +34,8 @@ describe('ReviewActionsWidget', () => {
   const euiTheme = result.current.euiTheme;
 
   it('invokes the matching callback when each button is clicked', () => {
-    const onAccept = jest.fn();
-    const onReject = jest.fn();
+    const onAccept = vi.fn();
+    const onReject = vi.fn();
 
     const widget = new ReviewActionsWidget(euiTheme, buildEditor(), 1, { onAccept, onReject });
     const dom = widget.getDomNode();
@@ -49,7 +51,7 @@ describe('ReviewActionsWidget', () => {
   });
 
   it('labels the accept button "Replace" when isReplaceMode is true and "Keep" otherwise', () => {
-    const callbacks = { onAccept: jest.fn(), onReject: jest.fn() };
+    const callbacks = { onAccept: vi.fn(), onReject: vi.fn() };
 
     const keepWidget = new ReviewActionsWidget(euiTheme, buildEditor(), 1, callbacks, false);
     const keepButtons = Array.from(keepWidget.getDomNode().querySelectorAll('button'));

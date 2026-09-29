@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 
@@ -12,32 +15,38 @@ import { createUnsecuredInboundSavedObjectsClient } from './create_unsecured_inb
 import { buildInboundEventsClient } from './client';
 import { createInboundEventsClient } from './factory';
 
-jest.mock('./create_unsecured_inbound_saved_objects_client', () => ({
-  createUnsecuredInboundSavedObjectsClient: jest.fn(),
-}));
+vi.mock('./create_unsecured_inbound_saved_objects_client', () => {
+      const mocked = {
+      createUnsecuredInboundSavedObjectsClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./client', () => ({
-  buildInboundEventsClient: jest.fn((deps) => deps),
-}));
+vi.mock('./client', () => {
+      const mocked = {
+      buildInboundEventsClient: vi.fn((deps) => deps),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createUnsecuredInboundSavedObjectsClientMock =
-  createUnsecuredInboundSavedObjectsClient as jest.MockedFunction<
+  createUnsecuredInboundSavedObjectsClient as MockedFunction<
     typeof createUnsecuredInboundSavedObjectsClient
   >;
-const buildInboundEventsClientMock = buildInboundEventsClient as jest.MockedFunction<
+const buildInboundEventsClientMock = buildInboundEventsClient as MockedFunction<
   typeof buildInboundEventsClient
 >;
 
 describe('createInboundEventsClient (factory)', () => {
   it('resolves the unsecured SO client factory once and passes it to the client', async () => {
     const getStartServices = coreMock.createSetup().getStartServices;
-    const emitConnectorEvents = jest.fn();
+    const emitConnectorEvents = vi.fn();
     const logger = loggingSystemMock.createLogger();
 
     createInboundEventsClient({
       logger,
       inboundEventsEnabled: true,
-      isActionTypeEnabled: jest.fn().mockReturnValue(true),
+      isActionTypeEnabled: vi.fn().mockReturnValue(true),
       maxEmitted: 25,
       maxBodyBytes: 1024 * 1024,
       emitConnectorEvents,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
@@ -13,15 +15,15 @@ import { mockSecurityJobs } from '../api.mock';
 import { cloneDeep } from 'lodash/fp';
 import type { SecurityJob } from '../types';
 
-jest.mock('../../../lib/kibana');
+vi.mock('../../../lib/kibana');
 
 describe('JobsTableComponent', () => {
   let securityJobs: SecurityJob[];
-  let onJobStateChangeMock = jest.fn();
+  let onJobStateChangeMock = vi.fn();
 
   beforeEach(() => {
     securityJobs = cloneDeep(mockSecurityJobs);
-    onJobStateChangeMock = jest.fn();
+    onJobStateChangeMock = vi.fn();
   });
 
   test('should display the job friendly name', async () => {

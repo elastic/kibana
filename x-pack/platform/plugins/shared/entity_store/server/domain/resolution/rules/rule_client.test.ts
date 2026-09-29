@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -21,7 +23,7 @@ const createClient = (soClient: Partial<SavedObjectsClientContract>) =>
 describe('ResolutionRulesClient', () => {
   it('returns in-code defaults when no overrides exist', async () => {
     const soClient = {
-      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
     };
     const client = createClient(soClient);
 
@@ -40,7 +42,7 @@ describe('ResolutionRulesClient', () => {
 
   it('merges saved object overrides over in-code defaults', async () => {
     const soClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             attributes: {
@@ -64,7 +66,7 @@ describe('ResolutionRulesClient', () => {
 
   it('creates an override when setting enabled for the first time', async () => {
     const soClient = {
-      create: jest.fn().mockResolvedValue({}),
+      create: vi.fn().mockResolvedValue({}),
     };
     const client = createClient(soClient);
 
@@ -89,12 +91,12 @@ describe('ResolutionRulesClient', () => {
 
   it('updates an existing override on create conflict', async () => {
     const soClient = {
-      create: jest
+      create: vi
         .fn()
         .mockRejectedValue(
           SavedObjectsErrorHelpers.createConflictError(EntityResolutionRuleTypeName, 'id')
         ),
-      update: jest.fn().mockResolvedValue({}),
+      update: vi.fn().mockResolvedValue({}),
     };
     const client = createClient(soClient);
 

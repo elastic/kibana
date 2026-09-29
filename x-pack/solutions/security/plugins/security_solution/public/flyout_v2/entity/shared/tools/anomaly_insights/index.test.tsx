@@ -5,57 +5,65 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { AnomalyInsights } from '.';
 import { ANOMALY_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
-jest.mock('../../../../shared/components/tools_flyout_header', () => ({
-  ToolsFlyoutHeader: ({
-    title,
-    label,
-    iconType,
-    onTitleClick,
-  }: {
-    title: string;
-    label?: string;
-    iconType?: string;
-    onTitleClick?: () => void;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="mockToolsFlyoutHeader"
-      data-title={title}
-      data-label={label}
-      data-icon-type={iconType}
-      onClick={onTitleClick}
-    />
-  ),
-}));
+vi.mock('../../../../shared/components/tools_flyout_header', () => {
+      const mocked = {
+      ToolsFlyoutHeader: ({
+        title,
+        label,
+        iconType,
+        onTitleClick,
+      }: {
+        title: string;
+        label?: string;
+        iconType?: string;
+        onTitleClick?: () => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="mockToolsFlyoutHeader"
+          data-title={title}
+          data-label={label}
+          data-icon-type={iconType}
+          onClick={onTitleClick}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../entity_analytics/components/anomalies/anomalies_tab', () => ({
-  AnomaliesTab: ({
-    entityId,
-    entityName,
-    entityType,
-  }: {
-    entityId: string;
-    entityName: string;
-    entityType: string;
-  }) => (
-    <div
-      data-test-subj="mockAnomaliesTab"
-      data-entity-id={entityId}
-      data-entity-name={entityName}
-      data-entity-type={entityType}
-    />
-  ),
-}));
+vi.mock('../../../../../entity_analytics/components/anomalies/anomalies_tab', () => {
+      const mocked = {
+      AnomaliesTab: ({
+        entityId,
+        entityName,
+        entityType,
+      }: {
+        entityId: string;
+        entityName: string;
+        entityType: string;
+      }) => (
+        <div
+          data-test-subj="mockAnomaliesTab"
+          data-entity-id={entityId}
+          data-entity-name={entityName}
+          data-entity-type={entityType}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('<AnomalyInsights /> host', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the header with the title, host label and storage icon', () => {
@@ -95,7 +103,7 @@ describe('<AnomalyInsights /> host', () => {
   });
 
   it('forwards onOpenEntity to the header click handler', () => {
-    const onOpenEntity = jest.fn();
+    const onOpenEntity = vi.fn();
     const { getByTestId } = render(
       <AnomalyInsights entityType={EntityType.host} value="my-host" onOpenEntity={onOpenEntity} />
     );
@@ -106,7 +114,7 @@ describe('<AnomalyInsights /> host', () => {
 
 describe('<AnomalyInsights /> user', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the header with the user label and user icon', () => {

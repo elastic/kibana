@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -17,8 +20,8 @@ import { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { mockFlyoutApi } from '../document_details/shared/mocks/mock_flyout_context';
 import { TestProviders } from '../../common/mock';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../common/hooks/use_experimental_features');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../common/hooks/use_experimental_features');
 
 const ip = 'ip';
 const flowTarget = FlowTargetSourceDest.destination;
@@ -26,9 +29,9 @@ const scopeId = 'scopeId';
 
 describe('<NetworkPanel />', () => {
   beforeEach(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    jest.mocked(useExpandableFlyoutHistory).mockReturnValue([]);
-    (useExpandableFlyoutState as jest.Mock).mockReturnValue({});
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.mocked(useExpandableFlyoutHistory).mockReturnValue([]);
+    (useExpandableFlyoutState as Mock).mockReturnValue({});
   });
 
   it('should not show footer if non-preview mode', () => {

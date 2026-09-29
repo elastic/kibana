@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -16,7 +18,7 @@ describe('ExitFullScreen', () => {
   test('it returns null when fullScreen is false', () => {
     const exitFullScreen = mount(
       <TestProviders>
-        <ExitFullScreen fullScreen={false} setFullScreen={jest.fn()} />
+        <ExitFullScreen fullScreen={false} setFullScreen={vi.fn()} />
       </TestProviders>
     );
 
@@ -26,7 +28,7 @@ describe('ExitFullScreen', () => {
   test('it renders a button with the exported EXIT_FULL_SCREEN_CLASS_NAME class when fullScreen is true', () => {
     const exitFullScreen = mount(
       <TestProviders>
-        <ExitFullScreen fullScreen={true} setFullScreen={jest.fn()} />
+        <ExitFullScreen fullScreen={true} setFullScreen={vi.fn()} />
       </TestProviders>
     );
 
@@ -36,7 +38,7 @@ describe('ExitFullScreen', () => {
   test('it renders the expected button text when fullScreen is true', () => {
     const exitFullScreen = mount(
       <TestProviders>
-        <ExitFullScreen fullScreen={true} setFullScreen={jest.fn()} />
+        <ExitFullScreen fullScreen={true} setFullScreen={vi.fn()} />
       </TestProviders>
     );
 
@@ -46,7 +48,7 @@ describe('ExitFullScreen', () => {
   });
 
   test('it invokes setFullScreen with a value of false when the button is clicked', () => {
-    const setFullScreen = jest.fn();
+    const setFullScreen = vi.fn();
 
     const exitFullScreen = mount(
       <TestProviders>

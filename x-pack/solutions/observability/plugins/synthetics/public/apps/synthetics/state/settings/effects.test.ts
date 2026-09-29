@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { call, put, select } from 'redux-saga/effects';
 import type { ForkEffect } from 'redux-saga/effects';
 import type { Action } from 'redux-actions';
@@ -16,23 +18,29 @@ import { setDynamicSettings } from './api';
 import { setDynamicSettingsEffect } from './effects';
 import { selectDynamicSettings } from './selectors';
 
-jest.mock('./api', () => ({
-  ...jest.requireActual('./api'),
-  setDynamicSettings: jest.fn(),
-}));
+vi.mock('./api', async () => {
+      const mocked = {
+      ...(await vi.importActual('./api')),
+      setDynamicSettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../utils/kibana_service', () => ({
-  kibanaService: {
-    coreSetup: {
-      notifications: {
-        toasts: {
-          addSuccess: jest.fn(),
-          addError: jest.fn(),
+vi.mock('../../../../utils/kibana_service', () => {
+      const mocked = {
+      kibanaService: {
+        coreSetup: {
+          notifications: {
+            toasts: {
+              addSuccess: vi.fn(),
+              addError: vi.fn(),
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function getSetDynamicSettingsWorker() {
   const gen = setDynamicSettingsEffect();
@@ -47,11 +55,11 @@ const savedSettings: DynamicSettings = {
 
 describe('setDynamicSettingsEffect', () => {
   beforeAll(() => {
-    jest.spyOn(Date, 'now').mockReturnValue(1700000000000);
+    vi.spyOn(Date, 'now').mockReturnValue(1700000000000);
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('does not refresh default alert rules when only shard rebalancing changes', () => {

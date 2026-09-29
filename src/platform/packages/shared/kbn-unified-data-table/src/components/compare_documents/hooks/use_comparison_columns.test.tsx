@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   DEFAULT_COLUMN_WIDTH,
   FIELD_COLUMN_NAME,
@@ -91,7 +93,7 @@ const renderColumns = ({
   if (wrapperWidth) {
     Object.defineProperty(wrapper, 'offsetWidth', { value: wrapperWidth });
   }
-  const replaceSelectedDocs = jest.fn();
+  const replaceSelectedDocs = vi.fn();
   const {
     result: { current: columns },
   } = renderHook(() =>

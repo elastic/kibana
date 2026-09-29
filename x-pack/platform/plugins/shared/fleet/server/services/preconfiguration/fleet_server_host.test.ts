@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
@@ -27,16 +30,16 @@ import {
 
 import { hashSecret } from './outputs';
 
-jest.mock('../fleet_server_host');
-jest.mock('../app_context');
-jest.mock('../agent_policy');
+vi.mock('../fleet_server_host');
+vi.mock('../app_context');
+vi.mock('../agent_policy');
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-const mockedFleetServerHostService = fleetServerHostService as jest.Mocked<
+const mockedFleetServerHostService = fleetServerHostService as Mocked<
   typeof fleetServerHostService
 >;
 
@@ -376,7 +379,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
       agentless: { enabled: true },
     } as any);
     // Default doesn't exist but agentless does
-    mockedFleetServerHostService.getDefaultFleetServerHost = jest
+    mockedFleetServerHostService.getDefaultFleetServerHost = vi
       .fn()
       .mockResolvedValue(null as any);
     mockedFleetServerHostService.get.mockResolvedValue({
@@ -424,7 +427,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
       agentless: { enabled: false },
     } as any);
     // Mock both getDefaultFleetServerHost and get calls to return null
-    mockedFleetServerHostService.getDefaultFleetServerHost = jest
+    mockedFleetServerHostService.getDefaultFleetServerHost = vi
       .fn()
       .mockResolvedValue(null as any);
     mockedFleetServerHostService.get.mockResolvedValue(null as any);
@@ -474,7 +477,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
       agentless: { enabled: true },
     } as any);
     // Default exists but agentless doesn't
-    mockedFleetServerHostService.getDefaultFleetServerHost = jest
+    mockedFleetServerHostService.getDefaultFleetServerHost = vi
       .fn()
       .mockResolvedValue({ id: 'existing-default' } as any);
     mockedFleetServerHostService.get.mockResolvedValue(null as any);
@@ -508,7 +511,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
       agentless: { enabled: true },
     } as any);
     // Both exist
-    mockedFleetServerHostService.getDefaultFleetServerHost = jest
+    mockedFleetServerHostService.getDefaultFleetServerHost = vi
       .fn()
       .mockResolvedValue({ id: 'existing-default' } as any);
     mockedFleetServerHostService.get.mockResolvedValue({ id: 'existing-agentless' } as any);
@@ -541,7 +544,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
       agentless: { enabled: false },
     } as any);
     // Default exists but agentless doesn't and agentless is disabled
-    mockedFleetServerHostService.getDefaultFleetServerHost = jest
+    mockedFleetServerHostService.getDefaultFleetServerHost = vi
       .fn()
       .mockResolvedValue({ id: 'existing-default' } as any);
     mockedFleetServerHostService.get.mockResolvedValue(null as any);
@@ -574,7 +577,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
       agentless: { enabled: true },
     } as any);
     // Default exists but we're in serverless
-    mockedFleetServerHostService.getDefaultFleetServerHost = jest
+    mockedFleetServerHostService.getDefaultFleetServerHost = vi
       .fn()
       .mockResolvedValue({ id: 'existing-default' } as any);
     mockedFleetServerHostService.get.mockResolvedValue(null as any);
@@ -621,7 +624,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
   });
   afterEach(() => {
     mockedFleetServerHostService.bulkGet.mockReset();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should create a preconfigured fleet server host that does not exist', async () => {
@@ -1005,12 +1008,12 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
 describe('cleanPreconfiguredFleetServerHosts', () => {
   beforeEach(() => {
     mockedAppContextService.getLogger.mockReturnValue(
-      new Proxy({} as any, { get: () => jest.fn() })
+      new Proxy({} as any, { get: () => vi.fn() })
     );
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should delete a preconfigured host removed from config (non-default)', async () => {

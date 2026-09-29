@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-jest.mock('./features_tooltip/features_tooltip', () => ({
-  FeaturesTooltip: () => {
-    return <div>mockFeaturesTooltip</div>;
-  },
-}));
+import { vi } from 'vitest';
+
+vi.mock('./features_tooltip/features_tooltip', () => {
+      const mocked = {
+      FeaturesTooltip: () => {
+        return <div>mockFeaturesTooltip</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import sinon from 'sinon';
 import React from 'react';

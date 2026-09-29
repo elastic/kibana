@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -26,16 +28,16 @@ let mockAgentBuilderSkillsRequirements = {
 /** Non-empty so the assertions below prove each href is run through `basePath.prepend`. */
 const MOCK_BASE_PATH = '/mock-base';
 
-jest.mock('@kbn/content-list-provider', () => {
-  const actual = jest.requireActual('@kbn/content-list-provider');
+vi.mock('@kbn/content-list-provider', async () => {
+  const actual = (await vi.importActual('@kbn/content-list-provider'));
   return {
     ...actual,
     useContentListPhase: () => mockPhase,
   };
 });
 
-jest.mock('@kbn/core-di-browser', () => {
-  const actual = jest.requireActual('@kbn/core-di-browser');
+vi.mock('@kbn/core-di-browser', async () => {
+  const actual = (await vi.importActual('@kbn/core-di-browser'));
   return {
     ...actual,
     useService: (token: symbol) => {
@@ -58,19 +60,25 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
-  useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
-}));
+vi.mock('../../hooks/use_alerting_v2_experimental_features', () => {
+      const mocked = {
+      useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
-  useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
-  useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
-}));
+vi.mock('../../hooks/use_are_agent_builder_skills_available', () => {
+      const mocked = {
+      useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
+      useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const onCreateRule = jest.fn();
-const onCreateEsqlRule = jest.fn();
-const onCreateWithAgent = jest.fn();
-const onBuildSequence = jest.fn();
+const onCreateRule = vi.fn();
+const onCreateEsqlRule = vi.fn();
+const onCreateWithAgent = vi.fn();
+const onBuildSequence = vi.fn();
 
 const renderHeader = (props?: Partial<React.ComponentProps<typeof RulesListHeader>>) =>
   render(
@@ -88,7 +96,7 @@ const renderHeader = (props?: Partial<React.ComponentProps<typeof RulesListHeade
 
 describe('RulesListHeader', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockPhase = 'populated';
     mockCanReadV1Rules = true;
     mockExperimentalFeaturesEnabled = true;

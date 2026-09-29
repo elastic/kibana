@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { updateConversationMetadataStepDefinition } from './update_conversation_metadata';
 import {
   createStepHandlerContext,
   createWorkflowStepConversationClientMock,
 } from '../../test_utils/workflow_steps';
 
-const experimentalEnabled = jest.fn().mockResolvedValue(true);
-const experimentalDisabled = jest.fn().mockResolvedValue(false);
-const getAgentRegistry = jest.fn().mockResolvedValue({ get: jest.fn() });
-const getExecutionService = jest.fn();
+const experimentalEnabled = vi.fn().mockResolvedValue(true);
+const experimentalDisabled = vi.fn().mockResolvedValue(false);
+const getAgentRegistry = vi.fn().mockResolvedValue({ get: vi.fn() });
+const getExecutionService = vi.fn();
 
 describe('updateConversationMetadataStepDefinition', () => {
   const baseInput = {
@@ -42,7 +44,7 @@ describe('updateConversationMetadataStepDefinition', () => {
       metadata: { status: 'resolved', severity: 'low', priority: 'high' },
     };
     const { patchMetadata, getConversationClient } = createWorkflowStepConversationClientMock({
-      patchMetadata: jest
+      patchMetadata: vi
         .fn()
         .mockResolvedValue({ changedFields: ['status', 'severity'], conversation }),
     });
@@ -72,7 +74,7 @@ describe('updateConversationMetadataStepDefinition', () => {
 
   it('returns empty changed_fields when the patch is a no-op', async () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock({
-      patchMetadata: jest.fn().mockResolvedValue({
+      patchMetadata: vi.fn().mockResolvedValue({
         changedFields: [],
         conversation: { id: 'conv-1', metadata: { status: 'open' } },
       }),
@@ -101,7 +103,7 @@ describe('updateConversationMetadataStepDefinition', () => {
 
   it('returns the error when patchMetadata throws', async () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock({
-      patchMetadata: jest.fn().mockRejectedValue(new Error('validation failed')),
+      patchMetadata: vi.fn().mockRejectedValue(new Error('validation failed')),
     });
 
     const definition = updateConversationMetadataStepDefinition({

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import { useGetGroupSelector, useGetGroupSelectorStateless } from './use_get_group_selector';
@@ -21,8 +23,8 @@ const defaultGroupingOptions = [
   { label: 'sourceIP', key: 'source.ip' },
 ];
 const groupingId = 'test-table';
-const dispatch = jest.fn();
-const onGroupChange = jest.fn();
+const dispatch = vi.fn();
+const onGroupChange = vi.fn();
 const statelessArgs = {
   defaultGroupingOptions,
   groupingId,
@@ -34,17 +36,17 @@ const defaultArgs = {
   ...statelessArgs,
   dispatch,
   groupingState: initialState,
-  tracker: jest.fn(),
+  tracker: vi.fn(),
 };
 const customField = 'custom.field';
 
 describe('Group Selector Hooks', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('useGetGroupSelector', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('Initializes a group with options', () => {
@@ -85,7 +87,7 @@ describe('Group Selector Hooks', () => {
     });
 
     it('Passes custom options to the onOptionsChange callback when it is provided', () => {
-      const onOptionsChange = jest.fn();
+      const onOptionsChange = vi.fn();
       renderHook(() =>
         useGetGroupSelector({
           ...defaultArgs,

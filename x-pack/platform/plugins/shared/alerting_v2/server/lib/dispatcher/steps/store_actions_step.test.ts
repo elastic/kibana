@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { StoreActionsStep } from './store_actions_step';
 import { createMockStorageServiceContract } from '../../services/storage_service/storage_service.mock';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
@@ -26,13 +28,13 @@ describe('StoreActionsStep', () => {
   const mockDate = new Date('2026-01-22T08:00:00.000Z');
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(mockDate);
+    vi.useFakeTimers();
+    vi.setSystemTime(mockDate);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   it('halts when there are no episodes at all', async () => {

@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { joinIndices, timeseriesIndices } from '../../../__tests__/commands/context_fixtures';
@@ -530,7 +532,7 @@ describe('hasWiredStreamsInQuery', () => {
   });
 
   it('returns false and does not call any callbacks when the query has no FROM sources', async () => {
-    const getSources = jest.fn(async () => [wiredStreamSource('ignored')]);
+    const getSources = vi.fn(async () => [wiredStreamSource('ignored')]);
 
     const result = await hasWiredStreamsInQuery('ROW x = 1', { getSources });
 
@@ -539,7 +541,7 @@ describe('hasWiredStreamsInQuery', () => {
   });
 
   it('returns false when a data stream is used but it is not a wired stream', async () => {
-    const getSources = jest.fn(async () => [indexSource('logs')]);
+    const getSources = vi.fn(async () => [indexSource('logs')]);
 
     const result = await hasWiredStreamsInQuery('FROM logs', { getSources });
 
@@ -547,7 +549,7 @@ describe('hasWiredStreamsInQuery', () => {
   });
 
   it('returns true when the query has a source that is a wired stream', async () => {
-    const getSources = jest.fn(async () => [wiredStreamSource('logs.otel.child')]);
+    const getSources = vi.fn(async () => [wiredStreamSource('logs.otel.child')]);
 
     const result = await hasWiredStreamsInQuery('FROM logs.otel.child | LIMIT 10', {
       getSources,
@@ -558,7 +560,7 @@ describe('hasWiredStreamsInQuery', () => {
   });
 
   it('returns true when the wired stream has a wildcard in the name', async () => {
-    const getSources = jest.fn(async () => [wiredStreamSource('logs')]);
+    const getSources = vi.fn(async () => [wiredStreamSource('logs')]);
 
     const result = await hasWiredStreamsInQuery('FROM logs*', { getSources });
 

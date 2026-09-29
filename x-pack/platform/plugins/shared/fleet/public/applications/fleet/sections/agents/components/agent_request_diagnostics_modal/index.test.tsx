@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { act, fireEvent } from '@testing-library/react';
@@ -15,20 +18,20 @@ import { sendPostRequestDiagnostics, sendPostBulkRequestDiagnostics } from '../.
 
 import { AgentRequestDiagnosticsModal } from '.';
 
-jest.mock('../../../../hooks', () => {
+vi.mock('../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../hooks'),
-    sendPostRequestDiagnostics: jest.fn().mockResolvedValue({}),
-    sendPostBulkRequestDiagnostics: jest.fn().mockResolvedValue({}),
+    ...(await vi.importActual('../../../../hooks')),
+    sendPostRequestDiagnostics: vi.fn().mockResolvedValue({}),
+    sendPostBulkRequestDiagnostics: vi.fn().mockResolvedValue({}),
   };
 });
 
-const mockSendPostRequestDiagnostics = sendPostRequestDiagnostics as jest.Mock;
-const mockSendPostBulkRequestDiagnostics = sendPostBulkRequestDiagnostics as jest.Mock;
+const mockSendPostRequestDiagnostics = sendPostRequestDiagnostics as Mock;
+const mockSendPostBulkRequestDiagnostics = sendPostBulkRequestDiagnostics as Mock;
 
 describe('AgentRequestDiagnosticsModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   function render(props: any = {}) {
@@ -36,7 +39,7 @@ describe('AgentRequestDiagnosticsModal', () => {
 
     const utils = renderer.render(
       <AgentRequestDiagnosticsModal
-        onClose={jest.fn()}
+        onClose={vi.fn()}
         agents={[{ id: 'agent1' } as any]}
         agentCount={1}
         {...props}

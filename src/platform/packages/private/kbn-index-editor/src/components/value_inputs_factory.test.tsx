@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
@@ -42,8 +44,8 @@ describe('getInputComponentForType', () => {
 
 describe('BooleanInput', () => {
   it('calls onChange and onError with null for valid boolean "true"', () => {
-    const handleChange = jest.fn();
-    const handleError = jest.fn();
+    const handleChange = vi.fn();
+    const handleError = vi.fn();
     renderWithI18n(<BooleanInput value="" onChange={handleChange} onError={handleError} />);
 
     const input = screen.getByRole('textbox');
@@ -54,8 +56,8 @@ describe('BooleanInput', () => {
   });
 
   it('calls onChange and onError with null for valid boolean "false"', () => {
-    const handleChange = jest.fn();
-    const handleError = jest.fn();
+    const handleChange = vi.fn();
+    const handleError = vi.fn();
     renderWithI18n(<BooleanInput value="" onChange={handleChange} onError={handleError} />);
 
     const input = screen.getByRole('textbox');
@@ -66,8 +68,8 @@ describe('BooleanInput', () => {
   });
 
   it('calls onChange and onError with an error for invalid boolean', () => {
-    const handleChange = jest.fn();
-    const handleError = jest.fn();
+    const handleChange = vi.fn();
+    const handleError = vi.fn();
     renderWithI18n(<BooleanInput value="" onChange={handleChange} onError={handleError} />);
 
     const input = screen.getByRole('textbox');
@@ -79,8 +81,8 @@ describe('BooleanInput', () => {
   });
 
   it('handles case-insensitivity', () => {
-    const handleChange = jest.fn();
-    const handleError = jest.fn();
+    const handleChange = vi.fn();
+    const handleError = vi.fn();
     renderWithI18n(<BooleanInput value="" onChange={handleChange} onError={handleError} />);
 
     const input = screen.getByRole('textbox');

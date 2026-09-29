@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ShowMoreActivities } from './show_more_activities';
 
-const onClickMock = jest.fn();
+const onClickMock = vi.fn();
 
 describe('ShowMoreActivities', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly with count', () => {

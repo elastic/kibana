@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React, { useContext } from 'react';
 import '@testing-library/jest-dom';
 import { act, render } from '@testing-library/react';
@@ -27,18 +30,21 @@ import {
 } from '../../common/constants';
 
 // Mock the EmbeddableComponent
-const mockEmbeddableComponent = jest.fn((props) => (
+const mockEmbeddableComponent = vi.fn((props) => (
   <div data-test-subj="embeddable-component" data-title-highlight={props.titleHighlight}>
     Mock EmbeddableComponent
   </div>
 ));
 
 // Mock useLensExtraActions
-jest.mock('./hooks/use_lens_extra_actions', () => ({
-  useLensExtraActions: jest.fn(() => []),
-}));
+vi.mock('./hooks/use_lens_extra_actions', () => {
+      const mocked = {
+      useLensExtraActions: vi.fn(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useLensExtraActionsMock = useLensExtraActions as jest.MockedFunction<
+const useLensExtraActionsMock = useLensExtraActions as MockedFunction<
   typeof useLensExtraActions
 >;
 
@@ -74,7 +80,7 @@ describe('LensWrapper', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('titleHighlight prop', () => {
@@ -181,8 +187,8 @@ describe('LensWrapper', () => {
 
   describe('integration with EmbeddableComponent', () => {
     it('passes all required props to EmbeddableComponent', () => {
-      const onBrushEnd = jest.fn();
-      const onFilter = jest.fn();
+      const onBrushEnd = vi.fn();
+      const onFilter = vi.fn();
       const abortController = new AbortController();
 
       render(
@@ -309,8 +315,8 @@ describe('LensWrapper', () => {
 
     it('does not auto-promote actions to the visible row just because a handler is wired', () => {
       const view = renderAndCaptureViewList({
-        onCopyToDashboard: jest.fn(),
-        onViewDetails: jest.fn(),
+        onCopyToDashboard: vi.fn(),
+        onViewDetails: vi.fn(),
       });
 
       expect(view).toEqual([ACTION_EXPLORE_IN_DISCOVER_TAB, ACTION_INSPECT_PANEL]);
@@ -329,7 +335,7 @@ describe('LensWrapper', () => {
 
     it('resolves esqlVariables from lensProps before calling onExploreInDiscoverTab', () => {
       const captured = captureExploreHandler();
-      const onExploreInDiscoverTab = jest.fn();
+      const onExploreInDiscoverTab = vi.fn();
 
       render(
         <EuiThemeProvider>
@@ -377,7 +383,7 @@ describe('LensWrapper', () => {
 
     it('passes non-esql queries through unchanged', () => {
       const captured = captureExploreHandler();
-      const onExploreInDiscoverTab = jest.fn();
+      const onExploreInDiscoverTab = vi.fn();
 
       render(
         <EuiThemeProvider>

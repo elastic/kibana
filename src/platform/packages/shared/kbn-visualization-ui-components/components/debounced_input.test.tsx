@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { mount } from 'enzyme';
 import { DebouncedInput } from './debounced_input';
 import { act } from 'react-dom/test-utils';
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
+vi.mock('lodash', () => {
+  const original = require('lodash');
 
   return {
     ...original,
@@ -24,7 +26,7 @@ jest.mock('lodash', () => {
 
 describe('DebouncedInput', () => {
   it('should render', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const wrapper = mount(
       <DebouncedInput value={'my value'} onChange={mockOnChange} defaultValue={'default value'} />
     );

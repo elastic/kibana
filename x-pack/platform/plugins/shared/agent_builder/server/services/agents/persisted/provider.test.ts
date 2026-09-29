@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { agentBuilderDefaultAgentId, chatAgentTypeId } from '@kbn/agent-builder-common';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { createClient, type AgentClient } from './client';
 import { createPersistedProviderFn } from './provider';
 
-jest.mock('./client');
+vi.mock('./client');
 
-const createClientMock = createClient as jest.MockedFunction<typeof createClient>;
+const createClientMock = createClient as MockedFunction<typeof createClient>;
 
 const gatedAgent = {
   id: 'gated-agent',
@@ -36,13 +39,13 @@ const availabilityContext = {
 
 describe('persisted agent provider', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('adds the default agent id when it is missing from optimized id results', async () => {
-    const ensureDefaultAgent = jest.fn().mockResolvedValue({ id: agentBuilderDefaultAgentId });
+    const ensureDefaultAgent = vi.fn().mockResolvedValue({ id: agentBuilderDefaultAgentId });
     createClientMock.mockResolvedValue({
-      getIds: jest.fn().mockResolvedValue(['custom-agent']),
+      getIds: vi.fn().mockResolvedValue(['custom-agent']),
       ensureDefaultAgent,
     } as unknown as AgentClient);
 
@@ -65,7 +68,7 @@ describe('persisted agent provider', () => {
   describe('availability', () => {
     it('keeps agents available when no availability was registered for their id', async () => {
       createClientMock.mockResolvedValue({
-        getWithAccess: jest.fn().mockResolvedValue(gatedAgent),
+        getWithAccess: vi.fn().mockResolvedValue(gatedAgent),
       } as unknown as AgentClient);
 
       const provider = await createPersistedProviderFn({
@@ -84,7 +87,7 @@ describe('persisted agent provider', () => {
 
     it('honours availability registered for that agent id', async () => {
       createClientMock.mockResolvedValue({
-        getWithAccess: jest.fn().mockResolvedValue(gatedAgent),
+        getWithAccess: vi.fn().mockResolvedValue(gatedAgent),
       } as unknown as AgentClient);
 
       const availabilityByAgentId = new Map<string, AgentAvailabilityConfig>([
@@ -114,7 +117,7 @@ describe('persisted agent provider', () => {
 
     it('does not apply another agent id availability to this agent', async () => {
       createClientMock.mockResolvedValue({
-        getWithAccess: jest.fn().mockResolvedValue(gatedAgent),
+        getWithAccess: vi.fn().mockResolvedValue(gatedAgent),
       } as unknown as AgentClient);
 
       const availabilityByAgentId = new Map<string, AgentAvailabilityConfig>([

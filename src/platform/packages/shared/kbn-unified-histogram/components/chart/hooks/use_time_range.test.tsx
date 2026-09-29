@@ -7,21 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { renderHook } from '@testing-library/react';
 import type { UnifiedHistogramBucketInterval } from '../../../types';
 import { useTimeRange } from './use_time_range';
 
-jest.mock('@kbn/datemath', () => ({
-  parse: jest.fn((datetime: string) => {
-    return {
-      format: jest.fn(() => {
-        return datetime;
+vi.mock('@kbn/datemath', () => {
+      const mocked = {
+      parse: vi.fn((datetime: string) => {
+        return {
+          format: vi.fn(() => {
+            return datetime;
+          }),
+        };
       }),
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
 describe('useTimeRange', () => {
   const uiSettings = uiSettingsServiceMock.createStartContract();

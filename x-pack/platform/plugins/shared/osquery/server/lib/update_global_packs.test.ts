@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObjectsClient } from '@kbn/core/server';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
@@ -17,15 +19,15 @@ describe('updateGlobalPacksCreateCallback', () => {
   let mockOsqueryContext: OsqueryAppContextService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockPacksClient = {
-      update: jest.fn().mockResolvedValue({}),
+      update: vi.fn().mockResolvedValue({}),
     } as unknown as SavedObjectsClient;
 
     mockOsqueryContext = {
-      getAgentPolicyService: jest.fn().mockReturnValue({
-        getByIds: jest.fn().mockResolvedValue([
+      getAgentPolicyService: vi.fn().mockReturnValue({
+        getByIds: vi.fn().mockResolvedValue([
           { id: 'policy-1', name: 'Policy 1' },
           { id: 'policy-2', name: 'Policy 2' },
         ]),

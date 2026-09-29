@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,7 +18,7 @@ describe('OperatorSelector', () => {
   const baseField = 'is_active';
 
   it('renders the boolean shorthand options', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <OperatorSelector condition={{ field: baseField, eq: '' }} onConditionChange={onChange} />
     );
@@ -32,7 +34,7 @@ describe('OperatorSelector', () => {
   });
 
   it('displays shorthand value for eq true', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <OperatorSelector condition={{ field: baseField, eq: true }} onConditionChange={onChange} />
     );
@@ -42,7 +44,7 @@ describe('OperatorSelector', () => {
   });
 
   it('displays shorthand value for neq false', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <OperatorSelector condition={{ field: baseField, neq: false }} onConditionChange={onChange} />
     );
@@ -53,7 +55,7 @@ describe('OperatorSelector', () => {
 
   it('emits appropriate streamlang condition when shorthand operator is selected', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <OperatorSelector condition={{ field: baseField, eq: '' }} onConditionChange={onChange} />
     );
@@ -66,7 +68,7 @@ describe('OperatorSelector', () => {
 
   it('switching from boolean shorthand to base eq uses default value when types differ', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     // Start from a shorthand-representable condition (eq boolean)
     render(
       <OperatorSelector condition={{ field: baseField, eq: true }} onConditionChange={onChange} />
@@ -81,7 +83,7 @@ describe('OperatorSelector', () => {
 
   it('keeps existing value when switching to an operator with same value type', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     // Existing string value, switching to eq (string default) preserves value
     render(
       <OperatorSelector
@@ -97,7 +99,7 @@ describe('OperatorSelector', () => {
   });
 
   it('renders range operator option', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <OperatorSelector condition={{ field: baseField, eq: '' }} onConditionChange={onChange} />
     );
@@ -111,7 +113,7 @@ describe('OperatorSelector', () => {
   });
 
   it('displays range operator when condition has range', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <OperatorSelector
         condition={{ field: baseField, range: { gte: '0', lt: '100' } }}
@@ -125,7 +127,7 @@ describe('OperatorSelector', () => {
 
   it('emits appropriate condition when range operator is selected', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <OperatorSelector condition={{ field: baseField, eq: '' }} onConditionChange={onChange} />
     );

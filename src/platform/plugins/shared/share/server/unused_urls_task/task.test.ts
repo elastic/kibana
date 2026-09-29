@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import type { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
 import type {
@@ -39,7 +41,7 @@ describe('unused_urls_task', () => {
     {
       ...mockCoreStart,
       savedObjects: {
-        createInternalRepository: jest.fn(() => mockSavedObjectsRepository),
+        createInternalRepository: vi.fn(() => mockSavedObjectsRepository),
       } as unknown as SavedObjectsServiceStart,
     },
     {},

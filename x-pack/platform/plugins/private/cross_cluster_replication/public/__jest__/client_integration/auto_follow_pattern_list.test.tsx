@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, within, act } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import { EuiTableTestHarness } from '@kbn/test-eui-helpers';
@@ -34,15 +36,15 @@ describe('<AutoFollowPatternList />', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
     // Set "default" mock responses by not providing any arguments
     httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse();
@@ -69,7 +71,7 @@ describe('<AutoFollowPatternList />', () => {
       ({ user } = setup());
       // Wait for HTTP request to complete
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 
@@ -102,7 +104,7 @@ describe('<AutoFollowPatternList />', () => {
 
       ({ user, actions } = setup());
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 
@@ -147,7 +149,7 @@ describe('<AutoFollowPatternList />', () => {
 
       ({ user, actions } = setup());
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 

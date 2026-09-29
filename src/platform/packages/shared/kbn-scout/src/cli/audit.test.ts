@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import Fs from 'fs';
 import Path from 'path';
 import { findPackageForPath } from '@kbn/repo-packages';
@@ -19,9 +22,12 @@ import {
   runAudit,
 } from './audit';
 
-jest.mock('@kbn/repo-packages', () => ({
-  findPackageForPath: jest.fn(),
-}));
+vi.mock('@kbn/repo-packages', () => {
+      const mocked = {
+      findPackageForPath: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const FIXTURES_DIR = Path.join(__dirname, '__fixtures__', 'audit');
 const FAKE_REPO_ROOT = Path.join(FIXTURES_DIR, 'fake_repo');
@@ -156,7 +162,7 @@ describe('findScoutTestFiles', () => {
 
 describe('censusPageObjectConsumers', () => {
   beforeEach(() => {
-    (findPackageForPath as jest.Mock).mockImplementation((_repoRoot: string, file: string) => {
+    (findPackageForPath as Mock).mockImplementation((_repoRoot: string, file: string) => {
       if (file.includes('fake_plugin_a')) return { id: 'fake-plugin-a' };
       if (file.includes('fake_plugin_b')) return { id: 'fake-plugin-b' };
       if (file.includes('kbn-scout-fake')) return { id: '@kbn/scout-fake' };
@@ -177,7 +183,7 @@ describe('censusPageObjectConsumers', () => {
 
 describe('runAudit', () => {
   beforeEach(() => {
-    (findPackageForPath as jest.Mock).mockImplementation((_repoRoot: string, file: string) => {
+    (findPackageForPath as Mock).mockImplementation((_repoRoot: string, file: string) => {
       if (file.includes('fake_plugin_a')) return { id: 'fake-plugin-a' };
       if (file.includes('fake_plugin_b')) return { id: 'fake-plugin-b' };
       if (file.includes('kbn-scout-fake')) return { id: '@kbn/scout-fake' };

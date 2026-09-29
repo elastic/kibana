@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type React from 'react';
 import moment from 'moment-timezone';
@@ -16,14 +19,14 @@ import type { FieldDefaultValue } from '../../utils/update_yaml_field_default';
 
 const createMockForm = () => {
   let watchCallback: (values: Record<string, unknown>) => void;
-  const unsubscribe = jest.fn();
-  const setValue = jest.fn();
-  const watch = jest.fn((cb: typeof watchCallback) => {
+  const unsubscribe = vi.fn();
+  const setValue = vi.fn();
+  const watch = vi.fn((cb: typeof watchCallback) => {
     watchCallback = cb;
     return { unsubscribe };
   });
 
-  const form = { setValue, watch } as unknown as jest.Mocked<UseFormReturn>;
+  const form = { setValue, watch } as unknown as Mocked<UseFormReturn>;
 
   return {
     form,
@@ -54,8 +57,8 @@ const createParsedFields = (
   }));
 
 describe('useYamlToFormSync', () => {
-  let mockForm: jest.Mocked<UseFormReturn>;
-  let setValue: jest.Mock;
+  let mockForm: Mocked<UseFormReturn>;
+  let setValue: Mock;
   let syncingFromYamlRef: React.MutableRefObject<boolean>;
   let lastSyncedRef: React.MutableRefObject<Record<string, string>>;
 
@@ -65,7 +68,7 @@ describe('useYamlToFormSync', () => {
     lastSyncedRef = { current: {} };
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('sets form field values from parsed fields on mount', () => {
     const fields = createParsedFields([
@@ -276,20 +279,20 @@ describe('useYamlToFormSync', () => {
 describe('useFormToYamlSync', () => {
   let syncingFromYamlRef: React.MutableRefObject<boolean>;
   let yamlDefaultsRef: React.MutableRefObject<Record<string, string>>;
-  let mockOnChange: jest.MockedFunction<OnFieldDefaultChange>;
+  let mockOnChange: MockedFunction<OnFieldDefaultChange>;
   let fireWatch: (values: Record<string, unknown>) => void;
-  let unsubscribe: jest.Mock;
-  let mockForm: jest.Mocked<UseFormReturn>;
-  let watch: jest.Mock;
+  let unsubscribe: Mock;
+  let mockForm: Mocked<UseFormReturn>;
+  let watch: Mock;
 
   beforeEach(() => {
     syncingFromYamlRef = { current: false };
     yamlDefaultsRef = { current: {} };
-    mockOnChange = jest.fn();
+    mockOnChange = vi.fn();
     ({ form: mockForm, watch, unsubscribe, fireWatch } = createMockForm());
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('subscribes to form changes', () => {
     const fields = createParsedFields([
@@ -577,19 +580,19 @@ describe('useFormToYamlSync', () => {
 });
 
 describe('useYamlFormSync (composed)', () => {
-  let mockForm: jest.Mocked<UseFormReturn>;
-  let setValue: jest.Mock;
-  let watch: jest.Mock;
+  let mockForm: Mocked<UseFormReturn>;
+  let setValue: Mock;
+  let watch: Mock;
   let fireWatch: (values: Record<string, unknown>) => void;
 
   beforeEach(() => {
     ({ form: mockForm, setValue, watch, fireWatch } = createMockForm());
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('syncs YAML defaults to form and subscribes to form changes', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const fields = createParsedFields([
       { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Hello' },
     ]);
@@ -688,7 +691,7 @@ describe('useYamlFormSync (composed)', () => {
   });
 
   it('prevents feedback loop: form subscription does not fire onFieldDefaultChange during YAML sync', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const fields = createParsedFields([
       { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Initial' },
     ]);
@@ -705,7 +708,7 @@ describe('useYamlFormSync (composed)', () => {
   });
 
   it('fires onFieldDefaultChange when user changes a form value', async () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const fields = createParsedFields([
       { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'Initial' },
     ]);
@@ -746,7 +749,7 @@ describe('useYamlFormSync (composed)', () => {
   });
 
   it('handles multiple field types with mixed changes', async () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const fields = createParsedFields([
       { name: 'text', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'text' },
       { name: 'number', type: 'integer', control: 'INPUT_NUMBER', defaultValue: 10 },
@@ -778,7 +781,7 @@ describe('useYamlFormSync (composed)', () => {
   });
 
   it('handles CHECKBOX_GROUP alongside other fields, only notifying changed ones', async () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const fields = createParsedFields([
       { name: 'summary', type: 'keyword', control: 'INPUT_TEXT', defaultValue: 'text' },
       { name: 'systems', type: 'keyword', control: 'CHECKBOX_GROUP', defaultValue: ['api'] },

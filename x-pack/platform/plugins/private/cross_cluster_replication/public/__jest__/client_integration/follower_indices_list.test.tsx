@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, screen, within, act } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import './mocks';
@@ -24,15 +26,15 @@ describe('<FollowerIndicesList />', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
     httpRequestsMockHelpers.setLoadFollowerIndicesResponse();
   });
@@ -55,7 +57,7 @@ describe('<FollowerIndicesList />', () => {
     beforeEach(async () => {
       ({ user } = setup());
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 
@@ -81,7 +83,7 @@ describe('<FollowerIndicesList />', () => {
       httpRequestsMockHelpers.setLoadFollowerIndicesResponse({ indices: followerIndices });
       ({ user } = setup());
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 
@@ -123,7 +125,7 @@ describe('<FollowerIndicesList />', () => {
 
       ({ user, actions } = setup());
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
 
       table = new EuiTableTestHarness('followerIndexListTable');
@@ -248,7 +250,7 @@ describe('<FollowerIndicesList />', () => {
         await user.click(confirmButton);
 
         await act(async () => {
-          await jest.runOnlyPendingTimersAsync();
+          await vi.runOnlyPendingTimersAsync();
         });
 
         // The selection is reset, so the manage button is gone and the row is unchecked.
@@ -277,7 +279,7 @@ describe('<FollowerIndicesList />', () => {
         await user.click(confirmButton);
 
         await act(async () => {
-          await jest.runOnlyPendingTimersAsync();
+          await vi.runOnlyPendingTimersAsync();
         });
 
         // The selection is reset through the detail flyout too, so the bulk manage button

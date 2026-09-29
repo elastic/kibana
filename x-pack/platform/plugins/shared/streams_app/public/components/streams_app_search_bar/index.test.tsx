@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { of } from 'rxjs';
@@ -14,25 +17,28 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
 import { useTimefilter } from '../../hooks/use_timefilter';
 
-jest.mock('./uncontrolled_streams_app_bar', () => ({
-  UncontrolledStreamsAppSearchBar: (props: UncontrolledStreamsAppSearchBarProps) => {
-    // Store onQuerySubmit on the DOM so tests can invoke it
-    return <div data-testid="mockSearchBar" ref={() => (capturedProps = props)} />;
-  },
-}));
+vi.mock('./uncontrolled_streams_app_bar', () => {
+      const mocked = {
+      UncontrolledStreamsAppSearchBar: (props: UncontrolledStreamsAppSearchBarProps) => {
+        // Store onQuerySubmit on the DOM so tests can invoke it
+        return <div data-testid="mockSearchBar" ref={() => (capturedProps = props)} />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_time_range');
-jest.mock('../../hooks/use_time_range_update');
-jest.mock('../../hooks/use_timefilter');
+vi.mock('../../hooks/use_time_range');
+vi.mock('../../hooks/use_time_range_update');
+vi.mock('../../hooks/use_timefilter');
 
-const mockUseTimeRange = useTimeRange as jest.MockedFunction<typeof useTimeRange>;
-const mockUseTimeRangeUpdate = useTimeRangeUpdate as jest.MockedFunction<typeof useTimeRangeUpdate>;
-const mockUseTimefilter = useTimefilter as jest.MockedFunction<typeof useTimefilter>;
+const mockUseTimeRange = useTimeRange as MockedFunction<typeof useTimeRange>;
+const mockUseTimeRangeUpdate = useTimeRangeUpdate as MockedFunction<typeof useTimeRangeUpdate>;
+const mockUseTimefilter = useTimefilter as MockedFunction<typeof useTimefilter>;
 
 let capturedProps: UncontrolledStreamsAppSearchBarProps;
 
-const mockUpdateTimeRange = jest.fn();
-const mockRefresh = jest.fn();
+const mockUpdateTimeRange = vi.fn();
+const mockRefresh = vi.fn();
 
 const dateRange = { from: 'now-15m', to: 'now' };
 const query = { query: '', language: 'kuery' };
@@ -49,7 +55,7 @@ const mockTimeState = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 
   mockUseTimeRange.mockReturnValue({
     rangeFrom: 'now-15m',
@@ -66,7 +72,7 @@ beforeEach(() => {
 
   mockUseTimefilter.mockReturnValue({
     refresh: mockRefresh,
-    setTime: jest.fn(),
+    setTime: vi.fn(),
     timeState: mockTimeState,
     timeState$: of({ kind: 'initial' as const, timeState: mockTimeState }),
   });
@@ -111,7 +117,7 @@ describe('StreamsAppSearchBar', () => {
 
   describe('parent onQuerySubmit forwarding', () => {
     it('should forward onQuerySubmit to the parent callback', () => {
-      const parentOnQuerySubmit = jest.fn();
+      const parentOnQuerySubmit = vi.fn();
       render(<StreamsAppSearchBar onQuerySubmit={parentOnQuerySubmit} />);
 
       capturedProps.onQuerySubmit!({ dateRange, query }, false);
@@ -120,7 +126,7 @@ describe('StreamsAppSearchBar', () => {
     });
 
     it('should forward isUpdate: true to the parent callback', () => {
-      const parentOnQuerySubmit = jest.fn();
+      const parentOnQuerySubmit = vi.fn();
       render(<StreamsAppSearchBar onQuerySubmit={parentOnQuerySubmit} />);
 
       capturedProps.onQuerySubmit!({ dateRange, query }, true);

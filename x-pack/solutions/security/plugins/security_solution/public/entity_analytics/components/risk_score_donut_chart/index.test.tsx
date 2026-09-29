@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { RiskSeverity } from '../../../../common/search_strategy';
 import type { SeverityCount } from '../severity/types';
 import { render } from '@testing-library/react';
@@ -13,15 +16,15 @@ import { RiskScoreDonutChart } from '.';
 import { TestProviders } from '../../../common/mock';
 import { DonutChart } from '../../../common/components/charts/donutchart';
 
-jest.mock('../../../common/components/charts/donutchart', () => {
-  const actual = jest.requireActual('../../../common/components/charts/donutchart');
+vi.mock('../../../common/components/charts/donutchart', async () => {
+  const actual = (await vi.importActual('../../../common/components/charts/donutchart'));
   return {
     ...actual,
-    DonutChart: jest.fn(() => <div data-test-subj="mock-donut-chart" />),
+    DonutChart: vi.fn(() => <div data-test-subj="mock-donut-chart" />),
   };
 });
 
-const mockDonutChart = DonutChart as unknown as jest.Mock;
+const mockDonutChart = DonutChart as unknown as Mock;
 
 const severityCount: SeverityCount = {
   [RiskSeverity.Low]: 1,
@@ -63,7 +66,7 @@ describe('RiskScoreDonutChart', () => {
   });
 
   it('invokes the onPartitionClick callback with the clicked RiskSeverity', () => {
-    const onPartitionClick = jest.fn();
+    const onPartitionClick = vi.fn();
 
     render(
       <TestProviders>

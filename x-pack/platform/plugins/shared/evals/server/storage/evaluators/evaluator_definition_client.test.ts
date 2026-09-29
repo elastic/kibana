@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { InternalIStorageClient } from '@kbn/storage-adapter';
@@ -152,7 +154,7 @@ const createStorageAdapter = ({
 }: { onSearch?: (params: Record<string, unknown>) => void } = {}) => {
   const docs = new Map<string, EvaluatorStorageDocument>();
 
-  const search = jest.fn(async (params: Record<string, unknown>) => {
+  const search = vi.fn(async (params: Record<string, unknown>) => {
     onSearch?.(params);
 
     const allRows: MockRow[] = [...docs.entries()].map(([id, document]) => ({
@@ -175,7 +177,7 @@ const createStorageAdapter = ({
     };
   });
 
-  const index = jest.fn(async ({ id, op_type: opType, document }: Record<string, unknown>) => {
+  const index = vi.fn(async ({ id, op_type: opType, document }: Record<string, unknown>) => {
     const docId = id as string;
     if (opType === 'create' && docs.has(docId)) {
       throw conflict();
@@ -184,7 +186,7 @@ const createStorageAdapter = ({
     return { result: 'created' };
   });
 
-  const bulk = jest.fn(
+  const bulk = vi.fn(
     async ({
       operations,
     }: {
@@ -221,7 +223,7 @@ const createClient = (
   } = {}
 ) => {
   const storage = createStorageAdapter({ onSearch: options.onSearch });
-  const logger = { debug: jest.fn(), error: jest.fn(), warn: jest.fn() } as unknown as Logger;
+  const logger = { debug: vi.fn(), error: vi.fn(), warn: vi.fn() } as unknown as Logger;
 
   return {
     ...storage,
@@ -522,7 +524,7 @@ describe('EvaluatorDefinitionClient', () => {
   describe('space scoping', () => {
     it('hides definitions belonging to another space', async () => {
       const storage = createStorageAdapter();
-      const logger = { debug: jest.fn() } as unknown as Logger;
+      const logger = { debug: vi.fn() } as unknown as Logger;
       const marketing = new EvaluatorDefinitionClient({
         storageAdapter: storage.adapter,
         logger,
@@ -547,7 +549,7 @@ describe('EvaluatorDefinitionClient', () => {
 
     it('lets the same name exist independently in two spaces', async () => {
       const storage = createStorageAdapter();
-      const logger = { debug: jest.fn() } as unknown as Logger;
+      const logger = { debug: vi.fn() } as unknown as Logger;
       const marketing = new EvaluatorDefinitionClient({
         storageAdapter: storage.adapter,
         logger,
@@ -574,7 +576,7 @@ describe('EvaluatorDefinitionClient', () => {
 
     it('surfaces documents predating the space field in the default space only', async () => {
       const storage = createStorageAdapter();
-      const logger = { debug: jest.fn() } as unknown as Logger;
+      const logger = { debug: vi.fn() } as unknown as Logger;
       storage.docs.set('legacy', {
         name: 'tone',
         version: '1.0.0',
@@ -605,7 +607,7 @@ describe('EvaluatorDefinitionClient', () => {
 
   it('reads persisted definitions through a newly created client', async () => {
     const storage = createStorageAdapter();
-    const logger = { debug: jest.fn() } as unknown as Logger;
+    const logger = { debug: vi.fn() } as unknown as Logger;
     const firstClient = new EvaluatorDefinitionClient({
       storageAdapter: storage.adapter,
       logger,
@@ -756,7 +758,7 @@ describe('EvaluatorDefinitionClient', () => {
 
     it('leaves another space definition of the same name alone', async () => {
       const storage = createStorageAdapter();
-      const logger = { debug: jest.fn() } as unknown as Logger;
+      const logger = { debug: vi.fn() } as unknown as Logger;
       const marketing = new EvaluatorDefinitionClient({
         storageAdapter: storage.adapter,
         logger,

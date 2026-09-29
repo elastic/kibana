@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
-jest.mock('react-use/lib/useSessionStorage');
-jest.mock('../../onboarding_flow_context', () => ({
-  useOnboardingFlow: jest.fn(),
-}));
+vi.mock('react-use/lib/useSessionStorage');
+vi.mock('../../onboarding_flow_context', () => {
+      const mocked = {
+      useOnboardingFlow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServiceSettings } from './use_service_settings';
@@ -20,14 +26,14 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
-const mockUseOnboardingFlow = useOnboardingFlow as jest.MockedFunction<typeof useOnboardingFlow>;
-const mockUseSessionStorage = useSessionStorage as jest.MockedFunction<typeof useSessionStorage>;
+const mockUseOnboardingFlow = useOnboardingFlow as MockedFunction<typeof useOnboardingFlow>;
+const mockUseSessionStorage = useSessionStorage as MockedFunction<typeof useSessionStorage>;
 
 beforeEach(() => {
   mockUseSessionStorage.mockImplementation((_key, initial) => useState(initial));
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds: ['guardduty'] },
-    removeDeployInstance: jest.fn(),
+    removeDeployInstance: vi.fn(),
     awsServicesMap: AWS_SERVICES_MAP,
   } as unknown as ReturnType<typeof useOnboardingFlow>);
 });
@@ -81,24 +87,24 @@ describe('useServiceSettings — incompleteInstances', () => {
     mockUseSessionStorage.mockImplementation((_key: string, initial: unknown) => useState(initial));
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: ['svc_a'] },
-      removeDeployInstance: jest.fn(),
+      removeDeployInstance: vi.fn(),
       awsServicesMap: new Map([['svc_a', svcWithRequired]]),
     } as unknown as ReturnType<typeof useOnboardingFlow>);
   });
 
   it('marks instance incomplete when required text var is empty', () => {
-    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServiceSettings({ onContinue: vi.fn() }));
     expect(result.current.incompleteInstances.map((i) => i.instanceId)).toContain('svc_a');
   });
 
   it('isReady is false when required var is empty even with region set', () => {
-    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServiceSettings({ onContinue: vi.fn() }));
     act(() => result.current.setGlobalRegion('us-east-1'));
     expect(result.current.isReady).toBe(false);
   });
 
   it('instance leaves incompleteInstances after required var is filled', () => {
-    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServiceSettings({ onContinue: vi.fn() }));
     act(() => result.current.setGlobalRegion('us-east-1'));
     act(() =>
       result.current.setServiceFieldsAndInputs(
@@ -117,7 +123,7 @@ describe('useServiceSettings — incompleteInstances', () => {
   });
 
   it('duplicate instance also appears in incompleteInstances when its required var is empty', () => {
-    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServiceSettings({ onContinue: vi.fn() }));
     act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, []));
     expect(result.current.incompleteInstances.length).toBeGreaterThanOrEqual(2);
     expect(result.current.incompleteInstanceIds.has('svc_a__dup-1')).toBe(true);
@@ -134,7 +140,7 @@ describe('useServiceSettings — signal filter', () => {
     mockUseSessionStorage.mockImplementation((_key: string, initial: unknown) => useState(initial));
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: ['svc_logs', 'svc_metrics'] },
-      removeDeployInstance: jest.fn(),
+      removeDeployInstance: vi.fn(),
       awsServicesMap: new Map([
         ['svc_logs', svcLogs],
         ['svc_metrics', svcMetrics],
@@ -143,19 +149,19 @@ describe('useServiceSettings — signal filter', () => {
   });
 
   it('shows all instances when filter is all', () => {
-    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServiceSettings({ onContinue: vi.fn() }));
     expect(result.current.filteredInstances).toHaveLength(2);
   });
 
   it('narrows to metrics instance when signal filter is metrics', () => {
-    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServiceSettings({ onContinue: vi.fn() }));
     act(() => result.current.setSignalFilter('metrics'));
     expect(result.current.filteredInstances).toHaveLength(1);
     expect(result.current.filteredInstances[0].instanceId).toBe('svc_metrics');
   });
 
   it('narrows to logs instance when signal filter is logs', () => {
-    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServiceSettings({ onContinue: vi.fn() }));
     act(() => result.current.setSignalFilter('logs'));
     expect(result.current.filteredInstances).toHaveLength(1);
     expect(result.current.filteredInstances[0].instanceId).toBe('svc_logs');
@@ -166,7 +172,7 @@ describe('useServiceSettings — signal filter', () => {
 
 describe('useServiceSettings — addDuplicate instanceId generation', () => {
   it('assigns __dup-1 for the first duplicate', () => {
-    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServiceSettings({ onContinue: vi.fn() }));
 
     act(() => {
       result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, []);
@@ -177,7 +183,7 @@ describe('useServiceSettings — addDuplicate instanceId generation', () => {
   });
 
   it('assigns __dup-2 for the second duplicate', () => {
-    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServiceSettings({ onContinue: vi.fn() }));
 
     act(() => {
       result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, []);
@@ -196,7 +202,7 @@ describe('useServiceSettings — addDuplicate instanceId generation', () => {
     // dup __dup-1 and __dup-2 exist; remove __dup-1; duplicate again.
     // Without the while-loop fix the new id would be __dup-2 (collision).
     // With the fix it must be __dup-3.
-    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    const { result } = renderHook(() => useServiceSettings({ onContinue: vi.fn() }));
 
     act(() => {
       result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, []);
@@ -235,7 +241,7 @@ describe('useServiceSettings — lazy serviceVars prune', () => {
         old_service: { enabledDataStreams: ['old_service'], varsByDataStream: {} },
       },
     };
-    const setPersisted = jest.fn((updater: unknown) => {
+    const setPersisted = vi.fn((updater: unknown) => {
       if (typeof updater === 'function') {
         storedState = (updater as Function)(storedState);
       } else {
@@ -245,11 +251,11 @@ describe('useServiceSettings — lazy serviceVars prune', () => {
     mockUseSessionStorage.mockReturnValue([storedState, setPersisted]);
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: ['guardduty'] },
-      removeDeployInstance: jest.fn(),
+      removeDeployInstance: vi.fn(),
       awsServicesMap: AWS_SERVICES_MAP,
     } as unknown as ReturnType<typeof useOnboardingFlow>);
 
-    renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    renderHook(() => useServiceSettings({ onContinue: vi.fn() }));
 
     // setPersisted must have been called to prune the stale key.
     expect(setPersisted).toHaveBeenCalled();
@@ -268,15 +274,15 @@ describe('useServiceSettings — lazy serviceVars prune', () => {
         guardduty: { enabledDataStreams: ['guardduty'], varsByDataStream: {} },
       },
     };
-    const setPersisted = jest.fn();
+    const setPersisted = vi.fn();
     mockUseSessionStorage.mockReturnValue([storedState, setPersisted]);
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: ['guardduty'] },
-      removeDeployInstance: jest.fn(),
+      removeDeployInstance: vi.fn(),
       awsServicesMap: AWS_SERVICES_MAP,
     } as unknown as ReturnType<typeof useOnboardingFlow>);
 
-    renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    renderHook(() => useServiceSettings({ onContinue: vi.fn() }));
 
     expect(setPersisted).not.toHaveBeenCalled();
   });
@@ -294,15 +300,15 @@ describe('useServiceSettings — lazy serviceVars prune', () => {
         svc_stale: { enabledDataStreams: [], varsByDataStream: {} },
       },
     };
-    const setPersisted = jest.fn();
+    const setPersisted = vi.fn();
     mockUseSessionStorage.mockReturnValue([storedState, setPersisted]);
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: ['svc_a', 'svc_b'] },
-      removeDeployInstance: jest.fn(),
+      removeDeployInstance: vi.fn(),
       awsServicesMap: AWS_SERVICES_MAP,
     } as unknown as ReturnType<typeof useOnboardingFlow>);
 
-    renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    renderHook(() => useServiceSettings({ onContinue: vi.fn() }));
 
     expect(setPersisted).toHaveBeenCalled();
     const call = setPersisted.mock.calls[0][0];

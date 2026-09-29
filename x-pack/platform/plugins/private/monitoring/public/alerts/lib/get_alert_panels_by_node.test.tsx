@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   RULE_CPU_USAGE,
   RULE_LOGSTASH_VERSION_MISMATCH,
@@ -21,20 +23,26 @@ import {
 import { RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
 import type { AlertState } from '../../../common/types/alerts';
 
-jest.mock('../../legacy_shims', () => ({
-  Legacy: {
-    shims: {
-      uiSettings: {
-        get: () => '',
+vi.mock('../../legacy_shims', () => {
+      const mocked = {
+      Legacy: {
+        shims: {
+          uiSettings: {
+            get: () => '',
+          },
+        },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/formatting', () => ({
-  getDateFromNow: (timestamp: number) => `triggered:${timestamp}`,
-  getCalendar: (timestamp: number) => `triggered:${timestamp}`,
-}));
+vi.mock('../../../common/formatting', () => {
+      const mocked = {
+      getDateFromNow: (timestamp: number) => `triggered:${timestamp}`,
+      getCalendar: (timestamp: number) => `triggered:${timestamp}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAlert = {
   enabled: true,

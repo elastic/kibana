@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -13,28 +16,40 @@ import { TransactionDetailFlyoutTraceSample } from '.';
 import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
 import { useTransactionDetailFlyoutTraceSamplesFetcher } from './use_transaction_detail_flyout_trace_samples_fetcher';
 
-jest.mock('../transaction_detail_flyout_context');
-jest.mock('./use_transaction_detail_flyout_trace_samples_fetcher');
-jest.mock('../../../app/transaction_details/use_unified_waterfall_fetcher', () => ({
-  useUnifiedWaterfallFetcher: jest.fn(),
-}));
-jest.mock('../../../app/transaction_details/waterfall_with_summary/maybe_view_trace_link', () => ({
-  MaybeViewTraceLink: () => <div data-test-subj="transactionDetailFlyoutViewFullTraceLink" />,
-}));
-jest.mock('../../summary/transaction_summary', () => ({
-  TransactionSummary: () => <div data-test-subj="transactionDetailFlyoutTraceSampleSummary" />,
-}));
-const mockTimeline = jest.fn((_props: { onNodeClick?: () => void }) => (
+vi.mock('../transaction_detail_flyout_context');
+vi.mock('./use_transaction_detail_flyout_trace_samples_fetcher');
+vi.mock('../../../app/transaction_details/use_unified_waterfall_fetcher', () => {
+      const mocked = {
+      useUnifiedWaterfallFetcher: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../app/transaction_details/waterfall_with_summary/maybe_view_trace_link', () => {
+      const mocked = {
+      MaybeViewTraceLink: () => <div data-test-subj="transactionDetailFlyoutViewFullTraceLink" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../summary/transaction_summary', () => {
+      const mocked = {
+      TransactionSummary: () => <div data-test-subj="transactionDetailFlyoutTraceSampleSummary" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockTimeline = vi.fn((_props: { onNodeClick?: () => void }) => (
   <div data-test-subj="transactionDetailFlyoutTraceSampleTimeline" />
 ));
-jest.mock('./trace_sample_timeline', () => ({
-  TransactionDetailFlyoutTraceSampleTimeline: (props: { onNodeClick?: () => void }) =>
-    mockTimeline(props),
-}));
+vi.mock('./trace_sample_timeline', () => {
+      const mocked = {
+      TransactionDetailFlyoutTraceSampleTimeline: (props: { onNodeClick?: () => void }) =>
+        mockTimeline(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseTransactionDetailFlyoutContext = useTransactionDetailFlyoutContext as jest.Mock;
+const mockedUseTransactionDetailFlyoutContext = useTransactionDetailFlyoutContext as Mock;
 const mockedUseTransactionDetailFlyoutTraceSamplesFetcher =
-  useTransactionDetailFlyoutTraceSamplesFetcher as jest.Mock;
+  useTransactionDetailFlyoutTraceSamplesFetcher as Mock;
 
 const FILTERS = {
   serviceName: 'checkout',
@@ -47,7 +62,7 @@ const FILTERS = {
   end: '2026-08-21T10:43:35.610Z',
 };
 
-const mockedUseUnifiedWaterfallFetcher = useUnifiedWaterfallFetcher as jest.Mock;
+const mockedUseUnifiedWaterfallFetcher = useUnifiedWaterfallFetcher as Mock;
 
 const DEFAULT_WATERFALL_RESULT = {
   traceItems: [
@@ -67,11 +82,11 @@ const DEFAULT_WATERFALL_RESULT = {
 
 describe('TransactionDetailFlyoutTraceSample', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseTransactionDetailFlyoutContext.mockReturnValue({
-      deps: { core: { notifications: { toasts: { addDanger: jest.fn() } } } },
+      deps: { core: { notifications: { toasts: { addDanger: vi.fn() } } } },
       filters: FILTERS,
-      openFullTraceFlyout: jest.fn(),
+      openFullTraceFlyout: vi.fn(),
     });
     mockedUseTransactionDetailFlyoutTraceSamplesFetcher.mockReturnValue({
       data: {
@@ -116,9 +131,9 @@ describe('TransactionDetailFlyoutTraceSample', () => {
   });
 
   it('opens the full-trace flyout when a waterfall node is clicked', () => {
-    const openFullTraceFlyout = jest.fn();
+    const openFullTraceFlyout = vi.fn();
     mockedUseTransactionDetailFlyoutContext.mockReturnValue({
-      deps: { core: { notifications: { toasts: { addDanger: jest.fn() } } } },
+      deps: { core: { notifications: { toasts: { addDanger: vi.fn() } } } },
       filters: FILTERS,
       openFullTraceFlyout,
     });

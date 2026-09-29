@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
@@ -12,23 +15,26 @@ import type { useFailureStoreConfig } from '../hooks/use_failure_store_config';
 import { FailureStoreSummary } from './failure_store_summary';
 import { LifecyclePreviewProvider } from '../common/hooks/lifecycle_preview';
 
-jest.mock('../../../../../hooks/use_kibana');
+vi.mock('../../../../../hooks/use_kibana');
 
 import { useKibana } from '../../../../../hooks/use_kibana';
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
-jest.mock('../hooks/use_ilm_phases_color_and_description', () => ({
-  useIlmPhasesColorAndDescription: () => ({
-    ilmPhases: {
-      hot: { color: '#FF0000', description: 'Hot phase' },
-      warm: { color: '#FFA500', description: 'Warm phase' },
-      cold: { color: '#0000FF', description: 'Cold phase' },
-      frozen: { color: '#00FFFF', description: 'Frozen phase' },
-      delete: { color: '#808080', description: 'Delete phase' },
-    },
-  }),
-}));
+vi.mock('../hooks/use_ilm_phases_color_and_description', () => {
+      const mocked = {
+      useIlmPhasesColorAndDescription: () => ({
+        ilmPhases: {
+          hot: { color: '#FF0000', description: 'Hot phase' },
+          warm: { color: '#FFA500', description: 'Warm phase' },
+          cold: { color: '#0000FF', description: 'Cold phase' },
+          frozen: { color: '#00FFFF', description: 'Frozen phase' },
+          delete: { color: '#808080', description: 'Delete phase' },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('FailureStoreSummary', () => {
   const createMockFailureStoreConfig = (
@@ -141,8 +147,8 @@ describe('FailureStoreSummary', () => {
             stats={stats}
             failureStoreConfig={failureStoreConfig}
             canManageLifecycle
-            onEditDeletePhase={jest.fn()}
-            onRemoveDeletePhase={jest.fn()}
+            onEditDeletePhase={vi.fn()}
+            onRemoveDeletePhase={vi.fn()}
           />
         </LifecyclePreviewProvider>
       );
@@ -223,8 +229,8 @@ describe('FailureStoreSummary', () => {
             stats={stats}
             failureStoreConfig={failureStoreConfig}
             canManageLifecycle
-            onEditDeletePhase={jest.fn()}
-            onRemoveDeletePhase={jest.fn()}
+            onEditDeletePhase={vi.fn()}
+            onRemoveDeletePhase={vi.fn()}
           />
         </LifecyclePreviewProvider>
       );
@@ -245,7 +251,7 @@ describe('FailureStoreSummary', () => {
             stats={stats}
             failureStoreConfig={failureStoreConfig}
             canManageLifecycle
-            onAddDeletePhase={jest.fn()}
+            onAddDeletePhase={vi.fn()}
           />
         </LifecyclePreviewProvider>
       );
@@ -317,7 +323,7 @@ describe('FailureStoreSummary', () => {
             stats={stats}
             failureStoreConfig={failureStoreConfig}
             canManageLifecycle
-            onEditDeletePhase={jest.fn()}
+            onEditDeletePhase={vi.fn()}
             // Simulates the edit failed lifecycle method-switcher flyout being open: it turns on
             // isExternalFlyoutOpen without isDeletePhaseFlyoutOpen.
             isExternalFlyoutOpen
@@ -336,7 +342,7 @@ describe('FailureStoreSummary', () => {
     it('still navigates to the delete phase flyout when that is the flyout that is open', () => {
       const stats = createMockStats(250000);
       const failureStoreConfig = createMockFailureStoreConfig({ defaultRetentionPeriod: '30d' });
-      const onEditDeletePhase = jest.fn();
+      const onEditDeletePhase = vi.fn();
 
       render(
         <LifecyclePreviewProvider>

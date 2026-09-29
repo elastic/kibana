@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { UISession } from '../types';
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
@@ -63,14 +65,14 @@ describe('Background Search Session management status labels', () => {
 
     describe('when the user hovers the indicator', () => {
       beforeAll(() => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
       });
 
       afterAll(() => {
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
-      const setupUser = () => userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      const setupUser = () => userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
       test('complete - expires soon', async () => {
         const user = setupUser();
@@ -84,7 +86,7 @@ describe('Background Search Session management status labels', () => {
 
         await user.hover(screen.getByText('Complete'));
         act(() => {
-          jest.advanceTimersByTime(300);
+          vi.advanceTimersByTime(300);
         });
 
         expect(await screen.findByText(/Expires on/i)).toBeVisible();
@@ -106,7 +108,7 @@ describe('Background Search Session management status labels', () => {
 
         await user.hover(screen.getByText('Error'));
         act(() => {
-          jest.advanceTimersByTime(300);
+          vi.advanceTimersByTime(300);
         });
 
         expect(
@@ -130,7 +132,7 @@ describe('Background Search Session management status labels', () => {
 
         await user.hover(screen.getByText('Complete'));
         act(() => {
-          jest.advanceTimersByTime(300);
+          vi.advanceTimersByTime(300);
         });
 
         expect(await screen.findByText(/Expires on unknown/i)).toBeVisible();

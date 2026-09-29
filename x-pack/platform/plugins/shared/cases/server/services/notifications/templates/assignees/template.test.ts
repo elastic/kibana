@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockCases } from '../../../../mocks';
 import { getByText } from '@testing-library/react';
 import { assigneesTemplateRenderer } from './renderer';
@@ -23,7 +25,7 @@ describe('Assignees template', () => {
   const mockCaseUrl = 'https://example.com/app/security/cases/mock-id-1';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders case data correctly', async () => {

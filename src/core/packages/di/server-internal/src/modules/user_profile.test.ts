@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { type Container, ContainerModule } from 'inversify';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { CoreStart, CurrentUserProfileId, Request, UserProfileFactory } from '@kbn/core-di-server';
@@ -17,14 +20,14 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { loadUserProfile } from './user_profile';
 
 describe('loadUserProfile', () => {
-  let injection: jest.Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
+  let injection: Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
   let container: Container;
   let userProfile: ReturnType<typeof userProfileServiceMock.createStart>;
   let profile: UserProfileWithSecurity;
   let request: KibanaRequest;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     injection = injectionServiceMock.createStartContract();
     profile = { uid: 'jesuswr123' } as UserProfileWithSecurity;
     userProfile = userProfileServiceMock.createStart();

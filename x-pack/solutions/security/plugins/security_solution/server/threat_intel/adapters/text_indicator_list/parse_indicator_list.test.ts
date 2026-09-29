@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { parseIndicatorList } from './parse_indicator_list';
 import { extractIocs } from '../../services/extract_iocs';
 import type { ExtractIocsResult, ExtractedIoc } from '../../services/extract_iocs';
 import type { IocType } from '../../../../common/threat_intel';
 
-jest.mock('../../services/extract_iocs');
+vi.mock('../../services/extract_iocs');
 
-const extractIocsMock = extractIocs as jest.MockedFunction<typeof extractIocs>;
+const extractIocsMock = extractIocs as MockedFunction<typeof extractIocs>;
 
 const empty = (): ExtractIocsResult => ({ count: 0, iocs: [], ioc_set_hash: null });
 

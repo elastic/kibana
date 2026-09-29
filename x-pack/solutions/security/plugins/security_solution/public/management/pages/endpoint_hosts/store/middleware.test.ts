@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import type { Store } from 'redux-v4';
 import { applyMiddleware, createStore } from 'redux-v4';
@@ -45,34 +48,43 @@ import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constan
 import { INGEST_API_PACKAGE_POLICIES } from '../../../services/policies/ingest';
 import { canFetchPackageAndAgentPolicies } from '../../../../../common/endpoint/service/authz/authz';
 
-const mockSendBulkGetPackagePolicies = jest.fn();
-jest.mock('../../../services/policies/ingest', () => ({
-  sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
-  sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
-  sendBulkGetPackagePolicies: () => mockSendBulkGetPackagePolicies(),
-  sendGetEndpointSecurityPackage: () => Promise.resolve({ version: '1.1.1' }),
-}));
+const mockSendBulkGetPackagePolicies = vi.fn();
+vi.mock('../../../services/policies/ingest', () => {
+      const mocked = {
+      sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
+      sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
+      sendBulkGetPackagePolicies: () => mockSendBulkGetPackagePolicies(),
+      sendGetEndpointSecurityPackage: () => Promise.resolve({ version: '1.1.1' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kibana');
-const mockFirstValueFrom = jest.fn();
-jest.mock('rxjs', () => ({
-  ...jest.requireActual('rxjs'),
-  firstValueFrom: () => mockFirstValueFrom(),
-}));
+vi.mock('../../../../common/lib/kibana');
+const mockFirstValueFrom = vi.fn();
+vi.mock('rxjs', () => {
+      const mocked = {
+      ...require('rxjs'),
+      firstValueFrom: () => mockFirstValueFrom(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/endpoint/service/authz/authz', () => ({
-  ...jest.requireActual('../../../../../common/endpoint/service/authz/authz'),
-  canFetchPackageAndAgentPolicies: jest.fn(),
-}));
-const canFetchAgentPoliciesMock = canFetchPackageAndAgentPolicies as jest.Mock;
+vi.mock('../../../../../common/endpoint/service/authz/authz', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../common/endpoint/service/authz/authz')),
+      canFetchPackageAndAgentPolicies: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const canFetchAgentPoliciesMock = canFetchPackageAndAgentPolicies as Mock;
 
 type EndpointListStore = Store<Immutable<EndpointState>, Immutable<AppAction>>;
 
 describe('endpoint list middleware', () => {
-  const getKibanaServicesMock = KibanaServices.get as jest.Mock;
-  let fakeCoreStart: jest.Mocked<CoreStart>;
+  const getKibanaServicesMock = KibanaServices.get as Mock;
+  let fakeCoreStart: Mocked<CoreStart>;
   let depsStart: DepsStartMock;
-  let fakeHttpServices: jest.Mocked<HttpSetup>;
+  let fakeHttpServices: Mocked<HttpSetup>;
   let store: EndpointListStore;
   let getState: EndpointListStore['getState'];
   let dispatch: EndpointListStore['dispatch'];
@@ -100,7 +112,7 @@ describe('endpoint list middleware', () => {
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
     depsStart = depsStartMock();
-    fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
+    fakeHttpServices = fakeCoreStart.http as Mocked<HttpSetup>;
     ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<EndpointState>());
     store = createStore(
       endpointListReducer,

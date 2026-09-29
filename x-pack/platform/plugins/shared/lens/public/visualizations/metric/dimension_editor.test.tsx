@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, getByTitle, within, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -32,7 +35,7 @@ import { getDefaultConfigForMode } from './palette_config';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
 // see https://github.com/facebook/jest/issues/4402#issuecomment-534516219
-const expectCalledBefore = (mock1: jest.Mock, mock2: jest.Mock) =>
+const expectCalledBefore = (mock1: Mock, mock2: Mock) =>
   expect(mock1.mock.invocationCallOrder[0]).toBeLessThan(mock2.mock.invocationCallOrder[0]);
 
 const SELECTORS = {
@@ -110,7 +113,7 @@ describe('dimension editor', () => {
 
   const getNonNumericDatasource = () =>
     createMockDatasource('formBased', {
-      getOperationForColumnId: jest.fn(() => ({
+      getOperationForColumnId: vi.fn(() => ({
         hasReducedTimeRange: false,
         dataType: 'string',
         hasTimeShift: false,
@@ -121,7 +124,7 @@ describe('dimension editor', () => {
 
   const getNumericDatasourceWithArraySupport = () =>
     createMockDatasource('formBased', {
-      getOperationForColumnId: jest.fn(() => ({
+      getOperationForColumnId: vi.fn(() => ({
         hasReducedTimeRange: false,
         dataType: 'number',
         hasArraySupport: true,
@@ -155,8 +158,8 @@ describe('dimension editor', () => {
       accessor: 'some-accessor',
       state: fullState,
       datasource: createMockDatasource('formBased', {
-        hasDefaultTimeField: jest.fn(() => true),
-        getOperationForColumnId: jest.fn(() => ({
+        hasDefaultTimeField: vi.fn(() => true),
+        getOperationForColumnId: vi.fn(() => ({
           hasReducedTimeRange: false,
           dataType: 'number',
           hasTimeShift: false,
@@ -164,21 +167,21 @@ describe('dimension editor', () => {
           isBucketed: false,
         })),
       }).publicAPIMock,
-      removeLayer: jest.fn(),
-      addLayer: jest.fn(),
+      removeLayer: vi.fn(),
+      addLayer: vi.fn(),
       frame: createMockFramePublicAPI(),
-      setState: jest.fn(),
+      setState: vi.fn(),
       panelRef: {} as React.MutableRefObject<HTMLDivElement | null>,
       paletteService: chartPluginMock.createPaletteRegistry(),
     };
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   describe('primary metric dimension', () => {
     const accessor = 'metric-col-id';
     const metricAccessorState = { ...fullState, metricAccessor: accessor };
-    const mockSetState = jest.fn();
+    const mockSetState = vi.fn();
 
     function renderPrimaryMetricEditor(overrides = {}) {
       const rtlRender = render(
@@ -250,7 +253,7 @@ describe('dimension editor', () => {
 
     describe('icon select', () => {
       it('sets icon with default iconAlign', async () => {
-        const setState = jest.fn();
+        const setState = vi.fn();
         const { setIcon } = renderPrimaryMetricEditor({
           state: { ...fullState, icon: undefined, iconAlign: undefined },
           setState,
@@ -265,7 +268,7 @@ describe('dimension editor', () => {
       });
 
       it('sets iconAlign with legacy icon', async () => {
-        const setState = jest.fn();
+        const setState = vi.fn();
         const { setIcon } = renderPrimaryMetricEditor({
           state: { ...fullState, icon: 'heart', iconAlign: undefined },
           setState,
@@ -280,7 +283,7 @@ describe('dimension editor', () => {
       });
 
       it('sets icon and iconAlign with icon and iconAlign already set', async () => {
-        const setState = jest.fn();
+        const setState = vi.fn();
         const { setIcon } = renderPrimaryMetricEditor({
           state: { ...fullState, icon: 'heart', iconAlign: 'left' },
           setState,
@@ -292,7 +295,7 @@ describe('dimension editor', () => {
       });
 
       it('clears icon and iconAlign when none is selected', async () => {
-        const setState = jest.fn();
+        const setState = vi.fn();
         const { clearIcon } = renderPrimaryMetricEditor({
           state: { ...fullState, icon: 'heart', iconAlign: 'left' },
           setState,
@@ -303,7 +306,7 @@ describe('dimension editor', () => {
       });
 
       it('does not call setState when same icon is selected', async () => {
-        const setState = jest.fn();
+        const setState = vi.fn();
         const { setIcon } = renderPrimaryMetricEditor({
           state: { ...fullState, icon: 'heart', iconAlign: 'left' },
           setState,
@@ -472,7 +475,7 @@ describe('dimension editor', () => {
       it.each(['hidden', 'before', 'after', 'tooltip'] as const)(
         'sets the visibility to %s',
         async (visibility) => {
-          const setState = jest.fn();
+          const setState = vi.fn();
           const { clickOnNameVisibility } = renderSecondaryMetricEditor({
             setState,
             state: {
@@ -518,7 +521,7 @@ describe('dimension editor', () => {
         it.each([{ mode: 'static' }, { mode: 'dynamic' }] as Array<{ mode: 'static' | 'dynamic' }>)(
           'should change the color mode to $mode',
           async ({ mode }) => {
-            const setState = jest.fn();
+            const setState = vi.fn();
             const { clickOnColorMode } = renderSecondaryMetricEditor({
               setState,
               state: { ...localState },
@@ -541,7 +544,7 @@ describe('dimension editor', () => {
               secondaryTrend: getDefaultConfigForMode('dynamic'),
             },
             datasource: createMockDatasource('formBased', {
-              getOperationForColumnId: jest.fn((id: string) =>
+              getOperationForColumnId: vi.fn((id: string) =>
                 createOperationByType(id === accessor ? 'string' : 'number')
               ),
             }).publicAPIMock,
@@ -593,7 +596,7 @@ describe('dimension editor', () => {
               },
             },
             datasource: createMockDatasource('formBased', {
-              getOperationForColumnId: jest.fn((id: string) =>
+              getOperationForColumnId: vi.fn((id: string) =>
                 createOperationByType(id !== accessor ? 'string' : 'number')
               ),
             }).publicAPIMock,
@@ -628,7 +631,7 @@ describe('dimension editor', () => {
       });
 
       it('should change the baselineValue to "primary" when changing the baseline mode from static', async () => {
-        const setState = jest.fn();
+        const setState = vi.fn();
         const { clickOnBaselineMode } = renderSecondaryMetricEditor({
           setState,
           state: {
@@ -730,7 +733,7 @@ describe('dimension editor', () => {
   describe('breakdown-by dimension', () => {
     const accessor = 'breakdown-col-id';
 
-    const mockSetState = jest.fn();
+    const mockSetState = vi.fn();
 
     afterEach(() => mockSetState.mockClear());
 
@@ -777,8 +780,8 @@ describe('dimension editor', () => {
     });
 
     it('sets max columns', async () => {
-      jest.useFakeTimers();
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      vi.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       try {
         const { setMaxCols } = renderBreakdownEditor({}, user);
         await setMaxCols(1);
@@ -794,7 +797,7 @@ describe('dimension editor', () => {
           expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 3 }))
         );
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
@@ -880,7 +883,7 @@ describe('dimension editor', () => {
   describe('additional section', () => {
     const accessor = 'metric-col-id';
     const metricAccessorState = { ...fullState, metricAccessor: accessor };
-    const mockSetState = jest.fn();
+    const mockSetState = vi.fn();
 
     afterEach(() => mockSetState.mockClear());
 
@@ -1080,7 +1083,7 @@ describe('dimension editor', () => {
 
           expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
           expect(props.addLayer).toHaveBeenCalledWith('metricTrendline');
-          expectCalledBefore(mockSetState, props.addLayer as jest.Mock);
+          expectCalledBefore(mockSetState, props.addLayer as Mock);
         });
 
         it('enables bar', async () => {
@@ -1092,7 +1095,7 @@ describe('dimension editor', () => {
           expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: true });
           expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
 
-          expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
+          expectCalledBefore(mockSetState, props.removeLayer as Mock);
         });
 
         it('selects none from bar', async () => {
@@ -1114,7 +1117,7 @@ describe('dimension editor', () => {
           expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: false });
           expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
 
-          expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
+          expectCalledBefore(mockSetState, props.removeLayer as Mock);
         });
 
         it('selects trendline from none with apply color to value', async () => {

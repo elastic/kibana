@@ -5,27 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LeasePool, IDLE_TIMEOUT_MS } from './lease_pool';
 
-const noopTerminate = jest.fn().mockResolvedValue(undefined);
+const noopTerminate = vi.fn().mockResolvedValue(undefined);
 
 const makeFakePerf = () => {
   let perfNow = 1;
-  jest.spyOn(performance, 'now').mockImplementation(() => perfNow);
+  vi.spyOn(performance, 'now').mockImplementation(() => perfNow);
 
   return {
     tick: (ms: number) => {
       perfNow += ms;
     },
     restore: () => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     },
   };
 };
 
 describe('LeasePool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('reuse: N sequential leases on the same key', () => {
@@ -79,7 +81,7 @@ describe('LeasePool', () => {
     it('removes the key when the build rejects so the next lease rebuilds', async () => {
       const pool = new LeasePool<string>();
       let callCount = 0;
-      const buildFn = jest.fn().mockImplementationOnce(async () => {
+      const buildFn = vi.fn().mockImplementationOnce(async () => {
         callCount++;
         throw new Error('build failed');
       });
@@ -122,8 +124,8 @@ describe('LeasePool', () => {
 
       const evictionPromise = pool.evict('conn');
 
-      const replacementTerminate = jest.fn().mockResolvedValue(undefined);
-      const replacementBuild = jest.fn().mockResolvedValue('replacement-client');
+      const replacementTerminate = vi.fn().mockResolvedValue(undefined);
+      const replacementBuild = vi.fn().mockResolvedValue('replacement-client');
       await expect(
         pool.lease('conn:mcp:shared', replacementBuild, replacementTerminate)
       ).resolves.toBe('replacement-client');
@@ -132,7 +134,7 @@ describe('LeasePool', () => {
       await expect(firstLease).rejects.toThrow('stale build failed');
       await evictionPromise;
 
-      const unexpectedBuild = jest.fn().mockResolvedValue('unexpected-client');
+      const unexpectedBuild = vi.fn().mockResolvedValue('unexpected-client');
       await expect(pool.lease('conn:mcp:shared', unexpectedBuild, noopTerminate)).resolves.toBe(
         'replacement-client'
       );
@@ -184,7 +186,7 @@ describe('LeasePool', () => {
 
     it('does not expire an entry re-leased just before the idle TTL', async () => {
       const pool = new LeasePool<string>();
-      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+      const terminateSpy = vi.fn().mockResolvedValue(undefined);
 
       await pool.lease('conn:mcp:shared', async () => 'client', terminateSpy);
 
@@ -201,8 +203,8 @@ describe('LeasePool', () => {
   describe('evict(connectorId)', () => {
     it('calls terminate on matching-prefix resolved entries and removes them', async () => {
       const pool = new LeasePool<string>();
-      const terminateA = jest.fn().mockResolvedValue(undefined);
-      const terminateB = jest.fn().mockResolvedValue(undefined);
+      const terminateA = vi.fn().mockResolvedValue(undefined);
+      const terminateB = vi.fn().mockResolvedValue(undefined);
 
       await pool.lease('conn-a:mcp:shared', async () => 'client-a', terminateA);
       await pool.lease('conn-b:mcp:shared', async () => 'client-b', terminateB);
@@ -215,7 +217,7 @@ describe('LeasePool', () => {
 
     it('removes the entry whether terminate resolves or rejects (best-effort)', async () => {
       const pool = new LeasePool<string>();
-      const terminateFailing = jest.fn().mockRejectedValue(new Error('terminate failed'));
+      const terminateFailing = vi.fn().mockRejectedValue(new Error('terminate failed'));
 
       await pool.lease('conn-x:mcp:shared', async () => 'client-x', terminateFailing);
 
@@ -267,7 +269,7 @@ describe('LeasePool', () => {
       const inFlight = new Promise<string>((res) => {
         resolveClient = res;
       });
-      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+      const terminateSpy = vi.fn().mockResolvedValue(undefined);
 
       const leasePromise = pool.lease('conn-y:mcp:shared', async () => inFlight, terminateSpy);
 
@@ -290,7 +292,7 @@ describe('LeasePool', () => {
       const inFlight = new Promise<string>((_, rej) => {
         rejectClient = rej;
       });
-      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+      const terminateSpy = vi.fn().mockResolvedValue(undefined);
 
       const leasePromise = pool.lease('conn-z:mcp:shared', async () => inFlight, terminateSpy);
 
@@ -306,7 +308,7 @@ describe('LeasePool', () => {
 
     it('does not touch entries for a different connector', async () => {
       const pool = new LeasePool<string>();
-      const terminateOther = jest.fn().mockResolvedValue(undefined);
+      const terminateOther = vi.fn().mockResolvedValue(undefined);
 
       await pool.lease('other-conn:mcp:shared', async () => 'other-client', terminateOther);
 
@@ -329,7 +331,7 @@ describe('LeasePool', () => {
 
     it('expires an idle entry after IDLE_TIMEOUT_MS', async () => {
       const pool = new LeasePool<string>();
-      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+      const terminateSpy = vi.fn().mockResolvedValue(undefined);
 
       await pool.lease('conn:mcp:shared', async () => 'client', terminateSpy);
 
@@ -355,8 +357,8 @@ describe('LeasePool', () => {
   describe('stop()', () => {
     it('fire-and-forgets terminate on all resolved entries', async () => {
       const pool = new LeasePool<string>();
-      const terminateA = jest.fn().mockResolvedValue(undefined);
-      const terminateB = jest.fn().mockResolvedValue(undefined);
+      const terminateA = vi.fn().mockResolvedValue(undefined);
+      const terminateB = vi.fn().mockResolvedValue(undefined);
 
       await pool.lease('conn-a:mcp:shared', async () => 'client-a', terminateA);
       await pool.lease('conn-b:mcp:shared', async () => 'client-b', terminateB);
@@ -381,7 +383,7 @@ describe('LeasePool', () => {
       const inFlight = new Promise<string>((res) => {
         resolveClient = res;
       });
-      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+      const terminateSpy = vi.fn().mockResolvedValue(undefined);
 
       const leasePromise = pool.lease('conn:mcp:shared', async () => inFlight, terminateSpy);
 
@@ -403,7 +405,7 @@ describe('LeasePool', () => {
       const inFlight = new Promise<string>((_, rej) => {
         rejectClient = rej;
       });
-      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+      const terminateSpy = vi.fn().mockResolvedValue(undefined);
 
       const leasePromise = pool.lease('conn:mcp:shared', async () => inFlight, terminateSpy);
 

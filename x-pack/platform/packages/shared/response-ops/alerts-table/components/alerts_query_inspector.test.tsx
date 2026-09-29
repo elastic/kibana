@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AlertsQueryInspector } from './alerts_query_inspector';
 import { AlertsQueryInspectorModal } from './alerts_query_inspector_modal';
 
-jest.mock('./alerts_query_inspector_modal');
-jest
+vi.mock('./alerts_query_inspector_modal');
+vi
   .mocked(AlertsQueryInspectorModal.type)
   .mockImplementation(() => <div data-test-subj="mocked-modal" />);
 

@@ -7,35 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { FlagsReader } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { runScoutPlaywrightConfig } from './run_tests';
 import { initLogsDir } from './init_logs_dir';
 import { parseTestFlags, runTests } from '../playwright/runner';
 
-jest.mock('./init_logs_dir', () => ({
-  initLogsDir: jest.fn(),
-}));
+vi.mock('./init_logs_dir', () => {
+      const mocked = {
+      initLogsDir: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../playwright/runner', () => ({
-  parseTestFlags: jest.fn().mockResolvedValue({ logsDir: 'path/to/logs/directory' }),
-  runTests: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../playwright/runner', () => {
+      const mocked = {
+      parseTestFlags: vi.fn().mockResolvedValue({ logsDir: 'path/to/logs/directory' }),
+      runTests: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('runScoutPlaywrightConfig', () => {
-  let flagsReader: jest.Mocked<FlagsReader>;
-  let log: jest.Mocked<ToolingLog>;
+  let flagsReader: Mocked<FlagsReader>;
+  let log: Mocked<ToolingLog>;
 
   beforeAll(() => {
     flagsReader = {
-      arrayOfStrings: jest.fn(),
-      boolean: jest.fn(),
+      arrayOfStrings: vi.fn(),
+      boolean: vi.fn(),
     } as any;
 
     log = {
-      info: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
+      warn: vi.fn(),
     } as any;
   });
 

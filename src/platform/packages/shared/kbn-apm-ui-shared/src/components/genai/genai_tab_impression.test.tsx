@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -17,7 +19,7 @@ import {
 
 describe('GenAiTabImpression', () => {
   it('reports an impression on mount', () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
 
     render(<GenAiTabImpression reportEvent={reportEvent} element="spanFlyoutTabs" />);
 
@@ -28,7 +30,7 @@ describe('GenAiTabImpression', () => {
   });
 
   it('does not report again on re-render with the same element and resourceId', () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
 
     const { rerender } = render(
       <GenAiTabImpression reportEvent={reportEvent} element="spanFlyoutTabs" resourceId="span-1" />
@@ -41,7 +43,7 @@ describe('GenAiTabImpression', () => {
   });
 
   it('reports a new impression when the resourceId changes', () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
 
     const { rerender } = render(
       <GenAiTabImpression reportEvent={reportEvent} element="spanFlyoutTabs" resourceId="span-1" />
@@ -54,10 +56,10 @@ describe('GenAiTabImpression', () => {
   });
 
   it('swallows reporting errors', () => {
-    const reportEvent = jest.fn(() => {
+    const reportEvent = vi.fn(() => {
       throw new Error('not registered');
     });
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
 
     expect(() =>
       render(<GenAiTabImpression reportEvent={reportEvent} element="spanFlyoutTabs" />)
@@ -67,7 +69,7 @@ describe('GenAiTabImpression', () => {
 
 describe('registerGenAiTabImpressionEventType', () => {
   it('registers the impression event type', () => {
-    const registerEventType = jest.fn();
+    const registerEventType = vi.fn();
 
     registerGenAiTabImpressionEventType({ registerEventType });
 

@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { ErrorCallout } from './error_callout';
 
-const mockRenderSearchError = jest.fn();
+const mockRenderSearchError = vi.fn();
 
-jest.mock('@kbn/search-errors', () => {
-  const originalModule = jest.requireActual('@kbn/search-errors');
+vi.mock('@kbn/search-errors', async () => {
+  const originalModule = (await vi.importActual('@kbn/search-errors'));
 
   return {
     ...originalModule,
@@ -29,7 +31,7 @@ const renderErrorCallout = (ui: React.ReactElement) =>
 
 describe('ErrorCallout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -40,7 +42,7 @@ describe('ErrorCallout', () => {
     const ERROR = new Error('My error');
     const TITLE = 'Error title';
 
-    renderErrorCallout(<ErrorCallout error={ERROR} title={TITLE} showErrorDialog={jest.fn()} />);
+    renderErrorCallout(<ErrorCallout error={ERROR} title={TITLE} showErrorDialog={vi.fn()} />);
 
     expect(screen.getByText(TITLE)).toBeVisible();
     expect(screen.getByText(ERROR.message)).toBeVisible();
@@ -54,7 +56,7 @@ describe('ErrorCallout', () => {
 
     mockRenderSearchError.mockReturnValue({ body: OVERWRITE_DISPLAY, title: OVERWRITE_TITLE });
     renderErrorCallout(
-      <ErrorCallout error={ERROR} title="Original title" showErrorDialog={jest.fn()} />
+      <ErrorCallout error={ERROR} title="Original title" showErrorDialog={vi.fn()} />
     );
 
     expect(screen.getByText(OVERWRITE_TITLE)).toBeVisible();
@@ -66,7 +68,7 @@ describe('ErrorCallout', () => {
   it('should call showErrorDialog when the button is clicked', async () => {
     const ERROR = new Error('My error');
     const TITLE = 'Error title';
-    const showErrorDialog = jest.fn();
+    const showErrorDialog = vi.fn();
     const user = userEvent.setup();
 
     renderErrorCallout(
@@ -87,7 +89,7 @@ describe('ErrorCallout', () => {
     const TITLE = 'Error title';
 
     renderErrorCallout(
-      <ErrorCallout error={ERROR} isEsqlMode title={TITLE} showErrorDialog={jest.fn()} />
+      <ErrorCallout error={ERROR} isEsqlMode title={TITLE} showErrorDialog={vi.fn()} />
     );
 
     expect(screen.queryByRole('button', { name: /view details/i })).not.toBeInTheDocument();

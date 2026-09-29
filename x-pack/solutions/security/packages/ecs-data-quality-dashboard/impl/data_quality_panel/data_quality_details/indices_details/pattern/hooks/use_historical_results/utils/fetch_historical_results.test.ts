@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { INTERNAL_API_VERSION } from '../../../../../../constants';
 import {
   DEFAULT_HISTORICAL_RESULTS_END_DATE,
@@ -26,7 +28,7 @@ const opts = {
 
 describe('fetchHistoricalResults', () => {
   it('should call historical results api for given indexName, internal api version with last week query params and abortcontroller signal', async () => {
-    const httpFetch = jest.fn().mockResolvedValue({ data: [], total: 0 });
+    const httpFetch = vi.fn().mockResolvedValue({ data: [], total: 0 });
     const abortController = new AbortController();
     await fetchHistoricalResults({
       indexName,
@@ -40,7 +42,7 @@ describe('fetchHistoricalResults', () => {
   });
 
   it('should return with historical results and total', async () => {
-    const httpFetch = jest.fn().mockResolvedValue({ data: [], total: 0 });
+    const httpFetch = vi.fn().mockResolvedValue({ data: [], total: 0 });
     await expect(
       fetchHistoricalResults({
         indexName,
@@ -52,7 +54,7 @@ describe('fetchHistoricalResults', () => {
 
   describe('given additional query params', () => {
     it('should include them in the query', async () => {
-      const httpFetch = jest.fn().mockResolvedValue({ data: [], total: 0 });
+      const httpFetch = vi.fn().mockResolvedValue({ data: [], total: 0 });
       const abortController = new AbortController();
       await fetchHistoricalResults({
         indexName: 'test-index',

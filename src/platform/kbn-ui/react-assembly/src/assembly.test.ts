@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createElement } from 'react';
 import { defineAssembly } from './assembly';
 import { getPartKey, getPresetKey, createDeclarativeComponent } from './factory';
@@ -217,7 +219,7 @@ describe('resolve', () => {
   });
 
   it('should return `undefined` and warn for a preset without a resolver.', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const part = {
       type: 'part' as const,
       part: 'column',
@@ -234,7 +236,7 @@ describe('resolve', () => {
   });
 
   it('should return `undefined` and warn for a part without a preset.', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const part = {
       type: 'part' as const,
       part: 'column',
@@ -326,7 +328,7 @@ describe('part.parseChildren', () => {
   });
 
   it('should warn for function component children that are not registered parts.', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const UnknownComponent = (): null => null;
     UnknownComponent.displayName = 'UnknownComponent';
 
@@ -345,7 +347,7 @@ describe('part.parseChildren', () => {
   });
 
   it('should not warn for intrinsic HTML element children.', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const div = createElement('div', { key: 'div' });
 
     const children = [createElement(NameCol, { key: '1', label: 'Title' }), div];
@@ -549,7 +551,7 @@ describe('createComponent — per-instance resolver isolation', () => {
 
     part.createComponent<Record<never, never>>({ resolve: () => ({ label: 'A' }) });
 
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     // No componentType: simulates a hand-constructed part or legacy usage.
     const partWithoutType = {
       type: 'part' as const,
@@ -605,7 +607,7 @@ describe('assembly.parseChildren', () => {
   });
 
   it('should preserve interleaved order with passthrough children.', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const div = createElement('div', { key: 'div' });
     const children = [
       createElement(NameCol, { key: '1', label: 'Title' }),
@@ -622,7 +624,7 @@ describe('assembly.parseChildren', () => {
   });
 
   it('should warn by default for function component children.', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const UnknownComponent = (): null => null;
     UnknownComponent.displayName = 'MyCallout';
 
@@ -641,7 +643,7 @@ describe('assembly.parseChildren', () => {
   });
 
   it('should not warn when `supportsOtherChildren` is `true`.', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const UnknownComponent = (): null => null;
     UnknownComponent.displayName = 'MyCallout';
 
@@ -656,7 +658,7 @@ describe('assembly.parseChildren', () => {
   });
 
   it('should not warn for intrinsic HTML element passthrough children.', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const div = createElement('div', { key: 'div' });
 
     const children = [createElement(NameCol, { key: '1', label: 'Title' }), div];
@@ -797,7 +799,7 @@ describe('resolveSkeleton', () => {
     const barePart = bareAsm.definePart<ColumnPresets, ColumnOutput, ColumnContext>({
       name: 'column',
     });
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const part = {
       type: 'part' as const,

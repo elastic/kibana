@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   ActionMocks,
   setMetaDocMigrationStartedMock,
@@ -35,7 +37,7 @@ describe('actions', () => {
   let actionMap: ActionMap;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     context = createContextMock();
     actionMap = nextActionMap(context);

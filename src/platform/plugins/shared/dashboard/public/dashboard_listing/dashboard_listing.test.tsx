@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from 'react-router-dom';
@@ -23,13 +26,13 @@ import { coreServices } from '../services/kibana_services';
 import { DashboardListing } from './dashboard_listing';
 import type { DashboardListingProps, DashboardListingTab } from './types';
 
-jest.mock('@kbn/content-management-tabbed-table-list-view', () => ({
+vi.mock('@kbn/content-management-tabbed-table-list-view', () => ({
   __esModule: true,
-  TabbedTableListView: jest.fn().mockReturnValue(null),
+  TabbedTableListView: vi.fn().mockReturnValue(null),
 }));
 
-const mockAppHeader = jest.fn().mockReturnValue(null);
-jest.mock('@kbn/app-header', () => ({
+const mockAppHeader = vi.fn().mockReturnValue(null);
+vi.mock('@kbn/app-header', () => ({
   __esModule: true,
   get AppHeader() {
     return mockAppHeader;
@@ -45,8 +48,8 @@ const renderDashboardListing = (
       <MemoryRouter initialEntries={initialEntries}>
         <Route path={['/list/:activeTab', '/list']}>
           <DashboardListing
-            goToDashboard={jest.fn()}
-            getDashboardUrl={jest.fn()}
+            goToDashboard={vi.fn()}
+            getDashboardUrl={vi.fn()}
             getTabs={() => []}
             {...props}
           />
@@ -55,10 +58,10 @@ const renderDashboardListing = (
     </I18nProvider>
   );
 
-const mockTabbedTableListView = TabbedTableListView as jest.Mock;
+const mockTabbedTableListView = TabbedTableListView as Mock;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   (coreServices.application.capabilities as any).dashboard_v2.createNew = true;
 });
 
@@ -79,7 +82,7 @@ test('works without getTabs (for embedded use cases)', () => {
     <I18nProvider>
       <MemoryRouter initialEntries={['/list']}>
         <Route path={['/list/:activeTab', '/list']}>
-          <DashboardListing goToDashboard={jest.fn()} getDashboardUrl={jest.fn()} />
+          <DashboardListing goToDashboard={vi.fn()} getDashboardUrl={vi.fn()} />
         </Route>
       </MemoryRouter>
     </I18nProvider>
@@ -93,7 +96,7 @@ test('works without getTabs (for embedded use cases)', () => {
 
 test('reads activeTab from URL path param when tab exists', () => {
   renderDashboardListing(
-    { getTabs: () => [{ id: 'custom-tab', title: 'Custom Tab', getTableList: jest.fn() }] },
+    { getTabs: () => [{ id: 'custom-tab', title: 'Custom Tab', getTableList: vi.fn() }] },
     { initialEntries: ['/list/custom-tab'] }
   );
 
@@ -103,7 +106,7 @@ test('reads activeTab from URL path param when tab exists', () => {
 });
 
 test('appends additional tabs after built-in tabs and preserves getTableList', () => {
-  const mockGetTableList = jest.fn();
+  const mockGetTableList = vi.fn();
   const mockAdditionalTab: DashboardListingTab = {
     id: 'annotations',
     title: 'Annotations',
@@ -123,7 +126,7 @@ test('changeActiveTab updates route to show new tab', async () => {
   const mockTab: DashboardListingTab = {
     id: 'custom-tab',
     title: 'Custom Tab',
-    getTableList: jest.fn(),
+    getTableList: vi.fn(),
   };
 
   renderDashboardListing({ getTabs: () => [mockTab] });

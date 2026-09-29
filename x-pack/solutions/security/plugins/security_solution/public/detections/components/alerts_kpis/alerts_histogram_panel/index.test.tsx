@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { mount } from 'enzyme';
@@ -22,21 +25,21 @@ import { useVisualizationResponse } from '../../../../common/components/visualiz
 import { useVisualizationResponseMock } from '../../../../common/components/visualization_actions/use_visualization_response.mock';
 import type { UseVisualizationResponseMock } from '../../../../common/components/visualization_actions/use_visualization_response.mock';
 
-jest.mock('../../../../common/containers/query_toggle');
+vi.mock('../../../../common/containers/query_toggle');
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const originalModule = require('react-router-dom');
   return {
     ...originalModule,
-    createHref: jest.fn(),
-    useHistory: jest.fn(),
-    useLocation: jest.fn().mockReturnValue({ pathname: '' }),
+    createHref: vi.fn(),
+    useHistory: vi.fn(),
+    useLocation: vi.fn().mockReturnValue({ pathname: '' }),
   };
 });
 
-const mockNavigateToApp = jest.fn();
-jest.mock('../../../../common/lib/kibana/kibana_react', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana/kibana_react');
+const mockNavigateToApp = vi.fn();
+vi.mock('../../../../common/lib/kibana/kibana_react', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana/kibana_react'));
 
   return {
     ...original,
@@ -44,23 +47,23 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => {
       services: {
         application: {
           navigateToApp: mockNavigateToApp,
-          getUrlForApp: jest.fn(),
+          getUrlForApp: vi.fn(),
         },
         data: {
           search: {
-            search: jest.fn(),
+            search: vi.fn(),
           },
         },
         uiSettings: {
-          get: jest.fn(),
+          get: vi.fn(),
         },
         notifications: {
           toasts: {
-            addWarning: jest.fn(),
-            addError: jest.fn(),
-            addSuccess: jest.fn(),
-            addInfo: jest.fn(),
-            remove: jest.fn(),
+            addWarning: vi.fn(),
+            addError: vi.fn(),
+            addSuccess: vi.fn(),
+            addInfo: vi.fn(),
+            remove: vi.fn(),
           },
         },
       },
@@ -68,54 +71,52 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => {
   };
 });
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...original,
-    useUiSetting$: jest.fn().mockReturnValue([]),
-    useGetUserSavedObjectPermissions: jest.fn(),
+    useUiSetting$: vi.fn().mockReturnValue([]),
+    useGetUserSavedObjectPermissions: vi.fn(),
   };
 });
 
-jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
+vi.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 
-jest.mock('../common/hooks', () => {
-  const actual = jest.requireActual('../common/hooks');
+vi.mock('../common/hooks', async () => {
+  const actual = (await vi.importActual('../common/hooks'));
   return {
     ...actual,
-    useInspectButton: jest.fn(),
+    useInspectButton: vi.fn(),
   };
 });
 
-jest.mock('../../../../common/components/visualization_actions/use_visualization_response', () => ({
-  ...jest.requireActual(
-    '../../../../common/components/visualization_actions/use_visualization_response'
-  ),
-  useVisualizationResponse: jest
-    .requireActual(
-      '../../../../common/components/visualization_actions/use_visualization_response.mock'
-    )
-    .useVisualizationResponseMock.create(),
-}));
+vi.mock('../../../../common/components/visualization_actions/use_visualization_response', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../common/components/visualization_actions/use_visualization_response')),
+      useVisualizationResponse: (await vi.importActual('../../../../common/components/visualization_actions/use_visualization_response.mock'))
+        .useVisualizationResponseMock.create(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSetIsExpanded = jest.fn();
+const mockSetIsExpanded = vi.fn();
 const defaultProps = {
-  setQuery: jest.fn(),
+  setQuery: vi.fn(),
   showBuildingBlockAlerts: false,
   showOnlyThreatIndicatorAlerts: false,
   showTotalAlertsCount: true,
   signalIndexName: 'signalIndexName',
-  updateDateRange: jest.fn(),
+  updateDateRange: vi.fn(),
   isExpanded: true,
   setIsExpanded: mockSetIsExpanded,
 };
-const mockSetToggle = jest.fn();
-const mockUseQueryToggle = useQueryToggle as jest.Mock;
+const mockSetToggle = vi.fn();
+const mockUseQueryToggle = useQueryToggle as Mock;
 const mockUseVisualizationResponse = useVisualizationResponse as UseVisualizationResponseMock;
 
 describe('AlertsHistogramPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
   });
 
@@ -166,7 +167,7 @@ describe('AlertsHistogramPanel', () => {
   });
 
   test('it invokes onFieldSelected when a field is selected', async () => {
-    const onFieldSelected = jest.fn();
+    const onFieldSelected = vi.fn();
     const optionToSelect = 'agent.hostname';
 
     render(
@@ -330,7 +331,7 @@ describe('AlertsHistogramPanel', () => {
       wrapper
         .find('button[data-test-subj="alerts-histogram-panel-go-to-alerts-page"]')
         .simulate('click', {
-          preventDefault: jest.fn(),
+          preventDefault: vi.fn(),
         });
 
       expect(mockNavigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
@@ -343,11 +344,14 @@ describe('AlertsHistogramPanel', () => {
 
   describe('Query', () => {
     it('it render with a illegal KQL', () => {
-      jest.mock('@kbn/es-query', () => ({
-        buildEsQuery: jest.fn().mockImplementation(() => {
-          throw new Error('Something went wrong');
-        }),
-      }));
+      vi.doMock('@kbn/es-query', () => {
+            const mocked = {
+                  buildEsQuery: vi.fn().mockImplementation(() => {
+                    throw new Error('Something went wrong');
+                  }),
+                };
+            return { ...mocked, default: mocked };
+          });
       const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
       const wrapper = mount(
         <TestProviders>
@@ -390,12 +394,12 @@ describe('AlertsHistogramPanel', () => {
         </TestProviders>
       );
 
-      expect((VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].timerange).toEqual({
+      expect((VisualizationEmbeddable as unknown as Mock).mock.calls[0][0].timerange).toEqual({
         from: '2020-07-07T08:20:18.966Z',
         to: '2020-07-08T08:20:18.966Z',
       });
       expect(
-        (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraOptions.filters
+        (VisualizationEmbeddable as unknown as Mock).mock.calls[0][0].extraOptions.filters
       ).toEqual(props.filters);
       wrapper.unmount();
     });
@@ -532,7 +536,7 @@ describe('AlertsHistogramPanel', () => {
         </TestProviders>
       );
 
-      expect((VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual(
+      expect((VisualizationEmbeddable as unknown as Mock).mock.calls[0][0].height).toEqual(
         155
       );
       wrapper.unmount();

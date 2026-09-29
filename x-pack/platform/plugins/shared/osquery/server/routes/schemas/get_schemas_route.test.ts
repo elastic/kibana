@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -12,9 +15,12 @@ import { createGetSchemasRoute } from './get_schemas_route';
 import type { SchemaService } from '../../lib/schema_service';
 import { API_VERSIONS } from '../../../common/constants';
 
-jest.mock('../../utils/get_internal_saved_object_client', () => ({
-  createInternalSavedObjectsClientForSpaceId: jest.fn(),
-}));
+vi.mock('../../utils/get_internal_saved_object_client', () => {
+      const mocked = {
+      createInternalSavedObjectsClientForSpaceId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
@@ -30,59 +36,59 @@ const createMockRouter = () => {
 const createMockOsqueryContext = (): OsqueryAppContext => {
   const logger = loggingSystemMock.createLogger();
   const mockSavedObjectsClient = {
-    find: jest.fn(),
-    get: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    find: vi.fn(),
+    get: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   };
 
   const mockCoreStart = {
     savedObjects: {
-      getScopedClient: jest.fn().mockReturnValue(mockSavedObjectsClient),
-      createInternalRepository: jest.fn(),
+      getScopedClient: vi.fn().mockReturnValue(mockSavedObjectsClient),
+      createInternalRepository: vi.fn(),
     },
     http: {
       basePath: {
-        set: jest.fn(),
-        get: jest.fn().mockReturnValue(''),
+        set: vi.fn(),
+        get: vi.fn().mockReturnValue(''),
       },
     },
   };
 
   return {
     logFactory: {
-      get: jest.fn().mockReturnValue(logger),
+      get: vi.fn().mockReturnValue(logger),
     },
     service: {
-      getPackageService: jest.fn().mockReturnValue(undefined),
-      getActiveSpace: jest.fn().mockResolvedValue({ id: 'default', name: 'Default' }),
+      getPackageService: vi.fn().mockReturnValue(undefined),
+      getActiveSpace: vi.fn().mockResolvedValue({ id: 'default', name: 'Default' }),
     },
-    getStartServices: jest.fn().mockResolvedValue([mockCoreStart, {}, {}]),
+    getStartServices: vi.fn().mockResolvedValue([mockCoreStart, {}, {}]),
   } as unknown as OsqueryAppContext;
 };
 
-const createMockSchemaService = (): jest.Mocked<SchemaService> =>
+const createMockSchemaService = (): Mocked<SchemaService> =>
   ({
-    getSchema: jest.fn(),
-  } as unknown as jest.Mocked<SchemaService>);
+    getSchema: vi.fn(),
+  } as unknown as Mocked<SchemaService>);
 
 describe('createGetSchemasRoute', () => {
   let mockOsqueryContext: OsqueryAppContext;
-  let mockSchemaService: jest.Mocked<SchemaService>;
+  let mockSchemaService: Mocked<SchemaService>;
   let mockRouter: ReturnType<typeof createMockRouter>;
   let mockSavedObjectsClient: object;
   let routeHandler: RequestHandler;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockOsqueryContext = createMockOsqueryContext();
     mockSchemaService = createMockSchemaService();
     mockRouter = createMockRouter();
-    mockSavedObjectsClient = { get: jest.fn(), find: jest.fn() };
+    mockSavedObjectsClient = { get: vi.fn(), find: vi.fn() };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
 
@@ -223,9 +229,9 @@ describe('createGetSchemasRoute', () => {
 
     describe('SchemaService integration', () => {
       it('should pass the packageService from osqueryContext to SchemaService', async () => {
-        const mockPackageService = { asInternalUser: { getInstallation: jest.fn() } };
+        const mockPackageService = { asInternalUser: { getInstallation: vi.fn() } };
 
-        (mockOsqueryContext.service.getPackageService as jest.Mock).mockReturnValue(
+        (mockOsqueryContext.service.getPackageService as Mock).mockReturnValue(
           mockPackageService
         );
 
@@ -246,7 +252,7 @@ describe('createGetSchemasRoute', () => {
       });
 
       it('should pass undefined packageService when Fleet is not available', async () => {
-        (mockOsqueryContext.service.getPackageService as jest.Mock).mockReturnValue(undefined);
+        (mockOsqueryContext.service.getPackageService as Mock).mockReturnValue(undefined);
 
         mockSchemaService.getSchema.mockResolvedValue({ version: '5.19.0', data: [] });
 
@@ -348,7 +354,7 @@ describe('createGetSchemasRoute', () => {
       });
 
       it('should return customError when createInternalSavedObjectsClientForSpaceId throws', async () => {
-        (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockRejectedValue(
+        (createInternalSavedObjectsClientForSpaceId as Mock).mockRejectedValue(
           new Error('Could not resolve space')
         );
 

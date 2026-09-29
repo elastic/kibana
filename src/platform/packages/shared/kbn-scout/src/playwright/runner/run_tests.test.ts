@@ -7,20 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getPlaywrightProject, hasTestsInPlaywrightConfig } from './run_tests';
 import { execPromise } from '../utils';
 import { ScoutTestTarget } from '@kbn/scout-info';
 
-jest.mock('../utils', () => ({
-  execPromise: jest.fn(),
-  withKibanaSwcRegister: jest.fn((env = {}) => ({
-    ...env,
-    NODE_OPTIONS: [env.NODE_OPTIONS, '--require=@kbn/swc-register/install']
-      .filter(Boolean)
-      .join(' '),
-  })),
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      execPromise: vi.fn(),
+      withKibanaSwcRegister: vi.fn((env = {}) => ({
+        ...env,
+        NODE_OPTIONS: [env.NODE_OPTIONS, '--require=@kbn/swc-register/install']
+          .filter(Boolean)
+          .join(' '),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getPlaywrightProject', () => {
   it('returns "local" for testTarget with location "local"', () => {
@@ -48,18 +54,18 @@ describe('getPlaywrightProject', () => {
 
 describe('hasTestsInPlaywrightConfig', () => {
   let mockLog: ToolingLog;
-  const execPromiseMock = execPromise as jest.Mock;
+  const execPromiseMock = execPromise as Mock;
 
   beforeEach(() => {
     mockLog = {
-      info: jest.fn(),
-      error: jest.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
     } as unknown as ToolingLog;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.resetAllMocks();
+    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   it(`should log the last line of stdout when tests are found and return '0'`, async () => {

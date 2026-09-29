@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { screen } from '@testing-library/react';
@@ -271,7 +273,7 @@ describe('AddDataSearchResults', () => {
 
   it('renders the error state and calls onRetry', async () => {
     const user = userEvent.setup();
-    const onRetry = jest.fn();
+    const onRetry = vi.fn();
     renderWithI18n(
       <AddDataSearchResults
         searchTerm="redis"

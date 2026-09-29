@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { LeadEntity } from './types';
@@ -57,7 +59,7 @@ const mgetFound = (source: Record<string, unknown>) => ({
 
 describe('buildEntityLookupMap', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient.mget.mockResolvedValue({ docs: [] } as never);
   });
 
@@ -180,7 +182,7 @@ describe('countInteractingEntities', () => {
   const termsAgg = (buckets: Array<{ key: string; doc_count: number }>) => ({ buckets });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns an empty map without querying when there are no targets', async () => {

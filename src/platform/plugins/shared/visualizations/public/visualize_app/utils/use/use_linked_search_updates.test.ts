@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { EventEmitter } from 'events';
 
@@ -15,12 +18,12 @@ import type { VisualizeServices, SavedVisInstance, VisualizeAppStateContainer } 
 import { createVisualizeServicesMock } from '../mocks';
 
 describe('useLinkedSearchUpdates', () => {
-  let mockServices: jest.Mocked<VisualizeServices>;
+  let mockServices: Mocked<VisualizeServices>;
   const eventEmitter = new EventEmitter();
   const savedVisInstance = {
     vis: {
       data: {
-        searchSource: { setField: jest.fn(), setParent: jest.fn() },
+        searchSource: { setField: vi.fn(), setParent: vi.fn() },
       },
     },
     savedVis: {},
@@ -40,14 +43,14 @@ describe('useLinkedSearchUpdates', () => {
   it('should subscribe on unlinkFromSavedSearch event if vis is based on saved search', () => {
     const mockAppState = {
       transitions: {
-        unlinkSavedSearch: jest.fn(),
+        unlinkSavedSearch: vi.fn(),
       },
     } as unknown as VisualizeAppStateContainer;
     savedVisInstance.savedSearch = {
       searchSource: {
-        getParent: jest.fn(),
-        getField: jest.fn(),
-        getOwnField: jest.fn(),
+        getParent: vi.fn(),
+        getField: vi.fn(),
+        getOwnField: vi.fn(),
       },
       title: 'savedSearch',
     } as unknown as SavedVisInstance['savedSearch'];

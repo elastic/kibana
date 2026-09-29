@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
@@ -13,11 +15,14 @@ import { PanelFooter } from './footer';
 import { AttackDetailsContext } from './context';
 import { FLYOUT_FOOTER_TEST_ID } from './constants/test_ids';
 
-jest.mock('../../flyout_v2/attack/main/footer', () => ({
-  Footer: ({ attack }: { attack: { id: string } }) => (
-    <div data-test-subj="mockV2Footer" data-attack-id={attack.id} />
-  ),
-}));
+vi.mock('../../flyout_v2/attack/main/footer', () => {
+      const mocked = {
+      Footer: ({ attack }: { attack: { id: string } }) => (
+        <div data-test-subj="mockV2Footer" data-attack-id={attack.id} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultSearchHit = {
   _id: 'attack-1',
@@ -50,7 +55,7 @@ const createMockContextValue = (
     getFieldsData: () => null,
     browserFields: {},
     dataFormattedForFieldBrowser: [],
-    refetch: jest.fn(),
+    refetch: vi.fn(),
     ...overrides,
   } as AttackDetailsContextType);
 

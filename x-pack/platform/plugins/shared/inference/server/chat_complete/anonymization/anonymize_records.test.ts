@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { anonymizeRecords } from './anonymize_records';
 import type { AnonymizationRule } from '@kbn/inference-common';
 import type { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
@@ -13,7 +15,7 @@ import { RegexWorkerService } from './regex_worker_service';
 import type { AnonymizationWorkerConfig } from '../../config';
 const mockEsClient = {
   ml: {
-    inferTrainedModel: jest.fn(),
+    inferTrainedModel: vi.fn(),
   },
 } as any;
 
@@ -49,7 +51,7 @@ describe('anonymizeRecords', () => {
   let regexWorker: RegexWorkerService;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     logger = loggerMock.create();
     regexWorker = new RegexWorkerService(testConfig, logger);
   });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -13,10 +16,13 @@ import { deduplicateAttackDiscoveries } from '.';
 import { mockAttackDiscoveries } from '../__mocks__/mock_attack_discoveries';
 import { generateAttackDiscoveryAlertHash } from '../transforms/transform_to_alert_documents';
 
-jest.mock('../transforms/transform_to_alert_documents', () => ({
-  ...jest.requireActual('../transforms/transform_to_alert_documents'),
-  generateAttackDiscoveryAlertHash: jest.fn(),
-}));
+vi.mock('../transforms/transform_to_alert_documents', async () => {
+      const mocked = {
+      ...(await vi.importActual('../transforms/transform_to_alert_documents')),
+      generateAttackDiscoveryAlertHash: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 const mockLogger = loggerMock.create();
@@ -48,9 +54,9 @@ describe('deduplicateAttackDiscoveries', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockEsClient.search.mockResponse({ hits: { hits: [] } } as unknown as estypes.SearchResponse);
-    (generateAttackDiscoveryAlertHash as jest.Mock).mockImplementation(({ attackDiscovery }) => {
+    (generateAttackDiscoveryAlertHash as Mock).mockImplementation(({ attackDiscovery }) => {
       if (attackDiscovery === attack1) return uuid1;
       if (attackDiscovery === attack2) return uuid2;
       return 'unknown-uuid';
@@ -108,7 +114,7 @@ describe('deduplicateAttackDiscoveries', () => {
   });
 
   it('should pass the injected computeSha256Hash to generateAttackDiscoveryAlertHash', async () => {
-    const computeSha256Hash = jest.fn((input: string) => input);
+    const computeSha256Hash = vi.fn((input: string) => input);
     await deduplicateAttackDiscoveries({
       ...defaultProps,
       attackDiscoveries: [attack1],
@@ -129,7 +135,7 @@ describe('deduplicateAttackDiscoveries', () => {
     expect(mockLogger.info).toHaveBeenCalledWith(
       'Ad-hoc Attack Discovery: Found 1 duplicate alert(s), skipping report for those.'
     );
-    expect((mockLogger.debug as jest.Mock).mock.calls[0][0]()).toBe(
+    expect((mockLogger.debug as Mock).mock.calls[0][0]()).toBe(
       `Ad-hoc Attack Discovery: Duplicated alerts:\n ${JSON.stringify([uuid1].sort(), null, 2)}`
     );
   });
@@ -147,7 +153,7 @@ describe('deduplicateAttackDiscoveries', () => {
     expect(mockLogger.info).toHaveBeenCalledWith(
       'Attack Discovery Schedule [test-owner-1]: Found 1 duplicate alert(s), skipping report for those.'
     );
-    expect((mockLogger.debug as jest.Mock).mock.calls[0][0]()).toBe(
+    expect((mockLogger.debug as Mock).mock.calls[0][0]()).toBe(
       `Attack Discovery Schedule [test-owner-1]: Duplicated alerts:\n ${JSON.stringify(
         [uuid1].sort(),
         null,
@@ -180,7 +186,7 @@ describe('deduplicateAttackDiscoveries', () => {
 
     describe('with hashes that vary by producer', () => {
       beforeEach(() => {
-        (generateAttackDiscoveryAlertHash as jest.Mock).mockImplementation(
+        (generateAttackDiscoveryAlertHash as Mock).mockImplementation(
           ({ attackDiscovery, generationSource }) =>
             `${attackDiscovery === attack1 ? uuid1 : uuid2}-${generationSource ?? 'none'}`
         );

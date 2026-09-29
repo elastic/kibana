@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   minMaxAvgLoC,
   updateMin,
@@ -34,14 +36,14 @@ let returnedSavedObjects = [
 ];
 
 const savedObjects = {
-  createPointInTimeFinder: jest.fn().mockReturnValue({
-    find: jest.fn().mockImplementation(async function* () {
+  createPointInTimeFinder: vi.fn().mockReturnValue({
+    find: vi.fn().mockImplementation(async function* () {
       yield await Promise.resolve({
         total: 3,
         saved_objects: returnedSavedObjects,
       });
     }),
-    close: jest.fn(),
+    close: vi.fn(),
   }),
 } as any as SavedObjectsClient;
 

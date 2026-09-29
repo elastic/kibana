@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { QualityPayload, CategoriesResponse } from '@kbn/siem-readiness';
@@ -18,14 +21,20 @@ import { getQualityTool } from './get_quality_tool';
 import { getQuality } from '../../../lib/siem_readiness/dimensions';
 import { getSiemReadinessSharedContext } from '../../../lib/siem_readiness/fetchers';
 
-jest.mock('../../../lib/siem_readiness/dimensions', () => ({ getQuality: jest.fn() }));
-jest.mock('../../../lib/siem_readiness/fetchers', () => ({
-  getSiemReadinessSharedContext: jest.fn(),
-  fetchSiemReadinessSharedContext: jest.fn(),
-}));
+vi.mock('../../../lib/siem_readiness/dimensions', () => {
+      const mocked = { getQuality: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/siem_readiness/fetchers', () => {
+      const mocked = {
+      getSiemReadinessSharedContext: vi.fn(),
+      fetchSiemReadinessSharedContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetQuality = getQuality as jest.Mock;
-const mockGetSharedContext = getSiemReadinessSharedContext as jest.Mock;
+const mockGetQuality = getQuality as Mock;
+const mockGetSharedContext = getSiemReadinessSharedContext as Mock;
 
 // Quality uses exact-match: DataQualityResultDocument.indexName must be in the category index list.
 const IDENTITY_INDEX = 'logs-identity.auth-default';
@@ -87,7 +96,7 @@ describe('getQualityTool', () => {
   const tool = getQualityTool(mockCore, mockLogger);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupMockCoreStartServices(mockCore, mockEsClient);
     mockGetSharedContext.mockResolvedValue(mockSharedContext);
   });

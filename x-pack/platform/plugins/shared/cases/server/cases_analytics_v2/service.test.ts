@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -22,8 +25,8 @@ import { ensureActivityIndex } from './ensure_indices/activity';
 import { RESET_TASK_ID, RESET_TASK_TYPE } from './reconciliation/reset_task';
 import { makeCase, makeUserAction } from './__test_helpers__';
 
-jest.mock('./ensure_indices/case');
-jest.mock('./ensure_indices/activity');
+vi.mock('./ensure_indices/case');
+vi.mock('./ensure_indices/activity');
 
 const buildService = () =>
   new CasesAnalyticsV2Service({
@@ -159,11 +162,11 @@ describe('CasesAnalyticsV2Service', () => {
     // Fire-and-forget writes settle on a microtask; flush before asserting.
     const flush = () => new Promise((r) => setImmediate(r));
 
-    afterEach(() => jest.clearAllMocks());
+    afterEach(() => vi.clearAllMocks());
 
     it('swaps in both real writers when both indices bootstrap', async () => {
-      (ensureCaseIndex as jest.Mock).mockResolvedValue(undefined);
-      (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
+      (ensureCaseIndex as Mock).mockResolvedValue(undefined);
+      (ensureActivityIndex as Mock).mockResolvedValue(undefined);
       const service = buildStartedService();
       const esClient = await startService(service);
 
@@ -176,8 +179,8 @@ describe('CasesAnalyticsV2Service', () => {
     });
 
     it('keeps the case writer a no-op when .cases bootstrap fails', async () => {
-      (ensureCaseIndex as jest.Mock).mockRejectedValue(new Error('shard limit'));
-      (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
+      (ensureCaseIndex as Mock).mockRejectedValue(new Error('shard limit'));
+      (ensureActivityIndex as Mock).mockResolvedValue(undefined);
       const service = buildStartedService();
       const esClient = await startService(service);
 
@@ -186,12 +189,12 @@ describe('CasesAnalyticsV2Service', () => {
       await flush();
 
       expect(esClient.index).toHaveBeenCalledTimes(1);
-      expect((esClient.index as unknown as jest.Mock).mock.calls[0][0].id).toBe('ua-1');
+      expect((esClient.index as unknown as Mock).mock.calls[0][0].id).toBe('ua-1');
     });
 
     it('keeps the activity writer a no-op when .cases-activity bootstrap fails', async () => {
-      (ensureCaseIndex as jest.Mock).mockResolvedValue(undefined);
-      (ensureActivityIndex as jest.Mock).mockRejectedValue(new Error('shard limit'));
+      (ensureCaseIndex as Mock).mockResolvedValue(undefined);
+      (ensureActivityIndex as Mock).mockRejectedValue(new Error('shard limit'));
       const service = buildStartedService();
       const esClient = await startService(service);
 
@@ -200,7 +203,7 @@ describe('CasesAnalyticsV2Service', () => {
       await flush();
 
       expect(esClient.index).toHaveBeenCalledTimes(1);
-      expect((esClient.index as unknown as jest.Mock).mock.calls[0][0].id).toBe('c-1');
+      expect((esClient.index as unknown as Mock).mock.calls[0][0].id).toBe('c-1');
     });
   });
 
@@ -216,8 +219,8 @@ describe('CasesAnalyticsV2Service', () => {
       });
 
     const startWithTaskManager = async (service: CasesAnalyticsV2Service) => {
-      (ensureCaseIndex as jest.Mock).mockResolvedValue(undefined);
-      (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
+      (ensureCaseIndex as Mock).mockResolvedValue(undefined);
+      (ensureActivityIndex as Mock).mockResolvedValue(undefined);
       const taskManager = taskManagerMock.createStart();
       await service.start({
         esClient: elasticsearchServiceMock.createElasticsearchClient(),
@@ -228,7 +231,7 @@ describe('CasesAnalyticsV2Service', () => {
       return taskManager;
     };
 
-    afterEach(() => jest.clearAllMocks());
+    afterEach(() => vi.clearAllMocks());
 
     it('no-ops when v2 is disabled', async () => {
       const service = build(false);
@@ -258,7 +261,7 @@ describe('CasesAnalyticsV2Service', () => {
     it('never throws when scheduling the reset task fails', async () => {
       const service = build(true);
       const taskManager = await startWithTaskManager(service);
-      (taskManager.schedule as jest.Mock).mockRejectedValue(new Error('tm down'));
+      (taskManager.schedule as Mock).mockRejectedValue(new Error('tm down'));
 
       await expect(service.triggerBackfillReconciliation()).resolves.toBeUndefined();
     });
@@ -275,7 +278,7 @@ describe('CasesAnalyticsV2Service', () => {
           dataViewService: { clearBootstrapCache: () => void };
         }
       ).dataViewService;
-      const clearSpy = jest.spyOn(dataViewService, 'clearBootstrapCache');
+      const clearSpy = vi.spyOn(dataViewService, 'clearBootstrapCache');
 
       await service.triggerBackfillReconciliation();
 
@@ -285,7 +288,7 @@ describe('CasesAnalyticsV2Service', () => {
     it('still clears the bootstrap cache even when scheduling the reset task fails', async () => {
       const service = build(true);
       const taskManager = await startWithTaskManager(service);
-      (taskManager.schedule as jest.Mock).mockRejectedValue(new Error('tm down'));
+      (taskManager.schedule as Mock).mockRejectedValue(new Error('tm down'));
 
       // The cache clear runs before (and independently of) the scheduling try/catch, so a Task
       // Manager failure must not strand the stale data views.
@@ -294,7 +297,7 @@ describe('CasesAnalyticsV2Service', () => {
           dataViewService: { clearBootstrapCache: () => void };
         }
       ).dataViewService;
-      const clearSpy = jest.spyOn(dataViewService, 'clearBootstrapCache');
+      const clearSpy = vi.spyOn(dataViewService, 'clearBootstrapCache');
 
       await service.triggerBackfillReconciliation();
 

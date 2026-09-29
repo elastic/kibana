@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 
 import { bulkDisableRulesRoute } from './bulk_disable_rules_route';
@@ -18,12 +21,15 @@ import type { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../ty
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('bulkDisableRulesRoute', () => {
@@ -86,7 +92,7 @@ describe('bulkDisableRulesRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyApiAccess as Mock).mockImplementation(() => {
       throw new Error('Failure');
     });
 

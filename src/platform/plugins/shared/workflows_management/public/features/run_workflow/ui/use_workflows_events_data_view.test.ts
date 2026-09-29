@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { WORKFLOWS_EVENTS_DATA_VIEW_FIELDS } from '@kbn/workflows';
 import { applyWorkflowsEventsKqlCuratedFields } from './use_workflows_events_data_view';
 
 describe('applyWorkflowsEventsKqlCuratedFields', () => {
   it('replaces ad-hoc data view fields with the shared workflows-events KQL field list', () => {
-    const replaceAll = jest.fn();
+    const replaceAll = vi.fn();
     const dataView = {
       fields: { replaceAll },
     } as unknown as DataView;

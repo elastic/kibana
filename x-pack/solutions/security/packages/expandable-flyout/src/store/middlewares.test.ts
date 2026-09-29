@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { localStorageMock } from '../../__mocks__';
 import {
   EXPANDABLE_FLYOUT_LOCAL_STORAGE,
@@ -44,19 +46,19 @@ describe('middlewares', () => {
 
   describe('savePushVsOverlayToLocalStorageMiddleware', () => {
     it('should ignore action without type', () => {
-      savePushVsOverlayToLocalStorageMiddleware()(jest.fn)(noTypeAction);
+      savePushVsOverlayToLocalStorageMiddleware()(vi.fn)(noTypeAction);
 
       expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
     });
 
     it('should ignore action of types other than changePushVsOverlayAction', () => {
-      savePushVsOverlayToLocalStorageMiddleware()(jest.fn)(randomAction);
+      savePushVsOverlayToLocalStorageMiddleware()(vi.fn)(randomAction);
 
       expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
     });
 
     it('should save value to local storage if action is of type changePushVsOverlayAction', () => {
-      savePushVsOverlayToLocalStorageMiddleware()(jest.fn)(
+      savePushVsOverlayToLocalStorageMiddleware()(vi.fn)(
         changePushVsOverlayAction({ type: 'push', savedToLocalStorage: true })
       );
 
@@ -66,7 +68,7 @@ describe('middlewares', () => {
     });
 
     it('should not save value to local storage if savedToLocalStorage is false', () => {
-      savePushVsOverlayToLocalStorageMiddleware()(jest.fn)(
+      savePushVsOverlayToLocalStorageMiddleware()(vi.fn)(
         changePushVsOverlayAction({ type: 'push', savedToLocalStorage: false })
       );
       expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
@@ -75,19 +77,19 @@ describe('middlewares', () => {
 
   describe('saveUserFlyoutWidthsToLocalStorageMiddleware', () => {
     it('should ignore action without type', () => {
-      saveUserFlyoutWidthsToLocalStorageMiddleware()(jest.fn)(noTypeAction);
+      saveUserFlyoutWidthsToLocalStorageMiddleware()(vi.fn)(noTypeAction);
 
       expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
     });
 
     it('should ignore action of other types', () => {
-      saveUserFlyoutWidthsToLocalStorageMiddleware()(jest.fn)(randomAction);
+      saveUserFlyoutWidthsToLocalStorageMiddleware()(vi.fn)(randomAction);
 
       expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
     });
 
     it('should save collapsed value to local storage if action is of type changeUserCollapsedWidthAction', () => {
-      saveUserFlyoutWidthsToLocalStorageMiddleware()(jest.fn)(
+      saveUserFlyoutWidthsToLocalStorageMiddleware()(vi.fn)(
         changeUserCollapsedWidthAction({ width: 250, savedToLocalStorage: true })
       );
 
@@ -100,7 +102,7 @@ describe('middlewares', () => {
     });
 
     it('should save expanded value to local storage if action is of type changeUserExpandedWidthAction', () => {
-      saveUserFlyoutWidthsToLocalStorageMiddleware()(jest.fn)(
+      saveUserFlyoutWidthsToLocalStorageMiddleware()(vi.fn)(
         changeUserExpandedWidthAction({ width: 500, savedToLocalStorage: true })
       );
 
@@ -113,7 +115,7 @@ describe('middlewares', () => {
     });
 
     it('should not save collapsed value to local storage if savedToLocalStorage is false', () => {
-      saveUserFlyoutWidthsToLocalStorageMiddleware()(jest.fn)(
+      saveUserFlyoutWidthsToLocalStorageMiddleware()(vi.fn)(
         changeUserCollapsedWidthAction({ width: 250, savedToLocalStorage: false })
       );
 
@@ -121,7 +123,7 @@ describe('middlewares', () => {
     });
 
     it('should not save expanded value to local storage if savedToLocalStorage is false', () => {
-      saveUserFlyoutWidthsToLocalStorageMiddleware()(jest.fn)(
+      saveUserFlyoutWidthsToLocalStorageMiddleware()(vi.fn)(
         changeUserExpandedWidthAction({ width: 500, savedToLocalStorage: false })
       );
 
@@ -131,19 +133,19 @@ describe('middlewares', () => {
 
   describe('saveUserSectionWidthsToLocalStorageMiddleware', () => {
     it('should ignore action without type', () => {
-      saveUserSectionWidthsToLocalStorageMiddleware()(jest.fn)(noTypeAction);
+      saveUserSectionWidthsToLocalStorageMiddleware()(vi.fn)(noTypeAction);
 
       expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
     });
 
     it('should ignore action of other types ', () => {
-      saveUserSectionWidthsToLocalStorageMiddleware()(jest.fn)(randomAction);
+      saveUserSectionWidthsToLocalStorageMiddleware()(vi.fn)(randomAction);
 
       expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
     });
 
     it('should save section width values to local storage if action is of type changeUserSectionWidthsAction', () => {
-      saveUserSectionWidthsToLocalStorageMiddleware()(jest.fn)(
+      saveUserSectionWidthsToLocalStorageMiddleware()(vi.fn)(
         changeUserSectionWidthsAction({
           left: 500,
           right: 500,
@@ -163,7 +165,7 @@ describe('middlewares', () => {
     });
 
     it('should not save section width values to local storage if savedToLocalStorage is false', () => {
-      saveUserSectionWidthsToLocalStorageMiddleware()(jest.fn)(
+      saveUserSectionWidthsToLocalStorageMiddleware()(vi.fn)(
         changeUserSectionWidthsAction({
           left: 500,
           right: 500,
@@ -177,13 +179,13 @@ describe('middlewares', () => {
 
   describe('clearAllUserWidthsFromLocalStorageMiddleware', () => {
     it('should ignore action without type', () => {
-      clearAllUserWidthsFromLocalStorageMiddleware()(jest.fn)(noTypeAction);
+      clearAllUserWidthsFromLocalStorageMiddleware()(vi.fn)(noTypeAction);
 
       expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
     });
 
     it('should ignore action of other types ', () => {
-      clearAllUserWidthsFromLocalStorageMiddleware()(jest.fn)(randomAction);
+      clearAllUserWidthsFromLocalStorageMiddleware()(vi.fn)(randomAction);
 
       expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
     });
@@ -199,7 +201,7 @@ describe('middlewares', () => {
         })
       );
 
-      clearAllUserWidthsFromLocalStorageMiddleware()(jest.fn)(resetAllUserChangedWidthsAction());
+      clearAllUserWidthsFromLocalStorageMiddleware()(vi.fn)(resetAllUserChangedWidthsAction());
 
       const expandableFlyout = localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE);
       expect(expandableFlyout).not.toBe(null);

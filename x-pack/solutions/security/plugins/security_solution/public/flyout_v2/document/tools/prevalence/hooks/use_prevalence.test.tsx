@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { usePrevalence } from './use_prevalence';
@@ -17,8 +20,8 @@ import {
   USERS_AGG_KEY,
 } from './use_fetch_prevalence';
 
-jest.mock('../../../main/hooks/use_highlighted_fields');
-jest.mock('./use_fetch_prevalence');
+vi.mock('../../../main/hooks/use_highlighted_fields');
+vi.mock('./use_fetch_prevalence');
 
 const interval = {
   from: 'now-30d',
@@ -29,12 +32,12 @@ const investigationFields = ['host.name', 'user.name'];
 
 describe('usePrevalence', () => {
   it('should return loading true', () => {
-    (useHighlightedFields as jest.Mock).mockReturnValue({
+    (useHighlightedFields as Mock).mockReturnValue({
       'host.name': {
         values: ['host-1'],
       },
     });
-    (useFetchPrevalence as jest.Mock).mockReturnValue({
+    (useFetchPrevalence as Mock).mockReturnValue({
       loading: true,
       error: false,
       data: undefined,
@@ -48,12 +51,12 @@ describe('usePrevalence', () => {
   });
 
   it('should return error true', () => {
-    (useHighlightedFields as jest.Mock).mockReturnValue({
+    (useHighlightedFields as Mock).mockReturnValue({
       'host.name': {
         values: ['host-1'],
       },
     });
-    (useFetchPrevalence as jest.Mock).mockReturnValue({
+    (useFetchPrevalence as Mock).mockReturnValue({
       loading: false,
       error: true,
       data: undefined,
@@ -67,12 +70,12 @@ describe('usePrevalence', () => {
   });
 
   it('should return data', () => {
-    (useHighlightedFields as jest.Mock).mockReturnValue({
+    (useHighlightedFields as Mock).mockReturnValue({
       'host.name': {
         values: ['host-1'],
       },
     });
-    (useFetchPrevalence as jest.Mock).mockReturnValue({
+    (useFetchPrevalence as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: {

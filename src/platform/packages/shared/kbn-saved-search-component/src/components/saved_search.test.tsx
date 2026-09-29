@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import type { BehaviorSubject } from 'rxjs';
@@ -20,23 +22,26 @@ interface CapturedParentApi {
 
 const mockCapturedParentApis: CapturedParentApi[] = [];
 
-jest.mock('@kbn/embeddable-plugin/public', () => ({
-  EmbeddableRenderer: ({ getParentApi }: { getParentApi: () => CapturedParentApi }) => {
-    // mirrors the real renderer, which resolves the parent API once per embeddable
-    if (mockCapturedParentApis.length === 0) {
-      mockCapturedParentApis.push(getParentApi());
-    }
-    return null;
-  },
-}));
+vi.mock('@kbn/embeddable-plugin/public', () => {
+      const mocked = {
+      EmbeddableRenderer: ({ getParentApi }: { getParentApi: () => CapturedParentApi }) => {
+        // mirrors the real renderer, which resolves the parent API once per embeddable
+        if (mockCapturedParentApis.length === 0) {
+          mockCapturedParentApis.push(getParentApi());
+        }
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createDependencies = () =>
   ({
     embeddable: {},
-    dataViews: { create: jest.fn().mockResolvedValue({ id: 'data-view-id' }) },
+    dataViews: { create: vi.fn().mockResolvedValue({ id: 'data-view-id' }) },
     searchSource: {
       createEmpty: () => ({
-        setField: jest.fn(),
+        setField: vi.fn(),
         serialize: () => ({ searchSourceJSON: '{}', references: [] }),
       }),
     },

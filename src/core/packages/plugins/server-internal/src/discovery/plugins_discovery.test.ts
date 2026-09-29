@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
 import { REPO_ROOT } from '@kbn/repo-info';
 import { mockPackage, scanPluginSearchPathsMock } from './plugins_discovery.test.mocks';
@@ -28,25 +31,29 @@ import { PluginsConfig, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
 
-jest.mock('@kbn/repo-packages', () => ({
-  ...jest.requireActual('@kbn/repo-packages'),
-  getPluginPackagesFilter: jest.fn().mockReturnValue(() => true),
-}));
+vi.mock('@kbn/repo-packages', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/repo-packages')),
+      getPluginPackagesFilter: vi.fn().mockReturnValue(() => true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./plugin_manifest_from_plugin_package', () => ({
-  pluginManifestFromPluginPackage: jest.fn((version, pkgManifest) => ({
-    version,
-    ...pkgManifest,
-  })),
-}));
+vi.mock('./plugin_manifest_from_plugin_package', () => {
+      const mocked = {
+      pluginManifestFromPluginPackage: vi.fn((version, pkgManifest) => ({
+        version,
+        ...pkgManifest,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getPluginPackagesFilter = jest.requireActual('@kbn/repo-packages').getPluginPackagesFilter;
+const getPluginPackagesFilter = (await vi.importActual('@kbn/repo-packages')).getPluginPackagesFilter;
 
-const getPluginPackagesFilterMock: jest.Mock =
-  jest.requireMock('@kbn/repo-packages').getPluginPackagesFilter;
-const pluginManifestFromPluginPackageMock: jest.Mock = jest.requireMock(
-  './plugin_manifest_from_plugin_package'
-).pluginManifestFromPluginPackage;
+const getPluginPackagesFilterMock: Mock =
+  (await vi.importMock('@kbn/repo-packages')).getPluginPackagesFilter;
+const pluginManifestFromPluginPackageMock: Mock = (await vi.importMock('./plugin_manifest_from_plugin_package')).pluginManifestFromPluginPackage;
 
 function getMockPackage(id: string, group: string = 'platform') {
   const relativePath = `packages/${id}`;
@@ -222,17 +229,17 @@ describe('plugins discovery system', () => {
     // jest relies on the filesystem to get sourcemaps when using console.log
     // which breaks with the mocked FS, see https://github.com/tschaub/mock-fs/issues/234
     // hijacking logging to process.stdout as a workaround for this suite.
-    jest.spyOn(console, 'log').mockImplementation((...args) => {
+    vi.spyOn(console, 'log').mockImplementation((...args) => {
       process.stdout.write(args + '\n');
     });
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
     mockFs.restore();
     // restore the console.log behavior
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('discovers plugins in the search locations', async () => {
@@ -623,7 +630,7 @@ describe('plugins discovery system', () => {
         pluginSearchPaths: [],
         repoPackages: [foo, bar],
       };
-      const filterFn = jest.fn((p: Package) => p === foo);
+      const filterFn = vi.fn((p: Package) => p === foo);
       getPluginPackagesFilterMock.mockReturnValue(filterFn);
 
       const { plugin$ } = discover({

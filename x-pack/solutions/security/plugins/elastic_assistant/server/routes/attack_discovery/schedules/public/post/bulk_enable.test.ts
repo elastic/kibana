@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { bulkEnableAttackDiscoverySchedulesRoute } from './bulk_enable';
@@ -14,29 +17,32 @@ import { bulkEnableAttackDiscoverySchedulesRequest } from '../../../../../__mock
 import type { AttackDiscoveryScheduleDataClient } from '@kbn/attack-discovery-schedules-common';
 import { performChecks } from '../../../../helpers';
 
-jest.mock('../../../../helpers', () => ({
-  performChecks: jest.fn(),
-}));
+vi.mock('../../../../helpers', () => {
+      const mocked = {
+      performChecks: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();
 clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
 
-const bulkEnableAttackDiscoverySchedules = jest.fn();
+const bulkEnableAttackDiscoverySchedules = vi.fn();
 const mockSchedulingDataClient = {
-  findSchedules: jest.fn(),
-  getSchedule: jest.fn(),
-  createSchedule: jest.fn(),
-  updateSchedule: jest.fn(),
-  deleteSchedule: jest.fn(),
-  enableSchedule: jest.fn(),
-  disableSchedule: jest.fn(),
+  findSchedules: vi.fn(),
+  getSchedule: vi.fn(),
+  createSchedule: vi.fn(),
+  updateSchedule: vi.fn(),
+  deleteSchedule: vi.fn(),
+  enableSchedule: vi.fn(),
+  disableSchedule: vi.fn(),
   bulkEnableSchedules: bulkEnableAttackDiscoverySchedules,
 } as unknown as AttackDiscoveryScheduleDataClient;
 
 describe('bulkEnableAttackDiscoverySchedulesRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     bulkEnableAttackDiscoverySchedules.mockResolvedValue({
       ids: ['schedule-1', 'schedule-2'],
       errors: [],
@@ -45,7 +51,7 @@ describe('bulkEnableAttackDiscoverySchedulesRoute', () => {
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
       mockSchedulingDataClient
     );
-    (performChecks as jest.Mock).mockResolvedValue({
+    (performChecks as Mock).mockResolvedValue({
       isSuccess: true,
     });
     bulkEnableAttackDiscoverySchedulesRoute(server.router);

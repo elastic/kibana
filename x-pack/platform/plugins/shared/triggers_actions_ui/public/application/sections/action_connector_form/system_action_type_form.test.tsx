@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import * as React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { SystemActionTypeForm } from './system_action_type_form';
@@ -17,22 +19,25 @@ import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
-jest.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', () => {
-  const original = jest.requireActual('@kbn/alerts-ui-shared/src/action_variables/transforms');
+vi.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', async () => {
+  const original = (await vi.importActual('@kbn/alerts-ui-shared/src/action_variables/transforms'));
   return {
     ...original,
-    transformActionVariables: jest.fn(),
+    transformActionVariables: vi.fn(),
   };
 });
 
-jest.mock('../../hooks/use_rule_alert_fields', () => ({
-  useRuleTypeAlertFields: () => ({
-    isLoading: false,
-    fields: [],
-  }),
-}));
+vi.mock('../../hooks/use_rule_alert_fields', () => {
+      const mocked = {
+      useRuleTypeAlertFields: () => ({
+        isLoading: false,
+        fields: [],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const actionConnector = createMockActionConnector({
   actionTypeId: '.test-system-action',
@@ -99,7 +104,7 @@ describe('action_type_form', () => {
 
     actionTypeRegistry.get.mockReturnValue(actionType);
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the system action correctly', async () => {
@@ -109,8 +114,8 @@ describe('action_type_form', () => {
           actionConnector={actionConnector}
           actionItem={actionItem}
           connectors={connectors}
-          onDeleteAction={jest.fn()}
-          setActionParamsProperty={jest.fn()}
+          onDeleteAction={vi.fn()}
+          setActionParamsProperty={vi.fn()}
           index={1}
           actionTypesIndex={actionTypeIndexDefault}
           actionTypeRegistry={actionTypeRegistry}
@@ -133,8 +138,8 @@ describe('action_type_form', () => {
           actionConnector={actionConnector}
           actionItem={actionItem}
           connectors={connectors}
-          onDeleteAction={jest.fn()}
-          setActionParamsProperty={jest.fn()}
+          onDeleteAction={vi.fn()}
+          setActionParamsProperty={vi.fn()}
           index={1}
           actionTypesIndex={actionTypeIndexDefault}
           actionTypeRegistry={actionTypeRegistry}
@@ -151,7 +156,7 @@ describe('action_type_form', () => {
   });
 
   it('calls onDeleteAction correctly', async () => {
-    const onDelete = jest.fn();
+    const onDelete = vi.fn();
 
     render(
       <I18nProvider>
@@ -160,7 +165,7 @@ describe('action_type_form', () => {
           actionItem={actionItem}
           connectors={connectors}
           onDeleteAction={onDelete}
-          setActionParamsProperty={jest.fn()}
+          setActionParamsProperty={vi.fn()}
           index={1}
           actionTypesIndex={actionTypeIndexDefault}
           actionTypeRegistry={actionTypeRegistry}
@@ -181,7 +186,7 @@ describe('action_type_form', () => {
   });
 
   it('calls setActionParamsProperty correctly', async () => {
-    const setActionParamsProperty = jest.fn();
+    const setActionParamsProperty = vi.fn();
 
     render(
       <I18nProvider>
@@ -189,7 +194,7 @@ describe('action_type_form', () => {
           actionConnector={actionConnector}
           actionItem={actionItem}
           connectors={connectors}
-          onDeleteAction={jest.fn()}
+          onDeleteAction={vi.fn()}
           setActionParamsProperty={setActionParamsProperty}
           index={1}
           actionTypesIndex={actionTypeIndexDefault}
@@ -238,7 +243,7 @@ describe('action_type_form', () => {
 
       actionTypeRegistry.get.mockReturnValue(actionType);
 
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should render the licensing message if the user does not have the sufficient license', async () => {
@@ -248,8 +253,8 @@ describe('action_type_form', () => {
             actionConnector={actionConnector}
             actionItem={actionItem}
             connectors={connectors}
-            onDeleteAction={jest.fn()}
-            setActionParamsProperty={jest.fn()}
+            onDeleteAction={vi.fn()}
+            setActionParamsProperty={vi.fn()}
             index={1}
             actionTypesIndex={actionTypeIndexDefaultWithLicensing}
             actionTypeRegistry={actionTypeRegistry}

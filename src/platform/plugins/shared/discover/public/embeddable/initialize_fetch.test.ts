@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject, Observable, of } from 'rxjs';
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
@@ -51,7 +53,7 @@ describe('initialize fetch', () => {
       }),
       refreshTrigger$,
       ...setters,
-      setApproximationApplied: jest.fn(),
+      setApproximationApplied: vi.fn(),
     });
     cleanupFetch = cleanup;
     await waitOneTick();
@@ -61,7 +63,7 @@ describe('initialize fetch', () => {
     expect(stateManager.rows.getValue()).toEqual([]);
     expect(stateManager.totalHitCount.getValue()).toEqual(0);
 
-    searchSource.fetch$ = jest.fn().mockImplementation(() =>
+    searchSource.fetch$ = vi.fn().mockImplementation(() =>
       of({
         rawResponse: {
           hits: {
@@ -89,7 +91,7 @@ describe('initialize fetch', () => {
 
   it('should catch and emit error', async () => {
     expect(mockedApi.searchError$.getValue()).toBeUndefined();
-    searchSource.fetch$ = jest.fn().mockImplementation(
+    searchSource.fetch$ = vi.fn().mockImplementation(
       () =>
         new Observable(() => {
           throw new Error('Search failed');
@@ -104,7 +106,7 @@ describe('initialize fetch', () => {
   it('should correctly handle aborted requests', async () => {
     const abortSignals: AbortSignal[] = [];
 
-    searchSource.fetch$ = jest.fn().mockImplementation(
+    searchSource.fetch$ = vi.fn().mockImplementation(
       (options) =>
         new Observable(() => {
           abortSignals.push(options.abortSignal);
@@ -126,7 +128,7 @@ describe('initialize fetch', () => {
   });
 
   it('should fetch again when refresh trigger emits', async () => {
-    const fetchMock = jest.fn().mockImplementation(() =>
+    const fetchMock = vi.fn().mockImplementation(() =>
       of({
         rawResponse: {
           hits: {

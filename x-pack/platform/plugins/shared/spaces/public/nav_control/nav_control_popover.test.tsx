@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
@@ -21,12 +23,15 @@ import { SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX } from '../solution_view_switch
 import type { SpacesManager } from '../spaces_manager';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 
-jest.mock('./solution_view_switch_tour', () => ({
-  SOLUTION_VIEW_SWITCH_TOUR_STORAGE_KEY_PREFIX: 'spaces.solutionViewSwitchTourShown',
-  SolutionViewSwitchTour: function MockSolutionViewSwitchTour() {
-    return <div data-test-subj="solutionViewSwitchTour" />;
-  },
-}));
+vi.mock('./solution_view_switch_tour', () => {
+      const mocked = {
+      SOLUTION_VIEW_SWITCH_TOUR_STORAGE_KEY_PREFIX: 'spaces.solutionViewSwitchTourShown',
+      SolutionViewSwitchTour: function MockSolutionViewSwitchTour() {
+        return <div data-test-subj="solutionViewSwitchTour" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockSpaces = [
   {
@@ -47,7 +52,7 @@ const mockSpaces = [
   },
 ];
 
-const reportEvent = jest.fn();
+const reportEvent = vi.fn();
 const eventTracker = new EventTracker({ reportEvent });
 
 describe('NavControlPopover', () => {
@@ -63,12 +68,12 @@ describe('NavControlPopover', () => {
       },
     });
     spacesManager = spacesManagerMock.create();
-    spacesManager.getSpaces = jest.fn().mockResolvedValue(mockSpaces);
+    spacesManager.getSpaces = vi.fn().mockResolvedValue(mockSpaces);
   });
 
   afterEach(() => {
     localStorage.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   function renderNavControlPopover(props?: Partial<NavControlPopoverProps>, activeSpace?: Space) {
@@ -82,8 +87,8 @@ describe('NavControlPopover', () => {
       serverBasePath: '/server-base-path',
       anchorPosition: 'rightCenter',
       capabilities: { navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } },
-      navigateToApp: jest.fn(),
-      navigateToUrl: jest.fn(),
+      navigateToApp: vi.fn(),
+      navigateToUrl: vi.fn(),
       allowSolutionVisibility: false,
       eventTracker,
       areAnnouncementsEnabled: true,
@@ -200,7 +205,7 @@ describe('NavControlPopover', () => {
   });
 
   it('calls navigateToUrl when a space is selected', async () => {
-    const navigateToUrl = jest.fn();
+    const navigateToUrl = vi.fn();
     const activeSpace = mockSpaces[0];
 
     renderNavControlPopover({ navigateToUrl }, activeSpace);
@@ -250,7 +255,7 @@ describe('NavControlPopover', () => {
   });
 
   it('calls navigateToApp when manage spaces button is clicked', async () => {
-    const navigateToApp = jest.fn();
+    const navigateToApp = vi.fn();
     const activeSpace = mockSpaces[0];
 
     renderNavControlPopover({ navigateToApp }, activeSpace);

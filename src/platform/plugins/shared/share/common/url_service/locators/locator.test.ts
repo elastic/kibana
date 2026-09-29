@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { LocatorDefinition } from './types';
 import type { LocatorDependencies } from './locator';
 import { Locator } from './locator';
@@ -21,14 +23,14 @@ const setup = (
   const deps: LocatorDependencies = {
     baseUrl,
     version,
-    navigate: jest.fn(),
-    getUrl: jest.fn(async (location: KibanaLocation, getUrlParams: LocatorGetUrlParams) => {
+    navigate: vi.fn(),
+    getUrl: vi.fn(async (location: KibanaLocation, getUrlParams: LocatorGetUrlParams) => {
       return (getUrlParams.absolute ? baseUrl : '') + '/app/' + location.app + location.path;
     }),
   };
   const definition: LocatorDefinition<{ foo?: string; baz?: string }> = {
     id: 'TEST_LOCATOR',
-    getLocation: jest.fn(async ({ foo = 'bar', baz = 'qux' }) => {
+    getLocation: vi.fn(async ({ foo = 'bar', baz = 'qux' }) => {
       return {
         app: 'test_app',
         path: `/foo/${foo}?baz=${baz}`,

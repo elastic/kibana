@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { RecoveredActionGroup } from '../../../../common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { transformRuleAttributesToRuleDomain } from './transform_rule_attributes_to_rule_domain';
 import type { UntypedNormalizedRuleType } from '../../../rule_type_registry';
 import type { RawRuleAction, RawRuleLastRun } from '../../../types';
 
-const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
+const ruleType: Mocked<UntypedNormalizedRuleType> = {
   id: 'test.rule-type',
   name: 'My test rule',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -19,7 +22,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   minimumLicenseRequired: 'basic',
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
-  executor: jest.fn(),
+  executor: vi.fn(),
   producer: 'alerts',
   solution: 'stack',
   cancelAlertsOnRuleTimeout: true,

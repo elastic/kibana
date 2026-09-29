@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { onFieldChange } from './field_selector';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { ALL_VALUE } from '@kbn/slo-schema';
 
 describe('onFieldChange', () => {
-  let onChangeMock: jest.Mock;
+  let onChangeMock: Mock;
 
   beforeEach(() => {
-    onChangeMock = jest.fn();
+    onChangeMock = vi.fn();
   });
 
   it('should filter out ALL_VALUE when a specific value is selected', () => {

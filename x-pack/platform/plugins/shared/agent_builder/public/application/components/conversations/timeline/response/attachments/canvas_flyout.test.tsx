@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { CanvasFlyout } from './canvas_flyout';
 
-const mockCloseCanvas = jest.fn();
-const mockOpenSidebarConversation = jest.fn();
+const mockCloseCanvas = vi.fn();
+const mockOpenSidebarConversation = vi.fn();
 let mockConversationId: string | undefined = 'conversation-1';
 let mockCanvasState: {
   attachment: UnknownAttachment;
@@ -20,52 +22,67 @@ let mockCanvasState: {
   version?: number;
 } | null = null;
 
-jest.mock('./canvas_context', () => ({
-  useCanvasContext: () => ({
-    canvasState: mockCanvasState,
-    closeCanvas: mockCloseCanvas,
-    setCanvasAttachmentOrigin: jest.fn(),
-    updateCanvasAttachment: jest.fn(),
-  }),
-}));
+vi.mock('./canvas_context', () => {
+      const mocked = {
+      useCanvasContext: () => ({
+        canvasState: mockCanvasState,
+        closeCanvas: mockCloseCanvas,
+        setCanvasAttachmentOrigin: vi.fn(),
+        updateCanvasAttachment: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../context/conversation/use_conversation_id', () => ({
-  useConversationId: () => mockConversationId,
-}));
+vi.mock('../../../../../context/conversation/use_conversation_id', () => {
+      const mocked = {
+      useConversationId: () => mockConversationId,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../context/conversation/conversation_context', () => ({
-  useConversationContext: () => ({
-    conversationActions: { invalidateConversation: jest.fn() },
-  }),
-}));
+vi.mock('../../../../../context/conversation/conversation_context', () => {
+      const mocked = {
+      useConversationContext: () => ({
+        conversationActions: { invalidateConversation: vi.fn() },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_conversation', () => ({
-  useConversation: () => ({
-    conversation: null,
-  }),
-  useAgentId: () => 'agent-1',
-}));
+vi.mock('../../../../../hooks/use_conversation', () => {
+      const mocked = {
+      useConversation: () => ({
+        conversation: null,
+      }),
+      useAgentId: () => 'agent-1',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({
-    openSidebarConversation: mockOpenSidebarConversation,
-  }),
-}));
+vi.mock('../../../../../hooks/use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: () => ({
+        openSidebarConversation: mockOpenSidebarConversation,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAttachmentsService = {
-  getAttachmentUiDefinition: jest.fn(),
-  updateOrigin: jest.fn(),
+  getAttachmentUiDefinition: vi.fn(),
+  updateOrigin: vi.fn(),
 } as any;
 
 describe('CanvasFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockConversationId = 'conversation-1';
     mockCanvasState = null;
   });
 
   it('shows a fallback instead of crashing when renderCanvasContent throws', () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
 
     mockAttachmentsService.getAttachmentUiDefinition.mockReturnValue({
       getLabel: () => 'Test attachment',
@@ -146,7 +163,7 @@ describe('CanvasFlyout', () => {
   });
 
   it('forwards closeCanvas to getActionButtons when rendering canvas header actions', () => {
-    const getActionButtons = jest.fn().mockReturnValue([]);
+    const getActionButtons = vi.fn().mockReturnValue([]);
     mockAttachmentsService.getAttachmentUiDefinition.mockReturnValue({
       getLabel: () => 'Test attachment',
       renderCanvasContent: () => <div>canvas body</div>,

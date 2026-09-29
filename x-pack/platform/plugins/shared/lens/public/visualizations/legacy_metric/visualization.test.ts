@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getLegacyMetricVisualization } from './visualization';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LegacyMetricState, DatasourcePublicAPI, FramePublicAPI } from '@kbn/lens-common';
@@ -15,7 +18,7 @@ import { ColorMode } from '@kbn/charts-plugin/common';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 
-jest.mock('../../id_generator');
+vi.mock('../../id_generator');
 
 function exampleState(): LegacyMetricState {
   return {
@@ -42,7 +45,7 @@ const metricVisualization = getLegacyMetricVisualization({
 describe('metric_visualization', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
-      (generateId as jest.Mock).mockReturnValueOnce('test-id1');
+      (generateId as Mock).mockReturnValueOnce('test-id1');
       const initialState = metricVisualization.initialize(() => 'test-id1');
 
       expect(initialState.accessor).not.toBeDefined();
@@ -68,7 +71,7 @@ describe('metric_visualization', () => {
 
   describe('#clearLayer', () => {
     it('returns a clean layer', () => {
-      (generateId as jest.Mock).mockReturnValueOnce('test-id1');
+      (generateId as Mock).mockReturnValueOnce('test-id1');
       expect(metricVisualization.clearLayer(exampleState(), 'l1', 'indexPattern1')).toEqual({
         accessor: undefined,
         layerId: 'l1',
@@ -407,7 +410,7 @@ describe('metric_visualization', () => {
       const getCustomPaletteToExpression = (palette: PaletteOutput<CustomPaletteParams>) => {
         const paletteService = chartPluginMock.createPaletteRegistry();
         const customPaletteToExpression = paletteService.get(CUSTOM_PALETTE)
-          .toExpression as jest.Mock;
+          .toExpression as Mock;
         const visualization = getLegacyMetricVisualization({ paletteService });
 
         visualization.toExpression(

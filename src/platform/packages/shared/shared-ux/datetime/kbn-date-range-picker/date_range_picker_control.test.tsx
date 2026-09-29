@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import moment from 'moment-timezone';
 import { fireEvent, render, screen, waitFor, act, within } from '@testing-library/react';
@@ -106,7 +108,7 @@ describe('DateRangePickerControl', () => {
     );
 
     it('saves a relative range with its human-readable display label, not the raw input', async () => {
-      const onPresetSave = jest.fn();
+      const onPresetSave = vi.fn();
 
       renderWithEuiTheme(
         <DateRangePicker {...defaultProps} defaultValue="-2m" onPresetSave={onPresetSave} />
@@ -125,7 +127,7 @@ describe('DateRangePickerControl', () => {
     });
 
     it('offers deletion for every preset except those marked as not editable', async () => {
-      const onPresetDelete = jest.fn();
+      const onPresetDelete = vi.fn();
 
       renderWithEuiTheme(
         <DateRangePicker
@@ -214,7 +216,7 @@ describe('DateRangePickerControl', () => {
     });
 
     it('selects clicked no-year absolute display parts in the input', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2026-06-04T12:00:00.000Z'));
+      vi.useFakeTimers().setSystemTime(new Date('2026-06-04T12:00:00.000Z'));
 
       try {
         renderWithEuiTheme(
@@ -224,7 +226,7 @@ describe('DateRangePickerControl', () => {
             onChange={() => {}}
           />
         );
-        jest.useRealTimers();
+        vi.useRealTimers();
 
         const displayPart = screen.getAllByText('00')[0];
         fireEvent.mouseDown(displayPart);
@@ -239,22 +241,22 @@ describe('DateRangePickerControl', () => {
         fireEvent.keyDown(input, { key: 'Escape' });
         await waitForPopoverClose();
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
     it('keeps the clicked display part visible when the input is scrolled', async () => {
       const animationFrameCallbacks: FrameRequestCallback[] = [];
-      const requestAnimationFrameSpy = jest
+      const requestAnimationFrameSpy = vi
         .spyOn(window, 'requestAnimationFrame')
         .mockImplementation((callback) => {
           animationFrameCallbacks.push(callback);
           return animationFrameCallbacks.length;
         });
-      const cancelAnimationFrameSpy = jest
+      const cancelAnimationFrameSpy = vi
         .spyOn(window, 'cancelAnimationFrame')
         .mockImplementation(() => {});
-      const getContextSpy = jest
+      const getContextSpy = vi
         .spyOn(HTMLCanvasElement.prototype, 'getContext')
         .mockReturnValue(null);
 
@@ -299,7 +301,7 @@ describe('DateRangePickerControl', () => {
     });
 
     it('submits on Enter and returns to idle mode', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={onChange} />);
 
       const input = openEditing();
@@ -313,7 +315,7 @@ describe('DateRangePickerControl', () => {
     });
 
     it('cancels on Escape and returns to idle mode', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={onChange} />);
 
       const input = openEditing();
@@ -340,7 +342,7 @@ describe('DateRangePickerControl', () => {
     });
 
     it('calls onInputChange when typing and clearing input', async () => {
-      const onInputChange = jest.fn();
+      const onInputChange = vi.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onInputChange={onInputChange} />);
 
       const input = openEditing();
@@ -356,7 +358,7 @@ describe('DateRangePickerControl', () => {
     });
 
     it('closes on outside click and returns to idle mode', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={onChange} />);
 
       openEditing();
@@ -534,7 +536,7 @@ describe('DateRangePickerControl', () => {
     });
 
     it('keeps "(rounded)" out of the input and the saved preset label', async () => {
-      const onPresetSave = jest.fn();
+      const onPresetSave = vi.fn();
 
       renderWithEuiTheme(
         <DateRangePicker {...defaultProps} defaultValue="-1y/y" onPresetSave={onPresetSave} />
@@ -730,7 +732,7 @@ describe('DateRangePickerControl', () => {
     });
 
     it('calls onChange on Enter in controlled mode', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderPicker({ value: 'last 20 minutes', onChange, ...controlledDefaults });
 
       const input = openEditing();
@@ -834,7 +836,7 @@ describe('DateRangePickerControl', () => {
 
   describe('roundRelativeTime', () => {
     it('applies rounding to the start date when selecting a preset', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithEuiTheme(
         <DateRangePicker
           defaultValue="last 20 minutes"
@@ -860,15 +862,15 @@ describe('DateRangePickerControl', () => {
   });
 
   describe('auto-refresh', () => {
-    const onRefresh = jest.fn();
+    const onRefresh = vi.fn();
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       onRefresh.mockClear();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     const autoRefreshSettings = {
@@ -986,7 +988,7 @@ describe('DateRangePickerControl', () => {
     });
 
     it('calls `onSettingsChange` when the auto-refresh append control is clicked', async () => {
-      const onSettingsChange = jest.fn();
+      const onSettingsChange = vi.fn();
 
       renderWithEuiTheme(
         <DateRangePicker
@@ -1013,7 +1015,7 @@ describe('DateRangePickerControl', () => {
     });
 
     it('remains interactive when readOnly is true, unlike the control button', () => {
-      const onSettingsChange = jest.fn();
+      const onSettingsChange = vi.fn();
 
       renderWithEuiTheme(
         <DateRangePicker
@@ -1037,7 +1039,7 @@ describe('DateRangePickerControl', () => {
     });
 
     it('calls `onRefresh` on each interval while `settings.autoRefresh` is active', () => {
-      const tickOnRefresh = jest.fn();
+      const tickOnRefresh = vi.fn();
 
       renderWithEuiTheme(
         <DateRangePicker
@@ -1048,14 +1050,14 @@ describe('DateRangePickerControl', () => {
       );
 
       act(() => {
-        jest.advanceTimersByTime(4000);
+        vi.advanceTimersByTime(4000);
       });
 
       expect(tickOnRefresh).toHaveBeenCalledTimes(1);
       expect(tickOnRefresh).toHaveBeenLastCalledWith();
 
       act(() => {
-        jest.advanceTimersByTime(4000);
+        vi.advanceTimersByTime(4000);
       });
 
       expect(tickOnRefresh).toHaveBeenCalledTimes(2);
@@ -1063,7 +1065,7 @@ describe('DateRangePickerControl', () => {
     });
 
     it('does not call `onRefresh` while `settings.autoRefresh.isPaused` is true', () => {
-      const pausedOnRefresh = jest.fn();
+      const pausedOnRefresh = vi.fn();
 
       renderWithEuiTheme(
         <DateRangePicker
@@ -1082,14 +1084,14 @@ describe('DateRangePickerControl', () => {
       );
 
       act(() => {
-        jest.advanceTimersByTime(10_000);
+        vi.advanceTimersByTime(10_000);
       });
 
       expect(pausedOnRefresh).not.toHaveBeenCalled();
     });
 
     it('does not call `onRefresh` while `settings.autoRefresh.isEnabled` is false', () => {
-      const disabledOnRefresh = jest.fn();
+      const disabledOnRefresh = vi.fn();
 
       renderWithEuiTheme(
         <DateRangePicker
@@ -1108,7 +1110,7 @@ describe('DateRangePickerControl', () => {
       );
 
       act(() => {
-        jest.advanceTimersByTime(10_000);
+        vi.advanceTimersByTime(10_000);
       });
 
       expect(disabledOnRefresh).not.toHaveBeenCalled();

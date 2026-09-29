@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -21,17 +24,17 @@ import {
   CALL_OUT_FILTER_FOR_ALERTS_BUTTON,
 } from './translations';
 
-jest.mock('../hooks/use_timeline_select_alerts_only_data_view');
-jest.mock('../hooks/use_add_alerts_only_filter');
+vi.mock('../hooks/use_timeline_select_alerts_only_data_view');
+vi.mock('../hooks/use_add_alerts_only_filter');
 
 describe('MigrationMessageCallout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render correctly', () => {
-    (useTimelineSelectAlertsOnlyDataView as jest.Mock).mockReturnValue(jest.fn());
-    (useAddAlertsOnlyFilter as jest.Mock).mockReturnValue(jest.fn());
+    (useTimelineSelectAlertsOnlyDataView as Mock).mockReturnValue(vi.fn());
+    (useAddAlertsOnlyFilter as Mock).mockReturnValue(vi.fn());
 
     const { getByTestId } = render(<MigrationMessageCallout timelineId={'test'} />);
 
@@ -45,9 +48,9 @@ describe('MigrationMessageCallout', () => {
   });
 
   it('should call the selectAlertsDataView callback', () => {
-    const selectAlertsDataView = jest.fn();
-    (useTimelineSelectAlertsOnlyDataView as jest.Mock).mockReturnValue(selectAlertsDataView);
-    (useAddAlertsOnlyFilter as jest.Mock).mockReturnValue(jest.fn());
+    const selectAlertsDataView = vi.fn();
+    (useTimelineSelectAlertsOnlyDataView as Mock).mockReturnValue(selectAlertsDataView);
+    (useAddAlertsOnlyFilter as Mock).mockReturnValue(vi.fn());
 
     const { getByTestId } = render(<MigrationMessageCallout timelineId={'test'} />);
 
@@ -56,9 +59,9 @@ describe('MigrationMessageCallout', () => {
   });
 
   it('should call the addAlertsFilter callback', () => {
-    const addAlertsFilter = jest.fn();
-    (useAddAlertsOnlyFilter as jest.Mock).mockReturnValue(addAlertsFilter);
-    (useTimelineSelectAlertsOnlyDataView as jest.Mock).mockReturnValue(jest.fn());
+    const addAlertsFilter = vi.fn();
+    (useAddAlertsOnlyFilter as Mock).mockReturnValue(addAlertsFilter);
+    (useTimelineSelectAlertsOnlyDataView as Mock).mockReturnValue(vi.fn());
 
     const { getByTestId } = render(<MigrationMessageCallout timelineId={'test'} />);
 

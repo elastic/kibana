@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useForm, FormProvider } from 'react-hook-form';
@@ -71,10 +73,10 @@ const renderFooter = ({
   formValues?: Partial<FormValues>;
   propsOverrides?: Partial<ComposeDiscoverFooterProps>;
 } = {}) => {
-  const onNext = jest.fn();
-  const onFinalSubmit = jest.fn();
-  const onYamlSave = jest.fn();
-  const dispatch = jest.fn();
+  const onNext = vi.fn();
+  const onFinalSubmit = vi.fn();
+  const onYamlSave = vi.fn();
+  const dispatch = vi.fn();
 
   const props: ComposeDiscoverFooterProps = {
     uiState: createState({ queryCommitted: true, childOpen: false, ...stateOverrides }),

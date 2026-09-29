@@ -5,34 +5,40 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import { useQueryTimelineByIdOnUrlChange } from './use_query_timeline_by_id_on_url_change';
 import { renderHook } from '@testing-library/react';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 
-jest.mock('../use_experimental_features');
+vi.mock('../use_experimental_features');
 
-jest.mock('../../../timelines/components/open_timeline/helpers');
+vi.mock('../../../timelines/components/open_timeline/helpers');
 
-const mockFlyoutTimeline = jest
+const mockFlyoutTimeline = vi
   .fn()
   .mockReturnValue({ timelineDefaults, savedObjectId: 'savedObjectId_12345' });
-jest.mock('../use_selector', () => ({
-  useShallowEqualSelector: () => mockFlyoutTimeline(),
-}));
+vi.mock('../use_selector', () => {
+      const mocked = {
+      useShallowEqualSelector: () => mockFlyoutTimeline(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/test', search: '?' });
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+const mockUseLocation = vi.fn().mockReturnValue({ pathname: '/test', search: '?' });
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
   return {
     ...original,
     useLocation: () => mockUseLocation(),
   };
 });
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -44,13 +50,13 @@ describe('queryTimelineByIdOnUrlChange', () => {
   const newTestTimelineId = `${oldTestTimelineId}-newId`;
   const oldTimelineRisonSearchString = `?timeline=(activeTab:query,id:%27${oldTestTimelineId}%27,isOpen:!t)`;
   const newTimelineRisonSearchString = `?timeline=(activeTab:query,id:%27${newTestTimelineId}%27,isOpen:!t)`;
-  const mockQueryTimelineById = jest.fn();
+  const mockQueryTimelineById = vi.fn();
 
   beforeEach(() => {
-    (useQueryTimelineById as jest.Mock).mockImplementation(() => mockQueryTimelineById);
+    (useQueryTimelineById as Mock).mockImplementation(() => mockQueryTimelineById);
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when an old timeline id exists, but a new id is given', () => {
@@ -59,7 +65,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
 
       const { rerender } = renderHook(() => useQueryTimelineByIdOnUrlChange());
       mockUseLocation.mockReturnValue({ search: newTimelineRisonSearchString });
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       rerender();
 
       expect(mockQueryTimelineById).toHaveBeenCalledWith(
@@ -82,7 +88,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
 
       const { rerender } = renderHook(() => useQueryTimelineByIdOnUrlChange());
       mockUseLocation.mockReturnValue({ search: newTimelineRisonSearchString });
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       rerender();
 
       expect(mockQueryTimelineById).not.toHaveBeenCalled();
@@ -107,7 +113,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
       mockUseLocation.mockReturnValue({ search: oldTimelineRisonSearchString });
 
       const { rerender } = renderHook(() => useQueryTimelineByIdOnUrlChange());
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       rerender();
 
       expect(mockQueryTimelineById).not.toHaveBeenCalled();
@@ -120,7 +126,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
 
       const { rerender } = renderHook(() => useQueryTimelineByIdOnUrlChange());
       mockUseLocation.mockReturnValue({ search: '?timeline=(activeTab:query)' }); // no id
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       rerender();
 
       expect(mockQueryTimelineById).not.toHaveBeenCalled();
@@ -134,7 +140,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
 
       const { rerender } = renderHook(() => useQueryTimelineByIdOnUrlChange());
       mockUseLocation.mockReturnValue({ search: newTimelineRisonSearchString });
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       rerender();
 
       expect(mockQueryTimelineById).not.toHaveBeenCalled();

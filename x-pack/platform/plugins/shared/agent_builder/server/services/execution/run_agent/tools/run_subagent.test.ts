@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Subject, ReplaySubject } from 'rxjs';
 import { ChatEventType, SELF_AGENT_ID, SubagentMode } from '@kbn/agent-builder-common';
 import type {
@@ -43,7 +46,7 @@ const createMockContext = (
 
   return {
     context: {
-      events: { reportProgress: jest.fn(), sendUiEvent: jest.fn() },
+      events: { reportProgress: vi.fn(), sendUiEvent: vi.fn() },
       modelProvider,
       prompts,
       interactivity,
@@ -100,13 +103,13 @@ describe('createSubagentTool', () => {
       allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
       executionId: 'parent-exec-id',
       subAgentExecutor: {
-        executeSubAgent: jest.fn().mockResolvedValue({
+        executeSubAgent: vi.fn().mockResolvedValue({
           executionId: 'sub-exec-id',
           events$: events$.asObservable(),
         }),
-        getExecution: jest.fn(),
-        createSubAgent: jest.fn(),
-        sendToSubAgent: jest.fn(),
+        getExecution: vi.fn(),
+        createSubAgent: vi.fn(),
+        sendToSubAgent: vi.fn(),
       },
       abortSignal: new AbortController().signal,
     });
@@ -133,10 +136,10 @@ describe('createSubagentTool', () => {
       allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
       executionId: 'parent-exec-id',
       subAgentExecutor: {
-        executeSubAgent: jest.fn().mockRejectedValue(new Error('LLM timeout')),
-        getExecution: jest.fn(),
-        createSubAgent: jest.fn(),
-        sendToSubAgent: jest.fn(),
+        executeSubAgent: vi.fn().mockRejectedValue(new Error('LLM timeout')),
+        getExecution: vi.fn(),
+        createSubAgent: vi.fn(),
+        sendToSubAgent: vi.fn(),
       },
       abortSignal: new AbortController().signal,
     });
@@ -162,13 +165,13 @@ describe('createSubagentTool', () => {
       allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
       executionId: 'parent-exec-id',
       subAgentExecutor: {
-        executeSubAgent: jest.fn().mockResolvedValue({
+        executeSubAgent: vi.fn().mockResolvedValue({
           executionId: 'sub-exec-id',
           events$: events$.asObservable(),
         }),
-        getExecution: jest.fn(),
-        createSubAgent: jest.fn(),
-        sendToSubAgent: jest.fn(),
+        getExecution: vi.fn(),
+        createSubAgent: vi.fn(),
+        sendToSubAgent: vi.fn(),
       },
     });
 
@@ -200,7 +203,7 @@ describe('createSubagentTool', () => {
     } as ChatEvent);
     events$.complete();
 
-    const executeSubAgent = jest.fn().mockResolvedValue({
+    const executeSubAgent = vi.fn().mockResolvedValue({
       executionId: 'sub-exec-id',
       events$: events$.asObservable(),
     });
@@ -212,9 +215,9 @@ describe('createSubagentTool', () => {
       executionId: 'parent-exec-id',
       subAgentExecutor: {
         executeSubAgent,
-        getExecution: jest.fn(),
-        createSubAgent: jest.fn(),
-        sendToSubAgent: jest.fn(),
+        getExecution: vi.fn(),
+        createSubAgent: vi.fn(),
+        sendToSubAgent: vi.fn(),
       },
       abortSignal,
     });
@@ -253,13 +256,13 @@ describe('createSubagentTool', () => {
       allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
       executionId: 'parent-exec-id',
       subAgentExecutor: {
-        executeSubAgent: jest.fn().mockResolvedValue({
+        executeSubAgent: vi.fn().mockResolvedValue({
           executionId: 'sub-exec-id',
           events$: events$.asObservable(),
         }),
-        getExecution: jest.fn(),
-        createSubAgent: jest.fn(),
-        sendToSubAgent: jest.fn(),
+        getExecution: vi.fn(),
+        createSubAgent: vi.fn(),
+        sendToSubAgent: vi.fn(),
       },
       abortSignal: new AbortController().signal,
     });
@@ -272,26 +275,26 @@ describe('createSubagentTool', () => {
 
   it('returns execution_id immediately when run_in_background is true', async () => {
     const events$ = new ReplaySubject<ChatEvent>();
-    const registerExecution = jest.fn();
+    const registerExecution = vi.fn();
 
     const tool = createSubagentTool({
       ownerAgentId: 'test-agent',
       allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
       executionId: 'parent-exec-id',
       subAgentExecutor: {
-        executeSubAgent: jest.fn().mockResolvedValue({
+        executeSubAgent: vi.fn().mockResolvedValue({
           executionId: 'bg-exec-id',
           events$: events$.asObservable(),
         }),
-        getExecution: jest.fn(),
-        createSubAgent: jest.fn(),
-        sendToSubAgent: jest.fn(),
+        getExecution: vi.fn(),
+        createSubAgent: vi.fn(),
+        sendToSubAgent: vi.fn(),
       },
       backgroundExecutionService: {
         registerExecution,
-        getState: jest.fn(),
-        hasPending: jest.fn(),
-        checkForCompletions: jest.fn(),
+        getState: vi.fn(),
+        hasPending: vi.fn(),
+        checkForCompletions: vi.fn(),
       } as any,
     });
 
@@ -343,22 +346,22 @@ describe('createSubagentTool', () => {
 
     it('creates a new persistent sub-agent (foreground) and registers on tracker', async () => {
       const events$ = roundCompleteEvents$();
-      const createSubAgent = jest.fn().mockResolvedValue({
+      const createSubAgent = vi.fn().mockResolvedValue({
         executionId: 'child-exec',
         events$: events$.asObservable(),
       });
       const subagentTracker = new SubagentTracker();
-      const conversationExists = jest.fn().mockResolvedValue(false);
+      const conversationExists = vi.fn().mockResolvedValue(false);
 
       const tool = createSubagentTool({
         ownerAgentId: 'test-agent',
         allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
         executionId: 'parent-exec',
         subAgentExecutor: {
-          executeSubAgent: jest.fn(),
+          executeSubAgent: vi.fn(),
           createSubAgent,
-          sendToSubAgent: jest.fn(),
-          getExecution: jest.fn(),
+          sendToSubAgent: vi.fn(),
+          getExecution: vi.fn(),
         },
         parentConversationId: 'parent-convo',
         subagentTracker,
@@ -410,18 +413,18 @@ describe('createSubagentTool', () => {
       const subagentTracker = new SubagentTracker({
         researcher: { conversation_id: 'existing-child', agent_id: 'test-agent' },
       });
-      const createSubAgent = jest.fn();
-      const conversationExists = jest.fn().mockResolvedValue(true);
+      const createSubAgent = vi.fn();
+      const conversationExists = vi.fn().mockResolvedValue(true);
 
       const tool = createSubagentTool({
         ownerAgentId: 'test-agent',
         allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
         executionId: 'parent-exec',
         subAgentExecutor: {
-          executeSubAgent: jest.fn(),
+          executeSubAgent: vi.fn(),
           createSubAgent,
-          sendToSubAgent: jest.fn(),
-          getExecution: jest.fn(),
+          sendToSubAgent: vi.fn(),
+          getExecution: vi.fn(),
         },
         parentConversationId: 'parent-convo',
         subagentTracker,
@@ -460,21 +463,21 @@ describe('createSubagentTool', () => {
       const subagentTracker = new SubagentTracker({
         researcher: { conversation_id: 'stale-child', agent_id: 'test-agent' },
       });
-      const createSubAgent = jest.fn().mockResolvedValue({
+      const createSubAgent = vi.fn().mockResolvedValue({
         executionId: 'new-exec',
         events$: events$.asObservable(),
       });
-      const conversationExists = jest.fn().mockResolvedValue(false);
+      const conversationExists = vi.fn().mockResolvedValue(false);
 
       const tool = createSubagentTool({
         ownerAgentId: 'test-agent',
         allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
         executionId: 'parent-exec',
         subAgentExecutor: {
-          executeSubAgent: jest.fn(),
+          executeSubAgent: vi.fn(),
           createSubAgent,
-          sendToSubAgent: jest.fn(),
-          getExecution: jest.fn(),
+          sendToSubAgent: vi.fn(),
+          getExecution: vi.fn(),
         },
         parentConversationId: 'parent-convo',
         subagentTracker,
@@ -507,9 +510,9 @@ describe('createSubagentTool', () => {
 
     it('background persistent creation registers with backgroundExecutionService', async () => {
       const events$ = new ReplaySubject<ChatEvent>();
-      const registerExecution = jest.fn();
+      const registerExecution = vi.fn();
       const subagentTracker = new SubagentTracker();
-      const createSubAgent = jest.fn().mockResolvedValue({
+      const createSubAgent = vi.fn().mockResolvedValue({
         executionId: 'bg-child',
         events$: events$.asObservable(),
       });
@@ -519,18 +522,18 @@ describe('createSubagentTool', () => {
         allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
         executionId: 'parent-exec',
         subAgentExecutor: {
-          executeSubAgent: jest.fn(),
+          executeSubAgent: vi.fn(),
           createSubAgent,
-          sendToSubAgent: jest.fn(),
-          getExecution: jest.fn(),
+          sendToSubAgent: vi.fn(),
+          getExecution: vi.fn(),
         },
         parentConversationId: 'parent-convo',
         subagentTracker,
         backgroundExecutionService: {
           registerExecution,
-          getState: jest.fn(),
-          hasPending: jest.fn(),
-          checkForCompletions: jest.fn(),
+          getState: vi.fn(),
+          hasPending: vi.fn(),
+          checkForCompletions: vi.fn(),
         } as any,
       });
 
@@ -564,10 +567,10 @@ describe('createSubagentTool', () => {
         allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
         executionId: 'parent-exec',
         subAgentExecutor: {
-          executeSubAgent: jest.fn(),
-          createSubAgent: jest.fn(),
-          sendToSubAgent: jest.fn(),
-          getExecution: jest.fn(),
+          executeSubAgent: vi.fn(),
+          createSubAgent: vi.fn(),
+          sendToSubAgent: vi.fn(),
+          getExecution: vi.fn(),
         },
         // No parentConversationId, no subagentTracker — persistent mode is unavailable.
       });
@@ -593,7 +596,7 @@ describe('createSubagentTool', () => {
 
     it('stores the raw _self sentinel on the tracker entry, not the resolved owner id', async () => {
       const events$ = roundCompleteEvents$();
-      const createSubAgent = jest.fn().mockResolvedValue({
+      const createSubAgent = vi.fn().mockResolvedValue({
         executionId: 'child-exec',
         events$: events$.asObservable(),
       });
@@ -604,14 +607,14 @@ describe('createSubagentTool', () => {
         allowedSubagents: [{ id: SELF_AGENT_ID, description: 'Self.' }],
         executionId: 'parent-exec',
         subAgentExecutor: {
-          executeSubAgent: jest.fn(),
+          executeSubAgent: vi.fn(),
           createSubAgent,
-          sendToSubAgent: jest.fn(),
-          getExecution: jest.fn(),
+          sendToSubAgent: vi.fn(),
+          getExecution: vi.fn(),
         },
         parentConversationId: 'parent-convo',
         subagentTracker,
-        conversationExists: jest.fn().mockResolvedValue(false),
+        conversationExists: vi.fn().mockResolvedValue(false),
       });
 
       const { context } = createMockContext();
@@ -646,7 +649,7 @@ describe('createSubagentTool', () => {
       } as ChatEvent);
       events$.complete();
 
-      const executeSubAgent = jest.fn().mockResolvedValue({
+      const executeSubAgent = vi.fn().mockResolvedValue({
         executionId: 'sub-exec-id',
         events$: events$.asObservable(),
       });
@@ -657,9 +660,9 @@ describe('createSubagentTool', () => {
         executionId: 'parent-exec-id',
         subAgentExecutor: {
           executeSubAgent,
-          getExecution: jest.fn(),
-          createSubAgent: jest.fn(),
-          sendToSubAgent: jest.fn(),
+          getExecution: vi.fn(),
+          createSubAgent: vi.fn(),
+          sendToSubAgent: vi.fn(),
         },
       });
 
@@ -679,7 +682,7 @@ describe('createSubagentTool', () => {
       } as ChatEvent);
       events$.complete();
 
-      const executeSubAgent = jest.fn().mockResolvedValue({
+      const executeSubAgent = vi.fn().mockResolvedValue({
         executionId: 'sub-exec-id',
         events$: events$.asObservable(),
       });
@@ -690,9 +693,9 @@ describe('createSubagentTool', () => {
         executionId: 'parent-exec-id',
         subAgentExecutor: {
           executeSubAgent,
-          getExecution: jest.fn(),
-          createSubAgent: jest.fn(),
-          sendToSubAgent: jest.fn(),
+          getExecution: vi.fn(),
+          createSubAgent: vi.fn(),
+          sendToSubAgent: vi.fn(),
         },
       });
 
@@ -711,10 +714,10 @@ describe('createSubagentTool', () => {
         ],
         executionId: 'parent-exec-id',
         subAgentExecutor: {
-          executeSubAgent: jest.fn(),
-          getExecution: jest.fn(),
-          createSubAgent: jest.fn(),
-          sendToSubAgent: jest.fn(),
+          executeSubAgent: vi.fn(),
+          getExecution: vi.fn(),
+          createSubAgent: vi.fn(),
+          sendToSubAgent: vi.fn(),
         },
       });
       const selfIdx = tool.description.indexOf(`- ${SELF_AGENT_ID}:`);
@@ -724,16 +727,16 @@ describe('createSubagentTool', () => {
     });
 
     it('rejects an agent_id outside the allowlist (defense-in-depth)', async () => {
-      const executeSubAgent = jest.fn();
+      const executeSubAgent = vi.fn();
       const tool = createSubagentTool({
         ownerAgentId: 'owner',
         allowedSubagents: [{ id: 'coder', description: 'Coder.' }],
         executionId: 'parent-exec-id',
         subAgentExecutor: {
           executeSubAgent,
-          getExecution: jest.fn(),
-          createSubAgent: jest.fn(),
-          sendToSubAgent: jest.fn(),
+          getExecution: vi.fn(),
+          createSubAgent: vi.fn(),
+          sendToSubAgent: vi.fn(),
         },
       });
 
@@ -777,15 +780,15 @@ describe('createSubagentTool', () => {
     };
 
     const createTool = ({
-      executeSubAgent = jest.fn(),
-      createSubAgent = jest.fn(),
+      executeSubAgent = vi.fn(),
+      createSubAgent = vi.fn(),
       subagentTracker,
       parentConversationId,
       childConversationExists = false,
       allowSelf = false,
     }: {
-      executeSubAgent?: jest.Mock;
-      createSubAgent?: jest.Mock;
+      executeSubAgent?: Mock;
+      createSubAgent?: Mock;
       subagentTracker?: SubagentTracker;
       parentConversationId?: string;
       childConversationExists?: boolean;
@@ -800,16 +803,16 @@ describe('createSubagentTool', () => {
         subAgentExecutor: {
           executeSubAgent,
           createSubAgent,
-          sendToSubAgent: jest.fn(),
-          getExecution: jest.fn(),
+          sendToSubAgent: vi.fn(),
+          getExecution: vi.fn(),
         },
         subagentTracker,
         parentConversationId,
-        conversationExists: jest.fn().mockResolvedValue(childConversationExists),
+        conversationExists: vi.fn().mockResolvedValue(childConversationExists),
       });
 
     it('asks the user to confirm the grant before spawning the sub-agent', async () => {
-      const executeSubAgent = jest.fn();
+      const executeSubAgent = vi.fn();
       const tool = createTool({ executeSubAgent });
       const { context, prompts } = createMockContext();
 
@@ -855,7 +858,7 @@ describe('createSubagentTool', () => {
     });
 
     it('leaves a read-only API out of the prompt and the grant', async () => {
-      const executeSubAgent = jest
+      const executeSubAgent = vi
         .fn()
         .mockResolvedValue({ executionId: 'sub-exec-id', events$: completedEvents$() });
       const tool = createTool({ executeSubAgent });
@@ -891,7 +894,7 @@ describe('createSubagentTool', () => {
     });
 
     it('asks for nothing when no requested API can change existing data', async () => {
-      const executeSubAgent = jest
+      const executeSubAgent = vi
         .fn()
         .mockResolvedValue({ executionId: 'sub-exec-id', events$: completedEvents$() });
       const tool = createTool({ executeSubAgent });
@@ -936,7 +939,7 @@ describe('createSubagentTool', () => {
     });
 
     it('lists a selector once when the delegating agent repeats it', async () => {
-      const executeSubAgent = jest.fn();
+      const executeSubAgent = vi.fn();
       const tool = createTool({ executeSubAgent });
       const { context, prompts } = createMockContext();
 
@@ -956,7 +959,7 @@ describe('createSubagentTool', () => {
     });
 
     it('passes the approved grant to a transient sub-agent', async () => {
-      const executeSubAgent = jest
+      const executeSubAgent = vi
         .fn()
         .mockResolvedValue({ executionId: 'sub-exec-id', events$: completedEvents$() });
       const tool = createTool({ executeSubAgent });
@@ -979,7 +982,7 @@ describe('createSubagentTool', () => {
     });
 
     it('passes the approved grant to a persistent sub-agent', async () => {
-      const createSubAgent = jest
+      const createSubAgent = vi
         .fn()
         .mockResolvedValue({ executionId: 'child-exec', events$: completedEvents$() });
       const tool = createTool({
@@ -1011,7 +1014,7 @@ describe('createSubagentTool', () => {
     });
 
     it('still runs the sub-agent without the grant once the user has denied it', async () => {
-      const executeSubAgent = jest
+      const executeSubAgent = vi
         .fn()
         .mockResolvedValue({ executionId: 'sub-exec-id', events$: completedEvents$() });
       const tool = createTool({ executeSubAgent });
@@ -1036,7 +1039,7 @@ describe('createSubagentTool', () => {
     });
 
     it('reports the grant as unavailable when the delegating run has no user to ask', async () => {
-      const executeSubAgent = jest
+      const executeSubAgent = vi
         .fn()
         .mockResolvedValue({ executionId: 'sub-exec-id', events$: completedEvents$() });
       const tool = createTool({ executeSubAgent });
@@ -1059,7 +1062,7 @@ describe('createSubagentTool', () => {
     });
 
     it('skips the prompt for APIs the delegating run already carries', async () => {
-      const executeSubAgent = jest
+      const executeSubAgent = vi
         .fn()
         .mockResolvedValue({ executionId: 'sub-exec-id', events$: completedEvents$() });
       const tool = createTool({ executeSubAgent });
@@ -1089,7 +1092,7 @@ describe('createSubagentTool', () => {
     });
 
     it('rejects an API identifier that exists on neither backend, without prompting', async () => {
-      const executeSubAgent = jest.fn();
+      const executeSubAgent = vi.fn();
       const tool = createTool({ executeSubAgent });
       const { context, prompts } = createMockContext();
 
@@ -1114,7 +1117,7 @@ describe('createSubagentTool', () => {
     });
 
     it('does not prompt for a grant when a persistent name is already taken', async () => {
-      const createSubAgent = jest.fn();
+      const createSubAgent = vi.fn();
       const tool = createTool({
         createSubAgent,
         subagentTracker: new SubagentTracker({
@@ -1146,7 +1149,7 @@ describe('createSubagentTool', () => {
     });
 
     it('leaves the sub-agent untouched when no grant is requested', async () => {
-      const executeSubAgent = jest
+      const executeSubAgent = vi
         .fn()
         .mockResolvedValue({ executionId: 'sub-exec-id', events$: completedEvents$() });
       const tool = createTool({ executeSubAgent });

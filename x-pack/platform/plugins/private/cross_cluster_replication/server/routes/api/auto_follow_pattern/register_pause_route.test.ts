@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -35,7 +37,7 @@ describe('[CCR API] Pause auto-follow pattern(s)', () => {
   it('pauses a single item', async () => {
     const routeContextMock = mockRouteContext({
       ccr: {
-        pauseAutoFollowPattern: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+        pauseAutoFollowPattern: vi.fn().mockResolvedValueOnce({ acknowledge: true }),
       },
     });
 
@@ -51,7 +53,7 @@ describe('[CCR API] Pause auto-follow pattern(s)', () => {
   it('pauses multiple items', async () => {
     const routeContextMock = mockRouteContext({
       ccr: {
-        pauseAutoFollowPattern: jest
+        pauseAutoFollowPattern: vi
           .fn()
           .mockResolvedValueOnce({ acknowledge: true })
           .mockResolvedValueOnce({ acknowledge: true })
@@ -71,7 +73,7 @@ describe('[CCR API] Pause auto-follow pattern(s)', () => {
   it('returns partial errors', async () => {
     const routeContextMock = mockRouteContext({
       ccr: {
-        pauseAutoFollowPattern: jest
+        pauseAutoFollowPattern: vi
           .fn()
           .mockResolvedValueOnce({ acknowledge: true })
           .mockRejectedValueOnce(mockError),

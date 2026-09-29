@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
@@ -19,16 +21,16 @@ import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/navigation/hooks');
-jest.mock('copy-to-clipboard', () => jest.fn());
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/navigation/hooks');
+vi.mock('copy-to-clipboard', () => vi.fn());
 
 describe('createCommonUpdateUserActionBuilder ', () => {
   const label = <>{'A label'}</>;
-  const handleOutlineComment = jest.fn();
+  const handleOutlineComment = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {
@@ -212,7 +214,7 @@ describe('createCommonUpdateUserActionBuilder ', () => {
           type: AttachmentActionType.BUTTON,
           label: 'Open alert',
           iconType: 'popout',
-          onClick: jest.fn(),
+          onClick: vi.fn(),
         },
         'doc-action-test-subj'
       ),

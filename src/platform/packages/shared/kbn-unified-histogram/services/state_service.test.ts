@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import {
   getChartHidden,
@@ -20,19 +23,22 @@ import { lensAdaptersMock } from '../__mocks__/lens_adapters';
 import type { UnifiedHistogramState } from './state_service';
 import { createStateService } from './state_service';
 
-jest.mock('@kbn/discover-utils', () => ({
-  getChartHidden: jest.fn(),
-  getTopPanelHeight: jest.fn(),
-  setChartHidden: jest.fn(),
-  setTopPanelHeight: jest.fn(),
-}));
+vi.mock('@kbn/discover-utils', () => {
+      const mocked = {
+      getChartHidden: vi.fn(),
+      getTopPanelHeight: vi.fn(),
+      setChartHidden: vi.fn(),
+      setTopPanelHeight: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('UnifiedHistogramStateService', () => {
   beforeEach(() => {
-    (getChartHidden as jest.Mock).mockClear();
-    (getTopPanelHeight as jest.Mock).mockClear();
-    (setChartHidden as jest.Mock).mockClear();
-    (setTopPanelHeight as jest.Mock).mockClear();
+    (getChartHidden as Mock).mockClear();
+    (getTopPanelHeight as Mock).mockClear();
+    (setChartHidden as Mock).mockClear();
+    (setTopPanelHeight as Mock).mockClear();
   });
 
   const initialState: UnifiedHistogramState = {
@@ -74,11 +80,11 @@ describe('UnifiedHistogramStateService', () => {
       localStorageKeyPrefix,
       initialState,
     });
-    expect(getChartHidden as jest.Mock).toHaveBeenCalledWith(
+    expect(getChartHidden as Mock).toHaveBeenCalledWith(
       unifiedHistogramServicesMock.storage,
       localStorageKeyPrefix
     );
-    expect(getTopPanelHeight as jest.Mock).toHaveBeenCalledWith(
+    expect(getTopPanelHeight as Mock).toHaveBeenCalledWith(
       unifiedHistogramServicesMock.storage,
       localStorageKeyPrefix
     );
@@ -89,8 +95,8 @@ describe('UnifiedHistogramStateService', () => {
       services: unifiedHistogramServicesMock,
       initialState,
     });
-    expect(getChartHidden as jest.Mock).not.toHaveBeenCalled();
-    expect(getTopPanelHeight as jest.Mock).not.toHaveBeenCalled();
+    expect(getChartHidden as Mock).not.toHaveBeenCalled();
+    expect(getTopPanelHeight as Mock).not.toHaveBeenCalled();
   });
 
   it('should update state', () => {
@@ -145,7 +151,7 @@ describe('UnifiedHistogramStateService', () => {
       chartHidden: true,
       topPanelHeight: 200,
     });
-    expect(setTopPanelHeight as jest.Mock).toHaveBeenCalledWith(
+    expect(setTopPanelHeight as Mock).toHaveBeenCalledWith(
       unifiedHistogramServicesMock.storage,
       localStorageKeyPrefix,
       200
@@ -167,7 +173,7 @@ describe('UnifiedHistogramStateService', () => {
       chartHidden: true,
       topPanelHeight: 200,
     });
-    expect(setChartHidden as jest.Mock).not.toHaveBeenCalled();
-    expect(setTopPanelHeight as jest.Mock).not.toHaveBeenCalled();
+    expect(setChartHidden as Mock).not.toHaveBeenCalled();
+    expect(setTopPanelHeight as Mock).not.toHaveBeenCalled();
   });
 });

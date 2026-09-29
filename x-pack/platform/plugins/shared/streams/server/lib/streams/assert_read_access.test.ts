@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { checkAccess } from './stream_crud';
 import { SecurityError } from './errors/security_error';
 import { StreamsClient } from './client';
 
-jest.mock('./stream_crud', () => {
-  const actual = jest.requireActual('./stream_crud');
+vi.mock('./stream_crud', async () => {
+  const actual = (await vi.importActual('./stream_crud'));
   return {
     ...actual,
-    checkAccess: jest.fn(),
-    checkAccessBulk: jest.fn(),
+    checkAccess: vi.fn(),
+    checkAccessBulk: vi.fn(),
   };
 });
 
-const mockedCheckAccess = checkAccess as jest.MockedFunction<typeof checkAccess>;
+const mockedCheckAccess = checkAccess as MockedFunction<typeof checkAccess>;
 
 const STREAM = 'logs.forbidden';
 
@@ -29,7 +32,7 @@ const makeClient = ({ isSecurityEnabled = true }: { isSecurityEnabled?: boolean 
     esClient: {} as never,
     attachmentClient: {} as never,
     storageClient: {} as never,
-    logger: { error: jest.fn(), debug: jest.fn() } as never,
+    logger: { error: vi.fn(), debug: vi.fn() } as never,
     isServerless: false,
     isSecurityEnabled,
     isWiredStreamViewsEnabled: false,

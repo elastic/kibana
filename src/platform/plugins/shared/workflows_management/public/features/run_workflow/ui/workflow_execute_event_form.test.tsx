@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { themeServiceMock } from '@kbn/core/public/mocks';
@@ -24,43 +27,46 @@ import { getTestProvider } from '../../../shared/mocks/test_providers';
 const mockTheme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
 const mockData = dataPluginMock.createStartContract();
 const mockUiSettings = {
-  get: jest.fn(),
-  isDefault: jest.fn(() => true),
+  get: vi.fn(),
+  isDefault: vi.fn(() => true),
 };
 const mockStorage = {
-  get: jest.fn(),
-  set: jest.fn(),
-  clear: jest.fn(),
-  remove: jest.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
+  clear: vi.fn(),
+  remove: vi.fn(),
 };
 
-jest.mock('../../../hooks/use_kibana');
-jest.mock('../../workflow_list/ui/use_event_driven_execution_status', () => ({
-  useEventDrivenExecutionStatus: () => ({
-    eventDrivenExecutionEnabled: true,
-    isLoading: false,
-    error: false,
-  }),
-}));
+vi.mock('../../../hooks/use_kibana');
+vi.mock('../../workflow_list/ui/use_event_driven_execution_status', () => {
+      const mocked = {
+      useEventDrivenExecutionStatus: () => ({
+        eventDrivenExecutionEnabled: true,
+        isLoading: false,
+        error: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
+vi.mock('@kbn/workflows-ui', async () => {
+  const actual = (await vi.importActual('@kbn/workflows-ui'));
   return {
     ...actual,
-    useQueryTriggerEvents: jest.fn(),
+    useQueryTriggerEvents: vi.fn(),
   };
 });
 
-jest.mock('@kbn/unified-data-table', () => {
-  const actual = jest.requireActual('@kbn/unified-data-table');
+vi.mock('@kbn/unified-data-table', async () => {
+  const actual = (await vi.importActual('@kbn/unified-data-table'));
   return {
     ...actual,
     UnifiedDataTable: () => <div data-test-subj="unifiedDataTable" />,
   };
 });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseQueryTriggerEvents = useQueryTriggerEvents as jest.MockedFunction<
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseQueryTriggerEvents = useQueryTriggerEvents as MockedFunction<
   typeof useQueryTriggerEvents
 >;
 const queryClient = new QueryClient(testQueryClientConfig);
@@ -76,13 +82,13 @@ const baseDefinition = {
 };
 
 describe('WorkflowExecuteEventForm', () => {
-  const mockSetValue = jest.fn();
+  const mockSetValue = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     mockUseQueryTriggerEvents.mockReset();
-    (mockData.query.timefilter.timefilter.getTimeDefaults as jest.Mock).mockReturnValue({
+    (mockData.query.timefilter.timefilter.getTimeDefaults as Mock).mockReturnValue({
       from: 'now-15m',
       to: 'now',
     });
@@ -112,7 +118,7 @@ describe('WorkflowExecuteEventForm', () => {
       error: undefined,
       isSuccess: true,
       status: 'success',
-      refetch: jest.fn().mockResolvedValue(undefined),
+      refetch: vi.fn().mockResolvedValue(undefined),
     } as unknown as ReturnType<typeof useQueryTriggerEvents>);
     mockUseKibana.mockReturnValue({
       services: {
@@ -122,28 +128,28 @@ describe('WorkflowExecuteEventForm', () => {
           },
         },
         dataViews: {
-          create: jest.fn().mockResolvedValue({
+          create: vi.fn().mockResolvedValue({
             id: 'dv-workflows-events',
             title: '.workflows-events',
             timeFieldName: '@timestamp',
-            getFieldByName: jest.fn(() => ({ name: 'triggerId' })),
+            getFieldByName: vi.fn(() => ({ name: 'triggerId' })),
             fields: {
-              replaceAll: jest.fn(),
-              getByName: jest.fn(() => null),
-              getAll: jest.fn().mockReturnValue([]),
-              create: jest.fn(),
-              add: jest.fn(),
-              remove: jest.fn(),
-              update: jest.fn(),
-              filter: jest.fn().mockReturnValue([]),
+              replaceAll: vi.fn(),
+              getByName: vi.fn(() => null),
+              getAll: vi.fn().mockReturnValue([]),
+              create: vi.fn(),
+              add: vi.fn(),
+              remove: vi.fn(),
+              update: vi.fn(),
+              filter: vi.fn().mockReturnValue([]),
             },
           }),
-          refreshFields: jest.fn().mockResolvedValue(undefined),
+          refreshFields: vi.fn().mockResolvedValue(undefined),
         },
         notifications: {
           toasts: {
-            addWarning: jest.fn(),
-            addError: jest.fn(),
+            addWarning: vi.fn(),
+            addError: vi.fn(),
           },
         },
         http: {},
@@ -184,7 +190,7 @@ describe('WorkflowExecuteEventForm', () => {
   });
 
   it('uses TIMEPICKER_FALLBACK when timefilter getTimeDefaults returns undefined', async () => {
-    (mockData.query.timefilter.timefilter.getTimeDefaults as jest.Mock).mockReturnValue(undefined);
+    (mockData.query.timefilter.timefilter.getTimeDefaults as Mock).mockReturnValue(undefined);
 
     const { findByTestId } = render(
       <TestWrapper>
@@ -208,7 +214,7 @@ describe('WorkflowExecuteEventForm', () => {
   });
 
   it('uses timefilter getTimeDefaults for the initial trigger event query range when set', async () => {
-    (mockData.query.timefilter.timefilter.getTimeDefaults as jest.Mock).mockReturnValue({
+    (mockData.query.timefilter.timefilter.getTimeDefaults as Mock).mockReturnValue({
       from: 'now-1h',
       to: 'now',
     });
@@ -327,7 +333,7 @@ describe('WorkflowExecuteEventForm', () => {
       error: undefined,
       isSuccess: true,
       status: 'success',
-      refetch: jest.fn().mockResolvedValue(undefined),
+      refetch: vi.fn().mockResolvedValue(undefined),
     } as unknown as ReturnType<typeof useQueryTriggerEvents>);
 
     const { findByTestId, getByText } = render(
@@ -363,7 +369,7 @@ describe('WorkflowExecuteEventForm', () => {
       error: undefined,
       isSuccess: true,
       status: 'success',
-      refetch: jest.fn().mockResolvedValue(undefined),
+      refetch: vi.fn().mockResolvedValue(undefined),
     } as unknown as ReturnType<typeof useQueryTriggerEvents>);
 
     const { findByTestId, getByTestId, getByText } = render(
@@ -404,7 +410,7 @@ describe('WorkflowExecuteEventForm', () => {
       error: undefined,
       isSuccess: true,
       status: 'success',
-      refetch: jest.fn().mockResolvedValue(undefined),
+      refetch: vi.fn().mockResolvedValue(undefined),
     } as unknown as ReturnType<typeof useQueryTriggerEvents>);
 
     const { findByTestId, queryByTestId } = render(

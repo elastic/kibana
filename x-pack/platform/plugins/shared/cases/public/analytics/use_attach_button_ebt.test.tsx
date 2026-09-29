@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import {
   CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE,
@@ -15,15 +18,21 @@ import { useKibana } from '../common/lib/kibana';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useAttachButtonClickedEBT, useAttachMenuItemClickedEBT } from './use_attach_button_ebt';
 
-jest.mock('../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/cases_context/use_cases_context', () => ({
-  useCasesContext: jest.fn(),
-}));
+vi.mock('../components/cases_context/use_cases_context', () => {
+      const mocked = {
+      useCasesContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getMockServices = (reportEvent: jest.Mock) => ({
+const getMockServices = (reportEvent: Mock) => ({
   services: {
     analytics: {
       reportEvent,
@@ -32,12 +41,12 @@ const getMockServices = (reportEvent: jest.Mock) => ({
 });
 
 describe('attach button EBT hooks', () => {
-  const reportEvent = jest.fn();
+  const reportEvent = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue(getMockServices(reportEvent));
-    (useCasesContext as jest.Mock).mockReturnValue({ owner: [SECURITY_SOLUTION_OWNER] });
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue(getMockServices(reportEvent));
+    (useCasesContext as Mock).mockReturnValue({ owner: [SECURITY_SOLUTION_OWNER] });
   });
 
   describe('useAttachButtonClickedEBT', () => {
@@ -53,7 +62,7 @@ describe('attach button EBT hooks', () => {
     });
 
     it('falls back to unknown owner', () => {
-      (useCasesContext as jest.Mock).mockReturnValue({ owner: ['invalid'] });
+      (useCasesContext as Mock).mockReturnValue({ owner: ['invalid'] });
       const { result } = renderHook(() => useAttachButtonClickedEBT());
 
       result.current('activity');

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { GcpIam } from './gcp_iam';
 
@@ -16,11 +18,11 @@ const SA_EMAIL = 'compromised-sa@my-project-123.iam.gserviceaccount.com';
 const KEY_ID = 'a'.repeat(40);
 
 describe('GcpIam', () => {
-  const mockClient = { get: jest.fn(), post: jest.fn(), delete: jest.fn() };
+  const mockClient = { get: vi.fn(), post: vi.fn(), delete: vi.fn() };
   const mockContext = {
     client: mockClient,
     config: {},
-    log: { debug: jest.fn() },
+    log: { debug: vi.fn() },
   } as unknown as ActionContext;
 
   const getAction = (name: string) => {
@@ -32,7 +34,7 @@ describe('GcpIam', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('metadata', () => {

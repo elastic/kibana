@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { isNew } from './utils';
 
 describe('isNew', () => {
   const fakeNow = new Date('2025-02-18T12:00:00.000Z');
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(fakeNow);
+    vi.useFakeTimers();
+    vi.setSystemTime(fakeNow);
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns true when publishedAt is less than 30 days ago', () => {

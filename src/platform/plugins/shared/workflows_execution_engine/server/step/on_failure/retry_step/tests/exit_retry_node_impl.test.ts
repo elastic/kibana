@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ExitRetryNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -29,16 +31,16 @@ describe('ExitRetryNodeImpl', () => {
       startNodeId: 'enter-retry-1',
     };
     stepExecutionRuntime = {
-      finishStep: jest.fn(),
-      getCurrentStepState: jest.fn().mockReturnValue({ attempt: 2 }),
-      setCurrentStepState: jest.fn(),
+      finishStep: vi.fn(),
+      getCurrentStepState: vi.fn().mockReturnValue({ attempt: 2 }),
+      setCurrentStepState: vi.fn(),
     } as unknown as StepExecutionRuntime;
     workflowRuntime = {
-      navigateToNextNode: jest.fn(),
+      navigateToNextNode: vi.fn(),
     } as unknown as WorkflowExecutionRuntimeManager;
     workflowLogger = {
-      logDebug: jest.fn(),
-      logError: jest.fn(),
+      logDebug: vi.fn(),
+      logError: vi.fn(),
     } as unknown as IWorkflowEventLogger;
     underTest = new ExitRetryNodeImpl(node, stepExecutionRuntime, workflowRuntime, workflowLogger);
   });

@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { DocumentProfilesSection } from './document_profiles_section';
@@ -13,7 +15,7 @@ import { getDataTableRecordWithContextMock } from '../../../__mocks__';
 import { userEvent } from '@testing-library/user-event';
 
 const setup = (props: Partial<React.ComponentProps<typeof DocumentProfilesSection>> = {}) => {
-  const onViewRecordDetails = jest.fn();
+  const onViewRecordDetails = vi.fn();
   const user = userEvent.setup();
 
   const allProps = {

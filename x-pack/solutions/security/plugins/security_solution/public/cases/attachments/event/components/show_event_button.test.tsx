@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ShowEventButton } from './show_event_button';
@@ -21,41 +24,50 @@ const props = {
   index: 'event-index',
 };
 
-const mockOpenFlyout = jest.fn();
-const mockReportEvent = jest.fn();
+const mockOpenFlyout = vi.fn();
+const mockReportEvent = vi.fn();
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: { telemetry: { reportEvent: mockReportEvent } },
-  }),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: { telemetry: { reportEvent: mockReportEvent } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/cases-plugin/public', () => ({
-  useCaseViewNavigation: jest.fn(),
-  useCaseViewParams: jest.fn(),
-}));
+vi.mock('@kbn/cases-plugin/public', () => {
+      const mocked = {
+      useCaseViewNavigation: vi.fn(),
+      useCaseViewParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../../../../flyout_v2/use_flyout_api');
+vi.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 
-const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
-const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
+const useCaseViewParamsMock = useCaseViewParams as Mock;
+const useCaseViewNavigationMock = useCaseViewNavigation as Mock;
 
 describe('ShowEventButton', () => {
-  const navigateToCaseView = jest.fn();
+  const navigateToCaseView = vi.fn();
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useCaseViewParamsMock.mockReturnValue({ detailName: 'case-id' });
     useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView });
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   it('renders the show event button', () => {
@@ -83,7 +95,7 @@ describe('ShowEventButton', () => {
   });
 
   it('opens the new document flyout (from index) when the new flyout is enabled', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
     render(<ShowEventButton {...props} />);
     const button = screen.getByTestId('comment-action-show-event-action-id');

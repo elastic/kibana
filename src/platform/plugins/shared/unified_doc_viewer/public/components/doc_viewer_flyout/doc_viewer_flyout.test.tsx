@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { type ForwardedRef } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,9 +20,9 @@ import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { UnifiedDocViewerFlyout, type UnifiedDocViewerFlyoutProps } from './doc_viewer_flyout';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  const react = jest.requireActual('react');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
+  const react = require('react');
   const OriginalFlyout = actual.EuiFlyout;
 
   return {
@@ -76,16 +78,16 @@ const buildProps = (
   hit: buildHit({ id: 'default-hit', message: 'default message' }),
   hits: undefined,
   dataView: dataViewMock,
-  setExpandedDoc: jest.fn(),
-  onClose: jest.fn(),
-  onAddColumn: jest.fn(),
-  onRemoveColumn: jest.fn(),
+  setExpandedDoc: vi.fn(),
+  onClose: vi.fn(),
+  onAddColumn: vi.fn(),
+  onRemoveColumn: vi.fn(),
   ...overrides,
 });
 
 describe('UnifiedDocViewerFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     unifiedDocViewerServices = createUnifiedDocViewerServices();
     setUnifiedDocViewerServices(unifiedDocViewerServices);
   });
@@ -145,7 +147,7 @@ describe('UnifiedDocViewerFlyout', () => {
 
   it('renders trailing actions in the flyout menu', async () => {
     const user = userEvent.setup();
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     const trailingAction = {
       iconType: 'share' as const,
       'aria-label': 'Copy link to this document',

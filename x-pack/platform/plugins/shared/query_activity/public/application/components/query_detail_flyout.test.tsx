@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen, waitFor } from '@testing-library/react';
@@ -13,12 +16,12 @@ import type { RunningQuery } from '../../../common/types';
 import { QueryDetailFlyout } from './query_detail_flyout';
 import { useQueryActivityAppContext, type QueryActivityAppContextValue } from '../app_context';
 
-jest.mock('../app_context', () => ({
+vi.mock('../app_context', () => ({
   __esModule: true,
-  useQueryActivityAppContext: jest.fn(),
+  useQueryActivityAppContext: vi.fn(),
 }));
 
-const mockUseQueryActivityAppContext = useQueryActivityAppContext as jest.MockedFunction<
+const mockUseQueryActivityAppContext = useQueryActivityAppContext as MockedFunction<
   typeof useQueryActivityAppContext
 >;
 
@@ -36,18 +39,18 @@ const createQuery = (overrides: Partial<RunningQuery> = {}): RunningQuery => ({
 });
 
 const mockContext = (
-  fetchQueryDetails: jest.Mock,
-  discoverLocator?: { getRedirectUrl: jest.Mock }
+  fetchQueryDetails: Mock,
+  discoverLocator?: { getRedirectUrl: Mock }
 ) =>
   ({
     chrome: {} as any,
-    dataViews: { get: jest.fn().mockResolvedValue({}) } as any,
-    http: { basePath: { prepend: jest.fn((path: string) => path) } } as any,
+    dataViews: { get: vi.fn().mockResolvedValue({}) } as any,
+    http: { basePath: { prepend: vi.fn((path: string) => path) } } as any,
     notifications: {} as any,
     apiService: { fetchQueryDetails } as any,
     url: {
       locators: {
-        get: jest.fn(() => discoverLocator),
+        get: vi.fn(() => discoverLocator),
       },
     } as any,
     docLinks: {
@@ -68,11 +71,11 @@ const mockContext = (
 const renderFlyout = (
   query: RunningQuery,
   overrides: {
-    onStopQuery?: jest.Mock;
-    onQueryNoLongerRunning?: jest.Mock;
+    onStopQuery?: Mock;
+    onQueryNoLongerRunning?: Mock;
   } = {}
 ) => {
-  const onStopQuery = overrides.onStopQuery ?? jest.fn();
+  const onStopQuery = overrides.onStopQuery ?? vi.fn();
   const renderResult = renderWithKibanaRenderContext(
     <QueryDetailFlyout
       summary={query}
@@ -87,11 +90,11 @@ const renderFlyout = (
 
 describe('QueryDetailFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows a loading state while fetching details', () => {
-    const fetchQueryDetails = jest.fn(() => new Promise(() => {}));
+    const fetchQueryDetails = vi.fn(() => new Promise(() => {}));
     mockUseQueryActivityAppContext.mockReturnValue(mockContext(fetchQueryDetails));
 
     renderFlyout(createQuery());
@@ -101,12 +104,12 @@ describe('QueryDetailFlyout', () => {
 
   it('renders fetched details and the trace ID link', async () => {
     const query = createQuery({ traceId: 'trace-123' });
-    const fetchQueryDetails = jest.fn().mockResolvedValue({
+    const fetchQueryDetails = vi.fn().mockResolvedValue({
       data: { query },
       error: null,
     });
     const discoverLocator = {
-      getRedirectUrl: jest.fn(() => '/app/discover#/?_a=()'),
+      getRedirectUrl: vi.fn(() => '/app/discover#/?_a=()'),
     };
     mockUseQueryActivityAppContext.mockReturnValue(mockContext(fetchQueryDetails, discoverLocator));
 
@@ -118,11 +121,11 @@ describe('QueryDetailFlyout', () => {
   });
 
   it('shows when the query completed and requests a list refresh', async () => {
-    const fetchQueryDetails = jest.fn().mockResolvedValue({
+    const fetchQueryDetails = vi.fn().mockResolvedValue({
       data: null,
       error: { attributes: { code: 'QUERY_NOT_FOUND' } },
     });
-    const onQueryNoLongerRunning = jest.fn();
+    const onQueryNoLongerRunning = vi.fn();
     mockUseQueryActivityAppContext.mockReturnValue(mockContext(fetchQueryDetails));
 
     renderFlyout(createQuery(), { onQueryNoLongerRunning });
@@ -133,7 +136,7 @@ describe('QueryDetailFlyout', () => {
   });
 
   it('shows a generic error when details cannot be loaded', async () => {
-    const fetchQueryDetails = jest.fn().mockResolvedValue({
+    const fetchQueryDetails = vi.fn().mockResolvedValue({
       data: null,
       error: { message: 'Unavailable' },
     });
@@ -147,8 +150,8 @@ describe('QueryDetailFlyout', () => {
   it('allows cancellation while details are loading', async () => {
     const user = userEvent.setup();
     const query = createQuery();
-    const fetchQueryDetails = jest.fn(() => new Promise(() => {}));
-    const onStopQuery = jest.fn();
+    const fetchQueryDetails = vi.fn(() => new Promise(() => {}));
+    const onStopQuery = vi.fn();
     mockUseQueryActivityAppContext.mockReturnValue(mockContext(fetchQueryDetails));
 
     renderFlyout(query, { onStopQuery });
@@ -162,7 +165,7 @@ describe('QueryDetailFlyout', () => {
       data: null;
       error: { attributes: { code: string } };
     }) => void = () => {};
-    const fetchQueryDetails = jest.fn(
+    const fetchQueryDetails = vi.fn(
       () =>
         new Promise<{
           data: null;
@@ -171,7 +174,7 @@ describe('QueryDetailFlyout', () => {
           resolveRequest = resolve;
         })
     );
-    const onQueryNoLongerRunning = jest.fn();
+    const onQueryNoLongerRunning = vi.fn();
     mockUseQueryActivityAppContext.mockReturnValue(mockContext(fetchQueryDetails));
 
     const { unmount } = renderFlyout(createQuery(), { onQueryNoLongerRunning });

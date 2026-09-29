@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   createAppRootMockRenderer,
   type AppContextTestRender,
@@ -26,7 +28,7 @@ describe('useGetEndpointExceptionsPerPolicyOptIn()', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when feature flag is disabled', () => {

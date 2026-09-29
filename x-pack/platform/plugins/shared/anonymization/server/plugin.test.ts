@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -17,27 +20,36 @@ import type { AnonymizationProfileInitializer } from './types';
 // Allow tests to control ANONYMIZATION_FEATURE_ACTIVE per test via createPlugin(active)
 // without exposing any production config option.
 let mockFeatureActive = true;
-jest.mock('@kbn/anonymization-common', () => ({
-  ...jest.requireActual('@kbn/anonymization-common'),
-  get ANONYMIZATION_FEATURE_ACTIVE() {
-    return mockFeatureActive;
-  },
-}));
+vi.mock('@kbn/anonymization-common', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/anonymization-common')),
+      get ANONYMIZATION_FEATURE_ACTIVE() {
+        return mockFeatureActive;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./system_index', () => ({
-  ensureProfilesIndex: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./system_index', () => {
+      const mocked = {
+      ensureProfilesIndex: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./initialization', () => ({
-  GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE: 'index',
-  GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID: '__kbn_global_anonymization_profile__',
-  LEGACY_ANONYMIZATION_UI_SETTING_KEY: 'ai:anonymizationSettings',
-  ensureGlobalAnonymizationProfile: jest.fn().mockResolvedValue(undefined),
-  migrateLegacyUiSettingsIntoGlobalProfile: jest.fn().mockResolvedValue(undefined),
-  ensureGlobalProfileForNamespace: jest.fn().mockResolvedValue(undefined),
-}));
-const initializationMock = jest.requireMock('./initialization') as {
-  ensureGlobalProfileForNamespace: jest.Mock;
+vi.mock('./initialization', () => {
+      const mocked = {
+      GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE: 'index',
+      GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID: '__kbn_global_anonymization_profile__',
+      LEGACY_ANONYMIZATION_UI_SETTING_KEY: 'ai:anonymizationSettings',
+      ensureGlobalAnonymizationProfile: vi.fn().mockResolvedValue(undefined),
+      migrateLegacyUiSettingsIntoGlobalProfile: vi.fn().mockResolvedValue(undefined),
+      ensureGlobalProfileForNamespace: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+const initializationMock = (await vi.importMock('./initialization')) as {
+  ensureGlobalProfileForNamespace: Mock;
 };
 
 const createPlugin = (active = true) => {
@@ -80,31 +92,31 @@ const createProfile = ({
 describe('AnonymizationPlugin policy resolution', () => {
   afterEach(() => {
     mockFeatureActive = true;
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('merges data view and referenced index-pattern policies with most-restrictive precedence', async () => {
     const plugin = createPlugin();
     const coreStart = coreMock.createStart();
 
-    const resolve = jest.fn().mockResolvedValue({
+    const resolve = vi.fn().mockResolvedValue({
       saved_object: {
         attributes: {
           title: 'logs-*, metrics-*',
         },
       },
     });
-    const get = jest.fn().mockResolvedValue({ id: 'security-solution-alert-default' });
-    const asScopedToNamespace = jest.fn().mockReturnValue({
+    const get = vi.fn().mockResolvedValue({ id: 'security-solution-alert-default' });
+    const asScopedToNamespace = vi.fn().mockReturnValue({
       resolve,
       get,
     });
-    coreStart.savedObjects.getUnsafeInternalClient = jest.fn().mockReturnValue({
+    coreStart.savedObjects.getUnsafeInternalClient = vi.fn().mockReturnValue({
       asScopedToNamespace,
     });
 
-    const findByTarget = jest
+    const findByTarget = vi
       .spyOn(ProfilesRepository.prototype, 'findByTarget')
       .mockImplementation(async (_namespace, targetType, targetId) => {
         if (targetType === 'data_view' && targetId === 'my-data-view') {
@@ -169,17 +181,17 @@ describe('AnonymizationPlugin policy resolution', () => {
       'index-pattern',
       'my-data-view'
     );
-    const resolve = jest.fn().mockRejectedValue(notFoundError);
-    const get = jest.fn().mockResolvedValue({ id: 'security-solution-alert-default' });
-    const asScopedToNamespace = jest.fn().mockReturnValue({
+    const resolve = vi.fn().mockRejectedValue(notFoundError);
+    const get = vi.fn().mockResolvedValue({ id: 'security-solution-alert-default' });
+    const asScopedToNamespace = vi.fn().mockReturnValue({
       resolve,
       get,
     });
-    coreStart.savedObjects.getUnsafeInternalClient = jest.fn().mockReturnValue({
+    coreStart.savedObjects.getUnsafeInternalClient = vi.fn().mockReturnValue({
       asScopedToNamespace,
     });
 
-    jest
+    vi
       .spyOn(ProfilesRepository.prototype, 'findByTarget')
       .mockImplementation(async (_namespace, targetType, targetId) => {
         if (targetType === 'data_view' && targetId === 'my-data-view') {
@@ -225,18 +237,18 @@ describe('AnonymizationPlugin policy resolution', () => {
     const plugin = createPlugin();
     const coreStart = coreMock.createStart();
 
-    const resolve = jest.fn().mockResolvedValue({
+    const resolve = vi.fn().mockResolvedValue({
       saved_object: { attributes: { title: 'logs-*' } },
     });
-    const get = jest.fn().mockResolvedValue({ id: 'security-solution-alert-default' });
-    const asScopedToNamespace = jest.fn().mockReturnValue({
+    const get = vi.fn().mockResolvedValue({ id: 'security-solution-alert-default' });
+    const asScopedToNamespace = vi.fn().mockReturnValue({
       resolve,
       get,
     });
-    coreStart.savedObjects.getUnsafeInternalClient = jest.fn().mockReturnValue({
+    coreStart.savedObjects.getUnsafeInternalClient = vi.fn().mockReturnValue({
       asScopedToNamespace,
     });
-    jest.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
+    vi.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
 
     const start = plugin.start(coreStart, {
       encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
@@ -255,19 +267,19 @@ describe('AnonymizationPlugin policy resolution', () => {
   it('returns no policy and skips initialization when plugin is disabled', async () => {
     const plugin = createPlugin(false);
     const coreStart = coreMock.createStart();
-    const resolve = jest.fn().mockResolvedValue({
+    const resolve = vi.fn().mockResolvedValue({
       saved_object: { attributes: { title: 'logs-*' } },
     });
-    const get = jest.fn().mockResolvedValue({ id: 'security-solution-alert-default' });
-    const asScopedToNamespace = jest.fn().mockReturnValue({
+    const get = vi.fn().mockResolvedValue({ id: 'security-solution-alert-default' });
+    const asScopedToNamespace = vi.fn().mockReturnValue({
       resolve,
       get,
     });
-    coreStart.savedObjects.getUnsafeInternalClient = jest.fn().mockReturnValue({
+    coreStart.savedObjects.getUnsafeInternalClient = vi.fn().mockReturnValue({
       asScopedToNamespace,
     });
 
-    const findByTarget = jest
+    const findByTarget = vi
       .spyOn(ProfilesRepository.prototype, 'findByTarget')
       .mockResolvedValue(null);
 
@@ -290,15 +302,15 @@ describe('AnonymizationPlugin policy resolution', () => {
   it('dispatches registered profile initializers before policy resolution', async () => {
     const plugin = createPlugin();
     const coreStart = coreMock.createStart();
-    const shouldInitialize = jest.fn().mockReturnValue(true);
-    const initialize = jest.fn().mockResolvedValue(undefined);
+    const shouldInitialize = vi.fn().mockReturnValue(true);
+    const initialize = vi.fn().mockResolvedValue(undefined);
     const initializer: AnonymizationProfileInitializer = {
       id: 'test.initializer',
       shouldInitialize,
       initialize,
     };
 
-    jest.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
+    vi.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
 
     const start = plugin.start(coreStart, {
       encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
@@ -324,20 +336,20 @@ describe('AnonymizationPlugin policy resolution', () => {
 
     const firstInitializer: AnonymizationProfileInitializer = {
       id: 'test.initializer.first',
-      shouldInitialize: jest.fn().mockReturnValue(true),
-      initialize: jest.fn().mockImplementation(async () => {
+      shouldInitialize: vi.fn().mockReturnValue(true),
+      initialize: vi.fn().mockImplementation(async () => {
         callOrder.push('first');
       }),
     };
     const secondInitializer: AnonymizationProfileInitializer = {
       id: 'test.initializer.second',
-      shouldInitialize: jest.fn().mockReturnValue(true),
-      initialize: jest.fn().mockImplementation(async () => {
+      shouldInitialize: vi.fn().mockReturnValue(true),
+      initialize: vi.fn().mockImplementation(async () => {
         callOrder.push('second');
       }),
     };
 
-    jest.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
+    vi.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
 
     const start = plugin.start(coreStart, {
       encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
@@ -360,16 +372,16 @@ describe('AnonymizationPlugin policy resolution', () => {
 
     const firstInitializer: AnonymizationProfileInitializer = {
       id: 'test.initializer.throwing',
-      shouldInitialize: jest.fn().mockReturnValue(true),
-      initialize: jest.fn().mockRejectedValue(firstError),
+      shouldInitialize: vi.fn().mockReturnValue(true),
+      initialize: vi.fn().mockRejectedValue(firstError),
     };
     const secondInitializer: AnonymizationProfileInitializer = {
       id: 'test.initializer.not_called',
-      shouldInitialize: jest.fn().mockReturnValue(true),
-      initialize: jest.fn().mockResolvedValue(undefined),
+      shouldInitialize: vi.fn().mockReturnValue(true),
+      initialize: vi.fn().mockResolvedValue(undefined),
     };
 
-    jest.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
+    vi.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
 
     const start = plugin.start(coreStart, {
       encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
@@ -389,8 +401,8 @@ describe('AnonymizationPlugin policy resolution', () => {
   it('overwrites existing initializer for duplicate id in start contract', async () => {
     const plugin = createPlugin();
     const coreStart = coreMock.createStart();
-    const firstInitialize = jest.fn().mockResolvedValue(undefined);
-    const secondInitialize = jest.fn().mockResolvedValue(undefined);
+    const firstInitialize = vi.fn().mockResolvedValue(undefined);
+    const secondInitialize = vi.fn().mockResolvedValue(undefined);
 
     const start = plugin.start(coreStart, {
       encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
@@ -398,16 +410,16 @@ describe('AnonymizationPlugin policy resolution', () => {
 
     start.registerProfileInitializer({
       id: 'test.initializer.duplicate',
-      shouldInitialize: jest.fn().mockReturnValue(true),
+      shouldInitialize: vi.fn().mockReturnValue(true),
       initialize: firstInitialize,
     });
     start.registerProfileInitializer({
       id: 'test.initializer.duplicate',
-      shouldInitialize: jest.fn().mockReturnValue(true),
+      shouldInitialize: vi.fn().mockReturnValue(true),
       initialize: secondInitialize,
     });
 
-    jest.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
+    vi.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
 
     await start.getPolicyService().resolveEffectivePolicy('default', {
       type: 'index',
@@ -421,8 +433,8 @@ describe('AnonymizationPlugin policy resolution', () => {
   it('logs a warning when duplicate initializer id is registered', () => {
     const plugin = createPlugin();
     const coreStart = coreMock.createStart();
-    const logger = (plugin as unknown as { logger: { warn: jest.Mock } }).logger;
-    const warnSpy = jest.spyOn(logger, 'warn');
+    const logger = (plugin as unknown as { logger: { warn: Mock } }).logger;
+    const warnSpy = vi.spyOn(logger, 'warn');
 
     const start = plugin.start(coreStart, {
       encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
@@ -430,13 +442,13 @@ describe('AnonymizationPlugin policy resolution', () => {
 
     start.registerProfileInitializer({
       id: 'test.initializer.duplicate_warn',
-      shouldInitialize: jest.fn().mockReturnValue(false),
-      initialize: jest.fn().mockResolvedValue(undefined),
+      shouldInitialize: vi.fn().mockReturnValue(false),
+      initialize: vi.fn().mockResolvedValue(undefined),
     });
     start.registerProfileInitializer({
       id: 'test.initializer.duplicate_warn',
-      shouldInitialize: jest.fn().mockReturnValue(false),
-      initialize: jest.fn().mockResolvedValue(undefined),
+      shouldInitialize: vi.fn().mockReturnValue(false),
+      initialize: vi.fn().mockResolvedValue(undefined),
     });
 
     expect(warnSpy).toHaveBeenCalledWith(

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { EuiButtonGroup } from '@elastic/eui';
@@ -24,8 +26,8 @@ import { act } from 'react-dom/test-utils';
 import type { PaletteConfigurationActions } from './types';
 
 // mocking random id generator function
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   return {
     ...original,
@@ -37,8 +39,8 @@ jest.mock('@elastic/eui', () => {
 });
 
 // mocking isAllColorRangesValid function
-jest.mock('./color_ranges/color_ranges_validation', () => {
-  const original = jest.requireActual('./color_ranges/color_ranges_validation');
+vi.mock('./color_ranges/color_ranges_validation', async () => {
+  const original = (await vi.importActual('./color_ranges/color_ranges_validation'));
 
   return {
     ...original,
@@ -60,11 +62,11 @@ describe('palette panel', () => {
       props = {
         activePalette: { type: 'palette', name: 'positive' },
         palettes: paletteRegistry,
-        setPalette: jest.fn(),
+        setPalette: vi.fn(),
         dataBounds: { min: 0, max: 100 },
       };
 
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
     });
 
     function changePaletteIn(instance: ReactWrapper, newPaletteName: string) {
@@ -100,7 +102,7 @@ describe('palette panel', () => {
         changePaletteIn(instance, 'custom');
       });
 
-      jest.advanceTimersByTime(250);
+      vi.advanceTimersByTime(250);
 
       expect(props.setPalette).toHaveBeenCalledWith({
         type: 'palette',
@@ -126,7 +128,7 @@ describe('palette panel', () => {
         changePaletteIn(instance, 'negative');
       });
 
-      jest.advanceTimersByTime(250);
+      vi.advanceTimersByTime(250);
 
       expect(props.setPalette).toHaveBeenCalledWith({
         type: 'palette',
@@ -145,7 +147,7 @@ describe('palette panel', () => {
         changePaletteIn(instance, 'custom');
       });
 
-      jest.advanceTimersByTime(250);
+      vi.advanceTimersByTime(250);
 
       expect(props.setPalette).toHaveBeenCalledWith({
         type: 'palette',
@@ -186,7 +188,7 @@ describe('palette panel', () => {
       });
       instance.update();
 
-      jest.advanceTimersByTime(250);
+      vi.advanceTimersByTime(250);
 
       expect(props.setPalette).toHaveBeenLastCalledWith({
         type: 'palette',
@@ -230,7 +232,7 @@ describe('palette panel', () => {
         });
       });
 
-      jest.advanceTimersByTime(250);
+      vi.advanceTimersByTime(250);
 
       expect(props.setPalette).not.toHaveBeenCalled();
     });
@@ -241,7 +243,7 @@ describe('palette panel', () => {
       props = {
         activePalette: { type: 'palette', name: 'custom' },
         palettes: paletteRegistry,
-        setPalette: jest.fn(),
+        setPalette: vi.fn(),
         dataBounds: { min: 5, max: 200 },
       };
     });
@@ -255,7 +257,7 @@ describe('palette panel', () => {
           .prop('onChange')!('number');
       });
 
-      jest.advanceTimersByTime(250);
+      vi.advanceTimersByTime(250);
 
       act(() => {
         instance
@@ -264,7 +266,7 @@ describe('palette panel', () => {
           .prop('onChange')!('percent');
       });
 
-      jest.advanceTimersByTime(250);
+      vi.advanceTimersByTime(250);
 
       expect(props.setPalette).toHaveBeenNthCalledWith(
         1,
@@ -306,7 +308,7 @@ describe('palette panel', () => {
       props = {
         activePalette: { type: 'palette', name: 'positive' },
         palettes: paletteRegistry,
-        setPalette: jest.fn(),
+        setPalette: vi.fn(),
         dataBounds: { min: 0, max: 100 },
       };
     });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EsqlKnowledgeBase } from '../../../../../../../common/task/util/esql_knowledge_base';
 import { getTranslateRuleNode } from './translate_rule';
@@ -12,11 +15,11 @@ import { getTranslateRuleNode } from './translate_rule';
 describe('getTranslateRuleNode', () => {
   const logger = loggerMock.create();
   const esqlKnowledgeBase = {
-    translate: jest.fn(),
-  } as unknown as jest.Mocked<EsqlKnowledgeBase>;
+    translate: vi.fn(),
+  } as unknown as Mocked<EsqlKnowledgeBase>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esqlKnowledgeBase.translate.mockResolvedValue(`\`\`\`esql
 FROM logs-*
 | LOOKUP JOIN lookup_default_threat_intel_ip ON destination.ip == ip

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
@@ -22,10 +24,10 @@ describe('HiddenItem', () => {
     icon: 'dashboard',
   };
 
-  const toggleItemVisibility = jest.fn();
+  const toggleItemVisibility = vi.fn();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the item title', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,9 +17,9 @@ import { searchAttacks } from '../api';
 import { getSearchAttacksResponseMock } from '../__mocks__/attacks';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 
-jest.mock('../../../hooks/use_app_toasts');
-jest.mock('../../../hooks/use_selector');
-jest.mock('../api');
+vi.mock('../../../hooks/use_app_toasts');
+vi.mock('../../../hooks/use_selector');
+vi.mock('../api');
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -34,17 +37,17 @@ const createWrapper = () => {
 
 describe('useSearchAttacks', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAppToasts as jest.Mock).mockReturnValue({
-      addSuccess: jest.fn(),
-      addError: jest.fn(),
+    vi.clearAllMocks();
+    (useAppToasts as Mock).mockReturnValue({
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
     });
   });
 
   it('should call searchAttacks with correct params', async () => {
     const query = { query: { match_all: {} } };
     const mockResponse = getSearchAttacksResponseMock();
-    (searchAttacks as jest.Mock).mockResolvedValueOnce(mockResponse);
+    (searchAttacks as Mock).mockResolvedValueOnce(mockResponse);
 
     const { result } = renderHook(() => useSearchAttacks(query), {
       wrapper: createWrapper(),
@@ -64,7 +67,7 @@ describe('useSearchAttacks', () => {
   it('should handle errors', async () => {
     const query = { query: { match_all: {} } };
     const error = new Error('Test error');
-    (searchAttacks as jest.Mock).mockRejectedValueOnce(error);
+    (searchAttacks as Mock).mockRejectedValueOnce(error);
 
     const { addError } = useAppToasts();
     const { result } = renderHook(() => useSearchAttacks(query), {
@@ -82,15 +85,15 @@ describe('useSearchAttacks', () => {
 });
 
 describe('useInvalidateSearchAttacks', () => {
-  const mockRefetch = jest.fn();
+  const mockRefetch = vi.fn();
 
   beforeEach(() => {
-    (useDeepEqualSelector as jest.Mock).mockReturnValue([{ refetch: mockRefetch }]);
+    (useDeepEqualSelector as Mock).mockReturnValue([{ refetch: mockRefetch }]);
   });
 
   it('should invalidate queries and refetch global queries', () => {
     const queryClient = new QueryClient();
-    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useInvalidateSearchAttacks(), {
       wrapper: ({ children }: { children: React.ReactNode }) => (

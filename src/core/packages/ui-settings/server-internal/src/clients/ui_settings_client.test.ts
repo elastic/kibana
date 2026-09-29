@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Chance from 'chance';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -59,7 +61,7 @@ describe('ui settings', () => {
     };
   }
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   describe('#setMany()', () => {
     it('returns a promise', () => {
@@ -408,7 +410,7 @@ describe('ui settings', () => {
 
     it('automatically creates the savedConfig if it is missing and returns empty object', async () => {
       const { uiSettings, savedObjectsClient } = setup();
-      savedObjectsClient.get = jest
+      savedObjectsClient.get = vi
         .fn()
         .mockRejectedValueOnce(SavedObjectsClient.errors.createGenericNotFoundError())
         .mockResolvedValueOnce({ attributes: {} });
@@ -689,7 +691,7 @@ describe('ui settings', () => {
       const defaults = {
         dynamicSetting: {
           value: 'fallback-value',
-          getValue: jest.fn().mockRejectedValue(new Error('getValue failed')),
+          getValue: vi.fn().mockRejectedValue(new Error('getValue failed')),
         },
       };
 
@@ -892,8 +894,8 @@ describe('ui settings', () => {
     }
 
     afterEach(() => {
-      jest.clearAllMocks();
-      jest.useRealTimers();
+      vi.clearAllMocks();
+      vi.useRealTimers();
     });
 
     describe('cross-request caching', () => {
@@ -1064,7 +1066,7 @@ describe('ui settings', () => {
 
     describe('TTL expiry', () => {
       it('expires shared cache after TTL', async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
 
         const { uiSettings, savedObjectsClient } = setupWithSharedCache({
           esDocSource: { foo: 'bar' },
@@ -1073,12 +1075,12 @@ describe('ui settings', () => {
         await uiSettings.getUserProvided();
         expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
 
-        jest.advanceTimersByTime(NAMESPACED_CACHE_TTL - 2_000);
+        vi.advanceTimersByTime(NAMESPACED_CACHE_TTL - 2_000);
 
         await uiSettings.getUserProvided();
         expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
 
-        jest.advanceTimersByTime(2_000);
+        vi.advanceTimersByTime(2_000);
 
         await uiSettings.getUserProvided();
         expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);

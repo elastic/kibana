@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/logging';
 import type { CategoriesResponse } from '@kbn/siem-readiness';
 import { getCoverage } from './get_coverage';
 
-const logger = { error: jest.fn(), warn: jest.fn(), info: jest.fn() } as unknown as Logger;
+const logger = { error: vi.fn(), warn: vi.fn(), info: vi.fn() } as unknown as Logger;
 
 const makeCategories = (
   categories: Array<{ category: string; docs: number }>
@@ -24,7 +26,7 @@ const makeCategories = (
 const emptyCategories: CategoriesResponse = { rawCategoriesMap: [], mainCategoriesMap: [] };
 
 describe('getCoverage', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('status', () => {
     it('returns noData when no categories and no detection rules', async () => {

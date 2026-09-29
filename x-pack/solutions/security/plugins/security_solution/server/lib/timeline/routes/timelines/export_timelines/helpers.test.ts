@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FrameworkRequest } from '../../../../framework';
 import type { TimelineResponse } from '../../../../../../common/api/timeline';
 import { getExportTimelineByObjectIds } from './helpers';
@@ -12,21 +15,30 @@ import { getSelectedTimelines } from '../../../saved_object/timelines';
 import * as noteLib from '../../../saved_object/notes';
 import * as pinnedEventLib from '../../../saved_object/pinned_events';
 
-jest.mock('../../../saved_object/timelines', () => ({
-  getSelectedTimelines: jest.fn(),
-}));
+vi.mock('../../../saved_object/timelines', () => {
+      const mocked = {
+      getSelectedTimelines: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../saved_object/notes', () => ({
-  getNotesByTimelineId: jest.fn(),
-}));
+vi.mock('../../../saved_object/notes', () => {
+      const mocked = {
+      getNotesByTimelineId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../saved_object/pinned_events', () => ({
-  getAllPinnedEventsByTimelineId: jest.fn(),
-}));
+vi.mock('../../../saved_object/pinned_events', () => {
+      const mocked = {
+      getAllPinnedEventsByTimelineId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('export timelines helpers', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('enriches notes and pinned events in bounded batches', async () => {
@@ -35,19 +47,19 @@ describe('export timelines helpers', () => {
       status: 'active',
     })) as unknown as TimelineResponse[];
 
-    (getSelectedTimelines as jest.Mock).mockResolvedValue({
+    (getSelectedTimelines as Mock).mockResolvedValue({
       timelines,
       errors: [],
     });
 
     const pendingNotes: Array<() => void> = [];
     const pendingPinnedEvents: Array<() => void> = [];
-    (noteLib.getNotesByTimelineId as jest.Mock).mockImplementation((_, timelineId: string) => {
+    (noteLib.getNotesByTimelineId as Mock).mockImplementation((_, timelineId: string) => {
       return new Promise((resolve) => {
         pendingNotes.push(() => resolve([{ timelineId }]));
       });
     });
-    (pinnedEventLib.getAllPinnedEventsByTimelineId as jest.Mock).mockImplementation(
+    (pinnedEventLib.getAllPinnedEventsByTimelineId as Mock).mockImplementation(
       (_, timelineId: string) => {
         return new Promise((resolve) => {
           pendingPinnedEvents.push(() => resolve([{ timelineId, eventId: `event-${timelineId}` }]));

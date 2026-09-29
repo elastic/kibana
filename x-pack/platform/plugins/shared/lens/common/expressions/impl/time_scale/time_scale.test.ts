@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 
@@ -480,7 +482,7 @@ describe('time_scale', () => {
     const timezonePromise = new Promise<string>((res) => {
       resolveTimezonePromise = res;
     });
-    const timeScaleResolved = jest.fn((x) => x);
+    const timeScaleResolved = vi.fn((x) => x);
     const delayedTimeScale = getTimeScale(createDatatableUtilitiesMock, () => timezonePromise);
     const delayedTimeScaleWrapper = functionWrapper(delayedTimeScale);
     const result = delayedTimeScaleWrapper(

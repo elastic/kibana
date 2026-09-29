@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -21,12 +23,12 @@ describe('ObservableTypesList', () => {
   const props: ObservableTypesListProps = {
     disabled: false,
     observableTypes,
-    onDeleteObservableType: jest.fn(),
-    onEditObservableType: jest.fn(),
+    onDeleteObservableType: vi.fn(),
+    onEditObservableType: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', () => {
@@ -51,7 +53,7 @@ describe('ObservableTypesList', () => {
 
   describe('Delete', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('shows confirmation modal when deleting a field ', async () => {
@@ -109,7 +111,7 @@ describe('ObservableTypesList', () => {
 
   describe('Edit', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('calls onEditObservableType correctly', async () => {

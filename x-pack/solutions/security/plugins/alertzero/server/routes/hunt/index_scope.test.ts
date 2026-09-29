@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { HuntTechnology, ResolvedIndexScope } from '@kbn/alertzero-common';
@@ -15,16 +18,16 @@ import {
   resolveIndexScope,
 } from '../../services/watches/hunt/common/resolve_index_scope';
 
-jest.mock('../../services/watches/hunt/common/resolve_index_scope', () => {
-  const actual = jest.requireActual('../../services/watches/hunt/common/resolve_index_scope');
-  return { ...actual, resolveIndexScope: jest.fn() };
+vi.mock('../../services/watches/hunt/common/resolve_index_scope', async () => {
+  const actual = (await vi.importActual('../../services/watches/hunt/common/resolve_index_scope'));
+  return { ...actual, resolveIndexScope: vi.fn() };
 });
 
-const resolveIndexScopeMock = resolveIndexScope as jest.MockedFunction<typeof resolveIndexScope>;
+const resolveIndexScopeMock = resolveIndexScope as MockedFunction<typeof resolveIndexScope>;
 
 const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
-  const addVersion = jest.fn();
-  const router = { versioned: { get: jest.fn().mockReturnValue({ addVersion }) } };
+  const addVersion = vi.fn();
+  const router = { versioned: { get: vi.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
 
   registerHuntIndexScopeRoute({
@@ -33,8 +36,8 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
     getSpaceId: () => spaceId,
   } as unknown as RouteDependencies);
 
-  const asCurrentUser = { search: jest.fn() };
-  const asInternalUser = { search: jest.fn() };
+  const asCurrentUser = { search: vi.fn() };
+  const asInternalUser = { search: vi.fn() };
   const context = {
     core: Promise.resolve({ elasticsearch: { client: { asCurrentUser, asInternalUser } } }),
   };

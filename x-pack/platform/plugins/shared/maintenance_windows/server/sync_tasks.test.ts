@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import pRetry from 'p-retry';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -12,9 +14,9 @@ import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server';
 import { MaintenanceWindowSyncTasks } from './sync_tasks';
 
 // Use 0ms delays so retry tests run synchronously without fake timers.
-jest.mock('p-retry', () => {
-  const actual = jest.requireActual<typeof import('p-retry')>('p-retry');
-  const mockFn = jest
+vi.mock('p-retry', () => {
+  const actual = (require('p-retry') as typeof import('p-retry'));
+  const mockFn = vi
     .fn()
     .mockImplementation((fn: Parameters<typeof actual.default>[0], options: any) =>
       actual.default(fn, { ...options, minTimeout: 0, maxTimeout: 0, randomize: false })
@@ -33,8 +35,8 @@ describe('MaintenanceWindowSyncTasks', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(pRetry).mockClear();
+    vi.clearAllMocks();
+    vi.mocked(pRetry).mockClear();
   });
 
   it('registers task ids and runs them soon', async () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, within } from '@testing-library/react';
@@ -28,17 +30,17 @@ type RenderTableProps = Partial<React.ComponentProps<typeof Table>>;
 const baseProps: React.ComponentProps<typeof Table> = {
   indexPattern: getIndexPatternMock(),
   items,
-  deleteFilter: jest.fn(),
+  deleteFilter: vi.fn(),
   fieldWildcardMatcher: (filters: string[]) => {
     const [query = ''] = filters;
     const normalizedQuery = query.replace('*', '');
     return (field: string) => field.includes(normalizedQuery);
   },
-  saveFilter: jest.fn(),
+  saveFilter: vi.fn(),
   isSaving: false,
   euiTablePersist: {
     pageSize: 10,
-    onTableChange: jest.fn(),
+    onTableChange: vi.fn(),
     sorting: { sort: { direction: 'asc' as const, field: 'clientId' as const } },
   },
 };
@@ -54,7 +56,7 @@ const renderTable = (customProps: RenderTableProps = {}) => {
 
 describe('Table', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders table headers and rows', () => {
@@ -112,7 +114,7 @@ describe('Table', () => {
 
     it('saves edited filter when save icon is clicked and exits edit mode', async () => {
       const user = userEvent.setup();
-      const saveFilter = jest.fn();
+      const saveFilter = vi.fn();
       renderTable({ saveFilter });
 
       await user.click(screen.getByTestId('edit_filter-tim*'));
@@ -127,7 +129,7 @@ describe('Table', () => {
 
   it('allows deletes', async () => {
     const user = userEvent.setup();
-    const deleteFilter = jest.fn();
+    const deleteFilter = vi.fn();
     renderTable({ deleteFilter });
 
     const row = screen.getByRole('row', { name: /tim\*/i });
@@ -137,7 +139,7 @@ describe('Table', () => {
 
   it('saves when in edit mode and Enter key is pressed', async () => {
     const user = userEvent.setup();
-    const saveFilter = jest.fn();
+    const saveFilter = vi.fn();
     renderTable({ saveFilter });
 
     await user.click(screen.getByTestId('edit_filter-tim*'));
@@ -152,7 +154,7 @@ describe('Table', () => {
 
   it('cancels when in edit mode and Escape key is pressed', async () => {
     const user = userEvent.setup();
-    const saveFilter = jest.fn();
+    const saveFilter = vi.fn();
     renderTable({ saveFilter });
 
     await user.click(screen.getByTestId('edit_filter-tim*'));

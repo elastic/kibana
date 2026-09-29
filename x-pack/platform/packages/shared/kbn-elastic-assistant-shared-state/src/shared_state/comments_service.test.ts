@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CommentServiceActions } from './comments_service';
 import { CommentsService } from './comments_service';
 import type { ClientMessage } from '@kbn/elastic-assistant';
@@ -36,7 +38,7 @@ describe('CommentsService', () => {
 
     const mockActions1: CommentServiceActions = {
       order: 1,
-      mount: jest.fn(({ message }) => {
+      mount: vi.fn(({ message }) => {
         expect(message).toBe(mockMessage);
         return mockMountPoint;
       }),
@@ -44,7 +46,7 @@ describe('CommentsService', () => {
 
     const mockActions2: CommentServiceActions = {
       order: 2,
-      mount: jest.fn(() => mockMountPoint),
+      mount: vi.fn(() => mockMountPoint),
     };
 
     // Register the actions
@@ -89,17 +91,17 @@ describe('CommentsService', () => {
 
     const action3: CommentServiceActions = {
       order: 3,
-      mount: jest.fn(() => mockMountPoint),
+      mount: vi.fn(() => mockMountPoint),
     };
 
     const action1: CommentServiceActions = {
       order: 1,
-      mount: jest.fn(() => mockMountPoint),
+      mount: vi.fn(() => mockMountPoint),
     };
 
     const action2: CommentServiceActions = {
       order: 2,
-      mount: jest.fn(() => mockMountPoint),
+      mount: vi.fn(() => mockMountPoint),
     };
 
     // Register the actions in random order

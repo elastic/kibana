@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -12,14 +15,14 @@ import { TestProviders } from '../../../../common/mock';
 import { useCasesByStatus } from './use_cases_by_status';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
-const mockDateNow = jest.fn().mockReturnValue(dateNow);
-Date.now = jest.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
-const mockSetQuery = jest.fn();
-const mockDeleteQuery = jest.fn();
+const mockDateNow = vi.fn().mockReturnValue(dateNow);
+Date.now = vi.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
+const mockSetQuery = vi.fn();
+const mockDeleteQuery = vi.fn();
 
-jest.mock('../../../../common/containers/use_global_time', () => {
+vi.mock('../../../../common/containers/use_global_time', () => {
   return {
-    useGlobalTime: jest.fn().mockReturnValue({
+    useGlobalTime: vi.fn().mockReturnValue({
       from: '2022-04-05T12:00:00.000Z',
       to: '2022-04-08T12:00:00.000Z',
       setQuery: () => mockSetQuery(),
@@ -27,9 +30,9 @@ jest.mock('../../../../common/containers/use_global_time', () => {
     }),
   };
 });
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-const mockGetCasesMetrics = jest.fn();
+const mockGetCasesMetrics = vi.fn();
 mockGetCasesMetrics.mockResolvedValue({
   status: {
     open: 1,
@@ -51,11 +54,11 @@ const mockUseKibana = {
   },
 };
 
-(useKibana as jest.Mock).mockReturnValue(mockUseKibana);
+(useKibana as Mock).mockReturnValue(mockUseKibana);
 
 describe('useCasesByStatus', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   test('init', async () => {
     mockGetCasesMetrics.mockResolvedValueOnce({
@@ -110,7 +113,7 @@ describe('useCasesByStatus', () => {
     // muting setState warning that happens on unmount
     // because it's a noop and going to be removed
     // in the next version of React
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { unmount } = renderHook(() => useCasesByStatus({ skip: false }), {
       wrapper: TestProviders,
     });
@@ -125,7 +128,7 @@ describe('useCasesByStatus', () => {
   });
 
   test('skip', async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
+    const abortSpy = vi.spyOn(AbortController.prototype, 'abort');
     const localProps = { skip: false };
 
     const { rerender } = renderHook(() => useCasesByStatus(localProps), {

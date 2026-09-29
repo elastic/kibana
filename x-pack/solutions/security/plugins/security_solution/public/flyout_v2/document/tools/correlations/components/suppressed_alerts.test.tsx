@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
@@ -22,11 +25,14 @@ import { DocumentDetailsContext } from '../../../../../flyout/document_details/s
 import { mockContextValue } from '../../../../../flyout/document_details/shared/mocks/mock_context';
 import { isSuppressionRuleInGA } from '../../../../../../common/detection_engine/utils';
 
-jest.mock('../../../../../../common/detection_engine/utils', () => ({
-  isSuppressionRuleInGA: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../../../../common/detection_engine/utils', () => {
+      const mocked = {
+      isSuppressionRuleInGA: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const isSuppressionRuleInGAMock = isSuppressionRuleInGA as jest.Mock;
+const isSuppressionRuleInGAMock = isSuppressionRuleInGA as Mock;
 
 const mockEcsData = {
   _id: 'testId',

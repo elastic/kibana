@@ -7,17 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import { stringify } from 'yaml';
 import type { ModuleDiscoveryInfo } from './types';
 
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/mock/repo/root',
-}));
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/mock/repo/root',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('fs');
-jest.mock('fast-glob');
+vi.mock('fs');
+vi.mock('fast-glob');
 
 import { filterModulesByScoutCiConfig } from './search_configs';
 
@@ -36,12 +42,12 @@ describe('filterModulesByScoutCiConfig', () => {
 
   beforeEach(() => {
     mockLog = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
-    jest.spyOn(mockLog, 'warning').mockImplementation(jest.fn());
-    (fs.readFileSync as jest.Mock).mockReturnValue(stringify(mockScoutCiConfig));
+    vi.spyOn(mockLog, 'warning').mockImplementation(vi.fn());
+    (fs.readFileSync as Mock).mockReturnValue(stringify(mockScoutCiConfig));
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return only enabled plugins and packages', () => {

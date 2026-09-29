@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-jest.mock('uuid', () => ({ v4: () => 'mock-report-id' }));
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('uuid', () => {
+      const mocked = { v4: () => 'mock-report-id' };
+      return { ...mocked, default: mocked };
+    });
 
 import rison from '@kbn/rison';
 
@@ -76,7 +82,7 @@ describe('Handle request to schedule', () => {
   let auditLogger: AuditLogger;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const mockConfig = createMockConfigSchema({});
     reportingCore = await createMockReportingCore(
       mockConfig,
@@ -100,17 +106,17 @@ describe('Handle request to schedule', () => {
     mockRequest = getMockRequest();
 
     mockResponseFactory = getMockResponseFactory();
-    (mockResponseFactory.ok as jest.Mock) = jest.fn((args: unknown) => args);
-    (mockResponseFactory.forbidden as jest.Mock) = jest.fn((args: unknown) => args);
-    (mockResponseFactory.badRequest as jest.Mock) = jest.fn((args: unknown) => args);
+    (mockResponseFactory.ok as Mock) = vi.fn((args: unknown) => args);
+    (mockResponseFactory.forbidden as Mock) = vi.fn((args: unknown) => args);
+    (mockResponseFactory.badRequest as Mock) = vi.fn((args: unknown) => args);
 
     mockContext = getMockContext();
     mockContext.reporting = Promise.resolve({} as ReportingSetup);
 
     auditLogger = await reportingCore.getAuditLogger(fakeRawRequest as unknown as KibanaRequest);
-    auditLogger.log = jest.fn();
+    auditLogger.log = vi.fn();
     soClient = await reportingCore.getScopedSoClient(fakeRawRequest as unknown as KibanaRequest);
-    soClient.create = jest.fn().mockImplementation(async (_, opts) => {
+    soClient.create = vi.fn().mockImplementation(async (_, opts) => {
       return {
         id: 'foo',
         attributes: opts,
@@ -118,7 +124,7 @@ describe('Handle request to schedule', () => {
       };
     });
 
-    jest.spyOn(reportingCore, 'scheduleRecurringTask').mockResolvedValue({
+    vi.spyOn(reportingCore, 'scheduleRecurringTask').mockResolvedValue({
       id: 'task-id',
       scheduledAt: new Date(),
       attempts: 0,
@@ -132,7 +138,7 @@ describe('Handle request to schedule', () => {
       params: {},
     });
 
-    jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValue({
+    vi.spyOn(reportingCore, 'getHealthInfo').mockResolvedValue({
       isSufficientlySecure: true,
       hasPermanentEncryptionKey: true,
       areNotificationsEnabled: true,
@@ -424,7 +430,7 @@ describe('Handle request to schedule', () => {
     });
 
     test('throws errors from so client create', async () => {
-      soClient.create = jest.fn().mockImplementationOnce(async () => {
+      soClient.create = vi.fn().mockImplementationOnce(async () => {
         throw new Error('SO create error');
       });
 
@@ -678,7 +684,7 @@ describe('Handle request to schedule', () => {
     });
 
     test('handles invalid email address', () => {
-      jest
+      vi
         .spyOn(reportingCore, 'validateNotificationEmails')
         .mockReturnValueOnce('not valid emails: foo');
       let error: { statusCode: number; body: string } | undefined;
@@ -774,7 +780,7 @@ describe('Handle request to schedule', () => {
     });
 
     test('disallows unsupporting license', async () => {
-      (reportingCore.getLicenseInfo as jest.Mock) = jest.fn(() => ({
+      (reportingCore.getLicenseInfo as Mock) = vi.fn(() => ({
         scheduledReports: {
           enableLinks: false,
           message: `seeing this means the license isn't supported`,
@@ -846,7 +852,7 @@ describe('Handle request to schedule', () => {
     });
 
     test('disallows scheduling when reportingHealth.hasPermanentEncryptionKey = false', async () => {
-      jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValueOnce({
+      vi.spyOn(reportingCore, 'getHealthInfo').mockResolvedValueOnce({
         isSufficientlySecure: true,
         hasPermanentEncryptionKey: false,
         areNotificationsEnabled: true,
@@ -865,7 +871,7 @@ describe('Handle request to schedule', () => {
     });
 
     test('disallows scheduling when reportingHealth.isSufficientlySecure=false', async () => {
-      jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValueOnce({
+      vi.spyOn(reportingCore, 'getHealthInfo').mockResolvedValueOnce({
         isSufficientlySecure: false,
         hasPermanentEncryptionKey: true,
         areNotificationsEnabled: true,
@@ -884,7 +890,7 @@ describe('Handle request to schedule', () => {
     });
 
     test('handles errors from so client create', async () => {
-      soClient.create = jest.fn().mockImplementationOnce(async () => {
+      soClient.create = vi.fn().mockImplementationOnce(async () => {
         throw new Error('SO create error');
       });
 

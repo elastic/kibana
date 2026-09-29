@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { CreateMicrosoftDefenderConnectorMockResponse } from './mocks';
 import { microsoftDefenderEndpointConnectorMocks } from './mocks';
 import { OAuthTokenManager } from './o_auth_token_manager';
@@ -13,11 +16,11 @@ import type { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/ty
 describe('Microsoft Defender for Endpoint oAuth token manager', () => {
   let testMock: CreateMicrosoftDefenderConnectorMockResponse;
   let msOAuthManagerMock: OAuthTokenManager;
-  let connectorTokenManagerClientMock: jest.Mocked<ConnectorTokenClientContract>;
+  let connectorTokenManagerClientMock: Mocked<ConnectorTokenClientContract>;
 
   beforeEach(() => {
     testMock = microsoftDefenderEndpointConnectorMocks.create();
-    connectorTokenManagerClientMock = jest.mocked(testMock.options.services.connectorTokenClient);
+    connectorTokenManagerClientMock = vi.mocked(testMock.options.services.connectorTokenClient);
     msOAuthManagerMock = new OAuthTokenManager({
       ...testMock.options,
       apiRequest: async (...args) => testMock.instanceMock.request(...args),

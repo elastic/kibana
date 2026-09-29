@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import type {
   ScopedRunnerRunToolsParams,
@@ -32,25 +35,28 @@ import {
   ConversationOriginType,
 } from '@kbn/agent-builder-common';
 
-jest.mock('@kbn/agent-builder-server/tools/utils', () => ({
-  ...jest.requireActual('@kbn/agent-builder-server/tools/utils'),
-  getToolResultId: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-server/tools/utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/agent-builder-server/tools/utils')),
+      getToolResultId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResultId>;
+const getToolResultIdMock = getToolResultId as MockedFunction<typeof getToolResultId>;
 
 describe('runTool', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
   let runnerManager: RunnerManager;
   let registry: ToolRegistryMock;
   let tool: MockedTool;
-  let toolHandler: jest.MockedFunction<ToolHandlerFn>;
-  let hooksRunMock: jest.MockedFunction<HooksServiceStart['run']>;
+  let toolHandler: MockedFunction<ToolHandlerFn>;
+  let hooksRunMock: MockedFunction<HooksServiceStart['run']>;
 
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
     runnerManager = new RunnerManager(runnerDeps);
-    hooksRunMock = runnerDeps.hooks.run as jest.MockedFunction<HooksServiceStart['run']>;
+    hooksRunMock = runnerDeps.hooks.run as MockedFunction<HooksServiceStart['run']>;
 
     getToolResultIdMock.mockReturnValue('some-result-id');
 
@@ -60,7 +66,7 @@ describe('runTool', () => {
     } = runnerDeps;
     getRegistry.mockResolvedValue(registry);
 
-    toolHandler = jest.fn().mockReturnValue({ results: [] });
+    toolHandler = vi.fn().mockReturnValue({ results: [] });
 
     tool = createMockedTool({});
     tool.getSchema.mockReturnValue(
@@ -191,7 +197,7 @@ describe('runTool', () => {
     );
 
     // resultStore received the capped result, never the original oversized data.
-    const resultStoreAdd = runnerDeps.resultStore.add as jest.MockedFunction<
+    const resultStoreAdd = runnerDeps.resultStore.add as MockedFunction<
       typeof runnerDeps.resultStore.add
     >;
     expect(resultStoreAdd).toHaveBeenCalledTimes(1);
@@ -425,15 +431,15 @@ describe('runInternalTool - confirmation policy', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
   let runnerManager: RunnerManager;
   let tool: MockedTool;
-  let toolHandler: jest.MockedFunction<ToolHandlerFn>;
+  let toolHandler: MockedFunction<ToolHandlerFn>;
 
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
     runnerManager = new RunnerManager(runnerDeps);
 
-    (getToolResultId as jest.Mock).mockReturnValue('some-result-id');
+    (getToolResultId as Mock).mockReturnValue('some-result-id');
 
-    toolHandler = jest.fn().mockReturnValue({ results: [] });
+    toolHandler = vi.fn().mockReturnValue({ results: [] });
 
     tool = createMockedTool({});
     tool.getSchema.mockReturnValue(
@@ -547,7 +553,7 @@ describe('runInternalTool - confirmation policy', () => {
     });
 
     it('passes toolParams and toolHandlerContext to getConfirmation', async () => {
-      const getConfirmation = jest.fn().mockResolvedValue({
+      const getConfirmation = vi.fn().mockResolvedValue({
         title: 'Confirm',
         message: 'Proceed?',
       });
@@ -766,8 +772,8 @@ describe('runInternalTool - telemetry', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
   let runnerManager: RunnerManager;
   let tool: MockedTool;
-  let toolHandler: jest.MockedFunction<ToolHandlerFn>;
-  let analyticsService: jest.Mocked<
+  let toolHandler: MockedFunction<ToolHandlerFn>;
+  let analyticsService: Mocked<
     Pick<AnalyticsService, 'reportToolCallSuccess' | 'reportToolCallError'>
   >;
 
@@ -775,16 +781,16 @@ describe('runInternalTool - telemetry', () => {
     runnerDeps = createScopedRunnerDepsMock();
 
     analyticsService = {
-      reportToolCallSuccess: jest.fn(),
-      reportToolCallError: jest.fn(),
+      reportToolCallSuccess: vi.fn(),
+      reportToolCallError: vi.fn(),
     };
     (runnerDeps as any).analyticsService = analyticsService;
 
     runnerManager = new RunnerManager(runnerDeps);
 
-    (getToolResultId as jest.Mock).mockReturnValue('some-result-id');
+    (getToolResultId as Mock).mockReturnValue('some-result-id');
 
-    toolHandler = jest.fn().mockReturnValue({
+    toolHandler = vi.fn().mockReturnValue({
       results: [{ type: ToolResultType.other, data: { value: 42 } }],
     });
 
@@ -1079,14 +1085,14 @@ describe('runInternalTool - telemetry', () => {
 describe('runInternalTool - sub-agent HITL blocking', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
   let tool: MockedTool;
-  let toolHandler: jest.MockedFunction<ToolHandlerFn>;
+  let toolHandler: MockedFunction<ToolHandlerFn>;
 
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
 
-    (getToolResultId as jest.Mock).mockReturnValue('some-result-id');
+    (getToolResultId as Mock).mockReturnValue('some-result-id');
 
-    toolHandler = jest.fn().mockReturnValue({ results: [] });
+    toolHandler = vi.fn().mockReturnValue({ results: [] });
 
     tool = createMockedTool({});
     tool.getSchema.mockReturnValue(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getAllConnectorsRoute } from './get_all';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../lib/license_state.mock';
@@ -19,13 +22,16 @@ const actionsConfigUtils = (inboundEventsFeatureEnabled = false) => {
   return utils;
 };
 
-jest.mock('../../verify_access_and_context', () => ({
-  verifyAccessAndContext: jest.fn(),
-}));
+vi.mock('../../verify_access_and_context', () => {
+      const mocked = {
+      verifyAccessAndContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
-  (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
+  vi.resetAllMocks();
+  (verifyAccessAndContext as Mock).mockImplementation((license, handler) => handler);
 });
 
 describe('getAllConnectorsRoute', () => {
@@ -81,7 +87,7 @@ describe('getAllConnectorsRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    (verifyAccessAndContext as jest.Mock).mockImplementation(() => async () => {
+    (verifyAccessAndContext as Mock).mockImplementation(() => async () => {
       throw new Error('OMG');
     });
 
@@ -232,7 +238,7 @@ describe('getAllConnectorsRoute', () => {
       ]),
     });
 
-    const responseBody = (res.ok as jest.Mock).mock.calls[0][0].body;
+    const responseBody = (res.ok as Mock).mock.calls[0][0].body;
     expect(responseBody[0]).not.toHaveProperty('auth_mode');
 
     expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
@@ -263,7 +269,7 @@ describe('getAllConnectorsRoute', () => {
     const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
     await handler(context, req, res);
 
-    const responseBody = (res.ok as jest.Mock).mock.calls[0][0].body;
+    const responseBody = (res.ok as Mock).mock.calls[0][0].body;
     expect(responseBody[0]).toEqual(expect.objectContaining({ is_inbound_events_enabled: true }));
   });
 
@@ -292,7 +298,7 @@ describe('getAllConnectorsRoute', () => {
     const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
     await handler(context, req, res);
 
-    const responseBody = (res.ok as jest.Mock).mock.calls[0][0].body;
+    const responseBody = (res.ok as Mock).mock.calls[0][0].body;
     expect(responseBody[0]).not.toHaveProperty('is_inbound_events_enabled');
   });
 });

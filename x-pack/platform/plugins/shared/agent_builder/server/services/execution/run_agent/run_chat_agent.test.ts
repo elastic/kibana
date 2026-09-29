@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { Overwrite, type Command } from '@langchain/langgraph';
 import type {
   BrowserApiToolMetadata,
@@ -47,67 +50,88 @@ import { createRootStateChunkEvent } from '../../../test_utils/graph_stream';
 import type { StateType } from './state';
 
 // the real fold, so resume tests exercise the actual pending-turn detection
-const { getPendingTurn: realGetPendingTurn } = jest.requireActual('./utils/conversation_turn');
+const { getPendingTurn: realGetPendingTurn } = (await vi.importActual('./utils/conversation_turn'));
 
-jest.mock('./utils', () => ({
-  prepareConversation: jest.fn(),
-  selectSkills: jest.fn().mockResolvedValue([]),
-  selectTools: jest.fn(),
-  extractRound: jest.fn(),
-  getPendingTurn: jest.fn(() => undefined),
-  createPreExecutionSteps: jest.fn(() => []),
-  addRoundCompleteEvent: jest.fn(() => (source$: any) => source$),
-  estimatePerRoundTokens: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('./utils', () => {
+      const mocked = {
+      prepareConversation: vi.fn(),
+      selectSkills: vi.fn().mockResolvedValue([]),
+      selectTools: vi.fn(),
+      extractRound: vi.fn(),
+      getPendingTurn: vi.fn(() => undefined),
+      createPreExecutionSteps: vi.fn(() => []),
+      addRoundCompleteEvent: vi.fn(() => (source$: any) => source$),
+      estimatePerRoundTokens: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./tools/register_internal_tools', () => ({
-  registerInternalTools: jest.fn(),
-}));
+vi.mock('./tools/register_internal_tools', () => {
+      const mocked = {
+      registerInternalTools: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./utils/create_result_transformer', () => ({
-  createResultTransformer: jest.fn(() => ({})),
-}));
+vi.mock('./utils/create_result_transformer', () => {
+      const mocked = {
+      createResultTransformer: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./utils/image_resolver', () => ({
-  createImageResolver: jest.fn(() => jest.fn()),
-}));
+vi.mock('./utils/image_resolver', () => {
+      const mocked = {
+      createImageResolver: vi.fn(() => vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./prompts', () => ({
-  createPromptFactory: jest.fn(() => ({})),
-}));
+vi.mock('./prompts', () => {
+      const mocked = {
+      createPromptFactory: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./graph', () => ({
-  createAgentGraph: jest.fn(),
-}));
+vi.mock('./graph', () => {
+      const mocked = {
+      createAgentGraph: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./convert_graph_events', () => ({
-  convertGraphEvents: jest.fn(() => (source$: any) => source$),
-}));
+vi.mock('./convert_graph_events', () => {
+      const mocked = {
+      convertGraphEvents: vi.fn(() => (source$: any) => source$),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const prepareConversationMock = prepareConversation as jest.MockedFn<typeof prepareConversation>;
-const selectToolsMock = selectTools as jest.MockedFn<typeof selectTools>;
-const selectSkillsMock = selectSkills as jest.MockedFn<typeof selectSkills>;
-const extractRoundMock = extractRound as jest.MockedFn<typeof extractRound>;
-const getPendingTurnMock = getPendingTurn as jest.MockedFn<typeof getPendingTurn>;
-const createPreExecutionStepsMock = createPreExecutionSteps as jest.MockedFn<
+const prepareConversationMock = prepareConversation as MockedFunction<typeof prepareConversation>;
+const selectToolsMock = selectTools as MockedFunction<typeof selectTools>;
+const selectSkillsMock = selectSkills as MockedFunction<typeof selectSkills>;
+const extractRoundMock = extractRound as MockedFunction<typeof extractRound>;
+const getPendingTurnMock = getPendingTurn as MockedFunction<typeof getPendingTurn>;
+const createPreExecutionStepsMock = createPreExecutionSteps as MockedFunction<
   typeof createPreExecutionSteps
 >;
-const createAgentGraphMock = createAgentGraph as jest.MockedFn<typeof createAgentGraph>;
-const addRoundCompleteEventMock = addRoundCompleteEvent as jest.MockedFn<
+const createAgentGraphMock = createAgentGraph as MockedFunction<typeof createAgentGraph>;
+const addRoundCompleteEventMock = addRoundCompleteEvent as MockedFunction<
   typeof addRoundCompleteEvent
 >;
-const createPromptFactoryMock = createPromptFactory as jest.MockedFn<typeof createPromptFactory>;
-const createImageResolverMock = createImageResolver as jest.MockedFn<typeof createImageResolver>;
+const createPromptFactoryMock = createPromptFactory as MockedFunction<typeof createPromptFactory>;
+const createImageResolverMock = createImageResolver as MockedFunction<typeof createImageResolver>;
 
 describe('runDefaultAgentMode', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('adds static and dynamic tools to the toolManager', async () => {
     const context = createAgentHandlerContextMock();
 
-    jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+    vi.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
       connector: { name: 'test-connector' },
       chatModel: {} as any,
     } as any);
@@ -144,7 +168,7 @@ describe('runDefaultAgentMode', () => {
     );
 
     createAgentGraphMock.mockReturnValue({
-      streamEvents: jest.fn(() => []),
+      streamEvents: vi.fn(() => []),
     } as any);
 
     const browserApiTools: BrowserApiToolMetadata[] = [
@@ -192,7 +216,7 @@ describe('runDefaultAgentMode', () => {
   it('configures the tool-result length guardrail budget on the toolManager', async () => {
     const context = createAgentHandlerContextMock();
 
-    jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+    vi.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
       connector: { name: 'test-connector' },
       chatModel: {} as any,
     } as any);
@@ -222,7 +246,7 @@ describe('runDefaultAgentMode', () => {
     );
 
     createAgentGraphMock.mockReturnValue({
-      streamEvents: jest.fn(() => []),
+      streamEvents: vi.fn(() => []),
     } as any);
 
     await runDefaultAgentMode(
@@ -238,7 +262,7 @@ describe('runDefaultAgentMode', () => {
 
   describe('plugin skill id filtering', () => {
     const setupBase = async (context: ReturnType<typeof createAgentHandlerContextMock>) => {
-      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+      vi.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
         connector: { name: 'test-connector' },
         chatModel: {} as any,
       } as any);
@@ -254,7 +278,7 @@ describe('runDefaultAgentMode', () => {
         attachmentStateManager: context.attachmentStateManager,
       } as any);
       extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
-      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+      createAgentGraphMock.mockReturnValue({ streamEvents: vi.fn(() => []) } as any);
     };
 
     it('passes all plugin skill ids to selectSkills when no skill_ids override is set', async () => {
@@ -319,7 +343,7 @@ describe('runDefaultAgentMode', () => {
 
   describe('threaded roundId', () => {
     const setupBase = async (context: ReturnType<typeof createAgentHandlerContextMock>) => {
-      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+      vi.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
         connector: { name: 'test-connector' },
         chatModel: {} as any,
       } as any);
@@ -335,7 +359,7 @@ describe('runDefaultAgentMode', () => {
         attachmentStateManager: context.attachmentStateManager,
       } as any);
       extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
-      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+      createAgentGraphMock.mockReturnValue({ streamEvents: vi.fn(() => []) } as any);
     };
 
     it('uses the caller-provided roundId when threaded from the execution runner', async () => {
@@ -378,7 +402,7 @@ describe('runDefaultAgentMode', () => {
 
   it('passes an image resolver built from the attachment state manager to the prompt factory', async () => {
     const context = createAgentHandlerContextMock();
-    jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+    vi.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
       connector: { name: 'test-connector' },
       chatModel: {} as any,
     } as any);
@@ -394,7 +418,7 @@ describe('runDefaultAgentMode', () => {
       attachmentStateManager: context.attachmentStateManager,
     } as any);
     extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
-    createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+    createAgentGraphMock.mockReturnValue({ streamEvents: vi.fn(() => []) } as any);
 
     await runDefaultAgentMode(
       {
@@ -415,14 +439,14 @@ describe('runDefaultAgentMode', () => {
   describe('round_interrupted', () => {
     const setup = () => {
       const context = createAgentHandlerContextMock();
-      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+      vi.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
         connector: { name: 'test-connector', connectorId: 'connector-1' },
         chatModel: {} as any,
       } as any);
       context.toolManager.getToolIdMapping.mockReturnValue(new Map());
       context.toolManager.getDynamicToolIds.mockReturnValue([]);
-      (context.attachmentStateManager.getAccessedRefs as jest.Mock).mockReturnValue([]);
-      (context.attachmentStateManager.getAll as jest.Mock).mockReturnValue([]);
+      (context.attachmentStateManager.getAccessedRefs as Mock).mockReturnValue([]);
+      (context.attachmentStateManager.getAll as Mock).mockReturnValue([]);
       getPendingTurnMock.mockReturnValue(undefined);
       selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
       prepareConversationMock.mockResolvedValue({
@@ -448,7 +472,7 @@ describe('runDefaultAgentMode', () => {
         progression: [],
       };
       createAgentGraphMock.mockReturnValue({
-        streamEvents: jest.fn(() => ({
+        streamEvents: vi.fn(() => ({
           async *[Symbol.asyncIterator]() {
             // The research node records a tool call before the run blows up: LangGraph streams the
             // state after that super-step as a root `values` chunk.
@@ -478,7 +502,7 @@ describe('runDefaultAgentMode', () => {
       // `extractRound` is mocked, so the handler returns before the (async) stream fails.
       await new Promise((resolve) => setImmediate(resolve));
 
-      const emitted = (context.events.emit as jest.Mock).mock.calls.map(([event]) => event);
+      const emitted = (context.events.emit as Mock).mock.calls.map(([event]) => event);
       const interrupted = emitted.find((event) => event.type === ChatEventType.roundInterrupted);
       expect(interrupted).toBeDefined();
       expect(interrupted.data).toMatchObject({
@@ -502,24 +526,24 @@ describe('runDefaultAgentMode', () => {
 
     it('does not emit round_interrupted when the run completes', async () => {
       const context = setup();
-      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+      createAgentGraphMock.mockReturnValue({ streamEvents: vi.fn(() => []) } as any);
 
       await runDefaultAgentMode(
         { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
         context
       );
 
-      const types = (context.events.emit as jest.Mock).mock.calls.map(([event]) => event.type);
+      const types = (context.events.emit as Mock).mock.calls.map(([event]) => event.type);
       expect(types).not.toContain(ChatEventType.roundInterrupted);
     });
 
     it('still surfaces the original error when the summary cannot be built', async () => {
       const context = setup();
-      (context.attachmentStateManager.getAccessedRefs as jest.Mock).mockImplementation(() => {
+      (context.attachmentStateManager.getAccessedRefs as Mock).mockImplementation(() => {
         throw new Error('state manager broken');
       });
       createAgentGraphMock.mockReturnValue({
-        streamEvents: jest.fn(() => ({
+        streamEvents: vi.fn(() => ({
           async *[Symbol.asyncIterator]() {
             throw new Error('llm exploded');
           },
@@ -531,7 +555,7 @@ describe('runDefaultAgentMode', () => {
         context
       );
 
-      const types = (context.events.emit as jest.Mock).mock.calls.map(([event]) => event.type);
+      const types = (context.events.emit as Mock).mock.calls.map(([event]) => event.type);
       expect(types).not.toContain(ChatEventType.roundInterrupted);
       expect(context.logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to build round_interrupted summary')
@@ -542,7 +566,7 @@ describe('runDefaultAgentMode', () => {
   describe('graph wiring', () => {
     const setup = () => {
       const context = createAgentHandlerContextMock();
-      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+      vi.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
         connector: { name: 'test-connector', connectorId: 'connector-1' },
         chatModel: {} as any,
       } as any);
@@ -557,15 +581,15 @@ describe('runDefaultAgentMode', () => {
         attachmentStateManager: context.attachmentStateManager,
       } as any);
       extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
-      const streamEvents = jest.fn(() => []);
+      const streamEvents = vi.fn(() => []);
       createAgentGraphMock.mockReturnValue({ streamEvents } as any);
       return { context, streamEvents };
     };
 
-    const initialCommand = (streamEvents: jest.Mock): Command<unknown, Partial<StateType>> =>
+    const initialCommand = (streamEvents: Mock): Command<unknown, Partial<StateType>> =>
       streamEvents.mock.calls[0][0];
     const streamOptions = (
-      streamEvents: jest.Mock
+      streamEvents: Mock
     ): { streamMode?: string; configurable?: Record<string, unknown> } =>
       (streamEvents.mock.calls[0] as unknown[])[1] as ReturnType<typeof streamOptions>;
 
@@ -646,7 +670,7 @@ describe('runDefaultAgentMode', () => {
         ],
       });
       getPendingTurnMock.mockImplementation(realGetPendingTurn);
-      (context.promptManager.dump as jest.Mock).mockReturnValue({ responses: {} });
+      (context.promptManager.dump as Mock).mockReturnValue({ responses: {} });
 
       await runDefaultAgentMode(
         {
@@ -709,7 +733,7 @@ describe('runDefaultAgentMode', () => {
         ],
       });
       getPendingTurnMock.mockImplementation(realGetPendingTurn);
-      (context.promptManager.dump as jest.Mock).mockReturnValue({ responses: {} });
+      (context.promptManager.dump as Mock).mockReturnValue({ responses: {} });
 
       await runDefaultAgentMode(
         {
@@ -749,7 +773,7 @@ describe('runDefaultAgentMode', () => {
         ],
       });
       getPendingTurnMock.mockImplementation(realGetPendingTurn);
-      (context.promptManager.dump as jest.Mock).mockReturnValue({
+      (context.promptManager.dump as Mock).mockReturnValue({
         responses: {
           q1: { type: AgentPromptType.ask_user_question, response: { answers: [{ choice: [0] }] } },
         },
@@ -771,7 +795,7 @@ describe('runDefaultAgentMode', () => {
       expect(command.update).toMatchObject({ pendingToolCallIds: [], researchOutcome: undefined });
       // the consumed answer is removed from the prompt manager and replayed as an event
       expect(context.promptManager.delete).toHaveBeenCalledWith('q1');
-      const emitted = (context.events.emit as jest.Mock).mock.calls.map(([event]) => event);
+      const emitted = (context.events.emit as Mock).mock.calls.map(([event]) => event);
       expect(emitted).toContainEqual(
         expect.objectContaining({
           type: ChatEventType.userQuestionAnswered,

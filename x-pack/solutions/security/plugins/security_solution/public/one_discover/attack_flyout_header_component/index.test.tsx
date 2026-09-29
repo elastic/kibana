@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataTableRecord } from '@kbn/discover-utils';
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -25,7 +27,7 @@ import {
   FLYOUT_TYPE,
 } from '../../common/lib/telemetry';
 
-const mockAttackHeader = jest.fn((props: unknown) => {
+const mockAttackHeader = vi.fn((props: unknown) => {
   const { onShowNotes } = props as { onShowNotes?: () => void };
 
   return (
@@ -34,61 +36,85 @@ const mockAttackHeader = jest.fn((props: unknown) => {
     </button>
   );
 });
-const mockReportEvent = jest.fn();
+const mockReportEvent = vi.fn();
 
-jest.mock('../../flyout_v2/attack/main/header', () => ({
-  Header: (props: unknown) => mockAttackHeader(props),
-}));
+vi.mock('../../flyout_v2/attack/main/header', () => {
+      const mocked = {
+      Header: (props: unknown) => mockAttackHeader(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../flyout_v2/shared/tools/notes', () => ({
-  NotesDetails: () => <div>{'MockNotesDetails'}</div>,
-}));
+vi.mock('../../flyout_v2/shared/tools/notes', () => {
+      const mocked = {
+      NotesDetails: () => <div>{'MockNotesDetails'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
-  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../common/components/user_privileges/user_privileges_context', () => {
+      const mocked = {
+      UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/discover_in_timeline/provider', () => ({
-  DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
-}));
+vi.mock('../../common/components/discover_in_timeline/provider', () => {
+      const mocked = {
+      DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
+        <>{children}</>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../cases/components/provider/provider', () => ({
-  CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../cases/components/provider/provider', () => {
+      const mocked = {
+      CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../assistant/provider', () => ({
-  AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../assistant/provider', () => {
+      const mocked = {
+      AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: jest.fn(),
-}));
+vi.mock('../../common/hooks/is_in_security_app', () => {
+      const mocked = {
+      useIsInSecurityApp: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFlyoutProviders = jest.fn(({ children }: { children: React.ReactNode }) => (
+const mockFlyoutProviders = vi.fn(({ children }: { children: React.ReactNode }) => (
   <>{children}</>
 ));
 
-jest.mock('../../flyout_v2/shared/components/flyout_provider', () => ({
-  flyoutProviders: (props: unknown) => mockFlyoutProviders(props as { children: React.ReactNode }),
-}));
+vi.mock('../../flyout_v2/shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: (props: unknown) => mockFlyoutProviders(props as { children: React.ReactNode }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AttackFlyoutHeader', () => {
-  const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
+  const mockUseIsInSecurityApp = vi.mocked(useIsInSecurityApp);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseIsInSecurityApp.mockReturnValue(false);
   });
 
   const servicesMock = {
     overlays: {
-      openSystemFlyout: jest.fn(() => ({ onClose: new Promise<void>(() => {}) })),
+      openSystemFlyout: vi.fn(() => ({ onClose: new Promise<void>(() => {}) })),
     },
     telemetry: { reportEvent: mockReportEvent },
     uiActions: {
-      getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
+      getTriggerCompatibleActions: vi.fn().mockResolvedValue([]),
     },
     application: {
       capabilities: {
@@ -108,7 +134,7 @@ describe('AttackFlyoutHeader', () => {
           hit={hit}
           servicesPromise={new Promise<StartServices>(() => undefined)}
           storePromise={new Promise<ReturnType<typeof createStore>>(() => undefined) as never}
-          onAttackUpdated={jest.fn()}
+          onAttackUpdated={vi.fn()}
         />
       </Router>
     );
@@ -131,7 +157,7 @@ describe('AttackFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
-          onAttackUpdated={jest.fn()}
+          onAttackUpdated={vi.fn()}
         />
       </Router>
     );
@@ -167,7 +193,7 @@ describe('AttackFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.reject(new Error('services failed'))}
           storePromise={Promise.resolve(store as never)}
-          onAttackUpdated={jest.fn()}
+          onAttackUpdated={vi.fn()}
         />
       </Router>
     );
@@ -188,7 +214,7 @@ describe('AttackFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
-          onAttackUpdated={jest.fn()}
+          onAttackUpdated={vi.fn()}
         />
       </Router>
     );
@@ -231,7 +257,7 @@ describe('AttackFlyoutHeader', () => {
           hit={hit}
           servicesPromise={Promise.resolve(servicesMock)}
           storePromise={Promise.resolve(store as never)}
-          onAttackUpdated={jest.fn()}
+          onAttackUpdated={vi.fn()}
         />
       </Router>
     );
@@ -251,7 +277,7 @@ describe('AttackFlyoutHeader', () => {
   });
 
   it('calls onAttackUpdated when the header mutation callback is triggered', async () => {
-    const onAttackUpdated = jest.fn();
+    const onAttackUpdated = vi.fn();
     const hit = {
       id: '1',
       raw: { _id: '1', _index: 'test' },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FC } from 'react';
 import React from 'react';
 
@@ -15,11 +17,11 @@ import { StorageContextProvider, useStorage } from '@kbn/ml-local-storage';
 
 import { ML_STORAGE_KEYS } from './storage';
 
-const mockSet = jest.fn();
-const mockRemove = jest.fn();
+const mockSet = vi.fn();
+const mockRemove = vi.fn();
 const mockStorage: Storage = {
   set: mockSet,
-  get: jest.fn((key: string) => {
+  get: vi.fn((key: string) => {
     switch (key) {
       case 'ml.gettingStarted.isDismissed':
         return true;
@@ -28,8 +30,8 @@ const mockStorage: Storage = {
     }
   }),
   remove: mockRemove,
-  store: jest.fn() as any,
-  clear: jest.fn(),
+  store: vi.fn() as any,
+  clear: vi.fn(),
 };
 
 const Provider: FC<{ children?: React.ReactNode }> = ({ children }) => {
@@ -42,7 +44,7 @@ const Provider: FC<{ children?: React.ReactNode }> = ({ children }) => {
 
 describe('useStorage', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('returns the default value', () => {

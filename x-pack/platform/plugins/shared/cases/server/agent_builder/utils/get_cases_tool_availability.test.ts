@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreSetup } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { CasesServerStartDependencies } from '../../types';
@@ -65,7 +67,7 @@ describe('getCasesToolAvailability', () => {
     const pluginsStart = {
       spaces: {
         spacesService: {
-          getActiveSpace: jest.fn().mockRejectedValue(new Error('spaces unavailable')),
+          getActiveSpace: vi.fn().mockRejectedValue(new Error('spaces unavailable')),
         },
       },
     };

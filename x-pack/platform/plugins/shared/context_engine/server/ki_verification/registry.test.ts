@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { KiVerifierRegistry } from './registry';
 import type { KiVerifier } from './types';
 
 const makeVerifier = (overrides: Partial<KiVerifier> & { id: string }): KiVerifier => ({
   applies: () => true,
-  verify: jest.fn(async () => ({ passed: true as const })),
+  verify: vi.fn(async () => ({ passed: true as const })),
   ...overrides,
 });
 

@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import type { UnlinkPanelFromLibraryActionApi } from './library_unlink_action';
 import { UnlinkFromLibraryAction } from './library_unlink_action';
 
 describe('AddToLibraryAction', () => {
   const action = new UnlinkFromLibraryAction();
-  const replacePanelMock = jest.fn();
+  const replacePanelMock = vi.fn();
   const embeddableApi = {
     defaultTitle$: new BehaviorSubject('Panel one'),
     hasLibraryItemWithTitle: async () => false,
@@ -31,7 +33,7 @@ describe('AddToLibraryAction', () => {
   } as UnlinkPanelFromLibraryActionApi;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('execute', () => {

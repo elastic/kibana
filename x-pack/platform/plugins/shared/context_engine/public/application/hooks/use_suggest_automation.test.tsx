@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -32,20 +35,20 @@ const renderSuggestHook = ({
   isManaged = false,
   canSuggest = true,
   hasProvider = true,
-  onSaved = jest.fn(),
+  onSaved = vi.fn(),
 }: {
   aiIndex?: GetAiIndexResponse;
   isManaged?: boolean;
   canSuggest?: boolean;
   hasProvider?: boolean;
-  onSaved?: jest.Mock;
+  onSaved?: Mock;
 } = {}) => {
-  const canSuggestMock = jest.fn().mockReturnValue(canSuggest);
-  const suggestAutomationMock = jest.fn();
+  const canSuggestMock = vi.fn().mockReturnValue(canSuggest);
+  const suggestAutomationMock = vi.fn();
   let automationSavedCallback: (() => void) | undefined;
-  const subscribeToAutomationSavedMock = jest.fn((_aiIndexId: string, callback: () => void) => {
+  const subscribeToAutomationSavedMock = vi.fn((_aiIndexId: string, callback: () => void) => {
     automationSavedCallback = callback;
-    return jest.fn();
+    return vi.fn();
   });
 
   const provider: SuggestAutomationProvider = {

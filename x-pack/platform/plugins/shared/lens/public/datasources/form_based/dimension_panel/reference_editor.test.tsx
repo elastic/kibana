@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { ShallowWrapper } from 'enzyme';
 import { ReactWrapper } from 'enzyme';
@@ -30,17 +33,20 @@ import { insertOrReplaceColumn, operationDefinitionMap } from '../operations';
 import { FieldSelect } from './field_select';
 import type { KqlPluginStart } from '@kbn/kql/public';
 
-jest.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => ({
-  useExistingFieldsReader: jest.fn(() => {
-    return {
-      hasFieldData: (dataViewId: string, fieldName: string) => {
-        return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
-      },
+vi.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => {
+      const mocked = {
+      useExistingFieldsReader: vi.fn(() => {
+        return {
+          hasFieldData: (dataViewId: string, fieldName: string) => {
+            return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
+          },
+        };
+      }),
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../operations');
+vi.mock('../operations');
 
 const getFieldSelectComboBox = (wrapper: ReactWrapper) =>
   wrapper
@@ -51,7 +57,7 @@ const getFieldSelectComboBox = (wrapper: ReactWrapper) =>
 
 describe('reference editor', () => {
   let wrapper: ReactWrapper | ShallowWrapper;
-  let paramEditorUpdater: jest.Mock<ReferenceEditorProps['paramEditorUpdater']>;
+  let paramEditorUpdater: Mock<ReferenceEditorProps['paramEditorUpdater']>;
 
   const layer = {
     indexPatternId: '1',
@@ -71,10 +77,10 @@ describe('reference editor', () => {
     return {
       layer,
       column: layer.columns.ref,
-      onChooseField: jest.fn(),
-      onChooseFunction: jest.fn(),
-      onDeleteColumn: jest.fn(),
-      onResetIncomplete: jest.fn(),
+      onChooseField: vi.fn(),
+      onChooseFunction: vi.fn(),
+      onDeleteColumn: vi.fn(),
+      onResetIncomplete: vi.fn(),
       columnId: 'ref',
       paramEditorUpdater,
       selectionStyle: 'full' as const,
@@ -89,21 +95,21 @@ describe('reference editor', () => {
       dataViews: dataViewPluginMocks.createStartContract(),
       dimensionGroups: [],
       isFullscreen: false,
-      toggleFullscreen: jest.fn(),
-      setIsCloseable: jest.fn(),
+      toggleFullscreen: vi.fn(),
+      setIsCloseable: vi.fn(),
       layerId: '1',
       operationDefinitionMap,
     };
   }
 
   beforeEach(() => {
-    paramEditorUpdater = jest.fn().mockImplementation((newLayer) => {
+    paramEditorUpdater = vi.fn().mockImplementation((newLayer) => {
       if (wrapper instanceof ReactWrapper) {
         wrapper.setProps({ layer: newLayer });
       }
     });
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -255,7 +261,7 @@ describe('reference editor', () => {
   });
 
   it('should keep the field when replacing an existing reference with a compatible function', () => {
-    const onChooseFunction = jest.fn();
+    const onChooseFunction = vi.fn();
     const newLayer = {
       indexPatternId: '1',
       columnOrder: ['ref'],
@@ -315,7 +321,7 @@ describe('reference editor', () => {
         },
       },
     } as FormBasedLayer;
-    const onChooseFunction = jest.fn();
+    const onChooseFunction = vi.fn();
     wrapper = mount(
       <ReferenceEditor
         {...getDefaultArgs()}

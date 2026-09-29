@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DashboardsUploadStep } from '.';
@@ -14,11 +16,11 @@ import { MigrationSource, SplunkDataInputStep } from '../../../../../common/type
 describe('DashboardsUploadStep', () => {
   const defaultProps = {
     migrationStats: undefined,
-    onMigrationCreated: jest.fn(),
-    onMissingResourcesFetched: jest.fn(),
+    onMigrationCreated: vi.fn(),
+    onMissingResourcesFetched: vi.fn(),
     dataInputStep: SplunkDataInputStep.Upload,
     migrationSource: MigrationSource.SPLUNK,
-    setDataInputStep: jest.fn(),
+    setDataInputStep: vi.fn(),
     missingResourcesIndexed: { lookups: [], macros: [] },
   };
 

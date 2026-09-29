@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Credentials } from './credentials';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ConnectorFormTestProvider } from '../test_utils';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
 describe('Credentials', () => {
   const connector = {

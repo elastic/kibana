@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { shallow } from 'enzyme';
 
-jest.mock('../components/vector_style_editor', () => ({
-  VectorStyleEditor: () => {
-    return <div>mockVectorStyleEditor</div>;
-  },
-}));
+vi.mock('../components/vector_style_editor', () => {
+      const mocked = {
+      VectorStyleEditor: () => {
+        return <div>mockVectorStyleEditor</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 import type { RawValue } from '../../../../../common/constants';

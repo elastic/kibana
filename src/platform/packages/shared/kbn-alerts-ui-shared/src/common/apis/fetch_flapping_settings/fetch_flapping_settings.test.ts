@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { fetchFlappingSettings } from './fetch_flapping_settings';
 
@@ -14,7 +16,7 @@ const http = httpServiceMock.createStartContract();
 
 describe('fetchFlappingSettings', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should call fetch rule flapping API', async () => {

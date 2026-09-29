@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { hasSignificantRounding, isInRoundedDeadZone } from './rounded_dead_zone';
 import { EDGE_ZONE } from '../lib/constants';
 
@@ -19,7 +21,7 @@ describe('hasSignificantRounding', () => {
   }): HTMLElement => {
     const el = document.createElement('div');
     const original = window.getComputedStyle;
-    jest.spyOn(window, 'getComputedStyle').mockImplementation((target) => {
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((target) => {
       if (target === el) {
         return {
           borderTopLeftRadius: radii.topLeft ?? '0px',
@@ -34,7 +36,7 @@ describe('hasSignificantRounding', () => {
   };
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should return false for an element with no border-radius', () => {

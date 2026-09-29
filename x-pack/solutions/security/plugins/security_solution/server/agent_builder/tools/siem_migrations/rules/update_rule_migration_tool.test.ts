@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import {
@@ -16,7 +19,7 @@ import type { ProductFeaturesService } from '../../../../lib/product_features_se
 import { updateRuleMigrationTool } from './update_rule_migration_tool';
 
 const mockProductFeaturesService = {
-  isEnabled: jest.fn().mockReturnValue(true),
+  isEnabled: vi.fn().mockReturnValue(true),
 } as unknown as ProductFeaturesService;
 
 describe('updateRuleMigrationTool', () => {
@@ -28,15 +31,15 @@ describe('updateRuleMigrationTool', () => {
     mockCheckPrivileges,
     mockRequest,
   } = createToolTestMocks();
-  let mockFetch: jest.Mock;
+  let mockFetch: Mock;
 
   const tool = updateRuleMigrationTool(mockCore, mockLogger, mockProductFeaturesService);
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockFetch = jest.fn();
+    vi.clearAllMocks();
+    mockFetch = vi.fn();
     const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient, mockSecurityStart);
-    (mockCoreStart.http.selfClient.asScoped as unknown as jest.Mock).mockReturnValue({
+    (mockCoreStart.http.selfClient.asScoped as unknown as Mock).mockReturnValue({
       fetch: mockFetch,
     });
   });

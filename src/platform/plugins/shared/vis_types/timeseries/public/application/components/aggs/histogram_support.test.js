@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Agg } from './agg';
@@ -15,9 +17,12 @@ import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
 import { setDataStart } from '../../../services';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
-jest.mock('../query_bar_wrapper', () => ({
-  QueryBarWrapper: jest.fn(() => null),
-}));
+vi.mock('../query_bar_wrapper', () => {
+      const mocked = {
+      QueryBarWrapper: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const runTest = (aggType, name, test, additionalProps = {}) => {
   describe(aggType, () => {
@@ -34,9 +39,9 @@ const runTest = (aggType, name, test, additionalProps = {}) => {
       const wrapper = mountWithIntl(
         <div>
           <Agg
-            onAdd={jest.fn()}
-            onModelChange={jest.fn()}
-            onDelete={jest.fn()}
+            onAdd={vi.fn()}
+            onModelChange={vi.fn()}
+            onDelete={vi.fn()}
             panel={panel}
             fields={FIELDS}
             model={metric}

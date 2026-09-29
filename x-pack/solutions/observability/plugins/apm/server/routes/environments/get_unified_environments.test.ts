@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { getUnifiedEnvironments } from './get_unified_environments';
@@ -65,7 +67,7 @@ describe('getUnifiedEnvironments', () => {
   });
 
   it('returns empty array without searching when both indices are empty strings', async () => {
-    const searchSpy = jest.fn();
+    const searchSpy = vi.fn();
     const esClient = { search: searchSpy } as unknown as ElasticsearchClient;
     const emptyIndices = { transaction: '', span: '' } as unknown as APMIndices;
     const result = await getUnifiedEnvironments({ esClient, ...baseArgs, indices: emptyIndices });

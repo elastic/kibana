@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import SlackActionFields from './slack_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
-jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
-  ...jest.requireActual(
-    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
-  ),
-  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
-}));
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api')),
+      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SlackActionFields renders', () => {
   test('all connector fields is rendered', async () => {
@@ -44,10 +47,10 @@ describe('SlackActionFields renders', () => {
   });
 
   describe('Validation', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('connector validation succeeds when connector config is valid', async () => {

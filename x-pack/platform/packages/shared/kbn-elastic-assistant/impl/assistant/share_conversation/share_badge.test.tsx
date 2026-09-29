@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ShareSelectModal } from './share_select_modal';
@@ -13,19 +15,25 @@ import { ConversationSharedState } from '@kbn/elastic-assistant-common';
 import { welcomeConvo } from '../../mock/conversation';
 import type { IToasts } from '@kbn/core-notifications-browser';
 
-const mockRefetchCurrentUserConversations = jest.fn();
-const mockRefetchCurrentConversation = jest.fn();
-const mockUpdateConversationUsers = jest.fn();
+const mockRefetchCurrentUserConversations = vi.fn();
+const mockRefetchCurrentConversation = vi.fn();
+const mockUpdateConversationUsers = vi.fn();
 
-jest.mock('../use_conversation', () => ({
-  useConversation: () => ({ updateConversationUsers: mockUpdateConversationUsers }),
-}));
+vi.mock('../use_conversation', () => {
+      const mocked = {
+      useConversation: () => ({ updateConversationUsers: mockUpdateConversationUsers }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./share_modal', () => ({
-  ShareModal: () => <div data-test-subj="share-modal">{'ShareModal'}</div>,
-}));
+vi.mock('./share_modal', () => {
+      const mocked = {
+      ShareModal: () => <div data-test-subj="share-modal">{'ShareModal'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const toastsMock = { addSuccess: jest.fn(), addError: jest.fn() } as unknown as IToasts;
+const toastsMock = { addSuccess: vi.fn(), addError: vi.fn() } as unknown as IToasts;
 const defaultProps = {
   conversationSharedState: ConversationSharedState.PRIVATE,
   selectedConversation: welcomeConvo,
@@ -36,7 +44,7 @@ const defaultProps = {
 
 describe('ShareSelectModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the badge with correct label', () => {

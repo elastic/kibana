@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { updateIndices, createIndex, createOrUpdateIndex } from './create_or_update_index';
 
@@ -22,7 +24,7 @@ const totalFieldsLimit = 1000;
 
 describe('updateIndices', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(`should update indices and expand patterns`, async () => {
@@ -159,7 +161,7 @@ describe('updateIndices', () => {
 
 describe('createIndex', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(`should create index`, async () => {
@@ -191,7 +193,7 @@ describe('createIndex', () => {
 
 describe('createOrUpdateIndex', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(`should create index if not exists`, async () => {

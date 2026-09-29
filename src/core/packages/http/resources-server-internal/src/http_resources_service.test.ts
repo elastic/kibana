@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
+
 import type { RouteConfig } from '@kbn/core-http-server';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
@@ -163,7 +165,7 @@ describe('HttpResources service', () => {
             const responseFactory = createHttpResourcesResponseFactory();
             await routeHandler(context, kibanaRequest, responseFactory);
 
-            const { headers } = (responseFactory.ok as jest.Mock).mock.calls[0][0];
+            const { headers } = (responseFactory.ok as Mock).mock.calls[0][0];
             const cookies: string[] = Array.isArray(headers['set-cookie'])
               ? headers['set-cookie']
               : [headers['set-cookie']];
@@ -202,7 +204,7 @@ describe('HttpResources service', () => {
             const responseFactory = createHttpResourcesResponseFactory();
             await routeHandler(context, kibanaRequest, responseFactory);
 
-            const { headers } = (responseFactory.ok as jest.Mock).mock.calls[0][0];
+            const { headers } = (responseFactory.ok as Mock).mock.calls[0][0];
             const cookies: string[] = Array.isArray(headers['set-cookie'])
               ? headers['set-cookie']
               : [headers['set-cookie']];

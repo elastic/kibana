@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { createOtherResult } from '@kbn/agent-builder-server';
 import type { StartServicesAccessor } from '@kbn/core/server';
@@ -28,17 +30,20 @@ import {
 import { createPolicyTool } from './create_policy_tool';
 import { toPresentationHash } from './trim_policy_result';
 
-jest.mock('./create_policy_tool', () => ({
-  createPolicyTool: jest.fn(),
-}));
+vi.mock('./create_policy_tool', () => {
+      const mocked = {
+      createPolicyTool: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SPACE_ID = 'space-marketing';
-const getStartServices = jest.fn() as unknown as StartServicesAccessor;
-const mockedCreatePolicyTool = jest.mocked(createPolicyTool);
+const getStartServices = vi.fn() as unknown as StartServicesAccessor;
+const mockedCreatePolicyTool = vi.mocked(createPolicyTool);
 const mockService = {
-  comparePolicies: jest.fn(),
+  comparePolicies: vi.fn(),
 } as unknown as EndpointPolicyManagementService;
-const mockedComparePolicies = jest.mocked(mockService.comparePolicies);
+const mockedComparePolicies = vi.mocked(mockService.comparePolicies);
 
 const createPolicyRead = (overrides: Partial<EndpointPolicyRead> = {}): EndpointPolicyRead => {
   const storedConfig = policyFactory();

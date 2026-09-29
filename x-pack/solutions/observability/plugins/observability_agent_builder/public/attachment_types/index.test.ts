@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
@@ -19,14 +21,14 @@ import {
 } from '../../common/constants';
 import { registerAttachmentUiDefinitions } from '.';
 
-const mockAddAttachmentType = jest.fn();
+const mockAddAttachmentType = vi.fn();
 const mockAttachments: AttachmentServiceStartContract = {
   addAttachmentType: mockAddAttachmentType,
 } as unknown as AttachmentServiceStartContract;
 
 describe('registerAttachmentUiDefinitions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('registers all nine attachment types', () => {

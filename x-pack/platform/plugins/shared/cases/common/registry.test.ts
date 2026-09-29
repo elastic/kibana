@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { AttachmentTypeRegistry } from './registry';
 
 export const ExpressionComponent: React.FunctionComponent = () => {
@@ -16,7 +18,7 @@ const getItem = (id: string = 'test') => {
 };
 
 describe('AttachmentTypeRegistry', () => {
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   describe('has()', () => {
     it('returns false for unregistered items', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -27,9 +29,9 @@ const DEFAULT_VALUES = {
 };
 
 describe('add inference pipeline button', () => {
-  const onClick = jest.fn();
+  const onClick = vi.fn();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues({ ...DEFAULT_VALUES });
   });
 

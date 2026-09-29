@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -16,7 +18,7 @@ import { TemplateFields } from './template_fields';
 describe('Template fields', () => {
   let user: UserEvent;
 
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
   const formDefaultValue = { templateTags: [] };
   const defaultProps = {
     isLoading: false,
@@ -24,17 +26,17 @@ describe('Template fields', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
   });
 
   it('renders template fields correctly', async () => {

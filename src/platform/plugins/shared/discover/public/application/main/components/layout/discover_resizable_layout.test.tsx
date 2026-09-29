@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   type DiscoverResizableLayoutProps,
   DiscoverResizableLayout as OriginalDiscoverResizableLayout,
@@ -33,13 +35,13 @@ let mockIsMobile = false;
 let mockSidebarWidth: number | undefined;
 
 const services = createDiscoverServicesMock();
-services.storage.get = jest.fn((key: string) => {
+services.storage.get = vi.fn((key: string) => {
   if (key === MOCK_SIDEBAR_KEY) return mockSidebarWidth;
   throw new Error(`Unexpected key: ${key}`);
 });
 
-jest.mock('@kbn/resizable-layout', () => {
-  const actual = jest.requireActual('@kbn/resizable-layout');
+vi.mock('@kbn/resizable-layout', async () => {
+  const actual = (await vi.importActual('@kbn/resizable-layout'));
   const ActualResizableLayout = actual.ResizableLayout;
 
   return {
@@ -51,18 +53,18 @@ jest.mock('@kbn/resizable-layout', () => {
   };
 });
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   return {
     ...original,
-    useIsWithinBreakpoints: jest.fn(),
+    useIsWithinBreakpoints: vi.fn(),
   };
 });
 
 import { useIsWithinBreakpoints as useIsWithinBreakpointsImport } from '@elastic/eui';
 
-const useIsWithinBreakpoints = jest.mocked(useIsWithinBreakpointsImport);
+const useIsWithinBreakpoints = vi.mocked(useIsWithinBreakpointsImport);
 
 useIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
   if (!isEqual(breakpoints, ['xs', 's'])) {

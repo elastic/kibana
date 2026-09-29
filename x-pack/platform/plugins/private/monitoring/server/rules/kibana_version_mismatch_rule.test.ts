@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { KibanaVersionMismatchRule } from './kibana_version_mismatch_rule';
 import { RULE_KIBANA_VERSION_MISMATCH } from '../../common/constants';
 import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
@@ -14,27 +17,36 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_kibana_versions', () => ({
-  fetchKibanaVersions: jest.fn(),
-}));
-jest.mock('../lib/alerts/fetch_clusters', () => ({
-  fetchClusters: jest.fn(),
-}));
+vi.mock('../lib/alerts/fetch_kibana_versions', () => {
+      const mocked = {
+      fetchKibanaVersions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/alerts/fetch_clusters', () => {
+      const mocked = {
+      fetchClusters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../static_globals', () => ({
-  Globals: {
-    app: {
-      url: 'UNIT_TEST_URL',
-      getLogger: () => ({ debug: jest.fn() }),
-      config: {
-        ui: {
-          ccs: { enabled: true },
-          container: { elasticsearch: { enabled: false } },
+vi.mock('../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          url: 'UNIT_TEST_URL',
+          getLogger: () => ({ debug: vi.fn() }),
+          config: {
+            ui: {
+              ccs: { enabled: true },
+              container: { elasticsearch: { enabled: false } },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('KibanaVersionMismatchRule', () => {
   it('should have defaults', () => {
@@ -89,17 +101,17 @@ describe('KibanaVersionMismatchRule', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchKibanaVersions as jest.Mock).mockImplementation(() => {
+      (fetchKibanaVersions as Mock).mockImplementation(() => {
         return kibanaVersions;
       });
-      (fetchClusters as jest.Mock).mockImplementation(() => {
+      (fetchClusters as Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
       });
     });
 
     afterEach(() => {
       Date = RealDate;
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('should fire action', async () => {
@@ -160,7 +172,7 @@ describe('KibanaVersionMismatchRule', () => {
     });
 
     it('should not fire actions if there is no mismatch', async () => {
-      (fetchKibanaVersions as jest.Mock).mockImplementation(() => {
+      (fetchKibanaVersions as Mock).mockImplementation(() => {
         return [
           {
             versions: ['8.0.0'],

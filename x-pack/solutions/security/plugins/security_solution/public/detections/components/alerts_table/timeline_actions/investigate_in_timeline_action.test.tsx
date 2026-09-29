@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { fireEvent, render, act } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -29,28 +32,28 @@ const ecsRowData: Ecs = {
   },
 };
 
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/lib/apm/use_start_transaction');
-jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../actions');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/apm/use_start_transaction');
+vi.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('../actions');
 
-(KibanaServices.get as jest.Mock).mockReturnValue(coreMock.createStart());
-const mockSendAlertToTimeline = jest.spyOn(actions, 'sendAlertToTimelineAction');
-(useKibana as jest.Mock).mockReturnValue({
+(KibanaServices.get as Mock).mockReturnValue(coreMock.createStart());
+const mockSendAlertToTimeline = vi.spyOn(actions, 'sendAlertToTimelineAction');
+(useKibana as Mock).mockReturnValue({
   services: {
     data: {
       search: {
-        searchStrategyClient: jest.fn(),
+        searchStrategyClient: vi.fn(),
       },
-      query: jest.fn(),
+      query: vi.fn(),
     },
   },
 });
-(useAppToasts as jest.Mock).mockReturnValue({
-  addError: jest.fn(),
+(useAppToasts as Mock).mockReturnValue({
+  addError: vi.fn(),
 });
-(useUserPrivileges as jest.Mock).mockReturnValue({
+(useUserPrivileges as Mock).mockReturnValue({
   timelinePrivileges: {
     crud: true,
     read: true,
@@ -65,7 +68,7 @@ const props = {
 
 describe('use investigate in timeline hook', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   test('it creates a component and click handler', () => {
     const wrapper = render(
@@ -88,7 +91,7 @@ describe('use investigate in timeline hook', () => {
     expect(mockSendAlertToTimeline).toHaveBeenCalledTimes(1);
   });
   test('it disables the button when the user does not have access to timeline', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: {
         read: false,
       },

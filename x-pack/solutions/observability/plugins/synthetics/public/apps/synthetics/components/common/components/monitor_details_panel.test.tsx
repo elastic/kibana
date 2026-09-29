@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MonitorDetailsPanel, getScheduleFromTimespan } from './monitor_details_panel';
@@ -16,45 +18,72 @@ import type {
 } from '../../../../../../common/runtime_types';
 import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
 
-jest.mock('react-redux-v7', () => ({
-  useDispatch: () => jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useDispatch: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_kibana_space', () => ({
-  useKibanaSpace: () => ({ space: { id: 'default' } }),
-}));
+vi.mock('../../../../../hooks/use_kibana_space', () => {
+      const mocked = {
+      useKibanaSpace: () => ({ space: { id: 'default' } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks', () => ({
-  useGetUrlParams: () => ({ spaceId: undefined, remoteName: undefined }),
-}));
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useGetUrlParams: () => ({ spaceId: undefined, remoteName: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_date_format', () => ({
-  useDateFormat: () => (ts?: string) => ts ?? '',
-}));
+vi.mock('../../../../../hooks/use_date_format', () => {
+      const mocked = {
+      useDateFormat: () => (ts?: string) => ts ?? '',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../monitors_page/management/monitor_list_table/monitor_enabled', () => ({
-  MonitorEnabled: () => <div data-test-subj="monitorEnabledStub" />,
-}));
+vi.mock('../../monitors_page/management/monitor_list_table/monitor_enabled', () => {
+      const mocked = {
+      MonitorEnabled: () => <div data-test-subj="monitorEnabledStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../monitor_details/monitor_summary/locations_status', () => ({
-  LocationsStatus: () => <div data-test-subj="locationsStatusStub" />,
-}));
+vi.mock('../../monitor_details/monitor_summary/locations_status', () => {
+      const mocked = {
+      LocationsStatus: () => <div data-test-subj="locationsStatusStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./monitor_assigned_agents', () => ({
-  MonitorAssignedAgents: () => <div data-test-subj="monitorAssignedAgentsStub" />,
-}));
+vi.mock('./monitor_assigned_agents', () => {
+      const mocked = {
+      MonitorAssignedAgents: () => <div data-test-subj="monitorAssignedAgentsStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  TagsList: ({ tags }: { tags: string[] }) => (
-    <div data-test-subj="tagsListStub">{tags.join(',')}</div>
-  ),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      TagsList: ({ tags }: { tags: string[] }) => (
+        <div data-test-subj="tagsListStub">{tags.join(',')}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./monitor_maintenance_windows', () => ({
-  MonitorMaintenanceWindows: ({ monitorMWs }: { monitorMWs: string[] }) => (
-    <div data-test-subj="maintenanceWindowsStub">{monitorMWs.join(',')}</div>
-  ),
-}));
+vi.mock('./monitor_maintenance_windows', () => {
+      const mocked = {
+      MonitorMaintenanceWindows: ({ monitorMWs }: { monitorMWs: string[] }) => (
+        <div data-test-subj="maintenanceWindowsStub">{monitorMWs.join(',')}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const localMonitor = {
   config_id: 'config-1',

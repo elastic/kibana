@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { setTimeout as timer } from 'timers/promises';
 import fetchMock from 'fetch-mock';
 import { readFileSync } from 'fs';
@@ -414,7 +416,7 @@ describe('Fetch', () => {
     });
 
     it('exposes the request to the interceptors in case of aborted request', async () => {
-      const responseErrorSpy = jest.fn();
+      const responseErrorSpy = vi.fn();
       const abortError = new DOMException('The operation was aborted.', 'AbortError');
 
       fetchMock.get('*', Promise.reject(abortError));
@@ -605,8 +607,8 @@ describe('Fetch', () => {
     });
 
     it('should skip remaining interceptors when controller halts during request', async () => {
-      const usedSpy = jest.fn();
-      const unusedSpy = jest.fn();
+      const usedSpy = vi.fn();
+      const unusedSpy = vi.fn();
 
       fetchInstance.intercept({ request: unusedSpy, response: unusedSpy });
       fetchInstance.intercept({
@@ -629,8 +631,8 @@ describe('Fetch', () => {
     });
 
     it('should skip remaining interceptors when controller halts during response', async () => {
-      const usedSpy = jest.fn();
-      const unusedSpy = jest.fn();
+      const usedSpy = vi.fn();
+      const unusedSpy = vi.fn();
 
       fetchInstance.intercept({
         request: usedSpy,
@@ -652,7 +654,7 @@ describe('Fetch', () => {
     it('should skip remaining interceptors when controller halts during responseError', async () => {
       fetchMock.post('*', 401);
 
-      const unusedSpy = jest.fn();
+      const unusedSpy = vi.fn();
 
       fetchInstance.intercept({
         responseError(response, controller) {
@@ -669,8 +671,8 @@ describe('Fetch', () => {
     });
 
     it('should not fetch if exception occurs during request interception', async () => {
-      const usedSpy = jest.fn();
-      const unusedSpy = jest.fn();
+      const usedSpy = vi.fn();
+      const unusedSpy = vi.fn();
 
       fetchInstance.intercept({
         request: unusedSpy,
@@ -694,8 +696,8 @@ describe('Fetch', () => {
     });
 
     it('should succeed if request throws but caught by interceptor', async () => {
-      const usedSpy = jest.fn();
-      const unusedSpy = jest.fn();
+      const usedSpy = vi.fn();
+      const unusedSpy = vi.fn();
 
       fetchInstance.intercept({
         request: unusedSpy,
@@ -720,7 +722,7 @@ describe('Fetch', () => {
 
     it('should accumulate request information', async () => {
       const routes = ['alpha', 'beta', 'gamma'];
-      const createRequest = jest.fn((options: HttpFetchOptionsWithPath) => ({
+      const createRequest = vi.fn((options: HttpFetchOptionsWithPath) => ({
         path: `/api/${routes.shift()}`,
       }));
 
@@ -755,7 +757,7 @@ describe('Fetch', () => {
 
     it('should accumulate response information', async () => {
       const bodies = ['alpha', 'beta', 'gamma'];
-      const createResponse = jest.fn((httpResponse: HttpResponse) => ({
+      const createResponse = vi.fn((httpResponse: HttpResponse) => ({
         body: bodies.shift(),
       }));
 
@@ -827,7 +829,7 @@ describe('Fetch', () => {
     });
 
     it('should actually halt request interceptors in reverse order', async () => {
-      const unusedSpy = jest.fn();
+      const unusedSpy = vi.fn();
 
       fetchInstance.intercept({ request: unusedSpy });
       fetchInstance.intercept({
@@ -843,7 +845,7 @@ describe('Fetch', () => {
     });
 
     it('should recover from failing request interception via request error interceptor', async () => {
-      const usedSpy = jest.fn();
+      const usedSpy = vi.fn();
 
       fetchInstance.intercept({
         requestError(httpErrorRequest) {
@@ -864,7 +866,7 @@ describe('Fetch', () => {
     });
 
     it('should intercept the actual fetch call', async () => {
-      const fetch = jest.fn().mockImplementation(async (next, options) => ({
+      const fetch = vi.fn().mockImplementation(async (next, options) => ({
         ...(await next(options)),
         body: { foo: 'baz' },
       }));
@@ -881,11 +883,11 @@ describe('Fetch', () => {
     });
 
     it('should call fetch interceptors in order', async () => {
-      const fetch1 = jest.fn().mockImplementation(async (next) => ({
+      const fetch1 = vi.fn().mockImplementation(async (next) => ({
         ...(await next({ path: '/fetch1' })),
         body: { foo: 'baz1' },
       }));
-      const fetch2 = jest.fn().mockImplementation(async (next) => ({
+      const fetch2 = vi.fn().mockImplementation(async (next) => ({
         ...(await next({ path: '/fetch2' })),
         body: { foo: 'baz2' },
       }));
@@ -910,11 +912,11 @@ describe('Fetch', () => {
     });
 
     it('should halt fetch interceptors', async () => {
-      const fetch1 = jest.fn().mockImplementation((next, options, controller) => {
+      const fetch1 = vi.fn().mockImplementation((next, options, controller) => {
         controller.halt();
         return next(options);
       });
-      const fetch2 = jest.fn().mockImplementation((next, options) => next(options));
+      const fetch2 = vi.fn().mockImplementation((next, options) => next(options));
       fetchInstance.intercept({ fetch: fetch1 });
       fetchInstance.intercept({ fetch: fetch2 });
 
@@ -958,9 +960,9 @@ describe('Fetch', () => {
     it('calls the request/response interceptors if rawResponse = true', async () => {
       fetchMock.get('*', { foo: 'bar' });
 
-      const requestSpy = jest.fn();
+      const requestSpy = vi.fn();
 
-      const responseSpy = jest.fn();
+      const responseSpy = vi.fn();
 
       fetchInstance.intercept({ request: requestSpy, response: responseSpy });
 

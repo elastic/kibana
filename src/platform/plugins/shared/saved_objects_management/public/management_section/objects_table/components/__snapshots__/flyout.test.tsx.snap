@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Flyout conflicts should allow conflict resolution 1`] = `
+exports[`Flyout > conflicts > should allow conflict resolution 1`] = `
 <EuiFlyout
   aria-labelledby="generated-id"
   data-test-subj="importSavedObjectsFlyout"
@@ -159,7 +159,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Flyout conflicts should allow conflict resolution 2`] = `
+exports[`Flyout > conflicts > should allow conflict resolution 2`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -273,7 +273,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
 }
 `;
 
-exports[`Flyout should render import step 1`] = `
+exports[`Flyout > should render import step 1`] = `
 <EuiFlyout
   aria-labelledby="generated-id"
   data-test-subj="importSavedObjectsFlyout"
@@ -381,7 +381,7 @@ exports[`Flyout should render import step 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Flyout summary should display summary when import is complete 1`] = `
+exports[`Flyout > summary > should display summary when import is complete 1`] = `
 <ImportSummary
   allowedTypes={Array []}
   basePath={

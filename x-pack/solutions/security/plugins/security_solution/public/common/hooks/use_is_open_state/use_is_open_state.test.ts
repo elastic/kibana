@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useIsOpenState } from './use_is_open_state';
 
 describe('useIsOpenState', () => {
   let initialState: boolean;
-  let onOpen: jest.Mock;
-  let onClose: jest.Mock;
-  let onToggle: jest.Mock;
+  let onOpen: Mock;
+  let onClose: Mock;
+  let onToggle: Mock;
 
   beforeEach(() => {
     initialState = false;
-    onOpen = jest.fn();
-    onClose = jest.fn();
-    onToggle = jest.fn();
+    onOpen = vi.fn();
+    onClose = vi.fn();
+    onToggle = vi.fn();
   });
 
   it('should initialize with the correct state', () => {

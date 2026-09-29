@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
@@ -30,8 +33,8 @@ function makeColumn(
 
 function createMockDataViewsService() {
   return {
-    create: jest.fn(async (spec: Record<string, unknown>) => spec),
-    clearInstanceCache: jest.fn(),
+    create: vi.fn(async (spec: Record<string, unknown>) => spec),
+    clearInstanceCache: vi.fn(),
   } as unknown as DataViewsPublicPluginStart;
 }
 
@@ -99,7 +102,7 @@ describe('registerEsqlSourceInDataViewsCache', () => {
 
     await registerEsqlSourceInDataViewsCache(dataViews, source);
 
-    const spec = (dataViews.create as jest.Mock).mock.calls[0][0] as {
+    const spec = (dataViews.create as Mock).mock.calls[0][0] as {
       fields: Record<string, unknown>;
     };
     expect(spec.fields).toHaveProperty('message');
@@ -116,7 +119,7 @@ describe('registerEsqlSourceInDataViewsCache', () => {
 
     await registerEsqlSourceInDataViewsCache(dataViews, source);
 
-    const spec = (dataViews.create as jest.Mock).mock.calls[0][0] as {
+    const spec = (dataViews.create as Mock).mock.calls[0][0] as {
       fields: Record<string, { isComputedColumn?: boolean }>;
     };
     expect(spec.fields.avg_bytes.isComputedColumn).toBe(true);

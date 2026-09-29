@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { estypes } from '@elastic/elasticsearch';
 
@@ -27,7 +30,7 @@ function createMockRoleMapping(mapping: Partial<estypes.SecurityRoleMapping> = {
 }
 
 describe('Kibana user deprecation routes', () => {
-  let router: jest.Mocked<SecurityRouter>;
+  let router: Mocked<SecurityRouter>;
   let mockContext: DeeplyMockedKeys<SecurityRequestHandlerContext> & {
     core: ReturnType<typeof coreMock.createRequestHandlerContext>;
   };
@@ -37,7 +40,7 @@ describe('Kibana user deprecation routes', () => {
 
     mockContext = {
       core: coreMock.createRequestHandlerContext(),
-      licensing: { license: { check: jest.fn().mockReturnValue({ state: 'valid' }) } },
+      licensing: { license: { check: vi.fn().mockReturnValue({ state: 'valid' }) } },
     } as any;
 
     defineKibanaUserRoleDeprecationRoutes(routeParamsMock);

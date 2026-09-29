@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { StatItemHeader } from './stat_item_header';
 
 describe('StatItemHeader', () => {
-  const mockOnToggle = jest.fn();
+  const mockOnToggle = vi.fn();
 
   beforeEach(() => {});
 

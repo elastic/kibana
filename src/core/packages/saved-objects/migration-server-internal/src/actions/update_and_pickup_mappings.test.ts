@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -14,12 +16,12 @@ import { updateAndPickupMappings } from './update_and_pickup_mappings';
 import { DEFAULT_TIMEOUT } from './constants';
 import { pickupUpdatedMappings } from './pickup_updated_mappings';
 
-jest.mock('./catch_retryable_es_client_errors');
-jest.mock('./pickup_updated_mappings');
+vi.mock('./catch_retryable_es_client_errors');
+vi.mock('./pickup_updated_mappings');
 
 describe('updateAndPickupMappings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('putMappingTask', () => {

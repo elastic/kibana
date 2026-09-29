@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render as rtlRender, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,34 +16,46 @@ import type { HuntingLead, Observation } from './types';
 
 const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        getUrlForApp: jest.fn(() => '/app/management/ai/genAiSettings'),
-      },
-    },
-  }),
-  useDateFormat: jest.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
-  useTimeZone: jest.fn(() => 'UTC'),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            getUrlForApp: vi.fn(() => '/app/management/ai/genAiSettings'),
+          },
+        },
+      }),
+      useDateFormat: vi.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
+      useTimeZone: vi.fn(() => 'UTC'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openFlyout: mockOpenFlyout,
-  }),
-}));
+const mockOpenFlyout = vi.fn();
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: () => ({
+        openFlyout: mockOpenFlyout,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => false,
-}));
+vi.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => {
+      const mocked = {
+      useIsNewFlyoutEnabled: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
-  useFlyoutApi: () => ({
-    openEntityFlyout: jest.fn(),
-  }),
-}));
+vi.mock('../../../../flyout_v2/use_flyout_api', () => {
+      const mocked = {
+      useFlyoutApi: () => ({
+        openEntityFlyout: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockObservation = (overrides: Partial<Observation> = {}): Observation => ({
   entityId: 'entity-1',
@@ -81,20 +95,20 @@ const defaultProps = {
   isLoading: false,
   isGenerating: false,
   isScheduled: false,
-  onToggleSchedule: jest.fn(),
-  onSeeAll: jest.fn(),
-  onLeadClick: jest.fn(),
-  onHuntInChat: jest.fn(),
-  onGenerate: jest.fn(),
+  onToggleSchedule: vi.fn(),
+  onSeeAll: vi.fn(),
+  onLeadClick: vi.fn(),
+  onHuntInChat: vi.fn(),
+  onGenerate: vi.fn(),
   connectorId: 'test-connector-id',
   hasValidConnector: true,
   isAgentChatExperienceEnabled: true,
-  onConnectorIdSelected: jest.fn(),
+  onConnectorIdSelected: vi.fn(),
 };
 
 describe('TopThreatHuntingLeads', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders cards with mock leads data (shows card for each lead, max 5)', () => {
@@ -186,7 +200,7 @@ describe('TopThreatHuntingLeads', () => {
   });
 
   it('"See All" button calls onSeeAll', () => {
-    const onSeeAll = jest.fn();
+    const onSeeAll = vi.fn();
     const lead = createMockLead();
 
     render(
@@ -242,7 +256,7 @@ describe('TopThreatHuntingLeads', () => {
   });
 
   it('shows "Generate" button when no leads exist and calls onGenerate', () => {
-    const onGenerate = jest.fn();
+    const onGenerate = vi.fn();
 
     render(<TopThreatHuntingLeads {...defaultProps} onGenerate={onGenerate} />);
 
@@ -266,7 +280,7 @@ describe('TopThreatHuntingLeads', () => {
   });
 
   it('shows refresh button instead of "Generate" button when leads exist', () => {
-    const onGenerate = jest.fn();
+    const onGenerate = vi.fn();
     const lead = createMockLead();
 
     render(
@@ -309,7 +323,7 @@ describe('TopThreatHuntingLeads', () => {
   });
 
   it('lead card click calls onLeadClick', () => {
-    const onLeadClick = jest.fn();
+    const onLeadClick = vi.fn();
     const lead = createMockLead({ id: 'lead-xyz', title: 'Test Lead' });
 
     render(
@@ -328,7 +342,7 @@ describe('TopThreatHuntingLeads', () => {
   });
 
   it('clicking an entity badge opens the entity flyout and does not trigger onLeadClick', () => {
-    const onLeadClick = jest.fn();
+    const onLeadClick = vi.fn();
     const lead = createMockLead({
       id: 'lead-badge',
       byline: 'User admin@example.com on host server-01',
@@ -362,7 +376,7 @@ describe('TopThreatHuntingLeads', () => {
   });
 
   it('renders a non-interactive badge for entities with an unrecognized type, and clicking it still opens the card (Agent Builder)', () => {
-    const onLeadClick = jest.fn();
+    const onLeadClick = vi.fn();
     const lead = createMockLead({
       id: 'lead-generic',
       byline: 'Service payment-api on host server-01',

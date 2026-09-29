@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { useOnboardingNavigate } from './use_onboarding_navigate';
 import { useKibana } from '../services';
 
-jest.mock('../services');
+vi.mock('../services');
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
-const getUrlForApp = jest.fn(
+const getUrlForApp = vi.fn(
   (appId: string, { path }: { path?: string } = {}) => `/app/${appId}${path ?? ''}`
 );
-const navigateToUrl = jest.fn();
+const navigateToUrl = vi.fn();
 
 const mockApplication = (
   currentAppId$: BehaviorSubject<string | undefined> | Subject<string | undefined>
@@ -28,7 +31,7 @@ const mockApplication = (
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('useOnboardingNavigate', () => {

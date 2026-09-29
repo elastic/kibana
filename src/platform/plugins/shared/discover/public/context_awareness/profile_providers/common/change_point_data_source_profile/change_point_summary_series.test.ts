@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getTime } from '@kbn/data-plugin/public';
@@ -23,11 +25,11 @@ import {
   type ChangePointSummarySeriesState,
 } from './change_point_summary_series';
 
-jest.mock('@kbn/data-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/data-plugin/public');
+vi.mock('@kbn/data-plugin/public', async () => {
+  const actual = (await vi.importActual('@kbn/data-plugin/public'));
   return {
     ...actual,
-    getTime: jest.fn(() => undefined),
+    getTime: vi.fn(() => undefined),
   };
 });
 
@@ -135,7 +137,7 @@ const setupLineSearch = ({
   const resolvedLineValues = lineValues ?? [...base.lineValues];
 
   let abortSignal: AbortSignal | undefined;
-  const esql = jest.fn();
+  const esql = vi.fn();
   if (lineSearch === 'reject') {
     esql.mockRejectedValue(lineError ?? new Error('esql failed'));
   } else if (lineSearch === 'hang') {
@@ -234,8 +236,8 @@ describe('change_point_summary_series', () => {
 
   describe('getChangePointSummarySeries$', () => {
     beforeEach(() => {
-      jest.mocked(getTime).mockClear();
-      jest.mocked(getTime).mockReturnValue(undefined);
+      vi.mocked(getTime).mockClear();
+      vi.mocked(getTime).mockReturnValue(undefined);
     });
 
     it('is unavailable when the table is missing', async () => {
@@ -563,7 +565,7 @@ describe('change_point_summary_series', () => {
     });
 
     it('calls getSeries$ once when the hook rerenders with the same inputs', () => {
-      const getSeries$ = jest.fn(() => of({ status: 'idle' as const }));
+      const getSeries$ = vi.fn(() => of({ status: 'idle' as const }));
       const cache = { getSeries$ } as ChangePointSummarySeriesCache;
       const fetchParams = {
         searchSessionId: 'session-1',
@@ -574,7 +576,7 @@ describe('change_point_summary_series', () => {
         timeRange: { from: 'now-1d', to: 'now' },
         dataView: dataViewMock,
       } as ChangePointFetchParams;
-      const data = { search: { esql: jest.fn() } } as unknown as DataPublicPluginStart;
+      const data = { search: { esql: vi.fn() } } as unknown as DataPublicPluginStart;
 
       const { rerender } = renderHook(() => useChangePointSummarySeries(fetchParams, data, cache));
       rerender();

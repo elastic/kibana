@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import { parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import * as generateBuiltInStepSnippetModule from './generate_builtin_step_snippet';
@@ -16,18 +19,18 @@ import { createFakeMonacoModel } from '../../../../../common/mocks/monaco_model'
 import { prependIndentToLines } from '../prepend_indent_to_lines';
 
 describe('insertStepSnippet', () => {
-  let generateBuiltInStepSnippetSpy: jest.SpyInstance;
-  let generateConnectorSnippetSpy: jest.SpyInstance;
+  let generateBuiltInStepSnippetSpy: MockInstance;
+  let generateConnectorSnippetSpy: MockInstance;
   beforeEach(() => {
-    generateBuiltInStepSnippetSpy = jest.spyOn(
+    generateBuiltInStepSnippetSpy = vi.spyOn(
       generateBuiltInStepSnippetModule,
       'generateBuiltInStepSnippet'
     );
-    generateConnectorSnippetSpy = jest.spyOn(
+    generateConnectorSnippetSpy = vi.spyOn(
       generateConnectorSnippetModule,
       'generateConnectorSnippet'
     );
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should insert the "steps:" section if it does not exist', () => {
@@ -193,7 +196,7 @@ steps:
     const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
     const mockEditor = {
-      pushUndoStop: jest.fn(),
+      pushUndoStop: vi.fn(),
     } as unknown as monaco.editor.IStandaloneCodeEditor;
 
     insertStepSnippet(
@@ -414,7 +417,7 @@ steps:
     });
 
     expect(model.pushEditOperations).toHaveBeenCalled();
-    const callArgs = (model.pushEditOperations as jest.Mock).mock.calls[0];
+    const callArgs = (model.pushEditOperations as Mock).mock.calls[0];
     expect(callArgs[0]).toBe(null);
     expect(callArgs[1]).toHaveLength(1);
     expect(callArgs[1][0].range).toBeInstanceOf(monaco.Range);
@@ -498,7 +501,7 @@ steps:
       full: true,
       withStepsSection: false,
     });
-    const callArgs = (model.pushEditOperations as jest.Mock).mock.calls[0];
+    const callArgs = (model.pushEditOperations as Mock).mock.calls[0];
     expect(callArgs[1][0].range.startLineNumber).toBe(6);
     expect(callArgs[1][0].range.startColumn).toBe(1);
     expect(callArgs[1][0].text).toBe(prependIndentToLines(snippetText, 2));
@@ -527,7 +530,7 @@ steps:
       full: true,
       withStepsSection: false,
     });
-    const callArgs = (model.pushEditOperations as jest.Mock).mock.calls[0];
+    const callArgs = (model.pushEditOperations as Mock).mock.calls[0];
     // Should insert on line 2 (next line after "steps:")
     expect(callArgs[1][0].range.startLineNumber).toBe(2);
     expect(callArgs[1][0].range.startColumn).toBe(1);
@@ -919,7 +922,7 @@ steps:
       withStepsSection: false,
     });
     expect(model.pushEditOperations).toHaveBeenCalled();
-    const callArgs = (model.pushEditOperations as jest.Mock).mock.calls[0];
+    const callArgs = (model.pushEditOperations as Mock).mock.calls[0];
     // The insertion should use nested indent (6 spaces for foreach > steps)
     expect(callArgs[1][0].text).toBe(
       prependIndentToLines(
@@ -972,7 +975,7 @@ steps:
       withStepsSection: false,
     });
     expect(model.pushEditOperations).toHaveBeenCalled();
-    const callArgs = (model.pushEditOperations as jest.Mock).mock.calls[0];
+    const callArgs = (model.pushEditOperations as Mock).mock.calls[0];
     // Deep nesting: foreach steps at 4, if steps at 8, so step indent is 10
     expect(callArgs[1][0].text).toBe(prependIndentToLines(snippetText, 10));
   });

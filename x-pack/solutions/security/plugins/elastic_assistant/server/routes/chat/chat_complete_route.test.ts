@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IRouter } from '@kbn/core/server';
 import { NEVER } from 'rxjs';
 import { mockActionResponse } from '../../__mocks__/action_result_data';
@@ -36,45 +39,48 @@ import { createMockConnector } from '@kbn/actions-plugin/server/application/conn
 const license = licensingMock.createLicenseMock();
 
 const actionsClient = actionsClientMock.create();
-jest.mock('../../lib/build_response', () => ({
-  buildResponse: jest.fn().mockImplementation((x) => x),
-}));
+vi.mock('../../lib/build_response', () => {
+      const mocked = {
+      buildResponse: vi.fn().mockImplementation((x) => x),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../helpers', () => {
-  const original = jest.requireActual('../helpers');
+vi.mock('../helpers', async () => {
+  const original = (await vi.importActual('../helpers'));
 
   return {
     ...original,
-    appendAssistantMessageToConversation: jest.fn(),
-    createConversationWithUserInput: jest.fn(),
-    getSystemPromptFromPromptId: jest.fn(),
-    getSystemPromptFromUserConversation: jest.fn(),
-    langChainExecute: jest.fn(),
+    appendAssistantMessageToConversation: vi.fn(),
+    createConversationWithUserInput: vi.fn(),
+    getSystemPromptFromPromptId: vi.fn(),
+    getSystemPromptFromUserConversation: vi.fn(),
+    langChainExecute: vi.fn(),
   };
 });
-const mockAppendAssistantMessageToConversation = appendAssistantMessageToConversation as jest.Mock;
-const mockCreateConversationWithUserInput = createConversationWithUserInput as jest.Mock;
-const mockGetSystemPromptFromPromptId = getSystemPromptFromPromptId as jest.Mock;
-const mockGetSystemPromptFromUserConversation = getSystemPromptFromUserConversation as jest.Mock;
+const mockAppendAssistantMessageToConversation = appendAssistantMessageToConversation as Mock;
+const mockCreateConversationWithUserInput = createConversationWithUserInput as Mock;
+const mockGetSystemPromptFromPromptId = getSystemPromptFromPromptId as Mock;
+const mockGetSystemPromptFromUserConversation = getSystemPromptFromUserConversation as Mock;
 
-const mockLangChainExecute = langChainExecute as jest.Mock;
-const mockStream = jest.fn().mockImplementation(() => new PassThrough());
+const mockLangChainExecute = langChainExecute as Mock;
+const mockStream = vi.fn().mockImplementation(() => new PassThrough());
 
 const existingConversation = getConversationResponseMock();
-const reportEvent = jest.fn();
-const appendConversationMessages = jest.fn();
+const reportEvent = vi.fn();
+const appendConversationMessages = vi.fn();
 const mockContext = {
-  resolve: jest.fn().mockResolvedValue({
+  resolve: vi.fn().mockResolvedValue({
     elasticAssistant: {
       actions: {
-        getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
+        getActionsClientWithRequest: vi.fn().mockResolvedValue(actionsClient),
       },
-      getRegisteredTools: jest.fn(() => []),
-      getRegisteredFeatures: jest.fn(() => defaultAssistantFeatures),
+      getRegisteredTools: vi.fn(() => []),
+      getRegisteredFeatures: vi.fn(() => defaultAssistantFeatures),
       logger: loggingSystemMock.createLogger(),
       telemetry: { ...coreMock.createSetup().analytics, reportEvent },
       inference: {
-        getConnectorById: jest.fn().mockImplementation((id: string) => {
+        getConnectorById: vi.fn().mockImplementation((id: string) => {
           if (id === 'mock-connector-id') {
             return Promise.resolve({
               connectorId: 'mock-connector-id',
@@ -89,7 +95,7 @@ const mockContext = {
           return Promise.resolve(undefined);
         }),
       },
-      llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
+      llmTasks: { retrieveDocumentationAvailable: vi.fn(), retrieveDocumentation: vi.fn() },
       getCurrentUser: () => ({
         username: 'user',
         email: 'email',
@@ -103,25 +109,25 @@ const mockContext = {
         elastic_cloud_user: false,
         metadata: { _reserved: false },
       }),
-      getAIAssistantConversationsDataClient: jest.fn().mockResolvedValue({
-        getConversation: jest.fn().mockResolvedValue(existingConversation),
-        updateConversation: jest.fn().mockResolvedValue(existingConversation),
-        createConversation: jest.fn().mockResolvedValue(existingConversation),
+      getAIAssistantConversationsDataClient: vi.fn().mockResolvedValue({
+        getConversation: vi.fn().mockResolvedValue(existingConversation),
+        updateConversation: vi.fn().mockResolvedValue(existingConversation),
+        createConversation: vi.fn().mockResolvedValue(existingConversation),
         appendConversationMessages:
           appendConversationMessages.mockResolvedValue(existingConversation),
       }),
-      getAIAssistantKnowledgeBaseDataClient: jest.fn().mockResolvedValue({
-        getKnowledgeBaseDocuments: jest.fn().mockResolvedValue([]),
+      getAIAssistantKnowledgeBaseDataClient: vi.fn().mockResolvedValue({
+        getKnowledgeBaseDocuments: vi.fn().mockResolvedValue([]),
         indexTemplateAndPattern: {
           alias: 'knowledge-base-alias',
         },
-        isInferenceEndpointExists: jest.fn().mockResolvedValue(true),
+        isInferenceEndpointExists: vi.fn().mockResolvedValue(true),
       }),
-      getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
-        findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
+      getAIAssistantAnonymizationFieldsDataClient: vi.fn().mockResolvedValue({
+        findDocuments: vi.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
       }),
-      getAIAssistantPromptsDataClient: jest.fn().mockResolvedValue({
-        findDocuments: jest.fn().mockResolvedValue({}),
+      getAIAssistantPromptsDataClient: vi.fn().mockResolvedValue({
+        findDocuments: vi.fn().mockResolvedValue({}),
       }),
     },
     core: {
@@ -171,13 +177,13 @@ const mockRequest = {
 };
 
 const mockResponse = {
-  ok: jest.fn().mockImplementation((x) => x),
-  error: jest.fn().mockImplementation((x) => x),
+  ok: vi.fn().mockImplementation((x) => x),
+  error: vi.fn().mockImplementation((x) => x),
 };
 
 describe('chatCompleteRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockAppendAssistantMessageToConversation.mockResolvedValue(true);
     license.hasAtLeast.mockReturnValue(true);
     mockCreateConversationWithUserInput.mockResolvedValue({ id: 'something' });
@@ -222,7 +228,7 @@ describe('chatCompleteRoute', () => {
       }
     );
     actionsClient.execute.mockImplementation(
-      jest.fn().mockResolvedValue(() => ({
+      vi.fn().mockResolvedValue(() => ({
         data: 'mockChatCompletion',
         status: 'ok',
       }))
@@ -244,9 +250,9 @@ describe('chatCompleteRoute', () => {
   it('returns the expected response when using the existingConversation', async () => {
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               const result = await handler(
                 mockContext,
                 {
@@ -278,9 +284,9 @@ describe('chatCompleteRoute', () => {
 
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               await handler(mockContext, mockRequest, mockResponse);
 
               expect(mockLangChainExecute).toHaveBeenCalledWith(
@@ -313,9 +319,9 @@ describe('chatCompleteRoute', () => {
 
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               await handler(mockContext, requestWithPromptId, mockResponse);
 
               expect(mockLangChainExecute).toHaveBeenCalledWith(
@@ -349,9 +355,9 @@ describe('chatCompleteRoute', () => {
 
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               await handler(mockContext, requestWithPromptIdAndNoPersist, mockResponse);
 
               expect(mockLangChainExecute).toHaveBeenCalledWith(
@@ -381,9 +387,9 @@ describe('chatCompleteRoute', () => {
 
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               const result = await handler(mockContext, requestWithBadConnectorId, mockResponse);
 
               expect(result).toEqual({
@@ -412,9 +418,9 @@ describe('chatCompleteRoute', () => {
 
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               await handler(mockContext, requestWithBadConnectorId, mockResponse);
 
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
@@ -448,9 +454,9 @@ describe('chatCompleteRoute', () => {
 
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               await handler(mockContext, badRequest, mockResponse);
               expect(mockAppendAssistantMessageToConversation).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -472,9 +478,9 @@ describe('chatCompleteRoute', () => {
   it('returns the expected response when isStream=true and actionTypeId=.gen-ai', async () => {
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               const result = await handler(
                 mockContext,
                 {
@@ -502,9 +508,9 @@ describe('chatCompleteRoute', () => {
   it('returns the expected response when isStream=true and actionTypeId=.bedrock', async () => {
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               const result = await handler(
                 mockContext,
                 {
@@ -531,9 +537,9 @@ describe('chatCompleteRoute', () => {
   it('should add assistant reply to existing conversation when `persist=true`', async () => {
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               await handler(
                 mockContext,
                 {
@@ -564,9 +570,9 @@ describe('chatCompleteRoute', () => {
   it('should not add assistant reply to existing conversation when `persist=false`', async () => {
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               await handler(
                 mockContext,
                 {
@@ -593,9 +599,9 @@ describe('chatCompleteRoute', () => {
   it('should add assistant reply to new conversation when `persist=true`', async () => {
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               await handler(
                 mockContext,
                 {
@@ -627,9 +633,9 @@ describe('chatCompleteRoute', () => {
   it('should not create a new conversation when `persist=false`', async () => {
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation(() => {
+        post: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+            addVersion: vi.fn().mockImplementation(async (_, handler) => {
               await handler(
                 mockContext,
                 {

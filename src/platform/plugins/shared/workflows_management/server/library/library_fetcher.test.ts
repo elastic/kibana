@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import fetch from 'node-fetch';
 import { createHash } from 'node:crypto';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -14,8 +17,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { LibraryFetchError, LibraryNotFoundError } from './errors';
 import { LibraryFetcher } from './library_fetcher';
 
-jest.mock('node-fetch');
-const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
+vi.mock('node-fetch');
+const mockedFetch = fetch as MockedFunction<typeof fetch>;
 
 const BASE_URL = 'https://workflows.test/v1';
 const KIBANA_VERSION = '9.5.0';
@@ -38,7 +41,7 @@ const jsonResponse = (body: unknown, init: { status?: number; etag?: string } = 
     headers: {
       get: (name: string) => (name.toLowerCase() === 'etag' ? init.etag ?? null : null),
     },
-    text: jest.fn().mockResolvedValue(typeof body === 'string' ? body : JSON.stringify(body)),
+    text: vi.fn().mockResolvedValue(typeof body === 'string' ? body : JSON.stringify(body)),
   } as unknown as Awaited<ReturnType<typeof fetch>>);
 
 const notModifiedResponse = () =>
@@ -46,7 +49,7 @@ const notModifiedResponse = () =>
     status: 304,
     ok: false,
     headers: { get: () => null },
-    text: jest.fn().mockResolvedValue(''),
+    text: vi.fn().mockResolvedValue(''),
   } as unknown as Awaited<ReturnType<typeof fetch>>);
 
 // `node-fetch` is auto-mocked, so its `FetchError` no longer extends `Error`
@@ -121,7 +124,7 @@ let now = Date.UTC(2026, 5, 1, 12, 0, 0);
 
 const advanceClock = (ms: number) => {
   now += ms;
-  jest.setSystemTime(new Date(now));
+  vi.setSystemTime(new Date(now));
 };
 
 beforeEach(() => {
@@ -129,14 +132,14 @@ beforeEach(() => {
   now = Date.UTC(2026, 5, 1, 12, 0, 0);
   // Fake only `Date` so we can drive TTL expiry; leave the timer primitives
   // real so p-retry's exponential backoff can complete in retry tests.
-  jest.useFakeTimers({
+  vi.useFakeTimers({
     doNotFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'setImmediate'],
   });
-  jest.setSystemTime(new Date(now));
+  vi.setSystemTime(new Date(now));
 });
 
 afterEach(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 describe('LibraryFetcher.listTemplates', () => {

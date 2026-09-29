@@ -7,24 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getExpressionRendererProps } from './get_expression_renderer_props';
 import type { Vis } from '../vis';
 import type { VisParams } from '../types';
 import { PersistedState } from '../persisted_state';
 import type { ExecutionContextSearch } from '@kbn/es-query';
 
-jest.mock('./to_ast', () => ({
-  toExpressionAst: jest.fn().mockResolvedValue('mock expression'),
-}));
+vi.mock('./to_ast', () => {
+      const mocked = {
+      toExpressionAst: vi.fn().mockResolvedValue('mock expression'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../services', () => ({
-  getExecutionContext: jest.fn().mockReturnValue({
-    get: jest.fn().mockReturnValue({}),
-  }),
-  getTimeFilter: jest.fn().mockReturnValue({
-    getTime: jest.fn().mockReturnValue({ from: 'now-15m', to: 'now' }),
-  }),
-}));
+vi.mock('../services', () => {
+      const mocked = {
+      getExecutionContext: vi.fn().mockReturnValue({
+        get: vi.fn().mockReturnValue({}),
+      }),
+      getTimeFilter: vi.fn().mockReturnValue({
+        getTime: vi.fn().mockReturnValue({ from: 'now-15m', to: 'now' }),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockVis = (overrides: Partial<Vis<VisParams>> = {}): Vis<VisParams> =>
   ({
@@ -33,7 +41,7 @@ const createMockVis = (overrides: Partial<Vis<VisParams>> = {}): Vis<VisParams> 
     type: {
       name: 'area',
       inspectorAdapters: undefined,
-      getExpressionVariables: jest.fn().mockResolvedValue({}),
+      getExpressionVariables: vi.fn().mockResolvedValue({}),
       ...overrides.type,
     } as any,
     uiState: new PersistedState(),
@@ -62,9 +70,9 @@ describe('getExpressionRendererProps', () => {
           syncTooltips: false,
         },
         vis,
-        onRender: jest.fn(),
-        onEvent: jest.fn(),
-        onData: jest.fn(),
+        onRender: vi.fn(),
+        onEvent: vi.fn(),
+        onData: vi.fn(),
       });
 
       expect(result.params).toBeDefined();
@@ -92,9 +100,9 @@ describe('getExpressionRendererProps', () => {
           syncTooltips: false,
         },
         vis,
-        onRender: jest.fn(),
-        onEvent: jest.fn(),
-        onData: jest.fn(),
+        onRender: vi.fn(),
+        onEvent: vi.fn(),
+        onData: vi.fn(),
       });
 
       expect(result.params).toBeDefined();
@@ -122,9 +130,9 @@ describe('getExpressionRendererProps', () => {
           syncTooltips: false,
         },
         vis,
-        onRender: jest.fn(),
-        onEvent: jest.fn(),
-        onData: jest.fn(),
+        onRender: vi.fn(),
+        onEvent: vi.fn(),
+        onData: vi.fn(),
       });
 
       expect(result.params).toBeDefined();
@@ -153,9 +161,9 @@ describe('getExpressionRendererProps', () => {
           syncTooltips: false,
         },
         vis,
-        onRender: jest.fn(),
-        onEvent: jest.fn(),
-        onData: jest.fn(),
+        onRender: vi.fn(),
+        onEvent: vi.fn(),
+        onData: vi.fn(),
       });
 
       expect(result.params).toBeDefined();
@@ -182,9 +190,9 @@ describe('getExpressionRendererProps', () => {
           syncTooltips: false,
         },
         vis,
-        onRender: jest.fn(),
-        onEvent: jest.fn(),
-        onData: jest.fn(),
+        onRender: vi.fn(),
+        onEvent: vi.fn(),
+        onData: vi.fn(),
       });
 
       expect(result.params).toBeDefined();
@@ -217,9 +225,9 @@ describe('getExpressionRendererProps', () => {
           syncTooltips: false,
         },
         vis,
-        onRender: jest.fn(),
-        onEvent: jest.fn(),
-        onData: jest.fn(),
+        onRender: vi.fn(),
+        onEvent: vi.fn(),
+        onData: vi.fn(),
       });
 
       expect(result.params).toBeDefined();

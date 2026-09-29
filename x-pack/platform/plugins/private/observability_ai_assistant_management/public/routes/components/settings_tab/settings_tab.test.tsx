@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '../../../helpers/test_helper';
 import { SettingsTab } from './settings_tab';
@@ -17,21 +20,21 @@ import {
   useInferenceEndpoints,
 } from '@kbn/ai-assistant/src/hooks';
 
-jest.mock('../../../hooks/use_app_context');
-jest.mock('../../../hooks/use_kibana');
-jest.mock('../../../hooks/use_product_doc');
-jest.mock('@kbn/ai-assistant/src/hooks');
+vi.mock('../../../hooks/use_app_context');
+vi.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_product_doc');
+vi.mock('@kbn/ai-assistant/src/hooks');
 
-const useAppContextMock = useAppContext as jest.Mock;
-const useKibanaMock = useKibana as jest.Mock;
-const useKnowledgeBaseMock = useKnowledgeBase as jest.Mock;
-const useGenAIConnectorsMock = useGenAIConnectors as jest.Mock;
-const useInferenceEndpointsMock = useInferenceEndpoints as jest.Mock;
-const navigateToAppMock = jest.fn(() => Promise.resolve());
+const useAppContextMock = useAppContext as Mock;
+const useKibanaMock = useKibana as Mock;
+const useKnowledgeBaseMock = useKnowledgeBase as Mock;
+const useGenAIConnectorsMock = useGenAIConnectors as Mock;
+const useInferenceEndpointsMock = useInferenceEndpoints as Mock;
+const navigateToAppMock = vi.fn(() => Promise.resolve());
 
 describe('SettingsTab', () => {
-  const getUrlForAppMock = jest.fn();
-  const prependMock = jest.fn();
+  const getUrlForAppMock = vi.fn();
+  const prependMock = vi.fn();
 
   beforeEach(() => {
     useAppContextMock.mockReturnValue({
@@ -51,7 +54,7 @@ describe('SettingsTab', () => {
         productDocBase: undefined,
         notifications: {
           toasts: {
-            add: jest.fn(),
+            add: vi.fn(),
           },
         },
       },
@@ -63,8 +66,8 @@ describe('SettingsTab', () => {
       isWarmingUpModel: false,
       isProductDocInstalling: false,
       isProductDocUninstalling: false,
-      installProductDoc: jest.fn().mockResolvedValue(undefined),
-      uninstallProductDoc: jest.fn().mockResolvedValue(undefined),
+      installProductDoc: vi.fn().mockResolvedValue(undefined),
+      uninstallProductDoc: vi.fn().mockResolvedValue(undefined),
     });
     useGenAIConnectorsMock.mockReturnValue({ connectors: [{ id: 'test-connector' }] });
     useInferenceEndpointsMock.mockReturnValue({

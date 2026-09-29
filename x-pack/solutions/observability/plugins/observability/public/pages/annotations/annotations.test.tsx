@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -19,28 +21,34 @@ const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 const onboardingHref = '/app/observabilityOnboarding';
 const onboardingLocator = sharePluginMock.createLocator();
 onboardingLocator.useUrl.mockReturnValue(onboardingHref);
-jest
+vi
   .spyOn(mockUseKibanaReturnValue.services.share.url.locators, 'get')
   .mockReturnValue(onboardingLocator);
 
-jest.mock('../../utils/kibana_react', () => ({
+vi.mock('../../utils/kibana_react', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+  useKibana: vi.fn(() => mockUseKibanaReturnValue),
 }));
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
-  useBreadcrumbs: jest.fn(),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+      useBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_plugin_context');
-jest.mock('./annotations_privileges');
-jest.mock('./annotations_list', () => ({
-  AnnotationsList: () => <div data-test-subj="annotationsList" />,
-}));
+vi.mock('../../hooks/use_plugin_context');
+vi.mock('./annotations_privileges');
+vi.mock('./annotations_list', () => {
+      const mocked = {
+      AnnotationsList: () => <div data-test-subj="annotationsList" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { usePluginContext } = jest.requireMock('../../hooks/use_plugin_context');
-const { useAnnotationsPrivileges } = jest.requireMock('./annotations_privileges');
+const { usePluginContext } = (await vi.importMock('../../hooks/use_plugin_context'));
+const { useAnnotationsPrivileges } = (await vi.importMock('./annotations_privileges'));
 
 function ObservabilityPageTemplate({
   children,
@@ -69,7 +77,7 @@ describe('AnnotationsPage', () => {
     usePluginContext.mockReturnValue({
       ObservabilityPageTemplate,
     });
-    jest
+    vi
       .spyOn(mockUseKibanaReturnValue.services.share.url.locators, 'get')
       .mockReturnValue(onboardingLocator);
     onboardingLocator.useUrl.mockReturnValue(onboardingHref);

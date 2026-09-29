@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -33,8 +35,8 @@ const createWrapper = (services: UserProfilesServices) => {
 };
 
 const baseServices: UserProfilesServices = {
-  getUserProfile: jest.fn(),
-  bulkGetUserProfiles: jest.fn(),
+  getUserProfile: vi.fn(),
+  bulkGetUserProfiles: vi.fn(),
 };
 
 describe('useSuggestUserProfiles', () => {
@@ -48,7 +50,7 @@ describe('useSuggestUserProfiles', () => {
   });
 
   it('is disabled when `name` is empty.', () => {
-    const suggestUserProfiles = jest.fn().mockResolvedValue([mockProfile]);
+    const suggestUserProfiles = vi.fn().mockResolvedValue([mockProfile]);
     const { result } = renderHook(() => useSuggestUserProfiles(''), {
       wrapper: createWrapper({ ...baseServices, suggestUserProfiles }),
     });
@@ -58,7 +60,7 @@ describe('useSuggestUserProfiles', () => {
   });
 
   it('calls the service and returns profiles when enabled.', async () => {
-    const suggestUserProfiles = jest.fn().mockResolvedValue([mockProfile]);
+    const suggestUserProfiles = vi.fn().mockResolvedValue([mockProfile]);
     const { result } = renderHook(() => useSuggestUserProfiles('jane'), {
       wrapper: createWrapper({ ...baseServices, suggestUserProfiles }),
     });

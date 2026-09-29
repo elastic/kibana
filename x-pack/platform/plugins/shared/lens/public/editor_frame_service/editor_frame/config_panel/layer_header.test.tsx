@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
@@ -65,8 +67,8 @@ describe('LayerHeader', () => {
             layerId: 'myLayer',
             state: {},
             frame: createMockFramePublicAPI(),
-            setState: jest.fn(),
-            onChangeIndexPattern: jest.fn(),
+            setState: vi.fn(),
+            onChangeIndexPattern: vi.fn(),
           }}
           {...propsOverrides}
         />
@@ -164,8 +166,8 @@ describe('LayerHeader', () => {
               layerId: 'myLayer',
               state: {},
               frame: createMockFramePublicAPI(),
-              setState: jest.fn(),
-              onChangeIndexPattern: jest.fn(),
+              setState: vi.fn(),
+              onChangeIndexPattern: vi.fn(),
             }}
           />
         </EditorFrameServiceProvider>

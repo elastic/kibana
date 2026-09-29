@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getAdminCapabilities, getUserCapabilities } from './__mocks__/ml_capabilities';
 import {
   areCapabilitiesAllowedByLicenseAndFeatures,
@@ -428,11 +430,11 @@ describe('check_capabilities', () => {
 const createAuthorizationMock = (hasAllRequested: boolean) => ({
   actions: {
     ui: {
-      get: jest.fn((feature: string, cap: string) => `${feature}:${cap}`),
+      get: vi.fn((feature: string, cap: string) => `${feature}:${cap}`),
     },
   },
-  checkPrivilegesDynamicallyWithRequest: jest.fn(() =>
-    jest.fn().mockResolvedValue({ hasAllRequested })
+  checkPrivilegesDynamicallyWithRequest: vi.fn(() =>
+    vi.fn().mockResolvedValue({ hasAllRequested })
   ),
 });
 
@@ -511,14 +513,14 @@ describe('hasMlCapabilitiesProvider', () => {
   const realRequest = { isFakeRequest: false } as any;
 
   test('passes when resolved capabilities include all requested capabilities', async () => {
-    const resolveMlCapabilities = jest.fn().mockResolvedValue(getAdminCapabilities());
+    const resolveMlCapabilities = vi.fn().mockResolvedValue(getAdminCapabilities());
     const hasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities, realRequest);
 
     await expect(hasMlCapabilities(['canCreateJob'])).resolves.toBeUndefined();
   });
 
   test('throws for real requests when resolved capabilities are insufficient', async () => {
-    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const resolveMlCapabilities = vi.fn().mockResolvedValue(getUserCapabilities());
     const hasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities, realRequest);
 
     await expect(hasMlCapabilities(['canCreateJob'])).rejects.toBeInstanceOf(
@@ -528,7 +530,7 @@ describe('hasMlCapabilitiesProvider', () => {
 
   test('authorizes fake requests via privileges and plugin features, ignoring resolved caps', async () => {
     // Fake requests resolve all-false UI caps (including isADEnabled). Privilege + features must win.
-    const resolveMlCapabilities = jest.fn().mockResolvedValue({
+    const resolveMlCapabilities = vi.fn().mockResolvedValue({
       ...getUserCapabilities(),
       canCreateJob: false,
       isADEnabled: false,
@@ -548,7 +550,7 @@ describe('hasMlCapabilitiesProvider', () => {
   });
 
   test('rejects fake requests on basic license for full-license capabilities', async () => {
-    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const resolveMlCapabilities = vi.fn().mockResolvedValue(getUserCapabilities());
     const authorization = createAuthorizationMock(true);
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
@@ -565,7 +567,7 @@ describe('hasMlCapabilitiesProvider', () => {
   });
 
   test('rejects fake requests when AD feature is disabled in plugin config', async () => {
-    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const resolveMlCapabilities = vi.fn().mockResolvedValue(getUserCapabilities());
     const authorization = createAuthorizationMock(true);
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
@@ -582,7 +584,7 @@ describe('hasMlCapabilitiesProvider', () => {
   });
 
   test('rejects fake requests when authorization is missing', async () => {
-    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const resolveMlCapabilities = vi.fn().mockResolvedValue(getUserCapabilities());
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
       fakeRequest,
@@ -597,7 +599,7 @@ describe('hasMlCapabilitiesProvider', () => {
   });
 
   test('rejects fake requests when mlLicense is missing', async () => {
-    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const resolveMlCapabilities = vi.fn().mockResolvedValue(getUserCapabilities());
     const authorization = createAuthorizationMock(true);
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
@@ -614,7 +616,7 @@ describe('hasMlCapabilitiesProvider', () => {
   });
 
   test('rejects fake requests when enabledFeatures is missing', async () => {
-    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const resolveMlCapabilities = vi.fn().mockResolvedValue(getUserCapabilities());
     const authorization = createAuthorizationMock(true);
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
@@ -630,7 +632,7 @@ describe('hasMlCapabilitiesProvider', () => {
   });
 
   test('rejects fake requests when role privileges are insufficient', async () => {
-    const resolveMlCapabilities = jest.fn().mockResolvedValue(getUserCapabilities());
+    const resolveMlCapabilities = vi.fn().mockResolvedValue(getUserCapabilities());
     const authorization = createAuthorizationMock(false);
     const hasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,

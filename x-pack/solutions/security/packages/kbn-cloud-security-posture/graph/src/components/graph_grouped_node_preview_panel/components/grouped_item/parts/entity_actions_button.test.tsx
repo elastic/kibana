@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EntityActionsButton as BaseEntityActionsButton } from './entity_actions_button';
@@ -25,38 +28,38 @@ import {
 } from '../../../../filters/filter_store';
 import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../../../common/constants';
 
-jest.mock('../../../../filters/filter_store', () => {
-  const actual = jest.requireActual('../../../../filters/filter_store');
+vi.mock('../../../../filters/filter_store', async () => {
+  const actual = (await vi.importActual('../../../../filters/filter_store'));
   return {
     ...actual,
-    isFilterActiveForScope: jest.fn(() => false),
-    isEntityRelationshipExpandedForScope: jest.fn(() => false),
-    emitFilterToggle: jest.fn(),
-    emitIsOneOfFilterToggle: jest.fn(),
-    emitEntityRelationshipToggle: jest.fn(),
-    emitPinnedEuidToggle: jest.fn(),
+    isFilterActiveForScope: vi.fn(() => false),
+    isEntityRelationshipExpandedForScope: vi.fn(() => false),
+    emitFilterToggle: vi.fn(),
+    emitIsOneOfFilterToggle: vi.fn(),
+    emitEntityRelationshipToggle: vi.fn(),
+    emitPinnedEuidToggle: vi.fn(),
   };
 });
 
-const mockEmitFilterToggle = emitFilterToggle as jest.MockedFunction<typeof emitFilterToggle>;
-const mockEmitIsOneOfFilterToggle = emitIsOneOfFilterToggle as jest.MockedFunction<
+const mockEmitFilterToggle = emitFilterToggle as MockedFunction<typeof emitFilterToggle>;
+const mockEmitIsOneOfFilterToggle = emitIsOneOfFilterToggle as MockedFunction<
   typeof emitIsOneOfFilterToggle
 >;
-const mockIsFilterActiveForScope = isFilterActiveForScope as jest.MockedFunction<
+const mockIsFilterActiveForScope = isFilterActiveForScope as MockedFunction<
   typeof isFilterActiveForScope
 >;
-const mockEmitEntityRelationshipToggle = emitEntityRelationshipToggle as jest.MockedFunction<
+const mockEmitEntityRelationshipToggle = emitEntityRelationshipToggle as MockedFunction<
   typeof emitEntityRelationshipToggle
 >;
-const mockEmitPinnedEuidToggle = emitPinnedEuidToggle as jest.MockedFunction<
+const mockEmitPinnedEuidToggle = emitPinnedEuidToggle as MockedFunction<
   typeof emitPinnedEuidToggle
 >;
 const mockIsEntityRelationshipExpandedForScope =
-  isEntityRelationshipExpandedForScope as jest.MockedFunction<
+  isEntityRelationshipExpandedForScope as MockedFunction<
     typeof isEntityRelationshipExpandedForScope
   >;
 
-const mockOnShowEntity = jest.fn();
+const mockOnShowEntity = vi.fn();
 
 // Test wrapper supplying a default `onShowEntity` so cases stay terse.
 const EntityActionsButton = (
@@ -78,7 +81,7 @@ describe('EntityActionsButton', () => {
   const scopeId = 'test-scope-id';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsFilterActiveForScope.mockReturnValue(false);
   });
 

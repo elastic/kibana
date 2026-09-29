@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { AxiosInstance, AxiosResponse } from 'axios';
 import axios, { AxiosError } from 'axios';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
@@ -15,13 +18,13 @@ import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { API_MAX_RESULTS, CONNECTOR_ID } from '@kbn/connector-schemas/tines';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
-jest.mock('axios');
-(axios as jest.Mocked<typeof axios>).create.mockImplementation(
-  () => jest.fn() as unknown as AxiosInstance
+vi.mock('axios');
+(axios as Mocked<typeof axios>).create.mockImplementation(
+  () => vi.fn() as unknown as AxiosInstance
 );
 
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils');
-const mockRequest = request as jest.Mock;
+vi.mock('@kbn/actions-plugin/server/lib/axios_utils');
+const mockRequest = request as Mock;
 
 const url = 'https://example.com';
 const email = 'some.email@test.com';
@@ -123,7 +126,7 @@ describe('TinesConnector', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',

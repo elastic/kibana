@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
@@ -43,20 +46,23 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
 };
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock(
+vi.mock(
   '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
 );
 const mockAlertData = {
@@ -70,8 +76,8 @@ const mockAlertData = {
 };
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const originalModule = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...originalModule,
     useKibana: () => ({
@@ -82,15 +88,15 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
-jest.mock('../../../../common/containers/use_global_time', () => {
+const mockUseGlobalTime = vi.fn().mockReturnValue({ from, to });
+vi.mock('../../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
   };
 });
 
-const mockUseRiskScore = useRiskScore as jest.Mock;
-jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
+const mockUseRiskScore = useRiskScore as Mock;
+vi.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 
 const renderHostEntityContent = (
   extraProps: Partial<React.ComponentProps<typeof HostEntityOverview>> = {}
@@ -108,10 +114,10 @@ const renderHostEntityContent = (
 
 describe('<HostEntityContent />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
-    (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({});
-    (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    (useMisconfigurationPreview as Mock).mockReturnValue({});
+    (useVulnerabilitiesPreview as Mock).mockReturnValue({});
+    (useAlertsByStatus as Mock).mockReturnValue({ isLoading: false, items: {} });
   });
 
   describe('license is valid', () => {
@@ -205,7 +211,7 @@ describe('<HostEntityContent />', () => {
     });
 
     it('should render alert count when data is available', () => {
-      (useAlertsByStatus as jest.Mock).mockReturnValue({
+      (useAlertsByStatus as Mock).mockReturnValue({
         isLoading: false,
         items: mockAlertData,
       });
@@ -215,7 +221,7 @@ describe('<HostEntityContent />', () => {
     });
 
     it('opens host alert details when clicking alert count with enableEntityLinks', () => {
-      (useAlertsByStatus as jest.Mock).mockReturnValue({
+      (useAlertsByStatus as Mock).mockReturnValue({
         isLoading: false,
         items: mockAlertData,
       });
@@ -248,7 +254,7 @@ describe('<HostEntityContent />', () => {
     });
 
     it('should render misconfiguration when data is available', () => {
-      (useMisconfigurationPreview as jest.Mock).mockReturnValue({
+      (useMisconfigurationPreview as Mock).mockReturnValue({
         data: { count: { passed: 1, failed: 2 } },
       });
 
@@ -257,7 +263,7 @@ describe('<HostEntityContent />', () => {
     });
 
     it('should render vulnerabilities when data is available', () => {
-      (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({
+      (useVulnerabilitiesPreview as Mock).mockReturnValue({
         data: { count: { CRITICAL: 0, HIGH: 1, MEDIUM: 1, LOW: 0, UNKNOWN: 0 } },
       });
 

@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const insertDataIntoIndexMock = jest.fn();
-jest.doMock('./lib/insert_data_into_index', () => ({
-  insertDataIntoIndex: insertDataIntoIndexMock,
-}));
+import { vi } from 'vitest';
 
-export const findSampleObjectsMock = jest.fn();
-jest.doMock('./lib/find_sample_objects', () => ({
-  findSampleObjects: findSampleObjectsMock,
-}));
+export const insertDataIntoIndexMock = vi.fn();
+vi.doMock('./lib/insert_data_into_index', () => {
+      const mocked = {
+      insertDataIntoIndex: insertDataIntoIndexMock,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+export const findSampleObjectsMock = vi.fn();
+vi.doMock('./lib/find_sample_objects', () => {
+      const mocked = {
+      findSampleObjects: findSampleObjectsMock,
+    };
+      return { ...mocked, default: mocked };
+    });

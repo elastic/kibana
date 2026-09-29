@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 
@@ -32,35 +35,38 @@ import { ExperimentalFeaturesService } from '../../../services';
 
 import { EditPackagePolicyPage } from '.';
 
-type MockFn = jest.MockedFunction<any>;
+type MockFn = MockedFunction<any>;
 
 let lastStepConfigureProps: any;
 let lastLayoutProps: any;
 
-jest.mock('../../../../../services/use_yaml', () => ({
-  useYaml: () => require('yaml'),
-}));
+vi.mock('../../../../../services/use_yaml', () => {
+      const mocked = {
+      useYaml: () => require('yaml'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../create_package_policy_page/components/steps/components/use_policies', () => {
+vi.mock('../create_package_policy_page/components/steps/components/use_policies', async () => {
   return {
-    ...jest.requireActual('../create_package_policy_page/components/steps/components/use_policies'),
-    useAllNonManagedAgentPolicies: jest
+    ...(await vi.importActual('../create_package_policy_page/components/steps/components/use_policies')),
+    useAllNonManagedAgentPolicies: vi
       .fn()
       .mockReturnValue([{ id: 'agent-policy-1', name: 'Agent policy 1' }]),
   };
 });
 
-jest.mock('../../../hooks', () => {
+vi.mock('../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../hooks'),
-    sendGetAgentStatus: jest.fn(),
-    sendBulkGetAgentPoliciesForRq: jest.fn(),
-    sendUpdatePackagePolicy: jest.fn(),
-    sendGetOnePackagePolicy: jest.fn(),
-    sendGetOneAgentPolicy: jest.fn(),
-    sendUpgradePackagePolicyDryRun: jest.fn(),
-    useMultipleAgentPolicies: jest.fn(),
-    sendGetPackageInfoByKey: jest.fn().mockImplementation((name, version) =>
+    ...(await vi.importActual('../../../hooks')),
+    sendGetAgentStatus: vi.fn(),
+    sendBulkGetAgentPoliciesForRq: vi.fn(),
+    sendUpdatePackagePolicy: vi.fn(),
+    sendGetOnePackagePolicy: vi.fn(),
+    sendGetOneAgentPolicy: vi.fn(),
+    sendUpgradePackagePolicyDryRun: vi.fn(),
+    useMultipleAgentPolicies: vi.fn(),
+    sendGetPackageInfoByKey: vi.fn().mockImplementation((name, version) =>
       Promise.resolve({
         data: {
           item: {
@@ -152,13 +158,13 @@ jest.mock('../../../hooks', () => {
         isLoading: false,
       })
     ),
-    useUIExtension: jest.fn(),
-    useStartServices: jest.fn().mockReturnValue({
-      application: { navigateToApp: jest.fn(), navigateToUrl: jest.fn() },
+    useUIExtension: vi.fn(),
+    useStartServices: vi.fn().mockReturnValue({
+      application: { navigateToApp: vi.fn(), navigateToUrl: vi.fn() },
       notifications: {
         toasts: {
-          addError: jest.fn(),
-          addSuccess: jest.fn(),
+          addError: vi.fn(),
+          addSuccess: vi.fn(),
         },
       },
       docLinks: {
@@ -174,18 +180,18 @@ jest.mock('../../../hooks', () => {
       },
       chrome: {
         docTitle: {
-          change: jest.fn(),
+          change: vi.fn(),
         },
-        setBreadcrumbs: jest.fn(),
+        setBreadcrumbs: vi.fn(),
       },
     }),
-    useLink: jest.fn().mockReturnValue({ getHref: jest.fn().mockReturnValue('/navigate/path') }),
-    useGetAgentPolicies: jest.fn(),
-    sendCreateAgentPolicy: jest.fn(),
-    sendBulkGetAgentPolicies: jest.fn(),
-    sendBulkInstallPackages: jest.fn(),
-    useGetPackagePolicies: jest.fn(),
-    useGetOutputs: jest.fn().mockReturnValue({
+    useLink: vi.fn().mockReturnValue({ getHref: vi.fn().mockReturnValue('/navigate/path') }),
+    useGetAgentPolicies: vi.fn(),
+    sendCreateAgentPolicy: vi.fn(),
+    sendBulkGetAgentPolicies: vi.fn(),
+    sendBulkInstallPackages: vi.fn(),
+    useGetPackagePolicies: vi.fn(),
+    useGetOutputs: vi.fn().mockReturnValue({
       data: {
         items: [
           {
@@ -199,48 +205,49 @@ jest.mock('../../../hooks', () => {
   };
 });
 
-jest.mock('../../../../integrations/hooks', () => {
+vi.mock('../../../../integrations/hooks', async () => {
   return {
-    ...jest.requireActual('../../../../integrations/hooks'),
-    useGetOnePackagePolicyQuery: jest.fn(),
-    useConfirmForceInstall: jest.fn(),
+    ...(await vi.importActual('../../../../integrations/hooks')),
+    useGetOnePackagePolicyQuery: vi.fn(),
+    useConfirmForceInstall: vi.fn(),
   };
 });
 
-jest.mock('../create_package_policy_page/components', () => {
-  const actual = jest.requireActual('../create_package_policy_page/components');
+vi.mock('../create_package_policy_page/components', async () => {
+  const actual = (await vi.importActual('../create_package_policy_page/components'));
   return {
     ...actual,
-    StepConfigurePackagePolicy: jest.fn((props) => {
+    StepConfigurePackagePolicy: vi.fn((props) => {
       lastStepConfigureProps = props;
       return (actual as any).StepConfigurePackagePolicy(props);
     }),
   };
 });
 
-jest.mock('../create_package_policy_page/single_page_layout/components', () => {
-  const { createElement } = jest.requireActual('react');
-  const { CreatePackagePolicySinglePageLayout: ActualLayout } = jest.requireActual(
-    '../create_package_policy_page/single_page_layout/components/layout'
-  );
+vi.mock('../create_package_policy_page/single_page_layout/components', async () => {
+  const { createElement } = require('react');
+  const { CreatePackagePolicySinglePageLayout: ActualLayout } = (await vi.importActual('../create_package_policy_page/single_page_layout/components/layout'));
   return {
-    ...jest.requireActual('../create_package_policy_page/single_page_layout/components'),
-    CreatePackagePolicySinglePageLayout: jest.fn((props) => {
+    ...(await vi.importActual('../create_package_policy_page/single_page_layout/components')),
+    CreatePackagePolicySinglePageLayout: vi.fn((props) => {
       lastLayoutProps = props;
       return createElement(ActualLayout, props);
     }),
   };
 });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useRouteMatch: jest.fn().mockReturnValue({
-    params: {
-      packagePolicyId: 'nginx-1',
-      policyId: 'agent-policy-1',
-    },
-  }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useRouteMatch: vi.fn().mockReturnValue({
+        params: {
+          packagePolicyId: 'nginx-1',
+          policyId: 'agent-policy-1',
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockPackagePolicy = {
   id: 'nginx-1',
@@ -295,7 +302,7 @@ const TestComponent = async () => {
   };
 };
 
-const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
+const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as MockedFunction<
   typeof useMultipleAgentPolicies
 >;
 
@@ -353,7 +360,7 @@ describe('edit package policy page', () => {
       },
       error: undefined,
       isLoading: false,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     });
     useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
   });
@@ -736,10 +743,10 @@ describe('edit package policy page', () => {
     beforeEach(() => {
       useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
 
-      (sendBulkGetAgentPoliciesForRq as jest.MockedFunction<any>).mockResolvedValue({
+      (sendBulkGetAgentPoliciesForRq as MockedFunction<any>).mockResolvedValue({
         data: [],
       });
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should create agent policy with sys monitoring when new agent policy button is clicked', async () => {
@@ -759,7 +766,7 @@ describe('edit package policy page', () => {
       fireEvent.click(renderResult.getAllByText(/Save and deploy changes/)[1].closest('button')!);
 
       await waitFor(() => {
-        expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
+        expect(sendCreateAgentPolicy as MockedFunction<any>).toHaveBeenCalledWith(
           {
             description: '',
             monitoring_enabled: ['logs', 'metrics', 'traces'],
@@ -837,7 +844,7 @@ describe('edit package policy page', () => {
 
   describe('agentless policies UI kill switch', () => {
     it('skips the package-policy read when the isAgentless hint is set and the switch is on', async () => {
-      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
         enableAgentlessPoliciesUI: true,
       } as any);
       testRenderer.history.push('?isAgentless=true');
@@ -849,7 +856,7 @@ describe('edit package policy page', () => {
     });
 
     it('ignores the isAgentless hint and keeps the package-policy read when the switch is off', async () => {
-      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
         enableAgentlessPoliciesUI: false,
       } as any);
       testRenderer.history.push('?isAgentless=true');

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { Subject, of, throwError } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
@@ -51,15 +54,15 @@ const createMockSearchResponse = (hits: unknown[], total: number | { value: numb
 
 const createMockSearch = () =>
   ({
-    search: jest.fn(),
-  } as unknown as jest.Mocked<IScopedSearchClient>);
+    search: vi.fn(),
+  } as unknown as Mocked<IScopedSearchClient>);
 
 const createMockFormatter = (): ResultFormatter => ({
   contentType: 'application/ndjson',
   fileExtension: 'ndjson',
-  opening: jest.fn().mockReturnValue('{"_meta":{}}\n'),
-  row: jest.fn().mockImplementation((record) => JSON.stringify(record) + '\n'),
-  closing: jest.fn().mockReturnValue(null),
+  opening: vi.fn().mockReturnValue('{"_meta":{}}\n'),
+  row: vi.fn().mockImplementation((record) => JSON.stringify(record) + '\n'),
+  closing: vi.fn().mockReturnValue(null),
 });
 
 const createMockHit = (id: string, fields: Record<string, unknown[]> = {}) => ({
@@ -86,20 +89,20 @@ const baseRequest: BaseExportRequest = {
 const pit = { id: 'test-pit-id', keep_alive: '5m' };
 
 describe('exportResultsToStream', () => {
-  let mockSearch: jest.Mocked<IScopedSearchClient>;
-  let closePit: jest.Mock;
+  let mockSearch: Mocked<IScopedSearchClient>;
+  let closePit: Mock;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let aborted$: Subject<void>;
 
   beforeEach(() => {
     mockSearch = createMockSearch();
-    closePit = jest.fn().mockResolvedValue(undefined);
+    closePit = vi.fn().mockResolvedValue(undefined);
     logger = loggingSystemMock.createLogger();
     aborted$ = new Subject<void>();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('PIT lifecycle', () => {
@@ -480,7 +483,7 @@ describe('exportResultsToStream', () => {
         .mockReturnValueOnce(of(createMockSearchResponse([], { value: 1 })));
 
       const formatter = createMockFormatter();
-      formatter.finalizeColumns = jest.fn();
+      formatter.finalizeColumns = vi.fn();
 
       const result = await exportResultsToStream({
         search: mockSearch,
@@ -567,7 +570,7 @@ describe('exportResultsToStream', () => {
 
       await collectStream(result as NodeJS.ReadableStream);
 
-      const rowCalls = (formatter.row as jest.Mock).mock.calls;
+      const rowCalls = (formatter.row as Mock).mock.calls;
       expect(rowCalls[0][1]).toBe(true); // first row
       expect(rowCalls[1][1]).toBe(false); // second row
       expect(rowCalls[2][1]).toBe(false); // third row
@@ -579,7 +582,7 @@ describe('exportResultsToStream', () => {
         .mockReturnValueOnce(of(createMockSearchResponse([], { value: 1 })));
 
       const formatter = createMockFormatter();
-      (formatter.closing as jest.Mock).mockReturnValue(']}\n');
+      (formatter.closing as Mock).mockReturnValue(']}\n');
 
       const result = await exportResultsToStream({
         search: mockSearch,
@@ -602,7 +605,7 @@ describe('exportResultsToStream', () => {
       mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 0 })));
 
       const formatter = createMockFormatter();
-      (formatter.opening as jest.Mock).mockReturnValue('OPENING_CONTENT\n');
+      (formatter.opening as Mock).mockReturnValue('OPENING_CONTENT\n');
 
       const result = await exportResultsToStream({
         search: mockSearch,
@@ -624,8 +627,8 @@ describe('exportResultsToStream', () => {
       mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 0 })));
 
       const formatter = createMockFormatter();
-      (formatter.opening as jest.Mock).mockReturnValue(null);
-      (formatter.closing as jest.Mock).mockReturnValue(null);
+      (formatter.opening as Mock).mockReturnValue(null);
+      (formatter.closing as Mock).mockReturnValue(null);
 
       const result = await exportResultsToStream({
         search: mockSearch,
@@ -653,7 +656,7 @@ describe('exportResultsToStream', () => {
         .mockReturnValueOnce(of(createMockSearchResponse([], { value: 3 })));
 
       const formatter = createMockFormatter();
-      (formatter.opening as jest.Mock).mockReturnValue(null);
+      (formatter.opening as Mock).mockReturnValue(null);
 
       const result = await exportResultsToStream({
         search: mockSearch,
@@ -668,7 +671,7 @@ describe('exportResultsToStream', () => {
 
       await collectStream(result as NodeJS.ReadableStream);
 
-      const rowCalls = (formatter.row as jest.Mock).mock.calls;
+      const rowCalls = (formatter.row as Mock).mock.calls;
       expect(rowCalls).toHaveLength(3);
       expect(rowCalls[0][1]).toBe(true); // first row across pages
       expect(rowCalls[1][1]).toBe(false);
@@ -699,7 +702,7 @@ describe('exportResultsToStream', () => {
       mockSearch.search.mockReturnValueOnce(of(createMockSearchResponse([], { value: 0 })));
 
       const formatter = createMockFormatter();
-      (formatter.closing as jest.Mock).mockReturnValue('CLOSING\n');
+      (formatter.closing as Mock).mockReturnValue('CLOSING\n');
 
       const result = await exportResultsToStream({
         search: mockSearch,
@@ -1065,7 +1068,7 @@ describe('exportResultsToStream', () => {
       // on the next tick so the loop can continue.
       let writeCount = 0;
       const realWrite = result.write.bind(result);
-      jest.spyOn(result, 'write').mockImplementation((chunk: unknown, ...rest: unknown[]) => {
+      vi.spyOn(result, 'write').mockImplementation((chunk: unknown, ...rest: unknown[]) => {
         writeCount += 1;
         // Return false on row 2 so the loop awaits drain; accept normally for others.
         if (writeCount === 3) {
@@ -1103,7 +1106,7 @@ describe('exportResultsToStream', () => {
 
       // Make the second write return false — and never emit drain. Abort fires instead.
       let writeCount = 0;
-      jest.spyOn(result, 'write').mockImplementation(() => {
+      vi.spyOn(result, 'write').mockImplementation(() => {
         writeCount += 1;
         if (writeCount === 2) {
           // Fire abort once the loop is awaiting drain

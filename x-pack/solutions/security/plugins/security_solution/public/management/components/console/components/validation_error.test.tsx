@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CommandDefinition, ConsoleProps } from '..';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { ConsoleTestSetup } from '../mocks';
@@ -17,11 +19,11 @@ describe('ValidationError component', () => {
   let enterCommand: ConsoleTestSetup['enterCommand'];
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
@@ -36,7 +38,7 @@ describe('ValidationError component', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should display message and help output if command is not hidden from help', async () => {

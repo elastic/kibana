@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook, act } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { useFinishMaintenanceWindow } from './use_finish_maintenance_window';
 
-const mockAddDanger = jest.fn();
-const mockAddSuccess = jest.fn();
+const mockAddDanger = vi.fn();
+const mockAddSuccess = vi.fn();
 
-jest.mock('../utils/kibana_react', () => {
-  const originalModule = jest.requireActual('../utils/kibana_react');
+vi.mock('../utils/kibana_react', async () => {
+  const originalModule = (await vi.importActual('../utils/kibana_react'));
   return {
     ...originalModule,
     useKibana: () => {
@@ -29,11 +31,14 @@ jest.mock('../utils/kibana_react', () => {
     },
   };
 });
-jest.mock('../services/finish', () => ({
-  finishMaintenanceWindow: jest.fn(),
-}));
+vi.mock('../services/finish', () => {
+      const mocked = {
+      finishMaintenanceWindow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { finishMaintenanceWindow } = jest.requireMock('../services/finish');
+const { finishMaintenanceWindow } = (await vi.importMock('../services/finish'));
 
 const maintenanceWindow = {
   title: 'cancel',
@@ -48,7 +53,7 @@ let appMockRenderer: AppMockRenderer;
 
 describe('useFinishMaintenanceWindow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     appMockRenderer = createAppMockRenderer();
     finishMaintenanceWindow.mockResolvedValue(maintenanceWindow);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import type { IEvent } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
@@ -40,7 +43,7 @@ import { gapReasonType } from '../../../common/constants';
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();
 
-const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
+const ruleType: Mocked<UntypedNormalizedRuleType> = {
   id: 'test',
   name: 'My test rule',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -48,7 +51,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   minimumLicenseRequired: 'basic',
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
-  executor: jest.fn(),
+  executor: vi.fn(),
   category: 'test',
   producer: 'alerts',
   solution: 'stack',
@@ -94,14 +97,14 @@ describe('AlertingEventLogger', () => {
   let adHocRunSO: SavedObjects;
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date(mockNow));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(mockNow));
     runDate = new Date();
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
     ruleContext = {
       savedObjectId: '123',
       savedObjectType: RULE_SAVED_OBJECT_TYPE,
@@ -133,7 +136,7 @@ describe('AlertingEventLogger', () => {
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('initialize()', () => {
@@ -1586,8 +1589,8 @@ describe('helper functions', () => {
   let alertSO: SavedObjects;
   let adHocRunSO: SavedObjects;
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
     ruleContext = {
       savedObjectId: '123',
       savedObjectType: RULE_SAVED_OBJECT_TYPE,

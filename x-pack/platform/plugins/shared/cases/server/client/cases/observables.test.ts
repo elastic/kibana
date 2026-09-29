@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import {
   addObservable,
   deleteObservable,
@@ -55,7 +58,7 @@ describe('addObservable', () => {
   beforeEach(() => {
     mockCaseService.patchCase.mockResolvedValue(caseSO);
     mockCaseService.getCase.mockResolvedValue(caseSO);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should add an observable successfully', async () => {
@@ -246,7 +249,7 @@ describe('addObservable', () => {
       mockCasesClient
     );
 
-    const [[, payload]] = (mockClientArgs.casesEventBus.emitObservablesAdded as jest.Mock).mock
+    const [[, payload]] = (mockClientArgs.casesEventBus.emitObservablesAdded as Mock).mock
       .calls;
     expect(payload).not.toHaveProperty('value');
     expect(payload).not.toHaveProperty('description');
@@ -307,7 +310,7 @@ describe('updateObservable', () => {
   beforeEach(() => {
     mockCaseService.patchCase.mockResolvedValue(caseSOWithObservables);
     mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should update an observable successfully', async () => {
@@ -417,7 +420,7 @@ describe('deleteObservable', () => {
   beforeEach(() => {
     mockCaseService.patchCase.mockResolvedValue(caseSOWithObservables);
     mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should delete an observable successfully', async () => {
@@ -470,7 +473,7 @@ describe('bulkAddObservables', () => {
   beforeEach(() => {
     mockCaseService.patchCase.mockResolvedValue(caseSOWithObservables);
     mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createObservableMatcher = (observable: ObservablePost) =>
@@ -642,7 +645,7 @@ describe('bulkAddObservables', () => {
     );
 
     expect(mockClientArgs.casesEventBus.emitObservablesAdded).toHaveBeenCalledTimes(1);
-    const [[, payload]] = (mockClientArgs.casesEventBus.emitObservablesAdded as jest.Mock).mock
+    const [[, payload]] = (mockClientArgs.casesEventBus.emitObservablesAdded as Mock).mock
       .calls;
 
     expect(payload.observableIds).toHaveLength(3);
@@ -660,7 +663,7 @@ describe('applyObservablesToCase', () => {
   beforeEach(() => {
     mockCaseService.patchCase.mockResolvedValue(caseSO);
     mockCaseService.getCase.mockResolvedValue(caseSO);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns early without hitting the database when observables is empty', async () => {

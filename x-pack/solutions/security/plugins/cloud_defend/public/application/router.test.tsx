@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import CloudDefendRouter from './router';
 import React from 'react';
 import { render } from '@testing-library/react';
@@ -15,14 +17,20 @@ import { createMemoryHistory } from 'history';
 import * as constants from '../common/navigation/constants';
 import type { QueryClientProviderProps } from '@kbn/react-query';
 
-jest.mock('../pages/policies', () => ({
-  Policies: () => <div data-test-subj="Policies">Policies</div>,
-}));
+vi.mock('../pages/policies', () => {
+      const mocked = {
+      Policies: () => <div data-test-subj="Policies">Policies</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@tanstack/react-query', () => ({
-  QueryClientProvider: ({ children }: QueryClientProviderProps) => <>{children}</>,
-  QueryClient: jest.fn(),
-}));
+vi.mock('@tanstack/react-query', () => {
+      const mocked = {
+      QueryClientProvider: ({ children }: QueryClientProviderProps) => <>{children}</>,
+      QueryClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CloudDefendRouter', () => {
   const originalCloudDefendPages = { ...constants.cloudDefendPages };
@@ -31,7 +39,7 @@ describe('CloudDefendRouter', () => {
   };
 
   const securityContext: CloudDefendSecuritySolutionContext = {
-    getFiltersGlobalComponent: jest.fn(),
+    getFiltersGlobalComponent: vi.fn(),
     getSpyRouteComponent: () => () => <div data-test-subj="mockedSpyRoute" />,
   };
 
@@ -46,7 +54,7 @@ describe('CloudDefendRouter', () => {
 
   beforeEach(() => {
     mockConstants.cloudDefendPages = originalCloudDefendPages;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     history = createMemoryHistory();
   });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -13,22 +16,28 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { RuleFormState } from '../types';
 import { RuleDashboards } from './rule_dashboards';
 
-jest.mock('@kbn/dashboards-selector', () => ({
-  DashboardsSelector: jest.fn(() => null),
-}));
+vi.mock('@kbn/dashboards-selector', () => {
+      const mocked = {
+      DashboardsSelector: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks', () => ({
-  useRuleFormState: jest.fn(),
-  useRuleFormDispatch: jest.fn(),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useRuleFormState: vi.fn(),
+      useRuleFormDispatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useRuleFormState, useRuleFormDispatch } = jest.requireMock<{
-  useRuleFormState: jest.Mock<{ formData: Partial<RuleFormState['formData']> }>;
-  useRuleFormDispatch: jest.Mock;
-}>('../hooks');
+const { useRuleFormState, useRuleFormDispatch } = (await vi.importMock<{
+  useRuleFormState: Mock<{ formData: Partial<RuleFormState['formData']> }>;
+  useRuleFormDispatch: Mock;
+}>('../hooks'));
 
-const mockSelector = jest.mocked(DashboardsSelector);
-const dispatch = jest.fn();
+const mockSelector = vi.mocked(DashboardsSelector);
+const dispatch = vi.fn();
 const uiActions = uiActionsPluginMock.createStartContract();
 
 const renderDashboards = () =>
@@ -46,7 +55,7 @@ const getSelectorProps = () => {
 
 describe('RuleDashboards', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useRuleFormState.mockReturnValue({ formData: {} });
     useRuleFormDispatch.mockReturnValue(dispatch);
   });

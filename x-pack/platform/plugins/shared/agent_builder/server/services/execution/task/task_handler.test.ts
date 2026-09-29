@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { defer, firstValueFrom, of, toArray } from 'rxjs';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -23,24 +26,24 @@ import { collectAndWriteEvents, handleAgentExecution } from '../execution_runner
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import { createAgentExecutionClient } from '../persistence';
 
-jest.mock('../execution_runner');
-jest.mock('../utils/serialize_execution_error');
-jest.mock('../persistence');
-jest.mock('../callback/deliver_callback_events');
+vi.mock('../execution_runner');
+vi.mock('../utils/serialize_execution_error');
+vi.mock('../persistence');
+vi.mock('../callback/deliver_callback_events');
 
-const handleAgentExecutionMock = handleAgentExecution as jest.MockedFunction<
+const handleAgentExecutionMock = handleAgentExecution as MockedFunction<
   typeof handleAgentExecution
 >;
-const collectAndWriteEventsMock = collectAndWriteEvents as jest.MockedFunction<
+const collectAndWriteEventsMock = collectAndWriteEvents as MockedFunction<
   typeof collectAndWriteEvents
 >;
-const serializeExecutionErrorMock = serializeExecutionError as jest.MockedFunction<
+const serializeExecutionErrorMock = serializeExecutionError as MockedFunction<
   typeof serializeExecutionError
 >;
-const createAgentExecutionClientMock = createAgentExecutionClient as jest.MockedFunction<
+const createAgentExecutionClientMock = createAgentExecutionClient as MockedFunction<
   typeof createAgentExecutionClient
 >;
-const deliverCallbackEventsMock = deliverCallbackEvents as jest.MockedFunction<
+const deliverCallbackEventsMock = deliverCallbackEvents as MockedFunction<
   typeof deliverCallbackEvents
 >;
 
@@ -96,22 +99,22 @@ describe('TaskHandler event streaming and finalization', () => {
   } as const;
 
   let executionClient: {
-    get: jest.Mock;
-    updateStatus: jest.Mock;
-    updateHeartbeat: jest.Mock;
+    get: Mock;
+    updateStatus: Mock;
+    updateHeartbeat: Mock;
   };
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let callbackDeliveryService: jest.Mocked<CallbackDeliveryService>;
+  let callbackDeliveryService: Mocked<CallbackDeliveryService>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggingSystemMock.createLogger();
-    callbackDeliveryService = {} as unknown as jest.Mocked<CallbackDeliveryService>;
+    callbackDeliveryService = {} as unknown as Mocked<CallbackDeliveryService>;
     deliverCallbackEventsMock.mockResolvedValue(undefined);
     executionClient = {
-      get: jest.fn().mockResolvedValue(execution),
-      updateStatus: jest.fn().mockResolvedValue(undefined),
-      updateHeartbeat: jest.fn().mockResolvedValue(undefined),
+      get: vi.fn().mockResolvedValue(execution),
+      updateStatus: vi.fn().mockResolvedValue(undefined),
+      updateHeartbeat: vi.fn().mockResolvedValue(undefined),
     };
     createAgentExecutionClientMock.mockReturnValue(executionClient as never);
     handleAgentExecutionMock.mockResolvedValue(of(...events));

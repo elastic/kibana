@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
@@ -22,36 +25,39 @@ import {
 } from '../../__mocks__/knowledge_base_entry_schema.mock';
 import { authenticatedUser } from '../../__mocks__/user';
 
-jest.mock('./get_knowledge_base_entry', () => ({
-  getKnowledgeBaseEntry: jest.fn(),
-}));
+vi.mock('./get_knowledge_base_entry', () => {
+      const mocked = {
+      getKnowledgeBaseEntry: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const telemetry = coreMock.createSetup().analytics;
 
 describe('createKnowledgeBaseEntry', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggingSystemMock.createLogger();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const date = '2024-01-28T04:20:02.394Z';
-    jest.setSystemTime(new Date(date));
+    vi.setSystemTime(new Date(date));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('it creates a knowledge base document entry with create schema', async () => {
     const knowledgeBaseEntry = getCreateKnowledgeBaseEntrySchemaMock();
-    (getKnowledgeBaseEntry as unknown as jest.Mock).mockResolvedValueOnce({
+    (getKnowledgeBaseEntry as unknown as Mock).mockResolvedValueOnce({
       ...getKnowledgeBaseEntryMock(),
       id: 'elastic-id-123',
     });
@@ -103,7 +109,7 @@ describe('createKnowledgeBaseEntry', () => {
 
   test('it creates a knowledge base index entry with create schema', async () => {
     const knowledgeBaseEntry = getCreateKnowledgeBaseEntrySchemaMock({ type: 'index' });
-    (getKnowledgeBaseEntry as unknown as jest.Mock).mockResolvedValueOnce({
+    (getKnowledgeBaseEntry as unknown as Mock).mockResolvedValueOnce({
       ...getKnowledgeBaseEntryMock(),
       id: 'elastic-id-123',
     });
@@ -201,7 +207,7 @@ describe('createKnowledgeBaseEntry', () => {
       global: false,
       users: [],
     });
-    (getKnowledgeBaseEntry as unknown as jest.Mock).mockResolvedValueOnce({
+    (getKnowledgeBaseEntry as unknown as Mock).mockResolvedValueOnce({
       ...getKnowledgeBaseEntryMock(),
       id: 'elastic-id-123',
     });

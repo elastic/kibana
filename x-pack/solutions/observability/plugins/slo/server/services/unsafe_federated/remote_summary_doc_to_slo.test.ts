@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { fromRemoteSummaryDocumentToSloDefinition } from './remote_summary_doc_to_slo';
 
 describe('FromRemoteSummaryDocToSlo', () => {
-  let loggerMock: jest.Mocked<MockedLogger>;
+  let loggerMock: Mocked<MockedLogger>;
   beforeEach(() => {
     loggerMock = loggingSystemMock.createLogger();
   });

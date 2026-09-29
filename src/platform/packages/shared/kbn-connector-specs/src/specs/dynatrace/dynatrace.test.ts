@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { Dynatrace } from './dynatrace';
@@ -17,10 +19,10 @@ import {
 
 describe('Dynatrace', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-    put: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
   };
 
   const authHeaders = { Authorization: 'Api-Token dt0c01.test.token' };
@@ -29,11 +31,11 @@ describe('Dynatrace', () => {
     client: mockClient,
     config: { environmentUrl: 'https://abc123.live.dynatrace.com' },
     secrets: { authType: 'api_key_header', apiToken: 'dt0c01.test.token' },
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {

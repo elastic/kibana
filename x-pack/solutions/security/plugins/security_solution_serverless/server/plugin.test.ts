@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import { SecuritySolutionServerlessPlugin } from './plugin';
@@ -13,59 +16,86 @@ import { ProductLine, ProductTier } from '../common/product';
 
 // ── Heavy module mocks ────────────────────────────────────────────────────────
 
-jest.mock('./config', () => ({
-  createConfig: jest.fn().mockReturnValue({
-    productTypes: [],
-    experimentalFeatures: {
-      enableAlertsAndAttacksAlignment: false,
-      ruleChangesHistoryEnabled: false,
-    },
-    usageApi: { enabled: false, url: undefined },
-    usageReportingTaskInterval: '1h',
-    cloudSecurityUsageReportingTaskInterval: '30m',
-    ai4SocUsageReportingTaskInterval: '1h',
-    usageReportingTaskTimeout: '1m',
-    cloudSecurityMetering: { cspm: { enabled: false } },
-  }),
-}));
+vi.mock('./config', () => {
+      const mocked = {
+      createConfig: vi.fn().mockReturnValue({
+        productTypes: [],
+        experimentalFeatures: {
+          enableAlertsAndAttacksAlignment: false,
+          ruleChangesHistoryEnabled: false,
+        },
+        usageApi: { enabled: false, url: undefined },
+        usageReportingTaskInterval: '1h',
+        cloudSecurityUsageReportingTaskInterval: '30m',
+        ai4SocUsageReportingTaskInterval: '1h',
+        usageReportingTaskTimeout: '1m',
+        cloudSecurityMetering: { cspm: { enabled: false } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./product_features', () => ({
-  registerProductFeatures: jest.fn(),
-  getSecurityAiSocProductTier: jest.fn().mockReturnValue(undefined),
-}));
+vi.mock('./product_features', () => {
+      const mocked = {
+      registerProductFeatures: vi.fn(),
+      getSecurityAiSocProductTier: vi.fn().mockReturnValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common/pli/pli_features', () => ({
-  getEnabledProductFeatures: jest.fn().mockReturnValue([]),
-}));
+vi.mock('../common/pli/pli_features', () => {
+      const mocked = {
+      getEnabledProductFeatures: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./task_manager/usage_reporting_task', () => ({
-  SecurityUsageReportingTask: jest.fn().mockImplementation(() => ({})),
-}));
+vi.mock('./task_manager/usage_reporting_task', () => {
+      const mocked = {
+      SecurityUsageReportingTask: vi.fn().mockImplementation(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./task_manager/nlp_cleanup_task/nlp_cleanup_task', () => ({
-  NLPCleanupTask: jest.fn().mockImplementation(() => ({})),
-}));
+vi.mock('./task_manager/nlp_cleanup_task/nlp_cleanup_task', () => {
+      const mocked = {
+      NLPCleanupTask: vi.fn().mockImplementation(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./telemetry/event_based_telemetry', () => ({
-  telemetryEvents: [],
-}));
+vi.mock('./telemetry/event_based_telemetry', () => {
+      const mocked = {
+      telemetryEvents: [],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./common/services/usage_reporting_service', () => ({
-  UsageReportingService: jest.fn().mockImplementation(() => ({})),
-}));
+vi.mock('./common/services/usage_reporting_service', () => {
+      const mocked = {
+      UsageReportingService: vi.fn().mockImplementation(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./ai4soc/services', () => ({
-  ai4SocMeteringService: { getUsageRecords: jest.fn() },
-}));
+vi.mock('./ai4soc/services', () => {
+      const mocked = {
+      ai4SocMeteringService: { getUsageRecords: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./cloud_security/cloud_security_metering_task_config', () => ({
-  cloudSecurityMetringTaskProperties: {
-    taskType: 'mock-task-type',
-    taskTitle: 'mock-task-title',
-    version: '1.0.0',
-    meteringCallback: jest.fn(),
-  },
-}));
+vi.mock('./cloud_security/cloud_security_metering_task_config', () => {
+      const mocked = {
+      cloudSecurityMetringTaskProperties: {
+        taskType: 'mock-task-type',
+        taskTitle: 'mock-task-title',
+        version: '1.0.0',
+        meteringCallback: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -78,7 +108,7 @@ const createMinimalSetupDeps = (alertzero?: {
       experimentalFeatures: {},
     } as unknown as SecuritySolutionServerlessPluginSetupDeps['securitySolution'],
     securitySolutionEss: {} as SecuritySolutionServerlessPluginSetupDeps['securitySolutionEss'],
-    serverless: { setupProjectSettings: jest.fn() },
+    serverless: { setupProjectSettings: vi.fn() },
     features: {} as SecuritySolutionServerlessPluginSetupDeps['features'],
     taskManager: {} as SecuritySolutionServerlessPluginSetupDeps['taskManager'],
     cloud: {} as SecuritySolutionServerlessPluginSetupDeps['cloud'],
@@ -106,7 +136,7 @@ describe('SecuritySolutionServerlessPlugin', () => {
 
       plugin.setup(coreMock.createSetup(), deps);
 
-      const setupProjectSettings = deps.serverless.setupProjectSettings as jest.Mock;
+      const setupProjectSettings = deps.serverless.setupProjectSettings as Mock;
       expect(setupProjectSettings).toHaveBeenCalledTimes(1);
       const [settingsArray] = setupProjectSettings.mock.calls[0];
       expect(settingsArray).toContain(ALERTZERO_ENABLED_SETTING_ID);
@@ -118,7 +148,7 @@ describe('SecuritySolutionServerlessPlugin', () => {
 
       plugin.setup(coreMock.createSetup(), deps);
 
-      const setupProjectSettings = deps.serverless.setupProjectSettings as jest.Mock;
+      const setupProjectSettings = deps.serverless.setupProjectSettings as Mock;
       expect(setupProjectSettings).toHaveBeenCalledTimes(1);
       const [settingsArray] = setupProjectSettings.mock.calls[0];
       expect(settingsArray).not.toContain(ALERTZERO_ENABLED_SETTING_ID);
@@ -130,7 +160,7 @@ describe('SecuritySolutionServerlessPlugin', () => {
 
       plugin.setup(coreMock.createSetup(), deps);
 
-      const setupProjectSettings = deps.serverless.setupProjectSettings as jest.Mock;
+      const setupProjectSettings = deps.serverless.setupProjectSettings as Mock;
       expect(setupProjectSettings).toHaveBeenCalledTimes(1);
       const [settingsArray] = setupProjectSettings.mock.calls[0];
       expect(settingsArray).not.toContain(ALERTZERO_ENABLED_SETTING_ID);

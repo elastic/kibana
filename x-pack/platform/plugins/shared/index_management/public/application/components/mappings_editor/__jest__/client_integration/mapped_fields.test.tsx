@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ComponentProps } from 'react';
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
@@ -12,10 +14,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { MappingsEditor } from '../../mappings_editor';
 import { WithAppDependencies } from './helpers/setup_environment';
 
-const onChangeHandler = jest.fn();
+const onChangeHandler = vi.fn();
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('Mappings editor: mapped fields', () => {

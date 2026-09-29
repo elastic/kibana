@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CasesClient } from '../../client';
 import { deleteObservableStepDefinition } from './delete_observable';
 import { createStepHandlerContext } from './test_utils';
@@ -14,7 +16,7 @@ const createContext = (input: unknown) =>
 
 describe('deleteObservableStepDefinition', () => {
   it('creates expected step definition structure', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     const definition = deleteObservableStepDefinition(getCasesClient);
 
     expect(definition.id).toBe('cases.deleteObservable');
@@ -28,8 +30,8 @@ describe('deleteObservableStepDefinition', () => {
   });
 
   it('calls cases.deleteObservable with correct params and echoes identifiers', async () => {
-    const deleteObservable = jest.fn().mockResolvedValue(undefined);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const deleteObservable = vi.fn().mockResolvedValue(undefined);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { deleteObservable },
     } as unknown as CasesClient);
     const definition = deleteObservableStepDefinition(getCasesClient);
@@ -46,8 +48,8 @@ describe('deleteObservableStepDefinition', () => {
 
   it('returns error when cases.deleteObservable throws', async () => {
     // FAILURE SCENARIO: client throws (e.g. observable not found or auth failure)
-    const deleteObservable = jest.fn().mockRejectedValue(new Error('observable not found'));
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const deleteObservable = vi.fn().mockRejectedValue(new Error('observable not found'));
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { deleteObservable },
     } as unknown as CasesClient);
     const definition = deleteObservableStepDefinition(getCasesClient);

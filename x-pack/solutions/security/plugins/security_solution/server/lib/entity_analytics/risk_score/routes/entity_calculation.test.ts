@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { RISK_SCORE_ENTITY_CALCULATION_URL } from '../../../../../common/constants';
 import {
@@ -24,8 +27,8 @@ import type {
   SecuritySolutionRequestHandlerContextMock,
 } from '../../../detection_engine/routes/__mocks__/request_context';
 
-jest.mock('../get_risk_inputs_index');
-jest.mock('../risk_score_service');
+vi.mock('../get_risk_inputs_index');
+vi.mock('../risk_score_service');
 
 describe('entity risk score calculation route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -39,10 +42,10 @@ describe('entity risk score calculation route', () => {
     enabled: true,
     range: { start: 'now-30d', end: 'now' },
   } as unknown as RiskEngineConfigurationWithDefaults;
-  let getStartServicesMock: jest.Mock;
+  let getStartServicesMock: Mock;
 
   beforeEach(() => {
-    getStartServicesMock = jest.fn().mockResolvedValue([
+    getStartServicesMock = vi.fn().mockResolvedValue([
       {},
       {
         security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
@@ -58,19 +61,19 @@ describe('entity risk score calculation route', () => {
       calculateAndPersistRiskScoresMock.buildResponse()
     );
 
-    (getRiskInputsIndex as jest.Mock).mockResolvedValue({
+    (getRiskInputsIndex as Mock).mockResolvedValue({
       index: 'default-dataview-index',
       runtimeMappings: {},
     });
     clients.appClient.getAlertsIndex.mockReturnValue('default-alerts-index');
-    (riskScoreServiceFactory as jest.Mock).mockReturnValue(mockRiskScoreService);
+    (riskScoreServiceFactory as Mock).mockReturnValue(mockRiskScoreService);
 
     riskScoreEntityCalculationRoute(server.router, getStartServicesMock, logger);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   const buildRequest = (overrides: object = {}) => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { RulesClientContext } from '../../../../rules_client';
 import { unsnoozeAlertInstance } from './unsnooze_instance';
@@ -13,17 +15,17 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 describe('unsnooze alert instance', () => {
   const savedObjectsMock = savedObjectsRepositoryMock.create();
-  const auditLoggerMock = { log: jest.fn() };
-  const authorizationMock = { ensureAuthorized: jest.fn() };
-  const actionsAuthorizationMock = { ensureAuthorized: jest.fn() };
-  const ruleTypeRegistryMock = { ensureRuleTypeEnabled: jest.fn() };
+  const auditLoggerMock = { log: vi.fn() };
+  const authorizationMock = { ensureAuthorized: vi.fn() };
+  const actionsAuthorizationMock = { ensureAuthorized: vi.fn() };
+  const ruleTypeRegistryMock = { ensureRuleTypeEnabled: vi.fn() };
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const context = {
-    logger: { error: jest.fn() },
+    logger: { error: vi.fn() },
     unsecuredSavedObjectsClient: savedObjectsMock,
     authorization: authorizationMock,
     actionsAuthorization: actionsAuthorizationMock,

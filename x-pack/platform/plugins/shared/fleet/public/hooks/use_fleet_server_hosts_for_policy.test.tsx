@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useFleetServerHostsForPolicy } from './use_fleet_server_hosts_for_policy';
 import { useGetEnrollmentSettings } from './use_request/settings';
 
-jest.mock('./use_request/settings');
+vi.mock('./use_request/settings');
 
 describe('useFleetServerHostsForPolicy', () => {
   beforeEach(() => {
-    jest.mocked(useGetEnrollmentSettings).mockReturnValue({
+    vi.mocked(useGetEnrollmentSettings).mockReturnValue({
       isLoading: false,
       isInitialRequest: false,
       error: null,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
       data: {
         fleet_server: {
           policies: [

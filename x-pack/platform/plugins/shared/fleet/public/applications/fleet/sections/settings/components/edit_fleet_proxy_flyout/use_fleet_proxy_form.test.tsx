@@ -5,24 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { useFleetProxyForm } from './use_fleet_proxy_form';
 
-jest.mock('../../hooks/use_confirm_modal', () => ({
-  ...jest.requireActual('../../hooks/use_confirm_modal'),
-  useConfirmModal: () => ({ confirm: () => true }),
-}));
+vi.mock('../../hooks/use_confirm_modal', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../hooks/use_confirm_modal')),
+      useConfirmModal: () => ({ confirm: () => true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../hooks/use_authz', () => ({
-  useAuthz: () => ({
-    fleet: {
-      allSettings: true,
-    },
-  }),
-}));
+vi.mock('../../../../../../hooks/use_authz', () => {
+      const mocked = {
+      useAuthz: () => ({
+        fleet: {
+          allSettings: true,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useFleetProxyForm', () => {
   describe('validate url', () => {
@@ -62,7 +70,7 @@ describe('useFleetProxyForm', () => {
   describe('SSL certificate path validation', () => {
     it('should block submission when certificate path contains spaces', async () => {
       const testRenderer = createFleetTestRendererMock();
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const { result } = testRenderer.renderHook(() => useFleetProxyForm(undefined, onSuccess));
 
       act(() => {
@@ -82,7 +90,7 @@ describe('useFleetProxyForm', () => {
 
     it('should block submission when certificate key path contains spaces', async () => {
       const testRenderer = createFleetTestRendererMock();
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const { result } = testRenderer.renderHook(() => useFleetProxyForm(undefined, onSuccess));
 
       act(() => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { stdSibling } from './std_sibling';
 
 describe('stdSibling(resp, panel, series)', () => {
@@ -63,14 +65,14 @@ describe('stdSibling(resp, panel, series)', () => {
   });
 
   test('calls next when finished', async () => {
-    const next = jest.fn();
+    const next = vi.fn();
     await stdSibling(resp, panel, series, {})(next)([]);
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('calls next when std. deviation bands set', async () => {
     series.metrics[1].mode = 'band';
-    const next = jest.fn((results) => results);
+    const next = vi.fn((results) => results);
     const results = await stdSibling(resp, panel, series, {})(next)([]);
     expect(next.mock.calls.length).toEqual(1);
     expect(results).toHaveLength(0);

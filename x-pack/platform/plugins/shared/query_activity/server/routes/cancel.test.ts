@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -31,8 +33,8 @@ describe(`POST ${API_BASE_PATH}/cancel`, () => {
   it('calls ES tasks.cancel and returns the result', async () => {
     const { handler, context, esClient, asCurrentUserClient } = setup();
 
-    jest.spyOn(asCurrentUserClient, 'security', 'get').mockReturnValue({
-      hasPrivileges: jest.fn().mockResolvedValue({ cluster: { manage: true } }),
+    vi.spyOn(asCurrentUserClient, 'security', 'get').mockReturnValue({
+      hasPrivileges: vi.fn().mockResolvedValue({ cluster: { manage: true } }),
     });
 
     esClient.tasks.cancel.mockResolvedValueOnce({ acknowledged: true } as any);
@@ -56,8 +58,8 @@ describe(`POST ${API_BASE_PATH}/cancel`, () => {
   it('treats 404 as success to keep the operation idempotent', async () => {
     const { handler, context, esClient, asCurrentUserClient } = setup();
 
-    jest.spyOn(asCurrentUserClient, 'security', 'get').mockReturnValue({
-      hasPrivileges: jest.fn().mockResolvedValue({ cluster: { manage: true } }),
+    vi.spyOn(asCurrentUserClient, 'security', 'get').mockReturnValue({
+      hasPrivileges: vi.fn().mockResolvedValue({ cluster: { manage: true } }),
     });
 
     const error: any = new Error('Not found');
@@ -79,8 +81,8 @@ describe(`POST ${API_BASE_PATH}/cancel`, () => {
   it('returns 403 when the user lacks privileges to cancel tasks', async () => {
     const { handler, context, esClient, asCurrentUserClient } = setup();
 
-    jest.spyOn(asCurrentUserClient, 'security', 'get').mockReturnValue({
-      hasPrivileges: jest.fn().mockResolvedValue({ cluster: { manage: true } }),
+    vi.spyOn(asCurrentUserClient, 'security', 'get').mockReturnValue({
+      hasPrivileges: vi.fn().mockResolvedValue({ cluster: { manage: true } }),
     });
 
     const error: any = new Error('Forbidden');

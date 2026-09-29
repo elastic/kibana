@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
@@ -71,9 +73,9 @@ const buildDefaultDeps = (
   esClient.search.mockResolvedValue(buildUsableStatsResponse() as never);
 
   const searchInferenceEndpoints = {
-    features: { get: jest.fn().mockImplementation((featureId: string) => ({ featureId })) },
+    features: { get: vi.fn().mockImplementation((featureId: string) => ({ featureId })) },
     endpoints: {
-      getForFeature: jest.fn().mockResolvedValue({
+      getForFeature: vi.fn().mockResolvedValue({
         endpoints: [{ connectorId: 'enrich-connector' }],
       }),
     },
@@ -83,10 +85,10 @@ const buildDefaultDeps = (
     esClient,
     spaceId: 'default',
     logger,
-    getBootstrapReady: jest.fn().mockResolvedValue(undefined),
+    getBootstrapReady: vi.fn().mockResolvedValue(undefined),
     request: httpServerMock.createKibanaRequest() as KibanaRequest,
-    getInference: jest.fn().mockReturnValue({}),
-    getSearchInferenceEndpoints: jest.fn().mockReturnValue(searchInferenceEndpoints),
+    getInference: vi.fn().mockReturnValue({}),
+    getSearchInferenceEndpoints: vi.fn().mockReturnValue(searchInferenceEndpoints),
     ...overrides,
   } as ReadinessDeps & {
     esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -96,7 +98,7 @@ const buildDefaultDeps = (
 describe('getThreatIntelReadiness', () => {
   it('returns blocked when bootstrap is incomplete', async () => {
     const deps = buildDefaultDeps({
-      getBootstrapReady: jest.fn().mockRejectedValue(new Error('still starting')),
+      getBootstrapReady: vi.fn().mockRejectedValue(new Error('still starting')),
     });
 
     const result = await getThreatIntelReadiness(deps);
@@ -223,10 +225,10 @@ describe('getThreatIntelReadiness', () => {
 
   it('returns degraded with no_enrich_connector when the enrich feature has no endpoint', async () => {
     const deps = buildDefaultDeps({
-      getSearchInferenceEndpoints: jest.fn().mockReturnValue({
-        features: { get: jest.fn().mockImplementation((featureId: string) => ({ featureId })) },
+      getSearchInferenceEndpoints: vi.fn().mockReturnValue({
+        features: { get: vi.fn().mockImplementation((featureId: string) => ({ featureId })) },
         endpoints: {
-          getForFeature: jest.fn().mockResolvedValue({ endpoints: [] }),
+          getForFeature: vi.fn().mockResolvedValue({ endpoints: [] }),
         },
       }),
     });
@@ -240,13 +242,13 @@ describe('getThreatIntelReadiness', () => {
     ['alertzero_fast', 'no_enrich_connector'],
     ['alertzero_reasoning', 'diamond_unavailable'],
   ])('reports %s as unavailable when the tier is unregistered', async (missingTier, reason) => {
-    const getForFeature = jest.fn().mockResolvedValue({
+    const getForFeature = vi.fn().mockResolvedValue({
       endpoints: [{ connectorId: 'genai-default' }],
     });
     const deps = buildDefaultDeps({
-      getSearchInferenceEndpoints: jest.fn().mockReturnValue({
+      getSearchInferenceEndpoints: vi.fn().mockReturnValue({
         features: {
-          get: jest
+          get: vi
             .fn()
             .mockImplementation((featureId: string) =>
               featureId === missingTier ? undefined : { featureId }
@@ -264,7 +266,7 @@ describe('getThreatIntelReadiness', () => {
 
   it('returns degraded with no_enrich_connector when inference plugin is missing', async () => {
     const deps = buildDefaultDeps({
-      getInference: jest.fn().mockReturnValue(undefined),
+      getInference: vi.fn().mockReturnValue(undefined),
     });
 
     const result = await getThreatIntelReadiness(deps);
@@ -304,7 +306,7 @@ describe('getThreatIntelReadiness', () => {
 
   it('returns both bootstrap and index reason codes when both fail', async () => {
     const deps = buildDefaultDeps({
-      getBootstrapReady: jest.fn().mockRejectedValue(new Error('boot failed')),
+      getBootstrapReady: vi.fn().mockRejectedValue(new Error('boot failed')),
     });
     deps.esClient.indices.exists.mockResolvedValue(false);
 

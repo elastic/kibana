@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 
 import { createFleetTestRendererMock } from '../../../../mock';
@@ -15,26 +18,29 @@ import { useGetSpaceSettings } from '../../hooks';
 
 import { AgentsApp } from '.';
 
-jest.mock('../../../../hooks/use_fleet_status', () => ({
-  ...jest.requireActual('../../../../hooks/use_fleet_status'),
-  useFleetStatus: jest.fn().mockReturnValue({}),
-}));
-jest.mock('../../../../hooks/use_request/settings');
-jest.mock('../../../../hooks/use_authz');
-jest.mock('./agent_requirements_page', () => {
+vi.mock('../../../../hooks/use_fleet_status', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../hooks/use_fleet_status')),
+      useFleetStatus: vi.fn().mockReturnValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../hooks/use_request/settings');
+vi.mock('../../../../hooks/use_authz');
+vi.mock('./agent_requirements_page', () => {
   return {
     FleetServerRequirementPage: () => <>FleetServerRequirementPage</>,
     MissingESRequirementsPage: () => <>MissingESRequirementsPage</>,
   };
 });
-jest.mock('./agent_list_page', () => {
+vi.mock('./agent_list_page', () => {
   return {
     AgentListPage: () => <>AgentListPage</>,
   };
 });
 
-const mockedUsedFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
-const mockedUseAuthz = useAuthz as jest.MockedFunction<typeof useAuthz>;
+const mockedUsedFleetStatus = useFleetStatus as MockedFunction<typeof useFleetStatus>;
+const mockedUseAuthz = useAuthz as MockedFunction<typeof useAuthz>;
 
 function renderAgentsApp() {
   const renderer = createFleetTestRendererMock();
@@ -53,7 +59,7 @@ describe('AgentApp', () => {
       },
       integrations: {},
     } as any);
-    jest.mocked(useGetSpaceSettings).mockReturnValue({} as any);
+    vi.mocked(useGetSpaceSettings).mockReturnValue({} as any);
   });
 
   it('should render the loading component if the status is loading', async () => {

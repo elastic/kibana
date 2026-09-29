@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const registerEbtCountersMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./ebt_counters', () => ({
-  registerEbtCounters: registerEbtCountersMock,
-}));
+export const registerEbtCountersMock = vi.fn();
+
+vi.doMock('./ebt_counters', () => {
+      const mocked = {
+      registerEbtCounters: registerEbtCountersMock,
+    };
+      return { ...mocked, default: mocked };
+    });

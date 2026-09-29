@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { InspectComponentResponse } from './fetch_component_data';
 import { fetchComponentData } from './fetch_component_data';
@@ -15,7 +17,7 @@ describe('fetchComponentData', () => {
   const mockHttpService = httpServiceMock.createStartContract();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call httpService.post with correct parameters', async () => {

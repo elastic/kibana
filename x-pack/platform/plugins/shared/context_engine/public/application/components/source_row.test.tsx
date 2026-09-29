@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -56,7 +58,7 @@ describe('SourceRow', () => {
   });
 
   it('calls onRemove when the remove button is clicked', () => {
-    const onRemove = jest.fn();
+    const onRemove = vi.fn();
     renderWithProviders(
       <SourceRow label="FROM logs-*" typeLabel="ES|QL" icon={<span />} onRemove={onRemove} />
     );

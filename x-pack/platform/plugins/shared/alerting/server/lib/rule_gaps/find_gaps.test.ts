@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { findGaps, findGapsSearchAfter } from './find_gaps';
 import { gapStatus } from '../../../common/constants/gap_status';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -43,7 +45,7 @@ describe('findGaps', () => {
   const mockEventLogClient = eventLogClientMock.create();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should call findEventsBySavedObjectIds with correct parameters', async () => {
@@ -164,7 +166,7 @@ describe('findGapsSearchAfter', () => {
   const mockEventLogClient = eventLogClientMock.create();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should call findEventsBySavedObjectIdsSearchAfter with correct parameters', async () => {

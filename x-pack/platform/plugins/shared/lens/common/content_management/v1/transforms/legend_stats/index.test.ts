@@ -5,21 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { convertToLegendStats } from '.';
 import type { LensAttributes } from '../../../../../server/content_management/v1/types';
 import { convertPartitionToLegendStats } from './partition';
 import { convertXYToLegendStats } from './xy';
 
-jest.mock('./xy', () => ({
-  convertXYToLegendStats: jest.fn().mockReturnValue('new xyVisState'),
-}));
-jest.mock('./partition', () => ({
-  convertPartitionToLegendStats: jest.fn().mockReturnValue('new partitionVisState'),
-}));
+vi.mock('./xy', () => {
+      const mocked = {
+      convertXYToLegendStats: vi.fn().mockReturnValue('new xyVisState'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./partition', () => {
+      const mocked = {
+      convertPartitionToLegendStats: vi.fn().mockReturnValue('new partitionVisState'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Legend stat transforms', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return original attributes if no state', () => {

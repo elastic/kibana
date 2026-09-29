@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useCasesFromAlerts } from './use_cases_from_alerts';
 import * as api from './api';
@@ -12,19 +15,19 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { mockCaseIdsFromAlertId } from './mock';
 
-jest.mock('./api');
-jest.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('./api');
+vi.mock('../../../../common/hooks/use_app_toasts');
 
 describe('useCasesFromAlerts hook', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
   });
 
   it('returns an array of caseIds', async () => {
-    const spyOnCases = jest.spyOn(api, 'getCaseIdsFromAlertId');
+    const spyOnCases = vi.spyOn(api, 'getCaseIdsFromAlertId');
     const { result } = renderHook(() => useCasesFromAlerts({ alertId: 'anAlertId' }));
     await waitFor(() => {
       expect(spyOnCases).toHaveBeenCalledTimes(1);

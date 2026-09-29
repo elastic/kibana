@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as Rx from 'rxjs';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -47,7 +49,7 @@ describe('GET space', () => {
 
     const log = loggingSystemMock.create().get('spaces');
 
-    const clientService = new SpacesClientService(jest.fn(), 'traditional');
+    const clientService = new SpacesClientService(vi.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -92,18 +94,18 @@ describe('GET space', () => {
     canGet?: boolean;
   }) => {
     const npreClient: INpreClient = {
-      getNpre: jest.fn().mockResolvedValue(options.expression),
-      canGetNpre: jest.fn().mockResolvedValue(!!options.canGet),
-      putNpre: jest.fn().mockResolvedValue(undefined),
-      deleteNpre: jest.fn().mockResolvedValue(undefined),
-      canPutNpre: jest.fn().mockResolvedValue(true),
+      getNpre: vi.fn().mockResolvedValue(options.expression),
+      canGetNpre: vi.fn().mockResolvedValue(!!options.canGet),
+      putNpre: vi.fn().mockResolvedValue(undefined),
+      deleteNpre: vi.fn().mockResolvedValue(undefined),
+      canPutNpre: vi.fn().mockResolvedValue(true),
     };
 
     const mockCpsStart = options.cpsEnabled
       ? {
-          createNpreClient: jest.fn().mockReturnValue(npreClient),
-          getLinkedProjects: jest.fn().mockResolvedValue([]),
-          isCpsActive: jest.fn().mockResolvedValue(false),
+          createNpreClient: vi.fn().mockReturnValue(npreClient),
+          getLinkedProjects: vi.fn().mockResolvedValue([]),
+          isCpsActive: vi.fn().mockResolvedValue(false),
         }
       : undefined;
 

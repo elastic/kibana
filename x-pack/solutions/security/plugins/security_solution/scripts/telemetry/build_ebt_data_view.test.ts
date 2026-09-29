@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { flattenSchema, upsertRuntimeFields } from './build_ebt_data_view';
 
-const mockedFetch = jest.spyOn(global, 'fetch');
+const mockedFetch = vi.spyOn(global, 'fetch');
 
 describe('upsertRuntimeFields', () => {
   const url = 'http://fake_url';
@@ -19,7 +21,7 @@ describe('upsertRuntimeFields', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockedFetch.mockResolvedValue(new Response(null, { status: 200 }));
   });
 

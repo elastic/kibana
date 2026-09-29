@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ShardSerialized } from '../../../types';
-jest.mock('../constants', () => ({
-  MAX_TREE_DEPTH: 3,
-}));
+vi.mock('../constants', () => {
+      const mocked = {
+      MAX_TREE_DEPTH: 3,
+    };
+      return { ...mocked, default: mocked };
+    });
 import { initDataFor } from '../init_data';
 
 import { searchResponse } from './fixtures/search_response';

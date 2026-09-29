@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -12,12 +15,12 @@ import { render } from '../../../utils/test_helper';
 import { buildSlo } from '../../../data/slo/slo';
 import { ErrorBudgetHeader } from './error_budget_header';
 
-jest.mock('../../../hooks/use_kibana');
-const useKibanaMock = useKibana as jest.Mock;
+vi.mock('../../../hooks/use_kibana');
+const useKibanaMock = useKibana as Mock;
 
 describe('In Observability Context', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: {
         executionContext: {
@@ -31,7 +34,7 @@ describe('In Observability Context', () => {
 
   it('renders "Add to Dashboard" link when setDashboardAttachmentReady is provided', () => {
     const slo = buildSlo();
-    render(<ErrorBudgetHeader slo={slo} setDashboardAttachmentReady={jest.fn()} />);
+    render(<ErrorBudgetHeader slo={slo} setDashboardAttachmentReady={vi.fn()} />);
     expect(screen.queryByTestId('sloActionsAddToDashboard')).toBeTruthy();
   });
 
@@ -50,7 +53,7 @@ describe('In Observability Context', () => {
 
 describe('In Dashboard Context', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useKibanaMock.mockReturnValue({
       services: {
@@ -65,7 +68,7 @@ describe('In Dashboard Context', () => {
 
   it('does not render "Add to Dashboard" link even when setDashboardAttachmentReady is provided', () => {
     const slo = buildSlo();
-    render(<ErrorBudgetHeader slo={slo} setDashboardAttachmentReady={jest.fn()} />);
+    render(<ErrorBudgetHeader slo={slo} setDashboardAttachmentReady={vi.fn()} />);
     expect(screen.queryByTestId('sloActionsAddToDashboard')).toBeFalsy();
   });
 

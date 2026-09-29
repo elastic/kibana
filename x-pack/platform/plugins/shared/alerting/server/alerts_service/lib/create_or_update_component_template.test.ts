@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { createOrUpdateComponentTemplate } from './create_or_update_component_template';
@@ -38,8 +40,8 @@ const ComponentTemplate: ClusterPutComponentTemplateRequest = {
 
 describe('createOrUpdateComponentTemplate', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
+    vi.resetAllMocks();
+    vi.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
   });
 
   const stampedComponentTemplate = {

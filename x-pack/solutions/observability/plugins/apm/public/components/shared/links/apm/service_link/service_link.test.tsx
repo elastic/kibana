@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ServiceLink } from '.';
@@ -20,11 +22,11 @@ const query = {
 } as any;
 
 describe('ServiceLink', () => {
-  const mockLink = jest.fn();
+  const mockLink = vi.fn();
 
   beforeEach(() => {
     mockLink.mockClear();
-    jest.spyOn(useApmRouterModule, 'useApmRouter').mockReturnValue({ link: mockLink } as any);
+    vi.spyOn(useApmRouterModule, 'useApmRouter').mockReturnValue({ link: mockLink } as any);
   });
 
   it('links to service details', () => {

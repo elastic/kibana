@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { screen } from '@testing-library/react';
@@ -18,7 +20,7 @@ import { HeaderHelpMenu } from './header_help_menu';
 import { TestChromeProviders, serverlessCoreEnv } from '../test_helpers';
 
 describe('HeaderHelpMenu', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   const renderAndOpenMenu = async ({
     chrome,
@@ -53,7 +55,7 @@ describe('HeaderHelpMenu', () => {
   });
 
   it('should render custom link with onClick and closes menu', async () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     const chrome = chromeServiceMock.createStartContract();
     chrome.getHelpExtension$.mockReturnValue(
       new BehaviorSubject<ChromeHelpExtension | undefined>({

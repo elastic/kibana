@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,21 +19,24 @@ import { AppStatus, type ApplicationStart, type PublicAppInfo } from '@kbn/core/
 import { BehaviorSubject } from 'rxjs';
 import type { FeatureCatalogueEntry } from '../../../services';
 
-jest.mock('../app_navigation_handler', () => {
+vi.mock('../app_navigation_handler', () => {
   return {
-    createAppNavigationHandler: jest.fn(() => () => {}),
+    createAppNavigationHandler: vi.fn(() => () => {}),
   };
 });
 
-jest.mock('../../kibana_services', () => ({
-  getServices: () => ({
-    share: { url: { locators: { get: () => ({ useUrl: () => '' }) } } },
-    trackUiMetric: jest.fn(),
-  }),
-}));
+vi.mock('../../kibana_services', () => {
+      const mocked = {
+      getServices: () => ({
+        share: { url: { locators: { get: () => ({ useUrl: () => '' }) } } },
+        trackUiMetric: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 const createApplicationStartMock = ({
@@ -68,7 +73,7 @@ const applicationStartMockWithInaccessibleManagement = createApplicationStartMoc
   managementAppStatus: AppStatus.inaccessible,
 });
 
-const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
+const addBasePathMock = vi.fn((path: string) => (path ? path : 'path'));
 
 const mockFeatures: FeatureCatalogueEntry[] = [
   {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -20,9 +23,9 @@ import { experimentalFeaturesMock } from '../public/mocks';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 
-jest.mock('../common/experimental_features');
+vi.mock('../common/experimental_features');
 
-const mockParseExperimentalConfigValue = parseExperimentalConfigValue as jest.Mock;
+const mockParseExperimentalConfigValue = parseExperimentalConfigValue as Mock;
 
 describe('Stack Connectors Plugin', () => {
   describe('setup()', () => {
@@ -44,7 +47,7 @@ describe('Stack Connectors Plugin', () => {
       const actionsSetup = actionsMock.createSetup();
       const actionsConfigurationUtilities = actionsSetup.getActionsConfigurationUtilities();
       actionsSetup.getActionsConfigurationUtilities.mockReturnValue(actionsConfigurationUtilities);
-      (actionsConfigurationUtilities.getWebhookSettings as jest.Mock).mockReturnValue({
+      (actionsConfigurationUtilities.getWebhookSettings as Mock).mockReturnValue({
         ssl: { pfx: { enabled: true } },
       });
 
@@ -295,7 +298,7 @@ describe('Stack Connectors Plugin', () => {
 
       const actionsSetup = actionsMock.createSetup();
       (
-        actionsSetup.getActionsConfigurationUtilities().getWebhookSettings as jest.Mock
+        actionsSetup.getActionsConfigurationUtilities().getWebhookSettings as Mock
       ).mockReturnValue({ ssl: { pfx: { enabled: true } } });
 
       plugin.setup(coreMock.createSetup(), { actions: actionsSetup, cloud });
@@ -311,7 +314,7 @@ describe('Stack Connectors Plugin', () => {
       const licensing = {
         ...licensingMock.createStart(),
         license$,
-        getLicense: jest.fn(() => firstValueFrom(license$)),
+        getLicense: vi.fn(() => firstValueFrom(license$)),
       } as unknown as LicensingPluginStart;
       plugin.start(coreMock.createStart(), { licensing } as unknown as ConnectorsPluginsStart);
     };

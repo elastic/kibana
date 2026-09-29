@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -20,12 +23,12 @@ interface MockMetricsSource {
 }
 
 const mockSourceContext: {
-  persistSourceConfiguration: jest.Mock;
+  persistSourceConfiguration: Mock;
   source: MockMetricsSource | undefined;
   sourceExists: boolean;
   isLoading: boolean;
 } = {
-  persistSourceConfiguration: jest.fn(),
+  persistSourceConfiguration: vi.fn(),
   source: {
     configuration: {},
     origin: 'stored',
@@ -35,63 +38,93 @@ const mockSourceContext: {
   isLoading: false,
 };
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  Prompt: () => null,
-  BottomBarActions: () => null,
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      Prompt: () => null,
+      BottomBarActions: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_metrics_breadcrumbs', () => ({
-  useMetricsBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../../hooks/use_metrics_breadcrumbs', () => {
+      const mocked = {
+      useMetricsBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../containers/metrics_source', () => ({
-  useSourceContext: () => mockSourceContext,
-}));
+vi.mock('../../../containers/metrics_source', () => {
+      const mocked = {
+      useSourceContext: () => mockSourceContext,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../containers/ml/infra_ml_capabilities', () => ({
-  useInfraMLCapabilitiesContext: () => ({ hasInfraMLCapabilities: false }),
-}));
+vi.mock('../../../containers/ml/infra_ml_capabilities', () => {
+      const mocked = {
+      useInfraMLCapabilitiesContext: () => ({ hasInfraMLCapabilities: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/page_template', () => ({
-  PageTemplate: ({
-    children,
-    'data-test-subj': dataTestSubj,
-  }: {
-    children: React.ReactNode;
-    'data-test-subj'?: string;
-  }) => <div data-test-subj={dataTestSubj}>{children}</div>,
-}));
+vi.mock('../../../components/page_template', () => {
+      const mocked = {
+      PageTemplate: ({
+        children,
+        'data-test-subj': dataTestSubj,
+      }: {
+        children: React.ReactNode;
+        'data-test-subj'?: string;
+      }) => <div data-test-subj={dataTestSubj}>{children}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./indices_configuration_panel', () => ({
-  IndicesConfigurationPanel: () => <div data-test-subj="indicesConfigurationPanel" />,
-}));
+vi.mock('./indices_configuration_panel', () => {
+      const mocked = {
+      IndicesConfigurationPanel: () => <div data-test-subj="indicesConfigurationPanel" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./ml_configuration_panel', () => ({
-  MLConfigurationPanel: () => <div data-test-subj="mlConfigurationPanel" />,
-}));
+vi.mock('./ml_configuration_panel', () => {
+      const mocked = {
+      MLConfigurationPanel: () => <div data-test-subj="mlConfigurationPanel" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./name_configuration_panel', () => ({
-  NameConfigurationPanel: () => <div data-test-subj="nameConfigurationPanel" />,
-}));
+vi.mock('./name_configuration_panel', () => {
+      const mocked = {
+      NameConfigurationPanel: () => <div data-test-subj="nameConfigurationPanel" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./source_configuration_form_state', () => ({
-  useSourceConfigurationFormState: () => ({
-    indicesConfigurationProps: { name: {}, metricAlias: {}, anomalyThreshold: {} },
-    errors: [],
-    resetForm: jest.fn(),
-    isFormValid: true,
-    formState: {},
-    formStateChanges: {},
-    getUnsavedChanges: () => ({}),
-  }),
-}));
+vi.mock('./source_configuration_form_state', () => {
+      const mocked = {
+      useSourceConfigurationFormState: () => ({
+        indicesConfigurationProps: { name: {}, metricAlias: {}, anomalyThreshold: {} },
+        errors: [],
+        resetForm: vi.fn(),
+        isFormValid: true,
+        formState: {},
+        formStateChanges: {},
+        getUnsavedChanges: () => ({}),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../header/use_metrics_app_header_menu', () => ({
-  useMetricsAppHeaderMenu: () => ({
-    menu: { items: [] },
-    flyouts: null,
-  }),
-}));
+vi.mock('../header/use_metrics_app_header_menu', () => {
+      const mocked = {
+      useMetricsAppHeaderMenu: () => ({
+        menu: { items: [] },
+        flyouts: null,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderSettings = () =>
   render(

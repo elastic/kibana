@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { EventEmitter } from 'events';
 import { firstValueFrom } from 'rxjs';
 import { filter, take } from 'rxjs';
@@ -16,43 +19,46 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 import { RspackOptimizer } from './optimizer';
 
-jest.mock('child_process', () => ({
-  fork: jest.fn(),
-}));
+vi.mock('child_process', () => {
+      const mocked = {
+      fork: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFork = fork as jest.MockedFunction<typeof fork>;
+const mockFork = fork as MockedFunction<typeof fork>;
 
 function createMockChildProcess(): ChildProcess {
   const child = new EventEmitter() as EventEmitter & {
     stdout: EventEmitter;
     stderr: EventEmitter;
-    send: jest.Mock;
-    kill: jest.Mock;
+    send: Mock;
+    kill: Mock;
   };
 
   child.stdout = new EventEmitter();
   child.stderr = new EventEmitter();
-  child.send = jest.fn();
-  child.kill = jest.fn();
+  child.send = vi.fn();
+  child.kill = vi.fn();
 
   return child as unknown as ChildProcess;
 }
 
-function createMockLog(): jest.Mocked<ToolingLog> {
+function createMockLog(): Mocked<ToolingLog> {
   return {
-    info: jest.fn(),
-    error: jest.fn(),
-    warning: jest.fn(),
-    success: jest.fn(),
-    debug: jest.fn(),
-  } as unknown as jest.Mocked<ToolingLog>;
+    info: vi.fn(),
+    error: vi.fn(),
+    warning: vi.fn(),
+    success: vi.fn(),
+    debug: vi.fn(),
+  } as unknown as Mocked<ToolingLog>;
 }
 
 describe('RspackOptimizer', () => {
   const repoRoot = '/repo/kibana';
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   function createOptimizer(

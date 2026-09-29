@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import { within } from '@testing-library/react';
 
@@ -34,15 +36,15 @@ const urlServiceMock = {
     }),
   },
 };
-jest.mock('react-use/lib/useObservable', () => () => jest.fn());
+vi.mock('react-use/lib/useObservable', () => () => vi.fn());
 
 describe('Data Streams - Project level max retention', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
-  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
+  vi.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const env = setupEnvironment();
     httpSetup = env.httpSetup;
     httpRequestsMockHelpers = env.httpRequestsMockHelpers;

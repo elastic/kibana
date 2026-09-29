@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { mockTimelineModel, TestProviders } from '../../../common/mock';
@@ -12,11 +15,11 @@ import { AddToFavoritesButton } from '.';
 import { TimelineStatusEnum } from '../../../../common/api/timeline';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
-jest.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/components/user_privileges');
 
-const mockGetState = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockGetState = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,7 +45,7 @@ const renderAddFavoritesButton = () =>
 
 describe('AddToFavoritesButton', () => {
   beforeEach(() => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: {
         crud: true,
       },
@@ -70,7 +73,7 @@ describe('AddToFavoritesButton', () => {
       ...mockTimelineModel,
       status: TimelineStatusEnum.active,
     });
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: {
         crud: false,
       },

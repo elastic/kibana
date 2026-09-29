@@ -7,25 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import * as Rx from 'rxjs';
 import { mapTo } from 'rxjs';
 
 import { asyncMap, asyncMapWithLimit } from './map';
 import { list } from './test_helpers';
 
-jest.mock('./observable');
-const mapWithLimit$: jest.Mock = jest.requireMock('./observable').mapWithLimit$;
-mapWithLimit$.mockImplementation(jest.requireActual('./observable').mapWithLimit$);
+vi.mock('./observable');
+const mapWithLimit$: Mock = (await vi.importMock('./observable')).mapWithLimit$;
+mapWithLimit$.mockImplementation((await vi.importActual('./observable')).mapWithLimit$);
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('asyncMapWithLimit', () => {
   it('calls mapWithLimit$ and resolves with properly sorted results', async () => {
     const iter = list(10);
     const limit = 5;
-    const fn = jest.fn((n) => (n % 2 ? Rx.timer(n) : Rx.timer(n * 4)).pipe(mapTo(n)));
+    const fn = vi.fn((n) => (n % 2 ? Rx.timer(n) : Rx.timer(n * 4)).pipe(mapTo(n)));
     const result = await asyncMapWithLimit(iter, limit, fn);
 
     expect(result).toMatchInlineSnapshot(`
@@ -59,7 +62,7 @@ describe('asyncMapWithLimit', () => {
 describe('asyncMap', () => {
   it('calls mapWithLimit$ without limit and resolves with undefined when it completes', async () => {
     const iter = list(10);
-    const fn = jest.fn((n) => (n % 2 ? Rx.timer(n) : Rx.timer(n * 4)).pipe(mapTo(n)));
+    const fn = vi.fn((n) => (n % 2 ? Rx.timer(n) : Rx.timer(n * 4)).pipe(mapTo(n)));
     const result = await asyncMap(iter, fn);
 
     expect(result).toMatchInlineSnapshot(`

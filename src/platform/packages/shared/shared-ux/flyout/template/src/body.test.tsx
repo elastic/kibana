@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FlyoutTemplate } from './flyout_template';
 import { bodyAssembly } from './assembly';
 
-jest.mock('@elastic/apm-rum');
+vi.mock('@elastic/apm-rum');
 
 const noop = () => {};
 
@@ -25,7 +27,7 @@ const ThrowOnRender = () => {
 
 describe('FlyoutTemplate body', () => {
   it('catches a throwing body child and shows the error fallback without crashing the flyout', () => {
-    jest.spyOn(console, 'error').mockImplementation(noop);
+    vi.spyOn(console, 'error').mockImplementation(noop);
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
         <FlyoutTemplate.Header title="Service inventory" />
@@ -37,11 +39,11 @@ describe('FlyoutTemplate body', () => {
 
     expect(screen.getByTestId('errorBoundaryFatalHeader')).toBeInTheDocument();
     expect(screen.getByTestId('myFlyoutHeader')).toBeInTheDocument();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('warns in development when the body zone is missing', () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(noop);
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Header title="No body here" />
@@ -178,7 +180,7 @@ describe('FlyoutTemplate body', () => {
   });
 
   it('renders a section action link on the title row', async () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Body>
@@ -307,7 +309,7 @@ describe('FlyoutTemplate body accordions', () => {
   });
 
   it('renders an accordion action as the extra action', async () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Body>
@@ -494,7 +496,7 @@ describe('FlyoutTemplate body subsections', () => {
   // The root parses the body's children for its tab-panel state and hands the result down.
   // Parsing again in the zone or the renderer would repeat every assembly warning per pass.
   it("parses the body children once, reusing the root's parse", () => {
-    const parseChildren = jest.spyOn(bodyAssembly, 'parseChildren');
+    const parseChildren = vi.spyOn(bodyAssembly, 'parseChildren');
     const marker = <span>content</span>;
 
     renderTemplate(

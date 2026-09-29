@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -36,7 +38,7 @@ describe('[CCR API] Create auto-follow pattern', () => {
     const routeContextMock = mockRouteContext({
       ccr: {
         // Fail the uniqueness check.
-        getAutoFollowPattern: jest.fn().mockResolvedValueOnce(true),
+        getAutoFollowPattern: vi.fn().mockResolvedValueOnce(true),
       },
     });
 
@@ -55,8 +57,8 @@ describe('[CCR API] Create auto-follow pattern', () => {
     const routeContextMock = mockRouteContext({
       ccr: {
         // Pass the uniqueness check.
-        getAutoFollowPattern: jest.fn().mockRejectedValueOnce({ statusCode: 404 }),
-        putAutoFollowPattern: jest.fn().mockResolvedValueOnce(true),
+        getAutoFollowPattern: vi.fn().mockRejectedValueOnce({ statusCode: 404 }),
+        putAutoFollowPattern: vi.fn().mockResolvedValueOnce(true),
       },
     });
 

@@ -5,19 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { DownloadSource } from '../../../../../types';
 import { sendGetAgents, sendGetAgentPolicies } from '../../../../../hooks';
 
 import { getCountsForDownloadSource } from './get_count';
 
-jest.mock('../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../hooks'),
-  sendGetAgents: jest.fn(),
-  sendGetAgentPolicies: jest.fn(),
-}));
+vi.mock('../../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../hooks')),
+      sendGetAgents: vi.fn(),
+      sendGetAgentPolicies: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedSendGetAgents = sendGetAgents as jest.Mock;
-const mockedSendGetAgentPolicies = sendGetAgentPolicies as jest.Mock;
+const mockedSendGetAgents = sendGetAgents as Mock;
+const mockedSendGetAgentPolicies = sendGetAgentPolicies as Mock;
 
 describe('getCountsForDownloadSource', () => {
   const downloadSource: DownloadSource = {

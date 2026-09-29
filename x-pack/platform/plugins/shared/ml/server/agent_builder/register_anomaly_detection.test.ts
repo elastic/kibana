@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerAnomalyDetectionAgentBuilder } from './register_anomaly_detection';
 import {
   AD_GET_JOB_INFO_TOOL_ID,
@@ -17,20 +19,20 @@ import {
 import type { MlClientFactoryDeps } from './ml_client_factory';
 
 const createAgentBuilderMock = () => ({
-  tools: { register: jest.fn() },
-  skills: { register: jest.fn() },
-  agents: { register: jest.fn() },
-  attachments: { registerType: jest.fn() },
-  hooks: { onBeforeToolCall: jest.fn(), onAfterToolCall: jest.fn() },
-  plugins: { register: jest.fn() },
+  tools: { register: vi.fn() },
+  skills: { register: vi.fn() },
+  agents: { register: vi.fn() },
+  attachments: { registerType: vi.fn() },
+  hooks: { onBeforeToolCall: vi.fn(), onAfterToolCall: vi.fn() },
+  plugins: { register: vi.fn() },
   topSnippets: { numSnippets: 5, numWords: 100 },
 });
 
-const resolveMlCapabilities = jest.fn().mockResolvedValue(null);
+const resolveMlCapabilities = vi.fn().mockResolvedValue(null);
 
 const mlClientFactoryDeps: MlClientFactoryDeps = {
-  getInternalSavedObjectsClient: jest.fn().mockReturnValue(null),
-  getAuditService: jest.fn().mockReturnValue(null),
+  getInternalSavedObjectsClient: vi.fn().mockReturnValue(null),
+  getAuditService: vi.fn().mockReturnValue(null),
   spacesEnabled: false,
   authorization: undefined,
   mlLicense: { isSecurityEnabled: () => false } as any,

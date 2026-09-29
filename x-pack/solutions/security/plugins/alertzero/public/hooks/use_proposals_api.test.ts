@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -18,9 +21,12 @@ import {
   useProposalsByCategory,
 } from './use_proposals_api';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({ useKibana: jest.fn() }));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = { useKibana: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -37,10 +43,10 @@ const page = (rows: number, total: number) => ({
   total,
 });
 
-let http: { get: jest.Mock };
+let http: { get: Mock };
 
 beforeEach(() => {
-  http = { get: jest.fn() };
+  http = { get: vi.fn() };
   useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<typeof useKibana>);
 });
 
@@ -122,7 +128,7 @@ describe('useProposalsByCategory', () => {
 
   it('polls only the leading page, however many the analyst has opened', async () => {
     // Before the render, or the poll's interval is scheduled on the real clock.
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     http.get.mockResolvedValue(page(10, 30));
     const { Wrapper, queryClient } = createWrapper();
 
@@ -134,7 +140,7 @@ describe('useProposalsByCategory', () => {
     await result.current.fetchNextPage();
     expect(http.get).toHaveBeenCalledTimes(2);
 
-    jest.advanceTimersByTime(PROPOSALS_POLL_INTERVAL_MS);
+    vi.advanceTimersByTime(PROPOSALS_POLL_INTERVAL_MS);
 
     // Settled, not merely started: a replay of the second page trails the first and
     // would slip past a check that stops at the request it expected.
@@ -143,11 +149,11 @@ describe('useProposalsByCategory', () => {
     // One request, not two: replaying every opened page would make each Show more
     // cost another request a minute, for as long as the page stays open.
     expect(http.get.mock.calls.map(([, options]) => options.query.from)).toEqual([0, 10, 0]);
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('polls, so a worker adding a proposal shows up without a reload', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     http.get.mockResolvedValue(page(10, 30));
 
     const { result } = renderHook(
@@ -156,10 +162,10 @@ describe('useProposalsByCategory', () => {
     );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    jest.advanceTimersByTime(PROPOSALS_POLL_INTERVAL_MS);
+    vi.advanceTimersByTime(PROPOSALS_POLL_INTERVAL_MS);
 
     await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('does not poll faster while a loaded row is settling, so a just-decided row stays dropped', async () => {
@@ -167,7 +173,7 @@ describe('useProposalsByCategory', () => {
     // removed optimistically. Search consistency for a just-written decision can lag behind
     // the plain GET the decision is confirmed with, so a too-soon refetch reads the row as
     // still pending and restores it. Only the slow 60s baseline should ever re-check.
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     http.get.mockResolvedValue({
       proposals: [{ id: 'prop-0', decision: 'approved', status: 'executing' }],
       total: 1,
@@ -182,10 +188,10 @@ describe('useProposalsByCategory', () => {
 
     // Well short of the 60s baseline — long enough that a settling-triggered fast poll (were
     // one wired here) would have fired several times over by now.
-    jest.advanceTimersByTime(10_000);
+    vi.advanceTimersByTime(10_000);
     expect(http.get).toHaveBeenCalledTimes(1);
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });
 

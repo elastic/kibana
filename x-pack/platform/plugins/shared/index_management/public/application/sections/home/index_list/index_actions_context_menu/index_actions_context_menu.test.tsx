@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -23,38 +25,42 @@ import { type DocCountResult, RequestResultType } from '../index_table/get_doc_c
 // which can cause user-event to throw when interacting with menu items.
 const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
 
-jest.mock('../../../../services/routing', () => ({
-  ...jest.requireActual('../../../../services/routing'),
-  getIndexDetailsLink: jest.fn(() => '/indices/some/stats'),
-}));
+vi.mock('../../../../services/routing', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../services/routing')),
+      getIndexDetailsLink: vi.fn(() => '/indices/some/stats'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal_container',
-  () => ({
-    ...jest.requireActual(
-      '../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal_container'
-    ),
-    ConvertToLookupIndexModalContainer: ({
-      onCloseModal,
-      onSuccess,
-    }: {
-      onCloseModal: () => void;
-      onSuccess: (lookupIndexName: string) => void;
-    }) => (
-      <div data-test-subj="mockConvertToLookup">
-        <button data-test-subj="convert-success" onClick={() => onSuccess('lookup-my-index')} />
-        <button data-test-subj="convert-close" onClick={onCloseModal} />
-      </div>
-    ),
-  })
+  async () => {
+      const mocked = {
+        ...(await vi.importActual('../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal_container')),
+        ConvertToLookupIndexModalContainer: ({
+          onCloseModal,
+          onSuccess,
+        }: {
+          onCloseModal: () => void;
+          onSuccess: (lookupIndexName: string) => void;
+        }) => (
+          <div data-test-subj="mockConvertToLookup">
+            <button data-test-subj="convert-success" onClick={() => onSuccess('lookup-my-index')} />
+            <button data-test-subj="convert-close" onClick={onCloseModal} />
+          </div>
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDependencies => {
-  const toasts = { add: jest.fn() } as any;
+  const toasts = { add: vi.fn() } as any;
   const base: AppDependencies = {
     core: {
       fatalErrors: {} as unknown as AppDependencies['core']['fatalErrors'],
-      getUrlForApp: jest.fn(),
+      getUrlForApp: vi.fn(),
       executionContext: {} as unknown as AppDependencies['core']['executionContext'],
       application: {} as unknown as AppDependencies['core']['application'],
       http: {} as unknown as AppDependencies['core']['http'],
@@ -66,7 +72,7 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
       usageCollection: {} as unknown as AppDependencies['plugins']['usageCollection'],
       isFleetEnabled: false,
       share: {
-        url: { locators: { get: () => ({ navigate: jest.fn() }) } },
+        url: { locators: { get: () => ({ navigate: vi.fn() }) } },
       } as unknown as AppDependencies['plugins']['share'],
       cloud: undefined,
       console: undefined,
@@ -104,12 +110,12 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
       enableVectorCount: false,
       isServerless: false,
     },
-    history: { push: jest.fn() } as unknown as AppDependencies['history'],
-    setBreadcrumbs: jest.fn(),
+    history: { push: vi.fn() } as unknown as AppDependencies['history'],
+    setBreadcrumbs: vi.fn(),
     uiSettings: {} as unknown as AppDependencies['uiSettings'],
     settings: {} as unknown as AppDependencies['settings'],
     url: {
-      locators: { get: () => ({ navigate: jest.fn() }) },
+      locators: { get: () => ({ navigate: vi.fn() }) },
     } as unknown as AppDependencies['url'],
     docLinks: {} as unknown as AppDependencies['docLinks'],
     kibanaVersion: {} as unknown as AppDependencies['kibanaVersion'],
@@ -140,18 +146,18 @@ const getBaseProps = (): MenuProps => {
       } satisfies Partial<Index>,
     ] as Index[],
     isOnListView: true,
-    resetSelection: jest.fn(),
+    resetSelection: vi.fn(),
     // All actions mocked
-    closeIndices: jest.fn(async () => {}),
-    openIndices: jest.fn(async () => {}),
-    flushIndices: jest.fn(async () => {}),
-    refreshIndices: jest.fn(async () => {}),
-    clearCacheIndices: jest.fn(async () => {}),
-    forcemergeIndices: jest.fn(async (_: string) => {}),
-    deleteIndices: jest.fn(async () => {}),
+    closeIndices: vi.fn(async () => {}),
+    openIndices: vi.fn(async () => {}),
+    flushIndices: vi.fn(async () => {}),
+    refreshIndices: vi.fn(async () => {}),
+    clearCacheIndices: vi.fn(async () => {}),
+    forcemergeIndices: vi.fn(async (_: string) => {}),
+    deleteIndices: vi.fn(async () => {}),
     indexStatusByName: { [indexName]: 'open' as Index['status'] },
-    performExtensionAction: jest.fn(async () => {}),
-    reloadIndices: jest.fn(),
+    performExtensionAction: vi.fn(async () => {}),
+    reloadIndices: vi.fn(),
     fill: true,
     isLoading: false,
     indicesListURLParams: '?foo=bar',
@@ -188,7 +194,7 @@ const closeActionsMenuIfOpen = async () => {
 
 describe('IndexActionsContextMenu', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(async () => {
@@ -392,7 +398,7 @@ describe('IndexActionsContextMenu', () => {
     describe('AND WHEN clicking Overview/Settings/Mapping/Stats', () => {
       it('SHOULD use history.push with getIndexDetailsLink for each navigation', async () => {
         const props = getBaseProps();
-        const historyPush = jest.fn();
+        const historyPush = vi.fn();
         const ctx = getIndexManagementCtx({
           history: { push: historyPush } as unknown as AppDependencies['history'],
         });
@@ -457,7 +463,7 @@ describe('IndexActionsContextMenu', () => {
     describe('AND WHEN extension provides request-based action', () => {
       it('SHOULD render extension action and call performExtensionAction', async () => {
         const props = getBaseProps();
-        const performExtensionAction = jest.fn(async () => {});
+        const performExtensionAction = vi.fn(async () => {});
 
         const ctx = getIndexManagementCtx({
           services: {
@@ -466,7 +472,7 @@ describe('IndexActionsContextMenu', () => {
               actions: [
                 () => ({
                   buttonLabel: 'Ext Request',
-                  requestMethod: jest.fn(),
+                  requestMethod: vi.fn(),
                   successMessage: 'ok',
                 }),
               ],
@@ -582,9 +588,9 @@ describe('IndexActionsContextMenu', () => {
             } satisfies Partial<Index>,
           ] as Index[],
           docCountApi: {
-            getByName: jest.fn(),
+            getByName: vi.fn(),
             getObservable: () => docCount$,
-            abort: jest.fn(),
+            abort: vi.fn(),
           },
         };
 
@@ -617,9 +623,9 @@ describe('IndexActionsContextMenu', () => {
             } satisfies Partial<Index>,
           ] as Index[],
           docCountApi: {
-            getByName: jest.fn(),
+            getByName: vi.fn(),
             getObservable: () => docCount$,
-            abort: jest.fn(),
+            abort: vi.fn(),
           },
         };
 
@@ -691,7 +697,7 @@ describe('IndexActionsContextMenu', () => {
     describe('AND WHEN doc count is missing and not yet cached', () => {
       it('SHOULD call getByName when the popover opens', async () => {
         const props = getBaseProps();
-        const getByName = jest.fn();
+        const getByName = vi.fn();
         const emptyDocCount$ = of<Record<string, DocCountResult>>({});
         const missingDocsProps: MenuProps = {
           ...props,
@@ -709,7 +715,7 @@ describe('IndexActionsContextMenu', () => {
           docCountApi: {
             getByName,
             getObservable: () => emptyDocCount$,
-            abort: jest.fn(),
+            abort: vi.fn(),
           },
         };
 
@@ -721,14 +727,14 @@ describe('IndexActionsContextMenu', () => {
 
       it('SHOULD NOT call getByName when documents are already present on the index', async () => {
         const props = getBaseProps(); // has documents: 100
-        const getByName = jest.fn();
+        const getByName = vi.fn();
         const docCount$ = of<Record<string, DocCountResult>>({});
         const propsWithDocs: MenuProps = {
           ...props,
           docCountApi: {
             getByName,
             getObservable: () => docCount$,
-            abort: jest.fn(),
+            abort: vi.fn(),
           },
         };
 
@@ -740,7 +746,7 @@ describe('IndexActionsContextMenu', () => {
 
       it('SHOULD NOT call getByName when the doc count is already in the observable cache', async () => {
         const props = getBaseProps();
-        const getByName = jest.fn();
+        const getByName = vi.fn();
         const cachedDocCount$ = of<Record<string, DocCountResult>>({
           'index-1': { status: RequestResultType.Success, count: 10 },
         });
@@ -760,7 +766,7 @@ describe('IndexActionsContextMenu', () => {
           docCountApi: {
             getByName,
             getObservable: () => cachedDocCount$,
-            abort: jest.fn(),
+            abort: vi.fn(),
           },
         };
 
@@ -774,7 +780,7 @@ describe('IndexActionsContextMenu', () => {
         'SHOULD NOT call getByName when the index status is %s',
         async (status) => {
           const props = getBaseProps();
-          const getByName = jest.fn();
+          const getByName = vi.fn();
           const emptyDocCount$ = of<Record<string, DocCountResult>>({});
           const closedIndexProps: MenuProps = {
             ...props,
@@ -793,7 +799,7 @@ describe('IndexActionsContextMenu', () => {
             docCountApi: {
               getByName,
               getObservable: () => emptyDocCount$,
-              abort: jest.fn(),
+              abort: vi.fn(),
             },
           };
 

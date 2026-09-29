@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { metricsCollectorMock } from './mocks_internal';
 export const cgroupCollectorMock = metricsCollectorMock.create();
-jest.doMock('./cgroup', () => ({
-  OsCgroupMetricsCollector: jest.fn(() => cgroupCollectorMock),
-}));
+vi.doMock('./cgroup', () => {
+      const mocked = {
+      OsCgroupMetricsCollector: vi.fn(() => cgroupCollectorMock),
+    };
+      return { ...mocked, default: mocked };
+    });

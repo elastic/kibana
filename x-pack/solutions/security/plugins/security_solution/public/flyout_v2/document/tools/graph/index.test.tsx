@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -13,29 +15,35 @@ import { rawEventData, TestProviders } from '../../../../common/mock';
 import { noopCellActionRenderer } from '../../../shared/components/cell_actions';
 import { GRAPH_TOOLS_TEST_ID, GraphDetails } from '.';
 
-jest.mock('./components/graph_visualization', () => ({
-  GraphVisualization: jest.fn(({ mode, scopeId, eventIds, timestamp, isAlert }) => (
-    <div
-      data-test-subj="mockGraphVisualization"
-      data-mode={mode}
-      data-scope-id={scopeId}
-      data-event-ids={eventIds?.join(',')}
-      data-timestamp={timestamp}
-      data-is-alert={String(isAlert)}
-    />
-  )),
-}));
+vi.mock('./components/graph_visualization', () => {
+      const mocked = {
+      GraphVisualization: vi.fn(({ mode, scopeId, eventIds, timestamp, isAlert }) => (
+        <div
+          data-test-subj="mockGraphVisualization"
+          data-mode={mode}
+          data-scope-id={scopeId}
+          data-event-ids={eventIds?.join(',')}
+          data-timestamp={timestamp}
+          data-is-alert={String(isAlert)}
+        />
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../main/hooks/use_graph_preview', () => ({
-  useGraphPreview: jest.fn().mockReturnValue({
-    timestamp: '2024-01-15T10:00:00.000Z',
-    eventIds: ['event-1'],
-    shouldShowGraph: true,
-    hasGraphData: true,
-  }),
-}));
+vi.mock('../../main/hooks/use_graph_preview', () => {
+      const mocked = {
+      useGraphPreview: vi.fn().mockReturnValue({
+        timestamp: '2024-01-15T10:00:00.000Z',
+        eventIds: ['event-1'],
+        shouldShowGraph: true,
+        hasGraphData: true,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOnAlertUpdated = jest.fn();
+const mockOnAlertUpdated = vi.fn();
 
 const createHit = (
   fields: Record<string, unknown[]> = {}
@@ -59,7 +67,7 @@ const renderGraphDetails = (fields: Record<string, unknown[]> = {}) =>
 
 describe('<GraphDetails />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the graph tools wrapper', () => {
@@ -113,8 +121,8 @@ describe('<GraphDetails />', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('returns null when timestamp is missing', () => {
-    const { useGraphPreview } = jest.requireMock('../../main/hooks/use_graph_preview');
+  it('returns null when timestamp is missing', async () => {
+    const { useGraphPreview } = (await vi.importMock('../../main/hooks/use_graph_preview'));
     useGraphPreview.mockReturnValueOnce({
       timestamp: null,
       eventIds: ['event-1'],

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -12,11 +14,11 @@ import { ListsSearchBar } from '.';
 
 describe('ListsSearchBar', () => {
   it('calls onInputChange with the typed value when user types in the search input', () => {
-    const onInputChange = jest.fn();
+    const onInputChange = vi.fn();
 
     const { getByTestId } = render(
       <TestProviders>
-        <ListsSearchBar onSearch={jest.fn()} onInputChange={onInputChange} />
+        <ListsSearchBar onSearch={vi.fn()} onInputChange={onInputChange} />
       </TestProviders>
     );
 
@@ -27,11 +29,11 @@ describe('ListsSearchBar', () => {
   });
 
   it('calls onInputChange with empty string when user clears the input', () => {
-    const onInputChange = jest.fn();
+    const onInputChange = vi.fn();
 
     const { getByTestId } = render(
       <TestProviders>
-        <ListsSearchBar onSearch={jest.fn()} onInputChange={onInputChange} />
+        <ListsSearchBar onSearch={vi.fn()} onInputChange={onInputChange} />
       </TestProviders>
     );
 
@@ -46,7 +48,7 @@ describe('ListsSearchBar', () => {
   it('does not throw when onInputChange is not provided', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <ListsSearchBar onSearch={jest.fn()} />
+        <ListsSearchBar onSearch={vi.fn()} />
       </TestProviders>
     );
 

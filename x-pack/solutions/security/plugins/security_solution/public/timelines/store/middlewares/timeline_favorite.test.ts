@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createMockStore, kibanaMock } from '../../../common/mock';
 import { selectTimelineById } from '../selectors';
 import { persistFavorite } from '../../containers/api';
@@ -19,34 +22,34 @@ import {
   updateTimeline,
 } from '../actions';
 
-jest.mock('../actions', () => {
-  const actual = jest.requireActual('../actions');
-  const endTLSaving = jest.fn((...args) => actual.endTimelineSaving(...args));
+vi.mock('../actions', async () => {
+  const actual = (await vi.importActual('../actions'));
+  const endTLSaving = vi.fn((...args) => actual.endTimelineSaving(...args));
   (endTLSaving as unknown as { match: Function }).match = () => false;
   return {
     ...actual,
-    showCallOutUnauthorizedMsg: jest
+    showCallOutUnauthorizedMsg: vi
       .fn()
       .mockImplementation((...args) => actual.showCallOutUnauthorizedMsg(...args)),
-    startTimelineSaving: jest
+    startTimelineSaving: vi
       .fn()
       .mockImplementation((...args) => actual.startTimelineSaving(...args)),
     endTimelineSaving: endTLSaving,
   };
 });
-jest.mock('../../containers/api');
-jest.mock('./helpers', () => {
-  const actual = jest.requireActual('./helpers');
+vi.mock('../../containers/api');
+vi.mock('./helpers', async () => {
+  const actual = (await vi.importActual('./helpers'));
 
   return {
     ...actual,
-    refreshTimelines: jest.fn(),
+    refreshTimelines: vi.fn(),
   };
 });
 
-const startTimelineSavingMock = startTimelineSaving as unknown as jest.Mock;
-const endTimelineSavingMock = endTimelineSaving as unknown as jest.Mock;
-const showCallOutUnauthorizedMsgMock = showCallOutUnauthorizedMsg as unknown as jest.Mock;
+const startTimelineSavingMock = startTimelineSaving as unknown as Mock;
+const endTimelineSavingMock = endTimelineSaving as unknown as Mock;
+const showCallOutUnauthorizedMsgMock = showCallOutUnauthorizedMsg as unknown as Mock;
 
 describe('Timeline favorite middleware', () => {
   let store = createMockStore(undefined, undefined, kibanaMock);
@@ -55,11 +58,11 @@ describe('Timeline favorite middleware', () => {
 
   beforeEach(() => {
     store = createMockStore(undefined, undefined, kibanaMock);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should persist a timeline favorite when a favorite action is dispatched', async () => {
-    (persistFavorite as jest.Mock).mockResolvedValue({
+    (persistFavorite as Mock).mockResolvedValue({
       favorite: [{}],
       savedObjectId: newSavedObjectId,
       version: newVersion,
@@ -68,7 +71,7 @@ describe('Timeline favorite middleware', () => {
     await store.dispatch(updateIsFavorite({ id: TimelineId.test, isFavorite: true }));
 
     expect(startTimelineSavingMock).toHaveBeenCalled();
-    expect(refreshTimelines as unknown as jest.Mock).toHaveBeenCalled();
+    expect(refreshTimelines as unknown as Mock).toHaveBeenCalled();
     expect(endTimelineSavingMock).toHaveBeenCalled();
     expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
       expect.objectContaining({
@@ -89,7 +92,7 @@ describe('Timeline favorite middleware', () => {
         },
       })
     );
-    (persistFavorite as jest.Mock).mockResolvedValue({
+    (persistFavorite as Mock).mockResolvedValue({
       favorite: [],
       savedObjectId: newSavedObjectId,
       version: newVersion,
@@ -98,7 +101,7 @@ describe('Timeline favorite middleware', () => {
     await store.dispatch(updateIsFavorite({ id: TimelineId.test, isFavorite: false }));
 
     expect(startTimelineSavingMock).toHaveBeenCalled();
-    expect(refreshTimelines as unknown as jest.Mock).toHaveBeenCalled();
+    expect(refreshTimelines as unknown as Mock).toHaveBeenCalled();
     expect(endTimelineSavingMock).toHaveBeenCalled();
     expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
       expect.objectContaining({
@@ -110,7 +113,7 @@ describe('Timeline favorite middleware', () => {
   });
 
   it('should show an error message when the call is unauthorized', async () => {
-    (persistFavorite as jest.Mock).mockRejectedValue({
+    (persistFavorite as Mock).mockRejectedValue({
       body: { status_code: 403 },
     });
 
@@ -122,8 +125,8 @@ describe('Timeline favorite middleware', () => {
   });
 
   it('should show a generic error when the persistence throws', async () => {
-    const addDangerMock = jest.spyOn(kibanaMock.notifications.toasts, 'addDanger');
-    (persistFavorite as jest.Mock).mockImplementation(() => {
+    const addDangerMock = vi.spyOn(kibanaMock.notifications.toasts, 'addDanger');
+    (persistFavorite as Mock).mockImplementation(() => {
       throw new Error();
     });
 

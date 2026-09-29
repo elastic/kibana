@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import { findCasesStepDefinition } from './find_cases';
 import type { CasesClient } from '../../client';
@@ -32,7 +34,7 @@ describe('findCasesStepDefinition', () => {
   };
 
   it('creates expected step definition structure', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     const definition = findCasesStepDefinition(getCasesClient);
 
     expect(definition.id).toBe('cases.findCases');
@@ -41,8 +43,8 @@ describe('findCasesStepDefinition', () => {
   });
 
   it('finds cases and returns expected output', async () => {
-    const find = jest.fn().mockResolvedValue(findCasesResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const find = vi.fn().mockResolvedValue(findCasesResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { find },
     } as unknown as CasesClient);
     const definition = findCasesStepDefinition(getCasesClient);
@@ -57,8 +59,8 @@ describe('findCasesStepDefinition', () => {
 
   it('returns error when find cases throws', async () => {
     const findError = new Error('find failed');
-    const find = jest.fn().mockRejectedValue(findError);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const find = vi.fn().mockRejectedValue(findError);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { find },
     } as unknown as CasesClient);
     const definition = findCasesStepDefinition(getCasesClient);

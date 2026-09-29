@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { DeleteAttachmentConfirmationModal } from './delete_attachment_confirmation_modal';
@@ -14,8 +16,8 @@ describe('DeleteAttachmentConfirmationModal', () => {
   const props = {
     title: 'My title',
     confirmButtonText: 'My button text',
-    onCancel: jest.fn(),
-    onConfirm: jest.fn(),
+    onCancel: vi.fn(),
+    onConfirm: vi.fn(),
   };
 
   it('renders correctly', async () => {

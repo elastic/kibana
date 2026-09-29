@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { hasExternalHitlChannels } from './has_external_hitl_channels';
 import {
   buildWaitForApprovalResumeLinks,
@@ -61,7 +63,7 @@ describe('send_wait_for_approval_notifications', () => {
     };
 
     it('sends webhook slack notification with mrkdwn-safe resume links', async () => {
-      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+      const execute = vi.fn().mockResolvedValue({ status: 'ok' });
       const resumeLinksWithQuery = {
         approveUrl: 'https://kibana.example/approve?token=abc&approved=true',
         rejectUrl: 'https://kibana.example/reject?token=abc&approved=false',
@@ -88,7 +90,7 @@ describe('send_wait_for_approval_notifications', () => {
     });
 
     it('sends slack and slack_api notifications when both are configured', async () => {
-      const execute = jest
+      const execute = vi
         .fn()
         .mockResolvedValueOnce({ status: 'ok' })
         .mockResolvedValueOnce({ status: 'ok' });
@@ -119,7 +121,7 @@ describe('send_wait_for_approval_notifications', () => {
     });
 
     it('sends slack_api notifications to every configured channel', async () => {
-      const execute = jest
+      const execute = vi
         .fn()
         .mockResolvedValueOnce({ status: 'ok' })
         .mockResolvedValueOnce({ status: 'ok' });
@@ -142,7 +144,7 @@ describe('send_wait_for_approval_notifications', () => {
     });
 
     it('sends slack_api #channel values as channelNames', async () => {
-      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+      const execute = vi.fn().mockResolvedValue({ status: 'ok' });
 
       await sendWaitForApprovalNotifications({
         channels: {
@@ -165,7 +167,7 @@ describe('send_wait_for_approval_notifications', () => {
     });
 
     it('throws when a configured connector fails', async () => {
-      const execute = jest
+      const execute = vi
         .fn()
         .mockResolvedValue({ status: 'error', message: 'Slack unavailable' });
 

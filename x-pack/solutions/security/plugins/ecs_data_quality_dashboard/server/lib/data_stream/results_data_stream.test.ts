@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedClass } from 'vitest';
+
 import { ResultsDataStream } from './results_data_stream';
 import { Subject } from 'rxjs';
 import type { InstallParams } from '@kbn/data-stream-adapter';
@@ -12,9 +15,9 @@ import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-jest.mock('@kbn/data-stream-adapter');
+vi.mock('@kbn/data-stream-adapter');
 
-const MockedDataStreamSpacesAdapter = DataStreamSpacesAdapter as unknown as jest.MockedClass<
+const MockedDataStreamSpacesAdapter = DataStreamSpacesAdapter as unknown as MockedClass<
   typeof DataStreamSpacesAdapter
 >;
 
@@ -22,7 +25,7 @@ const esClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 
 describe('ResultsDataStream', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('constructor', () => {
@@ -73,7 +76,7 @@ describe('ResultsDataStream', () => {
       };
       const [dataStreamSpacesAdapter] = MockedDataStreamSpacesAdapter.mock.instances;
       const error = new Error('test-error');
-      (dataStreamSpacesAdapter.install as jest.Mock).mockRejectedValueOnce(error);
+      (dataStreamSpacesAdapter.install as Mock).mockRejectedValueOnce(error);
 
       await resultsDataStream.install(params);
       expect(params.logger.error).toHaveBeenCalledWith(expect.any(String), error);
@@ -89,7 +92,7 @@ describe('ResultsDataStream', () => {
         pluginStop$: new Subject(),
       };
       const [dataStreamSpacesAdapter] = MockedDataStreamSpacesAdapter.mock.instances;
-      (dataStreamSpacesAdapter.install as jest.Mock).mockResolvedValueOnce(undefined);
+      (dataStreamSpacesAdapter.install as Mock).mockResolvedValueOnce(undefined);
 
       await resultsDataStream.install(params);
       await resultsDataStream.installSpace('space1');
@@ -112,7 +115,7 @@ describe('ResultsDataStream', () => {
       };
       const [dataStreamSpacesAdapter] = MockedDataStreamSpacesAdapter.mock.instances;
       const error = new Error('test-error');
-      (dataStreamSpacesAdapter.install as jest.Mock).mockRejectedValueOnce(error);
+      (dataStreamSpacesAdapter.install as Mock).mockRejectedValueOnce(error);
       await resultsDataStream.install(params);
 
       await expect(resultsDataStream.installSpace('space1')).rejects.toThrow(error);

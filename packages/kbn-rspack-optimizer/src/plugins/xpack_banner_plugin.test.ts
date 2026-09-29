@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Path from 'path';
 import { XPackBannerPlugin, XPACK_ELASTIC_LICENSE_BANNER } from './xpack_banner_plugin';
 
@@ -38,12 +40,12 @@ function createMockCompilation(
   const compilation = {
     chunks: new Set(chunks.map((c) => ({ name: c.name, files: new Set(c.files) }))),
     getAsset: (name: string) => assetStore.get(name),
-    updateAsset: jest.fn((filename: string, newSource: { source: () => string }) => {
+    updateAsset: vi.fn((filename: string, newSource: { source: () => string }) => {
       assetStore.set(filename, { source: newSource });
     }),
     hooks: {
       processAssets: {
-        tap: jest.fn((_opts: unknown, fn: () => void) => {
+        tap: vi.fn((_opts: unknown, fn: () => void) => {
           processAssetsFn = fn;
         }),
       },
@@ -53,7 +55,7 @@ function createMockCompilation(
   const compiler = {
     hooks: {
       compilation: {
-        tap: jest.fn((_name: string, fn: (c: typeof compilation) => void) => {
+        tap: vi.fn((_name: string, fn: (c: typeof compilation) => void) => {
           fn(compilation);
         }),
       },

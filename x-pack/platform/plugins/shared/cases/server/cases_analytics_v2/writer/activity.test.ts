@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ACTIVITY_INDEX_NAME } from '../constants';
@@ -27,7 +30,7 @@ const buildWriterUnderTest = () => {
     retryInitialDelayMs: 1,
   });
   // The writer names a child logger; reads go through it.
-  const childLogger = (logger.get as jest.Mock).mock.results[0]?.value ?? logger;
+  const childLogger = (logger.get as Mock).mock.results[0]?.value ?? logger;
   return { writer, esClient, logger, childLogger };
 };
 
@@ -35,19 +38,19 @@ const flushMicrotasks = () => new Promise((r) => setImmediate(r));
 
 describe('CasesActivityV2Writer', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('upsertAction', () => {
     it('indexes a single doc keyed on the user-action id', async () => {
       const { writer, esClient } = buildWriterUnderTest();
-      (esClient.index as unknown as jest.Mock).mockResolvedValue({ result: 'created' });
+      (esClient.index as unknown as Mock).mockResolvedValue({ result: 'created' });
 
       writer.upsertAction(makeUserAction('ua-1'));
       await flushMicrotasks();
 
       expect(esClient.index).toHaveBeenCalledTimes(1);
-      const arg = (esClient.index as unknown as jest.Mock).mock.calls[0][0];
+      const arg = (esClient.index as unknown as Mock).mock.calls[0][0];
       expect(arg.index).toBe(ACTIVITY_INDEX_NAME);
       expect(arg.id).toBe('ua-1');
       expect(arg.document).toBeDefined();
@@ -55,7 +58,7 @@ describe('CasesActivityV2Writer', () => {
 
     it('downgrades a post-retry-budget index failure to WARN (not ERROR)', async () => {
       const { writer, esClient, childLogger } = buildWriterUnderTest();
-      (esClient.index as unknown as jest.Mock).mockRejectedValue(new Error('boom'));
+      (esClient.index as unknown as Mock).mockRejectedValue(new Error('boom'));
 
       writer.upsertAction(makeUserAction('ua-1'));
       await new Promise((r) => setTimeout(r, 50));
@@ -71,13 +74,13 @@ describe('CasesActivityV2Writer', () => {
   describe('bulkUpsertActions', () => {
     it('dispatches one `_bulk` with a header + doc per action', async () => {
       const { writer, esClient } = buildWriterUnderTest();
-      (esClient.bulk as unknown as jest.Mock).mockResolvedValue({ errors: false, items: [] });
+      (esClient.bulk as unknown as Mock).mockResolvedValue({ errors: false, items: [] });
 
       writer.bulkUpsertActions([makeUserAction('ua-A'), makeUserAction('ua-B')]);
       await flushMicrotasks();
 
       expect(esClient.bulk).toHaveBeenCalledTimes(1);
-      const operations = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0].operations;
+      const operations = (esClient.bulk as unknown as Mock).mock.calls[0][0].operations;
       // 2 actions × 2 entries (header + doc) = 4.
       expect(operations).toHaveLength(4);
       expect(operations[0]).toEqual({ index: { _index: ACTIVITY_INDEX_NAME, _id: 'ua-A' } });
@@ -93,7 +96,7 @@ describe('CasesActivityV2Writer', () => {
 
     it('logs per-item failures at WARN but does not throw', async () => {
       const { writer, esClient, childLogger } = buildWriterUnderTest();
-      (esClient.bulk as unknown as jest.Mock).mockResolvedValue({
+      (esClient.bulk as unknown as Mock).mockResolvedValue({
         errors: true,
         items: [
           { index: { _id: 'ua-A', status: 201 } },
@@ -104,7 +107,7 @@ describe('CasesActivityV2Writer', () => {
       writer.bulkUpsertActions([makeUserAction('ua-A'), makeUserAction('ua-B')]);
       await flushMicrotasks();
 
-      const warnCalls = (childLogger.warn as jest.Mock).mock.calls.map(([m]: [string]) => m);
+      const warnCalls = (childLogger.warn as Mock).mock.calls.map(([m]: [string]) => m);
       expect(
         warnCalls.some((m: string) => m.includes('ua-B') && m.includes('mapper exception'))
       ).toBe(true);
@@ -114,7 +117,7 @@ describe('CasesActivityV2Writer', () => {
   describe('bulkUpsertActionsAwait', () => {
     it('resolves on success and dispatches one bulk', async () => {
       const { writer, esClient } = buildWriterUnderTest();
-      (esClient.bulk as unknown as jest.Mock).mockResolvedValue({ errors: false, items: [] });
+      (esClient.bulk as unknown as Mock).mockResolvedValue({ errors: false, items: [] });
 
       await expect(
         writer.bulkUpsertActionsAwait([makeUserAction('ua-A')])
@@ -135,7 +138,7 @@ describe('CasesActivityV2Writer', () => {
      */
     it('throws when the bulk request fails its retry budget — keeps cursor pinned', async () => {
       const { writer, esClient, childLogger } = buildWriterUnderTest();
-      (esClient.bulk as unknown as jest.Mock).mockRejectedValue(new Error('cluster down'));
+      (esClient.bulk as unknown as Mock).mockRejectedValue(new Error('cluster down'));
 
       await expect(writer.bulkUpsertActionsAwait([makeUserAction('ua-A')])).rejects.toThrow(
         'cluster down'
@@ -153,7 +156,7 @@ describe('CasesActivityV2Writer', () => {
      */
     it('throws when at least one item failed with a retryable status', async () => {
       const { writer, esClient } = buildWriterUnderTest();
-      (esClient.bulk as unknown as jest.Mock).mockResolvedValue({
+      (esClient.bulk as unknown as Mock).mockResolvedValue({
         errors: true,
         items: [{ index: { _id: 'ua-A', status: 429, error: { reason: 'queue full' } } }],
       });
@@ -170,7 +173,7 @@ describe('CasesActivityV2Writer', () => {
      */
     it('does not throw when the only item failures are permanent (400 mapper exception)', async () => {
       const { writer, esClient, childLogger } = buildWriterUnderTest();
-      (esClient.bulk as unknown as jest.Mock).mockResolvedValue({
+      (esClient.bulk as unknown as Mock).mockResolvedValue({
         errors: true,
         items: [
           { index: { _id: 'ua-A', status: 400, error: { reason: 'mapper_parsing_exception' } } },
@@ -189,13 +192,13 @@ describe('CasesActivityV2Writer', () => {
   describe('bulkDeleteActionsByCaseIds', () => {
     it('issues a delete_by_query with a terms filter on case.id', async () => {
       const { writer, esClient } = buildWriterUnderTest();
-      (esClient.deleteByQuery as unknown as jest.Mock).mockResolvedValue({ deleted: 3 });
+      (esClient.deleteByQuery as unknown as Mock).mockResolvedValue({ deleted: 3 });
 
       writer.bulkDeleteActionsByCaseIds(['case-1', 'case-2']);
       await flushMicrotasks();
 
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      const arg = (esClient.deleteByQuery as unknown as jest.Mock).mock.calls[0][0];
+      const arg = (esClient.deleteByQuery as unknown as Mock).mock.calls[0][0];
       expect(arg.index).toBe(ACTIVITY_INDEX_NAME);
       expect(arg.refresh).toBe(false);
       expect(arg.conflicts).toBe('proceed');
@@ -211,7 +214,7 @@ describe('CasesActivityV2Writer', () => {
 
     it('swallows a 404 on the index (bootstrap not yet run) without WARN', async () => {
       const { writer, esClient, childLogger } = buildWriterUnderTest();
-      (esClient.deleteByQuery as unknown as jest.Mock).mockRejectedValue({ statusCode: 404 });
+      (esClient.deleteByQuery as unknown as Mock).mockRejectedValue({ statusCode: 404 });
 
       writer.bulkDeleteActionsByCaseIds(['case-1']);
       await new Promise((r) => setTimeout(r, 50));
@@ -221,7 +224,7 @@ describe('CasesActivityV2Writer', () => {
 
     it('logs at WARN after exhausting retries on a non-404 failure', async () => {
       const { writer, esClient, childLogger } = buildWriterUnderTest();
-      (esClient.deleteByQuery as unknown as jest.Mock).mockRejectedValue(new Error('boom'));
+      (esClient.deleteByQuery as unknown as Mock).mockRejectedValue(new Error('boom'));
 
       writer.bulkDeleteActionsByCaseIds(['case-1']);
       await new Promise((r) => setTimeout(r, 50));

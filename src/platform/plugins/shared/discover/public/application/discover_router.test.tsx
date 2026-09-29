@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { render, screen } from '@testing-library/react';
@@ -17,25 +19,40 @@ import { createDiscoverServicesMock } from '../__mocks__/services';
 import type { HistoryLocationState } from '../build_services';
 
 // Mock the component dependencies
-jest.mock('./context', () => ({
-  ContextAppRoute: () => <div data-test-subj="context-app-route" />,
-}));
+vi.mock('./context', () => {
+      const mocked = {
+      ContextAppRoute: () => <div data-test-subj="context-app-route" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./doc', () => ({
-  SingleDocRoute: () => <div data-test-subj="single-doc-route" />,
-}));
+vi.mock('./doc', () => {
+      const mocked = {
+      SingleDocRoute: () => <div data-test-subj="single-doc-route" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./main', () => ({
-  DiscoverMainRoute: () => <div data-test-subj="discover-main-route" />,
-}));
+vi.mock('./main', () => {
+      const mocked = {
+      DiscoverMainRoute: () => <div data-test-subj="discover-main-route" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./view_alert', () => ({
-  ViewAlertRoute: () => <div data-test-subj="view-alert-route" />,
-}));
+vi.mock('./view_alert', () => {
+      const mocked = {
+      ViewAlertRoute: () => <div data-test-subj="view-alert-route" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./not_found', () => ({
-  NotFoundRoute: () => <div data-test-subj="not-found-route" />,
-}));
+vi.mock('./not_found', () => {
+      const mocked = {
+      NotFoundRoute: () => <div data-test-subj="not-found-route" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const services = createDiscoverServicesMock();
 
@@ -47,7 +64,7 @@ const renderWithRouter = (path: string) => {
   render(
     <DiscoverRouter
       services={{ ...services, history }}
-      onAppLeave={jest.fn()}
+      onAppLeave={vi.fn()}
       customizationContext={mockCustomizationContext}
     />
   );

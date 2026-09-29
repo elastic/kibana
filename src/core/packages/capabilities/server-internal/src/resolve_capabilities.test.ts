@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { splitIntoBucketsMock } from './resolve_capabilities.test.mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -298,9 +300,9 @@ describe('resolveCapabilities', () => {
         },
       });
 
-      const switcherAFunc = jest.fn().mockResolvedValue({});
-      const switcherBFunc = jest.fn().mockResolvedValue({});
-      const switcherCFunc = jest.fn().mockResolvedValue({});
+      const switcherAFunc = vi.fn().mockResolvedValue({});
+      const switcherBFunc = vi.fn().mockResolvedValue({});
+      const switcherCFunc = vi.fn().mockResolvedValue({});
 
       const switcherA: SwitcherWithOptions = {
         switcher: switcherAFunc,

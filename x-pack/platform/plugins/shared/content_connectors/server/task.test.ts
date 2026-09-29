@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { infraSyncTaskRunner } from './task';
@@ -78,8 +81,8 @@ describe('infraSyncTaskRunner', () => {
   };
 
   let logger: MockedLogger;
-  let serviceMock: jest.Mocked<AgentlessConnectorsInfraService>;
-  const getLicenseMock = jest.fn();
+  let serviceMock: Mocked<AgentlessConnectorsInfraService>;
+  const getLicenseMock = vi.fn();
 
   const taskInstanceStub: ConcreteTaskInstance = {
     id: '',
@@ -106,21 +109,21 @@ describe('infraSyncTaskRunner', () => {
   const validLicenseMock = licensingMock.createLicenseMock();
   validLicenseMock.check.mockReturnValue({ state: 'valid' });
   const { getStartServices } = coreMock.createSetup();
-  let agentlessConnectorsInfraServiceFactory: jest.Mocked<AgentlessConnectorsInfraServiceFactory>;
+  let agentlessConnectorsInfraServiceFactory: Mocked<AgentlessConnectorsInfraServiceFactory>;
 
   beforeAll(async () => {
     logger = loggerMock.create();
     serviceMock = {
-      getNativeConnectors: jest.fn(),
-      getConnectorPackagePolicies: jest.fn(),
-      deployConnector: jest.fn(),
-      removeDeployment: jest.fn(),
-    } as unknown as jest.Mocked<AgentlessConnectorsInfraService>;
+      getNativeConnectors: vi.fn(),
+      getConnectorPackagePolicies: vi.fn(),
+      deployConnector: vi.fn(),
+      removeDeployment: vi.fn(),
+    } as unknown as Mocked<AgentlessConnectorsInfraService>;
 
     agentlessConnectorsInfraServiceFactory = {
-      initialize: jest.fn(),
-      getAgentlessConnectorsInfraService: jest.fn().mockReturnValue(serviceMock),
-    } as unknown as jest.Mocked<AgentlessConnectorsInfraServiceFactory>;
+      initialize: vi.fn(),
+      getAgentlessConnectorsInfraService: vi.fn().mockReturnValue(serviceMock),
+    } as unknown as Mocked<AgentlessConnectorsInfraServiceFactory>;
     const [coreStart, deps, unknown] = await getStartServices();
     getStartServices.mockResolvedValue([
       coreStart,
@@ -135,7 +138,7 @@ describe('infraSyncTaskRunner', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Does nothing if no connectors or policies are configured', async () => {

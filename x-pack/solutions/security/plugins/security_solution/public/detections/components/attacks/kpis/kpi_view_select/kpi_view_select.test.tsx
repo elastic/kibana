@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
@@ -14,15 +17,15 @@ import { KpiViewSelection } from './helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
 describe('<KpiViewSelect />', () => {
-  const mockSetKpiViewSelection = jest.fn();
-  const reportEventMock = jest.fn();
+  const mockSetKpiViewSelection = vi.fn();
+  const reportEventMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: {
         telemetry: {
           reportEvent: reportEventMock,

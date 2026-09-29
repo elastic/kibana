@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 import {
   elasticsearchServiceMock,
@@ -22,16 +25,16 @@ import {
   createMockInMemoryConnector,
 } from '../application/connector/mocks';
 
-jest.mock('../application/connector/methods/get_all/get_all');
+vi.mock('../application/connector/methods/get_all/get_all');
 
-const mockGetAllUnsecured = getAllUnsecured as jest.MockedFunction<typeof getAllUnsecured>;
+const mockGetAllUnsecured = getAllUnsecured as MockedFunction<typeof getAllUnsecured>;
 
-const connectorTypeRegistry: ActionTypeRegistry = jest.fn() as unknown as ActionTypeRegistry;
+const connectorTypeRegistry: ActionTypeRegistry = vi.fn() as unknown as ActionTypeRegistry;
 
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const actionExecutor = actionExecutorMock.create();
-const executionEnqueuer = jest.fn();
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const executionEnqueuer = vi.fn();
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const clusterClient = elasticsearchServiceMock.createClusterClient();
 const inMemoryConnectors = [
   createMockInMemoryConnector({
@@ -58,8 +61,8 @@ const inMemoryConnectors = [
 let unsecuredActionsClient: UnsecuredActionsClient;
 
 beforeEach(() => {
-  jest.resetAllMocks();
-  connectorTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
+  vi.resetAllMocks();
+  connectorTypeRegistry.isDeprecated = vi.fn().mockReturnValue(false);
   unsecuredActionsClient = new UnsecuredActionsClient({
     actionExecutor,
     clusterClient,

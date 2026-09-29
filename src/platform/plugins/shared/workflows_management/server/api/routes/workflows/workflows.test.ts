@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { IRouter } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
@@ -24,28 +27,31 @@ import {
 } from '../utils/route_security';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
-jest.mock('../utils/route_error_handlers', () => ({
-  handleRouteError: jest.fn((response: { customError: jest.Mock }, error: Error) =>
-    response.customError({ statusCode: 500, body: { message: String(error) } })
-  ),
-}));
+vi.mock('../utils/route_error_handlers', () => {
+      const mocked = {
+      handleRouteError: vi.fn((response: { customError: Mock }, error: Error) =>
+        response.customError({ statusCode: 500, body: { message: String(error) } })
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createLicensingContext = () => ({
   workflows: Promise.resolve({
     isWorkflowsAvailable: true,
-    emitEvent: jest.fn(),
+    emitEvent: vi.fn(),
     managedWorkflows: {
-      install: jest.fn(),
-      uninstall: jest.fn(),
-      getWorkflowStatus: jest.fn(),
-      execute: jest.fn(),
+      install: vi.fn(),
+      uninstall: vi.fn(),
+      getWorkflowStatus: vi.fn(),
+      execute: vi.fn(),
     },
   }),
   licensing: Promise.resolve({
     license: {
       isAvailable: true,
       isActive: true,
-      hasAtLeast: jest.fn().mockReturnValue(true),
+      hasAtLeast: vi.fn().mockReturnValue(true),
       type: 'enterprise',
     },
   }),
@@ -54,7 +60,7 @@ const createLicensingContext = () => ({
       audit: {
         logger: {
           enabled: false,
-          log: jest.fn(),
+          log: vi.fn(),
           includeSavedObjectNames: false,
         },
       },
@@ -65,8 +71,8 @@ const createLicensingContext = () => ({
 describe('Workflow routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
   let routeSecurity: Record<string, unknown>;
-  let mockApi: Record<string, jest.Mock>;
-  let mockSpaces: { getSpaceId: jest.Mock };
+  let mockApi: Record<string, Mock>;
+  let mockSpaces: { getSpaceId: Mock };
   let mockAudit: ReturnType<typeof createWorkflowManagementAuditLogMock>;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
@@ -79,35 +85,35 @@ describe('Workflow routes', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     routeHandlers = {};
     routeSecurity = {};
-    mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default-space') };
+    mockSpaces = { getSpaceId: vi.fn().mockReturnValue('default-space') };
     mockLogger = loggingSystemMock.createLogger();
     mockAudit = createWorkflowManagementAuditLogMock();
-    jest.spyOn(mockAudit, 'logWorkflowUpdated');
+    vi.spyOn(mockAudit, 'logWorkflowUpdated');
 
     mockApi = {
-      getWorkflows: jest.fn(),
-      getWorkflow: jest.fn(),
-      getWorkflowsByIds: jest.fn(),
-      getWorkflowsSourceByIds: jest.fn(),
-      findExistingWorkflowIds: jest.fn(),
-      createWorkflow: jest.fn(),
-      updateWorkflow: jest.fn(),
-      updateAccessControl: jest.fn(),
-      deleteWorkflows: jest.fn(),
-      bulkCreateWorkflows: jest.fn(),
-      cloneWorkflow: jest.fn(),
-      validateWorkflow: jest.fn(),
-      getWorkflowStats: jest.fn(),
-      getWorkflowAggs: jest.fn(),
-      getAvailableConnectors: jest.fn(),
-      getWorkflowJsonSchema: jest.fn(),
+      getWorkflows: vi.fn(),
+      getWorkflow: vi.fn(),
+      getWorkflowsByIds: vi.fn(),
+      getWorkflowsSourceByIds: vi.fn(),
+      findExistingWorkflowIds: vi.fn(),
+      createWorkflow: vi.fn(),
+      updateWorkflow: vi.fn(),
+      updateAccessControl: vi.fn(),
+      deleteWorkflows: vi.fn(),
+      bulkCreateWorkflows: vi.fn(),
+      cloneWorkflow: vi.fn(),
+      validateWorkflow: vi.fn(),
+      getWorkflowStats: vi.fn(),
+      getWorkflowAggs: vi.fn(),
+      getAvailableConnectors: vi.fn(),
+      getWorkflowJsonSchema: vi.fn(),
     };
 
     const createVersionedRoute = (method: string, path: string) => ({
-      addVersion: jest
+      addVersion: vi
         .fn()
         .mockImplementation((_config: unknown, handler: (...args: any[]) => Promise<any>) => {
           routeHandlers[`${method}:${path}`] = {
@@ -116,12 +122,12 @@ describe('Workflow routes', () => {
               return handler(context, request, response);
             },
           };
-          return { addVersion: jest.fn() };
+          return { addVersion: vi.fn() };
         }),
     });
 
     const mockRouter = {
-      put: jest
+      put: vi
         .fn()
         .mockImplementation(
           (
@@ -132,26 +138,26 @@ describe('Workflow routes', () => {
             routeHandlers[`PUT:${config.path}`] = { handler };
           }
         ),
-      post: jest.fn(),
+      post: vi.fn(),
       versioned: {
-        get: jest.fn().mockImplementation((config: { path: string; security?: unknown }) => {
+        get: vi.fn().mockImplementation((config: { path: string; security?: unknown }) => {
           routeSecurity[`GET:${config.path}`] = config.security;
           return createVersionedRoute('GET', config.path);
         }),
-        post: jest.fn().mockImplementation((config: { path: string; security?: unknown }) => {
+        post: vi.fn().mockImplementation((config: { path: string; security?: unknown }) => {
           routeSecurity[`POST:${config.path}`] = config.security;
           return createVersionedRoute('POST', config.path);
         }),
-        put: jest.fn().mockImplementation((config: { path: string; security?: unknown }) => {
+        put: vi.fn().mockImplementation((config: { path: string; security?: unknown }) => {
           routeSecurity[`PUT:${config.path}`] = config.security;
           return createVersionedRoute('PUT', config.path);
         }),
-        delete: jest.fn().mockImplementation((config: { path: string; security?: unknown }) => {
+        delete: vi.fn().mockImplementation((config: { path: string; security?: unknown }) => {
           routeSecurity[`DELETE:${config.path}`] = config.security;
           return createVersionedRoute('DELETE', config.path);
         }),
       },
-    } as unknown as jest.Mocked<IRouter>;
+    } as unknown as Mocked<IRouter>;
 
     registerWorkflowRoutes({
       router: mockRouter,
@@ -906,7 +912,7 @@ describe('Workflow routes', () => {
       const context = createLicensingContext() as any;
 
       await routeHandlers[key].handler(context, request, response);
-      const { body } = (response.ok as jest.Mock).mock.calls[0][0];
+      const { body } = (response.ok as Mock).mock.calls[0][0];
 
       expect(body.entries).toEqual([
         { id: 'w-1', yaml: 'name: Workflow w-1\nsteps: []' },
@@ -936,7 +942,7 @@ describe('Workflow routes', () => {
       const context = createLicensingContext() as any;
 
       await routeHandlers[key].handler(context, request, response);
-      const { body } = (response.ok as jest.Mock).mock.calls[0][0];
+      const { body } = (response.ok as Mock).mock.calls[0][0];
 
       // Must return the stored yaml, not a re-serialisation of definition
       // (re-serialising definition would yield enabled: false and drop the comment)
@@ -958,7 +964,7 @@ describe('Workflow routes', () => {
       const context = createLicensingContext() as any;
 
       await routeHandlers[key].handler(context, request, response);
-      const { body } = (response.ok as jest.Mock).mock.calls[0][0];
+      const { body } = (response.ok as Mock).mock.calls[0][0];
 
       // Fallback must still produce some YAML string (not empty / not crashing)
       expect(body.entries[0].id).toBe('w-no-yaml');

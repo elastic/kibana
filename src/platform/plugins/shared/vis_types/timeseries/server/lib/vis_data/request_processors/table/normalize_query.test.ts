@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { normalizeQuery } from './normalize_query';
 import { overwrite } from '../../helpers';
 
@@ -21,7 +23,7 @@ describe('normalizeQuery', () => {
   const panelId = '39d49073-a924-426b-aa32-35acb40a9bb7';
   const tableRequestProcessorsParams = {} as TableRequestProcessorsParams;
 
-  const next = jest.fn((x) => x) as unknown as ReturnType<
+  const next = vi.fn((x) => x) as unknown as ReturnType<
     ReturnType<TableRequestProcessorsFunction>
   >;
 

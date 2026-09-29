@@ -5,40 +5,61 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, act, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 
-jest.mock('react-router-dom', () => ({
-  useLocation: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useLocation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  LazyAgentEnrollmentFlyout: jest.fn(),
-  LazyAwsStaticKeysForm: jest.fn(),
-  LazyAwsTemporaryKeysForm: jest.fn(),
-  LazyAgentPolicyIntegrationForm: jest.fn(),
-  useGetAgentPoliciesQuery: jest.fn(),
-  agentPolicyFormValidation: jest.fn(),
-}));
+vi.mock('@kbn/fleet-plugin/public', () => {
+      const mocked = {
+      LazyAgentEnrollmentFlyout: vi.fn(),
+      LazyAwsStaticKeysForm: vi.fn(),
+      LazyAwsTemporaryKeysForm: vi.fn(),
+      LazyAgentPolicyIntegrationForm: vi.fn(),
+      useGetAgentPoliciesQuery: vi.fn(),
+      agentPolicyFormValidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../onboarding_flow_context', () => ({
-  useOnboardingFlow: jest.fn(),
-}));
+vi.mock('../../onboarding_flow_context', () => {
+      const mocked = {
+      useOnboardingFlow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./agent_based_deploy/agent_policy_name', () => ({
-  buildAgentPolicyName: jest.fn().mockResolvedValue('AWS Agent Policy 1'),
-}));
+vi.mock('./agent_based_deploy/agent_policy_name', () => {
+      const mocked = {
+      buildAgentPolicyName: vi.fn().mockResolvedValue('AWS Agent Policy 1'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./agent_based_section/shared_credentials_form', () => ({
-  SharedCredentialsForm: jest.fn(),
-}));
+vi.mock('./agent_based_section/shared_credentials_form', () => {
+      const mocked = {
+      SharedCredentialsForm: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./agent_based_section/assume_role_form', () => ({
-  AssumeRoleForm: jest.fn(),
-}));
+vi.mock('./agent_based_section/assume_role_form', () => {
+      const mocked = {
+      AssumeRoleForm: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   LazyAgentEnrollmentFlyout,
@@ -53,17 +74,17 @@ import { useLocation } from 'react-router-dom';
 import { SharedCredentialsForm } from './agent_based_section/shared_credentials_form';
 import { AssumeRoleForm } from './agent_based_section/assume_role_form';
 
-const mockUseLocation = useLocation as jest.Mock;
+const mockUseLocation = useLocation as Mock;
 
-const MockSharedCredentialsForm = SharedCredentialsForm as unknown as jest.Mock;
-const MockAssumeRoleForm = AssumeRoleForm as unknown as jest.Mock;
-const MockAgentEnrollmentFlyout = LazyAgentEnrollmentFlyout as unknown as jest.Mock;
-const MockStaticKeysForm = LazyAwsStaticKeysForm as unknown as jest.Mock;
-const MockTemporaryKeysForm = LazyAwsTemporaryKeysForm as unknown as jest.Mock;
-const MockAgentPolicyIntegrationForm = LazyAgentPolicyIntegrationForm as unknown as jest.Mock;
-const mockAgentPolicyFormValidation = agentPolicyFormValidation as jest.Mock;
-const mockUseGetAgentPoliciesQuery = useGetAgentPoliciesQuery as jest.Mock;
-const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
+const MockSharedCredentialsForm = SharedCredentialsForm as unknown as Mock;
+const MockAssumeRoleForm = AssumeRoleForm as unknown as Mock;
+const MockAgentEnrollmentFlyout = LazyAgentEnrollmentFlyout as unknown as Mock;
+const MockStaticKeysForm = LazyAwsStaticKeysForm as unknown as Mock;
+const MockTemporaryKeysForm = LazyAwsTemporaryKeysForm as unknown as Mock;
+const MockAgentPolicyIntegrationForm = LazyAgentPolicyIntegrationForm as unknown as Mock;
+const mockAgentPolicyFormValidation = agentPolicyFormValidation as Mock;
+const mockUseGetAgentPoliciesQuery = useGetAgentPoliciesQuery as Mock;
+const mockUseOnboardingFlow = useOnboardingFlow as Mock;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -76,7 +97,7 @@ interface OnboardingFlowOptions {
   selectedAgentPolicyIds?: string[];
   agentCredentialMethod?: 'static_keys' | 'temporary_keys' | 'shared_credentials' | 'assume_role';
   withSysMonitoring?: boolean;
-  setAgentBasedDeployment?: jest.Mock;
+  setAgentBasedDeployment?: Mock;
   /** Persisted role ARN — seeds isCredentialReady:true for assume_role */
   roleArn?: string;
   /** Persisted credential profile name — seeds isCredentialReady:true for shared_credentials */
@@ -92,7 +113,7 @@ function setupMocks({
   selectedAgentPolicyIds = [],
   agentCredentialMethod = 'static_keys',
   withSysMonitoring = undefined,
-  setAgentBasedDeployment = jest.fn(),
+  setAgentBasedDeployment = vi.fn(),
   roleArn = undefined,
   credentialProfileName = undefined,
   isEditMode = false,
@@ -187,8 +208,8 @@ function setupMocks({
 
 interface RenderOptions {
   serviceCount?: number;
-  onDeploy?: jest.Mock;
-  onNextReadyChange?: jest.Mock;
+  onDeploy?: Mock;
+  onNextReadyChange?: Mock;
   isDeploying?: boolean;
   isDone?: boolean;
   hasFailed?: boolean;
@@ -197,7 +218,7 @@ interface RenderOptions {
 }
 
 function renderSection(props: RenderOptions = {}) {
-  const onDeploy = props.onDeploy ?? jest.fn();
+  const onDeploy = props.onDeploy ?? vi.fn();
   const onNextReadyChange = props.onNextReadyChange;
   return render(
     <I18nProvider>
@@ -221,7 +242,7 @@ function renderSection(props: RenderOptions = {}) {
 
 describe('AgentBasedSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupMocks();
   });
 
@@ -286,7 +307,7 @@ describe('AgentBasedSection', () => {
     it('clicking "Add agent" opens the flyout (does NOT call onDeploy)', async () => {
       setupMocks({ agentPolicyName: 'AWS Agent Policy 1' });
       mockAgentPolicyFormValidation.mockReturnValue({});
-      const onDeploy = jest.fn();
+      const onDeploy = vi.fn();
       renderSection({ onDeploy });
       act(() => {
         fireEvent.click(screen.getByText('mark-credential-ready'));
@@ -417,7 +438,7 @@ describe('AgentBasedSection', () => {
     });
 
     it('clicking "Add another agent" opens flyout', () => {
-      const onDeploy = jest.fn();
+      const onDeploy = vi.fn();
       renderSection({ onDeploy });
       fireEvent.click(screen.getByTestId('agentBasedSection-addAnotherAgentButton'));
       expect(onDeploy).not.toHaveBeenCalled();
@@ -440,7 +461,7 @@ describe('AgentBasedSection', () => {
 
   describe('radio onChange calls setAgentBasedDeployment', () => {
     it('radio onChange calls setAgentBasedDeployment', () => {
-      const setAgentBasedDeployment = jest.fn();
+      const setAgentBasedDeployment = vi.fn();
       setupMocks({ agentHostsMode: 'new', setAgentBasedDeployment });
       renderSection();
       fireEvent.click(screen.getByRole('radio', { name: /use an existing agent policy/i }));
@@ -467,7 +488,7 @@ describe('AgentBasedSection', () => {
     });
 
     it('clicking Retry calls onDeploy with failedInstances', () => {
-      const onDeploy = jest.fn();
+      const onDeploy = vi.fn();
       renderSection({ hasFailed: true, onDeploy, failedInstances: ['instance-1', 'instance-2'] });
       fireEvent.click(screen.getByTestId('agentBasedSection-retryButton'));
       expect(onDeploy).toHaveBeenCalledWith(['instance-1', 'instance-2']);
@@ -492,7 +513,7 @@ describe('AgentBasedSection', () => {
 
   describe('flyout — onAgentPolicyCreated callback', () => {
     it('persists id+name via setAgentBasedDeployment when policy is created in flyout', async () => {
-      const setAgentBasedDeployment = jest.fn();
+      const setAgentBasedDeployment = vi.fn();
       setupMocks({ agentPolicyName: 'AWS Agent Policy 1', setAgentBasedDeployment });
       mockAgentPolicyFormValidation.mockReturnValue({});
       renderSection();
@@ -541,7 +562,7 @@ describe('AgentBasedSection', () => {
   // §A — Resume credential gate and callout
   describe('Next readiness — resume in existing mode', () => {
     it('static_keys: Next is disabled on resume until credentials entered', async () => {
-      const onNextReadyChange = jest.fn();
+      const onNextReadyChange = vi.fn();
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: ['p1'],
@@ -561,7 +582,7 @@ describe('AgentBasedSection', () => {
     });
 
     it('temporary_keys: Next is disabled on resume until credentials entered', async () => {
-      const onNextReadyChange = jest.fn();
+      const onNextReadyChange = vi.fn();
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: ['p1'],
@@ -579,7 +600,7 @@ describe('AgentBasedSection', () => {
     });
 
     it('assume_role with persisted roleArn: Next is enabled immediately on resume', async () => {
-      const onNextReadyChange = jest.fn();
+      const onNextReadyChange = vi.fn();
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: ['p1'],
@@ -594,7 +615,7 @@ describe('AgentBasedSection', () => {
     });
 
     it('shared_credentials with persisted credentialProfileName: Next is enabled immediately on resume', async () => {
-      const onNextReadyChange = jest.fn();
+      const onNextReadyChange = vi.fn();
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: ['p1'],
@@ -609,7 +630,7 @@ describe('AgentBasedSection', () => {
     });
 
     it('shared_credentials: entering only a profile name (no file) enables Next', async () => {
-      const onNextReadyChange = jest.fn();
+      const onNextReadyChange = vi.fn();
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: ['p1'],
@@ -627,7 +648,7 @@ describe('AgentBasedSection', () => {
     });
 
     it('shared_credentials: clearing the last shared-credential file disables Next', async () => {
-      const onNextReadyChange = jest.fn();
+      const onNextReadyChange = vi.fn();
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: ['p1'],
@@ -648,7 +669,7 @@ describe('AgentBasedSection', () => {
     });
 
     it('no policies selected: Next remains disabled even when credentials are ready', async () => {
-      const onNextReadyChange = jest.fn();
+      const onNextReadyChange = vi.fn();
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: [],
@@ -714,7 +735,7 @@ describe('AgentBasedSection', () => {
 
   describe('selectedAgentPolicyIds reconciliation after policies load', () => {
     it('filters out deleted/managed policy ids from selectedAgentPolicyIds when policies load', async () => {
-      const setAgentBasedDeployment = jest.fn();
+      const setAgentBasedDeployment = vi.fn();
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: ['valid-policy', 'deleted-policy'],
@@ -744,7 +765,7 @@ describe('AgentBasedSection', () => {
     });
 
     it('does not call setAgentBasedDeployment when all ids are still valid', async () => {
-      const setAgentBasedDeployment = jest.fn();
+      const setAgentBasedDeployment = vi.fn();
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: ['policy-a', 'policy-b'],
@@ -772,7 +793,7 @@ describe('AgentBasedSection', () => {
     });
 
     it('does not reconcile when policies are still loading', async () => {
-      const setAgentBasedDeployment = jest.fn();
+      const setAgentBasedDeployment = vi.fn();
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: ['policy-a'],
@@ -789,7 +810,7 @@ describe('AgentBasedSection', () => {
     });
 
     it('does not reconcile when the policy query errors — retains persisted ids so a transient API failure does not wipe the selection', async () => {
-      const setAgentBasedDeployment = jest.fn();
+      const setAgentBasedDeployment = vi.fn();
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: ['policy-a'],
@@ -810,7 +831,7 @@ describe('AgentBasedSection', () => {
     });
 
     it('does not reconcile when not in existing mode', async () => {
-      const setAgentBasedDeployment = jest.fn();
+      const setAgentBasedDeployment = vi.fn();
       setupMocks({
         agentHostsMode: 'new',
         selectedAgentPolicyIds: [],
@@ -840,7 +861,7 @@ describe('AgentBasedSection', () => {
             <React.Suspense fallback={null}>
               <AgentBasedSection
                 serviceCount={2}
-                onDeploy={jest.fn()}
+                onDeploy={vi.fn()}
                 isDeploying={false}
                 isDone={true}
                 hasFailed={false}

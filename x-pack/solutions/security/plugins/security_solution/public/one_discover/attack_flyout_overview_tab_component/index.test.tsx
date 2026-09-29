@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataTableRecord } from '@kbn/discover-utils';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -12,31 +14,43 @@ import { createStore } from 'redux-v4';
 import { AttackFlyoutOverviewTab } from '.';
 import type { StartServices } from '../../types';
 
-const mockFlyoutProviders = jest.fn(({ children }: { children: React.ReactNode }) => (
+const mockFlyoutProviders = vi.fn(({ children }: { children: React.ReactNode }) => (
   <>{children}</>
 ));
 
-jest.mock('../../flyout_v2/shared/components/flyout_provider', () => ({
-  flyoutProviders: (props: unknown) => mockFlyoutProviders(props as { children: React.ReactNode }),
-}));
+vi.mock('../../flyout_v2/shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: (props: unknown) => mockFlyoutProviders(props as { children: React.ReactNode }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../flyout_v2/attack/main/tabs/overview_tab', () => ({
-  OverviewTab: () => (
-    <div data-test-subj="attackOverviewTabMock">
-      <div data-test-subj="mock-ai-summary-section" />
-      <div data-test-subj="mock-visualizations-section" />
-      <div data-test-subj="mock-insights-section" />
-    </div>
-  ),
-}));
+vi.mock('../../flyout_v2/attack/main/tabs/overview_tab', () => {
+      const mocked = {
+      OverviewTab: () => (
+        <div data-test-subj="attackOverviewTabMock">
+          <div data-test-subj="mock-ai-summary-section" />
+          <div data-test-subj="mock-visualizations-section" />
+          <div data-test-subj="mock-insights-section" />
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: () => false,
-}));
+vi.mock('../../common/hooks/is_in_security_app', () => {
+      const mocked = {
+      useIsInSecurityApp: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../alert_flyout_overview_tab_component/data_view_manager_bootstrap', () => ({
-  DataViewManagerBootstrap: () => null,
-}));
+vi.mock('../alert_flyout_overview_tab_component/data_view_manager_bootstrap', () => {
+      const mocked = {
+      DataViewManagerBootstrap: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AttackFlyoutOverviewTab', () => {
   beforeEach(() => {
@@ -44,9 +58,9 @@ describe('AttackFlyoutOverviewTab', () => {
   });
 
   const servicesMock = {
-    overlays: { openSystemFlyout: jest.fn() },
+    overlays: { openSystemFlyout: vi.fn() },
     uiActions: {
-      getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
+      getTriggerCompatibleActions: vi.fn().mockResolvedValue([]),
     },
   } as unknown as StartServices;
 
@@ -67,7 +81,7 @@ describe('AttackFlyoutOverviewTab', () => {
         hit={buildHit()}
         servicesPromise={new Promise<StartServices>(() => undefined)}
         storePromise={new Promise<ReturnType<typeof createStore>>(() => undefined) as never}
-        onAttackUpdated={jest.fn()}
+        onAttackUpdated={vi.fn()}
       />
     );
 
@@ -82,7 +96,7 @@ describe('AttackFlyoutOverviewTab', () => {
         hit={buildHit()}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
-        onAttackUpdated={jest.fn()}
+        onAttackUpdated={vi.fn()}
       />
     );
 
@@ -106,7 +120,7 @@ describe('AttackFlyoutOverviewTab', () => {
         hit={buildHit()}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
-        onAttackUpdated={jest.fn()}
+        onAttackUpdated={vi.fn()}
       />
     );
 
@@ -126,7 +140,7 @@ describe('AttackFlyoutOverviewTab', () => {
         hit={buildHit()}
         servicesPromise={Promise.reject(new Error('services failed'))}
         storePromise={Promise.resolve(store as never)}
-        onAttackUpdated={jest.fn()}
+        onAttackUpdated={vi.fn()}
       />
     );
 

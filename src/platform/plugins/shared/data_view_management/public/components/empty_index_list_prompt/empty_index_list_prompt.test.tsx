@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EmptyIndexListPrompt } from './empty_index_list_prompt';
 import { render, screen } from '@testing-library/react';
@@ -18,10 +20,10 @@ describe('EmptyIndexListPrompt', () => {
     render(
       <I18nProvider>
         <EmptyIndexListPrompt
-          onRefresh={jest.fn()}
-          createAnyway={jest.fn()}
+          onRefresh={vi.fn()}
+          createAnyway={vi.fn()}
           addDataUrl={'http://elastic.co'}
-          navigateToApp={jest.fn()}
+          navigateToApp={vi.fn()}
           canSaveIndexPattern
         />
       </I18nProvider>
@@ -38,10 +40,10 @@ describe('EmptyIndexListPrompt', () => {
     render(
       <I18nProvider>
         <EmptyIndexListPrompt
-          onRefresh={jest.fn()}
-          createAnyway={jest.fn()}
+          onRefresh={vi.fn()}
+          createAnyway={vi.fn()}
           addDataUrl={'http://elastic.co'}
-          navigateToApp={jest.fn()}
+          navigateToApp={vi.fn()}
           canSaveIndexPattern={false}
         />
       </I18nProvider>
@@ -51,14 +53,14 @@ describe('EmptyIndexListPrompt', () => {
   });
 
   it('calls onRefresh when refresh button is clicked', async () => {
-    const onRefresh = jest.fn();
+    const onRefresh = vi.fn();
     render(
       <I18nProvider>
         <EmptyIndexListPrompt
           onRefresh={onRefresh}
-          createAnyway={jest.fn()}
+          createAnyway={vi.fn()}
           addDataUrl={'http://elastic.co'}
-          navigateToApp={jest.fn()}
+          navigateToApp={vi.fn()}
           canSaveIndexPattern
         />
       </I18nProvider>

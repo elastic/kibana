@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
@@ -18,16 +20,19 @@ import type { Services } from './services';
 import { INSTALLED_STATUS, UNINSTALLED_STATUS } from './constants';
 
 // Mock the polling functions to resolve immediately in tests
-jest.mock('./hooks/poll_sample_data_status', () => ({
-  pollForInstallation: jest.fn(async () => Promise.resolve()),
-  pollForRemoval: jest.fn(async () => Promise.resolve()),
-}));
+vi.mock('./hooks/poll_sample_data_status', () => {
+      const mocked = {
+      pollForInstallation: vi.fn(async () => Promise.resolve()),
+      pollForRemoval: vi.fn(async () => Promise.resolve()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SampleDataCard', () => {
-  const onStatusChange = jest.fn();
+  const onStatusChange = vi.fn();
   const sampleDataSet = getMockDataSet();
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   const render = (element: React.ReactElement, services: Partial<Services> = {}) =>
     renderWithIntl(

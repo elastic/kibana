@@ -5,24 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SignificantEventsServer } from '../../types';
 import { resolveTokenTrackingCoverage } from './token_tracking_coverage';
 
-jest.mock('@kbn/core-http-server-utils', () => ({
-  kibanaRequestFactory: jest.fn((rawRequest) => rawRequest),
-}));
+vi.mock('@kbn/core-http-server-utils', () => {
+      const mocked = {
+      kibanaRequestFactory: vi.fn((rawRequest) => rawRequest),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const request = { headers: { authorization: 'test' } } as unknown as KibanaRequest;
 const logger = loggerMock.create();
-const getAll = jest.fn();
-const getSetting = jest.fn();
+const getAll = vi.fn();
+const getSetting = vi.fn();
 const enabledBySpace = new Map<string, boolean>();
-const getScopedClient = jest.fn((spaceRequest: { spaceId: string }) => ({
+const getScopedClient = vi.fn((spaceRequest: { spaceId: string }) => ({
   spaceId: spaceRequest.spaceId,
 }));
-const asScopedToClient = jest.fn((soClient: { spaceId: string }) => ({
+const asScopedToClient = vi.fn((soClient: { spaceId: string }) => ({
   get: () => getSetting(soClient.spaceId),
 }));
 
@@ -31,7 +36,7 @@ const createServer = ({ spacesAvailable = true }: { spacesAvailable?: boolean } 
     spaces: spacesAvailable
       ? {
           spacesService: {
-            createSpacesClient: jest.fn().mockReturnValue({ getAll }),
+            createSpacesClient: vi.fn().mockReturnValue({ getAll }),
           },
         }
       : undefined,
@@ -43,7 +48,7 @@ const createServer = ({ spacesAvailable = true }: { spacesAvailable?: boolean } 
 
 describe('resolveTokenTrackingCoverage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     enabledBySpace.clear();
     getSetting.mockImplementation(async (spaceId: string) => enabledBySpace.get(spaceId) ?? false);
   });

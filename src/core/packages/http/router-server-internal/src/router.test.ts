@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ResponseToolkit, ResponseObject } from '@hapi/hapi';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { isConfigSchema, schema } from '@kbn/config-schema';
@@ -17,13 +20,13 @@ import type { RouteValidatorRequestAndResponses } from '@kbn/core-http-server';
 import { getEnvOptions, createTestEnv } from '@kbn/config-mocks';
 
 const mockResponse = {
-  code: jest.fn().mockImplementation(() => mockResponse),
-  header: jest.fn().mockImplementation(() => mockResponse),
-} as unknown as jest.Mocked<ResponseObject>;
+  code: vi.fn().mockImplementation(() => mockResponse),
+  header: vi.fn().mockImplementation(() => mockResponse),
+} as unknown as Mocked<ResponseObject>;
 
 const mockResponseToolkit = {
-  response: jest.fn().mockReturnValue(mockResponse),
-} as unknown as jest.Mocked<ResponseToolkit>;
+  response: vi.fn().mockReturnValue(mockResponse),
+} as unknown as Mocked<ResponseToolkit>;
 
 const logger = loggingSystemMock.create().get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
@@ -44,7 +47,7 @@ describe('Router', () => {
   beforeEach(() => {
     testValidation = createFooValidation();
   });
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
   describe('#getRoutes', () => {
     it('returns expected route metadata', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
@@ -269,14 +272,14 @@ describe('Router', () => {
     const { fooValidation } = testValidation;
 
     const response200 = fooValidation.response[200].body;
-    const lazyResponse200 = jest.fn(() => response200());
+    const lazyResponse200 = vi.fn(() => response200());
     fooValidation.response[200].body = lazyResponse200;
 
     const response404 = fooValidation.response[404].body;
-    const lazyResponse404 = jest.fn(() => response404());
+    const lazyResponse404 = vi.fn(() => response404());
     fooValidation.response[404].body = lazyResponse404;
 
-    const lazyValidation = jest.fn(() => fooValidation);
+    const lazyValidation = vi.fn(() => fooValidation);
     router.post(
       {
         path: '/',

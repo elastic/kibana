@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,12 +17,12 @@ import { CaseViewObservables } from './case_view_observables';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 
-jest.mock('../../../common/use_cases_features');
+vi.mock('../../../common/use_cases_features');
 
 describe('Case View Page observables tab', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useCasesFeatures as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useCasesFeatures as Mock).mockReturnValue({
       isExtractObservablesEnabled: true,
       observablesAuthorized: true,
     });
@@ -31,7 +34,7 @@ describe('Case View Page observables tab', () => {
         caseData={basicCase}
         observables={basicCase.observables}
         isLoading={false}
-        onUpdateField={jest.fn()}
+        onUpdateField={vi.fn()}
       />
     );
 
@@ -44,7 +47,7 @@ describe('Case View Page observables tab', () => {
         caseData={basicCase}
         observables={basicCase.observables}
         isLoading={false}
-        onUpdateField={jest.fn()}
+        onUpdateField={vi.fn()}
       />
     );
 
@@ -52,7 +55,7 @@ describe('Case View Page observables tab', () => {
   });
 
   it('calls onUpdateField with the new (not stale) extractObservables value when toggled', async () => {
-    const onUpdateField = jest.fn();
+    const onUpdateField = vi.fn();
     renderWithTestingProviders(
       <CaseViewObservables
         caseData={{ ...basicCase, settings: { ...basicCase.settings, extractObservables: false } }}
@@ -78,7 +81,7 @@ describe('Case View Page observables tab', () => {
         observables={[]}
         isLoading={false}
         searchTerm="foobar"
-        onUpdateField={jest.fn()}
+        onUpdateField={vi.fn()}
       />
     );
 

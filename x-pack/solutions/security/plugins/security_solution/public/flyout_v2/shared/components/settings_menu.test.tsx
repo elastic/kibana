@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -21,11 +24,11 @@ import {
   FLYOUT_HEADER_SETTINGS_BUTTON_TEST_ID,
 } from './test_ids';
 
-jest.mock('../hooks/use_flyout_push_vs_overlay');
-jest.mock('../hooks/use_flyout_width');
+vi.mock('../hooks/use_flyout_push_vs_overlay');
+vi.mock('../hooks/use_flyout_width');
 
-const mockSetType = jest.fn();
-const mockResetSize = jest.fn();
+const mockSetType = vi.fn();
+const mockResetSize = vi.fn();
 
 const renderSettingsMenu = () =>
   render(
@@ -36,12 +39,12 @@ const renderSettingsMenu = () =>
 
 describe('SettingsMenu', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useFlyoutPushVsOverlay as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useFlyoutPushVsOverlay as Mock).mockReturnValue({
       type: 'overlay',
       setType: mockSetType,
     });
-    (useFlyoutSize as jest.Mock).mockReturnValue({
+    (useFlyoutSize as Mock).mockReturnValue({
       hasCustomWidth: true,
       resetSize: mockResetSize,
     });
@@ -65,7 +68,7 @@ describe('SettingsMenu', () => {
   });
 
   it('reflects the current type in the button group', async () => {
-    (useFlyoutPushVsOverlay as jest.Mock).mockReturnValue({ type: 'push', setType: mockSetType });
+    (useFlyoutPushVsOverlay as Mock).mockReturnValue({ type: 'push', setType: mockSetType });
     const { getByTestId } = renderSettingsMenu();
 
     await userEvent.click(getByTestId(FLYOUT_HEADER_SETTINGS_BUTTON_TEST_ID));
@@ -95,7 +98,7 @@ describe('SettingsMenu', () => {
   });
 
   it('disables the reset size control when no custom width is saved', async () => {
-    (useFlyoutSize as jest.Mock).mockReturnValue({
+    (useFlyoutSize as Mock).mockReturnValue({
       hasCustomWidth: false,
       resetSize: mockResetSize,
     });

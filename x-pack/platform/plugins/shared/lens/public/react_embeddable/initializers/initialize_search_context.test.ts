@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { LensRuntimeState } from '@kbn/lens-common';
 import { getLensRuntimeStateMock, getLensInternalApiMock, makeEmbeddableServices } from '../mocks';
 import { initializeSearchContext } from './initialize_search_context';
@@ -35,14 +37,14 @@ describe('Context API', () => {
 
   describe('Subscriptions', () => {
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     function setupApisAndSubscriptionSpies() {
       const { api, cleanup, internalApi } = setupSearchContextApi();
       const { query$, filters$ } = api;
-      const querySpy = jest.fn();
-      const filtersSpy = jest.fn();
+      const querySpy = vi.fn();
+      const filtersSpy = vi.fn();
 
       const querySub = query$.subscribe(querySpy);
       const filtersSub = filters$.subscribe(filtersSpy);

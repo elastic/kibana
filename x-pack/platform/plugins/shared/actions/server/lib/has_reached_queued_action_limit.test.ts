@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { hasReachedTheQueuedActionsLimit } from './has_reached_queued_actions_limit';
@@ -13,7 +15,7 @@ const mockTaskManager = taskManagerMock.createStart();
 const mockActionsConfig = actionsConfigMock.create();
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   mockTaskManager.aggregate.mockResolvedValue({
     took: 1,
     timed_out: false,

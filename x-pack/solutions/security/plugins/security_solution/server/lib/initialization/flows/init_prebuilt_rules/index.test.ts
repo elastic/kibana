@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
@@ -14,19 +17,19 @@ import type { InitializationFlowContext } from '../../types';
 import { initPrebuiltRulesFlow } from '.';
 import { installPrebuiltRulesPackage } from '../../../detection_engine/prebuilt_rules/logic/integrations/install_prebuilt_rules_package';
 
-jest.mock(
+vi.mock(
   '../../../detection_engine/prebuilt_rules/logic/integrations/install_prebuilt_rules_package'
 );
 
-const installPrebuiltRulesPackageMock = installPrebuiltRulesPackage as jest.MockedFunction<
+const installPrebuiltRulesPackageMock = installPrebuiltRulesPackage as MockedFunction<
   typeof installPrebuiltRulesPackage
 >;
 
 const createMockSecurityContext = () =>
   ({
-    getInternalFleetServices: jest.fn(),
-    getConfig: jest.fn(),
-    getAppClient: jest.fn(),
+    getInternalFleetServices: vi.fn(),
+    getConfig: vi.fn(),
+    getAppClient: vi.fn(),
   } as unknown);
 
 const createMockInitializationFlowContext = (): InitializationFlowContext =>
@@ -39,7 +42,7 @@ const createMockInitializationFlowContext = (): InitializationFlowContext =>
 
 describe('initPrebuiltRulesFlow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('has the correct id', () => {

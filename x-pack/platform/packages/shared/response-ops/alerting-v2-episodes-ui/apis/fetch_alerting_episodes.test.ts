@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -12,9 +14,9 @@ import { buildEpisodesQuery } from '@kbn/alerting-v2-common-queries';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { fetchAlertingEpisodes } from './fetch_alerting_episodes';
 
-jest.mock('../utils/execute_esql_query');
+vi.mock('../utils/execute_esql_query');
 
-const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
+const mockExecuteEsqlQuery = vi.mocked(executeEsqlQuery);
 
 const SPACE_ID = 'default';
 
@@ -22,7 +24,7 @@ describe('fetchAlertingEpisodes', () => {
   const mockExpressions = {} as ExpressionsStart;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockExecuteEsqlQuery.mockResolvedValue([]);
   });
 

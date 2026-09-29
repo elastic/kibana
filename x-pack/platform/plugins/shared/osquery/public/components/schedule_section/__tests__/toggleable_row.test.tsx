@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { ToggleableRow } from '../toggleable_row';
@@ -13,7 +15,7 @@ import { renderWithProviders } from './test_helpers';
 describe('ToggleableRow', () => {
   const baseProps = {
     title: 'Override schedule',
-    onToggle: jest.fn(),
+    onToggle: vi.fn(),
     dataTestSubj: 'osquery-toggleable-row',
   };
 

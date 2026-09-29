@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { SUB_ACTION, TASK_TYPE_BY_SUB_ACTION } from '@kbn/connector-schemas/inference/constants';
 import {
   getConnectorTypesFromStepType,
@@ -16,13 +19,16 @@ import {
 } from './connectors_utils';
 import { stepSchemas } from '../../../common/step_schemas';
 
-jest.mock('../../../common/step_schemas', () => ({
-  stepSchemas: {
-    getStepDefinition: jest.fn(),
-  },
-}));
+vi.mock('../../../common/step_schemas', () => {
+      const mocked = {
+      stepSchemas: {
+        getStepDefinition: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetStepDefinition = stepSchemas.getStepDefinition as jest.MockedFunction<
+const mockGetStepDefinition = stepSchemas.getStepDefinition as MockedFunction<
   typeof stepSchemas.getStepDefinition
 >;
 

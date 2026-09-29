@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { ImportModal } from './import_modal';
 
-jest.mock('../../../../capabilities/check_capabilities', () => ({
-  usePermissionCheck: () => [true, true],
-}));
+vi.mock('../../../../capabilities/check_capabilities', () => {
+      const mocked = {
+      usePermissionCheck: () => [true, true],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const testProps = {
-  addImportedEvents: jest.fn(),
-  closeImportModal: jest.fn(),
+  addImportedEvents: vi.fn(),
+  closeImportModal: vi.fn(),
   canCreateCalendar: true,
 };
 

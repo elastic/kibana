@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { AttackDiscoveryAgentBuilderChatClient, parseInsightsFromSteps } from './chat_client';
@@ -135,8 +137,8 @@ describe('AttackDiscoveryAgentBuilderChatClient.converse', () => {
     response: { message: string };
     trace_id?: string;
   }) => {
-    const fetch = jest.fn().mockResolvedValue(response) as unknown as HttpHandler;
-    const log = { error: jest.fn() } as unknown as ToolingLog;
+    const fetch = vi.fn().mockResolvedValue(response) as unknown as HttpHandler;
+    const log = { error: vi.fn() } as unknown as ToolingLog;
 
     return new AttackDiscoveryAgentBuilderChatClient(fetch, log, 'test-connector');
   };

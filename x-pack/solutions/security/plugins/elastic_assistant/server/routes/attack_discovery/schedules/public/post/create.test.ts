@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { CreateAttackDiscoverySchedulesRequestBody } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
@@ -17,23 +20,26 @@ import { getAttackDiscoveryScheduleMock } from '../../../../../__mocks__/attack_
 import type { AttackDiscoveryScheduleDataClient } from '@kbn/attack-discovery-schedules-common';
 import { performChecks } from '../../../../helpers';
 
-jest.mock('../../../../helpers', () => ({
-  performChecks: jest.fn(),
-}));
+vi.mock('../../../../helpers', () => {
+      const mocked = {
+      performChecks: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();
 clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
 
-const createAttackDiscoverySchedule = jest.fn();
+const createAttackDiscoverySchedule = vi.fn();
 const mockSchedulingDataClient = {
-  findSchedules: jest.fn(),
-  getSchedule: jest.fn(),
+  findSchedules: vi.fn(),
+  getSchedule: vi.fn(),
   createSchedule: createAttackDiscoverySchedule,
-  updateSchedule: jest.fn(),
-  deleteSchedule: jest.fn(),
-  enableSchedule: jest.fn(),
-  disableSchedule: jest.fn(),
+  updateSchedule: vi.fn(),
+  deleteSchedule: vi.fn(),
+  enableSchedule: vi.fn(),
+  disableSchedule: vi.fn(),
 } as unknown as AttackDiscoveryScheduleDataClient;
 const mockApiConfig = {
   connectorId: 'connector-id',
@@ -59,11 +65,11 @@ const mockRequestBody: CreateAttackDiscoverySchedulesRequestBody = {
 
 describe('createAttackDiscoverySchedulesRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
       mockSchedulingDataClient
     );
-    (performChecks as jest.Mock).mockResolvedValue({
+    (performChecks as Mock).mockResolvedValue({
       isSuccess: true,
     });
     createAttackDiscoverySchedulesRoute(server.router);
@@ -115,7 +121,7 @@ describe('createAttackDiscoverySchedulesRoute', () => {
   });
 
   it('should handle `dataClient.createSchedule` error', async () => {
-    (createAttackDiscoverySchedule as jest.Mock).mockRejectedValue(new Error('Oh no!'));
+    (createAttackDiscoverySchedule as Mock).mockRejectedValue(new Error('Oh no!'));
     const response = await server.inject(
       createAttackDiscoverySchedulesRequest(mockRequestBody),
       requestContextMock.convertContext(context)
@@ -135,7 +141,7 @@ describe('createAttackDiscoverySchedulesRoute', () => {
     let featureFlagContext: ReturnType<typeof requestContextMock.createTools>['context'];
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       featureFlagServer = serverMock.create();
       const { context: freshContext } = requestContextMock.createTools();
       featureFlagContext = freshContext;
@@ -145,7 +151,7 @@ describe('createAttackDiscoverySchedulesRoute', () => {
       featureFlagContext.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
         mockSchedulingDataClient
       );
-      (performChecks as jest.Mock).mockResolvedValue({
+      (performChecks as Mock).mockResolvedValue({
         isSuccess: true,
       });
 

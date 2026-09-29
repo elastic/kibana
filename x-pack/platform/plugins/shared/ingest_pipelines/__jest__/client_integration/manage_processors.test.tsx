@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -63,7 +65,7 @@ describe('<ManageProcessors />', () => {
     const databases = [database1, database2, database3, database4];
 
     test('renders the list of databases', async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       httpRequestsMockHelpers.setLoadDatabasesResponse(databases);
       await renderManageProcessors('geoipDatabaseList');
 
@@ -87,7 +89,7 @@ describe('<ManageProcessors />', () => {
     });
 
     test('deletes a database', async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       httpRequestsMockHelpers.setLoadDatabasesResponse(databases);
       httpRequestsMockHelpers.setDeleteDatabasesResponse(database1.id, {});
       await renderManageProcessors('geoipDatabaseList');
@@ -124,7 +126,7 @@ describe('<ManageProcessors />', () => {
 
   describe('Creates a database', () => {
     it('creates a MaxMind database when none with the same name exists', async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       httpRequestsMockHelpers.setLoadDatabasesResponse([]);
       const databaseName = 'GeoIP2-ISP';
       const maxmind = '123456';
@@ -158,7 +160,7 @@ describe('<ManageProcessors />', () => {
     });
 
     it('creates an IPinfo database when none with the same name exists', async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       httpRequestsMockHelpers.setLoadDatabasesResponse([]);
       const databaseName = 'standard_asn';
       httpRequestsMockHelpers.setCreateDatabasesResponse({
@@ -192,7 +194,7 @@ describe('<ManageProcessors />', () => {
 
   describe('No databases', () => {
     test('displays an empty prompt', async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       httpRequestsMockHelpers.setLoadDatabasesResponse([]);
       await renderManageProcessors('geoipEmptyListPrompt');
       expect(screen.getByTestId('geoipEmptyListPrompt')).toBeInTheDocument();
@@ -201,7 +203,7 @@ describe('<ManageProcessors />', () => {
 
   describe('Error handling', () => {
     test('displays an error callout', async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const error = {
         statusCode: 500,
         error: 'Internal server error',

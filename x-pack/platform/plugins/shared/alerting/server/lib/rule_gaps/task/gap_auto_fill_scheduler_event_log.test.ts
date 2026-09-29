@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { IEvent, IEventLogger } from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS } from '../../../plugin';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
@@ -12,19 +15,19 @@ import { createGapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler
 
 describe('gap_auto_fill_scheduler_event_log', () => {
   const fixedStart = new Date('2024-01-01T00:00:00.000Z');
-  let eventLogger: jest.Mocked<IEventLogger>;
+  let eventLogger: Mocked<IEventLogger>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2024-01-01T00:00:10.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T00:00:10.000Z'));
 
     // Use shared Kibana mock for event logger
-    eventLogger = eventLoggerMock.create() as unknown as jest.Mocked<IEventLogger>;
+    eventLogger = eventLoggerMock.create() as unknown as Mocked<IEventLogger>;
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   const makeArgs = () => ({

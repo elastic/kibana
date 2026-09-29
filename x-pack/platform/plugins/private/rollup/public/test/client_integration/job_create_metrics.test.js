@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@elastic/eui', () => {
+vi.mock('@elastic/eui', async () => {
   // We only override EuiPopover to avoid MutationObserver-based act warnings in JSDOM.
   const React = require('react');
-  const actual = jest.requireActual('@elastic/eui');
+  const actual = (await vi.importActual('@elastic/eui'));
 
   return {
     ...actual,
@@ -90,7 +92,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
   };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
     initDocumentation(docLinksServiceMock.createStartContract());

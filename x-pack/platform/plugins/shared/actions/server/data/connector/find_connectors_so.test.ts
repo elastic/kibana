@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { findConnectorsSo } from './find_connectors_so';
 
@@ -12,7 +14,7 @@ const savedObjectsClient = savedObjectsClientMock.create();
 
 describe('findConnectorsSo', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     savedObjectsClient.find.mockResolvedValue({
       total: 0,
       per_page: 10000,

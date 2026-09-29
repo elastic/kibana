@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type { MockRouter } from './__mocks__/routes.mock';
 import { createMockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 import { handleEsError } from '../shared_imports';
 
-jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
-  versionCheckHandlerWrapper: () => (a: any) => a,
-}));
+vi.mock('@kbn/upgrade-assistant-pkg-server', () => {
+      const mocked = {
+      versionCheckHandlerWrapper: () => (a: any) => a,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { registerDeprecationLoggingRoutes } from './deprecation_logging';
 
@@ -37,14 +43,14 @@ describe('deprecation logging API', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('GET /api/upgrade_assistant/deprecation_logging', () => {
     it('returns that indexing and writing logs is enabled', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-          .getSettings as jest.Mock
+          .getSettings as Mock
       ).mockResolvedValue({
         defaults: {
           cluster: { deprecation_indexing: { enabled: 'true' } },
@@ -66,7 +72,7 @@ describe('deprecation logging API', () => {
     it('returns an error if it throws', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-          .getSettings as jest.Mock
+          .getSettings as Mock
       ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
@@ -81,7 +87,7 @@ describe('deprecation logging API', () => {
     it('returns that indexing and writing logs is enabled', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-          .putSettings as jest.Mock
+          .putSettings as Mock
       ).mockResolvedValue({
         defaults: {
           logger: { deprecation: 'WARN' },
@@ -103,7 +109,7 @@ describe('deprecation logging API', () => {
     it('returns an error if it throws', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-          .putSettings as jest.Mock
+          .putSettings as Mock
       ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
@@ -119,10 +125,10 @@ describe('deprecation logging API', () => {
 
     it('returns count of deprecations', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices.exists as jest.Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices.exists as Mock
       ).mockResolvedValue(true);
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.count as jest.Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.count as Mock
       ).mockResolvedValue({ count: 10 });
 
       const resp = await routeDependencies.router.getHandler({
@@ -140,7 +146,7 @@ describe('deprecation logging API', () => {
 
     it('returns zero matches when deprecation logs index is not created', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices.exists as jest.Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices.exists as Mock
       ).mockResolvedValue(false);
 
       const resp = await routeDependencies.router.getHandler({
@@ -158,7 +164,7 @@ describe('deprecation logging API', () => {
 
     it('returns an error if it throws', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices.exists as jest.Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices.exists as Mock
       ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
@@ -173,7 +179,7 @@ describe('deprecation logging API', () => {
     it('returns ok if if the cache was deleted', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as jest.Mock
+          .request as Mock
       ).mockResolvedValue('ok');
 
       const resp = await routeDependencies.router.getHandler({
@@ -194,7 +200,7 @@ describe('deprecation logging API', () => {
     it('returns an error if it throws', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as jest.Mock
+          .request as Mock
       ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({

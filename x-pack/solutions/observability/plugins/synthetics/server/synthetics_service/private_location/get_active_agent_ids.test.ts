@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import { getRecentlyActiveAgentIds } from './get_active_agent_ids';
@@ -13,9 +15,9 @@ import * as getApiKeyModule from '../get_api_key';
 const NOW = 1_700_000_000_000;
 const WINDOW = 180_000;
 
-const search = jest.fn();
-const hasPrivileges = jest.fn();
-const getDecryptedAsInternalUser = jest.fn();
+const search = vi.fn();
+const hasPrivileges = vi.fn();
+const getDecryptedAsInternalUser = vi.fn();
 
 const makeServer = (service?: { manifestUrl?: string; devUrl?: string }): SyntheticsServerSetup =>
   ({
@@ -29,7 +31,7 @@ const makeServer = (service?: { manifestUrl?: string; devUrl?: string }): Synthe
       getClient: () => ({ getDecryptedAsInternalUser }),
     },
     security: {
-      authc: { apiKeys: { validate: jest.fn().mockResolvedValue(true) } },
+      authc: { apiKeys: { validate: vi.fn().mockResolvedValue(true) } },
     },
     logger: loggerMock.create(),
   } as unknown as SyntheticsServerSetup);
@@ -37,7 +39,7 @@ const makeServer = (service?: { manifestUrl?: string; devUrl?: string }): Synthe
 const withServiceConfig = () => makeServer({ manifestUrl: 'https://example' });
 
 const mockValidApiKey = () =>
-  jest
+  vi
     .spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService')
     .mockResolvedValue({ apiKey: { id: 'k', apiKey: 's', name: 'n' }, isValid: true } as never);
 
@@ -50,10 +52,10 @@ const getActive = (
 ) => getRecentlyActiveAgentIds(server, agentIds, WINDOW, NOW, signal);
 
 describe('getRecentlyActiveAgentIds', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns an empty set (and issues no query) when there are no agents', async () => {
-    const getApiKey = jest.spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService');
+    const getApiKey = vi.spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService');
 
     const active = await getActive(makeServer(), []);
 
@@ -88,7 +90,7 @@ describe('getRecentlyActiveAgentIds', () => {
   });
 
   it('returns an empty set when the synthetics API key is missing or invalid', async () => {
-    jest
+    vi
       .spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService')
       .mockResolvedValue({ isValid: false } as never);
 
@@ -99,7 +101,7 @@ describe('getRecentlyActiveAgentIds', () => {
   });
 
   it('uses the private-location sharding key when the service key is unavailable', async () => {
-    jest
+    vi
       .spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService')
       .mockResolvedValue({ isValid: false } as never);
     getDecryptedAsInternalUser.mockResolvedValue({
@@ -124,7 +126,7 @@ describe('getRecentlyActiveAgentIds', () => {
   });
 
   it('reads only the sharding key when no service manifest or dev URL is configured', async () => {
-    const getApiKey = jest.spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService');
+    const getApiKey = vi.spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService');
     getDecryptedAsInternalUser.mockResolvedValue({
       attributes: { id: 'sharding-key', apiKey: 'secret', name: 'private-location-sharding' },
     });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { faker } from '@faker-js/faker';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,51 +19,60 @@ import type { DashboardListingPageProps } from './dashboard_listing_page';
 import { DashboardListingPage } from './dashboard_listing_page';
 import { coreServices } from '../../services/kibana_services';
 
-const mockUseParams = jest.fn().mockReturnValue({});
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => mockUseParams(),
-}));
+const mockUseParams = vi.fn().mockReturnValue({});
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: () => mockUseParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetListingTabs = jest.fn().mockReturnValue([]);
-jest.mock('../hooks/dashboard_mount_context', () => ({
-  useDashboardMountContext: () => ({ getListingTabs: mockGetListingTabs }),
-}));
+const mockGetListingTabs = vi.fn().mockReturnValue([]);
+vi.mock('../hooks/dashboard_mount_context', () => {
+      const mocked = {
+      useDashboardMountContext: () => ({ getListingTabs: mockGetListingTabs }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock child components. The Dashboard listing page mostly passes down props to shared UX components which are tested in their own packages.
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
-jest.mock('../../dashboard_listing/dashboard_listing', () => {
+vi.mock('../../dashboard_listing/dashboard_listing', () => {
   return {
     __esModule: true,
-    DashboardListing: jest.fn().mockReturnValue(null),
+    DashboardListing: vi.fn().mockReturnValue(null),
   };
 });
 
 import { DashboardAppNoDataPage } from '../no_data/dashboard_app_no_data';
 import { dataService } from '../../services/kibana_services';
 
-const mockIsDashboardAppInNoDataState = jest.fn().mockResolvedValue(false);
-jest.mock('../no_data/dashboard_app_no_data', () => {
-  const originalModule = jest.requireActual('../no_data/dashboard_app_no_data');
+const mockIsDashboardAppInNoDataState = vi.fn().mockResolvedValue(false);
+vi.mock('../no_data/dashboard_app_no_data', async () => {
+  const originalModule = (await vi.importActual('../no_data/dashboard_app_no_data'));
   return {
     __esModule: true,
     ...originalModule,
     isDashboardAppInNoDataState: () => mockIsDashboardAppInNoDataState(),
-    DashboardAppNoDataPage: jest.fn().mockReturnValue(null),
+    DashboardAppNoDataPage: vi.fn().mockReturnValue(null),
   };
 });
 
-const mockFindByTitle = jest.fn();
-jest.mock('../../dashboard_client', () => ({
-  findService: {
-    findByTitle: () => mockFindByTitle(),
-  },
-}));
+const mockFindByTitle = vi.fn();
+vi.mock('../../dashboard_client', () => {
+      const mocked = {
+      findService: {
+        findByTitle: () => mockFindByTitle(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderDashboardListingPage = (props: Partial<DashboardListingPageProps> = {}) =>
   render(
     <DashboardListingPage
-      redirectTo={jest.fn()}
+      redirectTo={vi.fn()}
       kbnUrlStateStorage={createKbnUrlStateStorage()}
       {...props}
     />,
@@ -70,7 +81,7 @@ const renderDashboardListingPage = (props: Partial<DashboardListingPageProps> = 
 
 test('renders analytics no data page when the user has no data view', async () => {
   mockIsDashboardAppInNoDataState.mockResolvedValueOnce(true);
-  dataService.dataViews.hasData.hasDataView = jest.fn().mockResolvedValue(false);
+  dataService.dataViews.hasData.hasDataView = vi.fn().mockResolvedValue(false);
 
   renderDashboardListingPage();
 
@@ -94,7 +105,7 @@ test('initialFilter is passed through if title is not provided', async () => {
 
 test('When given a title that matches multiple dashboards, filter on the title', async () => {
   mockFindByTitle.mockResolvedValue(undefined);
-  const redirectTo = jest.fn();
+  const redirectTo = vi.fn();
 
   renderDashboardListingPage({ title: 'search by title', redirectTo });
 
@@ -111,7 +122,7 @@ test('When given a title that matches one dashboard, redirect to dashboard', asy
   mockFindByTitle.mockResolvedValue({
     id: 'you_found_me',
   });
-  const redirectTo = jest.fn();
+  const redirectTo = vi.fn();
 
   renderDashboardListingPage({ title: 'search by title', redirectTo });
 
@@ -137,7 +148,7 @@ test('sets only "Dashboards" breadcrumb on default tab', async () => {
 test('sets "Dashboards > Tab Title" breadcrumbs on active tab', async () => {
   mockUseParams.mockReturnValue({ activeTab: 'visualizations' });
   mockGetListingTabs.mockReturnValue([
-    { id: 'visualizations', title: 'Visualizations', getTableList: jest.fn() },
+    { id: 'visualizations', title: 'Visualizations', getTableList: vi.fn() },
   ]);
 
   renderDashboardListingPage();

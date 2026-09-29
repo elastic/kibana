@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   getSupportedActionConnectors,
   getCaseConfigure,
@@ -22,10 +25,10 @@ import { KibanaServices } from '../../common/lib/kibana';
 import { actionTypesMock, connectorsMock } from '../../common/mock/connectors';
 
 const abortCtrl = new AbortController();
-const mockKibanaServices = KibanaServices.get as jest.Mock;
-jest.mock('../../common/lib/kibana');
+const mockKibanaServices = KibanaServices.get as Mock;
+vi.mock('../../common/lib/kibana');
 
-const fetchMock = jest.fn();
+const fetchMock = vi.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
 describe('Case Configuration API', () => {

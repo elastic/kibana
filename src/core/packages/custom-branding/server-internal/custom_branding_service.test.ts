@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { CustomBrandingService } from './custom_branding_service';
@@ -17,7 +20,7 @@ describe('#setup', () => {
   it('registers plugin correctly', () => {
     const service = new CustomBrandingService(coreContext);
     const { register } = service.setup();
-    const fetchFn = jest.fn();
+    const fetchFn = vi.fn();
     register('pluginName', fetchFn);
     expect(() => {
       register('anotherPlugin', fetchFn);
@@ -27,9 +30,9 @@ describe('#setup', () => {
   it('throws if `getBrandingFor` called before #start', async () => {
     const service = new CustomBrandingService(coreContext);
     const { register, getBrandingFor } = service.setup();
-    const fetchFn = jest.fn();
+    const fetchFn = vi.fn();
     register('customBranding', fetchFn);
-    const kibanaRequest: jest.Mocked<KibanaRequest> = {} as unknown as jest.Mocked<KibanaRequest>;
+    const kibanaRequest: Mocked<KibanaRequest> = {} as unknown as Mocked<KibanaRequest>;
     try {
       await getBrandingFor(kibanaRequest);
     } catch (e) {
@@ -54,10 +57,10 @@ describe('#setup', () => {
     const service = new CustomBrandingService(coreContext);
     const { register, getBrandingFor } = service.setup();
     service.start();
-    const fetchFn = jest.fn();
+    const fetchFn = vi.fn();
     fetchFn.mockImplementation(() => Promise.resolve({ logo: 'myLogo' }));
     register('customBranding', fetchFn);
-    const kibanaRequest: jest.Mocked<KibanaRequest> = {} as unknown as jest.Mocked<KibanaRequest>;
+    const kibanaRequest: Mocked<KibanaRequest> = {} as unknown as Mocked<KibanaRequest>;
     const customBranding = await getBrandingFor(kibanaRequest);
     expect(fetchFn).toHaveBeenCalledTimes(1);
     expect(customBranding).toEqual({ logo: 'myLogo' });
@@ -67,10 +70,10 @@ describe('#setup', () => {
     const service = new CustomBrandingService(coreContext);
     const { register, getBrandingFor } = service.setup();
     service.start();
-    const fetchFn = jest.fn();
+    const fetchFn = vi.fn();
     fetchFn.mockImplementation(() => Promise.resolve({ logo: 'myLogo' }));
     register('customBranding', fetchFn);
-    const kibanaRequest: jest.Mocked<KibanaRequest> = {} as unknown as jest.Mocked<KibanaRequest>;
+    const kibanaRequest: Mocked<KibanaRequest> = {} as unknown as Mocked<KibanaRequest>;
     await getBrandingFor(kibanaRequest, { unauthenticated: true });
     expect(fetchFn).toHaveBeenCalledWith(kibanaRequest, true);
   });

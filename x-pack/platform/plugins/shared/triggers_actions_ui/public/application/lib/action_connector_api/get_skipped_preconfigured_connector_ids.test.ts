@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getSkippedPreconfiguredConnectorIds } from './get_skipped_preconfigured_connector_ids';
 
 const http = httpServiceMock.createStartContract();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('getSkippedPreconfiguredConnectorIds', () => {
   it('calls the correct endpoint', async () => {

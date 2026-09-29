@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { actionsConfigMock } from '../actions_config.mock';
 import type { TestConfig, TestSecrets } from './mocks';
@@ -14,7 +17,7 @@ import { ValidatorType } from './types';
 import { buildValidators } from './validators';
 
 describe('Validators', () => {
-  let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
+  let mockedActionsConfig: Mocked<ActionsConfigurationUtilities>;
 
   const getConnector = (
     overrides: Partial<SubActionConnectorType<TestConfig, TestSecrets>> = {}
@@ -41,8 +44,8 @@ describe('Validators', () => {
   };
 
   const createValidatorWithCustomValidation = (Service: IService<TestConfig, TestSecrets>) => {
-    const configValidator = jest.fn();
-    const secretsValidator = jest.fn();
+    const configValidator = vi.fn();
+    const secretsValidator = vi.fn();
 
     const connector = getConnector({
       validators: [
@@ -60,8 +63,8 @@ describe('Validators', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
 
     mockedActionsConfig = actionsConfigMock.create();
   });
@@ -145,7 +148,7 @@ describe('Validators', () => {
   });
 
   it('propagates error when config validator throws', () => {
-    const configValidator = jest.fn().mockImplementation(() => {
+    const configValidator = vi.fn().mockImplementation(() => {
       throw new Error('Config validation failed');
     });
     const connector = getConnector({
@@ -166,7 +169,7 @@ describe('Validators', () => {
   });
 
   it('propagates error when secrets validator throws', () => {
-    const secretsValidator = jest.fn().mockImplementation(() => {
+    const secretsValidator = vi.fn().mockImplementation(() => {
       throw new Error('Secrets validation failed');
     });
     const connector = getConnector({
@@ -187,8 +190,8 @@ describe('Validators', () => {
   });
 
   it('runs multiple config validators in sequence', () => {
-    const validator1 = jest.fn();
-    const validator2 = jest.fn();
+    const validator1 = vi.fn();
+    const validator2 = vi.fn();
     const connector = getConnector({
       validators: [
         { type: ValidatorType.CONFIG, validator: validator1 },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
@@ -15,12 +17,12 @@ import * as fetchTagUsageDataModule from './fetch_tag_usage_data';
 
 describe('createTagUsageCollector', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('creates usage collector with expected type and schema', () => {
     const usageCollection = createUsageCollectionSetupMock();
-    const getKibanaIndices = jest.fn().mockResolvedValue(['.kibana']);
+    const getKibanaIndices = vi.fn().mockResolvedValue(['.kibana']);
 
     createTagUsageCollector({ usageCollection, getKibanaIndices });
 
@@ -37,10 +39,10 @@ describe('createTagUsageCollector', () => {
 
   it('fetches usage data with indices returned by getKibanaIndices', async () => {
     const usageCollection = createUsageCollectionSetupMock();
-    const getKibanaIndices = jest.fn().mockResolvedValue(['.kibana_1', '.kibana_2']);
+    const getKibanaIndices = vi.fn().mockResolvedValue(['.kibana_1', '.kibana_2']);
     const fetchContext = createCollectorFetchContextMock();
     const usageData = { usedTags: 4, taggedObjects: 5, types: {} };
-    const fetchTagUsageDataMock = jest
+    const fetchTagUsageDataMock = vi
       .spyOn(fetchTagUsageDataModule, 'fetchTagUsageData')
       .mockResolvedValue(usageData);
 

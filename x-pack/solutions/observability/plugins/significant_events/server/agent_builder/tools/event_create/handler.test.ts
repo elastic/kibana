@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createEventToolHandler } from './handler';
 import { eventsWriteHandler } from '../event_write/handler';
 
-jest.mock('../event_write/handler', () => ({
-  eventsWriteHandler: jest.fn(),
-}));
+vi.mock('../event_write/handler', () => {
+      const mocked = {
+      eventsWriteHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseInput = {
   stream_names: ['logs.checkout'],
@@ -23,7 +29,7 @@ const baseInput = {
 
 describe('createEventToolHandler', () => {
   beforeEach(() => {
-    (eventsWriteHandler as jest.Mock).mockResolvedValue({
+    (eventsWriteHandler as Mock).mockResolvedValue({
       event_uuid: 'event-1',
       event_id: 'agent-event-abcd1234',
       status: 'open',
@@ -62,7 +68,7 @@ describe('createEventToolHandler', () => {
   it('passes a generated event_id so chat create is always-write snapshot', async () => {
     await createEventToolHandler({ eventClient: {} as never, eventInput: baseInput });
 
-    const delegatedInput = (eventsWriteHandler as jest.Mock).mock.calls[0][0].input;
+    const delegatedInput = (eventsWriteHandler as Mock).mock.calls[0][0].input;
     expect(delegatedInput.event_id).toEqual(expect.any(String));
     expect(delegatedInput).not.toHaveProperty('assessment_note');
     expect(delegatedInput).not.toHaveProperty('signals');
@@ -70,8 +76,8 @@ describe('createEventToolHandler', () => {
   });
 
   it('passes alertEventsClient and logger through to eventsWriteHandler', async () => {
-    const alertEventsClient = { createAlertEvent: jest.fn() } as never;
-    const logger = { error: jest.fn() } as never;
+    const alertEventsClient = { createAlertEvent: vi.fn() } as never;
+    const logger = { error: vi.fn() } as never;
 
     await createEventToolHandler({
       eventClient: {} as never,

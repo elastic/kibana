@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ConversationTemplate } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createSetConversationMetadataTool } from './set_conversation_metadata';
 
-jest.mock('@kbn/agent-builder-server', () => ({
-  ...jest.requireActual('@kbn/agent-builder-server'),
-  getToolResultId: jest.fn(() => 'tool-result-id'),
-}));
+vi.mock('@kbn/agent-builder-server', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/agent-builder-server')),
+      getToolResultId: vi.fn(() => 'tool-result-id'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeTemplate = (fields: ConversationTemplate['fields'] = {}): ConversationTemplate => ({
   id: 'test-template',
@@ -23,12 +29,12 @@ const makeTemplate = (fields: ConversationTemplate['fields'] = {}): Conversation
 });
 
 describe('createSetConversationMetadataTool', () => {
-  let updateConversationMetadata: jest.Mock;
+  let updateConversationMetadata: Mock;
   let template: ConversationTemplate;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    updateConversationMetadata = jest.fn().mockResolvedValue(undefined);
+    vi.clearAllMocks();
+    updateConversationMetadata = vi.fn().mockResolvedValue(undefined);
     template = makeTemplate({
       severity: {
         input_type: 'SELECT',

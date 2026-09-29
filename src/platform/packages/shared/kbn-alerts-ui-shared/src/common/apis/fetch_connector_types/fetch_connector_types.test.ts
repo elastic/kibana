@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { fetchConnectorTypes } from './fetch_connector_types';
 import type { ActionType } from '@kbn/actions-types';
 
 const http = httpServiceMock.createStartContract();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('loadActionTypes', () => {
   test('should call list types API', async () => {

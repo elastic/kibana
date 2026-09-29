@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
 import { DEFAULT_WORKFLOW_CONFIGURATION } from '../../constants';
@@ -12,12 +15,12 @@ import { getWorkflowSettings, setWorkflowSettings } from '../../local_storage';
 import type { WorkflowConfiguration } from '../../types';
 import { useWorkflowConfiguration } from '.';
 
-jest.mock('../../../../../../common/hooks/use_space_id');
-jest.mock('../../local_storage');
+vi.mock('../../../../../../common/hooks/use_space_id');
+vi.mock('../../local_storage');
 
-const mockUseSpaceId = useSpaceId as jest.Mock;
-const mockGetWorkflowSettings = getWorkflowSettings as jest.Mock;
-const mockSetWorkflowSettings = setWorkflowSettings as jest.Mock;
+const mockUseSpaceId = useSpaceId as Mock;
+const mockGetWorkflowSettings = getWorkflowSettings as Mock;
+const mockSetWorkflowSettings = setWorkflowSettings as Mock;
 
 describe('useWorkflowConfiguration', () => {
   const testSpaceId = 'test-space';
@@ -31,7 +34,7 @@ describe('useWorkflowConfiguration', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetWorkflowSettings.mockReturnValue(DEFAULT_WORKFLOW_CONFIGURATION);
     mockSetWorkflowSettings.mockReturnValue(true);
   });
@@ -133,7 +136,7 @@ describe('useWorkflowConfiguration', () => {
     it('returns false when space ID is not available', async () => {
       mockUseSpaceId.mockReturnValue(undefined);
 
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
 
       const { result } = renderHook(() => useWorkflowConfiguration());
 
@@ -191,7 +194,7 @@ describe('useWorkflowConfiguration', () => {
     it('warns when space ID is not available', async () => {
       mockUseSpaceId.mockReturnValue(undefined);
 
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
 
       const { result } = renderHook(() => useWorkflowConfiguration());
 

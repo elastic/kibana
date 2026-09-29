@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { KindSelect } from './kind_select';
 
 describe('KindSelect', () => {
   it('renders the goal label and both kind cards', () => {
-    render(<KindSelect value="alert" onChange={jest.fn()} />);
+    render(<KindSelect value="alert" onChange={vi.fn()} />);
 
     expect(screen.getByText("What's your goal?")).toBeInTheDocument();
     expect(screen.getByTestId('ruleV2KindSelect-alert')).toBeInTheDocument();
@@ -21,7 +23,7 @@ describe('KindSelect', () => {
   });
 
   it('calls onChange with the selected kind', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(<KindSelect value="alert" onChange={onChange} />);
 
     fireEvent.click(screen.getByTestId('ruleV2KindSelect-signal'));
@@ -30,21 +32,21 @@ describe('KindSelect', () => {
   });
 
   it('honors a custom data-test-subj', () => {
-    render(<KindSelect value="signal" onChange={jest.fn()} data-test-subj="customKind" />);
+    render(<KindSelect value="signal" onChange={vi.fn()} data-test-subj="customKind" />);
 
     expect(screen.getByTestId('customKind')).toBeInTheDocument();
     expect(screen.getByTestId('customKind-signal')).toBeInTheDocument();
   });
 
   it('disables the cards when disabled', () => {
-    render(<KindSelect value="alert" onChange={jest.fn()} disabled />);
+    render(<KindSelect value="alert" onChange={vi.fn()} disabled />);
 
     expect(screen.getByTestId('ruleV2KindSelect-alert').querySelector('input')).toBeDisabled();
     expect(screen.getByTestId('ruleV2KindSelect-signal').querySelector('input')).toBeDisabled();
   });
 
   it('renders only the selected card when readOnly', () => {
-    render(<KindSelect value="alert" onChange={jest.fn()} readOnly />);
+    render(<KindSelect value="alert" onChange={vi.fn()} readOnly />);
 
     expect(screen.getByTestId('ruleV2KindSelect-alert')).toBeInTheDocument();
     expect(screen.queryByTestId('ruleV2KindSelect-signal')).not.toBeInTheDocument();
@@ -52,7 +54,7 @@ describe('KindSelect', () => {
   });
 
   it('associates the goal label with the option group via a fieldset/legend', () => {
-    render(<KindSelect value="alert" onChange={jest.fn()} />);
+    render(<KindSelect value="alert" onChange={vi.fn()} />);
 
     expect(screen.getByRole('group', { name: "What's your goal?" })).toBeInTheDocument();
   });

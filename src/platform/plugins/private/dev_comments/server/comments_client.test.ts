@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { NewComment } from '../common';
@@ -20,11 +23,11 @@ const responseError = (statusCode: number) =>
 
 const storageMock = <T>() =>
   ({
-    search: jest.fn(),
-    get: jest.fn(),
-    index: jest.fn(),
-    delete: jest.fn(),
-  } as unknown as jest.Mocked<T>);
+    search: vi.fn(),
+    get: vi.fn(),
+    index: vi.fn(),
+    delete: vi.fn(),
+  } as unknown as Mocked<T>);
 
 const searchResponse = (hits: Array<{ _id: string; _source: object }>, total = hits.length) => ({
   hits: { total: { value: total, relation: 'eq' }, hits },
@@ -67,7 +70,7 @@ describe('CommentsClient', () => {
   const client = () => new CommentsClient(comments, snapshots, logger);
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     comments.search.mockResolvedValue(searchResponse([], 3) as never);
     comments.get.mockResolvedValue(getResponse('a', stored) as never);
     comments.index.mockResolvedValue({} as never);

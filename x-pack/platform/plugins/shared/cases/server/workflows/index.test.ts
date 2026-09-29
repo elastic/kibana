@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import { registerCaseWorkflowSteps } from '.';
 
@@ -16,9 +18,9 @@ describe('registerCaseWorkflowSteps', () => {
       registry = new UnifiedAttachmentTypeRegistry(),
     }: { isTemplatesEnabled?: boolean; registry?: UnifiedAttachmentTypeRegistry } = {}
   ) => {
-    const workflowsExtensions = { registerStepDefinition: jest.fn() };
-    const getCasesClient = jest.fn();
-    const waitForStartServices = jest.fn(() => Promise.resolve());
+    const workflowsExtensions = { registerStepDefinition: vi.fn() };
+    const getCasesClient = vi.fn();
+    const waitForStartServices = vi.fn(() => Promise.resolve());
 
     registerCaseWorkflowSteps(
       workflowsExtensions as never,

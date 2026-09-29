@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Subscription } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -60,9 +62,9 @@ describe('connect_to_global_state', () => {
   let timeFilter: TimefilterContract;
   let globalState: BaseStateContainer<QueryState>;
   let globalStateSub: Subscription;
-  let globalStateChangeTriggered = jest.fn();
+  let globalStateChangeTriggered = vi.fn();
   let filterManagerChangeSub: Subscription;
-  let filterManagerChangeTriggered = jest.fn();
+  let filterManagerChangeTriggered = vi.fn();
 
   let gF1: Filter;
   let gF2: Filter;
@@ -85,10 +87,10 @@ describe('connect_to_global_state', () => {
     timeFilter = queryServiceStart.timefilter.timefilter;
 
     globalState = createStateContainer({});
-    globalStateChangeTriggered = jest.fn();
+    globalStateChangeTriggered = vi.fn();
     globalStateSub = globalState.state$.subscribe(globalStateChangeTriggered);
 
-    filterManagerChangeTriggered = jest.fn();
+    filterManagerChangeTriggered = vi.fn();
     filterManagerChangeSub = filterManager.getUpdates$().subscribe(filterManagerChangeTriggered);
 
     gF1 = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
@@ -304,9 +306,9 @@ describe('connect_to_app_state', () => {
   let filterManager: FilterManager;
   let appState: BaseStateContainer<QueryState>;
   let appStateSub: Subscription;
-  let appStateChangeTriggered = jest.fn();
+  let appStateChangeTriggered = vi.fn();
   let filterManagerChangeSub: Subscription;
-  let filterManagerChangeTriggered = jest.fn();
+  let filterManagerChangeTriggered = vi.fn();
 
   let gF1: Filter;
   let gF2: Filter;
@@ -328,10 +330,10 @@ describe('connect_to_app_state', () => {
     filterManager = queryServiceStart.filterManager;
 
     appState = createStateContainer({});
-    appStateChangeTriggered = jest.fn();
+    appStateChangeTriggered = vi.fn();
     appStateSub = appState.state$.subscribe(appStateChangeTriggered);
 
-    filterManagerChangeTriggered = jest.fn();
+    filterManagerChangeTriggered = vi.fn();
     filterManagerChangeSub = filterManager.getUpdates$().subscribe(filterManagerChangeTriggered);
 
     gF1 = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
@@ -486,9 +488,9 @@ describe('filters with different state', () => {
   let filterManager: FilterManager;
   let state: BaseStateContainer<QueryState>;
   let stateSub: Subscription;
-  let stateChangeTriggered = jest.fn();
+  let stateChangeTriggered = vi.fn();
   let filterManagerChangeSub: Subscription;
-  let filterManagerChangeTriggered = jest.fn();
+  let filterManagerChangeTriggered = vi.fn();
 
   let filter: Filter;
 
@@ -507,10 +509,10 @@ describe('filters with different state', () => {
     filterManager = queryServiceStart.filterManager;
 
     state = createStateContainer({});
-    stateChangeTriggered = jest.fn();
+    stateChangeTriggered = vi.fn();
     stateSub = state.state$.subscribe(stateChangeTriggered);
 
-    filterManagerChangeTriggered = jest.fn();
+    filterManagerChangeTriggered = vi.fn();
     filterManagerChangeSub = filterManager.getUpdates$().subscribe(filterManagerChangeTriggered);
 
     filter = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');

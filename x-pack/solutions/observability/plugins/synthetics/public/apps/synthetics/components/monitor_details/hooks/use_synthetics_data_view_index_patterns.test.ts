@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useSyntheticsDataViewIndexPatterns } from './use_synthetics_data_view_index_patterns';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
-const mockUrlParams = jest.fn();
-jest.mock('../../../hooks', () => ({
-  useGetUrlParams: () => mockUrlParams(),
-}));
+const mockUrlParams = vi.fn();
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useGetUrlParams: () => mockUrlParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ALERTS_INDEX_PATTERN = '.alerts-observability*';
 
 describe('useSyntheticsDataViewIndexPatterns', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('returns the local synthetics and alerts index patterns when remoteName is absent', () => {
     mockUrlParams.mockReturnValue({});

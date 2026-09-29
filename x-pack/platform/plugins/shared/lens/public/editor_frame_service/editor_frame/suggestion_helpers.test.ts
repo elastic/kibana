@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { PaletteOutput } from '@kbn/coloring';
 import { getSuggestions, getTopSuggestionForField } from './suggestion_helpers';
 import type { DatasourceMock } from '../../mocks';
@@ -383,7 +386,7 @@ describe('suggestion helpers', () => {
       generateSuggestion(tableState1),
       generateSuggestion(tableState2),
     ]);
-    const vis1Suggestions = jest.fn();
+    const vis1Suggestions = vi.fn();
     vis1Suggestions.mockReturnValueOnce([
       {
         score: 0.3,
@@ -400,7 +403,7 @@ describe('suggestion helpers', () => {
         previewIcon: 'empty',
       },
     ]);
-    const vis2Suggestions = jest.fn();
+    const vis2Suggestions = vi.fn();
     vis2Suggestions.mockReturnValueOnce([]);
     vis2Suggestions.mockReturnValueOnce([
       {
@@ -520,7 +523,7 @@ describe('suggestion helpers', () => {
         name: 'mock',
       },
     };
-    mockVisualization1.getMainPalette = jest.fn(() => mainPalette);
+    mockVisualization1.getMainPalette = vi.fn(() => mainPalette);
     datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       generateSuggestion(0),
       generateSuggestion(1),
@@ -547,8 +550,8 @@ describe('suggestion helpers', () => {
   });
 
   describe('getTopSuggestionForField', () => {
-    let mockVisualization1: jest.Mocked<Visualization>;
-    let mockVisualization2: jest.Mocked<Visualization>;
+    let mockVisualization1: Mocked<Visualization>;
+    let mockVisualization2: Mocked<Visualization>;
     let mockDatasourceState: unknown;
     let defaultParams: Parameters<typeof getTopSuggestionForField>;
     beforeEach(() => {
@@ -594,13 +597,13 @@ describe('suggestion helpers', () => {
           '1': {
             getTableSpec: () => [{ columnId: 'col1', fields: [] }],
             datasourceId: '',
-            getOperationForColumnId: jest.fn(),
-            getVisualDefaults: jest.fn(),
-            getSourceId: jest.fn(),
-            getFilters: jest.fn(),
-            getMaxPossibleNumValues: jest.fn(),
-            isTextBasedLanguage: jest.fn(() => false),
-            hasDefaultTimeField: jest.fn(() => true),
+            getOperationForColumnId: vi.fn(),
+            getVisualDefaults: vi.fn(),
+            getSourceId: vi.fn(),
+            getFilters: vi.fn(),
+            getMaxPossibleNumValues: vi.fn(),
+            isTextBasedLanguage: vi.fn(() => false),
+            hasDefaultTimeField: vi.fn(() => true),
           },
         },
         { activeId: 'testVis', state: {}, selectedLayerId: null },
@@ -633,13 +636,13 @@ describe('suggestion helpers', () => {
         '1': {
           getTableSpec: () => [],
           datasourceId: '',
-          getOperationForColumnId: jest.fn(),
-          getVisualDefaults: jest.fn(),
-          getSourceId: jest.fn(),
-          getFilters: jest.fn(),
-          getMaxPossibleNumValues: jest.fn(),
-          isTextBasedLanguage: jest.fn(() => false),
-          hasDefaultTimeField: jest.fn(() => true),
+          getOperationForColumnId: vi.fn(),
+          getVisualDefaults: vi.fn(),
+          getSourceId: vi.fn(),
+          getFilters: vi.fn(),
+          getMaxPossibleNumValues: vi.fn(),
+          isTextBasedLanguage: vi.fn(() => false),
+          hasDefaultTimeField: vi.fn(() => true),
         },
       };
       defaultParams[3] = {
@@ -697,13 +700,13 @@ describe('suggestion helpers', () => {
         '1': {
           getTableSpec: () => [],
           datasourceId: '',
-          getOperationForColumnId: jest.fn(),
-          getVisualDefaults: jest.fn(),
-          getSourceId: jest.fn(),
-          getFilters: jest.fn(),
-          getMaxPossibleNumValues: jest.fn(),
-          isTextBasedLanguage: jest.fn(() => false),
-          hasDefaultTimeField: jest.fn(() => true),
+          getOperationForColumnId: vi.fn(),
+          getVisualDefaults: vi.fn(),
+          getSourceId: vi.fn(),
+          getFilters: vi.fn(),
+          getMaxPossibleNumValues: vi.fn(),
+          isTextBasedLanguage: vi.fn(() => false),
+          hasDefaultTimeField: vi.fn(() => true),
         },
       };
       mockVisualization1.getSuggestions.mockReturnValue([]);

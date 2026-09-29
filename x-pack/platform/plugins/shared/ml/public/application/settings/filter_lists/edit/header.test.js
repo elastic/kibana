@@ -5,26 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '../../../test_utils/render_with_ml_context';
 
 import { EditFilterListHeader } from './header';
 
-jest.mock('../../../contexts/kibana', () => ({
-  useMlKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: jest.fn(),
-        getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/filter_lists'),
-      },
-    },
-  }),
-  useNavigateToPath: () => jest.fn(),
-}));
+vi.mock('../../../contexts/kibana', () => {
+      const mocked = {
+      useMlKibana: () => ({
+        services: {
+          application: {
+            navigateToApp: vi.fn(),
+            getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/filter_lists'),
+          },
+        },
+      }),
+      useNavigateToPath: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EditFilterListHeader', () => {
-  const updateNewFilterId = jest.fn(() => {});
-  const updateDescription = jest.fn(() => {});
+  const updateNewFilterId = vi.fn(() => {});
+  const updateDescription = vi.fn(() => {});
 
   const requiredProps = {
     updateNewFilterId,

@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { EuiComboBoxProps } from '@elastic/eui';
 import { AutocompleteSelector } from './autocomplete_selector';
 
-jest.mock('@kbn/react-field', () => ({
-  FieldIcon: ({ type }: { type: string }) => <span data-test-subj={`field-icon-${type}`} />,
-}));
+vi.mock('@kbn/react-field', () => {
+      const mocked = {
+      FieldIcon: ({ type }: { type: string }) => <span data-test-subj={`field-icon-${type}`} />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AutocompleteSelector', () => {
   const mockSuggestions = [
@@ -27,12 +32,12 @@ describe('AutocompleteSelector', () => {
 
   const defaultProps = {
     value: '',
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     suggestions: mockSuggestions,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Basic Rendering', () => {
@@ -81,7 +86,7 @@ describe('AutocompleteSelector', () => {
     });
 
     it('calls onChange when selecting a structured log field', async () => {
-      const mockOnChange = jest.fn();
+      const mockOnChange = vi.fn();
       render(<AutocompleteSelector {...defaultProps} onChange={mockOnChange} />);
 
       const toggleButton = screen.getByTestId('comboBoxToggleListButton');
@@ -95,7 +100,7 @@ describe('AutocompleteSelector', () => {
     });
 
     it('allows creating custom field paths for dynamic schemas', async () => {
-      const mockOnChange = jest.fn();
+      const mockOnChange = vi.fn();
       render(<AutocompleteSelector {...defaultProps} onChange={mockOnChange} />);
 
       const input = screen.getByTestId('comboBoxSearchInput');
@@ -108,7 +113,7 @@ describe('AutocompleteSelector', () => {
     });
 
     it('switches between different field types for different processors', async () => {
-      const mockOnChange = jest.fn();
+      const mockOnChange = vi.fn();
       render(<AutocompleteSelector {...defaultProps} onChange={mockOnChange} />);
 
       const toggleButton = screen.getByTestId('comboBoxToggleListButton');
@@ -302,8 +307,8 @@ describe('AutocompleteSelector', () => {
     });
 
     it('allows interaction with prepended checkbox while using combobox', async () => {
-      const handleCheckboxChange = jest.fn();
-      const handleComboboxChange = jest.fn();
+      const handleCheckboxChange = vi.fn();
+      const handleComboboxChange = vi.fn();
 
       const prependCheckbox = (
         <input

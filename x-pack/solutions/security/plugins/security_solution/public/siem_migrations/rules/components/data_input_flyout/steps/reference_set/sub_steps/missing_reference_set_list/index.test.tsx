@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../../../../../common/mock/test_providers';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
@@ -12,17 +15,17 @@ import { getRuleMigrationStatsMock } from '../../../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../../../common/siem_migrations/constants';
 import { useMissingReferenceSetsListStep } from '.';
 
-jest.mock('../../../../../../service/hooks/use_upsert_resources');
-const mockUseUpsertResources = useUpsertResources as jest.Mock;
+vi.mock('../../../../../../service/hooks/use_upsert_resources');
+const mockUseUpsertResources = useUpsertResources as Mock;
 
 describe('useMissingReferenceSetsListStep', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns step props', () => {
     mockUseUpsertResources.mockReturnValue({
-      upsertResources: jest.fn(),
+      upsertResources: vi.fn(),
       isLoading: false,
       error: null,
     });
@@ -32,8 +35,8 @@ describe('useMissingReferenceSetsListStep', () => {
       migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
       missingLookups: [],
       uploadedLookups: {},
-      addUploadedLookups: jest.fn(),
-      onCopied: jest.fn(),
+      addUploadedLookups: vi.fn(),
+      onCopied: vi.fn(),
     };
     const { result } = renderHook(() => useMissingReferenceSetsListStep(props), {
       wrapper: TestProviders,
@@ -48,7 +51,7 @@ describe('useMissingReferenceSetsListStep', () => {
 
   it('returns step props with `loading` status', () => {
     mockUseUpsertResources.mockReturnValue({
-      upsertResources: jest.fn(),
+      upsertResources: vi.fn(),
       isLoading: true,
       error: null,
     });
@@ -58,8 +61,8 @@ describe('useMissingReferenceSetsListStep', () => {
       migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
       missingLookups: [],
       uploadedLookups: {},
-      addUploadedLookups: jest.fn(),
-      onCopied: jest.fn(),
+      addUploadedLookups: vi.fn(),
+      onCopied: vi.fn(),
     };
     const { result } = renderHook(() => useMissingReferenceSetsListStep(props), {
       wrapper: TestProviders,
@@ -74,7 +77,7 @@ describe('useMissingReferenceSetsListStep', () => {
 
   it('returns step props with `danger` status', () => {
     mockUseUpsertResources.mockReturnValue({
-      upsertResources: jest.fn(),
+      upsertResources: vi.fn(),
       isLoading: false,
       error: new Error('Failed!'),
     });
@@ -84,8 +87,8 @@ describe('useMissingReferenceSetsListStep', () => {
       migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
       missingLookups: [],
       uploadedLookups: {},
-      addUploadedLookups: jest.fn(),
-      onCopied: jest.fn(),
+      addUploadedLookups: vi.fn(),
+      onCopied: vi.fn(),
     };
     const { result } = renderHook(() => useMissingReferenceSetsListStep(props), {
       wrapper: TestProviders,

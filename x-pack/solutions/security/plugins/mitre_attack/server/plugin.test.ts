@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { MitreEntity } from '@kbn/security-mitre-attack-common';
@@ -15,22 +17,28 @@ import { MitreAttackPlugin } from './plugin';
 import { MITRE_ATTACK_ENTITY_SO_TYPE } from '@kbn/security-mitre-attack-common';
 import { registerRoutes } from './routes';
 
-jest.mock('@kbn/security-mitre-attack-server', () => ({
-  loadMitreArtifact: jest.fn(),
-}));
+vi.mock('@kbn/security-mitre-attack-server', () => {
+      const mocked = {
+      loadMitreArtifact: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./routes', () => ({
-  registerRoutes: jest.fn(),
-}));
+vi.mock('./routes', () => {
+      const mocked = {
+      registerRoutes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockLoadMitreArtifact = jest.mocked(loadMitreArtifact);
-const mockRegisterRoutes = jest.mocked(registerRoutes);
+const mockLoadMitreArtifact = vi.mocked(loadMitreArtifact);
+const mockRegisterRoutes = vi.mocked(registerRoutes);
 
 const flushPromises = (): Promise<void> => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
 describe('MitreAttackPlugin', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('flag off (managedSourceEnabled: false)', () => {

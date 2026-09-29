@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -111,7 +113,7 @@ describe('StepExecutionTreeItemLabel', () => {
   });
 
   it('calls onClick when the label is clicked', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderWithIntl({ ...defaultProps, onClick });
     fireEvent.click(screen.getByTestId('workflowStepName'));
     expect(onClick).toHaveBeenCalledTimes(1);

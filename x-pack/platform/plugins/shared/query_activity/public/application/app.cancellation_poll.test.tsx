@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -23,12 +26,12 @@ const renderApp = () =>
 import { markStopRequestedTask } from '../lib/stop_requested_tasks_storage';
 import { CANCELLATION_POLL_INTERVAL_MS } from '../../common/constants';
 
-jest.mock('./app_context', () => ({
+vi.mock('./app_context', () => ({
   __esModule: true,
-  useQueryActivityAppContext: jest.fn(),
+  useQueryActivityAppContext: vi.fn(),
 }));
 
-const mockUseQueryActivityAppContext = useQueryActivityAppContext as jest.MockedFunction<
+const mockUseQueryActivityAppContext = useQueryActivityAppContext as MockedFunction<
   typeof useQueryActivityAppContext
 >;
 
@@ -50,22 +53,22 @@ const mockContext = (
 ): QueryActivityAppContextValue =>
   ({
     chrome: {
-      setBreadcrumbs: jest.fn(),
-      docTitle: { change: jest.fn() },
+      setBreadcrumbs: vi.fn(),
+      docTitle: { change: vi.fn() },
     } as any,
-    http: { basePath: { prepend: jest.fn((path: string) => path) } } as any,
+    http: { basePath: { prepend: vi.fn((path: string) => path) } } as any,
     notifications: {
       toasts: {
-        addSuccess: jest.fn(),
-        addDanger: jest.fn(),
+        addSuccess: vi.fn(),
+        addDanger: vi.fn(),
       },
     } as any,
     apiService: {
-      useLoadQueryActivity: jest.fn(),
-      cancelTask: jest.fn(),
-      fetchQueryActivity: jest.fn(),
+      useLoadQueryActivity: vi.fn(),
+      cancelTask: vi.fn(),
+      fetchQueryActivity: vi.fn(),
     } as any,
-    url: { locators: { get: jest.fn(() => undefined) } } as any,
+    url: { locators: { get: vi.fn(() => undefined) } } as any,
     docLinks: {
       links: {
         management: {
@@ -84,30 +87,30 @@ const mockContext = (
 
 describe('QueryActivityApp - cancellation polling', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
     window.localStorage.clear();
   });
 
   afterEach(() => {
     cleanup();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('does not poll when there are no pending cancellations', async () => {
-    const fetchQueryActivity = jest.fn().mockResolvedValue({ data: { queries: [] } });
-    const resendRequest = jest.fn();
+    const fetchQueryActivity = vi.fn().mockResolvedValue({ data: { queries: [] } });
+    const resendRequest = vi.fn();
     const query = createQuery({ taskId: 'node1:no-poll' });
 
     const context = mockContext({
       apiService: {
-        useLoadQueryActivity: jest.fn(() => ({
+        useLoadQueryActivity: vi.fn(() => ({
           data: { queries: [query] },
           isLoading: false,
           error: null,
           resendRequest,
         })),
-        cancelTask: jest.fn(),
+        cancelTask: vi.fn(),
         fetchQueryActivity,
       } as any,
     });
@@ -117,7 +120,7 @@ describe('QueryActivityApp - cancellation polling', () => {
     await screen.findByText(query.taskId);
 
     await act(async () => {
-      jest.advanceTimersByTime(CANCELLATION_POLL_INTERVAL_MS * 3);
+      vi.advanceTimersByTime(CANCELLATION_POLL_INTERVAL_MS * 3);
     });
 
     expect(fetchQueryActivity).not.toHaveBeenCalled();
@@ -128,19 +131,19 @@ describe('QueryActivityApp - cancellation polling', () => {
     const taskId = 'node1:from-storage';
     markStopRequestedTask(taskId);
 
-    const fetchQueryActivity = jest
+    const fetchQueryActivity = vi
       .fn()
       .mockResolvedValue({ data: { queries: [createQuery({ taskId })] } });
 
     const context = mockContext({
       apiService: {
-        useLoadQueryActivity: jest.fn(() => ({
+        useLoadQueryActivity: vi.fn(() => ({
           data: { queries: [createQuery({ taskId })] },
           isLoading: false,
           error: null,
-          resendRequest: jest.fn(),
+          resendRequest: vi.fn(),
         })),
-        cancelTask: jest.fn(),
+        cancelTask: vi.fn(),
         fetchQueryActivity,
       } as any,
     });
@@ -150,7 +153,7 @@ describe('QueryActivityApp - cancellation polling', () => {
     await screen.findByText(taskId);
 
     await act(async () => {
-      jest.advanceTimersByTime(CANCELLATION_POLL_INTERVAL_MS);
+      vi.advanceTimersByTime(CANCELLATION_POLL_INTERVAL_MS);
     });
 
     expect(fetchQueryActivity).toHaveBeenCalledTimes(1);
@@ -160,19 +163,19 @@ describe('QueryActivityApp - cancellation polling', () => {
     const taskId = 'node1:repeat-poll';
     markStopRequestedTask(taskId);
 
-    const fetchQueryActivity = jest
+    const fetchQueryActivity = vi
       .fn()
       .mockResolvedValue({ data: { queries: [createQuery({ taskId })] } });
 
     const context = mockContext({
       apiService: {
-        useLoadQueryActivity: jest.fn(() => ({
+        useLoadQueryActivity: vi.fn(() => ({
           data: { queries: [createQuery({ taskId })] },
           isLoading: false,
           error: null,
-          resendRequest: jest.fn(),
+          resendRequest: vi.fn(),
         })),
-        cancelTask: jest.fn(),
+        cancelTask: vi.fn(),
         fetchQueryActivity,
       } as any,
     });
@@ -182,7 +185,7 @@ describe('QueryActivityApp - cancellation polling', () => {
     await screen.findByText(taskId);
 
     await act(async () => {
-      jest.advanceTimersByTime(CANCELLATION_POLL_INTERVAL_MS * 3);
+      vi.advanceTimersByTime(CANCELLATION_POLL_INTERVAL_MS * 3);
     });
 
     expect(fetchQueryActivity).toHaveBeenCalledTimes(3);
@@ -193,18 +196,18 @@ describe('QueryActivityApp - cancellation polling', () => {
     markStopRequestedTask(taskId);
 
     // Poll returns an empty list — the task is gone
-    const fetchQueryActivity = jest.fn().mockResolvedValue({ data: { queries: [] } });
-    const resendRequest = jest.fn();
+    const fetchQueryActivity = vi.fn().mockResolvedValue({ data: { queries: [] } });
+    const resendRequest = vi.fn();
 
     const context = mockContext({
       apiService: {
-        useLoadQueryActivity: jest.fn(() => ({
+        useLoadQueryActivity: vi.fn(() => ({
           data: { queries: [createQuery({ taskId })] },
           isLoading: false,
           error: null,
           resendRequest,
         })),
-        cancelTask: jest.fn(),
+        cancelTask: vi.fn(),
         fetchQueryActivity,
       } as any,
     });
@@ -214,7 +217,7 @@ describe('QueryActivityApp - cancellation polling', () => {
     await screen.findByText(taskId);
 
     await act(async () => {
-      jest.advanceTimersByTime(CANCELLATION_POLL_INTERVAL_MS);
+      vi.advanceTimersByTime(CANCELLATION_POLL_INTERVAL_MS);
     });
 
     await waitFor(() => expect(resendRequest).toHaveBeenCalledTimes(1));
@@ -225,18 +228,18 @@ describe('QueryActivityApp - cancellation polling', () => {
     markStopRequestedTask(taskId);
 
     // Task is gone from the very first poll
-    const fetchQueryActivity = jest.fn().mockResolvedValue({ data: { queries: [] } });
-    const resendRequest = jest.fn();
+    const fetchQueryActivity = vi.fn().mockResolvedValue({ data: { queries: [] } });
+    const resendRequest = vi.fn();
 
     const context = mockContext({
       apiService: {
-        useLoadQueryActivity: jest.fn(() => ({
+        useLoadQueryActivity: vi.fn(() => ({
           data: { queries: [createQuery({ taskId })] },
           isLoading: false,
           error: null,
           resendRequest,
         })),
-        cancelTask: jest.fn(),
+        cancelTask: vi.fn(),
         fetchQueryActivity,
       } as any,
     });
@@ -247,7 +250,7 @@ describe('QueryActivityApp - cancellation polling', () => {
 
     // First tick — task confirmed gone, pendingCancellations becomes empty
     await act(async () => {
-      jest.advanceTimersByTime(CANCELLATION_POLL_INTERVAL_MS);
+      vi.advanceTimersByTime(CANCELLATION_POLL_INTERVAL_MS);
     });
 
     await waitFor(() => expect(resendRequest).toHaveBeenCalledTimes(1));
@@ -255,29 +258,29 @@ describe('QueryActivityApp - cancellation polling', () => {
 
     // Subsequent ticks — no more polling since pendingCancellations is now empty
     await act(async () => {
-      jest.advanceTimersByTime(CANCELLATION_POLL_INTERVAL_MS * 3);
+      vi.advanceTimersByTime(CANCELLATION_POLL_INTERVAL_MS * 3);
     });
 
     expect(fetchQueryActivity).toHaveBeenCalledTimes(1);
   });
 
   it('starts polling after the user successfully cancels a query', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     const taskId = 'node1:cancel-starts-poll';
 
-    const fetchQueryActivity = jest
+    const fetchQueryActivity = vi
       .fn()
       .mockResolvedValue({ data: { queries: [createQuery({ taskId })] } });
 
     const context = mockContext({
       apiService: {
-        useLoadQueryActivity: jest.fn(() => ({
+        useLoadQueryActivity: vi.fn(() => ({
           data: { queries: [createQuery({ taskId })] },
           isLoading: false,
           error: null,
-          resendRequest: jest.fn(),
+          resendRequest: vi.fn(),
         })),
-        cancelTask: jest.fn().mockResolvedValue({ error: undefined }),
+        cancelTask: vi.fn().mockResolvedValue({ error: undefined }),
         fetchQueryActivity,
       } as any,
     });
@@ -296,7 +299,7 @@ describe('QueryActivityApp - cancellation polling', () => {
     const callsBeforeInterval = fetchQueryActivity.mock.calls.length;
 
     await act(async () => {
-      jest.advanceTimersByTime(CANCELLATION_POLL_INTERVAL_MS);
+      vi.advanceTimersByTime(CANCELLATION_POLL_INTERVAL_MS);
     });
 
     // After one interval, polling should have fired at least once

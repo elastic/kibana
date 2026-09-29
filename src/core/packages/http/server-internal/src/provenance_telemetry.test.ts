@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type {
   KibanaRequest,
   RouteMethod,
@@ -45,9 +48,9 @@ const forgeRequest = ({
   kibanaRouteOptions: KibanaRouteOptions;
 }>): KibanaRequest => mockRouter.createKibanaRequest({ headers, path, method, kibanaRouteOptions });
 
-const createToolkit = (): jest.Mocked<OnPostAuthToolkit> => ({
-  next: jest.fn().mockReturnValue('next'),
-  authzResultNext: jest.fn(),
+const createToolkit = (): Mocked<OnPostAuthToolkit> => ({
+  next: vi.fn().mockReturnValue('next'),
+  authzResultNext: vi.fn(),
 });
 
 const createConfig = (partial?: { disableProtection?: boolean; allowlist?: string[] }) => ({
@@ -162,10 +165,10 @@ describe('isLikelyModernBrowser', () => {
 describe('createProvenanceTelemetryPostAuthHandler', () => {
   const responseFactory = mockRouter.createResponseFactory();
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('skips safe methods without counting', () => {
-    const incrementCounter = jest.fn();
+    const incrementCounter = vi.fn();
     const toolkit = createToolkit();
     const handler = createProvenanceTelemetryPostAuthHandler(createConfig, incrementCounter);
 
@@ -176,7 +179,7 @@ describe('createProvenanceTelemetryPostAuthHandler', () => {
   });
 
   it('emits one counter per dimension for a state-changing request and never blocks', () => {
-    const incrementCounter = jest.fn();
+    const incrementCounter = vi.fn();
     const toolkit = createToolkit();
     const handler = createProvenanceTelemetryPostAuthHandler(createConfig, incrementCounter);
 
@@ -213,7 +216,7 @@ describe('createProvenanceTelemetryPostAuthHandler', () => {
   });
 
   it('counts the gap bucket for a browser request missing provenance headers', () => {
-    const incrementCounter = jest.fn();
+    const incrementCounter = vi.fn();
     const toolkit = createToolkit();
     const handler = createProvenanceTelemetryPostAuthHandler(createConfig, incrementCounter);
 
@@ -237,7 +240,7 @@ describe('createProvenanceTelemetryPostAuthHandler', () => {
   });
 
   it('slices counts by HTTP method and public vs internal route access', () => {
-    const incrementCounter = jest.fn();
+    const incrementCounter = vi.fn();
     const toolkit = createToolkit();
     const handler = createProvenanceTelemetryPostAuthHandler(createConfig, incrementCounter);
 
@@ -256,7 +259,7 @@ describe('createProvenanceTelemetryPostAuthHandler', () => {
   });
 
   it('mirrors enforcement scope: does not count when protection is disabled', () => {
-    const incrementCounter = jest.fn();
+    const incrementCounter = vi.fn();
     const toolkit = createToolkit();
     const handler = createProvenanceTelemetryPostAuthHandler(
       () => createConfig({ disableProtection: true }),
@@ -270,7 +273,7 @@ describe('createProvenanceTelemetryPostAuthHandler', () => {
   });
 
   it('mirrors enforcement scope: does not count allowlisted paths or xsrf-exempt routes', () => {
-    const incrementCounter = jest.fn();
+    const incrementCounter = vi.fn();
     const toolkit = createToolkit();
 
     const allowlistHandler = createProvenanceTelemetryPostAuthHandler(
@@ -290,7 +293,7 @@ describe('createProvenanceTelemetryPostAuthHandler', () => {
   });
 
   it('does not count when config is not yet available', () => {
-    const incrementCounter = jest.fn();
+    const incrementCounter = vi.fn();
     const toolkit = createToolkit();
     const handler = createProvenanceTelemetryPostAuthHandler(() => undefined, incrementCounter);
 

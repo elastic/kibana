@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-jest.mock('@kbn/mapbox-gl', () => ({}));
+import { vi } from 'vitest';
+
+vi.mock('@kbn/mapbox-gl', () => {
+      const mocked = {};
+      return { ...mocked, default: mocked };
+    });

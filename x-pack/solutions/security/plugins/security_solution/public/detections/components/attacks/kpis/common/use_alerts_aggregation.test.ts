@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { Filter, Query } from '@kbn/es-query';
 import type { estypes } from '@elastic/elasticsearch';
@@ -16,32 +19,32 @@ import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/aler
 import { fetchQueryUnifiedAlerts } from '../../../../containers/detection_engine/alerts/api';
 import { useInspectButton } from '../../../alerts_kpis/common/hooks';
 
-jest.mock('../../../../containers/detection_engine/alerts/use_query');
-jest.mock('../../../../../common/containers/use_global_time');
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../alerts_kpis/common/hooks');
+vi.mock('../../../../containers/detection_engine/alerts/use_query');
+vi.mock('../../../../../common/containers/use_global_time');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../alerts_kpis/common/hooks');
 
 describe('useAlertsAggregation', () => {
   const mockFrom = 'now-15m';
   const mockTo = 'now';
   const mockUiSettings = {
-    get: jest.fn().mockReturnValue(true),
+    get: vi.fn().mockReturnValue(true),
   };
-  const mockRefetch = jest.fn();
-  const mockSetAlertsQuery = jest.fn();
-  const mockDeleteQuery = jest.fn();
-  const mockSetGlobalQuery = jest.fn();
+  const mockRefetch = vi.fn();
+  const mockSetAlertsQuery = vi.fn();
+  const mockDeleteQuery = vi.fn();
+  const mockSetGlobalQuery = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGlobalTime as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useGlobalTime as Mock).mockReturnValue({
       from: mockFrom,
       to: mockTo,
       deleteQuery: mockDeleteQuery,
       setQuery: mockSetGlobalQuery,
     });
-    (useKibana as jest.Mock).mockReturnValue({ services: { uiSettings: mockUiSettings } });
-    (useQueryAlerts as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({ services: { uiSettings: mockUiSettings } });
+    (useQueryAlerts as Mock).mockReturnValue({
       data: undefined,
       loading: false,
       refetch: mockRefetch,
@@ -115,7 +118,7 @@ describe('useAlertsAggregation', () => {
 
   it('returns data, loading, and refetch from useQueryAlerts', () => {
     const mockData = { aggregations: { test: { value: 1 } } };
-    (useQueryAlerts as jest.Mock).mockReturnValue({
+    (useQueryAlerts as Mock).mockReturnValue({
       data: mockData,
       loading: true,
       refetch: mockRefetch,

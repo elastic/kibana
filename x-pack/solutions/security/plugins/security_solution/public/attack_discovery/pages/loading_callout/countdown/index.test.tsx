@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -16,15 +18,15 @@ import { APPROXIMATE_TIME_REMAINING } from './translations';
 
 describe('Countdown', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('renders the expected prefix', () => {
@@ -49,7 +51,7 @@ describe('Countdown', () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     expect(screen.getByTestId('timerText')).toHaveTextContent('00:59');

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
@@ -19,14 +21,14 @@ import {
   UserActionTypes,
 } from '../../../../common/types/domain';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/navigation/hooks');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/navigation/hooks');
 
 describe('createCustomFieldsUserActionBuilder ', () => {
   const builderArgs = getMockBuilderArgs();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly when a custom field is updated', () => {

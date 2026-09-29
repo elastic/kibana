@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -12,9 +15,9 @@ import { InferenceConnectorType } from '@kbn/inference-common';
 import { getConnectorList } from './get_connector_list';
 import { getInferenceEndpoints } from './get_inference_endpoints';
 
-jest.mock('./get_inference_endpoints');
+vi.mock('./get_inference_endpoints');
 
-const getInferenceEndpointsMock = getInferenceEndpoints as jest.MockedFn<
+const getInferenceEndpointsMock = getInferenceEndpoints as MockedFunction<
   typeof getInferenceEndpoints
 >;
 
@@ -35,7 +38,7 @@ describe('getConnectorList', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns stack connectors from the actions plugin', async () => {

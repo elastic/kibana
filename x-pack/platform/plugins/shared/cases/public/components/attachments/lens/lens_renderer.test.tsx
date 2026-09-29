@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -14,12 +16,12 @@ import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react
 import { renderWithTestingProviders } from '../../../common/mock';
 
 describe('LensRenderer', () => {
-  const mockEmbeddableComponent = jest
+  const mockEmbeddableComponent = vi
     .fn()
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the lens visualization correctly', () => {

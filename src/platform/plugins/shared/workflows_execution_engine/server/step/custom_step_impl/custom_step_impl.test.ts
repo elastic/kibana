@@ -7,64 +7,70 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedClass } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import { CustomStepImpl } from './custom_step_impl';
 import { OneShotStepDefinitionHandler, PollPolicyStepHandler } from './step_definition_handlers';
 
-const mockOneShotRun = jest.fn();
-const mockOneShotOnCancel = jest.fn();
-const mockPollRun = jest.fn();
-const mockPollOnCancel = jest.fn();
+const mockOneShotRun = vi.fn();
+const mockOneShotOnCancel = vi.fn();
+const mockPollRun = vi.fn();
+const mockPollOnCancel = vi.fn();
 
-jest.mock('./step_definition_handlers', () => ({
-  OneShotStepDefinitionHandler: jest.fn().mockImplementation(() => ({
-    run: mockOneShotRun,
-    onCancel: mockOneShotOnCancel,
-  })),
-  PollPolicyStepHandler: jest.fn().mockImplementation(() => ({
-    run: mockPollRun,
-    onCancel: mockPollOnCancel,
-  })),
-}));
+vi.mock('./step_definition_handlers', () => {
+      const mocked = {
+      OneShotStepDefinitionHandler: vi.fn().mockImplementation(() => ({
+        run: mockOneShotRun,
+        onCancel: mockOneShotOnCancel,
+      })),
+      PollPolicyStepHandler: vi.fn().mockImplementation(() => ({
+        run: mockPollRun,
+        onCancel: mockPollOnCancel,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MockedOneShotStepDefinitionHandler = OneShotStepDefinitionHandler as jest.MockedClass<
+const MockedOneShotStepDefinitionHandler = OneShotStepDefinitionHandler as MockedClass<
   typeof OneShotStepDefinitionHandler
 >;
-const MockedPollPolicyStepHandler = PollPolicyStepHandler as jest.MockedClass<
+const MockedPollPolicyStepHandler = PollPolicyStepHandler as MockedClass<
   typeof PollPolicyStepHandler
 >;
 
 const createMocks = () => {
   const stepExecutionRuntime = {
     contextManager: {
-      renderValueAccordingToContext: jest.fn((v: unknown) => v),
-      getContext: jest.fn(() => ({})),
-      getEsClientAsUser: jest.fn(() => ({})),
-      getFakeRequest: jest.fn(() => null),
+      renderValueAccordingToContext: vi.fn((v: unknown) => v),
+      getContext: vi.fn(() => ({})),
+      getEsClientAsUser: vi.fn(() => ({})),
+      getFakeRequest: vi.fn(() => null),
     },
     abortController: new AbortController(),
     node: { configuration: { with: { key: 'value' } } },
-    startStep: jest.fn(),
-    flushEventLogs: jest.fn().mockResolvedValue(undefined),
-    finishStep: jest.fn(),
-    failStep: jest.fn(),
-    setInput: jest.fn(),
+    startStep: vi.fn(),
+    flushEventLogs: vi.fn().mockResolvedValue(undefined),
+    finishStep: vi.fn(),
+    failStep: vi.fn(),
+    setInput: vi.fn(),
     stepExecutionId: 'step-exec-1',
     workflowExecution: { workflowDefinition: {} },
-    getCurrentStepState: jest.fn(),
-    setCurrentStepState: jest.fn(),
-    enterWaitUntil: jest.fn(),
+    getCurrentStepState: vi.fn(),
+    setCurrentStepState: vi.fn(),
+    enterWaitUntil: vi.fn(),
   };
 
   return {
     stepExecutionRuntime,
     connectorExecutor: {},
-    workflowRuntime: { navigateToNextNode: jest.fn() },
+    workflowRuntime: { navigateToNextNode: vi.fn() },
     workflowLogger: {
-      logInfo: jest.fn(),
-      logError: jest.fn(),
-      logDebug: jest.fn(),
-      logWarn: jest.fn(),
+      logInfo: vi.fn(),
+      logError: vi.fn(),
+      logDebug: vi.fn(),
+      logWarn: vi.fn(),
     },
   };
 };
@@ -101,7 +107,7 @@ const buildImpl = (
 
 describe('CustomStepImpl', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockOneShotRun.mockReset();
     mockOneShotOnCancel.mockReset();
     mockPollRun.mockReset();
@@ -111,7 +117,7 @@ describe('CustomStepImpl', () => {
   describe('resolveStepHandler', () => {
     it('constructs OneShotStepDefinitionHandler for handler definitions', () => {
       const mocks = createMocks();
-      const stepDefinition = { handler: jest.fn() };
+      const stepDefinition = { handler: vi.fn() };
 
       buildImpl(stepDefinition, mocks);
 
@@ -128,7 +134,7 @@ describe('CustomStepImpl', () => {
     it('constructs PollPolicyStepHandler for poll-only definitions', () => {
       const mocks = createMocks();
       const stepDefinition = {
-        poll: jest.fn(),
+        poll: vi.fn(),
         policy: { strategy: 'fixed', intervalMs: 1000 },
       };
 
@@ -147,8 +153,8 @@ describe('CustomStepImpl', () => {
     it('constructs PollPolicyStepHandler for start + poll definitions', () => {
       const mocks = createMocks();
       const stepDefinition = {
-        start: jest.fn(),
-        poll: jest.fn(),
+        start: vi.fn(),
+        poll: vi.fn(),
         policy: { strategy: 'fixed', intervalMs: 1000 },
       };
 
@@ -161,7 +167,7 @@ describe('CustomStepImpl', () => {
     it('throws when the definition has no handler or poll lifecycle', () => {
       const mocks = createMocks();
 
-      expect(() => buildImpl({ start: jest.fn() }, mocks)).toThrow(/Unknown step definition type/);
+      expect(() => buildImpl({ start: vi.fn() }, mocks)).toThrow(/Unknown step definition type/);
     });
   });
 
@@ -170,7 +176,7 @@ describe('CustomStepImpl', () => {
       const runResult = { input: { key: 'value' }, output: { ok: true }, error: undefined };
       mockOneShotRun.mockResolvedValue(runResult);
 
-      const impl = buildImpl({ handler: jest.fn() });
+      const impl = buildImpl({ handler: vi.fn() });
       const result = await (impl as any)._run({ key: 'value' });
 
       expect(mockOneShotRun).toHaveBeenCalledTimes(1);
@@ -188,7 +194,7 @@ describe('CustomStepImpl', () => {
       mockPollRun.mockResolvedValue(runResult);
 
       const impl = buildImpl({
-        poll: jest.fn(),
+        poll: vi.fn(),
         policy: { strategy: 'fixed', intervalMs: 1000 },
       });
       const result = await (impl as any)._run({});
@@ -202,7 +208,7 @@ describe('CustomStepImpl', () => {
     it('returns ExecutionError when the delegated handler run throws', async () => {
       mockOneShotRun.mockRejectedValue(new Error('handler blew up'));
 
-      const impl = buildImpl({ handler: jest.fn() });
+      const impl = buildImpl({ handler: vi.fn() });
       const result = await (impl as any)._run({ key: 'value' });
 
       expect(result.input).toEqual({ key: 'value' });
@@ -217,12 +223,12 @@ describe('CustomStepImpl', () => {
       mockOneShotOnCancel.mockResolvedValue(undefined);
       const mocks = createMocks();
       (
-        mocks.stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+        mocks.stepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock
       ).mockReturnValue({
         rendered: true,
       });
 
-      const impl = buildImpl({ handler: jest.fn() }, mocks);
+      const impl = buildImpl({ handler: vi.fn() }, mocks);
       await impl.onCancel();
 
       expect(mockOneShotOnCancel).toHaveBeenCalledTimes(1);
@@ -238,7 +244,7 @@ describe('CustomStepImpl', () => {
       mockPollOnCancel.mockResolvedValue(undefined);
 
       const impl = buildImpl({
-        poll: jest.fn(),
+        poll: vi.fn(),
         policy: { strategy: 'fixed', intervalMs: 1000 },
       });
       await impl.onCancel();
@@ -262,7 +268,7 @@ describe('CustomStepImpl', () => {
         'create-conversation': true,
       };
       (
-        mocks.stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+        mocks.stepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock
       ).mockReturnValueOnce(renderedConfig);
 
       mockOneShotRun.mockResolvedValue({ input: {}, output: { result: 42 }, error: undefined });
@@ -273,7 +279,7 @@ describe('CustomStepImpl', () => {
           'connector-id': z.string().optional(),
           'create-conversation': z.boolean().optional(),
         }),
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       const node: TestNode = {
@@ -316,7 +322,7 @@ describe('CustomStepImpl', () => {
         configSchema: z.object({
           source: z.unknown(),
         }),
-        handler: jest.fn(),
+        handler: vi.fn(),
       };
 
       const node: TestNode = {
@@ -360,7 +366,7 @@ describe('CustomStepImpl', () => {
         configuration: { with: { foo: 'bar' }, 'max-step-size': undefined },
       };
 
-      const impl = buildImpl({ handler: jest.fn() }, mocks, node);
+      const impl = buildImpl({ handler: vi.fn() }, mocks, node);
       const input = impl.getInput();
 
       expect(input).toEqual({ foo: 'bar' });

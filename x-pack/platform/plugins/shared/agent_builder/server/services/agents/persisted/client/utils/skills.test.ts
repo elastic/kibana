@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { validateSkillIds } from './skills';
 import type { SkillRegistry } from '../../../../skills/skill_registry';
 
 const makeRegistry = (knownIds: string[]): SkillRegistry => {
   const set = new Set(knownIds);
   return {
-    has: jest.fn(),
-    bulkGet: jest.fn(async (ids: string[]) => {
+    has: vi.fn(),
+    bulkGet: vi.fn(async (ids: string[]) => {
       const map = new Map();
       for (const id of ids) {
         if (set.has(id)) map.set(id, { id });

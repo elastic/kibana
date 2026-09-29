@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import type { FindAttackDiscoverySchedulesResponse } from '@kbn/discoveries-schemas';
 
 import { useFindWorkflowSchedules } from './use_find_workflow_schedules';
@@ -13,10 +16,10 @@ import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.moc
 import { renderQuery } from '../../../../../management/hooks/test_utils';
 import { findWorkflowSchedules } from '../api/internal';
 
-jest.mock('../api/internal');
-jest.mock('../../../../../common/hooks/use_app_toasts');
+vi.mock('../api/internal');
+vi.mock('../../../../../common/hooks/use_app_toasts');
 
-const findWorkflowSchedulesMock = findWorkflowSchedules as jest.MockedFunction<
+const findWorkflowSchedulesMock = findWorkflowSchedules as MockedFunction<
   typeof findWorkflowSchedules
 >;
 
@@ -49,13 +52,13 @@ const mockFindResponse: FindAttackDiscoverySchedulesResponse = {
 };
 
 describe('useFindWorkflowSchedules', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
 
     findWorkflowSchedulesMock.mockResolvedValue(mockFindResponse);
   });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useColumns } from './use_columns';
@@ -15,23 +18,23 @@ import {
   createStatusColumn,
 } from './columns';
 
-jest.mock('./columns');
+vi.mock('./columns');
 
-const mockCreateActionsColumn = createActionsColumn as jest.MockedFunction<
+const mockCreateActionsColumn = createActionsColumn as MockedFunction<
   typeof createActionsColumn
 >;
-const mockCreateEnableColumn = createEnableColumn as jest.MockedFunction<typeof createEnableColumn>;
-const mockCreateNameColumn = createNameColumn as jest.MockedFunction<typeof createNameColumn>;
-const mockCreateStatusColumn = createStatusColumn as jest.MockedFunction<typeof createStatusColumn>;
+const mockCreateEnableColumn = createEnableColumn as MockedFunction<typeof createEnableColumn>;
+const mockCreateNameColumn = createNameColumn as MockedFunction<typeof createNameColumn>;
+const mockCreateStatusColumn = createStatusColumn as MockedFunction<typeof createStatusColumn>;
 
-const openScheduleDetails = jest.fn();
-const enableSchedule = jest.fn();
-const disableSchedule = jest.fn();
-const requestDeleteSchedule = jest.fn();
+const openScheduleDetails = vi.fn();
+const enableSchedule = vi.fn();
+const disableSchedule = vi.fn();
+const requestDeleteSchedule = vi.fn();
 
 describe('useColumns', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     renderHook(() =>
       useColumns({

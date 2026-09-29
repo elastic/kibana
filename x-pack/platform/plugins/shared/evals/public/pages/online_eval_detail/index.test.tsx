@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -22,48 +24,57 @@ import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { useEvalsTraceFetcher } from '../../hooks/use_evals_api';
 import { useModelConnectors } from '../../hooks/use_model_connectors';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_online_eval_workflows');
-jest.mock('../../hooks/use_evals_permissions');
-jest.mock('../../hooks/use_evals_api');
-jest.mock('../../hooks/use_model_connectors');
+vi.mock('../../hooks/use_online_eval_workflows');
+vi.mock('../../hooks/use_evals_permissions');
+vi.mock('../../hooks/use_evals_api');
+vi.mock('../../hooks/use_model_connectors');
 
-jest.mock('@kbn/lens-embeddable-utils', () => ({
-  LensConfigBuilder: jest.fn().mockImplementation(() => ({
-    fromAPIFormat: (config: unknown) => config,
-  })),
-}));
+vi.mock('@kbn/lens-embeddable-utils', () => {
+      const mocked = {
+      LensConfigBuilder: vi.fn().mockImplementation(() => ({
+        fromAPIFormat: (config: unknown) => config,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/llm-trace-waterfall', () => ({
-  TraceWaterfall: ({ traceId }: { traceId: string }) => (
-    <div data-test-subj="mockTraceWaterfall">{`Trace waterfall ${traceId}`}</div>
-  ),
-  useTraceSpans: () => ({
-    spans: [],
-    durationMs: 0,
-    isLoading: false,
-    error: undefined,
-  }),
-}));
+vi.mock('@kbn/llm-trace-waterfall', () => {
+      const mocked = {
+      TraceWaterfall: ({ traceId }: { traceId: string }) => (
+        <div data-test-subj="mockTraceWaterfall">{`Trace waterfall ${traceId}`}</div>
+      ),
+      useTraceSpans: () => ({
+        spans: [],
+        durationMs: 0,
+        isLoading: false,
+        error: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseKibana = jest.mocked(useKibana);
-const mockedUseOnlineEvalWorkflow = jest.mocked(useOnlineEvalWorkflow);
-const mockedUseToggleOnlineEvalWorkflow = jest.mocked(useToggleOnlineEvalWorkflow);
-const mockedUseDeleteOnlineEvalWorkflow = jest.mocked(useDeleteOnlineEvalWorkflow);
-const mockedUseUpdateOnlineEvalWorkflow = jest.mocked(useUpdateOnlineEvalWorkflow);
-const mockedUseEvalsPermissions = jest.mocked(useEvalsPermissions);
-const mockedUseEvalsTraceFetcher = jest.mocked(useEvalsTraceFetcher);
-const mockedUseModelConnectors = jest.mocked(useModelConnectors);
+const mockedUseKibana = vi.mocked(useKibana);
+const mockedUseOnlineEvalWorkflow = vi.mocked(useOnlineEvalWorkflow);
+const mockedUseToggleOnlineEvalWorkflow = vi.mocked(useToggleOnlineEvalWorkflow);
+const mockedUseDeleteOnlineEvalWorkflow = vi.mocked(useDeleteOnlineEvalWorkflow);
+const mockedUseUpdateOnlineEvalWorkflow = vi.mocked(useUpdateOnlineEvalWorkflow);
+const mockedUseEvalsPermissions = vi.mocked(useEvalsPermissions);
+const mockedUseEvalsTraceFetcher = vi.mocked(useEvalsTraceFetcher);
+const mockedUseModelConnectors = vi.mocked(useModelConnectors);
 
-const lensEmbeddableComponent = jest.fn((props: { attributes?: unknown }) => (
+const lensEmbeddableComponent = vi.fn((props: { attributes?: unknown }) => (
   <div data-test-subj="mockLensEmbeddable">{JSON.stringify(props.attributes)}</div>
 ));
-const httpGet = jest.fn();
-const dataViewsCreate = jest.fn();
-const updateMutateAsync = jest.fn();
+const httpGet = vi.fn();
+const dataViewsCreate = vi.fn();
+const updateMutateAsync = vi.fn();
 
 const parsedConfig = {
   name: 'quality monitor',
@@ -99,7 +110,7 @@ describe('OnlineEvalDetailPage', () => {
     } as unknown as ReturnType<typeof useKibana>);
 
     mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true });
-    mockedUseEvalsTraceFetcher.mockReturnValue(jest.fn());
+    mockedUseEvalsTraceFetcher.mockReturnValue(vi.fn());
     mockedUseOnlineEvalWorkflow.mockReturnValue({
       data: {
         id: 'workflow-1',
@@ -112,11 +123,11 @@ describe('OnlineEvalDetailPage', () => {
       error: null,
     } as unknown as ReturnType<typeof useOnlineEvalWorkflow>);
     mockedUseToggleOnlineEvalWorkflow.mockReturnValue({
-      mutate: jest.fn(),
+      mutate: vi.fn(),
       isLoading: false,
     } as unknown as ReturnType<typeof useToggleOnlineEvalWorkflow>);
     mockedUseDeleteOnlineEvalWorkflow.mockReturnValue({
-      mutate: jest.fn(),
+      mutate: vi.fn(),
       isLoading: false,
     } as unknown as ReturnType<typeof useDeleteOnlineEvalWorkflow>);
     mockedUseUpdateOnlineEvalWorkflow.mockReturnValue({

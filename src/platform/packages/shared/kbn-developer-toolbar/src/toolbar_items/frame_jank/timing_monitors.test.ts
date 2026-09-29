@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { INPMonitor, type INPInfo, type PerformanceEventTiming } from './inp_monitor';
 import { LongTaskMonitor, type LongTaskInfo } from './long_task_monitor';
 
@@ -101,7 +103,7 @@ describe('LongTaskMonitor', () => {
   let snapshots: LongTaskInfo[];
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     installObserver();
     snapshots = [];
     monitor = new LongTaskMonitor();
@@ -111,8 +113,8 @@ describe('LongTaskMonitor', () => {
 
   afterEach(() => {
     monitor.destroy();
-    jest.useRealTimers();
-    jest.restoreAllMocks();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
     restoreObserver(originalObserver);
   });
 
@@ -124,9 +126,9 @@ describe('LongTaskMonitor', () => {
       worstTaskDuration: 300,
     });
 
-    jest.advanceTimersByTime(10_000);
+    vi.advanceTimersByTime(10_000);
     deliver([timingEntry(100), timingEntry(80)]);
-    jest.advanceTimersByTime(20_000);
+    vi.advanceTimersByTime(20_000);
     expect(snapshots.at(-1)).toMatchObject({
       totalBlockingTime: 80,
       tasksInLast30Seconds: 1,
@@ -135,7 +137,7 @@ describe('LongTaskMonitor', () => {
 
     const publicationsBeforeStop = snapshots.length;
     monitor.stopMonitoring();
-    jest.advanceTimersByTime(31_000);
+    vi.advanceTimersByTime(31_000);
     expect(snapshots).toHaveLength(publicationsBeforeStop);
 
     monitor.startMonitoring();
@@ -144,12 +146,12 @@ describe('LongTaskMonitor', () => {
       tasksInLast30Seconds: 0,
       worstTaskDuration: 0,
     });
-    expect(jest.getTimerCount()).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
   });
 
   it('ignores tasks that started before monitoring', () => {
     monitor.stopMonitoring();
-    jest.advanceTimersByTime(5_000);
+    vi.advanceTimersByTime(5_000);
     monitor.startMonitoring();
     deliver([timingEntry(400, 1_000)]);
     expect(snapshots.at(-1)?.tasksInLast30Seconds).toBe(0);
@@ -165,7 +167,7 @@ describe('INPMonitor', () => {
   let snapshots: INPInfo[];
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     installObserver();
     snapshots = [];
     monitor = new INPMonitor();
@@ -175,16 +177,16 @@ describe('INPMonitor', () => {
 
   afterEach(() => {
     monitor.destroy();
-    jest.useRealTimers();
-    jest.restoreAllMocks();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
     restoreObserver(originalObserver);
   });
 
   it('expires slow-interaction statistics and cancels expiry while stopped', () => {
     deliverEvents([eventEntry(300, 1)]);
-    jest.advanceTimersByTime(10_000);
+    vi.advanceTimersByTime(10_000);
     deliverEvents([eventEntry(100, 2), eventEntry(80, 3)]);
-    jest.advanceTimersByTime(20_000);
+    vi.advanceTimersByTime(20_000);
     expect(snapshots.at(-1)).toEqual({
       slowInteractionsCount: 1,
       worstInteractionDelay: 100,
@@ -192,7 +194,7 @@ describe('INPMonitor', () => {
 
     const publicationsBeforeStop = snapshots.length;
     monitor.stopMonitoring();
-    jest.advanceTimersByTime(31_000);
+    vi.advanceTimersByTime(31_000);
     expect(snapshots).toHaveLength(publicationsBeforeStop);
 
     monitor.startMonitoring();
@@ -200,12 +202,12 @@ describe('INPMonitor', () => {
       slowInteractionsCount: 0,
       worstInteractionDelay: 0,
     });
-    expect(jest.getTimerCount()).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
   });
 
   it('ignores interactions that started before monitoring', () => {
     monitor.stopMonitoring();
-    jest.advanceTimersByTime(5_000);
+    vi.advanceTimersByTime(5_000);
     monitor.startMonitoring();
     deliverEvents([eventEntry(400, 1, 1_000)]);
     expect(snapshots.at(-1)?.slowInteractionsCount).toBe(0);

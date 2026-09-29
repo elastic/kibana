@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { CaseStatuses } from '@kbn/cases-components';
@@ -16,16 +19,16 @@ import { useOnUpdateField } from '../../../use_on_update_field';
 import { useStatusAction } from '../../../../actions/status/use_status_action';
 import type { CaseUI } from '../../../../../../common';
 
-jest.mock('../../../../../common/navigation/hooks');
-jest.mock('../../../use_on_update_field');
-jest.mock('../../../use_on_refresh_case_view_page');
-jest.mock('../../../../actions/status/use_status_action');
+vi.mock('../../../../../common/navigation/hooks');
+vi.mock('../../../use_on_update_field');
+vi.mock('../../../use_on_refresh_case_view_page');
+vi.mock('../../../../actions/status/use_status_action');
 
-const onUpdateField = jest.fn();
-const handleUpdateCaseStatus = jest.fn();
+const onUpdateField = vi.fn();
+const handleUpdateCaseStatus = vi.fn();
 
-const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
-const useStatusActionMock = useStatusAction as jest.Mock;
+const useOnUpdateFieldMock = useOnUpdateField as Mock;
+const useStatusActionMock = useStatusAction as Mock;
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(TestProviders, null, children);
@@ -34,7 +37,7 @@ const caseData: CaseUI = basicCase;
 
 describe('useCaseViewActivity', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useOnUpdateFieldMock.mockReturnValue({ onUpdateField, isLoading: false, loadingKey: null });
     useStatusActionMock.mockReturnValue({
       isUpdatingStatus: false,

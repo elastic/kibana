@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
 import { getServiceStats } from './get_service_stats';
 import type { IEnvOptions } from './get_service_map';
 
-type SearchMock = jest.Mock<Promise<unknown>>;
+type SearchMock = Mock<Promise<unknown>>;
 
 function makeOptions(
   overrides: Partial<IEnvOptions & { maxNumberOfServices: number }> = {}
@@ -21,7 +24,7 @@ function makeOptions(
     environment: 'opbeans',
     start: 1_700_000_000_000,
     end: 1_700_000_900_000,
-    logger: { debug: jest.fn() } as unknown as IEnvOptions['logger'],
+    logger: { debug: vi.fn() } as unknown as IEnvOptions['logger'],
     maxNumberOfServices: 50,
     searchAggregatedTransactions: true,
     serviceName: 'opbeans-python',
@@ -55,7 +58,7 @@ function getSearchCall(search: SearchMock, callIndex: number) {
 
 describe('getServiceStats — rollup/kuery field-mismatch fallback', () => {
   it('uses ServiceTransactionMetric and does NOT retry when the rollup has data', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(aggResponse(['opbeans-python']));
+    const search: SearchMock = vi.fn().mockResolvedValueOnce(aggResponse(['opbeans-python']));
     const apmEventClient = { search } as unknown as APMEventClient;
 
     const services = await getServiceStats(makeOptions({ apmEventClient }));
@@ -69,7 +72,7 @@ describe('getServiceStats — rollup/kuery field-mismatch fallback', () => {
   });
 
   it('retries against TransactionMetric when the ServiceTransactionMetric rollup returns 0 buckets and a kuery is set', async () => {
-    const search: SearchMock = jest
+    const search: SearchMock = vi
       .fn()
       .mockResolvedValueOnce(aggResponse([]))
       .mockResolvedValueOnce(aggResponse(['opbeans-python']));
@@ -95,7 +98,7 @@ describe('getServiceStats — rollup/kuery field-mismatch fallback', () => {
   });
 
   it('does NOT retry when the rollup is empty but there is no kuery (the fallback only buys us anything for kuery field mismatches)', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(aggResponse([]));
+    const search: SearchMock = vi.fn().mockResolvedValueOnce(aggResponse([]));
     const apmEventClient = { search } as unknown as APMEventClient;
 
     const services = await getServiceStats(
@@ -107,7 +110,7 @@ describe('getServiceStats — rollup/kuery field-mismatch fallback', () => {
   });
 
   it('does NOT retry when the rollup is empty but the kuery is just whitespace', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(aggResponse([]));
+    const search: SearchMock = vi.fn().mockResolvedValueOnce(aggResponse([]));
     const apmEventClient = { search } as unknown as APMEventClient;
 
     await getServiceStats(makeOptions({ apmEventClient, kuery: '   ' }));
@@ -116,7 +119,7 @@ describe('getServiceStats — rollup/kuery field-mismatch fallback', () => {
   });
 
   it('does NOT retry when searchAggregatedTransactions=false (already using raw transactions, fallback would be a duplicate)', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(aggResponse([]));
+    const search: SearchMock = vi.fn().mockResolvedValueOnce(aggResponse([]));
     const apmEventClient = { search } as unknown as APMEventClient;
 
     const services = await getServiceStats(
@@ -129,7 +132,7 @@ describe('getServiceStats — rollup/kuery field-mismatch fallback', () => {
   });
 
   it('returns the fallback empty result when both queries miss (genuine "no data" case)', async () => {
-    const search: SearchMock = jest
+    const search: SearchMock = vi
       .fn()
       .mockResolvedValueOnce(aggResponse([]))
       .mockResolvedValueOnce(aggResponse([]));

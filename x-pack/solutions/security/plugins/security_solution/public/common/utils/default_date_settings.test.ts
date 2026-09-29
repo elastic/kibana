@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import moment from 'moment';
 
 import type { DefaultTimeRangeSetting, DefaultIntervalSetting } from './default_date_settings';
@@ -30,18 +33,21 @@ import type { Policy } from '../store/inputs/model';
 // we have to repeat ourselves once
 const DEFAULT_FROM_DATE = '1983-05-31T13:03:54.234Z';
 const DEFAULT_TO_DATE = '1990-05-31T13:03:54.234Z';
-jest.mock('../../../common/constants', () => ({
-  DEFAULT_FROM: '1983-05-31T13:03:54.234Z',
-  DEFAULT_TO: '1990-05-31T13:03:54.234Z',
-  DEFAULT_INTERVAL_PAUSE: true,
-  DEFAULT_INTERVAL_TYPE: 'manual',
-  DEFAULT_INTERVAL_VALUE: 300000,
-  DEFAULT_APP_REFRESH_INTERVAL: 'securitySolution:refreshIntervalDefaults',
-  DEFAULT_APP_TIME_RANGE: 'securitySolution:timeDefaults',
-}));
+vi.mock('../../../common/constants', () => {
+      const mocked = {
+      DEFAULT_FROM: '1983-05-31T13:03:54.234Z',
+      DEFAULT_TO: '1990-05-31T13:03:54.234Z',
+      DEFAULT_INTERVAL_PAUSE: true,
+      DEFAULT_INTERVAL_TYPE: 'manual',
+      DEFAULT_INTERVAL_VALUE: 300000,
+      DEFAULT_APP_REFRESH_INTERVAL: 'securitySolution:refreshIntervalDefaults',
+      DEFAULT_APP_TIME_RANGE: 'securitySolution:timeDefaults',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/kibana');
-const mockGetServices = KibanaServices.get as jest.Mock;
+vi.mock('../lib/kibana');
+const mockGetServices = KibanaServices.get as Mock;
 
 /**
  * We utilize the internal chrome mocking that is built in to be able to mock different time range

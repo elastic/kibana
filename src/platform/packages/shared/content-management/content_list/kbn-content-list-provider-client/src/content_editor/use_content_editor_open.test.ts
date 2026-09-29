@@ -7,23 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { contentListQueryClient } from '@kbn/content-list-provider';
 import { useContentEditorOpen } from './use_content_editor_open';
 import type { ContentEditorConfig } from './types';
 
-const mockOpenContentEditor = jest.fn((_params: OpenContentEditorParams): (() => void) =>
-  jest.fn()
+const mockOpenContentEditor = vi.fn((_params: OpenContentEditorParams): (() => void) =>
+  vi.fn()
 );
-const mockOnSave = jest.fn(async () => {});
+const mockOnSave = vi.fn(async () => {});
 
-jest.mock('@kbn/content-list-provider', () => {
-  const actual = jest.requireActual('@kbn/content-list-provider');
+vi.mock('@kbn/content-list-provider', async () => {
+  const actual = (await vi.importActual('@kbn/content-list-provider'));
   return {
     ...actual,
     contentListQueryClient: {
-      invalidateQueries: jest.fn(),
+      invalidateQueries: vi.fn(),
     },
   };
 });
@@ -54,7 +56,7 @@ const testItem = {
 
 describe('useContentEditorOpen', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns undefined when contentEditor is not provided', () => {

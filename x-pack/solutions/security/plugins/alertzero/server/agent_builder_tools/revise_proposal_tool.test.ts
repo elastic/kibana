@@ -5,25 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { reviseProposalTool } from './revise_proposal_tool';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 
-const logger = () => ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() });
+const logger = () => ({ error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() });
 
 const requestMock = {} as never;
 
 const agenticWith = (opts: {
-  assertCanManage?: jest.Mock;
-  revise?: jest.Mock;
-  getLatestRevision?: jest.Mock;
+  assertCanManage?: Mock;
+  revise?: Mock;
+  getLatestRevision?: Mock;
 }): (() => ProposalsPluginStart) => {
-  const assertCanManage = opts.assertCanManage ?? jest.fn().mockResolvedValue(undefined);
+  const assertCanManage = opts.assertCanManage ?? vi.fn().mockResolvedValue(undefined);
   const revise =
-    opts.revise ?? jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 });
+    opts.revise ?? vi.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 });
   // Defaults to the identity answer: the id passed in is already the live head.
   const getLatestRevision =
     opts.getLatestRevision ??
-    jest.fn().mockImplementation(async (id: string) => ({
+    vi.fn().mockImplementation(async (id: string) => ({
       proposalId: id,
       revision: 1,
       status: 'pending',
@@ -56,14 +59,14 @@ const run = async (
 
 describe('reviseProposalTool', () => {
   it('checks the manage privilege before revising', async () => {
-    const assertCanManage = jest.fn().mockResolvedValue(undefined);
-    const getLatestRevision = jest.fn().mockResolvedValue({
+    const assertCanManage = vi.fn().mockResolvedValue(undefined);
+    const getLatestRevision = vi.fn().mockResolvedValue({
       proposalId: 'proposal-1',
       revision: 1,
       status: 'pending',
       decision: undefined,
     });
-    const revise = jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 });
+    const revise = vi.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 });
     await run(agenticWith({ assertCanManage, revise, getLatestRevision }), {
       proposalId: 'proposal-1',
       comment: 'Tightened the match',
@@ -79,10 +82,10 @@ describe('reviseProposalTool', () => {
   });
 
   it('revises the live head when the given id is an earlier link in the chain', async () => {
-    const getLatestRevision = jest
+    const getLatestRevision = vi
       .fn()
       .mockResolvedValue({ proposalId: 'proposal-2', revision: 2, status: 'pending' });
-    const revise = jest.fn().mockResolvedValue({ proposalId: 'proposal-3', revision: 3 });
+    const revise = vi.fn().mockResolvedValue({ proposalId: 'proposal-3', revision: 3 });
     const result = await run(agenticWith({ getLatestRevision, revise }), {
       proposalId: 'proposal-1',
       impact: 'critical',
@@ -101,7 +104,7 @@ describe('reviseProposalTool', () => {
   });
 
   it('returns the new revision id, revision number, status, and the supersedes pointer', async () => {
-    const revise = jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 3 });
+    const revise = vi.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 3 });
     const result = await run(agenticWith({ revise }), { proposalId: 'proposal-1' });
 
     expect(result.results[0].data).toMatchObject({
@@ -138,9 +141,9 @@ describe('reviseProposalTool', () => {
   });
 
   it('never calls revise() when the privilege check rejects', async () => {
-    const assertCanManage = jest.fn().mockRejectedValue(new Error('missing manage_proposals'));
-    const getLatestRevision = jest.fn();
-    const revise = jest.fn();
+    const assertCanManage = vi.fn().mockRejectedValue(new Error('missing manage_proposals'));
+    const getLatestRevision = vi.fn();
+    const revise = vi.fn();
     const result = await run(agenticWith({ assertCanManage, revise, getLatestRevision }), {
       proposalId: 'proposal-1',
     });
@@ -151,7 +154,7 @@ describe('reviseProposalTool', () => {
   });
 
   it('returns an error result instead of throwing when the service rejects (e.g. already superseded)', async () => {
-    const revise = jest.fn().mockRejectedValue(new Error('already superseded'));
+    const revise = vi.fn().mockRejectedValue(new Error('already superseded'));
     const result = await run(agenticWith({ revise }), { proposalId: 'proposal-1' });
 
     expect(JSON.stringify(result.results[0])).toContain('already superseded');

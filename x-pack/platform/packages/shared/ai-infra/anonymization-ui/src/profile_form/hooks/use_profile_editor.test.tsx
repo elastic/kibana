@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { AnonymizationProfile } from '@kbn/anonymization-common';
 import { TARGET_TYPE_INDEX } from '../../common/target_types';
 import { useProfileForm } from '../../common/hooks/use_profile_form';
 import { useProfileEditor } from './use_profile_editor';
 
-jest.mock('../../common/hooks/use_profile_form', () => ({
-  useProfileForm: jest.fn(),
-}));
+vi.mock('../../common/hooks/use_profile_form', () => {
+      const mocked = {
+      useProfileForm: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseFormController = {
   values: {
@@ -29,15 +34,15 @@ const baseFormController = {
   submitError: undefined,
   isSubmitting: false,
   isEdit: false,
-  reset: jest.fn(),
-  setName: jest.fn(),
-  setDescription: jest.fn(),
-  setTargetType: jest.fn(),
-  setTargetId: jest.fn(),
-  setFieldRules: jest.fn(),
-  setRegexRules: jest.fn(),
-  setNerRules: jest.fn(),
-  submit: jest.fn(),
+  reset: vi.fn(),
+  setName: vi.fn(),
+  setDescription: vi.fn(),
+  setTargetType: vi.fn(),
+  setTargetId: vi.fn(),
+  setFieldRules: vi.fn(),
+  setRegexRules: vi.fn(),
+  setNerRules: vi.fn(),
+  submit: vi.fn(),
 };
 
 const createProfile = (id: string): AnonymizationProfile => ({
@@ -55,17 +60,17 @@ const createProfile = (id: string): AnonymizationProfile => ({
 });
 
 const createClient = () => ({
-  findProfiles: jest.fn(),
-  getProfile: jest.fn(),
-  createProfile: jest.fn(),
-  updateProfile: jest.fn(),
-  deleteProfile: jest.fn(),
+  findProfiles: vi.fn(),
+  getProfile: vi.fn(),
+  createProfile: vi.fn(),
+  updateProfile: vi.fn(),
+  deleteProfile: vi.fn(),
 });
 
 describe('useProfileEditor', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest
+    vi.clearAllMocks();
+    vi
       .mocked(useProfileForm)
       .mockReturnValue(baseFormController as ReturnType<typeof useProfileForm>);
   });

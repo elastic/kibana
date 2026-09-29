@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
@@ -22,17 +25,17 @@ import { isFleetServerVersionRequirementMet } from './version_requirements';
 // Both `appContextService` and `settingsService` come from '..' (the services barrel), so
 // we use the real appContextService (started via createAppContextStartContractMock) and mock
 // only settingsService and the fleet_server/index exports.
-jest.mock('.'); // fleet_server/index — stubs checkFleetServerVersionsForSecretsStorage
-jest.mock('../settings'); // services barrel re-exports `import * as settingsService from './settings'`
+vi.mock('.'); // fleet_server/index — stubs checkFleetServerVersionsForSecretsStorage
+vi.mock('../settings'); // services barrel re-exports `import * as settingsService from './settings'`
 
 const mockedCheckFleetServerVersions =
-  checkFleetServerVersionsForSecretsStorage as jest.MockedFunction<
+  checkFleetServerVersionsForSecretsStorage as MockedFunction<
     typeof checkFleetServerVersionsForSecretsStorage
   >;
-const mockedGetSettingsOrUndefined = settingsService.getSettingsOrUndefined as jest.MockedFunction<
+const mockedGetSettingsOrUndefined = settingsService.getSettingsOrUndefined as MockedFunction<
   typeof settingsService.getSettingsOrUndefined
 >;
-const mockedSaveSettings = settingsService.saveSettings as jest.MockedFunction<
+const mockedSaveSettings = settingsService.saveSettings as MockedFunction<
   typeof settingsService.saveSettings
 >;
 
@@ -61,7 +64,7 @@ describe('isFleetServerVersionRequirementMet', () => {
 
   afterEach(() => {
     appContextService.stop();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns true immediately for standalone Fleet Server without calling ES', async () => {

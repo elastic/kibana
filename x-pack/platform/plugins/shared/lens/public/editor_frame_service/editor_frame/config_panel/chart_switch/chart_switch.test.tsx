@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, within, waitFor } from '@testing-library/react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
@@ -38,7 +41,7 @@ const mockFrame = (layers: string[]) => ({
     (acc, layerId) => ({
       ...acc,
       [layerId]: {
-        getTableSpec: jest.fn(() => [{ columnId: 'col2' }]),
+        getTableSpec: vi.fn(() => [{ columnId: 'col2' }]),
         getOperationForColumnId: () => {},
       } as unknown as DatasourcePublicAPI,
     }),
@@ -147,7 +150,7 @@ describe('chart_switch', () => {
     frame = mockFrame(['a']);
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   /**
@@ -164,7 +167,7 @@ describe('chart_switch', () => {
     return {
       testVis: {
         ...createMockVisualization('testVis'),
-        getSuggestions: jest.fn((options) => [
+        getSuggestions: vi.fn((options) => [
           {
             score: 1,
             title: '',
@@ -183,7 +186,7 @@ describe('chart_switch', () => {
       },
       testVis2: {
         ...createMockVisualization('testVis2'),
-        getSuggestions: jest.fn((options) => [
+        getSuggestions: vi.fn((options) => [
           {
             score: 1,
             title: '',
@@ -195,7 +198,7 @@ describe('chart_switch', () => {
       },
       testVis3: {
         ...createMockVisualization('testVis3'),
-        initialize: jest.fn((_frame, state) => state ?? { type: 'subvisC1' }),
+        initialize: vi.fn((_frame, state) => state ?? { type: 'subvisC1' }),
         visualizationTypes: ['subvisC1', 'subvisC2', 'subvisC3'].map((id) => ({
           icon: 'empty',
           id,
@@ -203,8 +206,8 @@ describe('chart_switch', () => {
           sortPriority: 1,
           description: faker.lorem.sentence(),
         })),
-        getVisualizationTypeId: jest.fn((state) => state.type),
-        getSuggestions: jest.fn((options) => {
+        getVisualizationTypeId: vi.fn((state) => state.type),
+        getSuggestions: vi.fn((options) => {
           if (options.subVisualizationId === 'subvisC2') {
             return [];
           }
@@ -336,7 +339,7 @@ describe('chart_switch', () => {
       datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue(
         datasourceSuggestions.unchanged
       );
-      (frame.datasourceLayers.a?.getTableSpec as jest.Mock).mockReturnValue([
+      (frame.datasourceLayers.a?.getTableSpec as Mock).mockReturnValue([
         { columnId: 'col2' },
         { columnId: 'col1' },
       ]);
@@ -358,7 +361,7 @@ describe('chart_switch', () => {
     it('should not indicate data loss if there is no data', async () => {
       visualizationMap.testVis2.getSuggestions.mockReturnValueOnce([]);
       frame = mockFrame(['a']);
-      (frame.datasourceLayers.a?.getTableSpec as jest.Mock).mockReturnValue([]);
+      (frame.datasourceLayers.a?.getTableSpec as Mock).mockReturnValue([]);
       const { openChartSwitch, queryWarningNode } = renderChartSwitch();
       await openChartSwitch();
       expect(queryWarningNode('testVis2')).not.toBeInTheDocument();
@@ -368,7 +371,7 @@ describe('chart_switch', () => {
       frame = mockFrame(['a', 'b', 'c']);
 
       visualizationMap.testVis3.getVisualizationTypeId.mockReturnValue('subvisC2');
-      visualizationMap.testVis3.switchVisualizationType = jest.fn(() => ({ type: 'subvisC1' }));
+      visualizationMap.testVis3.switchVisualizationType = vi.fn(() => ({ type: 'subvisC1' }));
       const { openChartSwitch, queryWarningNode } = renderChartSwitch(undefined, {
         preloadedStateOverrides: {
           visualization: {
@@ -387,9 +390,9 @@ describe('chart_switch', () => {
       frame = mockFrame(['a', 'b', 'c']);
 
       visualizationMap.testVis3.getVisualizationTypeId.mockReturnValue('subvisC2');
-      visualizationMap.testVis3.switchVisualizationType = jest.fn(() => ({ type: 'subvisC1' }));
+      visualizationMap.testVis3.switchVisualizationType = vi.fn(() => ({ type: 'subvisC1' }));
       // we're mocking that subvisC1 is compatible with subvisC2
-      visualizationMap.testVis3.isSubtypeCompatible = jest.fn(
+      visualizationMap.testVis3.isSubtypeCompatible = vi.fn(
         (t1, t2) => t2 === 'subvisC1' && t1 === 'subvisC2'
       );
       const { openChartSwitch, queryWarningNode } = renderChartSwitch(undefined, {
@@ -482,7 +485,7 @@ describe('chart_switch', () => {
 
   it('should use initial state if there is no suggestion from the target visualization', async () => {
     visualizationMap.testVis2.getSuggestions.mockReturnValueOnce([]);
-    (frame.datasourceLayers.a?.getTableSpec as jest.Mock).mockReturnValue([]);
+    (frame.datasourceLayers.a?.getTableSpec as Mock).mockReturnValue([]);
     const { store, switchToVis, openChartSwitch } = renderChartSwitch();
     await openChartSwitch();
     await switchToVis('testVis2');
@@ -509,7 +512,7 @@ describe('chart_switch', () => {
       type: 'legacyPalette',
       value: { type: 'palette', name: 'mock' },
     };
-    visualizationMap.testVis.getMainPalette = jest.fn(() => legacyPalette);
+    visualizationMap.testVis.getMainPalette = vi.fn(() => legacyPalette);
     visualizationMap.testVis2.getSuggestions.mockReturnValueOnce([]);
     frame = mockFrame(['a', 'b', 'c']);
     datasourceMap.formBased.getLayers.mockReturnValue(['a', 'b', 'c']);
@@ -529,7 +532,7 @@ describe('chart_switch', () => {
   });
 
   it('should ensure the new visualization has the proper subtype', async () => {
-    visualizationMap.testVis2.switchVisualizationType = jest.fn(
+    visualizationMap.testVis2.switchVisualizationType = vi.fn(
       (visualizationType, state) => `${state} ${visualizationType}`
     );
     const { openChartSwitch, switchToVis, store } = renderChartSwitch();
@@ -579,11 +582,11 @@ describe('chart_switch', () => {
       datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue(
         datasourceSuggestions.layers
       );
-      (frame.datasourceLayers.a?.getTableSpec as jest.Mock).mockReturnValue([
+      (frame.datasourceLayers.a?.getTableSpec as Mock).mockReturnValue([
         { columnId: 'col2' },
         { columnId: 'col1' },
       ]);
-      (frame.datasourceLayers.b?.getTableSpec as jest.Mock).mockReturnValue([
+      (frame.datasourceLayers.b?.getTableSpec as Mock).mockReturnValue([
         { columnId: 'col2' },
         { columnId: 'col1' },
       ]);
@@ -609,7 +612,7 @@ describe('chart_switch', () => {
 
     it('should not remove layers when switching between subtypes', async () => {
       frame = mockFrame(['a', 'b', 'c']);
-      visualizationMap.testVis3.switchVisualizationType = jest.fn(() => 'switched');
+      visualizationMap.testVis3.switchVisualizationType = vi.fn(() => 'switched');
 
       const { openChartSwitch, switchToVis, store } = renderChartSwitch(undefined, {
         preloadedStateOverrides: {
@@ -648,10 +651,10 @@ describe('chart_switch', () => {
 
     it('should not remove layers and initialize with existing state when switching between subtypes without data', async () => {
       const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
-      datasourceLayers.a.getTableSpec = jest.fn().mockReturnValue([]);
+      datasourceLayers.a.getTableSpec = vi.fn().mockReturnValue([]);
 
-      visualizationMap.testVis3.getSuggestions = jest.fn().mockReturnValue([]);
-      visualizationMap.testVis3.switchVisualizationType = jest.fn(() => 'switched');
+      visualizationMap.testVis3.getSuggestions = vi.fn().mockReturnValue([]);
+      visualizationMap.testVis3.switchVisualizationType = vi.fn(() => 'switched');
 
       const { openChartSwitch, switchToVis } = renderChartSwitch(undefined, {
         preloadedStateOverrides: {

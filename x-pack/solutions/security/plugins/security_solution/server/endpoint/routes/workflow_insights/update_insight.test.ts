@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { createMockEndpointAppContext, getRegisteredVersionedRouteMock } from '../../mocks';
 import { registerUpdateInsightsRoute } from './update_insight';
@@ -12,17 +15,20 @@ import { WORKFLOW_INSIGHTS_UPDATE_ROUTE } from '../../../../common/endpoint/cons
 import { NotFoundError } from '../../errors';
 import type { EndpointAppContext } from '../../types';
 
-jest.mock('../../services', () => ({
-  securityWorkflowInsightsService: {
-    update: jest.fn(),
-    fetch: jest.fn(),
-  },
-}));
+vi.mock('../../services', () => {
+      const mocked = {
+      securityWorkflowInsightsService: {
+        update: vi.fn(),
+        fetch: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const updateMock = jest.requireMock('../../services').securityWorkflowInsightsService
-  .update as jest.Mock;
-const fetchMock = jest.requireMock('../../services').securityWorkflowInsightsService
-  .fetch as jest.Mock;
+const updateMock = (await vi.importMock('../../services')).securityWorkflowInsightsService
+  .update as Mock;
+const fetchMock = (await vi.importMock('../../services')).securityWorkflowInsightsService
+  .fetch as Mock;
 
 const mockDefaultInsight = () => {
   fetchMock.mockResolvedValue([{ _id: '1', _index: 'index-123', _source: {} }]);
@@ -55,19 +61,19 @@ describe('Update Insights Route Handler', () => {
       ...customContext,
       service: {
         ...mockEndpointContext.service,
-        getEndpointAuthz: jest.fn().mockResolvedValue(authz),
+        getEndpointAuthz: vi.fn().mockResolvedValue(authz),
         getTelemetryService:
           customContext?.service?.getTelemetryService ??
-          jest.fn().mockReturnValue({ reportEvent: jest.fn() }),
+          vi.fn().mockReturnValue({ reportEvent: vi.fn() }),
       },
       securitySolution: {
-        getEndpointAuthz: jest.fn().mockResolvedValue(authz),
-        getSpaceId: jest.fn().mockReturnValue('default'),
+        getEndpointAuthz: vi.fn().mockResolvedValue(authz),
+        getSpaceId: vi.fn().mockReturnValue('default'),
       },
       core: {
         security: {
           authc: {
-            getCurrentUser: jest.fn().mockReturnValue({ username: 'test-user', roles: ['admin'] }),
+            getCurrentUser: vi.fn().mockReturnValue({ username: 'test-user', roles: ['admin'] }),
           },
         },
       },
@@ -301,9 +307,9 @@ describe('Update Insights Route Handler', () => {
     });
 
     it('should report telemetry when action.type is remediated', async () => {
-      const reportEventMock = jest.fn();
+      const reportEventMock = vi.fn();
       const mockEndpointContext = createMockEndpointAppContext();
-      mockEndpointContext.service.getTelemetryService = jest.fn().mockReturnValue({
+      mockEndpointContext.service.getTelemetryService = vi.fn().mockReturnValue({
         reportEvent: reportEventMock,
       });
 
@@ -329,9 +335,9 @@ describe('Update Insights Route Handler', () => {
     });
 
     it('should report telemetry when action.type is dismissed', async () => {
-      const reportEventMock = jest.fn();
+      const reportEventMock = vi.fn();
       const mockEndpointContext = createMockEndpointAppContext();
-      mockEndpointContext.service.getTelemetryService = jest.fn().mockReturnValue({
+      mockEndpointContext.service.getTelemetryService = vi.fn().mockReturnValue({
         reportEvent: reportEventMock,
       });
 
@@ -402,15 +408,15 @@ describe('Update Insights Route Handler', () => {
         ...context,
         service: {
           ...context.service,
-          getEndpointAuthz: jest.fn().mockResolvedValue({
+          getEndpointAuthz: vi.fn().mockResolvedValue({
             canWriteWorkflowInsights: true,
             canReadWorkflowInsights: true,
           }),
-          getTelemetryService: jest.fn().mockReturnValue({ reportEvent: jest.fn() }),
+          getTelemetryService: vi.fn().mockReturnValue({ reportEvent: vi.fn() }),
         },
         securitySolution: {
-          getSpaceId: jest.fn().mockReturnValue('default'),
-          getEndpointAuthz: jest.fn().mockResolvedValue({
+          getSpaceId: vi.fn().mockReturnValue('default'),
+          getEndpointAuthz: vi.fn().mockResolvedValue({
             canWriteWorkflowInsights: true,
             canReadWorkflowInsights: true,
           }),
@@ -418,7 +424,7 @@ describe('Update Insights Route Handler', () => {
         core: {
           security: {
             authc: {
-              getCurrentUser: jest
+              getCurrentUser: vi
                 .fn()
                 .mockReturnValue({ username: 'test-user', roles: ['admin'] }),
             },
@@ -432,8 +438,8 @@ describe('Update Insights Route Handler', () => {
 
     it('combines agent IDs from request body and retrieved insight for ensureInCurrentSpace', async () => {
       const context = setupTest();
-      const mockEnsure = jest.fn();
-      context.service.getInternalFleetServices = jest
+      const mockEnsure = vi.fn();
+      context.service.getInternalFleetServices = vi
         .fn()
         .mockReturnValue({ ensureInCurrentSpace: mockEnsure });
 
@@ -454,8 +460,8 @@ describe('Update Insights Route Handler', () => {
 
     it('calls ensureInCurrentSpace with deduplicated agent IDs from request body', async () => {
       const context = setupTest();
-      const mockEnsure = jest.fn();
-      context.service.getInternalFleetServices = jest
+      const mockEnsure = vi.fn();
+      context.service.getInternalFleetServices = vi
         .fn()
         .mockReturnValue({ ensureInCurrentSpace: mockEnsure });
 
@@ -472,8 +478,8 @@ describe('Update Insights Route Handler', () => {
 
     it('uses agent IDs from fetched insight if not in request body', async () => {
       const context = setupTest();
-      const mockEnsure = jest.fn();
-      context.service.getInternalFleetServices = jest
+      const mockEnsure = vi.fn();
+      context.service.getInternalFleetServices = vi
         .fn()
         .mockReturnValue({ ensureInCurrentSpace: mockEnsure });
 
@@ -490,8 +496,8 @@ describe('Update Insights Route Handler', () => {
 
     it('returns 404 if ensureInCurrentSpace throws NotFoundError', async () => {
       const context = setupTest();
-      context.service.getInternalFleetServices = jest.fn().mockReturnValue({
-        ensureInCurrentSpace: jest.fn().mockRejectedValue(new NotFoundError('not found')),
+      context.service.getInternalFleetServices = vi.fn().mockReturnValue({
+        ensureInCurrentSpace: vi.fn().mockRejectedValue(new NotFoundError('not found')),
       });
 
       fetchMock.mockResolvedValue([
@@ -507,8 +513,8 @@ describe('Update Insights Route Handler', () => {
 
     it('skips ensureInCurrentSpace if agent IDs are missing from both body and retrieved insight', async () => {
       const context = setupTest();
-      const mockEnsure = jest.fn();
-      context.service.getInternalFleetServices = jest
+      const mockEnsure = vi.fn();
+      context.service.getInternalFleetServices = vi
         .fn()
         .mockReturnValue({ ensureInCurrentSpace: mockEnsure });
 
@@ -526,8 +532,8 @@ describe('Update Insights Route Handler', () => {
       fetchMock.mockResolvedValue([{ _id: '1', _index: 'index-1', _source: {} }]);
       updateMock.mockResolvedValue({ id: 1 });
 
-      const mockEnsure = jest.fn();
-      context.service.getInternalFleetServices = jest
+      const mockEnsure = vi.fn();
+      context.service.getInternalFleetServices = vi
         .fn()
         .mockReturnValue({ ensureInCurrentSpace: mockEnsure });
 

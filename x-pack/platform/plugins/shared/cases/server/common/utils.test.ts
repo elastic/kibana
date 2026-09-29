@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -109,12 +111,12 @@ describe('common utils', () => {
 
   describe('transformNewCase', () => {
     beforeAll(() => {
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date('2020-04-09T09:43:51.778Z'));
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2020-04-09T09:43:51.778Z'));
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('transform correctly', () => {

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createStatusTimeBins, getStatusEffectiveValue } from './monitor_status_data';
 
 describe('createStatusTimeBins', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return default values when `heatmapData` is `undefined`', () => {

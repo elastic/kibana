@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -82,14 +84,14 @@ describe('RuleTypeList', () => {
     render(
       <RuleTypeList
         ruleTypes={ruleTypes}
-        onSelectRuleType={jest.fn()}
-        onFilterByProducer={jest.fn()}
+        onSelectRuleType={vi.fn()}
+        onFilterByProducer={vi.fn()}
         selectedProducer={null}
         ruleTypeCountsByProducer={{
           total: 3,
           'Stack Alerts': 3,
         }}
-        onClearFilters={jest.fn()}
+        onClearFilters={vi.fn()}
         showCategories={false}
       />
     );

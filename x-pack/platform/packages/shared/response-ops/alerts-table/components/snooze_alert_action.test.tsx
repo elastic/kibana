@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import {
@@ -24,46 +27,52 @@ import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { SnoozeAlertAction } from './snooze_alert_action';
 import { ExpandableContextMenuPanel } from './expandable_context_menu_panel';
 
-jest.mock('../hooks/use_alert_muted_state');
-jest.mock('../hooks/use_alert_snoozed_state');
+vi.mock('../hooks/use_alert_muted_state');
+vi.mock('../hooks/use_alert_snoozed_state');
 
 // The mute-vs-snooze decision + toasts live in useAlertSnooze (covered by its own
 // unit tests), so here we mock it and assert SnoozeAlertAction wires the payloads.
-const mockSnoozeAlert = jest.fn().mockResolvedValue(true);
-const mockUnsnoozeAlert = jest.fn().mockResolvedValue(true);
+const mockSnoozeAlert = vi.fn().mockResolvedValue(true);
+const mockUnsnoozeAlert = vi.fn().mockResolvedValue(true);
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names', () => ({
-  useAlertFieldNames: () => ({ fieldNames: [], isLoading: false }),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names', () => {
+      const mocked = {
+      useAlertFieldNames: () => ({ fieldNames: [], isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/response-ops-alert-snooze', () => ({
-  useAlertSnooze: () => ({ snoozeAlert: mockSnoozeAlert, unsnoozeAlert: mockUnsnoozeAlert }),
-  AlertSnoozePanelInline: ({
-    onApply,
-    onBack,
-  }: {
-    onApply: (payload: unknown) => void;
-    onBack: () => void;
-  }) => (
-    <div data-test-subj="alertSnoozePanelInline">
-      <button
-        data-test-subj="alertSnoozePanelInlineApply"
-        onClick={() => onApply({ expiresAt: null })}
-      >
-        Apply
-      </button>
-      <button data-test-subj="alertSnoozePanelInlineBack" onClick={onBack}>
-        Back
-      </button>
-    </div>
-  ),
-}));
+vi.mock('@kbn/response-ops-alert-snooze', () => {
+      const mocked = {
+      useAlertSnooze: () => ({ snoozeAlert: mockSnoozeAlert, unsnoozeAlert: mockUnsnoozeAlert }),
+      AlertSnoozePanelInline: ({
+        onApply,
+        onBack,
+      }: {
+        onApply: (payload: unknown) => void;
+        onBack: () => void;
+      }) => (
+        <div data-test-subj="alertSnoozePanelInline">
+          <button
+            data-test-subj="alertSnoozePanelInlineApply"
+            onClick={() => onApply({ expiresAt: null })}
+          >
+            Apply
+          </button>
+          <button data-test-subj="alertSnoozePanelInlineBack" onClick={onBack}>
+            Back
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useAlertMutedState } from '../hooks/use_alert_muted_state';
 import { useAlertSnoozedState } from '../hooks/use_alert_snoozed_state';
 
-const mockUseAlertMutedState = useAlertMutedState as jest.MockedFunction<typeof useAlertMutedState>;
-const mockUseAlertSnoozedState = useAlertSnoozedState as jest.MockedFunction<
+const mockUseAlertMutedState = useAlertMutedState as MockedFunction<typeof useAlertMutedState>;
+const mockUseAlertSnoozedState = useAlertSnoozedState as MockedFunction<
   typeof useAlertSnoozedState
 >;
 
@@ -114,12 +123,12 @@ const InlineTestComponent = (props: AlertActionsProps) => (
 
 const baseProps = createPartialObjectMock<AlertActionsProps>({
   alert: activeAlert,
-  refresh: jest.fn(),
+  refresh: vi.fn(),
 });
 
 describe('SnoozeAlertAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSnoozeAlert.mockResolvedValue(true);
     mockUnsnoozeAlert.mockResolvedValue(true);
   });

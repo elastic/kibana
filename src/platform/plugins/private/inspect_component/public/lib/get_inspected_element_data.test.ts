@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getInspectedElementData } from './get_inspected_element_data';
 import { fetchComponentData } from '../api/fetch_component_data';
 import { getIconType } from './dom/get_icon_type';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { findFirstEuiComponent } from './fiber/find_first_eui_component';
 
-jest.mock('../api/fetch_component_data');
-jest.mock('./dom/get_icon_type');
-jest.mock('./fiber/find_first_eui_component');
+vi.mock('../api/fetch_component_data');
+vi.mock('./dom/get_icon_type');
+vi.mock('./fiber/find_first_eui_component');
 
 describe('getInspectedElementData', () => {
   const mockHttpService = httpServiceMock.createStartContract();
@@ -51,7 +54,7 @@ describe('getInspectedElementData', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return null if targetFiberNodeWithHtmlElement is null', async () => {
@@ -75,7 +78,7 @@ describe('getInspectedElementData', () => {
   });
 
   it('should return null if no component data fetched', async () => {
-    (fetchComponentData as jest.Mock).mockResolvedValue(null);
+    (fetchComponentData as Mock).mockResolvedValue(null);
 
     const result = await getInspectedElementData({
       httpService: mockHttpService,
@@ -92,9 +95,9 @@ describe('getInspectedElementData', () => {
   });
 
   it('should return component data', async () => {
-    (fetchComponentData as jest.Mock).mockResolvedValue(mockResponse);
-    (getIconType as jest.Mock).mockReturnValue('copy');
-    (findFirstEuiComponent as jest.Mock).mockReturnValue('EuiButton');
+    (fetchComponentData as Mock).mockResolvedValue(mockResponse);
+    (getIconType as Mock).mockReturnValue('copy');
+    (findFirstEuiComponent as Mock).mockReturnValue('EuiButton');
 
     const result = await getInspectedElementData({
       httpService: mockHttpService,

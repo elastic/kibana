@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -21,12 +23,12 @@ import type { ApmPluginStartDeps } from './plugin';
 import { ApmPlugin, apmCpsManager$, getApmInternalServices } from './plugin';
 
 describe('ApmPlugin', () => {
-  const callApmApi = jest.fn();
+  const callApmApi = vi.fn();
 
   // `CPSPluginStart['cpsManager']` is optional and not deep-mocked, so own the spy to keep the
   // registered resolvers typed.
   const createCpsStart = () => {
-    const registerAppAccess = jest.fn<void, [string, CPSAppAccessResolver]>();
+    const registerAppAccess = vi.fn<void, [string, CPSAppAccessResolver]>();
     const startContract = cpsPluginMock.createStartContract();
 
     return {
@@ -41,7 +43,7 @@ describe('ApmPlugin', () => {
 
     const { cps, registerAppAccess } = createCpsStart();
     const plugins = {
-      discoverShared: { features: { registry: { register: jest.fn() } } },
+      discoverShared: { features: { registry: { register: vi.fn() } } },
       share: {},
       lens: {},
       dataViews: {},
@@ -66,10 +68,10 @@ describe('ApmPlugin', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // `start()` builds the Discover service flyout renderer, which needs a telemetry client, and
     // the real service requires the analytics wiring from `setup()`.
-    jest.spyOn(TelemetryService.prototype, 'start').mockReturnValue({} as ITelemetryClient);
+    vi.spyOn(TelemetryService.prototype, 'start').mockReturnValue({} as ITelemetryClient);
   });
 
   it('observes the CPS flag with the shared default as fallback', () => {

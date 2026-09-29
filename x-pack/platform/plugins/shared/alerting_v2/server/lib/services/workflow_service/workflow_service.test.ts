@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   createWorkflowsClientMock,
@@ -23,11 +26,11 @@ describe('WorkflowService', () => {
   let workflowsExtensions: WorkflowsExtensionsStart;
   let loggerService: LoggerService;
   let service: WorkflowService;
-  let mockEmitEvent: jest.Mock;
+  let mockEmitEvent: Mock;
 
   beforeEach(() => {
     workflowsExtensions = workflowsExtensionsMock.createStart();
-    mockEmitEvent = jest.fn().mockResolvedValue(undefined);
+    mockEmitEvent = vi.fn().mockResolvedValue(undefined);
     workflowsExtensions.getClient.mockResolvedValue(
       createWorkflowsClientMock({ emitEvent: mockEmitEvent })
     );

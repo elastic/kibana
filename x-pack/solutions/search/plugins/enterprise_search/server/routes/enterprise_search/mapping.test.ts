@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 
-jest.mock('../../lib/fetch_mapping', () => ({
-  fetchMapping: jest.fn(),
-}));
+vi.mock('../../lib/fetch_mapping', () => {
+      const mocked = {
+      fetchMapping: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 import { fetchMapping } from '../../lib/fetch_mapping';
 
 import { registerMappingRoute } from './mapping';
@@ -23,7 +29,7 @@ describe('Elasticsearch Index Mapping', () => {
   beforeEach(() => {
     const context = {
       core: Promise.resolve({ elasticsearch: { client: mockClient } }),
-    } as jest.Mocked<RequestHandlerContext>;
+    } as Mocked<RequestHandlerContext>;
 
     mockRouter = new MockRouter({
       context,
@@ -51,7 +57,7 @@ describe('Elasticsearch Index Mapping', () => {
         },
       };
 
-      (fetchMapping as jest.Mock).mockImplementationOnce(() => {
+      (fetchMapping as Mock).mockImplementationOnce(() => {
         return Promise.resolve(mockData);
       });
 

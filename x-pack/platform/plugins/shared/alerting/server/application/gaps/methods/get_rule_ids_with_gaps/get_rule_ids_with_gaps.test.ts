@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
@@ -30,17 +33,20 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { gapFillStatus, gapStatus } from '../../../../../common';
 import { getSchedulerContextInternal } from '../../auto_fill_scheduler/methods/utils';
 
-jest.mock('../../auto_fill_scheduler/methods/utils', () => ({
-  getSchedulerContextInternal: jest.fn(),
-}));
-const mockGetSchedulerContext = getSchedulerContextInternal as jest.MockedFunction<
+vi.mock('../../auto_fill_scheduler/methods/utils', () => {
+      const mocked = {
+      getSchedulerContextInternal: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockGetSchedulerContext = getSchedulerContextInternal as MockedFunction<
   typeof getSchedulerContextInternal
 >;
 
 describe('getRuleIdsWithGaps', () => {
   let rulesClient: RulesClient;
   let eventLogClient: ReturnType<typeof eventLogClientMock.create>;
-  let rulesClientParams: jest.Mocked<ConstructorOptions>;
+  let rulesClientParams: Mocked<ConstructorOptions>;
 
   const kibanaVersion = 'v8.0.0';
   const taskManager = taskManagerMock.createStart();
@@ -76,32 +82,32 @@ describe('getRuleIdsWithGaps', () => {
       actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
       spaceId: 'default',
       namespace: 'default',
-      getUserName: jest.fn(),
-      getProfileUid: jest.fn(),
-      createAPIKey: jest.fn(),
-      cloneAPIKey: jest.fn(),
+      getUserName: vi.fn(),
+      getProfileUid: vi.fn(),
+      createAPIKey: vi.fn(),
+      cloneAPIKey: vi.fn(),
       logger,
       internalSavedObjectsRepository,
       encryptedSavedObjectsClient: encryptedSavedObjects,
-      getActionsClient: jest.fn(),
-      getEventLogClient: jest.fn(),
+      getActionsClient: vi.fn(),
+      getEventLogClient: vi.fn(),
       kibanaVersion,
       auditLogger,
       maxScheduledPerMinute: 10000,
       minimumScheduleInterval: { value: '1m', enforce: false },
-      isAuthenticationTypeAPIKey: jest.fn(),
-      getAuthenticationAPIKey: jest.fn(),
-      getAlertIndicesAlias: jest.fn(),
+      isAuthenticationTypeAPIKey: vi.fn(),
+      getAuthenticationAPIKey: vi.fn(),
+      getAlertIndicesAlias: vi.fn(),
       alertsService: null,
       backfillClient,
-      isSystemAction: jest.fn(),
+      isSystemAction: vi.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       eventLogger,
       isServerless: false,
-    } as jest.Mocked<ConstructorOptions>;
+    } as Mocked<ConstructorOptions>;
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     rulesClient = new RulesClient(rulesClientParams);
     rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
     authorization.getFindAuthorizationFilter.mockResolvedValue({
@@ -120,7 +126,7 @@ describe('getRuleIdsWithGaps', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('authorization', () => {

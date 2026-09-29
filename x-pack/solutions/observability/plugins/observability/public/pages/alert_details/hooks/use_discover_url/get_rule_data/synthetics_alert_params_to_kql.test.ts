@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SyntheticsMonitorStatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import moment, { type Moment } from 'moment';
@@ -16,12 +18,12 @@ describe('synthetics_alert_params_to_kql', () => {
   const DAYS_TO_MS = 1000 * 60 * 60 * 24;
 
   beforeAll(() => {
-    jest
+    vi
       .spyOn(moment.prototype, 'subtract')
       .mockImplementation(function (this: Moment, ...args: unknown[]) {
         return new Date(new Date(FIXED_DATE_ISO).valueOf() - (args[0] as number) * DAYS_TO_MS);
       });
-    jest
+    vi
       .spyOn(moment.prototype, 'add')
       .mockImplementation(function (this: Moment, ...args: unknown[]) {
         return new Date(new Date(FIXED_DATE_ISO).valueOf() + (args[0] as number) * DAYS_TO_MS);
@@ -30,7 +32,7 @@ describe('synthetics_alert_params_to_kql', () => {
 
   afterAll(() => {
     // dateNowSpy.mockRestore();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
   describe('syntheticsMonitorStatusAlertParamsToKqlQuery', () => {
     it('should return a valid KQL query string for given params', () => {

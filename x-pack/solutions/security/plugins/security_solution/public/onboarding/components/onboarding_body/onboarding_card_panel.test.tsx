@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { OnboardingCardPanel } from './onboarding_card_panel';
@@ -12,16 +14,22 @@ import { CARD_COMPLETE_BADGE, EXPAND_CARD_BUTTON_LABEL } from './translations';
 import type { OnboardingCardId } from '../../constants';
 import { TestProviders } from '../../../common/mock/test_providers';
 
-const mockUseDarkMode = jest.fn(() => false);
-jest.mock('@kbn/react-kibana-context-theme', () => ({
-  ...jest.requireActual('@kbn/react-kibana-context-theme'),
-  useKibanaIsDarkMode: () => mockUseDarkMode(),
-}));
+const mockUseDarkMode = vi.fn(() => false);
+vi.mock('@kbn/react-kibana-context-theme', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/react-kibana-context-theme')),
+      useKibanaIsDarkMode: () => mockUseDarkMode(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiIcon: jest.fn(({ type }: { type: string }) => <div data-test-subj={`EuiIcon-${type}`} />),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiIcon: vi.fn(({ type }: { type: string }) => <div data-test-subj={`EuiIcon-${type}`} />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('OnboardingCardPanel Component', () => {
   const defaultProps = {
@@ -32,11 +40,11 @@ describe('OnboardingCardPanel Component', () => {
     badge: undefined,
     isExpanded: false,
     isComplete: false,
-    onToggleExpanded: jest.fn(),
+    onToggleExpanded: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the card title', () => {

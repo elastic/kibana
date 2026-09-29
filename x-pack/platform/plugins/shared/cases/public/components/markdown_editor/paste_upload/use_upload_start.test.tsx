@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { type FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { renderHook } from '@testing-library/react';
 import { useUploadStart } from './use_upload_start';
@@ -23,7 +25,7 @@ describe('useUploadStart', () => {
 
     // Stub out the field hook with an initial value and a jest mock for setValue
     const fieldValue = 'hello world';
-    const setValue = jest.fn();
+    const setValue = vi.fn();
     const field = {
       value: fieldValue,
       setValue,
@@ -37,7 +39,7 @@ describe('useUploadStart', () => {
     };
 
     // Spy dispatch function
-    const dispatch = jest.fn();
+    const dispatch = vi.fn();
 
     renderHook(() => useUploadStart(state, dispatch, textarea, field));
 
@@ -56,14 +58,14 @@ describe('useUploadStart', () => {
       selectionEnd: 0,
     } as unknown as HTMLTextAreaElement;
 
-    const setValue = jest.fn();
+    const setValue = vi.fn();
     const field = {
       value: 'text',
       setValue,
     } as unknown as FieldHook<string>;
 
     const state: UploadIdleState = { phase: UploadPhase.IDLE };
-    const dispatch = jest.fn();
+    const dispatch = vi.fn();
 
     renderHook(() => useUploadStart(state, dispatch, textarea, field));
 

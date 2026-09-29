@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,12 +17,12 @@ import { VIEW_TOGGLE_LIST_ID, VIEW_TOGGLE_TABLE_ID } from '../constants';
 
 describe('ViewToggle', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders list and table toggle buttons', () => {
     renderWithTestingProviders(
-      <ViewToggle idSelected={VIEW_TOGGLE_LIST_ID} onChange={jest.fn()} />
+      <ViewToggle idSelected={VIEW_TOGGLE_LIST_ID} onChange={vi.fn()} />
     );
 
     expect(screen.getByRole('group', { name: /view toggle/i })).toBeInTheDocument();
@@ -29,7 +31,7 @@ describe('ViewToggle', () => {
 
   it('highlights the selected option', () => {
     renderWithTestingProviders(
-      <ViewToggle idSelected={VIEW_TOGGLE_TABLE_ID} onChange={jest.fn()} />
+      <ViewToggle idSelected={VIEW_TOGGLE_TABLE_ID} onChange={vi.fn()} />
     );
 
     expect(screen.getByRole('button', { name: /table view/i, pressed: true })).toBeInTheDocument();
@@ -37,7 +39,7 @@ describe('ViewToggle', () => {
   });
 
   it('calls onChange with the clicked option id', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     renderWithTestingProviders(<ViewToggle idSelected={VIEW_TOGGLE_LIST_ID} onChange={onChange} />);
 
@@ -47,7 +49,7 @@ describe('ViewToggle', () => {
   });
 
   it('calls onChange when switching from table to list', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     renderWithTestingProviders(
       <ViewToggle idSelected={VIEW_TOGGLE_TABLE_ID} onChange={onChange} />

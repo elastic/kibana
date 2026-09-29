@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { executeEsql, generateEsql } from '@kbn/agent-builder-genai-utils';
@@ -13,13 +16,16 @@ import { huntBehavior } from './hunt_behavior';
 import { ESQL_GENERATION_INSTRUCTIONS } from './extraction_contract';
 import { getMitreCatalog } from './mitre_catalog';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  generateEsql: jest.fn(),
-  executeEsql: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      generateEsql: vi.fn(),
+      executeEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const generateEsqlMock = generateEsql as jest.MockedFunction<typeof generateEsql>;
-const executeEsqlMock = executeEsql as jest.MockedFunction<typeof executeEsql>;
+const generateEsqlMock = generateEsql as MockedFunction<typeof generateEsql>;
+const executeEsqlMock = executeEsql as MockedFunction<typeof executeEsql>;
 
 const GROUNDED_ESQL =
   'FROM logs-aws.cloudtrail-*\n| WHERE aws.cloudtrail.event_name == "AssumeRole"\n| KEEP host.name, user.name\n| LIMIT 100';
@@ -44,8 +50,8 @@ const generateByTechnique = (queries: Record<string, string>) =>
 const buildMockModel = (
   candidates: Array<{ technique_id: string; evidence_quote: string; llm_confidence: number }> = []
 ): ScopedModel => {
-  const withStructuredOutput = jest.fn().mockReturnValue({
-    invoke: jest.fn().mockResolvedValue({ candidates }),
+  const withStructuredOutput = vi.fn().mockReturnValue({
+    invoke: vi.fn().mockResolvedValue({ candidates }),
   });
   return {
     chatModel: { withStructuredOutput } as unknown as ScopedModel['chatModel'],
@@ -57,7 +63,7 @@ const buildMockModel = (
 // Carries a stub `esql.query` because the probe-scoping wrapper reads `esClient.esql` when the
 // generator client is built. `generateEsql`/`executeEsql` are mocked, so it is never called.
 const esClient = {
-  esql: { query: jest.fn().mockResolvedValue({ columns: [], values: [] }) },
+  esql: { query: vi.fn().mockResolvedValue({ columns: [], values: [] }) },
 } as unknown as ElasticsearchClient;
 const col = (name: string) => ({ name, type: 'keyword' });
 const logger = loggingSystemMock.createLogger();
@@ -78,7 +84,7 @@ const executeParams = {
 
 describe('huntBehavior', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     generateByTechnique({ 'T1078.004': GROUNDED_ESQL, T1566: T1566_ESQL });
     executeEsqlMock.mockResolvedValue({ columns: [], values: [] });
   });
@@ -595,7 +601,7 @@ describe('huntBehavior', () => {
   });
 
   it('returns a warning when rows lack an _index column', async () => {
-    const warn = jest.spyOn(logger, 'warn');
+    const warn = vi.spyOn(logger, 'warn');
     executeEsqlMock.mockResolvedValue({ columns: [col('count')], values: [[3]] });
     await huntBehavior(buildMockModel([t1078Candidate]), logger, executeParams, esClient);
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('no _index column'));

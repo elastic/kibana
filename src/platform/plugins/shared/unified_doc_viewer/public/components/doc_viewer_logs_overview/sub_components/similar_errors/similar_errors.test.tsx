@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { SimilarErrors } from '.';
@@ -18,51 +21,63 @@ import { setUnifiedDocViewerServices } from '../../../../plugin';
 import { mockUnifiedDocViewerServices } from '../../../../__mocks__';
 import { getEsqlQuery } from './get_esql_query';
 
-const mockGenerateDiscoverLink = jest.fn((query) => (query ? 'http://discover/link' : undefined));
-const mockGetESQLQueryColumnsRaw = jest.fn();
+const mockGenerateDiscoverLink = vi.fn((query) => (query ? 'http://discover/link' : undefined));
+const mockGetESQLQueryColumnsRaw = vi.fn();
 
-jest.mock('../../../../hooks/use_generate_discover_link', () => ({
-  useGetGenerateDiscoverLink: () => ({
-    generateDiscoverLink: mockGenerateDiscoverLink,
-  }),
-}));
+vi.mock('../../../../hooks/use_generate_discover_link', () => {
+      const mocked = {
+      useGetGenerateDiscoverLink: () => ({
+        generateDiscoverLink: mockGenerateDiscoverLink,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLQueryColumnsRaw: (...args: unknown[]) => mockGetESQLQueryColumnsRaw(...args),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getESQLQueryColumnsRaw: (...args: unknown[]) => mockGetESQLQueryColumnsRaw(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./get_esql_query', () => {
-  const actual = jest.requireActual('./get_esql_query');
+vi.mock('./get_esql_query', async () => {
+  const actual = (await vi.importActual('./get_esql_query'));
   return {
-    getEsqlQuery: jest.fn(actual.getEsqlQuery),
+    getEsqlQuery: vi.fn(actual.getEsqlQuery),
   };
 });
 
-const mockGetEsqlQuery = getEsqlQuery as jest.Mock;
+const mockGetEsqlQuery = getEsqlQuery as Mock;
 
-jest.mock('../../../content_framework/lazy_content_framework_section', () => ({
-  ContentFrameworkSection: ({ children, title, actions, description, ...rest }: any) => (
-    <div data-test-subj="ContentFrameworkSection" {...rest}>
-      <h2>{title}</h2>
-      {description && <p>{description}</p>}
-      {actions && actions.length > 0 && (
-        <a data-test-subj="docViewerSimilarErrorsOpenInDiscoverButton" href={actions[0].href}>
-          {actions[0].label}
-        </a>
-      )}
-      {children}
-    </div>
-  ),
-}));
+vi.mock('../../../content_framework/lazy_content_framework_section', () => {
+      const mocked = {
+      ContentFrameworkSection: ({ children, title, actions, description, ...rest }: any) => (
+        <div data-test-subj="ContentFrameworkSection" {...rest}>
+          <h2>{title}</h2>
+          {description && <p>{description}</p>}
+          {actions && actions.length > 0 && (
+            <a data-test-subj="docViewerSimilarErrorsOpenInDiscoverButton" href={actions[0].href}>
+              {actions[0].label}
+            </a>
+          )}
+          {children}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./similar_errors_occurrences_chart', () => ({
-  SimilarErrorsOccurrencesChart: ({ baseEsqlQuery, currentDocumentTimestamp }: any) => (
-    <div
-      data-test-subj="SimilarErrorsOccurrencesChart"
-      data-current-document-timestamp={currentDocumentTimestamp}
-    />
-  ),
-}));
+vi.mock('./similar_errors_occurrences_chart', () => {
+      const mocked = {
+      SimilarErrorsOccurrencesChart: ({ baseEsqlQuery, currentDocumentTimestamp }: any) => (
+        <div
+          data-test-subj="SimilarErrorsOccurrencesChart"
+          data-current-document-timestamp={currentDocumentTimestamp}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
@@ -103,7 +118,7 @@ describe('SimilarErrors', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGenerateDiscoverLink.mockImplementation((query) =>
       query ? 'http://discover/link' : undefined
     );

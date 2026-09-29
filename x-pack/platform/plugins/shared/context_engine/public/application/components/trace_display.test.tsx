@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { TraceDisplay } from './trace_display';
 
-const mockUseAgentBuilderAgents = jest.fn();
+const mockUseAgentBuilderAgents = vi.fn();
 
-jest.mock('../hooks/use_agent_builder_agents', () => ({
-  useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
-}));
+vi.mock('../hooks/use_agent_builder_agents', () => {
+      const mocked = {
+      useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderDisplay = (trace: React.ComponentProps<typeof TraceDisplay>['trace']) =>
   render(
@@ -36,7 +41,7 @@ describe('TraceDisplay', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('resolves an elastic agent name and type label', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -19,17 +22,17 @@ import { TestProviders } from '../../mock';
 import * as i18n from './translations';
 import { mockUserProfiles } from './mocks';
 
-jest.mock('../user_profiles/use_get_current_user_profile');
-jest.mock('../user_profiles/use_bulk_get_user_profiles');
-jest.mock('../user_profiles/use_suggest_users');
+vi.mock('../user_profiles/use_get_current_user_profile');
+vi.mock('../user_profiles/use_bulk_get_user_profiles');
+vi.mock('../user_profiles/use_suggest_users');
 
 // Spied rather than stubbed: the option list is virtualised, so the rows it is asked to render
 // are only observable as props, while the tests below this one still need the real component.
-jest.mock('@kbn/user-profile-components', () => {
-  const actual = jest.requireActual('@kbn/user-profile-components');
+vi.mock('@kbn/user-profile-components', async () => {
+  const actual = (await vi.importActual('@kbn/user-profile-components'));
   return {
     ...actual,
-    UserProfilesSelectable: jest.fn((props) => actual.UserProfilesSelectable(props)),
+    UserProfilesSelectable: vi.fn((props) => actual.UserProfilesSelectable(props)),
   };
 });
 
@@ -45,7 +48,7 @@ const renderAssigneesSelectable = (
   } = { assignedUserIds: [] }
 ) => {
   const assignedProfiles = mockUserProfiles.filter((user) => assignedUserIds.includes(user.uid));
-  (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+  (useBulkGetUserProfiles as Mock).mockReturnValue({
     isLoading: false,
     data: assignedProfiles,
   });
@@ -61,21 +64,21 @@ const renderAssigneesSelectable = (
 };
 
 const lastSelectableProps = () => {
-  const { calls } = (UserProfilesSelectable as unknown as jest.Mock).mock;
+  const { calls } = (UserProfilesSelectable as unknown as Mock).mock;
   return calls[calls.length - 1][0];
 };
 
 describe('<AssigneesSelectable /> option ordering', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useSuggestUsers as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useSuggestUsers as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles,
     });
   });
 
   it('should withhold the options until the current user profile has resolved', () => {
-    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
+    (useGetCurrentUserProfile as Mock).mockReturnValue({
       isLoading: true,
       data: undefined,
     });
@@ -87,7 +90,7 @@ describe('<AssigneesSelectable /> option ordering', () => {
   });
 
   it('should bring the current user to the front once their profile has resolved', () => {
-    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
+    (useGetCurrentUserProfile as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles[2],
     });
@@ -106,12 +109,12 @@ describe('<AssigneesSelectable /> option ordering', () => {
 // Failing: See https://github.com/elastic/kibana/issues/260306
 describe.skip('<AssigneesSelectable />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useGetCurrentUserProfile as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles[0],
     });
-    (useSuggestUsers as jest.Mock).mockReturnValue({
+    (useSuggestUsers as Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles,
     });
@@ -138,12 +141,12 @@ describe.skip('<AssigneesSelectable />', () => {
   });
 
   it('should call `onSelectionChange` on user selection', async () => {
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+    (useBulkGetUserProfiles as Mock).mockReturnValue({
       isLoading: false,
       data: [],
     });
 
-    const onSelectionChangeMock = jest.fn();
+    const onSelectionChangeMock = vi.fn();
     const { getByText } = renderAssigneesSelectable({
       assignedUserIds: [],
       onSelectionChange: onSelectionChangeMock,

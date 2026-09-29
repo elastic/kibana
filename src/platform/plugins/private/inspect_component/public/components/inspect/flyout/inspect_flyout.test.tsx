@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -19,7 +22,7 @@ describe('InspectFlyout', () => {
   beforeEach(() => {
     target = document.createElement('div');
     Object.defineProperty(target, 'getBoundingClientRect', {
-      value: jest.fn(() => ({
+      value: vi.fn(() => ({
         top: 10,
         left: 20,
         width: 100,
@@ -78,7 +81,7 @@ describe('InspectFlyout', () => {
       width: 200,
       height: 100,
     };
-    (target.getBoundingClientRect as jest.Mock).mockReturnValue(newRect);
+    (target.getBoundingClientRect as Mock).mockReturnValue(newRect);
 
     fireEvent(window, new Event('resize'));
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, render, waitFor } from '@testing-library/react';
 import { StreamDetailGeneralData } from '.';
@@ -30,147 +33,184 @@ interface MockLifecycleSummaryProps {
 
 let mockLifecycleSummaryProps: MockLifecycleSummaryProps | undefined;
 
-jest.mock('../../../../../hooks/use_streams_privileges', () => ({
-  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
-}));
+vi.mock('../../../../../hooks/use_streams_privileges', () => {
+      const mocked = {
+      useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/unsaved-changes-prompt', () => ({
-  useUnsavedChangesPrompt: jest.fn(),
-}));
+vi.mock('@kbn/unsaved-changes-prompt', () => {
+      const mocked = {
+      useUnsavedChangesPrompt: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    core: {
-      notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
-      http: {},
-      overlays: { openConfirm: jest.fn() },
-      application: { navigateToUrl: jest.fn() },
-    },
-    appParams: { history: {} },
-    dependencies: {
-      start: {
-        streams: {
-          streamsRepositoryClient: { fetch: jest.fn() },
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        core: {
+          notifications: { toasts: { addSuccess: vi.fn(), addError: vi.fn() } },
+          http: {},
+          overlays: { openConfirm: vi.fn() },
+          application: { navigateToUrl: vi.fn() },
         },
-        share: {
-          url: {
-            locators: {
-              get: jest.fn(() => ({
-                getUrl: jest.fn(async () => '/mock-index-template-url'),
-              })),
+        appParams: { history: {} },
+        dependencies: {
+          start: {
+            streams: {
+              streamsRepositoryClient: { fetch: vi.fn() },
+            },
+            share: {
+              url: {
+                locators: {
+                  get: vi.fn(() => ({
+                    getUrl: vi.fn(async () => '/mock-index-template-url'),
+                  })),
+                },
+              },
             },
           },
         },
-      },
-    },
-    services: { telemetryClient: { trackRetentionChanged: jest.fn() } },
-  }),
-}));
+        services: { telemetryClient: { trackRetentionChanged: vi.fn() } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_streams_app_router', () => ({
-  useStreamsAppRouter: () => ({ link: jest.fn(() => '/mock-router-link') }),
-}));
+vi.mock('../../../../../hooks/use_streams_app_router', () => {
+      const mocked = {
+      useStreamsAppRouter: () => ({ link: vi.fn(() => '/mock-router-link') }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The frozen-phase gating hook reaches into licensing/cloud/application; this test focuses on the
 // unsaved-changes prompt wiring, so stub it out with non-gating defaults.
-jest.mock('../hooks/use_dlm_frozen_phase_gating', () => ({
-  useDlmFrozenPhaseGating: () => ({
-    excludeFrozen: false,
-    addPhaseBadges: {
-      showEnterpriseLicenseRequiredBadge: false,
-      showDefaultRepositoryRequiredBadge: false,
-    },
-    flyoutProps: {
-      isMissingEnterpriseLicense: false,
-      onUpgradeEnterprise: jest.fn(),
-      onRefreshDefaultRepository: jest.fn(),
-      isRefreshingDefaultRepository: false,
-      manageRepositoriesHref: '/mock-repositories',
-      defaultRepositoryName: undefined,
-    },
-    handleAddPhaseGating: () => false,
-    modals: null,
-  }),
-}));
-
-jest.mock('../../../../../hooks/use_timefilter', () => ({
-  useTimefilter: () => ({
-    timeState: {},
-    timeState$: { subscribe: () => ({ unsubscribe: () => {} }) },
-  }),
-}));
-
-jest.mock('@kbn/react-hooks', () => ({
-  useAbortController: () => ({ signal: undefined }),
-  useAbortableAsync: () => ({
-    value: undefined,
-    loading: false,
-    error: undefined,
-    refresh: () => {},
-  }),
-}));
-
-jest.mock('../common/section_panel', () => ({
-  SectionPanel: ({
-    children,
-    topCard,
-    bottomCard,
-  }: {
-    children: React.ReactNode;
-    topCard?: React.ReactNode;
-    bottomCard?: React.ReactNode;
-  }) => (
-    <div>
-      {topCard}
-      {children}
-      {bottomCard}
-    </div>
-  ),
-}));
-
-jest.mock('./cards/retention_card', () => ({
-  RetentionCard: () => <div data-test-subj="retentionCard" />,
-}));
-
-jest.mock('./cards/storage_size_card', () => ({
-  StorageSizeCard: () => <div data-test-subj="storageSizeCard" />,
-}));
-
-jest.mock('./cards/ingestion_card', () => ({
-  IngestionCard: () => <div data-test-subj="ingestionCard" />,
-}));
-
-jest.mock('./ingestion_rate', () => ({
-  IngestionRate: () => <div data-test-subj="ingestionRate" />,
-}));
-
-jest.mock('./lifecycle_summary', () => ({
-  LifecycleSummary: ({ onAddDeletePhase }: { onAddDeletePhase?: () => void }) => {
-    // Keep this unit test focused on StreamDetailGeneralData + unsaved prompt wiring.
-    // We emulate the lifecycle flyout updating the shared preview state.
-    const { useLifecyclePreview } = jest.requireActual(
-      '../common/hooks/lifecycle_preview'
-    ) as typeof import('../common/hooks/lifecycle_preview');
-    const preview = useLifecyclePreview();
-
-    mockLifecycleSummaryProps = {
-      onFlyoutOpenChange: (isOpen: boolean) => {
-        preview.setIsActive(isOpen);
-        if (!isOpen) {
-          preview.setHasUnsavedChanges(false);
-        }
-      },
-      onFlyoutUnsavedChangesChange: (hasUnsavedChanges: boolean) => {
-        preview.setHasUnsavedChanges(hasUnsavedChanges);
-      },
-      onAddDeletePhase,
+vi.mock('../hooks/use_dlm_frozen_phase_gating', () => {
+      const mocked = {
+      useDlmFrozenPhaseGating: () => ({
+        excludeFrozen: false,
+        addPhaseBadges: {
+          showEnterpriseLicenseRequiredBadge: false,
+          showDefaultRepositoryRequiredBadge: false,
+        },
+        flyoutProps: {
+          isMissingEnterpriseLicense: false,
+          onUpgradeEnterprise: vi.fn(),
+          onRefreshDefaultRepository: vi.fn(),
+          isRefreshingDefaultRepository: false,
+          manageRepositoriesHref: '/mock-repositories',
+          defaultRepositoryName: undefined,
+        },
+        handleAddPhaseGating: () => false,
+        modals: null,
+      }),
     };
+      return { ...mocked, default: mocked };
+    });
 
-    return <div data-test-subj="mockLifecycleSummary" />;
-  },
-}));
+vi.mock('../../../../../hooks/use_timefilter', () => {
+      const mocked = {
+      useTimefilter: () => ({
+        timeState: {},
+        timeState$: { subscribe: () => ({ unsubscribe: () => {} }) },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseUnsavedChangesPrompt = useUnsavedChangesPrompt as unknown as jest.Mock;
+vi.mock('@kbn/react-hooks', () => {
+      const mocked = {
+      useAbortController: () => ({ signal: undefined }),
+      useAbortableAsync: () => ({
+        value: undefined,
+        loading: false,
+        error: undefined,
+        refresh: () => {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../common/section_panel', () => {
+      const mocked = {
+      SectionPanel: ({
+        children,
+        topCard,
+        bottomCard,
+      }: {
+        children: React.ReactNode;
+        topCard?: React.ReactNode;
+        bottomCard?: React.ReactNode;
+      }) => (
+        <div>
+          {topCard}
+          {children}
+          {bottomCard}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('./cards/retention_card', () => {
+      const mocked = {
+      RetentionCard: () => <div data-test-subj="retentionCard" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('./cards/storage_size_card', () => {
+      const mocked = {
+      StorageSizeCard: () => <div data-test-subj="storageSizeCard" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('./cards/ingestion_card', () => {
+      const mocked = {
+      IngestionCard: () => <div data-test-subj="ingestionCard" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('./ingestion_rate', () => {
+      const mocked = {
+      IngestionRate: () => <div data-test-subj="ingestionRate" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('./lifecycle_summary', () => {
+      const mocked = {
+      LifecycleSummary: async ({ onAddDeletePhase }: { onAddDeletePhase?: () => void }) => {
+        // Keep this unit test focused on StreamDetailGeneralData + unsaved prompt wiring.
+        // We emulate the lifecycle flyout updating the shared preview state.
+        const { useLifecyclePreview } = (await vi.importActual('../common/hooks/lifecycle_preview')) as typeof import('../common/hooks/lifecycle_preview');
+        const preview = useLifecyclePreview();
+
+        mockLifecycleSummaryProps = {
+          onFlyoutOpenChange: (isOpen: boolean) => {
+            preview.setIsActive(isOpen);
+            if (!isOpen) {
+              preview.setHasUnsavedChanges(false);
+            }
+          },
+          onFlyoutUnsavedChangesChange: (hasUnsavedChanges: boolean) => {
+            preview.setHasUnsavedChanges(hasUnsavedChanges);
+          },
+          onAddDeletePhase,
+        };
+
+        return <div data-test-subj="mockLifecycleSummary" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+
+const mockUseUnsavedChangesPrompt = useUnsavedChangesPrompt as unknown as Mock;
 
 const getPromptHasUnsavedChanges = (): boolean => {
   const lastCall = mockUseUnsavedChangesPrompt.mock.calls.at(-1)?.[0];
@@ -179,7 +219,7 @@ const getPromptHasUnsavedChanges = (): boolean => {
 
 describe('StreamDetailGeneralData unsaved changes prompt', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFlyoutOpen = false;
     mockFlyoutHasUnsavedChanges = false;
     mockLifecycleSummaryProps = undefined;
@@ -198,7 +238,7 @@ describe('StreamDetailGeneralData unsaved changes prompt', () => {
     stats: undefined,
     error: undefined,
     isLoading: false,
-    refresh: jest.fn(),
+    refresh: vi.fn(),
     timeSeriesCountLoading: false,
     timeSeriesCountError: undefined,
   };
@@ -210,7 +250,7 @@ describe('StreamDetailGeneralData unsaved changes prompt', () => {
       <LifecycleFlyoutCoordinationProvider>
         <StreamDetailGeneralData
           definition={definition}
-          refreshDefinition={jest.fn()}
+          refreshDefinition={vi.fn()}
           data={data}
         />
         {extraSiblings}

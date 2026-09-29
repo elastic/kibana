@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
@@ -24,8 +27,8 @@ import type { ISearchSource } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
+vi.mock('@kbn/code-editor', async () => {
+  const original = (await vi.importActual('@kbn/code-editor'));
   return {
     ...original,
     // Mocking CodeEditor
@@ -87,8 +90,8 @@ const defaultEsqlRuleParams: EsQueryRuleParams<SearchType.esqlQuery> = {
 const dataViewPluginMock = (() => {
   const base = dataViewPluginMocks.createStartContract();
   return Object.assign(base, {
-    getFieldsForWildcard: jest.fn().mockResolvedValue([]),
-    getIndices: jest.fn().mockResolvedValue([]),
+    getFieldsForWildcard: vi.fn().mockResolvedValue([]),
+    getIndices: vi.fn().mockResolvedValue([]),
   });
 })();
 const chartsStartMock = chartPluginMock.createStartContract();
@@ -96,7 +99,7 @@ const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
 const httpMock = httpServiceMock.createStartContract();
 const docLinksMock = docLinksServiceMock.createStartContract();
 export const uiSettingsMock = {
-  get: jest.fn(),
+  get: vi.fn(),
 };
 
 const mockSearchResult = new Subject();
@@ -121,14 +124,14 @@ const searchSourceMock = {
   getField: (name: string) => {
     return (searchSourceFieldsMock as Record<string, object>)[name] || '';
   },
-  setField: jest.fn(),
-  createCopy: jest.fn(() => {
+  setField: vi.fn(),
+  createCopy: vi.fn(() => {
     return searchSourceMock;
   }),
-  setParent: jest.fn(() => {
+  setParent: vi.fn(() => {
     return searchSourceMock;
   }),
-  fetch$: jest.fn(() => {
+  fetch$: vi.fn(() => {
     return mockSearchResult;
   }),
 } as unknown as ISearchSource;
@@ -149,31 +152,31 @@ const savedQueryMock = {
 const dataMock = dataPluginMock.createStartContract();
 const dataViewsMock = {
   ...dataViewPluginMocks.createStartContract(),
-  getFieldsForWildcard: jest.fn().mockResolvedValue([]),
-  getIndices: jest.fn().mockResolvedValue([]),
+  getFieldsForWildcard: vi.fn().mockResolvedValue([]),
+  getIndices: vi.fn().mockResolvedValue([]),
 };
 const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
 const notificationsMock = notificationServiceMock.createStartContract();
 
-(dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>
+(dataMock.search.searchSource.create as Mock).mockImplementation(() =>
   Promise.resolve(searchSourceMock)
 );
-(dataViewsMock.getIds as jest.Mock) = jest.fn().mockImplementation(() => Promise.resolve([]));
-dataViewsMock.getDefaultDataView = jest.fn(() => Promise.resolve(null));
-dataViewsMock.get = jest.fn();
+(dataViewsMock.getIds as Mock) = vi.fn().mockImplementation(() => Promise.resolve([]));
+dataViewsMock.getDefaultDataView = vi.fn(() => Promise.resolve(null));
+dataViewsMock.get = vi.fn();
 dataViewsMock.create.mockResolvedValue({
   title: 'test-index',
   type: 'esql',
   id: 'test-index',
   getIndexPattern: () => 'test-index',
 } as DataView);
-(dataMock.query.savedQueries.getSavedQuery as jest.Mock).mockImplementation(() =>
+(dataMock.query.savedQueries.getSavedQuery as Mock).mockImplementation(() =>
   Promise.resolve(savedQueryMock)
 );
-dataMock.query.savedQueries.findSavedQueries = jest.fn(() =>
+dataMock.query.savedQueries.findSavedQueries = vi.fn(() =>
   Promise.resolve({ total: 0, queries: [] })
 );
-(httpMock.post as jest.Mock).mockImplementation(() => Promise.resolve({ fields: [] }));
+(httpMock.post as Mock).mockImplementation(() => Promise.resolve({ fields: [] }));
 
 const Wrapper: React.FC<{
   ruleParams:
@@ -216,7 +219,7 @@ const Wrapper: React.FC<{
       actionGroups={[]}
       charts={chartsStartMock}
       metadata={metadata}
-      onChangeMetaData={jest.fn()}
+      onChangeMetaData={vi.fn()}
     />
   );
 };
@@ -248,7 +251,7 @@ const setup = (
 
 describe('EsQueryRuleTypeExpression', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     uiSettingsMock.get.mockReturnValue(true);
   });

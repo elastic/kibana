@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Feature } from '@kbn/significant-events-schema';
 import { loggerMock } from '@kbn/logging-mocks';
 import { executeFeatureIdentificationAgent } from './identify_features_via_agent';
@@ -16,11 +18,14 @@ import {
   selectPreviouslyIdentifiedFeatures,
 } from './identify_inferred_features';
 
-jest.mock('./identify_features_via_agent', () => ({
-  executeFeatureIdentificationAgent: jest.fn(),
-}));
+vi.mock('./identify_features_via_agent', () => {
+      const mocked = {
+      executeFeatureIdentificationAgent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockExecuteFeatureIdentificationAgent = jest.mocked(executeFeatureIdentificationAgent);
+const mockExecuteFeatureIdentificationAgent = vi.mocked(executeFeatureIdentificationAgent);
 
 const createFeature = ({ id, ...overrides }: Partial<Feature> & Pick<Feature, 'id'>): Feature => ({
   id,
@@ -119,7 +124,7 @@ describe('buildKnownFeatureIds', () => {
 
 describe('findSimilarFeatures', () => {
   it('uses semantic search and returns only hits with the candidate type', async () => {
-    const findFeatures = jest.fn().mockResolvedValue({
+    const findFeatures = vi.fn().mockResolvedValue({
       hits: [
         createFeature({ id: 'okta', type: 'technology', title: undefined }),
         createFeature({ id: 'okta-service', type: 'entity' }),
@@ -159,7 +164,7 @@ describe('findSimilarFeatures', () => {
   });
 
   it('caps same-type hits at 5 after over-fetching across types', async () => {
-    const findFeatures = jest.fn().mockResolvedValue({
+    const findFeatures = vi.fn().mockResolvedValue({
       hits: [
         createFeature({ id: 'other-service', type: 'entity' }),
         ...Array.from({ length: 7 }, (_, i) =>
@@ -188,7 +193,7 @@ describe('findSimilarFeatures', () => {
 
   it('propagates semantic search errors for the reasoning-agent boundary to handle', async () => {
     const kiClient = {
-      findFeatures: jest.fn().mockRejectedValue(new Error('semantic unavailable')),
+      findFeatures: vi.fn().mockRejectedValue(new Error('semantic unavailable')),
     } as Parameters<typeof findSimilarFeatures>[0]['kiClient'];
 
     await expect(
@@ -260,10 +265,10 @@ describe('identifyInferredFeatures', () => {
     });
 
     const kiClient = {
-      getFeatures: jest.fn().mockResolvedValue({ hits: [] }),
-      getExcludedFeatures: jest.fn().mockResolvedValue({ hits: [] }),
-      bulk: jest.fn(),
-      getDefaultExpiresAt: jest.fn(),
+      getFeatures: vi.fn().mockResolvedValue({ hits: [] }),
+      getExcludedFeatures: vi.fn().mockResolvedValue({ hits: [] }),
+      bulk: vi.fn(),
+      getDefaultExpiresAt: vi.fn(),
     };
 
     await identifyInferredFeatures({

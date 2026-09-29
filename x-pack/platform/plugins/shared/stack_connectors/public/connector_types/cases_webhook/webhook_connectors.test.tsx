@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import CasesWebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
@@ -15,14 +18,14 @@ import * as i18n from './translations';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useSecretHeaders } from '../../common/auth/use_secret_headers';
 
-jest.mock('../../common/auth/use_secret_headers');
+vi.mock('../../common/auth/use_secret_headers');
 
-const useSecretHeadersMock = useSecretHeaders as jest.Mock;
+const useSecretHeadersMock = useSecretHeaders as Mock;
 
-jest.setTimeout(60_000);
+vi.setConfig({ testTimeout: 60_000 });
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
+vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
+  const originalModule = (await vi.importActual('@kbn/triggers-actions-ui-plugin/public'));
   const notFoundError = Object.assign(new Error('Not Found'), {
     request: {},
     response: { status: 404 },
@@ -37,11 +40,11 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
         },
         notifications: {
           toasts: {
-            addError: jest.fn(),
+            addError: vi.fn(),
           },
         },
         http: {
-          head: jest.fn().mockRejectedValue(notFoundError),
+          head: vi.fn().mockRejectedValue(notFoundError),
         },
       },
     }),
@@ -95,7 +98,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('All inputs are properly rendered', async () => {
@@ -493,10 +496,10 @@ describe('CasesWebhookActionConnectorFields renders', () => {
 
   describe('Validation', () => {
     let user: UserEvent;
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       user = userEvent.setup();
     });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedClass } from 'vitest';
+
 import type { LocationAgentStats } from '../../../../common/types';
 import { ConfigKey } from '../../../../common/runtime_types';
 import { agentIdCondition } from '../../../synthetics_service/private_location/assign_by_condition';
@@ -12,13 +15,13 @@ import { PackagePolicyService } from '../../../synthetics_service/private_locati
 import { getPrivateLocationAgentStats } from './get_agent_stats';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 
-jest.mock('./get_private_locations');
-jest.mock('../../../synthetics_service/private_location/package_policy_service');
+vi.mock('./get_private_locations');
+vi.mock('../../../synthetics_service/private_location/package_policy_service');
 
-const mockGetLocations = getPrivateLocationsAndAgentPolicies as jest.Mock;
-const mockListByAgentPolicy = jest.fn();
+const mockGetLocations = getPrivateLocationsAndAgentPolicies as Mock;
+const mockListByAgentPolicy = vi.fn();
 
-const mockPackagePolicyService = PackagePolicyService as jest.MockedClass<
+const mockPackagePolicyService = PackagePolicyService as MockedClass<
   typeof PackagePolicyService
 >;
 
@@ -77,7 +80,7 @@ const makeContext = ({
   visibleConfigIds = ['mon-a', 'mon-b', 'mon-c'],
   visibleMonitors,
 }: {
-  listAgentsImpl: jest.Mock;
+  listAgentsImpl: Mock;
   buckets?: ReturnType<typeof bucket>[];
   hasEnterprise?: boolean;
   rebalanceEnabled?: boolean;
@@ -88,25 +91,25 @@ const makeContext = ({
     namespaces?: string[];
   }>;
 }) => {
-  const search = jest.fn().mockResolvedValue({ aggregations: { by_host: { buckets } } });
+  const search = vi.fn().mockResolvedValue({ aggregations: { by_host: { buckets } } });
   const routeContext = {
     server: {
       fleet: { agentService: { asInternalUser: { listAgents: listAgentsImpl } } },
       pluginsStart: {
         taskManager: {
-          get: jest.fn().mockResolvedValue({
+          get: vi.fn().mockResolvedValue({
             state: { rebalancePrivateLocationShardsEnabled: rebalanceEnabled },
           }),
         },
         licensing: {
-          getLicense: jest.fn().mockResolvedValue({
+          getLicense: vi.fn().mockResolvedValue({
             isAvailable: true,
             isActive: true,
             hasAtLeast: (level: string) => level === 'enterprise' && hasEnterprise,
           }),
         },
       },
-      logger: { error: jest.fn(), warn: jest.fn() },
+      logger: { error: vi.fn(), warn: vi.fn() },
     },
     context: {
       core: Promise.resolve({ elasticsearch: { client: { asCurrentUser: { search } } } }),
@@ -114,7 +117,7 @@ const makeContext = ({
     savedObjectsClient: {},
     syntheticsMonitorClient: {},
     monitorConfigRepository: {
-      getAll: jest.fn().mockResolvedValue(
+      getAll: vi.fn().mockResolvedValue(
         visibleMonitors ??
           visibleConfigIds.map((id) => ({
             id,
@@ -152,10 +155,10 @@ describe('getPrivateLocationAgentStats route', () => {
     );
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('joins metrics for mixed-case host names (queries original case, keys result lowercase)', async () => {
-    const listAgents = jest.fn().mockResolvedValue({
+    const listAgents = vi.fn().mockResolvedValue({
       agents: [agent({ local_metadata: { host: { name: 'WIN-Server01' } } })],
       total: 1,
     });
@@ -181,7 +184,7 @@ describe('getPrivateLocationAgentStats route', () => {
   });
 
   it('caps usedMemoryMib at totalMemoryMib', async () => {
-    const listAgents = jest.fn().mockResolvedValue({
+    const listAgents = vi.fn().mockResolvedValue({
       agents: [agent({ local_metadata: { host: { name: 'host-a', memory: 4 * GIB } } })],
       total: 1,
     });
@@ -198,7 +201,7 @@ describe('getPrivateLocationAgentStats route', () => {
   });
 
   it('returns one row per agent id when several agents share a host name', async () => {
-    const listAgents = jest.fn().mockResolvedValue({
+    const listAgents = vi.fn().mockResolvedValue({
       agents: [
         agent({
           id: 'stale',
@@ -229,7 +232,7 @@ describe('getPrivateLocationAgentStats route', () => {
   });
 
   it('paginates using the reported total across multiple pages', async () => {
-    const listAgents = jest
+    const listAgents = vi
       .fn()
       .mockResolvedValueOnce({
         agents: [
@@ -251,7 +254,7 @@ describe('getPrivateLocationAgentStats route', () => {
   });
 
   it('resolves the agent policy display name', async () => {
-    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const listAgents = vi.fn().mockResolvedValue({ agents: [agent()], total: 1 });
     const { routeContext } = makeContext({ listAgentsImpl: listAgents });
 
     const result = await run(routeContext);
@@ -269,7 +272,7 @@ describe('getPrivateLocationAgentStats route', () => {
       { id: 'mon-b-loc-1', condition: agentIdCondition('agent-1') },
       { id: 'mon-c-loc-1', condition: agentIdCondition('other-agent') },
     ]);
-    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const listAgents = vi.fn().mockResolvedValue({ agents: [agent()], total: 1 });
     const { routeContext } = makeContext({ listAgentsImpl: listAgents, hasEnterprise: true });
 
     const result = await run(routeContext);
@@ -284,7 +287,7 @@ describe('getPrivateLocationAgentStats route', () => {
       { id: 'mon-a-loc-1', condition: agentIdCondition('agent-1') },
       { id: 'other-space-mon-loc-1', condition: agentIdCondition('agent-1') },
     ]);
-    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const listAgents = vi.fn().mockResolvedValue({ agents: [agent()], total: 1 });
     const { routeContext } = makeContext({
       listAgentsImpl: listAgents,
       hasEnterprise: true,
@@ -306,7 +309,7 @@ describe('getPrivateLocationAgentStats route', () => {
     mockListByAgentPolicy.mockResolvedValue([
       { id: 'project-monitor-id-loc-1', condition: agentIdCondition('agent-1') },
     ]);
-    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const listAgents = vi.fn().mockResolvedValue({ agents: [agent()], total: 1 });
     const { routeContext } = makeContext({ listAgentsImpl: listAgents, hasEnterprise: true });
     routeContext.monitorConfigRepository.getAll.mockResolvedValue([
       {
@@ -343,7 +346,7 @@ describe('getPrivateLocationAgentStats route', () => {
         },
       ])
     );
-    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const listAgents = vi.fn().mockResolvedValue({ agents: [agent()], total: 1 });
     const { routeContext } = makeContext({
       listAgentsImpl: listAgents,
       hasEnterprise: true,
@@ -377,7 +380,7 @@ describe('getPrivateLocationAgentStats route', () => {
         spaceIds: ['space-a'],
       },
     ]);
-    const listAgents = jest.fn().mockResolvedValue({
+    const listAgents = vi.fn().mockResolvedValue({
       agents: [agent({ id: 'visible-agent' }), agent({ id: 'hidden-agent' })],
       total: 2,
     });
@@ -409,7 +412,7 @@ describe('getPrivateLocationAgentStats route', () => {
     mockListByAgentPolicy.mockResolvedValue([
       { id: 'mon-a-loc-1', condition: agentIdCondition('agent-1') },
     ]);
-    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const listAgents = vi.fn().mockResolvedValue({ agents: [agent()], total: 1 });
     const { routeContext } = makeContext({ listAgentsImpl: listAgents, hasEnterprise: true });
     const error = new Error('failed to load monitors');
     routeContext.monitorConfigRepository.getAll.mockRejectedValue(error);
@@ -424,7 +427,7 @@ describe('getPrivateLocationAgentStats route', () => {
   });
 
   it('reports no sharding when shard rebalancing is off, even with an Enterprise license', async () => {
-    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const listAgents = vi.fn().mockResolvedValue({ agents: [agent()], total: 1 });
     const { routeContext } = makeContext({
       listAgentsImpl: listAgents,
       hasEnterprise: true,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 
@@ -18,15 +21,15 @@ import { useLicense } from '../../../../../../hooks/use_license';
 
 import { AgentDetailsActionMenu } from './actions_menu';
 
-jest.mock('../../../../../../services/experimental_features');
-jest.mock('../../../../../../hooks/use_authz');
-jest.mock('../../../../../../hooks/use_agent_version');
-jest.mock('../../../../../../hooks/use_license');
+vi.mock('../../../../../../services/experimental_features');
+vi.mock('../../../../../../hooks/use_authz');
+vi.mock('../../../../../../hooks/use_agent_version');
+vi.mock('../../../../../../hooks/use_license');
 
-const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
-const mockedUseAuthz = jest.mocked(useAuthz);
-const mockedUseAgentVersion = jest.mocked(useAgentVersion);
-const mockedUseLicense = useLicense as jest.MockedFunction<typeof useLicense>;
+const mockedExperimentalFeaturesService = vi.mocked(ExperimentalFeaturesService);
+const mockedUseAuthz = vi.mocked(useAuthz);
+const mockedUseAgentVersion = vi.mocked(useAgentVersion);
+const mockedUseLicense = useLicense as MockedFunction<typeof useLicense>;
 
 function renderActions({ agent, agentPolicy }: { agent: Agent; agentPolicy?: AgentPolicy }) {
   const renderer = createFleetTestRendererMock();
@@ -36,8 +39,8 @@ function renderActions({ agent, agentPolicy }: { agent: Agent; agentPolicy?: Age
       agent={agent}
       agentPolicy={agentPolicy}
       assignFlyoutOpenByDefault={false}
-      onCancelReassign={jest.fn()}
-      onAddRemoveTagsClick={jest.fn()}
+      onCancelReassign={vi.fn()}
+      onAddRemoveTagsClick={vi.fn()}
     />
   );
 

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useBlurCommitDraft } from './use_blur_commit_draft';
 
 describe('useBlurCommitDraft', () => {
   it('keeps a draft value while editing and commits only on blur', () => {
-    const onCommit = jest.fn();
-    const onFieldBlur = jest.fn();
-    const onAfterCommit = jest.fn();
+    const onCommit = vi.fn();
+    const onFieldBlur = vi.fn();
+    const onAfterCommit = vi.fn();
 
     const { result } = renderHook(() =>
       useBlurCommitDraft({
@@ -39,8 +41,8 @@ describe('useBlurCommitDraft', () => {
   });
 
   it('restores the committed value when cleared and blurred (no commit)', () => {
-    const onCommit = jest.fn();
-    const onAfterCommit = jest.fn();
+    const onCommit = vi.fn();
+    const onAfterCommit = vi.fn();
 
     const { result } = renderHook(() =>
       useBlurCommitDraft({
@@ -65,7 +67,7 @@ describe('useBlurCommitDraft', () => {
   });
 
   it('syncs draft from committed value when not editing', () => {
-    const onCommit = jest.fn();
+    const onCommit = vi.fn();
 
     const { result, rerender } = renderHook(
       ({ committedValue }) =>
@@ -83,8 +85,8 @@ describe('useBlurCommitDraft', () => {
   });
 
   it('does not commit or update when disabled', () => {
-    const onCommit = jest.fn();
-    const onFieldBlur = jest.fn();
+    const onCommit = vi.fn();
+    const onFieldBlur = vi.fn();
 
     const { result } = renderHook(() =>
       useBlurCommitDraft({

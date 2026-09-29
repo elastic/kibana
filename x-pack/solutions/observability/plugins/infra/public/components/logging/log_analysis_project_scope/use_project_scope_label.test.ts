@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ProjectRouting } from '@kbn/es-query';
 import { type CPSProject, type ICPSManager, PROJECT_ROUTING } from '@kbn/cps-utils';
@@ -15,19 +18,19 @@ const asProject = (id: string) => ({ _id: id } as CPSProject);
 const createCpsManager = ({
   totalProjectCount = 3,
   hasLinkedProjects = true,
-  fetchProjects = jest
+  fetchProjects = vi
     .fn()
     .mockResolvedValue({ origin: asProject('origin'), linkedProjects: [asProject('linked')] }),
 }: {
   totalProjectCount?: number;
   hasLinkedProjects?: boolean;
-  fetchProjects?: jest.Mock;
+  fetchProjects?: Mock;
 } = {}) =>
   ({
-    whenReady: jest.fn().mockResolvedValue(undefined),
+    whenReady: vi.fn().mockResolvedValue(undefined),
     fetchProjects,
-    getTotalProjectCount: jest.fn().mockReturnValue(totalProjectCount),
-    hasLinkedProjects: jest.fn().mockReturnValue(hasLinkedProjects),
+    getTotalProjectCount: vi.fn().mockReturnValue(totalProjectCount),
+    hasLinkedProjects: vi.fn().mockReturnValue(hasLinkedProjects),
   } as unknown as ICPSManager);
 
 const renderProjectScopeLabel = (cpsManager: ICPSManager, projectRouting: ProjectRouting) =>
@@ -57,7 +60,7 @@ describe('useProjectScopeLabel', () => {
   it('counts an origin-only scope like any other', async () => {
     const cpsManager = createCpsManager({
       totalProjectCount: 3,
-      fetchProjects: jest
+      fetchProjects: vi
         .fn()
         .mockResolvedValue({ origin: asProject('origin'), linkedProjects: [] }),
     });
@@ -87,7 +90,7 @@ describe('useProjectScopeLabel', () => {
 
   it('surfaces a failed project fetch', async () => {
     const cpsManager = createCpsManager({
-      fetchProjects: jest.fn().mockRejectedValue(new Error('boom')),
+      fetchProjects: vi.fn().mockRejectedValue(new Error('boom')),
     });
 
     const { result } = renderProjectScopeLabel(cpsManager, '_alias:linked');

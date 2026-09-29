@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   AGENT_ACCESS_CONTROL_MAX_ENTRIES,
@@ -28,30 +31,36 @@ const testSpace = 'default';
 const mockUser = { id: 'user-1', username: 'test-user', isAdmin: false };
 
 interface MockEsClient {
-  search: jest.Mock;
-  index: jest.Mock;
-  delete: jest.Mock;
-  bulk: jest.Mock;
+  search: Mock;
+  index: Mock;
+  delete: Mock;
+  bulk: Mock;
 }
 
 const mockEsClient: MockEsClient = {
-  search: jest.fn(),
-  index: jest.fn(),
-  delete: jest.fn(),
-  bulk: jest.fn(),
+  search: vi.fn(),
+  index: vi.fn(),
+  delete: vi.fn(),
+  bulk: vi.fn(),
 };
 
-jest.mock('./storage', () => ({
-  createStorage: jest.fn(() => ({
-    getClient: jest.fn(() => mockEsClient),
-  })),
-}));
+vi.mock('./storage', () => {
+      const mocked = {
+      createStorage: vi.fn(() => ({
+        getClient: vi.fn(() => mockEsClient),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../utils', () => ({
-  getUserFromRequest: jest.fn(),
-}));
+vi.mock('../../../utils', () => {
+      const mocked = {
+      getUserFromRequest: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getUserFromRequestMock = getUserFromRequest as jest.MockedFunction<typeof getUserFromRequest>;
+const getUserFromRequestMock = getUserFromRequest as MockedFunction<typeof getUserFromRequest>;
 
 describe('AgentClient', () => {
   let client: AgentClient;
@@ -59,7 +68,7 @@ describe('AgentClient', () => {
 
   beforeEach(async () => {
     logger = loggerMock.create();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getUserFromRequestMock.mockResolvedValue(mockUser);
 
     client = await createClient({
@@ -70,7 +79,7 @@ describe('AgentClient', () => {
       toolsService: {} as never,
       elasticsearch: {
         client: {
-          asScoped: jest.fn(() => ({
+          asScoped: vi.fn(() => ({
             asCurrentUser: {},
             asInternalUser: {},
           })),
@@ -125,7 +134,7 @@ describe('AgentClient', () => {
         toolsService: {} as never,
         elasticsearch: {
           client: {
-            asScoped: jest.fn(() => ({
+            asScoped: vi.fn(() => ({
               asCurrentUser: {},
               asInternalUser: {},
             })),
@@ -152,7 +161,7 @@ describe('AgentClient', () => {
     // A tools service whose registry accepts any tool, so tool validation never interferes
     // with the workflow-gating assertions under test.
     const toolsService = {
-      getRegistry: jest.fn().mockResolvedValue({ has: jest.fn().mockResolvedValue(true) }),
+      getRegistry: vi.fn().mockResolvedValue({ has: vi.fn().mockResolvedValue(true) }),
     };
 
     const buildClient = (isAdmin: boolean): Promise<AgentClient> => {
@@ -165,7 +174,7 @@ describe('AgentClient', () => {
         toolsService: toolsService as never,
         elasticsearch: {
           client: {
-            asScoped: jest.fn(() => ({
+            asScoped: vi.fn(() => ({
               asCurrentUser: {},
               asInternalUser: {},
             })),
@@ -277,7 +286,7 @@ describe('AgentClient', () => {
 
   describe('post-execution workflow configuration', () => {
     const toolsService = {
-      getRegistry: jest.fn().mockResolvedValue({ has: jest.fn().mockResolvedValue(true) }),
+      getRegistry: vi.fn().mockResolvedValue({ has: vi.fn().mockResolvedValue(true) }),
     };
 
     const buildClient = (isAdmin: boolean): Promise<AgentClient> => {
@@ -290,7 +299,7 @@ describe('AgentClient', () => {
         toolsService: toolsService as never,
         elasticsearch: {
           client: {
-            asScoped: jest.fn(() => ({
+            asScoped: vi.fn(() => ({
               asCurrentUser: {},
               asInternalUser: {},
             })),
@@ -435,11 +444,11 @@ describe('AgentClient', () => {
     const emptyHits = { hits: { hits: [] } };
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('creates and returns the default agent', async () => {
@@ -462,7 +471,7 @@ describe('AgentClient', () => {
       mockEsClient.index.mockRejectedValue(conflictError);
 
       const promise = client.ensureDefaultAgent(profile as never);
-      await jest.advanceTimersByTimeAsync(1000);
+      await vi.advanceTimersByTimeAsync(1000);
 
       await expect(promise).resolves.toMatchObject({ id: 'agent-1' });
       expect(mockEsClient.search).toHaveBeenCalledTimes(4);
@@ -476,7 +485,7 @@ describe('AgentClient', () => {
       promise.catch(() => {
         // prevent unhandled rejection while timers advance
       });
-      await jest.advanceTimersByTimeAsync(10_000);
+      await vi.advanceTimersByTimeAsync(10_000);
 
       const error = await promise.catch((e) => e);
       expect(isAgentNotFoundError(error)).toBe(true);
@@ -600,7 +609,7 @@ describe('SystemAgentClient', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('creates a system-owned agent without a request', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useReferencesFileUploadStep } from '.';
 import { TestProviders } from '../../../../../../../../common/mock/test_providers';
@@ -12,17 +15,17 @@ import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_r
 import { getRuleMigrationStatsMock } from '../../../../../../__mocks__/migration_rule_stats';
 import { SiemMigrationTaskStatus } from '../../../../../../../../../common/siem_migrations/constants';
 
-jest.mock('../../../../../../service/hooks/use_upsert_resources');
-const mockUseUpsertResources = useUpsertResources as jest.Mock;
+vi.mock('../../../../../../service/hooks/use_upsert_resources');
+const mockUseUpsertResources = useUpsertResources as Mock;
 
 describe('useReferencesFileUploadStep', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns step props', () => {
     mockUseUpsertResources.mockReturnValue({
-      upsertResources: jest.fn(),
+      upsertResources: vi.fn(),
       isLoading: false,
       error: null,
     });
@@ -31,7 +34,7 @@ describe('useReferencesFileUploadStep', () => {
       status: 'incomplete' as const,
       migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
       missingLookups: [],
-      addUploadedLookups: jest.fn(),
+      addUploadedLookups: vi.fn(),
     };
     const { result } = renderHook(() => useReferencesFileUploadStep(props), {
       wrapper: TestProviders,
@@ -46,7 +49,7 @@ describe('useReferencesFileUploadStep', () => {
 
   it('returns step props with `loading` status', () => {
     mockUseUpsertResources.mockReturnValue({
-      upsertResources: jest.fn(),
+      upsertResources: vi.fn(),
       isLoading: true,
       error: null,
     });
@@ -55,7 +58,7 @@ describe('useReferencesFileUploadStep', () => {
       status: 'incomplete' as const,
       migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
       missingLookups: [],
-      addUploadedLookups: jest.fn(),
+      addUploadedLookups: vi.fn(),
     };
     const { result } = renderHook(() => useReferencesFileUploadStep(props), {
       wrapper: TestProviders,
@@ -70,7 +73,7 @@ describe('useReferencesFileUploadStep', () => {
 
   it('returns step props with `danger` status', () => {
     mockUseUpsertResources.mockReturnValue({
-      upsertResources: jest.fn(),
+      upsertResources: vi.fn(),
       isLoading: false,
       error: new Error('Test failure!'),
     });
@@ -79,7 +82,7 @@ describe('useReferencesFileUploadStep', () => {
       status: 'incomplete' as const,
       migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
       missingLookups: [],
-      addUploadedLookups: jest.fn(),
+      addUploadedLookups: vi.fn(),
     };
     const { result } = renderHook(() => useReferencesFileUploadStep(props), {
       wrapper: TestProviders,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { WorkflowsFilterPopover } from './workflow_filter_popover';
@@ -18,10 +20,10 @@ const defaultValues = [
 ];
 
 describe('WorkflowsFilterPopover', () => {
-  const onSelectedValuesChanged = jest.fn();
+  const onSelectedValuesChanged = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the filter button with the title', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
@@ -17,28 +20,28 @@ import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { useUserPrivileges } from '../../../user_privileges';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 
-jest.mock('../../../../utils/timeline/use_timeline_click');
-jest.mock('../../../../hooks/is_in_security_app');
-jest.mock('../../../../hooks/timeline/use_open_timeline_in_new_tab');
-jest.mock('../../../../hooks/use_upselling');
-jest.mock('../../../user_privileges');
-jest.mock('../../../../hooks/use_app_toasts');
+vi.mock('../../../../utils/timeline/use_timeline_click');
+vi.mock('../../../../hooks/is_in_security_app');
+vi.mock('../../../../hooks/timeline/use_open_timeline_in_new_tab');
+vi.mock('../../../../hooks/use_upselling');
+vi.mock('../../../user_privileges');
+vi.mock('../../../../hooks/use_app_toasts');
 
-const handleTimelineClick = jest.fn();
-const openSavedTimelineInNewTab = jest.fn();
+const handleTimelineClick = vi.fn();
+const openSavedTimelineInNewTab = vi.fn();
 
 describe('TimelineMarkDownRenderer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useTimelineClick as jest.Mock).mockReturnValue(handleTimelineClick);
-    (useOpenTimelineInNewTab as jest.Mock).mockReturnValue({ openSavedTimelineInNewTab });
-    (useUpsellingMessage as jest.Mock).mockReturnValue(undefined);
-    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: true } });
-    (useAppToasts as jest.Mock).mockReturnValue({ addError: jest.fn() });
+    vi.clearAllMocks();
+    (useTimelineClick as Mock).mockReturnValue(handleTimelineClick);
+    (useOpenTimelineInNewTab as Mock).mockReturnValue({ openSavedTimelineInNewTab });
+    (useUpsellingMessage as Mock).mockReturnValue(undefined);
+    (useUserPrivileges as Mock).mockReturnValue({ timelinePrivileges: { read: true } });
+    (useAppToasts as Mock).mockReturnValue({ addError: vi.fn() });
   });
 
   it('opens the timeline in-app when inside the Security Solution app', () => {
-    (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
+    (useIsInSecurityApp as Mock).mockReturnValue(true);
 
     render(<TimelineMarkDownRenderer type={ID} id="timeline-id" title="My Timeline" />);
     fireEvent.click(screen.getByTestId('markdown-timeline-link-timeline-id'));
@@ -48,7 +51,7 @@ describe('TimelineMarkDownRenderer', () => {
   });
 
   it('opens the timeline in a new Security Solution tab when outside the app (e.g. Discover)', () => {
-    (useIsInSecurityApp as jest.Mock).mockReturnValue(false);
+    (useIsInSecurityApp as Mock).mockReturnValue(false);
 
     render(<TimelineMarkDownRenderer type={ID} id="timeline-id" title="My Timeline" />);
     fireEvent.click(screen.getByTestId('markdown-timeline-link-timeline-id'));

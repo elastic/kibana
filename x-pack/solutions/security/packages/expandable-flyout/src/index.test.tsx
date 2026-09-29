@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -15,7 +18,7 @@ import { TestProvider } from './test/provider';
 import { REDUX_ID_FOR_MEMORY_STORAGE } from './constants';
 import { initialUiState } from './store/state';
 
-jest.mock('./hooks/use_window_width');
+vi.mock('./hooks/use_window_width');
 
 const registeredPanels: Panel[] = [
   {
@@ -26,7 +29,7 @@ const registeredPanels: Panel[] = [
 
 describe('ExpandableFlyout', () => {
   it(`should not render flyout if window width is 0`, () => {
-    (useWindowWidth as jest.Mock).mockReturnValue(0);
+    (useWindowWidth as Mock).mockReturnValue(0);
 
     const result = render(
       <TestProvider>
@@ -38,7 +41,7 @@ describe('ExpandableFlyout', () => {
   });
 
   it(`should render flyout`, () => {
-    (useWindowWidth as jest.Mock).mockReturnValue(1000);
+    (useWindowWidth as Mock).mockReturnValue(1000);
 
     const state = {
       panels: {

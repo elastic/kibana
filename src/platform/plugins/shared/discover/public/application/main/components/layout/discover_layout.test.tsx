@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { DiscoverLayout } from './discover_layout';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
@@ -46,7 +48,7 @@ const setup = async ({
 }) => {
   const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
   const services = createDiscoverServicesMock();
-  const getUiSettingsMock = jest.mocked(services.uiSettings.get);
+  const getUiSettingsMock = vi.mocked(services.uiSettings.get);
   const originalGetImplementation = getUiSettingsMock.getMockImplementation();
 
   services.profilesManager = profilesManagerMock;
@@ -122,7 +124,7 @@ const setup = async ({
 
 describe('Discover component', () => {
   test('renders the conflict callout before the sidebar and results container', async () => {
-    const calloutSpy = jest
+    const calloutSpy = vi
       .spyOn(savedSearchUrlConflictCallout, 'SavedSearchURLConflictCallout')
       .mockReturnValue(<div data-test-subj="testConflictCallout" />);
 

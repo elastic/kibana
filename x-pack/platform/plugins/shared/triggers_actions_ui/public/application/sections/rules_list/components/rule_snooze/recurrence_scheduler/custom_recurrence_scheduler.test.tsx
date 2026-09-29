@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -22,7 +24,7 @@ describe('CustomRecurrenceScheduler', () => {
     bymonthday: [],
     bymonth: [],
   };
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   beforeEach(() => {
     onChange.mockReset();

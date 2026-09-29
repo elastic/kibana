@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { z } from '@kbn/zod/v4';
 import { screen, waitFor } from '@testing-library/react';
@@ -76,10 +78,10 @@ const caseWithObservables: CaseUI = {
 };
 
 describe('AttachmentTypeFilter', () => {
-  const onAttachmentTypesChange = jest.fn();
+  const onAttachmentTypesChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the trigger button', () => {

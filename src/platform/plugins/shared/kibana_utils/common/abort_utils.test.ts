@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { AbortError, abortSignalToPromise } from './abort_utils';
 
-jest.useFakeTimers({ legacyFakeTimers: true });
+vi.useFakeTimers({ legacyFakeTimers: true });
 
 const flushPromises = () =>
-  new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
+  new Promise((resolve) => require('timers').setImmediate(resolve));
 
 describe('AbortUtils', () => {
   describe('AbortError', () => {
@@ -33,7 +35,7 @@ describe('AbortUtils', () => {
       test('should not reject if the signal does not abort', async () => {
         const controller = new AbortController();
         const promise = abortSignalToPromise(controller.signal).promise;
-        const whenRejected = jest.fn();
+        const whenRejected = vi.fn();
         promise.catch(whenRejected);
         await flushPromises();
         expect(whenRejected).not.toHaveBeenCalled();
@@ -42,7 +44,7 @@ describe('AbortUtils', () => {
       test('should reject if the signal does abort', async () => {
         const controller = new AbortController();
         const promise = abortSignalToPromise(controller.signal).promise;
-        const whenRejected = jest.fn();
+        const whenRejected = vi.fn();
         promise.catch(whenRejected);
         controller.abort();
         await flushPromises();
@@ -59,7 +61,7 @@ describe('AbortUtils', () => {
       test('calling clean up handler prevents rejects', async () => {
         const controller = new AbortController();
         const { promise, cleanup } = abortSignalToPromise(controller.signal);
-        const whenRejected = jest.fn();
+        const whenRejected = vi.fn();
         promise.catch(whenRejected);
         cleanup();
         controller.abort();

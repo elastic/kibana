@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EntityForm } from './entity_form';
 import { screen, waitFor } from '@testing-library/react';
@@ -13,7 +15,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { GeoContainmentAlertParams } from '../types';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
-jest.mock('./query_input', () => {
+vi.mock('./query_input', () => {
   return {
     QueryInput: () => <div>mock query input</div>,
   };
@@ -50,12 +52,12 @@ test('should not call prop callbacks on render', async () => {
         language: 'kuery',
       },
     } as unknown as GeoContainmentAlertParams,
-    setDataViewId: jest.fn(),
-    setDataViewTitle: jest.fn(),
-    setDateField: jest.fn(),
-    setEntityField: jest.fn(),
-    setGeoField: jest.fn(),
-    setQuery: jest.fn(),
+    setDataViewId: vi.fn(),
+    setDataViewTitle: vi.fn(),
+    setDateField: vi.fn(),
+    setEntityField: vi.fn(),
+    setGeoField: vi.fn(),
+    setQuery: vi.fn(),
     unifiedSearch: {
       ui: {
         IndexPatternSelect: () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useQuery as _useQuery } from '@kbn/react-query';
 import { useBulkFetchFleetIntegrationPolicies } from './use_bulk_fetch_fleet_integration_policies';
 import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
@@ -14,14 +17,14 @@ import type { BulkGetPackagePoliciesRequestBody } from '@kbn/fleet-plugin/common
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import type { Mutable } from 'utility-types';
 
-const useQueryMock = _useQuery as jest.Mock;
+const useQueryMock = _useQuery as Mock;
 
-jest.mock('@kbn/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
+vi.mock('@kbn/react-query', async () => {
+  const actualReactQueryModule = (await vi.importActual('@kbn/react-query'));
 
   return {
     ...actualReactQueryModule,
-    useQuery: jest.fn((...args) => actualReactQueryModule.useQuery(...args)),
+    useQuery: vi.fn((...args) => actualReactQueryModule.useQuery(...args)),
   };
 });
 

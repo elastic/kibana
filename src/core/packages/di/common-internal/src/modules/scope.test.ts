@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { Container, ContainerModule } from 'inversify';
 import { Scope, type ScopedContainer } from '@kbn/core-di';
 import { InternalCoreStart, type InternalCoreStartContext } from './lifecycle';
@@ -14,13 +17,13 @@ import { Global } from './plugin';
 import { loadScope } from './scope';
 
 describe('loadScope', () => {
-  let injection: jest.Mocked<InternalCoreStartContext['injection']>;
+  let injection: Mocked<InternalCoreStartContext['injection']>;
   let container: Container;
 
   beforeEach(() => {
     container = new Container();
     injection = {
-      fork: jest.fn(() => new Container({ parent: container })),
+      fork: vi.fn(() => new Container({ parent: container })),
     } as unknown as typeof injection;
     container.bind(InternalCoreStart('injection')).toConstantValue(injection);
     container.load(new ContainerModule(loadScope));

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-jest.mock('./utils', () => {
-  const actual = jest.requireActual('./utils');
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
+vi.mock('./utils', async () => {
+  const actual = (await vi.importActual('./utils'));
   return {
     ...actual,
-    createIndex: jest.fn(),
-    populateIndex: jest.fn(),
-    ensureDefaultElserDeployed: jest.fn(),
-    isLegacySemanticTextVersion: jest.fn(),
+    createIndex: vi.fn(),
+    populateIndex: vi.fn(),
+    ensureDefaultElserDeployed: vi.fn(),
+    isLegacySemanticTextVersion: vi.fn(),
   };
 });
 
@@ -28,12 +31,12 @@ import {
   isLegacySemanticTextVersion,
 } from './utils';
 
-const createIndexMock = createIndex as jest.MockedFunction<typeof createIndex>;
-const populateIndexMock = populateIndex as jest.MockedFunction<typeof populateIndex>;
-const ensureDefaultElserDeployedMock = ensureDefaultElserDeployed as jest.MockedFunction<
+const createIndexMock = createIndex as MockedFunction<typeof createIndex>;
+const populateIndexMock = populateIndex as MockedFunction<typeof populateIndex>;
+const ensureDefaultElserDeployedMock = ensureDefaultElserDeployed as MockedFunction<
   typeof ensureDefaultElserDeployed
 >;
-const isLegacySemanticTextVersionMock = isLegacySemanticTextVersion as jest.MockedFunction<
+const isLegacySemanticTextVersionMock = isLegacySemanticTextVersion as MockedFunction<
   typeof isLegacySemanticTextVersion
 >;
 
@@ -43,7 +46,7 @@ describe('IndexManager', () => {
   let indexManager: IndexManager;
 
   const mockArchive = {
-    close: jest.fn(),
+    close: vi.fn(),
     entries: new Map(),
   } as unknown as ZipArchive;
 
@@ -79,7 +82,7 @@ describe('IndexManager', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('createAndPopulateIndex', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -17,18 +19,21 @@ import {
   PackageInstallProvider,
 } from './use_package_install';
 
-const mockInvalidateQueries = jest.fn();
-jest.mock('@kbn/react-query', () => ({
-  ...jest.requireActual('@kbn/react-query'),
-  useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
-}));
+const mockInvalidateQueries = vi.fn();
+vi.mock('@kbn/react-query', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/react-query')),
+      useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('usePackageInstall', () => {
   const coreStart = coreMock.createStart();
 
-  const addErrorSpy = jest.spyOn(coreStart.notifications.toasts, 'addError');
-  const addSuccessSpy = jest.spyOn(coreStart.notifications.toasts, 'addSuccess');
-  const addWarningSpy = jest.spyOn(coreStart.notifications.toasts, 'addWarning');
+  const addErrorSpy = vi.spyOn(coreStart.notifications.toasts, 'addError');
+  const addSuccessSpy = vi.spyOn(coreStart.notifications.toasts, 'addSuccess');
+  const addWarningSpy = vi.spyOn(coreStart.notifications.toasts, 'addWarning');
 
   beforeEach(() => {
     createIntegrationsTestRendererMock();

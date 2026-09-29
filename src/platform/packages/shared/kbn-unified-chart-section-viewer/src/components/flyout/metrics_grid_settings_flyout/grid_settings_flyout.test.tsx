@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,9 +16,9 @@ import { EuiSuperSelectTestHarness } from '@kbn/test-eui-helpers';
 import { GridSettingsFlyout } from './grid_settings_flyout';
 import { type MetricsGridSettings } from '@kbn/discover-utils';
 
-jest.mock('@kbn/discover-utils', () => {
+vi.mock('@kbn/discover-utils', async () => {
   const { METRICS_GRID_HISTOGRAM_PERCENTILES, METRICS_GRID_SIMPLE_AGGREGATIONS } =
-    jest.requireActual('@kbn/discover-utils/src/data_types/metrics');
+    (await vi.importActual('@kbn/discover-utils/src/data_types/metrics'));
 
   return {
     METRICS_GRID_HISTOGRAM_PERCENTILES,
@@ -24,13 +26,16 @@ jest.mock('@kbn/discover-utils', () => {
   };
 });
 
-const mockTrackAggregationConfigChanged = jest.fn();
+const mockTrackAggregationConfigChanged = vi.fn();
 
-jest.mock('../../../context/ebt_telemetry_context', () => ({
-  useTelemetry: () => ({
-    trackAggregationConfigChanged: mockTrackAggregationConfigChanged,
-  }),
-}));
+vi.mock('../../../context/ebt_telemetry_context', () => {
+      const mocked = {
+      useTelemetry: () => ({
+        trackAggregationConfigChanged: mockTrackAggregationConfigChanged,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultSettings: MetricsGridSettings = {
   counterAggregation: 'sum',
@@ -48,15 +53,15 @@ const histogramSelect = new EuiSuperSelectTestHarness(
 
 describe('GridSettingsFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the aggregation settings inside an accordion that is open by default', () => {
     render(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
-        onGridSettingsChange={jest.fn()}
-        onClose={jest.fn()}
+        onGridSettingsChange={vi.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -72,8 +77,8 @@ describe('GridSettingsFlyout', () => {
     render(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
-        onGridSettingsChange={jest.fn()}
-        onClose={jest.fn()}
+        onGridSettingsChange={vi.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -85,8 +90,8 @@ describe('GridSettingsFlyout', () => {
   });
 
   it('does not call onGridSettingsChange until "Apply and close" is clicked, then closes', async () => {
-    const onGridSettingsChange = jest.fn();
-    const onClose = jest.fn();
+    const onGridSettingsChange = vi.fn();
+    const onClose = vi.fn();
     render(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
@@ -115,8 +120,8 @@ describe('GridSettingsFlyout', () => {
     render(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
-        onGridSettingsChange={jest.fn()}
-        onClose={jest.fn()}
+        onGridSettingsChange={vi.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -138,8 +143,8 @@ describe('GridSettingsFlyout', () => {
   });
 
   it('discards the draft and does not call onGridSettingsChange when Cancel is clicked', async () => {
-    const onGridSettingsChange = jest.fn();
-    const onClose = jest.fn();
+    const onGridSettingsChange = vi.fn();
+    const onClose = vi.fn();
     render(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
@@ -158,8 +163,8 @@ describe('GridSettingsFlyout', () => {
   });
 
   it('discards the draft and does not call onGridSettingsChange when the flyout close button is clicked', async () => {
-    const onGridSettingsChange = jest.fn();
-    const onClose = jest.fn();
+    const onGridSettingsChange = vi.fn();
+    const onClose = vi.fn();
     render(
       <GridSettingsFlyout
         gridSettings={defaultSettings}

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
@@ -93,7 +95,7 @@ describe('Endpoint artifact packager task', () => {
       });
       void manifestTaskInstance.start({ taskManager: taskManagerMock.createStart() });
 
-      mockContext.service.getManifestManager = jest.fn().mockReturnValue(manifestManager);
+      mockContext.service.getManifestManager = vi.fn().mockReturnValue(manifestManager);
 
       const createTaskRunner =
         mockTaskManager.registerTaskDefinitions.mock.calls[0][0][ManifestTaskConstants.TYPE]
@@ -126,8 +128,8 @@ describe('Endpoint artifact packager task', () => {
     test('Should not run the process when no current manifest manager', async () => {
       const manifestManager = buildManifestManagerMock();
 
-      manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(null);
-      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
+      manifestManager.getLastComputedManifest = vi.fn().mockReturnValue(null);
+      manifestManager.cleanup = vi.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 
@@ -144,9 +146,9 @@ describe('Endpoint artifact packager task', () => {
       const manifestManager = buildManifestManagerMock();
       const lastManifest = ManifestManager.createDefaultManifest();
 
-      manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
-      manifestManager.buildNewManifest = jest.fn().mockRejectedValue(new Error());
-      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
+      manifestManager.getLastComputedManifest = vi.fn().mockReturnValue(lastManifest);
+      manifestManager.buildNewManifest = vi.fn().mockRejectedValue(new Error());
+      manifestManager.cleanup = vi.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 
@@ -164,9 +166,9 @@ describe('Endpoint artifact packager task', () => {
       const logger = loggingSystemMock.createLogger();
       const newManifest = ManifestManager.createDefaultManifest();
 
-      manifestManager.buildNewManifest = jest.fn().mockRejectedValue(newManifest);
-      mockContext.logFactory.get = jest.fn().mockReturnValue(logger);
-      manifestManager.getLastComputedManifest = jest.fn(async () => {
+      manifestManager.buildNewManifest = vi.fn().mockRejectedValue(newManifest);
+      mockContext.logFactory.get = vi.fn().mockReturnValue(logger);
+      manifestManager.getLastComputedManifest = vi.fn(async () => {
         throw new InvalidInternalManifestError(
           'Internal Manifest map SavedObject is missing version'
         );
@@ -189,12 +191,12 @@ describe('Endpoint artifact packager task', () => {
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
 
-      manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
-      manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
-      manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
-      manifestManager.tryDispatch = jest.fn().mockResolvedValue([]);
-      manifestManager.deleteArtifacts = jest.fn().mockResolvedValue([]);
-      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
+      manifestManager.getLastComputedManifest = vi.fn().mockReturnValue(lastManifest);
+      manifestManager.buildNewManifest = vi.fn().mockResolvedValue(newManifest);
+      manifestManager.pushArtifacts = vi.fn().mockResolvedValue([]);
+      manifestManager.tryDispatch = vi.fn().mockResolvedValue([]);
+      manifestManager.deleteArtifacts = vi.fn().mockResolvedValue([]);
+      manifestManager.cleanup = vi.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 
@@ -218,10 +220,10 @@ describe('Endpoint artifact packager task', () => {
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
-      manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
-      manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
-      manifestManager.pushArtifacts = jest.fn().mockResolvedValue([new Error()]);
-      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
+      manifestManager.getLastComputedManifest = vi.fn().mockReturnValue(lastManifest);
+      manifestManager.buildNewManifest = vi.fn().mockResolvedValue(newManifest);
+      manifestManager.pushArtifacts = vi.fn().mockResolvedValue([new Error()]);
+      manifestManager.cleanup = vi.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 
@@ -248,11 +250,11 @@ describe('Endpoint artifact packager task', () => {
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
-      manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
-      manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
-      manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
-      manifestManager.commit = jest.fn().mockRejectedValue(new Error());
-      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
+      manifestManager.getLastComputedManifest = vi.fn().mockReturnValue(lastManifest);
+      manifestManager.buildNewManifest = vi.fn().mockResolvedValue(newManifest);
+      manifestManager.pushArtifacts = vi.fn().mockResolvedValue([]);
+      manifestManager.commit = vi.fn().mockRejectedValue(new Error());
+      manifestManager.cleanup = vi.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 
@@ -279,12 +281,12 @@ describe('Endpoint artifact packager task', () => {
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
-      manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
-      manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
-      manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
-      manifestManager.commit = jest.fn().mockResolvedValue(null);
-      manifestManager.tryDispatch = jest.fn().mockResolvedValue([new Error()]);
-      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
+      manifestManager.getLastComputedManifest = vi.fn().mockReturnValue(lastManifest);
+      manifestManager.buildNewManifest = vi.fn().mockResolvedValue(newManifest);
+      manifestManager.pushArtifacts = vi.fn().mockResolvedValue([]);
+      manifestManager.commit = vi.fn().mockResolvedValue(null);
+      manifestManager.tryDispatch = vi.fn().mockResolvedValue([new Error()]);
+      manifestManager.cleanup = vi.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 
@@ -313,13 +315,13 @@ describe('Endpoint artifact packager task', () => {
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
-      manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
-      manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
-      manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
-      manifestManager.commit = jest.fn().mockResolvedValue(null);
-      manifestManager.tryDispatch = jest.fn().mockResolvedValue([]);
-      manifestManager.deleteArtifacts = jest.fn().mockResolvedValue([]);
-      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
+      manifestManager.getLastComputedManifest = vi.fn().mockReturnValue(lastManifest);
+      manifestManager.buildNewManifest = vi.fn().mockResolvedValue(newManifest);
+      manifestManager.pushArtifacts = vi.fn().mockResolvedValue([]);
+      manifestManager.commit = vi.fn().mockResolvedValue(null);
+      manifestManager.tryDispatch = vi.fn().mockResolvedValue([]);
+      manifestManager.deleteArtifacts = vi.fn().mockResolvedValue([]);
+      manifestManager.cleanup = vi.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 
@@ -348,13 +350,13 @@ describe('Endpoint artifact packager task', () => {
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
 
-      manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
-      manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
-      manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
-      manifestManager.commit = jest.fn().mockResolvedValue(null);
-      manifestManager.tryDispatch = jest.fn().mockResolvedValue([]);
-      manifestManager.deleteArtifacts = jest.fn().mockResolvedValue([]);
-      manifestManager.cleanup = jest.fn().mockResolvedValue(null);
+      manifestManager.getLastComputedManifest = vi.fn().mockReturnValue(lastManifest);
+      manifestManager.buildNewManifest = vi.fn().mockResolvedValue(newManifest);
+      manifestManager.pushArtifacts = vi.fn().mockResolvedValue([]);
+      manifestManager.commit = vi.fn().mockResolvedValue(null);
+      manifestManager.tryDispatch = vi.fn().mockResolvedValue([]);
+      manifestManager.deleteArtifacts = vi.fn().mockResolvedValue([]);
+      manifestManager.cleanup = vi.fn().mockResolvedValue(null);
 
       await runTask(manifestManager);
 

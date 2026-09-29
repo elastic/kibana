@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ProductFeaturesConfigMerger } from './product_features_config_merger';
 import type { Logger } from '@kbn/core/server';
@@ -136,13 +139,13 @@ export const subFeaturesMap = Object.freeze(
   ])
 );
 
-const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 
 describe('ProductFeaturesConfigMerger', () => {
   const merger = new ProductFeaturesConfigMerger(mockLogger, subFeaturesMap);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('main privileges', () => {
@@ -357,14 +360,14 @@ describe('ProductFeaturesConfigMerger', () => {
       {
         subFeatureIds: ['subFeature3', 'subFeature1'],
         featureConfigModifiers: [
-          jest.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
+          vi.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
             baseConfig.name = 'NEW NAME';
           }),
         ],
       },
       {
         featureConfigModifiers: [
-          jest.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
+          vi.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
             baseConfig.order = 666;
           }),
         ],
@@ -395,10 +398,10 @@ describe('ProductFeaturesConfigMerger', () => {
       {
         subFeatureIds: ['subFeature3', 'subFeature1'],
         featureConfigModifiers: [
-          jest.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
+          vi.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
             baseConfig.name = 'NEW NAME'; // overwritten by another featureConfigModifier in the same product feature
           }),
-          jest.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
+          vi.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
             baseConfig.name = 'EVEN NEWER NAME';
             baseConfig.minimumLicense = 'trial'; // overwritten by a second product feature
           }),
@@ -406,10 +409,10 @@ describe('ProductFeaturesConfigMerger', () => {
       },
       {
         featureConfigModifiers: [
-          jest.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
+          vi.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
             baseConfig.order = 666;
           }),
-          jest.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
+          vi.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
             baseConfig.minimumLicense = 'standard';
           }),
         ],

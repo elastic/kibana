@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { QuerySuggestion } from '../../autocomplete';
@@ -105,7 +107,7 @@ describe('SuggestionsComponent', () => {
   });
 
   it('Should call onClick with selected suggestion when clicked', async () => {
-    const mockClick = jest.fn();
+    const mockClick = vi.fn();
     renderWithTheme(
       <SuggestionsComponent
         index={0}
@@ -123,7 +125,7 @@ describe('SuggestionsComponent', () => {
   });
 
   it('Should call onMouseEnter with correct index when suggestion is hovered', async () => {
-    const mockEnter = jest.fn();
+    const mockEnter = vi.fn();
     renderWithTheme(
       <SuggestionsComponent
         index={0}

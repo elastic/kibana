@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { lastValueFrom } from 'rxjs';
 import type { StartServices } from '../../../../../../types';
 import {
@@ -13,13 +16,16 @@ import {
   getActiveIntegrationList,
 } from './integrations_check_complete_helpers';
 
-jest.mock('rxjs', () => ({
-  ...jest.requireActual('rxjs'),
-  lastValueFrom: jest.fn(),
-}));
+vi.mock('rxjs', () => {
+      const mocked = {
+      ...require('rxjs'),
+      lastValueFrom: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockHttpGet: jest.Mock = jest.fn();
-const mockSearch: jest.Mock = jest.fn();
+const mockHttpGet: Mock = vi.fn();
+const mockSearch: Mock = vi.fn();
 const mockService = {
   http: {
     get: mockHttpGet,
@@ -31,7 +37,7 @@ const mockService = {
   },
   notifications: {
     toasts: {
-      addError: jest.fn(),
+      addError: vi.fn(),
     },
   },
 } as unknown as StartServices;
@@ -50,7 +56,7 @@ describe('getCompleteBadgeText', () => {
 
 describe('getActiveIntegrationList', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns installed integrations according to the provided card names', async () => {
@@ -222,9 +228,9 @@ describe('getActiveIntegrationList', () => {
 });
 
 describe('getAgentsData', () => {
-  const mockLastValueFrom = lastValueFrom as jest.Mock;
+  const mockLastValueFrom = lastValueFrom as Mock;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns isAgentRequired as true when no agent data is available', async () => {

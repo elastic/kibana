@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { ReasonFound } from '.';
 
-jest.mock('../../../legacy_shims', () => ({
-  Legacy: {
-    shims: {
-      docLinks: {
-        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+vi.mock('../../../legacy_shims', () => {
+      const mocked = {
+      Legacy: {
+        shims: {
+          docLinks: {
+            ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+          },
+        },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const enabler = {};
 

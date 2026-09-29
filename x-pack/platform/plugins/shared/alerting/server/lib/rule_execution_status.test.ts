@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { RuleExecutionStatusErrorReasons, RuleExecutionStatusWarningReasons } from '../types';
@@ -38,7 +40,7 @@ const executionMetrics = {
 
 describe('RuleExecutionStatus', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   function testExpectedMetrics(received: RuleRunMetrics, expected: RuleRunMetrics) {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   type ISavedObjectTypeRegistry,
   MAIN_SAVED_OBJECT_INDEX,
@@ -15,8 +18,8 @@ import { getIndexForType } from './get_index_for_type';
 
 const createTypeRegistry = () => {
   return {
-    getIndex: jest.fn(),
-  } as unknown as jest.Mocked<ISavedObjectTypeRegistry>;
+    getIndex: vi.fn(),
+  } as unknown as Mocked<ISavedObjectTypeRegistry>;
 };
 
 describe('getIndexForType', () => {

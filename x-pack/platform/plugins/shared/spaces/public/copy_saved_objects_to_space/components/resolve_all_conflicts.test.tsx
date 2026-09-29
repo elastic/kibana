@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -56,11 +58,11 @@ describe('ResolveAllConflicts', () => {
     { type: 'type-1', id: 'id-1', overwrite: false },
     { type: 'type-5', id: 'id-5', overwrite: true, destinationId: 'dest-5b' },
   ];
-  const onRetriesChange = jest.fn();
-  const onDestinationMapChange = jest.fn();
+  const onRetriesChange = vi.fn();
+  const onDestinationMapChange = vi.fn();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const props: ResolveAllConflictsProps = {

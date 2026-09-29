@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -17,17 +20,17 @@ import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 import { useLicense } from '../../../common/hooks/use_license';
 
-jest.mock('../../../common/components/user_privileges');
-jest.mock('../../../common/hooks/use_license');
+vi.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/hooks/use_license');
 
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+const mockUseUserPrivileges = useUserPrivileges as Mock;
 
 const dataView: DataView = createStubDataView({ spec: {} });
 
 describe('AlertsPageContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
+    vi.clearAllMocks();
+    (useLicense as Mock).mockReturnValue({ isPlatinumPlus: () => true });
     mockUseUserPrivileges.mockReturnValue(
       getUserPrivilegesMockDefaultValue({
         rulesPrivileges: {

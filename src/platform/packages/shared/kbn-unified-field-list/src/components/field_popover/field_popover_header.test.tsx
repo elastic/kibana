@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,7 +18,7 @@ import { FieldPopoverHeader } from './field_popover_header';
 
 describe('UnifiedFieldList <FieldPopoverHeader />', () => {
   it('should render correctly without actions', async () => {
-    const mockClose = jest.fn();
+    const mockClose = vi.fn();
     const fieldName = 'extension';
     renderWithI18n(
       <FieldPopoverHeader
@@ -30,19 +32,19 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
   });
 
   it('should render correctly with all actions', async () => {
-    const mockClose = jest.fn();
+    const mockClose = vi.fn();
     const fieldName = 'extension.keyword';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
-    jest.spyOn(field, 'isRuntimeField', 'get').mockImplementation(() => true);
+    vi.spyOn(field, 'isRuntimeField', 'get').mockImplementation(() => true);
     renderWithI18n(
       <FieldPopoverHeader
         field={field}
         closePopover={mockClose}
-        onAddFieldToWorkspace={jest.fn()}
-        onAddBreakdownField={jest.fn()}
-        onAddFilter={jest.fn()}
-        onEditField={jest.fn()}
-        onDeleteField={jest.fn()}
+        onAddFieldToWorkspace={vi.fn()}
+        onAddBreakdownField={vi.fn()}
+        onAddFilter={vi.fn()}
+        onEditField={vi.fn()}
+        onDeleteField={vi.fn()}
       />
     );
 
@@ -56,8 +58,8 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
   });
 
   it('should correctly handle add-breakdown-field action', async () => {
-    const mockClose = jest.fn();
-    const mockAddBreakdownField = jest.fn();
+    const mockClose = vi.fn();
+    const mockAddBreakdownField = vi.fn();
     const fieldName = 'extension';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
     renderWithI18n(
@@ -75,8 +77,8 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
   });
 
   it('should correctly handle add-field action', async () => {
-    const mockClose = jest.fn();
-    const mockAddField = jest.fn();
+    const mockClose = vi.fn();
+    const mockAddField = vi.fn();
     const fieldName = 'extension';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
     renderWithI18n(
@@ -94,8 +96,8 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
   });
 
   it('should correctly handle add-exists-filter action', async () => {
-    const mockClose = jest.fn();
-    const mockAddFilter = jest.fn();
+    const mockClose = vi.fn();
+    const mockAddFilter = vi.fn();
     const fieldName = 'extension';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
 
@@ -109,12 +111,12 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
   });
 
   it('should correctly handle hidden add-exists-filter action', async () => {
-    const mockClose = jest.fn();
-    const mockAddFilter = jest.fn();
+    const mockClose = vi.fn();
+    const mockAddFilter = vi.fn();
     const fieldName = 'extension';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
 
-    jest.spyOn(field, 'filterable', 'get').mockImplementation(() => false);
+    vi.spyOn(field, 'filterable', 'get').mockImplementation(() => false);
     renderWithI18n(
       <FieldPopoverHeader field={field} closePopover={mockClose} onAddFilter={mockAddFilter} />
     );
@@ -124,13 +126,13 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
   });
 
   it('should correctly handle edit-field action', async () => {
-    const mockClose = jest.fn();
-    const mockEditField = jest.fn();
+    const mockClose = vi.fn();
+    const mockEditField = vi.fn();
     const fieldName = 'extension';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
 
     // available
-    jest.spyOn(field, 'isRuntimeField', 'get').mockImplementation(() => true);
+    vi.spyOn(field, 'isRuntimeField', 'get').mockImplementation(() => true);
     renderWithI18n(
       <FieldPopoverHeader field={field} closePopover={mockClose} onEditField={mockEditField} />
     );
@@ -140,13 +142,13 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
   });
 
   it('should correctly handle hidden edit-field action', async () => {
-    const mockClose = jest.fn();
-    const mockEditField = jest.fn();
+    const mockClose = vi.fn();
+    const mockEditField = vi.fn();
     const fieldName = 'extension';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
 
-    jest.spyOn(field, 'isRuntimeField', 'get').mockImplementation(() => false);
-    jest.spyOn(field, 'type', 'get').mockImplementation(() => 'unknown');
+    vi.spyOn(field, 'isRuntimeField', 'get').mockImplementation(() => false);
+    vi.spyOn(field, 'type', 'get').mockImplementation(() => 'unknown');
     renderWithI18n(
       <FieldPopoverHeader field={field} closePopover={mockClose} onEditField={mockEditField} />
     );
@@ -156,13 +158,13 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
   });
 
   it('should correctly handle delete-field action', async () => {
-    const mockClose = jest.fn();
-    const mockDeleteField = jest.fn();
+    const mockClose = vi.fn();
+    const mockDeleteField = vi.fn();
     const fieldName = 'extension';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
 
     // available
-    jest.spyOn(field, 'isRuntimeField', 'get').mockImplementation(() => true);
+    vi.spyOn(field, 'isRuntimeField', 'get').mockImplementation(() => true);
     renderWithI18n(
       <FieldPopoverHeader field={field} closePopover={mockClose} onDeleteField={mockDeleteField} />
     );
@@ -172,12 +174,12 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
   });
 
   it('should correctly handle hidden delete-field action', async () => {
-    const mockClose = jest.fn();
-    const mockDeleteField = jest.fn();
+    const mockClose = vi.fn();
+    const mockDeleteField = vi.fn();
     const fieldName = 'extension';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
 
-    jest.spyOn(field, 'isRuntimeField', 'get').mockImplementation(() => false);
+    vi.spyOn(field, 'isRuntimeField', 'get').mockImplementation(() => false);
     renderWithI18n(
       <FieldPopoverHeader field={field} closePopover={mockClose} onDeleteField={mockDeleteField} />
     );
@@ -189,19 +191,19 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
   it('should render correctly the field type icon on the header', () => {
     const fieldName = 'extension';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
-    renderWithI18n(<FieldPopoverHeader field={field} closePopover={jest.fn()} />);
+    renderWithI18n(<FieldPopoverHeader field={field} closePopover={vi.fn()} />);
 
     expect(screen.getByTestId(`fieldPopoverHeader_icon-${fieldName}`)).toBeVisible();
   });
 
   it('should handle getCustomFieldType', () => {
-    const mockGetCustomFieldType = jest.fn().mockReturnValue('custom');
+    const mockGetCustomFieldType = vi.fn().mockReturnValue('custom');
     const fieldName = 'extension';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
     renderWithI18n(
       <FieldPopoverHeader
         field={field}
-        closePopover={jest.fn()}
+        closePopover={vi.fn()}
         getCustomFieldType={mockGetCustomFieldType}
       />
     );

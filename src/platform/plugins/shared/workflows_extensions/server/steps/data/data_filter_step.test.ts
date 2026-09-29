@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { OrStringRecursive } from '@kbn/utility-types';
 import { dataFilterStepDefinition } from './data_filter_step';
 import type { StepHandlerContext } from '../../step_registry/types';
@@ -25,17 +27,17 @@ describe('dataFilterStepDefinition', () => {
     input,
     rawInput: input as OrStringRecursive<{ condition: string; limit?: number }>,
     contextManager: {
-      getContext: jest.fn(),
-      getFakeRequest: jest.fn(),
-      getScopedEsClient: jest.fn(),
-      renderInputTemplate: jest.fn((val) => val),
-      callKibanaApi: jest.fn(),
+      getContext: vi.fn(),
+      getFakeRequest: vi.fn(),
+      getScopedEsClient: vi.fn(),
+      renderInputTemplate: vi.fn((val) => val),
+      callKibanaApi: vi.fn(),
     },
     logger: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     },
     abortSignal: new AbortController().signal,
     stepId: 'test-filter-step',

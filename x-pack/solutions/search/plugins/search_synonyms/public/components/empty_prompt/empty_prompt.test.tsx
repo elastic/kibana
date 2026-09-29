@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { EmptyPrompt } from './empty_prompt';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('../../../common/doc_links', () => ({
-  docLinks: {
-    synonymsApi: 'documentation-url',
-  },
-}));
+vi.mock('../../../common/doc_links', () => {
+      const mocked = {
+      docLinks: {
+        synonymsApi: 'documentation-url',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 const Wrapper = ({ children }: { children?: React.ReactNode }) => (
   <I18nProvider>{children}</I18nProvider>
 );

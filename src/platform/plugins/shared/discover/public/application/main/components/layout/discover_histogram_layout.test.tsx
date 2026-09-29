@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { FetchStatus } from '../../../types';
@@ -28,7 +30,7 @@ import userEvent from '@testing-library/user-event';
 const dataView = dataViewWithTimefieldMock;
 const mockSearchSessionId = '123';
 
-jest.setTimeout(10_000);
+vi.setConfig({ testTimeout: 10_000 });
 
 const setup = async ({
   noSearchSessionId,
@@ -97,10 +99,10 @@ const setup = async ({
 
   const props: DiscoverMainContentProps = {
     dataView,
-    onFieldEdited: jest.fn(),
+    onFieldEdited: vi.fn(),
     columns: [],
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
-    onAddFilter: jest.fn(),
+    onAddFilter: vi.fn(),
   };
 
   render(

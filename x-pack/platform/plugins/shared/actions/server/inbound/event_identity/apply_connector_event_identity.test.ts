@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { httpServerMock, loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { Logger } from '@kbn/logging';
@@ -19,7 +21,7 @@ import { encodeApiKey } from './encode_api_key';
 import { connectorEventIdentityApiKeyName } from './types';
 
 const request = httpServerMock.createKibanaRequest();
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 
 const createContext = (overrides: Partial<ActionsClientContext> = {}): ActionsClientContext =>
   ({

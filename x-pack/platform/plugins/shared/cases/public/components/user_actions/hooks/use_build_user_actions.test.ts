@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 
@@ -17,9 +19,9 @@ import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framew
 import { allCasesPermissions } from '../../../common/mock';
 import { UserActionTypes } from '../../../../common/types/domain';
 
-jest.mock('../builder');
+vi.mock('../builder');
 
-const builderMapMock = jest.mocked(builderMap);
+const builderMapMock = vi.mocked(builderMap);
 
 const defaultArgs = {
   caseUserActions: [],
@@ -36,13 +38,13 @@ const defaultArgs = {
   selectedOutlineCommentId: '',
   loadingCommentIds: [],
   euiTheme: {} as EuiThemeComputed<{}>,
-  handleOutlineComment: jest.fn(),
-  handleDeleteComment: jest.fn(),
+  handleOutlineComment: vi.fn(),
+  handleDeleteComment: vi.fn(),
 };
 
 describe('useBuildUserActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty array when caseUserActions is empty', () => {
@@ -64,7 +66,7 @@ describe('useBuildUserActions', () => {
   it('builds comment props from supported user actions', () => {
     const commentAction = getUserAction(UserActionTypes.comment, 'create');
     const mockBuiltComment = { username: 'elastic', children: null };
-    const buildMock = jest.fn().mockReturnValue([mockBuiltComment]);
+    const buildMock = vi.fn().mockReturnValue([mockBuiltComment]);
 
     builderMapMock.comment.mockReturnValue({ build: buildMock });
 
@@ -81,8 +83,8 @@ describe('useBuildUserActions', () => {
     const action1 = getUserAction(UserActionTypes.comment, 'create');
     const action2 = getUserAction(UserActionTypes.title, 'update');
 
-    const buildMock1 = jest.fn().mockReturnValue([{ username: 'user1' }]);
-    const buildMock2 = jest.fn().mockReturnValue([{ username: 'user2' }]);
+    const buildMock1 = vi.fn().mockReturnValue([{ username: 'user1' }]);
+    const buildMock2 = vi.fn().mockReturnValue([{ username: 'user2' }]);
 
     builderMapMock.comment.mockReturnValue({ build: buildMock1 });
     builderMapMock.title.mockReturnValue({ build: buildMock2 });

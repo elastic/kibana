@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -30,12 +32,12 @@ describe('AnalyticsCollectionOverviewTable', () => {
     searchFilter: 'searches',
   };
   const mockActions = {
-    findDataView: jest.fn(),
-    setSelectedTable: jest.fn(),
+    findDataView: vi.fn(),
+    setSelectedTable: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     setMockValues(mockValues);
     setMockActions(mockActions);

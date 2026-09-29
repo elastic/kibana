@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
@@ -17,7 +20,7 @@ const infraMetricsQuery = {
 
 const createDiscoverLocator = () =>
   ({
-    getRedirectUrl: jest.fn((params: { query?: { esql?: string } }) => {
+    getRedirectUrl: vi.fn((params: { query?: { esql?: string } }) => {
       const esql = params.query?.esql ?? '';
       return `/app/discover#/?_a=(query:(esql:'${esql}'))`;
     }),
@@ -25,11 +28,11 @@ const createDiscoverLocator = () =>
 
 const createAssetDetailsLocator = () =>
   ({
-    getRedirectUrl: jest.fn(
+    getRedirectUrl: vi.fn(
       ({ entityId, entityType }: { entityId: string; entityType: string }) =>
         `/node-mock/${entityType}/${entityId}`
     ),
-  } as unknown as jest.Mocked<AssetDetailsLocator>);
+  } as unknown as Mocked<AssetDetailsLocator>);
 
 describe('getPodMetricsLink', () => {
   it('returns undefined when there is no pod id', () => {

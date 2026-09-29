@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import '../../mock/formatted_relative';
@@ -17,17 +20,20 @@ import { TestProviders } from '../../mock';
 
 import { LastEventTime } from '.';
 
-jest.mock('../../containers/events/last_event_time', () => ({
-  useTimelineLastEventTime: jest.fn(),
-}));
+vi.mock('../../containers/events/last_event_time', () => {
+      const mocked = {
+      useTimelineLastEventTime: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Last Event Time Stat', () => {
   beforeEach(() => {
-    (useTimelineLastEventTime as jest.Mock).mockReset();
+    (useTimelineLastEventTime as Mock).mockReset();
   });
 
   test('Loading', () => {
-    (useTimelineLastEventTime as jest.Mock).mockReturnValue([
+    (useTimelineLastEventTime as Mock).mockReturnValue([
       true,
       {
         lastSeen: null,
@@ -44,7 +50,7 @@ describe('Last Event Time Stat', () => {
   });
 
   test('Last seen', async () => {
-    (useTimelineLastEventTime as jest.Mock).mockReturnValue([
+    (useTimelineLastEventTime as Mock).mockReturnValue([
       false,
       {
         lastSeen: mockLastEventTimeQuery.lastSeen,
@@ -60,7 +66,7 @@ describe('Last Event Time Stat', () => {
   });
 
   test('Bad date time string', async () => {
-    (useTimelineLastEventTime as jest.Mock).mockReturnValue([
+    (useTimelineLastEventTime as Mock).mockReturnValue([
       false,
       {
         lastSeen: 'something-invalid',
@@ -76,7 +82,7 @@ describe('Last Event Time Stat', () => {
     expect(container).toHaveTextContent('something-invalid');
   });
   test('Null time string', async () => {
-    (useTimelineLastEventTime as jest.Mock).mockReturnValue([
+    (useTimelineLastEventTime as Mock).mockReturnValue([
       false,
       {
         lastSeen: null,

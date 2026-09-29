@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -25,7 +27,7 @@ const condition = (overrides: Partial<AlertCondition> = {}): AlertCondition => (
 });
 
 const renderSection = (props: { severity?: SeverityConfig; alertConditions: AlertCondition[] }) => {
-  const onChange = jest.fn<void, [SeverityConfig | undefined]>();
+  const onChange = vi.fn<void, [SeverityConfig | undefined]>();
   render(
     <IntlProvider locale="en">
       <SeveritySection

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
@@ -13,9 +16,9 @@ import { TemplatesTableSettings } from './templates_table_settings';
 import { renderWithTestingProviders } from '../../../common/mock';
 import * as api from '../api/api';
 
-jest.mock('../api/api');
+vi.mock('../api/api');
 
-const apiMock = api as jest.Mocked<typeof api>;
+const apiMock = api as Mocked<typeof api>;
 
 describe('TemplatesTableSettings', () => {
   let user: ReturnType<typeof userEvent.setup>;
@@ -41,22 +44,22 @@ describe('TemplatesTableSettings', () => {
     rangeEnd: 10,
     totalTemplates: 25,
     selectedTemplates: [] as Template[],
-    onBulkActionSuccess: jest.fn(),
+    onBulkActionSuccess: vi.fn(),
     hasFilters: false,
-    onClearFilters: jest.fn(),
+    onClearFilters: vi.fn(),
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
-    jest.clearAllMocks();
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime, pointerEventsCheck: 0 });
+    vi.clearAllMocks();
     apiMock.bulkDeleteTemplates?.mockResolvedValue?.({ success: true, deleted: [], errors: [] });
     apiMock.bulkExportTemplates?.mockResolvedValue?.({
       filename: 'templates-export.yaml',
@@ -94,7 +97,7 @@ describe('TemplatesTableSettings', () => {
   });
 
   it('calls onClearFilters when clear filters button is clicked', async () => {
-    const onClearFilters = jest.fn();
+    const onClearFilters = vi.fn();
     renderWithTestingProviders(
       <TemplatesTableSettings {...defaultProps} hasFilters onClearFilters={onClearFilters} />
     );
@@ -120,7 +123,7 @@ describe('TemplatesTableSettings', () => {
   });
 
   it('passes onBulkActionSuccess to TemplatesBulkActions', async () => {
-    const onBulkActionSuccess = jest.fn();
+    const onBulkActionSuccess = vi.fn();
     apiMock.bulkDeleteTemplates?.mockResolvedValue?.({
       success: true,
       deleted: ['template-1'],

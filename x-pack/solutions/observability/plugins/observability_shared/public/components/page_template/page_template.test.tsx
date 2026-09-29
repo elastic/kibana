@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { I18nProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { shallow } from 'enzyme';
@@ -18,19 +20,22 @@ import { createNavigationRegistry } from './helpers/navigation_registry';
 import { applicationServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: () => ({
-    pathname: '/test-path',
-  }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: () => ({
+        pathname: '/test-path',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockNotifications = notificationServiceMock.createStartContract();
 const mockApplication = applicationServiceMock.createStartContract();
 const mockSpaces = spacesPluginMock.createStartContract();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...original,
     useKibana: () => ({
@@ -148,7 +153,7 @@ describe('Page template', () => {
     const MockSolutionViewSwitchCallout = () => <div data-test-subj="solutionViewSwitchCallout" />;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockNotifications.tours.isEnabled.mockReturnValue(true);
       mockApplication.capabilities = {
         ...mockApplication.capabilities,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,16 +18,19 @@ import { SlackChannelSelector } from './slack_channel_selector';
 import { type SlackChannel, useFetchSlackChannels } from '../hooks/use_fetch_slack_channels';
 import type { UseQueryResult } from '@kbn/react-query';
 
-jest.mock('../hooks/use_fetch_slack_channels', () => ({
-  useFetchSlackChannels: jest.fn(),
-}));
+vi.mock('../hooks/use_fetch_slack_channels', () => {
+      const mocked = {
+      useFetchSlackChannels: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchSlackChannels = useFetchSlackChannels as jest.MockedFunction<
+const mockUseFetchSlackChannels = useFetchSlackChannels as MockedFunction<
   typeof useFetchSlackChannels
 >;
 
 const renderSelector = (props: Partial<React.ComponentProps<typeof SlackChannelSelector>> = {}) => {
-  const onParamsChange = jest.fn();
+  const onParamsChange = vi.fn();
   const result = render(
     <I18nProvider>
       <SlackChannelSelector
@@ -76,7 +82,7 @@ describe('SlackChannelSelector', () => {
 
     rerender(
       <I18nProvider>
-        <SlackChannelSelector connectorId="slack-1" params="" onParamsChange={jest.fn()} />
+        <SlackChannelSelector connectorId="slack-1" params="" onParamsChange={vi.fn()} />
       </I18nProvider>
     );
 
@@ -102,7 +108,7 @@ describe('SlackChannelSelector', () => {
 
     rerender(
       <I18nProvider>
-        <SlackChannelSelector connectorId="slack-2" params="" onParamsChange={jest.fn()} />
+        <SlackChannelSelector connectorId="slack-2" params="" onParamsChange={vi.fn()} />
       </I18nProvider>
     );
 

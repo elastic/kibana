@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 
@@ -12,29 +15,32 @@ import { fetchConnectorByIndexName } from '@kbn/search-connectors';
 
 import { fetchIndex } from './fetch_index';
 
-jest.mock('@kbn/search-connectors', () => ({
-  SyncStatus: {
-    CANCELED: 'canceled',
-    CANCELING: 'canceling',
-    COMPLETED: 'completed',
-    ERROR: 'error',
-    IN_PROGRESS: 'in_progress',
-    PENDING: 'pending',
-    SUSPENDED: 'suspended',
-  },
-  fetchConnectorByIndexName: jest.fn(),
-}));
+vi.mock('@kbn/search-connectors', () => {
+      const mocked = {
+      SyncStatus: {
+        CANCELED: 'canceled',
+        CANCELING: 'canceling',
+        COMPLETED: 'completed',
+        ERROR: 'error',
+        IN_PROGRESS: 'in_progress',
+        PENDING: 'pending',
+        SUSPENDED: 'suspended',
+      },
+      fetchConnectorByIndexName: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('fetchIndex lib function', () => {
   const mockClient = {
     asCurrentUser: {
-      count: jest.fn().mockReturnValue({ count: 100 }),
-      index: jest.fn(),
+      count: vi.fn().mockReturnValue({ count: 100 }),
+      index: vi.fn(),
       indices: {
-        get: jest.fn(),
-        stats: jest.fn(),
+        get: vi.fn(),
+        stats: vi.fn(),
       },
-      search: jest.fn().mockReturnValue({
+      search: vi.fn().mockReturnValue({
         hits: {
           hits: [{ _source: { status: 'in_progress' } }, { _source: { status: 'pending' } }],
         },
@@ -44,11 +50,11 @@ describe('fetchIndex lib function', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const logger = {
-    error: jest.fn(),
+    error: vi.fn(),
   } as any as Logger;
 
   const statsResponse = {
@@ -99,7 +105,7 @@ describe('fetchIndex lib function', () => {
         index_name: { aliases: [], data: 'full index' },
       })
     );
-    (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
+    (fetchConnectorByIndexName as Mock).mockImplementationOnce(() =>
       Promise.resolve(undefined)
     );
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
@@ -120,7 +126,7 @@ describe('fetchIndex lib function', () => {
         index_name: { aliases: [], data: 'full index' },
       })
     );
-    (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
+    (fetchConnectorByIndexName as Mock).mockImplementationOnce(() =>
       Promise.resolve({
         doc: 'doc',
         service_type: 'some-service-type',
@@ -139,7 +145,7 @@ describe('fetchIndex lib function', () => {
 
   it('should throw a 404 error if the index cannot be fonud', async () => {
     mockClient.asCurrentUser.indices.get.mockImplementation(() => Promise.resolve({}));
-    (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
+    (fetchConnectorByIndexName as Mock).mockImplementationOnce(() =>
       Promise.resolve(undefined)
     );
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
@@ -154,7 +160,7 @@ describe('fetchIndex lib function', () => {
         index_name: { aliases: [] },
       })
     );
-    (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
+    (fetchConnectorByIndexName as Mock).mockImplementationOnce(() =>
       Promise.resolve(undefined)
     );
     mockClient.asCurrentUser.indices.stats.mockImplementation(() =>
@@ -171,7 +177,7 @@ describe('fetchIndex lib function', () => {
         index_name: { aliases: [] },
       })
     );
-    (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
+    (fetchConnectorByIndexName as Mock).mockImplementationOnce(() =>
       Promise.resolve(undefined)
     );
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve({}));

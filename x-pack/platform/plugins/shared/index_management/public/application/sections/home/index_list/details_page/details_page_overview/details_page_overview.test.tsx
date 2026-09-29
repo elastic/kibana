@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
@@ -23,44 +25,53 @@ import {
   testIndexDocumentsSampleResponse,
 } from '../../../../../../../__jest__/client_integration/index_details_page/mocks';
 
-jest.mock('@kbn/code-editor');
+vi.mock('@kbn/code-editor');
 
-const mockUseCloudConnectStatus = jest.fn();
-jest.mock('@kbn/search-api-panels', () => ({
-  ...jest.requireActual('@kbn/search-api-panels'),
-  useCloudConnectStatus: (...args: unknown[]) => mockUseCloudConnectStatus(...args),
-  EisCloudConnectPromoCallout: (props: { promoId: string }) => (
-    <div data-test-subj={`${props.promoId}-cloud-connect-callout`}>Cloud Connect Promo</div>
-  ),
-  EisUpdateCallout: (props: { promoId: string; handleOnClick: () => void }) => (
-    <div data-test-subj={`${props.promoId}-eis-update-callout`}>
-      EIS Update Callout
-      <button data-test-subj="eisUpdateCalloutCtaBtn" onClick={props.handleOnClick}>
-        Update
-      </button>
-    </div>
-  ),
-}));
+const mockUseCloudConnectStatus = vi.fn();
+vi.mock('@kbn/search-api-panels', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/search-api-panels')),
+      useCloudConnectStatus: (...args: unknown[]) => mockUseCloudConnectStatus(...args),
+      EisCloudConnectPromoCallout: (props: { promoId: string }) => (
+        <div data-test-subj={`${props.promoId}-cloud-connect-callout`}>Cloud Connect Promo</div>
+      ),
+      EisUpdateCallout: (props: { promoId: string; handleOnClick: () => void }) => (
+        <div data-test-subj={`${props.promoId}-eis-update-callout`}>
+          EIS Update Callout
+          <button data-test-subj="eisUpdateCalloutCtaBtn" onClick={props.handleOnClick}>
+            Update
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockHasElserOnMlNodeSemanticTextField = jest.fn();
-jest.mock('../../../../../components/mappings_editor/lib/utils', () => ({
-  ...jest.requireActual('../../../../../components/mappings_editor/lib/utils'),
-  hasElserOnMlNodeSemanticTextField: (...args: unknown[]) =>
-    mockHasElserOnMlNodeSemanticTextField(...args),
-}));
+const mockHasElserOnMlNodeSemanticTextField = vi.fn();
+vi.mock('../../../../../components/mappings_editor/lib/utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../components/mappings_editor/lib/utils')),
+      hasElserOnMlNodeSemanticTextField: (...args: unknown[]) =>
+        mockHasElserOnMlNodeSemanticTextField(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../update_elser_mappings/update_elser_mappings_modal', () => ({
-  UpdateElserMappingsModal: (props: { indexName: string }) => (
-    <div data-test-subj="updateElserMappingsModal">Update ELSER Mappings for {props.indexName}</div>
-  ),
-}));
+vi.mock('../update_elser_mappings/update_elser_mappings_modal', () => {
+      const mocked = {
+      UpdateElserMappingsModal: (props: { indexName: string }) => (
+        <div data-test-subj="updateElserMappingsModal">Update ELSER Mappings for {props.indexName}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DetailsPageOverview', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const mockEnvironment = setupEnvironment();
     ({ httpSetup, httpRequestsMockHelpers } = mockEnvironment);
 
@@ -95,11 +106,11 @@ describe('DetailsPageOverview', () => {
       sampleDocuments: overrides.sampleDocuments ?? [],
       isDocumentsLoading: overrides.isDocumentsLoading ?? false,
       documentsError: overrides.documentsError ?? null,
-      onRefreshDocuments: overrides.onRefreshDocuments ?? jest.fn(),
+      onRefreshDocuments: overrides.onRefreshDocuments ?? vi.fn(),
     };
 
     const Comp = WithAppDependencies(() => <DetailsPageOverview {...defaultProps} />, httpSetup, {
-      url: { locators: { get: () => ({ navigate: jest.fn(), getUrl: jest.fn() }) } },
+      url: { locators: { get: () => ({ navigate: vi.fn(), getUrl: vi.fn() }) } },
       ...overrides.appDeps,
     });
 
@@ -245,7 +256,7 @@ describe('DetailsPageOverview', () => {
     });
 
     it('renders sample documents and reloads them when Refresh is clicked', async () => {
-      const onRefreshDocuments = jest.fn();
+      const onRefreshDocuments = vi.fn();
       renderComponent({ sampleDocuments, onRefreshDocuments });
 
       await waitFor(() => {

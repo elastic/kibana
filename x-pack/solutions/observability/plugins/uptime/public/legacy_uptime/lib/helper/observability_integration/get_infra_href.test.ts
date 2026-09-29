@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type {
   AssetDetailsLocator,
   AssetDetailsLocatorParams,
@@ -14,13 +17,13 @@ import type { MonitorSummary, Ping } from '../../../../../common/runtime_types';
 import { makePing } from '../../../../../common/runtime_types';
 
 const mockAssetDetailsLocator = {
-  getRedirectUrl: jest
+  getRedirectUrl: vi
     .fn()
     .mockImplementation(
       ({ entityId, entityType }: AssetDetailsLocatorParams) =>
         `/node-mock/${entityType}/${entityId}`
     ),
-} as unknown as jest.Mocked<AssetDetailsLocator>;
+} as unknown as Mocked<AssetDetailsLocator>;
 
 describe('getInfraHref', () => {
   let summary: MonitorSummary;

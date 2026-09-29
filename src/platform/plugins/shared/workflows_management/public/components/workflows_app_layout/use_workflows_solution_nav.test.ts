@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { EuiSideNavItemType } from '@elastic/eui';
 import { renderHook } from '@testing-library/react';
 import { WorkflowsPageName } from '@kbn/deeplinks-workflows';
@@ -42,7 +44,7 @@ const getSelectedId = (result: ReturnType<typeof renderSolutionNav>['result']) =
 
 describe('useWorkflowsSolutionNav', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return null when the list page is the only registered deep link', () => {

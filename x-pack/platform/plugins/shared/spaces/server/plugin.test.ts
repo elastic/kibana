@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom } from 'rxjs';
 
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
@@ -19,12 +21,12 @@ import { createDefaultSpace } from './default_space/create_default_space';
 import { SpacesPlugin } from './plugin';
 import type { SpacesPluginStartDeps } from './types';
 
-jest.mock('./default_space/create_default_space');
+vi.mock('./default_space/create_default_space');
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
     beforeEach(() => {
-      jest.mocked(createDefaultSpace).mockClear();
+      vi.mocked(createDefaultSpace).mockClear();
     });
 
     it('can setup with all optional plugins disabled, exposing the expected contract', () => {
@@ -149,8 +151,8 @@ describe('Spaces plugin', () => {
       const features = featuresPluginMock.createSetup();
       const licensing = licensingMock.createSetup();
       const cps = {
-        getCpsEnabled: jest.fn().mockReturnValue(false),
-        isTierEligible: jest.fn().mockResolvedValue(false),
+        getCpsEnabled: vi.fn().mockReturnValue(false),
+        isTierEligible: vi.fn().mockResolvedValue(false),
       };
 
       const plugin = new SpacesPlugin(initializerContext);
@@ -165,8 +167,8 @@ describe('Spaces plugin', () => {
       const features = featuresPluginMock.createSetup();
       const licensing = licensingMock.createSetup();
       const cps = {
-        getCpsEnabled: jest.fn().mockReturnValue(true),
-        isTierEligible: jest.fn().mockResolvedValue(true),
+        getCpsEnabled: vi.fn().mockReturnValue(true),
+        isTierEligible: vi.fn().mockResolvedValue(true),
       };
 
       const plugin = new SpacesPlugin(initializerContext);
@@ -228,8 +230,8 @@ describe('Spaces plugin', () => {
       const features = featuresPluginMock.createSetup();
       const licensing = licensingMock.createSetup();
       const cpsSetup = {
-        getCpsEnabled: jest.fn().mockReturnValue(true),
-        isTierEligible: jest.fn().mockResolvedValue(true),
+        getCpsEnabled: vi.fn().mockReturnValue(true),
+        isTierEligible: vi.fn().mockResolvedValue(true),
       };
 
       const plugin = new SpacesPlugin(initializerContext);
@@ -237,15 +239,15 @@ describe('Spaces plugin', () => {
 
       const coreStart = coreMock.createStart();
       const cpsStart = {
-        createNpreClient: jest.fn().mockReturnValue({
-          getNpre: jest.fn(),
-          canGetNpre: jest.fn(),
-          putNpre: jest.fn(),
-          deleteNpre: jest.fn(),
-          canPutNpre: jest.fn(),
+        createNpreClient: vi.fn().mockReturnValue({
+          getNpre: vi.fn(),
+          canGetNpre: vi.fn(),
+          putNpre: vi.fn(),
+          deleteNpre: vi.fn(),
+          canPutNpre: vi.fn(),
         }),
-        getLinkedProjects: jest.fn().mockResolvedValue([]),
-        isCpsActive: jest.fn().mockResolvedValue(false),
+        getLinkedProjects: vi.fn().mockResolvedValue([]),
+        isCpsActive: vi.fn().mockResolvedValue(false),
       };
 
       const spacesStart = plugin.start(coreStart, {

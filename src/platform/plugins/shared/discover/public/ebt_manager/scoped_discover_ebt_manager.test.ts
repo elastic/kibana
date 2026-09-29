@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { TabsEventName, type TabsEBTEvent } from '@kbn/unified-tabs';
@@ -20,7 +22,7 @@ describe('ScopedDiscoverEBTManager', () => {
 
   beforeEach(() => {
     ebtManager = new DiscoverEBTManager();
-    (coreSetupMock.analytics.reportEvent as jest.Mock).mockClear();
+    (coreSetupMock.analytics.reportEvent as Mock).mockClear();
   });
 
   const createInitializedScopedManager = () => {

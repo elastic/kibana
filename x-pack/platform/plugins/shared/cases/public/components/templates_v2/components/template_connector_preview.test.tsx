@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
@@ -12,22 +15,25 @@ import { ConnectorTypes } from '../../../../common/types/domain';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import { TemplateConnectorPreview } from './template_connector_preview';
 
-jest.mock('../../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../connectors/fields_preview_form', () => ({
-  ConnectorFieldsPreviewForm: ({
-    connector,
-    fields,
-  }: {
-    connector: { name: string };
-    fields: unknown;
-  }) => (
-    <div data-test-subj="mock-fields-preview-form">{`${connector?.name}:${JSON.stringify(
-      fields
-    )}`}</div>
-  ),
-}));
+vi.mock('../../../containers/configure/use_get_supported_action_connectors');
+vi.mock('../../connectors/fields_preview_form', () => {
+      const mocked = {
+      ConnectorFieldsPreviewForm: ({
+        connector,
+        fields,
+      }: {
+        connector: { name: string };
+        fields: unknown;
+      }) => (
+        <div data-test-subj="mock-fields-preview-form">{`${connector?.name}:${JSON.stringify(
+          fields
+        )}`}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useGetSupportedActionConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
+const useGetSupportedActionConnectorsMock = useGetSupportedActionConnectors as Mock;
 
 const jiraConnector = {
   type: ConnectorTypes.jira,
@@ -37,7 +43,7 @@ const jiraConnector = {
 
 describe('TemplateConnectorPreview', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows a loading state while connectors are loading', () => {

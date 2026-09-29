@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, act, fireEvent, waitForElementToBeRemoved, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -13,15 +15,15 @@ import { AgentStatusFilter } from './agent_status_filter';
 const PARTIAL_TOUR_TEXT = 'Some agents have become inactive and have been hidden';
 const mockStorage: Record<any, any> = {};
 
-jest.mock('../../../../../../hooks/use_core', () => {
+vi.mock('../../../../../../hooks/use_core', () => {
   return {
-    useStartServices: jest.fn(() => ({
+    useStartServices: vi.fn(() => ({
       uiSettings: {
-        get: jest.fn(() => false),
+        get: vi.fn(() => false),
       },
       storage: {
-        get: jest.fn((key) => mockStorage[key]),
-        set: jest.fn((key, val) => (mockStorage[key] = val)),
+        get: vi.fn((key) => mockStorage[key]),
+        set: vi.fn((key, val) => (mockStorage[key] = val)),
       },
     })),
   };

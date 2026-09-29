@@ -5,29 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { getRangeFilteredIndices } from './get_range_filtered_indices';
 import { fetchAvailableIndices } from '../lib/fetch_available_indices';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 
-jest.mock('../lib/fetch_available_indices');
+vi.mock('../lib/fetch_available_indices');
 
-const fetchAvailableIndicesMock = fetchAvailableIndices as jest.Mock;
+const fetchAvailableIndicesMock = fetchAvailableIndices as Mock;
 
 describe('getRangeFilteredIndices', () => {
-  let client: jest.Mocked<IScopedClusterClient>;
-  let logger: jest.Mocked<Logger>;
+  let client: Mocked<IScopedClusterClient>;
+  let logger: Mocked<Logger>;
 
   beforeEach(() => {
     client = {
-      asCurrentUser: jest.fn(),
-    } as unknown as jest.Mocked<IScopedClusterClient>;
+      asCurrentUser: vi.fn(),
+    } as unknown as Mocked<IScopedClusterClient>;
 
     logger = {
-      warn: jest.fn(),
-      error: jest.fn(),
-    } as unknown as jest.Mocked<Logger>;
+      warn: vi.fn(),
+      error: vi.fn(),
+    } as unknown as Mocked<Logger>;
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when fetching available indices is successful', () => {

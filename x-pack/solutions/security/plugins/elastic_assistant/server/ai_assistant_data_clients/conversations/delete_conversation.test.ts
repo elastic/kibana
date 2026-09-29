@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { DeleteConversationParams } from './delete_conversation';
 import { deleteConversation } from './delete_conversation';
@@ -12,9 +15,12 @@ import { getConversation } from './get_conversation';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getConversationResponseMock } from '../../__mocks__/response';
 
-jest.mock('./get_conversation', () => ({
-  getConversation: jest.fn(),
-}));
+vi.mock('./get_conversation', () => {
+      const mocked = {
+      getConversation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const getDeleteConversationOptionsMock = (): DeleteConversationParams => ({
   esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
@@ -25,15 +31,15 @@ export const getDeleteConversationOptionsMock = (): DeleteConversationParams => 
 
 describe('deleteConversation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Delete returns a null if the conversation is also null', async () => {
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(null);
+    (getConversation as unknown as Mock).mockResolvedValueOnce(null);
     const options = getDeleteConversationOptionsMock();
     const deletedConversation = await deleteConversation(options);
     expect(deletedConversation).toEqual(undefined);
@@ -41,15 +47,15 @@ describe('deleteConversation', () => {
 
   test('Delete returns the conversation id if a conversation is returned from getConversation', async () => {
     const conversation = getConversationResponseMock();
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(conversation);
+    (getConversation as unknown as Mock).mockResolvedValueOnce(conversation);
     const options = getDeleteConversationOptionsMock();
-    options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
+    options.esClient.deleteByQuery = vi.fn().mockResolvedValue({ deleted: 1 });
     const deletedConversations = await deleteConversation(options);
     expect(deletedConversations).toEqual(1);
   });
 
   test('Delete does not call data client if the conversation returns null', async () => {
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(null);
+    (getConversation as unknown as Mock).mockResolvedValueOnce(null);
     const options = getDeleteConversationOptionsMock();
     await deleteConversation(options);
     expect(options.esClient.delete).not.toHaveBeenCalled();
@@ -57,9 +63,9 @@ describe('deleteConversation', () => {
 
   test('throw error if no conversation was deleted', async () => {
     const conversation = getConversationResponseMock();
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(conversation);
+    (getConversation as unknown as Mock).mockResolvedValueOnce(conversation);
     const options = getDeleteConversationOptionsMock();
-    options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 0 });
+    options.esClient.deleteByQuery = vi.fn().mockResolvedValue({ deleted: 0 });
 
     await expect(deleteConversation(options)).rejects.toThrow('No conversation has been deleted');
   });

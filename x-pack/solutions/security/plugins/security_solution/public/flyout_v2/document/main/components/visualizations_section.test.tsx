@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -24,56 +26,86 @@ import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyz
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 
-jest.mock('../../../shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: jest.fn(),
-}));
-jest.mock('../../../shared/components/flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../../shared/hooks/use_expand_section', () => {
+      const mocked = {
+      useExpandSection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/hooks/is_in_security_app', () => {
+      const mocked = {
+      useIsInSecurityApp: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../detections/hooks/use_is_analyzer_enabled', () => ({
-  useIsAnalyzerEnabled: jest.fn(),
-}));
-jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: jest.fn(() => ({
-    status: 'ready',
-    dataView: {
-      hasMatchedIndices: () => true,
-    },
-  })),
-}));
+vi.mock('../../../../detections/hooks/use_is_analyzer_enabled', () => {
+      const mocked = {
+      useIsAnalyzerEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: vi.fn(() => ({
+        status: 'ready',
+        dataView: {
+          hasMatchedIndices: () => true,
+        },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./analyzer_preview', () => ({
-  AnalyzerPreview: () => <div data-test-subj="analyzerPreviewMock" />,
-}));
+vi.mock('./analyzer_preview', () => {
+      const mocked = {
+      AnalyzerPreview: () => <div data-test-subj="analyzerPreviewMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./session_preview_container', () => ({
-  SessionPreviewContainer: ({ onShowSessionView }: { onShowSessionView: () => void }) => (
-    <button type="button" data-test-subj="sessionPreviewContainerMock" onClick={onShowSessionView}>
-      {'SessionPreview'}
-    </button>
-  ),
-}));
+vi.mock('./session_preview_container', () => {
+      const mocked = {
+      SessionPreviewContainer: ({ onShowSessionView }: { onShowSessionView: () => void }) => (
+        <button type="button" data-test-subj="sessionPreviewContainerMock" onClick={onShowSessionView}>
+          {'SessionPreview'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./graph_preview_container', () => ({
-  GraphPreviewContainer: ({ onShowGraph }: { onShowGraph: () => void }) => (
-    <button type="button" data-test-subj="graphPreviewContainerMock" onClick={onShowGraph}>
-      {'GraphPreview'}
-    </button>
-  ),
-}));
+vi.mock('./graph_preview_container', () => {
+      const mocked = {
+      GraphPreviewContainer: ({ onShowGraph }: { onShowGraph: () => void }) => (
+        <button type="button" data-test-subj="graphPreviewContainerMock" onClick={onShowGraph}>
+          {'GraphPreview'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../tools/graph', () => ({
-  GraphDetails: () => <div data-test-subj="graphDetailsMock" />,
-}));
+vi.mock('../../tools/graph', () => {
+      const mocked = {
+      GraphDetails: () => <div data-test-subj="graphDetailsMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_graph_preview', () => ({
-  useGraphPreview: jest.fn(() => ({ hasGraphData: true })),
-}));
+vi.mock('../hooks/use_graph_preview', () => {
+      const mocked = {
+      useGraphPreview: vi.fn(() => ({ hasGraphData: true })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -88,14 +120,14 @@ const mockHit = createMockHit({
 });
 
 describe('VisualizationsSection', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
-  const mockUseKibana = jest.mocked(useKibana);
-  const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
-  const mockIsAnalyzerEnabled = jest.mocked(useIsAnalyzerEnabled);
+  const mockUseExpandSection = vi.mocked(useExpandSection);
+  const mockUseKibana = vi.mocked(useKibana);
+  const mockUseIsInSecurityApp = vi.mocked(useIsInSecurityApp);
+  const mockIsAnalyzerEnabled = vi.mocked(useIsAnalyzerEnabled);
 
-  const openSystemFlyout = jest.fn();
-  const renderCellActions = jest.fn();
-  const onAlertUpdated = jest.fn();
+  const openSystemFlyout = vi.fn();
+  const renderCellActions = vi.fn();
+  const onAlertUpdated = vi.fn();
   const store = createStore(() => ({}));
   const history = createMemoryHistory();
 
@@ -115,19 +147,19 @@ describe('VisualizationsSection', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    openSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
+    vi.clearAllMocks();
+    openSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: vi.fn() });
     mockUseKibana.mockReturnValue({
       services: {
         overlays: {
           openSystemFlyout,
         },
         uiSettings: {
-          get: jest.fn().mockReturnValue(true),
+          get: vi.fn().mockReturnValue(true),
         },
         serverless: undefined,
-        storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
-        telemetry: { reportEvent: jest.fn() },
+        storage: { get: vi.fn(), set: vi.fn(), remove: vi.fn() },
+        telemetry: { reportEvent: vi.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
     mockUseIsInSecurityApp.mockReturnValue(true);

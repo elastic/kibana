@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { APP_ID } from '../../../../../common';
@@ -16,25 +19,28 @@ import {
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 
-const mockRemoveTask = jest.fn();
-jest.mock('../tasks', () => ({
-  removeLeadGenerationTask: (...args: unknown[]) => mockRemoveTask(...args),
-}));
+const mockRemoveTask = vi.fn();
+vi.mock('../tasks', () => {
+      const mocked = {
+      removeLeadGenerationTask: (...args: unknown[]) => mockRemoveTask(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('disableLeadGenerationRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: ReturnType<typeof requestContextMock.convertContext>;
   const logger = loggingSystemMock.createLogger();
   let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
-  let getStartServicesMock: jest.Mock;
+  let getStartServicesMock: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     const { clients } = requestContextMock.createTools();
     context = requestContextMock.convertContext(requestContextMock.create({ ...clients }));
     mockTaskManagerStart = taskManagerMock.createStart();
-    getStartServicesMock = jest.fn().mockResolvedValue([{}, { taskManager: mockTaskManagerStart }]);
+    getStartServicesMock = vi.fn().mockResolvedValue([{}, { taskManager: mockTaskManagerStart }]);
     disableLeadGenerationRoute(server.router, logger, getStartServicesMock);
   });
 

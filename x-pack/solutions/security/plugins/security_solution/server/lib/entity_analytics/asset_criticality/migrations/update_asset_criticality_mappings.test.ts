@@ -5,27 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { updateAssetCriticalityMappings } from './update_asset_criticality_mappings';
 import type { Logger } from '@kbn/core/server';
 
-const mockisMappingsMigrationRequired = jest.fn();
-const mockmigrateMappings = jest.fn();
+const mockisMappingsMigrationRequired = vi.fn();
+const mockmigrateMappings = vi.fn();
 
-jest.mock('../asset_criticality_migration_client', () => ({
-  AssetCriticalityMigrationClient: jest.fn().mockImplementation(() => ({
-    isMappingsMigrationRequired: () => mockisMappingsMigrationRequired(),
-    migrateMappings: (spaceId?: string) => mockmigrateMappings(spaceId),
-  })),
-}));
+vi.mock('../asset_criticality_migration_client', () => {
+      const mocked = {
+      AssetCriticalityMigrationClient: vi.fn().mockImplementation(() => ({
+        isMappingsMigrationRequired: () => mockisMappingsMigrationRequired(),
+        migrateMappings: (spaceId?: string) => mockmigrateMappings(spaceId),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('updateAssetCriticalityMappings', () => {
-  const mockLogger = { info: jest.fn(), error: jest.fn() } as unknown as Logger;
-  const mockGetStartServices = jest
+  const mockLogger = { info: vi.fn(), error: vi.fn() } as unknown as Logger;
+  const mockGetStartServices = vi
     .fn()
     .mockResolvedValue([{ elasticsearch: { client: { asInternalUser: {} } } }]);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should migrate mappings if migration is required', async () => {

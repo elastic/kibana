@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -20,34 +22,49 @@ import { useUpdateConversationAccessControl } from '../../../../hooks/use_conver
 import { useUserProfiles } from '../../../../hooks/use_user_profiles';
 import { ConversationShareButton } from './conversation_share_button';
 
-jest.mock('../../../../hooks/use_conversation', () => ({
-  useConversation: jest.fn(),
-  useConversationPermissions: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_conversation', () => {
+      const mocked = {
+      useConversation: vi.fn(),
+      useConversationPermissions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_suggest_users', () => ({
-  useSuggestUsers: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_suggest_users', () => {
+      const mocked = {
+      useSuggestUsers: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_conversation_access_control', () => ({
-  useUpdateConversationAccessControl: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_conversation_access_control', () => {
+      const mocked = {
+      useUpdateConversationAccessControl: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_user_profiles', () => ({
-  useUserProfiles: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_user_profiles', () => {
+      const mocked = {
+      useUserProfiles: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/agents/use_agent_by_id', () => ({
-  useAgentBuilderAgentById: () => ({ agent: null, isLoading: false, error: null }),
-}));
+vi.mock('../../../../hooks/agents/use_agent_by_id', () => {
+      const mocked = {
+      useAgentBuilderAgentById: () => ({ agent: null, isLoading: false, error: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseConversation = jest.mocked(useConversation);
-const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
-const mockUseSuggestUsers = jest.mocked(useSuggestUsers);
-const mockUseUpdateConversationAccessControl = jest.mocked(useUpdateConversationAccessControl);
-const mockUseUserProfiles = jest.mocked(useUserProfiles);
+const mockUseConversation = vi.mocked(useConversation);
+const mockUseConversationPermissions = vi.mocked(useConversationPermissions);
+const mockUseSuggestUsers = vi.mocked(useSuggestUsers);
+const mockUseUpdateConversationAccessControl = vi.mocked(useUpdateConversationAccessControl);
+const mockUseUserProfiles = vi.mocked(useUserProfiles);
 
-const mutate = jest.fn();
+const mutate = vi.fn();
 let updateOptions: Parameters<typeof useUpdateConversationAccessControl>[0];
 
 const ownerProfile = {
@@ -143,7 +160,7 @@ const openPopover = async () => {
 
 describe('ConversationShareButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not render without access-control update permission or shared members', () => {

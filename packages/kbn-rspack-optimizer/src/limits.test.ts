@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Fs from 'fs';
 import Path from 'path';
 import Os from 'os';
@@ -16,14 +18,14 @@ import { readLimits, validateLimitsForAllBundles, updateBundleLimits } from './l
 const createTmpDir = () => Fs.mkdtempSync(Path.join(Os.tmpdir(), 'rspack-limits-test-'));
 
 const createMockLog = () => ({
-  success: jest.fn(),
-  info: jest.fn(),
-  warning: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  write: jest.fn(),
-  getWriters: jest.fn(() => []),
-  indent: jest.fn(),
+  success: vi.fn(),
+  info: vi.fn(),
+  warning: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  write: vi.fn(),
+  getWriters: vi.fn(() => []),
+  indent: vi.fn(),
   isVerbose: false,
 });
 

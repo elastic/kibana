@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { WATCHLISTS_URL } from '../../../../../../common/entity_analytics/watchlists/constants';
 import {
@@ -16,13 +19,16 @@ import { WATCHLIST_API_CALL_EVENT } from '../../../../telemetry/event_based/even
 import { createMockTelemetryEventsSender } from '../../../../telemetry/__mocks__';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
-const mockWatchlistUpdate = jest.fn();
+const mockWatchlistUpdate = vi.fn();
 
-jest.mock('../watchlist_config', () => ({
-  WatchlistConfigClient: jest.fn().mockImplementation(() => ({
-    update: mockWatchlistUpdate,
-  })),
-}));
+vi.mock('../watchlist_config', () => {
+      const mocked = {
+      WatchlistConfigClient: vi.fn().mockImplementation(() => ({
+        update: mockWatchlistUpdate,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { updateWatchlistRoute } from './update';
 
@@ -31,7 +37,7 @@ describe('PUT /api/entity_analytics/watchlists/{id} - updateWatchlistRoute', () 
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let logger: ReturnType<typeof loggerMock.create>;
   let telemetrySenderMock: ITelemetryEventsSender;
-  let reportEBT: jest.Mock;
+  let reportEBT: Mock;
 
   const watchlistId = 'wl-1';
 
@@ -43,7 +49,7 @@ describe('PUT /api/entity_analytics/watchlists/{id} - updateWatchlistRoute', () 
 
     mockWatchlistUpdate.mockReset();
 
-    reportEBT = jest.fn();
+    reportEBT = vi.fn();
     telemetrySenderMock = {
       ...createMockTelemetryEventsSender(),
       reportEBT,
@@ -53,7 +59,7 @@ describe('PUT /api/entity_analytics/watchlists/{id} - updateWatchlistRoute', () 
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const buildRequest = (id: string, body: object) =>

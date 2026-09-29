@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { validatedRelatedSavedObjects } from './related_saved_objects';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
@@ -13,7 +15,7 @@ const loggerMock = loggingSystemMock.createLogger();
 
 describe('related_saved_objects', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('validates valid objects', () => {
@@ -71,7 +73,7 @@ it('handles invalid objects', () => {
 
 describe('empty string validation', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('rejects empty string for required id field', () => {

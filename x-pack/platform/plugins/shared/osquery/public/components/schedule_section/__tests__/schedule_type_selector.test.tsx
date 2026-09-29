@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { ScheduleTypeSelector } from '../schedule_type_selector';
@@ -14,7 +16,7 @@ import { renderWithProviders } from './test_helpers';
 describe('ScheduleTypeSelector', () => {
   describe('rendering', () => {
     it('renders interval as selected when value is "interval"', () => {
-      renderWithProviders(<ScheduleTypeSelector value="interval" onChange={jest.fn()} />);
+      renderWithProviders(<ScheduleTypeSelector value="interval" onChange={vi.fn()} />);
 
       const intervalRadio = screen.getByLabelText('Interval') as HTMLInputElement;
       const rruleRadio = screen.getByLabelText('Date & time') as HTMLInputElement;
@@ -23,7 +25,7 @@ describe('ScheduleTypeSelector', () => {
     });
 
     it('renders rrule as selected when value is "rrule"', () => {
-      renderWithProviders(<ScheduleTypeSelector value="rrule" onChange={jest.fn()} />);
+      renderWithProviders(<ScheduleTypeSelector value="rrule" onChange={vi.fn()} />);
 
       const intervalRadio = screen.getByLabelText('Interval') as HTMLInputElement;
       const rruleRadio = screen.getByLabelText('Date & time') as HTMLInputElement;
@@ -32,7 +34,7 @@ describe('ScheduleTypeSelector', () => {
     });
 
     it('omits the locked help text when no lockedScheduleType is supplied', () => {
-      renderWithProviders(<ScheduleTypeSelector value="interval" onChange={jest.fn()} />);
+      renderWithProviders(<ScheduleTypeSelector value="interval" onChange={vi.fn()} />);
 
       expect(screen.queryByText(SCHEDULE_TYPE_LOCKED_HELP)).not.toBeInTheDocument();
     });
@@ -40,7 +42,7 @@ describe('ScheduleTypeSelector', () => {
 
   describe('change handling', () => {
     it('fires onChange when the user picks the other mode', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(<ScheduleTypeSelector value="interval" onChange={onChange} />);
 
       fireEvent.click(screen.getByTestId('osquery-schedule-type-rrule'));
@@ -48,7 +50,7 @@ describe('ScheduleTypeSelector', () => {
     });
 
     it('does not fire onChange when the user re-clicks the current mode', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(<ScheduleTypeSelector value="interval" onChange={onChange} />);
 
       fireEvent.click(screen.getByTestId('osquery-schedule-type-interval'));
@@ -56,7 +58,7 @@ describe('ScheduleTypeSelector', () => {
     });
 
     it('does not fire onChange when disabled', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(<ScheduleTypeSelector value="interval" onChange={onChange} disabled />);
 
       fireEvent.click(screen.getByTestId('osquery-schedule-type-rrule'));
@@ -68,7 +70,7 @@ describe('ScheduleTypeSelector', () => {
     it('renders the lockedScheduleType as selected, regardless of value prop', () => {
       // Pass mismatched `value` to prove `lockedScheduleType` wins.
       renderWithProviders(
-        <ScheduleTypeSelector value="interval" onChange={jest.fn()} lockedScheduleType="rrule" />
+        <ScheduleTypeSelector value="interval" onChange={vi.fn()} lockedScheduleType="rrule" />
       );
 
       const intervalRadio = screen.getByLabelText('Interval') as HTMLInputElement;
@@ -79,14 +81,14 @@ describe('ScheduleTypeSelector', () => {
 
     it('surfaces the locked help text', () => {
       renderWithProviders(
-        <ScheduleTypeSelector value="interval" onChange={jest.fn()} lockedScheduleType="interval" />
+        <ScheduleTypeSelector value="interval" onChange={vi.fn()} lockedScheduleType="interval" />
       );
 
       expect(screen.getByText(SCHEDULE_TYPE_LOCKED_HELP)).toBeInTheDocument();
     });
 
     it('does not fire onChange when locked and the user clicks the other card', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <ScheduleTypeSelector value="interval" onChange={onChange} lockedScheduleType="rrule" />
       );
@@ -105,8 +107,8 @@ describe('ScheduleTypeSelector', () => {
     // the tests pin distinct prefixes to mirror that behavior because EUI's
     // test-env stub returns a static id.
     it('routes clicks only to the instance whose label was clicked', () => {
-      const firstOnChange = jest.fn();
-      const secondOnChange = jest.fn();
+      const firstOnChange = vi.fn();
+      const secondOnChange = vi.fn();
       renderWithProviders(
         <>
           <ScheduleTypeSelector

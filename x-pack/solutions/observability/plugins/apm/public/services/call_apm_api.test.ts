@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as callApiExports from './rest/call_api';
 import { createCallApmApi, callApmApi } from './rest/create_call_apm_api';
 import type { CoreStart } from '@kbn/core/public';
 
-const callApi = jest
+const callApi = vi
   .spyOn(callApiExports, 'callApi')
   .mockImplementation(() => Promise.resolve(null));
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AiConfigCatchAll } from './helpers';
 import {
   getGenAiConfig,
@@ -81,7 +83,7 @@ describe('getActionTypeTitle', () => {
 
 describe('getConnectorTypeTitle', () => {
   const mockActionTypeRegistry = {
-    get: jest.fn().mockReturnValue({ actionTypeTitle: 'Fallback Action' }),
+    get: vi.fn().mockReturnValue({ actionTypeTitle: 'Fallback Action' }),
   } as unknown as ActionTypeRegistryContract;
 
   test('returns null when connector is undefined', () => {

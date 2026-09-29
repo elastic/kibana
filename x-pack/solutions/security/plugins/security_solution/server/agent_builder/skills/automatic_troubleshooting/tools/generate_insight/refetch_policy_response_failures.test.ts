@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { getPolicyResponseFailureEvents } from './refetch_policy_response_failures';
@@ -36,7 +39,7 @@ const bucket = (agentId: string, osName: string, id: string, actions: Action[]) 
 
 const mockEsClient = (buckets: unknown[]): ElasticsearchClient =>
   ({
-    search: jest.fn().mockResolvedValue({
+    search: vi.fn().mockResolvedValue({
       aggregations: { latest_actions: { buckets } },
     }),
   } as unknown as ElasticsearchClient);
@@ -46,7 +49,7 @@ describe('getPolicyResponseFailureEvents', () => {
     const esClient = mockEsClient([]);
     await getPolicyResponseFailureEvents(esClient, { endpointIds: ['a', 'b'] });
 
-    const query = (esClient.search as jest.Mock).mock.calls[0][0];
+    const query = (esClient.search as Mock).mock.calls[0][0];
     expect(query.index).toEqual(['metrics-endpoint.policy-*']);
     expect(query.query.bool).toEqual({
       must: [{ terms: { 'agent.id': ['a', 'b'] } }],
@@ -65,7 +68,7 @@ describe('getPolicyResponseFailureEvents', () => {
     const esClient = mockEsClient([]);
     await getPolicyResponseFailureEvents(esClient, { endpointIds: ['a'], ccsEnabled: true });
 
-    const query = (esClient.search as jest.Mock).mock.calls[0][0];
+    const query = (esClient.search as Mock).mock.calls[0][0];
     expect(query.index).toEqual(['metrics-endpoint.policy-*,*:metrics-endpoint.policy-*']);
   });
 
@@ -161,7 +164,7 @@ describe('getPolicyResponseFailureEvents', () => {
 
   it('returns an empty array when there are no aggregation buckets', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({}),
+      search: vi.fn().mockResolvedValue({}),
     } as unknown as ElasticsearchClient;
 
     const result = await getPolicyResponseFailureEvents(esClient, { endpointIds: ['a'] });
@@ -200,7 +203,7 @@ describe('getPolicyResponseFailureEvents', () => {
 
   it('propagates the rejection when the Elasticsearch search fails', async () => {
     const esClient = {
-      search: jest.fn().mockRejectedValue(new Error('search rejected')),
+      search: vi.fn().mockRejectedValue(new Error('search rejected')),
     } as unknown as ElasticsearchClient;
 
     await expect(getPolicyResponseFailureEvents(esClient, { endpointIds: ['a'] })).rejects.toThrow(

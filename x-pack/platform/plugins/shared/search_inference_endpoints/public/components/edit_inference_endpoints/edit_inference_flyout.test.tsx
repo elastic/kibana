@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import InferenceFlyoutWrapper from '@kbn/inference-endpoint-ui-common';
 import { useKibana } from '../../hooks/use_kibana';
 import React from 'react';
@@ -14,20 +17,23 @@ import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints'
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
-jest.mock('../../hooks/use_kibana');
-jest.mock('../../hooks/use_inference_endpoints');
-jest.mock('@kbn/inference-endpoint-ui-common/src/components/inference_flyout_wrapper', () => ({
-  InferenceFlyoutWrapper: jest.fn(() => <div data-test-subj="inferenceFlyoutWrapper" />),
-}));
+vi.mock('../../hooks/use_kibana');
+vi.mock('../../hooks/use_inference_endpoints');
+vi.mock('@kbn/inference-endpoint-ui-common/src/components/inference_flyout_wrapper', () => {
+      const mocked = {
+      InferenceFlyoutWrapper: vi.fn(() => <div data-test-subj="inferenceFlyoutWrapper" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseQueryInferenceEndpoints = useQueryInferenceEndpoints as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseQueryInferenceEndpoints = useQueryInferenceEndpoints as Mock;
 
 describe('EditInferenceFlyout', () => {
-  const mockOnFlyoutClose = jest.fn();
-  const mockRefetch = jest.fn();
-  const mockToasts = { addSuccess: jest.fn(), addError: jest.fn() };
-  const mockHttp = jest.fn();
+  const mockOnFlyoutClose = vi.fn();
+  const mockRefetch = vi.fn();
+  const mockToasts = { addSuccess: vi.fn(), addError: vi.fn() };
+  const mockHttp = vi.fn();
 
   const mockInferenceEndpoint: InferenceInferenceEndpointInfo = {
     inference_id: 'test-endpoint',
@@ -53,7 +59,7 @@ describe('EditInferenceFlyout', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         http: mockHttp,
@@ -101,7 +107,7 @@ describe('EditInferenceFlyout', () => {
   it('calls refetch on edit success', () => {
     renderComponent();
     // Extract the onSubmitSuccess function from the props passed to the InferenceFlyoutWrapper
-    const wrapperProps = (InferenceFlyoutWrapper as jest.Mock).mock.calls[0][0];
+    const wrapperProps = (InferenceFlyoutWrapper as Mock).mock.calls[0][0];
     const { onSubmitSuccess } = wrapperProps;
     // Simulate the success callback
     onSubmitSuccess();

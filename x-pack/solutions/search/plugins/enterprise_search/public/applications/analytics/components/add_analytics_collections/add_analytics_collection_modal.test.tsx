@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -23,15 +25,15 @@ const mockValues = {
 };
 
 const mockActions = {
-  createAnalyticsCollection: jest.fn(),
-  setNameValue: jest.fn(),
+  createAnalyticsCollection: vi.fn(),
+  setNameValue: vi.fn(),
 };
 
 describe('AddAnalyticsCollectionModal', () => {
-  const mockOnClose = jest.fn();
+  const mockOnClose = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders', () => {

@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { scheduleThrottledNotificationActions } from './schedule_throttle_notification_actions';
 import type { NotificationRuleTypeParams } from './schedule_notification_actions';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 
-jest.mock('./schedule_notification_actions', () => ({
-  scheduleNotificationActions: jest.fn(),
-}));
+vi.mock('./schedule_notification_actions', () => {
+      const mocked = {
+      scheduleNotificationActions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('schedule_throttle_notification_actions', () => {
   let notificationRuleParams: NotificationRuleTypeParams;
@@ -21,7 +27,7 @@ describe('schedule_throttle_notification_actions', () => {
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-    (scheduleNotificationActions as jest.Mock).mockReset();
+    (scheduleNotificationActions as Mock).mockReset();
     notificationRuleParams = {
       author: ['123'],
       id: '123',
@@ -94,7 +100,7 @@ describe('schedule_throttle_notification_actions', () => {
       signals: [],
     });
 
-    expect(scheduleNotificationActions as jest.Mock).toHaveBeenCalled();
+    expect(scheduleNotificationActions as Mock).toHaveBeenCalled();
   });
 
   it('should call "scheduleNotificationActions" if the signals length is 1 or greater', async () => {
@@ -124,7 +130,7 @@ describe('schedule_throttle_notification_actions', () => {
       ],
     });
 
-    expect(scheduleNotificationActions as jest.Mock).toHaveBeenCalled();
+    expect(scheduleNotificationActions as Mock).toHaveBeenCalled();
   });
 
   it('should NOT call "scheduleNotificationActions" if the results length is 0', async () => {
@@ -149,7 +155,7 @@ describe('schedule_throttle_notification_actions', () => {
       signals: [],
     });
 
-    expect(scheduleNotificationActions as jest.Mock).not.toHaveBeenCalled();
+    expect(scheduleNotificationActions as Mock).not.toHaveBeenCalled();
   });
 
   it('should NOT call "scheduleNotificationActions" if "throttle" is an invalid string', async () => {
@@ -178,7 +184,7 @@ describe('schedule_throttle_notification_actions', () => {
       signals: [],
     });
 
-    expect(scheduleNotificationActions as jest.Mock).not.toHaveBeenCalled();
+    expect(scheduleNotificationActions as Mock).not.toHaveBeenCalled();
   });
 
   it('should pass expected arguments into "scheduleNotificationActions" on success', async () => {
@@ -209,7 +215,7 @@ describe('schedule_throttle_notification_actions', () => {
       signals: [],
     });
 
-    expect((scheduleNotificationActions as jest.Mock).mock.calls[0][0].resultsLink).toMatch(
+    expect((scheduleNotificationActions as Mock).mock.calls[0][0].resultsLink).toMatch(
       'http://www.example.com/rules/id/123'
     );
     expect(scheduleNotificationActions).toHaveBeenCalledWith(

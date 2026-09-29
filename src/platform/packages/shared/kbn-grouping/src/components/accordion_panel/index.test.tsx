@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import { GroupPanel } from '.';
 import { createGroupFilter, getNullGroupFilter } from '../../containers/query/helpers';
 import React from 'react';
 import { groupingBucket } from '../../mocks';
 
-const onToggleGroup = jest.fn();
-const renderChildComponent = jest.fn();
+const onToggleGroup = vi.fn();
+const renderChildComponent = vi.fn();
 const ruleName = 'Rule name';
 const selectedGroup = 'kibana.alert.rule.name';
 
@@ -34,7 +36,7 @@ const testProps = {
 
 describe('grouping accordion panel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('creates the query for the selectedGroup attribute', () => {
     const { getByTestId } = render(<GroupPanel {...testProps} />);

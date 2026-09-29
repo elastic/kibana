@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { useFetchEventById } from './use_fetch_event_by_id';
 
-const mockSignificantEventsFetch = jest.fn();
+const mockSignificantEventsFetch = vi.fn();
 
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
   ({
@@ -25,36 +27,42 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
     ...overrides,
   } as SignificantEvent);
 
-jest.mock('./use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      significantEvents: {
-        significantEventsRepositoryClient: { fetch: mockSignificantEventsFetch },
-      },
-    },
-  }),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          significantEvents: {
+            significantEventsRepositoryClient: { fetch: mockSignificantEventsFetch },
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let capturedQueryFn: ((args: { signal?: AbortSignal }) => Promise<unknown>) | undefined;
 let capturedQueryKey: readonly unknown[] | undefined;
 let capturedEnabled: boolean | undefined;
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: (params: {
-    queryKey: readonly unknown[];
-    enabled: boolean;
-    queryFn: (args: { signal?: AbortSignal }) => Promise<unknown>;
-  }) => {
-    capturedQueryKey = params.queryKey;
-    capturedEnabled = params.enabled;
-    capturedQueryFn = params.queryFn;
-    return { data: undefined, isFetched: false };
-  },
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: (params: {
+        queryKey: readonly unknown[];
+        enabled: boolean;
+        queryFn: (args: { signal?: AbortSignal }) => Promise<unknown>;
+      }) => {
+        capturedQueryKey = params.queryKey;
+        capturedEnabled = params.enabled;
+        capturedQueryFn = params.queryFn;
+        return { data: undefined, isFetched: false };
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useFetchEventById', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedQueryFn = undefined;
     capturedQueryKey = undefined;
     capturedEnabled = undefined;

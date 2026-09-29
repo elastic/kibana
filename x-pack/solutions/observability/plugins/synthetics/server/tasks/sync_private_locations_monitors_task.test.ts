@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { CustomTaskInstance, SyncTaskRunResult } from './sync_private_locations_monitors_task';
 import {
   SyncPrivateLocationMonitorsTask,
@@ -28,25 +31,25 @@ const mockTaskManagerStart = taskManagerMock.createStart();
 const mockTaskManager = taskManagerMock.createSetup();
 const mockSoClient = {
   ...savedObjectsRepositoryMock.create(),
-  createInternalRepository: jest.fn(),
+  createInternalRepository: vi.fn(),
 };
 
 const mockEncryptedSoClient = mockEncryptedSO();
 
 const mockSyntheticsMonitorClient = {
   privateLocationAPI: {
-    editMonitors: jest.fn().mockResolvedValue({ failedUpdates: [], failedCreates: [] }),
+    editMonitors: vi.fn().mockResolvedValue({ failedUpdates: [], failedCreates: [] }),
   },
   syntheticsService: {
-    getSyntheticsParams: jest.fn(),
-    getMaintenanceWindows: jest.fn(),
+    getSyntheticsParams: vi.fn(),
+    getMaintenanceWindows: vi.fn(),
   },
 };
 const mockLogger = loggerMock.create();
 
 const mockFleet = createFleetStartContractMock();
 
-const mockServerSetup: jest.Mocked<SyntheticsServerSetup> = {
+const mockServerSetup: Mocked<SyntheticsServerSetup> = {
   coreStart: coreMock.createStart() as CoreStart,
   pluginsStart: {
     taskManager: mockTaskManagerStart,
@@ -94,7 +97,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
   let task: SyncPrivateLocationMonitorsTask;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     task = new SyncPrivateLocationMonitorsTask(
       mockServerSetup as any,
       mockSyntheticsMonitorClient as unknown as SyntheticsMonitorClient
@@ -158,12 +161,12 @@ describe('SyncPrivateLocationMonitorsTask', () => {
   describe('runTask', () => {
     it('should skip sync if no data has changed', async () => {
       const taskInstance = getMockTaskInstance();
-      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+      vi.spyOn(task, 'hasMWsChanged').mockResolvedValue({
         hasMWsChanged: false,
       } as any);
       // fetchMonitorMwsIds is used in the implementation now
-      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+      vi.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
           label: 'Private Location 1',
@@ -190,13 +193,13 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
     it('should run sync if data has changed', async () => {
       const taskInstance = getMockTaskInstance();
-      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+      vi.spyOn(task, 'hasMWsChanged').mockResolvedValue({
         hasMWsChanged: true,
         updatedMWs: [],
         missingMWIds: [],
       } as any);
-      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+      vi.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
           label: 'Private Location 1',
@@ -204,7 +207,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           agentPolicyId: 'policy-1',
         },
       ]);
-      jest
+      vi
         .spyOn(task.deployPackagePolicies, 'syncPackagePoliciesForMws')
         .mockResolvedValue(undefined);
 
@@ -230,9 +233,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const taskInstance = getMockTaskInstance();
       const error = new Error('Sync failed');
       // fetchMonitorMwsIds is called before hasMWsChanged in runTask
-      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
-      jest.spyOn(task, 'hasMWsChanged').mockRejectedValue(error);
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+      vi.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      vi.spyOn(task, 'hasMWsChanged').mockRejectedValue(error);
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
           label: 'Private Location 1',
@@ -262,11 +265,11 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ...getMockTaskInstance({ lastStartedAt: initialLastStartedAt }),
         startedAt,
       };
-      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+      vi.spyOn(task, 'hasMWsChanged').mockResolvedValue({
         hasMWsChanged: false,
       } as any);
-      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+      vi.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
           label: 'Private Location 1',
@@ -288,11 +291,11 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ...getMockTaskInstance(),
         startedAt,
       };
-      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+      vi.spyOn(task, 'hasMWsChanged').mockResolvedValue({
         hasMWsChanged: false,
       } as any);
-      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+      vi.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
           label: 'Private Location 1',
@@ -300,7 +303,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           agentPolicyId: 'policy-1',
         },
       ]);
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = vi
         .fn()
         .mockResolvedValue([{ id: 'mw-1', updatedAt: '2024-06-01T10:00:05.000Z' }]);
 
@@ -320,11 +323,11 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ...getMockTaskInstance(),
         startedAt,
       };
-      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+      vi.spyOn(task, 'hasMWsChanged').mockResolvedValue({
         hasMWsChanged: false,
       } as any);
-      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+      vi.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
           label: 'Private Location 1',
@@ -332,7 +335,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           agentPolicyId: 'policy-1',
         },
       ]);
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = vi
         .fn()
         .mockResolvedValue([{ id: 'alerting-mw', updatedAt: '2024-06-01T10:00:05.000Z' }]);
 
@@ -348,13 +351,13 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ...getMockTaskInstance(),
         startedAt,
       };
-      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+      vi.spyOn(task, 'hasMWsChanged').mockResolvedValue({
         hasMWsChanged: true,
         updatedMWs: [],
         missingMWIds: ['gone-mw'],
       } as any);
-      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['gone-mw']);
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+      vi.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['gone-mw']);
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
           label: 'Private Location 1',
@@ -362,10 +365,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           agentPolicyId: 'policy-1',
         },
       ]);
-      jest
+      vi
         .spyOn(task.deployPackagePolicies, 'syncPackagePoliciesForMws')
         .mockResolvedValue(undefined);
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = vi
         .fn()
         .mockResolvedValue([]);
 
@@ -378,11 +381,11 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     it('should sync only for provided privateLocationId and clear it from state', async () => {
       const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
       // Ensure the server's savedObjects.createInternalRepository returns an object for the call
-      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
+      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = vi
         .fn()
         .mockReturnValue(mockSoClient as any);
 
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
           label: 'Private Location 1',
@@ -391,7 +394,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         },
       ]);
 
-      const syncSpy = jest
+      const syncSpy = vi
         .spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies')
         .mockResolvedValue({ failedCreatesBySpace: [] });
 
@@ -415,11 +418,11 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
     it('should not return a schedule when a per-location sync fails', async () => {
       const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
-      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
+      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = vi
         .fn()
         .mockReturnValue(mockSoClient as any);
 
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
           label: 'Private Location 1',
@@ -427,7 +430,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           agentPolicyId: 'policy-1',
         },
       ]);
-      jest
+      vi
         .spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies')
         .mockRejectedValue(new Error('create failed'));
 
@@ -441,10 +444,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
     it('should schedule a per-location sync after cleanup', async () => {
       const taskInstance = getMockTaskInstance();
-      jest.spyOn(task, 'cleanUpDuplicatedPackagePolicies').mockResolvedValue({
+      vi.spyOn(task, 'cleanUpDuplicatedPackagePolicies').mockResolvedValue({
         performCleanupSync: true,
       });
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
           label: 'Private Location 1',
@@ -452,7 +455,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           agentPolicyId: 'policy-1',
         },
       ]);
-      const syncSpy = jest
+      const syncSpy = vi
         .spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies')
         .mockResolvedValue({ failedCreatesBySpace: [] });
 
@@ -474,10 +477,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
     it('should schedule a sync task for each private location after cleanup', async () => {
       const taskInstance = getMockTaskInstance();
-      jest.spyOn(task, 'cleanUpDuplicatedPackagePolicies').mockResolvedValue({
+      vi.spyOn(task, 'cleanUpDuplicatedPackagePolicies').mockResolvedValue({
         performCleanupSync: true,
       });
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
           label: 'Private Location 1',
@@ -506,10 +509,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
     it('should leave cleanup pending so a failed scheduling is retried next run', async () => {
       const taskInstance = getMockTaskInstance();
-      jest.spyOn(task, 'cleanUpDuplicatedPackagePolicies').mockResolvedValue({
+      vi.spyOn(task, 'cleanUpDuplicatedPackagePolicies').mockResolvedValue({
         performCleanupSync: true,
       });
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
           label: 'Private Location 1',
@@ -527,10 +530,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
     it('should mark cleanup done when there are no private locations to sync', async () => {
       const taskInstance = getMockTaskInstance();
-      jest.spyOn(task, 'cleanUpDuplicatedPackagePolicies').mockResolvedValue({
+      vi.spyOn(task, 'cleanUpDuplicatedPackagePolicies').mockResolvedValue({
         performCleanupSync: true,
       });
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([]);
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([]);
 
       const result = await task.runTask({ taskInstance });
 
@@ -540,11 +543,11 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
     it('should fail the per-location run when the sync reports failed creates', async () => {
       const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
-      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
+      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = vi
         .fn()
         .mockReturnValue(mockSoClient as any);
 
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
           label: 'Private Location 1',
@@ -552,7 +555,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           agentPolicyId: 'policy-1',
         },
       ]);
-      jest.spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies').mockResolvedValue({
+      vi.spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies').mockResolvedValue({
         failedCreatesBySpace: [{ spaceId: 'space1', count: 2 }],
       });
 
@@ -566,10 +569,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     it('should stop re-running cleanup once the retry budget is exhausted across task runs', async () => {
       // a monitor whose expected package policy never shows up in Fleet: every
       // cleanup pass wants a follow-up sync, and the recreate never succeeds
-      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
+      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = vi
         .fn()
         .mockReturnValue(mockSoClient as any);
-      mockSoClient.createPointInTimeFinder = jest.fn().mockImplementation(() => ({
+      mockSoClient.createPointInTimeFinder = vi.fn().mockImplementation(() => ({
         async *find() {
           yield {
             saved_objects: [
@@ -585,14 +588,14 @@ describe('SyncPrivateLocationMonitorsTask', () => {
             ],
           };
         },
-        close: jest.fn().mockResolvedValue(undefined),
+        close: vi.fn().mockResolvedValue(undefined),
       }));
       mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
         (async function* () {
           yield [];
         })()
       );
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
         {
           id: 'pl-1',
           label: 'Private Location 1',
@@ -600,7 +603,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           agentPolicyId: 'policy-1',
         },
       ]);
-      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue([]);
+      vi.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue([]);
 
       let state: Record<string, any> = {};
       for (let run = 0; run < 6; run++) {
@@ -619,7 +622,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
   describe('hasAnyDataChanged', () => {
     it('should return true if maintenance windows changed', async () => {
-      jest
+      vi
         .spyOn(task, 'hasMWsChanged')
         .mockResolvedValue({ hasMWsChanged: true, totalMWs: 2 } as any);
 
@@ -634,7 +637,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     });
 
     it('should return false if nothing changed', async () => {
-      jest
+      vi
         .spyOn(task, 'hasMWsChanged')
         .mockResolvedValue({ hasMWsChanged: false, totalMWs: 1 } as any);
 
@@ -654,7 +657,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
   describe('hasMWsChanged', () => {
     it('returns true if updated MWs are found', async () => {
       // mock maintenance window client to return an updated MW
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = vi
         .fn()
         .mockReturnValue([{ id: 'mw-1', updatedAt: '2024-01-02T00:00:00.000Z' }]);
 
@@ -671,7 +674,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
     it('returns true if total number of MWs changed (missing ids)', async () => {
       //  returns no maintenance windows -> missing ids detected
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = vi
         .fn()
         .mockReturnValue([]);
 
@@ -689,7 +692,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     it('returns false if no changes are detected', async () => {
       // bulkGet returns MWs updated before lastStartedAt and all ids present
 
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = vi
         .fn()
         .mockReturnValue([{ id: 'mw-1', updatedAt: '2023-01-01T00:00:00.000Z' }]);
 
@@ -707,7 +710,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
   describe('haveMWsUpdatedSince', () => {
     it('returns true when an MW was updated after the given timestamp', async () => {
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = vi
         .fn()
         .mockResolvedValue([{ id: 'mw-1', updatedAt: '2024-06-01T10:00:05.000Z' }]);
 
@@ -717,7 +720,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     });
 
     it('returns false when MW updates are not after the given timestamp', async () => {
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = vi
         .fn()
         .mockResolvedValue([{ id: 'mw-1', updatedAt: '2024-06-01T09:59:59.000Z' }]);
 
@@ -727,7 +730,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     });
 
     it('returns false when the updated MW is not referenced by any monitor', async () => {
-      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = vi
         .fn()
         .mockResolvedValue([{ id: 'alerting-mw', updatedAt: '2024-06-01T10:00:05.000Z' }]);
 
@@ -742,7 +745,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const mockAllPrivateLocations = [{ id: 'pl-1', name: 'Private Location 1' }];
 
       // Mocking the return of getAllMonitorConfigs
-      jest.spyOn(task.deployPackagePolicies, 'getAllMonitorConfigs').mockResolvedValue({
+      vi.spyOn(task.deployPackagePolicies, 'getAllMonitorConfigs').mockResolvedValue({
         configsBySpaces: {
           space1: [{ id: 'm1', locations: [{ name: 'pl-1', isServiceManaged: false }] }],
         },
@@ -751,7 +754,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         maintenanceWindows: [],
       } as any);
 
-      jest
+      vi
         .spyOn(task, 'parseLocations')
         .mockReturnValue({ privateLocations: ['pl-1'], publicLocations: [] } as any);
 
@@ -772,7 +775,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     });
 
     it('should not call editMonitors if no monitors are on private locations', async () => {
-      jest.spyOn(task.deployPackagePolicies, 'getAllMonitorConfigs').mockResolvedValue({
+      vi.spyOn(task.deployPackagePolicies, 'getAllMonitorConfigs').mockResolvedValue({
         configsBySpaces: {
           space1: [{ id: 'm1', locations: [] }],
         },
@@ -782,7 +785,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       } as any);
 
       // This monitor has no private locations
-      jest
+      vi
         .spyOn(task, 'parseLocations')
         .mockReturnValue({ privateLocations: [], publicLocations: [] } as any);
 
@@ -844,12 +847,12 @@ describe('SyncPrivateLocationMonitorsTask', () => {
             ],
           };
         },
-        close: jest.fn().mockImplementation(() => {
+        close: vi.fn().mockImplementation(() => {
           closed = true;
           return Promise.resolve();
         }),
       };
-      mockSoClient.createPointInTimeFinder = jest.fn().mockReturnValue(mockFinder);
+      mockSoClient.createPointInTimeFinder = vi.fn().mockReturnValue(mockFinder);
       task = new SyncPrivateLocationMonitorsTask(
         mockServerSetup as any,
         mockSyntheticsMonitorClient as unknown as SyntheticsMonitorClient
@@ -918,7 +921,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
     it('should stop re-attempting the follow-up sync once retries are exhausted', async () => {
       // the shared mockFinder is single-use, so hand out a fresh one per call
-      mockSoClient.createPointInTimeFinder = jest.fn().mockImplementation(() => ({
+      mockSoClient.createPointInTimeFinder = vi.fn().mockImplementation(() => ({
         async *find() {
           yield {
             saved_objects: [
@@ -934,7 +937,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
             ],
           };
         },
-        close: jest.fn().mockResolvedValue(undefined),
+        close: vi.fn().mockResolvedValue(undefined),
       }));
       mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
         (async function* () {
@@ -1028,9 +1031,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     ];
 
     beforeEach(() => {
-      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({ hasMWsChanged: false } as any);
-      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
-      jest
+      vi.spyOn(task, 'hasMWsChanged').mockResolvedValue({ hasMWsChanged: false } as any);
+      vi.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      vi
         .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
         .mockResolvedValue(mockPrivateLocations as any);
     });
@@ -1081,7 +1084,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
 describe('runSynPrivateLocationMonitorsTaskSoon', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should schedule the task to run soon successfully', async () => {
@@ -1119,7 +1122,7 @@ describe('runSynPrivateLocationMonitorsTaskSoon', () => {
 
 describe('resetSyncPrivateCleanUpState', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockTaskManagerStart.runSoon.mockResolvedValue({ id: 'x' } as any);
   });
 

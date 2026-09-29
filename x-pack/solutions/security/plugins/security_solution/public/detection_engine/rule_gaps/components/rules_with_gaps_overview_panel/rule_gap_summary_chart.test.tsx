@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RuleGapSummaryChart } from './rule_gap_summary_chart';
@@ -14,20 +17,26 @@ import { useRulesTableContextMock } from '../../../rule_management_ui/components
 import { useGapAutoFillSchedulerContext } from '../../context/gap_auto_fill_scheduler_context';
 import { useKibana } from '../../../../common/lib/kibana';
 
-jest.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
-jest.mock('../../context/gap_auto_fill_scheduler_context');
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/components/charts/donutchart', () => ({
-  DonutChart: jest.fn(() => <div data-test-subj="mock-donut-chart" />),
-}));
+vi.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
+vi.mock('../../context/gap_auto_fill_scheduler_context');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/components/charts/donutchart', () => {
+      const mocked = {
+      DonutChart: vi.fn(() => <div data-test-subj="mock-donut-chart" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetRuleIdsWithGaps = useGetRuleIdsWithGaps as jest.Mock;
-const mockUseKibana = useKibana as jest.Mock;
-const mockInvalidate = jest.fn();
-jest.mock('../../api/hooks/use_get_rule_ids_with_gaps', () => ({
-  useGetRuleIdsWithGaps: jest.fn(),
-  useInvalidateGetRuleIdsWithGapsQuery: () => mockInvalidate,
-}));
+const mockUseGetRuleIdsWithGaps = useGetRuleIdsWithGaps as Mock;
+const mockUseKibana = useKibana as Mock;
+const mockInvalidate = vi.fn();
+vi.mock('../../api/hooks/use_get_rule_ids_with_gaps', () => {
+      const mocked = {
+      useGetRuleIdsWithGaps: vi.fn(),
+      useInvalidateGetRuleIdsWithGapsQuery: () => mockInvalidate,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createGapsResponse = ({
   filled = 0,
@@ -67,16 +76,16 @@ const createGapsResponse = ({
 
 describe('RuleGapSummaryChart', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         uiSettings: {
-          get: jest.fn().mockReturnValue([]),
+          get: vi.fn().mockReturnValue([]),
         },
       },
     });
-    (useRulesTableContext as jest.Mock).mockReturnValue(useRulesTableContextMock.create());
-    (useGapAutoFillSchedulerContext as jest.Mock).mockReturnValue({
+    (useRulesTableContext as Mock).mockReturnValue(useRulesTableContextMock.create());
+    (useGapAutoFillSchedulerContext as Mock).mockReturnValue({
       canAccessGapAutoFill: false,
       canEditGapAutoFill: false,
       hasEnterpriseLicense: false,

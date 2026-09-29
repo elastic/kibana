@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
@@ -27,8 +29,8 @@ import {
   SPAN_TYPE,
 } from '@kbn/observability-shared-plugin/common';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     useEuiTheme: () => ({
@@ -39,74 +41,92 @@ jest.mock('@elastic/eui', () => {
 });
 
 // Mock APM plugin context
-jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => ({
-    core: {
-      uiSettings: {
-        get: jest.fn().mockReturnValue(false),
-      },
-      application: {
-        capabilities: {
-          slo: { read: true },
+vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
+      const mocked = {
+      useApmPluginContext: () => ({
+        core: {
+          uiSettings: {
+            get: vi.fn().mockReturnValue(false),
+          },
+          application: {
+            capabilities: {
+              slo: { read: true },
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_apm_route_path', () => ({
-  useApmRoutePath: () => '/service-map',
-}));
+vi.mock('../../../hooks/use_apm_route_path', () => {
+      const mocked = {
+      useApmRoutePath: () => '/service-map',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock APM router
-jest.mock('../../../hooks/use_apm_router', () => ({
-  useApmRouter: () => ({
-    link: jest.fn((path: string) => `/app/apm${path}`),
-  }),
-}));
+vi.mock('../../../hooks/use_apm_router', () => {
+      const mocked = {
+      useApmRouter: () => ({
+        link: vi.fn((path: string) => `/app/apm${path}`),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock APM params
-jest.mock('../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: () => ({
-    query: {
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-      comparisonEnabled: false,
-      offset: undefined,
-    },
-  }),
-}));
+vi.mock('../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useAnyOfApmParams: () => ({
+        query: {
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          comparisonEnabled: false,
+          offset: undefined,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock time range hook
-jest.mock('../../../hooks/use_time_range', () => ({
-  useTimeRange: () => ({
-    start: '2023-01-01T00:00:00.000Z',
-    end: '2023-01-01T01:00:00.000Z',
-  }),
-}));
+vi.mock('../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => ({
+        start: '2023-01-01T00:00:00.000Z',
+        end: '2023-01-01T01:00:00.000Z',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock fetcher
-jest.mock('../../../hooks/use_fetcher', () => ({
-  FETCH_STATUS: {
-    LOADING: 'loading',
-    SUCCESS: 'success',
-    FAILURE: 'failure',
-    NOT_INITIATED: 'not_initiated',
-  },
-  useFetcher: () => ({
-    data: { currentPeriod: {}, previousPeriod: undefined },
-    status: 'success',
-  }),
-}));
+vi.mock('../../../hooks/use_fetcher', () => {
+      const mocked = {
+      FETCH_STATUS: {
+        LOADING: 'loading',
+        SUCCESS: 'success',
+        FAILURE: 'failure',
+        NOT_INITIATED: 'not_initiated',
+      },
+      useFetcher: () => ({
+        data: { currentPeriod: {}, previousPeriod: undefined },
+        status: 'success',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock useReactFlow
-const mockGetViewport = jest.fn(() => ({ x: 0, y: 0, zoom: 1 }));
-const mockGetNode = jest.fn((id: string) => ({ id, measured: { width: 56, height: 56 } }));
-const mockGetZoom = jest.fn(() => 1);
-const mockSetCenter = jest.fn();
+const mockGetViewport = vi.fn(() => ({ x: 0, y: 0, zoom: 1 }));
+const mockGetNode = vi.fn((id: string) => ({ id, measured: { width: 56, height: 56 } }));
+const mockGetZoom = vi.fn(() => 1);
+const mockSetCenter = vi.fn();
 
-jest.mock('@xyflow/react', () => {
-  const original = jest.requireActual('@xyflow/react');
+vi.mock('@xyflow/react', () => {
+  const original = require('@xyflow/react');
   return {
     ...original,
     useReactFlow: () => ({
@@ -119,9 +139,12 @@ jest.mock('@xyflow/react', () => {
 });
 
 // Mock service map components
-jest.mock('./popover/edge_contents', () => ({
-  EdgeContents: jest.fn(() => <div data-testid="edge-contents" />),
-}));
+vi.mock('./popover/edge_contents', () => {
+      const mocked = {
+      EdgeContents: vi.fn(() => <div data-testid="edge-contents" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MapPopover', () => {
   const defaultProps = {
@@ -132,7 +155,7 @@ describe('MapPopover', () => {
     kuery: '',
     start: '2023-01-01T00:00:00.000Z',
     end: '2023-01-01T01:00:00.000Z',
-    onClose: jest.fn(),
+    onClose: vi.fn(),
   };
 
   const renderPopover = (props = {}) => {
@@ -144,7 +167,7 @@ describe('MapPopover', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not show popover content when no node is selected', () => {
@@ -240,7 +263,7 @@ describe('MapPopover', () => {
   });
 
   it('calls onClose when popover is closed', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     const serviceNode: ServiceMapNode = {
       id: 'test-service',
       type: 'service',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import {
   withLensReferences,
@@ -13,17 +15,20 @@ import {
   extractEsqlFromLens,
 } from './lens_reference';
 
-const mockToAPIFormat = jest.fn();
+const mockToAPIFormat = vi.fn();
 
-jest.mock('@kbn/lens-embeddable-utils', () => ({
-  LensConfigBuilder: jest.fn().mockImplementation(() => ({
-    toAPIFormat: (...args: unknown[]) => mockToAPIFormat(...args),
-  })),
-}));
+vi.mock('@kbn/lens-embeddable-utils', () => {
+      const mocked = {
+      LensConfigBuilder: vi.fn().mockImplementation(() => ({
+        toAPIFormat: (...args: unknown[]) => mockToAPIFormat(...args),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('lens_reference helpers', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('withLensReferences', () => {

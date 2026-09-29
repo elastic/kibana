@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -29,32 +32,41 @@ import { useEntityAnalyticsAgentNavigation } from '../entity_analytics_agent_nav
  * sourcerer runtime.
  */
 
-jest.mock('../../components/security_redux_embedded_provider', () => ({
-  SecurityReduxEmbeddedProvider: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="securityReduxEmbeddedProviderMock">{children}</div>
-  ),
-}));
+vi.mock('../../components/security_redux_embedded_provider', () => {
+      const mocked = {
+      SecurityReduxEmbeddedProvider: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="securityReduxEmbeddedProviderMock">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/entity_card_flyout_overview_canvas', () => ({
-  EntityCardFlyoutOverviewCanvas: (props: Record<string, unknown>) => (
-    <div data-test-subj="entityCardFlyoutOverviewCanvasMock">{JSON.stringify(props)}</div>
-  ),
-}));
+vi.mock('../../components/entity_card_flyout_overview_canvas', () => {
+      const mocked = {
+      EntityCardFlyoutOverviewCanvas: (props: Record<string, unknown>) => (
+        <div data-test-subj="entityCardFlyoutOverviewCanvasMock">{JSON.stringify(props)}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../entity_analytics_agent_navigation_context');
+vi.mock('../entity_analytics_agent_navigation_context');
 
-jest.mock('./entity_card/entity_card', () => ({
-  EntityCard: (props: Record<string, unknown>) => (
-    <div data-test-subj="entityCardMock">{JSON.stringify(props.identifier)}</div>
-  ),
-}));
+vi.mock('./entity_card/entity_card', () => {
+      const mocked = {
+      EntityCard: (props: Record<string, unknown>) => (
+        <div data-test-subj="entityCardMock">{JSON.stringify(props.identifier)}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const experimentalFeatures = {
   entityAnalyticsWatchlistEnabled: false,
   enableRiskScorePrivmonModifier: false,
 } as unknown as ExperimentalFeatures;
 
-const resolveSecurityCanvasContext = jest.fn(
+const resolveSecurityCanvasContext = vi.fn(
   async () => ({} as unknown as SecurityCanvasEmbeddedBundle)
 );
 
@@ -75,8 +87,8 @@ const renderCanvas = (data: unknown) =>
 
 describe('EntityAttachmentCanvasContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useEntityAnalyticsAgentNavigation as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useEntityAnalyticsAgentNavigation as Mock).mockReturnValue({
       isNewFlyoutEnabled: false,
     });
   });
@@ -92,7 +104,7 @@ describe('EntityAttachmentCanvasContent', () => {
   });
 
   it('hides section-header arrows when the new flyout is enabled', () => {
-    (useEntityAnalyticsAgentNavigation as jest.Mock).mockReturnValue({
+    (useEntityAnalyticsAgentNavigation as Mock).mockReturnValue({
       isNewFlyoutEnabled: true,
     });
 

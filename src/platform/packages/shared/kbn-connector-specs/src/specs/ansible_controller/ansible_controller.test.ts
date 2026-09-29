@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { AnsibleControllerConnector } from './ansible_controller';
@@ -18,19 +20,19 @@ interface TestResult {
 }
 
 describe('AnsibleControllerConnector', () => {
-  const mockRequest = jest.fn();
+  const mockRequest = vi.fn();
   const mockClient = { request: mockRequest };
 
   const mockContext = {
     client: mockClient,
     config: { apiUrl: API_URL, apiBasePath: '/api/v2' },
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   const okResponse = (data: unknown) => ({ data });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('metadata', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -29,14 +32,14 @@ const mockDataView = {
   },
 } as any;
 
-jest.mock('react-use/lib/useSessionStorage', () => jest.fn().mockReturnValue([false, jest.fn()]));
+vi.mock('react-use/lib/useSessionStorage', () => vi.fn().mockReturnValue([false, vi.fn()]));
 
 const renderFieldsTable = (props: Partial<FieldsSelectorTableProps> = {}) => {
   const defaultProps: FieldsSelectorTableProps = {
     dataView: mockDataView,
     columns: props.columns || [],
-    onAddColumn: jest.fn(),
-    onRemoveColumn: jest.fn(),
+    onAddColumn: vi.fn(),
+    onRemoveColumn: vi.fn(),
     title: 'title',
   };
 
@@ -49,7 +52,7 @@ const renderFieldsTable = (props: Partial<FieldsSelectorTableProps> = {}) => {
 
 describe('FieldsSelectorTable', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the table with data correctly', () => {
@@ -60,7 +63,7 @@ describe('FieldsSelectorTable', () => {
   });
 
   it('calls onAddColumn when a checkbox is checked', () => {
-    const onAddColumn = jest.fn();
+    const onAddColumn = vi.fn();
     const { getAllByRole } = renderFieldsTable({
       onAddColumn,
     });
@@ -72,7 +75,7 @@ describe('FieldsSelectorTable', () => {
   });
 
   it('calls onRemoveColumn when a checkbox is unchecked', () => {
-    const onRemoveColumn = jest.fn();
+    const onRemoveColumn = vi.fn();
     const { getAllByRole } = renderFieldsTable({
       columns: ['field1', 'field2'],
       onRemoveColumn,
@@ -101,7 +104,7 @@ describe('FieldsSelectorTable', () => {
     });
 
     it('should render "view selected" option when previous selection was "view selected"', () => {
-      (useSessionStorage as jest.Mock).mockReturnValueOnce([true, jest.fn()]);
+      (useSessionStorage as Mock).mockReturnValueOnce([true, vi.fn()]);
       const { getByTestId } = renderFieldsTable();
 
       expect(getByTestId('viewSelectorButton').textContent).toBe(VIEW_MENU_SELECTED_TEXT);
@@ -109,7 +112,7 @@ describe('FieldsSelectorTable', () => {
 
     it('should show "view all" option after the "view all" is selected', async () => {
       // Forcing the view to be the selected state
-      (useSessionStorage as jest.Mock).mockReturnValueOnce([true, jest.fn()]);
+      (useSessionStorage as Mock).mockReturnValueOnce([true, vi.fn()]);
 
       const { getByTestId } = renderFieldsTable();
       expect(getByTestId('viewSelectorButton').textContent).toBe(VIEW_MENU_SELECTED_TEXT);
@@ -123,7 +126,7 @@ describe('FieldsSelectorTable', () => {
     });
 
     it('should show only selected columns after the "view selected" option is selected', async () => {
-      (useSessionStorage as jest.Mock).mockReturnValueOnce([true, jest.fn()]);
+      (useSessionStorage as Mock).mockReturnValueOnce([true, vi.fn()]);
       // Render the table with field3 selected
       const { getAllByRole, getByTestId } = renderFieldsTable({ columns: ['field3'] });
       expect(getByTestId('viewSelectorButton').textContent).toBe(VIEW_MENU_SELECTED_TEXT);
@@ -134,7 +137,7 @@ describe('FieldsSelectorTable', () => {
 
     it('should show all columns available after the "view all" option is selected', async () => {
       // Forcing the view to be the selected state
-      (useSessionStorage as jest.Mock).mockReturnValueOnce([true, jest.fn()]);
+      (useSessionStorage as Mock).mockReturnValueOnce([true, vi.fn()]);
 
       // Render the table with field3 selected
       const { getAllByRole, getByTestId } = renderFieldsTable({ columns: ['field3'] });

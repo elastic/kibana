@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderOptInStatusNoticeBanner } from './render_opt_in_status_notice_banner';
 import {
   analyticsServiceMock,
@@ -33,7 +35,7 @@ describe('renderOptInStatusNoticeBanner', () => {
 
     const returnedBannerId = renderOptInStatusNoticeBanner({
       http: mockHttp,
-      onSeen: jest.fn(),
+      onSeen: vi.fn(),
       overlays,
       analytics,
       i18n,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type {
   RequestHandlerContextBase,
@@ -87,7 +89,7 @@ describe('ContextContainer', () => {
         contextContainer.registerContext<TestContext<{ ctxFromA: string; core: any }>, 'ctxFromA'>(
           Symbol('unknown'),
           'ctxFromA',
-          jest.fn()
+          vi.fn()
         )
       ).toThrowErrorMatchingInlineSnapshot(
         `"Cannot register context for unknown plugin: Symbol(unknown)"`
@@ -134,8 +136,8 @@ describe('ContextContainer', () => {
     it('lazily loads the providers when accessed', async () => {
       const contextContainer = new ContextContainer(plugins, coreId);
 
-      const core1provider = jest.fn().mockReturnValue('core1');
-      const ctxFromAProvider = jest.fn().mockReturnValue('ctxFromA');
+      const core1provider = vi.fn().mockReturnValue('core1');
+      const ctxFromAProvider = vi.fn().mockReturnValue('ctxFromA');
 
       contextContainer.registerContext<TestContext<{ core1: string; core: any }>, 'core1'>(
         coreId,
@@ -150,7 +152,7 @@ describe('ContextContainer', () => {
       );
 
       let context: any;
-      const rawHandler1 = jest.fn((ctx) => {
+      const rawHandler1 = vi.fn((ctx) => {
         context = ctx;
         return 'rawHandler1' as any;
       });
@@ -177,8 +179,8 @@ describe('ContextContainer', () => {
     it(`does not eagerly loads a provider's dependencies`, async () => {
       const contextContainer = new ContextContainer(plugins, coreId);
 
-      const core1provider = jest.fn().mockReturnValue('core1');
-      const ctxFromAProvider = jest.fn().mockReturnValue('ctxFromA');
+      const core1provider = vi.fn().mockReturnValue('core1');
+      const ctxFromAProvider = vi.fn().mockReturnValue('ctxFromA');
 
       contextContainer.registerContext<TestContext<{ core1: string; core: any }>, 'core1'>(
         coreId,
@@ -193,7 +195,7 @@ describe('ContextContainer', () => {
       );
 
       let context: any;
-      const rawHandler1 = jest.fn((ctx) => {
+      const rawHandler1 = vi.fn((ctx) => {
         context = ctx;
         return 'rawHandler1' as any;
       });
@@ -215,8 +217,8 @@ describe('ContextContainer', () => {
     it(`allows to load a dependency from a provider`, async () => {
       const contextContainer = new ContextContainer(plugins, coreId);
 
-      const core1provider = jest.fn().mockReturnValue('core1');
-      const ctxFromAProvider = jest.fn().mockImplementation(async (ctx: any) => {
+      const core1provider = vi.fn().mockReturnValue('core1');
+      const ctxFromAProvider = vi.fn().mockImplementation(async (ctx: any) => {
         const core1 = await ctx.core1;
         return `${core1}-ctxFromA`;
       });
@@ -234,7 +236,7 @@ describe('ContextContainer', () => {
       );
 
       let context: any;
-      const rawHandler1 = jest.fn((ctx) => {
+      const rawHandler1 = vi.fn((ctx) => {
         context = ctx;
         return 'rawHandler1' as any;
       });
@@ -257,8 +259,8 @@ describe('ContextContainer', () => {
     it(`only calls a provider once and caches the returned value`, async () => {
       const contextContainer = new ContextContainer(plugins, coreId);
 
-      const core1provider = jest.fn().mockReturnValue('core1');
-      const ctxFromAProvider = jest.fn().mockImplementation(async (ctx: any) => {
+      const core1provider = vi.fn().mockReturnValue('core1');
+      const ctxFromAProvider = vi.fn().mockImplementation(async (ctx: any) => {
         const core1 = await ctx.core1;
         return `${core1}-ctxFromA`;
       });
@@ -276,7 +278,7 @@ describe('ContextContainer', () => {
       );
 
       let context: any;
-      const rawHandler1 = jest.fn((ctx) => {
+      const rawHandler1 = vi.fn((ctx) => {
         context = ctx;
         return 'rawHandler1' as any;
       });
@@ -346,7 +348,7 @@ describe('ContextContainer', () => {
         }
       );
 
-      const rawHandler1 = jest.fn(async (context) => {
+      const rawHandler1 = vi.fn(async (context) => {
         expect(await resolveAllContexts(context)).toEqual({
           core1: 'core',
           ctxFromA: 'aString',
@@ -357,7 +359,7 @@ describe('ContextContainer', () => {
       });
       const handler1 = contextContainer.createHandler(pluginC, rawHandler1);
 
-      const rawHandler2 = jest.fn(async (context) => {
+      const rawHandler2 = vi.fn(async (context) => {
         expect(await resolveAllContexts(context)).toEqual({
           core1: 'core',
           ctxFromD: {},
@@ -400,7 +402,7 @@ describe('ContextContainer', () => {
           return 277;
         });
 
-      const rawHandler1 = jest.fn(async (context) => {
+      const rawHandler1 = vi.fn(async (context) => {
         expect(await resolveAllContexts(context)).toEqual({
           core1: 'core',
           core2: 101,
@@ -432,7 +434,7 @@ describe('ContextContainer', () => {
           return 101;
         });
 
-      const rawHandler1 = jest.fn(async (context) => {
+      const rawHandler1 = vi.fn(async (context) => {
         expect(await resolveAllContexts(context)).toEqual({
           core1: 'core',
           core2: 101,
@@ -456,7 +458,7 @@ describe('ContextContainer', () => {
         .registerContext<MyContext, 'core1'>(coreId, 'core1', (context) => 'core')
         .registerContext<MyContext, 'ctxFromA'>(pluginA, 'ctxFromA', (context) => 'aString');
 
-      const rawHandler1 = jest.fn(async (context) => {
+      const rawHandler1 = vi.fn(async (context) => {
         // pluginA context should not be present in a core handler
         expect(await resolveAllContexts(context)).toEqual({
           core1: 'core',
@@ -494,7 +496,7 @@ describe('ContextContainer', () => {
         }
       );
 
-      const rawHandler1 = jest.fn(async (context) => {
+      const rawHandler1 = vi.fn(async (context) => {
         expect(await resolveAllContexts(context)).toEqual({
           core1: 'core',
           ctxFromB: 77,
@@ -557,7 +559,7 @@ describe('ContextContainer', () => {
           }
         );
 
-        const rawHandler1 = jest.fn(async (context) => {
+        const rawHandler1 = vi.fn(async (context) => {
           expect(await context.resolve(['core1', 'ctxFromA', 'ctxFromB', 'ctxFromC'])).toEqual({
             core1: 'core',
             ctxFromA: 'aString',
@@ -568,7 +570,7 @@ describe('ContextContainer', () => {
         });
         const handler1 = contextContainer.createHandler(pluginC, rawHandler1);
 
-        const rawHandler2 = jest.fn(async (context) => {
+        const rawHandler2 = vi.fn(async (context) => {
           expect(await context.resolve(['core1', 'ctxFromD'])).toEqual({
             core1: 'core',
             ctxFromD: {},
@@ -597,7 +599,7 @@ describe('ContextContainer', () => {
     it('throws error if called with an unknown symbol', async () => {
       const contextContainer = new ContextContainer(plugins, coreId);
       await expect(() =>
-        contextContainer.createHandler(Symbol('unknown'), jest.fn())
+        contextContainer.createHandler(Symbol('unknown'), vi.fn())
       ).toThrowErrorMatchingInlineSnapshot(
         `"Cannot create handler for unknown plugin: Symbol(unknown)"`
       );
@@ -605,7 +607,7 @@ describe('ContextContainer', () => {
 
     it('returns value from original handler', async () => {
       const contextContainer = new ContextContainer(plugins, coreId);
-      const rawHandler1 = jest.fn(() => 'handler1' as any);
+      const rawHandler1 = vi.fn(() => 'handler1' as any);
       const handler1 = contextContainer.createHandler(pluginA, rawHandler1);
 
       const request = createKibanaRequest();
@@ -616,7 +618,7 @@ describe('ContextContainer', () => {
     it('passes additional arguments to handlers', async () => {
       const contextContainer = new ContextContainer(plugins, coreId);
 
-      const rawHandler1 = jest.fn(() => 'handler1' as any);
+      const rawHandler1 = vi.fn(() => 'handler1' as any);
       const handler1 = contextContainer.createHandler(pluginA, rawHandler1);
 
       const request = createKibanaRequest();

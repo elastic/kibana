@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { TestProviders } from '../../../common/mock';
@@ -25,23 +28,23 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-exceptions-common/a
 import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 import type { OptInStatusMetadata } from '../../../../server/endpoint/lib/reference_data';
 
-jest.mock('../../../common/components/user_privileges');
-jest.mock('../../../common/utils/route/mocks');
-jest.mock('../../hooks/use_all_exception_lists');
-jest.mock('@kbn/securitysolution-list-hooks');
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
+vi.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/utils/route/mocks');
+vi.mock('../../hooks/use_all_exception_lists');
+vi.mock('@kbn/securitysolution-list-hooks');
+vi.mock('react-router-dom', () => {
+  const originalModule = require('react-router-dom');
   return {
     ...originalModule,
-    useHistory: jest.fn(),
+    useHistory: vi.fn(),
   };
 });
-jest.mock('@kbn/i18n-react', () => {
-  const { i18n } = jest.requireActual('@kbn/i18n');
+vi.mock('@kbn/i18n-react', async () => {
+  const { i18n } = (await vi.importActual('@kbn/i18n'));
   i18n.init({ locale: 'en' });
 
-  const originalModule = jest.requireActual('@kbn/i18n-react');
-  const FormattedRelative = jest.fn();
+  const originalModule = (await vi.importActual('@kbn/i18n-react'));
+  const FormattedRelative = vi.fn();
   FormattedRelative.mockImplementationOnce(() => '2 days ago');
   FormattedRelative.mockImplementation(() => '20 hours ago');
 
@@ -51,33 +54,45 @@ jest.mock('@kbn/i18n-react', () => {
   };
 });
 
-jest.mock('../../../detections/containers/detection_engine/lists/use_lists_config', () => ({
-  useListsConfig: jest.fn().mockReturnValue({ loading: false }),
-}));
+vi.mock('../../../detections/containers/detection_engine/lists/use_lists_config', () => {
+      const mocked = {
+      useListsConfig: vi.fn().mockReturnValue({ loading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/cps-utils', () => ({
-  useRouteBasedCpsPickerAccess: jest.fn(),
-  ProjectRoutingAccess: { READONLY: 'readonly' },
-}));
+vi.mock('@kbn/cps-utils', () => {
+      const mocked = {
+      useRouteBasedCpsPickerAccess: vi.fn(),
+      ProjectRoutingAccess: { READONLY: 'readonly' },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_endpoint_exceptions_capability');
-jest.mock('../../components/create_shared_exception_list', () => ({
-  CreateSharedListFlyout: ({ handleCloseFlyout }: { handleCloseFlyout: () => void }) => (
-    <div data-test-subj="createSharedExceptionListFlyout">
-      <button type="button" data-test-subj="closeFlyoutButton" onClick={handleCloseFlyout}>
-        {'Close'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../../hooks/use_endpoint_exceptions_capability');
+vi.mock('../../components/create_shared_exception_list', () => {
+      const mocked = {
+      CreateSharedListFlyout: ({ handleCloseFlyout }: { handleCloseFlyout: () => void }) => (
+        <div data-test-subj="createSharedExceptionListFlyout">
+          <button type="button" data-test-subj="closeFlyoutButton" onClick={handleCloseFlyout}>
+            {'Close'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
-jest.mock('../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in');
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+vi.mock('../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in');
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as Mock;
 const mockUseGetEndpointExceptionsPerPolicyOptIn =
-  useGetEndpointExceptionsPerPolicyOptIn as jest.Mock;
+  useGetEndpointExceptionsPerPolicyOptIn as Mock;
 
 describe('SharedLists', () => {
   const mockHistory = generateHistoryMock();
@@ -85,16 +100,16 @@ describe('SharedLists', () => {
   const exceptionList2 = { ...getExceptionListSchemaMock(), list_id: 'not_endpoint_list', id: '2' };
 
   beforeAll(() => {
-    (useHistory as jest.Mock).mockReturnValue(mockHistory);
+    (useHistory as Mock).mockReturnValue(mockHistory);
   });
 
   beforeEach(() => {
-    (useApi as jest.Mock).mockReturnValue({
-      deleteExceptionList: jest.fn(),
-      exportExceptionList: jest.fn(),
+    (useApi as Mock).mockReturnValue({
+      deleteExceptionList: vi.fn(),
+      exportExceptionList: vi.fn(),
     });
 
-    (useExceptionLists as jest.Mock).mockReturnValue([
+    (useExceptionLists as Mock).mockReturnValue([
       false,
       [exceptionList1, exceptionList2],
       {
@@ -102,10 +117,10 @@ describe('SharedLists', () => {
         perPage: 20,
         total: 2,
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
-    (useAllExceptionLists as jest.Mock).mockReturnValue([
+    (useAllExceptionLists as Mock).mockReturnValue([
       false,
       [
         { ...exceptionList1, rules: [] },
@@ -117,18 +132,18 @@ describe('SharedLists', () => {
       },
     ]);
 
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
     });
 
-    (useEndpointExceptionsCapability as jest.Mock).mockReturnValue(true);
+    (useEndpointExceptionsCapability as Mock).mockReturnValue(true);
 
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     mockUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({ data: { status: false } });
   });
 
   it('renders empty view if no lists exist', async () => {
-    (useExceptionLists as jest.Mock).mockReturnValue([
+    (useExceptionLists as Mock).mockReturnValue([
       false,
       [],
       {
@@ -136,10 +151,10 @@ describe('SharedLists', () => {
         perPage: 20,
         total: 0,
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
-    (useAllExceptionLists as jest.Mock).mockReturnValue([false, [], {}]);
+    (useAllExceptionLists as Mock).mockReturnValue([false, [], {}]);
     const wrapper = render(
       <TestProviders>
         <SharedLists />
@@ -153,7 +168,7 @@ describe('SharedLists', () => {
   });
 
   it('does not render pagination when no lists exist', async () => {
-    (useExceptionLists as jest.Mock).mockReturnValue([
+    (useExceptionLists as Mock).mockReturnValue([
       false,
       [],
       {
@@ -161,10 +176,10 @@ describe('SharedLists', () => {
         perPage: 20,
         total: 0,
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
-    (useAllExceptionLists as jest.Mock).mockReturnValue([false, [], {}]);
+    (useAllExceptionLists as Mock).mockReturnValue([false, [], {}]);
     const wrapper = render(
       <TestProviders>
         <SharedLists />
@@ -181,7 +196,7 @@ describe('SharedLists', () => {
   });
 
   it('renders loading state when fetching lists', async () => {
-    (useExceptionLists as jest.Mock).mockReturnValue([
+    (useExceptionLists as Mock).mockReturnValue([
       true,
       [],
       {
@@ -189,10 +204,10 @@ describe('SharedLists', () => {
         perPage: 20,
         total: 0,
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
-    (useAllExceptionLists as jest.Mock).mockReturnValue([false, [], {}]);
+    (useAllExceptionLists as Mock).mockReturnValue([false, [], {}]);
     const wrapper = render(
       <TestProviders>
         <SharedLists />
@@ -206,7 +221,7 @@ describe('SharedLists', () => {
   });
 
   it('renders loading state when fetching refs', async () => {
-    (useExceptionLists as jest.Mock).mockReturnValue([
+    (useExceptionLists as Mock).mockReturnValue([
       false,
       [exceptionList1, exceptionList2],
       {
@@ -214,10 +229,10 @@ describe('SharedLists', () => {
         perPage: 20,
         total: 2,
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
-    (useAllExceptionLists as jest.Mock).mockReturnValue([true, [], {}]);
+    (useAllExceptionLists as Mock).mockReturnValue([true, [], {}]);
     const wrapper = render(
       <TestProviders>
         <SharedLists />
@@ -237,7 +252,7 @@ describe('SharedLists', () => {
       </TestProviders>
     );
 
-    (useExceptionLists as jest.Mock).mockReturnValue([
+    (useExceptionLists as Mock).mockReturnValue([
       false,
       [],
       {
@@ -245,10 +260,10 @@ describe('SharedLists', () => {
         perPage: 20,
         total: 0,
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
-    (useAllExceptionLists as jest.Mock).mockReturnValue([false, [], {}]);
+    (useAllExceptionLists as Mock).mockReturnValue([false, [], {}]);
 
     const searchBar = wrapper.getByTestId('exceptionsHeaderSearchInput');
     fireEvent.change(searchBar, { target: { value: 'foo' } });
@@ -262,7 +277,7 @@ describe('SharedLists', () => {
   describe('when moving Endpoint exceptions to Management', () => {
     it('should not fetch "endpoint_list" when Endpoint exceptions moved FF is enabled', async () => {
       mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         ...initialUserPrivilegesState(),
         rulesPrivileges: {
           rules: { read: true, edit: true },
@@ -340,7 +355,7 @@ describe('SharedLists', () => {
 
     it('should fetch "endpoint_list" but hide other endpoint artifacts when Endpoint exceptions moved FF is disabled', async () => {
       mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         ...initialUserPrivilegesState(),
         rulesPrivileges: {
           rules: { read: true, edit: true },
@@ -379,7 +394,7 @@ describe('SharedLists', () => {
   });
 
   it('renders the "endpoint_list" overflow card button as enabled when user is restricted to only READ Endpoint Exceptions', async () => {
-    (useEndpointExceptionsCapability as jest.Mock).mockReturnValue(false);
+    (useEndpointExceptionsCapability as Mock).mockReturnValue(false);
 
     const wrapper = render(
       <TestProviders>
@@ -413,7 +428,7 @@ describe('SharedLists', () => {
   });
 
   it('renders overflow card button as enabled if user is read only', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         rules: { read: true, edit: false },
@@ -432,7 +447,7 @@ describe('SharedLists', () => {
   });
 
   it('renders export option as enabled when user is restricted to only READ rules', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         rules: { read: true, edit: false },
@@ -456,16 +471,16 @@ describe('SharedLists', () => {
   });
 
   it('calls refreshExceptions via Refresh button when no stale filter is present', async () => {
-    const mockRefreshExceptions = jest.fn();
+    const mockRefreshExceptions = vi.fn();
 
-    (useExceptionLists as jest.Mock).mockReturnValue([
+    (useExceptionLists as Mock).mockReturnValue([
       false,
       [exceptionList1, exceptionList2],
       { page: 1, perPage: 20, total: 2 },
-      jest.fn(),
+      vi.fn(),
       mockRefreshExceptions,
       { field: 'created_at', order: 'desc' },
-      jest.fn(),
+      vi.fn(),
     ]);
 
     const { getByTestId } = render(
@@ -484,7 +499,7 @@ describe('SharedLists', () => {
   });
 
   it('returns focus to the create button when the create shared list flyout is closed', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         rules: { read: true, edit: true },

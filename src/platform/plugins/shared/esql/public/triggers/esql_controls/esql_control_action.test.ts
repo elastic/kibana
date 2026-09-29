@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
@@ -15,16 +18,19 @@ import { BehaviorSubject } from 'rxjs';
 import { CreateESQLControlAction } from './esql_control_action';
 
 // Mock external dependencies
-jest.mock('@kbn/discover-utils');
-jest.mock('@kbn/presentation-util');
-jest.mock('./esql_control_helpers', () => ({
-  loadESQLControlFlyout: jest.fn().mockResolvedValue({}),
-}));
+vi.mock('@kbn/discover-utils');
+vi.mock('@kbn/presentation-util');
+vi.mock('./esql_control_helpers', () => {
+      const mocked = {
+      loadESQLControlFlyout: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDismissAllFlyoutsExceptFor = dismissAllFlyoutsExceptFor as jest.MockedFunction<
+const mockDismissAllFlyoutsExceptFor = dismissAllFlyoutsExceptFor as MockedFunction<
   typeof dismissAllFlyoutsExceptFor
 >;
-const mockOpenLazyFlyout = openLazyFlyout as jest.MockedFunction<typeof openLazyFlyout>;
+const mockOpenLazyFlyout = openLazyFlyout as MockedFunction<typeof openLazyFlyout>;
 
 describe('CreateESQLControlAction', () => {
   const dataMock = dataPluginMock.createStartContract();
@@ -38,11 +44,11 @@ describe('CreateESQLControlAction', () => {
     queryString: 'FROM index | WHERE field = ?variable',
     variableType: ESQLVariableType.VALUES,
     esqlVariables: [],
-    onSaveControl: jest.fn(),
-    onCancelControl: jest.fn(),
+    onSaveControl: vi.fn(),
+    onCancelControl: vi.fn(),
     parentApi: {},
     triggerSource: ControlTriggerSource.QUESTION_MARK,
-    returnFocus: jest.fn(),
+    returnFocus: vi.fn(),
   };
 
   beforeEach(() => {
@@ -53,7 +59,7 @@ describe('CreateESQLControlAction', () => {
 
     action = new CreateESQLControlAction(mockCore, searchMock, timefilterMock);
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('execute', () => {

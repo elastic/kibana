@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { createJourneyScreenshotBlocksRoute } from './journey_screenshot_blocks';
 import type { UMServerLibs } from '../../uptime_server';
@@ -16,12 +18,12 @@ describe('journey screenshot blocks route', () => {
   beforeEach(() => {
     libs = {
       requests: {
-        getJourneyScreenshotBlocks: jest.fn().mockReturnValue([]),
+        getJourneyScreenshotBlocks: vi.fn().mockReturnValue([]),
       },
     } as unknown as UMServerLibs;
     handlerContext = {
       uptimeEsClient: {
-        search: jest.fn().mockResolvedValue({
+        search: vi.fn().mockResolvedValue({
           body: {
             hits: {
               hits: data,
@@ -35,9 +37,9 @@ describe('journey screenshot blocks route', () => {
         },
       },
       response: {
-        badRequest: jest.fn().mockReturnValue({ status: 400, message: 'Bad request.' }),
-        ok: jest.fn((responseData) => ({ ...responseData, status: 200, message: 'Ok' })),
-        notFound: jest.fn().mockReturnValue({ status: 404, message: 'Not found.' }),
+        badRequest: vi.fn().mockReturnValue({ status: 400, message: 'Bad request.' }),
+        ok: vi.fn((responseData) => ({ ...responseData, status: 200, message: 'Ok' })),
+        notFound: vi.fn().mockReturnValue({ status: 404, message: 'Not found.' }),
       },
     };
   });
@@ -58,7 +60,7 @@ describe('journey screenshot blocks route', () => {
   it('returns status code 404 if result is empty set', async () => {
     const route = createJourneyScreenshotBlocksRoute({
       requests: {
-        getJourneyScreenshotBlocks: jest.fn().mockReturnValue([]),
+        getJourneyScreenshotBlocks: vi.fn().mockReturnValue([]),
       },
     } as unknown as UMServerLibs);
 
@@ -68,7 +70,7 @@ describe('journey screenshot blocks route', () => {
   });
 
   it('returns blocks for request', async () => {
-    handlerContext.uptimeEsClient.search = jest.fn().mockResolvedValue({
+    handlerContext.uptimeEsClient.search = vi.fn().mockResolvedValue({
       body: {
         hits: {
           hits: [
@@ -112,7 +114,7 @@ describe('journey screenshot blocks route', () => {
     ];
     const route = createJourneyScreenshotBlocksRoute({
       requests: {
-        getJourneyScreenshotBlocks: jest.fn().mockReturnValue(responseData),
+        getJourneyScreenshotBlocks: vi.fn().mockReturnValue(responseData),
       },
     } as unknown as UMServerLibs);
 

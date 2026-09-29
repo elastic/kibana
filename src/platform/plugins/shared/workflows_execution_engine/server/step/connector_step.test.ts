@@ -7,38 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ConnectorStepImpl } from './connector_step';
 
 const createMocks = () => {
   const stepExecutionRuntime = {
     contextManager: {
-      renderValueAccordingToContext: jest.fn((v: unknown) => v),
+      renderValueAccordingToContext: vi.fn((v: unknown) => v),
     },
     abortController: new AbortController(),
     node: { configuration: {} },
-    startStep: jest.fn(),
-    flushEventLogs: jest.fn().mockResolvedValue(undefined),
-    finishStep: jest.fn(),
-    failStep: jest.fn(),
-    setInput: jest.fn(),
+    startStep: vi.fn(),
+    flushEventLogs: vi.fn().mockResolvedValue(undefined),
+    finishStep: vi.fn(),
+    failStep: vi.fn(),
+    setInput: vi.fn(),
     stepExecutionId: 'step-exec-1',
     workflowExecution: { workflowDefinition: {} },
   };
 
   const connectorExecutor = {
-    execute: jest.fn(),
-    executeSystemConnector: jest.fn(),
+    execute: vi.fn(),
+    executeSystemConnector: vi.fn(),
   };
 
   const workflowRuntime = {
-    navigateToNextNode: jest.fn(),
+    navigateToNextNode: vi.fn(),
   };
 
   const workflowLogger = {
-    logInfo: jest.fn(),
-    logError: jest.fn(),
-    logDebug: jest.fn(),
-    logWarn: jest.fn(),
+    logInfo: vi.fn(),
+    logError: vi.fn(),
+    logDebug: vi.fn(),
+    logWarn: vi.fn(),
   };
 
   return { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger };

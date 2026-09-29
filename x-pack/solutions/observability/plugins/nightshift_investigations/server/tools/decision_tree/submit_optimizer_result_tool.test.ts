@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { DecisionTreeStore, DecisionTreeDetail } from '../../decision_trees/store';
@@ -41,26 +44,26 @@ const stored = (mermaidBody: string): DecisionTreeDetail => ({
   learnings: [],
 });
 
-const createStore = (existing?: DecisionTreeDetail): jest.Mocked<DecisionTreeStore> =>
+const createStore = (existing?: DecisionTreeDetail): Mocked<DecisionTreeStore> =>
   ({
-    list: jest.fn().mockResolvedValue([]),
-    get: jest.fn().mockResolvedValue(existing),
-    commit: jest.fn().mockResolvedValue(stored(FULL_TREE)),
-    listVersions: jest.fn().mockResolvedValue([]),
-    getVersion: jest.fn().mockResolvedValue(undefined),
-    archive: jest.fn(),
-  } as jest.Mocked<DecisionTreeStore>);
+    list: vi.fn().mockResolvedValue([]),
+    get: vi.fn().mockResolvedValue(existing),
+    commit: vi.fn().mockResolvedValue(stored(FULL_TREE)),
+    listVersions: vi.fn().mockResolvedValue([]),
+    getVersion: vi.fn().mockResolvedValue(undefined),
+    archive: vi.fn(),
+  } as Mocked<DecisionTreeStore>);
 
 const createSandboxStart = (markdown: string) => {
   const session = {
-    readFiles: jest
+    readFiles: vi
       .fn()
       .mockResolvedValue([{ success: true, content: Buffer.from(markdown, 'utf8') }]),
   };
   return {
     session,
     getSandboxStart: () => ({
-      getSession: jest.fn().mockReturnValue(session),
+      getSession: vi.fn().mockReturnValue(session),
     }),
   };
 };
@@ -77,7 +80,7 @@ const runSubmit = async ({
   markdown,
   submission,
 }: {
-  store: jest.Mocked<DecisionTreeStore>;
+  store: Mocked<DecisionTreeStore>;
   markdown: string;
   submission?: Partial<{
     tree_id: string;
@@ -216,8 +219,8 @@ describe('nightshift_submit_optimizer_result', () => {
         keywords: [],
       },
     ];
-    const peekLearnings = jest.fn().mockReturnValue(buffered);
-    const drainLearnings = jest.fn().mockReturnValue([]);
+    const peekLearnings = vi.fn().mockReturnValue(buffered);
+    const drainLearnings = vi.fn().mockReturnValue([]);
     const tool = createSubmitOptimizerResultTool({
       getSandboxStart: createSandboxStart('').getSandboxStart as never,
       getStore: () => store,
@@ -249,7 +252,7 @@ describe('nightshift_submit_optimizer_result', () => {
 
   it('keeps buffered learnings when a submission is rejected, then drains them on success', async () => {
     const store = createStore(stored(FULL_TREE));
-    const peekLearnings = jest.fn().mockReturnValue([
+    const peekLearnings = vi.fn().mockReturnValue([
       {
         kind: 'system',
         tree_id: TREE_ID,
@@ -258,7 +261,7 @@ describe('nightshift_submit_optimizer_result', () => {
         keywords: [],
       },
     ]);
-    const drainLearnings = jest.fn().mockReturnValue([]);
+    const drainLearnings = vi.fn().mockReturnValue([]);
     const tool = createSubmitOptimizerResultTool({
       getSandboxStart: createSandboxStart(
         markdownFor('flowchart TD\n    S1([Checkout latency]) --> E1[Query logs]')
@@ -413,7 +416,7 @@ describe('nightshift_submit_optimizer_result', () => {
       const tool = createSubmitOptimizerResultTool({
         getSandboxStart: (() => ({
           getSession: () => ({
-            readFiles: jest.fn().mockResolvedValue([{ success: false }]),
+            readFiles: vi.fn().mockResolvedValue([{ success: false }]),
           }),
         })) as never,
         getStore: () => store,

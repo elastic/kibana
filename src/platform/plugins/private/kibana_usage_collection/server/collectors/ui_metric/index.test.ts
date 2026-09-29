@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import {
   Collector,
@@ -27,8 +29,8 @@ describe('telemetry_ui_metric', () => {
     return createUsageCollectionSetupMock().makeUsageCollector(config);
   });
 
-  const getUsageCollector = jest.fn();
-  const registerType = jest.fn();
+  const getUsageCollector = vi.fn();
+  const registerType = vi.fn();
   const mockedFetchContext = createCollectorFetchContextMock();
 
   const commonSavedObjectsAttributes = { score: 0, references: [], type: 'ui-metric' };

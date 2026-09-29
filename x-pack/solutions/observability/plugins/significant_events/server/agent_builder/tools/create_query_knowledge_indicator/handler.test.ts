@@ -5,17 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'generated-query-id'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn(() => 'generated-query-id'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/significant_events/validate_esql_query', () => ({
-  ...jest.requireActual('../../../lib/significant_events/validate_esql_query'),
-  validateEsqlQueryForStreamOrThrow: jest.fn(),
-}));
+vi.mock('../../../lib/significant_events/validate_esql_query', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../lib/significant_events/validate_esql_query')),
+      validateEsqlQueryForStreamOrThrow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('createQueryKnowledgeIndicatorToolHandler', () => {
   const logger = loggingSystemMock.createLogger();
@@ -30,12 +38,12 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('creates query KI with provided id and upserts it', async () => {
     const kiClient = {
-      upsertQuery: jest.fn().mockResolvedValue(undefined),
+      upsertQuery: vi.fn().mockResolvedValue(undefined),
     };
 
     const result = await createQueryKnowledgeIndicatorToolHandler({
@@ -67,7 +75,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
 
   it('generates id when missing', async () => {
     const kiClient = {
-      upsertQuery: jest.fn().mockResolvedValue(undefined),
+      upsertQuery: vi.fn().mockResolvedValue(undefined),
     };
 
     const result = await createQueryKnowledgeIndicatorToolHandler({
@@ -92,7 +100,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
 
   it('rejects an over-broad multi-word full-text predicate', async () => {
     const kiClient = {
-      upsertQuery: jest.fn().mockResolvedValue(undefined),
+      upsertQuery: vi.fn().mockResolvedValue(undefined),
     };
 
     await expect(
@@ -113,7 +121,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
 
   it('throws when query upsert fails', async () => {
     const kiClient = {
-      upsertQuery: jest.fn().mockRejectedValue(new Error('upsert failed')),
+      upsertQuery: vi.fn().mockRejectedValue(new Error('upsert failed')),
     };
 
     await expect(

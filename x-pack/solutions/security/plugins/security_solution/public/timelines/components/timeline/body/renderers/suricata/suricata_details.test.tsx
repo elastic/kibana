@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -15,17 +17,17 @@ import { useMountAppended } from '../../../../../../common/utils/use_mount_appen
 import { SuricataDetails } from './suricata_details';
 import { waitFor } from '@testing-library/react';
 
-jest.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/lib/kibana');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
   };
 });
 
-jest.mock('../../../../../../common/components/link_to');
+vi.mock('../../../../../../common/components/link_to');
 
 describe('SuricataDetails', () => {
   const mount = useMountAppended();

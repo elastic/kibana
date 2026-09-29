@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react';
@@ -12,18 +14,24 @@ import { useRefreshHelper } from './use_refresh_helper';
 import type { WorkpadRoutingContextType } from '../workpad_routing_context';
 import { WorkpadRoutingContext } from '../workpad_routing_context';
 
-const mockDispatch = jest.fn();
-const mockGetState = jest.fn();
+const mockDispatch = vi.fn();
+const mockGetState = vi.fn();
 const refreshAction = { type: 'fetchAllRenderables' };
 
-jest.mock('react-redux-v7', () => ({
-  useDispatch: () => mockDispatch,
-  useSelector: (selector: any) => selector(mockGetState()),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useDispatch: () => mockDispatch,
+      useSelector: (selector: any) => selector(mockGetState()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../state/actions/elements', () => ({
-  fetchAllRenderables: () => refreshAction,
-}));
+vi.mock('../../../state/actions/elements', () => {
+      const mocked = {
+      fetchAllRenderables: () => refreshAction,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getMockedContext = (context: any) =>
   ({
@@ -38,8 +46,8 @@ const getContextWrapper =
 
 describe('useRefreshHelper', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.resetAllMocks();
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
 
   test('starts a timer to refresh', () => {
@@ -57,7 +65,7 @@ describe('useRefreshHelper', () => {
     renderHook(useRefreshHelper, { wrapper: getContextWrapper(context) });
     expect(mockDispatch).not.toHaveBeenCalledWith(refreshAction);
 
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(mockDispatch).toHaveBeenCalledWith(refreshAction);
   });
 
@@ -75,14 +83,14 @@ describe('useRefreshHelper', () => {
     mockGetState.mockReturnValue(state);
     const { rerender } = renderHook(useRefreshHelper, { wrapper: getContextWrapper(context) });
 
-    jest.advanceTimersByTime(context.refreshInterval - 1);
+    vi.advanceTimersByTime(context.refreshInterval - 1);
     expect(mockDispatch).not.toHaveBeenCalledWith(refreshAction);
 
     state.transient.inFlight = true;
 
     rerender(useRefreshHelper);
 
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(mockDispatch).not.toHaveBeenCalled();
   });
 });

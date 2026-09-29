@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { EuiListGroupItemProps } from '@elastic/eui';
 import React from 'react';
@@ -29,13 +31,13 @@ const unknownField = dataViewMock.fields.create({
 
 describe('buildEditFieldButton', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should return null if the field is not editable', () => {
     const button = buildEditFieldButton({
       dataView: dataViewMock,
-      editField: jest.fn(),
+      editField: vi.fn(),
       field: unknownField,
       hasEditDataViewPermission: () => servicesMock.dataViewEditor.userPermissions.editDataView(),
     });
@@ -44,14 +46,14 @@ describe('buildEditFieldButton', () => {
   });
 
   it('should return null if the data view is not editable', () => {
-    jest
+    vi
       .spyOn(servicesMock.dataViewEditor.userPermissions, 'editDataView')
       .mockReturnValueOnce(false);
 
     const field = getField('bytes');
     const button = buildEditFieldButton({
       dataView: dataViewMock,
-      editField: jest.fn(),
+      editField: vi.fn(),
       field,
       hasEditDataViewPermission: () => servicesMock.dataViewEditor.userPermissions.editDataView(),
     });
@@ -63,7 +65,7 @@ describe('buildEditFieldButton', () => {
     const field = getField('_source');
     const button = buildEditFieldButton({
       dataView: dataViewMock,
-      editField: jest.fn(),
+      editField: vi.fn(),
       field,
       hasEditDataViewPermission: () => servicesMock.dataViewEditor.userPermissions.editDataView(),
     });
@@ -75,7 +77,7 @@ describe('buildEditFieldButton', () => {
     const field = getField('bytes');
     const button = buildEditFieldButton({
       dataView: dataViewMock,
-      editField: jest.fn(),
+      editField: vi.fn(),
       field,
       hasEditDataViewPermission: () => servicesMock.dataViewEditor.userPermissions.editDataView(),
     }) as EuiListGroupItemProps;
@@ -94,7 +96,7 @@ describe('buildEditFieldButton', () => {
   });
 
   it('should call editField when onClick is triggered', async () => {
-    const editField = jest.fn();
+    const editField = vi.fn();
     const field = getField('bytes');
     const buttonProps = buildEditFieldButton({
       dataView: dataViewMock,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -25,8 +27,8 @@ describe('ConfirmationPrompt', () => {
     renderWithProviders(
       <ConfirmationPrompt
         prompt={{ ...basePrompt, title: 'Allow `platform.core.list_indices` to run?' }}
-        onConfirm={jest.fn()}
-        onCancel={jest.fn()}
+        onConfirm={vi.fn()}
+        onCancel={vi.fn()}
       />
     );
     expect(screen.getByRole('code')).toHaveTextContent('platform.core.list_indices');

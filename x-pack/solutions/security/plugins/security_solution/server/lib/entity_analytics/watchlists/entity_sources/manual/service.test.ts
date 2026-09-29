@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { createManualEntityService } from './service';
 import { MANUAL_SOURCE_ID } from './constants';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -12,12 +15,12 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import { bulkUpsertOperationsFactory } from '../bulk/upsert';
 
-jest.mock('../sync/utils');
-jest.mock('../bulk/upsert');
-jest.mock('../sync/entity_store_sync');
-jest.mock('../bulk/soft_delete');
+vi.mock('../sync/utils');
+vi.mock('../bulk/upsert');
+vi.mock('../sync/entity_store_sync');
+vi.mock('../bulk/soft_delete');
 
-const bulkUpsertOperationsFactoryMock = bulkUpsertOperationsFactory as jest.Mock;
+const bulkUpsertOperationsFactoryMock = bulkUpsertOperationsFactory as Mock;
 
 describe('manual entity service', () => {
   const logger = loggerMock.create();
@@ -26,9 +29,9 @@ describe('manual entity service', () => {
   const createService = () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const crudClient = {
-      listEntities: jest.fn(),
-      bulkUpdateEntity: jest.fn(),
-    } as unknown as jest.Mocked<CRUDClient>;
+      listEntities: vi.fn(),
+      bulkUpdateEntity: vi.fn(),
+    } as unknown as Mocked<CRUDClient>;
 
     const service = createManualEntityService({
       esClient,
@@ -45,13 +48,13 @@ describe('manual entity service', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('assign', () => {
     it('returns not_found for entities not in the store', async () => {
       const { crudClient, service } = createService();
-      (crudClient.listEntities as jest.Mock).mockResolvedValue({ entities: [] });
+      (crudClient.listEntities as Mock).mockResolvedValue({ entities: [] });
 
       const result = await service.assign(['user:unknown']);
 
@@ -66,7 +69,7 @@ describe('manual entity service', () => {
 
     it('assigns found entities successfully', async () => {
       const { esClient, crudClient, service } = createService();
-      (crudClient.listEntities as jest.Mock).mockResolvedValue({
+      (crudClient.listEntities as Mock).mockResolvedValue({
         entities: [
           {
             entity: {
@@ -106,7 +109,7 @@ describe('manual entity service', () => {
 
     it('reports per-item failures on partial bulk errors', async () => {
       const { esClient, crudClient, service } = createService();
-      (crudClient.listEntities as jest.Mock).mockResolvedValue({
+      (crudClient.listEntities as Mock).mockResolvedValue({
         entities: [
           {
             entity: { id: 'user:ok', type: 'user', name: 'OK', attributes: { watchlists: [] } },
@@ -157,7 +160,7 @@ describe('manual entity service', () => {
 
     it('handles errors during assignment', async () => {
       const { esClient, crudClient, service } = createService();
-      (crudClient.listEntities as jest.Mock).mockResolvedValue({
+      (crudClient.listEntities as Mock).mockResolvedValue({
         entities: [{ entity: { id: 'user:known', type: 'user' } }],
       });
       esClient.bulk.mockRejectedValue(new Error('Bulk failed'));
@@ -205,7 +208,7 @@ describe('manual entity service', () => {
           hits: [{ _id: 'doc-1', _index: 'test-index', _source: { entity: { id: 'user:known' } } }],
         },
       });
-      (crudClient.listEntities as jest.Mock).mockResolvedValue({
+      (crudClient.listEntities as Mock).mockResolvedValue({
         entities: [
           {
             entity: {
@@ -256,7 +259,7 @@ describe('manual entity service', () => {
           hits: [{ _id: 'doc-1', _index: 'test-index', _source: { entity: { id: 'user:known' } } }],
         },
       });
-      (crudClient.listEntities as jest.Mock).mockRejectedValue(new Error('Store search failed'));
+      (crudClient.listEntities as Mock).mockRejectedValue(new Error('Store search failed'));
 
       const result = await service.unassign(['user:known']);
 

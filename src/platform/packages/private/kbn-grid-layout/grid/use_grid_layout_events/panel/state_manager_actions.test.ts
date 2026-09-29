@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { MutableRefObject } from 'react';
 import type { ActivePanelEvent, GridPanelData } from '../../grid_panel';
 import { getGridLayoutStateManagerMock } from '../../test_utils/mocks';
@@ -22,19 +24,19 @@ describe('panel state manager actions', () => {
   beforeEach(() => {
     gridLayoutStateManager.panelRefs.current = {
       panel1: {
-        getBoundingClientRect: jest
+        getBoundingClientRect: vi
           .fn()
           .mockReturnValue({ top: 0, left: 0, right: 50, bottom: 50, height: 50, width: 50 }),
-        scrollIntoView: jest.fn(),
+        scrollIntoView: vi.fn(),
       } as any as HTMLDivElement,
     };
     gridLayoutStateManager.sectionRefs.current = {
       'main-0': {
-        getBoundingClientRect: jest.fn().mockReturnValue({ top: 0, height: 100, bottom: 100 }),
+        getBoundingClientRect: vi.fn().mockReturnValue({ top: 0, height: 100, bottom: 100 }),
       } as any as HTMLDivElement,
     };
     gridLayoutStateManager.layoutRef.current = {
-      getBoundingClientRect: jest
+      getBoundingClientRect: vi
         .fn()
         .mockReturnValue({ top: 0, height: 100, bottom: 100, left: 0, width: 200, right: 200 }),
     } as any as HTMLDivElement;
@@ -140,7 +142,7 @@ describe('panel state manager actions', () => {
 
       it('can extend panel to the full width of the layout when it is offset', () => {
         gridLayoutStateManager.layoutRef.current = {
-          getBoundingClientRect: jest.fn().mockReturnValue({
+          getBoundingClientRect: vi.fn().mockReturnValue({
             top: 0,
             height: 100,
             bottom: 100,
@@ -150,7 +152,7 @@ describe('panel state manager actions', () => {
           }),
         } as any as HTMLDivElement;
         gridLayoutStateManager.panelRefs.current.panel1 = {
-          getBoundingClientRect: jest.fn().mockReturnValue({
+          getBoundingClientRect: vi.fn().mockReturnValue({
             top: 0,
             left: 100, // offset the panel by 100 pixels to the left as well
             right: 150,
@@ -158,7 +160,7 @@ describe('panel state manager actions', () => {
             height: 50,
             width: 50,
           }),
-          scrollIntoView: jest.fn(),
+          scrollIntoView: vi.fn(),
         } as any as HTMLDivElement;
 
         // update the active panel event

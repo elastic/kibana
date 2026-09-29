@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { OSQUERY_ATTACHMENT_TYPE, SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
@@ -19,15 +21,18 @@ const mockEcsData = {
   _index: 'alert-index-1',
 } as Ecs;
 
-const mockOpen = jest.fn();
-const mockCanUseCases = jest.fn();
+const mockOpen = vi.fn();
+const mockCanUseCases = vi.fn();
 
-const mockUseKibana = jest.fn();
+const mockUseKibana = vi.fn();
 
-jest.mock('../common/lib/kibana', () => ({
-  ...jest.requireActual('../common/lib/kibana'),
-  useKibana: () => mockUseKibana(),
-}));
+vi.mock('../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../common/lib/kibana')),
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const setupKibana = (
   permissions: { read: boolean; update: boolean; push: boolean } = {
@@ -44,10 +49,10 @@ const setupKibana = (
       cases: {
         helpers: {
           canUseCases: mockCanUseCases,
-          getRuleIdFromEvent: jest.fn(),
+          getRuleIdFromEvent: vi.fn(),
         },
         hooks: {
-          useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: mockOpen }),
+          useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({ open: mockOpen }),
         },
       },
       application: {
@@ -68,7 +73,7 @@ const setupKibana = (
 
 describe('AddToCaseButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupKibana();
   });
 

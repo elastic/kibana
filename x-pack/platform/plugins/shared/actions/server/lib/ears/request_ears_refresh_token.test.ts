@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-jest.mock('axios');
-jest.mock('../axios_utils');
-jest.mock('./url');
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
+vi.mock('axios');
+vi.mock('../axios_utils');
+vi.mock('./url');
 
 import axios from 'axios';
 import type { AxiosResponse } from 'axios';
@@ -18,11 +21,11 @@ import { request } from '../axios_utils';
 import { getEarsEndpointsForProvider, resolveEarsUrl } from './url';
 import { requestEarsRefreshToken } from './request_ears_refresh_token';
 
-const mockRequest = request as jest.MockedFunction<typeof request>;
-const mockGetEarsEndpointsForProvider = getEarsEndpointsForProvider as jest.MockedFunction<
+const mockRequest = request as MockedFunction<typeof request>;
+const mockGetEarsEndpointsForProvider = getEarsEndpointsForProvider as MockedFunction<
   typeof getEarsEndpointsForProvider
 >;
-const mockResolveEarsUrl = resolveEarsUrl as jest.MockedFunction<typeof resolveEarsUrl>;
+const mockResolveEarsUrl = resolveEarsUrl as MockedFunction<typeof resolveEarsUrl>;
 
 const REFRESH_URL = 'https://ears.example.com/v1/my-provider/oauth/refresh';
 
@@ -31,8 +34,8 @@ describe('requestEarsRefreshToken', () => {
   const configurationUtilities = actionsConfigMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (axios.create as jest.Mock).mockReturnValue({});
+    vi.clearAllMocks();
+    (axios.create as Mock).mockReturnValue({});
     mockGetEarsEndpointsForProvider.mockReturnValue({
       authorizeEndpoint: 'v1/my-provider/oauth/authorize',
       tokenEndpoint: 'v1/my-provider/oauth/token',

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
@@ -25,15 +28,21 @@ import {
   useFieldDefinitionUpdatedEBT,
 } from './use_field_definition_management_ebt';
 
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/cases_context/use_cases_context', () => ({
-  useCasesContext: jest.fn(),
-}));
+vi.mock('../../components/cases_context/use_cases_context', () => {
+      const mocked = {
+      useCasesContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getMockServices = (reportEvent: jest.Mock) => ({
+const getMockServices = (reportEvent: Mock) => ({
   services: {
     analytics: {
       reportEvent,
@@ -42,12 +51,12 @@ const getMockServices = (reportEvent: jest.Mock) => ({
 });
 
 describe('field definition management EBT hooks', () => {
-  const reportEvent = jest.fn();
+  const reportEvent = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue(getMockServices(reportEvent));
-    (useCasesContext as jest.Mock).mockReturnValue({ owner: [SECURITY_SOLUTION_OWNER] });
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue(getMockServices(reportEvent));
+    (useCasesContext as Mock).mockReturnValue({ owner: [SECURITY_SOLUTION_OWNER] });
   });
 
   describe('useFieldDefinitionCreatedEBT', () => {
@@ -64,7 +73,7 @@ describe('field definition management EBT hooks', () => {
     });
 
     it('reports a reusable field created with a distinct scope', () => {
-      (useCasesContext as jest.Mock).mockReturnValue({ owner: [OBSERVABILITY_OWNER] });
+      (useCasesContext as Mock).mockReturnValue({ owner: [OBSERVABILITY_OWNER] });
       const { result } = renderHook(() => useFieldDefinitionCreatedEBT());
 
       result.current({ isGlobal: false });
@@ -76,7 +85,7 @@ describe('field definition management EBT hooks', () => {
     });
 
     it('falls back to unknown owner', () => {
-      (useCasesContext as jest.Mock).mockReturnValue({ owner: ['invalid'] });
+      (useCasesContext as Mock).mockReturnValue({ owner: ['invalid'] });
       const { result } = renderHook(() => useFieldDefinitionCreatedEBT());
 
       result.current({ isGlobal: true });
@@ -113,7 +122,7 @@ describe('field definition management EBT hooks', () => {
     });
 
     it('falls back to unknown owner', () => {
-      (useCasesContext as jest.Mock).mockReturnValue({ owner: [] });
+      (useCasesContext as Mock).mockReturnValue({ owner: [] });
       const { result } = renderHook(() => useFieldDefinitionUpdatedEBT());
 
       result.current({ isGlobal: false });
@@ -140,7 +149,7 @@ describe('field definition management EBT hooks', () => {
     // Stack management is a real Field Library surface, and 'cases' is the one owner value that
     // reads like the fallback but is a registered solution.
     it('reports the stack management owner as itself, not as the fallback', () => {
-      (useCasesContext as jest.Mock).mockReturnValue({ owner: [GENERAL_CASES_OWNER] });
+      (useCasesContext as Mock).mockReturnValue({ owner: [GENERAL_CASES_OWNER] });
       const { result } = renderHook(() => useFieldDefinitionDeletedEBT());
 
       result.current();
@@ -151,7 +160,7 @@ describe('field definition management EBT hooks', () => {
     });
 
     it('falls back to unknown owner', () => {
-      (useCasesContext as jest.Mock).mockReturnValue({ owner: ['invalid'] });
+      (useCasesContext as Mock).mockReturnValue({ owner: ['invalid'] });
       const { result } = renderHook(() => useFieldDefinitionDeletedEBT());
 
       result.current();
@@ -169,7 +178,7 @@ describe('field definition management EBT hooks', () => {
 
     result.current({ isGlobal: true });
 
-    (useCasesContext as jest.Mock).mockReturnValue({ owner: [OBSERVABILITY_OWNER] });
+    (useCasesContext as Mock).mockReturnValue({ owner: [OBSERVABILITY_OWNER] });
     rerender();
     result.current({ isGlobal: true });
 
@@ -225,7 +234,7 @@ describe('field definition management EBT hooks', () => {
     const analyticsService = coreMock.createSetup().analytics;
     registerFieldLibraryManagementEvents({ analyticsService });
 
-    const registeredFields = (analyticsService.registerEventType as jest.Mock).mock.calls.reduce(
+    const registeredFields = (analyticsService.registerEventType as Mock).mock.calls.reduce(
       (acc, [options]) => ({ ...acc, [options.eventType]: Object.keys(options.schema).sort() }),
       {} as Record<string, string[]>
     );

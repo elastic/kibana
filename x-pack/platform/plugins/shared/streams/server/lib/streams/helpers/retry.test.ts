@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors, type DiagnosticResult } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 import { retryTransientEsErrors } from './retry';
 
-jest.mock('timers/promises', () => ({
-  setTimeout: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('timers/promises', () => {
+      const mocked = {
+      setTimeout: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createResponseError = (
   statusCode: number,
@@ -56,11 +61,11 @@ describe('retryTransientEsErrors', () => {
   const logger = loggerMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns result when call succeeds on first attempt', async () => {
-    const esCall = jest.fn().mockResolvedValue({ success: true });
+    const esCall = vi.fn().mockResolvedValue({ success: true });
 
     const result = await retryTransientEsErrors(esCall, { logger });
 
@@ -70,7 +75,7 @@ describe('retryTransientEsErrors', () => {
   });
 
   it('retries on es_rejected_execution_exception (HTTP 429) and succeeds', async () => {
-    const esCall = jest
+    const esCall = vi
       .fn()
       .mockRejectedValueOnce(createEsRejectedExecutionError())
       .mockResolvedValue({ success: true });
@@ -89,9 +94,9 @@ describe('retryTransientEsErrors', () => {
   });
 
   it('retries multiple times with exponential backoff before succeeding', async () => {
-    const { setTimeout: setTimeoutMock } = jest.requireMock('timers/promises');
+    const { setTimeout: setTimeoutMock } = (await vi.importMock('timers/promises'));
 
-    const esCall = jest
+    const esCall = vi
       .fn()
       .mockRejectedValueOnce(createEsRejectedExecutionError())
       .mockRejectedValueOnce(createEsRejectedExecutionError())
@@ -111,7 +116,7 @@ describe('retryTransientEsErrors', () => {
 
   it('throws after exhausting max retry attempts', async () => {
     const error = createEsRejectedExecutionError();
-    const esCall = jest.fn().mockRejectedValue(error);
+    const esCall = vi.fn().mockRejectedValue(error);
 
     await expect(retryTransientEsErrors(esCall, { logger })).rejects.toThrow(error);
 
@@ -121,7 +126,7 @@ describe('retryTransientEsErrors', () => {
 
   it('does not retry non-retryable errors', async () => {
     const error = createNonRetryableError();
-    const esCall = jest.fn().mockRejectedValue(error);
+    const esCall = vi.fn().mockRejectedValue(error);
 
     await expect(retryTransientEsErrors(esCall, { logger })).rejects.toThrow(error);
 
@@ -130,7 +135,7 @@ describe('retryTransientEsErrors', () => {
   });
 
   it('works without a logger', async () => {
-    const esCall = jest
+    const esCall = vi
       .fn()
       .mockRejectedValueOnce(createEsRejectedExecutionError())
       .mockResolvedValue({ success: true });

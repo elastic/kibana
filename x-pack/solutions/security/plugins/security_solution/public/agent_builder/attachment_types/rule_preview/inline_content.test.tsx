@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
@@ -15,18 +17,24 @@ import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import type { RulePreviewAttachment } from './types';
 import { RulePreviewInlineContent } from './inline_content';
 
-jest.mock('./providers', () => ({
-  RulePreviewAttachmentSecurityProviders: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
-  RulePreviewAttachmentDataViewBootstrap: () => null,
-}));
+vi.mock('./providers', () => {
+      const mocked = {
+      RulePreviewAttachmentSecurityProviders: ({ children }: { children: React.ReactNode }) => (
+        <>{children}</>
+      ),
+      RulePreviewAttachmentDataViewBootstrap: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../detection_engine/rule_creation_ui/components/rule_preview/rule_preview_alerts_table',
-  () => ({
-    RulePreviewAlertsTable: () => <div data-test-subj="mockAlertsTable" />,
-  })
+  () => {
+      const mocked = {
+        RulePreviewAlertsTable: () => <div data-test-subj="mockAlertsTable" />,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 const makeAttachment = (previewId: string): RulePreviewAttachment =>
@@ -38,13 +46,13 @@ const makeAttachment = (previewId: string): RulePreviewAttachment =>
 
 const makeSpaces = (spaceId = 'default'): SpacesPluginStart =>
   ({
-    getActiveSpace: jest.fn().mockResolvedValue({ id: spaceId }),
+    getActiveSpace: vi.fn().mockResolvedValue({ id: spaceId }),
   } as unknown as SpacesPluginStart);
 
 const makeData = (totalHits = 0): DataPublicPluginStart =>
   ({
     search: {
-      search: jest.fn().mockReturnValue(
+      search: vi.fn().mockReturnValue(
         of({
           rawResponse: {
             hits: { total: { value: totalHits, relation: 'eq' }, hits: [] },
@@ -74,8 +82,8 @@ const renderContent = (
         isSidebar={false}
         spaces={spaces}
         data={data}
-        getServices={jest.fn()}
-        getStore={jest.fn()}
+        getServices={vi.fn()}
+        getStore={vi.fn()}
       />
     </I18nProvider>
   );
@@ -83,7 +91,7 @@ const renderContent = (
 describe('RulePreviewInlineContent', () => {
   it('shows a loading spinner while the space and metadata are being fetched', () => {
     const spaces = {
-      getActiveSpace: jest.fn().mockReturnValue(new Promise(() => {})),
+      getActiveSpace: vi.fn().mockReturnValue(new Promise(() => {})),
     } as unknown as SpacesPluginStart;
 
     renderContent(spaces, makeData());
@@ -115,7 +123,7 @@ describe('RulePreviewInlineContent', () => {
 
   it('shows the error callout when fetching the active space fails', async () => {
     const spaces = {
-      getActiveSpace: jest.fn().mockRejectedValue(new Error('space error')),
+      getActiveSpace: vi.fn().mockRejectedValue(new Error('space error')),
     } as unknown as SpacesPluginStart;
 
     await act(async () => {

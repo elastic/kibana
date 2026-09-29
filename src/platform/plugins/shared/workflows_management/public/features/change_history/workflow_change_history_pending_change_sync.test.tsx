@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React, { useRef } from 'react';
 import type { ChangeHistoryAdapter, ChangeHistoryPendingChange } from '@kbn/change-history-ui';
@@ -23,15 +25,15 @@ const modalState = {
   isOpen: false,
 };
 
-jest.mock('@kbn/change-history-ui', () => {
-  const actual = jest.requireActual('@kbn/change-history-ui');
+vi.mock('@kbn/change-history-ui', async () => {
+  const actual = (await vi.importActual('@kbn/change-history-ui'));
 
   return {
     ...actual,
     useChangeHistoryModal: () => ({
       isOpen: modalState.isOpen,
-      openModal: jest.fn(),
-      closeModal: jest.fn(),
+      openModal: vi.fn(),
+      closeModal: vi.fn(),
     }),
   };
 });
@@ -50,9 +52,9 @@ const baseWorkflow: WorkflowDetailDto = {
 };
 
 const adapter: ChangeHistoryAdapter = {
-  listChanges: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-  getChange: jest.fn(),
-  getPendingChange: jest.fn(),
+  listChanges: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+  getChange: vi.fn(),
+  getPendingChange: vi.fn(),
 };
 
 const SyncHarness = ({
@@ -100,7 +102,7 @@ const renderPendingChangeSync = ({
 describe('WorkflowChangeHistoryPendingChangeSync', () => {
   beforeEach(() => {
     modalState.isOpen = false;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('clears the pending change ref while the history modal is closed', () => {

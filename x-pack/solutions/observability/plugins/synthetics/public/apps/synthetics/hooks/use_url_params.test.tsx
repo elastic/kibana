@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import DateMath from '@kbn/datemath';
 import userEvent from '@testing-library/user-event';
 import { render } from '../utils/testing';
@@ -50,7 +52,7 @@ describe('useUrlParams', () => {
   const MOCK_DATE_VALUE = 20;
 
   beforeEach(() => {
-    dateMathSpy = jest.spyOn(DateMath, 'parse');
+    dateMathSpy = vi.spyOn(DateMath, 'parse');
     dateMathSpy.mockReturnValue(MOCK_DATE_VALUE);
   });
 
@@ -60,7 +62,7 @@ describe('useUrlParams', () => {
         value={
           {
             lastRefresh: 123,
-            refreshApp: jest.fn(),
+            refreshApp: vi.fn(),
             refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
           } as any
         }
@@ -69,7 +71,7 @@ describe('useUrlParams', () => {
       </SyntheticsRefreshContext.Provider>
     );
 
-    const pushSpy = jest.spyOn(history, 'push');
+    const pushSpy = vi.spyOn(history, 'push');
 
     const setUrlParamsButton = await findByText('Set url params');
     await userEvent.click(setUrlParamsButton);
@@ -86,7 +88,7 @@ describe('useUrlParams', () => {
         value={
           {
             lastRefresh: 123,
-            refreshApp: jest.fn(),
+            refreshApp: vi.fn(),
             refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
           } as any
         }
@@ -95,7 +97,7 @@ describe('useUrlParams', () => {
       </SyntheticsRefreshContext.Provider>
     );
 
-    const pushSpy = jest.spyOn(history, 'push');
+    const pushSpy = vi.spyOn(history, 'push');
 
     const setUrlParamsButton = await findByText('Set url params');
     await userEvent.click(setUrlParamsButton);

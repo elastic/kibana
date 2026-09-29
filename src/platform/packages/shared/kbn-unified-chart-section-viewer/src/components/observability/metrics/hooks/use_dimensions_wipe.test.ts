@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { Dimension } from '../../../../types';
 import { useDimensionsWipe, type UseDimensionsWipeParams } from './use_dimensions_wipe';
@@ -18,14 +20,14 @@ const baseParams = (overrides: Partial<UseDimensionsWipeParams> = {}): UseDimens
   allDimensions: [dim('host.name')],
   isLoading: false,
   hasError: false,
-  onSelectedDimensionsChange: jest.fn(),
+  onSelectedDimensionsChange: vi.fn(),
   ...overrides,
 });
 
 describe('useDimensionsWipe', () => {
   describe('on a fresh, successful response', () => {
     it('prunes selectedDimensions to the intersection with allDimensions', () => {
-      const onSelectedDimensionsChange = jest.fn();
+      const onSelectedDimensionsChange = vi.fn();
       renderHook(() => useDimensionsWipe(baseParams({ onSelectedDimensionsChange })));
 
       expect(onSelectedDimensionsChange).toHaveBeenCalledTimes(1);
@@ -33,7 +35,7 @@ describe('useDimensionsWipe', () => {
     });
 
     it('calls onSelectedDimensionsChange with an empty array when no selection survives', () => {
-      const onSelectedDimensionsChange = jest.fn();
+      const onSelectedDimensionsChange = vi.fn();
       renderHook(() =>
         useDimensionsWipe(
           baseParams({
@@ -49,7 +51,7 @@ describe('useDimensionsWipe', () => {
     });
 
     it('does not call the callback when every selection is already in the universe', () => {
-      const onSelectedDimensionsChange = jest.fn();
+      const onSelectedDimensionsChange = vi.fn();
       renderHook(() =>
         useDimensionsWipe(
           baseParams({
@@ -64,7 +66,7 @@ describe('useDimensionsWipe', () => {
     });
 
     it('does not call the callback when there are no selected dimensions', () => {
-      const onSelectedDimensionsChange = jest.fn();
+      const onSelectedDimensionsChange = vi.fn();
       renderHook(() =>
         useDimensionsWipe(
           baseParams({
@@ -80,7 +82,7 @@ describe('useDimensionsWipe', () => {
 
   describe('gates', () => {
     it('does not act while a fetch is in flight (allDimensions can be stale)', () => {
-      const onSelectedDimensionsChange = jest.fn();
+      const onSelectedDimensionsChange = vi.fn();
       renderHook(() =>
         useDimensionsWipe(baseParams({ isLoading: true, onSelectedDimensionsChange }))
       );
@@ -89,7 +91,7 @@ describe('useDimensionsWipe', () => {
     });
 
     it('does not act when the last fetch errored', () => {
-      const onSelectedDimensionsChange = jest.fn();
+      const onSelectedDimensionsChange = vi.fn();
       renderHook(() =>
         useDimensionsWipe(baseParams({ hasError: true, onSelectedDimensionsChange }))
       );
@@ -103,7 +105,7 @@ describe('useDimensionsWipe', () => {
       // starts, so `isLoading` is briefly false with `allDimensions=[]`.
       // Without this gate the hook would prune the restored selection
       // against the empty universe.
-      const onSelectedDimensionsChange = jest.fn();
+      const onSelectedDimensionsChange = vi.fn();
       renderHook(() =>
         useDimensionsWipe(
           baseParams({
@@ -122,7 +124,7 @@ describe('useDimensionsWipe', () => {
 
   describe('reactivity', () => {
     it('fires the wipe when allDimensions changes to expose a new orphan', () => {
-      const onSelectedDimensionsChange = jest.fn();
+      const onSelectedDimensionsChange = vi.fn();
       const selectedDimensions = [dim('host.name'), dim('environment')];
 
       const { rerender } = renderHook(
@@ -145,7 +147,7 @@ describe('useDimensionsWipe', () => {
     });
 
     it('fires the wipe when transitioning from loading to a successful response', () => {
-      const onSelectedDimensionsChange = jest.fn();
+      const onSelectedDimensionsChange = vi.fn();
       const selectedDimensions = [dim('host.name'), dim('environment')];
       const allDimensions = [dim('host.name')];
 
@@ -169,7 +171,7 @@ describe('useDimensionsWipe', () => {
     });
 
     it('fires the wipe when transitioning from error to a successful response', () => {
-      const onSelectedDimensionsChange = jest.fn();
+      const onSelectedDimensionsChange = vi.fn();
       const selectedDimensions = [dim('host.name'), dim('environment')];
       const allDimensions = [dim('host.name')];
 
@@ -193,7 +195,7 @@ describe('useDimensionsWipe', () => {
     });
 
     it('does not fire again when only unrelated inputs change (deps stay equal)', () => {
-      const onSelectedDimensionsChange = jest.fn();
+      const onSelectedDimensionsChange = vi.fn();
       const selectedDimensions = [dim('host.name')];
       const allDimensions = [dim('host.name')];
 

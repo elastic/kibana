@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, fireEvent, render } from '@testing-library/react';
 import React, { type FC, type PropsWithChildren } from 'react';
 
@@ -17,13 +20,13 @@ const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <EuiProvider>{children}</EuiProvider>
 );
 
-jest.mock('./use_language_hook');
+vi.mock('./use_language_hook');
 
-jest.mock('@kbn/i18n', () => {
-  const original = jest.requireActual('@kbn/i18n');
+vi.mock('@kbn/i18n', async () => {
+  const original = (await vi.importActual('@kbn/i18n'));
   return {
     ...original,
-    getAvailableLocales: jest.fn(() => [
+    getAvailableLocales: vi.fn(() => [
       { id: 'en', label: 'English' },
       { id: 'fr-FR', label: 'Français' },
       { id: 'ja-JP', label: '日本語' },
@@ -32,16 +35,16 @@ jest.mock('@kbn/i18n', () => {
 });
 
 describe('LanguageModal', () => {
-  const closeModal = jest.fn();
-  let onChangeMock: jest.Mock;
-  let reportEventMock: jest.Mock;
+  const closeModal = vi.fn();
+  let onChangeMock: Mock;
+  let reportEventMock: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    onChangeMock = jest.fn().mockResolvedValue(undefined);
-    reportEventMock = jest.fn();
+    vi.clearAllMocks();
+    onChangeMock = vi.fn().mockResolvedValue(undefined);
+    reportEventMock = vi.fn();
 
-    (useLanguage as jest.Mock).mockReturnValue({
+    (useLanguage as Mock).mockReturnValue({
       value: 'en',
       initialValue: 'en',
       isLoading: false,
@@ -50,7 +53,7 @@ describe('LanguageModal', () => {
     });
   });
 
-  const renderModal = (analytics: { reportEvent: jest.Mock } = { reportEvent: reportEventMock }) =>
+  const renderModal = (analytics: { reportEvent: Mock } = { reportEvent: reportEventMock }) =>
     render(<LanguageModal closeModal={closeModal} analytics={analytics as any} />, {
       wrapper: Wrapper,
     });
@@ -63,7 +66,7 @@ describe('LanguageModal', () => {
   });
 
   it('saves and reports display_language_changed event when locale changed', async () => {
-    (useLanguage as jest.Mock).mockReturnValue({
+    (useLanguage as Mock).mockReturnValue({
       value: 'fr-FR',
       initialValue: 'en',
       isLoading: false,
@@ -87,7 +90,7 @@ describe('LanguageModal', () => {
 
   it('does not report event or close modal when save fails', async () => {
     onChangeMock.mockRejectedValue(new Error('save failed'));
-    (useLanguage as jest.Mock).mockReturnValue({
+    (useLanguage as Mock).mockReturnValue({
       value: 'fr-FR',
       initialValue: 'en',
       isLoading: false,
@@ -117,7 +120,7 @@ describe('LanguageModal', () => {
   });
 
   it('discards changes and closes modal without saving or reporting', () => {
-    (useLanguage as jest.Mock).mockReturnValue({
+    (useLanguage as Mock).mockReturnValue({
       value: 'fr-FR',
       initialValue: 'en',
       isLoading: false,

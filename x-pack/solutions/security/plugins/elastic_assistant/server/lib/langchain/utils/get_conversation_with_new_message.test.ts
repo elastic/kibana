@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { getConversationWithNewMessage } from './get_conversation_with_new_message';
 import type { ConversationResponse, Message, Replacements } from '@kbn/elastic-assistant-common';
@@ -15,9 +17,9 @@ describe('getConversationWithNewMessage', () => {
   const replacements = {
     'anonymized-value': 'original-value',
   } as unknown as Replacements;
-  const logger = { debug: jest.fn() } as unknown as Logger;
+  const logger = { debug: vi.fn() } as unknown as Logger;
   const conversationsDataClient = {
-    getConversation: jest.fn().mockImplementation(({ id }: { id: string }) => {
+    getConversation: vi.fn().mockImplementation(({ id }: { id: string }) => {
       if (id === 'empty') {
         return null;
       }
@@ -70,7 +72,7 @@ describe('getConversationWithNewMessage', () => {
         ],
       };
     }),
-    appendConversationMessages: jest
+    appendConversationMessages: vi
       .fn()
       .mockImplementation(
         ({
@@ -89,7 +91,7 @@ describe('getConversationWithNewMessage', () => {
   } as unknown as AIAssistantConversationsDataClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('when conversationId is missing, just returns the new message', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { set } from '@kbn/safer-lodash-set';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -73,7 +75,7 @@ describe('ContentStream', () => {
 
     it('should be an empty stream on empty response', async () => {
       client.search.mockResponseOnce({} as any);
-      const onData = jest.fn();
+      const onData = vi.fn();
 
       stream.on('data', onData);
       await new Promise((resolve) => stream.once('end', resolve));

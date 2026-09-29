@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
@@ -15,18 +18,18 @@ import { basicCaseId, basicFileMock } from '../../../containers/mock';
 import { useDeleteFileAttachment } from '../../../containers/use_delete_file_attachment';
 import { FileDeleteButton } from './file_delete_button';
 
-jest.mock('../../../containers/use_delete_file_attachment');
+vi.mock('../../../containers/use_delete_file_attachment');
 
-const useDeleteFileAttachmentMock = useDeleteFileAttachment as jest.Mock;
+const useDeleteFileAttachmentMock = useDeleteFileAttachment as Mock;
 
 describe('FileDeleteButton', () => {
-  const mutate = jest.fn();
+  const mutate = vi.fn();
 
   useDeleteFileAttachmentMock.mockReturnValue({ isLoading: false, mutate });
 
   describe('isIcon', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('renders delete button correctly', async () => {
@@ -92,7 +95,7 @@ describe('FileDeleteButton', () => {
 
   describe('not isIcon', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('renders delete button correctly', async () => {

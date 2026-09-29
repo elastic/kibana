@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getSessionStatus } from './get_session_status';
 import {
@@ -18,8 +20,8 @@ import { SEARCH_SESSION_TYPE, SearchSessionStatus, SearchStatus } from '../../..
 import { updateSessionStatus } from './update_session_status';
 import type { SavedObject } from '@kbn/core/server';
 
-jest.mock('./get_session_status');
-const getSessionStatusMock = jest.mocked(getSessionStatus);
+vi.mock('./get_session_status');
+const getSessionStatusMock = vi.mocked(getSessionStatus);
 
 const getSavedObjectMock = (overrides: Partial<SearchSessionSavedObjectAttributes> = {}) => {
   return {
@@ -34,8 +36,8 @@ const getDeps = () => {
     esClient: elasticsearchServiceMock.createElasticsearchClient(),
     savedObjectsClient: savedObjectsClientMock.create(),
     searchSessionEBTManager: {
-      trackBgsCompleted: jest.fn(),
-      trackBgsError: jest.fn(),
+      trackBgsCompleted: vi.fn(),
+      trackBgsError: vi.fn(),
     },
   };
 };

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Readable } from 'stream';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -15,9 +18,12 @@ import type { HapiReadableStream } from '../../../../types';
 import { entityResolutionCsvUploadRoute } from './upload_csv';
 import { processResolutionCsvUpload } from '../csv_upload';
 
-jest.mock('../csv_upload', () => ({
-  processResolutionCsvUpload: jest.fn(),
-}));
+vi.mock('../csv_upload', () => {
+      const mocked = {
+      processResolutionCsvUpload: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockStream = (): HapiReadableStream => {
   const stream = new Readable() as HapiReadableStream;
@@ -37,7 +43,7 @@ const getPostHandler = (router: ReturnType<typeof serverMock.create>['router']) 
 };
 
 const mockAnalytics = (): AnalyticsServiceStart =>
-  ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceStart);
+  ({ reportEvent: vi.fn() } as unknown as AnalyticsServiceStart);
 
 describe('entityResolutionCsvUploadRoute — license gating', () => {
   const logger = loggingSystemMock.create().get();
@@ -47,12 +53,12 @@ describe('entityResolutionCsvUploadRoute — license gating', () => {
     entityResolutionCsvUploadRoute({
       router: server.router,
       logger,
-      getStartServices: jest.fn(),
+      getStartServices: vi.fn(),
     } as never);
 
     const handler = getPostHandler(server.router);
     const responseFactory = httpServerMock.createResponseFactory();
-    const hasAtLeast = jest.fn().mockReturnValue(false);
+    const hasAtLeast = vi.fn().mockReturnValue(false);
     const context = {
       licensing: Promise.resolve({
         license: { hasAtLeast },
@@ -83,13 +89,13 @@ describe('entityResolutionCsvUploadRoute — telemetry', () => {
   const logger = loggingSystemMock.create().get();
   const namespace = 'default';
   let analytics: AnalyticsServiceStart;
-  let getStartServices: jest.Mock;
+  let getStartServices: Mock;
   let handler: ReturnType<typeof getPostHandler>;
   let responseFactory: ReturnType<typeof httpServerMock.createResponseFactory>;
 
   const createLicensedContext = () => ({
     licensing: Promise.resolve({
-      license: { hasAtLeast: jest.fn().mockReturnValue(true) },
+      license: { hasAtLeast: vi.fn().mockReturnValue(true) },
     }),
     core: Promise.resolve({
       elasticsearch: {
@@ -113,15 +119,15 @@ describe('entityResolutionCsvUploadRoute — telemetry', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     analytics = mockAnalytics();
-    getStartServices = jest.fn().mockResolvedValue([
+    getStartServices = vi.fn().mockResolvedValue([
       { analytics },
       {
         entityStore: {
-          createCRUDClient: jest.fn().mockReturnValue({}),
-          createResolutionClient: jest.fn().mockReturnValue({}),
+          createCRUDClient: vi.fn().mockReturnValue({}),
+          createResolutionClient: vi.fn().mockReturnValue({}),
         },
       },
     ]);
@@ -138,7 +144,7 @@ describe('entityResolutionCsvUploadRoute — telemetry', () => {
   });
 
   it('reports telemetry on successful upload without errors in payload', async () => {
-    (processResolutionCsvUpload as jest.Mock).mockResolvedValue({
+    (processResolutionCsvUpload as Mock).mockResolvedValue({
       total: 2,
       successful: 1,
       failed: 0,
@@ -152,7 +158,7 @@ describe('entityResolutionCsvUploadRoute — telemetry', () => {
     expect(processResolutionCsvUpload).toHaveBeenCalledTimes(1);
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
 
-    const [eventType, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [eventType, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(eventType).toBe(ENTITY_STORE_RESOLUTION_CSV_UPLOAD_EVENT.eventType);
     expect(payload).toMatchObject({
       total: 2,
@@ -177,7 +183,7 @@ describe('entityResolutionCsvUploadRoute — telemetry', () => {
   });
 
   it('includes errors array in telemetry when errorCounts is populated', async () => {
-    (processResolutionCsvUpload as jest.Mock).mockResolvedValue({
+    (processResolutionCsvUpload as Mock).mockResolvedValue({
       total: 2,
       successful: 0,
       failed: 2,
@@ -191,7 +197,7 @@ describe('entityResolutionCsvUploadRoute — telemetry', () => {
 
     await handler(createLicensedContext(), createRequest(), responseFactory);
 
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(payload.errors).toHaveLength(2);
     expect(
       [...payload.errors].sort((a, b) => a.errorCategory.localeCompare(b.errorCategory))
@@ -207,7 +213,7 @@ describe('entityResolutionCsvUploadRoute — telemetry', () => {
   });
 
   it('does not report telemetry on catastrophic failure', async () => {
-    (processResolutionCsvUpload as jest.Mock).mockRejectedValue(
+    (processResolutionCsvUpload as Mock).mockRejectedValue(
       new Error('CSV parse aborted before processing rows')
     );
 
@@ -219,7 +225,7 @@ describe('entityResolutionCsvUploadRoute — telemetry', () => {
   });
 
   it('returns 200 when reportEvent throws after a completed upload', async () => {
-    (processResolutionCsvUpload as jest.Mock).mockResolvedValue({
+    (processResolutionCsvUpload as Mock).mockResolvedValue({
       total: 1,
       successful: 1,
       failed: 0,
@@ -227,7 +233,7 @@ describe('entityResolutionCsvUploadRoute — telemetry', () => {
       items: [],
       errorCounts: {},
     });
-    (analytics.reportEvent as jest.Mock).mockImplementation(() => {
+    (analytics.reportEvent as Mock).mockImplementation(() => {
       throw new Error('Unregistered event type');
     });
 

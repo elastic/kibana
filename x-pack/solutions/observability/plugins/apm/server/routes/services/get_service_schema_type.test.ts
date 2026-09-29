@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { KIND } from '@kbn/apm-types/es_fields';
@@ -33,14 +36,14 @@ function makeHitsResponse(totalValue: number) {
 }
 
 function makeEsClient(counts: { ecs?: number; otel?: number } = {}): ElasticsearchClient {
-  const mock = jest.fn();
+  const mock = vi.fn();
   mock.mockResolvedValueOnce(makeHitsResponse(counts.ecs ?? 0));
   mock.mockResolvedValueOnce(makeHitsResponse(counts.otel ?? 0));
   return { search: mock } as unknown as ElasticsearchClient;
 }
 
 function getSearchCall(esClient: ElasticsearchClient, callIndex: number) {
-  return (esClient.search as jest.Mock).mock.calls[callIndex]?.[0];
+  return (esClient.search as Mock).mock.calls[callIndex]?.[0];
 }
 
 function getFilterClauses(esClient: ElasticsearchClient, callIndex: number) {
@@ -86,7 +89,7 @@ describe('getServiceSchemaType', () => {
     it('runs two parallel queries', async () => {
       const esClient = makeEsClient();
       await getServiceSchemaType({ esClient, ...baseParams });
-      expect((esClient.search as jest.Mock).mock.calls).toHaveLength(2);
+      expect((esClient.search as Mock).mock.calls).toHaveLength(2);
     });
 
     it('searches against the combined transaction and span indices for both queries', async () => {

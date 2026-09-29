@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -15,12 +18,15 @@ import type { CreateRuleData, RuleTemplateResponse } from '@kbn/alerting-v2-sche
 import { RuleTemplatesApi } from '../services/rule_templates_api';
 import { useCreateFromTemplateQuery } from './use_create_from_template_query';
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: jest.fn(),
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: vi.fn(),
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
+const mockUseService = useService as MockedFunction<typeof useService>;
 
 const mockCreatePayload: CreateRuleData = {
   kind: 'signal',
@@ -50,12 +56,12 @@ const createWrapper = (history: ReturnType<typeof createMemoryHistory>) => {
 };
 
 describe('useCreateFromTemplateQuery', () => {
-  const mockGetRuleTemplate = jest.fn();
-  const mockOpenCreateFromTemplateFlyout = jest.fn();
-  const mockAddError = jest.fn();
+  const mockGetRuleTemplate = vi.fn();
+  const mockOpenCreateFromTemplateFlyout = vi.fn();
+  const mockAddError = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseService.mockImplementation((token: unknown) => {
       if (token === RuleTemplatesApi) {
         return { getRuleTemplate: mockGetRuleTemplate };

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 
@@ -12,13 +15,13 @@ import { TestProviders } from './mock';
 import { useIsMainApplication } from './hooks';
 import { useApplication } from './lib/kibana/use_application';
 
-jest.mock('./lib/kibana/use_application');
+vi.mock('./lib/kibana/use_application');
 
-const useApplicationMock = useApplication as jest.Mock;
+const useApplicationMock = useApplication as Mock;
 
 describe('hooks', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('useIsMainApplication', () => {

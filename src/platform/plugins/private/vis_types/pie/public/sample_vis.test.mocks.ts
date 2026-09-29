@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { LegendDisplay } from '@kbn/expression-partition-vis-plugin/common';
 import { LegendSize } from '@kbn/chart-expressions-common';
 
-const mockUiStateGet = jest.fn().mockReturnValue(() => false);
+const mockUiStateGet = vi.fn().mockReturnValue(() => false);
 
 export const samplePieVis = {
   type: {

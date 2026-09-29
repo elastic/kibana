@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { tasks } from './tasks';
@@ -23,7 +25,7 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'environments');
 
     it('returns environment information', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
+      const search = vi.fn().mockResolvedValueOnce({
         aggregations: {
           environments: {
             buckets: [
@@ -81,7 +83,7 @@ describe('data telemetry collection tasks', () => {
 
     describe('without transactions', () => {
       it('returns an empty result', async () => {
-        const search = jest.fn().mockReturnValueOnce({
+        const search = vi.fn().mockReturnValueOnce({
           hits: {
             hits: [],
             total: {
@@ -95,7 +97,7 @@ describe('data telemetry collection tasks', () => {
     });
 
     it('returns aggregated transaction counts', async () => {
-      const search = jest
+      const search = vi
         .fn()
         // The first call to `search` asks for a transaction to get
         // a fixed date range.
@@ -159,7 +161,7 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'global_labels');
 
     it('returns count of global labels when present', async () => {
-      const fieldCaps = jest.fn().mockResolvedValue({
+      const fieldCaps = vi.fn().mockResolvedValue({
         indices: [
           '.ds-metrics-apm.service_destination.1m-default-2023.09.26-000005',
           '.ds-metrics-apm.service_summary.1m-default-2023.09.26-000005',
@@ -196,7 +198,7 @@ describe('data telemetry collection tasks', () => {
     });
 
     it('returns 0 count of global labels when not present', async () => {
-      const fieldCaps = jest.fn().mockResolvedValue({
+      const fieldCaps = vi.fn().mockResolvedValue({
         indices: [],
         fields: {},
       });
@@ -215,7 +217,7 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'cloud');
 
     it('returns a map of cloud provider data', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
+      const search = vi.fn().mockResolvedValueOnce({
         aggregations: {
           availability_zone: {
             buckets: [
@@ -249,7 +251,7 @@ describe('data telemetry collection tasks', () => {
 
     describe('with no results', () => {
       it('returns an empty map', async () => {
-        const search = jest.fn().mockResolvedValueOnce({});
+        const search = vi.fn().mockResolvedValueOnce({});
 
         expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
           cloud: {
@@ -266,7 +268,7 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'host');
 
     it('returns a map of host provider data', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
+      const search = vi.fn().mockResolvedValueOnce({
         aggregations: {
           platform: {
             buckets: [
@@ -287,7 +289,7 @@ describe('data telemetry collection tasks', () => {
 
     describe('with no results', () => {
       it('returns an empty map', async () => {
-        const search = jest.fn().mockResolvedValueOnce({});
+        const search = vi.fn().mockResolvedValueOnce({});
 
         expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
           host: {
@@ -304,9 +306,9 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'processor_events');
 
     it('returns a map of processor events', async () => {
-      const getTime = jest.spyOn(Date.prototype, 'getTime').mockReturnValue(1594330792957);
+      const getTime = vi.spyOn(Date.prototype, 'getTime').mockReturnValue(1594330792957);
 
-      const search = jest.fn().mockImplementation((params: any) => {
+      const search = vi.fn().mockImplementation((params: any) => {
         const isTotalHitsQuery = params?.track_total_hits;
 
         return Promise.resolve(
@@ -370,7 +372,7 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'integrations');
 
     it('returns the count of ML jobs', async () => {
-      const transportRequest = jest.fn().mockResolvedValueOnce({ body: { count: 1 } });
+      const transportRequest = vi.fn().mockResolvedValueOnce({ body: { count: 1 } });
 
       expect(
         await task?.executor({
@@ -388,7 +390,7 @@ describe('data telemetry collection tasks', () => {
 
     describe('with no data', () => {
       it('returns a count of 0', async () => {
-        const transportRequest = jest.fn().mockResolvedValueOnce({});
+        const transportRequest = vi.fn().mockResolvedValueOnce({});
 
         expect(
           await task?.executor({
@@ -574,8 +576,8 @@ describe('data telemetry collection tasks', () => {
         },
       };
 
-      const indicesStats = jest.fn().mockResolvedValue(indicesStatsResponse);
-      const search = jest.fn().mockResolvedValue(searchResponse);
+      const indicesStats = vi.fn().mockResolvedValue(indicesStatsResponse);
+      const search = vi.fn().mockResolvedValue(searchResponse);
 
       expect(
         await task?.executor({
@@ -615,8 +617,8 @@ describe('data telemetry collection tasks', () => {
 
       const searchResponse = {};
 
-      const indicesStats = jest.fn().mockResolvedValue(indicesStatsResponse);
-      const search = jest.fn().mockResolvedValue(searchResponse);
+      const indicesStats = vi.fn().mockResolvedValue(indicesStatsResponse);
+      const search = vi.fn().mockResolvedValue(searchResponse);
 
       expect(
         await task?.executor({
@@ -634,7 +636,7 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'cardinality');
 
     it('returns cardinalities', async () => {
-      const search = jest.fn().mockImplementation((params: any) => {
+      const search = vi.fn().mockImplementation((params: any) => {
         const isRumQuery = params.query.bool.filter.length === 2;
         if (isRumQuery) {
           return Promise.resolve({
@@ -828,7 +830,7 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'top_traces');
 
     it('returns max and median number of documents in top traces', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
+      const search = vi.fn().mockResolvedValueOnce({
         aggregations: {
           top_traces: {
             buckets: [
@@ -878,7 +880,7 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'services');
 
     it('should return services per agent name', async () => {
-      const search = jest.fn().mockImplementation((params: any) => {
+      const search = vi.fn().mockImplementation((params: any) => {
         const filter = params.query.bool.filter[0];
         const queryKnownAgentNames = filter.term;
         const queryOtelAgentNames = filter.prefix;
@@ -958,7 +960,7 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'agents');
 
     it('should return agent data per agent name', async () => {
-      const search = jest.fn().mockImplementation((params: any) => {
+      const search = vi.fn().mockImplementation((params: any) => {
         const agentDataMock = {
           'agent.activation_method': { buckets: [{ key: 'k8s-attach' }] },
           'agent.version': { buckets: [{ key: '1.38.0' }] },

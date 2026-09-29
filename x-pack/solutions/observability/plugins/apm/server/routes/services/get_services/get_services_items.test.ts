@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getServicesItems } from './get_services_items';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 import { getServiceAnomalyScores } from './get_service_anomaly_scores';
@@ -19,21 +22,21 @@ import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import type { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import type { RollupInterval } from '../../../../common/rollup';
 
-jest.mock('./get_service_transaction_stats');
-jest.mock('./get_service_anomaly_scores');
-jest.mock('./get_service_alerts');
-jest.mock('./get_services_slo_stats');
-jest.mock('./merge_service_stats');
+vi.mock('./get_service_transaction_stats');
+vi.mock('./get_service_anomaly_scores');
+vi.mock('./get_service_alerts');
+vi.mock('./get_services_slo_stats');
+vi.mock('./merge_service_stats');
 
-const mockGetServiceTransactionStats = getServiceTransactionStats as jest.Mock;
-const mockGetServiceAnomalyScores = getServiceAnomalyScores as jest.Mock;
-const mockGetServicesAlerts = getServicesAlerts as jest.Mock;
-const mockGetServicesSloStats = getServicesSloStats as jest.Mock;
-const mockMergeServiceStats = mergeServiceStats as jest.Mock;
+const mockGetServiceTransactionStats = getServiceTransactionStats as Mock;
+const mockGetServiceAnomalyScores = getServiceAnomalyScores as Mock;
+const mockGetServicesAlerts = getServicesAlerts as Mock;
+const mockGetServicesSloStats = getServicesSloStats as Mock;
+const mockMergeServiceStats = mergeServiceStats as Mock;
 
 describe('getServicesItems', () => {
   const mockLogger = {
-    debug: jest.fn(),
+    debug: vi.fn(),
   } as unknown as Logger;
 
   const baseParams = {
@@ -73,7 +76,7 @@ describe('getServicesItems', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetServiceTransactionStats.mockResolvedValue(mockServiceStats);
     mockGetServiceAnomalyScores.mockResolvedValue(mockAnomalyScores);
     mockGetServicesAlerts.mockResolvedValue(mockAlertCounts);

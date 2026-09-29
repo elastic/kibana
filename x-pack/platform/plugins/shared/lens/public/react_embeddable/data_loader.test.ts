@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
 import { faker } from '@faker-js/faker';
 import type { ReloadReason } from './data_loader';
 import { loadEmbeddableData } from './data_loader';
@@ -35,11 +38,14 @@ import * as Logger from './logger';
 import type { LensEmbeddableStartServices } from './types';
 import { waitFor } from '@testing-library/dom';
 
-jest.mock('@kbn/interpreter', () => ({
-  toExpression: jest.fn().mockReturnValue('expression'),
-}));
+vi.mock('@kbn/interpreter', () => {
+      const mocked = {
+      toExpression: vi.fn().mockReturnValue('expression'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const loggerFn = jest.spyOn(Logger, 'addLog');
+const loggerFn = vi.spyOn(Logger, 'addLog');
 
 // In order to listen the reload function, we need to
 // monitor the internalApi dispatchRenderStart spy
@@ -52,7 +58,7 @@ type ChangeFnType = ({
 }: {
   api: LensApi;
   internalApi: LensInternalApi;
-  getState: jest.MockedFunction<GetStateType>;
+  getState: MockedFunction<GetStateType>;
   parentApi: ReturnType<typeof createUnifiedSearchApi> &
     LensPublicCallbacks & {
       searchSessionId$: BehaviorSubject<string>;
@@ -86,18 +92,18 @@ async function expectRerenderOnDataLoader(
     ...createUnifiedSearchApi(),
     searchSessionId$: new BehaviorSubject<string>(''),
     esqlVariables$: new BehaviorSubject<ESQLControlVariable[] | undefined>([]),
-    onLoad: jest.fn(),
-    onBeforeBadgesRender: jest.fn(),
-    onBrushEnd: jest.fn(),
-    onFilter: jest.fn(),
-    onTableRowClick: jest.fn(),
+    onLoad: vi.fn(),
+    onBeforeBadgesRender: vi.fn(),
+    onBrushEnd: vi.fn(),
+    onFilter: vi.fn(),
+    onTableRowClick: vi.fn(),
     ...parentApiOverrides,
   };
   const api: LensApi = {
     ...getLensApiMock(),
     parentApi,
   };
-  const getState = jest.fn(() => runtimeState);
+  const getState = vi.fn(() => runtimeState);
   const internalApi = getLensInternalApiMock({
     ...internalApiOverrides,
     attributes$: new BehaviorSubject(runtimeState.attributes),
@@ -107,7 +113,7 @@ async function expectRerenderOnDataLoader(
       visOverrides: { id: 'lnsXY' },
       dataOverrides: { id: 'formBased' },
     }),
-    documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
+    documentToExpression: vi.fn().mockResolvedValue({ ast: 'expression_string' }),
     ...servicesOverrides,
   };
   const { cleanup } = loadEmbeddableData(
@@ -119,7 +125,7 @@ async function expectRerenderOnDataLoader(
     services
   );
   // there's a debounce, so skip to the next tick
-  jest.advanceTimersByTime(100);
+  vi.advanceTimersByTime(100);
   await waitFor(() => expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1));
   // change something
   const result = await changeFn({
@@ -134,7 +140,7 @@ async function expectRerenderOnDataLoader(
   // Add an advanced check if provided: the reload reason
   const rerenderReason = typeof result === 'string' ? result : undefined;
   // there's a debounce, so skip to the next tick
-  jest.advanceTimersByTime(200);
+  vi.advanceTimersByTime(200);
 
   if (expectRerender && rerenderReason) {
     const reloadCalls = loggerFn.mock.calls.filter((call) =>
@@ -164,14 +170,14 @@ function waitForValue(
 
 describe('Data Loader', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
     loggerFn.mockRestore();
   });
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('should re-render once on filter change', async () => {
     await expectRerenderOnDataLoader(async ({ parentApi }) => {
@@ -564,13 +570,13 @@ describe('Data Loader', () => {
           datasourceMap: {
             formBased: {
               ...createMockDatasource('formBased'),
-              checkIntegrity: jest.fn().mockReturnValue(['90943e30-9a47-11e8-b64d-95841ca0b247']),
+              checkIntegrity: vi.fn().mockReturnValue(['90943e30-9a47-11e8-b64d-95841ca0b247']),
             },
           },
         },
         // Mock the visualization context to fully load the datasource state
         internalApiOverrides: {
-          getVisualizationContext: jest.fn().mockReturnValue({
+          getVisualizationContext: vi.fn().mockReturnValue({
             activeAttributes: {
               ...defaultDoc,
               visualizationType: 'lnsXY',
@@ -610,7 +616,7 @@ describe('Data Loader', () => {
         ...internalApi.attributes$.getValue(),
         title: faker.lorem.word(),
       });
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
 
       await waitFor(() => expect(internalApi.blockingError$.getValue()).toBeUndefined());
 
@@ -626,7 +632,7 @@ describe('Data Loader', () => {
     };
     const error = new Error('runtime failure');
     let staleParams: ExpressionWrapperProps | undefined;
-    const documentToExpression = jest
+    const documentToExpression = vi
       .fn()
       .mockResolvedValueOnce(buildResult)
       // the previous renderer is still mounted while the new expression is built, so it can
@@ -649,7 +655,7 @@ describe('Data Loader', () => {
         const attributes = getLensAttributesMock({ title: faker.lorem.word() });
         getState.mockReturnValue({ attributes });
         (internalApi.attributes$ as BehaviorSubject<LensDocument | undefined>).next(attributes);
-        jest.advanceTimersByTime(200);
+        vi.advanceTimersByTime(200);
 
         // the stale error should not prevent the new expression from being rendered
         await waitFor(() => {
@@ -691,20 +697,20 @@ describe('Data Loader', () => {
   });
 
   it('should call setApproximationApplied onData', async () => {
-    const setApproximationApplied = jest.fn();
+    const setApproximationApplied = vi.fn();
     const runtimeState: LensRuntimeState = { attributes: getLensAttributesMock() };
     const parentApi = {
       ...createUnifiedSearchApi(),
       searchSessionId$: new BehaviorSubject<string>(''),
       esqlVariables$: new BehaviorSubject<ESQLControlVariable[] | undefined>([]),
-      onLoad: jest.fn(),
-      onBeforeBadgesRender: jest.fn(),
-      onBrushEnd: jest.fn(),
-      onFilter: jest.fn(),
-      onTableRowClick: jest.fn(),
+      onLoad: vi.fn(),
+      onBeforeBadgesRender: vi.fn(),
+      onBrushEnd: vi.fn(),
+      onFilter: vi.fn(),
+      onTableRowClick: vi.fn(),
     };
     const api: LensApi = { ...getLensApiMock(), parentApi };
-    const getState = jest.fn(() => runtimeState);
+    const getState = vi.fn(() => runtimeState);
     const internalApi = getLensInternalApiMock({
       attributes$: new BehaviorSubject(runtimeState.attributes),
     });
@@ -713,7 +719,7 @@ describe('Data Loader', () => {
         visOverrides: { id: 'lnsXY' },
         dataOverrides: { id: 'formBased' },
       }),
-      documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
+      documentToExpression: vi.fn().mockResolvedValue({ ast: 'expression_string' }),
     };
 
     const { cleanup } = loadEmbeddableData(
@@ -727,7 +733,7 @@ describe('Data Loader', () => {
       setApproximationApplied
     );
 
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     await waitFor(() => expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1));
 
     await waitForValue(

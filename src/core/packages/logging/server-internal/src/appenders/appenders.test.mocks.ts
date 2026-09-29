@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockCreateLayout = jest.fn();
-jest.mock('../layouts/layouts', () => {
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+export const mockCreateLayout = vi.fn();
+vi.mock('../layouts/layouts', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { schema } = require('@kbn/config-schema');
   return {
@@ -19,22 +22,28 @@ jest.mock('../layouts/layouts', () => {
   };
 });
 
-jest.mock('@opentelemetry/sdk-logs', () => ({
-  LoggerProvider: jest.fn(() => ({ getLogger: jest.fn(() => ({ emit: jest.fn() })) })),
-  BatchLogRecordProcessor: jest.fn(),
-}));
-jest.mock('@opentelemetry/exporter-logs-otlp-http', () => ({
-  OTLPLogExporter: jest.fn(),
-}));
-jest.mock('@elastic/opentelemetry-node/sdk', () => {
+vi.mock('@opentelemetry/sdk-logs', () => {
+      const mocked = {
+      LoggerProvider: vi.fn(() => ({ getLogger: vi.fn(() => ({ emit: vi.fn() })) })),
+      BatchLogRecordProcessor: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@opentelemetry/exporter-logs-otlp-http', () => {
+      const mocked = {
+      OTLPLogExporter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@elastic/opentelemetry-node/sdk', () => {
   interface MockResource {
-    merge: jest.Mock<MockResource>;
+    merge: Mock<MockResource>;
   }
-  const makeMergeableResource = (): MockResource => ({ merge: jest.fn(makeMergeableResource) });
+  const makeMergeableResource = (): MockResource => ({ merge: vi.fn(makeMergeableResource) });
   return {
     resources: {
-      detectResources: jest.fn(makeMergeableResource),
-      resourceFromAttributes: jest.fn(makeMergeableResource),
+      detectResources: vi.fn(makeMergeableResource),
+      resourceFromAttributes: vi.fn(makeMergeableResource),
       envDetector: 'envDetector',
       hostDetector: 'hostDetector',
       osDetector: 'osDetector',
@@ -42,28 +51,37 @@ jest.mock('@elastic/opentelemetry-node/sdk', () => {
     },
   };
 });
-jest.mock('@opentelemetry/api', () => {
-  const actual = jest.requireActual('@opentelemetry/api');
+vi.mock('@opentelemetry/api', () => {
+  const actual = require('@opentelemetry/api');
   // Preserve the prototype chain so prototype methods like getTracer() remain accessible.
   // A plain spread ({ ...actual.trace }) only copies own enumerable properties and silently
   // drops all prototype methods, which causes failures when kbn-inference-tracing calls
   // trace.getTracer() at module-load time.
   const mockTrace = Object.create(Object.getPrototypeOf(actual.trace));
-  Object.assign(mockTrace, actual.trace, { setSpanContext: jest.fn() });
+  Object.assign(mockTrace, actual.trace, { setSpanContext: vi.fn() });
   return { ...actual, ROOT_CONTEXT: 'root-context', trace: mockTrace };
 });
-jest.mock('@kbn/apm-config-loader', () => ({
-  getConfiguration: jest.fn(() => ({ serviceName: 'kibana', serviceVersion: '9.0.0' })),
-}));
+vi.mock('@kbn/apm-config-loader', () => {
+      const mocked = {
+      getConfiguration: vi.fn(() => ({ serviceName: 'kibana', serviceVersion: '9.0.0' })),
+    };
+      return { ...mocked, default: mocked };
+    });
 // @kbn/telemetry re-exports initTelemetry which transitively imports @kbn/tracing and
 // @kbn/metrics. Those packages load heavy OTel SDK modules at require-time that are
 // unrelated to what otel_appender.ts actually uses (buildOtelResources). Mocking them
 // here prevents those module graphs from loading.
-jest.mock('@kbn/tracing', () => ({
-  initTracing: jest.fn(),
-  LateBindingSpanProcessor: { get: jest.fn() },
-  OTLPSpanProcessor: jest.fn(),
-}));
-jest.mock('@kbn/metrics', () => ({
-  initMetrics: jest.fn(),
-}));
+vi.mock('@kbn/tracing', () => {
+      const mocked = {
+      initTracing: vi.fn(),
+      LateBindingSpanProcessor: { get: vi.fn() },
+      OTLPSpanProcessor: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/metrics', () => {
+      const mocked = {
+      initMetrics: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });

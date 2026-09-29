@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { postKnowledgeBaseRoute } from './post_knowledge_base';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
@@ -31,12 +33,12 @@ describe('Post Knowledge Base Route', () => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
-    context.elasticAssistant.getAIAssistantKnowledgeBaseDataClient = jest.fn().mockResolvedValue({
-      setupKnowledgeBase: jest.fn(),
+    context.elasticAssistant.getAIAssistantKnowledgeBaseDataClient = vi.fn().mockResolvedValue({
+      setupKnowledgeBase: vi.fn(),
       indexTemplateAndPattern: {
         alias: 'knowledge-base-alias',
       },
-      isModelInstalled: jest.fn().mockResolvedValue(true),
+      isModelInstalled: vi.fn().mockResolvedValue(true),
     });
 
     postKnowledgeBaseRoute(server.router);

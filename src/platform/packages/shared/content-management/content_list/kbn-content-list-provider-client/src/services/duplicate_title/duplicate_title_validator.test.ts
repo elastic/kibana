@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createDuplicateTitleValidator } from './duplicate_title_validator';
 
 describe('createDuplicateTitleValidator', () => {
   it('bails (returns undefined) when called without an id', async () => {
-    const findCurrentTitle = jest.fn();
-    const checkForDuplicate = jest.fn();
+    const findCurrentTitle = vi.fn();
+    const checkForDuplicate = vi.fn();
 
     const validator = createDuplicateTitleValidator({ findCurrentTitle, checkForDuplicate });
 
@@ -22,8 +24,8 @@ describe('createDuplicateTitleValidator', () => {
   });
 
   it('bails when `findCurrentTitle` returns `undefined` (item missing or in error state)', async () => {
-    const findCurrentTitle = jest.fn().mockResolvedValue(undefined);
-    const checkForDuplicate = jest.fn();
+    const findCurrentTitle = vi.fn().mockResolvedValue(undefined);
+    const checkForDuplicate = vi.fn();
 
     const validator = createDuplicateTitleValidator({ findCurrentTitle, checkForDuplicate });
 
@@ -32,8 +34,8 @@ describe('createDuplicateTitleValidator', () => {
   });
 
   it('returns the default warning string when `checkForDuplicate` resolves to `false`', async () => {
-    const findCurrentTitle = jest.fn().mockResolvedValue('Existing');
-    const checkForDuplicate = jest.fn().mockResolvedValue(false);
+    const findCurrentTitle = vi.fn().mockResolvedValue('Existing');
+    const checkForDuplicate = vi.fn().mockResolvedValue(false);
 
     const validator = createDuplicateTitleValidator({ findCurrentTitle, checkForDuplicate });
 
@@ -48,9 +50,9 @@ describe('createDuplicateTitleValidator', () => {
   });
 
   it('returns the formatted warning when `checkForDuplicate` throws (alternative idiom)', async () => {
-    const findCurrentTitle = jest.fn().mockResolvedValue('Existing');
-    const checkForDuplicate = jest.fn().mockRejectedValue(new Error('boom'));
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const findCurrentTitle = vi.fn().mockResolvedValue('Existing');
+    const checkForDuplicate = vi.fn().mockRejectedValue(new Error('boom'));
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     try {
       const validator = createDuplicateTitleValidator({
@@ -64,7 +66,7 @@ describe('createDuplicateTitleValidator', () => {
       // Without an error message on the throw, still falls back to the formatter.
       const validator2 = createDuplicateTitleValidator({
         findCurrentTitle,
-        checkForDuplicate: jest.fn().mockRejectedValue({}),
+        checkForDuplicate: vi.fn().mockRejectedValue({}),
         getDuplicateTitleWarning: (value) => `BAD: ${value}`,
       });
       await expect(validator2.fn('Duplicate', 'id-1')).resolves.toBe('BAD: Duplicate');
@@ -75,17 +77,17 @@ describe('createDuplicateTitleValidator', () => {
   });
 
   it('returns undefined when the title is unique (`checkForDuplicate` resolves true or void)', async () => {
-    const findCurrentTitle = jest.fn().mockResolvedValue('Existing');
+    const findCurrentTitle = vi.fn().mockResolvedValue('Existing');
 
     const okTrue = createDuplicateTitleValidator({
       findCurrentTitle,
-      checkForDuplicate: jest.fn().mockResolvedValue(true),
+      checkForDuplicate: vi.fn().mockResolvedValue(true),
     });
     await expect(okTrue.fn('Unique', 'id-1')).resolves.toBeUndefined();
 
     const okVoid = createDuplicateTitleValidator({
       findCurrentTitle,
-      checkForDuplicate: jest.fn().mockResolvedValue(undefined),
+      checkForDuplicate: vi.fn().mockResolvedValue(undefined),
     });
     await expect(okVoid.fn('Unique', 'id-1')).resolves.toBeUndefined();
   });

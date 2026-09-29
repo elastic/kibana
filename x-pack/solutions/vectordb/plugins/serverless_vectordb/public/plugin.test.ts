@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { ServerlessVectordbPlugin } from './plugin';
 import { CONSOLE_DEFAULT_CONTENT } from './console_default_content';
 
 describe('ServerlessVectordbPlugin setup', () => {
   it('seeds Console with the vector search sample requests', () => {
-    const setDefaultEditorContent = jest.fn();
+    const setDefaultEditorContent = vi.fn();
 
     new ServerlessVectordbPlugin().setup(coreMock.createSetup(), {
       console: { setDefaultEditorContent },

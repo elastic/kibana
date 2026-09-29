@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { convertModelVersionBackwardConversionSchemaMock } from './model_version.test.mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -51,7 +54,7 @@ describe('getModelVersionTransforms', () => {
       name: 'foo',
       modelVersions: {
         '1': {
-          changes: [{ type: 'data_backfill', backfillFn: jest.fn() }],
+          changes: [{ type: 'data_backfill', backfillFn: vi.fn() }],
         },
         '2': {
           changes: [{ type: 'mappings_deprecation', deprecatedMappings: [] }],
@@ -76,13 +79,13 @@ describe('getModelVersionTransforms', () => {
       name: 'foo',
       modelVersions: () => ({
         '1': {
-          changes: [{ type: 'data_backfill', backfillFn: jest.fn() }],
+          changes: [{ type: 'data_backfill', backfillFn: vi.fn() }],
         },
         '2': {
-          changes: [{ type: 'data_backfill', backfillFn: jest.fn() }],
+          changes: [{ type: 'data_backfill', backfillFn: vi.fn() }],
         },
         '3': {
-          changes: [{ type: 'data_backfill', backfillFn: jest.fn() }],
+          changes: [{ type: 'data_backfill', backfillFn: vi.fn() }],
         },
       }),
     });
@@ -110,8 +113,8 @@ describe('convertModelVersionTransformFn', () => {
     return { type: 'foo', id: `foo-${i++}`, attributes: {} };
   };
 
-  const createModelTransformFn = (): jest.MockedFunction<SavedObjectModelDataBackfillFn> => {
-    return jest.fn().mockImplementation((doc: unknown) => ({}));
+  const createModelTransformFn = (): MockedFunction<SavedObjectModelDataBackfillFn> => {
+    return vi.fn().mockImplementation((doc: unknown) => ({}));
   };
 
   it('generates a transform function calling the model transform', () => {
@@ -187,12 +190,12 @@ describe('convertModelVersionTransformFn', () => {
 describe('getModelVersionSchemas', () => {
   beforeEach(() => {
     convertModelVersionBackwardConversionSchemaMock.mockReset();
-    convertModelVersionBackwardConversionSchemaMock.mockImplementation(() => jest.fn());
+    convertModelVersionBackwardConversionSchemaMock.mockImplementation(() => vi.fn());
   });
 
   it('calls convertModelVersionBackwardConversionSchema with the correct parameters', () => {
-    const schema1 = jest.fn();
-    const schema3 = jest.fn();
+    const schema1 = vi.fn();
+    const schema3 = vi.fn();
 
     const typeDefinition = createType({
       name: 'foo',
@@ -224,8 +227,8 @@ describe('getModelVersionSchemas', () => {
   });
 
   it('generate schemas for correct model versions', () => {
-    const schema1 = jest.fn();
-    const schema3 = jest.fn();
+    const schema1 = vi.fn();
+    const schema3 = vi.fn();
 
     const typeDefinition = createType({
       name: 'foo',

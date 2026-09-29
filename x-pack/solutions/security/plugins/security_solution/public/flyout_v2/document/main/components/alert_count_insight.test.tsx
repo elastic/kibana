@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -18,15 +21,15 @@ import {
 } from './test_ids';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
-jest.mock(
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
+vi.mock(
   '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
 );
 
@@ -62,7 +65,7 @@ const mockAlertData: ParsedAlertsData = {
   },
 };
 
-const onShowAlertCountDetails = jest.fn();
+const onShowAlertCountDetails = vi.fn();
 
 const renderAlertCountInsight = () => {
   return render(
@@ -78,11 +81,11 @@ const renderAlertCountInsight = () => {
 
 describe('AlertCountInsight', () => {
   beforeEach(() => {
-    (useSignalIndex as jest.Mock).mockReturnValue({ signalIndexName: '' });
+    (useSignalIndex as Mock).mockReturnValue({ signalIndexName: '' });
   });
 
   it('renders', () => {
-    (useAlertsByStatus as jest.Mock).mockReturnValue({
+    (useAlertsByStatus as Mock).mockReturnValue({
       isLoading: false,
       items: mockAlertData,
     });
@@ -96,7 +99,7 @@ describe('AlertCountInsight', () => {
   });
 
   it('shows alert count details when clicking on the count', () => {
-    (useAlertsByStatus as jest.Mock).mockReturnValue({
+    (useAlertsByStatus as Mock).mockReturnValue({
       isLoading: false,
       items: mockAlertData,
     });
@@ -106,19 +109,19 @@ describe('AlertCountInsight', () => {
   });
 
   it('renders loading spinner if data is being fetched', () => {
-    (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: true, items: {} });
+    (useAlertsByStatus as Mock).mockReturnValue({ isLoading: true, items: {} });
     const { getByTestId } = renderAlertCountInsight();
     expect(getByTestId(`${testId}-loading-spinner`)).toBeInTheDocument();
   });
 
   it('renders null if no alert data found', () => {
-    (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
+    (useAlertsByStatus as Mock).mockReturnValue({ isLoading: false, items: {} });
     const { container } = renderAlertCountInsight();
     expect(container).toBeEmptyDOMElement();
   });
 
   it('renders null if no non-closed alert data found', () => {
-    (useAlertsByStatus as jest.Mock).mockReturnValue({
+    (useAlertsByStatus as Mock).mockReturnValue({
       isLoading: false,
       items: {
         closed: {

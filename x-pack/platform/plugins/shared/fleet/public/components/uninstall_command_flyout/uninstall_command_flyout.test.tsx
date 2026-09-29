@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
@@ -33,10 +36,13 @@ import { UninstallCommandFlyout } from './uninstall_command_flyout';
 import type { UninstallCommandTarget } from './types';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../hooks/use_request/uninstall_tokens', () => ({
-  useGetUninstallToken: jest.fn(),
-  useGetUninstallTokens: jest.fn(),
-}));
+vi.mock('../../hooks/use_request/uninstall_tokens', () => {
+      const mocked = {
+      useGetUninstallToken: vi.fn(),
+      useGetUninstallTokens: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type MockResponseType<DataType> = Pick<
   UseRequestResponse<DataType, RequestError>,
@@ -56,8 +62,8 @@ describe('UninstallCommandFlyout', () => {
     token: '123456789',
   };
 
-  const useGetUninstallTokensMock = useGetUninstallTokens as jest.Mock;
-  const useGetUninstallTokenMock = useGetUninstallToken as jest.Mock;
+  const useGetUninstallTokensMock = useGetUninstallTokens as Mock;
+  const useGetUninstallTokenMock = useGetUninstallToken as Mock;
 
   let renderer: TestRenderer;
 
@@ -97,7 +103,7 @@ describe('UninstallCommandFlyout', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('uninstall command targets', () => {

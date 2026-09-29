@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { registerBootstrapRoute } from './register_bootstrap_route';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
 describe('registerBootstrapRoute', () => {
   test('register with expected options', () => {
     const router = mockRouter.create();
-    const renderer = jest.fn();
+    const renderer = vi.fn();
     registerBootstrapRoute({ router, renderer });
     expect(router.get).toHaveBeenCalledTimes(2);
     expect(router.get).toHaveBeenNthCalledWith(

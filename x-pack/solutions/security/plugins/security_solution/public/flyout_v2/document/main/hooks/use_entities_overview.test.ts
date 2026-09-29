@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -12,21 +15,21 @@ import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { useEntitiesOverview } from './use_entities_overview';
 
-jest.mock('@kbn/entity-store/public', () => {
-  const actual = jest.requireActual('@kbn/entity-store/public');
+vi.mock('@kbn/entity-store/public', async () => {
+  const actual = (await vi.importActual('@kbn/entity-store/public'));
   return {
     ...actual,
-    useEntityStoreEuidApi: jest.fn(),
+    useEntityStoreEuidApi: vi.fn(),
   };
 });
 
-jest.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store');
+vi.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store');
 
-const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as jest.Mock;
-const mockUseEntityFromStore = useEntityFromStore as jest.Mock;
+const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as Mock;
+const mockUseEntityFromStore = useEntityFromStore as Mock;
 
-const mockGetEntityIdentifiersFromDocument = jest.fn();
-const mockGetEuidFromObject = jest.fn();
+const mockGetEntityIdentifiersFromDocument = vi.fn();
+const mockGetEuidFromObject = vi.fn();
 
 const buildHit = (source: Record<string, unknown>): DataTableRecord =>
   buildDataTableRecord({ _id: 'id-1', _index: 'idx-1', _source: source });
@@ -39,7 +42,7 @@ const getDefaultEntityFromStoreResult = () => ({
   isLoading: false,
   isInitialLoading: false,
   error: null,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
 });
 
 describe('useEntitiesOverview', () => {
@@ -56,7 +59,7 @@ describe('useEntitiesOverview', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('queries entity store when document has identity fields', () => {

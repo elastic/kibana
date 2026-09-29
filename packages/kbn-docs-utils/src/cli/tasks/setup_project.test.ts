@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import Path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { setupProject } from './setup_project';
@@ -14,43 +17,52 @@ import type { CliContext, CliOptions } from '../types';
 import type { FindPluginsOptions } from '../../find_plugins';
 
 // Mock dependencies - order matters: mock get_all_doc_file_ids first to prevent globby from loading
-jest.mock('../../mdx/get_all_doc_file_ids', () => ({
-  getAllDocFileIds: jest.fn(() => Promise.resolve([])),
-}));
+vi.mock('../../mdx/get_all_doc_file_ids', () => {
+      const mocked = {
+      getAllDocFileIds: vi.fn(() => Promise.resolve([])),
+    };
+      return { ...mocked, default: mocked };
+    });
 // Mock fs before @kbn/repo-info since it uses fs internally
 // Use jest.requireActual to preserve all fs functions that globby needs
-jest.mock('fs', () => {
-  const actualFs = jest.requireActual('fs');
+vi.mock('fs', () => {
+  const actualFs = require('fs');
   return {
     ...actualFs,
-    existsSync: jest.fn(() => false),
-    readFileSync: jest.fn((path: string) => {
+    existsSync: vi.fn(() => false),
+    readFileSync: vi.fn((path: string) => {
       // Return valid JSON for package.json paths
       if (path.includes('package.json')) {
         return JSON.stringify({ name: 'kibana', version: '1.0.0' });
       }
       return '{}';
     }),
-    realpathSync: jest.fn((path: string) => path),
+    realpathSync: vi.fn((path: string) => path),
   };
 });
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/mock/repo/root',
-}));
-jest.mock('../../find_plugins');
-jest.mock('../../get_paths_by_package');
-jest.mock('fs/promises', () => ({
-  rm: jest.fn(() => Promise.resolve()),
-  mkdir: jest.fn(() => Promise.resolve()),
-}));
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/mock/repo/root',
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../find_plugins');
+vi.mock('../../get_paths_by_package');
+vi.mock('fs/promises', () => {
+      const mocked = {
+      rm: vi.fn(() => Promise.resolve()),
+      mkdir: vi.fn(() => Promise.resolve()),
+    };
+      return { ...mocked, default: mocked };
+    });
 // Mock ts-morph to avoid Node.js internals access issues in Jest
-jest.mock('ts-morph', () => {
+vi.mock('ts-morph', () => {
   const mockProject = {
-    addSourceFilesAtPaths: jest.fn(),
-    resolveSourceFileDependencies: jest.fn(),
+    addSourceFilesAtPaths: vi.fn(),
+    resolveSourceFileDependencies: vi.fn(),
   };
   return {
-    Project: jest.fn(() => mockProject),
+    Project: vi.fn(() => mockProject),
   };
 });
 
@@ -70,8 +82,8 @@ describe('setupProject', () => {
     });
 
     transaction = {
-      startSpan: jest.fn(() => ({
-        end: jest.fn(),
+      startSpan: vi.fn(() => ({
+        end: vi.fn(),
       })),
     };
 
@@ -81,9 +93,9 @@ describe('setupProject', () => {
       outputFolder: Path.resolve(__dirname, '../../../../api_docs'),
     };
 
-    (findPlugins as jest.Mock).mockReturnValue([]);
-    (getPathsByPackage as jest.Mock).mockResolvedValue(new Map());
-    (getAllDocFileIds as jest.Mock).mockResolvedValue([]);
+    (findPlugins as Mock).mockReturnValue([]);
+    (getPathsByPackage as Mock).mockResolvedValue(new Map());
+    (getAllDocFileIds as Mock).mockResolvedValue([]);
   });
 
   it('returns setup result with plugins, paths, and project', async () => {
@@ -101,8 +113,8 @@ describe('setupProject', () => {
       },
     ];
 
-    (findPlugins as jest.Mock).mockReturnValue(mockPlugins);
-    (getPathsByPackage as jest.Mock).mockResolvedValue(
+    (findPlugins as Mock).mockReturnValue(mockPlugins);
+    (getPathsByPackage as Mock).mockResolvedValue(
       new Map([[mockPlugins[0], ['src/plugins/test/public/index.ts']]])
     );
 
@@ -119,9 +131,9 @@ describe('setupProject', () => {
   });
 
   it('collects initial doc IDs when output folder exists and no plugin filter', async () => {
-    const Fs = jest.requireMock('fs');
+    const Fs = (await vi.importMock('fs'));
     Fs.existsSync.mockReturnValue(true);
-    (getAllDocFileIds as jest.Mock).mockResolvedValue(['doc1', 'doc2']);
+    (getAllDocFileIds as Mock).mockResolvedValue(['doc1', 'doc2']);
 
     const options: CliOptions = {
       collectReferences: false,
@@ -133,7 +145,7 @@ describe('setupProject', () => {
   });
 
   it('does not collect initial doc IDs when plugin filter is provided', async () => {
-    const Fs = jest.requireMock('fs');
+    const Fs = (await vi.importMock('fs'));
     Fs.existsSync.mockReturnValue(true);
 
     const mockPlugin = {
@@ -145,7 +157,7 @@ describe('setupProject', () => {
     };
 
     // Return all plugins for allPlugins, filtered for filteredPlugins
-    (findPlugins as jest.Mock).mockImplementation((options?: FindPluginsOptions) => {
+    (findPlugins as Mock).mockImplementation((options?: FindPluginsOptions) => {
       if (options?.pluginFilter) {
         return [mockPlugin];
       }
@@ -163,7 +175,7 @@ describe('setupProject', () => {
   });
 
   it('validates plugin filter and throws error if plugins not found', async () => {
-    (findPlugins as jest.Mock).mockReturnValue([]);
+    (findPlugins as Mock).mockReturnValue([]);
 
     const options: CliOptions = {
       collectReferences: false,
@@ -176,7 +188,7 @@ describe('setupProject', () => {
   });
 
   it('validates package filter and throws error if packages not found', async () => {
-    (findPlugins as jest.Mock).mockReturnValue([]);
+    (findPlugins as Mock).mockReturnValue([]);
 
     const options: CliOptions = {
       collectReferences: false,
@@ -189,10 +201,10 @@ describe('setupProject', () => {
   });
 
   it('scopes TypeScript project to single plugin directory when pluginFilter has one plugin', async () => {
-    const { Project } = jest.requireMock('ts-morph');
+    const { Project } = (await vi.importMock('ts-morph'));
     const mockProject = Project();
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const mockPlugin = {
       id: 'single-plugin',
@@ -203,7 +215,7 @@ describe('setupProject', () => {
     };
 
     // Return all plugins for allPlugins, filtered for plugins
-    (findPlugins as jest.Mock).mockImplementation((options?: FindPluginsOptions) => {
+    (findPlugins as Mock).mockImplementation((options?: FindPluginsOptions) => {
       if (options?.pluginFilter) {
         return [mockPlugin];
       }
@@ -234,12 +246,12 @@ describe('setupProject', () => {
   });
 
   it('loads full codebase and resolves dependencies when no pluginFilter', async () => {
-    const { Project } = jest.requireMock('ts-morph');
+    const { Project } = (await vi.importMock('ts-morph'));
     const mockProject = Project();
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (findPlugins as jest.Mock).mockReturnValue([]);
+    (findPlugins as Mock).mockReturnValue([]);
 
     const options: CliOptions = {
       collectReferences: false,

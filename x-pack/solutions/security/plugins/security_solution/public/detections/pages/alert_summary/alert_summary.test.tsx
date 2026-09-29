@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AlertSummaryPage, LOADING_INTEGRATIONS_TEST_ID } from './alert_summary';
@@ -16,21 +19,21 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
 import { TestProviders } from '../../../common/mock';
 
-jest.mock('../../hooks/alert_summary/use_fetch_integrations');
-jest.mock('../../../common/hooks/use_add_integrations_url');
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/hooks/use_experimental_features');
-jest.mock('../../../common/hooks/use_create_data_view');
+vi.mock('../../hooks/alert_summary/use_fetch_integrations');
+vi.mock('../../../common/hooks/use_add_integrations_url');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/hooks/use_experimental_features');
+vi.mock('../../../common/hooks/use_create_data_view');
 
 describe('<AlertSummaryPage />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(false);
   });
 
   it('should render loading logo', () => {
-    (useFetchIntegrations as jest.Mock).mockReturnValue({
+    (useFetchIntegrations as Mock).mockReturnValue({
       isLoading: true,
     });
 
@@ -39,13 +42,13 @@ describe('<AlertSummaryPage />', () => {
   });
 
   it('should render landing page if no packages are installed', () => {
-    (useFetchIntegrations as jest.Mock).mockReturnValue({
+    (useFetchIntegrations as Mock).mockReturnValue({
       availablePackages: [{ id: 'id' }],
       installedPackages: [],
       isLoading: false,
     });
-    (useAddIntegrationsUrl as jest.Mock).mockReturnValue({
-      onClick: jest.fn(),
+    (useAddIntegrationsUrl as Mock).mockReturnValue({
+      onClick: vi.fn(),
     });
 
     const { getByTestId, queryByTestId } = render(
@@ -58,11 +61,11 @@ describe('<AlertSummaryPage />', () => {
   });
 
   it('should render wrapper if packages are installed', async () => {
-    (useCreateDataView as jest.Mock).mockReturnValue({
+    (useCreateDataView as Mock).mockReturnValue({
       dataView: undefined,
       loading: false,
     });
-    (useFetchIntegrations as jest.Mock).mockReturnValue({
+    (useFetchIntegrations as Mock).mockReturnValue({
       availablePackages: [],
       installedPackages: [{ id: 'id' }],
       isLoading: false,

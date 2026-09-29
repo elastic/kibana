@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { AsyncSearchSubmitResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -317,6 +319,6 @@ const createSearchStrategyDependenciesMock = () => ({
 // because the `licensing` plugin modifies the `RequestHandlerContext` core type.
 const createDataPluginMock = (esSearchStrategyMock: ISearchStrategy): any => ({
   search: {
-    getSearchStrategy: jest.fn().mockReturnValue(esSearchStrategyMock),
+    getSearchStrategy: vi.fn().mockReturnValue(esSearchStrategyMock),
   },
 });

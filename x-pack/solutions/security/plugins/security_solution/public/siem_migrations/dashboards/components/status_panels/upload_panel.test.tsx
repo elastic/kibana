@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { render } from '@testing-library/react';
@@ -12,7 +14,7 @@ import { UploadDashboardsPanel } from './upload_panel';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { MigrationDataInputContextProvider } from '../../../common/components';
 
-jest.mock('../../../../common/lib/kibana/use_kibana');
+vi.mock('../../../../common/lib/kibana/use_kibana');
 
 const renderTestComponent = (props: ComponentProps<typeof UploadDashboardsPanel> = {}) => {
   const defaultProps: ComponentProps<typeof UploadDashboardsPanel> = {
@@ -28,8 +30,8 @@ const renderTestComponent = (props: ComponentProps<typeof UploadDashboardsPanel>
   return render(
     <IntlProvider locale="en">
       <MigrationDataInputContextProvider
-        openFlyout={jest.fn()}
-        closeFlyout={jest.fn()}
+        openFlyout={vi.fn()}
+        closeFlyout={vi.fn()}
         isFlyoutOpen={false}
       >
         <UploadDashboardsPanel {...finalProps} />
@@ -40,7 +42,7 @@ const renderTestComponent = (props: ComponentProps<typeof UploadDashboardsPanel>
 
 describe('UploadDashboardsPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly with default props', () => {

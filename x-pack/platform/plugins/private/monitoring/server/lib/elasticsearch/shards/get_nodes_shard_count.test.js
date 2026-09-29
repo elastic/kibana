@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getNodesShardCount } from './get_nodes_shard_count';
 
-jest.mock('../../../static_globals', () => ({
-  Globals: {
-    app: {
-      config: {
-        ui: {
-          ccs: { enabled: true },
+vi.mock('../../../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          config: {
+            ui: {
+              ccs: { enabled: true },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getNodeShardCount', () => {
   it('should return the shard count per node', async () => {

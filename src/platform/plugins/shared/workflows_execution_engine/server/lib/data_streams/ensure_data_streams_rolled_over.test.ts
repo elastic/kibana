@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('./roll_data_stream_if_required', () => ({
-  rollDataStreamIfRequired: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
+vi.mock('./roll_data_stream_if_required', () => {
+      const mocked = {
+      rollDataStreamIfRequired: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ensureWorkflowsDataStreamsRolledOver } from './ensure_data_streams_rolled_over';
@@ -19,7 +25,7 @@ import { WORKFLOWS_LOGS_MANAGED_INDEX_MAPPINGS_VERSION } from '../../repositorie
 import { WORKFLOWS_EVENTS_DATA_STREAM } from '../../trigger_events/event_logs/constants';
 import { WORKFLOWS_EVENTS_MANAGED_INDEX_MAPPINGS_VERSION } from '../../trigger_events/event_logs/trigger_events_data_stream';
 
-const mockRollDataStreamIfRequired = rollDataStreamIfRequired as jest.MockedFunction<
+const mockRollDataStreamIfRequired = rollDataStreamIfRequired as MockedFunction<
   typeof rollDataStreamIfRequired
 >;
 
@@ -28,7 +34,7 @@ describe('ensureWorkflowsDataStreamsRolledOver', () => {
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 

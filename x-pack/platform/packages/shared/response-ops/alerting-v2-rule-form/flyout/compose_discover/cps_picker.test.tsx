@@ -5,27 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { CpsPicker } from './cps_picker';
 
-jest.mock('../../form/contexts/rule_form_context', () => ({
-  useRuleFormServices: jest.fn(),
-}));
+vi.mock('../../form/contexts/rule_form_context', () => {
+      const mocked = {
+      useRuleFormServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/cps-utils', () => ({
-  useFetchProjects: jest.fn(() => []),
-  ProjectPickerContent: () => <div data-test-subj="projectPickerContent" />,
-}));
+vi.mock('@kbn/cps-utils', () => {
+      const mocked = {
+      useFetchProjects: vi.fn(() => []),
+      ProjectPickerContent: () => <div data-test-subj="projectPickerContent" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRuleFormServices = jest.mocked(useRuleFormServices);
+const mockUseRuleFormServices = vi.mocked(useRuleFormServices);
 
 const mockCpsManager = {
-  getTotalProjectCount: jest.fn(),
-  getDefaultProjectRouting: jest.fn(() => undefined),
-  fetchProjects: jest.fn(() => Promise.resolve(null)),
+  getTotalProjectCount: vi.fn(),
+  getDefaultProjectRouting: vi.fn(() => undefined),
+  fetchProjects: vi.fn(() => Promise.resolve(null)),
 };
 
 const renderPicker = () =>
@@ -37,7 +45,7 @@ const renderPicker = () =>
 
 describe('CpsPicker', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders nothing when the cps service is absent', () => {

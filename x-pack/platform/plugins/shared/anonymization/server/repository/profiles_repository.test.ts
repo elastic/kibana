@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createHash } from 'crypto';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ProfilesRepository } from './profiles_repository';
 
 const createRepository = () => {
   const esClientMock = {
-    search: jest.fn(),
-    index: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
+    search: vi.fn(),
+    index: vi.fn(),
+    get: vi.fn(),
+    update: vi.fn(),
   };
 
   const esClient = esClientMock as unknown as ElasticsearchClient;

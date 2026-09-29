@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MaintenanceWindowAttributes } from '@kbn/maintenance-windows-plugin/common';
@@ -46,11 +49,11 @@ const mockFinderForSavedObjects = (docs: Array<SavedObject<MaintenanceWindowAttr
   async *find() {
     yield { saved_objects: docs };
   },
-  close: jest.fn().mockResolvedValue(undefined),
+  close: vi.fn().mockResolvedValue(undefined),
 });
 
 describe('MaintenanceWindowService', () => {
-  let client: jest.Mocked<SavedObjectsClientContract>;
+  let client: Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     client = savedObjectsClientMock.create();
@@ -124,7 +127,7 @@ describe('MaintenanceWindowService', () => {
   });
 
   it('returns empty array on fetch error, logs, and still closes the PIT finder', async () => {
-    const close = jest.fn().mockResolvedValue(undefined);
+    const close = vi.fn().mockResolvedValue(undefined);
     const finderThatThrows = {
       async *find() {
         throw new Error('boom');
@@ -158,7 +161,7 @@ describe('MaintenanceWindowService', () => {
       async *find() {
         yield { saved_objects: [valid] };
       },
-      close: jest.fn().mockRejectedValue(new Error('close boom')),
+      close: vi.fn().mockRejectedValue(new Error('close boom')),
     };
     client.createPointInTimeFinder.mockReturnValue(
       finderWithFailingClose as ReturnType<SavedObjectsClientContract['createPointInTimeFinder']>

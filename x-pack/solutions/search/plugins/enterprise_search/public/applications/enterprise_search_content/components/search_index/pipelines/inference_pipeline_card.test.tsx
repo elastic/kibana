@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -32,7 +34,7 @@ const mockValues = { ...DEFAULT_VALUES };
 
 describe('InferencePipelineCard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues(mockValues);
   });
 
@@ -90,7 +92,7 @@ describe('InferencePipelineCard', () => {
 
 describe('TrainedModelHealthPopover', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues(mockValues);
   });
 

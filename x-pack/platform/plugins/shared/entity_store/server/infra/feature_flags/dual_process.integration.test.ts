@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 /**
  * Integration-level coverage for the dual-process feature flag reactive path.
  *
@@ -70,13 +73,13 @@ function buildCoreStart(
   const coreStart = {
     featureFlags: {
       // First subscription is the startup snapshot; later ones drive in-session transitions.
-      getBooleanValue$: jest
+      getBooleanValue$: vi
         .fn()
         .mockImplementationOnce(() => startupFlag$)
         .mockReturnValue(flagSubject.asObservable()),
     },
     savedObjects: {
-      createInternalRepository: jest.fn().mockReturnValue(mockRepo),
+      createInternalRepository: vi.fn().mockReturnValue(mockRepo),
     },
   } as unknown as CoreStart;
 
@@ -88,7 +91,7 @@ describe('dual-process FF reactive path — integration', () => {
   let logger: ReturnType<typeof loggerMock.create>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     stop$ = new Subject<void>();
     logger = loggerMock.create();
   });
@@ -286,8 +289,8 @@ describe('dual-process FF reactive path — integration', () => {
     it('logs an error and does not throw when the startup reconciliation fails', async () => {
       const flagSubject = new Subject<boolean>();
       const { coreStart } = buildCoreStart(flagSubject, { saved_objects: [] });
-      (coreStart.featureFlags.getBooleanValue$ as jest.Mock).mockReset();
-      (coreStart.featureFlags.getBooleanValue$ as jest.Mock)
+      (coreStart.featureFlags.getBooleanValue$ as Mock).mockReset();
+      (coreStart.featureFlags.getBooleanValue$ as Mock)
         .mockImplementationOnce(() => throwError(() => new Error('LD unreachable')))
         .mockReturnValue(flagSubject.asObservable());
 
@@ -337,7 +340,7 @@ describe('dual-process FF reactive path — integration', () => {
 
       const coreStart = {
         featureFlags: {
-          getBooleanValue$: jest
+          getBooleanValue$: vi
             .fn()
             .mockImplementationOnce(() =>
               throwError(() => new Error('startup flag read not mocked for this test'))
@@ -345,7 +348,7 @@ describe('dual-process FF reactive path — integration', () => {
             .mockReturnValue(flagSubject.asObservable()),
         },
         savedObjects: {
-          createInternalRepository: jest.fn().mockReturnValue(mockRepo),
+          createInternalRepository: vi.fn().mockReturnValue(mockRepo),
         },
       } as unknown as CoreStart;
 

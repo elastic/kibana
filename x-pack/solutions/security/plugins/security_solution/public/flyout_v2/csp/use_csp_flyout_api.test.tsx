@@ -5,50 +5,77 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { useCspFlyoutApi } from './use_csp_flyout_api';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 
-jest.mock('react-redux-v7', () => ({ useStore: () => ({}) }));
-jest.mock('react-router-dom', () => ({ useHistory: () => ({}) }));
-jest.mock('../../common/hooks/is_in_security_app');
+vi.mock('react-redux-v7', () => {
+      const mocked = { useStore: () => ({}) };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = { useHistory: () => ({}) };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/hooks/is_in_security_app');
 
-jest.mock('../shared/components/flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: unknown }) => children,
-}));
+vi.mock('../shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: ({ children }: { children: unknown }) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../shared/utils/build_flyout_nav_title', () => ({
-  buildFlyoutNavTitle: (title: string) => title,
-}));
+vi.mock('../shared/utils/build_flyout_nav_title', () => {
+      const mocked = {
+      buildFlyoutNavTitle: (title: string) => title,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
-  useDefaultDocumentFlyoutProperties: () => ({ size: 's' }),
-}));
+vi.mock('../shared/hooks/use_default_flyout_properties', () => {
+      const mocked = {
+      useDefaultDocumentFlyoutProperties: () => ({ size: 's' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./misconfiguration/main', () => ({ Misconfiguration: () => null }));
-jest.mock('./vulnerability/main', () => ({ Vulnerability: () => null }));
+vi.mock('./misconfiguration/main', () => {
+      const mocked = { Misconfiguration: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./vulnerability/main', () => {
+      const mocked = { Vulnerability: () => null };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFlyoutRef = { close: jest.fn(), onClose: Promise.resolve() };
-const mockOpenSystemFlyout = jest.fn().mockReturnValue(mockFlyoutRef);
-const mockReportEvent = jest.fn();
+const mockFlyoutRef = { close: vi.fn(), onClose: Promise.resolve() };
+const mockOpenSystemFlyout = vi.fn().mockReturnValue(mockFlyoutRef);
+const mockReportEvent = vi.fn();
 
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      overlays: { openSystemFlyout: mockOpenSystemFlyout },
-      storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
-      telemetry: { reportEvent: mockReportEvent },
-    },
-  }),
-}));
+vi.mock('../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          overlays: { openSystemFlyout: mockOpenSystemFlyout },
+          storage: { get: vi.fn(), set: vi.fn(), remove: vi.fn() },
+          telemetry: { reportEvent: mockReportEvent },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useIsInSecurityAppMock = useIsInSecurityApp as jest.Mock;
+const useIsInSecurityAppMock = useIsInSecurityApp as Mock;
 
 describe('useCspFlyoutApi', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useIsInSecurityAppMock.mockReturnValue(true);
   });
 

@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { renderHook } from '@testing-library/react';
 import { CONTEXT_ENGINE_APP_PATH } from '../../../common/features';
 import { createAppChromeMock } from '../test_utils/app_chrome_mock';
 import { useContextEngineBreadcrumbs } from './use_context_engine_breadcrumbs';
 
-const mockUseKibana = jest.fn();
+const mockUseKibana = vi.fn();
 
-jest.mock('./use_kibana', () => ({
-  useKibana: () => mockUseKibana(),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useContextEngineBreadcrumbs', () => {
   const createServices = (
@@ -37,7 +42,7 @@ describe('useContextEngineBreadcrumbs', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('sets Build > Context breadcrumbs in classic chrome without a page name', () => {

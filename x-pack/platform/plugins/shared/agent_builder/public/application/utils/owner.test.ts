@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { resolveOwnerLabel } from './owner';
 
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    translate: (_id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
-  },
-}));
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: {
+        translate: (_id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('resolveOwnerLabel', () => {
   it('returns undefined when owner is undefined', () => {

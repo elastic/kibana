@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { useFindMaintenanceWindows } from './use_find_maintenance_windows';
 
-const mockAddDanger = jest.fn();
-const mockedHttp = jest.fn();
+const mockAddDanger = vi.fn();
+const mockedHttp = vi.fn();
 
-jest.mock('../utils/kibana_react', () => {
-  const originalModule = jest.requireActual('../utils/kibana_react');
+vi.mock('../utils/kibana_react', async () => {
+  const originalModule = (await vi.importActual('../utils/kibana_react'));
   return {
     ...originalModule,
     useKibana: () => {
@@ -30,11 +32,14 @@ jest.mock('../utils/kibana_react', () => {
     },
   };
 });
-jest.mock('../services/find', () => ({
-  findMaintenanceWindows: jest.fn(),
-}));
+vi.mock('../services/find', () => {
+      const mocked = {
+      findMaintenanceWindows: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { findMaintenanceWindows } = jest.requireMock('../services/find');
+const { findMaintenanceWindows } = (await vi.importMock('../services/find'));
 
 const defaultHookProps = { page: 1, perPage: 10, search: '', selectedStatus: [] };
 
@@ -42,7 +47,7 @@ let appMockRenderer: AppMockRenderer;
 
 describe('useFindMaintenanceWindows', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     appMockRenderer = createAppMockRenderer();
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, within, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -12,19 +14,25 @@ import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { TemplateSelectorComponent } from './templates_v2';
 import { renderWithTestingProviders } from '../../common/mock';
 
-const mockSetFieldValue = jest.fn();
-jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => ({
-  ...jest.requireActual('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib'),
-  useFormContext: () => ({ setFieldValue: mockSetFieldValue }),
-  UseField: ({ path }: { path: string }) => (
-    <input type="hidden" data-test-subj={`field-${path}`} />
-  ),
-}));
+const mockSetFieldValue = vi.fn();
+vi.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib')),
+      useFormContext: () => ({ setFieldValue: mockSetFieldValue }),
+      UseField: ({ path }: { path: string }) => (
+        <input type="hidden" data-test-subj={`field-${path}`} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetTemplates = jest.fn();
-jest.mock('../templates_v2/hooks/use_get_templates', () => ({
-  useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
-}));
+const mockUseGetTemplates = vi.fn();
+vi.mock('../templates_v2/hooks/use_get_templates', () => {
+      const mocked = {
+      useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockTemplatesData = {
   templates: [
@@ -40,16 +48,16 @@ describe('TemplateSelectorComponent', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
+    vi.clearAllMocks();
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime, pointerEventsCheck: 0 });
     mockUseGetTemplates.mockReturnValue({ data: mockTemplatesData, isLoading: false });
   });
 

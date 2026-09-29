@@ -7,22 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { AnalyticsClient } from '@elastic/ebt/client';
 import { Subject } from 'rxjs';
 import { lazyObject } from '@kbn/lazy-object';
 
-export const analyticsClientMock: jest.Mocked<AnalyticsClient> = lazyObject({
-  optIn: jest.fn(),
-  reportEvent: jest.fn(),
-  registerEventType: jest.fn(),
-  registerContextProvider: jest.fn(),
-  removeContextProvider: jest.fn(),
-  registerShipper: jest.fn(),
+export const analyticsClientMock: Mocked<AnalyticsClient> = lazyObject({
+  optIn: vi.fn(),
+  reportEvent: vi.fn(),
+  registerEventType: vi.fn(),
+  registerContextProvider: vi.fn(),
+  removeContextProvider: vi.fn(),
+  registerShipper: vi.fn(),
   telemetryCounter$: new Subject(),
-  shutdown: jest.fn(),
-  flush: jest.fn(),
+  shutdown: vi.fn(),
+  flush: vi.fn(),
 });
 
-jest.doMock('@elastic/ebt/client', () => ({
-  createAnalytics: () => analyticsClientMock,
-}));
+vi.doMock('@elastic/ebt/client', () => {
+      const mocked = {
+      createAnalytics: () => analyticsClientMock,
+    };
+      return { ...mocked, default: mocked };
+    });

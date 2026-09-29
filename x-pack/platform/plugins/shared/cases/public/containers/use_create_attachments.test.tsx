@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 
 import { COMMENT_ATTACHMENT_TYPE, SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -14,14 +17,14 @@ import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
 import { TestProviders } from '../common/mock';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
-const useToastMock = useToasts as jest.Mock;
+const useToastMock = useToasts as Mock;
 
 describe('useCreateAttachments', () => {
-  const addError = jest.fn();
-  const addSuccess = jest.fn();
+  const addError = vi.fn();
+  const addSuccess = vi.fn();
 
   useToastMock.mockReturnValue({
     addError,
@@ -40,11 +43,11 @@ describe('useCreateAttachments', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'createAttachments');
+    const spy = vi.spyOn(api, 'createAttachments');
 
     const { result } = renderHook(() => useCreateAttachments(), {
       wrapper: TestProviders,
@@ -75,7 +78,7 @@ describe('useCreateAttachments', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    jest
+    vi
       .spyOn(api, 'createAttachments')
       .mockRejectedValue(new Error('useCreateAttachments: Test error'));
 

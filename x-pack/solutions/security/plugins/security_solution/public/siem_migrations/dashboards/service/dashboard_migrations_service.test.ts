@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 /**
  * SiemDashboardMigrationsService.test.ts
  *
@@ -29,60 +32,78 @@ import { licenseService } from '../../../common/hooks/use_license';
 import type { ExperimentalFeatures } from '../../../../common';
 import { MigrationSource } from '../../common/types';
 
-jest.mock('../api', () => ({
-  createDashboardMigration: jest.fn(),
-  deleteDashboardMigration: jest.fn(),
-  upsertDashboardMigrationResources: jest.fn(),
-  startDashboardMigration: jest.fn(),
-  stopDashboardMigration: jest.fn(),
-  getDashboardMigrationStats: jest.fn(),
-  getDashboardMigrationAllStats: jest.fn(),
-  addDashboardsToDashboardMigration: jest.fn(),
-}));
+vi.mock('../api', () => {
+      const mocked = {
+      createDashboardMigration: vi.fn(),
+      deleteDashboardMigration: vi.fn(),
+      upsertDashboardMigrationResources: vi.fn(),
+      startDashboardMigration: vi.fn(),
+      stopDashboardMigration: vi.fn(),
+      getDashboardMigrationStats: vi.fn(),
+      getDashboardMigrationAllStats: vi.fn(),
+      addDashboardsToDashboardMigration: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/service/capabilities', () => {
+vi.mock('../../common/service/capabilities', async () => {
   return {
-    ...jest.requireActual('../../common/service/capabilities'),
-    getMissingCapabilitiesChecker: jest.fn(() => []),
+    ...(await vi.importActual('../../common/service/capabilities')),
+    getMissingCapabilitiesChecker: vi.fn(() => []),
   };
 });
 
-const mockGetMissingCapabilitiesChecker = getMissingCapabilitiesChecker as jest.MockedFunction<
+const mockGetMissingCapabilitiesChecker = getMissingCapabilitiesChecker as MockedFunction<
   typeof getMissingCapabilitiesChecker
 >;
 
-jest.mock('../../../common/experimental_features_service', () => ({
-  ExperimentalFeaturesService: {
-    get: jest.fn(() => ({ automaticDashboardsMigration: true, siemMigrationsDisabled: false })),
-  },
-}));
+vi.mock('../../../common/experimental_features_service', () => {
+      const mocked = {
+      ExperimentalFeaturesService: {
+        get: vi.fn(() => ({ automaticDashboardsMigration: true, siemMigrationsDisabled: false })),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_license', () => ({
-  licenseService: {
-    isEnterprise: jest.fn(() => true),
-  },
-}));
+vi.mock('../../../common/hooks/use_license', () => {
+      const mocked = {
+      licenseService: {
+        isEnterprise: vi.fn(() => true),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./notification/success_notification', () => ({
-  getSuccessToast: jest.fn().mockReturnValue({ title: 'Success' }),
-}));
+vi.mock('./notification/success_notification', () => {
+      const mocked = {
+      getSuccessToast: vi.fn().mockReturnValue({ title: 'Success' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/service/notifications/no_connector_notification', () => ({
-  getNoConnectorToast: jest.fn().mockReturnValue({ title: 'No Connector' }),
-}));
+vi.mock('../../common/service/notifications/no_connector_notification', () => {
+      const mocked = {
+      getNoConnectorToast: vi.fn().mockReturnValue({ title: 'No Connector' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/service/notifications/missing_capabilities_notification', () => ({
-  getMissingCapabilitiesToast: jest.fn().mockReturnValue({ title: 'Missing Capabilities' }),
-}));
+vi.mock('../../common/service/notifications/missing_capabilities_notification', () => {
+      const mocked = {
+      getMissingCapabilitiesToast: vi.fn().mockReturnValue({ title: 'Missing Capabilities' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetDashboardMigrationStats = api.getDashboardMigrationStats as jest.Mock;
-const mockGetDashboardMigrationAllStats = api.getDashboardMigrationAllStats as jest.Mock;
-const mockStartDashboardMigration = api.startDashboardMigration as jest.Mock;
-const mockStopDashboardMigration = api.stopDashboardMigration as jest.Mock;
-const mockAddDashboardsToDashboardMigration = api.addDashboardsToDashboardMigration as jest.Mock;
-const mockCreateDashboardMigration = api.createDashboardMigration as jest.Mock;
-const mockDeleteDashboardMigration = api.deleteDashboardMigration as jest.Mock;
-const mockUpsertDashboardMigrationResources = api.upsertDashboardMigrationResources as jest.Mock;
+const mockGetDashboardMigrationStats = api.getDashboardMigrationStats as Mock;
+const mockGetDashboardMigrationAllStats = api.getDashboardMigrationAllStats as Mock;
+const mockStartDashboardMigration = api.startDashboardMigration as Mock;
+const mockStopDashboardMigration = api.stopDashboardMigration as Mock;
+const mockAddDashboardsToDashboardMigration = api.addDashboardsToDashboardMigration as Mock;
+const mockCreateDashboardMigration = api.createDashboardMigration as Mock;
+const mockDeleteDashboardMigration = api.deleteDashboardMigration as Mock;
+const mockUpsertDashboardMigrationResources = api.upsertDashboardMigrationResources as Mock;
 
 const defaultMigrationStats = {
   id: 'mig-1',
@@ -100,12 +121,12 @@ describe('SiemDashboardMigrationsService', () => {
   let mockPlugins: StartPluginsDependencies;
   let mockNotifications: CoreStart['notifications'];
   const mockTelemetry = createTelemetryServiceMock();
-  const mockExperimentalFeaturesSpy = jest.spyOn(ExperimentalFeaturesService, 'get');
-  const mockLicenseServiceIsEnterpriseSpy = jest.spyOn(licenseService, 'isEnterprise');
+  const mockExperimentalFeaturesSpy = vi.spyOn(ExperimentalFeaturesService, 'get');
+  const mockLicenseServiceIsEnterpriseSpy = vi.spyOn(licenseService, 'isEnterprise');
 
   beforeEach(async () => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
 
     mockExperimentalFeaturesSpy.mockReturnValue({
       automaticDashboardsMigration: true,
@@ -113,7 +134,7 @@ describe('SiemDashboardMigrationsService', () => {
     } as unknown as ExperimentalFeatures);
 
     mockNotifications = {
-      toasts: { add: jest.fn(), addError: jest.fn(), addSuccess: jest.fn() },
+      toasts: { add: vi.fn(), addError: vi.fn(), addSuccess: vi.fn() },
     } as unknown as CoreStart['notifications'];
     mockCore = {
       application: { capabilities: {} },
@@ -121,7 +142,7 @@ describe('SiemDashboardMigrationsService', () => {
     } as CoreStart;
     mockPlugins = {
       spaces: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'test-space' }),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'test-space' }),
       },
     } as unknown as StartPluginsDependencies;
     mockGetDashboardMigrationStats.mockResolvedValue(defaultMigrationStats);
@@ -302,8 +323,8 @@ describe('SiemDashboardMigrationsService', () => {
     });
 
     it('should notify and not start migration if connectorId is missing', async () => {
-      jest.spyOn(service, 'getMissingCapabilities').mockReturnValue([]);
-      jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue(undefined);
+      vi.spyOn(service, 'getMissingCapabilities').mockReturnValue([]);
+      vi.spyOn(service.connectorIdStorage, 'get').mockReturnValue(undefined);
       const result = await service.startDashboardMigration({
         migrationId: defaultMigrationStats.id,
         vendor: defaultMigrationStats.vendor,
@@ -313,8 +334,8 @@ describe('SiemDashboardMigrationsService', () => {
     });
 
     it('should start migration successfully when capabilities and connectorId are present', async () => {
-      jest.spyOn(service, 'getMissingCapabilities').mockReturnValue([]);
-      jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
+      vi.spyOn(service, 'getMissingCapabilities').mockReturnValue([]);
+      vi.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
       mockStartDashboardMigration.mockResolvedValue({ started: true });
       let statsCalls = 0;
       mockGetDashboardMigrationStats.mockImplementation(async () => {
@@ -324,9 +345,9 @@ describe('SiemDashboardMigrationsService', () => {
         }
         return { ...defaultMigrationStats, status: SiemMigrationTaskStatus.RUNNING };
       });
-      const startPollingSpy = jest.spyOn(service, 'startPolling');
+      const startPollingSpy = vi.spyOn(service, 'startPolling');
       /* @ts-expect-error spying on protected property */
-      const migrationStatsTaskPollUntilSpy = jest.spyOn(service, 'migrationTaskPollingUntil');
+      const migrationStatsTaskPollUntilSpy = vi.spyOn(service, 'migrationTaskPollingUntil');
       const result = await service.startDashboardMigration({
         migrationId: defaultMigrationStats.id,
         vendor: defaultMigrationStats.vendor,
@@ -344,7 +365,7 @@ describe('SiemDashboardMigrationsService', () => {
 
   describe('stopDashboardMigration', () => {
     it('should notify and not stop migration if missing capabilities exist', async () => {
-      jest
+      vi
         .spyOn(service, 'getMissingCapabilities')
         .mockReturnValue([{ capability: 'cap', description: 'desc' }]);
       const result = await service.stopDashboardMigration({
@@ -356,7 +377,7 @@ describe('SiemDashboardMigrationsService', () => {
     });
 
     it('should stop migration successfully', async () => {
-      jest.spyOn(service, 'getMissingCapabilities').mockReturnValue([]);
+      vi.spyOn(service, 'getMissingCapabilities').mockReturnValue([]);
       mockStopDashboardMigration.mockResolvedValue({ stopped: true });
       let statsCalls = 0;
       mockGetDashboardMigrationStats.mockImplementation(async () => {
@@ -367,7 +388,7 @@ describe('SiemDashboardMigrationsService', () => {
         return { ...defaultMigrationStats, status: SiemMigrationTaskStatus.FINISHED };
       });
       /* @ts-expect-error Spying on protecting property */
-      const migrationStatsTaskPollUntilSpy = jest.spyOn(service, 'migrationTaskPollingUntil');
+      const migrationStatsTaskPollUntilSpy = vi.spyOn(service, 'migrationTaskPollingUntil');
       const result = await service.stopDashboardMigration({
         migrationId: defaultMigrationStats.id,
         vendor: defaultMigrationStats.vendor,

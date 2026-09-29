@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchCorrelations } from './fetch_correlations';
 
-jest.mock('../../latency_distribution/get_overall_latency_distribution');
-jest.mock('./fetch_infra_field_candidates');
-jest.mock('./fetch_duration_field_candidates');
-jest.mock('./fetch_field_value_pairs');
-jest.mock('./fetch_throughput_correlations');
-jest.mock('./fetch_p_values');
-jest.mock('./fetch_significant_correlations');
+vi.mock('../../latency_distribution/get_overall_latency_distribution');
+vi.mock('./fetch_infra_field_candidates');
+vi.mock('./fetch_duration_field_candidates');
+vi.mock('./fetch_field_value_pairs');
+vi.mock('./fetch_throughput_correlations');
+vi.mock('./fetch_p_values');
+vi.mock('./fetch_significant_correlations');
 
 import { getOverallLatencyDistribution } from '../../latency_distribution/get_overall_latency_distribution';
 import { fetchInfraFieldCandidates } from './fetch_infra_field_candidates';
@@ -24,23 +27,23 @@ import { fetchThroughputCorrelations } from './fetch_throughput_correlations';
 import { fetchPValues } from './fetch_p_values';
 import { fetchSignificantCorrelations } from './fetch_significant_correlations';
 
-const mockGetOverallLatencyDistribution = getOverallLatencyDistribution as jest.MockedFunction<
+const mockGetOverallLatencyDistribution = getOverallLatencyDistribution as MockedFunction<
   typeof getOverallLatencyDistribution
 >;
-const mockFetchInfraFieldCandidates = fetchInfraFieldCandidates as jest.MockedFunction<
+const mockFetchInfraFieldCandidates = fetchInfraFieldCandidates as MockedFunction<
   typeof fetchInfraFieldCandidates
 >;
-const mockFetchDurationFieldCandidates = fetchDurationFieldCandidates as jest.MockedFunction<
+const mockFetchDurationFieldCandidates = fetchDurationFieldCandidates as MockedFunction<
   typeof fetchDurationFieldCandidates
 >;
-const mockFetchFieldValuePairs = fetchFieldValuePairs as jest.MockedFunction<
+const mockFetchFieldValuePairs = fetchFieldValuePairs as MockedFunction<
   typeof fetchFieldValuePairs
 >;
-const mockFetchThroughputCorrelations = fetchThroughputCorrelations as jest.MockedFunction<
+const mockFetchThroughputCorrelations = fetchThroughputCorrelations as MockedFunction<
   typeof fetchThroughputCorrelations
 >;
-const mockFetchPValues = fetchPValues as jest.MockedFunction<typeof fetchPValues>;
-const mockFetchSignificantCorrelations = fetchSignificantCorrelations as jest.MockedFunction<
+const mockFetchPValues = fetchPValues as MockedFunction<typeof fetchPValues>;
+const mockFetchSignificantCorrelations = fetchSignificantCorrelations as MockedFunction<
   typeof fetchSignificantCorrelations
 >;
 
@@ -71,7 +74,7 @@ const infraCorrelation = {
 
 describe('fetchCorrelations', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockGetOverallLatencyDistribution.mockResolvedValue(defaultDistribution);
   });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
@@ -15,15 +18,15 @@ import {
 } from './no_api_integration_key_callout';
 import { useUserData } from '../user_info';
 
-jest.mock('../user_info');
+vi.mock('../user_info');
 
 describe('NoApiIntegrationKeyCallOut', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should show callout', () => {
-    (useUserData as jest.Mock).mockReturnValue([{ hasEncryptionKey: false }]);
+    (useUserData as Mock).mockReturnValue([{ hasEncryptionKey: false }]);
 
     const { getByTestId } = render(<NoApiIntegrationKeyCallOut />);
 
@@ -37,7 +40,7 @@ describe('NoApiIntegrationKeyCallOut', () => {
   });
 
   it('should hide callout if hasEncryptionKey is true', () => {
-    (useUserData as jest.Mock).mockReturnValue([{ hasEncryptionKey: true }]);
+    (useUserData as Mock).mockReturnValue([{ hasEncryptionKey: true }]);
 
     const { queryByTestId } = render(<NoApiIntegrationKeyCallOut />);
 
@@ -45,7 +48,7 @@ describe('NoApiIntegrationKeyCallOut', () => {
   });
 
   it('should hide when dismiss button is clicked', async () => {
-    (useUserData as jest.Mock).mockReturnValue([{ hasEncryptionKey: false }]);
+    (useUserData as Mock).mockReturnValue([{ hasEncryptionKey: false }]);
 
     const { getByTestId, queryByTestId } = render(<NoApiIntegrationKeyCallOut />);
 

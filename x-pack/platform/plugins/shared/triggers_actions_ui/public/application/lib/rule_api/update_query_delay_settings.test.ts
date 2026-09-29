@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { updateQueryDelaySettings } from './update_query_delay_settings';
 
 const http = httpServiceMock.createStartContract();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('updateQueryDelaySettings', () => {
   test('should call update query delay settings api', async () => {

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TextAreaWithMessageVariables } from './text_area_with_message_variables';
 
 describe('TextAreaWithMessageVariables', () => {
-  const editAction = jest.fn();
+  const editAction = vi.fn();
   const props = {
     messageVariables: [
       {
@@ -25,7 +27,7 @@ describe('TextAreaWithMessageVariables', () => {
     label: 'label',
   };
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   test('renders variables with double braces by default', async () => {
     render(<TextAreaWithMessageVariables {...props} />);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -38,10 +41,10 @@ import type { LayerPanelProps } from './types';
 import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 import { onActiveDataChange } from '../../../state_management';
 
-jest.mock('../../../id_generator');
+vi.mock('../../../id_generator');
 
-jest.mock('@kbn/kibana-utils-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-utils-plugin/public');
+vi.mock('@kbn/kibana-utils-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/kibana-utils-plugin/public'));
   return {
     ...original,
     Storage: class Storage {
@@ -81,7 +84,7 @@ const draggingField = {
   },
 };
 
-const onDropToDimension = jest.fn();
+const onDropToDimension = vi.fn();
 
 interface RenderLayerPanelOptions {
   propsOverrides?: Partial<LayerPanelProps>;
@@ -90,7 +93,7 @@ interface RenderLayerPanelOptions {
 }
 
 describe('LayerPanel', () => {
-  let mockVisualization: jest.Mocked<Visualization>;
+  let mockVisualization: Mocked<Visualization>;
 
   let mockDatasource = createMockDatasource('formBased');
 
@@ -100,10 +103,10 @@ describe('LayerPanel', () => {
       activeVisualization: mockVisualization,
       dimensionGroups: mockVisualization.getConfiguration({} as VisualizationConfigProps).groups,
       visualizationState: 'state',
-      updateVisualization: jest.fn(),
-      updateDatasource: jest.fn(),
-      updateDatasourceAsync: jest.fn(),
-      updateAll: jest.fn(),
+      updateVisualization: vi.fn(),
+      updateDatasource: vi.fn(),
+      updateDatasourceAsync: vi.fn(),
+      updateAll: vi.fn(),
       framePublicAPI: {
         ...createMockFramePublicAPI(),
         datasourceLayers: {
@@ -111,16 +114,16 @@ describe('LayerPanel', () => {
         },
       } as FramePublicAPI,
       isOnlyLayer: true,
-      addLayer: jest.fn(),
-      onRemoveLayer: jest.fn(),
-      onCloneLayer: jest.fn(),
-      onRemoveDimension: jest.fn(),
+      addLayer: vi.fn(),
+      onRemoveLayer: vi.fn(),
+      onCloneLayer: vi.fn(),
+      onRemoveDimension: vi.fn(),
       core: coreMock.createStart(),
       layerIndex: 0,
-      toggleFullscreen: jest.fn(),
-      onEmptyDimensionAdd: jest.fn(),
-      onChangeIndexPattern: jest.fn(),
-      registerLibraryAnnotationGroup: jest.fn(),
+      toggleFullscreen: vi.fn(),
+      onEmptyDimensionAdd: vi.fn(),
+      onChangeIndexPattern: vi.fn(),
+      registerLibraryAnnotationGroup: vi.fn(),
       indexPatternService: createIndexPatternServiceMock(),
       getUserMessages: () => [],
       displayLayerSettings: true,
@@ -171,7 +174,7 @@ describe('LayerPanel', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('single group', () => {
@@ -279,7 +282,7 @@ describe('LayerPanel', () => {
 
       renderLayerPanel({
         propsOverrides: {
-          setIsInlineFlyoutVisible: jest.fn(),
+          setIsInlineFlyoutVisible: vi.fn(),
         },
       });
       expect(screen.queryByText('Requires field')).toBeInTheDocument();
@@ -393,7 +396,7 @@ describe('LayerPanel', () => {
     });
 
     it('should not render visualization dimension editor when clicking on empty dimension', async () => {
-      (generateId as jest.Mock).mockReturnValue(`newid`);
+      (generateId as Mock).mockReturnValue(`newid`);
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
           {
@@ -425,9 +428,9 @@ describe('LayerPanel', () => {
     });
 
     it('should not update the visualization if the datasource is incomplete', async () => {
-      (generateId as jest.Mock).mockReturnValue(`newid`);
-      const updateAll = jest.fn();
-      const updateDatasourceAsync = jest.fn();
+      (generateId as Mock).mockReturnValue(`newid`);
+      const updateAll = vi.fn();
+      const updateDatasourceAsync = vi.fn();
 
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [{ ...defaultGroup, accessors: [{ columnId: 'newid' }] }],
@@ -456,9 +459,9 @@ describe('LayerPanel', () => {
     });
 
     it('should update visualization if the datasource is complete', async () => {
-      (generateId as jest.Mock).mockReturnValue(`newid`);
-      const updateAll = jest.fn();
-      const updateDatasourceAsync = jest.fn();
+      (generateId as Mock).mockReturnValue(`newid`);
+      const updateAll = vi.fn();
+      const updateDatasourceAsync = vi.fn();
 
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [{ ...defaultGroup, accessors: [] }],
@@ -491,9 +494,9 @@ describe('LayerPanel', () => {
     });
 
     it('should pass dimension intent to updateAll when datasource is complete', async () => {
-      (generateId as jest.Mock).mockReturnValue(`newid`);
-      const updateAll = jest.fn();
-      const updateDatasourceAsync = jest.fn();
+      (generateId as Mock).mockReturnValue(`newid`);
+      const updateAll = vi.fn();
+      const updateDatasourceAsync = vi.fn();
 
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [{ ...defaultGroup, accessors: [] }],
@@ -515,7 +518,7 @@ describe('LayerPanel', () => {
           mockDatasource.DimensionEditorComponent.mock.calls.length - 1
         ][0].setState;
 
-      const updater = jest.fn().mockReturnValue({ resolved: true });
+      const updater = vi.fn().mockReturnValue({ resolved: true });
       act(() => {
         stateFn(updater);
       });
@@ -538,7 +541,7 @@ describe('LayerPanel', () => {
           },
         ],
       });
-      const onRemoveDimension = jest.fn();
+      const onRemoveDimension = vi.fn();
       renderLayerPanel({
         propsOverrides: {
           onRemoveDimension,
@@ -580,7 +583,7 @@ describe('LayerPanel', () => {
        * this tests that the ID used in the first render is used to keep the container
        * open in future renders
        */
-      (generateId as jest.Mock).mockReturnValue(`columnId`);
+      (generateId as Mock).mockReturnValue(`columnId`);
       mockVisualization.getConfiguration.mockReturnValueOnce({
         groups: [
           {
@@ -590,7 +593,7 @@ describe('LayerPanel', () => {
         ],
       });
 
-      (generateId as jest.Mock).mockReturnValueOnce(`secondColumnId`);
+      (generateId as Mock).mockReturnValueOnce(`secondColumnId`);
       renderLayerPanel();
       await userEvent.click(screen.getAllByTestId('lns-empty-dimension')[0]);
       expect(screen.getByRole('heading', { name: defaultGroup.groupLabel })).toBeInTheDocument();
@@ -610,7 +613,7 @@ describe('LayerPanel', () => {
     });
 
     it('should only update the state on close when needed', async () => {
-      const updateDatasource = jest.fn();
+      const updateDatasource = vi.fn();
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
           {
@@ -622,7 +625,7 @@ describe('LayerPanel', () => {
       });
 
       // no pending state update
-      mockDatasource.updateStateOnCloseDimension = jest.fn().mockReturnValueOnce(undefined);
+      mockDatasource.updateStateOnCloseDimension = vi.fn().mockReturnValueOnce(undefined);
       renderLayerPanel({
         propsOverrides: {
           updateDatasource,
@@ -634,7 +637,7 @@ describe('LayerPanel', () => {
       expect(updateDatasource).not.toHaveBeenCalled();
 
       // // a pending state update
-      mockDatasource.updateStateOnCloseDimension = jest.fn().mockReturnValueOnce({ newState: {} });
+      mockDatasource.updateStateOnCloseDimension = vi.fn().mockReturnValueOnce({ newState: {} });
 
       await userEvent.click(screen.getAllByTestId('lnsLayerPanel-dimensionLink')[0]);
       await userEvent.click(screen.getByTestId('lns-indexPattern-dimensionContainerBack'));
@@ -679,12 +682,12 @@ describe('LayerPanel', () => {
 
   describe('add a new dimension', () => {
     it('should call onEmptyDimensionAdd callback on new dimension creation', async () => {
-      (generateId as jest.Mock).mockReturnValue(`newid`);
+      (generateId as Mock).mockReturnValue(`newid`);
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [defaultGroup],
       });
 
-      const onEmptyDimensionAdd = jest.fn();
+      const onEmptyDimensionAdd = vi.fn();
       renderLayerPanel({
         propsOverrides: {
           onEmptyDimensionAdd,
@@ -701,7 +704,7 @@ describe('LayerPanel', () => {
         groups: [{ ...defaultGroup, accessors: [{ columnId: 'x' }] }],
       });
 
-      mockVisualization.DimensionTriggerComponent = jest.fn();
+      mockVisualization.DimensionTriggerComponent = vi.fn();
       renderLayerPanel();
       expect(mockDatasource.DimensionTriggerComponent).toHaveBeenCalled();
       expect(mockVisualization.DimensionTriggerComponent).not.toHaveBeenCalled();
@@ -711,7 +714,7 @@ describe('LayerPanel', () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [{ ...defaultGroup, accessors: [{ columnId: 'x' }] }],
       });
-      mockVisualization.DimensionTriggerComponent = jest.fn();
+      mockVisualization.DimensionTriggerComponent = vi.fn();
 
       renderLayerPanel({
         propsOverrides: {
@@ -795,7 +798,7 @@ describe('LayerPanel', () => {
     });
 
     it('should allow drag to move between groups', async () => {
-      (generateId as jest.Mock).mockReturnValue(`newid`);
+      (generateId as Mock).mockReturnValue(`newid`);
 
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
@@ -869,7 +872,7 @@ describe('LayerPanel', () => {
     });
 
     it('should reorder when dropping in the same group', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
           {
@@ -904,7 +907,7 @@ describe('LayerPanel', () => {
         })
       );
 
-      act(() => jest.runAllTimers());
+      act(() => vi.runAllTimers());
       const secondButton = within(reorderableGroup).getAllByTestId(
         'lnsDragDrop-keyboardHandler'
       )[1];
@@ -913,7 +916,7 @@ describe('LayerPanel', () => {
     });
 
     it('should copy when dropping on empty slot in the same group', async () => {
-      (generateId as jest.Mock).mockReturnValue(`newid`);
+      (generateId as Mock).mockReturnValue(`newid`);
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
           {
@@ -950,7 +953,7 @@ describe('LayerPanel', () => {
     it('should call onDrop and update visualization when replacing between compatible groups', async () => {
       const mockVis = {
         ...mockVisualization,
-        setDimension: jest.fn(() => 'modifiedState'),
+        setDimension: vi.fn(() => 'modifiedState'),
       };
       mockVis.getConfiguration.mockReturnValue({
         groups: [
@@ -992,10 +995,10 @@ describe('LayerPanel', () => {
     it('should call onDrop and update visualization when replacing between compatible groups2', async () => {
       const mockVis = {
         ...mockVisualization,
-        setDimension: jest.fn(() => 'modifiedState'),
-        onDrop: jest.fn(() => 'modifiedState'),
+        setDimension: vi.fn(() => 'modifiedState'),
+        onDrop: vi.fn(() => 'modifiedState'),
       };
-      jest.spyOn(mockVis.onDrop, 'bind').mockImplementation((thisVal, ...args) => mockVis.onDrop);
+      vi.spyOn(mockVis.onDrop, 'bind').mockImplementation((thisVal, ...args) => mockVis.onDrop);
 
       mockVis.getConfiguration.mockReturnValue({
         groups: [
@@ -1018,7 +1021,7 @@ describe('LayerPanel', () => {
       });
 
       mockDatasource.onDrop.mockReturnValue(true);
-      const updateVisualization = jest.fn();
+      const updateVisualization = vi.fn();
 
       renderLayerPanel({
         propsOverrides: { updateVisualization, activeVisualization: mockVis },
@@ -1047,7 +1050,7 @@ describe('LayerPanel', () => {
     it('should not change visualization state if datasource drop failed', async () => {
       const mockVis = {
         ...mockVisualization,
-        setDimension: jest.fn(() => 'modifiedState'),
+        setDimension: vi.fn(() => 'modifiedState'),
       };
 
       mockVis.getConfiguration.mockReturnValue({
@@ -1066,7 +1069,7 @@ describe('LayerPanel', () => {
       });
 
       mockDatasource.onDrop.mockReturnValue(false);
-      const updateVisualization = jest.fn();
+      const updateVisualization = vi.fn();
 
       mockDatasource.getDropProps.mockReturnValue({
         dropTypes: ['replace_compatible'],
@@ -1151,7 +1154,7 @@ describe('LayerPanel', () => {
       } as FramePublicAPI;
     };
 
-    const lastDispatchedActiveData = (store: { dispatch: jest.Mock }) => {
+    const lastDispatchedActiveData = (store: { dispatch: Mock }) => {
       const activeDataCalls = store.dispatch.mock.calls.filter(
         ([action]) => action?.type === onActiveDataChange.type
       );
@@ -1160,7 +1163,7 @@ describe('LayerPanel', () => {
         | undefined;
     };
 
-    const countActiveDataDispatches = (store: { dispatch: jest.Mock }) =>
+    const countActiveDataDispatches = (store: { dispatch: Mock }) =>
       store.dispatch.mock.calls.filter(([action]) => action?.type === onActiveDataChange.type)
         .length;
 

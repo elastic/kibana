@@ -5,26 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { OnboardingApiKeys } from './onboarding_api_keys';
 import type { OnboardingServices } from '../services';
 
-const mockOpenWiredConnectionDetails = jest.fn();
-jest.mock('@kbn/cloud/connection_details', () => ({
-  openWiredConnectionDetails: (...args: unknown[]) => mockOpenWiredConnectionDetails(...args),
-}));
+const mockOpenWiredConnectionDetails = vi.fn();
+vi.mock('@kbn/cloud/connection_details', () => {
+      const mocked = {
+      openWiredConnectionDetails: (...args: unknown[]) => mockOpenWiredConnectionDetails(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCopy = jest.fn();
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiCopy: jest.fn(({ children }) => children(mockCopy)),
-}));
+const mockCopy = vi.fn();
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiCopy: vi.fn(({ children }) => children(mockCopy)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const services = {
-  notifications: { toasts: { addDanger: jest.fn() } },
-  application: { navigateToApp: jest.fn() },
+  notifications: { toasts: { addDanger: vi.fn() } },
+  application: { navigateToApp: vi.fn() },
 } as unknown as OnboardingServices;
 
 const renderComponent = (props: Partial<React.ComponentProps<typeof OnboardingApiKeys>> = {}) =>
@@ -36,7 +44,7 @@ const renderComponent = (props: Partial<React.ComponentProps<typeof OnboardingAp
 
 describe('OnboardingApiKeys', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockOpenWiredConnectionDetails.mockResolvedValue(undefined);
   });
 

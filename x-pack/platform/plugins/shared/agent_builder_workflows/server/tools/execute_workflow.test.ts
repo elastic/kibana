@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { executeWorkflowTool } from './execute_workflow';
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => {
-  const actual = jest.requireActual('@kbn/agent-builder-tools-base/workflows');
+vi.mock('@kbn/agent-builder-tools-base/workflows', async () => {
+  const actual = (await vi.importActual('@kbn/agent-builder-tools-base/workflows'));
   return {
     ...actual,
-    executeWorkflow: jest.fn(),
+    executeWorkflow: vi.fn(),
   };
 });
 
-const executeWorkflowMock = executeWorkflow as jest.MockedFunction<typeof executeWorkflow>;
+const executeWorkflowMock = executeWorkflow as MockedFunction<typeof executeWorkflow>;
 
 // Security plugin disabled by default in these tests -> privilege checks allow.
 const getSecurity = () => undefined;
@@ -44,12 +47,12 @@ describe('executeWorkflowTool', () => {
     workflow_name: 'Test Workflow',
   };
 
-  const buildContext = (overrides: Partial<{ get: jest.Mock }> = {}) =>
+  const buildContext = (overrides: Partial<{ get: Mock }> = {}) =>
     ({
       request: { __mock: 'request' },
       spaceId: 'default',
       attachments: {
-        get: overrides.get ?? jest.fn(),
+        get: overrides.get ?? vi.fn(),
       },
     } as any);
 
@@ -85,7 +88,7 @@ describe('executeWorkflowTool', () => {
   it.each([{ workflowId: 'wf-1' }, { yaml: 'name: Inline workflow' }, { attachmentId: 'att-1' }])(
     'does not execute %j when the caller lacks execute privilege',
     async (input) => {
-      const atSpace = jest.fn().mockResolvedValue({ hasAllRequested: false });
+      const atSpace = vi.fn().mockResolvedValue({ hasAllRequested: false });
       const denyingSecurity = () =>
         ({
           authz: {
@@ -99,7 +102,7 @@ describe('executeWorkflowTool', () => {
         tool,
         input,
         buildContext({
-          get: jest.fn().mockReturnValue({
+          get: vi.fn().mockReturnValue({
             type: WORKFLOW_YAML_ATTACHMENT_TYPE,
             data: { data: { yaml: 'name: Attached workflow' } },
           }),
@@ -137,7 +140,7 @@ describe('executeWorkflowTool', () => {
   it('resolves and executes a workflow yaml attachment when only `attachmentId` is provided', async () => {
     executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
 
-    const get = jest.fn().mockReturnValue({
+    const get = vi.fn().mockReturnValue({
       id: 'att-1',
       version: 1,
       type: WORKFLOW_YAML_ATTACHMENT_TYPE,
@@ -217,7 +220,7 @@ describe('executeWorkflowTool', () => {
     const result = await invokeHandler(
       tool,
       { attachmentId: 'missing' },
-      buildContext({ get: jest.fn().mockReturnValue(undefined) })
+      buildContext({ get: vi.fn().mockReturnValue(undefined) })
     );
     expect(executeWorkflowMock).not.toHaveBeenCalled();
     expect(result.results[0].type).toBe('error');
@@ -230,7 +233,7 @@ describe('executeWorkflowTool', () => {
       tool,
       { attachmentId: 'att-wrong' },
       buildContext({
-        get: jest.fn().mockReturnValue({
+        get: vi.fn().mockReturnValue({
           id: 'att-wrong',
           version: 1,
           type: 'something_else',

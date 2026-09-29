@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EuiCheckboxProps } from '@elastic/eui';
 import React from 'react';
 
@@ -51,14 +53,14 @@ describe('EnabledFeatures', () => {
             name: 'my space',
             disabledFeatures: ['feature-1', 'feature-2'],
           }}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       )
     ).toMatchSnapshot();
   });
 
   it('allows all features in a category to be toggled on', () => {
-    const changeHandler = jest.fn();
+    const changeHandler = vi.fn();
 
     const wrapper = mountWithIntl(
       <EnabledFeatures
@@ -91,7 +93,7 @@ describe('EnabledFeatures', () => {
   });
 
   it('allows all features in a category to be toggled off', async () => {
-    const changeHandler = jest.fn();
+    const changeHandler = vi.fn();
 
     const wrapper = mountWithIntl(
       <EnabledFeatures
@@ -127,7 +129,7 @@ describe('EnabledFeatures', () => {
   });
 
   it('allows all features to be toggled off', async () => {
-    const changeHandler = jest.fn();
+    const changeHandler = vi.fn();
 
     const wrapper = mountWithIntl(
       <EnabledFeatures
@@ -156,7 +158,7 @@ describe('EnabledFeatures', () => {
   });
 
   it('allows all features to be toggled on', async () => {
-    const changeHandler = jest.fn();
+    const changeHandler = vi.fn();
 
     const wrapper = mountWithIntl(
       <EnabledFeatures
@@ -193,7 +195,7 @@ describe('EnabledFeatures', () => {
           name: 'my space',
           disabledFeatures: ['feature-1'],
         }}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
       />
     );
     expect(findTestSubject(wrapper, 'hideAllFeaturesLink')).toHaveLength(1);
@@ -202,7 +204,7 @@ describe('EnabledFeatures', () => {
 
   describe('feature category button', () => {
     it(`does not toggle visibility when it contains more than one item`, () => {
-      const changeHandler = jest.fn();
+      const changeHandler = vi.fn();
       const wrapper = mountWithIntl(
         <EnabledFeatures
           features={features}
@@ -220,7 +222,7 @@ describe('EnabledFeatures', () => {
     });
 
     it('toggles item visibility when the category contains a single item', () => {
-      const changeHandler = jest.fn();
+      const changeHandler = vi.fn();
       const wrapper = mountWithIntl(
         <EnabledFeatures
           features={[

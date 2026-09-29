@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loadConnectors } from '@kbn/inference-connectors';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
@@ -18,26 +21,33 @@ import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 import { setConnectors } from '../slice';
 
-jest.mock('@kbn/inference-connectors', () => ({
-  loadConnectors: jest.fn(),
-}));
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      loadConnectors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockLoadConnectors = loadConnectors as jest.MockedFunction<typeof loadConnectors>;
+const mockLoadConnectors = loadConnectors as MockedFunction<typeof loadConnectors>;
 
 const mockWorkflowApi = createMockWorkflowApi();
-jest.mock('@kbn/workflows-ui', () => ({
-  WorkflowApi: jest.fn().mockImplementation(() => mockWorkflowApi),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      WorkflowApi: vi.fn().mockImplementation(() => mockWorkflowApi),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the schema functions
-jest.mock('../../../../../../common/schema', () => ({
-  addDynamicConnectorsToCache: jest.fn(),
-  getWorkflowZodSchema: jest.fn(() => ({})),
-}));
+vi.mock('../../../../../../common/schema', () => {
+      const mocked = {
+      addDynamicConnectorsToCache: vi.fn(),
+      getWorkflowZodSchema: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { addDynamicConnectorsToCache, getWorkflowZodSchema } = jest.requireMock(
-  '../../../../../../common/schema'
-);
+const { addDynamicConnectorsToCache, getWorkflowZodSchema } = (await vi.importMock('../../../../../../common/schema'));
 
 // Mock connector data
 const mockConnectorType1 = {
@@ -70,8 +80,8 @@ describe('loadConnectorsThunk', () => {
   let mockServices: MockServices;
 
   beforeEach(() => {
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
 
     store = createMockStore();
     mockServices = getMockServices(store);
@@ -96,7 +106,7 @@ describe('loadConnectorsThunk', () => {
   });
 
   it('loads inference connectors declared by registered step features', async () => {
-    jest.spyOn(stepSchemas, 'getAllRegisteredStepDefinitions').mockReturnValue([
+    vi.spyOn(stepSchemas, 'getAllRegisteredStepDefinitions').mockReturnValue([
       {
         editorHandlers: {
           config: {
@@ -149,7 +159,7 @@ describe('loadConnectorsThunk', () => {
   });
 
   it('fails connector loading when inference connector loading fails', async () => {
-    jest.spyOn(stepSchemas, 'getAllRegisteredStepDefinitions').mockReturnValue([
+    vi.spyOn(stepSchemas, 'getAllRegisteredStepDefinitions').mockReturnValue([
       {
         editorHandlers: {
           config: {

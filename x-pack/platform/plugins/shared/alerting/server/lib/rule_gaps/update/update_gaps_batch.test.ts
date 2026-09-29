@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { identity } from 'lodash';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { updateGapsInEventLog } from './update_gaps_in_event_log';
@@ -20,18 +23,24 @@ import { findOverlappingIntervals, toScheduledItem, prepareGapsForUpdate } from 
 import { applyScheduledBackfillsToGap } from './apply_scheduled_backfills_to_gap';
 import { backfillInitiator } from '../../../../common/constants';
 
-jest.mock('./update_gaps_in_event_log', () => ({
-  updateGapsInEventLog: jest.fn().mockResolvedValue(true),
-}));
-jest.mock('./utils');
-jest.mock('./apply_scheduled_backfills_to_gap', () => ({
-  applyScheduledBackfillsToGap: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./update_gaps_in_event_log', () => {
+      const mocked = {
+      updateGapsInEventLog: vi.fn().mockResolvedValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./utils');
+vi.mock('./apply_scheduled_backfills_to_gap', () => {
+      const mocked = {
+      applyScheduledBackfillsToGap: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const updateGapsInEventLogMock = updateGapsInEventLog as jest.Mock;
-const findOverlappingIntervalsMock = findOverlappingIntervals as jest.Mock;
-const toScheduledItemMock = toScheduledItem as jest.Mock;
-const applyScheduledBackfillsToGapMock = applyScheduledBackfillsToGap as jest.Mock;
+const updateGapsInEventLogMock = updateGapsInEventLog as Mock;
+const findOverlappingIntervalsMock = findOverlappingIntervals as Mock;
+const toScheduledItemMock = toScheduledItem as Mock;
+const applyScheduledBackfillsToGapMock = applyScheduledBackfillsToGap as Mock;
 
 const savedObjectsRepository = savedObjectsRepositoryMock.create();
 const mockLogger = loggerMock.create();
@@ -70,7 +79,7 @@ const backfillSchedule = [
 
 describe('updateGapsBatch', () => {
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     await updateGapsBatch({
       gaps,
@@ -113,7 +122,7 @@ describe('updateGapsBatch', () => {
       );
 
       toScheduledItemMock.mockImplementation(identity);
-      (prepareGapsForUpdate as unknown as jest.Mock).mockImplementation((gapsToUpdate: Gap[]) =>
+      (prepareGapsForUpdate as unknown as Mock).mockImplementation((gapsToUpdate: Gap[]) =>
         gapsToUpdate.map((gap) => ({ gap: gap.toObject(), internalFields: gap.internalFields }))
       );
       prepareGapsFn = updateGapsInEventLogMock.mock.calls[0][0].prepareGaps;
@@ -147,7 +156,7 @@ describe('updateGapsBatch', () => {
     });
 
     it('sets updated_at on each gap', async () => {
-      const spies = gaps.map((g) => jest.spyOn(g, 'setUpdatedAt'));
+      const spies = gaps.map((g) => vi.spyOn(g, 'setUpdatedAt'));
       await prepareGapsFn(gaps);
       spies.forEach((s) => expect(s).toHaveBeenCalled());
     });

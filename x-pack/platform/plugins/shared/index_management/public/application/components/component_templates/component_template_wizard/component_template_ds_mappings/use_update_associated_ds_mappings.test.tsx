@@ -5,28 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';
 
 import { useUpdateAssociatedDsMappings } from './use_update_associated_ds_mappings';
 
-jest.mock('../../component_templates_context');
+vi.mock('../../component_templates_context');
 
 describe('useUpdateAssociatedDsMappings', () => {
   beforeEach(() => {
-    jest.mocked(useComponentTemplatesContext).mockReturnValue({
+    vi.mocked(useComponentTemplatesContext).mockReturnValue({
       api: {
-        getComponentTemplateDatastreams: jest.fn(),
-        postDataStreamMappingsFromTemplate: jest.fn(),
+        getComponentTemplateDatastreams: vi.fn(),
+        postDataStreamMappingsFromTemplate: vi.fn(),
       },
       startServices: {
-        overlays: { openModal: jest.fn() },
+        overlays: { openModal: vi.fn() },
       },
     } as any);
   });
   it('should do nothing if there no impacted data_streams', async () => {
-    jest
+    vi
       .mocked(useComponentTemplatesContext().api.getComponentTemplateDatastreams)
       .mockResolvedValue({ data: { data_streams: [] }, error: undefined });
 
@@ -40,7 +42,7 @@ describe('useUpdateAssociatedDsMappings', () => {
   });
 
   it('should try to update mappings if there is impacted data_streams', async () => {
-    const { api, startServices } = jest.mocked(useComponentTemplatesContext());
+    const { api, startServices } = vi.mocked(useComponentTemplatesContext());
 
     api.getComponentTemplateDatastreams.mockResolvedValue({
       data: { data_streams: ['logs-test.data-default'] },
@@ -52,9 +54,9 @@ describe('useUpdateAssociatedDsMappings', () => {
       data: { data_streams: [] },
     });
 
-    jest
+    vi
       .mocked(useComponentTemplatesContext().startServices.overlays.openModal)
-      .mockReturnValue({ onClose: jest.fn() } as any);
+      .mockReturnValue({ onClose: vi.fn() } as any);
 
     const {
       result: {
@@ -69,7 +71,7 @@ describe('useUpdateAssociatedDsMappings', () => {
   });
 
   it('should show datastream rollover modal if there is an error when updating mappings', async () => {
-    const { api, startServices } = jest.mocked(useComponentTemplatesContext());
+    const { api, startServices } = vi.mocked(useComponentTemplatesContext());
 
     api.getComponentTemplateDatastreams.mockResolvedValue({
       data: { data_streams: ['logs-test.data-default'] },
@@ -81,9 +83,9 @@ describe('useUpdateAssociatedDsMappings', () => {
       data: { data_streams: [] },
     });
 
-    jest
+    vi
       .mocked(useComponentTemplatesContext().startServices.overlays.openModal)
-      .mockReturnValue({ onClose: jest.fn() } as any);
+      .mockReturnValue({ onClose: vi.fn() } as any);
 
     const {
       result: {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useServiceMapBadges } from './use_service_map_badges';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -14,23 +17,32 @@ import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import type { ServiceMapNode } from '../../../../common/service_map';
 import type { ServiceMapBadgesApiResponse } from './merge_service_map_nodes_with_badges';
 
-jest.mock('../../../context/license/use_license_context', () => ({
-  useLicenseContext: jest.fn(),
-}));
+vi.mock('../../../context/license/use_license_context', () => {
+      const mocked = {
+      useLicenseContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: jest.fn(),
-}));
+vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
+      const mocked = {
+      useApmPluginContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetcher', () => ({
-  FETCH_STATUS: jest.requireActual('../../../hooks/use_fetcher').FETCH_STATUS,
-  useFetcher: jest.fn(),
-}));
+vi.mock('../../../hooks/use_fetcher', async () => {
+      const mocked = {
+      FETCH_STATUS: (await vi.importActual('../../../hooks/use_fetcher')).FETCH_STATUS,
+      useFetcher: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseLicenseContext = jest.mocked(useLicenseContext);
-const mockedUseApmPluginContext = jest.mocked(useApmPluginContext);
-const mockedUseFetcher = jest.mocked(useFetcher);
-const mockedRefetch = jest.fn();
+const mockedUseLicenseContext = vi.mocked(useLicenseContext);
+const mockedUseApmPluginContext = vi.mocked(useApmPluginContext);
+const mockedUseFetcher = vi.mocked(useFetcher);
+const mockedRefetch = vi.fn();
 
 const platinumLicense = { isActive: true, hasAtLeast: () => true };
 
@@ -83,7 +95,7 @@ const defaultParams: Parameters<typeof useServiceMapBadges>[0] = {
 
 describe('useServiceMapBadges()', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockedUseLicenseContext.mockReturnValue(
       platinumLicense as unknown as ReturnType<typeof useLicenseContext>
@@ -279,7 +291,7 @@ describe('useServiceMapBadges()', () => {
   });
 
   describe('when the caller passes an empty kuery (badges decoupled from the map filter)', () => {
-    function invokeLastFetcherCallback(callApmApi: jest.Mock) {
+    function invokeLastFetcherCallback(callApmApi: Mock) {
       const calls = mockedUseFetcher.mock.calls;
       const cb = calls[calls.length - 1][0] as (
         callApmApiArg: unknown,
@@ -290,7 +302,7 @@ describe('useServiceMapBadges()', () => {
     }
 
     it('does not forward `kuery` to the badges endpoint', () => {
-      const callApmApi = jest.fn();
+      const callApmApi = vi.fn();
 
       renderHook(() => useServiceMapBadges({ ...defaultParams, kuery: '' }));
       invokeLastFetcherCallback(callApmApi);
@@ -304,7 +316,7 @@ describe('useServiceMapBadges()', () => {
     });
 
     it('still forwards `environment` to the badges endpoint', () => {
-      const callApmApi = jest.fn();
+      const callApmApi = vi.fn();
 
       renderHook(() =>
         useServiceMapBadges({ ...defaultParams, kuery: '', environment: 'production' })

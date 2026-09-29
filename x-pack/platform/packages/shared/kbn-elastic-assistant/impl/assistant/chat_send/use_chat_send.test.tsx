@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
@@ -15,15 +18,15 @@ import { waitFor, renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { useAssistantContext } from '../../..';
 
-jest.mock('../use_send_message');
-jest.mock('../use_conversation');
-jest.mock('../../..');
+vi.mock('../use_send_message');
+vi.mock('../use_conversation');
+vi.mock('../../..');
 
-const setSelectedPromptContexts = jest.fn();
-const sendMessage = jest.fn();
-const removeLastMessage = jest.fn();
-const clearConversation = jest.fn();
-const setCurrentConversation = jest.fn();
+const setSelectedPromptContexts = vi.fn();
+const sendMessage = vi.fn();
+const removeLastMessage = vi.fn();
+const clearConversation = vi.fn();
+const setCurrentConversation = vi.fn();
 
 export const testProps: UseChatSendProps = {
   selectedPromptContexts: {},
@@ -38,22 +41,22 @@ export const testProps: UseChatSendProps = {
   } as unknown as HttpSetup,
   setSelectedPromptContexts,
   setCurrentConversation,
-  refetchCurrentUserConversations: jest.fn(),
+  refetchCurrentUserConversations: vi.fn(),
 };
 const robotMessage = { response: 'Response message from the robot', isError: false };
-const reportAssistantMessageSent = jest.fn();
+const reportAssistantMessageSent = vi.fn();
 describe('use chat send', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useSendMessage as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useSendMessage as Mock).mockReturnValue({
       isLoading: false,
       sendMessage: sendMessage.mockReturnValue(robotMessage),
     });
-    (useConversation as jest.Mock).mockReturnValue({
+    (useConversation as Mock).mockReturnValue({
       removeLastMessage,
       clearConversation,
     });
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    (useAssistantContext as Mock).mockReturnValue({
       assistantTelemetry: {
         reportAssistantMessageSent,
       },
@@ -63,7 +66,7 @@ describe('use chat send', () => {
     });
   });
   it('handleOnChatCleared clears the conversation', async () => {
-    (clearConversation as jest.Mock).mockReturnValueOnce(testProps.currentConversation);
+    (clearConversation as Mock).mockReturnValueOnce(testProps.currentConversation);
     const { result } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
@@ -148,18 +151,18 @@ describe('use chat send', () => {
   });
   it('retries getConversation up to 5 times if title is empty, and stops when title is found', async () => {
     const promptText = 'test prompt';
-    const getConversationMock = jest.fn();
+    const getConversationMock = vi.fn();
     // First 3 calls return empty title, 4th returns non-empty
     getConversationMock
       .mockResolvedValueOnce({ title: '' })
       .mockResolvedValueOnce({ title: '' })
       .mockResolvedValueOnce({ title: '' })
       .mockResolvedValueOnce({ title: 'Final Title' });
-    (useConversation as jest.Mock).mockReturnValue({
+    (useConversation as Mock).mockReturnValue({
       removeLastMessage,
       clearConversation,
       getConversation: getConversationMock,
-      createConversation: jest.fn(),
+      createConversation: vi.fn(),
     });
     const { result } = renderHook(
       () =>

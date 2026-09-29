@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { registerBundleRoutesMock } from './core_app.test.mocks';
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
@@ -37,7 +39,7 @@ describe('CoreApp', () => {
   let httpResourcesRegistrar: ReturnType<typeof httpResourcesMock.createRegistrar>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     coreContext = mockCoreContext.create();
 
     coreContext.configService.atPath.mockReturnValue(config$);
@@ -63,7 +65,7 @@ describe('CoreApp', () => {
   afterEach(() => {
     registerBundleRoutesMock.mockReset();
     coreApp.stop();
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   describe('Dynamic Config feature', () => {
@@ -123,7 +125,7 @@ describe('CoreApp', () => {
 
         const repository =
           internalCoreStart.savedObjects.createInternalRepository.mock.results[0].value;
-        await jest.advanceTimersByTimeAsync(0); // "Advancing" 0ms is enough, but necessary to trigger the `timer` observable
+        await vi.advanceTimersByTimeAsync(0); // "Advancing" 0ms is enough, but necessary to trigger the `timer` observable
         expect(repository.get).toHaveBeenCalledWith(
           'dynamic-config-overrides',
           'dynamic-config-overrides'

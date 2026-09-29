@@ -5,54 +5,68 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { renderWithI18n } from '../../../test_utils/render_with_ml_context';
 
 import { CalendarsListHeader } from './header';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  withKibana: (comp) => {
-    return comp;
-  },
-}));
-jest.mock('../../../capabilities/check_capabilities', () => ({
-  usePermissionCheck: () => [true, true],
-}));
-jest.mock('../../../contexts/kibana/kibana_context', () => ({
-  useMlKibana: () => ({
-    services: {
-      docLinks: {
-        links: {
-          ml: { calendars: 'calendars link' },
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      withKibana: (comp) => {
+        return comp;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../capabilities/check_capabilities', () => {
+      const mocked = {
+      usePermissionCheck: () => [true, true],
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../contexts/kibana/kibana_context', () => {
+      const mocked = {
+      useMlKibana: () => ({
+        services: {
+          docLinks: {
+            links: {
+              ml: { calendars: 'calendars link' },
+            },
+          },
+          application: {
+            navigateToApp: vi.fn(),
+            getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/'),
+          },
         },
-      },
-      application: {
-        navigateToApp: jest.fn(),
-        getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/'),
-      },
-    },
-  }),
-}));
-jest.mock('../../../contexts/kibana', () => ({
-  useMlKibana: () => ({
-    services: {
-      docLinks: {
-        links: {
-          ml: { calendars: 'calendars link' },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../contexts/kibana', () => {
+      const mocked = {
+      useMlKibana: () => ({
+        services: {
+          docLinks: {
+            links: {
+              ml: { calendars: 'calendars link' },
+            },
+          },
+          application: {
+            navigateToApp: vi.fn(),
+            getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/'),
+          },
         },
-      },
-      application: {
-        navigateToApp: jest.fn(),
-        getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/'),
-      },
-    },
-  }),
-  useNavigateToPath: () => jest.fn(),
-}));
+      }),
+      useNavigateToPath: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CalendarListsHeader', () => {
-  const refreshCalendars = jest.fn(() => {});
+  const refreshCalendars = vi.fn(() => {});
 
   const requiredProps = {
     totalCount: 3,

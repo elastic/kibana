@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { useHeathBarLinearGradient, useHealthHexCodes } from './gradient';
 
-jest.mock('@elastic/eui', () => ({
-  useEuiTheme: () => ({
-    euiTheme: {
-      colors: {
-        backgroundFilledSuccess: 'green',
-        backgroundLightWarning: 'yellow',
-        backgroundFilledDanger: 'red',
-      },
-    },
-  }),
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      useEuiTheme: () => ({
+        euiTheme: {
+          colors: {
+            backgroundFilledSuccess: 'green',
+            backgroundLightWarning: 'yellow',
+            backgroundFilledDanger: 'red',
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useHeathBarLinearGradient', () => {
   const healthHexCodes = useHealthHexCodes();

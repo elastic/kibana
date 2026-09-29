@@ -7,20 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 import { OrderByParamEditor } from './order_by';
 
 describe('OrderAggParamEditor component', () => {
-  let setValue: jest.Mock;
-  let setValidity: jest.Mock;
-  let setTouched: jest.Mock;
+  let setValue: Mock;
+  let setValidity: Mock;
+  let setTouched: Mock;
   let defaultProps: any;
 
   beforeEach(() => {
-    setValue = jest.fn();
-    setValidity = jest.fn();
-    setTouched = jest.fn();
+    setValue = vi.fn();
+    setValidity = vi.fn();
+    setTouched = vi.fn();
 
     defaultProps = {
       agg: {},

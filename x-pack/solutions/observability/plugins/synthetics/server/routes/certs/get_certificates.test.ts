@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as getAllMonitors from '../../saved_objects/synthetics_monitor/process_monitors';
 import * as getCerts from '../../queries/get_certs';
 import { attachCertMonitorSpaces, getSyntheticsCertsRoute } from './get_certificates';
@@ -16,7 +18,7 @@ const serverlessServer = { isElasticsearchServerless: true } as any;
 const statefulServer = { isElasticsearchServerless: false } as any;
 
 describe('getSyntheticsCertsRoute', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
   const soClient = savedObjectsClientMock.create();
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createStart().getClient();
 
@@ -27,13 +29,13 @@ describe('getSyntheticsCertsRoute', () => {
 
   it('returns empty set when no monitors are found and CCS is disabled', async () => {
     const route = getSyntheticsCertsRoute();
-    mockMonitorConfigRepository.getAll = jest.fn().mockReturnValue([]);
+    mockMonitorConfigRepository.getAll = vi.fn().mockReturnValue([]);
     expect(
       await route.handler({
         // @ts-expect-error partial implementation for testing
         request: { query: {} },
         // @ts-expect-error partial implementation for testing
-        syntheticsEsClient: jest.fn(),
+        syntheticsEsClient: vi.fn(),
         savedObjectClient: soClient,
         monitorConfigRepository: mockMonitorConfigRepository,
         server: serverlessServer,
@@ -63,7 +65,7 @@ describe('getSyntheticsCertsRoute', () => {
         },
       },
     ] as any;
-    const processMonitorsSpy = jest.spyOn(getAllMonitors, 'processMonitors').mockReturnValue({
+    const processMonitorsSpy = vi.spyOn(getAllMonitors, 'processMonitors').mockReturnValue({
       // @ts-expect-error partial implementation for testing
       enableMonitorQueryIds: ['test-id'],
     });
@@ -84,18 +86,18 @@ describe('getSyntheticsCertsRoute', () => {
         },
       ],
     };
-    const getSyntheticsCertsSpy = jest
+    const getSyntheticsCertsSpy = vi
       .spyOn(getCerts, 'getSyntheticsCerts')
       // @ts-expect-error partial implementation for testing
       .mockReturnValue(getCertsResult);
     const route = getSyntheticsCertsRoute();
-    const getAll = jest.fn().mockReturnValue(getMonitorsResult);
+    const getAll = vi.fn().mockReturnValue(getMonitorsResult);
     const result = await route.handler({
       // @ts-expect-error partial implementation for testing
       request: { query: {} },
       // @ts-expect-error partial implementation for testing
-      syntheticsEsClient: jest.fn(),
-      savedObjectClient: jest.fn(),
+      syntheticsEsClient: vi.fn(),
+      savedObjectClient: vi.fn(),
       // @ts-expect-error partial implementation for testing
       monitorConfigRepository: { getAll },
       server: serverlessServer,
@@ -112,7 +114,7 @@ describe('getSyntheticsCertsRoute', () => {
     // Remote-only monitors have no local SO; the search itself surfaces them
     // via the route wrapper's CCS-expanded index pattern.
     // @ts-expect-error partial implementation for testing
-    jest.spyOn(getAllMonitors, 'processMonitors').mockReturnValue({
+    vi.spyOn(getAllMonitors, 'processMonitors').mockReturnValue({
       enabledMonitorQueryIds: [],
     });
     const remoteOnlyCerts = {
@@ -134,17 +136,17 @@ describe('getSyntheticsCertsRoute', () => {
         },
       ],
     };
-    const getSyntheticsCertsSpy = jest
+    const getSyntheticsCertsSpy = vi
       .spyOn(getCerts, 'getSyntheticsCerts')
       // @ts-expect-error partial implementation for testing
       .mockReturnValue(remoteOnlyCerts);
     const route = getSyntheticsCertsRoute();
-    const getAll = jest.fn().mockReturnValue([]);
+    const getAll = vi.fn().mockReturnValue([]);
     const result = await route.handler({
       // @ts-expect-error partial implementation for testing
       request: { query: { remoteNames: 'cluster1,cluster2' } },
       // @ts-expect-error partial implementation for testing
-      syntheticsEsClient: jest.fn(),
+      syntheticsEsClient: vi.fn(),
       // @ts-expect-error partial implementation for testing
       monitorConfigRepository: { getAll },
       server: statefulServer,
@@ -164,7 +166,7 @@ describe('getSyntheticsCertsRoute', () => {
 
   it('forwards showFromAllSpaces to getAll and the certs query', async () => {
     // @ts-expect-error partial implementation for testing
-    jest.spyOn(getAllMonitors, 'processMonitors').mockReturnValue({
+    vi.spyOn(getAllMonitors, 'processMonitors').mockReturnValue({
       enabledMonitorQueryIds: ['other-id'],
     });
     const getCertsResult = {
@@ -184,11 +186,11 @@ describe('getSyntheticsCertsRoute', () => {
         },
       ],
     };
-    const getSyntheticsCertsSpy = jest
+    const getSyntheticsCertsSpy = vi
       .spyOn(getCerts, 'getSyntheticsCerts')
       // @ts-expect-error partial implementation for testing
       .mockReturnValue(getCertsResult);
-    const getAll = jest.fn().mockReturnValue([
+    const getAll = vi.fn().mockReturnValue([
       {
         attributes: { config_id: 'other-id' },
         namespaces: ['team-a'],
@@ -199,7 +201,7 @@ describe('getSyntheticsCertsRoute', () => {
       // @ts-expect-error partial implementation for testing
       request: { query: { showFromAllSpaces: true } },
       // @ts-expect-error partial implementation for testing
-      syntheticsEsClient: jest.fn(),
+      syntheticsEsClient: vi.fn(),
       // @ts-expect-error partial implementation for testing
       monitorConfigRepository: { getAll },
       server: serverlessServer,

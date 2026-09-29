@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import buffer from 'buffer';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -30,27 +33,27 @@ import {
 import { getIndexDetails } from './core/get_index_details';
 import { isMemoryConstrained } from './low_memory';
 
-jest.mock('./low_memory', () => {
-  const actual = jest.requireActual('./low_memory');
+vi.mock('./low_memory', async () => {
+  const actual = (await vi.importActual('./low_memory'));
   return {
     ...actual,
-    isMemoryConstrained: jest.fn(() => false),
+    isMemoryConstrained: vi.fn(() => false),
   };
 });
 
-jest.mock('./core', () => {
-  const actual = jest.requireActual('./core');
+vi.mock('./core', async () => {
+  const actual = (await vi.importActual('./core'));
   return {
     ...actual,
-    createIndexMap: jest.fn(actual.createIndexMap),
+    createIndexMap: vi.fn(actual.createIndexMap),
   };
 });
 
-jest.mock('./core/get_index_details', () => {
-  const actual = jest.requireActual('./core/get_index_details');
+vi.mock('./core/get_index_details', async () => {
+  const actual = (await vi.importActual('./core/get_index_details'));
   return {
     ...actual,
-    getIndexDetails: jest.fn(() =>
+    getIndexDetails: vi.fn(() =>
       Promise.resolve({
         mappings: {},
         aliases: ['.my_index', '.my_index_9.1.0'],
@@ -79,22 +82,22 @@ const V2_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
   },
 ];
 
-jest.mock('./run_resilient_migrator', () => {
-  const actual = jest.requireActual('./run_resilient_migrator');
+vi.mock('./run_resilient_migrator', async () => {
+  const actual = (await vi.importActual('./run_resilient_migrator'));
   return {
     ...actual,
-    runResilientMigrator: jest.fn(() => Promise.resolve(V2_SUCCESSFUL_MIGRATION_RESULT)),
+    runResilientMigrator: vi.fn(() => Promise.resolve(V2_SUCCESSFUL_MIGRATION_RESULT)),
   };
 });
 
 const nextTick = () => new Promise((resolve) => setImmediate(resolve));
-const mockCreateIndexMap = createIndexMap as jest.MockedFunction<typeof createIndexMap>;
-const mockRunResilientMigrator = runResilientMigrator as jest.MockedFunction<
+const mockCreateIndexMap = createIndexMap as MockedFunction<typeof createIndexMap>;
+const mockRunResilientMigrator = runResilientMigrator as MockedFunction<
   typeof runResilientMigrator
 >;
 
-const mockGetIndexDetails = getIndexDetails as jest.MockedFunction<typeof getIndexDetails>;
-const mockIsMemoryConstrained = isMemoryConstrained as jest.MockedFunction<
+const mockGetIndexDetails = getIndexDetails as MockedFunction<typeof getIndexDetails>;
+const mockIsMemoryConstrained = isMemoryConstrained as MockedFunction<
   typeof isMemoryConstrained
 >;
 
@@ -311,7 +314,7 @@ describe('runV2Migration', () => {
 
 const mockOptions = (kibanaVersion = '8.2.3'): RunV2MigrationOpts => {
   const mockedClient = elasticsearchClientMock.createElasticsearchClient();
-  (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
+  (mockedClient as any).child = vi.fn().mockImplementation(() => mockedClient);
 
   const typeRegistry = savedObjectTypeRegistryMock;
 
@@ -351,6 +354,6 @@ const mockOptions = (kibanaVersion = '8.2.3'): RunV2MigrationOpts => {
     mappingProperties: buildTypesMappings(typeRegistry.getAllTypes()),
     esCapabilities: elasticsearchServiceMock.createCapabilities(),
     kibanaVersionCheck: '8.18.0',
-    meter: { record: jest.fn() },
+    meter: { record: vi.fn() },
   };
 };

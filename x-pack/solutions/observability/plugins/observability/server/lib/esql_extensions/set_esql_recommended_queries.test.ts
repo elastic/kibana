@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { setEsqlRecommendedQueries } from './set_esql_recommended_queries';
 import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 
 describe('setEsqlRecommendedQueries', () => {
-  let mockEsqlPlugin: jest.Mocked<ESQLSetup>;
+  let mockEsqlPlugin: Mocked<ESQLSetup>;
   let mockRegistry: {
-    setRecommendedQueries: jest.Mock;
-    setRecommendedFields: jest.Mock;
+    setRecommendedQueries: Mock;
+    setRecommendedFields: Mock;
   };
 
   beforeEach(() => {
     mockRegistry = {
-      setRecommendedQueries: jest.fn(),
-      setRecommendedFields: jest.fn(),
+      setRecommendedQueries: vi.fn(),
+      setRecommendedFields: vi.fn(),
     };
     mockEsqlPlugin = {
-      getExtensionsRegistry: jest.fn().mockReturnValue(mockRegistry),
-    } as unknown as jest.Mocked<ESQLSetup>;
+      getExtensionsRegistry: vi.fn().mockReturnValue(mockRegistry),
+    } as unknown as Mocked<ESQLSetup>;
   });
 
   it('registers observability recommended queries with the oblt scope', () => {

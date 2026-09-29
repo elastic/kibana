@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { clearAlertFlappingHistory } from './clear_alert_flapping_history';
@@ -45,7 +47,7 @@ describe('clearAlertFlappingHistory()', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should call updateByQuery with provided rule id and index', async () => {

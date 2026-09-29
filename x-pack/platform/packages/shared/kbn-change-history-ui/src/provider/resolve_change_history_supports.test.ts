@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryPendingChange } from '../types/change_history_pending_change';
 import { resolveChangeHistorySupports } from './resolve_change_history_supports';
@@ -18,19 +20,19 @@ const pendingChange: ChangeHistoryPendingChange = {
 };
 
 const adapterWithRestore: ChangeHistoryAdapter = {
-  listChanges: jest.fn(),
-  getChange: jest.fn(),
-  restoreChange: jest.fn(),
+  listChanges: vi.fn(),
+  getChange: vi.fn(),
+  restoreChange: vi.fn(),
 };
 
 const adapterWithoutRestore: ChangeHistoryAdapter = {
-  listChanges: jest.fn(),
-  getChange: jest.fn(),
+  listChanges: vi.fn(),
+  getChange: vi.fn(),
 };
 
 const adapterWithPendingChange: ChangeHistoryAdapter = {
-  listChanges: jest.fn(),
-  getChange: jest.fn(),
+  listChanges: vi.fn(),
+  getChange: vi.fn(),
   getPendingChange: () => pendingChange,
 };
 

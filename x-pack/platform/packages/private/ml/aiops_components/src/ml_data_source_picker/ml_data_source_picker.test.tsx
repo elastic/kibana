@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { MlDataSourcePicker } from './ml_data_source_picker';
 import type { MlDataSourcePickerServices } from './ml_data_source_picker';
 
-const mockHistoryReplace = jest.fn();
-jest.mock('react-router-dom', () => ({
-  useHistory: jest.fn(() => ({ replace: mockHistoryReplace })),
-  useLocation: jest.fn(() => ({ pathname: '/jobs/new_job/step/data_view', search: '' })),
-}));
+const mockHistoryReplace = vi.fn();
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: vi.fn(() => ({ replace: mockHistoryReplace })),
+      useLocation: vi.fn(() => ({ pathname: '/jobs/new_job/step/data_view', search: '' })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let capturedDataViewPickerProps: Record<string, any> = {};
 const MockDataViewPicker = (props: any) => {
@@ -27,26 +32,29 @@ const MockDataViewPicker = (props: any) => {
   );
 };
 
-jest.mock('./ml_open_session_flyout', () => ({
-  MlOpenSessionFlyout: (props: any) => {
-    return (
-      <div data-test-subj="mockOpenSessionFlyout">
-        <button onClick={props.onClose} data-test-subj="closeSessionPanel">
-          Close
-        </button>
-        <button
-          onClick={() => props.onOpenSavedSearch('saved-search-id-1')}
-          data-test-subj="openSavedSearch"
-        >
-          Open Saved Search
-        </button>
-      </div>
-    );
-  },
-}));
+vi.mock('./ml_open_session_flyout', () => {
+      const mocked = {
+      MlOpenSessionFlyout: (props: any) => {
+        return (
+          <div data-test-subj="mockOpenSessionFlyout">
+            <button onClick={props.onClose} data-test-subj="closeSessionPanel">
+              Close
+            </button>
+            <button
+              onClick={() => props.onOpenSavedSearch('saved-search-id-1')}
+              data-test-subj="openSavedSearch"
+            >
+              Open Saved Search
+            </button>
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetIdsWithTitle = jest.fn().mockResolvedValue([]);
-const mockOpenEditor = jest.fn().mockResolvedValue(() => {});
+const mockGetIdsWithTitle = vi.fn().mockResolvedValue([]);
+const mockOpenEditor = vi.fn().mockResolvedValue(() => {});
 
 const buildServices = (
   overrides?: Partial<MlDataSourcePickerServices>
@@ -54,10 +62,10 @@ const buildServices = (
   ({
     dataViews: { getIdsWithTitle: mockGetIdsWithTitle },
     dataViewEditor: {
-      userPermissions: { editDataView: jest.fn(() => true) },
+      userPermissions: { editDataView: vi.fn(() => true) },
     },
     dataViewFieldEditor: { openEditor: mockOpenEditor },
-    http: { basePath: { prepend: jest.fn((p: string) => p) } },
+    http: { basePath: { prepend: vi.fn((p: string) => p) } },
     application: { capabilities: {} },
     contentManagement: { client: {} },
     uiSettings: {},
@@ -80,7 +88,7 @@ const renderComponent = (props: { currentDataView: any; services?: MlDataSourceP
 
 describe('MlDataSourcePicker', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedDataViewPickerProps = {};
   });
 
@@ -97,7 +105,7 @@ describe('MlDataSourcePicker', () => {
   it('renders DataViewPicker with the data view name when currentDataView is provided', async () => {
     const mockDataView = {
       id: 'dv-1',
-      getName: jest.fn(() => 'My Data View'),
+      getName: vi.fn(() => 'My Data View'),
     };
 
     await act(async () => {
@@ -175,7 +183,7 @@ describe('MlDataSourcePicker', () => {
   it('onAddField is defined and calls dataViewFieldEditor.openEditor when canEditDataView=true and currentDataView is set', async () => {
     const mockDataView = {
       id: 'dv-1',
-      getName: jest.fn(() => 'My Data View'),
+      getName: vi.fn(() => 'My Data View'),
     };
 
     await act(async () => {
@@ -197,12 +205,12 @@ describe('MlDataSourcePicker', () => {
   it('onAddField is undefined when canEditDataView=false', async () => {
     const mockDataView = {
       id: 'dv-1',
-      getName: jest.fn(() => 'My Data View'),
+      getName: vi.fn(() => 'My Data View'),
     };
 
     const services = buildServices({
       dataViewEditor: {
-        userPermissions: { editDataView: jest.fn(() => false) },
+        userPermissions: { editDataView: vi.fn(() => false) },
       },
     } as any);
 

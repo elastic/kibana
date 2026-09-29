@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreStart, Logger } from '@kbn/core/server';
 
 import { invalidatePipelineApiKey } from '.';
 
-const invalidateAsInternalUser = jest.fn();
+const invalidateAsInternalUser = vi.fn();
 
 const createCoreStart = (): CoreStart =>
   ({
@@ -24,15 +26,15 @@ const createCoreStart = (): CoreStart =>
 
 const createLogger = (): Logger =>
   ({
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 describe('invalidatePipelineApiKey', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     invalidateAsInternalUser.mockResolvedValue({ invalidated_api_keys: ['granted-id'] });
   });

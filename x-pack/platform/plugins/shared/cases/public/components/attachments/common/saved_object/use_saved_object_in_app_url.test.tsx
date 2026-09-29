@@ -5,26 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSavedObjectInAppUrl, useSavedObjectInAppUrls } from './use_saved_object_in_app_url';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
-const buildHttp = (post: jest.Mock, prepend: (p: string) => string = (p) => `/base${p}`) => ({
+const buildHttp = (post: Mock, prepend: (p: string) => string = (p) => `/base${p}`) => ({
   services: { http: { post, basePath: { prepend } } },
 });
 
 describe('useSavedObjectInAppUrls', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls _bulk_get with the requested type+ids and returns prepended hrefs', async () => {
-    const post = jest.fn().mockResolvedValue([
+    const post = vi.fn().mockResolvedValue([
       { id: 'a', type: 'dashboard', meta: { inAppUrl: { path: '/app/dashboards#/a' } } },
       { id: 'b', type: 'dashboard', meta: { inAppUrl: { path: '/app/dashboards#/b' } } },
     ]);
@@ -52,7 +55,7 @@ describe('useSavedObjectInAppUrls', () => {
   });
 
   it('maps an entry to undefined when the SO has no inAppUrl', async () => {
-    const post = jest.fn().mockResolvedValue([{ id: 'a', type: 'dashboard', meta: {} }]);
+    const post = vi.fn().mockResolvedValue([{ id: 'a', type: 'dashboard', meta: {} }]);
     useKibanaMock.mockReturnValue(buildHttp(post));
 
     const { result } = renderHook(() => useSavedObjectInAppUrls('dashboard', ['a']), {
@@ -62,7 +65,7 @@ describe('useSavedObjectInAppUrls', () => {
   });
 
   it('does not refetch when the id set is unchanged (order ignored)', async () => {
-    const post = jest.fn().mockResolvedValue([]);
+    const post = vi.fn().mockResolvedValue([]);
     useKibanaMock.mockReturnValue(buildHttp(post));
 
     const { rerender } = renderHook(({ ids }) => useSavedObjectInAppUrls('dashboard', ids), {
@@ -76,7 +79,7 @@ describe('useSavedObjectInAppUrls', () => {
   });
 
   it('refetches when a new id appears', async () => {
-    const post = jest.fn().mockResolvedValue([]);
+    const post = vi.fn().mockResolvedValue([]);
     useKibanaMock.mockReturnValue(buildHttp(post));
 
     const { rerender } = renderHook(({ ids }) => useSavedObjectInAppUrls('dashboard', ids), {
@@ -90,7 +93,7 @@ describe('useSavedObjectInAppUrls', () => {
   });
 
   it('swallows fetch errors and leaves the map empty', async () => {
-    const post = jest.fn().mockRejectedValue(new Error('nope'));
+    const post = vi.fn().mockRejectedValue(new Error('nope'));
     useKibanaMock.mockReturnValue(buildHttp(post));
 
     const { result } = renderHook(() => useSavedObjectInAppUrls('dashboard', ['a']), {
@@ -103,11 +106,11 @@ describe('useSavedObjectInAppUrls', () => {
 
 describe('useSavedObjectInAppUrl', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the resolved URL for a single id', async () => {
-    const post = jest
+    const post = vi
       .fn()
       .mockResolvedValue([
         { id: 'a', type: 'dashboard', meta: { inAppUrl: { path: '/app/dashboards#/a' } } },
@@ -121,7 +124,7 @@ describe('useSavedObjectInAppUrl', () => {
   });
 
   it('returns undefined for a falsy id without making a request', () => {
-    const post = jest.fn();
+    const post = vi.fn();
     useKibanaMock.mockReturnValue(buildHttp(post));
 
     const { result } = renderHook(() => useSavedObjectInAppUrl('dashboard', undefined), {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -189,7 +191,7 @@ const invertedRawValueMap: InvertedRawValueMap = new Map(
 const buildComponent = (layer: DataLayerConfig): React.ComponentType<LegendActionProps> =>
   getLegendAction(
     [layer],
-    jest.fn(),
+    vi.fn(),
     [legendCellValueActions],
     {
       first: {
@@ -363,7 +365,7 @@ describe('getLegendAction', () => {
     };
     const Component = getLegendAction(
       [{ ...sampleLayer, table: tableWithComputedDateColumn }],
-      jest.fn(),
+      vi.fn(),
       [[]],
       {
         first: {

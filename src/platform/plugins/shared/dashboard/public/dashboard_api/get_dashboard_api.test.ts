@@ -12,27 +12,31 @@ import { getDashboardApi } from './get_dashboard_api';
 
 describe('initializeSettingsManager', () => {
   describe('anyStateChange$', () => {
-    test('should not emit on subscribe and emit when any state changes', (done) => {
-      const { api } = getDashboardApi({
-        incomingEmbeddables: [],
-        initialState: DEFAULT_DASHBOARD_STATE,
-      });
-      api.anyStateChange$.subscribe(() => {
-        try {
-          const { title } = api.getSettings();
-          expect(title).toBe('Updated title');
-        } catch (error) {
-          // title assertion fails when
-          // anyStateChange$ emits on subscribe
-          done(error);
-          return;
-        }
-        done();
-      });
-      api.setSettings({
-        ...api.getSettings(),
-        title: 'Updated title',
-      });
-    });
+    test('should not emit on subscribe and emit when any state changes', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              const { api } = getDashboardApi({
+                incomingEmbeddables: [],
+                initialState: DEFAULT_DASHBOARD_STATE,
+              });
+              api.anyStateChange$.subscribe(() => {
+                try {
+                  const { title } = api.getSettings();
+                  expect(title).toBe('Updated title');
+                } catch (error) {
+                  // title assertion fails when
+                  // anyStateChange$ emits on subscribe
+                  done(error);
+                  return;
+                }
+                done();
+              });
+              api.setSettings({
+                ...api.getSettings(),
+                title: 'Updated title',
+              });
+            
+        }));
   });
 });

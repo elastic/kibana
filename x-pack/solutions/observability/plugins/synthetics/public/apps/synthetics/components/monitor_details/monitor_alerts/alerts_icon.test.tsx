@@ -5,19 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MonitorAlertsIcon } from './alerts_icon';
 
-const mockUrlParams = jest.fn();
-jest.mock('../../../hooks', () => ({
-  useGetUrlParams: () => mockUrlParams(),
-}));
+const mockUrlParams = vi.fn();
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useGetUrlParams: () => mockUrlParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchActiveAlerts = jest.fn();
-jest.mock('../hooks/use_fetch_active_alerts', () => ({
-  useFetchActiveAlerts: () => mockUseFetchActiveAlerts(),
-}));
+const mockUseFetchActiveAlerts = vi.fn();
+vi.mock('../hooks/use_fetch_active_alerts', () => {
+      const mocked = {
+      useFetchActiveAlerts: () => mockUseFetchActiveAlerts(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MonitorAlertsIcon', () => {
   beforeEach(() => {
@@ -25,7 +33,7 @@ describe('MonitorAlertsIcon', () => {
     mockUseFetchActiveAlerts.mockReturnValue({ numberOfActiveAlerts: 0 });
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('renders nothing when there are no active alerts (local monitor)', () => {
     const { container } = render(<MonitorAlertsIcon />);

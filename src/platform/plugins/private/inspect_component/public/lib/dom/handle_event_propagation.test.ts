@@ -7,29 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { handleEventPropagation } from './handle_event_propagation';
 
 describe('handleEventPropagation', () => {
-  let callbackMock: jest.Mock;
+  let callbackMock: Mock;
   let eventMock: MouseEvent;
   let targetElementMock: HTMLElement;
 
   beforeEach(() => {
-    callbackMock = jest.fn();
+    callbackMock = vi.fn();
     targetElementMock = {
-      hasAttribute: jest.fn().mockReturnValue(false),
+      hasAttribute: vi.fn().mockReturnValue(false),
     } as unknown as HTMLElement;
 
     eventMock = {
-      stopPropagation: jest.fn(),
-      preventDefault: jest.fn(),
+      stopPropagation: vi.fn(),
+      preventDefault: vi.fn(),
       target: targetElementMock,
       type: 'pointerdown',
     } as unknown as MouseEvent;
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should call stopPropagation and preventDefault on the event', () => {
@@ -52,7 +55,7 @@ describe('handleEventPropagation', () => {
   });
 
   it('should call callback when target element is disabled', () => {
-    (targetElementMock.hasAttribute as jest.Mock).mockImplementation((attr: string) => {
+    (targetElementMock.hasAttribute as Mock).mockImplementation((attr: string) => {
       return attr === 'disabled';
     });
 

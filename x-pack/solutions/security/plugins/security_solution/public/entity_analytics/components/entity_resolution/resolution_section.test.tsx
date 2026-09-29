@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -13,22 +16,25 @@ import { ResolutionSection } from './resolution_section';
 import { RESOLUTION_SECTION_TEST_ID, RESOLUTION_EMPTY_STATE_TEST_ID } from './test_ids';
 import { useResolutionGroup } from './hooks/use_resolution_group';
 
-jest.mock('./hooks/use_resolution_group');
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: jest.fn() }),
-}));
+vi.mock('./hooks/use_resolution_group');
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: () => ({ openFlyout: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseResolutionGroup = useResolutionGroup as jest.Mock;
+const mockUseResolutionGroup = useResolutionGroup as Mock;
 
 describe('ResolutionSection', () => {
   const defaultProps = {
     entityId: 'alice-id',
     entityType: EntityType.user,
     scopeId: 'test-scope',
-    openDetailsPanel: jest.fn(),
+    openDetailsPanel: vi.fn(),
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders accordion with resolution group table', () => {
     mockUseResolutionGroup.mockReturnValue({

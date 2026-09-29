@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -28,26 +31,26 @@ import { DataQualityPanel } from '@kbn/ecs-data-quality-dashboard';
 
 const mockedUseKibana = mockUseKibana();
 
-jest.mock('@kbn/ecs-data-quality-dashboard', () => {
-  const actual = jest.requireActual('@kbn/ecs-data-quality-dashboard');
-  const ReactActual = jest.requireActual('react');
+vi.mock('@kbn/ecs-data-quality-dashboard', async () => {
+  const actual = (await vi.importActual('@kbn/ecs-data-quality-dashboard'));
+  const ReactActual = require('react');
 
   return {
     ...actual,
-    DataQualityPanel: jest.fn((props: React.ComponentProps<typeof actual.DataQualityPanel>) =>
+    DataQualityPanel: vi.fn((props: React.ComponentProps<typeof actual.DataQualityPanel>) =>
       ReactActual.createElement(actual.DataQualityPanel, props)
     ),
   };
 });
 
-jest.mock('../../common/components/empty_prompt');
-jest.mock('../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../common/lib/kibana');
+vi.mock('../../common/components/empty_prompt');
+vi.mock('../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../common/lib/kibana'));
 
   const mockKibanaServices = {
     get: () => ({
       http: {
-        fetch: jest.fn().mockImplementation((path: string, options: HttpFetchOptions) => {
+        fetch: vi.fn().mockImplementation((path: string, options: HttpFetchOptions) => {
           if (
             path.startsWith('/internal/ecs_data_quality_dashboard/results_latest') &&
             options.method === 'GET'
@@ -63,7 +66,7 @@ jest.mock('../../common/lib/kibana', () => {
   return {
     ...original,
     KibanaServices: mockKibanaServices,
-    useKibana: jest.fn(),
+    useKibana: vi.fn(),
     useUiSetting$: () => ['0,0.[000]'],
   };
 });
@@ -72,30 +75,33 @@ const defaultUseSignalIndexReturn = {
   loading: false,
   signalIndexName: '.alerts-security.alerts-default',
 };
-const mockUseSignalIndex = jest.fn(() => defaultUseSignalIndexReturn);
-jest.mock('../../detections/containers/detection_engine/alerts/use_signal_index', () => ({
-  useSignalIndex: () => mockUseSignalIndex(),
-}));
+const mockUseSignalIndex = vi.fn(() => defaultUseSignalIndexReturn);
+vi.mock('../../detections/containers/detection_engine/alerts/use_signal_index', () => {
+      const mocked = {
+      useSignalIndex: () => mockUseSignalIndex(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DataQuality', () => {
   const defaultIlmPhases = 'hotwarmunmanaged';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       ...mockedUseKibana,
       services: {
         ...mockedUseKibana.services,
         cases: {
           api: {
-            getRelatedCases: jest.fn(),
+            getRelatedCases: vi.fn(),
           },
           hooks: {
-            useCasesAddToNewCaseFlyout: jest.fn(),
+            useCasesAddToNewCaseFlyout: vi.fn(),
           },
           helpers: {
-            canUseCases: jest.fn().mockReturnValue({
+            canUseCases: vi.fn().mockReturnValue({
               all: false,
               create: false,
               read: true,
@@ -111,7 +117,7 @@ describe('DataQuality', () => {
 
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);
 
-    jest
+    vi
       .mocked(useDataView)
       .mockReturnValue(withIndices(['auditbeat-*', 'logs-*', 'packetbeat-*']));
   });
@@ -152,7 +158,7 @@ describe('DataQuality', () => {
     const alertsIndex = '.alerts-security.alerts-default';
 
     beforeEach(async () => {
-      jest.mocked(useDataView).mockReturnValue(withIndices(['logs-*', alertsIndex, 'auditbeat-*']));
+      vi.mocked(useDataView).mockReturnValue(withIndices(['logs-*', alertsIndex, 'auditbeat-*']));
 
       render(
         <KibanaRenderContextProvider {...mockedUseKibana.services}>
@@ -170,7 +176,7 @@ describe('DataQuality', () => {
     });
 
     test('passes each pattern once to DataQualityPanel', () => {
-      const MockDataQualityPanel = jest.mocked(DataQualityPanel);
+      const MockDataQualityPanel = vi.mocked(DataQualityPanel);
       expect(MockDataQualityPanel.mock.calls[0][0].patterns).toEqual([
         alertsIndex,
         'logs-*',
@@ -181,7 +187,7 @@ describe('DataQuality', () => {
 
   describe('when indices exist, but dataView is still loading', () => {
     beforeEach(async () => {
-      jest.mocked(useDataView).mockReturnValue({
+      vi.mocked(useDataView).mockReturnValue({
         dataView: getMockDataViewWithMatchedIndices(['auditbeat-*', 'logs-*', 'packetbeat-*']),
         status: 'loading',
       });
@@ -253,7 +259,7 @@ describe('DataQuality', () => {
   describe('when indices do NOT exist, and loading is complete', () => {
     beforeEach(async () => {
       mockUseSignalIndex.mockReturnValue({ ...defaultUseSignalIndexReturn, loading: false });
-      jest.mocked(useDataView).mockImplementation(defaultImplementation);
+      vi.mocked(useDataView).mockImplementation(defaultImplementation);
 
       render(
         <KibanaRenderContextProvider {...mockedUseKibana.services}>
@@ -288,7 +294,7 @@ describe('DataQuality', () => {
   describe('when indices do NOT exist, but dataview is still loading', () => {
     beforeEach(async () => {
       mockUseSignalIndex.mockReturnValue({ ...defaultUseSignalIndexReturn, loading: false });
-      jest.mocked(useDataView).mockReturnValue({
+      vi.mocked(useDataView).mockReturnValue({
         dataView: getMockDataView(),
         status: 'loading',
       });
@@ -359,19 +365,19 @@ describe('DataQuality', () => {
 
   describe('when ILMEnabled is false', () => {
     beforeEach(async () => {
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         ...mockedUseKibana,
         services: {
           ...mockedUseKibana.services,
           cases: {
             api: {
-              getRelatedCases: jest.fn(),
+              getRelatedCases: vi.fn(),
             },
             hooks: {
-              useCasesAddToNewCaseFlyout: jest.fn(),
+              useCasesAddToNewCaseFlyout: vi.fn(),
             },
             helpers: {
-              canUseCases: jest.fn().mockReturnValue({
+              canUseCases: vi.fn().mockReturnValue({
                 all: false,
                 create: false,
                 read: true,

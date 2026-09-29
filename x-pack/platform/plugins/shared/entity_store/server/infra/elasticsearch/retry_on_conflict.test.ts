@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { retryOnConflict } from './retry_on_conflict';
@@ -28,14 +30,14 @@ describe('retryOnConflict', () => {
   });
 
   it('retries on saved objects conflict errors', async () => {
-    const fn = jest.fn().mockRejectedValueOnce(soConflictError()).mockResolvedValue('ok');
+    const fn = vi.fn().mockRejectedValueOnce(soConflictError()).mockResolvedValue('ok');
 
     await expect(retryOnConflict(fn, fastRetries)).resolves.toBe('ok');
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
   it('retries on elasticsearch 409 responses', async () => {
-    const fn = jest.fn().mockRejectedValueOnce(esConflictError()).mockResolvedValue('ok');
+    const fn = vi.fn().mockRejectedValueOnce(esConflictError()).mockResolvedValue('ok');
 
     await expect(retryOnConflict(fn, fastRetries)).resolves.toBe('ok');
     expect(fn).toHaveBeenCalledTimes(2);
@@ -43,14 +45,14 @@ describe('retryOnConflict', () => {
 
   it('rejects with the original error on non-conflict failures without retrying', async () => {
     const failure = new Error('boom');
-    const fn = jest.fn().mockRejectedValue(failure);
+    const fn = vi.fn().mockRejectedValue(failure);
 
     await expect(retryOnConflict(fn, fastRetries)).rejects.toBe(failure);
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
   it('gives up after the configured retries and rejects with the conflict error', async () => {
-    const fn = jest.fn().mockRejectedValue(soConflictError());
+    const fn = vi.fn().mockRejectedValue(soConflictError());
 
     await expect(retryOnConflict(fn, { ...fastRetries, retries: 2 })).rejects.toThrow('conflict');
     expect(fn).toHaveBeenCalledTimes(3);

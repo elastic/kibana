@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { AttacksViewOptionsPopover } from './attacks_view_options_popover';
@@ -12,34 +15,37 @@ import { TABLE_SECTION_TEST_ID } from './table_section';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock(
+vi.mock(
   '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management',
-  () => ({
-    AnonymizationSettingsManagement: ({ onClose }: { onClose: () => void }) => (
-      <div data-test-subj="anonymizationSettingsModal">
-        <button type="button" data-test-subj="closeAnonymizationSettingsModal" onClick={onClose}>
-          {'Close'}
-        </button>
-      </div>
-    ),
-  })
+  () => {
+      const mocked = {
+        AnonymizationSettingsManagement: ({ onClose }: { onClose: () => void }) => (
+          <div data-test-subj="anonymizationSettingsModal">
+            <button type="button" data-test-subj="closeAnonymizationSettingsModal" onClick={onClose}>
+              {'Close'}
+            </button>
+          </div>
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 describe('AttacksViewOptionsPopover', () => {
   const defaultProps = {
     showAnonymized: false,
-    onToggleShowAnonymized: jest.fn(),
+    onToggleShowAnonymized: vi.fn(),
     showAttacksOnly: true,
-    onToggleShowAttacksOnly: jest.fn(),
+    onToggleShowAttacksOnly: vi.fn(),
   };
 
-  const reportEvent = jest.fn();
+  const reportEvent = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: {
         telemetry: {
           reportEvent,

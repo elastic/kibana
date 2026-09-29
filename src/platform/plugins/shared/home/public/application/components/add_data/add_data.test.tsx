@@ -7,41 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { AddData } from './add_data';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import type { ApplicationStart } from '@kbn/core/public';
 
-jest.mock('../app_navigation_handler', () => {
+vi.mock('../app_navigation_handler', () => {
   return {
-    createAppNavigationHandler: jest.fn(() => () => {}),
+    createAppNavigationHandler: vi.fn(() => () => {}),
   };
 });
 
-jest.mock('../../kibana_services', () => ({
-  getServices: jest.fn().mockReturnValue({
-    trackUiMetric: jest.fn(),
-    addDataService: {
-      getCloudConnectStatusHook: jest.fn(() => () => ({
-        isLoading: false,
-        isCloudConnected: false,
-      })),
-    },
-    notifications: {
-      tours: { isEnabled: jest.fn().mockReturnValue(true) },
-    },
-  }),
-}));
+vi.mock('../../kibana_services', () => {
+      const mocked = {
+      getServices: vi.fn().mockReturnValue({
+        trackUiMetric: vi.fn(),
+        addDataService: {
+          getCloudConnectStatusHook: vi.fn(() => () => ({
+            isLoading: false,
+            isCloudConnected: false,
+          })),
+        },
+        notifications: {
+          tours: { isEnabled: vi.fn().mockReturnValue(true) },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 const applicationStartMock = {
   capabilities: { navLinks: { integrations: true } },
 } as unknown as ApplicationStart;
 
-const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
+const addBasePathMock = vi.fn((path: string) => (path ? path : 'path'));
 
 const applicationWithCloudConnectMock = {
   capabilities: { navLinks: { integrations: true }, cloudConnect: { show: true } },
@@ -60,9 +65,8 @@ describe('AddData', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('hides SetupCloudConnect when hideAnnouncements is true', () => {
-    jest
-      .requireMock('../../kibana_services')
+  test('hides SetupCloudConnect when hideAnnouncements is true', async () => {
+    (await vi.importMock('../../kibana_services'))
       .getServices()
       .notifications.tours.isEnabled.mockReturnValueOnce(false);
     const component = shallowWithIntl(

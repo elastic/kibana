@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
@@ -12,7 +14,7 @@ import { TestProviders } from '../../common/mock';
 import { LinkIcon } from '.';
 
 describe('LinkIcon', () => {
-  const onClick = jest.fn;
+  const onClick = vi.fn;
 
   test('it renders', () => {
     const wrapper = shallow(

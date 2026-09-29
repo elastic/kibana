@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SelectionOption } from '@kbn/workflows';
 import { createCreateCaseFromTemplateStepDefinition } from './create_case_from_template';
 import { getCaseConfigure } from '../containers/configure/api';
 import type { Owner } from '../../common/bundled-types.gen';
 import type { CasesConfigurationUI } from '../../common/ui';
 
-jest.mock('../containers/configure/api', () => ({
-  getCaseConfigure: jest.fn(),
-}));
+vi.mock('../containers/configure/api', () => {
+      const mocked = {
+      getCaseConfigure: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('createCreateCaseFromTemplateStepDefinition', () => {
-  const getCaseConfigureMock = jest.mocked(getCaseConfigure);
+  const getCaseConfigureMock = vi.mocked(getCaseConfigure);
 
   const createSelectionContext = (owner?: Owner | string) => ({
     stepType: 'cases.createCaseFromTemplate' as const,

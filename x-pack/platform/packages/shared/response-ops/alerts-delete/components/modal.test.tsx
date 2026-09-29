@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AlertDeleteModal } from './modal';
@@ -17,9 +19,12 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
-  useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
-}));
+vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {
+      const mocked = {
+      useUiSetting: vi.fn().mockImplementation((_, defaultValue) => defaultValue),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const lastRunDate = '2025-10-01T02:10:23.000Z';
 const mockHttpGet = ({ lastRun = lastRunDate, affectedAlertCount = 0 }) => {
@@ -36,7 +41,7 @@ const mockHttpGet = ({ lastRun = lastRunDate, affectedAlertCount = 0 }) => {
 };
 
 describe('AlertDelete Modal', () => {
-  const closeModalMock = jest.fn();
+  const closeModalMock = vi.fn();
   const servicesMock = { http, notifications };
 
   const queryClient = new QueryClient({
@@ -57,7 +62,7 @@ describe('AlertDelete Modal', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     closeModalMock.mockClear();
     mockHttpGet({ lastRun: lastRunDate, affectedAlertCount: 0 });
   });
@@ -340,7 +345,7 @@ describe('AlertDelete Modal', () => {
 });
 
 describe('AlertDelete Modal Error Handling', () => {
-  const closeModalMock = jest.fn();
+  const closeModalMock = vi.fn();
   const servicesMock = { http, notifications };
 
   const queryClient = new QueryClient({
@@ -368,7 +373,7 @@ describe('AlertDelete Modal Error Handling', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     closeModalMock.mockClear();
   });
 

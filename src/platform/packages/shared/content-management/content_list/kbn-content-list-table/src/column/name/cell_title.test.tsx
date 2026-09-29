@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import {
@@ -17,7 +19,7 @@ import {
 } from '@kbn/content-list-provider';
 import { NameCellTitle } from './cell_title';
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({
     items: [],
     total: 0,
@@ -86,7 +88,7 @@ describe('NameCellTitle', () => {
   it('renders as a link and calls `onClick` when provided without `getHref`', () => {
     const Wrapper = createWrapper();
     const item = createItem({ title: 'Clickable Item' });
-    const handleClick = jest.fn();
+    const handleClick = vi.fn();
 
     render(
       <Wrapper>
@@ -102,7 +104,7 @@ describe('NameCellTitle', () => {
   it('ignores `getHref` by default when `onClick` is provided', () => {
     const Wrapper = createWrapper({ getHref: (item) => `/view/${item.id}` });
     const item = createItem({ title: 'Linked Clickable Item' });
-    const handleClick = jest.fn();
+    const handleClick = vi.fn();
 
     render(
       <Wrapper>
@@ -120,7 +122,7 @@ describe('NameCellTitle', () => {
   it('uses `getHref` with `onClick` when `shouldUseHref` is true', () => {
     const Wrapper = createWrapper({ getHref: (item) => `/view/${item.id}` });
     const item = createItem({ title: 'Linked Clickable Item' });
-    const handleClick = jest.fn();
+    const handleClick = vi.fn();
 
     render(
       <Wrapper>
@@ -141,7 +143,7 @@ describe('NameCellTitle', () => {
   it('allows modified clicks to use `getHref` when `shouldUseHref` is true', () => {
     const Wrapper = createWrapper({ getHref: (item) => `/view/${item.id}` });
     const item = createItem({ title: 'Linked Clickable Item' });
-    const handleClick = jest.fn();
+    const handleClick = vi.fn();
 
     render(
       <Wrapper>
@@ -169,7 +171,7 @@ describe('NameCellTitle', () => {
     // or returns `undefined`, modifier-key clicks must still call `onClick`.
     const Wrapper = createWrapper({});
     const item = createItem({ title: 'No-Href Clickable Item' });
-    const handleClick = jest.fn();
+    const handleClick = vi.fn();
 
     render(
       <Wrapper>

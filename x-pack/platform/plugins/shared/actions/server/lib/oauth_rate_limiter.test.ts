@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { OAuthRateLimiter } from './oauth_rate_limiter';
 
 const DEFAULT_CONFIG = {
@@ -14,12 +16,12 @@ const DEFAULT_CONFIG = {
 
 describe('OAuthRateLimiter', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-06-24T15:30:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-06-24T15:30:00.000Z'));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('log', () => {
@@ -27,9 +29,9 @@ describe('OAuthRateLimiter', () => {
       const rateLimiter = new OAuthRateLimiter({ config: DEFAULT_CONFIG });
 
       rateLimiter.log('user1', 'authorize');
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       rateLimiter.log('user1', 'authorize');
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       rateLimiter.log('user1', 'authorize');
 
       expect(rateLimiter.getLogs('user1', 'authorize')).toEqual([
@@ -41,9 +43,9 @@ describe('OAuthRateLimiter', () => {
       const rateLimiter = new OAuthRateLimiter({ config: DEFAULT_CONFIG });
 
       rateLimiter.log('user1', 'authorize');
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       rateLimiter.log('user2', 'authorize');
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       rateLimiter.log('user1', 'authorize');
 
       expect(rateLimiter.getLogs('user1', 'authorize')).toEqual([1750779000000, 1750779002000]);
@@ -54,9 +56,9 @@ describe('OAuthRateLimiter', () => {
       const rateLimiter = new OAuthRateLimiter({ config: DEFAULT_CONFIG });
 
       rateLimiter.log('user1', 'authorize');
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       rateLimiter.log('user1', 'callback');
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       rateLimiter.log('user1', 'authorize');
 
       expect(rateLimiter.getLogs('user1', 'authorize')).toEqual([1750779000000, 1750779002000]);
@@ -70,7 +72,7 @@ describe('OAuthRateLimiter', () => {
 
       for (let i = 0; i < 5; i++) {
         rateLimiter.log('user1', 'authorize');
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       }
 
       expect(rateLimiter.isRateLimited('user1', 'authorize')).toBe(false);
@@ -81,12 +83,12 @@ describe('OAuthRateLimiter', () => {
 
       for (let i = 0; i < 10; i++) {
         rateLimiter.log('user1', 'authorize');
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       }
 
       for (let i = 0; i < 15; i++) {
         rateLimiter.log('user2', 'authorize');
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       }
 
       expect(rateLimiter.isRateLimited('user1', 'authorize')).toBe(true);
@@ -103,13 +105,13 @@ describe('OAuthRateLimiter', () => {
       // Authorize endpoint - hit limit
       for (let i = 0; i < 5; i++) {
         rateLimiter.log('user1', 'authorize');
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       }
 
       // Callback endpoint - under limit
       for (let i = 0; i < 10; i++) {
         rateLimiter.log('user1', 'callback');
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       }
 
       expect(rateLimiter.isRateLimited('user1', 'authorize')).toBe(true);
@@ -126,13 +128,13 @@ describe('OAuthRateLimiter', () => {
       // User1 hits limit
       for (let i = 0; i < 5; i++) {
         rateLimiter.log('user1', 'authorize');
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       }
 
       // User2 under limit
       for (let i = 0; i < 3; i++) {
         rateLimiter.log('user2', 'authorize');
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       }
 
       expect(rateLimiter.isRateLimited('user1', 'authorize')).toBe(true);
@@ -151,7 +153,7 @@ describe('OAuthRateLimiter', () => {
       // Log 16 requests over 16 seconds
       for (let i = 0; i <= 15; i++) {
         rateLimiter.log('user1', 'authorize');
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       }
 
       // Before cleanup, all logs present
@@ -178,13 +180,13 @@ describe('OAuthRateLimiter', () => {
       // Hit the limit
       for (let i = 0; i < 5; i++) {
         rateLimiter.log('user1', 'authorize');
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       }
 
       expect(rateLimiter.isRateLimited('user1', 'authorize')).toBe(true);
 
       // Advance time beyond lookback window
-      jest.advanceTimersByTime(11000);
+      vi.advanceTimersByTime(11000);
 
       // Should no longer be rate limited
       expect(rateLimiter.isRateLimited('user1', 'authorize')).toBe(false);

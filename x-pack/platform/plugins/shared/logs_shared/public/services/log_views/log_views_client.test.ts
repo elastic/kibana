@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { of } from 'rxjs';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -21,11 +24,11 @@ const resolvedLogView = {
 } as ResolvedLogView<DataView>;
 
 const createClient = () => {
-  const search = jest.fn().mockReturnValue(
+  const search = vi.fn().mockReturnValue(
     of({
       rawResponse: { _shards: { total: 1 }, hits: { total: 1 } },
     })
-  ) as unknown as jest.MockedFunction<ISearchGeneric>;
+  ) as unknown as MockedFunction<ISearchGeneric>;
 
   const client = new LogViewsClient(
     {} as DataViewsContract,

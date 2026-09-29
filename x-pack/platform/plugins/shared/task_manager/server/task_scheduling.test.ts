@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import sinon from 'sinon';
 import moment from 'moment';
 
@@ -23,20 +25,29 @@ import { TaskAlreadyRunningError } from './lib/errors';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 
 let fakeTimer: sinon.SinonFakeTimers;
-jest.mock('uuid', () => ({
-  v4: () => 'v4uuid',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => 'v4uuid',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./constants', () => ({
-  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['foo'],
-}));
+vi.mock('./constants', () => {
+      const mocked = {
+      CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['foo'],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('elastic-apm-node', () => ({
-  currentTraceparent: 'parent',
-  currentTransaction: {
-    type: 'taskManager run',
-  },
-}));
+vi.mock('elastic-apm-node', () => {
+      const mocked = {
+      currentTraceparent: 'parent',
+      currentTransaction: {
+        type: 'taskManager run',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getTask = (overrides = {}): ConcreteTaskInstance => ({
   id: 'my-foo-id',
@@ -76,12 +87,12 @@ describe('TaskScheduling', () => {
     foo: {
       title: 'foo',
       maxConcurrency: 2,
-      createTaskRunner: jest.fn(),
+      createTaskRunner: vi.fn(),
     },
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     // resetAllMocks wipes the factory default; restore the security-enabled behavior.
     mockTaskStore.willGrantApiKeys.mockImplementation((options) => Boolean(options?.request));
   });
@@ -175,7 +186,7 @@ describe('TaskScheduling', () => {
   test('tries to updates schedule for tasks that have already been scheduled', async () => {
     const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-    const bulkUpdateScheduleSpy = jest
+    const bulkUpdateScheduleSpy = vi
       .spyOn(taskScheduling, 'bulkUpdateSchedules')
       .mockResolvedValue({ tasks: [task], errors: [] });
     mockTaskStore.schedule.mockRejectedValueOnce({
@@ -196,7 +207,7 @@ describe('TaskScheduling', () => {
   test('forwards options to bulkUpdateSchedules when updating schedule for tasks that have already been scheduled', async () => {
     const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-    const bulkUpdateScheduleSpy = jest
+    const bulkUpdateScheduleSpy = vi
       .spyOn(taskScheduling, 'bulkUpdateSchedules')
       .mockResolvedValue({ tasks: [task], errors: [] });
     mockTaskStore.schedule.mockRejectedValueOnce({
@@ -220,7 +231,7 @@ describe('TaskScheduling', () => {
   test('does not schedule a user scoped task that already exists, so no API key is granted', async () => {
     const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-    const bulkUpdateScheduleSpy = jest
+    const bulkUpdateScheduleSpy = vi
       .spyOn(taskScheduling, 'bulkUpdateSchedules')
       .mockResolvedValue({ tasks: [task], errors: [] });
     mockTaskStore.taskExists.mockResolvedValue(true);
@@ -243,7 +254,7 @@ describe('TaskScheduling', () => {
   test('grants an API key only once when ensureScheduled is called repeatedly for the same task', async () => {
     const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-    jest
+    vi
       .spyOn(taskScheduling, 'bulkUpdateSchedules')
       .mockResolvedValue({ tasks: [task], errors: [] });
     mockTaskStore.taskExists.mockResolvedValueOnce(false).mockResolvedValue(true);
@@ -260,7 +271,7 @@ describe('TaskScheduling', () => {
   test('does not look up the task when scheduling without a request', async () => {
     const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-    jest
+    vi
       .spyOn(taskScheduling, 'bulkUpdateSchedules')
       .mockResolvedValue({ tasks: [task], errors: [] });
     mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
@@ -274,7 +285,7 @@ describe('TaskScheduling', () => {
   test('does not look up the task when the store will not grant API keys despite a request (e.g. security disabled)', async () => {
     const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-    jest
+    vi
       .spyOn(taskScheduling, 'bulkUpdateSchedules')
       .mockResolvedValue({ tasks: [task], errors: [] });
     mockTaskStore.willGrantApiKeys.mockReturnValue(false);
@@ -290,7 +301,7 @@ describe('TaskScheduling', () => {
 
   test('does not try to update schedule for tasks that have already been scheduled if no schedule is provided', async () => {
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-    const bulkUpdateScheduleSpy = jest.spyOn(taskScheduling, 'bulkUpdateSchedules');
+    const bulkUpdateScheduleSpy = vi.spyOn(taskScheduling, 'bulkUpdateSchedules');
     mockTaskStore.schedule.mockRejectedValueOnce({
       statusCode: 409,
     });
@@ -310,7 +321,7 @@ describe('TaskScheduling', () => {
   test('propagates error when trying to update schedule for tasks that have already been scheduled', async () => {
     const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-    const bulkUpdateScheduleSpy = jest
+    const bulkUpdateScheduleSpy = vi
       .spyOn(taskScheduling, 'bulkUpdateSchedules')
       .mockResolvedValue({
         tasks: [],
@@ -344,7 +355,7 @@ describe('TaskScheduling', () => {
   test('handles VERSION_CONFLICT_STATUS errors when trying to update schedule for tasks that have already been scheduled', async () => {
     const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-    const bulkUpdateScheduleSpy = jest
+    const bulkUpdateScheduleSpy = vi
       .spyOn(taskScheduling, 'bulkUpdateSchedules')
       .mockResolvedValue({
         tasks: [],
@@ -377,7 +388,7 @@ describe('TaskScheduling', () => {
   test('handles NOT_FOUND_STATUS errors when trying to update schedule for tasks that have already been scheduled', async () => {
     const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-    const bulkUpdateScheduleSpy = jest
+    const bulkUpdateScheduleSpy = vi
       .spyOn(taskScheduling, 'bulkUpdateSchedules')
       .mockResolvedValue({
         tasks: [],
@@ -774,7 +785,7 @@ describe('TaskScheduling', () => {
       mockTaskStore.bulkGet.mockResolvedValue([]);
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
-      await taskScheduling.bulkUpdateState(Array.from({ length: 1250 }), jest.fn());
+      await taskScheduling.bulkUpdateState(Array.from({ length: 1250 }), vi.fn());
 
       expect(mockTaskStore.bulkGet).toHaveBeenCalledTimes(13);
     });
@@ -816,7 +827,7 @@ describe('TaskScheduling', () => {
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
       const result = await taskScheduling.bulkUpdateState(
         [successfulTask.id, failedToUpdateTask.id],
-        jest.fn()
+        vi.fn()
       );
 
       expect(result).toEqual({
@@ -844,7 +855,7 @@ describe('TaskScheduling', () => {
         scheduledAt: new Date('1969-09-10T21:33:58.285Z'),
         state: { removeMe: 'please remove me i dont like being in this task manager state' },
       });
-      const updaterFn = jest.fn((state) => {
+      const updaterFn = vi.fn((state) => {
         return {
           ...omit(state, 'removeMe'),
           expectedValue: 'HELLO I AM AN EXPECTED VALUE IT IS VERY NICE TO MEET YOU',

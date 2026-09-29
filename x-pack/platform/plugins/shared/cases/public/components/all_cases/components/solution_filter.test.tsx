@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -16,11 +18,11 @@ import { SolutionFilter } from './solution_filter';
 import userEvent from '@testing-library/user-event';
 
 describe('SolutionFilter ', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const solutions = [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders button correctly', () => {
@@ -33,7 +35,7 @@ describe('SolutionFilter ', () => {
 
   describe('when the owner is a single solution', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('renders options correctly', async () => {
@@ -102,7 +104,7 @@ describe('SolutionFilter ', () => {
 
   describe('when no owner set', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('renders options correctly', async () => {

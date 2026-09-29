@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EVALS_EVALUATE_URL, EVALS_SCORES_URL } from '@kbn/evals-common';
 import type { EvalsTaskProvider, TaskProviderRegistry } from '../task_providers/types';
 import {
@@ -32,7 +34,7 @@ const createRegistry = (
 ): TaskProviderRegistry => {
   const provider: EvalsTaskProvider = { name: 'inference', run };
   return {
-    register: jest.fn(),
+    register: vi.fn(),
     get: (name) => (name === 'inference' ? provider : undefined),
     has: (name) => name === 'inference',
     list: () => [provider],
@@ -52,9 +54,9 @@ const createRuntime = (recorded: RecordedCall[], spaceId = 'default'): StepRunti
   }) as unknown as StepRuntime['callKibanaApi'];
 
   return {
-    logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
     abortSignal: new AbortController().signal,
-    getInferenceClient: jest.fn() as unknown as StepRuntime['getInferenceClient'],
+    getInferenceClient: vi.fn() as unknown as StepRuntime['getInferenceClient'],
     callKibanaApi,
     spaceId,
     resolveModel: (async (connectorId: string) => ({
@@ -168,9 +170,9 @@ describe('runExampleEvaluation failure capture', () => {
     const recorded: RecordedCall[] = [];
     // The /_evaluate call succeeds overall, but one evaluator reports status 'error'.
     const runtime: StepRuntime = {
-      logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+      logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
       abortSignal: new AbortController().signal,
-      getInferenceClient: jest.fn() as unknown as StepRuntime['getInferenceClient'],
+      getInferenceClient: vi.fn() as unknown as StepRuntime['getInferenceClient'],
       spaceId: 'default',
       resolveModel: (async (connectorId: string) => ({
         id: connectorId,

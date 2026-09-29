@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getSignalsMigrationStatusRequest } from '../__mocks__/request_responses';
 import { getSignalsMigrationSavedObjectMock } from '../../migrations/saved_objects_schema.mock';
 import { serverMock } from '../__mocks__';
@@ -14,9 +17,9 @@ import { getSignalsMigrationStatusRoute } from './get_signals_migration_status_r
 import { getSignalsIndicesInRange } from '../../migrations/get_signals_indices_in_range';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
-jest.mock('../../migrations/get_signals_indices_in_range');
-jest.mock('../../migrations/get_signal_versions_by_index');
-jest.mock('../../migrations/get_migration_saved_objects_by_index');
+vi.mock('../../migrations/get_signals_indices_in_range');
+vi.mock('../../migrations/get_signal_versions_by_index');
+vi.mock('../../migrations/get_migration_saved_objects_by_index');
 
 describe('get signals migration status', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -26,15 +29,15 @@ describe('get signals migration status', () => {
     server = serverMock.create();
     getSignalsMigrationStatusRoute(server.router, docLinks);
 
-    (getSignalsIndicesInRange as jest.Mock).mockResolvedValueOnce(['my-signals-index']);
-    (getSignalVersionsByIndex as jest.Mock).mockResolvedValueOnce({
+    (getSignalsIndicesInRange as Mock).mockResolvedValueOnce(['my-signals-index']);
+    (getSignalVersionsByIndex as Mock).mockResolvedValueOnce({
       'my-signals-index': [],
     });
   });
 
   it('returns statuses by index', async () => {
     const migration = getSignalsMigrationSavedObjectMock();
-    (getMigrationSavedObjectsByIndex as jest.Mock).mockResolvedValueOnce({
+    (getMigrationSavedObjectsByIndex as Mock).mockResolvedValueOnce({
       'my-signals-index': [migration],
     });
 

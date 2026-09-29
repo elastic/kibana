@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
 import { merge } from 'lodash';
@@ -26,8 +28,8 @@ const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
 } as Partial<CoreStart>);
 
-const addWarning = jest.fn();
-const httpGet = jest.fn();
+const addWarning = vi.fn();
+const httpGet = vi.fn();
 
 function Wrapper({ children }: { children?: ReactNode }) {
   const mockPluginContext = merge({}, mockApmPluginContextValue, {
@@ -55,18 +57,18 @@ function Wrapper({ children }: { children?: ReactNode }) {
 describe('ServiceIcons', () => {
   beforeAll(() => {
     // Mocks console.warn so it won't polute tests output when testing the api throwing error
-    jest.spyOn(console, 'warn').mockImplementation(() => null);
+    vi.spyOn(console, 'warn').mockImplementation(() => null);
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
   describe('icons', () => {
     it('Shows loading spinner while fetching data', () => {
-      jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+      vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
         data: undefined,
         status: fetcherHook.FETCH_STATUS.LOADING,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
       const { getByTestId, queryAllByTestId } = render(
         <Wrapper>
@@ -86,10 +88,10 @@ describe('ServiceIcons', () => {
       expect(queryAllByTestId('cloud')).toHaveLength(0);
     });
     it("doesn't show any icons", () => {
-      jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+      vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
         data: {},
         status: fetcherHook.FETCH_STATUS.SUCCESS,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       const { queryAllByTestId } = render(
@@ -110,12 +112,12 @@ describe('ServiceIcons', () => {
       expect(queryAllByTestId('cloud')).toHaveLength(0);
     });
     it('shows service icon', () => {
-      jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+      vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
         data: {
           agentName: 'java',
         },
         status: fetcherHook.FETCH_STATUS.SUCCESS,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       const { queryAllByTestId, getByTestId } = render(
@@ -136,13 +138,13 @@ describe('ServiceIcons', () => {
       expect(queryAllByTestId('cloud')).toHaveLength(0);
     });
     it('shows service and container icons', () => {
-      jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+      vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
         data: {
           agentName: 'java',
           containerType: 'Kubernetes',
         },
         status: fetcherHook.FETCH_STATUS.SUCCESS,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       const { queryAllByTestId, getByTestId } = render(
@@ -163,14 +165,14 @@ describe('ServiceIcons', () => {
       expect(getByTestId('container')).toBeInTheDocument();
     });
     it('shows service, container and cloud icons', () => {
-      jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+      vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
         data: {
           agentName: 'java',
           containerType: 'Kubernetes',
           cloudProvider: 'gcp',
         },
         status: fetcherHook.FETCH_STATUS.SUCCESS,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       const { queryAllByTestId, getByTestId } = render(
@@ -206,15 +208,15 @@ describe('ServiceIcons', () => {
             cloudProvider: 'aws',
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
-          refetch: jest.fn(),
+          refetch: vi.fn(),
         },
         'GET /internal/apm/services/{serviceName}/metadata/details': {
           data: undefined,
           status: fetcherHook.FETCH_STATUS.LOADING,
-          refetch: jest.fn(),
+          refetch: vi.fn(),
         },
       };
-      jest.spyOn(fetcherHook, 'useFetcher').mockImplementation((func: Function, deps: string[]) => {
+      vi.spyOn(fetcherHook, 'useFetcher').mockImplementation((func: Function, deps: string[]) => {
         return func(callApmApi(apisMockData)) || {};
       });
 
@@ -249,15 +251,15 @@ describe('ServiceIcons', () => {
             cloudProvider: 'aws',
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
-          refetch: jest.fn(),
+          refetch: vi.fn(),
         },
         'GET /internal/apm/services/{serviceName}/metadata/details': {
           data: { service: { versions: ['v1.0.0'] } },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
-          refetch: jest.fn(),
+          refetch: vi.fn(),
         },
       };
-      jest.spyOn(fetcherHook, 'useFetcher').mockImplementation((func: Function, deps: string[]) => {
+      vi.spyOn(fetcherHook, 'useFetcher').mockImplementation((func: Function, deps: string[]) => {
         return func(callApmApi(apisMockData)) || {};
       });
 
@@ -294,7 +296,7 @@ describe('ServiceIcons', () => {
             cloudProvider: 'aws',
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
-          refetch: jest.fn(),
+          refetch: vi.fn(),
         },
         'GET /internal/apm/services/{serviceName}/metadata/details': {
           data: {
@@ -305,10 +307,10 @@ describe('ServiceIcons', () => {
             },
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
-          refetch: jest.fn(),
+          refetch: vi.fn(),
         },
       };
-      jest.spyOn(fetcherHook, 'useFetcher').mockImplementation((func: Function, deps: string[]) => {
+      vi.spyOn(fetcherHook, 'useFetcher').mockImplementation((func: Function, deps: string[]) => {
         return func(callApmApi(apisMockData)) || {};
       });
 
@@ -348,7 +350,7 @@ describe('ServiceIcons', () => {
             cloudProvider: 'aws',
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
-          refetch: jest.fn(),
+          refetch: vi.fn(),
         },
         'GET /internal/apm/services/{serviceName}/metadata/details': {
           data: {
@@ -362,10 +364,10 @@ describe('ServiceIcons', () => {
             },
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
-          refetch: jest.fn(),
+          refetch: vi.fn(),
         },
       };
-      jest.spyOn(fetcherHook, 'useFetcher').mockImplementation((func: Function, deps: string[]) => {
+      vi.spyOn(fetcherHook, 'useFetcher').mockImplementation((func: Function, deps: string[]) => {
         return func(callApmApi(apisMockData)) || {};
       });
 

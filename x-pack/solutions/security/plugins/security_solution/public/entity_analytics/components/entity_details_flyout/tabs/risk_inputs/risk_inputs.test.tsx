@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../../common/mock';
@@ -18,129 +20,168 @@ import {
   RiskScoreLeftPanelSubTab,
 } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
-const mockUseRiskContributingAlerts = jest
+const mockUseRiskContributingAlerts = vi
   .fn()
   .mockReturnValue({ loading: false, data: [], hasAlertsRead: true });
-const mockGetEuidFromObject = jest.fn().mockReturnValue('user:entity-1');
+const mockGetEuidFromObject = vi.fn().mockReturnValue('user:entity-1');
 
-jest.mock('../../../../hooks/use_risk_contributing_alerts', () => ({
-  useRiskContributingAlerts: (params: unknown) => mockUseRiskContributingAlerts(params),
-}));
+vi.mock('../../../../hooks/use_risk_contributing_alerts', () => {
+      const mocked = {
+      useRiskContributingAlerts: (params: unknown) => mockUseRiskContributingAlerts(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRiskScoreHistory = jest.fn().mockReturnValue({ data: undefined, isFetching: false });
+const mockUseRiskScoreHistory = vi.fn().mockReturnValue({ data: undefined, isFetching: false });
 
-jest.mock('../../../../api/hooks/use_risk_score_history', () => ({
-  useRiskScoreHistory: (params: unknown) => mockUseRiskScoreHistory(params),
-}));
+vi.mock('../../../../api/hooks/use_risk_score_history', () => {
+      const mocked = {
+      useRiskScoreHistory: (params: unknown) => mockUseRiskScoreHistory(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(false);
+const mockUseIsExperimentalFeatureEnabled = vi.fn().mockReturnValue(false);
 
-jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: (flag: string) => mockUseIsExperimentalFeatureEnabled(flag),
-}));
+vi.mock('../../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: (flag: string) => mockUseIsExperimentalFeatureEnabled(flag),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../risk_score_timeline', () => ({
-  RiskScoreTimeline: (props: {
-    entityId: string;
-    scoreType?: string;
-    onPointSelect: (timestamp: string | undefined) => void;
-    onRangeChange: (range: { from: string; to: string }) => void;
-  }) => (
-    <div
-      data-test-subj="mockRiskScoreTimeline"
-      data-entity-id={props.entityId}
-      data-score-type={props.scoreType}
-    >
-      <button
-        type="button"
-        data-test-subj="mockSelectPoint"
-        onClick={() => props.onPointSelect('2021-08-10T14:00:00.000Z')}
-      />
-      <button
-        type="button"
-        data-test-subj="mockRangeExcludingSelection"
-        onClick={() => props.onRangeChange({ from: 'now-1d', to: 'now' })}
-      />
-      <button
-        type="button"
-        data-test-subj="mockRangeIncludingSelection"
-        onClick={() => props.onRangeChange({ from: 'now-10y', to: 'now' })}
-      />
-    </div>
-  ),
-}));
+vi.mock('../../../risk_score_timeline', () => {
+      const mocked = {
+      RiskScoreTimeline: (props: {
+        entityId: string;
+        scoreType?: string;
+        onPointSelect: (timestamp: string | undefined) => void;
+        onRangeChange: (range: { from: string; to: string }) => void;
+      }) => (
+        <div
+          data-test-subj="mockRiskScoreTimeline"
+          data-entity-id={props.entityId}
+          data-score-type={props.scoreType}
+        >
+          <button
+            type="button"
+            data-test-subj="mockSelectPoint"
+            onClick={() => props.onPointSelect('2021-08-10T14:00:00.000Z')}
+          />
+          <button
+            type="button"
+            data-test-subj="mockRangeExcludingSelection"
+            onClick={() => props.onRangeChange({ from: 'now-1d', to: 'now' })}
+          />
+          <button
+            type="button"
+            data-test-subj="mockRangeIncludingSelection"
+            onClick={() => props.onRangeChange({ from: 'now-10y', to: 'now' })}
+          />
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/entity-store/public', () => ({
-  useEntityStoreEuidApi: () => ({
-    euid: {
-      getEuidFromObject: (...args: unknown[]) => mockGetEuidFromObject(...args),
-    },
-  }),
-}));
+vi.mock('@kbn/entity-store/public', () => {
+      const mocked = {
+      useEntityStoreEuidApi: () => ({
+        euid: {
+          getEuidFromObject: (...args: unknown[]) => mockGetEuidFromObject(...args),
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseUiSetting = jest.fn().mockReturnValue([false]);
+const mockUseUiSetting = vi.fn().mockReturnValue([false]);
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...original,
     useUiSetting$: () => mockUseUiSetting(),
   };
 });
 
-const mockUseRiskScore = jest.fn().mockReturnValue({ loading: false, data: [] });
+const mockUseRiskScore = vi.fn().mockReturnValue({ loading: false, data: [] });
 
-jest.mock('../../../../api/hooks/use_risk_score', () => ({
-  useRiskScore: (params: unknown) => mockUseRiskScore(params),
-}));
+vi.mock('../../../../api/hooks/use_risk_score', () => {
+      const mocked = {
+      useRiskScore: (params: unknown) => mockUseRiskScore(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseMissingRiskEnginePrivileges = jest.fn();
+const mockUseMissingRiskEnginePrivileges = vi.fn();
 
-jest.mock('../../../../hooks/use_missing_risk_engine_privileges', () => ({
-  useMissingRiskEnginePrivileges: (params: unknown) => mockUseMissingRiskEnginePrivileges(params),
-}));
+vi.mock('../../../../hooks/use_missing_risk_engine_privileges', () => {
+      const mocked = {
+      useMissingRiskEnginePrivileges: (params: unknown) => mockUseMissingRiskEnginePrivileges(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../risk_engine_privileges_callout', () => ({
-  RiskEnginePrivilegesCallOut: () => <div data-test-subj="missing-risk-engine-privileges" />,
-}));
+vi.mock('../../../risk_engine_privileges_callout', () => {
+      const mocked = {
+      RiskEnginePrivilegesCallOut: () => <div data-test-subj="missing-risk-engine-privileges" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetWatchlists = jest.fn().mockReturnValue({ data: [] });
+const mockUseGetWatchlists = vi.fn().mockReturnValue({ data: [] });
 
-jest.mock('../../../../api/hooks/use_get_watchlists', () => ({
-  useGetWatchlists: () => mockUseGetWatchlists(),
-}));
+vi.mock('../../../../api/hooks/use_get_watchlists', () => {
+      const mocked = {
+      useGetWatchlists: () => mockUseGetWatchlists(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseResolutionGroup = jest.fn().mockReturnValue({ data: undefined });
+const mockUseResolutionGroup = vi.fn().mockReturnValue({ data: undefined });
 
-jest.mock('../../../entity_resolution/hooks/use_resolution_group', () => ({
-  useResolutionGroup: (entityId: string) => mockUseResolutionGroup(entityId),
-}));
+vi.mock('../../../entity_resolution/hooks/use_resolution_group', () => {
+      const mocked = {
+      useResolutionGroup: (entityId: string) => mockUseResolutionGroup(entityId),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseEntityFromStore = jest.fn().mockReturnValue({ entityRecord: null });
+const mockUseEntityFromStore = vi.fn().mockReturnValue({ entityRecord: null });
 
-jest.mock('../../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
-  useEntityFromStore: (params: unknown) => mockUseEntityFromStore(params),
-}));
+vi.mock('../../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => {
+      const mocked = {
+      useEntityFromStore: (params: unknown) => mockUseEntityFromStore(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseStableExpandableFlyoutState = jest.fn().mockReturnValue({});
+const mockUseStableExpandableFlyoutState = vi.fn().mockReturnValue({});
 
-jest.mock('../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state', () => ({
-  useStableExpandableFlyoutState: () => mockUseStableExpandableFlyoutState(),
-}));
+vi.mock('../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state', () => {
+      const mocked = {
+      useStableExpandableFlyoutState: () => mockUseStableExpandableFlyoutState(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenPreviewPanel = jest.fn();
-const mockOpenLeftPanel = jest.fn();
-const mockOnShowAlert = jest.fn();
+const mockOpenPreviewPanel = vi.fn();
+const mockOpenLeftPanel = vi.fn();
+const mockOnShowAlert = vi.fn();
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openPreviewPanel: mockOpenPreviewPanel,
-    openLeftPanel: mockOpenLeftPanel,
-  }),
-  useExpandableFlyoutState: () => ({}),
-  useExpandableFlyoutHistory: () => [],
-  ExpandableFlyout: () => null,
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: () => ({
+        openPreviewPanel: mockOpenPreviewPanel,
+        openLeftPanel: mockOpenLeftPanel,
+      }),
+      useExpandableFlyoutState: () => ({}),
+      useExpandableFlyoutHistory: () => [],
+      ExpandableFlyout: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const riskScore = {
   '@timestamp': '2021-08-19T16:00:00.000Z',
@@ -188,7 +229,7 @@ describe('RiskInputsTab', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetEuidFromObject.mockReturnValue('user:entity-1');
     mockUseResolutionGroup.mockReturnValue({ data: undefined });
     mockUseGetWatchlists.mockReturnValue({ data: [] });
@@ -1699,7 +1740,7 @@ describe('RiskInputsTab', () => {
 
 describe('RiskInputsTab - alert preview navigation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseStableExpandableFlyoutState.mockReturnValue({});
     mockUseGetWatchlists.mockReturnValue({ data: [] });
     mockUseResolutionGroup.mockReturnValue({ data: undefined });
@@ -1714,7 +1755,7 @@ describe('RiskInputsTab - alert preview navigation', () => {
   });
 
   it('invokes the provided onShowAlert callback with the row identifiers', () => {
-    const onShowAlert = jest.fn();
+    const onShowAlert = vi.fn();
     const { getByTestId } = render(
       <TestProviders>
         <RiskInputsTab

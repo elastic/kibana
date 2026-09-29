@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
@@ -17,7 +19,7 @@ describe('SuppressChromeBackButton', () => {
   it('registers back: false when Chrome Next project style is active', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getChromeStyle.mockReturnValue('project');
-    chrome.appHeader.set.mockReturnValue(jest.fn());
+    chrome.appHeader.set.mockReturnValue(vi.fn());
 
     render(
       <ChromeServiceProvider value={{ chrome }}>
@@ -39,7 +41,7 @@ describe('SuppressChromeBackButton', () => {
   it('does not register outside Chrome Next project style', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getChromeStyle.mockReturnValue('classic');
-    chrome.appHeader.set.mockReturnValue(jest.fn());
+    chrome.appHeader.set.mockReturnValue(vi.fn());
 
     render(
       <ChromeServiceProvider value={{ chrome }}>

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ActionConnectorWithoutId } from '../../../types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { createActionConnector } from '.';
 
 const http = httpServiceMock.createStartContract();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('createActionConnector', () => {
   test('should call create action API', async () => {

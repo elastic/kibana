@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -17,9 +20,9 @@ import {
 import { useFetchRelatedAlertsBySameSourceEvent } from '../hooks/use_fetch_related_alerts_by_same_source_event';
 import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
 
-jest.mock('../hooks/use_fetch_related_alerts_by_same_source_event');
+vi.mock('../hooks/use_fetch_related_alerts_by_same_source_event');
 
-const mockOnShowCorrelationsDetails = jest.fn();
+const mockOnShowCorrelationsDetails = vi.fn();
 
 const originalEventId = 'originalEventId';
 const scopeId = 'scopeId';
@@ -47,11 +50,11 @@ const renderRelatedAlertsBySameSourceEvent = () =>
 
 describe('<RelatedAlertsBySameSourceEvent />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render single related alert correctly', () => {
-    (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsBySameSourceEvent as Mock).mockReturnValue({
       loading: false,
       error: false,
       dataCount: 1,
@@ -63,7 +66,7 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
   });
 
   it('should render multiple related alerts correctly', () => {
-    (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsBySameSourceEvent as Mock).mockReturnValue({
       loading: false,
       error: false,
       dataCount: 2,
@@ -75,7 +78,7 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
   });
 
   it('should render loading skeleton', () => {
-    (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsBySameSourceEvent as Mock).mockReturnValue({
       loading: true,
     });
 
@@ -84,7 +87,7 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
   });
 
   it('should render 0 same source alert if error', () => {
-    (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsBySameSourceEvent as Mock).mockReturnValue({
       loading: false,
       error: true,
       dataCount: 0,
@@ -96,7 +99,7 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
   });
 
   it('should open the expanded section to the correct tab when the number is clicked', () => {
-    (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
+    (useFetchRelatedAlertsBySameSourceEvent as Mock).mockReturnValue({
       loading: false,
       error: true,
       dataCount: 1,

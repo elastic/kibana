@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useDeleteFieldDefinition } from './use_delete_field_definition';
@@ -14,25 +17,28 @@ import { useCasesToast } from '../../../common/use_cases_toast';
 import { TestProviders, createTestQueryClient } from '../../../common/mock';
 import * as i18n from '../translations';
 
-jest.mock('../api/api');
-jest.mock('../../../common/use_cases_toast');
+vi.mock('../api/api');
+vi.mock('../../../common/use_cases_toast');
 
-const mockReportFieldDefinitionDeleted = jest.fn();
-jest.mock('../../../analytics/field_library', () => ({
-  useFieldDefinitionDeletedEBT: () => mockReportFieldDefinitionDeleted,
-}));
+const mockReportFieldDefinitionDeleted = vi.fn();
+vi.mock('../../../analytics/field_library', () => {
+      const mocked = {
+      useFieldDefinitionDeletedEBT: () => mockReportFieldDefinitionDeleted,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useDeleteFieldDefinition', () => {
-  const showErrorToast = jest.fn();
-  const showSuccessToast = jest.fn();
+  const showErrorToast = vi.fn();
+  const showSuccessToast = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useCasesToast as jest.Mock).mockReturnValue({ showErrorToast, showSuccessToast });
+    vi.clearAllMocks();
+    (useCasesToast as Mock).mockReturnValue({ showErrorToast, showSuccessToast });
   });
 
   it('calls deleteFieldDefinition with the id', async () => {
-    (deleteFieldDefinition as jest.Mock).mockResolvedValue(undefined);
+    (deleteFieldDefinition as Mock).mockResolvedValue(undefined);
 
     const { result } = renderHook(() => useDeleteFieldDefinition(), { wrapper: TestProviders });
 
@@ -44,9 +50,9 @@ describe('useDeleteFieldDefinition', () => {
   });
 
   it('invalidates field definitions query and shows success toast', async () => {
-    (deleteFieldDefinition as jest.Mock).mockResolvedValue(undefined);
+    (deleteFieldDefinition as Mock).mockResolvedValue(undefined);
     const queryClient = createTestQueryClient();
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useDeleteFieldDefinition(), {
       wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
@@ -64,8 +70,8 @@ describe('useDeleteFieldDefinition', () => {
   });
 
   it('calls the onSuccess callback', async () => {
-    (deleteFieldDefinition as jest.Mock).mockResolvedValue(undefined);
-    const onSuccess = jest.fn();
+    (deleteFieldDefinition as Mock).mockResolvedValue(undefined);
+    const onSuccess = vi.fn();
 
     const { result } = renderHook(() => useDeleteFieldDefinition({ onSuccess }), {
       wrapper: TestProviders,
@@ -80,7 +86,7 @@ describe('useDeleteFieldDefinition', () => {
 
   it('shows an error toast when the request fails', async () => {
     const error = new Error('Network error');
-    (deleteFieldDefinition as jest.Mock).mockRejectedValue(error);
+    (deleteFieldDefinition as Mock).mockRejectedValue(error);
 
     const { result } = renderHook(() => useDeleteFieldDefinition(), { wrapper: TestProviders });
 
@@ -97,7 +103,7 @@ describe('useDeleteFieldDefinition', () => {
 
   describe('telemetry', () => {
     it('reports the deleted event on success', async () => {
-      (deleteFieldDefinition as jest.Mock).mockResolvedValue(undefined);
+      (deleteFieldDefinition as Mock).mockResolvedValue(undefined);
 
       const { result } = renderHook(() => useDeleteFieldDefinition(), { wrapper: TestProviders });
 
@@ -111,7 +117,7 @@ describe('useDeleteFieldDefinition', () => {
     });
 
     it('does not report when the request fails', async () => {
-      (deleteFieldDefinition as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (deleteFieldDefinition as Mock).mockRejectedValue(new Error('Network error'));
 
       const { result } = renderHook(() => useDeleteFieldDefinition(), { wrapper: TestProviders });
 
@@ -132,7 +138,7 @@ describe('useDeleteFieldDefinition', () => {
 
     it('still reports when the caller unmounts before the server answers', async () => {
       let resolveDelete: (value: unknown) => void;
-      (deleteFieldDefinition as jest.Mock).mockImplementation(
+      (deleteFieldDefinition as Mock).mockImplementation(
         () => new Promise((resolve) => (resolveDelete = resolve))
       );
 

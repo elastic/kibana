@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObjectsSearchResponse } from '@kbn/core-saved-objects-api-server';
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { getUserCommentsTelemetryData } from './comments';
@@ -58,7 +60,7 @@ describe('comments', () => {
       } as unknown as SavedObjectsSearchResponse);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       savedObjectsClient.find
         .mockResolvedValueOnce(legacyResponse)
         .mockResolvedValueOnce(unifiedResponse);

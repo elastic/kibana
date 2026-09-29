@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { screen, fireEvent } from '@testing-library/react';
@@ -38,7 +40,7 @@ describe('useLocalStorage', () => {
 
   beforeEach(() => {
     global.localStorage.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('will read state from localStorage on init if values already exist', () => {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
 import { useFetchConnector } from './use_available_connectors';
@@ -14,15 +17,16 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { createStartServicesMock, createUseKibanaMockValue } from '../../../mocks';
 import { createQueryClientWrapper, createTestQueryClient } from '../../../shared/test_utils';
 
-jest.mock('../../../hooks/use_kibana');
-jest.mock('@kbn/alerts-ui-shared/src/common/apis', () => ({
-  fetchConnector: jest.fn(),
-}));
+vi.mock('../../../hooks/use_kibana');
+vi.mock('@kbn/alerts-ui-shared/src/common/apis', () => {
+      const mocked = {
+      fetchConnector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { fetchConnector: mockFetchConnector } = jest.requireMock(
-  '@kbn/alerts-ui-shared/src/common/apis'
-);
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const { fetchConnector: mockFetchConnector } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/apis'));
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 describe('useFetchConnector', () => {
   let queryClient: QueryClient;
@@ -35,7 +39,7 @@ describe('useFetchConnector', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     services = createStartServicesMock();
     mockUseKibana.mockReturnValue(createUseKibanaMockValue(services));
     mockFetchConnector.mockResolvedValue(connectorResponse);

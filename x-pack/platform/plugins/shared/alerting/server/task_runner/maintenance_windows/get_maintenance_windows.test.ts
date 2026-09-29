@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { maintenanceWindowCategoryIdTypes } from '@kbn/maintenance-windows-plugin/server';
 import { maintenanceWindowClientMock } from '@kbn/maintenance-windows-plugin/server/maintenance_window_client.mock';
@@ -35,7 +37,7 @@ describe('getMaintenanceWindows', () => {
   let contextMock: ReturnType<typeof getTaskRunnerContext>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     contextMock = getTaskRunnerContext();
     context = contextMock as unknown as TaskRunnerContext;
     fakeRequest = getFakeKibanaRequest(context, 'default', apiKey).fakeRequest;
@@ -64,7 +66,7 @@ describe('getMaintenanceWindows', () => {
     expect(
       await getMaintenanceWindows({
         fakeRequest,
-        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+        getMaintenanceWindowClientWithRequest: vi.fn().mockReturnValue(maintenanceWindowClient),
         logger,
         ruleTypeId,
         ruleTypeCategory: 'observability',
@@ -98,7 +100,7 @@ describe('getMaintenanceWindows', () => {
     expect(
       await getMaintenanceWindows({
         fakeRequest,
-        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+        getMaintenanceWindowClientWithRequest: vi.fn().mockReturnValue(maintenanceWindowClient),
         logger,
         ruleTypeId,
         ruleTypeCategory: 'observability',
@@ -139,7 +141,7 @@ describe('getMaintenanceWindows', () => {
     expect(
       await getMaintenanceWindows({
         fakeRequest,
-        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+        getMaintenanceWindowClientWithRequest: vi.fn().mockReturnValue(maintenanceWindowClient),
         logger,
         ruleTypeId,
         ruleTypeCategory: 'observability',
@@ -179,7 +181,7 @@ describe('getMaintenanceWindows', () => {
     expect(
       await getMaintenanceWindows({
         fakeRequest,
-        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+        getMaintenanceWindowClientWithRequest: vi.fn().mockReturnValue(maintenanceWindowClient),
         logger,
         ruleTypeId,
         ruleTypeCategory: 'management',
@@ -189,7 +191,7 @@ describe('getMaintenanceWindows', () => {
     expect(
       await getMaintenanceWindows({
         fakeRequest,
-        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+        getMaintenanceWindowClientWithRequest: vi.fn().mockReturnValue(maintenanceWindowClient),
         logger,
         ruleTypeId,
         ruleTypeCategory: 'observability',
@@ -199,7 +201,7 @@ describe('getMaintenanceWindows', () => {
     expect(
       await getMaintenanceWindows({
         fakeRequest,
-        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+        getMaintenanceWindowClientWithRequest: vi.fn().mockReturnValue(maintenanceWindowClient),
         logger,
         ruleTypeId,
         ruleTypeCategory: 'securitySolution',
@@ -213,7 +215,7 @@ describe('getMaintenanceWindows', () => {
     expect(
       await getMaintenanceWindows({
         fakeRequest,
-        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+        getMaintenanceWindowClientWithRequest: vi.fn().mockReturnValue(maintenanceWindowClient),
         logger,
         ruleTypeId,
         ruleTypeCategory: 'observability',
@@ -229,7 +231,7 @@ describe('getMaintenanceWindows', () => {
     expect(
       await getMaintenanceWindows({
         fakeRequest,
-        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+        getMaintenanceWindowClientWithRequest: vi.fn().mockReturnValue(maintenanceWindowClient),
         logger,
         ruleTypeId,
         ruleTypeCategory: 'observability',
@@ -408,6 +410,6 @@ describe('filterMaintenanceWindowsIds', () => {
 
 function getTaskRunnerContext() {
   return {
-    getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+    getMaintenanceWindowClientWithRequest: vi.fn().mockReturnValue(maintenanceWindowClient),
   };
 }

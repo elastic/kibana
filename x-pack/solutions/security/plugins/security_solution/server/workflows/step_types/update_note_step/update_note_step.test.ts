@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -13,16 +16,16 @@ import { NOTE_URL } from '../../../../common/constants';
 import type { updateNoteInputSchema } from '../../../../common/workflows/step_types/update_note_step/update_note_step_common';
 
 describe('updateNoteStepDefinition', () => {
-  let mockContextManager: jest.Mocked<
+  let mockContextManager: Mocked<
     StepHandlerContext<typeof updateNoteInputSchema>['contextManager']
   >;
   let mockContext: StepHandlerContext<typeof updateNoteInputSchema>;
 
   beforeEach(() => {
     mockContextManager = {
-      callKibanaApi: jest.fn(),
-      getFakeRequest: jest.fn(),
-    } as unknown as jest.Mocked<StepHandlerContext<typeof updateNoteInputSchema>['contextManager']>;
+      callKibanaApi: vi.fn(),
+      getFakeRequest: vi.fn(),
+    } as unknown as Mocked<StepHandlerContext<typeof updateNoteInputSchema>['contextManager']>;
 
     mockContext = {
       input: {

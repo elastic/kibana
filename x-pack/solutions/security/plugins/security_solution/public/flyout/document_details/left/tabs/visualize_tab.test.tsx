@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useGraphPreview } from '../../../../flyout_v2/document/main/hooks/use_graph_preview';
@@ -21,36 +24,51 @@ const mockAnalyzeGraphTestId = 'analyze-graph';
 const mockSessionViewTestId = 'session-view';
 
 // Mock all required dependencies
-jest.mock('../../../../flyout_v2/document/main/hooks/use_graph_preview');
-jest.mock('../../../../common/hooks/use_upselling');
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../shared/context');
-jest.mock('../components/graph_visualization', () => ({
-  GRAPH_ID: 'graph-id',
-  GraphVisualization: () => (
-    <div data-test-subj={mockGraphVisualizationTestId}>{'Graph Visualization'}</div>
-  ),
-}));
-jest.mock('../components/analyze_graph', () => ({
-  ANALYZE_GRAPH_ID: 'analyze-graph-id',
-  AnalyzeGraph: () => <div data-test-subj={mockAnalyzeGraphTestId}>{'Analyze Graph'}</div>,
-}));
-jest.mock('../components/session_view', () => ({
-  SESSION_VIEW_ID: 'session-view-id',
-  SessionView: () => <div data-test-subj={mockSessionViewTestId}>{'Session View'}</div>,
-}));
+vi.mock('../../../../flyout_v2/document/main/hooks/use_graph_preview');
+vi.mock('../../../../common/hooks/use_upselling');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../shared/context');
+vi.mock('../components/graph_visualization', () => {
+      const mocked = {
+      GRAPH_ID: 'graph-id',
+      GraphVisualization: () => (
+        <div data-test-subj={mockGraphVisualizationTestId}>{'Graph Visualization'}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../components/analyze_graph', () => {
+      const mocked = {
+      ANALYZE_GRAPH_ID: 'analyze-graph-id',
+      AnalyzeGraph: () => <div data-test-subj={mockAnalyzeGraphTestId}>{'Analyze Graph'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../components/session_view', () => {
+      const mocked = {
+      SESSION_VIEW_ID: 'session-view-id',
+      SessionView: () => <div data-test-subj={mockSessionViewTestId}>{'Session View'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
-  uiMetricService: {
-    trackUiMetric: jest.fn(),
-  },
-  GRAPH_INVESTIGATION: 'graph-investigation',
-}));
-jest.mock('../../../../common/lib/apm/use_start_transaction', () => ({
-  useStartTransaction: () => ({
-    startTransaction: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => {
+      const mocked = {
+      uiMetricService: {
+        trackUiMetric: vi.fn(),
+      },
+      GRAPH_INVESTIGATION: 'graph-investigation',
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/apm/use_start_transaction', () => {
+      const mocked = {
+      useStartTransaction: () => ({
+        startTransaction: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderVisualizeTab = () => {
   return render(
@@ -62,16 +80,16 @@ const renderVisualizeTab = () => {
 
 describe('VisualizeTab', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useGraphPreview as jest.Mock).mockReturnValue({
+    (useGraphPreview as Mock).mockReturnValue({
       shouldShowGraph: true,
       hasGraphData: true,
     });
 
-    (useUpsellingComponent as jest.Mock).mockReturnValue(null);
+    (useUpsellingComponent as Mock).mockReturnValue(null);
 
-    (useExpandableFlyoutState as jest.Mock).mockReturnValue({
+    (useExpandableFlyoutState as Mock).mockReturnValue({
       left: {
         path: {
           subTab: GRAPH_ID,
@@ -79,13 +97,13 @@ describe('VisualizeTab', () => {
       },
     });
 
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
+    (useDocumentDetailsContext as Mock).mockReturnValue({
       searchHit: { _id: 'doc-1', _index: 'idx', _source: {} },
     });
   });
 
   it('should not render GraphVisualization component when graph is not available', () => {
-    (useGraphPreview as jest.Mock).mockReturnValue({
+    (useGraphPreview as Mock).mockReturnValue({
       shouldShowGraph: false,
       hasGraphData: false,
     });
@@ -100,7 +118,7 @@ describe('VisualizeTab', () => {
   });
 
   it('should render graph visualization when shouldShowGraph is true', () => {
-    (useGraphPreview as jest.Mock).mockReturnValue({
+    (useGraphPreview as Mock).mockReturnValue({
       shouldShowGraph: true,
       hasGraphData: true,
     });
@@ -114,13 +132,13 @@ describe('VisualizeTab', () => {
   });
 
   it('should render graph upselling message when hasGraphData is true and upsell component is available', () => {
-    (useGraphPreview as jest.Mock).mockReturnValue({
+    (useGraphPreview as Mock).mockReturnValue({
       shouldShowGraph: false,
       hasGraphData: true,
     });
 
     const MockUpsell = () => <div data-test-subj="graphVisualizationUpsell">{'Upgrade'}</div>;
-    (useUpsellingComponent as jest.Mock).mockReturnValue(MockUpsell);
+    (useUpsellingComponent as Mock).mockReturnValue(MockUpsell);
 
     renderVisualizeTab();
 

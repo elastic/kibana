@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -17,11 +19,14 @@ import type { AnalyticsCollection } from '../../../../../../common/types/analyti
 
 import { AnalyticsCollectionIntegrateView } from './analytics_collection_integrate_view';
 
-jest.mock('../../../../shared/cloud_details/cloud_details', () => ({
-  useCloudDetails: () => ({
-    elasticsearchUrl: 'your_deployment_url',
-  }),
-}));
+vi.mock('../../../../shared/cloud_details/cloud_details', () => {
+      const mocked = {
+      useCloudDetails: () => ({
+        elasticsearchUrl: 'your_deployment_url',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AnalyticsCollectionIntegrate', () => {
   const analyticsCollections: AnalyticsCollection = {
@@ -30,7 +35,7 @@ describe('AnalyticsCollectionIntegrate', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders', () => {

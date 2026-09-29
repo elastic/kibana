@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCreateFieldDefinition } from './use_create_field_definition';
@@ -14,17 +17,20 @@ import { useCasesToast } from '../../../common/use_cases_toast';
 import { TestProviders, createTestQueryClient } from '../../../common/mock';
 import * as i18n from '../translations';
 
-jest.mock('../api/api');
-jest.mock('../../../common/use_cases_toast');
+vi.mock('../api/api');
+vi.mock('../../../common/use_cases_toast');
 
-const mockReportFieldDefinitionCreated = jest.fn();
-jest.mock('../../../analytics/field_library', () => ({
-  useFieldDefinitionCreatedEBT: () => mockReportFieldDefinitionCreated,
-}));
+const mockReportFieldDefinitionCreated = vi.fn();
+vi.mock('../../../analytics/field_library', () => {
+      const mocked = {
+      useFieldDefinitionCreatedEBT: () => mockReportFieldDefinitionCreated,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useCreateFieldDefinition', () => {
-  const showErrorToast = jest.fn();
-  const showSuccessToast = jest.fn();
+  const showErrorToast = vi.fn();
+  const showSuccessToast = vi.fn();
 
   const fieldDefinitionInput = {
     name: 'my_field',
@@ -40,12 +46,12 @@ describe('useCreateFieldDefinition', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useCasesToast as jest.Mock).mockReturnValue({ showErrorToast, showSuccessToast });
+    vi.clearAllMocks();
+    (useCasesToast as Mock).mockReturnValue({ showErrorToast, showSuccessToast });
   });
 
   it('calls postFieldDefinition with the input payload', async () => {
-    (postFieldDefinition as jest.Mock).mockResolvedValue(fieldDefinitionResponse);
+    (postFieldDefinition as Mock).mockResolvedValue(fieldDefinitionResponse);
 
     const { result } = renderHook(() => useCreateFieldDefinition(), { wrapper: TestProviders });
 
@@ -59,9 +65,9 @@ describe('useCreateFieldDefinition', () => {
   });
 
   it('invalidates field definitions query and shows success toast', async () => {
-    (postFieldDefinition as jest.Mock).mockResolvedValue(fieldDefinitionResponse);
+    (postFieldDefinition as Mock).mockResolvedValue(fieldDefinitionResponse);
     const queryClient = createTestQueryClient();
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useCreateFieldDefinition(), {
       wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
@@ -79,8 +85,8 @@ describe('useCreateFieldDefinition', () => {
   });
 
   it('calls the onSuccess callback with the server response', async () => {
-    (postFieldDefinition as jest.Mock).mockResolvedValue(fieldDefinitionResponse);
-    const onSuccess = jest.fn();
+    (postFieldDefinition as Mock).mockResolvedValue(fieldDefinitionResponse);
+    const onSuccess = vi.fn();
 
     const { result } = renderHook(() => useCreateFieldDefinition({ onSuccess }), {
       wrapper: TestProviders,
@@ -95,7 +101,7 @@ describe('useCreateFieldDefinition', () => {
 
   it('shows an error toast when the request fails', async () => {
     const error = new Error('Network error');
-    (postFieldDefinition as jest.Mock).mockRejectedValue(error);
+    (postFieldDefinition as Mock).mockRejectedValue(error);
 
     const { result } = renderHook(() => useCreateFieldDefinition(), { wrapper: TestProviders });
 
@@ -112,7 +118,7 @@ describe('useCreateFieldDefinition', () => {
 
   describe('telemetry', () => {
     it('reports the created event with is_global true for a global field', async () => {
-      (postFieldDefinition as jest.Mock).mockResolvedValue({
+      (postFieldDefinition as Mock).mockResolvedValue({
         ...fieldDefinitionResponse,
         isGlobal: true,
       });
@@ -131,7 +137,7 @@ describe('useCreateFieldDefinition', () => {
     });
 
     it('reports is_global false when the server returns isGlobal: false', async () => {
-      (postFieldDefinition as jest.Mock).mockResolvedValue({
+      (postFieldDefinition as Mock).mockResolvedValue({
         ...fieldDefinitionResponse,
         isGlobal: false,
       });
@@ -148,7 +154,7 @@ describe('useCreateFieldDefinition', () => {
     });
 
     it('reports is_global false when the server omits the isGlobal field', async () => {
-      (postFieldDefinition as jest.Mock).mockResolvedValue(fieldDefinitionResponse);
+      (postFieldDefinition as Mock).mockResolvedValue(fieldDefinitionResponse);
 
       const { result } = renderHook(() => useCreateFieldDefinition(), { wrapper: TestProviders });
 
@@ -162,7 +168,7 @@ describe('useCreateFieldDefinition', () => {
     });
 
     it('does not report when the request fails', async () => {
-      (postFieldDefinition as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (postFieldDefinition as Mock).mockRejectedValue(new Error('Network error'));
 
       const { result } = renderHook(() => useCreateFieldDefinition(), { wrapper: TestProviders });
 
@@ -186,7 +192,7 @@ describe('useCreateFieldDefinition', () => {
     // but always runs the mutation-level onSuccess).
     it('still reports when the caller unmounts before the server answers', async () => {
       let resolvePost: (value: unknown) => void;
-      (postFieldDefinition as jest.Mock).mockImplementation(
+      (postFieldDefinition as Mock).mockImplementation(
         () => new Promise((resolve) => (resolvePost = resolve))
       );
 

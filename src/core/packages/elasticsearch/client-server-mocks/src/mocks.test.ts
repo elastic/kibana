@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MockedFunction } from 'vitest';
+
 import { elasticsearchClientMock } from './mocks';
 
 describe('Mocked client', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
 
-  const expectMocked = (fn: jest.MockedFunction<any> | undefined) => {
+  const expectMocked = (fn: MockedFunction<any> | undefined) => {
     expect(fn).toBeDefined();
     expect(fn.mockReturnValue).toEqual(expect.any(Function));
   };

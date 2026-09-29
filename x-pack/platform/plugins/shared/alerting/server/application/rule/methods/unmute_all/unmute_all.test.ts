@@ -5,32 +5,44 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RulesClientContext } from '../../../../rules_client';
 import { unmuteAll } from './unmute_all';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
-jest.mock('../../../../lib/retry_if_conflicts', () => ({
-  retryIfConflicts: (_: unknown, id: unknown, asyncFn: () => Promise<unknown>) => {
-    return asyncFn();
-  },
-}));
+vi.mock('../../../../lib/retry_if_conflicts', () => {
+      const mocked = {
+      retryIfConflicts: (_: unknown, id: unknown, asyncFn: () => Promise<unknown>) => {
+        return asyncFn();
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../rules_client/lib', () => ({
-  updateMetaAttributes: (_context: unknown, attributes: unknown) => attributes,
-}));
+vi.mock('../../../../rules_client/lib', () => {
+      const mocked = {
+      updateMetaAttributes: (_context: unknown, attributes: unknown) => attributes,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../saved_objects', () => ({
-  partiallyUpdateRule: jest.fn(),
-}));
+vi.mock('../../../../saved_objects', () => {
+      const mocked = {
+      partiallyUpdateRule: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const loggerErrorMock = jest.fn();
-const getBulkMock = jest.fn();
-const unmuteAllAlertsMock = jest.fn();
+const loggerErrorMock = vi.fn();
+const getBulkMock = vi.fn();
+const unmuteAllAlertsMock = vi.fn();
 
 const savedObjectsMock = savedObjectsRepositoryMock.create();
-savedObjectsMock.get = jest.fn().mockReturnValue({
+savedObjectsMock.get = vi.fn().mockReturnValue({
   attributes: {
     actions: [],
     alertTypeId: 'test-type',
@@ -38,9 +50,7 @@ savedObjectsMock.get = jest.fn().mockReturnValue({
   version: '9.0.0',
 });
 
-const { partiallyUpdateRule: partiallyUpdateRuleMock } = jest.requireMock(
-  '../../../../saved_objects'
-);
+const { partiallyUpdateRule: partiallyUpdateRuleMock } = (await vi.importMock('../../../../saved_objects'));
 
 const context = {
   logger: { error: loggerErrorMock },
@@ -59,13 +69,13 @@ const context = {
   alertsService: {
     unmuteAllAlerts: unmuteAllAlertsMock,
   },
-  getAlertIndicesAlias: jest.fn().mockReturnValue(['.alerts-default']),
+  getAlertIndicesAlias: vi.fn().mockReturnValue(['.alerts-default']),
   spaceId: 'default',
 } as unknown as RulesClientContext;
 
 describe('unmuteAll', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should unmute all alerts for a rule', async () => {
@@ -123,7 +133,7 @@ describe('unmuteAll', () => {
   });
 
   it('should not call alertsService when no alert indices exist', async () => {
-    (context.getAlertIndicesAlias as jest.Mock).mockReturnValue([]);
+    (context.getAlertIndicesAlias as Mock).mockReturnValue([]);
     const validParams = {
       id: 'rule-123',
     };
@@ -135,13 +145,13 @@ describe('unmuteAll', () => {
 
   it('throws error but still updates rule when alertsService fails', async () => {
     const loggerMock = loggingSystemMock.create().get();
-    const unmuteAllAlertsErrorMock = jest
+    const unmuteAllAlertsErrorMock = vi
       .fn()
       .mockRejectedValueOnce(new Error('ES connection failed'));
     const contextWithLogger = {
       ...context,
       logger: loggerMock,
-      getAlertIndicesAlias: jest.fn().mockReturnValue(['.alerts-default']),
+      getAlertIndicesAlias: vi.fn().mockReturnValue(['.alerts-default']),
       alertsService: {
         unmuteAllAlerts: unmuteAllAlertsErrorMock,
       },

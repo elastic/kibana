@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,23 +14,29 @@ import userEvent from '@testing-library/user-event';
 import type { TaskTypeOption } from './add_endpoint_modal';
 import { AddEndpointModal } from './add_endpoint_modal';
 
-const mockMutate = jest.fn();
+const mockMutate = vi.fn();
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: {},
-      notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
-    },
-  }),
-}));
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: {},
+          notifications: { toasts: { addSuccess: vi.fn(), addDanger: vi.fn() } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/inference-endpoint-ui-common', () => ({
-  useInferenceEndpointMutation: () => ({
-    mutate: mockMutate,
-    isLoading: false,
-  }),
-}));
+vi.mock('@kbn/inference-endpoint-ui-common', () => {
+      const mocked = {
+      useInferenceEndpointMutation: () => ({
+        mutate: mockMutate,
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultTaskTypes: TaskTypeOption[] = [
   {
@@ -52,11 +60,11 @@ function getEndpointIdInput(): HTMLInputElement {
 }
 
 describe('AddEndpointModal', () => {
-  const onSave = jest.fn();
-  const onCancel = jest.fn();
+  const onSave = vi.fn();
+  const onCancel = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderModal = (overrides = {}) =>

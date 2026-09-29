@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { FilterStateStore, buildFilter, FILTERS } from '@kbn/es-query';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
@@ -22,13 +24,13 @@ type StartServicesMock = DeeplyMockedKeys<KibanaContextStartDependencies>;
 const createExecutionContextMock = (): DeeplyMockedKeys<ExecutionContext> => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abortSignal: {} as any,
-  getExecutionContext: jest.fn(),
-  getSearchContext: jest.fn(),
-  getSearchSessionId: jest.fn(),
-  inspectorAdapters: jest.fn(),
+  getExecutionContext: vi.fn(),
+  getSearchContext: vi.fn(),
+  getSearchSessionId: vi.fn(),
+  inspectorAdapters: vi.fn(),
   types: {},
   variables: {},
-  getKibanaRequest: jest.fn(),
+  getKibanaRequest: vi.fn(),
 });
 
 const emptyArgs = { q: null, timeRange: null, savedSearchId: null };
@@ -42,7 +44,7 @@ describe('kibanaContextFn', () => {
   beforeEach(async () => {
     kibanaContextFn = getKibanaContextFn(getStartServicesMock);
     startServicesMock = {
-      getSavedSearch: jest.fn(),
+      getSavedSearch: vi.fn(),
     };
   });
 

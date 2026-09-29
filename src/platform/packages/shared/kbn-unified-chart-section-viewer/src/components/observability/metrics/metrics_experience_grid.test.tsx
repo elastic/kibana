@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, render } from '@testing-library/react';
@@ -14,7 +17,7 @@ import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from './hooks';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 
-const useFetchMetricsDataMock = useFetchMetricsData as jest.MockedFunction<
+const useFetchMetricsDataMock = useFetchMetricsData as MockedFunction<
   typeof useFetchMetricsData
 >;
 import type {
@@ -42,30 +45,42 @@ import {
 import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags_mock';
 import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 
-jest.mock('./context/metrics_experience_state_provider');
-jest.mock('@kbn/ebt-tools', () => ({
-  PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  usePerformanceContext: () => ({
-    onPageReady: jest.fn(),
-  }),
-}));
-jest.mock('./hooks', () => ({
-  ...jest.requireActual('./hooks'),
-  useMetricsGridFullScreen: jest.fn(),
-  useMetricFieldsFilter: jest.fn(),
-  useDiscoverFieldForBreakdown: jest.fn(),
-}));
-jest.mock('./hooks/use_fetch_metrics_data', () => ({
-  useFetchMetricsData: jest.fn(),
-}));
-jest.mock('./metrics_experience_grid_content', () => ({
-  MetricsExperienceGridContent: jest.fn(() => (
-    <div data-test-subj="metricsExperienceGridContent" />
-  )),
-}));
+vi.mock('./context/metrics_experience_state_provider');
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      usePerformanceContext: () => ({
+        onPageReady: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('./hooks')),
+      useMetricsGridFullScreen: vi.fn(),
+      useMetricFieldsFilter: vi.fn(),
+      useDiscoverFieldForBreakdown: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./hooks/use_fetch_metrics_data', () => {
+      const mocked = {
+      useFetchMetricsData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./metrics_experience_grid_content', () => {
+      const mocked = {
+      MetricsExperienceGridContent: vi.fn(() => (
+        <div data-test-subj="metricsExperienceGridContent" />
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../flyout', () => {
-  const actual = jest.requireActual('../../flyout');
+vi.mock('../../flyout', async () => {
+  const actual = (await vi.importActual('../../flyout'));
   return {
     ...actual,
     GridSettingsFlyout: ({
@@ -88,8 +103,8 @@ jest.mock('../../flyout', () => {
 
 // Simplified ToolbarSelector so dimension options are clickable in JSDOM without
 // needing EUI portals or keyboard simulation.
-jest.mock('@kbn/shared-ux-toolbar-selector', () => {
-  const actual = jest.requireActual('@kbn/shared-ux-toolbar-selector');
+vi.mock('@kbn/shared-ux-toolbar-selector', async () => {
+  const actual = (await vi.importActual('@kbn/shared-ux-toolbar-selector'));
   return {
     ...actual,
     ToolbarSelector: ({
@@ -151,13 +166,13 @@ jest.mock('@kbn/shared-ux-toolbar-selector', () => {
 });
 
 // Make lodash debounce synchronous so dimension-change callbacks fire in act().
-jest.mock('lodash', () => {
-  const actual = jest.requireActual('lodash');
+vi.mock('lodash', () => {
+  const actual = require('lodash');
   return {
     ...actual,
     debounce: (fn: any) => {
       const debounced = (...args: any[]) => fn(...args);
-      debounced.cancel = jest.fn();
+      debounced.cancel = vi.fn();
       return debounced;
     },
   };
@@ -172,8 +187,8 @@ jest.mock('lodash', () => {
  * The EmptyState component uses EuiDelayRender with a 500ms delay to avoid
  * flashing loading states. In tests, this just slows things down.
  */
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiDelayRender: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -181,19 +196,19 @@ jest.mock('@elastic/eui', () => {
 });
 
 const useMetricsExperienceStateMock =
-  metricsExperienceStateProvider.useMetricsExperienceState as jest.MockedFunction<
+  metricsExperienceStateProvider.useMetricsExperienceState as MockedFunction<
     typeof metricsExperienceStateProvider.useMetricsExperienceState
   >;
 
-const useMetricsGridFullScreenMock = hooks.useMetricsGridFullScreen as jest.MockedFunction<
+const useMetricsGridFullScreenMock = hooks.useMetricsGridFullScreen as MockedFunction<
   typeof hooks.useMetricsGridFullScreen
 >;
 
-const useMetricFieldsFilterMock = hooks.useMetricFieldsFilter as jest.MockedFunction<
+const useMetricFieldsFilterMock = hooks.useMetricFieldsFilter as MockedFunction<
   typeof hooks.useMetricFieldsFilter
 >;
 
-const useDiscoverFieldForBreakdownMock = hooks.useDiscoverFieldForBreakdown as jest.MockedFunction<
+const useDiscoverFieldForBreakdownMock = hooks.useDiscoverFieldForBreakdown as MockedFunction<
   typeof hooks.useDiscoverFieldForBreakdown
 >;
 
@@ -247,7 +262,7 @@ describe('MetricsExperienceGrid', () => {
   let defaultProps: UnifiedMetricsGridProps;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     fetchParams = getFetchParamsMock({
       dataView: { getIndexPattern: () => 'metrics-*', isTimeBased: () => true } as any,
@@ -266,14 +281,14 @@ describe('MetricsExperienceGrid', () => {
       histogramCss: { name: '', styles: '' },
       fetchParams,
       actions: {
-        openInNewTab: jest.fn(),
-        updateESQLQuery: jest.fn(),
+        openInNewTab: vi.fn(),
+        updateESQLQuery: vi.fn(),
       },
       services: {
         fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
         data: {
           search: {
-            search: jest.fn(),
+            search: vi.fn(),
           },
         },
         uiSettings: {},
@@ -287,22 +302,22 @@ describe('MetricsExperienceGrid', () => {
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
       selectedDimensions: [],
-      onDimensionsChange: jest.fn(),
-      onPageChange: jest.fn(),
+      onDimensionsChange: vi.fn(),
+      onPageChange: vi.fn(),
       isFullscreen: false,
       searchTerm: '',
-      onSearchTermChange: jest.fn(),
-      onToggleFullscreen: jest.fn(),
-      onExitFullscreen: jest.fn(),
+      onSearchTermChange: vi.fn(),
+      onToggleFullscreen: vi.fn(),
+      onExitFullscreen: vi.fn(),
       flyoutState: undefined,
-      onFlyoutStateChange: jest.fn(),
-      onFlyoutSelectedTabChange: jest.fn(),
+      onFlyoutStateChange: vi.fn(),
+      onFlyoutSelectedTabChange: vi.fn(),
       metricsSort: METRICS_GRID_SORT_DEFAULTS,
-      onMetricsSortChange: jest.fn(),
+      onMetricsSortChange: vi.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
       recentlyExploredMetrics: [],
-      onGridSettingsChange: jest.fn(),
+      onGridSettingsChange: vi.fn(),
     });
 
     useFetchMetricsDataMock.mockReturnValue({
@@ -461,29 +476,29 @@ describe('MetricsExperienceGrid', () => {
   });
 
   it('shows and updates the search input when the search button is clicked', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
-    const onSearchTermChange = jest.fn();
+    const onSearchTermChange = vi.fn();
 
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
       selectedDimensions: [],
-      onDimensionsChange: jest.fn(),
-      onPageChange: jest.fn(),
+      onDimensionsChange: vi.fn(),
+      onPageChange: vi.fn(),
       isFullscreen: false,
       searchTerm: '',
       onSearchTermChange,
-      onToggleFullscreen: jest.fn(),
-      onExitFullscreen: jest.fn(),
+      onToggleFullscreen: vi.fn(),
+      onExitFullscreen: vi.fn(),
       flyoutState: undefined,
-      onFlyoutStateChange: jest.fn(),
-      onFlyoutSelectedTabChange: jest.fn(),
+      onFlyoutStateChange: vi.fn(),
+      onFlyoutSelectedTabChange: vi.fn(),
       metricsSort: METRICS_GRID_SORT_DEFAULTS,
-      onMetricsSortChange: jest.fn(),
+      onMetricsSortChange: vi.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
       recentlyExploredMetrics: [],
-      onGridSettingsChange: jest.fn(),
+      onGridSettingsChange: vi.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -505,37 +520,37 @@ describe('MetricsExperienceGrid', () => {
 
     act(() => {
       fireEvent.change(input, { target: { value: 'cpu' } });
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     expect(onSearchTermChange).toHaveBeenCalledWith('cpu');
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('toggles fullscreen mode when the fullscreen button is clicked', () => {
-    const onToggleFullscreen = jest.fn();
+    const onToggleFullscreen = vi.fn();
     const isFullscreen = false;
 
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
       selectedDimensions: [],
-      onDimensionsChange: jest.fn(),
-      onPageChange: jest.fn(),
+      onDimensionsChange: vi.fn(),
+      onPageChange: vi.fn(),
       isFullscreen,
       searchTerm: '',
-      onSearchTermChange: jest.fn(),
+      onSearchTermChange: vi.fn(),
       onToggleFullscreen,
-      onExitFullscreen: jest.fn(),
+      onExitFullscreen: vi.fn(),
       flyoutState: undefined,
-      onFlyoutStateChange: jest.fn(),
-      onFlyoutSelectedTabChange: jest.fn(),
+      onFlyoutStateChange: vi.fn(),
+      onFlyoutSelectedTabChange: vi.fn(),
       metricsSort: METRICS_GRID_SORT_DEFAULTS,
-      onMetricsSortChange: jest.fn(),
+      onMetricsSortChange: vi.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
       recentlyExploredMetrics: [],
-      onGridSettingsChange: jest.fn(),
+      onGridSettingsChange: vi.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -554,27 +569,27 @@ describe('MetricsExperienceGrid', () => {
   });
 
   it('exits fullscreen exactly once on Escape even when the search input has focus', () => {
-    const onToggleFullscreen = jest.fn();
+    const onToggleFullscreen = vi.fn();
 
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
       selectedDimensions: [],
-      onDimensionsChange: jest.fn(),
-      onPageChange: jest.fn(),
+      onDimensionsChange: vi.fn(),
+      onPageChange: vi.fn(),
       isFullscreen: true,
       searchTerm: '',
-      onSearchTermChange: jest.fn(),
+      onSearchTermChange: vi.fn(),
       onToggleFullscreen,
-      onExitFullscreen: jest.fn(),
+      onExitFullscreen: vi.fn(),
       flyoutState: undefined,
-      onFlyoutStateChange: jest.fn(),
-      onFlyoutSelectedTabChange: jest.fn(),
+      onFlyoutStateChange: vi.fn(),
+      onFlyoutSelectedTabChange: vi.fn(),
       metricsSort: METRICS_GRID_SORT_DEFAULTS,
-      onMetricsSortChange: jest.fn(),
+      onMetricsSortChange: vi.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
       recentlyExploredMetrics: [],
-      onGridSettingsChange: jest.fn(),
+      onGridSettingsChange: vi.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -598,31 +613,31 @@ describe('MetricsExperienceGrid', () => {
     // Smoke tests only: these assert the grid feeds `useExitFullscreenOnEmptyResults`
     // the unfiltered metrics. The full matrix of gates lives in
     // `use_exit_fullscreen_on_empty_results.test.ts`.
-    const mockFullscreenState = (onExitFullscreen: jest.Mock, searchTerm = '') => {
+    const mockFullscreenState = (onExitFullscreen: Mock, searchTerm = '') => {
       useMetricsExperienceStateMock.mockReturnValue({
         currentPage: 0,
         selectedDimensions: [],
-        onDimensionsChange: jest.fn(),
-        onPageChange: jest.fn(),
+        onDimensionsChange: vi.fn(),
+        onPageChange: vi.fn(),
         isFullscreen: true,
         searchTerm,
-        onSearchTermChange: jest.fn(),
-        onToggleFullscreen: jest.fn(),
+        onSearchTermChange: vi.fn(),
+        onToggleFullscreen: vi.fn(),
         onExitFullscreen,
         flyoutState: undefined,
-        onFlyoutStateChange: jest.fn(),
-        onFlyoutSelectedTabChange: jest.fn(),
+        onFlyoutStateChange: vi.fn(),
+        onFlyoutSelectedTabChange: vi.fn(),
         metricsSort: METRICS_GRID_SORT_DEFAULTS,
-        onMetricsSortChange: jest.fn(),
+        onMetricsSortChange: vi.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
         recentlyExploredMetrics: [],
-        onGridSettingsChange: jest.fn(),
+        onGridSettingsChange: vi.fn(),
       });
     };
 
     it('exits fullscreen when a settled fetch returns no metrics', () => {
-      const onExitFullscreen = jest.fn();
+      const onExitFullscreen = vi.fn();
       mockFullscreenState(onExitFullscreen);
 
       useFetchMetricsDataMock.mockReturnValue({
@@ -640,7 +655,7 @@ describe('MetricsExperienceGrid', () => {
     });
 
     it('stays in fullscreen while a fetch is in flight', () => {
-      const onExitFullscreen = jest.fn();
+      const onExitFullscreen = vi.fn();
       mockFullscreenState(onExitFullscreen);
 
       useFetchMetricsDataMock.mockReturnValue({
@@ -658,7 +673,7 @@ describe('MetricsExperienceGrid', () => {
     });
 
     it('stays in fullscreen when a search term filters every metric out', () => {
-      const onExitFullscreen = jest.fn();
+      const onExitFullscreen = vi.fn();
       mockFullscreenState(onExitFullscreen, 'no-such-metric');
 
       useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
@@ -677,27 +692,27 @@ describe('MetricsExperienceGrid', () => {
     const environment: Dimension = { name: 'environment' };
 
     it('prunes selectedDimensions when the active stream no longer emits one', () => {
-      const onDimensionsChange = jest.fn();
+      const onDimensionsChange = vi.fn();
 
       useMetricsExperienceStateMock.mockReturnValue({
         currentPage: 0,
         selectedDimensions: [hostName, environment],
         onDimensionsChange,
-        onPageChange: jest.fn(),
+        onPageChange: vi.fn(),
         isFullscreen: false,
         searchTerm: '',
-        onSearchTermChange: jest.fn(),
-        onToggleFullscreen: jest.fn(),
-        onExitFullscreen: jest.fn(),
+        onSearchTermChange: vi.fn(),
+        onToggleFullscreen: vi.fn(),
+        onExitFullscreen: vi.fn(),
         flyoutState: undefined,
-        onFlyoutStateChange: jest.fn(),
-        onFlyoutSelectedTabChange: jest.fn(),
+        onFlyoutStateChange: vi.fn(),
+        onFlyoutSelectedTabChange: vi.fn(),
         metricsSort: METRICS_GRID_SORT_DEFAULTS,
-        onMetricsSortChange: jest.fn(),
+        onMetricsSortChange: vi.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
         recentlyExploredMetrics: [],
-        onGridSettingsChange: jest.fn(),
+        onGridSettingsChange: vi.fn(),
       });
 
       // Stream's universe only has `host.name`; `environment` is mapped but
@@ -718,8 +733,8 @@ describe('MetricsExperienceGrid', () => {
 
   describe('toolbar dimension selection', () => {
     it('calls onDimensionsChange when user picks a dimension via the toolbar', () => {
-      const onPageChange = jest.fn();
-      const onDimensionsChange = jest.fn();
+      const onPageChange = vi.fn();
+      const onDimensionsChange = vi.fn();
 
       useMetricsExperienceStateMock.mockReturnValue({
         currentPage: 2,
@@ -728,18 +743,18 @@ describe('MetricsExperienceGrid', () => {
         onPageChange,
         isFullscreen: false,
         searchTerm: '',
-        onSearchTermChange: jest.fn(),
-        onToggleFullscreen: jest.fn(),
-        onExitFullscreen: jest.fn(),
+        onSearchTermChange: vi.fn(),
+        onToggleFullscreen: vi.fn(),
+        onExitFullscreen: vi.fn(),
         flyoutState: undefined,
-        onFlyoutStateChange: jest.fn(),
-        onFlyoutSelectedTabChange: jest.fn(),
+        onFlyoutStateChange: vi.fn(),
+        onFlyoutSelectedTabChange: vi.fn(),
         metricsSort: METRICS_GRID_SORT_DEFAULTS,
-        onMetricsSortChange: jest.fn(),
+        onMetricsSortChange: vi.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
         recentlyExploredMetrics: [],
-        onGridSettingsChange: jest.fn(),
+        onGridSettingsChange: vi.fn(),
       });
 
       const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -767,27 +782,27 @@ describe('MetricsExperienceGrid', () => {
     });
 
     it('opens the flyout when the edit button is clicked and forwards its callbacks to state', () => {
-      const onGridSettingsChange = jest.fn();
+      const onGridSettingsChange = vi.fn();
 
       useMetricsExperienceStateMock.mockReturnValue({
         currentPage: 0,
         selectedDimensions: [],
-        onDimensionsChange: jest.fn(),
-        onPageChange: jest.fn(),
+        onDimensionsChange: vi.fn(),
+        onPageChange: vi.fn(),
         isFullscreen: false,
         searchTerm: '',
-        onSearchTermChange: jest.fn(),
-        onToggleFullscreen: jest.fn(),
-        onExitFullscreen: jest.fn(),
+        onSearchTermChange: vi.fn(),
+        onToggleFullscreen: vi.fn(),
+        onExitFullscreen: vi.fn(),
         flyoutState: undefined,
-        onFlyoutStateChange: jest.fn(),
-        onFlyoutSelectedTabChange: jest.fn(),
+        onFlyoutStateChange: vi.fn(),
+        onFlyoutSelectedTabChange: vi.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
         recentlyExploredMetrics: [],
         onGridSettingsChange,
         metricsSort: METRICS_GRID_SORT_DEFAULTS,
-        onMetricsSortChange: jest.fn(),
+        onMetricsSortChange: vi.fn(),
       });
 
       const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -820,18 +835,18 @@ describe('MetricsExperienceGrid', () => {
     });
 
     it('closes the metric insights flyout when the edit button is clicked', () => {
-      const onFlyoutStateChange = jest.fn();
+      const onFlyoutStateChange = vi.fn();
 
       useMetricsExperienceStateMock.mockReturnValue({
         currentPage: 0,
         selectedDimensions: [],
-        onDimensionsChange: jest.fn(),
-        onPageChange: jest.fn(),
+        onDimensionsChange: vi.fn(),
+        onPageChange: vi.fn(),
         isFullscreen: false,
         searchTerm: '',
-        onSearchTermChange: jest.fn(),
-        onToggleFullscreen: jest.fn(),
-        onExitFullscreen: jest.fn(),
+        onSearchTermChange: vi.fn(),
+        onToggleFullscreen: vi.fn(),
+        onExitFullscreen: vi.fn(),
         flyoutState: {
           gridPosition: 0,
           metricUniqueKey: 'metrics-*:field1',
@@ -839,13 +854,13 @@ describe('MetricsExperienceGrid', () => {
           selectedTabId: 'overview',
         },
         onFlyoutStateChange,
-        onFlyoutSelectedTabChange: jest.fn(),
+        onFlyoutSelectedTabChange: vi.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
         recentlyExploredMetrics: [],
-        onGridSettingsChange: jest.fn(),
+        onGridSettingsChange: vi.fn(),
         metricsSort: METRICS_GRID_SORT_DEFAULTS,
-        onMetricsSortChange: jest.fn(),
+        onMetricsSortChange: vi.fn(),
       });
 
       const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {

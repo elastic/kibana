@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
@@ -17,57 +20,60 @@ import { listEnrollmentApiKeys, deleteEnrollmentApiKeys } from '../api_keys';
 
 import { resetPreconfiguredAgentPolicies } from './reset_agent_policies';
 
-jest.mock('../agent_policy');
-jest.mock('../package_policy');
-jest.mock('../setup');
-jest.mock('../agents');
-jest.mock('../api_keys');
+vi.mock('../agent_policy');
+vi.mock('../package_policy');
+vi.mock('../setup');
+vi.mock('../agents');
+vi.mock('../api_keys');
 
-const mockedSetupFleet = setupFleet as jest.MockedFunction<typeof setupFleet>;
-const mockedForceUnenrollAgent = forceUnenrollAgent as jest.MockedFunction<
+const mockedSetupFleet = setupFleet as MockedFunction<typeof setupFleet>;
+const mockedForceUnenrollAgent = forceUnenrollAgent as MockedFunction<
   typeof forceUnenrollAgent
 >;
-const mockedDeleteEnrollmentApiKeys = deleteEnrollmentApiKeys as jest.MockedFunction<
+const mockedDeleteEnrollmentApiKeys = deleteEnrollmentApiKeys as MockedFunction<
   typeof deleteEnrollmentApiKeys
 >;
-const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
-const mockedListEnrollmentApiKeys = listEnrollmentApiKeys as jest.MockedFunction<
+const mockedGetAgentsByKuery = getAgentsByKuery as MockedFunction<typeof getAgentsByKuery>;
+const mockedListEnrollmentApiKeys = listEnrollmentApiKeys as MockedFunction<
   typeof listEnrollmentApiKeys
 >;
 
-const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
-const mockedGetAgentPolicySavedObjectType = getAgentPolicySavedObjectType as jest.MockedFunction<
+const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
+const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
+const mockedGetAgentPolicySavedObjectType = getAgentPolicySavedObjectType as MockedFunction<
   typeof getAgentPolicySavedObjectType
 >;
 const mockedGetPackagePolicySavedObjectType =
-  getPackagePolicySavedObjectType as jest.MockedFunction<typeof getPackagePolicySavedObjectType>;
+  getPackagePolicySavedObjectType as MockedFunction<typeof getPackagePolicySavedObjectType>;
 
-jest.mock('../app_context', () => ({
-  appContextService: {
-    getLogger: () =>
-      new Proxy(
-        {},
-        {
-          get(_, property) {
-            if (property === 'get') {
-              return () =>
-                new Proxy(
-                  {},
-                  {
-                    get() {
-                      return jest.fn();
-                    },
-                  }
-                );
+vi.mock('../app_context', () => {
+      const mocked = {
+      appContextService: {
+        getLogger: () =>
+          new Proxy(
+            {},
+            {
+              get(_, property) {
+                if (property === 'get') {
+                  return () =>
+                    new Proxy(
+                      {},
+                      {
+                        get() {
+                          return vi.fn();
+                        },
+                      }
+                    );
+                }
+
+                return vi.fn();
+              },
             }
-
-            return jest.fn();
-          },
-        }
-      ),
-  },
-}));
+          ),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('reset agent policies', () => {
   it('should not unenroll agents or revoke enrollment api keys if there is no existing policies', async () => {
@@ -126,7 +132,7 @@ describe('reset agent policies', () => {
 
   describe('_deleteGhostPackagePolicies with legacy (non-space-aware) saved object types', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockedGetAgentPolicySavedObjectType.mockResolvedValue('ingest-agent-policies');
       mockedGetPackagePolicySavedObjectType.mockResolvedValue('ingest-package-policies');
       mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ConfirmResolutionModal } from './confirm_resolution_modal';
@@ -17,12 +19,12 @@ describe('ConfirmResolutionModal', () => {
   const defaultProps = {
     currentEntity,
     newEntity,
-    onConfirm: jest.fn(),
-    onCancel: jest.fn(),
+    onConfirm: vi.fn(),
+    onCancel: vi.fn(),
     isLoading: false,
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders modal with radio options', () => {
     const { getByTestId, getAllByRole } = render(<ConfirmResolutionModal {...defaultProps} />);

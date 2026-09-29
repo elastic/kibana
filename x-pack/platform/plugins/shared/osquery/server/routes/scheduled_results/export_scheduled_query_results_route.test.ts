@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { NEVER } from 'rxjs';
 import { escapeKuery } from '@kbn/es-query';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -18,49 +21,58 @@ import { exportScheduledQueryResultsRoute } from './export_scheduled_query_resul
 const SCHEDULED_EXPORT_PATH =
   '/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export';
 
-jest.mock('../export/create_export_route_handler', () => ({
-  createExportRouteHandler: jest.fn(),
-}));
+vi.mock('../export/create_export_route_handler', () => {
+      const mocked = {
+      createExportRouteHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/get_internal_saved_object_client', () => ({
-  createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
-}));
+vi.mock('../../utils/get_internal_saved_object_client', () => {
+      const mocked = {
+      createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../unified_history/process_scheduled_history', () => ({
-  getPacksForSpace: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('../unified_history/process_scheduled_history', () => {
+      const mocked = {
+      getPacksForSpace: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { createExportRouteHandler } from '../export/create_export_route_handler';
 import { getPacksForSpace } from '../unified_history/process_scheduled_history';
 
-const mockGetPacksForSpace = getPacksForSpace as jest.MockedFunction<typeof getPacksForSpace>;
+const mockGetPacksForSpace = getPacksForSpace as MockedFunction<typeof getPacksForSpace>;
 
-const mockCreateExportRouteHandler = createExportRouteHandler as jest.MockedFunction<
+const mockCreateExportRouteHandler = createExportRouteHandler as MockedFunction<
   typeof createExportRouteHandler
 >;
 
 const createOsqueryContext = (): OsqueryAppContext =>
   ({
     logFactory: { get: () => loggingSystemMock.createLogger() },
-    isCpsActive: jest.fn().mockResolvedValue(false),
+    isCpsActive: vi.fn().mockResolvedValue(false),
     experimentalFeatures: { ...allowedExperimentalValues, exportResults: true },
     security: {} as OsqueryAppContext['security'],
     service: {
-      getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+      getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
       getIntegrationNamespaces: undefined,
     },
-    getStartServices: jest.fn(),
-    config: jest.fn(),
+    getStartServices: vi.fn(),
+    config: vi.fn(),
     telemetryEventsSender: {},
     licensing: {},
   } as unknown as OsqueryAppContext);
 
 describe('exportScheduledQueryResultsRoute', () => {
-  let mockHandler: jest.Mock;
+  let mockHandler: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockHandler = jest.fn().mockResolvedValue({ status: 200 });
+    vi.clearAllMocks();
+    mockHandler = vi.fn().mockResolvedValue({ status: 200 });
     mockCreateExportRouteHandler.mockReturnValue(mockHandler);
     mockGetPacksForSpace.mockResolvedValue([]);
   });
@@ -102,7 +114,7 @@ describe('exportScheduledQueryResultsRoute', () => {
     const router = httpServiceMock.createRouter();
     exportScheduledQueryResultsRoute(router as never, createOsqueryContext());
 
-    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
       .mock.calls[0][1];
 
     const request = {
@@ -138,7 +150,7 @@ describe('exportScheduledQueryResultsRoute', () => {
     const router = httpServiceMock.createRouter();
     exportScheduledQueryResultsRoute(router as never, createOsqueryContext());
 
-    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
       .mock.calls[0][1];
 
     const request = {
@@ -188,7 +200,7 @@ describe('exportScheduledQueryResultsRoute', () => {
     const router = httpServiceMock.createRouter();
     exportScheduledQueryResultsRoute(router as never, createOsqueryContext());
 
-    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
       .mock.calls[0][1];
 
     const request = {
@@ -226,7 +238,7 @@ describe('exportScheduledQueryResultsRoute', () => {
     const router = httpServiceMock.createRouter();
     exportScheduledQueryResultsRoute(router as never, createOsqueryContext());
 
-    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
       .mock.calls[0][1];
 
     const request = {
@@ -262,7 +274,7 @@ describe('exportScheduledQueryResultsRoute', () => {
     const router = httpServiceMock.createRouter();
     exportScheduledQueryResultsRoute(router as never, createOsqueryContext());
 
-    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
       .mock.calls[0][1];
 
     const request = {
@@ -294,7 +306,7 @@ describe('exportScheduledQueryResultsRoute', () => {
     const router = httpServiceMock.createRouter();
     exportScheduledQueryResultsRoute(router as never, createOsqueryContext());
 
-    const registeredHandler = (router.versioned.post as jest.Mock).mock.results[0].value.addVersion
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
       .mock.calls[0][1];
 
     const request = {

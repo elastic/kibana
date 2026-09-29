@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { cloneDeep, omit } from 'lodash';
 import { map } from 'rxjs';
 import type {
@@ -103,17 +106,26 @@ const MULTI_URL_PROFILE_STATE_DEF: ProfileStateDefinition<MultiUrlProfileState> 
   },
 };
 
-jest.mock('../data_fetching/fetch_documents', () => ({
-  fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
-}));
+vi.mock('../data_fetching/fetch_documents', () => {
+      const mocked = {
+      fetchDocuments: vi.fn().mockResolvedValue({ records: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../data_fetching/fetch_esql', () => ({
-  fetchEsql: jest.fn().mockResolvedValue({ records: [] }),
-}));
+vi.mock('../data_fetching/fetch_esql', () => {
+      const mocked = {
+      fetchEsql: vi.fn().mockResolvedValue({ records: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/ebt-tools', () => ({
-  reportPerformanceMetricEvent: jest.fn(),
-}));
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      reportPerformanceMetricEvent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 async function getState(
   url: string = '/',
@@ -126,14 +138,14 @@ async function getState(
   nextHistory.push(url);
 
   const services = testServices ?? createDiscoverServicesMock();
-  services.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+  services.data.query.timefilter.timefilter.getTime = vi.fn(() => {
     return { from: 'now-15d', to: 'now' };
   });
-  services.data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
+  services.data.query.timefilter.timefilter.getRefreshInterval = vi.fn(() => {
     return { pause: true, value: 1000 };
   });
   if (savedSearch) {
-    services.data.search.searchSource.create = jest.fn().mockReturnValue(savedSearch.searchSource);
+    services.data.search.searchSource.create = vi.fn().mockReturnValue(savedSearch.searchSource);
   }
   const runtimeStateManager = createRuntimeStateManager();
   const nextState = getDiscoverStateMock({
@@ -261,7 +273,7 @@ describe('Discover state', () => {
     let state: DiscoverStateMockParams;
 
     beforeEach(async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       history = createMemoryHistory({
         initialEntries: [
           {
@@ -287,7 +299,7 @@ describe('Discover state', () => {
 
     afterEach(() => {
       state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     test('setting app state and syncing to URL', async () => {
@@ -299,7 +311,7 @@ describe('Discover state', () => {
         })
       );
 
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(history.createHref(history.location)).toMatchInlineSnapshot(
         `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:index-pattern-with-timefield-id,type:dataView),grid:(),hideChart:!f,hideTable:!f,interval:auto,query:(language:kuery,query:''),sort:!(!(timestamp,desc)))&_tab=(tabId:the-saved-search-id-with-timefield)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
@@ -309,7 +321,7 @@ describe('Discover state', () => {
     test('changing URL to be propagated to appState', async () => {
       history.push('/#?_a=(dataSource:(dataViewId:index-pattern-with-timefield-id,type:dataView))');
 
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       expect(state.getCurrentTab().appState).toMatchInlineSnapshot(`
               Object {
@@ -464,7 +476,7 @@ describe('Discover state', () => {
         }))
       );
       const state = getDiscoverInternalStateMock({ services, tabsStorageEnabled: true });
-      jest.spyOn(services.dataViews, 'create').mockImplementation(async (spec) => {
+      vi.spyOn(services.dataViews, 'create').mockImplementation(async (spec) => {
         return new DataView({ spec, fieldFormats: services.fieldFormats });
       });
       states.push(state);
@@ -689,12 +701,12 @@ describe('Discover state', () => {
         savedResponse.data.tabs[0].id = data.tabs[0].id;
         return cloneDeep(savedResponse);
       };
-      const apiClient: jest.Mocked<DiscoverSessionClient> = {
-        create: jest.fn(respondToSave),
-        upsert: jest.fn((_id: string, data: DiscoverSessionClientRequestData) =>
+      const apiClient: Mocked<DiscoverSessionClient> = {
+        create: vi.fn(respondToSave),
+        upsert: vi.fn((_id: string, data: DiscoverSessionClientRequestData) =>
           respondToSave(data)
         ),
-        get: jest.fn(async (_id: string) => ({ ...cloneDeep(savedResponse), resolve: {} })),
+        get: vi.fn(async (_id: string) => ({ ...cloneDeep(savedResponse), resolve: {} })),
       };
       const sessionService = createSessionService({
         apiClient,
@@ -702,7 +714,7 @@ describe('Discover state', () => {
         useHttpApi: true,
       });
       // Exercise HTTP through the existing save boundary without connecting production callers.
-      jest
+      vi
         .spyOn(services.savedSearch, 'saveDiscoverSession')
         .mockImplementation((session, options = {}) => sessionService.save(session, options));
 
@@ -787,7 +799,7 @@ describe('Discover state', () => {
       );
       services.storage = new Storage(localStorage);
       services.history = createMemoryHistory({ initialEntries: [location.path] });
-      jest
+      vi
         .spyOn(services, 'getScopedHistory')
         .mockReturnValue(scopedHistoryMock.create({ state: location.state }));
       const state = createState(services);
@@ -985,7 +997,7 @@ describe('Discover state', () => {
         currentTab.id
       ).scopedProfilesManager$.getValue();
       const contexts = scopedProfilesManager.getContexts();
-      jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+      vi.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
         ...contexts,
         dataSourceContext: {
           ...contexts.dataSourceContext,
@@ -1041,7 +1053,7 @@ describe('Discover state', () => {
       test('restoreState has sessionId and initialState has not', async () => {
         const services = createDiscoverServicesMock();
         const searchSessionId = 'id';
-        jest.mocked(services.data.search.session.getSessionId).mockReturnValue(searchSessionId);
+        vi.mocked(services.data.search.session.getSessionId).mockReturnValue(searchSessionId);
         const searchSessionInfoProvider = await setupSearchSessionInfoProvider({ services });
         const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
         expect(initialState.searchSessionId).toBeUndefined();
@@ -1056,10 +1068,10 @@ describe('Discover state', () => {
           to: '2025-12-31T00:00:00.000Z',
           mode: 'absolute',
         };
-        jest
+        vi
           .mocked(services.data.query.timefilter.timefilter.getTime)
           .mockReturnValue(relativeTime);
-        jest
+        vi
           .mocked(services.data.query.timefilter.timefilter.getAbsoluteTime)
           .mockReturnValue(absoluteTime);
         const searchSessionInfoProvider = await setupSearchSessionInfoProvider({ services });
@@ -1158,7 +1170,7 @@ describe('Discover state', () => {
         services: testServices,
       });
       const nextId = 'id';
-      testServices.data.search.session.start = jest.fn(() => nextId);
+      testServices.data.search.session.start = vi.fn(() => nextId);
       initializeDataStateInDiscoverStateMock(state); // Required: initializeAndSync expects dataStateContainer to exist
       state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeAndSync)()
@@ -1479,7 +1491,7 @@ describe('Discover state', () => {
         savedSearch,
         services: testServices,
       });
-      testServices.data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
+      testServices.data.query.timefilter.timefilter.getRefreshInterval = vi.fn(() => {
         return { pause: false, value: 1234 };
       });
       await state.internalState.dispatch(
@@ -1520,7 +1532,7 @@ describe('Discover state', () => {
         savedSearch,
         services: testServices,
       });
-      testServices.data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
+      testServices.data.query.timefilter.timefilter.getRefreshInterval = vi.fn(() => {
         return { pause: false, value: 60000 };
       });
       await state.internalState.dispatch(
@@ -1667,10 +1679,10 @@ describe('Discover state', () => {
       expect(hasUnsavedChanges).toBe(false);
       // Simulate loading a different saved search with time field
       const savedSearchWithTimeField = { ...savedSearchMockWithTimeField, id: savedSearchMock.id };
-      testServices.data.search.searchSource.create = jest
+      testServices.data.search.searchSource.create = vi
         .fn()
         .mockReturnValue(savedSearchWithTimeField.searchSource);
-      jest.spyOn(testServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
+      vi.spyOn(testServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
         ...savedSearchWithTimeField,
         id: savedSearchWithTimeField.id ?? '',
         title: savedSearchWithTimeField.title ?? '',
@@ -1712,10 +1724,10 @@ describe('Discover state', () => {
       }));
       expect(hasUnsavedChanges).toBe(false);
       // Simulate loading back to original saved search
-      testServices.data.search.searchSource.create = jest
+      testServices.data.search.searchSource.create = vi
         .fn()
         .mockReturnValue(savedSearchMock.searchSource);
-      jest.spyOn(testServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
+      vi.spyOn(testServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
         ...savedSearchMock,
         id: savedSearchMock.id ?? '',
         title: savedSearchMock.title ?? '',
@@ -1771,7 +1783,7 @@ describe('Discover state', () => {
         title: 'mock-title',
         timeFieldName: 'mock-time-field-name',
       };
-      const dataViewsCreateMock = testServices.dataViews.create as jest.Mock;
+      const dataViewsCreateMock = testServices.dataViews.create as Mock;
       dataViewsCreateMock.mockResolvedValueOnce({
         ...dataViewMock,
         ...dataViewSpecMock,
@@ -1862,7 +1874,7 @@ describe('Discover state', () => {
     test('loadSavedSearch with ad-hoc data view being added to internal state adHocDataViews', async () => {
       const adHocDataViewId = savedSearchAdHoc.searchSource.getField('index')!.id;
       const testServices = createDiscoverServicesMock();
-      testServices.dataViews.create = jest.fn().mockImplementation((spec) => {
+      testServices.dataViews.create = vi.fn().mockImplementation((spec) => {
         return Promise.resolve({
           ...dataViewMock,
           isPersisted: () => false,
@@ -1938,7 +1950,7 @@ describe('Discover state', () => {
         state.getCurrentTab().id
       );
       const dataState = dataStateContainer$.getValue()!;
-      jest.spyOn(dataState, 'fetch');
+      vi.spyOn(dataState, 'fetch');
 
       await new Promise(process.nextTick);
       // test initial state
@@ -2019,7 +2031,7 @@ describe('Discover state', () => {
         "/#?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))&_a=(columns:!(customer_first_name),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:ff959d40-b880-11e8-a6d9-e546fe2bba5f,key:customer_first_name,negate:!f,params:(query:Mary),type:phrase),query:(match_phrase:(customer_first_name:Mary)))),hideChart:!f,index:ff959d40-b880-11e8-a6d9-e546fe2bba5f,interval:auto,query:(language:kuery,query:''),sort:!())",
         { savedSearch: savedSearchMock, services: testServices }
       );
-      jest.spyOn(testServices.filterManager, 'getAppFilters').mockImplementation(() => {
+      vi.spyOn(testServices.filterManager, 'getAppFilters').mockImplementation(() => {
         return state.getCurrentTab().appState.filters!;
       });
       await state.internalState.dispatch(
@@ -2063,7 +2075,7 @@ describe('Discover state', () => {
       // Get dataStateContainer created by initializeSingleTab and set up spy
       const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, state.getCurrentTab().id);
       const dataState = tabRuntimeState.dataStateContainer$.getValue()!;
-      jest.spyOn(dataState, 'fetch');
+      vi.spyOn(dataState, 'fetch');
 
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toBe(
@@ -2112,8 +2124,8 @@ describe('Discover state', () => {
         savedSearch,
         services: testServices,
       });
-      const setTime = jest.fn();
-      const setRefreshInterval = jest.fn();
+      const setTime = vi.fn();
+      const setRefreshInterval = vi.fn();
       testServices.data.query.timefilter.timefilter.setTime = setTime;
       testServices.data.query.timefilter.timefilter.setRefreshInterval = setRefreshInterval;
       await state.internalState.dispatch(

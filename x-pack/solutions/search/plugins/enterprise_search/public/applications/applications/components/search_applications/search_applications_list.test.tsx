@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -48,13 +50,13 @@ const mockValues = {
 };
 
 const mockActions = {
-  fetchSearchApplications: jest.fn(),
-  onPaginate: jest.fn(),
+  fetchSearchApplications: vi.fn(),
+  onPaginate: vi.fn(),
 };
 
 describe('SearchApplicationsList', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     global.localStorage.clear();
   });
   it('renders loading when isLoading', () => {

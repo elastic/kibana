@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { monaco } from '@kbn/monaco';
 import type { ConnectorExamples, MonacoConnectorHandler } from './provider_interfaces';
 import {
@@ -23,15 +25,15 @@ const createMockHandler = (
 ): MonacoConnectorHandler => ({
   canHandle: canHandleFn ?? ((type: string) => type.startsWith(prefix)),
   getPriority: () => priority,
-  generateHoverContent: jest
+  generateHoverContent: vi
     .fn()
     .mockResolvedValue({ value: `hover-${prefix}`, isTrusted: true } as monaco.IMarkdownString),
-  getExamples: jest.fn().mockReturnValue(null as ConnectorExamples | null),
+  getExamples: vi.fn().mockReturnValue(null as ConnectorExamples | null),
 });
 
 describe('MonacoConnectorHandlerRegistry', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     clearHandlerRegistry();
   });
 

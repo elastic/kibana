@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,10 +18,10 @@ import { AdditionalFormFields } from './additional_form_fields';
 import { useGetFields } from './use_get_fields';
 import { useGetFieldsResponse } from './mocks';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('./use_get_fields');
+vi.mock('../../../common/lib/kibana');
+vi.mock('./use_get_fields');
 
-const useGetFieldsMock = useGetFields as jest.Mock;
+const useGetFieldsMock = useGetFields as Mock;
 
 describe('AdditionalFormFields', () => {
   beforeEach(() => {

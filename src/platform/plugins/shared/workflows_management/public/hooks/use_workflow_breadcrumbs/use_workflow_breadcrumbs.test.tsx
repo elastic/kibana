@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useSetWorkflowsBreadcrumbs, useWorkflowsBreadcrumbs } from './use_workflow_breadcrumbs';
 import { PLUGIN_ID } from '../../../common';
@@ -14,19 +17,22 @@ import { createStartServicesMock } from '../../mocks';
 import type { WorkflowsServices } from '../../types';
 import { useKibana } from '../use_kibana';
 
-jest.mock('../use_kibana');
-const mockUseKibana = useKibana as jest.Mock;
+vi.mock('../use_kibana');
+const mockUseKibana = useKibana as Mock;
 
 // Mock i18n to control translations
-jest.mock('@kbn/i18n', () => ({
-  i18n: { translate: jest.fn((key, { defaultMessage }) => defaultMessage) },
-}));
+vi.mock('@kbn/i18n', () => {
+      const mocked = {
+      i18n: { translate: vi.fn((key, { defaultMessage }) => defaultMessage) },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useWorkflowsBreadcrumbs', () => {
   let mockServices: ReturnType<typeof createStartServicesMock>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockServices = createStartServicesMock();
     mockServices.application.getUrlForApp.mockReturnValue('/app/workflows');
 
@@ -86,7 +92,7 @@ describe('useWorkflowsBreadcrumbs', () => {
       const mainBreadcrumb = breadcrumbs[0];
 
       // Test with preventDefault
-      const mockEvent = { preventDefault: jest.fn() };
+      const mockEvent = { preventDefault: vi.fn() };
       mainBreadcrumb.onClick?.(mockEvent as any);
 
       expect(mockEvent.preventDefault).toHaveBeenCalled();
@@ -232,7 +238,7 @@ describe('useSetWorkflowsBreadcrumbs', () => {
   let mockServices: ReturnType<typeof createStartServicesMock>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockServices = createStartServicesMock();
     mockServices.application.getUrlForApp.mockReturnValue('/app/workflows');
     mockUseKibana.mockReturnValue({ services: mockServices });

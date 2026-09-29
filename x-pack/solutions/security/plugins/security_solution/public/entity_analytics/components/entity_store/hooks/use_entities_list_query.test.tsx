@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { EntityType } from '@kbn/entity-store/common';
@@ -12,20 +15,23 @@ import { useEntitiesListQuery } from './use_entities_list_query';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import React from 'react';
 
-jest.mock('../../../api/api');
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({ services: { http: {} } }),
-}));
+vi.mock('../../../api/api');
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({ services: { http: {} } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useEntitiesListQuery', () => {
-  const fetchEntitiesListV2Mock = jest.fn();
+  const fetchEntitiesListV2Mock = vi.fn();
   const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useEntityAnalyticsRoutes as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useEntityAnalyticsRoutes as Mock).mockReturnValue({
       fetchEntitiesListV2: fetchEntitiesListV2Mock,
     });
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -19,7 +21,7 @@ import { Ai4SocMeteringService } from './metering_service';
 
 describe('Ai4SocMeteringService', () => {
   let meteringService: Ai4SocMeteringService;
-  let logger: jest.Mocked<Logger>;
+  let logger: Mocked<Logger>;
 
   const getDefaultConfig = (): ServerlessSecurityConfig =>
     ({

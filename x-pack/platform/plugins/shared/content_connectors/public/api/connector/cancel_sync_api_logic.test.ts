@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // write tests that checks cancelSync API logic calls correct endpoint
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -14,7 +16,7 @@ import { cancelSync } from './cancel_sync_api_logic';
 describe('CancelSyncApiLogic', () => {
   const http = httpServiceMock.createSetupContract();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('cancelSync', () => {
     it('calls correct api', async () => {

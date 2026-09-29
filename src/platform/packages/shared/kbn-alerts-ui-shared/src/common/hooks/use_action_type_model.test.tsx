@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -25,8 +28,8 @@ const mockDocLinks = docLinksServiceMock.createStartContract();
 describe('useActionTypeModel', () => {
   let actionTypeRegistry: ReturnType<typeof actionTypeRegistryMock.create>;
   let queryClient: QueryClient;
-  let mockHttp: { get: jest.Mock };
-  let mockUiSettings: { get: jest.Mock };
+  let mockHttp: { get: Mock };
+  let mockUiSettings: { get: Mock };
 
   const mockActionTypeModel: ActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
     id: 'test-connector',
@@ -53,9 +56,9 @@ describe('useActionTypeModel', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockHttp = { get: jest.fn() };
-    mockUiSettings = { get: jest.fn().mockReturnValue(true) };
+    vi.clearAllMocks();
+    mockHttp = { get: vi.fn() };
+    mockUiSettings = { get: vi.fn().mockReturnValue(true) };
     actionTypeRegistry = actionTypeRegistryMock.create();
     queryClient = new QueryClient({
       defaultOptions: {
@@ -255,7 +258,7 @@ describe('useActionTypeModel', () => {
       },
     };
 
-    const uiSettingsGet = jest.fn().mockReturnValue(false);
+    const uiSettingsGet = vi.fn().mockReturnValue(false);
     mockHttp.get.mockResolvedValue(workflowsSpecResponse);
 
     actionTypeRegistry.has.mockReturnValue(false);

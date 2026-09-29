@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { TitleSettingsProps } from './toolbar_title_settings';
 import { ToolbarTitleSettings } from './toolbar_title_settings';
@@ -17,7 +19,7 @@ const renderAxisTicksSettings = (propsOverrides?: Partial<TitleSettingsProps>) =
       title="My custom X axis title"
       settingId="x"
       isTitleVisible={true}
-      updateTitleState={jest.fn()}
+      updateTitleState={vi.fn()}
       {...propsOverrides}
     />
   );
@@ -70,7 +72,7 @@ describe('Axes Title settings', () => {
   });
 
   it('should reset the label when moving from custom to auto', async () => {
-    const updateTitleStateSpy = jest.fn();
+    const updateTitleStateSpy = vi.fn();
     const { getAxisTitleSelect, getAxisTitleInput } = renderAxisTicksSettings({
       isTitleVisible: true,
       title: 'Custom title',

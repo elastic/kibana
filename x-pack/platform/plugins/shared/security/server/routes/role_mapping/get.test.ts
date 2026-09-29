@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -57,7 +59,7 @@ function getMockContext(
 ) {
   return {
     core: coreMock.createRequestHandlerContext(),
-    licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
+    licensing: { license: { check: vi.fn().mockReturnValue(licenseCheckResult) } } as any,
   };
 }
 

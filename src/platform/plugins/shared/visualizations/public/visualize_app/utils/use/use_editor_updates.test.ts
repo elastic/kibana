@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { EventEmitter } from 'events';
 
@@ -16,15 +19,15 @@ import type { IEditorController } from '../../types';
 import { visualizeAppStateStub } from '../stubs';
 import { createVisualizeServicesMock } from '../mocks';
 
-jest.mock('../../../utils/saved_visualize_utils', () => {
-  const stubs = jest.requireActual('../stubs');
+vi.mock('../../../utils/saved_visualize_utils', async () => {
+  const stubs = (await vi.importActual('../stubs'));
   return { convertFromSerializedVis: () => ({ visState: stubs.visualizeAppStateStub.vis }) };
 });
 
 describe('useEditorUpdates', () => {
   const eventEmitter = new EventEmitter();
-  const setHasUnsavedChangesMock = jest.fn();
-  let mockServices: jest.Mocked<VisualizeServices>;
+  const setHasUnsavedChangesMock = vi.fn();
+  let mockServices: Mocked<VisualizeServices>;
 
   beforeEach(() => {
     mockServices = createVisualizeServicesMock();
@@ -48,7 +51,7 @@ describe('useEditorUpdates', () => {
     });
   });
 
-  let unsubscribeStateUpdatesMock: jest.Mock;
+  let unsubscribeStateUpdatesMock: Mock;
   let appState: VisualizeAppStateContainer;
   let savedVisInstance: SavedVisInstance;
   let visEditorController: IEditorController;
@@ -56,36 +59,36 @@ describe('useEditorUpdates', () => {
   let mockFilters: any;
 
   beforeEach(() => {
-    unsubscribeStateUpdatesMock = jest.fn();
+    unsubscribeStateUpdatesMock = vi.fn();
     appState = {
-      getState: jest.fn(() => visualizeAppStateStub),
-      subscribe: jest.fn(() => unsubscribeStateUpdatesMock),
+      getState: vi.fn(() => visualizeAppStateStub),
+      subscribe: vi.fn(() => unsubscribeStateUpdatesMock),
       transitions: {
-        set: jest.fn(),
+        set: vi.fn(),
       },
     } as unknown as VisualizeAppStateContainer;
     savedVisInstance = {
       vis: {
         uiState: {
-          on: jest.fn(),
-          off: jest.fn(),
-          setSilent: jest.fn(),
-          getChanges: jest.fn(() => visualizeAppStateStub.uiState),
+          on: vi.fn(),
+          off: vi.fn(),
+          setSilent: vi.fn(),
+          getChanges: vi.fn(() => visualizeAppStateStub.uiState),
         },
         data: {},
-        serialize: jest.fn(),
+        serialize: vi.fn(),
         title: visualizeAppStateStub.vis.title,
-        setState: jest.fn(),
+        setState: vi.fn(),
       },
       embeddableHandler: {
-        updateInput: jest.fn(),
-        reload: jest.fn(),
+        updateInput: vi.fn(),
+        reload: vi.fn(),
       },
       savedVis: {},
     } as unknown as SavedVisInstance;
     visEditorController = {
-      render: jest.fn(),
-      destroy: jest.fn(),
+      render: vi.fn(),
+      destroy: vi.fn(),
     };
     timeRange = {
       from: 'now-15m',
@@ -236,7 +239,7 @@ describe('useEditorUpdates', () => {
         },
       };
       const { aggs, ...visState } = newAppState.vis;
-      const updateEditorSpy = jest.fn();
+      const updateEditorSpy = vi.fn();
 
       eventEmitter.on('updateEditor', updateEditorSpy);
 

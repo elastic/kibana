@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,42 +18,51 @@ import { EpisodeActionPolicyHistoryTab } from './episode_action_policy_history_t
 
 const EPISODE_ID = 'episode-42';
 
-const mockUseFetchExecutionHistory = jest.fn();
-const mockRefetch = jest.fn();
+const mockUseFetchExecutionHistory = vi.fn();
+const mockRefetch = vi.fn();
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') {
-      return { getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}` };
-    }
-    if (token === 'settings') {
-      return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
-    }
-    if (typeof token === 'function') {
-      return { canRead: () => true, canWrite: () => true, can: () => true };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (token === 'application') {
+          return { getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}` };
+        }
+        if (token === 'settings') {
+          return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
+        }
+        if (typeof token === 'function') {
+          return { canRead: () => true, canWrite: () => true, can: () => true };
+        }
+        return {};
+      },
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_execution_history', () => ({
-  useFetchExecutionHistory: (...args: unknown[]) => mockUseFetchExecutionHistory(...args),
-}));
+vi.mock('../../../hooks/use_fetch_execution_history', () => {
+      const mocked = {
+      useFetchExecutionHistory: (...args: unknown[]) => mockUseFetchExecutionHistory(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_rules', () => ({
-  useFetchRules: () => ({ data: { items: [] }, isFetching: false }),
-}));
+vi.mock('../../../hooks/use_fetch_rules', () => {
+      const mocked = {
+      useFetchRules: () => ({ data: { items: [] }, isFetching: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The policies table renders on UnifiedDataTable; stub the grid (rendering each row through the
 // custom renderers) and the ad-hoc data view / services helpers so the test needs no real
 // DataViews service.
-jest.mock('@kbn/unified-data-table', () => {
-  const ReactActual = jest.requireActual('react');
+vi.mock('@kbn/unified-data-table', () => {
+  const ReactActual = require('react');
   return {
     DataLoadingState: { loading: 'loading', loaded: 'loaded' },
     ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
-    UnifiedDataTable: jest.fn(({ rows, columns, externalCustomRenderers }: Record<string, any>) =>
+    UnifiedDataTable: vi.fn(({ rows, columns, externalCustomRenderers }: Record<string, any>) =>
       ReactActual.createElement(
         'div',
         { 'data-test-subj': 'unifiedDataTable' },
@@ -76,36 +87,48 @@ jest.mock('@kbn/unified-data-table', () => {
   };
 });
 
-jest.mock('@kbn/cell-actions', () => ({
-  CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+vi.mock('@kbn/cell-actions', () => {
+      const mocked = {
+      CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../execution_history_page/data_view', () => ({
-  ...jest.requireActual('../../execution_history_page/data_view'),
-  usePolicyExecutionsDataView: () => ({ dataView: {}, error: undefined }),
-}));
+vi.mock('../../execution_history_page/data_view', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../execution_history_page/data_view')),
+      usePolicyExecutionsDataView: () => ({ dataView: {}, error: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../execution_history_page/hooks/use_unified_data_table_services', () => ({
-  useUnifiedDataTableServices: () => ({}),
-}));
+vi.mock('../../execution_history_page/hooks/use_unified_data_table_services', () => {
+      const mocked = {
+      useUnifiedDataTableServices: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../components/action_policy/details_flyout/action_policy_details_flyout_container',
-  () => ({
-    ActionPolicyDetailsFlyoutContainer: ({
-      policyId,
-      onClose,
-    }: {
-      policyId: string;
-      onClose: () => void;
-    }) => (
-      <div data-test-subj={`mockFlyout-${policyId}`}>
-        <button data-test-subj="mockFlyoutClose" onClick={onClose} type="button">
-          close
-        </button>
-      </div>
-    ),
-  })
+  () => {
+      const mocked = {
+        ActionPolicyDetailsFlyoutContainer: ({
+          policyId,
+          onClose,
+        }: {
+          policyId: string;
+          onClose: () => void;
+        }) => (
+          <div data-test-subj={`mockFlyout-${policyId}`}>
+            <button data-test-subj="mockFlyoutClose" onClick={onClose} type="button">
+              close
+            </button>
+          </div>
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 const buildItem = (
@@ -155,7 +178,7 @@ const renderTab = (episodeStart?: string) =>
 
 describe('EpisodeActionPolicyHistoryTab', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('fetches execution history scoped to the current episode', () => {
@@ -211,7 +234,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
 
     expect(screen.getByText('My Policy')).toBeInTheDocument();
 
-    const calls = jest.mocked(UnifiedDataTable).mock.calls;
+    const calls = vi.mocked(UnifiedDataTable).mock.calls;
     const { columns } = calls[calls.length - 1][0] as Record<string, any>;
     expect(columns).not.toContain(POLICY_EXECUTION_FIELDS.episodeCount);
     expect(columns).not.toContain(POLICY_EXECUTION_FIELDS.actionGroupCount);

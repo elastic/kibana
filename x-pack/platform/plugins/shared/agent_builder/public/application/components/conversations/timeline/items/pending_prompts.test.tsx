@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,49 +15,55 @@ import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import { PendingPrompts } from './pending_prompts';
 
-const mockResumeRound = jest.fn();
+const mockResumeRound = vi.fn();
 const mockStream = { isResuming: false };
 
-jest.mock('../../../../hooks/use_conversation_stream', () => ({
-  useConversationStream: () => ({
-    resumeRound: mockResumeRound,
-    isResuming: mockStream.isResuming,
-  }),
-}));
+vi.mock('../../../../hooks/use_conversation_stream', () => {
+      const mocked = {
+      useConversationStream: () => ({
+        resumeRound: mockResumeRound,
+        isResuming: mockStream.isResuming,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Stub the prompt components so the test targets PendingPrompts' aggregation, not each prompt's UI.
 // Each stub exposes the callbacks PendingPrompts wires up, keyed by prompt id.
-jest.mock('../prompts', () => ({
-  ConfirmationPrompt: ({ prompt, onConfirm, onCancel, isDisabled }: any) => (
-    <div>
-      <button data-test-subj={`confirm-${prompt.id}`} disabled={isDisabled} onClick={onConfirm}>
-        confirm
-      </button>
-      <button data-test-subj={`deny-${prompt.id}`} disabled={isDisabled} onClick={onCancel}>
-        deny
-      </button>
-    </div>
-  ),
-  AuthorizationPrompt: ({ prompt, onAuthorize, onCancel, isDisabled }: any) => (
-    <div>
-      <button data-test-subj={`authorize-${prompt.id}`} disabled={isDisabled} onClick={onAuthorize}>
-        authorize
-      </button>
-      <button data-test-subj={`decline-${prompt.id}`} disabled={isDisabled} onClick={onCancel}>
-        decline
-      </button>
-    </div>
-  ),
-  AskUserQuestionPrompt: ({ promptId, onSubmit, isDisabled }: any) => (
-    <button
-      data-test-subj={`submit-${promptId}`}
-      disabled={isDisabled}
-      onClick={() => onSubmit({ answers: [{ choice: [0] }] })}
-    >
-      submit
-    </button>
-  ),
-}));
+vi.mock('../prompts', () => {
+      const mocked = {
+      ConfirmationPrompt: ({ prompt, onConfirm, onCancel, isDisabled }: any) => (
+        <div>
+          <button data-test-subj={`confirm-${prompt.id}`} disabled={isDisabled} onClick={onConfirm}>
+            confirm
+          </button>
+          <button data-test-subj={`deny-${prompt.id}`} disabled={isDisabled} onClick={onCancel}>
+            deny
+          </button>
+        </div>
+      ),
+      AuthorizationPrompt: ({ prompt, onAuthorize, onCancel, isDisabled }: any) => (
+        <div>
+          <button data-test-subj={`authorize-${prompt.id}`} disabled={isDisabled} onClick={onAuthorize}>
+            authorize
+          </button>
+          <button data-test-subj={`decline-${prompt.id}`} disabled={isDisabled} onClick={onCancel}>
+            decline
+          </button>
+        </div>
+      ),
+      AskUserQuestionPrompt: ({ promptId, onSubmit, isDisabled }: any) => (
+        <button
+          data-test-subj={`submit-${promptId}`}
+          disabled={isDisabled}
+          onClick={() => onSubmit({ answers: [{ choice: [0] }] })}
+        >
+          submit
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const PROMPT_REQUESTED_EVENT_ID = 'round-1::execution_terminated';
 

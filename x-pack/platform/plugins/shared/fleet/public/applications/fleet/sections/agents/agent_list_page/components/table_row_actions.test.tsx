@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 
@@ -18,15 +21,15 @@ import { useLicense } from '../../../../../../hooks/use_license';
 
 import { TableRowActions } from './table_row_actions';
 
-jest.mock('../../../../../../services/experimental_features');
-jest.mock('../../../../../../hooks/use_authz');
-jest.mock('../../../../../../hooks/use_agent_version');
-jest.mock('../../../../../../hooks/use_license');
+vi.mock('../../../../../../services/experimental_features');
+vi.mock('../../../../../../hooks/use_authz');
+vi.mock('../../../../../../hooks/use_agent_version');
+vi.mock('../../../../../../hooks/use_license');
 
-const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
-const mockedUseAuthz = jest.mocked(useAuthz);
-const mockedUseAgentVersion = jest.mocked(useAgentVersion);
-const mockedUseLicense = useLicense as jest.MockedFunction<typeof useLicense>;
+const mockedExperimentalFeaturesService = vi.mocked(ExperimentalFeaturesService);
+const mockedUseAuthz = vi.mocked(useAuthz);
+const mockedUseAgentVersion = vi.mocked(useAgentVersion);
+const mockedUseLicense = useLicense as MockedFunction<typeof useLicense>;
 
 function renderTableRowActions({
   agent,
@@ -41,17 +44,17 @@ function renderTableRowActions({
     <TableRowActions
       agent={agent}
       agentPolicy={agentPolicy}
-      onAddRemoveTagsClick={jest.fn()}
-      onReassignClick={jest.fn()}
-      onRequestDiagnosticsClick={jest.fn()}
-      onUnenrollClick={jest.fn()}
-      onUpgradeClick={jest.fn()}
-      onGetUninstallCommandClick={jest.fn()}
-      onMigrateAgentClick={jest.fn()}
-      onChangeAgentPrivilegeLevelClick={jest.fn()}
-      onViewAgentJsonClick={jest.fn()}
-      onRollbackClick={jest.fn()}
-      onViewAgentPolicyClick={jest.fn()}
+      onAddRemoveTagsClick={vi.fn()}
+      onReassignClick={vi.fn()}
+      onRequestDiagnosticsClick={vi.fn()}
+      onUnenrollClick={vi.fn()}
+      onUpgradeClick={vi.fn()}
+      onGetUninstallCommandClick={vi.fn()}
+      onMigrateAgentClick={vi.fn()}
+      onChangeAgentPrivilegeLevelClick={vi.fn()}
+      onViewAgentJsonClick={vi.fn()}
+      onRollbackClick={vi.fn()}
+      onViewAgentPolicyClick={vi.fn()}
     />
   );
 

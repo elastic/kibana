@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -17,11 +20,11 @@ import {
 } from '../../../data/slo/indicator';
 import { ApmSourcePanel } from './apm_source_panel';
 
-jest.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_kibana');
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
-const mockGetRedirectUrl = jest.fn(() => 'https://mock-apm-link');
+const mockGetRedirectUrl = vi.fn(() => 'https://mock-apm-link');
 
 const withApmCapabilities = () => {
   useKibanaMock.mockReturnValue({
@@ -42,7 +45,7 @@ const withoutApmCapabilities = () => {
 };
 
 describe('ApmSourcePanel', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders the source panel with all fields for an APM availability SLO', () => {
     withApmCapabilities();

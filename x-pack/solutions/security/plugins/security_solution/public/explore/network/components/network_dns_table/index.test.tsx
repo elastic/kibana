@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
@@ -17,10 +19,10 @@ import { networkModel } from '../../store';
 import { NetworkDnsTable } from '.';
 import { mockData } from './mock';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('NetworkTopNFlow Table Component', () => {
-  const loadPage = jest.fn();
+  const loadPage = vi.fn();
   let store = createMockStore();
 
   const defaultProps = {
@@ -30,7 +32,7 @@ describe('NetworkTopNFlow Table Component', () => {
     isInspect: false,
     loading: false,
     loadPage,
-    setQuerySkip: jest.fn(),
+    setQuerySkip: vi.fn(),
     showMorePagesIndicator: getOr(false, 'showMorePagesIndicator', mockData.pageInfo),
     totalCount: mockData.totalCount,
     type: networkModel.NetworkType.page,

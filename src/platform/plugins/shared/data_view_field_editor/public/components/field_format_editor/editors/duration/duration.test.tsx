@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { createFieldFormatMock } from '../test_utils';
 import { DurationFormatEditor } from './duration';
@@ -23,7 +25,7 @@ const createDurationFormat = ({
   isHumanPrecise = false,
 } = {}) =>
   createFieldFormatMock({
-    getParamDefaults: jest.fn().mockImplementation(() => {
+    getParamDefaults: vi.fn().mockImplementation(() => {
       return {
         includeSpaceWithSuffix: true,
         inputFormat: 'seconds',
@@ -33,7 +35,7 @@ const createDurationFormat = ({
     }),
     isHuman: () => isHuman,
     isHumanPrecise: () => isHumanPrecise,
-    convertToReact: jest
+    convertToReact: vi
       .fn()
       .mockImplementation((input: string) => `converted duration for ${input}`),
     type: {
@@ -64,8 +66,8 @@ const formatParams = {
   outputPrecision: 2,
 };
 
-const onChange = jest.fn();
-const onError = jest.fn();
+const onChange = vi.fn();
+const onError = vi.fn();
 
 const renderDurationFormatEditor = ({
   newFormat = format,

@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { IndicatorBarchartLegendAction } from './legend_action';
 import { timestampToIsoString } from './utils';
 
-jest.mock('./utils');
+vi.mock('./utils');
 
-const announceFn = jest.fn();
+const announceFn = vi.fn();
 
 describe('IndicatorBarchartLegendAction', () => {
   const mockDate = '14182940000';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should formate group name if it is a date type', () => {
     const mockField = {
@@ -32,7 +34,7 @@ describe('IndicatorBarchartLegendAction', () => {
         field={mockField}
       />
     );
-    expect(jest.mocked(timestampToIsoString)).toHaveBeenCalled();
+    expect(vi.mocked(timestampToIsoString)).toHaveBeenCalled();
   });
 
   it('should render group name without formation', () => {
@@ -47,6 +49,6 @@ describe('IndicatorBarchartLegendAction', () => {
         field={mockField}
       />
     );
-    expect(jest.mocked(timestampToIsoString)).not.toHaveBeenCalled();
+    expect(vi.mocked(timestampToIsoString)).not.toHaveBeenCalled();
   });
 });

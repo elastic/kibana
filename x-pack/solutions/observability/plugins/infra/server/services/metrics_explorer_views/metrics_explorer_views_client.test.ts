@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -19,7 +21,7 @@ import type { UpdateMetricsExplorerViewAttributesRequestPayload } from '../../..
 
 describe('MetricsExplorerViewsClient class', () => {
   const mockFindMetricsExplorerList = (
-    savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
+    savedObjectsClient: Mocked<SavedObjectsClientContract>
   ) => {
     const metricsExplorerViewListMock = [
       createMetricsExplorerViewMock('0', {

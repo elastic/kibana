@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -16,26 +19,29 @@ import type { WorkflowsBaseTelemetry } from '@kbn/workflows-management-plugin/pu
 import { createWorkflowYamlAttachmentUiDefinition } from './workflow_yaml_attachment_renderer';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      useWorkflowsMonacoTheme: vi.fn(),
+      WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockWorkflowApi = createMockWorkflowApi();
 
 const mockAllWorkflowCapabilitiesTrue = createMockWorkflowsCapabilities();
 
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
+vi.mock('@kbn/workflows-ui', async () => {
+  const actual = (await vi.importActual('@kbn/workflows-ui'));
   return {
     ...actual,
-    useWorkflowsApi: jest.fn(() => mockWorkflowApi),
-    useWorkflowsCapabilities: jest.fn(() => mockAllWorkflowCapabilitiesTrue),
+    useWorkflowsApi: vi.fn(() => mockWorkflowApi),
+    useWorkflowsCapabilities: vi.fn(() => mockAllWorkflowCapabilitiesTrue),
   };
 });
 
-const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
 >;
 
@@ -47,8 +53,8 @@ const createMockServices = ({
   core.application.currentAppId$ = new BehaviorSubject<string | undefined>(currentAppId);
   core.application.currentLocation$ = new BehaviorSubject<string>(currentLocation);
   const telemetry = {
-    reportWorkflowCreated: jest.fn(),
-    reportWorkflowUpdated: jest.fn(),
+    reportWorkflowCreated: vi.fn(),
+    reportWorkflowUpdated: vi.fn(),
   } as unknown as WorkflowsBaseTelemetry;
   return {
     core,
@@ -124,8 +130,8 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         attachment,
         isSidebar: false,
         isCanvas: false,
-        updateOrigin: jest.fn(),
-        openCanvas: jest.fn(),
+        updateOrigin: vi.fn(),
+        openCanvas: vi.fn(),
       });
 
       const previewButton = buttons.find((b) => b.label === 'Preview');
@@ -141,7 +147,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         attachment,
         isSidebar: false,
         isCanvas: false,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
       });
 
       const openInEditorButton = buttons.find((b) => b.label === 'Open in editor');
@@ -157,7 +163,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         attachment,
         isSidebar: false,
         isCanvas: true,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
       });
 
       expect(buttons).toHaveLength(0);
@@ -172,7 +178,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         attachment,
         isSidebar: false,
         isCanvas: false,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
       });
 
       const openInEditorButton = buttons.find((b) => b.label === 'Open in editor');
@@ -188,7 +194,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         attachment,
         isSidebar: false,
         isCanvas: false,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
       });
 
       const openInEditorButton = buttons.find((b) => b.label === 'Open in editor');
@@ -207,7 +213,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         attachment,
         isSidebar: false,
         isCanvas: false,
-        updateOrigin: jest.fn(),
+        updateOrigin: vi.fn(),
       });
 
       const openInEditorButton = buttons.find((b) => b.label === 'Open in editor');
@@ -224,7 +230,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
           attachment,
           isSidebar: false,
           isCanvas: false,
-          updateOrigin: jest.fn(),
+          updateOrigin: vi.fn(),
         });
 
         const openInEditorButton = buttons.find((b) => b.label === 'Open in editor')!;
@@ -247,7 +253,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         <>
           {definition.renderCanvasContent!(
             { attachment, isSidebar: false },
-            { registerActionButtons: jest.fn(), updateOrigin: jest.fn(), closeCanvas: jest.fn() }
+            { registerActionButtons: vi.fn(), updateOrigin: vi.fn(), closeCanvas: vi.fn() }
           )}
         </>
       );
@@ -259,13 +265,13 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
       const services = createMockServices();
       const definition = createWorkflowYamlAttachmentUiDefinition(services);
       const attachment = createAttachment();
-      const registerActionButtons = jest.fn();
+      const registerActionButtons = vi.fn();
 
       render(
         <>
           {definition.renderCanvasContent!(
             { attachment, isSidebar: false },
-            { registerActionButtons, updateOrigin: jest.fn(), closeCanvas: jest.fn() }
+            { registerActionButtons, updateOrigin: vi.fn(), closeCanvas: vi.fn() }
           )}
         </>
       );
@@ -279,13 +285,13 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
       const services = createMockServices();
       const definition = createWorkflowYamlAttachmentUiDefinition(services);
       const attachment = createAttachment({ workflowId: 'wf-pre-assigned' });
-      const registerActionButtons = jest.fn();
+      const registerActionButtons = vi.fn();
 
       render(
         <>
           {definition.renderCanvasContent!(
             { attachment, isSidebar: false },
-            { registerActionButtons, updateOrigin: jest.fn(), closeCanvas: jest.fn() }
+            { registerActionButtons, updateOrigin: vi.fn(), closeCanvas: vi.fn() }
           )}
         </>
       );
@@ -300,13 +306,13 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
       const services = createMockServices();
       const definition = createWorkflowYamlAttachmentUiDefinition(services);
       const attachment = createAttachment({ workflowId: 'wf-123', origin: 'wf-123' });
-      const registerActionButtons = jest.fn();
+      const registerActionButtons = vi.fn();
 
       render(
         <>
           {definition.renderCanvasContent!(
             { attachment, isSidebar: false },
-            { registerActionButtons, updateOrigin: jest.fn(), closeCanvas: jest.fn() }
+            { registerActionButtons, updateOrigin: vi.fn(), closeCanvas: vi.fn() }
           )}
         </>
       );
@@ -320,13 +326,13 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
       const services = createMockServices();
       const definition = createWorkflowYamlAttachmentUiDefinition(services);
       const attachment = createAttachment({ workflowId: 'wf-123', origin: 'wf-123' });
-      const registerActionButtons = jest.fn();
+      const registerActionButtons = vi.fn();
 
       render(
         <>
           {definition.renderCanvasContent!(
             { attachment, isSidebar: false },
-            { registerActionButtons, updateOrigin: jest.fn(), closeCanvas: jest.fn() }
+            { registerActionButtons, updateOrigin: vi.fn(), closeCanvas: vi.fn() }
           )}
         </>
       );
@@ -344,13 +350,13 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         const services = createMockServices();
         const definition = createWorkflowYamlAttachmentUiDefinition(services);
         const attachment = createAttachment();
-        const registerActionButtons = jest.fn();
+        const registerActionButtons = vi.fn();
 
         render(
           <>
             {definition.renderCanvasContent!(
               { attachment, isSidebar: false },
-              { registerActionButtons, updateOrigin: jest.fn(), closeCanvas: jest.fn() }
+              { registerActionButtons, updateOrigin: vi.fn(), closeCanvas: vi.fn() }
             )}
           </>
         );
@@ -367,13 +373,13 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         const services = createMockServices();
         const definition = createWorkflowYamlAttachmentUiDefinition(services);
         const attachment = createAttachment({ workflowId: 'wf-123', origin: 'wf-123' });
-        const registerActionButtons = jest.fn();
+        const registerActionButtons = vi.fn();
 
         render(
           <>
             {definition.renderCanvasContent!(
               { attachment, isSidebar: false },
-              { registerActionButtons, updateOrigin: jest.fn(), closeCanvas: jest.fn() }
+              { registerActionButtons, updateOrigin: vi.fn(), closeCanvas: vi.fn() }
             )}
           </>
         );
@@ -391,13 +397,13 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         const services = createMockServices();
         const definition = createWorkflowYamlAttachmentUiDefinition(services);
         const attachment = createAttachment({ workflowId: 'wf-123', origin: 'wf-123' });
-        const registerActionButtons = jest.fn();
+        const registerActionButtons = vi.fn();
 
         render(
           <>
             {definition.renderCanvasContent!(
               { attachment, isSidebar: false },
-              { registerActionButtons, updateOrigin: jest.fn(), closeCanvas: jest.fn() }
+              { registerActionButtons, updateOrigin: vi.fn(), closeCanvas: vi.fn() }
             )}
           </>
         );
@@ -415,13 +421,13 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         const services = createMockServices();
         const definition = createWorkflowYamlAttachmentUiDefinition(services);
         const attachment = createAttachment({ workflowId: 'wf-123', origin: 'wf-123' });
-        const registerActionButtons = jest.fn();
+        const registerActionButtons = vi.fn();
 
         render(
           <>
             {definition.renderCanvasContent!(
               { attachment, isSidebar: false },
-              { registerActionButtons, updateOrigin: jest.fn(), closeCanvas: jest.fn() }
+              { registerActionButtons, updateOrigin: vi.fn(), closeCanvas: vi.fn() }
             )}
           </>
         );

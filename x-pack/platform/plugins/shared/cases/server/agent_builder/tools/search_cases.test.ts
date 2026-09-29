@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AvailabilityContext } from '@kbn/agent-builder-server';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
@@ -49,11 +52,11 @@ const buildCase = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const buildMockAttachments = () => ({
-  add: jest.fn().mockResolvedValue({ id: 'att-1' }),
-  get: jest.fn(),
-  delete: jest.fn(),
-  update: jest.fn(),
-  list: jest.fn(),
+  add: vi.fn().mockResolvedValue({ id: 'att-1' }),
+  get: vi.fn(),
+  delete: vi.fn(),
+  update: vi.fn(),
+  list: vi.fn(),
 });
 
 const buildToolContext = (overrides: Partial<ToolHandlerContext> = {}): ToolHandlerContext => {
@@ -76,7 +79,7 @@ function buildTool(casesClientMock: CasesClientMock) {
   const coreStart = coreMock.createStart();
   coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
 
-  const getCasesClientFn = jest.fn().mockResolvedValue(casesClientMock);
+  const getCasesClientFn = vi.fn().mockResolvedValue(casesClientMock);
   const tool = searchCasesTool(coreSetup, getCasesClientFn);
   return { tool, getCasesClientFn };
 }
@@ -184,7 +187,7 @@ describe('searchCasesTool handler — bulk_get mode', () => {
     const ids = Array.from({ length: 15 }, (_, i) => `c${i}`);
     await tool.handler({ mode: 'bulk_get', case_ids: ids } as never, buildToolContext());
 
-    const calledWith = (casesClient.cases.bulkGet as jest.Mock).mock.calls[0][0];
+    const calledWith = (casesClient.cases.bulkGet as Mock).mock.calls[0][0];
     expect(calledWith.ids).toHaveLength(10);
   });
 });
@@ -232,7 +235,7 @@ describe('searchCasesTool handler — by_alert mode', () => {
       buildToolContext()
     );
 
-    const bulkGetCall = (casesClient.cases.bulkGet as jest.Mock).mock.calls[0][0];
+    const bulkGetCall = (casesClient.cases.bulkGet as Mock).mock.calls[0][0];
     expect(bulkGetCall.ids).toHaveLength(1);
     expect(bulkGetCall.ids[0]).toBe('c1');
   });
@@ -292,7 +295,7 @@ describe('searchCasesTool handler — search mode', () => {
       buildToolContext()
     );
 
-    const findCall = (casesClient.cases.find as jest.Mock).mock.calls[0][0];
+    const findCall = (casesClient.cases.find as Mock).mock.calls[0][0];
     expect(findCall.perPage).toBe(50);
   });
 
@@ -311,7 +314,7 @@ describe('searchCasesTool handler — search mode', () => {
     const { tool } = buildTool(casesClient);
     await tool.handler({ mode: 'search', owner: 'securitySolution' } as never, buildToolContext());
 
-    const findCall = (casesClient.cases.find as jest.Mock).mock.calls[0][0];
+    const findCall = (casesClient.cases.find as Mock).mock.calls[0][0];
     expect(findCall.perPage).toBe(10);
   });
 
@@ -346,7 +349,7 @@ describe('searchCasesTool availability', () => {
   it('returns unavailable for es solution', async () => {
     const coreSetup = makeCoreWithSolution('es');
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    const tool = { ...searchCasesTool(coreSetup, jest.fn()), availability };
+    const tool = { ...searchCasesTool(coreSetup, vi.fn()), availability };
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as AvailabilityContext);
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
@@ -355,7 +358,7 @@ describe('searchCasesTool availability', () => {
   it('returns available for classic solution', async () => {
     const coreSetup = makeCoreWithSolution('classic');
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    const tool = { ...searchCasesTool(coreSetup, jest.fn()), availability };
+    const tool = { ...searchCasesTool(coreSetup, vi.fn()), availability };
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as AvailabilityContext);
     expect(result).toEqual({ status: 'available' });
@@ -365,7 +368,7 @@ describe('searchCasesTool availability', () => {
     const coreSetup = coreMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
-    const tool = { ...searchCasesTool(coreSetup, jest.fn()), availability };
+    const tool = { ...searchCasesTool(coreSetup, vi.fn()), availability };
     expect(tool.availability?.cacheMode).toBe('space');
   });
 });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { IUserStorageClient } from '@kbn/core-user-storage-common';
 import {
@@ -22,13 +25,13 @@ const createClient = (initial: { overrides?: ReadOverrides; readAllBefore?: stri
     [READ_ALL_BEFORE_KEY]: initial.readAllBefore ?? READ_ALL_BEFORE_DEFAULT,
   };
   const client: IUserStorageClient = {
-    get: jest.fn(async (key: string) => store[key]),
-    set: jest.fn(async (key: string, value: unknown) => {
+    get: vi.fn(async (key: string) => store[key]),
+    set: vi.fn(async (key: string, value: unknown) => {
       store[key] = value;
       return value;
     }),
-    remove: jest.fn(),
-    getForInjection: jest.fn(),
+    remove: vi.fn(),
+    getForInjection: vi.fn(),
   } as unknown as IUserStorageClient;
   return { client, store };
 };
@@ -96,7 +99,7 @@ describe('markAllRead', () => {
     const { client } = createClient({ overrides: { a: readOverride('2026-07-01T00:00:00.000Z') } });
     await markAllRead(client);
 
-    const setKeys = (client.set as jest.Mock).mock.calls.map(([key]) => key);
+    const setKeys = (client.set as Mock).mock.calls.map(([key]) => key);
     expect(setKeys).toEqual([READ_ALL_BEFORE_KEY, OVERRIDES_KEY]);
   });
 });
@@ -135,7 +138,7 @@ describe('getReadState', () => {
 
   it('degrades to an unannotated list when userStorage fails', async () => {
     const { client } = createClient();
-    (client.get as jest.Mock).mockRejectedValue(new Error('boom'));
+    (client.get as Mock).mockRejectedValue(new Error('boom'));
     const logger = loggingSystemMock.createLogger();
 
     await expect(getReadState(client, logger)).resolves.toBeUndefined();

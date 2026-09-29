@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
@@ -20,11 +23,11 @@ import { MANAGEMENT_OF_SHARED_PER_POLICY_ARTIFACT_NOT_ALLOWED_MESSAGE } from '..
 import type { ArtifactActionsDisabledState } from './use_artifact_actions_disabled';
 import { useArtifactActionsDisabled } from './use_artifact_actions_disabled';
 
-jest.mock('../../../common/components/user_privileges');
-jest.mock('../../../common/hooks/use_space_id');
+vi.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/hooks/use_space_id');
 
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
-const useSpaceIdMock = useSpaceId as jest.Mock;
+const useUserPrivilegesMock = useUserPrivileges as Mock;
+const useSpaceIdMock = useSpaceId as Mock;
 
 describe('useArtifactActionsDisabled()', () => {
   const ACTIVE_SPACE_ID = 'default';

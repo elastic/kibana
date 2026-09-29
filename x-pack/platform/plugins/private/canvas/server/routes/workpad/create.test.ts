@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AwaitedProperties } from '@kbn/utility-types';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import type { MockWorkpadRouteContext } from '../../mocks';
@@ -23,9 +26,12 @@ let mockRouteContext = {
   canvas: workpadRouteContextMock.create(),
 } as unknown as AwaitedProperties<MockWorkpadRouteContext>;
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('123abc'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('123abc'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('POST workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -113,7 +119,7 @@ describe('POST workpad', () => {
       id,
     });
 
-    (mockRouteContext.core.savedObjects.client.get as jest.Mock).mockResolvedValue(
+    (mockRouteContext.core.savedObjects.client.get as Mock).mockResolvedValue(
       mockTemplateResponse
     );
 

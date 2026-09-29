@@ -5,26 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CreateEscalationForm, type CreateEscalationFormProps } from './create_escalation_form';
 
-jest.mock('@kbn/user-profile-components', () => ({
-  UserProfilesSelectable: ({ 'data-test-subj': testSubj }: { 'data-test-subj'?: string }) => (
-    <div data-test-subj={testSubj ?? 'escalationModalCollaboratorPicker'} />
-  ),
-}));
+vi.mock('@kbn/user-profile-components', () => {
+      const mocked = {
+      UserProfilesSelectable: ({ 'data-test-subj': testSubj }: { 'data-test-subj'?: string }) => (
+        <div data-test-subj={testSubj ?? 'escalationModalCollaboratorPicker'} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps: CreateEscalationFormProps = {
   investigationTitle: 'Suspicious login activity',
   suggestedCollaborators: [],
-  onSearchCollaborators: jest.fn(),
+  onSearchCollaborators: vi.fn(),
   isSearchingCollaborators: false,
-  onSubmit: jest.fn(),
+  onSubmit: vi.fn(),
   isSubmitting: false,
-  onCancel: jest.fn(),
+  onCancel: vi.fn(),
   currentUserUid: 'user-123',
   currentUserName: 'Alice',
 };
@@ -38,7 +43,7 @@ const renderForm = (props: Partial<CreateEscalationFormProps> = {}) =>
     </I18nProvider>
   );
 
-afterEach(() => jest.clearAllMocks());
+afterEach(() => vi.clearAllMocks());
 
 describe('CreateEscalationForm', () => {
   it('pre-fills the title field with the investigation title', () => {
@@ -86,7 +91,7 @@ describe('CreateEscalationForm', () => {
   });
 
   it('calls onSubmit with title, public visibility, and empty collaborators by default', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
     renderForm({ onSubmit });
 
     fireEvent.click(screen.getByTestId('escalationModalCreateEscalation'));
@@ -99,7 +104,7 @@ describe('CreateEscalationForm', () => {
   });
 
   it('calls onSubmit with private visibility and currentUserUid prepended when private', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
     renderForm({ onSubmit, currentUserUid: 'user-abc' });
 
     fireEvent.click(screen.getByTestId('escalationModalVisibilitySwitch'));
@@ -113,7 +118,7 @@ describe('CreateEscalationForm', () => {
   });
 
   it('calls onCancel when the cancel button is clicked', () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
     renderForm({ onCancel });
 
     fireEvent.click(screen.getByTestId('escalationModalCancel'));

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -16,13 +19,13 @@ import type { KnowledgeBaseEntryContentReference } from '@kbn/elastic-assistant-
 import { SecurityPageName } from '@kbn/deeplinks-security';
 
 // Mocks
-jest.mock('@kbn/elastic-assistant');
-jest.mock('../../../../context/typed_kibana_context/typed_kibana_context');
+vi.mock('@kbn/elastic-assistant');
+vi.mock('../../../../context/typed_kibana_context/typed_kibana_context');
 
-const mockNavigateToApp = jest.fn();
+const mockNavigateToApp = vi.fn();
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseAssistantContext = useAssistantContext as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseAssistantContext = useAssistantContext as Mock;
 
 const defaultProps = {
   contentReferenceNode: {
@@ -39,7 +42,7 @@ const defaultProps = {
 
 describe('KnowledgeBaseEntryReference', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: { application: { navigateToApp: mockNavigateToApp } },
     });

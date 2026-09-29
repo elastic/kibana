@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { FieldRule } from '@kbn/anonymization-common';
@@ -12,8 +14,8 @@ import { FIELD_RULE_ACTION_ANONYMIZE } from '../../hooks/field_rule_actions';
 import { FieldRulesPanelRowItem } from './row_item';
 
 const renderRow = (rule: FieldRule) => {
-  const onRuleActionChange = jest.fn();
-  const onRuleEntityClassChange = jest.fn();
+  const onRuleActionChange = vi.fn();
+  const onRuleEntityClassChange = vi.fn();
 
   render(
     <FieldRulesPanelRowItem
@@ -22,7 +24,7 @@ const renderRow = (rule: FieldRule) => {
       showValidationErrors={false}
       isManageMode
       isSubmitting={false}
-      onToggleSelection={jest.fn()}
+      onToggleSelection={vi.fn()}
       onRuleActionChange={onRuleActionChange}
       onRuleEntityClassChange={onRuleEntityClassChange}
     />

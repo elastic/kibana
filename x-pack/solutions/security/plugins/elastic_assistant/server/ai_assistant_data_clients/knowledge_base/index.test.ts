@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KnowledgeBaseDataClientParams } from '.';
 import { AIAssistantKnowledgeBaseDataClient } from '.';
@@ -33,31 +36,31 @@ import {
   loadDefendInsights,
 } from '../../lib/langchain/content_loaders/defend_insights_loader';
 
-jest.mock('@kbn/ml-plugin/server/lib/node_utils');
-jest.mock('../../lib/langchain/content_loaders/security_labs_loader');
-jest.mock('../../lib/langchain/content_loaders/defend_insights_loader');
-jest.mock('p-retry');
+vi.mock('@kbn/ml-plugin/server/lib/node_utils');
+vi.mock('../../lib/langchain/content_loaders/security_labs_loader');
+vi.mock('../../lib/langchain/content_loaders/defend_insights_loader');
+vi.mock('p-retry');
 const date = '2023-03-28T22:27:28.159Z';
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 const mockUser1 = authenticatedUser;
 
-const mockedPRetry = pRetry as jest.MockedFunction<typeof pRetry>;
+const mockedPRetry = pRetry as MockedFunction<typeof pRetry>;
 mockedPRetry.mockResolvedValue({});
 const telemetry = coreMock.createSetup().analytics;
 
 describe('AIAssistantKnowledgeBaseDataClient', () => {
   let mockOptions: KnowledgeBaseDataClientParams;
   let ml: MlPluginSetup;
-  const getElserId = jest.fn();
-  const mockLoadSecurityLabs = loadSecurityLabs as jest.Mock;
-  const mockGetSecurityLabsDocsCount = getSecurityLabsDocsCount as jest.Mock;
-  const mockGetDefendInsightsDocsCount = getDefendInsightsDocsCount as jest.Mock;
-  const mockGetIsKBSetupInProgress = jest.fn();
+  const getElserId = vi.fn();
+  const mockLoadSecurityLabs = loadSecurityLabs as Mock;
+  const mockGetSecurityLabsDocsCount = getSecurityLabsDocsCount as Mock;
+  const mockGetDefendInsightsDocsCount = getDefendInsightsDocsCount as Mock;
+  const mockGetIsKBSetupInProgress = vi.fn();
   const trainedModelsProviderMock = createTrainedModelsProviderMock()();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggingSystemMock.createLogger();
     mockLoadSecurityLabs.mockClear();
     ml = mlPluginMock.createSetupContract() as unknown as MlPluginSetup; // Missing SharedServices mock, so manually mocking trainedModelsProvider
@@ -72,9 +75,9 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       getElserId: getElserId.mockResolvedValue('elser-id'),
       elserInferenceId: ASSISTANT_ELSER_INFERENCE_ID,
       getIsKBSetupInProgress: mockGetIsKBSetupInProgress.mockReturnValue(false),
-      getProductDocumentationStatus: jest.fn().mockResolvedValue('installed'),
+      getProductDocumentationStatus: vi.fn().mockResolvedValue('installed'),
       ingestPipelineResourceName: 'something',
-      setIsKBSetupInProgress: jest.fn().mockImplementation(() => {}),
+      setIsKBSetupInProgress: vi.fn().mockImplementation(() => {}),
       manageGlobalKnowledgeBaseAIAssistant: true,
       getTrainedModelsProvider: () => trainedModelsProviderMock,
     };
@@ -89,12 +92,12 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
   });
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date(date));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(date));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
   describe('isSetupInProgress', () => {
     it('should return true if setup is in progress', () => {
@@ -289,7 +292,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
   describe('setupKnowledgeBase', () => {
     it('should install, deploy, and load docs if not already done', async () => {
-      (getMlNodeCount as jest.Mock).mockResolvedValue({ count: 1, lazyNodeCount: 0 });
+      (getMlNodeCount as Mock).mockResolvedValue({ count: 1, lazyNodeCount: 0 });
       // @ts-expect-error not full response interface
       esClientMock.search.mockResolvedValue({});
       trainedModelsProviderMock.startTrainedModelDeployment.mockResolvedValue({});
@@ -316,7 +319,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
     });
 
     it('should skip installation and deployment if model is already installed and deployed', async () => {
-      (getMlNodeCount as jest.Mock).mockResolvedValue({ count: 1, lazyNodeCount: 0 });
+      (getMlNodeCount as Mock).mockResolvedValue({ count: 1, lazyNodeCount: 0 });
       mockGetSecurityLabsDocsCount.mockResolvedValue(1);
       mockGetDefendInsightsDocsCount.mockResolvedValue(1);
       trainedModelsProviderMock.getTrainedModels.mockResolvedValue({
@@ -357,7 +360,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
           { fully_defined: false, model_id: '', tags: [], input: { field_names: ['content'] } },
         ],
       });
-      (getMlNodeCount as jest.Mock).mockRejectedValue(new Error('Installation error'));
+      (getMlNodeCount as Mock).mockRejectedValue(new Error('Installation error'));
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
 
       await expect(client.setupKnowledgeBase({})).rejects.toThrow(
@@ -589,7 +592,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
   describe('getAssistantTools', () => {
     it('should return structured tools for relevant index entries', async () => {
-      IndexPatternsFetcher.prototype.getIndexPatternMatches = jest
+      IndexPatternsFetcher.prototype.getIndexPatternMatches = vi
         .fn()
         .mockResolvedValue({ matchedIndexPatterns: ['test'] });
       esClientMock.search.mockReturnValue(

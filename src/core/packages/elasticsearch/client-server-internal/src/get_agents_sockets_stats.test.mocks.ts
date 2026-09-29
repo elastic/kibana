@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent } from 'https';
 
@@ -20,10 +23,10 @@ export const getHttpsAgentMock = (overrides: Partial<HttpsAgent>) => {
   return Object.assign(new HttpsAgent(), overrides);
 };
 
-export const getAgentsSocketsStatsMock: jest.MockedFunction<typeof getAgentsSocketsStats> =
-  jest.fn();
+export const getAgentsSocketsStatsMock: MockedFunction<typeof getAgentsSocketsStats> =
+  vi.fn();
 
-jest.doMock('./get_agents_sockets_stats', () => {
+vi.doMock('./get_agents_sockets_stats', () => {
   return {
     getAgentsSocketsStats: getAgentsSocketsStatsMock,
   };

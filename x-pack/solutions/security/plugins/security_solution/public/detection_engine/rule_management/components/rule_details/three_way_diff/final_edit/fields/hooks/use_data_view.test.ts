@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useDataView } from './use_data_view';
 import { useKibana } from '../../../../../../../../common/lib/kibana';
 import { useKibana as mockUseKibana } from '../../../../../../../../common/lib/kibana/__mocks__';
 
-jest.mock('../../../../../../../../common/lib/kibana');
+vi.mock('../../../../../../../../common/lib/kibana');
 
 const mockedUseKibana = mockUseKibana();
-(useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
+(useKibana as Mock).mockReturnValue(mockedUseKibana);
 
 describe('useDataView', () => {
   it('should set isLoading to false if a dataView already exists', async () => {

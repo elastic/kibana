@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -23,24 +26,24 @@ import {
 describe('ensureSecurityLabsInstalled', () => {
   const inferenceId = defaultInferenceEndpoints.ELSER;
   let productDocBase: ProductDocBasePluginStart;
-  let uiSettings: { get: jest.Mock };
+  let uiSettings: { get: Mock };
   let logger: ReturnType<typeof loggerMock.create>;
 
   beforeEach(() => {
     productDocBase = {
       installation: {
-        getDefaultInferenceId: jest.fn().mockResolvedValue(inferenceId),
-        getStatus: jest.fn().mockResolvedValue({
+        getDefaultInferenceId: vi.fn().mockResolvedValue(inferenceId),
+        getStatus: vi.fn().mockResolvedValue({
           inferenceId,
           resourceType: ResourceTypes.securityLabs,
           status: 'uninstalled',
         }),
-        install: jest.fn().mockResolvedValue({ installed: true }),
-        uninstall: jest.fn(),
+        install: vi.fn().mockResolvedValue({ installed: true }),
+        uninstall: vi.fn(),
       },
     };
     uiSettings = {
-      get: jest.fn((key: string) => {
+      get: vi.fn((key: string) => {
         if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return 'some-connector';
         if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) return false;
         return undefined;
@@ -73,7 +76,7 @@ describe('ensureSecurityLabsInstalled', () => {
   });
 
   it('reinstalls when status is error', async () => {
-    (productDocBase.installation.getStatus as jest.Mock).mockResolvedValue({
+    (productDocBase.installation.getStatus as Mock).mockResolvedValue({
       inferenceId,
       resourceType: ResourceTypes.securityLabs,
       status: 'error',
@@ -95,7 +98,7 @@ describe('ensureSecurityLabsInstalled', () => {
   });
 
   it('skips install when already installed', async () => {
-    (productDocBase.installation.getStatus as jest.Mock).mockResolvedValue({
+    (productDocBase.installation.getStatus as Mock).mockResolvedValue({
       inferenceId,
       resourceType: ResourceTypes.securityLabs,
       status: 'installed',
@@ -114,7 +117,7 @@ describe('ensureSecurityLabsInstalled', () => {
   });
 
   it('installs Security Labs when in error state', async () => {
-    (productDocBase.installation.getStatus as jest.Mock).mockResolvedValue({
+    (productDocBase.installation.getStatus as Mock).mockResolvedValue({
       inferenceId,
       resourceType: ResourceTypes.securityLabs,
       status: 'error',
@@ -136,7 +139,7 @@ describe('ensureSecurityLabsInstalled', () => {
   });
 
   it('skips install when installation is in progress', async () => {
-    (productDocBase.installation.getStatus as jest.Mock).mockResolvedValue({
+    (productDocBase.installation.getStatus as Mock).mockResolvedValue({
       inferenceId,
       resourceType: ResourceTypes.securityLabs,
       status: 'installing',
@@ -201,18 +204,18 @@ describe('useEnsureSecurityLabs', () => {
   const createServices = () => {
     const productDocBase = {
       installation: {
-        getDefaultInferenceId: jest.fn().mockResolvedValue(defaultInferenceEndpoints.ELSER),
-        getStatus: jest.fn().mockResolvedValue({
+        getDefaultInferenceId: vi.fn().mockResolvedValue(defaultInferenceEndpoints.ELSER),
+        getStatus: vi.fn().mockResolvedValue({
           inferenceId: defaultInferenceEndpoints.ELSER,
           resourceType: ResourceTypes.securityLabs,
           status: 'uninstalled',
         }),
-        install: jest.fn().mockResolvedValue({ installed: true }),
-        uninstall: jest.fn(),
+        install: vi.fn().mockResolvedValue({ installed: true }),
+        uninstall: vi.fn(),
       },
     } as unknown as ProductDocBasePluginStart;
     const uiSettings = {
-      get: jest.fn((key: string) => {
+      get: vi.fn((key: string) => {
         if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return 'some-connector';
         if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) return false;
         return undefined;
@@ -267,7 +270,7 @@ describe('useEnsureSecurityLabs', () => {
 
   it('logs 403 failures at warn instead of error', async () => {
     const { productDocBase, uiSettings, logger } = createServices();
-    (productDocBase.installation.getDefaultInferenceId as jest.Mock).mockRejectedValue({
+    (productDocBase.installation.getDefaultInferenceId as Mock).mockRejectedValue({
       response: { status: 403 },
       body: { statusCode: 403 },
     });

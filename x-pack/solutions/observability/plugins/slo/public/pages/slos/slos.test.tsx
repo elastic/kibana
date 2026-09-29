@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { usePerformanceContext } from '@kbn/ebt-tools';
@@ -42,69 +45,78 @@ import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_c
 import { useGetSettings } from '../slo_settings/hooks/use_get_settings';
 import { SlosPage } from './slos';
 
-const mockHistoryReplace = jest.fn();
-const mockHistoryPush = jest.fn();
-const mockUseHistory = jest.fn();
+const mockHistoryReplace = vi.fn();
+const mockHistoryPush = vi.fn();
+const mockUseHistory = vi.fn();
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn(),
-  useHistory: () => mockUseHistory(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: vi.fn(),
+      useHistory: () => mockUseHistory(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('../../hooks/use_kibana');
-jest.mock('../../hooks/use_composite_slo_enabled', () => ({
-  useCompositeSloEnabled: jest.fn().mockReturnValue(false),
-}));
-jest.mock('../../hooks/use_license');
-jest.mock('../../hooks/use_fetch_slo_list');
-jest.mock('../../hooks/use_fetch_slo_definitions');
-jest.mock('../../hooks/use_has_slos');
-jest.mock('../../hooks/use_create_slo');
-jest.mock('../slo_settings/hooks/use_get_settings');
-jest.mock('../../hooks/use_delete_slo');
-jest.mock('../../hooks/use_delete_slo_instance');
-jest.mock('../../hooks/use_fetch_active_alerts');
-jest.mock('../../hooks/use_fetch_historical_summary');
-jest.mock('../../hooks/use_fetch_rules_for_slo');
-jest.mock('../../hooks/use_get_filtered_rule_types');
-jest.mock('../../hooks/use_permissions');
-jest.mock('../../hooks/use_create_data_view');
-jest.mock('../../hooks/use_space');
-jest.mock('./components/slo_list_search_bar');
-jest.mock('./components/slo_sparkline', () => ({
-  SloSparkline: () => <div data-test-subj="mockedSparkline" />,
-}));
-jest.mock('@kbn/ebt-tools');
+vi.mock('@kbn/observability-shared-plugin/public');
+vi.mock('../../hooks/use_kibana');
+vi.mock('../../hooks/use_composite_slo_enabled', () => {
+      const mocked = {
+      useCompositeSloEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_license');
+vi.mock('../../hooks/use_fetch_slo_list');
+vi.mock('../../hooks/use_fetch_slo_definitions');
+vi.mock('../../hooks/use_has_slos');
+vi.mock('../../hooks/use_create_slo');
+vi.mock('../slo_settings/hooks/use_get_settings');
+vi.mock('../../hooks/use_delete_slo');
+vi.mock('../../hooks/use_delete_slo_instance');
+vi.mock('../../hooks/use_fetch_active_alerts');
+vi.mock('../../hooks/use_fetch_historical_summary');
+vi.mock('../../hooks/use_fetch_rules_for_slo');
+vi.mock('../../hooks/use_get_filtered_rule_types');
+vi.mock('../../hooks/use_permissions');
+vi.mock('../../hooks/use_create_data_view');
+vi.mock('../../hooks/use_space');
+vi.mock('./components/slo_list_search_bar');
+vi.mock('./components/slo_sparkline', () => {
+      const mocked = {
+      SloSparkline: () => <div data-test-subj="mockedSparkline" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/ebt-tools');
 
-const useGetSettingsMock = useGetSettings as jest.Mock;
-const useKibanaMock = useKibana as jest.Mock;
-const useLicenseMock = useLicense as jest.Mock;
-const useFetchSloListMock = useFetchSloList as jest.Mock;
-const useFetchSloDefinitionsMock = useFetchSloDefinitions as jest.Mock;
-const useHasSlosMock = useHasSlos as jest.Mock;
-const useCreateSloMock = useCreateSlo as jest.Mock;
-const useDeleteSloMock = useDeleteSlo as jest.Mock;
-const useDeleteSloInstanceMock = useDeleteSloInstance as jest.Mock;
-const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
-const usePermissionsMock = usePermissions as jest.Mock;
-const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
-const useFetchRulesForSloMock = useFetchRulesForSlo as jest.Mock;
-const useGetFilteredRuleTypesMock = useGetFilteredRuleTypes as jest.Mock;
-const useSpaceMock = useSpace as jest.Mock;
-const useCreateDataViewMock = useCreateDataView as jest.Mock;
-const TagsListMock = TagsList as jest.Mock;
-const usePerformanceContextMock = usePerformanceContext as jest.Mock;
+const useGetSettingsMock = useGetSettings as Mock;
+const useKibanaMock = useKibana as Mock;
+const useLicenseMock = useLicense as Mock;
+const useFetchSloListMock = useFetchSloList as Mock;
+const useFetchSloDefinitionsMock = useFetchSloDefinitions as Mock;
+const useHasSlosMock = useHasSlos as Mock;
+const useCreateSloMock = useCreateSlo as Mock;
+const useDeleteSloMock = useDeleteSlo as Mock;
+const useDeleteSloInstanceMock = useDeleteSloInstance as Mock;
+const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as Mock;
+const usePermissionsMock = usePermissions as Mock;
+const useFetchActiveAlertsMock = useFetchActiveAlerts as Mock;
+const useFetchRulesForSloMock = useFetchRulesForSlo as Mock;
+const useGetFilteredRuleTypesMock = useGetFilteredRuleTypes as Mock;
+const useSpaceMock = useSpace as Mock;
+const useCreateDataViewMock = useCreateDataView as Mock;
+const TagsListMock = TagsList as Mock;
+const usePerformanceContextMock = usePerformanceContext as Mock;
 
-usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
+usePerformanceContextMock.mockReturnValue({ onPageReady: vi.fn() });
 TagsListMock.mockReturnValue(<div>Tags list</div>);
-const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
+const HeaderMenuPortalMock = HeaderMenuPortal as Mock;
 HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
-const mockCreateSlo = jest.fn();
-const mockDeleteSlo = jest.fn();
-const mockDeleteInstance = jest.fn();
+const mockCreateSlo = vi.fn();
+const mockDeleteSlo = vi.fn();
+const mockDeleteInstance = vi.fn();
 
 useCreateSloMock.mockReturnValue({ mutate: mockCreateSlo });
 useDeleteSloMock.mockReturnValue({ mutate: mockDeleteSlo });
@@ -115,14 +127,17 @@ useFetchRulesForSloMock.mockReturnValue({ data: {} });
 useGetFilteredRuleTypesMock.mockReturnValue([]);
 useSpaceMock.mockReturnValue('default');
 
-const mockNavigate = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
-const mockLocator = jest.fn();
+const mockNavigate = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
+const mockLocator = vi.fn();
 
-jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
-  RuleFormFlyout: jest.fn(() => <div data-test-subj="add-rule-flyout">Add rule flyout</div>),
-}));
+vi.mock('@kbn/response-ops-rule-form/flyout', () => {
+      const mocked = {
+      RuleFormFlyout: vi.fn(() => <div data-test-subj="add-rule-flyout">Add rule flyout</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -132,12 +147,12 @@ const mockKibana = () => {
       charts: chartPluginMock.createSetupContract(),
       data: {
         dataViews: {
-          find: jest.fn().mockReturnValue([]),
-          get: jest.fn().mockReturnValue([]),
+          find: vi.fn().mockReturnValue([]),
+          get: vi.fn().mockReturnValue([]),
         },
       },
       dataViews: {
-        create: jest.fn().mockResolvedValue(42),
+        create: vi.fn().mockResolvedValue(42),
       },
       docLinks: {
         links: {
@@ -186,7 +201,7 @@ const mockKibana = () => {
           hasQuerySuggestions: () => {},
         },
       },
-      inspector: { open: jest.fn() },
+      inspector: { open: vi.fn() },
       executionContext: {
         get: () => ({
           name: 'slo',
@@ -198,7 +213,7 @@ const mockKibana = () => {
 
 describe('SLOs Page', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockHistoryReplace.mockClear();
     mockHistoryPush.mockClear();
     mockUseHistory.mockReturnValue({
@@ -222,10 +237,10 @@ describe('SLOs Page', () => {
       isLoading: false,
       data: { hasAllReadRequested: true, hasAllWriteRequested: true },
     });
-    jest
+    vi
       .spyOn(Router, 'useLocation')
       .mockReturnValue({ pathname: '/slos', search: '', state: '', hash: '' });
-    jest
+    vi
       .spyOn(Router, 'useRouteMatch')
       .mockReturnValue({ url: '/slos', path: '/slos', isExact: true, params: {} });
   });

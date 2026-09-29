@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { AsyncField, createPrebuildFields } from './use_rule_description_fields';
 import { screen, render, waitFor } from '@testing-library/react';
@@ -15,15 +17,18 @@ import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_re
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { existsFilter } from '@kbn/es-query/src/filters/stubs';
 
-jest.mock('../../../../common/lib/kibana/kibana_react');
+vi.mock('../../../../common/lib/kibana/kibana_react');
 
-jest.mock('@kbn/unified-search-plugin/public', () => ({
-  FilterItems: () => <div data-test-subj="filter-items-mock" />,
-}));
+vi.mock('@kbn/unified-search-plugin/public', () => {
+      const mocked = {
+      FilterItems: () => <div data-test-subj="filter-items-mock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const dataViewGetMock = jest.fn();
+const dataViewGetMock = vi.fn();
 
-jest.mocked(useKibana).mockReturnValue({
+vi.mocked(useKibana).mockReturnValue({
   services: {
     ...createStartServicesMock(),
     dataViews: {
@@ -44,7 +49,7 @@ describe('use_rule_description_fields', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient({
       defaultOptions: {
         queries: {
@@ -67,7 +72,7 @@ describe('use_rule_description_fields', () => {
   describe('AsyncField', () => {
     it('should render async loaded data', async () => {
       const RESPONSE_TEXT = 'my test data';
-      const mockQueryFn = jest.fn().mockResolvedValue({ data: RESPONSE_TEXT });
+      const mockQueryFn = vi.fn().mockResolvedValue({ data: RESPONSE_TEXT });
 
       render(
         <AsyncField<{
@@ -113,7 +118,7 @@ describe('use_rule_description_fields', () => {
     });
 
     it('should show error "-" when something goes wrong', async () => {
-      jest.spyOn(console, 'error').mockImplementation(jest.fn());
+      vi.spyOn(console, 'error').mockImplementation(vi.fn());
       const DATA_VIEW_ID = 'my-data-view-id-error-test';
 
       dataViewGetMock.mockRejectedValue(new Error('Test error fetching data view'));

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { lastValueFrom } from 'rxjs';
 import { InferenceConnectorType } from '@kbn/inference-common';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -13,15 +16,18 @@ import type { FunctionRegistrationParameters } from '..';
 import { registerContextFunction } from './context';
 import { recallAndScore } from './utils/recall_and_score';
 
-jest.mock('./utils/recall_and_score', () => ({
-  recallAndScore: jest.fn(),
-}));
+vi.mock('./utils/recall_and_score', () => {
+      const mocked = {
+      recallAndScore: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const recallAndScoreMock = recallAndScore as jest.MockedFunction<typeof recallAndScore>;
+const recallAndScoreMock = recallAndScore as MockedFunction<typeof recallAndScore>;
 
 describe('registerContextFunction connector resolution', () => {
   const inferenceEndpointId = 'elastic-llm';
-  const getConnectorById = jest.fn();
+  const getConnectorById = vi.fn();
   const request = httpServerMock.createKibanaRequest();
   const logger = loggerMock.create();
 
@@ -37,7 +43,7 @@ describe('registerContextFunction connector resolution', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getConnectorById.mockResolvedValue(inferenceConnector);
     recallAndScoreMock.mockResolvedValue({
       suggestions: [],
@@ -47,21 +53,21 @@ describe('registerContextFunction connector resolution', () => {
   });
 
   function registerAndGetHandler(isKnowledgeBaseReady = true) {
-    const functions = { registerFunction: jest.fn() };
+    const functions = { registerFunction: vi.fn() };
     registerContextFunction({
-      client: { recall: jest.fn() },
+      client: { recall: vi.fn() },
       functions,
       resources: {
         request,
         logger,
         plugins: {
           core: {
-            start: jest.fn().mockResolvedValue({
-              analytics: { reportEvent: jest.fn() },
+            start: vi.fn().mockResolvedValue({
+              analytics: { reportEvent: vi.fn() },
             }),
           },
           inference: {
-            start: jest.fn().mockResolvedValue({ getConnectorById }),
+            start: vi.fn().mockResolvedValue({ getConnectorById }),
           },
         },
       },
@@ -79,7 +85,7 @@ describe('registerContextFunction connector resolution', () => {
       connectorId: inferenceEndpointId,
       messages: [],
       screenContexts: [{ screenDescription: 'User is viewing a service map.' }],
-      chat: jest.fn(),
+      chat: vi.fn(),
       signal: new AbortController().signal,
     });
 

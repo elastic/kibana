@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { PersistedLog } from './persisted_log';
 
 const createMockStorage = () => ({
-  clear: jest.fn(),
-  getItem: jest.fn(),
-  key: jest.fn(),
-  removeItem: jest.fn(),
-  setItem: jest.fn(),
+  clear: vi.fn(),
+  getItem: vi.fn(),
+  key: vi.fn(),
+  removeItem: vi.fn(),
+  setItem: vi.fn(),
   length: 0,
 });
 

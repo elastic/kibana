@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { AzureMonitor } from './azure_monitor';
@@ -16,11 +18,11 @@ const SUB_ID = '11111111-1111-1111-1111-111111111111';
 
 describe('AzureMonitor', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-    put: jest.fn(),
-    patch: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
   };
 
   const mockContext = {
@@ -31,11 +33,11 @@ describe('AzureMonitor', () => {
       clientId: 'client-id',
       clientSecret: 'client-secret',
     },
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {

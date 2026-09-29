@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { OUTPUT_SAVED_OBJECT_TYPE } from '../../constants';
@@ -18,24 +21,30 @@ import {
   fetchSavedObjectsHandler,
 } from './handler';
 
-jest.mock('../../services/security', () => ({ isDebugAuthorized: jest.fn() }));
-jest.mock('../../services/spaces/query_namespaces_filtering', () => ({
-  addNamespaceFilteringToQuery: jest.fn(),
-}));
+vi.mock('../../services/security', () => {
+      const mocked = { isDebugAuthorized: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../services/spaces/query_namespaces_filtering', () => {
+      const mocked = {
+      addNamespaceFilteringToQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockIsDebugAuthorized = isDebugAuthorized as jest.MockedFunction<typeof isDebugAuthorized>;
-const mockAddNamespaceFilteringToQuery = addNamespaceFilteringToQuery as jest.MockedFunction<
+const mockIsDebugAuthorized = isDebugAuthorized as MockedFunction<typeof isDebugAuthorized>;
+const mockAddNamespaceFilteringToQuery = addNamespaceFilteringToQuery as MockedFunction<
   typeof addNamespaceFilteringToQuery
 >;
 
 describe('Fleet debug handlers', () => {
   const createMockResponse = () => ({
-    ok: jest.fn().mockImplementation((opts: { body?: unknown }) => ({ ...opts, statusCode: 200 })),
-    badRequest: jest.fn().mockImplementation((opts: { body?: { message?: string } }) => ({
+    ok: vi.fn().mockImplementation((opts: { body?: unknown }) => ({ ...opts, statusCode: 200 })),
+    badRequest: vi.fn().mockImplementation((opts: { body?: { message?: string } }) => ({
       ...opts,
       statusCode: 400,
     })),
-    forbidden: jest.fn().mockImplementation((opts: { body?: { message?: string } }) => ({
+    forbidden: vi.fn().mockImplementation((opts: { body?: { message?: string } }) => ({
       ...opts,
       statusCode: 403,
     })),
@@ -48,7 +57,7 @@ describe('Fleet debug handlers', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('fetchIndexHandler', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { stringify as yamlStringify } from 'yaml';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
@@ -94,8 +96,8 @@ describe('TemplatesService', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   // Spy on the analytics v2 refresh hook so the per-write-path assertions
   // can verify it fires without any wiring.
-  const refreshAnalyticsV2DataView = jest.fn();
-  const getFieldDefinitionsForOwner = jest.fn().mockResolvedValue([]);
+  const refreshAnalyticsV2DataView = vi.fn();
+  const getFieldDefinitionsForOwner = vi.fn().mockResolvedValue([]);
 
   const createService = () =>
     new TemplatesService({
@@ -121,7 +123,7 @@ describe('TemplatesService', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     unsecuredSavedObjectsClient.find.mockResolvedValue(createMockFindResponse([]));
     getFieldDefinitionsForOwner.mockResolvedValue([]);
   });
@@ -1182,7 +1184,7 @@ describe('TemplatesService', () => {
     const definition = buildDefinition('Updated case defaults');
     const service = createService();
 
-    jest
+    vi
       .spyOn(
         service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
         '_getTemplate'
@@ -1240,7 +1242,7 @@ describe('TemplatesService', () => {
     });
     const service = createService();
 
-    jest
+    vi
       .spyOn(
         service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
         '_getTemplate'
@@ -1288,7 +1290,7 @@ describe('TemplatesService', () => {
     });
     const service = createService();
 
-    jest
+    vi
       .spyOn(
         service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
         '_getTemplate'
@@ -1334,7 +1336,7 @@ describe('TemplatesService', () => {
     const definition = buildDefinition('Case defaults');
     const service = createService();
 
-    jest
+    vi
       .spyOn(
         service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
         '_getTemplate'
@@ -1378,7 +1380,7 @@ describe('TemplatesService', () => {
     const definition = buildDefinition('Case defaults');
     const service = createService();
 
-    jest
+    vi
       .spyOn(
         service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
         '_getTemplate'
@@ -1424,7 +1426,7 @@ describe('TemplatesService', () => {
   describe('updateTemplate', () => {
     it('throws when the template does not exist', async () => {
       const service = createService();
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -1444,7 +1446,7 @@ describe('TemplatesService', () => {
       const definition = buildDefinition('Edited Template');
       const service = createService();
 
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -1489,7 +1491,7 @@ describe('TemplatesService', () => {
     it('carries the v1 legacyKey lineage forward across edits (incl. rename)', async () => {
       const service = createService();
 
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -1545,7 +1547,7 @@ describe('TemplatesService', () => {
 
       const mockCurrentTemplate = (definition: string) => {
         const service = createService();
-        jest
+        vi
           .spyOn(
             service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
             '_getTemplate'
@@ -1714,7 +1716,7 @@ describe('TemplatesService', () => {
 
     it('rejects an owner-changing update when the target owner is at the template limit', async () => {
       const service = createService();
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -1743,7 +1745,7 @@ describe('TemplatesService', () => {
 
     it('allows a same-owner update when the owner is at the template limit', async () => {
       const service = createService();
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -1880,7 +1882,7 @@ describe('TemplatesService', () => {
 
     it('rejects update when a definition declares too many fields', async () => {
       const service = createService();
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -1905,7 +1907,7 @@ describe('TemplatesService', () => {
 
     it('rejects update when a non-ASCII template default exceeds the maximum byte size', async () => {
       const service = createService();
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -1935,7 +1937,7 @@ describe('TemplatesService', () => {
 
     it('does not cap version history: allows update well past the former version limit', async () => {
       const service = createService();
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -2168,7 +2170,7 @@ describe('TemplatesService', () => {
     it('increments usageCount and sets lastUsedAt for an existing template', async () => {
       const service = createService();
 
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -2203,7 +2205,7 @@ describe('TemplatesService', () => {
     it('adds the given number of cases to usageCount', async () => {
       const service = createService();
 
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -2237,7 +2239,7 @@ describe('TemplatesService', () => {
     it('sets usageCount to 1 when usageCount is undefined', async () => {
       const service = createService();
 
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -2270,7 +2272,7 @@ describe('TemplatesService', () => {
     it('does nothing when template does not exist', async () => {
       const service = createService();
 
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -2287,7 +2289,7 @@ describe('TemplatesService', () => {
     it('marks all matching templates as deleted', async () => {
       const service = createService();
 
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -2346,7 +2348,7 @@ describe('TemplatesService', () => {
     it('does nothing when template does not exist', async () => {
       const service = createService();
 
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -2594,7 +2596,7 @@ describe('TemplatesService', () => {
         owner: 'securitySolution',
         templateVersion: 1,
       });
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -2616,7 +2618,7 @@ describe('TemplatesService', () => {
 
     it('fires the refresh hook after deleteTemplate', async () => {
       const service = createService();
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'
@@ -2650,7 +2652,7 @@ describe('TemplatesService', () => {
 
     it('does NOT fire the refresh hook when deleteTemplate finds nothing to delete', async () => {
       const service = createService();
-      jest
+      vi
         .spyOn(
           service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
           '_getTemplate'

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, screen } from '@testing-library/react';
@@ -19,8 +21,8 @@ import {
 import type { SnapshotState } from './use_snapshot_state';
 import { FixSnapshotsFlyout } from './flyout';
 
-jest.mock('../../../../app_context', () => {
-  const actual = jest.requireActual('../../../../app_context');
+vi.mock('../../../../app_context', async () => {
+  const actual = (await vi.importActual('../../../../app_context'));
 
   return {
     ...actual,
@@ -40,22 +42,22 @@ jest.mock('../../../../app_context', () => {
   };
 });
 
-jest.mock('../../../../lib/ui_metric', () => {
-  const actual = jest.requireActual('../../../../lib/ui_metric');
+vi.mock('../../../../lib/ui_metric', async () => {
+  const actual = (await vi.importActual('../../../../lib/ui_metric'));
 
   return {
     ...actual,
     uiMetricService: {
       ...actual.uiMetricService,
-      trackUiMetric: jest.fn(),
+      trackUiMetric: vi.fn(),
     },
   };
 });
 
 describe('FixSnapshotsFlyout', () => {
-  const closeFlyout = jest.fn();
-  const upgradeSnapshot = jest.fn();
-  const deleteSnapshot = jest.fn();
+  const closeFlyout = vi.fn();
+  const upgradeSnapshot = vi.fn();
+  const deleteSnapshot = vi.fn();
 
   const renderFlyout = ({
     snapshotState,

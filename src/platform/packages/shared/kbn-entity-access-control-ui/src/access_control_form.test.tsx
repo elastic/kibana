@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -27,7 +29,7 @@ const renderForm = (
   accessMode: 'public' | 'private' = 'private',
   allowPublicEntries = true
 ) => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   render(
     <EuiProvider>
       <AccessControlForm
@@ -36,7 +38,7 @@ const renderForm = (
         ownerId="owner"
         profiles={[]}
         suggestedProfiles={[]}
-        onSearch={jest.fn()}
+        onSearch={vi.fn()}
         roles={roles}
         publicDescription="Visible in this space"
         isDisabled={isDisabled}
@@ -83,10 +85,10 @@ describe('AccessControlForm', () => {
       <EuiProvider>
         <AccessControlForm
           value={{ access_mode: 'private', entries: [] }}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           currentUserId="current"
           profiles={[]}
-          onSearch={jest.fn()}
+          onSearch={vi.fn()}
           roles={roles}
           suggestedProfiles={[
             { uid: 'current', enabled: true, user: { username: 'elastic' }, data: {} },
@@ -106,12 +108,12 @@ describe('AccessControlForm', () => {
       <EuiProvider>
         <AccessControlForm
           value={{ access_mode: 'private', entries: [] }}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           ownerId="current"
           currentUserId="current"
           profiles={[]}
           suggestedProfiles={[]}
-          onSearch={jest.fn()}
+          onSearch={vi.fn()}
           roles={roles}
           publicDescription="Visible in this space"
         />
@@ -122,7 +124,7 @@ describe('AccessControlForm', () => {
   });
 
   it('distinguishes users with the same display name in suggestions and access entries', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const profiles = ['alice', 'bob'].map((username) => ({
       uid: `profile-${username}`,
       enabled: true,
@@ -133,7 +135,7 @@ describe('AccessControlForm', () => {
       onChange,
       profiles,
       suggestedProfiles: profiles,
-      onSearch: jest.fn(),
+      onSearch: vi.fn(),
       roles,
       publicDescription: 'Visible in this space',
     };

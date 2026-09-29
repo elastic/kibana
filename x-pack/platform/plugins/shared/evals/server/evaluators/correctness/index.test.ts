@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { BoundInferenceClient } from '@kbn/inference-common';
@@ -16,7 +18,7 @@ describe('correctness evaluator', () => {
   const traceId = '0af7651916cd43dd8448eb211c80319c';
 
   const createEsClient = () => {
-    const searchMock = jest.fn();
+    const searchMock = vi.fn();
     const esClient = {
       search: searchMock,
     } as unknown as ElasticsearchClient;
@@ -29,7 +31,7 @@ describe('correctness evaluator', () => {
     const { esClient, searchMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
 
-    const promptMock = jest.fn().mockResolvedValue({
+    const promptMock = vi.fn().mockResolvedValue({
       toolCalls: [
         {
           function: {

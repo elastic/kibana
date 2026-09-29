@@ -7,25 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { createFilterInActionFactory } from './filter_in';
 import { makeActionContext } from '../../mocks/helpers';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
-const mockFilterManager = { addFilters: jest.fn() } as unknown as FilterManager;
+const mockFilterManager = { addFilters: vi.fn() } as unknown as FilterManager;
 
-const mockCreateFilter = jest.fn((_: unknown) => ({}));
-jest.mock('./create_filter', () => ({
-  ...jest.requireActual('./create_filter'),
-  createFilter: (params: unknown) => mockCreateFilter(params),
-}));
+const mockCreateFilter = vi.fn((_: unknown) => ({}));
+vi.mock('./create_filter', async () => {
+      const mocked = {
+      ...(await vi.importActual('./create_filter')),
+      createFilter: (params: unknown) => mockCreateFilter(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const fieldName = 'user.name';
 const value = 'the value';
 const dataViewId = 'mockDataViewId';
 
-const mockWarningToast = jest.fn();
+const mockWarningToast = vi.fn();
 
 describe('createFilterInActionFactory', () => {
   const filterInActionFactory = createFilterInActionFactory({
@@ -43,7 +48,7 @@ describe('createFilterInActionFactory', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return display name', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IAggConfig, IAggType } from '@kbn/data-plugin/public';
 import { AggGroupNames, BUCKET_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -22,9 +24,12 @@ import type { EditorConfig } from './utils';
 import type { EditorVisState } from './sidebar/state/reducers';
 import { groupAndSortBy } from '../utils';
 
-jest.mock('../utils', () => ({
-  groupAndSortBy: jest.fn(() => ['indexedFields']),
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      groupAndSortBy: vi.fn(() => ['indexedFields']),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DefaultEditorAggParams helpers', () => {
   describe('getAggParamsToRender', () => {
@@ -104,7 +109,7 @@ describe('DefaultEditorAggParams helpers', () => {
               name: 'field',
               type: 'field',
               filterFieldTypes,
-              getAvailableFields: jest.fn((aggConfig: IAggConfig) =>
+              getAvailableFields: vi.fn((aggConfig: IAggConfig) =>
                 aggConfig
                   .getIndexPattern()
                   .fields.filter(({ type }) => filterFieldTypes.includes(type))
@@ -116,12 +121,12 @@ describe('DefaultEditorAggParams helpers', () => {
           ],
         },
         schema: 'metric',
-        getIndexPattern: jest.fn(() => ({
+        getIndexPattern: vi.fn(() => ({
           fields: [
             { name: '@timestamp', type: 'date' },
             { name: 'geo_desc', type: 'string' },
           ],
-          getAggregationRestrictions: jest.fn(),
+          getAggregationRestrictions: vi.fn(),
         })),
         params: {
           orderBy: 'orderBy',

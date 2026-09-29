@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   CASES_FIELD_DEFINITION_CREATED_EVENT_TYPE,
@@ -17,13 +20,13 @@ describe('registerFieldLibraryManagementEvents', () => {
   let analyticsService: ReturnType<typeof coreMock.createSetup>['analytics'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     analyticsService = coreMock.createSetup().analytics;
     registerFieldLibraryManagementEvents({ analyticsService });
   });
 
   const getSchema = (eventType: string) => {
-    const call = (analyticsService.registerEventType as jest.Mock).mock.calls.find(
+    const call = (analyticsService.registerEventType as Mock).mock.calls.find(
       ([options]) => options.eventType === eventType
     );
 
@@ -33,7 +36,7 @@ describe('registerFieldLibraryManagementEvents', () => {
   it('registers exactly the three management event types', () => {
     expect(analyticsService.registerEventType).toHaveBeenCalledTimes(3);
     expect(
-      (analyticsService.registerEventType as jest.Mock).mock.calls
+      (analyticsService.registerEventType as Mock).mock.calls
         .map(([options]) => options.eventType)
         .sort()
     ).toEqual([

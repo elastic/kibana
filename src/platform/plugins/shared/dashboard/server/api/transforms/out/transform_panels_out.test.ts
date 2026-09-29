@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformPanelsOut } from './transform_panels_out';
 
-const mockGetTransforms = jest.fn();
+const mockGetTransforms = vi.fn();
 
 beforeAll(() => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('../../../kibana_services').embeddableService = {
     getTransforms: mockGetTransforms,
-    getAllEmbeddableSchemas: jest.fn().mockReturnValue({}),
+    getAllEmbeddableSchemas: vi.fn().mockReturnValue({}),
   };
 });
 
@@ -105,9 +107,9 @@ describe('transformPanelsOut', () => {
       if (type === 'DASHBOARD_MARKDOWN') {
         return {
           title: 'markdown',
-          transformOut: jest.fn().mockImplementation((val) => val), // just pass the value through
+          transformOut: vi.fn().mockImplementation((val) => val), // just pass the value through
           schema: {
-            parse: jest.fn().mockImplementation((val) => val),
+            parse: vi.fn().mockImplementation((val) => val),
           },
         };
       }
@@ -115,7 +117,7 @@ describe('transformPanelsOut', () => {
         return {
           title: 'invalid',
           schema: {
-            parse: jest.fn().mockImplementation(() => {
+            parse: vi.fn().mockImplementation(() => {
               throw new Error('Boo!');
             }),
           },

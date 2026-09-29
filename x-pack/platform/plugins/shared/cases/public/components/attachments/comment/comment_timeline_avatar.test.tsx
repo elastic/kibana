@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -16,7 +18,7 @@ import { getMockCommentRenderingContext } from '../../user_actions/mock';
 import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
 import type { CommentTimelineAvatarProps } from './comment_timeline_avatar';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 const createdBy = {
   fullName: 'Elastic',

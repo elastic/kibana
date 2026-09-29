@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { join } from 'path';
 
 describe('I18n loader', () => {
@@ -18,7 +20,7 @@ describe('I18n loader', () => {
 
   afterEach(() => {
     // isolate modules for every test so that local module state doesn't conflict between tests
-    jest.resetModules();
+    vi.resetModules();
   });
 
   describe('registerTranslationFile', () => {

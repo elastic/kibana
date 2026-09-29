@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -33,10 +35,13 @@ import {
 import userEvent from '@testing-library/user-event';
 
 // Turn off the optimization that hides elements that are not visible in the viewport
-jest.mock('../constants', () => ({
-  ...jest.requireActual('../constants'),
-  ONLY_RENDER_VISIBLE_ELEMENTS: false,
-}));
+vi.mock('../constants', async () => {
+      const mocked = {
+      ...(await vi.importActual('../constants')),
+      ONLY_RENDER_VISIBLE_ELEMENTS: false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const nodeTypes = {
   diamond: DiamondNode,
@@ -171,7 +176,7 @@ describe('Entity Nodes', () => {
     });
 
     it('should call expandButtonClick when expand button is clicked', () => {
-      const mockExpandButtonClick = jest.fn();
+      const mockExpandButtonClick = vi.fn();
       renderNodeInFlow({
         interactive: true,
         expandButtonClick: mockExpandButtonClick,
@@ -184,7 +189,7 @@ describe('Entity Nodes', () => {
     });
 
     it('should call nodeClick when node is clicked', () => {
-      const mockNodeClick = jest.fn();
+      const mockNodeClick = vi.fn();
       renderNodeInFlow({
         interactive: true,
         nodeClick: mockNodeClick,
@@ -289,7 +294,7 @@ describe('Entity Nodes', () => {
     ];
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe.each(nodeComponents)(

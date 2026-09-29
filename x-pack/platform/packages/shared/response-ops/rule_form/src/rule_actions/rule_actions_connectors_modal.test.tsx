@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,20 +20,23 @@ import {
   getConnector,
 } from '../common/test_utils/actions_test_utils';
 
-jest.mock('../hooks', () => ({
-  useRuleFormState: jest.fn(),
-  useRuleFormDispatch: jest.fn(),
-  useRuleFormScreenContext: jest.fn(),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useRuleFormState: vi.fn(),
+      useRuleFormDispatch: vi.fn(),
+      useRuleFormScreenContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const { useRuleFormState, useRuleFormDispatch, useRuleFormScreenContext } =
-  jest.requireMock('../hooks');
+  (await vi.importMock('../hooks'));
 
 const mockConnectors: ActionConnector[] = [getConnector('1'), getConnector('2')];
 
 const mockActionTypes: ActionType[] = [getActionType('1'), getActionType('2')];
 
-const mockOnChange = jest.fn();
+const mockOnChange = vi.fn();
 
 describe('ruleActionsConnectorsModal', () => {
   beforeEach(() => {
@@ -58,7 +63,7 @@ describe('ruleActionsConnectorsModal', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders correctly', () => {

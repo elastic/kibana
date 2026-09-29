@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import React from 'react';
 import { transformBulkActionsToContextMenuItems } from './transform_bulk_actions_to_context_menu_items';
@@ -13,9 +15,9 @@ import type { BulkAttackActionItems } from '../types';
 const ALERT_ATTACK_DISCOVERY_ALERT_IDS = 'kibana.alert.attack_discovery.alert_ids';
 
 describe('transformBulkActionsToContextMenuItems', () => {
-  const mockClosePopover = jest.fn();
-  const mockSetIsLoading = jest.fn();
-  const mockOnClick = jest.fn();
+  const mockClosePopover = vi.fn();
+  const mockSetIsLoading = vi.fn();
+  const mockOnClick = vi.fn();
 
   const mockAlertItems: TimelineItem[] = [
     {
@@ -31,7 +33,7 @@ describe('transformBulkActionsToContextMenuItems', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should transform bulk action items to context menu items', () => {
@@ -92,7 +94,7 @@ describe('transformBulkActionsToContextMenuItems', () => {
   it('should close the popover before invoking the item onClick (direct-action item)', () => {
     const callOrder: string[] = [];
     mockClosePopover.mockImplementation(() => callOrder.push('closePopover'));
-    const onClick = jest.fn(() => callOrder.push('itemOnClick'));
+    const onClick = vi.fn(() => callOrder.push('itemOnClick'));
 
     const bulkActionItems: BulkAttackActionItems = {
       items: [
@@ -122,7 +124,7 @@ describe('transformBulkActionsToContextMenuItems', () => {
   });
 
   it('does not throw when closePopover is not provided', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     const bulkActionItems: BulkAttackActionItems = {
       items: [
         {
@@ -172,7 +174,7 @@ describe('transformBulkActionsToContextMenuItems', () => {
   });
 
   it('should transform bulk action panels to context menu panels', () => {
-    const mockRenderContent = jest.fn(() => React.createElement('div', null, 'Panel Content'));
+    const mockRenderContent = vi.fn(() => React.createElement('div', null, 'Panel Content'));
 
     const bulkActionItems: BulkAttackActionItems = {
       items: [],
@@ -202,7 +204,7 @@ describe('transformBulkActionsToContextMenuItems', () => {
   });
 
   it('should call renderContent with correct props', () => {
-    const mockRenderContent = jest.fn(() => React.createElement('div', null, 'Panel Content'));
+    const mockRenderContent = vi.fn(() => React.createElement('div', null, 'Panel Content'));
 
     const bulkActionItems: BulkAttackActionItems = {
       items: [],
@@ -233,7 +235,7 @@ describe('transformBulkActionsToContextMenuItems', () => {
   });
 
   it('should handle panels with width property', () => {
-    const mockRenderContent = jest.fn(() => React.createElement('div', null, 'Panel Content'));
+    const mockRenderContent = vi.fn(() => React.createElement('div', null, 'Panel Content'));
 
     const bulkActionItems: BulkAttackActionItems = {
       items: [],

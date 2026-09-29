@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { textIndicatorListAdapter } from './text_indicator_list_adapter';
 import { parseIndicatorList } from './parse_indicator_list';
@@ -14,8 +17,8 @@ import type { IndicatorBlock } from './parse_indicator_list';
 import type { IocType } from '../../../../common/threat_intel';
 import type { ExtractedIoc } from '../../services/extract_iocs';
 
-jest.mock('./parse_indicator_list');
-const parseIndicatorListMock = parseIndicatorList as jest.MockedFunction<typeof parseIndicatorList>;
+vi.mock('./parse_indicator_list');
+const parseIndicatorListMock = parseIndicatorList as MockedFunction<typeof parseIndicatorList>;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -28,7 +31,7 @@ const TRAIL_URL = 'https://raw.githubusercontent.com/stamparm/trails/main/malwar
 const MAX_NESTED_PER_DOC = 5000;
 
 const makeContext = (
-  fetchImpl: jest.Mock<Promise<Response>, [string | URL | Request, RequestInit?]>
+  fetchImpl: Mock<Promise<Response>, [string | URL | Request, RequestInit?]>
 ): AdapterRunContext => ({
   logger: loggingSystemMock.createLogger(),
   abortSignal: new AbortController().signal,
@@ -99,7 +102,7 @@ describe('textIndicatorListAdapter', () => {
 
   it('produces one report from a valid Maltrail body', async () => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
+    const fetchMock = vi.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
@@ -109,7 +112,7 @@ describe('textIndicatorListAdapter', () => {
 
   it('sets extraction_method to text_indicator_list and stamps extracted_at', async () => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
+    const fetchMock = vi.fn().mockResolvedValue(okResponse());
 
     const [report] = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
@@ -120,7 +123,7 @@ describe('textIndicatorListAdapter', () => {
 
   it('derives the trail label from the URL filename stem', async () => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
+    const fetchMock = vi.fn().mockResolvedValue(okResponse());
 
     const [report] = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
@@ -131,7 +134,7 @@ describe('textIndicatorListAdapter', () => {
 
   it('populates extracted.iocs with reference and block_index from the block', async () => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
+    const fetchMock = vi.fn().mockResolvedValue(okResponse());
 
     const [report] = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
@@ -166,7 +169,7 @@ describe('textIndicatorListAdapter', () => {
 
     const reports = await textIndicatorListAdapter.run(
       makeSource(),
-      makeContext(jest.fn().mockResolvedValue(okResponse()))
+      makeContext(vi.fn().mockResolvedValue(okResponse()))
     );
     const iocs = reports.flatMap((report) => report.extracted?.iocs ?? []);
 
@@ -178,7 +181,7 @@ describe('textIndicatorListAdapter', () => {
 
   it('deduplicates IOCs by (type, value) — first block attribution wins', async () => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
+    const fetchMock = vi.fn().mockResolvedValue(okResponse());
 
     const [report] = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
@@ -189,7 +192,7 @@ describe('textIndicatorListAdapter', () => {
 
   it('returns [] when the parser produces 0 blocks', async () => {
     parseIndicatorListMock.mockReturnValue([]);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
+    const fetchMock = vi.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
@@ -205,7 +208,7 @@ describe('textIndicatorListAdapter', () => {
       },
     ];
     parseIndicatorListMock.mockReturnValue(emptyIocBlocks);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
+    const fetchMock = vi.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
@@ -213,7 +216,7 @@ describe('textIndicatorListAdapter', () => {
   });
 
   it('throws on HTTP 4xx', async () => {
-    const fetchMock = jest
+    const fetchMock = vi
       .fn()
       .mockResolvedValue(new Response('', { status: 404, statusText: 'Not Found' }));
 
@@ -227,7 +230,7 @@ describe('textIndicatorListAdapter', () => {
       _id: 'text_indicator_list:unknown',
       _source: { adapter_type: 'text_indicator_list', name: 'maltrail' },
     };
-    const fetchMock = jest.fn();
+    const fetchMock = vi.fn();
 
     const reports = await textIndicatorListAdapter.run(source, makeContext(fetchMock));
     expect(reports).toHaveLength(0);
@@ -264,7 +267,7 @@ describe('textIndicatorListAdapter', () => {
       makeIocBlock(2, halfCap, 'https://ref2.example.com/post'),
     ];
     parseIndicatorListMock.mockReturnValue(blocks);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
+    const fetchMock = vi.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
@@ -293,7 +296,7 @@ describe('textIndicatorListAdapter', () => {
       makeIocBlock(2, halfCap, 'https://ref2.example.com/'),
     ];
     parseIndicatorListMock.mockReturnValue(blocks);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
+    const fetchMock = vi.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
@@ -315,7 +318,7 @@ describe('textIndicatorListAdapter', () => {
       },
     ];
     parseIndicatorListMock.mockReturnValue(blocks);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
+    const fetchMock = vi.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
@@ -336,7 +339,7 @@ describe('textIndicatorListAdapter', () => {
       makeIocBlock(i + 1, 100, `https://small${i}.example.com/`)
     );
     parseIndicatorListMock.mockReturnValue([bigBlock, ...smallBlocks]);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
+    const fetchMock = vi.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
@@ -372,7 +375,7 @@ describe('textIndicatorListAdapter', () => {
         iocs: block1Iocs,
       },
     ]);
-    const fetchMock = jest.fn().mockResolvedValue(okResponse());
+    const fetchMock = vi.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
 
@@ -394,7 +397,7 @@ describe('textIndicatorListAdapter', () => {
       ]);
       const reports = await textIndicatorListAdapter.run(
         makeSource(),
-        makeContext(jest.fn().mockResolvedValue(okResponse()))
+        makeContext(vi.fn().mockResolvedValue(okResponse()))
       );
       return reports.map((r) => r.content_fingerprint);
     };
@@ -425,7 +428,7 @@ describe('textIndicatorListAdapter — attribution and credentials', () => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
     return textIndicatorListAdapter.run(
       source,
-      makeContext(jest.fn().mockResolvedValue(okResponse()))
+      makeContext(vi.fn().mockResolvedValue(okResponse()))
     );
   };
 
@@ -451,7 +454,7 @@ describe('textIndicatorListAdapter — attribution and credentials', () => {
   it('keeps fetch failures readable without catalog secrets', async () => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
     const failing = makeContext(
-      jest
+      vi
         .fn()
         .mockResolvedValue(new Response('nope', { status: 503, statusText: 'Service Unavailable' }))
     );

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useKnowledgeBaseUpdater } from './use_knowledge_base_updater';
 import type { AssistantTelemetry } from '../../../..';
 
 describe('useKnowledgeBaseUpdater', () => {
-  const mockSetKnowledgeBase = jest.fn();
-  const mockReportAssistantSettingToggled = jest.fn();
+  const mockSetKnowledgeBase = vi.fn();
+  const mockReportAssistantSettingToggled = vi.fn();
   const assistantTelemetryMock = {
     reportAssistantSettingToggled: mockReportAssistantSettingToggled,
   } as unknown as AssistantTelemetry;
@@ -21,7 +23,7 @@ describe('useKnowledgeBaseUpdater', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should initialize with the provided knowledgeBase', () => {

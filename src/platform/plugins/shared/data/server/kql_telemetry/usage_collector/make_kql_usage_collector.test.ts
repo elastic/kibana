@@ -7,19 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { makeKQLUsageCollector } from './make_kql_usage_collector';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 describe('makeKQLUsageCollector', () => {
-  let usageCollectionMock: jest.Mocked<UsageCollectionSetup>;
+  let usageCollectionMock: Mocked<UsageCollectionSetup>;
 
   const getIndexForType = () => Promise.resolve('.kibana');
 
   beforeEach(() => {
     usageCollectionMock = {
-      makeUsageCollector: jest.fn(),
-      registerCollector: jest.fn(),
-    } as unknown as jest.Mocked<UsageCollectionSetup>;
+      makeUsageCollector: vi.fn(),
+      registerCollector: vi.fn(),
+    } as unknown as Mocked<UsageCollectionSetup>;
   });
 
   it('should call registerCollector', () => {

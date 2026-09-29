@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
 import { useDiscoverHistogram } from './use_discover_histogram';
@@ -16,11 +19,14 @@ import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider
 import React from 'react';
 import { DEFAULT_HISTOGRAM_KEY_PREFIX, selectTabRuntimeState } from '../../state_management/redux';
 
-jest.mock('./use_discover_histogram', () => ({
-  useDiscoverHistogram: jest.fn(),
-}));
+vi.mock('./use_discover_histogram', () => {
+      const mocked = {
+      useDiscoverHistogram: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useDiscoverHistogramMock = useDiscoverHistogram as jest.MockedFunction<
+const useDiscoverHistogramMock = useDiscoverHistogram as MockedFunction<
   typeof useDiscoverHistogram
 >;
 
@@ -58,7 +64,7 @@ describe('useUnifiedHistogramRuntimeState', () => {
   };
 
   beforeEach(() => {
-    useDiscoverHistogramMock.mockImplementation(jest.fn());
+    useDiscoverHistogramMock.mockImplementation(vi.fn());
   });
 
   it('should return the current tab id', async () => {

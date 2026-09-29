@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ESQLSource } from './esql_source';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 
-jest.mock('../../../kibana_services', () => {
+vi.mock('../../../kibana_services', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { dataPluginMock } = require('@kbn/data-plugin/public/mocks');
   return {
@@ -16,11 +18,14 @@ jest.mock('../../../kibana_services', () => {
   };
 });
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLQueryColumnsRaw: () => mockGetESQLQueryColumnsRaw(),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getESQLQueryColumnsRaw: () => mockGetESQLQueryColumnsRaw(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetESQLQueryColumnsRaw = jest.fn();
+const mockGetESQLQueryColumnsRaw = vi.fn();
 
 describe('getSupportedShapeTypes', () => {
   beforeEach(() => {

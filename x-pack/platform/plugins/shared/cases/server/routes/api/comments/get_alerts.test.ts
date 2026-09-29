@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { AttachmentType } from '../../../../common';
 import { createCasesRoute } from '../create_cases_route';
 
 import './get_alerts';
 
-jest.mock('../create_cases_route', () => ({ createCasesRoute: jest.fn() }));
+vi.mock('../create_cases_route', () => {
+      const mocked = { createCasesRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 describe('GET alerts attached to case', () => {
   let routeHandler: Function;
 
   beforeEach(() => {
-    routeHandler = jest.mocked(createCasesRoute).mock.calls[0][0].handler;
+    routeHandler = vi.mocked(createCasesRoute).mock.calls[0][0].handler;
   });
 
   it('calls getAllDocumentsAttachedToCase with correct attachment types', async () => {
@@ -28,11 +33,11 @@ describe('GET alerts attached to case', () => {
       ],
     };
 
-    const mockGetAllDocumentsAttachedToCase = jest.fn().mockResolvedValue(mockAlerts);
+    const mockGetAllDocumentsAttachedToCase = vi.fn().mockResolvedValue(mockAlerts);
 
     const mockContext = {
       cases: Promise.resolve({
-        getCasesClient: jest.fn().mockResolvedValue({
+        getCasesClient: vi.fn().mockResolvedValue({
           attachments: {
             getAllDocumentsAttachedToCase: mockGetAllDocumentsAttachedToCase,
           },
@@ -47,7 +52,7 @@ describe('GET alerts attached to case', () => {
     };
 
     const mockResponse = {
-      ok: jest.fn().mockReturnValue({ status: 200 }),
+      ok: vi.fn().mockReturnValue({ status: 200 }),
     };
 
     await routeHandler({ context: mockContext, request: mockRequest, response: mockResponse });

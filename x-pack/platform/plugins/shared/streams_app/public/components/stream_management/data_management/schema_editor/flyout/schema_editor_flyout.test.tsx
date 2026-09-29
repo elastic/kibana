@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,45 +16,54 @@ import type { Streams } from '@kbn/streams-schema';
 import type { SchemaField } from '../types';
 import { SchemaEditorFlyout } from '.';
 
-jest.mock('../../../../../hooks/use_streams_app_router', () => ({
-  useStreamsAppRouter: () => ({
-    link: () => '#',
-  }),
-}));
+vi.mock('../../../../../hooks/use_streams_app_router', () => {
+      const mocked = {
+      useStreamsAppRouter: () => ({
+        link: () => '#',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    dependencies: {
-      start: {
-        fieldsMetadata: {
-          useFieldsMetadata: () => ({
-            fieldsMetadata: {},
-            loading: false,
-          }),
-        },
-      },
-    },
-    core: {
-      docLinks: {
-        links: {
-          elasticsearch: {
-            mappingParameters: 'https://example.invalid',
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        dependencies: {
+          start: {
+            fieldsMetadata: {
+              useFieldsMetadata: () => ({
+                fieldsMetadata: {},
+                loading: false,
+              }),
+            },
           },
         },
-      },
-    },
-  }),
-}));
+        core: {
+          docLinks: {
+            links: {
+              elasticsearch: {
+                mappingParameters: 'https://example.invalid',
+              },
+            },
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
-    <textarea
-      data-test-subj="mockCodeEditor"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    />
-  ),
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: ({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
+        <textarea
+          data-test-subj="mockCodeEditor"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Setup userEvent with pointerEventsCheck disabled to avoid issues with EUI animation
 const user = userEvent.setup({ pointerEventsCheck: 0 });
@@ -92,13 +104,13 @@ const createMockClassicStream = (name: string) =>
 const renderFlyout = ({
   field,
   streamName = 'logs.test',
-  onStage = jest.fn(),
+  onStage = vi.fn(),
   streamType = 'wired' as 'wired' | 'classic',
   isDescriptionOnlyMode = false,
 }: {
   field: SchemaField;
   streamName?: string;
-  onStage?: jest.Mock;
+  onStage?: Mock;
   streamType?: 'wired' | 'classic';
   isDescriptionOnlyMode?: boolean;
 }) => {
@@ -108,7 +120,7 @@ const renderFlyout = ({
       : createMockWiredStream(streamName);
 
   let unmountFlyout = () => {};
-  const onClose = jest.fn(() => {
+  const onClose = vi.fn(() => {
     unmountFlyout();
   });
 

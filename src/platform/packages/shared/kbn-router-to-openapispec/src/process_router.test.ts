@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('./util', () => {
-  const module = jest.requireActual('./util');
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('./util', async () => {
+  const module = (await vi.importActual('./util'));
   return {
     ...module,
-    setXState: jest.fn(module.setXState),
+    setXState: vi.fn(module.setXState),
   };
 });
 
@@ -23,7 +26,7 @@ import { type InternalRouterRoute } from './type';
 import { createOpIdGenerator, setXState } from './util';
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('extractResponses', () => {
@@ -34,7 +37,7 @@ describe('extractResponses', () => {
   test('handles full response config as expected', () => {
     const route: InternalRouterRoute = {
       path: '/foo',
-      handler: jest.fn(),
+      handler: vi.fn(),
       isVersioned: false,
       method: 'get',
       options: {
@@ -101,28 +104,28 @@ describe('processRouter', () => {
         method: 'get',
         path: '/foo',
         options: { access: 'public', deprecated: true, discontinued: 'discontinued router' },
-        handler: jest.fn(),
+        handler: vi.fn(),
         validationSchemas: { request: { body: schema.object({}) } },
       },
       {
         method: 'get',
         path: '/bar',
         options: { access: 'public' },
-        handler: jest.fn(),
+        handler: vi.fn(),
         validationSchemas: { request: { body: schema.object({}) } },
       },
       {
         method: 'get',
         path: '/baz',
         options: { access: 'public' },
-        handler: jest.fn(),
+        handler: vi.fn(),
         validationSchemas: { request: { body: schema.object({}) } },
       },
       {
         path: '/qux',
         method: 'post',
         options: { access: 'public' },
-        handler: jest.fn(),
+        handler: vi.fn(),
         validationSchemas: { request: { body: schema.object({}) } },
         security: {
           authz: {
@@ -143,7 +146,7 @@ describe('processRouter', () => {
           description: 'This a test route description.',
           access: 'public',
         },
-        handler: jest.fn(),
+        handler: vi.fn(),
         validationSchemas: { request: { body: schema.object({}) } },
         security: {
           authz: {
@@ -222,7 +225,7 @@ describe('processRouter', () => {
     const routes = testRouter.getRoutes();
     expect(setXState).toHaveBeenCalledTimes(routes.length);
     routes.forEach((_, idx) => {
-      const [availability, operation, env] = (setXState as jest.Mock).mock.calls[idx];
+      const [availability, operation, env] = (setXState as Mock).mock.calls[idx];
       expect(availability === undefined || typeof availability === 'object').toBe(true);
       expect(typeof operation === 'object').toBe(true);
       expect(env).toEqual({ serverless: true });

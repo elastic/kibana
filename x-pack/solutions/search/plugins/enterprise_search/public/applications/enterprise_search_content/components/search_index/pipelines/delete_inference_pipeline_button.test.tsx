@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { screen } from '@testing-library/react';
@@ -25,9 +27,9 @@ export const DEFAULT_VALUES: InferencePipeline = {
 };
 
 describe('DeleteInferencePipelineButton', () => {
-  const onClickHandler = jest.fn();
+  const onClickHandler = vi.fn();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders button with defaults', () => {

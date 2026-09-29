@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -19,8 +22,8 @@ import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types'
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Info session routes', () => {
-  let router: jest.Mocked<SecurityRouter>;
-  let session: jest.Mocked<PublicMethodsOf<Session>>;
+  let router: Mocked<SecurityRouter>;
+  let session: Mocked<PublicMethodsOf<Session>>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
@@ -62,7 +65,7 @@ describe('Info session routes', () => {
 
     it('returns session info.', async () => {
       const now = 1000;
-      const dateSpy = jest.spyOn(Date, 'now');
+      const dateSpy = vi.spyOn(Date, 'now');
       dateSpy.mockReturnValue(now);
 
       const assertions = [

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -12,14 +15,17 @@ import { useUnlinkEntities } from './use_unlink_entities';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
-jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(),
-}));
-jest.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('../../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/hooks/use_app_toasts');
 
-const mockFetch = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
+const mockFetch = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
 
 const createWrapper = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -31,9 +37,9 @@ const createWrapper = () => {
 
 describe('useUnlinkEntities', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({ services: { http: { fetch: mockFetch } } });
-    (useAppToasts as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({ services: { http: { fetch: mockFetch } } });
+    (useAppToasts as Mock).mockReturnValue({
       addSuccess: mockAddSuccess,
       addError: mockAddError,
     });

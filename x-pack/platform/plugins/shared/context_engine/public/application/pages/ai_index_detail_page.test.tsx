@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
@@ -29,86 +31,110 @@ import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_p
 import { AiIndexDetailPage } from './ai_index_detail_page';
 import { useFeedbackLoopEnabled } from '../hooks/use_feedback_loop_enabled';
 
-jest.mock('@kbn/esql/public', () => ({
-  ESQLLangEditor: ({
-    query,
-    onTextLangQueryChange,
-  }: {
-    query: { esql: string };
-    onTextLangQueryChange: (query: { esql: string }) => void;
-  }) => (
-    <textarea
-      data-test-subj="mockEsqlEditor"
-      value={query.esql}
-      onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
-    />
-  ),
-}));
+vi.mock('@kbn/esql/public', () => {
+      const mocked = {
+      ESQLLangEditor: ({
+        query,
+        onTextLangQueryChange,
+      }: {
+        query: { esql: string };
+        onTextLangQueryChange: (query: { esql: string }) => void;
+      }) => (
+        <textarea
+          data-test-subj="mockEsqlEditor"
+          value={query.esql}
+          onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_data_connectors', () => ({
-  useDataConnectors: () => ({
-    connectors: [],
-    connectorNameById: new Map(),
-    connectorActionTypeById: new Map(),
-    isLoading: false,
-  }),
-}));
+vi.mock('../hooks/use_data_connectors', () => {
+      const mocked = {
+      useDataConnectors: () => ({
+        connectors: [],
+        connectorNameById: new Map(),
+        connectorActionTypeById: new Map(),
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockMgetWorkflows = jest.fn();
-const mockCreateWorkflow = jest.fn();
+const mockMgetWorkflows = vi.fn();
+const mockCreateWorkflow = vi.fn();
 
-jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsApi: () => ({
-    mgetWorkflows: mockMgetWorkflows,
-    createWorkflow: mockCreateWorkflow,
-  }),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useWorkflowsApi: () => ({
+        mgetWorkflows: mockMgetWorkflows,
+        createWorkflow: mockCreateWorkflow,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_ki_list', () => ({
-  useKiList: () => ({
-    kis: [],
-    total: 25,
-    summary: {
-      total: 25,
-      countsByType: [
-        { type: 'index_metadata', count: 10 },
-        { type: 'document', count: 8 },
-        { type: 'detection', count: 7 },
-      ],
-    },
-    isLoading: false,
-    error: undefined,
-    refetch: jest.fn(),
-  }),
-}));
+vi.mock('../hooks/use_ki_list', () => {
+      const mocked = {
+      useKiList: () => ({
+        kis: [],
+        total: 25,
+        summary: {
+          total: 25,
+          countsByType: [
+            { type: 'index_metadata', count: 10 },
+            { type: 'document', count: 8 },
+            { type: 'detection', count: 7 },
+          ],
+        },
+        isLoading: false,
+        error: undefined,
+        refetch: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_signal_groups', () => ({
-  useSignalGroups: () => ({ groups: [], isLoading: false, error: undefined, refetch: jest.fn() }),
-}));
+vi.mock('../hooks/use_signal_groups', () => {
+      const mocked = {
+      useSignalGroups: () => ({ groups: [], isLoading: false, error: undefined, refetch: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_feedback_loop_enabled', () => ({
-  useFeedbackLoopEnabled: jest.fn(() => true),
-}));
+vi.mock('../hooks/use_feedback_loop_enabled', () => {
+      const mocked = {
+      useFeedbackLoopEnabled: vi.fn(() => true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_agent_builder_agents', () => ({
-  useAgentBuilderAgents: () => ({
-    agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
-    isLoading: false,
-    error: undefined,
-  }),
-}));
+vi.mock('../hooks/use_agent_builder_agents', () => {
+      const mocked = {
+      useAgentBuilderAgents: () => ({
+        agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
+        isLoading: false,
+        error: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFeedbackLoopEnabled = jest.mocked(useFeedbackLoopEnabled);
+const mockUseFeedbackLoopEnabled = vi.mocked(useFeedbackLoopEnabled);
 
-jest.mock('../hooks/use_signals', () => ({
-  useSignals: () => ({
-    signals: [],
-    total: 0,
-    isLoading: false,
-    error: undefined,
-    refetch: jest.fn(),
-  }),
-}));
+vi.mock('../hooks/use_signals', () => {
+      const mocked = {
+      useSignals: () => ({
+        signals: [],
+        total: 0,
+        isLoading: false,
+        error: undefined,
+        refetch: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
@@ -147,7 +173,7 @@ const renderWithProviders = (
     '/app/management/data/index_management/indices/index_details?indexName=ai-index-ds-my-ai-index'
   );
 
-  jest.spyOn(services.share.url.locators, 'get').mockImplementation((locatorId: string) => {
+  vi.spyOn(services.share.url.locators, 'get').mockImplementation((locatorId: string) => {
     if (locatorId === DISCOVER_APP_LOCATOR) {
       return discoverLocator;
     }
@@ -193,7 +219,7 @@ describe('AiIndexDetailPage', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows a dismissible success callout when navigated from AI index creation', async () => {
@@ -252,7 +278,7 @@ describe('AiIndexDetailPage', () => {
       '/app/management/data/index_management/indices/index_details?indexName=ai-index-ds-my-ai-index'
     );
 
-    jest.spyOn(services.share.url.locators, 'get').mockImplementation((locatorId: string) => {
+    vi.spyOn(services.share.url.locators, 'get').mockImplementation((locatorId: string) => {
       if (locatorId === DISCOVER_APP_LOCATOR) {
         return discoverLocator;
       }

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -12,19 +14,22 @@ import { Summary } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { getMockAttackDiscoveryAlerts } from '../../mock/mock_attack_discovery_alerts';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock(
+vi.mock(
   '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management',
-  () => ({
-    AnonymizationSettingsManagement: ({ onClose }: { onClose: () => void }) => (
-      <div data-test-subj="anonymizationSettingsModal">
-        <button type="button" data-test-subj="closeAnonymizationSettingsModal" onClick={onClose}>
-          {'Close'}
-        </button>
-      </div>
-    ),
-  })
+  () => {
+      const mocked = {
+        AnonymizationSettingsManagement: ({ onClose }: { onClose: () => void }) => (
+          <div data-test-subj="anonymizationSettingsModal">
+            <button type="button" data-test-subj="closeAnonymizationSettingsModal" onClick={onClose}>
+              {'Close'}
+            </button>
+          </div>
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 describe('Summary', () => {
@@ -32,14 +37,14 @@ describe('Summary', () => {
     alertsCount: 20,
     attackDiscoveriesCount: 5,
     lastUpdated: new Date(),
-    onToggleShowAnonymized: jest.fn(),
+    onToggleShowAnonymized: vi.fn(),
     selectedAttackDiscoveries: {},
     selectedConnectorAttackDiscoveries: [],
-    setSelectedAttackDiscoveries: jest.fn(),
+    setSelectedAttackDiscoveries: vi.fn(),
     showAnonymized: false,
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders the expected summary counts', () => {
     render(<Summary {...defaultProps} />);
@@ -94,7 +99,7 @@ describe('Summary', () => {
   });
 
   it('passes refetchFindAttackDiscoveries to SelectedActions', () => {
-    const refetchFindAttackDiscoveries = jest.fn();
+    const refetchFindAttackDiscoveries = vi.fn();
     const selectedAttackDiscoveries = { '0b8cf9c7-5ba1-49ce-b53d-3cfb06918b60': true };
     render(
       <TestProviders>

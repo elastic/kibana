@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import type { RequestName } from './request_names';
 import type { OptionsParam } from './use_fetch';
 import { useFetch } from './use_fetch';
 
-export const mockEndTracking = jest.fn();
-export const mockStartTracking = jest.fn(() => ({ endTracking: mockEndTracking }));
-jest.mock('../../lib/apm/use_track_http_request', () => ({
-  useTrackHttpRequest: jest.fn(() => ({
-    startTracking: mockStartTracking,
-  })),
-}));
+export const mockEndTracking = vi.fn();
+export const mockStartTracking = vi.fn(() => ({ endTracking: mockEndTracking }));
+vi.mock('../../lib/apm/use_track_http_request', () => {
+      const mocked = {
+      useTrackHttpRequest: vi.fn(() => ({
+        startTracking: mockStartTracking,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const requestName = 'test name' as RequestName;
 
@@ -26,7 +31,7 @@ const parameters = {
 type Parameters = typeof parameters;
 
 const response = 'someData';
-const mockFetchFn = jest.fn(async (_: Parameters) => response);
+const mockFetchFn = vi.fn(async (_: Parameters) => response);
 
 const abortController = new AbortController();
 
@@ -35,7 +40,7 @@ const renderUseFetch = (options?: OptionsParam<Parameters>) =>
 
 describe('useFetch', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('init', async () => {
@@ -156,7 +161,7 @@ describe('useFetch', () => {
 
   it('should abort initial request if fetch is called', async () => {
     const firstAbortCtrl = new AbortController();
-    const abortSpy = jest.spyOn(window, 'AbortController').mockReturnValueOnce(firstAbortCtrl);
+    const abortSpy = vi.spyOn(window, 'AbortController').mockReturnValueOnce(firstAbortCtrl);
 
     const { result } = renderUseFetch({ initialParameters: parameters });
 
@@ -174,7 +179,7 @@ describe('useFetch', () => {
 
   it('should abort first request if fetch is called twice', async () => {
     const firstAbortCtrl = new AbortController();
-    const abortSpy = jest.spyOn(window, 'AbortController').mockReturnValueOnce(firstAbortCtrl);
+    const abortSpy = vi.spyOn(window, 'AbortController').mockReturnValueOnce(firstAbortCtrl);
 
     const { result } = renderUseFetch();
 
@@ -244,7 +249,7 @@ describe('useFetch', () => {
 
     it('should end aborted', async () => {
       const abortCtrl = new AbortController();
-      const abortSpy = jest.spyOn(window, 'AbortController').mockReturnValue(abortCtrl);
+      const abortSpy = vi.spyOn(window, 'AbortController').mockReturnValue(abortCtrl);
 
       mockFetchFn.mockImplementationOnce(async () => {
         abortCtrl.abort();

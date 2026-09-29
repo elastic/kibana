@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type {
   EnterCaseBranchNode,
   EnterDefaultBranchNode,
@@ -21,29 +24,29 @@ import { EnterSwitchNodeImpl } from '../enter_switch_node_impl';
 
 describe('EnterSwitchNodeImpl', () => {
   let node: EnterSwitchNode;
-  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
-  let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
+  let mockStepExecutionRuntime: Mocked<StepExecutionRuntime>;
+  let mockWorkflowRuntime: Mocked<WorkflowExecutionRuntimeManager>;
   let impl: EnterSwitchNodeImpl;
   let workflowContextLoggerMock: IWorkflowEventLogger;
-  let mockContextManager: jest.Mocked<
+  let mockContextManager: Mocked<
     Pick<WorkflowContextManager, 'getContext' | 'renderValueAccordingToContext'>
   >;
   let workflowGraph: WorkflowGraph;
 
   beforeEach(() => {
     workflowContextLoggerMock = {} as unknown as IWorkflowEventLogger;
-    workflowContextLoggerMock.logDebug = jest.fn();
+    workflowContextLoggerMock.logDebug = vi.fn();
 
     mockContextManager = {
-      getContext: jest.fn().mockReturnValue({}),
-      renderValueAccordingToContext: jest.fn().mockImplementation((value) => value),
+      getContext: vi.fn().mockReturnValue({}),
+      renderValueAccordingToContext: vi.fn().mockImplementation((value) => value),
     };
 
     mockStepExecutionRuntime = {
       contextManager: mockContextManager,
-      startStep: jest.fn().mockResolvedValue(undefined),
-      setInput: jest.fn(),
-      setCurrentStepState: jest.fn(),
+      startStep: vi.fn().mockResolvedValue(undefined),
+      setInput: vi.fn(),
+      setCurrentStepState: vi.fn(),
     } as any;
 
     node = {
@@ -60,7 +63,7 @@ describe('EnterSwitchNodeImpl', () => {
     } as EnterSwitchNode;
 
     mockWorkflowRuntime = {
-      navigateToNode: jest.fn(),
+      navigateToNode: vi.fn(),
     } as any;
 
     workflowGraph = {} as unknown as WorkflowGraph;
@@ -68,7 +71,7 @@ describe('EnterSwitchNodeImpl', () => {
 
   describe('matching case', () => {
     beforeEach(() => {
-      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValue([
+      workflowGraph.getDirectSuccessors = vi.fn().mockReturnValue([
         {
           id: 'enterCase_testStep_0',
           type: 'enter-case-branch',
@@ -93,7 +96,7 @@ describe('EnterSwitchNodeImpl', () => {
         } as EnterDefaultBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest.fn().mockImplementation((val) => {
+      mockContextManager.renderValueAccordingToContext = vi.fn().mockImplementation((val) => {
         if (val === '{{ steps.check.output.status }}') return 'success';
         return val;
       });
@@ -138,7 +141,7 @@ describe('EnterSwitchNodeImpl', () => {
 
   describe('second case match', () => {
     beforeEach(() => {
-      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValue([
+      workflowGraph.getDirectSuccessors = vi.fn().mockReturnValue([
         {
           id: 'enterCase_testStep_0',
           type: 'enter-case-branch',
@@ -157,7 +160,7 @@ describe('EnterSwitchNodeImpl', () => {
         } as EnterCaseBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest.fn().mockImplementation((val) => {
+      mockContextManager.renderValueAccordingToContext = vi.fn().mockImplementation((val) => {
         if (val === '{{ steps.check.output.status }}') return 'failure';
         return val;
       });
@@ -187,7 +190,7 @@ describe('EnterSwitchNodeImpl', () => {
 
   describe('default branch fallback', () => {
     beforeEach(() => {
-      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValue([
+      workflowGraph.getDirectSuccessors = vi.fn().mockReturnValue([
         {
           id: 'enterCase_testStep_0',
           type: 'enter-case-branch',
@@ -204,7 +207,7 @@ describe('EnterSwitchNodeImpl', () => {
         } as EnterDefaultBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest.fn().mockImplementation((val) => {
+      mockContextManager.renderValueAccordingToContext = vi.fn().mockImplementation((val) => {
         if (val === '{{ steps.check.output.status }}') return 'unknown_value';
         return val;
       });
@@ -234,7 +237,7 @@ describe('EnterSwitchNodeImpl', () => {
 
   describe('no match and no default', () => {
     beforeEach(() => {
-      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValue([
+      workflowGraph.getDirectSuccessors = vi.fn().mockReturnValue([
         {
           id: 'enterCase_testStep_0',
           type: 'enter-case-branch',
@@ -245,7 +248,7 @@ describe('EnterSwitchNodeImpl', () => {
         } as EnterCaseBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest.fn().mockImplementation((val) => {
+      mockContextManager.renderValueAccordingToContext = vi.fn().mockImplementation((val) => {
         if (val === '{{ steps.check.output.status }}') return 'unknown_value';
         return val;
       });
@@ -267,7 +270,7 @@ describe('EnterSwitchNodeImpl', () => {
 
   describe('numeric value matching', () => {
     beforeEach(() => {
-      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValue([
+      workflowGraph.getDirectSuccessors = vi.fn().mockReturnValue([
         {
           id: 'enterCase_testStep_0',
           type: 'enter-case-branch',
@@ -286,7 +289,7 @@ describe('EnterSwitchNodeImpl', () => {
         } as EnterCaseBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest.fn().mockImplementation((val) => {
+      mockContextManager.renderValueAccordingToContext = vi.fn().mockImplementation((val) => {
         if (val === '{{ steps.check.output.status }}') return '404';
         return val;
       });
@@ -308,7 +311,7 @@ describe('EnterSwitchNodeImpl', () => {
 
   describe('error handling', () => {
     it('should throw if successors contain invalid types', async () => {
-      workflowGraph.getDirectSuccessors = jest
+      workflowGraph.getDirectSuccessors = vi
         .fn()
         .mockReturnValue([{ id: 'someNode', type: 'invalid-type' }]);
 
@@ -328,7 +331,7 @@ describe('EnterSwitchNodeImpl', () => {
 
   describe('dynamic value matching (expression in case value)', () => {
     beforeEach(() => {
-      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValue([
+      workflowGraph.getDirectSuccessors = vi.fn().mockReturnValue([
         {
           id: 'enterCase_testStep_0',
           type: 'enter-case-branch',
@@ -347,7 +350,7 @@ describe('EnterSwitchNodeImpl', () => {
         } as EnterCaseBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest.fn().mockImplementation((val) => {
+      mockContextManager.renderValueAccordingToContext = vi.fn().mockImplementation((val) => {
         if (val === '{{ steps.check.output.status }}') return 'resolved_status';
         if (val === '{{ consts.expected_status }}') return 'resolved_status';
         return val;
@@ -377,7 +380,7 @@ describe('EnterSwitchNodeImpl', () => {
 
   describe('numeric values are not rendered as expressions', () => {
     beforeEach(() => {
-      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValue([
+      workflowGraph.getDirectSuccessors = vi.fn().mockReturnValue([
         {
           id: 'enterCase_testStep_0',
           type: 'enter-case-branch',
@@ -388,7 +391,7 @@ describe('EnterSwitchNodeImpl', () => {
         } as EnterCaseBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest.fn().mockImplementation((val) => {
+      mockContextManager.renderValueAccordingToContext = vi.fn().mockImplementation((val) => {
         if (val === '{{ steps.check.output.status }}') return '42';
         return val;
       });
@@ -417,7 +420,7 @@ describe('EnterSwitchNodeImpl', () => {
 
   describe('case ordering', () => {
     it('should match cases by index order even if successors are unordered', async () => {
-      workflowGraph.getDirectSuccessors = jest.fn().mockReturnValue([
+      workflowGraph.getDirectSuccessors = vi.fn().mockReturnValue([
         {
           id: 'enterCase_testStep_1',
           type: 'enter-case-branch',
@@ -436,7 +439,7 @@ describe('EnterSwitchNodeImpl', () => {
         } as EnterCaseBranchNode,
       ]);
 
-      mockContextManager.renderValueAccordingToContext = jest.fn().mockImplementation((val) => {
+      mockContextManager.renderValueAccordingToContext = vi.fn().mockImplementation((val) => {
         if (val === '{{ steps.check.output.status }}') return 'a';
         return val;
       });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,33 +20,36 @@ const actionsHandlerMock = {
   selectedOutlineCommentId: '',
   manageMarkdownEditIds: [],
   commentRefs: { current: {} },
-  handleManageMarkdownEditId: jest.fn(),
-  handleOutlineComment: jest.fn(),
-  handleSaveComment: jest.fn(),
-  handleDeleteComment: jest.fn(),
-  handleManageQuote: jest.fn(),
-  handleUpdate: jest.fn(),
+  handleManageMarkdownEditId: vi.fn(),
+  handleOutlineComment: vi.fn(),
+  handleSaveComment: vi.fn(),
+  handleDeleteComment: vi.fn(),
+  handleManageQuote: vi.fn(),
+  handleUpdate: vi.fn(),
 };
 
 const defaultProps = {
   comments: [] as React.ComponentProps<typeof UserActionsList>['comments'],
   commentRefs: { current: {} },
-  handleManageQuote: jest.fn(),
+  handleManageQuote: vi.fn(),
   caseData: basicCase,
   userProfiles: new Map(),
   actionsHandler: actionsHandlerMock,
 };
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ detailName: 'case-id' }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: () => ({ detailName: 'case-id' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
 describe('UserActionsList', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders list correctly', async () => {

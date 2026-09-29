@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
@@ -15,19 +17,22 @@ import { apiKeysManagementApp } from './api_keys_management_app';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 
-jest.mock('./api_keys_grid/api_keys_grid_page', () => ({ APIKeysGridPage: () => 'API Keys Page' }));
+vi.mock('./api_keys_grid/api_keys_grid_page', () => {
+      const mocked = { APIKeysGridPage: () => 'API Keys Page' };
+      return { ...mocked, default: mocked };
+    });
 
 const element = document.body.appendChild(document.createElement('div'));
 
 describe('apiKeysManagementApp', () => {
-  jest.setTimeout(15_000);
+  vi.setConfig({ testTimeout: 15_000 });
 
   it('renders application and sets breadcrumbs', async () => {
     const { getStartServices } = coreMock.createSetup();
     const coreStartMock = coreMock.createStart();
     getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
     const { authc } = securityMock.createSetup();
-    const setBreadcrumbs = jest.fn();
+    const setBreadcrumbs = vi.fn();
     const history = scopedHistoryMock.create({ pathname: '/' });
     coreStartMock.application.capabilities = {
       ...coreStartMock.application.capabilities,

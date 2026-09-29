@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { FieldDescription } from './field_description';
 import { render, screen } from '@testing-library/react';
@@ -14,12 +16,12 @@ import { userEvent } from '@testing-library/user-event';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { SHOULD_TRUNCATE_FIELD_DESCRIPTION_LOCALSTORAGE_KEY } from './field_description';
 
-const mockSetLocalStorage = jest.fn();
+const mockSetLocalStorage = vi.fn();
 const mockLocalStorageKey = SHOULD_TRUNCATE_FIELD_DESCRIPTION_LOCALSTORAGE_KEY;
 let mockTestInitialLocalStorageValue: boolean | undefined;
 
-jest.mock('react-use/lib/useLocalStorage', () => {
-  return jest.fn((key: string, initialValue: number) => {
+vi.mock('react-use/lib/useLocalStorage', () => {
+  return vi.fn((key: string, initialValue: number) => {
     if (key !== mockLocalStorageKey) {
       throw new Error(`Unexpected key: ${key}`);
     }
@@ -94,14 +96,14 @@ describe('FieldDescription', () => {
 
   it('should render correctly with markdown', async () => {
     const fieldsMetadataService: Partial<FieldsMetadataPublicStart> = {
-      useFieldsMetadata: jest.fn(() => ({
+      useFieldsMetadata: vi.fn(() => ({
         fieldsMetadata: {
           bytes: { description: 'ESC desc', type: 'long' },
         },
         streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
-        reload: jest.fn(),
+        reload: vi.fn(),
       })),
     };
     const customDescription = 'test this `markdown` desc';
@@ -118,14 +120,14 @@ describe('FieldDescription', () => {
 
   it('should fetch ECS metadata', async () => {
     const fieldsMetadataService: Partial<FieldsMetadataPublicStart> = {
-      useFieldsMetadata: jest.fn(() => ({
+      useFieldsMetadata: vi.fn(() => ({
         fieldsMetadata: {
           bytes: { description: 'ESC desc', type: 'long' },
         },
         streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
-        reload: jest.fn(),
+        reload: vi.fn(),
       })),
     };
     render(
@@ -144,14 +146,14 @@ describe('FieldDescription', () => {
 
   it('should not show ECS metadata if types do not match', async () => {
     const fieldsMetadataService: Partial<FieldsMetadataPublicStart> = {
-      useFieldsMetadata: jest.fn(() => ({
+      useFieldsMetadata: vi.fn(() => ({
         fieldsMetadata: {
           bytes: { description: 'ESC desc', type: 'keyword' },
         },
         streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
-        reload: jest.fn(),
+        reload: vi.fn(),
       })),
     };
     render(
@@ -166,12 +168,12 @@ describe('FieldDescription', () => {
 
   it('should not show ECS metadata if none found', async () => {
     const fieldsMetadataService: Partial<FieldsMetadataPublicStart> = {
-      useFieldsMetadata: jest.fn(() => ({
+      useFieldsMetadata: vi.fn(() => ({
         fieldsMetadata: {},
         streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
-        reload: jest.fn(),
+        reload: vi.fn(),
       })),
     };
     render(

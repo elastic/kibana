@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AgentFormattedAttachment } from '@kbn/agent-builder-server/attachments';
@@ -15,11 +18,14 @@ import {
 } from '../../common/attachments';
 import { createConnectorSetupAttachmentType } from './connector_setup';
 
-jest.mock('@kbn/connector-specs', () => ({
-  getConnectorSpec: jest.fn(),
-}));
+vi.mock('@kbn/connector-specs', () => {
+      const mocked = {
+      getConnectorSpec: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
+const getConnectorSpecMock = getConnectorSpec as MockedFunction<typeof getConnectorSpec>;
 
 const createAttachment = (
   data: ConnectorSetupAttachmentData
@@ -44,7 +50,7 @@ describe('connector_setup attachment type', () => {
   const attachmentType = createConnectorSetupAttachmentType();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('validate', () => {
@@ -92,7 +98,7 @@ describe('connector_setup attachment type', () => {
           supportedFeatureIds: [],
         },
         actions: {},
-        test: { handler: jest.fn(), enabled: false },
+        test: { handler: vi.fn(), enabled: false },
       });
 
       const formatted = attachmentType.format(

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -13,22 +15,25 @@ import { StaleAttachmentsPanel } from './stale_attachments_panel';
 const renderWithIntl = (ui: React.ReactElement) =>
   render(<IntlProvider locale="en">{ui}</IntlProvider>);
 
-jest.mock('./conversation_input/attachment_pills_row', () => ({
-  AttachmentPillsRow: () => <div data-test-subj="stalePanelPills" />,
-}));
+vi.mock('./conversation_input/attachment_pills_row', () => {
+      const mocked = {
+      AttachmentPillsRow: () => <div data-test-subj="stalePanelPills" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('StaleAttachmentsPanel', () => {
   it('renders nothing when there are no attachment inputs', () => {
     const { container } = renderWithIntl(
-      <StaleAttachmentsPanel attachmentInputs={[]} onAddToInput={jest.fn()} onDismiss={jest.fn()} />
+      <StaleAttachmentsPanel attachmentInputs={[]} onAddToInput={vi.fn()} onDismiss={vi.fn()} />
     );
 
     expect(container.firstChild).toBeNull();
   });
 
   it('renders callout and actions when attachments are stale', () => {
-    const onAddToInput = jest.fn();
-    const onDismiss = jest.fn();
+    const onAddToInput = vi.fn();
+    const onDismiss = vi.fn();
 
     renderWithIntl(
       <StaleAttachmentsPanel

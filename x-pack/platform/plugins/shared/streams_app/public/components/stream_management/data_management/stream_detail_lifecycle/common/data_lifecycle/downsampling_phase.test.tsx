@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { DownsamplingPhase } from './downsampling_phase';
@@ -54,7 +56,7 @@ describe('DownsamplingPhase', () => {
   });
 
   it('should navigate to the step when edit flyout is open (no popover)', () => {
-    const onEditStep = jest.fn();
+    const onEditStep = vi.fn();
 
     render(
       <DownsamplingPhase
@@ -74,7 +76,7 @@ describe('DownsamplingPhase', () => {
   });
 
   it('does nothing when disableInteractions is true, even with an edit flyout open', () => {
-    const onEditStep = jest.fn();
+    const onEditStep = vi.fn();
 
     render(
       <DownsamplingPhase

@@ -7,25 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getConfigurationFilePathsMock = jest.fn();
-jest.doMock('./utils/get_config_file_paths', () => ({
-  getConfigurationFilePaths: getConfigurationFilePathsMock,
-}));
+import { vi } from 'vitest';
 
-export const getConfigFromFilesMock = jest.fn();
-jest.doMock('./utils/read_config', () => ({
-  getConfigFromFiles: getConfigFromFilesMock,
-}));
+export const getConfigurationFilePathsMock = vi.fn();
+vi.doMock('./utils/get_config_file_paths', () => {
+      const mocked = {
+      getConfigurationFilePaths: getConfigurationFilePathsMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const applyConfigOverridesMock = jest.fn();
-jest.doMock('./utils/apply_config_overrides', () => ({
-  applyConfigOverrides: applyConfigOverridesMock,
-}));
+export const getConfigFromFilesMock = vi.fn();
+vi.doMock('./utils/read_config', () => {
+      const mocked = {
+      getConfigFromFiles: getConfigFromFilesMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const ApmConfigurationMock = jest.fn();
-jest.doMock('./config', () => ({
-  ApmConfiguration: ApmConfigurationMock,
-}));
+export const applyConfigOverridesMock = vi.fn();
+vi.doMock('./utils/apply_config_overrides', () => {
+      const mocked = {
+      applyConfigOverrides: applyConfigOverridesMock,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+export const ApmConfigurationMock = vi.fn();
+vi.doMock('./config', () => {
+      const mocked = {
+      ApmConfiguration: ApmConfigurationMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const resetAllMocks = () => {
   getConfigurationFilePathsMock.mockReset();

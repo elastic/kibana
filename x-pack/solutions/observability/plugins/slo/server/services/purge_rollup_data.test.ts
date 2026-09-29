@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { Duration, DurationUnit } from '@kbn/slo-schema';
@@ -15,11 +18,11 @@ import { BulkPurgeRollupData } from './bulk_purge_rollup_data';
 import { monthlyCalendarAligned } from './fixtures/time_window';
 
 describe('purge rollup data', () => {
-  let mockRepository: jest.Mocked<SLODefinitionRepository>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockRepository: Mocked<SLODefinitionRepository>;
+  let mockEsClient: Mocked<ElasticsearchClient>;
   let purgeRollupData: BulkPurgeRollupData;
 
-  jest.useFakeTimers().setSystemTime(new Date('2025-04-24'));
+  vi.useFakeTimers().setSystemTime(new Date('2025-04-24'));
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();

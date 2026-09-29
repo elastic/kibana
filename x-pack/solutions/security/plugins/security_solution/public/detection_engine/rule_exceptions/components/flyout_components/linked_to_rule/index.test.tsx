@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
@@ -13,7 +15,7 @@ import { TestProviders } from '../../../../../common/mock';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import type { Rule } from '../../../../rule_management/logic/types';
 
-jest.mock('../../../../rule_management/logic/use_find_rules');
+vi.mock('../../../../rule_management/logic/use_find_rules');
 
 describe('ExceptionsLinkedToRule', () => {
   it('it displays rule name and link', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core/public';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
@@ -13,23 +15,26 @@ import type { CaseUI } from '../../containers/types';
 import { useRunWorkflowOnCases } from './use_run_workflow_on_cases';
 import * as api from './api';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 // toMountPoint is a DOM utility — return the element as-is so tests can assert
 // on the text field without a full rendering environment.
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: (node: unknown) => node,
-}));
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = {
+      toMountPoint: (node: unknown) => node,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRunCaseWorkflow = jest.spyOn(api, 'runCaseWorkflow');
+const mockRunCaseWorkflow = vi.spyOn(api, 'runCaseWorkflow');
 
-describe('useRunWorkflowOnCases', () => {
+describe('useRunWorkflowOnCases', async () => {
   const mockHttp = {} as HttpStart;
   const mockToasts = notificationServiceMock.createStartContract().toasts;
 
-  const { useHttp, useToasts, useKibana } = jest.requireMock('../../common/lib/kibana');
+  const { useHttp, useToasts, useKibana } = (await vi.importMock('../../common/lib/kibana'));
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useHttp.mockReturnValue(mockHttp);
     useToasts.mockReturnValue(mockToasts);
     useKibana.mockReturnValue({ services: { rendering: {} } });
@@ -97,10 +102,10 @@ describe('useRunWorkflowOnCases', () => {
   });
 
   it('shows a success toast with a right-floated "View execution" button', async () => {
-    const mockGetAppUrl = jest
+    const mockGetAppUrl = vi
       .fn()
       .mockReturnValue('/app/workflows/wf-1?tab=executions&executionId=exec-1');
-    const { useAppUrl } = jest.requireMock('../../common/lib/kibana');
+    const { useAppUrl } = (await vi.importMock('../../common/lib/kibana'));
     useAppUrl.mockReturnValue({ getAppUrl: mockGetAppUrl });
 
     mockRunCaseWorkflow.mockResolvedValueOnce({
@@ -124,10 +129,10 @@ describe('useRunWorkflowOnCases', () => {
   });
 
   it('shows a warning toast (with "View execution" button) when activityStatus is "failed"', async () => {
-    const mockGetAppUrl = jest
+    const mockGetAppUrl = vi
       .fn()
       .mockReturnValue('/app/workflows/wf-1?tab=executions&executionId=exec-1');
-    const { useAppUrl } = jest.requireMock('../../common/lib/kibana');
+    const { useAppUrl } = (await vi.importMock('../../common/lib/kibana'));
     useAppUrl.mockReturnValue({ getAppUrl: mockGetAppUrl });
 
     mockRunCaseWorkflow.mockResolvedValueOnce({

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { transformRawCounter, createCounterFetcher } from './counters';
 import { rawServerCounters, rawUiCounters } from './__fixtures__/counters_saved_objects';
@@ -92,7 +94,7 @@ describe('transformRawCounter', () => {
 describe('createCounterFetcher', () => {
   const soClientMock = savedObjectsClientMock.create();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns saved objects only from a given source', async () => {

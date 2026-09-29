@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { Frequency } from '@kbn/rrule';
@@ -12,7 +14,7 @@ import { ReportScheduleIndicator } from './report_schedule_indicator';
 
 describe('ReportScheduleIndicator', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders hourly schedule indicator correctly', async () => {

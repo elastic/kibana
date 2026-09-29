@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -13,23 +15,29 @@ import React from 'react';
 import { hostsTitle, inventoryTitle } from '../../../translations';
 import { MetricsDetailAppHeader } from './metrics_detail_app_header';
 
-const mockGetBreadcrumbOptions = jest.fn(() => ({
+const mockGetBreadcrumbOptions = vi.fn(() => ({
   text: inventoryTitle,
   link: { href: '/app/metrics/inventory' },
 }));
 
-jest.mock('../../../hooks/use_parent_breadcrumb_resolver', () => ({
-  useParentBreadcrumbResolver: () => ({
-    getBreadcrumbOptions: () => mockGetBreadcrumbOptions(),
-  }),
-}));
+vi.mock('../../../hooks/use_parent_breadcrumb_resolver', () => {
+      const mocked = {
+      useParentBreadcrumbResolver: () => ({
+        getBreadcrumbOptions: () => mockGetBreadcrumbOptions(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_metrics_app_header_menu', () => ({
-  useMetricsAppHeaderMenu: () => ({
-    menu: { items: [] },
-    flyouts: <div data-test-subj="metricsDetailAppHeaderFlyouts" />,
-  }),
-}));
+vi.mock('./use_metrics_app_header_menu', () => {
+      const mocked = {
+      useMetricsAppHeaderMenu: () => ({
+        menu: { items: [] },
+        flyouts: <div data-test-subj="metricsDetailAppHeaderFlyouts" />,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderHeader = ({
   tabs,

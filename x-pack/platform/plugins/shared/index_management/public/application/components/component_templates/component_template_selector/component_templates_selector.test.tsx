@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,53 +14,74 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { ComponentTemplateListItem } from '../../../../../common';
 import { ComponentTemplatesSelector } from './component_templates_selector';
 
-const mockUseLoadComponentTemplates = jest.fn();
-const mockSelectionComponentsSpy = jest.fn();
+const mockUseLoadComponentTemplates = vi.fn();
+const mockSelectionComponentsSpy = vi.fn();
 
-jest.mock('../component_templates_context', () => ({
-  useApi: () => ({ useLoadComponentTemplates: () => mockUseLoadComponentTemplates() }),
-}));
+vi.mock('../component_templates_context', () => {
+      const mocked = {
+      useApi: () => ({ useLoadComponentTemplates: () => mockUseLoadComponentTemplates() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../template_form/steps/use_creates_data_stream', () => ({
-  useCreatesDataStream: () => false,
-}));
+vi.mock('../../template_form/steps/use_creates_data_stream', () => {
+      const mocked = {
+      useCreatesDataStream: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../shared_imports', () => ({
-  SectionError: () => <div data-test-subj="sectionError" />,
-  SectionLoading: () => <div data-test-subj="sectionLoading" />,
-  GlobalFlyout: {
-    useGlobalFlyout: () => ({ addContent: jest.fn(), removeContent: jest.fn() }),
-  },
-}));
+vi.mock('../shared_imports', () => {
+      const mocked = {
+      SectionError: () => <div data-test-subj="sectionError" />,
+      SectionLoading: () => <div data-test-subj="sectionLoading" />,
+      GlobalFlyout: {
+        useGlobalFlyout: () => ({ addContent: vi.fn(), removeContent: vi.fn() }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../component_template_details', () => ({
-  ComponentTemplateDetailsFlyoutContent: () => null,
-  defaultFlyoutProps: {},
-}));
+vi.mock('../component_template_details', () => {
+      const mocked = {
+      ComponentTemplateDetailsFlyoutContent: () => null,
+      defaultFlyoutProps: {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components', () => ({
-  CreateButtonPopOver: () => null,
-}));
+vi.mock('./components', () => {
+      const mocked = {
+      CreateButtonPopOver: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./component_templates', () => ({
-  ComponentTemplates: () => <div data-test-subj="mockComponentTemplatesList" />,
-}));
+vi.mock('./component_templates', () => {
+      const mocked = {
+      ComponentTemplates: () => <div data-test-subj="mockComponentTemplatesList" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./component_templates_selection', () => ({
-  ComponentTemplatesSelection: ({ components }: { components: ComponentTemplateListItem[] }) => {
-    mockSelectionComponentsSpy(components);
+vi.mock('./component_templates_selection', () => {
+      const mocked = {
+      ComponentTemplatesSelection: ({ components }: { components: ComponentTemplateListItem[] }) => {
+        mockSelectionComponentsSpy(components);
 
-    return (
-      <ul>
-        {components.map(({ name }) => (
-          <li key={name} data-test-subj="selectedComponent">
-            {name}
-          </li>
-        ))}
-      </ul>
-    );
-  },
-}));
+        return (
+          <ul>
+            {components.map(({ name }) => (
+              <li key={name} data-test-subj="selectedComponent">
+                {name}
+              </li>
+            ))}
+          </ul>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Every field other than `name` differs from the placeholder entry, so the object
 // assertions fail when an existing template falls back to a placeholder (or a partial copy).
@@ -72,12 +95,12 @@ const buildComponent = (name: string): ComponentTemplateListItem => ({
 });
 
 const renderSelector = (defaultValue: string[]) => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   render(
     <I18nProvider>
       <ComponentTemplatesSelector
         onChange={onChange}
-        onComponentsLoaded={jest.fn()}
+        onComponentsLoaded={vi.fn()}
         defaultValue={defaultValue}
         docUri="https://docs"
       />
@@ -91,7 +114,7 @@ const getSelectedNames = () =>
 
 describe('ComponentTemplatesSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseLoadComponentTemplates.mockReturnValue({
       data: [buildComponent('ct_a'), buildComponent('ct_b')],
       isLoading: false,

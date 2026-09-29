@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { TracksOverlays } from '@kbn/presentation-util';
@@ -56,16 +58,16 @@ describe('Customize panel action', () => {
   });
 
   it('opens a flyout on execute', async () => {
-    core.overlays.openFlyout = jest.fn();
+    core.overlays.openFlyout = vi.fn();
     await action.execute(context);
     expect(core.overlays.openFlyout).toHaveBeenCalled();
   });
 
   it('opens overlay on parent if parent is an overlay tracker', async () => {
     context.embeddable.parentApi = {
-      openOverlay: jest.fn(),
+      openOverlay: vi.fn(),
       timeRange$: undefined,
-      clearOverlays: jest.fn(),
+      clearOverlays: vi.fn(),
     };
     await action.execute(context);
     expect((context.embeddable.parentApi as TracksOverlays).openOverlay).toHaveBeenCalled();

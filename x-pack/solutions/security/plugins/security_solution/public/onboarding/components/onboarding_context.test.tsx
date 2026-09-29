@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { OnboardingContextProvider, useOnboardingContext } from './onboarding_context';
@@ -12,58 +15,73 @@ import { useLicense } from '../../common/hooks/use_license';
 import { hasCapabilities } from '../../common/lib/capabilities';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
-jest.mock('../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn().mockReturnValue({ services: { application: { capabilities: {} } } }),
-}));
-jest.mock('../../common/lib/capabilities', () => ({ hasCapabilities: jest.fn() }));
-const mockHasCapabilities = hasCapabilities as jest.Mock;
+vi.mock('../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({ services: { application: { capabilities: {} } } }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/lib/capabilities', () => {
+      const mocked = { hasCapabilities: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+const mockHasCapabilities = hasCapabilities as Mock;
 
-jest.mock('../../common/hooks/use_license', () => ({ useLicense: jest.fn() }));
-const mockUseLicense = useLicense as jest.Mock;
+vi.mock('../../common/hooks/use_license', () => {
+      const mocked = { useLicense: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+const mockUseLicense = useLicense as Mock;
 
-jest.mock('../../common/experimental_features_service', () => ({
-  ExperimentalFeaturesService: { get: jest.fn() },
-}));
-const mockExperimentalFeatures = ExperimentalFeaturesService.get as jest.Mock;
+vi.mock('../../common/experimental_features_service', () => {
+      const mocked = {
+      ExperimentalFeaturesService: { get: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockExperimentalFeatures = ExperimentalFeaturesService.get as Mock;
 
-jest.mock('../config', () => ({
-  onboardingConfig: [
-    {
-      id: 'default',
-      body: [
+vi.mock('../config', () => {
+      const mocked = {
+      onboardingConfig: [
         {
-          id: 'defaultGroup1',
-          cards: [{ id: 'defaultCard1' }],
+          id: 'default',
+          body: [
+            {
+              id: 'defaultGroup1',
+              cards: [{ id: 'defaultCard1' }],
+            },
+          ],
         },
-      ],
-    },
-    {
-      id: 'topic1',
-      experimentalFlagRequired: 'flag1',
-      licenseTypeRequired: 'gold',
-      capabilitiesRequired: ['capability1'],
-      body: [
         {
-          id: 'topic1Group1',
-          cards: [{ id: 'topic1Card1' }],
+          id: 'topic1',
+          experimentalFlagRequired: 'flag1',
+          licenseTypeRequired: 'gold',
+          capabilitiesRequired: ['capability1'],
+          body: [
+            {
+              id: 'topic1Group1',
+              cards: [{ id: 'topic1Card1' }],
+            },
+          ],
         },
-      ],
-    },
-    {
-      id: 'topic2',
-      body: [
         {
-          id: 'topic2Group1',
-          cards: [
-            { id: 'topic2Card1', experimentalFlagRequired: 'flag1' },
-            { id: 'topic2Card2', licenseTypeRequired: 'gold' },
-            { id: 'topic2Card3', capabilitiesRequired: ['capability1'] },
+          id: 'topic2',
+          body: [
+            {
+              id: 'topic2Group1',
+              cards: [
+                { id: 'topic2Card1', experimentalFlagRequired: 'flag1' },
+                { id: 'topic2Card2', licenseTypeRequired: 'gold' },
+                { id: 'topic2Card3', capabilitiesRequired: ['capability1'] },
+              ],
+            },
           ],
         },
       ],
-    },
-  ],
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <OnboardingContextProvider spaceId="space1">{children}</OnboardingContextProvider>
@@ -72,9 +90,9 @@ const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
 describe('OnboardingContextProvider', () => {
   describe('config', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockExperimentalFeatures.mockReturnValue({ flag1: true });
-      mockUseLicense.mockReturnValue({ isAtLeast: jest.fn(() => true) });
+      mockUseLicense.mockReturnValue({ isAtLeast: vi.fn(() => true) });
       mockHasCapabilities.mockReturnValue(true);
     });
 
@@ -99,7 +117,7 @@ describe('OnboardingContextProvider', () => {
 
       describe('and the required license is not met either', () => {
         beforeEach(() => {
-          mockUseLicense.mockReturnValue({ isAtLeast: jest.fn(() => false) });
+          mockUseLicense.mockReturnValue({ isAtLeast: vi.fn(() => false) });
         });
 
         it('should filter the topics config correctly', () => {
@@ -124,7 +142,7 @@ describe('OnboardingContextProvider', () => {
 
     describe('when the required license is not met', () => {
       beforeEach(() => {
-        mockUseLicense.mockReturnValue({ isAtLeast: jest.fn(() => false) });
+        mockUseLicense.mockReturnValue({ isAtLeast: vi.fn(() => false) });
       });
 
       it('should filter the topics config correctly', () => {

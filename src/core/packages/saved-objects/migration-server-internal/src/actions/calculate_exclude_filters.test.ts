@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as Either from 'fp-ts/Either';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -16,8 +18,8 @@ describe('calculateExcludeFilters', () => {
   const client = elasticsearchClientMock.createInternalClient();
 
   it('calls each provided hook and returns combined filter', async () => {
-    const hook1 = jest.fn().mockReturnValue({ bool: { must: { term: { fieldA: '123' } } } });
-    const hook2 = jest.fn().mockResolvedValue({ bool: { must: { term: { fieldB: 'abc' } } } });
+    const hook1 = vi.fn().mockReturnValue({ bool: { must: { term: { fieldA: '123' } } } });
+    const hook2 = vi.fn().mockResolvedValue({ bool: { must: { term: { fieldB: 'abc' } } } });
 
     const task = calculateExcludeFilters({
       client,
@@ -39,8 +41,8 @@ describe('calculateExcludeFilters', () => {
 
   it('ignores hooks that return non-retryable errors', async () => {
     const error = new Error('blah!');
-    const hook1 = jest.fn().mockRejectedValue(error);
-    const hook2 = jest.fn().mockResolvedValue({ bool: { must: { term: { fieldB: 'abc' } } } });
+    const hook1 = vi.fn().mockRejectedValue(error);
+    const hook2 = vi.fn().mockResolvedValue({ bool: { must: { term: { fieldB: 'abc' } } } });
 
     const task = calculateExcludeFilters({
       client,
@@ -60,8 +62,8 @@ describe('calculateExcludeFilters', () => {
       'reason',
       elasticsearchClientMock.createApiResponse()
     );
-    const hook1 = jest.fn().mockRejectedValue(error);
-    const hook2 = jest.fn().mockResolvedValue({ bool: { must: { term: { fieldB: 'abc' } } } });
+    const hook1 = vi.fn().mockRejectedValue(error);
+    const hook2 = vi.fn().mockResolvedValue({ bool: { must: { term: { fieldB: 'abc' } } } });
 
     const task = calculateExcludeFilters({
       client,
@@ -78,8 +80,8 @@ describe('calculateExcludeFilters', () => {
   });
 
   it('ignores and returns errors for hooks that take longer than timeout', async () => {
-    const hook1 = jest.fn().mockReturnValue(new Promise((r) => setTimeout(r, 40_000)));
-    const hook2 = jest.fn().mockResolvedValue({ bool: { must: { term: { fieldB: 'abc' } } } });
+    const hook1 = vi.fn().mockReturnValue(new Promise((r) => setTimeout(r, 40_000)));
+    const hook2 = vi.fn().mockResolvedValue({ bool: { must: { term: { fieldB: 'abc' } } } });
 
     const task = calculateExcludeFilters({
       client,

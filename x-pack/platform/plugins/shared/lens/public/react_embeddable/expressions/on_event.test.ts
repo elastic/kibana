@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { getLensApiMock, getLensRuntimeStateMock, makeEmbeddableServices } from '../mocks';
 import type { LensEmbeddableStartServices } from '../types';
@@ -22,23 +24,23 @@ import {
 describe('Embeddable interaction event handlers', () => {
   beforeEach(() => {
     // LensAPI mock is a static mock, so we need to reset it between tests
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   function getCallbacks(shouldPreventDefault?: boolean) {
     if (!shouldPreventDefault) {
       return {
-        onFilter: jest.fn(),
-        onBrushEnd: jest.fn(),
-        onTableRowClick: jest.fn(),
-        onAnnotationClick: jest.fn(),
+        onFilter: vi.fn(),
+        onBrushEnd: vi.fn(),
+        onTableRowClick: vi.fn(),
+        onAnnotationClick: vi.fn(),
       };
     }
     return {
-      onFilter: jest.fn((event) => event.preventDefault()),
-      onBrushEnd: jest.fn((event) => event.preventDefault()),
-      onTableRowClick: jest.fn((event) => event.preventDefault()),
-      onAnnotationClick: jest.fn((event) => event.preventDefault()),
+      onFilter: vi.fn((event) => event.preventDefault()),
+      onBrushEnd: vi.fn((event) => event.preventDefault()),
+      onTableRowClick: vi.fn((event) => event.preventDefault()),
+      onAnnotationClick: vi.fn((event) => event.preventDefault()),
     };
   }
 
@@ -50,7 +52,7 @@ describe('Embeddable interaction event handlers', () => {
   ) {
     return prepareEventHandler(
       api,
-      jest.fn(() => getLensRuntimeStateMock()),
+      vi.fn(() => getLensRuntimeStateMock()),
       callbacks,
       services,
       disableTriggers
@@ -62,7 +64,7 @@ describe('Embeddable interaction event handlers', () => {
   }
 
   async function submitEvent(event: ExpressionRendererEvent, callPreventDefault: boolean = false) {
-    const onEditAction = jest.fn();
+    const onEditAction = vi.fn();
     const callbacks = getCallbacks(callPreventDefault);
     const services = makeEmbeddableServices(undefined, undefined, {
       visOverrides: { id: 'lnsXY', onEditAction },

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ChangeHistoryProvider } from '../provider/change_history_provider';
@@ -22,8 +25,8 @@ import { createQueryClientWrapper } from '../test_utils/create_query_client_wrap
 const createAdapter = (
   restoreChange: ChangeHistoryAdapter['restoreChange']
 ): ChangeHistoryAdapter => ({
-  listChanges: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-  getChange: jest.fn(),
+  listChanges: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+  getChange: vi.fn(),
   restoreChange,
 });
 
@@ -31,7 +34,7 @@ const createHarness = (
   adapter: ChangeHistoryAdapter,
   features: { restore?: boolean } = { restore: true },
   permissions: { canRestore?: boolean } = { canRestore: true },
-  reportEvent?: jest.Mock
+  reportEvent?: Mock
 ) => {
   const { wrapper: QueryClientWrapper, queryClient } = createQueryClientWrapper();
 
@@ -57,14 +60,14 @@ const createHarness = (
 
 describe('useChangeHistoryRestore', () => {
   it('calls adapter.restoreChange, invokes onRestored, then invalidates cache', async () => {
-    const restoreChange = jest.fn().mockResolvedValue(undefined);
+    const restoreChange = vi.fn().mockResolvedValue(undefined);
     const callOrder: string[] = [];
-    const onRestored = jest.fn(async (): Promise<void> => {
+    const onRestored = vi.fn(async (): Promise<void> => {
       callOrder.push('onRestored');
     });
     const adapter = createAdapter(restoreChange);
     const { wrapper, queryClient } = createHarness(adapter);
-    const invalidateSpy = jest
+    const invalidateSpy = vi
       .spyOn(queryClient, 'invalidateQueries')
       .mockImplementation(async () => {
         callOrder.push('invalidate');
@@ -97,16 +100,16 @@ describe('useChangeHistoryRestore', () => {
   });
 
   it('does not invoke onRestored or invalidate cache when restore fails', async () => {
-    const restoreChange = jest.fn().mockRejectedValue({
+    const restoreChange = vi.fn().mockRejectedValue({
       body: {
         code: 'RESTORE_CONFLICT',
         message: 'Object was updated by another user.',
       },
     });
-    const onRestored = jest.fn(async (): Promise<void> => undefined);
+    const onRestored = vi.fn(async (): Promise<void> => undefined);
     const adapter = createAdapter(restoreChange);
     const { wrapper, queryClient } = createHarness(adapter);
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useChangeHistoryRestore({ onRestored }), {
       wrapper,
@@ -131,11 +134,11 @@ describe('useChangeHistoryRestore', () => {
   });
 
   it('does not call restore when the feature is disabled', async () => {
-    const restoreChange = jest.fn();
-    const onRestored = jest.fn(async (): Promise<void> => undefined);
+    const restoreChange = vi.fn();
+    const onRestored = vi.fn(async (): Promise<void> => undefined);
     const adapter = createAdapter(restoreChange);
     const { wrapper, queryClient } = createHarness(adapter, { restore: false });
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useChangeHistoryRestore({ onRestored }), {
       wrapper,
@@ -156,8 +159,8 @@ describe('useChangeHistoryRestore', () => {
   });
 
   it('reports restore_completed telemetry on success', async () => {
-    const reportEvent = jest.fn();
-    const restoreChange = jest.fn().mockResolvedValue(undefined);
+    const reportEvent = vi.fn();
+    const restoreChange = vi.fn().mockResolvedValue(undefined);
     const adapter = createAdapter(restoreChange);
     const { wrapper } = createHarness(
       adapter,
@@ -195,9 +198,9 @@ describe('useChangeHistoryRestore', () => {
   });
 
   it('measures restore duration before onRestored and cache invalidation', async () => {
-    const reportEvent = jest.fn();
-    const restoreChange = jest.fn().mockResolvedValue(undefined);
-    const onRestored = jest.fn(() => new Promise<void>((resolve) => setTimeout(resolve, 200)));
+    const reportEvent = vi.fn();
+    const restoreChange = vi.fn().mockResolvedValue(undefined);
+    const onRestored = vi.fn(() => new Promise<void>((resolve) => setTimeout(resolve, 200)));
     const adapter = createAdapter(restoreChange);
     const { wrapper, queryClient } = createHarness(
       adapter,
@@ -205,7 +208,7 @@ describe('useChangeHistoryRestore', () => {
       { canRestore: true },
       reportEvent
     );
-    jest
+    vi
       .spyOn(queryClient, 'invalidateQueries')
       .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 200)));
 
@@ -229,9 +232,9 @@ describe('useChangeHistoryRestore', () => {
   });
 
   it('reports restore_completed and returns true when post-restore steps fail', async () => {
-    const reportEvent = jest.fn();
-    const restoreChange = jest.fn().mockResolvedValue(undefined);
-    const onRestored = jest.fn().mockRejectedValue(new Error('callback failed'));
+    const reportEvent = vi.fn();
+    const restoreChange = vi.fn().mockResolvedValue(undefined);
+    const onRestored = vi.fn().mockRejectedValue(new Error('callback failed'));
     const adapter = createAdapter(restoreChange);
     const { wrapper } = createHarness(
       adapter,
@@ -266,8 +269,8 @@ describe('useChangeHistoryRestore', () => {
   });
 
   it('reports restore_completed and returns true when cache invalidation fails', async () => {
-    const reportEvent = jest.fn();
-    const restoreChange = jest.fn().mockResolvedValue(undefined);
+    const reportEvent = vi.fn();
+    const restoreChange = vi.fn().mockResolvedValue(undefined);
     const adapter = createAdapter(restoreChange);
     const { wrapper, queryClient } = createHarness(
       adapter,
@@ -275,7 +278,7 @@ describe('useChangeHistoryRestore', () => {
       { canRestore: true },
       reportEvent
     );
-    jest.spyOn(queryClient, 'invalidateQueries').mockRejectedValue(new Error('network error'));
+    vi.spyOn(queryClient, 'invalidateQueries').mockRejectedValue(new Error('network error'));
 
     const { result } = renderHook(() => useChangeHistoryRestore(), { wrapper });
 
@@ -303,8 +306,8 @@ describe('useChangeHistoryRestore', () => {
   });
 
   it('reports restore_failed telemetry when restore fails', async () => {
-    const reportEvent = jest.fn();
-    const restoreChange = jest.fn().mockRejectedValue({
+    const reportEvent = vi.fn();
+    const restoreChange = vi.fn().mockRejectedValue({
       body: {
         code: 'RESTORE_CONFLICT',
         message: 'Object was updated by another user.',

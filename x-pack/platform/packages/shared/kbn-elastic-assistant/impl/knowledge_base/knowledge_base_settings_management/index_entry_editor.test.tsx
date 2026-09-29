@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor, within } from '@testing-library/react';
 import { IndexEntryEditor } from './index_entry_editor';
@@ -15,23 +18,23 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { useIndexMappings } from './use_index_mappings';
 import type { HttpSetup } from '@kbn/core-http-browser';
 
-jest.mock('./use_index_mappings');
+vi.mock('./use_index_mappings');
 
 const Wrapper = ({ children }: { children?: React.ReactNode }) => (
   <I18nProvider>{children}</I18nProvider>
 );
 
 describe('IndexEntryEditor', () => {
-  const mockSetEntry = jest.fn();
+  const mockSetEntry = vi.fn();
   const mockDataViews = {
-    getExistingIndices: jest.fn().mockResolvedValue(['index-1']),
-    getIndices: jest.fn().mockResolvedValue([
+    getExistingIndices: vi.fn().mockResolvedValue(['index-1']),
+    getIndices: vi.fn().mockResolvedValue([
       { name: 'index-1', attributes: ['open'] },
       { name: 'index-2', attributes: ['open'] },
     ]),
   } as unknown as DataViewsContract;
   const http = {
-    get: jest.fn(),
+    get: vi.fn(),
   } as unknown as HttpSetup;
 
   const defaultProps = {
@@ -51,8 +54,8 @@ describe('IndexEntryEditor', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useIndexMappings as jest.Mock).mockImplementation(({ indexName }) => {
+    vi.clearAllMocks();
+    (useIndexMappings as Mock).mockImplementation(({ indexName }) => {
       if (indexName === 'index-1') {
         return {
           data: {
@@ -223,7 +226,7 @@ describe('IndexEntryEditor', () => {
   });
 
   it('fetches index options and updates on selection 2', async () => {
-    (mockDataViews.getExistingIndices as jest.Mock).mockResolvedValue([]);
+    (mockDataViews.getExistingIndices as Mock).mockResolvedValue([]);
     const { getByText } = render(
       <IndexEntryEditor
         {...defaultProps}

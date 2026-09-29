@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
@@ -27,20 +29,26 @@ import {
   PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
 } from '../test_ids';
 
-jest.mock('../../../../../common/components/event_details/investigate_in_timeline_button', () => ({
-  InvestigateInTimelineButton: ({
-    children,
-    'data-test-subj': dataTestSubj,
-  }: {
-    children: React.ReactNode;
-    'data-test-subj': string;
-  }) => <div data-test-subj={dataTestSubj}>{children}</div>,
-}));
+vi.mock('../../../../../common/components/event_details/investigate_in_timeline_button', () => {
+      const mocked = {
+      InvestigateInTimelineButton: ({
+        children,
+        'data-test-subj': dataTestSubj,
+      }: {
+        children: React.ReactNode;
+        'data-test-subj': string;
+      }) => <div data-test-subj={dataTestSubj}>{children}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/components/event_details/use_action_cell_data_provider', () => ({
-  getDataProvider: jest.fn(() => ({ id: 'mock-provider', field: 'field', value: 'value' })),
-  getDataProviderAnd: jest.fn(() => ({ id: 'mock-and-provider' })),
-}));
+vi.mock('../../../../../common/components/event_details/use_action_cell_data_provider', () => {
+      const mocked = {
+      getDataProvider: vi.fn(() => ({ id: 'mock-provider', field: 'field', value: 'value' })),
+      getDataProviderAnd: vi.fn(() => ({ id: 'mock-and-provider' })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const MockChildLink = ({
   field,
@@ -289,14 +297,14 @@ describe('userPrevalenceColumn', () => {
 
 describe('getColumns', () => {
   it('returns 6 columns', () => {
-    const columns = getColumns(jest.fn() as unknown as CellActionRenderer, true, 'alerts-page');
+    const columns = getColumns(vi.fn() as unknown as CellActionRenderer, true, 'alerts-page');
 
     expect(columns).toHaveLength(6);
   });
 
   describe('value column', () => {
     it('renders cell actions when renderCellActions is provided', () => {
-      const renderCellActions = jest.fn(({ children }: { children: React.ReactNode }) => (
+      const renderCellActions = vi.fn(({ children }: { children: React.ReactNode }) => (
         <div data-test-subj="cell-actions">{children}</div>
       )) as unknown as CellActionRenderer;
       const columns = getColumns(renderCellActions, true, 'alerts-page');
@@ -308,7 +316,7 @@ describe('getColumns', () => {
     });
 
     it('passes the correct field, value, and scopeId to renderCellActions', () => {
-      const renderCellActionsMock = jest.fn(() => null);
+      const renderCellActionsMock = vi.fn(() => null);
       const renderCellActions = renderCellActionsMock as unknown as CellActionRenderer;
       const columns = getColumns(renderCellActions, true, 'my-scope');
       const valueColumn = columns[1];
@@ -369,7 +377,7 @@ describe('getColumns', () => {
     });
 
     it('renders one item per value', () => {
-      const renderCellActionsMock = jest.fn(({ children }: { children: React.ReactNode }) => (
+      const renderCellActionsMock = vi.fn(({ children }: { children: React.ReactNode }) => (
         <span>{children}</span>
       ));
       const renderCellActions = renderCellActionsMock as unknown as CellActionRenderer;

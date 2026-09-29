@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 
 import {
@@ -41,7 +43,7 @@ function createMockClient(responses: SearchResponses, hasDataStreams = false) {
   // TODO: replace with proper mocked client
   const client: any = {
     helpers: {
-      scrollSearch: jest.fn(function* ({ index }) {
+      scrollSearch: vi.fn(function* ({ index }) {
         if (hasDataStreams) {
           index = `.ds-${index}`;
         }
@@ -52,10 +54,10 @@ function createMockClient(responses: SearchResponses, hasDataStreams = false) {
       }),
     },
     indices: {
-      get: jest.fn(async ({ index }) => {
+      get: vi.fn(async ({ index }) => {
         return { [index]: { data_stream: hasDataStreams && index.substring(4) } };
       }),
-      getDataStream: jest.fn(async ({ name }) => {
+      getDataStream: vi.fn(async ({ name }) => {
         if (!hasDataStreams) return { data_streams: [] };
         return { data_streams: [{ name }] };
       }),

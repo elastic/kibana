@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import type {
   AnalyticsServiceStart,
@@ -96,59 +99,59 @@ describe('Observability AI Assistant client', () => {
   let client: ObservabilityAIAssistantClient;
 
   const actionsClientMock: DeeplyMockedKeys<ActionsClient> = {
-    execute: jest.fn(),
-    get: jest.fn(),
+    execute: vi.fn(),
+    get: vi.fn(),
   } as any;
 
   const inferenceClientMock: DeeplyMockedKeys<InferenceClient> = {
-    chatComplete: jest.fn(),
+    chatComplete: vi.fn(),
   } as any;
 
   const uiSettingsClientMock: DeeplyMockedKeys<IUiSettingsClient> = {
-    get: jest.fn(),
+    get: vi.fn(),
   } as any;
 
   const internalUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
-    search: jest.fn(),
-    index: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    search: vi.fn(),
+    index: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   } as any;
 
   const currentUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
-    search: jest.fn(),
-    fieldCaps: jest.fn(),
+    search: vi.fn(),
+    fieldCaps: vi.fn(),
   } as any;
 
   const knowledgeBaseServiceMock: DeeplyMockedKeys<KnowledgeBaseService> = {
-    recall: jest.fn(),
-    getUserInstructions: jest.fn(),
+    recall: vi.fn(),
+    getUserInstructions: vi.fn(),
   } as any;
 
   let loggerMock: DeeplyMockedKeys<Logger> = {} as any;
 
   const functionClientMock: DeeplyMockedKeys<ChatFunctionClient> = {
-    executeFunction: jest.fn(),
-    getFunctions: jest.fn(),
-    hasFunction: jest.fn(),
-    hasAction: jest.fn(),
-    getActions: jest.fn(),
-    validate: jest.fn(),
-    getInstructions: jest.fn(),
+    executeFunction: vi.fn(),
+    getFunctions: vi.fn(),
+    hasFunction: vi.fn(),
+    hasAction: vi.fn(),
+    getActions: vi.fn(),
+    validate: vi.fn(),
+    getInstructions: vi.fn(),
   } as any;
 
-  const getConnectorByIdMock = jest.fn().mockResolvedValue({
+  const getConnectorByIdMock = vi.fn().mockResolvedValue({
     connectorId: 'test-connector-id',
     name: 'Test Connector',
     type: 'openai',
   });
 
-  const analyticsMock = { reportEvent: jest.fn() } as unknown as AnalyticsServiceStart;
+  const analyticsMock = { reportEvent: vi.fn() } as unknown as AnalyticsServiceStart;
 
   let llmSimulator: LlmSimulator;
 
   function createClient(namespace: SpaceId = DEFAULT_SPACE_ID) {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     // uncomment this line for debugging
     // const consoleOrPassThrough = console.log.bind(console);
@@ -156,11 +159,11 @@ describe('Observability AI Assistant client', () => {
     const consoleOrPassThrough = () => {};
 
     loggerMock = {
-      log: jest.fn().mockImplementation(consoleOrPassThrough),
-      error: jest.fn().mockImplementation(consoleOrPassThrough),
-      debug: jest.fn().mockImplementation(consoleOrPassThrough),
-      trace: jest.fn().mockImplementation(consoleOrPassThrough),
-      isLevelEnabled: jest.fn().mockReturnValue(true),
+      log: vi.fn().mockImplementation(consoleOrPassThrough),
+      error: vi.fn().mockImplementation(consoleOrPassThrough),
+      debug: vi.fn().mockImplementation(consoleOrPassThrough),
+      trace: vi.fn().mockImplementation(consoleOrPassThrough),
+      isLevelEnabled: vi.fn().mockReturnValue(true),
     } as any;
 
     functionClientMock.getFunctions.mockReturnValue([]);
@@ -242,7 +245,7 @@ describe('Observability AI Assistant client', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when completing a conversation without an initial conversation id', () => {
@@ -299,10 +302,10 @@ describe('Observability AI Assistant client', () => {
     });
 
     describe('when streaming the response from the LLM', () => {
-      let dataHandler: jest.Mock;
+      let dataHandler: Mock;
 
       beforeEach(async () => {
-        dataHandler = jest.fn();
+        dataHandler = vi.fn();
 
         stream.on('data', dataHandler);
 
@@ -529,7 +532,7 @@ describe('Observability AI Assistant client', () => {
   describe('when completing a conversation with an initial conversation id', () => {
     let stream: Readable;
 
-    let dataHandler: jest.Mock;
+    let dataHandler: Mock;
 
     beforeEach(async () => {
       client = createClient();
@@ -582,7 +585,7 @@ describe('Observability AI Assistant client', () => {
 
       stream = observableIntoStream(response$);
 
-      dataHandler = jest.fn();
+      dataHandler = vi.fn();
 
       stream.on('data', dataHandler);
 
@@ -653,7 +656,7 @@ describe('Observability AI Assistant client', () => {
   describe('when the LLM response fails', () => {
     let stream: Readable;
 
-    let dataHandler: jest.Mock;
+    let dataHandler: Mock;
 
     beforeEach(async () => {
       client = createClient();
@@ -674,7 +677,7 @@ describe('Observability AI Assistant client', () => {
 
       stream = observableIntoStream(response$);
 
-      dataHandler = jest.fn();
+      dataHandler = vi.fn();
 
       stream.on('data', dataHandler);
 
@@ -706,9 +709,9 @@ describe('Observability AI Assistant client', () => {
   describe('when the assistant answers with a function request', () => {
     let stream: Readable;
 
-    let dataHandler: jest.Mock;
+    let dataHandler: Mock;
 
-    let respondFn: jest.Mock;
+    let respondFn: Mock;
 
     let fnResponseResolve: (data: unknown) => void;
 
@@ -722,7 +725,7 @@ describe('Observability AI Assistant client', () => {
         });
       });
 
-      respondFn = jest.fn();
+      respondFn = vi.fn();
 
       functionClientMock.getFunctions.mockImplementation(() => [
         {
@@ -764,7 +767,7 @@ describe('Observability AI Assistant client', () => {
 
       stream = observableIntoStream(response$);
 
-      dataHandler = jest.fn();
+      dataHandler = vi.fn();
 
       stream.on('data', dataHandler);
 
@@ -1170,7 +1173,7 @@ describe('Observability AI Assistant client', () => {
   describe('when context is available', () => {
     let stream: Readable;
 
-    let dataHandler: jest.Mock;
+    let dataHandler: Mock;
     beforeEach(async () => {
       client = createClient();
       inferenceClientMock.chatComplete.mockImplementationOnce(() => {
@@ -1202,7 +1205,7 @@ describe('Observability AI Assistant client', () => {
 
       stream = observableIntoStream(response$);
 
-      dataHandler = jest.fn();
+      dataHandler = vi.fn();
 
       stream.on('data', dataHandler);
 
@@ -1279,7 +1282,7 @@ describe('Observability AI Assistant client', () => {
   describe('when the LLM keeps on calling a function and the limit has been exceeded', () => {
     let stream: Readable;
 
-    let dataHandler: jest.Mock;
+    let dataHandler: Mock;
     const maxFunctionCalls = 8;
 
     beforeEach(async () => {
@@ -1329,7 +1332,7 @@ describe('Observability AI Assistant client', () => {
 
       stream = observableIntoStream(response$);
 
-      dataHandler = jest.fn();
+      dataHandler = vi.fn();
 
       stream.on('data', dataHandler);
 
@@ -1384,7 +1387,7 @@ describe('Observability AI Assistant client', () => {
   });
 
   describe('when context has not been injected since last user message', () => {
-    let dataHandler: jest.Mock;
+    let dataHandler: Mock;
 
     beforeEach(async () => {
       client = createClient();
@@ -1416,7 +1419,7 @@ describe('Observability AI Assistant client', () => {
 
       const stream = observableIntoStream(response$);
 
-      dataHandler = jest.fn();
+      dataHandler = vi.fn();
 
       stream.on('data', dataHandler);
 
@@ -1459,7 +1462,7 @@ describe('Observability AI Assistant client', () => {
   describe('when the function response exceeds the max no of tokens for one', () => {
     let stream: Readable;
 
-    let dataHandler: jest.Mock;
+    let dataHandler: Mock;
 
     beforeEach(async () => {
       client = createClient();
@@ -1505,7 +1508,7 @@ describe('Observability AI Assistant client', () => {
 
       stream = observableIntoStream(response$);
 
-      dataHandler = jest.fn();
+      dataHandler = vi.fn();
 
       stream.on('data', dataHandler);
 
@@ -1550,7 +1553,7 @@ describe('Observability AI Assistant client', () => {
 
   it('Adds the default language to the system prompt', async () => {
     client = createClient();
-    const chatSpy = jest.spyOn(client, 'chat');
+    const chatSpy = vi.spyOn(client, 'chat');
 
     inferenceClientMock.chatComplete.mockImplementationOnce(() => {
       return new Observable((subscriber) => {
@@ -1780,9 +1783,9 @@ describe('Observability AI Assistant client', () => {
   });
   describe('space-aware links', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
-      (functionClientMock as any).registerInstruction = jest.fn();
+      (functionClientMock as any).registerInstruction = vi.fn();
       inferenceClientMock.chatComplete.mockImplementation(
         () => new Observable((sub) => sub.complete())
       );

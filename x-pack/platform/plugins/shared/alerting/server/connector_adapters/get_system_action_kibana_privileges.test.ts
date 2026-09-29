@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import { ConnectorAdapterRegistry } from './connector_adapter_registry';
 import { getSystemActionKibanaPrivileges } from './get_system_action_kibana_privileges';
@@ -14,7 +16,7 @@ describe('getSystemActionKibanaPrivileges', () => {
   const connectorAdapter: ConnectorAdapter = {
     connectorTypeId: '.test',
     ruleActionParamsSchema: schema.object({ foo: schema.string() }),
-    buildActionParams: jest.fn(),
+    buildActionParams: vi.fn(),
     getKibanaPrivileges: (args) => [`my-priv:${args.consumer}`],
   };
 

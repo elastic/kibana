@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { tabifyDocs, flattenHit } from './tabify_docs';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { estypes } from '@elastic/elasticsearch';
@@ -16,7 +18,7 @@ import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/da
 
 class MockFieldFormatter {}
 
-fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
+fieldFormatsMock.getInstance = vi.fn().mockImplementation(() => new MockFieldFormatter()) as any;
 
 // helper function to create index patterns
 function create(id: string) {

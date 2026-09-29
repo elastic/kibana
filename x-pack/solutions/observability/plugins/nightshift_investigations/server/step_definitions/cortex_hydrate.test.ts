@@ -5,29 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import { hydrateCortexWorkspace } from '../cortex/register_cortex';
 import { cortexHydrateStepDefinition } from './cortex_hydrate';
 
-jest.mock('../cortex/register_cortex', () => ({
-  hydrateCortexWorkspace: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../cortex/register_cortex', () => {
+      const mocked = {
+      hydrateCortexWorkspace: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('cortexHydrateStepDefinition', () => {
-  const esClient = { search: jest.fn() };
-  const getScopedEsClient = jest.fn().mockReturnValue(esClient);
-  const mockSession = { writeFiles: jest.fn(), mkdirs: jest.fn() } as unknown as SandboxSession;
+  const esClient = { search: vi.fn() };
+  const getScopedEsClient = vi.fn().mockReturnValue(esClient);
+  const mockSession = { writeFiles: vi.fn(), mkdirs: vi.fn() } as unknown as SandboxSession;
   const analytics = coreMock.createSetup().analytics;
 
   const makeSandboxStart = (): SandboxPluginStart => ({
-    getSession: jest.fn(),
-    getSessionForSpace: jest.fn().mockReturnValue(mockSession),
+    getSession: vi.fn(),
+    getSessionForSpace: vi.fn().mockReturnValue(mockSession),
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getScopedEsClient.mockReturnValue(esClient);
   });
 
@@ -36,11 +41,11 @@ describe('cortexHydrateStepDefinition', () => {
       input: { conversation_id: conversationId },
       rawInput: { conversation_id: conversationId },
       contextManager: {
-        getContext: jest.fn().mockReturnValue({ workflow: { spaceId } }),
-        getFakeRequest: jest.fn(),
+        getContext: vi.fn().mockReturnValue({ workflow: { spaceId } }),
+        getFakeRequest: vi.fn(),
         getScopedEsClient,
-        renderInputTemplate: jest.fn((val) => val),
-        callKibanaApi: jest.fn(),
+        renderInputTemplate: vi.fn((val) => val),
+        callKibanaApi: vi.fn(),
       },
       logger: loggerMock.create(),
       abortSignal: new AbortController().signal,

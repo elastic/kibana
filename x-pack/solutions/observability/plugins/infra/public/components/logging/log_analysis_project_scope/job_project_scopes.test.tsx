@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { screen, waitForElementToBeRemoved } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -13,9 +16,9 @@ import { MlCpsCapabilityContext } from '../../../hooks/use_infra_ml_cps';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { JobProjectScopes, type JobProjectScopeItem } from './job_project_scopes';
 
-jest.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_kibana');
 
-const useKibanaContextForPluginMock = useKibanaContextForPlugin as jest.MockedFunction<
+const useKibanaContextForPluginMock = useKibanaContextForPlugin as MockedFunction<
   typeof useKibanaContextForPlugin
 >;
 
@@ -23,12 +26,12 @@ const asProject = (id: string) => ({ _id: id } as CPSProject);
 
 const createCpsManager = ({ hasLinkedProjects = true }: { hasLinkedProjects?: boolean } = {}) =>
   ({
-    whenReady: jest.fn().mockResolvedValue(undefined),
-    fetchProjects: jest
+    whenReady: vi.fn().mockResolvedValue(undefined),
+    fetchProjects: vi
       .fn()
       .mockResolvedValue({ origin: asProject('origin'), linkedProjects: [asProject('linked')] }),
-    getTotalProjectCount: jest.fn().mockReturnValue(3),
-    hasLinkedProjects: jest.fn().mockReturnValue(hasLinkedProjects),
+    getTotalProjectCount: vi.fn().mockReturnValue(3),
+    hasLinkedProjects: vi.fn().mockReturnValue(hasLinkedProjects),
   } as unknown as ICPSManager);
 
 const renderJobProjectScopes = (
@@ -41,7 +44,7 @@ const renderJobProjectScopes = (
   useKibanaContextForPluginMock.mockReturnValue({
     services: {
       cps: { isTierEligible, cpsManager },
-      featureFlags: { useBooleanValue: jest.fn().mockReturnValue(true) },
+      featureFlags: { useBooleanValue: vi.fn().mockReturnValue(true) },
     },
   } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
 

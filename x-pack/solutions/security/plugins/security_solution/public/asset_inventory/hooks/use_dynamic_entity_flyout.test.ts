@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useDynamicEntityFlyout } from './use_dynamic_entity_flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -14,61 +17,76 @@ import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enab
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../flyout/shared/hooks/use_on_expandable_flyout_close', () => ({
-  useOnExpandableFlyoutClose: jest.fn(),
-}));
+vi.mock('../../flyout/shared/hooks/use_on_expandable_flyout_close', () => {
+      const mocked = {
+      useOnExpandableFlyoutClose: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: jest.fn(),
-}));
+vi.mock('../../common/hooks/use_is_new_flyout_enabled', () => {
+      const mocked = {
+      useIsNewFlyoutEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../flyout_v2/use_flyout_api', () => ({
-  useFlyoutApi: jest.fn(),
-}));
+vi.mock('../../flyout_v2/use_flyout_api', () => {
+      const mocked = {
+      useFlyoutApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useDynamicEntityFlyout', () => {
-  let openFlyoutMock: jest.Mock;
-  let closeFlyoutMock: jest.Mock;
-  let openHostFlyoutMock: jest.Mock;
-  let openUserFlyoutMock: jest.Mock;
-  let openServiceFlyoutMock: jest.Mock;
-  let openGenericEntityFlyoutMock: jest.Mock;
-  let toastsMock: { addDanger: jest.Mock };
-  let onFlyoutCloseMock: jest.Mock;
+  let openFlyoutMock: Mock;
+  let closeFlyoutMock: Mock;
+  let openHostFlyoutMock: Mock;
+  let openUserFlyoutMock: Mock;
+  let openServiceFlyoutMock: Mock;
+  let openGenericEntityFlyoutMock: Mock;
+  let toastsMock: { addDanger: Mock };
+  let onFlyoutCloseMock: Mock;
 
   beforeEach(() => {
-    openFlyoutMock = jest.fn();
-    closeFlyoutMock = jest.fn();
-    openHostFlyoutMock = jest.fn();
-    openUserFlyoutMock = jest.fn();
-    openServiceFlyoutMock = jest.fn();
-    openGenericEntityFlyoutMock = jest.fn();
-    toastsMock = { addDanger: jest.fn() };
-    onFlyoutCloseMock = jest.fn();
+    openFlyoutMock = vi.fn();
+    closeFlyoutMock = vi.fn();
+    openHostFlyoutMock = vi.fn();
+    openUserFlyoutMock = vi.fn();
+    openServiceFlyoutMock = vi.fn();
+    openGenericEntityFlyoutMock = vi.fn();
+    toastsMock = { addDanger: vi.fn() };
+    onFlyoutCloseMock = vi.fn();
 
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
+    (useExpandableFlyoutApi as Mock).mockReturnValue({
       openFlyout: openFlyoutMock,
       closeFlyout: closeFlyoutMock,
     });
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
-    (useFlyoutApi as jest.Mock).mockReturnValue({
+    (useIsNewFlyoutEnabled as Mock).mockReturnValue(true);
+    (useFlyoutApi as Mock).mockReturnValue({
       openHostFlyout: openHostFlyoutMock,
       openUserFlyout: openUserFlyoutMock,
       openServiceFlyout: openServiceFlyoutMock,
       openGenericEntityFlyout: openGenericEntityFlyoutMock,
     });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: { notifications: { toasts: toastsMock } },
     });
-    (useOnExpandableFlyoutClose as jest.Mock).mockImplementation(({ callback }) => callback);
+    (useOnExpandableFlyoutClose as Mock).mockImplementation(({ callback }) => callback);
   });
 
   it('should open the generic entity flyout for a generic entity', () => {
@@ -168,7 +186,7 @@ describe('useDynamicEntityFlyout', () => {
   });
 
   it('should open the legacy generic entity panel when the new flyout is disabled', () => {
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false);
+    (useIsNewFlyoutEnabled as Mock).mockReturnValue(false);
 
     const { result } = renderHook(() =>
       useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })

@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 import { ALERT_END, ALERT_EVALUATION_THRESHOLD, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: () => ({
-    euiTheme: {
-      colors: { danger: '#BD271E' },
-    },
-  }),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiTheme: () => ({
+        euiTheme: {
+          colors: { danger: '#BD271E' },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockAlert = (overrides: Partial<Record<string, unknown>> = {}): TopAlert =>
   ({

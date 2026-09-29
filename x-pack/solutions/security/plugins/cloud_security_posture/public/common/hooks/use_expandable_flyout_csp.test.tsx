@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -12,9 +14,9 @@ import type { CspSecuritySolutionContext, OpenFindingInSystemFlyoutHandle } from
 import { SecuritySolutionContext } from '../../application/security_solution_context';
 import { useExpandableFlyoutCsp } from './use_expandable_flyout_csp';
 
-const openFlyout = jest.fn();
-const closeFlyout = jest.fn();
-const useOnExpandableFlyoutClose = jest.fn();
+const openFlyout = vi.fn();
+const closeFlyout = vi.fn();
+const useOnExpandableFlyoutClose = vi.fn();
 
 const buildRecord = (source: Record<string, unknown>) =>
   ({ raw: { _source: source } } as unknown as DataTableRecord);
@@ -24,7 +26,7 @@ const buildFlyoutHandle = () => {
   const onClose = new Promise<void>((resolve) => {
     resolveClose = resolve;
   });
-  const handle: OpenFindingInSystemFlyoutHandle = { close: jest.fn(), onClose };
+  const handle: OpenFindingInSystemFlyoutHandle = { close: vi.fn(), onClose };
   return { handle, resolveClose };
 };
 
@@ -33,8 +35,8 @@ const renderCspFlyoutHook = (
   flyoutType?: 'misconfiguration' | 'vulnerability'
 ) => {
   const context: CspSecuritySolutionContext = {
-    getFiltersGlobalComponent: jest.fn(),
-    getSpyRouteComponent: jest.fn(),
+    getFiltersGlobalComponent: vi.fn(),
+    getSpyRouteComponent: vi.fn(),
     useExpandableFlyoutApi: () =>
       ({
         openFlyout,
@@ -55,7 +57,7 @@ const renderCspFlyoutHook = (
 
 describe('useExpandableFlyoutCsp', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a null onExpandDocClick when the expandable flyout API is unavailable', () => {
@@ -94,11 +96,11 @@ describe('useExpandableFlyoutCsp', () => {
   describe('system flyout (new flyout system enabled)', () => {
     it('opens a misconfiguration finding in the system flyout instead of the legacy panel', () => {
       const { handle } = buildFlyoutHandle();
-      const openMisconfigurationFinding = jest.fn().mockReturnValue(handle);
+      const openMisconfigurationFinding = vi.fn().mockReturnValue(handle);
       const { result } = renderCspFlyoutHook({
         useOpenFindingInSystemFlyout: () => ({
           openMisconfigurationFinding,
-          openVulnerabilityFinding: jest.fn(),
+          openVulnerabilityFinding: vi.fn(),
         }),
       });
       const record = buildRecord({ resource: { id: 'resource-1' }, rule: { id: 'rule-1' } });
@@ -116,11 +118,11 @@ describe('useExpandableFlyoutCsp', () => {
 
     it('opens a vulnerability finding in the system flyout instead of the legacy panel', () => {
       const { handle } = buildFlyoutHandle();
-      const openVulnerabilityFinding = jest.fn().mockReturnValue(handle);
+      const openVulnerabilityFinding = vi.fn().mockReturnValue(handle);
       const { result } = renderCspFlyoutHook(
         {
           useOpenFindingInSystemFlyout: () => ({
-            openMisconfigurationFinding: jest.fn(),
+            openMisconfigurationFinding: vi.fn(),
             openVulnerabilityFinding,
           }),
         },
@@ -149,11 +151,11 @@ describe('useExpandableFlyoutCsp', () => {
 
     it('closes the active system flyout (not the legacy flyout) when deselecting', () => {
       const { handle } = buildFlyoutHandle();
-      const openMisconfigurationFinding = jest.fn().mockReturnValue(handle);
+      const openMisconfigurationFinding = vi.fn().mockReturnValue(handle);
       const { result } = renderCspFlyoutHook({
         useOpenFindingInSystemFlyout: () => ({
           openMisconfigurationFinding,
-          openVulnerabilityFinding: jest.fn(),
+          openVulnerabilityFinding: vi.fn(),
         }),
       });
       const record = buildRecord({ resource: { id: 'resource-1' }, rule: { id: 'rule-1' } });
@@ -176,14 +178,14 @@ describe('useExpandableFlyoutCsp', () => {
       // switching findings must only swap which handle we track, never call `.close()`.
       const { handle: handleA } = buildFlyoutHandle();
       const { handle: handleB } = buildFlyoutHandle();
-      const openMisconfigurationFinding = jest
+      const openMisconfigurationFinding = vi
         .fn()
         .mockReturnValueOnce(handleA)
         .mockReturnValueOnce(handleB);
       const { result } = renderCspFlyoutHook({
         useOpenFindingInSystemFlyout: () => ({
           openMisconfigurationFinding,
-          openVulnerabilityFinding: jest.fn(),
+          openVulnerabilityFinding: vi.fn(),
         }),
       });
 
@@ -205,14 +207,14 @@ describe('useExpandableFlyoutCsp', () => {
     it('closes the current (not a stale) system flyout when deselecting after switching rows', () => {
       const { handle: handleA } = buildFlyoutHandle();
       const { handle: handleB } = buildFlyoutHandle();
-      const openMisconfigurationFinding = jest
+      const openMisconfigurationFinding = vi
         .fn()
         .mockReturnValueOnce(handleA)
         .mockReturnValueOnce(handleB);
       const { result } = renderCspFlyoutHook({
         useOpenFindingInSystemFlyout: () => ({
           openMisconfigurationFinding,
-          openVulnerabilityFinding: jest.fn(),
+          openVulnerabilityFinding: vi.fn(),
         }),
       });
 
@@ -237,14 +239,14 @@ describe('useExpandableFlyoutCsp', () => {
     it('ignores a stale onClose from a replaced finding (does not clobber the current one)', async () => {
       const { handle: handleA, resolveClose: resolveCloseA } = buildFlyoutHandle();
       const { handle: handleB } = buildFlyoutHandle();
-      const openMisconfigurationFinding = jest
+      const openMisconfigurationFinding = vi
         .fn()
         .mockReturnValueOnce(handleA)
         .mockReturnValueOnce(handleB);
       const { result } = renderCspFlyoutHook({
         useOpenFindingInSystemFlyout: () => ({
           openMisconfigurationFinding,
-          openVulnerabilityFinding: jest.fn(),
+          openVulnerabilityFinding: vi.fn(),
         }),
       });
 
@@ -271,11 +273,11 @@ describe('useExpandableFlyoutCsp', () => {
 
     it('resets the expanded doc when the system flyout is closed by the user', async () => {
       const { handle, resolveClose } = buildFlyoutHandle();
-      const openMisconfigurationFinding = jest.fn().mockReturnValue(handle);
+      const openMisconfigurationFinding = vi.fn().mockReturnValue(handle);
       const { result } = renderCspFlyoutHook({
         useOpenFindingInSystemFlyout: () => ({
           openMisconfigurationFinding,
-          openVulnerabilityFinding: jest.fn(),
+          openVulnerabilityFinding: vi.fn(),
         }),
       });
       const record = buildRecord({ resource: { id: 'resource-1' }, rule: { id: 'rule-1' } });

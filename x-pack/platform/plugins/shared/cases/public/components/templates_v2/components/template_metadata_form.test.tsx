@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,9 +14,12 @@ import { renderWithTestingProviders } from '../../../common/mock';
 import { TemplateMetadataForm } from './template_metadata_form';
 import type { TemplateMetadata } from '../utils/template_metadata';
 
-jest.mock('../hooks/use_get_template_tags', () => ({
-  useGetTemplateTags: () => ({ data: ['existing-tag'] }),
-}));
+vi.mock('../hooks/use_get_template_tags', () => {
+      const mocked = {
+      useGetTemplateTags: () => ({ data: ['existing-tag'] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TemplateMetadataForm', () => {
   const baseMetadata: TemplateMetadata = {
@@ -26,11 +31,11 @@ describe('TemplateMetadataForm', () => {
   const defaultProps = {
     metadata: baseMetadata,
     errors: {},
-    onChange: jest.fn(),
+    onChange: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the description and tags inputs with the current values', () => {
@@ -56,7 +61,7 @@ describe('TemplateMetadataForm', () => {
   });
 
   it('adds a newly created tag to the metadata', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderWithTestingProviders(<TemplateMetadataForm {...defaultProps} onChange={onChange} />);
 
     const tagsInput = screen.getByTestId('comboBoxSearchInput');

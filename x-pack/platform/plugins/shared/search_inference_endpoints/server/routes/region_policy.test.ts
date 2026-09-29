@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { ROUTE_VERSIONS } from '../../common/constants';
@@ -23,7 +26,7 @@ const mockPolicy = {
 
 const mockEsClient = {
   transport: {
-    request: jest.fn(),
+    request: vi.fn(),
   },
 };
 
@@ -36,13 +39,13 @@ const mockCore = {
 describe('Region Policy Routes', () => {
   const mockLogger = loggingSystemMock.createLogger().get();
   let mockRouter: MockRouter;
-  let context: jest.Mocked<RequestHandlerContext>;
+  let context: Mocked<RequestHandlerContext>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     context = {
       core: Promise.resolve(mockCore),
-    } as unknown as jest.Mocked<RequestHandlerContext>;
+    } as unknown as Mocked<RequestHandlerContext>;
   });
 
   describe('GET /internal/search_inference_endpoints/region_policy', () => {

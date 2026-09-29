@@ -5,30 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { render, screen } from '@testing-library/react';
 import { QueryRulesSets } from './query_rules_sets';
 
-jest.mock('../../hooks/use_fetch_query_rules_sets', () => ({
-  useFetchQueryRulesSets: () => ({
-    data: {
-      data: [
-        {
-          ruleset_id: 'Query Rule Set 1',
-          rule_total_count: 2,
+vi.mock('../../hooks/use_fetch_query_rules_sets', () => {
+      const mocked = {
+      useFetchQueryRulesSets: () => ({
+        data: {
+          data: [
+            {
+              ruleset_id: 'Query Rule Set 1',
+              rule_total_count: 2,
+            },
+            {
+              ruleset_id: 'Query Rule Set 2',
+              rule_total_count: 3,
+            },
+          ],
+          _meta: { pageIndex: 0, pageSize: 10, totalItemCount: 2 },
         },
-        {
-          ruleset_id: 'Query Rule Set 2',
-          rule_total_count: 3,
-        },
-      ],
-      _meta: { pageIndex: 0, pageSize: 10, totalItemCount: 2 },
-    },
-    isLoading: false,
-    isError: false,
-  }),
-}));
+        isLoading: false,
+        isError: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Search Query Rules Sets list', () => {
   it('should render the list with query rule sets', () => {

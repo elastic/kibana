@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { isWithinCurrentDate } from './is_within_current_date';
 
 describe('isWithinCurrentDate', () => {
   beforeEach(() => {
     // Thu, 19 Jul 2001 17:39:39 GMT
-    Date.now = jest.fn(() => 995564379100);
+    Date.now = vi.fn(() => 995564379100);
   });
 
   it('returns true for timespan within current date', () => {

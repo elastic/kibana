@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
 import type { IndicesListProps } from './indices_list';
@@ -32,7 +34,7 @@ const similarIndices = [
 describe('IndicesList', () => {
   const commonProps: Omit<IndicesListProps, 'query'> = {
     indices,
-    isExactMatch: jest.fn(() => false),
+    isExactMatch: vi.fn(() => false),
   };
 
   afterEach(() => {

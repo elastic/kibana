@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import Boom from '@hapi/boom';
 
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
@@ -35,7 +38,7 @@ describe('Get service account route', () => {
   ) {
     return coreMock.createCustomRequestHandlerContext({
       core: coreMock.createRequestHandlerContext(),
-      licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
+      licensing: { license: { check: vi.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
 
@@ -67,7 +70,7 @@ describe('Get service account route', () => {
     return {
       routeConfig: routeConfig as RouteConfig<any, any, any, 'get'>,
       routeHandler: handler as RequestHandler<any, any, any, any>,
-      serviceAccounts: serviceAccountsMock as jest.MockedObjectDeep<ServiceAccountsServiceStart>,
+      serviceAccounts: serviceAccountsMock as Mocked<ServiceAccountsServiceStart>,
     };
   }
 

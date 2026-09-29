@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { ID, useNetworkDetails } from '.';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 
-jest.mock('../../../../common/containers/use_search_strategy', () => ({
-  useSearchStrategy: jest.fn(),
-}));
-const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
-const mockSearch = jest.fn();
+vi.mock('../../../../common/containers/use_search_strategy', () => {
+      const mocked = {
+      useSearchStrategy: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockUseSearchStrategy = useSearchStrategy as Mock;
+const mockSearch = vi.fn();
 
 const defaultProps = {
   id: ID,
@@ -25,14 +31,14 @@ const defaultProps = {
 
 describe('useNetworkDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseSearchStrategy.mockReturnValue({
       loading: false,
       result: {
         networkDetails: {},
       },
       search: mockSearch,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       inspect: {},
     });
   });

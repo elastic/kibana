@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux-v7';
@@ -22,13 +24,13 @@ import type { ComputedData } from '../../../../entities/workflows/store/workflow
 import type { StepInfo } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import { createStepInfo } from '../../../../shared/test_utils';
 
-jest.mock('@kbn/monaco', () => {
-  const actualMonaco = jest.requireActual('@kbn/monaco');
+vi.mock('@kbn/monaco', async () => {
+  const actualMonaco = (await vi.importActual('@kbn/monaco'));
   return {
     ...actualMonaco,
     monaco: {
       ...actualMonaco.monaco,
-      Range: jest.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
+      Range: vi.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
         startLineNumber: startLine,
         startColumn: startCol,
         endLineNumber: endLine,
@@ -38,11 +40,11 @@ jest.mock('@kbn/monaco', () => {
   };
 });
 
-jest.mock('@elastic/eui', () => {
-  const actualEui = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actualEui = (await vi.importActual('@elastic/eui'));
   return {
     ...actualEui,
-    useEuiTheme: jest.fn(() => ({
+    useEuiTheme: vi.fn(() => ({
       euiTheme: {
         colors: {
           vis: {
@@ -51,24 +53,27 @@ jest.mock('@elastic/eui', () => {
         },
       },
     })),
-    useEuiShadow: jest.fn(() => 'box-shadow: 0 1px 5px rgba(0,0,0,0.1);'),
-    transparentize: jest.fn((color: string, opacity: number) => `${color}${opacity}`),
+    useEuiShadow: vi.fn(() => 'box-shadow: 0 1px 5px rgba(0,0,0,0.1);'),
+    transparentize: vi.fn((color: string, opacity: number) => `${color}${opacity}`),
   };
 });
 
-jest.mock('@emotion/css', () => ({
-  css: jest.fn(() => 'mock-block-class-name'),
-}));
+vi.mock('@emotion/css', () => {
+      const mocked = {
+      css: vi.fn(() => 'mock-block-class-name'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockEditor = () => {
   const decorationsCollection = {
-    clear: jest.fn(),
-    set: jest.fn(),
+    clear: vi.fn(),
+    set: vi.fn(),
   };
 
   return {
     editor: {
-      createDecorationsCollection: jest.fn(() => decorationsCollection),
+      createDecorationsCollection: vi.fn(() => decorationsCollection),
     } as unknown as monaco.editor.IStandaloneCodeEditor,
     decorationsCollection,
   };
@@ -105,7 +110,7 @@ const renderHookWithProviders = (
 
 describe('useFocusedStepDecoration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('draws a highlight box over the whole triggers block when cursor is on a trigger line', () => {

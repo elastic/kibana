@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   assertCanPerformMonitorBulkActionInAllSpaces,
   privateLocationCoversAllMonitorSpaces,
@@ -209,8 +211,8 @@ describe('validateMonitorPrivateLocationSpaces', () => {
 
 describe('assertCanPerformMonitorBulkActionInAllSpaces', () => {
   const createRouteContext = (hasAllRequested: boolean) => {
-    const checkSavedObjectsPrivileges = jest.fn().mockResolvedValue({ hasAllRequested });
-    const forbidden = jest.fn(({ body }) => ({ status: 403, body }));
+    const checkSavedObjectsPrivileges = vi.fn().mockResolvedValue({ hasAllRequested });
+    const forbidden = vi.fn(({ body }) => ({ status: 403, body }));
 
     return {
       routeContext: {
@@ -220,7 +222,7 @@ describe('assertCanPerformMonitorBulkActionInAllSpaces', () => {
         server: {
           security: {
             authz: {
-              checkSavedObjectsPrivilegesWithRequest: jest
+              checkSavedObjectsPrivilegesWithRequest: vi
                 .fn()
                 .mockReturnValue(checkSavedObjectsPrivileges),
             },

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getRuleHealthColor, getRuleStatusMessage } from './rule_status_helpers';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { RuleTableItem } from '../../types';
@@ -16,9 +19,12 @@ import {
   rulesStatusesTranslationsMapping,
 } from '../../application/sections/rules_list/translations';
 
-jest.mock('../get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockTheme = {
   colors: {
@@ -76,7 +82,7 @@ const licenseErrorRule = {
 } as RuleTableItem;
 
 beforeEach(() => {
-  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+  (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
 });
 
 describe('getRuleHealthColor', () => {
@@ -84,7 +90,7 @@ describe('getRuleHealthColor', () => {
     let color = getRuleHealthColor(mockRule, mockTheme);
     expect(color).toEqual(mockTheme.colors.success);
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
 
     color = getRuleHealthColor(mockRule, mockTheme);
     expect(color).toEqual(mockTheme.colors.success);
@@ -94,7 +100,7 @@ describe('getRuleHealthColor', () => {
     let color = getRuleHealthColor(warningRule, mockTheme);
     expect(color).toEqual(mockTheme.colors.warning);
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
 
     color = getRuleHealthColor(warningRule, mockTheme);
     expect(color).toEqual(mockTheme.colors.warning);
@@ -104,7 +110,7 @@ describe('getRuleHealthColor', () => {
     let color = getRuleHealthColor(failedRule, mockTheme);
     expect(color).toEqual(mockTheme.colors.danger);
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
 
     color = getRuleHealthColor(failedRule, mockTheme);
     expect(color).toEqual(mockTheme.colors.danger);
@@ -121,7 +127,7 @@ describe('getRuleStatusMessage', () => {
     });
     expect(statusMessage).toEqual('Succeeded');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
     statusMessage = getRuleStatusMessage({
       rule: mockRule,
       licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
@@ -140,7 +146,7 @@ describe('getRuleStatusMessage', () => {
     });
     expect(statusMessage).toEqual('Warning');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
     statusMessage = getRuleStatusMessage({
       rule: warningRule,
       licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
@@ -159,7 +165,7 @@ describe('getRuleStatusMessage', () => {
     });
     expect(statusMessage).toEqual('Failed');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
     statusMessage = getRuleStatusMessage({
       rule: failedRule,
       licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
@@ -178,7 +184,7 @@ describe('getRuleStatusMessage', () => {
     });
     expect(statusMessage).toEqual('License Error');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
     statusMessage = getRuleStatusMessage({
       rule: licenseErrorRule,
       licenseErrorText: ALERT_STATUS_LICENSE_ERROR,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -18,20 +21,20 @@ import {
 
 // The hooks read the space settings service off the shared services context;
 // mock the accessor so we can wire in per-test service stubs.
-jest.mock('./use_agent_builder_service');
+vi.mock('./use_agent_builder_service');
 // `useEffectiveSpaceDefaultAgent` cross-checks against the agents list and the
 // user's privileges; mock those sibling hooks (the other describes here don't
 // use them, so this is inert for them).
-jest.mock('./agents/use_agents');
-jest.mock('./use_ui_privileges');
+vi.mock('./agents/use_agents');
+vi.mock('./use_ui_privileges');
 
-const { useAgentBuilderServices } = jest.requireMock('./use_agent_builder_service');
-const { useAgentBuilderAgents } = jest.requireMock('./agents/use_agents');
-const { useUiPrivileges } = jest.requireMock('./use_ui_privileges');
+const { useAgentBuilderServices } = (await vi.importMock('./use_agent_builder_service'));
+const { useAgentBuilderAgents } = (await vi.importMock('./agents/use_agents'));
+const { useUiPrivileges } = (await vi.importMock('./use_ui_privileges'));
 
-const buildServices = (overrides?: { get?: jest.Mock; set?: jest.Mock }) => {
-  const get = overrides?.get ?? jest.fn().mockResolvedValue({ default_agent_id: null });
-  const set = overrides?.set ?? jest.fn().mockResolvedValue({ default_agent_id: null });
+const buildServices = (overrides?: { get?: Mock; set?: Mock }) => {
+  const get = overrides?.get ?? vi.fn().mockResolvedValue({ default_agent_id: null });
+  const set = overrides?.set ?? vi.fn().mockResolvedValue({ default_agent_id: null });
   useAgentBuilderServices.mockReturnValue({
     spaceSettingsService: { get, set },
   });
@@ -51,7 +54,7 @@ describe('useSpaceDefaultAgent', () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
     // Disable retries so a failed queryFn surfaces immediately instead of
     // hanging tests through react-query's default retry policy.
@@ -60,7 +63,7 @@ describe('useSpaceDefaultAgent', () => {
 
   it('returns the space assigned agent id from the service', async () => {
     const { get } = buildServices({
-      get: jest.fn().mockResolvedValue({ default_agent_id: 'siemens-agent' }),
+      get: vi.fn().mockResolvedValue({ default_agent_id: 'siemens-agent' }),
     });
 
     const { result } = renderHook(() => useSpaceDefaultAgent(), {
@@ -75,7 +78,7 @@ describe('useSpaceDefaultAgent', () => {
   });
 
   it('returns null when the service reports no assignment', async () => {
-    buildServices({ get: jest.fn().mockResolvedValue({ default_agent_id: null }) });
+    buildServices({ get: vi.fn().mockResolvedValue({ default_agent_id: null }) });
 
     const { result } = renderHook(() => useSpaceDefaultAgent(), {
       wrapper: withProviders(queryClient),
@@ -91,7 +94,7 @@ describe('useSetSpaceDefaultAgent', () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   });
@@ -103,13 +106,13 @@ describe('useSetSpaceDefaultAgent', () => {
     const agentProfilesKey = queryKeys.agentProfiles.all;
     queryClient.setQueryData(spaceSettingsKey, { default_agent_id: null });
     queryClient.setQueryData(agentProfilesKey, ['stub']);
-    jest.spyOn(queryClient, 'invalidateQueries');
+    vi.spyOn(queryClient, 'invalidateQueries');
 
     const { set } = buildServices({
-      set: jest.fn().mockResolvedValue({ default_agent_id: 'siemens-agent' }),
+      set: vi.fn().mockResolvedValue({ default_agent_id: 'siemens-agent' }),
     });
 
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const { result } = renderHook(() => useSetSpaceDefaultAgent({ onSuccess }), {
       wrapper: withProviders(queryClient, 'default'),
     });
@@ -126,9 +129,9 @@ describe('useSetSpaceDefaultAgent', () => {
 
   it('surfaces service errors through the onError callback', async () => {
     const failure = new Error('nope');
-    buildServices({ set: jest.fn().mockRejectedValue(failure) });
+    buildServices({ set: vi.fn().mockRejectedValue(failure) });
 
-    const onError = jest.fn();
+    const onError = vi.fn();
     const { result } = renderHook(() => useSetSpaceDefaultAgent({ onError }), {
       wrapper: withProviders(queryClient),
     });
@@ -155,7 +158,7 @@ describe('useEffectiveSpaceDefaultAgent', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     // Safe defaults; individual tests override.
@@ -164,7 +167,7 @@ describe('useEffectiveSpaceDefaultAgent', () => {
   });
 
   it('resolves and restricts a non-admin when the assigned agent is visible', async () => {
-    buildServices({ get: jest.fn().mockResolvedValue({ default_agent_id: 'siemens-agent' }) });
+    buildServices({ get: vi.fn().mockResolvedValue({ default_agent_id: 'siemens-agent' }) });
     setupAgents([{ id: 'siemens-agent' }, { id: 'other-agent' }]);
     setupPrivileges(false);
 
@@ -178,7 +181,7 @@ describe('useEffectiveSpaceDefaultAgent', () => {
   });
 
   it('resolves but does not restrict an admin', async () => {
-    buildServices({ get: jest.fn().mockResolvedValue({ default_agent_id: 'siemens-agent' }) });
+    buildServices({ get: vi.fn().mockResolvedValue({ default_agent_id: 'siemens-agent' }) });
     setupAgents([{ id: 'siemens-agent' }]);
     setupPrivileges(true);
 
@@ -193,7 +196,7 @@ describe('useEffectiveSpaceDefaultAgent', () => {
 
   it('treats the space as unconfigured when the assigned agent is not in the visible list', async () => {
     // Simulates a deleted / now-private / inaccessible assignment.
-    buildServices({ get: jest.fn().mockResolvedValue({ default_agent_id: 'gone-agent' }) });
+    buildServices({ get: vi.fn().mockResolvedValue({ default_agent_id: 'gone-agent' }) });
     setupAgents([{ id: 'other-agent' }]);
     setupPrivileges(false);
 
@@ -207,7 +210,7 @@ describe('useEffectiveSpaceDefaultAgent', () => {
   });
 
   it('is not ready while the agents list is still loading', async () => {
-    buildServices({ get: jest.fn().mockResolvedValue({ default_agent_id: 'siemens-agent' }) });
+    buildServices({ get: vi.fn().mockResolvedValue({ default_agent_id: 'siemens-agent' }) });
     setupAgents([], false);
     setupPrivileges(false);
 

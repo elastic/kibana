@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import _ from 'lodash';
 import $ from 'jquery';
 import {
@@ -39,7 +41,7 @@ dateHistogramArray.forEach(function (data, i) {
       mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
       mockedSVGElementGetBBox = setSVGElementGetBBox(100);
       mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
-      mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(900);
+      mockWidth = vi.spyOn($.prototype, 'width').mockReturnValue(900);
     });
 
     beforeEach(() => {
@@ -156,22 +158,26 @@ dateHistogramArray.forEach(function (data, i) {
     });
 
     describe('event proxying', function () {
-      test('should only pass the original event object to downstream handlers', function (done) {
-        const event = {};
-        const chart = vis.handler.charts[0];
+      test('should only pass the original event object to downstream handlers', () =>
+          new Promise((resolve, reject) => {
+          const done = Object.assign((error) => (error ? reject(error) : resolve()), { fail: reject });
 
-        const mockEmitter = function () {
-          const args = Array.from(arguments);
-          expect(args.length).toBe(2);
-          expect(args[0]).toBe('click');
-          expect(args[1].data).toBe(event);
-          done();
-        };
+                  const event = {};
+                  const chart = vis.handler.charts[0];
 
-        vis.emit = mockEmitter;
-        vis.handler.enable('click', chart);
-        chart.events.emit('click', event);
-      });
+                  const mockEmitter = function () {
+                    const args = Array.from(arguments);
+                    expect(args.length).toBe(2);
+                    expect(args[0]).toBe('click');
+                    expect(args[1].data).toBe(event);
+                    done();
+                  };
+
+                  vis.emit = mockEmitter;
+                  vis.handler.enable('click', chart);
+                  chart.events.emit('click', event);
+                
+          }));
     });
   });
 });

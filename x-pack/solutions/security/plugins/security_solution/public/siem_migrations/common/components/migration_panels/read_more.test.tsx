@@ -5,24 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MigrationsReadMore } from './read_more';
 import { TestProviders } from '../../../../common/mock';
 
-jest.mock('../../../../common/lib/kibana/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      docLinks: {
-        links: {
-          securitySolution: {
-            siemMigrations: 'https://example.com/docs',
+vi.mock('../../../../common/lib/kibana/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          docLinks: {
+            links: {
+              securitySolution: {
+                siemMigrations: 'https://example.com/docs',
+              },
+            },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MigrationsReadMore', () => {
   it('renders rule-specific data-test-subj', () => {

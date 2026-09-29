@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useCreateRule } from './use_create_rule';
 import { useService, CoreStart } from '@kbn/core-di-browser';
@@ -14,11 +17,11 @@ import { createHookTestProviders, createMockLocators } from '../test_utils/test_
 
 const mockLocators = createMockLocators();
 
-jest.mock('@kbn/core-di-browser');
-jest.mock('../services/rules_api');
+vi.mock('@kbn/core-di-browser');
+vi.mock('../services/rules_api');
 
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
-const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
+const mockUseService = useService as MockedFunction<typeof useService>;
+const mockCoreStart = CoreStart as MockedFunction<typeof CoreStart>;
 
 const mockRuleResponse: RuleResponse = {
   id: 'rule-1',
@@ -50,16 +53,16 @@ const mockCreatePayload: CreateRuleData = {
 const createWrapper = () => createHookTestProviders({ locators: mockLocators });
 
 describe('useCreateRule', () => {
-  const mockCreateRule = jest.fn();
-  const mockDisableRule = jest.fn();
-  const mockAddSuccess = jest.fn();
-  const mockAddError = jest.fn();
-  const mockAddDanger = jest.fn();
-  const mockNavigateToUrl = jest.fn();
-  const mockPrepend = jest.fn((path: string) => path);
+  const mockCreateRule = vi.fn();
+  const mockDisableRule = vi.fn();
+  const mockAddSuccess = vi.fn();
+  const mockAddError = vi.fn();
+  const mockAddDanger = vi.fn();
+  const mockNavigateToUrl = vi.fn();
+  const mockPrepend = vi.fn((path: string) => path);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockCoreStart.mockImplementation((key: string) => key as any);
 
@@ -108,7 +111,7 @@ describe('useCreateRule', () => {
     });
 
     const toast = mockAddSuccess.mock.calls[0][0];
-    const preventDefault = jest.fn();
+    const preventDefault = vi.fn();
     toast.actionProps.primary.onClick({ preventDefault });
     expect(preventDefault).toHaveBeenCalled();
     expect(mockLocators.rulesLocators.navigateSync).toHaveBeenCalledWith({ ruleId: 'rule-1' });
@@ -160,7 +163,7 @@ describe('useCreateRule', () => {
     });
 
     const toast = mockAddDanger.mock.calls[0][0];
-    const preventDefault = jest.fn();
+    const preventDefault = vi.fn();
     toast.actionProps.primary.onClick({ preventDefault });
     expect(preventDefault).toHaveBeenCalled();
     expect(mockLocators.rulesLocators.navigateSync).toHaveBeenCalledWith({ ruleId: 'rule-1' });

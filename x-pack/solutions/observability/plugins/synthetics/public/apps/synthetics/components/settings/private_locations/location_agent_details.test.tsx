@@ -5,23 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LocationAgentDetails } from './location_agent_details';
 import type { AgentStat, LocationAgentStats } from '../../../../../../common/types';
 
-jest.mock('../../../contexts', () => ({
-  useSyntheticsSettingsContext: () => ({ basePath: '' }),
-}));
+vi.mock('../../../contexts', () => {
+      const mocked = {
+      useSyntheticsSettingsContext: () => ({ basePath: '' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks', () => ({
-  useFleetPermissions: () => ({ canReadAgentPolicies: true, canReadAgents: true }),
-}));
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useFleetPermissions: () => ({ canReadAgentPolicies: true, canReadAgents: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({ createHref: () => '/monitors' }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: () => ({ createHref: () => '/monitors' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const agent = (overrides: Partial<AgentStat> = {}): AgentStat => ({
   host: 'agent-a',

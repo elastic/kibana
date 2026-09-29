@@ -5,20 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useExploreActions } from './use_explore_actions';
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: {
-        getUrlForApp: (_appId: string, { path }: { path: string }) =>
-          `/app/securitySolutionUI/${path}`,
-      },
-    },
-  }),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          application: {
+            getUrlForApp: (_appId: string, { path }: { path: string }) =>
+              `/app/securitySolutionUI/${path}`,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createHit = (
   flattened: Record<string, unknown> = {},
@@ -33,15 +38,15 @@ const createHit = (
   } as DataTableRecord);
 
 describe('useExploreActions', () => {
-  const mockClosePopover = jest.fn();
+  const mockClosePopover = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(window, 'open').mockImplementation(() => null);
+    vi.clearAllMocks();
+    vi.spyOn(window, 'open').mockImplementation(() => null);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns one item', () => {

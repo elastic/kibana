@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -22,20 +25,29 @@ import { createStartServicesMock } from '../../mocks';
 
 const mockUseKibanaServices = createStartServicesMock();
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: jest.fn(),
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      useWorkflowsCapabilities: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: () => ({ services: mockUseKibanaServices }),
-}));
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({ services: mockUseKibanaServices }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => ({
-  useWorkflowsBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => {
+      const mocked = {
+      useWorkflowsBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
 >;
 
@@ -48,7 +60,7 @@ const renderWithProviders = (ui: React.ReactElement) =>
 
 describe('WorkflowsPrivilegesWrapper', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render children when the user has read privileges', () => {

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`conditions_table ConditionsTable should render multi item table with and badge correctly 1`] = `
 <EuiFlexGroup

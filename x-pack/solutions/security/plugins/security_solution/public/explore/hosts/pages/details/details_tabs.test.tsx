@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -26,8 +29,8 @@ import { AuthenticationsQueryTabBody, UncommonProcessQueryTabBody } from '../nav
 import { AnomaliesQueryTabBody } from '../../../../common/containers/anomalies/anomalies_query_tab_body';
 import { EventsQueryTabBody } from '../../../../common/components/events_tab';
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana'));
 
   return {
     ...original,
@@ -41,70 +44,80 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../../common/utils/normalize_time_range');
+vi.mock('../../../../common/utils/normalize_time_range');
 
-jest.mock('../../../../common/containers/source', () => ({
-  useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
-}));
+vi.mock('../../../../common/containers/source', () => {
+      const mocked = {
+      useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/containers/use_global_time', () => ({
-  useGlobalTime: jest.fn().mockReturnValue({
-    from: '2020-07-07T08:20:18.966Z',
-    isInitializing: false,
-    to: '2020-07-08T08:20:18.966Z',
-    setQuery: jest.fn(),
-  }),
-}));
+vi.mock('../../../../common/containers/use_global_time', () => {
+      const mocked = {
+      useGlobalTime: vi.fn().mockReturnValue({
+        from: '2020-07-07T08:20:18.966Z',
+        isInitializing: false,
+        to: '2020-07-08T08:20:18.966Z',
+        setQuery: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
-jest.mock('../../../../common/components/search_bar', () => ({
-  SiemSearchBar: () => null,
-}));
-jest.mock('../../../../common/components/query_bar', () => ({
-  QueryBar: () => null,
-}));
+vi.mock('../../../../common/components/search_bar', () => {
+      const mocked = {
+      SiemSearchBar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/components/query_bar', () => {
+      const mocked = {
+      QueryBar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer/polyfilled');
+const mockUseResizeObserver: Mock = useResizeObserver as Mock;
+vi.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
-jest.mock('../../../../common/components/visualization_actions/actions');
-jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
+vi.mock('../../../../common/components/visualization_actions/actions');
+vi.mock('../../../../common/components/visualization_actions/lens_embeddable');
 
-jest.mock('../navigation/authentications_query_tab_body', () => {
-  const original = jest.requireActual('../navigation/authentications_query_tab_body');
+vi.mock('../navigation/authentications_query_tab_body', async () => {
+  const original = (await vi.importActual('../navigation/authentications_query_tab_body'));
   return {
     ...original,
-    AuthenticationsQueryTabBody: jest.fn(() => (
+    AuthenticationsQueryTabBody: vi.fn(() => (
       <div data-test-subj="authentications-query-tab-body">{'AuthenticationsQueryTabBody'}</div>
     )),
   };
 });
-jest.mock('../navigation/uncommon_process_query_tab_body', () => {
-  const original = jest.requireActual('../navigation/uncommon_process_query_tab_body');
+vi.mock('../navigation/uncommon_process_query_tab_body', async () => {
+  const original = (await vi.importActual('../navigation/uncommon_process_query_tab_body'));
   return {
     ...original,
-    UncommonProcessQueryTabBody: jest.fn(() => (
+    UncommonProcessQueryTabBody: vi.fn(() => (
       <div data-test-subj="uncommon-process-query-tab-body">{'UncommonProcessQueryTabBody'}</div>
     )),
   };
 });
-jest.mock('../../../../common/containers/anomalies/anomalies_query_tab_body', () => {
-  const original = jest.requireActual(
-    '../../../../common/containers/anomalies/anomalies_query_tab_body'
-  );
+vi.mock('../../../../common/containers/anomalies/anomalies_query_tab_body', async () => {
+  const original = (await vi.importActual('../../../../common/containers/anomalies/anomalies_query_tab_body'));
   return {
     ...original,
-    AnomaliesQueryTabBody: jest.fn(() => (
+    AnomaliesQueryTabBody: vi.fn(() => (
       <div data-test-subj="anomalies-query-tab-body">{'AnomaliesQueryTabBody'}</div>
     )),
   };
 });
-jest.mock('../../../../common/components/events_tab', () => {
-  const original = jest.requireActual('../../../../common/components/events_tab');
+vi.mock('../../../../common/components/events_tab', async () => {
+  const original = (await vi.importActual('../../../../common/components/events_tab'));
   return {
     ...original,
-    EventsQueryTabBody: jest.fn(() => (
+    EventsQueryTabBody: vi.fn(() => (
       <div data-test-subj="events-query-tab-body">{'EventsQueryTabBody'}</div>
     )),
   };
@@ -119,16 +132,16 @@ const myStore = createMockStore({
   },
 });
 
-const AuthenticationsQueryTabBodyMocked = AuthenticationsQueryTabBody as jest.MockedFunction<
+const AuthenticationsQueryTabBodyMocked = AuthenticationsQueryTabBody as MockedFunction<
   typeof AuthenticationsQueryTabBody
 >;
-const UncommonProcessQueryTabBodyMocked = UncommonProcessQueryTabBody as jest.MockedFunction<
+const UncommonProcessQueryTabBodyMocked = UncommonProcessQueryTabBody as MockedFunction<
   typeof UncommonProcessQueryTabBody
 >;
-const AnomaliesQueryTabBodyMocked = AnomaliesQueryTabBody as jest.MockedFunction<
+const AnomaliesQueryTabBodyMocked = AnomaliesQueryTabBody as MockedFunction<
   typeof AnomaliesQueryTabBody
 >;
-const EventsQueryTabBodyMocked = EventsQueryTabBody as jest.MockedFunction<
+const EventsQueryTabBodyMocked = EventsQueryTabBody as MockedFunction<
   typeof EventsQueryTabBody
 >;
 
@@ -159,7 +172,7 @@ describe('body', () => {
             <HostDetailsTabs
               isInitializing={false}
               detailName={'host-1'}
-              setQuery={jest.fn()}
+              setQuery={vi.fn()}
               hostDetailsPagePath={hostDetailsPagePath}
               indexNames={[]}
               type={HostsType.details}

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,13 +17,16 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useUpdateCompositeSlo } from './use_update_composite_slo';
 import type { CreateCompositeSLOForm } from '../types';
 
-jest.mock('../../../hooks/use_kibana');
-jest.mock('@kbn/react-kibana-mount', () => ({ toMountPoint: (node: unknown) => node }));
+vi.mock('../../../hooks/use_kibana');
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = { toMountPoint: (node: unknown) => node };
+      return { ...mocked, default: mocked };
+    });
 
-const mockPut = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
-const useKibanaMock = useKibana as jest.Mock;
+const mockPut = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
+const useKibanaMock = useKibana as Mock;
 
 function createWrapper(): FC<PropsWithChildren<{}>> {
   const queryClient = new QueryClient({
@@ -44,7 +50,7 @@ const baseForm: CreateCompositeSLOForm = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   useKibanaMock.mockReturnValue({
     services: {
       http: { put: mockPut },

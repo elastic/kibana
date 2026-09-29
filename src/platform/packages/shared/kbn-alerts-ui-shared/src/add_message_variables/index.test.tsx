@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AddMessageVariables } from '.';
@@ -27,7 +29,7 @@ describe('AddMessageVariables', () => {
           },
         ]}
         paramsProperty="foo"
-        onSelectEventHandler={jest.fn()}
+        onSelectEventHandler={vi.fn()}
       />
     );
 
@@ -47,7 +49,7 @@ describe('AddMessageVariables', () => {
           },
         ]}
         paramsProperty="foo"
-        onSelectEventHandler={jest.fn()}
+        onSelectEventHandler={vi.fn()}
       />
     );
 
@@ -66,7 +68,7 @@ describe('AddMessageVariables', () => {
           },
         ]}
         paramsProperty="foo"
-        onSelectEventHandler={jest.fn()}
+        onSelectEventHandler={vi.fn()}
       />
     );
 
@@ -76,7 +78,7 @@ describe('AddMessageVariables', () => {
   });
 
   test('onSelectEventHandler is called with proper action variable', async () => {
-    const onSelectEventHandler = jest.fn();
+    const onSelectEventHandler = vi.fn();
     render(
       <AddMessageVariables
         messageVariables={[
@@ -122,7 +124,7 @@ describe('AddMessageVariables', () => {
           },
         ]}
         paramsProperty="foo"
-        onSelectEventHandler={jest.fn()}
+        onSelectEventHandler={vi.fn()}
       />
     );
 
@@ -146,7 +148,7 @@ describe('AddMessageVariables', () => {
           },
         ]}
         paramsProperty="foo"
-        onSelectEventHandler={jest.fn()}
+        onSelectEventHandler={vi.fn()}
       />
     );
 
@@ -159,7 +161,7 @@ describe('AddMessageVariables', () => {
       <AddMessageVariables
         messageVariables={[]}
         paramsProperty="foo"
-        onSelectEventHandler={jest.fn()}
+        onSelectEventHandler={vi.fn()}
       />
     );
 
@@ -176,7 +178,7 @@ describe('AddMessageVariables', () => {
           },
         ]}
         paramsProperty="foo"
-        onSelectEventHandler={jest.fn()}
+        onSelectEventHandler={vi.fn()}
         showButtonTitle
       />
     );

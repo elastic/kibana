@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { ElasticsearchClient, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { putCriblRoutingPipeline } from './handlers/put_cribl_routing_pipeline';
 
-jest.mock('./handlers/put_cribl_routing_pipeline', () => ({
-  putCriblRoutingPipeline: jest.fn(),
-}));
+vi.mock('./handlers/put_cribl_routing_pipeline', () => {
+      const mocked = {
+      putCriblRoutingPipeline: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const putCriblRoutingPipelineMock = putCriblRoutingPipeline as jest.MockedFunction<
+const putCriblRoutingPipelineMock = putCriblRoutingPipeline as MockedFunction<
   typeof putCriblRoutingPipeline
 >;
 
 const createLogger = (): Logger =>
   ({
-    error: jest.fn(),
-    warn: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
   } as unknown as Logger);
 
 describe('getCriblPackagePolicyPostCreateOrUpdateCallback', () => {

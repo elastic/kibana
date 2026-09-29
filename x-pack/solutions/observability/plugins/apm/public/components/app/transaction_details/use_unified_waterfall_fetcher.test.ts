@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useUnifiedWaterfallFetcher } from './use_unified_waterfall_fetcher';
 import * as useFetcherModule from '../../../hooks/use_fetcher';
 
 describe('useUnifiedWaterfallFetcher', () => {
-  const mockUseFetcher = jest.spyOn(useFetcherModule, 'useFetcher');
+  const mockUseFetcher = vi.spyOn(useFetcherModule, 'useFetcher');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns initial data when fetch has not started', () => {
@@ -21,7 +23,7 @@ describe('useUnifiedWaterfallFetcher', () => {
       data: undefined,
       status: useFetcherModule.FETCH_STATUS.NOT_INITIATED,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { result } = renderHook(() =>
@@ -65,7 +67,7 @@ describe('useUnifiedWaterfallFetcher', () => {
       data: mockData,
       status: useFetcherModule.FETCH_STATUS.SUCCESS,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { result } = renderHook(() =>
@@ -98,7 +100,7 @@ describe('useUnifiedWaterfallFetcher', () => {
       },
       status: useFetcherModule.FETCH_STATUS.SUCCESS,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { result } = renderHook(() =>
@@ -120,7 +122,7 @@ describe('useUnifiedWaterfallFetcher', () => {
       data: undefined,
       status: useFetcherModule.FETCH_STATUS.NOT_INITIATED,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { result } = renderHook(() =>
@@ -140,7 +142,7 @@ describe('useUnifiedWaterfallFetcher', () => {
       data: undefined,
       status: useFetcherModule.FETCH_STATUS.NOT_INITIATED,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderHook(() =>
@@ -154,7 +156,7 @@ describe('useUnifiedWaterfallFetcher', () => {
     expect(mockUseFetcher).toHaveBeenCalled();
 
     const fetcherFn = mockUseFetcher.mock.calls[0][0];
-    const mockCallApmApi = jest.fn();
+    const mockCallApmApi = vi.fn();
 
     const result = fetcherFn(mockCallApmApi, {} as AbortSignal);
 
@@ -167,7 +169,7 @@ describe('useUnifiedWaterfallFetcher', () => {
       data: undefined,
       status: useFetcherModule.FETCH_STATUS.LOADING,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderHook(() =>
@@ -181,7 +183,7 @@ describe('useUnifiedWaterfallFetcher', () => {
     );
 
     const fetcherFn = mockUseFetcher.mock.calls[0][0];
-    const mockCallApmApi = jest.fn().mockResolvedValue({});
+    const mockCallApmApi = vi.fn().mockResolvedValue({});
 
     fetcherFn(mockCallApmApi, {} as AbortSignal);
 
@@ -204,7 +206,7 @@ describe('useUnifiedWaterfallFetcher', () => {
       data: undefined,
       status: useFetcherModule.FETCH_STATUS.NOT_INITIATED,
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderHook(() =>

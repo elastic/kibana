@@ -5,24 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
-jest.mock('../utils/resolve_connector_id', () => ({
-  resolveConnectorId: jest.fn(),
-}));
+vi.mock('../utils/resolve_connector_id', () => {
+      const mocked = {
+      resolveConnectorId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/steps/ai', () => ({
-  AiPromptStepCommonDefinition: {
-    id: 'ai.prompt',
-    inputSchema: {},
-    outputSchema: {},
-  },
-}));
+vi.mock('../../../../common/steps/ai', () => {
+      const mocked = {
+      AiPromptStepCommonDefinition: {
+        id: 'ai.prompt',
+        inputSchema: {},
+        outputSchema: {},
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-extensions/server', () => ({
-  createServerStepDefinition: jest.fn((definition) => definition),
-}));
+vi.mock('@kbn/workflows-extensions/server', () => {
+      const mocked = {
+      createServerStepDefinition: vi.fn((definition) => definition),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { aiPromptStepDefinition } from './step';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
@@ -32,44 +44,44 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { InferenceWorkflowsStartDeps } from '../../../types';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
 
-const mockResolveConnectorId = resolveConnectorId as jest.MockedFunction<typeof resolveConnectorId>;
-const mockCreateServerStepDefinition = createServerStepDefinition as jest.MockedFunction<
+const mockResolveConnectorId = resolveConnectorId as MockedFunction<typeof resolveConnectorId>;
+const mockCreateServerStepDefinition = createServerStepDefinition as MockedFunction<
   typeof createServerStepDefinition
 >;
 
 describe('aiPromptStepDefinition', () => {
-  let mockCoreSetup: jest.Mocked<CoreSetup<InferenceWorkflowsStartDeps>>;
-  let mockInference: jest.Mocked<InferenceServerStart>;
-  let mockContextManager: jest.Mocked<ContextManager>;
+  let mockCoreSetup: Mocked<CoreSetup<InferenceWorkflowsStartDeps>>;
+  let mockInference: Mocked<InferenceServerStart>;
+  let mockContextManager: Mocked<ContextManager>;
   let mockContext: StepHandlerContext<any>;
   let mockChatModel: any;
   let mockRunnable: any;
   let mockAbortController: AbortController;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockAbortController = new AbortController();
 
     mockRunnable = {
-      invoke: jest.fn(),
+      invoke: vi.fn(),
     };
 
     mockChatModel = {
-      invoke: jest.fn(),
-      withStructuredOutput: jest.fn().mockReturnValue(mockRunnable),
+      invoke: vi.fn(),
+      withStructuredOutput: vi.fn().mockReturnValue(mockRunnable),
     };
 
     mockInference = {
-      getChatModel: jest.fn().mockResolvedValue(mockChatModel),
+      getChatModel: vi.fn().mockResolvedValue(mockChatModel),
     } as any;
 
     mockContextManager = {
-      getFakeRequest: jest.fn().mockReturnValue({} as KibanaRequest),
-      getContext: jest.fn(),
-      getScopedEsClient: jest.fn(),
-      renderInputTemplate: jest.fn(),
-      callKibanaApi: jest.fn(),
+      getFakeRequest: vi.fn().mockReturnValue({} as KibanaRequest),
+      getContext: vi.fn(),
+      getScopedEsClient: vi.fn(),
+      renderInputTemplate: vi.fn(),
+      callKibanaApi: vi.fn(),
     };
 
     mockContext = {
@@ -86,10 +98,10 @@ describe('aiPromptStepDefinition', () => {
       },
       contextManager: mockContextManager,
       logger: {
-        debug: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
-        error: jest.fn(),
+        debug: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
       },
       abortSignal: mockAbortController.signal,
       stepId: 'test-step-id',
@@ -97,7 +109,7 @@ describe('aiPromptStepDefinition', () => {
     };
 
     mockCoreSetup = {
-      getStartServices: jest.fn().mockResolvedValue([{}, { inference: mockInference }]),
+      getStartServices: vi.fn().mockResolvedValue([{}, { inference: mockInference }]),
     } as any;
 
     mockResolveConnectorId.mockResolvedValue('resolved-connector-id');

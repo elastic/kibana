@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,8 +16,8 @@ import { SplitButtonWithNotification } from './split_button_with_notification';
 import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 
 const setup = (props: Partial<React.ComponentProps<typeof SplitButtonWithNotification>> = {}) => {
-  const onMainButtonClick = jest.fn();
-  const onSecondaryButtonClick = jest.fn();
+  const onMainButtonClick = vi.fn();
+  const onSecondaryButtonClick = vi.fn();
   const user = userEvent.setup();
 
   render(
@@ -34,7 +36,7 @@ const setup = (props: Partial<React.ComponentProps<typeof SplitButtonWithNotific
 
 describe('<SplitButtonWithNotification />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the primary and secondary buttons', () => {
@@ -69,7 +71,7 @@ describe('<SplitButtonWithNotification />', () => {
   });
 
   it('should not trigger onClick via the indicator when disabled', async () => {
-    const onMainButtonClick = jest.fn();
+    const onMainButtonClick = vi.fn();
     // bypass pointer-events: none on the outer wrapper — only the inner icon is interactive
     const user = userEvent.setup({ pointerEventsCheck: 0 });
 
@@ -77,7 +79,7 @@ describe('<SplitButtonWithNotification />', () => {
       <SplitButtonWithNotification
         label="Save"
         onClick={onMainButtonClick}
-        onSecondaryButtonClick={jest.fn()}
+        onSecondaryButtonClick={vi.fn()}
         secondaryButtonAriaLabel="More options"
         showNotificationIndicator={true}
         iconType="save"

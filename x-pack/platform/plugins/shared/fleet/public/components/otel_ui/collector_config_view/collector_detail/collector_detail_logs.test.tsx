@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import type { TestRenderer } from '../../../../mock';
@@ -12,16 +14,19 @@ import { createFleetTestRendererMock } from '../../../../mock';
 
 import { CollectorDetailLogs } from './collector_detail_logs';
 
-jest.mock('@kbn/saved-search-component', () => ({
-  LazySavedSearchComponent: ({ query }: { query: { query: string } }) => (
-    <div data-test-subj="savedSearchComponent" data-query={query.query}>
-      Saved search
-    </div>
-  ),
-}));
+vi.mock('@kbn/saved-search-component', () => {
+      const mocked = {
+      LazySavedSearchComponent: ({ query }: { query: { query: string } }) => (
+        <div data-test-subj="savedSearchComponent" data-query={query.query}>
+          Saved search
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-use/lib/useAsync', () =>
-  jest.fn(() => ({ value: 'logs-elastic_agent-*', loading: false }))
+vi.mock('react-use/lib/useAsync', () =>
+  vi.fn(() => ({ value: 'logs-elastic_agent-*', loading: false }))
 );
 
 describe('CollectorDetailLogs', () => {

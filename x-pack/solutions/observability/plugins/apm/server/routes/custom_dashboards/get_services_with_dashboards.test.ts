@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 import { getServicesWithDashboards } from './get_services_with_dashboards';
@@ -31,13 +34,13 @@ function createDashboard(id: string, kuery: string): SavedApmCustomDashboard {
 }
 
 function createApmEventClient(hitsPerSearch: boolean[]) {
-  const msearch = jest.fn().mockResolvedValue({
+  const msearch = vi.fn().mockResolvedValue({
     responses: hitsPerSearch.map((hasHits) => ({
       hits: { hits: hasHits ? [{ _source: {} }] : [] },
     })),
   });
 
-  return { msearch } as unknown as APMEventClient & { msearch: jest.Mock };
+  return { msearch } as unknown as APMEventClient & { msearch: Mock };
 }
 
 describe('getServicesWithDashboards', () => {

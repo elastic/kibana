@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
@@ -24,15 +27,15 @@ import { appContextService } from '../../../app_context';
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { saveArchiveEntriesFromAssetsMap } from '../../archive/storage';
 
-jest.mock('../../elasticsearch/template/template');
-jest.mock('../../kibana/assets/install');
-jest.mock('../../kibana/index_pattern/install');
-jest.mock('../get');
-jest.mock('../install_index_template_pipeline');
+vi.mock('../../elasticsearch/template/template');
+vi.mock('../../kibana/assets/install');
+vi.mock('../../kibana/index_pattern/install');
+vi.mock('../get');
+vi.mock('../install_index_template_pipeline');
 
-jest.mock('../../archive/storage');
-jest.mock('../../elasticsearch/ilm/install');
-jest.mock('../../elasticsearch/datastream_ilm/install');
+vi.mock('../../archive/storage');
+vi.mock('../../elasticsearch/ilm/install');
+vi.mock('../../elasticsearch/datastream_ilm/install');
 
 import { updateCurrentWriteIndices } from '../../elasticsearch/template/template';
 
@@ -48,29 +51,29 @@ import {
 } from './_state_machine_package_install';
 import { cleanupLatestExecutedState } from './steps';
 
-jest.mock('./state_machine');
-jest.mock('../install');
-jest.mock('./steps');
+vi.mock('./state_machine');
+vi.mock('../install');
+vi.mock('./steps');
 
 const mockedInstallIndexTemplatesAndPipelines =
-  installIndexTemplatesAndPipelines as jest.MockedFunction<
+  installIndexTemplatesAndPipelines as MockedFunction<
     typeof installIndexTemplatesAndPipelines
   >;
-const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.MockedFunction<
+const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as MockedFunction<
   typeof updateCurrentWriteIndices
 >;
-const mockCleanupLatestExecutedState = cleanupLatestExecutedState as jest.MockedFunction<
+const mockCleanupLatestExecutedState = cleanupLatestExecutedState as MockedFunction<
   typeof cleanupLatestExecutedState
 >;
-const mockHandleState = handleState as jest.MockedFunction<typeof handleState>;
+const mockHandleState = handleState as MockedFunction<typeof handleState>;
 
 function sleep(millis: number) {
   return new Promise((resolve) => setTimeout(resolve, millis));
 }
 
 describe('_stateMachineInstallPackage', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let esClient: Mocked<ElasticsearchClient>;
 
   beforeEach(async () => {
     soClient = savedObjectsClientMock.create();
@@ -83,7 +86,7 @@ describe('_stateMachineInstallPackage', () => {
     });
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
-    jest.mocked(saveArchiveEntriesFromAssetsMap).mockResolvedValue({
+    vi.mocked(saveArchiveEntriesFromAssetsMap).mockResolvedValue({
       saved_objects: [],
     });
   });
@@ -111,7 +114,7 @@ describe('_stateMachineInstallPackage', () => {
     const installationPromise = _stateMachineInstallPackage({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext: {
@@ -173,7 +176,7 @@ describe('_stateMachineInstallPackage', () => {
       await _stateMachineInstallPackage({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext: {
@@ -209,7 +212,7 @@ describe('_stateMachineInstallPackage', () => {
       await _stateMachineInstallPackage({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext: {
@@ -258,7 +261,7 @@ describe('_stateMachineInstallPackage', () => {
       await _stateMachineInstallPackage({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger: loggerMock.create(),
         packageInstallContext: {
@@ -325,7 +328,7 @@ describe('_stateMachineInstallPackage', () => {
     const installPromise = _stateMachineInstallPackage({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext: {

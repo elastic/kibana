@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,31 +17,43 @@ import { createExecutionTerminatedEvent } from '../items/execution_terminated_ev
 import { ResponseActions } from './response_actions';
 import { useToasts } from '../../../../hooks/use_toasts';
 
-jest.mock('copy-to-clipboard');
+vi.mock('copy-to-clipboard');
 
-jest.mock('../../../../hooks/use_toasts', () => ({
-  useToasts: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_toasts', () => {
+      const mocked = {
+      useToasts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_tracing_enabled', () => ({
-  useTracingEnabled: () => false,
-}));
+vi.mock('../../../../hooks/use_tracing_enabled', () => {
+      const mocked = {
+      useTracingEnabled: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_conversation', () => ({
-  useAgentId: () => undefined,
-}));
+vi.mock('../../../../hooks/use_conversation', () => {
+      const mocked = {
+      useAgentId: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../context/conversation/use_conversation_id', () => ({
-  useConversationId: () => undefined,
-}));
+vi.mock('../../../../context/conversation/use_conversation_id', () => {
+      const mocked = {
+      useConversationId: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const copyMock = copy as jest.MockedFunction<typeof copy>;
-const useToastsMock = useToasts as jest.MockedFunction<typeof useToasts>;
-const addSuccessToast = jest.fn();
+const copyMock = copy as MockedFunction<typeof copy>;
+const useToastsMock = useToasts as MockedFunction<typeof useToasts>;
+const addSuccessToast = vi.fn();
 
 describe('ResponseActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     copyMock.mockReturnValue(true);
     useToastsMock.mockReturnValue({ addSuccessToast } as unknown as ReturnType<typeof useToasts>);
   });

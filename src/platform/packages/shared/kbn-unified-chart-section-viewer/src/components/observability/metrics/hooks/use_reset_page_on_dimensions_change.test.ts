@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { Dimension } from '../../../../types';
 import { useResetPageOnDimensionsChange } from './use_reset_page_on_dimensions_change';
@@ -16,10 +18,10 @@ const SERVICE: Dimension = { name: 'service.name', type: 'keyword' };
 const NAMESPACE: Dimension = { name: 'kubernetes.namespace', type: 'keyword' };
 
 describe('useResetPageOnDimensionsChange', () => {
-  const mockOnPageChange = jest.fn();
+  const mockOnPageChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does NOT call onPageChange on the first render (tab restore path)', async () => {

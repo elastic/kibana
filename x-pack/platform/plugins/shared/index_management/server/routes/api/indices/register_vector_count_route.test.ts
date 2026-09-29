@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RequestMock } from '../../../test/helpers';
 import { routeDependencies, RouterMock } from '../../../test/helpers';
 import { addInternalBasePath } from '..';
@@ -28,7 +30,7 @@ describe('[Index management API Routes] vector count', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     hasPrivileges.mockResolvedValue({ has_all_requested: true });
   });
 
@@ -156,7 +158,7 @@ describe('[Index management API Routes] vector count', () => {
   describe('registration', () => {
     const registeredGetPaths = (isVectorCountEnabled: boolean) => {
       const indicesRouter = new RouterMock();
-      const registerGet = jest.spyOn(indicesRouter, 'get');
+      const registerGet = vi.spyOn(indicesRouter, 'get');
 
       registerIndicesRoutes({
         ...routeDependencies,

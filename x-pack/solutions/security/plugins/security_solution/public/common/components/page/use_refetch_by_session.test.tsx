@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
@@ -17,25 +20,25 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders>{children}</TestProviders>
 );
 
-jest.mock('react-redux-v7', () => {
-  const actual = jest.requireActual('react-redux-v7');
-  const mockDispatch = jest.fn();
+vi.mock('react-redux-v7', () => {
+  const actual = require('react-redux-v7');
+  const mockDispatch = vi.fn();
   return {
     ...actual,
-    useDispatch: jest.fn().mockReturnValue(mockDispatch),
+    useDispatch: vi.fn().mockReturnValue(mockDispatch),
   };
 });
 
-jest.mock('../../lib/kibana', () => {
+vi.mock('../../lib/kibana', () => {
   return {
-    useKibana: jest.fn(),
+    useKibana: vi.fn(),
   };
 });
 
-jest.mock('../../store/actions', () => {
+vi.mock('../../store/actions', () => {
   return {
     inputsActions: {
-      setInspectionParameter: jest.fn(),
+      setInspectionParameter: vi.fn(),
     },
   };
 });
@@ -45,12 +48,12 @@ describe(`useRefetchByRestartingSession`, () => {
     ReturnType<typeof useRefetchByRestartingSession>,
     Parameters<typeof useRefetchByRestartingSession>[0]
   >;
-  const mockSessionStart = jest.fn().mockReturnValue('mockSessionId');
+  const mockSessionStart = vi.fn().mockReturnValue('mockSessionId');
   const mockSession = {
     start: mockSessionStart,
   };
   beforeAll(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         data: {
           search: {
@@ -62,7 +65,7 @@ describe(`useRefetchByRestartingSession`, () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     res = renderHook(
       () =>
         useRefetchByRestartingSession({

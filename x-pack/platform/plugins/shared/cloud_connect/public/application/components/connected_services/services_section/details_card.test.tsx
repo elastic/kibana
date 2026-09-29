@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,9 +15,9 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ServiceCard, type ServiceCardProps } from './details_card';
 import { useCloudConnectedAppContext } from '../../../app_context';
 
-jest.mock('../../../app_context');
+vi.mock('../../../app_context');
 
-const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as jest.MockedFunction<
+const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as MockedFunction<
   typeof useCloudConnectedAppContext
 >;
 
@@ -32,13 +35,13 @@ describe('ServiceCard', () => {
     enabled: false,
     supported: true,
     description: 'Test service description',
-    onEnable: jest.fn(),
-    onDisable: jest.fn(),
-    onOpen: jest.fn(),
+    onEnable: vi.fn(),
+    onDisable: vi.fn(),
+    onOpen: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCloudConnectedAppContext.mockReturnValue({
       hasConfigurePermission: true,
     } as any);
@@ -144,7 +147,7 @@ describe('ServiceCard', () => {
 
   describe('User interactions', () => {
     it('should call onEnable when Connect button is clicked', async () => {
-      const onEnable = jest.fn();
+      const onEnable = vi.fn();
       renderWithIntl(<ServiceCard {...defaultProps} onEnable={onEnable} />);
 
       const connectButton = screen.getByTestId('serviceCardConnectButton');
@@ -176,7 +179,7 @@ describe('ServiceCard', () => {
     });
 
     it('should call onDisable when Disable service is clicked in popover', async () => {
-      const onDisable = jest.fn();
+      const onDisable = vi.fn();
       renderWithIntl(
         <ServiceCard
           {...defaultProps}
@@ -202,7 +205,7 @@ describe('ServiceCard', () => {
     });
 
     it('should call onRotateApiKey when Rotate API key is clicked in popover', async () => {
-      const onRotateApiKey = jest.fn();
+      const onRotateApiKey = vi.fn();
       renderWithIntl(
         <ServiceCard
           {...defaultProps}
@@ -227,7 +230,7 @@ describe('ServiceCard', () => {
     });
 
     it('should call onOpen when Open button is clicked', async () => {
-      const onOpen = jest.fn();
+      const onOpen = vi.fn();
       renderWithIntl(
         <ServiceCard
           {...defaultProps}

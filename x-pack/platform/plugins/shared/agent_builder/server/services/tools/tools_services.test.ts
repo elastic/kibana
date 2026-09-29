@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { isAllowedBuiltinTool } from '@kbn/agent-builder-server/allow_lists';
 import { ToolsService } from './tools_service';
 import { createMockedBuiltinTool } from '../../test_utils/tools';
 
-jest.mock('@kbn/agent-builder-server/allow_lists');
+vi.mock('@kbn/agent-builder-server/allow_lists');
 
-const isAllowedBuiltinToolMock = isAllowedBuiltinTool as jest.MockedFunction<
+const isAllowedBuiltinToolMock = isAllowedBuiltinTool as MockedFunction<
   typeof isAllowedBuiltinTool
 >;
 

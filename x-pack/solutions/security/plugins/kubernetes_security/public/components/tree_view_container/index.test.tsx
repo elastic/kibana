@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { TreeViewContainer } from '.';
 import { DEFAULT_FILTER_QUERY } from '../../../common/constants';
@@ -16,7 +18,7 @@ describe('TreeNav component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
-  const spy = jest.spyOn(context, 'useTreeViewContext');
+  const spy = vi.spyOn(context, 'useTreeViewContext');
 
   const defaultProps = {
     globalFilter: {
@@ -35,8 +37,8 @@ describe('TreeNav component', () => {
   });
 
   it('shows empty message when there is no results', () => {
-    spy.mockImplementation(() => ({
-      ...jest.requireActual('./contexts').useTreeViewContext,
+    spy.mockImplementation(async () => ({
+      ...(await vi.importActual('./contexts')).useTreeViewContext,
       noResults: true,
       treeNavSelection: {},
     }));

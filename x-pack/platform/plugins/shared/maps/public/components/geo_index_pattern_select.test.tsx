@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-jest.mock('../kibana_services', () => {
+import { vi } from 'vitest';
+
+vi.mock('../kibana_services', () => {
   const MockIndexPatternSelect = (props: unknown) => {
     return <div />;
   };

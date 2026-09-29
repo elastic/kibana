@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { IContextContainer } from '@kbn/core-http-server';
 
 const createContextMock = (mockContext: any = {}) => {
-  const contextMock: jest.Mocked<IContextContainer> = {
-    registerContext: jest.fn(),
-    createHandler: jest.fn(),
+  const contextMock: Mocked<IContextContainer> = {
+    registerContext: vi.fn(),
+    createHandler: vi.fn(),
   };
   contextMock.createHandler.mockImplementation(
     (pluginId, handler) =>
@@ -22,7 +25,10 @@ const createContextMock = (mockContext: any = {}) => {
   return contextMock;
 };
 
-export const MockContextConstructor = jest.fn(createContextMock);
-jest.doMock('./context_container', () => ({
-  ContextContainer: MockContextConstructor,
-}));
+export const MockContextConstructor = vi.fn(createContextMock);
+vi.doMock('./context_container', () => {
+      const mocked = {
+      ContextContainer: MockContextConstructor,
+    };
+      return { ...mocked, default: mocked };
+    });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import GeminiConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
@@ -16,16 +19,16 @@ import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => ({
+  useKibana: vi.fn(() => ({
     services: mockUseKibanaReturnValue,
   })),
 }));
-jest.mock('../lib/gen_ai/use_get_dashboard');
+vi.mock('../lib/gen_ai/use_get_dashboard');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const mockDashboard = useGetDashboard as jest.Mock;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+const mockDashboard = useGetDashboard as Mock;
 const geminiConnector = {
   actionTypeId: '.gemini',
   name: 'gemini',
@@ -53,11 +56,11 @@ const geminiConnector = {
   isDeprecated: false,
 };
 
-const navigateToUrl = jest.fn();
+const navigateToUrl = vi.fn();
 
 describe('GeminiConnectorFields renders', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock().services.application.navigateToUrl = navigateToUrl;
     mockDashboard.mockImplementation(({ connectorId }) => ({
       dashboardUrl: `https://dashboardurl.com/${connectorId}`,
@@ -133,10 +136,10 @@ describe('GeminiConnectorFields renders', () => {
   });
 
   describe('Validation', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('validates correctly if the apiUrl is empty', async () => {

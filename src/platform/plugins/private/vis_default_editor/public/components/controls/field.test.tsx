@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
@@ -29,10 +32,10 @@ function callComboBoxOnChange(comp: ReactWrapper, value: any = []) {
 }
 
 describe('FieldParamEditor component', () => {
-  let setValue: jest.Mock;
-  let setValidity: jest.Mock;
-  let setTouched: jest.Mock;
-  let onChange: jest.Mock;
+  let setValue: Mock;
+  let setValidity: Mock;
+  let setTouched: Mock;
+  let onChange: Mock;
   let defaultProps: FieldParamEditorProps;
   let indexedFields: ComboBoxGroupedOptions<DataViewField>;
   let field: DataViewField;
@@ -42,10 +45,10 @@ describe('FieldParamEditor component', () => {
   };
 
   beforeEach(() => {
-    setValue = jest.fn();
-    setValidity = jest.fn();
-    setTouched = jest.fn();
-    onChange = jest.fn();
+    setValue = vi.fn();
+    setValidity = vi.fn();
+    setTouched = vi.fn();
+    onChange = vi.fn();
 
     field = { displayName: 'bytes', type: 'bytes' } as DataViewField;
     option = { label: 'bytes', target: field };

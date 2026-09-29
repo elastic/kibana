@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { handleEsError } from '../shared_imports';
@@ -28,29 +31,44 @@ const defaultApiResponseProperties = {
   },
   kibanaApiDeprecations: undefined,
 };
-jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
-  versionCheckHandlerWrapper: () => (a: any) => a,
-}));
+vi.mock('@kbn/upgrade-assistant-pkg-server', () => {
+      const mocked = {
+      versionCheckHandlerWrapper: () => (a: any) => a,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/es_deprecations_status', () => ({
-  getESUpgradeStatus: jest.fn(),
-}));
-const getESUpgradeStatusMock = getESUpgradeStatus as jest.Mock;
+vi.mock('../lib/es_deprecations_status', () => {
+      const mocked = {
+      getESUpgradeStatus: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const getESUpgradeStatusMock = getESUpgradeStatus as Mock;
 
-jest.mock('../lib/kibana_status', () => ({
-  getKibanaUpgradeStatus: jest.fn(),
-}));
-const getKibanaUpgradeStatusMock = getKibanaUpgradeStatus as jest.Mock;
+vi.mock('../lib/kibana_status', () => {
+      const mocked = {
+      getKibanaUpgradeStatus: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const getKibanaUpgradeStatusMock = getKibanaUpgradeStatus as Mock;
 
-jest.mock('../lib/es_system_indices_migration', () => ({
-  getESSystemIndicesMigrationStatus: jest.fn(),
-}));
-const getESSystemIndicesMigrationStatusMock = getESSystemIndicesMigrationStatus as jest.Mock;
+vi.mock('../lib/es_system_indices_migration', () => {
+      const mocked = {
+      getESSystemIndicesMigrationStatus: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const getESSystemIndicesMigrationStatusMock = getESSystemIndicesMigrationStatus as Mock;
 
-jest.mock('../lib/es_deprecation_logging_apis', () => ({
-  getRecentEsDeprecationLogs: jest.fn(),
-}));
-const getRecentEsDeprecationLogsMock = getRecentEsDeprecationLogs as jest.Mock;
+vi.mock('../lib/es_deprecation_logging_apis', () => {
+      const mocked = {
+      getRecentEsDeprecationLogs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const getRecentEsDeprecationLogsMock = getRecentEsDeprecationLogs as Mock;
 
 const esDeprecationsResponse = {
   totalCriticalDeprecations: 1,
@@ -128,7 +146,7 @@ describe('Status API', () => {
         lib: { handleEsError },
         current: currentVersion,
         defaultTarget: nextMajor,
-        log: { error: jest.fn() },
+        log: { error: vi.fn() },
       };
 
       registerUpgradeStatusRoute(routeDependencies);
@@ -145,7 +163,7 @@ describe('Status API', () => {
     });
 
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('returns readyForUpgrade === false if Kibana or ES contain critical deprecations and no system indices need migration', async () => {
@@ -335,7 +353,7 @@ describe('Status API', () => {
         lib: { handleEsError },
         current: currentVersion,
         defaultTarget: nextMajor,
-        log: { error: jest.fn() },
+        log: { error: vi.fn() },
       };
 
       registerUpgradeStatusRoute(routeDependencies);
@@ -353,7 +371,7 @@ describe('Status API', () => {
     });
 
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('returns readyForUpgrade === false if ES contains critical health issues, ignoring deprecations', async () => {

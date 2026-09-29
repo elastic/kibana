@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SanitizedRule } from '@kbn/alerting-types';
 import { omit } from 'lodash';
 import {
@@ -23,7 +25,7 @@ describe('DefaultAlertService', () => {
     };
     const soResponse = { attributes: { ...expectedSettings } };
     it('returns settings if already set', async () => {
-      const soClient = { get: jest.fn() } as any;
+      const soClient = { get: vi.fn() } as any;
       const service = new DefaultRuleService({} as any, {} as any, soClient);
       service.settings = expectedSettings;
       const settings = await service.getSettings();
@@ -32,7 +34,7 @@ describe('DefaultAlertService', () => {
     });
 
     it('fetches settings if not set', async () => {
-      const soClient = { get: jest.fn() } as any;
+      const soClient = { get: vi.fn() } as any;
       const service = new DefaultRuleService({} as any, {} as any, soClient);
       soClient.get.mockResolvedValueOnce(soResponse);
       const settings = await service.getSettings();
@@ -47,12 +49,12 @@ describe('DefaultAlertService', () => {
   });
 
   describe('setupDefaultAlerts', () => {
-    afterEach(() => jest.resetAllMocks());
+    afterEach(() => vi.resetAllMocks());
 
     it('sets up status and tls rules', async () => {
-      const soClient = { get: jest.fn() } as any;
+      const soClient = { get: vi.fn() } as any;
       const service = new DefaultRuleService({} as any, {} as any, soClient);
-      service.getSettings = jest.fn().mockResolvedValue({
+      service.getSettings = vi.fn().mockResolvedValue({
         certAgeThreshold: 50,
         certExpirationThreshold: 10,
         defaultConnectors: ['slack', 'email'],
@@ -60,8 +62,8 @@ describe('DefaultAlertService', () => {
         defaultStatusRuleEnabled: true,
         defaultTLSRuleEnabled: true,
       });
-      const setupStatusRule = jest.fn();
-      const setupTlsRule = jest.fn();
+      const setupStatusRule = vi.fn();
+      const setupTlsRule = vi.fn();
       service.setupStatusRule = setupStatusRule;
       service.setupTlsRule = setupTlsRule;
       setupStatusRule.mockResolvedValueOnce({ status: 'fulfilled', value: {} });
@@ -75,9 +77,9 @@ describe('DefaultAlertService', () => {
       });
     });
     it('returns null rules if value is falsy', async () => {
-      const soClient = { get: jest.fn() } as any;
+      const soClient = { get: vi.fn() } as any;
       const service = new DefaultRuleService({} as any, {} as any, soClient);
-      service.getSettings = jest.fn().mockResolvedValue({
+      service.getSettings = vi.fn().mockResolvedValue({
         certAgeThreshold: 50,
         certExpirationThreshold: 10,
         defaultConnectors: ['slack', 'email'],
@@ -85,8 +87,8 @@ describe('DefaultAlertService', () => {
         defaultStatusRuleEnabled: true,
         defaultTLSRuleEnabled: true,
       });
-      const setupStatusRule = jest.fn();
-      const setupTlsRule = jest.fn();
+      const setupStatusRule = vi.fn();
+      const setupTlsRule = vi.fn();
       service.setupStatusRule = setupStatusRule;
       service.setupTlsRule = setupTlsRule;
       setupStatusRule.mockResolvedValueOnce(undefined);
@@ -122,10 +124,10 @@ describe('DefaultAlertService', () => {
   describe('setupStatusRule', () => {
     it('creates status rule if enabled', async () => {
       const service = new DefaultRuleService({} as any, {} as any, {} as any);
-      service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
-      service.createDefaultRuleIfNotExist = jest.fn();
+      service.getMinimumRuleInterval = vi.fn().mockReturnValue('1m');
+      service.createDefaultRuleIfNotExist = vi.fn();
       service.settings = { defaultStatusRuleEnabled: true } as any;
-      service.getSettings = jest.fn().mockResolvedValue({
+      service.getSettings = vi.fn().mockResolvedValue({
         defaultStatusRuleEnabled: true,
       });
       await service.setupStatusRule();
@@ -138,8 +140,8 @@ describe('DefaultAlertService', () => {
 
     it('does not create status rule if disabled', async () => {
       const service = new DefaultRuleService({} as any, {} as any, {} as any);
-      service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
-      service.createDefaultRuleIfNotExist = jest.fn();
+      service.getMinimumRuleInterval = vi.fn().mockReturnValue('1m');
+      service.createDefaultRuleIfNotExist = vi.fn();
       service.settings = { defaultStatusRuleEnabled: false } as any;
       const result = await service.setupStatusRule();
       expect(service.createDefaultRuleIfNotExist).not.toHaveBeenCalled();
@@ -150,10 +152,10 @@ describe('DefaultAlertService', () => {
   describe('setupTlsRule', () => {
     it('creates tls rule if enabled', async () => {
       const service = new DefaultRuleService({} as any, {} as any, {} as any);
-      service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
-      service.createDefaultRuleIfNotExist = jest.fn();
+      service.getMinimumRuleInterval = vi.fn().mockReturnValue('1m');
+      service.createDefaultRuleIfNotExist = vi.fn();
       service.settings = { defaultTlsRuleEnabled: true } as any;
-      service.getSettings = jest.fn().mockResolvedValue({
+      service.getSettings = vi.fn().mockResolvedValue({
         defaultTlsRuleEnabled: true,
       });
       await service.setupTlsRule();
@@ -166,8 +168,8 @@ describe('DefaultAlertService', () => {
 
     it('does not create tls rule if disabled', async () => {
       const service = new DefaultRuleService({} as any, {} as any, {} as any);
-      service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
-      service.createDefaultRuleIfNotExist = jest.fn();
+      service.getMinimumRuleInterval = vi.fn().mockReturnValue('1m');
+      service.createDefaultRuleIfNotExist = vi.fn();
       service.settings = { defaultTLSRuleEnabled: false } as any;
       const result = await service.setupTlsRule();
       expect(service.createDefaultRuleIfNotExist).not.toHaveBeenCalled();
@@ -180,7 +182,7 @@ describe('DefaultAlertService', () => {
       ruleOverride?: Partial<SanitizedRule<T>>,
       getRulesClientMocks = {}
     ) {
-      const getRulesClient = jest.fn();
+      const getRulesClient = vi.fn();
       const mockRule: any = ruleOverride ?? {
         actions: [{ alertsFilter: { query: { kql: 'some kql', filters: [] } } }],
         systemActions: [{ id: 'some system action', actionTypeId: 'actionTypeId', params: {} }],
@@ -188,7 +190,7 @@ describe('DefaultAlertService', () => {
         alertTypeId: 'xpack.synthetics.alerts.monitorStatus',
         id: '123',
       };
-      const find = jest.fn();
+      const find = vi.fn();
       find.mockResolvedValue({
         data: [mockRule],
       });
@@ -204,7 +206,7 @@ describe('DefaultAlertService', () => {
       };
     }
 
-    afterEach(() => jest.resetAllMocks());
+    afterEach(() => vi.resetAllMocks());
 
     describe('getExistingAlert', () => {
       it('returns rule if exists', async () => {
@@ -219,8 +221,8 @@ describe('DefaultAlertService', () => {
       });
 
       it('returns undefined if rule does not exist', async () => {
-        const find = jest.fn().mockResolvedValue({ data: [] });
-        const getRulesClient = jest.fn();
+        const find = vi.fn().mockResolvedValue({ data: [] });
+        const getRulesClient = vi.fn();
         getRulesClient.mockReturnValue({ find });
         const service = new DefaultRuleService(
           { alerting: { getRulesClient } } as any,
@@ -250,20 +252,20 @@ describe('DefaultAlertService', () => {
 
       it('creates rule if does not exist', async () => {
         const sampleAction = { alertsFilter: { query: { kql: 'some kql', filters: [] } } };
-        const find = jest.fn().mockResolvedValue({ data: [] });
-        const create = jest.fn().mockResolvedValue({
+        const find = vi.fn().mockResolvedValue({ data: [] });
+        const create = vi.fn().mockResolvedValue({
           actions: [sampleAction],
           systemActions: [],
           id: '123',
           alertTypeId: 'testalertid',
         });
-        const getActionsClient = jest.fn();
+        const getActionsClient = vi.fn();
         getActionsClient.mockReturnValue({
-          getAll: jest
+          getAll: vi
             .fn()
             .mockResolvedValue([{ id: 'id', actionTypeId: 'actionTypeId', name: 'action name' }]),
         });
-        const getRulesClient = jest.fn();
+        const getRulesClient = vi.fn();
         getRulesClient.mockReturnValue({ find, create });
         const service = new DefaultRuleService(
           { actions: { getActionsClient }, alerting: { getRulesClient } } as any,
@@ -286,7 +288,7 @@ describe('DefaultAlertService', () => {
     });
 
     function setUpUpdateTest<T extends Record<string, any>>(mockRule?: Partial<SanitizedRule<T>>) {
-      const update = jest.fn().mockResolvedValue({
+      const update = vi.fn().mockResolvedValue({
         alertTypeId: 'test-alert-type-id',
         actions: [{ id: 'id', actionTypeId: 'actionTypeId', name: 'action name' }],
         systemActions: [{ id: 'sys-id', actionTypeId: 'actionTypeId', name: 'action name' }],
@@ -295,14 +297,14 @@ describe('DefaultAlertService', () => {
       const { getRulesClient } = setUpExistingRules(mockRule ?? { schedule: { interval: '1m' } }, {
         update,
       });
-      const getConfig = jest.fn().mockReturnValue({ minimumScheduleInterval: { value: '3m' } });
+      const getConfig = vi.fn().mockReturnValue({ minimumScheduleInterval: { value: '3m' } });
       const server = {
         alerting: {
           getConfig,
         },
       } as any;
-      const getActionsClient = jest.fn();
-      const getAll = jest
+      const getActionsClient = vi.fn();
+      const getAll = vi
         .fn()
         .mockResolvedValue([{ id: 'id', actionTypeId: 'actionTypeId', name: 'action name' }]);
       getActionsClient.mockReturnValue({
@@ -359,10 +361,10 @@ describe('DefaultAlertService', () => {
       it('deletes the rule if it is disabled', async () => {
         const server = {
           alerting: {
-            getConfig: jest.fn().mockReturnValue({ minimumScheduleInterval: { value: '3m' } }),
+            getConfig: vi.fn().mockReturnValue({ minimumScheduleInterval: { value: '3m' } }),
           },
         } as any;
-        const bulkDeleteRules = jest.fn();
+        const bulkDeleteRules = vi.fn();
         const { getRulesClient } = setUpExistingRules(undefined, { bulkDeleteRules });
         const service = new DefaultRuleService(
           { alerting: { getRulesClient } } as any,
@@ -399,9 +401,9 @@ describe('DefaultAlertService', () => {
         const { context, server } = setUpUpdateTest();
         const service = new DefaultRuleService(context as any, server as any, {} as any);
         service.settings = { defaultConnectors: ['slack', 'email'] } as any;
-        const getExistingAlertMock = jest.fn().mockResolvedValue(undefined);
+        const getExistingAlertMock = vi.fn().mockResolvedValue(undefined);
         service.getExistingAlert = getExistingAlertMock;
-        const createDefaultAlertIfNotExistMock = jest.fn();
+        const createDefaultAlertIfNotExistMock = vi.fn();
         service.createDefaultRuleIfNotExist = createDefaultAlertIfNotExistMock;
         const result = await service.updateTlsRule(true);
         expect(result).toBeUndefined();
@@ -418,10 +420,10 @@ describe('DefaultAlertService', () => {
       it('deletes the rule if it is disabled', async () => {
         const server = {
           alerting: {
-            getConfig: jest.fn().mockReturnValue({ minimumScheduleInterval: { value: '3m' } }),
+            getConfig: vi.fn().mockReturnValue({ minimumScheduleInterval: { value: '3m' } }),
           },
         } as any;
-        const bulkDeleteRules = jest.fn();
+        const bulkDeleteRules = vi.fn();
         const { getRulesClient } = setUpExistingRules(undefined, { bulkDeleteRules });
         const service = new DefaultRuleService(
           { alerting: { getRulesClient } } as any,
@@ -440,15 +442,15 @@ describe('DefaultAlertService', () => {
 
   describe('getActionConnectors', () => {
     it('fetches settings if not set', async () => {
-      const getActionsClient = jest.fn();
-      const getAll = jest.fn().mockResolvedValue([{ id: 'id', actionTypeId: 'actionTypeId' }]);
+      const getActionsClient = vi.fn();
+      const getAll = vi.fn().mockResolvedValue([{ id: 'id', actionTypeId: 'actionTypeId' }]);
       getActionsClient.mockReturnValue({
         getAll,
       });
       const service = new DefaultRuleService(
         { actions: { getActionsClient } } as any,
         {} as any,
-        { get: jest.fn() } as any
+        { get: vi.fn() } as any
       );
       const connectors = await service.getActionConnectors();
       expect(connectors).toEqual({

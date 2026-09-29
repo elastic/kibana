@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterFallbackPathNodeImpl } from '../enter_fallback_path_node_impl';
 
@@ -16,8 +18,8 @@ describe('EnterFallbackPathNodeImpl', () => {
 
   beforeEach(() => {
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
-    workflowRuntime.enterScope = jest.fn();
-    workflowRuntime.navigateToNextNode = jest.fn();
+    workflowRuntime.enterScope = vi.fn();
+    workflowRuntime.navigateToNextNode = vi.fn();
 
     underTest = new EnterFallbackPathNodeImpl(workflowRuntime);
   });
@@ -35,10 +37,10 @@ describe('EnterFallbackPathNodeImpl', () => {
 
     it('should execute functions in correct order', async () => {
       const calls: string[] = [];
-      workflowRuntime.enterScope = jest.fn().mockImplementation(() => {
+      workflowRuntime.enterScope = vi.fn().mockImplementation(() => {
         calls.push('enterScope');
       });
-      workflowRuntime.navigateToNextNode = jest.fn().mockImplementation(() => {
+      workflowRuntime.navigateToNextNode = vi.fn().mockImplementation(() => {
         calls.push('goToNextStep');
       });
 

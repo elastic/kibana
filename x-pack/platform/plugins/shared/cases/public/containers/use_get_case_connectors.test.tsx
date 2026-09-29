@@ -5,27 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
 import { useGetCaseConnectors } from './use_get_case_connectors';
 import { TestProviders } from '../common/mock';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
 describe('useGetCaseConnectors', () => {
   const caseId = 'test-id';
   const abortCtrl = new AbortController();
-  const addSuccess = jest.fn();
-  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
+  const addSuccess = vi.fn();
+  (useToasts as Mock).mockReturnValue({ addSuccess, addError: vi.fn() });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls getCaseConnectors with correct arguments', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getCaseConnectors');
+    const spyOnGetCases = vi.spyOn(api, 'getCaseConnectors');
     renderHook(() => useGetCaseConnectors(caseId), {
       wrapper: TestProviders,
     });
@@ -38,13 +41,13 @@ describe('useGetCaseConnectors', () => {
   });
 
   it('shows a toast error message when an error occurs in the response', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getCaseConnectors');
+    const spyOnGetCases = vi.spyOn(api, 'getCaseConnectors');
     spyOnGetCases.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addSuccess, addError });
 
     renderHook(() => useGetCaseConnectors(caseId), {
       wrapper: TestProviders,

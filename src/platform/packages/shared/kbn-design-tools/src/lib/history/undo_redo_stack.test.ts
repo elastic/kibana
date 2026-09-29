@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { UndoRedoStack } from './undo_redo_stack';
 import type { TransactionInput } from './transaction';
 
@@ -167,7 +169,7 @@ describe('UndoRedoStack', () => {
 
   describe('subscribe', () => {
     it('should notify on push', () => {
-      const fn = jest.fn();
+      const fn = vi.fn();
       stack.subscribe(fn);
       stack.push(makeMove());
       expect(fn).toHaveBeenCalledTimes(1);
@@ -175,7 +177,7 @@ describe('UndoRedoStack', () => {
 
     it('should notify on undo', () => {
       stack.push(makeMove());
-      const fn = jest.fn();
+      const fn = vi.fn();
       stack.subscribe(fn);
       stack.undo();
       expect(fn).toHaveBeenCalledTimes(1);
@@ -184,7 +186,7 @@ describe('UndoRedoStack', () => {
     it('should notify on redo', () => {
       stack.push(makeMove());
       stack.undo();
-      const fn = jest.fn();
+      const fn = vi.fn();
       stack.subscribe(fn);
       stack.redo();
       expect(fn).toHaveBeenCalledTimes(1);
@@ -192,14 +194,14 @@ describe('UndoRedoStack', () => {
 
     it('should notify on clear', () => {
       stack.push(makeMove());
-      const fn = jest.fn();
+      const fn = vi.fn();
       stack.subscribe(fn);
       stack.clear();
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
     it('should unsubscribe stops notifications', () => {
-      const fn = jest.fn();
+      const fn = vi.fn();
       const unsub = stack.subscribe(fn);
       unsub();
       stack.push(makeMove());
@@ -207,8 +209,8 @@ describe('UndoRedoStack', () => {
     });
 
     it('should supports multiple subscribers', () => {
-      const fn1 = jest.fn();
-      const fn2 = jest.fn();
+      const fn1 = vi.fn();
+      const fn2 = vi.fn();
       stack.subscribe(fn1);
       stack.subscribe(fn2);
       stack.push(makeMove());

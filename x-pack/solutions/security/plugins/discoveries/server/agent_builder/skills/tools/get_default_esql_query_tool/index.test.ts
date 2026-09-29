@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -12,11 +14,14 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 
 import { GET_DEFAULT_ESQL_QUERY_TOOL_ID, getDefaultEsqlQueryTool } from '.';
 
-const mockBuildDefaultEsqlQuery = jest.fn();
+const mockBuildDefaultEsqlQuery = vi.fn();
 
-jest.mock('@kbn/discoveries/impl/lib/build_default_esql_query', () => ({
-  buildDefaultEsqlQuery: (...args: unknown[]) => mockBuildDefaultEsqlQuery(...args),
-}));
+vi.mock('@kbn/discoveries/impl/lib/build_default_esql_query', () => {
+      const mocked = {
+      buildDefaultEsqlQuery: (...args: unknown[]) => mockBuildDefaultEsqlQuery(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('GET_DEFAULT_ESQL_QUERY_TOOL_ID', () => {
   it('has the expected value', () => {
@@ -36,7 +41,7 @@ describe('getDefaultEsqlQueryTool', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a tool with the expected id', () => {

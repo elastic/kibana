@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,7 +20,7 @@ import type { ImageEditorFlyoutProps } from './image_editor_flyout';
 import { ImageEditorFlyout } from './image_editor_flyout';
 import { imageEmbeddableFileKind } from '../../imports';
 
-const validateUrl = jest.fn(() => ({ isValid: true }));
+const validateUrl = vi.fn(() => ({ isValid: true }));
 
 beforeEach(() => {
   validateUrl.mockImplementation(() => ({ isValid: true }));
@@ -50,7 +52,7 @@ const ImageEditor = (props: Partial<ImageEditorFlyoutProps>) => {
 };
 
 test('should call onCancel when "Cancel" clicked', async () => {
-  const onCancel = jest.fn();
+  const onCancel = vi.fn();
   const { getByText } = render(<ImageEditor onCancel={onCancel} />);
   expect(getByText('Cancel')).toBeVisible();
   await userEvent.click(getByText('Cancel'));
@@ -58,7 +60,7 @@ test('should call onCancel when "Cancel" clicked', async () => {
 });
 
 test('should call onSave when "Save" clicked (url)', async () => {
-  const onSave = jest.fn();
+  const onSave = vi.fn();
   const { getByText, getByTestId } = render(<ImageEditor onSave={onSave} />);
 
   await userEvent.click(getByText('Use link'));
@@ -88,7 +90,7 @@ test('should be able to edit', async () => {
       url: 'https://elastic.co/image',
     },
   };
-  const onSave = jest.fn();
+  const onSave = vi.fn();
   const { getByTestId } = render(
     <ImageEditor onSave={onSave} initialImageConfig={initialImageConfig} />
   );

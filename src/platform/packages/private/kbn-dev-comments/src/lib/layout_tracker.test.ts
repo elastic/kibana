@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createLayoutTracker } from './layout_tracker';
 
 class FakeResizeObserver {
@@ -32,25 +34,25 @@ class FakeResizeObserver {
 }
 
 describe('createLayoutTracker', () => {
-  const flushFrame = () => jest.advanceTimersByTime(20);
+  const flushFrame = () => vi.advanceTimersByTime(20);
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     FakeResizeObserver.instances = [];
     Object.assign(globalThis, { ResizeObserver: FakeResizeObserver });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
     Reflect.deleteProperty(globalThis, 'ResizeObserver');
   });
 
   it('installs one set of observers for all subscribers and removes it with the last one', () => {
     const tracker = createLayoutTracker();
-    const observe = jest.spyOn(MutationObserver.prototype, 'observe');
-    const disconnect = jest.spyOn(MutationObserver.prototype, 'disconnect');
-    const first = jest.fn();
-    const second = jest.fn();
+    const observe = vi.spyOn(MutationObserver.prototype, 'observe');
+    const disconnect = vi.spyOn(MutationObserver.prototype, 'disconnect');
+    const first = vi.fn();
+    const second = vi.fn();
 
     const unsubscribeFirst = tracker.subscribe(first);
     const unsubscribeSecond = tracker.subscribe(second);
@@ -75,7 +77,7 @@ describe('createLayoutTracker', () => {
 
   it('notifies on changes to the attributes and text anchors resolve by, and to layout, but not on others', async () => {
     const tracker = createLayoutTracker();
-    const listener = jest.fn();
+    const listener = vi.fn();
     const element = document.createElement('button');
     element.textContent = 'Loading';
     document.body.appendChild(element);
@@ -103,7 +105,7 @@ describe('createLayoutTracker', () => {
 
   it('notifies when a watched element changes size, but not for the report that follows observing it', () => {
     const tracker = createLayoutTracker();
-    const listener = jest.fn();
+    const listener = vi.fn();
     const element = document.createElement('div');
     document.body.appendChild(element);
 

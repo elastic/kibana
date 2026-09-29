@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -17,13 +19,16 @@ import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { RemoteDocumentCallout } from './remote_document_callout';
 
 let mockCloud: unknown;
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      cloud: mockCloud,
-    },
-  }),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          cloud: mockCloud,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const REMOTE_ATTACK_TEXT =
   'This attack originates from a remote cluster. Some features may not be available.';

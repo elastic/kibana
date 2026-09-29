@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import type { CategoriesBadgesProps } from './categories_badges';
 import { CategoriesBadges } from './categories_badges';
 
-const mockSetSelectedCategoryIds = jest.fn();
+const mockSetSelectedCategoryIds = vi.fn();
 const defaultProps = {
   setSelectedCategoryIds: mockSetSelectedCategoryIds,
   selectedCategoryIds: [],

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
@@ -44,11 +46,11 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     event: <>{'My event'}</>,
   };
 
-  const getIcon = jest.fn(() => 'test-icon');
-  const getCreationActivity = jest.fn().mockReturnValue(creationActivityProps);
-  const getRemovalActivity = jest.fn();
-  const getAttachmentViewProps = jest.fn().mockReturnValue(viewProps);
-  const getId = jest.fn().mockReturnValue(attachmentTypeId);
+  const getIcon = vi.fn(() => 'test-icon');
+  const getCreationActivity = vi.fn().mockReturnValue(creationActivityProps);
+  const getRemovalActivity = vi.fn();
+  const getAttachmentViewProps = vi.fn().mockReturnValue(viewProps);
+  const getId = vi.fn().mockReturnValue(attachmentTypeId);
 
   const item = {
     id: attachmentTypeId,
@@ -76,7 +78,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('builds the user action correctly', async () => {

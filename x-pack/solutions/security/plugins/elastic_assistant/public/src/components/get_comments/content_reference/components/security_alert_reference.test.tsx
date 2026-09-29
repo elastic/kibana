@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -20,12 +23,12 @@ import { encode } from '@kbn/rison';
 import { getDetectionEngineUrl } from './link_to/redirect_to_detection_engine';
 
 // Mocks
-jest.mock('@kbn/elastic-assistant');
-jest.mock('../../../../context/typed_kibana_context/typed_kibana_context');
+vi.mock('@kbn/elastic-assistant');
+vi.mock('../../../../context/typed_kibana_context/typed_kibana_context');
 
-const mockNavigateToApp = jest.fn();
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseAssistantContext = useAssistantContext as jest.Mock;
+const mockNavigateToApp = vi.fn();
+const mockUseKibana = useKibana as Mock;
+const mockUseAssistantContext = useAssistantContext as Mock;
 
 const defaultProps = {
   contentReferenceNode: {
@@ -41,7 +44,7 @@ const defaultProps = {
 
 describe('SecurityAlertReference', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: { application: { navigateToApp: mockNavigateToApp } },
     });

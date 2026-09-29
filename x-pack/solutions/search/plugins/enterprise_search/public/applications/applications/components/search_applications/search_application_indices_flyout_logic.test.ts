@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -54,8 +56,8 @@ describe('SearchApplicationIndicesFlyoutLogic', () => {
   const { mount: apiLogicMount } = new LogicMounter(FetchSearchApplicationApiLogic);
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
     apiLogicMount();
     mount();
   });
@@ -100,8 +102,8 @@ describe('SearchApplicationIndicesFlyoutLogic', () => {
       FetchSearchApplicationApiLogic.actions.apiSuccess(mockSearchApplicationData);
     });
     it('fetch search applications flyout when flyout is visible', async () => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
-      SearchApplicationIndicesFlyoutLogic.actions.openFlyout = jest.fn();
+      vi.useFakeTimers({ legacyFakeTimers: true });
+      SearchApplicationIndicesFlyoutLogic.actions.openFlyout = vi.fn();
       SearchApplicationIndicesFlyoutLogic.actions.openFlyout('my-test-search-application');
       await nextTick();
       expect(SearchApplicationIndicesFlyoutLogic.actions.openFlyout).toHaveBeenCalledTimes(1);

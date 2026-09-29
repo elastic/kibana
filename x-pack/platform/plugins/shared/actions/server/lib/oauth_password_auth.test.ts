@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Request, Response, Headers } from 'undici';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AuthTypeRegistry, registerAuthTypes } from '../auth_types';
@@ -12,7 +14,7 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { connectorTokenClientMock } from './connector_token_client.mock';
 import { getAxiosInstanceWithAuth } from './get_axios_instance';
 
-jest.mock('axios', () => jest.requireActual('axios/dist/node/axios.cjs'));
+vi.mock('axios', () => require('axios/dist/node/axios.cjs'));
 
 let nock: typeof import('nock');
 const origin = 'https://threatq.example.com';
@@ -62,11 +64,11 @@ describe('OAuth password authentication', () => {
 
   beforeAll(() => {
     Object.assign(globalThis, { Request, Response, Headers });
-    nock = jest.requireActual('nock');
+    nock = require('nock');
     nock.disableNetConnect();
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     configurationUtilities.ensureUriAllowed.mockReset();
     connectorTokenClient.get
       .mockReset()

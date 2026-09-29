@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -19,15 +21,15 @@ import { AnalyticsCollectionExplorerTable } from './analytics_collection_explore
 
 describe('AnalyticsCollectionExplorerTable', () => {
   const mockActions = {
-    onTableChange: jest.fn(),
-    setPageIndex: jest.fn(),
-    setPageSize: jest.fn(),
-    setSearch: jest.fn(),
-    setSelectedTable: jest.fn(),
+    onTableChange: vi.fn(),
+    setPageIndex: vi.fn(),
+    setPageSize: vi.fn(),
+    setSearch: vi.fn(),
+    setSelectedTable: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     setMockValues({ items: [], selectedTable: ExploreTables.Clicked });
     setMockActions(mockActions);

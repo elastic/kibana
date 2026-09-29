@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -13,25 +16,25 @@ import { bootstrapCleanupWorkflow, createCleanupWorkflowService } from './cleanu
 
 const createLogger = (): Logger => {
   const logger = {
-    get: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    get: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
-  (logger.get as jest.Mock).mockReturnValue(logger);
+  (logger.get as Mock).mockReturnValue(logger);
   return logger;
 };
 
 const createManagementApi = () => {
-  const getWorkflow = jest.fn();
+  const getWorkflow = vi.fn();
   return {
     getWorkflow,
-    getClient: jest.fn(() => ({ getWorkflow })),
-    updateWorkflow: jest.fn().mockResolvedValue({}),
-  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
+    getClient: vi.fn(() => ({ getWorkflow })),
+    updateWorkflow: vi.fn().mockResolvedValue({}),
+  } as unknown as Mocked<WorkflowsServerPluginSetup['management']>;
 };
 
 const createManagedWorkflowsClient = () => ({
-  install: jest.fn().mockResolvedValue(undefined),
+  install: vi.fn().mockResolvedValue(undefined),
 });
 
 const request = {} as KibanaRequest;
@@ -53,11 +56,11 @@ describe('CleanupWorkflowService', () => {
     createCleanupWorkflowService({
       logger,
       managementApi,
-      getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
+      getManagedWorkflowsClient: vi.fn().mockResolvedValue(managedWorkflowsClient),
     });
 
   it('installs and enables the workflow for the requested space', async () => {
-    (managementApi.getWorkflow as jest.Mock)
+    (managementApi.getWorkflow as Mock)
       .mockResolvedValueOnce(undefined)
       .mockResolvedValueOnce({ enabled: false });
 
@@ -76,7 +79,7 @@ describe('CleanupWorkflowService', () => {
   });
 
   it('is a no-op when the per-space workflow is already enabled', async () => {
-    (managementApi.getWorkflow as jest.Mock).mockResolvedValue({ enabled: true });
+    (managementApi.getWorkflow as Mock).mockResolvedValue({ enabled: true });
 
     await createService().ensureEnabled({ request, spaceId });
 
@@ -85,7 +88,7 @@ describe('CleanupWorkflowService', () => {
   });
 
   it('does not enable when best-effort installation did not persist the workflow', async () => {
-    (managementApi.getWorkflow as jest.Mock).mockResolvedValue(undefined);
+    (managementApi.getWorkflow as Mock).mockResolvedValue(undefined);
 
     await createService().ensureEnabled({ request, spaceId });
 
@@ -98,14 +101,14 @@ describe('CleanupWorkflowService', () => {
 
 describe('bootstrapCleanupWorkflow', () => {
   const logger = createLogger();
-  const ensureEnabled = jest.fn();
+  const ensureEnabled = vi.fn();
   const cleanupWorkflowService = { ensureEnabled };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('skips cleanup bootstrap while maintenance is paused', async () => {
     const maintenanceService = {
-      getState: jest.fn().mockResolvedValue('paused'),
+      getState: vi.fn().mockResolvedValue('paused'),
     } as unknown as SignificantEventsMaintenanceService;
 
     await bootstrapCleanupWorkflow({
@@ -122,7 +125,7 @@ describe('bootstrapCleanupWorkflow', () => {
   it('logs enablement failures without rejecting', async () => {
     ensureEnabled.mockRejectedValue(new Error('workflow unavailable'));
     const maintenanceService = {
-      getState: jest.fn().mockResolvedValue('enabled'),
+      getState: vi.fn().mockResolvedValue('enabled'),
     } as unknown as SignificantEventsMaintenanceService;
 
     await expect(

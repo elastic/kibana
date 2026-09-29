@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { DataSourceCategory } from '../../../../context_awareness/profiles';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__/context_awareness';
@@ -30,7 +32,7 @@ const setup = async ({
   services.profilesManager = profilesManagerMock;
 
   if (resolvedProfile) {
-    jest.mocked(dataSourceProfileProviderMock.resolve).mockReturnValue(
+    vi.mocked(dataSourceProfileProviderMock.resolve).mockReturnValue(
       resolvedProfile === 'metrics'
         ? {
             isMatch: true,

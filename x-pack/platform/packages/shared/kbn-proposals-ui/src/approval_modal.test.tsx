@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -29,9 +31,9 @@ const mockProposal: ApprovalProposal = {
 
 const baseProps: ApprovalModalProps = {
   proposal: mockProposal,
-  onConfirm: jest.fn().mockResolvedValue(undefined),
-  onClose: jest.fn(),
-  onDismiss: jest.fn(),
+  onConfirm: vi.fn().mockResolvedValue(undefined),
+  onClose: vi.fn(),
+  onDismiss: vi.fn(),
   'data-test-subj': 'approvalModal',
 };
 
@@ -40,7 +42,7 @@ const renderModal = (props: Partial<ApprovalModalProps> = {}) =>
 
 describe('ApprovalModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('titles the modal with the action name and shows the needs-review badge', () => {
@@ -125,7 +127,7 @@ describe('ApprovalModal', () => {
         id: 'always-allow',
         label: <span>Always allow session revocation in this case</span>,
         checked: false,
-        onChange: jest.fn(),
+        onChange: vi.fn(),
       },
     });
     expect(screen.getByRole('checkbox')).toBeInTheDocument();
@@ -133,7 +135,7 @@ describe('ApprovalModal', () => {
   });
 
   it('calls onChange when always-allow checkbox is toggled', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderModal({
       alwaysAllow: { id: 'always-allow', label: 'Always allow', checked: false, onChange },
     });
@@ -248,7 +250,7 @@ describe('ApprovalModal', () => {
   });
 
   it('reverts to pending and shows an error when onConfirm rejects', async () => {
-    const onConfirm = jest.fn().mockRejectedValue(new Error('The action rejected its inputs.'));
+    const onConfirm = vi.fn().mockRejectedValue(new Error('The action rejected its inputs.'));
     renderModal({ onConfirm });
 
     fireEvent.click(screen.getByTestId('approvalModal-confirm'));

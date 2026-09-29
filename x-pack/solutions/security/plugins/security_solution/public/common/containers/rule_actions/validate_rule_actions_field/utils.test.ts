@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { getActionTypeName, validateMustache, validateActionParams } from './utils';
 
@@ -38,7 +40,7 @@ describe('RuleActions utils', () => {
   });
 
   describe('validateActionParams', () => {
-    const validateParamsMock = jest.fn();
+    const validateParamsMock = vi.fn();
     const actionTypeRegistry = actionTypeRegistryMock.create();
 
     beforeAll(() => {

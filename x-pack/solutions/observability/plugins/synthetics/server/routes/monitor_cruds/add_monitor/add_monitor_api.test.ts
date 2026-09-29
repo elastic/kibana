@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { AddEditMonitorAPI, isPackagePolicyConflictFailure } from './add_monitor_api';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -41,22 +44,22 @@ describe('isPackagePolicyConflictFailure', () => {
 
 describe('AddNewMonitorsPublicAPI', () => {
   describe('revertMonitorIfCreated', () => {
-    const buildApi = (get: jest.Mock) =>
+    const buildApi = (get: Mock) =>
       new AddEditMonitorAPI({
-        server: { logger: { error: jest.fn() } },
+        server: { logger: { error: vi.fn() } },
         spaceId: 'default',
         monitorConfigRepository: { get },
       } as any);
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('does not delete policies when a conflicting existing monitor owns the id', async () => {
-      const bulkDelete = jest
+      const bulkDelete = vi
         .spyOn(PackagePolicyService.prototype, 'bulkDelete')
         .mockResolvedValue(undefined);
-      const api = buildApi(jest.fn().mockResolvedValue({ id: 'monitor-1' }));
+      const api = buildApi(vi.fn().mockResolvedValue({ id: 'monitor-1' }));
 
       await api.revertMonitorIfCreated({
         newMonitorId: 'monitor-1',
@@ -68,10 +71,10 @@ describe('AddNewMonitorsPublicAPI', () => {
     });
 
     it('deletes deterministic orphan policies when no monitor owns the id', async () => {
-      const bulkDelete = jest
+      const bulkDelete = vi
         .spyOn(PackagePolicyService.prototype, 'bulkDelete')
         .mockResolvedValue(undefined);
-      const api = buildApi(jest.fn().mockResolvedValue(null));
+      const api = buildApi(vi.fn().mockResolvedValue(null));
 
       await api.revertMonitorIfCreated({
         newMonitorId: 'monitor-1',
@@ -86,11 +89,11 @@ describe('AddNewMonitorsPublicAPI', () => {
     });
 
     it('does not delete policies when the monitor SO was created and revert fails', async () => {
-      const bulkDelete = jest
+      const bulkDelete = vi
         .spyOn(PackagePolicyService.prototype, 'bulkDelete')
         .mockResolvedValue(undefined);
-      jest.spyOn(DeleteMonitorAPI.prototype, 'execute').mockRejectedValue(new Error('forbidden'));
-      const api = buildApi(jest.fn().mockResolvedValue({ id: 'monitor-1' }));
+      vi.spyOn(DeleteMonitorAPI.prototype, 'execute').mockRejectedValue(new Error('forbidden'));
+      const api = buildApi(vi.fn().mockResolvedValue({ id: 'monitor-1' }));
 
       await api.revertMonitorIfCreated({
         newMonitorId: 'monitor-1',
@@ -102,13 +105,13 @@ describe('AddNewMonitorsPublicAPI', () => {
     });
 
     it('deletes the monitor and its policies via DeleteMonitorAPI when the monitor SO was created', async () => {
-      const bulkDelete = jest
+      const bulkDelete = vi
         .spyOn(PackagePolicyService.prototype, 'bulkDelete')
         .mockResolvedValue(undefined);
-      const deleteMonitorExecute = jest
+      const deleteMonitorExecute = vi
         .spyOn(DeleteMonitorAPI.prototype, 'execute')
         .mockResolvedValue(undefined as any);
-      const api = buildApi(jest.fn().mockResolvedValue({ id: 'monitor-1' }));
+      const api = buildApi(vi.fn().mockResolvedValue({ id: 'monitor-1' }));
 
       await api.revertMonitorIfCreated({
         newMonitorId: 'monitor-1',
@@ -389,7 +392,7 @@ describe('AddNewMonitorsPublicAPI', () => {
   describe('normalizeMonitor - maintenance windows', () => {
     const buildApi = (maintenanceWindows: Array<{ id: string; title: string }>) => {
       const syntheticsService = new SyntheticsService({ config: {} } as any);
-      syntheticsService.getMaintenanceWindows = jest.fn().mockResolvedValue(maintenanceWindows);
+      syntheticsService.getMaintenanceWindows = vi.fn().mockResolvedValue(maintenanceWindows);
       return {
         api: new AddEditMonitorAPI({
           spaceId: 'default',

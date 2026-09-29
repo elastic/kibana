@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
@@ -14,8 +16,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { ESQLMenu } from '.';
 
-jest.mock('./help_popover', () => {
-  const ReactActual = jest.requireActual('react');
+vi.mock('./help_popover', () => {
+  const ReactActual = require('react');
   return {
     HelpPopover: (props: { hideRecommendedQueries?: boolean }) =>
       ReactActual.createElement('button', {
@@ -28,7 +30,7 @@ jest.mock('./help_popover', () => {
 
 const startMock = coreMock.createStart();
 startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
-startMock.http.get = jest.fn().mockResolvedValue({ recommendedQueries: [] });
+startMock.http.get = vi.fn().mockResolvedValue({ recommendedQueries: [] });
 startMock.notifications = notificationServiceMock.createStartContract();
 
 const services = { core: startMock, data: { dataViews: {} } };

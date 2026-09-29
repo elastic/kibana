@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,25 +20,31 @@ import {
   useOutputFilterActionContext,
 } from '../../../../contexts/output_filter_context';
 
-jest.mock('../../../../contexts/output_filter_context', () => ({
-  useOutputFilterReadContext: jest.fn(),
-  useOutputFilterActionContext: jest.fn(),
-}));
+vi.mock('../../../../contexts/output_filter_context', () => {
+      const mocked = {
+      useOutputFilterReadContext: vi.fn(),
+      useOutputFilterActionContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./filter_help_modal', () => ({
-  FilterHelpModal: () => <div data-test-subj="filterHelpModal" />,
-}));
+vi.mock('./filter_help_modal', () => {
+      const mocked = {
+      FilterHelpModal: () => <div data-test-subj="filterHelpModal" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseOutputFilterReadContext = useOutputFilterReadContext as jest.MockedFunction<
+const mockUseOutputFilterReadContext = useOutputFilterReadContext as MockedFunction<
   typeof useOutputFilterReadContext
 >;
-const mockUseOutputFilterActionContext = useOutputFilterActionContext as jest.MockedFunction<
+const mockUseOutputFilterActionContext = useOutputFilterActionContext as MockedFunction<
   typeof useOutputFilterActionContext
 >;
 
-const mockSetExpression = jest.fn();
-const mockSetMode = jest.fn();
-const mockSetInvertMatch = jest.fn();
+const mockSetExpression = vi.fn();
+const mockSetMode = vi.fn();
+const mockSetInvertMatch = vi.fn();
 
 const defaultReadContext = {
   expression: '',
@@ -52,13 +61,13 @@ const renderComponent = () =>
   );
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseOutputFilterReadContext.mockReturnValue(defaultReadContext);
   mockUseOutputFilterActionContext.mockReturnValue({
     setExpression: mockSetExpression,
     setMode: mockSetMode,
     setInvertMatch: mockSetInvertMatch,
-    setIsExpanded: jest.fn(),
+    setIsExpanded: vi.fn(),
   });
 });
 

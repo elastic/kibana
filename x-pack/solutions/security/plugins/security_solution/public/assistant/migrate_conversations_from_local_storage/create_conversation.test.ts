@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { httpServiceMock, type HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -12,7 +15,7 @@ import { createConversations } from './create_conversation';
 import { coreMock } from '@kbn/core/public/mocks';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/constants');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/constants');
 let http: HttpSetupMock = coreMock.createSetup().http;
 export const mockConnectors = [
   {
@@ -129,23 +132,23 @@ const conversations = {
     messages: [],
   },
 };
-const getItemStorageMock = jest.fn().mockReturnValue(conversations);
+const getItemStorageMock = vi.fn().mockReturnValue(conversations);
 const mockStorage = {
-  store: jest.fn(),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
+  store: vi.fn(),
+  set: vi.fn(),
+  remove: vi.fn(),
+  clear: vi.fn(),
   get: getItemStorageMock,
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
 };
 
 describe('createConversations', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     http = httpServiceMock.createStartContract();
-    (loadConnectors as jest.Mock).mockResolvedValue(mockConnectors);
+    (loadConnectors as Mock).mockResolvedValue(mockConnectors);
   });
 
   it('should call bulk conversations with the transformed conversations from the local storage', async () => {

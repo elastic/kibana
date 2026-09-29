@@ -6,20 +6,26 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { getFormattedFields } from './get_formatted_fields';
 import { formatFieldValueReact } from './format_value';
 import type { DataTableRecord } from '../types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
-jest.mock('./format_value', () => ({
-  formatFieldValueReact: jest.fn(),
-}));
+vi.mock('./format_value', () => {
+      const mocked = {
+      formatFieldValueReact: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getFormattedFields', () => {
   const mockDataView = {
     fields: {
-      getByName: jest.fn(),
+      getByName: vi.fn(),
     },
   } as unknown as DataView;
 
@@ -37,11 +43,11 @@ describe('getFormattedFields', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('formats fields correctly when values exist', () => {
-    (formatFieldValueReact as jest.Mock).mockImplementation(({ value }) => `formatted_${value}`);
+    (formatFieldValueReact as Mock).mockImplementation(({ value }) => `formatted_${value}`);
 
     const result = getFormattedFields(mockDoc, ['field1', 'field2'], {
       dataView: mockDataView,
@@ -97,7 +103,7 @@ describe('getFormattedFields', () => {
   });
 
   it('calls dataView.fields.getByName for each field', () => {
-    mockDataView.fields.getByName = jest.fn().mockReturnValue('mockField');
+    mockDataView.fields.getByName = vi.fn().mockReturnValue('mockField');
 
     getFormattedFields(mockDoc, ['field1', 'field2'], {
       dataView: mockDataView,

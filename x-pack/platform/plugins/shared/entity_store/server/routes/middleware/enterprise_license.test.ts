@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { enterpriseLicenseMiddleware } from './enterprise_license';
 
 describe('enterpriseLicenseMiddleware', () => {
   let mockCtx: {
-    licensing: Promise<{ license: { hasAtLeast: jest.Mock } }>;
+    licensing: Promise<{ license: { hasAtLeast: Mock } }>;
   };
   let mockReq: unknown;
   let mockRes: {
-    forbidden: jest.Mock;
+    forbidden: Mock;
   };
-  let hasAtLeast: jest.Mock;
+  let hasAtLeast: Mock;
 
   beforeEach(() => {
-    hasAtLeast = jest.fn();
+    hasAtLeast = vi.fn();
     mockCtx = {
       licensing: Promise.resolve({
         license: { hasAtLeast },
@@ -26,7 +29,7 @@ describe('enterpriseLicenseMiddleware', () => {
     };
     mockReq = {};
     mockRes = {
-      forbidden: jest.fn(({ body }) => ({
+      forbidden: vi.fn(({ body }) => ({
         status: 403,
         payload: body,
       })),

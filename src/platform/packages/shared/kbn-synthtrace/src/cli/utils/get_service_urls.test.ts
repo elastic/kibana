@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createLogger, LogLevel } from '../../lib/utils/create_logger';
 import type { RunOptions } from './parse_run_cli_flags';
 import { getServiceUrls } from './get_service_urls';
 
-const mockedFetch = jest.spyOn(global, 'fetch');
-jest.mock('./ssl');
-jest.mock('./get_service_urls', () => ({
-  ...jest.requireActual('./get_service_urls'),
-  discoverAuth: jest.fn(),
-}));
+const mockedFetch = vi.spyOn(global, 'fetch');
+vi.mock('./ssl');
+vi.mock('./get_service_urls', async () => {
+      const mocked = {
+      ...(await vi.importActual('./get_service_urls')),
+      discoverAuth: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const logger = createLogger(LogLevel.debug);
 const runOptions = {
@@ -27,7 +32,7 @@ const runOptions = {
 
 describe('getServiceUrls', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('localhost Stateful', () => {
@@ -258,7 +263,7 @@ describe('getServiceUrls', () => {
       const kibana = 'https://elastic_serverless:changeme@localhost:5601';
       const kibanaWithoutAuth = 'https://localhost:5601';
 
-      const warnSpy = jest.spyOn(logger, 'warning');
+      const warnSpy = vi.spyOn(logger, 'warning');
       mockFetchWithAllowedSegments([target, kibanaWithoutAuth]);
       await expectServiceUrls(target, kibana, undefined, {
         esUrl: 'https://elastic_serverless:changeme@127.0.0.1:9200',

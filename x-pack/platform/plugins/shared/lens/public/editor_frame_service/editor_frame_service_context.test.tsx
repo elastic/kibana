@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EditorFrameServiceProvider, useEditorFrameService } from './editor_frame_service_context';
@@ -45,7 +47,7 @@ describe('EditorFrameServiceContext', () => {
 
   it('throws error when useEditorFrameService is used outside provider', () => {
     // Suppress console.error for this test
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     expect(() => {
       render(<TestComponent />);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
@@ -18,9 +21,9 @@ import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { OPERATOR_TITLES } from '../../translations';
 
-let onRemoveMock: jest.Mock;
-let onChangeMock: jest.Mock;
-let onVisitedMock: jest.Mock;
+let onRemoveMock: Mock;
+let onChangeMock: Mock;
+let onVisitedMock: Mock;
 
 const baseEntry: Readonly<TrustedAppConditionEntry> = {
   field: ConditionEntryField.HASH,
@@ -31,15 +34,15 @@ const baseEntry: Readonly<TrustedAppConditionEntry> = {
 
 describe('Condition entry input', () => {
   const formPrefix = 'condition-entry-input';
-  let props: jest.Mocked<ConditionEntryInputProps>;
+  let props: Mocked<ConditionEntryInputProps>;
   let mockedContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    onRemoveMock = jest.fn();
-    onChangeMock = jest.fn();
-    onVisitedMock = jest.fn();
+    onRemoveMock = vi.fn();
+    onChangeMock = vi.fn();
+    onVisitedMock = vi.fn();
     props = {
       os: OperatingSystem.WINDOWS,
       entry: baseEntry,

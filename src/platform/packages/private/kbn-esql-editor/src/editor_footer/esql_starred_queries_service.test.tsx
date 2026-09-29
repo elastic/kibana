@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { EsqlStarredQueriesService } from './esql_starred_queries_service';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -36,7 +38,7 @@ describe('EsqlStarredQueriesService', () => {
   const storage = new LocalStorageMock({}) as unknown as Storage;
 
   const isUserProfileEnabled$ = new BehaviorSubject<boolean>(true);
-  jest.spyOn(core.userProfile, 'getEnabled$').mockImplementation(() => isUserProfileEnabled$);
+  vi.spyOn(core.userProfile, 'getEnabled$').mockImplementation(() => isUserProfileEnabled$);
 
   beforeEach(() => {
     isUserProfileEnabled$.next(true);

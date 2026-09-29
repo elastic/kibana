@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { LegendSizeSettingsProps } from './legend_size_settings';
 import { LegendSizeSettings } from './legend_size_settings';
@@ -45,7 +47,7 @@ describe('legend size settings', () => {
   });
 
   it('allows user to select a new option', async () => {
-    const onSizeChange = jest.fn();
+    const onSizeChange = vi.fn();
     renderLegendSizeSettings({ onLegendSizeChange: onSizeChange });
     await chooseOption('Extra large');
     await chooseOption('Medium');

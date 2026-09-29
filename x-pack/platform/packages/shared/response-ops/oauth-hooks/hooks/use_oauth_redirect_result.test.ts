@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-const mockReplace = jest.fn();
-jest.mock('react-router-dom', () => ({
-  useLocation: jest.fn(),
-  useHistory: jest.fn(() => ({ replace: mockReplace })),
-}));
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
+const mockReplace = vi.fn();
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useLocation: vi.fn(),
+      useHistory: vi.fn(() => ({ replace: mockReplace })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { renderHook } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 import { useOAuthRedirectResult } from './use_oauth_redirect_result';
 import { OAUTH_BROADCAST_CHANNEL_NAME } from '../oauth';
 
-const useLocationMock = useLocation as jest.MockedFunction<typeof useLocation>;
+const useLocationMock = useLocation as MockedFunction<typeof useLocation>;
 
 class MockBroadcastChannel {
   static instances: MockBroadcastChannel[] = [];
@@ -33,7 +39,7 @@ class MockBroadcastChannel {
     this.messages.push(data);
   }
 
-  close = jest.fn();
+  close = vi.fn();
 }
 
 describe('useOAuthRedirectResult', () => {
@@ -41,10 +47,10 @@ describe('useOAuthRedirectResult', () => {
   const originalWindowClose = window.close;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     MockBroadcastChannel.instances = [];
     globalThis.BroadcastChannel = MockBroadcastChannel as never;
-    window.close = jest.fn();
+    window.close = vi.fn();
   });
 
   afterEach(() => {
@@ -64,8 +70,8 @@ describe('useOAuthRedirectResult', () => {
 
   it('does nothing when no oauth_authorization param is present', () => {
     setLocation('');
-    const onSuccess = jest.fn();
-    const onError = jest.fn();
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
 
     renderHook(() => useOAuthRedirectResult({ onSuccess, onError }));
 
@@ -76,7 +82,7 @@ describe('useOAuthRedirectResult', () => {
 
   it('does nothing when connector_id param is missing', () => {
     setLocation('?oauth_authorization=success');
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     renderHook(() => useOAuthRedirectResult({ onSuccess }));
 
@@ -86,7 +92,7 @@ describe('useOAuthRedirectResult', () => {
 
   it('calls onSuccess and broadcasts success message', () => {
     setLocation('?oauth_authorization=success&connector_id=conn-1');
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     renderHook(() => useOAuthRedirectResult({ onSuccess }));
 
@@ -101,7 +107,7 @@ describe('useOAuthRedirectResult', () => {
 
   it('calls onError and broadcasts error message when authorization fails', () => {
     setLocation('?oauth_authorization=error&connector_id=conn-2');
-    const onError = jest.fn();
+    const onError = vi.fn();
 
     renderHook(() => useOAuthRedirectResult({ onError }));
 

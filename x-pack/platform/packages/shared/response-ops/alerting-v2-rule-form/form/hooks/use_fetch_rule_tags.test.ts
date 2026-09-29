@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -18,7 +20,7 @@ describe('useFetchRuleTags', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     http = httpServiceMock.createStartContract();
   });
 

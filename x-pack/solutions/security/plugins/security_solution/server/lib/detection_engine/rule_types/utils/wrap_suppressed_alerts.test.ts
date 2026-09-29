@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { wrapSuppressedAlerts } from './wrap_suppressed_alerts';
 
 import {
@@ -21,9 +24,12 @@ import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { getSharedParamsMock } from '../__mocks__/shared_params';
 
-jest.mock('../factories/utils/transform_hit_to_alert', () => ({ transformHitToAlert: jest.fn() }));
+vi.mock('../factories/utils/transform_hit_to_alert', () => {
+      const mocked = { transformHitToAlert: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const transformHitToAlertMock = transformHitToAlert as jest.Mock;
+const transformHitToAlertMock = transformHitToAlert as Mock;
 
 const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
 

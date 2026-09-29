@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { RequestHandlerContext, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -19,7 +21,10 @@ import { transformDiscoverSessionIn } from './transforms';
 import { upsertDiscoverSession } from './session_upsert';
 import { assignStoredInlineDataViewIds } from './transforms/assign_stored_inline_data_view_ids';
 
-jest.mock('uuid', () => ({ v4: jest.fn(() => 'generated-inline-id') }));
+vi.mock('uuid', () => {
+      const mocked = { v4: vi.fn(() => 'generated-inline-id') };
+      return { ...mocked, default: mocked };
+    });
 
 const { attributes: apiAttributes, references } =
   transformDiscoverSessionIn(discoverSessionApiData);
@@ -44,9 +49,9 @@ describe('upsertDiscoverSession', () => {
 
   beforeEach(() => {
     coreContext = coreMock.createRequestHandlerContext();
-    requestContext = jest.mocked<RequestHandlerContext>({
+    requestContext = vi.mocked<RequestHandlerContext>({
       core: Promise.resolve(coreContext),
-      resolve: jest.fn().mockResolvedValue({ core: coreContext }),
+      resolve: vi.fn().mockResolvedValue({ core: coreContext }),
     });
   });
 

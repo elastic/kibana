@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { MAX_LEADS_PER_RUN } from '../../../../../common/entity_analytics/lead_generation/constants';
@@ -12,7 +15,7 @@ import type { LeadEntity, Observation, ObservationModule, ScoredEntity } from '.
 import { createLeadGenerationEngine, computeCohortContext } from './lead_generation_engine';
 import { llmSynthesizeBatch } from './llm_synthesize';
 
-jest.mock('./llm_synthesize');
+vi.mock('./llm_synthesize');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -51,7 +54,7 @@ const createMockModule = (
 ): ObservationModule =>
   ({
     config: { id, name: id, priority: 50, weight },
-    isEnabled: jest.fn().mockReturnValue(true),
+    isEnabled: vi.fn().mockReturnValue(true),
     collect: collectFn,
   } as ObservationModule);
 
@@ -72,13 +75,13 @@ const runEngine = async (
 
 describe('LeadGenerationEngine', () => {
   const logger = loggingSystemMock.createLogger();
-  const mockLlmSynthesizeBatch = llmSynthesizeBatch as jest.MockedFunction<
+  const mockLlmSynthesizeBatch = llmSynthesizeBatch as MockedFunction<
     typeof llmSynthesizeBatch
   >;
-  const fakeChatModel = { invoke: jest.fn() } as unknown as InferenceChatModel;
+  const fakeChatModel = { invoke: vi.fn() } as unknown as InferenceChatModel;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockLlmSynthesizeBatch.mockImplementation(async (_model, entities) =>
       entities.map(() => ({
         title: 'LLM title',
@@ -104,7 +107,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs]))
+        createMockModule('risk_analysis', 0.35, vi.fn().mockResolvedValue([obs]))
       );
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
@@ -131,7 +134,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs1, obs2]))
+        createMockModule('risk_analysis', 0.35, vi.fn().mockResolvedValue([obs1, obs2]))
       );
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
@@ -160,10 +163,10 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([riskObs]))
+        createMockModule('risk_analysis', 0.35, vi.fn().mockResolvedValue([riskObs]))
       );
       engine.registerModule(
-        createMockModule('behavioral_analysis', 0.3, jest.fn().mockResolvedValue([alertObs]))
+        createMockModule('behavioral_analysis', 0.3, vi.fn().mockResolvedValue([alertObs]))
       );
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
@@ -198,10 +201,10 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([risk1, risk2]))
+        createMockModule('risk_analysis', 0.35, vi.fn().mockResolvedValue([risk1, risk2]))
       );
       engine.registerModule(
-        createMockModule('behavioral_analysis', 0.3, jest.fn().mockResolvedValue([alert]))
+        createMockModule('behavioral_analysis', 0.3, vi.fn().mockResolvedValue([alert]))
       );
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
@@ -228,7 +231,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs]))
+        createMockModule('risk_analysis', 0.35, vi.fn().mockResolvedValue([obs]))
       );
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
@@ -251,7 +254,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('risk_analysis', 0.5, jest.fn().mockResolvedValue(observations))
+        createMockModule('risk_analysis', 0.5, vi.fn().mockResolvedValue(observations))
       );
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
@@ -273,7 +276,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs]))
+        createMockModule('risk_analysis', 0.35, vi.fn().mockResolvedValue([obs]))
       );
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
@@ -294,7 +297,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs]))
+        createMockModule('risk_analysis', 0.35, vi.fn().mockResolvedValue([obs]))
       );
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
@@ -314,7 +317,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('known_module', 0.35, jest.fn().mockResolvedValue([obs]))
+        createMockModule('known_module', 0.35, vi.fn().mockResolvedValue([obs]))
       );
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
@@ -346,8 +349,8 @@ describe('LeadGenerationEngine', () => {
           normalizationCeiling: 50,
         },
       });
-      engine.registerModule(createMockModule('mod_a', 0.5, jest.fn().mockResolvedValue([obs1])));
-      engine.registerModule(createMockModule('mod_b', 0.5, jest.fn().mockResolvedValue([obs2])));
+      engine.registerModule(createMockModule('mod_a', 0.5, vi.fn().mockResolvedValue([obs1])));
+      engine.registerModule(createMockModule('mod_b', 0.5, vi.fn().mockResolvedValue([obs2])));
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
 
@@ -367,7 +370,7 @@ describe('LeadGenerationEngine', () => {
   describe('prepareLeadCandidates + synthesizeLeads', () => {
     it('returns empty array for no entities', async () => {
       const engine = createLeadGenerationEngine({ logger });
-      engine.registerModule(createMockModule('m', 0.5, jest.fn().mockResolvedValue([])));
+      engine.registerModule(createMockModule('m', 0.5, vi.fn().mockResolvedValue([])));
 
       const leads = await runEngine(engine, [], fakeChatModel);
       expect(leads).toEqual([]);
@@ -376,7 +379,7 @@ describe('LeadGenerationEngine', () => {
     it('returns empty array when no observations are collected', async () => {
       const entity = createMockEntity('alice');
       const engine = createLeadGenerationEngine({ logger });
-      engine.registerModule(createMockModule('m', 0.5, jest.fn().mockResolvedValue([])));
+      engine.registerModule(createMockModule('m', 0.5, vi.fn().mockResolvedValue([])));
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
       expect(leads).toEqual([]);
@@ -396,7 +399,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger, config: { minObservations: 2 } });
       engine.registerModule(
-        createMockModule('mod', 0.5, jest.fn().mockResolvedValue([aliceObs1, aliceObs2, bobObs]))
+        createMockModule('mod', 0.5, vi.fn().mockResolvedValue([aliceObs1, aliceObs2, bobObs]))
       );
 
       const leads = await runEngine(engine, [alice, bob], fakeChatModel);
@@ -414,7 +417,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger, config: { maxLeads: 3 } });
       engine.registerModule(
-        createMockModule('mod', 0.5, jest.fn().mockResolvedValue(observations))
+        createMockModule('mod', 0.5, vi.fn().mockResolvedValue(observations))
       );
 
       const leads = await runEngine(engine, entities, fakeChatModel);
@@ -429,7 +432,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger, config: { maxLeads: 3 } });
       engine.registerModule(
-        createMockModule('mod', 0.5, jest.fn().mockResolvedValue(observations))
+        createMockModule('mod', 0.5, vi.fn().mockResolvedValue(observations))
       );
 
       const { confident, exploratory } = await engine.prepareLeadCandidates(entities);
@@ -449,7 +452,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('mod', 0.5, jest.fn().mockResolvedValue(observations))
+        createMockModule('mod', 0.5, vi.fn().mockResolvedValue(observations))
       );
 
       const { confident, exploratory } = await engine.prepareLeadCandidates(entities);
@@ -484,7 +487,7 @@ describe('LeadGenerationEngine', () => {
         config: { minObservations: 2, maxLeads: 0 },
       });
       engine.registerModule(
-        createMockModule('mod', 0.5, jest.fn().mockResolvedValue([aliceObs1, aliceObs2, bobObs]))
+        createMockModule('mod', 0.5, vi.fn().mockResolvedValue([aliceObs1, aliceObs2, bobObs]))
       );
 
       const { confident, exploratory } = await engine.prepareLeadCandidates([alice, bob]);
@@ -511,7 +514,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('mod', 0.35, jest.fn().mockResolvedValue([lowObs, highObs]))
+        createMockModule('mod', 0.35, vi.fn().mockResolvedValue([lowObs, highObs]))
       );
 
       const leads = await runEngine(engine, [low, high], fakeChatModel);
@@ -525,9 +528,9 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('failing', 0.5, jest.fn().mockRejectedValue(new Error('kaboom')))
+        createMockModule('failing', 0.5, vi.fn().mockRejectedValue(new Error('kaboom')))
       );
-      engine.registerModule(createMockModule('working', 0.3, jest.fn().mockResolvedValue([obs])));
+      engine.registerModule(createMockModule('working', 0.3, vi.fn().mockResolvedValue([obs])));
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
 
@@ -541,13 +544,13 @@ describe('LeadGenerationEngine', () => {
 
       const disabledModule: ObservationModule = {
         config: { id: 'disabled', name: 'disabled', priority: 100, weight: 0.5 },
-        isEnabled: jest.fn().mockReturnValue(false),
-        collect: jest.fn(),
+        isEnabled: vi.fn().mockReturnValue(false),
+        collect: vi.fn(),
       } as ObservationModule;
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(disabledModule);
-      engine.registerModule(createMockModule('enabled', 0.3, jest.fn().mockResolvedValue([obs])));
+      engine.registerModule(createMockModule('enabled', 0.3, vi.fn().mockResolvedValue([obs])));
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
 
@@ -559,7 +562,7 @@ describe('LeadGenerationEngine', () => {
       const entity = createMockEntity('alice');
       const obs = createMockObservation(entity, 'mod', { score: 80, confidence: 0.9 });
       const engine = createLeadGenerationEngine({ logger });
-      engine.registerModule(createMockModule('mod', 0.5, jest.fn().mockResolvedValue([obs])));
+      engine.registerModule(createMockModule('mod', 0.5, vi.fn().mockResolvedValue([obs])));
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
 
@@ -573,7 +576,7 @@ describe('LeadGenerationEngine', () => {
       });
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('behavioral_analysis', 0.3, jest.fn().mockResolvedValue([obs]))
+        createMockModule('behavioral_analysis', 0.3, vi.fn().mockResolvedValue([obs]))
       );
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
@@ -606,7 +609,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs]))
+        createMockModule('risk_analysis', 0.35, vi.fn().mockResolvedValue([obs]))
       );
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
@@ -645,7 +648,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs]))
+        createMockModule('risk_analysis', 0.35, vi.fn().mockResolvedValue([obs]))
       );
 
       const leads = await runEngine(engine, [entity], fakeChatModel);
@@ -667,7 +670,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([obs]))
+        createMockModule('risk_analysis', 0.35, vi.fn().mockResolvedValue([obs]))
       );
 
       await expect(runEngine(engine, [entity], fakeChatModel)).rejects.toThrow(
@@ -707,7 +710,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('risk_analysis', 0.35, jest.fn().mockResolvedValue([aliceObs, bobObs]))
+        createMockModule('risk_analysis', 0.35, vi.fn().mockResolvedValue([aliceObs, bobObs]))
       );
 
       const leads = await runEngine(engine, [alice, bob], fakeChatModel);
@@ -745,7 +748,7 @@ describe('LeadGenerationEngine', () => {
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(
-        createMockModule('risk_analysis', 0.9, jest.fn().mockResolvedValue([aliceObs, bobObs]))
+        createMockModule('risk_analysis', 0.9, vi.fn().mockResolvedValue([aliceObs, bobObs]))
       );
 
       await runEngine(engine, [alice, bob], fakeChatModel);

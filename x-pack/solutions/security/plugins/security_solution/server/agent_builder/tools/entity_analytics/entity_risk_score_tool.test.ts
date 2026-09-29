@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
@@ -19,16 +22,16 @@ import {
 import { entityRiskScoreTool } from './entity_risk_score_tool';
 import { createGetRiskScores } from '../../../lib/entity_analytics/risk_score/get_risk_score';
 
-jest.mock('../../../lib/entity_analytics/risk_score/get_risk_score');
+vi.mock('../../../lib/entity_analytics/risk_score/get_risk_score');
 
-const mockCreateGetRiskScores = createGetRiskScores as jest.Mock;
+const mockCreateGetRiskScores = createGetRiskScores as Mock;
 
 describe('entityRiskScoreTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const tool = entityRiskScoreTool(mockCore, mockLogger);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupMockCoreStartServices(mockCore, mockEsClient);
   });
 
@@ -155,11 +158,11 @@ describe('entityRiskScoreTool', () => {
 
   describe('handler', () => {
     beforeEach(() => {
-      mockCreateGetRiskScores.mockReturnValue(jest.fn());
+      mockCreateGetRiskScores.mockReturnValue(vi.fn());
     });
 
     it('passes handler context spaceId into createGetRiskScores', async () => {
-      const mockGetRiskScores = jest.fn().mockResolvedValue([
+      const mockGetRiskScores = vi.fn().mockResolvedValue([
         {
           '@timestamp': '2023-01-01T00:00:00Z',
           id_field: 'host.name',
@@ -184,7 +187,7 @@ describe('entityRiskScoreTool', () => {
     });
 
     it('successfully fetches risk score with valid identifierType and identifier', async () => {
-      const mockGetRiskScores = jest.fn().mockResolvedValue([
+      const mockGetRiskScores = vi.fn().mockResolvedValue([
         {
           '@timestamp': '2023-01-01T00:00:00Z',
           id_field: 'host.name',
@@ -247,7 +250,7 @@ describe('entityRiskScoreTool', () => {
     });
 
     it('returns error when no risk score found', async () => {
-      const mockGetRiskScores = jest.fn().mockResolvedValue([]);
+      const mockGetRiskScores = vi.fn().mockResolvedValue([]);
       mockCreateGetRiskScores.mockReturnValue(mockGetRiskScores);
 
       const result = (await tool.handler(
@@ -262,7 +265,7 @@ describe('entityRiskScoreTool', () => {
     });
 
     it('enhances inputs with alert data', async () => {
-      const mockGetRiskScores = jest.fn().mockResolvedValue([
+      const mockGetRiskScores = vi.fn().mockResolvedValue([
         {
           '@timestamp': '2023-01-01T00:00:00Z',
           id_field: 'host.name',
@@ -443,7 +446,7 @@ describe('entityRiskScoreTool', () => {
     });
 
     it('handles ES client failures', async () => {
-      const mockGetRiskScores = jest.fn().mockRejectedValue(new Error('ES error'));
+      const mockGetRiskScores = vi.fn().mockRejectedValue(new Error('ES error'));
       mockCreateGetRiskScores.mockReturnValue(mockGetRiskScores);
 
       const result = (await tool.handler(

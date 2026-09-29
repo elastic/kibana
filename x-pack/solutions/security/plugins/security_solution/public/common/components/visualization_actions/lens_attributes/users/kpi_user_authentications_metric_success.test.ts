@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { wrapper } from '../../mocks';
 
@@ -14,19 +16,22 @@ import { kpiUserAuthenticationsMetricSuccessLensAttributes } from './kpi_user_au
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('../../../../utils/route/use_route_spy', () => ({
-  useRouteSpy: jest.fn().mockReturnValue([
-    {
-      detailName: 'elastic',
-      pageName: 'users',
-      tabName: 'events',
-    },
-  ]),
-}));
+vi.mock('../../../../utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: vi.fn().mockReturnValue([
+        {
+          detailName: 'elastic',
+          pageName: 'users',
+          tabName: 'events',
+        },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('kpiUserAuthenticationsMetricSuccessLensAttributes', () => {
   beforeAll(() => {
-    jest
+    vi
       .mocked(useDataView)
       .mockReturnValue(withIndices(['auditbeat-mytest-*'], 'security-solution-my-test'));
   });

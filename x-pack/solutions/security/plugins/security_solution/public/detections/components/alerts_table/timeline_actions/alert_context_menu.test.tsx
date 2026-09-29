@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { AddExceptionFlyoutWrapper, AlertContextMenu } from './alert_context_menu';
 import { TestProviders } from '../../../../common/mock';
@@ -20,20 +23,29 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { ALERTS_FEATURE_ID, SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-jest.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/components/user_privileges');
 
 const testSecuritySolutionLinkHref = 'test-url';
-jest.mock('../../../../common/components/links', () => ({
-  useGetSecuritySolutionLinkProps: () => () => ({ href: testSecuritySolutionLinkHref }),
-}));
+vi.mock('../../../../common/components/links', () => {
+      const mocked = {
+      useGetSecuritySolutionLinkProps: () => () => ({ href: testSecuritySolutionLinkHref }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_license', () => ({
-  useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true }),
-}));
+vi.mock('../../../../common/hooks/use_license', () => {
+      const mocked = {
+      useLicense: vi.fn().mockReturnValue({ isPlatinumPlus: () => true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ecsRowData: Ecs = {
   _id: '1',
@@ -57,7 +69,7 @@ const props = {
     'Select more actions for the alert or event in row 26, with columns 2021-08-12T11:07:10.552Z Malware Prevention Alert high 73  siem-windows-endpoint SYSTEM powershell.exe mimikatz.exe  ',
   isRemoteDocument: false,
   ecsRowData,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
   timelineId: 'alerts-page',
 };
 
@@ -70,7 +82,7 @@ const mockUseKibanaReturnValue = {
     cases: {
       ...mockCasesContract(),
       helpers: {
-        canUseCases: jest.fn().mockReturnValue({
+        canUseCases: vi.fn().mockReturnValue({
           all: true,
           create: true,
           read: true,
@@ -81,51 +93,63 @@ const mockUseKibanaReturnValue = {
           reopenCase: true,
           manageTemplates: true,
         }),
-        getRuleIdFromEvent: jest.fn(),
+        getRuleIdFromEvent: vi.fn(),
       },
     },
   },
 };
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana'));
 
   return {
     ...original,
-    useToasts: jest.fn().mockReturnValue({
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-      addWarning: jest.fn(),
-      addInfo: jest.fn(),
-      remove: jest.fn(),
+    useToasts: vi.fn().mockReturnValue({
+      addError: vi.fn(),
+      addSuccess: vi.fn(),
+      addWarning: vi.fn(),
+      addInfo: vi.fn(),
+      remove: vi.fn(),
     }),
     useKibana: () => mockUseKibanaReturnValue,
   };
 });
 
-jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true }),
-}));
+vi.mock('../../../containers/detection_engine/alerts/use_alerts_privileges', () => {
+      const mocked = {
+      useAlertsPrivileges: vi.fn().mockReturnValue({ hasAlertsUpdate: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
+const mockUseRunAlertWorkflowPanel = vi.fn().mockReturnValue({
   runWorkflowMenuItem: [],
   runAlertWorkflowPanel: [],
 });
-jest.mock('./use_run_alert_workflow_panel', () => ({
-  useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
-}));
+vi.mock('./use_run_alert_workflow_panel', () => {
+      const mocked = {
+      useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRunDocumentWorkflowPanel = jest.fn().mockReturnValue({
+const mockUseRunDocumentWorkflowPanel = vi.fn().mockReturnValue({
   runWorkflowMenuItem: [],
   runDocumentWorkflowPanel: [],
 });
-jest.mock('./use_run_document_workflow_panel', () => ({
-  useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
-}));
+vi.mock('./use_run_document_workflow_panel', () => {
+      const mocked = {
+      useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAddToChatAction = jest.fn().mockReturnValue({ addToChatActionItems: [] });
-jest.mock('./use_add_to_chat_action', () => ({
-  useAddToChatAction: (...args: unknown[]) => mockUseAddToChatAction(...args),
-}));
+const mockUseAddToChatAction = vi.fn().mockReturnValue({ addToChatActionItems: [] });
+vi.mock('./use_add_to_chat_action', () => {
+      const mocked = {
+      useAddToChatAction: (...args: unknown[]) => mockUseAddToChatAction(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const actionMenuButton = 'timeline-context-menu-button';
 const addToCaseButton = 'add-to-case-action';
@@ -148,32 +172,53 @@ const documentWorkflowPanelContent = 'document-workflow-panel-content';
 // actions` test past Jest's default 5s test timeout (flake on
 // kibana-on-merge build 96698). Replacing the flyouts with no-op components
 // removes the cost at its source.
-jest.mock(
+vi.mock(
   '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout',
-  () => ({ EndpointExceptionsFlyout: () => null })
+  () => {
+      const mocked = { EndpointExceptionsFlyout: () => null };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock('../../osquery/osquery_flyout', () => ({ OsqueryFlyout: () => null }));
-jest.mock('../../../../detection_engine/rule_exceptions/components/add_exception_flyout', () => ({
-  AddExceptionFlyout: jest.fn().mockReturnValue(null),
-}));
+vi.mock('../../osquery/osquery_flyout', () => {
+      const mocked = { OsqueryFlyout: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../detection_engine/rule_exceptions/components/add_exception_flyout', () => {
+      const mocked = {
+      AddExceptionFlyout: vi.fn().mockReturnValue(null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseRuleWithFallback = jest.fn();
-jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => ({
-  useRuleWithFallback: (...args: unknown[]) => mockUseRuleWithFallback(...args),
-}));
+const mockUseRuleWithFallback = vi.fn();
+vi.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => {
+      const mocked = {
+      useRuleWithFallback: (...args: unknown[]) => mockUseRuleWithFallback(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSignalIndex = jest.fn();
-jest.mock('../../../containers/detection_engine/alerts/use_signal_index', () => ({
-  useSignalIndex: () => mockUseSignalIndex(),
-}));
+const mockUseSignalIndex = vi.fn();
+vi.mock('../../../containers/detection_engine/alerts/use_signal_index', () => {
+      const mocked = {
+      useSignalIndex: () => mockUseSignalIndex(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseQueryAlerts = jest.fn();
-jest.mock('../../../containers/detection_engine/alerts/use_query', () => ({
-  useQueryAlerts: (...args: unknown[]) => mockUseQueryAlerts(...args),
-}));
-jest.mock(
+const mockUseQueryAlerts = vi.fn();
+vi.mock('../../../containers/detection_engine/alerts/use_query', () => {
+      const mocked = {
+      useQueryAlerts: (...args: unknown[]) => mockUseQueryAlerts(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock(
   '../../../../management/pages/event_filters/view/components/event_filters_flyout',
-  () => ({ EventFiltersFlyout: () => null })
+  () => {
+      const mocked = { EventFiltersFlyout: () => null };
+      return { ...mocked, default: mocked };
+    }
 );
 
 describe('Alert table context menu', () => {
@@ -416,7 +461,7 @@ describe('Alert table context menu', () => {
 
       describe('when users has write event filters privilege', () => {
         beforeEach(() => {
-          (useUserPrivileges as jest.Mock).mockReturnValue({
+          (useUserPrivileges as Mock).mockReturnValue({
             ...mockInitialUserPrivilegesState(),
             endpointPrivileges: { loading: false, canWriteEventFilters: true },
           });
@@ -549,7 +594,7 @@ describe('Alert table context menu', () => {
           {
             'data-test-subj': addToChatButton,
             name: 'Add to chat',
-            onClick: jest.fn(),
+            onClick: vi.fn(),
           },
         ],
       });
@@ -595,7 +640,7 @@ describe('Alert table context menu', () => {
         runWorkflowMenuItem: [],
         runDocumentWorkflowPanel: [],
       });
-      (useUserPrivileges as jest.Mock).mockReturnValue(mockInitialUserPrivilegesState());
+      (useUserPrivileges as Mock).mockReturnValue(mockInitialUserPrivilegesState());
     });
 
     test('it disables the button and shows the remote tooltip for remote documents', async () => {
@@ -615,7 +660,7 @@ describe('Alert table context menu', () => {
     });
 
     test('it disables the button and shows insufficient privileges when there are no actions', async () => {
-      mockUseKibanaReturnValue.services.cases.helpers.canUseCases = jest.fn().mockReturnValue({
+      mockUseKibanaReturnValue.services.cases.helpers.canUseCases = vi.fn().mockReturnValue({
         all: false,
         create: false,
         read: false,
@@ -628,7 +673,7 @@ describe('Alert table context menu', () => {
         runWorkflowMenuItem: [],
         runDocumentWorkflowPanel: [],
       });
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         ...mockInitialUserPrivilegesState(),
         endpointPrivileges: { loading: false, canWriteEventFilters: false },
       });
@@ -675,21 +720,19 @@ const enrichedAlertWithoutIndex = {
   data: { hits: { hits: [{ _id: 'test-id', _index: 'test-index', _source: {} }] } },
 };
 
-const mockAddExceptionFlyout = jest.requireMock(
-  '../../../../detection_engine/rule_exceptions/components/add_exception_flyout'
-).AddExceptionFlyout as jest.Mock;
+const mockAddExceptionFlyout = (await vi.importMock('../../../../detection_engine/rule_exceptions/components/add_exception_flyout')).AddExceptionFlyout as Mock;
 
 const wrapperDefaults = {
   exceptionListType: null as ExceptionListTypeEnum | null,
   eventId: 'test-id',
-  onCancel: jest.fn(),
-  onConfirm: jest.fn(),
+  onCancel: vi.fn(),
+  onConfirm: vi.fn(),
   alertStatus: 'open' as const,
 };
 
 describe('AddExceptionFlyoutWrapper', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseRuleWithFallback.mockReturnValue({ rule: null, loading: false });
     mockUseSignalIndex.mockReturnValue({ loading: false, signalIndexName: '.siem-signals' });
     mockUseQueryAlerts.mockReturnValue(enrichedAlertWithoutIndex);

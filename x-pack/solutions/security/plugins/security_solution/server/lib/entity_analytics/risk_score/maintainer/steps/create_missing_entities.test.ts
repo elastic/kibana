@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
@@ -15,10 +18,10 @@ import type { ScopedLogger } from '../utils/with_log_context';
 
 const buildLogger = (): ScopedLogger =>
   ({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as unknown as ScopedLogger);
 
 const buildScore = (
@@ -45,7 +48,7 @@ const mockAlertDocsResponse = (
   esClient: ElasticsearchClient,
   docsByEuid: Record<string, Record<string, unknown>>
 ) => {
-  (esClient.search as jest.Mock).mockResolvedValueOnce({
+  (esClient.search as Mock).mockResolvedValueOnce({
     aggregations: {
       by_entity_id: {
         buckets: Object.entries(docsByEuid).map(([key, source]) => ({
@@ -71,7 +74,7 @@ describe('createMissingEntities', () => {
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-    crudClient = { createEntitiesFromSource: jest.fn() } as unknown as EntityUpdateClient;
+    crudClient = { createEntitiesFromSource: vi.fn() } as unknown as EntityUpdateClient;
     logger = buildLogger();
   });
 
@@ -115,7 +118,7 @@ describe('createMissingEntities', () => {
   it('forwards a create request per resolved document with the risk fields, provenance stamp, expectedEntityId, and firstSeen', async () => {
     const source = { user: { name: 'alice' }, host: { id: 'host-1' } };
     mockAlertDocsResponse(esClient, { 'user:alice@host-1@local': source });
-    (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
+    (crudClient.createEntitiesFromSource as Mock).mockResolvedValue({
       created: ['user:alice@host-1@local'],
       alreadyExists: [],
       skipped: [],
@@ -160,7 +163,7 @@ describe('createMissingEntities', () => {
       'user:a@host1@local': { user: { name: 'a' }, host: { id: 'host1' } },
       'user:b@host2@local': { user: { name: 'b' }, host: { id: 'host2' } },
     });
-    (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
+    (crudClient.createEntitiesFromSource as Mock).mockResolvedValue({
       created: ['user:a@host1@local'],
       alreadyExists: ['user:b@host2@local'],
       skipped: [],
@@ -185,7 +188,7 @@ describe('createMissingEntities', () => {
     mockAlertDocsResponse(esClient, {
       'user:idp@okta': { user: { name: 'idp' }, event: { module: 'okta' } },
     });
-    (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
+    (crudClient.createEntitiesFromSource as Mock).mockResolvedValue({
       created: [],
       alreadyExists: [],
       skipped: [{ euid: 'user:idp@okta', reason: 'user_not_local_namespace' }],
@@ -209,7 +212,7 @@ describe('createMissingEntities', () => {
     mockAlertDocsResponse(esClient, {
       'user:idp@okta': { user: { name: 'idp' } },
     });
-    (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
+    (crudClient.createEntitiesFromSource as Mock).mockResolvedValue({
       created: [],
       alreadyExists: [],
       skipped: [],
@@ -233,7 +236,7 @@ describe('createMissingEntities', () => {
       'user:idp@okta': { user: { name: 'idp' } },
       'user:mismatch@host1@local': { user: { name: 'mismatch' }, host: { id: 'host1' } },
     });
-    (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
+    (crudClient.createEntitiesFromSource as Mock).mockResolvedValue({
       created: [],
       alreadyExists: [],
       skipped: [{ euid: 'user:idp@okta', reason: 'user_not_local_namespace' }],

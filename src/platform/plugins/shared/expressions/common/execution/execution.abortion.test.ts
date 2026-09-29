@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { waitFor } from '@testing-library/react';
 import { lastValueFrom } from 'rxjs';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
@@ -15,10 +17,10 @@ import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
 import type { ExpressionFunctionDefinition } from '../expression_functions';
 
-jest.useFakeTimers({ legacyFakeTimers: true });
+vi.useFakeTimers({ legacyFakeTimers: true });
 
 beforeEach(() => {
-  jest.clearAllTimers();
+  vi.clearAllTimers();
 });
 
 const createExecution = (
@@ -57,7 +59,7 @@ describe('Execution abortion tests', () => {
     const execution = createExecution('sleep 300');
 
     execution.start();
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     execution.cancel();
 
     const result = await execution.result.toPromise();
@@ -72,7 +74,7 @@ describe('Execution abortion tests', () => {
   });
 
   test('cancelling execution after it completed has no effect', async () => {
-    jest.useRealTimers();
+    vi.useRealTimers();
 
     const execution = createExecution('sleep 1');
 
@@ -84,14 +86,14 @@ describe('Execution abortion tests', () => {
 
     expect(result).toBe(null);
 
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
 
   test('nested expressions are aborted when parent aborted', async () => {
-    jest.useRealTimers();
-    const started = jest.fn();
-    const completed = jest.fn();
-    const aborted = jest.fn();
+    vi.useRealTimers();
+    const started = vi.fn();
+    const completed = vi.fn();
+    const aborted = vi.fn();
 
     const defer: ExpressionFunctionDefinition<'defer', unknown, { time: number }, unknown> = {
       name: 'defer',
@@ -153,14 +155,14 @@ describe('Execution abortion tests', () => {
     expect(aborted).toHaveBeenCalledTimes(1);
     expect(completed).toHaveBeenCalledTimes(0);
 
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
 
   test('nested expressions are aborted when parent cancelled with CANCELED reason', async () => {
-    jest.useRealTimers();
-    const started = jest.fn();
-    const completed = jest.fn();
-    const aborted = jest.fn();
+    vi.useRealTimers();
+    const started = vi.fn();
+    const completed = vi.fn();
+    const aborted = vi.fn();
     const abortedReasons: unknown[] = [];
 
     const defer: ExpressionFunctionDefinition<'defer', unknown, { time: number }, unknown> = {
@@ -225,6 +227,6 @@ describe('Execution abortion tests', () => {
     expect(abortedReasons[0]).toBe(AbortReason.CANCELED);
     expect(completed).toHaveBeenCalledTimes(0);
 
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
 });

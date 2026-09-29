@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
 import { SCHEDULED_WORKFLOW_TRIGGERED_BY, wrapManagementApiForScheduledExecution } from '.';
@@ -13,14 +16,14 @@ type ManagementApi = NonNullable<WorkflowsServerPluginSetup['management']>;
 
 const buildManagementApi = (): ManagementApi =>
   ({
-    getWorkflow: jest.fn().mockResolvedValue({ id: 'workflow-1' }),
-    runWorkflow: jest.fn().mockResolvedValue('inline-run-id'),
-    scheduleWorkflow: jest.fn().mockResolvedValue('scheduled-run-id'),
+    getWorkflow: vi.fn().mockResolvedValue({ id: 'workflow-1' }),
+    runWorkflow: vi.fn().mockResolvedValue('inline-run-id'),
+    scheduleWorkflow: vi.fn().mockResolvedValue('scheduled-run-id'),
   } as unknown as ManagementApi);
 
 describe('wrapManagementApiForScheduledExecution', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('delegates runWorkflow to scheduleWorkflow with a default triggeredBy', async () => {
@@ -92,7 +95,7 @@ describe('wrapManagementApiForScheduledExecution', () => {
 
   it('propagates errors thrown by scheduleWorkflow', async () => {
     const management = buildManagementApi();
-    (management.scheduleWorkflow as jest.Mock).mockRejectedValue(new Error('boom'));
+    (management.scheduleWorkflow as Mock).mockRejectedValue(new Error('boom'));
 
     await expect(
       wrapManagementApiForScheduledExecution(management).runWorkflow(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -29,36 +32,45 @@ import { useExpandSection } from '../../../../../flyout_v2/shared/hooks/use_expa
 import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '../../../../../flyout_v2/shared/components/test_ids';
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
 
-jest.mock('../../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
+vi.mock('../../../../../flyout_v2/shared/hooks/use_expand_section', () => {
+      const mocked = {
+      useExpandSection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
 
   return {
     ...original,
-    useDispatch: () => jest.fn(),
+    useDispatch: () => vi.fn(),
   };
 });
 
-jest.mock('../../../../shared/hooks/use_should_show_graph');
+vi.mock('../../../../shared/hooks/use_should_show_graph');
 
-const mockUseShouldShowGraph = useShouldShowGraph as jest.Mock;
+const mockUseShouldShowGraph = useShouldShowGraph as Mock;
 
-jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
-  useFetchGraphData: jest.fn(),
-}));
+vi.mock('@kbn/cloud-security-posture-graph/src/hooks', () => {
+      const mocked = {
+      useFetchGraphData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
+const mockUseFetchGraphData = useFetchGraphData as Mock;
 
-jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
-  uiMetricService: {
-    trackUiMetric: jest.fn(),
-  },
-}));
+vi.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => {
+      const mocked = {
+      uiMetricService: {
+        trackUiMetric: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const uiMetricServiceMock = uiMetricService as jest.Mocked<typeof uiMetricService>;
+const uiMetricServiceMock = uiMetricService as Mocked<typeof uiMetricService>;
 
 const panelContextValue = {
   ...mockContextValue,
@@ -89,7 +101,7 @@ const renderVisualizationsSection = ({
   );
 
 describe('<VisualizationsSection />', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseExpandSection = vi.mocked(useExpandSection);
 
   beforeEach(() => {
     // Default mock: graph visualization available

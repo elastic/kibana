@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import axios from 'axios';
 import { getServiceLocations } from './get_service_locations';
 
 import { BandwidthLimitKey, LocationStatus } from '../../common/runtime_types';
 
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+vi.mock('axios');
+const mockedAxios = axios as Mocked<typeof axios>;
 
 const mockSuccessResponse = {
   data: {
@@ -49,19 +52,19 @@ const createMockServer = (): any => ({
     enabled: true,
   },
   logger: {
-    error: jest.fn(),
-    debug: jest.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   },
 });
 
 describe('getServiceLocations', function () {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should return all locations on successful first attempt', async () => {
@@ -71,7 +74,7 @@ describe('getServiceLocations', function () {
     const locationsPromise = getServiceLocations(mockServer);
 
     // Run all timers to completion
-    await jest.runAllTimersAsync();
+    await vi.runAllTimersAsync();
     const locations = await locationsPromise;
 
     expect(locations).toEqual({
@@ -121,7 +124,7 @@ describe('getServiceLocations', function () {
     const locationsPromise = getServiceLocations(mockServer);
 
     // Run all timers to completion
-    await jest.runAllTimersAsync();
+    await vi.runAllTimersAsync();
     const locations = await locationsPromise;
 
     expect(mockedAxios.get).toHaveBeenCalledTimes(3);
@@ -138,7 +141,7 @@ describe('getServiceLocations', function () {
     const locationsPromise = getServiceLocations(mockServer);
 
     // Run all timers to completion
-    await jest.runAllTimersAsync();
+    await vi.runAllTimersAsync();
     const locations = await locationsPromise;
 
     // Initial attempt + 3 retries = 4 total calls
@@ -162,7 +165,7 @@ describe('getServiceLocations', function () {
     const locationsPromise = getServiceLocations(mockServer);
 
     // Run all timers to completion
-    await jest.runAllTimersAsync();
+    await vi.runAllTimersAsync();
     const locations = await locationsPromise;
 
     expect(mockedAxios.get).toHaveBeenCalledTimes(2);
@@ -181,8 +184,8 @@ describe('getServiceLocations', function () {
         enabled: true,
       },
       logger: {
-        error: jest.fn(),
-        debug: jest.fn(),
+        error: vi.fn(),
+        debug: vi.fn(),
       },
     } as any;
 
@@ -204,8 +207,8 @@ describe('getServiceLocations', function () {
         enabled: true,
       },
       logger: {
-        error: jest.fn(),
-        debug: jest.fn(),
+        error: vi.fn(),
+        debug: vi.fn(),
       },
     } as any;
 

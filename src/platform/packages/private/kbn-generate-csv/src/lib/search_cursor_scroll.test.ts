@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as Rx from 'rxjs';
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
@@ -38,7 +40,7 @@ describe('CSV Export Search Cursor', () => {
   beforeEach(() => {
     settings = {
       scroll: {
-        duration: jest.fn(() => '10m'),
+        duration: vi.fn(() => '10m'),
         size: 500,
       },
       includeFrozen: false,
@@ -48,7 +50,7 @@ describe('CSV Export Search Cursor', () => {
 
     es = elasticsearchServiceMock.createScopedClusterClient();
     data = createSearchRequestHandlerContext();
-    jest
+    vi
       .spyOn(es.asCurrentUser, 'openPointInTime')
       .mockResolvedValue({ id: 'simply-scroll-id' } as OpenPointInTimeResponse);
 
@@ -69,7 +71,7 @@ describe('CSV Export Search Cursor', () => {
     });
 
     it('supports scan/scroll and max_concurrent_shard_requests', async () => {
-      const dataSearchSpy = jest
+      const dataSearchSpy = vi
         .spyOn(data, 'search')
         .mockReturnValue(Rx.of({ rawResponse: { hits: { hits: [] } } }));
 
@@ -122,7 +124,7 @@ describe('CSV Export Search Cursor', () => {
     });
 
     it('suppresses max_concurrent_shard_requests from search body', async () => {
-      const dataSearchSpy = jest
+      const dataSearchSpy = vi
         .spyOn(data, 'search')
         .mockReturnValue(Rx.of({ rawResponse: { hits: { hits: [] } } }));
 

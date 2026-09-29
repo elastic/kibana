@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getBreadcrumbs } from './get_breadcrumbs';
 import type { ScopedHistory } from '@kbn/core/public';
 
-jest.mock('../../../kibana_services', () => {});
-jest.mock('../../../render_app', () => {});
+vi.mock('../../../kibana_services', () => {});
+vi.mock('../../../render_app', () => {});
 
 const getHasUnsavedChanges = () => {
   return false;

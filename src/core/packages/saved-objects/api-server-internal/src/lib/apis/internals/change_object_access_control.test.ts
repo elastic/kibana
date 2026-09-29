@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -24,15 +26,18 @@ import {
 import { mockGetBulkOperationError } from './update_objects_spaces.test.mock';
 import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
 
-jest.mock('../utils', () => ({
-  getBulkOperationError: jest.fn(),
-  getExpectedVersionProperties: jest.fn(),
-  rawDocExistsInNamespace: jest.fn(),
-  isLeft: jest.requireActual('../utils').isLeft,
-  isRight: jest.requireActual('../utils').isRight,
-  left: jest.requireActual('../utils').left,
-  right: jest.requireActual('../utils').right,
-}));
+vi.mock('../utils', async () => {
+      const mocked = {
+      getBulkOperationError: vi.fn(),
+      getExpectedVersionProperties: vi.fn(),
+      rawDocExistsInNamespace: vi.fn(),
+      isLeft: (await vi.importActual('../utils')).isLeft,
+      isRight: (await vi.importActual('../utils')).isRight,
+      left: (await vi.importActual('../utils')).left,
+      right: (await vi.importActual('../utils')).right,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type SetupParams = Partial<Pick<ChangeAccessControlParams, 'objects'>>;
 

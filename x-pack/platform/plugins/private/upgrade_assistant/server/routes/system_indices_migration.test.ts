@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type { MockRouter } from './__mocks__/routes.mock';
 import { createMockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 import { handleEsError } from '../shared_imports';
 
-jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
-  versionCheckHandlerWrapper: () => (a: any) => a,
-}));
+vi.mock('@kbn/upgrade-assistant-pkg-server', () => {
+      const mocked = {
+      versionCheckHandlerWrapper: () => (a: any) => a,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { registerSystemIndicesMigrationRoutes } from './system_indices_migration';
 
@@ -64,14 +70,14 @@ describe('Migrate system indices API', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('GET /api/upgrade_assistant/system_indices_migration', () => {
     it('returns system indices migration status', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as jest.Mock
+          .request as Mock
       ).mockResolvedValue(mockedResponse);
 
       const resp = await routeDependencies.router.getHandler({
@@ -97,7 +103,7 @@ describe('Migrate system indices API', () => {
     it('returns an error if it throws', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as jest.Mock
+          .request as Mock
       ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
@@ -112,7 +118,7 @@ describe('Migrate system indices API', () => {
     it('returns system indices migration status', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as jest.Mock
+          .request as Mock
       ).mockResolvedValue(mockedResponse);
 
       const resp = await routeDependencies.router.getHandler({
@@ -133,7 +139,7 @@ describe('Migrate system indices API', () => {
     it('returns an error if it throws', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as jest.Mock
+          .request as Mock
       ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({

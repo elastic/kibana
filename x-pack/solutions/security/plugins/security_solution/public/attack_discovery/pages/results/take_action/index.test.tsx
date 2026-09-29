@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
-jest.mock('@kbn/elastic-assistant-common', () => {
-  const actual = jest.requireActual('@kbn/elastic-assistant-common');
+vi.mock('@kbn/elastic-assistant-common', async () => {
+  const actual = (await vi.importActual('@kbn/elastic-assistant-common'));
   return {
     ...actual,
     // `TakeAction` always generates markdown; keep it cheap for unit tests.
-    getAttackDiscoveryMarkdown: jest.fn(() => 'markdown'),
+    getAttackDiscoveryMarkdown: vi.fn(() => 'markdown'),
   };
 });
 
@@ -33,79 +36,112 @@ const defaultAgentBuilderAvailability = {
   hasValidAgentBuilderLicense: true,
 };
 
-const mockMutateAsyncBulk = jest.fn().mockResolvedValue({});
-const mockMutateAsyncStatus = jest.fn().mockResolvedValue({});
-jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
-  useAgentBuilderAvailability: jest.fn().mockReturnValue(defaultAgentBuilderAvailability),
-}));
-jest.mock('../../../../assistant/use_assistant_availability', () => ({
-  useAssistantAvailability: jest.fn(),
-}));
+const mockMutateAsyncBulk = vi.fn().mockResolvedValue({});
+const mockMutateAsyncStatus = vi.fn().mockResolvedValue({});
+vi.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => {
+      const mocked = {
+      useAgentBuilderAvailability: vi.fn().mockReturnValue(defaultAgentBuilderAvailability),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../assistant/use_assistant_availability', () => {
+      const mocked = {
+      useAssistantAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAssistantAvailability = useAssistantAvailability as jest.Mock;
-const mockUseAgentBuilderAvailability = jest.mocked(useAgentBuilderAvailability);
+const mockUseAssistantAvailability = useAssistantAvailability as Mock;
+const mockUseAgentBuilderAvailability = vi.mocked(useAgentBuilderAvailability);
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../use_attack_discovery_bulk', () => ({
-  useAttackDiscoveryBulk: jest.fn(() => ({ mutateAsync: mockMutateAsyncBulk })),
-}));
+vi.mock('../../use_attack_discovery_bulk', () => {
+      const mocked = {
+      useAttackDiscoveryBulk: vi.fn(() => ({ mutateAsync: mockMutateAsyncBulk })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_add_to_case', () => ({
-  useAddToCase: jest.fn(() => ({ disabled: false, onAddToCase: jest.fn() })),
-}));
+vi.mock('./use_add_to_case', () => {
+      const mocked = {
+      useAddToCase: vi.fn(() => ({ disabled: false, onAddToCase: vi.fn() })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant', () => ({
-  useViewInAiAssistant: jest.fn(() => ({
-    showAssistantOverlay: jest.fn(),
-    disabled: false,
-    isAssistantVisible: true,
-  })),
-}));
+vi.mock('../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant', () => {
+      const mocked = {
+      useViewInAiAssistant: vi.fn(() => ({
+        showAssistantOverlay: vi.fn(),
+        disabled: false,
+        isAssistantVisible: true,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_update_alerts_status', () => ({
-  useUpdateAlertsStatus: jest.fn(() => ({ mutateAsync: mockMutateAsyncStatus })),
-}));
+vi.mock('./use_update_alerts_status', () => {
+      const mocked = {
+      useUpdateAlertsStatus: vi.fn(() => ({ mutateAsync: mockMutateAsyncStatus })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/is_attack_discovery_alert', () => ({
-  isAttackDiscoveryAlert: (ad: { alertWorkflowStatus?: string }) =>
-    ad?.alertWorkflowStatus !== undefined,
-}));
+vi.mock('../../utils/is_attack_discovery_alert', () => {
+      const mocked = {
+      isAttackDiscoveryAlert: (ad: { alertWorkflowStatus?: string }) =>
+        ad?.alertWorkflowStatus !== undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
-jest.mock(
+vi.mock(
   '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items',
-  () => ({
-    useAttackRunWorkflowContextMenuItems: jest.fn(() => ({ items: [], panels: [] })),
-  })
+  () => {
+      const mocked = {
+        useAttackRunWorkflowContextMenuItems: vi.fn(() => ({ items: [], panels: [] })),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
+const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;
 
-jest.mock('../use_attack_discovery_attachment', () => ({
-  useAttackDiscoveryAttachment: jest.fn(() => jest.fn()),
-}));
+vi.mock('../use_attack_discovery_attachment', () => {
+      const mocked = {
+      useAttackDiscoveryAttachment: vi.fn(() => vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../agent_builder/hooks/use_report_add_to_chat', () => ({
-  useReportAddToChat: jest.fn(() => jest.fn()),
-}));
+vi.mock('../../../../agent_builder/hooks/use_report_add_to_chat', () => {
+      const mocked = {
+      useReportAddToChat: vi.fn(() => vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /** helper function to open the popover */
 const openPopover = () => fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
 
 const defaultProps = {
   attackDiscoveries: [mockAttackDiscovery],
-  setSelectedAttackDiscoveries: jest.fn(),
+  setSelectedAttackDiscoveries: vi.fn(),
 };
 
 describe('TakeAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAgentBuilderAvailability.mockReturnValue(defaultAgentBuilderAvailability);
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -117,7 +153,7 @@ describe('TakeAction', () => {
         },
         cases: {
           helpers: {
-            canUseCases: jest.fn().mockReturnValue({
+            canUseCases: vi.fn().mockReturnValue({
               all: true,
               connectors: true,
               create: true,
@@ -130,9 +166,9 @@ describe('TakeAction', () => {
             }),
           },
           hooks: {
-            useCasesAddToExistingCase: jest.fn(),
-            useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
-            useCasesAddToNewCaseFlyout: jest.fn(),
+            useCasesAddToExistingCase: vi.fn(),
+            useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({ open: vi.fn() }),
+            useCasesAddToNewCaseFlyout: vi.fn(),
           },
           ui: {},
         },
@@ -264,7 +300,7 @@ describe('TakeAction', () => {
 
   it('calls setSelectedAttackDiscoveries and closes the modal on confirm', async () => {
     const alert = { ...mockAttackDiscovery, alertWorkflowStatus: 'open', id: 'id1' };
-    const setSelectedAttackDiscoveries = jest.fn();
+    const setSelectedAttackDiscoveries = vi.fn();
     render(
       <TestProviders>
         <TakeAction
@@ -387,7 +423,7 @@ describe('TakeAction', () => {
     beforeEach(() => {
       render(
         <TestProviders>
-          <TakeAction attackDiscoveries={alerts} setSelectedAttackDiscoveries={jest.fn()} />
+          <TakeAction attackDiscoveries={alerts} setSelectedAttackDiscoveries={vi.fn()} />
         </TestProviders>
       );
 
@@ -401,12 +437,12 @@ describe('TakeAction', () => {
 
   describe('when EASE is the configured project', () => {
     let alert: ReturnType<typeof getMockAttackDiscoveryAlerts>[0];
-    let setSelectedAttackDiscoveries: jest.Mock;
+    let setSelectedAttackDiscoveries: Mock;
 
     beforeEach(() => {
       alert = getMockAttackDiscoveryAlerts()[0];
-      setSelectedAttackDiscoveries = jest.fn();
-      (useKibana as jest.Mock).mockReturnValue({
+      setSelectedAttackDiscoveries = vi.fn();
+      (useKibana as Mock).mockReturnValue({
         services: {
           cases: { helpers: { canUseCases: () => ({ createComment: true, read: true }) } },
         },
@@ -512,10 +548,10 @@ describe('TakeAction', () => {
   });
 
   describe('case interactions', () => {
-    const mockOnAddToCase = jest.fn();
+    const mockOnAddToCase = vi.fn();
 
-    beforeEach(() => {
-      const { useAddToCase } = jest.requireMock('./use_add_to_case');
+    beforeEach(async () => {
+      const { useAddToCase } = (await vi.importMock('./use_add_to_case'));
 
       useAddToCase.mockReturnValue({
         disabled: false,
@@ -542,8 +578,8 @@ describe('TakeAction', () => {
       });
     });
 
-    it('refreshes attack discoveries after adding to a case', () => {
-      const refetchFindAttackDiscoveries = jest.fn();
+    it('refreshes attack discoveries after adding to a case', async () => {
+      const refetchFindAttackDiscoveries = vi.fn();
 
       render(
         <TestProviders>
@@ -554,7 +590,7 @@ describe('TakeAction', () => {
         </TestProviders>
       );
 
-      const { useAddToCase } = jest.requireMock('./use_add_to_case');
+      const { useAddToCase } = (await vi.importMock('./use_add_to_case'));
       expect(useAddToCase).toHaveBeenCalledWith(
         expect.objectContaining({
           onSuccess: refetchFindAttackDiscoveries,
@@ -564,12 +600,12 @@ describe('TakeAction', () => {
   });
 
   describe('when case permissions are disabled', () => {
-    beforeEach(() => {
-      (useKibana as jest.Mock).mockReturnValue({
+    beforeEach(async () => {
+      (useKibana as Mock).mockReturnValue({
         services: {
           cases: {
             helpers: {
-              canUseCases: jest.fn().mockReturnValue({
+              canUseCases: vi.fn().mockReturnValue({
                 all: false,
                 connectors: false,
                 create: false,
@@ -582,9 +618,9 @@ describe('TakeAction', () => {
               }),
             },
             hooks: {
-              useCasesAddToExistingCase: jest.fn(),
-              useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
-              useCasesAddToNewCaseFlyout: jest.fn(),
+              useCasesAddToExistingCase: vi.fn(),
+              useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({ open: vi.fn() }),
+              useCasesAddToNewCaseFlyout: vi.fn(),
             },
             ui: {},
           },
@@ -599,10 +635,10 @@ describe('TakeAction', () => {
         },
       });
 
-      const { useAddToCase } = jest.requireMock('./use_add_to_case');
+      const { useAddToCase } = (await vi.importMock('./use_add_to_case'));
       useAddToCase.mockReturnValue({
         disabled: true,
-        onAddToCase: jest.fn(),
+        onAddToCase: vi.fn(),
       });
     });
 
@@ -620,12 +656,10 @@ describe('TakeAction', () => {
   });
 
   describe('AI Assistant interactions', () => {
-    const mockShowAssistantOverlay = jest.fn();
+    const mockShowAssistantOverlay = vi.fn();
 
-    beforeEach(() => {
-      const { useViewInAiAssistant } = jest.requireMock(
-        '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'
-      );
+    beforeEach(async () => {
+      const { useViewInAiAssistant } = (await vi.importMock('../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'));
       useViewInAiAssistant.mockReturnValue({
         showAssistantOverlay: mockShowAssistantOverlay,
         disabled: false,
@@ -633,10 +667,8 @@ describe('TakeAction', () => {
       });
     });
 
-    it('disables view in AI assistant when disabled', () => {
-      const { useViewInAiAssistant } = jest.requireMock(
-        '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'
-      );
+    it('disables view in AI assistant when disabled', async () => {
+      const { useViewInAiAssistant } = (await vi.importMock('../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'));
       useViewInAiAssistant.mockReturnValue({
         showAssistantOverlay: mockShowAssistantOverlay,
         disabled: true,
@@ -655,10 +687,8 @@ describe('TakeAction', () => {
       expect(viewInAiAssistantButton).toBeDisabled();
     });
 
-    it('does not render view in AI assistant when isAssistantVisible is false', () => {
-      const { useViewInAiAssistant } = jest.requireMock(
-        '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'
-      );
+    it('does not render view in AI assistant when isAssistantVisible is false', async () => {
+      const { useViewInAiAssistant } = (await vi.importMock('../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'));
       useViewInAiAssistant.mockReturnValue({
         showAssistantOverlay: mockShowAssistantOverlay,
         disabled: false,

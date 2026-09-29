@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import datemath from '@elastic/datemath';
 import { renderHook } from '@testing-library/react';
 import type { Moment } from 'moment';
@@ -12,13 +15,13 @@ import moment from 'moment';
 import { useAbsoluteDate } from './use_absolute_date';
 
 describe('useAbsoluteDate', () => {
-  let datemathSpy: jest.SpyInstance<Moment | undefined>;
+  let datemathSpy: MockInstance<Moment | undefined>;
 
   beforeEach(() => {
-    datemathSpy = jest.spyOn(datemath, 'parse');
+    datemathSpy = vi.spyOn(datemath, 'parse');
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('returns a parsed value for `from` and `to`', () => {
     datemathSpy.mockReturnValueOnce(moment('2022-11-18T18:54:06.342Z'));

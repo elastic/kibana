@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -19,13 +21,19 @@ import { App } from './app';
 import { FilesManagementAppContextProvider } from './context';
 import { i18nTexts } from './i18n_texts';
 
-jest.mock('@kbn/content-management-table-list-view-table', () => ({
-  TableListViewTable: () => <div data-test-subj="filesManagementTable" />,
-}));
+vi.mock('@kbn/content-management-table-list-view-table', () => {
+      const mocked = {
+      TableListViewTable: () => <div data-test-subj="filesManagementTable" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/diagnostics_flyout', () => ({
-  DiagnosticsFlyout: () => <div data-test-subj="diagnosticsFlyout" />,
-}));
+vi.mock('./components/diagnostics_flyout', () => {
+      const mocked = {
+      DiagnosticsFlyout: () => <div data-test-subj="diagnosticsFlyout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderApp = () =>
   render(
@@ -34,8 +42,8 @@ const renderApp = () =>
         <MockAppHeaderProvider>
           <FilesManagementAppContextProvider
             filesClient={{} as FilesClient}
-            getFileKindDefinition={jest.fn()}
-            getAllFindKindDefinitions={jest.fn().mockReturnValue([])}
+            getFileKindDefinition={vi.fn()}
+            getAllFindKindDefinitions={vi.fn().mockReturnValue([])}
           >
             <App />
           </FilesManagementAppContextProvider>

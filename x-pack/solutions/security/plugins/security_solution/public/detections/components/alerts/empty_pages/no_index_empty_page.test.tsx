@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { NO_INDEX_TEST_ID, NoIndexEmptyPage } from './no_index_empty_page';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('NoIndexEmptyPage', () => {
   it('should render correctly', () => {

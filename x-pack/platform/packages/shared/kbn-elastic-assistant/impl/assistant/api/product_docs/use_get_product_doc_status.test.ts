@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useGetProductDocStatus } from './use_get_product_doc_status';
 import { useAssistantContext } from '../../../..';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 
-jest.mock('../../../..', () => ({
-  useAssistantContext: jest.fn(),
-}));
+vi.mock('../../../..', () => {
+      const mocked = {
+      useAssistantContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useGetProductDocStatus', () => {
-  const mockGetStatus = jest.fn();
+  const mockGetStatus = vi.fn();
 
   beforeEach(() => {
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    (useAssistantContext as Mock).mockReturnValue({
       productDocBase: {
         installation: {
           getStatus: mockGetStatus,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
@@ -24,27 +27,33 @@ import { ReqStatus } from '../../../../notes';
 import { useTimelineConfig } from './hooks/use_timeline_config';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 
-jest.mock('./components/notes_remote_callout', () => ({
-  NotesRemoteCallout: () => null,
-}));
+vi.mock('./components/notes_remote_callout', () => {
+      const mocked = {
+      NotesRemoteCallout: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_timeline_config');
-jest.mock('../../../../common/hooks/is_in_security_app');
-const useIsInSecurityAppMock = useIsInSecurityApp as jest.Mock;
+vi.mock('./hooks/use_timeline_config');
+vi.mock('../../../../common/hooks/is_in_security_app');
+const useIsInSecurityAppMock = useIsInSecurityApp as Mock;
 
-jest.mock('../../../../common/components/user_privileges');
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+vi.mock('../../../../common/components/user_privileges');
+const useUserPrivilegesMock = useUserPrivileges as Mock;
 
-const mockAddError = jest.fn();
-jest.mock('../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addError: mockAddError,
-  }),
-}));
+const mockAddError = vi.fn();
+vi.mock('../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addError: mockAddError,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -54,9 +63,9 @@ jest.mock('react-redux-v7', () => {
 const mockTimelineConfig = {
   timelineSavedObjectId: 'savedObjectId',
   isTimelineSaved: true,
-  onNoteAddInTimeline: jest.fn(),
+  onNoteAddInTimeline: vi.fn(),
   attachToTimeline: true,
-  setAttachToTimeline: jest.fn(),
+  setAttachToTimeline: vi.fn(),
   attachToTimelineElement: (
     <div data-test-subj="attach-to-timeline-callout">
       <input data-test-subj="attach-to-timeline-checkbox" type="checkbox" />
@@ -76,7 +85,7 @@ const renderNotesDetails = () =>
 
 describe('NotesDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useUserPrivilegesMock.mockReturnValue({
       notesPrivileges: { crud: true },
       timelinePrivileges: { crud: true },
@@ -86,7 +95,7 @@ describe('NotesDetails', () => {
         },
       },
     });
-    (useTimelineConfig as jest.Mock).mockReturnValue(mockTimelineConfig);
+    (useTimelineConfig as Mock).mockReturnValue(mockTimelineConfig);
     useIsInSecurityAppMock.mockReturnValue(false);
   });
 
@@ -212,7 +221,7 @@ describe('NotesDetails', () => {
   });
 
   it('should not render the callout and attach to timeline checkbox if not timeline flyout', () => {
-    (useTimelineConfig as jest.Mock).mockReturnValue(undefined);
+    (useTimelineConfig as Mock).mockReturnValue(undefined);
 
     const { getByTestId, queryByTestId } = renderNotesDetails();
 
@@ -224,12 +233,12 @@ describe('NotesDetails', () => {
 
 describe('NotesDetails hideTimelineIcon prop', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useUserPrivilegesMock.mockReturnValue({
       notesPrivileges: { crud: true, read: true },
       timelinePrivileges: { crud: true, read: true },
     });
-    (useTimelineConfig as jest.Mock).mockReturnValue(undefined);
+    (useTimelineConfig as Mock).mockReturnValue(undefined);
   });
 
   const getNotesStoreWithTimelineNote = () =>

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '../..';
 
 test('required by default', () => {
@@ -362,7 +364,7 @@ test('works within `oneOf`', () => {
 
 describe('#validate', () => {
   test('is called after all content is processed', () => {
-    const mockValidate = jest.fn();
+    const mockValidate = vi.fn();
 
     const type = schema.object(
       {

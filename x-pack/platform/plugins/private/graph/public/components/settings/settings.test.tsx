@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { EuiListGroupItem, EuiAccordion, EuiFieldText } from '@elastic/eui';
 import * as Rx from 'rxjs';
@@ -20,8 +23,8 @@ import { createMockGraphStore } from '../../state_management/mocks';
 import { Provider } from 'react-redux';
 import type { UrlTemplate } from '../../types';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   return {
     ...original,
@@ -34,13 +37,13 @@ jest.mock('@elastic/eui', () => {
 
 describe('settings', () => {
   let store: GraphStore;
-  let dispatchSpy: jest.Mock;
+  let dispatchSpy: Mock;
 
   const initialTemplate: UrlTemplate = {
     description: 'template',
     encoder: {
       description: 'test encoder description',
-      encode: jest.fn(),
+      encode: vi.fn(),
       id: 'test',
       title: 'test encoder',
       type: 'esq',
@@ -55,7 +58,7 @@ describe('settings', () => {
     isDefault: false,
   };
 
-  const workspaceProps: jest.Mocked<SettingsWorkspaceProps> = {
+  const workspaceProps: Mocked<SettingsWorkspaceProps> = {
     blocklistedNodes: [
       {
         x: 0,
@@ -94,12 +97,12 @@ describe('settings', () => {
         },
       },
     ],
-    unblockNode: jest.fn(),
-    unblockAll: jest.fn(),
+    unblockNode: vi.fn(),
+    unblockAll: vi.fn(),
     canEditDrillDownUrls: true,
   };
 
-  let subject: Rx.BehaviorSubject<jest.Mocked<SettingsWorkspaceProps>>;
+  let subject: Rx.BehaviorSubject<Mocked<SettingsWorkspaceProps>>;
   let instance: ReactWrapper;
 
   beforeEach(() => {
@@ -149,7 +152,7 @@ describe('settings', () => {
         template: initialTemplate,
       })
     );
-    dispatchSpy = jest.fn(store.dispatch);
+    dispatchSpy = vi.fn(store.dispatch);
     store.dispatch = dispatchSpy;
     subject = new Rx.BehaviorSubject(workspaceProps);
     instance = mountWithIntl(

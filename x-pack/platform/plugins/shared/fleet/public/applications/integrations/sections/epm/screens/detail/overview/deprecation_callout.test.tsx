@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -20,14 +22,17 @@ import {
   isUpcomingDeprecation,
 } from './deprecation_callout';
 
-const mockUseLink = jest.fn();
+const mockUseLink = vi.fn();
 
-jest.mock('../../../../../../../../common/services/packages_with_integrations', () => ({
-  doesPackageHaveIntegrations: (pkg: any) => (pkg.policy_templates || []).length > 1,
-}));
+vi.mock('../../../../../../../../common/services/packages_with_integrations', () => {
+      const mocked = {
+      doesPackageHaveIntegrations: (pkg: any) => (pkg.policy_templates || []).length > 1,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../hooks', () => {
-  const actual = jest.requireActual('../../../../../../../hooks');
+vi.mock('../../../../../../../hooks', async () => {
+  const actual = (await vi.importActual('../../../../../../../hooks'));
   return {
     ...actual,
     useLink: () => mockUseLink(),
@@ -35,7 +40,7 @@ jest.mock('../../../../../../../hooks', () => {
 });
 
 describe('DeprecationCallout', () => {
-  const mockGetHref = jest.fn((page: string, params?: any) => {
+  const mockGetHref = vi.fn((page: string, params?: any) => {
     if (params?.pkgkey) {
       return `/app/integrations/detail/${params.pkgkey}/overview`;
     }
@@ -43,7 +48,7 @@ describe('DeprecationCallout', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseLink.mockReturnValue({
       getHref: mockGetHref,
     });
@@ -282,7 +287,7 @@ describe('DeprecationCallout', () => {
 
   describe('With upcoming deprecations', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockUseLink.mockReturnValue({ getHref: mockGetHref });
     });
 

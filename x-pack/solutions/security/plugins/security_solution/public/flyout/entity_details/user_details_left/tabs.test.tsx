@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { RESOLUTION_GROUP_TAB_TEST_ID } from '../../../entity_analytics/components/entity_resolution/test_ids';
@@ -12,20 +15,23 @@ import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_ent
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { useTabs } from './tabs';
 
-jest.mock('../../../common/hooks/use_has_entity_resolution_license', () => ({
-  useHasEntityResolutionLicense: jest.fn(() => false),
-}));
+vi.mock('../../../common/hooks/use_has_entity_resolution_license', () => {
+      const mocked = {
+      useHasEntityResolutionLicense: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const emptyManagedUser = {};
 
 describe('user_details_left useTabs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+    vi.clearAllMocks();
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(false);
   });
 
   it('includes Resolution tab when entityStoreEntityId is set and Entity Resolution license is active', () => {
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(true);
     const { result } = renderHook(
       () =>
         useTabs(
@@ -53,7 +59,7 @@ describe('user_details_left useTabs', () => {
   });
 
   it('does not include Resolution tab when entityStoreEntityId is set but license is inactive', () => {
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(false);
     const { result } = renderHook(
       () =>
         useTabs(
@@ -77,7 +83,7 @@ describe('user_details_left useTabs', () => {
   });
 
   it('does not include Resolution tab when license is active but entityStoreEntityId is missing', () => {
-    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+    (useHasEntityResolutionLicense as Mock).mockReturnValue(true);
     const { result } = renderHook(
       () =>
         useTabs(

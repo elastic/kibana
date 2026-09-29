@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
@@ -21,14 +24,14 @@ import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageScope } from '../../../../data_view_manager/constants';
 
-jest.mock('../../../../detections/hooks/use_is_analyzer_enabled');
-jest.mock('../../../../data_view_manager/hooks/use_data_view');
-jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
+vi.mock('../../../../detections/hooks/use_is_analyzer_enabled');
+vi.mock('../../../../data_view_manager/hooks/use_data_view');
+vi.mock('../../../../data_view_manager/hooks/use_selected_patterns');
 
-const mockUiSettingsGet = jest.fn();
+const mockUiSettingsGet = vi.fn();
 let mockServerless: unknown;
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...actual,
     useKibana: () => ({
@@ -42,12 +45,15 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-const mockAnalyzerPreview = jest.fn((_props: unknown) => (
+const mockAnalyzerPreview = vi.fn((_props: unknown) => (
   <div data-test-subj="analyzerPreviewStub" />
 ));
-jest.mock('./analyzer_preview', () => ({
-  AnalyzerPreview: (props: unknown) => mockAnalyzerPreview(props),
-}));
+vi.mock('./analyzer_preview', () => {
+      const mocked = {
+      AnalyzerPreview: (props: unknown) => mockAnalyzerPreview(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -57,7 +63,7 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
     isAnchor: false,
   } as DataTableRecord);
 
-const mockOnShowAnalyzer = jest.fn();
+const mockOnShowAnalyzer = vi.fn();
 const mockHit = createMockHit({});
 
 const renderAnalyzerPreview = (
@@ -78,12 +84,12 @@ const renderAnalyzerPreview = (
 
 describe('AnalyzerPreviewContainer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockServerless = undefined;
     mockUiSettingsGet.mockReturnValue(true);
-    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
-    (useSelectedPatterns as jest.Mock).mockReturnValue(['experimental-analyzer-pattern']);
-    (useDataView as jest.Mock).mockReturnValue({
+    (useIsAnalyzerEnabled as Mock).mockReturnValue(true);
+    (useSelectedPatterns as Mock).mockReturnValue(['experimental-analyzer-pattern']);
+    (useDataView as Mock).mockReturnValue({
       status: 'ready',
       dataView: {
         hasMatchedIndices: () => true,
@@ -141,7 +147,7 @@ describe('AnalyzerPreviewContainer', () => {
   });
 
   it('should show loading skeleton when the data view is loading', () => {
-    (useDataView as jest.Mock).mockReturnValue({ status: 'loading' });
+    (useDataView as Mock).mockReturnValue({ status: 'loading' });
 
     const { getByTestId } = renderAnalyzerPreview();
     expect(getByTestId(ANALYZER_PREVIEW_LOADING_TEST_ID)).toBeInTheDocument();
@@ -149,7 +155,7 @@ describe('AnalyzerPreviewContainer', () => {
   });
 
   it('should show loading skeleton when the data view is pristine', () => {
-    (useDataView as jest.Mock).mockReturnValue({ status: 'pristine' });
+    (useDataView as Mock).mockReturnValue({ status: 'pristine' });
 
     const { getByTestId } = renderAnalyzerPreview();
     expect(getByTestId(ANALYZER_PREVIEW_LOADING_TEST_ID)).toBeInTheDocument();
@@ -157,7 +163,7 @@ describe('AnalyzerPreviewContainer', () => {
   });
 
   it('should show an error message when the data view is error', () => {
-    (useDataView as jest.Mock).mockReturnValue({ status: 'error' });
+    (useDataView as Mock).mockReturnValue({ status: 'error' });
 
     const { getByText } = renderAnalyzerPreview();
     expect(getByText('Unable to retrieve the data view for analyzer.')).toBeInTheDocument();
@@ -165,7 +171,7 @@ describe('AnalyzerPreviewContainer', () => {
   });
 
   it('should show an error message when the data view has no matched indices', () => {
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       status: 'ready',
       dataView: { hasMatchedIndices: () => false },
     });
@@ -176,7 +182,7 @@ describe('AnalyzerPreviewContainer', () => {
   });
 
   it('should show no-data message when analyzer is not enabled', () => {
-    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(false);
+    (useIsAnalyzerEnabled as Mock).mockReturnValue(false);
 
     const { getByText, queryByTestId } = renderAnalyzerPreview();
     expect(queryByTestId(ANALYZER_PREVIEW_LOADING_TEST_ID)).not.toBeInTheDocument();
@@ -187,7 +193,7 @@ describe('AnalyzerPreviewContainer', () => {
   });
 
   it('should not render a title link when analyzer is not enabled', () => {
-    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(false);
+    (useIsAnalyzerEnabled as Mock).mockReturnValue(false);
 
     const { queryByTestId } = renderAnalyzerPreview();
     expect(

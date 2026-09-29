@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
 import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
@@ -25,9 +28,9 @@ import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator'
 
 import { stepUpdateCurrentWriteIndices } from './step_update_current_write_indices';
 
-jest.mock('../../../elasticsearch/template/template');
+vi.mock('../../../elasticsearch/template/template');
 
-const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.MockedFunction<
+const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as MockedFunction<
   typeof updateCurrentWriteIndices
 >;
 
@@ -40,8 +43,8 @@ const createMockTemplate = ({ name, composedOf = [] }: { name: string; composedO
   } as IndicesGetIndexTemplateIndexTemplateItem);
 
 describe('stepUpdateCurrentWriteIndices', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let esClient: Mocked<ElasticsearchClient>;
   const getMockInstalledPackageSo = (
     installedEs: EsAssetReference[] = []
   ): SavedObject<Installation> => {
@@ -69,7 +72,7 @@ describe('stepUpdateCurrentWriteIndices', () => {
     appContextService.start(createAppContextStartContractMock());
   });
   afterEach(async () => {
-    jest.mocked(mockedUpdateCurrentWriteIndices).mockReset();
+    vi.mocked(mockedUpdateCurrentWriteIndices).mockReset();
   });
 
   const packageInstallContext = {
@@ -117,7 +120,7 @@ describe('stepUpdateCurrentWriteIndices', () => {
     await stepUpdateCurrentWriteIndices({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -141,7 +144,7 @@ describe('stepUpdateCurrentWriteIndices', () => {
     await stepUpdateCurrentWriteIndices({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,

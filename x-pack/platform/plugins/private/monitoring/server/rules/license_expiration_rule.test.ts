@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { LicenseExpirationRule } from './license_expiration_rule';
 import { RULE_LICENSE_EXPIRATION } from '../../common/constants';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
@@ -14,27 +17,36 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_licenses', () => ({
-  fetchLicenses: jest.fn(),
-}));
-jest.mock('../lib/alerts/fetch_clusters', () => ({
-  fetchClusters: jest.fn(),
-}));
+vi.mock('../lib/alerts/fetch_licenses', () => {
+      const mocked = {
+      fetchLicenses: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/alerts/fetch_clusters', () => {
+      const mocked = {
+      fetchClusters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../static_globals', () => ({
-  Globals: {
-    app: {
-      getLogger: () => ({ debug: jest.fn() }),
-      config: {
-        ui: {
-          show_license_expiration: true,
-          ccs: { enabled: true },
-          container: { elasticsearch: { enabled: false } },
+vi.mock('../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          getLogger: () => ({ debug: vi.fn() }),
+          config: {
+            ui: {
+              show_license_expiration: true,
+              ccs: { enabled: true },
+              container: { elasticsearch: { enabled: false } },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('LicenseExpirationRule', () => {
   it('should have defaults', () => {
@@ -82,25 +94,25 @@ describe('LicenseExpirationRule', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchLicenses as jest.Mock).mockImplementation(() => {
+      (fetchLicenses as Mock).mockImplementation(() => {
         return [license];
       });
-      (fetchClusters as jest.Mock).mockImplementation(() => {
+      (fetchClusters as Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
       });
     });
 
     afterEach(() => {
       Date = RealDate;
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should fire action', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('2023-03-30T00:00:00.000Z'));
+      vi.useFakeTimers().setSystemTime(new Date('2023-03-30T00:00:00.000Z'));
       const alert = new LicenseExpirationRule();
       const type = alert.getRuleType();
       await type.executor({
@@ -182,7 +194,7 @@ describe('LicenseExpirationRule', () => {
     });
 
     it('should not fire actions if the license is not expired', async () => {
-      (fetchLicenses as jest.Mock).mockImplementation(() => {
+      (fetchLicenses as Mock).mockImplementation(() => {
         return [
           {
             status: 'active',
@@ -203,7 +215,7 @@ describe('LicenseExpirationRule', () => {
     });
 
     it('should use danger severity for a license expiring soon', async () => {
-      (fetchLicenses as jest.Mock).mockImplementation(() => {
+      (fetchLicenses as Mock).mockImplementation(() => {
         return [
           {
             status: 'active',
@@ -294,7 +306,7 @@ describe('LicenseExpirationRule', () => {
     });
 
     it('should use warning severity for a license expiring in a bit', async () => {
-      (fetchLicenses as jest.Mock).mockImplementation(() => {
+      (fetchLicenses as Mock).mockImplementation(() => {
         return [
           {
             status: 'active',

@@ -7,20 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { useWorkflowStepExecutions } from './use_workflow_step_executions';
 import { createQueryClientWrapper, createTestQueryClient } from '../../../shared/test_utils';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsApi: jest.fn(),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useWorkflowsApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
+const mockUseWorkflowsApi = useWorkflowsApi as MockedFunction<typeof useWorkflowsApi>;
 
 describe('useWorkflowStepExecutions', () => {
-  let mockGetWorkflowStepExecutions: jest.Mock;
+  let mockGetWorkflowStepExecutions: Mock;
   let queryClient: QueryClient;
 
   const stepExecutionsResponse = {
@@ -32,8 +38,8 @@ describe('useWorkflowStepExecutions', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockGetWorkflowStepExecutions = jest.fn().mockResolvedValue(stepExecutionsResponse);
+    vi.clearAllMocks();
+    mockGetWorkflowStepExecutions = vi.fn().mockResolvedValue(stepExecutionsResponse);
     mockUseWorkflowsApi.mockReturnValue({
       getWorkflowStepExecutions: mockGetWorkflowStepExecutions,
     } as any);

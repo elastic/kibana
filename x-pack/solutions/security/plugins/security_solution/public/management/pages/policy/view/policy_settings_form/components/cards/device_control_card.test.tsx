@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
@@ -18,9 +21,9 @@ import { useLicense as _useLicense } from '../../../../../../../common/hooks/use
 import type { DeviceControlProps } from './device_control_card';
 import { DEVICE_CONTROL_CARD_TITLE, DeviceControlCard } from './device_control_card';
 
-jest.mock('../../../../../../../common/hooks/use_license');
+vi.mock('../../../../../../../common/hooks/use_license');
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 
 describe('Policy Device Control Card', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').deviceControl;
@@ -35,7 +38,7 @@ describe('Policy Device Control Card', () => {
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
         .config.policy.value,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': testSubj.card,
     };
@@ -218,13 +221,13 @@ describe('Policy Device Control Card', () => {
 
       // Verify onChange was called and device control is disabled
       expect(formProps.onChange).toHaveBeenCalled();
-      const offCallArgs = (formProps.onChange as jest.Mock).mock.calls[0][0];
+      const offCallArgs = (formProps.onChange as Mock).mock.calls[0][0];
       expect(offCallArgs.updatedPolicy.windows.device_control.enabled).toBe(false);
       expect(offCallArgs.updatedPolicy.mac.device_control.enabled).toBe(false);
 
       // Update the policy with the disabled state
       formProps.policy = offCallArgs.updatedPolicy;
-      formProps.onChange = jest.fn(); // Reset mock
+      formProps.onChange = vi.fn(); // Reset mock
 
       // Re-render with updated policy
       renderResult.rerender(<DeviceControlCard {...formProps} />);
@@ -234,7 +237,7 @@ describe('Policy Device Control Card', () => {
 
       // Verify onChange was called and device control is re-enabled
       expect(formProps.onChange).toHaveBeenCalled();
-      const onCallArgs = (formProps.onChange as jest.Mock).mock.calls[0][0];
+      const onCallArgs = (formProps.onChange as Mock).mock.calls[0][0];
 
       // The key assertion: after toggling off and back on, the policy should match the original
       // This ensures the Save Changes button will be properly disabled when reverting changes

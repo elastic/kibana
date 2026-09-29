@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { countUnassignedNotesLinkedToDocument } from './count_unassigned_notes';
 
 describe('countUnassignedNotesLinkedToDocument', () => {
-  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockSavedObjectsClient: Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSavedObjectsClient = {
-      find: jest.fn().mockReturnValue({ total: 1 }),
-    } as unknown as jest.Mocked<SavedObjectsClientContract>;
+      find: vi.fn().mockReturnValue({ total: 1 }),
+    } as unknown as Mocked<SavedObjectsClientContract>;
   });
 
   it('calls savedObjectsClient.find with correct parameters', async () => {

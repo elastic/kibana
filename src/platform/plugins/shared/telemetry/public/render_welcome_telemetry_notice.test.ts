@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
@@ -16,7 +18,7 @@ describe('renderWelcomeTelemetryNotice', () => {
   const telemetryConstants = mockTelemetryConstants();
 
   test('it should render the WelcomeTelemetryNotice component', () => {
-    const reactLazySpy = jest.spyOn(React, 'lazy');
+    const reactLazySpy = vi.spyOn(React, 'lazy');
     const telemetryService = mockTelemetryService();
     shallowWithIntl(
       renderWelcomeTelemetryNotice(telemetryService, (url) => url, telemetryConstants)

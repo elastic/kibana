@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { hasMlAdminPermissions } from '../../../common/machine_learning/has_ml_admin_permissions';
@@ -12,14 +15,14 @@ import { mlServicesMock } from './mocks';
 import { hasMlLicense, isMlAdmin, buildMlAuthz } from './authz';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
-jest.mock('../../../common/machine_learning/has_ml_admin_permissions');
+vi.mock('../../../common/machine_learning/has_ml_admin_permissions');
 
 describe('isMlAdmin', () => {
   it('returns true if hasMlAdminPermissions is true', async () => {
     const mockMl = mlServicesMock.createSetupContract();
     const request = httpServerMock.createKibanaRequest();
     const savedObjectsClient = savedObjectsClientMock.create();
-    (hasMlAdminPermissions as jest.Mock).mockReturnValue(true);
+    (hasMlAdminPermissions as Mock).mockReturnValue(true);
 
     expect(await isMlAdmin({ ml: mockMl, request, savedObjectsClient })).toEqual(true);
   });
@@ -28,7 +31,7 @@ describe('isMlAdmin', () => {
     const mockMl = mlServicesMock.createSetupContract();
     const request = httpServerMock.createKibanaRequest();
     const savedObjectsClient = savedObjectsClientMock.create();
-    (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
+    (hasMlAdminPermissions as Mock).mockReturnValue(false);
 
     expect(await isMlAdmin({ ml: mockMl, request, savedObjectsClient })).toEqual(false);
   });
@@ -131,7 +134,7 @@ describe('mlAuthz', () => {
     });
 
     it('is valid for a non-ML rule when not an ML Admin', async () => {
-      (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
+      (hasMlAdminPermissions as Mock).mockReturnValue(false);
 
       const mlAuthz = buildMlAuthz({
         license: licenseMock,
@@ -147,7 +150,7 @@ describe('mlAuthz', () => {
 
     it('is invalid for an ML rule when not an ML Admin', async () => {
       licenseMock.hasAtLeast.mockReturnValue(true); // prevents short-circuit on license check
-      (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
+      (hasMlAdminPermissions as Mock).mockReturnValue(false);
 
       const mlAuthz = buildMlAuthz({
         license: licenseMock,
@@ -166,7 +169,7 @@ describe('mlAuthz', () => {
 
     it('is valid for an ML rule if ML available, license is sufficient, and an ML Admin', async () => {
       licenseMock.hasAtLeast.mockReturnValue(true);
-      (hasMlAdminPermissions as jest.Mock).mockReturnValue(true);
+      (hasMlAdminPermissions as Mock).mockReturnValue(true);
 
       const mlAuthz = buildMlAuthz({
         license: licenseMock,
@@ -182,10 +185,10 @@ describe('mlAuthz', () => {
     });
 
     it('only calls ml services once for multiple invocations', async () => {
-      const mockMlCapabilities = jest.fn();
+      const mockMlCapabilities = vi.fn();
       mlMock.mlSystemProvider.mockImplementation(() => ({
-        mlInfo: jest.fn(),
-        mlAnomalySearch: jest.fn(),
+        mlInfo: vi.fn(),
+        mlAnomalySearch: vi.fn(),
         mlCapabilities: mockMlCapabilities,
       }));
 
@@ -204,10 +207,10 @@ describe('mlAuthz', () => {
     });
 
     it('does not call ml services for non-ML rules', async () => {
-      const mockMlCapabilities = jest.fn();
+      const mockMlCapabilities = vi.fn();
       mlMock.mlSystemProvider.mockImplementation(() => ({
-        mlInfo: jest.fn(),
-        mlAnomalySearch: jest.fn(),
+        mlInfo: vi.fn(),
+        mlAnomalySearch: vi.fn(),
         mlCapabilities: mockMlCapabilities,
       }));
 
@@ -252,7 +255,7 @@ describe('mlAuthz', () => {
     it('will invalidate the cache result if the builder is called a second time after a license change', async () => {
       licenseMock.hasAtLeast.mockReturnValueOnce(false);
       licenseMock.hasAtLeast.mockReturnValueOnce(true);
-      (hasMlAdminPermissions as jest.Mock).mockReturnValueOnce(true);
+      (hasMlAdminPermissions as Mock).mockReturnValueOnce(true);
 
       const mlAuthzFirst = buildMlAuthz({
         license: licenseMock,

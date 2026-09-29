@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -21,44 +23,50 @@ let mockLastPageTemplateProps: {
   noDataConfig?: NoDataConfig;
 } = {};
 
-const mockGetRedirectUrl = jest.fn().mockReturnValue(ONBOARDING_HREF);
+const mockGetRedirectUrl = vi.fn().mockReturnValue(ONBOARDING_HREF);
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({
-    services: {
-      observabilityAIAssistant: undefined,
-      observabilityShared: {
-        navigation: {
-          PageTemplate: (props: {
-            'data-test-subj'?: string;
-            isEmptyState?: boolean;
-            noDataConfig?: NoDataConfig;
-            children?: React.ReactNode;
-          }) => {
-            mockLastPageTemplateProps = {
-              'data-test-subj': props['data-test-subj'],
-              isEmptyState: props.isEmptyState,
-              noDataConfig: props.noDataConfig,
-            };
-            return <div data-test-subj={props['data-test-subj']}>{props.children}</div>;
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibanaContextForPlugin: () => ({
+        services: {
+          observabilityAIAssistant: undefined,
+          observabilityShared: {
+            navigation: {
+              PageTemplate: (props: {
+                'data-test-subj'?: string;
+                isEmptyState?: boolean;
+                noDataConfig?: NoDataConfig;
+                children?: React.ReactNode;
+              }) => {
+                mockLastPageTemplateProps = {
+                  'data-test-subj': props['data-test-subj'],
+                  isEmptyState: props.isEmptyState,
+                  noDataConfig: props.noDataConfig,
+                };
+                return <div data-test-subj={props['data-test-subj']}>{props.children}</div>;
+              },
+            },
           },
-        },
-      },
-      share: {
-        url: {
-          locators: {
-            get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+          share: {
+            url: {
+              locators: {
+                get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+              },
+            },
           },
+          docLinks: { links: { observability: { guide: 'https://docs.example' } } },
         },
-      },
-      docLinks: { links: { observability: { guide: 'https://docs.example' } } },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/shared-ux-page-no-data', () => ({
-  NoDataPage: () => <div data-test-subj="logsOnboardingPage">onboarding</div>,
-}));
+vi.mock('@kbn/shared-ux-page-no-data', () => {
+      const mocked = {
+      NoDataPage: () => <div data-test-subj="logsOnboardingPage">onboarding</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
@@ -69,7 +77,7 @@ const renderWithProviders = (ui: React.ReactElement) =>
 
 describe('LogsPageTemplate', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetRedirectUrl.mockReturnValue(ONBOARDING_HREF);
     mockLastPageTemplateProps = {};
   });

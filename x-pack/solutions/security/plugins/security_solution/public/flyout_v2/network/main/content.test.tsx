@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -17,35 +20,47 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
-jest.mock('../../../explore/network/components/details', () => ({
-  IpOverview: () => <div data-test-subj="ip-overview" />,
-}));
+vi.mock('../../../explore/network/components/details', () => {
+      const mocked = {
+      IpOverview: () => <div data-test-subj="ip-overview" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/components/empty_prompt', () => ({
-  EmptyPrompt: () => <div data-test-subj="empty-prompt" />,
-}));
+vi.mock('../../../common/components/empty_prompt', () => {
+      const mocked = {
+      EmptyPrompt: () => <div data-test-subj="empty-prompt" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/components/page_loader', () => ({
-  PageLoader: () => <div data-test-subj="page-loader" />,
-}));
+vi.mock('../../../common/components/page_loader', () => {
+      const mocked = {
+      PageLoader: () => <div data-test-subj="page-loader" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../explore/network/containers/details');
-jest.mock('../../../common/components/ml/anomaly/use_anomalies_table_data');
-jest.mock('../../../common/components/ml/hooks/use_installed_security_jobs');
-jest.mock('../../../common/containers/use_global_time');
-jest.mock('../../../data_view_manager/hooks/use_data_view');
-jest.mock('../../../data_view_manager/hooks/use_selected_patterns');
-jest.mock('../../../common/hooks/use_invalid_filter_query');
-jest.mock('../../../common/lib/kuery', () => ({
-  convertToBuildEsQuery: jest.fn().mockReturnValue([undefined, undefined]),
-}));
+vi.mock('../../../explore/network/containers/details');
+vi.mock('../../../common/components/ml/anomaly/use_anomalies_table_data');
+vi.mock('../../../common/components/ml/hooks/use_installed_security_jobs');
+vi.mock('../../../common/containers/use_global_time');
+vi.mock('../../../data_view_manager/hooks/use_data_view');
+vi.mock('../../../data_view_manager/hooks/use_selected_patterns');
+vi.mock('../../../common/hooks/use_invalid_filter_query');
+vi.mock('../../../common/lib/kuery', () => {
+      const mocked = {
+      convertToBuildEsQuery: vi.fn().mockReturnValue([undefined, undefined]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseNetworkDetails = useNetworkDetails as jest.Mock;
-const mockUseAnomaliesTableData = useAnomaliesTableData as jest.Mock;
-const mockUseInstalledSecurityJobNameById = useInstalledSecurityJobNameById as jest.Mock;
-const mockUseGlobalTime = useGlobalTime as jest.Mock;
-const mockUseDataView = useDataView as jest.Mock;
-const mockUseSelectedPatterns = useSelectedPatterns as jest.Mock;
+const mockUseNetworkDetails = useNetworkDetails as Mock;
+const mockUseAnomaliesTableData = useAnomaliesTableData as Mock;
+const mockUseInstalledSecurityJobNameById = useInstalledSecurityJobNameById as Mock;
+const mockUseGlobalTime = useGlobalTime as Mock;
+const mockUseDataView = useDataView as Mock;
+const mockUseSelectedPatterns = useSelectedPatterns as Mock;
 
 const defaultProps = {
   ip: '192.168.1.1',
@@ -54,13 +69,13 @@ const defaultProps = {
 
 describe('<Content />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseGlobalTime.mockReturnValue({
       from: '2020-07-07T08:20:18.966Z',
       to: '2020-07-08T08:20:18.966Z',
       isInitializing: false,
-      setQuery: jest.fn(),
+      setQuery: vi.fn(),
     });
 
     mockUseNetworkDetails.mockReturnValue([false, { id: 'test-id', networkDetails: {} }]);

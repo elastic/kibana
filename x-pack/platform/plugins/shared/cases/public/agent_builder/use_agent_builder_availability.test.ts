@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
@@ -12,17 +15,17 @@ import { useKibana } from '../common/lib/kibana';
 import { useLicense } from '../common/use_license';
 import { useAgentBuilderAvailability } from './use_agent_builder_availability';
 
-jest.mock('../common/lib/kibana');
-jest.mock('../common/use_license');
-jest.mock('@kbn/kibana-react-plugin/public');
+vi.mock('../common/lib/kibana');
+vi.mock('../common/use_license');
+vi.mock('@kbn/kibana-react-plugin/public');
 
-const useKibanaMock = useKibana as jest.Mock;
-const useLicenseMock = useLicense as jest.Mock;
-const useUiSetting$Mock = useUiSetting$ as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useLicenseMock = useLicense as Mock;
+const useUiSetting$Mock = useUiSetting$ as Mock;
 
 describe('useAgentBuilderAvailability', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: {
         application: {

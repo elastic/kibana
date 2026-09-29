@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CaseStatuses } from '../../../common/types/domain';
 import { createCasesClientMockArgs } from '../../client/mocks';
 import { mockCaseComments, mockCases } from '../../mocks';
@@ -125,7 +127,7 @@ describe('CaseCommentModel', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('create', () => {
@@ -322,7 +324,7 @@ describe('CaseCommentModel', () => {
       );
 
       afterAll(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('throws if limit is reached when creating persistable state attachment', async () => {
@@ -920,7 +922,7 @@ describe('CaseCommentModel', () => {
       );
 
       afterAll(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('throws if limit is reached when creating persistable state attachment', async () => {

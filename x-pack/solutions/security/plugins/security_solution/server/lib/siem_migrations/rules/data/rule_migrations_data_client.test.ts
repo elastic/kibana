@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { RuleMigrationsDataClient } from './rule_migrations_data_client';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
@@ -12,30 +15,30 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { SiemMigrationsDataResourcesClient } from '../../common/data/siem_migrations_data_resources_client';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 
-jest.mock('./rule_migrations_data_rules_client');
-jest.mock('../../common/data/siem_migrations_data_resources_client');
+vi.mock('./rule_migrations_data_rules_client');
+vi.mock('../../common/data/siem_migrations_data_resources_client');
 
 const mockedRulesClient = {
-  prepareDelete: jest
+  prepareDelete: vi
     .fn()
     .mockReturnValue([
       { delete: { _id: 'rule1', _index: '.mocked-rule-index' } },
       { delete: { _id: 'rule2', _index: '.mocked-rule-index' } },
     ]),
-} as unknown as jest.Mocked<RuleMigrationsDataRulesClient>;
+} as unknown as Mocked<RuleMigrationsDataRulesClient>;
 
 const mockedResourcesClient = {
-  prepareDelete: jest
+  prepareDelete: vi
     .fn()
     .mockReturnValue([{ delete: { _id: 'resource1', _index: '.mocked-resource-index' } }]),
-} as unknown as jest.Mocked<SiemMigrationsDataResourcesClient>;
+} as unknown as Mocked<SiemMigrationsDataResourcesClient>;
 
 const mockIndexNameProviders = {
-  migrations: jest.fn().mockReturnValue('.mocked-migration-index'),
-  rules: jest.fn().mockReturnValue('.mocked-rule-index'),
-  resources: jest.fn().mockReturnValue('.mocked-resource-index'),
-  prebuiltrules: jest.fn().mockReturnValue('.mocked-prebuilt-rules-index'),
-  integrations: jest.fn().mockReturnValue('.mocked-integrations-index'),
+  migrations: vi.fn().mockReturnValue('.mocked-migration-index'),
+  rules: vi.fn().mockReturnValue('.mocked-rule-index'),
+  resources: vi.fn().mockReturnValue('.mocked-resource-index'),
+  prebuiltrules: vi.fn().mockReturnValue('.mocked-prebuilt-rules-index'),
+  integrations: vi.fn().mockReturnValue('.mocked-integrations-index'),
 };
 
 const mockCurrentUser = {
@@ -45,30 +48,30 @@ const mockCurrentUser = {
 
 const mockEsClient = {
   asInternalUser: {
-    bulk: jest.fn().mockResolvedValue({ errors: false }),
+    bulk: vi.fn().mockResolvedValue({ errors: false }),
   },
-} as unknown as jest.Mocked<IScopedClusterClient>;
+} as unknown as Mocked<IScopedClusterClient>;
 
 const mockLogger = {
-  error: jest.fn(),
-  info: jest.fn(),
-} as unknown as jest.Mocked<Logger>;
+  error: vi.fn(),
+  info: vi.fn(),
+} as unknown as Mocked<Logger>;
 
 const mockSpaceId = 'default';
-const mockDependencies = {} as unknown as jest.Mocked<SiemMigrationsClientDependencies>;
+const mockDependencies = {} as unknown as Mocked<SiemMigrationsClientDependencies>;
 
 describe('RuleMigrationsDataClient', () => {
   beforeEach(() => {
-    (RuleMigrationsDataRulesClient as unknown as jest.Mock).mockImplementation(
+    (RuleMigrationsDataRulesClient as unknown as Mock).mockImplementation(
       () => mockedRulesClient
     );
-    (SiemMigrationsDataResourcesClient as unknown as jest.Mock).mockImplementation(
+    (SiemMigrationsDataResourcesClient as unknown as Mock).mockImplementation(
       () => mockedResourcesClient
     );
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('deleteMigration', () => {
     it('should delete the migration and associated rules and resources', async () => {

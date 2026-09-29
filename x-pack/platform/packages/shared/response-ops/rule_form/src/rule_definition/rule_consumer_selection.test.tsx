@@ -5,20 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 
-const mockOnChange = jest.fn();
+const mockOnChange = vi.fn();
 const mockConsumers: RuleCreationValidConsumer[] = ['logs', 'infrastructure', 'stackAlerts'];
 
-jest.mock('../hooks', () => ({
-  useRuleFormState: jest.fn(),
-  useRuleFormDispatch: jest.fn(),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useRuleFormState: vi.fn(),
+      useRuleFormDispatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
+const { useRuleFormState, useRuleFormDispatch } = (await vi.importMock('../hooks'));
 
 describe('RuleConsumerSelection', () => {
   beforeEach(() => {
@@ -29,7 +34,7 @@ describe('RuleConsumerSelection', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('Renders correctly', () => {

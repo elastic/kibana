@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-jest.mock('../../significant_events/latest_source_query', () => {
-  const actual = jest.requireActual('../../significant_events/latest_source_query');
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('../../significant_events/latest_source_query', async () => {
+  const actual = (await vi.importActual('../../significant_events/latest_source_query'));
   return {
     ...actual,
-    executeAndDecodeSource: jest.fn(),
+    executeAndDecodeSource: vi.fn(),
   };
 });
 
@@ -26,9 +29,9 @@ const STREAM = 'logs-app';
 
 function makeReader(): {
   reader: IndicatorReader;
-  runEsql: jest.Mock;
+  runEsql: Mock;
 } {
-  const runEsql = executeAndDecodeSource as jest.Mock;
+  const runEsql = executeAndDecodeSource as Mock;
   const logger = loggerMock.create();
   const revisionReader = new RevisionReader({} as ElasticsearchClient, logger);
   const reader = new IndicatorReader(revisionReader);
@@ -57,13 +60,13 @@ function createQueryDoc(
   };
 }
 
-function capturedQueryString(runEsql: jest.Mock): string {
+function capturedQueryString(runEsql: Mock): string {
   const query = runEsql.mock.calls[0][1];
   return query.print('basic');
 }
 
 beforeEach(() => {
-  (executeAndDecodeSource as jest.Mock).mockReset();
+  (executeAndDecodeSource as Mock).mockReset();
 });
 
 describe('IndicatorReader.getQueryLinks', () => {

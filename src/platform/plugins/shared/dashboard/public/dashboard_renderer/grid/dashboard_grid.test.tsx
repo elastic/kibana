@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { EuiThemeProvider } from '@elastic/eui';
@@ -30,11 +32,14 @@ import {
 import { DashboardGrid } from './dashboard_grid';
 import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('54321'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('54321'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./dashboard_grid_item', () => {
+vi.mock('./dashboard_grid_item', () => {
   return {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     DashboardGridItem: require('react').forwardRef(
@@ -111,7 +116,7 @@ const createAndMountDashboardGrid = async (overrides?: Partial<DashboardState>) 
 
 describe('DashboardGrid', () => {
   beforeAll(() => {
-    Element.prototype.scrollIntoView = jest.fn();
+    Element.prototype.scrollIntoView = vi.fn();
   });
   test('renders', async () => {
     await createAndMountDashboardGrid();

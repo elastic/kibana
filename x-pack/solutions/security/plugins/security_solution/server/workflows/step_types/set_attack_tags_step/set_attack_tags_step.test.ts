@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { setAttackTagsStepDefinition } from './set_attack_tags_step';
@@ -16,17 +19,17 @@ const createMockContext = (input: Record<string, unknown>) => {
     config: {},
     rawInput: input,
     contextManager: {
-      getContext: jest.fn(),
-      getScopedEsClient: jest.fn(),
-      renderInputTemplate: jest.fn(),
-      getFakeRequest: jest.fn(),
-      callKibanaApi: jest.fn(),
+      getContext: vi.fn(),
+      getScopedEsClient: vi.fn(),
+      renderInputTemplate: vi.fn(),
+      getFakeRequest: vi.fn(),
+      callKibanaApi: vi.fn(),
     },
     logger: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     },
     abortSignal: new AbortController().signal,
     stepId: 'test-step',
@@ -36,7 +39,7 @@ const createMockContext = (input: Record<string, unknown>) => {
 
 describe('setAttackTagsStepDefinition', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the Kibana API with correct payload for a single attack ID', async () => {
@@ -44,7 +47,7 @@ describe('setAttackTagsStepDefinition', () => {
       ids: 'attack-1',
       tags_to_add: ['tag1'],
     });
-    (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+    (mockContext.contextManager.callKibanaApi as Mock).mockResolvedValue({
       status: 200,
       body: {},
     });
@@ -81,7 +84,7 @@ describe('setAttackTagsStepDefinition', () => {
       tags_to_remove: ['tag3'],
       update_related_alerts: true,
     });
-    (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+    (mockContext.contextManager.callKibanaApi as Mock).mockResolvedValue({
       status: 200,
       body: {},
     });
@@ -116,7 +119,7 @@ describe('setAttackTagsStepDefinition', () => {
       ids: 'attack-1',
       tags_to_add: ['tag1'],
     });
-    (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+    (mockContext.contextManager.callKibanaApi as Mock).mockResolvedValue({
       status: 400,
       body: { error: 'Bad Request' },
     });
@@ -133,7 +136,7 @@ describe('setAttackTagsStepDefinition', () => {
       ids: 'attack-1',
       tags_to_add: ['tag1'],
     });
-    (mockContext.contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
+    (mockContext.contextManager.callKibanaApi as Mock).mockRejectedValue(
       new Error('Network error')
     );
 

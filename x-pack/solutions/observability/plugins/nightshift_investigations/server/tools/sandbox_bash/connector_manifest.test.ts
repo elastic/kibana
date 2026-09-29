@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
@@ -43,9 +46,9 @@ const createRawConnector = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const createSessionMock = (): jest.Mocked<Pick<SandboxSession, 'writeFiles' | 'isReset'>> => ({
+const createSessionMock = (): Mocked<Pick<SandboxSession, 'writeFiles' | 'isReset'>> => ({
   isReset: false,
-  writeFiles: jest.fn().mockResolvedValue([{ path: '/workspace/connectors.md', success: true }]),
+  writeFiles: vi.fn().mockResolvedValue([{ path: '/workspace/connectors.md', success: true }]),
 });
 
 const createCallContext = (allowedConnectorIds: readonly string[]): SandboxCallContext => ({
@@ -54,8 +57,8 @@ const createCallContext = (allowedConnectorIds: readonly string[]): SandboxCallC
 });
 
 const createGetActionsClient = (connectors: Array<Record<string, unknown>>) => {
-  const getAll = jest.fn().mockResolvedValue(connectors);
-  const getActionsClient = jest.fn(async (_req: KibanaRequest) => ({ getAll }));
+  const getAll = vi.fn().mockResolvedValue(connectors);
+  const getActionsClient = vi.fn(async (_req: KibanaRequest) => ({ getAll }));
   return { getActionsClient, getAll };
 };
 
@@ -90,7 +93,7 @@ const renderManifest = async ({
 
 describe('writeConnectorManifest', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('file writing', () => {

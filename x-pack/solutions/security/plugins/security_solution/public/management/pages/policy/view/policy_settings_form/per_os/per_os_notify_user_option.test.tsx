@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { fireEvent } from '@testing-library/react';
@@ -22,15 +25,15 @@ import { createMalwarePolicyAccessor } from './policy_accessor';
 import type { PerOsNotifyUserOptionProps } from './per_os_notify_user_option';
 import { PerOsNotifyUserOption } from './per_os_notify_user_option';
 
-jest.mock('../../../../../../common/hooks/use_license');
+vi.mock('../../../../../../common/hooks/use_license');
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 
 describe('PerOsNotifyUserOption', () => {
   let policy: PolicyConfig;
-  let onChange: jest.Mock;
+  let onChange: Mock;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let mockedContext: AppContextTestRender;
   let hasRendered: boolean;
@@ -59,7 +62,7 @@ describe('PerOsNotifyUserOption', () => {
     useLicenseMock.mockReturnValue(licenseServiceMocked);
     policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
       .config.policy.value;
-    onChange = jest.fn();
+    onChange = vi.fn();
     policy.windows.popup.malware.enabled = false;
     policy.windows.popup.malware.message = 'windows message';
     policy.windows.malware.mode = ProtectionModes.off;

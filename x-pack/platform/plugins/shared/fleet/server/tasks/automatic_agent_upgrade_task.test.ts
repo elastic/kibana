@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { CoreSetup } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -24,9 +27,9 @@ import type { Agent, AgentPolicy } from '../types';
 
 import { AutomaticAgentUpgradeTask, TYPE, VERSION } from './automatic_agent_upgrade_task';
 
-jest.mock('../../common/services');
-jest.mock('../services');
-jest.mock('../services/agents');
+vi.mock('../../common/services');
+vi.mock('../services');
+vi.mock('../services/agents');
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -42,28 +45,28 @@ const MOCK_TASK_INSTANCE = {
   taskType: TYPE,
 };
 
-const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-const mockedFetchAllAgentsByKuery = fetchAllAgentsByKuery as jest.MockedFunction<
+const mockAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
+const mockedFetchAllAgentsByKuery = fetchAllAgentsByKuery as MockedFunction<
   typeof fetchAllAgentsByKuery
 >;
-const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
+const mockedGetAgentsByKuery = getAgentsByKuery as MockedFunction<typeof getAgentsByKuery>;
 const mockedSendAutomaticUpgradeAgentsActions =
-  sendAutomaticUpgradeAgentsActions as jest.MockedFunction<
+  sendAutomaticUpgradeAgentsActions as MockedFunction<
     typeof sendAutomaticUpgradeAgentsActions
   >;
-const mockedIsAgentUpgradeable = isAgentUpgradeable as jest.MockedFunction<
+const mockedIsAgentUpgradeable = isAgentUpgradeable as MockedFunction<
   typeof isAgentUpgradeable
 >;
 
 const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
-  jest.fn().mockResolvedValue(
-    jest.fn(async function* () {
+  vi.fn().mockResolvedValue(
+    vi.fn(async function* () {
       yield items;
     })()
   );
 
 const getMockFetchAllAgentsByKuery = (items: Agent[]) =>
-  jest.fn(async function* () {
+  vi.fn(async function* () {
     yield items;
   })();
 
@@ -103,10 +106,10 @@ describe('AutomaticAgentUpgradeTask', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   let mockTask: AutomaticAgentUpgradeTask;
   let mockCore: CoreSetup;
-  let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
+  let mockTaskManagerSetup: Mocked<TaskManagerSetupContract>;
 
   beforeEach(() => {
-    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+    vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
@@ -124,8 +127,8 @@ describe('AutomaticAgentUpgradeTask', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(licenseService, 'isEnterprise').mockClear();
+    vi.clearAllMocks();
+    vi.spyOn(licenseService, 'isEnterprise').mockClear();
   });
 
   describe('Task lifecycle', () => {
@@ -155,7 +158,7 @@ describe('AutomaticAgentUpgradeTask', () => {
     };
 
     beforeEach(() => {
-      jest
+      vi
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableAutomaticAgentUpgrades: true } as any);
       mockDefaultAgentPolicy();
@@ -164,7 +167,7 @@ describe('AutomaticAgentUpgradeTask', () => {
     });
 
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('Should not run if task is outdated', async () => {
@@ -175,7 +178,7 @@ describe('AutomaticAgentUpgradeTask', () => {
     });
 
     it('Should exit if the enableAutomaticAgentUpgrades feature flag is disabled', async () => {
-      jest
+      vi
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableAutomaticAgentUpgrades: false } as any);
 
@@ -185,7 +188,7 @@ describe('AutomaticAgentUpgradeTask', () => {
     });
 
     it('Should exit if the license is not at least Enterprise', async () => {
-      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+      vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
 
       await runTask();
 
@@ -393,8 +396,8 @@ describe('AutomaticAgentUpgradeTask', () => {
           required_versions: [{ version: '8.18.0', percentage: 30 }],
         },
       ] as AgentPolicy[];
-      mockAgentPolicyService.fetchAllAgentPolicies = jest.fn().mockResolvedValue(
-        jest.fn(async function* () {
+      mockAgentPolicyService.fetchAllAgentPolicies = vi.fn().mockResolvedValue(
+        vi.fn(async function* () {
           yield firstAgentPoliciesBatch;
           yield secondAgentPoliciesBatch;
         })()
@@ -438,7 +441,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       mockedFetchAllAgentsByKuery
         .mockResolvedValueOnce(getMockFetchAllAgentsByKuery([])) // agents marked for retry
         .mockResolvedValueOnce(
-          jest.fn(async function* () {
+          vi.fn(async function* () {
             yield firstAgentsBatch;
             yield secondAgentsBatch;
           })()

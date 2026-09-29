@@ -7,22 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { resolve, join } from 'path';
 import { getTranslationPaths } from './get_translation_paths';
 
-jest.mock('fs/promises', () => {
-  const actual = jest.requireActual('fs/promises');
+vi.mock('fs/promises', () => {
+  const actual = require('fs/promises');
   return {
     ...actual,
-    glob: jest.fn(),
-    readFile: jest.fn(),
+    glob: vi.fn(),
+    readFile: vi.fn(),
   };
 });
 
 import { glob, readFile } from 'fs/promises';
 
-const globMock = glob as jest.Mock;
-const readFileMock = readFile as jest.Mock;
+const globMock = glob as Mock;
+const readFileMock = readFile as Mock;
 
 describe('getTranslationPaths', () => {
   beforeEach(() => {

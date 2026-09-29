@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { UiSettingsCommon } from '@kbn/data-views-plugin/common';
 import { getEsqlFn } from './esql';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
@@ -19,12 +22,12 @@ import type {
 import type { KibanaContext } from '..';
 
 interface MockTypedSearchService {
-  esql: jest.Mock<Promise<IEsqlSearchResult>, [IEsqlSearchParams, IEsqlSearchOptions?]>;
+  esql: Mock<Promise<IEsqlSearchResult>, [IEsqlSearchParams, IEsqlSearchOptions?]>;
 }
 
 const mockUiSettings = (): UiSettingsCommon =>
   ({
-    get: jest.fn((key: string) => {
+    get: vi.fn((key: string) => {
       if (key === 'dateFormat:tz') return 'UTC';
       return undefined;
     }),
@@ -34,9 +37,9 @@ const createExecutionContext = (): ExecutionContext =>
   ({
     abortSignal: new AbortController().signal,
     inspectorAdapters: {},
-    getKibanaRequest: jest.fn(),
-    getSearchSessionId: jest.fn(),
-    getExecutionContext: jest.fn(),
+    getKibanaRequest: vi.fn(),
+    getSearchSessionId: vi.fn(),
+    getExecutionContext: vi.fn(),
   } as unknown as ExecutionContext);
 
 const getMockSearchService = (
@@ -44,7 +47,7 @@ const getMockSearchService = (
   values: unknown[][] = [['v1']]
 ): MockTypedSearchService => {
   const mockTyped = {
-    esql: jest.fn().mockResolvedValue({
+    esql: vi.fn().mockResolvedValue({
       rawResponse: {
         values,
         columns,

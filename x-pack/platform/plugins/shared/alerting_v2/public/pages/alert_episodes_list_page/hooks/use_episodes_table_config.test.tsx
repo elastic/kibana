@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -18,10 +20,10 @@ import {
 import { useEpisodesTableConfig } from './use_episodes_table_config';
 
 const createMockStorage = (initialValue: unknown = null) => ({
-  get: jest.fn().mockReturnValue(initialValue),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
+  get: vi.fn().mockReturnValue(initialValue),
+  set: vi.fn(),
+  remove: vi.fn(),
+  clear: vi.fn(),
 });
 
 describe('useEpisodesTableConfig', () => {
@@ -229,14 +231,14 @@ describe('useEpisodesTableConfig', () => {
     // mock would then hand back the stale pre-reset value.
     let stored: unknown = { ...DEFAULT_EPISODES_TABLE_CONFIG, rowHeight: -1 };
     const mockStorage = {
-      get: jest.fn(() => stored),
-      set: jest.fn((_, v) => {
+      get: vi.fn(() => stored),
+      set: vi.fn((_, v) => {
         stored = v;
       }),
-      remove: jest.fn(() => {
+      remove: vi.fn(() => {
         stored = null;
       }),
-      clear: jest.fn(),
+      clear: vi.fn(),
     };
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (

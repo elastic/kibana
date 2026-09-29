@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import sinon from 'sinon';
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -113,9 +115,12 @@ const getResult = (
   actionToLog: { alertGroup: 'default', alertId, id: actionId, uuid: actionUuid, typeId: 'test' },
 });
 
-jest.mock('../../transform_action_params', () => ({
-  transformActionParams: jest.fn(),
-}));
+vi.mock('../../transform_action_params', () => {
+      const mocked = {
+      transformActionParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let clock: sinon.SinonFakeTimers;
 
@@ -125,8 +130,8 @@ describe('Per-Alert Action Scheduler', () => {
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
     mockActionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     mockActionsPlugin.isActionExecutable.mockReturnValue(true);
     mockActionsPlugin.getActionsClientWithRequest.mockResolvedValue(actionsClient);
@@ -1406,7 +1411,7 @@ describe('Per-Alert Action Scheduler', () => {
         meta: {},
       });
 
-      const spy = jest.spyOn(alert, 'clearThrottlingLastScheduledActions');
+      const spy = vi.spyOn(alert, 'clearThrottlingLastScheduledActions');
 
       alert.scheduleActions('default');
 
@@ -1508,7 +1513,7 @@ describe('Per-Alert Action Scheduler', () => {
       });
 
       afterEach(() => {
-        jest.restoreAllMocks();
+        vi.restoreAllMocks();
         clock = sinon.useFakeTimers();
       });
 
@@ -1517,9 +1522,9 @@ describe('Per-Alert Action Scheduler', () => {
         // subsequent call returns 100ms, so the first iteration immediately exceeds
         // the 50ms budget and triggers exactly one yield.
         let nowCallCount = 0;
-        jest.spyOn(Date, 'now').mockImplementation(() => (nowCallCount++ === 0 ? 0 : 100));
+        vi.spyOn(Date, 'now').mockImplementation(() => (nowCallCount++ === 0 ? 0 : 100));
 
-        const setImmediateSpy = jest.spyOn(global, 'setImmediate');
+        const setImmediateSpy = vi.spyOn(global, 'setImmediate');
 
         const scheduler = new PerAlertActionScheduler({
           ...getSchedulerContext(),
@@ -1539,8 +1544,8 @@ describe('Per-Alert Action Scheduler', () => {
 
       test('does not yield when the time budget is not exceeded', async () => {
         // Date.now always returns 0, so elapsed time never exceeds the budget.
-        jest.spyOn(Date, 'now').mockReturnValue(0);
-        const setImmediateSpy = jest.spyOn(global, 'setImmediate');
+        vi.spyOn(Date, 'now').mockReturnValue(0);
+        const setImmediateSpy = vi.spyOn(global, 'setImmediate');
 
         const scheduler = new PerAlertActionScheduler({
           ...getSchedulerContext(),

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -13,16 +16,16 @@ import { DETECTION_ENGINE_ATTACKS_STATUS_URL } from '../../../../common/constant
 import type { setAttackStatusInputSchema } from '../../../../common/workflows/step_types/set_attack_status_step/set_attack_status_step_common';
 
 describe('setAttackStatusStepDefinition', () => {
-  let mockContextManager: jest.Mocked<
+  let mockContextManager: Mocked<
     StepHandlerContext<typeof setAttackStatusInputSchema>['contextManager']
   >;
   let mockContext: StepHandlerContext<typeof setAttackStatusInputSchema>;
 
   beforeEach(() => {
     mockContextManager = {
-      callKibanaApi: jest.fn(),
-      getFakeRequest: jest.fn(),
-    } as unknown as jest.Mocked<
+      callKibanaApi: vi.fn(),
+      getFakeRequest: vi.fn(),
+    } as unknown as Mocked<
       StepHandlerContext<typeof setAttackStatusInputSchema>['contextManager']
     >;
 

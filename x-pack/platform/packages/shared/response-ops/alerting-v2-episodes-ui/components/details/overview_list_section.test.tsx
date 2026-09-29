@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -21,13 +23,13 @@ import {
 } from '../../hooks/test_utils';
 import { AlertEpisodeOverviewListSection } from './overview_list_section';
 
-jest.mock('../../utils/run_esql_async_search');
-jest.mock('../../apis/fetch_episode_actions');
-jest.mock('../../apis/fetch_group_actions');
+vi.mock('../../utils/run_esql_async_search');
+vi.mock('../../apis/fetch_episode_actions');
+vi.mock('../../apis/fetch_group_actions');
 
-const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
-const fetchEpisodeActionsMock = jest.mocked(fetchEpisodeActions);
-const fetchGroupActionsMock = jest.mocked(fetchGroupActions);
+const runEsqlAsyncSearchMock = vi.mocked(runEsqlAsyncSearch);
+const fetchEpisodeActionsMock = vi.mocked(fetchEpisodeActions);
+const fetchGroupActionsMock = vi.mocked(fetchGroupActions);
 
 const mockHttp = httpServiceMock.createStartContract();
 const mockServices = createMockServices({ http: mockHttp });
@@ -43,7 +45,7 @@ const wrapper = createQueryClientWrapper(queryClient);
 
 describe('AlertEpisodeOverviewListSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 

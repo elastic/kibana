@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { TransportRequestParams, TransportRequestOptions } from '@elastic/elasticsearch';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -17,7 +19,7 @@ describe('getTimingRequestHandler', () => {
   const mockLogger = loggerMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('sets timing context with startTime', () => {

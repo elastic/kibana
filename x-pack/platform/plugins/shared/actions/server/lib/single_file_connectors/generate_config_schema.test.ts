@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 
 import { generateConfigSchema } from './generate_config_schema';
@@ -15,7 +17,7 @@ const mockConfigUtils = actionsConfigMock.create();
 const validatorServices = { configurationUtilities: mockConfigUtils };
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   mockConfigUtils.getWebhookSettings.mockReturnValue({ ssl: { pfx: { enabled: false } } });
 });
 

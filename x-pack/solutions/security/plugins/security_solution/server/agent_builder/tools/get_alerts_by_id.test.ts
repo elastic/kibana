@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERTS_BATCH_MAX_SIZE, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
 import { getAlertsById } from './get_alerts_by_id';
 
 const makeClient = (hits: Array<{ _id?: string; _source?: unknown }>) =>
   ({
-    search: jest.fn().mockResolvedValue({ hits: { hits } }),
+    search: vi.fn().mockResolvedValue({ hits: { hits } }),
   } as unknown as ElasticsearchClient);
 
 describe('getAlertsById', () => {

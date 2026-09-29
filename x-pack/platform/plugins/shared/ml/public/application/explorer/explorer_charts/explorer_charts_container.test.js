@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -21,51 +23,54 @@ import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_contex
 import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
 import { timefilterMock } from '../../contexts/kibana/__mocks__/use_timefilter';
 
-jest.mock('../../contexts/kibana', () => ({
-  useMlKibana: () => {
-    return {
-      services: {
-        chrome: { recentlyAccessed: { add: jest.fn() } },
-        share: {
-          url: {
-            locators: {
-              get: jest.fn(() => {
-                return {
-                  getLocation: jest.fn(() => ({ path: '/#maps' })),
-                };
-              }),
-            },
-          },
-        },
-        data: {
-          query: {
-            timefilter: {
-              timefilter: {
-                getTime: jest.fn(() => {
-                  return { from: '', to: '' };
-                }),
+vi.mock('../../contexts/kibana', () => {
+      const mocked = {
+      useMlKibana: () => {
+        return {
+          services: {
+            chrome: { recentlyAccessed: { add: vi.fn() } },
+            share: {
+              url: {
+                locators: {
+                  get: vi.fn(() => {
+                    return {
+                      getLocation: vi.fn(() => ({ path: '/#maps' })),
+                    };
+                  }),
+                },
               },
             },
+            data: {
+              query: {
+                timefilter: {
+                  timefilter: {
+                    getTime: vi.fn(() => {
+                      return { from: '', to: '' };
+                    }),
+                  },
+                },
+              },
+            },
+            application: {
+              navigateToApp: vi.fn(),
+            },
           },
-        },
-        application: {
-          navigateToApp: jest.fn(),
-        },
+        };
       },
     };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
 const getUtilityProps = () => {
   const mlUrlGenerator = {
-    createUrl: jest.fn(),
+    createUrl: vi.fn(),
   };
   return {
     mlUrlGenerator,
     timefilter: timefilterMock,
     timeBuckets: timeBucketsMock,
     kibana: kibanaContextMock,
-    onPointerUpdate: jest.fn(),
+    onPointerUpdate: vi.fn(),
     chartsService: kibanaContextMock.services.charts,
   };
 };

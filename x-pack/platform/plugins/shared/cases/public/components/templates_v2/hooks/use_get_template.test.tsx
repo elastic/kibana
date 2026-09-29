@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 
@@ -14,9 +17,9 @@ import { useGetTemplate } from './use_get_template';
 import { casesQueriesKeys } from '../../../containers/constants';
 import * as api from '../api/api';
 
-jest.mock('../api/api');
+vi.mock('../api/api');
 
-const apiMock = api as jest.Mocked<typeof api>;
+const apiMock = api as Mocked<typeof api>;
 
 const mockTemplate: ParsedTemplate = {
   templateId: 'template-1',
@@ -32,7 +35,7 @@ const mockTemplate: ParsedTemplate = {
 
 describe('useGetTemplate', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     apiMock.getTemplate.mockResolvedValue(mockTemplate);
   });
 

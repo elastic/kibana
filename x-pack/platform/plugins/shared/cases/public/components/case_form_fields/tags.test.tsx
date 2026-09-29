@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
@@ -20,10 +23,10 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { MAX_LENGTH_PER_TAG } from '../../../common/constants';
 import type { CaseFormFieldsSchemaProps } from './schema';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../containers/use_get_tags');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../containers/use_get_tags');
 
-const useGetTagsMock = useGetTags as jest.Mock;
+const useGetTagsMock = useGetTags as Mock;
 
 describe('Tags', () => {
   let globalForm: FormHook;
@@ -50,7 +53,7 @@ describe('Tags', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('it renders', async () => {

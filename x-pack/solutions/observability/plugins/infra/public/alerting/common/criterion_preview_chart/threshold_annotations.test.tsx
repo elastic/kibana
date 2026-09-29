@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Color } from '../../../../common/color_palette';
 import { ThresholdAnnotations } from './threshold_annotations';
 
-jest.mock('@elastic/charts', () => {
-  const original = jest.requireActual('@elastic/charts');
+vi.mock('@elastic/charts', () => {
+  const original = require('@elastic/charts');
 
   const mockComponent = (props: any) => {
     // Stringify dataValues if it's an object

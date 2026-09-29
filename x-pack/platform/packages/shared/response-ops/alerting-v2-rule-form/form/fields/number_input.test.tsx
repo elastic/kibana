@@ -5,24 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { NumberInput, type NumberInputProps } from './number_input';
 
 const defaultProps: NumberInputProps = {
   value: 5,
-  onChange: jest.fn(),
+  onChange: vi.fn(),
   'data-test-subj': 'testNumberInput',
 };
 
 const renderInput = (overrides: Partial<NumberInputProps> = {}) => {
-  const props = { ...defaultProps, ...overrides, onChange: jest.fn() };
+  const props = { ...defaultProps, ...overrides, onChange: vi.fn() };
   const result = render(<NumberInput {...props} />);
   return { ...result, onChange: props.onChange };
 };
 
 describe('NumberInput', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   describe('rendering', () => {
     it('renders the input with the provided value', () => {
@@ -137,7 +139,7 @@ describe('NumberInput', () => {
       const input = screen.getByTestId('testNumberInput');
 
       const event = new KeyboardEvent('keydown', { key, bubbles: true });
-      const preventDefaultSpy = jest.spyOn(event, 'preventDefault');
+      const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
 
       input.dispatchEvent(event);
 
@@ -149,7 +151,7 @@ describe('NumberInput', () => {
       const input = screen.getByTestId('testNumberInput');
 
       const event = new KeyboardEvent('keydown', { key: '3', bubbles: true });
-      const preventDefaultSpy = jest.spyOn(event, 'preventDefault');
+      const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
 
       input.dispatchEvent(event);
 

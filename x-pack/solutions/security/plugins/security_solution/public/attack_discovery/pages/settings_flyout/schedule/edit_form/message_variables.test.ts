@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getMessageVariables } from './message_variables';
 
 describe('getMessageVariables', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return `context.attack.alertIds` action variable', () => {

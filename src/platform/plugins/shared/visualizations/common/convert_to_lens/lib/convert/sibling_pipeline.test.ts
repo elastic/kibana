@@ -7,22 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IAggConfig } from '@kbn/data-plugin/common';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { SchemaConfig } from '../../..';
 import { convertToSiblingPipelineColumns } from './sibling_pipeline';
 
-const mockConvertMetricToColumns = jest.fn();
-const mockConvertToSchemaConfig = jest.fn();
+const mockConvertMetricToColumns = vi.fn();
+const mockConvertToSchemaConfig = vi.fn();
 
-jest.mock('../metrics', () => ({
-  convertMetricToColumns: jest.fn(() => mockConvertMetricToColumns()),
-}));
+vi.mock('../metrics', () => {
+      const mocked = {
+      convertMetricToColumns: vi.fn(() => mockConvertMetricToColumns()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../vis_schemas', () => ({
-  convertToSchemaConfig: jest.fn(() => mockConvertToSchemaConfig()),
-}));
+vi.mock('../../../vis_schemas', () => {
+      const mocked = {
+      convertToSchemaConfig: vi.fn(() => mockConvertToSchemaConfig()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('convertToSiblingPipelineColumns', () => {
   const visType = 'heatmap';
@@ -42,7 +50,7 @@ describe('convertToSiblingPipelineColumns', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockConvertMetricToColumns.mockReturnValue([{}]);
     mockConvertToSchemaConfig.mockReturnValue({});
   });

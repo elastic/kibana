@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 
 import type { WorkflowExecutionsTracking } from '../types';
 import { writeAlertRetrievalStartedEvent } from '.';
 
-const mockWriteAttackDiscoveryEvent = jest.fn();
+const mockWriteAttackDiscoveryEvent = vi.fn();
 
-jest.mock('../../persistence/event_logging', () => ({
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED: 'alert-retrieval-started',
-  writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
-}));
+vi.mock('../../persistence/event_logging', () => {
+      const mocked = {
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED: 'alert-retrieval-started',
+      writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('writeAlertRetrievalStartedEvent', () => {
   const defaultProps = {
@@ -26,10 +31,10 @@ describe('writeAlertRetrievalStartedEvent', () => {
       username: 'test-user',
     } as AuthenticatedUser,
     connectorId: 'connector-1',
-    eventLogger: { logEvent: jest.fn() } as unknown as IEventLogger,
+    eventLogger: { logEvent: vi.fn() } as unknown as IEventLogger,
     eventLogIndex: '.kibana-event-log-test',
     executionUuid: 'exec-1',
-    logger: { error: jest.fn() } as unknown as Logger,
+    logger: { error: vi.fn() } as unknown as Logger,
     spaceId: 'default',
     startTime: new Date('2024-01-01T00:00:00.000Z'),
     workflowExecutions: {
@@ -42,7 +47,7 @@ describe('writeAlertRetrievalStartedEvent', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('writes the started event', async () => {

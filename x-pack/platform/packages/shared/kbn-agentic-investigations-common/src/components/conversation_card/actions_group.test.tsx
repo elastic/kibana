@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -35,9 +37,9 @@ const renderGroup = (
     canManageEscalations = false,
   }: { withRecommendedAction?: boolean; canManageEscalations?: boolean } = {}
 ) => {
-  const onClickRecommendedAction = jest.fn();
-  const onClickAction = jest.fn();
-  const onOpenChat = jest.fn();
+  const onClickRecommendedAction = vi.fn();
+  const onClickAction = vi.fn();
+  const onOpenChat = vi.fn();
 
   renderWithKibanaRenderContext(
     <ConversationsActionsGroup
@@ -158,12 +160,12 @@ describe('ConversationsActionsGroup', () => {
     });
 
     it('keeps close available while the decision is open when canCloseInvestigation is true', () => {
-      const onClickAction = jest.fn();
+      const onClickAction = vi.fn();
       renderWithKibanaRenderContext(
         <ConversationsActionsGroup
           investigation={makeInvestigation()}
           onClickAction={onClickAction}
-          onOpenChat={jest.fn()}
+          onOpenChat={vi.fn()}
           canCloseInvestigation={true}
         />
       );

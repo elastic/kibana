@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
@@ -20,14 +23,17 @@ import type {
 import type { EvidenceRound, InstrumentationProfile } from './evidence/types';
 import type { TraceAccessorWithSearch } from './trace_accessor';
 
-jest.mock('./evidence/evidence_service', () => ({
-  ...jest.requireActual('./evidence/evidence_service'),
-  hasTraceDocuments: jest.fn(),
-  hasRootSpan: jest.fn(),
-  extractEvidence: jest.fn(),
-  extractProfilesEvidence: jest.fn(),
-  extractSelectedEvidence: jest.fn(),
-}));
+vi.mock('./evidence/evidence_service', async () => {
+      const mocked = {
+      ...(await vi.importActual('./evidence/evidence_service')),
+      hasTraceDocuments: vi.fn(),
+      hasRootSpan: vi.fn(),
+      extractEvidence: vi.fn(),
+      extractProfilesEvidence: vi.fn(),
+      extractSelectedEvidence: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type ResponseErrorArgs = ConstructorParameters<typeof EsErrors.ResponseError>[0];
 
@@ -83,15 +89,15 @@ describe('awaitTraceReady', () => {
   const traceAccessor: TraceAccessorWithSearch = {
     traceId,
     esClient: {
-      search: jest.fn(),
+      search: vi.fn(),
     } as unknown as TraceAccessorWithSearch['esClient'],
-    runSearch: jest.fn(),
+    runSearch: vi.fn(),
   };
-  const hasTraceDocumentsMock = evidenceServiceModule.hasTraceDocuments as jest.Mock;
-  const hasRootSpanMock = evidenceServiceModule.hasRootSpan as jest.Mock;
-  const extractEvidenceMock = evidenceServiceModule.extractEvidence as jest.Mock;
-  const extractProfilesEvidenceMock = evidenceServiceModule.extractProfilesEvidence as jest.Mock;
-  const extractSelectedEvidenceMock = evidenceServiceModule.extractSelectedEvidence as jest.Mock;
+  const hasTraceDocumentsMock = evidenceServiceModule.hasTraceDocuments as Mock;
+  const hasRootSpanMock = evidenceServiceModule.hasRootSpan as Mock;
+  const extractEvidenceMock = evidenceServiceModule.extractEvidence as Mock;
+  const extractProfilesEvidenceMock = evidenceServiceModule.extractProfilesEvidence as Mock;
+  const extractSelectedEvidenceMock = evidenceServiceModule.extractSelectedEvidence as Mock;
 
   const run = (
     request: AwaitTraceReadyRequest = {
@@ -102,7 +108,7 @@ describe('awaitTraceReady', () => {
   ) => awaitTraceReady(traceAccessor, request, logger, options);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     hasTraceDocumentsMock.mockResolvedValue(true);
     hasRootSpanMock.mockResolvedValue(true);
     extractEvidenceMock.mockResolvedValue(buildExtraction(READY_ROUND));
@@ -126,7 +132,7 @@ describe('awaitTraceReady', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('completes a trace-only profile after consecutive structurally equal rounds', async () => {
@@ -180,7 +186,7 @@ describe('awaitTraceReady', () => {
   });
 
   it('requires stable evidence to span the configured window', async () => {
-    jest.spyOn(Date, 'now').mockReturnValueOnce(0).mockReturnValueOnce(5).mockReturnValue(10);
+    vi.spyOn(Date, 'now').mockReturnValueOnce(0).mockReturnValueOnce(5).mockReturnValue(10);
 
     await expect(
       run(
@@ -193,7 +199,7 @@ describe('awaitTraceReady', () => {
   });
 
   it('applies the configured window to log-backed complete profiles', async () => {
-    jest.spyOn(Date, 'now').mockReturnValueOnce(0).mockReturnValueOnce(5).mockReturnValue(10);
+    vi.spyOn(Date, 'now').mockReturnValueOnce(0).mockReturnValueOnce(5).mockReturnValue(10);
 
     await expect(
       run({ mode: 'complete', profile: 'claude-code' }, { ...FAST_BUDGET, stabilityWindowMs: 10 })
@@ -209,7 +215,7 @@ describe('awaitTraceReady', () => {
     extractEvidenceMock
       .mockResolvedValueOnce(buildExtraction(READY_ROUND))
       .mockResolvedValue(buildExtraction(changedRound));
-    jest
+    vi
       .spyOn(Date, 'now')
       .mockReturnValueOnce(0)
       .mockReturnValueOnce(10)
@@ -484,7 +490,7 @@ describe('awaitTraceReady', () => {
       .mockResolvedValueOnce(buildExtraction(READY_ROUND))
       .mockResolvedValueOnce(buildExtraction(READY_ROUND))
       .mockResolvedValueOnce(buildExtraction(READY_ROUND));
-    jest
+    vi
       .spyOn(Date, 'now')
       .mockReturnValueOnce(0)
       .mockReturnValueOnce(5)
@@ -510,7 +516,7 @@ describe('awaitTraceReady', () => {
     extractProfilesEvidenceMock
       .mockResolvedValueOnce([unresolvedEvents, resolvedElastic])
       .mockResolvedValue([resolvedEvents, resolvedElastic]);
-    jest.spyOn(Date, 'now').mockReturnValueOnce(0).mockReturnValueOnce(10).mockReturnValue(20);
+    vi.spyOn(Date, 'now').mockReturnValueOnce(0).mockReturnValueOnce(10).mockReturnValue(20);
 
     await expect(
       run({ mode: 'stable' }, { ...FAST_BUDGET, stabilityWindowMs: 10 })

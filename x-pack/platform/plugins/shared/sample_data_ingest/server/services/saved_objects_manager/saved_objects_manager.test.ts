@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-jest.mock('../../saved_objects/saved_objects', () => {
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
+vi.mock('../../saved_objects/saved_objects', () => {
   return {
-    getSavedObjects: jest.fn(),
-    getDashboardId: jest.fn(),
+    getSavedObjects: vi.fn(),
+    getDashboardId: vi.fn(),
   };
 });
 
@@ -25,14 +28,14 @@ import { DatasetSampleType } from '../../../common';
 import { SavedObjectsManager } from './saved_objects_manager';
 import { getSavedObjects, getDashboardId } from '../../saved_objects/saved_objects';
 
-const mockGetSavedObjects = getSavedObjects as jest.MockedFunction<typeof getSavedObjects>;
-const mockGetDashboardId = getDashboardId as jest.MockedFunction<typeof getDashboardId>;
+const mockGetSavedObjects = getSavedObjects as MockedFunction<typeof getSavedObjects>;
+const mockGetDashboardId = getDashboardId as MockedFunction<typeof getDashboardId>;
 
 describe('SavedObjectsManager', () => {
   let logger: MockedLogger;
   let savedObjectsManager: SavedObjectsManager;
   let mockSoClient: ReturnType<typeof savedObjectsClientMock.create>;
-  let mockSoImporter: jest.Mocked<ISavedObjectsImporter>;
+  let mockSoImporter: Mocked<ISavedObjectsImporter>;
 
   const mockSavedObjects: SavedObject[] = [
     {
@@ -69,7 +72,7 @@ describe('SavedObjectsManager', () => {
     logger = loggerMock.create();
     mockSoClient = savedObjectsClientMock.create();
     mockSoImporter = {
-      import: jest.fn(),
+      import: vi.fn(),
     } as any;
 
     savedObjectsManager = new SavedObjectsManager({
@@ -81,7 +84,7 @@ describe('SavedObjectsManager', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('constructor', () => {

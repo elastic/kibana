@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { type ReactNode } from 'react';
 
 import { screen } from '@testing-library/react';
@@ -27,8 +29,8 @@ interface MockExportJsonFlyoutContentProps {
   }>;
 }
 
-const mockDownloadFileAs = jest.fn();
-const mockExportJsonFlyoutContent = jest.fn(
+const mockDownloadFileAs = vi.fn();
+const mockExportJsonFlyoutContent = vi.fn(
   ({ headerActions, headerNotice }: MockExportJsonFlyoutContentProps) => (
     <>
       {headerActions}
@@ -37,19 +39,25 @@ const mockExportJsonFlyoutContent = jest.fn(
   )
 );
 
-jest.mock('@kbn/as-code-export-flyout-component', () => ({
-  ExportJsonFlyoutContent: (props: MockExportJsonFlyoutContentProps) =>
-    mockExportJsonFlyoutContent(props),
-}));
+vi.mock('@kbn/as-code-export-flyout-component', () => {
+      const mocked = {
+      ExportJsonFlyoutContent: (props: MockExportJsonFlyoutContentProps) =>
+        mockExportJsonFlyoutContent(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/share-plugin/public', () => ({
-  downloadFileAs: (...args: unknown[]) => mockDownloadFileAs(...args),
-}));
+vi.mock('@kbn/share-plugin/public', () => {
+      const mocked = {
+      downloadFileAs: (...args: unknown[]) => mockDownloadFileAs(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DashboardPanelExportJsonFlyout', () => {
   it('adapts the Dashboard panel controls and callbacks', async () => {
     const user = userEvent.setup();
-    const getExportJson = jest.fn((_forceExportByValue = false) => ({ key: 'value' }));
+    const getExportJson = vi.fn((_forceExportByValue = false) => ({ key: 'value' }));
     const warnings: NonNullable<DashboardSanitizeResponseBody['warnings']> = [
       {
         type: 'dropped_property',
@@ -57,7 +65,7 @@ describe('DashboardPanelExportJsonFlyout', () => {
         key: 'legacyProperty',
       },
     ];
-    const sanitizeState = jest.fn(async (state: object) => ({
+    const sanitizeState = vi.fn(async (state: object) => ({
       data: state,
       warnings,
     }));
@@ -66,7 +74,7 @@ describe('DashboardPanelExportJsonFlyout', () => {
       <DashboardPanelExportJsonFlyout
         title="Panel"
         objectType="visualization"
-        closeFlyout={jest.fn()}
+        closeFlyout={vi.fn()}
         getExportJson={getExportJson}
         isByReference
         sanitizeState={sanitizeState}

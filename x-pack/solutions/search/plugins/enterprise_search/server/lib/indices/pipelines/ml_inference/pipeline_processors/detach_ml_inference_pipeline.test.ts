@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
@@ -13,14 +15,14 @@ import { detachMlInferencePipeline } from './detach_ml_inference_pipeline';
 describe('detachMlInferencePipeline', () => {
   const mockClient = {
     ingest: {
-      deletePipeline: jest.fn(),
-      getPipeline: jest.fn(),
-      putPipeline: jest.fn(),
+      deletePipeline: vi.fn(),
+      getPipeline: vi.fn(),
+      putPipeline: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const anyObject: any = {};

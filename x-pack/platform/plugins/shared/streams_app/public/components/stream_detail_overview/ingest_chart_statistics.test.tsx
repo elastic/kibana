@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,30 +14,39 @@ import { IngestChartStatistics } from './ingest_chart_statistics';
 
 // ─── Module mocks ────────────────────────────────────────────────────────────
 
-const mockUseStreamsAppFetch = jest.fn();
+const mockUseStreamsAppFetch = vi.fn();
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    core: { uiSettings: {} },
-    isServerless: false,
-    dependencies: {
-      start: {
-        data: { search: { search: jest.fn() } },
-        streams: { streamsRepositoryClient: { fetch: jest.fn() } },
-      },
-    },
-  }),
-}));
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        core: { uiSettings: {} },
+        isServerless: false,
+        dependencies: {
+          start: {
+            data: { search: { search: vi.fn() } },
+            streams: { streamsRepositoryClient: { fetch: vi.fn() } },
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_streams_app_fetch', () => ({
-  useStreamsAppFetch: (...args: unknown[]) => mockUseStreamsAppFetch(...args),
-}));
+vi.mock('../../hooks/use_streams_app_fetch', () => {
+      const mocked = {
+      useStreamsAppFetch: (...args: unknown[]) => mockUseStreamsAppFetch(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // executeEsqlQuery is called inside useStreamsAppFetch which we mock entirely,
 // so this import only needs to exist to prevent module-not-found errors.
-jest.mock('../../hooks/use_execute_esql_query', () => ({
-  executeEsqlQuery: jest.fn(),
-}));
+vi.mock('../../hooks/use_execute_esql_query', () => {
+      const mocked = {
+      executeEsqlQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -48,10 +59,10 @@ const defaultFetch = (value: unknown) => ({
   value,
   loading: false,
   error: undefined,
-  refresh: jest.fn(),
+  refresh: vi.fn(),
 });
 
-const loadingFetch = { value: undefined, loading: true, error: undefined, refresh: jest.fn() };
+const loadingFetch = { value: undefined, loading: true, error: undefined, refresh: vi.fn() };
 
 /**
  * Sets up the three sequential `useStreamsAppFetch` calls:
@@ -113,7 +124,7 @@ const baseProps = {
 
 describe('IngestChartStatistics', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('stat labels', () => {

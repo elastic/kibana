@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, act, fireEvent } from '@testing-library/react';
 import type { Query, AggregateQuery } from '@kbn/es-query';
@@ -28,10 +31,10 @@ import { createIndexPatternServiceMock } from '../../../mocks/data_views_service
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 
-jest.mock('../../../id_generator');
+vi.mock('../../../id_generator');
 
-jest.mock('@kbn/kibana-utils-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-utils-plugin/public');
+vi.mock('@kbn/kibana-utils-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/kibana-utils-plugin/public'));
   return {
     ...original,
     Storage: class Storage {
@@ -45,14 +48,14 @@ describe('ConfigPanel', () => {
   let uiActions: UiActionsStart;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     frame = createMockFramePublicAPI();
     uiActions = uiActionsPluginMock.createStartContract();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   function renderConfigPanel(
@@ -64,7 +67,7 @@ describe('ConfigPanel', () => {
     query?: Query | AggregateQuery,
     selectedLayerId: string | null = 'first'
   ) {
-    (generateId as jest.Mock).mockReturnValue(`newId`);
+    (generateId as Mock).mockReturnValue(`newId`);
     const { visualizationMap, datasourceMap, ...rest } = props;
     return renderWithReduxStore(
       <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
@@ -136,14 +139,14 @@ describe('ConfigPanel', () => {
       } as Visualization,
       indexPatternService: createIndexPatternServiceMock(),
       visualizationState: 'state',
-      updateVisualization: jest.fn(),
-      updateDatasource: jest.fn(),
-      updateAll: jest.fn(),
+      updateVisualization: vi.fn(),
+      updateDatasource: vi.fn(),
+      updateAll: vi.fn(),
       framePublicAPI: frame,
-      dispatch: jest.fn(),
+      dispatch: vi.fn(),
       core: coreMock.createStart(),
       isFullscreen: false,
-      toggleFullscreen: jest.fn(),
+      toggleFullscreen: vi.fn(),
       uiActions,
       dataViews: {} as DataViewsPublicPluginStart,
       data: dataPluginMock.createStartContract(),
@@ -163,7 +166,7 @@ describe('ConfigPanel', () => {
     visualizationMap: ReturnType<typeof mockVisualizationMap>,
     accessors: Array<{ columnId: string }>
   ) {
-    visualizationMap.testVis.getConfiguration = jest.fn(() => ({
+    visualizationMap.testVis.getConfiguration = vi.fn(() => ({
       groups: [
         {
           groupId: 'a',
@@ -171,13 +174,13 @@ describe('ConfigPanel', () => {
           layerId: 'first',
           supportsMoreColumns: true,
           accessors,
-          filterOperations: jest.fn(() => true),
+          filterOperations: vi.fn(() => true),
           dataTestSubj: 'mockVisA',
         },
       ],
     }));
-    visualizationMap.testVis.setDimension = jest.fn().mockReturnValue('state');
-    datasourceMap.formBased.DimensionEditorComponent = jest
+    visualizationMap.testVis.setDimension = vi.fn().mockReturnValue('state');
+    datasourceMap.formBased.DimensionEditorComponent = vi
       .fn()
       .mockImplementation(({ setState }: { setState: (s: unknown) => void }) => (
         <button data-test-subj="mockDimensionEditorApply" onClick={() => setState('updated')} />
@@ -196,7 +199,7 @@ describe('ConfigPanel', () => {
     fireEvent.click(screen.getByTestId('mockDimensionEditorApply'));
 
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(store.getState().lens.datasourceStates.formBased.state).toEqual('updated');
@@ -214,7 +217,7 @@ describe('ConfigPanel', () => {
     fireEvent.click(screen.getByTestId('mockDimensionEditorApply'));
 
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(store.getState().lens.datasourceStates.formBased.state).toEqual('updated');
@@ -232,7 +235,7 @@ describe('ConfigPanel', () => {
       const datasourceMap = mockDatasourceMap();
       const visualizationMap = mockVisualizationMap();
 
-      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
+      visualizationMap.testVis.getSupportedLayers = vi.fn(() => [
         {
           type: LayerTypes.DATA,
           label: 'Data Layer',
@@ -245,7 +248,7 @@ describe('ConfigPanel', () => {
           ],
         },
       ]);
-      datasourceMap.formBased.initializeDimension = jest.fn();
+      datasourceMap.formBased.initializeDimension = vi.fn();
       const props = getDefaultProps({ visualizationMap, datasourceMap });
       const { store } = renderConfigPanel(props);
 
@@ -281,7 +284,7 @@ describe('ConfigPanel', () => {
       const datasourceMap = mockDatasourceMap();
       const visualizationMap = mockVisualizationMap();
 
-      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
+      visualizationMap.testVis.getSupportedLayers = vi.fn(() => [
         { type: LayerTypes.DATA, label: 'Data Layer' },
         {
           type: LayerTypes.REFERENCELINE,
@@ -289,7 +292,7 @@ describe('ConfigPanel', () => {
         },
       ]);
       datasourceMap.textBased.publicAPIMock.isTextBasedLanguage.mockReturnValue(true);
-      visualizationMap.testVis.cloneLayer = jest.fn();
+      visualizationMap.testVis.cloneLayer = vi.fn();
 
       const props = getDefaultProps({
         datasourceMap,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { registerAnalyticsContextProviderMock } from './chrome_service.test.mocks';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -41,9 +43,9 @@ import { ChromeService } from './chrome_service';
 import { NavLinksService } from './services/nav_links';
 import { ProjectNavigationService } from './services/project_navigation';
 
-const mockhandleSystemColorModeChange = jest.fn();
+const mockhandleSystemColorModeChange = vi.fn();
 
-jest.mock('./side_effects/handle_system_colormode_change', () => {
+vi.mock('./side_effects/handle_system_colormode_change', () => {
   return {
     handleSystemColorModeChange: (...args: any[]) => mockhandleSystemColorModeChange(...args),
   };
@@ -621,7 +623,7 @@ describe('start', () => {
         chrome.getBreadcrumbs$().pipe(Rx.take(3), toArray())
       );
       const badgePromise = firstValueFrom(chrome.getBadge$().pipe(Rx.take(3), toArray()));
-      const docTitleResetSpy = jest.spyOn(chrome.docTitle, 'reset');
+      const docTitleResetSpy = vi.spyOn(chrome.docTitle, 'reset');
 
       const promises = Promise.all([helpExtensionPromise, breadcrumbsPromise, badgePromise]);
 
@@ -844,8 +846,8 @@ describe('inline app header', () => {
 
 describe('stop', () => {
   it('stops sub-services without relying on observable completion', async () => {
-    const navLinksStopSpy = jest.spyOn(NavLinksService.prototype, 'stop');
-    const projectNavigationStopSpy = jest.spyOn(ProjectNavigationService.prototype, 'stop');
+    const navLinksStopSpy = vi.spyOn(NavLinksService.prototype, 'stop');
+    const projectNavigationStopSpy = vi.spyOn(ProjectNavigationService.prototype, 'stop');
     const { service } = await start();
 
     service.stop();

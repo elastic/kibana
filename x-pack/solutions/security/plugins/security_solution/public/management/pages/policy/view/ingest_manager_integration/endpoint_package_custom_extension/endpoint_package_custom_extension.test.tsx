@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createFleetContextRendererMock, generateFleetPackageInfo } from '../mocks';
@@ -13,8 +16,8 @@ import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
 
-jest.mock('../../../../../../common/components/user_privileges');
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+vi.mock('../../../../../../common/components/user_privileges');
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
 
 describe('When displaying the EndpointPackageCustomExtension fleet UI extension', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

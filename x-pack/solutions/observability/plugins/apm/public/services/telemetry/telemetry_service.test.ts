@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { coreMock } from '@kbn/core/server/mocks';
 import { apmTelemetryEventBasedTypes } from './telemetry_events';
 import { TelemetryService } from './telemetry_service';
@@ -15,7 +17,7 @@ describe('TelemetryService', () => {
   let telemetry: ReturnType<typeof service.start>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service.setup({ analytics: mockCoreStart.analytics });
     telemetry = service.start();
   });

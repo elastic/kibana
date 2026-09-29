@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { loggerMock } from '@kbn/logging-mocks';
@@ -23,46 +26,46 @@ import {
   getRemoteSyncedIntegrationsStatus,
 } from './compare_synced_integrations';
 
-jest.mock('../../services/app_context');
-jest.mock('./custom_assets', () => {
-  return { getPipeline: jest.fn(), getComponentTemplate: jest.fn(), installCustomAsset: jest.fn() };
+vi.mock('../../services/app_context');
+vi.mock('./custom_assets', () => {
+  return { getPipeline: vi.fn(), getComponentTemplate: vi.fn(), installCustomAsset: vi.fn() };
 });
-jest.mock('../../services/epm/packages/get', () => {
+vi.mock('../../services/epm/packages/get', () => {
   return {
-    getPackageSavedObjects: jest.fn(),
+    getPackageSavedObjects: vi.fn(),
   };
 });
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 
-const getPipelineMock = getPipeline as jest.Mocked<typeof getPipeline>;
-const getComponentTemplateMock = getComponentTemplate as jest.Mocked<typeof getComponentTemplate>;
-let mockedLogger: jest.Mocked<Logger>;
+const getPipelineMock = getPipeline as Mocked<typeof getPipeline>;
+const getComponentTemplateMock = getComponentTemplate as Mocked<typeof getComponentTemplate>;
+let mockedLogger: Mocked<Logger>;
 
 describe('getFollowerIndexInfo', () => {
   let esClientMock: any;
-  let getIndicesMock: jest.Mock;
-  let searchMock: jest.Mock;
+  let getIndicesMock: Mock;
+  let searchMock: Mock;
 
   beforeEach(() => {
-    getIndicesMock = jest.fn();
-    searchMock = jest.fn();
+    getIndicesMock = vi.fn();
+    searchMock = vi.fn();
     esClientMock = {
       indices: {
         get: getIndicesMock,
       },
       search: searchMock,
-      ccr: { followInfo: jest.fn(), followStats: jest.fn() },
+      ccr: { followInfo: vi.fn(), followStats: vi.fn() },
     };
 
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
-    (installCustomAsset as jest.Mock).mockClear();
+    (installCustomAsset as Mock).mockClear();
     getIndicesMock.mockResolvedValue({
       'fleet-synced-integrations-ccr-remote1': {},
     });
   });
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should return error if follower index is not available', async () => {
@@ -177,25 +180,25 @@ describe('getFollowerIndexInfo', () => {
 
 describe('fetchAndCompareSyncedIntegrations', () => {
   let esClientMock: any;
-  let getIndicesMock: jest.Mock;
-  let searchMock: jest.Mock;
+  let getIndicesMock: Mock;
+  let searchMock: Mock;
   const soClientMock = savedObjectsClientMock.create();
 
   beforeEach(() => {
-    getIndicesMock = jest.fn();
-    searchMock = jest.fn();
+    getIndicesMock = vi.fn();
+    searchMock = vi.fn();
     esClientMock = {
       indices: {
         get: getIndicesMock,
       },
       search: searchMock,
     };
-    (installCustomAsset as jest.Mock).mockClear();
+    (installCustomAsset as Mock).mockClear();
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
   });
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should return error if no integrations are found', async () => {
@@ -298,7 +301,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         ],
       },
     } as any);
-    (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+    (getPackageSavedObjects as MockedFunction<any>).mockReturnValue({
       page: 1,
       per_page: 10000,
       total: 1,
@@ -373,7 +376,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         ],
       },
     } as any);
-    (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+    (getPackageSavedObjects as MockedFunction<any>).mockReturnValue({
       page: 1,
       per_page: 10000,
       total: 1,
@@ -465,7 +468,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         ],
       },
     } as any);
-    (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+    (getPackageSavedObjects as MockedFunction<any>).mockReturnValue({
       page: 1,
       per_page: 10000,
       total: 1,
@@ -573,7 +576,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         ],
       },
     } as any);
-    (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+    (getPackageSavedObjects as MockedFunction<any>).mockReturnValue({
       page: 1,
       per_page: 10000,
       total: 1,
@@ -651,7 +654,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         ],
       },
     } as any);
-    (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+    (getPackageSavedObjects as MockedFunction<any>).mockReturnValue({
       page: 1,
       per_page: 10000,
       total: 4,
@@ -776,10 +779,10 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     };
 
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
     beforeEach(() => {
-      searchMockWithCustomAssets = jest.fn().mockResolvedValue({
+      searchMockWithCustomAssets = vi.fn().mockResolvedValue({
         hits: {
           hits: [
             {
@@ -805,7 +808,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     });
 
     it('should return synchronizing state if the assets are different', async () => {
-      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({
+      (getPipelineMock as MockedFunction<any>).mockResolvedValue({
         'logs-system.auth@custom': {
           processors: [
             {
@@ -816,7 +819,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           ],
         },
       });
-      (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
+      (getComponentTemplateMock as MockedFunction<any>).mockResolvedValue({
         component_templates: [
           {
             name: 'logs-system.auth@custom',
@@ -838,7 +841,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       esClientMock = {
         search: searchMockWithCustomAssets,
       };
-      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+      (getPackageSavedObjects as MockedFunction<any>).mockReturnValue({
         page: 1,
         per_page: 10000,
         total: 1,
@@ -899,7 +902,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     });
 
     it('should return failed state if custom asset failure is found', async () => {
-      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({
+      (getPipelineMock as MockedFunction<any>).mockResolvedValue({
         'logs-system.auth@custom': {
           processors: [
             {
@@ -910,7 +913,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           ],
         },
       });
-      (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
+      (getComponentTemplateMock as MockedFunction<any>).mockResolvedValue({
         component_templates: [
           {
             name: 'logs-system.auth@custom',
@@ -932,7 +935,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       esClientMock = {
         search: searchMockWithCustomAssets,
       };
-      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+      (getPackageSavedObjects as MockedFunction<any>).mockReturnValue({
         page: 1,
         per_page: 10000,
         total: 1,
@@ -1015,7 +1018,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     });
 
     it('should return completed status if custom assets are equal', async () => {
-      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValueOnce({
+      (getPipelineMock as MockedFunction<any>).mockResolvedValueOnce({
         'logs-system.auth@custom': {
           processors: [
             {
@@ -1028,12 +1031,12 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           created_date_millis: 1762258252589,
         },
       });
-      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValueOnce({
+      (getPipelineMock as MockedFunction<any>).mockResolvedValueOnce({
         'filestream-pipeline1': {
           processors: [{}],
         },
       });
-      (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
+      (getComponentTemplateMock as MockedFunction<any>).mockResolvedValue({
         component_templates: [
           {
             name: 'logs-system.auth@custom',
@@ -1056,7 +1059,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       esClientMock = {
         search: searchMockWithCustomAssets,
       };
-      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+      (getPackageSavedObjects as MockedFunction<any>).mockReturnValue({
         page: 1,
         per_page: 10000,
         total: 1,
@@ -1116,7 +1119,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       });
     });
     it('should return synchronizing status if versions do not match', async () => {
-      const searchMockWithVersionedPipeline = jest.fn().mockResolvedValue({
+      const searchMockWithVersionedPipeline = vi.fn().mockResolvedValue({
         hits: {
           hits: [
             {
@@ -1165,7 +1168,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           ],
         },
       });
-      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({
+      (getPipelineMock as MockedFunction<any>).mockResolvedValue({
         'logs-system.auth@custom': {
           processors: [
             {
@@ -1178,7 +1181,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           version: 1,
         },
       });
-      (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
+      (getComponentTemplateMock as MockedFunction<any>).mockResolvedValue({
         component_templates: [
           {
             name: 'logs-system.auth@custom',
@@ -1201,7 +1204,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       esClientMock = {
         search: searchMockWithVersionedPipeline,
       };
-      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+      (getPackageSavedObjects as MockedFunction<any>).mockReturnValue({
         page: 1,
         per_page: 10000,
         total: 1,
@@ -1258,7 +1261,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       esClientMock = {
         search: searchMockWithCustomAssets,
       };
-      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+      (getPackageSavedObjects as MockedFunction<any>).mockReturnValue({
         page: 1,
         per_page: 10000,
         total: 1,
@@ -1274,7 +1277,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           },
         ],
       });
-      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({});
+      (getPipelineMock as MockedFunction<any>).mockResolvedValue({});
 
       const res = await fetchAndCompareSyncedIntegrations(
         esClientMock,
@@ -1319,7 +1322,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     });
 
     it('should return synchronizing status if assets are not installed and is_deleted === false', async () => {
-      const searchMockWithDeletedAssets = jest.fn().mockResolvedValue({
+      const searchMockWithDeletedAssets = vi.fn().mockResolvedValue({
         hits: {
           hits: [
             {
@@ -1350,7 +1353,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       esClientMock = {
         search: searchMockWithDeletedAssets,
       };
-      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+      (getPackageSavedObjects as MockedFunction<any>).mockReturnValue({
         page: 1,
         per_page: 10000,
         total: 1,
@@ -1403,7 +1406,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     });
 
     it('should return synchronizing status if is_deleted = true but the assets are still installed', async () => {
-      const searchMockWithDeletedAssets = jest.fn().mockResolvedValue({
+      const searchMockWithDeletedAssets = vi.fn().mockResolvedValue({
         hits: {
           hits: [
             {
@@ -1434,7 +1437,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       esClientMock = {
         search: searchMockWithDeletedAssets,
       };
-      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({
+      (getPipelineMock as MockedFunction<any>).mockResolvedValue({
         'logs-system.auth@custom': {
           processors: [
             {
@@ -1446,7 +1449,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           ],
         },
       });
-      (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
+      (getComponentTemplateMock as MockedFunction<any>).mockResolvedValue({
         component_templates: [
           {
             name: 'logs-system.auth@custom',
@@ -1465,7 +1468,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           },
         ],
       });
-      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+      (getPackageSavedObjects as MockedFunction<any>).mockReturnValue({
         page: 1,
         per_page: 10000,
         total: 1,
@@ -1520,7 +1523,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     });
 
     it('should return completed status if is_deleted = true and the assets are not installed', async () => {
-      const searchMockWithDeletedAssets = jest.fn().mockResolvedValue({
+      const searchMockWithDeletedAssets = vi.fn().mockResolvedValue({
         hits: {
           hits: [
             {
@@ -1551,7 +1554,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       esClientMock = {
         search: searchMockWithDeletedAssets,
       };
-      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+      (getPackageSavedObjects as MockedFunction<any>).mockReturnValue({
         page: 1,
         per_page: 10000,
         total: 1,
@@ -1567,8 +1570,8 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           },
         ],
       });
-      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({});
-      (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
+      (getPipelineMock as MockedFunction<any>).mockResolvedValue({});
+      (getComponentTemplateMock as MockedFunction<any>).mockResolvedValue({
         component_templates: [],
       });
 
@@ -1611,7 +1614,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
 
     it('should return error in the top level if there is any error in the function', async () => {
       esClientMock = {
-        search: jest.fn().mockRejectedValueOnce(new Error('Some es error')),
+        search: vi.fn().mockRejectedValueOnce(new Error('Some es error')),
       };
 
       const res = await fetchAndCompareSyncedIntegrations(
@@ -1627,10 +1630,10 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     });
 
     it('should return error when custom assets throws error', async () => {
-      (getPipelineMock as jest.MockedFunction<any>).mockRejectedValueOnce(
+      (getPipelineMock as MockedFunction<any>).mockRejectedValueOnce(
         new Error('Error in getPipeline')
       );
-      (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
+      (getComponentTemplateMock as MockedFunction<any>).mockResolvedValue({
         component_templates: [
           {
             name: 'logs-system.auth@custom',
@@ -1653,7 +1656,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       esClientMock = {
         search: searchMockWithCustomAssets,
       };
-      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+      (getPackageSavedObjects as MockedFunction<any>).mockReturnValue({
         page: 1,
         per_page: 10000,
         total: 1,
@@ -1694,7 +1697,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     });
 
     it('should return warning status if component template has ILM policy', async () => {
-      (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
+      (getComponentTemplateMock as MockedFunction<any>).mockResolvedValue({
         component_templates: [
           {
             name: 'logs-system.auth@custom',
@@ -1717,7 +1720,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       });
 
       esClientMock = {
-        search: jest.fn().mockResolvedValue({
+        search: vi.fn().mockResolvedValue({
           hits: {
             hits: [
               {
@@ -1757,7 +1760,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           },
         }),
       };
-      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+      (getPackageSavedObjects as MockedFunction<any>).mockReturnValue({
         page: 1,
         per_page: 10000,
         total: 1,
@@ -1811,35 +1814,35 @@ describe('fetchAndCompareSyncedIntegrations', () => {
 
 describe('getRemoteSyncedIntegrationsStatus', () => {
   let esClientMock: any;
-  let getIndicesMock: jest.Mock;
-  let searchMock: jest.Mock;
+  let getIndicesMock: Mock;
+  let searchMock: Mock;
   let soClientMock: any;
 
   beforeEach(() => {
-    getIndicesMock = jest.fn();
-    searchMock = jest.fn();
+    getIndicesMock = vi.fn();
+    searchMock = vi.fn();
     esClientMock = {
       indices: {
         get: getIndicesMock,
       },
       search: searchMock,
-      ccr: { followInfo: jest.fn(), followStats: jest.fn() },
+      ccr: { followInfo: vi.fn(), followStats: vi.fn() },
     };
 
     soClientMock = savedObjectsClientMock.create();
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
-    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+    vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
-    (installCustomAsset as jest.Mock).mockClear();
+    (installCustomAsset as Mock).mockClear();
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should return empty integrations array if feature flag is not available', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: false } as any);
     expect(await getRemoteSyncedIntegrationsStatus(esClientMock, soClientMock)).toEqual({
@@ -1848,10 +1851,10 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
   });
 
   it('should return empty integrations array if license is less than Enterprise', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
-    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+    vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
 
     expect(await getRemoteSyncedIntegrationsStatus(esClientMock, soClientMock)).toEqual({
       integrations: [],
@@ -1859,7 +1862,7 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
   });
 
   it('should return error if there is an error in getFollowerIndexInfo', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     getIndicesMock.mockResolvedValue({
@@ -1872,19 +1875,19 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
   });
 
   it('should return error if there is an error inside fetchAndCompareSyncedIntegrations', async () => {
-    jest
+    vi
       .spyOn(appContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
 
     esClientMock = {
-      search: jest.fn().mockRejectedValueOnce(new Error('Some ES error')),
+      search: vi.fn().mockRejectedValueOnce(new Error('Some ES error')),
       indices: {
-        get: jest.fn().mockResolvedValue({
+        get: vi.fn().mockResolvedValue({
           'fleet-synced-integrations-ccr-remote1': {},
         }),
       },
       ccr: {
-        followInfo: jest.fn().mockResolvedValue({
+        followInfo: vi.fn().mockResolvedValue({
           follower_indices: [
             {
               follower_index: 'fleet-synced-integrations-ccr-remote1',
@@ -1895,7 +1898,7 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
             },
           ],
         }),
-        followStats: jest.fn().mockResolvedValue({
+        followStats: vi.fn().mockResolvedValue({
           indices: [
             {
               shards: [{}],

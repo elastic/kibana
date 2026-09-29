@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,7 +14,7 @@ import { TestProviders } from '../../../../../common/mock';
 
 import { MlUserJobDescription } from './ml_user_job_description';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
 import { mockOpenedJob } from '../../../../../common/components/ml_popover/api.mock';
 

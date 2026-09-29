@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, render, fireEvent } from '@testing-library/react';
 import { TestProviders, useFormFieldMock } from '../../../../common/mock';
 import { DataViewSelectorField } from './data_view_selector_field';
 import { useDataViewListItems } from './use_data_view_list_items';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('./use_data_view_list_items');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('./use_data_view_list_items');
 
 describe('data_view_selector', () => {
   it('renders correctly', () => {
-    (useDataViewListItems as jest.Mock).mockReturnValue({ data: [], isFetching: false });
+    (useDataViewListItems as Mock).mockReturnValue({ data: [], isFetching: false });
 
     render(
       <DataViewSelectorField
@@ -31,7 +34,7 @@ describe('data_view_selector', () => {
   });
 
   it('disables the combobox while data views are fetching', () => {
-    (useDataViewListItems as jest.Mock).mockReturnValue({ data: [], isFetching: true });
+    (useDataViewListItems as Mock).mockReturnValue({ data: [], isFetching: true });
 
     render(
       <DataViewSelectorField
@@ -58,7 +61,7 @@ describe('data_view_selector', () => {
         name: 'dataview-name',
       },
     ];
-    (useDataViewListItems as jest.Mock).mockReturnValue({ data: dataViews, isFetching: false });
+    (useDataViewListItems as Mock).mockReturnValue({ data: dataViews, isFetching: false });
 
     render(
       <DataViewSelectorField
@@ -86,7 +89,7 @@ describe('data_view_selector', () => {
         title: 'logs-*',
       },
     ];
-    (useDataViewListItems as jest.Mock).mockReturnValue({ data: dataViews, isFetching: false });
+    (useDataViewListItems as Mock).mockReturnValue({ data: dataViews, isFetching: false });
 
     render(
       <DataViewSelectorField
@@ -112,7 +115,7 @@ describe('data_view_selector', () => {
         title: 'logs-*',
       },
     ];
-    (useDataViewListItems as jest.Mock).mockReturnValue({ data: dataViews, isFetching: false });
+    (useDataViewListItems as Mock).mockReturnValue({ data: dataViews, isFetching: false });
 
     render(
       <DataViewSelectorField
@@ -127,7 +130,7 @@ describe('data_view_selector', () => {
   });
 
   it('displays warning on missing data view', () => {
-    (useDataViewListItems as jest.Mock).mockReturnValue({ data: [], isFetching: false });
+    (useDataViewListItems as Mock).mockReturnValue({ data: [], isFetching: false });
 
     render(
       <DataViewSelectorField

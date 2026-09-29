@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { MAX_PAGE_SIZE, TRACK_TOTAL_HITS_CAP } from './constants';
 import { searchTriggerEventLog } from './trigger_event_log_query';
 import type { TriggerEventsDataStreamClient } from './trigger_events_data_stream';
 
 describe('searchTriggerEventLog', () => {
-  const mockSearch = jest.fn().mockResolvedValue({
+  const mockSearch = vi.fn().mockResolvedValue({
     hits: { hits: [], total: { value: 0 } },
   });
 
@@ -21,7 +23,7 @@ describe('searchTriggerEventLog', () => {
   } as unknown as TriggerEventsDataStreamClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('KQL translation', () => {

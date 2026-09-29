@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { PropsWithChildren } from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
@@ -16,15 +18,15 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 
-jest.mock('../../contexts/alerts_table_context', () => {
-  const actual = jest.requireActual('../../contexts/alerts_table_context');
+vi.mock('../../contexts/alerts_table_context', async () => {
+  const actual = (await vi.importActual('../../contexts/alerts_table_context'));
   return {
     ...actual,
-    useAlertsTableContext: jest.fn(),
+    useAlertsTableContext: vi.fn(),
   };
 });
 
-const { useAlertsTableContext } = jest.requireMock('../../contexts/alerts_table_context');
+const { useAlertsTableContext } = (await vi.importMock('../../contexts/alerts_table_context'));
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
@@ -43,13 +45,13 @@ describe('useTagsAction', () => {
     ALERT_WORKFLOW_TAGS: ['coke', 'pepsi'],
   } as unknown as Alert;
 
-  const onActionSuccess = jest.fn();
-  const onActionError = jest.fn();
+  const onActionSuccess = vi.fn();
+  const onActionError = vi.fn();
   const http = httpServiceMock.createStartContract();
   const notifications = notificationServiceMock.createStartContract();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     http.post.mockResolvedValue({});
     useAlertsTableContext.mockReturnValue({
       services: {

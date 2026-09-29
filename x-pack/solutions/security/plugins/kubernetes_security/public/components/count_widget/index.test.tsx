@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
@@ -36,16 +39,19 @@ const MOCK_DATA_CLOSE_TO_MILLION = {
   pages: [999999],
 };
 
-jest.mock('../../hooks/use_filter', () => ({
-  useSetFilter: () => ({
-    getFilterForValueButton: jest.fn(),
-    getFilterOutValueButton: jest.fn(),
-    filterManager: {},
-  }),
-}));
+vi.mock('../../hooks/use_filter', () => {
+      const mocked = {
+      useSetFilter: () => ({
+        getFilterForValueButton: vi.fn(),
+        getFilterOutValueButton: vi.fn(),
+        filterManager: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks');
-const mockUseFetchData = useFetchCountWidgetData as jest.Mock;
+vi.mock('./hooks');
+const mockUseFetchData = useFetchCountWidgetData as Mock;
 
 describe('CountWidget component', () => {
   let renderResult: ReturnType<typeof render>;

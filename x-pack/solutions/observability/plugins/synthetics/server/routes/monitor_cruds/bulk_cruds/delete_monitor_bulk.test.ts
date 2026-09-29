@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { z } from '@kbn/zod';
 import { deleteSyntheticsMonitorBulkRoute } from './delete_monitor_bulk';
 
-jest.mock('../services/delete_monitor_api', () => ({
-  DeleteMonitorAPI: jest.fn(),
-}));
+vi.mock('../services/delete_monitor_api', () => {
+      const mocked = {
+      DeleteMonitorAPI: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const installExecuteResult = (executeResult: any) => {
-  const { DeleteMonitorAPI } = jest.requireMock('../services/delete_monitor_api');
-  const execute = jest.fn().mockResolvedValue(executeResult);
+const installExecuteResult = async (executeResult: any) => {
+  const { DeleteMonitorAPI } = (await vi.importMock('../services/delete_monitor_api'));
+  const execute = vi.fn().mockResolvedValue(executeResult);
   DeleteMonitorAPI.mockImplementation(() => ({ execute }));
   return { execute };
 };
@@ -29,7 +34,7 @@ describe('deleteSyntheticsMonitorBulkRoute', () => {
   const bodySchema = (route.validation as { request: { body: z.ZodType } }).request.body;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('rejects unknown keys so a dry_run typo cannot proceed as a real delete', () => {

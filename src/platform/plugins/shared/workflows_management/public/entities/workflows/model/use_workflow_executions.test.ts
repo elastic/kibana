@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
@@ -16,15 +19,18 @@ import { createMockWorkflowApi, type MockWorkflowApi } from '@kbn/workflows-ui/m
 import { useWorkflowExecutions } from './use_workflow_executions';
 import { createQueryClientWrapper, createTestQueryClient } from '../../../shared/test_utils';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsApi: jest.fn(),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useWorkflowsApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
+const mockUseWorkflowsApi = useWorkflowsApi as MockedFunction<typeof useWorkflowsApi>;
 
 describe('useWorkflowExecutions', () => {
   let mockWorkflowApi: MockWorkflowApi;
-  let mockGetWorkflowExecutions: jest.MockedFunction<MockWorkflowApi['getWorkflowExecutions']>;
+  let mockGetWorkflowExecutions: MockedFunction<MockWorkflowApi['getWorkflowExecutions']>;
   let queryClient: QueryClient;
 
   const executionsPage1: WorkflowExecutionListDto = {
@@ -72,7 +78,7 @@ describe('useWorkflowExecutions', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockWorkflowApi = createMockWorkflowApi();
     mockGetWorkflowExecutions = mockWorkflowApi.getWorkflowExecutions;
     mockGetWorkflowExecutions.mockResolvedValue(executionsPage1);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -29,9 +32,9 @@ import {
   VERSION,
 } from './agent_status_change_task';
 
-jest.mock('../services');
-jest.mock('../services/agents');
-jest.mock('../services/outputs/helpers');
+vi.mock('../services');
+vi.mock('../services/agents');
+vi.mock('../services/outputs/helpers');
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -47,28 +50,28 @@ const MOCK_TASK_INSTANCE = {
   taskType: TYPE,
 };
 
-const mockedFetchAllAgentsByKuery = fetchAllAgentsByKuery as jest.MockedFunction<
+const mockedFetchAllAgentsByKuery = fetchAllAgentsByKuery as MockedFunction<
   typeof fetchAllAgentsByKuery
 >;
-const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+const mockAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
 const getMockAgentPolicyFetchAllAgentPolicies = (items: any[]) =>
-  jest.fn().mockImplementation(async () =>
+  vi.fn().mockImplementation(async () =>
     (async function* () {
       yield items;
     })()
   );
 const getMockFetchAllAgentsByKuery = (items: Agent[]) =>
-  jest.fn(async function* () {
+  vi.fn(async function* () {
     yield items;
   })();
 
 const getMockFetchAllAgentsByKueryPages = (pages: Agent[][]) =>
-  jest.fn(async function* () {
+  vi.fn(async function* () {
     for (const page of pages) {
       yield page;
     }
   })();
-const mockBulkUpdateAgents = bulkUpdateAgents as jest.MockedFunction<typeof bulkUpdateAgents>;
+const mockBulkUpdateAgents = bulkUpdateAgents as MockedFunction<typeof bulkUpdateAgents>;
 
 describe('AgentStatusChangeTask', () => {
   const { createSetup: coreSetupMock } = coreMock;
@@ -77,7 +80,7 @@ describe('AgentStatusChangeTask', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   let mockTask: AgentStatusChangeTask;
   let mockCore: CoreSetup;
-  let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
+  let mockTaskManagerSetup: Mocked<TaskManagerSetupContract>;
   let mockLogFactory: ReturnType<typeof loggingSystemMock.create>;
 
   beforeEach(async () => {
@@ -99,7 +102,7 @@ describe('AgentStatusChangeTask', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Task lifecycle', () => {
@@ -132,7 +135,7 @@ describe('AgentStatusChangeTask', () => {
     beforeEach(async () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
       esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
-      jest
+      vi
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableAgentStatusAlerting: true } as any);
 
@@ -161,7 +164,7 @@ describe('AgentStatusChangeTask', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('Should not run if task is outdated', async () => {
@@ -530,7 +533,7 @@ describe('AgentStatusChangeTask', () => {
     });
 
     it('should do nothing when feature flag is disabled', async () => {
-      jest
+      vi
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableAgentStatusAlerting: false } as any);
       const agents = [

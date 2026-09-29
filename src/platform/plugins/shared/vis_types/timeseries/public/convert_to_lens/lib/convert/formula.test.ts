@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createSeries } from '../__mocks__';
 import {
   createFormulaColumn,
@@ -34,7 +36,7 @@ describe('createFormulaColumn', () => {
     },
   });
 
-  dataViewWithInvalidFormats.getFormatterForField = jest.fn().mockImplementation(() => ({
+  dataViewWithInvalidFormats.getFormatterForField = vi.fn().mockImplementation(() => ({
     type: {
       id: 'date',
     },
@@ -128,7 +130,7 @@ describe('convertMathToFormulaColumn', () => {
     },
   });
 
-  dataViewWithInvalidFormats.getFormatterForField = jest.fn().mockImplementation(() => ({
+  dataViewWithInvalidFormats.getFormatterForField = vi.fn().mockImplementation(() => ({
     type: {
       id: 'date',
     },

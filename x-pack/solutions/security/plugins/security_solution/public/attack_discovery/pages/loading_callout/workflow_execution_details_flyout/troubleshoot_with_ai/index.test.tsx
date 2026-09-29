@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -21,18 +24,24 @@ import { TroubleshootWithAi } from '.';
 import * as i18n from './translations';
 import * as buildDiagnosticReportModule from '../diagnostic_report/helpers/build_diagnostic_report';
 
-jest.mock('../../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
-  useAgentBuilderAvailability: jest.fn(),
-}));
+vi.mock('../../../../../agent_builder/hooks/use_agent_builder_availability', () => {
+      const mocked = {
+      useAgentBuilderAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenChat = jest.fn();
-const mockReportEvent = jest.fn();
-const mockUseAgentBuilderAvailability = jest.mocked(useAgentBuilderAvailability);
-const mockUseKibana = useKibana as jest.Mock;
+const mockOpenChat = vi.fn();
+const mockReportEvent = vi.fn();
+const mockUseAgentBuilderAvailability = vi.mocked(useAgentBuilderAvailability);
+const mockUseKibana = useKibana as Mock;
 
 const mockAggregatedExecution: AggregatedWorkflowExecution = {
   status: ExecutionStatus.FAILED,
@@ -94,7 +103,7 @@ const defaultProps = {
 
 describe('TroubleshootWithAi', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseAgentBuilderAvailability.mockReturnValue({
       hasAgentBuilderPrivilege: true,
@@ -248,10 +257,10 @@ describe('TroubleshootWithAi', () => {
   });
 
   describe('buildDiagnosticReport params forwarding', () => {
-    let buildDiagnosticReportSpy: jest.SpyInstance;
+    let buildDiagnosticReportSpy: MockInstance;
 
     beforeEach(() => {
-      buildDiagnosticReportSpy = jest.spyOn(buildDiagnosticReportModule, 'buildDiagnosticReport');
+      buildDiagnosticReportSpy = vi.spyOn(buildDiagnosticReportModule, 'buildDiagnosticReport');
     });
 
     afterEach(() => {

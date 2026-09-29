@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -15,29 +18,41 @@ import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
 import { FlyoutSessionContextProvider } from '../../session_context';
 import { FLYOUT_DESCRIPTOR_KIND } from '../url_state/flyout_v2_url_param';
 
-jest.mock('../utils/build_flyout_content');
-jest.mock('../utils/build_flyout_nav_title', () => ({
-  buildFlyoutNavTitle: jest.fn((title: string) => `NAV:${title}`),
-}));
-jest.mock('./flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('../hooks/use_default_flyout_properties', () => ({
-  useDefaultDocumentFlyoutProperties: () => ({ outsideClickCloses: true }),
-}));
+vi.mock('../utils/build_flyout_content');
+vi.mock('../utils/build_flyout_nav_title', () => {
+      const mocked = {
+      buildFlyoutNavTitle: vi.fn((title: string) => `NAV:${title}`),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_default_flyout_properties', () => {
+      const mocked = {
+      useDefaultDocumentFlyoutProperties: () => ({ outsideClickCloses: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockWriteOnOpen = jest.fn();
-const mockBuildOnClose = jest.fn(() => jest.fn());
-jest.mock('../url_state/flyout_v2_url_writer', () => ({
-  useFlyoutV2UrlWriter: jest.fn(() => ({
-    writeOnOpen: mockWriteOnOpen,
-    buildOnClose: mockBuildOnClose,
-  })),
-}));
+const mockWriteOnOpen = vi.fn();
+const mockBuildOnClose = vi.fn(() => vi.fn());
+vi.mock('../url_state/flyout_v2_url_writer', () => {
+      const mocked = {
+      useFlyoutV2UrlWriter: vi.fn(() => ({
+        writeOnOpen: mockWriteOnOpen,
+        buildOnClose: mockBuildOnClose,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenSystemFlyout = jest.fn();
-jest.mock('../../../common/lib/kibana', () => {
-  const kibanaActual = jest.requireActual('../../../common/lib/kibana');
+const mockOpenSystemFlyout = vi.fn();
+vi.mock('../../../common/lib/kibana', async () => {
+  const kibanaActual = (await vi.importActual('../../../common/lib/kibana'));
   return {
     ...kibanaActual,
     useKibana: () => ({
@@ -53,9 +68,9 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-const buildFlyoutContentMock = buildFlyoutContent as jest.Mock;
-const buildFlyoutDescriptorFromFieldMock = buildFlyoutDescriptorFromField as jest.Mock;
-const buildFlyoutNavTitleMock = buildFlyoutNavTitle as jest.Mock;
+const buildFlyoutContentMock = buildFlyoutContent as Mock;
+const buildFlyoutDescriptorFromFieldMock = buildFlyoutDescriptorFromField as Mock;
+const buildFlyoutNavTitleMock = buildFlyoutNavTitle as Mock;
 
 const renderOpenFlyoutLink = (props: Partial<React.ComponentProps<typeof OpenFlyoutLink>> = {}) =>
   render(
@@ -68,9 +83,9 @@ const renderOpenFlyoutLink = (props: Partial<React.ComponentProps<typeof OpenFly
 
 describe('<OpenFlyoutLink />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
-    mockBuildOnClose.mockReturnValue(jest.fn());
+    vi.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: vi.fn() });
+    mockBuildOnClose.mockReturnValue(vi.fn());
   });
 
   describe('when the field is supported', () => {

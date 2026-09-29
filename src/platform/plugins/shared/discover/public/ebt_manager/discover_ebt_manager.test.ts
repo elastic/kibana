@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { BehaviorSubject, skip } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { type DiscoverEBTContextProps, DiscoverEBTManager } from '.';
@@ -22,10 +25,13 @@ import {
   DiscoverInDashboardEventName,
 } from './discover_in_dashboard_event_definition';
 
-jest.mock('@kbn/ebt-tools', () => ({
-  ...jest.requireActual('@kbn/ebt-tools'),
-  reportPerformanceMetricEvent: jest.fn(),
-}));
+vi.mock('@kbn/ebt-tools', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/ebt-tools')),
+      reportPerformanceMetricEvent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DiscoverEBTManager', () => {
   let discoverEBTContextManager: DiscoverEBTManager;
@@ -34,8 +40,8 @@ describe('DiscoverEBTManager', () => {
   const coreSetupMock = coreMock.createSetup();
 
   const fieldsMetadata = {
-    getClient: jest.fn().mockResolvedValue({
-      find: jest.fn().mockResolvedValue({
+    getClient: vi.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         fields: {
           test: {
             short: 'test',
@@ -65,9 +71,9 @@ describe('DiscoverEBTManager', () => {
     discoverEbtContext$ = new BehaviorSubject<DiscoverEBTContextProps>({
       discoverProfiles: [],
     });
-    (coreSetupMock.analytics.reportEvent as jest.Mock).mockClear();
-    (reportPerformanceMetricEvent as jest.Mock).mockClear();
-    jest.spyOn(window.performance, 'now').mockRestore();
+    (coreSetupMock.analytics.reportEvent as Mock).mockClear();
+    (reportPerformanceMetricEvent as Mock).mockClear();
+    vi.spyOn(window.performance, 'now').mockRestore();
   });
 
   describe('register', () => {
@@ -530,7 +536,7 @@ describe('DiscoverEBTManager', () => {
         results.push(discoverProfiles);
       });
 
-      jest
+      vi
         .spyOn(coreSetupMock.analytics, 'reportEvent')
         .mockImplementation((eventType, eventData) => {
           results.push({ eventType, eventData });
@@ -692,7 +698,7 @@ describe('DiscoverEBTManager', () => {
         results.push(discoverProfiles);
       });
 
-      jest
+      vi
         .spyOn(coreSetupMock.analytics, 'reportEvent')
         .mockImplementation((eventType, eventData) => {
           results.push({ eventType, eventData });
@@ -999,7 +1005,7 @@ describe('DiscoverEBTManager', () => {
       const scopedManager = discoverEBTContextManager.createScopedEBTManager();
       scopedManager.setAsActiveManager();
 
-      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+      vi.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
 
       const tracker = scopedManager.trackPerformanceEvent('testEvent');
       tracker.reportEvent({ meta: { foo: 'bar' } });
@@ -1036,11 +1042,11 @@ describe('DiscoverEBTManager', () => {
         results.push(discoverProfiles);
       });
 
-      (reportPerformanceMetricEvent as jest.Mock).mockImplementation((_, eventData) => {
+      (reportPerformanceMetricEvent as Mock).mockImplementation((_, eventData) => {
         results.push(eventData);
       });
 
-      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+      vi.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
 
       const tracker = anotherScopedManager.trackPerformanceEvent('testEvent');
       tracker.reportEvent({ meta: { foo: 'bar' } });
@@ -1067,7 +1073,7 @@ describe('DiscoverEBTManager', () => {
       const scopedManager = discoverEBTContextManager.createScopedEBTManager();
       scopedManager.setAsActiveManager();
 
-      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+      vi.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
 
       const requestAdapter = createRequestAdapterWithRequests([
         {
@@ -1144,7 +1150,7 @@ describe('DiscoverEBTManager', () => {
       const scopedManager = discoverEBTContextManager.createScopedEBTManager();
       scopedManager.setAsActiveManager();
 
-      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+      vi.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
 
       const tracker = scopedManager.trackQueryPerformanceEvent({
         eventName: 'testQueryEvent',
@@ -1182,7 +1188,7 @@ describe('DiscoverEBTManager', () => {
       const scopedManager = discoverEBTContextManager.createScopedEBTManager();
       scopedManager.setAsActiveManager();
 
-      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+      vi.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
 
       const tracker = scopedManager.trackQueryPerformanceEvent({
         eventName: 'testQueryEvent',
@@ -1220,8 +1226,8 @@ describe('DiscoverEBTManager', () => {
       const scopedManager = discoverEBTContextManager.createScopedEBTManager();
       scopedManager.setAsActiveManager();
 
-      const analyzeSpy = jest.spyOn(queryAnalysisUtils, 'analyzeMultiMatchTypesRequest');
-      jest.spyOn(window.performance, 'now').mockReturnValue(250);
+      const analyzeSpy = vi.spyOn(queryAnalysisUtils, 'analyzeMultiMatchTypesRequest');
+      vi.spyOn(window.performance, 'now').mockReturnValue(250);
 
       const requestAdapter = createRequestAdapterWithRequests([
         {

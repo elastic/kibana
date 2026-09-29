@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render, fireEvent } from '@testing-library/react';
 import { Card } from './card';
@@ -34,7 +36,7 @@ describe('Card', () => {
   });
 
   it('adds an aria-label when onClick is provided', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     render(<Card {...defaultProps} onClick={onClick} />);
 
     const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title');
@@ -42,7 +44,7 @@ describe('Card', () => {
   });
 
   it('calls onClick when card is clicked', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     render(<Card {...defaultProps} onClick={onClick} />);
 
     const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title');
@@ -52,7 +54,7 @@ describe('Card', () => {
   });
 
   it('does not call onClick when isDisabled is true', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     render(<Card {...defaultProps} onClick={onClick} isDisabled />);
 
     const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title');
@@ -61,7 +63,7 @@ describe('Card', () => {
   });
 
   it('does not call onClick when isSelected is true', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     render(<Card {...defaultProps} onClick={onClick} isSelected />);
 
     const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title');

@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useBenchmarkDynamicValues } from './use_benchmark_dynamic_values';
 import { renderHook } from '@testing-library/react';
 import type { BenchmarksCisId } from '@kbn/cloud-security-posture-common';
 import { useCspIntegrationLink } from '../navigation/use_csp_integration_link';
 
-jest.mock('../navigation/use_csp_integration_link');
+vi.mock('../navigation/use_csp_integration_link');
 
 describe('useBenchmarkDynamicValues', () => {
   const setupMocks = (cspmIntegrationLink: string, kspmIntegrationLink: string) => {
-    (useCspIntegrationLink as jest.Mock)
+    (useCspIntegrationLink as Mock)
       .mockReturnValueOnce(cspmIntegrationLink)
       .mockReturnValueOnce(kspmIntegrationLink);
   };

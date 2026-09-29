@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import type { ActionsConfigurationUtilities } from '../actions_config';
@@ -24,7 +27,7 @@ describe('Executor', () => {
   const params = { subAction: 'testUrl', subActionParams: { url: 'https://example.com' } };
   let logger: MockedLogger;
   let services: ReturnType<typeof actionsMock.createServices>;
-  let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
+  let mockedActionsConfig: Mocked<ActionsConfigurationUtilities>;
   let connectorUsageCollector: ConnectorUsageCollector;
 
   const createExecutor = (Service: IService<TestConfig, TestSecrets>) => {
@@ -45,8 +48,8 @@ describe('Executor', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
 
     logger = loggingSystemMock.createLogger();
     services = actionsMock.createServices();
@@ -318,7 +321,7 @@ describe('Executor', () => {
       },
       getService: (serviceParams: ServiceParams<TestConfig, TestSecrets>) => {
         const service = new TestExecutor(serviceParams);
-        echoSpy = jest.spyOn(service, 'echo').mockResolvedValue(subActionParams);
+        echoSpy = vi.spyOn(service, 'echo').mockResolvedValue(subActionParams);
         return service;
       },
     };

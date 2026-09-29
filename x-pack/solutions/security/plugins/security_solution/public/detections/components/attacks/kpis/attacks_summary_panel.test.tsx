@@ -5,19 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { AttacksSummaryPanel } from './attacks_summary_panel';
 import { TestProviders } from '../../../../common/mock';
 
-jest.mock('./attacks_volume_panel/attacks_volume_panel', () => ({
-  AttacksVolumePanel: () => <div data-test-subj="mock-attacks-volume-panel" />,
-}));
+vi.mock('./attacks_volume_panel/attacks_volume_panel', () => {
+      const mocked = {
+      AttacksVolumePanel: () => <div data-test-subj="mock-attacks-volume-panel" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./attacks_list_panel/attacks_list_panel', () => ({
-  AttacksListPanel: () => <div data-test-subj="mock-attacks-list-panel" />,
-}));
+vi.mock('./attacks_list_panel/attacks_list_panel', () => {
+      const mocked = {
+      AttacksListPanel: () => <div data-test-subj="mock-attacks-list-panel" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('<AttacksSummaryPanel />', () => {
   const defaultProps = {
@@ -26,7 +34,7 @@ describe('<AttacksSummaryPanel />', () => {
     dataView: {} as DataView,
     title: 'Summary',
     isExpanded: true,
-    setIsExpanded: jest.fn(),
+    setIsExpanded: vi.fn(),
   };
 
   it('renders summary view content', () => {

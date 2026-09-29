@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { getEsqlRuleParams } from '../../rule_schema/mocks';
 import { sampleDocNoSortIdWithTimestamp } from '../__mocks__/es_results';
@@ -34,7 +36,7 @@ describe('wrapSuppressedEsqlAlerts', () => {
   });
 
   test('should call generateAlertId for alert id', () => {
-    jest.spyOn(esqlUtils, 'generateAlertId').mockReturnValueOnce('mocked-alert-id');
+    vi.spyOn(esqlUtils, 'generateAlertId').mockReturnValueOnce('mocked-alert-id');
     const newSharedParams = getSharedParamsMock({
       ruleParams: getEsqlRuleParams({
         alertSuppression: {

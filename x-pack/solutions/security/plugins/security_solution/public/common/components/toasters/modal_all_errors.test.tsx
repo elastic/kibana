@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { shallow } from 'enzyme';
 
 import React from 'react';
@@ -24,7 +26,7 @@ const mockToast: AppToast = {
 };
 
 describe('Modal all errors', () => {
-  const toggle = jest.fn();
+  const toggle = vi.fn();
   describe('rendering', () => {
     test('it renders the default all errors modal when isShowing is positive', () => {
       const wrapper = shallow(

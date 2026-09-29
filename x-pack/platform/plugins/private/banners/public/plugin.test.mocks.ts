@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export const getBannerInfoMock = jest.fn();
-jest.doMock('./get_banner_info', () => ({
-  getBannerInfo: getBannerInfoMock,
-}));
+import { vi } from 'vitest';
+
+export const getBannerInfoMock = vi.fn();
+vi.doMock('./get_banner_info', () => {
+      const mocked = {
+      getBannerInfo: getBannerInfoMock,
+    };
+      return { ...mocked, default: mocked };
+    });

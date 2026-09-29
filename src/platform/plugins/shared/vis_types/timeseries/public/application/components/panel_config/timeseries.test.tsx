@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 
-jest.mock('../lib/get_default_query_language', () => ({
-  getDefaultQueryLanguage: () => 'kuery',
-}));
+vi.mock('../lib/get_default_query_language', () => {
+      const mocked = {
+      getDefaultQueryLanguage: () => 'kuery',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { TimeseriesPanelConfig } from './timeseries';
 import type { PanelConfigProps } from './types';
@@ -24,7 +29,7 @@ describe('TimeseriesPanelConfig', () => {
       model: {
         max_lines_legend: 2,
       },
-      onChange: jest.fn(),
+      onChange: vi.fn(),
     } as unknown as PanelConfigProps;
     const wrapper = shallow(<TimeseriesPanelConfig {...props} />);
     wrapper.instance().setState({ selectedTab: 'options' });
@@ -40,7 +45,7 @@ describe('TimeseriesPanelConfig', () => {
         max_lines_legend: 2,
         truncate_legend: 1,
       },
-      onChange: jest.fn(),
+      onChange: vi.fn(),
     } as unknown as PanelConfigProps;
     const wrapper = shallow(<TimeseriesPanelConfig {...props} />);
     wrapper.instance().setState({ selectedTab: 'options' });
@@ -56,7 +61,7 @@ describe('TimeseriesPanelConfig', () => {
         max_lines_legend: 2,
         truncate_legend: 0,
       },
-      onChange: jest.fn(),
+      onChange: vi.fn(),
     } as unknown as PanelConfigProps;
     const wrapper = shallow(<TimeseriesPanelConfig {...props} />);
     wrapper.instance().setState({ selectedTab: 'options' });
@@ -72,7 +77,7 @@ describe('TimeseriesPanelConfig', () => {
         max_lines_legend: 2,
         truncate_legend: 0,
       },
-      onChange: jest.fn(),
+      onChange: vi.fn(),
     } as unknown as PanelConfigProps;
     const wrapper = shallow(<TimeseriesPanelConfig {...props} />);
     wrapper.instance().setState({ selectedTab: 'options' });

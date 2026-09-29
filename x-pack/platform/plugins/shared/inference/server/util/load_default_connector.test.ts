@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import {
   InferenceConnectorType,
   defaultInferenceEndpoints,
@@ -17,11 +20,11 @@ import { loadDefaultConnector } from './load_default_connector';
 import { getConnectorById } from './get_connector_by_id';
 import { getConnectorList } from './get_connector_list';
 
-jest.mock('./get_connector_by_id');
-jest.mock('./get_connector_list');
+vi.mock('./get_connector_by_id');
+vi.mock('./get_connector_list');
 
-const getConnectorByIdMock = getConnectorById as jest.MockedFn<typeof getConnectorById>;
-const getConnectorListMock = getConnectorList as jest.MockedFn<typeof getConnectorList>;
+const getConnectorByIdMock = getConnectorById as MockedFunction<typeof getConnectorById>;
+const getConnectorListMock = getConnectorList as MockedFunction<typeof getConnectorList>;
 
 const createConnector = (parts: Partial<InferenceConnector> = {}): InferenceConnector => ({
   connectorId: 'default-id',
@@ -41,7 +44,7 @@ describe('loadDefaultConnector', () => {
   const logger = loggerMock.create();
 
   const uiSettingsClient = {
-    get: jest.fn(),
+    get: vi.fn(),
   } as any;
 
   beforeEach(() => {
@@ -58,7 +61,7 @@ describe('loadDefaultConnector', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the connector matching the uiSettings default connector', async () => {

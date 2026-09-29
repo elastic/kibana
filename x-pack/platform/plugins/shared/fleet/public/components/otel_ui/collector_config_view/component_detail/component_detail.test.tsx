@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 
@@ -15,9 +17,12 @@ import type { OTelCollectorConfig, ComponentHealth } from '../../../../../common
 
 import { OTelComponentDetail } from './component_detail';
 
-jest.mock('../../../../services/use_yaml', () => ({
-  useYaml: () => require('yaml'),
-}));
+vi.mock('../../../../services/use_yaml', () => {
+      const mocked = {
+      useYaml: () => require('yaml'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const config: OTelCollectorConfig = {
   receivers: {
@@ -68,7 +73,7 @@ describe('OTelComponentDetail', () => {
         componentId="otlp"
         componentType="receiver"
         config={config}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -81,7 +86,7 @@ describe('OTelComponentDetail', () => {
         componentId="otlp"
         componentType="receiver"
         config={config}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -102,7 +107,7 @@ describe('OTelComponentDetail', () => {
         componentId="noop"
         componentType="receiver"
         config={minimalConfig}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -111,7 +116,7 @@ describe('OTelComponentDetail', () => {
   });
 
   it('calls onClose when the close button is clicked', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
 
     const result = testRenderer.render(
       <OTelComponentDetail
@@ -132,7 +137,7 @@ describe('OTelComponentDetail', () => {
         componentId="elasticsearch/default"
         componentType="exporter"
         config={config}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -147,7 +152,7 @@ describe('OTelComponentDetail', () => {
         componentId="otlp"
         componentType="receiver"
         config={config}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -162,7 +167,7 @@ describe('OTelComponentDetail', () => {
         componentId="otlp"
         componentType="receiver"
         config={config}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -178,7 +183,7 @@ describe('OTelComponentDetail', () => {
         componentId="otlp"
         componentType="receiver"
         config={config}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -204,7 +209,7 @@ describe('OTelComponentDetail', () => {
         componentType="receiver"
         config={config}
         health={health}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -233,7 +238,7 @@ describe('OTelComponentDetail', () => {
         componentType="processor"
         config={config}
         health={health}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -267,7 +272,7 @@ describe('OTelComponentDetail', () => {
         componentType="receiver"
         config={config}
         health={health}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -282,7 +287,7 @@ describe('OTelComponentDetail', () => {
         componentId="logs/default"
         componentType="pipeline"
         config={config}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -299,7 +304,7 @@ describe('OTelComponentDetail', () => {
         componentId="logs/default"
         componentType="pipeline"
         config={config}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -312,7 +317,7 @@ describe('OTelComponentDetail', () => {
         componentId="otlp"
         componentType="receiver"
         config={config}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -330,7 +335,7 @@ describe('OTelComponentDetail', () => {
         componentId="logs/default"
         componentType="pipeline"
         config={config}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -348,7 +353,7 @@ describe('OTelComponentDetail', () => {
         componentId="unknown_nonexistent"
         componentType="receiver"
         config={unknownConfig}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 

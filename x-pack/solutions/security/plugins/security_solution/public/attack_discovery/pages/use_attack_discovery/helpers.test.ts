@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
@@ -21,7 +24,7 @@ import {
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 import * as workflowConfigModule from '../settings_flyout/workflow_configuration';
 
-jest.mock('../settings_flyout/workflow_configuration');
+vi.mock('../settings_flyout/workflow_configuration');
 
 const connector = createMockActionConnector({
   actionTypeId: '.gen-ai',
@@ -335,10 +338,10 @@ describe('getRequestBody', () => {
 });
 
 describe('getWorkflowConfig', () => {
-  const mockGetWorkflowSettings = workflowConfigModule.getWorkflowSettings as jest.Mock;
+  const mockGetWorkflowSettings = workflowConfigModule.getWorkflowSettings as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('with custom workflow configuration', () => {
@@ -496,7 +499,7 @@ describe('getWorkflowConfig', () => {
 });
 
 describe('callInternalGenerateApi', () => {
-  const mockGetWorkflowSettings = workflowConfigModule.getWorkflowSettings as jest.Mock;
+  const mockGetWorkflowSettings = workflowConfigModule.getWorkflowSettings as Mock;
   let mockHttp: HttpSetup;
 
   const defaultParams = {
@@ -512,9 +515,9 @@ describe('callInternalGenerateApi', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockHttp = {
-      post: jest.fn(),
+      post: vi.fn(),
     } as unknown as HttpSetup;
   });
 
@@ -529,7 +532,7 @@ describe('callInternalGenerateApi', () => {
         validationWorkflowId: 'default',
       };
       mockGetWorkflowSettings.mockReturnValue(mockSettings);
-      (mockHttp.post as jest.MockedFunction<typeof mockHttp.post>).mockResolvedValue({
+      (mockHttp.post as MockedFunction<typeof mockHttp.post>).mockResolvedValue({
         attack_discoveries: null,
         execution_uuid: '12345678-1234-5678-9abc-123456789012',
         replacements: {},
@@ -548,7 +551,7 @@ describe('callInternalGenerateApi', () => {
     it('calls internal API with version 1', async () => {
       await callInternalGenerateApi({ ...defaultParams, http: mockHttp });
 
-      const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
+      const mockPost = mockHttp.post as MockedFunction<typeof mockHttp.post>;
       // @ts-expect-error - mock.calls type is incorrect, runtime uses two-argument form
       const options = mockPost.mock.calls[0][1] as unknown as { version?: string };
 
@@ -558,7 +561,7 @@ describe('callInternalGenerateApi', () => {
     it('calls internal API with stringified body', async () => {
       await callInternalGenerateApi({ ...defaultParams, http: mockHttp });
 
-      const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
+      const mockPost = mockHttp.post as MockedFunction<typeof mockHttp.post>;
       // @ts-expect-error - mock.calls type is incorrect, runtime uses two-argument form
       const options = mockPost.mock.calls[0][1] as unknown as { body?: unknown };
 
@@ -566,7 +569,7 @@ describe('callInternalGenerateApi', () => {
     });
 
     it('returns request body without alerts', async () => {
-      const mockPost = mockHttp.post as jest.Mock;
+      const mockPost = mockHttp.post as Mock;
 
       await callInternalGenerateApi({ ...defaultParams, http: mockHttp });
 
@@ -589,7 +592,7 @@ describe('callInternalGenerateApi', () => {
 
     beforeEach(() => {
       mockGetWorkflowSettings.mockReturnValue(mockSettings);
-      (mockHttp.post as jest.MockedFunction<typeof mockHttp.post>).mockResolvedValue({
+      (mockHttp.post as MockedFunction<typeof mockHttp.post>).mockResolvedValue({
         attack_discoveries: null,
         execution_uuid: '12345678-1234-5678-9abc-123456789012',
         replacements: {},
@@ -599,7 +602,7 @@ describe('callInternalGenerateApi', () => {
     it('includes alert_retrieval_workflow_ids', async () => {
       await callInternalGenerateApi({ ...defaultParams, http: mockHttp });
 
-      const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
+      const mockPost = mockHttp.post as MockedFunction<typeof mockHttp.post>;
       // @ts-expect-error - mock.calls type is incorrect, runtime uses two-argument form
       const options = mockPost.mock.calls[0][1] as unknown as { body?: string };
       const requestBody = JSON.parse(options?.body as string);
@@ -613,7 +616,7 @@ describe('callInternalGenerateApi', () => {
     it('includes alert_retrieval_mode', async () => {
       await callInternalGenerateApi({ ...defaultParams, http: mockHttp });
 
-      const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
+      const mockPost = mockHttp.post as MockedFunction<typeof mockHttp.post>;
       // @ts-expect-error - mock.calls type is incorrect, runtime uses two-argument form
       const options = mockPost.mock.calls[0][1] as unknown as { body?: string };
       const requestBody = JSON.parse(options?.body as string);
@@ -624,7 +627,7 @@ describe('callInternalGenerateApi', () => {
     it('includes the composite retrieval toggles', async () => {
       await callInternalGenerateApi({ ...defaultParams, http: mockHttp });
 
-      const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
+      const mockPost = mockHttp.post as MockedFunction<typeof mockHttp.post>;
       // @ts-expect-error - mock.calls type is incorrect, runtime uses two-argument form
       const options = mockPost.mock.calls[0][1] as unknown as { body?: string };
       const requestBody = JSON.parse(options?.body as string);
@@ -637,7 +640,7 @@ describe('callInternalGenerateApi', () => {
     it('includes validation_workflow_id', async () => {
       await callInternalGenerateApi({ ...defaultParams, http: mockHttp });
 
-      const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
+      const mockPost = mockHttp.post as MockedFunction<typeof mockHttp.post>;
       // @ts-expect-error - mock.calls type is incorrect, runtime uses two-argument form
       const options = mockPost.mock.calls[0][1] as unknown as { body?: string };
       const requestBody = JSON.parse(options?.body as string);
@@ -648,7 +651,7 @@ describe('callInternalGenerateApi', () => {
 
   describe('when spaceId is null', () => {
     beforeEach(() => {
-      (mockHttp.post as jest.MockedFunction<typeof mockHttp.post>).mockResolvedValue({
+      (mockHttp.post as MockedFunction<typeof mockHttp.post>).mockResolvedValue({
         attack_discoveries: null,
         execution_uuid: '12345678-1234-5678-9abc-123456789012',
         replacements: {},
@@ -662,7 +665,7 @@ describe('callInternalGenerateApi', () => {
         spaceId: null,
       });
 
-      const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
+      const mockPost = mockHttp.post as MockedFunction<typeof mockHttp.post>;
       // @ts-expect-error - mock.calls type is incorrect, runtime uses two-argument form
       const options = mockPost.mock.calls[0][1] as unknown as { body?: string };
       const requestBody = JSON.parse(options?.body as string);
@@ -677,7 +680,7 @@ describe('callInternalGenerateApi', () => {
         spaceId: null,
       });
 
-      const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
+      const mockPost = mockHttp.post as MockedFunction<typeof mockHttp.post>;
       // @ts-expect-error - mock.calls type is incorrect, runtime uses two-argument form
       const options = mockPost.mock.calls[0][1] as unknown as { body?: string };
       const requestBody = JSON.parse(options?.body as string);
@@ -692,7 +695,7 @@ describe('callInternalGenerateApi', () => {
         spaceId: null,
       });
 
-      const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
+      const mockPost = mockHttp.post as MockedFunction<typeof mockHttp.post>;
       // @ts-expect-error - mock.calls type is incorrect, runtime uses two-argument form
       const options = mockPost.mock.calls[0][1] as unknown as { body?: string };
       const requestBody = JSON.parse(options?.body as string);
@@ -709,7 +712,7 @@ describe('callInternalGenerateApi', () => {
         spaceId: null,
       });
 
-      const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
+      const mockPost = mockHttp.post as MockedFunction<typeof mockHttp.post>;
       // @ts-expect-error - mock.calls type is incorrect, runtime uses two-argument form
       const options = mockPost.mock.calls[0][1] as unknown as { body?: string };
       const requestBody = JSON.parse(options?.body as string);
@@ -729,7 +732,7 @@ describe('callInternalGenerateApi', () => {
         validationWorkflowId: 'default',
       };
       mockGetWorkflowSettings.mockReturnValue(mockSettings);
-      (mockHttp.post as jest.MockedFunction<typeof mockHttp.post>).mockResolvedValue({
+      (mockHttp.post as MockedFunction<typeof mockHttp.post>).mockResolvedValue({
         attack_discoveries: null,
         execution_uuid: '12345678-1234-5678-9abc-123456789012',
         replacements: {},
@@ -743,7 +746,7 @@ describe('callInternalGenerateApi', () => {
         http: mockHttp,
       });
 
-      const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
+      const mockPost = mockHttp.post as MockedFunction<typeof mockHttp.post>;
       // @ts-expect-error - mock.calls type is incorrect, runtime uses two-argument form
       const options = mockPost.mock.calls[0][1] as unknown as { body?: string };
       const requestBody = JSON.parse(options?.body as string);
@@ -758,7 +761,7 @@ describe('callInternalGenerateApi', () => {
         start: '2024-01-14T12:00:00Z',
       });
 
-      const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
+      const mockPost = mockHttp.post as MockedFunction<typeof mockHttp.post>;
       // @ts-expect-error - mock.calls type is incorrect, runtime uses two-argument form
       const options = mockPost.mock.calls[0][1] as unknown as { body?: string };
       const requestBody = JSON.parse(options?.body as string);
@@ -775,7 +778,7 @@ describe('callInternalGenerateApi', () => {
         http: mockHttp,
       });
 
-      const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
+      const mockPost = mockHttp.post as MockedFunction<typeof mockHttp.post>;
       // @ts-expect-error - mock.calls type is incorrect, runtime uses two-argument form
       const options = mockPost.mock.calls[0][1] as unknown as { body?: string };
       const requestBody = JSON.parse(options?.body as string);
@@ -795,7 +798,7 @@ describe('callInternalGenerateApi', () => {
         validationWorkflowId: 'default',
       };
       mockGetWorkflowSettings.mockReturnValue(mockSettings);
-      (mockHttp.post as jest.MockedFunction<typeof mockHttp.post>).mockResolvedValue({
+      (mockHttp.post as MockedFunction<typeof mockHttp.post>).mockResolvedValue({
         invalid: 'response',
       });
 
@@ -822,15 +825,15 @@ describe('callPublicGenerateApi', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockHttp = {
-      post: jest.fn(),
+      post: vi.fn(),
     } as unknown as HttpSetup;
   });
 
   describe('with valid parameters', () => {
     beforeEach(() => {
-      (mockHttp.post as jest.MockedFunction<typeof mockHttp.post>).mockResolvedValue({
+      (mockHttp.post as MockedFunction<typeof mockHttp.post>).mockResolvedValue({
         execution_uuid: '12345678-1234-5678-9abc-123456789012',
       });
     });
@@ -853,7 +856,7 @@ describe('callPublicGenerateApi', () => {
         http: mockHttp,
       });
 
-      const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
+      const mockPost = mockHttp.post as MockedFunction<typeof mockHttp.post>;
       // @ts-expect-error - mock.calls type is incorrect, runtime uses two-argument form
       const options = mockPost.mock.calls[0][1] as unknown as { body?: string };
 
@@ -866,7 +869,7 @@ describe('callPublicGenerateApi', () => {
         http: mockHttp,
       });
 
-      const mockPost = mockHttp.post as jest.MockedFunction<typeof mockHttp.post>;
+      const mockPost = mockHttp.post as MockedFunction<typeof mockHttp.post>;
       // @ts-expect-error - mock.calls type is incorrect, runtime uses two-argument form
       const options = mockPost.mock.calls[0][1] as unknown as { version?: string };
 
@@ -877,7 +880,7 @@ describe('callPublicGenerateApi', () => {
   describe('response handling', () => {
     it('returns response when parsing succeeds', async () => {
       const mockResponse = { execution_uuid: '12345678-1234-1234-1234-123456789012' };
-      (mockHttp.post as jest.MockedFunction<typeof mockHttp.post>).mockResolvedValue(mockResponse);
+      (mockHttp.post as MockedFunction<typeof mockHttp.post>).mockResolvedValue(mockResponse);
 
       const result = await callPublicGenerateApi({
         body: defaultBody,
@@ -890,7 +893,7 @@ describe('callPublicGenerateApi', () => {
 
   describe('error handling', () => {
     it('throws error when response parsing fails', async () => {
-      (mockHttp.post as jest.MockedFunction<typeof mockHttp.post>).mockResolvedValue({
+      (mockHttp.post as MockedFunction<typeof mockHttp.post>).mockResolvedValue({
         invalid: 'response',
       });
 

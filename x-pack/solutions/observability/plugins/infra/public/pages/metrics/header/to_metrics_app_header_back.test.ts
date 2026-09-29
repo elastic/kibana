@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { hostsTitle, inventoryTitle } from '../../../translations';
 import { toMetricsAppHeaderBack } from './to_metrics_app_header_back';
 
 describe('toMetricsAppHeaderBack', () => {
   it('maps a parent breadcrumb with href to a single AppHeader back target', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
 
     expect(
       toMetricsAppHeaderBack({
@@ -40,7 +42,7 @@ describe('toMetricsAppHeaderBack', () => {
     expect(
       toMetricsAppHeaderBack({
         text: inventoryTitle,
-        link: { onClick: jest.fn() },
+        link: { onClick: vi.fn() },
       })
     ).toBeUndefined();
   });

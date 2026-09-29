@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
@@ -13,20 +16,26 @@ import { assetCriticalityDynamicInlineToolHandler } from './asset_criticality_es
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import type { EntityAnalyticsSkillsContext } from '../../entity_analytics_skill';
 
-jest.mock('../common', () => ({
-  bootstrapCommonServices: jest.fn(),
-  entityAnalyticsInlineToolSchema: {},
-}));
+vi.mock('../common', () => {
+      const mocked = {
+      bootstrapCommonServices: vi.fn(),
+      entityAnalyticsInlineToolSchema: {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  generateEsql: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      generateEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockBootstrapCommonServices = jest.requireMock('../common')
-  .bootstrapCommonServices as jest.Mock;
+const mockBootstrapCommonServices = (await vi.importMock('../common'))
+  .bootstrapCommonServices as Mock;
 
-const mockGenerateEsql = jest.requireMock('@kbn/agent-builder-genai-utils')
-  .generateEsql as jest.Mock;
+const mockGenerateEsql = (await vi.importMock('@kbn/agent-builder-genai-utils'))
+  .generateEsql as Mock;
 
 const defaultToolArgs = {
   entityType: 'host' as EntityType,
@@ -50,7 +59,7 @@ describe('assetCriticalityDynamicInlineToolHandler', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockBootstrapCommonServices.mockResolvedValue({
       defaultMessage: 'General security solution message.',
       isEntityStoreV2Enabled: false,

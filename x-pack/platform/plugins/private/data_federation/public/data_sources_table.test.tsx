@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render } from '@testing-library/react';
@@ -40,7 +42,7 @@ const docLinksMock = {
 };
 
 describe('DataSourcesTable', () => {
-  const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {
+  const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {
     const [first] = args;
     if (typeof first === 'string' && first.includes('Detected not recommended unit')) {
       return;
@@ -52,7 +54,7 @@ describe('DataSourcesTable', () => {
   });
 
   it('calls onCreate when the add button is clicked', async () => {
-    const onCreate = jest.fn();
+    const onCreate = vi.fn();
 
     const { getByTestId } = render(
       <EuiProvider>
@@ -61,11 +63,11 @@ describe('DataSourcesTable', () => {
             dataSources={[createDataSource('ds1', 's3')]}
             selectedDataSources={[]}
             dataSetsCountByDataSource={new Map()}
-            onSelectionChange={jest.fn()}
+            onSelectionChange={vi.fn()}
             onCreate={onCreate}
-            onEdit={jest.fn()}
-            onDelete={jest.fn()}
-            onDeleteSelected={jest.fn()}
+            onEdit={vi.fn()}
+            onDelete={vi.fn()}
+            onDeleteSelected={vi.fn()}
           />
         </KibanaContextProvider>
       </EuiProvider>
@@ -76,7 +78,7 @@ describe('DataSourcesTable', () => {
   });
 
   it('disables the edit action for a data source with an unsupported type', async () => {
-    const onEdit = jest.fn();
+    const onEdit = vi.fn();
 
     const { getAllByTestId } = render(
       <EuiProvider>
@@ -88,11 +90,11 @@ describe('DataSourcesTable', () => {
             ]}
             selectedDataSources={[]}
             dataSetsCountByDataSource={new Map()}
-            onSelectionChange={jest.fn()}
-            onCreate={jest.fn()}
+            onSelectionChange={vi.fn()}
+            onCreate={vi.fn()}
             onEdit={onEdit}
-            onDelete={jest.fn()}
-            onDeleteSelected={jest.fn()}
+            onDelete={vi.fn()}
+            onDeleteSelected={vi.fn()}
           />
         </KibanaContextProvider>
       </EuiProvider>
@@ -110,7 +112,7 @@ describe('DataSourcesTable', () => {
   });
 
   it('disables the delete action and checkbox when a data source has connected datasets', async () => {
-    const onDelete = jest.fn();
+    const onDelete = vi.fn();
 
     const dataSetsCountByDataSource = new Map<string, number>([
       ['Source A', 1],
@@ -124,11 +126,11 @@ describe('DataSourcesTable', () => {
             dataSources={[createDataSource('Source A', 's3'), createDataSource('Source B', 's3')]}
             selectedDataSources={[]}
             dataSetsCountByDataSource={dataSetsCountByDataSource}
-            onSelectionChange={jest.fn()}
-            onCreate={jest.fn()}
-            onEdit={jest.fn()}
+            onSelectionChange={vi.fn()}
+            onCreate={vi.fn()}
+            onEdit={vi.fn()}
             onDelete={onDelete}
-            onDeleteSelected={jest.fn()}
+            onDeleteSelected={vi.fn()}
           />
         </KibanaContextProvider>
       </EuiProvider>
@@ -158,7 +160,7 @@ describe('DataSourcesTable', () => {
   });
 
   it('shows bulk delete when selection is non-empty and calls onDeleteSelected', async () => {
-    const onDeleteSelected = jest.fn();
+    const onDeleteSelected = vi.fn();
     const selectedDataSources = [createDataSource('selected', 's3')];
 
     const { getByTestId } = render(
@@ -168,10 +170,10 @@ describe('DataSourcesTable', () => {
             dataSources={[...selectedDataSources, createDataSource('other', 's3')]}
             selectedDataSources={selectedDataSources}
             dataSetsCountByDataSource={new Map()}
-            onSelectionChange={jest.fn()}
-            onCreate={jest.fn()}
-            onEdit={jest.fn()}
-            onDelete={jest.fn()}
+            onSelectionChange={vi.fn()}
+            onCreate={vi.fn()}
+            onEdit={vi.fn()}
+            onDelete={vi.fn()}
             onDeleteSelected={onDeleteSelected}
           />
         </KibanaContextProvider>

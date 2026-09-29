@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import type {
   RuleHistoryItem,
@@ -18,12 +21,12 @@ import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { RuleChangesHistoryEventTypes } from '../../../../common/lib/telemetry/events/rule_changes_history/types';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
-jest.mock('../../../rule_management/api/hooks/use_restore_rule_revision_mutation');
-jest.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('../../../rule_management/api/hooks/use_restore_rule_revision_mutation');
+vi.mock('../../../../common/hooks/use_app_toasts');
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana'));
 
   return {
     ...original,
@@ -71,11 +74,11 @@ describe('useRuleRestoreFromHistory', () => {
   ) => void;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAppToasts as jest.Mock).mockReturnValue(useAppToastsValueMock);
-    (useRestoreRuleFromHistoryMutation as jest.Mock).mockImplementation(({ onSettled }) => {
+    vi.clearAllMocks();
+    (useAppToasts as Mock).mockReturnValue(useAppToastsValueMock);
+    (useRestoreRuleFromHistoryMutation as Mock).mockImplementation(({ onSettled }) => {
       capturedOnSettled = onSettled;
-      return { mutate: jest.fn() };
+      return { mutate: vi.fn() };
     });
   });
 
@@ -172,7 +175,7 @@ describe('useRuleRestoreFromHistory', () => {
 
     it('reports status "conflict" with isConflictRetry false on the first conflicting attempt', () => {
       const item = createHistoryItem(MOCK_CUSTOM_RULE);
-      const onConflict = jest.fn();
+      const onConflict = vi.fn();
       const { result } = renderHook(() =>
         useRuleRestoreFromHistory({ ruleId: 'rule-1', ruleRevision: 1, onConflict })
       );
@@ -201,7 +204,7 @@ describe('useRuleRestoreFromHistory', () => {
 
     it('reports status "conflict" with isConflictRetry true on a restore-anyway retry', () => {
       const item = createHistoryItem(MOCK_CUSTOM_RULE);
-      const onConflict = jest.fn();
+      const onConflict = vi.fn();
       const { result } = renderHook(() =>
         useRuleRestoreFromHistory({ ruleId: 'rule-1', ruleRevision: 1, onConflict })
       );

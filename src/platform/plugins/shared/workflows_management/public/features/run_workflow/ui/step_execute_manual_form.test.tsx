@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { StepExecuteManualForm } from './step_execute_manual_form';
 
-jest.mock('@kbn/code-editor', () => {
+vi.mock('@kbn/code-editor', () => {
   return {
     CodeEditor: ({
       value,
@@ -37,7 +39,7 @@ const renderWithProviders = (component: React.ReactElement) => {
 };
 
 describe('StepExecuteManualForm', () => {
-  const mockOnChange = jest.fn();
+  const mockOnChange = vi.fn();
 
   const defaultProps = {
     value: '{"foo":"bar"}',
@@ -47,7 +49,7 @@ describe('StepExecuteManualForm', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the Input Data label', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import {
   buildDataViewMock,
@@ -143,7 +145,7 @@ describe('updateSearchSource', () => {
         },
       },
     };
-    discoverServiceMock.data.query.timefilter.timefilter.createFilter = jest.fn(() => {
+    discoverServiceMock.data.query.timefilter.timefilter.createFilter = vi.fn(() => {
       return timeRangeFilter;
     });
 

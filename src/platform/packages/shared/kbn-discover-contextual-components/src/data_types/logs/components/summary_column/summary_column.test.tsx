@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
@@ -33,16 +35,19 @@ import {
 } from '@kbn/discover-utils/src/__mocks__';
 import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiCodeBlock: ({
-    children,
-    dangerouslySetInnerHTML,
-  }: {
-    children?: string;
-    dangerouslySetInnerHTML?: { __html: string };
-  }) => <code data-test-subj="codeBlock">{children ?? dangerouslySetInnerHTML?.__html ?? ''}</code>,
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiCodeBlock: ({
+        children,
+        dangerouslySetInnerHTML,
+      }: {
+        children?: string;
+        dangerouslySetInnerHTML?: { __html: string };
+      }) => <code data-test-subj="codeBlock">{children ?? dangerouslySetInnerHTML?.__html ?? ''}</code>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getSummaryProps = (
   record: DataTableRecord,
@@ -58,18 +63,18 @@ const getSummaryProps = (
   dataView: dataViewMock,
   fieldFormats: {
     ...fieldFormatsMock,
-    getDefaultInstance: jest
+    getDefaultInstance: vi
       .fn()
       .mockImplementation((...params: Parameters<IFieldFormatsRegistry['getDefaultInstance']>) => ({
         ...fieldFormatsMock.getDefaultInstance(...params),
-        convertToText: jest.fn().mockImplementation((t: string) => String(t)),
+        convertToText: vi.fn().mockImplementation((t: string) => String(t)),
       })),
   },
   setCellProps: () => {},
   closePopover: () => {},
   density: DataGridDensity.COMPACT,
   rowHeight: 1,
-  onFilter: jest.fn(),
+  onFilter: vi.fn(),
   shouldShowFieldHandler: () => true,
   columnsMeta: undefined,
   core: corePluginMock.createStart(),

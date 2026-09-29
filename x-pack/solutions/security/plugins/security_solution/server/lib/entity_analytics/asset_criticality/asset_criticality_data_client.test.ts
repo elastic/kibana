@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { Readable } from 'stream';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
@@ -16,9 +18,12 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 type MockInternalEsClient = ReturnType<
   typeof elasticsearchServiceMock.createScopedClusterClient
 >['asInternalUser'];
-jest.mock('../utils/create_or_update_index', () => ({
-  createOrUpdateIndex: jest.fn(),
-}));
+vi.mock('../utils/create_or_update_index', () => {
+      const mocked = {
+      createOrUpdateIndex: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AssetCriticalityDataClient', () => {
   const esClientInternal = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
@@ -396,7 +401,7 @@ describe('AssetCriticalityDataClient', () => {
 });
 
 const mockEsBulk = () =>
-  jest.fn().mockImplementation(async ({ datasource }) => {
+  vi.fn().mockImplementation(async ({ datasource }) => {
     let count = 0;
     for await (const _ of datasource) {
       count++;

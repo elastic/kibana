@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithI18nProvider, mountWithIntl } from '@kbn/test-jest-helpers';
 import type { OverwriteModalProps } from './overwrite_modal';
@@ -15,10 +17,10 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('OverwriteModal', () => {
   const obj = { type: 'foo', id: 'bar', meta: { title: 'baz' } };
-  const onFinish = jest.fn();
+  const onFinish = vi.fn();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('with a regular conflict', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { logFilteredDiscoveries } from '.';
 import type { DiscoveryWithAlertIds } from '../types';
@@ -13,7 +15,7 @@ describe('logFilteredDiscoveries', () => {
   const mockLogger = loggerMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const mockDiscovery1: DiscoveryWithAlertIds = {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getVisualizeListItemLinkFn } from './get_visualize_list_item_link';
 import type { ApplicationStart } from '@kbn/core/public';
 import { createHashHistory } from 'history';
@@ -37,16 +39,16 @@ const mockItem: VisualizeUserContent = {
   },
 };
 
-jest.mock('../../services', () => {
+vi.mock('../../services', () => {
   return {
     getUISettings: () => ({
-      get: jest.fn(),
+      get: vi.fn(),
     }),
   };
 });
 
 const application = {
-  getUrlForApp: jest.fn((appId: string, options?: { path?: string; absolute?: boolean }) => {
+  getUrlForApp: vi.fn((appId: string, options?: { path?: string; absolute?: boolean }) => {
     return `/app/${appId}${options?.path}`;
   }),
 } as unknown as ApplicationStart;

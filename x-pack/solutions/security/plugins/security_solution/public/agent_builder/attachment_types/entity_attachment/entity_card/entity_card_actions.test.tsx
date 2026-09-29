@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -19,20 +22,20 @@ import {
 import { EntityAnalyticsAgentNavigationProvider } from '../../entity_analytics_agent_navigation_context';
 import { EntityCardActions } from './entity_card_actions';
 
-jest.mock('../../entity_explore_navigation', () => {
-  const actual = jest.requireActual('../../entity_explore_navigation');
+vi.mock('../../entity_explore_navigation', async () => {
+  const actual = (await vi.importActual('../../entity_explore_navigation'));
   return {
     ...actual,
-    navigateToEntityAnalyticsHomePageInApp: jest.fn(),
-    navigateToEntityAnalyticsWithFlyoutInApp: jest.fn(),
+    navigateToEntityAnalyticsHomePageInApp: vi.fn(),
+    navigateToEntityAnalyticsWithFlyoutInApp: vi.fn(),
   };
 });
 
-const mockedNavigateToHome = navigateToEntityAnalyticsHomePageInApp as jest.Mock;
-const mockedNavigateToFlyout = navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock;
+const mockedNavigateToHome = navigateToEntityAnalyticsHomePageInApp as Mock;
+const mockedNavigateToFlyout = navigateToEntityAnalyticsWithFlyoutInApp as Mock;
 
 const buildApplicationMock = (): ApplicationStart =>
-  ({ navigateToApp: jest.fn() } as unknown as ApplicationStart);
+  ({ navigateToApp: vi.fn() } as unknown as ApplicationStart);
 
 const renderActions = (
   identifier: EntityAttachmentIdentifier,
@@ -159,7 +162,7 @@ describe('EntityCardActions', () => {
     });
 
     it('forwards the optional searchSession so the helper can clear it before navigating', () => {
-      const searchSession = { clear: jest.fn() };
+      const searchSession = { clear: vi.fn() };
 
       renderActions(
         {

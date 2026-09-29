@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedClass } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Template } from '@kbn/workflows-library';
 
@@ -15,11 +18,11 @@ import { LibraryFetcher } from './library_fetcher';
 import { LibraryService } from './library_service';
 import type { WorkflowsManagementConfig } from '../config';
 
-jest.mock('./library_fetcher');
-jest.mock('./library_bundle_reader');
+vi.mock('./library_fetcher');
+vi.mock('./library_bundle_reader');
 
-const MockedLibraryFetcher = LibraryFetcher as jest.MockedClass<typeof LibraryFetcher>;
-const MockedLibraryBundleReader = LibraryBundleReader as jest.MockedClass<
+const MockedLibraryFetcher = LibraryFetcher as MockedClass<typeof LibraryFetcher>;
+const MockedLibraryBundleReader = LibraryBundleReader as MockedClass<
   typeof LibraryBundleReader
 >;
 
@@ -42,9 +45,9 @@ const buildService = (templates: Template[]) => {
   MockedLibraryFetcher.mockImplementation(
     () =>
       ({
-        listTemplates: jest.fn().mockResolvedValue(templates),
-        getTemplate: jest.fn(),
-        getHealth: jest.fn(),
+        listTemplates: vi.fn().mockResolvedValue(templates),
+        getTemplate: vi.fn(),
+        getHealth: vi.fn(),
       } as unknown as LibraryFetcher)
   );
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -35,7 +37,7 @@ describe('[CCR API] Create follower index', () => {
   it('should return 200 status when follower index is created', async () => {
     const routeContextMock = mockRouteContext({
       ccr: {
-        follow: jest.fn().mockResolvedValueOnce({ acknowledge: true }),
+        follow: vi.fn().mockResolvedValueOnce({ acknowledge: true }),
       },
     });
 

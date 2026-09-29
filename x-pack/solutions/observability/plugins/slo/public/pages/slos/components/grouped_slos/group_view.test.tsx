@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render } from '../../../../utils/test_helper';
 import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
@@ -13,13 +16,13 @@ import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../../../../common/constants';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { GroupView } from './group_view';
 
-jest.mock('../../../../hooks/use_fetch_slo_groups');
-jest.mock('../../hooks/use_url_search_state');
-jest.mock('../../../../hooks/use_fetch_slo_list');
+vi.mock('../../../../hooks/use_fetch_slo_groups');
+vi.mock('../../hooks/use_url_search_state');
+vi.mock('../../../../hooks/use_fetch_slo_list');
 
-const useFetchSloGroupsMock = useFetchSloGroups as jest.Mock;
-const useUrlSearchStateMock = useUrlSearchState as jest.Mock;
-const useFetchSloListMock = useFetchSloList as jest.Mock;
+const useFetchSloGroupsMock = useFetchSloGroups as Mock;
+const useUrlSearchStateMock = useUrlSearchState as Mock;
+const useFetchSloListMock = useFetchSloList as Mock;
 
 describe('Group View', () => {
   beforeEach(() => {
@@ -47,7 +50,7 @@ describe('Group View', () => {
       isError: true,
       isLoading: false,
       isRefetching: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     const { queryByTestId, getByTestId } = render(
       <GroupView groupBy="slo.tags" kqlQuery="" view="cardView" sort="status" direction="desc" />
@@ -67,7 +70,7 @@ describe('Group View', () => {
         total: 0,
         results: [],
       },
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { queryByTestId, getByTestId } = render(
@@ -81,7 +84,7 @@ describe('Group View', () => {
   it('should show loading indicator', async () => {
     useFetchSloGroupsMock.mockReturnValue({
       isLoading: true,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { queryByTestId, getByTestId } = render(
@@ -167,7 +170,7 @@ describe('Group View', () => {
             },
           ],
         },
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
       const { queryAllByTestId, getByTestId } = render(
         <GroupView groupBy="slo.tags" kqlQuery="" view="cardView" sort="status" direction="desc" />
@@ -210,7 +213,7 @@ describe('Group View', () => {
             },
           ],
         },
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       const { queryAllByTestId } = render(

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { query } from './query';
 
 import type {
@@ -24,7 +26,7 @@ describe('query', () => {
   let capabilities: AnnotationsRequestProcessorsParams['capabilities'];
   let uiSettings: AnnotationsRequestProcessorsParams['uiSettings'];
 
-  const next = jest.fn((x) => x) as unknown as ReturnType<
+  const next = vi.fn((x) => x) as unknown as ReturnType<
     ReturnType<AnnotationsRequestProcessorsFunction>
   >;
 
@@ -47,10 +49,10 @@ describe('query', () => {
       indexPatternString: 'foo*',
     };
     capabilities = {
-      getValidTimeInterval: jest.fn((x) => x),
+      getValidTimeInterval: vi.fn((x) => x),
     } as unknown as DefaultSearchCapabilities;
     uiSettings = {
-      get: jest.fn().mockResolvedValue(100),
+      get: vi.fn().mockResolvedValue(100),
     } as unknown as AnnotationsRequestProcessorsParams['uiSettings'];
   });
 

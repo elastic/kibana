@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -13,7 +15,7 @@ import * as i18n from '../empty_prompt/translations';
 
 describe('Generate Component', () => {
   it('calls onGenerate when the button is clicked', () => {
-    const onGenerate = jest.fn();
+    const onGenerate = vi.fn();
 
     render(<Generate isLoading={false} onGenerate={onGenerate} />);
 
@@ -23,19 +25,19 @@ describe('Generate Component', () => {
   });
 
   it('disables the generate button when isLoading is true', () => {
-    render(<Generate isLoading={true} onGenerate={jest.fn()} />);
+    render(<Generate isLoading={true} onGenerate={vi.fn()} />);
 
     expect(screen.getByTestId('generate')).toBeDisabled();
   });
 
   it('disables the generate button when isDisabled is true', () => {
-    render(<Generate isLoading={false} isDisabled={true} onGenerate={jest.fn()} />);
+    render(<Generate isLoading={false} isDisabled={true} onGenerate={vi.fn()} />);
 
     expect(screen.getByTestId('generate')).toBeDisabled();
   });
 
   it('shows tooltip content when the button is disabled', async () => {
-    render(<Generate isLoading={false} isDisabled={true} onGenerate={jest.fn()} />);
+    render(<Generate isLoading={false} isDisabled={true} onGenerate={vi.fn()} />);
 
     fireEvent.mouseOver(screen.getByTestId('generate'));
 

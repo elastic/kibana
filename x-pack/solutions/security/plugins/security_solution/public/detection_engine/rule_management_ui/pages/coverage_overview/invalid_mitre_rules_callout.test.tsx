@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -14,12 +17,15 @@ import { MITRE_ATTACK_VERSION } from '../../../../../common/detection_engine/mit
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import type { CoverageOverviewDashboard } from '../../../rule_management/model/coverage_overview/dashboard';
 
-jest.mock('./coverage_overview_dashboard_context');
+vi.mock('./coverage_overview_dashboard_context');
 
-const mockUseMitreConfiguration = jest.fn();
-jest.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => ({
-  useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
-}));
+const mockUseMitreConfiguration = vi.fn();
+vi.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => {
+      const mocked = {
+      useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const emptyInvalidlyMappedRules: CoverageOverviewDashboard['invalidlyMappedRules'] = {
   enabledRules: [],
@@ -29,7 +35,7 @@ const emptyInvalidlyMappedRules: CoverageOverviewDashboard['invalidlyMappedRules
 const mockContextWithInvalidRules = (
   invalidlyMappedRules: CoverageOverviewDashboard['invalidlyMappedRules']
 ) => {
-  (useCoverageOverviewDashboardContext as jest.Mock).mockReturnValue({
+  (useCoverageOverviewDashboardContext as Mock).mockReturnValue({
     state: { data: { invalidlyMappedRules } },
   });
 };

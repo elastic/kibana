@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 const {
   failureLogMetadataKey,
   failureLogMetadataKeysForProject,
@@ -71,7 +73,7 @@ function textResponse(content) {
 }
 
 function mockFetchJson(json) {
-  return jest.fn().mockResolvedValue({
+  return vi.fn().mockResolvedValue({
     ok: true,
     status: 200,
     text: () => Promise.resolve(JSON.stringify(json)),
@@ -210,7 +212,7 @@ describe('runTriageModelStructured / runTriageModel (mocked fetch)', () => {
   beforeEach(() => {
     process.env.OPENROUTER_BASE_URL = 'https://openrouter.test/api/v1';
     process.env.OPENROUTER_API_KEY = 'sk-test';
-    consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {

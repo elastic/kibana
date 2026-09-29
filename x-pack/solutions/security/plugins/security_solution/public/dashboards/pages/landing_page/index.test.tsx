@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../../app/types';
@@ -20,23 +23,32 @@ import type { NavigationLink } from '../../../common/links/types';
 import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
 import { DASHBOARDS_PAGE_SECTION_CUSTOM } from './translations';
 
-jest.mock('../../../common/containers/tags/api');
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
-jest.mock('@kbn/dashboard-plugin/public', () => ({
-  DashboardListingTable: jest.fn(() => <span data-test-subj="dashboardsTable" />),
-  DashboardTopNav: jest.fn(() => <span data-test-subj="dashboardTopNav" />),
-}));
+vi.mock('../../../common/containers/tags/api');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/utils/route/spy_routes', () => {
+      const mocked = { SpyRoute: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/dashboard-plugin/public', () => {
+      const mocked = {
+      DashboardListingTable: vi.fn(() => <span data-test-subj="dashboardsTable" />),
+      DashboardTopNav: vi.fn(() => <span data-test-subj="dashboardTopNav" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseContractComponents = jest.fn(() => ({}));
-jest.mock('../../../common/hooks/use_contract_component', () => ({
-  useContractComponents: () => mockUseContractComponents(),
-}));
+const mockUseContractComponents = vi.fn(() => ({}));
+vi.mock('../../../common/hooks/use_contract_component', () => {
+      const mocked = {
+      useContractComponents: () => mockUseContractComponents(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const DEFAULT_DASHBOARD_CAPABILITIES = { show: true, createNew: true };
-const mockUseCapabilities = useCapabilities as jest.Mock;
+const mockUseCapabilities = useCapabilities as Mock;
 mockUseCapabilities.mockReturnValue(DEFAULT_DASHBOARD_CAPABILITIES);
-const spyTrack = jest.spyOn(telemetry, 'track');
+const spyTrack = vi.spyOn(telemetry, 'track');
 
 const OVERVIEW_ITEM_LABEL = 'Overview';
 const DETECTION_RESPONSE_ITEM_LABEL = 'Detection & Response';
@@ -61,15 +73,18 @@ const APP_DASHBOARD_LINKS: NavigationLink = {
 };
 const URL = '/path/to/dashboards';
 
-const mockAppManageLink = jest.fn(() => APP_DASHBOARD_LINKS);
-jest.mock('../../../common/links/nav_links', () => ({
-  useRootNavLink: () => mockAppManageLink(),
-}));
+const mockAppManageLink = vi.fn(() => APP_DASHBOARD_LINKS);
+vi.mock('../../../common/links/nav_links', () => {
+      const mocked = {
+      useRootNavLink: () => mockAppManageLink(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const CREATE_DASHBOARD_LINK = { isLoading: false, url: URL };
-const mockUseCreateSecurityDashboard = jest.fn(() => CREATE_DASHBOARD_LINK);
-jest.mock('../../hooks/use_create_security_dashboard_link', () => {
-  const actual = jest.requireActual('../../hooks/use_create_security_dashboard_link');
+const mockUseCreateSecurityDashboard = vi.fn(() => CREATE_DASHBOARD_LINK);
+vi.mock('../../hooks/use_create_security_dashboard_link', async () => {
+  const actual = (await vi.importActual('../../hooks/use_create_security_dashboard_link'));
   return {
     ...actual,
     useCreateSecurityDashboardLink: () => mockUseCreateSecurityDashboard(),
@@ -149,7 +164,7 @@ describe('Dashboards landing', () => {
     it('should call DashboardListingTable with correct initialFilter', async () => {
       await renderDashboardLanding();
 
-      expect((DashboardListingTable as jest.Mock).mock.calls[0][0].initialFilter).toEqual(
+      expect((DashboardListingTable as Mock).mock.calls[0][0].initialFilter).toEqual(
         `tag:("${MOCK_TAG_NAME}")`
       );
     });

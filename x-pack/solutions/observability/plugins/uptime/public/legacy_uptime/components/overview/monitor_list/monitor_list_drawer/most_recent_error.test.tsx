@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { shallowWithIntl, renderWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import moment from 'moment';
@@ -17,7 +19,7 @@ describe('MostRecentError component', () => {
   let monitorError: PingError;
 
   beforeAll(() => {
-    moment.prototype.fromNow = jest.fn(() => '5 days ago');
+    moment.prototype.fromNow = vi.fn(() => '5 days ago');
   });
 
   beforeEach(() => {

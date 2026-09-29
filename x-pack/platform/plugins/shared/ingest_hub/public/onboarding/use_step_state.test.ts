@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
-jest.mock('react-use/lib/useSessionStorage');
+vi.mock('react-use/lib/useSessionStorage');
 
-const mockUseSessionStorage = useSessionStorage as jest.MockedFunction<typeof useSessionStorage>;
+const mockUseSessionStorage = useSessionStorage as MockedFunction<typeof useSessionStorage>;
 
 // Back useSessionStorage with a real React.useState so setState triggers re-renders.
 beforeEach(() => {

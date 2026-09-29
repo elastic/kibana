@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { getMatchPrebuiltRuleAgentNode } from './agent';
@@ -25,14 +27,14 @@ import {
 } from '../__mocks__/mocks';
 
 describe('getMatchPrebuiltRuleAgentNode', () => {
-  const mockInvoke = jest.fn();
+  const mockInvoke = vi.fn();
   const model = { bindTools: () => ({ invoke: mockInvoke }) } as never;
   const tool = { name: 'searchPrebuiltRules' } as never;
 
   const node = getMatchPrebuiltRuleAgentNode({ model, tool });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('found in one attempt', () => {

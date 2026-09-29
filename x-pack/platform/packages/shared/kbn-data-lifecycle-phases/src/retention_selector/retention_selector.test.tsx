@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import '@testing-library/jest-dom';
 import { EuiButton, EuiThemeProvider } from '@elastic/eui';
@@ -39,8 +41,8 @@ describe('RetentionSelector', () => {
 
   it('filters options by search value', async () => {
     const user = userEvent.setup();
-    const onSelectOption = jest.fn();
-    const onInspect = jest.fn();
+    const onSelectOption = vi.fn();
+    const onInspect = vi.fn();
 
     renderWithTheme(
       <RetentionSelector
@@ -63,8 +65,8 @@ describe('RetentionSelector', () => {
 
   it('calls onSelectOption when a row is clicked', async () => {
     const user = userEvent.setup();
-    const onSelectOption = jest.fn();
-    const onInspect = jest.fn();
+    const onSelectOption = vi.fn();
+    const onInspect = vi.fn();
 
     renderWithTheme(
       <RetentionSelector
@@ -83,8 +85,8 @@ describe('RetentionSelector', () => {
 
   it('calls onInspect without selecting the row', async () => {
     const user = userEvent.setup();
-    const onSelectOption = jest.fn();
-    const onInspect = jest.fn();
+    const onSelectOption = vi.fn();
+    const onInspect = vi.fn();
 
     renderWithTheme(
       <RetentionSelector
@@ -104,8 +106,8 @@ describe('RetentionSelector', () => {
 
   it('disables search, selection, and inspect actions when isDisabled is true', async () => {
     const user = userEvent.setup();
-    const onSelectOption = jest.fn();
-    const onInspect = jest.fn();
+    const onSelectOption = vi.fn();
+    const onInspect = vi.fn();
 
     renderWithTheme(
       <RetentionSelector
@@ -127,8 +129,8 @@ describe('RetentionSelector', () => {
   });
 
   it('can hide row actions (selection + inspect)', () => {
-    const onSelectOption = jest.fn();
-    const onInspect = jest.fn();
+    const onSelectOption = vi.fn();
+    const onInspect = vi.fn();
 
     renderWithTheme(
       <RetentionSelector
@@ -147,7 +149,7 @@ describe('RetentionSelector', () => {
 
   it('hides inspect actions when onInspect is not provided', async () => {
     const user = userEvent.setup();
-    const onSelectOption = jest.fn();
+    const onSelectOption = vi.fn();
 
     renderWithTheme(
       <RetentionSelector
@@ -440,7 +442,7 @@ describe('RetentionSelector', () => {
 
     it('renders both the "Managed" badge and the inspect button on a managed, inspectable row', async () => {
       const user = userEvent.setup();
-      const onInspect = jest.fn();
+      const onInspect = vi.fn();
       const managedInspectableOption: RetentionOption = {
         name: 'Managed Inspectable',
         descriptionParts: ['hot', '30d'],

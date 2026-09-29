@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -65,13 +68,13 @@ const makeLegacyAttachmentSO = (
 
 describe('CasesAttachmentsV2Writer', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('bulkUpsertAttachments', () => {
     it('dispatches one _bulk request with index ops per attachment', async () => {
       const { writer, esClient } = buildWriterUnderTest();
-      (esClient.bulk as unknown as jest.Mock).mockResolvedValue({ errors: false, items: [] });
+      (esClient.bulk as unknown as Mock).mockResolvedValue({ errors: false, items: [] });
 
       writer.bulkUpsertAttachments([
         makeLegacyAttachmentSO('att-1'),
@@ -80,7 +83,7 @@ describe('CasesAttachmentsV2Writer', () => {
       await new Promise((r) => setImmediate(r));
 
       expect(esClient.bulk).toHaveBeenCalledTimes(1);
-      const operations = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0].operations;
+      const operations = (esClient.bulk as unknown as Mock).mock.calls[0][0].operations;
       expect(operations).toHaveLength(4);
       expect(operations[0]).toEqual({ index: { _index: ATTACHMENTS_INDEX_NAME, _id: 'att-1' } });
       expect(operations[2]).toEqual({ index: { _index: ATTACHMENTS_INDEX_NAME, _id: 'att-2' } });
@@ -97,13 +100,13 @@ describe('CasesAttachmentsV2Writer', () => {
   describe('bulkDeleteAttachments (per-id delete path)', () => {
     it('dispatches one _bulk request with delete ops per id', async () => {
       const { writer, esClient } = buildWriterUnderTest();
-      (esClient.bulk as unknown as jest.Mock).mockResolvedValue({ errors: false, items: [] });
+      (esClient.bulk as unknown as Mock).mockResolvedValue({ errors: false, items: [] });
 
       writer.bulkDeleteAttachments(['att-1', 'att-2']);
       await new Promise((r) => setImmediate(r));
 
       expect(esClient.bulk).toHaveBeenCalledTimes(1);
-      const operations = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0].operations;
+      const operations = (esClient.bulk as unknown as Mock).mock.calls[0][0].operations;
       expect(operations).toEqual([
         { delete: { _index: ATTACHMENTS_INDEX_NAME, _id: 'att-1' } },
         { delete: { _index: ATTACHMENTS_INDEX_NAME, _id: 'att-2' } },
@@ -112,7 +115,7 @@ describe('CasesAttachmentsV2Writer', () => {
 
     it('treats per-item 404s as success (post-state already met)', async () => {
       const { writer, esClient, logger } = buildWriterUnderTest();
-      (esClient.bulk as unknown as jest.Mock).mockResolvedValue({
+      (esClient.bulk as unknown as Mock).mockResolvedValue({
         errors: true,
         items: [
           { delete: { _id: 'att-1', status: 200 } },
@@ -125,8 +128,8 @@ describe('CasesAttachmentsV2Writer', () => {
       await new Promise((r) => setImmediate(r));
 
       // 404s should NOT contribute to per-item WARN logs.
-      const childLogger = (logger.get as jest.Mock).mock.results[0]?.value ?? logger;
-      const warnCalls = (childLogger.warn as jest.Mock).mock.calls.map(([msg]: [string]) => msg);
+      const childLogger = (logger.get as Mock).mock.results[0]?.value ?? logger;
+      const warnCalls = (childLogger.warn as Mock).mock.calls.map(([msg]: [string]) => msg);
       expect(warnCalls.some((m: string) => m.includes('att-2') && m.includes('not_found'))).toBe(
         false
       );
@@ -134,7 +137,7 @@ describe('CasesAttachmentsV2Writer', () => {
 
     it('logs per-item failures other than 404 at WARN', async () => {
       const { writer, esClient, logger } = buildWriterUnderTest();
-      (esClient.bulk as unknown as jest.Mock).mockResolvedValue({
+      (esClient.bulk as unknown as Mock).mockResolvedValue({
         errors: true,
         items: [{ delete: { _id: 'att-1', status: 500, error: { reason: 'cluster busy' } } }],
       });
@@ -142,8 +145,8 @@ describe('CasesAttachmentsV2Writer', () => {
       writer.bulkDeleteAttachments(['att-1']);
       await new Promise((r) => setImmediate(r));
 
-      const childLogger = (logger.get as jest.Mock).mock.results[0]?.value ?? logger;
-      const warnCalls = (childLogger.warn as jest.Mock).mock.calls.map(([msg]: [string]) => msg);
+      const childLogger = (logger.get as Mock).mock.results[0]?.value ?? logger;
+      const warnCalls = (childLogger.warn as Mock).mock.calls.map(([msg]: [string]) => msg);
       expect(warnCalls.some((m: string) => m.includes('att-1') && m.includes('cluster busy'))).toBe(
         true
       );
@@ -153,13 +156,13 @@ describe('CasesAttachmentsV2Writer', () => {
   describe('bulkDeleteAttachmentsByCaseIds (cascade path)', () => {
     it('dispatches a single delete_by_query against `case.id` for every supplied case id', async () => {
       const { writer, esClient } = buildWriterUnderTest();
-      (esClient.deleteByQuery as unknown as jest.Mock).mockResolvedValue({ deleted: 0 });
+      (esClient.deleteByQuery as unknown as Mock).mockResolvedValue({ deleted: 0 });
 
       writer.bulkDeleteAttachmentsByCaseIds(['case-1', 'case-2']);
       await new Promise((r) => setImmediate(r));
 
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      const arg = (esClient.deleteByQuery as unknown as jest.Mock).mock.calls[0][0];
+      const arg = (esClient.deleteByQuery as unknown as Mock).mock.calls[0][0];
       expect(arg.index).toBe(ATTACHMENTS_INDEX_NAME);
       // `terms` query on the denormalized case.id — implicitly
       // covers BOTH source SO types (legacy + unified) because the
@@ -179,7 +182,7 @@ describe('CasesAttachmentsV2Writer', () => {
 
     it('treats a 404 on the index itself as a no-op (analytics not bootstrapped yet)', async () => {
       const { writer, esClient, logger } = buildWriterUnderTest();
-      (esClient.deleteByQuery as unknown as jest.Mock).mockRejectedValue({
+      (esClient.deleteByQuery as unknown as Mock).mockRejectedValue({
         statusCode: 404,
         message: 'index_not_found_exception',
       });
@@ -187,8 +190,8 @@ describe('CasesAttachmentsV2Writer', () => {
       writer.bulkDeleteAttachmentsByCaseIds(['case-1']);
       await new Promise((r) => setImmediate(r));
 
-      const childLogger = (logger.get as jest.Mock).mock.results[0]?.value ?? logger;
-      const warnCalls = (childLogger.warn as jest.Mock).mock.calls.map(([msg]: [string]) => msg);
+      const childLogger = (logger.get as Mock).mock.results[0]?.value ?? logger;
+      const warnCalls = (childLogger.warn as Mock).mock.calls.map(([msg]: [string]) => msg);
       expect(warnCalls.some((m: string) => m.includes('write failed after'))).toBe(false);
     });
   });

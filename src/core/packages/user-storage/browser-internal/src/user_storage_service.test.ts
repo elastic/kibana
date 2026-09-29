@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
@@ -64,7 +66,7 @@ describe('UserStorageService', () => {
     const client = service.setup(buildDeps());
 
     const errors$ = client.getHttpError$();
-    const completed = jest.fn();
+    const completed = vi.fn();
     client.get$('key').subscribe({ complete: completed });
 
     service.stop();

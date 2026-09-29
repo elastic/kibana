@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -25,27 +28,36 @@ import { useConversationsUrlParams } from '../conversations/conversations_url_pa
 import { EscalationsPage } from './escalations_page';
 
 // These hooks open the Agent Builder flyout and manage the URL; stub them out here.
-jest.mock('../conversations/use_investigation_details', () => ({
-  useInvestigationDetails: jest.fn(),
-}));
-jest.mock('../conversations/conversations_url_params', () => ({
-  useConversationsUrlParams: jest.fn(),
-}));
+vi.mock('../conversations/use_investigation_details', () => {
+      const mocked = {
+      useInvestigationDetails: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../conversations/conversations_url_params', () => {
+      const mocked = {
+      useConversationsUrlParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
-  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
-  useAssignEscalation: jest.fn(),
-  useListEscalations: jest.fn(),
-  useUserProfiles: jest.fn(),
-  useSuggestUserProfiles: jest.fn(),
-}));
+vi.mock('@kbn/agentic-investigations-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/agentic-investigations-plugin/public')),
+      useAssignEscalation: vi.fn(),
+      useListEscalations: vi.fn(),
+      useUserProfiles: vi.fn(),
+      useSuggestUserProfiles: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Replace AssignToUsers with a minimal stub: clicking the "assign" button calls
 // onChange with a known profile. This isolates the page-level mutation wiring from the
 // internals of the EUI UserProfilesPopover (which renders in a portal difficult to drive
 // in JSDOM tests).
-jest.mock('@kbn/agentic-investigations-common', () => {
-  const actual = jest.requireActual('@kbn/agentic-investigations-common');
+vi.mock('@kbn/agentic-investigations-common', async () => {
+  const actual = (await vi.importActual('@kbn/agentic-investigations-common'));
   return {
     ...actual,
     // eslint-disable-next-line react/display-name
@@ -74,20 +86,23 @@ jest.mock('@kbn/agentic-investigations-common', () => {
 });
 
 // Doc-title hook has a DOM side-effect irrelevant to these tests.
-jest.mock('../../hooks/use_alertzero_doc_title', () => ({
-  useAlertZeroDocTitle: jest.fn(),
-}));
+vi.mock('../../hooks/use_alertzero_doc_title', () => {
+      const mocked = {
+      useAlertZeroDocTitle: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAssignEscalation = useAssignEscalation as jest.Mock;
-const mockUseListEscalations = useListEscalations as jest.Mock;
-const mockUseUserProfiles = useUserProfiles as jest.Mock;
-const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
-const mockUseInvestigationDetails = useInvestigationDetails as jest.Mock;
-const mockUseConversationsUrlParams = useConversationsUrlParams as jest.Mock;
+const mockUseAssignEscalation = useAssignEscalation as Mock;
+const mockUseListEscalations = useListEscalations as Mock;
+const mockUseUserProfiles = useUserProfiles as Mock;
+const mockUseSuggestUserProfiles = useSuggestUserProfiles as Mock;
+const mockUseInvestigationDetails = useInvestigationDetails as Mock;
+const mockUseConversationsUrlParams = useConversationsUrlParams as Mock;
 
 // Stable URL-param spies — recreated in beforeEach so jest.clearAllMocks() can track calls.
-let selectConversation: jest.Mock;
-let clearSelectedConversation: jest.Mock;
+let selectConversation: Mock;
+let clearSelectedConversation: Mock;
 
 const openEscalation = {
   id: 'esc-open-1',
@@ -105,7 +120,7 @@ const closedEscalation = {
   metadata: { status: 'closed' },
 };
 
-const assignMutate = jest.fn().mockResolvedValue({});
+const assignMutate = vi.fn().mockResolvedValue({});
 
 const renderPage = (overrides: { capabilities?: object } = {}) => {
   const core = coreMock.createStart();
@@ -140,8 +155,8 @@ const renderPage = (overrides: { capabilities?: object } = {}) => {
 };
 
 beforeEach(() => {
-  selectConversation = jest.fn();
-  clearSelectedConversation = jest.fn();
+  selectConversation = vi.fn();
+  clearSelectedConversation = vi.fn();
   mockUseConversationsUrlParams.mockReturnValue({
     selectedConversationId: undefined,
     selectConversation,
@@ -153,7 +168,7 @@ beforeEach(() => {
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
 });
 
-afterEach(() => jest.clearAllMocks());
+afterEach(() => vi.clearAllMocks());
 
 /**
  * Sets up both list queries — open and closed — with the given results.

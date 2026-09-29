@@ -5,23 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { serverMock, requestContextMock } from '../../../../detection_engine/routes/__mocks__';
 import { getAllTimeline } from '../../../saved_object/timelines';
 import { getTimelineRequest } from '../../../__mocks__/request_responses';
 import { getTimelinesRoute } from '.';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../../detection_engine/routes/__mocks__/request_context';
 
-jest.mock('../../../saved_object/timelines', () => ({
-  getAllTimeline: jest.fn(),
-}));
+vi.mock('../../../saved_object/timelines', () => {
+      const mocked = {
+      getAllTimeline: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('get all timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     server = serverMock.create();
     context = requestContextMock.createTools().context;
@@ -30,18 +36,18 @@ describe('get all timelines', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('should get the total count', async () => {
     await server.inject(getTimelineRequest(), requestContextMock.convertContext(context));
-    expect((getAllTimeline as jest.Mock).mock.calls[0][2]).toEqual({ pageSize: 1, pageIndex: 1 });
+    expect((getAllTimeline as Mock).mock.calls[0][2]).toEqual({ pageSize: 1, pageIndex: 1 });
   });
 
   test('should get all timelines with total count', async () => {
-    (getAllTimeline as jest.Mock).mockResolvedValue({ totalCount: 100 });
+    (getAllTimeline as Mock).mockResolvedValue({ totalCount: 100 });
     await server.inject(getTimelineRequest(), requestContextMock.convertContext(context));
-    expect((getAllTimeline as jest.Mock).mock.calls[1][2]).toEqual({ pageSize: 100, pageIndex: 1 });
+    expect((getAllTimeline as Mock).mock.calls[1][2]).toEqual({ pageSize: 100, pageIndex: 1 });
   });
 });

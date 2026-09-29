@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { compressToEncodedURIComponent } from 'lz-string';
 import React from 'react';
 
@@ -19,7 +21,7 @@ import type { ExportJsonPreparedState, UseConsoleUrl } from './types';
 
 describe('ExportJsonPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows a loading indicator while loading', async () => {
@@ -29,7 +31,7 @@ describe('ExportJsonPanel', () => {
       warnings: [],
       error: undefined,
     };
-    render(<ExportJsonPanel {...preparedState} dataTestSubjPrefix="test" onRetry={jest.fn()} />);
+    render(<ExportJsonPanel {...preparedState} dataTestSubjPrefix="test" onRetry={vi.fn()} />);
     expect(screen.getByTestId('testExportSourceLoading')).toBeInTheDocument();
   });
 
@@ -42,7 +44,7 @@ describe('ExportJsonPanel', () => {
       error: undefined,
     };
 
-    render(<ExportJsonPanel {...preparedState} dataTestSubjPrefix="test" onRetry={jest.fn()} />);
+    render(<ExportJsonPanel {...preparedState} dataTestSubjPrefix="test" onRetry={vi.fn()} />);
 
     expect(screen.getByTestId('testExportSourceWarnings')).toBeInTheDocument();
 
@@ -67,8 +69,8 @@ describe('ExportJsonPanel', () => {
     const jsonValue = '{\n  "key": "value"\n}';
     const request = `POST kbn:/api/object\n${jsonValue}`;
     const devToolsDataUri = compressToEncodedURIComponent(request);
-    const getRequest = jest.fn(() => request);
-    const useUrl = jest.fn<ReturnType<UseConsoleUrl>, Parameters<UseConsoleUrl>>(
+    const getRequest = vi.fn(() => request);
+    const useUrl = vi.fn<ReturnType<UseConsoleUrl>, Parameters<UseConsoleUrl>>(
       () => '/app/dev_tools'
     );
 
@@ -76,7 +78,7 @@ describe('ExportJsonPanel', () => {
       <ExportJsonPanel
         {...preparedState}
         dataTestSubjPrefix="test"
-        onRetry={jest.fn()}
+        onRetry={vi.fn()}
         openInConsole={{
           canShow: true,
           getRequest,
@@ -110,7 +112,7 @@ describe('ExportJsonPanel', () => {
       warnings: [],
       error: new Error('boom'),
     };
-    render(<ExportJsonPanel {...preparedState} dataTestSubjPrefix="test" onRetry={jest.fn()} />);
+    render(<ExportJsonPanel {...preparedState} dataTestSubjPrefix="test" onRetry={vi.fn()} />);
 
     expect(screen.getByTestId('testExportSourcePrepareErrorPrompt')).toBeInTheDocument();
 
@@ -120,7 +122,7 @@ describe('ExportJsonPanel', () => {
 
   it('calls onRetry when the user clicks Retry', async () => {
     const user = userEvent.setup();
-    const onRetry = jest.fn();
+    const onRetry = vi.fn();
     const preparedState: ExportJsonPreparedState<{}> = {
       status: 'error',
       data: undefined,

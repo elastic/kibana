@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import {
@@ -17,7 +19,7 @@ import { getConnectorTypeIdForTriggerEventId } from '../../common/triggers/conne
 
 describe('registerConnectorEventTriggersPublic', () => {
   it('does not register inboundWebhook.received when inbound events are disabled', () => {
-    const registerTriggerDefinition = jest.fn();
+    const registerTriggerDefinition = vi.fn();
 
     registerConnectorEventTriggersPublic({
       inboundEventsEnabled: false,
@@ -28,7 +30,7 @@ describe('registerConnectorEventTriggersPublic', () => {
   });
 
   it('registers inboundWebhook.received when inbound events are enabled', () => {
-    const registerTriggerDefinition = jest.fn();
+    const registerTriggerDefinition = vi.fn();
 
     registerConnectorEventTriggersPublic({
       inboundEventsEnabled: true,
@@ -50,7 +52,7 @@ describe('registerConnectorEventTriggersPublic', () => {
   });
 
   it('uses each connector icon for the event triggers registered from that connector', () => {
-    const registerTriggerDefinition = jest.fn();
+    const registerTriggerDefinition = vi.fn();
 
     registerConnectorEventTriggersPublic({
       inboundEventsEnabled: true,

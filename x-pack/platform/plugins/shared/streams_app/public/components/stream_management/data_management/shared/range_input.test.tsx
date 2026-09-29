@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,7 +16,7 @@ import { RangeInput } from './range_input';
 
 describe('RangeInput', () => {
   it('renders from and to input fields', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const value: RangeCondition = {};
     render(<RangeInput value={value} onChange={onChange} />);
 
@@ -23,7 +25,7 @@ describe('RangeInput', () => {
   });
 
   it('displays existing values', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const value: RangeCondition = { gte: '2024-01-01', lt: '2024-12-31' };
     render(<RangeInput value={value} onChange={onChange} />);
 
@@ -42,7 +44,7 @@ describe('RangeInput', () => {
 
   it('calls onChange when from value changes', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const value: RangeCondition = {};
     render(<RangeInput value={value} onChange={onChange} />);
 
@@ -57,7 +59,7 @@ describe('RangeInput', () => {
 
   it('calls onChange when to value changes', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const value: RangeCondition = { gte: '2024-01-01' };
     render(<RangeInput value={value} onChange={onChange} />);
 
@@ -72,7 +74,7 @@ describe('RangeInput', () => {
 
   it('removes field when cleared', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const value: RangeCondition = { gte: '10', lt: '100' };
     render(<RangeInput value={value} onChange={onChange} />);
 
@@ -89,7 +91,7 @@ describe('RangeInput', () => {
 
   it('allows both from and to values to be set', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const { rerender } = render(<RangeInput value={{}} onChange={onChange} />);
 
     // Set "from" value
@@ -115,7 +117,7 @@ describe('RangeInput', () => {
   });
 
   it('respects disabled prop', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const value: RangeCondition = {};
     render(<RangeInput value={value} onChange={onChange} disabled />);
 
@@ -132,7 +134,7 @@ describe('RangeInput', () => {
   });
 
   it('passes valueSuggestions to autocomplete selectors', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const value: RangeCondition = {};
     const suggestions = [
       { name: '2024-01-01', type: 'date' },
@@ -147,7 +149,7 @@ describe('RangeInput', () => {
 
   describe('checkbox functionality', () => {
     it('renders checkboxes for from and to fields', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: RangeCondition = {};
       render(<RangeInput value={value} onChange={onChange} />);
 
@@ -156,7 +158,7 @@ describe('RangeInput', () => {
     });
 
     it('defaults from checkbox to checked (gte) and to checkbox to checked (lte)', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: RangeCondition = { gte: '10', lte: '100' };
       render(<RangeInput value={value} onChange={onChange} />);
 
@@ -172,7 +174,7 @@ describe('RangeInput', () => {
     });
 
     it('shows correct checkbox states for gt/lte operators', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: RangeCondition = { gt: '10', lte: '100' };
       render(<RangeInput value={value} onChange={onChange} />);
 
@@ -189,7 +191,7 @@ describe('RangeInput', () => {
 
     it('toggles from operator between gte and gt when checkbox is clicked', async () => {
       const user = userEvent.setup();
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: RangeCondition = { gte: '10', lt: '100' };
       render(<RangeInput value={value} onChange={onChange} />);
 
@@ -203,7 +205,7 @@ describe('RangeInput', () => {
 
     it('toggles to operator between lte and lt when checkbox is clicked', async () => {
       const user = userEvent.setup();
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: RangeCondition = { gte: '10', lte: '100' };
       render(<RangeInput value={value} onChange={onChange} />);
 
@@ -217,7 +219,7 @@ describe('RangeInput', () => {
 
     it('allows checkbox to be toggled even with empty value', async () => {
       const user = userEvent.setup();
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: RangeCondition = {};
       render(<RangeInput value={value} onChange={onChange} />);
 
@@ -232,7 +234,7 @@ describe('RangeInput', () => {
 
     it('uses checkbox state when entering new values', async () => {
       const user = userEvent.setup();
-      const onChange = jest.fn();
+      const onChange = vi.fn();
 
       // Start with gt (unchecked state)
       render(<RangeInput value={{ gt: '' }} onChange={onChange} />);
@@ -255,7 +257,7 @@ describe('RangeInput', () => {
 
     it('preserves checkbox state when value changes', async () => {
       const user = userEvent.setup();
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const { rerender } = render(
         <RangeInput value={{ gte: '10', lt: '100' }} onChange={onChange} />
       );
@@ -277,7 +279,7 @@ describe('RangeInput', () => {
     });
 
     it('checkboxes are not disabled when fields are empty', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: RangeCondition = {};
       render(<RangeInput value={value} onChange={onChange} />);
 
@@ -289,7 +291,7 @@ describe('RangeInput', () => {
     });
 
     it('respects disabled prop for checkboxes', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: RangeCondition = { gte: '10', lt: '100' };
       render(<RangeInput value={value} onChange={onChange} disabled />);
 

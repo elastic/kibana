@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { monaco } from '../../../../monaco_imports';
 import { getFallbackRequestStartPosition } from './request_anchor';
 
 describe('getFallbackRequestStartPosition', () => {
   const createModel = (lines: string[]) => {
-    const getPositionAt = jest.fn((offset: number) => {
+    const getPositionAt = vi.fn((offset: number) => {
       let remainingOffset = offset;
       for (const [index, line] of lines.entries()) {
         if (remainingOffset <= line.length) {
@@ -22,13 +25,13 @@ describe('getFallbackRequestStartPosition', () => {
       }
       return { lineNumber: lines.length, column: lines.at(-1)?.length ?? 1 };
     });
-    const getOffsetAt = jest.fn(({ lineNumber, column }: monaco.IPosition) => {
+    const getOffsetAt = vi.fn(({ lineNumber, column }: monaco.IPosition) => {
       const precedingLinesLength = lines
         .slice(0, lineNumber - 1)
         .reduce((length, line) => length + line.length + 1, 0);
       return precedingLinesLength + column - 1;
     });
-    const getValueInRange = jest.fn(
+    const getValueInRange = vi.fn(
       ({ startLineNumber, startColumn, endLineNumber, endColumn }: monaco.IRange) => {
         if (startLineNumber === endLineNumber) {
           return (lines[startLineNumber - 1] ?? '').slice(startColumn - 1, endColumn - 1);
@@ -43,7 +46,7 @@ describe('getFallbackRequestStartPosition', () => {
         return selectedLines.join('\n');
       }
     );
-    const getWordUntilPosition = jest.fn(({ column }: monaco.IPosition) => ({
+    const getWordUntilPosition = vi.fn(({ column }: monaco.IPosition) => ({
       word: '',
       startColumn: column,
       endColumn: column,
@@ -55,7 +58,7 @@ describe('getFallbackRequestStartPosition', () => {
       getPositionAt,
       getValueInRange,
       getWordUntilPosition,
-    } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+    } as unknown as Mocked<monaco.editor.ITextModel>;
   };
 
   it('caps malformed parsed-request inspection', () => {

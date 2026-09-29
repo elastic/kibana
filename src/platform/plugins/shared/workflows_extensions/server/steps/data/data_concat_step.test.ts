@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { dataConcatStepDefinition, MAX_CONCAT_ITEMS } from './data_concat_step';
 import type { StepHandlerContext } from '../../step_registry/types';
 
@@ -19,17 +21,17 @@ describe('dataConcatStepDefinition', () => {
     input: { dedupe: input.dedupe ?? false, flatten: input.flatten ?? false },
     rawInput: input as any,
     contextManager: {
-      getContext: jest.fn(),
-      getFakeRequest: jest.fn(),
-      getScopedEsClient: jest.fn(),
-      renderInputTemplate: jest.fn((val) => val),
-      callKibanaApi: jest.fn(),
+      getContext: vi.fn(),
+      getFakeRequest: vi.fn(),
+      getScopedEsClient: vi.fn(),
+      renderInputTemplate: vi.fn((val) => val),
+      callKibanaApi: vi.fn(),
     },
     logger: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     },
     abortSignal: new AbortController().signal,
     stepId: 'test-concat-step',

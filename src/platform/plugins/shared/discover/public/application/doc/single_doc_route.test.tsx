@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -26,7 +28,7 @@ describe('SingleDocRoute', () => {
     let capturedToolkit: ContextAwarenessToolkit | undefined;
 
     services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
-    jest
+    vi
       .spyOn(services.profilesManager, 'createScopedProfilesManager')
       .mockImplementation((args) => {
         capturedToolkit = args.toolkit;

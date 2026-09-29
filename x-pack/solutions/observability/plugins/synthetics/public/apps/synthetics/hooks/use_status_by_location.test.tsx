@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { useStatusByLocation } from './use_status_by_location';
@@ -12,29 +15,44 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 import { MONITOR_STATUS_LOOKBACK } from '../../../../common/constants/client_defaults';
 import { MONITOR_STATUS_ENUM } from '../../../../common/constants/monitor_management';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useEsSearch: jest.fn().mockReturnValue({ data: undefined, loading: false }),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useEsSearch: vi.fn().mockReturnValue({ data: undefined, loading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../contexts', () => ({
-  useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
-}));
+vi.mock('../contexts', () => {
+      const mocked = {
+      useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUrlParams = jest.fn();
-jest.mock('./use_url_params', () => ({
-  useGetUrlParams: () => mockUrlParams(),
-}));
+const mockUrlParams = vi.fn();
+vi.mock('./use_url_params', () => {
+      const mocked = {
+      useGetUrlParams: () => mockUrlParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseLocations = jest.fn();
-jest.mock('./use_locations', () => ({
-  useLocations: () => mockUseLocations(),
-}));
+const mockUseLocations = vi.fn();
+vi.mock('./use_locations', () => {
+      const mocked = {
+      useLocations: () => mockUseLocations(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/monitors_page/hooks/use_monitor_health_color', () => ({
-  useMonitorHealthColor: () => (status: string) => `color:${status}`,
-}));
+vi.mock('../components/monitors_page/hooks/use_monitor_health_color', () => {
+      const mocked = {
+      useMonitorHealthColor: () => (status: string) => `color:${status}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useEsSearchMock = observabilitySharedPublic.useEsSearch as jest.Mock;
+const useEsSearchMock = observabilitySharedPublic.useEsSearch as Mock;
 
 const usEastLocal = { id: 'us-east', label: 'US East' };
 const euWestLocal = { id: 'eu-west', label: 'EU West' };
@@ -47,7 +65,7 @@ describe('useStatusByLocation', () => {
     useEsSearchMock.mockReturnValue({ data: undefined, loading: false });
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   describe('query construction', () => {
     it('queries the local synthetics index pattern when no remoteName is provided', () => {

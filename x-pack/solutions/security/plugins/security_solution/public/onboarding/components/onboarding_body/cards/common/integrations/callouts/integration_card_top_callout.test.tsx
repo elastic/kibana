@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
@@ -13,32 +16,41 @@ import { useOnboardingService } from '../../../../../hooks/use_onboarding_servic
 import { IntegrationTabId } from '../../../../../../../common/lib/integrations/types';
 import { useShowMigrationCallout } from './migrations_callout';
 
-jest.mock('../../../../../hooks/use_onboarding_service', () => ({
-  useOnboardingService: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_onboarding_service', () => {
+      const mocked = {
+      useOnboardingService: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  matchPath: jest.fn(),
-  useLocation: jest.fn().mockReturnValue({
-    pathname: '/test-path',
-  }),
-}));
-jest.mock('./agentless_available_callout');
-jest.mock('./active_integrations_callout');
-jest.mock('./endpoint_callout');
-jest.mock('./migrations_callout', () => ({
-  MigrationsCallout: () => <div data-test-subj="migrationsCallout" />,
-  useShowMigrationCallout: jest.fn(() => true),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      matchPath: vi.fn(),
+      useLocation: vi.fn().mockReturnValue({
+        pathname: '/test-path',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./agentless_available_callout');
+vi.mock('./active_integrations_callout');
+vi.mock('./endpoint_callout');
+vi.mock('./migrations_callout', () => {
+      const mocked = {
+      MigrationsCallout: () => <div data-test-subj="migrationsCallout" />,
+      useShowMigrationCallout: vi.fn(() => true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('IntegrationCardTopCallout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useShowMigrationCallout as jest.Mock).mockReturnValue(true);
+    vi.clearAllMocks();
+    (useShowMigrationCallout as Mock).mockReturnValue(true);
   });
 
   test('renders EndpointCallout when endpoint tab selected and no integrations installed', async () => {
-    (useOnboardingService as jest.Mock).mockReturnValue({
+    (useOnboardingService as Mock).mockReturnValue({
       isAgentlessAvailable$: of(true),
     });
 
@@ -56,7 +68,7 @@ describe('IntegrationCardTopCallout', () => {
   });
 
   test('renders AgentlessAvailableCallout when agentless is available and no integrations installed', async () => {
-    (useOnboardingService as jest.Mock).mockReturnValue({
+    (useOnboardingService as Mock).mockReturnValue({
       isAgentlessAvailable$: of(true),
     });
 
@@ -74,7 +86,7 @@ describe('IntegrationCardTopCallout', () => {
   });
 
   test('renders InstalledIntegrationsCallout when there are active integrations', async () => {
-    (useOnboardingService as jest.Mock).mockReturnValue({
+    (useOnboardingService as Mock).mockReturnValue({
       isAgentlessAvailable$: of(false),
     });
 
@@ -92,10 +104,10 @@ describe('IntegrationCardTopCallout', () => {
   });
 
   test('does not render MigrationsCallout when visibility hook returns false', () => {
-    (useOnboardingService as jest.Mock).mockReturnValue({
+    (useOnboardingService as Mock).mockReturnValue({
       isAgentlessAvailable$: of(false),
     });
-    (useShowMigrationCallout as jest.Mock).mockReturnValue(false);
+    (useShowMigrationCallout as Mock).mockReturnValue(false);
 
     const { queryByTestId } = render(
       <IntegrationCardTopCallout

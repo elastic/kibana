@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 
@@ -13,20 +15,23 @@ import type { AgentPolicy } from '../types';
 
 import { NewEnrollmentTokenModal } from './new_enrollment_key_modal';
 
-const mockSendCreateEnrollmentAPIKey = jest.fn().mockResolvedValue({ data: { item: {} } });
+const mockSendCreateEnrollmentAPIKey = vi.fn().mockResolvedValue({ data: { item: {} } });
 
-jest.mock('../hooks', () => ({
-  ...jest.requireActual('../hooks'),
-  useStartServices: jest.fn().mockReturnValue({
-    notifications: {
-      toasts: {
-        addSuccess: jest.fn(),
-        addError: jest.fn(),
-      },
-    },
-  }),
-  sendCreateEnrollmentAPIKey: (...args: unknown[]) => mockSendCreateEnrollmentAPIKey(...args),
-}));
+vi.mock('../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../hooks')),
+      useStartServices: vi.fn().mockReturnValue({
+        notifications: {
+          toasts: {
+            addSuccess: vi.fn(),
+            addError: vi.fn(),
+          },
+        },
+      }),
+      sendCreateEnrollmentAPIKey: (...args: unknown[]) => mockSendCreateEnrollmentAPIKey(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const MOCK_POLICIES = [
   { id: 'normal-policy', name: 'Normal Policy', revision: 1 },
@@ -45,7 +50,7 @@ describe('NewEnrollmentTokenModal', () => {
     ] as AgentPolicy[];
 
     const results = testRenderer.render(
-      <NewEnrollmentTokenModal agentPolicies={policies} onClose={jest.fn()} />
+      <NewEnrollmentTokenModal agentPolicies={policies} onClose={vi.fn()} />
     );
 
     // Open the combobox dropdown to see the remaining non-selected options
@@ -63,7 +68,7 @@ describe('NewEnrollmentTokenModal', () => {
   it('renders the expiration field', () => {
     const testRenderer = createFleetTestRendererMock();
     const results = testRenderer.render(
-      <NewEnrollmentTokenModal agentPolicies={MOCK_POLICIES} onClose={jest.fn()} />
+      <NewEnrollmentTokenModal agentPolicies={MOCK_POLICIES} onClose={vi.fn()} />
     );
     expect(results.getByTestId('createEnrollmentTokenExpirationField')).toBeInTheDocument();
   });
@@ -84,7 +89,7 @@ describe('NewEnrollmentTokenModal', () => {
   ])('shows a validation error for invalid expiration "%s"', async (invalidValue) => {
     const testRenderer = createFleetTestRendererMock();
     const results = testRenderer.render(
-      <NewEnrollmentTokenModal agentPolicies={MOCK_POLICIES} onClose={jest.fn()} />
+      <NewEnrollmentTokenModal agentPolicies={MOCK_POLICIES} onClose={vi.fn()} />
     );
 
     const expirationField = results.getByTestId('createEnrollmentTokenExpirationField');
@@ -110,7 +115,7 @@ describe('NewEnrollmentTokenModal', () => {
     mockSendCreateEnrollmentAPIKey.mockResolvedValue({ data: { item: {} } });
     const testRenderer = createFleetTestRendererMock();
     const results = testRenderer.render(
-      <NewEnrollmentTokenModal agentPolicies={MOCK_POLICIES} onClose={jest.fn()} />
+      <NewEnrollmentTokenModal agentPolicies={MOCK_POLICIES} onClose={vi.fn()} />
     );
 
     const expirationField = results.getByTestId('createEnrollmentTokenExpirationField');
@@ -137,7 +142,7 @@ describe('NewEnrollmentTokenModal', () => {
     mockSendCreateEnrollmentAPIKey.mockResolvedValue({ data: { item: {} } });
     const testRenderer = createFleetTestRendererMock();
     const results = testRenderer.render(
-      <NewEnrollmentTokenModal agentPolicies={MOCK_POLICIES} onClose={jest.fn()} />
+      <NewEnrollmentTokenModal agentPolicies={MOCK_POLICIES} onClose={vi.fn()} />
     );
 
     const expirationField = results.getByTestId('createEnrollmentTokenExpirationField');
@@ -162,7 +167,7 @@ describe('NewEnrollmentTokenModal', () => {
     mockSendCreateEnrollmentAPIKey.mockResolvedValue({ data: { item: {} } });
     const testRenderer = createFleetTestRendererMock();
     const results = testRenderer.render(
-      <NewEnrollmentTokenModal agentPolicies={MOCK_POLICIES} onClose={jest.fn()} />
+      <NewEnrollmentTokenModal agentPolicies={MOCK_POLICIES} onClose={vi.fn()} />
     );
 
     await act(async () => {
@@ -186,7 +191,7 @@ describe('NewEnrollmentTokenModal', () => {
     ] as AgentPolicy[];
 
     const results = testRenderer.render(
-      <NewEnrollmentTokenModal agentPolicies={policiesAllExcluded} onClose={jest.fn()} />
+      <NewEnrollmentTokenModal agentPolicies={policiesAllExcluded} onClose={vi.fn()} />
     );
 
     expect(results.getByTestId('createEnrollmentTokenSelectField')).toBeInTheDocument();

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
@@ -22,18 +25,21 @@ import { DATA_VIEW_PICKER_TEST_ID } from '../../../data_view_manager/components/
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../common/lib/kibana';
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
-jest.mock('react-reverse-portal', () => ({
-  InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  OutPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  createHtmlPortalNode: () => ({ unmount: jest.fn() }),
-}));
+vi.mock('react-reverse-portal', () => {
+      const mocked = {
+      InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      OutPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      createHtmlPortalNode: () => ({ unmount: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('global header', () => {
   const state = {
@@ -51,8 +57,8 @@ describe('global header', () => {
   const store = createMockStore(state);
   // mock capabilities to exclude Search AI Lake configurations
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       ...mockUseKibana(),
       services: {
         ...mockUseKibana().services,
@@ -88,7 +94,7 @@ describe('global header', () => {
   });
 
   it('does not show the default Add data URL when hasSearchAILakeConfigurations', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       ...mockUseKibana(),
       services: {
         ...mockUseKibana().services,
@@ -111,7 +117,7 @@ describe('global header', () => {
   });
 
   it('points to the threat_intel Add data URL for threat_intelligence url', () => {
-    (useLocation as jest.Mock).mockReturnValue({ pathname: THREAT_INTELLIGENCE_PATH });
+    (useLocation as Mock).mockReturnValue({ pathname: THREAT_INTELLIGENCE_PATH });
     const { queryByTestId } = render(
       <TestProviders store={store}>
         <GlobalHeader />
@@ -122,7 +128,7 @@ describe('global header', () => {
   });
 
   it.each(dataViewPickerPaths)('shows data view manager on %s page', (pathname) => {
-    (useLocation as jest.Mock).mockReturnValue({ pathname });
+    (useLocation as Mock).mockReturnValue({ pathname });
 
     const { getByTestId } = render(
       <TestProviders store={store}>
@@ -133,7 +139,7 @@ describe('global header', () => {
   });
 
   it('shows data view manager on rule details page', () => {
-    (useLocation as jest.Mock).mockReturnValue({ pathname: dataViewPickerPaths[2] });
+    (useLocation as Mock).mockReturnValue({ pathname: dataViewPickerPaths[2] });
 
     const { getByTestId } = render(
       <TestProviders store={store}>
@@ -158,7 +164,7 @@ describe('global header', () => {
     };
     const mockStore = createMockStore(mockstate);
 
-    (useLocation as jest.Mock).mockReturnValue({ pathname: dataViewPickerPaths[2] });
+    (useLocation as Mock).mockReturnValue({ pathname: dataViewPickerPaths[2] });
 
     const { queryByTestId } = render(
       <TestProviders store={mockStore}>

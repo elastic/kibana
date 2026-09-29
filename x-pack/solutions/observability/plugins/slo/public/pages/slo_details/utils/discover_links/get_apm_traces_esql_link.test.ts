@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ALL_VALUE } from '@kbn/slo-schema';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import {
@@ -20,7 +22,7 @@ const TIME_RANGE = { from: 'now-24h', to: 'now' };
 function createMockDiscover(): DiscoverStart {
   return {
     locator: {
-      getRedirectUrl: jest.fn(({ query }: { query: { esql: string } }) => query.esql),
+      getRedirectUrl: vi.fn(({ query }: { query: { esql: string } }) => query.esql),
     },
   } as unknown as DiscoverStart;
 }
@@ -35,7 +37,7 @@ describe('getApmTracesEsqlLink', () => {
   });
 
   it('opens a new Discover tab labelled with "Good vs bad events" and the SLO name', () => {
-    const getRedirectUrl = jest.fn(() => 'url');
+    const getRedirectUrl = vi.fn(() => 'url');
     const discover = { locator: { getRedirectUrl } } as unknown as DiscoverStart;
     const slo = buildSlo({ indicator: buildApmLatencyIndicator(), name: 'My APM SLO' });
 
@@ -253,7 +255,7 @@ describe('navigateToApmTracesEsqlLink', () => {
   });
 
   it('does nothing when transactionIndex is empty', () => {
-    const navigate = jest.fn();
+    const navigate = vi.fn();
     const discover = { locator: { navigate } } as unknown as DiscoverStart;
     const slo = buildSlo({ indicator: buildApmLatencyIndicator() });
 
@@ -263,7 +265,7 @@ describe('navigateToApmTracesEsqlLink', () => {
   });
 
   it('calls locator.navigate with the correct time range and tab label', () => {
-    const navigate = jest.fn();
+    const navigate = vi.fn();
     const discover = { locator: { navigate } } as unknown as DiscoverStart;
     const slo = buildSlo({ indicator: buildApmLatencyIndicator(), name: 'My APM SLO' });
 
@@ -283,7 +285,7 @@ describe('navigateToApmTracesEsqlLink', () => {
   });
 
   it('defaults selectedEventType to All in the esql control', () => {
-    const navigate = jest.fn();
+    const navigate = vi.fn();
     const discover = { locator: { navigate } } as unknown as DiscoverStart;
     const slo = buildSlo({ indicator: buildApmLatencyIndicator() });
 
@@ -304,7 +306,7 @@ describe('navigateToApmTracesEsqlLink', () => {
   });
 
   it('sets selected_options to Bad when selectedEventType is Bad', () => {
-    const navigate = jest.fn();
+    const navigate = vi.fn();
     const discover = { locator: { navigate } } as unknown as DiscoverStart;
     const slo = buildSlo({ indicator: buildApmLatencyIndicator() });
 
@@ -326,7 +328,7 @@ describe('navigateToApmTracesEsqlLink', () => {
   });
 
   it('sets selected_options to Good when selectedEventType is Good', () => {
-    const navigate = jest.fn();
+    const navigate = vi.fn();
     const discover = { locator: { navigate } } as unknown as DiscoverStart;
     const slo = buildSlo({ indicator: buildApmAvailabilityIndicator() });
 

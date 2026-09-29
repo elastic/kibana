@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { responseActionsClientMock } from '../mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -69,7 +71,7 @@ describe('`NormalizedExternalConnectorClient` class', () => {
     });
 
     it('should error if unable to retrieve all connector instances (`.getAll()`) ', async () => {
-      (actionPluginConnectorClient.getAll as jest.Mock).mockImplementation(async () => {
+      (actionPluginConnectorClient.getAll as Mock).mockImplementation(async () => {
         throw new Error('oh oh');
       });
       const testInstance = new NormalizedExternalConnectorClient(
@@ -104,7 +106,7 @@ describe('`NormalizedExternalConnectorClient` class', () => {
         ],
       ],
     ])('should error if a connector instance %s', async (_, getResponse) => {
-      (actionPluginConnectorClient.getAll as jest.Mock).mockResolvedValue(getResponse());
+      (actionPluginConnectorClient.getAll as Mock).mockResolvedValue(getResponse());
       const testInstance = new NormalizedExternalConnectorClient(
         actionPluginConnectorClient,
         logger
@@ -164,10 +166,10 @@ describe('`NormalizedExternalConnectorClient` class', () => {
     beforeEach(() => {
       actionPluginConnectorClient = unsecuredActionsClientMock.create();
 
-      (actionPluginConnectorClient.getAll as jest.Mock).mockResolvedValue([
+      (actionPluginConnectorClient.getAll as Mock).mockResolvedValue([
         responseActionsClientMock.createConnector({ actionTypeId: 'foo' }),
       ]);
-      (actionPluginConnectorClient.execute as jest.Mock).mockResolvedValue(
+      (actionPluginConnectorClient.execute as Mock).mockResolvedValue(
         responseActionsClientMock.createConnectorActionExecuteResponse()
       );
     });
@@ -212,7 +214,7 @@ describe('`NormalizedExternalConnectorClient` class', () => {
     });
 
     it('should throw a ResponseActionClientError if connector execute fails', async () => {
-      (actionPluginConnectorClient.execute as jest.Mock).mockImplementation(async () => {
+      (actionPluginConnectorClient.execute as Mock).mockImplementation(async () => {
         throw new Error('oh oh');
       });
 

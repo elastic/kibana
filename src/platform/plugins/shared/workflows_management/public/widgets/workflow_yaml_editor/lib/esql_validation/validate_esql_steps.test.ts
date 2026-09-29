@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { LineCounter, parseDocument } from 'yaml';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { validateEsqlSteps } from './validate_esql_steps';
 import { buildWorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
-const mockValidate = jest.fn();
+const mockValidate = vi.fn();
 
-jest.mock('@kbn/esql-language', () => ({
+vi.mock('@kbn/esql-language', () => ({
   __esModule: true,
   validateQuery: (...args: unknown[]) => mockValidate(...args),
 }));

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
@@ -17,9 +20,12 @@ import { runEsqlMatcherRule } from './run';
 import type { RunEsqlMatcherDeps } from './run';
 import type { PerRuleState } from '../maintainers/automated_resolution/types';
 
-jest.mock('../../../asset_manager/resolve_entity_store_indices', () => ({
-  resolveLatestEntitiesIndexName: jest.fn().mockResolvedValue('.entities.v2.latest.default'),
-}));
+vi.mock('../../../asset_manager/resolve_entity_store_indices', () => {
+      const mocked = {
+      resolveLatestEntitiesIndexName: vi.fn().mockResolvedValue('.entities.v2.latest.default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const EMAIL_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH)!.matcher!;
 const SID_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE)!.matcher!;
@@ -44,7 +50,7 @@ const createDeps = (
   logger: loggerMock.create(),
   resolutionClient,
   signal: new AbortController().signal,
-  telemetry: { report: jest.fn() },
+  telemetry: { report: vi.fn() },
   spec: EMAIL_SPEC,
   ruleId: RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH,
   pageSize: 5,
@@ -100,13 +106,13 @@ const entityHit = (id: string, namespace: string, resolvedTo?: string) => ({
 });
 
 describe('runEsqlMatcherRule', () => {
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockCascadeLink: jest.Mock;
+  let mockEsClient: Mocked<ElasticsearchClient>;
+  let mockCascadeLink: Mock;
   let mockResolutionClient: ResolutionClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockCascadeLink = jest.fn().mockResolvedValue({
+    vi.clearAllMocks();
+    mockCascadeLink = vi.fn().mockResolvedValue({
       linked: ['alias-1'],
       retargeted: [],
       skipped: [],
@@ -117,14 +123,14 @@ describe('runEsqlMatcherRule', () => {
       cascadeLinkEntities: mockCascadeLink,
     } as unknown as ResolutionClient;
     mockEsClient = {
-      esql: { query: jest.fn() },
-      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
-    } as unknown as jest.Mocked<ElasticsearchClient>;
+      esql: { query: vi.fn() },
+      search: vi.fn().mockResolvedValue({ hits: { hits: [] } }),
+    } as unknown as Mocked<ElasticsearchClient>;
   });
 
   it('skips grouping and keeps the watermark when nothing is newer', async () => {
     const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse(null))
       .mockResolvedValueOnce(emptyGroups());
 
@@ -143,13 +149,13 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('omits the first_seen bound from the grouping query when watermark is null', async () => {
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(emptyGroups());
 
     await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
 
-    const groupingQuery = (mockEsClient.esql.query as jest.Mock).mock.calls[1][0].query as string;
+    const groupingQuery = (mockEsClient.esql.query as Mock).mock.calls[1][0].query as string;
     expect(groupingQuery).not.toContain('first_seen > TO_DATETIME');
   });
 
@@ -200,12 +206,12 @@ describe('runEsqlMatcherRule', () => {
       ]
     );
 
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(page1)
       .mockResolvedValueOnce(page2);
 
-    (mockEsClient.search as jest.Mock).mockImplementation(async ({ query }) => {
+    (mockEsClient.search as Mock).mockImplementation(async ({ query }) => {
       const ids: string[] = query.bool.filter[0].terms['entity.id'];
       return {
         hits: { hits: ids.map((id) => entityHit(id, id.endsWith('1') ? 'okta' : 'entra_id')) },
@@ -216,7 +222,7 @@ describe('runEsqlMatcherRule', () => {
       createDeps(createInitialState(), mockEsClient, mockResolutionClient, { pageSize: 5 })
     );
 
-    const groupingQueries = (mockEsClient.esql.query as jest.Mock).mock.calls
+    const groupingQueries = (mockEsClient.esql.query as Mock).mock.calls
       .slice(1)
       .map((call) => call[0].query as string);
     expect(groupingQueries).toHaveLength(2);
@@ -230,7 +236,7 @@ describe('runEsqlMatcherRule', () => {
 
   it('declines a bucket with two unresolved entities in one namespace', async () => {
     const logger = loggerMock.create();
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -258,7 +264,7 @@ describe('runEsqlMatcherRule', () => {
 
   it('declines a bucket with two unresolved local entities sharing an email', async () => {
     const logger = loggerMock.create();
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -285,7 +291,7 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('links several unresolved local entities sharing a SID onto the AD target', async () => {
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -300,7 +306,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [
           entityHit('user-local-a', 'local'),
@@ -321,7 +327,7 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('links two AD entities sharing a SID because a SID names one account, not a collision', async () => {
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -336,7 +342,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [
           entityHit('user-ad-1', 'active_directory'),
@@ -357,7 +363,7 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('links two leftover CrowdStrike-namespace entities sharing a SID because a SID names one account, not a collision', async () => {
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -372,7 +378,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [entityHit('user-cs-1', 'crowdstrike'), entityHit('user-cs-2', 'crowdstrike')],
       },
@@ -389,7 +395,7 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('links two unresolved local entities sharing a domain SID with no other namespace', async () => {
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -404,7 +410,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [entityHit('user-local-z', 'local'), entityHit('user-local-a', 'local')],
       },
@@ -428,7 +434,7 @@ describe('runEsqlMatcherRule', () => {
       cascadesBlocked: 0,
       target_id: 'user-ad',
     });
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -444,7 +450,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [entityHit('user-ad', 'active_directory'), entityHit('user-local-a', 'local')],
       },
@@ -464,7 +470,7 @@ describe('runEsqlMatcherRule', () => {
 
   it('declines a bucket above the group-size ceiling without linking a subset', async () => {
     const logger = loggerMock.create();
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -492,8 +498,8 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('bins declined oversized group sizes and reports the largest in telemetry', async () => {
-    const telemetry = { report: jest.fn() };
-    (mockEsClient.esql.query as jest.Mock)
+    const telemetry = { report: vi.fn() };
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -541,7 +547,7 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('cascade-links unresolved members onto the namespace-priority target', async () => {
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -555,7 +561,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [
           entityHit('user-okta', 'okta'),
@@ -571,7 +577,7 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('extends an existing group by cascade-linking onto the known target', async () => {
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -588,7 +594,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [entityHit('user-new', 'entra_id'), entityHit('user-okta', 'okta')],
       },
@@ -600,7 +606,7 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('does not rewrite an already-correct group when the email watermark is reset', async () => {
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -617,7 +623,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [entityHit('user-okta', 'okta')],
       },
@@ -633,7 +639,7 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('counts a singleton unresolved group with no existing targets as a no-op skip', async () => {
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -659,7 +665,7 @@ describe('runEsqlMatcherRule', () => {
 
   it('counts a missing-entity fetch as a no-op skip and warns', async () => {
     const logger = loggerMock.create();
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -686,7 +692,7 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('retargets an out-of-group existing target when a higher-priority unresolved member wins', async () => {
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -703,7 +709,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [entityHit('user-ad', 'active_directory'), entityHit('user-okta', 'okta')],
       },
@@ -715,7 +721,7 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('includes a losing existing target when linking other unresolved members', async () => {
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -732,7 +738,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [
           entityHit('user-ad', 'active_directory'),
@@ -748,7 +754,7 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('does not pass a mid-chain existing target to cascadeLinkEntities', async () => {
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -765,7 +771,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [
           entityHit('user-cs', 'crowdstrike'),
@@ -783,7 +789,7 @@ describe('runEsqlMatcherRule', () => {
   it('does not advance the watermark when a bucket fails', async () => {
     const logger = loggerMock.create();
     const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -797,7 +803,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [entityHit('user-okta', 'okta'), entityHit('user-entra', 'entra_id')],
       },
@@ -814,9 +820,9 @@ describe('runEsqlMatcherRule', () => {
 
   it('skips a truncated alias tree and advances the watermark', async () => {
     const logger = loggerMock.create();
-    const telemetry = { report: jest.fn() };
+    const telemetry = { report: vi.fn() };
     const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -830,7 +836,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [entityHit('user-okta', 'okta'), entityHit('user-entra', 'entra_id')],
       },
@@ -860,8 +866,8 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('reports per-rule telemetry distinguishing link, cascade, and skip outcomes', async () => {
-    const telemetry = { report: jest.fn() };
-    (mockEsClient.esql.query as jest.Mock)
+    const telemetry = { report: vi.fn() };
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -875,7 +881,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [entityHit('user-okta', 'okta'), entityHit('user-entra', 'entra_id')],
       },
@@ -919,7 +925,7 @@ describe('runEsqlMatcherRule', () => {
     const abortCtrl = new AbortController();
     abortCtrl.abort();
     const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValueOnce(
+    (mockEsClient.esql.query as Mock).mockResolvedValueOnce(
       watermarkResponse('2026-08-10T00:00:00Z')
     );
 
@@ -934,7 +940,7 @@ describe('runEsqlMatcherRule', () => {
 
   it('forwards the abort signal on the watermark query', async () => {
     const abortCtrl = new AbortController();
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse(null))
       .mockResolvedValueOnce(emptyGroups());
 
@@ -944,13 +950,13 @@ describe('runEsqlMatcherRule', () => {
       })
     );
 
-    const watermarkCall = (mockEsClient.esql.query as jest.Mock).mock.calls[0];
+    const watermarkCall = (mockEsClient.esql.query as Mock).mock.calls[0];
     expect(watermarkCall[1]).toEqual(expect.objectContaining({ signal: abortCtrl.signal }));
   });
 
   it('does not advance the watermark when ES|QL returns partial results', async () => {
     const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
-    (mockEsClient.esql.query as jest.Mock).mockResolvedValueOnce({
+    (mockEsClient.esql.query as Mock).mockResolvedValueOnce({
       ...watermarkResponse('2026-08-10T00:00:00Z'),
       is_partial: true,
     });
@@ -961,7 +967,7 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('throws when a required match-group column is missing', async () => {
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(esqlResponse(['match_value', 'ids'], [['a@corp.com', ['user-1']]]));
 
@@ -971,7 +977,7 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('links a group whose size equals the ceiling', async () => {
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -986,7 +992,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [entityHit('user-okta', 'okta'), entityHit('user-entra', 'entra_id')],
       },
@@ -998,7 +1004,7 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('cascade-links both existing targets when a higher-priority unresolved member wins', async () => {
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -1015,7 +1021,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockResolvedValue({
+    (mockEsClient.search as Mock).mockResolvedValue({
       hits: {
         hits: [
           entityHit('user-ad', 'active_directory'),
@@ -1033,7 +1039,7 @@ describe('runEsqlMatcherRule', () => {
   it('skips a group that overlaps ids written earlier this tick and holds the watermark', async () => {
     const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
     const mutatedIds = new Set(['user-okta']);
-    (mockEsClient.esql.query as jest.Mock)
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -1057,8 +1063,8 @@ describe('runEsqlMatcherRule', () => {
   });
 
   it('reports a mixed funnel where scanned equals applied plus skipped plus failed', async () => {
-    const telemetry = { report: jest.fn() };
-    (mockEsClient.esql.query as jest.Mock)
+    const telemetry = { report: vi.fn() };
+    (mockEsClient.esql.query as Mock)
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
@@ -1104,7 +1110,7 @@ describe('runEsqlMatcherRule', () => {
           ]
         )
       );
-    (mockEsClient.search as jest.Mock).mockImplementation(async ({ query }) => {
+    (mockEsClient.search as Mock).mockImplementation(async ({ query }) => {
       const ids: string[] = query.bool.filter[0].terms['entity.id'];
       return {
         hits: {

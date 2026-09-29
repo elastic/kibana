@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { WorkflowsExtensionsPublicPlugin } from './plugin';
 
-jest.mock('./steps', () => ({
-  registerInternalStepDefinitions: jest.fn(),
-}));
+vi.mock('./steps', () => {
+      const mocked = {
+      registerInternalStepDefinitions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { registerInternalStepDefinitions } = jest.requireMock('./steps');
+const { registerInternalStepDefinitions } = (await vi.importMock('./steps'));
 
 const createPlugin = () => {
   const initContext = coreMock.createPluginInitializerContext();
@@ -23,7 +28,7 @@ const createPlugin = () => {
 
 describe('WorkflowsExtensionsPublicPlugin', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('setup', () => {

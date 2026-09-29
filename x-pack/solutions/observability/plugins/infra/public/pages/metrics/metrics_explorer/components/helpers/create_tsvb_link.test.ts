@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createTSVBLink, createFilterFromOptions } from './create_tsvb_link';
 import { options, timeRange, chartOptions } from '../../../../../utils/fixtures/metrics_explorer';
 import {
@@ -13,9 +15,12 @@ import {
 } from '../../hooks/use_metrics_explorer_options';
 import type { MetricsExplorerOptions } from '../../hooks/use_metrics_explorer_options';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('test-id'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('test-id'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const indexPattern = 'metricbeat-*';
 const series = { id: 'example-01', rows: [], columns: [] };

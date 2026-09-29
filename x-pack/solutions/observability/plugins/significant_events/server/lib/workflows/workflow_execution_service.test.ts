@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -15,25 +18,25 @@ const WORKFLOW_SPACE_ID = '*';
 
 const statusRequest = httpServerMock.createKibanaRequest();
 
-const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
+const createMockManagementApi = (overrides: Record<string, Mock> = {}) => {
   const api = {
-    getWorkflow: jest.fn().mockResolvedValue({
+    getWorkflow: vi.fn().mockResolvedValue({
       id: WORKFLOW_ID,
       name: 'workflow',
       enabled: true,
       definition: {},
       yaml: '',
     }),
-    runWorkflow: jest.fn().mockResolvedValue('execution-id'),
-    getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
-    getWorkflowExecution: jest.fn().mockResolvedValue(null),
-    cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    runWorkflow: vi.fn().mockResolvedValue('execution-id'),
+    getWorkflowExecutions: vi.fn().mockResolvedValue({ results: [], total: 0 }),
+    getWorkflowExecution: vi.fn().mockResolvedValue(null),
+    cancelWorkflowExecution: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
-  return { ...api, getClient: jest.fn(() => api) };
+  return { ...api, getClient: vi.fn(() => api) };
 };
 
-const createService = (overrides: Record<string, jest.Mock> = {}) => {
+const createService = (overrides: Record<string, Mock> = {}) => {
   const managementApi = createMockManagementApi(overrides);
   const service = new WorkflowExecutionService({
     managementApi: managementApi as never,
@@ -111,7 +114,7 @@ describe('WorkflowExecutionService', () => {
 
     it('returns InProgress with executionId for a running execution', async () => {
       const { service } = createService({
-        getWorkflowExecutions: jest
+        getWorkflowExecutions: vi
           .fn()
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }] }),
       });
@@ -126,7 +129,7 @@ describe('WorkflowExecutionService', () => {
 
     it('returns Completed with executionId for a completed execution', async () => {
       const { service } = createService({
-        getWorkflowExecutions: jest
+        getWorkflowExecutions: vi
           .fn()
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.COMPLETED }] }),
       });
@@ -141,7 +144,7 @@ describe('WorkflowExecutionService', () => {
 
     it('returns Failed with error message for a failed execution', async () => {
       const { service } = createService({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({
+        getWorkflowExecutions: vi.fn().mockResolvedValue({
           results: [{ id: 'exec-1', status: ExecutionStatus.FAILED, error: { message: 'boom' } }],
         }),
       });
@@ -157,7 +160,7 @@ describe('WorkflowExecutionService', () => {
 
     it('returns Failed with "Workflow <id> timed out" for a timed-out execution', async () => {
       const { service } = createService({
-        getWorkflowExecutions: jest
+        getWorkflowExecutions: vi
           .fn()
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.TIMED_OUT }] }),
       });
@@ -249,7 +252,7 @@ describe('WorkflowExecutionService', () => {
     });
 
     it('throws when the workflow is not found', async () => {
-      const { service } = createService({ getWorkflow: jest.fn().mockResolvedValue(null) });
+      const { service } = createService({ getWorkflow: vi.fn().mockResolvedValue(null) });
 
       await expect(
         service.execute({
@@ -261,7 +264,7 @@ describe('WorkflowExecutionService', () => {
 
     it('throws when the workflow has no definition', async () => {
       const { service } = createService({
-        getWorkflow: jest.fn().mockResolvedValue({ id: WORKFLOW_ID, definition: null }),
+        getWorkflow: vi.fn().mockResolvedValue({ id: WORKFLOW_ID, definition: null }),
       });
 
       await expect(
@@ -273,7 +276,7 @@ describe('WorkflowExecutionService', () => {
     });
 
     it('throws "Workflow <id> not found" when the workflow is not found', async () => {
-      const { service } = createService({ getWorkflow: jest.fn().mockResolvedValue(null) });
+      const { service } = createService({ getWorkflow: vi.fn().mockResolvedValue(null) });
 
       await expect(
         service.execute({
@@ -287,7 +290,7 @@ describe('WorkflowExecutionService', () => {
   describe('cancelLatest', () => {
     it('cancels the latest non-terminal execution and returns its id', async () => {
       const { service, managementApi } = createService({
-        getWorkflowExecutions: jest
+        getWorkflowExecutions: vi
           .fn()
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }] }),
       });
@@ -305,7 +308,7 @@ describe('WorkflowExecutionService', () => {
 
     it('returns null and does not cancel when the latest execution is terminal', async () => {
       const { service, managementApi } = createService({
-        getWorkflowExecutions: jest
+        getWorkflowExecutions: vi
           .fn()
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.COMPLETED }] }),
       });
@@ -353,7 +356,7 @@ describe('WorkflowExecutionService', () => {
   describe('getLastExecution', () => {
     it('returns the first result when executions exist', async () => {
       const { service } = createService({
-        getWorkflowExecutions: jest
+        getWorkflowExecutions: vi
           .fn()
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }] }),
       });

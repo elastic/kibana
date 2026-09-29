@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, renderHook, screen } from '@testing-library/react';
 import React from 'react';
@@ -16,18 +18,21 @@ const renderWithProviders = (ui: React.ReactElement) => {
 };
 
 const mockRouter: StatefulStreamsAppRouter = {
-  link: jest.fn().mockReturnValue('/mock-link'),
-  push: jest.fn(),
-  replace: jest.fn(),
-  matchRoutes: jest.fn(),
-  getParams: jest.fn(),
-  getRoutePath: jest.fn(),
-  getRoutesToMatch: jest.fn(),
+  link: vi.fn().mockReturnValue('/mock-link'),
+  push: vi.fn(),
+  replace: vi.fn(),
+  matchRoutes: vi.fn(),
+  getParams: vi.fn(),
+  getRoutePath: vi.fn(),
+  getRoutesToMatch: vi.fn(),
 } as StatefulStreamsAppRouter;
 
-jest.mock('../../hooks/use_streams_app_router', () => ({
-  useStreamsAppRouter: () => mockRouter,
-}));
+vi.mock('../../hooks/use_streams_app_router', () => {
+      const mocked = {
+      useStreamsAppRouter: () => mockRouter,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockRoutingContext = {
   definition: {
@@ -36,19 +41,22 @@ const mockRoutingContext = {
   routing: [] as Array<{ destination: string; isNew?: boolean }>,
 };
 
-jest.mock(
+vi.mock(
   '../stream_management/data_management/stream_detail_routing/state_management/stream_routing_state_machine',
-  () => ({
-    // Note: `<T,>` syntax avoids TSX parsing this as JSX
-    useStreamsRoutingSelector: <TSelected,>(
-      selector: (snapshot: { context: typeof mockRoutingContext }) => TSelected
-    ): TSelected => selector({ context: mockRoutingContext }),
-  })
+  () => {
+      const mocked = {
+        // Note: `<T,>` syntax avoids TSX parsing this as JSX
+        useStreamsRoutingSelector: <TSelected,>(
+          selector: (snapshot: { context: typeof mockRoutingContext }) => TSelected
+        ): TSelected => selector({ context: mockRoutingContext }),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 describe('StreamNameFormRow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockRoutingContext.routing = [];
   });
 

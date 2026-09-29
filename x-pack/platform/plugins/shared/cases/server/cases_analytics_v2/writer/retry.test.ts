@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { withRetry } from './retry';
 
 describe('withRetry', () => {
   it('returns immediately when the first attempt succeeds', async () => {
-    const op = jest.fn().mockResolvedValue(undefined);
+    const op = vi.fn().mockResolvedValue(undefined);
     await withRetry({ op, maxRetries: 3, initialDelayMs: 1 });
     expect(op).toHaveBeenCalledTimes(1);
   });
 
   it('retries up to maxRetries on failure, then succeeds', async () => {
-    const op = jest
+    const op = vi
       .fn()
       .mockRejectedValueOnce(new Error('blip 1'))
       .mockRejectedValueOnce(new Error('blip 2'))
@@ -26,7 +28,7 @@ describe('withRetry', () => {
   });
 
   it('throws the final error when retries are exhausted', async () => {
-    const op = jest.fn().mockRejectedValue(new Error('persistent'));
+    const op = vi.fn().mockRejectedValue(new Error('persistent'));
     await expect(withRetry({ op, maxRetries: 2, initialDelayMs: 1 })).rejects.toThrow('persistent');
     // 1 initial + 2 retries = 3 total attempts.
     expect(op).toHaveBeenCalledTimes(3);

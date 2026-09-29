@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -46,7 +48,7 @@ describe('Slider Control', () => {
         <ControlSlider
           values={values}
           currentValue={0.00001}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           data-test-subj="test-id"
         />
       </I18nProvider>
@@ -61,7 +63,7 @@ describe('Slider Control', () => {
         <ControlSlider
           values={values}
           currentValue={0.00001}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           data-test-subj="test-id"
         />
       </I18nProvider>
@@ -78,7 +80,7 @@ describe('Slider Control', () => {
         <ControlSlider
           values={values}
           currentValue={4}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           data-test-subj="test-id"
         />
       </I18nProvider>

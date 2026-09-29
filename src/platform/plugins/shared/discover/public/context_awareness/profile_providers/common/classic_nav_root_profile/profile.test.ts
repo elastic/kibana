@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { SolutionType } from '../../../profiles';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
@@ -64,7 +66,7 @@ describe('classicNavRootProfileProvider', () => {
     });
 
     it('should return no default data views', async () => {
-      jest
+      vi
         .spyOn(mockServices.logsContextService, 'getAllLogsIndexPattern')
         .mockReturnValueOnce(undefined);
       const result = await classicNavRootProfileProvider.resolve({ solutionNavId: undefined });

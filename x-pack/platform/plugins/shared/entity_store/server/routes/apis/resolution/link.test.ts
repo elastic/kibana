@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaResponseFactory } from '@kbn/core-http-server';
 import {
@@ -28,7 +31,7 @@ import { handleResolutionLink } from './link';
 const NAMESPACE = 'default';
 
 function createMockAnalytics(): TelemetryReporter {
-  return { reportEvent: jest.fn() };
+  return { reportEvent: vi.fn() };
 }
 
 function createMockContext(
@@ -47,19 +50,19 @@ function createMockContext(
 
 function createMockResponse() {
   return {
-    ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
-    customError: jest.fn(({ statusCode, body }) => ({ status: statusCode, payload: body })),
-    badRequest: jest.fn(({ body }) => ({ status: 400, payload: body })),
+    ok: vi.fn(({ body }) => ({ status: 200, payload: body })),
+    customError: vi.fn(({ statusCode, body }) => ({ status: statusCode, payload: body })),
+    badRequest: vi.fn(({ body }) => ({ status: 400, payload: body })),
   } as unknown as KibanaResponseFactory;
 }
 
 describe('handleResolutionLink', () => {
   let analytics: TelemetryReporter;
-  let mockLinkEntities: jest.Mock;
+  let mockLinkEntities: Mock;
 
   beforeEach(() => {
     analytics = createMockAnalytics();
-    mockLinkEntities = jest.fn();
+    mockLinkEntities = vi.fn();
   });
 
   it('reports link telemetry on success', async () => {

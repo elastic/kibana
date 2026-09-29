@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
 import { LogsLocatorDefinition } from './logs_locator';
 
@@ -12,19 +14,19 @@ const CUSTOM_LOG_PATTERN = 'custom-logs-*,remote:custom-logs-*';
 
 const ALL_LOGS_DATA_VIEW_SPEC = getAllLogsDataViewSpec({ allLogsIndexPattern: CUSTOM_LOG_PATTERN });
 
-const mockGetLocation = jest.fn().mockResolvedValue({
+const mockGetLocation = vi.fn().mockResolvedValue({
   app: 'discover',
   path: '/mock-path',
   state: {},
 });
 
 const mockLocators = {
-  get: jest.fn().mockReturnValue({ getLocation: mockGetLocation }),
+  get: vi.fn().mockReturnValue({ getLocation: mockGetLocation }),
 };
 
-const mockGetFlattenedLogSources = jest.fn().mockResolvedValue(CUSTOM_LOG_PATTERN);
+const mockGetFlattenedLogSources = vi.fn().mockResolvedValue(CUSTOM_LOG_PATTERN);
 
-const mockGetLogSourcesService = jest.fn().mockResolvedValue({
+const mockGetLogSourcesService = vi.fn().mockResolvedValue({
   getFlattenedLogSources: mockGetFlattenedLogSources,
 });
 
@@ -36,12 +38,12 @@ const createLocator = ({
   new LogsLocatorDefinition({
     locators: mockLocators as any,
     getLogSourcesService: mockGetLogSourcesService,
-    getIsEsqlDefault: jest.fn().mockResolvedValue(isEsqlDefault),
+    getIsEsqlDefault: vi.fn().mockResolvedValue(isEsqlDefault),
   });
 
 describe('LogsLocatorDefinition', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when discover.isEsqlDefault is true', () => {

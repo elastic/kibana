@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { cloneDeep } from 'lodash';
 import type { SerializedPolicy } from '../../../../../common/types';
 import type {
@@ -439,7 +442,7 @@ describe('deserializer and serializer', () => {
 
   describe('validations', () => {
     const createValidationArg = (
-      fields: Record<string, { value: boolean; clearErrors: jest.Mock }>,
+      fields: Record<string, { value: boolean; clearErrors: Mock }>,
       formData: Record<string, unknown> = {}
     ): ValidationFuncArg<FormData, unknown> =>
       ({
@@ -458,10 +461,10 @@ describe('deserializer and serializer', () => {
       } as unknown as ValidationFuncArg<FormData, unknown>);
 
     it('requires at least one data phase enabled', () => {
-      const hotEnabledField = { value: false, clearErrors: jest.fn() };
-      const warmEnabledField = { value: false, clearErrors: jest.fn() };
-      const coldEnabledField = { value: false, clearErrors: jest.fn() };
-      const frozenEnabledField = { value: false, clearErrors: jest.fn() };
+      const hotEnabledField = { value: false, clearErrors: vi.fn() };
+      const warmEnabledField = { value: false, clearErrors: vi.fn() };
+      const coldEnabledField = { value: false, clearErrors: vi.fn() };
+      const frozenEnabledField = { value: false, clearErrors: vi.fn() };
 
       const arg = createValidationArg({
         '_meta.hot.enabled': hotEnabledField,
@@ -482,10 +485,10 @@ describe('deserializer and serializer', () => {
     });
 
     it('clears validation error when any data phase is enabled', () => {
-      const hotEnabledField = { value: true, clearErrors: jest.fn() };
-      const warmEnabledField = { value: false, clearErrors: jest.fn() };
-      const coldEnabledField = { value: false, clearErrors: jest.fn() };
-      const frozenEnabledField = { value: false, clearErrors: jest.fn() };
+      const hotEnabledField = { value: true, clearErrors: vi.fn() };
+      const warmEnabledField = { value: false, clearErrors: vi.fn() };
+      const coldEnabledField = { value: false, clearErrors: vi.fn() };
+      const frozenEnabledField = { value: false, clearErrors: vi.fn() };
 
       const arg = createValidationArg({
         '_meta.hot.enabled': hotEnabledField,
@@ -509,9 +512,9 @@ describe('deserializer and serializer', () => {
     });
 
     it('does not error when hot is implicitly enabled but not registered', () => {
-      const warmEnabledField = { value: false, clearErrors: jest.fn() };
-      const coldEnabledField = { value: false, clearErrors: jest.fn() };
-      const frozenEnabledField = { value: false, clearErrors: jest.fn() };
+      const warmEnabledField = { value: false, clearErrors: vi.fn() };
+      const coldEnabledField = { value: false, clearErrors: vi.fn() };
+      const frozenEnabledField = { value: false, clearErrors: vi.fn() };
 
       const arg = createValidationArg({
         '_meta.warm.enabled': warmEnabledField,
@@ -523,9 +526,9 @@ describe('deserializer and serializer', () => {
     });
 
     it('still errors if hot is missing but explicitly disabled in form data', () => {
-      const warmEnabledField = { value: false, clearErrors: jest.fn() };
-      const coldEnabledField = { value: false, clearErrors: jest.fn() };
-      const frozenEnabledField = { value: false, clearErrors: jest.fn() };
+      const warmEnabledField = { value: false, clearErrors: vi.fn() };
+      const coldEnabledField = { value: false, clearErrors: vi.fn() };
+      const frozenEnabledField = { value: false, clearErrors: vi.fn() };
 
       const arg = createValidationArg(
         {

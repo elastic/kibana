@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { CoreStart } from '@kbn/core/server';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
@@ -12,14 +14,14 @@ import { EngineDescriptorTypeName } from '../domain/saved_objects';
 
 describe('shouldDeleteOrphanedEntityStoreTask', () => {
   const logger = loggerMock.create();
-  const find = jest.fn();
-  const createInternalRepository = jest.fn(() => ({ find }));
+  const find = vi.fn();
+  const createInternalRepository = vi.fn(() => ({ find }));
   const coreStart = {
     savedObjects: { createInternalRepository },
   } as unknown as CoreStart;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     createInternalRepository.mockReturnValue({ find });
   });
 

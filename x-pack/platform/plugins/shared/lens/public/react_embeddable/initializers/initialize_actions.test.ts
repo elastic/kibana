@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { pick } from 'lodash';
 import { faker } from '@faker-js/faker';
 import type { LensRuntimeState, VisualizationContext } from '@kbn/lens-common';
@@ -20,10 +22,10 @@ import {
 import { mockDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
 const DATAVIEW_ID = 'myDataView';
 
-jest.mock('../../app_plugin/show_underlying_data', () => {
+vi.mock('../../app_plugin/show_underlying_data', async () => {
   return {
-    ...jest.requireActual('../../app_plugin/show_underlying_data'),
-    getLayerMetaInfo: jest.fn(() => ({
+    ...(await vi.importActual('../../app_plugin/show_underlying_data')),
+    getLayerMetaInfo: vi.fn(() => ({
       meta: {
         id: DATAVIEW_ID,
         columns: ['a', 'b'],
@@ -64,7 +66,7 @@ function setupActionsApi(
       ...services,
       data: {
         ...services.data,
-        nowProvider: { ...services.data.nowProvider, get: jest.fn(() => new Date()) },
+        nowProvider: { ...services.data.nowProvider, get: vi.fn(() => new Date()) },
       },
     },
     mockDrilldownsManager()
@@ -105,8 +107,8 @@ describe('Dashboard actions', () => {
               searchable: true,
             },
           ],
-          getFieldByName: jest.fn(),
-          getFormatterForField: jest.fn(),
+          getFieldByName: vi.fn(),
+          getFormatterForField: vi.fn(),
           isPersisted: true,
           spec: {},
         },

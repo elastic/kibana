@@ -5,19 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useService } from '@kbn/core-di-browser';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import type { InlineWorkflowActionDraft } from '@kbn/alerting-v2-rule-form';
 import { useCreateInlineWorkflows } from './use_create_inline_workflows';
 
-jest.mock('@kbn/core-di-browser');
-jest.mock('@kbn/workflows-ui');
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  buildInlineWorkflowYaml: jest.fn().mockReturnValue('workflow: yaml'),
-}));
+vi.mock('@kbn/core-di-browser');
+vi.mock('@kbn/workflows-ui');
+vi.mock('@kbn/alerting-v2-rule-form', () => {
+      const mocked = {
+      buildInlineWorkflowYaml: vi.fn().mockReturnValue('workflow: yaml'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
+const mockUseService = useService as MockedFunction<typeof useService>;
 
 const draft = (id: string): InlineWorkflowActionDraft => ({
   id,
@@ -28,11 +34,11 @@ const draft = (id: string): InlineWorkflowActionDraft => ({
 });
 
 describe('useCreateInlineWorkflows', () => {
-  const mockCreateWorkflow = jest.fn();
-  const mockDeleteWorkflow = jest.fn();
+  const mockCreateWorkflow = vi.fn();
+  const mockDeleteWorkflow = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseService.mockImplementation((service: unknown) => {
       if (service === WorkflowApi) {
         return {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
@@ -15,7 +17,7 @@ import { FleetToHostFilesClient } from './client_to_host';
 
 import { getFilesClientFactory } from './get_files_client_factory';
 
-jest.mock('@kbn/files-plugin/server');
+vi.mock('@kbn/files-plugin/server');
 
 describe('getFilesClientFactory()', () => {
   let clientFactory: FilesClientFactory;

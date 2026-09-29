@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
@@ -63,7 +65,7 @@ describe('created_by column', () => {
     entityNamePlural: 'tests',
     initialFilter: '',
     initialPageSize: 20,
-    findItems: jest.fn().mockResolvedValue({ total: 0, hits }),
+    findItems: vi.fn().mockResolvedValue({ total: 0, hits }),
     getDetailViewLink: () => 'http://elastic.co',
     urlStateEnabled: false,
     onFetchSuccess: () => {},
@@ -89,10 +91,10 @@ describe('created_by column', () => {
       data: {},
     },
   ];
-  const mockBulkGetUserProfiles = jest.fn((uids) =>
+  const mockBulkGetUserProfiles = vi.fn((uids) =>
     Promise.resolve(mockUsers.filter((user) => uids.includes(user.uid)))
   );
-  const mockGetUserProfile = jest.fn((uid) =>
+  const mockGetUserProfile = vi.fn((uid) =>
     Promise.resolve(mockUsers.find((user) => user.uid === uid)!)
   );
 

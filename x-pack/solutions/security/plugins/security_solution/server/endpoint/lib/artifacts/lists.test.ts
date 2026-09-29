@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
@@ -41,12 +44,15 @@ import {
 import type { YaraValidateResult } from '../libyara';
 import { validateYaraRule, YaraEngineUnavailableError } from '../libyara';
 
-jest.mock('../libyara', () => ({
-  validateYaraRule: jest.fn(),
-  YaraEngineUnavailableError: jest.requireActual('../libyara/errors').YaraEngineUnavailableError,
-}));
+vi.mock('../libyara', async () => {
+      const mocked = {
+      validateYaraRule: vi.fn(),
+      YaraEngineUnavailableError: (await vi.importActual('../libyara/errors')).YaraEngineUnavailableError,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockValidateYaraRule = validateYaraRule as jest.MockedFunction<typeof validateYaraRule>;
+const mockValidateYaraRule = validateYaraRule as MockedFunction<typeof validateYaraRule>;
 
 const createYaraValidateResult = (
   rules: Array<{ identifier?: string; arch?: string; scanType?: string }>
@@ -90,7 +96,7 @@ describe('artifacts lists', () => {
   let defaultFeatures: ExperimentalFeatures;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockExceptionClient = listMock.getExceptionListClient();
     defaultFeatures = allowedExperimentalValues;
     mockValidateYaraRule.mockReset();
@@ -126,7 +132,7 @@ describe('artifacts lists', () => {
       };
 
       const first = getFoundExceptionListItemSchemaMock();
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+      mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(first);
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
@@ -171,7 +177,7 @@ describe('artifacts lists', () => {
 
       const first = getFoundExceptionListItemSchemaMock();
       first.data[0].entries = testEntries;
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+      mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(first);
 
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
@@ -222,7 +228,7 @@ describe('artifacts lists', () => {
 
       const first = getFoundExceptionListItemSchemaMock();
       first.data[0].entries = testEntries;
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+      mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(first);
 
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
@@ -275,7 +281,7 @@ describe('artifacts lists', () => {
 
       const first = getFoundExceptionListItemSchemaMock();
       first.data[0].entries = testEntries;
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+      mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(first);
 
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
@@ -327,7 +333,7 @@ describe('artifacts lists', () => {
 
       const first = getFoundExceptionListItemSchemaMock();
       first.data[0].entries = testEntries;
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+      mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(first);
 
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
@@ -370,7 +376,7 @@ describe('artifacts lists', () => {
       // Create a second exception item with the same entries
       first.data[1] = getExceptionListItemSchemaMock();
       first.data[1].entries = testEntries;
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+      mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(first);
 
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
@@ -413,7 +419,7 @@ describe('artifacts lists', () => {
 
       const first = getFoundExceptionListItemSchemaMock();
       first.data[0].entries = testEntries;
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+      mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(first);
 
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
@@ -439,7 +445,7 @@ describe('artifacts lists', () => {
       second.total = 4;
       second.data.push(getExceptionListItemSchemaMock());
 
-      mockExceptionClient.findExceptionListItem = jest
+      mockExceptionClient.findExceptionListItem = vi
         .fn()
         .mockReturnValueOnce(first)
         .mockReturnValueOnce(second);
@@ -459,7 +465,7 @@ describe('artifacts lists', () => {
       const exceptionsResponse = getFoundExceptionListItemSchemaMock();
       exceptionsResponse.data = [];
       exceptionsResponse.total = 0;
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionsResponse);
+      mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(exceptionsResponse);
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
@@ -481,7 +487,7 @@ describe('artifacts lists', () => {
           value: yaraRuleText,
         },
       ];
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+      mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(exceptionMock);
 
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
@@ -516,7 +522,7 @@ describe('artifacts lists', () => {
         id: 'entry-2',
         name: 'Second signature',
       });
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+      mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(exceptionMock);
 
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
@@ -562,7 +568,7 @@ describe('artifacts lists', () => {
         ],
       });
       exceptionMock.data[1] = getCustomYaraExceptionItem(enabledRule);
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+      mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(exceptionMock);
 
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
@@ -596,7 +602,7 @@ describe('artifacts lists', () => {
           type: 'exists',
         },
       ];
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+      mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(exceptionMock);
 
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
@@ -852,7 +858,7 @@ describe('artifacts lists', () => {
 
     test('it should retry a transient libyara engine failure for one entry and continue', async () => {
       const validRule = 'rule Valid { condition: true }';
-      const logger = { warn: jest.fn(), error: jest.fn() } as unknown as Logger;
+      const logger = { warn: vi.fn(), error: vi.fn() } as unknown as Logger;
       mockValidateYaraRule
         .mockRejectedValueOnce(new YaraEngineUnavailableError('libyara WASM trap'))
         .mockResolvedValueOnce(createYaraValidateResult([{}]))
@@ -1066,7 +1072,7 @@ describe('artifacts lists', () => {
         exceptionMock.data[0].tags.push(FILTER_PROCESS_DESCENDANTS_TAG);
         exceptionMock.data[0].list_id = listId;
         exceptionMock.data[0].entries = inputEntry;
-        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+        mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(exceptionMock);
 
         const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
@@ -1123,7 +1129,7 @@ describe('artifacts lists', () => {
         exceptionMock.data[0].tags.push(FILTER_PROCESS_DESCENDANTS_TAG);
         exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
         exceptionMock.data[0].entries = inputEntry;
-        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+        mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(exceptionMock);
 
         const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
@@ -1182,7 +1188,7 @@ describe('artifacts lists', () => {
         const exceptionMock = getFoundExceptionListItemSchemaMock();
         exceptionMock.data[0].tags.push(FILTER_PROCESS_DESCENDANTS_TAG);
         exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
-        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+        mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(exceptionMock);
 
         const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
@@ -1230,7 +1236,7 @@ describe('artifacts lists', () => {
         exceptionMock.data[0].tags.push(TRUSTED_PROCESS_DESCENDANTS_TAG);
         exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
         exceptionMock.data[0].entries = inputEntry;
-        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+        mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(exceptionMock);
 
         const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
@@ -1274,7 +1280,7 @@ describe('artifacts lists', () => {
         exceptionMock.data[0].tags.push(TRUSTED_PROCESS_DESCENDANTS_TAG);
         exceptionMock.data[0].list_id = listId;
         exceptionMock.data[0].entries = inputEntry;
-        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+        mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(exceptionMock);
 
         const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
@@ -1323,7 +1329,7 @@ describe('artifacts lists', () => {
         exceptionMock.data[0].tags.push(TRUSTED_PROCESS_DESCENDANTS_TAG);
         exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
         exceptionMock.data[0].entries = inputEntry;
-        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+        mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(exceptionMock);
 
         const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
@@ -1374,7 +1380,7 @@ describe('artifacts lists', () => {
         const exceptionMock = getFoundExceptionListItemSchemaMock();
         exceptionMock.data[0].tags.push(TRUSTED_PROCESS_DESCENDANTS_TAG);
         exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
-        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+        mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(exceptionMock);
 
         const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
@@ -1437,7 +1443,7 @@ describe('artifacts lists', () => {
           const first = getFoundExceptionListItemSchemaMock();
           first.data[0].entries = testEntries;
           first.data[0].os_types = [os];
-          mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+          mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(first);
 
           const resp = await getFilteredEndpointExceptionListRaw({
             elClient: mockExceptionClient,
@@ -1475,7 +1481,7 @@ describe('artifacts lists', () => {
           const first = getFoundExceptionListItemSchemaMock();
           first.data[0].entries = testEntries;
           first.data[0].os_types = [os];
-          mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+          mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce(first);
 
           const resp = await getFilteredEndpointExceptionListRaw({
             elClient: mockExceptionClient,
@@ -1521,7 +1527,7 @@ describe('artifacts lists', () => {
 
   describe('Builds proper kuery', () => {
     test('for Endpoint List', async () => {
-      mockExceptionClient.findExceptionListItem = jest
+      mockExceptionClient.findExceptionListItem = vi
         .fn()
         .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
 
@@ -1546,7 +1552,7 @@ describe('artifacts lists', () => {
     });
 
     test('for Trusted Apps', async () => {
-      mockExceptionClient.findExceptionListItem = jest
+      mockExceptionClient.findExceptionListItem = vi
         .fn()
         .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
 
@@ -1571,7 +1577,7 @@ describe('artifacts lists', () => {
     });
 
     test('for Event Filters', async () => {
-      mockExceptionClient.findExceptionListItem = jest
+      mockExceptionClient.findExceptionListItem = vi
         .fn()
         .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
 
@@ -1596,7 +1602,7 @@ describe('artifacts lists', () => {
     });
 
     test('for Host Isolation Exceptions', async () => {
-      mockExceptionClient.findExceptionListItem = jest
+      mockExceptionClient.findExceptionListItem = vi
         .fn()
         .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
 
@@ -1621,7 +1627,7 @@ describe('artifacts lists', () => {
     });
 
     test('for Blocklists', async () => {
-      mockExceptionClient.findExceptionListItem = jest
+      mockExceptionClient.findExceptionListItem = vi
         .fn()
         .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
 
@@ -1646,7 +1652,7 @@ describe('artifacts lists', () => {
     });
 
     test('for Trusted Devices', async () => {
-      mockExceptionClient.findExceptionListItem = jest
+      mockExceptionClient.findExceptionListItem = vi
         .fn()
         .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
 
@@ -1672,7 +1678,7 @@ describe('artifacts lists', () => {
 
     test('for Custom YARA Signatures', async () => {
       const yaraRuleText = 'rule Example { condition: true }';
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce({
+      mockExceptionClient.findExceptionListItem = vi.fn().mockReturnValueOnce({
         ...getFoundExceptionListItemSchemaMock(),
         data: [
           getExceptionListItemSchemaMock({

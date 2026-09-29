@@ -5,28 +5,39 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '../../../../test_utils/render_with_ml_context';
 
 import { CalendarForm } from './calendar_form';
 
-jest.mock('../../../../contexts/kibana/use_create_url', () => ({
-  useCreateAndNavigateToManagementMlLink: jest.fn(),
-}));
-jest.mock('../../../../capabilities/check_capabilities', () => ({
-  usePermissionCheck: () => [true, true],
-}));
-jest.mock('../../../../contexts/kibana', () => ({
-  useMlKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: jest.fn(),
-        getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/calendars_list'),
-      },
-    },
-  }),
-  useNavigateToPath: () => jest.fn(),
-}));
+vi.mock('../../../../contexts/kibana/use_create_url', () => {
+      const mocked = {
+      useCreateAndNavigateToManagementMlLink: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../capabilities/check_capabilities', () => {
+      const mocked = {
+      usePermissionCheck: () => [true, true],
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../contexts/kibana', () => {
+      const mocked = {
+      useMlKibana: () => ({
+        services: {
+          application: {
+            navigateToApp: vi.fn(),
+            getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/calendars_list'),
+          },
+        },
+      }),
+      useNavigateToPath: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const testProps = {
   calendarId: '',
@@ -38,19 +49,19 @@ const testProps = {
   isEdit: false,
   isNewCalendarIdValid: false,
   jobIds: [],
-  onCalendarIdChange: jest.fn(),
-  onCreate: jest.fn(),
-  onCreateGroupOption: jest.fn(),
-  onDescriptionChange: jest.fn(),
-  onEdit: jest.fn(),
-  onEventDelete: jest.fn(),
-  onGroupSelection: jest.fn(),
-  showImportModal: jest.fn(),
-  onJobSelection: jest.fn(),
+  onCalendarIdChange: vi.fn(),
+  onCreate: vi.fn(),
+  onCreateGroupOption: vi.fn(),
+  onDescriptionChange: vi.fn(),
+  onEdit: vi.fn(),
+  onEventDelete: vi.fn(),
+  onGroupSelection: vi.fn(),
+  showImportModal: vi.fn(),
+  onJobSelection: vi.fn(),
   saving: false,
   selectedGroupOptions: [],
   selectedJobOptions: [],
-  showNewEventModal: jest.fn(),
+  showNewEventModal: vi.fn(),
   isGlobalCalendar: false,
   isDst: false,
 };

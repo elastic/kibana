@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { of } from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -20,16 +23,16 @@ import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/pub
 import { RowViewer } from './row_viewer';
 
 describe('RowViewer', () => {
-  function renderComponent(closeFlyoutSpy?: jest.Mock, extraHit?: DataTableRecord) {
+  function renderComponent(closeFlyoutSpy?: Mock, extraHit?: DataTableRecord) {
     const dataView = {
       title: 'foo',
       id: 'foo',
       name: 'foo',
-      toSpec: jest.fn(),
-      toMinimalSpec: jest.fn(),
-      isPersisted: jest.fn().mockReturnValue(false),
+      toSpec: vi.fn(),
+      toMinimalSpec: vi.fn(),
+      isPersisted: vi.fn().mockReturnValue(false),
       fields: {
-        getByName: jest.fn(),
+        getByName: vi.fn(),
       },
       timeFieldName: 'timestamp',
     };
@@ -52,7 +55,7 @@ describe('RowViewer', () => {
     }
     const services = {
       toastNotifications: {
-        addSuccess: jest.fn(),
+        addSuccess: vi.fn(),
       },
     };
 
@@ -65,23 +68,23 @@ describe('RowViewer', () => {
           notifications={
             {
               toasts: {
-                addSuccess: jest.fn(),
+                addSuccess: vi.fn(),
               },
             } as unknown as CoreStart['notifications']
           }
           chrome={
             {
-              getChromeStyle$: jest.fn().mockReturnValue(of('classic')),
+              getChromeStyle$: vi.fn().mockReturnValue(of('classic')),
             } as unknown as CoreStart['chrome']
           }
           hit={hit}
           hits={hits}
           columns={columns}
           flyoutType={'push'}
-          onRemoveColumn={jest.fn()}
-          onAddColumn={jest.fn()}
-          onClose={closeFlyoutSpy ?? jest.fn()}
-          setExpandedDoc={jest.fn()}
+          onRemoveColumn={vi.fn()}
+          onAddColumn={vi.fn()}
+          onClose={closeFlyoutSpy ?? vi.fn()}
+          setExpandedDoc={vi.fn()}
         />
       </KibanaContextProvider>
     );
@@ -93,7 +96,7 @@ describe('RowViewer', () => {
   });
 
   it('should run the onClose prop when the close button is clicked', async () => {
-    const closeFlyoutSpy = jest.fn();
+    const closeFlyoutSpy = vi.fn();
     renderComponent(closeFlyoutSpy);
     await userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
     expect(closeFlyoutSpy).toHaveBeenCalled();

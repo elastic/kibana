@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
@@ -15,8 +17,8 @@ import { TestProviders } from '../../common/mock';
 import { createStatusUserActionBuilder } from './status';
 import { getMockBuilderArgs } from './mock';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/navigation/hooks');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/navigation/hooks');
 
 describe('createStatusUserActionBuilder ', () => {
   const builderArgs = getMockBuilderArgs();
@@ -27,7 +29,7 @@ describe('createStatusUserActionBuilder ', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it.each(tests)('renders correctly when changed to %s status', async (status, label) => {

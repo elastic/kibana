@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -14,7 +16,7 @@ import type { SolutionSideNavItem } from './types';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { TELEMETRY_EVENT } from './telemetry/const';
 
-const mockTrack = jest.fn();
+const mockTrack = vi.fn();
 
 const mockItems: SolutionSideNavItem[] = [
   {
@@ -57,7 +59,7 @@ const renderNav = (props: Partial<SolutionSideNavProps> = {}) =>
 
 describe('SolutionSideNav', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render all main items', () => {
@@ -78,7 +80,7 @@ describe('SolutionSideNav', () => {
     });
 
     it('should call onClick callback if link clicked', async () => {
-      const mockOnClick = jest.fn((ev) => {
+      const mockOnClick = vi.fn((ev) => {
         ev.preventDefault();
       });
       const items = [

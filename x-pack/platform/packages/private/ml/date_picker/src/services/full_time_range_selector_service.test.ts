@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import moment from 'moment';
 
 import type { TimefilterContract } from '@kbn/data-plugin/public';
@@ -13,29 +16,29 @@ import type { ToastsStart, HttpStart } from '@kbn/core/public';
 
 import { setFullTimeRange } from './full_time_range_selector_service';
 
-jest.mock('./time_field_range');
+vi.mock('./time_field_range');
 
 import { getTimeFieldRange } from './time_field_range';
 
 const mockParamsFactory = () => ({
-  timefilter: { setTime: jest.fn() } as unknown as TimefilterContract,
-  dataView: { getIndexPattern: jest.fn(), getRuntimeMappings: jest.fn() } as unknown as DataView,
+  timefilter: { setTime: vi.fn() } as unknown as TimefilterContract,
+  dataView: { getIndexPattern: vi.fn(), getRuntimeMappings: vi.fn() } as unknown as DataView,
   toasts: {
-    addWarning: jest.fn(),
-    addDanger: jest.fn(),
-    addError: jest.fn(),
+    addWarning: vi.fn(),
+    addDanger: vi.fn(),
+    addError: vi.fn(),
   } as unknown as ToastsStart,
 });
 
 describe('setFullTimeRange', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the full time range based off the file upload endpoint format', async () => {
     // prepare
     const { timefilter, dataView, toasts } = mockParamsFactory();
-    (getTimeFieldRange as jest.MockedFunction<any>).mockImplementationOnce(async () => ({
+    (getTimeFieldRange as MockedFunction<any>).mockImplementationOnce(async () => ({
       success: true,
       start: { epoch: 1234, string: moment(1234).toISOString() },
       end: { epoch: 2345, string: moment(2345).toISOString() },
@@ -56,7 +59,7 @@ describe('setFullTimeRange', () => {
   it('returns the full time range based off the ml endpoint format', async () => {
     // prepare
     const { timefilter, dataView, toasts } = mockParamsFactory();
-    (getTimeFieldRange as jest.MockedFunction<any>).mockImplementationOnce(async () => ({
+    (getTimeFieldRange as MockedFunction<any>).mockImplementationOnce(async () => ({
       success: true,
       start: 1234,
       end: 2345,
@@ -77,7 +80,7 @@ describe('setFullTimeRange', () => {
   it('returns undefined based off the file upload endpoint format', async () => {
     // prepare
     const { timefilter, dataView, toasts } = mockParamsFactory();
-    (getTimeFieldRange as jest.MockedFunction<any>).mockImplementationOnce(async () => ({
+    (getTimeFieldRange as MockedFunction<any>).mockImplementationOnce(async () => ({
       success: true,
       start: { epoch: null, string: moment(null).toISOString() },
       end: { epoch: null, string: moment(null).toISOString() },
@@ -94,7 +97,7 @@ describe('setFullTimeRange', () => {
   it('returns undefined based off the ml endpoint format', async () => {
     // prepare
     const { timefilter, dataView, toasts } = mockParamsFactory();
-    (getTimeFieldRange as jest.MockedFunction<any>).mockImplementationOnce(async () => ({
+    (getTimeFieldRange as MockedFunction<any>).mockImplementationOnce(async () => ({
       success: true,
       start: null,
       end: null,

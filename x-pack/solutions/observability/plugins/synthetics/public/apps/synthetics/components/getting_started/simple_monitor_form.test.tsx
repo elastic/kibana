@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   CREATE_MONITOR_LABEL,
   SimpleMonitorForm,
@@ -19,11 +21,11 @@ import { syntheticsTestSubjects } from '../../../../../common/constants/data_tes
 import { apiService } from '../../../../utils/api_service';
 import * as reduxHooks from 'react-redux-v7';
 
-jest.setTimeout(10_000);
+vi.setConfig({ testTimeout: 10_000 });
 
 describe('SimpleMonitorForm', () => {
-  const apiSpy = jest.spyOn(apiService, 'post');
-  const dispatchSpy = jest.spyOn(reduxHooks, 'useDispatch');
+  const apiSpy = vi.spyOn(apiService, 'post');
+  const dispatchSpy = vi.spyOn(reduxHooks, 'useDispatch');
 
   it('renders', async () => {
     render(<SimpleMonitorForm />);

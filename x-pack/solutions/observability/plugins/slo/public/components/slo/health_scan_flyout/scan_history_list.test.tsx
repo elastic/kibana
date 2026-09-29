@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -15,17 +18,17 @@ import { useScheduleHealthScan } from '../../../hooks/use_schedule_health_scan';
 import { useKibana } from '../../../hooks/use_kibana';
 import { render } from '../../../utils/test_helper';
 
-jest.mock('../../../hooks/use_list_health_scans');
-jest.mock('../../../hooks/use_schedule_health_scan');
-jest.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_list_health_scans');
+vi.mock('../../../hooks/use_schedule_health_scan');
+vi.mock('../../../hooks/use_kibana');
 
-const mockUseListHealthScans = useListHealthScans as jest.MockedFunction<typeof useListHealthScans>;
-const mockUseScheduleHealthScan = useScheduleHealthScan as jest.MockedFunction<
+const mockUseListHealthScans = useListHealthScans as MockedFunction<typeof useListHealthScans>;
+const mockUseScheduleHealthScan = useScheduleHealthScan as MockedFunction<
   typeof useScheduleHealthScan
 >;
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
-const mockScheduleHealthScan = jest.fn();
+const mockScheduleHealthScan = vi.fn();
 
 const mockScan: HealthScanSummary = {
   scanId: 'scan-abc',
@@ -36,15 +39,15 @@ const mockScan: HealthScanSummary = {
 };
 
 describe('ScanHistoryList', () => {
-  const mockOnSelectScanId = jest.fn();
+  const mockOnSelectScanId = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {
-        uiSettings: { get: jest.fn().mockReturnValue('MMM D, YYYY @ HH:mm:ss.SSS') },
-        notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+        uiSettings: { get: vi.fn().mockReturnValue('MMM D, YYYY @ HH:mm:ss.SSS') },
+        notifications: { toasts: { addSuccess: vi.fn(), addError: vi.fn() } },
       },
     } as any);
 

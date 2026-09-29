@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -29,23 +32,23 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 import { getMockRulesAuthz } from '../../__mocks__/authz';
 
-jest.mock('../../../../machine_learning/authz');
-jest.mock('../../../../machine_learning/validation');
+vi.mock('../../../../machine_learning/authz');
+vi.mock('../../../../machine_learning/validation');
 
 describe('DetectionRulesClient.createPrebuiltRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
   let analytics: AnalyticsServiceSetup;
 
-  const mlAuthz = (buildMlAuthz as jest.Mock)();
+  const mlAuthz = (buildMlAuthz as Mock)();
   const rulesAuthz = getMockRulesAuthz();
-  const actionsClient: jest.Mocked<ActionsClient> = {} as unknown as jest.Mocked<ActionsClient>;
+  const actionsClient: Mocked<ActionsClient> = {} as unknown as Mocked<ActionsClient>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
     rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-    analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup;
+    analytics = { reportEvent: vi.fn() } as unknown as AnalyticsServiceSetup;
 
     const savedObjectsClient = savedObjectsClientMock.create();
     detectionRulesClient = createDetectionRulesClient({
@@ -106,7 +109,7 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
 
   it('throws if mlAuth fails', async () => {
     const params = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-id' };
-    (throwAuthzError as jest.Mock).mockImplementationOnce(() => {
+    (throwAuthzError as Mock).mockImplementationOnce(() => {
       throw new Error('mocked MLAuth error');
     });
 

@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { SchemaConfig } from '../../..';
 import { convertMetricAggregationColumnWithoutSpecialParams } from './metric';
 import { SUPPORTED_METRICS } from './supported_metrics';
 
-const mockGetFieldByName = jest.fn();
+const mockGetFieldByName = vi.fn();
 
 describe('convertToLastValueColumn', () => {
   const dataView = stubLogstashDataView;
@@ -34,7 +36,7 @@ describe('convertToLastValueColumn', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetFieldByName.mockReturnValue(dataView.fields[0]);
     dataView.getFieldByName = mockGetFieldByName;
   });

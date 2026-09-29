@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import {
@@ -25,15 +28,15 @@ import { USER_PREVIEW_BANNER } from './user_entity_overview';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
 
-jest.mock('../../../../management/hooks');
-jest.mock('../../../../management/hooks/agents/use_get_agent_status');
+vi.mock('../../../../management/hooks');
+vi.mock('../../../../management/hooks/agents/use_get_agent_status');
 
-jest.mock('@kbn/expandable-flyout');
+vi.mock('@kbn/expandable-flyout');
 
 const mockedTelemetry = createTelemetryServiceMock();
-const mockOpenSystemFlyout = jest.fn();
-jest.mock('../../../../common/lib/kibana', () => {
-  const kibanaActual = jest.requireActual('../../../../common/lib/kibana');
+const mockOpenSystemFlyout = vi.fn();
+vi.mock('../../../../common/lib/kibana', async () => {
+  const kibanaActual = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...kibanaActual,
     useKibana: () => ({
@@ -47,11 +50,11 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
       },
     }),
-    useUiSetting: jest.fn().mockReturnValue(false),
+    useUiSetting: vi.fn().mockReturnValue(false),
   };
 });
 
-const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
+const useGetAgentStatusMock = useGetAgentStatus as Mock;
 
 const SCOPE_ID = 'scopeId';
 
@@ -69,11 +72,11 @@ const renderHighlightedFieldsCell = (values: string[], field: string, showPrevie
 
 describe('<HighlightedFieldsCell />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render a basic cell', () => {

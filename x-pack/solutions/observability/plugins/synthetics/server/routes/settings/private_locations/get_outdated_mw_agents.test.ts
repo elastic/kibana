@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getOutdatedMwAgentLocations } from './get_outdated_mw_agents';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import type { OutdatedMwAgentLocationsResponse } from '../../../../common/utils/agent_mw_support';
 
-jest.mock('./get_private_locations');
+vi.mock('./get_private_locations');
 
-const mockGetLocations = getPrivateLocationsAndAgentPolicies as jest.Mock;
+const mockGetLocations = getPrivateLocationsAndAgentPolicies as Mock;
 
 interface FakeAgent {
   id?: string;
@@ -28,7 +31,7 @@ const agent = (over: FakeAgent = {}): FakeAgent => ({
   ...over,
 });
 
-const makeContext = (listAgentsImpl: jest.Mock, loggerError = jest.fn()) => ({
+const makeContext = (listAgentsImpl: Mock, loggerError = vi.fn()) => ({
   server: {
     fleet: { agentService: { asInternalUser: { listAgents: listAgentsImpl } } },
     logger: { error: loggerError },
@@ -53,10 +56,10 @@ describe('getOutdatedMwAgentLocations route', () => {
     });
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('returns no locations when every agent is MW-compatible', async () => {
-    const listAgents = jest.fn().mockResolvedValue({
+    const listAgents = vi.fn().mockResolvedValue({
       agents: [agent({ local_metadata: { elastic: { agent: { version: '8.19.0' } } } })],
       total: 1,
     });
@@ -69,7 +72,7 @@ describe('getOutdatedMwAgentLocations route', () => {
   });
 
   it('includes a location with at least one agent older than the MW threshold', async () => {
-    const listAgents = jest.fn().mockResolvedValue({
+    const listAgents = vi.fn().mockResolvedValue({
       agents: [
         agent({ id: 'ok', local_metadata: { elastic: { agent: { version: '9.3.4' } } } }),
         agent({ id: 'old', local_metadata: { elastic: { agent: { version: '8.17.2' } } } }),
@@ -83,7 +86,7 @@ describe('getOutdatedMwAgentLocations route', () => {
   });
 
   it('does not flag a location solely because of an unparsable agent version', async () => {
-    const listAgents = jest.fn().mockResolvedValue({
+    const listAgents = vi.fn().mockResolvedValue({
       agents: [agent({ local_metadata: { elastic: { agent: { version: undefined } } } })],
       total: 1,
     });
@@ -94,7 +97,7 @@ describe('getOutdatedMwAgentLocations route', () => {
   });
 
   it('treats 8.19.0-SNAPSHOT as compatible', async () => {
-    const listAgents = jest.fn().mockResolvedValue({
+    const listAgents = vi.fn().mockResolvedValue({
       agents: [agent({ local_metadata: { elastic: { agent: { version: '8.19.0-SNAPSHOT' } } } })],
       total: 1,
     });
@@ -105,7 +108,7 @@ describe('getOutdatedMwAgentLocations route', () => {
   });
 
   it('stops paging a location once an outdated agent is found', async () => {
-    const listAgents = jest
+    const listAgents = vi
       .fn()
       .mockResolvedValueOnce({
         agents: [
@@ -132,7 +135,7 @@ describe('getOutdatedMwAgentLocations route', () => {
       ],
       agentPolicies: [],
     });
-    const listAgents = jest.fn().mockImplementation(async ({ kuery }: { kuery: string }) => {
+    const listAgents = vi.fn().mockImplementation(async ({ kuery }: { kuery: string }) => {
       if (kuery.includes('policy-old')) {
         return {
           agents: [agent({ local_metadata: { elastic: { agent: { version: '8.17.2' } } } })],
@@ -151,8 +154,8 @@ describe('getOutdatedMwAgentLocations route', () => {
   });
 
   it('skips a location when Fleet listing fails', async () => {
-    const listAgents = jest.fn().mockRejectedValue(new Error('fleet down'));
-    const loggerError = jest.fn();
+    const listAgents = vi.fn().mockRejectedValue(new Error('fleet down'));
+    const loggerError = vi.fn();
 
     const result = await run(makeContext(listAgents, loggerError));
 

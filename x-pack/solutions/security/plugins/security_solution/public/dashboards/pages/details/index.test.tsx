@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
@@ -12,29 +15,32 @@ import { DashboardView } from '.';
 import { useCapabilities } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
   return {
     ...actual,
-    useParams: jest.fn().mockReturnValue({ detailName: 'mockSavedObjectId' }),
+    useParams: vi.fn().mockReturnValue({ detailName: 'mockSavedObjectId' }),
   };
 });
 
-jest.mock('../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../common/lib/kibana'));
   return {
     ...actual,
-    useCapabilities: jest.fn().mockReturnValue({ show: true, showWriteControls: true }),
+    useCapabilities: vi.fn().mockReturnValue({ show: true, showWriteControls: true }),
   };
 });
 
-jest.mock('../../components/dashboard_renderer', () => ({
-  DashboardRenderer: jest
-    .fn()
-    .mockImplementation((props) => (
-      <div data-test-subj={`dashboard-view-${props.savedObjectId}`} />
-    )),
-}));
+vi.mock('../../components/dashboard_renderer', () => {
+      const mocked = {
+      DashboardRenderer: vi
+        .fn()
+        .mockImplementation((props) => (
+          <div data-test-subj={`dashboard-view-${props.savedObjectId}`} />
+        )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -48,19 +54,19 @@ const mockHistory = {
   length: 2,
   location,
   action: pop,
-  push: jest.fn(),
-  replace: jest.fn(),
-  go: jest.fn(),
-  goBack: jest.fn(),
-  goForward: jest.fn(),
-  block: jest.fn(),
-  createHref: jest.fn(),
-  listen: jest.fn(),
+  push: vi.fn(),
+  replace: vi.fn(),
+  go: vi.fn(),
+  goBack: vi.fn(),
+  goForward: vi.fn(),
+  block: vi.fn(),
+  createHref: vi.fn(),
+  listen: vi.fn(),
 };
 
 describe('DashboardView', () => {
   beforeEach(() => {
-    (useCapabilities as unknown as jest.Mock).mockReturnValue({
+    (useCapabilities as unknown as Mock).mockReturnValue({
       show: true,
       showWriteControls: true,
     });
@@ -77,7 +83,7 @@ describe('DashboardView', () => {
   });
 
   test('render a prompt when error state exists', () => {
-    (useCapabilities as unknown as jest.Mock).mockReturnValue({
+    (useCapabilities as unknown as Mock).mockReturnValue({
       show: false,
       showWriteControls: true,
     });

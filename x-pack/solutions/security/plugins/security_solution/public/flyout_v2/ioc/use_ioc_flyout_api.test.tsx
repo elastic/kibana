@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useHistory } from 'react-router-dom';
 import { decode } from '@kbn/rison';
@@ -23,27 +26,39 @@ import {
   FLYOUT_SESSION_KIND,
 } from '../../common/lib/telemetry';
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useStore: jest.fn(() => ({})),
-}));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: jest.fn(() => ({})),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useStore: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useHistoryMock = useHistory as jest.Mock;
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/hooks/is_in_security_app');
-jest.mock('../shared/components/flyout_provider', () => ({
-  flyoutProviders: jest.fn(() => 'FLYOUT_CONTENT'),
-}));
-jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
-  useDefaultDocumentFlyoutProperties: jest.fn(() => ({ size: 's' })),
-}));
+const useHistoryMock = useHistory as Mock;
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/hooks/is_in_security_app');
+vi.mock('../shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: vi.fn(() => 'FLYOUT_CONTENT'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../shared/hooks/use_default_flyout_properties', () => {
+      const mocked = {
+      useDefaultDocumentFlyoutProperties: vi.fn(() => ({ size: 's' })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenSystemFlyout = jest.fn();
-const mockReportEvent = jest.fn();
+const mockOpenSystemFlyout = vi.fn();
+const mockReportEvent = vi.fn();
 const indicator = {
   _id: 'ioc-1',
   fields: { 'threat.indicator.type': ['url'] },
@@ -51,17 +66,17 @@ const indicator = {
 
 describe('useIocFlyoutApi', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useHistoryMock.mockReturnValue({});
-    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
-    (useKibana as jest.Mock).mockReturnValue({
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: vi.fn() });
+    (useKibana as Mock).mockReturnValue({
       services: {
         overlays: { openSystemFlyout: mockOpenSystemFlyout },
-        storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
+        storage: { get: vi.fn(), set: vi.fn(), remove: vi.fn() },
         telemetry: { reportEvent: mockReportEvent },
       },
     });
-    (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
+    (useIsInSecurityApp as Mock).mockReturnValue(true);
   });
 
   it('openIocFlyout opens a system flyout as a new session with the document properties', () => {
@@ -118,7 +133,7 @@ describe('useIocFlyoutApi', () => {
   });
 
   it('uses the doc-viewer history key when outside the security app', () => {
-    (useIsInSecurityApp as jest.Mock).mockReturnValue(false);
+    (useIsInSecurityApp as Mock).mockReturnValue(false);
     const { result } = renderHook(() => useIocFlyoutApi());
     result.current.openIocFlyout({ indicator });
 
@@ -126,7 +141,7 @@ describe('useIocFlyoutApi', () => {
   });
 
   it("persists the indicator's `_index` in the flyoutV2 URL descriptor so it can be restored", () => {
-    const replace = jest.fn();
+    const replace = vi.fn();
     useHistoryMock.mockReturnValue({ location: { search: '' }, replace });
     const indicatorWithIndex = {
       _id: 'ioc-1',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -23,12 +25,12 @@ describe('createExploreDataView', () => {
   const mockCreatedDataView = { id: 'explore-dv', title: 'some-title' } as unknown as DataView;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockDataViews = {
-      create: jest.fn().mockResolvedValue(mockCreatedDataView),
+      create: vi.fn().mockResolvedValue(mockCreatedDataView),
     };
     mockSpaces = {
-      getActiveSpace: jest.fn().mockResolvedValue({ id: 'space1' }),
+      getActiveSpace: vi.fn().mockResolvedValue({ id: 'space1' }),
     };
   });
 
@@ -82,7 +84,7 @@ describe('createExploreDataView', () => {
 
   it('propagates errors from dataViews.create', async () => {
     const error = new Error('create failed');
-    mockDataViews.create = jest.fn().mockRejectedValue(error);
+    mockDataViews.create = vi.fn().mockRejectedValue(error);
 
     await expect(
       createExploreDataView(

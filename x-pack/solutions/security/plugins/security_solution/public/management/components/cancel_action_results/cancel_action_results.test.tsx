@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -36,7 +38,7 @@ describe('CancelActionResults', () => {
   });
 
   it('should render an empty div and log an error when agentId is not in action.agents', () => {
-    const consoleSpy = jest.spyOn(window.console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(window.console, 'error').mockImplementation(() => {});
 
     renderResult = appTestContext.render(
       <CancelActionResults

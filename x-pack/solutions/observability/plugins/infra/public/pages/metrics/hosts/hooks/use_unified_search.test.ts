@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { Query } from '@kbn/es-query';
 import { Subject } from 'rxjs';
@@ -18,37 +21,40 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useUnifiedSearch } from './use_unified_search';
 import { useHostsUrlState } from './use_unified_search_url_state';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useKibanaQuerySettings: jest.fn(),
-}));
-jest.mock('../../../../alerting/use_alert_prefill');
-jest.mock('../../../../containers/ml/infra_ml_capabilities');
-jest.mock('../../../../containers/metrics_source');
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../hooks/use_reload_request_time');
-jest.mock('../../../../hooks/use_time_range');
-jest.mock('./use_unified_search_url_state');
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useKibanaQuerySettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../alerting/use_alert_prefill');
+vi.mock('../../../../containers/ml/infra_ml_capabilities');
+vi.mock('../../../../containers/metrics_source');
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../hooks/use_reload_request_time');
+vi.mock('../../../../hooks/use_time_range');
+vi.mock('./use_unified_search_url_state');
 
-const mockUseKibanaQuerySettings = useKibanaQuerySettings as jest.MockedFunction<
+const mockUseKibanaQuerySettings = useKibanaQuerySettings as MockedFunction<
   typeof useKibanaQuerySettings
 >;
-const mockUseAlertPrefillContext = useAlertPrefillContext as jest.MockedFunction<
+const mockUseAlertPrefillContext = useAlertPrefillContext as MockedFunction<
   typeof useAlertPrefillContext
 >;
-const mockUseInfraMLCapabilitiesContext = useInfraMLCapabilitiesContext as jest.MockedFunction<
+const mockUseInfraMLCapabilitiesContext = useInfraMLCapabilitiesContext as MockedFunction<
   typeof useInfraMLCapabilitiesContext
 >;
-const mockUseMetricsDataViewContext = useMetricsDataViewContext as jest.MockedFunction<
+const mockUseMetricsDataViewContext = useMetricsDataViewContext as MockedFunction<
   typeof useMetricsDataViewContext
 >;
-const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as jest.MockedFunction<
+const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as MockedFunction<
   typeof useKibanaContextForPlugin
 >;
-const mockUseReloadRequestTimeContext = useReloadRequestTimeContext as jest.MockedFunction<
+const mockUseReloadRequestTimeContext = useReloadRequestTimeContext as MockedFunction<
   typeof useReloadRequestTimeContext
 >;
-const mockUseTimeRange = useTimeRange as jest.MockedFunction<typeof useTimeRange>;
-const mockUseHostsUrlState = useHostsUrlState as jest.MockedFunction<typeof useHostsUrlState>;
+const mockUseTimeRange = useTimeRange as MockedFunction<typeof useTimeRange>;
+const mockUseHostsUrlState = useHostsUrlState as MockedFunction<typeof useHostsUrlState>;
 
 const initialQuery: Query = { language: 'kuery', query: '' };
 const searchCriteria = {
@@ -59,13 +65,13 @@ const searchCriteria = {
   preferredSchema: 'ecs' as const,
   query: initialQuery,
 };
-const setSearch = jest.fn();
-const updateReloadRequestTime = jest.fn();
-const refetchMetricsView = jest.fn();
-const updateTopbarMenuVisibilityBySchema = jest.fn();
-const resetPrefill = jest.fn();
-const setPrefillState = jest.fn();
-const reportHostsViewQuerySubmitted = jest.fn();
+const setSearch = vi.fn();
+const updateReloadRequestTime = vi.fn();
+const refetchMetricsView = vi.fn();
+const updateTopbarMenuVisibilityBySchema = vi.fn();
+const resetPrefill = vi.fn();
+const setPrefillState = vi.fn();
+const reportHostsViewQuerySubmitted = vi.fn();
 
 describe('useUnifiedSearch', () => {
   let queryUpdates$: Subject<void>;
@@ -74,7 +80,7 @@ describe('useUnifiedSearch', () => {
   let currentQuery: Query;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryUpdates$ = new Subject();
     filterUpdates$ = new Subject();
     timeUpdates$ = new Subject();
@@ -107,19 +113,19 @@ describe('useUnifiedSearch', () => {
         data: {
           query: {
             filterManager: {
-              getFilters: jest.fn(() => []),
-              getUpdates$: jest.fn(() => filterUpdates$),
-              setFilters: jest.fn(),
+              getFilters: vi.fn(() => []),
+              getUpdates$: vi.fn(() => filterUpdates$),
+              setFilters: vi.fn(),
             },
             queryString: {
-              getQuery: jest.fn(() => currentQuery),
-              getUpdates$: jest.fn(() => queryUpdates$),
-              setQuery: jest.fn(),
+              getQuery: vi.fn(() => currentQuery),
+              getUpdates$: vi.fn(() => queryUpdates$),
+              setQuery: vi.fn(),
             },
             timefilter: {
               timefilter: {
-                getTime: jest.fn(() => searchCriteria.dateRange),
-                getTimeUpdate$: jest.fn(() => timeUpdates$),
+                getTime: vi.fn(() => searchCriteria.dateRange),
+                getTimeUpdate$: vi.fn(() => timeUpdates$),
               },
             },
           },

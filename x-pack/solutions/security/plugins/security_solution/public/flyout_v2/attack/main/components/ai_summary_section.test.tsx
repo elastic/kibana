@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,39 +14,51 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { AISummarySection } from './ai_summary_section';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 
-jest.mock('@kbn/i18n-react', () => ({
-  FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
-}));
+vi.mock('@kbn/i18n-react', () => {
+      const mocked = {
+      FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
+vi.mock('../../../shared/hooks/use_expand_section', () => {
+      const mocked = {
+      useExpandSection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/components/expandable_section', () => ({
-  ExpandableSection: ({
-    title,
-    children,
-    extraAction,
-    'data-test-subj': dataTestSubj,
-  }: {
-    title: React.ReactNode;
-    children: React.ReactNode;
-    extraAction?: React.ReactNode;
-    'data-test-subj'?: string;
-  }) => (
-    <section data-test-subj={dataTestSubj}>
-      <div>{title}</div>
-      {extraAction}
-      {children}
-    </section>
-  ),
-}));
+vi.mock('../../../shared/components/expandable_section', () => {
+      const mocked = {
+      ExpandableSection: ({
+        title,
+        children,
+        extraAction,
+        'data-test-subj': dataTestSubj,
+      }: {
+        title: React.ReactNode;
+        children: React.ReactNode;
+        extraAction?: React.ReactNode;
+        'data-test-subj'?: string;
+      }) => (
+        <section data-test-subj={dataTestSubj}>
+          <div>{title}</div>
+          {extraAction}
+          {children}
+        </section>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => ({
-  AttackDiscoveryMarkdownFormatter: ({ markdown }: { markdown: string }) => <div>{markdown}</div>,
-}));
+vi.mock('../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => {
+      const mocked = {
+      AttackDiscoveryMarkdownFormatter: ({ markdown }: { markdown: string }) => <div>{markdown}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseExpandSection = jest.mocked(useExpandSection);
+const mockedUseExpandSection = vi.mocked(useExpandSection);
 
 const KEY = 'aisummary';
 
@@ -65,7 +79,7 @@ const buildHit = (overrides: Record<string, unknown> = {}): DataTableRecord =>
 
 describe('AISummarySection (v2)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUseExpandSection.mockReturnValue(true);
   });
 

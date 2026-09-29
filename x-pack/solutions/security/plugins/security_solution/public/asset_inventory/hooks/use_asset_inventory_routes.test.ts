@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAssetInventoryRoutes } from './use_asset_inventory_routes';
 import { useKibana } from '../../common/lib/kibana';
 import { API_VERSIONS } from '../../../common/constants';
 import { ASSET_INVENTORY_INSTALL_DATA_VIEW_API_PATH } from '../../../common/api/asset_inventory/constants';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
 describe('useAssetInventoryRoutes', () => {
-  const mockFetch = jest.fn();
+  const mockFetch = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: {
         http: { fetch: mockFetch },
       },

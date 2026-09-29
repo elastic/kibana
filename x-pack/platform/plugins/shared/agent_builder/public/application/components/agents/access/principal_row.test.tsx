@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -22,8 +24,8 @@ const renderRow = (entry: AgentAccessControlEntry) =>
       <PrincipalRow
         entry={entry}
         accessControlMode={AgentAccessControlMode.Private}
-        onChangeRole={jest.fn()}
-        onRemove={jest.fn()}
+        onChangeRole={vi.fn()}
+        onRemove={vi.fn()}
       />
     </IntlProvider>
   );

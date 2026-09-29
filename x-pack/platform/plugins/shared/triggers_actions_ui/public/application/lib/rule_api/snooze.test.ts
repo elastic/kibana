@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { snoozeRule } from './snooze';
 
 const http = httpServiceMock.createStartContract();
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('snoozeRule', () => {
   test('should call mute alert API', async () => {

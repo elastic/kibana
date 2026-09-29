@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
@@ -20,18 +23,24 @@ import { useGetUrlParams } from '../../../../hooks';
 import { fetchBulkUpdateMonitors } from '../../../../state';
 import { BulkScheduleFlyout } from './bulk_schedule_flyout';
 
-jest.mock('../../../../hooks', () => ({
-  ...jest.requireActual('../../../../hooks'),
-  useGetUrlParams: jest.fn(),
-}));
+vi.mock('../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../hooks')),
+      useGetUrlParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../state', () => ({
-  ...jest.requireActual('../../../../state'),
-  fetchBulkUpdateMonitors: jest.fn(),
-}));
+vi.mock('../../../../state', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../state')),
+      fetchBulkUpdateMonitors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useGetUrlParamsMock = useGetUrlParams as jest.MockedFunction<typeof useGetUrlParams>;
-const fetchBulkUpdateMonitorsMock = fetchBulkUpdateMonitors as jest.MockedFunction<
+const useGetUrlParamsMock = useGetUrlParams as MockedFunction<typeof useGetUrlParams>;
+const fetchBulkUpdateMonitorsMock = fetchBulkUpdateMonitors as MockedFunction<
   typeof fetchBulkUpdateMonitors
 >;
 
@@ -57,11 +66,11 @@ const makeMonitor = (
   } as unknown as EncryptedSyntheticsSavedMonitor);
 
 describe('<BulkScheduleFlyout />', () => {
-  const onClose = jest.fn();
-  const reloadPage = jest.fn();
+  const onClose = vi.fn();
+  const reloadPage = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useGetUrlParamsMock.mockReturnValue({ spaceId: 'default' } as ReturnType<
       typeof useGetUrlParams
     >);

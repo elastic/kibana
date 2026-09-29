@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 
@@ -17,30 +20,30 @@ import { useStatusAction } from '../../../../actions/status/use_status_action';
 import { useCloseCaseModal } from '../../../../all_cases/hooks/use_close_case_modal';
 import { useCanSyncCloseReasonToAlerts } from '../../../../all_cases/hooks/use_can_sync_close_reason_to_alerts';
 
-jest.mock('../../../../actions/status/use_status_action');
-jest.mock('../../../../all_cases/hooks/use_close_case_modal');
-jest.mock('../../../../all_cases/hooks/use_can_sync_close_reason_to_alerts');
-jest.mock('../../../use_on_refresh_case_view_page');
+vi.mock('../../../../actions/status/use_status_action');
+vi.mock('../../../../all_cases/hooks/use_close_case_modal');
+vi.mock('../../../../all_cases/hooks/use_can_sync_close_reason_to_alerts');
+vi.mock('../../../use_on_refresh_case_view_page');
 
-const mockHandleUpdateCaseStatus = jest.fn();
-const mockOpenCloseCaseModal = jest.fn();
+const mockHandleUpdateCaseStatus = vi.fn();
+const mockOpenCloseCaseModal = vi.fn();
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(TestProviders, null, children);
 
 describe('useCloseCaseFlow', () => {
-  const onUpdateField = jest.fn();
+  const onUpdateField = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useStatusAction as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useStatusAction as Mock).mockReturnValue({
       handleUpdateCaseStatus: mockHandleUpdateCaseStatus,
     });
-    (useCloseCaseModal as jest.Mock).mockReturnValue({
+    (useCloseCaseModal as Mock).mockReturnValue({
       openCloseCaseModal: mockOpenCloseCaseModal,
       closeCaseModal: null,
     });
-    (useCanSyncCloseReasonToAlerts as jest.Mock).mockReturnValue(false);
+    (useCanSyncCloseReasonToAlerts as Mock).mockReturnValue(false);
   });
 
   it('calls onUpdateField for non-closed statuses', () => {
@@ -87,7 +90,7 @@ describe('useCloseCaseFlow', () => {
 
   it('returns closeCaseModal from useCloseCaseModal', () => {
     const mockModal = 'mock-modal-element';
-    (useCloseCaseModal as jest.Mock).mockReturnValue({
+    (useCloseCaseModal as Mock).mockReturnValue({
       openCloseCaseModal: mockOpenCloseCaseModal,
       closeCaseModal: mockModal,
     });
@@ -100,7 +103,7 @@ describe('useCloseCaseFlow', () => {
   });
 
   it('passes canSyncCloseReasonToAlerts to useCloseCaseModal', () => {
-    (useCanSyncCloseReasonToAlerts as jest.Mock).mockReturnValue(true);
+    (useCanSyncCloseReasonToAlerts as Mock).mockReturnValue(true);
 
     renderHook(() => useCloseCaseFlow({ caseData: basicCase, onUpdateField }), { wrapper });
 

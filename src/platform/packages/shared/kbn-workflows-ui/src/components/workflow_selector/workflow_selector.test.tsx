@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
@@ -37,24 +39,30 @@ const mockWorkflows: WorkflowListItemDto[] = [
   },
 ];
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        getUrlForApp: () => '/app/workflows',
-      },
-    },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            getUrlForApp: () => '/app/workflows',
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks', () => ({
-  useWorkflows: () => ({ data: { results: mockWorkflows } }),
-  useWorkflowsCapabilities: () => ({ canReadManagedWorkflow: true }),
-}));
+vi.mock('../../hooks', () => {
+      const mocked = {
+      useWorkflows: () => ({ data: { results: mockWorkflows } }),
+      useWorkflowsCapabilities: () => ({ canReadManagedWorkflow: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowSelector', () => {
   it('keeps the search term after selecting an option when the selection is hidden from search', () => {
-    const onWorkflowChange = jest.fn();
+    const onWorkflowChange = vi.fn();
     render(
       <WorkflowSelector
         onWorkflowChange={onWorkflowChange}

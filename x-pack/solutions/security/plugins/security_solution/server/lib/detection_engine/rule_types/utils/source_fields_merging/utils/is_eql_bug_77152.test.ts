@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { isEqlBug77152 } from './is_eql_bug_77152';
 
 /**
@@ -12,11 +14,11 @@ import { isEqlBug77152 } from './is_eql_bug_77152';
  */
 describe('is_eql_bug_77152', () => {
   beforeAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('returns true if it encounters the bug which is _ignored is returned in the fields', () => {

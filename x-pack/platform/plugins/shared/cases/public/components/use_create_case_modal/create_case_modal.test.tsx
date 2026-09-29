@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 
@@ -13,14 +16,17 @@ import { TestProviders } from '../../common/mock';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CreateCase } from '../create';
 
-jest.mock('../create', () => ({
-  CreateCase: jest.fn(),
-}));
+vi.mock('../create', () => {
+      const mocked = {
+      CreateCase: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const CreateCaseMock = CreateCase as unknown as jest.Mock;
+const CreateCaseMock = CreateCase as unknown as Mock;
 
-const onCloseCaseModal = jest.fn();
-const onSuccess = jest.fn();
+const onCloseCaseModal = vi.fn();
+const onSuccess = vi.fn();
 const defaultProps = {
   isModalOpen: true,
   onCloseCaseModal,
@@ -30,7 +36,7 @@ const defaultProps = {
 
 describe('CreateCaseModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     CreateCaseMock.mockReturnValue(<></>);
   });
 

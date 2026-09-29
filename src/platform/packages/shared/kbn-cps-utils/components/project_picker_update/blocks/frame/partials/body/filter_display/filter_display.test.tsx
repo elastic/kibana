@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -34,13 +37,16 @@ const envProdExpression = {
   tagValue: 'prod',
 } as const;
 
-const mockUseProjectPickerState = jest.fn();
-const mockUseProjectPickerActions = jest.fn();
+const mockUseProjectPickerState = vi.fn();
+const mockUseProjectPickerActions = vi.fn();
 
-jest.mock('../../../../../state', () => ({
-  useProjectPickerState: () => mockUseProjectPickerState(),
-  useProjectPickerActions: () => mockUseProjectPickerActions(),
-}));
+vi.mock('../../../../../state', () => {
+      const mocked = {
+      useProjectPickerState: () => mockUseProjectPickerState(),
+      useProjectPickerActions: () => mockUseProjectPickerActions(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createFilterExpressions = (
   entries: Array<[FilterExpressionValue, boolean?]>
@@ -80,16 +86,16 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
 };
 
 const defaultActions = {
-  invertFilterExpressionOperator: jest.fn(),
-  toggleFilterExpression: jest.fn(),
-  removeFilterExpression: jest.fn(),
+  invertFilterExpressionOperator: vi.fn(),
+  toggleFilterExpression: vi.fn(),
+  removeFilterExpression: vi.fn(),
 };
 
 const renderComponent = (
   stateOverrides: Partial<ProjectPickerState> = {},
-  props: { onEditFilter?: jest.Mock; currentFilterInputId?: string } = {}
+  props: { onEditFilter?: Mock; currentFilterInputId?: string } = {}
 ) => {
-  const onEditFilter = props.onEditFilter ?? jest.fn();
+  const onEditFilter = props.onEditFilter ?? vi.fn();
   mockUseProjectPickerState.mockReturnValue(createState(stateOverrides));
   mockUseProjectPickerActions.mockReturnValue(defaultActions);
 
@@ -108,7 +114,7 @@ const renderComponent = (
 
 describe('ProjectPickerFilterDisplay', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render nothing when there are no filter expressions', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import * as React from 'react';
 import { screen } from '@testing-library/react';
 import ConnectorAddModal from './connector_add_modal';
@@ -16,15 +19,18 @@ import type { AppMockRenderer } from '../test_utils';
 import { createAppMockRenderer } from '../test_utils';
 import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../lib/action_connector_api', () => ({
-  ...(jest.requireActual('../../lib/action_connector_api') as any),
-  loadActionTypes: jest.fn(),
-}));
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../lib/action_connector_api', async () => {
+      const mocked = {
+      ...((await vi.importActual('../../lib/action_connector_api')) as any),
+      loadActionTypes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { loadActionTypes } = jest.requireMock('../../lib/action_connector_api');
+const { loadActionTypes } = (await vi.importMock('../../lib/action_connector_api'));
 const actionTypeRegistry = actionTypeRegistryMock.create();
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 describe('connector_add_modal', () => {
   let appMockRenderer: AppMockRenderer;

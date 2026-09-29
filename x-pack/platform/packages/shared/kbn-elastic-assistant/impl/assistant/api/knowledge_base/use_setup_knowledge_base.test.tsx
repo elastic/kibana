@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import type { UseSetupKnowledgeBaseParams } from './use_setup_knowledge_base';
 import { useSetupKnowledgeBase } from './use_setup_knowledge_base';
@@ -12,44 +15,47 @@ import { postKnowledgeBase as _postKnowledgeBase } from './api';
 import { useMutation as _useMutation } from '@kbn/react-query';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
-const postKnowledgeBaseMock = _postKnowledgeBase as jest.Mock;
-const useMutationMock = _useMutation as jest.Mock;
-jest.mock('./api', () => {
-  const actual = jest.requireActual('./api');
+const postKnowledgeBaseMock = _postKnowledgeBase as Mock;
+const useMutationMock = _useMutation as Mock;
+vi.mock('./api', async () => {
+  const actual = (await vi.importActual('./api'));
   return {
     ...actual,
-    postKnowledgeBase: jest.fn((...args) => actual.postKnowledgeBase(...args)),
+    postKnowledgeBase: vi.fn((...args) => actual.postKnowledgeBase(...args)),
   };
 });
-jest.mock('./use_knowledge_base_status');
-jest.mock('./entries/use_knowledge_base_entries');
+vi.mock('./use_knowledge_base_status');
+vi.mock('./entries/use_knowledge_base_entries');
 
-jest.mock('@kbn/react-query', () => ({
-  useMutation: jest.fn().mockImplementation(async (queryKey, fn, opts) => {
-    try {
-      const res = await fn();
-      return Promise.resolve(res);
-    } catch (e) {
-      opts.onError(e);
-    }
-  }),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useMutation: vi.fn().mockImplementation(async (queryKey, fn, opts) => {
+        try {
+          const res = await fn();
+          return Promise.resolve(res);
+        } catch (e) {
+          opts.onError(e);
+        }
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const statusResponse = {
   success: true,
 };
 
 const http = {
-  fetch: jest.fn().mockResolvedValue(statusResponse),
+  fetch: vi.fn().mockResolvedValue(statusResponse),
 };
 const toasts = {
-  addError: jest.fn(),
+  addError: vi.fn(),
 };
 const defaultProps = { http, toasts } as unknown as UseSetupKnowledgeBaseParams;
 
 describe('useSetupKnowledgeBase', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should call api to post knowledge base setup', async () => {
     renderHook(() => useSetupKnowledgeBase(defaultProps));

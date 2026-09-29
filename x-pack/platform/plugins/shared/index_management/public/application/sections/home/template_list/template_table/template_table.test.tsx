@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ScopedHistory } from '@kbn/core/public';
@@ -13,8 +16,8 @@ import { TemplateTable } from './template_table';
 
 let mockSelectedNames = new Set<string>();
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
 
   const renderColumnCell = (column: any, item: any) => {
     if (column.actions) {
@@ -112,50 +115,71 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/shared-ux-table-persist', () => ({
-  useEuiTablePersist: () => ({
-    pageSize: 20,
-    sorting: {},
-    onTableChange: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/shared-ux-table-persist', () => {
+      const mocked = {
+      useEuiTablePersist: () => ({
+        pageSize: 20,
+        sorting: {},
+        onTableChange: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/i18n-react', () => ({
-  FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => (
-    <span>{defaultMessage}</span>
-  ),
-}));
+vi.mock('@kbn/i18n-react', () => {
+      const mocked = {
+      FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => (
+        <span>{defaultMessage}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../app_context', () => ({
-  useServices: jest.fn(),
-  useAppContext: jest.fn(),
-}));
+vi.mock('../../../../app_context', () => {
+      const mocked = {
+      useServices: vi.fn(),
+      useAppContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useAppContext, useServices } from '../../../../app_context';
 
-jest.mock('../../../../../shared_imports', () => ({
-  reactRouterNavigate: (_history: unknown, _path: unknown, onNavigateCallback?: () => void) => ({
-    href: '#',
-    onClick: () => {
-      onNavigateCallback?.();
-    },
-  }),
-}));
+vi.mock('../../../../../shared_imports', () => {
+      const mocked = {
+      reactRouterNavigate: (_history: unknown, _path: unknown, onNavigateCallback?: () => void) => ({
+        href: '#',
+        onClick: () => {
+          onNavigateCallback?.();
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../components', () => ({
-  TemplateDeleteModal: () => <div data-test-subj="templateDeleteModal" />,
-}));
+vi.mock('../../../../components', () => {
+      const mocked = {
+      TemplateDeleteModal: () => <div data-test-subj="templateDeleteModal" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../components/shared', () => ({
-  TemplateContentIndicator: () => <span data-test-subj="templateContentIndicator" />,
-}));
+vi.mock('../../../../components/shared', () => {
+      const mocked = {
+      TemplateContentIndicator: () => <span data-test-subj="templateContentIndicator" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components', () => ({
-  TemplateTypeIndicator: ({ templateType }: { templateType: string }) => (
-    <span data-test-subj={`templateType-${templateType}`} />
-  ),
-  TemplateDeprecatedBadge: () => <span data-test-subj="templateDeprecatedBadge" />,
-}));
+vi.mock('../components', () => {
+      const mocked = {
+      TemplateTypeIndicator: ({ templateType }: { templateType: string }) => (
+        <span data-test-subj={`templateType-${templateType}`} />
+      ),
+      TemplateDeprecatedBadge: () => <span data-test-subj="templateDeprecatedBadge" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createTemplate = (overrides: Partial<TemplateListItem> = {}): TemplateListItem => {
   const base: TemplateListItem = {
@@ -181,12 +205,12 @@ const createTemplate = (overrides: Partial<TemplateListItem> = {}): TemplateList
 };
 
 const createHistory = (): ScopedHistory =>
-  ({ push: jest.fn(), location: {} } as unknown as ScopedHistory);
+  ({ push: vi.fn(), location: {} } as unknown as ScopedHistory);
 
 describe('TemplateTable', () => {
-  const mockTrackMetric = jest.fn();
-  const mockedUseAppContext = useAppContext as jest.MockedFunction<typeof useAppContext>;
-  const mockedUseServices = useServices as jest.MockedFunction<typeof useServices>;
+  const mockTrackMetric = vi.fn();
+  const mockedUseAppContext = useAppContext as MockedFunction<typeof useAppContext>;
+  const mockedUseServices = useServices as MockedFunction<typeof useServices>;
 
   beforeEach(() => {
     mockSelectedNames = new Set<string>();
@@ -210,9 +234,9 @@ describe('TemplateTable', () => {
     render(
       <TemplateTable
         templates={[template]}
-        reload={jest.fn()}
-        editTemplate={jest.fn()}
-        cloneTemplate={jest.fn()}
+        reload={vi.fn()}
+        editTemplate={vi.fn()}
+        cloneTemplate={vi.fn()}
         history={createHistory()}
       />
     );
@@ -228,9 +252,9 @@ describe('TemplateTable', () => {
     render(
       <TemplateTable
         templates={[template]}
-        reload={jest.fn()}
-        editTemplate={jest.fn()}
-        cloneTemplate={jest.fn()}
+        reload={vi.fn()}
+        editTemplate={vi.fn()}
+        cloneTemplate={vi.fn()}
         history={createHistory()}
       />
     );
@@ -245,9 +269,9 @@ describe('TemplateTable', () => {
     render(
       <TemplateTable
         templates={[template]}
-        reload={jest.fn()}
-        editTemplate={jest.fn()}
-        cloneTemplate={jest.fn()}
+        reload={vi.fn()}
+        editTemplate={vi.fn()}
+        cloneTemplate={vi.fn()}
         history={createHistory()}
       />
     );
@@ -262,9 +286,9 @@ describe('TemplateTable', () => {
     render(
       <TemplateTable
         templates={[template]}
-        reload={jest.fn()}
-        editTemplate={jest.fn()}
-        cloneTemplate={jest.fn()}
+        reload={vi.fn()}
+        editTemplate={vi.fn()}
+        cloneTemplate={vi.fn()}
         history={createHistory()}
       />
     );
@@ -281,9 +305,9 @@ describe('TemplateTable', () => {
     render(
       <TemplateTable
         templates={[template]}
-        reload={jest.fn()}
-        editTemplate={jest.fn()}
-        cloneTemplate={jest.fn()}
+        reload={vi.fn()}
+        editTemplate={vi.fn()}
+        cloneTemplate={vi.fn()}
         history={createHistory()}
       />
     );
@@ -292,15 +316,15 @@ describe('TemplateTable', () => {
   });
 
   it('calls editTemplate when Edit is clicked', () => {
-    const editTemplate = jest.fn();
+    const editTemplate = vi.fn();
     const template = createTemplate({ name: 't1' });
 
     render(
       <TemplateTable
         templates={[template]}
-        reload={jest.fn()}
+        reload={vi.fn()}
         editTemplate={editTemplate}
-        cloneTemplate={jest.fn()}
+        cloneTemplate={vi.fn()}
         history={createHistory()}
       />
     );
@@ -310,14 +334,14 @@ describe('TemplateTable', () => {
   });
 
   it('calls cloneTemplate when Clone is clicked', () => {
-    const cloneTemplate = jest.fn();
+    const cloneTemplate = vi.fn();
     const template = createTemplate({ name: 't1' });
 
     render(
       <TemplateTable
         templates={[template]}
-        reload={jest.fn()}
-        editTemplate={jest.fn()}
+        reload={vi.fn()}
+        editTemplate={vi.fn()}
         cloneTemplate={cloneTemplate}
         history={createHistory()}
       />
@@ -333,9 +357,9 @@ describe('TemplateTable', () => {
     render(
       <TemplateTable
         templates={[template]}
-        reload={jest.fn()}
-        editTemplate={jest.fn()}
-        cloneTemplate={jest.fn()}
+        reload={vi.fn()}
+        editTemplate={vi.fn()}
+        cloneTemplate={vi.fn()}
         history={createHistory()}
       />
     );
@@ -352,9 +376,9 @@ describe('TemplateTable', () => {
     render(
       <TemplateTable
         templates={[t1, t2]}
-        reload={jest.fn()}
-        editTemplate={jest.fn()}
-        cloneTemplate={jest.fn()}
+        reload={vi.fn()}
+        editTemplate={vi.fn()}
+        cloneTemplate={vi.fn()}
         history={createHistory()}
       />
     );
@@ -368,9 +392,9 @@ describe('TemplateTable', () => {
     render(
       <TemplateTable
         templates={[createTemplate()]}
-        reload={jest.fn()}
-        editTemplate={jest.fn()}
-        cloneTemplate={jest.fn()}
+        reload={vi.fn()}
+        editTemplate={vi.fn()}
+        cloneTemplate={vi.fn()}
         history={createHistory()}
       />
     );
@@ -391,9 +415,9 @@ describe('TemplateTable', () => {
     render(
       <TemplateTable
         templates={[createTemplate({ name: 't1' })]}
-        reload={jest.fn()}
-        editTemplate={jest.fn()}
-        cloneTemplate={jest.fn()}
+        reload={vi.fn()}
+        editTemplate={vi.fn()}
+        cloneTemplate={vi.fn()}
         history={createHistory()}
       />
     );
@@ -412,9 +436,9 @@ describe('TemplateTable', () => {
     render(
       <TemplateTable
         templates={[template]}
-        reload={jest.fn()}
-        editTemplate={jest.fn()}
-        cloneTemplate={jest.fn()}
+        reload={vi.fn()}
+        editTemplate={vi.fn()}
+        cloneTemplate={vi.fn()}
         history={createHistory()}
       />
     );

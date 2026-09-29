@@ -5,25 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../data_view_manager/constants';
 import { CellActions } from './cell_actions';
 
-const MockedSecurityCellActions = jest.fn(({ children }) => <>{children}</>);
+const MockedSecurityCellActions = vi.fn(({ children }) => <>{children}</>);
 
-jest.mock('../../../common/components/cell_actions', () => ({
-  ...jest.requireActual('../../../common/components/cell_actions'),
-  SecurityCellActions: (props: { children?: React.ReactNode } & Record<string, unknown>) => {
-    MockedSecurityCellActions(props);
-    return <>{props.children}</>;
-  },
-}));
+vi.mock('../../../common/components/cell_actions', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/components/cell_actions')),
+      SecurityCellActions: (props: { children?: React.ReactNode } & Record<string, unknown>) => {
+        MockedSecurityCellActions(props);
+        return <>{props.children}</>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CellActions (attack details flyout)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('passes triggerId, sourcererScopeId, data, and metadata to SecurityCellActions', () => {

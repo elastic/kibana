@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { generateFileHashMock, getFileCacheKeyMock } from './file_hash.test.mocks';
 
 import { resolve } from 'path';
@@ -14,10 +17,10 @@ import type { Stats } from 'fs';
 import { getFileHash } from './file_hash';
 import type { IFileHashCache } from './file_hash_cache';
 
-const mockedCache = (): jest.Mocked<IFileHashCache> => ({
-  del: jest.fn(),
-  get: jest.fn(),
-  set: jest.fn(),
+const mockedCache = (): Mocked<IFileHashCache> => ({
+  del: vi.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
 });
 
 describe('getFileHash', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -20,13 +22,13 @@ const baseProps: ApprovalContentProps = {
   comment: 'Isolate the compromised host.',
   primaryAction: {
     label: 'Approve',
-    onClick: jest.fn(),
+    onClick: vi.fn(),
     'data-test-subj': 'content-confirm',
   },
   secondaryActions: [
     {
       label: 'Cancel',
-      onClick: jest.fn(),
+      onClick: vi.fn(),
       'data-test-subj': 'content-cancel',
     },
   ],
@@ -43,7 +45,7 @@ const isBefore = (first: Element, second: Element) =>
 
 describe('ApprovalContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the header when showHeader is true (default)', () => {
@@ -100,7 +102,7 @@ describe('ApprovalContent', () => {
   it('renders the icon a secondary action asks for', () => {
     renderContent({
       secondaryActions: [
-        { label: 'Dismiss', iconType: 'cross', onClick: jest.fn(), 'data-test-subj': 'content-x' },
+        { label: 'Dismiss', iconType: 'cross', onClick: vi.fn(), 'data-test-subj': 'content-x' },
       ],
     });
     expect(screen.getByTestId('content-x').querySelector('[data-euiicon-type]')).toBeTruthy();
@@ -117,7 +119,7 @@ describe('ApprovalContent', () => {
   });
 
   it('calls primaryAction.onClick when primary button is clicked', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderContent({
       primaryAction: { label: 'Approve', onClick, 'data-test-subj': 'content-confirm' },
     });
@@ -126,7 +128,7 @@ describe('ApprovalContent', () => {
   });
 
   it('calls secondaryAction.onClick when secondary button is clicked', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderContent({
       secondaryActions: [{ label: 'Cancel', onClick, 'data-test-subj': 'content-cancel' }],
     });
@@ -153,7 +155,7 @@ describe('ApprovalContent', () => {
         id: 'always-allow',
         label: 'Always allow',
         checked: false,
-        onChange: jest.fn(),
+        onChange: vi.fn(),
       },
     });
     expect(screen.getByRole('checkbox')).toBeInTheDocument();
@@ -165,7 +167,7 @@ describe('ApprovalContent', () => {
   });
 
   it('calls alwaysAllow.onChange when checkbox is toggled', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderContent({
       alwaysAllow: {
         id: 'always-allow',

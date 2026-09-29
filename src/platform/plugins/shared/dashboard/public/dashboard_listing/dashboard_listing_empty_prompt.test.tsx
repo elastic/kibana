@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,21 +19,21 @@ import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 import type { DashboardListingEmptyPromptProps } from './dashboard_listing_empty_prompt';
 import { DashboardListingEmptyPrompt } from './dashboard_listing_empty_prompt';
 
-jest.mock('./confirm_overlays', () => {
-  const originalModule = jest.requireActual('./confirm_overlays');
+vi.mock('./confirm_overlays', async () => {
+  const originalModule = (await vi.importActual('./confirm_overlays'));
   return {
     __esModule: true,
     ...originalModule,
-    confirmDiscardUnsavedChanges: jest.fn(),
+    confirmDiscardUnsavedChanges: vi.fn(),
   };
 });
 
 const renderDashboardListingEmptyPrompt = (props: Partial<DashboardListingEmptyPromptProps> = {}) =>
   render(
     <DashboardListingEmptyPrompt
-      createItem={jest.fn()}
-      goToDashboard={jest.fn()}
-      setUnsavedDashboardIds={jest.fn()}
+      createItem={vi.fn()}
+      goToDashboard={vi.fn()}
+      setUnsavedDashboardIds={vi.fn()}
       unsavedDashboardIds={[]}
       useSessionStorageIntegration={true}
       disableCreateDashboardButton={false}
@@ -68,7 +70,7 @@ test('renders continue button when no dashboards exist but one is in progress', 
   (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
 
   const props = {
-    goToDashboard: jest.fn(),
+    goToDashboard: vi.fn(),
     unsavedDashboardIds: ['newDashboard'],
     useSessionStorageIntegration: true,
   };

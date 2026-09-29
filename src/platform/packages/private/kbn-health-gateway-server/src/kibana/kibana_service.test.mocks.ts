@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockReadFileSync = jest.fn();
-jest.doMock('fs', () => ({ readFileSync: mockReadFileSync }));
+import { vi } from 'vitest';
+
+export const mockReadFileSync = vi.fn();
+vi.doMock('fs', () => {
+      const mocked = { readFileSync: mockReadFileSync };
+      return { ...mocked, default: mocked };
+    });

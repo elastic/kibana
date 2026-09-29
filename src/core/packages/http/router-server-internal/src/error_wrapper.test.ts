@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 import type {
   KibanaResponseFactory,
@@ -35,7 +37,7 @@ describe('wrapErrors', () => {
   });
 
   it('should pass-though call parameters to the handler', async () => {
-    const handler = jest.fn();
+    const handler = vi.fn();
     const wrapped = wrapErrors(handler);
     await wrapped(context, request, response);
     expect(handler).toHaveBeenCalledWith(context, request, response);

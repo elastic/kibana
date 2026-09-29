@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -12,7 +14,7 @@ import { TestProviders } from '../../../common/mock';
 
 import { Ja3Fingerprint } from '.';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 describe('Ja3Fingerprint', () => {
   test('renders the expected label', () => {

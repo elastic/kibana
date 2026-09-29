@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { agentPolicyService } from '../../services';
@@ -19,118 +22,133 @@ import {
   getEnrollmentSettingsHandler,
 } from './enrollment_settings_handler';
 
-jest.mock('../../services', () => ({
-  agentPolicyService: {
-    get: jest.fn(),
-    getByIds: jest.fn(),
-  },
-  appContextService: {
-    getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
-  },
-  downloadSourceService: {
-    list: jest.fn().mockResolvedValue({
-      items: [
-        {
-          id: 'source-1',
-          name: 'Source 1',
-          host: 'https://source-1/',
-          is_default: true,
-          auth: {
-            username: 'elastic',
-            password: 'source-password',
-            api_key: 'source-api-key',
-          },
-          ssl: {
-            certificate_authorities: ['/path/to/source-ca'],
-            certificate: '/path/to/source-cert',
-            key: '/path/to/source-key',
-          },
-          secrets: {
-            ssl: {
-              key: { id: 'source-ssl-key-secret' },
+vi.mock('../../services', () => {
+      const mocked = {
+      agentPolicyService: {
+        get: vi.fn(),
+        getByIds: vi.fn(),
+      },
+      appContextService: {
+        getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
+      },
+      downloadSourceService: {
+        list: vi.fn().mockResolvedValue({
+          items: [
+            {
+              id: 'source-1',
+              name: 'Source 1',
+              host: 'https://source-1/',
+              is_default: true,
+              auth: {
+                username: 'elastic',
+                password: 'source-password',
+                api_key: 'source-api-key',
+              },
+              ssl: {
+                certificate_authorities: ['/path/to/source-ca'],
+                certificate: '/path/to/source-cert',
+                key: '/path/to/source-key',
+              },
+              secrets: {
+                ssl: {
+                  key: { id: 'source-ssl-key-secret' },
+                },
+              },
             },
+            {
+              id: 'source-2',
+              name: 'Source 2',
+              host: 'https://source-2/',
+              is_default: false,
+              proxy_id: 'proxy-1',
+            },
+          ],
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../services/fleet_server', () => {
+      const mocked = {
+      getFleetServerPolicies: vi.fn(),
+      hasFleetServersForPolicies: vi.fn().mockResolvedValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../services/fleet_server_host', () => {
+      const mocked = {
+      getFleetServerHostsForAgentPolicy: vi.fn().mockResolvedValue({
+        id: 'host-1',
+        is_default: true,
+        is_preconfigured: true,
+        name: 'Host 1',
+        host_urls: ['http://localhost:8220'],
+        proxy_id: 'proxy-1',
+        ssl: {
+          certificate: '/path/to/cert',
+          certificate_authorities: ['/path/to/ca'],
+          key: '/path/to/key',
+          es_certificate: '/path/to/es-cert',
+          es_key: '/path/to/es-key',
+          agent_certificate: '/path/to/agent-cert',
+          agent_key: '/path/to/agent-key',
+        },
+        secrets: {
+          ssl: {
+            key: { id: 'host-key-secret' },
+            es_key: { id: 'host-es-key-secret' },
+            agent_key: { id: 'host-agent-key-secret' },
           },
         },
-        {
-          id: 'source-2',
-          name: 'Source 2',
-          host: 'https://source-2/',
-          is_default: false,
-          proxy_id: 'proxy-1',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../services/fleet_proxies', () => {
+      const mocked = {
+      getFleetProxy: vi.fn().mockResolvedValue({
+        id: 'proxy-1',
+        name: 'Proxy 1',
+        url: 'https://proxy-1/',
+        is_preconfigured: true,
+        proxy_headers: {
+          authorization: 'Bearer secret-token',
         },
-      ],
-    }),
-  },
-}));
+        certificate: 'proxy-cert',
+        certificate_authorities: 'proxy-ca',
+        certificate_key: 'proxy-key',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/fleet_server', () => ({
-  getFleetServerPolicies: jest.fn(),
-  hasFleetServersForPolicies: jest.fn().mockResolvedValue(true),
-}));
-
-jest.mock('../../services/fleet_server_host', () => ({
-  getFleetServerHostsForAgentPolicy: jest.fn().mockResolvedValue({
-    id: 'host-1',
-    is_default: true,
-    is_preconfigured: true,
-    name: 'Host 1',
-    host_urls: ['http://localhost:8220'],
-    proxy_id: 'proxy-1',
-    ssl: {
-      certificate: '/path/to/cert',
-      certificate_authorities: ['/path/to/ca'],
-      key: '/path/to/key',
-      es_certificate: '/path/to/es-cert',
-      es_key: '/path/to/es-key',
-      agent_certificate: '/path/to/agent-cert',
-      agent_key: '/path/to/agent-key',
-    },
-    secrets: {
-      ssl: {
-        key: { id: 'host-key-secret' },
-        es_key: { id: 'host-es-key-secret' },
-        agent_key: { id: 'host-agent-key-secret' },
-      },
-    },
-  }),
-}));
-
-jest.mock('../../services/fleet_proxies', () => ({
-  getFleetProxy: jest.fn().mockResolvedValue({
-    id: 'proxy-1',
-    name: 'Proxy 1',
-    url: 'https://proxy-1/',
-    is_preconfigured: true,
-    proxy_headers: {
-      authorization: 'Bearer secret-token',
-    },
-    certificate: 'proxy-cert',
-    certificate_authorities: 'proxy-ca',
-    certificate_key: 'proxy-key',
-  }),
-}));
-
-jest.mock('../../services/agent_policies', () => ({
-  getDataOutputForAgentPolicy: jest.fn().mockResolvedValue({
-    id: 'output-1',
-    name: 'Default output',
-    type: 'elasticsearch',
-    is_default: true,
-    is_default_monitoring: true,
-    hosts: ['https://elasticsearch:9200'],
-    proxy_id: 'proxy-1',
-    ssl: {
-      certificate: '/path/to/output-cert',
-      key: '/path/to/output-key',
-      certificate_authorities: ['/path/to/output-ca'],
-    },
-    secrets: {
-      ssl: {
-        key: { id: 'output-ssl-key-secret' },
-      },
-    },
-  }),
-}));
+vi.mock('../../services/agent_policies', () => {
+      const mocked = {
+      getDataOutputForAgentPolicy: vi.fn().mockResolvedValue({
+        id: 'output-1',
+        name: 'Default output',
+        type: 'elasticsearch',
+        is_default: true,
+        is_default_monitoring: true,
+        hosts: ['https://elasticsearch:9200'],
+        proxy_id: 'proxy-1',
+        ssl: {
+          certificate: '/path/to/output-cert',
+          key: '/path/to/output-key',
+          certificate_authorities: ['/path/to/output-ca'],
+        },
+        secrets: {
+          ssl: {
+            key: { id: 'output-ssl-key-secret' },
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EnrollmentSettingsHandler utils', () => {
   const mockSoClient = savedObjectsClientMock.create();
@@ -231,7 +249,7 @@ describe('EnrollmentSettingsHandler utils', () => {
     });
 
     it('returns fleet server policy when specified agent policy ID is a fleet server policy', async () => {
-      (agentPolicyService.get as jest.Mock).mockResolvedValueOnce({
+      (agentPolicyService.get as Mock).mockResolvedValueOnce({
         ...mockFleetServerPolicies[1],
         package_policies: [mockPackagePolicies[1]],
       });
@@ -244,7 +262,7 @@ describe('EnrollmentSettingsHandler utils', () => {
     });
 
     it('returns scoped agent policy when specified agent policy ID is not a fleet server policy', async () => {
-      (agentPolicyService.get as jest.Mock).mockResolvedValueOnce({
+      (agentPolicyService.get as Mock).mockResolvedValueOnce({
         ...mockAgentPolicies[1],
         package_policies: [mockPackagePolicies[2]],
       });
@@ -257,7 +275,7 @@ describe('EnrollmentSettingsHandler utils', () => {
     });
 
     it('returns no policies when specified agent policy ID is not found', async () => {
-      (agentPolicyService.get as jest.Mock).mockResolvedValueOnce(undefined);
+      (agentPolicyService.get as Mock).mockResolvedValueOnce(undefined);
       const { fleetServerPolicies, scopedAgentPolicy } = await getFleetServerOrAgentPolicies(
         mockSoClient,
         'agent-policy-3'
@@ -306,7 +324,7 @@ describe('EnrollmentSettingsHandler utils', () => {
       beforeEach(() => {
         context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
         response = httpServerMock.createResponseFactory();
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('should return valid enrollment settings', async () => {
@@ -321,7 +339,7 @@ describe('EnrollmentSettingsHandler utils', () => {
             fleet_server_host_id: undefined,
           },
         ];
-        (getFleetServerPolicies as jest.Mock).mockResolvedValueOnce(fleetServerPolicies);
+        (getFleetServerPolicies as Mock).mockResolvedValueOnce(fleetServerPolicies);
         const expectedResponse = {
           fleet_server: {
             has_active: true,
@@ -392,7 +410,7 @@ describe('EnrollmentSettingsHandler utils', () => {
           body: expectedResponse,
         });
 
-        const actualBody = (response.ok as jest.Mock).mock.calls[0][0].body;
+        const actualBody = (response.ok as Mock).mock.calls[0][0].body;
         expect(actualBody.download_source?.auth?.password).toBeUndefined();
         expect(actualBody.download_source?.auth?.api_key).toBeUndefined();
         expect(actualBody.download_source?.ssl?.key).toBeUndefined();

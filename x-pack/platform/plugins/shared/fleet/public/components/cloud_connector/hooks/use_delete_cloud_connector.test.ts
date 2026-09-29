@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,24 +17,24 @@ import { CLOUD_CONNECTOR_API_ROUTES } from '../../../constants';
 
 import { useDeleteCloudConnector } from './use_delete_cloud_connector';
 
-jest.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public');
 
 const mockHttp = {
-  delete: jest.fn(),
+  delete: vi.fn(),
 };
 
 const mockToasts = {
-  addSuccess: jest.fn(),
-  addError: jest.fn(),
+  addSuccess: vi.fn(),
+  addError: vi.fn(),
 };
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 describe('useDeleteCloudConnector', () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
 
     queryClient = new QueryClient({
       defaultOptions: {
@@ -60,7 +63,7 @@ describe('useDeleteCloudConnector', () => {
 
   afterEach(() => {
     queryClient.clear();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -124,7 +127,7 @@ describe('useDeleteCloudConnector', () => {
 
   it('should call onSuccess callback on successful deletion', async () => {
     mockHttp.delete.mockResolvedValue({ id: 'connector-123' });
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     const { result } = renderHook(() => useDeleteCloudConnector('connector-123', onSuccess), {
       wrapper,
@@ -195,7 +198,7 @@ describe('useDeleteCloudConnector', () => {
       response: {},
     });
     mockHttp.delete.mockRejectedValue(httpError);
-    const onError = jest.fn();
+    const onError = vi.fn();
 
     const { result } = renderHook(
       () => useDeleteCloudConnector('connector-123', undefined, onError),

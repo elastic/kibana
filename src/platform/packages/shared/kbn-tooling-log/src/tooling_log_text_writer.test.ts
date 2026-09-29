@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLogTextWriter } from './tooling_log_text_writer';
 
 it('throws error if created with invalid level', () => {
@@ -42,7 +44,7 @@ const types = ['verbose', 'debug', 'info', 'warning', 'error', 'success'] as con
 for (const level of levels) {
   for (const type of types) {
     it(`level:${level}/type:${type} snapshots`, () => {
-      const write = jest.fn();
+      const write = vi.fn();
       const writer = new ToolingLogTextWriter({
         level,
         writeTo: {
@@ -67,7 +69,7 @@ for (const level of levels) {
 }
 
 it('formats %s patterns and indents multi-line messages correctly', () => {
-  const write = jest.fn();
+  const write = vi.fn();
   const writer = new ToolingLogTextWriter({
     level: 'debug',
     writeTo: {
@@ -91,7 +93,7 @@ it('formats %s patterns and indents multi-line messages correctly', () => {
 });
 
 it('does not write messages from sources in ignoreSources', () => {
-  const write = jest.fn();
+  const write = vi.fn();
   const writer = new ToolingLogTextWriter({
     ignoreSources: ['myIgnoredSource'],
     level: 'debug',
@@ -117,7 +119,7 @@ it('does not write messages from sources in ignoreSources', () => {
 });
 
 it('never ignores write messages from the kibana elasticsearch.deprecation logger context', () => {
-  const write = jest.fn();
+  const write = vi.fn();
   const writer = new ToolingLogTextWriter({
     ignoreSources: ['myIgnoredSource'],
     level: 'debug',

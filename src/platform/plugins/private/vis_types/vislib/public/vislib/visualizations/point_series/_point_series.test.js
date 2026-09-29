@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { PointSeries } from './_point_series';
 
 describe('Point Series', () => {
@@ -16,7 +18,7 @@ describe('Point Series', () => {
     beforeEach(() => {
       handler = {
         visConfig: {
-          get: jest.fn(),
+          get: vi.fn(),
         },
         pointSeries: {
           chartConfig: {

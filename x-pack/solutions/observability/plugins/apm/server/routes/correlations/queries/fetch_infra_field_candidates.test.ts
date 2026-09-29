@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   HOST_NAME,
@@ -21,7 +23,7 @@ const makeFieldEntry = () => ({
   keyword: { type: 'keyword', metadata_field: false, searchable: true, aggregatable: true },
 });
 
-const mockFieldCaps = jest.fn();
+const mockFieldCaps = vi.fn();
 const mockApmEventClient = {
   fieldCaps: mockFieldCaps,
 } as unknown as APMEventClient;

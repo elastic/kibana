@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AvailabilityContext } from '@kbn/agent-builder-server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { contextEngineSkillAvailability } from './context_engine_skill_availability';
 
-const contextWith = (get: jest.Mock): AvailabilityContext =>
+const contextWith = (get: Mock): AvailabilityContext =>
   ({ uiSettings: { get }, request: {}, spaceId: 'default' } as unknown as AvailabilityContext);
 
 describe('contextEngineSkillAvailability', () => {
@@ -18,7 +21,7 @@ describe('contextEngineSkillAvailability', () => {
   });
 
   it('is available when Context Engine is enabled', async () => {
-    const get = jest.fn().mockResolvedValue(true);
+    const get = vi.fn().mockResolvedValue(true);
 
     await expect(contextEngineSkillAvailability.handler(contextWith(get))).resolves.toEqual({
       status: 'available',
@@ -27,7 +30,7 @@ describe('contextEngineSkillAvailability', () => {
   });
 
   it('is unavailable when Context Engine is disabled', async () => {
-    const get = jest.fn().mockResolvedValue(false);
+    const get = vi.fn().mockResolvedValue(false);
 
     await expect(contextEngineSkillAvailability.handler(contextWith(get))).resolves.toEqual({
       status: 'unavailable',
@@ -36,7 +39,7 @@ describe('contextEngineSkillAvailability', () => {
   });
 
   it('fails closed when the setting cannot be read', async () => {
-    const get = jest.fn().mockRejectedValue(new Error('boom'));
+    const get = vi.fn().mockRejectedValue(new Error('boom'));
 
     await expect(contextEngineSkillAvailability.handler(contextWith(get))).resolves.toMatchObject({
       status: 'unavailable',

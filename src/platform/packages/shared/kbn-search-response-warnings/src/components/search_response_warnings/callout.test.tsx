@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -21,7 +23,7 @@ describe('SearchResponseWarningsCallout', () => {
       <SearchResponseWarningsCallout
         warnings={warnings}
         isDismissed={false}
-        onDismiss={jest.fn()}
+        onDismiss={vi.fn()}
       />
     );
 
@@ -30,7 +32,7 @@ describe('SearchResponseWarningsCallout', () => {
 
   it('renders nothing when there are no warnings', () => {
     const { container } = render(
-      <SearchResponseWarningsCallout warnings={[]} isDismissed={false} onDismiss={jest.fn()} />
+      <SearchResponseWarningsCallout warnings={[]} isDismissed={false} onDismiss={vi.fn()} />
     );
 
     expect(container).toBeEmptyDOMElement();
@@ -38,7 +40,7 @@ describe('SearchResponseWarningsCallout', () => {
 
   it('hides the callout when isDismissed is true', () => {
     render(
-      <SearchResponseWarningsCallout warnings={warnings} isDismissed={true} onDismiss={jest.fn()} />
+      <SearchResponseWarningsCallout warnings={warnings} isDismissed={true} onDismiss={vi.fn()} />
     );
 
     expect(screen.queryByTestId('searchResponseWarningsCallout')).not.toBeInTheDocument();
@@ -46,7 +48,7 @@ describe('SearchResponseWarningsCallout', () => {
 
   it('calls onDismiss when the callout is dismissed', async () => {
     const user = userEvent.setup();
-    const onDismiss = jest.fn();
+    const onDismiss = vi.fn();
     render(
       <SearchResponseWarningsCallout
         warnings={warnings}

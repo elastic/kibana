@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import {
@@ -34,7 +36,7 @@ const ruleTuning: Worker = {
   },
 };
 
-const renderSettings = (onExtrasChange = jest.fn()) => {
+const renderSettings = (onExtrasChange = vi.fn()) => {
   const { rerender } = render(
     <RuleTuningSettings
       worker={ruleTuning}
@@ -89,7 +91,7 @@ describe('RuleTuningSettings', () => {
   it.each(FIELDS)(
     'hands back the complete extras object when a valid $name is committed on blur',
     ({ testSubj, valid, key }) => {
-      const onExtrasChange = jest.fn();
+      const onExtrasChange = vi.fn();
       renderSettings(onExtrasChange);
       const field = screen.getByTestId(testSubj);
 
@@ -105,7 +107,7 @@ describe('RuleTuningSettings', () => {
   it.each(FIELDS)(
     'reverts an out-of-range $name on blur instead of emitting it',
     ({ testSubj, saved, outOfRange }) => {
-      const onExtrasChange = jest.fn();
+      const onExtrasChange = vi.fn();
       renderSettings(onExtrasChange);
       const field = screen.getByTestId(testSubj);
 
@@ -123,7 +125,7 @@ describe('RuleTuningSettings', () => {
   it.each(FIELDS)(
     'holds incomplete $name input while typing and reverts it on blur',
     ({ testSubj, saved }) => {
-      const onExtrasChange = jest.fn();
+      const onExtrasChange = vi.fn();
       renderSettings(onExtrasChange);
       const field = screen.getByTestId(testSubj);
 
@@ -146,7 +148,7 @@ describe('RuleTuningSettings', () => {
       <RuleTuningSettings
         worker={ruleTuning}
         settings={{ ...ruleTuning.settings, extras: RULE_TUNING_DEFAULT_EXTRAS }}
-        onExtrasChange={jest.fn()}
+        onExtrasChange={vi.fn()}
       />
     );
 
@@ -194,7 +196,7 @@ describe('RuleTuningSettings', () => {
       <RuleTuningSettings
         worker={ruleTuning}
         settings={{ ...ruleTuning.settings, extras: undefined }}
-        onExtrasChange={jest.fn()}
+        onExtrasChange={vi.fn()}
       />
     );
 
@@ -206,7 +208,7 @@ describe('RuleTuningSettings', () => {
       <RuleTuningSettings
         worker={ruleTuning}
         settings={{ ...ruleTuning.settings, extras: { analysisWindowDays: 21 } }}
-        onExtrasChange={jest.fn()}
+        onExtrasChange={vi.fn()}
       />
     );
 

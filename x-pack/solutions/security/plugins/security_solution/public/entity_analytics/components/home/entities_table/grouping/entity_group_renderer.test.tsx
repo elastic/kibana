@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { RawBucket } from '@kbn/grouping';
@@ -14,25 +16,34 @@ import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { ENTITY_GROUPING_OPTIONS, TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT } from '../constants';
 import { TestProviders } from '../../../../../common/mock';
 
-const mockOpenRightPanel = jest.fn();
+const mockOpenRightPanel = vi.fn();
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openRightPanel: mockOpenRightPanel,
-    openFlyout: jest.fn(),
-    closeFlyout: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: () => ({
+        openRightPanel: mockOpenRightPanel,
+        openFlyout: vi.fn(),
+        closeFlyout: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => false,
-}));
+vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => {
+      const mocked = {
+      useIsNewFlyoutEnabled: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../flyout_v2/use_flyout_api', () => ({
-  useFlyoutApi: () => ({
-    openEntityFlyout: jest.fn(),
-  }),
-}));
+vi.mock('../../../../../flyout_v2/use_flyout_api', () => {
+      const mocked = {
+      useFlyoutApi: () => ({
+        openEntityFlyout: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockBucket = (
   overrides: Partial<RawBucket<EntitiesGroupingAggregation>> = {}

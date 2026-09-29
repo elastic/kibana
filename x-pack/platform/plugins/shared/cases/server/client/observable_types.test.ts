@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Configurations } from '../../common/types/domain/configure/v1';
 import { OBSERVABLE_TYPES_BUILTIN } from '../../common/constants';
 import { createCasesClientMock } from './mocks';
@@ -19,7 +21,7 @@ const arrayToMap = (arr: ObservableType[]): Map<string, ObservableType> => {
 
 describe('getAvailableObservableTypesMap', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return a map of available observable types', async () => {
@@ -28,7 +30,7 @@ describe('getAvailableObservableTypesMap', () => {
       { key: 'type2', label: 'test 2' },
     ];
 
-    jest.mocked(mockCasesClient.configure.get).mockResolvedValue([
+    vi.mocked(mockCasesClient.configure.get).mockResolvedValue([
       {
         observableTypes: mockObservableTypes,
       },
@@ -40,7 +42,7 @@ describe('getAvailableObservableTypesMap', () => {
   });
 
   it('should return only built-in observable types if no types are configured', async () => {
-    jest.mocked(mockCasesClient.configure.get).mockResolvedValue([
+    vi.mocked(mockCasesClient.configure.get).mockResolvedValue([
       {
         observableTypes: [],
       },
@@ -52,7 +54,7 @@ describe('getAvailableObservableTypesMap', () => {
   });
 
   it('should handle errors and return an empty map', async () => {
-    jest
+    vi
       .mocked(mockCasesClient.configure.get)
       .mockRejectedValue(new Error('Failed to fetch configuration'));
 

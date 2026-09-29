@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import type { MonacoYamlOptions } from 'monaco-yaml';
 import React from 'react';
@@ -15,25 +18,25 @@ import { YamlEditor } from './yaml_editor';
 import { yamlLanguageService } from './yaml_language_service';
 
 // Create a mock for monacoYaml
-const mockDispose = jest.fn();
-const mockUpdate = jest.fn();
+const mockDispose = vi.fn();
+const mockUpdate = vi.fn();
 
 // Mock the yaml_language_service
-jest.mock('./yaml_language_service', () => {
+vi.mock('./yaml_language_service', () => {
   // Create a closure to hold the mock instance
   const mockState = { instance: null };
 
   return {
     yamlLanguageService: {
-      initialize: jest.fn().mockImplementation(async () => {
-        const { configureMonacoYamlSchema } = jest.requireMock('@kbn/monaco');
+      initialize: vi.fn().mockImplementation(async () => {
+        const { configureMonacoYamlSchema } = (await vi.importMock('@kbn/monaco'));
         mockState.instance = await configureMonacoYamlSchema();
         return mockState.instance;
       }),
-      update: jest.fn().mockImplementation(async (schemas) => {
+      update: vi.fn().mockImplementation(async (schemas) => {
         if (!mockState.instance) {
           // Initialize if not already done
-          const { configureMonacoYamlSchema } = jest.requireMock('@kbn/monaco');
+          const { configureMonacoYamlSchema } = (await vi.importMock('@kbn/monaco'));
           // eslint-disable-next-line require-atomic-updates
           mockState.instance = await configureMonacoYamlSchema(schemas);
           // @ts-expect-error - mockState.instance is not typed
@@ -47,7 +50,7 @@ jest.mock('./yaml_language_service', () => {
           });
         }
       }),
-      clearSchemas: jest.fn().mockImplementation(async () => {
+      clearSchemas: vi.fn().mockImplementation(async () => {
         // @ts-expect-error - mockState.instance is not typed
         if (mockState.instance && mockState.instance.update) {
           // @ts-expect-error - mockState.instance is not typed
@@ -59,7 +62,7 @@ jest.mock('./yaml_language_service', () => {
           });
         }
       }),
-      dispose: jest.fn().mockImplementation(() => {
+      dispose: vi.fn().mockImplementation(() => {
         // @ts-expect-error - mockState.instance is not typed
         if (mockState.instance && mockState.instance.dispose) {
           // @ts-expect-error - mockState.instance is not typed
@@ -67,20 +70,20 @@ jest.mock('./yaml_language_service', () => {
         }
         mockState.instance = null;
       }),
-      getInstance: jest.fn().mockImplementation(() => mockState.instance),
-      isInitialized: jest.fn().mockImplementation(() => mockState.instance !== null),
+      getInstance: vi.fn().mockImplementation(() => mockState.instance),
+      isInitialized: vi.fn().mockImplementation(() => mockState.instance !== null),
     },
   };
 });
 
 // Mock the CodeEditor component
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
+vi.mock('@kbn/code-editor', async () => {
+  const original = (await vi.importActual('@kbn/code-editor'));
   return {
     ...original,
     CodeEditor: (props: CodeEditorProps) => {
       // Use React from the outer scope
-      const { useEffect } = jest.requireActual('react');
+      const { useEffect } = require('react');
       const { editorWillUnmount, value, onChange } = props;
 
       // Store the editorWillUnmount callback so we can call it in tests
@@ -109,40 +112,46 @@ jest.mock('@kbn/code-editor', () => {
 });
 
 // Mock lodash debounce to execute immediately in tests
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  debounce: (fn: Function) => {
-    const debouncedFn = fn as Function & { flush: () => void; cancel: () => void };
-    debouncedFn.flush = () => {};
-    debouncedFn.cancel = () => {};
-    return debouncedFn;
-  },
-}));
+vi.mock('lodash', () => {
+      const mocked = {
+      ...require('lodash'),
+      debounce: (fn: Function) => {
+        const debouncedFn = fn as Function & { flush: () => void; cancel: () => void };
+        debouncedFn.flush = () => {};
+        debouncedFn.cancel = () => {};
+        return debouncedFn;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the configureMonacoYamlSchema function
-jest.mock('@kbn/monaco', () => ({
-  configureMonacoYamlSchema: jest.fn(() =>
-    Promise.resolve({
-      dispose: mockDispose,
-      update: mockUpdate,
-    })
-  ),
-}));
+vi.mock('@kbn/monaco', () => {
+      const mocked = {
+      configureMonacoYamlSchema: vi.fn(() =>
+        Promise.resolve({
+          dispose: mockDispose,
+          update: mockUpdate,
+        })
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('YamlEditor', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockDispose.mockClear();
     mockUpdate.mockClear();
     // Reset singleton by disposing the service
     yamlLanguageService.dispose();
     // Clear the dispose mock after calling it
-    jest.mocked(yamlLanguageService.dispose).mockClear();
+    vi.mocked(yamlLanguageService.dispose).mockClear();
   });
 
   describe('monacoYaml singleton behavior', () => {
     it('should create singleton on mount and clear schemas on unmount', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const schemas = [
         {
           uri: 'http://example.com/schema.json',
@@ -178,12 +187,12 @@ describe('YamlEditor', () => {
       expect(yamlLanguageService.dispose).not.toHaveBeenCalled();
     });
 
-    it('should not update schemas if singleton was never initialized', () => {
-      const onChange = jest.fn();
+    it('should not update schemas if singleton was never initialized', async () => {
+      const onChange = vi.fn();
 
       // Mock configureMonacoYamlSchema to never resolve
-      const monaco = jest.requireMock('@kbn/monaco');
-      (monaco.configureMonacoYamlSchema as jest.Mock).mockReturnValue(new Promise(() => {}));
+      const monaco = (await vi.importMock('@kbn/monaco'));
+      (monaco.configureMonacoYamlSchema as Mock).mockReturnValue(new Promise(() => {}));
 
       // Render the component
       const { unmount } = render(
@@ -198,7 +207,7 @@ describe('YamlEditor', () => {
       expect(yamlLanguageService.getInstance()).toBeNull();
 
       // Restore the mock
-      (monaco.configureMonacoYamlSchema as jest.Mock).mockImplementation(() =>
+      (monaco.configureMonacoYamlSchema as Mock).mockImplementation(() =>
         Promise.resolve({
           dispose: mockDispose,
           update: mockUpdate,
@@ -207,7 +216,7 @@ describe('YamlEditor', () => {
     });
 
     it('should persist singleton after unmount and remount', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const schemas = [
         {
           uri: 'http://example.com/schema.json',
@@ -236,7 +245,7 @@ describe('YamlEditor', () => {
       expect(yamlLanguageService.clearSchemas).toHaveBeenCalled();
 
       // Clear mocks
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       // Remount - should reuse the same singleton
       const { unmount: unmount2 } = render(
@@ -258,8 +267,8 @@ describe('YamlEditor', () => {
     });
 
     it('should clear singleton when any component unmounts', async () => {
-      const onChange1 = jest.fn();
-      const onChange2 = jest.fn();
+      const onChange1 = vi.fn();
+      const onChange2 = vi.fn();
       const schemas = [
         {
           uri: 'http://example.com/schema.json',
@@ -287,7 +296,7 @@ describe('YamlEditor', () => {
 
       // Both should use same singleton
       expect(yamlLanguageService.getInstance()).toBe(firstSingleton);
-      expect(jest.requireMock('@kbn/monaco').configureMonacoYamlSchema).toHaveBeenCalledTimes(1);
+      expect((await vi.importMock('@kbn/monaco')).configureMonacoYamlSchema).toHaveBeenCalledTimes(1);
 
       // Unmount first component - schemas are cleared but singleton persists
       unmount1();
@@ -303,8 +312,8 @@ describe('YamlEditor', () => {
     });
 
     it('should handle custom editorWillUnmount callback', async () => {
-      const onChange = jest.fn();
-      const customUnmount = jest.fn();
+      const onChange = vi.fn();
+      const customUnmount = vi.fn();
       const schemas = [
         {
           uri: 'http://example.com/schema.json',
@@ -336,9 +345,9 @@ describe('YamlEditor', () => {
     });
 
     it('should initialize singleton only once when multiple instances are rendered', async () => {
-      const onChange1 = jest.fn();
-      const onChange2 = jest.fn();
-      const onChange3 = jest.fn();
+      const onChange1 = vi.fn();
+      const onChange2 = vi.fn();
+      const onChange3 = vi.fn();
 
       const schemas1 = [
         {
@@ -357,8 +366,8 @@ describe('YamlEditor', () => {
       ];
 
       // Clear mocks to ensure clean count
-      jest.clearAllMocks();
-      const monaco = jest.requireMock('@kbn/monaco');
+      vi.clearAllMocks();
+      const monaco = (await vi.importMock('@kbn/monaco'));
 
       // Render first instance
       const { unmount: unmount1 } = render(
@@ -428,7 +437,7 @@ describe('YamlEditor', () => {
 
   describe('schema updates', () => {
     it('should update singleton when schemas change', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const initialSchemas = [
         {
           uri: 'http://example.com/schema1.json',
@@ -466,7 +475,7 @@ describe('YamlEditor', () => {
 
   describe('value and onChange behavior', () => {
     it('should update internal value and call onChange when text changes', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const initialValue = 'test: initial';
       const newValue = 'test: updated';
 
@@ -487,7 +496,7 @@ describe('YamlEditor', () => {
     });
 
     it('should update internal value when prop value changes', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const initialValue = 'test: initial';
       const newPropValue = 'test: from-props';
 
@@ -507,8 +516,8 @@ describe('YamlEditor', () => {
 
   describe('onSyncStateChange callback', () => {
     it('should call onSyncStateChange(false) then onSyncStateChange(true) when text changes', () => {
-      const onChange = jest.fn();
-      const onSyncStateChange = jest.fn();
+      const onChange = vi.fn();
+      const onSyncStateChange = vi.fn();
 
       const { container } = render(
         <YamlEditor
@@ -534,8 +543,8 @@ describe('YamlEditor', () => {
     });
 
     it('should call onSyncStateChange for each text change', () => {
-      const onChange = jest.fn();
-      const onSyncStateChange = jest.fn();
+      const onChange = vi.fn();
+      const onSyncStateChange = vi.fn();
 
       const { container } = render(
         <YamlEditor
@@ -562,7 +571,7 @@ describe('YamlEditor', () => {
     });
 
     it('should work without onSyncStateChange (optional prop)', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
 
       const { container } = render(
         <YamlEditor value="test: initial" onChange={onChange} schemas={null} />

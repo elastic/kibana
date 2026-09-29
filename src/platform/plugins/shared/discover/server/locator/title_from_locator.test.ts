@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IUiSettingsClient, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
@@ -60,7 +62,7 @@ beforeAll(async () => {
   };
 
   const soClientGet = soClient.get;
-  soClient.get = jest.fn().mockImplementation((type, id) => {
+  soClient.get = vi.fn().mockImplementation((type, id) => {
     if (id === mockSavedSearchId) return mockSavedSearch;
     return soClientGet(type, id);
   });
@@ -70,7 +72,7 @@ beforeEach(() => {
   mockPayload = [{ params: { savedSearchId: mockSavedSearchId } }];
   mockSavedSearch = { ...defaultSavedSearch, attributes: { ...defaultSavedSearch.attributes } };
   const uiSettingsGet = uiSettingsClient.get;
-  uiSettingsClient.get = jest.fn().mockImplementation((key: string) => {
+  uiSettingsClient.get = vi.fn().mockImplementation((key: string) => {
     if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
       return false; // this is the default for the real setting
     }

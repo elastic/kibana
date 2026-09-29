@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -16,18 +18,24 @@ const mockSkills = [
   { id: 'skill-3', name: 'Search', description: 'Search documents' },
 ];
 
-jest.mock('../../../../../../../hooks/use_conversation', () => ({
-  useAgentId: () => 'test-agent-id',
-}));
+vi.mock('../../../../../../../hooks/use_conversation', () => {
+      const mocked = {
+      useAgentId: () => 'test-agent-id',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../hooks/skills/use_agent_skills', () => ({
-  useAgentSkills: () => ({
-    skills: mockSkills,
-    isLoading: false,
-    error: null,
-    isError: false,
-  }),
-}));
+vi.mock('../../../../../../../hooks/skills/use_agent_skills', () => {
+      const mocked = {
+      useAgentSkills: () => ({
+        skills: mockSkills,
+        isLoading: false,
+        error: null,
+        isError: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProvider = (ui: React.ReactElement) => {
   return render(<EuiProvider>{ui}</EuiProvider>);
@@ -35,7 +43,7 @@ const renderWithProvider = (ui: React.ReactElement) => {
 
 describe('Skills', () => {
   it('renders all skills when query is empty', () => {
-    renderWithProvider(<Skills query="" onSelect={jest.fn()} />);
+    renderWithProvider(<Skills query="" onSelect={vi.fn()} />);
 
     expect(screen.getByText('Summarize')).toBeInTheDocument();
     expect(screen.getByText('Translate')).toBeInTheDocument();
@@ -43,7 +51,7 @@ describe('Skills', () => {
   });
 
   it('filters skills by query', () => {
-    renderWithProvider(<Skills query="sum" onSelect={jest.fn()} />);
+    renderWithProvider(<Skills query="sum" onSelect={vi.fn()} />);
 
     expect(screen.getByText('Summarize')).toBeInTheDocument();
     expect(screen.queryByText('Translate')).not.toBeInTheDocument();
@@ -51,16 +59,14 @@ describe('Skills', () => {
   });
 
   it('filters case-insensitively', () => {
-    renderWithProvider(<Skills query="TRANS" onSelect={jest.fn()} />);
+    renderWithProvider(<Skills query="TRANS" onSelect={vi.fn()} />);
 
     expect(screen.getByText('Translate')).toBeInTheDocument();
     expect(screen.queryByText('Summarize')).not.toBeInTheDocument();
   });
 
-  it('shows loading state when skills are loading', () => {
-    const useAgentSkillsMock = jest.requireMock(
-      '../../../../../../../hooks/skills/use_agent_skills'
-    ) as {
+  it('shows loading state when skills are loading', async () => {
+    const useAgentSkillsMock = (await vi.importMock('../../../../../../../hooks/skills/use_agent_skills')) as {
       useAgentSkills: () => unknown;
     };
     const originalImpl = useAgentSkillsMock.useAgentSkills;
@@ -71,7 +77,7 @@ describe('Skills', () => {
       isError: false,
     });
 
-    renderWithProvider(<Skills query="" onSelect={jest.fn()} />);
+    renderWithProvider(<Skills query="" onSelect={vi.fn()} />);
 
     expect(screen.getByTestId('skillsMenu-loading')).toBeInTheDocument();
 
@@ -80,27 +86,25 @@ describe('Skills', () => {
 
   describe('reporting content presence via onContentChange', () => {
     it('reports content when there are matching skills, for the current query', () => {
-      const onContentChange = jest.fn();
+      const onContentChange = vi.fn();
       renderWithProvider(
-        <Skills query="" onSelect={jest.fn()} onContentChange={onContentChange} />
+        <Skills query="" onSelect={vi.fn()} onContentChange={onContentChange} />
       );
 
       expect(onContentChange).toHaveBeenCalledWith(true, '');
     });
 
     it('reports no content once the query matches nothing, for the current query', () => {
-      const onContentChange = jest.fn();
+      const onContentChange = vi.fn();
       renderWithProvider(
-        <Skills query="nosuchskill" onSelect={jest.fn()} onContentChange={onContentChange} />
+        <Skills query="nosuchskill" onSelect={vi.fn()} onContentChange={onContentChange} />
       );
 
       expect(onContentChange).toHaveBeenCalledWith(false, 'nosuchskill');
     });
 
-    it('keeps reporting content across every word of a multi-word skill name', () => {
-      const useAgentSkillsMock = jest.requireMock(
-        '../../../../../../../hooks/skills/use_agent_skills'
-      ) as {
+    it('keeps reporting content across every word of a multi-word skill name', async () => {
+      const useAgentSkillsMock = (await vi.importMock('../../../../../../../hooks/skills/use_agent_skills')) as {
         useAgentSkills: () => unknown;
       };
       const originalImpl = useAgentSkillsMock.useAgentSkills;
@@ -111,15 +115,15 @@ describe('Skills', () => {
         isError: false,
       });
 
-      const onContentChange = jest.fn();
+      const onContentChange = vi.fn();
       const { rerender } = renderWithProvider(
-        <Skills query="Skill" onSelect={jest.fn()} onContentChange={onContentChange} />
+        <Skills query="Skill" onSelect={vi.fn()} onContentChange={onContentChange} />
       );
       expect(onContentChange).toHaveBeenLastCalledWith(true, 'Skill');
 
       rerender(
         <EuiProvider>
-          <Skills query="Skill With" onSelect={jest.fn()} onContentChange={onContentChange} />
+          <Skills query="Skill With" onSelect={vi.fn()} onContentChange={onContentChange} />
         </EuiProvider>
       );
       expect(onContentChange).toHaveBeenLastCalledWith(true, 'Skill With');
@@ -128,7 +132,7 @@ describe('Skills', () => {
         <EuiProvider>
           <Skills
             query="Skill With Spaces"
-            onSelect={jest.fn()}
+            onSelect={vi.fn()}
             onContentChange={onContentChange}
           />
         </EuiProvider>
@@ -138,10 +142,8 @@ describe('Skills', () => {
       useAgentSkillsMock.useAgentSkills = originalImpl;
     });
 
-    it('reports content while loading, even with zero skills so far', () => {
-      const useAgentSkillsMock = jest.requireMock(
-        '../../../../../../../hooks/skills/use_agent_skills'
-      ) as {
+    it('reports content while loading, even with zero skills so far', async () => {
+      const useAgentSkillsMock = (await vi.importMock('../../../../../../../hooks/skills/use_agent_skills')) as {
         useAgentSkills: () => unknown;
       };
       const originalImpl = useAgentSkillsMock.useAgentSkills;
@@ -152,9 +154,9 @@ describe('Skills', () => {
         isError: false,
       });
 
-      const onContentChange = jest.fn();
+      const onContentChange = vi.fn();
       renderWithProvider(
-        <Skills query="nosuchskill" onSelect={jest.fn()} onContentChange={onContentChange} />
+        <Skills query="nosuchskill" onSelect={vi.fn()} onContentChange={onContentChange} />
       );
 
       expect(onContentChange).toHaveBeenCalledWith(true, 'nosuchskill');

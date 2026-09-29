@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { fireEvent, screen } from '@testing-library/react';
@@ -19,7 +21,7 @@ function renderWithTheme(component: React.ReactNode, params?: any) {
 
 describe('CriticalPathToggle', () => {
   it('renders with correct label and calls onChange', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderWithTheme(<CriticalPathToggle checked={false} onChange={onChange} />);
 
     const toggle = screen.getByTestId('criticalPathToggle');

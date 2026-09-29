@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { useParams } from 'react-router-dom';
@@ -14,25 +17,25 @@ import { DeleteTimelineModal } from './delete_timeline_modal';
 import * as i18n from '../translations';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
   return {
     ...actual,
-    useParams: jest.fn(),
+    useParams: vi.fn(),
   };
 });
 
 describe('DeleteTimelineModal', () => {
   beforeAll(() => {
-    (useParams as jest.Mock).mockReturnValue({ tabName: TimelineTypeEnum.default });
+    (useParams as Mock).mockReturnValue({ tabName: TimelineTypeEnum.default });
   });
 
   test('it renders the expected title when a timeline is selected', () => {
     const wrapper = mountWithIntl(
       <DeleteTimelineModal
         title={'Privilege Escalation'}
-        onDelete={jest.fn()}
-        closeModal={jest.fn()}
+        onDelete={vi.fn()}
+        closeModal={vi.fn()}
       />
     );
 
@@ -45,8 +48,8 @@ describe('DeleteTimelineModal', () => {
     const wrapper = mountWithIntl(
       <DeleteTimelineModal
         title={'    Leading and trailing whitespace    '}
-        onDelete={jest.fn()}
-        closeModal={jest.fn()}
+        onDelete={vi.fn()}
+        closeModal={vi.fn()}
       />
     );
 
@@ -57,7 +60,7 @@ describe('DeleteTimelineModal', () => {
 
   test('it displays `Untitled Timeline` in the title when title is undefined', () => {
     const wrapper = mountWithIntl(
-      <DeleteTimelineModal onDelete={jest.fn()} closeModal={jest.fn()} />
+      <DeleteTimelineModal onDelete={vi.fn()} closeModal={vi.fn()} />
     );
 
     expect(wrapper.find('[data-test-subj="confirmModalTitleText"]').first().text()).toEqual(
@@ -67,7 +70,7 @@ describe('DeleteTimelineModal', () => {
 
   test('it displays `Untitled Timeline` in the title when title is null', () => {
     const wrapper = mountWithIntl(
-      <DeleteTimelineModal onDelete={jest.fn()} title={null} closeModal={jest.fn()} />
+      <DeleteTimelineModal onDelete={vi.fn()} title={null} closeModal={vi.fn()} />
     );
 
     expect(wrapper.find('[data-test-subj="confirmModalTitleText"]').first().text()).toEqual(
@@ -77,7 +80,7 @@ describe('DeleteTimelineModal', () => {
 
   test('it displays `Untitled Timeline` in the title when title is just whitespace', () => {
     const wrapper = mountWithIntl(
-      <DeleteTimelineModal onDelete={jest.fn()} title={'    '} closeModal={jest.fn()} />
+      <DeleteTimelineModal onDelete={vi.fn()} title={'    '} closeModal={vi.fn()} />
     );
 
     expect(wrapper.find('[data-test-subj="confirmModalTitleText"]').first().text()).toEqual(
@@ -89,8 +92,8 @@ describe('DeleteTimelineModal', () => {
     const wrapper = mountWithIntl(
       <DeleteTimelineModal
         title="Privilege Escalation"
-        onDelete={jest.fn()}
-        closeModal={jest.fn()}
+        onDelete={vi.fn()}
+        closeModal={vi.fn()}
       />
     );
 
@@ -100,12 +103,12 @@ describe('DeleteTimelineModal', () => {
   });
 
   test('it invokes closeModal when the Cancel button is clicked', () => {
-    const closeModal = jest.fn();
+    const closeModal = vi.fn();
 
     const wrapper = mountWithIntl(
       <DeleteTimelineModal
         title="Privilege Escalation"
-        onDelete={jest.fn()}
+        onDelete={vi.fn()}
         closeModal={closeModal}
       />
     );
@@ -116,13 +119,13 @@ describe('DeleteTimelineModal', () => {
   });
 
   test('it invokes onDelete when the Delete button is clicked', () => {
-    const onDelete = jest.fn();
+    const onDelete = vi.fn();
 
     const wrapper = mountWithIntl(
       <DeleteTimelineModal
         title="Privilege Escalation"
         onDelete={onDelete}
-        closeModal={jest.fn()}
+        closeModal={vi.fn()}
       />
     );
 
@@ -134,15 +137,15 @@ describe('DeleteTimelineModal', () => {
 
 describe('DeleteTimelineTemplateModal', () => {
   beforeAll(() => {
-    (useParams as jest.Mock).mockReturnValue({ tabName: TimelineTypeEnum.template });
+    (useParams as Mock).mockReturnValue({ tabName: TimelineTypeEnum.template });
   });
 
   test('it renders a deletion warning', () => {
     const wrapper = mountWithIntl(
       <DeleteTimelineModal
         title="Privilege Escalation"
-        onDelete={jest.fn()}
-        closeModal={jest.fn()}
+        onDelete={vi.fn()}
+        closeModal={vi.fn()}
       />
     );
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -14,22 +17,25 @@ import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { getDefaultAttackDiscoveryGraph } from '.';
 import { throwIfErrorCountsExceeded } from './throw_if_error_counts_exceeded';
 
-jest.mock('@kbn/langchain/server');
-jest.mock('@kbn/langchain/server/tracers/langsmith');
-jest.mock('.', () => ({
-  ...jest.requireActual('.'),
-  getDefaultAttackDiscoveryGraph: jest.fn(),
-}));
-jest.mock('./throw_if_error_counts_exceeded');
+vi.mock('@kbn/langchain/server');
+vi.mock('@kbn/langchain/server/tracers/langsmith');
+vi.mock('.', async () => {
+      const mocked = {
+      ...(await vi.importActual('.')),
+      getDefaultAttackDiscoveryGraph: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./throw_if_error_counts_exceeded');
 
 describe('invokeAttackDiscoveryGraphWithAlerts', () => {
   const mockActionsClient = {} as PublicMethodsOf<ActionsClient>;
   const mockEsClient = {} as ElasticsearchClient;
   const mockLogger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
   const mockPrompts = {
@@ -49,15 +55,15 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
     { metadata: {}, pageContent: 'alert 2' },
   ];
 
-  const mockGraphInvoke = jest.fn();
+  const mockGraphInvoke = vi.fn();
   const mockGraph = {
     invoke: mockGraphInvoke,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getDefaultAttackDiscoveryGraph as jest.Mock).mockReturnValue(mockGraph);
-    (getLangSmithTracer as jest.Mock).mockReturnValue([]);
+    vi.clearAllMocks();
+    (getDefaultAttackDiscoveryGraph as Mock).mockReturnValue(mockGraph);
+    (getLangSmithTracer as Mock).mockReturnValue([]);
   });
 
   it('creates LLM with correct configuration', async () => {
@@ -285,7 +291,7 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
 
   it('configures LangSmith tracer when project is provided', async () => {
     const mockTracer = [{ name: 'langsmith' }];
-    (getLangSmithTracer as jest.Mock).mockReturnValue(mockTracer);
+    (getLangSmithTracer as Mock).mockReturnValue(mockTracer);
 
     mockGraphInvoke.mockResolvedValue({
       anonymizedDocuments: mockAlerts,
@@ -393,7 +399,7 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
         maxHallucinationFailures: 5,
         replacements: {},
       });
-      (throwIfErrorCountsExceeded as jest.Mock).mockImplementationOnce(() => {
+      (throwIfErrorCountsExceeded as Mock).mockImplementationOnce(() => {
         throw new Error('Maximum generation attempts (10) reached.');
       });
 
@@ -519,7 +525,7 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
       replacements: initialReplacements,
     });
 
-    const graphCall = (getDefaultAttackDiscoveryGraph as jest.Mock).mock.calls[0][0];
+    const graphCall = (getDefaultAttackDiscoveryGraph as Mock).mock.calls[0][0];
     const onNewReplacements = graphCall.onNewReplacements;
 
     onNewReplacements({ key2: 'value2' });

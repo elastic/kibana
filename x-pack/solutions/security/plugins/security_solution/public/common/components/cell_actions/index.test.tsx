@@ -5,37 +5,49 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { CellActionsMode, SecurityCellActions } from '.';
 import { CellActions } from '@kbn/cell-actions';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
-jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: jest.fn(() => ({
-    dataView: {
-      id: 'security-default-dataview-id',
-      fields: {
-        getByName: jest.fn().mockReturnValue({
-          toSpec: jest.fn().mockReturnValue({
-            searchable: true,
-            aggregatable: true,
-          }),
-        }),
-      },
-    },
-  })),
-}));
+vi.mock('../../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: vi.fn(() => ({
+        dataView: {
+          id: 'security-default-dataview-id',
+          fields: {
+            getByName: vi.fn().mockReturnValue({
+              toSpec: vi.fn().mockReturnValue({
+                searchable: true,
+                aggregatable: true,
+              }),
+            }),
+          },
+        },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(() => false),
-}));
+vi.mock('../../hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MockCellActions = CellActions as jest.Mocked<typeof CellActions>;
-jest.mock('@kbn/cell-actions', () => ({
-  ...jest.requireActual('@kbn/cell-actions'),
-  CellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
-}));
+const MockCellActions = CellActions as Mocked<typeof CellActions>;
+vi.mock('@kbn/cell-actions', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/cell-actions')),
+      CellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDataViewId = 'security-default-dataview-id';
 
@@ -48,7 +60,7 @@ const mockMetadata = { someMetadata: 'value' };
 
 describe('SecurityCellActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render CellActions component when data is not empty', () => {

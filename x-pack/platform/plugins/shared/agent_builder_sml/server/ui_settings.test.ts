@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { registerUISettings } from './ui_settings';
@@ -15,7 +17,7 @@ describe('registerUISettings', () => {
 
     registerUISettings({ uiSettings });
 
-    const registeredSettings = (uiSettings.register as jest.Mock).mock.calls[0][0];
+    const registeredSettings = (uiSettings.register as Mock).mock.calls[0][0];
 
     expect(registeredSettings).toHaveProperty(CONTEXT_ENGINE_ENABLED_SETTING_ID);
     expect(registeredSettings[CONTEXT_ENGINE_ENABLED_SETTING_ID]).toEqual(

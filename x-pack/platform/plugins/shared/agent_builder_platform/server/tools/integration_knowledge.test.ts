@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CoreSetup } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -17,7 +20,7 @@ import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '.
 
 describe('integrationKnowledgeTool', () => {
   let mockCoreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
-  let mockSearch: jest.Mock;
+  let mockSearch: Mock;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
   let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
@@ -35,13 +38,13 @@ describe('integrationKnowledgeTool', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockCoreSetup = coreMock.createSetup() as unknown as CoreSetup<
       PluginStartDependencies,
       AgentBuilderPlatformPluginStart
     >;
-    mockSearch = jest.fn();
+    mockSearch = vi.fn();
     mockLogger = loggingSystemMock.createLogger();
     mockRequest = httpServerMock.createKibanaRequest();
   });
@@ -353,7 +356,7 @@ describe('integrationKnowledgeTool', () => {
         asInternalUser: { search: mockSearch },
         asCurrentUser: { search: mockSearch },
       });
-      (mockCoreSetup.getStartServices as jest.Mock).mockResolvedValue([mockCoreStart, {}, {}]);
+      (mockCoreSetup.getStartServices as Mock).mockResolvedValue([mockCoreStart, {}, {}]);
     };
 
     it('returns available when index exists', async () => {
@@ -381,7 +384,7 @@ describe('integrationKnowledgeTool', () => {
     });
 
     it('returns unavailable when getStartServices fails', async () => {
-      (mockCoreSetup.getStartServices as jest.Mock).mockRejectedValue(
+      (mockCoreSetup.getStartServices as Mock).mockRejectedValue(
         new Error('Services not available')
       );
 

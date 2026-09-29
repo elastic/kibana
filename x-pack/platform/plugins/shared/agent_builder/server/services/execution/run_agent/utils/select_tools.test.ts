@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
@@ -21,17 +23,17 @@ import {
 import type { ProcessedConversation } from './prepare_conversation';
 import { selectTools } from './select_tools';
 
-jest.mock('../../../tools/builtin/attachments', () => {
+vi.mock('../../../tools/builtin/attachments', async () => {
   // Keep mock dependencies local to the factory to satisfy Jest hoisting rules.
-  const { z: mockZ } = jest.requireActual('@kbn/zod/v4');
+  const { z: mockZ } = (await vi.importActual('@kbn/zod/v4'));
   return {
-    createAttachmentTools: jest.fn(() => [
+    createAttachmentTools: vi.fn(() => [
       {
         id: 'attachments.read',
         description: 'attachment read',
         tags: [],
         schema: mockZ.object({}),
-        handler: jest.fn(),
+        handler: vi.fn(),
       },
     ]),
   };
@@ -46,7 +48,7 @@ const createExecutableTool = (id: string): ExecutableTool =>
     readonly: false,
     configuration: {},
     getSchema: () => z.object({}),
-    execute: jest.fn(),
+    execute: vi.fn(),
   } as unknown as ExecutableTool);
 
 describe('selectTools', () => {
@@ -56,30 +58,30 @@ describe('selectTools', () => {
     const dynamicInlineTool = createExecutableTool('inline.dynamic');
 
     const skills = {
-      convertSkillTool: jest.fn().mockReturnValue(dynamicInlineTool),
+      convertSkillTool: vi.fn().mockReturnValue(dynamicInlineTool),
     } as any;
 
     const filteredSkills = [
       {
-        getInlineTools: jest
+        getInlineTools: vi
           .fn()
           .mockResolvedValue([{ id: 'inline.dynamic', type: ToolType.builtin }]),
       },
     ] as any;
 
     const toolProvider = {
-      list: jest.fn().mockResolvedValue([staticRegistryTool, dynamicRegistryTool]),
+      list: vi.fn().mockResolvedValue([staticRegistryTool, dynamicRegistryTool]),
     } as any;
 
     const attachmentsService = {
-      getTypeDefinition: jest.fn(),
+      getTypeDefinition: vi.fn(),
     } as any;
 
     const result = await selectTools({
       conversation: {
         attachmentTypes: [],
         attachmentStateManager: {
-          getActive: jest.fn().mockReturnValue([]),
+          getActive: vi.fn().mockReturnValue([]),
         },
       } as any,
       previousDynamicToolIds: ['registry.dynamic', 'inline.dynamic'],
@@ -95,7 +97,7 @@ describe('selectTools', () => {
       attachmentsService,
       spaceId: 'default',
       runner: {
-        runInternalTool: jest.fn(),
+        runInternalTool: vi.fn(),
       } as any,
     });
 
@@ -122,21 +124,21 @@ describe('selectTools', () => {
     };
     const convertedBoundedTool = createExecutableTool('attachment.inline');
     const attachmentDefinition = {
-      format: jest.fn().mockResolvedValue({
-        getBoundedTools: jest.fn().mockResolvedValue([boundedTool]),
+      format: vi.fn().mockResolvedValue({
+        getBoundedTools: vi.fn().mockResolvedValue([boundedTool]),
       }),
     };
 
     const attachmentsService = {
-      getTypeDefinition: jest.fn().mockReturnValue(attachmentDefinition),
-      convertAttachmentTool: jest.fn().mockReturnValue(convertedBoundedTool),
+      getTypeDefinition: vi.fn().mockReturnValue(attachmentDefinition),
+      convertAttachmentTool: vi.fn().mockReturnValue(convertedBoundedTool),
     } as any;
 
     const result = await selectTools({
       conversation: {
         attachmentTypes: [],
         attachmentStateManager: {
-          getActive: jest.fn().mockReturnValue([
+          getActive: vi.fn().mockReturnValue([
             {
               id: 'a-1',
               type: 'text',
@@ -149,15 +151,15 @@ describe('selectTools', () => {
       } as any,
       previousDynamicToolIds: [],
       filteredSkills: [],
-      skills: { convertSkillTool: jest.fn() } as any,
+      skills: { convertSkillTool: vi.fn() } as any,
       request: {} as any,
-      toolProvider: { list: jest.fn().mockResolvedValue([]) } as any,
+      toolProvider: { list: vi.fn().mockResolvedValue([]) } as any,
       agentConfiguration: { tools: [], enable_elastic_capabilities: false } as any,
       aiIndicesEnabled: false,
       attachmentsService,
       spaceId: 'default',
       runner: {
-        runInternalTool: jest.fn(),
+        runInternalTool: vi.fn(),
       } as any,
     });
 

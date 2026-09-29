@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
@@ -34,7 +36,7 @@ describe('useOpenContentEditor() hook', () => {
   };
 
   const mockedServices = getMockServices();
-  const openSystemFlyout = mockedServices.openSystemFlyout as jest.MockedFunction<
+  const openSystemFlyout = mockedServices.openSystemFlyout as MockedFunction<
     Services['openSystemFlyout']
   >;
 

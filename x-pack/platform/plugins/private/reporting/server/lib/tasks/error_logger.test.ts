@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { errorLogger } from './error_logger';
 
 const logger = loggingSystemMock.createLogger();
 
 describe('Execute Report Error Logger', () => {
-  const errorLogSpy = jest.spyOn(logger, 'error');
+  const errorLogSpy = vi.spyOn(logger, 'error');
 
   beforeEach(() => {
     errorLogSpy.mockReset();

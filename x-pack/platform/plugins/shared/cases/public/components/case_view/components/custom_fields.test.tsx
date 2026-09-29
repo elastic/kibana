@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 
@@ -17,10 +19,10 @@ import { CustomFieldTypes } from '../../../../common/types/domain';
 
 // Failing: See https://github.com/elastic/kibana/issues/185046
 describe('Case View Page files tab', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the custom fields correctly', async () => {

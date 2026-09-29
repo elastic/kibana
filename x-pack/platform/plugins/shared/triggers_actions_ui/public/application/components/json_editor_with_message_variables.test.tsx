@@ -4,16 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { JsonEditorWithMessageVariables } from './json_editor_with_message_variables';
 import { MockedCodeEditor } from '@kbn/code-editor-mock';
 
-const mockCodeEditor = jest.fn();
+const mockCodeEditor = vi.fn();
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
+vi.mock('@kbn/code-editor', async () => {
+  const original = (await vi.importActual('@kbn/code-editor'));
   return {
     ...original,
     CodeEditor: (props: any) => {
@@ -24,7 +26,7 @@ jest.mock('@kbn/code-editor', () => {
 });
 
 describe('JsonEditorWithMessageVariables', () => {
-  const onDocumentsChange = jest.fn();
+  const onDocumentsChange = vi.fn();
   const props = {
     messageVariables: [
       {
@@ -37,7 +39,7 @@ describe('JsonEditorWithMessageVariables', () => {
     onDocumentsChange,
   };
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   test('renders variables with double braces by default', async () => {
     render(<JsonEditorWithMessageVariables {...props} />);

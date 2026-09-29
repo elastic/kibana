@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -29,12 +31,12 @@ const baseProps = {
   isAttachInFlight: false,
   isAttachingAny: false,
   taggingApi: undefined,
-  onAttach: jest.fn(),
+  onAttach: vi.fn(),
 };
 
 describe('SavedObjectRow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders title link, type badge, and "Attach" action', () => {
@@ -64,7 +66,7 @@ describe('SavedObjectRow', () => {
   });
 
   it('invokes onAttach with the saved object when the button is clicked', async () => {
-    const onAttach = jest.fn();
+    const onAttach = vi.fn();
     renderWithTestingProviders(<SavedObjectRow {...baseProps} onAttach={onAttach} />);
 
     await userEvent.click(screen.getByTestId(`cases-attach-so-button-${savedObject.id}`));
@@ -84,7 +86,7 @@ describe('SavedObjectRow', () => {
   });
 
   it('keeps the button disabled while its own attach request is in flight', async () => {
-    const onAttach = jest.fn();
+    const onAttach = vi.fn();
     renderWithTestingProviders(
       <SavedObjectRow {...baseProps} isAttachInFlight isAttachingAny onAttach={onAttach} />
     );

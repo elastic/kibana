@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SavedObjectsErrorHelpers, type StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { escapeKuery, escapeQuotes } from '@kbn/es-query';
@@ -28,13 +30,11 @@ import {
 } from './policy_errors';
 import { getEndpointPolicy } from './read_policy';
 
-jest.mock('../domain/normalize_policy_config', () => {
-  const actual = jest.requireActual(
-    '../domain/normalize_policy_config'
-  ) as typeof import('../domain/normalize_policy_config');
+vi.mock('../domain/normalize_policy_config', async () => {
+  const actual = (await vi.importActual('../domain/normalize_policy_config')) as typeof import('../domain/normalize_policy_config');
   return {
     ...actual,
-    normalize: jest.fn(actual.normalize),
+    normalize: vi.fn(actual.normalize),
   };
 });
 
@@ -72,8 +72,8 @@ const createReadAccess = async () => {
     })
   );
 
-  const getStartServices = jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
+  const getStartServices = vi.fn(async () => [
+    { savedObjects: { getScopedClient: vi.fn().mockReturnValue({}) } },
   ]) as unknown as StartServicesAccessor;
   const access = await createPolicyAccessContext(
     endpointAppContextService,
@@ -82,9 +82,9 @@ const createReadAccess = async () => {
     getStartServices
   );
   const soClient = access.fleet.getSoClient();
-  const getById = jest.spyOn(access.fleet.packagePolicy, 'get');
-  const listByName = jest.spyOn(access.fleet.packagePolicy, 'list');
-  const ensureInCurrentSpace = jest.spyOn(access.fleet, 'ensureInCurrentSpace');
+  const getById = vi.spyOn(access.fleet.packagePolicy, 'get');
+  const listByName = vi.spyOn(access.fleet.packagePolicy, 'list');
+  const ensureInCurrentSpace = vi.spyOn(access.fleet, 'ensureInCurrentSpace');
   ensureInCurrentSpace.mockResolvedValue(undefined);
 
   return { access, soClient, getById, listByName, ensureInCurrentSpace };
@@ -368,7 +368,7 @@ describe('getEndpointPolicy', () => {
 
   it('rethrows a non-TypeError thrown by normalize unchanged', async () => {
     const programmerError = new Error('programmer');
-    const mockedNormalize = jest.mocked(normalize);
+    const mockedNormalize = vi.mocked(normalize);
     mockedNormalize.mockImplementationOnce(() => {
       throw programmerError;
     });
@@ -384,9 +384,7 @@ describe('getEndpointPolicy', () => {
     } finally {
       mockedNormalize.mockReset();
       mockedNormalize.mockImplementation(
-        jest.requireActual<typeof import('../domain/normalize_policy_config')>(
-          '../domain/normalize_policy_config'
-        ).normalize
+        (await vi.importActual<typeof import('../domain/normalize_policy_config')>('../domain/normalize_policy_config')).normalize
       );
     }
   });

@@ -5,25 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useRefetchOnTimelineClose } from './use_refetch_on_timeline_close';
 
-const mockRefetch = jest.fn();
+const mockRefetch = vi.fn();
 
 // Controls what the mocked useSelector returns for { show }.
 let mockShow = false;
 
-jest.mock('react-redux-v7', () => ({
-  useSelector: (selector: (s: unknown) => unknown) => selector({}),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useSelector: (selector: (s: unknown) => unknown) => selector({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../timelines/store/selectors', () => ({
-  getTimelineShowStatusByIdSelector: () => () => ({ show: mockShow }),
-}));
+vi.mock('../../../timelines/store/selectors', () => {
+      const mocked = {
+      getTimelineShowStatusByIdSelector: () => () => ({ show: mockShow }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useRefetchOnTimelineClose', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockShow = false;
   });
 

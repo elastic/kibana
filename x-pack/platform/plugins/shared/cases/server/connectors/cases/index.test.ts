@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
 import { getCasesConnectorAdapter, getCasesConnectorType } from '.';
@@ -23,26 +26,26 @@ import { attackDiscoveryAlerts } from './attack_discovery/group_alerts.mock';
 import type { AttackDiscoveryExpandedAlert } from './attack_discovery';
 import { ATTACK_DISCOVERY_MAX_OPEN_CASES } from './attack_discovery';
 
-jest.mock('./cases_connector');
+vi.mock('./cases_connector');
 
-const CasesConnectorMock = CasesConnector as jest.Mock;
+const CasesConnectorMock = CasesConnector as Mock;
 
 describe('getCasesConnectorType', () => {
-  const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
   let caseConnectorType: SubActionConnectorType<CasesConnectorConfig, CasesConnectorSecrets>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     caseConnectorType = getCasesConnectorType({
-      getCasesClient: jest.fn(),
-      getActionsClient: jest.fn(),
-      getUnsecuredSavedObjectsClient: jest.fn(),
-      getUiSettingsClient: jest.fn(),
-      getSpaceId: jest.fn(),
+      getCasesClient: vi.fn(),
+      getActionsClient: vi.fn(),
+      getUnsecuredSavedObjectsClient: vi.fn(),
+      getUiSettingsClient: vi.fn(),
+      getSpaceId: vi.fn(),
       isCasesAttachmentsEnabled: false,
       isTemplatesEnabled: false,
-      isAtLeastPlatinum: jest.fn().mockResolvedValue(true),
+      isAtLeastPlatinum: vi.fn().mockResolvedValue(true),
     });
   });
 
@@ -59,14 +62,14 @@ describe('getCasesConnectorType', () => {
 
   it('threads isTemplatesEnabled: true through to the CasesConnector when enabled', () => {
     const caseConnectorTypeWithTemplatesEnabled = getCasesConnectorType({
-      getCasesClient: jest.fn(),
-      getActionsClient: jest.fn(),
-      getUnsecuredSavedObjectsClient: jest.fn(),
-      getUiSettingsClient: jest.fn(),
-      getSpaceId: jest.fn(),
+      getCasesClient: vi.fn(),
+      getActionsClient: vi.fn(),
+      getUnsecuredSavedObjectsClient: vi.fn(),
+      getUiSettingsClient: vi.fn(),
+      getSpaceId: vi.fn(),
       isCasesAttachmentsEnabled: false,
       isTemplatesEnabled: true,
-      isAtLeastPlatinum: jest.fn().mockResolvedValue(true),
+      isAtLeastPlatinum: vi.fn().mockResolvedValue(true),
     });
 
     // @ts-expect-error: only the subset of params used by getService is provided

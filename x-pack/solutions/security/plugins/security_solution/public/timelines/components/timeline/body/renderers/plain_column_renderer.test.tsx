@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
@@ -17,17 +19,17 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 import { plainColumnRenderer } from './plain_column_renderer';
 import { deleteItemIdx, findItem, getValues } from './helpers';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
   };
 });
 
-jest.mock('../../../../../common/components/link_to');
+vi.mock('../../../../../common/components/link_to');
 
 describe('plain_column_renderer', () => {
   const mount = useMountAppended();

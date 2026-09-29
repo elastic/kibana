@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import produce from 'immer-v9';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -14,11 +17,11 @@ import type { Privilege } from './types';
 import { useAlertsPrivileges } from './use_alerts_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 
-jest.mock('./api');
-jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../common/components/user_privileges');
+vi.mock('./api');
+vi.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('../../../../common/components/user_privileges');
 
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock<ReturnType<typeof useUserPrivileges>>;
+const useUserPrivilegesMock = useUserPrivileges as Mock<ReturnType<typeof useUserPrivileges>>;
 
 const privilege: Privilege = {
   username: 'soc_manager',
@@ -91,12 +94,12 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
 };
 
 describe('useAlertsPrivileges', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
     useUserPrivilegesMock.mockReturnValue(userPrivilegesInitial);
   });
 

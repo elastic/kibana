@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProvidersComponent } from '../../mocks/test_providers';
@@ -12,8 +15,8 @@ import { DOCS_LINK_TEST_ID, EmptyPage, INTEGRATION_LINK_ID } from './empty_page'
 import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
 import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
 
-jest.mock('../../hooks/use_integrations_page_link');
-jest.mock('../../hooks/use_documentation_link');
+vi.mock('../../hooks/use_integrations_page_link');
+vi.mock('../../hooks/use_documentation_link');
 
 const INTEGRATION_HREF = 'INTEGRATION_HREF';
 const DOCUMENTATION_HREF = 'DOCUMENTATION_HREF';
@@ -21,9 +24,9 @@ const DOCUMENTATION_HREF = 'DOCUMENTATION_HREF';
 describe('<EmptyPage />', () => {
   it('should render', () => {
     (
-      useIntegrationsPageLink as jest.MockedFunction<typeof useIntegrationsPageLink>
+      useIntegrationsPageLink as MockedFunction<typeof useIntegrationsPageLink>
     ).mockReturnValue(INTEGRATION_HREF);
-    (useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
+    (useTIDocumentationLink as MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
       DOCUMENTATION_HREF
     );
 

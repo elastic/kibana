@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
 
@@ -12,9 +15,9 @@ import { TestProviders, createTestQueryClient } from '../../../common/mock';
 import { useBulkDeleteTemplates } from './use_bulk_delete_templates';
 import * as api from '../api/api';
 
-jest.mock('../api/api');
+vi.mock('../api/api');
 
-const apiMock = api as jest.Mocked<typeof api>;
+const apiMock = api as Mocked<typeof api>;
 
 describe('useBulkDeleteTemplates', () => {
   const mockBulkDeleteResponse = {
@@ -24,7 +27,7 @@ describe('useBulkDeleteTemplates', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     apiMock.bulkDeleteTemplates.mockResolvedValue(mockBulkDeleteResponse);
   });
 
@@ -94,7 +97,7 @@ describe('useBulkDeleteTemplates', () => {
   });
 
   it('calls onSuccess callback on successful bulk deletion', async () => {
-    const onSuccessMock = jest.fn();
+    const onSuccessMock = vi.fn();
     const queryClient = createTestQueryClient();
 
     const { result } = renderHook(() => useBulkDeleteTemplates({ onSuccess: onSuccessMock }), {

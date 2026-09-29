@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '../../../../../lib/helper/rtl_helpers';
 import { WaterfallMarkerTrend } from './waterfall_marker_trend';
@@ -13,9 +15,9 @@ import type { JourneyStep } from '../../../../../../../common/runtime_types';
 import { TestWrapper } from './waterfall_marker_test_helper';
 
 describe('<WaterfallMarkerTrend />', () => {
-  const mockDiff = jest.fn();
+  const mockDiff = vi.fn();
 
-  jest.spyOn(moment.prototype, 'diff').mockImplementation(mockDiff);
+  vi.spyOn(moment.prototype, 'diff').mockImplementation(mockDiff);
 
   const timestamp = '2021-12-03T14:35:41.072Z';
 

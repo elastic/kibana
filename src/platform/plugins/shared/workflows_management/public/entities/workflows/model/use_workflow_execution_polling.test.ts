@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux-v7';
@@ -17,25 +19,31 @@ import { WORKFLOW_EXECUTION_POLL_INTERVAL_MS } from '../../../hooks/polling_cons
 import { createMockStore, getMockServices } from '../store/__mocks__/store.mock';
 import type { MockStore } from '../store/__mocks__/store.mock';
 
-const mockGetExecution = jest.fn();
-const mockGetExecutionSteps = jest.fn();
+const mockGetExecution = vi.fn();
+const mockGetExecutionSteps = vi.fn();
 
-jest.mock('@kbn/workflows-ui', () => ({
-  WorkflowApi: jest.fn().mockImplementation(() => ({
-    getExecution: mockGetExecution,
-    getExecutionSteps: mockGetExecutionSteps,
-  })),
-}));
-jest.mock('../store/workflow_detail/utils/computation', () => ({
-  performComputation: jest.fn(() => ({ yamlString: 'test' })),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      WorkflowApi: vi.fn().mockImplementation(() => ({
+        getExecution: mockGetExecution,
+        getExecutionSteps: mockGetExecutionSteps,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../store/workflow_detail/utils/computation', () => {
+      const mocked = {
+      performComputation: vi.fn(() => ({ yamlString: 'test' })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useWorkflowExecutionPolling', () => {
   const mockWorkflowExecutionId = 'test-execution-id';
   let store: MockStore;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockGetExecution.mockReset();
     mockGetExecutionSteps.mockReset();
     mockGetExecutionSteps.mockResolvedValue({ results: [], total: 0, page: 1, size: 5000 });
@@ -43,8 +51,8 @@ describe('useWorkflowExecutionPolling', () => {
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   const createMockWorkflowDefinition = (): WorkflowYaml => ({
@@ -92,7 +100,7 @@ describe('useWorkflowExecutionPolling', () => {
 
   const advance = async (milliseconds = 0) => {
     await act(async () => {
-      await jest.advanceTimersByTimeAsync(milliseconds);
+      await vi.advanceTimersByTimeAsync(milliseconds);
     });
   };
 

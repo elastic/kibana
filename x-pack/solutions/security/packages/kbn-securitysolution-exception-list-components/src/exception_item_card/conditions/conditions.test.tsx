@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -35,8 +37,8 @@ const getEntryKey = (
 
 describe('ExceptionItemCardConditions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.resetAllMocks();
+    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
   it('it includes os condition if one exists', () => {
     const entries: TestEntry[] = [

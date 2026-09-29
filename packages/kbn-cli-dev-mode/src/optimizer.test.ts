@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { PassThrough } from 'stream';
 
 import * as Rx from 'rxjs';
@@ -20,22 +23,22 @@ import { Optimizer } from './optimizer';
 
 const importState = { shouldFail: false };
 
-jest.mock('@kbn/rspack-optimizer', () => {
+vi.mock('@kbn/rspack-optimizer', () => {
   if (importState.shouldFail) {
     throw new Error('missing native binding');
   }
 
   return {
-    RspackOptimizer: jest.fn(),
+    RspackOptimizer: vi.fn(),
   };
 });
 
 interface RspackMockInstance {
   opts: unknown;
   _phase$: Rx.Subject<OptimizerPhase>;
-  getPhase$: jest.Mock;
-  run: jest.Mock;
-  stop: jest.Mock;
+  getPhase$: Mock;
+  run: Mock;
+  stop: Mock;
 }
 
 const defaultOptions: Options = {
@@ -53,7 +56,7 @@ const defaultOptions: Options = {
 };
 
 const subscriptions: Rx.Subscription[] = [];
-let RspackOptimizerMock: jest.Mock;
+let RspackOptimizerMock: Mock;
 
 function flushPromises(): Promise<void> {
   const { promise, resolve } = Promise.withResolvers<void>();
@@ -64,17 +67,15 @@ function flushPromises(): Promise<void> {
 expect.addSnapshotSerializer(createReplaceSerializer(/\[\d\d:\d\d:\d\d\.\d\d\d\]/, '[timestamp]'));
 expect.addSnapshotSerializer(createReplaceSerializer(/\x1b\[[0-9;]*m/g, ''));
 
-beforeEach(() => {
+beforeEach(async () => {
   // resolve the mock from the current module registry, which the import failure test resets
-  RspackOptimizerMock = jest.requireMock<{ RspackOptimizer: jest.Mock }>(
-    '@kbn/rspack-optimizer'
-  ).RspackOptimizer;
+  RspackOptimizerMock = (await vi.importMock<{ RspackOptimizer: Mock }>('@kbn/rspack-optimizer')).RspackOptimizer;
   RspackOptimizerMock.mockImplementation(function (this: RspackMockInstance, opts: unknown) {
     this.opts = opts;
     this._phase$ = new Rx.Subject<OptimizerPhase>();
-    this.getPhase$ = jest.fn(() => this._phase$.asObservable());
-    this.run = jest.fn(async () => {});
-    this.stop = jest.fn(async () => {});
+    this.getPhase$ = vi.fn(() => this._phase$.asObservable());
+    this.run = vi.fn(async () => {});
+    this.stop = vi.fn(async () => {});
   });
 });
 
@@ -84,7 +85,7 @@ afterEach(() => {
   }
   subscriptions.length = 0;
 
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 it('constructs RspackOptimizer with expected options and a CLI-formatted log', async () => {
@@ -200,7 +201,7 @@ it('completes run$ when not in watch mode after run() resolves', async () => {
     watch: false,
   });
 
-  const runComplete = jest.fn();
+  const runComplete = vi.fn();
   subscriptions.push(
     optimizer.run$.subscribe({
       complete: runComplete,
@@ -222,7 +223,7 @@ it('completes run$ when not in watch mode after run() resolves', async () => {
 
 it('completes immediately and is immediately ready when disabled', async () => {
   const ready$ = new Rx.BehaviorSubject<undefined | boolean>(undefined);
-  const runComplete = jest.fn();
+  const runComplete = vi.fn();
 
   const optimizer = new Optimizer({
     ...defaultOptions,
@@ -243,11 +244,11 @@ it('completes immediately and is immediately ready when disabled', async () => {
 it('logs and errors run$ when @kbn/rspack-optimizer fails to load', async () => {
   const writeLogTo = new PassThrough();
   const linesPromise = Rx.firstValueFrom(observeLines(writeLogTo).pipe(toArray()));
-  const error = jest.fn();
+  const error = vi.fn();
 
   importState.shouldFail = true;
   // drop the cached mock so the deferred import goes through the (now throwing) module factory
-  jest.resetModules();
+  vi.resetModules();
 
   try {
     subscriptions.push(new Optimizer({ ...defaultOptions, writeLogTo }).run$.subscribe({ error }));

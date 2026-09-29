@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { SystemPromptSettings } from './system_prompt_settings';
@@ -13,10 +15,10 @@ import { alertConvo, welcomeConvo } from '../../../../mock/conversation';
 import { mockSystemPromptSettings } from '../../../../mock/system_prompt';
 import { TEST_IDS } from '../../../constants';
 
-const onSystemPromptSelect = jest.fn();
-const onPromptContentChange = jest.fn();
-const onConversationSelectionChange = jest.fn();
-const onNewConversationDefaultChange = jest.fn();
+const onSystemPromptSelect = vi.fn();
+const onPromptContentChange = vi.fn();
+const onConversationSelectionChange = vi.fn();
+const onNewConversationDefaultChange = vi.fn();
 
 const testProps = {
   conversations: {
@@ -25,49 +27,55 @@ const testProps = {
   onConversationSelectionChange,
   onNewConversationDefaultChange,
   onPromptContentChange,
-  onSystemPromptDelete: jest.fn(),
+  onSystemPromptDelete: vi.fn(),
   onSystemPromptSelect,
-  resetSettings: jest.fn(),
+  resetSettings: vi.fn(),
   selectedSystemPrompt: mockSystemPromptSettings[0],
   systemPromptSettings: mockSystemPromptSettings,
-  setPaginationObserver: jest.fn(),
+  setPaginationObserver: vi.fn(),
 };
 
-jest.mock('./system_prompt_selector/system_prompt_selector', () => ({
-  // @ts-ignore
-  SystemPromptSelector: ({ onSystemPromptDeleted, onSystemPromptSelectionChange }) => (
-    <>
-      <button
-        type="button"
-        data-test-subj="delete-sp"
-        onClick={() => onSystemPromptDeleted(mockSystemPromptSettings[1].name)}
-      />
-      <button
-        type="button"
-        data-test-subj="change-sp"
-        onClick={() => onSystemPromptSelectionChange(mockSystemPromptSettings[1])}
-      />
-      <button
-        type="button"
-        data-test-subj="change-sp-custom"
-        onClick={() => onSystemPromptSelectionChange('sooper custom prompt')}
-      />
-    </>
-  ),
-}));
+vi.mock('./system_prompt_selector/system_prompt_selector', () => {
+      const mocked = {
+      // @ts-ignore
+      SystemPromptSelector: ({ onSystemPromptDeleted, onSystemPromptSelectionChange }) => (
+        <>
+          <button
+            type="button"
+            data-test-subj="delete-sp"
+            onClick={() => onSystemPromptDeleted(mockSystemPromptSettings[1].name)}
+          />
+          <button
+            type="button"
+            data-test-subj="change-sp"
+            onClick={() => onSystemPromptSelectionChange(mockSystemPromptSettings[1])}
+          />
+          <button
+            type="button"
+            data-test-subj="change-sp-custom"
+            onClick={() => onSystemPromptSelectionChange('sooper custom prompt')}
+          />
+        </>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 const mockConvos = [alertConvo, welcomeConvo];
-jest.mock('./conversation_multi_selector/conversation_multi_selector', () => ({
-  // @ts-ignore
-  ConversationMultiSelector: ({ onConversationSelectionChange: onChange }) => (
-    <>
-      <button type="button" data-test-subj="change-multi" onClick={() => onChange(mockConvos)} />
-    </>
-  ),
-}));
+vi.mock('./conversation_multi_selector/conversation_multi_selector', () => {
+      const mocked = {
+      // @ts-ignore
+      ConversationMultiSelector: ({ onConversationSelectionChange: onChange }) => (
+        <>
+          <button type="button" data-test-subj="change-multi" onClick={() => onChange(mockConvos)} />
+        </>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SystemPromptSettings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('Selecting a system prompt updates the selected system prompts', () => {
     const { getByTestId } = render(

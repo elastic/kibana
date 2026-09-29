@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import type { CategoryComponentProps } from './category_component';
@@ -13,7 +15,7 @@ import { waitFor, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 
-const onChange = jest.fn();
+const onChange = vi.fn();
 const defaultProps: CategoryComponentProps = {
   isLoading: false,
   onChange,
@@ -22,7 +24,7 @@ const defaultProps: CategoryComponentProps = {
 
 describe('Category ', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders list correctly', () => {

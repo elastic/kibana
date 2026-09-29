@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { updateGapsInEventLog } from '../update/update_gaps_in_event_log';
 import { loggerMock } from '@kbn/logging-mocks';
 import { softDeleteGapsBatch } from './soft_delete_gaps_batch';
@@ -12,11 +15,14 @@ import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_clien
 import { Gap } from '../gap';
 import { alertingEventLoggerMock } from '../../alerting_event_logger/alerting_event_logger.mock';
 
-jest.mock('../update/update_gaps_in_event_log', () => ({
-  updateGapsInEventLog: jest.fn().mockResolvedValue(true),
-}));
+vi.mock('../update/update_gaps_in_event_log', () => {
+      const mocked = {
+      updateGapsInEventLog: vi.fn().mockResolvedValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const updateGapsInEventLogMock = updateGapsInEventLog as jest.Mock;
+const updateGapsInEventLogMock = updateGapsInEventLog as Mock;
 
 const mockLogger = loggerMock.create();
 const eventLogClient = eventLogClientMock.create();
@@ -39,7 +45,7 @@ const gaps = [getGap('1'), getGap('2')];
 
 describe('softDeleteGapsBatch', () => {
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     await softDeleteGapsBatch({
       gaps,

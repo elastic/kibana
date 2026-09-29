@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { LineCounter, parseDocument } from 'yaml';
 import type { WorkflowValidationRuleId, WorkflowYaml } from '@kbn/workflows';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
@@ -167,7 +169,7 @@ const ruleParityCases: RuleParityCase[] = [
     name: 'invalid trigger conditions',
     expectedRuleId: 'invalidTriggerCondition',
     getClientRuleIds: () => {
-      const getTriggerDefinitionSpy = jest
+      const getTriggerDefinitionSpy = vi
         .spyOn(triggerSchemas, 'getTriggerDefinition')
         .mockReturnValue(customTriggerDefinition);
       try {

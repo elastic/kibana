@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -15,7 +17,7 @@ import type { ESQLColumn } from '@kbn/es-types';
 import { ESQLValuesPreview } from './esql_values_preview';
 
 const noopProps = {
-  updateQuery: jest.fn(),
+  updateQuery: vi.fn(),
 };
 
 const numericColumn: ESQLColumn = { name: 'bytes', type: 'long' };
@@ -140,7 +142,7 @@ describe('ESQLValuesPreview', () => {
     });
 
     it('should call updateQuery when a column is selected', async () => {
-      const updateQuery = jest.fn();
+      const updateQuery = vi.fn();
       const { getByTestId, getByText } = render(
         <I18nProvider>
           <ESQLValuesPreview

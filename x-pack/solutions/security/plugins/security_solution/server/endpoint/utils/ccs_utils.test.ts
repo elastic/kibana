@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from './ccs_utils';
 
@@ -12,7 +14,7 @@ describe('hasConnectedRemoteClusters', () => {
   const mockEsClient = (remoteInfo: Record<string, { connected: boolean }>): ElasticsearchClient =>
     ({
       cluster: {
-        remoteInfo: jest.fn().mockResolvedValue(remoteInfo),
+        remoteInfo: vi.fn().mockResolvedValue(remoteInfo),
       },
     } as unknown as ElasticsearchClient);
 
@@ -36,7 +38,7 @@ describe('hasConnectedRemoteClusters', () => {
 
   it('rejects when remoteInfo throws (caller decides how to handle the failure)', async () => {
     const esClient = {
-      cluster: { remoteInfo: jest.fn().mockRejectedValue(new Error('permission denied')) },
+      cluster: { remoteInfo: vi.fn().mockRejectedValue(new Error('permission denied')) },
     } as unknown as ElasticsearchClient;
     await expect(hasConnectedRemoteClusters(esClient)).rejects.toThrow('permission denied');
   });

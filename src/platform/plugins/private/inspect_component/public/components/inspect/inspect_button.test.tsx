@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,25 +18,28 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { isKeyboardShortcut } from '../../lib/keyboard_shortcut/keyboard_shortcut';
 import { mockBranch } from '../../__mocks__/mocks';
 
-jest.mock('../../lib/keyboard_shortcut/keyboard_shortcut', () => ({
-  isKeyboardShortcut: jest.fn(),
-  isMac: jest.fn(),
-  isEscapeKey: jest.fn(),
-}));
+vi.mock('../../lib/keyboard_shortcut/keyboard_shortcut', () => {
+      const mocked = {
+      isKeyboardShortcut: vi.fn(),
+      isMac: vi.fn(),
+      isEscapeKey: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedIsKeyboardShortcut = jest.mocked(isKeyboardShortcut);
+const mockedIsKeyboardShortcut = vi.mocked(isKeyboardShortcut);
 
 describe('InspectButton', () => {
   const mockCoreStart = coreMock.createStart();
 
   beforeAll(() => {
-    document.elementsFromPoint = jest
+    document.elementsFromPoint = vi
       .fn()
       .mockReturnValue([document.createElement('div'), document.createElement('span')]);
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render correctly', () => {
@@ -83,7 +88,7 @@ describe('InspectButton', () => {
     const inspectButton = screen.getByTestId('inspectComponentButton');
 
     const mouseDownEvent = new MouseEvent('mousedown', { bubbles: true });
-    const preventDefaultSpy = jest.spyOn(mouseDownEvent, 'preventDefault');
+    const preventDefaultSpy = vi.spyOn(mouseDownEvent, 'preventDefault');
 
     fireEvent(inspectButton, mouseDownEvent);
 

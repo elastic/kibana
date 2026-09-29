@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -14,41 +17,41 @@ import { SystemGenericFileDetails, SystemGenericFileLine } from './generic_file_
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { CellActionsRenderer } from '../../../../../../common/components/cell_actions/cell_actions_renderer';
 
-jest.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/lib/kibana');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
   };
 });
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
 
   return {
     ...original,
     useHistory: () => ({
-      createHref: jest.fn(),
-      push: jest.fn(),
+      createHref: vi.fn(),
+      push: vi.fn(),
     }),
   };
 });
 
-jest.mock('../../../../../../common/components/cell_actions/cell_actions_renderer', () => {
+vi.mock('../../../../../../common/components/cell_actions/cell_actions_renderer', () => {
   return {
-    CellActionsRenderer: jest.fn(),
+    CellActionsRenderer: vi.fn(),
   };
 });
 
-const MockedCellActionsRenderer = jest.fn(({ children }) => {
+const MockedCellActionsRenderer = vi.fn(({ children }) => {
   return <div data-test-subj="mock-cell-action-renderer">{children}</div>;
 });
 
 describe('SystemGenericFileDetails', () => {
   beforeEach(() => {
-    (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
+    (CellActionsRenderer as unknown as Mock).mockImplementation(MockedCellActionsRenderer);
   });
 
   const mount = useMountAppended();

@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { SpanFlyoutContent, type SpanFlyoutContentProps } from '.';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 
-const mockOpenAndScrollToSection = jest.fn();
+const mockOpenAndScrollToSection = vi.fn();
 
-jest.mock('../../../../doc_viewer_overview/overview', () => {
-  const ReactMock = jest.requireActual('react');
+vi.mock('../../../../doc_viewer_overview/overview', () => {
+  const ReactMock = require('react');
 
   const stableApi = {
     openAndScrollToSection: (section: string) => mockOpenAndScrollToSection(section),
@@ -47,11 +49,14 @@ const mockIndexes = {
   logs: 'logs-*',
 };
 
-jest.mock('../../../../../../../hooks/use_data_sources', () => ({
-  useDataSourcesContext: () => ({
-    indexes: mockIndexes,
-  }),
-}));
+vi.mock('../../../../../../../hooks/use_data_sources', () => {
+      const mocked = {
+      useDataSourcesContext: () => ({
+        indexes: mockIndexes,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SpanFlyoutContent', () => {
   const mockHit = buildDataTableRecord(
@@ -74,7 +79,7 @@ describe('SpanFlyoutContent', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockOpenAndScrollToSection.mockClear();
   });
 

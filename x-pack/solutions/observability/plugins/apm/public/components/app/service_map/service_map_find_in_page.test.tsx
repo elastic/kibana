@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,19 +14,19 @@ import type { ServiceMapNode } from '../../../../common/service_map';
 import { MOCK_EUI_THEME_FOR_USE_THEME, NODE_HEIGHT, NODE_WIDTH } from './constants';
 import { ServiceMapFindInPage } from './service_map_find_in_page';
 
-const mockSetCenter = jest.fn();
-const mockSetSearchHighlight = jest.fn();
+const mockSetCenter = vi.fn();
+const mockSetSearchHighlight = vi.fn();
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     useEuiTheme: () => ({ euiTheme: MOCK_EUI_THEME_FOR_USE_THEME }),
   };
 });
 
-jest.mock('@xyflow/react', () => {
-  const original = jest.requireActual('@xyflow/react');
+vi.mock('@xyflow/react', () => {
+  const original = require('@xyflow/react');
   return {
     ...original,
     useReactFlow: () => ({
@@ -33,12 +35,15 @@ jest.mock('@xyflow/react', () => {
   };
 });
 
-jest.mock('../../shared/service_map/service_map_search_context', () => ({
-  ...jest.requireActual('../../shared/service_map/service_map_search_context'),
-  useServiceMapHighlight: () => ({
-    setSearchHighlight: mockSetSearchHighlight,
-  }),
-}));
+vi.mock('../../shared/service_map/service_map_search_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../shared/service_map/service_map_search_context')),
+      useServiceMapHighlight: () => ({
+        setSearchHighlight: mockSetSearchHighlight,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function serviceNode(
   id: string,

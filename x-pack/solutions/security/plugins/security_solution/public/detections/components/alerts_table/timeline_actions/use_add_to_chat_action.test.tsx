@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAddToChatAction } from './use_add_to_chat_action';
 import { TestProviders } from '../../../../common/mock';
@@ -12,12 +15,12 @@ import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import { useReportAddToChat } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 
-jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability');
-jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment');
-jest.mock('../../../../agent_builder/hooks/use_report_add_to_chat');
+vi.mock('../../../../agent_builder/hooks/use_agent_builder_availability');
+vi.mock('../../../../agent_builder/hooks/use_agent_builder_attachment');
+vi.mock('../../../../agent_builder/hooks/use_report_add_to_chat');
 
-const mockOpenAgentBuilderFlyout = jest.fn();
-const mockReportAddToChat = jest.fn();
+const mockOpenAgentBuilderFlyout = vi.fn();
+const mockReportAddToChat = vi.fn();
 
 const defaultAvailability = {
   isAgentBuilderEnabled: true,
@@ -31,18 +34,18 @@ const defaultProps = {
     { field: 'kibana.alert.rule.name', value: ['Test Rule'] },
     { field: 'kibana.alert.rule.uuid', value: ['rule-id-1'] },
   ],
-  onMenuItemClick: jest.fn(),
+  onMenuItemClick: vi.fn(),
   alertId: 'alert-id-1',
 };
 
 describe('useAddToChatAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue(defaultAvailability);
-    (useAgentBuilderAttachment as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAgentBuilderAvailability as Mock).mockReturnValue(defaultAvailability);
+    (useAgentBuilderAttachment as Mock).mockReturnValue({
       openAgentBuilderFlyout: mockOpenAgentBuilderFlyout,
     });
-    (useReportAddToChat as jest.Mock).mockReturnValue(mockReportAddToChat);
+    (useReportAddToChat as Mock).mockReturnValue(mockReportAddToChat);
   });
 
   it('returns an "Add to chat" menu item when agent builder is enabled', () => {
@@ -55,7 +58,7 @@ describe('useAddToChatAction', () => {
   });
 
   it('returns an empty array when agent builder is disabled', () => {
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       ...defaultAvailability,
       isAgentBuilderEnabled: false,
     });
@@ -68,7 +71,7 @@ describe('useAddToChatAction', () => {
   });
 
   it('disables the menu item when the user lacks a valid license', () => {
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       ...defaultAvailability,
       hasValidAgentBuilderLicense: false,
     });
@@ -81,7 +84,7 @@ describe('useAddToChatAction', () => {
   });
 
   it('calls openAgentBuilderFlyout, reportAddToChat, and onMenuItemClick when the item is clicked', () => {
-    const onMenuItemClick = jest.fn();
+    const onMenuItemClick = vi.fn();
     const { result } = renderHook(() => useAddToChatAction({ ...defaultProps, onMenuItemClick }), {
       wrapper: TestProviders,
     });

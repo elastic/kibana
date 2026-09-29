@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID } from './test_ids';
 import { FlyoutMissingAlertsPrivilege } from './flyout_missing_alerts_privilege';
 
-const mockNoPrivileges = jest.fn(
+const mockNoPrivileges = vi.fn(
   ({ pageName, docLinkSelector, ...rest }: Record<string, unknown>) => (
     <div data-test-subj={rest['data-test-subj']}>
       <span data-page-name={pageName} />
@@ -19,9 +21,12 @@ const mockNoPrivileges = jest.fn(
   )
 );
 
-jest.mock('../../../../common/components/no_privileges', () => ({
-  NoPrivileges: (props: Record<string, unknown>) => mockNoPrivileges(props),
-}));
+vi.mock('../../../../common/components/no_privileges', () => {
+      const mocked = {
+      NoPrivileges: (props: Record<string, unknown>) => mockNoPrivileges(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('<FlyoutMissingAlertsPrivilege />', () => {
   it('renders with the correct test id', () => {

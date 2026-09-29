@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { inspector } from '../../kibana_services';
 import type { InspectPanelActionApi } from './inspect_panel_action';
 import { InspectPanelAction } from './inspect_panel_action';
@@ -21,7 +23,7 @@ describe('Inspect panel action', () => {
       embeddable: {
         uuid: 'some-uuid',
         title$: { value: 'some-title' },
-        getInspectorAdapters: jest.fn().mockReturnValue({
+        getInspectorAdapters: vi.fn().mockReturnValue({
           filters: `My filters are extremely interesting. Please inspect them.`,
         }),
       } as unknown as InspectPanelActionApi,
@@ -36,7 +38,7 @@ describe('Inspect panel action', () => {
   });
 
   it('is compatible when inspector adapters are available', async () => {
-    inspector.isAvailable = jest.fn().mockReturnValue(true);
+    inspector.isAvailable = vi.fn().mockReturnValue(true);
 
     expect(await action.isCompatible(context)).toBe(true);
     expect(inspector.isAvailable).toHaveBeenCalledTimes(1);
@@ -46,7 +48,7 @@ describe('Inspect panel action', () => {
   });
 
   it('is not compatible when inspector adapters are not available', async () => {
-    inspector.isAvailable = jest.fn().mockReturnValue(false);
+    inspector.isAvailable = vi.fn().mockReturnValue(false);
 
     expect(await action.isCompatible(context)).toBe(false);
     expect(inspector.isAvailable).toHaveBeenCalledTimes(1);
@@ -56,8 +58,8 @@ describe('Inspect panel action', () => {
   });
 
   test('Executes when inspector adapters are available', async () => {
-    inspector.isAvailable = jest.fn().mockReturnValue(true);
-    inspector.open = jest.fn().mockReturnValue({ onClose: Promise.resolve(undefined) });
+    inspector.isAvailable = vi.fn().mockReturnValue(true);
+    inspector.open = vi.fn().mockReturnValue({ onClose: Promise.resolve(undefined) });
 
     expect(inspector.open).toHaveBeenCalledTimes(0);
 
@@ -67,10 +69,10 @@ describe('Inspect panel action', () => {
   });
 
   it('props are passed to inspector', async () => {
-    inspector.open = jest.fn().mockReturnValue({ onClose: Promise.resolve(undefined) });
+    inspector.open = vi.fn().mockReturnValue({ onClose: Promise.resolve(undefined) });
     context.embeddable.parentApi = {
-      openOverlay: jest.fn(),
-      clearOverlays: jest.fn(),
+      openOverlay: vi.fn(),
+      clearOverlays: vi.fn(),
     };
 
     await action.execute(context);

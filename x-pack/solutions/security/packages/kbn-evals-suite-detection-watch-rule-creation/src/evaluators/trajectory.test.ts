@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RuleCreationResult } from '../rule_creation_client';
@@ -17,10 +19,10 @@ import {
 } from './trajectory';
 
 const log = {
-  info: jest.fn(),
-  debug: jest.fn(),
-  warning: jest.fn(),
-  error: jest.fn(),
+  info: vi.fn(),
+  debug: vi.fn(),
+  warning: vi.fn(),
+  error: vi.fn(),
 } as unknown as ToolingLog;
 
 const SKILL = 'load_skill';
@@ -52,7 +54,7 @@ const rows = (names: Array<string | null>, spanIds?: string[], skill = RULE_CREA
 
 const esWith = (handler: (query: string, call: number) => unknown) => {
   let calls = 0;
-  const query = jest.fn(async ({ query: q }: { query: string }) => handler(q, ++calls));
+  const query = vi.fn(async ({ query: q }: { query: string }) => handler(q, ++calls));
   return { client: { esql: { query } } as unknown as EsClient, query };
 };
 

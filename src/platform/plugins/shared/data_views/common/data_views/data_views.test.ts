@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { set } from '@kbn/safer-lodash-set';
 import { defaults } from 'lodash';
 import { DataViewsService, DataView, DataViewLazy } from '.';
@@ -24,7 +27,7 @@ import { DataViewMissingIndices } from '../lib';
 
 const createFieldsFetcher = () =>
   ({
-    getFieldsForWildcard: jest.fn(async () => ({ fields: [], indices: ['test'] })),
+    getFieldsForWildcard: vi.fn(async () => ({ fields: [], indices: ['test'] })),
   } as any as IDataViewsApiClient);
 
 const fieldFormats = fieldFormatsMock;
@@ -68,20 +71,20 @@ describe('IndexPatterns', () => {
   const uiSettings = {
     get: () => Promise.resolve(false),
     getAll: () => {},
-    set: jest.fn(),
-    remove: jest.fn(),
+    set: vi.fn(),
+    remove: vi.fn(),
   } as any as UiSettingsCommon;
   const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     savedObjectsClient = {} as PersistenceAPI;
-    savedObjectsClient.find = jest.fn(
+    savedObjectsClient.find = vi.fn(
       () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
     );
-    savedObjectsClient.delete = jest.fn(() => Promise.resolve() as Promise<any>);
-    savedObjectsClient.create = jest.fn();
-    savedObjectsClient.get = jest.fn().mockImplementation(async (type, id) => {
+    savedObjectsClient.delete = vi.fn(() => Promise.resolve() as Promise<any>);
+    savedObjectsClient.create = vi.fn();
+    savedObjectsClient.get = vi.fn().mockImplementation(async (type, id) => {
       await new Promise((resolve) => setTimeout(resolve, SOClientGetDelay));
       return {
         id: object.id,
@@ -89,7 +92,7 @@ describe('IndexPatterns', () => {
         attributes: object.attributes,
       };
     });
-    savedObjectsClient.update = jest.fn().mockImplementation(async (id, body, { version }) => {
+    savedObjectsClient.update = vi.fn().mockImplementation(async (id, body, { version }) => {
       if (object.version !== version) {
         throw new Object({
           res: {
@@ -290,12 +293,12 @@ describe('IndexPatterns', () => {
 
     // eslint-disable-next-line dot-notation
     const createFromSpecOriginal = indexPatterns['createFromSpec'];
-    let mockedCreateFromSpec: jest.Mock;
+    let mockedCreateFromSpec: Mock;
 
     set(
       indexPatterns,
       'createFromSpec',
-      (mockedCreateFromSpec = jest
+      (mockedCreateFromSpec = vi
         .fn()
         .mockImplementation((spec: DataViewSpec, skipFetchFields = false, displayErrors = true) =>
           doWithTimeout(
@@ -334,12 +337,12 @@ describe('IndexPatterns', () => {
 
     // eslint-disable-next-line dot-notation
     const createFromSpecOriginal = indexPatterns['createFromSpecLazy'];
-    let mockedCreateFromSpec: jest.Mock;
+    let mockedCreateFromSpec: Mock;
 
     set(
       indexPatterns,
       'createFromSpecLazy',
-      (mockedCreateFromSpec = jest
+      (mockedCreateFromSpec = vi
         .fn()
         .mockImplementation((spec: DataViewSpec) =>
           doWithTimeout(() => createFromSpecOriginal.call(indexPatterns, spec), 1000)
@@ -408,7 +411,7 @@ describe('IndexPatterns', () => {
         title: 'something',
       },
     });
-    apiClient.getFieldsForWildcard = jest.fn().mockImplementation(async () => {
+    apiClient.getFieldsForWildcard = vi.fn().mockImplementation(async () => {
       throw new DataViewMissingIndices('Catch me if you can!');
     });
     const dataView = await indexPatterns.get(id);
@@ -486,7 +489,7 @@ describe('IndexPatterns', () => {
 
   test('create', async () => {
     const indexPattern = 'kibana-*';
-    indexPatterns.refreshFields = jest.fn();
+    indexPatterns.refreshFields = vi.fn();
 
     const dataView = await indexPatterns.create({ title: indexPattern }, true);
     expect(dataView).toBeInstanceOf(DataView);
@@ -523,8 +526,8 @@ describe('IndexPatterns', () => {
     const dataView = await indexPatterns.create({ title }, true);
     const id = dataView.id;
 
-    savedObjectsClient.find = jest.fn().mockResolvedValue([]);
-    savedObjectsClient.create = jest.fn().mockResolvedValue({
+    savedObjectsClient.find = vi.fn().mockResolvedValue([]);
+    savedObjectsClient.create = vi.fn().mockResolvedValue({
       ...savedObject,
       id: dataView.id,
       version,
@@ -572,10 +575,10 @@ describe('IndexPatterns', () => {
 
   test('createAndSave', async () => {
     const title = 'kibana-*';
-    indexPatterns.createSavedObject = jest.fn(() => Promise.resolve());
-    savedObjectsClient.find = jest.fn().mockResolvedValue([]);
-    savedObjectsClient.create = jest.fn().mockResolvedValue({});
-    indexPatterns.setDefault = jest.fn();
+    indexPatterns.createSavedObject = vi.fn(() => Promise.resolve());
+    savedObjectsClient.find = vi.fn().mockResolvedValue([]);
+    savedObjectsClient.create = vi.fn().mockResolvedValue({});
+    indexPatterns.setDefault = vi.fn();
     await indexPatterns.createAndSave({ title });
     expect(indexPatterns.createSavedObject).toHaveBeenCalled();
     expect(indexPatterns.setDefault).toHaveBeenCalled();
@@ -583,10 +586,10 @@ describe('IndexPatterns', () => {
 
   test('createAndSave DataViewLazy', async () => {
     const title = 'kibana-*';
-    indexPatterns.createSavedObject = jest.fn(() => Promise.resolve());
-    savedObjectsClient.find = jest.fn().mockResolvedValue([]);
-    savedObjectsClient.create = jest.fn().mockResolvedValue({});
-    indexPatterns.setDefault = jest.fn();
+    indexPatterns.createSavedObject = vi.fn(() => Promise.resolve());
+    savedObjectsClient.find = vi.fn().mockResolvedValue([]);
+    savedObjectsClient.create = vi.fn().mockResolvedValue({});
+    indexPatterns.setDefault = vi.fn();
     await indexPatterns.createAndSaveDataViewLazy({ title });
     expect(indexPatterns.createSavedObject).toHaveBeenCalled();
     expect(indexPatterns.setDefault).toHaveBeenCalled();
@@ -625,7 +628,7 @@ describe('IndexPatterns', () => {
 
   test('failed requests do not remain in cache', async () => {
     const badRequest = new Error('bad request');
-    savedObjectsClient.get = jest
+    savedObjectsClient.get = vi
       .fn()
       .mockResolvedValue(indexPatternObj)
       .mockRejectedValueOnce(badRequest);
@@ -642,12 +645,12 @@ describe('IndexPatterns', () => {
     }
 
     // successful subsequent request
-    expect(indexPatterns.get(id)).resolves.toBeInstanceOf(DataView);
+    await expect(indexPatterns.get(id)).resolves.toBeInstanceOf(DataView);
   });
 
   test('failed requests do not remain in cache for DataViewLazy', async () => {
     const badRequest = new Error('bad request');
-    savedObjectsClient.get = jest
+    savedObjectsClient.get = vi
       .fn()
       .mockResolvedValue(indexPatternObj)
       .mockRejectedValueOnce(badRequest);
@@ -664,12 +667,12 @@ describe('IndexPatterns', () => {
     }
 
     // successful subsequent request
-    expect(indexPatterns.getDataViewLazy(id)).resolves.toBeInstanceOf(DataViewLazy);
+    await expect(indexPatterns.getDataViewLazy(id)).resolves.toBeInstanceOf(DataViewLazy);
   });
 
   test('failed request does not affect adhoc data view being created', async () => {
     const badRequest = new Error('bad request');
-    savedObjectsClient.get = jest.fn().mockRejectedValue(badRequest);
+    savedObjectsClient.get = vi.fn().mockRejectedValue(badRequest);
 
     const id = '1';
     const failedDataViewPromise = indexPatterns.get(id);
@@ -686,13 +689,13 @@ describe('IndexPatterns', () => {
     const dataView = await indexPatterns.get(id);
     dataView.setFieldFormat('field', { id: 'formatId' });
     await indexPatterns.updateSavedObject(dataView);
-    let lastCall = (savedObjectsClient.update as jest.Mock).mock.calls.pop() ?? [];
+    let lastCall = (savedObjectsClient.update as Mock).mock.calls.pop() ?? [];
     let [, attrs] = lastCall;
     expect(attrs).toHaveProperty('fieldFormatMap');
     expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{\\"field\\":{\\"id\\":\\"formatId\\"}}"`);
     dataView.deleteFieldFormat('field');
     await indexPatterns.updateSavedObject(dataView);
-    lastCall = (savedObjectsClient.update as jest.Mock).mock.calls.pop() ?? [];
+    lastCall = (savedObjectsClient.update as Mock).mock.calls.pop() ?? [];
     [, attrs] = lastCall;
 
     // https://github.com/elastic/kibana/issues/134873: must keep an empty object and not delete it
@@ -720,13 +723,13 @@ describe('IndexPatterns', () => {
   describe('defaultDataViewExists', () => {
     beforeEach(() => {
       indexPatterns.clearCache();
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('return true if exists', async () => {
-      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
-      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
-      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+      uiSettings.get = vi.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = vi.fn().mockResolvedValue([indexPatternObj]);
+      savedObjectsClient.get = vi.fn().mockResolvedValue(indexPatternObj);
 
       expect(await indexPatterns.defaultDataViewExists()).toBe(true);
       // make sure we're not pulling from cache
@@ -735,9 +738,9 @@ describe('IndexPatterns', () => {
     });
 
     test('return false if no default data view found', async () => {
-      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
-      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
-      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+      uiSettings.get = vi.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = vi.fn().mockResolvedValue([]);
+      savedObjectsClient.get = vi.fn().mockResolvedValue(indexPatternObj);
 
       expect(await indexPatterns.defaultDataViewExists()).toBe(false);
       // make sure we're not pulling from cache
@@ -749,14 +752,14 @@ describe('IndexPatterns', () => {
   describe('getDefaultDataView', () => {
     beforeEach(() => {
       indexPatterns.clearCache();
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('gets default data view', async () => {
-      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
-      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
-      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
-      jest.spyOn(indexPatterns, 'refreshFields');
+      uiSettings.get = vi.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = vi.fn().mockResolvedValue([indexPatternObj]);
+      savedObjectsClient.get = vi.fn().mockResolvedValue(indexPatternObj);
+      vi.spyOn(indexPatterns, 'refreshFields');
 
       expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
       expect(indexPatterns.refreshFields).not.toHaveBeenCalled();
@@ -766,9 +769,9 @@ describe('IndexPatterns', () => {
     });
 
     test('gets default data view lazy', async () => {
-      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
-      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
-      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+      uiSettings.get = vi.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = vi.fn().mockResolvedValue([indexPatternObj]);
+      savedObjectsClient.get = vi.fn().mockResolvedValue(indexPatternObj);
 
       expect(await indexPatterns.getDefaultDataViewLazy()).toBeInstanceOf(DataViewLazy);
       // make sure we're not pulling from cache
@@ -777,11 +780,11 @@ describe('IndexPatterns', () => {
     });
 
     test('gets default data view and passes down defined arguments (refreshFields and displayErrors)', async () => {
-      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
-      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
-      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
-      jest.spyOn(indexPatterns, 'get');
-      jest.spyOn(indexPatterns, 'refreshFields');
+      uiSettings.get = vi.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.get = vi.fn().mockResolvedValue(indexPatternObj);
+      savedObjectsClient.find = vi.fn().mockResolvedValue([indexPatternObj]);
+      vi.spyOn(indexPatterns, 'get');
+      vi.spyOn(indexPatterns, 'refreshFields');
 
       const dataView = await indexPatterns.get(indexPatternObj.id); // and to cache the result
 
@@ -802,11 +805,11 @@ describe('IndexPatterns', () => {
     });
 
     test('gets default data view and passes down undefined arguments (refreshFields and displayErrors)', async () => {
-      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
-      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
-      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
-      jest.spyOn(indexPatterns, 'get');
-      jest.spyOn(indexPatterns, 'refreshFields');
+      uiSettings.get = vi.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.get = vi.fn().mockResolvedValue(indexPatternObj);
+      savedObjectsClient.find = vi.fn().mockResolvedValue([indexPatternObj]);
+      vi.spyOn(indexPatterns, 'get');
+      vi.spyOn(indexPatterns, 'refreshFields');
 
       await indexPatterns.get(indexPatternObj.id); // to cache the result
 
@@ -819,24 +822,24 @@ describe('IndexPatterns', () => {
     });
 
     test('returns undefined if no data views exist', async () => {
-      uiSettings.get = jest.fn().mockResolvedValue('foo');
-      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      uiSettings.get = vi.fn().mockResolvedValue('foo');
+      savedObjectsClient.find = vi.fn().mockResolvedValue([]);
 
       expect(await indexPatterns.getDefaultDataView()).toBeNull();
     });
 
     test('returns undefined if no data views exist - dataViewLazy', async () => {
-      uiSettings.get = jest.fn().mockResolvedValue('foo');
-      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      uiSettings.get = vi.fn().mockResolvedValue('foo');
+      savedObjectsClient.find = vi.fn().mockResolvedValue([]);
 
       expect(await indexPatterns.getDefaultDataViewLazy()).toBeNull();
     });
 
     test("default doesn't exist, grabs another data view", async () => {
-      uiSettings.get = jest.fn().mockResolvedValue('foo');
-      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
+      uiSettings.get = vi.fn().mockResolvedValue('foo');
+      savedObjectsClient.find = vi.fn().mockResolvedValue([indexPatternObj]);
 
-      savedObjectsClient.get = jest.fn().mockResolvedValue({
+      savedObjectsClient.get = vi.fn().mockResolvedValue({
         id: 'bar',
         version: 'foo',
         attributes: {
@@ -853,14 +856,14 @@ describe('IndexPatterns', () => {
     });
 
     test("when default exists, it isn't overridden with first data view", async () => {
-      uiSettings.get = jest.fn().mockResolvedValue('id2');
+      uiSettings.get = vi.fn().mockResolvedValue('id2');
 
-      savedObjectsClient.find = jest.fn().mockResolvedValue([
+      savedObjectsClient.find = vi.fn().mockResolvedValue([
         { id: 'id1', version: 'a', attributes: { title: 'title' } },
         { id: 'id2', version: 'a', attributes: { title: 'title' } },
       ]);
 
-      savedObjectsClient.get = jest
+      savedObjectsClient.get = vi
         .fn()
         .mockImplementation((id: string) =>
           Promise.resolve({ id, version: 'a', attributes: { title: 'title' } })
@@ -878,8 +881,8 @@ describe('IndexPatterns', () => {
     });
 
     test('dont set defaultIndex without capability allowing advancedSettings save', async () => {
-      uiSettings.get = jest.fn().mockResolvedValue(null);
-      savedObjectsClient.find = jest.fn().mockResolvedValue([
+      uiSettings.get = vi.fn().mockResolvedValue(null);
+      savedObjectsClient.find = vi.fn().mockResolvedValue([
         {
           id: 'id1',
           version: 'a',
@@ -892,7 +895,7 @@ describe('IndexPatterns', () => {
         },
       ]);
 
-      savedObjectsClient.get = jest
+      savedObjectsClient.get = vi
         .fn()
         .mockImplementation((id: string) =>
           Promise.resolve({ id, version: 'a', attributes: { title: '1' } })
@@ -908,7 +911,7 @@ describe('IndexPatterns', () => {
   describe('refreshFields', () => {
     beforeEach(() => {
       // preserve mocked functionality
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('refreshFields includes runtimeFields', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import * as CheckPrivilige from '../../../../../capabilities/check_capabilities';
@@ -16,32 +18,41 @@ import { DeleteActionName } from './delete_action_name';
 import { DeleteActionModal } from './delete_action_modal';
 import { useDeleteAction } from './use_delete_action';
 
-jest.mock('../../../../../capabilities/check_capabilities', () => ({
-  checkPermission: jest.fn(() => false),
-  createPermissionFailureMessage: jest.fn(),
-}));
-
-jest.mock('../../../../../contexts/kibana', () => ({
-  useMlApi: jest.fn(),
-  useMlKibana: () => ({
-    services: { ...mockCoreServices.createStart(), data: { data_view: { find: jest.fn() } } },
-  }),
-  useNotifications: () => {
-    return {
-      toasts: { addSuccess: jest.fn(), addDanger: jest.fn(), addError: jest.fn() },
+vi.mock('../../../../../capabilities/check_capabilities', () => {
+      const mocked = {
+      checkPermission: vi.fn(() => false),
+      createPermissionFailureMessage: vi.fn(),
     };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../../../contexts/kibana', () => {
+      const mocked = {
+      useMlApi: vi.fn(),
+      useMlKibana: () => ({
+        services: { ...mockCoreServices.createStart(), data: { data_view: { find: vi.fn() } } },
+      }),
+      useNotifications: () => {
+        return {
+          toasts: { addSuccess: vi.fn(), addDanger: vi.fn(), addError: vi.fn() },
+        };
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const MockI18nService = i18nServiceMock.create();
-export const I18nServiceConstructor = jest.fn().mockImplementation(() => MockI18nService);
-jest.doMock('@kbn/i18n', () => ({
-  I18nService: I18nServiceConstructor,
-}));
+export const I18nServiceConstructor = vi.fn().mockImplementation(() => MockI18nService);
+vi.doMock('@kbn/i18n', () => {
+      const mocked = {
+      I18nService: I18nServiceConstructor,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DeleteAction', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should display a tooltip when isDisabled prop is true.', () => {
@@ -64,7 +75,7 @@ describe('DeleteAction', () => {
 
   describe('When delete model is open', () => {
     it('should not allow to delete target index by default.', () => {
-      const mock = jest.spyOn(CheckPrivilige, 'checkPermission');
+      const mock = vi.spyOn(CheckPrivilige, 'checkPermission');
       mock.mockImplementation((p) => p === 'canDeleteDataFrameAnalytics');
 
       const TestComponent = () => {

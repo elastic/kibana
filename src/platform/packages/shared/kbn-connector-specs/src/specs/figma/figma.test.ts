@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { FigmaConnector } from './figma';
 
 describe('FigmaConnector', () => {
   const mockClient = {
-    get: jest.fn(),
+    get: vi.fn(),
   };
 
   const mockContext = {
     client: mockClient,
-    log: { debug: jest.fn() },
+    log: { debug: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should define every action (except test) as a tool for agent exposure', () => {

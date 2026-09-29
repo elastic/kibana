@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
@@ -16,11 +18,11 @@ const endTime = 'now';
 const isILMAvailable = true;
 
 describe('useStoredPatternResults', () => {
-  const httpFetch = jest.fn();
+  const httpFetch = vi.fn();
   const mockToasts = notificationServiceMock.createStartContract().toasts;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when patterns are empty', () => {

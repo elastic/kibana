@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
@@ -12,7 +15,7 @@ import { MissingPrivilegesCallOut } from './missing_privileges_callout';
 import type { MissingPrivileges } from '../../hooks/use_missing_privileges';
 import { useMissingPrivileges } from '../../hooks/use_missing_privileges';
 
-jest.mock('../../hooks/use_missing_privileges');
+vi.mock('../../hooks/use_missing_privileges');
 
 const missingPrivileges: MissingPrivileges = {
   featurePrivileges: [['feature', ['read', 'write']]],
@@ -21,7 +24,7 @@ const missingPrivileges: MissingPrivileges = {
 
 describe('MissingPrivilegesCallOut', () => {
   it('should show callout', () => {
-    (useMissingPrivileges as jest.Mock).mockReturnValue({
+    (useMissingPrivileges as Mock).mockReturnValue({
       featurePrivileges: [['feature', ['read', 'write']]],
       indexPrivileges: [['index', ['read', 'write']]],
     });

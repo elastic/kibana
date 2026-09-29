@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiComboBox } from '@elastic/eui';
 import React from 'react';
 
@@ -21,8 +23,8 @@ describe('RoleTemplateEditor', () => {
           source: '{{username}}_foo',
         },
       },
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
       canUseStoredScripts: true,
       canUseInlineScripts: true,
     };
@@ -46,8 +48,8 @@ describe('RoleTemplateEditor', () => {
           source: '{{username}}_foo',
         },
       },
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
       canUseStoredScripts: true,
       canUseInlineScripts: false,
     };
@@ -65,8 +67,8 @@ describe('RoleTemplateEditor', () => {
           id: '{{username}}_foo',
         },
       },
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
       canUseStoredScripts: false,
       canUseInlineScripts: true,
     };
@@ -84,8 +86,8 @@ describe('RoleTemplateEditor', () => {
           source: '{{username}}_foo',
         },
       },
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
       canUseStoredScripts: true,
       canUseInlineScripts: true,
     };
@@ -107,8 +109,8 @@ describe('RoleTemplateEditor', () => {
       roleTemplate: {
         template: `This is a string instead of an object if the template was stored in an unparsable format in ES`,
       },
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
       canUseStoredScripts: true,
       canUseInlineScripts: true,
     };
@@ -126,8 +128,8 @@ describe('RoleTemplateEditor', () => {
           source: '{{username}}_foo',
         },
       },
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
       canUseStoredScripts: true,
       canUseInlineScripts: true,
       readOnly: true,

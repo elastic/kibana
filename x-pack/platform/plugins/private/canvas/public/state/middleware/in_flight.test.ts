@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { inFlightActive, inFlightComplete, setLoading, setValue } from '../actions/resolved_args';
 import { inFlightMiddlewareFactory } from './in_flight';
 
-const next = jest.fn();
-const dispatch = jest.fn();
+const next = vi.fn();
+const dispatch = vi.fn();
 const loadingIndicator = {
-  show: jest.fn(),
-  hide: jest.fn(),
+  show: vi.fn(),
+  hide: vi.fn(),
 };
 const pendingCache: string[] = [];
 
 const testMiddleware = inFlightMiddlewareFactory({
   loadingIndicator,
   pendingCache,
-})({ dispatch, getState: jest.fn() })(next);
+})({ dispatch, getState: vi.fn() })(next);
 
 describe('inflight middleware', () => {
   beforeEach(() => {
@@ -28,8 +30,8 @@ describe('inflight middleware', () => {
 
   describe('loading indicator', () => {
     beforeEach(() => {
-      loadingIndicator.show = jest.fn();
-      loadingIndicator.hide = jest.fn();
+      loadingIndicator.show = vi.fn();
+      loadingIndicator.hide = vi.fn();
     });
 
     it('shows the loading indicator on inFlightActive action', () => {

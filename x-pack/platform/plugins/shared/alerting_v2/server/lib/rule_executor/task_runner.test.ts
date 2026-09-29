@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { asSpaceId } from '@kbn/core-spaces-common';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import { isUnrecoverableError } from '@kbn/task-manager-plugin/server';
@@ -25,7 +28,7 @@ const createEmptyMetricsSnapshot = (): RuleExecutionMetricsSnapshot => ({
 
 describe('RuleExecutorTaskRunner', () => {
   let runner: RuleExecutorTaskRunner;
-  let pipeline: jest.Mocked<RuleExecutionPipelineContract>;
+  let pipeline: Mocked<RuleExecutionPipelineContract>;
   let signal: AbortSignal;
   let mockLoggerService: ReturnType<typeof createLoggerService>;
 
@@ -41,7 +44,7 @@ describe('RuleExecutorTaskRunner', () => {
   };
 
   beforeEach(() => {
-    pipeline = { execute: jest.fn() };
+    pipeline = { execute: vi.fn() };
     mockLoggerService = createLoggerService();
     runner = new RuleExecutorTaskRunner(pipeline, mockLoggerService.loggerService);
     signal = new AbortController().signal;

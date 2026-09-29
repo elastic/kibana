@@ -5,33 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { UpdateAlertsModal } from '.';
 
 // Mock EUI hooks and components as needed (see history/index.test.tsx for style)
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     useEuiTheme: () => ({ euiTheme: { size: { m: '8px', xxxl: '32px' } } }),
-    useGeneratedHtmlId: jest.fn(() => 'generated-id'),
+    useGeneratedHtmlId: vi.fn(() => 'generated-id'),
   };
 });
 
 const defaultProps = {
   alertsCount: 2,
   attackDiscoveriesCount: 3,
-  onCancel: jest.fn(),
-  onClose: jest.fn(),
-  onConfirm: jest.fn(),
+  onCancel: vi.fn(),
+  onClose: vi.fn(),
+  onConfirm: vi.fn(),
   workflowStatus: 'acknowledged' as const,
 };
 
 describe('UpdateAlertsModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the modal body with correct counts', () => {

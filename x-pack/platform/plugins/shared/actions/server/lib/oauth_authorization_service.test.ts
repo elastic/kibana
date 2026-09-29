@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { OAuthAuthorizationService } from './oauth_authorization_service';
 import { actionsClientMock } from '../actions_client/actions_client.mock';
 import { createMockConnector } from '../application/connector/mocks';
@@ -12,7 +14,7 @@ import { createMockConnector } from '../application/connector/mocks';
 const mockActionsClient = actionsClientMock.create();
 
 const mockEncryptedSavedObjectsClient = {
-  getDecryptedAsInternalUser: jest.fn(),
+  getDecryptedAsInternalUser: vi.fn(),
 };
 
 const createService = () =>
@@ -23,7 +25,7 @@ const createService = () =>
 
 describe('OAuthAuthorizationService', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('getOAuthConfig', () => {

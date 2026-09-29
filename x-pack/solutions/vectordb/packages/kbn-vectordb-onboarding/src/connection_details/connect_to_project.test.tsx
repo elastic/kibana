@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { EuiCopy, EuiThemeProvider } from '@elastic/eui';
@@ -13,19 +15,22 @@ import { MCP_SERVER_PATH } from '@kbn/agent-builder-plugin/public';
 import { ConnectToProject } from './connect_to_project';
 import type { OnboardingServices } from '../services';
 
-const mockCopy = jest.fn();
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiCopy: jest.fn(({ children }) => children(mockCopy)),
-}));
+const mockCopy = vi.fn();
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiCopy: vi.fn(({ children }) => children(mockCopy)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const KIBANA_URL = 'https://kibana.example.com';
 const ELASTICSEARCH_URL = 'https://elasticsearch.example.com:443';
 
 const services = {
   http: { basePath: { publicBaseUrl: KIBANA_URL, serverBasePath: '', get: () => '' } },
-  notifications: { toasts: { addDanger: jest.fn() } },
-  application: { navigateToApp: jest.fn() },
+  notifications: { toasts: { addDanger: vi.fn() } },
+  application: { navigateToApp: vi.fn() },
 } as unknown as OnboardingServices;
 
 const renderComponent = (props: Partial<React.ComponentProps<typeof ConnectToProject>> = {}) =>
@@ -43,11 +48,11 @@ const renderComponent = (props: Partial<React.ComponentProps<typeof ConnectToPro
     </EuiThemeProvider>
   );
 
-const getCurrentTextToCopy = () => jest.mocked(EuiCopy).mock.lastCall?.[0].textToCopy;
+const getCurrentTextToCopy = () => vi.mocked(EuiCopy).mock.lastCall?.[0].textToCopy;
 
 describe('ConnectToProject', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not render the connection type selector by default', () => {

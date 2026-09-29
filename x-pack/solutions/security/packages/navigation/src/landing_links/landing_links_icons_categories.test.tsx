@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { SecurityPageName } from '../constants';
@@ -13,10 +15,10 @@ import type { LinkCategories, NavigationLink } from '../types';
 import { LandingLinksIconsCategories } from './landing_links_icons_categories';
 import { BETA } from './beta_badge';
 
-jest.mock('../navigation');
+vi.mock('../navigation');
 
 mockGetAppUrl.mockImplementation(({ deepLinkId }: { deepLinkId: string }) => `/${deepLinkId}`);
-const mockOnLinkClick = jest.fn();
+const mockOnLinkClick = vi.fn();
 
 const RULES_ITEM_LABEL = 'elastic rules!';
 const EXCEPTIONS_ITEM_LABEL = 'exceptional!';

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,15 +15,15 @@ import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_
 import { SubmitCaseButton } from './submit_button';
 import { renderWithTestingProviders } from '../../common/mock';
 
-jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib');
+vi.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib');
 
 describe('SubmitCaseButton', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // @ts-expect-error: not all properties are needed for testing
-    jest.mocked(useFormContext).mockReturnValue({ submit: onSubmit });
+    vi.mocked(useFormContext).mockReturnValue({ submit: onSubmit });
   });
 
   it('renders', async () => {
@@ -40,7 +42,7 @@ describe('SubmitCaseButton', () => {
 
   it('disables when submitting', async () => {
     // @ts-expect-error: not all properties are needed for testing
-    jest.mocked(useFormContext).mockReturnValue({ submit: onSubmit });
+    vi.mocked(useFormContext).mockReturnValue({ submit: onSubmit });
     renderWithTestingProviders(<SubmitCaseButton isSubmitting={true} />);
 
     const button = await screen.findByTestId('create-case-submit');

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
@@ -17,9 +20,12 @@ import {
 } from './tool';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 
-jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn(),
-}));
+vi.mock('../../../routes/utils/assert_significant_events_access', () => {
+      const mocked = {
+      assertSignificantEventsAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ki_search tool', () => {
   const logger = loggingSystemMock.createLogger();
@@ -28,7 +34,7 @@ describe('ki_search tool', () => {
   const uiSettings = {} as unknown as IUiSettingsClient;
 
   it('uses the expected tool id', () => {
-    const getScopedClients = jest.fn() as unknown as jest.MockedFunction<GetScopedClients>;
+    const getScopedClients = vi.fn() as unknown as MockedFunction<GetScopedClients>;
     const tool = createSearchKnowledgeIndicatorsTool({
       getScopedClients,
       server,
@@ -40,7 +46,7 @@ describe('ki_search tool', () => {
   });
 
   it('accepts typed filters and pagination', () => {
-    const getScopedClients = jest.fn() as unknown as jest.MockedFunction<GetScopedClients>;
+    const getScopedClients = vi.fn() as unknown as MockedFunction<GetScopedClients>;
     const tool = createSearchKnowledgeIndicatorsTool({
       getScopedClients,
       server,
@@ -73,11 +79,11 @@ describe('ki_search tool', () => {
   });
 
   it('availability returns available when access check succeeds', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValueOnce(undefined);
+    (assertSignificantEventsAccess as Mock).mockResolvedValueOnce(undefined);
 
-    const getScopedClients = jest.fn(async () => {
+    const getScopedClients = vi.fn(async () => {
       return { licensing: {}, uiSettingsClient: {} } as unknown as RouteHandlerScopedClients;
-    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    }) as unknown as MockedFunction<GetScopedClients>;
 
     const tool = createSearchKnowledgeIndicatorsTool({
       getScopedClients,
@@ -90,11 +96,11 @@ describe('ki_search tool', () => {
   });
 
   it('availability returns unavailable when access check throws', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockRejectedValueOnce(new Error('nope'));
+    (assertSignificantEventsAccess as Mock).mockRejectedValueOnce(new Error('nope'));
 
-    const getScopedClients = jest.fn(async () => {
+    const getScopedClients = vi.fn(async () => {
       return { licensing: {}, uiSettingsClient: {} } as unknown as RouteHandlerScopedClients;
-    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    }) as unknown as MockedFunction<GetScopedClients>;
 
     const tool = createSearchKnowledgeIndicatorsTool({
       getScopedClients,

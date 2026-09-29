@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { SharepointOnline } from './sharepoint_online';
 
@@ -87,19 +89,19 @@ interface SharePointSearchResponse {
 
 describe('SharepointOnline', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-    request: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    request: vi.fn(),
   };
 
   const mockContext = {
     client: mockClient,
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
     config: { region: 'NAM' },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('auth', () => {

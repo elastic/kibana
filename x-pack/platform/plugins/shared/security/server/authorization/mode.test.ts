@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { authorizationModeFactory } from './mode';
@@ -12,7 +14,7 @@ import type { SecurityLicense, SecurityLicenseFeatures } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 
 describe(`#useRbacForRequest`, () => {
-  let mockLicense: jest.Mocked<SecurityLicense>;
+  let mockLicense: Mocked<SecurityLicense>;
   beforeEach(() => {
     mockLicense = licenseMock.create();
     mockLicense.getFeatures.mockReturnValue({ allowRbac: false } as SecurityLicenseFeatures);

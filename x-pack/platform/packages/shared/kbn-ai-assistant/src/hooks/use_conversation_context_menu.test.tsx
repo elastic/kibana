@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
@@ -12,28 +15,28 @@ import type { Conversation } from '@kbn/observability-ai-assistant-plugin/common
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useConversationContextMenu } from './use_conversation_context_menu';
 
-const setIsUpdatingConversationList = jest.fn();
-const refreshConversations = jest.fn();
+const setIsUpdatingConversationList = vi.fn();
+const refreshConversations = vi.fn();
 
-const mockService: { callApi: jest.Mock } = {
-  callApi: jest.fn(),
+const mockService: { callApi: Mock } = {
+  callApi: vi.fn(),
 };
 
 const mockNotifications = {
   toasts: {
-    addSuccess: jest.fn(),
-    addError: jest.fn(),
+    addSuccess: vi.fn(),
+    addError: vi.fn(),
   },
 };
 
 const mockHttp = {
   basePath: {
-    prepend: jest.fn((path) => `/mock-base${path}`),
+    prepend: vi.fn((path) => `/mock-base${path}`),
   },
 };
 
 const useKibanaMockServices = {
-  uiSettings: { get: jest.fn() },
+  uiSettings: { get: vi.fn() },
   notifications: mockNotifications,
   http: mockHttp,
   observabilityAIAssistant: { service: mockService },
@@ -49,7 +52,7 @@ describe('useConversationContextMenu', () => {
   beforeAll(() => {
     Object.defineProperty(navigator, 'clipboard', {
       value: {
-        writeText: jest.fn(),
+        writeText: vi.fn(),
       },
       writable: true,
     });
@@ -62,7 +65,7 @@ describe('useConversationContextMenu', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('deletes a conversation successfully', async () => {
@@ -167,7 +170,7 @@ describe('useConversationContextMenu', () => {
       { wrapper }
     );
 
-    jest.spyOn(navigator.clipboard, 'writeText').mockImplementation(() => {
+    vi.spyOn(navigator.clipboard, 'writeText').mockImplementation(() => {
       throw new Error('Copy failed');
     });
 

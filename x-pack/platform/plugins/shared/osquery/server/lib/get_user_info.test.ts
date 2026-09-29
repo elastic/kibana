@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getUserInfo } from './get_user_info';
@@ -22,7 +24,7 @@ describe('getUserInfo', () => {
   it('returns user profile info when available', async () => {
     const security = {
       userProfiles: {
-        getCurrent: jest.fn().mockResolvedValue({
+        getCurrent: vi.fn().mockResolvedValue({
           uid: 'profile-1',
           user: {
             username: 'user-name',
@@ -32,7 +34,7 @@ describe('getUserInfo', () => {
         }),
       },
       authc: {
-        getCurrentUser: jest.fn(),
+        getCurrentUser: vi.fn(),
       },
     } as unknown as SecurityPluginStart;
 
@@ -49,10 +51,10 @@ describe('getUserInfo', () => {
   it('falls back to authc when user profile lookup fails', async () => {
     const security = {
       userProfiles: {
-        getCurrent: jest.fn().mockRejectedValue(new Error('failed')),
+        getCurrent: vi.fn().mockRejectedValue(new Error('failed')),
       },
       authc: {
-        getCurrentUser: jest.fn().mockReturnValue({
+        getCurrentUser: vi.fn().mockReturnValue({
           username: 'fallback-user',
           full_name: null,
           email: 'fallback@example.com',
@@ -73,10 +75,10 @@ describe('getUserInfo', () => {
   it('uses profile_uid from authc fallback when available', async () => {
     const security = {
       userProfiles: {
-        getCurrent: jest.fn().mockResolvedValue(null),
+        getCurrent: vi.fn().mockResolvedValue(null),
       },
       authc: {
-        getCurrentUser: jest.fn().mockReturnValue({
+        getCurrentUser: vi.fn().mockReturnValue({
           username: 'cloud-user',
           full_name: null,
           email: 'cloud-user@example.com',

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { externalServiceMock, apiParams, serviceNowCommonFields, serviceNowChoices } from './mocks';
@@ -12,11 +15,11 @@ import { api } from './api';
 
 describe('api', () => {
   const mockedLogger = loggerMock.create();
-  let externalService: jest.Mocked<ExternalService>;
+  let externalService: Mocked<ExternalService>;
 
   beforeEach(() => {
     externalService = externalServiceMock.create();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('create incident', () => {

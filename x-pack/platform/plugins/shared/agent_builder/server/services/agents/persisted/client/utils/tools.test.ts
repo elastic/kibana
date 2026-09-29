@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { validateToolSelection } from './tools';
 import type { KibanaRequest } from '@kbn/core/server';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -26,8 +28,8 @@ describe('validateToolSelection (unit)', () => {
   const toolB = generateMockTool('toolB', ToolType.esql);
 
   const makeRegistry = (tools: any[]) => ({
-    list: jest.fn().mockResolvedValue(tools),
-    has: jest.fn().mockImplementation((toolId: string) => {
+    list: vi.fn().mockResolvedValue(tools),
+    has: vi.fn().mockImplementation((toolId: string) => {
       return Promise.resolve(tools.some((tool) => tool.id === toolId));
     }),
   });

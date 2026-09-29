@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -34,7 +36,7 @@ describe('GET /internal/evals/evaluators', () => {
           response: z.object({ message: z.string().min(1) }),
           steps: z.array(z.object({}).catchall(z.unknown())),
         }),
-        evaluate: jest.fn(),
+        evaluate: vi.fn(),
       },
       {
         name: 'latency',
@@ -43,7 +45,7 @@ describe('GET /internal/evals/evaluators', () => {
         origin: 'built_in',
         description: 'Latency evaluator',
         direction: 'minimize',
-        evaluate: jest.fn(),
+        evaluate: vi.fn(),
       },
       {
         name: 'input_tokens',
@@ -52,7 +54,7 @@ describe('GET /internal/evals/evaluators', () => {
         origin: 'built_in',
         description: 'Input tokens evaluator',
         direction: 'minimize',
-        evaluate: jest.fn(),
+        evaluate: vi.fn(),
       },
       {
         name: 'output_tokens',
@@ -61,7 +63,7 @@ describe('GET /internal/evals/evaluators', () => {
         origin: 'built_in',
         description: 'Output tokens evaluator',
         direction: 'minimize',
-        evaluate: jest.fn(),
+        evaluate: vi.fn(),
       },
       {
         name: 'tool_calls',
@@ -70,7 +72,7 @@ describe('GET /internal/evals/evaluators', () => {
         origin: 'built_in',
         description: 'Tool calls evaluator',
         direction: 'neutral',
-        evaluate: jest.fn(),
+        evaluate: vi.fn(),
       },
       {
         name: 'correctness',
@@ -86,7 +88,7 @@ describe('GET /internal/evals/evaluators', () => {
             .min(1)
             .describe('The expected ground truth response to compare against.'),
         }),
-        evaluate: jest.fn(),
+        evaluate: vi.fn(),
       },
       {
         name: 'tone',
@@ -95,7 +97,7 @@ describe('GET /internal/evals/evaluators', () => {
         origin: 'user_defined',
         description: 'Tone evaluator',
         direction: 'maximize',
-        evaluate: jest.fn(),
+        evaluate: vi.fn(),
       },
     ]);
 
@@ -105,14 +107,14 @@ describe('GET /internal/evals/evaluators', () => {
   }: { evaluatorRegistry?: EvaluatorRegistry; spaceId?: string } = {}) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    const getSpaceId = spaceId ? jest.fn().mockResolvedValue(spaceId) : undefined;
+    const getSpaceId = spaceId ? vi.fn().mockResolvedValue(spaceId) : undefined;
     const versionedRouter = router.versioned as MockedVersionedRouter;
     registerListEvaluatorsRoute({
       router,
       logger,
       canEncrypt: false,
       evaluatorRegistry: evaluatorRegistry ?? buildEvaluatorRegistry(),
-      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+      getInferenceStart: async () => ({ getClient: vi.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
       getSpaceId,
@@ -182,7 +184,7 @@ describe('GET /internal/evals/evaluators', () => {
 
   it('lists evaluators from the active space', async () => {
     const evaluatorRegistry = buildEvaluatorRegistry();
-    const asScoped = jest.spyOn(evaluatorRegistry, 'asScoped');
+    const asScoped = vi.spyOn(evaluatorRegistry, 'asScoped');
     const { handler, getSpaceId } = setup({ evaluatorRegistry, spaceId: 'marketing' });
     const request = {} as Parameters<typeof handler>[1];
 

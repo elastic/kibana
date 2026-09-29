@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { set } from '@kbn/safer-lodash-set';
 import { unset } from 'lodash';
@@ -19,17 +21,20 @@ interface HitParams {
   value?: string;
 }
 
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      config: {
-        ui: {
-          ccs: { enabled: true },
+vi.mock('../../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          config: {
+            ui: {
+              ccs: { enabled: true },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // deletes, adds, or updates the properties based on a default object
 function createResponseObjHit(params?: HitParams[]): ElasticsearchResponseHit {
@@ -199,8 +204,8 @@ describe('get_logstash_info', () => {
   });
 
   it('works with standalone cluster', async () => {
-    const callWithRequest = jest.fn().mockReturnValue({
-      then: jest.fn(),
+    const callWithRequest = vi.fn().mockReturnValue({
+      then: vi.fn(),
     });
     const req = {
       payload: {},

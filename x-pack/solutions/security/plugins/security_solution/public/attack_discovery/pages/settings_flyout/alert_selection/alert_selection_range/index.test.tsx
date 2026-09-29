@@ -5,22 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { AlertSelectionRange } from '.';
 import { SEND_FEWER_ALERTS } from '../translations';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
 const defaultProps = {
   maxAlerts: 100,
-  setMaxAlerts: jest.fn(),
+  setMaxAlerts: vi.fn(),
 };
 
 describe('AlertSelectionRange', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the AlertsRange', () => {

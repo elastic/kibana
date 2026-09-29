@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { acceptAllActiveProposals, setActiveProposalManager } from './active_proposal_manager';
 import type { ProposalManager } from './proposed_changes';
 
 const createStub = (hasPending: boolean, content = 'yaml: after') =>
   ({
-    hasPendingProposals: jest.fn().mockReturnValue(hasPending),
-    acceptAll: jest.fn(),
-    getCurrentContent: jest.fn().mockReturnValue(content),
+    hasPendingProposals: vi.fn().mockReturnValue(hasPending),
+    acceptAll: vi.fn(),
+    getCurrentContent: vi.fn().mockReturnValue(content),
   } as unknown as ProposalManager);
 
 describe('active_proposal_manager', () => {
@@ -49,7 +51,7 @@ describe('active_proposal_manager', () => {
   });
 
   it('warns when a manager is overwritten while a previous one is still registered', () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     setActiveProposalManager(createStub(false));
     setActiveProposalManager(createStub(false));
     expect(warn).toHaveBeenCalledWith(

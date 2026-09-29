@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
 import { updateSelectedOptions } from './update_selected_options';
 
 describe('updateSelectedOptions()', () => {
-  const mockedClearSelections = jest.fn();
-  const mockedSetSelectedOptions = jest.fn();
+  const mockedClearSelections = vi.fn();
+  const mockedSetSelectedOptions = vi.fn();
   const alertFilterControlHandler = {
     children$: {
       getValue: () => [
@@ -22,7 +24,7 @@ describe('updateSelectedOptions()', () => {
   } as any as FilterGroupHandler;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Should not do anything if controlIndex is < 0', () => {

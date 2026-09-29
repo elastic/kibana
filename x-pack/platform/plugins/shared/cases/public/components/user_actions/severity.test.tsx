@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiCommentList } from '@elastic/eui';
 import { screen } from '@testing-library/react';
 import { CaseSeverity, UserActionActions } from '../../../common/types/domain';
@@ -15,8 +17,8 @@ import { getUserAction } from '../../containers/mock';
 import { getMockBuilderArgs } from './mock';
 import { createSeverityUserActionBuilder } from './severity';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/navigation/hooks');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/navigation/hooks');
 
 const builderArgs = getMockBuilderArgs();
 describe('createSeverityUserActionBuilder', () => {

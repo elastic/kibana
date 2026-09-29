@@ -5,32 +5,43 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useMonitorPings } from './use_monitor_pings';
 import { ConfigKey, MonitorTypeEnum } from '../../../../../../common/runtime_types';
 import { getMonitorRecentPingsAction } from '../../../state';
 
-const mockUrlParams = jest.fn();
-jest.mock('../../../hooks', () => ({
-  useGetUrlParams: () => mockUrlParams(),
-}));
+const mockUrlParams = vi.fn();
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useGetUrlParams: () => mockUrlParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSelectedMonitor = jest.fn();
-jest.mock('./use_selected_monitor', () => ({
-  useSelectedMonitor: () => mockUseSelectedMonitor(),
-}));
+const mockUseSelectedMonitor = vi.fn();
+vi.mock('./use_selected_monitor', () => {
+      const mocked = {
+      useSelectedMonitor: () => mockUseSelectedMonitor(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSelectedLocation = jest.fn();
-jest.mock('./use_selected_location', () => ({
-  useSelectedLocation: () => mockUseSelectedLocation(),
-}));
+const mockUseSelectedLocation = vi.fn();
+vi.mock('./use_selected_location', () => {
+      const mocked = {
+      useSelectedLocation: () => mockUseSelectedLocation(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDispatch = jest.fn();
-const mockPingsState = jest.fn();
-const mockStatusFilter = jest.fn();
+const mockDispatch = vi.fn();
+const mockPingsState = vi.fn();
+const mockStatusFilter = vi.fn();
 let mockSelectorCallIndex = 0;
-jest.mock('react-redux-v7', () => {
-  const actual = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const actual = require('react-redux-v7');
   return {
     ...actual,
     useDispatch: () => mockDispatch,
@@ -71,7 +82,7 @@ describe('useMonitorPings', () => {
     mockSelectorCallIndex = 0;
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('does not dispatch until monitorId and locationLabel are both known', () => {
     mockUseSelectedMonitor.mockReturnValue({ monitor: undefined });

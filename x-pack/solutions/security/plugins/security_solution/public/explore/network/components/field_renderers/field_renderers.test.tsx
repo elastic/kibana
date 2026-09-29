@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
 import 'jest-styled-components';
@@ -26,8 +28,8 @@ import type { HostEcs } from '@kbn/securitysolution-ecs';
 import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
 import { PageScope } from '../../../../data_view_manager/constants';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('@kbn/security-solution-navigation/src/context');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('@kbn/security-solution-navigation/src/context');
 mockGetUrlForApp.mockImplementation(
   (appId: string, options?: { path?: string; deepLinkId?: boolean }) =>
     `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`

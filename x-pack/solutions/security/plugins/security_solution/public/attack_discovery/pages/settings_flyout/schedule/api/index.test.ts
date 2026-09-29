@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import type {
@@ -41,13 +44,13 @@ import {
 } from '.';
 import { KibanaServices } from '../../../../../common/lib/kibana';
 
-jest.mock('../../../../../common/lib/kibana');
-const mockKibanaServices = KibanaServices.get as jest.Mock;
+vi.mock('../../../../../common/lib/kibana');
+const mockKibanaServices = KibanaServices.get as Mock;
 
 describe('Schedule API', () => {
   beforeEach(() => {
     mockKibanaServices.mockReturnValue(coreMock.createStart({ basePath: '/mock' }));
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const body: AttackDiscoveryScheduleCreateProps = {

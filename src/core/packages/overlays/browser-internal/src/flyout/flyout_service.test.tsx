@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
 import { render } from '@testing-library/react';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
@@ -76,7 +78,7 @@ describe('FlyoutService', () => {
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
       it('resolves onClose on the previous ref', async () => {
-        const onCloseComplete = jest.fn();
+        const onCloseComplete = vi.fn();
         ref1.onClose.then(onCloseComplete);
         flyouts.open(mountText('Flyout content 2'));
         await ref1.onClose;
@@ -87,7 +89,7 @@ describe('FlyoutService', () => {
   describe('closeAllFlyouts()', () => {
     it('closes the active flyout and resolves onClose', async () => {
       const ref = flyouts.open(mountText('Flyout content'));
-      const onCloseComplete = jest.fn();
+      const onCloseComplete = vi.fn();
       ref.onClose.then(onCloseComplete);
 
       service.closeAllFlyouts();
@@ -106,7 +108,7 @@ describe('FlyoutService', () => {
     it('resolves the onClose Promise', async () => {
       const ref = flyouts.open(mountText('Flyout content'));
 
-      const onCloseComplete = jest.fn();
+      const onCloseComplete = vi.fn();
       ref.onClose.then(onCloseComplete);
       await ref.close();
       await ref.close();
@@ -123,7 +125,7 @@ describe('FlyoutService', () => {
     it("on a stale FlyoutRef doesn't affect the active flyout", async () => {
       const ref1 = flyouts.open(mountText('Flyout content 1'));
       const ref2 = flyouts.open(mountText('Flyout content 2'));
-      const onCloseComplete = jest.fn();
+      const onCloseComplete = vi.fn();
       ref2.onClose.then(onCloseComplete);
       mockReactDomUnmount.mockClear();
       await ref1.close();

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import './use_workflow_change_history_preview_validation.test_mocks';
 
 import { act, renderHook, type RenderHookResult, waitFor } from '@testing-library/react';
@@ -45,17 +48,17 @@ import { useWorkflowJsonSchema } from '../validate_workflow_yaml/model/use_workf
 
 const emptyRegistry = createMockWorkflowContextRegistry();
 
-const mockApplyValidation = applyWorkflowYamlValidationToEditor as jest.Mock;
-const mockApplyHighlights = applyValidationHighlightsToEditor as jest.Mock;
-const mockCollectYamlResults = collectYamlSchemaValidationResults as jest.Mock;
-const mockUseWorkflowJsonSchema = useWorkflowJsonSchema as jest.Mock;
-const mockUseAvailableConnectors = useAvailableConnectors as jest.Mock;
-const mockWaitForPreviewYamlSchemaMarkers = waitForPreviewYamlSchemaMarkers as jest.Mock;
-const mockGetValidationContextError = getWorkflowYamlValidationContextError as jest.Mock;
-const mockUseValidationContextRef = useWorkflowYamlValidationContextRef as jest.Mock;
+const mockApplyValidation = applyWorkflowYamlValidationToEditor as Mock;
+const mockApplyHighlights = applyValidationHighlightsToEditor as Mock;
+const mockCollectYamlResults = collectYamlSchemaValidationResults as Mock;
+const mockUseWorkflowJsonSchema = useWorkflowJsonSchema as Mock;
+const mockUseAvailableConnectors = useAvailableConnectors as Mock;
+const mockWaitForPreviewYamlSchemaMarkers = waitForPreviewYamlSchemaMarkers as Mock;
+const mockGetValidationContextError = getWorkflowYamlValidationContextError as Mock;
+const mockUseValidationContextRef = useWorkflowYamlValidationContextRef as Mock;
 
-const { monaco: mockMonaco } = jest.requireMock('@kbn/code-editor') as {
-  monaco: { editor: { getModelMarkers: jest.Mock } };
+const { monaco: mockMonaco } = (await vi.importMock('@kbn/code-editor')) as {
+  monaco: { editor: { getModelMarkers: Mock } };
 };
 const mockGetModelMarkers = mockMonaco.editor.getModelMarkers;
 
@@ -109,7 +112,7 @@ const flushMicrotasks = async (): Promise<void> => {
 
 describe('useWorkflowChangeHistoryPreviewValidation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resetPreviewValidationHarness();
     mockGetModelMarkers.mockReturnValue([]);
     mockUseWorkflowJsonSchema.mockReturnValue({
@@ -130,7 +133,7 @@ describe('useWorkflowChangeHistoryPreviewValidation', () => {
   afterEach(() => {
     unmountHook?.();
     unmountHook = undefined;
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('clears validation results when highlight is disabled', async () => {

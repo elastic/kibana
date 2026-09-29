@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { encode } from '@kbn/rison';
 import { translateLegacyStateToDescriptors } from '../../../../common/flyout_v2';
@@ -27,25 +30,28 @@ import { Router } from '@kbn/shared-ux-router';
 // Mocks
 // ---------------------------------------------------------------------------
 
-jest.mock('../../use_flyout_api');
-jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
-jest.mock('@kbn/unified-doc-viewer-plugin/public', () => ({
-  useEsDocSearch: jest.fn(),
-}));
-jest.mock('../../../data_view_manager/hooks/use_data_view');
+vi.mock('../../use_flyout_api');
+vi.mock('../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('@kbn/unified-doc-viewer-plugin/public', () => {
+      const mocked = {
+      useEsDocSearch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../data_view_manager/hooks/use_data_view');
 
 const mockFlyoutApi = createFlyoutApiMock();
-(useFlyoutApi as jest.Mock).mockReturnValue(mockFlyoutApi);
-(useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
+(useFlyoutApi as Mock).mockReturnValue(mockFlyoutApi);
+(useIsNewFlyoutEnabled as Mock).mockReturnValue(true);
 
-const mockDataView = { getRuntimeMappings: jest.fn(() => ({})) };
-(useDataView as jest.Mock).mockReturnValue({ dataView: mockDataView, status: 'ready' });
+const mockDataView = { getRuntimeMappings: vi.fn(() => ({})) };
+(useDataView as Mock).mockReturnValue({ dataView: mockDataView, status: 'ready' });
 
 const noHit = () =>
-  (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.NotFound, null, jest.fn()]);
+  (useEsDocSearch as Mock).mockReturnValue([ElasticRequestState.NotFound, null, vi.fn()]);
 
 const withHit = (record: Record<string, unknown>) =>
-  (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, record, jest.fn()]);
+  (useEsDocSearch as Mock).mockReturnValue([ElasticRequestState.Found, record, vi.fn()]);
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -495,15 +501,15 @@ describe('translateLegacyStateToDescriptors', () => {
 
 describe('useLegacyFlyoutUrlInterop', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useFlyoutApi as jest.Mock).mockReturnValue(mockFlyoutApi);
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
-    (useDataView as jest.Mock).mockReturnValue({ dataView: mockDataView, status: 'ready' });
+    vi.clearAllMocks();
+    (useFlyoutApi as Mock).mockReturnValue(mockFlyoutApi);
+    (useIsNewFlyoutEnabled as Mock).mockReturnValue(true);
+    (useDataView as Mock).mockReturnValue({ dataView: mockDataView, status: 'ready' });
     noHit();
   });
 
   it('does nothing when new flyout is disabled', async () => {
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false);
+    (useIsNewFlyoutEnabled as Mock).mockReturnValue(false);
     const legacyState = {
       right: {
         id: 'document-details-right',
@@ -567,7 +573,7 @@ describe('useLegacyFlyoutUrlInterop', () => {
 
     await act(async () => {
       // Advance timers to let setTimeout(0) fire
-      jest.runAllTimers();
+      vi.runAllTimers();
       await Promise.resolve();
     });
 
@@ -589,7 +595,7 @@ describe('useLegacyFlyoutUrlInterop', () => {
     const { history } = renderInterop(buildLegacyUrl(legacyState));
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
       await Promise.resolve();
     });
 
@@ -607,7 +613,7 @@ describe('useLegacyFlyoutUrlInterop', () => {
     renderInterop(buildLegacyUrl(legacyState));
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
       await Promise.resolve();
     });
 
@@ -623,7 +629,7 @@ describe('useLegacyFlyoutUrlInterop', () => {
     renderInterop(buildLegacyUrl(legacyState));
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
       await Promise.resolve();
     });
 
@@ -635,8 +641,8 @@ describe('useLegacyFlyoutUrlInterop', () => {
     // view's index pattern — using it there silently finds no hit and wrongly falls back to
     // the attack main flyout. Give each scope a distinct data view instance so we can assert
     // the attack fetch used the attacks-scoped one.
-    const mockAttacksDataView = { getRuntimeMappings: jest.fn(() => ({})) };
-    (useDataView as jest.Mock).mockImplementation((scope: PageScope) =>
+    const mockAttacksDataView = { getRuntimeMappings: vi.fn(() => ({})) };
+    (useDataView as Mock).mockImplementation((scope: PageScope) =>
       scope === PageScope.attacks
         ? { dataView: mockAttacksDataView, status: 'ready' }
         : { dataView: mockDataView, status: 'ready' }
@@ -650,11 +656,11 @@ describe('useLegacyFlyoutUrlInterop', () => {
     renderInterop(buildLegacyUrl(legacyState));
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
       await Promise.resolve();
     });
 
-    const attackFetchCall = (useEsDocSearch as jest.Mock).mock.calls.find(
+    const attackFetchCall = (useEsDocSearch as Mock).mock.calls.find(
       ([params]) => params.id === 'atk-3'
     );
     expect(attackFetchCall?.[0].dataView).toBe(mockAttacksDataView);
@@ -670,7 +676,7 @@ describe('useLegacyFlyoutUrlInterop', () => {
     renderInterop(buildLegacyUrl(legacyState));
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
       await Promise.resolve();
     });
 
@@ -689,7 +695,7 @@ describe('useLegacyFlyoutUrlInterop', () => {
     renderHook(() => useLegacyFlyoutUrlInterop(LEGACY_PARAM, V2_PARAM), { wrapper });
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
       await Promise.resolve();
     });
 
@@ -701,7 +707,7 @@ describe('useLegacyFlyoutUrlInterop', () => {
     renderInterop('/?some=other-param');
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
       await Promise.resolve();
     });
 

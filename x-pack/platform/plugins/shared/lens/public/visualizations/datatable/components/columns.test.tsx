@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import type {
   EuiButtonEmptyProps,
@@ -76,13 +78,13 @@ const callCreateGridColumns = (
     params.visibleColumns ?? visibleColumns,
     params.formatFactory ??
       (((x: unknown) => ({ convertToText: () => x })) as unknown as FormatFactory),
-    params.onColumnResize ?? jest.fn(),
-    params.onColumnHide ?? jest.fn(),
+    params.onColumnResize ?? vi.fn(),
+    params.onColumnHide ?? vi.fn(),
     params.alignments ?? new Map(),
     params.headerRowHeight ?? LENS_ROW_HEIGHT_MODE.auto,
     params.headerRowLines ?? 1,
     params.columnCellValueActions ?? [],
-    params.closeCellPopover ?? jest.fn(),
+    params.closeCellPopover ?? vi.fn(),
     params.columnFilterable ?? []
   );
 

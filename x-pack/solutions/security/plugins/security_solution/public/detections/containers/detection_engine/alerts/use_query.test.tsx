@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { ReturnQueryAlerts } from './use_query';
 import { useQueryAlerts } from './use_query';
@@ -12,8 +14,8 @@ import { ALERTS_QUERY_NAMES } from './constants';
 import * as api from './api';
 import { alertsMock, mockAlertsQuery } from './mock';
 
-jest.mock('./api');
-jest.mock('../../../../common/lib/apm/use_track_http_request');
+vi.mock('./api');
+vi.mock('../../../../common/lib/apm/use_track_http_request');
 
 const indexName = 'mock-index-name';
 const defaultProps = {
@@ -24,7 +26,7 @@ const defaultProps = {
 
 describe('useQueryAlerts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('init', async () => {
@@ -58,7 +60,7 @@ describe('useQueryAlerts', () => {
   });
 
   test('re-fetch alerts data', async () => {
-    const spyOnfetchQueryAlerts = jest.spyOn(api, 'fetchQueryAlerts');
+    const spyOnfetchQueryAlerts = vi.spyOn(api, 'fetchQueryAlerts');
     const { result } = renderHook(() => useQueryAlerts<unknown, unknown>(defaultProps));
     await waitFor(() => expect(result.current.refetch).toBeDefined());
 
@@ -70,7 +72,7 @@ describe('useQueryAlerts', () => {
   });
 
   test('fetch alert when index name changed', async () => {
-    const spyOnfetchRules = jest.spyOn(api, 'fetchQueryAlerts');
+    const spyOnfetchRules = vi.spyOn(api, 'fetchQueryAlerts');
     const { rerender } = renderHook<ReturnQueryAlerts<unknown, unknown>, [object, string]>(
       (args) => useQueryAlerts({ ...defaultProps, query: args[0], indexName: args[1] }),
       {
@@ -83,7 +85,7 @@ describe('useQueryAlerts', () => {
   });
 
   test('fetch alert when query object changed', async () => {
-    const spyOnfetchRules = jest.spyOn(api, 'fetchQueryAlerts');
+    const spyOnfetchRules = vi.spyOn(api, 'fetchQueryAlerts');
     const { result } = renderHook<ReturnQueryAlerts<unknown, unknown>, [object, string]>(
       (args) => useQueryAlerts({ ...defaultProps, query: args[0], indexName: args[1] }),
       {
@@ -98,7 +100,7 @@ describe('useQueryAlerts', () => {
   });
 
   test('if there is an error when fetching data, we should get back the init value for every properties', async () => {
-    const spyOnGetUserPrivilege = jest.spyOn(api, 'fetchQueryAlerts');
+    const spyOnGetUserPrivilege = vi.spyOn(api, 'fetchQueryAlerts');
     spyOnGetUserPrivilege.mockImplementation(() => {
       throw new Error('Something went wrong, let see what happen');
     });
@@ -116,7 +118,7 @@ describe('useQueryAlerts', () => {
   });
 
   test('skip', async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
+    const abortSpy = vi.spyOn(AbortController.prototype, 'abort');
     const localProps = { ...defaultProps, skip: false };
     const { rerender } = renderHook(() => useQueryAlerts<unknown, unknown>(localProps));
 
@@ -139,7 +141,7 @@ describe('useQueryAlerts', () => {
     });
 
     test('refetch is a function after a failed fetch', async () => {
-      jest.spyOn(api, 'fetchQueryAlerts').mockImplementation(() => {
+      vi.spyOn(api, 'fetchQueryAlerts').mockImplementation(() => {
         throw new Error('fetch error');
       });
       const { result } = renderHook(() => useQueryAlerts<unknown, unknown>(defaultProps));
@@ -158,7 +160,7 @@ describe('useQueryAlerts', () => {
 
   describe('executionContext', () => {
     test('forwards the current executionContext to fetchAlerts', async () => {
-      const spy = jest.spyOn(api, 'fetchQueryAlerts');
+      const spy = vi.spyOn(api, 'fetchQueryAlerts');
       const context = { name: 'alerts-table', id: 'panel-1' };
       renderHook(() =>
         useQueryAlerts<unknown, unknown>({ ...defaultProps, executionContext: context })
@@ -172,8 +174,8 @@ describe('useQueryAlerts', () => {
       // dependency causes an unbounded abort+refetch loop when callers pass a fresh
       // literal (e.g. `buildExecutionContext(...)` inline) because the effect's own
       // setState updates re-render the caller.
-      const spy = jest.spyOn(api, 'fetchQueryAlerts');
-      const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
+      const spy = vi.spyOn(api, 'fetchQueryAlerts');
+      const abortSpy = vi.spyOn(AbortController.prototype, 'abort');
 
       const { rerender } = renderHook(() =>
         // Fresh object identity on every render.
@@ -201,7 +203,7 @@ describe('useQueryAlerts', () => {
     test('reads the latest executionContext from the ref on the next fetch', async () => {
       // Sanity: ref-based reads still see updated context values on subsequent fetches
       // (proven via refetch, which is the only way a new fetch fires without other deps changing).
-      const spy = jest.spyOn(api, 'fetchQueryAlerts');
+      const spy = vi.spyOn(api, 'fetchQueryAlerts');
       const firstContext = { name: 'alerts-table', id: 'panel-1' };
       const secondContext = { name: 'alerts-table', id: 'panel-2' };
 

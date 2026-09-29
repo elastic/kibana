@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { Status } from '../../../../../common/types/api';
@@ -36,8 +38,8 @@ describe('SearchApplicationViewLogic', () => {
   const { mount } = new LogicMounter(SearchApplicationViewLogic);
   const { mount: mountSearchApplicationsListLogic } = new LogicMounter(SearchApplicationsListLogic);
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
 
     mountSearchApplicationsListLogic();
     mount(
@@ -53,8 +55,8 @@ describe('SearchApplicationViewLogic', () => {
   describe('listeners', () => {
     describe('deleteSuccess', () => {
       it('should navigate to the search applications list when an search application is deleted', () => {
-        jest.spyOn(SearchApplicationViewLogic.actions, 'deleteSuccess');
-        jest
+        vi.spyOn(SearchApplicationViewLogic.actions, 'deleteSuccess');
+        vi
           .spyOn(KibanaLogic.values, 'navigateToUrl')
           .mockImplementationOnce(() => Promise.resolve());
         SearchApplicationsListLogic.actions.deleteSuccess(

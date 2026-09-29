@@ -5,26 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useRulesFileUploadStep } from '.';
 import { TestProviders } from '../../../../../../../../common/mock';
 import { useCreateMigration } from '../../../../../../service/hooks/use_create_migration';
 import { MigrationSource } from '../../../../../../../common/types';
 
-jest.mock('../../../../../../service/hooks/use_create_migration', () => ({
-  useCreateMigration: jest.fn(),
-}));
+vi.mock('../../../../../../service/hooks/use_create_migration', () => {
+      const mocked = {
+      useCreateMigration: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useRulesFileUploadStep', () => {
-  const mockUseCreateMigration = useCreateMigration as jest.Mock;
+  const mockUseCreateMigration = useCreateMigration as Mock;
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns step props with incomplete status', () => {
     mockUseCreateMigration.mockReturnValue({
-      createMigration: jest.fn(),
+      createMigration: vi.fn(),
       isLoading: false,
       error: null,
     });
@@ -35,8 +41,8 @@ describe('useRulesFileUploadStep', () => {
           status: 'incomplete',
           migrationStats: undefined,
           migrationName: 'test',
-          onMigrationCreated: jest.fn(),
-          onRulesFileChanged: jest.fn(),
+          onMigrationCreated: vi.fn(),
+          onRulesFileChanged: vi.fn(),
           migrationSource: MigrationSource.SPLUNK,
         }),
       { wrapper: TestProviders }
@@ -51,7 +57,7 @@ describe('useRulesFileUploadStep', () => {
 
   it('returns step props with loading status', () => {
     mockUseCreateMigration.mockReturnValue({
-      createMigration: jest.fn(),
+      createMigration: vi.fn(),
       isLoading: true,
       error: null,
     });
@@ -62,8 +68,8 @@ describe('useRulesFileUploadStep', () => {
           status: 'incomplete',
           migrationStats: undefined,
           migrationName: 'test',
-          onMigrationCreated: jest.fn(),
-          onRulesFileChanged: jest.fn(),
+          onMigrationCreated: vi.fn(),
+          onRulesFileChanged: vi.fn(),
           migrationSource: MigrationSource.SPLUNK,
         }),
       { wrapper: TestProviders }
@@ -78,7 +84,7 @@ describe('useRulesFileUploadStep', () => {
 
   it('returns step props with danger status on error', () => {
     mockUseCreateMigration.mockReturnValue({
-      createMigration: jest.fn(),
+      createMigration: vi.fn(),
       isLoading: false,
       error: new Error('test error'),
     });
@@ -89,8 +95,8 @@ describe('useRulesFileUploadStep', () => {
           status: 'incomplete',
           migrationStats: undefined,
           migrationName: 'test',
-          onMigrationCreated: jest.fn(),
-          onRulesFileChanged: jest.fn(),
+          onMigrationCreated: vi.fn(),
+          onRulesFileChanged: vi.fn(),
           migrationSource: MigrationSource.SPLUNK,
         }),
       { wrapper: TestProviders }

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { Trello } from './trello';
 import { SearchInputSchema, CreateCardInputSchema, UpdateCardInputSchema } from './types';
@@ -14,9 +16,9 @@ import { SearchInputSchema, CreateCardInputSchema, UpdateCardInputSchema } from 
 const BASE_URL = 'https://api.trello.com/1';
 
 const mockClient = {
-  get: jest.fn(),
-  post: jest.fn(),
-  put: jest.fn(),
+  get: vi.fn(),
+  post: vi.fn(),
+  put: vi.fn(),
 };
 
 const mockContext = {
@@ -26,7 +28,7 @@ const mockContext = {
 
 describe('Trello', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {

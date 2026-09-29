@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import numeral from '@elastic/numeral';
 import userEvent from '@testing-library/user-event';
 import { act, render, screen, waitFor } from '@testing-library/react';
@@ -29,14 +31,14 @@ const defaultNumberFormat = '0,0.[000]';
 const mockFormatNumber = (value: number | undefined) =>
   value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT;
 
-const mockFetchMappings = jest.fn(() =>
+const mockFetchMappings = vi.fn(() =>
   Promise.resolve(
     mockMappingsResponse // happy path
   )
 );
 
-jest.mock('../../../utils/fetch_mappings', () => {
-  const original = jest.requireActual('../../../utils/fetch_mappings');
+vi.mock('../../../utils/fetch_mappings', async () => {
+  const original = (await vi.importActual('../../../utils/fetch_mappings'));
   return {
     ...original,
     fetchMappings: (_: { abortController: AbortController; patternOrIndexName: string }) =>
@@ -44,10 +46,10 @@ jest.mock('../../../utils/fetch_mappings', () => {
   };
 });
 
-const mockFetchUnallowedValues = jest.fn(() => Promise.resolve(mockUnallowedValuesResponse));
+const mockFetchUnallowedValues = vi.fn(() => Promise.resolve(mockUnallowedValuesResponse));
 
-jest.mock('../../../utils/fetch_unallowed_values', () => {
-  const original = jest.requireActual('../../../utils/fetch_unallowed_values');
+vi.mock('../../../utils/fetch_unallowed_values', async () => {
+  const original = (await vi.importActual('../../../utils/fetch_unallowed_values'));
   return {
     ...original,
     fetchUnallowedValues: (_: {
@@ -82,15 +84,15 @@ const ilmPhases: string[] = ['hot', 'warm', 'unmanaged'];
 
 describe('CheckAll', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it renders the expected button text when a check is NOT running', () => {
@@ -108,10 +110,10 @@ describe('CheckAll', () => {
           }}
         >
           <CheckAll
-            incrementCheckAllIndiciesChecked={jest.fn()}
-            setCheckAllIndiciesChecked={jest.fn()}
-            setCheckAllTotalIndiciesToCheck={jest.fn()}
-            setIndexToCheck={jest.fn()}
+            incrementCheckAllIndiciesChecked={vi.fn()}
+            setCheckAllIndiciesChecked={vi.fn()}
+            setCheckAllTotalIndiciesToCheck={vi.fn()}
+            setIndexToCheck={vi.fn()}
           />
         </TestDataQualityProviders>
       </TestExternalProviders>
@@ -135,10 +137,10 @@ describe('CheckAll', () => {
           }}
         >
           <CheckAll
-            incrementCheckAllIndiciesChecked={jest.fn()}
-            setCheckAllIndiciesChecked={jest.fn()}
-            setCheckAllTotalIndiciesToCheck={jest.fn()}
-            setIndexToCheck={jest.fn()}
+            incrementCheckAllIndiciesChecked={vi.fn()}
+            setCheckAllIndiciesChecked={vi.fn()}
+            setCheckAllTotalIndiciesToCheck={vi.fn()}
+            setIndexToCheck={vi.fn()}
           />
         </TestDataQualityProviders>
       </TestExternalProviders>
@@ -163,10 +165,10 @@ describe('CheckAll', () => {
           }}
         >
           <CheckAll
-            incrementCheckAllIndiciesChecked={jest.fn()}
-            setCheckAllIndiciesChecked={jest.fn()}
-            setCheckAllTotalIndiciesToCheck={jest.fn()}
-            setIndexToCheck={jest.fn()}
+            incrementCheckAllIndiciesChecked={vi.fn()}
+            setCheckAllIndiciesChecked={vi.fn()}
+            setCheckAllTotalIndiciesToCheck={vi.fn()}
+            setIndexToCheck={vi.fn()}
           />
         </TestDataQualityProviders>
       </TestExternalProviders>
@@ -177,7 +179,7 @@ describe('CheckAll', () => {
 
   test('it renders the expected button text when a check is running', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(
       <TestExternalProviders>
         <TestDataQualityProviders
@@ -193,10 +195,10 @@ describe('CheckAll', () => {
           }}
         >
           <CheckAll
-            incrementCheckAllIndiciesChecked={jest.fn()}
-            setCheckAllIndiciesChecked={jest.fn()}
-            setCheckAllTotalIndiciesToCheck={jest.fn()}
-            setIndexToCheck={jest.fn()}
+            incrementCheckAllIndiciesChecked={vi.fn()}
+            setCheckAllIndiciesChecked={vi.fn()}
+            setCheckAllTotalIndiciesToCheck={vi.fn()}
+            setIndexToCheck={vi.fn()}
           />
         </TestDataQualityProviders>
       </TestExternalProviders>
@@ -212,11 +214,11 @@ describe('CheckAll', () => {
   describe('formatNumber', () => {
     test('it renders a comma-separated `value` via the `defaultNumberFormat`', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       /** stores the result of invoking `CheckAll`'s `formatNumber` function */
       let formatNumberResult = '';
 
-      const onCheckCompleted: OnCheckCompleted = jest.fn(({ formatBytes, formatNumber }) => {
+      const onCheckCompleted: OnCheckCompleted = vi.fn(({ formatBytes, formatNumber }) => {
         const value = 123456789; // numeric input to `CheckAll`'s `formatNumber` function
 
         formatNumberResult = formatNumber(value);
@@ -238,10 +240,10 @@ describe('CheckAll', () => {
             }}
           >
             <CheckAll
-              incrementCheckAllIndiciesChecked={jest.fn()}
-              setCheckAllIndiciesChecked={jest.fn()}
-              setCheckAllTotalIndiciesToCheck={jest.fn()}
-              setIndexToCheck={jest.fn()}
+              incrementCheckAllIndiciesChecked={vi.fn()}
+              setCheckAllIndiciesChecked={vi.fn()}
+              setCheckAllTotalIndiciesToCheck={vi.fn()}
+              setIndexToCheck={vi.fn()}
             />
           </TestDataQualityProviders>
         </TestExternalProviders>
@@ -258,12 +260,12 @@ describe('CheckAll', () => {
 
     test('it renders an empty stat placeholder when `value` is undefined', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
       /** stores the result of invoking `CheckAll`'s `formatNumber` function */
       let formatNumberResult = '';
 
-      const onCheckCompleted: OnCheckCompleted = jest.fn(({ formatBytes, formatNumber }) => {
+      const onCheckCompleted: OnCheckCompleted = vi.fn(({ formatBytes, formatNumber }) => {
         const value = undefined; // undefined input to `CheckAll`'s `formatNumber` function
         formatNumberResult = formatNumber(value);
       });
@@ -284,10 +286,10 @@ describe('CheckAll', () => {
             }}
           >
             <CheckAll
-              incrementCheckAllIndiciesChecked={jest.fn()}
-              setCheckAllIndiciesChecked={jest.fn()}
-              setCheckAllTotalIndiciesToCheck={jest.fn()}
-              setIndexToCheck={jest.fn()}
+              incrementCheckAllIndiciesChecked={vi.fn()}
+              setCheckAllIndiciesChecked={vi.fn()}
+              setCheckAllTotalIndiciesToCheck={vi.fn()}
+              setIndexToCheck={vi.fn()}
             />
           </TestDataQualityProviders>
         </TestExternalProviders>
@@ -305,13 +307,13 @@ describe('CheckAll', () => {
 
   describe('when a running check is cancelled', () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
-    const setCheckAllIndiciesChecked = jest.fn();
-    const setCheckAllTotalIndiciesToCheck = jest.fn();
+    const setCheckAllIndiciesChecked = vi.fn();
+    const setCheckAllTotalIndiciesToCheck = vi.fn();
 
     beforeEach(async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       render(
         <TestExternalProviders>
@@ -328,10 +330,10 @@ describe('CheckAll', () => {
             }}
           >
             <CheckAll
-              incrementCheckAllIndiciesChecked={jest.fn()}
+              incrementCheckAllIndiciesChecked={vi.fn()}
               setCheckAllIndiciesChecked={setCheckAllIndiciesChecked}
               setCheckAllTotalIndiciesToCheck={setCheckAllTotalIndiciesToCheck}
-              setIndexToCheck={jest.fn()}
+              setIndexToCheck={vi.fn()}
             />
           </TestDataQualityProviders>
         </TestExternalProviders>
@@ -358,14 +360,14 @@ describe('CheckAll', () => {
   });
 
   describe('when all checks have completed', () => {
-    const setIndexToCheck = jest.fn();
-    const onCheckCompleted = jest.fn();
+    const setIndexToCheck = vi.fn();
+    const onCheckCompleted = vi.fn();
     beforeEach(async () => {
-      jest.clearAllMocks();
-      jest.useFakeTimers();
+      vi.clearAllMocks();
+      vi.useFakeTimers();
 
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
       render(
         <TestExternalProviders>
@@ -383,9 +385,9 @@ describe('CheckAll', () => {
             }}
           >
             <CheckAll
-              incrementCheckAllIndiciesChecked={jest.fn()}
-              setCheckAllIndiciesChecked={jest.fn()}
-              setCheckAllTotalIndiciesToCheck={jest.fn()}
+              incrementCheckAllIndiciesChecked={vi.fn()}
+              setCheckAllIndiciesChecked={vi.fn()}
+              setCheckAllTotalIndiciesToCheck={vi.fn()}
               setIndexToCheck={setIndexToCheck}
             />
           </TestDataQualityProviders>
@@ -404,14 +406,14 @@ describe('CheckAll', () => {
       // simulate the wall clock advancing
       for (let i = 0; i < totalIndexNames + 1; i++) {
         await act(async () => {
-          jest.advanceTimersByTime(1000 * 10);
+          vi.advanceTimersByTime(1000 * 10);
         });
         await waitFor(() => {});
       }
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     test('it invokes setIndexToCheck with `null` after all the checks have completed', () => {

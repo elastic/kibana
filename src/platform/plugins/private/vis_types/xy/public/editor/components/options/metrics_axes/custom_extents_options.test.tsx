@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 
@@ -21,15 +24,15 @@ const SCALE = 'scale';
 const SET_Y_EXTENTS = 'setYExtents';
 
 describe('CustomExtentsOptions component', () => {
-  let setValueAxis: jest.Mock;
-  let setValueAxisScale: jest.Mock;
-  let setMultipleValidity: jest.Mock;
+  let setValueAxis: Mock;
+  let setValueAxisScale: Mock;
+  let setMultipleValidity: Mock;
   let defaultProps: CustomExtentsOptionsProps;
 
   beforeEach(() => {
-    setValueAxis = jest.fn();
-    setValueAxisScale = jest.fn();
-    setMultipleValidity = jest.fn();
+    setValueAxis = vi.fn();
+    setValueAxisScale = vi.fn();
+    setMultipleValidity = vi.fn();
 
     defaultProps = {
       axisScale: { ...valueAxis.scale },

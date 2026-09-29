@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { FetchStatus } from '../../types';
 import type { Subject } from 'rxjs';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
@@ -31,16 +34,22 @@ import { internalStateActions, selectTabRuntimeState } from '../state_management
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
-jest.mock('./fetch_documents', () => ({
-  fetchDocuments: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('./fetch_documents', () => {
+      const mocked = {
+      fetchDocuments: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./fetch_esql', () => ({
-  fetchEsql: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('./fetch_esql', () => {
+      const mocked = {
+      fetchEsql: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFetchDocuments = fetchDocuments as unknown as jest.MockedFunction<typeof fetchDocuments>;
-const mockfetchEsql = fetchEsql as unknown as jest.MockedFunction<typeof fetchEsql>;
+const mockFetchDocuments = fetchDocuments as unknown as MockedFunction<typeof fetchDocuments>;
+const mockfetchEsql = fetchEsql as unknown as MockedFunction<typeof fetchEsql>;
 
 function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
   const promise = firstValueFrom(

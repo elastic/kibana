@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 /**
  * Unit tests for the Promote threat indicators bulk-op builder.
  *
@@ -37,15 +40,18 @@ import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plu
 // self-deletion bug ship: Task Manager DELETES a recurring task's saved object
 // when a run throws an unrecoverable error, so which helper a branch reaches is
 // the whole guarantee, and a test that cannot tell them apart proves nothing.
-jest.mock('@kbn/task-manager-plugin/server', () => ({
-  TaskCost: { Normal: 2 },
-  throwRetryableError: (err: Error, runAt: Date) => {
-    throw Object.assign(err, { __taskOutcome: 'retryable', __runAt: runAt });
-  },
-  throwUnrecoverableError: (err: Error) => {
-    throw Object.assign(err, { __taskOutcome: 'unrecoverable' });
-  },
-}));
+vi.mock('@kbn/task-manager-plugin/server', () => {
+      const mocked = {
+      TaskCost: { Normal: 2 },
+      throwRetryableError: (err: Error, runAt: Date) => {
+        throw Object.assign(err, { __taskOutcome: 'retryable', __runAt: runAt });
+      },
+      throwUnrecoverableError: (err: Error) => {
+        throw Object.assign(err, { __taskOutcome: 'unrecoverable' });
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intel';
 import {
@@ -439,28 +445,28 @@ describe('promote task runner', () => {
     const coreStart = coreMock.createStart();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     let call = 0;
-    (esClient.search as jest.Mock).mockImplementation(async () => {
+    (esClient.search as Mock).mockImplementation(async () => {
       const response = searchResponses[call] ?? { hits: { hits: [] } };
       call += 1;
       return response;
     });
-    (esClient.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [] });
-    (esClient.openPointInTime as jest.Mock).mockResolvedValue({ id: 'pit-1' });
-    (esClient.closePointInTime as jest.Mock).mockResolvedValue({ succeeded: true, num_freed: 1 });
+    (esClient.bulk as Mock).mockResolvedValue({ errors: false, items: [] });
+    (esClient.openPointInTime as Mock).mockResolvedValue({ id: 'pit-1' });
+    (esClient.closePointInTime as Mock).mockResolvedValue({ succeeded: true, num_freed: 1 });
 
     const coreSetup = coreMock.createSetup();
-    (coreSetup.getStartServices as jest.Mock).mockResolvedValue([coreStart, {}, {}]);
+    (coreSetup.getStartServices as Mock).mockResolvedValue([coreStart, {}, {}]);
 
     const definitions: Record<string, { createTaskRunner: Function }> = {};
     const taskManager = {
-      registerTaskDefinitions: jest.fn((defs) => Object.assign(definitions, defs)),
+      registerTaskDefinitions: vi.fn((defs) => Object.assign(definitions, defs)),
     } as unknown as TaskManagerSetupContract;
 
     registerPromoteThreatIndicatorsTask({
       taskManager,
       coreSetup,
       logger: loggingSystemMock.createLogger(),
-      getReconcileAttributeWorkflows: jest.fn().mockResolvedValue(undefined),
+      getReconcileAttributeWorkflows: vi.fn().mockResolvedValue(undefined),
     });
 
     const definition = definitions[PROMOTE_THREAT_INDICATORS_TASK_TYPE];
@@ -476,7 +482,7 @@ describe('promote task runner', () => {
       taskInstance: { state: {}, params: {} },
       signal: new AbortController().signal,
       executionUuid: 'test-execution-uuid',
-      setCustomTaskRunEventFields: jest.fn(),
+      setCustomTaskRunEventFields: vi.fn(),
       ...overrides,
     } as unknown as RunContext);
 
@@ -532,7 +538,7 @@ describe('promote task runner', () => {
 
   it('does not count bulk-rejected operations as written', async () => {
     const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
-    (esClient.bulk as jest.Mock).mockResolvedValue({
+    (esClient.bulk as Mock).mockResolvedValue({
       errors: true,
       items: [{ update: { error: { type: 'strict_dynamic_mapping_exception' } } }],
     });
@@ -550,7 +556,7 @@ describe('promote task runner', () => {
   // the affected reports were never promoted and nothing re-read that range.
   it('holds the cursor on a transient bulk rejection, so the range is re-scanned', async () => {
     const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
-    (esClient.bulk as jest.Mock).mockResolvedValue({
+    (esClient.bulk as Mock).mockResolvedValue({
       errors: true,
       items: [{ update: { status: 429, error: { type: 'es_rejected_execution_exception' } } }],
     });
@@ -571,7 +577,7 @@ describe('promote task runner', () => {
   // which is strictly worse than dropping the row that cannot be written.
   it('advances the cursor past a permanent bulk rejection and counts it', async () => {
     const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
-    (esClient.bulk as jest.Mock).mockResolvedValue({
+    (esClient.bulk as Mock).mockResolvedValue({
       errors: true,
       items: [
         {
@@ -603,7 +609,7 @@ describe('promote task runner', () => {
   // run, so it must not be able to pin the checkpoint.
   it('treats an unrecognised error type as permanent rather than retryable', async () => {
     const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
-    (esClient.bulk as jest.Mock).mockResolvedValue({
+    (esClient.bulk as Mock).mockResolvedValue({
       errors: true,
       items: [{ update: { status: 400, error: { type: 'strict_dynamic_mapping_exception' } } }],
     });
@@ -635,7 +641,7 @@ describe('promote task runner', () => {
       );
 
       // The PIT pins the indices, so the search must not also pass `index`.
-      const searchArg = (esClient.search as jest.Mock).mock.calls[0][0];
+      const searchArg = (esClient.search as Mock).mock.calls[0][0];
       expect(searchArg.pit).toEqual(expect.objectContaining({ id: 'pit-1' }));
       expect(searchArg.index).toBeUndefined();
       expect(searchArg.query.bool.filter).toEqual(
@@ -659,7 +665,7 @@ describe('promote task runner', () => {
         )
         .run();
 
-      const searchArg = (esClient.search as jest.Mock).mock.calls[0][0];
+      const searchArg = (esClient.search as Mock).mock.calls[0][0];
       expect(searchArg.query.bool.filter).toEqual(
         expect.arrayContaining([{ range: { 'lineage.extracted_at': { gte: EXTRACTED_AT } } }])
       );
@@ -677,7 +683,7 @@ describe('promote task runner', () => {
 
     it('closes the PIT even when the scan throws', async () => {
       const { definition, esClient } = setupRunner([]);
-      (esClient.search as jest.Mock).mockRejectedValue(
+      (esClient.search as Mock).mockRejectedValue(
         Object.assign(new Error('boom'), { statusCode: 500 })
       );
 
@@ -692,7 +698,7 @@ describe('promote task runner', () => {
 
     it('treats a missing reports index as a no-op', async () => {
       const { definition, esClient } = setupRunner([]);
-      (esClient.openPointInTime as jest.Mock).mockRejectedValue(
+      (esClient.openPointInTime as Mock).mockRejectedValue(
         Object.assign(new Error('index_not_found'), { statusCode: 404 })
       );
 
@@ -720,7 +726,7 @@ describe('promote task runner', () => {
   describe('failing a run never unschedules the task', () => {
     const searchFailureOutcome = async (err: unknown) => {
       const { definition, esClient } = setupRunner([]);
-      (esClient.search as jest.Mock).mockRejectedValue(err);
+      (esClient.search as Mock).mockRejectedValue(err);
 
       return definition
         .createTaskRunner(runContext({ taskInstance: { state: {}, params: {} } as never }))
@@ -783,7 +789,7 @@ describe('promote task runner', () => {
       const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
       // What the abort actually looks like to the task: a rejection with no
       // status code, indistinguishable from a transport failure on its own.
-      (esClient[failing] as jest.Mock).mockImplementation(async () => {
+      (esClient[failing] as Mock).mockImplementation(async () => {
         controller.abort();
         throw new Error('Request aborted');
       });

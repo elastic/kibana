@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { API_VERSIONS, ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../../common/constants';
@@ -14,30 +17,30 @@ import { updateActionTagsRoute } from './update_action_tags_route';
 describe('updateActionTagsRoute', () => {
   let routeHandler: RequestHandler;
   let mockOsqueryContext: OsqueryAppContext;
-  let mockEsClient: { search: jest.Mock; update: jest.Mock; indices: { exists: jest.Mock } };
-  let mockDataReadEsClient: { search: jest.Mock };
+  let mockEsClient: { search: Mock; update: Mock; indices: { exists: Mock } };
+  let mockDataReadEsClient: { search: Mock };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockEsClient = {
-      search: jest.fn(),
-      update: jest.fn().mockResolvedValue({}),
-      indices: { exists: jest.fn().mockResolvedValue(true) },
+      search: vi.fn(),
+      update: vi.fn().mockResolvedValue({}),
+      indices: { exists: vi.fn().mockResolvedValue(true) },
     };
-    mockDataReadEsClient = { search: jest.fn() };
+    mockDataReadEsClient = { search: vi.fn() };
 
     mockOsqueryContext = {
-      isCpsActive: jest.fn().mockResolvedValue(false),
+      isCpsActive: vi.fn().mockResolvedValue(false),
       service: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
       },
-      getStartServices: jest.fn().mockResolvedValue([
+      getStartServices: vi.fn().mockResolvedValue([
         {
           elasticsearch: {
             client: {
               asInternalUser: mockEsClient,
-              asScoped: jest.fn().mockReturnValue({ asCurrentUser: mockDataReadEsClient }),
+              asScoped: vi.fn().mockReturnValue({ asCurrentUser: mockDataReadEsClient }),
             },
           },
         },
@@ -61,7 +64,7 @@ describe('updateActionTagsRoute', () => {
 
   const callRoute = async (id: string, spaceId?: string) => {
     if (spaceId) {
-      (mockOsqueryContext.service.getActiveSpace as jest.Mock).mockResolvedValue({ id: spaceId });
+      (mockOsqueryContext.service.getActiveSpace as Mock).mockResolvedValue({ id: spaceId });
     }
 
     setupRoute();
@@ -122,7 +125,7 @@ describe('updateActionTagsRoute', () => {
     });
 
     it('uses a strict default-space filter for the scheduled probe when CPS is enabled', async () => {
-      (mockOsqueryContext.isCpsActive as jest.Mock).mockResolvedValue(true);
+      (mockOsqueryContext.isCpsActive as Mock).mockResolvedValue(true);
       mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [] } });
       mockDataReadEsClient.search.mockResolvedValueOnce({ hits: { total: { value: 0 } } });
 

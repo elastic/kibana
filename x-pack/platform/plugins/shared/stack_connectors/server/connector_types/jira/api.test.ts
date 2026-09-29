@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { externalServiceMock, apiParams } from './mocks';
@@ -13,7 +15,7 @@ import { api } from './api';
 const mockedLogger = loggerMock.create();
 
 describe('api', () => {
-  let externalService: jest.Mocked<ExternalService>;
+  let externalService: Mocked<ExternalService>;
 
   beforeEach(() => {
     externalService = externalServiceMock.create();

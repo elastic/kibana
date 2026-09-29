@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,9 +21,9 @@ import { CaseViewFiles, DEFAULT_CASE_FILES_FILTERING_OPTIONS } from './case_view
 import { renderWithTestingProviders } from '../../../common/mock';
 import { makeFileComment } from './test_helpers';
 
-jest.mock('../../../containers/use_get_case_files');
+vi.mock('../../../containers/use_get_case_files');
 
-const useGetCaseFilesMock = useGetCaseFiles as jest.Mock;
+const useGetCaseFilesMock = useGetCaseFiles as Mock;
 
 const makeFile = (id: string, name = id): Partial<FileJSON> => ({
   id,
@@ -47,7 +50,7 @@ describe('Case View Page files tab', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the utility bar for the files table', async () => {

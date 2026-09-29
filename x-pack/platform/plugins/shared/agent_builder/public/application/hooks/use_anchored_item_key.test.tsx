@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useTimelineItems } from '../components/conversations/timeline/use_timeline_items';
 import type { TimelineItem } from '../components/conversations/timeline/types';
@@ -13,13 +15,22 @@ import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useCurrentConversationStreamType } from './use_is_current_conversation_streaming';
 import { useAnchoredItemKey } from './use_anchored_item_key';
 
-jest.mock('../components/conversations/timeline/use_timeline_items', () => ({
-  useTimelineItems: jest.fn(),
-}));
-jest.mock('../context/conversation/use_conversation_id', () => ({ useConversationId: jest.fn() }));
-jest.mock('./use_is_current_conversation_streaming', () => ({
-  useCurrentConversationStreamType: jest.fn(),
-}));
+vi.mock('../components/conversations/timeline/use_timeline_items', () => {
+      const mocked = {
+      useTimelineItems: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../context/conversation/use_conversation_id', () => {
+      const mocked = { useConversationId: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_is_current_conversation_streaming', () => {
+      const mocked = {
+      useCurrentConversationStreamType: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const message = (id: string): TimelineItem => ({
   kind: 'userMessage',
@@ -48,12 +59,12 @@ const setState = (state: State) => {
   const { isStreaming = false, isResuming = false, items } = state;
   // An explicit `undefined` is the new-conversation page, which has no id yet.
   const conversationId = 'conversationId' in state ? state.conversationId : 'a';
-  jest.mocked(useConversationId).mockReturnValue(conversationId);
+  vi.mocked(useConversationId).mockReturnValue(conversationId);
   // The stream type is already scoped to the current conversation, so a resume elsewhere is simply
   // invisible here: this conversation reads its own `send` (or nothing).
   const streamType = isResuming ? 'resume' : isStreaming ? 'send' : undefined;
-  jest.mocked(useCurrentConversationStreamType).mockReturnValue(streamType);
-  jest.mocked(useTimelineItems).mockReturnValue(items);
+  vi.mocked(useCurrentConversationStreamType).mockReturnValue(streamType);
+  vi.mocked(useTimelineItems).mockReturnValue(items);
 };
 
 const renderAnchor = (initial: State) => {
@@ -71,7 +82,7 @@ const renderAnchor = (initial: State) => {
 const history = [message('u1'), turn('t1')];
 
 describe('useAnchoredItemKey', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('anchors nothing in a conversation that has only been read', () => {
     const { result } = renderAnchor({ items: history });

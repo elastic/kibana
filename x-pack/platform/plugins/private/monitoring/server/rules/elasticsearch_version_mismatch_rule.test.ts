@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ElasticsearchVersionMismatchRule } from './elasticsearch_version_mismatch_rule';
 import { RULE_ELASTICSEARCH_VERSION_MISMATCH } from '../../common/constants';
 import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
@@ -14,27 +17,36 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_elasticsearch_versions', () => ({
-  fetchElasticsearchVersions: jest.fn(),
-}));
-jest.mock('../lib/alerts/fetch_clusters', () => ({
-  fetchClusters: jest.fn(),
-}));
+vi.mock('../lib/alerts/fetch_elasticsearch_versions', () => {
+      const mocked = {
+      fetchElasticsearchVersions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/alerts/fetch_clusters', () => {
+      const mocked = {
+      fetchClusters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../static_globals', () => ({
-  Globals: {
-    app: {
-      url: 'UNIT_TEST_URL',
-      getLogger: () => ({ debug: jest.fn() }),
-      config: {
-        ui: {
-          ccs: { enabled: true },
-          container: { elasticsearch: { enabled: false } },
+vi.mock('../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          url: 'UNIT_TEST_URL',
+          getLogger: () => ({ debug: vi.fn() }),
+          config: {
+            ui: {
+              ccs: { enabled: true },
+              container: { elasticsearch: { enabled: false } },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ElasticsearchVersionMismatchAlert', () => {
   it('should have defaults', () => {
@@ -86,17 +98,17 @@ describe('ElasticsearchVersionMismatchAlert', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchElasticsearchVersions as jest.Mock).mockImplementation(() => {
+      (fetchElasticsearchVersions as Mock).mockImplementation(() => {
         return elasticsearchVersions;
       });
-      (fetchClusters as jest.Mock).mockImplementation(() => {
+      (fetchClusters as Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
       });
     });
 
     afterEach(() => {
       Date = RealDate;
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('should fire action', async () => {
@@ -157,7 +169,7 @@ describe('ElasticsearchVersionMismatchAlert', () => {
     });
 
     it('should not fire actions if there is no mismatch', async () => {
-      (fetchElasticsearchVersions as jest.Mock).mockImplementation(() => {
+      (fetchElasticsearchVersions as Mock).mockImplementation(() => {
         return [
           {
             versions: ['8.0.0'],

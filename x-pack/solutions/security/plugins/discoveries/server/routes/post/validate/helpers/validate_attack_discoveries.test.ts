@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { PostValidateRequestBody } from '@kbn/discoveries-schemas';
@@ -15,22 +18,34 @@ import { validateAttackDiscoveries } from './validate_attack_discoveries';
 import { transformSearchResponseToAlerts } from './transform_search_response_to_alerts';
 import { transformToAlertDocuments } from './transform_to_alert_documents';
 
-jest.mock('uuid', () => ({
-  v4: () => 'generated-uuid',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => 'generated-uuid',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./transform_search_response_to_alerts', () => ({
-  transformSearchResponseToAlerts: jest.fn(),
-}));
+vi.mock('./transform_search_response_to_alerts', () => {
+      const mocked = {
+      transformSearchResponseToAlerts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./transform_to_alert_documents', () => ({
-  transformToAlertDocuments: jest.fn(),
-}));
+vi.mock('./transform_to_alert_documents', () => {
+      const mocked = {
+      transformToAlertDocuments: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/attack-discovery-schedules-common', () => ({
-  ...jest.requireActual('@kbn/attack-discovery-schedules-common'),
-  backfillAttackIdsBestEffort: jest.fn(),
-}));
+vi.mock('@kbn/attack-discovery-schedules-common', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/attack-discovery-schedules-common')),
+      backfillAttackIdsBestEffort: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('validateAttackDiscoveries', () => {
   const authenticatedUser = {
@@ -39,9 +54,9 @@ describe('validateAttackDiscoveries', () => {
   } as unknown as AuthenticatedUser;
 
   const logger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
   } as unknown as Logger;
 
   const esClient = {} as unknown as ElasticsearchClient;
@@ -67,7 +82,7 @@ describe('validateAttackDiscoveries', () => {
 
   const createAdhocAttackDiscoveryDataClient = () => {
     const readDataClient = {
-      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+      search: vi.fn().mockResolvedValue({ hits: { hits: [] } }),
     };
 
     const bulkResponse = {
@@ -76,24 +91,24 @@ describe('validateAttackDiscoveries', () => {
     };
 
     const writeDataClient = {
-      bulk: jest.fn().mockResolvedValue({ body: bulkResponse }),
+      bulk: vi.fn().mockResolvedValue({ body: bulkResponse }),
     };
 
     const dataClient = {
-      getReader: jest.fn().mockReturnValue(readDataClient),
-      getWriter: jest.fn().mockResolvedValue(writeDataClient),
-      indexNameWithNamespace: jest.fn().mockReturnValue('.adhoc.alerts-test'),
-    } as unknown as jest.Mocked<IRuleDataClient>;
+      getReader: vi.fn().mockReturnValue(readDataClient),
+      getWriter: vi.fn().mockResolvedValue(writeDataClient),
+      indexNameWithNamespace: vi.fn().mockReturnValue('.adhoc.alerts-test'),
+    } as unknown as Mocked<IRuleDataClient>;
 
     return { dataClient, readDataClient, writeDataClient };
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns an empty validated_discoveries array when there are no alert documents to create', async () => {
-    (transformToAlertDocuments as jest.Mock).mockReturnValue([]);
+    (transformToAlertDocuments as Mock).mockReturnValue([]);
 
     const { dataClient } = createAdhocAttackDiscoveryDataClient();
     const result = await validateAttackDiscoveries({
@@ -112,10 +127,10 @@ describe('validateAttackDiscoveries', () => {
   });
 
   it('uses a generated uuid when the alert document is missing a uuid', async () => {
-    (transformToAlertDocuments as jest.Mock).mockReturnValue([{}]);
+    (transformToAlertDocuments as Mock).mockReturnValue([{}]);
 
     const { dataClient } = createAdhocAttackDiscoveryDataClient();
-    (await dataClient.getWriter({ namespace: 'default' })).bulk = jest.fn().mockResolvedValue({
+    (await dataClient.getWriter({ namespace: 'default' })).bulk = vi.fn().mockResolvedValue({
       body: { errors: false, items: [] },
     });
 
@@ -136,14 +151,14 @@ describe('validateAttackDiscoveries', () => {
   });
 
   it('drops the discovery and counts duplicates_dropped_count when the document already exists', async () => {
-    (transformToAlertDocuments as jest.Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
-    (transformSearchResponseToAlerts as jest.Mock).mockReturnValue([]);
+    (transformToAlertDocuments as Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
+    (transformSearchResponseToAlerts as Mock).mockReturnValue([]);
 
     const { dataClient, readDataClient, writeDataClient } = createAdhocAttackDiscoveryDataClient();
 
     // Bulk `create` reports a version conflict for the pre-existing document, so
     // it is dropped (never overwritten) and never fetched back.
-    writeDataClient.bulk = jest.fn().mockResolvedValue({
+    writeDataClient.bulk = vi.fn().mockResolvedValue({
       body: {
         errors: true,
         items: [
@@ -177,10 +192,10 @@ describe('validateAttackDiscoveries', () => {
   });
 
   it('returns an empty validated_discoveries array when bulk returns an undefined body', async () => {
-    (transformToAlertDocuments as jest.Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
+    (transformToAlertDocuments as Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
 
     const { dataClient } = createAdhocAttackDiscoveryDataClient();
-    (await dataClient.getWriter({ namespace: 'default' })).bulk = jest
+    (await dataClient.getWriter({ namespace: 'default' })).bulk = vi
       .fn()
       .mockResolvedValue({ body: undefined });
 
@@ -200,10 +215,10 @@ describe('validateAttackDiscoveries', () => {
   });
 
   it('returns an empty validated_discoveries array when a created bulk item is missing an id', async () => {
-    (transformToAlertDocuments as jest.Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
+    (transformToAlertDocuments as Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
 
     const { dataClient } = createAdhocAttackDiscoveryDataClient();
-    (await dataClient.getWriter({ namespace: 'default' })).bulk = jest.fn().mockResolvedValue({
+    (await dataClient.getWriter({ namespace: 'default' })).bulk = vi.fn().mockResolvedValue({
       body: {
         errors: false,
         items: [{ create: { result: 'created' } }],
@@ -226,10 +241,10 @@ describe('validateAttackDiscoveries', () => {
   });
 
   it('throws when bulk returns non-idempotent errors', async () => {
-    (transformToAlertDocuments as jest.Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
+    (transformToAlertDocuments as Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
 
     const { dataClient } = createAdhocAttackDiscoveryDataClient();
-    (await dataClient.getWriter({ namespace: 'default' })).bulk = jest.fn().mockResolvedValue({
+    (await dataClient.getWriter({ namespace: 'default' })).bulk = vi.fn().mockResolvedValue({
       body: {
         errors: true,
         // Include one item without an error to cover the `error == null` branch in the errorDetails builder.
@@ -253,10 +268,10 @@ describe('validateAttackDiscoveries', () => {
   });
 
   it('throws when bulk errors are true and the item error has no id', async () => {
-    (transformToAlertDocuments as jest.Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
+    (transformToAlertDocuments as Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
 
     const { dataClient } = createAdhocAttackDiscoveryDataClient();
-    (await dataClient.getWriter({ namespace: 'default' })).bulk = jest.fn().mockResolvedValue({
+    (await dataClient.getWriter({ namespace: 'default' })).bulk = vi.fn().mockResolvedValue({
       body: {
         errors: true,
         items: [{ create: { error: { reason: 'boom', type: 'error' } } }],
@@ -276,10 +291,10 @@ describe('validateAttackDiscoveries', () => {
   });
 
   it('does not throw for version conflicts (expected duplicates) and drops them', async () => {
-    (transformToAlertDocuments as jest.Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
+    (transformToAlertDocuments as Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
 
     const { dataClient } = createAdhocAttackDiscoveryDataClient();
-    (await dataClient.getWriter({ namespace: 'default' })).bulk = jest.fn().mockResolvedValue({
+    (await dataClient.getWriter({ namespace: 'default' })).bulk = vi.fn().mockResolvedValue({
       body: {
         errors: true,
         items: [
@@ -310,11 +325,11 @@ describe('validateAttackDiscoveries', () => {
   });
 
   it('returns an empty validated_discoveries array when bulk errors are true but there are no item errors', async () => {
-    (transformToAlertDocuments as jest.Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
-    (transformSearchResponseToAlerts as jest.Mock).mockReturnValue([]);
+    (transformToAlertDocuments as Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
+    (transformSearchResponseToAlerts as Mock).mockReturnValue([]);
 
     const { dataClient } = createAdhocAttackDiscoveryDataClient();
-    (await dataClient.getWriter({ namespace: 'default' })).bulk = jest.fn().mockResolvedValue({
+    (await dataClient.getWriter({ namespace: 'default' })).bulk = vi.fn().mockResolvedValue({
       body: {
         errors: true,
         items: [{ create: { _id: 'doc-1', result: 'created' } }],
@@ -337,10 +352,10 @@ describe('validateAttackDiscoveries', () => {
   });
 
   it('returns an empty validated_discoveries array when no documents were created', async () => {
-    (transformToAlertDocuments as jest.Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
+    (transformToAlertDocuments as Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
 
     const { dataClient } = createAdhocAttackDiscoveryDataClient();
-    (await dataClient.getWriter({ namespace: 'default' })).bulk = jest.fn().mockResolvedValue({
+    (await dataClient.getWriter({ namespace: 'default' })).bulk = vi.fn().mockResolvedValue({
       body: { errors: false, items: [{ create: { _id: 'doc-1', result: 'noop' } }] },
     });
 
@@ -360,8 +375,8 @@ describe('validateAttackDiscoveries', () => {
   });
 
   it('returns validated_discoveries from the search response transformation', async () => {
-    (transformToAlertDocuments as jest.Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
-    (transformSearchResponseToAlerts as jest.Mock).mockReturnValue([
+    (transformToAlertDocuments as Mock).mockReturnValue([{ 'kibana.alert.uuid': 'uuid-1' }]);
+    (transformSearchResponseToAlerts as Mock).mockReturnValue([
       {
         alert_ids: ['a1'],
         connector_id: 'connector-1',
@@ -395,16 +410,16 @@ describe('validateAttackDiscoveries', () => {
   });
 
   it('back-fills the underlying detection alerts with the created attack id', async () => {
-    (transformToAlertDocuments as jest.Mock).mockReturnValue([
+    (transformToAlertDocuments as Mock).mockReturnValue([
       {
         [ALERT_UUID]: 'attack-1',
         [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: ['detection-a', 'detection-b'],
       },
     ]);
-    (transformSearchResponseToAlerts as jest.Mock).mockReturnValue([]);
+    (transformSearchResponseToAlerts as Mock).mockReturnValue([]);
 
     const { dataClient, writeDataClient } = createAdhocAttackDiscoveryDataClient();
-    writeDataClient.bulk = jest.fn().mockResolvedValue({
+    writeDataClient.bulk = vi.fn().mockResolvedValue({
       body: { errors: false, items: [{ create: { _id: 'attack-1', result: 'created' } }] },
     });
 
@@ -429,7 +444,7 @@ describe('validateAttackDiscoveries', () => {
   });
 
   it('does not back-fill detection alerts when no documents were created', async () => {
-    (transformToAlertDocuments as jest.Mock).mockReturnValue([
+    (transformToAlertDocuments as Mock).mockReturnValue([
       {
         [ALERT_UUID]: 'attack-1',
         [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: ['detection-a'],
@@ -437,7 +452,7 @@ describe('validateAttackDiscoveries', () => {
     ]);
 
     const { dataClient } = createAdhocAttackDiscoveryDataClient();
-    (await dataClient.getWriter({ namespace: 'default' })).bulk = jest.fn().mockResolvedValue({
+    (await dataClient.getWriter({ namespace: 'default' })).bulk = vi.fn().mockResolvedValue({
       body: { errors: false, items: [{ create: { _id: 'attack-1', result: 'noop' } }] },
     });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
@@ -14,28 +17,40 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { RegularNotesTab } from './regular_notes_tab';
 import { useNotesTabData } from './use_notes_tab_data';
 
-jest.mock('./use_notes_tab_data');
-jest.mock('../../../../../common/components/user_privileges');
+vi.mock('./use_notes_tab_data');
+vi.mock('../../../../../common/components/user_privileges');
 
-jest.mock('../../../../../notes/components/notes_list', () => ({
-  NotesList: () => <div data-test-subj="mock-notes-list" />,
-}));
+vi.mock('../../../../../notes/components/notes_list', () => {
+      const mocked = {
+      NotesList: () => <div data-test-subj="mock-notes-list" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../notes/components/add_note', () => ({
-  AddNote: ({ children }: { children?: React.ReactNode }) => (
-    <div data-test-subj="mock-add-note">{children}</div>
-  ),
-}));
+vi.mock('../../../../../notes/components/add_note', () => {
+      const mocked = {
+      AddNote: ({ children }: { children?: React.ReactNode }) => (
+        <div data-test-subj="mock-add-note">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../notes/participants', () => ({
-  Participants: () => <div data-test-subj="mock-participants" />,
-}));
+vi.mock('../../../notes/participants', () => {
+      const mocked = {
+      Participants: () => <div data-test-subj="mock-participants" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../notes/save_timeline', () => ({
-  SaveTimelineCallout: () => <div data-test-subj="mock-save-timeline-callout" />,
-}));
+vi.mock('../../../notes/save_timeline', () => {
+      const mocked = {
+      SaveTimelineCallout: () => <div data-test-subj="mock-save-timeline-callout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseNotesTabData = useNotesTabData as jest.MockedFunction<typeof useNotesTabData>;
+const mockUseNotesTabData = useNotesTabData as MockedFunction<typeof useNotesTabData>;
 
 const savedTimeline = {
   savedObjectId: 'so-1',
@@ -60,9 +75,9 @@ const defaultHookData = {
 
 describe('RegularNotesTab', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseNotesTabData.mockReturnValue(defaultHookData);
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       notesPrivileges: { crud: true },
     });
   });
@@ -112,7 +127,7 @@ describe('RegularNotesTab', () => {
   });
 
   it('renders AddNote when user has CRUD privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       notesPrivileges: { crud: true },
     });
 
@@ -126,7 +141,7 @@ describe('RegularNotesTab', () => {
   });
 
   it('does NOT render AddNote when user lacks CRUD privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       notesPrivileges: { crud: false },
     });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -61,7 +63,7 @@ describe('TemplatesInfoPanel', () => {
   });
 
   it('calls onDismiss when the dismiss button is clicked', async () => {
-    const onDismiss = jest.fn();
+    const onDismiss = vi.fn();
     renderWithTestingProviders(<TemplatesInfoPanel onDismiss={onDismiss} />);
 
     await userEvent.click(await screen.findByTestId('templates-info-panel-dismiss'));
@@ -70,7 +72,7 @@ describe('TemplatesInfoPanel', () => {
   });
 
   it('renders the start tour button when onStartTour is provided', async () => {
-    renderWithTestingProviders(<TemplatesInfoPanel onStartTour={jest.fn()} />);
+    renderWithTestingProviders(<TemplatesInfoPanel onStartTour={vi.fn()} />);
 
     expect(await screen.findByTestId('templates-info-panel-primaryAction')).toBeInTheDocument();
   });

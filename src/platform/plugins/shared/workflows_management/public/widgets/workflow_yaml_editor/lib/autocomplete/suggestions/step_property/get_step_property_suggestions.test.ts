@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { LineCounter, Scalar } from 'yaml';
 import { YAMLMap } from 'yaml';
 import { monaco } from '@kbn/monaco';
@@ -20,7 +23,7 @@ describe('getStepPropertySuggestions', () => {
     startPos = { line: 1, col: 1 },
     endPos = { line: 1, col: 10 }
   ): LineCounter => {
-    const linePosMock = jest.fn();
+    const linePosMock = vi.fn();
     linePosMock.mockReturnValueOnce(startPos).mockReturnValueOnce(endPos);
     return { linePos: linePosMock } as unknown as LineCounter;
   };
@@ -46,7 +49,7 @@ describe('getStepPropertySuggestions', () => {
   });
 
   const createMockGetPropertyHandler = (
-    search: jest.Mock | null = jest.fn().mockResolvedValue([
+    search: Mock | null = vi.fn().mockResolvedValue([
       { label: 'option-1', value: 'value-1' },
       { label: 'option-2', value: 'value-2' },
     ])
@@ -58,14 +61,14 @@ describe('getStepPropertySuggestions', () => {
           },
         }
       : null;
-    return jest.fn().mockReturnValue(handler);
+    return vi.fn().mockReturnValue(handler);
   };
 
   describe('basic functionality', () => {
     it('should return suggestions for custom properties', async () => {
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(
-        jest.fn().mockResolvedValue([
+        vi.fn().mockResolvedValue([
           { label: 'custom-label', value: 'custom-value' },
           { label: 'custom-label-2', value: 'custom-value-2' },
         ])
@@ -108,7 +111,7 @@ describe('getStepPropertySuggestions', () => {
     });
 
     it('should pass current value to the search function', async () => {
-      const searchMock = jest.fn().mockResolvedValue([]);
+      const searchMock = vi.fn().mockResolvedValue([]);
       const context = createMockContext({
         focusedYamlPair: {
           keyNode: { value: 'key', range: [1, 1, 1] } as Scalar,
@@ -254,7 +257,7 @@ describe('getStepPropertySuggestions', () => {
 
     it('should return empty array when propertyHandler.selection is null', async () => {
       const context = createMockContext();
-      const getPropertyHandler = jest.fn().mockReturnValue(null);
+      const getPropertyHandler = vi.fn().mockReturnValue(null);
 
       const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
@@ -263,7 +266,7 @@ describe('getStepPropertySuggestions', () => {
 
     it('should return empty array when propertyHandler.selection.search is undefined', async () => {
       const context = createMockContext();
-      const getPropertyHandler = jest.fn().mockReturnValue({
+      const getPropertyHandler = vi.fn().mockReturnValue({
         selection: {
           search: undefined,
         },
@@ -276,7 +279,7 @@ describe('getStepPropertySuggestions', () => {
 
     it('should return empty array when completions array is empty', async () => {
       const context = createMockContext();
-      const getPropertyHandler = createMockGetPropertyHandler(jest.fn().mockResolvedValue([]));
+      const getPropertyHandler = createMockGetPropertyHandler(vi.fn().mockResolvedValue([]));
 
       const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
 
@@ -337,7 +340,7 @@ describe('getStepPropertySuggestions', () => {
 
   describe('array element fields', () => {
     it('falls back to the array property handler for an indexed input path', async () => {
-      const searchMock = jest.fn().mockResolvedValue([{ label: 'Duplicate', value: 'Duplicate' }]);
+      const searchMock = vi.fn().mockResolvedValue([{ label: 'Duplicate', value: 'Duplicate' }]);
       const context = createMockContext({
         focusedYamlPair: {
           keyNode: { value: 'tags_to_add', range: [1, 1, 1] } as Scalar,
@@ -394,7 +397,7 @@ describe('getStepPropertySuggestions', () => {
     it('should set CompletionItemKind.Value for all suggestions', async () => {
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(
-        jest.fn().mockResolvedValue([
+        vi.fn().mockResolvedValue([
           { label: 'opt1', value: 'val1' },
           { label: 'opt2', value: 'val2' },
         ])
@@ -410,7 +413,7 @@ describe('getStepPropertySuggestions', () => {
     it('should use completion value as insertText', async () => {
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(
-        jest.fn().mockResolvedValue([{ label: 'Display Label', value: 'actual-insert-value' }])
+        vi.fn().mockResolvedValue([{ label: 'Display Label', value: 'actual-insert-value' }])
       );
 
       const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
@@ -421,7 +424,7 @@ describe('getStepPropertySuggestions', () => {
     it('should include description when provided by selection', async () => {
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(
-        jest
+        vi
           .fn()
           .mockResolvedValue([
             { label: 'option', value: 'val', description: 'This is a description' },
@@ -436,7 +439,7 @@ describe('getStepPropertySuggestions', () => {
     it('should include documentation when provided by completion', async () => {
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(
-        jest
+        vi
           .fn()
           .mockResolvedValue([
             { label: 'option', value: 'val', documentation: 'Extended documentation here' },
@@ -451,7 +454,7 @@ describe('getStepPropertySuggestions', () => {
     it('should handle completions without optional fields', async () => {
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(
-        jest.fn().mockResolvedValue([{ label: 'minimal', value: 'min-val' }])
+        vi.fn().mockResolvedValue([{ label: 'minimal', value: 'min-val' }])
       );
 
       const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
@@ -493,7 +496,7 @@ describe('getStepPropertySuggestions', () => {
     });
 
     it('should call linePos with correct offsets from valueNode.range', async () => {
-      const linePosMock = jest.fn().mockReturnValue({ line: 1, col: 1 });
+      const linePosMock = vi.fn().mockReturnValue({ line: 1, col: 1 });
       const yamlLineCounter = { linePos: linePosMock } as unknown as LineCounter;
       const context = createMockContext({
         focusedYamlPair: {
@@ -514,7 +517,7 @@ describe('getStepPropertySuggestions', () => {
 
   describe('async behavior', () => {
     it('should properly await async search function', async () => {
-      const searchMock = jest.fn().mockImplementation(
+      const searchMock = vi.fn().mockImplementation(
         () =>
           new Promise((resolve) => {
             setTimeout(() => resolve([{ label: 'async-option', value: 'async-value' }]), 10);
@@ -530,7 +533,7 @@ describe('getStepPropertySuggestions', () => {
     });
 
     it('should handle rejected promises from search function', async () => {
-      const searchMock = jest.fn().mockRejectedValue(new Error('Search failed'));
+      const searchMock = vi.fn().mockRejectedValue(new Error('Search failed'));
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(searchMock);
 
@@ -549,7 +552,7 @@ describe('getStepPropertySuggestions', () => {
       }));
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(
-        jest.fn().mockResolvedValue(manyCompletions)
+        vi.fn().mockResolvedValue(manyCompletions)
       );
 
       const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
@@ -567,7 +570,7 @@ describe('getStepPropertySuggestions', () => {
       ];
       const context = createMockContext();
       const getPropertyHandler = createMockGetPropertyHandler(
-        jest.fn().mockResolvedValue(orderedCompletions)
+        vi.fn().mockResolvedValue(orderedCompletions)
       );
 
       const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);

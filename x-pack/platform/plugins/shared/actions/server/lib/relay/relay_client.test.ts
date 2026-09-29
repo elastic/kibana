@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import type { SSLSettings } from '@kbn/actions-utils';
 import type { SystemIdentity } from '@kbn/security-plugin-types-server';
@@ -13,9 +16,9 @@ import { request } from '../axios_utils';
 import { RelayClient } from './relay_client';
 import { RelayRequestError } from './relay_error';
 
-jest.mock('../axios_utils');
+vi.mock('../axios_utils');
 
-const requestMock = jest.mocked(request);
+const requestMock = vi.mocked(request);
 const logger = {} as Logger;
 const relaySSLSettings: SSLSettings = {
   verificationMode: 'full',
@@ -23,11 +26,11 @@ const relaySSLSettings: SSLSettings = {
   key: Buffer.from('key'),
 };
 const configurationUtilities = {
-  getRelaySSLSettings: jest.fn().mockReturnValue(relaySSLSettings),
+  getRelaySSLSettings: vi.fn().mockReturnValue(relaySSLSettings),
 } as unknown as ActionsConfigurationUtilities;
 
-const systemIdentity: jest.Mocked<SystemIdentity> = {
-  createEphemeralToken: jest.fn(),
+const systemIdentity: Mocked<SystemIdentity> = {
+  createEphemeralToken: vi.fn(),
 };
 
 const createClient = ({
@@ -44,7 +47,7 @@ const createClient = ({
 
 describe('RelayClient', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     systemIdentity.createEphemeralToken.mockResolvedValue('essu_kibana-token');
   });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { LeftPanelTabType } from './tabs';
@@ -15,52 +18,64 @@ import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { DocumentEventTypes } from '../../../common/lib/telemetry/types';
 
-const mockOpenLeftPanel = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openLeftPanel: mockOpenLeftPanel }),
-}));
+const mockOpenLeftPanel = vi.fn();
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: () => ({ openLeftPanel: mockOpenLeftPanel }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/components/user_privileges');
 
-const mockReportEvent = jest.fn();
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({ services: { telemetry: { reportEvent: mockReportEvent } } }),
-}));
+const mockReportEvent = vi.fn();
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({ services: { telemetry: { reportEvent: mockReportEvent } } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./header', () => ({
-  PanelHeader: ({
-    tabs,
-    selectedTabId,
-    setSelectedTabId,
-  }: {
-    tabs: LeftPanelTabType[];
-    selectedTabId: string;
-    setSelectedTabId: (id: string) => void;
-  }) => (
-    <div
-      data-test-subj="mockPanelHeader"
-      data-tab-ids={tabs.map((t) => t.id).join(',')}
-      data-selected-tab={selectedTabId}
-    >
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          type="button"
-          data-test-subj={`tab-${tab.id}`}
-          onClick={() => setSelectedTabId(tab.id)}
+vi.mock('./header', () => {
+      const mocked = {
+      PanelHeader: ({
+        tabs,
+        selectedTabId,
+        setSelectedTabId,
+      }: {
+        tabs: LeftPanelTabType[];
+        selectedTabId: string;
+        setSelectedTabId: (id: string) => void;
+      }) => (
+        <div
+          data-test-subj="mockPanelHeader"
+          data-tab-ids={tabs.map((t) => t.id).join(',')}
+          data-selected-tab={selectedTabId}
         >
-          {tab.id}
-        </button>
-      ))}
-    </div>
-  ),
-}));
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              data-test-subj={`tab-${tab.id}`}
+              onClick={() => setSelectedTabId(tab.id)}
+            >
+              {tab.id}
+            </button>
+          ))}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./content', () => ({
-  PanelContent: () => <div data-test-subj="mockPanelContent" />,
-}));
+vi.mock('./content', () => {
+      const mocked = {
+      PanelContent: () => <div data-test-subj="mockPanelContent" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+const mockUseUserPrivileges = useUserPrivileges as Mock;
 
 const nonAlertGetFieldsData = (field: string) => (field === 'event.kind' ? 'event' : undefined);
 
@@ -87,7 +102,7 @@ const getSelectedTabId = (container: HTMLElement): string =>
 
 describe('<LeftPanel />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseUserPrivileges.mockReturnValue({ notesPrivileges: { read: false } });
   });
 

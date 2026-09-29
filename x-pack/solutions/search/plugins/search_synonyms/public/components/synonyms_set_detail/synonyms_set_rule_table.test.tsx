@@ -5,63 +5,77 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { render, screen } from '@testing-library/react';
 import { SynonymsSetRuleTable } from './synonyms_set_rule_table';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('../../hooks/use_fetch_synonyms_set', () => ({
-  useFetchSynonymsSet: () => ({
-    data: {
-      data: [
-        {
-          id: 'rule_id_1',
-          synonyms: 'synonym1',
+vi.mock('../../hooks/use_fetch_synonyms_set', () => {
+      const mocked = {
+      useFetchSynonymsSet: () => ({
+        data: {
+          data: [
+            {
+              id: 'rule_id_1',
+              synonyms: 'synonym1',
+            },
+            {
+              id: 'rule_id_2',
+              synonyms: 'synonym2',
+            },
+            {
+              id: 'rule_id_3',
+              synonyms: 'explicit-from => explicit-to',
+            },
+          ],
+          id: 'my_synonyms_set',
+          _meta: {
+            pageIndex: 0,
+            pageSize: 10,
+            totalItemCount: 2,
+          },
         },
-        {
-          id: 'rule_id_2',
-          synonyms: 'synonym2',
-        },
-        {
+        isLoading: false,
+        isError: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../hooks/use_fetch_generated_rule_id', () => {
+      const mocked = {
+      useFetchGeneratedRuleId: () => ({
+        mutate: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../hooks/use_fetch_synonym_rule', () => {
+      const mocked = {
+      useFetchSynonymRule: () => ({
+        data: {
           id: 'rule_id_3',
           synonyms: 'explicit-from => explicit-to',
         },
-      ],
-      id: 'my_synonyms_set',
-      _meta: {
-        pageIndex: 0,
-        pageSize: 10,
-        totalItemCount: 2,
-      },
-    },
-    isLoading: false,
-    isError: false,
-  }),
-}));
+        isLoading: false,
+        isError: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_fetch_generated_rule_id', () => ({
-  useFetchGeneratedRuleId: () => ({
-    mutate: jest.fn(),
-  }),
-}));
-
-jest.mock('../../hooks/use_fetch_synonym_rule', () => ({
-  useFetchSynonymRule: () => ({
-    data: {
-      id: 'rule_id_3',
-      synonyms: 'explicit-from => explicit-to',
-    },
-    isLoading: false,
-    isError: false,
-  }),
-}));
-
-jest.mock('../../hooks/use_put_synonyms_rule', () => ({
-  usePutSynonymsRule: () => ({
-    mutate: jest.fn(),
-  }),
-}));
+vi.mock('../../hooks/use_put_synonyms_rule', () => {
+      const mocked = {
+      usePutSynonymsRule: () => ({
+        mutate: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SynonymSetDetail table', () => {
   it('should render the list with synonym rules', () => {

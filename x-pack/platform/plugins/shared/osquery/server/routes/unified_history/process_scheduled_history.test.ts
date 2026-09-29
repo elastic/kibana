@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ScheduledExecutionBucket, PackSO } from './process_scheduled_history';
 import {
   resolvePackFilterForKuery,
@@ -61,7 +63,7 @@ const createMockPackSO = (
 describe('process_scheduled_history', () => {
   describe('getPacksForSpace', () => {
     it('fetches all packs and maps to PackSO shape', async () => {
-      const mockFind = jest.fn().mockResolvedValue({
+      const mockFind = vi.fn().mockResolvedValue({
         saved_objects: [
           { id: 'pack-1', attributes: { name: 'Pack 1', queries: [] } },
           { id: 'pack-2', attributes: { name: 'Pack 2', queries: [] } },

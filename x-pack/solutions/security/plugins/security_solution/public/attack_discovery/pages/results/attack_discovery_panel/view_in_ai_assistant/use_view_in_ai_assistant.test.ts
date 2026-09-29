@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
 import { getAttackDiscoveryMarkdown } from '@kbn/elastic-assistant-common';
@@ -13,26 +16,26 @@ import { useAssistantAvailability } from '../../../../../assistant/use_assistant
 import { mockAttackDiscovery } from '../../../mock/mock_attack_discovery';
 import { useViewInAiAssistant } from './use_view_in_ai_assistant';
 
-jest.mock('@kbn/elastic-assistant');
-jest.mock('@kbn/elastic-assistant-common');
-jest.mock('../../../../../assistant/use_assistant_availability');
-const mockUseAssistantOverlay = useAssistantOverlay as jest.Mock;
+vi.mock('@kbn/elastic-assistant');
+vi.mock('@kbn/elastic-assistant-common');
+vi.mock('../../../../../assistant/use_assistant_availability');
+const mockUseAssistantOverlay = useAssistantOverlay as Mock;
 describe('useViewInAiAssistant', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseAssistantOverlay.mockReturnValue({
       promptContextId: 'prompt-context-id',
-      showAssistantOverlay: jest.fn(),
+      showAssistantOverlay: vi.fn(),
     });
 
-    (useAssistantAvailability as jest.Mock).mockReturnValue({
+    (useAssistantAvailability as Mock).mockReturnValue({
       hasAssistantPrivilege: true,
       isAssistantEnabled: true,
       isAssistantVisible: true,
     });
 
-    (getAttackDiscoveryMarkdown as jest.Mock).mockResolvedValue('Test markdown');
+    (getAttackDiscoveryMarkdown as Mock).mockResolvedValue('Test markdown');
   });
 
   it('returns the expected promptContextId', () => {
@@ -56,7 +59,7 @@ describe('useViewInAiAssistant', () => {
   });
 
   it('returns disabled: true when the user does NOT have assistant privileges', () => {
-    (useAssistantAvailability as jest.Mock).mockReturnValue({
+    (useAssistantAvailability as Mock).mockReturnValue({
       hasAssistantPrivilege: false, // <-- the user does NOT have assistant privileges
       isAssistantEnabled: true,
       isAssistantVisible: true,
@@ -72,7 +75,7 @@ describe('useViewInAiAssistant', () => {
   });
 
   it('returns isAssistantVisible: false when the assistant is not visible', () => {
-    (useAssistantAvailability as jest.Mock).mockReturnValue({
+    (useAssistantAvailability as Mock).mockReturnValue({
       hasAssistantPrivilege: true,
       isAssistantEnabled: true,
       isAssistantVisible: false,
@@ -88,9 +91,9 @@ describe('useViewInAiAssistant', () => {
   });
 
   it('returns disabled: true when promptContextId is null', () => {
-    (useAssistantOverlay as jest.Mock).mockReturnValue({
+    (useAssistantOverlay as Mock).mockReturnValue({
       promptContextId: null, // <-- promptContextId is null
-      showAssistantOverlay: jest.fn(),
+      showAssistantOverlay: vi.fn(),
     });
 
     const { result } = renderHook(() =>
@@ -123,7 +126,7 @@ describe('useViewInAiAssistant', () => {
   });
 
   it('calls showOverlay(true) when showAssistantOverlay is called', () => {
-    const showOverlayMock = jest.fn();
+    const showOverlayMock = vi.fn();
     mockUseAssistantOverlay.mockReturnValue({
       promptContextId: 'prompt-context-id',
       showAssistantOverlay: showOverlayMock,

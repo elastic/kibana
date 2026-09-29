@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { addGeneratedActionValues } from './add_generated_action_values';
 import type { RuleAction, RuleSystemAction } from '../../../common';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { getRulesClientMockParams } from '../../test_utils';
 
-jest.mock('uuid', () => ({
-  v4: () => '111-222',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => '111-222',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('addGeneratedActionValues()', () => {
   const uiSettings = uiSettingsServiceMock.createStartContract();
@@ -57,7 +62,7 @@ describe('addGeneratedActionValues()', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('adds uuid', async () => {

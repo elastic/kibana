@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mockHttpServer } from './http_service.test.mocks';
 
 import { noop } from 'lodash';
@@ -21,7 +23,7 @@ import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
-jest.mock('@kbn/core-http-router-server-internal');
+vi.mock('@kbn/core-http-router-server-internal');
 import { HttpService } from './http_service';
 import type { HttpConfigType } from './http_config';
 import { config } from './http_config';
@@ -71,7 +73,7 @@ const fakeHapiServer = {
 };
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 test('creates and sets up http server', async () => {
@@ -82,18 +84,22 @@ test('creates and sets up http server', async () => {
 
   const httpServer = {
     isListening: () => false,
-    setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
-    start: jest.fn(),
-    stop: jest.fn(),
+    setup: vi.fn().mockReturnValue({ server: fakeHapiServer }),
+    start: vi.fn(),
+    stop: vi.fn(),
   };
   const prebootHttpServer = {
     isListening: () => false,
-    setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: jest.fn() }),
-    start: jest.fn(),
-    stop: jest.fn(),
+    setup: vi.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: vi.fn() }),
+    start: vi.fn(),
+    stop: vi.fn(),
   };
-  mockHttpServer.mockImplementationOnce(() => prebootHttpServer);
-  mockHttpServer.mockImplementationOnce(() => httpServer);
+  mockHttpServer.mockImplementationOnce(function () {
+    return prebootHttpServer;
+  });
+  mockHttpServer.mockImplementationOnce(function () {
+    return httpServer;
+  });
 
   const service = new HttpService({ coreId, configService, env, logger });
 
@@ -125,23 +131,27 @@ test('spins up `preboot` server until started if configured with `autoListen:tru
   const configService = createConfigService();
   const httpServer = {
     isListening: () => false,
-    setup: jest.fn().mockReturnValue({}),
-    start: jest.fn(),
-    stop: jest.fn(),
+    setup: vi.fn().mockReturnValue({}),
+    start: vi.fn(),
+    stop: vi.fn(),
   };
   const prebootHapiServer = {
-    start: jest.fn(),
-    stop: jest.fn(),
-    route: jest.fn(),
+    start: vi.fn(),
+    stop: vi.fn(),
+    route: vi.fn(),
   };
 
   mockHttpServer
-    .mockImplementationOnce(() => ({
-      setup: () => ({ server: prebootHapiServer, registerStaticDir: jest.fn() }),
-      start: jest.fn(),
-      stop: jest.fn().mockImplementation(() => prebootHapiServer.stop()),
-    }))
-    .mockImplementationOnce(() => httpServer);
+    .mockImplementationOnce(function () {
+      return {
+        setup: () => ({ server: prebootHapiServer, registerStaticDir: vi.fn() }),
+        start: vi.fn(),
+        stop: vi.fn().mockImplementation(() => prebootHapiServer.stop()),
+      };
+    })
+    .mockImplementationOnce(function () {
+      return httpServer;
+    });
 
   const service = new HttpService({
     coreId,
@@ -153,11 +163,11 @@ test('spins up `preboot` server until started if configured with `autoListen:tru
   await service.preboot(prebootDeps);
 
   const mockResponse: any = {
-    code: jest.fn().mockImplementation(() => mockResponse),
-    header: jest.fn().mockImplementation(() => mockResponse),
+    code: vi.fn().mockImplementation(() => mockResponse),
+    header: vi.fn().mockImplementation(() => mockResponse),
   };
   const mockResponseToolkit = {
-    response: jest.fn().mockReturnValue(mockResponse),
+    response: vi.fn().mockReturnValue(mockResponse),
   };
 
   const [[{ handler }]] = prebootHapiServer.route.mock.calls;
@@ -180,22 +190,26 @@ test('spins up `preboot` server until started if configured with `autoListen:tru
 test('logs error if already set up', async () => {
   const configService = createConfigService();
 
-  mockHttpServer.mockImplementationOnce(() => ({
-    setup: () => ({
-      server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
-      registerStaticDir: jest.fn(),
-    }),
-    start: noop,
-    stop: noop,
-  }));
+  mockHttpServer.mockImplementationOnce(function () {
+    return {
+      setup: () => ({
+        server: { start: vi.fn(), stop: vi.fn(), route: vi.fn() },
+        registerStaticDir: vi.fn(),
+      }),
+      start: noop,
+      stop: noop,
+    };
+  });
 
   const httpServer = {
     isListening: () => true,
-    setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
+    setup: vi.fn().mockReturnValue({ server: fakeHapiServer }),
     start: noop,
     stop: noop,
   };
-  mockHttpServer.mockImplementation(() => httpServer);
+  mockHttpServer.mockImplementation(function () {
+    return httpServer;
+  });
 
   const service = new HttpService({ coreId, configService, env, logger });
 
@@ -211,18 +225,22 @@ test('stops http server', async () => {
 
   const httpServer = {
     isListening: () => false,
-    setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
+    setup: vi.fn().mockReturnValue({ server: fakeHapiServer }),
     start: noop,
-    stop: jest.fn(),
+    stop: vi.fn(),
   };
   const prebootHttpServer = {
     isListening: () => false,
-    setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: jest.fn() }),
+    setup: vi.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: vi.fn() }),
     start: noop,
-    stop: jest.fn(),
+    stop: vi.fn(),
   };
-  mockHttpServer.mockImplementationOnce(() => prebootHttpServer);
-  mockHttpServer.mockImplementationOnce(() => httpServer);
+  mockHttpServer.mockImplementationOnce(function () {
+    return prebootHttpServer;
+  });
+  mockHttpServer.mockImplementationOnce(function () {
+    return httpServer;
+  });
 
   const service = new HttpService({ coreId, configService, env, logger });
 
@@ -241,17 +259,19 @@ test('stops http server', async () => {
 test('stops `preboot` server if it is running', async () => {
   const configService = createConfigService();
   const mockHapiServer = {
-    start: jest.fn(),
-    stop: jest.fn(),
-    route: jest.fn(),
+    start: vi.fn(),
+    stop: vi.fn(),
+    route: vi.fn(),
   };
   const httpServer = {
     isListening: () => false,
-    setup: jest.fn().mockReturnValue({ server: mockHapiServer, registerStaticDir: jest.fn() }),
+    setup: vi.fn().mockReturnValue({ server: mockHapiServer, registerStaticDir: vi.fn() }),
     start: noop,
-    stop: jest.fn().mockImplementation(() => mockHapiServer.stop()),
+    stop: vi.fn().mockImplementation(() => mockHapiServer.stop()),
   };
-  mockHttpServer.mockImplementation(() => httpServer);
+  mockHttpServer.mockImplementation(function () {
+    return httpServer;
+  });
 
   const service = new HttpService({ coreId, configService, env, logger });
 
@@ -265,20 +285,24 @@ test('stops `preboot` server if it is running', async () => {
 test('does not try to stop `preboot` server if it has been already stopped', async () => {
   const prebootHttpServer = {
     isListening: () => false,
-    setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: jest.fn() }),
+    setup: vi.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: vi.fn() }),
     start: noop,
-    stop: jest.fn(),
+    stop: vi.fn(),
   };
   const standardHttpServer = {
     isListening: () => false,
-    setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
+    setup: vi.fn().mockReturnValue({ server: fakeHapiServer }),
     start: noop,
-    stop: jest.fn(),
+    stop: vi.fn(),
   };
 
   mockHttpServer
-    .mockImplementationOnce(() => prebootHttpServer)
-    .mockImplementationOnce(() => standardHttpServer);
+    .mockImplementationOnce(function () {
+      return prebootHttpServer;
+    })
+    .mockImplementationOnce(function () {
+      return standardHttpServer;
+    });
 
   const service = new HttpService({ coreId, configService: createConfigService(), env, logger });
   await service.preboot(prebootDeps);
@@ -301,25 +325,27 @@ test('does not try to stop `preboot` server if it has been already stopped', asy
 test('register route handler', async () => {
   const configService = createConfigService();
 
-  mockHttpServer.mockImplementationOnce(() => ({
-    setup: () => ({
-      server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
-      registerStaticDir: jest.fn(),
-    }),
-    start: noop,
-    stop: noop,
-  }));
+  mockHttpServer.mockImplementationOnce(function () {
+    return {
+      setup: () => ({
+        server: { start: vi.fn(), stop: vi.fn(), route: vi.fn() },
+        registerStaticDir: vi.fn(),
+      }),
+      start: noop,
+      stop: noop,
+    };
+  });
 
-  const registerRouterMock = jest.fn();
+  const registerRouterMock = vi.fn();
   const httpServer = {
     isListening: () => false,
-    setup: jest
-      .fn()
-      .mockReturnValue({ server: fakeHapiServer, registerRouter: registerRouterMock }),
+    setup: vi.fn().mockReturnValue({ server: fakeHapiServer, registerRouter: registerRouterMock }),
     start: noop,
     stop: noop,
   };
-  mockHttpServer.mockImplementation(() => httpServer);
+  mockHttpServer.mockImplementation(function () {
+    return httpServer;
+  });
 
   const service = new HttpService({ coreId, configService, env, logger });
 
@@ -333,20 +359,22 @@ test('register route handler', async () => {
 });
 
 test('register preboot route handler on preboot', async () => {
-  const registerRouterMock = jest.fn();
-  mockHttpServer.mockImplementationOnce(() => ({
-    setup: () => ({
-      server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
-      registerStaticDir: jest.fn(),
-      registerRouterAfterListening: registerRouterMock,
-    }),
-    start: noop,
-    stop: noop,
-  }));
+  const registerRouterMock = vi.fn();
+  mockHttpServer.mockImplementationOnce(function () {
+    return {
+      setup: () => ({
+        server: { start: vi.fn(), stop: vi.fn(), route: vi.fn() },
+        registerStaticDir: vi.fn(),
+        registerRouterAfterListening: registerRouterMock,
+      }),
+      start: noop,
+      stop: noop,
+    };
+  });
 
   const service = new HttpService({ coreId, configService: createConfigService(), env, logger });
 
-  const registerRoutesMock = jest.fn();
+  const registerRoutesMock = vi.fn();
   const { registerRoutes } = await service.preboot(prebootDeps);
   registerRoutes('some-path', registerRoutesMock);
 
@@ -363,19 +391,21 @@ test('returns `preboot` http server contract on preboot', async () => {
   const configService = createConfigService();
   const httpServer = {
     server: fakeHapiServer,
-    registerStaticDir: jest.fn(),
+    registerStaticDir: vi.fn(),
     auth: Symbol('auth'),
     basePath: Symbol('basePath'),
     csp: Symbol('csp'),
-    getServerInfo: jest.fn(),
+    getServerInfo: vi.fn(),
   };
 
-  mockHttpServer.mockImplementation(() => ({
-    isListening: () => false,
-    setup: jest.fn().mockReturnValue(httpServer),
-    start: noop,
-    stop: noop,
-  }));
+  mockHttpServer.mockImplementation(function () {
+    return {
+      isListening: () => false,
+      setup: vi.fn().mockReturnValue(httpServer),
+      start: noop,
+      stop: noop,
+    };
+  });
 
   const service = new HttpService({ coreId, configService, env, logger });
   await expect(service.preboot(prebootDeps)).resolves.toMatchObject({
@@ -395,21 +425,25 @@ test('returns http server contract on setup', async () => {
   const configService = createConfigService();
   const httpServer = { server: fakeHapiServer, options: { someOption: true } };
 
-  mockHttpServer.mockImplementationOnce(() => ({
-    setup: () => ({
-      server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
-      registerStaticDir: jest.fn(),
-    }),
-    start: noop,
-    stop: noop,
-  }));
+  mockHttpServer.mockImplementationOnce(function () {
+    return {
+      setup: () => ({
+        server: { start: vi.fn(), stop: vi.fn(), route: vi.fn() },
+        registerStaticDir: vi.fn(),
+      }),
+      start: noop,
+      stop: noop,
+    };
+  });
 
-  mockHttpServer.mockImplementation(() => ({
-    isListening: () => false,
-    setup: jest.fn().mockReturnValue(httpServer),
-    start: noop,
-    stop: noop,
-  }));
+  mockHttpServer.mockImplementation(function () {
+    return {
+      isListening: () => false,
+      setup: vi.fn().mockReturnValue(httpServer),
+      start: noop,
+      stop: noop,
+    };
+  });
 
   const service = new HttpService({ coreId, configService, env, logger });
   await service.preboot(prebootDeps);
@@ -425,21 +459,25 @@ test('does not start http server if configured with `autoListen:false`', async (
   const configService = createConfigService({
     autoListen: false,
   });
-  mockHttpServer.mockImplementationOnce(() => ({
-    setup: () => ({
-      server: { start: jest.fn(), stop: jest.fn(), route: jest.fn() },
-      registerStaticDir: jest.fn(),
-    }),
-    start: noop,
-    stop: noop,
-  }));
+  mockHttpServer.mockImplementationOnce(function () {
+    return {
+      setup: () => ({
+        server: { start: vi.fn(), stop: vi.fn(), route: vi.fn() },
+        registerStaticDir: vi.fn(),
+      }),
+      start: noop,
+      stop: noop,
+    };
+  });
   const httpServer = {
     isListening: () => false,
-    setup: jest.fn().mockReturnValue({}),
-    start: jest.fn(),
+    setup: vi.fn().mockReturnValue({}),
+    start: vi.fn(),
     stop: noop,
   };
-  mockHttpServer.mockImplementation(() => httpServer);
+  mockHttpServer.mockImplementation(function () {
+    return httpServer;
+  });
 
   const service = new HttpService({
     coreId,
@@ -467,18 +505,22 @@ test('passes versioned config to router', async () => {
 
   const httpServer = {
     isListening: () => false,
-    setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerRouter: jest.fn() }),
-    start: jest.fn(),
-    stop: jest.fn(),
+    setup: vi.fn().mockReturnValue({ server: fakeHapiServer, registerRouter: vi.fn() }),
+    start: vi.fn(),
+    stop: vi.fn(),
   };
   const prebootHttpServer = {
     isListening: () => false,
-    setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: jest.fn() }),
-    start: jest.fn(),
-    stop: jest.fn(),
+    setup: vi.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: vi.fn() }),
+    start: vi.fn(),
+    stop: vi.fn(),
   };
-  mockHttpServer.mockImplementationOnce(() => prebootHttpServer);
-  mockHttpServer.mockImplementationOnce(() => httpServer);
+  mockHttpServer.mockImplementationOnce(function () {
+    return prebootHttpServer;
+  });
+  mockHttpServer.mockImplementationOnce(function () {
+    return httpServer;
+  });
 
   const service = new HttpService({ coreId, configService, env, logger });
   await service.preboot(prebootDeps);

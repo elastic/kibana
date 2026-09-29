@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { Subject, throwError } from 'rxjs';
 import type { Observable } from 'rxjs';
@@ -18,23 +20,29 @@ const RESOLVED_AGENT_EXECUTION_ID = 'agent-exec-1';
 const FOLLOW_PATH = `/internal/agent_builder/executions/${RESOLVED_AGENT_EXECUTION_ID}/follow`;
 
 let mockEvents$: Observable<unknown>;
-const mockGetExecution = jest.fn();
-const mockFindAgentExecution = jest.fn();
+const mockGetExecution = vi.fn();
+const mockFindAgentExecution = vi.fn();
 
-jest.mock('@kbn/sse-utils-client', () => ({
-  /**
-   * Subscribes to the source (so the http.get() side effect still happens), but replaces
-   * its output with the test-controlled `mockEvents$` observable.
-   */
-  httpResponseIntoObservable: () => (source: { subscribe: (o: unknown) => void }) => {
-    source.subscribe({ error: () => {} });
-    return mockEvents$;
-  },
-}));
+vi.mock('@kbn/sse-utils-client', () => {
+      const mocked = {
+      /**
+       * Subscribes to the source (so the http.get() side effect still happens), but replaces
+       * its output with the test-controlled `mockEvents$` observable.
+       */
+      httpResponseIntoObservable: () => (source: { subscribe: (o: unknown) => void }) => {
+        source.subscribe({ error: () => {} });
+        return mockEvents$;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => ({
-  WorkflowApi: jest.fn().mockImplementation(() => ({ getExecution: mockGetExecution })),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      WorkflowApi: vi.fn().mockImplementation(() => ({ getExecution: mockGetExecution })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const validState = { summary: 'ok', hypotheses: [] };
 
@@ -79,7 +87,7 @@ describe('useInvestigationState', () => {
   });
 
   const createHttp = () => {
-    const get = jest.fn((path: string) => {
+    const get = vi.fn((path: string) => {
       if (path === FIND_EXECUTION_PATH) {
         return mockFindAgentExecution();
       }
@@ -221,7 +229,7 @@ describe('useInvestigationState', () => {
     });
 
     it('retries a completed execution whose output is not visible yet, then reports unavailable', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       try {
         mockGetExecution.mockResolvedValue(completedExecutionWithOutput({ message: 'ok' }));
         const http = createHttp();
@@ -231,19 +239,19 @@ describe('useInvestigationState', () => {
         );
 
         await act(async () => {
-          await jest.advanceTimersByTimeAsync(5000);
+          await vi.advanceTimersByTimeAsync(5000);
         });
 
         expect(mockGetExecution.mock.calls.length).toBeGreaterThan(1);
         expect(result.current.status).toBe('unavailable');
         expect(result.current.error).toBe("Couldn't load the investigation result.");
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
     it('recovers when a retry sees the output land after the persistence flush', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       try {
         mockGetExecution
           .mockResolvedValueOnce(completedExecutionWithOutput({ message: 'ok' }))
@@ -257,13 +265,13 @@ describe('useInvestigationState', () => {
         );
 
         await act(async () => {
-          await jest.advanceTimersByTimeAsync(2000);
+          await vi.advanceTimersByTimeAsync(2000);
         });
 
         expect(result.current.status).toBe('complete');
         expect(result.current.state).toEqual(validState);
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
@@ -286,7 +294,7 @@ describe('useInvestigationState', () => {
     });
 
     it('resumes following live when the workflow execution is actually still running', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       try {
         mockGetExecution.mockResolvedValue({ status: 'running', stepExecutions: [] });
         const http = createHttp();
@@ -296,7 +304,7 @@ describe('useInvestigationState', () => {
         );
 
         await act(async () => {
-          await jest.advanceTimersByTimeAsync(4000);
+          await vi.advanceTimersByTimeAsync(4000);
         });
 
         expect(result.current.status).toBe('running');
@@ -305,7 +313,7 @@ describe('useInvestigationState', () => {
           expect.objectContaining({ asResponse: true, rawResponse: true })
         );
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
   });
@@ -333,7 +341,7 @@ describe('useInvestigationState', () => {
     });
 
     it('polls the find-by-metadata endpoint until it resolves an id, without calling follow in between', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       try {
         mockFindAgentExecution
           .mockResolvedValueOnce({ executionId: null })
@@ -345,20 +353,20 @@ describe('useInvestigationState', () => {
         );
 
         await act(async () => {
-          await jest.advanceTimersByTimeAsync(0);
+          await vi.advanceTimersByTimeAsync(0);
         });
         expect(http.get).not.toHaveBeenCalledWith(FOLLOW_PATH, expect.anything());
         expect(result.current.status).toBe('running');
 
         await act(async () => {
-          await jest.advanceTimersByTimeAsync(3000);
+          await vi.advanceTimersByTimeAsync(3000);
         });
         expect(http.get).toHaveBeenCalledWith(
           FOLLOW_PATH,
           expect.objectContaining({ asResponse: true, rawResponse: true })
         );
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
@@ -449,7 +457,7 @@ describe('useInvestigationState', () => {
     });
 
     it('waits for the workflow to become terminal when the stream completes before the engine finishes', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       try {
         const finalState = { summary: 'final', hypotheses: [] };
         mockGetExecution
@@ -464,24 +472,24 @@ describe('useInvestigationState', () => {
         );
 
         await act(async () => {
-          await jest.advanceTimersByTimeAsync(0);
+          await vi.advanceTimersByTimeAsync(0);
         });
         act(() => {
           mockSubject.complete();
         });
         await act(async () => {
-          await jest.advanceTimersByTimeAsync(2000);
+          await vi.advanceTimersByTimeAsync(2000);
         });
 
         expect(result.current.status).toBe('complete');
         expect(result.current.state).toEqual(finalState);
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
     it('re-follows instead of failing when the stream errors while the workflow still runs', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       try {
         mockEvents$ = throwError(() => new Error('Execution not found'));
         mockGetExecution.mockResolvedValue({ status: 'running', stepExecutions: [] });
@@ -492,19 +500,19 @@ describe('useInvestigationState', () => {
         );
 
         await act(async () => {
-          await jest.advanceTimersByTimeAsync(4000);
+          await vi.advanceTimersByTimeAsync(4000);
         });
 
         expect(result.current.status).toBe('running');
         expect(result.current.error).toBeUndefined();
         expect(mockFindAgentExecution.mock.calls.length).toBeGreaterThan(1);
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
     it('re-resolves the agent execution id (not just re-follows the previous one) after a stream error', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       try {
         const SECOND_AGENT_EXECUTION_ID = 'agent-exec-2';
         mockFindAgentExecution
@@ -519,7 +527,7 @@ describe('useInvestigationState', () => {
         );
 
         await act(async () => {
-          await jest.advanceTimersByTimeAsync(4000);
+          await vi.advanceTimersByTimeAsync(4000);
         });
 
         expect(http.get).toHaveBeenCalledWith(
@@ -527,7 +535,7 @@ describe('useInvestigationState', () => {
           expect.objectContaining({ asResponse: true, rawResponse: true })
         );
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 

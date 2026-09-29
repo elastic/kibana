@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useCaseObservables } from './use_case_observables';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -41,15 +44,15 @@ const mockCaseData = {
   ],
 };
 
-jest.mock('../../containers/configure/use_get_case_configuration');
+vi.mock('../../containers/configure/use_get_case_configuration');
 
 describe('useCaseObservables', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns loading state when configuration is loading', () => {
-    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+    (useGetCaseConfiguration as Mock).mockReturnValue({
       data: { observableTypes: [] },
       isLoading: true,
     });
@@ -63,7 +66,7 @@ describe('useCaseObservables', () => {
   });
 
   it('filters observables based on available types', () => {
-    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+    (useGetCaseConfiguration as Mock).mockReturnValue({
       data: { observableTypes: [{ key: 'type1' }] },
       isLoading: false,
     });
@@ -94,7 +97,7 @@ describe('useCaseObservables', () => {
   });
 
   it('includes built-in observable types', () => {
-    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+    (useGetCaseConfiguration as Mock).mockReturnValue({
       data: { observableTypes: [] },
       isLoading: false,
     });
@@ -109,7 +112,7 @@ describe('useCaseObservables', () => {
   });
 
   it('filters observables by searchTerm when provided', () => {
-    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+    (useGetCaseConfiguration as Mock).mockReturnValue({
       data: { observableTypes: [{ key: 'type1' }] },
       isLoading: false,
     });
@@ -132,7 +135,7 @@ describe('useCaseObservables', () => {
   });
 
   it('returns empty array when searchTerm does not match any observable values', () => {
-    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+    (useGetCaseConfiguration as Mock).mockReturnValue({
       data: { observableTypes: [{ key: 'type1' }] },
       isLoading: false,
     });

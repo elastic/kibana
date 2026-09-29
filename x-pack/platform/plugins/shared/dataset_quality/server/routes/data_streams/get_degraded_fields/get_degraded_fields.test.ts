@@ -5,34 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { createDatasetQualityESClient } from '../../../utils';
 import { getDegradedFields } from '.';
 
-jest.mock('../../../utils', () => {
-  const actual = jest.requireActual('../../../utils');
+vi.mock('../../../utils', async () => {
+  const actual = (await vi.importActual('../../../utils'));
   return {
     ...actual,
-    createDatasetQualityESClient: jest.fn(),
+    createDatasetQualityESClient: vi.fn(),
   };
 });
 
-const mockCreateDatasetQualityESClient = createDatasetQualityESClient as jest.MockedFunction<
+const mockCreateDatasetQualityESClient = createDatasetQualityESClient as MockedFunction<
   typeof createDatasetQualityESClient
 >;
 
 describe('getDegradedFields', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockDatasetQualityESClient: {
-    search: jest.MockedFunction<ReturnType<typeof createDatasetQualityESClient>['search']>;
-    fieldCaps: jest.MockedFunction<ReturnType<typeof createDatasetQualityESClient>['fieldCaps']>;
+    search: MockedFunction<ReturnType<typeof createDatasetQualityESClient>['search']>;
+    fieldCaps: MockedFunction<ReturnType<typeof createDatasetQualityESClient>['fieldCaps']>;
   };
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     mockDatasetQualityESClient = {
-      search: jest.fn(),
-      fieldCaps: jest.fn(),
+      search: vi.fn(),
+      fieldCaps: vi.fn(),
     };
     mockCreateDatasetQualityESClient.mockReturnValue(
       mockDatasetQualityESClient as unknown as ReturnType<typeof createDatasetQualityESClient>
@@ -40,7 +43,7 @@ describe('getDegradedFields', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('issues the search and maps degraded field buckets when _ignored is aggregatable', async () => {

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { DEFAULT_TIMEOUT, KibanaDiscoveryService } from './kibana_discovery_service';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
@@ -28,15 +30,15 @@ describe('KibanaDiscoveryService', () => {
   savedObjectsRepository.bulkDelete.mockResolvedValue({} as SavedObjectsBulkDeleteResponse);
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.spyOn(global, 'setTimeout');
-    jest.spyOn(global, 'clearTimeout');
-    jest.setSystemTime(new Date(now));
+    vi.useFakeTimers();
+    vi.spyOn(global, 'setTimeout');
+    vi.spyOn(global, 'clearTimeout');
+    vi.setSystemTime(new Date(now));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   describe('Discovery', () => {
@@ -110,7 +112,7 @@ describe('KibanaDiscoveryService', () => {
         DEFAULT_DISCOVERY_INTERVAL_MS
       );
 
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
 
       expect(savedObjectsRepository.update).toHaveBeenCalledTimes(2);
     });
@@ -188,7 +190,7 @@ describe('KibanaDiscoveryService', () => {
 
       savedObjectsRepository.update.mockRejectedValueOnce(new Error('foo'));
 
-      await jest.advanceTimersByTimeAsync(15000);
+      await vi.advanceTimersByTimeAsync(15000);
 
       expect(savedObjectsRepository.update).toHaveBeenCalledTimes(2);
       expect(setTimeout).toHaveBeenCalledTimes(2);
@@ -231,7 +233,7 @@ describe('KibanaDiscoveryService', () => {
         new Error('failed due to cluster_block_exception, task_manager index')
       );
 
-      await jest.advanceTimersByTimeAsync(15000);
+      await vi.advanceTimersByTimeAsync(15000);
 
       expect(savedObjectsRepository.update).toHaveBeenCalledTimes(2);
       expect(setTimeout).toHaveBeenCalledTimes(2);
@@ -275,7 +277,7 @@ describe('KibanaDiscoveryService', () => {
 
       kibanaDiscoveryService.stop();
 
-      await jest.advanceTimersByTimeAsync(15000);
+      await vi.advanceTimersByTimeAsync(15000);
 
       expect(savedObjectsRepository.update).toHaveBeenCalledTimes(1);
       expect(setTimeout).toHaveBeenCalledTimes(1);
@@ -293,7 +295,7 @@ describe('KibanaDiscoveryService', () => {
     savedObjectsRepository.find.mockResolvedValueOnce(createFindResponse(mockActiveNodes));
 
     it('returns the active kibana nodes', async () => {
-      const onNodesCounted = jest.fn();
+      const onNodesCounted = vi.fn();
       const kibanaDiscoveryService = new KibanaDiscoveryService({
         savedObjectsRepository,
         logger,

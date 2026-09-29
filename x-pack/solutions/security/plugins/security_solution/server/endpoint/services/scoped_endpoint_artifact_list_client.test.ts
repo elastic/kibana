@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { FindExceptionListItemOptions } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
@@ -14,136 +17,144 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { EndpointAppContextService } from '../endpoint_app_context_services';
 import { ScopedEndpointArtifactListClient } from './scoped_endpoint_artifact_list_client';
 
-jest.mock('../../lists_integration/endpoint/utils/build_space_data_filter', () => ({
-  buildSpaceDataFilter: jest.fn().mockResolvedValue({ filter: 'space-filter-kql' }),
-}));
+vi.mock('../../lists_integration/endpoint/utils/build_space_data_filter', () => {
+      const mocked = {
+      buildSpaceDataFilter: vi.fn().mockResolvedValue({ filter: 'space-filter-kql' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockValidatePreSingleListFind = jest.fn().mockResolvedValue(undefined);
+const mockValidatePreSingleListFind = vi.fn().mockResolvedValue(undefined);
 
-jest.mock('../../lists_integration/endpoint/validators/trusted_app_validator', () => ({
-  TrustedAppValidator: Object.assign(
-    jest.fn().mockImplementation(() => ({
-      validatePreSingleListFind: mockValidatePreSingleListFind,
-    })),
-    {
-      isTrustedApp: jest.fn(({ listId }: { listId: string }) => listId === 'endpoint_trusted_apps'),
-    }
-  ),
-}));
-
-jest.mock('../../lists_integration/endpoint/validators/trusted_device_validator', () => ({
-  TrustedDeviceValidator: Object.assign(
-    jest.fn().mockImplementation(() => ({
-      validatePreSingleListFind: jest.fn().mockResolvedValue(undefined),
-    })),
-    {
-      isTrustedDevice: jest.fn(
-        ({ listId }: { listId: string }) => listId === 'endpoint_trusted_devices'
+vi.mock('../../lists_integration/endpoint/validators/trusted_app_validator', () => {
+      const mocked = {
+      TrustedAppValidator: Object.assign(
+        vi.fn().mockImplementation(() => ({
+          validatePreSingleListFind: mockValidatePreSingleListFind,
+        })),
+        {
+          isTrustedApp: vi.fn(({ listId }: { listId: string }) => listId === 'endpoint_trusted_apps'),
+        }
       ),
-    }
-  ),
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock('../../lists_integration/endpoint/validators/trusted_device_validator', () => {
+      const mocked = {
+      TrustedDeviceValidator: Object.assign(
+        vi.fn().mockImplementation(() => ({
+          validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
+        })),
+        {
+          isTrustedDevice: vi.fn(
+            ({ listId }: { listId: string }) => listId === 'endpoint_trusted_devices'
+          ),
+        }
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock(
   '../../lists_integration/endpoint/validators/host_isolation_exceptions_validator',
-  () => ({
-    HostIsolationExceptionsValidator: Object.assign(
-      jest.fn().mockImplementation(() => ({
-        validatePreSingleListFind: jest.fn().mockResolvedValue(undefined),
-      })),
-      {
-        isHostIsolationException: jest.fn(
-          ({ listId }: { listId: string }) => listId === 'endpoint_host_isolation_exceptions'
+  () => {
+      const mocked = {
+        HostIsolationExceptionsValidator: Object.assign(
+          vi.fn().mockImplementation(() => ({
+            validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
+          })),
+          {
+            isHostIsolationException: vi.fn(
+              ({ listId }: { listId: string }) => listId === 'endpoint_host_isolation_exceptions'
+            ),
+          }
         ),
-      }
-    ),
-  })
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../lists_integration/endpoint/validators/event_filter_validator', () => ({
-  EventFilterValidator: Object.assign(
-    jest.fn().mockImplementation(() => ({
-      validatePreSingleListFind: jest.fn().mockResolvedValue(undefined),
-    })),
-    {
-      isEventFilter: jest.fn(
-        ({ listId }: { listId: string }) => listId === 'endpoint_event_filters'
+vi.mock('../../lists_integration/endpoint/validators/event_filter_validator', () => {
+      const mocked = {
+      EventFilterValidator: Object.assign(
+        vi.fn().mockImplementation(() => ({
+          validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
+        })),
+        {
+          isEventFilter: vi.fn(
+            ({ listId }: { listId: string }) => listId === 'endpoint_event_filters'
+          ),
+        }
       ),
-    }
-  ),
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lists_integration/endpoint/validators/blocklist_validator', () => ({
-  BlocklistValidator: Object.assign(
-    jest.fn().mockImplementation(() => ({
-      validatePreSingleListFind: jest.fn().mockResolvedValue(undefined),
-    })),
-    {
-      isBlocklist: jest.fn(({ listId }: { listId: string }) => listId === 'endpoint_blocklists'),
-    }
-  ),
-}));
-
-jest.mock('../../lists_integration/endpoint/validators/endpoint_exceptions_validator', () => ({
-  EndpointExceptionsValidator: Object.assign(
-    jest.fn().mockImplementation(() => ({
-      validatePreSingleListFind: jest.fn().mockResolvedValue(undefined),
-    })),
-    {
-      isEndpointException: jest.fn(({ listId }: { listId: string }) => listId === 'endpoint_list'),
-    }
-  ),
-}));
-
-jest.mock('../../lists_integration/endpoint/validators/custom_yara_signatures_validator', () => ({
-  CustomYaraSignaturesValidator: Object.assign(
-    jest.fn().mockImplementation(() => ({
-      validatePreSingleListFind: jest.fn().mockResolvedValue(undefined),
-    })),
-    {
-      isCustomYaraSignature: jest.fn(
-        ({ listId }: { listId: string }) => listId === 'endpoint_custom_yara_signatures'
+vi.mock('../../lists_integration/endpoint/validators/blocklist_validator', () => {
+      const mocked = {
+      BlocklistValidator: Object.assign(
+        vi.fn().mockImplementation(() => ({
+          validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
+        })),
+        {
+          isBlocklist: vi.fn(({ listId }: { listId: string }) => listId === 'endpoint_blocklists'),
+        }
       ),
-    }
-  ),
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { buildSpaceDataFilter } = jest.requireMock(
-  '../../lists_integration/endpoint/utils/build_space_data_filter'
-) as { buildSpaceDataFilter: jest.Mock };
+vi.mock('../../lists_integration/endpoint/validators/endpoint_exceptions_validator', () => {
+      const mocked = {
+      EndpointExceptionsValidator: Object.assign(
+        vi.fn().mockImplementation(() => ({
+          validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
+        })),
+        {
+          isEndpointException: vi.fn(({ listId }: { listId: string }) => listId === 'endpoint_list'),
+        }
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { TrustedAppValidator } = jest.requireMock(
-  '../../lists_integration/endpoint/validators/trusted_app_validator'
-) as { TrustedAppValidator: jest.Mock & { isTrustedApp: jest.Mock } };
+vi.mock('../../lists_integration/endpoint/validators/custom_yara_signatures_validator', () => {
+      const mocked = {
+      CustomYaraSignaturesValidator: Object.assign(
+        vi.fn().mockImplementation(() => ({
+          validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
+        })),
+        {
+          isCustomYaraSignature: vi.fn(
+            ({ listId }: { listId: string }) => listId === 'endpoint_custom_yara_signatures'
+          ),
+        }
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { BlocklistValidator } = jest.requireMock(
-  '../../lists_integration/endpoint/validators/blocklist_validator'
-) as { BlocklistValidator: jest.Mock & { isBlocklist: jest.Mock } };
+const { buildSpaceDataFilter } = (await vi.importMock('../../lists_integration/endpoint/utils/build_space_data_filter')) as { buildSpaceDataFilter: Mock };
 
-const { TrustedDeviceValidator } = jest.requireMock(
-  '../../lists_integration/endpoint/validators/trusted_device_validator'
-) as { TrustedDeviceValidator: jest.Mock & { isTrustedDevice: jest.Mock } };
+const { TrustedAppValidator } = (await vi.importMock('../../lists_integration/endpoint/validators/trusted_app_validator')) as { TrustedAppValidator: Mock & { isTrustedApp: Mock } };
 
-const { HostIsolationExceptionsValidator } = jest.requireMock(
-  '../../lists_integration/endpoint/validators/host_isolation_exceptions_validator'
-) as {
-  HostIsolationExceptionsValidator: jest.Mock & { isHostIsolationException: jest.Mock };
+const { BlocklistValidator } = (await vi.importMock('../../lists_integration/endpoint/validators/blocklist_validator')) as { BlocklistValidator: Mock & { isBlocklist: Mock } };
+
+const { TrustedDeviceValidator } = (await vi.importMock('../../lists_integration/endpoint/validators/trusted_device_validator')) as { TrustedDeviceValidator: Mock & { isTrustedDevice: Mock } };
+
+const { HostIsolationExceptionsValidator } = (await vi.importMock('../../lists_integration/endpoint/validators/host_isolation_exceptions_validator')) as {
+  HostIsolationExceptionsValidator: Mock & { isHostIsolationException: Mock };
 };
 
-const { EventFilterValidator } = jest.requireMock(
-  '../../lists_integration/endpoint/validators/event_filter_validator'
-) as { EventFilterValidator: jest.Mock & { isEventFilter: jest.Mock } };
+const { EventFilterValidator } = (await vi.importMock('../../lists_integration/endpoint/validators/event_filter_validator')) as { EventFilterValidator: Mock & { isEventFilter: Mock } };
 
-const { EndpointExceptionsValidator } = jest.requireMock(
-  '../../lists_integration/endpoint/validators/endpoint_exceptions_validator'
-) as { EndpointExceptionsValidator: jest.Mock & { isEndpointException: jest.Mock } };
+const { EndpointExceptionsValidator } = (await vi.importMock('../../lists_integration/endpoint/validators/endpoint_exceptions_validator')) as { EndpointExceptionsValidator: Mock & { isEndpointException: Mock } };
 
-const { CustomYaraSignaturesValidator } = jest.requireMock(
-  '../../lists_integration/endpoint/validators/custom_yara_signatures_validator'
-) as { CustomYaraSignaturesValidator: jest.Mock & { isCustomYaraSignature: jest.Mock } };
+const { CustomYaraSignaturesValidator } = (await vi.importMock('../../lists_integration/endpoint/validators/custom_yara_signatures_validator')) as { CustomYaraSignaturesValidator: Mock & { isCustomYaraSignature: Mock } };
 
 describe('ScopedEndpointArtifactListClient', () => {
-  let mockExceptionListClient: jest.Mocked<ExceptionListClient>;
+  let mockExceptionListClient: Mocked<ExceptionListClient>;
   let mockEndpointAppContextService: EndpointAppContextService;
   let mockRequest: KibanaRequest;
   let client: ScopedEndpointArtifactListClient;
@@ -159,17 +170,17 @@ describe('ScopedEndpointArtifactListClient', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockValidatePreSingleListFind.mockResolvedValue(undefined);
 
     mockExceptionListClient = {
-      findExceptionListItem: jest.fn().mockResolvedValue({
+      findExceptionListItem: vi.fn().mockResolvedValue({
         data: [],
         total: 0,
         page: 1,
         per_page: 20,
       }),
-    } as unknown as jest.Mocked<ExceptionListClient>;
+    } as unknown as Mocked<ExceptionListClient>;
 
     mockEndpointAppContextService = {} as EndpointAppContextService;
     mockRequest = httpServerMock.createKibanaRequest();

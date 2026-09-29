@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { NamespacedCache } from './namespaced_cache';
 
 describe('NamespacedCache', () => {
@@ -14,12 +16,12 @@ describe('NamespacedCache', () => {
 
   beforeEach(() => {
     cache = new NamespacedCache();
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
     cache.clear();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('get/set', () => {
@@ -58,7 +60,7 @@ describe('NamespacedCache', () => {
       cache.set('default', 'value1', 1000);
       expect(cache.get('default')).toBe('value1');
 
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       expect(cache.get('default')).toBeNull();
     });
 
@@ -66,7 +68,7 @@ describe('NamespacedCache', () => {
       cache.set('default', 'value1', 1000);
       expect(cache.get('default')).toBe('value1');
 
-      jest.advanceTimersByTime(999);
+      vi.advanceTimersByTime(999);
       expect(cache.get('default')).toBe('value1');
     });
 
@@ -74,11 +76,11 @@ describe('NamespacedCache', () => {
       cache.set('ns1', 'value1', 1000);
       cache.set('ns2', 'value2', 2000);
 
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       expect(cache.get('ns1')).toBeNull();
       expect(cache.get('ns2')).toBe('value2');
 
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       expect(cache.get('ns2')).toBeNull();
     });
   });
@@ -95,7 +97,7 @@ describe('NamespacedCache', () => {
     });
 
     it('clears the timer when deleting', () => {
-      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
       cache.set('default', 'value1', 5000);
       cache.del('default');
 
@@ -141,7 +143,7 @@ describe('NamespacedCache', () => {
     });
 
     it('clears all timers', () => {
-      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
       cache.set('ns1', 'value1', 5000);
       cache.set('ns2', 'value2', 5000);
 
@@ -178,21 +180,21 @@ describe('NamespacedCache', () => {
       cache.set('default', 'value1', 1000);
       expect(cache.has('default')).toBe(true);
 
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       expect(cache.has('default')).toBe(false);
     });
   });
 
   describe('updating existing entries', () => {
     it('replaces value and resets timer when setting existing namespace', () => {
-      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
       cache.set('default', 'value1', 5000);
       cache.set('default', 'value2', 3000);
 
       expect(clearTimeoutSpy).toHaveBeenCalled();
       expect(cache.get('default')).toBe('value2');
 
-      jest.advanceTimersByTime(3000);
+      vi.advanceTimersByTime(3000);
       expect(cache.get('default')).toBeNull();
     });
   });
@@ -223,7 +225,7 @@ describe('NamespacedCache', () => {
 
     it('auto-removes in-flight promise after it resolves', async () => {
       // Use real timers for this test since it involves actual promise resolution
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       const promise = Promise.resolve('test-value');
       cache.setInflightRead('default', promise);
@@ -237,12 +239,12 @@ describe('NamespacedCache', () => {
       expect(cache.getInflightRead('default')).toBeNull();
 
       // Restore fake timers for other tests
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     it('auto-removes in-flight promise after it rejects', async () => {
       // Use real timers for this test since it involves actual promise resolution
-      jest.useRealTimers();
+      vi.useRealTimers();
 
       const promise = Promise.reject(new Error('test error'));
       cache.setInflightRead('default', promise);
@@ -256,7 +258,7 @@ describe('NamespacedCache', () => {
       expect(cache.getInflightRead('default')).toBeNull();
 
       // Restore fake timers for other tests
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     it('allows multiple concurrent in-flight promises for different namespaces', () => {

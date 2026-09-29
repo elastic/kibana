@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 
 import { useIdsFromUrl } from '.';
 
-const mockSetSearchParams = jest.fn();
+const mockSetSearchParams = vi.fn();
 let mockSearchParams: URLSearchParams;
 
-jest.mock('@kbn/shared-ux-router', () => ({
-  ...jest.requireActual('@kbn/shared-ux-router'),
-  useSearchParams: jest.fn(() => [mockSearchParams, mockSetSearchParams]),
-}));
+vi.mock('@kbn/shared-ux-router', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/shared-ux-router')),
+      useSearchParams: vi.fn(() => [mockSearchParams, mockSetSearchParams]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useIdsFromUrl', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSetSearchParams.mockClear();
 
     mockSearchParams = new URLSearchParams('');

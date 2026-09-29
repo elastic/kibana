@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { ContentManagementPlugin } from './plugin';
 import type { IRouter } from '@kbn/core-http-server';
@@ -14,34 +17,37 @@ import type { ProcedureName } from '../common';
 import { procedureNames } from '../common/rpc';
 import { MSearchService } from './core/msearch';
 
-jest.mock('./core', () => ({
-  ...jest.requireActual('./core'),
-  Core: class {
-    setup() {
-      return {
-        contentRegistry: 'mockedContentRegistry',
-        api: {
-          register: jest.fn().mockReturnValue('mockedRegister'),
-          crud: jest.fn().mockReturnValue('mockedCrud'),
-          eventBus: {
-            emit: jest.fn().mockReturnValue('mockedEventBusEmit'),
-          },
-        },
-      };
-    }
-  },
-}));
+vi.mock('./core', async () => {
+      const mocked = {
+      ...(await vi.importActual('./core')),
+      Core: class {
+        setup() {
+          return {
+            contentRegistry: 'mockedContentRegistry',
+            api: {
+              register: vi.fn().mockReturnValue('mockedRegister'),
+              crud: vi.fn().mockReturnValue('mockedCrud'),
+              eventBus: {
+                emit: vi.fn().mockReturnValue('mockedEventBusEmit'),
+              },
+            },
+          };
+        }
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGet = jest.fn().mockResolvedValue('getMocked');
-const mockBulkGet = jest.fn().mockResolvedValue('bulkGetMocked');
-const mockCreate = jest.fn().mockResolvedValue('createMocked');
-const mockUpdate = jest.fn().mockResolvedValue('updateMocked');
-const mockDelete = jest.fn().mockResolvedValue('deleteMocked');
-const mockSearch = jest.fn().mockResolvedValue('searchMocked');
-const mockMSearch = jest.fn().mockResolvedValue('mSearchMocked');
+const mockGet = vi.fn().mockResolvedValue('getMocked');
+const mockBulkGet = vi.fn().mockResolvedValue('bulkGetMocked');
+const mockCreate = vi.fn().mockResolvedValue('createMocked');
+const mockUpdate = vi.fn().mockResolvedValue('updateMocked');
+const mockDelete = vi.fn().mockResolvedValue('deleteMocked');
+const mockSearch = vi.fn().mockResolvedValue('searchMocked');
+const mockMSearch = vi.fn().mockResolvedValue('mSearchMocked');
 
-jest.mock('./rpc/procedures/all_procedures', () => {
-  const mockedProcedure = (spyGetter: () => jest.Mock) => ({
+vi.mock('./rpc/procedures/all_procedures', () => {
+  const mockedProcedure = (spyGetter: () => Mock) => ({
     fn: (...args: unknown[]) => spyGetter()(...args),
     schemas: {
       in: {
@@ -61,7 +67,7 @@ jest.mock('./rpc/procedures/all_procedures', () => {
   };
 
   return {
-    getProcedures: jest.fn().mockReturnValue(mockedProcedures),
+    getProcedures: vi.fn().mockReturnValue(mockedProcedures),
   };
 });
 
@@ -71,7 +77,7 @@ const setup = () => {
   const http = { ...coreSetup.http, createRouter: () => router };
   const plugin = new ContentManagementPlugin(coreMock.createPluginInitializerContext());
 
-  router.post = jest.fn();
+  router.post = vi.fn();
 
   return {
     plugin,
@@ -102,7 +108,7 @@ describe('ContentManagementPlugin', () => {
         const { plugin, coreSetup, router, pluginsSetup } = setup();
         plugin.setup(coreSetup, pluginsSetup);
 
-        const [routeConfig]: Parameters<IRouter['post']> = (router.post as jest.Mock).mock.calls[0];
+        const [routeConfig]: Parameters<IRouter['post']> = (router.post as Mock).mock.calls[0];
 
         expect(routeConfig.path).toBe('/api/content_management/rpc/{name}');
       });
@@ -111,12 +117,12 @@ describe('ContentManagementPlugin', () => {
         const { plugin, coreSetup, router, pluginsSetup } = setup();
         plugin.setup(coreSetup, pluginsSetup);
 
-        const [_, handler]: Parameters<IRouter['post']> = (router.post as jest.Mock).mock.calls[0];
+        const [_, handler]: Parameters<IRouter['post']> = (router.post as Mock).mock.calls[0];
 
         const mockedRequestHandlerContext: any = { foo: 'bar' };
         const mockedResponse: any = {
-          ok: jest.fn((data: { body: unknown }) => data.body),
-          customError: jest.fn((e: any) => e),
+          ok: vi.fn((data: { body: unknown }) => data.body),
+          customError: vi.fn((e: any) => e),
         };
 
         const input = { testInput: 'baz' };
@@ -155,12 +161,12 @@ describe('ContentManagementPlugin', () => {
         const { plugin, coreSetup, router, pluginsSetup } = setup();
         plugin.setup(coreSetup, pluginsSetup);
 
-        const [_, handler]: Parameters<IRouter['post']> = (router.post as jest.Mock).mock.calls[0];
+        const [_, handler]: Parameters<IRouter['post']> = (router.post as Mock).mock.calls[0];
 
         // const mockedRequestHandlerContext: any = { foo: 'bar' };
         const mockedResponse: any = {
-          ok: jest.fn((response: { body: unknown }) => response.body),
-          customError: jest.fn((e: any) => e),
+          ok: vi.fn((response: { body: unknown }) => response.body),
+          customError: vi.fn((e: any) => e),
         };
 
         mockGet.mockRejectedValueOnce(new Error('Houston we got a problem.'));

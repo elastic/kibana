@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import type { History, Location } from 'history';
 import moment from 'moment-timezone';
@@ -98,7 +100,7 @@ describe('UrlParamsContext', () => {
       search: '?rangeFrom=now-1d%2Fd&rangeTo=now-1d%2Fd&transactionId=UPDATED',
     } as Location;
 
-    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(0);
+    const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(0);
 
     // Use renderHelper instead of mountParams
     const { getByRole, rerender } = renderHelper(location);
@@ -135,10 +137,10 @@ describe('UrlParamsContext', () => {
       location: {
         pathname: '/test',
       },
-      listen: jest.fn(),
+      listen: vi.fn(),
     } as unknown as History;
 
-    jest.spyOn(Date, 'now').mockImplementation(() => new Date('2000-06-15T12:00:00Z').getTime());
+    vi.spyOn(Date, 'now').mockImplementation(() => new Date('2000-06-15T12:00:00Z').getTime());
 
     const { getByRole } = render(
       <Router history={history}>

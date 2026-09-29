@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { GET_INDEX_MAPPINGS } from '../../common/constants';
 
 import { fetchMappings } from '../lib';
@@ -14,9 +17,12 @@ import { requestContextMock } from '../__mocks__/request_context';
 import { getIndexMappingsRoute } from './get_index_mappings';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
-jest.mock('../lib', () => ({
-  fetchMappings: jest.fn(),
-}));
+vi.mock('../lib', () => {
+      const mocked = {
+      fetchMappings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getIndexMappingsRoute route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -32,7 +38,7 @@ describe('getIndexMappingsRoute route', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     server = serverMock.create();
     logger = loggerMock.create();
@@ -44,7 +50,7 @@ describe('getIndexMappingsRoute route', () => {
 
   test('Returns index stats', async () => {
     const mockIndices = { 'auditbeat-7.15.1-2022.12.06-000001': {} };
-    (fetchMappings as jest.Mock).mockResolvedValue(mockIndices);
+    (fetchMappings as Mock).mockResolvedValue(mockIndices);
 
     const response = await server.inject(req, requestContextMock.convertContext(context));
     expect(response.status).toEqual(200);
@@ -53,7 +59,7 @@ describe('getIndexMappingsRoute route', () => {
 
   test('Handles error', async () => {
     const errorMessage = 'Error!';
-    (fetchMappings as jest.Mock).mockRejectedValue({ message: errorMessage });
+    (fetchMappings as Mock).mockRejectedValue({ message: errorMessage });
 
     const response = await server.inject(req, requestContextMock.convertContext(context));
     expect(response.status).toEqual(500);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,7 +18,7 @@ import { mappings } from './mocks';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('SwimlaneParamsFields renders', () => {
-  const editAction = jest.fn();
+  const editAction = vi.fn();
   const actionParams = {
     subAction: 'pushToService',
     subActionParams: {
@@ -53,7 +55,7 @@ describe('SwimlaneParamsFields renders', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('all params fields are rendered', () => {

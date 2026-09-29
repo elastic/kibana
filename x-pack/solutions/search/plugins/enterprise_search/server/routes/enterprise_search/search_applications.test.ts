@@ -5,17 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { mockDependencies, MockRouter } from '../../__mocks__';
 
-jest.mock('../../lib/search_applications/field_capabilities', () => ({
-  fetchSearchApplicationFieldCapabilities: jest.fn(),
-}));
-jest.mock('../../lib/search_applications/fetch_indices_stats', () => ({
-  fetchIndicesStats: jest.fn(),
-}));
-jest.mock('../../lib/search_applications/fetch_alias_indices', () => ({
-  fetchAliasIndices: jest.fn(),
-}));
+vi.mock('../../lib/search_applications/field_capabilities', () => {
+      const mocked = {
+      fetchSearchApplicationFieldCapabilities: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/search_applications/fetch_indices_stats', () => {
+      const mocked = {
+      fetchIndicesStats: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/search_applications/fetch_alias_indices', () => {
+      const mocked = {
+      fetchAliasIndices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 
@@ -32,15 +44,15 @@ describe('engines routes', () => {
     const mockClient = {
       asCurrentUser: {
         searchApplication: {
-          list: jest.fn(),
+          list: vi.fn(),
         },
       },
     };
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const context = {
         core: Promise.resolve({ elasticsearch: { client: mockClient } }),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -85,15 +97,15 @@ describe('engines routes', () => {
     const mockClient = {
       asCurrentUser: {
         searchApplication: {
-          get: jest.fn(),
+          get: vi.fn(),
         },
       },
     };
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const context = {
         core: Promise.resolve({ elasticsearch: { client: mockClient } }),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -113,7 +125,7 @@ describe('engines routes', () => {
         { count: 10, health: 'yellow', name: 'test-index-name-2' },
         { count: 0, health: 'red', name: 'test-index-name-3' },
       ];
-      const mock = jest.fn();
+      const mock = vi.fn();
       const fetchAliasIndicesResponse = mock([
         'test-index-name-1',
         'test-index-name-2',
@@ -126,7 +138,7 @@ describe('engines routes', () => {
         updated_at_millis: 1679847286355,
       };
 
-      (mockClient.asCurrentUser.searchApplication.get as jest.Mock).mockResolvedValueOnce(
+      (mockClient.asCurrentUser.searchApplication.get as Mock).mockResolvedValueOnce(
         engineResult
       );
 
@@ -134,10 +146,10 @@ describe('engines routes', () => {
         params: { engine_name: engineResult.name },
       });
 
-      (fetchAliasIndices as jest.Mock).mockResolvedValueOnce(fetchAliasIndicesResponse);
+      (fetchAliasIndices as Mock).mockResolvedValueOnce(fetchAliasIndicesResponse);
       expect(fetchAliasIndices).toHaveBeenCalledWith(mockClient, engineResult.name);
 
-      (fetchIndicesStats as jest.Mock).mockResolvedValueOnce(fetchIndicesStatsResponse);
+      (fetchIndicesStats as Mock).mockResolvedValueOnce(fetchIndicesStatsResponse);
       expect(fetchIndicesStats).toHaveBeenCalledWith(mockClient, fetchAliasIndicesResponse);
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
@@ -163,15 +175,15 @@ describe('engines routes', () => {
     const mockClient = {
       asCurrentUser: {
         searchApplication: {
-          put: jest.fn(),
+          put: vi.fn(),
         },
       },
     };
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const context = {
         core: Promise.resolve({ elasticsearch: { client: mockClient } }),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -208,7 +220,7 @@ describe('engines routes', () => {
           updated_at_millis: expect.any(Number),
         },
       });
-      const mock = jest.fn();
+      const mock = vi.fn();
       const mockResponse = mock({ result: 'created' });
       expect(mockRouter.response.ok).toHaveReturnedWith(mockResponse);
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
@@ -267,7 +279,7 @@ describe('engines routes', () => {
           updated_at_millis: expect.any(Number),
         },
       });
-      const mock = jest.fn();
+      const mock = vi.fn();
       const mockResponse = mock({ result: 'created' });
       expect(mockRouter.response.ok).toHaveReturnedWith(mockResponse);
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
@@ -277,7 +289,7 @@ describe('engines routes', () => {
       });
     });
     it('returns 400, create search application with invalid characters', async () => {
-      (mockClient.asCurrentUser.searchApplication.put as jest.Mock).mockRejectedValueOnce({
+      (mockClient.asCurrentUser.searchApplication.put as Mock).mockRejectedValueOnce({
         meta: {
           body: {
             error: {
@@ -323,7 +335,7 @@ describe('engines routes', () => {
           updated_at_millis: expect.any(Number),
         },
       });
-      const mock = jest.fn();
+      const mock = vi.fn();
       const mockResponse = mock({ result: 'updated' });
       expect(mockRouter.response.ok).toHaveReturnedWith(mockResponse);
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
@@ -360,7 +372,7 @@ describe('engines routes', () => {
     });
 
     it('returns 409 when upsert create search application throws error', async () => {
-      (mockClient.asCurrentUser.searchApplication.put as jest.Mock).mockRejectedValueOnce({
+      (mockClient.asCurrentUser.searchApplication.put as Mock).mockRejectedValueOnce({
         meta: {
           body: {
             error: {
@@ -391,15 +403,15 @@ describe('engines routes', () => {
     const mockClient = {
       asCurrentUser: {
         searchApplication: {
-          delete: jest.fn(),
+          delete: vi.fn(),
         },
       },
     };
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const context = {
         core: Promise.resolve({ elasticsearch: { client: mockClient } }),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -450,14 +462,14 @@ describe('engines routes', () => {
     let mockRouter: MockRouter;
     const mockClient = {
       asCurrentUser: {
-        search: jest.fn(),
+        search: vi.fn(),
       },
     };
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const context = {
         core: Promise.resolve({ elasticsearch: { client: mockClient } }),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -539,7 +551,7 @@ describe('engines routes', () => {
   describe('GET /internal/enterprise_search/search_applications/{engine_name}/field_capabilities', () => {
     let mockRouter: MockRouter;
     const mockClient = {
-      asCurrentUser: { searchApplication: { get: jest.fn() } },
+      asCurrentUser: { searchApplication: { get: vi.fn() } },
     };
     const mockCore = {
       elasticsearch: { client: mockClient },
@@ -547,11 +559,11 @@ describe('engines routes', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       const context = {
         core: Promise.resolve(mockCore),
-      } as unknown as jest.Mocked<RequestHandlerContext>;
+      } as unknown as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -576,10 +588,10 @@ describe('engines routes', () => {
         name: 'unit-test',
       };
 
-      (mockClient.asCurrentUser.searchApplication.get as jest.Mock).mockResolvedValueOnce(
+      (mockClient.asCurrentUser.searchApplication.get as Mock).mockResolvedValueOnce(
         engineResult
       );
-      (fetchSearchApplicationFieldCapabilities as jest.Mock).mockResolvedValueOnce(
+      (fetchSearchApplicationFieldCapabilities as Mock).mockResolvedValueOnce(
         fieldCapabilitiesResult
       );
 
@@ -600,7 +612,7 @@ describe('engines routes', () => {
       });
     });
     it('returns 404 when fetch engine throws a not found exception', async () => {
-      (mockClient.asCurrentUser.searchApplication.get as jest.Mock).mockRejectedValueOnce({
+      (mockClient.asCurrentUser.searchApplication.get as Mock).mockRejectedValueOnce({
         meta: {
           body: {
             error: {
@@ -626,7 +638,7 @@ describe('engines routes', () => {
       });
     });
     it('returns error when fetch engine returns an unknown error', async () => {
-      (mockClient.asCurrentUser.searchApplication.get as jest.Mock).mockRejectedValueOnce({
+      (mockClient.asCurrentUser.searchApplication.get as Mock).mockRejectedValueOnce({
         body: {
           attributes: {
             error_code: 'unknown_error',

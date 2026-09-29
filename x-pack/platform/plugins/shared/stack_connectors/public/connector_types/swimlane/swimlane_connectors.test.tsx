@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import SwimlaneActionConnectorFields from './swimlane_connectors';
 import { useGetApplication } from './use_get_application';
@@ -14,17 +17,18 @@ import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { waitFor, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
-jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
-  ...jest.requireActual(
-    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
-  ),
-  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
-}));
-jest.mock('./use_get_application');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api')),
+      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_get_application');
 
-const useGetApplicationMock = useGetApplication as jest.Mock;
-const getApplication = jest.fn();
+const useGetApplicationMock = useGetApplication as Mock;
+const getApplication = vi.fn();
 
 describe('SwimlaneActionConnectorFields renders', () => {
   beforeAll(() => {
@@ -241,10 +245,10 @@ describe('SwimlaneActionConnectorFields renders', () => {
   });
 
   describe('Validation', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       getApplication.mockResolvedValue({
         fields: applicationFields,
       });

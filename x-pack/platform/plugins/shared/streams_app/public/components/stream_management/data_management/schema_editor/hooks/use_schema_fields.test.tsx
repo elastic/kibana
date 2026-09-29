@@ -5,67 +5,78 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useSchemaFields, getDefinitionFields } from './use_schema_fields';
 import type { Streams } from '@kbn/streams-schema';
 
 // Mock the Kibana hook
 const mockToasts = {
-  addSuccess: jest.fn(),
-  addError: jest.fn(),
+  addSuccess: vi.fn(),
+  addError: vi.fn(),
 };
 
 const mockTelemetryClient = {
-  trackSchemaUpdated: jest.fn(),
+  trackSchemaUpdated: vi.fn(),
 };
 
 const mockStreamsRepositoryClient = {
-  fetch: jest.fn(),
+  fetch: vi.fn(),
 };
 
 const mockDataViews = {
-  getFieldsForWildcard: jest.fn(),
+  getFieldsForWildcard: vi.fn(),
 };
 
-const mockRefreshDefinition = jest.fn();
+const mockRefreshDefinition = vi.fn();
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient: mockStreamsRepositoryClient },
-        data: { dataViews: mockDataViews },
-      },
-    },
-    core: {
-      notifications: { toasts: mockToasts },
-    },
-    services: { telemetryClient: mockTelemetryClient },
-  }),
-}));
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        dependencies: {
+          start: {
+            streams: { streamsRepositoryClient: mockStreamsRepositoryClient },
+            data: { dataViews: mockDataViews },
+          },
+        },
+        core: {
+          notifications: { toasts: mockToasts },
+        },
+        services: { telemetryClient: mockTelemetryClient },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the abort controller hook
-jest.mock('@kbn/react-hooks', () => ({
-  useAbortController: () => ({
-    signal: new AbortController().signal,
-    abort: jest.fn(),
-    refresh: jest.fn(),
-  }),
-  useAbortableAsync: jest.fn(() => ({
-    value: null,
-    loading: false,
-    refresh: jest.fn(),
-  })),
-}));
+vi.mock('@kbn/react-hooks', () => {
+      const mocked = {
+      useAbortController: () => ({
+        signal: new AbortController().signal,
+        abort: vi.fn(),
+        refresh: vi.fn(),
+      }),
+      useAbortableAsync: vi.fn(() => ({
+        value: null,
+        loading: false,
+        refresh: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock useStreamsAppFetch
-jest.mock('../../../../../hooks/use_streams_app_fetch', () => ({
-  useStreamsAppFetch: jest.fn(() => ({
-    value: null,
-    loading: false,
-    refresh: jest.fn(),
-  })),
-}));
+vi.mock('../../../../../hooks/use_streams_app_fetch', () => {
+      const mocked = {
+      useStreamsAppFetch: vi.fn(() => ({
+        value: null,
+        loading: false,
+        refresh: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderUseSchemaFields = (definition: Streams.ingest.all.GetResponse) =>
   renderHook(() =>
@@ -93,7 +104,7 @@ import {
 
 describe('useSchemaFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockRefreshDefinition.mockReset();
     mockStreamsRepositoryClient.fetch.mockReset();
     mockDataViews.getFieldsForWildcard.mockResolvedValue([]);

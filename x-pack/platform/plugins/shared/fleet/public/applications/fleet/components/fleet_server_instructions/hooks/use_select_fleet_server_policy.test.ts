@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { useGetEnrollmentSettings } from '../../../hooks';
 import { createFleetTestRendererMock } from '../../../../../mock';
 
 import { useSelectFleetServerPolicy } from './use_select_fleet_server_policy';
 
-jest.mock('../../../hooks');
-jest.mocked(useGetEnrollmentSettings).mockReturnValue({
+vi.mock('../../../hooks');
+vi.mocked(useGetEnrollmentSettings).mockReturnValue({
   isLoading: false,
   isInitialRequest: false,
   error: null,
-  resendRequest: jest.fn(),
+  resendRequest: vi.fn(),
   data: {
     fleet_server: {
       policies: [
@@ -55,7 +57,7 @@ jest.mocked(useGetEnrollmentSettings).mockReturnValue({
 
 describe('useSelectFleetServerPolicy hook', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('Return eligible fleet server policies', async () => {

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ChangeEvent, SyntheticEvent } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useEditModal } from './use_edit_modal';
 
 const listDetails = { name: 'test-name', description: 'test-description' };
-const onSave = jest.fn();
+const onSave = vi.fn();
 describe('useEditModal', () => {
   it('should return default values based on input', () => {
     const { result } = renderHook(() => useEditModal({ listDetails, onSave }));
@@ -34,7 +36,7 @@ describe('useEditModal', () => {
     const { result } = renderHook(() => useEditModal({ listDetails, onSave }));
     const { error, onSubmit } = result.current;
 
-    const preventDefault = jest.fn();
+    const preventDefault = vi.fn();
     act(() => onSubmit({ preventDefault } as unknown as SyntheticEvent));
     expect(error).toBeFalsy();
     expect(onSave).toHaveBeenCalled();

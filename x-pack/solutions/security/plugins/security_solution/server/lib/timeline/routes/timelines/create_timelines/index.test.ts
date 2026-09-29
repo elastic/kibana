@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import {
@@ -37,42 +40,42 @@ describe('create timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
   let securitySetup: SecurityPluginSetup;
   let context: SecuritySolutionRequestHandlerContextMock;
-  let mockGetTimeline: jest.Mock;
-  let mockGetTemplateTimeline: jest.Mock;
-  let mockPersistTimeline: jest.Mock;
-  let mockPersistPinnedEventOnTimeline: jest.Mock;
-  let mockPersistNote: jest.Mock;
+  let mockGetTimeline: Mock;
+  let mockGetTemplateTimeline: Mock;
+  let mockPersistTimeline: Mock;
+  let mockPersistPinnedEventOnTimeline: Mock;
+  let mockPersistNote: Mock;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     server = serverMock.create();
     context = requestContextMock.createTools().context;
 
     securitySetup = {
       authc: {
-        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
+        getCurrentUser: vi.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
     } as unknown as SecurityPluginSetup;
 
-    mockGetTimeline = jest.fn();
-    mockGetTemplateTimeline = jest.fn();
-    mockPersistTimeline = jest.fn();
-    mockPersistPinnedEventOnTimeline = jest.fn();
-    mockPersistNote = jest.fn();
+    mockGetTimeline = vi.fn();
+    mockGetTemplateTimeline = vi.fn();
+    mockPersistTimeline = vi.fn();
+    mockPersistPinnedEventOnTimeline = vi.fn();
+    mockPersistNote = vi.fn();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('Manipulate timeline', () => {
     describe('Create a new timeline', () => {
       beforeEach(async () => {
-        jest.doMock('../../../saved_object/timelines', () => {
+        vi.doMock('../../../saved_object/timelines', () => {
           return {
             persistTimeline: mockPersistTimeline.mockReturnValue({
               code: 200,
@@ -81,19 +84,19 @@ describe('create timelines', () => {
           };
         });
 
-        jest.doMock('../../../saved_object/pinned_events', () => {
+        vi.doMock('../../../saved_object/pinned_events', () => {
           return {
             persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
-        jest.doMock('../../../saved_object/notes', () => {
+        vi.doMock('../../../saved_object/notes', () => {
           return {
             persistNote: mockPersistNote,
           };
         });
 
-        const createTimelinesRoute = jest.requireActual('.').createTimelinesRoute;
+        const createTimelinesRoute = (await vi.importActual('.')).createTimelinesRoute;
         createTimelinesRoute(server.router, createMockConfig(), securitySetup);
 
         const mockRequest = getCreateTimelinesRequest(createTimelineWithoutTimelineId);
@@ -134,27 +137,27 @@ describe('create timelines', () => {
     });
 
     describe('Import a timeline already exist', () => {
-      beforeEach(() => {
-        jest.doMock('../../../saved_object/timelines', () => {
+      beforeEach(async () => {
+        vi.doMock('../../../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
             persistTimeline: mockPersistTimeline,
           };
         });
 
-        jest.doMock('../../../saved_object/pinned_events', () => {
+        vi.doMock('../../../saved_object/pinned_events', () => {
           return {
             persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
-        jest.doMock('../../../saved_object/notes', () => {
+        vi.doMock('../../../saved_object/notes', () => {
           return {
             persistNote: mockPersistNote,
           };
         });
 
-        const createTimelinesRoute = jest.requireActual('.').createTimelinesRoute;
+        const createTimelinesRoute = (await vi.importActual('.')).createTimelinesRoute;
         createTimelinesRoute(server.router, createMockConfig(), securitySetup);
       });
 
@@ -174,7 +177,7 @@ describe('create timelines', () => {
   describe('Manipulate timeline template', () => {
     describe('Create a new timeline template', () => {
       beforeEach(async () => {
-        jest.doMock('../../../saved_object/timelines', () => {
+        vi.doMock('../../../saved_object/timelines', () => {
           return {
             getTimelineTemplateOrNull: mockGetTimeline.mockReturnValue(null),
             persistTimeline: mockPersistTimeline.mockReturnValue({
@@ -184,19 +187,19 @@ describe('create timelines', () => {
           };
         });
 
-        jest.doMock('../../../saved_object/pinned_events', () => {
+        vi.doMock('../../../saved_object/pinned_events', () => {
           return {
             persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
-        jest.doMock('../../../saved_object/notes', () => {
+        vi.doMock('../../../saved_object/notes', () => {
           return {
             persistNote: mockPersistNote,
           };
         });
 
-        const createTimelinesRoute = jest.requireActual('.').createTimelinesRoute;
+        const createTimelinesRoute = (await vi.importActual('.')).createTimelinesRoute;
         createTimelinesRoute(server.router, createMockConfig(), securitySetup);
 
         const mockRequest = getCreateTimelinesRequest(createTemplateTimelineWithoutTimelineId);
@@ -239,8 +242,8 @@ describe('create timelines', () => {
     });
 
     describe('Create a timeline template already exist', () => {
-      beforeEach(() => {
-        jest.doMock('../../../saved_object/timelines', () => {
+      beforeEach(async () => {
+        vi.doMock('../../../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
             getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(
@@ -250,19 +253,19 @@ describe('create timelines', () => {
           };
         });
 
-        jest.doMock('../../../saved_object/pinned_events', () => {
+        vi.doMock('../../../saved_object/pinned_events', () => {
           return {
             persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
-        jest.doMock('../../../saved_object/notes', () => {
+        vi.doMock('../../../saved_object/notes', () => {
           return {
             persistNote: mockPersistNote,
           };
         });
 
-        const createTimelinesRoute = jest.requireActual('.').createTimelinesRoute;
+        const createTimelinesRoute = (await vi.importActual('.')).createTimelinesRoute;
         createTimelinesRoute(server.router, createMockConfig(), securitySetup);
       });
 

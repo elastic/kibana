@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import { mockCasesResult, parsedCasesItems } from './mock_data';
@@ -13,14 +15,14 @@ import { useCaseItems } from './use_case_items';
 import type { UseCaseItems, UseCaseItemsProps } from './use_case_items';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
-const mockDateNow = jest.fn().mockReturnValue(dateNow);
-Date.now = jest.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
+const mockDateNow = vi.fn().mockReturnValue(dateNow);
+Date.now = vi.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
 
 const defaultCasesReturn = {
   cases: [],
 };
 
-const mockCasesApi = jest.fn().mockResolvedValue(defaultCasesReturn);
+const mockCasesApi = vi.fn().mockResolvedValue(defaultCasesReturn);
 const mockKibana = {
   services: {
     cases: {
@@ -33,19 +35,22 @@ const mockKibana = {
   },
 };
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => mockKibana,
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => mockKibana,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const from = '2020-07-07T08:20:18.966Z';
 const to = '2020-07-08T08:20:18.966Z';
-const mockSetQuery = jest.fn();
-const mockDeleteQuery = jest.fn();
+const mockSetQuery = vi.fn();
+const mockDeleteQuery = vi.fn();
 
-const mockUseGlobalTime = jest
+const mockUseGlobalTime = vi
   .fn()
   .mockReturnValue({ from, to, setQuery: mockSetQuery, deleteQuery: mockDeleteQuery });
-jest.mock('../../../../common/containers/use_global_time', () => {
+vi.mock('../../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
   };
@@ -58,7 +63,7 @@ const renderUseCaseItems = (overrides: Partial<UseCaseItemsProps> = {}) =>
 
 describe('useCaseItems', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockDateNow.mockReturnValue(dateNow);
     mockCasesApi.mockResolvedValue(defaultCasesReturn);
   });

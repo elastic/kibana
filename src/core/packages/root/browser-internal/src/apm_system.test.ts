@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@elastic/apm-rum');
+import { vi } from 'vitest';
+import type { MockInstance, Mocked } from 'vitest';
+
+vi.mock('@elastic/apm-rum');
 
 import { Subject } from 'rxjs';
 import type { DeeplyMockedKeys, MockedKeys } from '@kbn/utility-types-jest';
@@ -18,13 +21,13 @@ import { ApmSystem } from './apm_system';
 import { ebtSpanFilter } from './filters/ebt_span_filter';
 import { ignoredErrorsFilter } from './filters/ignored_errors_filter';
 
-const initMock = init as jest.Mocked<typeof init>;
+const initMock = init as Mocked<typeof init>;
 const apmMock = apm as DeeplyMockedKeys<typeof apm>;
 
 describe('ApmSystem', () => {
   afterEach(() => {
-    jest.resetAllMocks();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('setup', () => {
@@ -59,8 +62,8 @@ describe('ApmSystem', () => {
         const mockTransaction: MockedKeys<Transaction> = {
           type: 'wrong',
           // @ts-expect-error 2345
-          block: jest.fn(),
-          mark: jest.fn(),
+          block: vi.fn(),
+          mark: vi.fn(),
         };
         apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
         await apmSystem.setup();
@@ -74,8 +77,8 @@ describe('ApmSystem', () => {
         const mockTransaction: MockedKeys<Transaction> = {
           type: 'page-load',
           // @ts-expect-error 2345
-          block: jest.fn(),
-          mark: jest.fn(),
+          block: vi.fn(),
+          mark: vi.fn(),
         };
         apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
         await apmSystem.setup();
@@ -88,14 +91,14 @@ describe('ApmSystem', () => {
       it('marks apm start', async () => {
         const apmSystem = new ApmSystem({ active: true });
         const currentAppId$ = new Subject<string>();
-        const mark = jest.fn();
+        const mark = vi.fn();
         const mockTransaction: MockedKeys<Transaction> = {
           type: 'page-load',
           mark,
           // @ts-expect-error 2345
-          block: jest.fn(),
-          end: jest.fn(),
-          addLabels: jest.fn(),
+          block: vi.fn(),
+          end: vi.fn(),
+          addLabels: vi.fn(),
         };
 
         apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
@@ -119,10 +122,10 @@ describe('ApmSystem', () => {
         const mockTransaction: MockedKeys<Transaction> = {
           type: 'page-load',
           // @ts-expect-error 2345
-          block: jest.fn(),
-          mark: jest.fn(),
-          end: jest.fn(),
-          addLabels: jest.fn(),
+          block: vi.fn(),
+          mark: vi.fn(),
+          end: vi.fn(),
+          addLabels: vi.fn(),
         };
         apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
         await apmSystem.setup();
@@ -147,10 +150,10 @@ describe('ApmSystem', () => {
         const mockTransaction: Transaction = {
           type: 'page-load',
           // @ts-expect-error 2345
-          block: jest.fn(),
-          mark: jest.fn(),
-          end: jest.fn(),
-          addLabels: jest.fn(),
+          block: vi.fn(),
+          mark: vi.fn(),
+          end: vi.fn(),
+          addLabels: vi.fn(),
         };
         apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
         await apmSystem.setup();
@@ -169,7 +172,7 @@ describe('ApmSystem', () => {
       });
 
       it('sets a low-cardinality name on the page load transaction when closing it', async () => {
-        const locationSpy = jest.spyOn(window, 'location', 'get').mockReturnValue({
+        const locationSpy = vi.spyOn(window, 'location', 'get').mockReturnValue({
           pathname: '/app/myapp/some/raw/path',
         } as Location);
 
@@ -179,10 +182,10 @@ describe('ApmSystem', () => {
           type: 'page-load',
           name: '/app/myapp/some/raw/path',
           // @ts-expect-error 2345
-          block: jest.fn(),
-          mark: jest.fn(),
-          end: jest.fn(),
-          addLabels: jest.fn(),
+          block: vi.fn(),
+          mark: vi.fn(),
+          end: vi.fn(),
+          addLabels: vi.fn(),
         };
         apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
         await apmSystem.setup();
@@ -200,7 +203,7 @@ describe('ApmSystem', () => {
       });
 
       it('closes non-app page loads with a stable pathname-based name', async () => {
-        const locationSpy = jest.spyOn(window, 'location', 'get').mockReturnValue({
+        const locationSpy = vi.spyOn(window, 'location', 'get').mockReturnValue({
           pathname: '/login',
         } as Location);
 
@@ -210,10 +213,10 @@ describe('ApmSystem', () => {
           type: 'page-load',
           name: '/login',
           // @ts-expect-error 2345
-          block: jest.fn(),
-          mark: jest.fn(),
-          end: jest.fn(),
-          addLabels: jest.fn(),
+          block: vi.fn(),
+          mark: vi.fn(),
+          end: vi.fn(),
+          addLabels: vi.fn(),
         };
         apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
         await apmSystem.setup();
@@ -237,13 +240,13 @@ describe('ApmSystem', () => {
       let windowSpy: any;
 
       beforeEach(() => {
-        windowSpy = jest.spyOn(global as any, 'window', 'get').mockImplementation(() => ({
+        windowSpy = vi.spyOn(global as any, 'window', 'get').mockImplementation(() => ({
           location: {
             protocol: 'http:',
             hostname: 'mykibanadomain.com',
             port: '5601',
           },
-          addEventListener: jest.fn(),
+          addEventListener: vi.fn(),
         }));
       });
 
@@ -359,11 +362,11 @@ describe('ApmSystem', () => {
     });
 
     describe('window click event listener', () => {
-      let addEventListenerSpy: jest.SpyInstance;
+      let addEventListenerSpy: MockInstance;
       let mockTransaction: MockedKeys<Transaction>;
 
       beforeEach(() => {
-        addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+        addEventListenerSpy = vi.spyOn(window, 'addEventListener');
         mockTransaction = {
           name: 'initial-name',
         } as MockedKeys<Transaction>;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, httpServerMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
@@ -12,7 +14,7 @@ import { setupSpacesClient } from './setup_spaces_client';
 import { auditServiceMock } from '../audit/mocks';
 import { authorizationMock } from '../authorization/index.mock';
 
-const getCurrentUser = jest.fn();
+const getCurrentUser = vi.fn();
 
 describe('setupSpacesClient', () => {
   const getTypeRegistry = () => savedObjectsServiceMock.createTypeRegistryMock();

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { createPackageInfoMock } from '../../../common/mocks';
@@ -91,8 +93,8 @@ describe('Package Policy Utils', () => {
 
   describe('preflightCheckPackagePolicy', () => {
     beforeEach(() => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockClear();
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockClear();
+      vi.spyOn(licenseService, 'hasAtLeast').mockClear();
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockClear();
     });
     const soClient = savedObjectsClientMock.create();
     const testPolicy = {
@@ -109,7 +111,7 @@ describe('Package Policy Utils', () => {
     };
 
     it('should throw if no enterprise license and multiple policy_ids is provided', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       await expect(
         preflightCheckPackagePolicy(soClient, { ...testPolicy, policy_ids: ['1', '2'] })
@@ -119,7 +121,7 @@ describe('Package Policy Utils', () => {
     });
 
     it('should throw if no enterprise license and no policy_ids is provided', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       await expect(
         preflightCheckPackagePolicy(soClient, { ...testPolicy, policy_ids: [] })
@@ -129,21 +131,21 @@ describe('Package Policy Utils', () => {
     });
 
     it('should not throw if enterprise license and multiple policy_ids is provided', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await expect(
         preflightCheckPackagePolicy(soClient, { ...testPolicy, policy_ids: ['1', '2'] })
       ).resolves.not.toThrow();
     });
 
     it('should not throw if enterprise license and no policy_ids is provided', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await expect(
         preflightCheckPackagePolicy(soClient, { ...testPolicy, policy_ids: [] })
       ).resolves.not.toThrow();
     });
 
     it('should throw if no valid license and output_id is provided', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       await expect(
         preflightCheckPackagePolicy(soClient, { ...testPolicy, output_id: 'some-output' })
@@ -151,8 +153,8 @@ describe('Package Policy Utils', () => {
     });
 
     it('should throw if valid license and an incompatible output_id for the package is given', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      jest
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi
         .spyOn(outputService, 'get')
         .mockResolvedValueOnce({ id: 'non-es-output', type: 'kafka' } as any);
 
@@ -166,8 +168,8 @@ describe('Package Policy Utils', () => {
     });
 
     it('should throw if content package is being used', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      jest
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi
         .spyOn(outputService, 'get')
         .mockResolvedValueOnce({ id: 'es-output', type: 'elasticsearch' } as any);
       await expect(
@@ -185,8 +187,8 @@ describe('Package Policy Utils', () => {
     });
 
     it('should not throw if valid license and valid output_id is provided and is not content package', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      jest
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi
         .spyOn(outputService, 'get')
         .mockResolvedValueOnce({ id: 'es-output', type: 'elasticsearch' } as any);
       await expect(
@@ -204,7 +206,7 @@ describe('Package Policy Utils', () => {
     });
 
     it('should throw if non-dynamic package has a stream with undefined data_stream.type', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       const policyWithUndefinedType = {
         ...testPolicy,
         inputs: [
@@ -229,7 +231,7 @@ describe('Package Policy Utils', () => {
     });
 
     it('should not throw if dynamic_signal_types package has a stream with undefined data_stream.type', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       const policyWithUndefinedType = {
         ...testPolicy,
         inputs: [
@@ -263,7 +265,7 @@ describe('Package Policy Utils', () => {
     });
 
     it('should not throw for a composable integration with a dynamic OTel nested input and undefined data_stream.type', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       const policyWithMixedInputs = {
         ...testPolicy,
         inputs: [
@@ -313,7 +315,7 @@ describe('Package Policy Utils', () => {
     });
 
     it('should throw for a composable integration when a non-dynamic input has undefined data_stream.type', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       const policyWithBadLogfileInput = {
         ...testPolicy,
         inputs: [
@@ -362,12 +364,12 @@ describe('canUseOutputForIntegration', () => {
   const soClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should reject a Logstash output_id on a package policy with an OTel input', async () => {
-    jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-    jest
+    vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+    vi
       .spyOn(outputService, 'get')
       .mockResolvedValue({ id: 'logstash-output', type: 'logstash' } as any);
 
@@ -383,8 +385,8 @@ describe('canUseOutputForIntegration', () => {
   });
 
   it('should reject a Kafka output_id on a package policy with an OTel input', async () => {
-    jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-    jest
+    vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+    vi
       .spyOn(outputService, 'get')
       .mockResolvedValue({ id: 'kafka-output', type: 'kafka' } as any);
 
@@ -400,8 +402,8 @@ describe('canUseOutputForIntegration', () => {
   });
 
   it('should accept an Elasticsearch output_id on a package policy with an OTel input', async () => {
-    jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-    jest
+    vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+    vi
       .spyOn(outputService, 'get')
       .mockResolvedValue({ id: 'es-output', type: 'elasticsearch' } as any);
 
@@ -417,8 +419,8 @@ describe('canUseOutputForIntegration', () => {
   });
 
   it('should still permit Logstash output_id on a non-OTel package policy (regression guard)', async () => {
-    jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-    jest
+    vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+    vi
       .spyOn(outputService, 'get')
       .mockResolvedValue({ id: 'logstash-output', type: 'logstash' } as any);
 
@@ -456,7 +458,7 @@ describe('canDeployAsAgentlessOrThrow', () => {
   });
 
   it('should throw if policy supports agentless, is custom package, and is not allowed', () => {
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
     let error = null;
     try {
       canDeployCustomPackageAsAgentlessOrThrow(
@@ -471,7 +473,7 @@ describe('canDeployAsAgentlessOrThrow', () => {
   });
 
   it('should not throw if policy supports agentless, is not custom package, and is not allowed', () => {
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
     let error = null;
     try {
       canDeployCustomPackageAsAgentlessOrThrow(getTestPolicy(), createPackageInfoMock());
@@ -483,7 +485,7 @@ describe('canDeployAsAgentlessOrThrow', () => {
   });
 
   it('should not throw if policy does not support agentless, is custom package, and is not allowed', () => {
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
     let error = null;
     try {
       canDeployCustomPackageAsAgentlessOrThrow(
@@ -498,7 +500,7 @@ describe('canDeployAsAgentlessOrThrow', () => {
   });
 
   it('should not throw if policy supports agentless, is custom package, and is allowed', () => {
-    jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig(true));
+    vi.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig(true));
     let error = null;
     try {
       canDeployCustomPackageAsAgentlessOrThrow(

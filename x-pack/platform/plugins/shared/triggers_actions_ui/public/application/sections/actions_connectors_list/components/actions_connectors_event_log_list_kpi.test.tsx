@@ -5,27 +5,39 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, within, waitFor } from '@testing-library/react';
 import { loadGlobalConnectorExecutionKPIAggregations } from '../../../lib/action_connector_api/load_execution_kpi_aggregations';
 import { ConnectorEventLogListKPI } from './actions_connectors_event_log_list_kpi';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      notifications: { toast: { addDanger: jest.fn() } },
-    },
-  }),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          notifications: { toast: { addDanger: vi.fn() } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/action_connector_api/load_execution_kpi_aggregations', () => ({
-  loadGlobalConnectorExecutionKPIAggregations: jest.fn(),
-}));
+vi.mock('../../../lib/action_connector_api/load_execution_kpi_aggregations', () => {
+      const mocked = {
+      loadGlobalConnectorExecutionKPIAggregations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockKpiResponse = {
   success: 4,
@@ -35,12 +47,12 @@ const mockKpiResponse = {
 };
 
 const loadGlobalExecutionKPIAggregationsMock =
-  loadGlobalConnectorExecutionKPIAggregations as unknown as jest.MockedFunction<any>;
+  loadGlobalConnectorExecutionKPIAggregations as unknown as MockedFunction<any>;
 
 describe('actions_connectors_event_log_list_kpi', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    vi.clearAllMocks();
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
     loadGlobalExecutionKPIAggregationsMock.mockResolvedValue(mockKpiResponse);
   });
 

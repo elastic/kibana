@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -92,7 +94,7 @@ describe('Table', () => {
   });
 
   it('should handle query parse error', () => {
-    const onQueryChangeMock = jest.fn();
+    const onQueryChangeMock = vi.fn();
     const customizedProps = {
       ...defaultProps,
       onQueryChange: onQueryChangeMock,
@@ -167,7 +169,7 @@ describe('Table', () => {
         setActionContext: () => null,
       } as any,
     ]);
-    const onActionRefresh = jest.fn();
+    const onActionRefresh = vi.fn();
     const customizedProps = { ...defaultProps, actionRegistry, onActionRefresh };
     const component = shallowWithI18nProvider(<Table {...customizedProps} />);
 

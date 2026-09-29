@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -14,14 +17,14 @@ import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 import { render } from '../../utils/test_helper';
 import { SloSelector } from './slo_selector';
 
-jest.mock('../../hooks/use_fetch_slo_definitions');
+vi.mock('../../hooks/use_fetch_slo_definitions');
 
-const useFetchSloDefinitionsMock = useFetchSloDefinitions as jest.Mock;
+const useFetchSloDefinitionsMock = useFetchSloDefinitions as Mock;
 
 describe('SLO Selector', () => {
-  const onSelectedSpy = jest.fn();
+  const onSelectedSpy = vi.fn();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useFetchSloDefinitionsMock.mockReturnValue({ isLoading: true, data: emptySloList });
   });
 

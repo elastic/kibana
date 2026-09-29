@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { createOrUpdateIndexTemplate } from './create_or_update_index_template';
@@ -70,8 +72,8 @@ const simulateTemplateResponse = {
 
 describe('createOrUpdateIndexTemplate', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
+    vi.resetAllMocks();
+    vi.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
   });
 
   it(`should call esClient to put index template`, async () => {

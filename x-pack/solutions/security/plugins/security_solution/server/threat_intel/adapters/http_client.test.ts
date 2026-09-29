@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   assertSafeUrlResolved,
   createFetchUrl,
@@ -256,7 +259,7 @@ describe('assertSafeUrlResolved', () => {
   });
 
   it('does not look up literal IPs', async () => {
-    const lookupFn = jest.fn();
+    const lookupFn = vi.fn();
     await assertSafeUrlResolved('https://93.184.216.34/', lookupFn);
     expect(lookupFn).not.toHaveBeenCalled();
   });
@@ -330,7 +333,7 @@ describe('fetchUrl redirect handling', () => {
   it('rejects a redirect to a private host', async () => {
     const controller = new AbortController();
     let callCount = 0;
-    const fetchFn = jest.fn(async (url: string) => {
+    const fetchFn = vi.fn(async (url: string) => {
       callCount += 1;
       if (callCount === 1) {
         return makeResponse(301, { location: 'http://169.254.169.254/latest/meta-data/' });
@@ -352,7 +355,7 @@ describe('fetchUrl redirect handling', () => {
   it('follows a redirect to a safe host and returns the body', async () => {
     const controller = new AbortController();
     let callCount = 0;
-    const fetchFn = jest.fn(async (url: string) => {
+    const fetchFn = vi.fn(async (url: string) => {
       callCount += 1;
       if (callCount === 1) {
         return makeResponse(301, { location: 'https://cdn.example.com/feed.xml' });
@@ -372,7 +375,7 @@ describe('fetchUrl redirect handling', () => {
 
   it('rejects a redirect to a hostname that resolves to a private address', async () => {
     const controller = new AbortController();
-    const fetchFn = jest.fn(async () =>
+    const fetchFn = vi.fn(async () =>
       makeResponse(302, { location: 'https://internal.example.com/' })
     );
 
@@ -403,14 +406,14 @@ describe('fetchUrl redirect credential handling', () => {
   /** Redirects once to `location`, then returns 200. Records sent headers. */
   const redirectOnceTo = (location: string) => {
     const sent: Array<Record<string, string>> = [];
-    const fetchFn = jest.fn(async (_url: string, init?: RequestInit) => {
+    const fetchFn = vi.fn(async (_url: string, init?: RequestInit) => {
       sent.push({ ...((init?.headers ?? {}) as Record<string, string>) });
       return sent.length === 1 ? makeResponse(301, { location }) : makeResponse(200, {}, 'ok');
     });
     return { fetchFn, sent };
   };
 
-  const run = (fetchFn: jest.Mock) =>
+  const run = (fetchFn: Mock) =>
     createFetchUrl({
       fetchFn: fetchFn as unknown as typeof fetch,
       timeoutMs: 1000,
@@ -456,7 +459,7 @@ describe('fetchUrl redirect credential handling', () => {
 describe('fetchUrl redirect hop limit', () => {
   it('stops after MAX_REDIRECT_HOPS rather than following forever', async () => {
     let hop = 0;
-    const fetchFn = jest.fn(async () => {
+    const fetchFn = vi.fn(async () => {
       hop += 1;
       return makeResponse(302, { location: `https://example.com/hop-${hop}` });
     });
@@ -478,14 +481,14 @@ describe('fetchUrl DNS pinning', () => {
   /** Captures the RequestInit so the dispatcher can be inspected. */
   const capturingFetch = () => {
     let init: (RequestInit & { dispatcher?: unknown }) | undefined;
-    const fetchFn = jest.fn(async (_url: string, requestInit?: RequestInit) => {
+    const fetchFn = vi.fn(async (_url: string, requestInit?: RequestInit) => {
       init = requestInit as RequestInit & { dispatcher?: unknown };
       return makeResponse(200, {}, 'ok');
     });
     return { fetchFn, getInit: () => init };
   };
 
-  const fetchThrough = (url: string, fetchFn: jest.Mock) =>
+  const fetchThrough = (url: string, fetchFn: Mock) =>
     createFetchUrl({
       fetchFn: fetchFn as unknown as typeof fetch,
       timeoutMs: 1000,
@@ -553,7 +556,7 @@ describe('fetchUrl DNS pinning', () => {
   it('attaches a separate dispatcher to each redirect hop', async () => {
     const seen: unknown[] = [];
     let hop = 0;
-    const fetchFn = jest.fn(async (_url: string, init?: RequestInit) => {
+    const fetchFn = vi.fn(async (_url: string, init?: RequestInit) => {
       seen.push((init as RequestInit & { dispatcher?: unknown }).dispatcher);
       hop += 1;
       return hop === 1
@@ -587,7 +590,7 @@ describe('fetchUrl DNS pinning', () => {
 describe('fetchUrl body cap', () => {
   it('enforces the cap on a streaming body', async () => {
     const controller = new AbortController();
-    const fetchFn = jest.fn(async () =>
+    const fetchFn = vi.fn(async () =>
       makeStreamingResponse(200, ['a'.repeat(64), 'b'.repeat(64)])
     );
 
@@ -603,7 +606,7 @@ describe('fetchUrl body cap', () => {
 
   it('enforces the cap when the response exposes no stream', async () => {
     const controller = new AbortController();
-    const fetchFn = jest.fn(async () => makeResponse(200, {}, 'x'.repeat(200)));
+    const fetchFn = vi.fn(async () => makeResponse(200, {}, 'x'.repeat(200)));
 
     await expect(
       createFetchUrl({
@@ -617,7 +620,7 @@ describe('fetchUrl body cap', () => {
 
   it('returns a streamed body that fits under the cap', async () => {
     const controller = new AbortController();
-    const fetchFn = jest.fn(async () => makeStreamingResponse(200, ['<feed', '/>']));
+    const fetchFn = vi.fn(async () => makeStreamingResponse(200, ['<feed', '/>']));
 
     const result = await createFetchUrl({
       fetchFn: fetchFn as unknown as typeof fetch,
@@ -637,7 +640,7 @@ describe('fetchUrl body cap', () => {
 describe('fetchUrl with credentials in the URL', () => {
   const capture = () => {
     const seen: Array<{ url: string; headers: Record<string, string> }> = [];
-    const fetchFn = jest.fn(async (url: string, init?: RequestInit) => {
+    const fetchFn = vi.fn(async (url: string, init?: RequestInit) => {
       seen.push({ url, headers: (init?.headers ?? {}) as Record<string, string> });
       return makeResponse(200, {}, 'ok');
     });
@@ -723,7 +726,7 @@ describe('fetchUrl with credentials in the URL', () => {
   // one leak for another.
   it('strips the derived credential on a cross-origin redirect', async () => {
     const seen: Array<{ url: string; headers: Record<string, string> }> = [];
-    const fetchFn = jest.fn(async (url: string, init?: RequestInit) => {
+    const fetchFn = vi.fn(async (url: string, init?: RequestInit) => {
       seen.push({ url, headers: (init?.headers ?? {}) as Record<string, string> });
       return seen.length === 1
         ? makeResponse(302, { location: 'https://elsewhere.test/feed.xml' })
@@ -744,7 +747,7 @@ describe('fetchUrl with credentials in the URL', () => {
 
   it('keeps the derived credential on a same-origin redirect', async () => {
     const seen: Array<{ url: string; headers: Record<string, string> }> = [];
-    const fetchFn = jest.fn(async (url: string, init?: RequestInit) => {
+    const fetchFn = vi.fn(async (url: string, init?: RequestInit) => {
       seen.push({ url, headers: (init?.headers ?? {}) as Record<string, string> });
       return seen.length === 1
         ? makeResponse(302, { location: 'https://example.com/feed-v2.xml' })
@@ -781,7 +784,7 @@ describe('fetchUrl with credentials in the URL', () => {
 
 /** Response whose body stream records whether it was released. */
 const makeResponseWithBody = (status: number, headers: Record<string, string> = {}) => {
-  const cancel = jest.fn().mockResolvedValue(undefined);
+  const cancel = vi.fn().mockResolvedValue(undefined);
   const response = {
     status,
     statusText: String(status),
@@ -856,7 +859,7 @@ describe('fetchUrl non-followed 3xx', () => {
 
   it('still follows a 308', async () => {
     let hop = 0;
-    const fetchFn = jest.fn(async () => {
+    const fetchFn = vi.fn(async () => {
       hop += 1;
       return hop === 1
         ? makeResponse(308, { location: 'https://example.com/moved.xml' })
@@ -894,8 +897,8 @@ describe('fetchUrl redirect body release', () => {
   });
 
   it('releases the redirect body when the hop limit is exhausted', async () => {
-    const cancels: jest.Mock[] = [];
-    const fetchFn = jest.fn(async () => {
+    const cancels: Mock[] = [];
+    const fetchFn = vi.fn(async () => {
       const { response, cancel } = makeResponseWithBody(302, {
         location: 'https://example.com/next',
       });
@@ -932,7 +935,7 @@ describe('fetchUrl cross-origin credential stripping', () => {
   const captureHops = (locations: string[]) => {
     const seen: Array<Record<string, string>> = [];
     let hop = 0;
-    const fetchFn = jest.fn(async (_url: string, init?: RequestInit) => {
+    const fetchFn = vi.fn(async (_url: string, init?: RequestInit) => {
       seen.push((init?.headers ?? {}) as Record<string, string>);
       const location = locations[hop];
       hop += 1;
@@ -1026,7 +1029,7 @@ describe('redactUrl on malformed input', () => {
 describe('fetchUrl authorization precedence is case-insensitive', () => {
   const capture = () => {
     const seen: Array<Record<string, string>> = [];
-    const fetchFn = jest.fn(async (_url: string, init?: RequestInit) => {
+    const fetchFn = vi.fn(async (_url: string, init?: RequestInit) => {
       seen.push((init?.headers ?? {}) as Record<string, string>);
       return makeResponse(200, {}, 'ok');
     });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useRef } from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -25,13 +27,16 @@ const typeSecurityExpression = {
   tagValue: 'security',
 } as const;
 
-const mockUseProjectPickerState = jest.fn();
-const mockUseProjectPickerActions = jest.fn();
+const mockUseProjectPickerState = vi.fn();
+const mockUseProjectPickerActions = vi.fn();
 
-jest.mock('../../../../state', () => ({
-  useProjectPickerState: () => mockUseProjectPickerState(),
-  useProjectPickerActions: () => mockUseProjectPickerActions(),
-}));
+vi.mock('../../../../state', () => {
+      const mocked = {
+      useProjectPickerState: () => mockUseProjectPickerState(),
+      useProjectPickerActions: () => mockUseProjectPickerActions(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createFilterExpressions = (
   entries: Array<[FilterExpressionValue, boolean?]>
@@ -116,7 +121,7 @@ const ProjectPickerFrameBodyWithScrollContainerRef = ({
 
 describe('ProjectPickerFrameBody', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('enabled controls state', () => {
@@ -139,7 +144,7 @@ describe('ProjectPickerFrameBody', () => {
     it('attaches a passed-in scrollContainerRef to the scrollable container element', () => {
       mockUseProjectPickerState.mockReturnValue(createState());
       mockUseProjectPickerActions.mockReturnValue({});
-      const onRefAttached = jest.fn();
+      const onRefAttached = vi.fn();
 
       render(<ProjectPickerFrameBodyWithScrollContainerRef onRefAttached={onRefAttached} />);
 

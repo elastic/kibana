@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
@@ -12,16 +14,19 @@ import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/
 import { SaveTimelineModal } from './save_timeline_modal';
 import * as i18n from './translations';
 
-jest.mock('../../../hooks/use_create_timeline', () => ({
-  useCreateTimeline: jest.fn(),
-}));
+vi.mock('../../../hooks/use_create_timeline', () => {
+      const mocked = {
+      useCreateTimeline: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetState = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const actual = jest.requireActual('react-redux-v7');
+const mockGetState = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const actual = require('react-redux-v7');
   return {
     ...actual,
-    useDispatch: jest.fn(),
+    useDispatch: vi.fn(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     useSelector: (selector: any) =>
       selector({
@@ -41,7 +46,7 @@ const renderSaveTimelineModal = (showWarning?: boolean) =>
     <TestProviders>
       <SaveTimelineModal
         initialFocusOn="title"
-        closeSaveTimeline={jest.fn()}
+        closeSaveTimeline={vi.fn()}
         timelineId="timeline-1"
         showWarning={showWarning}
       />

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -16,7 +18,7 @@ const createCloudMock = (overrides: Record<string, unknown> = {}): CloudStart =>
     isCloudEnabled: true,
     baseUrl: 'https://cloud.elastic.co',
     organizationUrl: 'https://cloud.elastic.co/account/members',
-    getPrivilegedUrls: jest.fn().mockResolvedValue({
+    getPrivilegedUrls: vi.fn().mockResolvedValue({
       billingUrl: 'https://cloud.elastic.co/billing',
     }),
     ...overrides,
@@ -31,7 +33,7 @@ const renderCloudLinks = (cloud?: CloudStart) =>
 
 describe('CloudLinks', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders nothing when cloud is undefined', () => {
@@ -88,7 +90,7 @@ describe('CloudLinks', () => {
 
   it('does not render usage link when user lacks billing access', async () => {
     const cloud = createCloudMock({
-      getPrivilegedUrls: jest.fn().mockResolvedValue({}),
+      getPrivilegedUrls: vi.fn().mockResolvedValue({}),
     });
     const { queryByTestId } = renderCloudLinks(cloud);
 
@@ -101,7 +103,7 @@ describe('CloudLinks', () => {
 
   it('does not render usage link when getPrivilegedUrls rejects', async () => {
     const cloud = createCloudMock({
-      getPrivilegedUrls: jest.fn().mockRejectedValue(new Error('forbidden')),
+      getPrivilegedUrls: vi.fn().mockRejectedValue(new Error('forbidden')),
     });
     const { queryByTestId } = renderCloudLinks(cloud);
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getCurrentUserAlertSummaryRequest, requestMock } from '../../__mocks__/request';
 import { ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND } from '@kbn/elastic-assistant-common';
 import { serverMock } from '../../__mocks__/server';
@@ -16,10 +19,13 @@ import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { getAlertSummaryMock } from '../../__mocks__/alert_summary.mock';
 
-jest.mock('../../lib/prompt', () => ({
-  ...jest.requireActual('../../lib/prompt'),
-  getPrompt: jest.fn().mockResolvedValue('hello world'),
-}));
+vi.mock('../../lib/prompt', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../lib/prompt')),
+      getPrompt: vi.fn().mockResolvedValue('hello world'),
+    };
+      return { ...mocked, default: mocked };
+    });
 describe('Find user prompts route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
@@ -41,7 +47,7 @@ describe('Find user prompts route', () => {
     );
     logger = loggingSystemMock.createLogger();
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
-    (context.elasticAssistant.actions.getActionsClientWithRequest as jest.Mock) = jest
+    (context.elasticAssistant.actions.getActionsClientWithRequest as Mock) = vi
       .fn()
       .mockReturnValueOnce(actionsClientMock.create());
     findAlertSummaryRoute(server.router, logger);

@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { TestProviders } from '../../../../../common/mock';
 import { renderHook } from '@testing-library/react';
 import { useTimelineColumns } from './use_timeline_columns';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline/columns';
 
-jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
+vi.mock('../../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useTimelineColumns', () => {
   const mockColumns: ColumnHeaderOptions[] = [

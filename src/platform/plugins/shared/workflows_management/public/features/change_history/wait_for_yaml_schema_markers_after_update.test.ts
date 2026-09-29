@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SchemasSettings } from 'monaco-yaml';
 import { monaco } from '@kbn/code-editor';
 import { waitForPreviewYamlSchemaMarkers } from './wait_for_yaml_schema_markers_after_update';
@@ -16,16 +19,17 @@ import {
   WORKFLOW_CHANGE_HISTORY_VALIDATION_MARKER_REUSE_MAX_WAIT_MS,
 } from './workflow_change_history_preview_constants';
 
-jest.mock('../../shared/ui/yaml_editor/yaml_language_service', () => ({
-  yamlLanguageService: {
-    update: jest.fn(() => Promise.resolve()),
-  },
-}));
+vi.mock('../../shared/ui/yaml_editor/yaml_language_service', () => {
+      const mocked = {
+      yamlLanguageService: {
+        update: vi.fn(() => Promise.resolve()),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { yamlLanguageService } = jest.requireMock(
-  '../../shared/ui/yaml_editor/yaml_language_service'
-) as {
-  yamlLanguageService: { update: jest.Mock };
+const { yamlLanguageService } = (await vi.importMock('../../shared/ui/yaml_editor/yaml_language_service')) as {
+  yamlLanguageService: { update: Mock };
 };
 
 const sampleSchemas: SchemasSettings[] = [
@@ -37,13 +41,13 @@ describe('wait_for_yaml_schema_markers_after_update', () => {
   let markerChangeListener: ((uris: monaco.Uri[]) => void) | undefined;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
     markerChangeListener = undefined;
     model = monaco.editor.createModel('name: test\n', 'yaml');
 
     const originalOnDidChangeMarkers = monaco.editor.onDidChangeMarkers.bind(monaco.editor);
-    jest.spyOn(monaco.editor, 'onDidChangeMarkers').mockImplementation((listener) => {
+    vi.spyOn(monaco.editor, 'onDidChangeMarkers').mockImplementation((listener) => {
       markerChangeListener = listener;
       return originalOnDidChangeMarkers(listener);
     });
@@ -51,8 +55,8 @@ describe('wait_for_yaml_schema_markers_after_update', () => {
 
   afterEach(() => {
     model.dispose();
-    jest.restoreAllMocks();
-    jest.useRealTimers();
+    vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   it('skips work when schemas are empty', async () => {
@@ -74,7 +78,7 @@ describe('wait_for_yaml_schema_markers_after_update', () => {
     expect(yamlLanguageService.update).toHaveBeenCalledWith(sampleSchemas);
 
     markerChangeListener?.([model.uri]);
-    jest.advanceTimersByTime(WORKFLOW_CHANGE_HISTORY_VALIDATION_DEBOUNCE_MS);
+    vi.advanceTimersByTime(WORKFLOW_CHANGE_HISTORY_VALIDATION_DEBOUNCE_MS);
 
     await expect(waitPromise).resolves.toBeUndefined();
   });
@@ -102,10 +106,10 @@ describe('wait_for_yaml_schema_markers_after_update', () => {
     await Promise.resolve();
     expect(yamlLanguageService.update).toHaveBeenCalledWith(sampleSchemas);
 
-    jest.advanceTimersByTime(WORKFLOW_CHANGE_HISTORY_VALIDATION_DEBOUNCE_MS);
+    vi.advanceTimersByTime(WORKFLOW_CHANGE_HISTORY_VALIDATION_DEBOUNCE_MS);
     expect(pending).toBe(true);
 
-    jest.advanceTimersByTime(
+    vi.advanceTimersByTime(
       WORKFLOW_CHANGE_HISTORY_VALIDATION_MARKER_MAX_WAIT_MS -
         WORKFLOW_CHANGE_HISTORY_VALIDATION_DEBOUNCE_MS
     );
@@ -120,7 +124,7 @@ describe('wait_for_yaml_schema_markers_after_update', () => {
     });
 
     await Promise.resolve();
-    jest.advanceTimersByTime(WORKFLOW_CHANGE_HISTORY_VALIDATION_MARKER_MAX_WAIT_MS);
+    vi.advanceTimersByTime(WORKFLOW_CHANGE_HISTORY_VALIDATION_MARKER_MAX_WAIT_MS);
 
     await expect(waitPromise).resolves.toBeUndefined();
   });
@@ -147,7 +151,7 @@ describe('wait_for_yaml_schema_markers_after_update', () => {
     expect(yamlLanguageService.update).not.toHaveBeenCalled();
 
     markerChangeListener?.([model.uri]);
-    jest.advanceTimersByTime(WORKFLOW_CHANGE_HISTORY_VALIDATION_DEBOUNCE_MS);
+    vi.advanceTimersByTime(WORKFLOW_CHANGE_HISTORY_VALIDATION_DEBOUNCE_MS);
 
     await expect(waitPromise).resolves.toBeUndefined();
   });
@@ -162,7 +166,7 @@ describe('wait_for_yaml_schema_markers_after_update', () => {
     });
 
     await Promise.resolve();
-    jest.advanceTimersByTime(WORKFLOW_CHANGE_HISTORY_VALIDATION_MARKER_REUSE_MAX_WAIT_MS);
+    vi.advanceTimersByTime(WORKFLOW_CHANGE_HISTORY_VALIDATION_MARKER_REUSE_MAX_WAIT_MS);
 
     await expect(waitPromise).resolves.toBeUndefined();
     expect(pending).toBe(false);

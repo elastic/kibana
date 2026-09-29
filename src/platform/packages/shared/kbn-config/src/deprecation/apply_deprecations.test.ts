@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DocLinks } from '@kbn/doc-links';
 import { applyDeprecations } from './apply_deprecations';
 import type {
@@ -33,9 +35,9 @@ describe('applyDeprecations', () => {
   });
 
   it('calls all deprecations handlers once', () => {
-    const handlerA = jest.fn();
-    const handlerB = jest.fn();
-    const handlerC = jest.fn();
+    const handlerA = vi.fn();
+    const handlerB = vi.fn();
+    const handlerC = vi.fn();
     applyDeprecations(
       {},
       [handlerA, handlerB, handlerC].map((h) => wrapHandler(h))
@@ -47,11 +49,11 @@ describe('applyDeprecations', () => {
 
   it('calls deprecations handlers with the correct parameters', () => {
     const config = { foo: 'bar' };
-    const addDeprecation = jest.fn();
-    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
+    const addDeprecation = vi.fn();
+    const createAddDeprecation = vi.fn().mockReturnValue(addDeprecation);
 
-    const handlerA = jest.fn();
-    const handlerB = jest.fn();
+    const handlerA = vi.fn();
+    const handlerB = vi.fn();
     applyDeprecations(
       config,
       [wrapHandler(handlerA, 'pathA'), wrapHandler(handlerB, 'pathB')],
@@ -66,12 +68,12 @@ describe('applyDeprecations', () => {
   });
 
   it('passes path to addDeprecation factory', () => {
-    const addDeprecation = jest.fn();
-    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
+    const addDeprecation = vi.fn();
+    const createAddDeprecation = vi.fn().mockReturnValue(addDeprecation);
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
 
-    const handlerA = jest.fn().mockReturnValue({ unset: [{ path: 'deprecated' }] });
-    const handlerB = jest.fn().mockReturnValue(undefined);
+    const handlerA = vi.fn().mockReturnValue({ unset: [{ path: 'deprecated' }] });
+    const handlerB = vi.fn().mockReturnValue(undefined);
 
     applyDeprecations(
       initialConfig,
@@ -85,18 +87,18 @@ describe('applyDeprecations', () => {
   });
 
   it('calls handlers with correct config argument', () => {
-    const addDeprecation = jest.fn();
-    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
+    const addDeprecation = vi.fn();
+    const createAddDeprecation = vi.fn().mockReturnValue(addDeprecation);
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
     const alteredConfig = { foo: 'bar' };
 
     const configs: Array<{ fn: string; config: Record<string, any> }> = [];
-    const handlerA = jest.fn().mockImplementation((config) => {
+    const handlerA = vi.fn().mockImplementation((config) => {
       // the first argument is mutated between calls, we store a copy of it
       configs.push({ fn: 'handlerA', config: { ...config } });
       return { unset: [{ path: 'deprecated' }] };
     });
-    const handlerB = jest.fn().mockImplementation((config) => {
+    const handlerB = vi.fn().mockImplementation((config) => {
       configs.push({ fn: 'handlerB', config: { ...config } });
     });
 
@@ -167,11 +169,11 @@ describe('applyDeprecations', () => {
   });
 
   it('ignores a command for unknown path', () => {
-    const addDeprecation = jest.fn();
-    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
+    const addDeprecation = vi.fn();
+    const createAddDeprecation = vi.fn().mockReturnValue(addDeprecation);
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
 
-    const handler = jest.fn().mockImplementation((config) => {
+    const handler = vi.fn().mockImplementation((config) => {
       return { unset: [{ path: 'unknown' }] };
     });
 
@@ -185,11 +187,11 @@ describe('applyDeprecations', () => {
   });
 
   it('ignores an unknown command', () => {
-    const addDeprecation = jest.fn();
-    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
+    const addDeprecation = vi.fn();
+    const createAddDeprecation = vi.fn().mockReturnValue(addDeprecation);
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
 
-    const handler = jest.fn().mockImplementation((config) => {
+    const handler = vi.fn().mockImplementation((config) => {
       return { rewrite: [{ path: 'foo' }] };
     });
 
@@ -203,11 +205,11 @@ describe('applyDeprecations', () => {
   });
 
   it('returns a list of changes config paths', () => {
-    const addDeprecation = jest.fn();
-    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
+    const addDeprecation = vi.fn();
+    const createAddDeprecation = vi.fn().mockReturnValue(addDeprecation);
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
 
-    const handler = jest.fn().mockImplementation((config) => {
+    const handler = vi.fn().mockImplementation((config) => {
       return { set: [{ path: 'foo', value: 'bar' }], unset: [{ path: 'baz' }] };
     });
 

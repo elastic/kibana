@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsOsqueryAvailableSimple } from './use_is_osquery_available_simple';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -11,7 +14,7 @@ import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
 const response = {
   item: {
@@ -29,7 +32,7 @@ describe('UseIsOsqueryAvailableSimple', () => {
   const mockedHttp = httpServiceMock.createStartContract();
   mockedHttp.get.mockResolvedValue(response);
   beforeAll(() => {
-    (useKibana as jest.Mock).mockImplementation(() => {
+    (useKibana as Mock).mockImplementation(() => {
       const mockStartServicesMock = createStartServicesMock();
 
       return {

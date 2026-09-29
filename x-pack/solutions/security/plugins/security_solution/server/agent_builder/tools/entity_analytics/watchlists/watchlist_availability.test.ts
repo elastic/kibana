@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { createToolTestMocks } from '../../../__mocks__/test_helpers';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { getAgentBuilderResourceAvailability } from '../../../utils/get_agent_builder_resource_availability';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 
-jest.mock('../../../utils/get_agent_builder_resource_availability', () => ({
-  getAgentBuilderResourceAvailability: jest.fn(),
-}));
+vi.mock('../../../utils/get_agent_builder_resource_availability', () => {
+      const mocked = {
+      getAgentBuilderResourceAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
+const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as Mock;
 
 const mockExperimentalFeatures = {
   entityAnalyticsWatchlistEnabled: true,
@@ -25,11 +31,11 @@ const mockExperimentalFeatures = {
 describe('getWatchlistToolAvailability', () => {
   const { mockCore, mockLogger, mockRequest } = createToolTestMocks();
 
-  const mockHasAtLeast = jest.fn().mockReturnValue(true);
-  const mockGetLicense = jest.fn().mockResolvedValue({ hasAtLeast: mockHasAtLeast });
+  const mockHasAtLeast = vi.fn().mockReturnValue(true);
+  const mockGetLicense = vi.fn().mockResolvedValue({ hasAtLeast: mockHasAtLeast });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({ status: 'available' });
     mockHasAtLeast.mockReturnValue(true);
 

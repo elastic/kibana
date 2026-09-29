@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getNewsFeed } from './get_news_feed';
 import type { HttpSetup } from '@kbn/core/public';
 
@@ -12,7 +14,7 @@ describe('getNewsFeed', () => {
   const originalConsole = global.console;
   beforeAll(() => {
     // mocks console to avoid poluting the test output
-    global.console = { error: jest.fn() } as unknown as typeof console;
+    global.console = { error: vi.fn() } as unknown as typeof console;
   });
 
   afterAll(() => {

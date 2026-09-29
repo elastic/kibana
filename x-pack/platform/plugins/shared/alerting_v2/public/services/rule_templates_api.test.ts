@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH } from '../constants';
 import { RuleTemplatesApi } from './rule_templates_api';
@@ -17,7 +19,7 @@ describe('RuleTemplatesApi', () => {
     }
   })();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('listRuleTemplates', () => {
     it('sends a GET request with list query params', async () => {

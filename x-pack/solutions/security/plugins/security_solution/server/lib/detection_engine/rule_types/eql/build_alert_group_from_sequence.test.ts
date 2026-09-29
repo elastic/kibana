@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_REASON, ALERT_RULE_CONSUMER, ALERT_URL } from '@kbn/rule-data-utils';
 
@@ -33,7 +35,7 @@ const sharedParams = getSharedParamsMock({
 
 describe('buildAlert', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it builds an alert as expected without original_event if event does not exist', () => {

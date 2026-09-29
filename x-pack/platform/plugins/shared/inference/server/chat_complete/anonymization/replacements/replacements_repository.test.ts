@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ReplacementsRepository } from './replacements_repository';
 
 describe('ReplacementsRepository', () => {
   const esClient = {
-    index: jest.fn(),
-    get: jest.fn(),
-    search: jest.fn(),
-    update: jest.fn(),
-    deleteByQuery: jest.fn(),
-  } as unknown as jest.Mocked<ElasticsearchClient>;
+    index: vi.fn(),
+    get: vi.fn(),
+    search: vi.fn(),
+    update: vi.fn(),
+    deleteByQuery: vi.fn(),
+  } as unknown as Mocked<ElasticsearchClient>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('stores token mappings encrypted when encryption key is configured', async () => {
@@ -32,7 +35,7 @@ describe('ReplacementsRepository', () => {
       createdBy: 'test',
     });
 
-    const payload = (esClient.index as jest.Mock).mock.calls[0][0].document as {
+    const payload = (esClient.index as Mock).mock.calls[0][0].document as {
       replacements: Array<{
         anonymized: string;
         original_encrypted?: string;
@@ -54,11 +57,11 @@ describe('ReplacementsRepository', () => {
       createdBy: 'test',
     });
 
-    const createdDoc = (esClient.index as jest.Mock).mock.calls[0][0].document as Record<
+    const createdDoc = (esClient.index as Mock).mock.calls[0][0].document as Record<
       string,
       unknown
     >;
-    (esClient.get as jest.Mock).mockResolvedValue({
+    (esClient.get as Mock).mockResolvedValue({
       _source: createdDoc,
     });
 
@@ -73,7 +76,7 @@ describe('ReplacementsRepository', () => {
     });
     const id = 'replacements-1';
 
-    (esClient.get as jest.Mock).mockResolvedValue({
+    (esClient.get as Mock).mockResolvedValue({
       _source: {
         id,
         replacements: [{ anonymized: 'TOKEN_A', original: 'original-a' }],
@@ -97,7 +100,7 @@ describe('ReplacementsRepository', () => {
     });
     const id = 'replacements-2';
 
-    (esClient.get as jest.Mock)
+    (esClient.get as Mock)
       .mockResolvedValueOnce({
         _source: {
           id,
@@ -133,7 +136,7 @@ describe('ReplacementsRepository', () => {
     const id = 'replacements-retry';
     const now = new Date().toISOString();
 
-    (esClient.get as jest.Mock)
+    (esClient.get as Mock)
       .mockResolvedValueOnce({
         _seq_no: 1,
         _primary_term: 1,
@@ -175,7 +178,7 @@ describe('ReplacementsRepository', () => {
     const conflictError = Object.assign(new Error('version conflict'), {
       meta: { statusCode: 409 },
     });
-    (esClient.update as jest.Mock)
+    (esClient.update as Mock)
       .mockRejectedValueOnce(conflictError)
       .mockResolvedValueOnce({ result: 'updated' });
 
@@ -184,11 +187,11 @@ describe('ReplacementsRepository', () => {
     });
 
     expect(esClient.update).toHaveBeenCalledTimes(2);
-    expect((esClient.update as jest.Mock).mock.calls[0][0]).toMatchObject({
+    expect((esClient.update as Mock).mock.calls[0][0]).toMatchObject({
       if_seq_no: 1,
       if_primary_term: 1,
     });
-    expect((esClient.update as jest.Mock).mock.calls[1][0]).toMatchObject({
+    expect((esClient.update as Mock).mock.calls[1][0]).toMatchObject({
       if_seq_no: 2,
       if_primary_term: 1,
     });
@@ -201,7 +204,7 @@ describe('ReplacementsRepository', () => {
     });
     const id = 'replacements-invalid';
 
-    (esClient.get as jest.Mock).mockResolvedValue({
+    (esClient.get as Mock).mockResolvedValue({
       _source: {
         id,
         replacements: [{ anonymized: 'TOKEN_A' }],

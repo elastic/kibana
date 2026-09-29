@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 
 import type { ObjectType } from '@kbn/config-schema';
@@ -26,9 +29,9 @@ import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types'
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Change password', () => {
-  let router: jest.Mocked<SecurityRouter>;
+  let router: Mocked<SecurityRouter>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
-  let session: jest.Mocked<PublicMethodsOf<Session>>;
+  let session: Mocked<PublicMethodsOf<Session>>;
   let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
   let routeConfig: RouteConfig<any, any, any, any>;
   let mockContext: DeeplyMockedKeys<SecurityRequestHandlerContext>;
@@ -60,7 +63,7 @@ describe('Change password', () => {
     mockCoreContext = coreMock.createRequestHandlerContext();
     mockContext = coreMock.createCustomRequestHandlerContext({
       core: mockCoreContext,
-      licensing: { license: { check: jest.fn().mockReturnValue({ state: 'valid' }) } },
+      licensing: { license: { check: vi.fn().mockReturnValue({ state: 'valid' }) } },
     }) as any;
 
     defineChangeUserPasswordRoutes(routeParamsMock);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { schema } from '@kbn/config-schema';
@@ -46,33 +49,42 @@ import {
   createAgentAndPackagePoliciesHandler,
 } from './handlers';
 
-jest.mock('./handlers', () => ({
-  ...jest.requireActual('./handlers'),
-  getAgentPoliciesHandler: jest.fn(),
-  getOneAgentPolicyHandler: jest.fn(),
-  createAgentPolicyHandler: jest.fn(),
-  updateAgentPolicyHandler: jest.fn(),
-  copyAgentPolicyHandler: jest.fn(),
-  deleteAgentPoliciesHandler: jest.fn(),
-  getFullAgentPolicy: jest.fn(),
-  getK8sManifest: jest.fn(),
-  bulkGetAgentPoliciesHandler: jest.fn(),
-  createAgentAndPackagePoliciesHandler: jest.fn(),
-}));
+vi.mock('./handlers', async () => {
+      const mocked = {
+      ...(await vi.importActual('./handlers')),
+      getAgentPoliciesHandler: vi.fn(),
+      getOneAgentPolicyHandler: vi.fn(),
+      createAgentPolicyHandler: vi.fn(),
+      updateAgentPolicyHandler: vi.fn(),
+      copyAgentPolicyHandler: vi.fn(),
+      deleteAgentPoliciesHandler: vi.fn(),
+      getFullAgentPolicy: vi.fn(),
+      getK8sManifest: vi.fn(),
+      bulkGetAgentPoliciesHandler: vi.fn(),
+      createAgentAndPackagePoliciesHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services', () => ({
-  agentPolicyService: {
-    getFullAgentPolicy: jest.fn(),
-    getFullAgentManifest: jest.fn(),
-  },
-  appContextService: {
-    getLogger: jest.fn().mockReturnValue({ error: jest.fn() } as any),
-  },
-}));
+vi.mock('../../services', () => {
+      const mocked = {
+      agentPolicyService: {
+        getFullAgentPolicy: vi.fn(),
+        getFullAgentManifest: vi.fn(),
+      },
+      appContextService: {
+        getLogger: vi.fn().mockReturnValue({ error: vi.fn() } as any),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/agents', () => ({
-  getLatestAgentAvailableDockerImageVersion: jest.fn().mockResolvedValue('1.0.0'),
-}));
+vi.mock('../../services/agents', () => {
+      const mocked = {
+      getLatestAgentAvailableDockerImageVersion: vi.fn().mockResolvedValue('1.0.0'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;
@@ -341,7 +353,7 @@ describe('schema validation', () => {
       page: 1,
       perPage: 20,
     };
-    (getAgentPoliciesHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getAgentPoliciesHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getAgentPoliciesHandler(context, {} as any, response);
@@ -357,7 +369,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       items: [agentPolicy],
     };
-    (bulkGetAgentPoliciesHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (bulkGetAgentPoliciesHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await bulkGetAgentPoliciesHandler(context, {} as any, response);
@@ -373,7 +385,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       item: agentPolicy,
     };
-    (getOneAgentPolicyHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getOneAgentPolicyHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getOneAgentPolicyHandler(context, {} as any, response);
@@ -390,7 +402,7 @@ describe('schema validation', () => {
       id: 'id',
       name: 'name',
     };
-    (deleteAgentPoliciesHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (deleteAgentPoliciesHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await deleteAgentPoliciesHandler(context, { body: { agentPolicyId: 'id' } } as any, response);
@@ -406,7 +418,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       item: agentPolicy,
     };
-    (createAgentPolicyHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (createAgentPolicyHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await createAgentPolicyHandler(context, {} as any, response);
@@ -438,7 +450,7 @@ describe('schema validation', () => {
       const expectedResponse = {
         item: agentPolicy,
       };
-      (createAgentAndPackagePoliciesHandler as jest.Mock).mockImplementation(
+      (createAgentAndPackagePoliciesHandler as Mock).mockImplementation(
         (ctx, request, res) => {
           return res.ok({ body: expectedResponse });
         }
@@ -481,7 +493,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       item: agentPolicy,
     };
-    (updateAgentPolicyHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (updateAgentPolicyHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await updateAgentPolicyHandler(context, {} as any, response);
@@ -497,7 +509,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       item: agentPolicy,
     };
-    (copyAgentPolicyHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+    (copyAgentPolicyHandler as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await copyAgentPolicyHandler(context, {} as any, response);
@@ -621,7 +633,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       item: testPolicy,
     };
-    (getFullAgentPolicy as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getFullAgentPolicy as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getFullAgentPolicy(context, {} as any, response);
@@ -649,7 +661,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       item: testPolicy,
     };
-    (getFullAgentPolicy as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getFullAgentPolicy as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getFullAgentPolicy(context, {} as any, response);
@@ -665,7 +677,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       item: 'policy',
     };
-    (getFullAgentPolicy as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getFullAgentPolicy as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getFullAgentPolicy(context, {} as any, response);
@@ -679,7 +691,7 @@ describe('schema validation', () => {
 
   it('download full agent policy should return valid response', async () => {
     const expectedResponse = fullAgentPolicyToYaml(fullAgentPolicy, yaml);
-    (agentPolicyService.getFullAgentPolicy as jest.Mock).mockResolvedValue(fullAgentPolicy);
+    (agentPolicyService.getFullAgentPolicy as Mock).mockResolvedValue(fullAgentPolicy);
     await downloadFullAgentPolicy(
       context,
       { params: { agentPolicyId: 'policy1' }, query: { kubernetes: false } } as any,
@@ -701,7 +713,7 @@ describe('schema validation', () => {
     const expectedResponse = {
       item: 'manifest',
     };
-    (getK8sManifest as jest.Mock).mockImplementation((ctx, request, res) => {
+    (getK8sManifest as Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
     });
     await getK8sManifest(context, {} as any, response);
@@ -716,7 +728,7 @@ describe('schema validation', () => {
   it('download k8s manifest should return valid response', async () => {
     const expectedResponse = 'manifest';
 
-    (agentPolicyService.getFullAgentManifest as jest.Mock).mockResolvedValue(expectedResponse);
+    (agentPolicyService.getFullAgentManifest as Mock).mockResolvedValue(expectedResponse);
     await downloadK8sManifest(context, { query: {} } as any, response);
 
     expect(response.ok).toHaveBeenCalledWith({

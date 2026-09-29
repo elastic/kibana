@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import Path from 'path';
 
 import execa from 'execa';
@@ -16,8 +19,11 @@ import {
   detectStaleArtifacts,
 } from './detect_stale_artifacts';
 
-jest.mock('execa');
-jest.mock('@kbn/repo-info', () => ({ REPO_ROOT: '/repo' }));
+vi.mock('execa');
+vi.mock('@kbn/repo-info', () => {
+      const mocked = { REPO_ROOT: '/repo' };
+      return { ...mocked, default: mocked };
+    });
 
 const REPO = '/repo';
 
@@ -33,7 +39,7 @@ const PROJECTS = [
   { tsConfigPath: tsc('x-pack/enterprise'), dir: dir('x-pack/enterprise') },
 ];
 
-const mockExeca = execa as unknown as jest.Mock;
+const mockExeca = execa as unknown as Mock;
 
 // ── getChangedFiles ───────────────────────────────────────────────────────────
 

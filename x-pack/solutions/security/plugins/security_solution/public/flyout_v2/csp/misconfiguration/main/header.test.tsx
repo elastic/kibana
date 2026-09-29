@@ -5,40 +5,54 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { Header } from './header';
 
-jest.mock('@kbn/cloud-security-posture', () => ({
-  CspEvaluationBadge: ({ type }: { type?: string }) => (
-    <div data-test-subj="mockCspEvaluationBadge" data-type={type} />
-  ),
-}));
+vi.mock('@kbn/cloud-security-posture', () => {
+      const mocked = {
+      CspEvaluationBadge: ({ type }: { type?: string }) => (
+        <div data-test-subj="mockCspEvaluationBadge" data-type={type} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/components/flyout_title', () => ({
-  FlyoutTitle: ({ title }: { title: string }) => (
-    <div data-test-subj="mockFlyoutTitle">{title}</div>
-  ),
-}));
+vi.mock('../../../shared/components/flyout_title', () => {
+      const mocked = {
+      FlyoutTitle: ({ title }: { title: string }) => (
+        <div data-test-subj="mockFlyoutTitle">{title}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/components/formatted_date', () => ({
-  PreferenceFormattedDate: () => <span data-test-subj="mockFormattedDate" />,
-}));
+vi.mock('../../../../common/components/formatted_date', () => {
+      const mocked = {
+      PreferenceFormattedDate: () => <span data-test-subj="mockFormattedDate" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCspHeader = jest.fn(() => <div data-test-subj="mockCspFlyoutHeader" />);
+const mockCspHeader = vi.fn(() => <div data-test-subj="mockCspFlyoutHeader" />);
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      cloudSecurityPosture: {
-        getCloudSecurityPostureMisconfigurationFlyout: () => ({
-          Header: mockCspHeader,
-        }),
-      },
-    },
-  }),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          cloudSecurityPosture: {
+            getCloudSecurityPostureMisconfigurationFlyout: () => ({
+              Header: mockCspHeader,
+            }),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const finding = {
   '@timestamp': '2024-01-15T10:30:00.000Z',
@@ -48,7 +62,7 @@ const finding = {
 
 describe('<Header /> (misconfiguration)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the evaluation badge, title, and CSP header', () => {

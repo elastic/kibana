@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { from, lastValueFrom } from 'rxjs';
 import { toArray } from 'rxjs';
 import type {
@@ -30,7 +32,7 @@ describe('deanonymizeMessage', () => {
   let logger: MockedLogger;
   let regexWorker: RegexWorkerService;
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     logger = loggerMock.create();
     regexWorker = new RegexWorkerService(testConfig, logger);
   });
@@ -232,7 +234,7 @@ describe('deanonymizeMessage', () => {
         },
       ],
       anonymizationRules: [websiteRule],
-      esClient: { ml: { inferTrainedModel: jest.fn() } } as any, // no ML calls for regex rules
+      esClient: { ml: { inferTrainedModel: vi.fn() } } as any, // no ML calls for regex rules
     });
 
     const maskedUserContent = (maskedMsgs[0] as UserMessage).content as string;

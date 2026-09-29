@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { InMemoryFs } from 'just-bash';
 import { DirtyTrackingFs } from './dirty_tracking_fs';
 
@@ -115,7 +117,7 @@ describe('DirtyTrackingFs', () => {
     it('writeFile to an inaccessible path leaves dirty unchanged', async () => {
       // Mock an inner that always throws on writeFile.
       const inner = {
-        writeFile: jest.fn().mockRejectedValue(new Error('EROFS')),
+        writeFile: vi.fn().mockRejectedValue(new Error('EROFS')),
         // Stubs to satisfy IFileSystem — never called in this test.
       } as unknown as InMemoryFs;
       const fs = new DirtyTrackingFs(inner);

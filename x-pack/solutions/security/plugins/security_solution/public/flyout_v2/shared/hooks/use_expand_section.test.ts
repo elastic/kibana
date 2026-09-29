@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import type { UseExpandSectionParams } from './use_expand_section';
 import { useExpandSection } from './use_expand_section';
 import { useKibana } from '../../../common/lib/kibana';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 describe('useExpandSection', () => {
   let hookResult: RenderHookResult<boolean, UseExpandSectionParams>;
@@ -19,9 +22,9 @@ describe('useExpandSection', () => {
   const STORAGE_KEY = 'test-storage-key';
 
   it('should return default value if nothing in localStorage', () => {
-    const get = jest.fn().mockReturnValue(undefined);
+    const get = vi.fn().mockReturnValue(undefined);
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         storage: { get },
       },
@@ -42,9 +45,9 @@ describe('useExpandSection', () => {
   });
 
   it(`should return default value if localStorage doesn't have the correct key`, () => {
-    const get = jest.fn().mockReturnValue({ other: false });
+    const get = vi.fn().mockReturnValue({ other: false });
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         storage: { get },
       },
@@ -65,9 +68,9 @@ describe('useExpandSection', () => {
   });
 
   it('should return value from local storage', () => {
-    const get = jest.fn().mockReturnValue({ test: false });
+    const get = vi.fn().mockReturnValue({ test: false });
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         storage: { get },
       },
@@ -88,9 +91,9 @@ describe('useExpandSection', () => {
   });
 
   it('should check against lowercase values', () => {
-    const get = jest.fn().mockReturnValue({ test: false });
+    const get = vi.fn().mockReturnValue({ test: false });
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         storage: { get },
       },

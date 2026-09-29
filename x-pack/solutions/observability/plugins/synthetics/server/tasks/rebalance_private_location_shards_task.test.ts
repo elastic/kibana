@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CoreStart } from '@kbn/core-lifecycle-server';
 import { coreMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -41,8 +44,8 @@ const NOW = 1_700_000_000_000;
 const mockTaskManagerStart = taskManagerMock.createStart();
 const mockSoRepo = savedObjectsRepositoryMock.create();
 const mockLogger = loggerMock.create();
-const mockRebalanceShards = jest.fn().mockResolvedValue({ total: 0, moved: 0 });
-const mockClearShardConditions = jest.fn().mockResolvedValue({ cleared: 0, failed: 0 });
+const mockRebalanceShards = vi.fn().mockResolvedValue({ total: 0, moved: 0 });
+const mockClearShardConditions = vi.fn().mockResolvedValue({ cleared: 0, failed: 0 });
 
 const mockSyntheticsMonitorClient = {
   privateLocationAPI: {
@@ -52,10 +55,10 @@ const mockSyntheticsMonitorClient = {
 } as unknown as SyntheticsMonitorClient;
 
 const coreStart = coreMock.createStart() as CoreStart;
-(coreStart.savedObjects.createInternalRepository as jest.Mock).mockReturnValue(mockSoRepo);
+(coreStart.savedObjects.createInternalRepository as Mock).mockReturnValue(mockSoRepo);
 
 const enterpriseLicense = () => licenseMock.createLicense({ license: { type: 'enterprise' } });
-const mockGetLicense = jest.fn();
+const mockGetLicense = vi.fn();
 
 const mockServerSetup = {
   coreStart,
@@ -98,15 +101,15 @@ const run = (
 
 describe('RebalancePrivateLocationShardsTask', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers().setSystemTime(NOW);
+    vi.clearAllMocks();
+    vi.useFakeTimers().setSystemTime(NOW);
     mockTaskManagerStart.get.mockReset();
     mockGetLicense.mockResolvedValue(enterpriseLicense());
     mockRebalanceShards.mockResolvedValue({ total: 0, moved: 0 });
     mockClearShardConditions.mockResolvedValue({ cleared: 0, failed: 0 });
   });
 
-  afterEach(() => jest.useRealTimers());
+  afterEach(() => vi.useRealTimers());
 
   describe('start', () => {
     it('schedules with the default interval when the task does not exist yet', async () => {
@@ -140,8 +143,8 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
   describe('runTask', () => {
     it('clears leftover agent pins and skips rebalance when the kill-switch is off', async () => {
-      const getPrivateLocationsSpy = jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
-      const getAgentInfo = jest.spyOn(getAgentInfoModule, 'getAgentInfo');
+      const getPrivateLocationsSpy = vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
+      const getAgentInfo = vi.spyOn(getAgentInfoModule, 'getAgentInfo');
       mockClearShardConditions.mockResolvedValue({ cleared: 3, failed: 0 });
 
       const result = await run({ keep: 1, [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false });
@@ -249,7 +252,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       mockTaskManagerStart.get.mockResolvedValue({
         state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false, extra: 1 },
       } as never);
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([]);
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([]);
 
       const result = await run({ keep: 1 });
 
@@ -262,8 +265,8 @@ describe('RebalancePrivateLocationShardsTask', () => {
     });
 
     it('early-exits and does not read agents when there are no private locations', async () => {
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([]);
-      const getAgentInfo = jest.spyOn(getAgentInfoModule, 'getAgentInfo');
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([]);
+      const getAgentInfo = vi.spyOn(getAgentInfoModule, 'getAgentInfo');
 
       const result = await run({ foo: 1 });
 
@@ -280,7 +283,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       mockGetLicense.mockResolvedValue(
         licenseMock.createLicense({ license: { type: 'platinum' } })
       );
-      const getPrivateLocationsSpy = jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
+      const getPrivateLocationsSpy = vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
 
       const result = await run({ [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true });
 
@@ -305,7 +308,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       ],
     ])('leaves pins untouched for the cycle when the license %s', async (_label, arrange) => {
       arrange();
-      const getPrivateLocationsSpy = jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
+      const getPrivateLocationsSpy = vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
 
       const result = await run({ keep: 1, [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true });
 
@@ -328,8 +331,8 @@ describe('RebalancePrivateLocationShardsTask', () => {
     });
 
     it('rebalances a healthy location, passing healthy/recovery agents and capacities', async () => {
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
-      jest.spyOn(getAgentInfoModule, 'getAgentInfo').mockResolvedValue(
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      vi.spyOn(getAgentInfoModule, 'getAgentInfo').mockResolvedValue(
         new Map([
           ['agent-1', agentInfo(NOW, 2048)],
           ['agent-2', agentInfo(NOW, null)],
@@ -359,11 +362,11 @@ describe('RebalancePrivateLocationShardsTask', () => {
     });
 
     it('skips the data-plane liveness query when every agent is fresh', async () => {
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
-      jest
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      vi
         .spyOn(getAgentInfoModule, 'getAgentInfo')
         .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));
-      const getActive = jest.spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds');
+      const getActive = vi.spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds');
 
       await run();
 
@@ -372,11 +375,11 @@ describe('RebalancePrivateLocationShardsTask', () => {
     });
 
     it('keeps a stale-check-in agent that the liveness query proves active', async () => {
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
-      jest
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      vi
         .spyOn(getAgentInfoModule, 'getAgentInfo')
         .mockResolvedValue(new Map([['agent-1', agentInfo(NOW - STALE_CHECKIN_MS - 1)]]));
-      const getActive = jest
+      const getActive = vi
         .spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds')
         .mockResolvedValue(new Set(['agent-1']));
 
@@ -390,11 +393,11 @@ describe('RebalancePrivateLocationShardsTask', () => {
     });
 
     it('warns and skips the rebalance when a location has no healthy agents', async () => {
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
-      jest
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      vi
         .spyOn(getAgentInfoModule, 'getAgentInfo')
         .mockResolvedValue(new Map([['agent-1', agentInfo(NOW - STALE_CHECKIN_MS - 1)]]));
-      jest.spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds').mockResolvedValue(new Set());
+      vi.spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds').mockResolvedValue(new Set());
 
       await run();
 
@@ -403,13 +406,13 @@ describe('RebalancePrivateLocationShardsTask', () => {
     });
 
     it('isolates a failing location and still processes the others', async () => {
-      jest
+      vi
         .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
         .mockResolvedValue([
           location({ id: 'loc-a', agentPolicyId: 'ap-a' }),
           location({ id: 'loc-b', agentPolicyId: 'ap-b' }),
         ]);
-      jest
+      vi
         .spyOn(getAgentInfoModule, 'getAgentInfo')
         .mockRejectedValueOnce(new Error('fleet boom'))
         .mockResolvedValueOnce(new Map([['agent-1', agentInfo(NOW)]]));
@@ -425,13 +428,13 @@ describe('RebalancePrivateLocationShardsTask', () => {
     });
 
     it('keeps processing later locations (and persists streaks) when rebalanceShards throws', async () => {
-      jest
+      vi
         .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
         .mockResolvedValue([
           location({ id: 'loc-a', agentPolicyId: 'ap-a' }),
           location({ id: 'loc-b', agentPolicyId: 'ap-b' }),
         ]);
-      jest
+      vi
         .spyOn(getAgentInfoModule, 'getAgentInfo')
         .mockResolvedValueOnce(new Map([['agent-a', agentInfo(NOW)]]))
         .mockResolvedValueOnce(new Map([['agent-b', agentInfo(NOW)]]));
@@ -457,7 +460,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
     });
 
     it('does not throw when getPrivateLocations fails; returns the prior state', async () => {
-      jest
+      vi
         .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
         .mockRejectedValue(new Error('so boom'));
 
@@ -470,7 +473,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
     it('throws without work when the task signal is already aborted', async () => {
       const abortController = new AbortController();
       abortController.abort();
-      const getLocations = jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
+      const getLocations = vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
 
       await expect(run({ keep: 1 }, abortController.signal)).rejects.toThrow();
 
@@ -480,13 +483,13 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
     it('stops after the current location when the task is cancelled and does not treat abort as a location failure', async () => {
       const abortController = new AbortController();
-      jest
+      vi
         .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
         .mockResolvedValue([
           location({ id: 'loc-a', agentPolicyId: 'ap-a' }),
           location({ id: 'loc-b', agentPolicyId: 'ap-b' }),
         ]);
-      const getAgentInfo = jest
+      const getAgentInfo = vi
         .spyOn(getAgentInfoModule, 'getAgentInfo')
         .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));
       mockRebalanceShards.mockImplementation(async () => {
@@ -503,11 +506,11 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
     it('passes the task signal into agent listing, the liveness query, and rebalance writes', async () => {
       const abortController = new AbortController();
-      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
-      const getAgentInfo = jest
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      const getAgentInfo = vi
         .spyOn(getAgentInfoModule, 'getAgentInfo')
         .mockResolvedValue(new Map([['agent-1', agentInfo(NOW - STALE_CHECKIN_MS - 1)]]));
-      const getActive = jest
+      const getActive = vi
         .spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds')
         .mockResolvedValue(new Set(['agent-1']));
 

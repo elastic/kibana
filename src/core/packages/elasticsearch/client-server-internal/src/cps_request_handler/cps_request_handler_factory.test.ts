@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import type { TransportRequestParams } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import { asSpaceId } from '@kbn/core-spaces-common';
@@ -23,7 +25,7 @@ const makeSearchParams = (body?: Record<string, unknown>): TransportRequestParam
 });
 
 describe('getRequestHandlerFactory', () => {
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
 
   beforeEach(() => {
     mockLogger = loggerMock.create();

@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import axios from 'axios';
 import type { D3SecurityConnectorType } from '.';
 import { getConnectorType } from '.';
 
-jest.mock('axios');
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+vi.mock('axios');
+vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
+  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
   return {
     ...originalUtils,
-    request: jest.fn(),
-    patch: jest.fn(),
+    request: vi.fn(),
+    patch: vi.fn(),
   };
 });
 
-axios.create = jest.fn(() => axios);
+axios.create = vi.fn(() => axios);
 
 let connectorType: D3SecurityConnectorType;
 

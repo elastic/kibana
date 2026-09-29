@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type {
@@ -52,26 +55,26 @@ const makeBulkRemoveStatus = (
 });
 
 const mockLogger: Logger = {
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  fatal: jest.fn(),
-  trace: jest.fn(),
-  isLevelEnabled: jest.fn(),
-  get: jest.fn(),
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  fatal: vi.fn(),
+  trace: vi.fn(),
+  isLevelEnabled: vi.fn(),
+  get: vi.fn(),
 } as any;
 
 const makeMockTaskManager = (
   overrides?: Partial<TaskManagerStartContract>
-): jest.Mocked<TaskManagerStartContract> =>
+): Mocked<TaskManagerStartContract> =>
   ({
-    schedule: jest.fn().mockResolvedValue(makeTaskInstance('test-task-id')),
-    get: jest.fn().mockResolvedValue(makeTaskInstance('test-task-id')),
-    fetch: jest.fn().mockResolvedValue(makeFetchResult([])),
-    bulkRemove: jest.fn().mockResolvedValue({ statuses: [] }),
-    removeIfExists: jest.fn().mockResolvedValue(undefined),
-    bulkUpdateSchedules: jest.fn().mockResolvedValue({ tasks: [], errors: [] }),
+    schedule: vi.fn().mockResolvedValue(makeTaskInstance('test-task-id')),
+    get: vi.fn().mockResolvedValue(makeTaskInstance('test-task-id')),
+    fetch: vi.fn().mockResolvedValue(makeFetchResult([])),
+    bulkRemove: vi.fn().mockResolvedValue({ statuses: [] }),
+    removeIfExists: vi.fn().mockResolvedValue(undefined),
+    bulkUpdateSchedules: vi.fn().mockResolvedValue({ tasks: [], errors: [] }),
     ...overrides,
   } as any);
 
@@ -101,7 +104,7 @@ const makeWorkflow = (overrides?: Partial<EsWorkflow>): EsWorkflow => ({
 
 describe('WorkflowTaskScheduler', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('scheduleWorkflowTasks', () => {

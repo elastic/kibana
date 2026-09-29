@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { adHocRunStatus } from '../../../../common/constants';
 import { backfillClientMock } from '../../../backfill_client/backfill_client.mock';
@@ -17,13 +20,16 @@ import { updateGapFromSchedule } from './update_gap_from_schedule';
 import type { ScheduledItem } from './utils';
 import { backfillInitiator } from '../../../../common/constants';
 
-jest.mock('./calculate_gaps_state', () => ({
-  calculateGapStateFromAllBackfills: jest.fn().mockResolvedValue(undefined),
-}));
-jest.mock('./update_gap_from_schedule');
+vi.mock('./calculate_gaps_state', () => {
+      const mocked = {
+      calculateGapStateFromAllBackfills: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./update_gap_from_schedule');
 
-const calculateGapStateFromAllBackfillsMock = calculateGapStateFromAllBackfills as jest.Mock;
-const updateGapFromScheduleMock = updateGapFromSchedule as jest.Mock;
+const calculateGapStateFromAllBackfillsMock = calculateGapStateFromAllBackfills as Mock;
+const updateGapFromScheduleMock = updateGapFromSchedule as Mock;
 
 const savedObjectsRepository = savedObjectsRepositoryMock.create();
 const mockLogger = loggerMock.create();
@@ -55,8 +61,8 @@ const gap = new Gap({
 });
 
 const testToHaveBeenCalledBefore = (
-  calledFirst: jest.Mock,
-  calledSecond: jest.Mock,
+  calledFirst: Mock,
+  calledSecond: Mock,
   timesCalled = 1
 ) => {
   const calledFirstOrder = calledFirst.mock.invocationCallOrder;
@@ -72,7 +78,7 @@ const testToHaveBeenCalledBefore = (
 
 describe('applyScheduledBackfillsToGap', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('when the gap state must be calculated based on all backfills', () => {
     test('when the scheduled items array is empty', async () => {
@@ -219,7 +225,7 @@ describe('applyScheduledBackfillsToGap', () => {
 
   describe('failed auto fill attempts', () => {
     it('should increment failed auto fill attempts when initiator is SYSTEM and has failed backfill task with ERROR status', async () => {
-      const gapSpy = jest.spyOn(gap, 'incrementFailedAutoFillAttempts');
+      const gapSpy = vi.spyOn(gap, 'incrementFailedAutoFillAttempts');
 
       const scheduledItemsWithError = [
         ...scheduledItems,
@@ -243,7 +249,7 @@ describe('applyScheduledBackfillsToGap', () => {
     });
 
     it('should increment failed auto fill attempts when initiator is SYSTEM and has failed backfill task with TIMEOUT status', async () => {
-      const gapSpy = jest.spyOn(gap, 'incrementFailedAutoFillAttempts');
+      const gapSpy = vi.spyOn(gap, 'incrementFailedAutoFillAttempts');
 
       const scheduledItemsWithTimeout = [
         ...scheduledItems,
@@ -267,7 +273,7 @@ describe('applyScheduledBackfillsToGap', () => {
     });
 
     it('should NOT increment failed auto fill attempts when initiator is USER and has failed backfill task', async () => {
-      const gapSpy = jest.spyOn(gap, 'incrementFailedAutoFillAttempts');
+      const gapSpy = vi.spyOn(gap, 'incrementFailedAutoFillAttempts');
 
       const scheduledItemsWithError = [
         ...scheduledItems,
@@ -291,7 +297,7 @@ describe('applyScheduledBackfillsToGap', () => {
     });
 
     it('should NOT increment failed auto fill attempts when initiator is SYSTEM but has no failed backfill tasks', async () => {
-      const gapSpy = jest.spyOn(gap, 'incrementFailedAutoFillAttempts');
+      const gapSpy = vi.spyOn(gap, 'incrementFailedAutoFillAttempts');
 
       await applyScheduledBackfillsToGap({
         gap,
@@ -308,7 +314,7 @@ describe('applyScheduledBackfillsToGap', () => {
     });
 
     it('should NOT increment failed auto fill attempts when initiator is undefined', async () => {
-      const gapSpy = jest.spyOn(gap, 'incrementFailedAutoFillAttempts');
+      const gapSpy = vi.spyOn(gap, 'incrementFailedAutoFillAttempts');
 
       const scheduledItemsWithError = [
         ...scheduledItems,

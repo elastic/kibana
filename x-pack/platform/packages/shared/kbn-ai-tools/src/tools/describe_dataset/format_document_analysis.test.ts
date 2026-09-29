@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DocumentAnalysis } from './document_analysis';
 import { formatDocumentAnalysis } from './format_document_analysis';
 
 // disable shuffle to get deterministic results
-jest.mock('lodash', () => {
-  const actual = jest.requireActual<typeof import('lodash')>('lodash');
+vi.mock('lodash', () => {
+  const actual = (require('lodash') as typeof import('lodash'));
   return {
     ...actual,
-    shuffle: jest.fn((value: unknown[]) => value),
+    shuffle: vi.fn((value: unknown[]) => value),
   };
 });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import type {
@@ -18,9 +21,9 @@ import { ALERT_ANCESTORS_ID } from '../../../../../../common/field_maps/field_na
 import { ANCESTOR_INDEX } from '../../../main/constants/field_names';
 import { useIsAnalyzerEnabled } from '../../../../../detections/hooks/use_is_analyzer_enabled';
 
-jest.mock('../../../../../common/hooks/use_license', () => {
+vi.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
+    isPlatinumPlus: vi.fn(),
   };
   return {
     licenseService: licenseServiceInstance,
@@ -29,8 +32,8 @@ jest.mock('../../../../../common/hooks/use_license', () => {
     },
   };
 });
-jest.mock('../../../../../detections/hooks/use_is_analyzer_enabled');
-const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+vi.mock('../../../../../detections/hooks/use_is_analyzer_enabled');
+const licenseServiceMock = licenseService as Mocked<typeof licenseService>;
 
 const hitWithoutAncestors: DataTableRecord = {
   id: 'event-id',
@@ -70,7 +73,7 @@ describe('useShowRelatedAlertsByAncestry', () => {
   >;
 
   it('should return false if Process Entity Info is not available', () => {
-    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(false);
+    (useIsAnalyzerEnabled as Mock).mockReturnValue(false);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     hookResult = renderHook(() =>
       useShowRelatedAlertsByAncestry({
@@ -101,7 +104,7 @@ describe('useShowRelatedAlertsByAncestry', () => {
   });
 
   it('should return true and event id as document id by default ', () => {
-    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
+    (useIsAnalyzerEnabled as Mock).mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     hookResult = renderHook(() =>
       useShowRelatedAlertsByAncestry({
@@ -117,7 +120,7 @@ describe('useShowRelatedAlertsByAncestry', () => {
   });
 
   it('should return true and ancestor id as document id if flyout is open in preview', () => {
-    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
+    (useIsAnalyzerEnabled as Mock).mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     hookResult = renderHook(() =>
       useShowRelatedAlertsByAncestry({
@@ -133,7 +136,7 @@ describe('useShowRelatedAlertsByAncestry', () => {
   });
 
   it('should return the project-qualified ancestor index when previewing a rule off a linked document', () => {
-    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
+    (useIsAnalyzerEnabled as Mock).mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     hookResult = renderHook(() =>
       useShowRelatedAlertsByAncestry({

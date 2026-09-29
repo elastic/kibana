@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { hasApiKeyPrivileges } from './has_api_key_privileges';
 import { APM_EVENT_WRITE_APPLICATION, INDEX_OTLP_LOGS_METRICS_AND_TRACES } from './privileges';
 
 const createMockEsClient = (hasAllRequested: boolean) => {
-  const hasPrivileges = jest.fn().mockResolvedValue({ has_all_requested: hasAllRequested });
+  const hasPrivileges = vi.fn().mockResolvedValue({ has_all_requested: hasAllRequested });
   return {
     client: { security: { hasPrivileges } } as unknown as ElasticsearchClient,
     hasPrivileges,

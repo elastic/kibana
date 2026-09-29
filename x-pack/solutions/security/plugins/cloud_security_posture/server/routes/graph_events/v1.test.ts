@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
@@ -12,11 +14,11 @@ import { getEvents } from './v1';
 import { fetchEvents } from './fetch';
 import { parseEventRecords } from './parse';
 
-jest.mock('./fetch');
-jest.mock('./parse');
+vi.mock('./fetch');
+vi.mock('./parse');
 
-const mockedFetchEvents = jest.mocked(fetchEvents);
-const mockedParseEventRecords = jest.mocked(parseEventRecords);
+const mockedFetchEvents = vi.mocked(fetchEvents);
+const mockedParseEventRecords = vi.mocked(parseEventRecords);
 
 describe('getEvents', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -28,7 +30,7 @@ describe('getEvents', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('uses default index patterns, paginates IDs, and preserves totalRecords', async () => {

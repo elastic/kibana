@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowsBaseTelemetry } from './telemetry';
@@ -20,12 +22,12 @@ import {
 } from '../lib/telemetry/events/workflows';
 import type { TelemetryServiceClient } from '../lib/telemetry/types';
 
-jest.mock('../lib/telemetry/utils/extract_workflow_metadata', () => {
-  const actual = jest.requireActual('../lib/telemetry/utils/extract_workflow_metadata');
+vi.mock('../lib/telemetry/utils/extract_workflow_metadata', async () => {
+  const actual = (await vi.importActual('../lib/telemetry/utils/extract_workflow_metadata'));
   return {
     ...actual,
-    extractWorkflowMetadata: jest.fn(actual.extractWorkflowMetadata),
-    extractStepInfoFromWorkflowYaml: jest.fn(actual.extractStepInfoFromWorkflowYaml),
+    extractWorkflowMetadata: vi.fn(actual.extractWorkflowMetadata),
+    extractStepInfoFromWorkflowYaml: vi.fn(actual.extractStepInfoFromWorkflowYaml),
   };
 });
 
@@ -34,14 +36,12 @@ import {
   extractWorkflowMetadata,
 } from '../lib/telemetry/utils/extract_workflow_metadata';
 
-const extractWorkflowMetadataMock = jest.mocked(extractWorkflowMetadata);
-const extractStepInfoFromWorkflowYamlMock = jest.mocked(extractStepInfoFromWorkflowYaml);
-const { extractWorkflowMetadata: extractWorkflowMetadataActual } = jest.requireActual(
-  '../lib/telemetry/utils/extract_workflow_metadata'
-) as typeof import('../lib/telemetry/utils/extract_workflow_metadata');
+const extractWorkflowMetadataMock = vi.mocked(extractWorkflowMetadata);
+const extractStepInfoFromWorkflowYamlMock = vi.mocked(extractStepInfoFromWorkflowYaml);
+const { extractWorkflowMetadata: extractWorkflowMetadataActual } = (await vi.importActual('../lib/telemetry/utils/extract_workflow_metadata')) as typeof import('../lib/telemetry/utils/extract_workflow_metadata');
 
 const createMockTelemetryClient = (): TelemetryServiceClient => ({
-  reportEvent: jest.fn(),
+  reportEvent: vi.fn(),
 });
 
 const createMockValidationResult = (
@@ -66,7 +66,7 @@ describe('WorkflowsBaseTelemetry', () => {
   let telemetry: WorkflowsBaseTelemetry;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockClient = createMockTelemetryClient();
     telemetry = new WorkflowsBaseTelemetry(mockClient);
   });
@@ -195,7 +195,7 @@ describe('WorkflowsBaseTelemetry', () => {
     it('does not include optional fields when not provided', () => {
       telemetry.reportWorkflowCreated({});
 
-      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const call = vi.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('editorType');
       expect(eventData).not.toHaveProperty('origin');
@@ -522,7 +522,7 @@ describe('WorkflowsBaseTelemetry', () => {
         isBulkDelete: false,
       });
 
-      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const call = vi.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('origin');
     });
@@ -655,7 +655,7 @@ describe('WorkflowsBaseTelemetry', () => {
         })
       );
 
-      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const call = vi.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('newWorkflowId');
     });
@@ -712,7 +712,7 @@ describe('WorkflowsBaseTelemetry', () => {
         inputCount: 0,
       });
 
-      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const call = vi.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('editorType');
       expect(eventData).not.toHaveProperty('origin');
@@ -763,7 +763,7 @@ describe('WorkflowsBaseTelemetry', () => {
         workflowExecutionId: 'exec-1',
       });
 
-      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const call = vi.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('workflowId');
       expect(eventData).not.toHaveProperty('timeToCancellation');
@@ -810,7 +810,7 @@ describe('WorkflowsBaseTelemetry', () => {
         workflowId: 'wf-1',
       });
 
-      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const call = vi.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('origin');
     });
@@ -850,7 +850,7 @@ describe('WorkflowsBaseTelemetry', () => {
         inputCount: 0,
       });
 
-      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const call = vi.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('workflowId');
       expect(eventData).toHaveProperty('result', 'success');
@@ -971,7 +971,7 @@ describe('WorkflowsBaseTelemetry', () => {
         stepId: 'my-step',
       });
 
-      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const call = vi.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('connectorType');
     });
@@ -1133,7 +1133,7 @@ describe('WorkflowsBaseTelemetry', () => {
         })
       );
 
-      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const call = vi.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('filterTypes');
     });
@@ -1175,7 +1175,7 @@ describe('WorkflowsBaseTelemetry', () => {
         search: { size: 25, page: 1 },
       });
 
-      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const call = vi.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('filterTypes');
     });
@@ -1187,7 +1187,7 @@ describe('WorkflowsBaseTelemetry', () => {
         search: { enabled: [] },
       });
 
-      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const call = vi.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('filterTypes');
     });
@@ -1226,7 +1226,7 @@ describe('WorkflowsBaseTelemetry', () => {
         })
       );
 
-      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const call = vi.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('editorType');
     });
@@ -1308,7 +1308,7 @@ describe('WorkflowsBaseTelemetry', () => {
         })
       );
 
-      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const call = vi.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1] as unknown as Record<string, unknown>;
       expect(eventData.errorTypes).toEqual(
         expect.arrayContaining(['yaml', 'step-name-validation'])
@@ -1503,7 +1503,7 @@ describe('WorkflowsBaseTelemetry', () => {
         validationResults,
       });
 
-      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const call = vi.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('workflowId');
     });
@@ -1521,7 +1521,7 @@ describe('WorkflowsBaseTelemetry', () => {
         validationResults,
       });
 
-      const call = jest.mocked(mockClient.reportEvent).mock.calls[0];
+      const call = vi.mocked(mockClient.reportEvent).mock.calls[0];
       const eventData = call[1];
       expect(eventData).not.toHaveProperty('editorType');
       expect(eventData).not.toHaveProperty('origin');

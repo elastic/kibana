@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { type PropsWithChildren } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -23,10 +25,13 @@ import {
   useEsqlDataCascadeRowActionHelpers,
 } from './use_row_header_components';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  copyToClipboard: jest.fn(),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      copyToClipboard: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const services = createDiscoverServicesMock();
 
@@ -175,8 +180,8 @@ describe('useEsqlDataCascadeRowActionHelpers', () => {
     const editorQuery: AggregateQuery = {
       esql: 'FROM logstash-* | STATS count = COUNT(bytes) BY clientip',
     };
-    const updateESQLQuery = jest.fn();
-    const openInNewTab = jest.fn();
+    const updateESQLQuery = vi.fn();
+    const openInNewTab = vi.fn();
 
     render(
       <RowActionsTestComponent
@@ -203,8 +208,8 @@ describe('useEsqlDataCascadeRowActionHelpers', () => {
     const esqlVariables: ESQLControlVariable[] = [
       { key: 'field', type: ESQLVariableType.FIELDS, value: 'clientip' },
     ];
-    const updateESQLQuery = jest.fn();
-    const openInNewTab = jest.fn();
+    const updateESQLQuery = vi.fn();
+    const openInNewTab = vi.fn();
 
     render(
       <RowActionsTestComponent
@@ -235,8 +240,8 @@ describe('useEsqlDataCascadeRowActionHelpers', () => {
     const esqlVariables: ESQLControlVariable[] = [
       { key: 'field', type: ESQLVariableType.FIELDS, value: 'clientip' },
     ];
-    const updateESQLQuery = jest.fn();
-    const openInNewTab = jest.fn();
+    const updateESQLQuery = vi.fn();
+    const openInNewTab = vi.fn();
 
     render(
       <RowActionsTestComponent
@@ -264,8 +269,8 @@ describe('useEsqlDataCascadeRowActionHelpers', () => {
     const editorQuery: AggregateQuery = {
       esql: 'FROM logstash-* | STATS count = COUNT(bytes) BY CATEGORIZE(message)',
     };
-    const updateESQLQuery = jest.fn();
-    const openInNewTab = jest.fn();
+    const updateESQLQuery = vi.fn();
+    const openInNewTab = vi.fn();
 
     render(
       <RowActionsTestComponent

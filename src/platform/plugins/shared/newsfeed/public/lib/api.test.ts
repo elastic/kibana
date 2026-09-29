@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
+
 import { driverInstanceMock, storageInstanceMock } from './api.test.mocks';
 
 import moment from 'moment';
@@ -51,8 +53,8 @@ describe('getApi', () => {
   afterEach(() => {
     storageInstanceMock.isAnyUnread$.mockReset();
     driverInstanceMock.fetchNewsfeedItems.mockReset();
-    (MockNewsfeedApiDriver as jest.Mock).mockClear();
-    (MockNeverFetchNewsfeedApiDriver as jest.Mock).mockClear();
+    (MockNewsfeedApiDriver as Mock).mockClear();
+    (MockNeverFetchNewsfeedApiDriver as Mock).mockClear();
   });
 
   it('merges the newsfeed and unread observables', () => {

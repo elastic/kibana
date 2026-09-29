@@ -5,38 +5,44 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useLocation } from 'react-router-dom';
 import { renderHook } from '@testing-library/react';
 import { useDeepEqualSelector } from './use_selector';
 import { useKibana } from '../lib/kibana';
 import { useResolveRedirect } from './use_resolve_redirect';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
 
   return {
     ...original,
-    useLocation: jest.fn(),
+    useLocation: vi.fn(),
   };
 });
-jest.mock('../lib/kibana');
-jest.mock('./use_selector');
-jest.mock('../../timelines/store', () => ({
-  timelineSelectors: {
-    getTimelineByIdSelector: () => jest.fn(),
-  },
-}));
+vi.mock('../lib/kibana');
+vi.mock('./use_selector');
+vi.mock('../../timelines/store', () => {
+      const mocked = {
+      timelineSelectors: {
+        getTimelineByIdSelector: () => vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useResolveRedirect', () => {
-  const mockRedirectLegacyUrl = jest.fn();
+  const mockRedirectLegacyUrl = vi.fn();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Mock rison format in actual url
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as Mock).mockReturnValue({
       pathname: 'my/cool/path',
       search: 'timeline=(activeTab:query,id:%2704e8ffb0-2c2a-11ec-949c-39005af91f70%27,isOpen:!t)',
     });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         spaces: {
           ui: {
@@ -48,12 +54,12 @@ describe('useResolveRedirect', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('resolve object is not provided', () => {
     it('should not redirect', async () => {
-      (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
+      (useDeepEqualSelector as Mock).mockImplementation(() => ({
         savedObjectId: 'current-saved-object-id',
         activeTab: 'some-tab',
         show: false,
@@ -65,7 +71,7 @@ describe('useResolveRedirect', () => {
 
   describe('outcome is exactMatch', () => {
     it('should not redirect', async () => {
-      (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
+      (useDeepEqualSelector as Mock).mockImplementation(() => ({
         resolveTimelineConfig: {
           outcome: 'exactMatch',
         },
@@ -80,7 +86,7 @@ describe('useResolveRedirect', () => {
 
   describe('outcome is aliasMatch', () => {
     it('should redirect to url with id:new-id if outcome is aliasMatch', async () => {
-      (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
+      (useDeepEqualSelector as Mock).mockImplementation(() => ({
         resolveTimelineConfig: {
           outcome: 'aliasMatch',
           alias_target_id: 'new-id',
@@ -97,11 +103,11 @@ describe('useResolveRedirect', () => {
 
     describe('rison is unable to be decoded', () => {
       it('should use timeline values from redux to create the redirect path', async () => {
-        (useLocation as jest.Mock).mockReturnValue({
+        (useLocation as Mock).mockReturnValue({
           pathname: 'my/cool/path',
           search: '?foo=bar',
         });
-        (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
+        (useDeepEqualSelector as Mock).mockImplementation(() => ({
           resolveTimelineConfig: {
             outcome: 'aliasMatch',
             alias_target_id: 'new-id',
@@ -123,7 +129,7 @@ describe('useResolveRedirect', () => {
 
   describe('outcome is conflict', () => {
     it('should not redirect', async () => {
-      (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
+      (useDeepEqualSelector as Mock).mockImplementation(() => ({
         resolveTimelineConfig: {
           outcome: 'conflict',
           alias_target_id: 'new-id',

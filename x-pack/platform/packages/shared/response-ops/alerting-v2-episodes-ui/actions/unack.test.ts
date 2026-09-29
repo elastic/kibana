@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { createUnackAction } from './unack';
@@ -46,7 +48,7 @@ const makeDeps = () => ({
 });
 
 describe('createUnackAction', () => {
-  beforeEach(() => jest.restoreAllMocks());
+  beforeEach(() => vi.restoreAllMocks());
 
   it('compatible when at least one episode is acked', () => {
     expect(
@@ -76,7 +78,7 @@ describe('createUnackAction', () => {
     const extension = {
       actionId: 'ALERTING_V2_UNACK_EPISODE',
       isCompatible: () => true,
-      execute: jest.fn(),
+      execute: vi.fn(),
     };
     expect(
       createUnackAction(makeDeps(), extension).isCompatible({
@@ -91,10 +93,10 @@ describe('createUnackAction', () => {
 
   it('execute: POSTs per-episode UNACK items with distinct episode_ids, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest
+    vi
       .spyOn(bulk, 'bulkUnackEpisodeActions')
       .mockResolvedValue({ affected_count: 2, errors: [] });
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     await createUnackAction(deps).execute({
       episodes: [
         makeEpisode({ 'episode.id': 'e1', group_hash: 'g1', last_ack_action: 'ack' }),
@@ -112,17 +114,17 @@ describe('createUnackAction', () => {
 
   it('execute: dispatches to extension for source episodes in mixed selection', async () => {
     const deps = makeDeps();
-    const extensionExecute = jest.fn().mockResolvedValue({ succeeded: 1, failed: 0 });
+    const extensionExecute = vi.fn().mockResolvedValue({ succeeded: 1, failed: 0 });
     const extension = {
       actionId: 'ALERTING_V2_UNACK_EPISODE',
       isCompatible: () => true,
       execute: extensionExecute,
     };
 
-    jest
+    vi
       .spyOn(bulk, 'bulkUnackEpisodeActions')
       .mockResolvedValue({ affected_count: 1, errors: [] });
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     await createUnackAction(deps, extension).execute({
       episodes: [
@@ -139,8 +141,8 @@ describe('createUnackAction', () => {
 
   it('execute: error path calls notifications.toasts.addDanger with BULK_ERROR_TOAST', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkUnackEpisodeActions').mockRejectedValue(new Error('network error'));
-    const onSuccess = jest.fn();
+    vi.spyOn(bulk, 'bulkUnackEpisodeActions').mockRejectedValue(new Error('network error'));
+    const onSuccess = vi.fn();
     await createUnackAction(deps).execute({
       episodes: [makeEpisode({ last_ack_action: 'ack' })],
       onSuccess,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { useResultsFiltering } from './use_results_filtering';
@@ -13,16 +15,16 @@ const createMockDataView = (id = 'test-dv-id'): DataView =>
   ({
     id,
     fields: {
-      getByName: jest.fn((name: string) =>
+      getByName: vi.fn((name: string) =>
         name === 'agent.name' ? ({ name: 'agent.name' } as DataViewField) : undefined
       ),
-      filter: jest.fn().mockReturnValue([]),
+      filter: vi.fn().mockReturnValue([]),
       length: 0,
     },
   } as unknown as DataView);
 
 describe('useResultsFiltering', () => {
-  const resetPagination = jest.fn();
+  const resetPagination = vi.fn();
 
   const defaultOptions = {
     enabled: true,

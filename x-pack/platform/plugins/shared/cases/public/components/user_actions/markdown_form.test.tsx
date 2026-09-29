@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,11 +15,11 @@ import { renderWithTestingProviders } from '../../common/mock';
 import { UserActionMarkdown } from './markdown_form';
 import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/navigation/hooks');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/navigation/hooks');
 
-const onChangeEditable = jest.fn();
-const onSaveContent = jest.fn();
+const onChangeEditable = vi.fn();
+const onSaveContent = vi.fn();
 
 const hyperlink = `[hyperlink](http://elastic.co)`;
 const draftStorageKey = `cases.securitySolution.caseId.markdown-id.markdownEditor`;
@@ -33,7 +35,7 @@ const defaultProps = {
 
 describe('UserActionMarkdown ', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {

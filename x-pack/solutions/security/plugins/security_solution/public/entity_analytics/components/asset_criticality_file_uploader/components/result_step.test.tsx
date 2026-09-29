@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AssetCriticalityResultStep } from './result_step';
@@ -25,7 +27,7 @@ describe('AssetCriticalityResultStep', () => {
           },
         }}
         validLinesAsText={mockValidLinesAsText}
-        onReturn={jest.fn()}
+        onReturn={vi.fn()}
       />,
       { wrapper: TestProviders }
     );
@@ -38,7 +40,7 @@ describe('AssetCriticalityResultStep', () => {
       <AssetCriticalityResultStep
         validLinesAsText={mockValidLinesAsText}
         errorMessage={'test error message'}
-        onReturn={jest.fn()}
+        onReturn={vi.fn()}
       />,
       { wrapper: TestProviders }
     );
@@ -50,7 +52,7 @@ describe('AssetCriticalityResultStep', () => {
     const { getByTestId } = render(
       <AssetCriticalityResultStep
         validLinesAsText={mockValidLinesAsText}
-        onReturn={jest.fn()}
+        onReturn={vi.fn()}
         result={{
           errors: [
             { message: 'error message 1', index: 1 },

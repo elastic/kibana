@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
@@ -12,20 +14,26 @@ import { createIntegrationsTestRendererMock } from '../../mock';
 
 import { AgentlessStatusDetailsFlyout } from '.';
 
-jest.mock('../../hooks', () => ({
-  ...jest.requireActual('../../hooks'),
-  useStartServices: jest.fn().mockReturnValue({
-    docLinks: { links: { fleet: { troubleshooting: 'https://elastic.co/docs/troubleshoot' } } },
-  }),
-}));
+vi.mock('../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../hooks')),
+      useStartServices: vi.fn().mockReturnValue({
+        docLinks: { links: { fleet: { troubleshooting: 'https://elastic.co/docs/troubleshoot' } } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Stub out AgentDetailsIntegration — its internal hooks are not relevant here
-jest.mock(
+vi.mock(
   '../../applications/fleet/sections/agents/agent_details_page/components/agent_details/agent_details_integration',
-  () => ({ AgentDetailsIntegration: () => <div data-test-subj="agentDetailsIntegration" /> })
+  () => {
+      const mocked = { AgentDetailsIntegration: () => <div data-test-subj="agentDetailsIntegration" /> };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const onClose = jest.fn();
+const onClose = vi.fn();
 
 function makeAgent(
   unitStatuses: Array<{ inputId: string; status: 'HEALTHY' | 'DEGRADED' | 'FAILED' }>

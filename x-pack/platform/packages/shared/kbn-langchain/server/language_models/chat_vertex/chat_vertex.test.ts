@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
@@ -18,12 +20,12 @@ import { FinishReason } from '@google/generative-ai';
 
 const connectorId = 'mock-connector-id';
 
-const mockExecute = jest.fn();
+const mockExecute = vi.fn();
 const actionsClient = actionsClientMock.create();
 
 const mockLogger = loggerMock.create();
 
-const mockStreamExecute = jest.fn().mockImplementation(() => {
+const mockStreamExecute = vi.fn().mockImplementation(() => {
   const passThrough = new PassThrough();
 
   // Write the data chunks to the stream
@@ -57,7 +59,7 @@ const mockStreamExecute = jest.fn().mockImplementation(() => {
   };
 });
 
-const mockStreamExecuteWithGoodStopEvents = jest.fn().mockImplementation(() => {
+const mockStreamExecuteWithGoodStopEvents = vi.fn().mockImplementation(() => {
   const passThrough = new PassThrough();
 
   // Write the data chunks to the stream
@@ -91,7 +93,7 @@ const mockStreamExecuteWithGoodStopEvents = jest.fn().mockImplementation(() => {
   };
 });
 
-const mockStreamExecuteWithBadStopEvents = jest.fn().mockImplementation(() => {
+const mockStreamExecuteWithBadStopEvents = vi.fn().mockImplementation(() => {
   const passThrough = new PassThrough();
 
   // Write the data chunks to the stream
@@ -138,12 +140,12 @@ const callOptions = {
   /** Maximum number of parallel calls to make. */
   maxConcurrency: 0,
 };
-const handleLLMNewToken = jest.fn();
+const handleLLMNewToken = vi.fn();
 const callRunManager = {
   handleLLMNewToken,
-  handleCustomEvent: jest.fn().mockResolvedValue({}),
+  handleCustomEvent: vi.fn().mockResolvedValue({}),
 } as unknown as CallbackManagerForLLMRun;
-const onFailedAttempt = jest.fn();
+const onFailedAttempt = vi.fn();
 const defaultArgs = {
   actionsClient,
   connectorId,
@@ -175,9 +177,9 @@ export const mockActionResponse = {
 
 describe('ActionsClientChatVertexAI', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     actionsClient.execute.mockImplementation(
-      jest.fn().mockImplementation(() => ({
+      vi.fn().mockImplementation(() => ({
         data: mockActionResponse,
         status: 'ok',
       }))
@@ -203,7 +205,7 @@ describe('ActionsClientChatVertexAI', () => {
     });
 
     it('rejects with the expected error when the action result status is error', async () => {
-      const hasErrorStatus = jest.fn().mockImplementation(() => {
+      const hasErrorStatus = vi.fn().mockImplementation(() => {
         throw new Error(
           'ActionsClientChatVertexAI: action result status is error: action-result-message - action-result-service-message'
         );
@@ -224,7 +226,7 @@ describe('ActionsClientChatVertexAI', () => {
 
     it('resolves to expected result when message has invalid content', async () => {
       actionsClient.execute.mockImplementation(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           data: {
             Bad: true,
             finishReason: 'badness',

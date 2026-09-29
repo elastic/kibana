@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getCurrentIndexMock = jest.fn();
-export const checkVersionCompatibilityMock = jest.fn();
-export const buildIndexMappingsMock = jest.fn();
-export const generateAdditiveMappingDiffMock = jest.fn();
-export const getAliasActionsMock = jest.fn();
-export const checkIndexCurrentAlgorithmMock = jest.fn();
+import { vi } from 'vitest';
 
-export const getCreationAliasesMock = jest.fn();
+export const getCurrentIndexMock = vi.fn();
+export const checkVersionCompatibilityMock = vi.fn();
+export const buildIndexMappingsMock = vi.fn();
+export const generateAdditiveMappingDiffMock = vi.fn();
+export const getAliasActionsMock = vi.fn();
+export const checkIndexCurrentAlgorithmMock = vi.fn();
 
-jest.doMock('../../utils', () => {
-  const realModule = jest.requireActual('../../utils');
+export const getCreationAliasesMock = vi.fn();
+
+vi.doMock('../../utils', async () => {
+  const realModule = (await vi.importActual('../../utils'));
   return {
     ...realModule,
     getCurrentIndex: getCurrentIndexMock,
@@ -30,10 +32,10 @@ jest.doMock('../../utils', () => {
   };
 });
 
-export const getAliasesMock = jest.fn();
+export const getAliasesMock = vi.fn();
 
-jest.doMock('../../../model/helpers', () => {
-  const realModule = jest.requireActual('../../../model/helpers');
+vi.doMock('../../../model/helpers', async () => {
+  const realModule = (await vi.importActual('../../../model/helpers'));
   return {
     ...realModule,
     getAliases: getAliasesMock,

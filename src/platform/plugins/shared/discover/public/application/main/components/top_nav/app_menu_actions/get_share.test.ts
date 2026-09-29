@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { isValidElement } from 'react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -228,7 +230,7 @@ describe('getShare', () => {
       currentTab.id
     ).scopedProfilesManager$.getValue();
     const contexts = scopedProfilesManager.getContexts();
-    const getContextsSpy = jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+    const getContextsSpy = vi.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
       ...contexts,
       dataSourceContext: {
         ...contexts.dataSourceContext,
@@ -268,7 +270,7 @@ describe('getShare', () => {
       currentTab.id
     ).scopedProfilesManager$.getValue();
     const contexts = scopedProfilesManager.getContexts();
-    const getContextsSpy = jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+    const getContextsSpy = vi.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
       ...contexts,
       dataSourceContext: {
         ...contexts.dataSourceContext,
@@ -374,7 +376,7 @@ describe('getShare', () => {
 
     // `getTime` is a fixed stub, so configure it directly.
     const setTimeRange = (timeRange: { from: string; to: string }) => {
-      jest
+      vi
         .mocked(mockDiscoverService.data.query.timefilter.timefilter.getTime)
         .mockReturnValue(timeRange);
     };

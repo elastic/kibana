@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -16,7 +18,7 @@ describe('RuleSettingsFlappingTitleTooltip', () => {
   it('announces the info button with a descriptive accessible name', () => {
     render(
       <I18nProvider>
-        <RuleSettingsFlappingTitleTooltip isOpen={false} setIsPopoverOpen={jest.fn()} />
+        <RuleSettingsFlappingTitleTooltip isOpen={false} setIsPopoverOpen={vi.fn()} />
       </I18nProvider>
     );
 
@@ -28,7 +30,7 @@ describe('RuleSettingsFlappingTitleTooltip', () => {
   it('uses the alert flapping detection title for the open popover', () => {
     render(
       <I18nProvider>
-        <RuleSettingsFlappingTitleTooltip isOpen={true} setIsPopoverOpen={jest.fn()} />
+        <RuleSettingsFlappingTitleTooltip isOpen={true} setIsPopoverOpen={vi.fn()} />
       </I18nProvider>
     );
 

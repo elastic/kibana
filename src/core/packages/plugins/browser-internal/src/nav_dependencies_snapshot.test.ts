@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { PluginName, PluginOpaqueId } from '@kbn/core-base-common';
 import type { RegisteredAppInfo } from '@kbn/core-application-browser-internal';
 import {
@@ -21,7 +23,7 @@ const dashboardId = Symbol('dashboard');
 const coreId = Symbol('core');
 
 const createApplication = (apps: RegisteredAppInfo[]) => ({
-  getRegisteredAppsInfo: jest.fn(() => apps),
+  getRegisteredAppsInfo: vi.fn(() => apps),
 });
 
 const opaqueIdToPluginId = new Map<PluginOpaqueId, PluginName>([

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { ACTION_VISUALIZE_LENS_FIELD, ActionInternal } from '@kbn/ui-actions-plugin/public';
@@ -24,7 +26,7 @@ const ORIGINATING_APP = 'test';
 
 const uiActions = uiActionsPluginMock.createStartContract();
 
-const mockExecuteAction = jest.fn();
+const mockExecuteAction = vi.fn();
 
 const visualizeAction = new ActionInternal({
   type: ACTION_VISUALIZE_LENS_FIELD,
@@ -37,7 +39,7 @@ const visualizeAction = new ActionInternal({
   getHref: async () => '/app/test',
 });
 
-jest
+vi
   .spyOn(uiActions, 'getTriggerCompatibleActions')
   .mockResolvedValue([visualizeAction as ActionInternal<object>]);
 
@@ -52,8 +54,8 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
 
     const contextualFields = ['bytes'];
 
-    jest.spyOn(field, 'visualizable', 'get').mockImplementationOnce(() => false);
-    jest.spyOn(fieldKeyword, 'visualizable', 'get').mockImplementationOnce(() => true);
+    vi.spyOn(field, 'visualizable', 'get').mockImplementationOnce(() => false);
+    vi.spyOn(fieldKeyword, 'visualizable', 'get').mockImplementationOnce(() => true);
 
     const visualizeButton = await getFieldVisualizeButton({
       field,
@@ -91,7 +93,7 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
     const FIELD_NAME = 'geo.coordinates';
     const field = dataView.fields.find((f) => f.name === FIELD_NAME)!;
 
-    jest.spyOn(field, 'visualizable', 'get').mockImplementationOnce(() => true);
+    vi.spyOn(field, 'visualizable', 'get').mockImplementationOnce(() => true);
 
     const visualizeButton = await getFieldVisualizeButton({
       field,

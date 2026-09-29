@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -15,16 +18,16 @@ import {
 import { useEaseDetailsContext } from '../context';
 import { TestProviders } from '../../../common/mock';
 
-jest.mock('../context');
+vi.mock('../context');
 
 describe('AIAssistantSection', () => {
   it('should the AI assistant section', () => {
-    (useEaseDetailsContext as jest.Mock).mockReturnValue({
+    (useEaseDetailsContext as Mock).mockReturnValue({
       eventId: 'eventId',
-      getFieldsData: jest.fn(),
+      getFieldsData: vi.fn(),
     });
 
-    const getPromptContext = jest.fn();
+    const getPromptContext = vi.fn();
 
     const { getByTestId } = render(
       <TestProviders>

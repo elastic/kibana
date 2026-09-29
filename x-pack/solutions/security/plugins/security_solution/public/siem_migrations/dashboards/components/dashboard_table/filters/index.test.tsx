@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { MigrationDashboardsFilter } from '.';
@@ -23,7 +25,7 @@ describe('MigrationDashboardsFilter', () => {
   });
 
   it('calls filter changed handler on `installed` status selection', async () => {
-    const onFilterOptionsChanged = jest.fn();
+    const onFilterOptionsChanged = vi.fn();
     const { getByTestId, getByText } = render(
       <TestProviders>
         <MigrationDashboardsFilter onFilterOptionsChanged={onFilterOptionsChanged} />
@@ -39,7 +41,7 @@ describe('MigrationDashboardsFilter', () => {
   });
 
   it('calls filter changed handler on `translated` status selection', async () => {
-    const onFilterOptionsChanged = jest.fn();
+    const onFilterOptionsChanged = vi.fn();
     const { getByTestId, getByText } = render(
       <TestProviders>
         <MigrationDashboardsFilter onFilterOptionsChanged={onFilterOptionsChanged} />
@@ -55,7 +57,7 @@ describe('MigrationDashboardsFilter', () => {
   });
 
   it('calls filter changed handler on `partially translated` status selection', async () => {
-    const onFilterOptionsChanged = jest.fn();
+    const onFilterOptionsChanged = vi.fn();
     const { getByTestId, getByText } = render(
       <TestProviders>
         <MigrationDashboardsFilter onFilterOptionsChanged={onFilterOptionsChanged} />
@@ -73,7 +75,7 @@ describe('MigrationDashboardsFilter', () => {
   });
 
   it('calls filter changed handler on `not translated` status selection', async () => {
-    const onFilterOptionsChanged = jest.fn();
+    const onFilterOptionsChanged = vi.fn();
     const { getByTestId, getByText } = render(
       <TestProviders>
         <MigrationDashboardsFilter onFilterOptionsChanged={onFilterOptionsChanged} />
@@ -91,7 +93,7 @@ describe('MigrationDashboardsFilter', () => {
   });
 
   it('calls filter changed handler on `failed` status selection', async () => {
-    const onFilterOptionsChanged = jest.fn();
+    const onFilterOptionsChanged = vi.fn();
     const { getByTestId, getByText } = render(
       <TestProviders>
         <MigrationDashboardsFilter onFilterOptionsChanged={onFilterOptionsChanged} />

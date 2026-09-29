@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   DiagnosticsContext,
@@ -13,7 +15,7 @@ import type {
 
 import { getWorkflowExecutionsTracking } from '.';
 
-const mockSearch = jest.fn();
+const mockSearch = vi.fn();
 
 const esClient = {
   search: mockSearch,
@@ -44,7 +46,7 @@ const validTracking: WorkflowExecutionsTracking = {
 
 describe('getWorkflowExecutionsTracking', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns WorkflowExecutionsTracking when event.reference is found', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { AbortSignalExecutionContext, createExecutionContext } from './execution_context';
 import { RuleExecutionCancellationError } from './cancellation_error';
 
@@ -76,7 +78,7 @@ describe('AbortSignalExecutionContext', () => {
     it('calls handler when signal is aborted', () => {
       const controller = new AbortController();
       const context = new AbortSignalExecutionContext(controller.signal);
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       context.onAbort(handler);
       controller.abort();
@@ -87,7 +89,7 @@ describe('AbortSignalExecutionContext', () => {
     it('calls handler only once', () => {
       const controller = new AbortController();
       const context = new AbortSignalExecutionContext(controller.signal);
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       context.onAbort(handler);
       controller.abort();
@@ -99,7 +101,7 @@ describe('AbortSignalExecutionContext', () => {
     it('returns unsubscribe function that prevents handler from being called', () => {
       const controller = new AbortController();
       const context = new AbortSignalExecutionContext(controller.signal);
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       const unsubscribe = context.onAbort(handler);
       unsubscribe();
@@ -112,7 +114,7 @@ describe('AbortSignalExecutionContext', () => {
       const controller = new AbortController();
       controller.abort();
       const context = new AbortSignalExecutionContext(controller.signal);
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       context.onAbort(handler);
 
@@ -126,7 +128,7 @@ describe('AbortSignalExecutionContext', () => {
       const controller = new AbortController();
       const context = new AbortSignalExecutionContext(controller.signal);
       const scope = context.createScope();
-      const disposer = jest.fn();
+      const disposer = vi.fn();
 
       scope.add(disposer);
       controller.abort();
@@ -140,7 +142,7 @@ describe('AbortSignalExecutionContext', () => {
       const controller = new AbortController();
       const context = new AbortSignalExecutionContext(controller.signal);
       const scope = context.createScope();
-      const disposer = jest.fn();
+      const disposer = vi.fn();
 
       scope.add(disposer);
       await scope.disposeAll();
@@ -152,7 +154,7 @@ describe('AbortSignalExecutionContext', () => {
       const controller = new AbortController();
       const context = new AbortSignalExecutionContext(controller.signal);
       const scope = context.createScope();
-      const unhandledRejectionHandler = jest.fn();
+      const unhandledRejectionHandler = vi.fn();
 
       process.on('unhandledRejection', unhandledRejectionHandler);
 
@@ -173,7 +175,7 @@ describe('AbortSignalExecutionContext', () => {
       const controller = new AbortController();
       const context = new AbortSignalExecutionContext(controller.signal);
       const scope = context.createScope();
-      const disposer = jest.fn();
+      const disposer = vi.fn();
 
       scope.add(disposer);
       await scope.disposeAll();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { KibanaServices } from '../common/lib/kibana';
 
@@ -90,11 +93,11 @@ import {
   CustomFieldTypes,
 } from '../../common/types/domain';
 const abortCtrl = new AbortController();
-const mockKibanaServices = KibanaServices.get as jest.Mock;
-jest.mock('../common/lib/kibana');
+const mockKibanaServices = KibanaServices.get as Mock;
+vi.mock('../common/lib/kibana');
 
-const fetchMock = jest.fn();
-const postMock = jest.fn();
+const fetchMock = vi.fn();
+const postMock = vi.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock, post: postMock } });
 
 describe('Cases API', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import type { AttackDiscoverySchedule } from '@kbn/discoveries-schemas';
 
 import { useGetWorkflowSchedule } from './use_get_workflow_schedule';
@@ -13,10 +16,10 @@ import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.moc
 import { renderQuery } from '../../../../../management/hooks/test_utils';
 import { getWorkflowSchedule } from '../api/internal';
 
-jest.mock('../api/internal');
-jest.mock('../../../../../common/hooks/use_app_toasts');
+vi.mock('../api/internal');
+vi.mock('../../../../../common/hooks/use_app_toasts');
 
-const getWorkflowScheduleMock = getWorkflowSchedule as jest.MockedFunction<
+const getWorkflowScheduleMock = getWorkflowSchedule as MockedFunction<
   typeof getWorkflowSchedule
 >;
 
@@ -42,13 +45,13 @@ const mockApiResponse: AttackDiscoverySchedule = {
 };
 
 describe('useGetWorkflowSchedule', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
 
     getWorkflowScheduleMock.mockResolvedValue(mockApiResponse);
   });

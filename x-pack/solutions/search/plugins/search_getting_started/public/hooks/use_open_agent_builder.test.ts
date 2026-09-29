@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { useOpenAgentBuilder } from './use_open_agent_builder';
 import { useKibana } from './use_kibana';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockNavigateToApp = jest.fn();
-const mockUseKibana = useKibana as jest.Mock;
+const mockNavigateToApp = vi.fn();
+const mockUseKibana = useKibana as Mock;
 
 beforeEach(() => {
   mockNavigateToApp.mockClear();

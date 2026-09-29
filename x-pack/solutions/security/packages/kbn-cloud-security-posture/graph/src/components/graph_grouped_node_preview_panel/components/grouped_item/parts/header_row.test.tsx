@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
@@ -17,8 +19,8 @@ import { HeaderRow as BaseHeaderRow } from './header_row';
 import type { EntityItem } from '../types';
 import { getOrCreateFilterStore, destroyFilterStore } from '../../../../filters/filter_store';
 
-const mockOnShowDocument = jest.fn();
-const mockOnShowEntity = jest.fn();
+const mockOnShowDocument = vi.fn();
+const mockOnShowEntity = vi.fn();
 
 // HeaderRow delegates both event/alert and entity previews to the consumer via props, so the test
 // wrapper supplies default handlers and cases assert against these mocks.

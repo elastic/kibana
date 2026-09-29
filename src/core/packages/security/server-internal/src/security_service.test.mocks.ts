@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getDefaultSecurityImplementationMock = jest.fn();
-export const convertSecurityApiMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./utils', () => {
-  const actual = jest.requireActual('./utils');
+export const getDefaultSecurityImplementationMock = vi.fn();
+export const convertSecurityApiMock = vi.fn();
+
+vi.doMock('./utils', async () => {
+  const actual = (await vi.importActual('./utils'));
   return {
     ...actual,
     getDefaultSecurityImplementation: getDefaultSecurityImplementationMock,

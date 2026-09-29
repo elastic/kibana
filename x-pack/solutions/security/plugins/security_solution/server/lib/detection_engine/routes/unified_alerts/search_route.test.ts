@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
@@ -28,7 +30,7 @@ describe('search for unified alerts', () => {
   let ruleDataClient: RuleDataClientMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
@@ -44,8 +46,8 @@ describe('search for unified alerts', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('search and agg on signals index', () => {

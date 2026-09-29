@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -13,9 +16,9 @@ import { useKibana } from './use_kibana';
 import { APIRoutes } from '../../common/types';
 import { INFERENCE_SETTINGS_QUERY_KEY, ROUTE_VERSIONS } from '../../common/constants';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -25,10 +28,10 @@ const createWrapper = () => {
 };
 
 describe('useInferenceSettings', () => {
-  const mockGet = jest.fn();
+  const mockGet = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({ services: { http: { get: mockGet } } });
   });
 
@@ -71,13 +74,13 @@ describe('useInferenceSettings', () => {
 });
 
 describe('useSaveInferenceSettings', () => {
-  const mockPut = jest.fn();
-  const mockAddSuccess = jest.fn();
-  const mockAddDanger = jest.fn();
-  const mockSetQueryData = jest.fn();
+  const mockPut = vi.fn();
+  const mockAddSuccess = vi.fn();
+  const mockAddDanger = vi.fn();
+  const mockSetQueryData = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         http: { put: mockPut },
@@ -91,7 +94,7 @@ describe('useSaveInferenceSettings', () => {
     mockPut.mockResolvedValue(responseData);
 
     const { queryClient } = createWrapper();
-    jest.spyOn(queryClient, 'setQueryData').mockImplementation(mockSetQueryData);
+    vi.spyOn(queryClient, 'setQueryData').mockImplementation(mockSetQueryData);
 
     const { result } = renderHook(() => useSaveInferenceSettings(), {
       wrapper: ({ children }) =>
@@ -117,7 +120,7 @@ describe('useSaveInferenceSettings', () => {
     mockPut.mockResolvedValue(responseData);
 
     const { queryClient } = createWrapper();
-    jest.spyOn(queryClient, 'setQueryData').mockImplementation(mockSetQueryData);
+    vi.spyOn(queryClient, 'setQueryData').mockImplementation(mockSetQueryData);
 
     const { result } = renderHook(() => useSaveInferenceSettings(), {
       wrapper: ({ children }) =>

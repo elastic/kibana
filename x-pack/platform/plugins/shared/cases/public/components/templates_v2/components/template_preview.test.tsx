@@ -5,32 +5,46 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useEffect } from 'react';
 import { render, screen } from '@testing-library/react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { TemplatePreview } from './template_preview';
 import { TemplateFieldRenderer } from '../field_types/field_renderer';
 
-const mockCaseDefaultsForm = jest.fn((_props?: unknown) => (
+const mockCaseDefaultsForm = vi.fn((_props?: unknown) => (
   <div data-test-subj="template-case-defaults-form" />
 ));
 
-jest.mock('../field_types/field_renderer', () => ({
-  TemplateFieldRenderer: jest.fn(() => <div data-test-subj="template-field-renderer" />),
-}));
-jest.mock('./template_case_defaults_form', () => ({
-  TemplateCaseDefaultsForm: (props: unknown) => mockCaseDefaultsForm(props),
-}));
+vi.mock('../field_types/field_renderer', () => {
+      const mocked = {
+      TemplateFieldRenderer: vi.fn(() => <div data-test-subj="template-field-renderer" />),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./template_case_defaults_form', () => {
+      const mocked = {
+      TemplateCaseDefaultsForm: (props: unknown) => mockCaseDefaultsForm(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../cases_context/use_cases_context', () => ({
-  useCasesContext: () => ({ owner: ['securitySolution'] }),
-}));
+vi.mock('../../cases_context/use_cases_context', () => {
+      const mocked = {
+      useCasesContext: () => ({ owner: ['securitySolution'] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // TemplatePreview renders TemplateMetadataPreview, which calls useCasesFeatures (sync-alerts gate).
 // Mock it so the preview doesn't need the full cases features/permissions context.
-jest.mock('../../../common/use_cases_features', () => ({
-  useCasesFeatures: () => ({ isSyncAlertsEnabled: true }),
-}));
+vi.mock('../../../common/use_cases_features', () => {
+      const mocked = {
+      useCasesFeatures: () => ({ isSyncAlertsEnabled: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CreateTemplatePreview', () => {
   const renderPreview = (
@@ -59,7 +73,7 @@ describe('CreateTemplatePreview', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the field renderer for valid YAML', () => {
@@ -81,7 +95,7 @@ describe('CreateTemplatePreview', () => {
   });
 
   it('passes the case-default edit handler to the case defaults form', () => {
-    const onCaseDefaultChange = jest.fn();
+    const onCaseDefaultChange = vi.fn();
     renderPreview(
       `name: Preview\nfields:\n  - control: INPUT_TEXT\n    name: field_one\n    type: keyword`,
       onCaseDefaultChange

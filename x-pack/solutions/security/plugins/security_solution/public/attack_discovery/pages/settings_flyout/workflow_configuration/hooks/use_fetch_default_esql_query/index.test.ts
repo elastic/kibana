@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFetchDefaultEsqlQuery } from '.';
 
-jest.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/lib/kibana');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 const DEFAULT_QUERY = 'FROM .alerts-security.alerts-default | LIMIT 100';
 
 describe('useFetchDefaultEsqlQuery', () => {
-  const mockGet = jest.fn();
+  const mockGet = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {

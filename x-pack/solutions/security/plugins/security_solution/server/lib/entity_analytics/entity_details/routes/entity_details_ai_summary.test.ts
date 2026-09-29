@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   MAX_ENTITY_SUMMARY_HIGHLIGHTS,
@@ -23,14 +26,14 @@ import {
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 
-const mockBulkAppendMetadata = jest.fn();
-const mockCreateEntityMetadataClient = jest.fn(() => ({
+const mockBulkAppendMetadata = vi.fn();
+const mockCreateEntityMetadataClient = vi.fn(() => ({
   bulkAppendMetadata: mockBulkAppendMetadata,
 }));
 
-const mockCheckPrivileges = jest.fn();
-const mockCheckPrivilegesDynamicallyWithRequest = jest.fn(() => mockCheckPrivileges);
-const mockGetStartServices = jest.fn();
+const mockCheckPrivileges = vi.fn();
+const mockCheckPrivilegesDynamicallyWithRequest = vi.fn(() => mockCheckPrivileges);
+const mockGetStartServices = vi.fn();
 
 // Import after mocks are set up
 import { entityDetailsAiSummaryRoute } from './entity_details_ai_summary';
@@ -54,7 +57,7 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
   let ctx: ReturnType<typeof requestContextMock.createTools>['context'];
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let mockReportEvent: jest.Mock;
+  let mockReportEvent: Mock;
   const mockCurrentUser = {
     username: 'test-user',
     profile_uid: 'u_test_user',
@@ -73,12 +76,12 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
     // Mocks must be configured on the raw context before convertContext wraps it —
     // mutating the converted context.core does not propagate through to the route.
     // Authenticated user (getCurrentUser is already a jest.Mock on the core mock).
-    (ctx.core.security.authc.getCurrentUser as jest.Mock).mockReturnValue(mockCurrentUser);
+    (ctx.core.security.authc.getCurrentUser as Mock).mockReturnValue(mockCurrentUser);
 
     // getSpaceId already returns 'default'. Use a stable analytics mock so the telemetry
     // assertions can inspect reportEvent regardless of how many times getAnalytics is called.
-    mockReportEvent = jest.fn();
-    (ctx.securitySolution.getAnalytics as jest.Mock).mockReturnValue({
+    mockReportEvent = vi.fn();
+    (ctx.securitySolution.getAnalytics as Mock).mockReturnValue({
       reportEvent: mockReportEvent,
     });
 
@@ -112,7 +115,7 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const buildRequest = (body: object = BASE_REQUEST_BODY) =>
@@ -165,7 +168,7 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
   });
 
   it('omits Ai_summary.author_profile_uid when the authenticated user has no profile_uid', async () => {
-    (ctx.core.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+    (ctx.core.security.authc.getCurrentUser as Mock).mockReturnValue({
       username: 'test-user',
     });
 
@@ -246,7 +249,7 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
 
   it('falls back to "unknown" for Ai_summary.generated_by when no authenticated user', async () => {
     // Same jest.Mock reference the converted context wraps, so this applies at request time.
-    (ctx.core.security.authc.getCurrentUser as jest.Mock).mockReturnValue(null);
+    (ctx.core.security.authc.getCurrentUser as Mock).mockReturnValue(null);
 
     const request = buildRequest();
     await server.inject(request, context);
@@ -362,7 +365,7 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
     // Simulate a cluster on a sub-enterprise license (e.g. basic): `withLicense` must
     // block before any persistence. Configure the downgrade on the raw context, then
     // re-convert so the gate observes it at request time.
-    (ctx.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+    (ctx.licensing.license.hasAtLeast as Mock).mockReturnValue(false);
     const licenseGatedContext = requestContextMock.convertContext(ctx);
 
     const response = await server.inject(buildRequest(), licenseGatedContext);

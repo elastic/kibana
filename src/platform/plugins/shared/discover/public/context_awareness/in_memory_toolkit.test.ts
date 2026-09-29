@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createInMemoryContextAwarenessToolkit } from './in_memory_toolkit';
 import {
   createRegisteredTestProfileStateRegistry,
@@ -20,7 +22,7 @@ const createRegisteredRegistry = () => {
 
 describe('createInMemoryContextAwarenessToolkit', () => {
   it('exposes provided actions', () => {
-    const refreshData = jest.fn();
+    const refreshData = vi.fn();
     const toolkit = createInMemoryContextAwarenessToolkit({
       actions: { refreshData },
       profileStateRegistry: createRegisteredRegistry(),

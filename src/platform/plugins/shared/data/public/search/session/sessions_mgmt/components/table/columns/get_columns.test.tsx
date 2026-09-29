@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
 import { getColumns } from './get_columns';
@@ -56,7 +58,7 @@ const setup = ({
     featureFlags: mockCoreStart.featureFlags,
   });
 
-  const handleAction = jest.fn();
+  const handleAction = vi.fn();
 
   return getColumns({
     core: mockCoreStart,

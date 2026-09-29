@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   fetchServerResultsMock,
   getDefaultPreferenceMock,
@@ -53,10 +56,10 @@ describe('SearchService', () => {
       source?: Observable<GlobalSearchProviderResult[]>;
       types?: string[] | Promise<string[]>;
     } = {}
-  ): jest.Mocked<GlobalSearchResultProvider> => ({
+  ): Mocked<GlobalSearchResultProvider> => ({
     id,
-    find: jest.fn().mockImplementation((term, options, context) => source),
-    getSearchableTypes: jest.fn().mockReturnValue(types),
+    find: vi.fn().mockImplementation((term, options, context) => source),
+    getSearchableTypes: vi.fn().mockReturnValue(types),
   });
 
   const expectedResult = (id: string) => expect.objectContaining({ id });

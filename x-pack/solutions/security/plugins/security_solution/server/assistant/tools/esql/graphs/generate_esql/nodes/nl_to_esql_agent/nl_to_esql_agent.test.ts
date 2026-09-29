@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getNlToEsqlAgent } from './nl_to_esql_agent';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
@@ -17,9 +20,12 @@ import { ChatCompletionEventType } from '@kbn/inference-common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import type { GenerateEsqlAnnotation } from '../../state';
 
-jest.mock('@kbn/inference-plugin/server', () => ({
-  naturalLanguageToEsql: jest.fn(),
-}));
+vi.mock('@kbn/inference-plugin/server', () => {
+      const mocked = {
+      naturalLanguageToEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('nl to esql agent', () => {
   const request = {
@@ -34,7 +40,7 @@ describe('nl to esql agent', () => {
   } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   const logger = loggerMock.create();
   const inference = {
-    getClient: jest.fn(),
+    getClient: vi.fn(),
   } as unknown as InferenceServerStart;
   const connectorId = 'fake-connector';
   const rest = {
@@ -78,7 +84,7 @@ describe('nl to esql agent', () => {
 
   it('calls naturalLanguageToEsql with the correct parameters', async () => {
     const agent = getNlToEsqlAgent({ ...rest });
-    (naturalLanguageToEsql as unknown as jest.Mock).mockReturnValue(
+    (naturalLanguageToEsql as unknown as Mock).mockReturnValue(
       new Observable((subscriber) => {
         const result: ChatCompletionMessageEvent = {
           content: 'Hello, World!',

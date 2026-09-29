@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -15,15 +18,15 @@ import { isSpaceAwarenessEnabled } from '../../services/spaces/helpers';
 
 import { sweepOrphanedFleetPolicies } from './sweep_orphaned_fleet_policies';
 
-jest.mock('../../services');
-jest.mock('../../services/agent_policy');
-jest.mock('../../services/spaces/helpers');
+vi.mock('../../services');
+vi.mock('../../services/agent_policy');
+vi.mock('../../services/spaces/helpers');
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
-const mockedGetAgentPolicySavedObjectType = getAgentPolicySavedObjectType as jest.MockedFunction<
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
+const mockedGetAgentPolicySavedObjectType = getAgentPolicySavedObjectType as MockedFunction<
   typeof getAgentPolicySavedObjectType
 >;
-const mockedIsSpaceAwarenessEnabled = isSpaceAwarenessEnabled as jest.MockedFunction<
+const mockedIsSpaceAwarenessEnabled = isSpaceAwarenessEnabled as MockedFunction<
   typeof isSpaceAwarenessEnabled
 >;
 
@@ -40,7 +43,7 @@ describe('sweepOrphanedFleetPolicies', () => {
   let logger: ReturnType<typeof loggerMock.create>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     soClient = savedObjectsClientMock.create();

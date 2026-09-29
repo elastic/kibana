@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import path, { join, resolve } from 'path';
 import { getTemplateFilePath } from './utils';
 
 describe('getTemplateFilePath', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('resolves path correctly', async () => {
-    const resolveSpy = jest.spyOn(path, 'resolve').mockReturnValueOnce('../fake_path');
+    const resolveSpy = vi.spyOn(path, 'resolve').mockReturnValueOnce('../fake_path');
     const dataPath = getTemplateFilePath('', 'foo.js');
 
     expect(dataPath).toEqual('../fake_path');
@@ -30,7 +32,7 @@ describe('getTemplateFilePath', () => {
   });
 
   it('throws error correctly', async () => {
-    const getTemplateFilePathMock = jest.fn().mockImplementation(() => {
+    const getTemplateFilePathMock = vi.fn().mockImplementation(() => {
       throw new Error('Error finding the file!');
     });
 

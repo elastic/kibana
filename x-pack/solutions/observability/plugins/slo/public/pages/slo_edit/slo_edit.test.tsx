@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { ILicense } from '@kbn/licensing-types';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
@@ -32,44 +35,50 @@ import { useUpdateSlo } from '../../hooks/use_update_slo';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SloEditPage } from './slo_edit';
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('@kbn/observability-plugin/public');
-jest.mock('../../hooks/use_fetch_indices');
-jest.mock('../../hooks/use_create_data_view');
-jest.mock('../../hooks/use_fetch_slo_details');
-jest.mock('../../hooks/use_fetch_slo_template');
-jest.mock('../../hooks/use_create_slo');
-jest.mock('../../hooks/use_update_slo');
-jest.mock('../../hooks/use_fetch_apm_suggestions');
-jest.mock('../../hooks/use_permissions');
-jest.mock('../../hooks/use_create_burn_rate_rule');
+vi.mock('@kbn/observability-shared-plugin/public');
+vi.mock('@kbn/observability-plugin/public');
+vi.mock('../../hooks/use_fetch_indices');
+vi.mock('../../hooks/use_create_data_view');
+vi.mock('../../hooks/use_fetch_slo_details');
+vi.mock('../../hooks/use_fetch_slo_template');
+vi.mock('../../hooks/use_create_slo');
+vi.mock('../../hooks/use_update_slo');
+vi.mock('../../hooks/use_fetch_apm_suggestions');
+vi.mock('../../hooks/use_permissions');
+vi.mock('../../hooks/use_create_burn_rate_rule');
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
-}));
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(() => mockUseKibanaReturnValue),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mock;
-const useFetchIndicesMock = useFetchIndices as jest.Mock;
-const useFetchDataViewsMock = useFetchDataViews as jest.Mock;
-const useCreateDataViewMock = useCreateDataView as jest.Mock;
-const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
-const useFetchSloTemplateMock = useFetchSloTemplate as jest.Mock;
-const useCreateSloMock = useCreateSlo as jest.Mock;
-const useUpdateSloMock = useUpdateSlo as jest.Mock;
-const useCreateRuleMock = useCreateRule as jest.Mock;
-const useFetchApmSuggestionsMock = useFetchApmSuggestions as jest.Mock;
-const usePermissionsMock = usePermissions as jest.Mock;
-const useFetcherMock = useFetcher as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useFetchIndicesMock = useFetchIndices as Mock;
+const useFetchDataViewsMock = useFetchDataViews as Mock;
+const useCreateDataViewMock = useCreateDataView as Mock;
+const useFetchSloDetailsMock = useFetchSloDetails as Mock;
+const useFetchSloTemplateMock = useFetchSloTemplate as Mock;
+const useCreateSloMock = useCreateSlo as Mock;
+const useUpdateSloMock = useUpdateSlo as Mock;
+const useCreateRuleMock = useCreateRule as Mock;
+const useFetchApmSuggestionsMock = useFetchApmSuggestions as Mock;
+const usePermissionsMock = usePermissions as Mock;
+const useFetcherMock = useFetcher as Mock;
 
-const mockNavigate = jest.fn();
-const mockBasePathPrepend = jest.fn();
+const mockNavigate = vi.fn();
+const mockBasePathPrepend = vi.fn();
 const licenseMock = licensingMock.createLicenseMock();
 
 const mockKibana = (license: ILicense | null = licenseMock) => {
@@ -88,15 +97,15 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
       dataViewEditor: {},
       data: {
         dataViews: {
-          find: jest.fn().mockReturnValue([]),
-          get: jest.fn().mockReturnValue([]),
-          getDefault: jest.fn(),
+          find: vi.fn().mockReturnValue([]),
+          get: vi.fn().mockReturnValue([]),
+          getDefault: vi.fn(),
         },
       },
       dataViews: {
-        create: jest.fn().mockResolvedValue({
-          getIndexPattern: jest.fn().mockReturnValue('some-index'),
-          getRuntimeMappings: jest.fn().mockReturnValue({}),
+        create: vi.fn().mockResolvedValue({
+          getIndexPattern: vi.fn().mockReturnValue('some-index'),
+          getRuntimeMappings: vi.fn().mockReturnValue({}),
           id: 'some-data-view-id',
         }),
       },
@@ -115,8 +124,8 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
       },
       notifications: {
         toasts: {
-          addError: jest.fn(),
-          addSuccess: jest.fn(),
+          addError: vi.fn(),
+          addSuccess: vi.fn(),
         },
       },
       observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
@@ -140,7 +149,7 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
         license$: new BehaviorSubject(license),
       },
       share: sharePluginMock.createStartContract(),
-      inspector: { open: jest.fn() },
+      inspector: { open: vi.fn() },
     },
   });
 };
@@ -148,22 +157,22 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
 const SLO_ID = 'slo-1234';
 
 describe('SLO Edit Page', () => {
-  const mockCreate = jest.fn(() => Promise.resolve({ id: SLO_ID }));
-  const mockUpdate = jest.fn();
-  const mockCreateRule = jest.fn();
+  const mockCreate = vi.fn(() => Promise.resolve({ id: SLO_ID }));
+  const mockUpdate = vi.fn();
+  const mockCreateRule = vi.fn();
 
   const history = createBrowserHistory();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibana();
 
     // Silence all the ref errors in Eui components.
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
 
     history.replace('');
-    jest.spyOn(Router, 'useHistory').mockReturnValue(history);
+    vi.spyOn(Router, 'useHistory').mockReturnValue(history);
 
     useFetchDataViewsMock.mockReturnValue({
       isLoading: false,
@@ -171,7 +180,7 @@ describe('SLO Edit Page', () => {
         {
           getName: () => 'dataview',
           getIndexPattern: () => 'some-index',
-          getRuntimeMappings: jest.fn().mockReturnValue({}),
+          getRuntimeMappings: vi.fn().mockReturnValue({}),
         },
       ],
     });
@@ -180,7 +189,7 @@ describe('SLO Edit Page', () => {
       dataView: {
         getName: () => 'dataview',
         getIndexPattern: () => 'some-index',
-        getRuntimeMappings: jest.fn().mockReturnValue({}),
+        getRuntimeMappings: vi.fn().mockReturnValue({}),
         fields: [{ name: 'custom_timestamp', type: 'date' }],
       },
       loading: false,
@@ -227,8 +236,8 @@ describe('SLO Edit Page', () => {
 
   describe('create SLO flow', () => {
     beforeEach(() => {
-      jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
-      jest
+      vi.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
+      vi
         .spyOn(Router, 'useLocation')
         .mockReturnValue({ pathname: '/slos/create', search: '', state: '', hash: '' });
       useFetchSloDetailsMock.mockReturnValue({ isInitialLoading: false, data: undefined });
@@ -399,8 +408,8 @@ describe('SLO Edit Page', () => {
   describe('edit SLO flow', () => {
     let slo: SLOWithSummaryResponse;
     beforeEach(() => {
-      jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: SLO_ID });
-      jest
+      vi.spyOn(Router, 'useParams').mockReturnValue({ sloId: SLO_ID });
+      vi
         .spyOn(Router, 'useLocation')
         .mockReturnValue({ pathname: `/slos/edit/${SLO_ID}`, search: '', state: '', hash: '' });
       slo = buildSlo({ id: SLO_ID });

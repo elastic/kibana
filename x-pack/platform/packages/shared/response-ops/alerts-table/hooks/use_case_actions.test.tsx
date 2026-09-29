@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { Alert } from '@kbn/alerting-types';
 import { createCasesServiceMock, openAddToExistingCaseModalMock } from '../mocks/cases.mock';
@@ -21,7 +23,7 @@ const mockAlert: Alert = {
 
 describe('useCaseActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     casesServiceMock.helpers.getRuleIdFromEvent.mockReturnValue({
       id: 'rule-id',
       name: 'Test rule',
@@ -56,7 +58,7 @@ describe('useCaseActions', () => {
   });
 
   it.each([true, false])('reports the modal case path: isNewCase=%s', (isNewCase) => {
-    const onAddToCase = jest.fn();
+    const onAddToCase = vi.fn();
 
     renderHook(() =>
       useCaseActions({

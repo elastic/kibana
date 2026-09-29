@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { InvestigationGuide } from './investigation_guide';
 import { render } from '../../../utils/test_helper';
 import * as kibana from '../../../utils/kibana_react';
 import { act, fireEvent } from '@testing-library/react';
 
-jest.mock('@kbn/response-ops-rule-form/flyout', () => {
+vi.mock('@kbn/response-ops-rule-form/flyout', () => {
   return {
     // we mock the response-ops flyout because we aren't testing it here
     RuleFormFlyout: () => <div>Mock Flyout</div>,
@@ -20,21 +22,21 @@ jest.mock('@kbn/response-ops-rule-form/flyout', () => {
 
 describe('InvestigationGuide', () => {
   beforeEach(() => {
-    jest.spyOn(kibana, 'useKibana').mockReturnValue({
+    vi.spyOn(kibana, 'useKibana').mockReturnValue({
       services: {
         triggersActionsUi: {
           // @ts-expect-error partial implementation for mocking
           ruleTypeRegistry: {
-            get: jest.fn(),
+            get: vi.fn(),
           },
           // @ts-expect-error partial implementation for mocking
           actionTypeRegistry: {
-            get: jest.fn(),
+            get: vi.fn(),
           },
         },
       },
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('provides an empty state that will open the rule form flyout', async () => {

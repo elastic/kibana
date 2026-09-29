@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { ErrorResultData } from '@kbn/agent-builder-common/tools/tool_result';
@@ -15,29 +18,35 @@ import type { ApiDescribeResultData } from './describe';
 import { getRegistries } from '../../api/registry';
 import type { ApiRegistry, ApiRegistryDefinition, LoadedApi } from '../../api';
 
-jest.mock('../../api/registry', () => ({
-  ...jest.requireActual('../../api/registry'),
-  getRegistries: jest.fn(),
-}));
+vi.mock('../../api/registry', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../api/registry')),
+      getRegistries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/schemas/es/json/_types.json', () => ({
-  $defs: {
-    Oversized: {
-      type: 'object',
-      description: 'x'.repeat(2_000),
-      properties: { bool: { type: 'object' }, term: { type: 'object' } },
-    },
-  },
-}));
+vi.mock('@elastic/schemas/es/json/_types.json', () => {
+      const mocked = {
+      $defs: {
+        Oversized: {
+          type: 'object',
+          description: 'x'.repeat(2_000),
+          properties: { bool: { type: 'object' }, term: { type: 'object' } },
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetRegistries = jest.mocked(getRegistries);
+const mockGetRegistries = vi.mocked(getRegistries);
 
 const createLoadedApi = (definition: ApiRegistryDefinition): LoadedApi => ({
   definition,
-  buildRequest: jest.fn(),
+  buildRequest: vi.fn(),
 });
 
-const createRegistry = (loadApi: jest.Mock): ApiRegistry => ({
+const createRegistry = (loadApi: Mock): ApiRegistry => ({
   manifest: [],
   loadApi,
 });
@@ -50,14 +59,14 @@ class UnknownApiError extends Error {
 }
 
 describe('createDescribeApiTool', () => {
-  let loadApi: jest.Mock;
+  let loadApi: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    loadApi = jest.fn();
+    vi.clearAllMocks();
+    loadApi = vi.fn();
     mockGetRegistries.mockResolvedValue({
       elasticsearch: createRegistry(loadApi),
-      kibana: createRegistry(jest.fn()),
+      kibana: createRegistry(vi.fn()),
     });
   });
 

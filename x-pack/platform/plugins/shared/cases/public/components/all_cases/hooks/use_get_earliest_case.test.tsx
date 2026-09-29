@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useGetCases } from '../../../containers/use_get_cases';
 import { useGetEarliestCase } from './use_get_earliest_case';
@@ -12,9 +15,9 @@ import { TestProviders } from '../../../common/mock';
 import { SortFieldCase } from '../../../../common/ui/types';
 import { basicCase } from '../../../containers/mock';
 
-jest.mock('../../../containers/use_get_cases');
+vi.mock('../../../containers/use_get_cases');
 
-const useGetCasesMock = useGetCases as jest.Mock;
+const useGetCasesMock = useGetCases as Mock;
 const queryParams = {
   page: 1,
   perPage: 1,
@@ -24,7 +27,7 @@ const queryParams = {
 
 describe('useGetEarliestCase', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call useGetCases with correct parameters', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import type { UseAllSourcesParams } from './use_all_sources';
@@ -31,10 +33,10 @@ const makeParams = (overrides: Partial<Parameters<typeof useAllSources>[0]> = {}
   isOpen: true,
   isTimeseries: false,
   preloadedSources: undefined,
-  getSources: jest.fn().mockResolvedValue([mockIndex]),
-  getTimeseriesIndices: jest.fn().mockResolvedValue({ indices: [] }),
-  getDatasets: jest.fn().mockResolvedValue(mockDataset),
-  getViews: jest.fn().mockResolvedValue(mockViews),
+  getSources: vi.fn().mockResolvedValue([mockIndex]),
+  getTimeseriesIndices: vi.fn().mockResolvedValue({ indices: [] }),
+  getDatasets: vi.fn().mockResolvedValue(mockDataset),
+  getViews: vi.fn().mockResolvedValue(mockViews),
   ...overrides,
 });
 
@@ -51,7 +53,7 @@ describe('useAllSources', () => {
 
   it('keeps the regular source when a dataset shares its name', async () => {
     const params = makeParams({
-      getDatasets: jest.fn().mockResolvedValue({
+      getDatasets: vi.fn().mockResolvedValue({
         datasets: [
           { name: 'my-index', data_source: 'src-1', resource: 'r-1', description: 'A dataset' },
         ],
@@ -98,10 +100,10 @@ describe('useAllSources', () => {
   });
 
   it('skips datasets for timeseries commands', async () => {
-    const getDatasets = jest.fn().mockResolvedValue(mockDataset);
+    const getDatasets = vi.fn().mockResolvedValue(mockDataset);
     const params = makeParams({
       isTimeseries: true,
-      getTimeseriesIndices: jest
+      getTimeseriesIndices: vi
         .fn()
         .mockResolvedValue({ indices: [{ name: 'ts-idx', mode: 'time_series', aliases: [] }] }),
       getDatasets,
@@ -118,7 +120,7 @@ describe('useAllSources', () => {
 
   it('still returns regular sources when getDatasets rejects', async () => {
     const params = makeParams({
-      getDatasets: jest.fn().mockRejectedValue(new Error('network error')),
+      getDatasets: vi.fn().mockRejectedValue(new Error('network error')),
     });
     const { result } = renderHook(() => useAllSources(params));
 
@@ -178,7 +180,7 @@ describe('useAllSources', () => {
 
     it('keeps an enriched view type instead of the default VIEW type', async () => {
       const params = makeParams({
-        getViews: jest.fn().mockResolvedValue({
+        getViews: vi.fn().mockResolvedValue({
           views: [{ name: 'view-1', query: 'FROM logs', type: SOURCES_TYPES.QUERY_STREAM }],
         }),
       });
@@ -203,10 +205,10 @@ describe('useAllSources', () => {
     });
 
     it('skips views for timeseries commands', async () => {
-      const getViews = jest.fn().mockResolvedValue(mockViews);
+      const getViews = vi.fn().mockResolvedValue(mockViews);
       const params = makeParams({
         isTimeseries: true,
-        getTimeseriesIndices: jest
+        getTimeseriesIndices: vi
           .fn()
           .mockResolvedValue({ indices: [{ name: 'ts-idx', mode: 'time_series', aliases: [] }] }),
         getViews,
@@ -220,9 +222,9 @@ describe('useAllSources', () => {
     });
 
     it('still returns regular sources when getViews rejects', async () => {
-      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
       const params = makeParams({
-        getViews: jest.fn().mockRejectedValue(new Error('Forbidden')),
+        getViews: vi.fn().mockRejectedValue(new Error('Forbidden')),
       });
       const { result } = renderHook(() => useAllSources(params));
 
@@ -238,7 +240,7 @@ describe('useAllSources', () => {
 
     it('still lists views when getSources rejects', async () => {
       const params = makeParams({
-        getSources: jest.fn().mockRejectedValue(new Error('Failed to fetch the sources')),
+        getSources: vi.fn().mockRejectedValue(new Error('Failed to fetch the sources')),
       });
       const { result } = renderHook(() => useAllSources(params));
 
@@ -250,7 +252,7 @@ describe('useAllSources', () => {
 
     it('lists views without waiting for a slow datasets request', async () => {
       let resolveDatasets: (result: EsqlDatasetsResult) => void = () => {};
-      const getDatasets = jest.fn(
+      const getDatasets = vi.fn(
         () =>
           new Promise<EsqlDatasetsResult>((resolve) => {
             resolveDatasets = resolve;
@@ -277,13 +279,13 @@ describe('useAllSources', () => {
 
     it('stops loading as soon as views arrive for an empty base list', async () => {
       let resolveDatasets: (result: EsqlDatasetsResult) => void = () => {};
-      const getDatasets = jest.fn(
+      const getDatasets = vi.fn(
         () =>
           new Promise<EsqlDatasetsResult>((resolve) => {
             resolveDatasets = resolve;
           })
       );
-      const params = makeParams({ getSources: jest.fn().mockResolvedValue([]), getDatasets });
+      const params = makeParams({ getSources: vi.fn().mockResolvedValue([]), getDatasets });
       const { result } = renderHook(() => useAllSources(params));
 
       // Loading until the datasets settle would hide the views that already arrived.
@@ -296,7 +298,7 @@ describe('useAllSources', () => {
     });
 
     it('tolerates a views response that carries no views array', async () => {
-      const params = makeParams({ getViews: jest.fn().mockResolvedValue({}) });
+      const params = makeParams({ getViews: vi.fn().mockResolvedValue({}) });
       const { result } = renderHook(() => useAllSources(params));
 
       await waitFor(() =>
@@ -305,7 +307,7 @@ describe('useAllSources', () => {
     });
 
     it('re-reads views when the browser is reopened, so new views show up', async () => {
-      const getViews = jest
+      const getViews = vi
         .fn()
         .mockResolvedValueOnce(mockViews)
         .mockResolvedValueOnce({
@@ -328,15 +330,15 @@ describe('useAllSources', () => {
 
     it('keeps loading while views arrive for an empty base list', async () => {
       let resolveViews: (result: EsqlViewsResult) => void = () => {};
-      const getViews = jest.fn(
+      const getViews = vi.fn(
         () =>
           new Promise<EsqlViewsResult>((resolve) => {
             resolveViews = resolve;
           })
       );
       const params = makeParams({
-        getSources: jest.fn().mockResolvedValue([]),
-        getDatasets: jest.fn().mockResolvedValue({ datasets: [] }),
+        getSources: vi.fn().mockResolvedValue([]),
+        getDatasets: vi.fn().mockResolvedValue({ datasets: [] }),
         getViews,
       });
       const { result } = renderHook(() => useAllSources(params));
@@ -354,7 +356,7 @@ describe('useAllSources', () => {
 
     it('keeps loading while views arrive for an empty preloaded list', async () => {
       let resolveViews: (result: EsqlViewsResult) => void = () => {};
-      const getViews = jest.fn(
+      const getViews = vi.fn(
         () =>
           new Promise<EsqlViewsResult>((resolve) => {
             resolveViews = resolve;
@@ -362,7 +364,7 @@ describe('useAllSources', () => {
       );
       const params = makeParams({
         preloadedSources: [],
-        getDatasets: jest.fn().mockResolvedValue({ datasets: [] }),
+        getDatasets: vi.fn().mockResolvedValue({ datasets: [] }),
         getViews,
       });
       const { result } = renderHook(() => useAllSources(params));
@@ -379,10 +381,10 @@ describe('useAllSources', () => {
     });
 
     it('stops loading when reopened with preloaded sources while a views request is in flight', async () => {
-      const getViews = jest.fn(() => new Promise<EsqlViewsResult>(() => {}));
+      const getViews = vi.fn(() => new Promise<EsqlViewsResult>(() => {}));
       const params = makeParams({
         preloadedSources: [],
-        getDatasets: jest.fn().mockResolvedValue({ datasets: [] }),
+        getDatasets: vi.fn().mockResolvedValue({ datasets: [] }),
         getViews,
       });
       const { result, rerender } = renderHook(

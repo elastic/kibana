@@ -7,41 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 
 export const LayoutsMock = {
-  create: jest.fn(),
+  create: vi.fn(),
   configSchema: schema.any(),
 };
-jest.doMock('../../layouts/layouts', () => ({
-  Layouts: LayoutsMock,
-}));
+vi.doMock('../../layouts/layouts', () => {
+      const mocked = {
+      Layouts: LayoutsMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const createTriggeringPolicyMock = jest.fn();
-jest.doMock('./policies', () => ({
-  triggeringPolicyConfigSchema: schema.any(),
-  createTriggeringPolicy: createTriggeringPolicyMock,
-}));
+export const createTriggeringPolicyMock = vi.fn();
+vi.doMock('./policies', () => {
+      const mocked = {
+      triggeringPolicyConfigSchema: schema.any(),
+      createTriggeringPolicy: createTriggeringPolicyMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const createRollingStrategyMock = jest.fn();
-jest.doMock('./strategies', () => ({
-  rollingStrategyConfigSchema: schema.any(),
-  createRollingStrategy: createRollingStrategyMock,
-}));
+export const createRollingStrategyMock = vi.fn();
+vi.doMock('./strategies', () => {
+      const mocked = {
+      rollingStrategyConfigSchema: schema.any(),
+      createRollingStrategy: createRollingStrategyMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const RollingFileManagerMock = jest.fn();
-jest.doMock('./rolling_file_manager', () => ({
-  RollingFileManager: RollingFileManagerMock,
-}));
+export const RollingFileManagerMock = vi.fn();
+vi.doMock('./rolling_file_manager', () => {
+      const mocked = {
+      RollingFileManager: RollingFileManagerMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const RollingFileContextMock = jest.fn();
-jest.doMock('./rolling_file_context', () => ({
-  RollingFileContext: RollingFileContextMock,
-}));
+export const RollingFileContextMock = vi.fn();
+vi.doMock('./rolling_file_context', () => {
+      const mocked = {
+      RollingFileContext: RollingFileContextMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const createRetentionPolicyMock = jest.fn();
-jest.doMock('./retention', () => {
-  const actual = jest.requireActual('./retention');
+export const createRetentionPolicyMock = vi.fn();
+vi.doMock('./retention', async () => {
+  const actual = (await vi.importActual('./retention'));
   return {
     ...actual,
     createRetentionPolicy: createRetentionPolicyMock,

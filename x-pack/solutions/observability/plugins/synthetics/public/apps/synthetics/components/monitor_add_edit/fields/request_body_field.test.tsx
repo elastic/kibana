@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import 'jest-canvas-mock';
 
 import React, { useState, useCallback } from 'react';
@@ -14,10 +16,13 @@ import { render } from '../../../utils/testing/rtl_helpers';
 import { RequestBodyField } from './request_body_field';
 import { CodeEditorMode } from '../types';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
-  htmlIdGenerator: () => () => `id-${Math.random()}`,
-}));
+vi.mock('@elastic/eui/lib/services/accessibility/html_id_generator', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui/lib/services/accessibility/html_id_generator')),
+      htmlIdGenerator: () => () => `id-${Math.random()}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('<RequestBodyField />', () => {
   let user: UserEvent;
@@ -45,18 +50,18 @@ describe('<RequestBodyField />', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     // Note: We cannot use `pointerEventsCheck: 0` here because the code editor
     // relies on pointer events to determine if it should be read-only or not.
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
   });
 
   it('renders RequestBodyField', () => {

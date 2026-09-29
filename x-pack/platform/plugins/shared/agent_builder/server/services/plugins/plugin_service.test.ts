@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ParsedPluginArchive } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -13,33 +16,48 @@ import type { PluginClient, PersistedPluginDefinition } from './client';
 import type { SkillClient } from '../skills/persisted/client';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 
-const mockRandomUUID = jest.fn().mockReturnValue('test-plugin-uuid');
-jest.mock('crypto', () => ({
-  ...jest.requireActual('crypto'),
-  randomUUID: () => mockRandomUUID(),
-}));
+const mockRandomUUID = vi.fn().mockReturnValue('test-plugin-uuid');
+vi.mock('crypto', () => {
+      const mocked = {
+      ...require('crypto'),
+      randomUUID: () => mockRandomUUID(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockParsePluginFromUrl = jest.fn();
-const mockParsePluginFromFile = jest.fn();
-jest.mock('./utils', () => ({
-  parsePluginFromUrl: (...args: unknown[]) => mockParsePluginFromUrl(...args),
-  parsePluginFromFile: (...args: unknown[]) => mockParsePluginFromFile(...args),
-}));
+const mockParsePluginFromUrl = vi.fn();
+const mockParsePluginFromFile = vi.fn();
+vi.mock('./utils', () => {
+      const mocked = {
+      parsePluginFromUrl: (...args: unknown[]) => mockParsePluginFromUrl(...args),
+      parsePluginFromFile: (...args: unknown[]) => mockParsePluginFromFile(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCreateClient = jest.fn();
-jest.mock('./client', () => ({
-  ...jest.requireActual('./client'),
-  createClient: (...args: unknown[]) => mockCreateClient(...args),
-}));
+const mockCreateClient = vi.fn();
+vi.mock('./client', async () => {
+      const mocked = {
+      ...(await vi.importActual('./client')),
+      createClient: (...args: unknown[]) => mockCreateClient(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCreateSkillClient = jest.fn();
-jest.mock('../skills/persisted/client', () => ({
-  createClient: (...args: unknown[]) => mockCreateSkillClient(...args),
-}));
+const mockCreateSkillClient = vi.fn();
+vi.mock('../skills/persisted/client', () => {
+      const mocked = {
+      createClient: (...args: unknown[]) => mockCreateSkillClient(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/spaces', () => ({
-  getCurrentSpaceId: jest.fn(() => 'default'),
-}));
+vi.mock('../../utils/spaces', () => {
+      const mocked = {
+      getCurrentSpaceId: vi.fn(() => 'default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockParsedArchive = (
   overrides?: Partial<ParsedPluginArchive>
@@ -95,48 +113,48 @@ const createMockPersistedPlugin = (
 
 describe('PluginsService', () => {
   let start: PluginsServiceStart;
-  let mockClient: jest.Mocked<PluginClient>;
-  let mockSkillClient: jest.Mocked<SkillClient>;
-  let mockToolRegistry: { has: jest.Mock };
-  let mockAnalyticsService: jest.Mocked<Pick<AnalyticsService, 'reportPluginImported'>>;
-  let mockTrackingService: jest.Mocked<Pick<TrackingService, 'trackPluginImport'>>;
+  let mockClient: Mocked<PluginClient>;
+  let mockSkillClient: Mocked<SkillClient>;
+  let mockToolRegistry: { has: Mock };
+  let mockAnalyticsService: Mocked<Pick<AnalyticsService, 'reportPluginImported'>>;
+  let mockTrackingService: Mocked<Pick<TrackingService, 'trackPluginImport'>>;
   const mockRequest = {} as KibanaRequest;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockClient = {
-      get: jest.fn(),
-      list: jest.fn(),
-      has: jest.fn(),
-      findByName: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
+      get: vi.fn(),
+      list: vi.fn(),
+      has: vi.fn(),
+      findByName: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
     };
 
     mockSkillClient = {
-      get: jest.fn(),
-      bulkGet: jest.fn(),
-      list: jest.fn(),
-      has: jest.fn(),
-      create: jest.fn(),
-      bulkCreate: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      deleteByPluginId: jest.fn(),
+      get: vi.fn(),
+      bulkGet: vi.fn(),
+      list: vi.fn(),
+      has: vi.fn(),
+      create: vi.fn(),
+      bulkCreate: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deleteByPluginId: vi.fn(),
     };
 
     mockToolRegistry = {
-      has: jest.fn().mockResolvedValue(true),
+      has: vi.fn().mockResolvedValue(true),
     };
 
     mockAnalyticsService = {
-      reportPluginImported: jest.fn(),
+      reportPluginImported: vi.fn(),
     };
 
     mockTrackingService = {
-      trackPluginImport: jest.fn(),
+      trackPluginImport: vi.fn(),
     };
 
     mockCreateClient.mockReturnValue(mockClient);
@@ -144,18 +162,18 @@ describe('PluginsService', () => {
 
     const mockElasticsearch = {
       client: {
-        asScoped: jest.fn(() => ({
+        asScoped: vi.fn(() => ({
           asInternalUser: {},
         })),
       },
     };
 
     const service = createPluginsService();
-    service.setup({ skillsSetup: { registerSkill: jest.fn() } });
+    service.setup({ skillsSetup: { registerSkill: vi.fn() } });
     start = service.start({
       logger: loggerMock.create(),
       elasticsearch: mockElasticsearch as any,
-      getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+      getToolRegistry: vi.fn().mockResolvedValue(mockToolRegistry),
       config: {
         enabled: true,
         githubBaseUrl: 'https://github.com',
@@ -545,18 +563,18 @@ describe('PluginsService', () => {
         it('does not throw when trackingService is undefined', async () => {
           const mockElasticsearch = {
             client: {
-              asScoped: jest.fn(() => ({
+              asScoped: vi.fn(() => ({
                 asInternalUser: {},
               })),
             },
           };
 
           const service = createPluginsService();
-          service.setup({ skillsSetup: { registerSkill: jest.fn() } });
+          service.setup({ skillsSetup: { registerSkill: vi.fn() } });
           const startWithoutTracking = service.start({
             logger: loggerMock.create(),
             elasticsearch: mockElasticsearch as any,
-            getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+            getToolRegistry: vi.fn().mockResolvedValue(mockToolRegistry),
             config: {
               enabled: true,
               githubBaseUrl: 'https://github.com',

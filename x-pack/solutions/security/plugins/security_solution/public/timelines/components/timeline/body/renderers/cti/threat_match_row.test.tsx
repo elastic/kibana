@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -13,7 +15,7 @@ import { useMountAppended } from '../../../../../../common/utils/use_mount_appen
 import type { ThreatMatchRowProps } from './threat_match_row';
 import { ThreatMatchRowView } from './threat_match_row';
 
-jest.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/lib/kibana');
 
 describe('ThreatMatchRowView', () => {
   const mount = useMountAppended();

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { removeAttributesId } from './remove_attributes_id';
 
 const context: any = {
-  log: jest.fn(),
+  log: vi.fn(),
 };
 
 describe(`removeAttributesId`, () => {

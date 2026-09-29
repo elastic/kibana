@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { addBasePath } from '..';
 import { registerSnapshotRepositoriesRoute } from './register_snapshot_repositories_route';
 import type { RequestMock } from '../../../test/helpers';
@@ -123,7 +125,7 @@ describe('[Index management API Routes] Snapshot repositories', () => {
   });
 
   test('reports canCreateRepository as true without checking privileges when security is disabled', async () => {
-    (routeDependencies.config.isSecurityEnabled as jest.Mock).mockReturnValueOnce(false);
+    (routeDependencies.config.isSecurityEnabled as Mock).mockReturnValueOnce(false);
     getSettings.mockResolvedValue({});
     hasPrivileges.mockClear();
 

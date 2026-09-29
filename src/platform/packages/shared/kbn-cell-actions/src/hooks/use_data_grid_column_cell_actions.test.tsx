@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { JSXElementConstructor, MutableRefObject } from 'react';
 import React from 'react';
 import {
@@ -23,27 +25,30 @@ import {
 } from './use_data_grid_column_cell_actions';
 
 const action1 = makeAction('action-1', 'icon1', 1);
-action1.execute = jest.fn();
+action1.execute = vi.fn();
 const action2 = makeAction('action-2', 'icon2', 2);
-action2.execute = jest.fn();
+action2.execute = vi.fn();
 const actions = [action1, action2];
-const mockGetActions = jest.fn(async () => actions);
+const mockGetActions = vi.fn(async () => actions);
 
-jest.mock('../context/cell_actions_context', () => ({
-  useCellActionsContext: () => ({ getActions: mockGetActions }),
-}));
+vi.mock('../context/cell_actions_context', () => {
+      const mocked = {
+      useCellActionsContext: () => ({ getActions: mockGetActions }),
+    };
+      return { ...mocked, default: mocked };
+    });
 const fieldValues: Record<string, string[]> = {
   column1: ['0.0', '0.1', '0.2', '0.3'],
   column2: ['1.0', '1.1', '1.2', '1.3'],
 };
-const mockGetCellValue = jest.fn(
+const mockGetCellValue = vi.fn(
   (field: string, rowIndex: number) => fieldValues[field]?.[rowIndex % fieldValues[field].length]
 );
 const field1 = { name: 'column1', type: 'text', searchable: true, aggregatable: true };
 const field2 = { name: 'column2', type: 'keyword', searchable: true, aggregatable: true };
 const columns = [{ id: field1.name }, { id: field2.name }];
 
-const mockCloseCellPopover = jest.fn();
+const mockCloseCellPopover = vi.fn();
 const useDataGridColumnsCellActionsProps: UseDataGridColumnsCellActionsProps = {
   fields: [field1, field2],
   getCellValue: mockGetCellValue,
@@ -73,7 +78,7 @@ const renderCellAction = (
 
 describe('useDataGridColumnsCellActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return array with actions for each columns', async () => {

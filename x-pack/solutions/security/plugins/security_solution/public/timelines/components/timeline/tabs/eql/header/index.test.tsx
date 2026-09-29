@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { render, screen } from '@testing-library/react';
@@ -19,7 +21,7 @@ describe('Eql Header', () => {
     activeTab: TimelineTabs.eql,
     timelineId: TimelineId.test,
     timelineFullScreen: false,
-    setTimelineFullScreen: jest.fn(),
+    setTimelineFullScreen: vi.fn(),
   } as EqlTabHeaderProps;
 
   describe('rendering', () => {

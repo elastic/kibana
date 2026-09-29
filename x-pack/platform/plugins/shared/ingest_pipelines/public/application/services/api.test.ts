@@ -5,31 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core/public';
 
-jest.mock('../../shared_imports', () => ({
-  sendRequest: jest.fn(),
-  useRequest: jest.fn(),
-}));
+vi.mock('../../shared_imports', () => {
+      const mocked = {
+      sendRequest: vi.fn(),
+      useRequest: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { ApiService } from './api';
 
-describe('ApiService payload shaping', () => {
-  const sharedImportsMock = jest.requireMock('../../shared_imports') as {
-    sendRequest: jest.Mock;
-    useRequest: jest.Mock;
+describe('ApiService payload shaping', async () => {
+  const sharedImportsMock = (await vi.importMock('../../shared_imports')) as {
+    sendRequest: Mock;
+    useRequest: Mock;
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('createPipeline omits UI-only fields', async () => {
     const api = new ApiService();
 
     const http = {} as unknown as HttpSetup;
-    const uiMetricService = { trackUiMetric: jest.fn() } as any;
+    const uiMetricService = { trackUiMetric: vi.fn() } as any;
     api.setup(http, uiMetricService);
 
     sharedImportsMock.sendRequest.mockResolvedValue({ data: undefined, error: undefined });
@@ -64,7 +70,7 @@ describe('ApiService payload shaping', () => {
     const api = new ApiService();
 
     const http = {} as unknown as HttpSetup;
-    const uiMetricService = { trackUiMetric: jest.fn() } as any;
+    const uiMetricService = { trackUiMetric: vi.fn() } as any;
     api.setup(http, uiMetricService);
 
     sharedImportsMock.sendRequest.mockResolvedValue({ data: undefined, error: undefined });

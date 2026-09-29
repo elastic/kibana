@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   createConcatStream,
   createFilterStream,
@@ -16,7 +18,7 @@ import {
 
 describe('createFilterStream()', () => {
   test('calls the function with each item in the source stream', async () => {
-    const filter = jest.fn().mockReturnValue(true);
+    const filter = vi.fn().mockReturnValue(true);
 
     await createPromiseFromStreams([createListStream(['a', 'b', 'c']), createFilterStream(filter)]);
 

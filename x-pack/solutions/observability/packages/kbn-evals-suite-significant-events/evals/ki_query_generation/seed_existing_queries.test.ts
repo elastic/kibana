@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Client } from '@elastic/elasticsearch';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../../src/data_generators/snapshot_indices';
 import { seedExistingQueries } from './seed_existing_queries';
 
 describe('seedExistingQueries', () => {
-  const deleteByQuery = jest.fn().mockResolvedValue({});
-  const bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
+  const deleteByQuery = vi.fn().mockResolvedValue({});
+  const bulk = vi.fn().mockResolvedValue({ errors: false, items: [] });
   const esClient = { deleteByQuery, bulk } as unknown as Client;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('replaces stored queries with rerun fixtures while preserving their ids', async () => {

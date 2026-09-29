@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -15,12 +17,12 @@ import { FeedbackTextArea } from './feedback_text_area';
 
 const mockProps = {
   value: '',
-  handleChangeValue: jest.fn(),
+  handleChangeValue: vi.fn(),
 };
 
 describe('FeedbackTextArea', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render feedback textarea', () => {

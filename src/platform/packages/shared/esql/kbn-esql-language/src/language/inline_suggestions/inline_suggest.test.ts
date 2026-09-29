@@ -6,23 +6,35 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { inlineSuggest } from './inline_suggest';
 import type { InlineSuggestionItem } from './types';
 
-jest.mock('../../commands/registry/options/recommended_queries', () => ({
-  getRecommendedQueriesTemplates: jest.fn(),
-  getTimeAndCategorizationFields: jest.fn(),
-}));
+vi.mock('../../commands/registry/options/recommended_queries', () => {
+      const mocked = {
+      getRecommendedQueriesTemplates: vi.fn(),
+      getTimeAndCategorizationFields: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../shared/columns_retrieval_helpers', () => ({
-  getColumnsByTypeRetriever: jest.fn(),
-}));
+vi.mock('../shared/columns_retrieval_helpers', () => {
+      const mocked = {
+      getColumnsByTypeRetriever: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./inline_suggestions_cache', () => ({
-  fromCache: jest.fn(),
-  setToCache: jest.fn(),
-}));
+vi.mock('./inline_suggestions_cache', () => {
+      const mocked = {
+      fromCache: vi.fn(),
+      setToCache: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   getRecommendedQueriesTemplates,
@@ -31,17 +43,17 @@ import {
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { setToCache } from './inline_suggestions_cache';
 
-const mockGetRecommendedQueriesTemplates = getRecommendedQueriesTemplates as jest.MockedFunction<
+const mockGetRecommendedQueriesTemplates = getRecommendedQueriesTemplates as MockedFunction<
   typeof getRecommendedQueriesTemplates
 >;
-const mockGetTimeAndCategorizationFields = getTimeAndCategorizationFields as jest.MockedFunction<
+const mockGetTimeAndCategorizationFields = getTimeAndCategorizationFields as MockedFunction<
   typeof getTimeAndCategorizationFields
 >;
-const mockGetColumnsByTypeRetriever = getColumnsByTypeRetriever as jest.MockedFunction<
+const mockGetColumnsByTypeRetriever = getColumnsByTypeRetriever as MockedFunction<
   typeof getColumnsByTypeRetriever
 >;
 
-const mockSetToCache = setToCache as jest.MockedFunction<typeof setToCache>;
+const mockSetToCache = setToCache as MockedFunction<typeof setToCache>;
 
 describe('inlineSuggest', () => {
   const mockRange: InlineSuggestionItem['range'] = {
@@ -52,14 +64,14 @@ describe('inlineSuggest', () => {
   };
 
   const mockCallbacks: ESQLCallbacks = {
-    getSources: jest.fn(),
-    getColumnsFor: jest.fn(),
-    getEditorExtensions: jest.fn(),
-    getHistoryStarredItems: jest.fn(),
+    getSources: vi.fn(),
+    getColumnsFor: vi.fn(),
+    getEditorExtensions: vi.fn(),
+    getHistoryStarredItems: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockGetTimeAndCategorizationFields.mockResolvedValue({
       timeField: '@timestamp',
@@ -73,17 +85,17 @@ describe('inlineSuggest', () => {
       },
     ]);
     mockGetColumnsByTypeRetriever.mockReturnValue({
-      getColumnsByType: jest.fn(),
-      getColumnMap: jest.fn(),
+      getColumnsByType: vi.fn(),
+      getColumnMap: vi.fn(),
     });
 
     // Callbacks
-    (mockCallbacks.getEditorExtensions as jest.Mock).mockResolvedValue({
+    (mockCallbacks.getEditorExtensions as Mock).mockResolvedValue({
       recommendedQueries: [
         { query: 'FROM logs* | STATS count = COUNT(*)', name: 'Count aggregation' },
       ],
     });
-    (mockCallbacks.getHistoryStarredItems as jest.Mock).mockResolvedValue([
+    (mockCallbacks.getHistoryStarredItems as Mock).mockResolvedValue([
       'FROM logs* | WHERE host.name: "server1"',
       // break the query suggestion at same command
       `FROM test_logs | WHERE response: "error"\nAND status_code >= 500`,

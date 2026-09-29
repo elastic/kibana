@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -15,22 +18,31 @@ import { useConversationsByDate, useConversationContextMenu } from '../hooks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getDisplayedConversation } from '../hooks/use_conversations_by_date.test';
 
-jest.mock('../hooks/use_conversations_by_date', () => ({
-  useConversationsByDate: jest.fn(),
-}));
+vi.mock('../hooks/use_conversations_by_date', () => {
+      const mocked = {
+      useConversationsByDate: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_confirm_modal', () => ({
-  useConfirmModal: jest.fn(() => ({
-    element: <div data-test-subj="confirmModal" />,
-    confirm: jest.fn(() => Promise.resolve(true)),
-  })),
-}));
+vi.mock('../hooks/use_confirm_modal', () => {
+      const mocked = {
+      useConfirmModal: vi.fn(() => ({
+        element: <div data-test-subj="confirmModal" />,
+        confirm: vi.fn(() => Promise.resolve(true)),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_conversation_context_menu', () => ({
-  useConversationContextMenu: jest.fn().mockReturnValue({
-    deleteConversation: jest.fn(() => Promise.resolve(true)),
-  }),
-}));
+vi.mock('../hooks/use_conversation_context_menu', () => {
+      const mocked = {
+      useConversationContextMenu: vi.fn().mockReturnValue({
+        deleteConversation: vi.fn(() => Promise.resolve(true)),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockConversations: UseConversationListResult['conversations'] = {
   value: {
@@ -73,7 +85,7 @@ const mockConversations: UseConversationListResult['conversations'] = {
   },
   error: undefined,
   loading: false,
-  refresh: jest.fn(),
+  refresh: vi.fn(),
 };
 
 const mockCategorizedConversations = {
@@ -100,20 +112,20 @@ const defaultProps = {
   conversations: mockConversations,
   isLoading: false,
   selectedConversationId: undefined,
-  onConversationSelect: jest.fn(),
-  onConversationDeleteClick: jest.fn(),
+  onConversationSelect: vi.fn(),
+  onConversationDeleteClick: vi.fn(),
   newConversationHref: '/conversation/new',
   getConversationHref: (id: string) => `/conversation/${id}`,
-  setIsUpdatingConversationList: jest.fn(),
-  refreshConversations: jest.fn(),
-  updateDisplayedConversation: jest.fn(),
+  setIsUpdatingConversationList: vi.fn(),
+  refreshConversations: vi.fn(),
+  updateDisplayedConversation: vi.fn(),
   currentUser: mockAuthenticatedUser,
 };
 
 describe('ConversationList', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useConversationsByDate as jest.Mock).mockReturnValue(mockCategorizedConversations);
+    vi.clearAllMocks();
+    (useConversationsByDate as Mock).mockReturnValue(mockCategorizedConversations);
   });
 
   it('renders conversations and archived sections properly', () => {
@@ -219,8 +231,8 @@ describe('ConversationList', () => {
   });
 
   it('triggers delete flow when delete icon is clicked and confirmed', async () => {
-    const mockDeleteConversation = jest.fn(() => Promise.resolve());
-    (useConversationContextMenu as jest.Mock).mockReturnValue({
+    const mockDeleteConversation = vi.fn(() => Promise.resolve());
+    (useConversationContextMenu as Mock).mockReturnValue({
       deleteConversation: mockDeleteConversation,
     });
 

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
 import { PushCallouts } from './push_callouts';
 import { renderWithTestingProviders } from '../../common/mock';
 
-const onEditClick = jest.fn();
+const onEditClick = vi.fn();
 
 const defaultProps = {
   hasConnectors: false,
@@ -23,7 +25,7 @@ const defaultProps = {
 // Failing: See https://github.com/elastic/kibana/issues/206367
 describe('PushCallouts ', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders', async () => {

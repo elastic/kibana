@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createLeadIndexService } from './lead_index_service';
 import {
@@ -12,10 +14,13 @@ import {
   getLegacyLeadsIndexNames,
 } from '../../../../../common/entity_analytics/lead_generation';
 
-const mockCreateOrUpdateIndex = jest.fn();
-jest.mock('../../utils/create_or_update_index', () => ({
-  createOrUpdateIndex: (...args: unknown[]) => mockCreateOrUpdateIndex(...args),
-}));
+const mockCreateOrUpdateIndex = vi.fn();
+vi.mock('../../utils/create_or_update_index', () => {
+      const mocked = {
+      createOrUpdateIndex: (...args: unknown[]) => mockCreateOrUpdateIndex(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('LeadIndexService', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -28,7 +33,7 @@ describe('LeadIndexService', () => {
   let service: ReturnType<typeof createLeadIndexService>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = createLeadIndexService({ esClient, logger, spaceId });
   });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
@@ -12,9 +15,12 @@ import type { PackagePolicy } from '../../../common/types/models';
 
 import { getPolicyThroughput } from './throughput';
 
-jest.mock('../epm/elasticsearch/retry', () => ({
-  retryTransientEsErrors: (fn: () => Promise<unknown>) => fn(),
-}));
+vi.mock('../epm/elasticsearch/retry', () => {
+      const mocked = {
+      retryTransientEsErrors: (fn: () => Promise<unknown>) => fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makePolicy = (
   streams: Array<{ enabled: boolean; type?: string; dataset: string }>
@@ -42,11 +48,11 @@ const FULL_WINDOW_SECONDS = 24 * 3600; // 86400s
 
 describe('getPolicyThroughput', () => {
   let esClient: ElasticsearchClientMock;
-  let dateSpy: jest.SpyInstance;
+  let dateSpy: MockInstance;
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    dateSpy = jest.spyOn(Date, 'now');
+    dateSpy = vi.spyOn(Date, 'now');
   });
 
   afterEach(() => {

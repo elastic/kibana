@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ILicense } from '@kbn/licensing-types';
 import { licenseCheck } from './license';
 
@@ -17,7 +19,7 @@ describe('license check', () => {
 
   it('throws for unsupported license type', () => {
     mockLicense = {
-      hasAtLeast: jest.fn().mockReturnValue(false),
+      hasAtLeast: vi.fn().mockReturnValue(false),
       isActive: false,
     };
     expect(licenseCheck(mockLicense)).toMatchSnapshot();
@@ -25,7 +27,7 @@ describe('license check', () => {
 
   it('throws for inactive license', () => {
     mockLicense = {
-      hasAtLeast: jest.fn().mockReturnValue(true),
+      hasAtLeast: vi.fn().mockReturnValue(true),
       isActive: false,
     };
     expect(licenseCheck(mockLicense)).toMatchSnapshot();
@@ -33,7 +35,7 @@ describe('license check', () => {
 
   it('returns result for a valid license', () => {
     mockLicense = {
-      hasAtLeast: jest.fn().mockReturnValue(true),
+      hasAtLeast: vi.fn().mockReturnValue(true),
       isActive: true,
     };
     expect(licenseCheck(mockLicense)).toMatchSnapshot();

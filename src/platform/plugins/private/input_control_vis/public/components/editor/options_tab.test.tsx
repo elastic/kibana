@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -22,10 +25,10 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('OptionsTab', () => {
   let props: OptionsTabProps;
-  let setValue: jest.MockedFunction<any>;
+  let setValue: MockedFunction<any>;
 
   beforeEach(() => {
-    setValue = jest.fn();
+    setValue = vi.fn();
     props = {
       vis: {} as Vis,
       stateParams: {

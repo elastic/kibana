@@ -5,88 +5,113 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import React from 'react';
 import { HostWindowsOtelPage } from '../windows_otel_page';
 import { buildFetchError, renderWithHostPageProviders } from './test_helpers';
 
-jest.mock('../../../quickstart_flows/otel_logs/steps', () => ({
-  OtelLogsInstallStep: ({ os }: { os: string }) => (
-    <div data-test-subj="otelInstallStep" data-os={os} />
-  ),
-  OtelLogsStartStep: () => <div data-test-subj="otelStartStep" />,
-  OtelLogsVisualizeStep: () => <div data-test-subj="otelVisualizeStep" />,
-}));
+vi.mock('../../../quickstart_flows/otel_logs/steps', () => {
+      const mocked = {
+      OtelLogsInstallStep: ({ os }: { os: string }) => (
+        <div data-test-subj="otelInstallStep" data-os={os} />
+      ),
+      OtelLogsStartStep: () => <div data-test-subj="otelStartStep" />,
+      OtelLogsVisualizeStep: () => <div data-test-subj="otelVisualizeStep" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../quickstart_flows/shared/empty_prompt', () => ({
-  EmptyPrompt: ({
-    onboardingFlowType,
-    inline,
-  }: {
-    onboardingFlowType: string;
-    inline?: boolean;
-  }) => (
-    <div
-      data-test-subj="emptyPromptStub"
-      data-onboarding-flow-type={onboardingFlowType}
-      data-inline={inline ? 'true' : 'false'}
-    />
-  ),
-}));
+vi.mock('../../../quickstart_flows/shared/empty_prompt', () => {
+      const mocked = {
+      EmptyPrompt: ({
+        onboardingFlowType,
+        inline,
+      }: {
+        onboardingFlowType: string;
+        inline?: boolean;
+      }) => (
+        <div
+          data-test-subj="emptyPromptStub"
+          data-onboarding-flow-type={onboardingFlowType}
+          data-inline={inline ? 'true' : 'false'}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/ebt-tools', () => ({
-  usePerformanceContext: () => ({
-    onPageReady: jest.fn(),
-    onPageRefreshStart: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      usePerformanceContext: () => ({
+        onPageReady: vi.fn(),
+        onPageRefreshStart: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_fetcher', () => ({
-  useFetcher: jest.fn().mockReturnValue({
-    data: undefined,
-    status: 'loading',
-    refetch: jest.fn(),
-  }),
-  FETCH_STATUS: {
-    LOADING: 'loading',
-    SUCCESS: 'success',
-    FAILURE: 'failure',
-    NOT_INITIATED: 'not_initiated',
-  },
-}));
+vi.mock('../../../../hooks/use_fetcher', () => {
+      const mocked = {
+      useFetcher: vi.fn().mockReturnValue({
+        data: undefined,
+        status: 'loading',
+        refetch: vi.fn(),
+      }),
+      FETCH_STATUS: {
+        LOADING: 'loading',
+        SUCCESS: 'success',
+        FAILURE: 'failure',
+        NOT_INITIATED: 'not_initiated',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useFetcher: useFetcherMock } = jest.requireMock('../../../../hooks/use_fetcher');
+const { useFetcher: useFetcherMock } = (await vi.importMock('../../../../hooks/use_fetcher'));
 
-jest.mock('../../../quickstart_flows/shared/use_pre_existing_data_check', () => ({
-  usePreExistingDataCheck: jest.fn().mockReturnValue(false),
-}));
-jest.mock('../../../quickstart_flows/shared/use_window_blur_data_monitoring_trigger', () => ({
-  useWindowBlurDataMonitoringTrigger: jest.fn().mockReturnValue(false),
-}));
-jest.mock('../../../quickstart_flows/shared/use_time_window_data_detection', () => ({
-  useTimeWindowDataDetection: jest.fn().mockReturnValue({
-    hasData: false,
-    hasPreExistingData: false,
-    isTroubleshootingVisible: false,
-  }),
-}));
+vi.mock('../../../quickstart_flows/shared/use_pre_existing_data_check', () => {
+      const mocked = {
+      usePreExistingDataCheck: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../quickstart_flows/shared/use_window_blur_data_monitoring_trigger', () => {
+      const mocked = {
+      useWindowBlurDataMonitoringTrigger: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../quickstart_flows/shared/use_time_window_data_detection', () => {
+      const mocked = {
+      useTimeWindowDataDetection: vi.fn().mockReturnValue({
+        hasData: false,
+        hasPreExistingData: false,
+        isTroubleshootingVisible: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { usePreExistingDataCheck: usePreExistingDataCheckMock } = jest.requireMock(
-  '../../../quickstart_flows/shared/use_pre_existing_data_check'
-);
+const { usePreExistingDataCheck: usePreExistingDataCheckMock } = (await vi.importMock('../../../quickstart_flows/shared/use_pre_existing_data_check'));
 const { useWindowBlurDataMonitoringTrigger: useWindowBlurDataMonitoringTriggerMock } =
-  jest.requireMock('../../../quickstart_flows/shared/use_window_blur_data_monitoring_trigger');
-const { useTimeWindowDataDetection: useTimeWindowDataDetectionMock } = jest.requireMock(
-  '../../../quickstart_flows/shared/use_time_window_data_detection'
-);
+  (await vi.importMock('../../../quickstart_flows/shared/use_window_blur_data_monitoring_trigger'));
+const { useTimeWindowDataDetection: useTimeWindowDataDetectionMock } = (await vi.importMock('../../../quickstart_flows/shared/use_time_window_data_detection'));
 
-jest.mock('../../../shared/use_flow_breadcrumbs', () => ({
-  useFlowBreadcrumb: jest.fn(),
-}));
+vi.mock('../../../shared/use_flow_breadcrumbs', () => {
+      const mocked = {
+      useFlowBreadcrumb: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/use_managed_otlp_service_availability', () => ({
-  useManagedOtlpServiceAvailability: () => false,
-}));
+vi.mock('../../../shared/use_managed_otlp_service_availability', () => {
+      const mocked = {
+      useManagedOtlpServiceAvailability: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWindowsOtelPage = (initialEntries: string[] = ['/host/windows']) =>
   renderWithHostPageProviders(<HostWindowsOtelPage />, { initialEntries });
@@ -142,7 +167,7 @@ describe('HostWindowsOtelPage', () => {
       data: undefined,
       status: 'failure',
       error: buildFetchError(),
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     try {
       renderWindowsOtelPage();
@@ -159,7 +184,7 @@ describe('HostWindowsOtelPage', () => {
         useFetcherMock.mockReturnValue({
           data: undefined,
           status: 'loading',
-          refetch: jest.fn(),
+          refetch: vi.fn(),
         });
       }
     }

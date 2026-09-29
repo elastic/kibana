@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '../../../utils/test_helper';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
@@ -15,23 +18,29 @@ const cases = [
   { id: 'case-2', title: 'Case Two', url: '/app/observability/cases/case-2' },
 ];
 
-jest.mock('../hooks/use_case_links', () => ({
-  useCaseLinks: jest.fn(() => ({
-    firstCaseLink: '/app/observability/cases/case-1',
-    casesOverviewLink: '/app/observability/cases',
-  })),
-}));
+vi.mock('../hooks/use_case_links', () => {
+      const mocked = {
+      useCaseLinks: vi.fn(() => ({
+        firstCaseLink: '/app/observability/cases/case-1',
+        casesOverviewLink: '/app/observability/cases',
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_bulk_cases', () => ({
-  useFetchBulkCases: jest.fn(() => ({
-    cases,
-  })),
-}));
+vi.mock('../../../hooks/use_fetch_bulk_cases', () => {
+      const mocked = {
+      useFetchBulkCases: vi.fn(() => ({
+        cases,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useFetchBulkCases } from '../../../hooks/use_fetch_bulk_cases';
 
 describe('CaseLinks', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders a list of case links', () => {
     const { getByText, getAllByRole } = render(
@@ -55,8 +64,8 @@ describe('CaseLinks', () => {
   });
 
   it('renders nothing if cases is empty', () => {
-    (useFetchBulkCases as jest.Mock).mockReset();
-    (useFetchBulkCases as jest.Mock).mockReturnValue({
+    (useFetchBulkCases as Mock).mockReset();
+    (useFetchBulkCases as Mock).mockReturnValue({
       cases: [],
       isLoading: false,
     });
@@ -74,8 +83,8 @@ describe('CaseLinks', () => {
   });
 
   it('renders nothing if cases is undefined', () => {
-    (useFetchBulkCases as jest.Mock).mockReset();
-    (useFetchBulkCases as jest.Mock).mockReturnValue({
+    (useFetchBulkCases as Mock).mockReset();
+    (useFetchBulkCases as Mock).mockReturnValue({
       cases: undefined,
       isLoading: false,
     });

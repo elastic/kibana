@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 
@@ -104,9 +106,9 @@ class TestSOContentStorage extends SOContentStorage<MockCrudTypes> {
 const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
   storage = storage ?? new TestSOContentStorage();
   const requestHandlerCoreContext = coreMock.createRequestHandlerContext();
-  const requestHandlerContext = jest.mocked<RequestHandlerContext>({
+  const requestHandlerContext = vi.mocked<RequestHandlerContext>({
     core: Promise.resolve(requestHandlerCoreContext),
-    resolve: jest.fn(),
+    resolve: vi.fn(),
   });
 
   return {

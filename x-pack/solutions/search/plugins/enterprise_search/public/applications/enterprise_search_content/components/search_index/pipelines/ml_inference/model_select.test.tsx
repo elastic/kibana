@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 
 // EuiSelectable uses ResizeObserver and complex internal state in JSDOM.
@@ -12,8 +14,8 @@ import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logi
 // relying on EUI's internal click handling or DOM measurement.
 let capturedOnChange: ((options: any[]) => void) | undefined;
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiSelectable: (props: any) => {
@@ -75,12 +77,12 @@ const DEFAULT_MODEL: MlModel = {
 };
 
 const MOCK_ACTIONS = {
-  setInferencePipelineConfiguration: jest.fn(),
+  setInferencePipelineConfiguration: vi.fn(),
 };
 
 describe('ModelSelect', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedOnChange = undefined;
     setMockValues({});
     setMockActions(MOCK_ACTIONS);
@@ -207,7 +209,7 @@ describe('ModelSelect', () => {
 
   describe('SelectedModel', () => {
     beforeEach(() => {
-      setMockActions({ createModel: jest.fn(), startModel: jest.fn() });
+      setMockActions({ createModel: vi.fn(), startModel: vi.fn() });
       setMockValues({ areActionButtonsDisabled: false });
     });
 

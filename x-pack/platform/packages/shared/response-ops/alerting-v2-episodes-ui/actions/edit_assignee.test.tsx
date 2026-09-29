@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -22,32 +24,35 @@ import { createEditAssigneeAction } from './edit_assignee';
 import { bulkAssignEpisodeActions } from './bulk_create_alert_actions';
 import { openAssigneeModal } from '../components/assignee_modal';
 
-jest.mock('./bulk_create_alert_actions');
-jest.mock('../components/assignee_modal');
-jest.mock('../components/actions/edit_episode_assignee_popover_item', () => ({
-  EditEpisodeAssigneePopoverItem: ({
-    assigneeUid,
-    episodeCount,
-    onApply,
-  }: {
-    assigneeUid: string | null;
-    episodeCount?: number;
-    onApply: (uid: string | null) => void;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="mockPopoverItem"
-      data-assignee-uid={String(assigneeUid)}
-      data-episode-count={episodeCount}
-      onClick={() => onApply('uid-picked')}
-    >
-      {'Edit assignee'}
-    </button>
-  ),
-}));
+vi.mock('./bulk_create_alert_actions');
+vi.mock('../components/assignee_modal');
+vi.mock('../components/actions/edit_episode_assignee_popover_item', () => {
+      const mocked = {
+      EditEpisodeAssigneePopoverItem: ({
+        assigneeUid,
+        episodeCount,
+        onApply,
+      }: {
+        assigneeUid: string | null;
+        episodeCount?: number;
+        onApply: (uid: string | null) => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="mockPopoverItem"
+          data-assignee-uid={String(assigneeUid)}
+          data-episode-count={episodeCount}
+          onClick={() => onApply('uid-picked')}
+        >
+          {'Edit assignee'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockBulkCreate = jest.mocked(bulkAssignEpisodeActions);
-const mockOpenModal = jest.mocked(openAssigneeModal);
+const mockBulkCreate = vi.mocked(bulkAssignEpisodeActions);
+const mockOpenModal = vi.mocked(openAssigneeModal);
 
 const makeEpisode = (id: string, assigneeUid?: string): AlertEpisode => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -73,7 +78,7 @@ const mockDeps = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockBulkCreate.mockResolvedValue({ affected_count: 2, errors: [] } as never);
 });
 
@@ -104,7 +109,7 @@ describe('createEditAssigneeAction', () => {
     });
 
     it('posts one ASSIGN per episode on apply and refreshes the caller', async () => {
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const action = createEditAssigneeAction(mockDeps);
       render(
         <>
@@ -127,7 +132,7 @@ describe('createEditAssigneeAction', () => {
 
     it('surfaces a danger toast when the bulk request fails', async () => {
       mockBulkCreate.mockRejectedValue(new Error('boom'));
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const action = createEditAssigneeAction(mockDeps);
       render(<>{action.renderMenuItem!({ episodes: [makeEpisode('ep-1')], onSuccess })}</>);
 

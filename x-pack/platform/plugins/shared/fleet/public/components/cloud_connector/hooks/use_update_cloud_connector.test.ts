@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,18 +17,18 @@ import { CLOUD_CONNECTOR_API_ROUTES } from '../../../constants';
 
 import { useUpdateCloudConnector } from './use_update_cloud_connector';
 
-jest.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public');
 
 const mockHttp = {
-  put: jest.fn(),
+  put: vi.fn(),
 };
 
 const mockToasts = {
-  addSuccess: jest.fn(),
-  addError: jest.fn(),
+  addSuccess: vi.fn(),
+  addError: vi.fn(),
 };
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 const mockCloudConnector = {
   id: 'connector-123',
@@ -41,7 +44,7 @@ describe('useUpdateCloudConnector', () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
 
     queryClient = new QueryClient({
       defaultOptions: {
@@ -70,7 +73,7 @@ describe('useUpdateCloudConnector', () => {
 
   afterEach(() => {
     queryClient.clear();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -116,7 +119,7 @@ describe('useUpdateCloudConnector', () => {
   it('should call onSuccess callback on successful update', async () => {
     const updatedConnector = { ...mockCloudConnector, name: 'Updated Name' };
     mockHttp.put.mockResolvedValue({ item: updatedConnector });
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     const { result } = renderHook(() => useUpdateCloudConnector('connector-123', onSuccess), {
       wrapper,
@@ -187,7 +190,7 @@ describe('useUpdateCloudConnector', () => {
       response: {},
     });
     mockHttp.put.mockRejectedValue(httpError);
-    const onError = jest.fn();
+    const onError = vi.fn();
 
     const { result } = renderHook(
       () => useUpdateCloudConnector('connector-123', undefined, onError),

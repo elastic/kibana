@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CasesPermissions } from '@kbn/cases-plugin/common';
 import { renderHook } from '@testing-library/react';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
@@ -12,11 +14,11 @@ import { noCasesPermissions } from '../../../cases_test_utils';
 import { APP_ID } from '../../../../common/constants';
 import { useCanAttachToCase } from './use_can_attach_to_case';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 describe('useCanAttachToCase', () => {
   const mockedUseKibana = mockUseKibana();
-  const mockCanUseCases = jest.fn();
+  const mockCanUseCases = vi.fn();
 
   beforeEach(() => {
     mockedUseKibana.services.cases.helpers.canUseCases = mockCanUseCases;

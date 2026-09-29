@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills/tools';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
@@ -16,11 +19,9 @@ import type {
 } from '../../../lib/alert_analysis/services/find_related_alerts';
 import { RELATED_ALERTS_INLINE_MAX_RESULTS } from '../../../lib/alert_analysis/services/find_related_alerts';
 
-jest.mock('../../../lib/alert_analysis/services/find_related_alerts');
+vi.mock('../../../lib/alert_analysis/services/find_related_alerts');
 
-const { findRelatedAlerts } = jest.requireMock(
-  '../../../lib/alert_analysis/services/find_related_alerts'
-) as { findRelatedAlerts: jest.MockedFunction<() => Promise<FindRelatedAlertsResult>> };
+const { findRelatedAlerts } = (await vi.importMock('../../../lib/alert_analysis/services/find_related_alerts')) as { findRelatedAlerts: MockedFunction<() => Promise<FindRelatedAlertsResult>> };
 
 interface ResultData {
   message?: string;
@@ -71,7 +72,7 @@ describe('alertAnalysisSkill', () => {
       let tool: BuiltinSkillBoundedTool;
 
       beforeEach(async () => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         const inlineTools = await alertAnalysisSkill.getInlineTools?.();
         tool = inlineTools![0] as BuiltinSkillBoundedTool;
       });

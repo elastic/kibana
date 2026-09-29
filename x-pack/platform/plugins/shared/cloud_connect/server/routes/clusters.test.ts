@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedClass, MockedFunction } from 'vitest';
+
 import type { IRouter } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerClustersRoute } from './clusters';
@@ -12,56 +15,56 @@ import { CloudConnectClient } from '../services/cloud_connect_client';
 import type { CloudConnectApiKey } from '../types';
 import { CLOUD_CONNECT_READ_SECURITY, CLOUD_CONNECT_MANAGE_SECURITY } from './route_security';
 
-jest.mock('../services/cloud_connect_client');
-jest.mock('../lib/create_storage_service');
-jest.mock('../services/inference_ccm');
+vi.mock('../services/cloud_connect_client');
+vi.mock('../lib/create_storage_service');
+vi.mock('../services/inference_ccm');
 
 describe('Clusters Routes', () => {
-  let mockRouter: jest.Mocked<IRouter>;
+  let mockRouter: Mocked<IRouter>;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockStorageService: {
-    getApiKey: jest.MockedFunction<() => Promise<CloudConnectApiKey | undefined>>;
-    saveApiKey: jest.MockedFunction<(apiKey: string, clusterId: string) => Promise<void>>;
-    deleteApiKey: jest.MockedFunction<() => Promise<void>>;
+    getApiKey: MockedFunction<() => Promise<CloudConnectApiKey | undefined>>;
+    saveApiKey: MockedFunction<(apiKey: string, clusterId: string) => Promise<void>>;
+    deleteApiKey: MockedFunction<() => Promise<void>>;
   };
-  let mockCloudConnectInstance: jest.Mocked<CloudConnectClient>;
+  let mockCloudConnectInstance: Mocked<CloudConnectClient>;
   let mockContext: any;
   let mockRequest: any;
   let mockResponse: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockLogger = loggingSystemMock.createLogger();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 
     mockStorageService = {
-      getApiKey: jest.fn(),
-      saveApiKey: jest.fn(),
-      deleteApiKey: jest.fn(),
+      getApiKey: vi.fn(),
+      saveApiKey: vi.fn(),
+      deleteApiKey: vi.fn(),
     };
 
     mockCloudConnectInstance = {
-      validateApiKeyScope: jest.fn(),
-      getClusterDetails: jest.fn(),
-      onboardCluster: jest.fn(),
-      onboardClusterWithKeyGeneration: jest.fn(),
-      updateCluster: jest.fn(),
-      deleteCluster: jest.fn(),
-      getOrganizationSubscription: jest.fn(),
+      validateApiKeyScope: vi.fn(),
+      getClusterDetails: vi.fn(),
+      onboardCluster: vi.fn(),
+      onboardClusterWithKeyGeneration: vi.fn(),
+      updateCluster: vi.fn(),
+      deleteCluster: vi.fn(),
+      getOrganizationSubscription: vi.fn(),
     } as any;
 
     // Mock the CloudConnectClient constructor to return our mock instance
-    (CloudConnectClient as jest.MockedClass<typeof CloudConnectClient>).mockImplementation(
+    (CloudConnectClient as MockedClass<typeof CloudConnectClient>).mockImplementation(
       () => mockCloudConnectInstance
     );
 
     mockRouter = {
-      get: jest.fn(),
-      post: jest.fn(),
-      put: jest.fn(),
-      delete: jest.fn(),
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn(),
     } as any;
 
     mockContext = {
@@ -72,18 +75,18 @@ describe('Clusters Routes', () => {
           },
         },
         savedObjects: {
-          getClient: jest.fn(),
+          getClient: vi.fn(),
         },
       }),
     };
 
     mockResponse = {
-      ok: jest.fn((params) => params),
-      badRequest: jest.fn((params) => params),
-      unauthorized: jest.fn((params) => params),
-      forbidden: jest.fn((params) => params),
-      notFound: jest.fn((params) => params),
-      customError: jest.fn((params) => params),
+      ok: vi.fn((params) => params),
+      badRequest: vi.fn((params) => params),
+      unauthorized: vi.fn((params) => params),
+      forbidden: vi.fn((params) => params),
+      notFound: vi.fn((params) => params),
+      customError: vi.fn((params) => params),
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -95,7 +98,7 @@ describe('Clusters Routes', () => {
     let routeHandler: Function;
 
     beforeEach(() => {
-      const mockGetStartServices = jest.fn();
+      const mockGetStartServices = vi.fn();
 
       registerClustersRoute({
         router: mockRouter,
@@ -456,7 +459,7 @@ describe('Clusters Routes', () => {
     let routeHandler: Function;
 
     beforeEach(() => {
-      const mockGetStartServices = jest.fn();
+      const mockGetStartServices = vi.fn();
 
       registerClustersRoute({
         router: mockRouter,
@@ -581,7 +584,7 @@ describe('Clusters Routes', () => {
     let routeHandler: Function;
 
     beforeEach(() => {
-      const mockGetStartServices = jest.fn();
+      const mockGetStartServices = vi.fn();
 
       registerClustersRoute({
         router: mockRouter,

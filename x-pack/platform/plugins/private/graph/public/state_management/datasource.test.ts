@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { MockedGraphEnvironment } from './mocks';
 import { createMockGraphStore } from './mocks';
 import type { AdvancedSettings, WorkspaceField } from '../types';
@@ -24,7 +27,7 @@ describe('datasource saga', () => {
       sagas: [datasourceSaga],
       mockedDepsOverwrites: {
         indexPatternProvider: {
-          get: jest.fn(() =>
+          get: vi.fn(() =>
             Promise.resolve({
               title: 'test-pattern',
               getNonScriptedFields: () => [{ name: 'field1', type: 'string', isMapped: true }],
@@ -71,7 +74,7 @@ describe('datasource saga', () => {
   });
 
   it('should error with a toast and abort if index pattern is not found', async () => {
-    (env.mockedDeps.indexPatternProvider.get as jest.Mock).mockRejectedValueOnce(new Error());
+    (env.mockedDeps.indexPatternProvider.get as Mock).mockRejectedValueOnce(new Error());
     dispatchRequest();
     await waitForPromise();
     expect(env.mockedDeps.notifications.toasts.addDanger).toHaveBeenCalled();

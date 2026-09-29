@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import {
   SettingsContextProvider,
@@ -27,7 +29,7 @@ describe('settings_context', () => {
       },
     });
     const updateSubject = new Subject<{ key: string }>();
-    const set = jest.fn().mockResolvedValue(undefined);
+    const set = vi.fn().mockResolvedValue(undefined);
 
     const rendered = renderHook(() => useSettingsContext(), {
       wrapper: ({ children }) => (
@@ -35,8 +37,8 @@ describe('settings_context', () => {
           services={{
             notifications: {
               toasts: {
-                addDanger: jest.fn(),
-                addSuccess: jest.fn(),
+                addDanger: vi.fn(),
+                addSuccess: vi.fn(),
               },
             },
             settings: {
@@ -46,7 +48,7 @@ describe('settings_context', () => {
                 isOverridden: () => false,
                 isCustom: () => false,
                 set,
-                getAll: jest.fn().mockReturnValue({
+                getAll: vi.fn().mockReturnValue({
                   'genAiSettings:defaultAIConnector': {
                     readonlyMode: 'ui',
                     value: 'NO_DEFAULT_CONNECTOR',
@@ -94,7 +96,7 @@ describe('settings_context', () => {
 
   it('should subscribe to settings updates and invalidate queries for tracked settings', async () => {
     const { result, queryClient, updateSubject } = setupSettingsContext();
-    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     await waitFor(() => {
       expect(result.current.fields).toBeDefined();
@@ -313,8 +315,8 @@ describe('settings_context', () => {
     });
 
     it('should show success toast when settings are saved successfully', async () => {
-      const addSuccess = jest.fn();
-      const set = jest.fn().mockResolvedValue(undefined);
+      const addSuccess = vi.fn();
+      const set = vi.fn().mockResolvedValue(undefined);
 
       // We need to setup the context with a way to access the addSuccess mock
       const setupWithSuccessMock = () => {
@@ -326,7 +328,7 @@ describe('settings_context', () => {
               services={{
                 notifications: {
                   toasts: {
-                    addDanger: jest.fn(),
+                    addDanger: vi.fn(),
                     addSuccess,
                   },
                 },
@@ -337,7 +339,7 @@ describe('settings_context', () => {
                     isOverridden: () => false,
                     isCustom: () => false,
                     set,
-                    getAll: jest.fn().mockReturnValue({
+                    getAll: vi.fn().mockReturnValue({
                       'genAiSettings:defaultAIConnector': {
                         readonlyMode: 'ui',
                         value: 'NO_DEFAULT_CONNECTOR',
@@ -399,7 +401,7 @@ describe('settings_context', () => {
               services={{
                 notifications: {
                   toasts: {
-                    addDanger: jest.fn(),
+                    addDanger: vi.fn(),
                   },
                 },
                 settings: {
@@ -407,8 +409,8 @@ describe('settings_context', () => {
                     getUpdateErrors$: () => new Subject(),
                     isOverridden: () => false,
                     isCustom: () => false,
-                    set: jest.fn(),
-                    getAll: jest.fn().mockReturnValue({}),
+                    set: vi.fn(),
+                    getAll: vi.fn().mockReturnValue({}),
                   },
                 },
               }}
@@ -431,7 +433,7 @@ describe('settings_context', () => {
             services={{
               notifications: {
                 toasts: {
-                  addDanger: jest.fn(),
+                  addDanger: vi.fn(),
                 },
               },
               settings: {
@@ -440,8 +442,8 @@ describe('settings_context', () => {
                   getUpdateErrors$: () => new Subject(),
                   isOverridden: () => false,
                   isCustom: () => false,
-                  set: jest.fn(),
-                  getAll: jest.fn().mockReturnValue({}),
+                  set: vi.fn(),
+                  getAll: vi.fn().mockReturnValue({}),
                 },
               },
             }}
@@ -469,7 +471,7 @@ describe('settings_context', () => {
             services={{
               notifications: {
                 toasts: {
-                  addDanger: jest.fn(),
+                  addDanger: vi.fn(),
                 },
               },
               settings: {
@@ -478,8 +480,8 @@ describe('settings_context', () => {
                   getUpdateErrors$: () => new Subject(),
                   isOverridden: () => false,
                   isCustom: () => false,
-                  set: jest.fn(),
-                  getAll: jest.fn().mockReturnValue({}),
+                  set: vi.fn(),
+                  getAll: vi.fn().mockReturnValue({}),
                 },
               },
             }}

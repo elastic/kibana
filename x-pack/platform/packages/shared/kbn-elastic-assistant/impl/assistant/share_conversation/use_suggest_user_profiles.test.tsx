@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useSuggestUserProfiles } from './use_suggest_user_profiles';
 import { TestProviders } from '../../mock/test_providers/test_providers';
@@ -17,18 +20,18 @@ const testProps = {
   searchTerm: mockSearchTerm,
   forbiddenUsers: [MOCK_CURRENT_USER.id],
   size: 5,
-  onDebounce: jest.fn(),
+  onDebounce: vi.fn(),
 };
-jest.mock('../../..');
+vi.mock('../../..');
 const mockUsers = [MOCK_USER_PROFILE];
 const http = {
-  post: jest.fn().mockResolvedValue(mockUsers),
+  post: vi.fn().mockResolvedValue(mockUsers),
 } as unknown as HttpSetup;
 
 describe('useSuggestUserProfiles', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAssistantContext as Mock).mockReturnValue({
       http,
       assistantAvailability: {
         isAssistantEnabled: true,
@@ -50,7 +53,7 @@ describe('useSuggestUserProfiles', () => {
   });
 
   it('should call onDebounce when searchTerm changes', async () => {
-    const onDebounce = jest.fn();
+    const onDebounce = vi.fn();
     const initialProps = { ...testProps, onDebounce };
     const { rerender } = renderHook(() => useSuggestUserProfiles(initialProps), {
       initialProps,

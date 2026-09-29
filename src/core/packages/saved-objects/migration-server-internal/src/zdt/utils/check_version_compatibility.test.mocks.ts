@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getVirtualVersionsFromMappingsMock = jest.fn();
-export const compareVirtualVersionsMock = jest.fn();
-export const getVirtualVersionMapMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('@kbn/core-saved-objects-base-server-internal', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-base-server-internal');
+export const getVirtualVersionsFromMappingsMock = vi.fn();
+export const compareVirtualVersionsMock = vi.fn();
+export const getVirtualVersionMapMock = vi.fn();
+
+vi.doMock('@kbn/core-saved-objects-base-server-internal', async () => {
+  const actual = (await vi.importActual('@kbn/core-saved-objects-base-server-internal'));
   return {
     ...actual,
     getVirtualVersionsFromMappings: getVirtualVersionsFromMappingsMock,
@@ -21,10 +23,10 @@ jest.doMock('@kbn/core-saved-objects-base-server-internal', () => {
   };
 });
 
-export const getUpdatedRootFieldsMock = jest.fn();
+export const getUpdatedRootFieldsMock = vi.fn();
 
-jest.doMock('../../core/compare_mappings', () => {
-  const actual = jest.requireActual('../../core/compare_mappings');
+vi.doMock('../../core/compare_mappings', async () => {
+  const actual = (await vi.importActual('../../core/compare_mappings'));
   return {
     ...actual,
     getUpdatedRootFields: getUpdatedRootFieldsMock,

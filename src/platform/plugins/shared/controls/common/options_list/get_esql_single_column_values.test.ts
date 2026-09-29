@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type {
   GetESQLSingleColumnValuesSuccess,
@@ -13,9 +15,9 @@ import type {
 } from './get_esql_single_column_values';
 import { getESQLSingleColumnValues } from './get_esql_single_column_values';
 
-const mockGetESQLResults = jest.fn();
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
+const mockGetESQLResults = vi.fn();
+vi.mock('@kbn/esql-utils', async () => ({
+  ...(await vi.importActual('@kbn/esql-utils')),
   getESQLResults: (...args: unknown[]) => mockGetESQLResults(...args),
 }));
 
@@ -23,7 +25,7 @@ const searchMock = {} as ISearchGeneric;
 
 describe('getESQLSingleColumnValues', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   it('returns string values for non-numeric columns', async () => {
     mockGetESQLResults.mockResolvedValueOnce({

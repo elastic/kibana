@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { keys } from '@elastic/eui';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -28,7 +31,7 @@ describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js'
   const getColorRulesProps = (gaugeColorRules: unknown = []) => ({
     name: 'gauge_color_rules',
     model: { gauge_color_rules: gaugeColorRules },
-    onChange: jest.fn(),
+    onChange: vi.fn(),
   });
 
   const defaultProps = getColorRulesProps([
@@ -60,7 +63,7 @@ describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js'
       const emptyProps = {
         name: 'gauge_color_rules',
         model: {},
-        onChange: jest.fn(),
+        onChange: vi.fn(),
       } as unknown as ColorRulesProps;
       const wrapper = mountWithIntl(<ColorRules {...emptyProps} />);
       const isNode = wrapper.find('div').children().exists();
@@ -75,29 +78,29 @@ describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js'
     });
 
     it('should handle change of operator and value correctly', () => {
-      collectionActions.handleChange = jest.fn();
+      collectionActions.handleChange = vi.fn();
       const wrapper = mountWithIntl(<ColorRules {...defaultProps} />);
       const operatorInput = findTestSubject(wrapper, 'colorRuleOperator').find('input');
       operatorInput.simulate('keyDown', { key: keys.ARROW_DOWN });
       operatorInput.simulate('keyDown', { key: keys.ARROW_DOWN });
       operatorInput.simulate('keyDown', { key: keys.ENTER });
-      expect((collectionActions.handleChange as jest.Mock).mock.calls[0][1].operator).toEqual('gt');
+      expect((collectionActions.handleChange as Mock).mock.calls[0][1].operator).toEqual('gt');
 
       const numberInput = findTestSubject(wrapper, 'colorRuleValue');
 
       numberInput.simulate('change', { target: { value: '123' } });
-      expect((collectionActions.handleChange as jest.Mock).mock.calls[1][1].value).toEqual(123);
+      expect((collectionActions.handleChange as Mock).mock.calls[1][1].value).toEqual(123);
     });
 
     it('should handle render of value field if empty value oparetor is selected by default', () => {
-      collectionActions.handleChange = jest.fn();
+      collectionActions.handleChange = vi.fn();
       const wrapper = mountWithIntl(<ColorRules {...emptyColorRuleProps} />);
       const numberInput = findTestSubject(wrapper, 'colorRuleValue');
       expect(numberInput.exists()).toBeFalsy();
     });
 
     it('should handle render of value field if not empty operator is selected by default', () => {
-      collectionActions.handleChange = jest.fn();
+      collectionActions.handleChange = vi.fn();
       const wrapper = mountWithIntl(<ColorRules {...notEmptyColorRuleProps} />);
       const numberInput = findTestSubject(wrapper, 'colorRuleValue');
       expect(numberInput.exists()).toBeTruthy();

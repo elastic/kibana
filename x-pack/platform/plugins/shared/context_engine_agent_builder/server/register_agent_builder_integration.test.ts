@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreSetup } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AiIndexResolver } from '@kbn/agent-builder-server';
@@ -24,12 +26,18 @@ import type {
   ContextEngineAgentBuilderStartDependencies,
 } from './types';
 
-jest.mock('./agent_builder/tools', () => ({
-  registerAgentBuilderTools: jest.fn(),
-}));
-jest.mock('./attachment_types', () => ({
-  registerAttachmentTypes: jest.fn(),
-}));
+vi.mock('./agent_builder/tools', () => {
+      const mocked = {
+      registerAgentBuilderTools: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./attachment_types', () => {
+      const mocked = {
+      registerAttachmentTypes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const request = {} as KibanaRequest;
 
@@ -44,21 +52,21 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
   }) => {
     const checkPrivileges =
       authorized instanceof Error
-        ? jest.fn().mockRejectedValue(authorized)
-        : jest.fn().mockResolvedValue({ hasAllRequested: authorized });
+        ? vi.fn().mockRejectedValue(authorized)
+        : vi.fn().mockResolvedValue({ hasAllRequested: authorized });
     const security = {
       authz: {
-        checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
+        checkPrivilegesDynamicallyWithRequest: vi.fn().mockReturnValue(checkPrivileges),
         actions: { api: { get: (privilege: string) => `api:${privilege}` } },
       },
     };
 
-    const list = jest.fn().mockResolvedValue(aiIndices);
-    const getAiIndexDataReadService = jest.fn().mockReturnValue({ list });
+    const list = vi.fn().mockResolvedValue(aiIndices);
+    const getAiIndexDataReadService = vi.fn().mockReturnValue({ list });
     const asCurrentUser = {};
-    const asScoped = jest.fn().mockReturnValue({ asCurrentUser });
+    const asScoped = vi.fn().mockReturnValue({ asCurrentUser });
     const coreSetup = {
-      getStartServices: jest.fn().mockResolvedValue([
+      getStartServices: vi.fn().mockResolvedValue([
         { elasticsearch: { client: { asScoped } } },
         {
           contextEngine: { getAiIndexDataReadService },
@@ -72,12 +80,12 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     >;
 
     let resolver: AiIndexResolver | undefined;
-    const register = jest.fn();
+    const register = vi.fn();
     const agentBuilder = {
       agents: {
         register,
-        registerType: jest.fn(),
-        registerAiIndexResolver: jest.fn((registered: AiIndexResolver) => {
+        registerType: vi.fn(),
+        registerAiIndexResolver: vi.fn((registered: AiIndexResolver) => {
           resolver = registered;
         }),
       },
@@ -106,7 +114,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
 
   it('registers the tools with a Context Engine start accessor', async () => {
     const { getAiIndexDataReadService } = setup({ aiIndices: [] });
-    const { registerAgentBuilderTools } = jest.requireMock('./agent_builder/tools');
+    const { registerAgentBuilderTools } = (await vi.importMock('./agent_builder/tools'));
 
     const [{ getContextEngineStart }] = registerAgentBuilderTools.mock.calls.at(-1);
 
@@ -215,14 +223,14 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     const { availability } = register.mock.calls[0][0];
 
     const unavailable = await availability.handler({
-      uiSettings: { get: jest.fn().mockResolvedValue(false) } as any,
+      uiSettings: { get: vi.fn().mockResolvedValue(false) } as any,
       request: {} as any,
       spaceId: 'my-space',
     });
     expect(unavailable.status).toBe('unavailable');
 
     const available = await availability.handler({
-      uiSettings: { get: jest.fn().mockResolvedValue(true) } as any,
+      uiSettings: { get: vi.fn().mockResolvedValue(true) } as any,
       request: {} as any,
       spaceId: 'my-space',
     });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { screen, render } from '@testing-library/react';
 
@@ -17,25 +20,28 @@ import {
 } from '../../translations';
 import { getFormattedCheckTime } from '../../data_quality_details/indices_details/pattern/index_check_flyout/utils/get_formatted_check_time';
 
-jest.mock('@kbn/elastic-assistant', () => ({
-  NewChat: jest.fn(({ children }) => (
-    <button type="button" data-test-subj="newChatLink">
-      {children}
-    </button>
-  )),
-  useFindPrompts: jest.fn().mockReturnValue({
-    data: { prompts: [] },
-  }),
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      NewChat: vi.fn(({ children }) => (
+        <button type="button" data-test-subj="newChatLink">
+          {children}
+        </button>
+      )),
+      useFindPrompts: vi.fn().mockReturnValue({
+        data: { prompts: [] },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useFindPromptsMock = useFindPrompts as unknown as jest.Mock<
+const useFindPromptsMock = useFindPrompts as unknown as Mock<
   Pick<ReturnType<typeof useFindPrompts>, 'data'>
 >;
-const NewChatMock = NewChat as jest.MockedFunction<typeof NewChat>;
+const NewChatMock = NewChat as MockedFunction<typeof NewChat>;
 
 describe('ChatAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render new chat link', async () => {
@@ -171,7 +177,7 @@ describe('ChatAction', () => {
       const markdownComment = 'test markdown';
       const indexName = 'test-index';
 
-      (useFindPrompts as jest.Mock).mockReturnValue({
+      (useFindPrompts as Mock).mockReturnValue({
         data: {
           prompts: [{ promptId: 'other', prompt: 'Other prompt' }],
         },

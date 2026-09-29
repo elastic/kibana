@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -32,7 +34,7 @@ const TestComponent = ({ policy }: { policy: PolicyFromES }) => {
 
 describe('View policy flyout', () => {
   beforeEach(() => {
-    jest.spyOn(readOnlyHook, 'useIsReadOnly').mockReturnValue(false);
+    vi.spyOn(readOnlyHook, 'useIsReadOnly').mockReturnValue(false);
   });
 
   it('shows all phases', () => {
@@ -47,7 +49,7 @@ describe('View policy flyout', () => {
   });
 
   it(`doesn't render manage button in read only view`, () => {
-    jest.spyOn(readOnlyHook, 'useIsReadOnly').mockReturnValue(true);
+    vi.spyOn(readOnlyHook, 'useIsReadOnly').mockReturnValue(true);
     renderWithI18n(<TestComponent policy={policyAllPhases} />);
     const button = screen.queryByTestId('managePolicyButton');
     expect(button).not.toBeInTheDocument();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -153,12 +155,12 @@ describe('FetchHistoricalSummary', () => {
   let esClientMock: ElasticsearchClientMock;
 
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-01-18T15:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-01-18T15:00:00.000Z'));
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('Rolling and Occurrences SLOs', () => {

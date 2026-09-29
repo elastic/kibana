@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { monaco } from '@kbn/code-editor';
 import {
   filterHighlightableValidationResults,
@@ -19,9 +21,12 @@ import { performComputation } from '../../../entities/workflows/store/workflow_d
 
 const emptyRegistry = createMockWorkflowContextRegistry();
 
-jest.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => ({
-  validateEsqlSteps: jest.fn(async () => []),
-}));
+vi.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => {
+      const mocked = {
+      validateEsqlSteps: vi.fn(async () => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /** Broken YAML shared by editor and change-history preview validation paths. */
 export const WORKFLOW_YAML_VALIDATION_PARITY_FIXTURE = [

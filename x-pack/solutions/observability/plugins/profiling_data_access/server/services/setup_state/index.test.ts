@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { RegisterServicesParams } from '../register_services';
 import * as setupStateModule from '.';
@@ -12,25 +14,34 @@ import { cloudSetupState } from './cloud_setup_state';
 import { selfManagedSetupState } from './self_managed_setup_state';
 import { serverlessSetupState } from './serverless_setup_state';
 
-jest.mock('./cloud_setup_state', () => ({
-  cloudSetupState: jest.fn(),
-}));
+vi.mock('./cloud_setup_state', () => {
+      const mocked = {
+      cloudSetupState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./self_managed_setup_state', () => ({
-  selfManagedSetupState: jest.fn(),
-}));
+vi.mock('./self_managed_setup_state', () => {
+      const mocked = {
+      selfManagedSetupState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./serverless_setup_state', () => ({
-  serverlessSetupState: jest.fn(),
-}));
+vi.mock('./serverless_setup_state', () => {
+      const mocked = {
+      serverlessSetupState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedCloudSetupState = jest.mocked(cloudSetupState);
-const mockedSelfManagedSetupState = jest.mocked(selfManagedSetupState);
-const mockedServerlessSetupState = jest.mocked(serverlessSetupState);
+const mockedCloudSetupState = vi.mocked(cloudSetupState);
+const mockedSelfManagedSetupState = vi.mocked(selfManagedSetupState);
+const mockedServerlessSetupState = vi.mocked(serverlessSetupState);
 
 describe('getSetupState', () => {
   const logger = {
-    debug: jest.fn(),
+    debug: vi.fn(),
   } as unknown as RegisterServicesParams['logger'];
 
   const packagePolicyService = {} as NonNullable<
@@ -47,7 +58,7 @@ describe('getSetupState', () => {
   const internalProfilingClient = { name: 'internal-profiling-client' };
   const currentProfilingClient = { name: 'current-profiling-client' };
 
-  const createProfilingEsClient = jest.fn(({ esClient: scopedClient }: { esClient: unknown }) => {
+  const createProfilingEsClient = vi.fn(({ esClient: scopedClient }: { esClient: unknown }) => {
     if (scopedClient === internalEsClient) {
       return internalProfilingClient as any;
     }
@@ -58,7 +69,7 @@ describe('getSetupState', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('uses serverless setup state when isServerless is true', async () => {

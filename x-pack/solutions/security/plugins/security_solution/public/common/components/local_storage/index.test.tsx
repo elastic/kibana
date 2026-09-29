@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import { APP_ID } from '../../../../common/constants';
@@ -25,13 +27,13 @@ const mockedUseKibana = {
     ...mockUseKibana().services,
     storage: {
       ...mockUseKibana().services.storage,
-      get: jest.fn(),
-      set: jest.fn(),
+      get: vi.fn(),
+      set: vi.fn(),
     },
   },
 };
 
-jest.mock('../../lib/kibana', () => {
+vi.mock('../../lib/kibana', () => {
   return {
     useKibana: () => mockedUseKibana,
   };
@@ -39,7 +41,7 @@ jest.mock('../../lib/kibana', () => {
 
 describe('useLocalStorage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it returns the expected value from local storage', async () => {

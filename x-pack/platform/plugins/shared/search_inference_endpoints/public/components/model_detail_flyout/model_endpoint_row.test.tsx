@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { EisInferenceEndpoint } from '../../../common/types';
@@ -20,10 +22,10 @@ const createEndpoint = (overrides: Partial<EisInferenceEndpoint> = {}): EisInfer
 });
 
 describe('ModelEndpointRow', () => {
-  const onView = jest.fn();
-  const onCopy = jest.fn();
+  const onView = vi.fn();
+  const onCopy = vi.fn();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders endpoint id and task type badge', () => {
     render(<ModelEndpointRow endpoint={createEndpoint()} onView={onView} onCopy={onCopy} />);

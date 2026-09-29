@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 import { useNavigateTo } from '@kbn/security-solution-navigation';
@@ -17,38 +20,53 @@ import {
   CONFIGURATIONS_INTEGRATIONS_PATH,
 } from '../../../common/constants';
 
-jest.mock('react-router-dom', () => ({
-  useLocation: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useLocation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/security-solution-navigation', () => ({
-  useNavigateTo: jest.fn(),
-}));
+vi.mock('@kbn/security-solution-navigation', () => {
+      const mocked = {
+      useNavigateTo: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../helpers', () => ({
-  isThreatIntelligencePath: jest.fn(),
-}));
+vi.mock('../../helpers', () => {
+      const mocked = {
+      isThreatIntelligencePath: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/capabilities', () => ({
-  hasCapabilities: jest.fn(),
-}));
+vi.mock('../lib/capabilities', () => {
+      const mocked = {
+      hasCapabilities: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { hasCapabilities } from '../lib/capabilities';
 
 describe('useAddIntegrationsUrl', () => {
-  const mockPrepend = jest.fn((path) => `/mock-base-path${path}`);
-  const mockNavigateTo = jest.fn();
+  const mockPrepend = vi.fn((path) => `/mock-base-path${path}`);
+  const mockNavigateTo = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useLocation as jest.Mock).mockReturnValue({ pathname: '/some/path' });
-    (useNavigateTo as jest.Mock).mockReturnValue({ navigateTo: mockNavigateTo });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useLocation as Mock).mockReturnValue({ pathname: '/some/path' });
+    (useNavigateTo as Mock).mockReturnValue({ navigateTo: mockNavigateTo });
+    (useKibana as Mock).mockReturnValue({
       services: {
         http: {
           basePath: {
@@ -60,12 +78,12 @@ describe('useAddIntegrationsUrl', () => {
         },
       },
     });
-    (isThreatIntelligencePath as jest.Mock).mockReturnValue(false);
-    (hasCapabilities as jest.Mock).mockReturnValue(false);
+    (isThreatIntelligencePath as Mock).mockReturnValue(false);
+    (hasCapabilities as Mock).mockReturnValue(false);
   });
 
   it('returns ADD_THREAT_INTELLIGENCE_DATA_PATH when on threat intelligence path', () => {
-    (isThreatIntelligencePath as jest.Mock).mockReturnValue(true);
+    (isThreatIntelligencePath as Mock).mockReturnValue(true);
 
     const { result } = renderHook(() => useAddIntegrationsUrl());
 
@@ -74,8 +92,8 @@ describe('useAddIntegrationsUrl', () => {
   });
 
   it('returns CONFIGURATIONS_INTEGRATIONS_PATH when user has configurations capabilities', () => {
-    (isThreatIntelligencePath as jest.Mock).mockReturnValue(false);
-    (hasCapabilities as jest.Mock).mockReturnValue(true);
+    (isThreatIntelligencePath as Mock).mockReturnValue(false);
+    (hasCapabilities as Mock).mockReturnValue(true);
 
     const { result } = renderHook(() => useAddIntegrationsUrl());
 
@@ -84,8 +102,8 @@ describe('useAddIntegrationsUrl', () => {
   });
 
   it('returns ADD_DATA_PATH when not on threat intelligence path and no configurations capabilities', () => {
-    (isThreatIntelligencePath as jest.Mock).mockReturnValue(false);
-    (hasCapabilities as jest.Mock).mockReturnValue(false);
+    (isThreatIntelligencePath as Mock).mockReturnValue(false);
+    (hasCapabilities as Mock).mockReturnValue(false);
 
     const { result } = renderHook(() => useAddIntegrationsUrl());
 
@@ -97,7 +115,7 @@ describe('useAddIntegrationsUrl', () => {
     const { result } = renderHook(() => useAddIntegrationsUrl());
 
     const mockEvent = {
-      preventDefault: jest.fn(),
+      preventDefault: vi.fn(),
     } as unknown as React.SyntheticEvent;
 
     act(() => {
@@ -110,14 +128,14 @@ describe('useAddIntegrationsUrl', () => {
 
   it('updates href when dependencies change', () => {
     // Initial render with ADD_DATA_PATH
-    (isThreatIntelligencePath as jest.Mock).mockReturnValue(false);
-    (hasCapabilities as jest.Mock).mockReturnValue(false);
+    (isThreatIntelligencePath as Mock).mockReturnValue(false);
+    (hasCapabilities as Mock).mockReturnValue(false);
 
     const { result, rerender } = renderHook(() => useAddIntegrationsUrl());
     expect(result.current.href).toBe(`/mock-base-path${ADD_DATA_PATH}`);
 
     // Update to threat intelligence path
-    (isThreatIntelligencePath as jest.Mock).mockReturnValue(true);
+    (isThreatIntelligencePath as Mock).mockReturnValue(true);
     rerender();
 
     expect(result.current.href).toBe(`/mock-base-path${ADD_THREAT_INTELLIGENCE_DATA_PATH}`);

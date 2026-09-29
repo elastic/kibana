@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { MetricsDataClient, DEFAULT_METRIC_INDICES } from './client';
@@ -15,7 +17,7 @@ describe('MetricsDataClient', () => {
     it('retrieves metrics saved object', async () => {
       const client = new MetricsDataClient();
       const savedObjectsClient = {
-        get: jest.fn().mockResolvedValue({ attributes: { metricIndices: 'foo,bar' } }),
+        get: vi.fn().mockResolvedValue({ attributes: { metricIndices: 'foo,bar' } }),
       };
 
       const indices = await client.getMetricIndices({
@@ -36,7 +38,7 @@ describe('MetricsDataClient', () => {
         return 'fallback-indices*';
       });
       const savedObjectsClient = {
-        get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+        get: vi.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
       };
 
       const indices = await client.getMetricIndices({
@@ -54,7 +56,7 @@ describe('MetricsDataClient', () => {
     it('falls back to static indices when no fallback exists', async () => {
       const client = new MetricsDataClient();
       const savedObjectsClient = {
-        get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+        get: vi.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
       };
 
       const indices = await client.getMetricIndices({

@@ -5,59 +5,86 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('../../onboarding_flow_context', () => ({
-  useOnboardingFlow: jest.fn(),
-}));
+vi.mock('../../onboarding_flow_context', () => {
+      const mocked = {
+      useOnboardingFlow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
+vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
 
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  useGetPackageInfoByKeyQuery: jest.fn(),
-  pagePathGetters: {
-    integration_details_policies: ({ pkgkey }: { pkgkey: string }) => [
-      '/app/integrations',
-      `/detail/${pkgkey}/policies`,
-    ],
-  },
-}));
+vi.mock('@kbn/fleet-plugin/public', () => {
+      const mocked = {
+      useGetPackageInfoByKeyQuery: vi.fn(),
+      pagePathGetters: {
+        integration_details_policies: ({ pkgkey }: { pkgkey: string }) => [
+          '/app/integrations',
+          `/detail/${pkgkey}/policies`,
+        ],
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_service_data_detection', () => ({
-  useServiceDataDetection: jest.fn(),
-}));
+vi.mock('./use_service_data_detection', () => {
+      const mocked = {
+      useServiceDataDetection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./deployment_summary', () => ({
-  DeploymentSummary: ({ totalCount }: { totalCount: number }) => (
-    <div data-test-subj="mock-deployment-summary">{totalCount} services</div>
-  ),
-}));
+vi.mock('./deployment_summary', () => {
+      const mocked = {
+      DeploymentSummary: ({ totalCount }: { totalCount: number }) => (
+        <div data-test-subj="mock-deployment-summary">{totalCount} services</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./installed_content', () => ({
-  InstalledContent: () => <div data-test-subj="mock-installed-content" />,
-}));
+vi.mock('./installed_content', () => {
+      const mocked = {
+      InstalledContent: () => <div data-test-subj="mock-installed-content" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_aws_overview_dashboard_url', () => ({
-  useAwsOverviewDashboardUrl: jest.fn(),
-}));
+vi.mock('./use_aws_overview_dashboard_url', () => {
+      const mocked = {
+      useAwsOverviewDashboardUrl: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./agent_setup_callout', () => ({
-  AgentSetupCallout: () => (
-    <div data-test-subj="mock-agent-callout">
-      <button data-test-subj="detectAndReviewStep-agentSetupCallout-dismiss" onClick={() => {}}>
-        Dismiss
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./agent_setup_callout', () => {
+      const mocked = {
+      AgentSetupCallout: () => (
+        <div data-test-subj="mock-agent-callout">
+          <button data-test-subj="detectAndReviewStep-agentSetupCallout-dismiss" onClick={() => {}}>
+            Dismiss
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: { http: { basePath: { prepend: (path: string) => `/base${path}` } } },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: { http: { basePath: { prepend: (path: string) => `/base${path}` } } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
@@ -66,11 +93,11 @@ import { useServiceDataDetection } from './use_service_data_detection';
 import { useAwsOverviewDashboardUrl } from './use_aws_overview_dashboard_url';
 import { DetectAndReviewStep } from '.';
 
-const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
-const mockUseSessionStorage = useSessionStorage as jest.Mock;
-const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
-const mockUseServiceDataDetection = useServiceDataDetection as jest.Mock;
-const mockUseAwsOverviewDashboardUrl = useAwsOverviewDashboardUrl as jest.Mock;
+const mockUseOnboardingFlow = useOnboardingFlow as Mock;
+const mockUseSessionStorage = useSessionStorage as Mock;
+const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as Mock;
+const mockUseServiceDataDetection = useServiceDataDetection as Mock;
+const mockUseAwsOverviewDashboardUrl = useAwsOverviewDashboardUrl as Mock;
 
 function setupMocks({
   deploymentMethod = 'managed_integration' as 'managed_integration' | 'agent_based' | 'ecf',
@@ -88,11 +115,11 @@ function setupMocks({
     },
     deploymentMethod,
     awsServicesMap: new Map(),
-    updateDetectAndReviewStep: jest.fn(),
+    updateDetectAndReviewStep: vi.fn(),
   });
   mockUseSessionStorage.mockReturnValue([
     { globalRegion: 'us-east-1', serviceVars: {}, instances: [] },
-    jest.fn(),
+    vi.fn(),
   ]);
   mockUseGetPackageInfoByKeyQuery.mockReturnValue({ data: packageData });
   mockUseServiceDataDetection.mockReturnValue({
@@ -107,13 +134,13 @@ function setupMocks({
 function renderStep(props: { onContinue?: () => void; onBack?: () => void } = {}) {
   return render(
     <I18nProvider>
-      <DetectAndReviewStep onContinue={props.onContinue ?? jest.fn()} onBack={props.onBack} />
+      <DetectAndReviewStep onContinue={props.onContinue ?? vi.fn()} onBack={props.onBack} />
     </I18nProvider>
   );
 }
 
 describe('DetectAndReviewStep', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('step header', () => {
     it('renders title and subtitle', () => {
@@ -148,7 +175,7 @@ describe('DetectAndReviewStep', () => {
 
     it('calls onContinue when clicked', () => {
       setupMocks();
-      const onContinue = jest.fn();
+      const onContinue = vi.fn();
       renderStep({ onContinue });
       fireEvent.click(screen.getByTestId('detectAndReviewStep-continueButton'));
       expect(onContinue).toHaveBeenCalledTimes(1);
@@ -156,7 +183,7 @@ describe('DetectAndReviewStep', () => {
 
     it('shows Back button when onBack is provided', () => {
       setupMocks();
-      const onBack = jest.fn();
+      const onBack = vi.fn();
       renderStep({ onBack });
       fireEvent.click(screen.getByText('Back'));
       expect(onBack).toHaveBeenCalledTimes(1);
@@ -212,7 +239,7 @@ describe('DetectAndReviewStep', () => {
 
     it('calls onContinue when clicked', () => {
       setupMocks();
-      const onContinue = jest.fn();
+      const onContinue = vi.fn();
       renderStep({ onContinue });
       fireEvent.click(screen.getByTestId('detectAndReviewStep-finishButton'));
       expect(onContinue).toHaveBeenCalledTimes(1);

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { CoreStart } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -18,7 +20,7 @@ import type { PrivateLocationAttributes } from '../../runtime_types/private_loca
 
 const mockCoreStart = coreMock.createStart() as CoreStart;
 
-mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockResolvedValue({
+mockCoreStart.elasticsearch.client.asInternalUser.license.get = vi.fn().mockResolvedValue({
   license: {
     status: 'active',
     uid: 'c5788419-1c6f-424a-9217-da7a0a9151a0',
@@ -37,7 +39,7 @@ mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockRe
 
 describe('SyntheticsMonitorClient', () => {
   const mockEsClient = {
-    search: jest.fn(),
+    search: vi.fn(),
   };
 
   const logger = loggerMock.create();
@@ -46,8 +48,8 @@ describe('SyntheticsMonitorClient', () => {
     logger,
     syntheticsEsClient: mockEsClient,
     authSavedObjectsClient: {
-      bulkUpdate: jest.fn(),
-      get: jest.fn(),
+      bulkUpdate: vi.fn(),
+      get: vi.fn(),
     },
     basePath: {
       publicBaseUrl: 'https://localhost:5601',
@@ -64,10 +66,10 @@ describe('SyntheticsMonitorClient', () => {
 
   const syntheticsService = new SyntheticsService(serverMock);
 
-  syntheticsService.addConfigs = jest.fn();
-  syntheticsService.editConfig = jest.fn();
-  syntheticsService.deleteConfigs = jest.fn();
-  syntheticsService.getMaintenanceWindows = jest.fn();
+  syntheticsService.addConfigs = vi.fn();
+  syntheticsService.editConfig = vi.fn();
+  syntheticsService.deleteConfigs = vi.fn();
+  syntheticsService.getMaintenanceWindows = vi.fn();
 
   const locations = times(3).map((n) => {
     return {
@@ -124,7 +126,7 @@ describe('SyntheticsMonitorClient', () => {
 
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.createPackagePolicies = jest.fn();
+    client.privateLocationAPI.createPackagePolicies = vi.fn();
 
     await client.addMonitors([{ monitor, id }], privateLocations, 'test-space');
 
@@ -137,7 +139,7 @@ describe('SyntheticsMonitorClient', () => {
 
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({
+    client.privateLocationAPI.editMonitors = vi.fn().mockResolvedValue({
       failedUpdates: [],
     });
 
@@ -163,8 +165,8 @@ describe('SyntheticsMonitorClient', () => {
 
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    syntheticsService.editConfig = jest.fn();
-    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({
+    syntheticsService.editConfig = vi.fn();
+    client.privateLocationAPI.editMonitors = vi.fn().mockResolvedValue({
       failedUpdates: [],
     });
 
@@ -208,8 +210,8 @@ describe('SyntheticsMonitorClient', () => {
     locations[1].isServiceManaged = false;
 
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.deleteMonitors = jest.fn();
-    syntheticsService.deleteConfigs = jest.fn();
+    client.privateLocationAPI.deleteMonitors = vi.fn();
+    syntheticsService.deleteConfigs = vi.fn();
 
     await client.deleteMonitors([monitor as unknown as SyntheticsMonitorWithId], 'test-space');
 
@@ -240,8 +242,8 @@ describe('SyntheticsMonitorClient', () => {
     ];
 
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.createPackagePolicies = jest.fn();
-    syntheticsService.getMaintenanceWindows = jest.fn().mockResolvedValue(maintenanceWindows);
+    client.privateLocationAPI.createPackagePolicies = vi.fn();
+    syntheticsService.getMaintenanceWindows = vi.fn().mockResolvedValue(maintenanceWindows);
 
     await client.addMonitors([{ monitor, id }], privateLocations, spaceId);
 
@@ -279,8 +281,8 @@ describe('SyntheticsMonitorClient', () => {
     ];
 
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({});
-    syntheticsService.getMaintenanceWindows = jest.fn().mockResolvedValue(maintenanceWindows);
+    client.privateLocationAPI.editMonitors = vi.fn().mockResolvedValue({});
+    syntheticsService.getMaintenanceWindows = vi.fn().mockResolvedValue(maintenanceWindows);
 
     await client.editMonitors(
       [

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { onBrushEnd } from './on_brush_end';
 import type { History } from 'history';
 
 describe('Chart helper', () => {
   describe('onBrushEnd', () => {
     const history = {
-      push: jest.fn(),
+      push: vi.fn(),
       location: {
         search: '',
       },

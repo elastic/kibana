@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   isValidUTCDate,
   formatTime,
@@ -15,11 +18,11 @@ import {
 } from './runner_utils';
 import moment from 'moment';
 import { ScoutTestTarget } from '@kbn/scout-info';
-jest.mock('moment', () => {
-  const actualMoment = jest.requireActual('moment');
+vi.mock('moment', () => {
+  const actualMoment = require('moment');
   return {
     ...actualMoment,
-    utc: jest.fn((date, fmt) => actualMoment(date, fmt)),
+    utc: vi.fn((date, fmt) => actualMoment(date, fmt)),
   };
 });
 
@@ -42,7 +45,7 @@ describe('formatTime', () => {
   it('should format the time using the default format', () => {
     const mockDate = '2024-12-16T12:00:00.000Z';
     const mockFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
-    (moment.utc as jest.Mock).mockReturnValue({ format: () => 'Dec 16, 2024 @ 12:00:00.000' });
+    (moment.utc as Mock).mockReturnValue({ format: () => 'Dec 16, 2024 @ 12:00:00.000' });
 
     const result = formatTime(mockDate);
 
@@ -53,7 +56,7 @@ describe('formatTime', () => {
   it('should format the time using a custom format', () => {
     const mockDate = '2024-12-16T12:00:00.000Z';
     const customFormat = 'YYYY-MM-DD';
-    (moment.utc as jest.Mock).mockReturnValue({ format: () => '2024-12-16' });
+    (moment.utc as Mock).mockReturnValue({ format: () => '2024-12-16' });
 
     const result = formatTime(mockDate, customFormat);
 

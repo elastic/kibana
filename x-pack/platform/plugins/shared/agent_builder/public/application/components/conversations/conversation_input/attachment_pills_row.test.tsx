@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type {
@@ -15,22 +17,31 @@ import { AttachmentPillsRow } from './attachment_pills_row';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentGroupPill } from './attachment_group_pill';
 
-jest.mock('../../../context/conversation/conversation_context', () => ({
-  useConversationContext: jest.fn(),
-}));
+vi.mock('../../../context/conversation/conversation_context', () => {
+      const mocked = {
+      useConversationContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./attachment_pill', () => ({
-  AttachmentPill: ({ attachment }: { attachment: { id: string } }) => (
-    <div data-test-subj={`mock-attachment-pill-${attachment.id}`} />
-  ),
-}));
+vi.mock('./attachment_pill', () => {
+      const mocked = {
+      AttachmentPill: ({ attachment }: { attachment: { id: string } }) => (
+        <div data-test-subj={`mock-attachment-pill-${attachment.id}`} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./attachment_group_pill', () => ({
-  AttachmentGroupPill: jest.fn(() => null),
-}));
+vi.mock('./attachment_group_pill', () => {
+      const mocked = {
+      AttachmentGroupPill: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseConversationContext = jest.mocked(useConversationContext);
-const MockAttachmentGroupPill = jest.mocked(AttachmentGroupPill);
+const mockUseConversationContext = vi.mocked(useConversationContext);
+const MockAttachmentGroupPill = vi.mocked(AttachmentGroupPill);
 
 const makeGroup = (id: string): AttachmentGroup => ({
   type: 'group',
@@ -46,7 +57,7 @@ const makeInput = (id: string): ConversationAttachment => ({
 });
 
 describe('AttachmentPillsRow', () => {
-  const mockRemoveAttachment = jest.fn();
+  const mockRemoveAttachment = vi.fn();
 
   beforeEach(() => {
     mockRemoveAttachment.mockReset();

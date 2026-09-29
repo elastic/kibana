@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -12,72 +14,96 @@ import type { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import type { ServiceFlyoutService } from '..';
 import { ServiceFlyoutOverview } from '.';
 
-const mockUseServiceHasSystemMetrics = jest.fn<
+const mockUseServiceHasSystemMetrics = vi.fn<
   { hasSystemMetrics: boolean | undefined; isLoading: boolean },
   []
 >();
 let transactionsSectionProps: React.ComponentProps<typeof ServiceFlyoutTransactionsSection> | null =
   null;
 
-const mockUseServiceFlyoutContext = jest.fn();
-const mockUseProjectRouting = jest.fn<string | undefined, []>(() => undefined);
-jest.mock('../service_flyout_context', () => ({
-  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
-}));
+const mockUseServiceFlyoutContext = vi.fn();
+const mockUseProjectRouting = vi.fn<string | undefined, []>(() => undefined);
+vi.mock('../service_flyout_context', () => {
+      const mocked = {
+      useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_service_has_system_metrics', () => ({
-  useServiceHasSystemMetrics: () => mockUseServiceHasSystemMetrics(),
-}));
+vi.mock('../hooks/use_service_has_system_metrics', () => {
+      const mocked = {
+      useServiceHasSystemMetrics: () => mockUseServiceHasSystemMetrics(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Avoid pulling the real plugin module (heavy import graph) into this test.
-jest.mock('../hooks/use_project_routing', () => ({
-  useProjectRouting: () => mockUseProjectRouting(),
-}));
+vi.mock('../hooks/use_project_routing', () => {
+      const mocked = {
+      useProjectRouting: () => mockUseProjectRouting(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/apm-ui-shared', () => ({
-  ServiceFlyoutTransactionsSection: (
-    props: React.ComponentProps<typeof ServiceFlyoutTransactionsSection>
-  ) => {
-    transactionsSectionProps = props;
-    return <div data-test-subj="transactionsSectionMock" />;
-  },
-}));
+vi.mock('@kbn/apm-ui-shared', () => {
+      const mocked = {
+      ServiceFlyoutTransactionsSection: (
+        props: React.ComponentProps<typeof ServiceFlyoutTransactionsSection>
+      ) => {
+        transactionsSectionProps = props;
+        return <div data-test-subj="transactionsSectionMock" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./query_controls', () => ({
-  ServiceFlyoutQueryControls: () => <div data-test-subj="queryControlsMock" />,
-}));
+vi.mock('./query_controls', () => {
+      const mocked = {
+      ServiceFlyoutQueryControls: () => <div data-test-subj="queryControlsMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./lens_chart', () => ({
-  ServiceFlyoutLensChart: () => <div data-test-subj="lensChartMock" />,
-}));
+vi.mock('./lens_chart', () => {
+      const mocked = {
+      ServiceFlyoutLensChart: () => <div data-test-subj="lensChartMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockTransactionDetailFlyoutProps = jest.fn();
-jest.mock('../../transaction_detail_flyout', () => ({
-  TransactionDetailFlyout: (props: {
-    filters: { transactionName: string };
-    onClose: () => void;
-    preferDocumentBasedCharts?: boolean;
-    schema?: string;
-    indices?: unknown;
-    deps: { lens?: unknown; dataViews?: unknown };
-  }) => {
-    mockTransactionDetailFlyoutProps(props);
-    return (
-      <div data-test-subj="transactionDetailFlyoutMock">
-        <span>{props.filters.transactionName}</span>
-        <button type="button" onClick={props.onClose}>
-          close
-        </button>
-      </div>
-    );
-  },
-}));
-const mockServiceFlyoutApmCharts = jest.fn((_props: unknown) => (
+const mockTransactionDetailFlyoutProps = vi.fn();
+vi.mock('../../transaction_detail_flyout', () => {
+      const mocked = {
+      TransactionDetailFlyout: (props: {
+        filters: { transactionName: string };
+        onClose: () => void;
+        preferDocumentBasedCharts?: boolean;
+        schema?: string;
+        indices?: unknown;
+        deps: { lens?: unknown; dataViews?: unknown };
+      }) => {
+        mockTransactionDetailFlyoutProps(props);
+        return (
+          <div data-test-subj="transactionDetailFlyoutMock">
+            <span>{props.filters.transactionName}</span>
+            <button type="button" onClick={props.onClose}>
+              close
+            </button>
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockServiceFlyoutApmCharts = vi.fn((_props: unknown) => (
   <div data-test-subj="apmChartsMock" />
 ));
-jest.mock('./apm_charts', () => ({
-  ServiceFlyoutApmCharts: (props: unknown) => mockServiceFlyoutApmCharts(props as never),
-}));
+vi.mock('./apm_charts', () => {
+      const mocked = {
+      ServiceFlyoutApmCharts: (props: unknown) => mockServiceFlyoutApmCharts(props as never),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const service: ServiceFlyoutService = {
   name: 'opbeans-java',
@@ -102,9 +128,9 @@ function buildContextValue({
     deps: {
       core: {
         http: {},
-        notifications: { toasts: { addDanger: jest.fn() } },
+        notifications: { toasts: { addDanger: vi.fn() } },
       } as any,
-      share: { url: { locators: { get: jest.fn() } } } as any,
+      share: { url: { locators: { get: vi.fn() } } } as any,
       lens: undefined as any,
       dataViews: undefined as any,
     },
@@ -121,16 +147,16 @@ function buildContextValue({
     },
     filters: {
       environment: 'production' as const,
-      setEnvironment: jest.fn(),
+      setEnvironment: vi.fn(),
       rangeFrom: 'now-15m',
       rangeTo: 'now',
       start: '2026-09-11T00:00:00.000Z',
       end: '2026-09-18T15:20:34.096Z',
-      setRange: jest.fn(),
+      setRange: vi.fn(),
       transactionType,
-      setTransactionType: jest.fn(),
+      setTransactionType: vi.fn(),
       refreshToken,
-      onRefresh: jest.fn(),
+      onRefresh: vi.fn(),
       ...filters,
     },
   };
@@ -186,7 +212,7 @@ function listMeta(
 }
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseProjectRouting.mockReturnValue(undefined);
   transactionsSectionProps = null;
 });

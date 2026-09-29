@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { getAlertsTelemetryData } from './alerts';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
@@ -110,7 +112,7 @@ describe('alerts', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       savedObjectsClient.find
         .mockResolvedValueOnce(legacyResponse)
         .mockResolvedValueOnce(emptyUnifiedResponse);

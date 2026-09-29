@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { useGetEndpointPolicyResponse } from './use_get_endpoint_policy_response';
 import type { HttpSetup } from '@kbn/core/public';
 import { useHttp } from '../../../common/lib/kibana';
@@ -12,12 +15,12 @@ import { getFakeHttpService, renderQuery } from '../test_utils';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { BASE_POLICY_RESPONSE_ROUTE } from '../../../../common/endpoint/constants';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 describe('Get endpoint policy response hook', () => {
   let result: ReturnType<typeof useGetEndpointPolicyResponse>;
-  const useGetEndpointPolicyResponseMock = useHttp as jest.Mock;
-  let fakeHttpServices: jest.Mocked<HttpSetup>;
+  const useGetEndpointPolicyResponseMock = useHttp as Mock;
+  let fakeHttpServices: Mocked<HttpSetup>;
 
   beforeEach(() => {
     fakeHttpServices = getFakeHttpService();
@@ -30,7 +33,7 @@ describe('Get endpoint policy response hook', () => {
     useGetEndpointPolicyResponseMock.mockImplementation(() => fakeHttpServices);
     fakeHttpServices.get.mockResolvedValueOnce(policyResponse);
 
-    const onSuccessMock: jest.Mock = jest.fn();
+    const onSuccessMock: Mock = vi.fn();
 
     result = await renderQuery(
       () =>
@@ -58,7 +61,7 @@ describe('Get endpoint policy response hook', () => {
     };
     fakeHttpServices.get.mockRejectedValue(error);
 
-    const onErrorMock: jest.Mock = jest.fn();
+    const onErrorMock: Mock = vi.fn();
 
     result = await renderQuery(
       () =>

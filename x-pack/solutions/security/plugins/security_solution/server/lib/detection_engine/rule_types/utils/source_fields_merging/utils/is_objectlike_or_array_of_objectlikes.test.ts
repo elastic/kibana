@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { isObjectLikeOrArrayOfObjectLikes } from './is_objectlike_or_array_of_objectlikes';
 
 describe('is_objectlike_or_array_of_objectlikes', () => {
   beforeAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('returns false when an empty array is passed in', () => {

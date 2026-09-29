@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
@@ -14,25 +17,31 @@ import { securityWorkflowInsightsService } from '../../../../../endpoint/service
 import { getPolicyResponseFailureEvents } from './refetch_policy_response_failures';
 import { createGenerateInsightGraph } from './graph';
 
-jest.mock('../../../../../endpoint/services', () => ({
-  securityWorkflowInsightsService: {
-    createFromDefendInsights: jest.fn(),
-  },
-}));
+vi.mock('../../../../../endpoint/services', () => {
+      const mocked = {
+      securityWorkflowInsightsService: {
+        createFromDefendInsights: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./refetch_policy_response_failures', () => ({
-  getPolicyResponseFailureEvents: jest.fn(),
-}));
+vi.mock('./refetch_policy_response_failures', () => {
+      const mocked = {
+      getPolicyResponseFailureEvents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockCreateFromDefendInsights =
-  securityWorkflowInsightsService.createFromDefendInsights as jest.Mock;
-const mockGetPolicyResponseFailureEvents = getPolicyResponseFailureEvents as jest.Mock;
+  securityWorkflowInsightsService.createFromDefendInsights as Mock;
+const mockGetPolicyResponseFailureEvents = getPolicyResponseFailureEvents as Mock;
 
 interface ModelMock {
   model: ScopedModel;
-  categorizeInvoke: jest.Mock;
-  generateInvoke: jest.Mock;
-  withStructuredOutput: jest.Mock;
+  categorizeInvoke: Mock;
+  generateInvoke: Mock;
+  withStructuredOutput: Mock;
 }
 
 const createModel = ({
@@ -42,9 +51,9 @@ const createModel = ({
   insightType: WorkflowInsightType;
   insights: unknown;
 }): ModelMock => {
-  const categorizeInvoke = jest.fn().mockResolvedValue({ insightType });
-  const generateInvoke = jest.fn().mockResolvedValue({ insights });
-  const withStructuredOutput = jest
+  const categorizeInvoke = vi.fn().mockResolvedValue({ insightType });
+  const generateInvoke = vi.fn().mockResolvedValue({ insights });
+  const withStructuredOutput = vi
     .fn()
     .mockReturnValueOnce({ invoke: categorizeInvoke })
     .mockReturnValueOnce({ invoke: generateInvoke });
@@ -81,7 +90,7 @@ const buildGraph = (
 
 describe('createGenerateInsightGraph', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('passes the active space ID when creating workflow insights', async () => {

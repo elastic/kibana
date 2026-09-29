@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AddPrebuiltRulesTable } from './add_prebuilt_rules_table';
@@ -19,102 +22,129 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
 
 // Mock components not needed in this test suite
-jest.mock('../../../../rule_management/components/rule_details/rule_details_flyout', () => ({
-  RuleDetailsFlyout: jest.fn(() => <></>),
-}));
-jest.mock('../rules_changelog_link', () => ({
-  RulesChangelogLink: jest.fn(() => <></>),
-}));
-jest.mock('./add_prebuilt_rules_table_filters', () => ({
-  AddPrebuiltRulesTableFilters: jest.fn(() => <></>),
-}));
+vi.mock('../../../../rule_management/components/rule_details/rule_details_flyout', () => {
+      const mocked = {
+      RuleDetailsFlyout: vi.fn(() => <></>),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../rules_changelog_link', () => {
+      const mocked = {
+      RulesChangelogLink: vi.fn(() => <></>),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./add_prebuilt_rules_table_filters', () => {
+      const mocked = {
+      AddPrebuiltRulesTableFilters: vi.fn(() => <></>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install', () => ({
-  usePerformInstallAllRules: () => ({
-    performInstallAll: jest.fn(),
-    isLoading: false,
-  }),
-  usePerformInstallSpecificRules: () => ({
-    performInstallSpecific: jest.fn(),
-    isLoading: false,
-  }),
-}));
+vi.mock('../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install', () => {
+      const mocked = {
+      usePerformInstallAllRules: () => ({
+        performInstallAll: vi.fn(),
+        isLoading: false,
+      }),
+      usePerformInstallSpecificRules: () => ({
+        performInstallSpecific: vi.fn(),
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useUiSetting$: jest.fn().mockReturnValue([false]),
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      docLinks: { links: { siem: { ruleChangeLog: '' } } },
-    },
-  }),
-}));
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useUiSetting$: vi.fn().mockReturnValue([false]),
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          docLinks: { links: { siem: { ruleChangeLog: '' } } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/components/links', () => ({
-  useGetSecuritySolutionLinkProps: () =>
-    jest.fn().mockReturnValue({
-      onClick: jest.fn(),
-    }),
-}));
+vi.mock('../../../../../common/components/links', () => {
+      const mocked = {
+      useGetSecuritySolutionLinkProps: () =>
+        vi.fn().mockReturnValue({
+          onClick: vi.fn(),
+        }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query',
-  () => ({
-    useFetchPrebuiltRulesStatusQuery: jest.fn().mockReturnValue({
-      data: {
-        prebuiltRulesStatus: {
-          num_prebuilt_rules_total_in_package: 1,
-        },
-      },
-    }),
-    useInvalidateFetchPrebuiltRulesStatusQuery: jest.fn().mockReturnValue(jest.fn()),
-  })
-);
-
-jest.mock(
-  '../../../../../common/components/initialization/use_security_solution_initialization',
-  () => ({
-    useSecuritySolutionInitialization: jest.fn().mockReturnValue({
-      'init-prebuilt-rules': { loading: false, result: { status: 'ready' } },
-    }),
-  })
-);
-
-jest.mock(
-  '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review',
-  () => ({
-    usePrebuiltRulesInstallReview: jest.fn().mockReturnValue({
-      data: {
-        rules: [
-          {
-            id: 'rule-1',
-            name: 'rule-1',
-            tags: [],
-            risk_score: 1,
-            severity: 'low',
+  () => {
+      const mocked = {
+        useFetchPrebuiltRulesStatusQuery: vi.fn().mockReturnValue({
+          data: {
+            prebuiltRulesStatus: {
+              num_prebuilt_rules_total_in_package: 1,
+            },
           },
-        ],
-        stats: {
-          num_rules_to_install: 1,
-          tags: [],
-        },
-      },
-      isLoading: false,
-      isFetched: true,
-    }),
-  })
+        }),
+        useInvalidateFetchPrebuiltRulesStatusQuery: vi.fn().mockReturnValue(vi.fn()),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../../../../common/components/user_privileges');
+vi.mock(
+  '../../../../../common/components/initialization/use_security_solution_initialization',
+  () => {
+      const mocked = {
+        useSecuritySolutionInitialization: vi.fn().mockReturnValue({
+          'init-prebuilt-rules': { loading: false, result: { status: 'ready' } },
+        }),
+      };
+      return { ...mocked, default: mocked };
+    }
+);
+
+vi.mock(
+  '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review',
+  () => {
+      const mocked = {
+        usePrebuiltRulesInstallReview: vi.fn().mockReturnValue({
+          data: {
+            rules: [
+              {
+                id: 'rule-1',
+                name: 'rule-1',
+                tags: [],
+                risk_score: 1,
+                severity: 'low',
+              },
+            ],
+            stats: {
+              num_rules_to_install: 1,
+              tags: [],
+            },
+          },
+          isLoading: false,
+          isFetched: true,
+        }),
+      };
+      return { ...mocked, default: mocked };
+    }
+);
+
+vi.mock('../../../../../common/components/user_privileges');
 
 describe('AddPrebuiltRulesTable', () => {
   afterEach(() => {
-    (useSecuritySolutionInitialization as jest.Mock).mockReturnValue({
+    (useSecuritySolutionInitialization as Mock).mockReturnValue({
       [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: { loading: false, result: { status: 'ready' } },
     });
   });
 
   it('disables `Install all` button if user has no write permissions', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         ...initialUserPrivilegesState().rulesPrivileges,
@@ -138,7 +168,7 @@ describe('AddPrebuiltRulesTable', () => {
   });
 
   it('disables `Install all` button if prebuilt package is being installed', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         ...initialUserPrivilegesState().rulesPrivileges,
@@ -146,7 +176,7 @@ describe('AddPrebuiltRulesTable', () => {
       },
     });
 
-    (useSecuritySolutionInitialization as jest.Mock).mockReturnValue({
+    (useSecuritySolutionInitialization as Mock).mockReturnValue({
       [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: { loading: true },
     });
 
@@ -166,7 +196,7 @@ describe('AddPrebuiltRulesTable', () => {
   });
 
   it('enables Install all` button when user has permissions', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         ...initialUserPrivilegesState().rulesPrivileges,
@@ -195,7 +225,7 @@ describe('AddPrebuiltRulesTable', () => {
   ])(
     `renders "No rules available for install" when there are no rules to install and user has %s`,
     async (_permissions, canEdit) => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         ...initialUserPrivilegesState(),
         rulesPrivileges: {
           ...initialUserPrivilegesState().rulesPrivileges,
@@ -203,7 +233,7 @@ describe('AddPrebuiltRulesTable', () => {
         },
       });
 
-      (usePrebuiltRulesInstallReview as jest.Mock).mockReturnValueOnce({
+      (usePrebuiltRulesInstallReview as Mock).mockReturnValueOnce({
         data: {
           rules: [],
           stats: {
@@ -214,7 +244,7 @@ describe('AddPrebuiltRulesTable', () => {
         isLoading: false,
         isFetched: true,
       });
-      (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValueOnce({
+      (useFetchPrebuiltRulesStatusQuery as Mock).mockReturnValueOnce({
         data: {
           prebuiltRulesStatus: {
             num_prebuilt_rules_total_in_package: 0,
@@ -235,7 +265,7 @@ describe('AddPrebuiltRulesTable', () => {
   );
 
   it('does not render `Install rule` on rule rows for users with no write permissions', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         ...initialUserPrivilegesState().rulesPrivileges,
@@ -244,7 +274,7 @@ describe('AddPrebuiltRulesTable', () => {
     });
 
     const id = 'rule-1';
-    (usePrebuiltRulesInstallReview as jest.Mock).mockReturnValueOnce({
+    (usePrebuiltRulesInstallReview as Mock).mockReturnValueOnce({
       data: {
         rules: [
           {
@@ -264,7 +294,7 @@ describe('AddPrebuiltRulesTable', () => {
       isLoading: false,
       isFetched: true,
     });
-    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValueOnce({
+    (useFetchPrebuiltRulesStatusQuery as Mock).mockReturnValueOnce({
       data: {
         prebuiltRulesStatus: {
           num_prebuilt_rules_total_in_package: 1,
@@ -286,7 +316,7 @@ describe('AddPrebuiltRulesTable', () => {
   });
 
   it('renders `Install rule` on rule rows for users with write permissions', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         ...initialUserPrivilegesState().rulesPrivileges,
@@ -295,7 +325,7 @@ describe('AddPrebuiltRulesTable', () => {
     });
 
     const id = 'rule-1';
-    (usePrebuiltRulesInstallReview as jest.Mock).mockReturnValueOnce({
+    (usePrebuiltRulesInstallReview as Mock).mockReturnValueOnce({
       data: {
         rules: [
           {
@@ -315,7 +345,7 @@ describe('AddPrebuiltRulesTable', () => {
       isLoading: false,
       isFetched: true,
     });
-    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValueOnce({
+    (useFetchPrebuiltRulesStatusQuery as Mock).mockReturnValueOnce({
       data: {
         prebuiltRulesStatus: {
           num_prebuilt_rules_total_in_package: 1,

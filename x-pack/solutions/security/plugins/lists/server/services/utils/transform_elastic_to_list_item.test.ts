@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
@@ -20,11 +22,11 @@ import {
 
 describe('transform_elastic_to_list_item', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('transformElasticToListItem', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getSuccessfulSignalUpdateResponse } from '../../__mocks__/request_responses';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../__mocks__/request_context';
 import { requestContextMock } from '../../__mocks__';
@@ -23,7 +25,7 @@ describe('updateAlertsAssignees', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ context } = requestContextMock.createTools());
     context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
       getSuccessfulSignalUpdateResponse()
@@ -31,8 +33,8 @@ describe('updateAlertsAssignees', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns the updateByQuery response', async () => {

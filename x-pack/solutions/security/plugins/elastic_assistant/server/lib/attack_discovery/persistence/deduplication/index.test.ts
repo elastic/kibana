@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createHash } from 'crypto';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -13,10 +16,13 @@ import { deduplicateAttackDiscoveries as deduplicateAttackDiscoveriesShared } fr
 import { deduplicateAttackDiscoveries } from '.';
 import { mockAttackDiscoveries } from '../../evaluation/__mocks__/mock_attack_discoveries';
 
-jest.mock('@kbn/attack-discovery-schedules-common', () => ({
-  ...jest.requireActual('@kbn/attack-discovery-schedules-common'),
-  deduplicateAttackDiscoveries: jest.fn(),
-}));
+vi.mock('@kbn/attack-discovery-schedules-common', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/attack-discovery-schedules-common')),
+      deduplicateAttackDiscoveries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 const mockLogger = loggerMock.create();
@@ -38,8 +44,8 @@ describe('deduplicateAttackDiscoveries', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (deduplicateAttackDiscoveriesShared as jest.Mock).mockResolvedValue(mockAttackDiscoveries);
+    vi.clearAllMocks();
+    (deduplicateAttackDiscoveriesShared as Mock).mockResolvedValue(mockAttackDiscoveries);
   });
 
   it('delegates to the shared deduplicateAttackDiscoveries with the provided params', async () => {
@@ -53,7 +59,7 @@ describe('deduplicateAttackDiscoveries', () => {
   it('injects a computeSha256Hash that returns the sha256 hex digest', async () => {
     await deduplicateAttackDiscoveries(defaultProps);
 
-    const { computeSha256Hash } = (deduplicateAttackDiscoveriesShared as jest.Mock).mock
+    const { computeSha256Hash } = (deduplicateAttackDiscoveriesShared as Mock).mock
       .calls[0][0];
 
     expect(computeSha256Hash('some-input')).toBe(
@@ -63,7 +69,7 @@ describe('deduplicateAttackDiscoveries', () => {
 
   it('returns the result from the shared deduplicateAttackDiscoveries', async () => {
     const [attack1] = mockAttackDiscoveries;
-    (deduplicateAttackDiscoveriesShared as jest.Mock).mockResolvedValue([attack1]);
+    (deduplicateAttackDiscoveriesShared as Mock).mockResolvedValue([attack1]);
 
     const result = await deduplicateAttackDiscoveries(defaultProps);
 

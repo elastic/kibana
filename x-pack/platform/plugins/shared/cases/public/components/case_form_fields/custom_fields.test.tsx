@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,7 +18,7 @@ import { renderWithTestingProviders } from '../../common/mock';
 
 // Failing: See https://github.com/elastic/kibana/issues/188133
 describe('CustomFields', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   const defaultProps = {
     configurationCustomFields: customFieldsConfigurationMock,
@@ -26,7 +28,7 @@ describe('CustomFields', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

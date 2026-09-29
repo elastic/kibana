@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import {
   loggingSystemMock,
   elasticsearchServiceMock,
@@ -27,14 +29,17 @@ import {
 import type { ConfigType } from '../../config';
 import type { SiemMigrationsClientDependencies } from './common/types';
 
-jest.mock('./rules/siem_rule_migrations_service');
-jest.mock('./dashboards/siem_dashboard_migration_service');
+vi.mock('./rules/siem_rule_migrations_service');
+vi.mock('./dashboards/siem_dashboard_migration_service');
 
-const mockReplaySubject$ = { next: jest.fn(), complete: jest.fn() };
-jest.mock('rxjs', () => ({
-  ...jest.requireActual('rxjs'),
-  ReplaySubject: jest.fn().mockImplementation(() => mockReplaySubject$),
-}));
+const mockReplaySubject$ = { next: vi.fn(), complete: vi.fn() };
+vi.mock('rxjs', () => {
+      const mocked = {
+      ...require('rxjs'),
+      ReplaySubject: vi.fn().mockImplementation(() => mockReplaySubject$),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ruleMigrationDependencies = {} as SiemMigrationsClientDependencies;
 
@@ -47,7 +52,7 @@ describe('SiemMigrationsService', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('dashboards', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import axios from 'axios';
 
 import { createExternalService } from './service';
@@ -17,20 +20,20 @@ import { observables } from '../lib/servicenow/mocks';
 import { snExternalServiceConfig } from '../lib/servicenow/config';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 
-jest.mock('axios');
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+vi.mock('axios');
+vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
+  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
   return {
     ...originalUtils,
-    request: jest.fn(),
-    patch: jest.fn(),
+    request: vi.fn(),
+    patch: vi.fn(),
   };
 });
 
-axios.create = jest.fn(() => axios);
-const requestMock = utils.request as jest.Mock;
+axios.create = vi.fn(() => axios);
+const requestMock = utils.request as Mock;
 const configurationUtilities = actionsConfigMock.create();
 let connectorUsageCollector: ConnectorUsageCollector;
 
@@ -114,7 +117,7 @@ describe('ServiceNow SIR service', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('bulkAddObservableToIncident', () => {

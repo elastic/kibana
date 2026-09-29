@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -14,7 +16,7 @@ import { cancelSyncs } from './cancel_syncs_api_logic';
 describe('CancelSyncsLogic', () => {
   const http = httpServiceMock.createSetupContract();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('cancelSyncs', () => {
     it('calls correct api', async () => {

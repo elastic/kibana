@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { MemoryVolume } from '../runner/store/memory_volume';
 import { FilesystemService } from './filesystem_service';
 import { WorkspaceVolume } from './workspace_volume';
 import type { IWorkspaceClient } from '../../workspaces';
 
-const mockWorkspaceClient = (): jest.Mocked<IWorkspaceClient> => ({
-  load: jest.fn().mockResolvedValue(undefined),
-  save: jest.fn().mockResolvedValue(undefined),
+const mockWorkspaceClient = (): Mocked<IWorkspaceClient> => ({
+  load: vi.fn().mockResolvedValue(undefined),
+  save: vi.fn().mockResolvedValue(undefined),
 });
 
 const makeService = (workspaceClient: IWorkspaceClient, opts?: { workspaceId?: string }) => {
@@ -29,7 +32,7 @@ const makeService = (workspaceClient: IWorkspaceClient, opts?: { workspaceId?: s
 };
 
 describe('FilesystemService', () => {
-  let workspaceClient: jest.Mocked<IWorkspaceClient>;
+  let workspaceClient: Mocked<IWorkspaceClient>;
 
   beforeEach(() => {
     workspaceClient = mockWorkspaceClient();

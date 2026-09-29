@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   sendGetAgentlessPolicy,
   sendGetPackageInfoByKeyForRq,
@@ -16,12 +18,15 @@ import { fetchAgentlessPolicyAsPackagePolicy } from './fetch_agentless_policy';
 
 // Mock the leaf `use_request` module (like the edit/copy hook tests) so the real inverse mapper
 // (`agentlessPolicyToPackagePolicy`) still runs against the nginx fixture below.
-jest.mock('../../../../../hooks/use_request', () => ({
-  ...jest.requireActual('../../../../../hooks/use_request'),
-  sendGetAgentlessPolicy: jest.fn(),
-  sendGetPackageInfoByKeyForRq: jest.fn(),
-  sendGetSettings: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_request', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../hooks/use_request')),
+      sendGetAgentlessPolicy: vi.fn(),
+      sendGetPackageInfoByKeyForRq: vi.fn(),
+      sendGetSettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('fetchAgentlessPolicyAsPackagePolicy', () => {
   const agentlessPolicy = {
@@ -33,10 +38,10 @@ describe('fetchAgentlessPolicyAsPackagePolicy', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(sendGetAgentlessPolicy).mockResolvedValue({ item: agentlessPolicy } as any);
-    jest.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({ item: nginxPackageInfo } as any);
-    jest
+    vi.clearAllMocks();
+    vi.mocked(sendGetAgentlessPolicy).mockResolvedValue({ item: agentlessPolicy } as any);
+    vi.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({ item: nginxPackageInfo } as any);
+    vi
       .mocked(sendGetSettings)
       .mockResolvedValue({ data: { item: { prerelease_integrations_enabled: false } } } as any);
   });
@@ -61,7 +66,7 @@ describe('fetchAgentlessPolicyAsPackagePolicy', () => {
   });
 
   it('resolves prerelease from settings when the setting is on', async () => {
-    jest
+    vi
       .mocked(sendGetSettings)
       .mockResolvedValue({ data: { item: { prerelease_integrations_enabled: true } } } as any);
 
@@ -77,7 +82,7 @@ describe('fetchAgentlessPolicyAsPackagePolicy', () => {
   it('propagates a failed read instead of resolving', async () => {
     // Both callers (edit loader, copy query) rely on the throw to surface the real error.
     const notFound = Object.assign(new Error('agentless policy not found'), { statusCode: 404 });
-    jest.mocked(sendGetAgentlessPolicy).mockRejectedValue(notFound);
+    vi.mocked(sendGetAgentlessPolicy).mockRejectedValue(notFound);
 
     await expect(fetchAgentlessPolicyAsPackagePolicy('missing')).rejects.toThrow(
       'agentless policy not found'

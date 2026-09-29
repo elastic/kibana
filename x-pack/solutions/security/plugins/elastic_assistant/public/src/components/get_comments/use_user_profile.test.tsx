@@ -4,21 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useUserProfile } from './use_user_profile';
 
 // Mock dependencies
-const mockBulkGet = jest.fn();
+const mockBulkGet = vi.fn();
 const mockUserProfileService = { bulkGet: mockBulkGet };
-const mockUseKibana = jest
+const mockUseKibana = vi
   .fn()
   .mockReturnValue({ services: { userProfile: mockUserProfileService } });
 
-jest.mock('../../context/typed_kibana_context/typed_kibana_context', () => ({
-  useKibana: () => mockUseKibana(),
-}));
+vi.mock('../../context/typed_kibana_context/typed_kibana_context', () => {
+      const mocked = {
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useUserProfile', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -26,7 +31,7 @@ describe('useUserProfile', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('Does not fetch if no user id is provided', async () => {
     const { result } = renderHook(() => useUserProfile({}), { wrapper });

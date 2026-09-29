@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataTableRecord } from '@kbn/discover-utils';
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -24,7 +26,7 @@ import {
   FLYOUT_TYPE,
 } from '../../common/lib/telemetry';
 
-const mockDocumentFooter = jest.fn((props: unknown) => {
+const mockDocumentFooter = vi.fn((props: unknown) => {
   const { onShowNotes } = props as { onShowNotes?: () => void };
   return (
     <button type="button" onClick={onShowNotes}>
@@ -32,23 +34,32 @@ const mockDocumentFooter = jest.fn((props: unknown) => {
     </button>
   );
 });
-const mockFlyoutProviders = jest.fn(({ children }: { children: React.ReactNode }) => (
+const mockFlyoutProviders = vi.fn(({ children }: { children: React.ReactNode }) => (
   <>{children}</>
 ));
-const mockReportEvent = jest.fn();
+const mockReportEvent = vi.fn();
 
-jest.mock('../../flyout_v2/document/main/footer', () => ({
-  Footer: (props: unknown) => mockDocumentFooter(props),
-}));
-jest.mock('../../flyout_v2/shared/components/flyout_provider', () => ({
-  flyoutProviders: (props: unknown) => mockFlyoutProviders(props as { children: React.ReactNode }),
-}));
-jest.mock('../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: jest.fn(),
-}));
+vi.mock('../../flyout_v2/document/main/footer', () => {
+      const mocked = {
+      Footer: (props: unknown) => mockDocumentFooter(props),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../flyout_v2/shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: (props: unknown) => mockFlyoutProviders(props as { children: React.ReactNode }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/hooks/is_in_security_app', () => {
+      const mocked = {
+      useIsInSecurityApp: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AlertFlyoutFooter', () => {
-  const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
+  const mockUseIsInSecurityApp = vi.mocked(useIsInSecurityApp);
 
   beforeEach(() => {
     mockDocumentFooter.mockClear();
@@ -58,12 +69,12 @@ describe('AlertFlyoutFooter', () => {
 
   const servicesMock = {
     overlays: {
-      openSystemFlyout: jest.fn(() => ({ onClose: new Promise<void>(() => {}) })),
+      openSystemFlyout: vi.fn(() => ({ onClose: new Promise<void>(() => {}) })),
     },
     telemetry: { reportEvent: mockReportEvent },
     core: { overlays: {} },
     uiActions: {
-      getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
+      getTriggerCompatibleActions: vi.fn().mockResolvedValue([]),
     },
     application: {
       capabilities: {
@@ -72,14 +83,14 @@ describe('AlertFlyoutFooter', () => {
     },
     notifications: {
       toasts: {
-        addError: jest.fn(),
+        addError: vi.fn(),
       },
     },
     http: {},
     upselling: {},
   } as unknown as StartServices;
 
-  const mockOnAlertUpdated = jest.fn();
+  const mockOnAlertUpdated = vi.fn();
 
   it('does not render before promises resolve', () => {
     const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;

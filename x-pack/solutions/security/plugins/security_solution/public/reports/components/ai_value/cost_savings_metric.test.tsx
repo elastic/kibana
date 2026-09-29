@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { CostSavingsMetric } from './cost_savings_metric';
@@ -15,30 +18,45 @@ import { useMetricAnimation } from '../../hooks/use_metric_animation';
 import * as i18n from './translations';
 
 // Mock VisualizationEmbeddable
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
-  VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
-}));
+vi.mock('../../../common/components/visualization_actions/visualization_embeddable', () => {
+      const mocked = {
+      VisualizationEmbeddable: vi.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_signal_index_with_default', () => ({
-  useSignalIndexWithDefault: jest.fn(),
-}));
+vi.mock('../../hooks/use_signal_index_with_default', () => {
+      const mocked = {
+      useSignalIndexWithDefault: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../providers/ai_value/export_provider', () => ({
-  useAIValueExportContext: jest.fn(),
-}));
+vi.mock('../../providers/ai_value/export_provider', () => {
+      const mocked = {
+      useAIValueExportContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_metric_animation', () => ({
-  useMetricAnimation: jest.fn(),
-}));
+vi.mock('../../hooks/use_metric_animation', () => {
+      const mocked = {
+      useMetricAnimation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./sample_metric', () => ({
-  SampleMetric: jest.fn(({ title }: { title: string }) => (
-    <div data-test-subj="mock-sample-metric">{title}</div>
-  )),
-}));
+vi.mock('./sample_metric', () => {
+      const mocked = {
+      SampleMetric: vi.fn(({ title }: { title: string }) => (
+        <div data-test-subj="mock-sample-metric">{title}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useAIValueExportContextMock = useAIValueExportContext as jest.Mock;
-const useMetricAnimationMock = useMetricAnimation as jest.Mock;
+const useAIValueExportContextMock = useAIValueExportContext as Mock;
+const useMetricAnimationMock = useMetricAnimation as Mock;
 
 const defaultProps = {
   isSample: false as const,
@@ -48,13 +66,13 @@ const defaultProps = {
   analystHourlyRate: 100,
 };
 
-const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as jest.MockedFunction<
+const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as MockedFunction<
   typeof useSignalIndexWithDefault
 >;
 
 describe('CostSavingsMetric', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseSignalIndexWithDefault.mockReturnValue('.alerts-security.alerts-default');
   });
 

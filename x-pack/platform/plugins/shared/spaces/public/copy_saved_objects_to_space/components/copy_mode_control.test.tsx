@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -18,10 +20,10 @@ const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I1
 
 describe('CopyModeControl', () => {
   const initialValues = { createNewCopies: true, overwrite: true };
-  const updateSelection = jest.fn();
+  const updateSelection = vi.fn();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const props: CopyModeControlProps = { initialValues, updateSelection };

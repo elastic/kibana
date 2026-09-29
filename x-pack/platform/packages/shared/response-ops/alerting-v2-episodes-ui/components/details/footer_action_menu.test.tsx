@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
@@ -15,8 +17,8 @@ import { EpisodeFooterActionMenu } from './footer_action_menu';
 // EuiWrappingPopover portals to document.body via EuiPortal, which causes DOM
 // teardown errors in jsdom and leaks content between tests. Mock it as a simple
 // conditional renderer so the menu logic is tested without portal side-effects.
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   const MockWrappingPopover = ({
     isOpen,
     children,
@@ -57,11 +59,11 @@ const makeAction = (id: string, overrides?: Partial<EpisodeAction>): EpisodeActi
   displayName: `Action ${id}`,
   iconType: 'check',
   isCompatible: () => true,
-  execute: jest.fn().mockResolvedValue(undefined),
+  execute: vi.fn().mockResolvedValue(undefined),
   ...overrides,
 });
 
-const mockOnSuccess = jest.fn();
+const mockOnSuccess = vi.fn();
 
 /**
  * TestWrapper renders a real anchor button and manages the isOpen state. It passes
@@ -100,7 +102,7 @@ const TestWrapper = ({ actions }: TestWrapperProps) => {
 
 const renderMenu = (actions: EpisodeAction[]) => render(<TestWrapper actions={actions} />);
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 describe('EpisodeFooterActionMenu', () => {
   it('keeps the menu collapsed until the take action button is clicked', () => {
@@ -172,7 +174,7 @@ describe('EpisodeFooterActionMenu', () => {
   });
 
   it('lets an action own its menu entry and hands it a menu closer', async () => {
-    const renderMenuItem = jest.fn(({ closeMenu }) => (
+    const renderMenuItem = vi.fn(({ closeMenu }) => (
       <button type="button" data-test-subj="ownEntry" onClick={closeMenu}>
         {'Own entry'}
       </button>

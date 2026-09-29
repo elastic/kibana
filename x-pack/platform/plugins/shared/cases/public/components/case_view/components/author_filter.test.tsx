@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -29,10 +31,10 @@ const caseWithTwoAuthors: CaseUI = {
 };
 
 describe('AuthorFilter', () => {
-  const onAuthorsChange = jest.fn();
+  const onAuthorsChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the trigger button', () => {

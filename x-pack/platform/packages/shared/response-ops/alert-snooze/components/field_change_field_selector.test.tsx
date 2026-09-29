@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -34,7 +36,7 @@ const renderSelector = (node: React.ReactElement) =>
 describe('FieldChangeFieldSelector', () => {
   it('offers the provided leaf scalar fields as options', async () => {
     renderSelector(
-      <FieldChangeFieldSelector entry={entry()} onChange={jest.fn()} options={OPTIONS} />
+      <FieldChangeFieldSelector entry={entry()} onChange={vi.fn()} options={OPTIONS} />
     );
 
     await userEvent.click(screen.getByRole('combobox'));
@@ -45,7 +47,7 @@ describe('FieldChangeFieldSelector', () => {
 
   it('calls onChange with the selected field value', async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderSelector(
       <FieldChangeFieldSelector entry={entry()} onChange={onChange} options={OPTIONS} />
     );
@@ -62,7 +64,7 @@ describe('FieldChangeFieldSelector', () => {
     renderSelector(
       <FieldChangeFieldSelector
         entry={entry({ field: 'kibana.alert.status' })}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         options={OPTIONS}
       />
     );
@@ -71,7 +73,7 @@ describe('FieldChangeFieldSelector', () => {
   });
 
   it('clears the field when the selection is removed', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderSelector(
       <FieldChangeFieldSelector
         entry={entry({ field: 'kibana.alert.status' })}
@@ -86,7 +88,7 @@ describe('FieldChangeFieldSelector', () => {
   });
 
   it('renders no options when the options list is empty', async () => {
-    renderSelector(<FieldChangeFieldSelector entry={entry()} onChange={jest.fn()} options={[]} />);
+    renderSelector(<FieldChangeFieldSelector entry={entry()} onChange={vi.fn()} options={[]} />);
 
     await userEvent.click(screen.getByRole('combobox'));
 

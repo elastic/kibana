@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import BedrockParamsFields from './params';
@@ -47,7 +49,7 @@ describe('Bedrock Params Fields renders', () => {
       subAction: undefined,
       subActionParams: undefined,
     };
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     const actionConnector = createMockActionConnector({
       secrets: {
@@ -86,7 +88,7 @@ describe('Bedrock Params Fields renders', () => {
         body: '{"key": "value"}',
       },
     };
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     render(
       <BedrockParamsFields
@@ -105,7 +107,7 @@ describe('Bedrock Params Fields renders', () => {
   });
 
   it('calls editAction function with the body argument', () => {
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     const { getByTestId } = render(
       <BedrockParamsFields
@@ -134,7 +136,7 @@ describe('Bedrock Params Fields renders', () => {
   });
 
   it('removes trailing spaces from the body argument', () => {
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     const { getByTestId } = render(
       <BedrockParamsFields
@@ -163,7 +165,7 @@ describe('Bedrock Params Fields renders', () => {
   });
 
   it('calls editAction function with the model argument', () => {
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     const { getByTestId } = render(
       <BedrockParamsFields

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { UsageRecord, UsageReportingService } from '@kbn/usage-api-plugin/server';
@@ -45,23 +48,23 @@ const createMockExecution = (
   ...overrides,
 });
 
-const createMockLogger = (): jest.Mocked<Logger> =>
+const createMockLogger = (): Mocked<Logger> =>
   ({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    fatal: jest.fn(),
-    trace: jest.fn(),
-    get: jest.fn(),
-    isLevelEnabled: jest.fn(),
-    log: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    fatal: vi.fn(),
+    trace: vi.fn(),
+    get: vi.fn(),
+    isLevelEnabled: vi.fn(),
+    log: vi.fn(),
+  } as unknown as Mocked<Logger>);
 
-const createMockUsageReportingService = (): jest.Mocked<UsageReportingService> =>
+const createMockUsageReportingService = (): Mocked<UsageReportingService> =>
   ({
-    reportUsage: jest.fn().mockResolvedValue({ ok: true, status: 200 }),
-  } as unknown as jest.Mocked<UsageReportingService>);
+    reportUsage: vi.fn().mockResolvedValue({ ok: true, status: 200 }),
+  } as unknown as Mocked<UsageReportingService>);
 
 const createMockCloudSetup = (overrides: Partial<CloudSetup> = {}): CloudSetup =>
   ({
@@ -72,8 +75,8 @@ const createMockCloudSetup = (overrides: Partial<CloudSetup> = {}): CloudSetup =
 
 describe('WorkflowsMeteringService', () => {
   let meteringService: WorkflowsMeteringService;
-  let mockUsageReportingService: jest.Mocked<UsageReportingService>;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockUsageReportingService: Mocked<UsageReportingService>;
+  let mockLogger: Mocked<Logger>;
 
   beforeEach(() => {
     mockUsageReportingService = createMockUsageReportingService();
@@ -82,7 +85,7 @@ describe('WorkflowsMeteringService', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('reportWorkflowExecution', () => {

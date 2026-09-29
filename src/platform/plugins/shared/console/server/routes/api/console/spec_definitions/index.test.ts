@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { EsLegacyConfigService, SpecDefinitionsService } from '../../../../services';
@@ -15,11 +18,11 @@ import { handleEsError } from '../../../../shared_imports';
 import type { RouteDependencies } from '../../..';
 import { registerSpecDefinitionsRoute } from '.';
 
-jest.mock('../../../../services/compact_spec_definitions', () => {
-  const actual = jest.requireActual('../../../../services/compact_spec_definitions');
+vi.mock('../../../../services/compact_spec_definitions', async () => {
+  const actual = (await vi.importActual('../../../../services/compact_spec_definitions'));
   return {
     ...actual,
-    compactSpecDefinitions: jest.fn(actual.compactSpecDefinitions),
+    compactSpecDefinitions: vi.fn(actual.compactSpecDefinitions),
   };
 });
 
@@ -30,24 +33,24 @@ const createLargeRule = (): Record<string, unknown> =>
 
 describe('WHEN serving Console spec definitions', () => {
   const mockRouter = httpServiceMock.createRouter();
-  const compactSpecDefinitionsMock = compactSpecDefinitions as jest.MockedFunction<
+  const compactSpecDefinitionsMock = compactSpecDefinitions as MockedFunction<
     typeof compactSpecDefinitions
   >;
   let specDefinitionService: SpecDefinitionsService;
   let log: RouteDependencies['log'];
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
     // clearAllMocks does not drain a pending mockImplementationOnce queue, so
     // reset the compaction mock and reinstate the real implementation to keep a
     // one-off throw from leaking into a later test.
     compactSpecDefinitionsMock.mockReset();
     compactSpecDefinitionsMock.mockImplementation(
-      jest.requireActual('../../../../services/compact_spec_definitions').compactSpecDefinitions
+      (await vi.importActual('../../../../services/compact_spec_definitions')).compactSpecDefinitions
     );
     specDefinitionService = new SpecDefinitionsService();
     const repeatedRules = createLargeRule();
-    jest.spyOn(specDefinitionService, 'asJson').mockReturnValue({
+    vi.spyOn(specDefinitionService, 'asJson').mockReturnValue({
       name: 'es',
       globals: {},
       endpoints: {
@@ -61,7 +64,7 @@ describe('WHEN serving Console spec definitions', () => {
       log,
       getStartServices: coreMock.createSetup().getStartServices,
       proxy: {
-        readLegacyESConfig: jest.fn(),
+        readLegacyESConfig: vi.fn(),
       },
       services: {
         esLegacyConfigService: new EsLegacyConfigService(),

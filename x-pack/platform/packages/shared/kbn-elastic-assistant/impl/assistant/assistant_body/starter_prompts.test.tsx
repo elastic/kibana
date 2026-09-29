@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   formatPromptGroups,
   getAllPromptIds,
@@ -79,12 +82,12 @@ const mockResponse = [
 ];
 
 const testProps = {
-  setUserPrompt: jest.fn(),
+  setUserPrompt: vi.fn(),
 };
-const mockReportAssistantStarterPrompt = jest.fn();
-jest.mock('../../..', () => {
+const mockReportAssistantStarterPrompt = vi.fn();
+vi.mock('../../..', () => {
   return {
-    useFindPrompts: jest.fn(),
+    useFindPrompts: vi.fn(),
     useAssistantContext: () => ({
       assistantAvailability: {
         isAssistantEnabled: true,
@@ -99,7 +102,7 @@ jest.mock('../../..', () => {
 
 describe('StarterPrompts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should return an empty array if no prompts are provided', () => {
     expect(getAllPromptIds(promptGroups)).toEqual([
@@ -146,7 +149,7 @@ describe('StarterPrompts', () => {
     ]);
   });
   it('the component renders correctly with valid props', () => {
-    (useFindPrompts as jest.Mock).mockReturnValue({ data: { prompts: mockResponse } });
+    (useFindPrompts as Mock).mockReturnValue({ data: { prompts: mockResponse } });
     const testId = 'starter-prompt-starter-prompt-title-1-from-api-yall';
     const { getByTestId } = render(
       <TestProviders>
@@ -156,7 +159,7 @@ describe('StarterPrompts', () => {
     expect(getByTestId(testId)).toBeInTheDocument();
   });
   it('calls setUserPrompt when a prompt is selected', () => {
-    (useFindPrompts as jest.Mock).mockReturnValue({ data: { prompts: mockResponse } });
+    (useFindPrompts as Mock).mockReturnValue({ data: { prompts: mockResponse } });
     const testId = 'starter-prompt-starter-prompt-title-2-from-api-yall';
     const { getByTestId } = render(
       <TestProviders>
@@ -167,7 +170,7 @@ describe('StarterPrompts', () => {
     expect(testProps.setUserPrompt).toHaveBeenCalledWith('starterPromptPrompt2 from API yall');
   });
   it('calls reportAssistantStarterPrompt with prompt title when a prompt is selected', () => {
-    (useFindPrompts as jest.Mock).mockReturnValue({ data: { prompts: mockResponse } });
+    (useFindPrompts as Mock).mockReturnValue({ data: { prompts: mockResponse } });
     const testId = 'starter-prompt-starter-prompt-title-2-from-api-yall';
     const { getByTestId } = render(
       <TestProviders>

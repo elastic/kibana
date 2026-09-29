@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { UptimeEsClient } from './lib';
 import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -21,7 +23,7 @@ describe('UptimeEsClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('search', () => {
@@ -141,7 +143,7 @@ describe('UptimeEsClient', () => {
   });
   describe('heartbeatIndices', () => {
     it('appends synthetics-* in index for legacy alerts', async () => {
-      savedObjectsClient.get = jest.fn().mockResolvedValue({
+      savedObjectsClient.get = vi.fn().mockResolvedValue({
         attributes: {
           heartbeatIndices: 'heartbeat-*',
           syntheticsIndexRemoved: true,
@@ -170,7 +172,7 @@ describe('UptimeEsClient', () => {
       );
     });
     it('appends synthetics-* in index for legacy alerts when settings are never saved', async () => {
-      savedObjectsClient.get = jest.fn().mockImplementation(() => {
+      savedObjectsClient.get = vi.fn().mockImplementation(() => {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(
           umDynamicSettings.name,
           settingsObjectId
@@ -199,7 +201,7 @@ describe('UptimeEsClient', () => {
       );
     });
     it('does not append synthetics-* to index for stack version 8.10.0 or later', async () => {
-      savedObjectsClient.get = jest.fn().mockImplementation(() => {
+      savedObjectsClient.get = vi.fn().mockImplementation(() => {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(
           umDynamicSettings.name,
           settingsObjectId

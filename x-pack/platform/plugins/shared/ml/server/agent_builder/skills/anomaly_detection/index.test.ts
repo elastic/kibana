@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { createAnomalyDetectionSkill } from '.';
 
-const mockResolveMlCapabilities = jest.fn() as ResolveMlCapabilities;
+const mockResolveMlCapabilities = vi.fn() as ResolveMlCapabilities;
 
 describe('createAnomalyDetectionSkill', () => {
   it('returns a skill definition with the correct id and name', () => {

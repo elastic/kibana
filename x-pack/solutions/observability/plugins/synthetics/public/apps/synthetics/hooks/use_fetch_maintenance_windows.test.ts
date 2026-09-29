@@ -5,22 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useQuery } from '@kbn/react-query';
 import { useFetchMaintenanceWindows } from './use_fetch_maintenance_windows';
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn().mockReturnValue({ data: undefined, isLoading: false }),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: vi.fn().mockReturnValue({ data: undefined, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../utils/api_service', () => ({
-  apiService: { get: jest.fn() },
-}));
+vi.mock('../../../utils/api_service', () => {
+      const mocked = {
+      apiService: { get: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useQueryMock = useQuery as jest.Mock;
+const useQueryMock = useQuery as Mock;
 
 describe('useFetchMaintenanceWindows', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('sets staleTime equal to the refetch interval, so a component mount between polls does not trigger its own fetch', () => {
     // This hook is called per-card from the virtualized overview grid

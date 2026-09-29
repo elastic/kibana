@@ -7,24 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 const mockKeystoreData =
   '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDyfGfJSy4mH' +
   'BBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqhI4lzJ9M' +
   'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
 
-jest.mock('fs', () => ({
-  readFileSync: jest.fn().mockImplementation((path) => {
-    if (!path.includes('foo')) {
-      return JSON.stringify(mockKeystoreData);
-    }
+vi.mock('fs', () => {
+      const mocked = {
+      readFileSync: vi.fn().mockImplementation((path) => {
+        if (!path.includes('foo')) {
+          return JSON.stringify(mockKeystoreData);
+        }
 
-    throw { code: 'ENOENT' };
-  }),
-  existsSync: jest.fn().mockImplementation((path) => {
-    return !path.includes('foo');
-  }),
-  writeFileSync: jest.fn(),
-}));
+        throw { code: 'ENOENT' };
+      }),
+      existsSync: vi.fn().mockImplementation((path) => {
+        return !path.includes('foo');
+      }),
+      writeFileSync: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import sinon from 'sinon';
 
@@ -93,6 +98,6 @@ describe('Kibana keystore', () => {
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 });

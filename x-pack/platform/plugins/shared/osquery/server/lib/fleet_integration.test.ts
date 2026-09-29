@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type {
   CoreStart,
   ElasticsearchClient,
@@ -17,16 +20,16 @@ import { getInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_s
 import { getPackagePolicyDeleteCallback } from './fleet_integration';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
-jest.mock('../utils/get_internal_saved_object_client');
+vi.mock('../utils/get_internal_saved_object_client');
 
 const getInternalSavedObjectsClientForSpaceIdMock =
-  getInternalSavedObjectsClientForSpaceId as jest.MockedFunction<
+  getInternalSavedObjectsClientForSpaceId as MockedFunction<
     typeof getInternalSavedObjectsClientForSpaceId
   >;
 
 const buildSoClient = (spaceId: string | undefined): SavedObjectsClientContract =>
   ({
-    getCurrentNamespace: jest.fn().mockReturnValue(spaceId),
+    getCurrentNamespace: vi.fn().mockReturnValue(spaceId),
   } as unknown as SavedObjectsClientContract);
 
 const buildDeletedPackagePolicy = (
@@ -56,11 +59,11 @@ describe('getPackagePolicyDeleteCallback', () => {
   let mockEsClient: ElasticsearchClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockPacksClient = {
-      find: jest.fn(),
-      update: jest.fn().mockResolvedValue({}),
+      find: vi.fn(),
+      update: vi.fn().mockResolvedValue({}),
     } as unknown as SavedObjectsClient;
 
     // A single space-scoped client instance is returned; assertions below verify
@@ -73,7 +76,7 @@ describe('getPackagePolicyDeleteCallback', () => {
   });
 
   it('looks packs up and updates them with the SAME client scoped to the current (custom) space', async () => {
-    (mockPacksClient.find as jest.Mock).mockResolvedValue({
+    (mockPacksClient.find as Mock).mockResolvedValue({
       saved_objects: [
         {
           id: 'pack-1',
@@ -107,7 +110,7 @@ describe('getPackagePolicyDeleteCallback', () => {
     // In the default space Fleet's SO client returns `undefined` from
     // `getCurrentNamespace()`, which the callback forwards unchanged so the
     // client resolves to the default namespace.
-    (mockPacksClient.find as jest.Mock).mockResolvedValue({
+    (mockPacksClient.find as Mock).mockResolvedValue({
       saved_objects: [
         {
           id: 'pack-1',
@@ -131,7 +134,7 @@ describe('getPackagePolicyDeleteCallback', () => {
   });
 
   it('should remove only deleted policy references and keep remaining ones', async () => {
-    (mockPacksClient.find as jest.Mock).mockResolvedValue({
+    (mockPacksClient.find as Mock).mockResolvedValue({
       saved_objects: [
         {
           id: 'pack-1',
@@ -197,7 +200,7 @@ describe('getPackagePolicyDeleteCallback', () => {
   });
 
   it('should remove all references when deleting the last policy', async () => {
-    (mockPacksClient.find as jest.Mock).mockResolvedValue({
+    (mockPacksClient.find as Mock).mockResolvedValue({
       saved_objects: [
         {
           id: 'pack-1',
@@ -235,7 +238,7 @@ describe('getPackagePolicyDeleteCallback', () => {
   });
 
   it('should handle deletion of multiple policies at once', async () => {
-    (mockPacksClient.find as jest.Mock).mockResolvedValue({
+    (mockPacksClient.find as Mock).mockResolvedValue({
       saved_objects: [
         {
           id: 'pack-1',

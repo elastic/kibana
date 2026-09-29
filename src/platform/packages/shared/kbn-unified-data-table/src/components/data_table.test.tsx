@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type {
@@ -54,18 +57,21 @@ import { useColumns } from '../hooks/use_data_grid_columns';
 import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-const mockUseDataGridColumnsCellActions = jest.fn((_prop: unknown) => []);
+const mockUseDataGridColumnsCellActions = vi.fn((_prop: unknown) => []);
 
-jest.mock('@kbn/cell-actions', () => ({
-  ...jest.requireActual('@kbn/cell-actions'),
-  useDataGridColumnsCellActions: (prop: unknown) => mockUseDataGridColumnsCellActions(prop),
-}));
+vi.mock('@kbn/cell-actions', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/cell-actions')),
+      useDataGridColumnsCellActions: (prop: unknown) => mockUseDataGridColumnsCellActions(prop),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockEuiDataGrid = jest.fn();
+const mockEuiDataGrid = vi.fn();
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  const ReactActual = jest.requireActual('react');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
+  const ReactActual = require('react');
 
   return {
     ...actual,
@@ -88,7 +94,7 @@ const dataViewMock = buildDataViewMock({
 
 const getProps = (): UnifiedDataTableProps => {
   const services = servicesMock;
-  services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn().mockReturnValue(true);
+  services.dataViewFieldEditor.userPermissions.editIndexPattern = vi.fn().mockReturnValue(true);
 
   return {
     ariaLabelledBy: '',
@@ -99,10 +105,10 @@ const getProps = (): UnifiedDataTableProps => {
     dataView: dataViewMock,
     expandedDoc: undefined,
     loadingState: DataLoadingState.loaded,
-    onFilter: jest.fn(),
-    onResize: jest.fn(),
-    onSetColumns: jest.fn(),
-    onSort: jest.fn(),
+    onFilter: vi.fn(),
+    onResize: vi.fn(),
+    onSetColumns: vi.fn(),
+    onSort: vi.fn(),
     rows: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
     sampleSizeState: 30,
     searchDescription: '',
@@ -116,7 +122,7 @@ const getProps = (): UnifiedDataTableProps => {
       data: services.data,
       theme: services.theme,
     },
-    setExpandedDoc: jest.fn(),
+    setExpandedDoc: vi.fn(),
     settings: {},
     showTimeCol: true,
     sort: [],
@@ -240,7 +246,7 @@ describe('UnifiedDataTable', () => {
   beforeAll(() => {
     Object.defineProperty(navigator, 'clipboard', {
       value: {
-        writeText: jest.fn(),
+        writeText: vi.fn(),
       },
       writable: true,
     });
@@ -253,7 +259,7 @@ describe('UnifiedDataTable', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Document selection', () => {
@@ -461,7 +467,7 @@ describe('UnifiedDataTable', () => {
     it(
       'should render the edit field button if onFieldEdited is provided',
       async () => {
-        await renderDataTable({ columns: ['message'], onFieldEdited: jest.fn() });
+        await renderDataTable({ columns: ['message'], onFieldEdited: vi.fn() });
 
         expect(
           screen.queryByTestId('dataGridHeaderCellActionGroup-message')
@@ -500,7 +506,7 @@ describe('UnifiedDataTable', () => {
         await renderComponent({
           ...getProps(),
           columns: ['message'],
-          onFieldEdited: jest.fn(),
+          onFieldEdited: vi.fn(),
         });
 
         expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
@@ -525,7 +531,7 @@ describe('UnifiedDataTable', () => {
           ...getProps(),
           cellActionsTriggerId: 'test',
           columns: ['message'],
-          onFieldEdited: jest.fn(),
+          onFieldEdited: vi.fn(),
         });
 
         expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
@@ -591,7 +597,7 @@ describe('UnifiedDataTable', () => {
       });
       await waitForEuiPopoverClose();
 
-      return (navigator.clipboard.writeText as jest.Mock).mock.calls.at(-1)![0] as string;
+      return (navigator.clipboard.writeText as Mock).mock.calls.at(-1)![0] as string;
     };
 
     it(
@@ -810,7 +816,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderComponent({
           ...getProps(),
-          onUpdateRowHeight: jest.fn(),
+          onUpdateRowHeight: vi.fn(),
         });
 
         expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
@@ -839,7 +845,7 @@ describe('UnifiedDataTable', () => {
         await renderComponent({
           ...getProps(),
           onUpdateRowHeight: undefined,
-          onUpdateSampleSize: jest.fn(),
+          onUpdateSampleSize: vi.fn(),
         });
 
         expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
@@ -867,8 +873,8 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderComponent({
           ...getProps(),
-          onUpdateDataGridDensity: jest.fn(),
-          onUpdateRowHeight: jest.fn(),
+          onUpdateDataGridDensity: vi.fn(),
+          onUpdateRowHeight: vi.fn(),
         });
 
         expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
@@ -897,8 +903,8 @@ describe('UnifiedDataTable', () => {
         await renderComponent({
           ...getProps(),
           onUpdateDataGridDensity: undefined,
-          onUpdateRowHeight: jest.fn(),
-          onUpdateSampleSize: jest.fn(),
+          onUpdateRowHeight: vi.fn(),
+          onUpdateSampleSize: vi.fn(),
         });
 
         expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
@@ -992,12 +998,12 @@ describe('UnifiedDataTable', () => {
               _index: 'test_i',
               _id: 'test',
             },
-            flattened: { test: jest.fn() },
+            flattened: { test: vi.fn() },
           },
           externalControlColumns: [testLeadingControlColumn],
-          renderDocumentView: jest.fn(),
+          renderDocumentView: vi.fn(),
           rowAdditionalLeadingControls: mockRowAdditionalLeadingControls,
-          setExpandedDoc: jest.fn(),
+          setExpandedDoc: vi.fn(),
         });
 
         expect(screen.getAllByTestId('test-body-control-column-cell')[0]).toBeVisible();
@@ -1021,15 +1027,15 @@ describe('UnifiedDataTable', () => {
           ...getProps(),
           expandedDoc: {
             id: 'test',
-            flattened: { test: jest.fn() },
+            flattened: { test: vi.fn() },
             raw: {
               _index: 'test_i',
               _id: 'test',
             },
           },
           externalControlColumns: [testLeadingControlColumn],
-          renderDocumentView: jest.fn(),
-          setExpandedDoc: jest.fn(),
+          renderDocumentView: vi.fn(),
+          setExpandedDoc: vi.fn(),
           trailingControlColumns: testTrailingControlColumns,
         });
 
@@ -1048,15 +1054,15 @@ describe('UnifiedDataTable', () => {
           ...getProps(),
           expandedDoc: {
             id: 'test',
-            flattened: { test: jest.fn() },
+            flattened: { test: vi.fn() },
             raw: {
               _index: 'test_i',
               _id: 'test',
             },
           },
           externalControlColumns: [testLeadingControlColumn],
-          renderDocumentView: jest.fn(),
-          setExpandedDoc: jest.fn(),
+          renderDocumentView: vi.fn(),
+          setExpandedDoc: vi.fn(),
         });
 
         expect(screen.getAllByTestId('docTableExpandToggleColumn')[0]).toBeVisible();
@@ -1071,7 +1077,7 @@ describe('UnifiedDataTable', () => {
     async () => {
       const expandedDoc = {
         id: 'test',
-        flattened: { test: jest.fn() },
+        flattened: { test: vi.fn() },
         raw: {
           _index: 'test_i',
           _id: 'test',
@@ -1080,11 +1086,11 @@ describe('UnifiedDataTable', () => {
 
       const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
 
-      const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
+      const renderDocumentViewMock = vi.fn((hit: DataTableRecord) => (
         <div data-test-subj="test-document-view">{hit.id}</div>
       ));
 
-      const setExpandedDocMock = jest.fn();
+      const setExpandedDocMock = vi.fn();
 
       await renderComponent({
         ...getProps(),
@@ -1113,14 +1119,14 @@ describe('UnifiedDataTable', () => {
     async () => {
       const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
       const [expandedDoc] = rows;
-      const setRenderDocumentViewMeta = jest.fn();
+      const setRenderDocumentViewMeta = vi.fn();
 
       const props = {
         ...getProps(),
         expandedDoc,
         renderDocumentView: 'external',
         rows,
-        setExpandedDoc: jest.fn(),
+        setExpandedDoc: vi.fn(),
         setRenderDocumentViewMeta,
       } satisfies UnifiedDataTableProps;
 
@@ -1214,7 +1220,7 @@ describe('UnifiedDataTable', () => {
 
               // When rendering this custom cell, we'll want to override
               // the automatic width/heights calculated by EuiDataGrid
-              rowCellRender: jest.fn(),
+              rowCellRender: vi.fn(),
             },
           ],
           renderCustomGridBody: (props: EuiDataGridCustomBodyProps) => (
@@ -1239,14 +1245,14 @@ describe('UnifiedDataTable', () => {
           componentsTourSteps: { expandButton: 'test-expand' },
           expandedDoc: {
             id: 'test',
-            flattened: { test: jest.fn() },
+            flattened: { test: vi.fn() },
             raw: {
               _index: 'test_i',
               _id: 'test',
             },
           },
-          renderDocumentView: jest.fn(),
-          setExpandedDoc: jest.fn(),
+          renderDocumentView: vi.fn(),
+          setExpandedDoc: vi.fn(),
         });
 
         expect(screen.getAllByTestId('docTableExpandToggleColumn')[0]).toHaveAttribute(
@@ -1265,7 +1271,7 @@ describe('UnifiedDataTable', () => {
         let toolbarParams: Record<string, unknown> = {};
         let gridParams: Record<string, unknown> = {};
 
-        const renderCustomToolbarMock = jest.fn((props) => {
+        const renderCustomToolbarMock = vi.fn((props) => {
           toolbarParams = props.toolbarProps;
           gridParams = props.gridProps;
 
@@ -1416,8 +1422,8 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderComponent({
           ...getProps(),
-          onUpdateRowHeight: jest.fn(),
-          onUpdateHeaderRowHeight: jest.fn(),
+          onUpdateRowHeight: vi.fn(),
+          onUpdateHeaderRowHeight: vi.fn(),
           documentsDisplayModeState: 'table',
         });
 
@@ -1591,7 +1597,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderComponent({
           ...getProps(),
-          getRowIndicator: jest.fn(() => ({ color: 'blue', label: 'test' })),
+          getRowIndicator: vi.fn(() => ({ color: 'blue', label: 'test' })),
         });
 
         expect(screen.getByTestId('dataGridHeaderCell-colorIndicator')).toBeVisible();
@@ -1783,10 +1789,10 @@ describe('UnifiedDataTable', () => {
   });
 
   describe('pagination', () => {
-    const onChangePageMock = jest.fn();
+    const onChangePageMock = vi.fn();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should effect pageIndex change', async () => {
@@ -1869,7 +1875,7 @@ describe('UnifiedDataTable', () => {
   // so scrolling and retry behavior are covered by the focused hook tests instead.
   describe('scrolling to the expanded document', () => {
     const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    const onChangePageMock = jest.fn();
+    const onChangePageMock = vi.fn();
 
     beforeEach(() => {
       onChangePageMock.mockClear();
@@ -1881,8 +1887,8 @@ describe('UnifiedDataTable', () => {
       rowsPerPageOptions: [1, 5],
       rowsPerPageState: 1,
       onUpdatePageIndex: onChangePageMock,
-      setExpandedDoc: jest.fn(),
-      renderDocumentView: jest.fn(),
+      setExpandedDoc: vi.fn(),
+      renderDocumentView: vi.fn(),
     });
 
     it('should page to the expanded document when it is not on the current page', async () => {
@@ -2004,7 +2010,7 @@ describe('UnifiedDataTable', () => {
     it(
       'should render find-button if enableInTableSearch is true and renderCustomToolbar is provided',
       async () => {
-        const renderCustomToolbarMock = jest.fn((props) => {
+        const renderCustomToolbarMock = vi.fn((props) => {
           return (
             <div data-test-subj="custom-toolbar">
               Custom layout {props.gridProps.inTableSearchButton}

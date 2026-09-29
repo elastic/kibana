@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { getAllConnectors } from '@kbn/workflows-management-plugin/common/schema';
 import {
@@ -13,21 +16,24 @@ import {
   prefetchTriggerDefinitions,
 } from './prefetch';
 
-jest.mock('@kbn/workflows-management-plugin/common/schema', () => ({
-  getAllConnectors: jest.fn().mockReturnValue([]),
-}));
+vi.mock('@kbn/workflows-management-plugin/common/schema', () => {
+      const mocked = {
+      getAllConnectors: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getAllConnectorsMock = getAllConnectors as jest.MockedFunction<typeof getAllConnectors>;
+const getAllConnectorsMock = getAllConnectors as MockedFunction<typeof getAllConnectors>;
 
 const buildApi = (
   overrides: Partial<{
-    getAvailableConnectors: jest.Mock;
+    getAvailableConnectors: Mock;
   }> = {}
 ) =>
   ({
     getAvailableConnectors:
       overrides.getAvailableConnectors ??
-      jest.fn().mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
+      vi.fn().mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
   } as any);
 
 beforeEach(() => {
@@ -39,7 +45,7 @@ describe('prefetch helpers', () => {
   describe('prefetchConnectors', () => {
     it('returns compact summaries from a connectorTypes map with sub-actions', async () => {
       const api = buildApi({
-        getAvailableConnectors: jest.fn().mockResolvedValue({
+        getAvailableConnectors: vi.fn().mockResolvedValue({
           connectorTypes: {
             '.slack': {
               instances: [{ id: 'slack-1', name: 'Eng Slack' }],

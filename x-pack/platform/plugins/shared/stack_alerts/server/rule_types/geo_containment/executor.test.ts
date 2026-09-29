@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
@@ -63,8 +65,8 @@ describe('executor', () => {
   };
 
   // Boundary test mocks
-  const boundaryCall = jest.fn();
-  const esAggCall = jest.fn();
+  const boundaryCall = vi.fn();
+  const esAggCall = vi.fn();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   // @ts-ignore incomplete return type
   esClient.search.mockResponseImplementation(({ index }) => {
@@ -104,7 +106,7 @@ describe('executor', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     alerts.length = 0;
   });
 

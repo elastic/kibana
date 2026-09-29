@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockEncrypt = jest.fn();
-export const createRequestEncryptor = jest.fn().mockResolvedValue({
+import { vi } from 'vitest';
+
+export const mockEncrypt = vi.fn();
+export const createRequestEncryptor = vi.fn().mockResolvedValue({
   encrypt: mockEncrypt,
 });
 
-jest.doMock('@elastic/request-crypto', () => ({
-  createRequestEncryptor,
-}));
+vi.doMock('@elastic/request-crypto', () => {
+      const mocked = {
+      createRequestEncryptor,
+    };
+      return { ...mocked, default: mocked };
+    });

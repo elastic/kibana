@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import React from 'react';
 import { act, render, waitFor } from '@testing-library/react';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
@@ -22,17 +25,20 @@ import * as useFetcherHook from '../../../hooks/use_fetcher';
 import * as useProcessorEventHook from '../../../hooks/use_processor_event';
 import { fromQuery } from '../links/url_helpers';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 interface SetupResult {
-  setQuerySpy: jest.SpyInstance;
-  getQuerySpy: jest.SpyInstance;
-  clearQuerySpy: jest.SpyInstance;
-  setTimeSpy: jest.SpyInstance;
-  setRefreshIntervalSpy: jest.SpyInstance;
+  setQuerySpy: MockInstance;
+  getQuerySpy: MockInstance;
+  clearQuerySpy: MockInstance;
+  setTimeSpy: MockInstance;
+  setRefreshIntervalSpy: MockInstance;
 }
 
 async function setup({
@@ -47,16 +53,16 @@ async function setup({
     search: fromQuery(urlParams),
   });
 
-  const setQuerySpy = jest.fn();
-  const getQuerySpy = jest.fn();
-  const clearQuerySpy = jest.fn();
-  const setTimeSpy = jest.fn();
-  const setRefreshIntervalSpy = jest.fn();
+  const setQuerySpy = vi.fn();
+  const getQuerySpy = vi.fn();
+  const clearQuerySpy = vi.fn();
+  const setTimeSpy = vi.fn();
+  const setRefreshIntervalSpy = vi.fn();
 
-  jest
+  vi
     .spyOn(useApmDataViewHook, 'useAdHocApmDataView')
     .mockReturnValue({ dataView: undefined, apmIndices: undefined });
-  jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
+  vi.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   render(
     <MockApmPluginContextWrapper
@@ -109,20 +115,20 @@ describe('UnifiedSearchBar', () => {
 
   beforeEach(() => {
     history = createMemoryHistory();
-    jest.spyOn(history, 'push');
-    jest.spyOn(history, 'replace');
+    vi.spyOn(history, 'push');
+    vi.spyOn(history, 'replace');
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('sets search bar state based on URL parameters', async () => {
-    jest.spyOn(useProcessorEventHook, 'useProcessorEvent').mockReturnValue(undefined);
+    vi.spyOn(useProcessorEventHook, 'useProcessorEvent').mockReturnValue(undefined);
 
     const search = '?method=json';
     const pathname = '/services';
-    (useLocation as jest.Mock).mockReturnValue({ search, pathname });
+    (useLocation as Mock).mockReturnValue({ search, pathname });
 
     const expectedQuery = {
       query: 'service.name:"opbeans-android"',
@@ -151,7 +157,7 @@ describe('UnifiedSearchBar', () => {
       refreshInterval: refreshInterval.value,
     };
 
-    jest.spyOn(useApmParamsHook, 'useApmParams').mockReturnValue({ query: urlParams, path: {} });
+    vi.spyOn(useApmParamsHook, 'useApmParams').mockReturnValue({ query: urlParams, path: {} });
 
     const { setQuerySpy, setTimeSpy, setRefreshIntervalSpy } = await setup({
       history,
@@ -166,12 +172,12 @@ describe('UnifiedSearchBar', () => {
   });
 
   it('forwards showFilterBar to the unified search component', async () => {
-    jest.spyOn(useProcessorEventHook, 'useProcessorEvent').mockReturnValue(undefined);
+    vi.spyOn(useProcessorEventHook, 'useProcessorEvent').mockReturnValue(undefined);
 
-    const searchBarSpy = jest.fn(() => <div />);
+    const searchBarSpy = vi.fn(() => <div />);
     const search = '?method=json';
     const pathname = '/service-map';
-    (useLocation as jest.Mock).mockReturnValue({ search, pathname });
+    (useLocation as Mock).mockReturnValue({ search, pathname });
 
     const urlParams = {
       kuery: '',
@@ -183,7 +189,7 @@ describe('UnifiedSearchBar', () => {
       offset: '1d',
     };
 
-    jest.spyOn(useApmParamsHook, 'useApmParams').mockReturnValue({ query: urlParams, path: {} });
+    vi.spyOn(useApmParamsHook, 'useApmParams').mockReturnValue({ query: urlParams, path: {} });
 
     render(
       <MockApmPluginContextWrapper
@@ -213,9 +219,9 @@ describe('UnifiedSearchBar', () => {
   });
 
   it('preserves comparison params when query is updated', async () => {
-    jest.spyOn(useProcessorEventHook, 'useProcessorEvent').mockReturnValue(undefined);
+    vi.spyOn(useProcessorEventHook, 'useProcessorEvent').mockReturnValue(undefined);
 
-    const searchBarSpy = jest.fn(() => <div />);
+    const searchBarSpy = vi.fn(() => <div />);
     const urlParams = {
       kuery: 'service.name:"opbeans-android"',
       rangeFrom: 'now-15m',
@@ -228,9 +234,9 @@ describe('UnifiedSearchBar', () => {
     const search = fromQuery(urlParams);
     const pathname = '/service-map';
 
-    (useLocation as jest.Mock).mockReturnValue({ search, pathname });
-    jest.spyOn(useApmParamsHook, 'useApmParams').mockReturnValue({ query: urlParams, path: {} });
-    jest.spyOn(useApmDataViewHook, 'useAdHocApmDataView').mockReturnValue({
+    (useLocation as Mock).mockReturnValue({ search, pathname });
+    vi.spyOn(useApmParamsHook, 'useApmParams').mockReturnValue({ query: urlParams, path: {} });
+    vi.spyOn(useApmDataViewHook, 'useAdHocApmDataView').mockReturnValue({
       dataView: {
         title: 'apm',
         fields: [
@@ -300,7 +306,7 @@ describe('UnifiedSearchBar', () => {
       expect(history.push).toHaveBeenCalled();
     });
 
-    const pushArgs = (history.push as jest.Mock).mock.calls.find(
+    const pushArgs = (history.push as Mock).mock.calls.find(
       (call) => call[0] && typeof call[0] === 'object' && 'search' in call[0]
     );
     expect(pushArgs).toBeDefined();

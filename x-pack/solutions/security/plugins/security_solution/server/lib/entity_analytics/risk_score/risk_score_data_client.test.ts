@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   createOrUpdateComponentTemplate,
   createOrUpdateIndexTemplate,
@@ -27,21 +30,30 @@ import {
   riskScoreSeriesEntityBatchSize,
 } from '../utils/elasticsearch_terms_limits';
 
-jest.mock('@kbn/alerting-plugin/server', () => ({
-  createOrUpdateComponentTemplate: jest.fn(),
-  createOrUpdateIndexTemplate: jest.fn(),
-}));
+vi.mock('@kbn/alerting-plugin/server', () => {
+      const mocked = {
+      createOrUpdateComponentTemplate: vi.fn(),
+      createOrUpdateIndexTemplate: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils/create_datastream', () => ({
-  createDataStream: jest.fn(),
-}));
+vi.mock('../utils/create_datastream', () => {
+      const mocked = {
+      createDataStream: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils/create_or_update_index', () => ({
-  createOrUpdateIndex: jest.fn(),
-}));
+vi.mock('../utils/create_or_update_index', () => {
+      const mocked = {
+      createOrUpdateIndex: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.spyOn(transforms, 'createTransform').mockResolvedValue(Promise.resolve());
-jest.spyOn(transforms, 'scheduleTransformNow').mockResolvedValue(Promise.resolve());
+vi.spyOn(transforms, 'createTransform').mockResolvedValue(Promise.resolve());
+vi.spyOn(transforms, 'scheduleTransformNow').mockResolvedValue(Promise.resolve());
 
 let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
@@ -71,7 +83,7 @@ describe('RiskScoreDataClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getWriter', () => {
@@ -108,7 +120,7 @@ describe('RiskScoreDataClient', () => {
       assertDataStream('space-1');
 
       expect(
-        (createOrUpdateComponentTemplate as jest.Mock).mock.lastCall[0].template.template
+        (createOrUpdateComponentTemplate as Mock).mock.lastCall[0].template.template
       ).toMatchSnapshot();
     });
   });
@@ -134,7 +146,7 @@ describe('RiskScoreDataClient', () => {
   describe('init error', () => {
     it('should handle errors during initialization', async () => {
       const error = new Error('There error');
-      (createOrUpdateIndexTemplate as jest.Mock).mockRejectedValueOnce(error);
+      (createOrUpdateIndexTemplate as Mock).mockRejectedValueOnce(error);
 
       try {
         await riskScoreDataClient.init();
@@ -159,7 +171,7 @@ describe('RiskScoreDataClient', () => {
 
   describe('getDailyAverageRiskScoreNormSeries', () => {
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('returns an empty map without querying ES when entityIds is empty', async () => {

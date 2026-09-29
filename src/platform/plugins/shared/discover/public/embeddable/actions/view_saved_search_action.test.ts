@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { BehaviorSubject } from 'rxjs';
@@ -24,14 +26,14 @@ const services = discoverServiceMock;
 const compatibleEmbeddableApi: SearchEmbeddableApi = {
   type: SEARCH_EMBEDDABLE_TYPE,
   savedSearch$: new BehaviorSubject({
-    searchSource: { getField: jest.fn() },
+    searchSource: { getField: vi.fn() },
   } as unknown as SavedSearch),
   parentApi: {
     viewMode$: new BehaviorSubject('view'),
   },
 } as unknown as SearchEmbeddableApi;
 
-jest
+vi
   .spyOn(services.core.chrome, 'getActiveSolutionNavId$')
   .mockReturnValue(new BehaviorSubject(SolutionType.Search));
 

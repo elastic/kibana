@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { HighlightWrapper } from './highlight_wrapper';
 import { useServiceMapSearchHighlight } from './service_map_search_context';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from './test_helpers';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     useEuiTheme: () => ({
@@ -22,14 +24,17 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('./service_map_search_context', () => ({
-  useServiceMapSearchHighlight: jest.fn(() => ({
-    isSearchMatch: false,
-    isActiveSearchMatch: false,
-  })),
-}));
+vi.mock('./service_map_search_context', () => {
+      const mocked = {
+      useServiceMapSearchHighlight: vi.fn(() => ({
+        isSearchMatch: false,
+        isActiveSearchMatch: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseServiceMapSearchHighlight = jest.mocked(useServiceMapSearchHighlight);
+const mockUseServiceMapSearchHighlight = vi.mocked(useServiceMapSearchHighlight);
 
 function renderWrapper(props: { nodeId: string; contextHighlight?: boolean }) {
   return render(

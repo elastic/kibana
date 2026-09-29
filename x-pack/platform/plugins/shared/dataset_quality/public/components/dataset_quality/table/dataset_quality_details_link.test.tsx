@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import React from 'react';
@@ -12,8 +14,8 @@ import { DatasetQualityDetailsLink } from './dataset_quality_details_link';
 import { screen, render } from '@testing-library/react';
 
 const createMockLocator = (id: string) => ({
-  navigate: jest.fn(),
-  getRedirectUrl: jest.fn().mockReturnValue(id),
+  navigate: vi.fn(),
+  getRedirectUrl: vi.fn().mockReturnValue(id),
 });
 
 describe('DatasetQualityDetailsLink', () => {
@@ -21,7 +23,7 @@ describe('DatasetQualityDetailsLink', () => {
 
   const urlServiceMock = {
     locators: {
-      get: jest.fn((id) => {
+      get: vi.fn((id) => {
         switch (id) {
           case DATA_QUALITY_DETAILS_LOCATOR_ID:
             return mockDataQualityDetailsLocator;
@@ -47,7 +49,7 @@ describe('DatasetQualityDetailsLink', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a link to dataset quality details', () => {

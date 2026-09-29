@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
@@ -19,14 +22,14 @@ import type {
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { useQuery as _useQuery } from '@kbn/react-query';
 
-const useQueryMock = _useQuery as jest.Mock;
+const useQueryMock = _useQuery as Mock;
 
-jest.mock('@kbn/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
+vi.mock('@kbn/react-query', async () => {
+  const actualReactQueryModule = (await vi.importActual('@kbn/react-query'));
 
   return {
     ...actualReactQueryModule,
-    useQuery: jest.fn((...args) => actualReactQueryModule.useQuery(...args)),
+    useQuery: vi.fn((...args) => actualReactQueryModule.useQuery(...args)),
   };
 });
 

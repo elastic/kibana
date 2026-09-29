@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 
@@ -15,39 +18,39 @@ import { useToasts } from '../../../../../common/lib/kibana';
 import { EndpointScriptDeleteModal } from './script_delete_modal';
 import { useDeleteEndpointScript } from '../../../../hooks/script_library';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../hooks/script_library/use_delete_script_by_id');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../hooks/script_library/use_delete_script_by_id');
 
-const useToastsMock = useToasts as jest.Mock;
+const useToastsMock = useToasts as Mock;
 
 describe('EndpointScriptDeleteModal', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
   let defaultProps: React.ComponentProps<typeof EndpointScriptDeleteModal>;
-  let deleteScriptMutation: jest.Mock;
-  let onSuccessMock: jest.Mock;
-  let onCancelMock: jest.Mock;
-  let addSuccessToast: jest.Mock;
-  let addErrorToast: jest.Mock;
+  let deleteScriptMutation: Mock;
+  let onSuccessMock: Mock;
+  let onCancelMock: Mock;
+  let addSuccessToast: Mock;
+  let addErrorToast: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedContext = createAppRootMockRenderer();
-    deleteScriptMutation = jest.fn();
-    onSuccessMock = jest.fn();
-    onCancelMock = jest.fn();
-    addSuccessToast = jest.fn();
-    addErrorToast = jest.fn();
+    deleteScriptMutation = vi.fn();
+    onSuccessMock = vi.fn();
+    onCancelMock = vi.fn();
+    addSuccessToast = vi.fn();
+    addErrorToast = vi.fn();
 
-    (useToastsMock as jest.Mock).mockReturnValue({
-      addDanger: jest.fn(),
+    (useToastsMock as Mock).mockReturnValue({
+      addDanger: vi.fn(),
       addSuccess: addSuccessToast,
       addError: addErrorToast,
     });
 
-    (useDeleteEndpointScript as jest.Mock).mockImplementation(({ onSuccess, onError }) => ({
-      mutateAsync: jest.fn(async (params) => {
+    (useDeleteEndpointScript as Mock).mockImplementation(({ onSuccess, onError }) => ({
+      mutateAsync: vi.fn(async (params) => {
         try {
           const result = await deleteScriptMutation(params);
           onSuccess(result);

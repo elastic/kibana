@@ -5,44 +5,61 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EMPTY } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { getLogAiInsights, type GetLogAiInsightsParams } from './get_log_ai_insights';
 
-jest.mock('./get_log_document_by_id', () => ({
-  getLogDocumentById: jest.fn(),
-}));
+vi.mock('./get_log_document_by_id', () => {
+      const mocked = {
+      getLogDocumentById: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../tools/get_traces/handler', () => ({
-  getToolHandler: jest.fn().mockResolvedValue({ traces: [] }),
-}));
+vi.mock('../../tools/get_traces/handler', () => {
+      const mocked = {
+      getToolHandler: vi.fn().mockResolvedValue({ traces: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/warning_and_above_log_filter', () => ({
-  isWarningOrAbove: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../utils/warning_and_above_log_filter', () => {
+      const mocked = {
+      isWarningOrAbove: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/get_entity_linking_instructions', () => ({
-  getEntityLinkingInstructions: jest.fn().mockReturnValue(''),
-}));
+vi.mock('../../utils/get_entity_linking_instructions', () => {
+      const mocked = {
+      getEntityLinkingInstructions: vi.fn().mockReturnValue(''),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./types', () => ({
-  createAiInsightResult: jest.fn((context: string, _connector: unknown, events$: unknown) => ({
-    context,
-    events$,
-  })),
-}));
+vi.mock('./types', () => {
+      const mocked = {
+      createAiInsightResult: vi.fn((context: string, _connector: unknown, events$: unknown) => ({
+        context,
+        events$,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getLogDocumentById } = jest.requireMock('./get_log_document_by_id');
-const { getToolHandler: getTraces } = jest.requireMock('../../tools/get_traces/handler');
+const { getLogDocumentById } = (await vi.importMock('./get_log_document_by_id'));
+const { getToolHandler: getTraces } = (await vi.importMock('../../tools/get_traces/handler'));
 
-const mockLogger = { debug: jest.fn(), error: jest.fn() } as unknown as Logger;
+const mockLogger = { debug: vi.fn(), error: vi.fn() } as unknown as Logger;
 
 function createBaseParams(overrides: Partial<GetLogAiInsightsParams> = {}): GetLogAiInsightsParams {
   return {
     core: { http: { basePath: { get: () => '' } } } as any,
     plugins: {} as any,
-    inferenceClient: { chatComplete: jest.fn().mockReturnValue(EMPTY) } as any,
+    inferenceClient: { chatComplete: vi.fn().mockReturnValue(EMPTY) } as any,
     connectorId: 'test-connector',
     connector: {} as any,
     request: httpServerMock.createKibanaRequest(),
@@ -54,7 +71,7 @@ function createBaseParams(overrides: Partial<GetLogAiInsightsParams> = {}): GetL
 
 describe('getLogAiInsights', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getTraces.mockResolvedValue({ traces: [] });
   });
 

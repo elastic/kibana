@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AbsoluteTimeRange } from '../store/inputs/model';
 import { getFutureTimeRange, getPreviousTimeRange } from './get_time_range';
 import { getTimeRangeSettings } from './default_date_settings';
 
-const getTimeRangeSettingsMock = getTimeRangeSettings as jest.Mock;
+const getTimeRangeSettingsMock = getTimeRangeSettings as Mock;
 
-jest.mock('./default_date_settings');
+vi.mock('./default_date_settings');
 
 getTimeRangeSettingsMock.mockImplementation(() => ({
   from: '2020-07-04T08:20:18.966Z',
@@ -21,7 +24,7 @@ getTimeRangeSettingsMock.mockImplementation(() => ({
 }));
 describe('get time range', () => {
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('previous range', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -17,9 +19,9 @@ const renderWithIntlProvider = (children: React.ReactNode) =>
   render(<IntlProvider>{children}</IntlProvider>);
 
 describe('UpdateAvailableCallout', () => {
-  const mockToggleChangelogModal = jest.fn();
-  const mockBreakingChangesToggleIsUnderstood = jest.fn();
-  const mockBreakingChangesOnOpen = jest.fn();
+  const mockToggleChangelogModal = vi.fn();
+  const mockBreakingChangesToggleIsUnderstood = vi.fn();
+  const mockBreakingChangesOnOpen = vi.fn();
 
   const breakingChangesBaseMock = {
     changelog: [],

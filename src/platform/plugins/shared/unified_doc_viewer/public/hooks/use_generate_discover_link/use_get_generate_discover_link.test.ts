@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { Builder, esql } from '@elastic/esql';
 import { esqlEquals } from '../../utils/esql_expressions';
 import { useGetGenerateDiscoverLink } from '.';
 
-jest.mock('../../plugin', () => ({
-  getUnifiedDocViewerServices: jest.fn(),
-}));
+vi.mock('../../plugin', () => {
+      const mocked = {
+      getUnifiedDocViewerServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const DISCOVER_URL = 'http://discover/url';
 
@@ -22,7 +27,7 @@ describe('useGetGenerateDiscoverLink', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const mockGetUnifiedDocViewerServices = require('../../plugin').getUnifiedDocViewerServices;
   const mockDiscoverLocator = {
-    getRedirectUrl: jest.fn(() => DISCOVER_URL),
+    getRedirectUrl: vi.fn(() => DISCOVER_URL),
   };
 
   beforeEach(() => {
@@ -30,14 +35,14 @@ describe('useGetGenerateDiscoverLink', () => {
       data: {
         query: {
           timefilter: {
-            timefilter: { getAbsoluteTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })) },
+            timefilter: { getAbsoluteTime: vi.fn(() => ({ from: 'now-15m', to: 'now' })) },
           },
         },
       },
       share: {
         url: {
           locators: {
-            get: jest.fn((key: string) =>
+            get: vi.fn((key: string) =>
               key === 'DISCOVER_APP_LOCATOR' ? mockDiscoverLocator : undefined
             ),
           },
@@ -47,7 +52,7 @@ describe('useGetGenerateDiscoverLink', () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('returns undefined if discoverLocator is missing', () => {
@@ -55,11 +60,11 @@ describe('useGetGenerateDiscoverLink', () => {
       data: {
         query: {
           timefilter: {
-            timefilter: { getAbsoluteTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })) },
+            timefilter: { getAbsoluteTime: vi.fn(() => ({ from: 'now-15m', to: 'now' })) },
           },
         },
       },
-      share: { url: { locators: { get: jest.fn(() => undefined) } } },
+      share: { url: { locators: { get: vi.fn(() => undefined) } } },
     });
 
     const { result } = renderHook(() => useGetGenerateDiscoverLink({ indexPattern: 'traces-*' }));
@@ -80,7 +85,7 @@ describe('useGetGenerateDiscoverLink', () => {
 
   it('generates a discover link with a whereClause', () => {
     const { result } = renderHook(() => useGetGenerateDiscoverLink({ indexPattern: 'traces-*' }));
-    const mockGetRedirectUrl = jest.fn(() => DISCOVER_URL);
+    const mockGetRedirectUrl = vi.fn(() => DISCOVER_URL);
     mockDiscoverLocator.getRedirectUrl = mockGetRedirectUrl;
 
     const url = result.current.generateDiscoverLink(
@@ -101,7 +106,7 @@ describe('useGetGenerateDiscoverLink', () => {
     const { result } = renderHook(() =>
       useGetGenerateDiscoverLink({ indexPattern: 'traces-*', unmappedFieldsPolicy: 'NULLIFY' })
     );
-    const mockGetRedirectUrl = jest.fn(() => DISCOVER_URL);
+    const mockGetRedirectUrl = vi.fn(() => DISCOVER_URL);
     mockDiscoverLocator.getRedirectUrl = mockGetRedirectUrl;
 
     const url = result.current.generateDiscoverLink(
@@ -120,7 +125,7 @@ describe('useGetGenerateDiscoverLink', () => {
     const { result } = renderHook(() =>
       useGetGenerateDiscoverLink({ indexPattern: 'logs-*', unmappedFieldsPolicy: 'NULLIFY' })
     );
-    const mockGetRedirectUrl = jest.fn(() => DISCOVER_URL);
+    const mockGetRedirectUrl = vi.fn(() => DISCOVER_URL);
     mockDiscoverLocator.getRedirectUrl = mockGetRedirectUrl;
 
     result.current.generateDiscoverLink(
@@ -139,7 +144,7 @@ describe('useGetGenerateDiscoverLink', () => {
 
   it('preserves backslashes in the Discover href query without double-escaping', () => {
     const { result } = renderHook(() => useGetGenerateDiscoverLink({ indexPattern: 'logs-*' }));
-    const mockGetRedirectUrl = jest.fn(() => DISCOVER_URL);
+    const mockGetRedirectUrl = vi.fn(() => DISCOVER_URL);
     mockDiscoverLocator.getRedirectUrl = mockGetRedirectUrl;
 
     result.current.generateDiscoverLink(

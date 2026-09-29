@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { badRequest } from '@hapi/boom';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import { initializeListTemplates } from './list';
@@ -44,7 +46,7 @@ describe('Find workpad', () => {
       ],
     };
 
-    const findMock = mockRouteContext.core.savedObjects.client.find as jest.Mock;
+    const findMock = mockRouteContext.core.savedObjects.client.find as Mock;
 
     findMock.mockResolvedValueOnce(mockResults);
 
@@ -75,7 +77,7 @@ describe('Find workpad', () => {
   });
 
   it(`returns appropriate error on error`, async () => {
-    (mockRouteContext.core.savedObjects.client.find as jest.Mock).mockImplementationOnce(() => {
+    (mockRouteContext.core.savedObjects.client.find as Mock).mockImplementationOnce(() => {
       throw badRequest('generic error');
     });
 

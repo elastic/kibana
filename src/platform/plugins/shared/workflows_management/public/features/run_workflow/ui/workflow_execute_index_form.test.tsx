@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { themeServiceMock } from '@kbn/core/public/mocks';
@@ -22,42 +25,45 @@ import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { useKibana } from '../../../hooks/use_kibana';
 import { TestProvider } from '../../../shared/mocks/test_providers';
 
-jest.mock('../../../hooks/use_kibana');
-jest.mock('@kbn/unified-search-plugin/public', () => ({
-  SearchBar: MockSearchBar,
-  DataViewPicker: MockDataViewPicker,
-}));
+vi.mock('../../../hooks/use_kibana');
+vi.mock('@kbn/unified-search-plugin/public', () => {
+      const mocked = {
+      SearchBar: MockSearchBar,
+      DataViewPicker: MockDataViewPicker,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/unified-data-table', () => {
-  const actual = jest.requireActual('@kbn/unified-data-table');
+vi.mock('@kbn/unified-data-table', async () => {
+  const actual = (await vi.importActual('@kbn/unified-data-table'));
   return {
     ...actual,
     UnifiedDataTable: () => <div data-test-subj="unifiedDataTable" />,
   };
 });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 const mockTheme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
 const mockUiSettings = {
-  get: jest.fn(),
-  isDefault: jest.fn(() => true),
+  get: vi.fn(),
+  isDefault: vi.fn(() => true),
 };
 const mockStorage = {
-  get: jest.fn(),
-  set: jest.fn(),
-  clear: jest.fn(),
-  remove: jest.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
+  clear: vi.fn(),
+  remove: vi.fn(),
 };
 
 const TestWrapper = TestProvider;
 
 describe('WorkflowExecuteIndexForm', () => {
-  const mockSetValue = jest.fn();
-  const mockSetErrors = jest.fn();
+  const mockSetValue = vi.fn();
+  const mockSetErrors = vi.fn();
   const { mockDataViews, mockData } = createIndexFormKibanaMocks();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         unifiedSearch: {
@@ -211,23 +217,23 @@ describe('WorkflowExecuteIndexForm', () => {
       title: 'logs-*',
       name: 'logs-*',
       timeFieldName: '@timestamp',
-      getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      getFormatterForField: jest.fn().mockReturnValue(mockFieldFormatter),
-      getFieldByName: jest.fn((name: string) => ({
+      getIndexPattern: vi.fn().mockReturnValue('logs-*'),
+      getFormatterForField: vi.fn().mockReturnValue(mockFieldFormatter),
+      getFieldByName: vi.fn((name: string) => ({
         name,
         type: name === '@timestamp' ? 'date' : 'string',
         esTypes: name === '@timestamp' ? ['date'] : ['keyword'],
       })),
       fields: {
-        replaceAll: jest.fn(),
-        getByName: jest.fn().mockReturnValue(null),
-        getAll: jest.fn().mockReturnValue([{ name: '@timestamp' }, { name: 'message' }]),
-        create: jest.fn((spec: { name: string }) => ({ name: spec.name, type: 'string' })),
-        add: jest.fn(),
-        remove: jest.fn(),
-        update: jest.fn(),
+        replaceAll: vi.fn(),
+        getByName: vi.fn().mockReturnValue(null),
+        getAll: vi.fn().mockReturnValue([{ name: '@timestamp' }, { name: 'message' }]),
+        create: vi.fn((spec: { name: string }) => ({ name: spec.name, type: 'string' })),
+        add: vi.fn(),
+        remove: vi.fn(),
+        update: vi.fn(),
         length: 2, // Has fields - should skip refresh
-        filter: jest.fn().mockReturnValue([]),
+        filter: vi.fn().mockReturnValue([]),
       },
     };
 
@@ -270,23 +276,23 @@ describe('WorkflowExecuteIndexForm', () => {
       title: 'logs-*',
       name: 'logs-*',
       timeFieldName: '@timestamp',
-      getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      getFormatterForField: jest.fn().mockReturnValue(mockFieldFormatter),
-      getFieldByName: jest.fn((name: string) => ({
+      getIndexPattern: vi.fn().mockReturnValue('logs-*'),
+      getFormatterForField: vi.fn().mockReturnValue(mockFieldFormatter),
+      getFieldByName: vi.fn((name: string) => ({
         name,
         type: name === '@timestamp' ? 'date' : 'string',
         esTypes: name === '@timestamp' ? ['date'] : ['keyword'],
       })),
       fields: {
-        replaceAll: jest.fn(),
-        getByName: jest.fn().mockReturnValue(null),
-        getAll: jest.fn().mockReturnValue([{ name: '@timestamp' }, { name: 'message' }]),
-        create: jest.fn((spec: { name: string }) => ({ name: spec.name, type: 'string' })),
-        add: jest.fn(),
-        remove: jest.fn(),
-        update: jest.fn(),
+        replaceAll: vi.fn(),
+        getByName: vi.fn().mockReturnValue(null),
+        getAll: vi.fn().mockReturnValue([{ name: '@timestamp' }, { name: 'message' }]),
+        create: vi.fn((spec: { name: string }) => ({ name: spec.name, type: 'string' })),
+        add: vi.fn(),
+        remove: vi.fn(),
+        update: vi.fn(),
         length: 2,
-        filter: jest.fn().mockReturnValue([]),
+        filter: vi.fn().mockReturnValue([]),
       },
     };
     const dataViewWithoutFields = {
@@ -294,23 +300,23 @@ describe('WorkflowExecuteIndexForm', () => {
       title: 'logs-*',
       name: 'logs-*',
       timeFieldName: '@timestamp',
-      getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      getFormatterForField: jest.fn().mockReturnValue(mockFieldFormatter),
-      getFieldByName: jest.fn((name: string) => ({
+      getIndexPattern: vi.fn().mockReturnValue('logs-*'),
+      getFormatterForField: vi.fn().mockReturnValue(mockFieldFormatter),
+      getFieldByName: vi.fn((name: string) => ({
         name,
         type: name === '@timestamp' ? 'date' : 'string',
         esTypes: name === '@timestamp' ? ['date'] : ['keyword'],
       })),
       fields: {
-        replaceAll: jest.fn(),
-        getByName: jest.fn().mockReturnValue(null),
-        getAll: jest.fn().mockReturnValue([]),
-        create: jest.fn((spec: { name: string }) => ({ name: spec.name, type: 'string' })),
-        add: jest.fn(),
-        remove: jest.fn(),
-        update: jest.fn(),
+        replaceAll: vi.fn(),
+        getByName: vi.fn().mockReturnValue(null),
+        getAll: vi.fn().mockReturnValue([]),
+        create: vi.fn((spec: { name: string }) => ({ name: spec.name, type: 'string' })),
+        add: vi.fn(),
+        remove: vi.fn(),
+        update: vi.fn(),
         length: 0, // No fields - triggers refresh
-        filter: jest.fn().mockReturnValue([]),
+        filter: vi.fn().mockReturnValue([]),
       },
     };
     mockDataViews.getIdsWithTitle.mockResolvedValueOnce([
@@ -339,7 +345,7 @@ describe('WorkflowExecuteIndexForm', () => {
         uiSettings: mockUiSettings,
         storage: mockStorage,
         notifications: mockNotifications,
-        http: { get: jest.fn(), post: jest.fn() },
+        http: { get: vi.fn(), post: vi.fn() },
       },
     } as any);
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { omit, pick } from 'lodash';
 import { updateRuleRoute } from './update_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
@@ -18,9 +21,12 @@ import { RuleNotifyWhen } from '../../../../../common';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('updateRuleRoute', () => {
   const mockedRule = {
@@ -145,8 +151,8 @@ describe('updateRuleRoute', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    rulesClient.get = jest.fn().mockResolvedValue(mockedRule);
+    vi.resetAllMocks();
+    rulesClient.get = vi.fn().mockResolvedValue(mockedRule);
   });
 
   it('updates a rule with proper parameters', async () => {
@@ -254,7 +260,7 @@ describe('updateRuleRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyApiAccess as Mock).mockImplementation(() => {
       throw new Error('OMG');
     });
 
@@ -332,7 +338,7 @@ describe('updateRuleRoute', () => {
     it('returns 400 if the rule type is internally managed', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
-      rulesClient.get = jest
+      rulesClient.get = vi
         .fn()
         .mockResolvedValue({ ...mockedRule, alertTypeId: 'test.internal-rule-type' });
 

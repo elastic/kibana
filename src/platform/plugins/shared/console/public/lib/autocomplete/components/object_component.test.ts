@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ConstantComponent } from './constant_component';
 import { ObjectComponent } from './object_component';
 import { SharedComponent } from './shared_component';
@@ -30,7 +32,7 @@ describe('WHEN matching object child rules', () => {
     const secondConstantChild = new SharedComponent('second_constant_child', secondConstant);
     wildcard.addComponent(new SharedComponent('wildcard_child'));
     const globalChild = new SharedComponent('global_child');
-    const globalComponentResolver = jest.fn(() => [globalChild]);
+    const globalComponentResolver = vi.fn(() => [globalChild]);
     const component = new ObjectComponent('object', [firstConstant, secondConstant], [wildcard]);
 
     expect(component.match('query', { globalComponentResolver }, null)).toEqual({
@@ -49,7 +51,7 @@ describe('WHEN matching object child rules', () => {
     const firstWildcardChild = new SharedComponent('first_wildcard_child', firstWildcard);
     const secondWildcardChild = new SharedComponent('second_wildcard_child', secondWildcard);
     const globalChild = new SharedComponent('global_child');
-    const globalComponentResolver = jest.fn(() => [globalChild]);
+    const globalComponentResolver = vi.fn(() => [globalChild]);
     const component = new ObjectComponent(
       'object',
       [new ConstantComponent('other')],
@@ -71,7 +73,7 @@ describe('WHEN matching object child rules', () => {
     new ConstantComponent('wildcard_string_value', wildcard);
     const globalObjectOpen = new ConstantComponent('{');
     const globalQueryChild = new ConstantComponent('global_query_child', globalObjectOpen);
-    const globalComponentResolver = jest.fn(() => [globalObjectOpen]);
+    const globalComponentResolver = vi.fn(() => [globalObjectOpen]);
     const component = new ObjectComponent('object', [], [wildcard]);
 
     const states = walkTokenPath(
@@ -91,7 +93,7 @@ describe('WHEN matching object child rules', () => {
     const wildcardQueryChild = new ConstantComponent('wildcard_query_child', wildcardObjectOpen);
     const globalObjectOpen = new ConstantComponent('{');
     new ConstantComponent('global_query_child', globalObjectOpen);
-    const globalComponentResolver = jest.fn(() => [globalObjectOpen]);
+    const globalComponentResolver = vi.fn(() => [globalObjectOpen]);
     const component = new ObjectComponent('object', [], [wildcard]);
 
     const states = walkTokenPath(
@@ -111,7 +113,7 @@ describe('WHEN matching object child rules', () => {
     new ConstantComponent('wildcard_query_child', wildcardObjectOpen);
     const globalObjectOpen = new ConstantComponent('{');
     new ConstantComponent('global_query_child', globalObjectOpen);
-    const globalComponentResolver = jest.fn(() => [globalObjectOpen]);
+    const globalComponentResolver = vi.fn(() => [globalObjectOpen]);
     const component = new ObjectComponent('object', [], [wildcard]);
     const context: TestContext = { globalComponentResolver };
 
@@ -126,7 +128,7 @@ describe('WHEN matching object child rules', () => {
     new ConstantComponent('{', wildcard);
     const globalObjectOpen = new ConstantComponent('{');
     new ConstantComponent('global_query_child', globalObjectOpen);
-    const globalComponentResolver = jest.fn(() => [globalObjectOpen]);
+    const globalComponentResolver = vi.fn(() => [globalObjectOpen]);
     const component = new ObjectComponent('object', [], [wildcard]);
     const context: TestContext = { globalComponentResolver };
 
@@ -144,8 +146,8 @@ describe('WHEN matching object child rules', () => {
     );
     const globalObjectOpen = new ConstantComponent('{');
     const globalQueryChild = new ConstantComponent('global_query_child', globalObjectOpen);
-    const globalGetTerms = jest.spyOn(globalQueryChild, 'getTerms');
-    const globalComponentResolver = jest.fn(() => [globalObjectOpen]);
+    const globalGetTerms = vi.spyOn(globalQueryChild, 'getTerms');
+    const globalComponentResolver = vi.fn(() => [globalObjectOpen]);
     const component = new ObjectComponent('object', [queryConstant], []);
     const context: TestContext = { globalComponentResolver };
 
@@ -161,7 +163,7 @@ describe('WHEN matching object child rules', () => {
     const explicitObjectOpen = new SimpleParamComponent('explicitBranch', queryConstant);
     explicitObjectOpen.addComponent(new ConstantComponent('explicit_query_child'));
     const globalObjectOpen = new SimpleParamComponent('globalBranch');
-    const globalComponentResolver = jest.fn(() => [globalObjectOpen]);
+    const globalComponentResolver = vi.fn(() => [globalObjectOpen]);
     const component = new ObjectComponent('object', [queryConstant], []);
     const context: TestContext & {
       explicitBranch?: unknown;
@@ -192,10 +194,10 @@ describe('WHEN matching object child rules', () => {
       outerFallbackStepOne
     );
     const outerFallbackTerm = new ConstantComponent('outer_fallback_term', outerFallbackStepTwo);
-    const outerFallbackGetTerms = jest.spyOn(outerFallbackTerm, 'getTerms');
+    const outerFallbackGetTerms = vi.spyOn(outerFallbackTerm, 'getTerms');
 
     const component = new ObjectComponent('outer_object', [outerKey], []);
-    const globalComponentResolver = jest.fn((token: unknown) => {
+    const globalComponentResolver = vi.fn((token: unknown) => {
       if (token === 'outer') {
         return [outerFallbackStepOne];
       }
@@ -220,7 +222,7 @@ describe('WHEN matching object child rules', () => {
     new SimpleParamComponent('explicitBranch', queryConstant);
     const globalObjectOpen = new SimpleParamComponent('globalBranch');
     globalObjectOpen.addComponent(new ConstantComponent('global_query_child'));
-    const globalComponentResolver = jest.fn(() => [globalObjectOpen]);
+    const globalComponentResolver = vi.fn(() => [globalObjectOpen]);
     const component = new ObjectComponent('object', [queryConstant], []);
     const context: TestContext & {
       explicitBranch?: unknown;
@@ -243,7 +245,7 @@ describe('WHEN matching object child rules', () => {
     queryObjectOpen.addComponent(new ObjectComponent('inner', [], []));
     const globalObjectOpen = new ConstantComponent('{');
     new ConstantComponent('global_query_child', globalObjectOpen);
-    const globalComponentResolver = jest.fn((token: unknown) =>
+    const globalComponentResolver = vi.fn((token: unknown) =>
       token === 'query' ? [globalObjectOpen] : null
     );
     // runtime body root shape: ConstantComponent('{') wrapping the key matcher
@@ -259,7 +261,7 @@ describe('WHEN matching object child rules', () => {
 
   it('SHOULD use same-name global rules when no explicit rule matches', () => {
     const globalChild = new SharedComponent('global_child');
-    const globalComponentResolver = jest.fn(() => [globalChild]);
+    const globalComponentResolver = vi.fn(() => [globalChild]);
     const component = new ObjectComponent('object', [new ConstantComponent('other')], []);
 
     expect(component.match('query', { globalComponentResolver }, null)).toEqual({
@@ -269,7 +271,7 @@ describe('WHEN matching object child rules', () => {
   });
 
   it('SHOULD return no children when no rule matches', () => {
-    const globalComponentResolver = jest.fn(() => null);
+    const globalComponentResolver = vi.fn(() => null);
     const component = new ObjectComponent('object', [new ConstantComponent('other')], []);
 
     expect(component.match('query', { globalComponentResolver }, null)).toEqual({

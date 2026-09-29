@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { z } from '@kbn/zod/v4';
@@ -32,7 +34,7 @@ const TestFormWrapper = ({
 
 describe('SingleOptionUnionWidget', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('basic rendering', () => {

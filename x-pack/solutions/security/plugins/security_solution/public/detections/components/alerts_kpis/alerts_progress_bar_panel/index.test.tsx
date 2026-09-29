@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { act, render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
@@ -12,33 +15,36 @@ import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_
 import type { GroupBySelection } from './types';
 import { useStackByFields } from '../common/hooks';
 
-jest.mock('../common/hooks');
+vi.mock('../common/hooks');
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock('../../../../common/components/cell_actions', () => ({
-  ...jest.requireActual('../../../../common/components/cell_actions'),
-  SecurityCellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
-}));
+vi.mock('../../../../common/components/cell_actions', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../common/components/cell_actions')),
+      SecurityCellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../alerts_summary_charts_panel/use_summary_chart_data');
-const mockUseSummaryChartData = useSummaryChartData as jest.Mock;
+vi.mock('../alerts_summary_charts_panel/use_summary_chart_data');
+const mockUseSummaryChartData = useSummaryChartData as Mock;
 
 describe('Alert by grouping', () => {
   const defaultProps = {
     signalIndexName: 'signalIndexName',
     skip: false,
     groupBySelection: 'host.name' as GroupBySelection,
-    setGroupBySelection: jest.fn(),
+    setGroupBySelection: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseSummaryChartData.mockReturnValue({ items: [], isLoading: false });
-    (useStackByFields as jest.Mock).mockReturnValue(jest.fn());
+    (useStackByFields as Mock).mockReturnValue(vi.fn());
   });
 
   test('renders correctly', () => {
@@ -69,7 +75,7 @@ describe('Alert by grouping', () => {
   });
 
   describe('combo box', () => {
-    const setGroupBySelection = jest.fn();
+    const setGroupBySelection = vi.fn();
 
     test('renders combo box', () => {
       const { getByTestId } = render(

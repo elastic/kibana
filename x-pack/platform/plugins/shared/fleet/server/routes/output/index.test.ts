@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { FleetRequestHandlerContext } from '../..';
@@ -30,54 +33,63 @@ import {
   putOutputHandler,
 } from './handler';
 
-jest.mock('../../services', () => ({
-  agentPolicyService: {
-    bumpAllAgentPoliciesForOutput: jest.fn().mockResolvedValue({} as any),
-  },
-  appContextService: {
-    getLogger: jest.fn().mockReturnValue({ error: jest.fn() } as any),
-    getCloud: jest.fn().mockReturnValue({ isServerlessEnabled: false } as any),
-  },
-}));
+vi.mock('../../services', () => {
+      const mocked = {
+      agentPolicyService: {
+        bumpAllAgentPoliciesForOutput: vi.fn().mockResolvedValue({} as any),
+      },
+      appContextService: {
+        getLogger: vi.fn().mockReturnValue({ error: vi.fn() } as any),
+        getCloud: vi.fn().mockReturnValue({ isServerlessEnabled: false } as any),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/output', () => ({
-  outputService: {
-    list: jest.fn().mockResolvedValue({
-      items: [
-        {
-          id: 'output1',
-          type: 'elasticsearch',
-          hosts: ['http://elasticsearch:9200'],
-          is_default: true,
-          is_default_monitoring: true,
-          name: 'Default',
-        },
-      ],
-      total: 1,
-      page: 1,
-      perPage: 20,
-    }),
-    create: jest.fn().mockResolvedValue({ id: 'output1' }),
-    update: jest.fn().mockResolvedValue({}),
-    get: jest.fn().mockResolvedValue({ id: 'output1' }),
-    delete: jest.fn().mockResolvedValue({}),
-    getLatestOutputHealth: jest.fn().mockResolvedValue({
-      state: 'HEALTHY',
-      message: '',
-      timestamp: '2021-01-01T00:00:00Z',
-    }),
-  },
-}));
+vi.mock('../../services/output', () => {
+      const mocked = {
+      outputService: {
+        list: vi.fn().mockResolvedValue({
+          items: [
+            {
+              id: 'output1',
+              type: 'elasticsearch',
+              hosts: ['http://elasticsearch:9200'],
+              is_default: true,
+              is_default_monitoring: true,
+              name: 'Default',
+            },
+          ],
+          total: 1,
+          page: 1,
+          perPage: 20,
+        }),
+        create: vi.fn().mockResolvedValue({ id: 'output1' }),
+        update: vi.fn().mockResolvedValue({}),
+        get: vi.fn().mockResolvedValue({ id: 'output1' }),
+        delete: vi.fn().mockResolvedValue({}),
+        getLatestOutputHealth: vi.fn().mockResolvedValue({
+          state: 'HEALTHY',
+          message: '',
+          timestamp: '2021-01-01T00:00:00Z',
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/api_keys', () => ({
-  canCreateLogstashApiKey: jest.fn().mockResolvedValue(true),
-  generateLogstashApiKey: jest.fn().mockResolvedValue({
-    id: 'id',
-    api_key: 'apikey',
-  }),
-}));
+vi.mock('../../services/api_keys', () => {
+      const mocked = {
+      canCreateLogstashApiKey: vi.fn().mockResolvedValue(true),
+      generateLogstashApiKey: vi.fn().mockResolvedValue({
+        id: 'id',
+        api_key: 'apikey',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const outputServiceMock = outputService as jest.Mocked<typeof outputService>;
+const outputServiceMock = outputService as Mocked<typeof outputService>;
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;

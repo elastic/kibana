@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -18,13 +21,13 @@ import type {
 import { useContentListState, useQueryModel, useProfileCache } from '@kbn/content-list-provider';
 import { ProfilePrimeEffect } from './profile_prime_effect';
 
-jest.mock('@kbn/content-list-provider', () => {
+vi.mock('@kbn/content-list-provider', () => {
   const MANAGED = '__managed__';
   const NO_CREATOR = '__no_creator__';
   return {
-    useContentListState: jest.fn(),
-    useQueryModel: jest.fn(),
-    useProfileCache: jest.fn(),
+    useContentListState: vi.fn(),
+    useQueryModel: vi.fn(),
+    useProfileCache: vi.fn(),
     MANAGED_USER_FILTER: MANAGED,
     NO_CREATOR_USER_FILTER: NO_CREATOR,
     SENTINEL_KEYS: new Set([MANAGED, NO_CREATOR]),
@@ -37,22 +40,22 @@ jest.mock('@kbn/content-list-provider', () => {
   };
 });
 
-const mockedUseContentListState = jest.mocked(useContentListState);
-const mockedUseQueryModel = jest.mocked(useQueryModel);
-const mockedUseProfileCache = jest.mocked(useProfileCache);
+const mockedUseContentListState = vi.mocked(useContentListState);
+const mockedUseQueryModel = vi.mocked(useQueryModel);
+const mockedUseProfileCache = vi.mocked(useProfileCache);
 
-const createMockCache = (): jest.Mocked<
+const createMockCache = (): Mocked<
   Pick<
     ProfileCache,
     'resolve' | 'getAll' | 'ensureLoaded' | 'loadOne' | 'subscribe' | 'getSnapshot'
   >
 > => ({
-  resolve: jest.fn().mockReturnValue(undefined),
-  getAll: jest.fn().mockReturnValue([]),
-  ensureLoaded: jest.fn().mockResolvedValue(undefined),
-  loadOne: jest.fn().mockResolvedValue(undefined),
-  subscribe: jest.fn().mockReturnValue(() => {}),
-  getSnapshot: jest.fn().mockReturnValue(0),
+  resolve: vi.fn().mockReturnValue(undefined),
+  getAll: vi.fn().mockReturnValue([]),
+  ensureLoaded: vi.fn().mockResolvedValue(undefined),
+  loadOne: vi.fn().mockResolvedValue(undefined),
+  subscribe: vi.fn().mockReturnValue(() => {}),
+  getSnapshot: vi.fn().mockReturnValue(0),
 });
 
 const createRenderedItems = (...ids: string[]): ContentListItem[] =>
@@ -98,21 +101,21 @@ const setMockContentListState = (queryText: string, items: ContentListItem[]) =>
       hasNoResults: false,
       hasActiveQuery: queryText.length > 0,
     },
-    dispatch: jest.fn(),
-    refetch: jest.fn().mockResolvedValue(undefined),
-    refresh: jest.fn().mockResolvedValue(undefined),
+    dispatch: vi.fn(),
+    refetch: vi.fn().mockResolvedValue(undefined),
+    refresh: vi.fn().mockResolvedValue(undefined),
   });
 };
 
 describe('ProfilePrimeEffect', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('primes profiles when the query model references createdBy', async () => {
     const cache = createMockCache();
     const allItems = createRawItems('1', '2');
-    const getItems = jest.fn(() => allItems);
+    const getItems = vi.fn(() => allItems);
 
     setMockContentListState('createdBy:jane', createRenderedItems('visible-1'));
     mockedUseQueryModel.mockReturnValue(createQueryModel(['createdBy']));
@@ -132,7 +135,7 @@ describe('ProfilePrimeEffect', () => {
     mockedUseQueryModel.mockReturnValue(createQueryModel(['tag']));
     mockedUseProfileCache.mockReturnValue(cache as unknown as ProfileCache);
 
-    render(<ProfilePrimeEffect getItems={jest.fn(() => createRawItems('1'))} />);
+    render(<ProfilePrimeEffect getItems={vi.fn(() => createRawItems('1'))} />);
 
     expect(cache.ensureLoaded).not.toHaveBeenCalled();
   });
@@ -144,7 +147,7 @@ describe('ProfilePrimeEffect', () => {
     mockedUseQueryModel.mockReturnValue(createQueryModel(['createdBy']));
     mockedUseProfileCache.mockReturnValue(cache as unknown as ProfileCache);
 
-    render(<ProfilePrimeEffect getItems={jest.fn(() => [])} />);
+    render(<ProfilePrimeEffect getItems={vi.fn(() => [])} />);
 
     expect(cache.ensureLoaded).not.toHaveBeenCalled();
   });
@@ -170,14 +173,14 @@ describe('ProfilePrimeEffect', () => {
         hasNoResults: false,
         hasActiveQuery: true,
       },
-      dispatch: jest.fn(),
-      refetch: jest.fn().mockResolvedValue(undefined),
-      refresh: jest.fn().mockResolvedValue(undefined),
+      dispatch: vi.fn(),
+      refetch: vi.fn().mockResolvedValue(undefined),
+      refresh: vi.fn().mockResolvedValue(undefined),
     }));
     mockedUseQueryModel.mockReturnValue(createQueryModel(['createdBy']));
     mockedUseProfileCache.mockReturnValue(cache as unknown as ProfileCache);
 
-    const getItems = jest.fn(() => rawItems);
+    const getItems = vi.fn(() => rawItems);
 
     const { rerender } = render(<ProfilePrimeEffect getItems={getItems} />);
 
@@ -203,7 +206,7 @@ describe('ProfilePrimeEffect', () => {
     mockedUseQueryModel.mockReturnValue(createQueryModel(['createdBy'], []));
     mockedUseProfileCache.mockReturnValue(cache as unknown as ProfileCache);
 
-    render(<ProfilePrimeEffect getItems={jest.fn(() => createRawItems('1'))} />);
+    render(<ProfilePrimeEffect getItems={vi.fn(() => createRawItems('1'))} />);
 
     expect(cache.ensureLoaded).not.toHaveBeenCalled();
   });
@@ -213,7 +216,7 @@ describe('ProfilePrimeEffect', () => {
     mockedUseQueryModel.mockReturnValue(createQueryModel(['createdBy']));
     mockedUseProfileCache.mockReturnValue(undefined);
 
-    render(<ProfilePrimeEffect getItems={jest.fn(() => createRawItems('1'))} />);
+    render(<ProfilePrimeEffect getItems={vi.fn(() => createRawItems('1'))} />);
 
     // No error thrown, no ensureLoaded called -- cache is undefined.
   });
@@ -240,7 +243,7 @@ describe('ProfilePrimeEffect', () => {
         // No createdBy -- getCreatorKey returns NO_CREATOR_USER_FILTER
       },
     ];
-    const getItems = jest.fn(() => allItems);
+    const getItems = vi.fn(() => allItems);
 
     setMockContentListState('createdBy:jane', createRenderedItems('visible-1'));
     mockedUseQueryModel.mockReturnValue(createQueryModel(['createdBy']));

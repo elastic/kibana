@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { createAppContextStartContractMock } from '../../../mocks';
@@ -18,7 +20,7 @@ import { REDIS_ASSETS_MAP } from './__fixtures__/redis_1_18_0_streams_template';
 import { LOGS_2_3_0_ASSETS_MAP, LOGS_2_3_0_PACKAGE_INFO } from './__fixtures__/logs_2_3_0';
 import { DOCKER_2_11_0_PACKAGE_INFO, DOCKER_2_11_0_ASSETS_MAP } from './__fixtures__/docker_2_11_0';
 
-jest.mock('./get');
+vi.mock('./get');
 
 const packageInfoCache = new Map();
 packageInfoCache.set('mock_package-0.0.0', {
@@ -352,7 +354,7 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
 describe('Fleet - getTemplateInputs', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    jest.mocked(getAgentTemplateAssetsMap).mockImplementation(async ({ packageInfo }) => {
+    vi.mocked(getAgentTemplateAssetsMap).mockImplementation(async ({ packageInfo }) => {
       if (packageInfo.name === 'redis' && packageInfo.version === '1.18.0') {
         return REDIS_ASSETS_MAP as PackagePolicyAssetsMap;
       }
@@ -366,7 +368,7 @@ describe('Fleet - getTemplateInputs', () => {
 
       return new Map() as PackagePolicyAssetsMap;
     });
-    jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
+    vi.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
       const pkgInfo = packageInfoCache.get(`${pkgName}-${pkgVersion}`);
       if (!pkgInfo) {
         throw new Error('package not mocked');

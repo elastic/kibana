@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
@@ -12,12 +15,12 @@ import { GenAiSettingsPlugin } from './plugin';
 
 describe('GenAI Settings Plugin', () => {
   const createAppMock = () => ({
-    enable: jest.fn(),
-    disable: jest.fn(),
+    enable: vi.fn(),
+    disable: vi.fn(),
   });
 
   const createManagementMock = (app = createAppMock()) => {
-    const registerApp = jest.fn().mockReturnValue(app);
+    const registerApp = vi.fn().mockReturnValue(app);
     return {
       app,
       management: {
@@ -29,14 +32,14 @@ describe('GenAI Settings Plugin', () => {
           },
         },
       } as unknown as ManagementSetup & {
-        sections: { section: { ai: { registerApp: jest.Mock } } };
+        sections: { section: { ai: { registerApp: Mock } } };
       },
     };
   };
 
   const createCoreSetupMock = (): CoreSetup<any, any> =>
     ({
-      getStartServices: jest.fn(),
+      getStartServices: vi.fn(),
     } as any);
 
   const createCoreStartMock = (
@@ -48,7 +51,7 @@ describe('GenAI Settings Plugin', () => {
 
   const createPlugin = () =>
     new GenAiSettingsPlugin({
-      config: { get: jest.fn(() => ({})) },
+      config: { get: vi.fn(() => ({})) },
       env: { packageInfo: { buildFlavor: 'traditional', branch: 'main' } },
     } as unknown as PluginInitializerContext);
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { CompositeSLOMemberWithSummary } from '@kbn/slo-schema';
 import { createSLO, createAPMTransactionErrorRateIndicator } from '../fixtures/slo';
 import { createCompositeSlo } from '../fixtures/composite_slo';
@@ -41,8 +43,8 @@ const DEFAULT_BURN_RATE_WINDOWS = buildBurnRateWindows({
 });
 
 describe('computeLiveCompositeSummary', () => {
-  let mockSloRepo: jest.Mocked<SLODefinitionRepository>;
-  let mockSummaryClient: jest.Mocked<SummaryClient>;
+  let mockSloRepo: Mocked<SLODefinitionRepository>;
+  let mockSummaryClient: Mocked<SummaryClient>;
 
   beforeEach(() => {
     mockSloRepo = createSLORepositoryMock();

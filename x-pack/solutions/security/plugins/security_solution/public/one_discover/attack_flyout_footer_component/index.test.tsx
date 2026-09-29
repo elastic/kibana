@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataTableRecord } from '@kbn/discover-utils';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -13,42 +15,52 @@ import { AttackFlyoutFooter } from '.';
 import type { StartServices } from '../../types';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 
-const mockFlyoutProviders = jest.fn(({ children }: { children: React.ReactNode }) => (
+const mockFlyoutProviders = vi.fn(({ children }: { children: React.ReactNode }) => (
   <>{children}</>
 ));
 
-jest.mock('../../flyout_v2/shared/components/flyout_provider', () => ({
-  flyoutProviders: (props: unknown) => mockFlyoutProviders(props as { children: React.ReactNode }),
-}));
+vi.mock('../../flyout_v2/shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: (props: unknown) => mockFlyoutProviders(props as { children: React.ReactNode }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRefetch = jest.fn();
+const mockRefetch = vi.fn();
 const mockAttack = { id: 'attack-1' } as unknown as AttackDiscoveryAlert;
 
-jest.mock('../../flyout/attack_details/hooks/use_attack_details', () => ({
-  useAttackDetails: jest.fn(() => ({
-    attack: mockAttack,
-    loading: false,
-    refetch: mockRefetch,
-  })),
-}));
+vi.mock('../../flyout/attack_details/hooks/use_attack_details', () => {
+      const mocked = {
+      useAttackDetails: vi.fn(() => ({
+        attack: mockAttack,
+        loading: false,
+        refetch: mockRefetch,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../flyout_v2/attack/main/footer', () => ({
-  Footer: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
-    <div data-test-subj="attackFooterMock">
-      <button type="button" data-test-subj="attackFooterUpdateBtn" onClick={onAttackUpdated}>
-        {'update'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../../flyout_v2/attack/main/footer', () => {
+      const mocked = {
+      Footer: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
+        <div data-test-subj="attackFooterMock">
+          <button type="button" data-test-subj="attackFooterUpdateBtn" onClick={onAttackUpdated}>
+            {'update'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../flyout_v2/shared/components/flyout_loading', () => ({
-  FlyoutLoading: () => <div data-test-subj="attackFlyoutFooterLoading" />,
-}));
+vi.mock('../../flyout_v2/shared/components/flyout_loading', () => {
+      const mocked = {
+      FlyoutLoading: () => <div data-test-subj="attackFlyoutFooterLoading" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useAttackDetails } = jest.requireMock(
-  '../../flyout/attack_details/hooks/use_attack_details'
-);
+const { useAttackDetails } = (await vi.importMock('../../flyout/attack_details/hooks/use_attack_details'));
 
 describe('AttackFlyoutFooter', () => {
   beforeEach(() => {
@@ -58,9 +70,9 @@ describe('AttackFlyoutFooter', () => {
   });
 
   const servicesMock = {
-    overlays: { openSystemFlyout: jest.fn() },
+    overlays: { openSystemFlyout: vi.fn() },
     uiActions: {
-      getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
+      getTriggerCompatibleActions: vi.fn().mockResolvedValue([]),
     },
   } as unknown as StartServices;
 
@@ -81,7 +93,7 @@ describe('AttackFlyoutFooter', () => {
         hit={buildHit()}
         servicesPromise={new Promise<StartServices>(() => undefined)}
         storePromise={new Promise<ReturnType<typeof createStore>>(() => undefined) as never}
-        onAttackUpdated={jest.fn()}
+        onAttackUpdated={vi.fn()}
       />
     );
 
@@ -96,7 +108,7 @@ describe('AttackFlyoutFooter', () => {
         hit={buildHit()}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
-        onAttackUpdated={jest.fn()}
+        onAttackUpdated={vi.fn()}
       />
     );
 
@@ -121,7 +133,7 @@ describe('AttackFlyoutFooter', () => {
         hit={buildHit()}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
-        onAttackUpdated={jest.fn()}
+        onAttackUpdated={vi.fn()}
       />
     );
 
@@ -131,7 +143,7 @@ describe('AttackFlyoutFooter', () => {
   });
 
   it('calls both onAttackUpdated and refetch when onAttackUpdated fires', async () => {
-    const onAttackUpdated = jest.fn();
+    const onAttackUpdated = vi.fn();
     const store = createStore(() => ({}));
 
     render(
@@ -161,7 +173,7 @@ describe('AttackFlyoutFooter', () => {
         hit={buildHit('open')}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
-        onAttackUpdated={jest.fn()}
+        onAttackUpdated={vi.fn()}
       />
     );
 
@@ -176,7 +188,7 @@ describe('AttackFlyoutFooter', () => {
         hit={buildHit('closed')}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
-        onAttackUpdated={jest.fn()}
+        onAttackUpdated={vi.fn()}
       />
     );
 
@@ -191,7 +203,7 @@ describe('AttackFlyoutFooter', () => {
         hit={buildHit()}
         servicesPromise={Promise.reject(new Error('services failed'))}
         storePromise={Promise.resolve(store as never)}
-        onAttackUpdated={jest.fn()}
+        onAttackUpdated={vi.fn()}
       />
     );
 

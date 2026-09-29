@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import sinon from 'sinon';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { CustomElement } from '../../../types';
@@ -27,9 +30,12 @@ const mockRouteContext = {
 const now = new Date();
 const nowIso = now.toISOString();
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('123abc'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('123abc'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type CustomElementPayload = CustomElement & {
   '@timestamp': string;
@@ -60,7 +66,7 @@ describe('PUT custom element', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     clock.restore();
   });
 
@@ -120,7 +126,7 @@ describe('PUT custom element', () => {
       body: {},
     });
 
-    (mockRouteContext.core.savedObjects.client.get as jest.Mock).mockImplementationOnce(() => {
+    (mockRouteContext.core.savedObjects.client.get as Mock).mockImplementationOnce(() => {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError('not found');
     });
 
@@ -151,7 +157,7 @@ describe('PUT custom element', () => {
     });
 
     mockRouteContext.core.savedObjects.client = savedObjectsClient;
-    (mockRouteContext.core.savedObjects.client.create as jest.Mock).mockImplementationOnce(() => {
+    (mockRouteContext.core.savedObjects.client.create as Mock).mockImplementationOnce(() => {
       throw SavedObjectsErrorHelpers.createBadRequestError('bad request');
     });
 

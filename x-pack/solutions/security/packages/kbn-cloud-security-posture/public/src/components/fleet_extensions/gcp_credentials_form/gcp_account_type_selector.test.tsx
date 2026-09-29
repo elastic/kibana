@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -22,27 +24,33 @@ import { GcpAccountTypeSelect } from './gcp_account_type_selector';
 import type { UpdatePolicy } from '../types';
 
 // Mock the cloud setup context
-const mockUseCloudSetup = jest.fn();
-jest.mock('../hooks/use_cloud_setup_context', () => ({
-  useCloudSetup: () => mockUseCloudSetup(),
-}));
+const mockUseCloudSetup = vi.fn();
+vi.mock('../hooks/use_cloud_setup_context', () => {
+      const mocked = {
+      useCloudSetup: () => mockUseCloudSetup(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the utility functions
-jest.mock('../utils', () => ({
-  updatePolicyWithInputs: jest.fn(),
-  gcpField: {
-    fields: {
-      'gcp.organization_id': { value: '' },
-    },
-  },
-  getGcpInputVarsFields: jest.fn(),
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      updatePolicyWithInputs: vi.fn(),
+      gcpField: {
+        fields: {
+          'gcp.organization_id': { value: '' },
+        },
+      },
+      getGcpInputVarsFields: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Get mocked functions from jest modules
 const {
   updatePolicyWithInputs: mockUpdatePolicyWithInputs,
   getGcpInputVarsFields: mockGetGcpInputVarsFields,
-} = jest.requireMock('../utils');
+} = (await vi.importMock('../utils'));
 
 const renderWithIntl = (component: React.ReactElement) =>
   render(<I18nProvider>{component}</I18nProvider>);
@@ -90,7 +98,7 @@ const getDefaultGcpAccountCloudSetup = () => ({
 });
 
 describe('GcpAccountTypeSelect', () => {
-  const mockUpdatePolicy = jest.fn();
+  const mockUpdatePolicy = vi.fn();
   const mockInput = createMockGcpAccountInput();
   const mockPackageInfo = createMockGcpAccountPackageInfo();
   const mockNewPolicy = createMockGcpAccountPolicy(mockInput);
@@ -106,7 +114,7 @@ describe('GcpAccountTypeSelect', () => {
   const defaultCloudSetup = getDefaultGcpAccountCloudSetup();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCloudSetup.mockReturnValue(defaultCloudSetup);
     mockUpdatePolicyWithInputs.mockImplementation(
       (

@@ -7,22 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { getComponentCodeowners, clearCodeownersCache } from './get_component_codeowners';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-jest.mock('fs');
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/mock/repo/root',
-}));
+vi.mock('fs');
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/mock/repo/root',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockExistsSync = existsSync as jest.MockedFunction<typeof existsSync>;
-const mockReadFileSync = readFileSync as jest.MockedFunction<typeof readFileSync>;
+const mockExistsSync = existsSync as MockedFunction<typeof existsSync>;
+const mockReadFileSync = readFileSync as MockedFunction<typeof readFileSync>;
 
 describe('getComponentCodeowners', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     clearCodeownersCache();
     mockExistsSync.mockReturnValue(true);
   });

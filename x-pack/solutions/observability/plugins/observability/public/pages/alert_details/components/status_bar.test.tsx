@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import type { AlertStatus } from '@kbn/rule-data-utils';
@@ -19,11 +22,11 @@ import { useAlertSnoozeState } from '../hooks/use_alert_snooze_state';
 import type { StatusBarProps } from './status_bar';
 import { StatusBar } from './status_bar';
 
-jest.mock('../../../utils/kibana_react');
-jest.mock('../hooks/use_alert_snooze_state');
+vi.mock('../../../utils/kibana_react');
+vi.mock('../hooks/use_alert_snooze_state');
 
-const useKibanaMock = useKibana as jest.Mock;
-const useAlertSnoozeStateMock = useAlertSnoozeState as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useAlertSnoozeStateMock = useAlertSnoozeState as Mock;
 
 const notSnoozedState = {
   ruleId: 'rule-1',
@@ -31,13 +34,13 @@ const notSnoozedState = {
   isMuted: false,
   isSnoozed: false,
   snoozedInstance: undefined,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
   isLoading: false,
 };
-const unsubscribeMock = jest.fn();
-const subscribeMock = jest.fn().mockReturnValue({ unsubscribe: unsubscribeMock });
+const unsubscribeMock = vi.fn();
+const subscribeMock = vi.fn().mockReturnValue({ unsubscribe: unsubscribeMock });
 const mockSpaces = {
-  getActiveSpace$: jest.fn().mockReturnValue({
+  getActiveSpace$: vi.fn().mockReturnValue({
     subscribe: subscribeMock,
     pipe: () => ({
       subscribe: subscribeMock,
@@ -50,7 +53,7 @@ const mockKibana = () => {
       ...kibanaStartMock.startContract().services,
       http: {
         basePath: {
-          prepend: jest.fn(),
+          prepend: vi.fn(),
         },
       },
       spaces: mockSpaces,
@@ -64,7 +67,7 @@ describe('Source bar', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibana();
     useAlertSnoozeStateMock.mockReturnValue(notSnoozedState);
   });

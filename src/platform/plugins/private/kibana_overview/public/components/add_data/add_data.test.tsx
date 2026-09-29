@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { AddData } from './add_data';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
@@ -44,11 +46,14 @@ const mockFeatures = [
   },
 ];
 
-jest.mock('../../lib/ui_metric', () => ({
-  trackUiMetric: jest.fn(),
-}));
+vi.mock('../../lib/ui_metric', () => {
+      const mocked = {
+      trackUiMetric: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
+const addBasePathMock = vi.fn((path: string) => (path ? path : 'path'));
 
 describe('AddData', () => {
   test('render', () => {

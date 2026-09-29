@@ -5,66 +5,83 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 
 // --- Kibana services ---
-const mockAddDanger = jest.fn();
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        capabilities: {
-          osquery: {
-            writeSavedQueries: true,
-            readSavedQueries: true,
-            writeLiveQueries: true,
-            runSavedQueries: true,
+const mockAddDanger = vi.fn();
+vi.mock('../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            capabilities: {
+              osquery: {
+                writeSavedQueries: true,
+                readSavedQueries: true,
+                writeLiveQueries: true,
+                runSavedQueries: true,
+              },
+            },
           },
+          notifications: { toasts: { addDanger: mockAddDanger } },
         },
-      },
-      notifications: { toasts: { addDanger: mockAddDanger } },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // --- Heavy child component stubs ---
-jest.mock('../../saved_queries/form/code_editor_field', () => ({
-  CodeEditorField: () => <div data-test-subj="codeEditorField">Editor</div>,
-}));
+vi.mock('../../saved_queries/form/code_editor_field', () => {
+      const mocked = {
+      CodeEditorField: () => <div data-test-subj="codeEditorField">Editor</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./lazy_ecs_mapping_editor_field', () => ({
-  ECSMappingEditorField: () => <div data-test-subj="ecsMappingEditor">ECS Mapping</div>,
-}));
+vi.mock('./lazy_ecs_mapping_editor_field', () => {
+      const mocked = {
+      ECSMappingEditorField: () => <div data-test-subj="ecsMappingEditor">ECS Mapping</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Track the onChange callback from SavedQueriesDropdown
 let savedQueryOnChange: ((value: Record<string, unknown>) => void) | null = null;
-jest.mock('../../saved_queries/saved_queries_dropdown', () => ({
-  SavedQueriesDropdown: ({ onChange }: { onChange: (value: Record<string, unknown>) => void }) => {
-    savedQueryOnChange = onChange;
+vi.mock('../../saved_queries/saved_queries_dropdown', () => {
+      const mocked = {
+      SavedQueriesDropdown: ({ onChange }: { onChange: (value: Record<string, unknown>) => void }) => {
+        savedQueryOnChange = onChange;
 
-    return <div data-test-subj="savedQueriesDropdown">Saved Queries</div>;
-  },
-}));
+        return <div data-test-subj="savedQueriesDropdown">Saved Queries</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Stub ScheduleSection so the flyout tests don't pull in the full EUI form
 // tree. Render a minimal marker that surfaces the schedule type so tests can
 // assert the value the flyout passed in.
-jest.mock('../../components/schedule_section', () => ({
-  ScheduleSection: ({
-    value,
-    disabled,
-  }: {
-    value: Record<string, unknown>;
-    disabled?: boolean;
-  }) => (
-    <div data-test-subj="mocked-schedule-section" data-disabled={String(!!disabled)}>
-      {JSON.stringify(value?.scheduleType ?? 'unknown')}
-    </div>
-  ),
-}));
+vi.mock('../../components/schedule_section', () => {
+      const mocked = {
+      ScheduleSection: ({
+        value,
+        disabled,
+      }: {
+        value: Record<string, unknown>;
+        disabled?: boolean;
+      }) => (
+        <div data-test-subj="mocked-schedule-section" data-disabled={String(!!disabled)}>
+          {JSON.stringify(value?.scheduleType ?? 'unknown')}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { QueryFlyout } from './query_flyout';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
@@ -80,14 +97,14 @@ const renderFlyout = (props: Partial<React.ComponentProps<typeof QueryFlyout>> =
   render(
     <EuiProvider>
       <IntlProvider locale="en">
-        <QueryFlyout uniqueQueryIds={[]} onSave={jest.fn()} onClose={jest.fn()} {...props} />
+        <QueryFlyout uniqueQueryIds={[]} onSave={vi.fn()} onClose={vi.fn()} {...props} />
       </IntlProvider>
     </EuiProvider>
   );
 
 describe('QueryFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     savedQueryOnChange = null;
   });
 
@@ -178,7 +195,7 @@ describe('QueryFlyout', () => {
     });
 
     it('should call onClose when Cancel is clicked', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderFlyout({ onClose });
 
       fireEvent.click(screen.getByTestId('query-flyout-cancel-button'));
@@ -273,8 +290,8 @@ describe('QueryFlyout', () => {
     });
 
     it('should call onSave with no schedule fields when override is off at submit', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
-      const onClose = jest.fn();
+      const onSave = vi.fn().mockResolvedValue(undefined);
+      const onClose = vi.fn();
 
       renderFlyout({
         onSave,
@@ -311,7 +328,7 @@ describe('QueryFlyout', () => {
     // An invalid override keeps the Save button enabled but clicking it fires a
     // danger toast and never saves (this subsumes the bare not-saved assertion).
     it('shows a danger toast and blocks save for an invalid override schedule', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
 
       renderFlyout({
         onSave,
@@ -341,7 +358,7 @@ describe('QueryFlyout', () => {
     });
 
     it('a valid override schedule saves with no error toast', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
 
       renderFlyout({
         onSave,
@@ -372,7 +389,7 @@ describe('QueryFlyout', () => {
       ExperimentalFeaturesService.init({
         experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
       });
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
 
       renderFlyout({ onSave });
 
@@ -410,8 +427,8 @@ describe('QueryFlyout', () => {
           <IntlProvider locale="en">
             <QueryFlyout
               uniqueQueryIds={[]}
-              onSave={jest.fn()}
-              onClose={jest.fn()}
+              onSave={vi.fn()}
+              onClose={vi.fn()}
               packSchedule={{
                 schedule_type: 'rrule',
                 rrule_schedule: {
@@ -460,8 +477,8 @@ describe('QueryFlyout', () => {
           <IntlProvider locale="en">
             <QueryFlyout
               uniqueQueryIds={[]}
-              onSave={jest.fn()}
-              onClose={jest.fn()}
+              onSave={vi.fn()}
+              onClose={vi.fn()}
               packSchedule={{ schedule_type: 'interval', interval: 3600 }}
             />
           </IntlProvider>
@@ -516,7 +533,7 @@ describe('QueryFlyout', () => {
 
     describe('inherited ScheduleSection', () => {
       it('does not surface a validation toast while inheriting an invalid pack schedule', async () => {
-        const onSave = jest.fn().mockResolvedValue(undefined);
+        const onSave = vi.fn().mockResolvedValue(undefined);
 
         // Pack carries an over-cap (13h) splay. While inherited (override off),
         // the disabled fields must NOT trigger validation or block save.
@@ -544,7 +561,7 @@ describe('QueryFlyout', () => {
 
     describe('legacy interval inheritance (elastic/kibana#277700)', () => {
       it('shows and saves a legacy non-override query own interval, not the synthesized pack default', async () => {
-        const onSave = jest.fn().mockResolvedValue(undefined);
+        const onSave = vi.fn().mockResolvedValue(undefined);
 
         renderFlyout({
           onSave,
@@ -574,7 +591,7 @@ describe('QueryFlyout', () => {
       });
 
       it('inherits (strips) the interval for a non-override query when the pack schedule is explicit', async () => {
-        const onSave = jest.fn().mockResolvedValue(undefined);
+        const onSave = vi.fn().mockResolvedValue(undefined);
 
         renderFlyout({
           onSave,
@@ -638,7 +655,7 @@ describe('QueryFlyout', () => {
     });
 
     it('strips every execution default when the toggle is off', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
       renderFlyout({
         onSave,
         uniqueQueryIds: ['q1'],
@@ -679,7 +696,7 @@ describe('QueryFlyout', () => {
     // per-query values for fields the pack had no default for — the query
     // inherited nothing and silently lost its own setting.
     it('should keep a per-query value for a field the pack does not default when the toggle is off', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
       renderFlyout({
         onSave,
         uniqueQueryIds: ['q1'],
@@ -716,7 +733,7 @@ describe('QueryFlyout', () => {
     });
 
     it('emits a per-query value that differs from the pack default', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
       renderFlyout({
         onSave,
         uniqueQueryIds: ['q2'],
@@ -739,7 +756,7 @@ describe('QueryFlyout', () => {
     // The point of "emit only what differs": a query overriding one field
     // keeps inheriting the others, so later pack-level changes still reach it.
     it('does not emit a per-query value equal to the pack default', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
       renderFlyout({
         onSave,
         uniqueQueryIds: ['q3'],
@@ -770,7 +787,7 @@ describe('QueryFlyout', () => {
     // a later pack-level result-type change would never reach this query — the
     // opposite of the inheritance this branch is supposed to preserve.
     it('does not leak seeded snapshot/removed when overriding only another field', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
       renderFlyout({
         onSave,
         uniqueQueryIds: ['q4'],
@@ -806,7 +823,7 @@ describe('QueryFlyout', () => {
     // booleans the field reads. Those must not leak to the wire for an
     // inheriting query — the pack default already fans out server-side.
     it('does not leak seeded snapshot/removed booleans for an inheriting query', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
       renderFlyout({
         onSave,
         uniqueQueryIds: ['q4'],
@@ -832,7 +849,7 @@ describe('QueryFlyout', () => {
     });
 
     it('does not pin a newly attached query to the pack result type when overriding another field', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
       renderFlyout({
         onSave,
         uniqueQueryIds: [],
@@ -861,7 +878,7 @@ describe('QueryFlyout', () => {
     });
 
     it('resets result_type when a saved query is loaded after a result-type change', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
       renderFlyout({ onSave, uniqueQueryIds: [] });
 
       fireEvent.click(screen.getByTestId('resultsTypeField'));
@@ -886,7 +903,7 @@ describe('QueryFlyout', () => {
     });
 
     it('does not treat a saved query without a platform as an override of the pack OS', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
       renderFlyout({
         onSave,
         uniqueQueryIds: [],
@@ -915,7 +932,7 @@ describe('QueryFlyout', () => {
     });
 
     it('turns the override toggle on when a saved query differs from the pack result type', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
       renderFlyout({
         onSave,
         uniqueQueryIds: [],
@@ -945,7 +962,7 @@ describe('QueryFlyout', () => {
     });
 
     it('turns the override toggle on when the saved query has its own platform', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
       renderFlyout({
         onSave,
         uniqueQueryIds: [],

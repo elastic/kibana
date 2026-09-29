@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { Frequency } from '@kbn/rrule';
 import moment from 'moment-timezone';
 import { archiveMaintenanceWindow } from './archive_maintenance_window';
@@ -32,9 +35,9 @@ const updatedMetadata = {
   updatedBy: 'updated-user',
 };
 
-const mockContext: jest.Mocked<MaintenanceWindowClientContext> = {
+const mockContext: Mocked<MaintenanceWindowClientContext> = {
   logger: loggingSystemMock.create().get(),
-  getModificationMetadata: jest.fn(),
+  getModificationMetadata: vi.fn(),
   savedObjectsClient,
   uiSettings,
 };
@@ -45,15 +48,15 @@ describe('MaintenanceWindowClient - archive', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should archive maintenance windows', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(firstTimestamp));
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
     });
@@ -72,7 +75,7 @@ describe('MaintenanceWindowClient - archive', () => {
     } as unknown as SavedObjectsUpdateResponse);
 
     // Move to some time in the future
-    jest.useFakeTimers().setSystemTime(new Date(secondTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(secondTimestamp));
     await archiveMaintenanceWindow(mockContext, { id: 'test-id', archive: true });
 
     expect(savedObjectsClient.get).toHaveBeenLastCalledWith(
@@ -97,7 +100,7 @@ describe('MaintenanceWindowClient - archive', () => {
   });
 
   it('should unarchive maintenance window', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(firstTimestamp));
     const rRule = {
       tzid: 'UTC',
       dtstart: '2023-02-26T00:00:00.000Z',
@@ -140,7 +143,7 @@ describe('MaintenanceWindowClient - archive', () => {
     } as unknown as SavedObjectsUpdateResponse);
 
     // Move to some time in the future
-    jest.useFakeTimers().setSystemTime(new Date(secondTimestamp));
+    vi.useFakeTimers().setSystemTime(new Date(secondTimestamp));
     await archiveMaintenanceWindow(mockContext, { id: 'test-id', archive: false });
 
     expect(savedObjectsClient.get).toHaveBeenLastCalledWith(

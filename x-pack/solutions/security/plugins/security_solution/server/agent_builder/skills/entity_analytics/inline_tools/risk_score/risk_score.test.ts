@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { queryRisks, queryRisksOverInterval } from './risk_score';
 import { ToolResultType } from '@kbn/agent-builder-common';
@@ -15,7 +17,7 @@ const timeseriesIndex = 'risk-score-timeseries';
 
 describe('QUERY_FNS', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('queryRisks', () => {

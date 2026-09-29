@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import './helpers/mocks';
 
 import React from 'react';
@@ -13,21 +15,24 @@ import { SnapshotDeleteProvider } from '../../public/application/components/snap
 import { deleteSnapshots } from '../../public/application/services/http';
 import { WithAppDependencies } from './helpers/setup_environment';
 
-jest.mock('../../public/application/services/http', () => ({
-  ...jest.requireActual('../../public/application/services/http'),
-  deleteSnapshots: jest.fn(),
-}));
+vi.mock('../../public/application/services/http', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../public/application/services/http')),
+      deleteSnapshots: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WHEN deleting snapshots', () => {
-  const addSuccess = jest.fn();
-  const addDanger = jest.fn();
-  const onSuccess = jest.fn();
+  const addSuccess = vi.fn();
+  const addDanger = vi.fn();
+  const onSuccess = vi.fn();
   const Provider = WithAppDependencies(SnapshotDeleteProvider, undefined, {
     core: { notifications: { toasts: { addSuccess, addDanger } } },
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it.each([1, 2])('SHOULD keep loading until deletion of %i snapshots completes', async (count) => {
@@ -36,7 +41,7 @@ describe('WHEN deleting snapshots', () => {
       snapshot: `snapshot-${index}`,
     }));
     let resolveDeletion: (result: Awaited<ReturnType<typeof deleteSnapshots>>) => void = () => {};
-    jest.mocked(deleteSnapshots).mockReturnValue(
+    vi.mocked(deleteSnapshots).mockReturnValue(
       new Promise((resolve) => {
         resolveDeletion = resolve;
       })
@@ -75,9 +80,9 @@ describe('WHEN deleting snapshots', () => {
   it('SHOULD keep the modal and its callback until a pending deletion completes', async () => {
     const ids = [{ repository: 'test-repository', snapshot: 'snapshot-1' }];
     const otherIds = [{ repository: 'test-repository', snapshot: 'snapshot-2' }];
-    const otherOnSuccess = jest.fn();
+    const otherOnSuccess = vi.fn();
     let resolveDeletion: (result: Awaited<ReturnType<typeof deleteSnapshots>>) => void = () => {};
-    jest.mocked(deleteSnapshots).mockReturnValue(
+    vi.mocked(deleteSnapshots).mockReturnValue(
       new Promise((resolve) => {
         resolveDeletion = resolve;
       })
@@ -118,7 +123,7 @@ describe('WHEN deleting snapshots', () => {
 
   it('SHOULD report a failed deletion without a success notification', async () => {
     const ids = [{ repository: 'test-repository', snapshot: 'snapshot-1' }];
-    jest.mocked(deleteSnapshots).mockResolvedValue({
+    vi.mocked(deleteSnapshots).mockResolvedValue({
       data: { itemsDeleted: [], errors: [{ id: ids[0], error: { cause: 'Deletion failed' } }] },
       error: null,
     });

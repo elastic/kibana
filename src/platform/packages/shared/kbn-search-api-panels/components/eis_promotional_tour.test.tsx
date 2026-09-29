@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -15,20 +18,23 @@ import { EisPromotionalTour } from './eis_promotional_tour';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
 import { EIS_PROMO_TOUR_TITLE, TOUR_CTA } from '../translations';
 
-jest.mock('../hooks/use_show_eis_promotional_content');
+vi.mock('../hooks/use_show_eis_promotional_content');
 
-const mockToursIsEnabled = jest.fn(() => true);
-jest.mock('../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      notifications: {
-        tours: {
-          isEnabled: mockToursIsEnabled,
+const mockToursIsEnabled = vi.fn(() => true);
+vi.mock('../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          notifications: {
+            tours: {
+              isEnabled: mockToursIsEnabled,
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EisPromotionalTour', () => {
   const promoId = 'testPromo';
@@ -45,14 +51,14 @@ describe('EisPromotionalTour', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockToursIsEnabled.mockReturnValue(true);
   });
 
   it('renders children only when promo is not visible', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: false,
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
 
     renderEisPromotionalTour();
@@ -65,9 +71,9 @@ describe('EisPromotionalTour', () => {
   });
 
   it('renders children and does not render the tour when tours is disabled', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
     mockToursIsEnabled.mockReturnValue(false);
 
@@ -81,9 +87,9 @@ describe('EisPromotionalTour', () => {
   });
 
   it('renders the tour when promo is visible', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
 
     renderEisPromotionalTour();
@@ -99,8 +105,8 @@ describe('EisPromotionalTour', () => {
   });
 
   it('calls onDismissPromo when clicking the close button', () => {
-    const mockOnDismissPromo = jest.fn();
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    const mockOnDismissPromo = vi.fn();
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true,
       onDismissPromo: mockOnDismissPromo,
     });
@@ -115,9 +121,9 @@ describe('EisPromotionalTour', () => {
 
   it('renders CTA button only when ctaLink is provided', () => {
     const ctaLink = 'https://example.com';
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
 
     renderEisPromotionalTour({ ctaLink });
@@ -129,9 +135,9 @@ describe('EisPromotionalTour', () => {
   });
 
   it('does not render CTA button when ctaLink is undefined', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
 
     renderEisPromotionalTour({ ctaLink: undefined });
@@ -145,11 +151,11 @@ describe('EisPromotionalTour', () => {
   it('removes the tour from the DOM when close button is clicked, child remains', () => {
     // Use a variable to simulate state
     let isVisible = true;
-    const mockOnDismissPromo = jest.fn(() => {
+    const mockOnDismissPromo = vi.fn(() => {
       isVisible = false;
     });
 
-    (useShowEisPromotionalContent as jest.Mock).mockImplementation(() => ({
+    (useShowEisPromotionalContent as Mock).mockImplementation(() => ({
       get isPromoVisible() {
         return isVisible;
       },

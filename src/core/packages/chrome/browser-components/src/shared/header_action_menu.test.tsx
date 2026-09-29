@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
@@ -19,7 +22,7 @@ import { ChromeComponentsProvider } from '../context';
 import { createMockChromeComponentsDeps } from '../test_helpers';
 import { HeaderActionMenu } from './header_action_menu';
 
-type MockedUnmount = jest.MockedFunction<UnmountCallback>;
+type MockedUnmount = MockedFunction<UnmountCallback>;
 
 describe('HeaderActionMenu', () => {
   let component: ReactWrapper;
@@ -54,7 +57,7 @@ describe('HeaderActionMenu', () => {
       // eslint-disable-next-line no-unsanitized/property
       container.innerHTML = content;
       root.appendChild(container);
-      const unmount = jest.fn(() => container.remove());
+      const unmount = vi.fn(() => container.remove());
       unmounts[id] = unmount;
       return unmount;
     };

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { WATCHLISTS_DATA_SOURCE_URL } from '../../../../../../../common/constants';
 import {
@@ -13,33 +16,38 @@ import {
   requestMock,
 } from '../../../../../detection_engine/routes/__mocks__';
 
-const mockWatchlistClientCreate = jest.fn();
-const mockAddEntitySourceReference = jest.fn();
-const mockSyncWatchlist = jest.fn();
-const mockGetStartServices = jest.fn();
+const mockWatchlistClientCreate = vi.fn();
+const mockAddEntitySourceReference = vi.fn();
+const mockSyncWatchlist = vi.fn();
+const mockGetStartServices = vi.fn();
 
-jest.mock('../../watchlist_config', () => ({
-  WatchlistConfigClient: jest.fn().mockImplementation(() => ({
-    addEntitySourceReference: mockAddEntitySourceReference,
-  })),
-}));
+vi.mock('../../watchlist_config', () => {
+      const mocked = {
+      WatchlistConfigClient: vi.fn().mockImplementation(() => ({
+        addEntitySourceReference: mockAddEntitySourceReference,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../entity_sources/infra', () => ({
-  ...jest.requireActual('../../../entity_sources/infra'),
-  WatchlistEntitySourceClient: jest.fn(),
-}));
+vi.mock('../../../entity_sources/infra', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../entity_sources/infra')),
+      WatchlistEntitySourceClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../entity_sources/entity_sources_service', () => ({
-  createEntitySourcesService: jest.fn(),
-}));
+vi.mock('../../../entity_sources/entity_sources_service', () => {
+      const mocked = {
+      createEntitySourcesService: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { WatchlistEntitySourceClient: MockWatchlistEntitySourceClient } = jest.requireMock(
-  '../../../entity_sources/infra'
-) as { WatchlistEntitySourceClient: jest.Mock };
+const { WatchlistEntitySourceClient: MockWatchlistEntitySourceClient } = (await vi.importMock('../../../entity_sources/infra')) as { WatchlistEntitySourceClient: Mock };
 
-const { createEntitySourcesService: mockCreateEntitySourcesService } = jest.requireMock(
-  '../../../entity_sources/entity_sources_service'
-) as { createEntitySourcesService: jest.Mock };
+const { createEntitySourcesService: mockCreateEntitySourcesService } = (await vi.importMock('../../../entity_sources/entity_sources_service')) as { createEntitySourcesService: Mock };
 
 // Import after mocks are set up
 import { createEntitySourceRoute } from './create';
@@ -62,7 +70,7 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
     mockAddEntitySourceReference.mockReset();
     mockSyncWatchlist.mockReset();
 
-    const mockSecurity = { authc: { apiKeys: { grantAsInternalUser: jest.fn() } } };
+    const mockSecurity = { authc: { apiKeys: { grantAsInternalUser: vi.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
 
     MockWatchlistEntitySourceClient.mockImplementation(() => ({
@@ -75,7 +83,7 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const buildRequest = (body: object) =>

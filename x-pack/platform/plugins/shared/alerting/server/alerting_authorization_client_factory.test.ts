@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
@@ -13,23 +16,23 @@ import { AlertingAuthorizationClientFactory } from './alerting_authorization_cli
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 
-jest.mock('./authorization/alerting_authorization');
+vi.mock('./authorization/alerting_authorization');
 
 describe('AlertingAuthorizationClientFactory', () => {
   const features = featuresPluginMock.createStart();
   const securityPluginStart = securityMock.createStart();
   const logger = loggingSystemMock.create().get();
-  const alertingAuthorizationClientFactoryParams: jest.Mocked<AlertingAuthorizationClientFactoryOpts> =
+  const alertingAuthorizationClientFactoryParams: Mocked<AlertingAuthorizationClientFactoryOpts> =
     {
       ruleTypeRegistry: ruleTypeRegistryMock.create(),
-      getSpace: jest.fn(),
-      getSpaceId: jest.fn(),
+      getSpace: vi.fn(),
+      getSpaceId: vi.fn(),
       features,
       logger,
     };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('creates an alerting authorization client with proper constructor arguments when security is enabled', async () => {
@@ -44,7 +47,7 @@ describe('AlertingAuthorizationClientFactory', () => {
 
     await factory.create(request);
 
-    const { AlertingAuthorization } = jest.requireMock('./authorization/alerting_authorization');
+    const { AlertingAuthorization } = (await vi.importMock('./authorization/alerting_authorization'));
     expect(AlertingAuthorization.create).toHaveBeenCalledWith({
       request,
       authorization: securityPluginStart.authz,
@@ -62,7 +65,7 @@ describe('AlertingAuthorizationClientFactory', () => {
 
     await factory.create(request);
 
-    const { AlertingAuthorization } = jest.requireMock('./authorization/alerting_authorization');
+    const { AlertingAuthorization } = (await vi.importMock('./authorization/alerting_authorization'));
     expect(AlertingAuthorization.create).toHaveBeenCalledWith({
       request,
       ruleTypeRegistry: alertingAuthorizationClientFactoryParams.ruleTypeRegistry,
@@ -110,7 +113,7 @@ describe('AlertingAuthorizationClientFactory', () => {
       );
 
       // Should have called create() via AlertingAuthorization.create with request-derived space functions
-      const { AlertingAuthorization } = jest.requireMock('./authorization/alerting_authorization');
+      const { AlertingAuthorization } = (await vi.importMock('./authorization/alerting_authorization'));
       expect(AlertingAuthorization.create).toHaveBeenCalledWith({
         request,
         ruleTypeRegistry: alertingAuthorizationClientFactoryParams.ruleTypeRegistry,
@@ -121,7 +124,7 @@ describe('AlertingAuthorizationClientFactory', () => {
     });
 
     it('creates an alerting authorization client scoped to the provided spaceId when getSpaceById is available', async () => {
-      const getSpaceById = jest
+      const getSpaceById = vi
         .fn()
         .mockResolvedValue({ id: 'custom-space', name: 'Custom Space' });
       const factory = new AlertingAuthorizationClientFactory();
@@ -134,7 +137,7 @@ describe('AlertingAuthorizationClientFactory', () => {
       const request = mockRouter.createKibanaRequest();
       await factory.createForSpace(request, asSpaceId('custom-space'));
 
-      const { AlertingAuthorization } = jest.requireMock('./authorization/alerting_authorization');
+      const { AlertingAuthorization } = (await vi.importMock('./authorization/alerting_authorization'));
       expect(AlertingAuthorization.create).toHaveBeenCalledWith({
         request,
         authorization: securityPluginStart.authz,

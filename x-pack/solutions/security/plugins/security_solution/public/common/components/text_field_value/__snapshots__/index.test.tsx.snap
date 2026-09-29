@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`text_field_value TextFieldValue should render long text correctly, when there is limit 1`] = `
 <EuiToolTip

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiContextMenuItem } from '@elastic/eui';
@@ -16,15 +19,18 @@ import type { TableRow } from './types';
 import { useEntityCaseTakeActionItems } from '../../../../cases/attachments/entity/hooks/use_entity_case_take_action_items';
 import { ADD_TO_CASE_TEST_ID } from '../../../../../common/cases/attachments/entity/test_ids';
 
-jest.mock('../../../api/hooks/use_anomaly_table_row_actions');
-jest.mock('../../../../cases/attachments/entity/hooks/use_entity_case_take_action_items', () => ({
-  useEntityCaseTakeActionItems: jest.fn(),
-}));
+vi.mock('../../../api/hooks/use_anomaly_table_row_actions');
+vi.mock('../../../../cases/attachments/entity/hooks/use_entity_case_take_action_items', () => {
+      const mocked = {
+      useEntityCaseTakeActionItems: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useAnomalyTableRowActionsMock = useAnomalyTableRowActions as jest.MockedFunction<
+const useAnomalyTableRowActionsMock = useAnomalyTableRowActions as MockedFunction<
   typeof useAnomalyTableRowActions
 >;
-const useEntityCaseTakeActionItemsMock = useEntityCaseTakeActionItems as jest.MockedFunction<
+const useEntityCaseTakeActionItemsMock = useEntityCaseTakeActionItems as MockedFunction<
   typeof useEntityCaseTakeActionItems
 >;
 
@@ -53,9 +59,9 @@ const row: TableRow = {
 const timeRange = { from: 'now-30d', to: 'now' };
 const entityToAttach = { id: 'entity-1', name: 'host-1', type: 'host' as const };
 
-const addToTimeline = jest.fn();
-const viewInDiscover = jest.fn();
-const viewInSingleMetricViewer = jest.fn();
+const addToTimeline = vi.fn();
+const viewInDiscover = vi.fn();
+const viewInSingleMetricViewer = vi.fn();
 
 const allActions: AnomalyTableRowAction[] = [
   { key: 'add-to-timeline', label: 'Add to timeline', icon: 'timeline', onClick: addToTimeline },
@@ -89,7 +95,7 @@ const openMenu = async () => {
 
 describe('AnomalyRowActionsMenu', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useAnomalyTableRowActionsMock.mockReturnValue({ actions: allActions });
     useEntityCaseTakeActionItemsMock.mockReturnValue(() => [
       <EuiContextMenuItem key="addToCase" data-test-subj={ADD_TO_CASE}>

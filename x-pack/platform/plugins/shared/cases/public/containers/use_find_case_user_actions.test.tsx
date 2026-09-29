@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useFindCaseUserActions } from './use_find_case_user_actions';
 import type { CaseUserActionTypeWithAll } from '../../common/ui/types';
@@ -13,8 +16,8 @@ import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
 import { TestProviders } from '../common/mock';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
 const initialData = {
   data: undefined,
@@ -35,7 +38,7 @@ describe('UseFindCaseUserActions', () => {
   const isEnabled = true;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns proper state on findCaseUserActions', async () => {
@@ -63,7 +66,7 @@ describe('UseFindCaseUserActions', () => {
   });
 
   it('calls the API with correct parameters', async () => {
-    const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
+    const spy = vi.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
     renderHook(
       () =>
@@ -90,7 +93,7 @@ describe('UseFindCaseUserActions', () => {
   });
 
   it('calls the API with search and authors parameters', async () => {
-    const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
+    const spy = vi.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
     renderHook(
       () =>
@@ -126,7 +129,7 @@ describe('UseFindCaseUserActions', () => {
   });
 
   it('does not call API when not enabled', async () => {
-    const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
+    const spy = vi.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
     renderHook(
       () =>
@@ -147,8 +150,8 @@ describe('UseFindCaseUserActions', () => {
   });
 
   it('shows a toast error when the API returns an error', async () => {
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addError });
 
     renderHook(() => useFindCaseUserActions(basicCase.id, params, isEnabled), {
       wrapper: TestProviders,

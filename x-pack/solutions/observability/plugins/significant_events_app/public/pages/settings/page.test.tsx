@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
@@ -12,19 +15,22 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
 import { SettingsPage } from './page';
 
-jest.mock('../../hooks/use_kibana');
-jest.mock('../../hooks/use_significant_events_availability');
-jest.mock('../significant_events/components/settings/tab', () => ({
-  SettingsTab: () => null,
-}));
+vi.mock('../../hooks/use_kibana');
+vi.mock('../../hooks/use_significant_events_availability');
+vi.mock('../significant_events/components/settings/tab', () => {
+      const mocked = {
+      SettingsTab: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 const mockUseSignificantEventsAvailability =
-  useSignificantEventsAvailability as jest.MockedFunction<typeof useSignificantEventsAvailability>;
+  useSignificantEventsAvailability as MockedFunction<typeof useSignificantEventsAvailability>;
 
-const getUrlForApp = jest.fn().mockReturnValue('/app/nightshift');
-const navigateToApp = jest.fn();
-const setBreadcrumbs = jest.fn();
+const getUrlForApp = vi.fn().mockReturnValue('/app/nightshift');
+const navigateToApp = vi.fn();
+const setBreadcrumbs = vi.fn();
 
 const setCapabilities = (canConfigure: boolean) => {
   mockUseKibana.mockReturnValue({
@@ -41,7 +47,7 @@ const setCapabilities = (canConfigure: boolean) => {
 
 describe('SettingsPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setCapabilities(true);
     mockUseSignificantEventsAvailability.mockReturnValue({
       availability: { available: true },

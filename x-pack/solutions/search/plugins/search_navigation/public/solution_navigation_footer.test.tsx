@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { applicationServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
@@ -19,7 +21,7 @@ describe('SolutionNavigationFooter', () => {
     const mockSpaces = spacesPluginMock.createStartContract();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockNotifications.tours.isEnabled.mockReturnValue(true);
       mockApplication.capabilities = {
         ...mockApplication.capabilities,

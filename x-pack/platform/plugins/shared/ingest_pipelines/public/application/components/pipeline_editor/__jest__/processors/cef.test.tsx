@@ -5,26 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const CEF_TYPE = 'cef';
 
 describe('Processor: CEF', () => {
-  let onUpdate: jest.Mock;
+  let onUpdate: Mock;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   describe('add CEF processor', () => {
     beforeEach(async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       ({ httpSetup } = setupEnvironment());
-      onUpdate = jest.fn();
+      onUpdate = vi.fn();
 
       renderProcessorEditor(httpSetup, {
         value: {
           processors: [],
         },
-        onFlyoutOpen: jest.fn(),
+        onFlyoutOpen: vi.fn(),
         onUpdate,
       });
 
@@ -91,9 +94,9 @@ describe('Processor: CEF', () => {
 
   describe('edit saved CEF processor defaults', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       ({ httpSetup } = setupEnvironment());
-      onUpdate = jest.fn();
+      onUpdate = vi.fn();
     });
 
     test('clearing target_field and resetting ignore_empty_values removes both keys on save', async () => {
@@ -109,7 +112,7 @@ describe('Processor: CEF', () => {
             },
           ],
         },
-        onFlyoutOpen: jest.fn(),
+        onFlyoutOpen: vi.fn(),
         onUpdate,
       });
 

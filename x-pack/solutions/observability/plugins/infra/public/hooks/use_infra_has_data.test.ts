@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { FETCH_STATUS } from './use_fetcher';
 import { useInfraHasData } from './use_infra_has_data';
 
-const mockUseFetcher = jest.fn();
+const mockUseFetcher = vi.fn();
 
-jest.mock('./use_fetcher', () => ({
-  ...jest.requireActual('./use_fetcher'),
-  useFetcher: (...args: unknown[]) => mockUseFetcher(...args),
-}));
+vi.mock('./use_fetcher', async () => {
+      const mocked = {
+      ...(await vi.importActual('./use_fetcher')),
+      useFetcher: (...args: unknown[]) => mockUseFetcher(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useInfraHasData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('asks for cluster-level metrics existence rather than the current time range', async () => {
@@ -26,9 +32,9 @@ describe('useInfraHasData', () => {
 
     renderHook(() => useInfraHasData());
 
-    type FetchCallback = (callApi: jest.Mock) => Promise<unknown>;
+    type FetchCallback = (callApi: Mock) => Promise<unknown>;
     const [fetchCallback] = mockUseFetcher.mock.calls[0] as [FetchCallback];
-    const callApi = jest.fn();
+    const callApi = vi.fn();
     await fetchCallback(callApi);
 
     expect(callApi).toHaveBeenCalledWith('/api/metrics/source/hasData', {

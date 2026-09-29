@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -22,15 +25,15 @@ import {
 } from '../common/hooks/lifecycle_flyout_coordination';
 
 // Mock the hooks
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 const mockStreamsRepositoryClient = { fetch: mockFetch };
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
 
 const mockKibana = {
   core: {
     application: {
-      navigateToApp: jest.fn(),
+      navigateToApp: vi.fn(),
     },
     notifications: {
       toasts: {
@@ -59,37 +62,49 @@ const mockKibana = {
   isServerless: false,
 };
 
-jest.mock('../../../../../hooks/use_streams_privileges', () => ({
-  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
-}));
+vi.mock('../../../../../hooks/use_streams_privileges', () => {
+      const mocked = {
+      useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: () => mockKibana,
-}));
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => mockKibana,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 
-jest.mock('../../../../../hooks/use_streams_app_fetch', () => ({
-  useStreamsAppFetch: jest.fn(() => ({
-    value: undefined,
-    loading: false,
-    refresh: jest.fn(),
-  })),
-}));
+vi.mock('../../../../../hooks/use_streams_app_fetch', () => {
+      const mocked = {
+      useStreamsAppFetch: vi.fn(() => ({
+        value: undefined,
+        loading: false,
+        refresh: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseStreamsAppFetch = useStreamsAppFetch as jest.Mock;
+const mockUseStreamsAppFetch = useStreamsAppFetch as Mock;
 
-jest.mock('../hooks/use_ilm_phases_color_and_description', () => ({
-  useIlmPhasesColorAndDescription: () => ({
-    ilmPhases: {
-      hot: { color: '#FF0000', hoverColor: '#FF3333', description: 'Hot phase' },
-      warm: { color: '#FFA500', hoverColor: '#FFB833', description: 'Warm phase' },
-      cold: { color: '#0000FF', hoverColor: '#3333FF', description: 'Cold phase' },
-      frozen: { color: '#00FFFF', hoverColor: '#33FFFF', description: 'Frozen phase' },
-      delete: { color: '#808080', hoverColor: '#999999', description: 'Delete phase' },
-    },
-  }),
-}));
+vi.mock('../hooks/use_ilm_phases_color_and_description', () => {
+      const mocked = {
+      useIlmPhasesColorAndDescription: () => ({
+        ilmPhases: {
+          hot: { color: '#FF0000', hoverColor: '#FF3333', description: 'Hot phase' },
+          warm: { color: '#FFA500', hoverColor: '#FFB833', description: 'Warm phase' },
+          cold: { color: '#0000FF', hoverColor: '#3333FF', description: 'Cold phase' },
+          frozen: { color: '#00FFFF', hoverColor: '#33FFFF', description: 'Frozen phase' },
+          delete: { color: '#808080', hoverColor: '#999999', description: 'Delete phase' },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const FlyoutCoordinationProbe = () => {
   const { isAnyFlyoutOpen } = useLifecycleFlyoutCoordination();
@@ -253,7 +268,7 @@ describe('LifecycleSummary', () => {
     } as Streams.ingest.all.GetResponse);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibana.isServerless = false;
 
     // Default: avoid noisy async errors from useSnapshotRepositories
@@ -268,7 +283,7 @@ describe('LifecycleSummary', () => {
     mockUseStreamsAppFetch.mockReturnValue({
       value: undefined,
       loading: false,
-      refresh: jest.fn(),
+      refresh: vi.fn(),
     });
   });
 
@@ -321,7 +336,7 @@ describe('LifecycleSummary', () => {
         <LifecycleSummary
           definition={definition}
           isMetricsStream
-          onEditSuccessfulLifecycle={jest.fn()}
+          onEditSuccessfulLifecycle={vi.fn()}
         />
       );
 
@@ -367,7 +382,7 @@ describe('LifecycleSummary', () => {
       const definition = createDslDefinition(undefined, [{ after: '1d', fixed_interval: '1d' }]);
 
       renderWithSync(
-        <LifecycleSummary definition={definition} isMetricsStream onAddDataPhase={jest.fn()} />
+        <LifecycleSummary definition={definition} isMetricsStream onAddDataPhase={vi.fn()} />
       );
 
       // On stateful DLM the "Add data phase" popover replaces the dedicated "Add delete phase" button.
@@ -397,7 +412,7 @@ describe('LifecycleSummary', () => {
         <LifecycleSummary
           definition={definition}
           isMetricsStream={false}
-          onAddDataPhase={jest.fn()}
+          onAddDataPhase={vi.fn()}
         />
       );
 
@@ -412,7 +427,7 @@ describe('LifecycleSummary', () => {
         <LifecycleSummary
           definition={definition}
           isMetricsStream={false}
-          onAddDataPhase={jest.fn()}
+          onAddDataPhase={vi.fn()}
         />
       );
 
@@ -426,8 +441,8 @@ describe('LifecycleSummary', () => {
         <LifecycleSummary
           definition={definition}
           isMetricsStream={false}
-          onAddDataPhase={jest.fn()}
-          refreshDefinition={jest.fn()}
+          onAddDataPhase={vi.fn()}
+          refreshDefinition={vi.fn()}
         />
       );
 
@@ -445,7 +460,7 @@ describe('LifecycleSummary', () => {
       const definition = createDslDefinition('30d');
 
       renderWithSync(
-        <LifecycleSummary definition={definition} isMetricsStream onAddDeletePhase={jest.fn()} />
+        <LifecycleSummary definition={definition} isMetricsStream onAddDeletePhase={vi.fn()} />
       );
 
       const addDeletePhaseButton = screen.getByTestId('dataLifecycleSummaryAddDeletePhase');
@@ -647,8 +662,8 @@ describe('LifecycleSummary', () => {
         <LifecycleSummary
           definition={definition}
           isMetricsStream
-          onAddDeletePhase={jest.fn()}
-          onEditSuccessfulLifecycle={jest.fn()}
+          onAddDeletePhase={vi.fn()}
+          onEditSuccessfulLifecycle={vi.fn()}
         />
       );
 
@@ -711,7 +726,7 @@ describe('LifecycleSummary', () => {
         <LifecycleSummary
           definition={definition}
           isMetricsStream={false}
-          onAddDataPhase={jest.fn()}
+          onAddDataPhase={vi.fn()}
         />
       );
 
@@ -725,7 +740,7 @@ describe('LifecycleSummary', () => {
       mockUseStreamsAppFetch.mockReturnValue({
         value: undefined,
         loading: true,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       const definition = createIlmDefinition();
@@ -753,7 +768,7 @@ describe('LifecycleSummary', () => {
       mockUseStreamsAppFetch.mockReturnValue({
         value: ilmStatsValue,
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       mockFetch.mockImplementation((endpoint: string) => {
@@ -808,7 +823,7 @@ describe('LifecycleSummary', () => {
       mockUseStreamsAppFetch.mockReturnValue({
         value: ilmStatsValue,
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       mockFetch.mockImplementation((endpoint: string) => {
@@ -868,7 +883,7 @@ describe('LifecycleSummary', () => {
       mockUseStreamsAppFetch.mockReturnValue({
         value: ilmStatsValue,
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       const definition = createIlmDefinition();
@@ -896,7 +911,7 @@ describe('LifecycleSummary', () => {
       mockUseStreamsAppFetch.mockReturnValue({
         value: ilmStatsValue,
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       const definition = createIlmDefinition();
@@ -927,7 +942,7 @@ describe('LifecycleSummary', () => {
       mockUseStreamsAppFetch.mockReturnValue({
         value: ilmStatsValue,
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
       mockFetch.mockImplementation((endpoint: string) => {
         if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
@@ -945,7 +960,7 @@ describe('LifecycleSummary', () => {
         <LifecycleSummary
           definition={definition}
           isMetricsStream
-          onEditSuccessfulLifecycle={jest.fn()}
+          onEditSuccessfulLifecycle={vi.fn()}
         />
       );
 
@@ -993,7 +1008,7 @@ describe('LifecycleSummary', () => {
       mockUseStreamsAppFetch.mockReturnValue({
         value: ilmStatsValue,
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
       mockFetch.mockImplementation((endpoint: string) => {
         if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
@@ -1011,7 +1026,7 @@ describe('LifecycleSummary', () => {
         <LifecycleSummary
           definition={definition}
           isMetricsStream
-          onEditSuccessfulLifecycle={jest.fn()}
+          onEditSuccessfulLifecycle={vi.fn()}
         />
       );
 
@@ -1073,7 +1088,7 @@ describe('LifecycleSummary', () => {
       mockUseStreamsAppFetch.mockReturnValue({
         value: ilmStatsValue,
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
       mockFetch.mockImplementation((endpoint: string) => {
         if (endpoint === 'GET /internal/streams/lifecycle/_policies') {

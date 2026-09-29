@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
 import 'jest-styled-components';
@@ -14,9 +16,9 @@ import { CertificateSearch } from './cert_search';
 describe('CertificatesSearch', () => {
   it('shallow renders expected elements for valid props', () => {
     // dive() removes all unnecessary React-Router wrapping elements
-    expect(shallowWithRouter(<CertificateSearch setSearch={jest.fn()} />).dive()).toMatchSnapshot();
+    expect(shallowWithRouter(<CertificateSearch setSearch={vi.fn()} />).dive()).toMatchSnapshot();
   });
   it('renders expected elements for valid props', () => {
-    expect(renderWithRouter(<CertificateSearch setSearch={jest.fn()} />)).toMatchSnapshot();
+    expect(renderWithRouter(<CertificateSearch setSearch={vi.fn()} />)).toMatchSnapshot();
   });
 });

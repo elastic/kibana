@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, MockedFunction } from 'vitest';
+
 import type { EuiSearchBarProps, IconType } from '@elastic/eui';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import lodash from 'lodash';
@@ -24,7 +27,7 @@ import {
 
 type SavedObjectFinderProps = React.ComponentProps<typeof SavedObjectFinder>;
 
-type MockSearch = jest.MockedFunction<
+type MockSearch = MockedFunction<
   (...args: Parameters<SavedObjectFinderProps['services']['contentClient']['mSearch']>) => Promise<{
     hits: unknown[];
   }>
@@ -32,14 +35,14 @@ type MockSearch = jest.MockedFunction<
 
 let capturedTableSearch: EuiSearchBarProps | undefined;
 
-jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => {
-  fn.cancel = jest.fn();
+vi.spyOn(lodash, 'debounce').mockImplementation((fn: any) => {
+  fn.cancel = vi.fn();
 
   return fn;
 });
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual<typeof import('@elastic/eui')>('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual<typeof import('@elastic/eui')>('@elastic/eui'));
   const ActualEuiInMemoryTable = actual.EuiInMemoryTable;
 
   const EuiInMemoryTable = (props: React.ComponentProps<typeof ActualEuiInMemoryTable>) => {
@@ -116,15 +119,15 @@ uiSettings.get.mockImplementation(() => 10);
 
 const savedObjectsTagging = {
   ui: {
-    convertNameToReference: jest.fn((name: string) => ({ type: 'tag', id: name })),
-    getSearchBarFilter: jest.fn(() => ({
+    convertNameToReference: vi.fn((name: string) => ({ type: 'tag', id: name })),
+    getSearchBarFilter: vi.fn(() => ({
       field: 'tag',
       multiSelect: 'or',
       name: 'Tags',
       options: [],
       type: 'field_value_selection',
     })),
-    getTableColumnDefinition: jest.fn(() => ({
+    getTableColumnDefinition: vi.fn(() => ({
       'data-test-subj': 'listingTableRowTags',
       description: 'Tags associated with this saved object',
       field: 'references',
@@ -188,12 +191,12 @@ const updateTableSearch = async (
 };
 
 describe('SavedObjectsFinder', () => {
-  let consoleWarnSpy: jest.SpyInstance;
+  let consoleWarnSpy: MockInstance;
 
   beforeAll(() => {
     const originalConsoleWarn = globalThis.console.warn.bind(globalThis.console);
 
-    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args) => {
+    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation((...args) => {
       if (typeof args[0] === 'string' && args[0].includes(euiTableWidthWarning)) return;
 
       originalConsoleWarn(...args);
@@ -246,7 +249,7 @@ describe('SavedObjectsFinder', () => {
     });
 
     it('calls onChoose on item click', async () => {
-      const onChoose = jest.fn();
+      const onChoose = vi.fn();
       mockSearch.mockImplementation(() => Promise.resolve({ hits: [doc] }));
 
       const user = userEvent.setup();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { Streams } from '@kbn/streams-schema';
@@ -19,21 +22,30 @@ import { useEditFailedLifecycleFlyout } from './use_edit_failed_lifecycle_flyout
 let mockInheritedValue: unknown = null;
 let mockInheritedLoading = false;
 
-jest.mock('../../../../../../hooks/use_streams_privileges', () => ({
-  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
-}));
+vi.mock('../../../../../../hooks/use_streams_privileges', () => {
+      const mocked = {
+      useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../hooks/use_streams_app_fetch', () => ({
-  useStreamsAppFetch: () => ({
-    value: mockInheritedValue,
-    loading: mockInheritedLoading,
-    refresh: jest.fn(),
-  }),
-}));
+vi.mock('../../../../../../hooks/use_streams_app_fetch', () => {
+      const mocked = {
+      useStreamsAppFetch: () => ({
+        value: mockInheritedValue,
+        loading: mockInheritedLoading,
+        refresh: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/hooks/use_inherit_link', () => ({
-  useInheritLink: () => undefined,
-}));
+vi.mock('../../common/hooks/use_inherit_link', () => {
+      const mocked = {
+      useInheritLink: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type FailureStoreConfig = ReturnType<typeof useFailureStoreConfig>;
 
@@ -63,7 +75,7 @@ const createDefinition = (): Streams.ingest.all.GetResponse =>
 
 const createKibana = (
   isServerless: boolean,
-  toasts: { addSuccess: jest.Mock; addError: jest.Mock }
+  toasts: { addSuccess: Mock; addError: Mock }
 ) =>
   ({
     core: {
@@ -72,7 +84,7 @@ const createKibana = (
     },
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient: { fetch: jest.fn() } },
+        streams: { streamsRepositoryClient: { fetch: vi.fn() } },
       },
     },
     isServerless,
@@ -83,20 +95,20 @@ const Harness = ({
   isServerless,
   updateFailureStore,
   failureStoreConfig,
-  refreshDefinition = jest.fn(),
-  toasts = { addSuccess: jest.fn(), addError: jest.fn() },
+  refreshDefinition = vi.fn(),
+  toasts = { addSuccess: vi.fn(), addError: vi.fn() },
 }: {
   isServerless: boolean;
-  updateFailureStore: jest.Mock;
+  updateFailureStore: Mock;
   failureStoreConfig: FailureStoreConfig;
-  refreshDefinition?: jest.Mock;
-  toasts?: { addSuccess: jest.Mock; addError: jest.Mock };
+  refreshDefinition?: Mock;
+  toasts?: { addSuccess: Mock; addError: Mock };
 }) => {
   const { mainFlyout, deletePhaseFlyout, openMainFlyout, openDeletePhaseFlyout } =
     useEditFailedLifecycleFlyout({
       definition: createDefinition(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data: { refresh: jest.fn() } as any,
+      data: { refresh: vi.fn() } as any,
       refreshDefinition,
       failureStoreConfig,
       kibana: createKibana(isServerless, toasts),
@@ -135,7 +147,7 @@ const renderHarness = (
   isServerless: boolean,
   failureStoreConfigOverrides: Partial<FailureStoreConfig> = {}
 ) => {
-  const updateFailureStore = jest.fn().mockResolvedValue(undefined);
+  const updateFailureStore = vi.fn().mockResolvedValue(undefined);
   render(
     <LifecyclePreviewProvider>
       <LifecycleFlyoutCoordinationProvider>
@@ -330,8 +342,8 @@ describe('useEditFailedLifecycleFlyout - saveMainFlyout', () => {
   });
 
   it('keeps the main flyout open and shows an error when the save fails', async () => {
-    const updateFailureStore = jest.fn().mockRejectedValue(new Error('boom'));
-    const toasts = { addSuccess: jest.fn(), addError: jest.fn() };
+    const updateFailureStore = vi.fn().mockRejectedValue(new Error('boom'));
+    const toasts = { addSuccess: vi.fn(), addError: vi.fn() };
 
     render(
       <LifecyclePreviewProvider>
@@ -364,11 +376,11 @@ describe('useEditFailedLifecycleFlyout - saveMainFlyout', () => {
   });
 
   it('reports success (not an error) when refreshing the definition fails after a successful save', async () => {
-    const updateFailureStore = jest.fn().mockResolvedValue(undefined);
-    const refreshDefinition = jest.fn(() => {
+    const updateFailureStore = vi.fn().mockResolvedValue(undefined);
+    const refreshDefinition = vi.fn(() => {
       throw new Error('refresh failed');
     });
-    const toasts = { addSuccess: jest.fn(), addError: jest.fn() };
+    const toasts = { addSuccess: vi.fn(), addError: vi.fn() };
 
     render(
       <LifecyclePreviewProvider>

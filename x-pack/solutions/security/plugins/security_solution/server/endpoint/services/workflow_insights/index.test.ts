@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance, Mocked } from 'vitest';
+
 import { merge, cloneDeep } from 'lodash';
 import moment from 'moment';
 import { ReplaySubject } from 'rxjs';
@@ -48,21 +51,21 @@ import { securityWorkflowInsightsService } from '.';
 import { DATA_STREAM_NAME } from './constants';
 import { buildWorkflowInsights } from './builders';
 
-jest.mock('./helpers', () => {
-  const original = jest.requireActual('./helpers');
+vi.mock('./helpers', async () => {
+  const original = (await vi.importActual('./helpers'));
   return {
     ...original,
-    createDatastream: jest.fn(),
-    createPipeline: jest.fn(),
-    checkIfRemediationExists: jest.fn(),
+    createDatastream: vi.fn(),
+    createPipeline: vi.fn(),
+    checkIfRemediationExists: vi.fn(),
   };
 });
 
-jest.mock('./builders', () => {
-  const original = jest.requireActual('./builders');
+vi.mock('./builders', async () => {
+  const original = (await vi.importActual('./builders'));
   return {
     ...original,
-    buildWorkflowInsights: jest.fn(),
+    buildWorkflowInsights: vi.fn(),
   };
 });
 
@@ -120,28 +123,28 @@ function getDefaultInsight(overrides?: Partial<SecurityWorkflowInsight>): Securi
 describe('SecurityWorkflowInsightsService', () => {
   let logger: Logger;
   let esClient: ElasticsearchClient;
-  let mockEndpointAppContextService: jest.Mocked<EndpointAppContextService>;
-  let isInitializedSpy: jest.SpyInstance<Promise<[void, void]>, [], boolean>;
+  let mockEndpointAppContextService: Mocked<EndpointAppContextService>;
+  let isInitializedSpy: MockInstance<Promise<[void, void]>, [], boolean>;
 
   beforeEach(() => {
     logger = loggerMock.create();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
 
     mockEndpointAppContextService = createMockEndpointAppContext()
-      .service as jest.Mocked<EndpointAppContextService>;
+      .service as Mocked<EndpointAppContextService>;
 
-    isInitializedSpy = jest
+    isInitializedSpy = vi
       .spyOn(securityWorkflowInsightsService, 'isInitialized', 'get')
       .mockResolvedValueOnce([undefined, undefined]);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('setup', () => {
     it('should set up the data stream', () => {
-      const createDatastreamMock = createDatastream as jest.Mock;
+      const createDatastreamMock = createDatastream as Mock;
       createDatastreamMock.mockReturnValueOnce(
         new DataStreamSpacesAdapter(DATA_STREAM_NAME, {
           kibanaVersion: kibanaPackageJson.version,
@@ -159,7 +162,7 @@ describe('SecurityWorkflowInsightsService', () => {
     });
 
     it('should log a warning if createDatastream throws an error', () => {
-      const createDatastreamMock = createDatastream as jest.Mock;
+      const createDatastreamMock = createDatastream as Mock;
       createDatastreamMock.mockImplementation(() => {
         throw new Error('test error');
       });
@@ -177,16 +180,16 @@ describe('SecurityWorkflowInsightsService', () => {
 
   describe('start', () => {
     it('should start the service', async () => {
-      const createDatastreamMock = createDatastream as jest.Mock;
+      const createDatastreamMock = createDatastream as Mock;
       const ds = new DataStreamSpacesAdapter(DATA_STREAM_NAME, {
         kibanaVersion: kibanaPackageJson.version,
       });
-      const dsInstallSpy = jest.spyOn(ds, 'install');
+      const dsInstallSpy = vi.spyOn(ds, 'install');
       dsInstallSpy.mockResolvedValueOnce();
       createDatastreamMock.mockReturnValueOnce(ds);
-      const createPipelineMock = createPipeline as jest.Mock;
+      const createPipelineMock = createPipeline as Mock;
       createPipelineMock.mockResolvedValueOnce(true);
-      const createDataStreamMock = esClient.indices.createDataStream as jest.Mock;
+      const createDataStreamMock = esClient.indices.createDataStream as Mock;
 
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
@@ -198,7 +201,7 @@ describe('SecurityWorkflowInsightsService', () => {
 
       await securityWorkflowInsightsService.start({
         esClient,
-        registerDefendInsightsCallback: jest.fn(),
+        registerDefendInsightsCallback: vi.fn(),
       });
 
       expect(createPipelineMock).toHaveBeenCalledTimes(1);
@@ -220,14 +223,14 @@ describe('SecurityWorkflowInsightsService', () => {
         endpointContext: mockEndpointAppContextService,
       });
 
-      const createPipelineMock = createPipeline as jest.Mock;
+      const createPipelineMock = createPipeline as Mock;
       createPipelineMock.mockImplementationOnce(() => {
         throw new Error('test error');
       });
 
       await securityWorkflowInsightsService.start({
         esClient,
-        registerDefendInsightsCallback: jest.fn(),
+        registerDefendInsightsCallback: vi.fn(),
       });
 
       expect(logger.warn).toHaveBeenCalledTimes(2);
@@ -235,7 +238,7 @@ describe('SecurityWorkflowInsightsService', () => {
     });
 
     it('should register a post-create callback that passes the active space to createFromDefendInsights', async () => {
-      const registerCallbackMock = jest.fn();
+      const registerCallbackMock = vi.fn();
       mockEndpointAppContextService.getActiveSpaceId.mockReturnValue('space-1');
 
       securityWorkflowInsightsService.setup({
@@ -253,7 +256,7 @@ describe('SecurityWorkflowInsightsService', () => {
       )?.[1];
       expect(postCreateCallback).toBeDefined();
 
-      const createFromDefendInsightsSpy = jest
+      const createFromDefendInsightsSpy = vi
         .spyOn(securityWorkflowInsightsService, 'createFromDefendInsights')
         .mockResolvedValueOnce([]);
 
@@ -283,8 +286,8 @@ describe('SecurityWorkflowInsightsService', () => {
 
   describe('createFromDefendInsights', () => {
     it('should report insight_created telemetry event', async () => {
-      const reportEventMock = jest.fn();
-      mockEndpointAppContextService.getTelemetryService = jest.fn().mockReturnValue({
+      const reportEventMock = vi.fn();
+      mockEndpointAppContextService.getTelemetryService = vi.fn().mockReturnValue({
         reportEvent: reportEventMock,
       });
 
@@ -300,7 +303,7 @@ describe('SecurityWorkflowInsightsService', () => {
       };
 
       const workflowInsights: SecurityWorkflowInsight[] = [getDefaultInsight()];
-      (buildWorkflowInsights as jest.Mock).mockResolvedValueOnce(workflowInsights);
+      (buildWorkflowInsights as Mock).mockResolvedValueOnce(workflowInsights);
 
       const esClientIndexResp = {
         _index: DATA_STREAM_NAME,
@@ -309,7 +312,7 @@ describe('SecurityWorkflowInsightsService', () => {
         _shards: { total: 1, successful: 1, failed: 0 },
         _version: 1,
       };
-      jest.spyOn(esClient, 'index').mockResolvedValue(esClientIndexResp);
+      vi.spyOn(esClient, 'index').mockResolvedValue(esClientIndexResp);
 
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
@@ -318,7 +321,7 @@ describe('SecurityWorkflowInsightsService', () => {
       });
       await securityWorkflowInsightsService.start({
         esClient,
-        registerDefendInsightsCallback: jest.fn(),
+        registerDefendInsightsCallback: vi.fn(),
       });
 
       await securityWorkflowInsightsService.createFromDefendInsights(
@@ -353,7 +356,7 @@ describe('SecurityWorkflowInsightsService', () => {
       ];
 
       const workflowInsights: SecurityWorkflowInsight[] = [getDefaultInsight()];
-      const buildWorkflowInsightsMock = buildWorkflowInsights as jest.Mock;
+      const buildWorkflowInsightsMock = buildWorkflowInsights as Mock;
       buildWorkflowInsightsMock.mockResolvedValueOnce(workflowInsights);
 
       const esClientIndexResp = {
@@ -367,7 +370,7 @@ describe('SecurityWorkflowInsightsService', () => {
         },
         _version: 1,
       };
-      jest.spyOn(esClient, 'index').mockResolvedValue(esClientIndexResp);
+      vi.spyOn(esClient, 'index').mockResolvedValue(esClientIndexResp);
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
@@ -375,7 +378,7 @@ describe('SecurityWorkflowInsightsService', () => {
       });
       await securityWorkflowInsightsService.start({
         esClient,
-        registerDefendInsightsCallback: jest.fn(),
+        registerDefendInsightsCallback: vi.fn(),
       });
       const result = await securityWorkflowInsightsService.createFromDefendInsights(
         defendInsights,
@@ -427,7 +430,7 @@ describe('SecurityWorkflowInsightsService', () => {
       const endpointMetadataService = {} as ReturnType<
         EndpointAppContextService['getEndpointMetadataService']
       >;
-      const buildWorkflowInsightsMock = buildWorkflowInsights as jest.Mock;
+      const buildWorkflowInsightsMock = buildWorkflowInsights as Mock;
       buildWorkflowInsightsMock.mockResolvedValueOnce(workflowInsights);
       mockEndpointAppContextService.getEndpointMetadataService.mockReturnValue(
         endpointMetadataService
@@ -444,7 +447,7 @@ describe('SecurityWorkflowInsightsService', () => {
         },
         _version: 1,
       };
-      jest.spyOn(esClient, 'index').mockResolvedValue(esClientIndexResp);
+      vi.spyOn(esClient, 'index').mockResolvedValue(esClientIndexResp);
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
@@ -452,7 +455,7 @@ describe('SecurityWorkflowInsightsService', () => {
       });
       await securityWorkflowInsightsService.start({
         esClient,
-        registerDefendInsightsCallback: jest.fn(),
+        registerDefendInsightsCallback: vi.fn(),
       });
 
       const result = await securityWorkflowInsightsService.createFromDefendInsights(
@@ -490,7 +493,7 @@ describe('SecurityWorkflowInsightsService', () => {
     it('should index the doc correctly', async () => {
       await securityWorkflowInsightsService.start({
         esClient,
-        registerDefendInsightsCallback: jest.fn(),
+        registerDefendInsightsCallback: vi.fn(),
       });
       const insight = getDefaultInsight();
       await securityWorkflowInsightsService.create(insight, DEFAULT_SPACE_ID);
@@ -511,11 +514,11 @@ describe('SecurityWorkflowInsightsService', () => {
     it('should mark insight as remediated if remediation exists', async () => {
       await securityWorkflowInsightsService.start({
         esClient,
-        registerDefendInsightsCallback: jest.fn(),
+        registerDefendInsightsCallback: vi.fn(),
       });
       const insight = getDefaultInsight();
 
-      const remediationExistsMock = checkIfRemediationExists as jest.Mock;
+      const remediationExistsMock = checkIfRemediationExists as Mock;
       remediationExistsMock.mockResolvedValueOnce(true);
 
       await securityWorkflowInsightsService.create(insight, DEFAULT_SPACE_ID);
@@ -538,17 +541,17 @@ describe('SecurityWorkflowInsightsService', () => {
 
     it('should call update instead if insight already exists', async () => {
       const indexName = 'backing-index';
-      const fetchSpy = jest
+      const fetchSpy = vi
         .spyOn(securityWorkflowInsightsService, 'fetch')
         .mockResolvedValueOnce([{ _index: indexName }] as Array<
           SearchHit<SecurityWorkflowInsight>
         >);
-      const updateSpy = jest
+      const updateSpy = vi
         .spyOn(securityWorkflowInsightsService, 'update')
         .mockResolvedValueOnce({} as UpdateResponse);
       await securityWorkflowInsightsService.start({
         esClient,
-        registerDefendInsightsCallback: jest.fn(),
+        registerDefendInsightsCallback: vi.fn(),
       });
       const insight = getDefaultInsight();
       await securityWorkflowInsightsService.create(insight, DEFAULT_SPACE_ID);
@@ -575,7 +578,7 @@ describe('SecurityWorkflowInsightsService', () => {
     it('should update the doc correctly', async () => {
       await securityWorkflowInsightsService.start({
         esClient,
-        registerDefendInsightsCallback: jest.fn(),
+        registerDefendInsightsCallback: vi.fn(),
       });
       const insightId = 'some-insight-id';
       const insight = getDefaultInsight();
@@ -599,7 +602,7 @@ describe('SecurityWorkflowInsightsService', () => {
     it('should fetch the docs with the correct params', async () => {
       await securityWorkflowInsightsService.start({
         esClient,
-        registerDefendInsightsCallback: jest.fn(),
+        registerDefendInsightsCallback: vi.fn(),
       });
       const searchParams: SearchParams = {
         size: 50,
@@ -719,7 +722,7 @@ describe('SecurityWorkflowInsightsService', () => {
     beforeEach(async () => {
       await securityWorkflowInsightsService.start({
         esClient,
-        registerDefendInsightsCallback: jest.fn(),
+        registerDefendInsightsCallback: vi.fn(),
       });
 
       request = {} as KibanaRequest<unknown, unknown, DefendInsightsGetRequestQuery>;

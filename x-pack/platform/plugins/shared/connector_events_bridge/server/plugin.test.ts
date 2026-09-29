@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreSetup } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
@@ -29,7 +31,7 @@ describe('ConnectorEventsBridgePlugin', () => {
     actions.getActionsConfigurationUtilities.mockReturnValue(configUtils);
 
     const core = {
-      getStartServices: jest.fn(),
+      getStartServices: vi.fn(),
     } as unknown as CoreSetup<ConnectorEventsBridgeStartDeps>;
 
     plugin.setup(core, { actions });
@@ -46,7 +48,7 @@ describe('ConnectorEventsBridgePlugin', () => {
     actions.getActionsConfigurationUtilities.mockReturnValue(configUtils);
 
     const core = {
-      getStartServices: jest.fn().mockResolvedValue([{}, { workflowsExtensions: undefined }]),
+      getStartServices: vi.fn().mockResolvedValue([{}, { workflowsExtensions: undefined }]),
     } as unknown as CoreSetup<ConnectorEventsBridgeStartDeps>;
 
     plugin.setup(core, { actions });

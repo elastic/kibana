@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render as rtlRender, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,42 +17,60 @@ import type { HuntingLead } from './types';
 
 const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn(),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../api/api', () => ({
-  useEntityAnalyticsRoutes: jest.fn(),
-}));
+vi.mock('../../../api/api', () => {
+      const mocked = {
+      useEntityAnalyticsRoutes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOpenFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openFlyout: mockOpenFlyout,
-  }),
-}));
+const mockOpenFlyout = vi.fn();
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: () => ({
+        openFlyout: mockOpenFlyout,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => false,
-}));
+vi.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => {
+      const mocked = {
+      useIsNewFlyoutEnabled: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
-  useFlyoutApi: () => ({
-    openEntityFlyout: jest.fn(),
-  }),
-}));
+vi.mock('../../../../flyout_v2/use_flyout_api', () => {
+      const mocked = {
+      useFlyoutApi: () => ({
+        openEntityFlyout: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {},
-  }),
-  useDateFormat: jest.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
-  useTimeZone: jest.fn(() => 'UTC'),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {},
+      }),
+      useDateFormat: vi.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
+      useTimeZone: vi.fn(() => 'UTC'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseQuery = jest.requireMock('@kbn/react-query').useQuery as jest.Mock;
-const mockUseEntityAnalyticsRoutes = jest.requireMock('../../../api/api')
-  .useEntityAnalyticsRoutes as jest.Mock;
+const mockUseQuery = (await vi.importMock('@kbn/react-query')).useQuery as Mock;
+const mockUseEntityAnalyticsRoutes = (await vi.importMock('../../../api/api'))
+  .useEntityAnalyticsRoutes as Mock;
 
 const createMockLead = (overrides: Partial<HuntingLead> = {}): HuntingLead => ({
   id: 'lead-1',
@@ -80,14 +101,14 @@ const createApiLead = (overrides: Partial<HuntingLead> = {}) => {
 };
 
 const defaultProps = {
-  onClose: jest.fn(),
-  onSelectLead: jest.fn(),
+  onClose: vi.fn(),
+  onSelectLead: vi.fn(),
 };
 
 describe('ThreatHuntingLeadsFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseEntityAnalyticsRoutes.mockReturnValue({ fetchLeads: jest.fn() });
+    vi.clearAllMocks();
+    mockUseEntityAnalyticsRoutes.mockReturnValue({ fetchLeads: vi.fn() });
     mockUseQuery.mockReturnValue({
       data: { leads: [createApiLead()], total: 1 },
       isLoading: false,
@@ -104,7 +125,7 @@ describe('ThreatHuntingLeadsFlyout', () => {
   });
 
   it('fetches leads with a perPage of 20 so the flyout is not artificially capped at 10', () => {
-    const mockFetchLeads = jest.fn().mockResolvedValue({ leads: [], total: 0 });
+    const mockFetchLeads = vi.fn().mockResolvedValue({ leads: [], total: 0 });
     mockUseEntityAnalyticsRoutes.mockReturnValue({ fetchLeads: mockFetchLeads });
     let capturedQueryFn: ((ctx: { signal?: AbortSignal }) => unknown) | undefined;
     mockUseQuery.mockImplementation(
@@ -178,7 +199,7 @@ describe('ThreatHuntingLeadsFlyout', () => {
   });
 
   it('close button calls onClose', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     render(<ThreatHuntingLeadsFlyout {...defaultProps} onClose={onClose} />);
 
     const closeButton = screen.getByTestId('euiFlyoutCloseButton');
@@ -188,7 +209,7 @@ describe('ThreatHuntingLeadsFlyout', () => {
   });
 
   it('clicking a lead item calls onSelectLead', () => {
-    const onSelectLead = jest.fn();
+    const onSelectLead = vi.fn();
     mockUseQuery.mockReturnValue({
       data: { leads: [createApiLead({ id: 'lead-42', title: 'Clicked Lead' })], total: 1 },
       isLoading: false,
@@ -205,7 +226,7 @@ describe('ThreatHuntingLeadsFlyout', () => {
   });
 
   it('clicking an entity badge in a list item opens the entity flyout and does not trigger onSelectLead', () => {
-    const onSelectLead = jest.fn();
+    const onSelectLead = vi.fn();
     mockUseQuery.mockReturnValue({
       data: {
         leads: [

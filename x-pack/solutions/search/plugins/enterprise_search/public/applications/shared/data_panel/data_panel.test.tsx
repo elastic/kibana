@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+import { vi } from 'vitest';
+
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     // EuiTitle applies size via CSS-in-JS only (no stable DOM class); mock to inspect props
-    EuiTitle: jest.fn(({ children }) => children),
+    EuiTitle: vi.fn(({ children }) => children),
   };
 });
 
@@ -23,11 +25,11 @@ import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import { DataPanel } from './data_panel';
 
-const MockEuiTitle = jest.mocked(EuiTitle);
+const MockEuiTitle = vi.mocked(EuiTitle);
 
 describe('DataPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with a title and children', () => {

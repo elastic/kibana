@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { clone } from 'lodash';
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
@@ -17,7 +19,7 @@ import {
   updateFrozenInputs,
 } from './package_policy_frozen_variables';
 
-jest.mock('../package_policy');
+vi.mock('../package_policy');
 
 const basePolicy: PackagePolicy = {
   id: '1',
@@ -74,7 +76,7 @@ describe('packagePolicyHasFrozenVariablesUpdate', () => {
 
 describe('updateFrozenInputs', () => {
   beforeEach(() => {
-    jest.mocked(packagePolicyService.update).mockReset();
+    vi.mocked(packagePolicyService.update).mockReset();
   });
   it('should update only frozen variables', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();

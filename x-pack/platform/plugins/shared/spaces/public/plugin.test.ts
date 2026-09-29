@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
@@ -84,7 +86,7 @@ describe('Spaces plugin', () => {
 
       const management = managementPluginMock.createSetupContract();
       const mockSection = createManagementSectionMock();
-      mockSection.registerApp = jest.fn();
+      mockSection.registerApp = vi.fn();
 
       management.sections.section.kibana = mockSection;
 
@@ -119,7 +121,7 @@ describe('Spaces plugin', () => {
 
       const management = managementPluginMock.createSetupContract();
       const mockSection = createManagementSectionMock();
-      mockSection.registerApp = jest.fn();
+      mockSection.registerApp = vi.fn();
 
       management.sections.section.kibana = mockSection;
 
@@ -151,7 +153,7 @@ describe('Spaces plugin', () => {
 
       const management = managementPluginMock.createSetupContract();
       const mockSection = createManagementSectionMock();
-      mockSection.registerApp = jest.fn();
+      mockSection.registerApp = vi.fn();
 
       management.sections.section.kibana = mockSection;
 

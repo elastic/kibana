@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act } from '@testing-library/react';
 
@@ -13,27 +15,33 @@ import { useIsPackagePolicyUpgradable } from '../../../../../hooks';
 
 import { PackagePoliciesTable } from './package_policies_table';
 
-jest.mock('../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../hooks'),
-  useAuthz: jest.fn().mockReturnValue({
-    fleet: { readAgentPolicies: true, allAgentPolicies: true },
-    integrations: {
-      writeIntegrationPolicies: true,
-      readIntegrationPolicies: true,
-      installPackages: true,
-    },
-  }),
-  useIsPackagePolicyUpgradable: jest.fn(),
-  usePermissionCheck: jest.fn().mockReturnValue({ data: { success: true } }),
-  useMultipleAgentPolicies: jest.fn().mockReturnValue({ canUseMultipleAgentPolicies: false }),
-  useGetOutputs: jest.fn().mockReturnValue({ data: { items: [] }, isLoading: false }),
-  useDefaultOutput: jest.fn().mockReturnValue({ output: null }),
-}));
+vi.mock('../../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../hooks')),
+      useAuthz: vi.fn().mockReturnValue({
+        fleet: { readAgentPolicies: true, allAgentPolicies: true },
+        integrations: {
+          writeIntegrationPolicies: true,
+          readIntegrationPolicies: true,
+          installPackages: true,
+        },
+      }),
+      useIsPackagePolicyUpgradable: vi.fn(),
+      usePermissionCheck: vi.fn().mockReturnValue({ data: { success: true } }),
+      useMultipleAgentPolicies: vi.fn().mockReturnValue({ canUseMultipleAgentPolicies: false }),
+      useGetOutputs: vi.fn().mockReturnValue({ data: { items: [] }, isLoading: false }),
+      useDefaultOutput: vi.fn().mockReturnValue({ output: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../services', () => ({
-  ...jest.requireActual('../../../../../services'),
-  ExperimentalFeaturesService: { get: jest.fn().mockReturnValue({}) },
-}));
+vi.mock('../../../../../services', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../services')),
+      ExperimentalFeaturesService: { get: vi.fn().mockReturnValue({}) },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const basePackagePolicy = {
   id: 'pkg1',
@@ -72,11 +80,11 @@ describe('PackagePoliciesTable', () => {
   }) => {
     const { hasUpgrade = false, keepPoliciesUpToDate = false, pendingUpgradeReview } = overrides;
 
-    jest.mocked(useIsPackagePolicyUpgradable).mockReturnValue({
-      isPackagePolicyUpgradable: jest.fn().mockReturnValue(hasUpgrade),
-      getPackagePolicyUpgradeReview: jest.fn().mockReturnValue(pendingUpgradeReview),
-      getKeepPoliciesUpToDate: jest.fn().mockReturnValue(keepPoliciesUpToDate),
-      getUpgradeVersion: jest.fn().mockReturnValue('2.0.0'),
+    vi.mocked(useIsPackagePolicyUpgradable).mockReturnValue({
+      isPackagePolicyUpgradable: vi.fn().mockReturnValue(hasUpgrade),
+      getPackagePolicyUpgradeReview: vi.fn().mockReturnValue(pendingUpgradeReview),
+      getKeepPoliciesUpToDate: vi.fn().mockReturnValue(keepPoliciesUpToDate),
+      getUpgradeVersion: vi.fn().mockReturnValue('2.0.0'),
       isLoadingPackages: false,
     });
 
@@ -85,7 +93,7 @@ describe('PackagePoliciesTable', () => {
       <PackagePoliciesTable
         packagePolicies={[basePackagePolicy] as any}
         agentPolicy={agentPolicy as any}
-        refreshAgentPolicy={jest.fn()}
+        refreshAgentPolicy={vi.fn()}
       />
     );
   };

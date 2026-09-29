@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import type { GroupBySelection } from '../../alerts_progress_bar_panel/types';
@@ -13,13 +16,13 @@ import { ChartCollapse } from '.';
 import { useSummaryChartData } from '../../alerts_summary_charts_panel/use_summary_chart_data';
 import * as mock from './mock_data';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
-jest.mock('../../alerts_summary_charts_panel/use_summary_chart_data');
+vi.mock('../../alerts_summary_charts_panel/use_summary_chart_data');
 
 const defaultProps = {
   groupBySelection: 'host.name' as GroupBySelection,
@@ -31,10 +34,10 @@ const ruleId = '[data-test-subj="chart-collapse-top-rule"]';
 const groupId = '[data-test-subj="chart-collapse-top-group"]';
 
 describe('ChartCollapse', () => {
-  const mockUseSummaryChartData = useSummaryChartData as jest.Mock;
+  const mockUseSummaryChartData = useSummaryChartData as Mock;
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it renders the chart collapse panel and the 3 summary componenets', () => {

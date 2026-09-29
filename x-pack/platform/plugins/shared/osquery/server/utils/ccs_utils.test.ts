@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs, resetCcsCache } from './ccs_utils';
 
@@ -16,7 +18,7 @@ describe('hasConnectedRemoteClusters', () => {
   const mockEsClient = (remoteInfo: Record<string, { connected: boolean }>) =>
     ({
       cluster: {
-        remoteInfo: jest.fn().mockResolvedValue(remoteInfo),
+        remoteInfo: vi.fn().mockResolvedValue(remoteInfo),
       },
     } as unknown as ElasticsearchClient);
 
@@ -49,7 +51,7 @@ describe('hasConnectedRemoteClusters', () => {
 
   it('returns false and caches the result when remoteInfo throws', async () => {
     const esClient = {
-      cluster: { remoteInfo: jest.fn().mockRejectedValue(new Error('permission denied')) },
+      cluster: { remoteInfo: vi.fn().mockRejectedValue(new Error('permission denied')) },
     } as unknown as ElasticsearchClient;
     expect(await hasConnectedRemoteClusters(esClient)).toBe(false);
     expect(await hasConnectedRemoteClusters(esClient)).toBe(false);

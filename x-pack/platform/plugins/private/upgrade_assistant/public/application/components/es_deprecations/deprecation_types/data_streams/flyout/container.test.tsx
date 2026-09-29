@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { screen } from '@testing-library/react';
@@ -16,8 +18,8 @@ import { LoadingState } from '../../../../types';
 import type { MigrationState } from '../use_migration_state';
 import { DataStreamReindexFlyout } from './container';
 
-jest.mock('../../../../../app_context', () => {
-  const actual = jest.requireActual('../../../../../app_context');
+vi.mock('../../../../../app_context', async () => {
+  const actual = (await vi.importActual('../../../../../app_context'));
 
   return {
     ...actual,
@@ -36,30 +38,45 @@ jest.mock('../../../../../app_context', () => {
   };
 });
 
-jest.mock('../use_migration_step', () => ({
-  useMigrationStep: () => ['confirm', jest.fn()] as const,
-}));
+vi.mock('../use_migration_step', () => {
+      const mocked = {
+      useMigrationStep: () => ['confirm', vi.fn()] as const,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./steps/confirm', () => ({
-  ConfirmMigrationReindexFlyoutStep: ({
-    lastIndexCreationDateFormatted,
-  }: {
-    lastIndexCreationDateFormatted: string;
-  }) => <div data-test-subj="confirmMigrationStep">{lastIndexCreationDateFormatted}</div>,
-  ConfirmMigrationReadonlyFlyoutStep: () => <div data-test-subj="confirmReadonlyStep" />,
-}));
+vi.mock('./steps/confirm', () => {
+      const mocked = {
+      ConfirmMigrationReindexFlyoutStep: ({
+        lastIndexCreationDateFormatted,
+      }: {
+        lastIndexCreationDateFormatted: string;
+      }) => <div data-test-subj="confirmMigrationStep">{lastIndexCreationDateFormatted}</div>,
+      ConfirmMigrationReadonlyFlyoutStep: () => <div data-test-subj="confirmReadonlyStep" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./steps/checklist', () => ({
-  ChecklistFlyoutStep: () => <div data-test-subj="checklistStep" />,
-}));
+vi.mock('./steps/checklist', () => {
+      const mocked = {
+      ChecklistFlyoutStep: () => <div data-test-subj="checklistStep" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./steps/completed', () => ({
-  MigrationCompletedFlyoutStep: () => <div data-test-subj="completedStep" />,
-}));
+vi.mock('./steps/completed', () => {
+      const mocked = {
+      MigrationCompletedFlyoutStep: () => <div data-test-subj="completedStep" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/initializing_step', () => ({
-  InitializingStep: () => <div data-test-subj="initializingStep" />,
-}));
+vi.mock('../../../common/initializing_step', () => {
+      const mocked = {
+      InitializingStep: () => <div data-test-subj="initializingStep" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDeprecation: EnrichedDeprecationInfo = {
   type: 'data_streams',
@@ -107,14 +124,14 @@ describe('DataStreamReindexFlyout', () => {
     renderWithI18n(
       <DataStreamReindexFlyout
         deprecation={mockDeprecation}
-        closeFlyout={jest.fn()}
-        loadDataStreamMetadata={jest.fn<Promise<void>, []>()}
+        closeFlyout={vi.fn()}
+        loadDataStreamMetadata={vi.fn<Promise<void>, []>()}
         migrationState={migrationState}
-        initMigration={jest.fn<void, [resolutionType: 'reindex' | 'readonly']>()}
-        startReindex={jest.fn<Promise<void>, []>()}
-        cancelReindex={jest.fn<Promise<void>, []>()}
-        startReadonly={jest.fn<Promise<void>, []>()}
-        cancelReadonly={jest.fn<Promise<void>, []>()}
+        initMigration={vi.fn<void, [resolutionType: 'reindex' | 'readonly']>()}
+        startReindex={vi.fn<Promise<void>, []>()}
+        cancelReindex={vi.fn<Promise<void>, []>()}
+        startReadonly={vi.fn<Promise<void>, []>()}
+        cancelReadonly={vi.fn<Promise<void>, []>()}
       />
     );
 

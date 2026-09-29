@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ConfigKey, FormMonitorType } from '../types';
 import { FORM_CONFIG } from './form_config';
 
-jest.mock('../../../../../utils/kibana_service', () => ({
-  kibanaService: { coreStart: { docLinks: { links: {} } } },
-}));
+vi.mock('../../../../../utils/kibana_service', () => {
+      const mocked = {
+      kibanaService: { coreStart: { docLinks: { links: {} } } },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const paramsFields = (fields: Array<{ fieldKey: string }> | undefined) =>
   (fields ?? []).filter((field) => field.fieldKey === ConfigKey.PARAMS);

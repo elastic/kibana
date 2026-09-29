@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory, ReservedPrivilegesSet } from '@kbn/core/server';
@@ -15,9 +17,9 @@ import { defineKeyRotationRoutes } from './key_rotation';
 import type { EncryptionKeyRotationService } from '../crypto';
 
 describe('Key rotation routes', () => {
-  let router: jest.Mocked<IRouter>;
+  let router: Mocked<IRouter>;
   let mockContext: RequestHandlerContext;
-  let mockEncryptionKeyRotationService: jest.Mocked<EncryptionKeyRotationService>;
+  let mockEncryptionKeyRotationService: Mocked<EncryptionKeyRotationService>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create({
       keyRotation: { decryptionOnlyKeys: ['b'.repeat(32)] },

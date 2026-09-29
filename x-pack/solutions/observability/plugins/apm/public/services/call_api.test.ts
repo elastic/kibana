@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { mockNow } from '../utils/test_helpers';
 import { clearCache, callApi } from './rest/call_api';
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 
 type CoreMock = CoreStart & {
   http: {
-    get: jest.SpyInstance<HttpSetup['get']>;
+    get: MockInstance<HttpSetup['get']>;
   };
 };
 
@@ -21,7 +24,7 @@ describe('callApi', () => {
   beforeEach(() => {
     core = {
       http: {
-        get: jest.fn().mockReturnValue({
+        get: vi.fn().mockReturnValue({
           my_key: 'hello_world',
         }),
       },
@@ -56,7 +59,7 @@ describe('callApi', () => {
   });
 
   describe('cache', () => {
-    let nowSpy: jest.SpyInstance;
+    let nowSpy: MockInstance;
     beforeEach(() => {
       nowSpy = mockNow('2019');
     });

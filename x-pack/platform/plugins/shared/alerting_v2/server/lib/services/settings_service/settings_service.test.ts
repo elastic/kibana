@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
@@ -24,7 +26,7 @@ describe('SettingsService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('get', () => {

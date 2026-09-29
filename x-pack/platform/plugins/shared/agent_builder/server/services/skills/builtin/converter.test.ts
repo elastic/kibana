@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { AvailabilityContext } from '@kbn/agent-builder-server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -76,7 +78,7 @@ describe('convertBuiltinSkill', () => {
   });
 
   it('preserves getInlineTools function', () => {
-    const inlineToolsFn = jest.fn(async () => []);
+    const inlineToolsFn = vi.fn(async () => []);
     const skill = createMockSkillDefinition({
       getInlineTools: inlineToolsFn,
     });
@@ -137,7 +139,7 @@ describe('convertBuiltinSkill', () => {
   });
 
   it('wires availability config to isAvailable via the cache', async () => {
-    const handler = jest.fn().mockResolvedValue({ status: 'unavailable', reason: 'gated' });
+    const handler = vi.fn().mockResolvedValue({ status: 'unavailable', reason: 'gated' });
     const skill = createMockSkillDefinition({
       availability: { cacheMode: 'space', handler },
     });
@@ -155,7 +157,7 @@ describe('convertBuiltinSkill', () => {
   });
 
   it('caches availability results for the same skill and space', async () => {
-    const handler = jest.fn().mockResolvedValue({ status: 'available' });
+    const handler = vi.fn().mockResolvedValue({ status: 'available' });
     const testCache = new AvailabilityCache();
     const skill = createMockSkillDefinition({
       availability: { cacheMode: 'space', handler },

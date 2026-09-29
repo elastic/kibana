@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SearchTypes } from '../../../../../../../common/detection_engine/types';
 import { recursiveUnboxingFields } from './recursive_unboxing_fields';
 import type { FieldsType } from '../types';
 
 describe('recursive_unboxing_fields', () => {
   beforeAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('valueInMergedDocument is "undefined"', () => {

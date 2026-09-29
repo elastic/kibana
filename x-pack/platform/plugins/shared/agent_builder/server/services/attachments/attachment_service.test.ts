@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { httpServerMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { isAllowedBuiltinAttachment } from '@kbn/agent-builder-server/allow_lists';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentService } from './attachment_service';
 
-jest.mock('@kbn/agent-builder-server/allow_lists');
+vi.mock('@kbn/agent-builder-server/allow_lists');
 
-const isAllowedBuiltinAttachmentMock = isAllowedBuiltinAttachment as jest.MockedFunction<
+const isAllowedBuiltinAttachmentMock = isAllowedBuiltinAttachment as MockedFunction<
   typeof isAllowedBuiltinAttachment
 >;
 

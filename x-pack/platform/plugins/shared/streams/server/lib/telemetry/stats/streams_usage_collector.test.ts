@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerStreamsUsageCollector } from './streams_usage_collector';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -20,11 +22,11 @@ const fakeEsClient: ElasticsearchClient = elasticsearchServiceMock.createElastic
 const makeReader =
   (defs: Streams.all.Definition[] = []) =>
   async () => ({
-    readAllManagedStreams: jest.fn().mockResolvedValue(defs),
+    readAllManagedStreams: vi.fn().mockResolvedValue(defs),
   });
 
 const makeThrowingReader = (error: Error) => async () => ({
-  readAllManagedStreams: jest.fn().mockRejectedValue(error),
+  readAllManagedStreams: vi.fn().mockRejectedValue(error),
 });
 
 describe('Streams Usage Collector (simplified)', () => {

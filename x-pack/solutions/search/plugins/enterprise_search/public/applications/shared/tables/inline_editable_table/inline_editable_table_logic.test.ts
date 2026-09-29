@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -43,7 +45,7 @@ describe('InlineEditableTableLogic', () => {
   const logicValuesWithoutSelectors = (logic: any) => omit(logic.values, Object.keys(SELECTORS));
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const DEFAULT_LOGIC_PARAMS = {
@@ -51,21 +53,21 @@ describe('InlineEditableTableLogic', () => {
     columns: [
       {
         field: 'foo',
-        render: jest.fn(),
-        editingRender: jest.fn(),
+        render: vi.fn(),
+        editingRender: vi.fn(),
       },
       {
         field: 'bar',
-        render: jest.fn(),
-        editingRender: jest.fn(),
+        render: vi.fn(),
+        editingRender: vi.fn(),
       },
     ],
-    onAdd: jest.fn(),
-    onDelete: jest.fn(),
-    onReorder: jest.fn(),
-    onUpdate: jest.fn(),
-    transformItem: jest.fn(),
-    validateItem: jest.fn(),
+    onAdd: vi.fn(),
+    onDelete: vi.fn(),
+    onReorder: vi.fn(),
+    onUpdate: vi.fn(),
+    transformItem: vi.fn(),
+    validateItem: vi.fn(),
   };
 
   const mountLogic = (values: object = {}, params: object = DEFAULT_LOGIC_PARAMS) =>
@@ -367,7 +369,7 @@ describe('InlineEditableTableLogic', () => {
           ...DEFAULT_VALUES,
           editingItemValue,
         });
-        jest.spyOn(logic.actions, 'setFieldErrors');
+        vi.spyOn(logic.actions, 'setFieldErrors');
         logic.actions.saveExistingItem();
         expect(DEFAULT_LOGIC_PARAMS.onUpdate).not.toHaveBeenCalled();
         expect(logic.actions.setFieldErrors).toHaveBeenCalledWith(fieldErrors);
@@ -379,7 +381,7 @@ describe('InlineEditableTableLogic', () => {
           ...DEFAULT_VALUES,
           editingItemValue,
         });
-        jest.spyOn(logic.actions, 'setFieldErrors');
+        vi.spyOn(logic.actions, 'setFieldErrors');
         logic.actions.saveExistingItem();
         expect(DEFAULT_LOGIC_PARAMS.onUpdate).not.toHaveBeenCalled();
         expect(logic.actions.setFieldErrors).not.toHaveBeenCalled();
@@ -452,7 +454,7 @@ describe('InlineEditableTableLogic', () => {
           ...DEFAULT_VALUES,
           editingItemValue,
         });
-        jest.spyOn(logic.actions, 'setFieldErrors');
+        vi.spyOn(logic.actions, 'setFieldErrors');
         logic.actions.saveNewItem();
         expect(DEFAULT_LOGIC_PARAMS.onAdd).not.toHaveBeenCalled();
         expect(logic.actions.setFieldErrors).toHaveBeenCalledWith(fieldErrors);
@@ -464,7 +466,7 @@ describe('InlineEditableTableLogic', () => {
           ...DEFAULT_VALUES,
           editingItemValue,
         });
-        jest.spyOn(logic.actions, 'setFieldErrors');
+        vi.spyOn(logic.actions, 'setFieldErrors');
         logic.actions.saveNewItem();
         expect(DEFAULT_LOGIC_PARAMS.onAdd).not.toHaveBeenCalled();
         expect(logic.actions.setFieldErrors).not.toHaveBeenCalled();

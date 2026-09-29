@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -33,7 +36,7 @@ const createWrapper = () => {
 
 describe('useTraceSpans', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns spans and duration from fetchTrace', async () => {
@@ -49,7 +52,7 @@ describe('useTraceSpans', () => {
       ],
       durationMs: 500,
     };
-    const fetchTrace: jest.MockedFunction<TraceFetcher> = jest.fn();
+    const fetchTrace: MockedFunction<TraceFetcher> = vi.fn();
     fetchTrace.mockResolvedValue(fetchResult);
     const { queryClient, Wrapper } = createWrapper();
 
@@ -69,7 +72,7 @@ describe('useTraceSpans', () => {
   });
 
   it('returns empty state and does not call fetchTrace when traceId is null', async () => {
-    const fetchTrace: jest.MockedFunction<TraceFetcher> = jest.fn();
+    const fetchTrace: MockedFunction<TraceFetcher> = vi.fn();
     const { queryClient, Wrapper } = createWrapper();
 
     const { result } = renderHook(() => useTraceSpans(null, { fetchTrace }), { wrapper: Wrapper });
@@ -87,7 +90,7 @@ describe('useTraceSpans', () => {
 
   it('returns query error and no spans when fetchTrace rejects', async () => {
     const error = new Error('boom');
-    const fetchTrace: jest.MockedFunction<TraceFetcher> = jest.fn();
+    const fetchTrace: MockedFunction<TraceFetcher> = vi.fn();
     fetchTrace.mockRejectedValue(error);
     const { queryClient, Wrapper } = createWrapper();
 
@@ -106,7 +109,7 @@ describe('useTraceSpans', () => {
   });
 
   it('returns empty spans and zero duration when fetchTrace resolves empty payload', async () => {
-    const fetchTrace: jest.MockedFunction<TraceFetcher> = jest.fn();
+    const fetchTrace: MockedFunction<TraceFetcher> = vi.fn();
     fetchTrace.mockResolvedValue({ spans: [], durationMs: 0 });
     const { queryClient, Wrapper } = createWrapper();
 

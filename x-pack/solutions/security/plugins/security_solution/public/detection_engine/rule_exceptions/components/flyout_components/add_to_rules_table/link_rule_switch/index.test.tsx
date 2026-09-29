@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
@@ -13,7 +15,7 @@ import { LinkRuleSwitch } from '.';
 
 const mockedRule = getRulesSchemaMock();
 const linkedRules = Array(3).fill(mockedRule);
-const onRuleLinkChangeMock = jest.fn();
+const onRuleLinkChangeMock = vi.fn();
 describe('LinkRuleSwitch', () => {
   it('should render the switch checked if rule is linked', () => {
     const { getByRole } = render(

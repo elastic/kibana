@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -21,41 +24,50 @@ import { useCurrentUserProfile } from '@kbn/agentic-investigations-plugin/public
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ProposedActionsSlot } from './proposed_actions_slot';
 
-jest.mock('@kbn/proposals-plugin/public', () => ({
-  useConversationProposals: jest.fn(),
-  useApproveProposal: jest.fn(),
-  useDismissProposal: jest.fn(),
-  useIsApprovingProposal: jest.fn(),
-  useIsDecliningProposal: jest.fn(),
-}));
+vi.mock('@kbn/proposals-plugin/public', () => {
+      const mocked = {
+      useConversationProposals: vi.fn(),
+      useApproveProposal: vi.fn(),
+      useDismissProposal: vi.fn(),
+      useIsApprovingProposal: vi.fn(),
+      useIsDecliningProposal: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
-  useCurrentUserProfile: jest.fn(),
-}));
+vi.mock('@kbn/agentic-investigations-plugin/public', () => {
+      const mocked = {
+      useCurrentUserProfile: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseConversationProposals = useConversationProposals as jest.MockedFunction<
+const mockUseConversationProposals = useConversationProposals as MockedFunction<
   typeof useConversationProposals
 >;
-const mockUseApproveProposal = useApproveProposal as jest.MockedFunction<typeof useApproveProposal>;
-const mockUseDismissProposal = useDismissProposal as jest.MockedFunction<typeof useDismissProposal>;
-const mockUseIsApprovingProposal = useIsApprovingProposal as jest.MockedFunction<
+const mockUseApproveProposal = useApproveProposal as MockedFunction<typeof useApproveProposal>;
+const mockUseDismissProposal = useDismissProposal as MockedFunction<typeof useDismissProposal>;
+const mockUseIsApprovingProposal = useIsApprovingProposal as MockedFunction<
   typeof useIsApprovingProposal
 >;
-const mockUseIsDecliningProposal = useIsDecliningProposal as jest.MockedFunction<
+const mockUseIsDecliningProposal = useIsDecliningProposal as MockedFunction<
   typeof useIsDecliningProposal
 >;
-const mockUseCurrentUserProfile = useCurrentUserProfile as jest.MockedFunction<
+const mockUseCurrentUserProfile = useCurrentUserProfile as MockedFunction<
   typeof useCurrentUserProfile
 >;
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
-const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
-const dismissMutateAsync = jest.fn().mockResolvedValue(undefined);
-const addDanger = jest.fn();
+const approveMutateAsync = vi.fn().mockResolvedValue(undefined);
+const dismissMutateAsync = vi.fn().mockResolvedValue(undefined);
+const addDanger = vi.fn();
 
 const mockProposal: ProposalWithMetadata = {
   id: 'proposal-1',
@@ -105,13 +117,13 @@ const mockConversationProposalsPage = (
     isError: false,
     hasNextPage: false,
     isFetchingNextPage: false,
-    fetchNextPage: jest.fn(),
+    fetchNextPage: vi.fn(),
     ...overrides,
   } as unknown as ReturnType<typeof useConversationProposals>);
 
 describe('ProposedActionsSlot', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     approveMutateAsync.mockResolvedValue(undefined);
     dismissMutateAsync.mockResolvedValue(undefined);
     mockUseApproveProposal.mockReturnValue({
@@ -243,7 +255,7 @@ describe('ProposedActionsSlot', () => {
   });
 
   it('offers Show more when the conversation has more proposals than the loaded page, and fetches the next one', () => {
-    const fetchNextPage = jest.fn();
+    const fetchNextPage = vi.fn();
     mockConversationProposalsPage([mockProposal], {
       hasNextPage: true,
       fetchNextPage,

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getDataStreamNamespaceFilter } from './get_data_stream_namespace_filter';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
 const uiSettingsClientMock = uiSettingsServiceMock.create().setup();
 describe('getDataStreamNamespaceFilter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return empty array if ui settings is null or undefined', async () => {

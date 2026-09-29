@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
@@ -20,9 +22,9 @@ const request = {} as KibanaRequest;
 const spaceId = 'default';
 
 const createSecurityMock = (hasAllRequested: boolean) => {
-  const atSpace = jest.fn().mockResolvedValue({ hasAllRequested });
-  const checkPrivilegesWithRequest = jest.fn().mockReturnValue({ atSpace });
-  const get = jest.fn((action: string) => `api:${action}`);
+  const atSpace = vi.fn().mockResolvedValue({ hasAllRequested });
+  const checkPrivilegesWithRequest = vi.fn().mockReturnValue({ atSpace });
+  const get = vi.fn((action: string) => `api:${action}`);
 
   const security = {
     authz: {

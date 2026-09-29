@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../constants';
@@ -12,15 +14,18 @@ import { useDataView } from './use_data_view';
 import { useSelector } from 'react-redux-v7';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
-jest.mock('../../common/hooks/use_experimental_features');
+vi.mock('../../common/hooks/use_experimental_features');
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useSelector: jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useSelector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGet = jest.fn();
-const mockToastsDanger = jest.fn();
+const mockGet = vi.fn();
+const mockToastsDanger = vi.fn();
 
 const mockNotifications = {
   toasts: {
@@ -37,8 +42,8 @@ const fakeDataView = new DataView({
   fieldFormats: {} as FieldFormatsStartCommon,
 });
 
-jest.mock('../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../common/lib/kibana'));
   return {
     ...actual,
     useKibana: () => ({
@@ -52,8 +57,8 @@ jest.mock('../../common/lib/kibana', () => {
 
 describe('useDataView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest
+    vi.clearAllMocks();
+    vi
       .mocked(useSelector)
       .mockReturnValue({ dataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, status: 'ready' });
   });
@@ -92,7 +97,7 @@ describe('useDataView', () => {
       expect(result.current.status).toEqual('ready');
     });
 
-    jest
+    vi
       .mocked(useSelector)
       .mockReturnValue({ dataViewId: 'different-data-view', status: 'ready' });
 
@@ -106,7 +111,7 @@ describe('useDataView', () => {
   });
 
   it('should not call get if dataViewId is missing', async () => {
-    jest.mocked(useSelector).mockReturnValue({ dataViewId: undefined, status: 'ready' });
+    vi.mocked(useSelector).mockReturnValue({ dataViewId: undefined, status: 'ready' });
 
     const { result, rerender } = renderHook(() => useDataView(PageScope.default));
 
@@ -116,7 +121,7 @@ describe('useDataView', () => {
   });
 
   it('should not call get if status is not ready', async () => {
-    jest
+    vi
       .mocked(useSelector)
       .mockReturnValue({ dataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, status: 'loading' });
 

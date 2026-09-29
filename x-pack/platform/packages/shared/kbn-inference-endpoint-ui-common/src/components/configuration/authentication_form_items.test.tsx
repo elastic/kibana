@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { AuthenticationFormItems } from './authentication_form_items';
 import { render, screen } from '@testing-library/react';
@@ -75,7 +77,7 @@ describe('AuthenticationFormItems', () => {
 
   const defaultProps = {
     isLoading: false,
-    setConfigEntry: jest.fn(),
+    setConfigEntry: vi.fn(),
     reenterSecretsOnEdit: true,
   };
 

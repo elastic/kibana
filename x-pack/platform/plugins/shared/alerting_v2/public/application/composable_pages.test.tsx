@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -23,11 +25,9 @@ const ALL_CAPABILITIES = {
 
 let mockAlertingV2ExperimentalFeaturesEnabled = true;
 
-jest.mock('@kbn/core-di-browser', () => {
-  const actual = jest.requireActual('react');
-  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
-    '../services/user_capabilities'
-  );
+vi.mock('@kbn/core-di-browser', async () => {
+  const actual = require('react');
+  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../services/user_capabilities'));
   return {
     Context: actual.createContext(undefined),
     useService: (token: unknown) => {
@@ -43,63 +43,96 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('../pages/rules_list_page/rules_list_page', () => ({
-  RulesListPage: () => <div data-test-subj="rulesListPage">rules</div>,
-}));
+vi.mock('../pages/rules_list_page/rules_list_page', () => {
+      const mocked = {
+      RulesListPage: () => <div data-test-subj="rulesListPage">rules</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../routes/rule_details_route', () => ({
-  RuleDetailsRoute: () => <div data-test-subj="ruleDetailsRoute">rule detail</div>,
-}));
+vi.mock('../routes/rule_details_route', () => {
+      const mocked = {
+      RuleDetailsRoute: () => <div data-test-subj="ruleDetailsRoute">rule detail</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../pages/sequence_builder_page', () => ({
-  SequenceBuilderPage: () => <div data-test-subj="sequenceBuilderPage">sequence</div>,
-}));
+vi.mock('../pages/sequence_builder_page', () => {
+      const mocked = {
+      SequenceBuilderPage: () => <div data-test-subj="sequenceBuilderPage">sequence</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../pages/rule_library_page/rule_library_page', () => ({
-  RuleLibraryPage: () => <div data-test-subj="ruleLibraryPage">library</div>,
-}));
+vi.mock('../pages/rule_library_page/rule_library_page', () => {
+      const mocked = {
+      RuleLibraryPage: () => <div data-test-subj="ruleLibraryPage">library</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../pages/alert_episodes_list_page/alert_episodes_list_page', () => ({
-  AlertEpisodesListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
-}));
+vi.mock('../pages/alert_episodes_list_page/alert_episodes_list_page', () => {
+      const mocked = {
+      AlertEpisodesListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../pages/episode_details_page/episode_details_page', () => ({
-  EpisodeDetailsPage: () => <div data-test-subj="episodeDetailsPage">episode detail</div>,
-}));
+vi.mock('../pages/episode_details_page/episode_details_page', () => {
+      const mocked = {
+      EpisodeDetailsPage: () => <div data-test-subj="episodeDetailsPage">episode detail</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../pages/list_action_policies_page/list_action_policies_page', () => ({
-  ListActionPoliciesPage: () => <div data-test-subj="listActionPoliciesPage">policies</div>,
-}));
+vi.mock('../pages/list_action_policies_page/list_action_policies_page', () => {
+      const mocked = {
+      ListActionPoliciesPage: () => <div data-test-subj="listActionPoliciesPage">policies</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../pages/action_policy_form_page/action_policy_form_page', () => ({
-  ActionPolicyFormPage: () => <div data-test-subj="actionPolicyFormPage">form</div>,
-}));
+vi.mock('../pages/action_policy_form_page/action_policy_form_page', () => {
+      const mocked = {
+      ActionPolicyFormPage: () => <div data-test-subj="actionPolicyFormPage">form</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../pages/execution_history_page/execution_history_page', () => ({
-  ExecutionHistoryPage: () => <div data-test-subj="executionHistoryPage">history</div>,
-}));
+vi.mock('../pages/execution_history_page/execution_history_page', () => {
+      const mocked = {
+      ExecutionHistoryPage: () => <div data-test-subj="executionHistoryPage">history</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  KibanaContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      KibanaContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
-  RedirectAppLinks: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('@kbn/shared-ux-link-redirect-app', () => {
+      const mocked = {
+      RedirectAppLinks: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockLocator = () => ({
-  useUrl: jest.fn().mockReturnValue(''),
-  getUrl: jest.fn().mockResolvedValue(''),
-  getRedirectUrl: jest.fn().mockReturnValue(''),
-  navigate: jest.fn().mockResolvedValue(undefined),
-  navigateSync: jest.fn(),
-  getLocation: jest.fn().mockResolvedValue({ app: 'management', path: '/', state: {} }),
+  useUrl: vi.fn().mockReturnValue(''),
+  getUrl: vi.fn().mockResolvedValue(''),
+  getRedirectUrl: vi.fn().mockReturnValue(''),
+  navigate: vi.fn().mockResolvedValue(undefined),
+  navigateSync: vi.fn(),
+  getLocation: vi.fn().mockResolvedValue({ app: 'management', path: '/', state: {} }),
 });
 
 const createMockSharePlugin = () => ({
   url: {
     locators: {
-      get: jest.fn().mockReturnValue(createMockLocator()),
+      get: vi.fn().mockReturnValue(createMockLocator()),
     },
   },
 });
@@ -108,9 +141,9 @@ const createMockContainer = () => {
   const sharePlugin = createMockSharePlugin();
   const defaultMock = { ...sharePlugin };
   return {
-    get: jest.fn().mockReturnValue(defaultMock),
-    getAsync: jest.fn().mockResolvedValue({}),
-    isBound: jest.fn().mockReturnValue(true),
+    get: vi.fn().mockReturnValue(defaultMock),
+    getAsync: vi.fn().mockResolvedValue({}),
+    isBound: vi.fn().mockReturnValue(true),
   };
 };
 
@@ -124,7 +157,7 @@ const createMockCoreStart = () => {
     application: {},
     uiSettings: {},
     featureFlags: {},
-    settings: { globalClient: { get: jest.fn(), get$: jest.fn() } },
+    settings: { globalClient: { get: vi.fn(), get$: vi.fn() } },
     userProfile: {},
   } as unknown as CoreStart;
 };
@@ -132,7 +165,7 @@ const createMockCoreStart = () => {
 const defaultProps = (): InternalPageProps => ({
   coreStart: createMockCoreStart(),
   container: createMockContainer() as unknown as Container,
-  setBreadcrumbs: jest.fn() as (crumbs: ChromeBreadcrumb[]) => void,
+  setBreadcrumbs: vi.fn() as (crumbs: ChromeBreadcrumb[]) => void,
 });
 
 const renderInRouter = (ui: React.ReactElement, path = '/') =>

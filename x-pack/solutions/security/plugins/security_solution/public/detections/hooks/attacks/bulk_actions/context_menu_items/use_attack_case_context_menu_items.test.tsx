@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAttackCaseContextMenuItems } from './use_attack_case_context_menu_items';
 import { useBulkAttackCaseItems } from '../bulk_action_items/use_bulk_attack_case_items';
 
-jest.mock('../bulk_action_items/use_bulk_attack_case_items');
+vi.mock('../bulk_action_items/use_bulk_attack_case_items');
 
-const mockUseBulkAttackCaseItems = useBulkAttackCaseItems as jest.MockedFunction<
+const mockUseBulkAttackCaseItems = useBulkAttackCaseItems as MockedFunction<
   typeof useBulkAttackCaseItems
 >;
 
 describe('useAttackCaseContextMenuItems', () => {
-  const closePopover = jest.fn();
+  const closePopover = vi.fn();
   const title = 'Attack title';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseBulkAttackCaseItems.mockReturnValue({
       items: [
         {
@@ -28,7 +31,7 @@ describe('useAttackCaseContextMenuItems', () => {
           key: 'attack-add-to-case',
           'data-test-subj': 'attack-add-to-case',
           disableOnQuery: true,
-          onClick: jest.fn(),
+          onClick: vi.fn(),
         },
       ],
       panels: [],

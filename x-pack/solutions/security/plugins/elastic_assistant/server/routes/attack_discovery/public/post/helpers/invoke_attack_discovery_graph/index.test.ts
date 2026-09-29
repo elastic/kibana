@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { invokeAttackDiscoveryGraph } from '.';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -18,47 +21,62 @@ import { getAttackDiscoveryPrompts } from '../../../../../../lib/attack_discover
 import { throwIfErrorCountsExceeded } from '../throw_if_error_counts_exceeded';
 import { throwIfInvalidAnonymization } from '../throw_if_invalid_anonymization';
 
-jest.mock('@kbn/langchain/server', () => ({
-  ActionsClientLlm: jest.fn(),
-  InferenceClientLlm: jest.fn(),
-  getLangSmithTracer: jest.fn().mockReturnValue([]),
-}));
+vi.mock('@kbn/langchain/server', () => {
+      const mocked = {
+      ActionsClientLlm: vi.fn(),
+      InferenceClientLlm: vi.fn(),
+      getLangSmithTracer: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph', () => ({
-  getDefaultAttackDiscoveryGraph: jest.fn(),
-}));
+vi.mock('../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph', () => {
+      const mocked = {
+      getDefaultAttackDiscoveryGraph: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/prompts',
-  () => ({
-    getAttackDiscoveryPrompts: jest.fn().mockResolvedValue({}),
-  })
+  () => {
+      const mocked = {
+        getAttackDiscoveryPrompts: vi.fn().mockResolvedValue({}),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../throw_if_error_counts_exceeded', () => ({
-  throwIfErrorCountsExceeded: jest.fn(),
-}));
+vi.mock('../throw_if_error_counts_exceeded', () => {
+      const mocked = {
+      throwIfErrorCountsExceeded: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../throw_if_invalid_anonymization', () => ({
-  throwIfInvalidAnonymization: jest.fn(),
-}));
+vi.mock('../throw_if_invalid_anonymization', () => {
+      const mocked = {
+      throwIfInvalidAnonymization: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('invokeAttackDiscoveryGraph', () => {
   let actionsClient: PublicMethodsOf<ActionsClient>;
   let esClient: ElasticsearchClient;
   let logger: Logger;
   let savedObjectsClient: SavedObjectsClientContract;
-  let mockGraphInvoke: jest.Mock;
+  let mockGraphInvoke: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     actionsClient = {} as PublicMethodsOf<ActionsClient>;
     esClient = {} as ElasticsearchClient;
-    logger = { debug: jest.fn() } as unknown as Logger;
+    logger = { debug: vi.fn() } as unknown as Logger;
     savedObjectsClient = {} as SavedObjectsClientContract;
 
-    mockGraphInvoke = jest.fn().mockResolvedValue({
+    mockGraphInvoke = vi.fn().mockResolvedValue({
       insights: [{ title: 'Test Insight' }],
       anonymizedDocuments: [{ pageContent: 'Test Doc' }],
       errors: [],
@@ -68,7 +86,7 @@ describe('invokeAttackDiscoveryGraph', () => {
       maxHallucinationFailures: 3,
     });
 
-    (getDefaultAttackDiscoveryGraph as jest.Mock).mockReturnValue({
+    (getDefaultAttackDiscoveryGraph as Mock).mockReturnValue({
       invoke: mockGraphInvoke,
     });
   });
@@ -88,7 +106,7 @@ describe('invokeAttackDiscoveryGraph', () => {
         esClient,
         latestReplacements: {},
         logger,
-        onNewReplacements: jest.fn(),
+        onNewReplacements: vi.fn(),
         savedObjectsClient,
         size: 10,
       })
@@ -112,7 +130,7 @@ describe('invokeAttackDiscoveryGraph', () => {
       esClient,
       latestReplacements: {},
       logger,
-      onNewReplacements: jest.fn(),
+      onNewReplacements: vi.fn(),
       savedObjectsClient,
       size: 10,
     });
@@ -153,7 +171,7 @@ describe('invokeAttackDiscoveryGraph', () => {
       inferenceClient,
       latestReplacements: {},
       logger,
-      onNewReplacements: jest.fn(),
+      onNewReplacements: vi.fn(),
       savedObjectsClient,
       size: 10,
     });
@@ -184,7 +202,7 @@ describe('invokeAttackDiscoveryGraph', () => {
       connectorId: 'legacy-connector',
     };
 
-    (throwIfErrorCountsExceeded as jest.Mock).mockImplementation(() => {
+    (throwIfErrorCountsExceeded as Mock).mockImplementation(() => {
       throw new Error('Error counts exceeded');
     });
 
@@ -198,7 +216,7 @@ describe('invokeAttackDiscoveryGraph', () => {
         esClient,
         latestReplacements: {},
         logger,
-        onNewReplacements: jest.fn(),
+        onNewReplacements: vi.fn(),
         savedObjectsClient,
         size: 10,
       })

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -22,8 +24,8 @@ const renderWithIntl = (ui: React.ReactElement) => {
 describe('for the last expression', () => {
   it('renders with defined options', async () => {
     const user = userEvent.setup();
-    const onChangeWindowSize = jest.fn();
-    const onChangeWindowUnit = jest.fn();
+    const onChangeWindowSize = vi.fn();
+    const onChangeWindowUnit = vi.fn();
 
     renderWithIntl(
       <ForLastExpression
@@ -45,8 +47,8 @@ describe('for the last expression', () => {
 
   it('renders with default timeWindowSize and timeWindowUnit', async () => {
     const user = userEvent.setup();
-    const onChangeWindowSize = jest.fn();
-    const onChangeWindowUnit = jest.fn();
+    const onChangeWindowSize = vi.fn();
+    const onChangeWindowUnit = vi.fn();
 
     renderWithIntl(
       <ForLastExpression
@@ -71,8 +73,8 @@ describe('for the last expression', () => {
 
   it('renders with recommended time size warning', async () => {
     const user = userEvent.setup();
-    const onChangeWindowSize = jest.fn();
-    const onChangeWindowUnit = jest.fn();
+    const onChangeWindowSize = vi.fn();
+    const onChangeWindowUnit = vi.fn();
     renderWithIntl(
       <ForLastExpression
         errors={{ timeWindowSize: [] }}

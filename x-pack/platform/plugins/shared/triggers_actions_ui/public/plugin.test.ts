@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -34,7 +36,7 @@ const createPluginsStart = () => {
     data: dataPluginMock.createStartContract(),
     dataViews: dataViewPluginMocks.createStartContract(),
     dataViewEditor: {
-      openEditor: jest.fn(),
+      openEditor: vi.fn(),
     } as unknown as DataViewEditorStart,
     charts: chartPluginMock.createStartContract(),
     navigateToApp: coreStart.application.navigateToApp,
@@ -65,9 +67,9 @@ describe('Plugin Stack Alerts management registration', () => {
       security: securityMock.createSetup(),
       management,
       actions: {
-        validateEmailAddresses: jest.fn(),
+        validateEmailAddresses: vi.fn(),
         enabledEmailServices: ['*'],
-        isWebhookSslWithPfxEnabled: jest.fn(),
+        isWebhookSslWithPfxEnabled: vi.fn(),
       } as unknown as ActionsPublicPluginSetup,
       share: sharePluginMock.createSetupContract(),
     });
@@ -94,9 +96,9 @@ describe('Plugin getClassicRulesPage', () => {
       security: securityMock.createSetup(),
       management: managementPluginMock.createSetupContract(),
       actions: {
-        validateEmailAddresses: jest.fn(),
+        validateEmailAddresses: vi.fn(),
         enabledEmailServices: ['*'],
-        isWebhookSslWithPfxEnabled: jest.fn(),
+        isWebhookSslWithPfxEnabled: vi.fn(),
       } as unknown as ActionsPublicPluginSetup,
       share: sharePluginMock.createSetupContract(),
     });
@@ -104,7 +106,7 @@ describe('Plugin getClassicRulesPage', () => {
     const start = plugin.start(coreMock.createStart(), createPluginsStart());
     const element = start.getClassicRulesPage({
       coreStart: coreMock.createStart(),
-      setBreadcrumbs: jest.fn(),
+      setBreadcrumbs: vi.fn(),
     });
 
     expect(React.isValidElement(element)).toBe(true);

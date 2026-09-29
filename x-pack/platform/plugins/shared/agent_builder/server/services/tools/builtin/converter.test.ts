@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type {
@@ -78,14 +80,14 @@ const makeStaticWorkflowTool = (
 
 const nonBuiltinDefinition: ToolTypeDefinition = {
   toolType: ToolType.esql,
-  getDynamicProps: jest.fn().mockResolvedValue({
+  getDynamicProps: vi.fn().mockResolvedValue({
     getSchema: () => z.object({}),
-    getHandler: () => jest.fn(),
+    getHandler: () => vi.fn(),
   }),
   createSchema: {} as any,
   updateSchema: {} as any,
-  validateForCreate: jest.fn() as any,
-  validateForUpdate: jest.fn() as any,
+  validateForCreate: vi.fn() as any,
+  validateForUpdate: vi.fn() as any,
 };
 
 describe('convertTool (builtin)', () => {

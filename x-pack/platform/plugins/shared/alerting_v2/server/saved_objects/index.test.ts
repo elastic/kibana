@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ALERTING_LOG_CODES } from '../lib/errors/error_codes';
@@ -20,11 +23,11 @@ describe('registerSavedObjects', () => {
   const createDeps = () => {
     const { loggerService, mockLogger } = createLoggerService();
     const savedObjects = {
-      registerType: jest.fn(),
-    } as unknown as jest.Mocked<SavedObjectsServiceSetup>;
+      registerType: vi.fn(),
+    } as unknown as Mocked<SavedObjectsServiceSetup>;
     const encryptedSavedObjects = {
-      registerType: jest.fn(),
-    } as unknown as jest.Mocked<EncryptedSavedObjectsPluginSetup>;
+      registerType: vi.fn(),
+    } as unknown as Mocked<EncryptedSavedObjectsPluginSetup>;
 
     return {
       logger: loggerService.forSubsystem('savedObjects'),
@@ -57,7 +60,7 @@ describe('registerSavedObjects', () => {
   it('logs SAVED_OBJECTS_TYPE_REGISTRATION_FAILED and rethrows when a type fails to register', () => {
     const { logger, mockLogger, savedObjects, encryptedSavedObjects } = createDeps();
     const failure = new Error('boom');
-    (savedObjects.registerType as jest.Mock)
+    (savedObjects.registerType as Mock)
       .mockImplementationOnce(() => undefined)
       .mockImplementationOnce(() => {
         throw failure;

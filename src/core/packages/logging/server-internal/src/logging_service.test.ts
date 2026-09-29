@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { of, Subject } from 'rxjs';
 
 import { loggerMock } from '@kbn/logging-mocks';
@@ -16,19 +19,19 @@ import type { LoggerContextConfigType } from './logging_config';
 import type { ILoggingSystem } from './logging_system';
 
 const createLoggingSystemMock = () => {
-  const mocked: jest.Mocked<ILoggingSystem> = {
-    get: jest.fn().mockImplementation(() => loggerMock.create()),
-    asLoggerFactory: jest.fn().mockImplementation(() => loggerMock.create()),
-    setContextConfig: jest.fn(),
-    setGlobalContext: jest.fn(),
-    upgrade: jest.fn(),
-    stop: jest.fn(),
+  const mocked: Mocked<ILoggingSystem> = {
+    get: vi.fn().mockImplementation(() => loggerMock.create()),
+    asLoggerFactory: vi.fn().mockImplementation(() => loggerMock.create()),
+    setContextConfig: vi.fn(),
+    setGlobalContext: vi.fn(),
+    upgrade: vi.fn(),
+    stop: vi.fn(),
   };
   return mocked;
 };
 
 describe('LoggingService', () => {
-  let loggingSystem: jest.Mocked<ILoggingSystem>;
+  let loggingSystem: Mocked<ILoggingSystem>;
   let service: LoggingService;
   let preboot: InternalLoggingServicePreboot;
 

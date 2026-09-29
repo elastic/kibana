@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import datemath from '@elastic/datemath';
 import moment from 'moment';
 import { getNextTimeRange } from '.';
 
 describe('getNextTimeRange', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
   describe('getDateRange', () => {
     describe('when rangeFrom and rangeTo are not changed', () => {
@@ -37,7 +39,7 @@ describe('getNextTimeRange', () => {
     describe('when rangeFrom or rangeTo are falsy', () => {
       it('returns the previous state', () => {
         // Disable console warning about not receiving a valid date for rangeFrom
-        jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
+        vi.spyOn(console, 'warn').mockImplementationOnce(() => {});
 
         expect(
           getNextTimeRange({
@@ -58,7 +60,7 @@ describe('getNextTimeRange', () => {
     describe('when the start or end are invalid', () => {
       it('returns the previous state', () => {
         const endDate = moment('2021-06-04T18:03:24.211Z');
-        jest.spyOn(datemath, 'parse').mockReturnValueOnce(undefined).mockReturnValueOnce(endDate);
+        vi.spyOn(datemath, 'parse').mockReturnValueOnce(undefined).mockReturnValueOnce(endDate);
 
         expect(
           getNextTimeRange({
@@ -78,7 +80,7 @@ describe('getNextTimeRange', () => {
 
     describe('when rangeFrom or rangeTo have changed', () => {
       it('returns new state', () => {
-        jest.spyOn(Date, 'now').mockReturnValue(moment(0).unix());
+        vi.spyOn(Date, 'now').mockReturnValue(moment(0).unix());
 
         expect(
           getNextTimeRange({

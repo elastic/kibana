@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
@@ -36,9 +38,9 @@ const renderWithChrome = (ui: React.ReactElement) =>
 describe('Internal dashboard top nav', () => {
   beforeEach(() => {
     setMockedPresentationUtilServices();
-    dataService.query.filterManager.getFilters = jest.fn().mockReturnValue([]);
-    shareService!.availableIntegrations = jest.fn().mockReturnValue([]);
-    jest.clearAllMocks();
+    dataService.query.filterManager.getFilters = vi.fn().mockReturnValue([]);
+    shareService!.availableIntegrations = vi.fn().mockReturnValue([]);
+    vi.clearAllMocks();
   });
 
   it('should not render the managed badge by default', async () => {
@@ -46,7 +48,7 @@ describe('Internal dashboard top nav', () => {
     renderWithChrome(
       <DashboardContext.Provider value={api}>
         <DashboardInternalContext.Provider value={internalApi}>
-          <InternalDashboardTopNav redirectTo={jest.fn()} />
+          <InternalDashboardTopNav redirectTo={vi.fn()} />
         </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
     );
@@ -66,7 +68,7 @@ describe('Internal dashboard top nav', () => {
     renderWithChrome(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
-          <InternalDashboardTopNav redirectTo={jest.fn()} />
+          <InternalDashboardTopNav redirectTo={vi.fn()} />
         </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
     );
@@ -93,7 +95,7 @@ describe('Internal dashboard top nav', () => {
         <DashboardContext.Provider value={dashboardApi}>
           <DashboardInternalContext.Provider value={internalApi}>
             <InternalDashboardTopNav
-              redirectTo={jest.fn()}
+              redirectTo={vi.fn()}
               embedSettings={{
                 forceShowDatePicker: false,
                 forceHideFilterBar: false,
@@ -128,7 +130,7 @@ describe('Internal dashboard top nav', () => {
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
-            redirectTo={jest.fn()}
+            redirectTo={vi.fn()}
             embedSettings={{
               forceHideFilterBar: true,
               forceShowDatePicker: false,
@@ -155,7 +157,7 @@ describe('Internal dashboard top nav', () => {
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
-            redirectTo={jest.fn()}
+            redirectTo={vi.fn()}
             embedSettings={{
               forceShowDatePicker: true,
               forceHideFilterBar: false,
@@ -192,7 +194,7 @@ describe('Internal dashboard top nav', () => {
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
-            redirectTo={jest.fn()}
+            redirectTo={vi.fn()}
             embedSettings={{
               forceShowDatePicker: true,
               forceHideFilterBar: false,
@@ -226,7 +228,7 @@ describe('Internal dashboard top nav', () => {
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
-            redirectTo={jest.fn()}
+            redirectTo={vi.fn()}
             embedSettings={{
               forceShowDatePicker: true,
               forceHideFilterBar: false,
@@ -260,7 +262,7 @@ describe('Internal dashboard top nav', () => {
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
-            redirectTo={jest.fn()}
+            redirectTo={vi.fn()}
             embedSettings={{
               forceShowDatePicker: true,
               forceHideFilterBar: false,
@@ -295,7 +297,7 @@ describe('Internal dashboard top nav', () => {
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
-            redirectTo={jest.fn()}
+            redirectTo={vi.fn()}
             embedSettings={{
               forceShowDatePicker: true,
               forceHideFilterBar: false,
@@ -326,7 +328,7 @@ describe('Internal dashboard top nav', () => {
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
-            redirectTo={jest.fn()}
+            redirectTo={vi.fn()}
             embedSettings={{
               forceShowDatePicker: false,
               forceHideFilterBar: false,
@@ -360,7 +362,7 @@ describe('Internal dashboard top nav', () => {
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
-            redirectTo={jest.fn()}
+            redirectTo={vi.fn()}
             embedSettings={{
               forceShowDatePicker: false,
               forceShowTopNavMenu: true,
@@ -392,7 +394,7 @@ describe('Internal dashboard top nav', () => {
       renderWithChrome(
         <DashboardContext.Provider value={api}>
           <DashboardInternalContext.Provider value={internalApi}>
-            <InternalDashboardTopNav redirectTo={jest.fn()} />
+            <InternalDashboardTopNav redirectTo={vi.fn()} />
           </DashboardInternalContext.Provider>
         </DashboardContext.Provider>
       );
@@ -418,7 +420,7 @@ describe('Internal dashboard top nav', () => {
       renderWithChrome(
         <DashboardContext.Provider value={api}>
           <DashboardInternalContext.Provider value={internalApi}>
-            <InternalDashboardTopNav redirectTo={jest.fn()} />
+            <InternalDashboardTopNav redirectTo={vi.fn()} />
           </DashboardInternalContext.Provider>
         </DashboardContext.Provider>
       );

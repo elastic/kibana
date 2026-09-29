@@ -5,30 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 
-jest.mock('@kbn/code-editor', () => ({
-  monaco: {
-    editor: {
-      createModel: jest.fn(() => ({ dispose: jest.fn() })),
-      createDiffEditor: jest.fn(() => ({
-        setModel: jest.fn(),
-        updateOptions: jest.fn(),
-        getModifiedEditor: jest.fn(() => ({ layout: jest.fn() })),
-        dispose: jest.fn(),
-      })),
-    },
-  },
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      monaco: {
+        editor: {
+          createModel: vi.fn(() => ({ dispose: vi.fn() })),
+          createDiffEditor: vi.fn(() => ({
+            setModel: vi.fn(),
+            updateOptions: vi.fn(),
+            getModifiedEditor: vi.fn(() => ({ layout: vi.fn() })),
+            dispose: vi.fn(),
+          })),
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
+vi.mock('@kbn/workflows-ui', async () => {
+  const actual = (await vi.importActual('@kbn/workflows-ui'));
   return {
     ...actual,
-    useWorkflowsMonacoTheme: jest.fn(),
+    useWorkflowsMonacoTheme: vi.fn(),
     WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
-    computeWorkflowYamlDiffStats: jest.fn(actual.computeWorkflowYamlDiffStats),
+    computeWorkflowYamlDiffStats: vi.fn(actual.computeWorkflowYamlDiffStats),
   };
 });
 
@@ -38,7 +44,7 @@ import { computeWorkflowYamlDiffStats } from '@kbn/workflows-ui';
 
 import { workflowYamlDiffAttachmentUiDefinition } from './workflow_yaml_diff_attachment_renderer';
 
-const mockedComputeStats = computeWorkflowYamlDiffStats as jest.MockedFunction<
+const mockedComputeStats = computeWorkflowYamlDiffStats as MockedFunction<
   typeof computeWorkflowYamlDiffStats
 >;
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { riskEngineEnableRoute } from './enable';
 import { RISK_ENGINE_ENABLE_URL } from '../../../../../common/constants';
@@ -21,14 +24,14 @@ describe('risk score enable route', () => {
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
   let mockRiskEngineDataClient: ReturnType<typeof riskEngineDataClientMock.create>;
-  let getStartServicesMock: jest.Mock;
-  let mockUiSettingsClientGet: jest.Mock;
+  let getStartServicesMock: Mock;
+  let mockUiSettingsClientGet: Mock;
 
   beforeEach(() => {
     server = serverMock.create();
     const { clients } = requestContextMock.createTools();
     mockRiskEngineDataClient = riskEngineDataClientMock.create();
-    mockUiSettingsClientGet = clients.core.uiSettings.client.get as jest.Mock;
+    mockUiSettingsClientGet = clients.core.uiSettings.client.get as Mock;
     mockUiSettingsClientGet.mockResolvedValue(false);
     context = requestContextMock.convertContext(
       requestContextMock.create({
@@ -49,7 +52,7 @@ describe('risk score enable route', () => {
 
   describe('when task manager is available', () => {
     beforeEach(() => {
-      getStartServicesMock = jest.fn().mockResolvedValue([
+      getStartServicesMock = vi.fn().mockResolvedValue([
         {},
         {
           taskManager: mockTaskManagerStart,
@@ -89,7 +92,7 @@ describe('risk score enable route', () => {
 
   describe('when task manager is unavailable', () => {
     beforeEach(() => {
-      getStartServicesMock = jest.fn().mockResolvedValue([
+      getStartServicesMock = vi.fn().mockResolvedValue([
         {},
         {
           taskManager: undefined,
@@ -115,7 +118,7 @@ describe('risk score enable route', () => {
   describe('when maintainer feature and Entity Store V2 mode are enabled', () => {
     beforeEach(() => {
       mockUiSettingsClientGet.mockResolvedValue(true);
-      getStartServicesMock = jest.fn().mockResolvedValue([
+      getStartServicesMock = vi.fn().mockResolvedValue([
         {},
         {
           taskManager: mockTaskManagerStart,
@@ -142,7 +145,7 @@ describe('risk score enable route', () => {
   describe('when maintainer feature is enabled but Entity Store V2 mode is disabled', () => {
     beforeEach(() => {
       mockUiSettingsClientGet.mockResolvedValue(false);
-      getStartServicesMock = jest.fn().mockResolvedValue([
+      getStartServicesMock = vi.fn().mockResolvedValue([
         {},
         {
           taskManager: mockTaskManagerStart,

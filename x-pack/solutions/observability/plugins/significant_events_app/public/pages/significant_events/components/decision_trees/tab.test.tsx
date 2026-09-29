@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,9 +15,9 @@ import { DecisionTreesTab } from './tab';
 import { useDecisionTrees } from './use_decision_trees';
 import type { ListDecisionTreesResponse } from './types';
 
-jest.mock('./use_decision_trees');
+vi.mock('./use_decision_trees');
 
-const mockUseDecisionTrees = useDecisionTrees as jest.MockedFunction<typeof useDecisionTrees>;
+const mockUseDecisionTrees = useDecisionTrees as MockedFunction<typeof useDecisionTrees>;
 
 const asQueryResult = (overrides: Record<string, unknown>) =>
   ({ isLoading: false, isError: false, data: undefined, ...overrides } as unknown as ReturnType<

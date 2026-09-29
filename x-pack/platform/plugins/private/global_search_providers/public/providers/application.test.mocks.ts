@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export const getAppResultsMock = jest.fn();
-jest.doMock('./get_app_results', () => ({
-  getAppResults: getAppResultsMock,
-}));
+import { vi } from 'vitest';
+
+export const getAppResultsMock = vi.fn();
+vi.doMock('./get_app_results', () => {
+      const mocked = {
+      getAppResults: getAppResultsMock,
+    };
+      return { ...mocked, default: mocked };
+    });

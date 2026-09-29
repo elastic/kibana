@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { usePager } from '@kbn/discover-utils';
@@ -19,59 +21,71 @@ const renderWithIntl = (component: React.ReactElement) => {
 };
 
 // Mock child components
-const mockFieldName = jest.fn();
-const mockTableFieldValue = jest.fn();
+const mockFieldName = vi.fn();
+const mockTableFieldValue = vi.fn();
 
-jest.mock('./field_name', () => ({
-  FieldName: (props: any) => {
-    mockFieldName(props);
-    return (
-      <div data-test-subj={`mocked-field-name-${props.fieldName}`}>
-        {`${props.fieldName} (${props.fieldType})`}
-      </div>
-    );
-  },
-}));
+vi.mock('./field_name', () => {
+      const mocked = {
+      FieldName: (props: any) => {
+        mockFieldName(props);
+        return (
+          <div data-test-subj={`mocked-field-name-${props.fieldName}`}>
+            {`${props.fieldName} (${props.fieldType})`}
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./table_field_value', () => ({
-  TableFieldValue: (props: any) => {
-    mockTableFieldValue(props);
-    return <div data-test-subj={`mocked-field-value-${props.field}`}>{props.formattedValue}</div>;
-  },
-}));
+vi.mock('./table_field_value', () => {
+      const mocked = {
+      TableFieldValue: (props: any) => {
+        mockTableFieldValue(props);
+        return <div data-test-subj={`mocked-field-value-${props.field}`}>{props.formattedValue}</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock useGetFormattedDateTime hook
-const mockGetFormattedDateTime = jest.fn((date: Date) => date.toISOString());
+const mockGetFormattedDateTime = vi.fn((date: Date) => date.toISOString());
 
-jest.mock('../use_formatted_date', () => ({
-  useGetFormattedDateTime: () => mockGetFormattedDateTime,
-}));
+vi.mock('../use_formatted_date', () => {
+      const mocked = {
+      useGetFormattedDateTime: () => mockGetFormattedDateTime,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock usePager hook
-const mockChangePageIndex = jest.fn();
-const mockChangePageSize = jest.fn();
+const mockChangePageIndex = vi.fn();
+const mockChangePageSize = vi.fn();
 
-jest.mock('@kbn/discover-utils', () => ({
-  usePager: jest.fn(() => ({
-    curPageIndex: 0,
-    pageSize: 20,
-    changePageIndex: mockChangePageIndex,
-    changePageSize: mockChangePageSize,
-  })),
-  IgnoredReason: {
-    IGNORE_ABOVE: 'ignore_above',
-    MALFORMED: 'malformed',
-    UNKNOWN: 'unknown',
-  },
-}));
+vi.mock('@kbn/discover-utils', () => {
+      const mocked = {
+      usePager: vi.fn(() => ({
+        curPageIndex: 0,
+        pageSize: 20,
+        changePageIndex: mockChangePageIndex,
+        changePageSize: mockChangePageSize,
+      })),
+      IgnoredReason: {
+        IGNORE_ABOVE: 'ignore_above',
+        MALFORMED: 'malformed',
+        UNKNOWN: 'unknown',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock @elastic/eui
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    copyToClipboard: jest.fn(),
-    useResizeObserver: jest.fn(() => ({ width: 800, height: 600 })),
+    copyToClipboard: vi.fn(),
+    useResizeObserver: vi.fn(() => ({ width: 800, height: 600 })),
   };
 });
 
@@ -85,7 +99,7 @@ describe('JSONDataTable', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {

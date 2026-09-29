@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -66,16 +69,16 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
   </I18nProvider>
 );
 
-let stageFilter: jest.MockedFunction<any>;
-let submitFilters: jest.MockedFunction<any>;
-let resetControls: jest.MockedFunction<any>;
-let clearControls: jest.MockedFunction<any>;
+let stageFilter: MockedFunction<any>;
+let submitFilters: MockedFunction<any>;
+let resetControls: MockedFunction<any>;
+let clearControls: MockedFunction<any>;
 
 beforeEach(() => {
-  stageFilter = jest.fn();
-  submitFilters = jest.fn();
-  resetControls = jest.fn();
-  clearControls = jest.fn();
+  stageFilter = vi.fn();
+  submitFilters = vi.fn();
+  resetControls = vi.fn();
+  clearControls = vi.fn();
 });
 
 test('Renders list control', () => {

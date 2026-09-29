@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getTelemetry, updateTelemetry } from './telemetry';
 
 const internalRepository = () => ({
-  get: jest.fn(() => null),
-  create: jest.fn(() => ({ attributes: 'test' })),
-  update: jest.fn(() => ({ attributes: 'test' })),
+  get: vi.fn(() => null),
+  create: vi.fn(() => ({ attributes: 'test' })),
+  update: vi.fn(() => ({ attributes: 'test' })),
 });
 
 function mockInit(getVal: any = { attributes: {} }): any {
   return {
     ...internalRepository(),
-    get: jest.fn(() => getVal),
+    get: vi.fn(() => getVal),
   };
 }
 

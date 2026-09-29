@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
@@ -344,7 +346,7 @@ const createLogViewsClient = () => {
   const dataViews = dataViewsServiceMock;
   const logSourcesService = createLogSourcesServiceMock();
   const savedObjectsClient = savedObjectsClientMock.create();
-  const logViewFallbackHandler = jest.fn();
+  const logViewFallbackHandler = vi.fn();
   const internalLogViews = new Map<string, LogView>();
   const logViewStaticConfig: LogViewsStaticConfig = {
     messageFields: ['message'],

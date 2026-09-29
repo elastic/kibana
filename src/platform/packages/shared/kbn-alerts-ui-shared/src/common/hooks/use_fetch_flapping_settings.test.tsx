@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -39,7 +41,7 @@ describe('useFetchFlappingSettings', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     queryClient.clear();
   });
 
@@ -76,7 +78,7 @@ describe('useFetchFlappingSettings', () => {
   });
 
   test('should call onSuccess when the fetching was successful', async () => {
-    const onSuccessMock = jest.fn();
+    const onSuccessMock = vi.fn();
     const { result } = renderHook(
       () => useFetchFlappingSettings({ http, enabled: true, onSuccess: onSuccessMock }),
       {

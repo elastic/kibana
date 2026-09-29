@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getUpdateScript } from './helpers';
 import type { UpdateConversationSchema } from './update_conversation';
 
@@ -23,11 +25,11 @@ const getUpdateConversationMock = (): UpdateConversationSchema => {
 
 describe('helpers', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getUpdateScript', () => {

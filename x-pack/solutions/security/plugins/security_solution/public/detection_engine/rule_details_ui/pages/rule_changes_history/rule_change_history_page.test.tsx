@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { RuleChangesHistoryPage } from './rule_change_history_page';
@@ -13,25 +16,37 @@ import { RuleChangesHistoryEventTypes } from '../../../../common/lib/telemetry/e
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 import { TestProviders } from '../../../../common/mock';
 
-jest.mock('../../../rule_management/logic/use_rule_with_fallback');
-const mockUseParams = jest.fn().mockReturnValue({ ruleId: 'rule-1' });
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => mockUseParams(),
-}));
-jest.mock('../../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
+vi.mock('../../../rule_management/logic/use_rule_with_fallback');
+const mockUseParams = vi.fn().mockReturnValue({ ruleId: 'rule-1' });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: () => mockUseParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/utils/route/spy_routes', () => {
+      const mocked = { SpyRoute: () => null };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/changes_history', () => ({
-  RuleChangesHistory: () => <div data-test-subj="mockRuleChangesHistory" />,
-}));
+vi.mock('../../components/changes_history', () => {
+      const mocked = {
+      RuleChangesHistory: () => <div data-test-subj="mockRuleChangesHistory" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./rule_change_history_page_header', () => ({
-  RuleChangesHistoryPageHeader: () => <div data-test-subj="mockRuleChangesHistoryPageHeader" />,
-}));
+vi.mock('./rule_change_history_page_header', () => {
+      const mocked = {
+      RuleChangesHistoryPageHeader: () => <div data-test-subj="mockRuleChangesHistoryPageHeader" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana'));
 
   return {
     ...original,
@@ -43,11 +58,11 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-const mockUseRuleWithFallback = useRuleWithFallback as jest.Mock;
+const mockUseRuleWithFallback = useRuleWithFallback as Mock;
 
 describe('RuleChangesHistoryPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseRuleWithFallback.mockReturnValue({ rule: undefined });
     mockUseParams.mockReturnValue({ ruleId: 'rule-1' });
   });

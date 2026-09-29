@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
@@ -13,8 +15,8 @@ import { findSloDefinitionMap, getKey } from './find_slo_definitions';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 
 describe('findSloDefinitionMap', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let logger: jest.Mocked<MockedLogger>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let logger: Mocked<MockedLogger>;
 
   beforeEach(() => {
     soClient = savedObjectsClientMock.create();

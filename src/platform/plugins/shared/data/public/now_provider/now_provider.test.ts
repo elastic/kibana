@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { NowProviderInternalContract } from './now_provider';
 import { NowProvider } from './now_provider';
 
 let mockDateFromUrl: undefined | Date;
 let nowProvider: NowProviderInternalContract;
 
-jest.mock('./lib', () => ({
-  // @ts-ignore
-  ...jest.requireActual('./lib'),
-  getForceNowFromUrl: () => mockDateFromUrl,
-}));
+vi.mock('./lib', async () => {
+      const mocked = {
+      // @ts-ignore
+      ...(await vi.importActual('./lib')),
+      getForceNowFromUrl: () => mockDateFromUrl,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
   nowProvider = new NowProvider();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
@@ -88,27 +90,33 @@ const extractEuiIconText = (str: string) => {
   return str.replaceAll('External link', '');
 };
 
-jest.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/lib/kibana');
 
-jest.mock('../host_name', () => ({
-  HostName: () => null,
-}));
+vi.mock('../host_name', () => {
+      const mocked = {
+      HostName: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
   };
 });
 
-jest.mock('../../../../../../common/components/link_to');
-jest.mock('../../../../../../overview/components/events_by_dataset');
-jest.mock('../../../../../../flyout/shared/components/flyout_link', () => ({
-  FlyoutLink: ({ children, value }: { children?: React.ReactNode; value: string }) => (
-    <>{children ?? value}</>
-  ),
-}));
+vi.mock('../../../../../../common/components/link_to');
+vi.mock('../../../../../../overview/components/events_by_dataset');
+vi.mock('../../../../../../flyout/shared/components/flyout_link', () => {
+      const mocked = {
+      FlyoutLink: ({ children, value }: { children?: React.ReactNode; value: string }) => (
+        <>{children ?? value}</>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('GenericRowRenderer', () => {
   const mount = useMountAppended();

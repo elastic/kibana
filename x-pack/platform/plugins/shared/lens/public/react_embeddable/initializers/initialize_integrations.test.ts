@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { faker } from '@faker-js/faker';
 
 import type { LensRuntimeState } from '@kbn/lens-common';
@@ -15,9 +18,12 @@ import { getLensAttributesMock, getLensRuntimeStateMock } from '../mocks';
 import { getLensBuilder } from '../../lazy_builder';
 import { initializeIntegrations } from './initialize_integrations';
 
-jest.mock('../../lazy_builder', () => ({
-  getLensBuilder: jest.fn(),
-}));
+vi.mock('../../lazy_builder', () => {
+      const mocked = {
+      getLensBuilder: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function setupIntegrationsApi(stateOverrides?: Partial<LensRuntimeState>): LensApi {
   const runtimeState = getLensRuntimeStateMock(stateOverrides);
@@ -34,7 +40,7 @@ function createAttributesWithReferences() {
 describe('Dashboard services API', () => {
   describe('serializeState', () => {
     beforeEach(() => {
-      (getLensBuilder as jest.Mock).mockReturnValue(null);
+      (getLensBuilder as Mock).mockReturnValue(null);
     });
 
     it('should work for a by-value panel', async () => {
@@ -68,7 +74,7 @@ describe('Dashboard services API', () => {
     });
 
     it('should flatten by-value serialized state when Lens API format is enabled', () => {
-      (getLensBuilder as jest.Mock).mockReturnValue({
+      (getLensBuilder as Mock).mockReturnValue({
         isEnabled: true,
         getType: () => 'lnsXY',
         isSupported: () => true,

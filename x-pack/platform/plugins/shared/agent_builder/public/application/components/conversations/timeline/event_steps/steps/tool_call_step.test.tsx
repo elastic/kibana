@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -85,7 +87,7 @@ describe('ToolCallStep', () => {
   describe('with FlyoutStackContext', () => {
     it('delegates click to context and renders no flyout', async () => {
       const user = userEvent.setup();
-      const openToolStep = jest.fn();
+      const openToolStep = vi.fn();
       const step = makeStep([otherResult('r1')]);
       renderWithProviders(
         <FlyoutStackContext.Provider value={{ openToolStep }}>

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -14,10 +17,13 @@ import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import * as mock from '../../../../flyout/document_details/right/mocks/mock_analyzer_data';
 
-jest.mock('../hooks/use_alert_prevalence_from_process_tree', () => ({
-  useAlertPrevalenceFromProcessTree: jest.fn(),
-}));
-const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
+vi.mock('../hooks/use_alert_prevalence_from_process_tree', () => {
+      const mocked = {
+      useAlertPrevalenceFromProcessTree: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as Mock;
 
 const mockTreeValues = {
   loading: false,
@@ -56,7 +62,7 @@ const renderAnalyzerPreview = (
 
 describe('<AnalyzerPreview />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue(mockTreeValues);
   });

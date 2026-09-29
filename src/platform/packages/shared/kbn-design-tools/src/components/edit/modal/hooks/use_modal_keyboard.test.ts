@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useModalKeyboard } from './use_modal_keyboard';
 
@@ -23,8 +25,8 @@ describe('useModalKeyboard', () => {
   };
 
   it('should call onUndo on Cmd+Z', () => {
-    const onUndo = jest.fn();
-    const onRedo = jest.fn();
+    const onUndo = vi.fn();
+    const onRedo = vi.fn();
     renderHook(() => useModalKeyboard(onUndo, onRedo));
 
     dispatch('z', { metaKey: true });
@@ -34,8 +36,8 @@ describe('useModalKeyboard', () => {
   });
 
   it('should call onRedo on Cmd+Shift+Z', () => {
-    const onUndo = jest.fn();
-    const onRedo = jest.fn();
+    const onUndo = vi.fn();
+    const onRedo = vi.fn();
     renderHook(() => useModalKeyboard(onUndo, onRedo));
 
     dispatch('z', { metaKey: true, shiftKey: true });
@@ -45,8 +47,8 @@ describe('useModalKeyboard', () => {
   });
 
   it('should call onUndo on Ctrl+Z', () => {
-    const onUndo = jest.fn();
-    const onRedo = jest.fn();
+    const onUndo = vi.fn();
+    const onRedo = vi.fn();
     renderHook(() => useModalKeyboard(onUndo, onRedo));
 
     dispatch('z', { ctrlKey: true });
@@ -55,8 +57,8 @@ describe('useModalKeyboard', () => {
   });
 
   it('should call onRedo on Ctrl+Shift+Z', () => {
-    const onUndo = jest.fn();
-    const onRedo = jest.fn();
+    const onUndo = vi.fn();
+    const onRedo = vi.fn();
     renderHook(() => useModalKeyboard(onUndo, onRedo));
 
     dispatch('z', { ctrlKey: true, shiftKey: true });
@@ -65,8 +67,8 @@ describe('useModalKeyboard', () => {
   });
 
   it('should not trigger on plain Z without modifier', () => {
-    const onUndo = jest.fn();
-    const onRedo = jest.fn();
+    const onUndo = vi.fn();
+    const onRedo = vi.fn();
     renderHook(() => useModalKeyboard(onUndo, onRedo));
 
     dispatch('z');
@@ -76,8 +78,8 @@ describe('useModalKeyboard', () => {
   });
 
   it('should remove the listener on unmount', () => {
-    const onUndo = jest.fn();
-    const onRedo = jest.fn();
+    const onUndo = vi.fn();
+    const onRedo = vi.fn();
     const { unmount } = renderHook(() => useModalKeyboard(onUndo, onRedo));
 
     unmount();
@@ -87,11 +89,11 @@ describe('useModalKeyboard', () => {
   });
 
   it('should use capture phase to stop propagation', () => {
-    const onUndo = jest.fn();
-    const onRedo = jest.fn();
+    const onUndo = vi.fn();
+    const onRedo = vi.fn();
     renderHook(() => useModalKeyboard(onUndo, onRedo));
 
-    const bubbleListener = jest.fn();
+    const bubbleListener = vi.fn();
     document.addEventListener('keydown', bubbleListener);
 
     dispatch('z', { metaKey: true });

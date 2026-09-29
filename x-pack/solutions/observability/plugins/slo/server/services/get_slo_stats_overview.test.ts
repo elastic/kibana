@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
@@ -38,15 +40,15 @@ const emptyAlertSummary = {
 
 describe('GetSLOStatsOverview', () => {
   let mockScopedClusterClient: ScopedClusterClientMock;
-  let mockRulesClient: jest.Mocked<RulesClientApi>;
+  let mockRulesClient: Mocked<RulesClientApi>;
   let mockRacClient: ReturnType<typeof alertsClientMock.create>;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
 
   beforeEach(() => {
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockRulesClient = rulesClientMock.create();
     mockRacClient = alertsClientMock.create();
-    mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+    mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 
     mockRulesClient.find.mockResolvedValue(emptyRulesFindResponse);
     mockRacClient.getAlertSummary.mockResolvedValue(emptyAlertSummary);

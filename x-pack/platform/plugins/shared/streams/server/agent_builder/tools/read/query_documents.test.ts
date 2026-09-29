@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { Streams } from '@kbn/streams-schema';
 import type {
   SearchHit,
@@ -55,7 +57,7 @@ describe('createQueryDocumentsTool handler', () => {
     } as unknown as SearchResponse);
 
     const inferenceClient = (await context.modelProvider.getDefaultModel()).inferenceClient;
-    (inferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+    (inferenceClient.chatComplete as Mock).mockResolvedValue({
       content: '{ "query": { "match_all": {} }, "size": 10 }',
     });
 
@@ -83,7 +85,7 @@ describe('createQueryDocumentsTool handler', () => {
     } as unknown as SearchResponse);
 
     const inferenceClient = (await context.modelProvider.getDefaultModel()).inferenceClient;
-    (inferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+    (inferenceClient.chatComplete as Mock).mockResolvedValue({
       content: '{ "query": { "match_all": {} }, "size": 100 }',
     });
 
@@ -110,7 +112,7 @@ describe('createQueryDocumentsTool handler', () => {
     } as unknown as SearchResponse);
 
     const inferenceClient = (await context.modelProvider.getDefaultModel()).inferenceClient;
-    (inferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+    (inferenceClient.chatComplete as Mock).mockResolvedValue({
       content: JSON.stringify({
         query: { match_all: {} },
         size: 10,
@@ -140,7 +142,7 @@ describe('createQueryDocumentsTool handler', () => {
     } as unknown as SearchResponse);
 
     const inferenceClient = (await context.modelProvider.getDefaultModel()).inferenceClient;
-    (inferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+    (inferenceClient.chatComplete as Mock).mockResolvedValue({
       content: JSON.stringify({
         query: { match_all: {} },
         aggs: { by_level: { terms: { field: 'log.level' } } },
@@ -178,7 +180,7 @@ describe('createQueryDocumentsTool handler', () => {
     } as unknown as SearchResponse);
 
     const inferenceClient = (await context.modelProvider.getDefaultModel()).inferenceClient;
-    (inferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+    (inferenceClient.chatComplete as Mock).mockResolvedValue({
       content: '{ "query": { "match_all": {} }, "size": 10 }',
     });
 
@@ -236,7 +238,7 @@ describe('createQueryDocumentsTool handler', () => {
     } as unknown as SearchResponse);
 
     const inferenceClient = (await context.modelProvider.getDefaultModel()).inferenceClient;
-    (inferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+    (inferenceClient.chatComplete as Mock).mockResolvedValue({
       content: '{ "query": { "match_all": {} }, "size": 10 }',
     });
 
@@ -259,7 +261,7 @@ describe('createQueryDocumentsTool handler', () => {
     } as unknown as SearchResponse);
 
     const inferenceClient = (await context.modelProvider.getDefaultModel()).inferenceClient;
-    (inferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+    (inferenceClient.chatComplete as Mock).mockResolvedValue({
       content: '{ "query": { "match_all": {} }, "size": 10 }',
     });
 

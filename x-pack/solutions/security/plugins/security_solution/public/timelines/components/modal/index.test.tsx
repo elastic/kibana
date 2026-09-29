@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -15,9 +17,9 @@ import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_e
 import { useUnmanagedFlyoutZIndex } from '../../../common/hooks/use_unmanaged_flyout_z_index';
 import { timelineFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
 
-const mockCapturedFlyoutSessionContext = jest.fn();
-jest.mock('../timeline', () => {
-  const { useFlyoutSessionContext } = jest.requireActual('../../../flyout_v2/session_context');
+const mockCapturedFlyoutSessionContext = vi.fn();
+vi.mock('../timeline', async () => {
+  const { useFlyoutSessionContext } = (await vi.importActual('../../../flyout_v2/session_context'));
   return {
     StatefulTimeline: () => {
       mockCapturedFlyoutSessionContext(useFlyoutSessionContext());
@@ -26,13 +28,16 @@ jest.mock('../timeline', () => {
   };
 });
 
-jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
-jest.mock('../../../common/hooks/use_unmanaged_flyout_z_index');
+vi.mock('../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../../../common/hooks/use_unmanaged_flyout_z_index');
 
-const mockIsFullScreen = jest.fn(() => false);
-jest.mock('../../../common/store/selectors', () => ({
-  inputsSelectors: { timelineFullScreenSelector: () => mockIsFullScreen() },
-}));
+const mockIsFullScreen = vi.fn(() => false);
+vi.mock('../../../common/store/selectors', () => {
+      const mocked = {
+      inputsSelectors: { timelineFullScreenSelector: () => mockIsFullScreen() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockRef = {
   current: null,
@@ -47,9 +52,9 @@ const renderTimelineModal = () =>
 
 describe('TimelineModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
-    jest.mocked(useUnmanagedFlyoutZIndex).mockReturnValue(undefined);
+    vi.clearAllMocks();
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useUnmanagedFlyoutZIndex).mockReturnValue(undefined);
   });
 
   it('should render the timeline', async () => {
@@ -89,7 +94,7 @@ describe('TimelineModal', () => {
 
   describe('when the new flyout system is enabled', () => {
     beforeEach(() => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+      vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
     });
 
     it('scopes flyouts opened from within Timeline to their own, dedicated history key', () => {
@@ -105,7 +110,7 @@ describe('TimelineModal', () => {
 
   describe('when the new flyout system is disabled', () => {
     beforeEach(() => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+      vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     });
 
     it('does not scope flyouts opened from within Timeline to a dedicated history key', () => {

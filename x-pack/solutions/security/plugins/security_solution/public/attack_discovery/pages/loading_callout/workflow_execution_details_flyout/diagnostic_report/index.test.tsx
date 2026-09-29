@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -14,11 +17,14 @@ import { TestProviders } from '../../../../../common/mock';
 import type { AggregatedWorkflowExecution } from '../../types';
 import { DiagnosticReport } from '.';
 
-jest.mock('../../../../../common/utils/download_blob', () => ({
-  downloadBlob: jest.fn(),
-}));
+vi.mock('../../../../../common/utils/download_blob', () => {
+      const mocked = {
+      downloadBlob: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDownloadBlob = downloadBlob as jest.Mock;
+const mockDownloadBlob = downloadBlob as Mock;
 
 const defaultAggregatedExecution: AggregatedWorkflowExecution = {
   status: ExecutionStatus.FAILED,
@@ -31,7 +37,7 @@ const defaultProps = {
   executionUuid: 'test-uuid-123',
 };
 
-const writeTextMock = jest.fn();
+const writeTextMock = vi.fn();
 
 beforeAll(() => {
   Object.defineProperty(navigator, 'clipboard', {
@@ -42,7 +48,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   writeTextMock.mockResolvedValue(undefined);
 });
 

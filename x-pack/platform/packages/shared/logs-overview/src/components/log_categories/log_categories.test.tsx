@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
@@ -37,7 +40,7 @@ const testLogsSource = {
 
 const availableGroupingCapabilities: GroupingCapabilities = { status: 'available' };
 
-const makeProps = (searchMock: jest.Mock): LogCategoriesProps => ({
+const makeProps = (searchMock: Mock): LogCategoriesProps => ({
   dependencies: {
     charts: chartPluginMock.createStartContract(),
     dataViews: dataViewPluginMocks.createStartContract(),
@@ -53,14 +56,14 @@ const makeProps = (searchMock: jest.Mock): LogCategoriesProps => ({
   timeRange: { start: '2024-01-01T00:00:00Z', end: '2024-01-02T00:00:00Z' },
   grouping: 'categories',
   groupingCapabilities: availableGroupingCapabilities,
-  onChangeGrouping: jest.fn(),
+  onChangeGrouping: vi.fn(),
 });
 
 describe('LogCategories', () => {
   it('Cancel shows neutral cancelled prompt, NOT the error prompt', async () => {
     // Return a never-completing Subject so the machine stays in countingDocuments
     const subject = new Subject();
-    const searchMock = jest.fn(() => subject.asObservable());
+    const searchMock = vi.fn(() => subject.asObservable());
 
     renderWithKibanaRenderContext(<LogCategories {...makeProps(searchMock)} />);
 
@@ -84,7 +87,7 @@ describe('LogCategories', () => {
 
   it('Load patterns button after cancel restarts loading', async () => {
     const subject = new Subject();
-    const searchMock = jest.fn(() => subject.asObservable());
+    const searchMock = vi.fn(() => subject.asObservable());
 
     renderWithKibanaRenderContext(<LogCategories {...makeProps(searchMock)} />);
 
@@ -112,7 +115,7 @@ describe('LogCategories', () => {
     const testError = new Error('Something went wrong fetching logs');
     testError.stack = `Error: Something went wrong\n    at ${distinctiveStack}`;
 
-    const searchMock = jest.fn(() => throwError(() => testError));
+    const searchMock = vi.fn(() => throwError(() => testError));
 
     renderWithKibanaRenderContext(<LogCategories {...makeProps(searchMock)} />);
 

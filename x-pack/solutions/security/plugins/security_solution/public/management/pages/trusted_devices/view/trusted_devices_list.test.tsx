@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import React from 'react';
@@ -19,8 +22,8 @@ import { parseQueryFilterToKQL } from '../../../common/utils';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
 
-jest.mock('../../../../common/components/user_privileges');
-const mockUserPrivileges = useUserPrivileges as jest.Mock;
+vi.mock('../../../../common/components/user_privileges');
+const mockUserPrivileges = useUserPrivileges as Mock;
 
 describe('When on the trusted devices page', () => {
   let user: UserEvent;
@@ -32,16 +35,16 @@ describe('When on the trusted devices page', () => {
   let mockedEndpointPrivileges: Partial<EndpointPrivileges>;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     mockedContext = createAppRootMockRenderer();
     mockedContext.setExperimentalFlag({ trustedDevices: true });
     ({ history } = mockedContext);

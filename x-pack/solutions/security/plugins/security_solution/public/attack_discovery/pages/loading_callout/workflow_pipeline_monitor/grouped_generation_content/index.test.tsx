@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -13,9 +15,12 @@ import { GroupedGenerationContent } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import type { StepExecutionWithLink } from '../../types';
 
-jest.mock('../../../use_workflow_editor_link', () => ({
-  useWorkflowEditorLink: jest.fn(() => ({ editorUrl: null, navigateToEditor: jest.fn() })),
-}));
+vi.mock('../../../use_workflow_editor_link', () => {
+      const mocked = {
+      useWorkflowEditorLink: vi.fn(() => ({ editorUrl: null, navigateToEditor: vi.fn() })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockStep = (overrides: Partial<StepExecutionWithLink> = {}): StepExecutionWithLink => ({
   error: undefined,

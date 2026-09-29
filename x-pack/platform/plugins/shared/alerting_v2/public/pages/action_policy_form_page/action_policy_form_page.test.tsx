@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,33 +18,39 @@ import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_p
 
 const mockLocators = createMockLocators();
 
-const mockNavigateToUrl = jest.fn();
-const mockBasePath = { prepend: jest.fn((path: string) => `/mock${path}`) };
-const mockGetUrlForApp = jest.fn(
+const mockNavigateToUrl = vi.fn();
+const mockBasePath = { prepend: vi.fn((path: string) => `/mock${path}`) };
+const mockGetUrlForApp = vi.fn(
   (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
 );
 
-jest.mock('../../components/action_policy/form/components/matcher_input', () => ({
-  MatcherInput: (props: {
-    value: string;
-    onChange: (v: string) => void;
-    'data-test-subj'?: string;
-  }) => (
-    <input
-      data-test-subj={props['data-test-subj']}
-      value={props.value}
-      onChange={(e) => props.onChange(e.target.value)}
-    />
-  ),
-}));
+vi.mock('../../components/action_policy/form/components/matcher_input', () => {
+      const mocked = {
+      MatcherInput: (props: {
+        value: string;
+        onChange: (v: string) => void;
+        'data-test-subj'?: string;
+      }) => (
+        <input
+          data-test-subj={props['data-test-subj']}
+          value={props.value}
+          onChange={(e) => props.onChange(e.target.value)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../application/breadcrumb_context', () => ({
-  useSetBreadcrumbs: () => jest.fn(),
-}));
+vi.mock('../../application/breadcrumb_context', () => {
+      const mocked = {
+      useSetBreadcrumbs: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di-browser', () => {
+vi.mock('@kbn/core-di-browser', () => {
   return {
-    useService: jest.fn((token: unknown) => {
+    useService: vi.fn((token: unknown) => {
       const tokenStr = String(token);
       if (tokenStr.includes('application')) {
         return {
@@ -52,7 +60,7 @@ jest.mock('@kbn/core-di-browser', () => {
         };
       }
       if (tokenStr.includes('chrome')) {
-        return { docTitle: { change: jest.fn() } };
+        return { docTitle: { change: vi.fn() } };
       }
       if (tokenStr.includes('http')) {
         return { basePath: mockBasePath };
@@ -61,11 +69,11 @@ jest.mock('@kbn/core-di-browser', () => {
         return { get: () => true };
       }
       if (tokenStr.includes('notifications')) {
-        return { toasts: { addError: jest.fn(), addSuccess: jest.fn() } };
+        return { toasts: { addError: vi.fn(), addSuccess: vi.fn() } };
       }
       return {};
     }),
-    CoreStart: jest.fn((name: string) => `CoreStart(${name})`),
+    CoreStart: vi.fn((name: string) => `CoreStart(${name})`),
   };
 });
 
@@ -86,114 +94,150 @@ const INLINE_DEFS = [
   },
 ];
 
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
-  getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
-  buildInlineWorkflowYaml: () => 'workflow: yaml',
-  isActionValid: (action: {
-    source: 'existing' | 'inline';
-    workflowId?: string | null;
-    connectorId?: string | null;
-    params?: string;
-  }) =>
-    action.source === 'existing'
-      ? Boolean(action.workflowId)
-      : action.connectorId != null && (action.params ?? '').trim() !== '',
-  InlineWorkflowEditor: ({
-    value,
-    onChange,
-    connectorCreationConfig,
-  }: {
-    value: { id: string; connectorId: string | null; params: string };
-    onChange: (next: { id: string; connectorId: string | null; params: string }) => void;
-    connectorCreationConfig?: { mode: string; href?: string };
-  }) => (
-    <div
-      data-test-subj={`inlineWorkflowEditor-${value.id}`}
-      data-connector-creation-mode={connectorCreationConfig?.mode}
-      data-connector-creation-href={connectorCreationConfig?.href}
-    >
-      <button
-        type="button"
-        data-test-subj={`inlineFill-${value.id}`}
-        onClick={() => onChange({ ...value, connectorId: 'connector-x', params: 'message: hi' })}
-      >
-        fill
-      </button>
-    </div>
-  ),
-}));
+vi.mock('@kbn/alerting-v2-rule-form', () => {
+      const mocked = {
+      INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
+      getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
+      buildInlineWorkflowYaml: () => 'workflow: yaml',
+      isActionValid: (action: {
+        source: 'existing' | 'inline';
+        workflowId?: string | null;
+        connectorId?: string | null;
+        params?: string;
+      }) =>
+        action.source === 'existing'
+          ? Boolean(action.workflowId)
+          : action.connectorId != null && (action.params ?? '').trim() !== '',
+      InlineWorkflowEditor: ({
+        value,
+        onChange,
+        connectorCreationConfig,
+      }: {
+        value: { id: string; connectorId: string | null; params: string };
+        onChange: (next: { id: string; connectorId: string | null; params: string }) => void;
+        connectorCreationConfig?: { mode: string; href?: string };
+      }) => (
+        <div
+          data-test-subj={`inlineWorkflowEditor-${value.id}`}
+          data-connector-creation-mode={connectorCreationConfig?.mode}
+          data-connector-creation-href={connectorCreationConfig?.href}
+        >
+          <button
+            type="button"
+            data-test-subj={`inlineFill-${value.id}`}
+            onClick={() => onChange({ ...value, connectorId: 'connector-x', params: 'message: hi' })}
+          >
+            fill
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCreateMutateAsync = jest.fn();
-const mockUpdateMutateAsync = jest.fn();
-const mockCreateInlineWorkflows = jest.fn();
-const mockRollbackWorkflows = jest.fn();
+const mockCreateMutateAsync = vi.fn();
+const mockUpdateMutateAsync = vi.fn();
+const mockCreateInlineWorkflows = vi.fn();
+const mockRollbackWorkflows = vi.fn();
 
-jest.mock('@kbn/alerting-v2-browser-shared', () => ({
-  ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
-  useActionPolicyAutoAttach: jest.fn(),
-}));
+vi.mock('@kbn/alerting-v2-browser-shared', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerting-v2-browser-shared')),
+      useActionPolicyAutoAttach: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_create_action_policy', () => ({
-  useCreateActionPolicy: () => ({
-    mutateAsync: mockCreateMutateAsync,
-    isLoading: false,
-  }),
-}));
+vi.mock('../../hooks/use_create_action_policy', () => {
+      const mocked = {
+      useCreateActionPolicy: () => ({
+        mutateAsync: mockCreateMutateAsync,
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_update_action_policy', () => ({
-  useUpdateActionPolicy: () => ({
-    mutateAsync: mockUpdateMutateAsync,
-    isLoading: false,
-  }),
-}));
+vi.mock('../../hooks/use_update_action_policy', () => {
+      const mocked = {
+      useUpdateActionPolicy: () => ({
+        mutateAsync: mockUpdateMutateAsync,
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_create_inline_workflows', () => ({
-  useCreateInlineWorkflows: () => ({
-    createInlineWorkflows: mockCreateInlineWorkflows,
-    rollbackWorkflows: mockRollbackWorkflows,
-  }),
-}));
+vi.mock('../../hooks/use_create_inline_workflows', () => {
+      const mocked = {
+      useCreateInlineWorkflows: () => ({
+        createInlineWorkflows: mockCreateInlineWorkflows,
+        rollbackWorkflows: mockRollbackWorkflows,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockIsLicenseValid = true;
-jest.mock('../../hooks/use_is_action_policies_license_valid', () => ({
-  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
-}));
+vi.mock('../../hooks/use_is_action_policies_license_valid', () => {
+      const mocked = {
+      useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchActionPolicy = jest.fn();
-jest.mock('../../hooks/use_fetch_action_policy', () => ({
-  useFetchActionPolicy: (...args: unknown[]) => mockUseFetchActionPolicy(...args),
-}));
+const mockUseFetchActionPolicy = vi.fn();
+vi.mock('../../hooks/use_fetch_action_policy', () => {
+      const mocked = {
+      useFetchActionPolicy: (...args: unknown[]) => mockUseFetchActionPolicy(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_fetch_rule_event_fields', () => ({
-  useFetchRuleEventFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
-}));
+vi.mock('../../hooks/use_fetch_rule_event_fields', () => {
+      const mocked = {
+      useFetchRuleEventFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_fetch_rules', () => ({
-  useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
-}));
+vi.mock('../../hooks/use_fetch_rules', () => {
+      const mocked = {
+      useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: () => ({ data: [], isLoading: false }),
-}));
+vi.mock('../../hooks/use_fetch_rule_tags', () => {
+      const mocked = {
+      useFetchRuleTags: () => ({ data: [], isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_fetch_workflows', () => ({
-  useFetchWorkflows: () => ({
-    data: {
-      results: [
-        { id: 'workflow-1', name: 'Workflow 1' },
-        { id: 'workflow-2', name: 'Workflow 2' },
-      ],
-    },
-    isLoading: false,
-  }),
-}));
+vi.mock('../../hooks/use_fetch_workflows', () => {
+      const mocked = {
+      useFetchWorkflows: () => ({
+        data: {
+          results: [
+            { id: 'workflow-1', name: 'Workflow 1' },
+            { id: 'workflow-2', name: 'Workflow 2' },
+          ],
+        },
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseParams = jest.fn();
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => mockUseParams(),
-}));
+const mockUseParams = vi.fn();
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: () => mockUseParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TEST_SUBJ = {
   pageTitle: 'pageTitle',
@@ -233,11 +277,11 @@ const renderPage = () => {
   );
 };
 
-const mockUseActionPolicyAutoAttach = jest.mocked(useActionPolicyAutoAttach);
+const mockUseActionPolicyAutoAttach = vi.mocked(useActionPolicyAutoAttach);
 
 describe('ActionPolicyFormPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsLicenseValid = true;
     mockCreateMutateAsync.mockResolvedValue({});
     mockUpdateMutateAsync.mockResolvedValue({});

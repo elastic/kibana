@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useMigrationDashboardDetailsFlyout } from './use_migration_dashboard_details_flyout';
@@ -13,14 +15,17 @@ import { getDashboardMigrationDashboardMock } from '../../../../common/siem_migr
 import { SiemMigrationStatus } from '../../../../common/siem_migrations/constants';
 import type { DashboardMigrationDashboard } from '../../../../common/siem_migrations/model/dashboard_migration.gen';
 
-jest.mock('../components/dashboard_details_flyout', () => ({
-  DashboardMigrationDetailsFlyout: (props: DashboardMigrationDashboardDetailsFlyoutProps) => (
-    <div data-test-subj="dashboard-details-flyout" {...props} />
-  ),
-}));
+vi.mock('../components/dashboard_details_flyout', () => {
+      const mocked = {
+      DashboardMigrationDetailsFlyout: (props: DashboardMigrationDashboardDetailsFlyoutProps) => (
+        <div data-test-subj="dashboard-details-flyout" {...props} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const migrationDashboardMock = getDashboardMigrationDashboardMock();
-const getMigrationDashboardData = jest.fn().mockReturnValue({
+const getMigrationDashboardData = vi.fn().mockReturnValue({
   migrationDashboard: migrationDashboardMock,
 });
 

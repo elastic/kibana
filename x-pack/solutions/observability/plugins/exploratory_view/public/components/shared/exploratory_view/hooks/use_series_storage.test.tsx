@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useEffect } from 'react';
 import { Router, Route } from '@kbn/shared-ux-router';
 import { render, renderHook, act } from '@testing-library/react';
@@ -54,7 +56,7 @@ const mockMultipleSeries = [
 
 describe('userSeriesStorage', function () {
   function setupTestComponent(seriesData: any) {
-    const setData = jest.fn();
+    const setData = vi.fn();
 
     function TestComponent() {
       const data = useSeriesStorage();
@@ -71,10 +73,10 @@ describe('userSeriesStorage', function () {
         <Route path={'/app/exploratory-view/:mode'}>
           <UrlStorageContextProvider
             storage={{
-              get: jest
+              get: vi
                 .fn()
                 .mockImplementation((key: string) => (key === 'sr' ? seriesData : null)),
-              set: jest.fn(),
+              set: vi.fn(),
             }}
           >
             <TestComponent />
@@ -138,10 +140,10 @@ describe('userSeriesStorage', function () {
       return (
         <UrlStorageContextProvider
           storage={{
-            get: jest
+            get: vi
               .fn()
               .mockImplementation((key: string) => (key === 'sr' ? mockMultipleSeries : null)),
-            set: jest.fn(),
+            set: vi.fn(),
           }}
         >
           {React.createElement(React.Fragment, {}, children)}
@@ -164,12 +166,12 @@ describe('userSeriesStorage', function () {
   });
 
   it('sets reportType when calling applyChanges', () => {
-    const setStorage = jest.fn();
+    const setStorage = vi.fn();
     function wrapper({ children }: React.PropsWithChildren) {
       return (
         <UrlStorageContextProvider
           storage={{
-            get: jest
+            get: vi
               .fn()
               .mockImplementation((key: string) =>
                 key === 'sr' ? mockMultipleSeries : 'kpi-over-time'
@@ -195,12 +197,12 @@ describe('userSeriesStorage', function () {
   });
 
   it('returns reportType in state, not url storage, from hook', () => {
-    const setStorage = jest.fn();
+    const setStorage = vi.fn();
     function wrapper({ children }: React.PropsWithChildren) {
       return (
         <UrlStorageContextProvider
           storage={{
-            get: jest
+            get: vi
               .fn()
               .mockImplementation((key: string) =>
                 key === 'sr' ? mockMultipleSeries : 'kpi-over-time'
@@ -222,18 +224,18 @@ describe('userSeriesStorage', function () {
   });
 
   it('ensures that telemetry is called', () => {
-    const trackEvent = jest.fn();
-    jest.spyOn(useTrackMetric, 'useUiTracker').mockReturnValue(trackEvent);
+    const trackEvent = vi.fn();
+    vi.spyOn(useTrackMetric, 'useUiTracker').mockReturnValue(trackEvent);
     function wrapper({ children }: React.PropsWithChildren) {
       return (
         <UrlStorageContextProvider
           storage={{
-            get: jest
+            get: vi
               .fn()
               .mockImplementation((key: string) =>
                 key === 'sr' ? mockMultipleSeries : 'kpi-over-time'
               ),
-            set: jest.fn(),
+            set: vi.fn(),
           }}
         >
           {React.createElement(React.Fragment, {}, children)}

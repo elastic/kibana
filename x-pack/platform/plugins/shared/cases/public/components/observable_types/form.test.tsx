@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { renderWithTestingProviders } from '../../common/mock';
@@ -16,12 +18,12 @@ import { MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH } from '../../../common/consta
 
 describe('ObservableTypesForm ', () => {
   const props: ObservableTypesFormProps = {
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     initialValue: null,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

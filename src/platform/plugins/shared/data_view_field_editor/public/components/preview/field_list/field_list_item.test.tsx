@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,11 +17,14 @@ import { useFieldPreviewContext } from '../field_preview_context';
 import type { PreviewController } from '../preview_controller';
 import { BehaviorSubject } from 'rxjs';
 
-jest.mock('../field_preview_context', () => ({
-  ...jest.requireActual('../field_preview_context'),
-  useFieldPreviewContext: jest.fn(),
-}));
-const mockUseFieldPreviewContext = jest.mocked(useFieldPreviewContext);
+vi.mock('../field_preview_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../field_preview_context')),
+      useFieldPreviewContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockUseFieldPreviewContext = vi.mocked(useFieldPreviewContext);
 
 const previewController = {
   state$: new BehaviorSubject({
@@ -38,7 +43,7 @@ const setup = (props: Partial<ComponentProps>) => {
 
   const finalProps: ComponentProps = {
     field: { key: 'test', value: 'test', formattedValue: 'test', isPinned: false },
-    toggleIsPinned: jest.fn(),
+    toggleIsPinned: vi.fn(),
     hasScriptError: false,
     isFromScript: false,
     ...props,
@@ -54,7 +59,7 @@ const setup = (props: Partial<ComponentProps>) => {
 };
 
 afterAll(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('<PreviewListItem />', () => {
@@ -112,7 +117,7 @@ describe('<PreviewListItem />', () => {
   describe('when toggleIsPinned is provided', () => {
     it('should render the pin button', () => {
       // When
-      setup({ toggleIsPinned: jest.fn() });
+      setup({ toggleIsPinned: vi.fn() });
 
       // Then
       expect(screen.getByRole('button', { name: /pin field/i })).toBeInTheDocument();
@@ -121,7 +126,7 @@ describe('<PreviewListItem />', () => {
     describe('when clicked', () => {
       it('should call toggleIsPined', async () => {
         // When
-        const toggleIsPinned = jest.fn();
+        const toggleIsPinned = vi.fn();
         const { props, user } = setup({ toggleIsPinned });
 
         // Then
@@ -138,7 +143,7 @@ describe('<PreviewListItem />', () => {
     describe('when the user tabs to the button and presses Enter', () => {
       it('should call toggleIsPinned', async () => {
         // When
-        const toggleIsPinned = jest.fn();
+        const toggleIsPinned = vi.fn();
         const { props, user } = setup({ toggleIsPinned });
 
         // Then

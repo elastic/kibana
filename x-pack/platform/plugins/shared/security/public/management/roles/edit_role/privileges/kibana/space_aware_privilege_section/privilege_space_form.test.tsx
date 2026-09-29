@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -71,8 +73,8 @@ describe('PrivilegeSpaceForm', () => {
       kibanaPrivileges,
       privilegeIndex: -1,
       canCustomizeSubFeaturePrivileges: true,
-      onChange: jest.fn(),
-      onCancel: jest.fn(),
+      onChange: vi.fn(),
+      onCancel: vi.fn(),
     });
 
     expect(screen.queryByTestId('basePrivilegeButtonGroup')).toBeNull();
@@ -94,8 +96,8 @@ describe('PrivilegeSpaceForm', () => {
       kibanaPrivileges,
       canCustomizeSubFeaturePrivileges: true,
       privilegeIndex: 0,
-      onChange: jest.fn(),
-      onCancel: jest.fn(),
+      onChange: vi.fn(),
+      onCancel: vi.fn(),
     });
 
     expect(getSelectedBasePrivilege()).toEqual('basePrivilege_all');
@@ -154,8 +156,8 @@ describe('PrivilegeSpaceForm', () => {
       kibanaPrivileges,
       canCustomizeSubFeaturePrivileges: true,
       privilegeIndex: 0,
-      onChange: jest.fn(),
-      onCancel: jest.fn(),
+      onChange: vi.fn(),
+      onCancel: vi.fn(),
     });
 
     expect(getSelectedBasePrivilege()).toEqual('basePrivilege_custom');
@@ -220,8 +222,8 @@ describe('PrivilegeSpaceForm', () => {
       kibanaPrivileges,
       canCustomizeSubFeaturePrivileges: true,
       privilegeIndex: 0,
-      onChange: jest.fn(),
-      onCancel: jest.fn(),
+      onChange: vi.fn(),
+      onCancel: vi.fn(),
     });
 
     expect(getSelectedBasePrivilege()).toEqual('basePrivilege_custom');
@@ -281,7 +283,7 @@ describe('PrivilegeSpaceForm', () => {
     ]);
     const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
 
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     renderComponent({
       role,
@@ -290,7 +292,7 @@ describe('PrivilegeSpaceForm', () => {
       canCustomizeSubFeaturePrivileges: true,
       privilegeIndex: 0,
       onChange,
-      onCancel: jest.fn(),
+      onCancel: vi.fn(),
     });
 
     fireEvent.click(screen.getByTestId('changeAllPrivilegesButton'));
@@ -343,8 +345,8 @@ describe('PrivilegeSpaceForm', () => {
       kibanaPrivileges,
       canCustomizeSubFeaturePrivileges: true,
       privilegeIndex: 0,
-      onChange: jest.fn(),
-      onCancel: jest.fn(),
+      onChange: vi.fn(),
+      onCancel: vi.fn(),
     });
 
     expect(screen.queryAllByTestId('customizeSubFeaturePrivileges').length).toBeGreaterThan(0);
@@ -376,7 +378,7 @@ describe('PrivilegeSpaceForm', () => {
       }),
     ];
     const kibanaPrivileges = createKibanaPrivileges(extendedKibanaFeatures);
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     beforeEach(() => {
       onChange.mockReset();
     });
@@ -388,7 +390,7 @@ describe('PrivilegeSpaceForm', () => {
         canCustomizeSubFeaturePrivileges: true,
         privilegeIndex: 0,
         onChange,
-        onCancel: jest.fn(),
+        onCancel: vi.fn(),
       });
 
       fireEvent.click(screen.getByTestId('changeAllPrivilegesButton'));
@@ -432,7 +434,7 @@ describe('PrivilegeSpaceForm', () => {
         canCustomizeSubFeaturePrivileges: true,
         privilegeIndex: 0,
         onChange,
-        onCancel: jest.fn(),
+        onCancel: vi.fn(),
       });
 
       fireEvent.click(screen.getByTestId('changeAllPrivilegesButton'));
@@ -493,7 +495,7 @@ describe('PrivilegeSpaceForm', () => {
     ];
     const kibanaPrivileges = createKibanaPrivileges(extendedKibanaFeatures);
 
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     beforeEach(() => {
       onChange.mockReset();
@@ -507,7 +509,7 @@ describe('PrivilegeSpaceForm', () => {
         canCustomizeSubFeaturePrivileges: true,
         privilegeIndex: 0,
         onChange,
-        onCancel: jest.fn(),
+        onCancel: vi.fn(),
       });
 
       fireEvent.click(screen.getByTestId('changeAllPrivilegesButton'));
@@ -549,7 +551,7 @@ describe('PrivilegeSpaceForm', () => {
         canCustomizeSubFeaturePrivileges: true,
         privilegeIndex: 0,
         onChange,
-        onCancel: jest.fn(),
+        onCancel: vi.fn(),
       });
 
       fireEvent.click(screen.getByTestId('changeAllPrivilegesButton'));
@@ -608,7 +610,7 @@ describe('PrivilegeSpaceForm', () => {
         canCustomizeSubFeaturePrivileges: true,
         privilegeIndex: 0,
         onChange,
-        onCancel: jest.fn(),
+        onCancel: vi.fn(),
       });
 
       fireEvent.click(screen.getByTestId('changeAllPrivilegesButton'));

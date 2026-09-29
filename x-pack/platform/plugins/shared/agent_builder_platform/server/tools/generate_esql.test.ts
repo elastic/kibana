@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { platformCoreTools, ToolResultType } from '@kbn/agent-builder-common';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { generateEsqlTool } from './generate_esql';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => {
-  const actual = jest.requireActual('@kbn/agent-builder-genai-utils');
+vi.mock('@kbn/agent-builder-genai-utils', async () => {
+  const actual = (await vi.importActual('@kbn/agent-builder-genai-utils'));
   return {
     ...actual,
-    generateEsql: jest.fn(),
-    setDefaultEsqlCacheKey: jest.fn(),
+    generateEsql: vi.fn(),
+    setDefaultEsqlCacheKey: vi.fn(),
   };
 });
 
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 
-const generateEsqlMock = generateEsql as jest.MockedFunction<typeof generateEsql>;
+const generateEsqlMock = generateEsql as MockedFunction<typeof generateEsql>;
 
 const createHandlerContext = () =>
   ({
@@ -29,7 +32,7 @@ const createHandlerContext = () =>
     attachments: { getActive: () => [] } as unknown as AttachmentStateManager,
     experimentalFeatures: { datasets: false },
     modelProvider: {},
-    logger: { debug: jest.fn() },
+    logger: { debug: vi.fn() },
     events: {},
   } as any);
 
@@ -45,7 +48,7 @@ const run = async (query = 'total sales') => {
 const typesOf = (results: ToolHandlerStandardReturn['results']) => results.map(({ type }) => type);
 
 describe('generateEsqlTool', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('has the platform generate_esql tool id', () => {
     expect(generateEsqlTool().id).toBe(platformCoreTools.generateEsql);

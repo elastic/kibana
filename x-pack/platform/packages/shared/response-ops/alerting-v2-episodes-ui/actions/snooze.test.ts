@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
@@ -33,7 +35,7 @@ const makeDeps = () => ({
 });
 
 describe('createSnoozeAction', () => {
-  beforeEach(() => jest.restoreAllMocks());
+  beforeEach(() => vi.restoreAllMocks());
 
   it('compatible when at least one episode is not snoozed', () => {
     expect(
@@ -70,11 +72,11 @@ describe('createSnoozeAction', () => {
 
   it('execute: opens modal, POSTs unique-by-group SNOOZE items, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue('2026-05-01T00:00:00Z');
-    jest
+    vi.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue('2026-05-01T00:00:00Z');
+    vi
       .spyOn(bulk, 'bulkSnoozeSeriesActions')
       .mockResolvedValue({ affected_count: 1, errors: [] });
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     await createSnoozeAction(deps).execute({
       episodes: [makeEpisode(), makeEpisode({ 'episode.id': 'e2' })],
       onSuccess,
@@ -88,8 +90,8 @@ describe('createSnoozeAction', () => {
 
   it('execute: cancelled modal is a no-op', async () => {
     const deps = makeDeps();
-    jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue(undefined);
-    const onSuccess = jest.fn();
+    vi.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue(undefined);
+    const onSuccess = vi.fn();
     await createSnoozeAction(deps).execute({ episodes: [makeEpisode()], onSuccess });
     expect(deps.http.post).not.toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
@@ -15,23 +18,23 @@ import { persistRiskScoresToEntityStore } from '../../persist_risk_scores_to_ent
 import type { WatchlistObject } from '../../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
 
-jest.mock('../../persist_risk_scores_to_entity_store');
+vi.mock('../../persist_risk_scores_to_entity_store');
 
 describe('resetToZero (maintainer)', () => {
   let esClient: ElasticsearchClient;
   let logger: Logger;
   let writer: RiskEngineDataWriter;
-  let writerBulkMock: jest.Mock;
-  let crudClient: jest.Mocked<EntityStoreCRUDClient>;
+  let writerBulkMock: Mock;
+  let crudClient: Mocked<EntityStoreCRUDClient>;
   const emptyWatchlistConfigs = new Map<string, WatchlistObject>();
   const now = '2026-01-01T00:00:00.000Z';
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     logger = loggingSystemMock.createLogger();
-    writerBulkMock = jest.fn().mockResolvedValue({ errors: [], docs_written: 1 });
+    writerBulkMock = vi.fn().mockResolvedValue({ errors: [], docs_written: 1 });
     writer = { bulk: writerBulkMock } as unknown as RiskEngineDataWriter;
-    (persistRiskScoresToEntityStore as jest.Mock).mockImplementation(
+    (persistRiskScoresToEntityStore as Mock).mockImplementation(
       async ({ scores }: { scores: Partial<Record<string, unknown[]>> }) => {
         const count = Object.values(scores).reduce(
           (sum, arr) => sum + ((arr as unknown[] | undefined)?.length ?? 0),
@@ -40,22 +43,22 @@ describe('resetToZero (maintainer)', () => {
         return { docsWritten: count, unexpectedErrors: [] };
       }
     );
-    (esClient.indices.exists as jest.Mock).mockResolvedValue(true);
+    (esClient.indices.exists as Mock).mockResolvedValue(true);
     crudClient = {
-      createEntity: jest.fn(),
-      updateEntity: jest.fn(),
-      bulkUpdateEntity: jest.fn().mockResolvedValue([]),
-      deleteEntity: jest.fn(),
-      listEntities: jest.fn().mockResolvedValue({ entities: [], nextSearchAfter: undefined }),
-    } as unknown as jest.Mocked<EntityStoreCRUDClient>;
+      createEntity: vi.fn(),
+      updateEntity: vi.fn(),
+      bulkUpdateEntity: vi.fn().mockResolvedValue([]),
+      deleteEntity: vi.fn(),
+      listEntities: vi.fn().mockResolvedValue({ entities: [], nextSearchAfter: undefined }),
+    } as unknown as Mocked<EntityStoreCRUDClient>;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('writes zero scores with entity.id identifier field', async () => {
-    (esClient.esql.query as jest.Mock)
+    (esClient.esql.query as Mock)
       .mockResolvedValueOnce({
         values: [['host:host-1', null]],
       })
@@ -97,14 +100,14 @@ describe('resetToZero (maintainer)', () => {
   });
 
   it('fetches entities from entity store for modifier application', async () => {
-    (esClient.esql.query as jest.Mock)
+    (esClient.esql.query as Mock)
       .mockResolvedValueOnce({
         values: [['host:host-1', null]],
       })
       .mockResolvedValueOnce({
         values: [],
       });
-    (crudClient.listEntities as jest.Mock).mockResolvedValue({
+    (crudClient.listEntities as Mock).mockResolvedValue({
       entities: [
         { entity: { id: 'host:host-1' }, asset: { criticality: 'high_impact' } } as Entity,
       ],
@@ -164,14 +167,14 @@ describe('resetToZero (maintainer)', () => {
       ],
     ]);
 
-    (esClient.esql.query as jest.Mock)
+    (esClient.esql.query as Mock)
       .mockResolvedValueOnce({
         values: [['user:user-1', null]],
       })
       .mockResolvedValueOnce({
         values: [],
       });
-    (crudClient.listEntities as jest.Mock).mockResolvedValue({
+    (crudClient.listEntities as Mock).mockResolvedValue({
       entities: [
         {
           entity: {
@@ -215,7 +218,7 @@ describe('resetToZero (maintainer)', () => {
   });
 
   it('supports service entity reset-to-zero writes', async () => {
-    (esClient.esql.query as jest.Mock)
+    (esClient.esql.query as Mock)
       .mockResolvedValueOnce({
         values: [['service:svc-1', null]],
       })
@@ -255,14 +258,14 @@ describe('resetToZero (maintainer)', () => {
   });
 
   it('proceeds with empty entity map when entity fetch fails', async () => {
-    (esClient.esql.query as jest.Mock)
+    (esClient.esql.query as Mock)
       .mockResolvedValueOnce({
         values: [['host:host-1', null]],
       })
       .mockResolvedValueOnce({
         values: [],
       });
-    (crudClient.listEntities as jest.Mock).mockRejectedValue(new Error('Entity store error'));
+    (crudClient.listEntities as Mock).mockRejectedValue(new Error('Entity store error'));
 
     const result = await resetToZero({
       esClient,
@@ -299,7 +302,7 @@ describe('resetToZero (maintainer)', () => {
   });
 
   it('returns zero when no stale entities are found', async () => {
-    (esClient.esql.query as jest.Mock).mockResolvedValue({
+    (esClient.esql.query as Mock).mockResolvedValue({
       values: [],
     });
 
@@ -327,7 +330,7 @@ describe('resetToZero (maintainer)', () => {
   });
 
   it('returns zero when risk score index does not exist yet', async () => {
-    (esClient.indices.exists as jest.Mock).mockResolvedValue(false);
+    (esClient.indices.exists as Mock).mockResolvedValue(false);
 
     const result = await resetToZero({
       esClient,
@@ -354,7 +357,7 @@ describe('resetToZero (maintainer)', () => {
   });
 
   it('queries stale base docs by latest run id', async () => {
-    (esClient.esql.query as jest.Mock)
+    (esClient.esql.query as Mock)
       .mockResolvedValueOnce({
         values: [['host:host-2', null]],
       })
@@ -375,14 +378,14 @@ describe('resetToZero (maintainer)', () => {
       watchlistConfigs: emptyWatchlistConfigs,
     });
 
-    const query = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
+    const query = (esClient.esql.query as Mock).mock.calls[0][0].query as string;
     expect(query).toContain('WHERE score_type IS NULL OR score_type == "base"');
     expect(query).toContain('score = LAST(score, @timestamp)');
     expect(query).toContain('WHERE calculation_run_id IS NULL OR calculation_run_id != "run-id-1"');
   });
 
   it('writes to entity store when idBasedRiskScoringEnabled is true', async () => {
-    (esClient.esql.query as jest.Mock)
+    (esClient.esql.query as Mock)
       .mockResolvedValueOnce({
         values: [['host:host-1', null]],
       })

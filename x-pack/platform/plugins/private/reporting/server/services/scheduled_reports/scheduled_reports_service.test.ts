@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type {
   AuditLogger,
   ElasticsearchClient,
@@ -231,28 +234,28 @@ describe('ScheduledReportsService', () => {
   let mockResponseFactory: ReturnType<typeof getMockResponseFactory>;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const schema = createMockConfigSchema();
     core = await createMockReportingCore(schema);
 
     auditLogger = await core.getAuditLogger(fakeRawRequest);
-    auditLogger.log = jest.fn();
+    auditLogger.log = vi.fn();
 
     soClient = await core.getScopedSoClient(fakeRawRequest);
-    soClient.find = jest.fn().mockImplementation(async () => {
+    soClient.find = vi.fn().mockImplementation(async () => {
       return soResponse;
     });
-    soClient.bulkGet = jest.fn().mockImplementation(async () => ({ saved_objects: savedObjects }));
-    soClient.update = jest.fn();
-    soClient.get = jest.fn().mockResolvedValue(savedObjects[0]);
-    soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+    soClient.bulkGet = vi.fn().mockImplementation(async () => ({ saved_objects: savedObjects }));
+    soClient.update = vi.fn();
+    soClient.get = vi.fn().mockResolvedValue(savedObjects[0]);
+    soClient.bulkUpdate = vi.fn().mockImplementation(async () => ({
       saved_objects: savedObjects.map((so) => ({
         id: so.id,
         type: so.type,
         attributes: { enabled: false },
       })),
     }));
-    soClient.bulkDelete = jest.fn().mockImplementation(async () => ({
+    soClient.bulkDelete = vi.fn().mockImplementation(async () => ({
       statuses: savedObjects.map((so) => ({
         id: so.id,
         type: so.type,
@@ -263,17 +266,17 @@ describe('ScheduledReportsService', () => {
       lastRunResponse as unknown as Awaited<ReturnType<ElasticsearchClient['search']>>
     );
     taskManager = await core.getTaskManager();
-    taskManager.bulkDisable = jest.fn().mockImplementation(async () => ({
+    taskManager.bulkDisable = vi.fn().mockImplementation(async () => ({
       tasks: savedObjects.map((so) => ({ id: so.id })),
       errors: [],
     }));
-    taskManager.bulkRemove = jest.fn().mockImplementation(async () => ({
+    taskManager.bulkRemove = vi.fn().mockImplementation(async () => ({
       statuses: savedObjects.map((so) => ({ id: so.id, success: true })),
     }));
-    taskManager.bulkGet = jest.fn().mockResolvedValue(nextRunResponse);
-    taskManager.bulkUpdateSchedules = jest.fn();
+    taskManager.bulkGet = vi.fn().mockResolvedValue(nextRunResponse);
+    taskManager.bulkUpdateSchedules = vi.fn();
     mockResponseFactory = getMockResponseFactory();
-    jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValue(true);
+    vi.spyOn(core, 'canManageReportingForSpace').mockResolvedValue(true);
     scheduledReportsService = await ScheduledReportsService.build({
       logger: mockLogger,
       reportingCore: core,
@@ -281,9 +284,9 @@ describe('ScheduledReportsService', () => {
       request: fakeRawRequest,
     });
 
-    (mockResponseFactory.ok as jest.Mock) = jest.fn((args: unknown) => args);
-    (mockResponseFactory.forbidden as jest.Mock) = jest.fn((args: unknown) => args);
-    (mockResponseFactory.badRequest as jest.Mock) = jest.fn((args: unknown) => args);
+    (mockResponseFactory.ok as Mock) = vi.fn((args: unknown) => args);
+    (mockResponseFactory.forbidden as Mock) = vi.fn((args: unknown) => args);
+    (mockResponseFactory.badRequest as Mock) = vi.fn((args: unknown) => args);
   });
 
   describe('list', () => {
@@ -423,7 +426,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should filter by username when user does not have manage reporting permissions', async () => {
-      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      vi.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
         reportingCore: core,
@@ -469,7 +472,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should return an empty array when there are no hits', async () => {
-      soClient.find = jest.fn().mockImplementationOnce(async () => ({
+      soClient.find = vi.fn().mockImplementationOnce(async () => ({
         page: 1,
         per_page: 10,
         total: 0,
@@ -493,7 +496,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should reject if the soClient.find throws an error', async () => {
-      soClient.find = jest.fn().mockImplementationOnce(async () => {
+      soClient.find = vi.fn().mockImplementationOnce(async () => {
         throw new Error('Some error');
       });
 
@@ -588,7 +591,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should gracefully handle taskManager.bulkGet errors', async () => {
-      taskManager.bulkGet = jest.fn().mockImplementationOnce(() => {
+      taskManager.bulkGet = vi.fn().mockImplementationOnce(() => {
         throw new Error('task manager error');
       });
       const result = await scheduledReportsService.list({
@@ -658,7 +661,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should gracefully handle errors in taskManager.bulkGet result', async () => {
-      taskManager.bulkGet = jest.fn().mockImplementationOnce(() => {
+      taskManager.bulkGet = vi.fn().mockImplementationOnce(() => {
         return [nextRunResponse[0], { tag: 'error', error: new Error('not found') }];
       });
       const result = await scheduledReportsService.list({
@@ -808,14 +811,14 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should not disable scheduled report when user does not have permissions', async () => {
-      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      vi.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
         reportingCore: core,
         responseFactory: mockResponseFactory,
         request: fakeRawRequest,
       });
-      soClient.bulkUpdate = jest.fn().mockImplementationOnce(async () => ({
+      soClient.bulkUpdate = vi.fn().mockImplementationOnce(async () => ({
         saved_objects: [
           {
             id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
@@ -824,7 +827,7 @@ describe('ScheduledReportsService', () => {
           },
         ],
       }));
-      taskManager.bulkDisable = jest.fn().mockImplementationOnce(async () => ({
+      taskManager.bulkDisable = vi.fn().mockImplementationOnce(async () => ({
         tasks: [{ id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca' }],
         errors: [],
       }));
@@ -910,7 +913,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should handle errors in bulk get', async () => {
-      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+      soClient.bulkGet = vi.fn().mockImplementationOnce(async () => ({
         saved_objects: [
           {
             id: savedObjects[0].id,
@@ -925,7 +928,7 @@ describe('ScheduledReportsService', () => {
           savedObjects[1],
         ],
       }));
-      soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+      soClient.bulkUpdate = vi.fn().mockImplementation(async () => ({
         saved_objects: [
           {
             id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
@@ -934,7 +937,7 @@ describe('ScheduledReportsService', () => {
           },
         ],
       }));
-      taskManager.bulkDisable = jest.fn().mockImplementation(async () => ({
+      taskManager.bulkDisable = vi.fn().mockImplementation(async () => ({
         tasks: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4' }],
         errors: [],
       }));
@@ -997,7 +1000,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should short-circuit if no saved objects to update', async () => {
-      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+      soClient.bulkGet = vi.fn().mockImplementationOnce(async () => ({
         saved_objects: [
           {
             id: savedObjects[0].id,
@@ -1049,7 +1052,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should not update saved object if already disabled', async () => {
-      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+      soClient.bulkGet = vi.fn().mockImplementationOnce(async () => ({
         saved_objects: [
           {
             id: savedObjects[0].id,
@@ -1059,7 +1062,7 @@ describe('ScheduledReportsService', () => {
           savedObjects[1],
         ],
       }));
-      soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+      soClient.bulkUpdate = vi.fn().mockImplementation(async () => ({
         saved_objects: [
           {
             id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
@@ -1127,7 +1130,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should handle errors in bulk update', async () => {
-      soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+      soClient.bulkUpdate = vi.fn().mockImplementation(async () => ({
         saved_objects: [
           {
             id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
@@ -1141,7 +1144,7 @@ describe('ScheduledReportsService', () => {
           },
         ],
       }));
-      taskManager.bulkDisable = jest.fn().mockImplementation(async () => ({
+      taskManager.bulkDisable = vi.fn().mockImplementation(async () => ({
         tasks: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4' }],
         errors: [],
       }));
@@ -1211,7 +1214,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should handle errors in bulk disable', async () => {
-      taskManager.bulkDisable = jest.fn().mockImplementation(async () => ({
+      taskManager.bulkDisable = vi.fn().mockImplementation(async () => ({
         tasks: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4' }],
         errors: [
           {
@@ -1270,7 +1273,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should reject if the soClient throws an error', async () => {
-      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => {
+      soClient.bulkGet = vi.fn().mockImplementationOnce(async () => {
         throw new Error('Some error');
       });
 
@@ -1290,15 +1293,15 @@ describe('ScheduledReportsService', () => {
 
   describe('bulkEnable', () => {
     beforeEach(async () => {
-      jest.clearAllMocks();
-      soClient.bulkGet = jest.fn().mockImplementation(async () => ({
+      vi.clearAllMocks();
+      soClient.bulkGet = vi.fn().mockImplementation(async () => ({
         saved_objects: savedObjects.map((so) => ({
           ...so,
           attributes: { ...so.attributes, enabled: false },
         })),
       }));
 
-      soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+      soClient.bulkUpdate = vi.fn().mockImplementation(async () => ({
         saved_objects: savedObjects.map((so) => ({
           id: so.id,
           type: so.type,
@@ -1306,12 +1309,12 @@ describe('ScheduledReportsService', () => {
         })),
       }));
 
-      taskManager.bulkEnable = jest.fn().mockImplementation(async () => ({
+      taskManager.bulkEnable = vi.fn().mockImplementation(async () => ({
         tasks: savedObjects.map((so) => ({ id: so.id })),
         errors: [],
       }));
 
-      taskManager.bulkGet = jest
+      taskManager.bulkGet = vi
         .fn()
         .mockResolvedValue(
           nextRunResponse.map((task) =>
@@ -1399,14 +1402,14 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should not enable scheduled report when user does not have permissions', async () => {
-      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      vi.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
         reportingCore: core,
         responseFactory: mockResponseFactory,
         request: fakeRawRequest,
       });
-      soClient.bulkUpdate = jest.fn().mockImplementationOnce(async () => ({
+      soClient.bulkUpdate = vi.fn().mockImplementationOnce(async () => ({
         saved_objects: [
           {
             id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
@@ -1415,7 +1418,7 @@ describe('ScheduledReportsService', () => {
           },
         ],
       }));
-      taskManager.bulkEnable = jest.fn().mockImplementationOnce(async () => ({
+      taskManager.bulkEnable = vi.fn().mockImplementationOnce(async () => ({
         tasks: [{ id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca' }],
         errors: [],
       }));
@@ -1501,7 +1504,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should handle errors in bulk get', async () => {
-      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+      soClient.bulkGet = vi.fn().mockImplementationOnce(async () => ({
         saved_objects: [
           {
             id: savedObjects[0].id,
@@ -1516,7 +1519,7 @@ describe('ScheduledReportsService', () => {
           { ...savedObjects[1], attributes: { ...savedObjects[1].attributes, enabled: false } },
         ],
       }));
-      soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+      soClient.bulkUpdate = vi.fn().mockImplementation(async () => ({
         saved_objects: [
           {
             id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
@@ -1525,7 +1528,7 @@ describe('ScheduledReportsService', () => {
           },
         ],
       }));
-      taskManager.bulkEnable = jest.fn().mockImplementation(async () => ({
+      taskManager.bulkEnable = vi.fn().mockImplementation(async () => ({
         tasks: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4' }],
         errors: [],
       }));
@@ -1588,7 +1591,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should short-circuit if no saved objects to update', async () => {
-      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+      soClient.bulkGet = vi.fn().mockImplementationOnce(async () => ({
         saved_objects: [
           {
             id: savedObjects[0].id,
@@ -1640,7 +1643,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should not update saved object if already enabled', async () => {
-      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+      soClient.bulkGet = vi.fn().mockImplementationOnce(async () => ({
         saved_objects: [
           {
             id: savedObjects[0].id,
@@ -1650,7 +1653,7 @@ describe('ScheduledReportsService', () => {
           { ...savedObjects[1], attributes: { ...savedObjects[1].attributes, enabled: false } },
         ],
       }));
-      soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+      soClient.bulkUpdate = vi.fn().mockImplementation(async () => ({
         saved_objects: [
           {
             id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
@@ -1718,7 +1721,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should handle errors in bulk update', async () => {
-      soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+      soClient.bulkUpdate = vi.fn().mockImplementation(async () => ({
         saved_objects: [
           {
             id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
@@ -1732,7 +1735,7 @@ describe('ScheduledReportsService', () => {
           },
         ],
       }));
-      taskManager.bulkEnable = jest.fn().mockImplementation(async () => ({
+      taskManager.bulkEnable = vi.fn().mockImplementation(async () => ({
         tasks: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4' }],
         errors: [],
       }));
@@ -1802,7 +1805,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should handle errors in bulk enable', async () => {
-      taskManager.bulkEnable = jest.fn().mockImplementation(async () => ({
+      taskManager.bulkEnable = vi.fn().mockImplementation(async () => ({
         tasks: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4' }],
         errors: [
           {
@@ -1861,7 +1864,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should reject if the soClient throws an error', async () => {
-      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => {
+      soClient.bulkGet = vi.fn().mockImplementationOnce(async () => {
         throw new Error('Some error');
       });
 
@@ -1956,14 +1959,14 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should not delete scheduled report when user does not have permissions', async () => {
-      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      vi.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
         reportingCore: core,
         responseFactory: mockResponseFactory,
         request: fakeRawRequest,
       });
-      soClient.bulkDelete = jest.fn().mockImplementationOnce(async () => ({
+      soClient.bulkDelete = vi.fn().mockImplementationOnce(async () => ({
         statuses: [
           {
             id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
@@ -1971,7 +1974,7 @@ describe('ScheduledReportsService', () => {
           },
         ],
       }));
-      taskManager.bulkRemove = jest.fn().mockImplementationOnce(async () => ({
+      taskManager.bulkRemove = vi.fn().mockImplementationOnce(async () => ({
         statuses: [{ id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', success: true }],
       }));
       const result = await scheduledReportsService.bulkDelete({
@@ -2051,7 +2054,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should handle errors in bulk get', async () => {
-      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+      soClient.bulkGet = vi.fn().mockImplementationOnce(async () => ({
         saved_objects: [
           {
             id: savedObjects[0].id,
@@ -2066,7 +2069,7 @@ describe('ScheduledReportsService', () => {
           savedObjects[1],
         ],
       }));
-      soClient.bulkDelete = jest.fn().mockImplementation(async () => ({
+      soClient.bulkDelete = vi.fn().mockImplementation(async () => ({
         statuses: [
           {
             id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
@@ -2075,7 +2078,7 @@ describe('ScheduledReportsService', () => {
           },
         ],
       }));
-      taskManager.bulkRemove = jest.fn().mockImplementation(async () => ({
+      taskManager.bulkRemove = vi.fn().mockImplementation(async () => ({
         statuses: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', success: true }],
       }));
       const result = await scheduledReportsService.bulkDelete({
@@ -2132,7 +2135,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should short-circuit if no saved objects to update', async () => {
-      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+      soClient.bulkGet = vi.fn().mockImplementationOnce(async () => ({
         saved_objects: [
           {
             id: savedObjects[0].id,
@@ -2184,7 +2187,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should handle errors in bulk delete', async () => {
-      soClient.bulkDelete = jest.fn().mockImplementation(async () => ({
+      soClient.bulkDelete = vi.fn().mockImplementation(async () => ({
         statuses: [
           {
             id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
@@ -2199,7 +2202,7 @@ describe('ScheduledReportsService', () => {
           },
         ],
       }));
-      taskManager.bulkRemove = jest.fn().mockImplementation(async () => ({
+      taskManager.bulkRemove = vi.fn().mockImplementation(async () => ({
         statuses: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', success: true }],
       }));
       const result = await scheduledReportsService.bulkDelete({
@@ -2262,7 +2265,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should handle errors in bulk task remove', async () => {
-      taskManager.bulkRemove = jest.fn().mockImplementation(async () => ({
+      taskManager.bulkRemove = vi.fn().mockImplementation(async () => ({
         statuses: [
           { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', success: true },
           {
@@ -2319,7 +2322,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should reject if the soClient throws an error', async () => {
-      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => {
+      soClient.bulkGet = vi.fn().mockImplementationOnce(async () => {
         throw new Error('Some error');
       });
 
@@ -2439,7 +2442,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should update scheduled report when user does not have permissions but is the creator', async () => {
-      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      vi.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
         reportingCore: core,
@@ -2491,7 +2494,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should not update scheduled report when user does not have permissions and is not the creator', async () => {
-      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      vi.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
         reportingCore: core,
@@ -2534,7 +2537,7 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should reject if the soClient throws an error', async () => {
-      soClient.get = jest.fn().mockImplementationOnce(async () => {
+      soClient.get = vi.fn().mockImplementationOnce(async () => {
         throw new Error('Some error');
       });
 

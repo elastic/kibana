@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
@@ -17,8 +19,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { SLODefinitionClient } from './slo_definition_client';
 
 describe('GetSLO', () => {
-  let mockRepository: jest.Mocked<SLODefinitionRepository>;
-  let mockSummaryClient: jest.Mocked<SummaryClient>;
+  let mockRepository: Mocked<SLODefinitionRepository>;
+  let mockSummaryClient: Mocked<SummaryClient>;
   let getSLO: GetSLO;
   let defintionClient: SLODefinitionClient;
 

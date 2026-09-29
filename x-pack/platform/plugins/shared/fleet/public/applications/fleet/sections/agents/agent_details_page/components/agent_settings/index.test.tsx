@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { useAuthz, useStartServices } from '../../../../../hooks';
@@ -12,26 +15,26 @@ import { createFleetTestRendererMock } from '../../../../../../../mock';
 
 import { AgentSettings } from '.';
 
-jest.mock('../../../../../hooks', () => {
+vi.mock('../../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../../hooks'),
-    useLink: jest.fn(),
-    useStartServices: jest.fn(),
-    useAuthz: jest.fn(),
-    useDiscoverLocator: jest.fn().mockImplementation(() => {
+    ...(await vi.importActual('../../../../../hooks')),
+    useLink: vi.fn(),
+    useStartServices: vi.fn(),
+    useAuthz: vi.fn(),
+    useDiscoverLocator: vi.fn().mockImplementation(() => {
       return {
         id: 'DISCOVER_APP_LOCATOR',
-        getRedirectUrl: jest.fn().mockResolvedValue('app/discover/logs/someview'),
+        getRedirectUrl: vi.fn().mockResolvedValue('app/discover/logs/someview'),
       };
     }),
   };
 });
 
-const mockUseStartServices = useStartServices as jest.Mock;
+const mockUseStartServices = useStartServices as Mock;
 
 describe('AgentSettings', () => {
   beforeEach(() => {
-    jest.mocked(useAuthz).mockReturnValue({
+    vi.mocked(useAuthz).mockReturnValue({
       fleet: {
         allAgents: true,
         readAgents: true,
@@ -71,7 +74,7 @@ describe('AgentSettings', () => {
         query: {
           timefilter: {
             timefilter: {
-              calculateBounds: jest.fn().mockReturnValue({
+              calculateBounds: vi.fn().mockReturnValue({
                 min: '2023-10-04T13:08:53.340Z',
                 max: '2023-10-05T13:08:53.340Z',
               }),

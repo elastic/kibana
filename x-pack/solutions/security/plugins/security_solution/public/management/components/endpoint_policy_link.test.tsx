@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AppContextTestRender, UserPrivilegesMockSetter } from '../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../common/mock/endpoint';
 import React from 'react';
@@ -12,9 +15,9 @@ import type { EndpointPolicyLinkProps } from './endpoint_policy_link';
 import { EndpointPolicyLink, POLICY_NOT_FOUND_MESSAGE } from './endpoint_policy_link';
 import { useUserPrivileges as _useUserPrivileges } from '../../common/components/user_privileges';
 
-jest.mock('../../common/components/user_privileges');
+vi.mock('../../common/components/user_privileges');
 
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
 
 describe('EndpointPolicyLink component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

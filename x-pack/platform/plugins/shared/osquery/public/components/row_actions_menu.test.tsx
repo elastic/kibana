@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -31,9 +33,9 @@ const defaultProps = {
   deleteModalConfig: DELETE_MODAL_CONFIG,
   canWrite: true,
   isDeletable: true,
-  onEdit: jest.fn(),
-  onDuplicate: jest.fn(),
-  onDelete: jest.fn().mockResolvedValue(undefined),
+  onEdit: vi.fn(),
+  onDuplicate: vi.fn(),
+  onDelete: vi.fn().mockResolvedValue(undefined),
 };
 
 const renderWithIntl = (ui: React.ReactElement) =>
@@ -41,7 +43,7 @@ const renderWithIntl = (ui: React.ReactElement) =>
 
 describe('RowActionsMenu', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the actions button', () => {

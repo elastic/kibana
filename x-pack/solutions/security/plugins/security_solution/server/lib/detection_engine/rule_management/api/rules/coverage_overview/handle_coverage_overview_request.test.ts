@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Rule } from '@kbn/alerting-plugin/common';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { findRules } from '../../../logic/search/find_rules';
@@ -14,7 +17,7 @@ import { buildValidMitreIdsFromBuckets } from '../../../../../../../common/detec
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import { resetResolveMitreBucketsCache } from '../../../../mitre/resolve_mitre_buckets';
 
-jest.mock('../../../logic/search/find_rules');
+vi.mock('../../../logic/search/find_rules');
 
 const VALID_TACTIC_ID = 'TA0005';
 const VALID_TECHNIQUE_ID = 'T1548';
@@ -30,12 +33,12 @@ const makeManagedBuckets = (validIds: ValidMitreIdSets) => ({
 
 describe('handleCoverageOverviewRequest', () => {
   beforeEach(() => {
-    (findRules as jest.Mock).mockReset();
+    (findRules as Mock).mockReset();
     resetResolveMitreBucketsCache();
   });
 
   it('does not request more than 10k rules', async () => {
-    (findRules as jest.Mock)
+    (findRules as Mock)
       .mockResolvedValueOnce({
         total: 25555,
         page: 1,
@@ -97,7 +100,7 @@ describe('handleCoverageOverviewRequest', () => {
       },
     } as unknown as Rule;
 
-    (findRules as jest.Mock).mockResolvedValueOnce({
+    (findRules as Mock).mockResolvedValueOnce({
       total: 1,
       page: 1,
       perPage: 10000,
@@ -140,7 +143,7 @@ describe('handleCoverageOverviewRequest', () => {
       },
     } as unknown as Rule;
 
-    (findRules as jest.Mock).mockResolvedValueOnce({
+    (findRules as Mock).mockResolvedValueOnce({
       total: 1,
       page: 1,
       perPage: 10000,
@@ -163,7 +166,7 @@ describe('handleCoverageOverviewRequest', () => {
       params: {},
     } as unknown as Rule;
 
-    (findRules as jest.Mock).mockResolvedValueOnce({
+    (findRules as Mock).mockResolvedValueOnce({
       total: 1,
       page: 1,
       perPage: 10000,
@@ -199,15 +202,15 @@ describe('handleCoverageOverviewRequest', () => {
       },
     } as unknown as Rule;
 
-    (findRules as jest.Mock).mockResolvedValueOnce({
+    (findRules as Mock).mockResolvedValueOnce({
       total: 1,
       page: 1,
       perPage: 10000,
       data: [ruleWithMitreIds],
     });
 
-    const failingList = jest.fn().mockRejectedValue(new Error('SO unavailable'));
-    const mitreDataClient: MitreAttackDataClient = { list: failingList, getById: jest.fn() };
+    const failingList = vi.fn().mockRejectedValue(new Error('SO unavailable'));
+    const mitreDataClient: MitreAttackDataClient = { list: failingList, getById: vi.fn() };
 
     const result = await handleCoverageOverviewRequest({
       params: {},
@@ -240,7 +243,7 @@ describe('handleCoverageOverviewRequest', () => {
       },
     } as unknown as Rule;
 
-    (findRules as jest.Mock).mockResolvedValueOnce({
+    (findRules as Mock).mockResolvedValueOnce({
       total: 1,
       page: 1,
       perPage: 10000,
@@ -248,10 +251,10 @@ describe('handleCoverageOverviewRequest', () => {
     });
 
     // Simulates the state where the managed SO has not yet been populated.
-    const emptyList = jest
+    const emptyList = vi
       .fn()
       .mockResolvedValue({ tactics: [], techniques: [], subtechniques: [] });
-    const mitreDataClient: MitreAttackDataClient = { list: emptyList, getById: jest.fn() };
+    const mitreDataClient: MitreAttackDataClient = { list: emptyList, getById: vi.fn() };
 
     const result = await handleCoverageOverviewRequest({
       params: {},
@@ -272,8 +275,8 @@ describe('handleCoverageOverviewRequest', () => {
     });
 
     const managedBuckets = makeManagedBuckets(validIdSets);
-    const mockList = jest.fn().mockResolvedValue(managedBuckets);
-    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+    const mockList = vi.fn().mockResolvedValue(managedBuckets);
+    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: vi.fn() };
 
     const ruleWithBogusIds: Rule = {
       id: 'rule-bogus',
@@ -319,7 +322,7 @@ describe('handleCoverageOverviewRequest', () => {
       },
     } as unknown as Rule;
 
-    (findRules as jest.Mock).mockResolvedValueOnce({
+    (findRules as Mock).mockResolvedValueOnce({
       total: 2,
       page: 1,
       perPage: 10000,

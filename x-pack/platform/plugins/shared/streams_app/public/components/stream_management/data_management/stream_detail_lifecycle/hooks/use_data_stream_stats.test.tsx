@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
 import type { TimeState } from '@kbn/es-query';
@@ -12,14 +15,14 @@ import { useDataStreamStats } from './use_data_stream_stats';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 
-jest.mock('../../../../../hooks/use_kibana');
-jest.mock('../../../../../hooks/use_timefilter');
+vi.mock('../../../../../hooks/use_kibana');
+vi.mock('../../../../../hooks/use_timefilter');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseTimefilter = useTimefilter as jest.MockedFunction<typeof useTimefilter>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseTimefilter = useTimefilter as MockedFunction<typeof useTimefilter>;
 
 const mockDataStreamsClient = {
-  getDataStreamsStats: jest.fn(),
+  getDataStreamsStats: vi.fn(),
 };
 
 const mockFailureStoreStats = {
@@ -27,11 +30,11 @@ const mockFailureStoreStats = {
 };
 
 const mockStreamsRepositoryClient = {
-  fetch: jest.fn(),
+  fetch: vi.fn(),
 };
 
 const mockDataSearch = {
-  search: jest.fn(),
+  search: vi.fn(),
 };
 
 const mockDefinition = {
@@ -86,16 +89,16 @@ const createDeferred = <T,>() => {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 
   mockUseKibana.mockReturnValue({
     services: {
       dataStreamsClient: Promise.resolve(mockDataStreamsClient),
     },
     core: {
-      notifications: { toasts: { addError: jest.fn() } },
+      notifications: { toasts: { addError: vi.fn() } },
       uiSettings: {
-        get: jest.fn().mockImplementation((key: string) => {
+        get: vi.fn().mockImplementation((key: string) => {
           if (key === 'dateFormat') return 'MMM D, YYYY @ HH:mm:ss.SSS';
           if (key === 'histogram:maxBars') return 1000;
           if (key === 'histogram:barTarget') return 50;
@@ -479,7 +482,7 @@ describe('useDataStreamStats', () => {
     });
 
     it('should handle errors', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
       const mockError = new Error('Failed to fetch data stream stats');
       mockDataStreamsClient.getDataStreamsStats.mockRejectedValue(mockError);
 

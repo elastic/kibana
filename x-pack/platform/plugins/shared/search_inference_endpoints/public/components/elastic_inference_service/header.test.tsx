@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -17,13 +20,13 @@ import { useEisModels } from '../../hooks/use_eis_models';
 import { useKibana } from '../../hooks/use_kibana';
 import { useRegionPolicy } from '../../hooks/use_region_policy';
 
-jest.mock('../../hooks/use_kibana');
-jest.mock('../../hooks/use_region_policy');
-jest.mock('../../hooks/use_eis_models');
+vi.mock('../../hooks/use_kibana');
+vi.mock('../../hooks/use_region_policy');
+vi.mock('../../hooks/use_eis_models');
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseRegionPolicy = useRegionPolicy as jest.Mock;
-const mockUseEisModels = useEisModels as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseRegionPolicy = useRegionPolicy as Mock;
+const mockUseEisModels = useEisModels as Mock;
 
 const mockKibanaReturn = (options?: { manage?: boolean; cloud?: Record<string, unknown> }) => {
   const manage = options?.manage ?? true;
@@ -42,7 +45,7 @@ const mockKibanaReturn = (options?: { manage?: boolean; cloud?: Record<string, u
 };
 
 describe('ElasticInferenceServiceModelsHeader', () => {
-  const onManageRegions = jest.fn();
+  const onManageRegions = vi.fn();
 
   const renderHeader = (
     props: React.ComponentProps<typeof ElasticInferenceServiceModelsHeader> = { onManageRegions }
@@ -58,7 +61,7 @@ describe('ElasticInferenceServiceModelsHeader', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue(mockKibanaReturn());
     mockUseRegionPolicy.mockReturnValue({ data: null });
     mockUseEisModels.mockReturnValue({ data: [] });
@@ -136,7 +139,7 @@ describe('ElasticInferenceServiceModelsHeader', () => {
         mockKibanaReturn({
           cloud: {
             isCloudEnabled: true,
-            getPrivilegedUrls: jest
+            getPrivilegedUrls: vi
               .fn()
               .mockResolvedValue({ billingUrl: 'https://cloud.elastic.co/billing/' }),
           },
@@ -166,7 +169,7 @@ describe('ElasticInferenceServiceModelsHeader', () => {
         mockKibanaReturn({
           cloud: {
             isCloudEnabled: true,
-            getPrivilegedUrls: jest.fn().mockResolvedValue({}),
+            getPrivilegedUrls: vi.fn().mockResolvedValue({}),
           },
         })
       );

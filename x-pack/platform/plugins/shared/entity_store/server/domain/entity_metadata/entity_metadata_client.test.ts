@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { RelationshipMetadataDoc } from '../../../common/domain/entity_metadata/relationship_metadata';
@@ -12,17 +15,20 @@ import { EntityMetadataClient } from './entity_metadata_client';
 import { runWithSpan } from '../../telemetry/traces';
 import { ensureMetadataDataStreamMappingsOnce } from '../asset_manager/ensure_metadata_mappings';
 
-jest.mock('../../telemetry/traces', () => {
-  const actual = jest.requireActual('../../telemetry/traces');
+vi.mock('../../telemetry/traces', async () => {
+  const actual = (await vi.importActual('../../telemetry/traces'));
   return {
     ...actual,
-    runWithSpan: jest.fn(actual.runWithSpan),
+    runWithSpan: vi.fn(actual.runWithSpan),
   };
 });
 
-jest.mock('../asset_manager/ensure_metadata_mappings', () => ({
-  ensureMetadataDataStreamMappingsOnce: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../asset_manager/ensure_metadata_mappings', () => {
+      const mocked = {
+      ensureMetadataDataStreamMappingsOnce: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeDoc = (overrides: Partial<RelationshipMetadataDoc> = {}): RelationshipMetadataDoc =>
   ({
@@ -51,8 +57,8 @@ describe('EntityMetadataClient', () => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggerMock.create();
     client = new EntityMetadataClient({ esClient, logger, namespace: 'default' });
-    (runWithSpan as jest.Mock).mockClear();
-    (ensureMetadataDataStreamMappingsOnce as jest.Mock).mockClear();
+    (runWithSpan as Mock).mockClear();
+    (ensureMetadataDataStreamMappingsOnce as Mock).mockClear();
   });
 
   // Drains the helper `datasource` (so the mock counts docs) and invokes
@@ -60,7 +66,7 @@ describe('EntityMetadataClient', () => {
   const mockHelpersBulk = (
     drops: Array<{ status: number; error?: { type?: string; reason?: string } }> = []
   ) => {
-    const impl = jest.fn().mockImplementation(async (opts: any) => {
+    const impl = vi.fn().mockImplementation(async (opts: any) => {
       let total = 0;
       for await (const _ of opts.datasource) total++;
       for (const drop of drops) {
@@ -95,7 +101,7 @@ describe('EntityMetadataClient', () => {
         logger
       );
 
-      const ensureOrder = (ensureMetadataDataStreamMappingsOnce as jest.Mock).mock
+      const ensureOrder = (ensureMetadataDataStreamMappingsOnce as Mock).mock
         .invocationCallOrder[0];
       const bulkOrder = bulk.mock.invocationCallOrder[0];
       expect(ensureOrder).toBeLessThan(bulkOrder);
@@ -180,7 +186,7 @@ describe('EntityMetadataClient', () => {
     it('wraps the call in runWithSpan with the entityStore.metadata.bulk_append name', async () => {
       mockHelpersBulk();
       await client.bulkAppendMetadata([makeDoc()]);
-      const calls = (runWithSpan as jest.Mock).mock.calls;
+      const calls = (runWithSpan as Mock).mock.calls;
       const spanNames = calls.map((c) => (c[0] as { name?: string }).name);
       expect(spanNames).toContain('entityStore.metadata.bulk_append');
     });
@@ -188,7 +194,7 @@ describe('EntityMetadataClient', () => {
     it('records the doc count on the tracing span attributes', async () => {
       mockHelpersBulk();
       await client.bulkAppendMetadata([makeDoc(), makeDoc(), makeDoc()]);
-      const calls = (runWithSpan as jest.Mock).mock.calls;
+      const calls = (runWithSpan as Mock).mock.calls;
       const matching = calls.find(
         (c) => (c[0] as { name?: string }).name === 'entityStore.metadata.bulk_append'
       );
@@ -281,7 +287,7 @@ describe('EntityMetadataClient', () => {
         entityId: 'user:alice@corp',
         eventAction: 'relationship_observed',
       });
-      const spanNames = (runWithSpan as jest.Mock).mock.calls.map(
+      const spanNames = (runWithSpan as Mock).mock.calls.map(
         (c) => (c[0] as { name?: string }).name
       );
       expect(spanNames).toContain('entityStore.metadata.get_latest_by_entity_id');

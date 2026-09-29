@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import dateMath from '@kbn/datemath';
 import { mlExecutor } from './ml';
 import { getCompleteRuleMock, getMlRuleParams } from '../../rule_schema/mocks';
@@ -17,14 +20,14 @@ import { getSharedParamsMock } from '../__mocks__/shared_params';
 import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
-jest.mock('./find_ml_signals');
-jest.mock('./bulk_create_ml_signals');
+vi.mock('./find_ml_signals');
+vi.mock('./bulk_create_ml_signals');
 
 describe('ml_executor', () => {
-  let mockScheduledNotificationResponseAction: jest.Mock;
-  let jobsSummaryMock: jest.Mock;
-  let forceStartDatafeedsMock: jest.Mock;
-  let stopDatafeedsMock: jest.Mock;
+  let mockScheduledNotificationResponseAction: Mock;
+  let jobsSummaryMock: Mock;
+  let forceStartDatafeedsMock: Mock;
+  let stopDatafeedsMock: Mock;
   let mlMock: ReturnType<typeof mlPluginServerMock.createSetupContract>;
   let ruleServices: PersistenceExecutorOptionsMock;
 
@@ -46,8 +49,8 @@ describe('ml_executor', () => {
   sharedParams.ruleExecutionLogger = ruleExecutionLogger;
 
   beforeEach(() => {
-    mockScheduledNotificationResponseAction = jest.fn();
-    jobsSummaryMock = jest.fn();
+    mockScheduledNotificationResponseAction = vi.fn();
+    jobsSummaryMock = vi.fn();
     mlMock = mlPluginServerMock.createSetupContract();
     mlMock.jobServiceProvider.mockReturnValue({
       jobsSummary: jobsSummaryMock,
@@ -57,7 +60,7 @@ describe('ml_executor', () => {
       stopDatafeeds: stopDatafeedsMock,
     });
     ruleServices = createPersistenceExecutorOptionsMock();
-    (findMlSignals as jest.Mock).mockResolvedValue({
+    (findMlSignals as Mock).mockResolvedValue({
       anomalyResults: {
         _shards: {},
         hits: {
@@ -65,7 +68,7 @@ describe('ml_executor', () => {
         },
       },
     });
-    (bulkCreateMlSignals as jest.Mock).mockResolvedValue({
+    (bulkCreateMlSignals as Mock).mockResolvedValue({
       success: true,
       bulkCreateDuration: 21,
       createdItemsCount: 0,
@@ -81,7 +84,7 @@ describe('ml_executor', () => {
         sharedParams,
         ml: undefined,
         services: ruleServices,
-        wrapSuppressedHits: jest.fn(),
+        wrapSuppressedHits: vi.fn(),
         isAlertSuppressionActive: true,
         scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
       })
@@ -94,7 +97,7 @@ describe('ml_executor', () => {
       sharedParams,
       ml: mlMock,
       services: ruleServices,
-      wrapSuppressedHits: jest.fn(),
+      wrapSuppressedHits: vi.fn(),
       isAlertSuppressionActive: true,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
@@ -116,7 +119,7 @@ describe('ml_executor', () => {
       sharedParams,
       ml: mlMock,
       services: ruleServices,
-      wrapSuppressedHits: jest.fn(),
+      wrapSuppressedHits: vi.fn(),
       isAlertSuppressionActive: true,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
@@ -126,7 +129,7 @@ describe('ml_executor', () => {
   });
 
   it('should report job missing errors as user errors', async () => {
-    (findMlSignals as jest.Mock).mockRejectedValue({
+    (findMlSignals as Mock).mockRejectedValue({
       message: 'my_test_job_name missing',
     });
 
@@ -134,7 +137,7 @@ describe('ml_executor', () => {
       sharedParams,
       ml: mlMock,
       services: ruleServices,
-      wrapSuppressedHits: jest.fn(),
+      wrapSuppressedHits: vi.fn(),
       isAlertSuppressionActive: true,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
@@ -158,7 +161,7 @@ describe('ml_executor', () => {
       sharedParams,
       ml: mlMock,
       services: ruleServices,
-      wrapSuppressedHits: jest.fn(),
+      wrapSuppressedHits: vi.fn(),
       isAlertSuppressionActive: true,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
@@ -174,7 +177,7 @@ describe('ml_executor', () => {
       sharedParams,
       ml: mlMock,
       services: ruleServices,
-      wrapSuppressedHits: jest.fn(),
+      wrapSuppressedHits: vi.fn(),
       isAlertSuppressionActive: true,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });

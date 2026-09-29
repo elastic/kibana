@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import React from 'react';
 import type { ComponentProps } from 'react';
 import {
@@ -20,9 +23,9 @@ import * as supportedLanguages from './languages/supported';
 
 const defaultProps: Partial<ComponentProps<typeof MonacoEditor>> = {
   options: {},
-  editorDidMount: jest.fn(),
-  editorWillMount: jest.fn(),
-  editorWillUnmount: jest.fn(),
+  editorDidMount: vi.fn(),
+  editorWillMount: vi.fn(),
+  editorWillUnmount: vi.fn(),
 };
 
 const createEvent = (
@@ -45,16 +48,16 @@ const createRange = (): monaco.IRange => ({
   endColumn: 1,
 });
 
-const createDisposable = (): monaco.IDisposable => ({ dispose: jest.fn() });
+const createDisposable = (): monaco.IDisposable => ({ dispose: vi.fn() });
 
 const setupMonacoEditorHarness = (params: {
   onDidChangeModelContent?: (cb: (e: monaco.editor.IModelContentChangedEvent) => void) => void;
-  onPushUndoStop: jest.Mock;
+  onPushUndoStop: Mock;
   onCreateModel?: (model: monaco.editor.ITextModel) => void;
 }) => {
   const disposable = createDisposable();
 
-  const createSpy = jest.spyOn(monaco.editor, 'create').mockImplementation((container, options) => {
+  const createSpy = vi.spyOn(monaco.editor, 'create').mockImplementation((container, options) => {
     if (!options?.model) {
       throw new Error('expected create() to be called with a model');
     }
@@ -69,19 +72,19 @@ const setupMonacoEditorHarness = (params: {
       },
       getModel: () => model,
       pushUndoStop: params.onPushUndoStop,
-      updateOptions: jest.fn(),
-      layout: jest.fn(),
-      dispose: jest.fn(),
+      updateOptions: vi.fn(),
+      layout: vi.fn(),
+      dispose: vi.fn(),
       getDomNode: () => null,
     } as unknown as monaco.editor.IStandaloneCodeEditor;
 
     return editor;
   });
 
-  const markersSpy = jest
+  const markersSpy = vi
     .spyOn(monaco.editor, 'onDidChangeMarkers')
     .mockImplementation(() => disposable);
-  const getModelMarkersSpy = jest.spyOn(monaco.editor, 'getModelMarkers').mockReturnValue([]);
+  const getModelMarkersSpy = vi.spyOn(monaco.editor, 'getModelMarkers').mockReturnValue([]);
 
   const cleanup = () => {
     createSpy.mockRestore();
@@ -97,7 +100,7 @@ describe('react monaco editor', () => {
 
   beforeEach(() => {
     const { cleanup } = setupMonacoEditorHarness({
-      onPushUndoStop: jest.fn(),
+      onPushUndoStop: vi.fn(),
     });
     cleanupMonaco = cleanup;
   });
@@ -108,7 +111,7 @@ describe('react monaco editor', () => {
   });
 
   beforeAll(() => {
-    jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(
       (contextId, options) =>
         ({
           webkitBackingStorePixelRatio: 1,
@@ -117,7 +120,7 @@ describe('react monaco editor', () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('registers all supported languages', () => {
@@ -131,7 +134,7 @@ describe('react monaco editor', () => {
   });
 
   it('registers the default theme', () => {
-    const defineThemeSpy = jest.spyOn(window.MonacoEnvironment?.monaco.editor!, 'defineTheme');
+    const defineThemeSpy = vi.spyOn(window.MonacoEnvironment?.monaco.editor!, 'defineTheme');
 
     render(<MonacoEditor {...defaultProps} />);
 
@@ -154,7 +157,7 @@ describe('react monaco editor', () => {
   it('uses defaultValue when value is undefined (uncontrolled mode)', async () => {
     const originalCreateModel = monaco.editor.createModel.bind(monaco.editor);
     let firstArg: unknown;
-    const createModelSpy = jest
+    const createModelSpy = vi
       .spyOn(monaco.editor, 'createModel')
       .mockImplementation((...args) => {
         firstArg = args[0];
@@ -177,11 +180,11 @@ describe('react monaco editor onChange performance', () => {
 
   beforeEach(() => {
     lastOnDidChangeModelContentCb = undefined;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('computes the next value from event.changes (including multiple changes)', async () => {
-    const editorPushUndoStop = jest.fn();
+    const editorPushUndoStop = vi.fn();
 
     let createdModel: monaco.editor.ITextModel | undefined;
     const { cleanup } = setupMonacoEditorHarness({
@@ -194,7 +197,7 @@ describe('react monaco editor onChange performance', () => {
       },
     });
 
-    const onChange = jest.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
+    const onChange = vi.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
 
     render(
       <MonacoEditor value={null} defaultValue="abcdefghij" onChange={onChange} options={{}} />
@@ -220,16 +223,16 @@ describe('react monaco editor onChange performance', () => {
 
   it('does not normalize or push edits when a controlled rerender matches the shadow value', async () => {
     const originalCreateModel = monaco.editor.createModel.bind(monaco.editor);
-    let pushEditOperationsSpy: jest.SpyInstance | undefined;
-    const createModelSpy = jest
+    let pushEditOperationsSpy: MockInstance | undefined;
+    const createModelSpy = vi
       .spyOn(monaco.editor, 'createModel')
       .mockImplementation((...args) => {
         const model = originalCreateModel(...args);
-        pushEditOperationsSpy = jest.spyOn(model, 'pushEditOperations');
+        pushEditOperationsSpy = vi.spyOn(model, 'pushEditOperations');
         return model;
       });
 
-    const editorPushUndoStop = jest.fn();
+    const editorPushUndoStop = vi.fn();
     const { cleanup } = setupMonacoEditorHarness({
       onDidChangeModelContent: (cb) => {
         lastOnDidChangeModelContentCb = cb;
@@ -237,7 +240,7 @@ describe('react monaco editor onChange performance', () => {
       onPushUndoStop: editorPushUndoStop,
     });
 
-    const onChange = jest.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
+    const onChange = vi.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
     const { rerender } = render(
       <MonacoEditor value="abcdefghij" onChange={onChange} options={{}} />
     );
@@ -251,7 +254,7 @@ describe('react monaco editor onChange performance', () => {
 
     expect(onChange).toHaveBeenCalledWith('abXXXXefghij', event);
 
-    const stringIncludesSpy = jest.spyOn(String.prototype, 'includes');
+    const stringIncludesSpy = vi.spyOn(String.prototype, 'includes');
     try {
       rerender(<MonacoEditor value="abXXXXefghij" onChange={onChange} options={{}} />);
 
@@ -270,7 +273,7 @@ describe('react monaco editor onChange performance', () => {
     it('SHOULD apply Monaco change offsets to a CRLF-normalized shadow value', async () => {
       let createdModel: monaco.editor.ITextModel | undefined;
 
-      const editorPushUndoStop = jest.fn();
+      const editorPushUndoStop = vi.fn();
       const { cleanup } = setupMonacoEditorHarness({
         onDidChangeModelContent: (cb) => {
           lastOnDidChangeModelContentCb = cb;
@@ -281,7 +284,7 @@ describe('react monaco editor onChange performance', () => {
         },
       });
 
-      const onChange = jest.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
+      const onChange = vi.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
       const { rerender } = render(<MonacoEditor value="" onChange={onChange} options={{}} />);
 
       await screen.findByTestId(OVERFLOW_WIDGETS_TEST_ID);
@@ -309,7 +312,7 @@ describe('react monaco editor onChange performance', () => {
     it('SHOULD apply Monaco change offsets to an LF-normalized shadow value', async () => {
       let createdModel: monaco.editor.ITextModel | undefined;
 
-      const editorPushUndoStop = jest.fn();
+      const editorPushUndoStop = vi.fn();
       const { cleanup } = setupMonacoEditorHarness({
         onDidChangeModelContent: (cb) => {
           lastOnDidChangeModelContentCb = cb;
@@ -320,7 +323,7 @@ describe('react monaco editor onChange performance', () => {
         },
       });
 
-      const onChange = jest.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
+      const onChange = vi.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
       const { rerender } = render(<MonacoEditor value="" onChange={onChange} options={{}} />);
 
       await screen.findByTestId(OVERFLOW_WIDGETS_TEST_ID);
@@ -346,21 +349,21 @@ describe('react monaco editor onChange performance', () => {
 
   it('pushes a full replace when controlled value changes externally', async () => {
     const originalCreateModel = monaco.editor.createModel.bind(monaco.editor);
-    let pushEditOperationsSpy: jest.SpyInstance | undefined;
-    const createModelSpy = jest
+    let pushEditOperationsSpy: MockInstance | undefined;
+    const createModelSpy = vi
       .spyOn(monaco.editor, 'createModel')
       .mockImplementation((...args) => {
         const model = originalCreateModel(...args);
-        pushEditOperationsSpy = jest.spyOn(model, 'pushEditOperations');
+        pushEditOperationsSpy = vi.spyOn(model, 'pushEditOperations');
         return model;
       });
 
-    const editorPushUndoStop = jest.fn();
+    const editorPushUndoStop = vi.fn();
     const { cleanup } = setupMonacoEditorHarness({
       onPushUndoStop: editorPushUndoStop,
     });
 
-    const onChange = jest.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
+    const onChange = vi.fn<void, [string, monaco.editor.IModelContentChangedEvent]>();
     const { rerender } = render(<MonacoEditor value="initial" onChange={onChange} options={{}} />);
 
     await screen.findByTestId(OVERFLOW_WIDGETS_TEST_ID);

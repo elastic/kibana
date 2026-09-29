@@ -5,33 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { getFallbackKibanaUrl, useKibanaUrl } from './use_kibana_url';
 import { useKibana } from './use_kibana';
 import { useSpaceId } from './use_space_id';
 
-jest.mock('./use_kibana');
-jest.mock('./use_space_id');
+vi.mock('./use_kibana');
+vi.mock('./use_space_id');
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseSpaceId = useSpaceId as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseSpaceId = useSpaceId as Mock;
 
 const mockHttp = (publicBaseUrl: string | undefined, serverBasePath = '') => ({
   basePath: {
     publicBaseUrl,
     serverBasePath,
-    get: jest.fn().mockReturnValue('/base'),
+    get: vi.fn().mockReturnValue('/base'),
   },
 });
 
 describe('getFallbackKibanaUrl', () => {
   it('returns window.location.origin combined with the base path', () => {
-    const http = { basePath: { get: jest.fn().mockReturnValue('/base') } } as any;
+    const http = { basePath: { get: vi.fn().mockReturnValue('/base') } } as any;
     expect(getFallbackKibanaUrl(http)).toBe(`${window.location.origin}/base`);
   });
 
   it('handles an empty base path', () => {
-    const http = { basePath: { get: jest.fn().mockReturnValue('') } } as any;
+    const http = { basePath: { get: vi.fn().mockReturnValue('') } } as any;
     expect(getFallbackKibanaUrl(http)).toBe(window.location.origin);
   });
 });

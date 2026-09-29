@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { FleetRequestHandlerContext } from '../..';
@@ -17,13 +20,16 @@ import { ListDataStreamsResponseSchema } from '.';
 
 import { getListHandler, getDeprecatedILMCheckHandler } from './handlers';
 
-jest.mock('./handlers', () => ({
-  getListHandler: jest.fn(),
-  getDeprecatedILMCheckHandler: jest.fn(),
-}));
+vi.mock('./handlers', () => {
+      const mocked = {
+      getListHandler: vi.fn(),
+      getDeprecatedILMCheckHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getListHandlerMock = getListHandler as jest.Mock;
-const getDeprecatedILMCheckHandlerMock = getDeprecatedILMCheckHandler as jest.Mock;
+const getListHandlerMock = getListHandler as Mock;
+const getDeprecatedILMCheckHandlerMock = getDeprecatedILMCheckHandler as Mock;
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;

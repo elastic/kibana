@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import type { LogLevelId, Logger } from '@kbn/logging';
 import { unsafeConsole } from '@kbn/security-hardening';
 import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
@@ -16,7 +19,7 @@ import type { BaseLogger } from './logger';
 describe('BrowserLoggingSystem', () => {
   const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 33, 22, 11));
 
-  let mockConsoleLog: jest.SpyInstance;
+  let mockConsoleLog: MockInstance;
 
   const createLoggingConfig = (parts: Partial<BrowserLoggingConfig> = {}): BrowserLoggingConfig => {
     return {
@@ -29,8 +32,8 @@ describe('BrowserLoggingSystem', () => {
   };
 
   beforeEach(() => {
-    mockConsoleLog = jest.spyOn(unsafeConsole, 'log').mockReturnValue(undefined);
-    jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
+    mockConsoleLog = vi.spyOn(unsafeConsole, 'log').mockReturnValue(undefined);
+    vi.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
   });
 
   afterEach(() => {

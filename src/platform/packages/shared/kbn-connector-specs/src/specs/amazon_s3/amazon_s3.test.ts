@@ -7,21 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 
-const mockListAmazonS3Buckets = jest.fn();
-const mockListAmazonS3BucketObjects = jest.fn();
-const mockGetAmazonS3BucketObjectMetadata = jest.fn();
-const mockGenerateAmazonS3BucketObjectPresignedUrl = jest.fn();
-const mockDownloadAmazonS3BucketObject = jest.fn();
+const mockListAmazonS3Buckets = vi.fn();
+const mockListAmazonS3BucketObjects = vi.fn();
+const mockGetAmazonS3BucketObjectMetadata = vi.fn();
+const mockGenerateAmazonS3BucketObjectPresignedUrl = vi.fn();
+const mockDownloadAmazonS3BucketObject = vi.fn();
 
-jest.mock('./amazon_s3_api', () => ({
-  listAmazonS3Buckets: mockListAmazonS3Buckets,
-  listAmazonS3BucketObjects: mockListAmazonS3BucketObjects,
-  getAmazonS3BucketObjectMetadata: mockGetAmazonS3BucketObjectMetadata,
-  generateAmazonS3BucketObjectPresignedUrl: mockGenerateAmazonS3BucketObjectPresignedUrl,
-  downloadAmazonS3BucketObject: mockDownloadAmazonS3BucketObject,
-}));
+vi.mock('./amazon_s3_api', () => {
+      const mocked = {
+      listAmazonS3Buckets: mockListAmazonS3Buckets,
+      listAmazonS3BucketObjects: mockListAmazonS3BucketObjects,
+      getAmazonS3BucketObjectMetadata: mockGetAmazonS3BucketObjectMetadata,
+      generateAmazonS3BucketObjectPresignedUrl: mockGenerateAmazonS3BucketObjectPresignedUrl,
+      downloadAmazonS3BucketObject: mockDownloadAmazonS3BucketObject,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Load the module under test after mocks are in place
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -29,8 +34,8 @@ const { AmazonS3 } = require('./amazon_s3');
 
 describe('AmazonS3', () => {
   const mockClient = {
-    get: jest.fn(),
-    head: jest.fn(),
+    get: vi.fn(),
+    head: vi.fn(),
   };
 
   const mockContext = {
@@ -43,11 +48,11 @@ describe('AmazonS3', () => {
       accessKeyId: 'example_access_key',
       secretAccessKey: 'example_secret_key',
     },
-    log: { debug: jest.fn() },
+    log: { debug: vi.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should list buckets', async () => {

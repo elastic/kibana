@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { readCasesPermissions, TestProviders } from '../../../common/mock';
 import { NoCases } from '.';
 import type { NoCasesComp } from '.';
 
-jest.mock('../../../common/navigation/hooks');
+vi.mock('../../../common/navigation/hooks');
 
 describe('NoCases', () => {
   const defaultProps: NoCasesComp = {

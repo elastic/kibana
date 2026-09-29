@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable dot-notation */
 import { ElasticV3ServerShipper } from '@elastic/ebt/shippers/elastic_v3/server';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -45,7 +47,7 @@ describe('TelemetryPlugin', () => {
         const coreSetupMock = coreMock.createSetup();
 
         const telemetryPlugin = new TelemetryPlugin(initializerContext);
-        telemetryPlugin['getSendToEnv'] = jest.fn();
+        telemetryPlugin['getSendToEnv'] = vi.fn();
 
         telemetryPlugin.setup(coreSetupMock, {
           usageCollection: usageCollectionPluginMock.createSetupContract(),
@@ -71,7 +73,7 @@ describe('TelemetryPlugin', () => {
         const coreSetupMock = coreMock.createSetup();
 
         const telemetryPlugin = new TelemetryPlugin(initializerContext);
-        telemetryPlugin['getSendToEnv'] = jest.fn();
+        telemetryPlugin['getSendToEnv'] = vi.fn();
 
         telemetryPlugin.setup(coreSetupMock, {
           usageCollection: usageCollectionPluginMock.createSetupContract(),
@@ -102,7 +104,7 @@ describe('TelemetryPlugin', () => {
 
         const plugin = new TelemetryPlugin(initializerContext);
 
-        const startFetcherMock = (plugin['startFetcher'] = jest.fn());
+        const startFetcherMock = (plugin['startFetcher'] = vi.fn());
 
         plugin.setup(coreMock.createSetup(), {
           usageCollection: usageCollectionPluginMock.createSetupContract(),
@@ -117,7 +119,7 @@ describe('TelemetryPlugin', () => {
       }
 
       afterEach(() => {
-        jest.resetAllMocks();
+        vi.resetAllMocks();
       });
 
       it('calls startFetcher when it is a UI node', () => {

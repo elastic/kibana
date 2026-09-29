@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   createPromiseFromStreams,
   createListStream,
@@ -27,7 +29,7 @@ describe('intersperseStream', () => {
 
   test('emits values as soon as possible, does not needlessly buffer', async () => {
     const str = createIntersperseStream('y');
-    const onData = jest.fn();
+    const onData = vi.fn();
     str.on('data', onData);
 
     str.write('a');

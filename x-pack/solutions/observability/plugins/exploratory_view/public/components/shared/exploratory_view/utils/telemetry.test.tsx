@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { AppDataType } from '../types';
 import { trackTelemetryOnApply, trackTelemetryOnLoad } from './telemetry';
 
@@ -38,7 +40,7 @@ const mockMultipleSeries = [
 
 describe('telemetry', function () {
   it('ensures that appropriate telemetry is called when settings are applied', () => {
-    const trackEvent = jest.fn();
+    const trackEvent = vi.fn();
     trackTelemetryOnApply(trackEvent, mockMultipleSeries, 'kpi-over-time');
 
     expect(trackEvent).toHaveBeenCalledTimes(7);
@@ -83,7 +85,7 @@ describe('telemetry', function () {
   });
 
   it('does not call track event for report type/data type/metric type config unless all values are truthy', () => {
-    const trackEvent = jest.fn();
+    const trackEvent = vi.fn();
     const series = {
       ...mockMultipleSeries[1],
       filters: undefined,
@@ -107,7 +109,7 @@ describe('telemetry', function () {
     [1635784050000, '30-60'],
     [1635784080000, '60+'],
   ])('ensures that appropriate telemetry is called when chart is loaded', (endTime, range) => {
-    const trackEvent = jest.fn();
+    const trackEvent = vi.fn();
     trackTelemetryOnLoad(trackEvent, 1635784020000, endTime);
 
     expect(trackEvent).toHaveBeenCalledTimes(1);

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 // This import needs to come first as it contains the jest.mocks
 import { createPreviewError, mockDocuments } from './helpers/mocks';
 import { setupEnvironment } from './helpers';
@@ -18,11 +20,11 @@ describe('<FieldEditorFlyoutContent />', () => {
   const { httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(async () => {
@@ -82,7 +84,7 @@ describe('<FieldEditorFlyoutContent />', () => {
       type: 'date' as const,
       script: { source: 'test=123' },
     };
-    const onSave = jest.fn();
+    const onSave = vi.fn();
 
     const {
       actions: { saveField },
@@ -98,7 +100,7 @@ describe('<FieldEditorFlyoutContent />', () => {
   });
 
   it('should accept an onCancel prop', async () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
     const {
       actions: { closeFlyout },
     } = await setup({ onCancel });
@@ -110,7 +112,7 @@ describe('<FieldEditorFlyoutContent />', () => {
 
   describe('validation', () => {
     it('should validate the fields and prevent saving invalid form', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
 
       const {
         actions: { saveField },
@@ -127,7 +129,7 @@ describe('<FieldEditorFlyoutContent />', () => {
     });
 
     it('should forward default values from the form', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
 
       const {
         actions: { fields, saveField, toggleFormRow, waitForUpdates },
@@ -153,7 +155,7 @@ describe('<FieldEditorFlyoutContent />', () => {
     });
 
     it('should forward updated type and popularity from the form', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       const fieldToCreate = {
         name: 'someName',
         type: 'keyword' as const,
@@ -205,7 +207,7 @@ describe('<FieldEditorFlyoutContent />', () => {
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: [], error, status: 400 });
       setSearchResponse([]);
 
-      const onSave = jest.fn();
+      const onSave = vi.fn();
 
       const {
         actions: { fields, saveField, toggleFormRow, waitForUpdates },

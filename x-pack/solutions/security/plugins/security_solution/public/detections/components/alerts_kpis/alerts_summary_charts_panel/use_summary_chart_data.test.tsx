@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
@@ -20,10 +22,10 @@ const to = '2022-04-08T12:00:00.000Z';
 const additionalFilters = [{ bool: { filter: [], must: [], must_not: [], should: [] } }];
 
 const dateNow = new Date(to).valueOf();
-const mockDateNow = jest.fn().mockReturnValue(dateNow);
-Date.now = jest.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
+const mockDateNow = vi.fn().mockReturnValue(dateNow);
+Date.now = vi.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 const defaultUseQueryAlertsReturn = {
   loading: false,
@@ -33,17 +35,17 @@ const defaultUseQueryAlertsReturn = {
   request: '',
   refetch: () => {},
 };
-const mockUseQueryAlerts = jest.fn().mockReturnValue(defaultUseQueryAlertsReturn);
-jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
+const mockUseQueryAlerts = vi.fn().mockReturnValue(defaultUseQueryAlertsReturn);
+vi.mock('../../../containers/detection_engine/alerts/use_query', () => {
   return {
     useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
   };
 });
 
-const mockUseGlobalTime = jest
+const mockUseGlobalTime = vi
   .fn()
-  .mockReturnValue({ from, to, setQuery: jest.fn(), deleteQuery: jest.fn() });
-jest.mock('../../../../common/containers/use_global_time', () => {
+  .mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() });
+vi.mock('../../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
   };
@@ -90,7 +92,7 @@ const renderUseSummaryChartData = (props: Partial<UseAlertsQueryProps> = {}) =>
 
 describe('get summary charts data', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockDateNow.mockReturnValue(dateNow);
     mockUseQueryAlerts.mockReturnValue(defaultUseQueryAlertsReturn);
   });
@@ -165,7 +167,7 @@ describe('get summary charts data', () => {
 
   describe('get alerts by rule data', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockDateNow.mockReturnValue(dateNow);
       mockUseQueryAlerts.mockReturnValue(defaultUseQueryAlertsReturn);
     });
@@ -208,7 +210,7 @@ describe('get summary charts data', () => {
 
   describe('get top alerts data', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockDateNow.mockReturnValue(dateNow);
       mockUseQueryAlerts.mockReturnValue(defaultUseQueryAlertsReturn);
     });

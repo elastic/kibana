@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RiskScore, RiskScoreMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { sampleDocRiskScore } from '../../__mocks__/es_results';
 import type { BuildRiskScoreFromMappingReturn } from './build_risk_score_from_mapping';
@@ -12,7 +14,7 @@ import { buildRiskScoreFromMapping } from './build_risk_score_from_mapping';
 
 describe('buildRiskScoreFromMapping', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('base cases: when mapping is undefined', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { IGNORE_ATTR } from '../constants';
@@ -33,7 +35,7 @@ describe('CommentModeOverlay', () => {
 
   const renderOverlay = () => {
     const controller = createCommentsController(createHostServices({ ignoreSelectors: ['#host'] }));
-    controller.pick = jest.fn();
+    controller.pick = vi.fn();
     render(
       <CommentsProvider controller={controller}>
         <CommentModeOverlay />
@@ -45,7 +47,7 @@ describe('CommentModeOverlay', () => {
   it('starts a comment where the pointer is released, on disabled controls too, but not on clicks the page synthesizes', () => {
     const controller = renderOverlay();
     const target = query<HTMLButtonElement>('#target');
-    const pageHandler = jest.fn();
+    const pageHandler = vi.fn();
     target.addEventListener('click', pageHandler);
     // Browsers dispatch the pointer's release on a disabled control, but never a click.
     target.disabled = true;
@@ -66,7 +68,7 @@ describe('CommentModeOverlay', () => {
   it('selects the focused element with Enter or Space, swallowing both key phases', () => {
     const controller = renderOverlay();
     const target = query('#target');
-    const pageHandler = jest.fn();
+    const pageHandler = vi.fn();
     target.addEventListener('keydown', pageHandler);
 
     expect(keyDown(target, { key: 'Enter' }).defaultPrevented).toBe(true);
@@ -82,7 +84,7 @@ describe('CommentModeOverlay', () => {
   it('lets focus movement, Escape and shortcuts through, but no typing or pasting', () => {
     renderOverlay();
     const field = query('#field');
-    const pageHandler = jest.fn();
+    const pageHandler = vi.fn();
     field.addEventListener('keydown', pageHandler);
 
     expect(keyDown(field, { key: 'Tab' }).defaultPrevented).toBe(false);
@@ -103,7 +105,7 @@ describe('CommentModeOverlay', () => {
 
   it('does not select the document body and leaves the layer and excluded UI alone', () => {
     const controller = renderOverlay();
-    const hostHandler = jest.fn();
+    const hostHandler = vi.fn();
     query('#hostButton').addEventListener('click', hostHandler);
 
     keyDown(document.body, { key: 'Enter' });

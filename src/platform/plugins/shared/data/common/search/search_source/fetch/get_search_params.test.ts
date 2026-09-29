@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { UI_SETTINGS } from '../../../constants';
 import type { GetConfigFn } from '../../../types';
 import { getSearchParamsFromRequest, getEsPreference } from './get_search_params';
@@ -108,7 +110,7 @@ describe('getSearchParams', () => {
   });
 
   describe('getEsPreference', () => {
-    const mockConfigGet = jest.fn();
+    const mockConfigGet = vi.fn();
 
     beforeEach(() => {
       mockConfigGet.mockClear();

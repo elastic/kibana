@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -22,7 +24,7 @@ function renderComboBox(
     <WorkflowComboBox
       workflows={workflows}
       value={[]}
-      onChange={jest.fn()}
+      onChange={vi.fn()}
       aria-label="Workflows"
       {...props}
     />
@@ -48,7 +50,7 @@ describe('WorkflowComboBox', () => {
 
   it('allows removing a selected disabled workflow', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderComboBox({ value: ['wf-disabled'], onChange });
 
     await user.click(

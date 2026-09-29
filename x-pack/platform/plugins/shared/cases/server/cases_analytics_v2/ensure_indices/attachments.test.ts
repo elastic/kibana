@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ATTACHMENTS_INDEX_NAME } from '../constants';
@@ -17,18 +20,18 @@ const buildDeps = () => ({
 
 describe('ensureAttachmentsIndex', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('creates the index with the correct settings when it does not exist', async () => {
     const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
-    (esClient.indices.create as unknown as jest.Mock).mockResolvedValue({});
+    (esClient.indices.exists as unknown as Mock).mockResolvedValue(false);
+    (esClient.indices.create as unknown as Mock).mockResolvedValue({});
 
     await ensureAttachmentsIndex({ esClient, logger });
 
     expect(esClient.indices.create).toHaveBeenCalledTimes(1);
-    const call = (esClient.indices.create as unknown as jest.Mock).mock.calls[0][0];
+    const call = (esClient.indices.create as unknown as Mock).mock.calls[0][0];
     expect(call.index).toBe(ATTACHMENTS_INDEX_NAME);
     expect(call.settings).toMatchObject({ 'index.hidden': true });
   });
@@ -44,18 +47,18 @@ describe('ensureAttachmentsIndex', () => {
    */
   it('sets auto_expand_replicas to prevent max_shards_open failures on single-node clusters', async () => {
     const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
-    (esClient.indices.create as unknown as jest.Mock).mockResolvedValue({});
+    (esClient.indices.exists as unknown as Mock).mockResolvedValue(false);
+    (esClient.indices.create as unknown as Mock).mockResolvedValue({});
 
     await ensureAttachmentsIndex({ esClient, logger });
 
-    const call = (esClient.indices.create as unknown as jest.Mock).mock.calls[0][0];
+    const call = (esClient.indices.create as unknown as Mock).mock.calls[0][0];
     expect(call.settings['index.auto_expand_replicas']).toBe('0-1');
   });
 
   it('skips creation and logs debug when the index already exists', async () => {
     const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(true);
+    (esClient.indices.exists as unknown as Mock).mockResolvedValue(true);
 
     await ensureAttachmentsIndex({ esClient, logger });
 
@@ -67,11 +70,11 @@ describe('ensureAttachmentsIndex', () => {
 
   it('swallows resource_already_exists_exception from a concurrent bootstrap race', async () => {
     const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
+    (esClient.indices.exists as unknown as Mock).mockResolvedValue(false);
     const err = Object.assign(new Error('already exists'), {
       meta: { body: { error: { type: 'resource_already_exists_exception' } } },
     });
-    (esClient.indices.create as unknown as jest.Mock).mockRejectedValue(err);
+    (esClient.indices.create as unknown as Mock).mockRejectedValue(err);
 
     await expect(ensureAttachmentsIndex({ esClient, logger })).resolves.toBeUndefined();
     expect(logger.error).not.toHaveBeenCalled();
@@ -79,7 +82,7 @@ describe('ensureAttachmentsIndex', () => {
 
   it('throws an actionable message when the cluster shard limit is reached', async () => {
     const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
+    (esClient.indices.exists as unknown as Mock).mockResolvedValue(false);
     const err = Object.assign(new Error('Validation Failed: 1: this action would add [2] shards'), {
       meta: {
         body: {
@@ -91,7 +94,7 @@ describe('ensureAttachmentsIndex', () => {
         },
       },
     });
-    (esClient.indices.create as unknown as jest.Mock).mockRejectedValue(err);
+    (esClient.indices.create as unknown as Mock).mockRejectedValue(err);
 
     await expect(ensureAttachmentsIndex({ esClient, logger })).rejects.toThrow(
       'cluster.max_shards_per_node'
@@ -100,9 +103,9 @@ describe('ensureAttachmentsIndex', () => {
 
   it('throws on unexpected ES failure so the caller can handle it', async () => {
     const { esClient, logger } = buildDeps();
-    (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(false);
+    (esClient.indices.exists as unknown as Mock).mockResolvedValue(false);
     const err = new Error('cluster_block_exception');
-    (esClient.indices.create as unknown as jest.Mock).mockRejectedValue(err);
+    (esClient.indices.create as unknown as Mock).mockRejectedValue(err);
 
     await expect(ensureAttachmentsIndex({ esClient, logger })).rejects.toThrow(
       'cluster_block_exception'

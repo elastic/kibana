@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { render } from '@testing-library/react';
@@ -13,7 +16,7 @@ import { WORKFLOW_STATUS_DETAILS_TEST_ID, WORKFLOW_STATUS_TITLE_TEST_ID } from '
 import { TestProviders } from '../../../../common/mock';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 
-jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -52,10 +55,10 @@ const mockUserProfiles = [
 ];
 
 describe('<AlertStatus />', () => {
-  const mockUseBulkGetUserProfiles = useBulkGetUserProfiles as jest.Mock;
+  const mockUseBulkGetUserProfiles = useBulkGetUserProfiles as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseBulkGetUserProfiles.mockReturnValue({
       data: mockUserProfiles,
     });

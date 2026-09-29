@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import type { DeleteConversationParams, GetConversationByIdParams } from './conversations';
@@ -15,12 +17,12 @@ import { coreMock } from '@kbn/core/public/mocks';
 let http: HttpSetupMock = coreMock.createSetup().http;
 
 const toasts = {
-  addError: jest.fn(),
+  addError: vi.fn(),
 };
 
 describe('conversations api', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     http = coreMock.createSetup().http;
   });
 

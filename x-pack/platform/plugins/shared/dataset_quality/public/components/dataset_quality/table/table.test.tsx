@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -12,11 +15,14 @@ import { DataStreamStat } from '../../../../common/data_streams_stats/data_strea
 import { Table } from './table';
 import { useDatasetQualityTable } from '../../../hooks';
 
-jest.mock('../../../hooks', () => ({
-  useDatasetQualityTable: jest.fn(),
-}));
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useDatasetQualityTable: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useDatasetQualityTableMock = useDatasetQualityTable as jest.MockedFunction<
+const useDatasetQualityTableMock = useDatasetQualityTable as MockedFunction<
   typeof useDatasetQualityTable
 >;
 
@@ -25,7 +31,7 @@ const baseTableState: Omit<
   'renderedItems' | 'loading'
 > = {
   sort: { sort: { field: 'title', direction: 'asc' } },
-  onTableChange: jest.fn(),
+  onTableChange: vi.fn(),
   pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 0, hidePerPageOptions: true },
   filteredItems: [],
   columns: [{ name: 'Data set name', field: 'title', render: (value: string) => value }],
@@ -34,9 +40,9 @@ const baseTableState: Omit<
   showFullDatasetNames: false,
   canUserMonitorAnyDataset: true,
   canUserMonitorAnyDataStream: true,
-  toggleInactiveDatasets: jest.fn(),
-  toggleFullDatasetNames: jest.fn(),
-  updateFailureStore: jest.fn(),
+  toggleInactiveDatasets: vi.fn(),
+  toggleFullDatasetNames: vi.fn(),
+  updateFailureStore: vi.fn(),
 };
 
 const renderedItem = DataStreamStat.fromQualityStats({

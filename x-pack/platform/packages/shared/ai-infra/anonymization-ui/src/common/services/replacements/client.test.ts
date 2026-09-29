@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createAnonymizationReplacementsClient } from './client';
 
 describe('createAnonymizationReplacementsClient', () => {
   it('fetches replacements by id', async () => {
-    const fetch = jest.fn().mockResolvedValue({
+    const fetch = vi.fn().mockResolvedValue({
       id: 'rep-1',
       namespace: 'default',
       replacements: [{ anonymized: 'EMAIL_1', original: 'user@example.com' }],
@@ -26,7 +28,7 @@ describe('createAnonymizationReplacementsClient', () => {
   });
 
   it('deanonymizes text using replacements id', async () => {
-    const fetch = jest.fn().mockResolvedValue({ text: 'hello user@example.com' });
+    const fetch = vi.fn().mockResolvedValue({ text: 'hello user@example.com' });
     const client = createAnonymizationReplacementsClient({ fetch });
 
     const response = await client.deanonymizeText({
@@ -46,7 +48,7 @@ describe('createAnonymizationReplacementsClient', () => {
   });
 
   it('maps replacements response into token map', async () => {
-    const fetch = jest.fn().mockResolvedValue({
+    const fetch = vi.fn().mockResolvedValue({
       id: 'rep-1',
       namespace: 'default',
       replacements: [
@@ -65,7 +67,7 @@ describe('createAnonymizationReplacementsClient', () => {
   });
 
   it('maps known API errors', async () => {
-    const fetch = jest.fn().mockRejectedValue({ statusCode: 404, body: { message: 'missing' } });
+    const fetch = vi.fn().mockRejectedValue({ statusCode: 404, body: { message: 'missing' } });
     const client = createAnonymizationReplacementsClient({ fetch });
 
     await expect(client.getReplacements('missing')).rejects.toMatchObject({

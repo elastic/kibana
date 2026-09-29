@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -42,7 +45,7 @@ describe('set unified alerts tags', () => {
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
@@ -55,8 +58,8 @@ describe('set unified alerts tags', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('tags on unified alerts', () => {
@@ -214,11 +217,11 @@ describe('set unified alerts tags', () => {
   });
 
   describe('workflow trigger emission', () => {
-    let mockEventBus: { emitAlertTagsChanged: jest.Mock; emitAttackTagsChanged: jest.Mock };
+    let mockEventBus: { emitAlertTagsChanged: Mock; emitAttackTagsChanged: Mock };
 
     beforeEach(() => {
       server = serverMock.create();
-      mockEventBus = { emitAlertTagsChanged: jest.fn(), emitAttackTagsChanged: jest.fn() };
+      mockEventBus = { emitAlertTagsChanged: vi.fn(), emitAttackTagsChanged: vi.fn() };
       setUnifiedAlertsTagsRoute(
         server.router,
         ruleDataClient,

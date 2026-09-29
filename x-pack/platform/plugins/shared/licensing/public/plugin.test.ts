@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom } from 'rxjs';
 import { take, toArray } from 'rxjs';
 import type { LicenseType } from '@kbn/licensing-types';
@@ -22,7 +24,7 @@ describe('licensing plugin', () => {
   let plugin: LicensingPlugin;
 
   afterEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     await plugin.stop();
   });
 
@@ -469,7 +471,7 @@ describe('licensing plugin', () => {
 
       const coreSetup = coreMock.createSetup();
 
-      const removeInterceptorMock = jest.fn();
+      const removeInterceptorMock = vi.fn();
       coreSetup.http.intercept.mockReturnValue(removeInterceptorMock);
 
       await plugin.setup(coreSetup);

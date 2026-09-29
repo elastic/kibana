@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { render, renderHook } from '@testing-library/react';
 import React from 'react';
@@ -40,9 +42,9 @@ function collectEbt(
   return collected;
 }
 
-const mockGetRedirectUrl = jest.fn(() => '/app/observabilityOnboarding');
-const mockInspectorOpen = jest.fn();
-const mockUiSettingsGet = jest.fn(() => false);
+const mockGetRedirectUrl = vi.fn(() => '/app/observabilityOnboarding');
+const mockInspectorOpen = vi.fn();
+const mockUiSettingsGet = vi.fn(() => false);
 
 const mockFeatureFlags = {
   customThresholdAlertsEnabled: true,
@@ -72,65 +74,89 @@ const mockActiveSpace: { space: { id: string } | undefined } = {
   space: { id: 'default' },
 };
 
-jest.mock('../../../containers/plugin_config_context', () => ({
-  usePluginConfig: () => ({
-    featureFlags: mockFeatureFlags,
-  }),
-}));
+vi.mock('../../../containers/plugin_config_context', () => {
+      const mocked = {
+      usePluginConfig: () => ({
+        featureFlags: mockFeatureFlags,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../containers/ml/infra_ml_capabilities', () => ({
-  useInfraMLCapabilitiesContext: () => mockMlVisibility,
-}));
+vi.mock('../../../containers/ml/infra_ml_capabilities', () => {
+      const mocked = {
+      useInfraMLCapabilitiesContext: () => mockMlVisibility,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({
-    services: {
-      inspector: { open: mockInspectorOpen },
-      observability: {
-        useRulesLink: () => ({ href: '/app/observability/alerts/rules' }),
-      },
-      share: {
-        url: {
-          locators: {
-            get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibanaContextForPlugin: () => ({
+        services: {
+          inspector: { open: mockInspectorOpen },
+          observability: {
+            useRulesLink: () => ({ href: '/app/observability/alerts/rules' }),
           },
+          share: {
+            url: {
+              locators: {
+                get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+              },
+            },
+          },
+          uiSettings: { get: mockUiSettingsGet },
+          application: { capabilities: mockCapabilities },
         },
-      },
-      uiSettings: { get: mockUiSettingsGet },
-      application: { capabilities: mockCapabilities },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useLinkProps: () => ({ href: '/app/metrics/settings' }),
-  useInspectorContext: () => ({ inspectorAdapters: { requests: {} } }),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useLinkProps: () => ({ href: '/app/metrics/settings' }),
+      useInspectorContext: () => ({ inspectorAdapters: { requests: {} } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../containers/metrics_source', () => ({
-  useMetricsDataViewContext: () => mockMetricsViewState,
-}));
+vi.mock('../../../containers/metrics_source', () => {
+      const mocked = {
+      useMetricsDataViewContext: () => mockMetricsViewState,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_kibana_space', () => ({
-  useActiveKibanaSpace: () => mockActiveSpace,
-}));
+vi.mock('../../../hooks/use_kibana_space', () => {
+      const mocked = {
+      useActiveKibanaSpace: () => mockActiveSpace,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAnomalyFlyoutCapture: {
   hideJobType?: boolean;
   hideSelectGroup?: boolean;
 } = {};
 
-jest.mock('../../../components/ml/anomaly_detection/anomaly_detection_flyout', () => ({
-  AnomalyDetectionFlyout: (props: { hideJobType?: boolean; hideSelectGroup?: boolean }) => {
-    mockAnomalyFlyoutCapture.hideJobType = props.hideJobType;
-    mockAnomalyFlyoutCapture.hideSelectGroup = props.hideSelectGroup;
-    return null;
-  },
-}));
+vi.mock('../../../components/ml/anomaly_detection/anomaly_detection_flyout', () => {
+      const mocked = {
+      AnomalyDetectionFlyout: (props: { hideJobType?: boolean; hideSelectGroup?: boolean }) => {
+        mockAnomalyFlyoutCapture.hideJobType = props.hideJobType;
+        mockAnomalyFlyoutCapture.hideSelectGroup = props.hideSelectGroup;
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../alerting/common/components/metrics_alert_dropdown', () => ({
-  MetricsAlertFlyout: () => null,
-}));
+vi.mock('../../../alerting/common/components/metrics_alert_dropdown', () => {
+      const mocked = {
+      MetricsAlertFlyout: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function renderMenuHook(pathname: string) {
   return renderHook(() => useMetricsAppHeaderMenu(), {

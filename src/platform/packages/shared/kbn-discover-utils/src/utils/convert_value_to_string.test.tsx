@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { convertValueToString } from './convert_value_to_string';
@@ -47,8 +49,8 @@ export const dataViewComplexMock = buildDataViewMock({
 });
 
 // The format_value file has its own test suite, so we can mock it here to avoid duplication.
-jest.mock('./format_value');
-const mockFormatFieldValueText = jest.mocked(formatFieldValueText);
+vi.mock('./format_value');
+const mockFormatFieldValueText = vi.mocked(formatFieldValueText);
 
 describe('convertValueToString', () => {
   describe('when the data view field type is _source', () => {
@@ -124,7 +126,7 @@ describe('convertValueToString', () => {
 
     describe('when the flattened value is missing', () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it.each([

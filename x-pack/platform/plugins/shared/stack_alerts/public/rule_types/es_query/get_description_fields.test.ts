@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getDescriptionFields } from './get_description_fields';
 import { RULE_PREBUILD_DESCRIPTION_FIELDS } from '@kbn/triggers-actions-ui-plugin/public';
 import type { EsQueryRuleParams } from './types';
@@ -14,30 +16,30 @@ import type { HttpSetup } from '@kbn/core/public';
 
 describe('getDescriptionFields', () => {
   const mockPrebuildFields = {
-    [RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]: jest.fn((val: string[]) => ({
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]: vi.fn((val: string[]) => ({
       type: 'index_pattern',
       value: val,
     })),
-    [RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY]: jest.fn((val: string) => ({
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY]: vi.fn((val: string) => ({
       type: 'custom_query',
       value: val,
     })),
-    [RULE_PREBUILD_DESCRIPTION_FIELDS.ESQL_QUERY]: jest.fn((val: string) => ({
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.ESQL_QUERY]: vi.fn((val: string) => ({
       type: 'esql_query',
       value: val,
     })),
-    [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_ID]: jest.fn((val: string) => ({
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_ID]: vi.fn((val: string) => ({
       type: 'data_view_id',
       value: val,
     })),
-    [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN]: jest.fn((val: string[]) => ({
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN]: vi.fn((val: string[]) => ({
       type: 'data_view_index_pattern',
       value: val,
     })),
   } as unknown as PrebuildFieldsMap;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('guard clauses', () => {

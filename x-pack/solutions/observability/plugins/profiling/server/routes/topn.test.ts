@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -16,29 +18,32 @@ const anyQuery = 'any::query';
 const smallestInterval = '1s';
 const testAgg = { aggs: { test: {} } };
 
-jest.mock('./query', () => ({
-  createCommonFilter: ({}: {}) => {
-    return anyQuery;
-  },
-  findFixedIntervalForBucketsPerTimeRange: (from: number, to: number, buckets: number): string => {
-    return smallestInterval;
-  },
-  aggregateByFieldAndTimestamp: (
-    searchField: string,
-    interval: string
-  ): AggregationsAggregationContainer => {
-    return testAgg;
-  },
-}));
+vi.mock('./query', () => {
+      const mocked = {
+      createCommonFilter: ({}: {}) => {
+        return anyQuery;
+      },
+      findFixedIntervalForBucketsPerTimeRange: (from: number, to: number, buckets: number): string => {
+        return smallestInterval;
+      },
+      aggregateByFieldAndTimestamp: (
+        searchField: string,
+        interval: string
+      ): AggregationsAggregationContainer => {
+        return testAgg;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TopN data from Elasticsearch', () => {
   const context = coreMock.createRequestHandlerContext();
   const client: ProfilingESClient = {
-    search: jest.fn(
+    search: vi.fn(
       (operationName, request) =>
         context.elasticsearch.client.asCurrentUser.search(request) as Promise<any>
     ),
-    profilingStacktraces: jest.fn(
+    profilingStacktraces: vi.fn(
       (request) =>
         context.elasticsearch.client.asCurrentUser.transport.request({
           method: 'POST',
@@ -49,7 +54,7 @@ describe('TopN data from Elasticsearch', () => {
           },
         }) as Promise<any>
     ),
-    profilingStatus: jest.fn(
+    profilingStatus: vi.fn(
       () =>
         context.elasticsearch.client.asCurrentUser.transport.request({
           method: 'GET',
@@ -57,8 +62,8 @@ describe('TopN data from Elasticsearch', () => {
           body: {},
         }) as Promise<any>
     ),
-    getEsClient: jest.fn(() => context.elasticsearch.client.asCurrentUser),
-    profilingFlamegraph: jest.fn(
+    getEsClient: vi.fn(() => context.elasticsearch.client.asCurrentUser),
+    profilingFlamegraph: vi.fn(
       (request) =>
         context.elasticsearch.client.asCurrentUser.transport.request({
           method: 'POST',
@@ -69,12 +74,12 @@ describe('TopN data from Elasticsearch', () => {
           },
         }) as Promise<any>
     ),
-    topNFunctions: jest.fn(),
+    topNFunctions: vi.fn(),
   };
   const logger = loggerMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when fetching Stack Traces', () => {

@@ -7,28 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { mockContextDependencies } from '../../execution_functions/__mock__/context_dependencies';
 import { buildWorkflowContext, buildWorkflowRenderContext } from '../build_workflow_context';
 
-jest.mock('../../utils', () => ({
-  getKibanaUrl: jest.fn().mockReturnValue('http://localhost:5601'),
-  buildWorkflowExecutionUrl: jest
-    .fn()
-    .mockImplementation((kibanaUrl, spaceId, workflowId, executionId) => {
-      const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
-      return `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}?executionId=${executionId}`;
-    }),
-}));
+vi.mock('../../utils', () => {
+      const mocked = {
+      getKibanaUrl: vi.fn().mockReturnValue('http://localhost:5601'),
+      buildWorkflowExecutionUrl: vi
+        .fn()
+        .mockImplementation((kibanaUrl, spaceId, workflowId, executionId) => {
+          const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
+          return `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}?executionId=${executionId}`;
+        }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
-  ...jest.requireActual('@kbn/workflows/spec/lib/field_conversion'),
-  getInputsFromDefinition: jest.fn(),
-}));
+vi.mock('@kbn/workflows/spec/lib/field_conversion', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows/spec/lib/field_conversion')),
+      getInputsFromDefinition: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetInputsFromDefinition = getInputsFromDefinition as jest.MockedFunction<
+const mockGetInputsFromDefinition = getInputsFromDefinition as MockedFunction<
   typeof getInputsFromDefinition
 >;
 

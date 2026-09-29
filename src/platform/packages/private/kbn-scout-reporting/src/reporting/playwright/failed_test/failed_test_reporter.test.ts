@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, MockedFunction } from 'vitest';
+
 import type {
   FullConfig,
   FullResult,
@@ -19,20 +22,23 @@ import { getKibanaModuleData } from '../../../helpers';
 import { ScoutFailedTestReporter } from './failed_test_reporter';
 import { ScoutFailureTracker } from './failure_tracking';
 
-jest.mock('@kbn/code-owners', () => ({
-  getCodeOwnersEntries: jest.fn(() => []),
-  getOwningTeamsForPath: jest.fn(() => []),
-}));
+vi.mock('@kbn/code-owners', () => {
+      const mocked = {
+      getCodeOwnersEntries: vi.fn(() => []),
+      getOwningTeamsForPath: vi.fn(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../helpers', () => {
-  const actual = jest.requireActual('../../../helpers');
+vi.mock('../../../helpers', async () => {
+  const actual = (await vi.importActual('../../../helpers'));
   return {
     ...actual,
-    getKibanaModuleData: jest.fn(),
+    getKibanaModuleData: vi.fn(),
   };
 });
 
-const mockedGetKibanaModuleData = getKibanaModuleData as jest.MockedFunction<
+const mockedGetKibanaModuleData = getKibanaModuleData as MockedFunction<
   typeof getKibanaModuleData
 >;
 
@@ -78,25 +84,25 @@ const createMockFullResult = (): FullResult => ({ status: 'failed', duration: 10
 
 describe('ScoutFailedTestReporter', () => {
   let reporter: ScoutFailedTestReporter;
-  let reportLogEventSpy: jest.SpyInstance;
-  let trackerSaveSpy: jest.SpyInstance;
-  let trackerAddFailureSpy: jest.SpyInstance;
+  let reportLogEventSpy: MockInstance;
+  let trackerSaveSpy: MockInstance;
+  let trackerAddFailureSpy: MockInstance;
 
   beforeEach(() => {
     reporter = new ScoutFailedTestReporter({ runId: 'test-run-id' });
-    reportLogEventSpy = jest
+    reportLogEventSpy = vi
       .spyOn((reporter as any).report, 'logEvent')
       .mockImplementation(() => {});
-    jest.spyOn((reporter as any).report, 'save').mockImplementation(() => {});
-    jest.spyOn((reporter as any).report, 'conclude').mockImplementation(() => {});
-    trackerSaveSpy = jest.spyOn(ScoutFailureTracker.prototype, 'save').mockImplementation(() => {});
-    trackerAddFailureSpy = jest.spyOn(ScoutFailureTracker.prototype, 'addFailure');
+    vi.spyOn((reporter as any).report, 'save').mockImplementation(() => {});
+    vi.spyOn((reporter as any).report, 'conclude').mockImplementation(() => {});
+    trackerSaveSpy = vi.spyOn(ScoutFailureTracker.prototype, 'save').mockImplementation(() => {});
+    trackerAddFailureSpy = vi.spyOn(ScoutFailureTracker.prototype, 'addFailure');
     mockedGetKibanaModuleData.mockReset();
   });
 
   afterEach(() => {
     // Spies on ScoutFailureTracker.prototype are shared across tests and must be restored.
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('logs a flaky test to the report artifact but excludes it from the tracker', () => {
@@ -178,7 +184,7 @@ describe('ScoutFailedTestReporter', () => {
     mockedGetKibanaModuleData.mockImplementation(() => {
       throw new Error('Manifest file not found: /repo/src/core/packages/user-storage/kibana.jsonc');
     });
-    const warningSpy = jest.spyOn(ToolingLog.prototype, 'warning').mockImplementation(() => {});
+    const warningSpy = vi.spyOn(ToolingLog.prototype, 'warning').mockImplementation(() => {});
     const hardFailure = createMockTestCase({ outcome: 'unexpected', title: 'hard failure' });
 
     expect(() =>

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { streamGraph } from './helpers';
 import agent from 'elastic-apm-node';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -18,11 +21,11 @@ import type { DefaultAssistantGraph } from './graph';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { AIMessage, AIMessageChunk, HumanMessage } from '@langchain/core/messages';
 
-jest.mock('elastic-apm-node');
+vi.mock('elastic-apm-node');
 
-jest.mock('@kbn/securitysolution-es-utils');
+vi.mock('@kbn/securitysolution-es-utils');
 const mockStream = new PassThrough();
-const mockPush = jest.fn();
+const mockPush = vi.fn();
 const mockResponseWithHeaders = {
   body: mockStream,
   headers: {
@@ -33,24 +36,27 @@ const mockResponseWithHeaders = {
     'Transfer-Encoding': 'chunked',
   },
 };
-jest.mock('@kbn/ml-response-stream/server', () => ({
-  streamFactory: jest.fn().mockImplementation(() => ({
-    DELIMITER: '\n',
-    end: jest.fn(),
-    push: mockPush,
-    responseWithHeaders: mockResponseWithHeaders,
-  })),
-}));
+vi.mock('@kbn/ml-response-stream/server', () => {
+      const mocked = {
+      streamFactory: vi.fn().mockImplementation(() => ({
+        DELIMITER: '\n',
+        end: vi.fn(),
+        push: mockPush,
+        responseWithHeaders: mockResponseWithHeaders,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('streamGraph', () => {
   const mockRequest = {} as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   const mockLogger = loggerMock.create();
   const mockApmTracer = {} as APMTracer;
-  const mockStreamEvents = jest.fn();
+  const mockStreamEvents = vi.fn();
   const mockAssistantGraph = {
     streamEvents: mockStreamEvents,
   } as unknown as DefaultAssistantGraph;
-  const mockOnLlmResponse = jest.fn().mockResolvedValue(null);
+  const mockOnLlmResponse = vi.fn().mockResolvedValue(null);
   const requestArgs: Parameters<typeof streamGraph>[0] = {
     assistantGraph: mockAssistantGraph,
     inputs: {
@@ -68,15 +74,15 @@ describe('streamGraph', () => {
     apmTracer: mockApmTracer,
     isEnabledKnowledgeBase: false,
     telemetry: {
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     } as unknown as AnalyticsServiceSetup,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (agent.isStarted as jest.Mock).mockReturnValue(true);
-    (agent.startSpan as jest.Mock).mockReturnValue({
-      end: jest.fn(),
+    vi.clearAllMocks();
+    (agent.isStarted as Mock).mockReturnValue(true);
+    (agent.startSpan as Mock).mockReturnValue({
+      end: vi.fn(),
       ids: { 'trace.id': 'traceId' },
       transaction: { ids: { 'transaction.id': 'transactionId' } },
     });

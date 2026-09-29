@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, renderHook } from '@testing-library/react';
@@ -25,18 +27,18 @@ const defaultArgs = {
   defaultGroupingOptions,
   fields: [],
   groupingId,
-  tracker: jest.fn(),
+  tracker: vi.fn(),
   componentProps: {
-    groupPanelRenderer: jest.fn(),
-    groupStatsRenderer: jest.fn(),
-    onGroupToggle: jest.fn(),
+    groupPanelRenderer: vi.fn(),
+    groupStatsRenderer: vi.fn(),
+    onGroupToggle: vi.fn(),
   },
 };
 
 const groupingArgs = {
   data: {},
   isLoading: false,
-  takeActionItems: jest.fn(),
+  takeActionItems: vi.fn(),
   activePage: 0,
   itemsPerPage: 25,
   onGroupClose: () => {},
@@ -44,7 +46,7 @@ const groupingArgs = {
 
 describe('useGrouping', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Renders child component without grouping table wrapper when no group is selected', async () => {
@@ -84,7 +86,7 @@ describe('useGrouping', () => {
     expect(queryByTestId('grouping-table')).not.toBeInTheDocument();
   });
   it('Renders child component with grouping table wrapper when group is selected', async () => {
-    const getItem = jest.spyOn(window.localStorage.__proto__, 'getItem');
+    const getItem = vi.spyOn(window.localStorage.__proto__, 'getItem');
     getItem.mockReturnValue(
       JSON.stringify({
         'test-table': {
@@ -122,7 +124,7 @@ describe('useGrouping', () => {
               value: 18,
             },
           },
-          renderChildComponent: jest.fn(),
+          renderChildComponent: vi.fn(),
           selectedGroup: 'test',
         })}
       </IntlProvider>
@@ -148,7 +150,7 @@ describe('useGrouping', () => {
   });
 
   it('Hides group selector in getGrouping when hideGroupSelector is true', async () => {
-    const getItem = jest.spyOn(window.localStorage.__proto__, 'getItem');
+    const getItem = vi.spyOn(window.localStorage.__proto__, 'getItem');
     getItem.mockReturnValue(
       JSON.stringify({
         'test-table': {
@@ -198,7 +200,7 @@ describe('useGrouping', () => {
               value: 18,
             },
           },
-          renderChildComponent: jest.fn(),
+          renderChildComponent: vi.fn(),
           selectedGroup: 'test',
         })}
       </IntlProvider>
@@ -248,7 +250,7 @@ describe('useGrouping', () => {
                 value: 5,
               },
             },
-            renderChildComponent: jest.fn(),
+            renderChildComponent: vi.fn(),
             selectedGroup: 'test',
           })}
         </IntlProvider>
@@ -288,7 +290,7 @@ describe('useGrouping', () => {
                 value: 2,
               },
             },
-            renderChildComponent: jest.fn(),
+            renderChildComponent: vi.fn(),
             selectedGroup: 'test',
           })}
         </IntlProvider>
@@ -334,7 +336,7 @@ describe('useGrouping', () => {
                 value: 1,
               },
             },
-            renderChildComponent: jest.fn(),
+            renderChildComponent: vi.fn(),
             selectedGroup: 'test',
           })}
         </IntlProvider>

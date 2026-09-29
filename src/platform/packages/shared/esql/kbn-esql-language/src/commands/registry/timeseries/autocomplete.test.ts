@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import { getMockCallbacks, mockContext } from '../../../__tests__/commands/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions } from '../../../__tests__/commands/autocomplete';
@@ -51,7 +53,7 @@ const tsExpectSuggestions = (
 describe('TS Autocomplete', () => {
   let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Reset mocks before each test to ensure isolation
     mockCallbacks = getMockCallbacks();
@@ -67,7 +69,7 @@ describe('TS Autocomplete', () => {
     };
 
     test('suggests Browse data sources in empty source slots when enabled', async () => {
-      mockCallbacks.canSuggestResourceBrowser = jest.fn().mockResolvedValue(true);
+      mockCallbacks.canSuggestResourceBrowser = vi.fn().mockResolvedValue(true);
 
       const suggestions = await suggest('TS ');
       const labels = suggestions.map((s) => s.label);

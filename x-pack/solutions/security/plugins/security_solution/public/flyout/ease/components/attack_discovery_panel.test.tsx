@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useLocation } from 'react-router-dom';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -19,18 +22,24 @@ import { useIdsFromUrl } from '../../../attack_discovery/pages/results/history/u
 import { useAttackDiscoveryHistoryTimerange } from '../../../attack_discovery/pages/use_attack_discovery_history_timerange';
 import { ATTACK_DISCOVERY_DETAILS_ALERTS_BADGE_TEST_ID } from './attack_discovery_details';
 
-jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
-  useFindAttackDiscoveries: jest.fn(),
-}));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
-}));
-jest.mock('../../../attack_discovery/pages/results/history/use_ids_from_url');
-jest.mock('../../../attack_discovery/pages/use_attack_discovery_history_timerange');
-jest.mock('@kbn/security-solution-navigation');
+vi.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => {
+      const mocked = {
+      useFindAttackDiscoveries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: vi.fn().mockReturnValue({ pathname: '/test' }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../attack_discovery/pages/results/history/use_ids_from_url');
+vi.mock('../../../attack_discovery/pages/use_attack_discovery_history_timerange');
+vi.mock('@kbn/security-solution-navigation');
 
-const mockSetIdsUrl = jest.fn();
+const mockSetIdsUrl = vi.fn();
 const attackDiscovery = {
   id: '123',
   alertIds: ['alert-id-xyz789'],
@@ -52,21 +61,21 @@ const defaultProps: AttackDiscoveryPanelProps = {
   start: '2025-04-29T20:00:00.000Z',
   end: '2025-04-29T21:00:00.000Z',
 };
-const mockSetHistoryEnd = jest.fn();
-const mockSetHistoryStart = jest.fn();
+const mockSetHistoryEnd = vi.fn();
+const mockSetHistoryStart = vi.fn();
 
 describe('AttackDiscoveryPanel', () => {
-  const mockNavigateTo = jest.fn();
+  const mockNavigateTo = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useNavigateTo as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useNavigateTo as Mock).mockReturnValue({
       navigateTo: mockNavigateTo,
     });
-    (useIdsFromUrl as jest.Mock).mockReturnValue({
+    (useIdsFromUrl as Mock).mockReturnValue({
       setIdsUrl: mockSetIdsUrl,
     });
-    (useAttackDiscoveryHistoryTimerange as jest.Mock).mockReturnValue({
+    (useAttackDiscoveryHistoryTimerange as Mock).mockReturnValue({
       setHistoryEnd: mockSetHistoryEnd,
       setHistoryStart: mockSetHistoryStart,
     });
@@ -82,7 +91,7 @@ describe('AttackDiscoveryPanel', () => {
   });
 
   it('should navigate to attack discovery page when "View Details" button is clicked', () => {
-    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+    (useFindAttackDiscoveries as Mock).mockReturnValue({
       isLoading: false,
       data: { data: [attackDiscovery] },
     });
@@ -101,7 +110,7 @@ describe('AttackDiscoveryPanel', () => {
   });
 
   it('when already on attack discovery, when "View Details" button is clicked sets search params', () => {
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as Mock).mockReturnValue({
       pathname: '/attack_discovery',
     });
 

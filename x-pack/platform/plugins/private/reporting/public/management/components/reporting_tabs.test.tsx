@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -43,11 +45,11 @@ import { PolicyStatusContextProvider } from '../../lib/default_status_context';
 import { mockConfig } from '../__test__/report_listing.test.helpers';
 import { ReportDiagnostic } from './report_diagnostic';
 
-jest.mock('./report_exports_table', () => {
+vi.mock('./report_exports_table', () => {
   return () => <div data-test-subj="reportExportsTable">{'Render Report Exports Table'}</div>;
 });
 
-jest.mock('./report_schedules_table', () => {
+vi.mock('./report_schedules_table', () => {
   return () => <div data-test-subj="reportSchedulesTable">{'Render Report Schedules Table'}</div>;
 });
 
@@ -55,7 +57,7 @@ const queryClient = new QueryClient();
 
 describe('Reporting tabs', () => {
   const ilmLocator: LocatorPublic<SerializableRecord> = {
-    getUrl: jest.fn(),
+    getUrl: vi.fn(),
   } as unknown as LocatorPublic<SerializableRecord>;
   const http = httpServiceMock.createSetupContract();
   const uiSettingsClient = coreMock.createSetup().uiSettings;
@@ -68,7 +70,7 @@ describe('Reporting tabs', () => {
       message: '',
     }),
   };
-  const mockUnsubscribe = jest.fn();
+  const mockUnsubscribe = vi.fn();
   // @ts-expect-error we don't need to provide all props for the test
   const license$ = {
     subscribe: (handler: unknown) => {
@@ -163,7 +165,7 @@ describe('Reporting tabs', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUnsubscribe.mockClear();
   });
 

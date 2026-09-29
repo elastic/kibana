@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { PropsWithChildren } from 'react';
 import type { Store } from 'redux-v4';
@@ -18,9 +21,9 @@ import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import type { EntitiesBaseURLQuery } from './use_entity_url_state';
 import { useEntityURLState } from './use_entity_url_state';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
-const mockSetUrlQuery = jest.fn();
+const mockSetUrlQuery = vi.fn();
 const mockUrlQuery = {
   query: { query: '', language: 'kuery' },
   filters: [] as unknown[],
@@ -29,39 +32,51 @@ const mockUrlQuery = {
   pageIndex: 0,
 };
 
-jest.mock('./use_url_query', () => ({
-  useUrlQuery: () => ({ urlQuery: mockUrlQuery, setUrlQuery: mockSetUrlQuery }),
-}));
+vi.mock('./use_url_query', () => {
+      const mocked = {
+      useUrlQuery: () => ({ urlQuery: mockUrlQuery, setUrlQuery: mockSetUrlQuery }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_page_size', () => ({
-  usePageSize: () => ({ pageSize: 25, setPageSize: jest.fn() }),
-}));
+vi.mock('./use_page_size', () => {
+      const mocked = {
+      usePageSize: () => ({ pageSize: 25, setPageSize: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_base_es_query', () => ({
-  useBaseEsQuery: () => ({
-    query: { bool: { must: [], filter: [], should: [], must_not: [] } },
-  }),
-}));
+vi.mock('./use_base_es_query', () => {
+      const mocked = {
+      useBaseEsQuery: () => ({
+        query: { bool: { must: [], filter: [], should: [], must_not: [] } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_persisted_query', () => ({
-  usePersistedQuery:
-    <T,>(getter: (params: EntitiesBaseURLQuery) => T) =>
-    () =>
-      getter({ filters: [], query: { query: '', language: 'kuery' } }),
-}));
+vi.mock('./use_persisted_query', () => {
+      const mocked = {
+      usePersistedQuery:
+        <T,>(getter: (params: EntitiesBaseURLQuery) => T) =>
+        () =>
+          getter({ filters: [], query: { query: '', language: 'kuery' } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = jest.mocked(useKibana);
+const mockUseKibana = vi.mocked(useKibana);
 
 interface FilterManagerMock {
-  setAppFilters: jest.Mock;
-  getAppFilters: jest.Mock;
-  getUpdates$: jest.Mock;
+  setAppFilters: Mock;
+  getAppFilters: Mock;
+  getUpdates$: Mock;
 }
 
 const buildFilterManagerMock = (overrides: Partial<FilterManagerMock> = {}): FilterManagerMock => ({
-  setAppFilters: jest.fn(),
-  getAppFilters: jest.fn(() => []),
-  getUpdates$: jest.fn(() => new Observable()),
+  setAppFilters: vi.fn(),
+  getAppFilters: vi.fn(() => []),
+  getUpdates$: vi.fn(() => new Observable()),
   ...overrides,
 });
 
@@ -95,7 +110,7 @@ const renderUseEntityURLState = (store: Store = createMockStore()) => {
 
 describe('useEntityURLState', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUrlQuery.query = { query: '', language: 'kuery' };
     mockUrlQuery.filters = [];
 
@@ -107,7 +122,7 @@ describe('useEntityURLState', () => {
       mockUrlQuery.query = { query: 'resource.id: "test-resource"', language: 'kuery' };
 
       const store = createMockStore();
-      const dispatchSpy = jest.spyOn(store, 'dispatch');
+      const dispatchSpy = vi.spyOn(store, 'dispatch');
       renderUseEntityURLState(store);
 
       expect(dispatchSpy).toHaveBeenCalledWith(
@@ -123,7 +138,7 @@ describe('useEntityURLState', () => {
       mockUrlQuery.query = { query: '', language: 'kuery' };
 
       const store = createMockStore();
-      const dispatchSpy = jest.spyOn(store, 'dispatch');
+      const dispatchSpy = vi.spyOn(store, 'dispatch');
       renderUseEntityURLState(store);
 
       expect(dispatchSpy).toHaveBeenCalledWith(
@@ -190,7 +205,7 @@ describe('useEntityURLState', () => {
 
     it('dispatches setFilterQuery for the global input to clear the search bar text', () => {
       const store = createMockStore();
-      const dispatchSpy = jest.spyOn(store, 'dispatch');
+      const dispatchSpy = vi.spyOn(store, 'dispatch');
       const { result } = renderUseEntityURLState(store);
 
       act(() => {
@@ -208,7 +223,7 @@ describe('useEntityURLState', () => {
 
     it('dispatches setSavedQuery for the global input to clear any applied saved query', () => {
       const store = createMockStore();
-      const dispatchSpy = jest.spyOn(store, 'dispatch');
+      const dispatchSpy = vi.spyOn(store, 'dispatch');
       const { result } = renderUseEntityURLState(store);
 
       act(() => {
@@ -258,9 +273,9 @@ describe('useEntityURLState', () => {
       // instead of pushing a redundant URL update.
       const updates$ = new Subject<void>();
       const filterManager = buildFilterManagerMock({
-        getUpdates$: jest.fn(() => updates$.asObservable()),
-        setAppFilters: jest.fn(() => updates$.next()),
-        getAppFilters: jest.fn(() => []),
+        getUpdates$: vi.fn(() => updates$.asObservable()),
+        setAppFilters: vi.fn(() => updates$.next()),
+        getAppFilters: vi.fn(() => []),
       });
       setKibanaFilterManager(filterManager);
 

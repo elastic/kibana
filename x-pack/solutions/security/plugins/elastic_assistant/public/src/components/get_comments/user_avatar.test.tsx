@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { SecurityUserAvatar, SecurityUserName } from './user_avatar';
@@ -18,15 +21,15 @@ const mockUser = {
   full_name: 'Test User Full',
 };
 
-jest.mock('./use_user_profile');
+vi.mock('./use_user_profile');
 
 describe('SecurityUserAvatar', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useUserProfile as jest.Mock).mockReturnValue({ data: undefined });
+    vi.clearAllMocks();
+    (useUserProfile as Mock).mockReturnValue({ data: undefined });
   });
   it('renders UserAvatar when userProfile exists', () => {
-    (useUserProfile as jest.Mock).mockReturnValue({
+    (useUserProfile as Mock).mockReturnValue({
       data: { user: mockUser, avatar: 'avatarUrl' },
     });
     render(<SecurityUserAvatar user={mockUser} />);
@@ -41,11 +44,11 @@ describe('SecurityUserAvatar', () => {
 
 describe('SecurityUserName', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useUserProfile as jest.Mock).mockReturnValue({ data: undefined });
+    vi.clearAllMocks();
+    (useUserProfile as Mock).mockReturnValue({ data: undefined });
   });
   it('returns full_name when userProfile exists', () => {
-    (useUserProfile as jest.Mock).mockReturnValue({
+    (useUserProfile as Mock).mockReturnValue({
       data: { user: { ...mockUser, full_name: 'Full Name' } },
     });
     render(<SecurityUserName user={mockUser} />);
@@ -53,7 +56,7 @@ describe('SecurityUserName', () => {
   });
 
   it('returns username when full_name is missing', () => {
-    (useUserProfile as jest.Mock).mockReturnValue({
+    (useUserProfile as Mock).mockReturnValue({
       data: { user: { ...mockUser, full_name: undefined } },
     });
     render(<SecurityUserName user={mockUser} />);

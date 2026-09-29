@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Path from 'path';
 
-jest.mock('fs');
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/some/imaginary/path',
-}));
-jest.mock('@kbn/config');
+vi.mock('fs');
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/some/imaginary/path',
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/config');
 
 import { statSync } from 'fs';
 import { getConfigFromFiles } from '@kbn/config';
@@ -22,7 +27,7 @@ import { compileConfigStack } from './compile_config_stack';
 
 describe('compileConfigStack', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     statSync.mockImplementation(() => {
       return {

@@ -5,14 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 // Mocks must be at the top, before imports that use them
-jest.mock('../../../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('../../../../../../detections/components/alerts_table', () => ({
-  AlertsTable: () => <div data-test-subj="detection-engine-alerts-table" />,
-}));
-jest.mock('./ease/wrapper', () => ({
-  EaseAlertsTab: () => <div data-test-subj="ease-alerts-table" />,
-}));
+vi.mock('../../../../../../common/lib/kibana', () => {
+      const mocked = { useKibana: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../../detections/components/alerts_table', () => {
+      const mocked = {
+      AlertsTable: () => <div data-test-subj="detection-engine-alerts-table" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./ease/wrapper', () => {
+      const mocked = {
+      EaseAlertsTab: () => <div data-test-subj="ease-alerts-table" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -27,11 +39,11 @@ describe('AlertsTab', () => {
   const defaultProps = { attackDiscovery: mockAttackDiscovery };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the alerts tab with DetectionEngineAlertsTable', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -53,7 +65,7 @@ describe('AlertsTab', () => {
   });
 
   it('renders the alerts tab with EASE alerts table', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -75,7 +87,7 @@ describe('AlertsTab', () => {
   });
 
   it('renders DetectionEngineAlertsTable when EASE is false', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -97,7 +109,7 @@ describe('AlertsTab', () => {
   });
 
   it('renders EaseAlertsTab when EASE is true', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -119,7 +131,7 @@ describe('AlertsTab', () => {
   });
 
   it('renders with replacements mapping alertIds', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -144,7 +156,7 @@ describe('AlertsTab', () => {
   });
 
   it('renders with replacements missing mapping for some alertIds', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -167,7 +179,7 @@ describe('AlertsTab', () => {
   });
 
   it('renders with empty alertIds', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: {

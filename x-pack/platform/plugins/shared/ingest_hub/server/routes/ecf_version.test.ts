@@ -5,29 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { ECF_LATEST_VERSION_API_PATH } from '../../common/providers/aws/ecf_version_api';
 import { ECF_FALLBACK_TEMPLATE_VERSION } from '../../common/providers/aws/ecf_template_version';
 import { registerEcfVersionRoute } from './ecf_version';
 
-jest.mock('../services/ecf_version', () => ({
-  getLatestEcfVersion: jest.fn(),
-}));
+vi.mock('../services/ecf_version', () => {
+      const mocked = {
+      getLatestEcfVersion: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { getLatestEcfVersion } from '../services/ecf_version';
-const mockGetLatestEcfVersion = getLatestEcfVersion as jest.MockedFunction<
+const mockGetLatestEcfVersion = getLatestEcfVersion as MockedFunction<
   typeof getLatestEcfVersion
 >;
 
-const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
+const { loggerMock } = (await vi.importActual('@kbn/logging-mocks'));
 const mockLogger = loggerMock.create();
 
 describe('registerEcfVersionRoute()', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     router = httpServiceMock.createRouter();
     registerEcfVersionRoute(router, mockLogger);
   });

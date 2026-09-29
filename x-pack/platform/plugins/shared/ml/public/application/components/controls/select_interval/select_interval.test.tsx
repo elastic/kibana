@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,18 +16,21 @@ import { SelectInterval } from './select_interval';
 // The following mock setup is necessary so that we can simulate
 // both triggering the update callback and the internal state update
 // to update the dropdown to the new state.
-const mockUpdateCallback = jest.fn();
-const mockUseState = jest.fn().mockImplementation(useState);
-jest.mock('@kbn/ml-url-state', () => ({
-  usePageUrlState: () => {
-    const [interval, setInterval] = mockUseState({ display: 'Auto', val: 'auto' });
-    return [interval, mockUpdateCallback.mockImplementation((d) => setInterval(d))];
-  },
-}));
+const mockUpdateCallback = vi.fn();
+const mockUseState = vi.fn().mockImplementation(useState);
+vi.mock('@kbn/ml-url-state', () => {
+      const mocked = {
+      usePageUrlState: () => {
+        const [interval, setInterval] = mockUseState({ display: 'Auto', val: 'auto' });
+        return [interval, mockUpdateCallback.mockImplementation((d) => setInterval(d))];
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SelectInterval', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('updates the selected value correctly on click', async () => {

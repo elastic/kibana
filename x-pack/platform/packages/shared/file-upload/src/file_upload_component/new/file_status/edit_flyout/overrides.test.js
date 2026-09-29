@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { FILE_FORMATS } from '@kbn/file-upload-common';
 
 import { Overrides } from './overrides';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  withKibana: (comp) => {
-    return comp;
-  },
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      withKibana: (comp) => {
+        return comp;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function getProps() {
   return {

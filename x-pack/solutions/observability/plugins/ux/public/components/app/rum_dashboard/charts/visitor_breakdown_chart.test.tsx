@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -15,8 +18,8 @@ import {
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-jest.mock('../../../../hooks/use_kibana_services');
-jest.mock('uuid');
+vi.mock('../../../../hooks/use_kibana_services');
+vi.mock('uuid');
 
 const mockDataView = {
   id: 'mock-id',
@@ -44,14 +47,14 @@ describe('VisitorBreakdownChart', () => {
     });
   });
 
-  describe('component', () => {
-    const mockUuid = jest.requireMock('uuid');
-    mockUuid.v4 = jest.fn().mockReturnValue('xxxx-xxxxxxxxxxx-xxxx');
-    const mockEmbeddableComponent = jest.fn((_) => <></>);
+  describe('component', async () => {
+    const mockUuid = (await vi.importMock('uuid'));
+    mockUuid.v4 = vi.fn().mockReturnValue('xxxx-xxxxxxxxxxx-xxxx');
+    const mockEmbeddableComponent = vi.fn((_) => <></>);
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      (useKibanaServices as jest.Mock).mockReturnValue({
+      vi.clearAllMocks();
+      (useKibanaServices as Mock).mockReturnValue({
         lens: {
           EmbeddableComponent: mockEmbeddableComponent,
         },

@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, take, type Subscription, toArray } from 'rxjs';
 import { analyticsClientMock } from './analytics_service.test.mocks';
 import { trackViewportSize } from './track_viewport_size';
 
 describe('trackViewportSize', () => {
-  const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+  const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
   let subscription: Subscription | undefined;
 
   afterEach(() => {
     subscription?.unsubscribe();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('registers the analytics event type, the context provider, and a listener to the "resize" events', () => {

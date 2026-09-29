@@ -5,32 +5,38 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { DiscoveryWithAlertIds } from '@kbn/discoveries/impl/attack_discovery/hallucination_detection';
 import { filterHallucinatedAlerts } from '@kbn/discoveries/impl/attack_discovery/hallucination_detection';
 
 import { filterAndValidateDiscoveries } from './filter_and_validate_discoveries';
 
-jest.mock('@kbn/discoveries/impl/attack_discovery/hallucination_detection', () => ({
-  filterHallucinatedAlerts: jest.fn(),
-  getAlertIds: jest.requireActual('@kbn/discoveries/impl/attack_discovery/hallucination_detection')
-    .getAlertIds,
-}));
+vi.mock('@kbn/discoveries/impl/attack_discovery/hallucination_detection', async () => {
+      const mocked = {
+      filterHallucinatedAlerts: vi.fn(),
+      getAlertIds: (await vi.importActual('@kbn/discoveries/impl/attack_discovery/hallucination_detection'))
+        .getAlertIds,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFilterHallucinatedAlerts = filterHallucinatedAlerts as jest.MockedFunction<
+const mockFilterHallucinatedAlerts = filterHallucinatedAlerts as MockedFunction<
   typeof filterHallucinatedAlerts
 >;
 
 describe('filterAndValidateDiscoveries', () => {
   const mockLogger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
   const mockContextLogger = {
-    info: jest.fn(),
+    info: vi.fn(),
   };
 
   const mockEsClient = {} as unknown as ElasticsearchClient;
@@ -44,7 +50,7 @@ describe('filterAndValidateDiscoveries', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when attackDiscoveries is null', () => {

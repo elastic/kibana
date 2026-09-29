@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -12,11 +15,11 @@ import { RuleActionsField } from '.';
 import { useForm, Form } from '../../../shared_imports';
 import { useKibana } from '../../lib/kibana';
 import { useFormFieldMock } from '../../mock';
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
 describe('RuleActionsField', () => {
   it('should not render ActionForm if no actions are supported', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         triggersActionsUi: {
           actionTypeRegistry: {},

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
@@ -87,7 +89,7 @@ describe('executeEsqlQueryRetryingRemoteResources', () => {
   it('mutates indexPatterns and retries after a remote-view error', async () => {
     const logger = loggerMock.create();
     const indexPatterns = ['logs-*'];
-    const execute = jest
+    const execute = vi
       .fn()
       .mockRejectedValueOnce({
         message: SAMPLE_REASON,
@@ -117,7 +119,7 @@ describe('executeEsqlQueryRetryingRemoteResources', () => {
   it('rethrows errors that are not remote-resource failures', async () => {
     const logger = loggerMock.create();
     const boom = new Error('cluster_block_exception');
-    const execute = jest.fn().mockRejectedValue(boom);
+    const execute = vi.fn().mockRejectedValue(boom);
 
     await expect(
       executeEsqlQueryRetryingRemoteResources({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
@@ -20,12 +22,12 @@ import {
 } from './install';
 
 const createClient = () => ({
-  install: jest.fn().mockResolvedValue(undefined),
-  uninstall: jest.fn().mockResolvedValue(undefined),
-  ready: jest.fn().mockResolvedValue(undefined),
+  install: vi.fn().mockResolvedValue(undefined),
+  uninstall: vi.fn().mockResolvedValue(undefined),
+  ready: vi.fn().mockResolvedValue(undefined),
   // Defaults to "nothing installed"; tests that exercise the uninstall path
   // override this to report at least one TI instance as installed.
-  listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
+  listInstalledWorkflowStates: vi.fn().mockResolvedValue([]),
 });
 
 const installedState = (overrides: {
@@ -167,7 +169,7 @@ describe('threat intel managed workflow install', () => {
   // every restart just to confirm there is nothing to remove.
   it('skips space enumeration and every uninstall call when no TI workflow is installed', async () => {
     const client = createClient();
-    const getSpaceIds = jest.fn().mockResolvedValue(['default', 'space-a']);
+    const getSpaceIds = vi.fn().mockResolvedValue(['default', 'space-a']);
 
     await uninstallThreatIntelManagedWorkflows({
       managedWorkflowsClient: client as never,
@@ -202,7 +204,7 @@ describe('threat intel managed workflow install', () => {
 
   it('still uninstalls when only a per-space attribute workflow is installed', async () => {
     const client = createClient();
-    const getSpaceIds = jest.fn().mockResolvedValue(['default']);
+    const getSpaceIds = vi.fn().mockResolvedValue(['default']);
     client.listInstalledWorkflowStates.mockResolvedValue([
       installedState({
         workflowId: `${THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID}-default`,
@@ -228,7 +230,7 @@ describe('threat intel managed workflow install', () => {
   // healthy securitySolution boot. That must not disable the short circuit.
   it('skips uninstall when the list has only a non-TI workflow', async () => {
     const client = createClient();
-    const getSpaceIds = jest.fn().mockResolvedValue(['default']);
+    const getSpaceIds = vi.fn().mockResolvedValue(['default']);
     client.listInstalledWorkflowStates.mockResolvedValue([
       installedState({ workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID }),
     ]);

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { createClickHandler } from './presentation_panel_hover_actions';
@@ -16,7 +18,7 @@ describe('createClickHandler', () => {
     document.body.innerHTML = '';
   });
 
-  const buildAction = () => ({ execute: jest.fn() } as unknown as Action<EmbeddableApiContext>);
+  const buildAction = () => ({ execute: vi.fn() } as unknown as Action<EmbeddableApiContext>);
   const context = {} as ActionExecutionContext<EmbeddableApiContext>;
 
   const buildEvent = (currentTarget: HTMLElement) =>
@@ -24,7 +26,7 @@ describe('createClickHandler', () => {
       currentTarget,
       button: 0,
       defaultPrevented: false,
-      preventDefault: jest.fn(),
+      preventDefault: vi.fn(),
     } as unknown as React.MouseEvent);
 
   it('executes the action', () => {

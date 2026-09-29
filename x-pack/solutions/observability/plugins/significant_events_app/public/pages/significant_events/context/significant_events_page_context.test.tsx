@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,19 +17,25 @@ import {
   useSignificantEventsPageContext,
 } from './significant_events_page_context';
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_significant_events_discovery_api', () => ({
-  useSignificantEventsDiscoveryApi: jest.fn(),
-}));
+vi.mock('../../../hooks/use_significant_events_discovery_api', () => {
+      const mocked = {
+      useSignificantEventsDiscoveryApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSignificantEventsDiscoveryApi } from '../../../hooks/use_significant_events_discovery_api';
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseApi = useSignificantEventsDiscoveryApi as jest.MockedFunction<
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseApi = useSignificantEventsDiscoveryApi as MockedFunction<
   typeof useSignificantEventsDiscoveryApi
 >;
 
@@ -38,12 +47,12 @@ interface StatusResponse {
 
 const STATUS_QUERY_KEY = ['significant_events_discovery_status'];
 
-const addSuccess = jest.fn();
-const addDanger = jest.fn();
-const addError = jest.fn();
+const addSuccess = vi.fn();
+const addDanger = vi.fn();
+const addError = vi.fn();
 
-const trigger = jest.fn();
-const cancel = jest.fn();
+const trigger = vi.fn();
+const cancel = vi.fn();
 
 const createSetup = (onComplete?: () => void) => {
   const queryClient = new QueryClient({
@@ -68,8 +77,8 @@ const renderContext = (onComplete?: () => void) => {
 
 describe('SignificantEventsPageProvider', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
     mockUseKibana.mockReturnValue({
       core: {
         application: {
@@ -81,7 +90,7 @@ describe('SignificantEventsPageProvider', () => {
     mockUseApi.mockReturnValue({
       triggerSignificantEventsDiscovery: trigger,
       cancelSignificantEventsDiscovery: cancel,
-      getSignificantEventsDiscoveryStatus: jest.fn(async () => undefined),
+      getSignificantEventsDiscoveryStatus: vi.fn(async () => undefined),
     } as unknown as ReturnType<typeof useSignificantEventsDiscoveryApi>);
   });
 
@@ -146,7 +155,7 @@ describe('SignificantEventsPageProvider', () => {
   describe('terminal status transitions', () => {
     it('fires the success toast and onComplete when a run completes', async () => {
       trigger.mockResolvedValue({ executionId: 'exec-1' });
-      const onComplete = jest.fn();
+      const onComplete = vi.fn();
       const { result, setStatus } = renderContext(onComplete);
 
       act(() => {
@@ -215,7 +224,7 @@ describe('SignificantEventsPageProvider', () => {
 
     it('stays running while the poll reports the previous run, then toasts on the new completion', async () => {
       trigger.mockResolvedValue({ executionId: 'new-exec' });
-      const onComplete = jest.fn();
+      const onComplete = vi.fn();
       const { result, setStatus } = renderContext(onComplete);
 
       act(() => {

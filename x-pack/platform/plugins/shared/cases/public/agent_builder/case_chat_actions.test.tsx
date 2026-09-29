@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,16 +16,16 @@ import { basicCase } from '../containers/mock';
 import { useAddCaseToChat } from './use_add_case_to_chat';
 import { CaseChatActions } from './case_chat_actions';
 
-jest.mock('./use_add_case_to_chat');
+vi.mock('./use_add_case_to_chat');
 
-const useAddCaseToChatMock = useAddCaseToChat as jest.Mock;
+const useAddCaseToChatMock = useAddCaseToChat as Mock;
 
 describe('CaseChatActions', () => {
-  const addToChat = jest.fn();
-  const summarizeCase = jest.fn();
+  const addToChat = vi.fn();
+  const summarizeCase = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useAddCaseToChatMock.mockReturnValue({
       addToChat,
       summarizeCase,

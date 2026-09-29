@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
@@ -13,13 +16,16 @@ import { NOTES_LOADING_TEST_ID } from '../../../../../notes/components/test_ids'
 import { SuperTimelineNotesTab } from './super_timeline_notes_tab';
 import { useNotesTabData } from './use_notes_tab_data';
 
-jest.mock('./use_notes_tab_data');
+vi.mock('./use_notes_tab_data');
 
-jest.mock('../../../super_timeline/super_timeline_notes', () => ({
-  SuperTimelineNotes: () => <div data-test-subj="mock-super-timeline-notes" />,
-}));
+vi.mock('../../../super_timeline/super_timeline_notes', () => {
+      const mocked = {
+      SuperTimelineNotes: () => <div data-test-subj="mock-super-timeline-notes" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseNotesTabData = useNotesTabData as jest.MockedFunction<typeof useNotesTabData>;
+const mockUseNotesTabData = useNotesTabData as MockedFunction<typeof useNotesTabData>;
 
 const defaultHookData = {
   timeline: {} as never,
@@ -35,7 +41,7 @@ const defaultHookData = {
 
 describe('SuperTimelineNotesTab', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseNotesTabData.mockReturnValue(defaultHookData);
   });
 

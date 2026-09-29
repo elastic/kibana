@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -45,35 +47,47 @@ const privilegesMissingWrite = {
   },
 };
 
-const mockUseAssetCriticalityPrivileges = jest.fn();
-jest.mock('./use_asset_criticality', () => ({
-  useAssetCriticalityPrivileges: (...args: unknown[]) => mockUseAssetCriticalityPrivileges(...args),
-}));
+const mockUseAssetCriticalityPrivileges = vi.fn();
+vi.mock('./use_asset_criticality', () => {
+      const mocked = {
+      useAssetCriticalityPrivileges: (...args: unknown[]) => mockUseAssetCriticalityPrivileges(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseHasSecurityCapability = jest.fn();
-jest.mock('../../../helper_hooks', () => ({
-  useHasSecurityCapability: (...args: unknown[]) => mockUseHasSecurityCapability(...args),
-}));
+const mockUseHasSecurityCapability = vi.fn();
+vi.mock('../../../helper_hooks', () => {
+      const mocked = {
+      useHasSecurityCapability: (...args: unknown[]) => mockUseHasSecurityCapability(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      docLinks: {
-        links: {
-          securitySolution: {
-            entityAnalytics: {
-              assetCriticality: 'https://example.com/asset-criticality',
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          docLinks: {
+            links: {
+              securitySolution: {
+                entityAnalytics: {
+                  assetCriticality: 'https://example.com/asset-criticality',
+                },
+              },
             },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../asset_criticality_file_uploader/asset_criticality_file_uploader', () => ({
-  AssetCriticalityFileUploader: () => <div data-test-subj="asset-criticality-file-uploader" />,
-}));
+vi.mock('../asset_criticality_file_uploader/asset_criticality_file_uploader', () => {
+      const mocked = {
+      AssetCriticalityFileUploader: () => <div data-test-subj="asset-criticality-file-uploader" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -81,7 +95,7 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 describe('AssetCriticalityTab', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseHasSecurityCapability.mockReturnValue(true);
     mockUseAssetCriticalityPrivileges.mockReturnValue({
       isLoading: false,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
@@ -12,9 +14,12 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getAgentsRoute } from './get_agents';
 
-jest.mock('../../utils/get_internal_saved_object_client', () => ({
-  createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
-}));
+vi.mock('../../utils/get_internal_saved_object_client', () => {
+      const mocked = {
+      createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getAgentsRoute', () => {
   let mockOsqueryContext: OsqueryAppContext;
@@ -23,12 +28,12 @@ describe('getAgentsRoute', () => {
   >;
   let routeHandler: RequestHandler<unknown, Record<string, unknown>, unknown>;
 
-  const mockListAgents = jest.fn();
+  const mockListAgents = vi.fn();
   const mockAgentService = {
-    asInternalScopedUser: jest.fn().mockReturnValue({ listAgents: mockListAgents }),
+    asInternalScopedUser: vi.fn().mockReturnValue({ listAgents: mockListAgents }),
   };
-  const mockPackagePolicyService = { list: jest.fn() };
-  const mockAgentPolicyService = { getByIds: jest.fn() };
+  const mockPackagePolicyService = { list: vi.fn() };
+  const mockAgentPolicyService = { getByIds: vi.fn() };
 
   const createMockRequest = (kuery = '') =>
     httpServerMock.createKibanaRequest({
@@ -41,7 +46,7 @@ describe('getAgentsRoute', () => {
   const receivedEsQuery = () => JSON.stringify(toElasticsearchQuery(receivedKueryNode()));
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockAgentService.asInternalScopedUser.mockReturnValue({ listAgents: mockListAgents });
     mockPackagePolicyService.list.mockResolvedValue({
@@ -53,12 +58,12 @@ describe('getAgentsRoute', () => {
     mockListAgents.mockResolvedValue({ total: 0, agents: [], aggregations: undefined });
 
     mockOsqueryContext = {
-      logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn(), error: jest.fn() }) },
+      logFactory: { get: vi.fn().mockReturnValue({ debug: vi.fn(), error: vi.fn() }) },
       service: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-        getAgentService: jest.fn().mockReturnValue(mockAgentService),
-        getPackagePolicyService: jest.fn().mockReturnValue(mockPackagePolicyService),
-        getAgentPolicyService: jest.fn().mockReturnValue(mockAgentPolicyService),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+        getAgentService: vi.fn().mockReturnValue(mockAgentService),
+        getPackagePolicyService: vi.fn().mockReturnValue(mockPackagePolicyService),
+        getAgentPolicyService: vi.fn().mockReturnValue(mockAgentPolicyService),
       },
     } as unknown as OsqueryAppContext;
 

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-jest.mock('../ears/get_ears_access_token');
-jest.mock('../ears/url');
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
+vi.mock('../ears/get_ears_access_token');
+vi.mock('../ears/url');
 
 import type { AxiosInstance } from 'axios';
 import { authTypeSpecs } from '@kbn/connector-specs';
@@ -19,8 +22,8 @@ import { resolveEarsUrl } from '../ears/url';
 import { EarsStrategy } from './ears_strategy';
 import type { AuthStrategyDeps } from './types';
 
-const mockGetEarsAccessToken = getEarsAccessToken as jest.MockedFunction<typeof getEarsAccessToken>;
-const mockResolveEarsUrl = resolveEarsUrl as jest.MockedFunction<typeof resolveEarsUrl>;
+const mockGetEarsAccessToken = getEarsAccessToken as MockedFunction<typeof getEarsAccessToken>;
+const mockResolveEarsUrl = resolveEarsUrl as MockedFunction<typeof resolveEarsUrl>;
 
 const logger = loggerMock.create();
 const configurationUtilities = actionsConfigMock.create();
@@ -35,9 +38,9 @@ const baseDeps: AuthStrategyDeps = {
 };
 
 const createMockAxiosInstance = () => {
-  const mockRequest = jest.fn();
+  const mockRequest = vi.fn();
   const instance = {
-    interceptors: { response: { use: jest.fn() } },
+    interceptors: { response: { use: vi.fn() } },
     request: mockRequest,
     defaults: { headers: { common: {} as Record<string, string> } },
   } as unknown as AxiosInstance;
@@ -45,13 +48,13 @@ const createMockAxiosInstance = () => {
 };
 
 const getOnFulfilled = (instance: AxiosInstance) => {
-  const useMock = instance.interceptors.response.use as jest.Mock;
+  const useMock = instance.interceptors.response.use as Mock;
   expect(useMock).toHaveBeenCalledTimes(1);
   return useMock.mock.calls[0][0] as (response: unknown) => Promise<unknown>;
 };
 
 const getOnRejected = (instance: AxiosInstance) => {
-  const useMock = instance.interceptors.response.use as jest.Mock;
+  const useMock = instance.interceptors.response.use as Mock;
   expect(useMock).toHaveBeenCalledTimes(1);
   return useMock.mock.calls[0][1] as (error: unknown) => Promise<unknown>;
 };
@@ -60,7 +63,7 @@ describe('EarsStrategy', () => {
   let strategy: EarsStrategy;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     strategy = new EarsStrategy();
     mockResolveEarsUrl.mockImplementation((url) => `https://ears.example.com${url}`);
   });
@@ -294,7 +297,7 @@ describe('EarsStrategy', () => {
       'sets Authorization header with title-case Bearer scheme at setup time (%s -> %s)',
       async (input, expected) => {
         const ctx = {
-          getToken: jest.fn().mockResolvedValue(input),
+          getToken: vi.fn().mockResolvedValue(input),
         } as unknown as AuthContext;
         const { instance } = createMockAxiosInstance();
 

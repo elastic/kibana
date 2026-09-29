@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SnapshotSerializer } from 'vitest';
+
 import { take } from 'rxjs';
 import { Subject, of } from 'rxjs';
 
@@ -15,7 +17,7 @@ import { ServiceStatusLevels } from '@kbn/core-status-common';
 import { calculateStatus$ } from './status';
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
-const ServiceStatusLevelSnapshotSerializer: jest.SnapshotSerializerPlugin = {
+const ServiceStatusLevelSnapshotSerializer: SnapshotSerializer = {
   test: (val: any) => Object.values(ServiceStatusLevels).includes(val),
   serialize: (val: ServiceStatusLevel) => val.toString(),
 };

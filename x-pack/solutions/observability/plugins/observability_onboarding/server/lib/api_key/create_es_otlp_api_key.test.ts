@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { createEsOtlpApiKey } from './create_es_otlp_api_key';
 import { INDEX_OTLP_LOGS_METRICS_AND_TRACES } from './privileges';
 
 const createMockEsClient = () => {
-  const createApiKey = jest.fn().mockResolvedValue({ encoded: 'encoded-key' });
+  const createApiKey = vi.fn().mockResolvedValue({ encoded: 'encoded-key' });
   return {
     client: { security: { createApiKey } } as unknown as ElasticsearchClient,
     createApiKey,

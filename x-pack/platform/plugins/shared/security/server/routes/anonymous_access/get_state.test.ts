@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
@@ -18,7 +20,7 @@ describe('GET /internal/security/anonymous_access/state', () => {
     mockRouteDefinitionParams.getAnonymousAccessService.mockReturnValue({
       isAnonymousAccessEnabled: true,
       accessURLParameters,
-      getCapabilities: jest.fn(),
+      getCapabilities: vi.fn(),
     });
     const mockContext = securityRequestHandlerContextMock.create();
 

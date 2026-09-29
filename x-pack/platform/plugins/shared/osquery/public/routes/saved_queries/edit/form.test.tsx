@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -13,30 +15,33 @@ import { EuiProvider } from '@elastic/eui';
 
 import { EditSavedQueryForm } from './form';
 
-jest.mock('../../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../../common/lib/kibana'),
-  useKibana: () => ({
-    services: {
-      application: {
-        capabilities: {
-          osquery: {
-            writeSavedQueries: true,
-            readSavedQueries: true,
-            writeLiveQueries: true,
-            runSavedQueries: true,
+vi.mock('../../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/lib/kibana')),
+      useKibana: () => ({
+        services: {
+          application: {
+            capabilities: {
+              osquery: {
+                writeSavedQueries: true,
+                readSavedQueries: true,
+                writeLiveQueries: true,
+                runSavedQueries: true,
+              },
+            },
           },
+          notifications: { toasts: { addSuccess: vi.fn(), addError: vi.fn() } },
+          http: { get: vi.fn(), post: vi.fn() },
         },
-      },
-      notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
-      http: { get: jest.fn(), post: jest.fn() },
-    },
-  }),
-  useRouterNavigate: (path: string) => ({ onClick: jest.fn(), href: path }),
-}));
+      }),
+      useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockIdSet = new Set<string>();
-const mockSerializer = jest.fn((data: unknown) => data);
-const mockHandleSubmit = jest.fn((callback: (data: unknown) => void) => (e?: any) => {
+const mockSerializer = vi.fn((data: unknown) => data);
+const mockHandleSubmit = vi.fn((callback: (data: unknown) => void) => (e?: any) => {
   e?.preventDefault?.();
   callback({
     id: 'test-query',
@@ -47,41 +52,47 @@ const mockHandleSubmit = jest.fn((callback: (data: unknown) => void) => (e?: any
 });
 const mockFormState = { isSubmitting: false, isDirty: false };
 
-jest.mock('../../../saved_queries/form/use_saved_query_form', () => ({
-  useSavedQueryForm: jest.fn(() => ({
-    serializer: mockSerializer,
-    idSet: mockIdSet,
-    handleSubmit: mockHandleSubmit,
-    formState: mockFormState,
-    register: jest.fn(),
-    unregister: jest.fn(),
-    watch: jest.fn(),
-    setValue: jest.fn(),
-    getValues: jest.fn(),
-    getFieldState: jest.fn(),
-    setError: jest.fn(),
-    clearErrors: jest.fn(),
-    resetField: jest.fn(),
-    reset: jest.fn(),
-    trigger: jest.fn(),
-    control: {},
-  })),
-}));
+vi.mock('../../../saved_queries/form/use_saved_query_form', () => {
+      const mocked = {
+      useSavedQueryForm: vi.fn(() => ({
+        serializer: mockSerializer,
+        idSet: mockIdSet,
+        handleSubmit: mockHandleSubmit,
+        formState: mockFormState,
+        register: vi.fn(),
+        unregister: vi.fn(),
+        watch: vi.fn(),
+        setValue: vi.fn(),
+        getValues: vi.fn(),
+        getFieldState: vi.fn(),
+        setError: vi.fn(),
+        clearErrors: vi.fn(),
+        resetField: vi.fn(),
+        reset: vi.fn(),
+        trigger: vi.fn(),
+        control: {},
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../saved_queries/form', () => ({
-  SavedQueryForm: ({
-    viewMode,
-    hasPlayground,
-  }: {
-    viewMode?: boolean;
-    hasPlayground?: boolean;
-  }) => (
-    <div data-test-subj="saved-query-form">
-      <span data-test-subj="view-mode">{String(!!viewMode)}</span>
-      <span data-test-subj="has-playground">{String(!!hasPlayground)}</span>
-    </div>
-  ),
-}));
+vi.mock('../../../saved_queries/form', () => {
+      const mocked = {
+      SavedQueryForm: ({
+        viewMode,
+        hasPlayground,
+      }: {
+        viewMode?: boolean;
+        hasPlayground?: boolean;
+      }) => (
+        <div data-test-subj="saved-query-form">
+          <span data-test-subj="view-mode">{String(!!viewMode)}</span>
+          <span data-test-subj="has-playground">{String(!!hasPlayground)}</span>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createTestQueryClient = () =>
   new QueryClient({ defaultOptions: { queries: { retry: false, cacheTime: 0 } } });
@@ -91,7 +102,7 @@ const renderComponent = (props: Partial<React.ComponentProps<typeof EditSavedQue
     <EuiProvider>
       <IntlProvider locale="en">
         <QueryClientProvider client={createTestQueryClient()}>
-          <EditSavedQueryForm handleSubmit={jest.fn()} {...props} />
+          <EditSavedQueryForm handleSubmit={vi.fn()} {...props} />
         </QueryClientProvider>
       </IntlProvider>
     </EuiProvider>
@@ -99,7 +110,7 @@ const renderComponent = (props: Partial<React.ComponentProps<typeof EditSavedQue
 
 describe('EditSavedQueryForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFormState.isSubmitting = false;
     mockFormState.isDirty = false;
   });
@@ -144,7 +155,7 @@ describe('EditSavedQueryForm', () => {
 
   describe('update button', () => {
     it('should call handleSubmit when Update query is clicked', () => {
-      const handleSubmit = jest.fn().mockResolvedValue(undefined);
+      const handleSubmit = vi.fn().mockResolvedValue(undefined);
       renderComponent({ handleSubmit });
 
       fireEvent.click(screen.getByTestId('update-query-button'));
@@ -155,7 +166,7 @@ describe('EditSavedQueryForm', () => {
 
   describe('dirty state tracking', () => {
     it('should call onDirtyStateChange when form becomes dirty', () => {
-      const onDirtyStateChange = jest.fn();
+      const onDirtyStateChange = vi.fn();
       mockFormState.isDirty = true;
 
       renderComponent({ onDirtyStateChange });
@@ -164,7 +175,7 @@ describe('EditSavedQueryForm', () => {
     });
 
     it('should call onDirtyStateChange with false when form is clean', () => {
-      const onDirtyStateChange = jest.fn();
+      const onDirtyStateChange = vi.fn();
       mockFormState.isDirty = false;
 
       renderComponent({ onDirtyStateChange });

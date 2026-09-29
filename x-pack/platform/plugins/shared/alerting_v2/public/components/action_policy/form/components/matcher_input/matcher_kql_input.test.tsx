@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -12,7 +14,7 @@ import type { Query } from '@kbn/es-query';
 import { MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
 import { MatcherInput } from './matcher_kql_input';
 
-const mockQueryStringInput = jest.fn((props: Record<string, unknown>) => (
+const mockQueryStringInput = vi.fn((props: Record<string, unknown>) => (
   <input
     data-test-subj={props.dataTestSubj as string}
     value={(props.query as Query).query as string}
@@ -24,15 +26,21 @@ const mockQueryStringInput = jest.fn((props: Record<string, unknown>) => (
   />
 ));
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: jest.fn(() => ({
-    QueryStringInput: (props: Record<string, unknown>) => mockQueryStringInput(props),
-  })),
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: vi.fn(() => ({
+        QueryStringInput: (props: Record<string, unknown>) => mockQueryStringInput(props),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di', () => ({
-  PluginStart: jest.fn((name: string) => `PluginStart(${name})`),
-}));
+vi.mock('@kbn/core-di', () => {
+      const mocked = {
+      PluginStart: vi.fn((name: string) => `PluginStart(${name})`),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MatcherInput', () => {
   beforeEach(() => {
@@ -43,7 +51,7 @@ describe('MatcherInput', () => {
     render(
       <MatcherInput
         value='episode_status : "active"'
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         data-test-subj="matcherInput"
       />
     );
@@ -52,7 +60,7 @@ describe('MatcherInput', () => {
   });
 
   it('passes a synthetic DataView built from MATCHER_CONTEXT_FIELDS', () => {
-    render(<MatcherInput value="" onChange={jest.fn()} />);
+    render(<MatcherInput value="" onChange={vi.fn()} />);
 
     const { indexPatterns } = mockQueryStringInput.mock.calls[0][0] as {
       indexPatterns: Array<{ fields: Array<{ name: string }> }>;
@@ -66,7 +74,7 @@ describe('MatcherInput', () => {
   });
 
   it('disables the language switcher and uses kuery language', () => {
-    render(<MatcherInput value="" onChange={jest.fn()} />);
+    render(<MatcherInput value="" onChange={vi.fn()} />);
 
     const props = mockQueryStringInput.mock.calls[0][0];
     expect(props.disableLanguageSwitcher).toBe(true);
@@ -74,7 +82,7 @@ describe('MatcherInput', () => {
   });
 
   it('calls onChange with the query string when QueryStringInput changes', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(<MatcherInput value="" onChange={onChange} data-test-subj="matcherInput" />);
 
     const input = screen.getByTestId('matcherInput');
@@ -91,7 +99,7 @@ describe('MatcherInput', () => {
 
   it('passes placeholder and data-test-subj props through', () => {
     render(
-      <MatcherInput value="" onChange={jest.fn()} placeholder="Type KQL" data-test-subj="myInput" />
+      <MatcherInput value="" onChange={vi.fn()} placeholder="Type KQL" data-test-subj="myInput" />
     );
 
     const props = mockQueryStringInput.mock.calls[0][0];
@@ -100,7 +108,7 @@ describe('MatcherInput', () => {
   });
 
   it('sets appName to alertingV2', () => {
-    render(<MatcherInput value="" onChange={jest.fn()} />);
+    render(<MatcherInput value="" onChange={vi.fn()} />);
 
     const props = mockQueryStringInput.mock.calls[0][0];
     expect(props.appName).toBe('alertingV2');

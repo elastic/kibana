@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { GroupsFilterPopoverComponent } from './groups_filter_popover';
@@ -23,14 +25,14 @@ describe('GroupsFilterPopover', () => {
     const wrapper = shallow(
       <GroupsFilterPopoverComponent
         securityJobs={securityJobs}
-        onSelectedGroupsChanged={jest.fn()}
+        onSelectedGroupsChanged={vi.fn()}
       />
     );
     expect(wrapper).toMatchSnapshot();
   });
 
   test('when a filter is clicked, it becomes checked ', () => {
-    const mockOnSelectedGroupsChanged = jest.fn();
+    const mockOnSelectedGroupsChanged = vi.fn();
     const wrapper = mount(
       <GroupsFilterPopoverComponent
         securityJobs={securityJobs}

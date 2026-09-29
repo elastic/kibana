@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataSourceType } from '../../../../../common/data_sources';
@@ -195,7 +197,7 @@ describe('sparklineDataSourceProfileProvider', () => {
     });
 
     it('falls through to prev when sparklineColumns is empty', () => {
-      const existingRenderer = jest.fn();
+      const existingRenderer = vi.fn();
       const prevRenderers = { existing_col: existingRenderer };
       const getCellRenderers = provider.profile.getCellRenderers!(() => prevRenderers, {
         context: {
@@ -214,7 +216,7 @@ describe('sparklineDataSourceProfileProvider', () => {
     });
 
     it('merges sparkline renderers with renderers from prev', () => {
-      const existingRenderer = jest.fn();
+      const existingRenderer = vi.fn();
       const getCellRenderers = provider.profile.getCellRenderers!(
         () => ({ existing_col: existingRenderer }),
         {
@@ -235,7 +237,7 @@ describe('sparklineDataSourceProfileProvider', () => {
     });
 
     it('sparkline renderers do not override non-sparkline renderers from prev', () => {
-      const nonSparklineRenderer = jest.fn();
+      const nonSparklineRenderer = vi.fn();
       const getCellRenderers = provider.profile.getCellRenderers!(
         () => ({ some_other_col: nonSparklineRenderer }),
         {

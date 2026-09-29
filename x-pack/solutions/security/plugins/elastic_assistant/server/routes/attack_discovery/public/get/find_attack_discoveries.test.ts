@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 
@@ -18,12 +21,12 @@ import { requestContextMock } from '../../../../__mocks__/request_context';
 
 const mockAttackDiscoveryFindResponse = getMockAttackDiscoveryFindResponse();
 
-jest.mock('../../helpers/index_privileges', () => {
-  const original = jest.requireActual('../../helpers/index_privileges');
+vi.mock('../../helpers/index_privileges', async () => {
+  const original = (await vi.importActual('../../helpers/index_privileges'));
 
   return {
     ...original,
-    hasReadAttackDiscoveryAlertsPrivileges: jest.fn(),
+    hasReadAttackDiscoveryAlertsPrivileges: vi.fn(),
   };
 });
 
@@ -33,15 +36,15 @@ describe('findAttackDiscoveriesRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let mockRequest: Partial<KibanaRequest<unknown, unknown, unknown>>;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
-  let mockDataClient: { findAttackDiscoveryAlerts: jest.Mock };
-  let addVersionMock: jest.Mock;
+  let mockDataClient: { findAttackDiscoveryAlerts: Mock };
+  let addVersionMock: Mock;
   let getHandler: (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     router = httpServiceMock.createRouter();
     mockDataClient = {
-      findAttackDiscoveryAlerts: jest.fn().mockResolvedValue(mockAttackDiscoveryFindResponse),
+      findAttackDiscoveryAlerts: vi.fn().mockResolvedValue(mockAttackDiscoveryFindResponse),
     };
     mockContext.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(
       mockDataClient as unknown as AttackDiscoveryDataClient
@@ -50,15 +53,15 @@ describe('findAttackDiscoveriesRoute', () => {
       query: { page: 1, per_page: 10 },
     };
     mockResponse = httpServerMock.createResponseFactory();
-    jest
+    vi
       .spyOn(helpers, 'performChecks')
       .mockResolvedValue({ isSuccess: true, currentUser: mockAuthenticatedUser });
 
-    addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({ addVersion: addVersionMock });
     findAttackDiscoveriesRoute(router);
     getHandler = addVersionMock.mock.calls[0][1];
-    (hasReadAttackDiscoveryAlertsPrivileges as jest.Mock).mockResolvedValue({
+    (hasReadAttackDiscoveryAlertsPrivileges as Mock).mockResolvedValue({
       isSuccess: true,
     });
   });
@@ -89,7 +92,7 @@ describe('findAttackDiscoveriesRoute', () => {
   });
 
   it('returns an error when performChecks fails', async () => {
-    (helpers.performChecks as jest.Mock).mockResolvedValueOnce({
+    (helpers.performChecks as Mock).mockResolvedValueOnce({
       isSuccess: false,
       response: { status: 403, payload: { message: 'Forbidden' } },
     });
@@ -100,7 +103,7 @@ describe('findAttackDiscoveriesRoute', () => {
   });
 
   it('returns an error when hasReadAttackDiscoveryAlertsPrivileges fails', async () => {
-    (hasReadAttackDiscoveryAlertsPrivileges as jest.Mock).mockImplementation(({ response }) => {
+    (hasReadAttackDiscoveryAlertsPrivileges as Mock).mockImplementation(({ response }) => {
       return Promise.resolve({
         isSuccess: false,
         response: { status: 403, payload: { message: 'no privileges' } },
@@ -138,7 +141,7 @@ describe('findAttackDiscoveriesRoute', () => {
   it('throws if response validation fails', async () => {
     mockDataClient.findAttackDiscoveryAlerts.mockResolvedValueOnce({ invalid: true });
 
-    const throwValidationError = jest.fn(() => {
+    const throwValidationError = vi.fn(() => {
       throw new Error('Response validation failed');
     });
     mockResponse.ok = throwValidationError;

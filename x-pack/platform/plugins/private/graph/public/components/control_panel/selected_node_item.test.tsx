@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { render, fireEvent } from '@testing-library/react';
@@ -28,8 +30,8 @@ const buildNode = (overrides: Partial<WorkspaceNode> = {}): WorkspaceNode => ({
 });
 
 const renderItem = (props: Partial<Parameters<typeof SelectedNodeItem>[0]> = {}) => {
-  const onSelectedFieldClick = jest.fn();
-  const onDeselectNode = jest.fn();
+  const onSelectedFieldClick = vi.fn();
+  const onDeselectNode = vi.fn();
   const node = props.node ?? buildNode();
   const result = render(
     <EuiProvider>

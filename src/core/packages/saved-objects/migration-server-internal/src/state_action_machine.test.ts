@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { stateActionMachine } from './state_action_machine';
 import * as E from 'fp-ts/Either';
 
 describe('state action machine', () => {
   const state = { controlState: 'INIT', count: 1 };
 
-  const next = jest.fn((s: typeof state) => {
+  const next = vi.fn((s: typeof state) => {
     if (s.controlState === 'INIT') return () => Promise.resolve(E.right('response'));
     if (s.controlState === 'DONE') return null;
     else throw new Error('Invalid control state');
   });
 
   const countUntilModel = (maxCount: number) =>
-    jest.fn((s: typeof state, res: E.Either<unknown, string>) => {
+    vi.fn((s: typeof state, res: E.Either<unknown, string>) => {
       if (s.count === maxCount) {
         return { controlState: 'DONE', count: s.count };
       } else {

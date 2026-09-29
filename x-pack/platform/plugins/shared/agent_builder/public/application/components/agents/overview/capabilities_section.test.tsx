@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -25,15 +27,15 @@ const baseProps = {
   connectorsCount: 0,
   hasConnectorsPrivileges: true,
   connectorsHref: '/agents/a/connectors',
-  onNavigateToSkills: jest.fn(),
-  onNavigateToPlugins: jest.fn(),
-  onNavigateToTools: jest.fn(),
-  onNavigateToConnectors: jest.fn(),
+  onNavigateToSkills: vi.fn(),
+  onNavigateToPlugins: vi.fn(),
+  onNavigateToTools: vi.fn(),
+  onNavigateToConnectors: vi.fn(),
 };
 
 describe('CapabilitiesSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders Skills, Plugins, and Tools cards when experimental features are enabled', () => {
@@ -54,8 +56,8 @@ describe('CapabilitiesSection', () => {
 
   it('fires navigation handlers when non-loading cards are clicked', async () => {
     const user = userEvent.setup();
-    const onNavigateToSkills = jest.fn();
-    const onNavigateToTools = jest.fn();
+    const onNavigateToSkills = vi.fn();
+    const onNavigateToTools = vi.fn();
 
     render(
       <CapabilitiesSection

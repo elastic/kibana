@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { NoDataCard } from '../no_data_card';
 import { ActionCards } from './action_cards';
 
 describe('ActionCards', () => {
-  const onClick = jest.fn();
+  const onClick = vi.fn();
   const action = {
     recommended: false,
     button: 'Button text',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 
@@ -33,17 +35,26 @@ import { getPrivilegeAPIClientMock } from '../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../roles_api_client.mock';
 import { getSecurityLicenseMock } from '../security_license.mock';
 
-jest.mock('./edit_space_general_tab', () => ({
-  EditSpaceSettingsTab: () => <div />,
-}));
+vi.mock('./edit_space_general_tab', () => {
+      const mocked = {
+      EditSpaceSettingsTab: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./edit_space_roles_tab', () => ({
-  EditSpaceAssignedRolesTab: () => <div />,
-}));
+vi.mock('./edit_space_roles_tab', () => {
+      const mocked = {
+      EditSpaceAssignedRolesTab: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./edit_space_content_tab', () => ({
-  EditSpaceContentTab: () => <div />,
-}));
+vi.mock('./edit_space_content_tab', () => {
+      const mocked = {
+      EditSpaceContentTab: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const spaceId = asSpaceId('my-space');
 const space = {
@@ -85,7 +96,7 @@ const createRole = (name: string): Role => ({
 
 const renderEditSpace = ({
   spacesManager = spacesManagerMock.create(),
-  getFeatures = jest.fn().mockResolvedValue(features),
+  getFeatures = vi.fn().mockResolvedValue(features),
   getIsRoleManagementEnabled = () => Promise.resolve(() => true),
 }: {
   spacesManager?: ReturnType<typeof spacesManagerMock.create>;
@@ -104,7 +115,7 @@ const renderEditSpace = ({
             roles: { view: true, save: true },
           }}
           getUrlForApp={(appId) => appId}
-          navigateToUrl={jest.fn()}
+          navigateToUrl={vi.fn()}
           serverBasePath=""
           spacesManager={spacesManager}
           getRolesAPIClient={getRolesAPIClientMock}
@@ -124,7 +135,7 @@ const renderEditSpace = ({
             spaceId={spaceId}
             history={history}
             getFeatures={getFeatures}
-            onLoadSpace={jest.fn()}
+            onLoadSpace={vi.fn()}
             allowFeatureVisibility
             allowSolutionVisibility
           />
@@ -136,7 +147,7 @@ const renderEditSpace = ({
 
 describe('EditSpace', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     history.createHref.mockImplementation((location) => location.pathname ?? '/');
   });
 

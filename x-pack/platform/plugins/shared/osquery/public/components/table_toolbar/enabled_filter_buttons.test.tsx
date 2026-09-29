@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EnabledFilterButtons } from './enabled_filter_buttons';
 import type { EnabledFilter } from './enabled_filter_buttons';
 
-const renderComponent = (props: Partial<{ value: EnabledFilter; onChange: jest.Mock }> = {}) => {
+const renderComponent = (props: Partial<{ value: EnabledFilter; onChange: Mock }> = {}) => {
   const defaultProps = {
     value: undefined as EnabledFilter,
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     ...props,
   };
 
@@ -72,7 +75,7 @@ describe('EnabledFilterButtons', () => {
     render(
       React.createElement(EnabledFilterButtons, {
         value: undefined,
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         'data-test-subj': 'packs-status',
       })
     );

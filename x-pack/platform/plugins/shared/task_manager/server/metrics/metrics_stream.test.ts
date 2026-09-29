@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { take, bufferCount } from 'rxjs';
 import { createMetricsStream } from './metrics_stream';
@@ -12,7 +14,7 @@ import type { JsonValue } from '@kbn/utility-types';
 import type { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('createMetricsStream', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import type {
@@ -54,7 +57,7 @@ describe('xy style settings', () => {
   ) => {
     const state = testState();
     const rtlRender = render(
-      <XyStyleSettings frame={frame} setState={jest.fn()} state={state} {...overrideProps} />
+      <XyStyleSettings frame={frame} setState={vi.fn()} state={state} {...overrideProps} />
     );
     return rtlRender;
   };
@@ -136,7 +139,7 @@ describe('xy style settings', () => {
 
     it('should pass in endzone visibility setter and current sate for time chart', async () => {
       const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
-      (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+      (datasourceLayers.first.getOperationForColumnId as Mock).mockReturnValue({
         dataType: 'date',
       });
       const state = testState();
@@ -171,10 +174,10 @@ describe('xy style settings', () => {
 
     it.skip('should pass in current time marker visibility setter and current state for time chart', () => {
       const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
-      (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+      (datasourceLayers.first.getOperationForColumnId as Mock).mockReturnValue({
         dataType: 'date',
       });
-      const mockSetState = jest.fn();
+      const mockSetState = vi.fn();
       const stateForTest = testState();
       const state = {
         ...stateForTest,
@@ -223,7 +226,7 @@ describe('xy style settings', () => {
       render(
         <XyStyleSettings
           frame={frame}
-          setState={jest.fn()}
+          setState={vi.fn()}
           state={{
             ...state,
             preferredSeriesType: 'line',
@@ -246,7 +249,7 @@ describe('xy style settings', () => {
       render(
         <XyStyleSettings
           frame={frame}
-          setState={jest.fn()}
+          setState={vi.fn()}
           state={{
             ...state,
             preferredSeriesType: 'line',

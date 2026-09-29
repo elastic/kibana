@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import stripAnsi from 'strip-ansi';
 import { ToolingLog } from '@kbn/tooling-log';
 import type {
@@ -415,7 +417,7 @@ describe('displaySummary', () => {
   const renderSummary = (input: FlakyTestReport, limit: number, width?: number): string => {
     const writes: string[] = [];
     const log = new ToolingLog();
-    log.write = jest.fn((...args: unknown[]) => {
+    log.write = vi.fn((...args: unknown[]) => {
       writes.push(String(args[0]));
     }) as unknown as ToolingLog['write'];
     displaySummary(input, limit, log, width);

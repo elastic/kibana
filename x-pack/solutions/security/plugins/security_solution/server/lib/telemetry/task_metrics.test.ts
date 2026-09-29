@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ITaskMetricsService, TaskMetric } from './task_metrics.types';
 import { TaskMetricsService } from './task_metrics';
@@ -15,17 +18,17 @@ import { telemetryConfiguration } from './configuration';
 describe('task metrics', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let taskMetricsService: ITaskMetricsService;
-  let mockTelemetryEventsSender: jest.Mocked<ITelemetryEventsSender>;
+  let mockTelemetryEventsSender: Mocked<ITelemetryEventsSender>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     mockTelemetryEventsSender = createMockTelemetryEventsSender();
     taskMetricsService = new TaskMetricsService(logger, mockTelemetryEventsSender);
-    jest.spyOn(telemetryConfiguration, 'use_async_sender', 'get').mockReturnValue(true);
+    vi.spyOn(telemetryConfiguration, 'use_async_sender', 'get').mockReturnValue(true);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should start trace', async () => {
@@ -46,7 +49,7 @@ describe('task metrics', () => {
   });
 
   it('should use legacy sender when feature flag is disabled', async () => {
-    jest.spyOn(telemetryConfiguration, 'use_async_sender', 'get').mockReturnValue(false);
+    vi.spyOn(telemetryConfiguration, 'use_async_sender', 'get').mockReturnValue(false);
 
     const trace = taskMetricsService.start('test');
     await taskMetricsService.end(trace);

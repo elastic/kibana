@@ -5,27 +5,38 @@
  * 2.0.
  */
 
-jest.mock('./spaces_grid', () => ({
-  SpacesGridPage: (props: any) => `Spaces Page: ${JSON.stringify(props)}`,
-}));
+import { vi } from 'vitest';
 
-jest.mock('./create_space', () => ({
-  CreateSpacePage: (props: any) => {
-    if (props.spacesManager && props.onLoadSpace) {
-      props.spacesManager.getSpace().then((space: any) => props.onLoadSpace(space));
-    }
-    return `Spaces Create Page: ${JSON.stringify(props)}`;
-  },
-}));
+vi.mock('./spaces_grid', () => {
+      const mocked = {
+      SpacesGridPage: (props: any) => `Spaces Page: ${JSON.stringify(props)}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./edit_space', () => ({
-  EditSpacePage: (props: any) => {
-    if (props.spacesManager && props.onLoadSpace) {
-      props.spacesManager.getSpace().then((space: any) => props.onLoadSpace(space));
-    }
-    return `Spaces Edit Page: ${JSON.stringify(props)}`;
-  },
-}));
+vi.mock('./create_space', () => {
+      const mocked = {
+      CreateSpacePage: (props: any) => {
+        if (props.spacesManager && props.onLoadSpace) {
+          props.spacesManager.getSpace().then((space: any) => props.onLoadSpace(space));
+        }
+        return `Spaces Create Page: ${JSON.stringify(props)}`;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('./edit_space', () => {
+      const mocked = {
+      EditSpacePage: (props: any) => {
+        if (props.spacesManager && props.onLoadSpace) {
+          props.spacesManager.getSpace().then((space: any) => props.onLoadSpace(space));
+        }
+        return `Spaces Edit Page: ${JSON.stringify(props)}`;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   coreMock,
@@ -48,12 +59,12 @@ const config: ConfigType = {
   allowSolutionVisibility: true,
 };
 
-const eventTracker = new EventTracker({ reportEvent: jest.fn() });
+const eventTracker = new EventTracker({ reportEvent: vi.fn() });
 const logger = loggingSystemMock.createLogger();
 
 async function mountApp(basePath: string, pathname: string, spaceId?: string) {
   const container = document.createElement('div');
-  const setBreadcrumbs = jest.fn();
+  const setBreadcrumbs = vi.fn();
 
   const spacesManager = spacesManagerMock.create();
   if (spaceId) {
@@ -74,9 +85,9 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
       config,
       logger,
       getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
-      getRolesAPIClient: jest.fn(),
-      getPrivilegesAPIClient: jest.fn(),
-      getSecurityLicense: jest.fn(),
+      getRolesAPIClient: vi.fn(),
+      getPrivilegesAPIClient: vi.fn(),
+      getSecurityLicense: vi.fn(),
       eventTracker,
       isServerless: false,
     })
@@ -101,9 +112,9 @@ describe('spacesManagementApp', () => {
         config,
         logger,
         getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
-        getRolesAPIClient: jest.fn(),
-        getPrivilegesAPIClient: jest.fn(),
-        getSecurityLicense: jest.fn(),
+        getRolesAPIClient: vi.fn(),
+        getPrivilegesAPIClient: vi.fn(),
+        getSecurityLicense: vi.fn(),
         eventTracker,
         isServerless: false,
       })

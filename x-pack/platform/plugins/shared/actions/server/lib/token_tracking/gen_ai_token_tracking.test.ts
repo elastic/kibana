@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import { loggerMock } from '@kbn/logging-mocks';
 import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
@@ -13,27 +16,27 @@ import { getTokenCountFromInvokeAsyncIterator } from './get_token_count_from_inv
 import { IncomingMessage } from 'http';
 import { Socket } from 'net';
 
-jest.mock('./get_token_count_from_bedrock_invoke');
-jest.mock('./get_token_count_from_invoke_stream');
-jest.mock('./get_token_count_from_invoke_async_iterator');
+vi.mock('./get_token_count_from_bedrock_invoke');
+vi.mock('./get_token_count_from_invoke_stream');
+vi.mock('./get_token_count_from_invoke_async_iterator');
 
 const logger = loggerMock.create();
 
 describe('getGenAiTokenTracking', () => {
-  let mockGetTokenCountFromBedrockInvoke: jest.Mock;
-  let mockGetTokenCountFromInvokeStream: jest.Mock;
-  let mockGetTokenCountFromInvokeAsyncIterator: jest.Mock;
+  let mockGetTokenCountFromBedrockInvoke: Mock;
+  let mockGetTokenCountFromInvokeStream: Mock;
+  let mockGetTokenCountFromInvokeAsyncIterator: Mock;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetTokenCountFromBedrockInvoke = (
-      getTokenCountFromBedrockInvoke as jest.Mock
+      getTokenCountFromBedrockInvoke as Mock
     ).mockResolvedValueOnce({
       total: 100,
       prompt: 50,
       completion: 50,
     });
     mockGetTokenCountFromInvokeStream = (
-      getTokenCountFromInvokeStream as jest.Mock
+      getTokenCountFromInvokeStream as Mock
     ).mockResolvedValueOnce({
       total: 100,
       prompt: 50,
@@ -41,7 +44,7 @@ describe('getGenAiTokenTracking', () => {
     });
 
     mockGetTokenCountFromInvokeAsyncIterator = (
-      getTokenCountFromInvokeAsyncIterator as jest.Mock
+      getTokenCountFromInvokeAsyncIterator as Mock
     ).mockResolvedValueOnce({
       total: 100,
       prompt: 50,
@@ -308,7 +311,7 @@ describe('getGenAiTokenTracking', () => {
   });
 
   it('should return the total, prompt, and completion token counts when given a valid OpenAI async iterator response', async () => {
-    const mockStream = jest.fn();
+    const mockStream = vi.fn();
     const actionTypeId = '.gen-ai';
     const result = {
       actionId: '123',
@@ -410,7 +413,7 @@ describe('getGenAiTokenTracking', () => {
   });
 
   it('should return the total, prompt, and completion token counts when given a valid Inference async iterator response', async () => {
-    const mockStream = jest.fn();
+    const mockStream = vi.fn();
     const actionTypeId = '.inference';
     const result = {
       actionId: '123',

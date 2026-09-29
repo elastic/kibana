@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { from } from 'rxjs';
 import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
@@ -51,7 +53,7 @@ describe('Search service', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCoreSetup = coreMock.createSetup();
     mockLogger = coreMock.createPluginInitializerContext().logger.get();
   });
@@ -78,7 +80,7 @@ describe('Search service', () => {
 
     const mockContext = {
       search: {
-        search: jest.fn().mockReturnValue(from(Promise.resolve(response))),
+        search: vi.fn().mockReturnValue(from(Promise.resolve(response))),
       },
     };
 
@@ -107,7 +109,7 @@ describe('Search service', () => {
 
     const mockContext = {
       search: {
-        search: jest.fn().mockReturnValue(rejectedValue),
+        search: vi.fn().mockReturnValue(rejectedValue),
       },
     };
 
@@ -137,7 +139,7 @@ describe('Search service', () => {
 
     const mockContext = {
       search: {
-        search: jest.fn().mockReturnValue(rejectedValue),
+        search: vi.fn().mockReturnValue(rejectedValue),
       },
     };
 
@@ -164,7 +166,7 @@ describe('Search service', () => {
 
     const mockContext = {
       search: {
-        search: jest.fn().mockReturnValue(rejectedValue),
+        search: vi.fn().mockReturnValue(rejectedValue),
       },
     };
 
@@ -186,7 +188,7 @@ describe('Search service', () => {
   it('DELETE request calls cancel with the given ID and strategy', async () => {
     const mockContext = {
       search: {
-        cancel: jest.fn(),
+        cancel: vi.fn(),
       },
     };
 

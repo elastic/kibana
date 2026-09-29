@@ -7,21 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AiStepSection } from './ai_step_section';
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        getUrlForApp: (_app: string, { path }: { path: string }) => `/app/management${path}`,
-      },
-    },
-  }),
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            getUrlForApp: (_app: string, { path }: { path: string }) => `/app/management${path}`,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderSection = (
   ai: React.ComponentProps<typeof AiStepSection>['ai'],

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
@@ -15,7 +18,7 @@ import { useToasts } from '../common/lib/kibana';
 import { useGetCaseFileStats } from './use_get_case_file_stats';
 import { constructFileKindIdByOwner } from '../../common/files';
 
-jest.mock('../common/lib/kibana');
+vi.mock('../common/lib/kibana');
 
 const searchTerm = 'foobar';
 const hookParams = {
@@ -31,7 +34,7 @@ const expectedCallParams = {
 
 describe('useGetCaseFileStats', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls filesClient.list when searchTerm is not provided', async () => {
@@ -60,10 +63,10 @@ describe('useGetCaseFileStats', () => {
 
   it('shows an error toast when filesClient.list throws', async () => {
     const filesClient = createMockFilesClient();
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addError });
 
-    filesClient.list = jest.fn().mockImplementation(() => {
+    filesClient.list = vi.fn().mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 

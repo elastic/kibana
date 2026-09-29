@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   elasticsearchServiceMock,
@@ -19,21 +22,21 @@ import type { CorrelationMap } from '../../../entities/types';
 
 const emptyWatchlistsByEuid: WatchlistsByEuid = new Map();
 
-const createMockCrudClient = (): jest.Mocked<CRUDClient> =>
+const createMockCrudClient = (): Mocked<CRUDClient> =>
   ({
-    searchLatestEntities: jest
+    searchLatestEntities: vi
       .fn()
       .mockResolvedValue({ records: [], total: 0, inspect: { dsl: [], response: [] } }),
-    bulkUpdateEntity: jest.fn().mockResolvedValue([]),
-  } as unknown as jest.Mocked<CRUDClient>);
+    bulkUpdateEntity: vi.fn().mockResolvedValue([]),
+  } as unknown as Mocked<CRUDClient>);
 
-jest.mock('../../infra/entity_source_client');
+vi.mock('../../infra/entity_source_client');
 
 const { WatchlistEntitySourceClient, mockGetLastProcessedMarker, mockUpdateLastProcessedMarker } =
-  jest.requireMock('../../infra/entity_source_client') as {
-    WatchlistEntitySourceClient: jest.Mock;
-    mockGetLastProcessedMarker: jest.Mock;
-    mockUpdateLastProcessedMarker: jest.Mock;
+  (await vi.importMock('../../infra/entity_source_client')) as {
+    WatchlistEntitySourceClient: Mock;
+    mockGetLastProcessedMarker: Mock;
+    mockUpdateLastProcessedMarker: Mock;
   };
 
 type CapturedSearchRequest = SearchRequest & {
@@ -90,7 +93,7 @@ describe('Watchlist update detection service', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggingSystemMock.createLogger();
   });
 

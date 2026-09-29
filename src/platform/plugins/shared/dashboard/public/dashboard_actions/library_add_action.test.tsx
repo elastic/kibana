@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type React from 'react';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { AddPanelToLibraryActionApi } from './library_add_action';
 import { AddToLibraryAction } from './library_add_action';
 import { BehaviorSubject } from 'rxjs';
 
-jest.mock('@kbn/saved-objects-plugin/public', () => {
+vi.mock('@kbn/saved-objects-plugin/public', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { render } = require('@testing-library/react');
   const MockSavedObjectSaveModal = ({
@@ -39,8 +41,8 @@ jest.mock('@kbn/saved-objects-plugin/public', () => {
 
 describe('AddToLibraryAction', () => {
   const action = new AddToLibraryAction();
-  const saveToLibraryMock = jest.fn(async () => 'libraryId1');
-  const replacePanelMock = jest.fn();
+  const saveToLibraryMock = vi.fn(async () => 'libraryId1');
+  const replacePanelMock = vi.fn();
   const embeddableApi = {
     hasLibraryItemWithTitle: async () => false,
     canLinkToLibrary: async () => true,
@@ -57,7 +59,7 @@ describe('AddToLibraryAction', () => {
   } as AddPanelToLibraryActionApi;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('execute', () => {

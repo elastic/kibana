@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import type { Conversation } from '@kbn/agent-builder-common';
@@ -15,7 +17,10 @@ import { createExecutionStepEvent } from '../components/conversations/timeline/i
 import { createExecutionTerminatedEvent } from '../components/conversations/timeline/items/execution_terminated_event.factory';
 import { useStepsFromSavedTurns } from './use_steps_from_saved_turns';
 
-jest.mock('./use_conversation', () => ({ useConversation: jest.fn() }));
+vi.mock('./use_conversation', () => {
+      const mocked = { useConversation: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 const turn = (n: number, reasoning: string) => [
   createUserMessageEvent({ id: `user-${n}` }),
@@ -38,7 +43,7 @@ const turn = (n: number, reasoning: string) => [
 ];
 
 const setConversation = (conversation?: Partial<Conversation>) =>
-  jest
+  vi
     .mocked(useConversation)
     .mockReturnValue({ conversation } as ReturnType<typeof useConversation>);
 

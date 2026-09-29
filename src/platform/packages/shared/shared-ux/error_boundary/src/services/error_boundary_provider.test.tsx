@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -17,7 +19,7 @@ import userEvent from '@testing-library/user-event';
 
 describe('<KibanaErrorBoundaryProvider>', () => {
   beforeEach(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   it('creates a context of services for KibanaErrorBoundary', async () => {

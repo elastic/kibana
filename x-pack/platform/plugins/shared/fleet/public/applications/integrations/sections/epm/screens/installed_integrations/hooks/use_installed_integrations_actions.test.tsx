@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { act } from 'react-dom/test-utils';
 
@@ -19,22 +21,25 @@ import { createFleetTestRendererMock } from '../../../../../../../mock';
 
 import { useInstalledIntegrationsActions } from './use_installed_integrations_actions';
 
-jest.mock('@kbn/react-kibana-mount');
-jest.mock('../../../../../../../hooks/use_request/epm', () => ({
-  ...jest.requireActual('../../../../../../../hooks/use_request/epm'),
-  sendRemovePackageForRq: jest.fn(),
-  sendBulkUninstallPackagesForRq: jest.fn(),
-  sendBulkUpgradePackagesForRq: jest.fn(),
-  sendBulkRollbackPackagesForRq: jest.fn(),
-}));
+vi.mock('@kbn/react-kibana-mount');
+vi.mock('../../../../../../../hooks/use_request/epm', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../../../hooks/use_request/epm')),
+      sendRemovePackageForRq: vi.fn(),
+      sendBulkUninstallPackagesForRq: vi.fn(),
+      sendBulkUpgradePackagesForRq: vi.fn(),
+      sendBulkRollbackPackagesForRq: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useInstalledIntegrationsActions', () => {
   beforeEach(() => {
-    jest.mocked(sendRemovePackageForRq).mockReset();
-    jest.mocked(sendBulkUninstallPackagesForRq).mockReset();
-    jest.mocked(sendBulkUpgradePackagesForRq).mockReset();
-    jest.mocked(toMountPoint).mockReset();
-    jest.mocked(sendBulkRollbackPackagesForRq).mockReset();
+    vi.mocked(sendRemovePackageForRq).mockReset();
+    vi.mocked(sendBulkUninstallPackagesForRq).mockReset();
+    vi.mocked(sendBulkUpgradePackagesForRq).mockReset();
+    vi.mocked(toMountPoint).mockReset();
+    vi.mocked(sendBulkRollbackPackagesForRq).mockReset();
   });
   describe('bulkUninstallIntegrationsWithConfirmModal', () => {
     it('should work with single integration', async () => {
@@ -52,7 +57,7 @@ describe('useInstalledIntegrationsActions', () => {
         ] as any);
 
       // Mount the modal
-      const modal = jest.mocked(toMountPoint).mock.lastCall![0];
+      const modal = vi.mocked(toMountPoint).mock.lastCall![0];
       const modalResult = renderer.render(modal as any);
 
       modalResult.getByTestId('confirmModalConfirmButton').click();
@@ -85,7 +90,7 @@ describe('useInstalledIntegrationsActions', () => {
         ] as any);
 
       // Mount the modal
-      const modal = jest.mocked(toMountPoint).mock.lastCall![0];
+      const modal = vi.mocked(toMountPoint).mock.lastCall![0];
       const modalResult = renderer.render(modal as any);
 
       modalResult.getByTestId('confirmModalConfirmButton').click();
@@ -116,7 +121,7 @@ describe('useInstalledIntegrationsActions', () => {
         ] as any);
 
       // Mount the modal
-      const modal = jest.mocked(toMountPoint).mock.lastCall![0];
+      const modal = vi.mocked(toMountPoint).mock.lastCall![0];
       const modalResult = renderer.render(modal as any);
 
       modalResult.getByTestId('confirmModalCancelButton').click();
@@ -143,7 +148,7 @@ describe('useInstalledIntegrationsActions', () => {
         ] as any);
 
       // Mount the modal
-      const modal = jest.mocked(toMountPoint).mock.lastCall![0];
+      const modal = vi.mocked(toMountPoint).mock.lastCall![0];
       const modalResult = renderer.render(modal as any);
 
       modalResult.getByTestId('confirmModalConfirmButton').click();
@@ -172,7 +177,7 @@ describe('useInstalledIntegrationsActions', () => {
         ] as any);
 
       // Mount the modal
-      const modal = jest.mocked(toMountPoint).mock.lastCall![0];
+      const modal = vi.mocked(toMountPoint).mock.lastCall![0];
       const modalResult = renderer.render(modal as any);
 
       act(() => modalResult.getByTestId('upgradeIntegrationsPoliciesSwitch').click());
@@ -209,7 +214,7 @@ describe('useInstalledIntegrationsActions', () => {
         ] as any);
 
       // Mount the modal
-      const modal = jest.mocked(toMountPoint).mock.lastCall![0];
+      const modal = vi.mocked(toMountPoint).mock.lastCall![0];
       const modalResult = renderer.render(modal as any);
       act(() => modalResult.getByTestId('confirmModalConfirmButton').click());
 
@@ -240,7 +245,7 @@ describe('useInstalledIntegrationsActions', () => {
         ] as any);
 
       // Mount the modal
-      const modal = jest.mocked(toMountPoint).mock.lastCall![0];
+      const modal = vi.mocked(toMountPoint).mock.lastCall![0];
       const modalResult = renderer.render(modal as any);
 
       modalResult.getByTestId('confirmModalCancelButton').click();
@@ -267,7 +272,7 @@ describe('useInstalledIntegrationsActions', () => {
         ] as any);
 
       // Mount the modal
-      const modal = jest.mocked(toMountPoint).mock.lastCall![0];
+      const modal = vi.mocked(toMountPoint).mock.lastCall![0];
       const modalResult = renderer.render(modal as any);
 
       modalResult.getByTestId('confirmModalConfirmButton').click();
@@ -300,7 +305,7 @@ describe('useInstalledIntegrationsActions', () => {
         ] as any);
 
       // Mount the modal
-      const modal = jest.mocked(toMountPoint).mock.lastCall![0];
+      const modal = vi.mocked(toMountPoint).mock.lastCall![0];
       const modalResult = renderer.render(modal as any);
 
       modalResult.getByTestId('confirmModalConfirmButton').click();
@@ -328,7 +333,7 @@ describe('useInstalledIntegrationsActions', () => {
         ] as any);
 
       // Mount the modal
-      const modal = jest.mocked(toMountPoint).mock.lastCall![0];
+      const modal = vi.mocked(toMountPoint).mock.lastCall![0];
       const modalResult = renderer.render(modal as any);
 
       modalResult.getByTestId('confirmModalCancelButton').click();

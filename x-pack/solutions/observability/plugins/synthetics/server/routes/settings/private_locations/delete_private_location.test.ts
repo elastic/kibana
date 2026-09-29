@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { deletePrivateLocationRoute } from './delete_private_location';
@@ -13,33 +16,33 @@ import { privateLocationSavedObjectName } from '../../../../common/saved_objects
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 
-jest.mock('./get_private_locations');
-jest.mock('./migrate_legacy_private_locations');
+vi.mock('./get_private_locations');
+vi.mock('./migrate_legacy_private_locations');
 
 const locationId = 'test-location-id';
 
 const emptyFindResponse = { total: 0, saved_objects: [], page: 1, per_page: 0 };
 
 const setup = ({ crossSpaceMonitorTotal }: { crossSpaceMonitorTotal: number }) => {
-  (migrateLegacyPrivateLocations as jest.Mock).mockResolvedValue(undefined);
-  (getPrivateLocationsAndAgentPolicies as jest.Mock).mockResolvedValue({
+  (migrateLegacyPrivateLocations as Mock).mockResolvedValue(undefined);
+  (getPrivateLocationsAndAgentPolicies as Mock).mockResolvedValue({
     locations: [{ id: locationId }],
   });
 
   // Internal (unscoped) repository sees monitors in every space.
   const internalSOClient = {
-    find: jest.fn().mockResolvedValue({ ...emptyFindResponse, total: crossSpaceMonitorTotal }),
+    find: vi.fn().mockResolvedValue({ ...emptyFindResponse, total: crossSpaceMonitorTotal }),
   };
   // Request-scoped client is bound to the caller's space; it must NOT be used for the count.
   const savedObjectsClient = {
-    find: jest.fn().mockResolvedValue(emptyFindResponse),
-    delete: jest.fn().mockResolvedValue({}),
+    find: vi.fn().mockResolvedValue(emptyFindResponse),
+    delete: vi.fn().mockResolvedValue({}),
   } as unknown as SavedObjectsClientContract;
 
   const monitorConfigRepository = new MonitorConfigRepository(savedObjectsClient, {} as never);
 
   const response = {
-    badRequest: jest.fn((arg) => ({ status: 400, ...arg })),
+    badRequest: vi.fn((arg) => ({ status: 400, ...arg })),
   };
 
   const routeContext = {
@@ -49,9 +52,9 @@ const setup = ({ crossSpaceMonitorTotal }: { crossSpaceMonitorTotal: number }) =
     response,
     monitorConfigRepository,
     server: {
-      logger: { debug: jest.fn(), error: jest.fn() },
+      logger: { debug: vi.fn(), error: vi.fn() },
       coreStart: {
-        savedObjects: { createInternalRepository: jest.fn().mockReturnValue(internalSOClient) },
+        savedObjects: { createInternalRepository: vi.fn().mockReturnValue(internalSOClient) },
       },
     },
   } as any;
@@ -60,7 +63,7 @@ const setup = ({ crossSpaceMonitorTotal }: { crossSpaceMonitorTotal: number }) =
 };
 
 describe('deletePrivateLocationRoute', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('counts monitors across all spaces via the internal repository', async () => {
     const { routeContext, internalSOClient, savedObjectsClient } = setup({

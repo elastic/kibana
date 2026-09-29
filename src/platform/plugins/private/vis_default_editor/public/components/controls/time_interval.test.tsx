@@ -7,21 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { TimeIntervalParamEditor } from './time_interval';
 import { aggParamCommonPropsMock } from './test_utils';
 import type { AggParamEditorProps } from '../agg_param_props';
 
-jest.mock('@kbn/data-plugin/public', () => ({
-  search: {
-    aggs: {
-      isValidInterval: jest.fn().mockReturnValue(true),
-      parseEsInterval: jest.fn(),
-      InvalidEsCalendarIntervalError: class {},
-    },
-  },
-}));
+vi.mock('@kbn/data-plugin/public', () => {
+      const mocked = {
+      search: {
+        aggs: {
+          isValidInterval: vi.fn().mockReturnValue(true),
+          parseEsInterval: vi.fn(),
+          InvalidEsCalendarIntervalError: class {},
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { search } from '@kbn/data-plugin/public';
 
@@ -32,14 +37,14 @@ describe('TimeIntervalParamEditor', () => {
     props = {
       ...aggParamCommonPropsMock,
       showValidation: true,
-      setTouched: jest.fn(),
-      setValidity: jest.fn(),
-      setValue: jest.fn(),
+      setTouched: vi.fn(),
+      setValidity: vi.fn(),
+      setValue: vi.fn(),
     };
     props.aggParam.options = [
       {
         display: 'Auto',
-        enabled: jest.fn().mockReturnValue(true),
+        enabled: vi.fn().mockReturnValue(true),
         val: 'auto',
       },
       {
@@ -87,7 +92,7 @@ describe('TimeIntervalParamEditor', () => {
     });
 
     test('should filter out "auto" interval value if it is disabled in options and mark as invalid', () => {
-      props.aggParam.options[0].enabled = jest.fn().mockReturnValue(false);
+      props.aggParam.options[0].enabled = vi.fn().mockReturnValue(false);
       props.value = 'auto';
       const comp = shallow(<TimeIntervalParamEditor {...props} />);
 
@@ -112,7 +117,7 @@ describe('TimeIntervalParamEditor', () => {
       props.value = '2h';
       // @ts-ignore
       props.agg.buckets = {
-        getInterval: jest.fn().mockReturnValue({
+        getInterval: vi.fn().mockReturnValue({
           expression: '2h',
         }),
       };
@@ -128,7 +133,7 @@ describe('TimeIntervalParamEditor', () => {
       props.value = '3w';
       // @ts-ignore
       props.agg.buckets = {
-        getInterval: jest.fn().mockReturnValue({
+        getInterval: vi.fn().mockReturnValue({
           expression: '3w',
         }),
       };

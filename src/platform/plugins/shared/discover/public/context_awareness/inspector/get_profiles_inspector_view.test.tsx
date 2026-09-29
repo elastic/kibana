@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { getProfilesInspectorView } from './get_profiles_inspector_view';
@@ -41,10 +43,10 @@ describe('getProfilesInspectorView', () => {
 
   describe('when profiles are available', () => {
     const contextsAdapter: ContextsAdapter = {
-      getRootContext: jest.fn().mockReturnValue(getRootContextMock()),
-      getDataSourceContext: jest.fn().mockReturnValue(getDataSourceContextMock()),
-      getDocumentContexts: jest.fn().mockReturnValue({}),
-      openDocDetails: jest.fn(),
+      getRootContext: vi.fn().mockReturnValue(getRootContextMock()),
+      getDataSourceContext: vi.fn().mockReturnValue(getDataSourceContextMock()),
+      getDocumentContexts: vi.fn().mockReturnValue({}),
+      openDocDetails: vi.fn(),
     };
 
     it('should show the view', () => {

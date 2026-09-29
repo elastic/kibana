@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -21,7 +23,7 @@ const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I1
 
 describe('IngestionCard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('daily period', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import {
   getEmptyFindResult,
@@ -28,7 +30,7 @@ describe('Delete rule route', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
@@ -40,8 +42,8 @@ describe('Delete rule route', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('status codes with actionClient and alertClient', () => {

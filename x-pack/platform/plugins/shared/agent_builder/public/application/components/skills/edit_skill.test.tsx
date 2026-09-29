@@ -5,42 +5,47 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EditSkill } from './edit_skill';
 import { SkillFormMode } from './skill_form';
 
-jest.mock('react-router-dom', () => ({
-  useParams: () => ({ skillId: 'skill-1' }),
-  Redirect: () => <div data-test-subj="redirect" />,
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useParams: () => ({ skillId: 'skill-1' }),
+      Redirect: () => <div data-test-subj="redirect" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/skills/use_edit_skill');
-jest.mock('../../hooks/use_ui_privileges');
+vi.mock('../../hooks/skills/use_edit_skill');
+vi.mock('../../hooks/use_ui_privileges');
 
 // Render the SkillForm as a lightweight stub that surfaces the `mode` prop so the test can assert
 // whether EditSkill chose the editable or read-only variant.
-jest.mock('./skill_form', () => {
-  const actual = jest.requireActual('./skill_form');
+vi.mock('./skill_form', async () => {
+  const actual = (await vi.importActual('./skill_form'));
   return {
     SkillFormMode: actual.SkillFormMode,
     SkillForm: ({ mode }: { mode: string }) => <div data-test-subj={`skillForm-${mode}`} />,
   };
 });
 
-const { useEditSkill } = jest.requireMock('../../hooks/skills/use_edit_skill');
-const { useUiPrivileges } = jest.requireMock('../../hooks/use_ui_privileges');
+const { useEditSkill } = (await vi.importMock('../../hooks/skills/use_edit_skill'));
+const { useUiPrivileges } = (await vi.importMock('../../hooks/use_ui_privileges'));
 
 describe('EditSkill', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useEditSkill.mockReturnValue({
       skill: { id: 'skill-1', name: 'Skill 1', readonly: false },
       isSubmitting: false,
       isLoading: false,
-      editSkill: jest.fn(),
+      editSkill: vi.fn(),
     });
 
     useUiPrivileges.mockReturnValue({ manageSkills: true });
@@ -62,7 +67,7 @@ describe('EditSkill', () => {
       skill: { id: 'skill-1', name: 'Skill 1', readonly: true },
       isSubmitting: false,
       isLoading: false,
-      editSkill: jest.fn(),
+      editSkill: vi.fn(),
     });
     render(<EditSkill />);
     expect(screen.getByTestId(`skillForm-${SkillFormMode.View}`)).toBeInTheDocument();

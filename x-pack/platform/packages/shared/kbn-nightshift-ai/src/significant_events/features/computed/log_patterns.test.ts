@@ -5,22 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getSigEventsLogPatternsEsql } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { logPatternsGenerator, selectLogPatternsForLlm } from './log_patterns';
 
-jest.mock('@kbn/ai-tools', () => ({
-  getSigEventsLogPatternsEsql: jest.fn(),
-}));
+vi.mock('@kbn/ai-tools', () => {
+      const mocked = {
+      getSigEventsLogPatternsEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/traced-es-client', () => ({
-  createTracedEsClient: jest.fn(),
-}));
+vi.mock('@kbn/traced-es-client', () => {
+      const mocked = {
+      createTracedEsClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getSigEventsLogPatternsEsqlMock = jest.mocked(getSigEventsLogPatternsEsql);
-const createTracedEsClientMock = jest.mocked(createTracedEsClient);
+const getSigEventsLogPatternsEsqlMock = vi.mocked(getSigEventsLogPatternsEsql);
+const createTracedEsClientMock = vi.mocked(createTracedEsClient);
 
 const target: AnalysisTarget = {
   id: 'logs.test-default',
@@ -35,7 +43,7 @@ const tracedClient = { traced: true };
 
 describe('logPatternsGenerator', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     createTracedEsClientMock.mockReturnValue(tracedClient as never);
   });
 

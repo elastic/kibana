@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { waitFor } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -15,9 +18,9 @@ import type { AgentPolicy } from '../../../../types';
 
 import { useOutputOptions, useFleetServerHostsOptions } from './hooks';
 
-jest.mock('../../../../../../hooks/use_license');
+vi.mock('../../../../../../hooks/use_license');
 
-const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
+const mockedUseLicence = useLicense as MockedFunction<typeof useLicense>;
 
 function defaultHttpClientGetImplementation(path: any) {
   if (typeof path !== 'string') {

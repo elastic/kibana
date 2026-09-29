@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   buildDataTableRecord,
   type DataTableColumnsMeta,
@@ -26,27 +28,33 @@ import type {
 import { CascadedDocumentsFetcher } from './cascaded_documents_fetcher';
 import { fetchEsql } from './fetch_esql';
 
-jest.mock('./fetch_esql', () => ({
-  fetchEsql: jest.fn(),
-}));
+vi.mock('./fetch_esql', () => {
+      const mocked = {
+      fetchEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-utils', () => {
-  const actual = jest.requireActual('@kbn/esql-utils');
+vi.mock('@kbn/esql-utils', async () => {
+  const actual = (await vi.importActual('@kbn/esql-utils'));
   return {
     ...actual,
-    constructCascadeQuery: jest.fn(actual.constructCascadeQuery),
+    constructCascadeQuery: vi.fn(actual.constructCascadeQuery),
   };
 });
 
-jest.mock('@elastic/apm-rum', () => ({
-  apm: {
-    captureError: jest.fn(),
-  },
-}));
+vi.mock('@elastic/apm-rum', () => {
+      const mocked = {
+      apm: {
+        captureError: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFetchEsql = jest.mocked(fetchEsql);
-const mockConstructCascadeQuery = jest.mocked(constructCascadeQuery);
-const mockApmCaptureError = jest.mocked(apm.captureError);
+const mockFetchEsql = vi.mocked(fetchEsql);
+const mockConstructCascadeQuery = vi.mocked(constructCascadeQuery);
+const mockApmCaptureError = vi.mocked(apm.captureError);
 const columnsMeta: DataTableColumnsMeta = {
   extension: {
     type: 'string',
@@ -59,13 +67,13 @@ const createStateManager = (
   const recordsById = new Map<string, DataTableRecord[]>();
   let currentColumnsMeta = initialColumnsMeta;
   return {
-    getIsActiveInstance: jest.fn(() => true),
-    getCascadedDocuments: jest.fn((nodeId: string) => recordsById.get(nodeId)),
-    getColumnsMeta: jest.fn(() => currentColumnsMeta),
-    setCascadedDocuments: jest.fn((nodeId: string, records: DataTableRecord[]) => {
+    getIsActiveInstance: vi.fn(() => true),
+    getCascadedDocuments: vi.fn((nodeId: string) => recordsById.get(nodeId)),
+    getColumnsMeta: vi.fn(() => currentColumnsMeta),
+    setCascadedDocuments: vi.fn((nodeId: string, records: DataTableRecord[]) => {
       recordsById.set(nodeId, records);
     }),
-    setColumnsMeta: jest.fn((nextColumnsMeta: DataTableColumnsMeta) => {
+    setColumnsMeta: vi.fn((nextColumnsMeta: DataTableColumnsMeta) => {
       currentColumnsMeta = nextColumnsMeta;
     }),
   };
@@ -106,7 +114,7 @@ const createFetchParams = (
 
 describe('CascadedDocumentsFetcher', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns cached records without fetching', async () => {
@@ -245,7 +253,7 @@ describe('CascadedDocumentsFetcher', () => {
     const records = [buildDataTableRecord({ _id: '1', _index: 'logs' }, dataViewWithTimefieldMock)];
     let capturedSignal: AbortSignal | undefined;
 
-    jest.mocked(stateManager.getIsActiveInstance).mockReturnValue(false);
+    vi.mocked(stateManager.getIsActiveInstance).mockReturnValue(false);
     mockFetchEsql.mockImplementation(async ({ abortSignal }) => {
       capturedSignal = abortSignal;
       await delay.promise;

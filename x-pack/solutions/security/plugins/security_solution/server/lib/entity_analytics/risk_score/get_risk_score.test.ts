@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createGetRiskScores } from './get_risk_score';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -12,15 +15,15 @@ import { EntityType } from '../../../../common/search_strategy/security_solution
 
 describe('createGetRiskScores', () => {
   const logger: Logger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    info: jest.fn(),
-    fatal: jest.fn(),
-    trace: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+    fatal: vi.fn(),
+    trace: vi.fn(),
   } as unknown as Logger;
   const esClient = {
-    search: jest.fn(),
+    search: vi.fn(),
   } as unknown as ElasticsearchClient;
   const spaceId = 'default';
 
@@ -29,7 +32,7 @@ describe('createGetRiskScores', () => {
   const pagination = { querySize: 10, cursorStart: 0 };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should build the query and call esClient.search', async () => {
@@ -39,7 +42,7 @@ describe('createGetRiskScores', () => {
         hits: [{ _source: { [entityType]: { risk: riskScore } } }],
       },
     };
-    (esClient.search as jest.Mock).mockResolvedValue(mockResponse);
+    (esClient.search as Mock).mockResolvedValue(mockResponse);
 
     const getRiskScores = createGetRiskScores({ logger, esClient, spaceId });
     const result = await getRiskScores({ entityType, entityIdentifier, pagination });
@@ -55,7 +58,7 @@ describe('createGetRiskScores', () => {
         hits: [{ _source: { [entityType]: { risk: riskScore } } }, { not_source: true }],
       },
     };
-    (esClient.search as jest.Mock).mockResolvedValue(mockResponse);
+    (esClient.search as Mock).mockResolvedValue(mockResponse);
 
     const getRiskScores = createGetRiskScores({ logger, esClient, spaceId });
     const result = await getRiskScores({ entityType, entityIdentifier, pagination });
@@ -69,7 +72,7 @@ describe('createGetRiskScores', () => {
         hits: [],
       },
     };
-    (esClient.search as jest.Mock).mockResolvedValue(mockResponse);
+    (esClient.search as Mock).mockResolvedValue(mockResponse);
 
     const getRiskScores = createGetRiskScores({ logger, esClient, spaceId });
     const result = await getRiskScores({ entityType, entityIdentifier, pagination });

@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
 import { SeverityHeatmapEventDataTable } from './severity_heatmap_event_data_table';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    useEuiTheme: jest.fn(),
+    useEuiTheme: vi.fn(),
   };
 });
 
-const useEuiThemeMock = jest.mocked(useEuiTheme);
+const useEuiThemeMock = vi.mocked(useEuiTheme);
 
 const TestWrapper = ({ eventData }: { eventData: Record<string, unknown> | null }) => {
   const { euiTheme } = useEuiTheme();

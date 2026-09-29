@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getAlertDeletePreview } from './get_alert_delete_preview';
 
@@ -12,7 +14,7 @@ const http = httpServiceMock.createStartContract();
 
 describe('getAlertDeletePreview', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('sends the correct HTTP request and parses the response', async () => {

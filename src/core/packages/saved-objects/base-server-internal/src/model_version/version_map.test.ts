@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObjectsType, SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import {
   getModelVersionMapForTypes,
@@ -49,7 +51,7 @@ describe('ModelVersion map utilities', () => {
     ],
   });
 
-  const dummyMigration = jest.fn();
+  const dummyMigration = vi.fn();
 
   describe('getLatestModelVersion', () => {
     it('returns 0 when no model versions are registered', () => {

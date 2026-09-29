@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useNavigateToSessionView } from './use_navigate_to_session_view';
@@ -14,11 +17,11 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
 import { SESSION_VIEW_ID } from '../../left/components/session_view';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../common/lib/kibana');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../../../common/lib/kibana');
 
 const mockedUseKibana = mockUseKibana();
-(useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
+(useKibana as Mock).mockReturnValue(mockedUseKibana);
 
 const eventId = 'eventId1';
 const indexName = 'index1';
@@ -26,8 +29,8 @@ const scopeId = 'scopeId1';
 
 describe('useNavigateToSessionView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.clearAllMocks();
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
   it('when isFlyoutOpen is true, should return callback that opens left panel', () => {

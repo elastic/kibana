@@ -7,48 +7,59 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { JsonCodeEditorCommon, JSONCodeEditorCommonMemoized } from './json_editor_common';
 
 // Mock CodeEditor
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: (props: any) => (
-    <div
-      data-test-subj="mocked-code-editor"
-      data-value={props.value}
-      data-readonly={String(props.options?.readOnly ?? false)}
-      data-language={props.languageId}
-      aria-label={props['aria-label']}
-    >
-      {props.value}
-    </div>
-  ),
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: (props: any) => (
+        <div
+          data-test-subj="mocked-code-editor"
+          data-value={props.value}
+          data-readonly={String(props.options?.readOnly ?? false)}
+          data-language={props.languageId}
+          aria-label={props['aria-label']}
+        >
+          {props.value}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock useMemoCss
-jest.mock('@kbn/css-utils/public/use_memo_css', () => ({
-  useMemoCss: () => ({
-    codeEditor: undefined,
-    copyButtonContainer: undefined,
-  }),
-}));
+vi.mock('@kbn/css-utils/public/use_memo_css', () => {
+      const mocked = {
+      useMemoCss: () => ({
+        codeEditor: undefined,
+        copyButtonContainer: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock theme constant + registration hook
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
-  useWorkflowsMonacoTheme: jest.fn(),
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
+      useWorkflowsMonacoTheme: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('JsonCodeEditorCommon', () => {
   const defaultProps = {
     jsonValue: '{"key": "value"}',
-    onEditorDidMount: jest.fn(),
+    onEditorDidMount: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return null when jsonValue is empty', () => {
@@ -102,7 +113,7 @@ describe('JSONCodeEditorCommonMemoized', () => {
   it('should render the same as JsonCodeEditorCommon', () => {
     const props = {
       jsonValue: '{"memoized": true}',
-      onEditorDidMount: jest.fn(),
+      onEditorDidMount: vi.fn(),
     };
 
     render(<JSONCodeEditorCommonMemoized {...props} />);

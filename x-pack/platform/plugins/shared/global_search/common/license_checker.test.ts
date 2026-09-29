@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Observable } from 'rxjs';
 import { of, BehaviorSubject } from 'rxjs';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
@@ -48,9 +50,9 @@ describe('LicenseChecker', () => {
   });
 
   it('removes the subscription when calling `clean`', () => {
-    const mockUnsubscribe = jest.fn();
+    const mockUnsubscribe = vi.fn();
     const mockObs = {
-      subscribe: jest.fn().mockReturnValue({ unsubscribe: mockUnsubscribe }),
+      subscribe: vi.fn().mockReturnValue({ unsubscribe: mockUnsubscribe }),
     };
 
     const checker = new LicenseChecker(mockObs as any);

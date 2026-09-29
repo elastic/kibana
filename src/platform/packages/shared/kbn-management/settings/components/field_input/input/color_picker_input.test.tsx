@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import type { ColorPickerInputProps } from './color_picker_input';
@@ -17,7 +19,7 @@ const name = 'Some color field';
 const id = 'some:color:field';
 
 describe('ColorPickerInput', () => {
-  const onInputChange = jest.fn();
+  const onInputChange = vi.fn();
   const defaultProps: ColorPickerInputProps = {
     onInputChange,
     field: {

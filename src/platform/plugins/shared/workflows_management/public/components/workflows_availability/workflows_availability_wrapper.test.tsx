@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -20,12 +22,18 @@ import {
 import { createStartServicesMock } from '../../mocks';
 
 const mockUseKibanaServices = createStartServicesMock();
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: () => ({ services: mockUseKibanaServices }),
-}));
-jest.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => ({
-  useWorkflowsBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({ services: mockUseKibanaServices }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => {
+      const mocked = {
+      useWorkflowsBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock helper
 const mockAvailabilityService = mockUseKibanaServices.workflowsManagement.availability;
@@ -39,7 +47,7 @@ const renderWithProviders = (ui: React.ReactElement) =>
 
 describe('WorkflowsAvailabilityWrapper', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockAvailabilityService.getAvailabilityStatus$.mockReturnValue(of({ isAvailable: true }));
   });
 

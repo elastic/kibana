@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { EsResourceType } from '@kbn/agent-builder-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -14,7 +16,7 @@ describe('resolveResourceForEsqlWithSamplingStats', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 

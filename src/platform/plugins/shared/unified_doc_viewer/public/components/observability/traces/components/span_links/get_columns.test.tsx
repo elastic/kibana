@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { getColumns } from './get_columns';
 import { createEvent, fireEvent, render } from '@testing-library/react';
@@ -16,17 +19,26 @@ import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_l
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { useDocViewerExtensionActionsContext } from '../../../../../hooks/use_doc_viewer_extension_actions';
 
-jest.mock('../../../../../hooks/use_discover_link_and_esql_query', () => ({
-  useDiscoverLinkAndEsqlQuery: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_discover_link_and_esql_query', () => {
+      const mocked = {
+      useDiscoverLinkAndEsqlQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_data_sources', () => ({
-  useDataSourcesContext: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_data_sources', () => {
+      const mocked = {
+      useDataSourcesContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_doc_viewer_extension_actions', () => ({
-  useDocViewerExtensionActionsContext: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_doc_viewer_extension_actions', () => {
+      const mocked = {
+      useDocViewerExtensionActionsContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getColumns', () => {
   const type = 'incoming';
@@ -45,12 +57,12 @@ describe('getColumns', () => {
   } as SpanLinkDetails;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useDataSourcesContext as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useDataSourcesContext as Mock).mockReturnValue({
       indexes: { apm: { traces: 'apm-traces-*' } },
     });
-    (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue(undefined);
-    (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+    (useDocViewerExtensionActionsContext as Mock).mockReturnValue(undefined);
+    (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
       discoverUrl: undefined,
       esqlQueryString: undefined,
     });
@@ -58,7 +70,7 @@ describe('getColumns', () => {
 
   describe('span name link', () => {
     it('renders with link', () => {
-      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+      (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
         discoverUrl: '/discover/transaction/transaction999',
         esqlQueryString: 'ESQL_TRANSACTION',
       });
@@ -79,11 +91,11 @@ describe('getColumns', () => {
     });
 
     it('renders plain text when both discoverUrl and openInNewTab are unavailable', () => {
-      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+      (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
         discoverUrl: undefined,
         esqlQueryString: undefined,
       });
-      (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue(undefined);
+      (useDocViewerExtensionActionsContext as Mock).mockReturnValue(undefined);
 
       const SpanRender = columns[0].render;
       const { getByText, queryByTestId } = render(<>{SpanRender?.(null, item)}</>);
@@ -92,9 +104,9 @@ describe('getColumns', () => {
     });
 
     it('calls openInNewTab on plain left click', () => {
-      const openInNewTab = jest.fn();
-      (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue({ openInNewTab });
-      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+      const openInNewTab = vi.fn();
+      (useDocViewerExtensionActionsContext as Mock).mockReturnValue({ openInNewTab });
+      (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
         discoverUrl: '/discover/transaction/transaction999',
         esqlQueryString: 'ESQL_TRANSACTION',
       });
@@ -116,7 +128,7 @@ describe('getColumns', () => {
 
   describe('service name link', () => {
     it('renders with link', () => {
-      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+      (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
         discoverUrl: '/discover/service/myService',
         esqlQueryString: 'ESQL_SERVICE',
       });
@@ -137,11 +149,11 @@ describe('getColumns', () => {
     });
 
     it('renders plain text when both discoverUrl and openInNewTab are unavailable', () => {
-      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+      (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
         discoverUrl: undefined,
         esqlQueryString: undefined,
       });
-      (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue(undefined);
+      (useDocViewerExtensionActionsContext as Mock).mockReturnValue(undefined);
 
       const ServiceNameRender = columns[2].render;
       const { getByText, queryByTestId } = render(<>{ServiceNameRender?.(null, item)}</>);
@@ -150,9 +162,9 @@ describe('getColumns', () => {
     });
 
     it('calls openInNewTab on plain left click', () => {
-      const openInNewTab = jest.fn();
-      (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue({ openInNewTab });
-      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+      const openInNewTab = vi.fn();
+      (useDocViewerExtensionActionsContext as Mock).mockReturnValue({ openInNewTab });
+      (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
         discoverUrl: '/discover/service/myService',
         esqlQueryString: 'ESQL_SERVICE',
       });
@@ -174,7 +186,7 @@ describe('getColumns', () => {
 
   describe('trace id link', () => {
     it('renders with link', () => {
-      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+      (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
         discoverUrl: '/discover/trace/trace456',
         esqlQueryString: 'ESQL_TRACE',
       });
@@ -195,11 +207,11 @@ describe('getColumns', () => {
     });
 
     it('renders plain text when both discoverUrl and openInNewTab are unavailable', () => {
-      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+      (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
         discoverUrl: undefined,
         esqlQueryString: undefined,
       });
-      (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue(undefined);
+      (useDocViewerExtensionActionsContext as Mock).mockReturnValue(undefined);
 
       const TraceIdRender = columns[3].render;
       const { getByText, queryByTestId } = render(<>{TraceIdRender?.(null, item)}</>);
@@ -208,9 +220,9 @@ describe('getColumns', () => {
     });
 
     it('calls openInNewTab on plain left click', () => {
-      const openInNewTab = jest.fn();
-      (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue({ openInNewTab });
-      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+      const openInNewTab = vi.fn();
+      (useDocViewerExtensionActionsContext as Mock).mockReturnValue({ openInNewTab });
+      (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
         discoverUrl: '/discover/trace/trace456',
         esqlQueryString: 'ESQL_TRACE',
       });
@@ -230,9 +242,9 @@ describe('getColumns', () => {
     });
 
     it('does not intercept modifier clicks when href is present', () => {
-      const openInNewTab = jest.fn();
-      (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue({ openInNewTab });
-      (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+      const openInNewTab = vi.fn();
+      (useDocViewerExtensionActionsContext as Mock).mockReturnValue({ openInNewTab });
+      (useDiscoverLinkAndEsqlQuery as Mock).mockReturnValue({
         discoverUrl: '/discover/trace/trace456',
         esqlQueryString: 'ESQL_TRACE',
       });

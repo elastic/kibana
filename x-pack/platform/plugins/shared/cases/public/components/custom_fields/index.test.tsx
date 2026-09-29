@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
@@ -20,14 +22,14 @@ describe('CustomFields', () => {
   const props = {
     disabled: false,
     isLoading: false,
-    handleAddCustomField: jest.fn(),
-    handleDeleteCustomField: jest.fn(),
-    handleEditCustomField: jest.fn(),
+    handleAddCustomField: vi.fn(),
+    handleDeleteCustomField: vi.fn(),
+    handleEditCustomField: vi.fn(),
     customFields: [],
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

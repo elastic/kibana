@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { render, screen, within } from '@testing-library/react';
@@ -37,34 +39,40 @@ import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
 import { IncludeExcludeRow } from './include_exclude_options';
 import { TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS } from '../../../../../user_messages_ids';
 
-jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
-  loadFieldStats: jest.fn().mockResolvedValue({
-    topValues: {
-      buckets: [
-        {
-          key: 'A',
+vi.mock('@kbn/unified-field-list/src/services/field_stats', () => {
+      const mocked = {
+      loadFieldStats: vi.fn().mockResolvedValue({
+        topValues: {
+          buckets: [
+            {
+              key: 'A',
+            },
+            {
+              key: 'B',
+            },
+          ],
         },
-        {
-          key: 'B',
-        },
-      ],
-    },
-  }),
-}));
-
-jest.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => ({
-  useExistingFieldsReader: jest.fn(() => {
-    return {
-      hasFieldData: (dataViewId: string, fieldName: string) => {
-        return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
-      },
+      }),
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => {
+      const mocked = {
+      useExistingFieldsReader: vi.fn(() => {
+        return {
+          hasFieldData: (dataViewId: string, fieldName: string) => {
+            return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
+          },
+        };
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // mocking random id generator function
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   return {
     ...original,
@@ -76,8 +84,8 @@ jest.mock('@elastic/eui', () => {
 });
 
 // Need to mock the debounce call to test some FieldInput behaviour
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
+vi.mock('lodash', () => {
+  const original = require('lodash');
 
   return {
     ...original,
@@ -100,8 +108,8 @@ const defaultProps = {
   // need to provide the terms operation as some helpers use operation specific features
   operationDefinitionMap,
   isFullscreen: false,
-  toggleFullscreen: jest.fn(),
-  setIsCloseable: jest.fn(),
+  toggleFullscreen: vi.fn(),
+  setIsCloseable: vi.fn(),
   layerId: '1',
   ReferenceEditor,
 };
@@ -1279,7 +1287,7 @@ describe('terms', () => {
     }
 
     it('should render the default field input for no field (incomplete operation)', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
       const instance = mount(
         <InlineFieldInput
@@ -1304,7 +1312,7 @@ describe('terms', () => {
     });
 
     it('should show an error message when first field is invalid', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       layer.columns.col1 = {
@@ -1335,7 +1343,7 @@ describe('terms', () => {
     });
 
     it('should show an error message when first field is not supported', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       layer.columns.col1 = {
@@ -1367,7 +1375,7 @@ describe('terms', () => {
     });
 
     it('should show an error message when any field but the first is invalid', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
       const col1: TermsIndexPatternColumn = {
         label: 'Top value of geo.src + 1 other',
@@ -1399,7 +1407,7 @@ describe('terms', () => {
     });
 
     it('should show an error message when any field but the first is not supported', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       layer.columns.col1 = {
@@ -1431,7 +1439,7 @@ describe('terms', () => {
     });
 
     it('should render the an add button for single layer and disabled the remove button', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
       const instance = mount(
         <InlineFieldInput
@@ -1460,7 +1468,7 @@ describe('terms', () => {
     });
 
     it('should switch to the first supported operation when in single term mode and the picked field is not supported', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
       const instance = mount(
         <InlineFieldInput
@@ -1492,7 +1500,7 @@ describe('terms', () => {
     });
 
     it('should render the multi terms specific UI', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['bytes'];
@@ -1521,7 +1529,7 @@ describe('terms', () => {
     });
 
     it('should return to single value UI when removing second item of two', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
@@ -1551,7 +1559,7 @@ describe('terms', () => {
     });
 
     it('should disable remove button and reorder drag when single value and one temporary new field', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       let instance = mount(
@@ -1592,7 +1600,7 @@ describe('terms', () => {
     });
 
     it('should accept scripted fields for single value', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).sourceField = 'scripted';
@@ -1616,7 +1624,7 @@ describe('terms', () => {
     });
 
     it('should mark scripted fields for multiple values', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).sourceField = 'scripted';
@@ -1644,7 +1652,7 @@ describe('terms', () => {
     });
 
     it('should not filter scripted fields when in single value', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       const instance = mount(
@@ -1672,7 +1680,7 @@ describe('terms', () => {
     });
 
     it('should filter scripted fields when in multi terms mode', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
@@ -1702,7 +1710,7 @@ describe('terms', () => {
     });
 
     it('should filter already used fields when displaying fields list', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory', 'bytes'];
@@ -1740,7 +1748,7 @@ describe('terms', () => {
     });
 
     it('should filter fields with unsupported types when in multi terms mode', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
@@ -1770,7 +1778,7 @@ describe('terms', () => {
     });
 
     it('should limit the number of multiple fields', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = [
@@ -1803,7 +1811,7 @@ describe('terms', () => {
     });
 
     it('should let the user add new empty field up to the limit', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       let instance = mount(
@@ -1837,7 +1845,7 @@ describe('terms', () => {
     });
 
     it('should update the parentFormatter on transition between single to multi terms', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       let instance = mount(
@@ -1876,7 +1884,7 @@ describe('terms', () => {
     });
 
     it('should preserve custom label when set by the user', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       layer.columns.col1 = {
@@ -1929,7 +1937,7 @@ describe('terms', () => {
 
   describe('param editor', () => {
     it('should render current other bucket value', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -1948,7 +1956,7 @@ describe('terms', () => {
     });
 
     it('should hide other bucket setting for rollups', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -1967,7 +1975,7 @@ describe('terms', () => {
     });
 
     it('should disable missing bucket setting as long as other bucket is not set', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -1986,7 +1994,7 @@ describe('terms', () => {
     });
 
     it('should enable missing bucket setting as long as other bucket is set', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -2013,7 +2021,7 @@ describe('terms', () => {
     });
 
     it('should disable missing bucket and other bucket setting for rarity sorting', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -2044,7 +2052,7 @@ describe('terms', () => {
     });
 
     it('should disable missing bucket and other bucket setting when ordered by significance', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -2171,7 +2179,7 @@ describe('terms', () => {
     });
 
     it('should disable size input and show max doc count input', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -2198,7 +2206,7 @@ describe('terms', () => {
     });
 
     it('should disable missing bucket setting if field is not a string', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -2226,7 +2234,7 @@ describe('terms', () => {
     });
 
     it('should update state when clicking other bucket toggle', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -2262,7 +2270,7 @@ describe('terms', () => {
     });
 
     it('should render current order by value and options', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -2319,7 +2327,7 @@ describe('terms', () => {
         <InlineOptions
           {...defaultProps}
           layer={layerWithEmptyLabel}
-          paramEditorUpdater={jest.fn()}
+          paramEditorUpdater={vi.fn()}
           columnId="col1"
           currentColumn={layerWithEmptyLabel.columns.col1 as TermsIndexPatternColumn}
         />
@@ -2330,7 +2338,7 @@ describe('terms', () => {
     });
 
     it('should disable rare ordering for floating point types', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -2356,7 +2364,7 @@ describe('terms', () => {
     });
 
     it('should update state with the order by value', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -2396,7 +2404,7 @@ describe('terms', () => {
     });
 
     it('should render current order direction value and options', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -2414,7 +2422,7 @@ describe('terms', () => {
     });
 
     it('should update state with the order direction value', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -2443,7 +2451,7 @@ describe('terms', () => {
     });
 
     it('should render reference editor when order is set to custom metric', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const currentLayer = {
         ...layer,
         columns: {
@@ -2506,7 +2514,7 @@ describe('terms', () => {
     });
 
     it('should update column when changing the operation for orderAgg', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const currentLayer = {
         ...layer,
         columns: {
@@ -2573,7 +2581,7 @@ describe('terms', () => {
     });
 
     it('should update column when changing the field for orderAgg', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const currentLayer = {
         ...layer,
         columns: {
@@ -2639,7 +2647,7 @@ describe('terms', () => {
     });
 
     it('should render current size value', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = mount(
         <InlineOptions
           {...defaultProps}
@@ -2654,7 +2662,7 @@ describe('terms', () => {
     });
 
     it('should not update the column when the change creates incomplete column', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const currentLayer = {
         ...layer,
         columns: {
@@ -2712,7 +2720,7 @@ describe('terms', () => {
     });
 
     it('should update state with the size value', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const instance = mount(
         <InlineOptions
           {...defaultProps}

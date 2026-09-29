@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react';
@@ -17,7 +20,7 @@ import {
   useFlyoutSessionContext,
 } from './session_context';
 
-jest.mock('../common/hooks/is_in_security_app');
+vi.mock('../common/hooks/is_in_security_app');
 
 const renderWithProvider = (value?: FlyoutSessionContextValue) =>
   renderHook(() => useFlyoutSessionContext(), {
@@ -31,8 +34,8 @@ const renderWithProvider = (value?: FlyoutSessionContextValue) =>
 
 describe('session_context', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
+    vi.clearAllMocks();
+    (useIsInSecurityApp as Mock).mockReturnValue(true);
   });
 
   describe('useFlyoutSessionContext', () => {
@@ -49,7 +52,7 @@ describe('session_context', () => {
     });
 
     it('resolves historyKey to DOC_VIEWER_FLYOUT_HISTORY_KEY when outside the Security app and no provider is set', () => {
-      (useIsInSecurityApp as jest.Mock).mockReturnValue(false);
+      (useIsInSecurityApp as Mock).mockReturnValue(false);
 
       const { result } = renderWithProvider();
 
@@ -74,7 +77,7 @@ describe('session_context', () => {
     });
 
     it('falls back to the app-wide default when a provider does not set an ambient historyKey', () => {
-      (useIsInSecurityApp as jest.Mock).mockReturnValue(false);
+      (useIsInSecurityApp as Mock).mockReturnValue(false);
 
       const { result } = renderWithProvider({ session: 'start' } as FlyoutSessionContextValue);
 

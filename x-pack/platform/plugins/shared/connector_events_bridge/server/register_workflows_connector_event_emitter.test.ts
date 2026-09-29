@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { ConnectorEventEmitParams, ConnectorEventEmitter } from '@kbn/actions-plugin/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -32,7 +35,7 @@ const createEmitParams = (
 
 describe('registerWorkflowsConnectorEventEmitter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resetConnectorEventEmitFailureCountForTests();
   });
 
@@ -40,17 +43,17 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     getClient,
     getWorkflowsExtensionsStart,
   }: {
-    getClient?: jest.Mock;
+    getClient?: Mock;
     getWorkflowsExtensionsStart?: () => Promise<WorkflowsExtensionsServerPluginStart | undefined>;
   } = {}): {
     emitter: ConnectorEventEmitter;
-    emitEvent: jest.Mock;
-    getClient: jest.Mock;
+    emitEvent: Mock;
+    getClient: Mock;
     actions: ReturnType<typeof actionsMock.createSetup>;
   } => {
     const actions = actionsMock.createSetup();
-    const emitEvent = jest.fn().mockResolvedValue(undefined);
-    const resolvedGetClient = getClient ?? jest.fn().mockResolvedValue({ emitEvent });
+    const emitEvent = vi.fn().mockResolvedValue(undefined);
+    const resolvedGetClient = getClient ?? vi.fn().mockResolvedValue({ emitEvent });
 
     registerWorkflowsConnectorEventEmitter({
       actions,
@@ -134,8 +137,8 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
   });
 
   it('increments failure counter and rethrows when emitEvent fails', async () => {
-    const emitEvent = jest.fn().mockRejectedValue(new Error('emit boom'));
-    const getClient = jest.fn().mockResolvedValue({ emitEvent });
+    const emitEvent = vi.fn().mockRejectedValue(new Error('emit boom'));
+    const getClient = vi.fn().mockResolvedValue({ emitEvent });
     const { emitter } = registerAndGetEmitter({ getClient });
 
     await expect(emitter.emit(createEmitParams())).rejects.toThrow('emit boom');
@@ -144,7 +147,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
   });
 
   it('increments failure counter when getClient throws', async () => {
-    const getClient = jest.fn().mockRejectedValue(new Error('client boom'));
+    const getClient = vi.fn().mockRejectedValue(new Error('client boom'));
     const { emitter } = registerAndGetEmitter({ getClient });
 
     await expect(emitter.emit(createEmitParams())).rejects.toThrow('client boom');

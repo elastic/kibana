@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -26,39 +29,54 @@ let capturedOnSubmit:
   | ((q: AggregateQuery, abortController?: AbortController) => Promise<void>)
   | undefined;
 
-jest.mock('@kbn/esql/public', () => ({
-  ESQLLangEditor: (props: {
-    onTextLangQuerySubmit: (q: AggregateQuery, a?: AbortController) => Promise<void>;
-  }) => {
-    capturedOnSubmit = props.onTextLangQuerySubmit;
-    return null;
-  },
-  useESQLQueryStats: jest.fn().mockReturnValue(undefined),
-}));
+vi.mock('@kbn/esql/public', () => {
+      const mocked = {
+      ESQLLangEditor: (props: {
+        onTextLangQuerySubmit: (q: AggregateQuery, a?: AbortController) => Promise<void>;
+      }) => {
+        capturedOnSubmit = props.onTextLangQuerySubmit;
+        return null;
+      },
+      useESQLQueryStats: vi.fn().mockReturnValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../app_plugin/shared/edit_on_the_fly/helpers', () => ({
-  getSuggestions: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../../app_plugin/shared/edit_on_the_fly/helpers', () => {
+      const mocked = {
+      getSuggestions: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The initialization hook triggers an initial `runQuery` against real
 // services; irrelevant for these tests, which submit queries explicitly.
-jest.mock('./use_initialize_chart', () => ({
-  useInitializeChart: jest.fn(),
-}));
+vi.mock('./use_initialize_chart', () => {
+      const mocked = {
+      useInitializeChart: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../app_plugin/shared/edit_on_the_fly/use_esql_variables', () => ({
-  useESQLVariables: jest.fn().mockReturnValue({
-    onSaveControl: jest.fn(),
-    onCancelControl: jest.fn(),
-  }),
-}));
+vi.mock('../../../app_plugin/shared/edit_on_the_fly/use_esql_variables', () => {
+      const mocked = {
+      useESQLVariables: vi.fn().mockReturnValue({
+        onSaveControl: vi.fn(),
+        onCancelControl: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/presentation-publishing', () => ({
-  ...jest.requireActual('@kbn/presentation-publishing'),
-  useFetchContext: jest.fn().mockReturnValue({ esqlVariables: [], isApproximate: false }),
-}));
+vi.mock('@kbn/presentation-publishing', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/presentation-publishing')),
+      useFetchContext: vi.fn().mockReturnValue({ esqlVariables: [], isApproximate: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getSuggestionsMock = getSuggestions as jest.MockedFunction<typeof getSuggestions>;
+const getSuggestionsMock = getSuggestions as MockedFunction<typeof getSuggestions>;
 
 describe('ESQLEditor', () => {
   const coreStart = coreMock.createStart();
@@ -88,12 +106,12 @@ describe('ESQLEditor', () => {
       parentApi: undefined,
       panelId: undefined,
       layerId: 'layer1',
-      closeFlyout: jest.fn(),
+      closeFlyout: vi.fn(),
       editorContainer: undefined,
       dataLoading$: undefined,
-      setCurrentAttributes: jest.fn(),
-      updateSuggestion: jest.fn(),
-      onTextBasedQueryStateChange: jest.fn(),
+      setCurrentAttributes: vi.fn(),
+      updateSuggestion: vi.fn(),
+      onTextBasedQueryStateChange: vi.fn(),
     } as unknown as ESQLEditorProps;
 
     return renderWithReduxStore(

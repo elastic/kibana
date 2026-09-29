@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { FIELD_PAGE_SIZE } from '../../constants';
 import { FieldRulesPanelPagination } from './pagination';
 import { useFieldRulesPanelContext } from './context';
 
-jest.mock('./context', () => ({
-  useFieldRulesPanelContext: jest.fn(),
-}));
+vi.mock('./context', () => {
+      const mocked = {
+      useFieldRulesPanelContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createRules = (count: number) =>
   Array.from({ length: count }, (_, index) => ({
@@ -24,29 +29,29 @@ const createRules = (count: number) =>
 
 describe('FieldRulesPanelPagination', () => {
   it('does not render pagination when all rules fit one page', () => {
-    jest.mocked(useFieldRulesPanelContext).mockReturnValue({
+    vi.mocked(useFieldRulesPanelContext).mockReturnValue({
       fieldSearchQuery: '',
-      setFieldSearchQuery: jest.fn(),
+      setFieldSearchQuery: vi.fn(),
       fieldActionFilter: 'all',
-      setFieldActionFilter: jest.fn(),
+      setFieldActionFilter: vi.fn(),
       fieldPageIndex: 0,
-      setFieldPageIndex: jest.fn(),
+      setFieldPageIndex: vi.fn(),
       bulkAction: 'allow',
-      setBulkAction: jest.fn(),
+      setBulkAction: vi.fn(),
       bulkEntityClass: '',
-      setBulkEntityClass: jest.fn(),
+      setBulkEntityClass: vi.fn(),
       pagedRules: [],
       filteredRules: createRules(FIELD_PAGE_SIZE),
       allRules: [],
       selectedFields: [],
-      setSelectedFields: jest.fn(),
+      setSelectedFields: vi.fn(),
       allFieldsSelected: false,
       hasActiveFieldFilters: false,
       selectedCount: 0,
-      toggleSelectAllFields: jest.fn(),
-      onRuleActionChange: jest.fn(),
-      onRuleEntityClassChange: jest.fn(),
-      applyBulkAction: jest.fn(),
+      toggleSelectAllFields: vi.fn(),
+      onRuleActionChange: vi.fn(),
+      onRuleEntityClassChange: vi.fn(),
+      applyBulkAction: vi.fn(),
       policyCounters: { allow: 0, anonymize: 0, deny: 0 },
       isManageMode: true,
       isSubmitting: false,
@@ -57,29 +62,29 @@ describe('FieldRulesPanelPagination', () => {
   });
 
   it('renders pagination summary when rules span multiple pages', () => {
-    jest.mocked(useFieldRulesPanelContext).mockReturnValue({
+    vi.mocked(useFieldRulesPanelContext).mockReturnValue({
       fieldSearchQuery: '',
-      setFieldSearchQuery: jest.fn(),
+      setFieldSearchQuery: vi.fn(),
       fieldActionFilter: 'all',
-      setFieldActionFilter: jest.fn(),
+      setFieldActionFilter: vi.fn(),
       fieldPageIndex: 0,
-      setFieldPageIndex: jest.fn(),
+      setFieldPageIndex: vi.fn(),
       bulkAction: 'allow',
-      setBulkAction: jest.fn(),
+      setBulkAction: vi.fn(),
       bulkEntityClass: '',
-      setBulkEntityClass: jest.fn(),
+      setBulkEntityClass: vi.fn(),
       pagedRules: [],
       filteredRules: createRules(FIELD_PAGE_SIZE + 1),
       allRules: [],
       selectedFields: [],
-      setSelectedFields: jest.fn(),
+      setSelectedFields: vi.fn(),
       allFieldsSelected: false,
       hasActiveFieldFilters: false,
       selectedCount: 0,
-      toggleSelectAllFields: jest.fn(),
-      onRuleActionChange: jest.fn(),
-      onRuleEntityClassChange: jest.fn(),
-      applyBulkAction: jest.fn(),
+      toggleSelectAllFields: vi.fn(),
+      onRuleActionChange: vi.fn(),
+      onRuleEntityClassChange: vi.fn(),
+      applyBulkAction: vi.fn(),
       policyCounters: { allow: 0, anonymize: 0, deny: 0 },
       isManageMode: true,
       isSubmitting: false,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import DateMath from '@kbn/datemath';
 import { getSupportedUrlParams } from './get_supported_url_params';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
@@ -14,12 +16,12 @@ describe('getSupportedUrlParams', () => {
   const MOCK_DATE_VALUE = 20;
 
   beforeEach(() => {
-    dateMathSpy = jest.spyOn(DateMath, 'parse');
+    dateMathSpy = vi.spyOn(DateMath, 'parse');
     dateMathSpy.mockReturnValue(MOCK_DATE_VALUE);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns custom values', () => {

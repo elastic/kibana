@@ -7,23 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ICPSManager } from '../types';
 import { useIsCpsMultiProject } from './use_is_cps_multi_project';
 
 const createCpsManager = (overrides: Partial<ICPSManager> = {}): ICPSManager => ({
-  whenReady: jest.fn().mockResolvedValue(undefined),
-  fetchProjects: jest.fn().mockResolvedValue(null),
-  getTotalProjectCount: jest.fn().mockReturnValue(0),
-  hasLinkedProjects: jest.fn().mockReturnValue(false),
-  getProjectRouting$: jest.fn(),
-  setProjectRouting: jest.fn(),
-  getProjectRouting: jest.fn(),
-  getDefaultProjectRouting: jest.fn(),
-  updateDefaultProjectRouting: jest.fn(),
-  getProjectPickerAccess$: jest.fn(),
-  registerAppAccess: jest.fn(),
-  getConfigurationLinks: jest.fn(),
+  whenReady: vi.fn().mockResolvedValue(undefined),
+  fetchProjects: vi.fn().mockResolvedValue(null),
+  getTotalProjectCount: vi.fn().mockReturnValue(0),
+  hasLinkedProjects: vi.fn().mockReturnValue(false),
+  getProjectRouting$: vi.fn(),
+  setProjectRouting: vi.fn(),
+  getProjectRouting: vi.fn(),
+  getDefaultProjectRouting: vi.fn(),
+  updateDefaultProjectRouting: vi.fn(),
+  getProjectPickerAccess$: vi.fn(),
+  registerAppAccess: vi.fn(),
+  getConfigurationLinks: vi.fn(),
   ...overrides,
 });
 
@@ -51,7 +53,7 @@ describe('useIsCpsMultiProject', () => {
   // A synchronous `false` can't be told apart from "not loaded yet", so it has to stay pending
   // until readiness confirms it rather than being seeded like a `true` reading.
   it('stays pending on the first render and settles on false when there is no linked project', async () => {
-    const cpsManager = createCpsManager({ hasLinkedProjects: jest.fn().mockReturnValue(false) });
+    const cpsManager = createCpsManager({ hasLinkedProjects: vi.fn().mockReturnValue(false) });
 
     const { result } = renderHook(() => useIsCpsMultiProject(cpsManager));
 
@@ -63,7 +65,7 @@ describe('useIsCpsMultiProject', () => {
 
   it('is undefined while readiness is still pending', () => {
     const cpsManager = createCpsManager({
-      whenReady: jest.fn().mockReturnValue(new Promise<void>(() => {})),
+      whenReady: vi.fn().mockReturnValue(new Promise<void>(() => {})),
     });
 
     const { result } = renderHook(() => useIsCpsMultiProject(cpsManager));
@@ -72,7 +74,7 @@ describe('useIsCpsMultiProject', () => {
   });
 
   it('is true once readiness resolves and a linked project is present', async () => {
-    const cpsManager = createCpsManager({ hasLinkedProjects: jest.fn().mockReturnValue(true) });
+    const cpsManager = createCpsManager({ hasLinkedProjects: vi.fn().mockReturnValue(true) });
 
     const { result } = renderHook(() => useIsCpsMultiProject(cpsManager));
 
@@ -85,7 +87,7 @@ describe('useIsCpsMultiProject', () => {
     let isReady = false;
     let markReady = () => {};
     const cpsManager = createCpsManager({
-      whenReady: jest.fn().mockReturnValue(
+      whenReady: vi.fn().mockReturnValue(
         new Promise<void>((resolve) => {
           markReady = () => {
             isReady = true;
@@ -93,7 +95,7 @@ describe('useIsCpsMultiProject', () => {
           };
         })
       ),
-      hasLinkedProjects: jest.fn(() => isReady),
+      hasLinkedProjects: vi.fn(() => isReady),
     });
 
     const { result } = renderHook(() => useIsCpsMultiProject(cpsManager));
@@ -108,7 +110,7 @@ describe('useIsCpsMultiProject', () => {
   // Consumers gate a column or panel on this, so a manager that has already resolved has to
   // answer before paint, otherwise the gated element gets inserted afterwards.
   it('reports an already-ready manager on the first render', async () => {
-    const cpsManager = createCpsManager({ hasLinkedProjects: jest.fn().mockReturnValue(true) });
+    const cpsManager = createCpsManager({ hasLinkedProjects: vi.fn().mockReturnValue(true) });
 
     const { result } = renderHook(() => useIsCpsMultiProject(cpsManager));
 
@@ -120,8 +122,8 @@ describe('useIsCpsMultiProject', () => {
 
   it('is false when readiness rejects', async () => {
     const cpsManager = createCpsManager({
-      whenReady: jest.fn().mockRejectedValue(new Error('boom')),
-      hasLinkedProjects: jest.fn().mockReturnValue(true),
+      whenReady: vi.fn().mockRejectedValue(new Error('boom')),
+      hasLinkedProjects: vi.fn().mockReturnValue(true),
     });
 
     const { result } = renderHook(() => useIsCpsMultiProject(cpsManager));
@@ -131,8 +133,8 @@ describe('useIsCpsMultiProject', () => {
   });
 
   it('re-resolves when the cps manager changes', async () => {
-    const withoutLinked = createCpsManager({ hasLinkedProjects: jest.fn().mockReturnValue(false) });
-    const withLinked = createCpsManager({ hasLinkedProjects: jest.fn().mockReturnValue(true) });
+    const withoutLinked = createCpsManager({ hasLinkedProjects: vi.fn().mockReturnValue(false) });
+    const withLinked = createCpsManager({ hasLinkedProjects: vi.fn().mockReturnValue(true) });
 
     const { result, rerender } = renderHook(
       ({ cpsManager }: { cpsManager: ICPSManager }) => useIsCpsMultiProject(cpsManager),

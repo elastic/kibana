@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 // eslint-disable-next-line import/order
 import { createAppContextStartContractMock } from '../../../../mocks';
 
-jest.mock('../../packages/get', () => {
-  return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };
+vi.mock('../../packages/get', () => {
+  return { getInstallation: vi.fn(), getInstallationObject: vi.fn() };
 });
 
 import { errors } from '@elastic/elasticsearch';
@@ -34,7 +37,7 @@ import { installTransforms } from './install';
 
 describe('test transform install with legacy schema', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
   // Tracks the "persisted" epm-packages SO attributes that savedObjectsClient.get/.update mocks
   // read from and write to below, so repeated get/update cycles within a test see each other's
   // writes the same way they would against a real saved objects index. Tests seed this with
@@ -44,8 +47,8 @@ describe('test transform install with legacy schema', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
     esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
-    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReset();
-    (getInstallationObject as jest.MockedFunction<typeof getInstallationObject>).mockReset();
+    (getInstallation as MockedFunction<typeof getInstallation>).mockReset();
+    (getInstallationObject as MockedFunction<typeof getInstallationObject>).mockReset();
     savedObjectsClient = savedObjectsClientMock.create();
     currentAttributes = {};
     savedObjectsClient.get.mockImplementation(
@@ -69,7 +72,7 @@ describe('test transform install with legacy schema', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('can install new versions and removes older version', async () => {
@@ -106,7 +109,7 @@ describe('test transform install with legacy schema', () => {
         },
       ],
     } as unknown as Installation;
-    (getInstallation as jest.MockedFunction<typeof getInstallation>)
+    (getInstallation as MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
     currentAttributes = { installed_es: previousInstallation.installed_es };
@@ -306,7 +309,7 @@ describe('test transform install with legacy schema', () => {
       ],
     } as unknown as Installation;
 
-    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReturnValueOnce(
+    (getInstallation as MockedFunction<typeof getInstallation>).mockReturnValueOnce(
       Promise.resolve(installation)
     );
     currentAttributes = { installed_es: installation.installed_es };
@@ -370,7 +373,7 @@ describe('test transform install with legacy schema', () => {
         },
       ],
     } as unknown as Installation;
-    (getInstallation as jest.MockedFunction<typeof getInstallation>)
+    (getInstallation as MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
     currentAttributes = { installed_es: [] };
@@ -471,7 +474,7 @@ describe('test transform install with legacy schema', () => {
       installed_es: [],
     } as unknown as Installation;
 
-    (getInstallation as jest.MockedFunction<typeof getInstallation>)
+    (getInstallation as MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
     currentAttributes = { installed_es: currentInstallation.installed_es };
@@ -580,7 +583,7 @@ describe('test transform install with legacy schema', () => {
         },
       ],
     } as unknown as Installation;
-    (getInstallation as jest.MockedFunction<typeof getInstallation>)
+    (getInstallation as MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
     currentAttributes = { installed_es: [] };

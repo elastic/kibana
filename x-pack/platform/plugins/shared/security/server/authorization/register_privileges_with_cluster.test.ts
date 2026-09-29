@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import type { Logger } from '@kbn/core/server';
@@ -16,11 +19,14 @@ import type { SecurityTelemetryAttributes } from '../otel/instrumentation';
 import { securityTelemetry } from '../otel/instrumentation';
 
 // Mock the telemetry module
-jest.mock('../otel/instrumentation', () => ({
-  securityTelemetry: {
-    recordPrivilegeRegistrationDuration: jest.fn(),
-  },
-}));
+vi.mock('../otel/instrumentation', () => {
+      const mocked = {
+      securityTelemetry: {
+        recordPrivilegeRegistrationDuration: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const application = 'default-application';
 const registerPrivilegesWithClusterTest = (
@@ -46,7 +52,7 @@ const registerPrivilegesWithClusterTest = (
 ) => {
   const createExpectUpdatedPrivileges = (
     mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
-    mockLogger: jest.Mocked<Logger>,
+    mockLogger: Mocked<Logger>,
     error: Error
   ) => {
     return (postPrivilegesBody: any, deletedPrivileges: string[] = []) => {
@@ -146,13 +152,13 @@ const registerPrivilegesWithClusterTest = (
       }
     }) as any);
 
-    const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+    const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 
     let error;
     try {
       await registerPrivilegesWithCluster(
         mockLogger,
-        { get: jest.fn().mockReturnValue(privilegeMap) },
+        { get: vi.fn().mockReturnValue(privilegeMap) },
         application,
         mockClusterClient
       );

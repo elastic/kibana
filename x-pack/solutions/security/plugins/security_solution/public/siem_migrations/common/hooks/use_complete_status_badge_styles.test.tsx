@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useCompleteBadgeStyles } from './use_complete_status_badge_styles';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -25,11 +27,14 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const mockUseDarkMode = jest.fn(() => false);
-jest.mock('@kbn/react-kibana-context-theme', () => ({
-  ...jest.requireActual('@kbn/react-kibana-context-theme'),
-  useKibanaIsDarkMode: () => mockUseDarkMode(),
-}));
+const mockUseDarkMode = vi.fn(() => false);
+vi.mock('@kbn/react-kibana-context-theme', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/react-kibana-context-theme')),
+      useKibanaIsDarkMode: () => mockUseDarkMode(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useCompleteBadgeStyles', () => {
   it('returns the correct styles for dark mode', () => {

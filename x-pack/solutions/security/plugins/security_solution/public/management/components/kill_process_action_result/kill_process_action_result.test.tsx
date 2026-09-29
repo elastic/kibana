@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type {
   ActionDetails,
@@ -53,7 +55,7 @@ describe('KillSuspendProcessActionResult', () => {
   });
 
   it('should warn and render nothing when the command is not kill/suspend process', () => {
-    const consoleSpy = jest.spyOn(window.console, 'warn').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(window.console, 'warn').mockImplementation(() => {});
     action = generator.generateActionDetails<
       KillProcessActionOutputContent | SuspendProcessActionOutputContent,
       ResponseActionParametersWithProcessData

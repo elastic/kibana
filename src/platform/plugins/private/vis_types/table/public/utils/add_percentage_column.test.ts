@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('../services', () => ({
-  getFormatService: jest.fn(() => ({
-    deserialize: jest.fn(() => 'formatter'),
-  })),
-}));
+import { vi } from 'vitest';
+
+vi.mock('../services', () => {
+      const mocked = {
+      getFormatService: vi.fn(() => ({
+        deserialize: vi.fn(() => 'formatter'),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { TableContext } from '../types';

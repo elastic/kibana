@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { AggConfigs } from '../agg_configs';
 import { METRIC_TYPES } from '../metrics';
 import { mockAggTypesRegistry } from '../test_helpers';
@@ -68,7 +70,7 @@ describe('Terms Agg', () => {
           },
         ],
         { typesRegistry: mockAggTypesRegistry() },
-        jest.fn()
+        vi.fn()
       );
     };
 
@@ -355,7 +357,7 @@ describe('Terms Agg', () => {
           },
         ],
         { typesRegistry: mockAggTypesRegistry() },
-        jest.fn()
+        vi.fn()
       );
       const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
 

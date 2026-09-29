@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useReducer } from 'react';
 import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
@@ -14,8 +16,8 @@ import type { StreamNameValidator } from '../../../utils';
 import { formReducer, initialFormState } from '../reducers/form_reducer';
 
 describe('useStreamValidation', () => {
-  const mockOnCreate = jest.fn().mockResolvedValue(undefined);
-  const mockOnValidate: StreamNameValidator = jest.fn().mockResolvedValue({
+  const mockOnCreate = vi.fn().mockResolvedValue(undefined);
+  const mockOnValidate: StreamNameValidator = vi.fn().mockResolvedValue({
     errorType: null,
   });
 
@@ -55,16 +57,16 @@ describe('useStreamValidation', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('WHEN initialized', () => {
@@ -89,7 +91,7 @@ describe('useStreamValidation', () => {
       });
 
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
 
       expect(mockOnValidate).not.toHaveBeenCalled();
@@ -102,7 +104,7 @@ describe('useStreamValidation', () => {
       // Create completes successfully - returns to IDLE mode
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
@@ -118,7 +120,7 @@ describe('useStreamValidation', () => {
       expect(result.current.formState.validation.isValidating).toBe(false);
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       // Should NOT trigger validation
@@ -131,7 +133,7 @@ describe('useStreamValidation', () => {
     });
 
     it('SHOULD trigger debounced validation in Live Validation Mode (has error)', async () => {
-      const mockOnValidateWithError: StreamNameValidator = jest.fn().mockResolvedValue({
+      const mockOnValidateWithError: StreamNameValidator = vi.fn().mockResolvedValue({
         errorType: 'duplicate',
       });
 
@@ -140,7 +142,7 @@ describe('useStreamValidation', () => {
       // First submit to get error - enters Live Validation Mode
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
@@ -153,7 +155,7 @@ describe('useStreamValidation', () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       // Should trigger debounced validation (in Live Validation Mode)
@@ -167,7 +169,7 @@ describe('useStreamValidation', () => {
     });
 
     it('SHOULD keep validation error visible and trigger debounced validation in Live Validation Mode', async () => {
-      const mockOnValidateWithError: StreamNameValidator = jest.fn().mockResolvedValue({
+      const mockOnValidateWithError: StreamNameValidator = vi.fn().mockResolvedValue({
         errorType: 'duplicate',
       });
 
@@ -176,7 +178,7 @@ describe('useStreamValidation', () => {
       // First submit to get error
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
@@ -196,7 +198,7 @@ describe('useStreamValidation', () => {
 
       // Advance timers to trigger debounced validation
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       // Debounced validation should have been triggered
@@ -217,14 +219,14 @@ describe('useStreamValidation', () => {
       });
 
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
 
       expect(mockOnValidate).not.toHaveBeenCalled();
     });
 
     it('SHOULD abort Create validation and return to IDLE when name changes during Create', async () => {
-      const slowValidator: StreamNameValidator = jest.fn().mockImplementation(async (_, signal) => {
+      const slowValidator: StreamNameValidator = vi.fn().mockImplementation(async (_, signal) => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         if (signal?.aborted) {
           throw new Error('Aborted');
@@ -260,7 +262,7 @@ describe('useStreamValidation', () => {
 
       // Advance timers to let the aborted Create validation complete
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(1000);
+        await vi.advanceTimersByTimeAsync(1000);
       });
 
       await act(async () => {
@@ -272,7 +274,7 @@ describe('useStreamValidation', () => {
 
       // Advance debounce timers - no validation should trigger (we're in IDLE)
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       // Only the initial Create validation should have been called
@@ -295,7 +297,7 @@ describe('useStreamValidation', () => {
 
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
@@ -311,7 +313,7 @@ describe('useStreamValidation', () => {
 
     it('SHOULD set isSubmitting to true while onCreate is running and false after', async () => {
       let resolveOnCreate: () => void;
-      const slowOnCreate = jest.fn().mockImplementation(
+      const slowOnCreate = vi.fn().mockImplementation(
         () =>
           new Promise<void>((resolve) => {
             resolveOnCreate = resolve;
@@ -339,7 +341,7 @@ describe('useStreamValidation', () => {
       let createPromise: Promise<void>;
       await act(async () => {
         createPromise = result.current.handleCreate();
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
 
       // isSubmitting should be true while onCreate is running
@@ -358,7 +360,7 @@ describe('useStreamValidation', () => {
 
     it('SHOULD set isSubmitting to false even if onCreate throws an error', async () => {
       // onCreate handles its own errors, the hook just needs to reset isSubmitting
-      const failingOnCreate = jest.fn().mockImplementation(() => {
+      const failingOnCreate = vi.fn().mockImplementation(() => {
         return Promise.reject(new Error('Create failed'));
       });
 
@@ -381,7 +383,7 @@ describe('useStreamValidation', () => {
 
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
         // Error is swallowed - onCreate is expected to handle its own errors
         await handleCreatePromise;
       });
@@ -392,7 +394,7 @@ describe('useStreamValidation', () => {
     });
 
     it('SHOULD set validation error and not call onCreate on validation failure', async () => {
-      const mockOnValidateWithError: StreamNameValidator = jest.fn().mockResolvedValue({
+      const mockOnValidateWithError: StreamNameValidator = vi.fn().mockResolvedValue({
         errorType: 'duplicate',
       });
 
@@ -400,7 +402,7 @@ describe('useStreamValidation', () => {
 
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
@@ -430,7 +432,7 @@ describe('useStreamValidation', () => {
 
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
@@ -439,7 +441,7 @@ describe('useStreamValidation', () => {
     });
 
     it('SHOULD handle higherPriority error with conflicting pattern', async () => {
-      const mockOnValidateHigherPriority: StreamNameValidator = jest.fn().mockResolvedValue({
+      const mockOnValidateHigherPriority: StreamNameValidator = vi.fn().mockResolvedValue({
         errorType: 'higherPriority',
         conflictingIndexPattern: 'logs-*',
       });
@@ -448,7 +450,7 @@ describe('useStreamValidation', () => {
 
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
@@ -458,7 +460,7 @@ describe('useStreamValidation', () => {
     });
 
     it('SHOULD cancel debounced validation when Create is called in Live Validation Mode', async () => {
-      const mockOnValidateWithError: StreamNameValidator = jest.fn().mockResolvedValue({
+      const mockOnValidateWithError: StreamNameValidator = vi.fn().mockResolvedValue({
         errorType: 'duplicate',
       });
 
@@ -467,7 +469,7 @@ describe('useStreamValidation', () => {
       // First submit to get error - enters Live Validation Mode
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
@@ -487,7 +489,7 @@ describe('useStreamValidation', () => {
       // Immediately call Create to cancel debounced validation before it executes
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
@@ -501,7 +503,7 @@ describe('useStreamValidation', () => {
     });
 
     it('SHOULD handle validation errors gracefully', async () => {
-      const errorValidator: StreamNameValidator = jest
+      const errorValidator: StreamNameValidator = vi
         .fn()
         .mockRejectedValue(new Error('Network error'));
 
@@ -509,7 +511,7 @@ describe('useStreamValidation', () => {
 
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
@@ -519,7 +521,7 @@ describe('useStreamValidation', () => {
     });
 
     it('SHOULD abort validation when signal is aborted', async () => {
-      const slowValidator: StreamNameValidator = jest
+      const slowValidator: StreamNameValidator = vi
         .fn()
         .mockImplementation(async (name, signal) => {
           await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -548,7 +550,7 @@ describe('useStreamValidation', () => {
       });
 
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
         await createPromise;
       });
 
@@ -559,7 +561,7 @@ describe('useStreamValidation', () => {
 
   describe('WHEN rapid name changes occur in Live Validation Mode', () => {
     it('SHOULD only validate the final name', async () => {
-      const mockOnValidateWithError: StreamNameValidator = jest.fn().mockResolvedValue({
+      const mockOnValidateWithError: StreamNameValidator = vi.fn().mockResolvedValue({
         errorType: 'duplicate',
       });
 
@@ -568,7 +570,7 @@ describe('useStreamValidation', () => {
       // Trigger submit to get error and enter Live Validation Mode
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
@@ -576,7 +578,7 @@ describe('useStreamValidation', () => {
       expect(result.current.formState.validation.validationError).toBe('duplicate');
 
       // Clear previous calls
-      jest.mocked(mockOnValidateWithError).mockClear();
+      vi.mocked(mockOnValidateWithError).mockClear();
 
       // Rapid name changes
       act(() => {
@@ -591,7 +593,7 @@ describe('useStreamValidation', () => {
 
       // Wait for debounce
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       await waitFor(() => {
@@ -607,7 +609,7 @@ describe('useStreamValidation', () => {
     });
 
     it('SHOULD abort previous debounced validation when name changes', async () => {
-      const mockOnValidateWithError: StreamNameValidator = jest.fn().mockResolvedValue({
+      const mockOnValidateWithError: StreamNameValidator = vi.fn().mockResolvedValue({
         errorType: 'duplicate',
       });
 
@@ -616,7 +618,7 @@ describe('useStreamValidation', () => {
       // Trigger submit to get error
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
@@ -631,7 +633,7 @@ describe('useStreamValidation', () => {
 
       // Wait less than debounce time
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(100);
+        await vi.advanceTimersByTimeAsync(100);
       });
 
       // Change name again (should abort previous)
@@ -641,7 +643,7 @@ describe('useStreamValidation', () => {
 
       // Complete the debounce
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       await waitFor(() => {
@@ -659,7 +661,7 @@ describe('useStreamValidation', () => {
 
   describe('WHEN debounce delay is configured', () => {
     it('SHOULD use custom debounce delay in Live Validation Mode', async () => {
-      const mockOnValidateWithError: StreamNameValidator = jest.fn().mockResolvedValue({
+      const mockOnValidateWithError: StreamNameValidator = vi.fn().mockResolvedValue({
         errorType: 'duplicate',
       });
 
@@ -684,7 +686,7 @@ describe('useStreamValidation', () => {
       // Trigger submit to get error
       await act(async () => {
         const handleCreatePromise = result.current.handleCreate();
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
         await handleCreatePromise;
       });
 
@@ -692,7 +694,7 @@ describe('useStreamValidation', () => {
       expect(result.current.formState.validation.validationError).toBe('duplicate');
 
       // Clear mock calls
-      jest.mocked(mockOnValidateWithError).mockClear();
+      vi.mocked(mockOnValidateWithError).mockClear();
 
       // Change name
       act(() => {
@@ -701,7 +703,7 @@ describe('useStreamValidation', () => {
 
       // Wait for custom delay minus 100ms
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(400);
+        await vi.advanceTimersByTimeAsync(400);
       });
 
       // Should not have validated yet
@@ -709,7 +711,7 @@ describe('useStreamValidation', () => {
 
       // Now wait for debounced validation to trigger after full delay
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(100);
+        await vi.advanceTimersByTimeAsync(100);
       });
 
       await waitFor(() => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -22,17 +24,26 @@ import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 
-jest.mock('./resolve_uuid', () => ({
-  resolveInstanceUuid: jest.fn().mockResolvedValue('SOME_UUID'),
-}));
+vi.mock('./resolve_uuid', () => {
+      const mocked = {
+      resolveInstanceUuid: vi.fn().mockResolvedValue('SOME_UUID'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./create_data_folder', () => ({
-  createDataFolder: jest.fn(),
-}));
+vi.mock('./create_data_folder', () => {
+      const mocked = {
+      createDataFolder: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./write_pid_file', () => ({
-  writePidFile: jest.fn(),
-}));
+vi.mock('./write_pid_file', () => {
+      const mocked = {
+      writePidFile: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const pathConfig = {
   data: 'data-folder',
@@ -79,7 +90,7 @@ describe('UuidService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('#preboot()', () => {

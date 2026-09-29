@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { useFleetServerHostsForm } from './use_fleet_server_host_form';
 
-jest.mock('../../hooks/use_confirm_modal', () => ({
-  ...jest.requireActual('../../hooks/use_confirm_modal'),
-  useConfirmModal: () => ({ confirm: () => true }),
-}));
+vi.mock('../../hooks/use_confirm_modal', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../hooks/use_confirm_modal')),
+      useConfirmModal: () => ({ confirm: () => true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useFleetServerHostsForm', () => {
   it('should not allow to submit an invalid form', async () => {
     const testRenderer = createFleetTestRendererMock();
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const { result } = testRenderer.renderHook(() => useFleetServerHostsForm(undefined, onSuccess));
 
     act(() =>
@@ -48,7 +53,7 @@ describe('useFleetServerHostsForm', () => {
 
   it('should submit a valid form', async () => {
     const testRenderer = createFleetTestRendererMock();
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     testRenderer.startServices.http.post.mockResolvedValue({});
     const { result } = testRenderer.renderHook(() =>
       useFleetServerHostsForm(
@@ -72,7 +77,7 @@ describe('useFleetServerHostsForm', () => {
 
   it('should submit a valid form with SSL options', async () => {
     const testRenderer = createFleetTestRendererMock();
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     testRenderer.startServices.http.put.mockResolvedValue({});
     const { result } = testRenderer.renderHook(() =>
       useFleetServerHostsForm(
@@ -106,7 +111,7 @@ describe('useFleetServerHostsForm', () => {
   describe('SSL certificate path validation', () => {
     it('should block submission when a certificate path contains spaces', async () => {
       const testRenderer = createFleetTestRendererMock();
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const { result } = testRenderer.renderHook(() =>
         useFleetServerHostsForm(
           {
@@ -133,7 +138,7 @@ describe('useFleetServerHostsForm', () => {
 
     it('should block submission when an ES certificate authorities path contains spaces', async () => {
       const testRenderer = createFleetTestRendererMock();
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const { result } = testRenderer.renderHook(() =>
         useFleetServerHostsForm(
           {
@@ -164,7 +169,7 @@ describe('useFleetServerHostsForm', () => {
 
     it('should allow submission when all SSL paths are valid', async () => {
       const testRenderer = createFleetTestRendererMock();
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       testRenderer.startServices.http.put.mockResolvedValue({});
       const { result } = testRenderer.renderHook(() =>
         useFleetServerHostsForm(
@@ -194,7 +199,7 @@ describe('useFleetServerHostsForm', () => {
   describe('preconfigured host with allow_edit', () => {
     it('should have is_default switch enabled when allow_edit includes is_default', async () => {
       const testRenderer = createFleetTestRendererMock();
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const { result } = testRenderer.renderHook(() =>
         useFleetServerHostsForm(
           {
@@ -215,7 +220,7 @@ describe('useFleetServerHostsForm', () => {
 
     it('should have host_urls disabled for preconfigured host even with allow_edit', async () => {
       const testRenderer = createFleetTestRendererMock();
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const { result } = testRenderer.renderHook(() =>
         useFleetServerHostsForm(
           {
@@ -235,7 +240,7 @@ describe('useFleetServerHostsForm', () => {
 
     it('should be disabled before is_default is changed', async () => {
       const testRenderer = createFleetTestRendererMock();
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const { result } = testRenderer.renderHook(() =>
         useFleetServerHostsForm(
           {
@@ -255,7 +260,7 @@ describe('useFleetServerHostsForm', () => {
 
     it('should become enabled after toggling is_default', async () => {
       const testRenderer = createFleetTestRendererMock();
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const { result } = testRenderer.renderHook(() =>
         useFleetServerHostsForm(
           {
@@ -277,7 +282,7 @@ describe('useFleetServerHostsForm', () => {
 
     it('should submit only is_default for a preconfigured host', async () => {
       const testRenderer = createFleetTestRendererMock();
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       testRenderer.startServices.http.put.mockResolvedValue({});
       const { result } = testRenderer.renderHook(() =>
         useFleetServerHostsForm(
@@ -309,7 +314,7 @@ describe('useFleetServerHostsForm', () => {
 
     it('should show the host own URLs when editing an existing preconfigured host', async () => {
       const testRenderer = createFleetTestRendererMock();
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       const { result } = testRenderer.renderHook(() =>
         useFleetServerHostsForm(
           {
@@ -340,7 +345,7 @@ describe('useFleetServerHostsForm', () => {
 
   it('should allow the user to correct and submit an invalid form', async () => {
     const testRenderer = createFleetTestRendererMock();
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     testRenderer.startServices.http.post.mockResolvedValue({});
     const { result } = testRenderer.renderHook(() =>
       useFleetServerHostsForm(
@@ -375,7 +380,7 @@ describe('useFleetServerHostsForm', () => {
 
   it('should send explicit null when clearing an existing ssl secret key', async () => {
     const testRenderer = createFleetTestRendererMock();
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     testRenderer.startServices.http.put.mockResolvedValue({});
     const { result } = testRenderer.renderHook(() =>
       useFleetServerHostsForm(
@@ -412,7 +417,7 @@ describe('useFleetServerHostsForm', () => {
 
   it('should preserve an untouched secret when clearing a different one', async () => {
     const testRenderer = createFleetTestRendererMock();
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     testRenderer.startServices.http.put.mockResolvedValue({});
     const { result } = testRenderer.renderHook(() =>
       useFleetServerHostsForm(

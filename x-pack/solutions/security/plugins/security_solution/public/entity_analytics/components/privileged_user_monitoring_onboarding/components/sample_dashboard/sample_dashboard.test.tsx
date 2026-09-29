@@ -5,20 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { PrivilegedUserMonitoringSampleDashboard } from './sample_dashboard';
 import { TestProviders } from '../../../../../common/mock';
 
-jest.mock('../esql_dashboard_panel/esql_dashboard_panel', () => ({
-  EsqlDashboardPanel: jest.fn(({ title }) => (
-    <div data-test-subj="esql-dashboard-panel">{title}</div>
-  )),
-}));
+vi.mock('../esql_dashboard_panel/esql_dashboard_panel', () => {
+      const mocked = {
+      EsqlDashboardPanel: vi.fn(({ title }) => (
+        <div data-test-subj="esql-dashboard-panel">{title}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('PrivilegedUserMonitoringSampleDashboard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the panel and header', () => {

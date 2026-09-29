@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { usePackQueryForm } from './use_pack_query_form';
@@ -363,11 +365,11 @@ describe('usePackQueryForm', () => {
     const NOW = new Date('2026-06-19T12:00:00.000Z');
 
     beforeEach(() => {
-      jest.useFakeTimers().setSystemTime(NOW);
+      vi.useFakeTimers().setSystemTime(NOW);
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     // Missing `start_date` forces `deserializeSchedule`'s `new Date()` fallback.
@@ -420,7 +422,7 @@ describe('usePackQueryForm', () => {
 
       const firstStartDate = result.current.deserializedSchedule.startDate.getTime();
 
-      jest.setSystemTime(new Date(NOW.getTime() + 60_000));
+      vi.setSystemTime(new Date(NOW.getTime() + 60_000));
       rerender(initialProps);
 
       expect(result.current.deserializedSchedule.startDate.getTime()).toBe(firstStartDate);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { API_VERSIONS } from '../../common/constants';
@@ -12,16 +15,19 @@ import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import { getPackUsersRoute } from './get_users_route';
 import { createInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
 
-jest.mock('../utils/get_internal_saved_object_client', () => ({
-  createInternalSavedObjectsClientForSpaceId: jest.fn(),
-}));
+vi.mock('../utils/get_internal_saved_object_client', () => {
+      const mocked = {
+      createInternalSavedObjectsClientForSpaceId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TEST_PATH = '/internal/osquery/packs/users';
 
 describe('getPackUsersRoute', () => {
   let routeHandler: RequestHandler;
   let mockOsqueryContext: OsqueryAppContext;
-  let mockSavedObjectsClient: { find: jest.Mock };
+  let mockSavedObjectsClient: { find: Mock };
 
   const createMockRouter = () => {
     const httpService = httpServiceMock.createSetupContract();
@@ -39,15 +45,15 @@ describe('getPackUsersRoute', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockOsqueryContext = {
       logFactory: {
-        get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()),
+        get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()),
       },
     } as unknown as OsqueryAppContext;
 
     mockSavedObjectsClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [],
         total: 0,
         page: 1,
@@ -55,7 +61,7 @@ describe('getPackUsersRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
   });

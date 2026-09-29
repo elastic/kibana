@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
@@ -41,14 +43,14 @@ describe('<ToolbarButton />', () => {
     });
 
     test('accepts an onClick handler', () => {
-      const mockHandler = jest.fn();
+      const mockHandler = vi.fn();
       const component = mountWithIntl(<ToolbarButton label="Create chart" onClick={mockHandler} />);
       component.find('button').simulate('click');
       expect(mockHandler).toHaveBeenCalled();
     });
 
     test('accepts an onBlur handler', () => {
-      const mockHandler = jest.fn();
+      const mockHandler = vi.fn();
       const component = mountWithIntl(<ToolbarButton label="Create chart" onBlur={mockHandler} />);
       component.find('button').simulate('blur');
       expect(mockHandler).toHaveBeenCalled();
@@ -58,7 +60,7 @@ describe('<ToolbarButton />', () => {
   describe('iconButton', () => {
     test('is rendered - default', () => {
       const component = mountWithIntl(
-        <ToolbarButton as="iconButton" iconType="rocket" onClick={jest.fn()} />
+        <ToolbarButton as="iconButton" iconType="rocket" onClick={vi.fn()} />
       );
       expect(component.render()).toMatchSnapshot();
     });

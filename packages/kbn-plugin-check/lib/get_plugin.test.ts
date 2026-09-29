@@ -7,15 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ToolingLog } from '@kbn/tooling-log';
 
 import { getPlugin } from './get_plugin';
 
-jest.mock('@kbn/docs-utils', () => ({
-  findPlugins: jest.fn(),
-}));
+vi.mock('@kbn/docs-utils', () => {
+      const mocked = {
+      findPlugins: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { findPlugins } = jest.requireMock('@kbn/docs-utils');
+const { findPlugins } = (await vi.importMock('@kbn/docs-utils'));
 
 interface MockPlugin {
   id: string;
@@ -37,15 +43,15 @@ const createMockPlugin = (id: string): MockPlugin => ({
   manifestPath: `/path/to/${id}/kibana.jsonc`,
 });
 
-const createMockLog = (): jest.Mocked<ToolingLog> =>
+const createMockLog = (): Mocked<ToolingLog> =>
   ({
-    debug: jest.fn(),
-    error: jest.fn(),
-  } as unknown as jest.Mocked<ToolingLog>);
+    debug: vi.fn(),
+    error: vi.fn(),
+  } as unknown as Mocked<ToolingLog>);
 
 describe('getPlugin', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the plugin when found', () => {

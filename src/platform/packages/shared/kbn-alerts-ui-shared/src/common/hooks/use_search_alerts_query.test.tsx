@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { of } from 'rxjs';
@@ -90,8 +92,8 @@ const queryClient = new QueryClient(testQueryClientConfig);
 describe('useSearchAlertsQuery', () => {
   const mockDataPlugin = {
     search: {
-      search: jest.fn().mockReturnValue(searchResponse$),
-      showError: jest.fn(),
+      search: vi.fn().mockReturnValue(searchResponse$),
+      showError: vi.fn(),
     },
   };
 
@@ -118,7 +120,7 @@ describe('useSearchAlertsQuery', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {

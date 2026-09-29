@@ -5,27 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Readable, PassThrough } from 'stream';
 
-const mockGetSafePath = jest.fn();
-const mockCreateWriteStream = jest.fn();
-const mockDeleteFile = jest.fn();
+const mockGetSafePath = vi.fn();
+const mockCreateWriteStream = vi.fn();
+const mockDeleteFile = vi.fn();
 
-jest.mock('@kbn/fs', () => ({
-  getSafePath: (...args: unknown[]) => mockGetSafePath(...args),
-  createWriteStream: (...args: unknown[]) => mockCreateWriteStream(...args),
-  deleteFile: (...args: unknown[]) => mockDeleteFile(...args),
-}));
+vi.mock('@kbn/fs', () => {
+      const mocked = {
+      getSafePath: (...args: unknown[]) => mockGetSafePath(...args),
+      createWriteStream: (...args: unknown[]) => mockCreateWriteStream(...args),
+      deleteFile: (...args: unknown[]) => mockDeleteFile(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('crypto', () => ({
-  randomUUID: () => 'test-uuid-1234',
-}));
+vi.mock('crypto', () => {
+      const mocked = {
+      randomUUID: () => 'test-uuid-1234',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { saveUploadedFile } from './save_uploaded_file';
 
 describe('saveUploadedFile', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetSafePath.mockReturnValue({ fullPath: '/data/agent_builder/tmp/test-uuid-1234.zip' });
     mockDeleteFile.mockResolvedValue(undefined);
   });

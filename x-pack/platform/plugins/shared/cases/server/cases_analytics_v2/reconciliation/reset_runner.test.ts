@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -19,15 +22,27 @@ import type { CasesAnalyticsV2WriterContract } from '../writer';
 import type { CasesActivityV2WriterContract } from '../writer/activity';
 import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
 
-jest.mock('./runner', () => ({ runReconciliation: jest.fn() }));
-jest.mock('./activity_runner', () => ({ runActivityReconciliation: jest.fn() }));
-jest.mock('./attachments_runner', () => ({ runAttachmentsReconciliation: jest.fn() }));
-jest.mock('.', () => ({ resetReconciliationTask: jest.fn() }));
+vi.mock('./runner', () => {
+      const mocked = { runReconciliation: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./activity_runner', () => {
+      const mocked = { runActivityReconciliation: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./attachments_runner', () => {
+      const mocked = { runAttachmentsReconciliation: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('.', () => {
+      const mocked = { resetReconciliationTask: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const runReconciliationMock = runReconciliation as jest.Mock;
-const runActivityReconciliationMock = runActivityReconciliation as jest.Mock;
-const runAttachmentsReconciliationMock = runAttachmentsReconciliation as jest.Mock;
-const resetReconciliationTaskMock = resetReconciliationTask as jest.Mock;
+const runReconciliationMock = runReconciliation as Mock;
+const runActivityReconciliationMock = runActivityReconciliation as Mock;
+const runAttachmentsReconciliationMock = runAttachmentsReconciliation as Mock;
+const resetReconciliationTaskMock = resetReconciliationTask as Mock;
 
 const flushMicrotasks = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -45,7 +60,7 @@ const buildDeps = (overrides: Partial<Parameters<typeof runFullReset>[0]> = {}) 
 
 describe('runFullReset', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     runReconciliationMock.mockResolvedValue({
       newLastRunAt: '2026-05-01T00:00:00.000Z',
       processed: 5,

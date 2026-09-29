@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { SignalGroupRow } from './signal_group_row';
 
-const renderRow = (onView = jest.fn()) => {
+const renderRow = (onView = vi.fn()) => {
   render(
     <I18nProvider>
       <EuiProvider>

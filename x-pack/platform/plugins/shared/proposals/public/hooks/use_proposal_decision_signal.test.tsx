@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -13,7 +15,7 @@ import { useProposalDecisionSignal } from './use_proposal_decision_signal';
 
 const renderWithOwnClient = () => {
   const queryClient = new QueryClient();
-  const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+  const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
   const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );

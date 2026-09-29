@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiFlexItem } from '@elastic/eui';
 import { shallow } from 'enzyme';
 import React from 'react';
@@ -13,10 +15,10 @@ import { TestProviders } from '../../../../../../common/mock';
 import { SessionUserHostWorkingDir } from './session_user_host_working_dir';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
-jest.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/lib/kibana');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,

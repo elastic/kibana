@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useReviewSuggestionsForm } from './use_review_suggestions_form';
 import type { Condition } from '@kbn/streamlang';
 import { useFetchErrorToast } from '../../../../../hooks/use_fetch_error_toast';
 
-jest.mock('react-use/lib/useUpdateEffect', () => {
+vi.mock('react-use/lib/useUpdateEffect', () => {
   return (cb: () => void, deps: unknown[]) => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const ReactImport = require('react');
@@ -20,40 +22,52 @@ jest.mock('react-use/lib/useUpdateEffect', () => {
 });
 
 const mockStreamsRepositoryClient = {
-  stream: jest.fn(),
+  stream: vi.fn(),
 };
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient: mockStreamsRepositoryClient },
-      },
-    },
-  }),
-}));
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        dependencies: {
+          start: {
+            streams: { streamsRepositoryClient: mockStreamsRepositoryClient },
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the abort controller hook
-jest.mock('@kbn/react-hooks', () => ({
-  useAbortController: () => ({
-    signal: new AbortController().signal,
-    abort: jest.fn(),
-    refresh: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/react-hooks', () => {
+      const mocked = {
+      useAbortController: () => ({
+        signal: new AbortController().signal,
+        abort: vi.fn(),
+        refresh: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the error toast function
-const mockShowFetchErrorToast = jest.fn();
-jest.mock('../../../../../hooks/use_fetch_error_toast', () => ({
-  useFetchErrorToast: () => mockShowFetchErrorToast,
-}));
+const mockShowFetchErrorToast = vi.fn();
+vi.mock('../../../../../hooks/use_fetch_error_toast', () => {
+      const mocked = {
+      useFetchErrorToast: () => mockShowFetchErrorToast,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the actor ref hook; capture sent events for assertions
-const mockSend = jest.fn();
-jest.mock('../state_management/stream_routing_state_machine', () => ({
-  useStreamsRoutingActorRef: () => ({ send: mockSend }),
-  useStreamsRoutingSelector: () => 'test-stream',
-}));
+const mockSend = vi.fn();
+vi.mock('../state_management/stream_routing_state_machine', () => {
+      const mocked = {
+      useStreamsRoutingActorRef: () => ({ send: mockSend }),
+      useStreamsRoutingSelector: () => 'test-stream',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const condition: Condition = { field: 'service.name', eq: 'api' };
 
@@ -72,7 +86,7 @@ const setupSuggestionsApi = ({
 
   // Mock the Observable stream
   const mockObservable = {
-    subscribe: jest.fn((observer) => {
+    subscribe: vi.fn((observer) => {
       observer.next(mockResponse);
       observer.complete();
     }),
@@ -308,7 +322,7 @@ describe('useReviewSuggestionsForm', () => {
 
     // Mock Observable that throws an error
     const mockObservable = {
-      subscribe: jest.fn((observer) => {
+      subscribe: vi.fn((observer) => {
         observer.error(error);
       }),
     };
@@ -336,7 +350,7 @@ describe('useReviewSuggestionsForm', () => {
 
     // Mock Observable that throws an AbortError
     const mockObservable = {
-      subscribe: jest.fn((observer) => {
+      subscribe: vi.fn((observer) => {
         observer.error(abortError);
       }),
     };
@@ -361,7 +375,7 @@ describe('useReviewSuggestionsForm', () => {
   it('sets loading state during fetchSuggestions', async () => {
     let resolveObserver: () => void;
     const mockObservable = {
-      subscribe: jest.fn((observer) => {
+      subscribe: vi.fn((observer) => {
         resolveObserver = () => {
           observer.next({ partitions: [], reason: 'no_clusters' as const });
           observer.complete();
@@ -536,7 +550,7 @@ describe('useReviewSuggestionsForm', () => {
       };
 
       const mockObservable = {
-        subscribe: jest.fn((observer) => {
+        subscribe: vi.fn((observer) => {
           observer.next(mockResponse);
           observer.complete();
         }),

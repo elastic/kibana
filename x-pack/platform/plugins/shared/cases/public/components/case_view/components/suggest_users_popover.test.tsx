@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -17,7 +19,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { AssigneeWithProfile } from '../../user_profiles/types';
 import { renderWithTestingProviders } from '../../../common/mock';
 
-jest.mock('../../../containers/user_profiles/api');
+vi.mock('../../../containers/user_profiles/api');
 
 const asAssignee = (profile: UserProfileWithAvatar): AssigneeWithProfile => ({
   uid: profile.uid,
@@ -31,27 +33,27 @@ describe('SuggestUsersPopover', () => {
     isLoading: false,
     assignedUsersWithProfiles: [],
     isPopoverOpen: true,
-    onUsersChange: jest.fn(),
-    togglePopover: jest.fn(),
-    onClosePopover: jest.fn(),
+    onUsersChange: vi.fn(),
+    togglePopover: vi.fn(),
+    onClosePopover: vi.fn(),
     currentUserProfile: undefined,
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
   });
 
   it('calls onUsersChange when 1 user is selected', async () => {
-    const onUsersChange = jest.fn();
+    const onUsersChange = vi.fn();
     const props = { ...defaultProps, onUsersChange };
     renderWithTestingProviders(<SuggestUsersPopover {...props} />);
 
@@ -78,7 +80,7 @@ describe('SuggestUsersPopover', () => {
   });
 
   it('calls onUsersChange when multiple users are selected', async () => {
-    const onUsersChange = jest.fn();
+    const onUsersChange = vi.fn();
     const props = { ...defaultProps, onUsersChange };
     renderWithTestingProviders(<SuggestUsersPopover {...props} />);
 
@@ -116,7 +118,7 @@ describe('SuggestUsersPopover', () => {
   });
 
   it('calls onUsersChange with the current user (Physical Dinosaur) at the beginning', async () => {
-    const onUsersChange = jest.fn();
+    const onUsersChange = vi.fn();
     const props = {
       ...defaultProps,
       assignedUsersWithProfiles: [asAssignee(userProfiles[1]), asAssignee(userProfiles[0])],
@@ -209,7 +211,7 @@ describe('SuggestUsersPopover', () => {
   });
 
   it('calls onTogglePopover when clicking the edit button after the popover is already open', async () => {
-    const togglePopover = jest.fn();
+    const togglePopover = vi.fn();
     const props = {
       ...defaultProps,
       togglePopover,

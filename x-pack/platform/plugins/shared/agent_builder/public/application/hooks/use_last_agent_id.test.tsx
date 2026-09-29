@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
@@ -12,15 +14,21 @@ import { ActiveSpaceProvider } from '../context/active_space_context';
 import { storageKeys } from '../storage_keys';
 import { getLastAgentId, useLastAgentId } from './use_last_agent_id';
 
-const mockUseEffectiveSpaceDefaultAgent = jest.fn();
-jest.mock('./use_space_default_agent', () => ({
-  useEffectiveSpaceDefaultAgent: () => mockUseEffectiveSpaceDefaultAgent(),
-}));
+const mockUseEffectiveSpaceDefaultAgent = vi.fn();
+vi.mock('./use_space_default_agent', () => {
+      const mocked = {
+      useEffectiveSpaceDefaultAgent: () => mockUseEffectiveSpaceDefaultAgent(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockValidateAgentId = jest.fn();
-jest.mock('./agents/use_validate_agent_id', () => ({
-  useValidateAgentId: () => mockValidateAgentId,
-}));
+const mockValidateAgentId = vi.fn();
+vi.mock('./agents/use_validate_agent_id', () => {
+      const mocked = {
+      useValidateAgentId: () => mockValidateAgentId,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const wrapperFor = (spaceId: string) => {
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   LogicMounter,
   mockFlashMessageHelpers,
@@ -28,7 +30,7 @@ describe('addAnalyticsCollectionLogic', () => {
   const { http } = mockHttpValues;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mount();
   });
 
@@ -64,7 +66,7 @@ describe('addAnalyticsCollectionLogic', () => {
   describe('listeners', () => {
     describe('onApiSuccess', () => {
       it('should flash a success toast and navigate to collection view', async () => {
-        jest.useFakeTimers({ legacyFakeTimers: true });
+        vi.useFakeTimers({ legacyFakeTimers: true });
 
         const { navigateToUrl } = mockKibanaValues;
 
@@ -76,10 +78,10 @@ describe('addAnalyticsCollectionLogic', () => {
         } as AnalyticsCollection);
 
         expect(flashSuccessToast).toHaveBeenCalled();
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
         await nextTick();
         expect(navigateToUrl).toHaveBeenCalledWith('/collections/test/overview');
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
     });
 
@@ -131,7 +133,7 @@ describe('addAnalyticsCollectionLogic', () => {
           fetchOptions: {},
           request: {},
         } as HttpError;
-        AddAnalyticsCollectionLogic.actions.setInputError = jest.fn();
+        AddAnalyticsCollectionLogic.actions.setInputError = vi.fn();
         AddAnalyticsCollectionLogic.actions.apiError(httpError);
 
         expect(AddAnalyticsCollectionLogic.actions.setInputError).toHaveBeenCalledWith(
@@ -145,7 +147,7 @@ describe('addAnalyticsCollectionLogic', () => {
         mount({
           name: 'test',
         });
-        AddAnalyticsCollectionLogic.actions.makeRequest = jest.fn();
+        AddAnalyticsCollectionLogic.actions.makeRequest = vi.fn();
         AddAnalyticsCollectionLogic.actions.createAnalyticsCollection();
         expect(AddAnalyticsCollectionLogic.actions.makeRequest).toHaveBeenCalledWith({
           name: 'test',

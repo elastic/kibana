@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import type { CheckLicense } from './wrap_route_with_license_check';
@@ -20,7 +22,7 @@ const request = httpServerMock.createKibanaRequest();
 describe('wrapRouteWithLicenseCheck', () => {
   it('calls route handler if checkLicense returns "valid": true', async () => {
     const checkLicense: CheckLicense = () => ({ valid: true, message: null });
-    const routeHandler = jest.fn();
+    const routeHandler = vi.fn();
     const wrapper = wrapRouteWithLicenseCheck(checkLicense, routeHandler);
     const response = httpServerMock.createResponseFactory();
 
@@ -32,7 +34,7 @@ describe('wrapRouteWithLicenseCheck', () => {
 
   it('does not call route handler if checkLicense returns "valid": false', async () => {
     const checkLicense: CheckLicense = () => ({ valid: false, message: 'reason' });
-    const routeHandler = jest.fn();
+    const routeHandler = vi.fn();
     const wrapper = wrapRouteWithLicenseCheck(checkLicense, routeHandler);
     const response = httpServerMock.createResponseFactory();
 
@@ -60,7 +62,7 @@ describe('wrapRouteWithLicenseCheck', () => {
     const checkLicense: CheckLicense = () => {
       throw new Error('reason');
     };
-    const routeHandler = jest.fn();
+    const routeHandler = vi.fn();
     const wrapper = wrapRouteWithLicenseCheck(checkLicense, routeHandler);
     const response = httpServerMock.createResponseFactory();
 

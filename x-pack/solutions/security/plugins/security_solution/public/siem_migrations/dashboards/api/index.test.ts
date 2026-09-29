@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
@@ -25,8 +28,8 @@ import type { LangSmithOptions } from '../../../../common/siem_migrations/model/
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as api from '.';
 
-jest.mock('../../../common/lib/kibana');
-const mockKibanaServices = KibanaServices.get as jest.Mock;
+vi.mock('../../../common/lib/kibana');
+const mockKibanaServices = KibanaServices.get as Mock;
 
 const migrationId = 'test-migration-id';
 const signal = {} as AbortSignal;
@@ -41,7 +44,7 @@ describe('SIEM Dashboards API', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('createDashboardMigration', () => {

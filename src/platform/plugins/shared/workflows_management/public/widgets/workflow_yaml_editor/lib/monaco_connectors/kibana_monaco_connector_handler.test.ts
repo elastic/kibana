@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { KibanaMonacoConnectorHandler } from './kibana_monaco_connector_handler';
 import {
   createMockHoverContext,
@@ -17,22 +19,28 @@ import {
 import type { ConnectorExamples } from '../monaco_providers/provider_interfaces';
 import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
-jest.mock('../../../../../common/schema', () => ({
-  getAllConnectors: jest.fn(),
-}));
+vi.mock('../../../../../common/schema', () => {
+      const mocked = {
+      getAllConnectors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows', () => ({
-  isInternalConnector: jest.fn().mockReturnValue(true),
-}));
+vi.mock('@kbn/workflows', () => {
+      const mocked = {
+      isInternalConnector: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getAllConnectors } = jest.requireMock('../../../../../common/schema');
-const { isInternalConnector } = jest.requireMock('@kbn/workflows');
+const { getAllConnectors } = (await vi.importMock('../../../../../common/schema'));
+const { isInternalConnector } = (await vi.importMock('@kbn/workflows'));
 
 describe('KibanaMonacoConnectorHandler', () => {
   let handler: KibanaMonacoConnectorHandler;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockStabilityBadgeThemeForTests();
 
     getAllConnectors.mockReturnValue([

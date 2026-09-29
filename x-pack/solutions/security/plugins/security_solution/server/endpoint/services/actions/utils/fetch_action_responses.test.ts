@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { applyActionListEsSearchMock } from '../mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -23,8 +25,8 @@ describe('fetchActionResponses()', () => {
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
     applyActionListEsSearchMock(esClientMock);
-    (endpointServiceMock.isCcsEnabled as jest.Mock).mockResolvedValue(false);
-    (endpointServiceMock.isCpsActive as jest.Mock).mockResolvedValue(false);
+    (endpointServiceMock.isCcsEnabled as Mock).mockResolvedValue(false);
+    (endpointServiceMock.isCpsActive as Mock).mockResolvedValue(false);
   });
 
   it('should return results', async () => {
@@ -140,7 +142,7 @@ describe('fetchActionResponses()', () => {
   });
 
   it('should query CCS-prefixed response indexes when CCS is enabled', async () => {
-    (endpointServiceMock.isCcsEnabled as jest.Mock).mockResolvedValue(true);
+    (endpointServiceMock.isCcsEnabled as Mock).mockResolvedValue(true);
     await fetchActionResponses({ esClient: esClientMock, endpointService: endpointServiceMock });
 
     expect(esClientMock.search).toHaveBeenCalledWith(
@@ -158,11 +160,11 @@ describe('fetchActionResponses()', () => {
   });
 
   it('should not CCS-prefix the endpoint response index once the read fans out', async () => {
-    (endpointServiceMock.isCcsEnabled as jest.Mock).mockResolvedValue(true);
-    (endpointServiceMock.isCpsActive as jest.Mock).mockResolvedValue(true);
+    (endpointServiceMock.isCcsEnabled as Mock).mockResolvedValue(true);
+    (endpointServiceMock.isCpsActive as Mock).mockResolvedValue(true);
     const scopedEsClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     applyActionListEsSearchMock(scopedEsClient);
-    (endpointServiceMock.getReadEsClient as jest.Mock).mockResolvedValue(scopedEsClient);
+    (endpointServiceMock.getReadEsClient as Mock).mockResolvedValue(scopedEsClient);
 
     const scoped = await endpointServiceMock.asScoped(httpServerMock.createKibanaRequest());
     await fetchActionResponses({

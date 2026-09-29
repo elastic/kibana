@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 
 import { useHasWorkflowsPrivileges } from '.';
 import { useKibana } from '../../../../common/lib/kibana';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 interface MockServicesOptions {
   executeWorkflow?: boolean;
@@ -46,18 +49,18 @@ const mockServices = ({
         },
       },
       featureFlags: {
-        useBooleanValue: jest.fn().mockReturnValue(ffValue),
+        useBooleanValue: vi.fn().mockReturnValue(ffValue),
       },
       uiSettings: {
-        get: jest.fn().mockReturnValue(settingValue),
+        get: vi.fn().mockReturnValue(settingValue),
       },
     },
-  } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+  } as unknown as Mocked<ReturnType<typeof useKibana>>);
 };
 
 describe('useHasWorkflowsPrivileges', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when the feature flag is ON but the per-space uiSetting is OFF', () => {

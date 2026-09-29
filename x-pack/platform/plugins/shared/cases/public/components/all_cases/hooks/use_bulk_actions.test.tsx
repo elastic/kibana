@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 import { EuiContextMenu } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
@@ -29,13 +32,13 @@ import { MAX_CASES_PER_WORKFLOW_RUN } from '../../../../common/constants';
 import type { CasesPermissions } from '../../../../common';
 import * as i18n from '../translations';
 
-jest.mock('../../../containers/api');
-jest.mock('../../../containers/user_profiles/api');
+vi.mock('../../../containers/api');
+vi.mock('../../../containers/user_profiles/api');
 
-const mockCanExecuteWorkflow = jest.fn(() => false);
+const mockCanExecuteWorkflow = vi.fn(() => false);
 
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
+vi.mock('@kbn/workflows-ui', async () => {
+  const actual = (await vi.importActual('@kbn/workflows-ui'));
   return {
     ...actual,
     useWorkflowsCapabilities: () => ({
@@ -45,16 +48,19 @@ jest.mock('@kbn/workflows-ui', () => {
   };
 });
 
-jest.mock('../../workflows/run_case_workflow_modal', () => ({
-  RunCaseWorkflowModal: () => <div data-test-subj="cases-run-workflow-modal" />,
-}));
+vi.mock('../../workflows/run_case_workflow_modal', () => {
+      const mocked = {
+      RunCaseWorkflowModal: () => <div data-test-subj="cases-run-workflow-modal" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useBulkActions', () => {
-  const onAction = jest.fn();
-  const onActionSuccess = jest.fn();
+  const onAction = vi.fn();
+  const onActionSuccess = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Panels', () => {
@@ -215,7 +221,7 @@ describe('useBulkActions', () => {
     });
 
     it('change the status of cases', async () => {
-      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+      const updateCasesSpy = vi.spyOn(api, 'updateCases');
 
       const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
@@ -302,7 +308,7 @@ describe('useBulkActions', () => {
     });
 
     it('closes without modal when sync alerts is off', async () => {
-      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+      const updateCasesSpy = vi.spyOn(api, 'updateCases');
 
       const { result } = renderHook(
         () =>
@@ -360,7 +366,7 @@ describe('useBulkActions', () => {
     });
 
     it('change the severity of cases', async () => {
-      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+      const updateCasesSpy = vi.spyOn(api, 'updateCases');
 
       const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
@@ -398,7 +404,7 @@ describe('useBulkActions', () => {
 
     describe('Modals', () => {
       it('delete a case', async () => {
-        const deleteSpy = jest.spyOn(api, 'deleteCases');
+        const deleteSpy = vi.spyOn(api, 'deleteCases');
 
         const { result } = renderHook(
           () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
@@ -487,7 +493,7 @@ describe('useBulkActions', () => {
 
   describe('Flyouts', () => {
     it('change the tags of the case', async () => {
-      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+      const updateCasesSpy = vi.spyOn(api, 'updateCases');
 
       const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
@@ -534,7 +540,7 @@ describe('useBulkActions', () => {
     });
 
     it('change the assignees of the case', async () => {
-      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+      const updateCasesSpy = vi.spyOn(api, 'updateCases');
 
       const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
@@ -718,10 +724,10 @@ describe('useBulkActions', () => {
   });
 
   describe('Run workflow', () => {
-    let getConfigSpy: jest.SpyInstance;
+    let getConfigSpy: MockInstance;
 
     beforeEach(() => {
-      getConfigSpy = jest
+      getConfigSpy = vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ runWorkflows: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig

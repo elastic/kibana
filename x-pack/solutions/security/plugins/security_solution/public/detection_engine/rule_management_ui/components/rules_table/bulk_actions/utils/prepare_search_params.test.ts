@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { DryRunResult } from '../types';
 import type { FilterOptions } from '../../../../../rule_management/logic/types';
 
@@ -13,11 +16,14 @@ import { convertRulesFilterToKQL } from '../../../../../../../common/detection_e
 import { prepareSearchParams } from './prepare_search_params';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
 
-jest.mock('../../../../../../../common/detection_engine/rule_management/rule_filtering', () => ({
-  convertRulesFilterToKQL: jest.fn().mockReturnValue('str'),
-}));
+vi.mock('../../../../../../../common/detection_engine/rule_management/rule_filtering', () => {
+      const mocked = {
+      convertRulesFilterToKQL: vi.fn().mockReturnValue('str'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockConvertRulesFilterToKQL = convertRulesFilterToKQL as jest.Mock;
+const mockConvertRulesFilterToKQL = convertRulesFilterToKQL as Mock;
 
 describe('prepareSearchParams', () => {
   test('should remove ids from selectedRuleIds if dryRunResult has failed ids', () => {

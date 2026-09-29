@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -26,8 +29,8 @@ import { ChangeHistoryTelemetryEventTypes } from '../telemetry/types';
 const testScope = TEST_CHANGE_HISTORY_SCOPE;
 
 const adapter: ChangeHistoryAdapter = {
-  listChanges: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-  getChange: jest.fn(),
+  listChanges: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+  getChange: vi.fn(),
 };
 
 const Harness = ({
@@ -36,7 +39,7 @@ const Harness = ({
   telemetryEnabled = true,
 }: {
   objectId: string;
-  reportEvent?: jest.Mock;
+  reportEvent?: Mock;
   telemetryEnabled?: boolean;
 }) => (
   <TestProvider>
@@ -57,7 +60,7 @@ const Harness = ({
 
 describe('ChangeHistoryProvider', () => {
   it('reports change_history_opened when the modal is opened', () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
     render(<Harness objectId={TEST_OBJECT_ID_A} reportEvent={reportEvent} />);
 
     fireEvent.click(screen.getByTestId('changeHistoryTrigger'));
@@ -70,7 +73,7 @@ describe('ChangeHistoryProvider', () => {
   });
 
   it('does not report change_history_opened when telemetry is disabled', () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
     render(
       <Harness objectId={TEST_OBJECT_ID_A} reportEvent={reportEvent} telemetryEnabled={false} />
     );
@@ -81,7 +84,7 @@ describe('ChangeHistoryProvider', () => {
   });
 
   it('reports change_history_opened only once per open transition', () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
 
     const Probe = () => {
       const { openModal } = useChangeHistoryModal();
@@ -118,7 +121,7 @@ describe('ChangeHistoryProvider', () => {
   });
 
   it('reports change_history_opened on each close then reopen transition', () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
 
     const Probe = () => {
       const { openModal, closeModal } = useChangeHistoryModal();
@@ -170,7 +173,7 @@ describe('ChangeHistoryProvider', () => {
   });
 
   it('exposes a no-op telemetry reporter when analytics is omitted', () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
     const Probe = () => {
       const { telemetry } = useChangeHistoryConfig();
       telemetry.reportOpened();
@@ -195,7 +198,7 @@ describe('ChangeHistoryProvider', () => {
   });
 
   it('exposes a telemetry reporter that respects features.telemetry', () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
 
     const Probe = () => {
       const { telemetry } = useChangeHistoryConfig();
@@ -223,7 +226,7 @@ describe('ChangeHistoryProvider', () => {
   });
 
   it('wires scope and analytics into the config telemetry reporter', () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
 
     const Probe = () => {
       const { telemetry } = useChangeHistoryConfig();

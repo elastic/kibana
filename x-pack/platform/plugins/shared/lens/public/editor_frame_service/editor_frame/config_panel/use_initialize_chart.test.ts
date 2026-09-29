@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import {
   createInitializeChartFunction,
@@ -12,17 +15,17 @@ import {
 import type { TypedLensSerializedState } from '@kbn/lens-common';
 
 describe('createInitializeChartFunction', () => {
-  let mockSetErrors: jest.Mock;
-  let mockSetIsInitialized: jest.Mock;
-  let mockRunQuery: jest.Mock;
+  let mockSetErrors: Mock;
+  let mockSetIsInitialized: Mock;
+  let mockRunQuery: Mock;
   let mockPrevQueryRef: { current: AggregateQuery | Query };
   let defaultArgs: Parameters<typeof createInitializeChartFunction>[0];
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockSetErrors = jest.fn();
-    mockSetIsInitialized = jest.fn();
-    mockRunQuery = jest.fn();
+    vi.clearAllMocks();
+    mockSetErrors = vi.fn();
+    mockSetIsInitialized = vi.fn();
+    mockRunQuery = vi.fn();
     mockPrevQueryRef = { current: { esql: '' } as AggregateQuery };
 
     defaultArgs = {
@@ -99,7 +102,7 @@ describe('createInitializeChartFunction', () => {
 
   it('should set errors and update prevQueryRef if runQuery throws an error', async () => {
     const simulatedError = new Error('Failed to fetch data');
-    (mockRunQuery as jest.Mock).mockRejectedValue(simulatedError);
+    (mockRunQuery as Mock).mockRejectedValue(simulatedError);
 
     const initializeChart = createInitializeChartFunction(defaultArgs);
     await initializeChart(new AbortController());

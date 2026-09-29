@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { GetPolicyResponseSchema } from '../../../../common/api/endpoint';
 import type { GetPolicyResponseByAgentIdOptions } from './service';
 import { getESQueryPolicyResponseByAgentID, getPolicyResponseByAgentId } from './service';
@@ -188,7 +190,7 @@ describe('Policy Response Services', () => {
           new Error('Agent ID(s) not found: [1-2-3]')
         );
         (
-          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as jest.Mock
+          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as Mock
         ).mockResolvedValue([]);
 
         await expect(getPolicyResponseByAgentId(fetchOptions)).resolves.toEqual(
@@ -223,7 +225,7 @@ describe('Policy Response Services', () => {
           new Error('Agent ID(s) not found: [1-2-3]')
         );
         (
-          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as jest.Mock
+          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as Mock
         ).mockResolvedValue([]);
 
         await expect(getPolicyResponseByAgentId(fetchOptions)).resolves.toEqual(
@@ -248,7 +250,7 @@ describe('Policy Response Services', () => {
           new Error('Agent ID(s) not found: [1-2-3]')
         );
         (
-          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as jest.Mock
+          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as Mock
         ).mockResolvedValue([]);
 
         await expect(getPolicyResponseByAgentId(fetchOptions)).rejects.toThrow();
@@ -271,7 +273,7 @@ describe('Policy Response Services', () => {
           new Error('Agent ID(s) not found: [1-2-3]')
         );
         (
-          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as jest.Mock
+          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as Mock
         ).mockResolvedValue([]);
 
         await expect(getPolicyResponseByAgentId(fetchOptions)).rejects.toThrow();
@@ -282,7 +284,7 @@ describe('Policy Response Services', () => {
 
         fleetServicesMock.ensureInCurrentSpace.mockRejectedValue(spaceError);
         (
-          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as jest.Mock
+          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as Mock
         ).mockResolvedValue([]);
 
         await expect(getPolicyResponseByAgentId(fetchOptions)).rejects.toThrow(spaceError);
@@ -294,7 +296,7 @@ describe('Policy Response Services', () => {
         mockPolicyResponseFrom('linked:.ds-metrics-endpoint.policy-default-000001');
         fleetServicesMock.ensureInCurrentSpace.mockRejectedValue(spaceError);
         (
-          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as jest.Mock
+          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as Mock
         ).mockResolvedValue([new FleetAgentGenerator('seed').generate({ id: '1-2-3' })]);
 
         await expect(getPolicyResponseByAgentId(fetchOptions)).rejects.toThrow(spaceError);
@@ -328,7 +330,7 @@ describe('Policy Response Services', () => {
           new Error('Agent ID(s) not found: [1-2-3]')
         );
         (
-          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as jest.Mock
+          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as Mock
         ).mockResolvedValue([]);
 
         // Build a scoped object where getSpace rejects — the space does not exist on this project

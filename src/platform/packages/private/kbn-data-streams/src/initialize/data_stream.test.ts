@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -17,7 +20,7 @@ import type { DataStreamDefinition } from '../types';
 
 describe('initializeDataStream', () => {
   let logger: Logger;
-  let elasticsearchClient: jest.Mocked<ElasticsearchClient>;
+  let elasticsearchClient: Mocked<ElasticsearchClient>;
 
   const testMappings = {
     properties: {
@@ -32,7 +35,7 @@ describe('initializeDataStream', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not update lifecycle when only key ordering differs', async () => {
@@ -53,13 +56,13 @@ describe('initializeDataStream', () => {
       },
     };
 
-    (elasticsearchClient.indices.simulateIndexTemplate as jest.Mock).mockResolvedValue({
+    (elasticsearchClient.indices.simulateIndexTemplate as Mock).mockResolvedValue({
       template: {
         mappings: dataStream.template.mappings,
       },
     });
 
-    (elasticsearchClient.indices.putMapping as jest.Mock).mockResolvedValue({
+    (elasticsearchClient.indices.putMapping as Mock).mockResolvedValue({
       acknowledged: true,
     });
 

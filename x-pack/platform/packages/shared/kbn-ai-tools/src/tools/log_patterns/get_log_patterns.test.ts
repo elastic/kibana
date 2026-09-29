@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import { getSigEventsLogPatternsEsql } from './get_log_patterns';
@@ -12,8 +14,8 @@ import { getSigEventsLogPatternsEsql } from './get_log_patterns';
 const createEsClient = (
   columns: Array<{ name: string; type: string }> = [{ name: 'message', type: 'text' }]
 ) => {
-  const esql = jest.fn();
-  const rawEsqlQuery = jest.fn().mockResolvedValueOnce({ columns, values: [] });
+  const esql = vi.fn();
+  const rawEsqlQuery = vi.fn().mockResolvedValueOnce({ columns, values: [] });
 
   return {
     esClient: {
@@ -46,7 +48,7 @@ const categorizeResponse = (
 
 describe('getSigEventsLogPatternsEsql', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('builds ES|QL count and two-pass categorize queries', async () => {

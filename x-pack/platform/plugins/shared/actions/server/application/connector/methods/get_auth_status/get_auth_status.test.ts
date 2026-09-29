@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { ActionsClient } from '../../../../actions_client';
 import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
@@ -28,52 +31,58 @@ import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
 import { filterInferenceConnectors } from '../get_all';
 
-jest.mock('../get_all', () => {
-  const actual = jest.requireActual('../get_all');
+vi.mock('../get_all', async () => {
+  const actual = (await vi.importActual('../get_all'));
   return {
     ...actual,
-    filterInferenceConnectors: jest.fn(
+    filterInferenceConnectors: vi.fn(
       async (_esClient: unknown, connectors: InMemoryConnector[]) => connectors
     ),
   };
 });
 
-jest.mock('../../../../lib/get_oauth_jwt_access_token', () => ({
-  getOAuthJwtAccessToken: jest.fn(),
-}));
-jest.mock('../../../../lib/get_oauth_client_credentials_access_token', () => ({
-  getOAuthClientCredentialsAccessToken: jest.fn(),
-}));
+vi.mock('../../../../lib/get_oauth_jwt_access_token', () => {
+      const mocked = {
+      getOAuthJwtAccessToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../lib/get_oauth_client_credentials_access_token', () => {
+      const mocked = {
+      getOAuthClientCredentialsAccessToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const kibanaIndices = ['.kibana'];
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
-const bulkExecutionEnqueuer = jest.fn();
+const bulkExecutionEnqueuer = vi.fn();
 const request = httpServerMock.createKibanaRequest();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const eventLogClient = eventLogClientMock.create();
-const getEventLogClient = jest.fn();
+const getEventLogClient = vi.fn();
 const connectorTokenClient = connectorTokenClientMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
-const getAxiosInstanceWithAuth = jest.fn();
+const getAxiosInstanceWithAuth = vi.fn();
 const isESOCanEncrypt = true;
 
 let actionsClient: ActionsClient;
-const actionTypeRegistry: ActionTypeRegistry = jest.fn() as unknown as ActionTypeRegistry;
+const actionTypeRegistry: ActionTypeRegistry = vi.fn() as unknown as ActionTypeRegistry;
 const authTypeRegistry: AuthTypeRegistry =
   authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
 
 describe('getAuthStatus()', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest
+    vi.resetAllMocks();
+    vi
       .mocked(filterInferenceConnectors)
       .mockImplementation(async (_esClient, connectors) => connectors);
-    actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
+    actionTypeRegistry.isDeprecated = vi.fn().mockReturnValue(false);
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -93,8 +102,8 @@ describe('getAuthStatus()', () => {
       isESOCanEncrypt,
       getAxiosInstanceWithAuth,
     });
-    (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
-    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
+    (getOAuthJwtAccessToken as Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
+    (getOAuthClientCredentialsAccessToken as Mock).mockResolvedValue(
       `Bearer clienttokentokentoken`
     );
     getEventLogClient.mockResolvedValue(eventLogClient);
@@ -313,7 +322,7 @@ describe('getAuthStatus()', () => {
       authMode: 'per-user',
     });
 
-    jest
+    vi
       .mocked(filterInferenceConnectors)
       .mockImplementationOnce(async (_esClient, connectors) =>
         connectors.filter((c) => c.id === 'in-memory-kept')

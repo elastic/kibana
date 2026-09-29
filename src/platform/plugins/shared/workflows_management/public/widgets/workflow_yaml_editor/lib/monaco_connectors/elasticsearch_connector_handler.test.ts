@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ElasticsearchMonacoConnectorHandler } from './elasticsearch_connector_handler';
 import {
   createMockHoverContext,
@@ -16,27 +18,33 @@ import {
 } from './test_utils/mock_factories';
 import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
-jest.mock('../../../../../common/schema', () => ({
-  getAllConnectors: jest.fn(),
-}));
+vi.mock('../../../../../common/schema', () => {
+      const mocked = {
+      getAllConnectors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows', () => ({
-  buildElasticsearchRequest: jest.fn().mockReturnValue({
-    method: 'GET',
-    path: '/my-index/_search',
-    body: undefined,
-  }),
-  isInternalConnector: jest.fn().mockReturnValue(true),
-}));
+vi.mock('@kbn/workflows', () => {
+      const mocked = {
+      buildElasticsearchRequest: vi.fn().mockReturnValue({
+        method: 'GET',
+        path: '/my-index/_search',
+        body: undefined,
+      }),
+      isInternalConnector: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getAllConnectors } = jest.requireMock('../../../../../common/schema');
-const { buildElasticsearchRequest, isInternalConnector } = jest.requireMock('@kbn/workflows');
+const { getAllConnectors } = (await vi.importMock('../../../../../common/schema'));
+const { buildElasticsearchRequest, isInternalConnector } = (await vi.importMock('@kbn/workflows'));
 
 describe('ElasticsearchMonacoConnectorHandler', () => {
   let handler: ElasticsearchMonacoConnectorHandler;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockStabilityBadgeThemeForTests();
     handler = new ElasticsearchMonacoConnectorHandler();
 

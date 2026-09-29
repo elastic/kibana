@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Peggy from '@kbn/peggy';
 
 import type { Cache } from '../cache/types';
@@ -14,24 +16,27 @@ import { dotTextTransform } from './dot_text';
 import { peggyTransform } from './peggy';
 import { yamlTransform } from './yaml';
 
-jest.mock('@kbn/peggy', () => ({
-  findConfigFile: jest.fn(() => '/repo/peggy.config.js'),
-  getJsSourceSync: jest.fn(() => ({ source: 'compiled peggy' })),
-}));
+vi.mock('@kbn/peggy', () => {
+      const mocked = {
+      findConfigFile: vi.fn(() => '/repo/peggy.config.js'),
+      getJsSourceSync: vi.fn(() => ({ source: 'compiled peggy' })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeCache = (code: string | undefined = undefined) => {
   const cache: Cache = {
-    getKey: jest.fn(() => 'cache-key'),
-    getCode: jest.fn(() => code),
-    getSourceMap: jest.fn(),
-    update: jest.fn(async () => undefined),
+    getKey: vi.fn(() => 'cache-key'),
+    getCode: vi.fn(() => code),
+    getSourceMap: vi.fn(),
+    update: vi.fn(async () => undefined),
   };
 
   return cache;
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 it('caches dot-text transforms', () => {

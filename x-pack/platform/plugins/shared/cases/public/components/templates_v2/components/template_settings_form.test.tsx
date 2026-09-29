@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,8 +15,8 @@ import { TemplateSettingsForm } from './template_settings_form';
 // Counts mounts of the (stubbed) connector form so tests can assert the parent remounts it via
 // `key` on reset (and does NOT remount it on ordinary edits, which would drop focus).
 const mockConnectorFormMounts = { count: 0 };
-jest.mock('./template_connector_form', () => {
-  const ReactActual = jest.requireActual('react');
+vi.mock('./template_connector_form', () => {
+  const ReactActual = require('react');
   return {
     TemplateConnectorForm: () => {
       ReactActual.useEffect(() => {
@@ -25,23 +27,26 @@ jest.mock('./template_connector_form', () => {
   };
 });
 
-const mockUseCasesFeatures = jest.fn(() => ({
+const mockUseCasesFeatures = vi.fn(() => ({
   isSyncAlertsEnabled: true,
   observablesAuthorized: true,
   isExtractObservablesEnabled: true,
 }));
-jest.mock('../../../common/use_cases_features', () => ({
-  useCasesFeatures: () => mockUseCasesFeatures(),
-}));
+vi.mock('../../../common/use_cases_features', () => {
+      const mocked = {
+      useCasesFeatures: () => mockUseCasesFeatures(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TemplateSettingsForm', () => {
   const base = {
-    onSettingsChange: jest.fn(),
-    onConnectorChange: jest.fn(),
+    onSettingsChange: vi.fn(),
+    onConnectorChange: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockConnectorFormMounts.count = 0;
     mockUseCasesFeatures.mockReturnValue({
       isSyncAlertsEnabled: true,
@@ -69,7 +74,7 @@ describe('TemplateSettingsForm', () => {
 
   it('calls onSettingsChange when toggling sync alerts', async () => {
     const user = userEvent.setup();
-    const onSettingsChange = jest.fn();
+    const onSettingsChange = vi.fn();
     render(
       <TemplateSettingsForm
         {...base}
@@ -88,7 +93,7 @@ describe('TemplateSettingsForm', () => {
 
   it('preserves other settings when toggling one', async () => {
     const user = userEvent.setup();
-    const onSettingsChange = jest.fn();
+    const onSettingsChange = vi.fn();
     render(
       <TemplateSettingsForm
         {...base}

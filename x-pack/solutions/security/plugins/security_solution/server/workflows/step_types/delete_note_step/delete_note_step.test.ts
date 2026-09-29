@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -13,16 +16,16 @@ import { NOTE_URL } from '../../../../common/constants';
 import type { deleteNoteInputSchema } from '../../../../common/workflows/step_types/delete_note_step/delete_note_step_common';
 
 describe('deleteNoteStepDefinition', () => {
-  let mockContextManager: jest.Mocked<
+  let mockContextManager: Mocked<
     StepHandlerContext<typeof deleteNoteInputSchema>['contextManager']
   >;
   let mockContext: StepHandlerContext<typeof deleteNoteInputSchema>;
 
   beforeEach(() => {
     mockContextManager = {
-      callKibanaApi: jest.fn(),
-      getFakeRequest: jest.fn(),
-    } as unknown as jest.Mocked<StepHandlerContext<typeof deleteNoteInputSchema>['contextManager']>;
+      callKibanaApi: vi.fn(),
+      getFakeRequest: vi.fn(),
+    } as unknown as Mocked<StepHandlerContext<typeof deleteNoteInputSchema>['contextManager']>;
 
     mockContext = {
       input: {

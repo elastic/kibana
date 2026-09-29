@@ -5,22 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '../../../utils/testing';
 import { StepMetrics } from './step_metrics';
 import { useStepMetrics } from '../hooks/use_step_metrics';
 import { useStepPrevMetrics } from '../hooks/use_step_prev_metrics';
 
-jest.mock('../hooks/use_step_metrics', () => ({
-  useStepMetrics: jest.fn(),
-}));
+vi.mock('../hooks/use_step_metrics', () => {
+      const mocked = {
+      useStepMetrics: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_step_prev_metrics', () => ({
-  useStepPrevMetrics: jest.fn(),
-}));
+vi.mock('../hooks/use_step_prev_metrics', () => {
+      const mocked = {
+      useStepPrevMetrics: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseStepMetrics = useStepMetrics as jest.MockedFunction<typeof useStepMetrics>;
-const mockUseStepPrevMetrics = useStepPrevMetrics as jest.MockedFunction<typeof useStepPrevMetrics>;
+const mockUseStepMetrics = useStepMetrics as MockedFunction<typeof useStepMetrics>;
+const mockUseStepPrevMetrics = useStepPrevMetrics as MockedFunction<typeof useStepPrevMetrics>;
 
 describe('StepMetrics', () => {
   beforeEach(() => {
@@ -50,7 +59,7 @@ describe('StepMetrics', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders transfer size, FCP, and LCP stats', () => {

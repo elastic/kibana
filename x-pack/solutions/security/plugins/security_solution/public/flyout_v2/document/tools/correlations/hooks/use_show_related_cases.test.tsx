@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useKibana as mockUseKibana } from '../../../../../common/lib/kibana/__mocks__';
@@ -12,10 +14,10 @@ import { useShowRelatedCases } from './use_show_related_cases';
 import type { DataTableRecord } from '@kbn/discover-utils';
 
 const mockedUseKibana = mockUseKibana();
-const mockCanUseCases = jest.fn();
+const mockCanUseCases = vi.fn();
 
-jest.mock('../../../../../common/lib/kibana/kibana_react', () => {
-  const original = jest.requireActual('../../../../../common/lib/kibana/kibana_react');
+vi.mock('../../../../../common/lib/kibana/kibana_react', async () => {
+  const original = (await vi.importActual('../../../../../common/lib/kibana/kibana_react'));
 
   return {
     ...original,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -18,15 +21,15 @@ import { TestProviders } from '../../../../common/mock';
 import { useSummaryChartData } from '../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
 import { parsedAlerts } from '../../alerts_kpis/alerts_progress_bar_panel/mock_data';
 
-jest.mock('../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data');
+vi.mock('../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data');
 
 describe('<AlertsProgressBarByHostNamePanel />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render all components', () => {
-    (useSummaryChartData as jest.Mock).mockReturnValue({
+    (useSummaryChartData as Mock).mockReturnValue({
       items: parsedAlerts,
       isLoading: false,
     });
@@ -57,7 +60,7 @@ describe('<AlertsProgressBarByHostNamePanel />', () => {
   });
 
   it('should render loading', () => {
-    (useSummaryChartData as jest.Mock).mockReturnValue({
+    (useSummaryChartData as Mock).mockReturnValue({
       items: [],
       isLoading: true,
     });
@@ -72,7 +75,7 @@ describe('<AlertsProgressBarByHostNamePanel />', () => {
   });
 
   it('should render no data', () => {
-    (useSummaryChartData as jest.Mock).mockReturnValue({
+    (useSummaryChartData as Mock).mockReturnValue({
       items: [],
       isLoading: false,
     });

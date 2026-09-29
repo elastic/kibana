@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { createFleetTestRendererMock } from '../../../../../../../mock';
@@ -16,7 +18,7 @@ describe('ChangeAgentPrivilegeLevelFlyout', () => {
   let component: ReturnType<typeof renderer.render>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the alert panel when there are unsupported agents', () => {
@@ -47,8 +49,8 @@ describe('ChangeAgentPrivilegeLevelFlyout', () => {
             enrolled_at: new Date().toISOString(),
           },
         ]}
-        onClose={jest.fn()}
-        onSave={jest.fn()}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
       />
     );
 
@@ -76,8 +78,8 @@ describe('ChangeAgentPrivilegeLevelFlyout', () => {
         ]}
         agentCount={1}
         unsupportedAgents={[]}
-        onClose={jest.fn()}
-        onSave={jest.fn()}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
       />
     );
 

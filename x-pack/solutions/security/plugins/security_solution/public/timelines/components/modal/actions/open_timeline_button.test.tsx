@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { OpenTimelineButton } from './open_timeline_button';
@@ -14,29 +17,29 @@ import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useTimelineStatus } from '../../open_timeline/use_timeline_status';
 
-jest.mock('../../../../common/lib/apm/use_start_transaction');
-jest.mock('../../open_timeline/use_timeline_status');
-jest.mock('react-redux-v7', () => {
-  const origin = jest.requireActual('react-redux-v7');
-  const mockDispatch = jest.fn();
+vi.mock('../../../../common/lib/apm/use_start_transaction');
+vi.mock('../../open_timeline/use_timeline_status');
+vi.mock('react-redux-v7', () => {
+  const origin = require('react-redux-v7');
+  const mockDispatch = vi.fn();
   return {
     ...origin,
-    useDispatch: jest.fn(() => mockDispatch),
+    useDispatch: vi.fn(() => mockDispatch),
   };
 });
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
   return {
     ...actual,
-    useParams: jest.fn(),
+    useParams: vi.fn(),
   };
 });
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...actual,
     useNavigation: () => ({
-      navigateTo: jest.fn(),
+      navigateTo: vi.fn(),
     }),
   };
 });
@@ -59,12 +62,12 @@ describe('OpenTimelineButton', () => {
   });
 
   it('should open the modal after clicking on the button', async () => {
-    (useParams as jest.Mock).mockReturnValue({ tabName: TimelineTypeEnum.template });
-    (useStartTransaction as jest.Mock).mockReturnValue({ startTransaction: jest.fn() });
-    (useTimelineStatus as jest.Mock).mockReturnValue({
+    (useParams as Mock).mockReturnValue({ tabName: TimelineTypeEnum.template });
+    (useStartTransaction as Mock).mockReturnValue({ startTransaction: vi.fn() });
+    (useTimelineStatus as Mock).mockReturnValue({
       timelineStatus: 'active',
       templateTimelineFilter: null,
-      installPrepackagedTimelines: jest.fn(),
+      installPrepackagedTimelines: vi.fn(),
     });
 
     const { getByTestId } = renderOpenTimelineButton();

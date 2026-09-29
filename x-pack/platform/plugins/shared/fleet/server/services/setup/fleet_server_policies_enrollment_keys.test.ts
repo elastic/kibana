@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -17,15 +19,15 @@ import { scheduleDeployAgentPoliciesTask } from '../agent_policies/deploy_agent_
 
 import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './fleet_server_policies_enrollment_keys';
 
-jest.mock('../app_context');
-jest.mock('../agent_policy');
-jest.mock('../api_keys');
-jest.mock('../agent_policies/deploy_agent_policies_task');
+vi.mock('../app_context');
+vi.mock('../agent_policy');
+vi.mock('../api_keys');
+vi.mock('../agent_policies/deploy_agent_policies_task');
 
-const mockedGenerateEnrollmentAPIKey = jest.mocked(generateEnrollmentAPIKey);
+const mockedGenerateEnrollmentAPIKey = vi.mocked(generateEnrollmentAPIKey);
 
-const mockedAgentPolicyService = jest.mocked(agentPolicyService);
-const mockedAppContextService = jest.mocked(appContextService);
+const mockedAgentPolicyService = vi.mocked(agentPolicyService);
+const mockedAppContextService = vi.mocked(appContextService);
 
 // Provide the data setup reads: the latest deployed revision per policy (via
 // `agentPolicyService.getLatestFleetPolicyRevisions`) and the policies that already have an
@@ -66,7 +68,7 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     mockedAgentPolicyService.getLatestFleetPolicyRevisions.mockResolvedValue(new Map());
     mockedAgentPolicyService.deployPolicies.mockReset();
     mockedAgentPolicyService.deployPolicies.mockImplementation(async () => {});
-    jest.mocked(scheduleDeployAgentPoliciesTask).mockReset();
+    vi.mocked(scheduleDeployAgentPoliciesTask).mockReset();
     mockedAgentPolicyService.list.mockResolvedValue({
       items: [
         {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import {
   savedObjectsClientMock,
   elasticsearchServiceMock,
@@ -17,9 +20,12 @@ import { cloudConnectorService } from '../cloud_connector';
 
 import { createAndIntegrateCloudConnector } from './agentless_policy_integration';
 
-jest.mock('../secrets/cloud_connector', () => ({
-  extractAndCreateCloudConnectorSecrets: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../secrets/cloud_connector', () => {
+      const mocked = {
+      extractAndCreateCloudConnectorSecrets: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('createAndIntegrateCloudConnector — policy group enforcement on reuse', () => {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -55,11 +61,11 @@ describe('createAndIntegrateCloudConnector — policy group enforcement on reuse
     } as any);
   };
 
-  let getByIdSpy: jest.SpyInstance;
+  let getByIdSpy: MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    getByIdSpy = jest.spyOn(cloudConnectorService, 'getById').mockResolvedValue({
+    vi.clearAllMocks();
+    getByIdSpy = vi.spyOn(cloudConnectorService, 'getById').mockResolvedValue({
       id: 'connector-1',
       name: 'AWS Production',
       cloudProvider: 'aws',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { stringify } from 'yaml';
@@ -25,34 +27,37 @@ const StatefulYamlRuleForm = ({
 };
 
 // Mock the yaml-rule-editor to avoid monaco editor setup
-jest.mock('@kbn/yaml-rule-editor', () => ({
-  YamlRuleEditor: ({
-    value,
-    onChange,
-    onBlur,
-    isReadOnly,
-    dataTestSubj,
-  }: {
-    value: string;
-    onChange: (value: string) => void;
-    onBlur?: () => void;
-    isReadOnly?: boolean;
-    dataTestSubj?: string;
-  }) => (
-    <textarea
-      data-test-subj={dataTestSubj}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      onBlur={onBlur}
-      disabled={isReadOnly}
-      aria-label="YAML Editor"
-    />
-  ),
-}));
+vi.mock('@kbn/yaml-rule-editor', () => {
+      const mocked = {
+      YamlRuleEditor: ({
+        value,
+        onChange,
+        onBlur,
+        isReadOnly,
+        dataTestSubj,
+      }: {
+        value: string;
+        onChange: (value: string) => void;
+        onBlur?: () => void;
+        isReadOnly?: boolean;
+        dataTestSubj?: string;
+      }) => (
+        <textarea
+          data-test-subj={dataTestSubj}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
+          disabled={isReadOnly}
+          aria-label="YAML Editor"
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock EUI components that cause act() warnings due to internal state management
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     // Simple passthrough for EuiFormRow - removes internal state management
@@ -107,11 +112,11 @@ describe('YamlRuleForm component', () => {
 
   const defaultProps = {
     services: mockServices,
-    onSubmit: jest.fn(),
+    onSubmit: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the YAML editor with the provided yamlText prop', () => {
@@ -150,7 +155,7 @@ describe('YamlRuleForm component', () => {
   });
 
   it('calls onSubmit with parsed values on valid submission', async () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
 
     render(<StatefulYamlRuleForm {...defaultProps} onSubmit={onSubmit} />, {
       wrapper: createFormWrapper(),
@@ -186,7 +191,7 @@ describe('YamlRuleForm component', () => {
   });
 
   it('displays error callout for invalid YAML', async () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
 
     render(<StatefulYamlRuleForm {...defaultProps} onSubmit={onSubmit} />, {
       wrapper: createFormWrapper(),

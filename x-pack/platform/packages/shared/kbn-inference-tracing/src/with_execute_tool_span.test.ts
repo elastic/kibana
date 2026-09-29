@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Span } from '@opentelemetry/api';
 import { SpanStatusCode } from '@opentelemetry/api';
 import { GenAISemanticConventions } from './types';
@@ -15,33 +18,36 @@ import {
 } from './with_execute_tool_span';
 
 const mockSpan: Span = {
-  setAttribute: jest.fn().mockReturnThis(),
-  setStatus: jest.fn().mockReturnThis(),
-  end: jest.fn(),
-  isRecording: jest.fn().mockReturnValue(true),
-  recordException: jest.fn(),
-  setAttributes: jest.fn().mockReturnThis(),
-  addEvent: jest.fn().mockReturnThis(),
-  addLink: jest.fn().mockReturnThis(),
-  addLinks: jest.fn().mockReturnThis(),
-  updateName: jest.fn().mockReturnThis(),
-  spanContext: jest.fn().mockReturnValue({
+  setAttribute: vi.fn().mockReturnThis(),
+  setStatus: vi.fn().mockReturnThis(),
+  end: vi.fn(),
+  isRecording: vi.fn().mockReturnValue(true),
+  recordException: vi.fn(),
+  setAttributes: vi.fn().mockReturnThis(),
+  addEvent: vi.fn().mockReturnThis(),
+  addLink: vi.fn().mockReturnThis(),
+  addLinks: vi.fn().mockReturnThis(),
+  updateName: vi.fn().mockReturnThis(),
+  spanContext: vi.fn().mockReturnValue({
     traceId: '0'.repeat(32),
     spanId: '0'.repeat(16),
     traceFlags: 0,
   }),
 };
 
-jest.mock('./with_active_inference_span', () => ({
-  withActiveInferenceSpan: jest.fn((_name: string, _opts: unknown, cb: (span: Span) => unknown) =>
-    cb(mockSpan)
-  ),
-}));
+vi.mock('./with_active_inference_span', () => {
+      const mocked = {
+      withActiveInferenceSpan: vi.fn((_name: string, _opts: unknown, cb: (span: Span) => unknown) =>
+        cb(mockSpan)
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('withExecuteToolSpan', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (mockSpan.isRecording as jest.Mock).mockReturnValue(true);
+    vi.clearAllMocks();
+    (mockSpan.isRecording as Mock).mockReturnValue(true);
   });
 
   it('sets gen_ai.tool.call.result on async success', async () => {
@@ -107,8 +113,8 @@ describe('withExecuteToolSpan', () => {
 
 describe('markToolSpanAsError', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (mockSpan.isRecording as jest.Mock).mockReturnValue(true);
+    vi.clearAllMocks();
+    (mockSpan.isRecording as Mock).mockReturnValue(true);
   });
 
   it('sets error.type, ERROR status, and ends the span without result', () => {
@@ -173,14 +179,14 @@ describe('markToolSpanAsError', () => {
 
     expect(mockSpan.setAttribute).toHaveBeenCalledWith('error.type', TOOL_ERROR_TYPE);
     expect(mockSpan.end).toHaveBeenCalled();
-    const resultCalls = (mockSpan.setAttribute as jest.Mock).mock.calls.filter(
+    const resultCalls = (mockSpan.setAttribute as Mock).mock.calls.filter(
       (call) => call[0] === GenAISemanticConventions.GenAIToolCallResult
     );
     expect(resultCalls).toHaveLength(0);
   });
 
   it('no-ops when the span is not recording', () => {
-    (mockSpan.isRecording as jest.Mock).mockReturnValue(false);
+    (mockSpan.isRecording as Mock).mockReturnValue(false);
 
     markToolSpanAsError(mockSpan, { error: new Error('boom') });
 

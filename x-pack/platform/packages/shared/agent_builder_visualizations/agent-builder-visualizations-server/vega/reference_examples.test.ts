@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import {
@@ -23,14 +26,14 @@ import {
  */
 const mockModel = (
   result: { exampleIds?: string[] } | (() => never)
-): { model: ScopedModel; invoke: jest.Mock; withStructuredOutput: jest.Mock } => {
-  const invoke = jest.fn(async () => {
+): { model: ScopedModel; invoke: Mock; withStructuredOutput: Mock } => {
+  const invoke = vi.fn(async () => {
     if (typeof result === 'function') {
       return result();
     }
     return result;
   });
-  const withStructuredOutput = jest.fn(() => ({ invoke }));
+  const withStructuredOutput = vi.fn(() => ({ invoke }));
   return {
     model: { chatModel: { withStructuredOutput } } as unknown as ScopedModel,
     invoke,
@@ -38,7 +41,7 @@ const mockModel = (
   };
 };
 
-const mockLogger = (): Logger => ({ warn: jest.fn() } as unknown as Logger);
+const mockLogger = (): Logger => ({ warn: vi.fn() } as unknown as Logger);
 
 const fixedColorPaths = (node: unknown, path = '$'): string[] => {
   if (Array.isArray(node)) {

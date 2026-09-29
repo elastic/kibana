@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { KbnClient } from '@kbn/test';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
@@ -14,22 +17,22 @@ import * as spaces from '../../common/spaces';
 import { CONNECTOR_ID as CROWDSTRIKE_CONNECTOR_ID } from '@kbn/connector-schemas/crowdstrike/constants';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
-jest.mock('../../common/connectors_services');
-jest.mock('../../common/spaces');
+vi.mock('../../common/connectors_services');
+vi.mock('../../common/spaces');
 
-const mockedConnectorsServices = connectorsServices as jest.Mocked<typeof connectorsServices>;
-const mockedSpaces = spaces as jest.Mocked<typeof spaces>;
+const mockedConnectorsServices = connectorsServices as Mocked<typeof connectorsServices>;
+const mockedSpaces = spaces as Mocked<typeof spaces>;
 
 describe('createCrowdStrikeConnectorIfNeeded', () => {
-  let mockKbnClient: jest.Mocked<KbnClient>;
+  let mockKbnClient: Mocked<KbnClient>;
   let mockLog: ReturnType<typeof createToolingLogger>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockKbnClient = {
-      request: jest.fn(),
-    } as unknown as jest.Mocked<KbnClient>;
+      request: vi.fn(),
+    } as unknown as Mocked<KbnClient>;
 
     mockLog = createToolingLogger();
 

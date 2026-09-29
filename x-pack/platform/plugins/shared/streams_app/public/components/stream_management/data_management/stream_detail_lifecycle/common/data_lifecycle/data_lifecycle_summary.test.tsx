@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiBadge } from '@elastic/eui';
@@ -364,8 +366,8 @@ describe('DataLifecycleSummary', () => {
         <DataLifecycleSummary
           {...defaultProps}
           model={{ phases }}
-          phaseActions={{ onRemovePhase: jest.fn() }}
-          downsamplingActions={{ onRemoveDownsampleStep: jest.fn() }}
+          phaseActions={{ onRemovePhase: vi.fn() }}
+          downsamplingActions={{ onRemoveDownsampleStep: vi.fn() }}
         />
       );
 
@@ -382,7 +384,7 @@ describe('DataLifecycleSummary', () => {
 
   describe('Edit flyout open behavior', () => {
     it('should navigate to phase when edit flyout is open (no popover)', () => {
-      const onEditPhase = jest.fn();
+      const onEditPhase = vi.fn();
       const phases: LifecyclePhase[] = [
         { grow: 5, name: 'hot', label: 'hot', color: '#FF0000', min_age: '0d' },
         { grow: 3, name: 'warm', label: 'warm', color: '#FFA500', min_age: '30d' },
@@ -404,7 +406,7 @@ describe('DataLifecycleSummary', () => {
     });
 
     it('should navigate to downsampling step when edit flyout is open (no popover)', () => {
-      const onEditDownsampleStep = jest.fn();
+      const onEditDownsampleStep = vi.fn();
       const phases: LifecyclePhase[] = [
         {
           color: '#FF0000',

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import type { EuiTableFieldDataColumnType, EuiThemeComputed } from '@elastic/eui';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
@@ -21,15 +23,15 @@ describe('buildWatchlistsManagementTableColumns', () => {
   const getColumns = () =>
     buildWatchlistsManagementTableColumns(
       euiTheme,
-      jest.fn(), // onEdit
-      jest.fn() // onDelete
+      vi.fn(), // onEdit
+      vi.fn() // onDelete
     );
 
   const getReadOnlyColumns = () =>
     buildWatchlistsManagementTableColumns(
       euiTheme,
-      jest.fn(), // onEdit
-      jest.fn(), // onDelete
+      vi.fn(), // onEdit
+      vi.fn(), // onDelete
       false
     );
 

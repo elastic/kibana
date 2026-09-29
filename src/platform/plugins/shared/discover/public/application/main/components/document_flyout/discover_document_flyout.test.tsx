@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { type ForwardedRef } from 'react';
 import { from, throwError } from 'rxjs';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
@@ -35,14 +37,14 @@ import {
   type ExpandedDocRef,
 } from '../../utils/expanded_doc';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  const react = jest.requireActual('react');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
+  const react = require('react');
   const OriginalFlyout = actual.EuiFlyout;
 
   return {
     ...actual,
-    copyToClipboard: jest.fn(),
+    copyToClipboard: vi.fn(),
     EuiFlyout: react.forwardRef((props: EuiFlyoutProps, ref: ForwardedRef<HTMLDivElement>) => {
       const { flyoutMenuProps, children, ...rest } = props;
 
@@ -56,10 +58,13 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/react-kibana-mount', () => ({
-  ...jest.requireActual('@kbn/react-kibana-mount'),
-  toMountPoint: jest.fn((node) => node),
-}));
+vi.mock('@kbn/react-kibana-mount', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/react-kibana-mount')),
+      toMountPoint: vi.fn((node) => node),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const [inResultsHit, outOfResultsHit] = esHitsMock;
 const expandedDocRef: ExpandedDocRef = {
@@ -93,7 +98,7 @@ const setup = async ({
   setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
   if (searchResult) {
-    jest
+    vi
       .mocked(services.data.search.search)
       .mockImplementation(() =>
         searchResult instanceof Error ? throwError(() => searchResult) : from(searchResult)
@@ -148,9 +153,9 @@ const setup = async ({
       <DiscoverDocumentFlyout
         dataView={dataViewMock}
         columns={['bytes']}
-        onAddColumn={jest.fn()}
-        onRemoveColumn={jest.fn()}
-        onAddFilter={jest.fn()}
+        onAddColumn={vi.fn()}
+        onRemoveColumn={vi.fn()}
+        onAddFilter={vi.fn()}
       />
     </DiscoverToolkitTestProvider>
   );
@@ -169,13 +174,13 @@ describe('DiscoverDocumentFlyout', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('copies a document link from the flyout menu and ignores duplicate clicks', async () => {
     const { services, toolkit } = await setup({ hits: esHitsMock });
     // Freeze the seeded results so the unawaited main fetch can't remount the menu mid-click.
-    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
+    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = vi.fn();
 
     const shareButton = await screen.findByRole('button', {
       name: 'Copy link',
@@ -207,8 +212,8 @@ describe('DiscoverDocumentFlyout', () => {
     const shortUrlClient = share.url.shortUrls.get(null);
     const shortUrlLocator = sharePluginMock.createLocator<{ slug: string }>();
     shortUrlLocator.getUrl.mockResolvedValue('https://example.com/s/short-link');
-    jest.spyOn(share.url.shortUrls, 'get').mockReturnValue(shortUrlClient);
-    jest.spyOn(shortUrlClient, 'createWithLocator').mockResolvedValue({
+    vi.spyOn(share.url.shortUrls, 'get').mockReturnValue(shortUrlClient);
+    vi.spyOn(shortUrlClient, 'createWithLocator').mockResolvedValue({
       data: {
         id: 'short-url-id',
         slug: 'short-link',
@@ -239,8 +244,8 @@ describe('DiscoverDocumentFlyout', () => {
     const services = createDiscoverServicesMock();
     const share = sharePluginMock.createStartContract();
     const shortUrlClient = share.url.shortUrls.get(null);
-    jest.spyOn(share.url.shortUrls, 'get').mockReturnValue(shortUrlClient);
-    jest.spyOn(shortUrlClient, 'createWithLocator').mockRejectedValue(new Error('Request failed'));
+    vi.spyOn(share.url.shortUrls, 'get').mockReturnValue(shortUrlClient);
+    vi.spyOn(shortUrlClient, 'createWithLocator').mockRejectedValue(new Error('Request failed'));
     services.share = share;
     services.capabilities.discover_v2.createShortUrl = true;
 
@@ -288,7 +293,7 @@ describe('DiscoverDocumentFlyout', () => {
       const services = createDiscoverServicesMock();
       let toastText: React.ReactNode = null;
 
-      jest.mocked(services.toastNotifications.addWarning).mockImplementation((toast) => {
+      vi.mocked(services.toastNotifications.addWarning).mockImplementation((toast) => {
         if (typeof toast === 'string') {
           toastText = toast;
         } else if (typeof toast.text === 'string' || React.isValidElement(toast.text)) {
@@ -360,7 +365,7 @@ describe('DiscoverDocumentFlyout', () => {
       expect(toolkit.getCurrentTab().expandedDoc?.raw._routing).toBe(routing);
     });
 
-    const searchRequest = jest.mocked(services.data.search.search).mock.calls[0][0];
+    const searchRequest = vi.mocked(services.data.search.search).mock.calls[0][0];
     expect(searchRequest.params.routing).toBe(routing);
   });
 
@@ -370,7 +375,7 @@ describe('DiscoverDocumentFlyout', () => {
       hits: esHitsMock,
     });
     // Freeze the seeded results so the unawaited main fetch can't replace them mid-assertion.
-    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
+    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = vi.fn();
 
     await waitFor(() => {
       expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(outOfResultsHit._id);
@@ -392,7 +397,7 @@ describe('DiscoverDocumentFlyout', () => {
     const services = createDiscoverServicesMock();
     let resolveSearch: (response: IKibanaSearchResponse) => void = () => {};
 
-    jest
+    vi
       .mocked(services.data.search.search)
       .mockImplementation(() =>
         from(new Promise<IKibanaSearchResponse>((resolve) => (resolveSearch = resolve)))
@@ -412,7 +417,7 @@ describe('DiscoverDocumentFlyout', () => {
     const emitDocuments = documents$.next.bind(documents$);
     // Freeze before seeding: the main fetch uses searchSource.fetch$ (not the hanging search mock),
     // and useDataState ignores later COMPLETE payloads once fetchStatus is already COMPLETE.
-    documents$.next = jest.fn();
+    documents$.next = vi.fn();
 
     toolkit.internalState.dispatch(
       internalStateActions.updateAppState({
@@ -431,9 +436,9 @@ describe('DiscoverDocumentFlyout', () => {
         <DiscoverDocumentFlyout
           dataView={dataViewMock}
           columns={['bytes']}
-          onAddColumn={jest.fn()}
-          onRemoveColumn={jest.fn()}
-          onAddFilter={jest.fn()}
+          onAddColumn={vi.fn()}
+          onRemoveColumn={vi.fn()}
+          onAddFilter={vi.fn()}
         />
       </DiscoverToolkitTestProvider>
     );
@@ -471,7 +476,7 @@ describe('DiscoverDocumentFlyout', () => {
     const { toolkit } = await setup({ hits: esHitsMock });
     const tabId = toolkit.getCurrentTab().id;
     // Freeze the seeded results so the unawaited main fetch can't replace them mid-assertion.
-    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
+    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = vi.fn();
 
     await waitFor(() => {
       expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(outOfResultsHit._id);
@@ -584,7 +589,7 @@ describe('DiscoverDocumentFlyout', () => {
 
   it('clears the current document when the reference changes to a missing document', async () => {
     const services = createDiscoverServicesMock();
-    jest
+    vi
       .mocked(services.data.search.search)
       .mockImplementationOnce(() => from(searchResponseFor(outOfResultsHit)))
       .mockImplementationOnce(() => from(Promise.resolve({ rawResponse: { hits: { hits: [] } } })));
@@ -683,16 +688,16 @@ describe('DiscoverDocumentFlyout', () => {
       fetchStatus: FetchStatus.COMPLETE,
       result: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
     });
-    dataStateContainer.data$.documents$.next = jest.fn();
+    dataStateContainer.data$.documents$.next = vi.fn();
 
     renderWithI18n(
       <DiscoverToolkitTestProvider toolkit={toolkit}>
         <DiscoverDocumentFlyout
           dataView={dataViewMock}
           columns={['bytes']}
-          onAddColumn={jest.fn()}
-          onRemoveColumn={jest.fn()}
-          onAddFilter={jest.fn()}
+          onAddColumn={vi.fn()}
+          onRemoveColumn={vi.fn()}
+          onAddFilter={vi.fn()}
         />
       </DiscoverToolkitTestProvider>
     );
@@ -781,9 +786,9 @@ describe('DiscoverDocumentFlyout', () => {
         <DiscoverDocumentFlyout
           dataView={dataViewMock}
           columns={['bytes']}
-          onAddColumn={jest.fn()}
-          onRemoveColumn={jest.fn()}
-          onAddFilter={jest.fn()}
+          onAddColumn={vi.fn()}
+          onRemoveColumn={vi.fn()}
+          onAddFilter={vi.fn()}
         />
       </DiscoverToolkitTestProvider>
     );
@@ -840,16 +845,16 @@ describe('DiscoverDocumentFlyout', () => {
       fetchStatus: FetchStatus.COMPLETE,
       result: [buildDataTableRecord(inResultsHit, dataViewMock)],
     });
-    dataStateContainer.data$.documents$.next = jest.fn();
+    dataStateContainer.data$.documents$.next = vi.fn();
 
     renderWithI18n(
       <DiscoverToolkitTestProvider toolkit={toolkit}>
         <DiscoverDocumentFlyout
           dataView={dataViewMock}
           columns={['bytes']}
-          onAddColumn={jest.fn()}
-          onRemoveColumn={jest.fn()}
-          onAddFilter={jest.fn()}
+          onAddColumn={vi.fn()}
+          onRemoveColumn={vi.fn()}
+          onAddFilter={vi.fn()}
         />
       </DiscoverToolkitTestProvider>
     );

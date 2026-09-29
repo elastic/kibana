@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -13,24 +15,30 @@ import { render } from '../../../utils/test_helper';
 
 let mockOnSelectScanId: (scanId: string) => void;
 
-jest.mock('./scan_history_list', () => ({
-  ScanHistoryList: ({ onSelectScanId }: { onSelectScanId: (scanId: string) => void }) => {
-    mockOnSelectScanId = onSelectScanId;
-    return <div data-test-subj="scanHistoryList">ScanHistoryList</div>;
-  },
-}));
+vi.mock('./scan_history_list', () => {
+      const mocked = {
+      ScanHistoryList: ({ onSelectScanId }: { onSelectScanId: (scanId: string) => void }) => {
+        mockOnSelectScanId = onSelectScanId;
+        return <div data-test-subj="scanHistoryList">ScanHistoryList</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./scan_results_panel', () => ({
-  ScanResultsPanel: ({ scanId }: { scanId: string }) => (
-    <div data-test-subj="scanResultsPanel">ScanResultsPanel: {scanId}</div>
-  ),
-}));
+vi.mock('./scan_results_panel', () => {
+      const mocked = {
+      ScanResultsPanel: ({ scanId }: { scanId: string }) => (
+        <div data-test-subj="scanResultsPanel">ScanResultsPanel: {scanId}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('HealthScanFlyout', () => {
-  const mockOnClose = jest.fn();
+  const mockOnClose = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders flyout with "Health Scans" title and ScanHistoryList by default', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { ErrorCode } from '../../../../../common/types/error_codes';
@@ -17,7 +19,7 @@ describe('updateMlInferenceMappings', () => {
   const mockClient = elasticsearchServiceMock.createScopedClusterClient();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockClient.asCurrentUser.ml.getTrainedModels.mockResolvedValue({
       count: 1,

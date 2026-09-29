@@ -5,22 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 import { useUpdateSignificantEvent } from './use_update_significant_event';
 
-jest.mock('./use_kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 describe('useUpdateSignificantEvent', () => {
-  const fetch = jest.fn();
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
+  const fetch = vi.fn();
+  const addSuccess = vi.fn();
+  const addError = vi.fn();
 
   const wrapper = ({ children }: { children: React.ReactNode }) => {
     const queryClient = new QueryClient({

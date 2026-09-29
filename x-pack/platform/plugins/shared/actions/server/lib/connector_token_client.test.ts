@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import sinon from 'sinon';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -15,21 +18,24 @@ import type { ConnectorToken } from '../types';
 import * as allRetry from './retry_if_conflicts';
 import { actionsConfigMock } from '../actions_config.mock';
 
-jest.mock('./ears/revoke_ears_credentials', () => ({
-  revokeEarsCredentials: jest.fn(),
-}));
+vi.mock('./ears/revoke_ears_credentials', () => {
+      const mocked = {
+      revokeEarsCredentials: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRevokeEarsCredentials = revokeEarsCredentials as jest.MockedFunction<
+const mockRevokeEarsCredentials = revokeEarsCredentials as MockedFunction<
   typeof revokeEarsCredentials
 >;
 
-const rootLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const rootLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 const logger = {
   ...rootLogger,
   get: () => rootLogger,
-} as unknown as jest.Mocked<Logger>;
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+} as unknown as Mocked<Logger>;
+vi.mock('@kbn/core-saved-objects-utils-server', async () => {
+  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
   return {
     ...actual,
     SavedObjectsUtils: {
@@ -51,8 +57,8 @@ beforeAll(() => {
 });
 beforeEach(() => {
   clock.reset();
-  jest.resetAllMocks();
-  jest.restoreAllMocks();
+  vi.resetAllMocks();
+  vi.restoreAllMocks();
   mockRevokeEarsCredentials.mockResolvedValue(undefined);
   connectorTokenClient = new ConnectorTokenClient({
     unsecuredSavedObjectsClient,
@@ -405,7 +411,7 @@ describe('update()', () => {
       },
       references: [],
     });
-    const retryIfConflictsMock = jest.spyOn(allRetry, 'retryIfConflicts');
+    const retryIfConflictsMock = vi.spyOn(allRetry, 'retryIfConflicts');
     retryIfConflictsMock.mockRejectedValue(new Error('There is a conflict.'));
     await expect(
       connectorTokenClient.update({
@@ -434,7 +440,7 @@ describe('update()', () => {
       },
       references: [],
     });
-    const retryIfConflictsMock = jest.spyOn(allRetry, 'retryIfConflicts');
+    const retryIfConflictsMock = vi.spyOn(allRetry, 'retryIfConflicts');
     retryIfConflictsMock.mockRejectedValue(new Error('There is a conflict.'));
     await expect(
       connectorTokenClient.update({
@@ -578,9 +584,9 @@ describe('delete()', () => {
 
     test('authMode per-user without profileUid bulk-deletes all user tokens for the connector', async () => {
       (
-        encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock
+        encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as Mock
       ).mockResolvedValueOnce({
-        close: jest.fn(),
+        close: vi.fn(),
         async *find() {
           yield {
             saved_objects: [

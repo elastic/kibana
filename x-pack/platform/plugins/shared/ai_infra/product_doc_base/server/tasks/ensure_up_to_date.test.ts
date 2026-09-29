@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -27,21 +30,21 @@ const since = new Date(requestedAt);
 const task = (fields: Partial<ConcreteTaskInstance>) => fields as ConcreteTaskInstance;
 
 describe('EnsureUpToDate task', () => {
-  let updateProductIfNeeded: jest.Mock;
-  let getProductsToUpdate: jest.Mock;
-  let ensureOpenApiSpecUpToDate: jest.Mock;
-  let wasUninstalledSince: jest.Mock;
-  let withLock: jest.Mock;
+  let updateProductIfNeeded: Mock;
+  let getProductsToUpdate: Mock;
+  let ensureOpenApiSpecUpToDate: Mock;
+  let wasUninstalledSince: Mock;
+  let withLock: Mock;
   let logger: ReturnType<typeof loggerMock.create>;
   let runTask: () => Promise<unknown>;
 
   beforeEach(() => {
     logger = loggerMock.create();
-    updateProductIfNeeded = jest.fn().mockResolvedValue(true);
-    getProductsToUpdate = jest.fn().mockResolvedValue(['kibana', 'security']);
-    ensureOpenApiSpecUpToDate = jest.fn().mockResolvedValue(undefined);
-    wasUninstalledSince = jest.fn().mockResolvedValue(false);
-    withLock = jest.fn((_lockId: string, callback: () => Promise<void>) => callback());
+    updateProductIfNeeded = vi.fn().mockResolvedValue(true);
+    getProductsToUpdate = vi.fn().mockResolvedValue(['kibana', 'security']);
+    ensureOpenApiSpecUpToDate = vi.fn().mockResolvedValue(undefined);
+    wasUninstalledSince = vi.fn().mockResolvedValue(false);
+    withLock = vi.fn((_lockId: string, callback: () => Promise<void>) => callback());
     const taskManager = taskManagerMock.createSetup();
     registerEnsureUpToDateTaskDefinition({
       taskManager,

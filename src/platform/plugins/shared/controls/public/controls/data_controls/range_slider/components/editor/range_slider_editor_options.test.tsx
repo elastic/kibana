@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
@@ -17,8 +19,8 @@ describe('RangeSliderEditorOptions', () => {
     const component = render(
       <RangeSliderEditorOptions
         initialState={{} as RangeSliderControlState}
-        updateState={jest.fn()}
-        setControlEditorValid={jest.fn()}
+        updateState={vi.fn()}
+        setControlEditorValid={vi.fn()}
       />
     );
     expect(
@@ -27,11 +29,11 @@ describe('RangeSliderEditorOptions', () => {
   });
 
   test('validates step setting is greater than 0', async () => {
-    const setControlEditorValid = jest.fn();
+    const setControlEditorValid = vi.fn();
     const component = render(
       <RangeSliderEditorOptions
         initialState={{} as RangeSliderControlState}
-        updateState={jest.fn()}
+        updateState={vi.fn()}
         setControlEditorValid={setControlEditorValid}
       />
     );

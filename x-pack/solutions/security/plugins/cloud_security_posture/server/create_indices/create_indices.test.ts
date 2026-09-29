@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createBenchmarkScoreIndex } from './create_indices';
@@ -23,7 +25,7 @@ describe('createBenchmarkScoreIndex', () => {
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should delete old index template from prev verions first', async () => {

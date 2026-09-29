@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getRequestId } from './get_request_id';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getRequestId', () => {
   describe('when allowFromAnyIp is true', () => {

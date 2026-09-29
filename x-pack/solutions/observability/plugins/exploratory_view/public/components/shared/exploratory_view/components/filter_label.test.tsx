@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { mockAppDataView, mockDataView, mockUxSeries, render } from '../rtl_helpers';
@@ -13,13 +15,13 @@ import * as useSeriesHook from '../hooks/use_series_filters';
 import { buildFilterLabel } from '../../filter_value_label/filter_value_label';
 import 'jest-canvas-mock';
 
-jest.setTimeout(30 * 1000);
+vi.setConfig({ testTimeout: 30 * 1000 });
 
 describe('FilterLabel', function () {
   mockAppDataView();
 
-  const invertFilter = jest.fn();
-  jest.spyOn(useSeriesHook, 'useSeriesFilters').mockReturnValue({
+  const invertFilter = vi.fn();
+  vi.spyOn(useSeriesHook, 'useSeriesFilters').mockReturnValue({
     invertFilter,
   } as any);
 
@@ -31,7 +33,7 @@ describe('FilterLabel', function () {
         label={'Web Application'}
         negate={false}
         seriesId={0}
-        removeFilter={jest.fn()}
+        removeFilter={vi.fn()}
         dataView={mockDataView}
         series={mockUxSeries}
       />
@@ -43,7 +45,7 @@ describe('FilterLabel', function () {
   });
 
   it('should delete filter', async function () {
-    const removeFilter = jest.fn();
+    const removeFilter = vi.fn();
     render(
       <FilterLabel
         field={'service.name'}
@@ -65,7 +67,7 @@ describe('FilterLabel', function () {
   });
 
   it('should invert filter', async function () {
-    const removeFilter = jest.fn();
+    const removeFilter = vi.fn();
     render(
       <FilterLabel
         field={'service.name'}
@@ -98,7 +100,7 @@ describe('FilterLabel', function () {
         label={'Web Application'}
         negate={true}
         seriesId={0}
-        removeFilter={jest.fn()}
+        removeFilter={vi.fn()}
         dataView={mockDataView}
         series={mockUxSeries}
       />

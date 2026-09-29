@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   asyncGlobalParamsPropagation,
   SyncGlobalParamsPrivateLocationsTask,
@@ -16,15 +19,15 @@ describe('asyncGlobalParamsPropagation', () => {
   const FIXED_NOW = 1_000_000;
 
   beforeEach(() => {
-    jest.spyOn(Date, 'now').mockReturnValue(FIXED_NOW);
+    vi.spyOn(Date, 'now').mockReturnValue(FIXED_NOW);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('schedules a task for each provided space', async () => {
-    const ensureScheduled = jest.fn().mockResolvedValue(undefined);
+    const ensureScheduled = vi.fn().mockResolvedValue(undefined);
     const server = { pluginsStart: { taskManager: { ensureScheduled } } } as any;
     const spaces = ['space-a', 'space-b'];
 
@@ -48,7 +51,7 @@ describe('asyncGlobalParamsPropagation', () => {
   });
 
   test('when ALL_SPACES_ID present only schedules for ALL_SPACES_ID', async () => {
-    const ensureScheduled = jest.fn().mockResolvedValue(undefined);
+    const ensureScheduled = vi.fn().mockResolvedValue(undefined);
     const server = { pluginsStart: { taskManager: { ensureScheduled } } } as any;
     const spaces = [ALL_SPACES_ID, 'other-space'];
 
@@ -62,12 +65,12 @@ describe('asyncGlobalParamsPropagation', () => {
 });
 
 describe('SyncGlobalParamsPrivateLocationsTask.runTask', () => {
-  const buildTask = ({ editMonitors }: { editMonitors: jest.Mock }) => {
+  const buildTask = ({ editMonitors }: { editMonitors: Mock }) => {
     const serverSetup = {
-      coreStart: { savedObjects: { createInternalRepository: jest.fn().mockReturnValue({}) } },
+      coreStart: { savedObjects: { createInternalRepository: vi.fn().mockReturnValue({}) } },
       encryptedSavedObjects: {},
       fleet: { runWithCache: (fn: () => Promise<unknown>) => fn() },
-      logger: { error: jest.fn(), debug: jest.fn() },
+      logger: { error: vi.fn(), debug: vi.fn() },
     } as any;
     const task = new SyncGlobalParamsPrivateLocationsTask(
       serverSetup,
@@ -77,16 +80,16 @@ describe('SyncGlobalParamsPrivateLocationsTask.runTask', () => {
       } as any
     );
 
-    jest
+    vi
       .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
       .mockResolvedValue([{ id: 'pl-1' }] as any);
-    jest.spyOn(task.deployPackagePolicies, 'getAllMonitorConfigs').mockResolvedValue({
+    vi.spyOn(task.deployPackagePolicies, 'getAllMonitorConfigs').mockResolvedValue({
       configsBySpaces: { space1: [{ id: 'm1' }] },
       monitorSpaceIds: new Set(['space1']),
       paramsBySpace: {},
       maintenanceWindows: [],
     } as any);
-    jest
+    vi
       .spyOn(task.deployPackagePolicies, 'parseLocations')
       .mockReturnValue({ privateLocations: [{ id: 'pl-1' }], publicLocations: [] } as any);
 
@@ -96,7 +99,7 @@ describe('SyncGlobalParamsPrivateLocationsTask.runTask', () => {
   const taskInstance = { state: { paramsSpaceToSync: 'space1' } } as any;
 
   test('does not fail the task when some package policies could not be created', async () => {
-    const editMonitors = jest
+    const editMonitors = vi
       .fn()
       .mockResolvedValue({ failedUpdates: [], failedCreates: [{ packagePolicy: { id: 'p1' } }] });
     const { task, serverSetup } = buildTask({ editMonitors });
@@ -110,7 +113,7 @@ describe('SyncGlobalParamsPrivateLocationsTask.runTask', () => {
   });
 
   test('still fails the task when the sync itself throws', async () => {
-    const editMonitors = jest.fn().mockRejectedValue(new Error('boom'));
+    const editMonitors = vi.fn().mockRejectedValue(new Error('boom'));
     const { task } = buildTask({ editMonitors });
 
     const result = await task.runTask({ taskInstance });

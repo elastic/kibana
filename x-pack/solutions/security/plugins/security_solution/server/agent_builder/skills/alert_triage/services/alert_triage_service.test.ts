@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { prioritizeAlerts } from './alert_triage_service';
@@ -34,8 +37,8 @@ interface AlertSearchParams {
  * asset-criticality index returns criticality docs. The returned `search` jest mock is
  * exposed so tests can assert on the query sent to the alerts index.
  */
-const createEsClient = (data: MockData): { esClient: ElasticsearchClient; search: jest.Mock } => {
-  const search = jest.fn(async (params: { index: string }) => {
+const createEsClient = (data: MockData): { esClient: ElasticsearchClient; search: Mock } => {
+  const search = vi.fn(async (params: { index: string }) => {
     if (params.index.startsWith('risk-score.')) {
       if (data.riskThrows) throw new Error('risk index missing');
       return { hits: { hits: data.risk ?? [] } };
@@ -50,7 +53,7 @@ const createEsClient = (data: MockData): { esClient: ElasticsearchClient; search
 };
 
 /** Returns the query bool.filter clauses sent to the alerts index (first search call). */
-const getAlertQueryFilter = (search: jest.Mock): Array<Record<string, unknown>> => {
+const getAlertQueryFilter = (search: Mock): Array<Record<string, unknown>> => {
   const call = search.mock.calls.find(([params]) =>
     (params as AlertSearchParams).index.startsWith('.alerts-security.')
   );

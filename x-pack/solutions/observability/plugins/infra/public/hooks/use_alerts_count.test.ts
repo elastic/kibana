@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
 
@@ -39,10 +42,10 @@ const expectedResult = {
   recoveredAlertCount: 20,
 };
 
-jest.mock('@kbn/kibana-react-plugin/public');
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+vi.mock('@kbn/kibana-react-plugin/public');
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
-const mockedPostAPI = jest.fn();
+const mockedPostAPI = vi.fn();
 
 const mockUseKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -62,7 +65,7 @@ describe('useAlertsCount', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return the mocked data from API', async () => {

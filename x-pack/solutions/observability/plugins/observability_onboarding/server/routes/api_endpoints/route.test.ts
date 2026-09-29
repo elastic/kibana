@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { isRight } from 'fp-ts/Either';
 import { ApiEndpointId } from '../../../common/api_endpoints';
@@ -19,21 +22,36 @@ import { resolveApiKeyFactory } from '../../lib/api_key/resolve_api_key_factory'
 import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
 import { IS_VENDOR_ENDPOINTS_ENABLED } from '../../../common/feature_flags';
 
-jest.mock('../../lib/get_managed_otlp_service_url', () => ({
-  getManagedOtlpServiceUrl: jest.fn().mockReturnValue('https://otlp.example.com:443'),
-}));
-jest.mock('../../lib/get_fallback_urls', () => ({
-  getFallbackESUrl: jest.fn().mockResolvedValue([]),
-}));
-jest.mock('../../lib/api_key/has_api_key_privileges', () => ({
-  hasApiKeyPrivileges: jest.fn().mockResolvedValue(true),
-}));
-jest.mock('../../lib/api_key/has_log_monitoring_privileges', () => ({
-  hasLogMonitoringPrivileges: jest.fn().mockResolvedValue(true),
-}));
-jest.mock('../../lib/api_key/resolve_api_key_factory', () => ({
-  resolveApiKeyFactory: jest.fn(),
-}));
+vi.mock('../../lib/get_managed_otlp_service_url', () => {
+      const mocked = {
+      getManagedOtlpServiceUrl: vi.fn().mockReturnValue('https://otlp.example.com:443'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/get_fallback_urls', () => {
+      const mocked = {
+      getFallbackESUrl: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/api_key/has_api_key_privileges', () => {
+      const mocked = {
+      hasApiKeyPrivileges: vi.fn().mockResolvedValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/api_key/has_log_monitoring_privileges', () => {
+      const mocked = {
+      hasLogMonitoringPrivileges: vi.fn().mockResolvedValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/api_key/resolve_api_key_factory', () => {
+      const mocked = {
+      resolveApiKeyFactory: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('hasManagedElasticsearchBulkEndpoint', () => {
   it('uses managed URL presence as the Elasticsearch-compatible bulk endpoint availability signal', () => {
@@ -144,7 +162,7 @@ describe('create_key handler', () => {
         core: Promise.resolve({
           elasticsearch: { client: { asCurrentUser: {} } },
           featureFlags: {
-            getBooleanValue: jest
+            getBooleanValue: vi
               .fn()
               .mockImplementation((key: string) =>
                 Promise.resolve(
@@ -160,15 +178,15 @@ describe('create_key handler', () => {
     } as unknown as Parameters<typeof handler>[0]);
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getManagedOtlpServiceUrl as jest.Mock).mockReturnValue('https://otlp.example.com:443');
+    vi.clearAllMocks();
+    (getManagedOtlpServiceUrl as Mock).mockReturnValue('https://otlp.example.com:443');
   });
 
   it.each([ApiEndpointId.Supabase, ApiEndpointId.Vercel])(
     'names vendor keys after the endpoint id for %s',
     async (id) => {
-      const factory = jest.fn().mockResolvedValue({ encoded: 'encoded-key' });
-      (resolveApiKeyFactory as jest.Mock).mockReturnValue(factory);
+      const factory = vi.fn().mockResolvedValue({ encoded: 'encoded-key' });
+      (resolveApiKeyFactory as Mock).mockReturnValue(factory);
 
       const result = await handler(createResources({ id }));
 
@@ -190,7 +208,7 @@ describe('create_key handler', () => {
   });
 
   it('rejects vendor key creation on serverless when the managed OTLP URL is unavailable', async () => {
-    (getManagedOtlpServiceUrl as jest.Mock).mockReturnValue('');
+    (getManagedOtlpServiceUrl as Mock).mockReturnValue('');
 
     await expect(handler(createResources({ id: ApiEndpointId.Supabase }))).rejects.toMatchObject({
       output: { statusCode: 400 },

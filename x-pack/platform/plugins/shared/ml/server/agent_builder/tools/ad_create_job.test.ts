@@ -5,23 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getAdminCapabilities } from '../../lib/capabilities/__mocks__/ml_capabilities';
 import { createAdCreateJobTool } from './ad_create_job';
 import { AD_CREATE_JOB_TOOL_ID } from './tool_ids';
 
-const resolveMlCapabilities = jest.fn().mockResolvedValue(getAdminCapabilities());
+const resolveMlCapabilities = vi.fn().mockResolvedValue(getAdminCapabilities());
 const adCreateJobTool = createAdCreateJobTool(resolveMlCapabilities);
 
 const createMlMock = () => ({
-  validate: jest.fn().mockResolvedValue({ valid: true }),
-  estimateModelMemory: jest.fn().mockResolvedValue({ model_memory_estimate: '100mb' }),
-  putJob: jest.fn().mockResolvedValue({ job_id: 'test-job' }),
-  putDatafeed: jest.fn().mockResolvedValue({ datafeed_id: 'datafeed-test-job' }),
+  validate: vi.fn().mockResolvedValue({ valid: true }),
+  estimateModelMemory: vi.fn().mockResolvedValue({ model_memory_estimate: '100mb' }),
+  putJob: vi.fn().mockResolvedValue({ job_id: 'test-job' }),
+  putDatafeed: vi.fn().mockResolvedValue({ datafeed_id: 'datafeed-test-job' }),
 });
 
-const createContext = (mlMock = createMlMock(), search = jest.fn()) =>
+const createContext = (mlMock = createMlMock(), search = vi.fn()) =>
   ({
     esClient: { asCurrentUser: { ml: mlMock, search } },
     request: {},
@@ -147,7 +149,7 @@ describe('adCreateJobTool', () => {
 
     it('operation=estimate_memory returns an error when cardinality lookup fails', async () => {
       const ml = createMlMock();
-      const search = jest.fn().mockRejectedValue(new Error('index_not_found_exception'));
+      const search = vi.fn().mockRejectedValue(new Error('index_not_found_exception'));
       const result = await adCreateJobTool.handler(
         {
           operation: 'estimate_memory',
@@ -171,7 +173,7 @@ describe('adCreateJobTool', () => {
 
     it('operation=estimate_memory returns an error when the cardinality aggregation is missing', async () => {
       const ml = createMlMock();
-      const search = jest.fn().mockResolvedValue({ aggregations: {} });
+      const search = vi.fn().mockResolvedValue({ aggregations: {} });
       const result = await adCreateJobTool.handler(
         {
           operation: 'estimate_memory',
@@ -198,7 +200,7 @@ describe('adCreateJobTool', () => {
         { host: 'web-1', bytes: 100 },
         { host: 'web-2', bytes: 200 },
       ];
-      const previewDatafeed = jest.fn().mockResolvedValue({ body: sampleDocuments });
+      const previewDatafeed = vi.fn().mockResolvedValue({ body: sampleDocuments });
       const tool = createAdCreateJobTool(
         resolveMlCapabilities,
         undefined,

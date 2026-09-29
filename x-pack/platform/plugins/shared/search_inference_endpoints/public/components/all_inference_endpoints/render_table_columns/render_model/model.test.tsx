@@ -5,20 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { Model } from './model';
 
-jest.mock('@kbn/ml-trained-models-utils', () => ({
-  ...jest.requireActual('@kbn/ml-trained-models-utils'),
-  ELASTIC_MODEL_DEFINITIONS: {
-    '.multilingual-e5-small': {
-      license: 'MIT',
-      licenseUrl: 'https://huggingface.co/intfloat/multilingual-e5-small',
-    },
-  },
-}));
+vi.mock('@kbn/ml-trained-models-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/ml-trained-models-utils')),
+      ELASTIC_MODEL_DEFINITIONS: {
+        '.multilingual-e5-small': {
+          license: 'MIT',
+          licenseUrl: 'https://huggingface.co/intfloat/multilingual-e5-small',
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Model component', () => {
   it('renders model_id when available in service_settings', () => {

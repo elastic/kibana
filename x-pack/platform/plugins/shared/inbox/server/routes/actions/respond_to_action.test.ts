@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -26,12 +29,12 @@ const getSpaceId = () => 'default';
 
 type Router = ReturnType<typeof httpServiceMock.createRouter>;
 
-const fakeProvider = (sourceApp: string): jest.Mocked<InboxActionProvider> => ({
+const fakeProvider = (sourceApp: string): Mocked<InboxActionProvider> => ({
   sourceApp,
-  list: jest.fn<ReturnType<InboxActionProvider['list']>, Parameters<InboxActionProvider['list']>>(
+  list: vi.fn<ReturnType<InboxActionProvider['list']>, Parameters<InboxActionProvider['list']>>(
     async () => ({ actions: [], total: 0 })
   ),
-  respond: jest.fn<
+  respond: vi.fn<
     ReturnType<InboxActionProvider['respond']>,
     Parameters<InboxActionProvider['respond']>
   >(async () => {}),
@@ -120,8 +123,8 @@ describe('POST /internal/inbox/actions/{source_app}/{source_id}/respond', () => 
       const captured: string[] = [];
       const capturingProvider: InboxActionProvider = {
         sourceApp: 'workflows',
-        list: jest.fn(async () => ({ actions: [], total: 0 })),
-        respond: jest.fn(async (_sourceId, _input, ctx) => {
+        list: vi.fn(async () => ({ actions: [], total: 0 })),
+        respond: vi.fn(async (_sourceId, _input, ctx) => {
           captured.push(ctx.spaceId);
         }),
       };
@@ -171,8 +174,8 @@ describe('POST /internal/inbox/actions/{source_app}/{source_id}/respond', () => 
       const captured: Array<string | undefined> = [];
       const capturingProvider: InboxActionProvider = {
         sourceApp: 'workflows',
-        list: jest.fn(async () => ({ actions: [], total: 0 })),
-        respond: jest.fn(async (_sourceId, _input, ctx) => {
+        list: vi.fn(async () => ({ actions: [], total: 0 })),
+        respond: vi.fn(async (_sourceId, _input, ctx) => {
           captured.push(ctx.channel);
         }),
       };
@@ -201,8 +204,8 @@ describe('POST /internal/inbox/actions/{source_app}/{source_id}/respond', () => 
       const captured: Array<string | undefined> = [];
       const capturingProvider: InboxActionProvider = {
         sourceApp: 'workflows',
-        list: jest.fn(async () => ({ actions: [], total: 0 })),
-        respond: jest.fn(async (_sourceId, _input, ctx) => {
+        list: vi.fn(async () => ({ actions: [], total: 0 })),
+        respond: vi.fn(async (_sourceId, _input, ctx) => {
           captured.push(ctx.channel);
         }),
       };

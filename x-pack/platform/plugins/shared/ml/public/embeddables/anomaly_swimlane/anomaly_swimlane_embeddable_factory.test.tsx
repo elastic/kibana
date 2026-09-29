@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -33,17 +35,17 @@ const mockResponse = of([
   },
 ]);
 
-jest.mock('../../application/capabilities/check_capabilities', () => {
+vi.mock('../../application/capabilities/check_capabilities', () => {
   return {
-    checkPermissionAsync: jest.fn().mockResolvedValue(true),
+    checkPermissionAsync: vi.fn().mockResolvedValue(true),
   };
 });
 
-jest.mock('../../application/services/anomaly_detector_service', () => {
+vi.mock('../../application/services/anomaly_detector_service', () => {
   return {
-    AnomalyDetectorService: jest.fn().mockImplementation(() => {
+    AnomalyDetectorService: vi.fn().mockImplementation(() => {
       return {
-        getJobs$: jest.fn((jobId: string[]) => {
+        getJobs$: vi.fn((jobId: string[]) => {
           if (jobId.includes('invalid-job-id')) {
             throw new Error('Invalid job');
           }
@@ -54,12 +56,12 @@ jest.mock('../../application/services/anomaly_detector_service', () => {
   };
 });
 
-jest.mock('../../application/services/anomaly_timeline_service', () => {
+vi.mock('../../application/services/anomaly_timeline_service', () => {
   return {
-    AnomalyTimelineService: jest.fn().mockImplementation(() => {
+    AnomalyTimelineService: vi.fn().mockImplementation(() => {
       return {
-        setTimeRange: jest.fn(),
-        loadOverallData: jest.fn(() =>
+        setTimeRange: vi.fn(),
+        loadOverallData: vi.fn(() =>
           Promise.resolve({
             earliest: 0,
             latest: 0,
@@ -67,14 +69,14 @@ jest.mock('../../application/services/anomaly_timeline_service', () => {
             interval: 3600,
           })
         ),
-        loadViewBySwimlane: jest.fn(() =>
+        loadViewBySwimlane: vi.fn(() =>
           Promise.resolve({
             points: [],
           })
         ),
-        getSwimlaneBucketInterval: jest.fn(() => {
+        getSwimlaneBucketInterval: vi.fn(() => {
           return {
-            asSeconds: jest.fn(() => 900),
+            asSeconds: vi.fn(() => 900),
           };
         }),
       };
@@ -94,7 +96,7 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
       },
     };
     const { api, Component } = await factory.buildEmbeddable({
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
       initialState: {
         swimlane_type: 'viewBy',
         job_ids: ['my-job'],

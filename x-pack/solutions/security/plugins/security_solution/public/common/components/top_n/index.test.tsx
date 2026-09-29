@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -18,32 +21,32 @@ import { detectionAlertsTables } from './helpers';
 import { StatefulTopN } from '.';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
 
   return {
     ...original,
     useHistory: () => ({
-      useHistory: jest.fn(),
+      useHistory: vi.fn(),
     }),
-    useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
+    useLocation: vi.fn().mockReturnValue({ pathname: '/test' }),
   };
 });
 
-jest.mock('../link_to');
-jest.mock('../../lib/kibana');
-jest.mock('../../../timelines/store/actions');
-jest.mock('../visualization_actions/actions');
-jest.mock('../visualization_actions/lens_embeddable');
+vi.mock('../link_to');
+vi.mock('../../lib/kibana');
+vi.mock('../../../timelines/store/actions');
+vi.mock('../visualization_actions/actions');
+vi.mock('../visualization_actions/lens_embeddable');
 
-jest.mock('./top_n', () => {
+vi.mock('./top_n', async () => {
   return {
-    ...jest.requireActual('./top_n'),
-    TopN: jest.fn(() => <div data-test-subj="top-n-mock" />),
+    ...(await vi.importActual('./top_n')),
+    TopN: vi.fn(() => <div data-test-subj="top-n-mock" />),
   };
 });
 
-const TopNMocked = TopN as jest.MockedFunction<typeof TopN>;
+const TopNMocked = TopN as MockedFunction<typeof TopN>;
 
 const field = 'process.name';
 
@@ -157,12 +160,12 @@ const testProps = {
   field,
   indexPattern: mockDataViewSpec,
   scopeId: TableId.hostsPageEvents,
-  toggleTopN: jest.fn(),
-  onFilterAdded: jest.fn(),
+  toggleTopN: vi.fn(),
+  onFilterAdded: vi.fn(),
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('StatefulTopN', () => {

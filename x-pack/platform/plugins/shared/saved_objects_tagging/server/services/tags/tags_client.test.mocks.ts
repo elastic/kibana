@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-export const validateTagMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./validate_tag', () => ({
-  validateTag: validateTagMock,
-}));
+export const validateTagMock = vi.fn();
+
+vi.doMock('./validate_tag', () => {
+      const mocked = {
+      validateTag: validateTagMock,
+    };
+      return { ...mocked, default: mocked };
+    });

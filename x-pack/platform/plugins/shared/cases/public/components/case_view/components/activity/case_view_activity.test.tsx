@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor, within } from '@testing-library/react';
@@ -42,32 +45,38 @@ import { useGetCaseConfiguration } from '../../../../containers/configure/use_ge
 import { useGetCurrentUserProfile } from '../../../../containers/user_profiles/use_get_current_user_profile';
 import { isLegacyAttachmentRequest } from '../../../../../common/utils/attachments';
 
-jest.mock('../../../../containers/use_infinite_find_case_user_actions');
-jest.mock('../../../../containers/use_find_case_user_actions');
-jest.mock('../../../../containers/use_get_case_user_actions_stats');
-jest.mock('../../../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../../../containers/use_post_push_to_service');
-jest.mock('../../../user_actions/timestamp', () => ({
-  UserActionTimestamp: () => <></>,
-}));
-jest.mock('../sidebar/sidebar_toggle_button', () => ({
-  SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
-}));
-jest.mock('../../../../common/navigation/hooks');
-jest.mock('../../../../containers/use_get_action_license');
-jest.mock('../../../../containers/use_get_tags');
-jest.mock('../../../../containers/use_get_categories');
-jest.mock('../../../../containers/user_profiles/use_bulk_get_user_profiles');
-jest.mock('../../../../containers/use_get_case_connectors');
-jest.mock('../../../../containers/use_get_case_users');
-jest.mock('../../use_on_update_field');
-jest.mock('../../../../containers/configure/use_get_case_configuration');
-jest.mock('../../../../containers/user_profiles/use_get_current_user_profile');
+vi.mock('../../../../containers/use_infinite_find_case_user_actions');
+vi.mock('../../../../containers/use_find_case_user_actions');
+vi.mock('../../../../containers/use_get_case_user_actions_stats');
+vi.mock('../../../../containers/configure/use_get_supported_action_connectors');
+vi.mock('../../../../containers/use_post_push_to_service');
+vi.mock('../../../user_actions/timestamp', () => {
+      const mocked = {
+      UserActionTimestamp: () => <></>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../sidebar/sidebar_toggle_button', () => {
+      const mocked = {
+      SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/navigation/hooks');
+vi.mock('../../../../containers/use_get_action_license');
+vi.mock('../../../../containers/use_get_tags');
+vi.mock('../../../../containers/use_get_categories');
+vi.mock('../../../../containers/user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../../../containers/use_get_case_connectors');
+vi.mock('../../../../containers/use_get_case_users');
+vi.mock('../../use_on_update_field');
+vi.mock('../../../../containers/configure/use_get_case_configuration');
+vi.mock('../../../../containers/user_profiles/use_get_current_user_profile');
 
-(useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
-(useGetCategories as jest.Mock).mockReturnValue({ data: ['foo', 'bar'], refetch: jest.fn() });
-(useGetCaseConfiguration as jest.Mock).mockReturnValue({ data: { observableTypes: [] } });
-(useGetCurrentUserProfile as jest.Mock).mockReturnValue({ data: {}, isFetching: false });
+(useGetTags as Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: vi.fn() });
+(useGetCategories as Mock).mockReturnValue({ data: ['foo', 'bar'], refetch: vi.fn() });
+(useGetCaseConfiguration as Mock).mockReturnValue({ data: { observableTypes: [] } });
+(useGetCurrentUserProfile as Mock).mockReturnValue({ data: {}, isFetching: false });
 
 const caseData: CaseUI = {
   ...basicCase,
@@ -81,7 +90,7 @@ const caseData: CaseUI = {
 };
 
 const caseViewProps: CaseViewProps = {
-  onComponentInitialized: jest.fn(),
+  onComponentInitialized: vi.fn(),
 };
 
 const userActivityQueryParams = {
@@ -91,7 +100,7 @@ const userActivityQueryParams = {
   perPage: 10,
 };
 
-const pushCaseToExternalService = jest.fn();
+const pushCaseToExternalService = vi.fn();
 
 const userActionsStats = {
   total: 21,
@@ -107,19 +116,19 @@ const userActionsStats = {
 const caseProps = {
   ...caseViewProps,
   caseData,
-  fetchCaseMetrics: jest.fn(),
+  fetchCaseMetrics: vi.fn(),
 };
 
 const caseUsers = getCaseUsersMockResponse();
 
-const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
-const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
-const useGetCaseUserActionsStatsMock = useGetCaseUserActionsStats as jest.Mock;
-const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const usePostPushToServiceMock = usePostPushToService as jest.Mock;
-const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
-const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
-const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
+const useFindCaseUserActionsMock = useFindCaseUserActions as Mock;
+const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as Mock;
+const useGetCaseUserActionsStatsMock = useGetCaseUserActionsStats as Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as Mock;
+const usePostPushToServiceMock = usePostPushToService as Mock;
+const useGetCaseConnectorsMock = useGetCaseConnectors as Mock;
+const useGetCaseUsersMock = useGetCaseUsers as Mock;
+const useOnUpdateFieldMock = useOnUpdateField as Mock;
 
 const localStorageKey = `${basicCase.owner}.cases.userActivity.redesign.filters`;
 
@@ -146,7 +155,7 @@ describe('Case View Page activity tab (redesign)', () => {
     });
     useOnUpdateFieldMock.mockReturnValue({
       isLoading: false,
-      useOnUpdateField: jest.fn,
+      useOnUpdateField: vi.fn,
     });
 
     Object.defineProperty(window, 'getComputedStyle', {
@@ -174,7 +183,7 @@ describe('Case View Page activity tab (redesign)', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     localStorage.clear();
 
@@ -292,7 +301,7 @@ describe('Case View Page activity tab (redesign)', () => {
 
   describe('filter activity', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
       useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
       useGetCaseUserActionsStatsMock.mockReturnValue({

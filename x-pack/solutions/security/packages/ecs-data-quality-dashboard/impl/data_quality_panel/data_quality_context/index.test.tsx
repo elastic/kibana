@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Theme } from '@elastic/charts';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { renderHook } from '@testing-library/react';
@@ -13,9 +15,9 @@ import React from 'react';
 
 import { DataQualityProvider, useDataQualityContext } from '.';
 
-const mockReportDataQualityIndexChecked = jest.fn();
-const mockReportDataQualityCheckAllClicked = jest.fn();
-const mockHttpFetch = jest.fn();
+const mockReportDataQualityIndexChecked = vi.fn();
+const mockReportDataQualityCheckAllClicked = vi.fn();
+const mockHttpFetch = vi.fn();
 const { toasts } = notificationServiceMock.createSetupContract();
 const mockTelemetryEvents = {
   reportDataQualityIndexChecked: mockReportDataQualityIndexChecked,
@@ -27,16 +29,16 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
     telemetryEvents={mockTelemetryEvents}
     isILMAvailable={true}
     toasts={toasts}
-    addSuccessToast={jest.fn()}
-    canUserCreateAndReadCases={jest.fn(() => true)}
+    addSuccessToast={vi.fn()}
+    canUserCreateAndReadCases={vi.fn(() => true)}
     endDate={null}
-    formatBytes={jest.fn()}
-    formatNumber={jest.fn()}
+    formatBytes={vi.fn()}
+    formatNumber={vi.fn()}
     isAssistantEnabled={true}
     lastChecked={'2023-03-28T22:27:28.159Z'}
-    openCreateCaseFlyout={jest.fn()}
+    openCreateCaseFlyout={vi.fn()}
     patterns={['auditbeat-*']}
-    setLastChecked={jest.fn()}
+    setLastChecked={vi.fn()}
     startDate={null}
     theme={{
       background: {
@@ -65,7 +67,7 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
         value: 'unmanaged',
       },
     ]}
-    setSelectedIlmPhaseOptions={jest.fn()}
+    setSelectedIlmPhaseOptions={vi.fn()}
     defaultStartTime="now-7d"
     defaultEndTime="now"
   >
@@ -75,7 +77,7 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
 
 describe('DataQualityContext', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it throws an error when useDataQualityContext hook is used without a DataQualityContext', () => {

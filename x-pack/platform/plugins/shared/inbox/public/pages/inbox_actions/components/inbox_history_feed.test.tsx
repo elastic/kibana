@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -14,9 +17,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { createStubInboxAction } from '../../../../common/test_helpers';
 import { InboxHistoryFeed } from './inbox_history_feed';
 
-jest.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createWrapper = (): FC<PropsWithChildren<{}>> => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -28,10 +31,10 @@ const createWrapper = (): FC<PropsWithChildren<{}>> => {
 };
 
 describe('InboxHistoryFeed', () => {
-  let httpGet: jest.Mock;
+  let httpGet: Mock;
 
   beforeEach(() => {
-    httpGet = jest.fn().mockResolvedValue({ channel: [], respondedBy: [] });
+    httpGet = vi.fn().mockResolvedValue({ channel: [], respondedBy: [] });
     useKibanaMock.mockReturnValue({
       services: { http: { get: httpGet } },
     } as unknown as ReturnType<typeof useKibana>);

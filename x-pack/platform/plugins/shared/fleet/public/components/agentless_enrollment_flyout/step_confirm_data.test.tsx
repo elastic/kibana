@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -20,26 +23,38 @@ import {
 
 import { AgentlessStepConfirmData } from './step_confirm_data';
 
-jest.mock('../../hooks', () => ({
-  ...jest.requireActual('../../hooks'),
-  useStartServices: jest.fn(),
-}));
+vi.mock('../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../hooks')),
+      useStartServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../agent_enrollment_flyout/use_get_agent_incoming_data', () => ({
-  usePollingIncomingData: jest.fn(),
-  POLLING_TIMEOUT_MS: 300_000,
-}));
+vi.mock('../agent_enrollment_flyout/use_get_agent_incoming_data', () => {
+      const mocked = {
+      usePollingIncomingData: vi.fn(),
+      POLLING_TIMEOUT_MS: 300_000,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/telemetry/aws_onboarding_events', () => ({
-  ...jest.requireActual('../../../common/telemetry/aws_onboarding_events'),
-  reportAwsOnboardingFirstDataArrived: jest.fn(),
-  reportAwsOnboardingFirstDataTimeout: jest.fn(),
-}));
+vi.mock('../../../common/telemetry/aws_onboarding_events', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/telemetry/aws_onboarding_events')),
+      reportAwsOnboardingFirstDataArrived: vi.fn(),
+      reportAwsOnboardingFirstDataTimeout: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Avoid pulling in EUI/i18n dependencies from NextSteps
-jest.mock('./next_steps', () => ({ NextSteps: () => null }));
+vi.mock('./next_steps', () => {
+      const mocked = { NextSteps: () => null };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAnalytics = { reportEvent: jest.fn() };
+const mockAnalytics = { reportEvent: vi.fn() };
 
 const mockAgent = { id: 'test-agent-id' } as any;
 
@@ -47,7 +62,7 @@ const defaultProps = {
   agent: mockAgent,
   packageName: AWS_ONBOARDING_PACKAGE_NAME,
   packageVersion: '0.5.0',
-  setConfirmDataStatus: jest.fn(),
+  setConfirmDataStatus: vi.fn(),
 };
 
 function renderComponent(props = defaultProps) {
@@ -59,13 +74,13 @@ function renderComponent(props = defaultProps) {
 }
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   sessionStorage.removeItem(AWS_ONBOARDING_TELEMETRY_STORAGE_KEY);
-  (useStartServices as jest.Mock).mockReturnValue({
+  (useStartServices as Mock).mockReturnValue({
     analytics: mockAnalytics,
     docLinks: { links: { fleet: { troubleshooting: 'https://example.com' } } },
   });
-  (usePollingIncomingData as jest.Mock).mockReturnValue({
+  (usePollingIncomingData as Mock).mockReturnValue({
     incomingData: [],
     hasReachedTimeout: false,
   });
@@ -73,7 +88,7 @@ beforeEach(() => {
 
 describe('AgentlessStepConfirmData — first_data_arrived telemetry', () => {
   it('emits first_data_arrived when incoming data is detected for the AWS package', () => {
-    (usePollingIncomingData as jest.Mock).mockReturnValue({
+    (usePollingIncomingData as Mock).mockReturnValue({
       incomingData: [{ 'test-agent-id': { data: true } }],
       hasReachedTimeout: false,
     });
@@ -86,7 +101,7 @@ describe('AgentlessStepConfirmData — first_data_arrived telemetry', () => {
   });
 
   it('does not emit first_data_arrived for a different package', () => {
-    (usePollingIncomingData as jest.Mock).mockReturnValue({
+    (usePollingIncomingData as Mock).mockReturnValue({
       incomingData: [{ 'test-agent-id': { data: true } }],
       hasReachedTimeout: false,
     });
@@ -95,11 +110,11 @@ describe('AgentlessStepConfirmData — first_data_arrived telemetry', () => {
   });
 
   it('does not emit first_data_arrived when analytics is unavailable', () => {
-    (useStartServices as jest.Mock).mockReturnValue({
+    (useStartServices as Mock).mockReturnValue({
       analytics: undefined,
       docLinks: { links: { fleet: { troubleshooting: 'https://example.com' } } },
     });
-    (usePollingIncomingData as jest.Mock).mockReturnValue({
+    (usePollingIncomingData as Mock).mockReturnValue({
       incomingData: [{ 'test-agent-id': { data: true } }],
       hasReachedTimeout: false,
     });
@@ -115,7 +130,7 @@ describe('AgentlessStepConfirmData — first_data_arrived telemetry', () => {
 
 describe('AgentlessStepConfirmData — first_data_timeout telemetry', () => {
   it('emits first_data_timeout when polling times out for the AWS package', () => {
-    (usePollingIncomingData as jest.Mock).mockReturnValue({
+    (usePollingIncomingData as Mock).mockReturnValue({
       incomingData: [],
       hasReachedTimeout: true,
     });
@@ -128,7 +143,7 @@ describe('AgentlessStepConfirmData — first_data_timeout telemetry', () => {
   });
 
   it('does not emit first_data_timeout for a different package', () => {
-    (usePollingIncomingData as jest.Mock).mockReturnValue({
+    (usePollingIncomingData as Mock).mockReturnValue({
       incomingData: [],
       hasReachedTimeout: true,
     });
@@ -137,11 +152,11 @@ describe('AgentlessStepConfirmData — first_data_timeout telemetry', () => {
   });
 
   it('does not emit first_data_timeout when analytics is unavailable', () => {
-    (useStartServices as jest.Mock).mockReturnValue({
+    (useStartServices as Mock).mockReturnValue({
       analytics: undefined,
       docLinks: { links: { fleet: { troubleshooting: 'https://example.com' } } },
     });
-    (usePollingIncomingData as jest.Mock).mockReturnValue({
+    (usePollingIncomingData as Mock).mockReturnValue({
       incomingData: [],
       hasReachedTimeout: true,
     });
@@ -150,7 +165,7 @@ describe('AgentlessStepConfirmData — first_data_timeout telemetry', () => {
   });
 
   it('emits timeout but not arrived when both timeout and no data', () => {
-    (usePollingIncomingData as jest.Mock).mockReturnValue({
+    (usePollingIncomingData as Mock).mockReturnValue({
       incomingData: [],
       hasReachedTimeout: true,
     });

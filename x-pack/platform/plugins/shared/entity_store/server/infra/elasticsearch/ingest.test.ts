@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ESQLSearchResponse } from '@kbn/es-types';
@@ -32,7 +34,7 @@ describe('ingestEntities', () => {
     drops: Array<{ status: number; error?: { type?: string; reason?: string } }> = [],
     results: Array<'created' | 'updated' | 'noop'> = []
   ) => {
-    const impl = jest.fn().mockImplementation(async (opts: any) => {
+    const impl = vi.fn().mockImplementation(async (opts: any) => {
       let total = 0;
       for await (const _ of opts.datasource) total++;
       for (const result of results) {
@@ -63,7 +65,7 @@ describe('ingestEntities', () => {
   });
 
   it('accounts for every row sent: created + updated + noop + dropped', async () => {
-    const onDropped = jest.fn();
+    const onDropped = vi.fn();
     const rowCount = 5;
     mockHelpersBulk(
       [{ status: 403, error: { type: 'security_exception', reason: 'unauthorized' } }],
@@ -136,7 +138,7 @@ describe('ingestEntities', () => {
       { status: 403, error: { type: 'security_exception', reason: 'unauthorized' } },
       { status: 400, error: { type: 'mapper_parsing_exception', reason: 'bad field' } },
     ]);
-    const onDropped = jest.fn();
+    const onDropped = vi.fn();
     await ingestEntities({
       esClient,
       esqlResponse: makeEsqlResponse(2),
@@ -150,7 +152,7 @@ describe('ingestEntities', () => {
 
   it('does not call onDropped when nothing is dropped', async () => {
     mockHelpersBulk();
-    const onDropped = jest.fn();
+    const onDropped = vi.fn();
     await ingestEntities({
       esClient,
       esqlResponse: makeEsqlResponse(2),

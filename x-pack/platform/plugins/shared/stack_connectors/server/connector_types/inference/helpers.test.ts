@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Readable } from 'node:stream';
 import { toArray, firstValueFrom } from 'rxjs';
 import { eventSourceStreamIntoObservable } from './helpers';
@@ -30,7 +32,7 @@ describe('eventSourceStreamIntoObservable', () => {
   });
 
   it('destroys the stream and errors the subscriber when maxDurationMs is exceeded', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
       const stream = new Readable({ read: () => {} });
 
@@ -40,7 +42,7 @@ describe('eventSourceStreamIntoObservable', () => {
         });
       });
 
-      jest.advanceTimersByTime(1_001);
+      vi.advanceTimersByTime(1_001);
 
       const error = await error$;
       expect(stream.destroyed).toBe(true);
@@ -50,13 +52,13 @@ describe('eventSourceStreamIntoObservable', () => {
         })
       );
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 
   it('enforces the deadline in-band when the timers phase is starved', async () => {
     const start = Date.now();
-    const nowSpy = jest.spyOn(Date, 'now');
+    const nowSpy = vi.spyOn(Date, 'now');
     try {
       const stream = new Readable({ read: () => {} });
 

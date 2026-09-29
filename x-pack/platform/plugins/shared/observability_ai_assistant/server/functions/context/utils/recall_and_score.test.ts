@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RecalledSuggestion } from './recall_and_score';
 import { recallAndScore } from './recall_and_score';
 import { scoreSuggestions } from './score_suggestions';
@@ -14,9 +17,12 @@ import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { recallRankingEventType } from '../../../analytics/recall_ranking';
 
-jest.mock('./score_suggestions', () => ({
-  scoreSuggestions: jest.fn(),
-}));
+vi.mock('./score_suggestions', () => {
+      const mocked = {
+      scoreSuggestions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const normalConversationMessages: Message[] = [
   {
@@ -56,14 +62,14 @@ export const contextualInsightsMessages: Message[] = [
 ];
 
 describe('recallAndScore', () => {
-  const mockRecall = jest.fn();
-  const mockChat = jest.fn() as unknown as FunctionCallChatFunction;
-  const mockLogger = { error: jest.fn(), debug: jest.fn() } as unknown as Logger;
-  const mockAnalytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceStart;
+  const mockRecall = vi.fn();
+  const mockChat = vi.fn() as unknown as FunctionCallChatFunction;
+  const mockLogger = { error: vi.fn(), debug: vi.fn() } as unknown as Logger;
+  const mockAnalytics = { reportEvent: vi.fn() } as unknown as AnalyticsServiceStart;
   const signal = new AbortController().signal;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when no documents are recalled', () => {
@@ -106,7 +112,7 @@ describe('recallAndScore', () => {
 
   it('handles errors when scoring fails', async () => {
     mockRecall.mockResolvedValue([{ id: 'doc1', text: 'Hello world', esScore: 0.5 }]);
-    (scoreSuggestions as jest.Mock).mockRejectedValue(new Error('Scoring failed'));
+    (scoreSuggestions as Mock).mockRejectedValue(new Error('Scoring failed'));
 
     const result = await recallAndScore({
       recall: mockRecall,
@@ -131,7 +137,7 @@ describe('recallAndScore', () => {
   it('calls scoreSuggestions with correct arguments', async () => {
     const recalledDocs = [{ id: 'doc1', text: 'Hello world', esScore: 0.8 }];
     mockRecall.mockResolvedValue(recalledDocs);
-    (scoreSuggestions as jest.Mock).mockResolvedValue({
+    (scoreSuggestions as Mock).mockResolvedValue({
       llmScores: [{ id: 'doc1', llmScore: 7 }],
       relevantDocuments: recalledDocs,
     });
@@ -163,7 +169,7 @@ describe('recallAndScore', () => {
     mockRecall.mockResolvedValue([
       { id: 'fav_color', text: 'My favourite color is blue.', esScore: 0.9 },
     ]);
-    (scoreSuggestions as jest.Mock).mockResolvedValue({
+    (scoreSuggestions as Mock).mockResolvedValue({
       llmScores: [{ id: 'fav_color', llmScore: 7 }],
       relevantDocuments: [{ id: 'fav_color', text: 'My favourite color is blue.' }],
     });
@@ -191,7 +197,7 @@ describe('recallAndScore', () => {
     mockRecall.mockResolvedValue([
       { id: 'alert_cause', text: 'The alert was triggered due to high CPU usage.', esScore: 0.85 },
     ]);
-    (scoreSuggestions as jest.Mock).mockResolvedValue({
+    (scoreSuggestions as Mock).mockResolvedValue({
       llmScores: [{ id: 'alert_cause', llmScore: 6 }],
       relevantDocuments: [
         { id: 'alert_cause', text: 'The alert was triggered due to high CPU usage.' },
@@ -220,7 +226,7 @@ describe('recallAndScore', () => {
   it('reports analytics with the correct structure', async () => {
     const recalledDocs = [{ id: 'doc1', text: 'Hello world', esScore: 0.8 }];
     mockRecall.mockResolvedValue(recalledDocs);
-    (scoreSuggestions as jest.Mock).mockResolvedValue({
+    (scoreSuggestions as Mock).mockResolvedValue({
       llmScores: [{ id: 'doc1', llmScore: 7 }],
       relevantDocuments: recalledDocs,
     });

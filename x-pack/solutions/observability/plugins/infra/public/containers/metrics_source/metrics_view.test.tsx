@@ -5,27 +5,39 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useProjectRouting } from '../../hooks/use_project_routing';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useMetricsDataView } from './metrics_view';
 
-jest.mock('../../hooks/use_project_routing', () => ({
-  useProjectRouting: jest.fn(),
-}));
+vi.mock('../../hooks/use_project_routing', () => {
+      const mocked = {
+      useProjectRouting: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: jest.fn(),
-}));
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibanaContextForPlugin: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./source', () => ({
-  useSourceContext: jest.fn(() => ({
-    source: { configuration: { metricAlias: 'metrics-*' } },
-  })),
-}));
+vi.mock('./source', () => {
+      const mocked = {
+      useSourceContext: vi.fn(() => ({
+        source: { configuration: { metricAlias: 'metrics-*' } },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useProjectRoutingMock = useProjectRouting as jest.Mock;
-const useKibanaContextForPluginMock = useKibanaContextForPlugin as jest.Mock;
+const useProjectRoutingMock = useProjectRouting as Mock;
+const useKibanaContextForPluginMock = useKibanaContextForPlugin as Mock;
 
 interface MockDataView {
   getIndexPattern: () => string;
@@ -41,14 +53,14 @@ const makeDataView = (fieldNames: string[]): MockDataView => ({
 
 describe('useMetricsDataView', () => {
   let dataView: MockDataView;
-  let create: jest.Mock;
-  let refreshFields: jest.Mock;
+  let create: Mock;
+  let refreshFields: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     dataView = makeDataView(['system.cpu.total.norm.pct', 'state']);
-    create = jest.fn().mockResolvedValue(dataView);
-    refreshFields = jest.fn().mockImplementation(async (dv: MockDataView) => {
+    create = vi.fn().mockResolvedValue(dataView);
+    refreshFields = vi.fn().mockImplementation(async (dv: MockDataView) => {
       dv.fields = [{ name: 'system.cpu.total.norm.pct' }];
     });
     useKibanaContextForPluginMock.mockReturnValue({

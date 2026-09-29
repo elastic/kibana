@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import mockFs from 'mock-fs';
 
 import Fsp from 'fs/promises';
@@ -57,46 +60,55 @@ import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
  */
 process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'false';
 
-jest.mock('execa');
-const execa = jest.requireMock('execa');
+vi.mock('execa');
+const execa = (await vi.importMock('execa'));
 execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
-jest.mock('./read_string_secrets', () => ({
-  readStringSecrets: jest.fn().mockResolvedValue({}),
-}));
+vi.mock('./read_string_secrets', () => {
+      const mocked = {
+      readStringSecrets: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const readStringSecretsMock = (
-  jest.requireMock('./read_string_secrets') as {
-    readStringSecrets: jest.MockedFunction<(path: string) => Promise<Record<string, string>>>;
+  (await vi.importMock('./read_string_secrets')) as {
+    readStringSecrets: MockedFunction<(path: string) => Promise<Record<string, string>>>;
   }
 ).readStringSecrets;
 
-jest.mock('@elastic/elasticsearch', () => {
+vi.mock('@elastic/elasticsearch', () => {
   return {
-    Client: jest.fn(),
+    Client: vi.fn(),
   };
 });
 
-jest.mock('./wait_until_cluster_ready', () => ({
-  waitUntilClusterReady: jest.fn(),
-}));
+vi.mock('./wait_until_cluster_ready', () => {
+      const mocked = {
+      waitUntilClusterReady: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./wait_for_security_index', () => ({
-  waitForSecurityIndex: jest.fn(),
-}));
+vi.mock('./wait_for_security_index', () => {
+      const mocked = {
+      waitForSecurityIndex: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./docker_uiam', () => {
-  const originalModule = jest.requireActual('./docker_uiam');
+vi.mock('./docker_uiam', async () => {
+  const originalModule = (await vi.importActual('./docker_uiam'));
   return {
     ...originalModule,
-    runUiamContainer: jest
+    runUiamContainer: vi
       .fn()
       .mockImplementation((_, container) => Promise.resolve(container.name)),
-    initializeUiamContainers: jest.fn(),
+    initializeUiamContainers: vi.fn(),
   };
 });
 
-jest.mock('@kbn/mock-idp-utils');
+vi.mock('@kbn/mock-idp-utils');
 
 const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
@@ -108,20 +120,20 @@ const baseEsPath = `${KIBANA_ROOT}/.es`;
 const serverlessDir = 'stateless';
 const serverlessObjectStorePath = `${baseEsPath}/${serverlessDir}`;
 
-const waitUntilClusterReadyMock = jest.spyOn(waitClusterUtil, 'waitUntilClusterReady');
-const waitForSecurityIndexMock = jest.spyOn(waitForSecurityIndexUtil, 'waitForSecurityIndex');
-const ensureSAMLRoleMappingMock = jest.spyOn(mockIdpPluginUtil, 'ensureSAMLRoleMapping');
-const createMockIdpMetadataMock = jest.spyOn(mockIdpPluginUtil, 'createMockIdpMetadata');
+const waitUntilClusterReadyMock = vi.spyOn(waitClusterUtil, 'waitUntilClusterReady');
+const waitForSecurityIndexMock = vi.spyOn(waitForSecurityIndexUtil, 'waitForSecurityIndex');
+const ensureSAMLRoleMappingMock = vi.spyOn(mockIdpPluginUtil, 'ensureSAMLRoleMapping');
+const createMockIdpMetadataMock = vi.spyOn(mockIdpPluginUtil, 'createMockIdpMetadata');
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   log.indent(-log.getIndent());
   logWriter.messages.length = 0;
 
   // jest relies on the filesystem to get sourcemaps when using console.log
   // which breaks with the mocked FS, see https://github.com/tschaub/mock-fs/issues/234
   // hijacking logging to process.stdout as a workaround for this suite.
-  jest.spyOn(console, 'log').mockImplementation((...args) => {
+  vi.spyOn(console, 'log').mockImplementation((...args) => {
     process.stdout.write(args + '\n');
   });
 });
@@ -129,7 +141,7 @@ beforeEach(() => {
 afterEach(() => {
   mockFs.restore();
   // restore the console.log behavior
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
@@ -961,13 +973,13 @@ describe('runServerlessEsNode()', () => {
 });
 
 describe('runServerlessCluster()', () => {
-  let runUiamContainerMock: jest.MockedFunction<typeof dockerUiam.runUiamContainer>;
-  let initializeUiamContainersMock: jest.MockedFunction<typeof dockerUiam.initializeUiamContainers>;
+  let runUiamContainerMock: MockedFunction<typeof dockerUiam.runUiamContainer>;
+  let initializeUiamContainersMock: MockedFunction<typeof dockerUiam.initializeUiamContainers>;
   beforeEach(() => {
-    runUiamContainerMock = dockerUiam.runUiamContainer as jest.MockedFunction<
+    runUiamContainerMock = dockerUiam.runUiamContainer as MockedFunction<
       typeof dockerUiam.runUiamContainer
     >;
-    initializeUiamContainersMock = dockerUiam.initializeUiamContainers as jest.MockedFunction<
+    initializeUiamContainersMock = dockerUiam.initializeUiamContainers as MockedFunction<
       typeof dockerUiam.initializeUiamContainers
     >;
   });
@@ -1096,7 +1108,7 @@ describe('runServerlessCluster()', () => {
     });
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
-    const onReady = jest.fn().mockResolvedValue(undefined);
+    const onReady = vi.fn().mockResolvedValue(undefined);
     await runServerlessCluster(log, {
       projectType,
       basePath: baseEsPath,
@@ -1116,7 +1128,7 @@ describe('runServerlessCluster()', () => {
     });
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
-    const onReady = jest.fn().mockResolvedValue(undefined);
+    const onReady = vi.fn().mockResolvedValue(undefined);
     await runServerlessCluster(log, { projectType, basePath: baseEsPath, onReady });
     expect(onReady).not.toHaveBeenCalled();
   });

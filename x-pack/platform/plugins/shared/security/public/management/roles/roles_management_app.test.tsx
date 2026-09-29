@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
@@ -18,56 +20,62 @@ import type { Props as RolesGridPageProps } from './roles_grid/roles_grid_page';
 import { rolesManagementApp } from './roles_management_app';
 import { licenseMock } from '../../../common/licensing/index.mock';
 
-jest.mock('./roles_grid', () => ({
-  RolesGridPage: ({
-    // props object is too big to include into test snapshot, so we just check for existence of fields we care about
-    buildFlavor,
-    cloudOrgUrl,
-    readOnly,
-    rolesAPIClient,
-  }: RolesGridPageProps) =>
-    `Roles Page: ${JSON.stringify(
-      {
+vi.mock('./roles_grid', () => {
+      const mocked = {
+      RolesGridPage: ({
+        // props object is too big to include into test snapshot, so we just check for existence of fields we care about
         buildFlavor,
         cloudOrgUrl,
         readOnly,
-        rolesAPIClient: rolesAPIClient ? 'rolesAPIClient' : undefined,
-      },
+        rolesAPIClient,
+      }: RolesGridPageProps) =>
+        `Roles Page: ${JSON.stringify(
+          {
+            buildFlavor,
+            cloudOrgUrl,
+            readOnly,
+            rolesAPIClient: rolesAPIClient ? 'rolesAPIClient' : undefined,
+          },
       null,
       '  '
     )}`,
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./edit_role', () => ({
-  EditRolePage: ({
-    // props object is too big to include into test snapshot, so we just check for existence of fields we care about
-    buildFlavor,
-    cloudOrgUrl,
-    roleName,
-    indicesAPIClient,
-    privilegesAPIClient,
-    rolesAPIClient,
-    userAPIClient,
-  }: EditRolePageProps) =>
-    `Role Edit Page: ${JSON.stringify(
-      {
+vi.mock('./edit_role', () => {
+      const mocked = {
+      EditRolePage: ({
+        // props object is too big to include into test snapshot, so we just check for existence of fields we care about
         buildFlavor,
         cloudOrgUrl,
         roleName,
-        indicesAPIClient: indicesAPIClient ? 'indicesAPIClient' : undefined,
-        privilegesAPIClient: privilegesAPIClient ? 'privilegesAPIClient' : undefined,
-        rolesAPIClient: rolesAPIClient ? 'rolesAPIClient' : undefined,
-        userAPIClient: userAPIClient ? 'userAPIClient' : undefined,
-      },
+        indicesAPIClient,
+        privilegesAPIClient,
+        rolesAPIClient,
+        userAPIClient,
+      }: EditRolePageProps) =>
+        `Role Edit Page: ${JSON.stringify(
+          {
+            buildFlavor,
+            cloudOrgUrl,
+            roleName,
+            indicesAPIClient: indicesAPIClient ? 'indicesAPIClient' : undefined,
+            privilegesAPIClient: privilegesAPIClient ? 'privilegesAPIClient' : undefined,
+            rolesAPIClient: rolesAPIClient ? 'rolesAPIClient' : undefined,
+            userAPIClient: userAPIClient ? 'userAPIClient' : undefined,
+          },
       null,
       '  '
     )}`,
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 async function mountApp(basePath: string, pathname: string, buildFlavor?: BuildFlavor) {
   const { fatalErrors } = coreMock.createSetup();
   const container = document.createElement('div');
-  const setBreadcrumbs = jest.fn();
+  const setBreadcrumbs = vi.fn();
 
   const featuresStart = featuresPluginMock.createStart();
   const coreStart = coreMock.createStart();
@@ -84,7 +92,7 @@ async function mountApp(basePath: string, pathname: string, buildFlavor?: BuildF
       .create({
         license: licenseMock.create(),
         fatalErrors,
-        getStartServices: jest
+        getStartServices: vi
           .fn()
           .mockResolvedValue([coreStart, { data: {}, features: featuresStart }]),
         buildFlavor: buildFlavor ?? 'traditional',

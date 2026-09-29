@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { getDefaultPreference } from './utils';
 
 describe('getDefaultPreference', () => {
   let storage: Storage;
-  let getItemSpy: jest.SpyInstance;
-  let setItemSpy: jest.SpyInstance;
+  let getItemSpy: MockInstance;
+  let setItemSpy: MockInstance;
 
   beforeEach(() => {
     storage = new StubBrowserStorage();
-    getItemSpy = jest.spyOn(storage, 'getItem');
-    setItemSpy = jest.spyOn(storage, 'setItem');
+    getItemSpy = vi.spyOn(storage, 'getItem');
+    setItemSpy = vi.spyOn(storage, 'setItem');
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns the value in storage when available', () => {

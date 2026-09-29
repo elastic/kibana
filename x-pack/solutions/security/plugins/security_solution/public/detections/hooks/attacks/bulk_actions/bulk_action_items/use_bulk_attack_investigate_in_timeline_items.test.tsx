@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -15,20 +18,23 @@ import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '../constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 
-jest.mock('../../../../../common/components/user_privileges');
-jest.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline');
-jest.mock('../../../../components/alerts_table/actions', () => ({
-  buildAlertsKqlFilter: jest.fn().mockReturnValue([]),
-}));
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline');
+vi.mock('../../../../components/alerts_table/actions', () => {
+      const mocked = {
+      buildAlertsKqlFilter: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../common/lib/kibana');
 
-const mockUseUserPrivileges = useUserPrivileges as jest.MockedFunction<typeof useUserPrivileges>;
-const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.MockedFunction<
+const mockUseUserPrivileges = useUserPrivileges as MockedFunction<typeof useUserPrivileges>;
+const mockUseInvestigateInTimeline = useInvestigateInTimeline as MockedFunction<
   typeof useInvestigateInTimeline
 >;
 
-const reportEventMock = jest.fn();
-(useKibana as jest.Mock).mockReturnValue({
+const reportEventMock = vi.fn();
+(useKibana as Mock).mockReturnValue({
   services: {
     telemetry: {
       reportEvent: reportEventMock,
@@ -44,12 +50,12 @@ function wrapper(props: { children: React.ReactNode }) {
 
 describe('useBulkAttackInvestigateInTimelineItems', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     reportEventMock.mockClear();
     queryClient = new QueryClient();
 
     mockUseInvestigateInTimeline.mockReturnValue({
-      investigateInTimeline: jest.fn(),
+      investigateInTimeline: vi.fn(),
     } as unknown as ReturnType<typeof useInvestigateInTimeline>);
 
     mockUseUserPrivileges.mockReturnValue({
@@ -72,8 +78,8 @@ describe('useBulkAttackInvestigateInTimelineItems', () => {
   });
 
   it('should call investigateInTimeline on click', async () => {
-    const investigateInTimeline = jest.fn();
-    const closePopover = jest.fn();
+    const investigateInTimeline = vi.fn();
+    const closePopover = vi.fn();
     mockUseInvestigateInTimeline.mockReturnValue({
       investigateInTimeline,
     } as unknown as ReturnType<typeof useInvestigateInTimeline>);
@@ -90,9 +96,9 @@ describe('useBulkAttackInvestigateInTimelineItems', () => {
         },
       ],
       false,
-      jest.fn(),
-      jest.fn(),
-      jest.fn()
+      vi.fn(),
+      vi.fn(),
+      vi.fn()
     );
 
     expect(investigateInTimeline).toHaveBeenCalledTimes(1);
@@ -100,7 +106,7 @@ describe('useBulkAttackInvestigateInTimelineItems', () => {
   });
 
   it('should report TimelineInvestigationOpened event on click', async () => {
-    const investigateInTimeline = jest.fn();
+    const investigateInTimeline = vi.fn();
     mockUseInvestigateInTimeline.mockReturnValue({
       investigateInTimeline,
     } as unknown as ReturnType<typeof useInvestigateInTimeline>);
@@ -123,9 +129,9 @@ describe('useBulkAttackInvestigateInTimelineItems', () => {
         },
       ],
       false,
-      jest.fn(),
-      jest.fn(),
-      jest.fn()
+      vi.fn(),
+      vi.fn(),
+      vi.fn()
     );
 
     expect(reportEventMock).toHaveBeenCalledWith(AttacksEventTypes.TimelineInvestigationOpened, {

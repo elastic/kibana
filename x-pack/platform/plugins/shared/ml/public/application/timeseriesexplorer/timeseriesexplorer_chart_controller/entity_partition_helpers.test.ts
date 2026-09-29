@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { applySmvTableFilter, buildCriteriaFields } from './entity_partition_helpers';
 
 describe('buildCriteriaFields', () => {
@@ -33,31 +35,31 @@ describe('applySmvTableFilter', () => {
   ];
 
   it('sets entity value on include (+) when current value differs', () => {
-    const setEntities = jest.fn();
+    const setEntities = vi.fn();
     applySmvTableFilter('airline', 'BAW', '+', controls, setEntities);
     expect(setEntities).toHaveBeenCalledWith({ airline: 'BAW', region: null });
   });
 
   it('clears entity value on exclude (-) when current value matches', () => {
-    const setEntities = jest.fn();
+    const setEntities = vi.fn();
     applySmvTableFilter('airline', 'AAL', '-', controls, setEntities);
     expect(setEntities).toHaveBeenCalledWith({ airline: null, region: null });
   });
 
   it('no-ops on include (+) when value is already selected', () => {
-    const setEntities = jest.fn();
+    const setEntities = vi.fn();
     applySmvTableFilter('airline', 'AAL', '+', controls, setEntities);
     expect(setEntities).not.toHaveBeenCalled();
   });
 
   it('no-ops on exclude (-) when value is not currently selected', () => {
-    const setEntities = jest.fn();
+    const setEntities = vi.fn();
     applySmvTableFilter('airline', 'BAW', '-', controls, setEntities);
     expect(setEntities).not.toHaveBeenCalled();
   });
 
   it('no-ops when the field is not in the entity controls', () => {
-    const setEntities = jest.fn();
+    const setEntities = vi.fn();
     applySmvTableFilter('unknown_field', 'val', '+', controls, setEntities);
     expect(setEntities).not.toHaveBeenCalled();
   });

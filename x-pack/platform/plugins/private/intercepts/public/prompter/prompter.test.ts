@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
 import * as Rx from 'rxjs';
 import React from 'react';
 import { fireEvent, createEvent, waitFor } from '@testing-library/react';
@@ -38,8 +41,8 @@ describe('ProductInterceptPrompter', () => {
     const notifications = notificationServiceMock.createStartContract();
     const userAllowsFeedback = notifications.feedback.isEnabled();
 
-    const interceptDialogServiceStartFnSpy = jest.spyOn(InterceptDialogService.prototype, 'start');
-    const userInterceptRunPersistenceServiceStartFnSpy = jest.spyOn(
+    const interceptDialogServiceStartFnSpy = vi.spyOn(InterceptDialogService.prototype, 'start');
+    const userInterceptRunPersistenceServiceStartFnSpy = vi.spyOn(
       UserInterceptRunPersistenceService.prototype,
       'start'
     );
@@ -74,15 +77,15 @@ describe('ProductInterceptPrompter', () => {
     describe('registerIntercept', () => {
       let registerIntercept: ReturnType<InterceptPrompter['start']>['registerIntercept'];
 
-      const mockQueueInterceptFn = jest.fn();
-      const documentHiddenStateSpy = jest.spyOn(document, 'hidden', 'get');
+      const mockQueueInterceptFn = vi.fn();
+      const documentHiddenStateSpy = vi.spyOn(document, 'hidden', 'get');
 
-      let localStorageSetItemSpy: jest.SpyInstance;
-      let localStorageGetItemSpy: jest.SpyInstance;
+      let localStorageSetItemSpy: MockInstance;
+      let localStorageGetItemSpy: MockInstance;
 
       // default return value for the mockGetUserTriggerData$ function is unset,
       // implying user has not interacted with the intercept yet
-      const mockGetUserTriggerData$ = jest.fn<
+      const mockGetUserTriggerData$ = vi.fn<
         Rx.Observable<{ lastInteractedInterceptId: number | null }>,
         [triggerId: string]
       >(() => Rx.of({ lastInteractedInterceptId: null }));
@@ -108,17 +111,17 @@ describe('ProductInterceptPrompter', () => {
       const intercept: Intercept = {
         id: 'test-intercept',
         steps: interceptSteps,
-        onFinish: jest.fn(),
-        onDismiss: jest.fn(),
-        onProgress: jest.fn(),
+        onFinish: vi.fn(),
+        onDismiss: vi.fn(),
+        onProgress: vi.fn(),
       };
 
       beforeEach(() => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
 
-        localStorageSetItemSpy = jest.spyOn(Object.getPrototypeOf(window.localStorage), 'setItem');
+        localStorageSetItemSpy = vi.spyOn(Object.getPrototypeOf(window.localStorage), 'setItem');
 
-        localStorageGetItemSpy = jest.spyOn(Object.getPrototypeOf(window.localStorage), 'getItem');
+        localStorageGetItemSpy = vi.spyOn(Object.getPrototypeOf(window.localStorage), 'getItem');
 
         interceptDialogServiceStartFnSpy.mockImplementation(() => {
           return {
@@ -129,7 +132,7 @@ describe('ProductInterceptPrompter', () => {
         userInterceptRunPersistenceServiceStartFnSpy.mockImplementation(() => {
           return {
             getUserTriggerData$: mockGetUserTriggerData$,
-            updateUserTriggerData: jest.fn(),
+            updateUserTriggerData: vi.fn(),
           };
         });
 
@@ -143,12 +146,12 @@ describe('ProductInterceptPrompter', () => {
       });
 
       afterEach(() => {
-        jest.useRealTimers();
-        jest.clearAllMocks();
+        vi.useRealTimers();
+        vi.clearAllMocks();
       });
 
       it('invoking the registerIntercept method returns an observable', () => {
-        jest.spyOn(http, 'post').mockResolvedValue({
+        vi.spyOn(http, 'post').mockResolvedValue({
           registeredAt: new Date().toISOString(),
           triggerIntervalInMs: 1000,
         });
@@ -162,7 +165,7 @@ describe('ProductInterceptPrompter', () => {
       });
 
       it('skips intercept registration logic if feedback is disabled', () => {
-        const httpPostSpy = jest.spyOn(http, 'post');
+        const httpPostSpy = vi.spyOn(http, 'post');
 
         ({ registerIntercept } = prompter.start({
           http,
@@ -182,7 +185,7 @@ describe('ProductInterceptPrompter', () => {
       });
 
       it('subscribing to the returned observable makes a request to the trigger info api endpoint', async () => {
-        jest.spyOn(http, 'post').mockResolvedValue({
+        vi.spyOn(http, 'post').mockResolvedValue({
           registeredAt: new Date().toISOString(),
           triggerIntervalInMs: 1000,
         });
@@ -194,11 +197,11 @@ describe('ProductInterceptPrompter', () => {
 
         expect(intercept$).toBeInstanceOf(Rx.Observable);
 
-        const subscriptionHandler = jest.fn();
+        const subscriptionHandler = vi.fn();
 
         const subscription = intercept$.subscribe(subscriptionHandler);
 
-        jest.runAllTimers();
+        vi.runAllTimers();
 
         expect(http.post).toHaveBeenCalledWith(TRIGGER_INFO_API_ROUTE, {
           body: JSON.stringify({ triggerId: intercept.id }),
@@ -225,13 +228,13 @@ describe('ProductInterceptPrompter', () => {
         );
 
         // return the configured trigger info
-        jest.spyOn(http, 'post').mockResolvedValue(triggerInfo);
+        vi.spyOn(http, 'post').mockResolvedValue(triggerInfo);
 
         // configure a user that encountered the intercept on the 30th run
         mockGetUserTriggerData$.mockReturnValue(Rx.of({ lastInteractedInterceptId: triggerRuns }));
 
         // set system time to time in the future, with just the exact time before the next trigger
-        jest.setSystemTime(
+        vi.setSystemTime(
           new Date(
             Date.parse(triggerInfo.registeredAt) +
               triggerInfo.triggerIntervalInMs * triggerRuns +
@@ -240,7 +243,7 @@ describe('ProductInterceptPrompter', () => {
           )
         );
 
-        const subscriptionHandler = jest.fn();
+        const subscriptionHandler = vi.fn();
 
         const intercept$ = registerIntercept({
           id: intercept.id,
@@ -249,7 +252,7 @@ describe('ProductInterceptPrompter', () => {
 
         const subscription = intercept$.subscribe(subscriptionHandler);
 
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
 
         expect(http.post).toHaveBeenCalledWith(TRIGGER_INFO_API_ROUTE, {
           body: JSON.stringify({ triggerId: intercept.id }),
@@ -262,7 +265,7 @@ describe('ProductInterceptPrompter', () => {
         );
 
         // simulate the passage of time beyond the next trigger
-        await jest.advanceTimersByTimeAsync(triggerInfo.triggerIntervalInMs);
+        await vi.advanceTimersByTimeAsync(triggerInfo.triggerIntervalInMs);
 
         // intercept should not be queued because since the triggering only happens on page load and visibility change
         // if the record in localstorage is stale past the trigger interval
@@ -288,13 +291,13 @@ describe('ProductInterceptPrompter', () => {
         );
 
         // return the configured trigger info
-        jest.spyOn(http, 'post').mockResolvedValue(triggerInfo);
+        vi.spyOn(http, 'post').mockResolvedValue(triggerInfo);
 
         // configure a user that encountered the intercept on the 30th run
         mockGetUserTriggerData$.mockReturnValue(Rx.of({ lastInteractedInterceptId: triggerRuns }));
 
         // set system time to time in the future, with just the exact time before the next trigger
-        jest.setSystemTime(
+        vi.setSystemTime(
           new Date(
             Date.parse(triggerInfo.registeredAt) +
               triggerInfo.triggerIntervalInMs * triggerRuns +
@@ -308,12 +311,12 @@ describe('ProductInterceptPrompter', () => {
         localStorageGetItemSpy.mockReturnValue(
           JSON.stringify({
             [intercept.id]: {
-              timerStart: new Date(jest.now() - triggerInfo.triggerIntervalInMs - 1).toISOString(),
+              timerStart: new Date(vi.now() - triggerInfo.triggerIntervalInMs - 1).toISOString(),
             },
           })
         );
 
-        const subscriptionHandler = jest.fn();
+        const subscriptionHandler = vi.fn();
 
         const intercept$ = registerIntercept({
           id: intercept.id,
@@ -323,7 +326,7 @@ describe('ProductInterceptPrompter', () => {
         const subscription = intercept$.subscribe(subscriptionHandler);
 
         // only run timers for http request
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
 
         expect(http.post).toHaveBeenCalledWith(TRIGGER_INFO_API_ROUTE, {
           body: JSON.stringify({ triggerId: intercept.id }),
@@ -351,11 +354,11 @@ describe('ProductInterceptPrompter', () => {
         );
 
         // return the configured trigger info
-        jest.spyOn(http, 'post').mockResolvedValue(triggerInfo);
+        vi.spyOn(http, 'post').mockResolvedValue(triggerInfo);
         mockGetUserTriggerData$.mockReturnValue(Rx.of({ lastInteractedInterceptId: triggerRuns }));
 
         // set system time to time in the future, with just the exact time before the next trigger
-        jest.setSystemTime(
+        vi.setSystemTime(
           new Date(
             Date.parse(triggerInfo.registeredAt) +
               triggerInfo.triggerIntervalInMs * triggerRuns +
@@ -364,7 +367,7 @@ describe('ProductInterceptPrompter', () => {
           )
         );
 
-        const subscriptionHandler = jest.fn();
+        const subscriptionHandler = vi.fn();
 
         const intercept$ = registerIntercept({
           id: intercept.id,
@@ -374,7 +377,7 @@ describe('ProductInterceptPrompter', () => {
         const subscription = intercept$.subscribe(subscriptionHandler);
 
         // advance timers to halfway through the time until the next run should happen
-        await jest.advanceTimersByTimeAsync(timeTillNextRun / 2);
+        await vi.advanceTimersByTimeAsync(timeTillNextRun / 2);
 
         expect(http.post).toHaveBeenCalledWith(TRIGGER_INFO_API_ROUTE, {
           body: JSON.stringify({ triggerId: intercept.id }),
@@ -386,7 +389,7 @@ describe('ProductInterceptPrompter', () => {
         fireEvent(document, createEvent('visibilitychange', document));
 
         // simulate the passage of time beyond the next trigger
-        await jest.advanceTimersByTimeAsync(triggerInfo.triggerIntervalInMs);
+        await vi.advanceTimersByTimeAsync(triggerInfo.triggerIntervalInMs);
 
         expect(mockQueueInterceptFn).not.toHaveBeenCalled();
 
@@ -423,13 +426,13 @@ describe('ProductInterceptPrompter', () => {
         );
 
         // return the configured trigger info
-        jest.spyOn(http, 'post').mockResolvedValue(triggerInfo);
+        vi.spyOn(http, 'post').mockResolvedValue(triggerInfo);
 
         // configure a user that encountered the intercept on the 30th run
         mockGetUserTriggerData$.mockReturnValue(Rx.of({ lastInteractedInterceptId: triggerRuns }));
 
         // set system time to time in the future, with just the exact time before the next trigger
-        jest.setSystemTime(
+        vi.setSystemTime(
           new Date(
             Date.parse(triggerInfo.registeredAt) +
               triggerInfo.triggerIntervalInMs * triggerRuns +
@@ -438,7 +441,7 @@ describe('ProductInterceptPrompter', () => {
           )
         );
 
-        const subscriptionHandler = jest.fn();
+        const subscriptionHandler = vi.fn();
 
         const intercept$ = registerIntercept({
           id: intercept.id,
@@ -447,7 +450,7 @@ describe('ProductInterceptPrompter', () => {
 
         const subscription = intercept$.subscribe(subscriptionHandler);
 
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
 
         expect(http.post).toHaveBeenCalledWith(TRIGGER_INFO_API_ROUTE, {
           body: JSON.stringify({ triggerId: intercept.id }),
@@ -459,7 +462,7 @@ describe('ProductInterceptPrompter', () => {
         fireEvent(document, createEvent('visibilitychange', document));
 
         // simulate the passage of time beyond the next trigger
-        await jest.advanceTimersByTimeAsync(triggerInfo.triggerIntervalInMs);
+        await vi.advanceTimersByTimeAsync(triggerInfo.triggerIntervalInMs);
 
         expect(mockQueueInterceptFn).not.toHaveBeenCalled();
 

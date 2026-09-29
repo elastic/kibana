@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { transformRequestToMetricsAPIRequest } from './transform_request_to_metrics_api_request';
 import { withDefaultSnapshotSchema } from './with_default_snapshot_schema';
 import type { InfraSource } from '../../../lib/sources';
@@ -12,7 +14,7 @@ import type { SnapshotRequest } from '../../../../common/http_api';
 import type { MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
 import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
 
-jest.mock('./create_timerange_with_interval', () => {
+vi.mock('./create_timerange_with_interval', () => {
   return {
     createTimeRangeWithInterval: () => ({
       interval: '60s',

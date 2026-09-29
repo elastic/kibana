@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { QueryClient } from '@kbn/react-query';
 import { createServiceAccountDirectory } from './service_account_directory';
 
 describe('service account directory', () => {
   const http = httpServiceMock.createStartContract();
-  const isEnabled = jest.fn();
+  const isEnabled = vi.fn();
   let queryClient: QueryClient;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient();
     isEnabled.mockReturnValue(true);
   });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CoreSetup } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
@@ -37,11 +40,11 @@ describe('TaskManagerService telemetry', () => {
   let service: TaskManagerService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockAnalytics = analyticsServiceMock.createAnalyticsServiceSetup();
 
     const mockTaskManagerSetup = {
-      registerTaskDefinitions: jest.fn(),
+      registerTaskDefinitions: vi.fn(),
     } as unknown as TaskManagerSetupContract;
     const mockCore = {} as unknown as CoreSetup<AutomaticImportPluginStartDependencies>;
     const mockSamplesIndex = {} as unknown as AutomaticImportSamplesIndexService;
@@ -119,7 +122,7 @@ describe('TaskManagerService telemetry', () => {
         success: true,
       });
 
-      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1];
+      const payload = (mockAnalytics.reportEvent as Mock).mock.calls[0][1];
       expect(payload).not.toHaveProperty('errorMessage');
     });
 
@@ -158,14 +161,14 @@ describe('TaskManagerService telemetry', () => {
         success: true,
       });
 
-      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1];
+      const payload = (mockAnalytics.reportEvent as Mock).mock.calls[0][1];
       expect(payload).not.toHaveProperty('modelName');
       expect(payload).not.toHaveProperty('connectorType');
       expect(payload).not.toHaveProperty('connectorName');
     });
 
     it('does not throw when analytics.reportEvent throws', () => {
-      (mockAnalytics.reportEvent as jest.Mock).mockImplementation(() => {
+      (mockAnalytics.reportEvent as Mock).mockImplementation(() => {
         throw new Error('analytics unavailable');
       });
 

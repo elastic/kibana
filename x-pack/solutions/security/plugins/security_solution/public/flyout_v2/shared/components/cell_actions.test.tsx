@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -17,14 +19,17 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { PageScope } from '../../../data_view_manager/constants';
 import { cellActionRenderer, createCellActionRenderer } from './cell_actions';
 
-const mockSecurityCellActions = jest.fn((props: Record<string, unknown>) => (
+const mockSecurityCellActions = vi.fn((props: Record<string, unknown>) => (
   <div data-test-subj="cell-actions">{props.children as React.ReactNode}</div>
 ));
 
-jest.mock('../../../common/components/cell_actions', () => ({
-  SecurityCellActions: (props: Record<string, unknown>) => mockSecurityCellActions(props),
-  CellActionsMode: { HOVER_DOWN: 'hover-down' },
-}));
+vi.mock('../../../common/components/cell_actions', () => {
+      const mocked = {
+      SecurityCellActions: (props: Record<string, unknown>) => mockSecurityCellActions(props),
+      CellActionsMode: { HOVER_DOWN: 'hover-down' },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderCellAction = (renderer: ReturnType<typeof createCellActionRenderer>, scopeId: string) =>
   render(

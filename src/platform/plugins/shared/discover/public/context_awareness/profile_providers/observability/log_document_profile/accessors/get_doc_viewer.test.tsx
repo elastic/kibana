@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DocView, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -19,15 +21,15 @@ import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../toolkit';
 import type { LogOverviewContext } from '../../logs_data_source_profile/profile';
 import { createGetDocViewer } from './get_doc_viewer';
 
-const mockOpenAndScrollToSection = jest.fn();
+const mockOpenAndScrollToSection = vi.fn();
 // Stable across renders: the profile stores the handle in state, so a fresh object each render
 // would loop.
 const mockLogsOverviewApi = { openAndScrollToSection: mockOpenAndScrollToSection };
 
 // The accordion is opened through the imperative handle the logs-overview component hands back, so
 // the stub only needs to surrender a ref; what it renders is not this accessor's concern.
-jest.mock('@kbn/unified-doc-viewer-plugin/public', () => {
-  const actualReact: typeof React = jest.requireActual('react');
+vi.mock('@kbn/unified-doc-viewer-plugin/public', () => {
+  const actualReact: typeof React = require('react');
 
   return {
     UnifiedDocViewerLogsOverview: actualReact.forwardRef((_props, ref) => {

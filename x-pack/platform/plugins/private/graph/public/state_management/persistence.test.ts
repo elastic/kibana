@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { MockedGraphEnvironment } from './mocks';
 import { createMockGraphStore } from './mocks';
 import type { LoadSavedWorkspacePayload } from './persistence';
@@ -30,8 +33,8 @@ import { openSaveModal } from '../services/save_modal';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
 // mocking random id generator function
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   return {
     ...original,
@@ -42,33 +45,42 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../services/persistence', () => ({
-  lookupIndexPatternId: jest.fn(() => ({ id: '123', attributes: { title: 'test-pattern' } })),
-  migrateLegacyIndexPatternRef: jest.fn(() => ({ success: true })),
-  savedWorkspaceToAppState: jest.fn(() => ({
-    urlTemplates: [
-      {
-        description: 'template',
-        url: 'http://example.org/q={{gquery}}',
-      },
-    ] as UrlTemplate[],
-    advancedSettings: { minDocCount: 12 } as AdvancedSettings,
-    allFields: [
-      {
-        name: 'testfield',
-      },
-    ] as WorkspaceField[],
-  })),
-  appStateToSavedWorkspace: jest.fn(),
-}));
+vi.mock('../services/persistence', () => {
+      const mocked = {
+      lookupIndexPatternId: vi.fn(() => ({ id: '123', attributes: { title: 'test-pattern' } })),
+      migrateLegacyIndexPatternRef: vi.fn(() => ({ success: true })),
+      savedWorkspaceToAppState: vi.fn(() => ({
+        urlTemplates: [
+          {
+            description: 'template',
+            url: 'http://example.org/q={{gquery}}',
+          },
+        ] as UrlTemplate[],
+        advancedSettings: { minDocCount: 12 } as AdvancedSettings,
+        allFields: [
+          {
+            name: 'testfield',
+          },
+        ] as WorkspaceField[],
+      })),
+      appStateToSavedWorkspace: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../services/save_modal', () => ({
-  openSaveModal: jest.fn(),
-}));
+vi.mock('../services/save_modal', () => {
+      const mocked = {
+      openSaveModal: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../helpers/saved_workspace_utils', () => ({
-  saveSavedWorkspace: jest.fn().mockResolvedValueOnce('123'),
-}));
+vi.mock('../helpers/saved_workspace_utils', () => {
+      const mocked = {
+      saveSavedWorkspace: vi.fn().mockResolvedValueOnce('123'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('persistence sagas', () => {
   let env: MockedGraphEnvironment;
@@ -95,7 +107,7 @@ describe('persistence sagas', () => {
     });
 
     it('should warn with a toast and abort if index pattern is not found', async () => {
-      (migrateLegacyIndexPatternRef as jest.Mock).mockReturnValueOnce({ success: false });
+      (migrateLegacyIndexPatternRef as Mock).mockReturnValueOnce({ success: false });
       env.store.dispatch(loadSavedWorkspace({ savedWorkspace: {} } as LoadSavedWorkspacePayload));
       await waitForPromise();
       expect(env.mockedDeps.notifications.toasts.addDanger).toHaveBeenCalled();
@@ -104,7 +116,7 @@ describe('persistence sagas', () => {
     });
 
     it('should not crash if the data view goes missing', async () => {
-      (lookupIndexPatternId as jest.Mock).mockReturnValueOnce('missing-dataview');
+      (lookupIndexPatternId as Mock).mockReturnValueOnce('missing-dataview');
       env.store.dispatch(
         loadSavedWorkspace({
           savedWorkspace: {
@@ -141,7 +153,7 @@ describe('persistence sagas', () => {
 
     it('should serialize saved object and save after confirmation', async () => {
       env.store.dispatch(saveWorkspace({ id: '123' } as GraphWorkspaceSavedObject));
-      (openSaveModal as jest.Mock).mock.calls[0][0].saveWorkspace({}, true);
+      (openSaveModal as Mock).mock.calls[0][0].saveWorkspace({}, true);
       expect(appStateToSavedWorkspace).toHaveBeenCalled();
       await waitForPromise();
 
@@ -153,7 +165,7 @@ describe('persistence sagas', () => {
 
     it('should not save data if user does not give consent in the modal', async () => {
       env.store.dispatch(saveWorkspace({} as GraphWorkspaceSavedObject));
-      (openSaveModal as jest.Mock).mock.calls[0][0].saveWorkspace({}, false);
+      (openSaveModal as Mock).mock.calls[0][0].saveWorkspace({}, false);
       // serialize function is called with `canSaveData` set to false
       expect(appStateToSavedWorkspace).toHaveBeenCalledWith(
         expect.anything(),

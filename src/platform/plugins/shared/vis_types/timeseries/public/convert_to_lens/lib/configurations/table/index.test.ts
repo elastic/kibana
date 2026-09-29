@@ -7,18 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createSeries } from '../../__mocks__';
 import { getColumnState } from '.';
 
-const mockGetPalette = jest.fn();
+const mockGetPalette = vi.fn();
 
-jest.mock('../palette', () => ({
-  getPalette: jest.fn(() => mockGetPalette()),
-}));
+vi.mock('../palette', () => {
+      const mocked = {
+      getPalette: vi.fn(() => mockGetPalette()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getColumnState', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetPalette.mockReturnValue({ id: 'custom' });
   });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -13,58 +16,70 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 
-const mockUseAuthz = jest.fn();
-const mockExperimentalFeaturesGet = jest.fn();
-const mockUseAlertingAssets = jest.fn();
-const mockIsAlertingV2Enabled = jest.fn();
-const mockGetRuleLibraryRedirectUrl = jest.fn(
+const mockUseAuthz = vi.fn();
+const mockExperimentalFeaturesGet = vi.fn();
+const mockUseAlertingAssets = vi.fn();
+const mockIsAlertingV2Enabled = vi.fn();
+const mockGetRuleLibraryRedirectUrl = vi.fn(
   ({ templateId }: { templateId?: string }) =>
     `/app/r?l=ALERTING_V2_RULE_LIBRARY_LOCATOR&templateId=${templateId}`
 );
 
-jest.mock('../../../../../services', () => ({
-  ExperimentalFeaturesService: {
-    get: (...args: any[]) => mockExperimentalFeaturesGet(...args),
-  },
-}));
+vi.mock('../../../../../services', () => {
+      const mocked = {
+      ExperimentalFeaturesService: {
+        get: (...args: any[]) => mockExperimentalFeaturesGet(...args),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-utils', () => ({
-  isAlertingV2Enabled: (...args: any[]) => mockIsAlertingV2Enabled(...args),
-}));
+vi.mock('@kbn/alerting-v2-utils', () => {
+      const mocked = {
+      isAlertingV2Enabled: (...args: any[]) => mockIsAlertingV2Enabled(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/side_bar_column', () => ({
-  SideBarColumn: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
-}));
+vi.mock('../../../components/side_bar_column', () => {
+      const mocked = {
+      SideBarColumn: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../hooks'),
-  useGetPackageInstallStatus: jest.fn().mockReturnValue(() => ({
-    status: 'installed',
-    version: '1.0.0',
-  })),
-  useLink: jest.fn().mockReturnValue({ getPath: jest.fn().mockReturnValue('/mock') }),
-  useStartServices: jest.fn().mockReturnValue({
-    notifications: {
-      toasts: { addInfo: jest.fn(), addSuccess: jest.fn(), addError: jest.fn() },
-    },
-    http: {
-      basePath: { prepend: (path: string) => `/mock${path}` },
-    },
-  }),
-  useFleetStatus: jest.fn().mockReturnValue({ spaceId: 'default' }),
-  useAuthz: (...args: any[]) => mockUseAuthz(...args),
-  sendRequestInstallRuleAssets: jest.fn(),
-  useAlertingAssets: (...args: any[]) => mockUseAlertingAssets(...args),
-  useAlertingV2RuleLibraryLocator: () => ({
-    getRedirectUrl: mockGetRuleLibraryRedirectUrl,
-  }),
-}));
+vi.mock('../../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../hooks')),
+      useGetPackageInstallStatus: vi.fn().mockReturnValue(() => ({
+        status: 'installed',
+        version: '1.0.0',
+      })),
+      useLink: vi.fn().mockReturnValue({ getPath: vi.fn().mockReturnValue('/mock') }),
+      useStartServices: vi.fn().mockReturnValue({
+        notifications: {
+          toasts: { addInfo: vi.fn(), addSuccess: vi.fn(), addError: vi.fn() },
+        },
+        http: {
+          basePath: { prepend: (path: string) => `/mock${path}` },
+        },
+      }),
+      useFleetStatus: vi.fn().mockReturnValue({ spaceId: 'default' }),
+      useAuthz: (...args: any[]) => mockUseAuthz(...args),
+      sendRequestInstallRuleAssets: vi.fn(),
+      useAlertingAssets: (...args: any[]) => mockUseAlertingAssets(...args),
+      useAlertingV2RuleLibraryLocator: () => ({
+        getRedirectUrl: mockGetRuleLibraryRedirectUrl,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useGetPackageInstallStatus } from '../../../../../hooks';
 
 import { AlertingPage } from './alerting_page';
 
-const mockUseGetPackageInstallStatus = useGetPackageInstallStatus as jest.MockedFunction<
+const mockUseGetPackageInstallStatus = useGetPackageInstallStatus as MockedFunction<
   typeof useGetPackageInstallStatus
 >;
 
@@ -103,10 +118,10 @@ describe('AlertingPage', () => {
     },
   } as unknown as PackageInfo;
 
-  const refetchPackageInfo = jest.fn();
+  const refetchPackageInfo = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockIsAlertingV2Enabled.mockReturnValue(false);
 
@@ -148,7 +163,7 @@ describe('AlertingPage', () => {
       userCreatedRules: [],
       isLoading: false,
       fetchError: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     mockUseAuthz.mockReturnValue({
@@ -235,7 +250,7 @@ describe('AlertingPage', () => {
       userCreatedRules: [],
       isLoading: false,
       fetchError: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderComponent();
@@ -286,7 +301,7 @@ describe('AlertingPage', () => {
       userCreatedRules: [],
       isLoading: false,
       fetchError: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderComponent();
@@ -326,7 +341,7 @@ describe('AlertingPage', () => {
       ],
       isLoading: false,
       fetchError: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderComponent();
@@ -345,7 +360,7 @@ describe('AlertingPage', () => {
       userCreatedRules: [],
       isLoading: false,
       fetchError: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderComponent();
@@ -423,7 +438,7 @@ describe('AlertingPage', () => {
         userCreatedRules: [],
         isLoading: false,
         fetchError: undefined,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       renderComponent();
@@ -487,7 +502,7 @@ describe('AlertingPage', () => {
         userCreatedRules: [],
         isLoading: false,
         fetchError: undefined,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       renderComponent();
@@ -539,7 +554,7 @@ describe('AlertingPage', () => {
         userCreatedRules: [],
         isLoading: false,
         fetchError: undefined,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       renderComponent();
@@ -589,7 +604,7 @@ describe('AlertingPage', () => {
       ],
       isLoading: false,
       fetchError: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderComponent();

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -19,67 +22,88 @@ import { PLUGIN_ID } from '../../../common';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
 import { TestWrapper } from '../../shared/test_utils/test_wrapper';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 // Force the app menu to render at the xl breakpoint so the primary action button
 // (create) renders inline instead of collapsing into the overflow popover.
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
+vi.mock('@kbn/workflows-ui', async () => {
+  const actual = (await vi.importActual('@kbn/workflows-ui'));
   return {
     ...actual,
-    useShowManagedWorkflowsSetting: jest.fn(),
-    useWorkflows: jest.fn(),
+    useShowManagedWorkflowsSetting: vi.fn(),
+    useWorkflows: vi.fn(),
   };
 });
 
-jest.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => ({
-  useWorkflowsBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => {
+      const mocked = {
+      useWorkflowsBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../entities/workflows/model/use_workflow_stats', () => ({
-  useWorkflowFiltersOptions: jest.fn(),
-}));
+vi.mock('../../entities/workflows/model/use_workflow_stats', () => {
+      const mocked = {
+      useWorkflowFiltersOptions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../features/workflow_list', () => ({
-  WorkflowList: () => <div data-test-subj="mockWorkflowListForAuthzTest" />,
-}));
+vi.mock('../../features/workflow_list', () => {
+      const mocked = {
+      WorkflowList: () => <div data-test-subj="mockWorkflowListForAuthzTest" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../widgets/workflow_search_field/ui/workflow_search_field', () => ({
-  WorkflowSearchField: ({ onSearch }: { onSearch: (query: string) => void }) => (
-    <button type="button" data-test-subj="workflowSearchField" onClick={() => onSearch('security')}>
-      {'Search workflows'}
-    </button>
-  ),
-}));
+vi.mock('../../widgets/workflow_search_field/ui/workflow_search_field', () => {
+      const mocked = {
+      WorkflowSearchField: ({ onSearch }: { onSearch: (query: string) => void }) => (
+        <button type="button" data-test-subj="workflowSearchField" onClick={() => onSearch('security')}>
+          {'Search workflows'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../features/workflow_executions_stats/ui', () => ({
-  WorkflowExecutionStatsBar: () => <div data-test-subj="mockWorkflowExecutionStatsBar" />,
-}));
+vi.mock('../../features/workflow_executions_stats/ui', () => {
+      const mocked = {
+      WorkflowExecutionStatsBar: () => <div data-test-subj="mockWorkflowExecutionStatsBar" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWorkflows = useWorkflows as jest.MockedFunction<typeof useWorkflows>;
-const mockUseShowManagedWorkflowsSetting = useShowManagedWorkflowsSetting as jest.MockedFunction<
+const mockUseWorkflows = useWorkflows as MockedFunction<typeof useWorkflows>;
+const mockUseShowManagedWorkflowsSetting = useShowManagedWorkflowsSetting as MockedFunction<
   typeof useShowManagedWorkflowsSetting
 >;
-const mockUseWorkflowFiltersOptions = useWorkflowFiltersOptions as jest.MockedFunction<
+const mockUseWorkflowFiltersOptions = useWorkflowFiltersOptions as MockedFunction<
   typeof useWorkflowFiltersOptions
 >;
-let mockNavigateToApp: jest.Mock;
+let mockNavigateToApp: Mock;
 let isExecutionStatsBarEnabled = false;
 
 const emptyWorkflowsResult = {
   data: { results: [], total: 0 },
   isLoading: false,
   error: undefined,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
 };
 
 const filtersData = {
@@ -112,7 +136,7 @@ function mockCapabilities(
     manageConnectors?: boolean;
   } = {}
 ): void {
-  mockNavigateToApp = jest.fn();
+  mockNavigateToApp = vi.fn();
   mockUseKibana.mockReturnValue({
     services: {
       application: {
@@ -129,7 +153,7 @@ function mockCapabilities(
             },
           },
         },
-        getUrlForApp: jest.fn((appId: string, options?: { deepLinkId?: string; path?: string }) => {
+        getUrlForApp: vi.fn((appId: string, options?: { deepLinkId?: string; path?: string }) => {
           const deepLinkPath = options?.deepLinkId
             ? `/insightsAndAlerting/${options.deepLinkId}`
             : '';
@@ -146,7 +170,7 @@ function mockCapabilities(
 
 describe('WorkflowsPage authorization', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     isExecutionStatsBarEnabled = false;
     mockUseWorkflows.mockReturnValue(emptyWorkflowsResult as any);
     mockUseShowManagedWorkflowsSetting.mockReturnValue(false);

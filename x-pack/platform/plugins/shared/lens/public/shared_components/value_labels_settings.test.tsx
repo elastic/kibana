@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import type { VisualOptionsProps } from './value_labels_settings';
@@ -14,7 +16,7 @@ describe('Value labels Settings', () => {
   let props: VisualOptionsProps;
   beforeEach(() => {
     props = {
-      onValueLabelChange: jest.fn(),
+      onValueLabelChange: vi.fn(),
     };
   });
 

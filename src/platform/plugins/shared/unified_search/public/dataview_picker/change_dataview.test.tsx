@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -36,20 +39,20 @@ Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({
-    clear: jest.fn(),
-    getItem: jest.fn(),
-    key: jest.fn(),
-    removeItem: jest.fn(),
-    setItem: jest.fn(),
+    clear: vi.fn(),
+    getItem: vi.fn(),
+    key: vi.fn(),
+    removeItem: vi.fn(),
+    setItem: vi.fn(),
     length: 0,
   });
 
   const createMockStorage = () => ({
     storage: createMockWebStorage(),
-    get: jest.fn(),
-    set: jest.fn(),
-    remove: jest.fn(),
-    clear: jest.fn(),
+    get: vi.fn(),
+    set: vi.fn(),
+    remove: vi.fn(),
+    clear: vi.fn(),
   });
 
   const getStorage = (v: boolean) => {
@@ -64,25 +67,25 @@ describe('DataView component', () => {
     uiSettingValue: boolean = false
   ) {
     const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
-    (dataViewEditorMock.userPermissions.editDataView as jest.Mock).mockReturnValue(true);
+    (dataViewEditorMock.userPermissions.editDataView as Mock).mockReturnValue(true);
 
     // Mock openEditor to immediately call onSave callback when called
-    (dataViewEditorMock.openEditor as jest.Mock).mockImplementation(({ onSave }) => {
+    (dataViewEditorMock.openEditor as Mock).mockImplementation(({ onSave }) => {
       if (onSave) {
         // Simulate saving by calling onSave with a mock data view
         setTimeout(() => {
           onSave({ id: 'new-dataview', title: 'New Data View' });
         }, 0);
       }
-      return jest.fn(); // Return a mock close function
+      return vi.fn(); // Return a mock close function
     });
     let dataMock = dataPluginMock.createStartContract();
     dataMock = {
       ...dataMock,
       dataViews: {
         ...dataMock.dataViews,
-        getIdsWithTitle: jest.fn().mockReturnValue([]),
-        get: jest.fn().mockReturnValue({ isPersisted: () => true }),
+        getIdsWithTitle: vi.fn().mockReturnValue([]),
+        get: vi.fn().mockReturnValue({ isPersisted: () => true }),
       },
     };
     const services = {
@@ -90,7 +93,7 @@ describe('DataView component', () => {
       storage: getStorage(storageValue),
       dataViewEditor: dataViewEditorMock,
       uiSettings: {
-        get: jest.fn(() => uiSettingValue),
+        get: vi.fn(() => uiSettingValue),
       },
     };
 
@@ -102,7 +105,7 @@ describe('DataView component', () => {
         fullWidth: true,
         'data-test-subj': 'dataview-trigger',
       },
-      onChangeDataView: jest.fn(),
+      onChangeDataView: vi.fn(),
     };
 
     return (
@@ -115,7 +118,7 @@ describe('DataView component', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('uses the full data view label as the accessible name without a browser tooltip', () => {
@@ -161,7 +164,7 @@ describe('DataView component', () => {
       expectPresent: true,
     },
   ])('$description', async ({ hasAddField, expectPresent }) => {
-    const addFieldSpy = jest.fn();
+    const addFieldSpy = vi.fn();
     const testProps = hasAddField ? { onAddField: addFieldSpy } : {};
 
     render(wrapDataViewComponentInContext(testProps, !hasAddField));
@@ -193,7 +196,7 @@ describe('DataView component', () => {
       expectPresent: true,
     },
   ])('$description', async ({ hasOnDataViewCreated, expectPresent }) => {
-    const addDataViewSpy = jest.fn();
+    const addDataViewSpy = vi.fn();
     const testProps = hasOnDataViewCreated ? { onDataViewCreated: addDataViewSpy } : {};
 
     render(wrapDataViewComponentInContext(testProps, !hasOnDataViewCreated));
@@ -217,7 +220,7 @@ describe('DataView component', () => {
   it('should properly handle ad hoc data views', async () => {
     render(
       wrapDataViewComponentInContext({
-        onDataViewCreated: jest.fn(),
+        onDataViewCreated: vi.fn(),
         savedDataViews: [
           {
             id: 'dataview-1',
@@ -328,8 +331,8 @@ describe('DataView component', () => {
   });
 
   it('should call onClosePopover when it is given and popover is closed', async () => {
-    const onClosePopoverSpy = jest.fn();
-    const addDataViewSpy = jest.fn();
+    const onClosePopoverSpy = vi.fn();
+    const addDataViewSpy = vi.fn();
 
     render(
       wrapDataViewComponentInContext({

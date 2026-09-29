@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -25,7 +27,7 @@ const createMockDeps = (settings: MockServerSettings = {}) => {
     simulateCreateErrorCondition = false,
   } = settings;
 
-  const mockGet = jest.fn().mockImplementation((type, id) => {
+  const mockGet = vi.fn().mockImplementation((type, id) => {
     if (simulateGetErrorCondition) {
       throw new Error('unit test: unexpected exception condition');
     }
@@ -36,7 +38,7 @@ const createMockDeps = (settings: MockServerSettings = {}) => {
     throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
   });
 
-  const mockCreate = jest.fn().mockImplementation(() => {
+  const mockCreate = vi.fn().mockImplementation(() => {
     if (simulateConflict) {
       throw SavedObjectsErrorHelpers.decorateConflictError(
         new Error('unit test: default space already exists')
@@ -52,7 +54,7 @@ const createMockDeps = (settings: MockServerSettings = {}) => {
   return {
     getSavedObjects: () =>
       Promise.resolve({
-        createInternalRepository: jest.fn().mockImplementation(() => {
+        createInternalRepository: vi.fn().mockImplementation(() => {
           return {
             get: mockGet,
             create: mockCreate,

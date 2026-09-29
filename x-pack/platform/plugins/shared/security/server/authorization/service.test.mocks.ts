@@ -5,36 +5,53 @@
  * 2.0.
  */
 
-export const mockCheckPrivilegesFactory = jest.fn();
-jest.mock('./check_privileges', () => ({
-  checkPrivilegesFactory: mockCheckPrivilegesFactory,
-}));
+import { vi } from 'vitest';
 
-export const mockCheckPrivilegesDynamicallyWithRequestFactory = jest.fn();
-jest.mock('./check_privileges_dynamically', () => ({
-  checkPrivilegesDynamicallyWithRequestFactory: mockCheckPrivilegesDynamicallyWithRequestFactory,
-}));
+export const mockCheckPrivilegesFactory = vi.fn();
+vi.mock('./check_privileges', () => {
+      const mocked = {
+      checkPrivilegesFactory: mockCheckPrivilegesFactory,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const mockCheckSavedObjectsPrivilegesWithRequestFactory = jest.fn();
-jest.mock('./check_saved_objects_privileges', () => ({
-  checkSavedObjectsPrivilegesWithRequestFactory: mockCheckSavedObjectsPrivilegesWithRequestFactory,
-}));
+export const mockCheckPrivilegesDynamicallyWithRequestFactory = vi.fn();
+vi.mock('./check_privileges_dynamically', () => {
+      const mocked = {
+      checkPrivilegesDynamicallyWithRequestFactory: mockCheckPrivilegesDynamicallyWithRequestFactory,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const mockPrivilegesFactory = jest.fn();
-jest.mock('@kbn/security-authorization-core', () => {
-  const authzCore = jest.requireActual('@kbn/security-authorization-core');
+export const mockCheckSavedObjectsPrivilegesWithRequestFactory = vi.fn();
+vi.mock('./check_saved_objects_privileges', () => {
+      const mocked = {
+      checkSavedObjectsPrivilegesWithRequestFactory: mockCheckSavedObjectsPrivilegesWithRequestFactory,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+export const mockPrivilegesFactory = vi.fn();
+vi.mock('@kbn/security-authorization-core', async () => {
+  const authzCore = (await vi.importActual('@kbn/security-authorization-core'));
   return {
     ...authzCore,
     privilegesFactory: mockPrivilegesFactory,
   };
 });
 
-export const mockAuthorizationModeFactory = jest.fn();
-jest.mock('./mode', () => ({
-  authorizationModeFactory: mockAuthorizationModeFactory,
-}));
+export const mockAuthorizationModeFactory = vi.fn();
+vi.mock('./mode', () => {
+      const mocked = {
+      authorizationModeFactory: mockAuthorizationModeFactory,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const mockRegisterPrivilegesWithCluster = jest.fn();
-jest.mock('./register_privileges_with_cluster', () => ({
-  registerPrivilegesWithCluster: mockRegisterPrivilegesWithCluster,
-}));
+export const mockRegisterPrivilegesWithCluster = vi.fn();
+vi.mock('./register_privileges_with_cluster', () => {
+      const mocked = {
+      registerPrivilegesWithCluster: mockRegisterPrivilegesWithCluster,
+    };
+      return { ...mocked, default: mocked };
+    });

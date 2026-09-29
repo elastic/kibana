@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { proposalDecisionSignal } from './proposal_decision_signal';
 
 describe('proposalDecisionSignal', () => {
   it('notifies every subscriber when bumped', () => {
-    const first = jest.fn();
-    const second = jest.fn();
+    const first = vi.fn();
+    const second = vi.fn();
     const unsubscribeFirst = proposalDecisionSignal.subscribe(first);
     const unsubscribeSecond = proposalDecisionSignal.subscribe(second);
 
@@ -29,7 +31,7 @@ describe('proposalDecisionSignal', () => {
   });
 
   it('stops notifying a listener once it unsubscribes', () => {
-    const listener = jest.fn();
+    const listener = vi.fn();
     const unsubscribe = proposalDecisionSignal.subscribe(listener);
     unsubscribe();
 

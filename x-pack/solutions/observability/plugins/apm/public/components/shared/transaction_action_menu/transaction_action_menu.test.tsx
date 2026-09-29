@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance, Mocked } from 'vitest';
+
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
@@ -37,13 +40,13 @@ import type {
 import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 
 const mockAssetDetailsLocator = {
-  getRedirectUrl: jest
+  getRedirectUrl: vi
     .fn()
     .mockImplementation(
       ({ entityId, entityType, assetDetails }: AssetDetailsLocatorParams) =>
         `/node-mock/${entityType}/${entityId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
     ),
-} as unknown as jest.Mocked<AssetDetailsLocator>;
+} as unknown as Mocked<AssetDetailsLocator>;
 
 const apmContextMock = {
   ...mockApmPluginContextValue,
@@ -61,7 +64,7 @@ const apmContextMock = {
           if (id === uptimeOverviewLocatorID) {
             return {
               ...sharePluginMock.createLocator(),
-              getRedirectUrl: jest.fn(
+              getRedirectUrl: vi.fn(
                 () =>
                   'http://localhost/basepath/app/uptime?dateRangeStart=now-24h&dateRangeEnd=now&search=url.domain:%22example.com%22'
               ),
@@ -76,9 +79,12 @@ const apmContextMock = {
   },
 } as unknown as ApmPluginContextValue;
 
-jest.mock('../../../hooks/use_profiling_integration_setting', () => ({
-  useProfilingPluginSetting: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../hooks/use_profiling_integration_setting', () => {
+      const mocked = {
+      useProfilingPluginSetting: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const history = createMemoryHistory();
 history.replace(
@@ -89,10 +95,10 @@ function Wrapper({ children }: { children?: React.ReactNode }) {
   const mockServices = {
     dataViews: {
       get: async () => {},
-      create: jest.fn(),
+      create: vi.fn(),
     },
     spaces: {
-      getActiveSpace: jest.fn().mockImplementation(() => ({ id: 'mockSpaceId' })),
+      getActiveSpace: vi.fn().mockImplementation(() => ({ id: 'mockSpaceId' })),
     },
   };
 
@@ -124,23 +130,23 @@ const expectLogsLocatorToBeCalled = () => {
   expect(logsLocatorMock.getRedirectUrl).toHaveBeenCalled();
 };
 
-let useAdHocApmDataViewSpy: jest.SpyInstance;
+let useAdHocApmDataViewSpy: MockInstance;
 
 describe('TransactionActionMenu ', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+  vi.spyOn(hooks, 'useFetcher').mockReturnValue({
     // return as Profiling had been initialized
     data: {
       initialized: true,
     },
     status: hooks.FETCH_STATUS.SUCCESS,
-    refetch: jest.fn(),
+    refetch: vi.fn(),
   });
 
-  useAdHocApmDataViewSpy = jest.spyOn(useAdHocApmDataView, 'useAdHocApmDataView');
+  useAdHocApmDataViewSpy = vi.spyOn(useAdHocApmDataView, 'useAdHocApmDataView');
 
   useAdHocApmDataViewSpy.mockImplementation(() => {
     return {
@@ -151,7 +157,7 @@ describe('TransactionActionMenu ', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call logs locators getRedirectUrl function', async () => {
@@ -285,7 +291,7 @@ describe('TransactionActionMenu ', () => {
 
   describe('Profiling items', () => {
     beforeEach(() => {
-      (useProfilingPluginSetting as jest.Mock).mockReturnValue(true);
+      (useProfilingPluginSetting as Mock).mockReturnValue(true);
     });
 
     it('renders flamegraph item', async () => {
@@ -304,7 +310,7 @@ describe('TransactionActionMenu ', () => {
 
   describe('Custom links', () => {
     afterAll(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
     function renderTransactionActionMenuWithLicense(license: License) {
       return render(
@@ -439,14 +445,14 @@ describe('TransactionActionMenu ', () => {
 
 describe('Profiling not initialized', () => {
   beforeAll(() => {
-    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+    vi.spyOn(hooks, 'useFetcher').mockReturnValue({
       // return as Profiling had not been initialized
       data: { initialized: false },
       status: hooks.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
-    useAdHocApmDataViewSpy = jest.spyOn(useAdHocApmDataView, 'useAdHocApmDataView');
+    useAdHocApmDataViewSpy = vi.spyOn(useAdHocApmDataView, 'useAdHocApmDataView');
 
     useAdHocApmDataViewSpy.mockImplementation(() => {
       return {
@@ -457,7 +463,7 @@ describe('Profiling not initialized', () => {
     });
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('does not render flamegraph item', async () => {
     const component = await renderTransaction(Transactions.transactionWithHostData);

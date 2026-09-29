@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { getDateRange } from '../../../context/url_params_context/helpers';
 import { getComparisonOptions } from './get_comparison_options';
 import moment from 'moment-timezone';
@@ -27,12 +30,12 @@ function getExpectedTimesAndComparisons({
 }
 
 describe('Comparison test suite', () => {
-  let dateNowSpy: jest.SpyInstance;
+  let dateNowSpy: MockInstance;
 
   beforeAll(() => {
     moment.tz.setDefault('Europe/London');
     const mockDateNow = '2022-01-14T18:30:15.500Z';
-    dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(new Date(mockDateNow).getTime());
+    dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(new Date(mockDateNow).getTime());
   });
 
   afterAll(() => {

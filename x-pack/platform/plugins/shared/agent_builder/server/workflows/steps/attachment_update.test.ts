@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { updateAttachmentStepDefinition } from './attachment_update';
 import {
   createStepHandlerContext,
   createWorkflowStepAttachmentClientMock,
 } from '../../test_utils/workflow_steps';
 
-const experimentalEnabled = jest.fn().mockResolvedValue(true);
-const experimentalDisabled = jest.fn().mockResolvedValue(false);
+const experimentalEnabled = vi.fn().mockResolvedValue(true);
+const experimentalDisabled = vi.fn().mockResolvedValue(false);
 
 describe('updateAttachmentStepDefinition', () => {
   it('creates the expected step definition structure', () => {
@@ -28,7 +30,7 @@ describe('updateAttachmentStepDefinition', () => {
 
   it('updates and returns the reference', async () => {
     const { update, getAttachmentClient } = createWorkflowStepAttachmentClientMock({
-      update: jest.fn().mockResolvedValue({
+      update: vi.fn().mockResolvedValue({
         id: 'att-1',
         type: 'text',
         current_version: 3,
@@ -65,7 +67,7 @@ describe('updateAttachmentStepDefinition', () => {
 
   it('forwards render_inline to the client', async () => {
     const { update, getAttachmentClient } = createWorkflowStepAttachmentClientMock({
-      update: jest
+      update: vi
         .fn()
         .mockResolvedValue({ id: 'att-1', type: 'text', current_version: 2, versions: [] }),
     });
@@ -114,7 +116,7 @@ describe('updateAttachmentStepDefinition', () => {
 
   it('returns an error when the client throws', async () => {
     const { getAttachmentClient } = createWorkflowStepAttachmentClientMock({
-      update: jest.fn().mockRejectedValue(new Error('not found')),
+      update: vi.fn().mockRejectedValue(new Error('not found')),
     });
 
     const definition = updateAttachmentStepDefinition({

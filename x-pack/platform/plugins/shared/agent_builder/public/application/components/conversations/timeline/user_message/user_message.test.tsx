@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -14,30 +16,45 @@ import { UserMessage } from './user_message';
 import { ResponseActions } from '../response/response_actions';
 import { UserMessageImages } from './user_message_images';
 
-jest.mock('../../../../hooks/use_current_user', () => ({
-  useCurrentUser: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_current_user', () => {
+      const mocked = {
+      useCurrentUser: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_user_profiles', () => ({
-  useUserProfiles: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_user_profiles', () => {
+      const mocked = {
+      useUserProfiles: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../response/response_actions', () => ({
-  ResponseActions: jest.fn(() => <div data-test-subj="agentBuilderUserMessageActions" />),
-}));
+vi.mock('../response/response_actions', () => {
+      const mocked = {
+      ResponseActions: vi.fn(() => <div data-test-subj="agentBuilderUserMessageActions" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../attachments/attachment_references', () => ({
-  AttachmentReferences: () => <div data-test-subj="agentBuilderUserMessageAttachments" />,
-}));
+vi.mock('../attachments/attachment_references', () => {
+      const mocked = {
+      AttachmentReferences: () => <div data-test-subj="agentBuilderUserMessageAttachments" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./user_message_images', () => ({
-  UserMessageImages: jest.fn(() => <div data-test-subj="agentBuilderUserMessageImages" />),
-}));
+vi.mock('./user_message_images', () => {
+      const mocked = {
+      UserMessageImages: vi.fn(() => <div data-test-subj="agentBuilderUserMessageImages" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseCurrentUser = jest.mocked(useCurrentUser);
-const mockUseUserProfiles = jest.mocked(useUserProfiles);
-const MockResponseActions = jest.mocked(ResponseActions);
-const MockUserMessageImages = jest.mocked(UserMessageImages);
+const mockUseCurrentUser = vi.mocked(useCurrentUser);
+const mockUseUserProfiles = vi.mocked(useUserProfiles);
+const MockResponseActions = vi.mocked(ResponseActions);
+const MockUserMessageImages = vi.mocked(UserMessageImages);
 
 const currentUser = {
   uid: 'current-user',

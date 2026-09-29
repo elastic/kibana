@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ComponentProps } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -21,7 +23,7 @@ import { defaultPaletteParams } from './palette_config';
 type Props = ComponentProps<typeof GaugeDimensionEditor>;
 
 describe('GaugeDimensionEditor', () => {
-  const mockSetState = jest.fn();
+  const mockSetState = vi.fn();
   const paletteService = chartPluginMock.createPaletteRegistry();
   const defaultFrame = createMockFramePublicAPI({
     activeData: {
@@ -59,7 +61,7 @@ describe('GaugeDimensionEditor', () => {
     accessor: 'metric-col-id',
     state: defaultState,
     datasource: createMockDatasource('formBased', {
-      getOperationForColumnId: jest.fn(() => ({
+      getOperationForColumnId: vi.fn(() => ({
         hasReducedTimeRange: false,
         dataType: 'number',
         hasTimeShift: false,
@@ -69,15 +71,15 @@ describe('GaugeDimensionEditor', () => {
     }).publicAPIMock,
     frame: defaultFrame,
     setState: mockSetState,
-    addLayer: jest.fn(),
-    removeLayer: jest.fn(),
+    addLayer: vi.fn(),
+    removeLayer: vi.fn(),
     panelRef: { current: null },
     isInlineEditing: false,
     paletteService,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   function renderGaugeDimensionEditor(overrides: Partial<Props> = {}) {

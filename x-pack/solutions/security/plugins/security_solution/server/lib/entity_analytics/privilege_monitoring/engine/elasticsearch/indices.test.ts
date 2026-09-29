@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AuditLogger } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
@@ -19,15 +21,18 @@ import type { PrivmonIndexService } from './indices';
 import { createPrivmonIndexService } from './indices';
 import { PRIVMON_EVENT_INGEST_PIPELINE_ID, eventIngestPipeline } from './pipeline';
 
-const mockCreateOrUpdateIndex = jest.fn();
-jest.mock('../../../utils/create_or_update_index', () => ({
-  createOrUpdateIndex: () => mockCreateOrUpdateIndex(),
-}));
+const mockCreateOrUpdateIndex = vi.fn();
+vi.mock('../../../utils/create_or_update_index', () => {
+      const mocked = {
+      createOrUpdateIndex: () => mockCreateOrUpdateIndex(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Privileged User Monitoring: Indices Service', () => {
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const loggerMock = loggingSystemMock.createLogger();
-  const auditMock = { log: jest.fn().mockReturnValue(undefined) } as unknown as AuditLogger;
+  const auditMock = { log: vi.fn().mockReturnValue(undefined) } as unknown as AuditLogger;
   const telemetryMock = analyticsServiceMock.createAnalyticsServiceSetup();
 
   const savedObjectServiceMock = savedObjectsServiceMock.createStartContract();
@@ -46,7 +51,7 @@ describe('Privileged User Monitoring: Indices Service', () => {
   let dataClient: PrivilegeMonitoringDataClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     dataClient = new PrivilegeMonitoringDataClient(deps);
     indexService = createPrivmonIndexService(dataClient);
   });

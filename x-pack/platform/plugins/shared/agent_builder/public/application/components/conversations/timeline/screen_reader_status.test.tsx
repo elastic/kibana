@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { TimelineScreenReaderStatus } from './screen_reader_status';
 
-jest.mock('../../../hooks/use_conversation_stream', () => ({
-  useConversationStream: jest.fn(),
-}));
+vi.mock('../../../hooks/use_conversation_stream', () => {
+      const mocked = {
+      useConversationStream: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const setLoading = (isResponseLoading: boolean) =>
-  jest
+  vi
     .mocked(useConversationStream)
     .mockReturnValue({ isResponseLoading } as ReturnType<typeof useConversationStream>);
 

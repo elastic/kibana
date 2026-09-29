@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { getRoutePaths } from '../../../common';
@@ -20,15 +22,15 @@ function setup({
   serverless?: boolean;
 } = {}) {
   const router = httpServiceMock.createRouter();
-  const getSetupState = jest.fn().mockResolvedValue({
+  const getSetupState = vi.fn().mockResolvedValue({
     type: 'self-managed',
     setupState: {
       resource_management: { enabled: true },
       settings: { configured: true },
     },
   });
-  const profilingStatus = jest.fn().mockResolvedValue({});
-  const createProfilingEsClient = jest.fn().mockReturnValue({ profilingStatus });
+  const profilingStatus = vi.fn().mockResolvedValue({});
+  const createProfilingEsClient = vi.fn().mockReturnValue({ profilingStatus });
 
   registerSetupRoute({
     router,

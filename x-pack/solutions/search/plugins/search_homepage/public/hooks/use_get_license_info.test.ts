@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-types';
 import useObservable from 'react-use/lib/useObservable';
@@ -12,11 +15,11 @@ import useObservable from 'react-use/lib/useObservable';
 import { useGetLicenseInfo } from './use_get_license_info';
 import { useKibana } from './use_kibana';
 
-jest.mock('./use_kibana');
-jest.mock('react-use/lib/useObservable');
+vi.mock('./use_kibana');
+vi.mock('react-use/lib/useObservable');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseObservable = useObservable as jest.MockedFunction<typeof useObservable>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseObservable = useObservable as MockedFunction<typeof useObservable>;
 
 const makeLicense = (
   overrides: Partial<{
@@ -36,7 +39,7 @@ const makeLicense = (
     type,
     isAvailable,
     isActive,
-    hasAtLeast: jest.fn((level: string) => (level === 'enterprise' ? hasAtLeastEnterprise : false)),
+    hasAtLeast: vi.fn((level: string) => (level === 'enterprise' ? hasAtLeastEnterprise : false)),
   } as unknown as ILicense;
 };
 
@@ -61,7 +64,7 @@ const makeKibanaMock = (cloudOverrides?: {
 
 describe('useGetLicenseInfo', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     // Default: no cloud, basic license
     mockUseKibana.mockReturnValue(makeKibanaMock());
     mockUseObservable.mockReturnValue(makeLicense());

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -100,7 +102,7 @@ describe('TagListComponent', () => {
 
   describe('with onClick handler', () => {
     it('passes onClick to each TagBadge', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const user = userEvent.setup();
 
       render(<TagListComponent tags={mockTags} onClick={onClick} />, {
@@ -118,7 +120,7 @@ describe('TagListComponent', () => {
     });
 
     it('allows clicking different tags', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const user = userEvent.setup();
 
       render(<TagListComponent tags={mockTags} onClick={onClick} />, {
@@ -148,7 +150,7 @@ describe('TagListComponent', () => {
     });
 
     it('supports modifier key clicks', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const user = userEvent.setup();
 
       render(<TagListComponent tags={mockTags} onClick={onClick} />, {
@@ -169,7 +171,7 @@ describe('TagListComponent', () => {
     });
 
     it('renders badges as buttons when onClick is provided', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
 
       render(<TagListComponent tags={mockTags} onClick={onClick} />, {
         wrapper: createWrapper,
@@ -267,7 +269,7 @@ describe('TagListComponent', () => {
 
   describe('accessibility', () => {
     it('provides proper aria labels when onClick is provided', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
 
       render(<TagListComponent tags={mockTags} onClick={onClick} />, {
         wrapper: createWrapper,
@@ -280,7 +282,7 @@ describe('TagListComponent', () => {
     });
 
     it('includes tag name in aria label', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
 
       render(<TagListComponent tags={mockTags} onClick={onClick} />, {
         wrapper: createWrapper,

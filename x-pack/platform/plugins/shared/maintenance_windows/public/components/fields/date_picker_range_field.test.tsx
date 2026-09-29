@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import moment from 'moment';
@@ -18,11 +20,11 @@ import { createAppMockRenderer } from '../../lib/test_utils';
 import type { FormProps } from '../schema';
 import { DatePickerRangeField } from './date_picker_range_field';
 
-jest.mock('../../utils/kibana_react');
-jest.mock('../../helpers/get_selected_for_date_picker');
+vi.mock('../../utils/kibana_react');
+vi.mock('../../helpers/get_selected_for_date_picker');
 
-const { useUiSetting } = jest.requireMock('../../utils/kibana_react');
-const { getSelectedForDatePicker } = jest.requireMock('../../helpers/get_selected_for_date_picker');
+const { useUiSetting } = (await vi.importMock('../../utils/kibana_react'));
+const { getSelectedForDatePicker } = (await vi.importMock('../../helpers/get_selected_for_date_picker'));
 
 describe('DatePickerRangeField', () => {
   let appMockRenderer: AppMockRenderer;
@@ -34,14 +36,14 @@ describe('DatePickerRangeField', () => {
         startDate: {},
         endDate: {},
       },
-      onSubmit: jest.fn(),
+      onSubmit: vi.fn(),
     });
 
     return <Form form={form}>{children}</Form>;
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
   });
 

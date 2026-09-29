@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { RenderHookResult } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -17,15 +20,18 @@ import type {
 } from './use_show_related_attacks';
 import { useShowRelatedAttacks } from './use_show_related_attacks';
 
-jest.mock('../../../../../common/hooks/use_is_alerts_and_attacks_alignment_enabled', () => ({
-  useIsAlertsAndAttacksAlignmentEnabled: jest.fn(),
-}));
+vi.mock('../../../../../common/hooks/use_is_alerts_and_attacks_alignment_enabled', () => {
+      const mocked = {
+      useIsAlertsAndAttacksAlignmentEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useShowRelatedAttacks', () => {
   let hookResult: RenderHookResult<UseShowRelatedAttacksResult, UseShowRelatedAttacksParams>;
 
   beforeEach(() => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
+    (useIsAlertsAndAttacksAlignmentEnabled as Mock).mockReturnValue(true);
   });
 
   it('should return true when setting is enabled even if hit has no attack ids', () => {
@@ -36,7 +42,7 @@ describe('useShowRelatedAttacks', () => {
   });
 
   it('should return false if setting is disabled, even when attack ids exist', () => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(false);
+    (useIsAlertsAndAttacksAlignmentEnabled as Mock).mockReturnValue(false);
 
     const hit = {
       flattened: { [ALERT_ATTACK_IDS]: ['attack-id-1', 'attack-id-2'] },

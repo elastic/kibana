@@ -5,35 +5,49 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { useServiceFlyoutLinks } from './use_service_flyout_links';
 
-jest.mock('../../../../hooks/use_manage_slos_url', () => ({
-  getManageSlosUrl: jest.fn(() => '/app/slos?serviceName=opbeans-java'),
-}));
+vi.mock('../../../../hooks/use_manage_slos_url', () => {
+      const mocked = {
+      getManageSlosUrl: vi.fn(() => '/app/slos?serviceName=opbeans-java'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../footer/hooks/use_alerts_href', () => ({
-  useAlertsHref: jest.fn(() => '/app/observability/alerts?mock'),
-}));
+vi.mock('../footer/hooks/use_alerts_href', () => {
+      const mocked = {
+      useAlertsHref: vi.fn(() => '/app/observability/alerts?mock'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFlyoutDiscoverHref = jest.fn();
-jest.mock('../utils/get_flyout_discover_navigation', () => ({
-  getFlyoutDiscoverNavigation: (args: unknown) => mockUseFlyoutDiscoverHref(args),
-}));
+const mockUseFlyoutDiscoverHref = vi.fn();
+vi.mock('../utils/get_flyout_discover_navigation', () => {
+      const mocked = {
+      getFlyoutDiscoverNavigation: (args: unknown) => mockUseFlyoutDiscoverHref(args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetRedirectUrl = jest.fn(
+const mockGetRedirectUrl = vi.fn(
   (payload: { serviceName: string; serviceOverviewTab?: string }) => {
     const tab = payload.serviceOverviewTab ?? 'overview';
     return `/app/apm/services/${payload.serviceName}/${tab}`;
   }
 );
-const mockLocatorsGet = jest.fn(() => ({ getRedirectUrl: mockGetRedirectUrl }));
+const mockLocatorsGet = vi.fn(() => ({ getRedirectUrl: mockGetRedirectUrl }));
 
-const mockUseServiceFlyoutContext = jest.fn();
-jest.mock('../service_flyout_context', () => ({
-  useServiceFlyoutContext: (...args: unknown[]) => mockUseServiceFlyoutContext(...args),
-}));
+const mockUseServiceFlyoutContext = vi.fn();
+vi.mock('../service_flyout_context', () => {
+      const mocked = {
+      useServiceFlyoutContext: (...args: unknown[]) => mockUseServiceFlyoutContext(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function makeContext(overrides: { sloRead?: boolean; transactionType?: string } = {}) {
   const { sloRead = true, transactionType } = overrides;
@@ -146,7 +160,7 @@ describe('useServiceFlyoutLinks', () => {
   });
 
   it('builds openInDiscoverTab closures when openInNewDiscoverTab is in context', () => {
-    const mockOpenInNewDiscoverTab = jest.fn();
+    const mockOpenInNewDiscoverTab = vi.fn();
     mockUseServiceFlyoutContext.mockReturnValue({
       ...makeContext({ transactionType: 'request' }),
       contextActions: { openInNewDiscoverTab: mockOpenInNewDiscoverTab },

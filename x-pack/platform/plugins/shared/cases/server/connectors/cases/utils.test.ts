@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type {
   CaseCustomFields,
   CustomFieldConfiguration,
@@ -81,7 +83,7 @@ describe('utils', () => {
 
   describe('buildCustomFieldsForRequest', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('adds required custom fields with default values in configuration', () => {

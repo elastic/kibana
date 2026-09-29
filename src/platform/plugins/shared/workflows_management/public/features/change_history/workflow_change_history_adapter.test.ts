@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core/public';
 import { createWorkflowChangeHistoryAdapter } from './workflow_change_history_adapter';
 import { INTERNAL_API_VERSION } from '../../../common/lib/api_constants';
@@ -47,8 +50,8 @@ const sampleWorkflowHistoryResponse: WorkflowChangesHistoryResponse = {
 };
 
 const createHttpMock = (
-  get: jest.Mock,
-  post: jest.Mock = jest.fn().mockResolvedValue({})
+  get: Mock,
+  post: Mock = vi.fn().mockResolvedValue({})
 ): Pick<HttpSetup, 'get' | 'post'> => ({
   get,
   post,
@@ -56,11 +59,11 @@ const createHttpMock = (
 
 describe('createWorkflowChangeHistoryAdapter', () => {
   it('yields to requestAnimationFrame between list rows when computing changes', async () => {
-    const rafSpy = jest.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+    const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
       callback(0);
       return 1;
     });
-    const http = createHttpMock(jest.fn().mockResolvedValue(sampleWorkflowHistoryResponse));
+    const http = createHttpMock(vi.fn().mockResolvedValue(sampleWorkflowHistoryResponse));
 
     const adapter = createWorkflowChangeHistoryAdapter(http as HttpSetup);
 
@@ -74,7 +77,7 @@ describe('createWorkflowChangeHistoryAdapter', () => {
   });
 
   it('fetches paginated history with 1-based API page numbers', async () => {
-    const http = createHttpMock(jest.fn().mockResolvedValue(sampleWorkflowHistoryResponse));
+    const http = createHttpMock(vi.fn().mockResolvedValue(sampleWorkflowHistoryResponse));
 
     const adapter = createWorkflowChangeHistoryAdapter(http as HttpSetup);
 
@@ -104,7 +107,7 @@ describe('createWorkflowChangeHistoryAdapter', () => {
 
   it('omits changes for a page tail until the next page is loaded', async () => {
     const http = createHttpMock(
-      jest.fn().mockResolvedValue({
+      vi.fn().mockResolvedValue({
         page: 1,
         perPage: 1,
         total: 3,
@@ -126,7 +129,7 @@ describe('createWorkflowChangeHistoryAdapter', () => {
 
   it('patches the previous page tail when the next page loads', async () => {
     const http = createHttpMock(
-      jest.fn().mockImplementation((_url, options) => {
+      vi.fn().mockImplementation((_url, options) => {
         const apiPage = options?.query?.page;
 
         if (apiPage === 1) {
@@ -183,7 +186,7 @@ describe('createWorkflowChangeHistoryAdapter', () => {
       version: 0,
     };
     const http = createHttpMock(
-      jest.fn().mockImplementation((_url, options) => {
+      vi.fn().mockImplementation((_url, options) => {
         const page = options?.query?.page;
 
         if (page === 1) {
@@ -232,7 +235,7 @@ describe('createWorkflowChangeHistoryAdapter', () => {
   });
 
   it('namespaces cache by objectId so colliding change ids do not leak across workflows', async () => {
-    const http = createHttpMock(jest.fn().mockResolvedValue(sampleWorkflowHistoryResponse));
+    const http = createHttpMock(vi.fn().mockResolvedValue(sampleWorkflowHistoryResponse));
     const adapter = createWorkflowChangeHistoryAdapter(http as HttpSetup);
 
     await adapter.listChanges({
@@ -249,7 +252,7 @@ describe('createWorkflowChangeHistoryAdapter', () => {
   });
 
   it('returns cached detail from list rows without a dedicated detail route', async () => {
-    const http = createHttpMock(jest.fn().mockResolvedValue(sampleWorkflowHistoryResponse));
+    const http = createHttpMock(vi.fn().mockResolvedValue(sampleWorkflowHistoryResponse));
     const adapter = createWorkflowChangeHistoryAdapter(http as HttpSetup);
 
     await adapter.listChanges({
@@ -274,7 +277,7 @@ describe('createWorkflowChangeHistoryAdapter', () => {
 
   it('clears only the current workflow cache on page-0 refetch', async () => {
     const http = createHttpMock(
-      jest.fn().mockImplementation((_url, options) => {
+      vi.fn().mockImplementation((_url, options) => {
         const page = options?.query?.page;
 
         if (page === 1) {
@@ -315,7 +318,7 @@ describe('createWorkflowChangeHistoryAdapter', () => {
   });
 
   it('throws when getChange is called before the row was loaded', async () => {
-    const adapter = createWorkflowChangeHistoryAdapter(createHttpMock(jest.fn()) as HttpSetup);
+    const adapter = createWorkflowChangeHistoryAdapter(createHttpMock(vi.fn()) as HttpSetup);
 
     await expect(
       adapter.getChange({
@@ -326,8 +329,8 @@ describe('createWorkflowChangeHistoryAdapter', () => {
   });
 
   it('posts restore without clearing cached history rows before list refetch', async () => {
-    const post = jest.fn().mockResolvedValue({});
-    const http = createHttpMock(jest.fn().mockResolvedValue(sampleWorkflowHistoryResponse), post);
+    const post = vi.fn().mockResolvedValue({});
+    const http = createHttpMock(vi.fn().mockResolvedValue(sampleWorkflowHistoryResponse), post);
     const adapter = createWorkflowChangeHistoryAdapter(http as HttpSetup);
 
     await adapter.listChanges({
@@ -357,10 +360,10 @@ describe('createWorkflowChangeHistoryAdapter', () => {
   });
 
   it('reloads the workflow detail after a successful restore', async () => {
-    const onWorkflowRestored = jest.fn().mockResolvedValue(undefined);
-    const post = jest.fn().mockResolvedValue({});
+    const onWorkflowRestored = vi.fn().mockResolvedValue(undefined);
+    const post = vi.fn().mockResolvedValue({});
     const adapter = createWorkflowChangeHistoryAdapter(
-      createHttpMock(jest.fn(), post) as HttpSetup,
+      createHttpMock(vi.fn(), post) as HttpSetup,
       {
         onWorkflowRestored,
       }
@@ -375,14 +378,14 @@ describe('createWorkflowChangeHistoryAdapter', () => {
   });
 
   it('does not reload the workflow detail when restore fails', async () => {
-    const onWorkflowRestored = jest.fn();
-    const post = jest.fn().mockRejectedValue({
+    const onWorkflowRestored = vi.fn();
+    const post = vi.fn().mockRejectedValue({
       response: { status: 409 },
       body: { message: 'Workflow was updated by another user.' },
       message: 'Conflict',
     });
     const adapter = createWorkflowChangeHistoryAdapter(
-      createHttpMock(jest.fn(), post) as HttpSetup,
+      createHttpMock(vi.fn(), post) as HttpSetup,
       {
         onWorkflowRestored,
       }
@@ -403,13 +406,13 @@ describe('createWorkflowChangeHistoryAdapter', () => {
   });
 
   it('maps HTTP restore errors to structured change-history codes', async () => {
-    const post = jest.fn().mockRejectedValue({
+    const post = vi.fn().mockRejectedValue({
       response: { status: 409 },
       body: { message: 'Workflow was updated by another user.' },
       message: 'Conflict',
     });
     const adapter = createWorkflowChangeHistoryAdapter(
-      createHttpMock(jest.fn(), post) as HttpSetup
+      createHttpMock(vi.fn(), post) as HttpSetup
     );
 
     await expect(

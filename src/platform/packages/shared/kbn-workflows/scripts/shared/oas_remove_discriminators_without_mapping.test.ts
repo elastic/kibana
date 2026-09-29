@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { OpenAPIV3 } from 'openapi-types';
 import { removeDiscriminatorsWithoutMapping } from './oas_remove_discriminators_without_mapping';
 
@@ -30,7 +32,7 @@ describe('removeDiscriminatorsWithoutMapping', () => {
   });
 
   it('should remove discriminator when it has no mapping', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation();
     const doc = makeDocument({
       MySchema: {
         oneOf: [{ $ref: '#/components/schemas/A' }, { $ref: '#/components/schemas/B' }],

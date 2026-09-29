@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { SLONotFound } from '../../errors';
 import { createCompositeSlo } from '../fixtures/composite_slo';
 import { createCompositeSLORepositoryMock } from '../mocks';
@@ -12,7 +14,7 @@ import type { CompositeSLORepository } from './composite_slo_repository';
 import { GetCompositeSLODefinition } from './get_composite_slo_definition';
 
 describe('GetCompositeSLODefinition', () => {
-  let mockCompositeRepo: jest.Mocked<CompositeSLORepository>;
+  let mockCompositeRepo: Mocked<CompositeSLORepository>;
   let getCompositeSLODefinition: GetCompositeSLODefinition;
 
   beforeEach(() => {

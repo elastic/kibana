@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { OccConflictError } from './errors';
 import { OccWriter } from './occ_writer';
 import type { OccDocument, OccMetadata } from './types';
@@ -16,8 +19,8 @@ interface TestDoc extends Record<string, unknown> {
 }
 
 const createWriter = (deps: {
-  get?: jest.Mock;
-  index: jest.Mock;
+  get?: Mock;
+  index: Mock;
   maxRetries?: number;
   retryDelayMs?: number;
 }) =>
@@ -31,7 +34,7 @@ const createWriter = (deps: {
 describe('OccWriter', () => {
   describe('create', () => {
     it('creates a document without reading first', async () => {
-      const index = jest.fn().mockResolvedValue({ seqNo: 1, primaryTerm: 1 } satisfies OccMetadata);
+      const index = vi.fn().mockResolvedValue({ seqNo: 1, primaryTerm: 1 } satisfies OccMetadata);
       const writer = createWriter({ index });
 
       const result = await writer.create({
@@ -49,7 +52,7 @@ describe('OccWriter', () => {
 
     it('wraps op_type create 409 (id already exists) in OccConflictError', async () => {
       const conflict = Object.assign(new Error('conflict'), { statusCode: 409 });
-      const index = jest.fn().mockRejectedValue(conflict);
+      const index = vi.fn().mockRejectedValue(conflict);
       const writer = createWriter({ index });
 
       await expect(
@@ -68,8 +71,8 @@ describe('OccWriter', () => {
 
   describe('write', () => {
     it('indexes with caller-supplied OCC metadata and does not read', async () => {
-      const get = jest.fn();
-      const index = jest.fn().mockResolvedValue({ seqNo: 5, primaryTerm: 2 } satisfies OccMetadata);
+      const get = vi.fn();
+      const index = vi.fn().mockResolvedValue({ seqNo: 5, primaryTerm: 2 } satisfies OccMetadata);
       const writer = createWriter({ get, index });
 
       const result = await writer.write({
@@ -90,9 +93,9 @@ describe('OccWriter', () => {
     });
 
     it('wraps version conflicts in OccConflictError without retrying', async () => {
-      const get = jest.fn();
+      const get = vi.fn();
       const conflict = Object.assign(new Error('conflict'), { statusCode: 409 });
-      const index = jest.fn().mockRejectedValue(conflict);
+      const index = vi.fn().mockRejectedValue(conflict);
       const writer = createWriter({ get, index });
 
       await expect(
@@ -116,8 +119,8 @@ describe('OccWriter', () => {
         source: { value: 1 },
         occ: { seqNo: 4, primaryTerm: 2 },
       };
-      const get = jest.fn().mockResolvedValue(existing);
-      const index = jest.fn().mockResolvedValue({ seqNo: 5, primaryTerm: 2 } satisfies OccMetadata);
+      const get = vi.fn().mockResolvedValue(existing);
+      const index = vi.fn().mockResolvedValue({ seqNo: 5, primaryTerm: 2 } satisfies OccMetadata);
       const writer = createWriter({ get, index });
 
       const result = await writer.readModifyWrite({
@@ -145,12 +148,12 @@ describe('OccWriter', () => {
         source: { value: 5 },
         occ: { seqNo: 2, primaryTerm: 1 },
       };
-      const get = jest
+      const get = vi
         .fn()
         .mockResolvedValueOnce(firstExisting)
         .mockResolvedValueOnce(secondExisting);
       const conflict = Object.assign(new Error('conflict'), { statusCode: 409 });
-      const index = jest
+      const index = vi
         .fn()
         .mockRejectedValueOnce(conflict)
         .mockResolvedValueOnce({ seqNo: 3, primaryTerm: 1 } satisfies OccMetadata);
@@ -172,9 +175,9 @@ describe('OccWriter', () => {
         source: { value: 1 },
         occ: { seqNo: 1, primaryTerm: 1 },
       };
-      const get = jest.fn().mockResolvedValue(existing);
+      const get = vi.fn().mockResolvedValue(existing);
       const conflict = Object.assign(new Error('conflict'), { statusCode: 409 });
-      const index = jest.fn().mockRejectedValue(conflict);
+      const index = vi.fn().mockRejectedValue(conflict);
       const writer = createWriter({ get, index, maxRetries: 1 });
 
       await expect(
@@ -188,8 +191,8 @@ describe('OccWriter', () => {
     });
 
     it('throws when updating a missing document', async () => {
-      const get = jest.fn().mockResolvedValue(null);
-      const index = jest.fn();
+      const get = vi.fn().mockResolvedValue(null);
+      const index = vi.fn();
       const writer = createWriter({ get, index });
 
       await expect(
@@ -201,7 +204,7 @@ describe('OccWriter', () => {
     });
 
     it('throws when get is not configured', async () => {
-      const writer = createWriter({ index: jest.fn() });
+      const writer = createWriter({ index: vi.fn() });
 
       await expect(
         writer.readModifyWrite({

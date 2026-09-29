@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   clearYaraValidateCache,
@@ -43,7 +45,7 @@ describe('validateYaraRule (libyara WASM)', () => {
 
     const mod = await loadYaraValidateModule();
     const originalCcall = mod.ccall;
-    const utf8ToString = jest.spyOn(mod, 'UTF8ToString');
+    const utf8ToString = vi.spyOn(mod, 'UTF8ToString');
 
     mod.ccall = ((
       ident: string,

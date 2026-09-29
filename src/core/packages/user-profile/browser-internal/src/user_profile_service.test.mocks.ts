@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getDefaultUserProfileImplementationMock = jest.fn();
-export const convertUserProfileAPIMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./utils', () => {
-  const actual = jest.requireActual('./utils');
+export const getDefaultUserProfileImplementationMock = vi.fn();
+export const convertUserProfileAPIMock = vi.fn();
+
+vi.doMock('./utils', async () => {
+  const actual = (await vi.importActual('./utils'));
   return {
     ...actual,
     getDefaultUserProfileImplementation: getDefaultUserProfileImplementationMock,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, screen, waitFor, within } from '@testing-library/react';
 
@@ -23,7 +25,7 @@ import { RemoteClusterList } from '../../../public/application/sections/remote_c
 import { setupEnvironment } from '../helpers/setup_environment';
 import { renderRemoteClustersRoute } from '../helpers/render';
 
-jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
+vi.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
   return {
     EuiSearchBox: (props: { 'data-test-subj'?: string; onSearch: (value: string) => void }) => (
       <input

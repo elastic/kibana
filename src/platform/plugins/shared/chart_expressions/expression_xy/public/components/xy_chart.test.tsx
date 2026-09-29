@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -82,15 +85,15 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { NULL_LABEL } from '@kbn/field-formats-common';
 
-const onClickValue = jest.fn();
-const onClickMultiValue = jest.fn();
+const onClickValue = vi.fn();
+const onClickMultiValue = vi.fn();
 const layerCellValueActions: LayerCellValueActions = [];
-const onSelectRange = jest.fn();
-const onAnnotationClick = jest.fn();
+const onSelectRange = vi.fn();
+const onAnnotationClick = vi.fn();
 
 describe('XYChart component', () => {
-  let formatFactorySpy: jest.Mock;
-  let convertSpy: jest.Mock;
+  let formatFactorySpy: Mock;
+  let convertSpy: Mock;
   let defaultProps: Omit<XYChartRenderProps, 'args'>;
 
   const dataWithoutFormats: Datatable = {
@@ -145,7 +148,7 @@ describe('XYChart component', () => {
   beforeEach(() => {
     // use the current fieldFormatRegistry
     const fieldFormatsRegistry = getFieldFormatsRegistry({
-      uiSettings: { get: jest.fn() },
+      uiSettings: { get: vi.fn() },
     } as unknown as CoreSetup);
 
     // attach the required aggsFormats to allow formatting special charts in esaggs
@@ -155,15 +158,15 @@ describe('XYChart component', () => {
       )
     );
 
-    formatFactorySpy = jest.fn((mapping?: SerializedFieldFormat) => {
+    formatFactorySpy = vi.fn((mapping?: SerializedFieldFormat) => {
       const fieldFormat = fieldFormatsRegistry.deserialize(mapping);
       const originalConvert = fieldFormat.convertToText?.bind(fieldFormat) ?? ((v: unknown) => v);
-      convertSpy = jest.fn((value) => originalConvert(value));
+      convertSpy = vi.fn((value) => originalConvert(value));
       fieldFormat.convertToText = convertSpy as typeof fieldFormat.convertToText;
       return fieldFormat;
     });
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     defaultProps = {
       data: dataPluginMock.createStartContract(),
@@ -183,10 +186,10 @@ describe('XYChart component', () => {
       syncTooltips: false,
       syncCursor: true,
       eventAnnotationService: eventAnnotationServiceMock,
-      renderComplete: jest.fn(),
+      renderComplete: vi.fn(),
       timeFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
-      setChartSize: jest.fn(),
-      onCreateAlertRule: jest.fn(),
+      setChartSize: vi.fn(),
+      onCreateAlertRule: vi.fn(),
     };
   });
 
@@ -2368,11 +2371,11 @@ describe('XYChart component', () => {
   });
 
   test('it should pass the formatter function to the axis', () => {
-    const localConvertSpy = jest.fn((x) => x);
-    const getFormatSpy = jest.fn();
+    const localConvertSpy = vi.fn((x) => x);
+    const getFormatSpy = vi.fn();
     getFormatSpy.mockReturnValue({
       convertToText: localConvertSpy,
-      params: jest.fn(() => ({})),
+      params: vi.fn(() => ({})),
     });
 
     const { args } = sampleArgs();
@@ -3168,10 +3171,10 @@ describe('XYChart component', () => {
 
     const args = createArgsWithLayers([timeSampleLayer]);
 
-    const getCustomFormatSpy = jest.fn();
+    const getCustomFormatSpy = vi.fn();
     getCustomFormatSpy.mockReturnValue({
-      convertToText: jest.fn((x) => Boolean(x)),
-      params: jest.fn(() => ({})),
+      convertToText: vi.fn((x) => Boolean(x)),
+      params: vi.fn(() => ({})),
     });
 
     const component = shallow(

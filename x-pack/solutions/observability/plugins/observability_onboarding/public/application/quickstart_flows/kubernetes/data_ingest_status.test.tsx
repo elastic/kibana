@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,17 +15,17 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { DataIngestStatus, type ActionLink } from './data_ingest_status';
 
-jest.mock('@kbn/kibana-react-plugin/public');
-jest.mock('../../../hooks/use_fetcher', () => {
-  const actual = jest.requireActual('../../../hooks/use_fetcher');
+vi.mock('@kbn/kibana-react-plugin/public');
+vi.mock('../../../hooks/use_fetcher', async () => {
+  const actual = (await vi.importActual('../../../hooks/use_fetcher'));
   return {
     ...actual,
-    useFetcher: jest.fn(),
+    useFetcher: vi.fn(),
   };
 });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseFetcher = useFetcher as jest.MockedFunction<typeof useFetcher>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseFetcher = useFetcher as MockedFunction<typeof useFetcher>;
 
 const FETCH_INTERVAL_MS = 2000;
 
@@ -58,12 +61,12 @@ const renderStatus = (overrides: Partial<React.ComponentProps<typeof DataIngestS
 
 describe('DataIngestStatus polling gate', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
 
     mockUseKibana.mockReturnValue({
       services: {
-        analytics: { reportEvent: jest.fn() },
+        analytics: { reportEvent: vi.fn() },
         http: {
           basePath: { get: () => '' },
           staticAssets: {
@@ -75,11 +78,11 @@ describe('DataIngestStatus polling gate', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('continues polling when metrics arrived but logs are still pending (metrics-first race)', () => {
-    const refetch = jest.fn();
+    const refetch = vi.fn();
     mockUseFetcher.mockReturnValue({
       data: { hasData: true, hasLogs: false, hasMetrics: true },
       status: FETCH_STATUS.SUCCESS,
@@ -89,14 +92,14 @@ describe('DataIngestStatus polling gate', () => {
     renderStatus();
 
     act(() => {
-      jest.advanceTimersByTime(FETCH_INTERVAL_MS);
+      vi.advanceTimersByTime(FETCH_INTERVAL_MS);
     });
 
     expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   it('continues polling when logs arrived but metrics are still pending (logs-first race)', () => {
-    const refetch = jest.fn();
+    const refetch = vi.fn();
     mockUseFetcher.mockReturnValue({
       data: { hasData: true, hasLogs: true, hasMetrics: false },
       status: FETCH_STATUS.SUCCESS,
@@ -106,14 +109,14 @@ describe('DataIngestStatus polling gate', () => {
     renderStatus();
 
     act(() => {
-      jest.advanceTimersByTime(FETCH_INTERVAL_MS);
+      vi.advanceTimersByTime(FETCH_INTERVAL_MS);
     });
 
     expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   it('stops polling once both required data types are present', () => {
-    const refetch = jest.fn();
+    const refetch = vi.fn();
     mockUseFetcher.mockReturnValue({
       data: { hasData: true, hasLogs: true, hasMetrics: true },
       status: FETCH_STATUS.SUCCESS,
@@ -123,14 +126,14 @@ describe('DataIngestStatus polling gate', () => {
     renderStatus();
 
     act(() => {
-      jest.advanceTimersByTime(FETCH_INTERVAL_MS * 3);
+      vi.advanceTimersByTime(FETCH_INTERVAL_MS * 3);
     });
 
     expect(refetch).not.toHaveBeenCalled();
   });
 
   it('omits the logs action link until hasLogs flips to true', () => {
-    const refetch = jest.fn();
+    const refetch = vi.fn();
     mockUseFetcher.mockReturnValue({
       data: { hasData: true, hasLogs: false, hasMetrics: true },
       status: FETCH_STATUS.SUCCESS,
@@ -145,7 +148,7 @@ describe('DataIngestStatus polling gate', () => {
   });
 
   it('treats action links without a requires constraint as satisfied by any data', () => {
-    const refetch = jest.fn();
+    const refetch = vi.fn();
     mockUseFetcher.mockReturnValue({
       data: { hasData: true, hasLogs: true, hasMetrics: false },
       status: FETCH_STATUS.SUCCESS,
@@ -164,7 +167,7 @@ describe('DataIngestStatus polling gate', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(FETCH_INTERVAL_MS * 3);
+      vi.advanceTimersByTime(FETCH_INTERVAL_MS * 3);
     });
 
     expect(refetch).not.toHaveBeenCalled();
@@ -174,13 +177,13 @@ describe('DataIngestStatus polling gate', () => {
     mockUseFetcher.mockReturnValue({
       data: undefined,
       status: FETCH_STATUS.LOADING,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     renderStatus({});
 
     const fetcherCallback = mockUseFetcher.mock.calls[0][0];
-    const callApi = jest.fn();
+    const callApi = vi.fn();
     fetcherCallback(callApi);
 
     const [, options] = callApi.mock.calls[0];

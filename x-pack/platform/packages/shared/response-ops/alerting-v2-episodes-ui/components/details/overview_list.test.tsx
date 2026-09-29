@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,34 +14,43 @@ import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { AlertEpisodeOverviewList } from './overview_list';
 
-jest.mock('../assignee_cell', () => ({
-  AlertEpisodeAssigneeCell: ({ assigneeUid }: { assigneeUid: string | null | undefined }) => (
-    <div data-test-subj="mockAssigneeCell">{assigneeUid ?? 'no-assignee'}</div>
-  ),
-}));
-jest.mock('../user_profile_display', () => ({
-  UserProfileDisplay: ({
-    userProfileUid,
-    emptyState = '—',
-  }: {
-    userProfileUid: string | null | undefined;
-    emptyState?: React.ReactNode;
-  }) => <div data-test-subj="mockUserProfileDisplay">{userProfileUid ?? emptyState}</div>,
-}));
+vi.mock('../assignee_cell', () => {
+      const mocked = {
+      AlertEpisodeAssigneeCell: ({ assigneeUid }: { assigneeUid: string | null | undefined }) => (
+        <div data-test-subj="mockAssigneeCell">{assigneeUid ?? 'no-assignee'}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../user_profile_display', () => {
+      const mocked = {
+      UserProfileDisplay: ({
+        userProfileUid,
+        emptyState = '—',
+      }: {
+        userProfileUid: string | null | undefined;
+        emptyState?: React.ReactNode;
+      }) => <div data-test-subj="mockUserProfileDisplay">{userProfileUid ?? emptyState}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../grouping/alerting_episode_grouping_tags', () => ({
-  AlertingEpisodeGroupingTags: ({
-    fields,
-    data,
-  }: {
-    fields: readonly string[];
-    data: Record<string, unknown>;
-  }) => (
-    <div data-test-subj="mockGroupingTags">
-      {fields.map((field) => `${field}=${String(data[field] ?? '')}`).join(',')}
-    </div>
-  ),
-}));
+vi.mock('../grouping/alerting_episode_grouping_tags', () => {
+      const mocked = {
+      AlertingEpisodeGroupingTags: ({
+        fields,
+        data,
+      }: {
+        fields: readonly string[];
+        data: Record<string, unknown>;
+      }) => (
+        <div data-test-subj="mockGroupingTags">
+          {fields.map((field) => `${field}=${String(data[field] ?? '')}`).join(',')}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockUserProfile = userProfileServiceMock.createStart();
 

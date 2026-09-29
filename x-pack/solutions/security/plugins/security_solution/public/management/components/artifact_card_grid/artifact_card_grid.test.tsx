@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import React from 'react';
@@ -27,17 +30,17 @@ describe.each([
     props?: Partial<ArtifactCardGridProps>
   ) => ReturnType<AppContextTestRender['render']>;
   let items: ArtifactCardGridProps['items'];
-  let pageChangeHandler: jest.Mock<ArtifactCardGridProps['onPageChange']>;
-  let expandCollapseHandler: jest.MockedFunction<ArtifactCardGridProps['onExpandCollapse']>;
-  let cardComponentPropsProvider: jest.MockedFunction<
+  let pageChangeHandler: Mock<ArtifactCardGridProps['onPageChange']>;
+  let expandCollapseHandler: MockedFunction<ArtifactCardGridProps['onExpandCollapse']>;
+  let cardComponentPropsProvider: MockedFunction<
     Required<ArtifactCardGridProps>['cardComponentProps']
   >;
 
   beforeEach(() => {
     items = Array.from({ length: 5 }, () => generateItem());
-    pageChangeHandler = jest.fn();
-    expandCollapseHandler = jest.fn();
-    cardComponentPropsProvider = jest.fn((item) => {
+    pageChangeHandler = vi.fn();
+    expandCollapseHandler = vi.fn();
+    cardComponentPropsProvider = vi.fn((item) => {
       return {
         'data-test-subj': `card-${items.indexOf(item as AnyArtifact)}`,
       };
@@ -146,7 +149,7 @@ describe.each([
     });
 
     it('should call onExpandCollapse callback when collapse all', () => {
-      cardComponentPropsProvider = jest.fn((item) => {
+      cardComponentPropsProvider = vi.fn((item) => {
         return {
           'data-test-subj': `card-${items.indexOf(item as AnyArtifact)}`,
           expanded: true,
@@ -164,7 +167,7 @@ describe.each([
     });
 
     it('should call onExpandCollapse callback when expand all if not all items are expanded', () => {
-      cardComponentPropsProvider = jest.fn((item) => {
+      cardComponentPropsProvider = vi.fn((item) => {
         const index = items.indexOf(item as AnyArtifact);
         return {
           'data-test-subj': `card-${index}`,

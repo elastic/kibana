@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
 import { buildWorkflowExecutionUrl, getKibanaUrl } from './get_kibana_url';
@@ -41,9 +43,9 @@ describe('getKibanaUrl', () => {
     const coreStart = {
       http: {
         basePath: {
-          prepend: jest.fn((path: string) => `/base-path${path}`),
+          prepend: vi.fn((path: string) => `/base-path${path}`),
         },
-        getServerInfo: jest.fn(() => ({
+        getServerInfo: vi.fn(() => ({
           protocol: 'https',
           hostname: 'localhost',
           port: 5601,
@@ -64,9 +66,9 @@ describe('getKibanaUrl', () => {
         http: {
           basePath: {
             publicBaseUrl: 'https://kibana.example.com',
-            prepend: jest.fn((path: string) => `/base-path${path}`),
+            prepend: vi.fn((path: string) => `/base-path${path}`),
           },
-          getServerInfo: jest.fn(() => ({
+          getServerInfo: vi.fn(() => ({
             protocol: 'https',
             hostname: 'internal-host',
             port: 5601,
@@ -81,9 +83,9 @@ describe('getKibanaUrl', () => {
       const coreStart = {
         http: {
           basePath: {
-            prepend: jest.fn((path: string) => `/base-path${path}`),
+            prepend: vi.fn((path: string) => `/base-path${path}`),
           },
-          getServerInfo: jest.fn(() => ({
+          getServerInfo: vi.fn(() => ({
             protocol: 'http',
             hostname: 'internal-host',
             port: 5601,
@@ -130,9 +132,9 @@ describe('getKibanaUrl', () => {
         http: {
           basePath: {
             publicBaseUrl: 'https://kibana.example.com',
-            prepend: jest.fn((path: string) => `/base-path${path}`),
+            prepend: vi.fn((path: string) => `/base-path${path}`),
           },
-          getServerInfo: jest.fn(() => ({
+          getServerInfo: vi.fn(() => ({
             protocol: 'https',
             hostname: 'internal-host',
             port: 5601,

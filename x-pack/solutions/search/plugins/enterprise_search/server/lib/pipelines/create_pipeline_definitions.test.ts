@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { createIndexPipelineDefinitions } from './create_pipeline_definitions';
@@ -13,12 +15,12 @@ describe('createIndexPipelineDefinitions util function', () => {
 
   const mockClient = {
     ingest: {
-      putPipeline: jest.fn(),
+      putPipeline: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should create the pipelines', async () => {

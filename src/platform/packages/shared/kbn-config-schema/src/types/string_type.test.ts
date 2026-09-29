@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '../..';
 import { META_FIELD_X_OAS_MAX_LENGTH, META_FIELD_X_OAS_MIN_LENGTH } from '../oas_meta_fields';
 
@@ -193,7 +195,7 @@ describe('#validate', () => {
   });
 
   test('is not called with default value in no input', () => {
-    const validate = jest.fn();
+    const validate = vi.fn();
 
     schema.string({ validate, defaultValue: 'foo' }).validate(undefined);
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -13,9 +16,9 @@ import { useBulkExportMutation } from '../../api/hooks/use_bulk_export_mutation'
 import type { QueryOrIds } from '../../api/api';
 import { useBulkExport } from './use_bulk_export';
 
-jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../api/hooks/use_bulk_export_mutation');
-jest.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
+vi.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('../../api/hooks/use_bulk_export_mutation');
+vi.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
 
 async function bulkExport(queryOrIds: QueryOrIds): Promise<void> {
   const {
@@ -28,13 +31,13 @@ async function bulkExport(queryOrIds: QueryOrIds): Promise<void> {
 }
 
 describe('useBulkExport', () => {
-  let mutateAsync: jest.Mock;
-  let toasts: Record<string, jest.Mock>;
+  let mutateAsync: Mock;
+  let toasts: Record<string, Mock>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    mutateAsync = jest.fn().mockResolvedValue({
+    mutateAsync = vi.fn().mockResolvedValue({
       attributes: {
         results: {
           updated: [{ immutable: true }, { immutable: false }],
@@ -45,13 +48,13 @@ describe('useBulkExport', () => {
         },
       },
     });
-    (useBulkExportMutation as jest.Mock).mockReturnValue({ mutateAsync });
+    (useBulkExportMutation as Mock).mockReturnValue({ mutateAsync });
 
     toasts = {
-      addSuccess: jest.fn(),
-      addError: jest.fn(),
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
     };
-    (useAppToasts as jest.Mock).mockReturnValue(toasts);
+    (useAppToasts as Mock).mockReturnValue(toasts);
   });
 
   it('executes bulk export action', async () => {
@@ -62,8 +65,8 @@ describe('useBulkExport', () => {
 
   describe('state handlers', () => {
     it('shows error toast upon failure', async () => {
-      (useBulkExportMutation as jest.Mock).mockReturnValue({
-        mutateAsync: jest.fn().mockRejectedValue(new Error()),
+      (useBulkExportMutation as Mock).mockReturnValue({
+        mutateAsync: vi.fn().mockRejectedValue(new Error()),
       });
 
       await bulkExport({ ids: ['ruleId1'] });
@@ -73,11 +76,11 @@ describe('useBulkExport', () => {
   });
 
   describe('when rules table context is available', () => {
-    let setLoadingRules: jest.Mock;
+    let setLoadingRules: Mock;
 
     beforeEach(() => {
-      setLoadingRules = jest.fn();
-      (useRulesTableContextOptional as jest.Mock).mockReturnValue({
+      setLoadingRules = vi.fn();
+      (useRulesTableContextOptional as Mock).mockReturnValue({
         actions: {
           setLoadingRules,
         },
@@ -112,8 +115,8 @@ describe('useBulkExport', () => {
     });
 
     it('clears loading state for the processing rules after execution failure', async () => {
-      (useBulkExportMutation as jest.Mock).mockReturnValue({
-        mutateAsync: jest.fn().mockRejectedValue(new Error()),
+      (useBulkExportMutation as Mock).mockReturnValue({
+        mutateAsync: vi.fn().mockRejectedValue(new Error()),
       });
 
       await bulkExport({ ids: ['ruleId1', 'ruleId2'] });

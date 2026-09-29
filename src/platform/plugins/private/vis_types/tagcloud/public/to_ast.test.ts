@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Vis, VisToExpressionAstParams } from '@kbn/visualizations-plugin/public';
 import { toExpressionAst } from './to_ast';
 import type { TagCloudVisParams } from './types';
@@ -31,9 +33,12 @@ const mockedSchemas = {
   ],
 };
 
-jest.mock('@kbn/visualizations-plugin/public', () => ({
-  getVisSchemas: () => mockedSchemas,
-}));
+vi.mock('@kbn/visualizations-plugin/public', () => {
+      const mocked = {
+      getVisSchemas: () => mockedSchemas,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('tagcloud vis toExpressionAst function', () => {
   let vis: Vis<TagCloudVisParams>;

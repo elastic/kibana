@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { Transform } from 'stream';
 import {
   getTokenCountFromInvokeStream,
@@ -33,7 +35,7 @@ function createStreamMock() {
 const logger = loggerMock.create();
 describe('getTokenCountFromInvokeStream', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   let stream: ReturnType<typeof createStreamMock>;
   const body = {
@@ -119,7 +121,7 @@ describe('getTokenCountFromInvokeStream', () => {
       expect(logger.error).toHaveBeenCalled();
     });
     it('Stops the stream early when the request is aborted', async () => {
-      const mockDestroy = jest.spyOn(stream.transform, 'destroy');
+      const mockDestroy = vi.spyOn(stream.transform, 'destroy');
       const abortController = new AbortController();
 
       const tokenPromise = getTokenCountFromInvokeStream({

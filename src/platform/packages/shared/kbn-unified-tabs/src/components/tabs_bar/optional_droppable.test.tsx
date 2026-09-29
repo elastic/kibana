@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
@@ -19,7 +21,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { OptionalDroppable } from './optional_droppable';
 
-const mockOnDrag = jest.fn();
+const mockOnDrag = vi.fn();
 
 const renderOptionalDroppable = (disableDragAndDrop: boolean) => {
   render(
@@ -43,7 +45,7 @@ const renderOptionalDroppable = (disableDragAndDrop: boolean) => {
 
 describe('OptionalDroppable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders children in a plain div when drag-and-drop is disabled', () => {

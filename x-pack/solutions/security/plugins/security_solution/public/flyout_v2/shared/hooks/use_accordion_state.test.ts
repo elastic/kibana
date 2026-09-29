@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ToggleReducerAction, UseAccordionStateValue } from './use_accordion_state';
 import { toggleReducer, useAccordionState } from './use_accordion_state';
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 
-const mockSet = jest.fn();
+const mockSet = vi.fn();
 
 describe('useAccordionState', () => {
   let hookResult: RenderHookResult<UseAccordionStateValue, boolean>;
@@ -27,12 +29,12 @@ describe('useAccordionState', () => {
 
 describe('toggleReducer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return correct state and pass values to localStorage', () => {
     const mockStorage = {
-      get: jest.fn().mockReturnValue({}), // ensure reducer spreads an object
+      get: vi.fn().mockReturnValue({}), // ensure reducer spreads an object
       set: mockSet,
     };
 
@@ -56,7 +58,7 @@ describe('toggleReducer', () => {
 
   it(`should merge with existing localStorage value`, () => {
     const mockStorage = {
-      get: jest.fn().mockReturnValue({ existingSection: false }),
+      get: vi.fn().mockReturnValue({ existingSection: false }),
       set: mockSet,
     };
 
@@ -80,7 +82,7 @@ describe('toggleReducer', () => {
 
   it(`should not pass values to localStorage if localStorageKey isn't provided`, () => {
     const mockStorage = {
-      get: jest.fn(),
+      get: vi.fn(),
       set: mockSet,
     };
 
@@ -99,7 +101,7 @@ describe('toggleReducer', () => {
 
   it(`should not pass values to localStorage if title isn't provided`, () => {
     const mockStorage = {
-      get: jest.fn(),
+      get: vi.fn(),
       set: mockSet,
     };
 

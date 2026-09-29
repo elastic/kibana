@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
@@ -45,33 +48,36 @@ describe('get notes route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let securitySetup: SecurityPluginSetup;
   let context: SecuritySolutionRequestHandlerContextMock;
-  let mockGetAllSavedNote: jest.Mock;
+  let mockGetAllSavedNote: Mock;
 
-  beforeEach(() => {
-    jest.resetModules();
+  beforeEach(async () => {
+    vi.resetModules();
 
     server = serverMock.create();
     context = requestContextMock.createTools().context;
 
     securitySetup = {
       authc: {
-        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
+        getCurrentUser: vi.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
     } as unknown as SecurityPluginSetup;
 
-    mockGetAllSavedNote = jest.fn();
-    jest.doMock('../../saved_object/notes', () => ({
-      getAllSavedNote: mockGetAllSavedNote,
-    }));
+    mockGetAllSavedNote = vi.fn();
+    vi.doMock('../../saved_object/notes', () => {
+          const mocked = {
+              getAllSavedNote: mockGetAllSavedNote,
+            };
+          return { ...mocked, default: mocked };
+        });
 
-    const getNotesRoute = jest.requireActual('.').getNotesRoute;
+    const getNotesRoute = (await vi.importActual('.')).getNotesRoute;
     getNotesRoute(server.router, createMockConfig(), securitySetup);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('should return a list of notes and the count by default', async () => {

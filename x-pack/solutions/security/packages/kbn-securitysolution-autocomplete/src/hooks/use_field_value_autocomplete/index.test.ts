@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -32,8 +34,8 @@ export const stubIndexPatternWithFields = {
 };
 
 describe('use_field_value_autocomplete', () => {
-  const onErrorMock = jest.fn();
-  const getValueSuggestionsMock = jest.fn().mockResolvedValue(['value 1', 'value 2']);
+  const onErrorMock = vi.fn();
+  const getValueSuggestionsMock = vi.fn().mockResolvedValue(['value 1', 'value 2']);
 
   afterEach(() => {
     onErrorMock.mockClear();
@@ -127,7 +129,7 @@ describe('use_field_value_autocomplete', () => {
   });
 
   test('it uses full path name for nested fields to fetch suggestions', async () => {
-    const suggestionsMock = jest.fn().mockResolvedValue([]);
+    const suggestionsMock = vi.fn().mockResolvedValue([]);
 
     const selectedField: DataViewFieldBase | undefined = getField('nestedField.child');
     if (selectedField == null) {
@@ -197,7 +199,7 @@ describe('use_field_value_autocomplete', () => {
   });
 
   test('returns "isSuggestingValues" of false to note that autocomplete service is not in use if no autocomplete suggestions available', async () => {
-    const suggestionsMock = jest.fn().mockResolvedValue([]);
+    const suggestionsMock = vi.fn().mockResolvedValue([]);
 
     const { result } = renderHook(() =>
       useFieldValueAutocomplete({

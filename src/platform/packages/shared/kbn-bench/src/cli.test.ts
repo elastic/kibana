@@ -7,13 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/dev-cli-runner', () => ({
-  run: jest.fn(),
-}));
+import { vi } from 'vitest';
 
-jest.mock('./bench', () => ({
-  bench: jest.fn(),
-}));
+vi.mock('@kbn/dev-cli-runner', () => {
+      const mocked = {
+      run: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('./bench', () => {
+      const mocked = {
+      bench: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -46,8 +54,8 @@ interface TestCliRunContext {
 
 describe('cli', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(bench).mockResolvedValue(undefined);
+    vi.clearAllMocks();
+    vi.mocked(bench).mockResolvedValue(undefined);
   });
 
   it('passes build directory comparison flags to bench without refs', async () => {
@@ -57,12 +65,12 @@ describe('cli', () => {
         write: () => {},
       },
     });
-    const withContextSpy = jest.spyOn(log, 'withContext');
+    const withContextSpy = vi.spyOn(log, 'withContext');
 
     cli();
 
-    const callback: (context: TestCliRunContext) => Promise<void> = jest.mocked(
-      jest.requireMock('@kbn/dev-cli-runner').run
+    const callback: (context: TestCliRunContext) => Promise<void> = vi.mocked(
+      (await vi.importMock('@kbn/dev-cli-runner')).run
     ).mock.calls[0][0];
     await callback({
       flags: {
@@ -106,7 +114,7 @@ describe('cli', () => {
   it('registers build directory override flags as string options', () => {
     cli();
 
-    const options = jest.mocked(run).mock.calls[0][1];
+    const options = vi.mocked(run).mock.calls[0][1];
 
     expect(options?.flags?.string).toContain('left-build-dir');
     expect(options?.flags?.string).toContain('right-build-dir');

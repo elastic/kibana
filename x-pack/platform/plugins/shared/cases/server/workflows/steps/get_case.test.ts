@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import { getCaseStepDefinition } from './get_case';
 import { createStepHandlerContext } from './test_utils';
@@ -15,7 +17,7 @@ const createContext = (input: unknown) =>
 
 describe('getCaseStepDefinition', () => {
   it('creates expected step definition structure', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     const definition = getCaseStepDefinition(getCasesClient);
 
     expect(definition.id).toBe('cases.getCase');
@@ -29,8 +31,8 @@ describe('getCaseStepDefinition', () => {
   });
 
   it('preserves behavior: fetches with includeComments=true when include_comments is true (deprecated but not ignored)', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get },
     } as unknown as CasesClient);
     const definition = getCaseStepDefinition(getCasesClient);
@@ -73,8 +75,8 @@ describe('getCaseStepDefinition', () => {
         },
       ],
     };
-    const get = jest.fn().mockResolvedValue(unifiedCase);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(unifiedCase);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get },
     } as unknown as CasesClient);
     const definition = getCaseStepDefinition(getCasesClient);
@@ -115,8 +117,8 @@ describe('getCaseStepDefinition', () => {
   });
 
   it('fetches case with includeComments=false when include_comments is false', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get },
     } as unknown as CasesClient);
     const definition = getCaseStepDefinition(getCasesClient);
@@ -132,7 +134,7 @@ describe('getCaseStepDefinition', () => {
   });
 
   it('still accepts include_comments in the input schema (no validation error)', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     const definition = getCaseStepDefinition(getCasesClient);
 
     expect(
@@ -145,8 +147,8 @@ describe('getCaseStepDefinition', () => {
 
   it('returns error when client.cases.get throws', async () => {
     const getError = new Error('get failed');
-    const get = jest.fn().mockRejectedValue(getError);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockRejectedValue(getError);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get },
     } as unknown as CasesClient);
     const definition = getCaseStepDefinition(getCasesClient);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Toolbar } from './tool_bar_component';
@@ -13,9 +15,9 @@ import * as i18n from './translations';
 describe('Toolbar', () => {
   const setup = (propsOverrides = {}) => {
     const props = {
-      onConversationsBulkDeleted: jest.fn(),
-      handleSelectAll: jest.fn(),
-      handleUnselectAll: jest.fn(),
+      onConversationsBulkDeleted: vi.fn(),
+      handleSelectAll: vi.fn(),
+      handleUnselectAll: vi.fn(),
       totalConversations: 10,
       totalSelected: 0,
       isDeleteAll: false,
@@ -29,9 +31,9 @@ describe('Toolbar', () => {
   it('renders nothing if totalConversations is 0', () => {
     const { container } = render(
       <Toolbar
-        onConversationsBulkDeleted={jest.fn()}
-        handleSelectAll={jest.fn()}
-        handleUnselectAll={jest.fn()}
+        onConversationsBulkDeleted={vi.fn()}
+        handleSelectAll={vi.fn()}
+        handleUnselectAll={vi.fn()}
         totalConversations={0}
         totalSelected={0}
         isDeleteAll={false}

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useInitializeFromLocalStorage } from './use_initialize_from_local_storage';
 import { localStorageMock } from '../../__mocks__';
@@ -23,7 +26,7 @@ import {
   changePushVsOverlayAction,
 } from '../store/actions';
 
-jest.mock('../store/redux');
+vi.mock('../store/redux');
 
 describe('useInitializeFromLocalStorage', () => {
   beforeEach(() => {
@@ -35,8 +38,8 @@ describe('useInitializeFromLocalStorage', () => {
   // if this test fails, it's very likely because the data format of the values saved in local storage
   // has changed and we might need to run a migration
   it('should retrieve values from local storage', () => {
-    const mockUseDispatch = jest.fn();
-    (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
+    const mockUseDispatch = vi.fn();
+    (useDispatch as Mock).mockImplementation(() => mockUseDispatch);
 
     localStorage.setItem(
       EXPANDABLE_FLYOUT_LOCAL_STORAGE,
@@ -78,8 +81,8 @@ describe('useInitializeFromLocalStorage', () => {
   });
 
   it('should not dispatch action if expandable flyout key is not present in local storage', () => {
-    const mockUseDispatch = jest.fn();
-    (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
+    const mockUseDispatch = vi.fn();
+    (useDispatch as Mock).mockImplementation(() => mockUseDispatch);
 
     localStorage.setItem(
       'wrong_top_level_key',
@@ -97,8 +100,8 @@ describe('useInitializeFromLocalStorage', () => {
   });
 
   it('should not dispatch action if expandable flyout key is present in local storage but no has no properties', () => {
-    const mockUseDispatch = jest.fn();
-    (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
+    const mockUseDispatch = vi.fn();
+    (useDispatch as Mock).mockImplementation(() => mockUseDispatch);
 
     localStorage.setItem(
       EXPANDABLE_FLYOUT_LOCAL_STORAGE,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,19 +17,19 @@ import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 
 describe('AppMenuOverflowButton', () => {
   const defaultItems = [
-    { id: 'item1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
-    { id: 'item2', label: 'Item 2', run: jest.fn(), iconType: 'magnify', order: 2 },
+    { id: 'item1', label: 'Item 1', run: vi.fn(), iconType: 'gear', order: 1 },
+    { id: 'item2', label: 'Item 2', run: vi.fn(), iconType: 'magnify', order: 2 },
   ];
 
   const defaultProps = {
     items: defaultItems,
     isPopoverOpen: false,
-    onPopoverToggle: jest.fn(),
-    onPopoverClose: jest.fn(),
+    onPopoverToggle: vi.fn(),
+    onPopoverClose: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the overflow button', () => {

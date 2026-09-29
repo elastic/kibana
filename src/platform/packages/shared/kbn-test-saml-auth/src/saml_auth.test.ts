@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 
 import {
@@ -16,11 +18,14 @@ import {
   finishSAMLHandshake,
 } from './saml_auth';
 
-const fetchMock = jest.spyOn(global, 'fetch');
+const fetchMock = vi.spyOn(global, 'fetch');
 
-jest.mock('timers/promises', () => ({
-  setTimeout: jest.fn(() => Promise.resolve()),
-}));
+vi.mock('timers/promises', () => {
+      const mocked = {
+      setTimeout: vi.fn(() => Promise.resolve()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const jsonResponse = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), { status });
@@ -39,7 +44,7 @@ describe('saml_auth', () => {
 
   describe('createCloudSession', () => {
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('returns token value', async () => {
@@ -174,7 +179,7 @@ describe('saml_auth', () => {
 
   describe('createSAMLRequest', () => {
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('returns { location, sid }', async () => {
@@ -231,7 +236,7 @@ describe('saml_auth', () => {
 
   describe('createSAMLResponse', () => {
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     const location = 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F';
@@ -283,7 +288,7 @@ https://kbn.test.co in the same window.`);
     const retryCount = 3;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should return cookie on 302 response', async () => {

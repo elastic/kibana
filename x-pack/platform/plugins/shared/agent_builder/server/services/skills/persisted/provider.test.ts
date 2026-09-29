@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { createSkillNotFoundError } from '@kbn/agent-builder-common';
 import { createPersistedSkillProvider } from './provider';
 import type { SkillClient, SkillPersistedDefinition } from './client';
 
-jest.mock('./client', () => ({
-  createClient: jest.fn(),
-}));
+vi.mock('./client', () => {
+      const mocked = {
+      createClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockPersistedSkill = (
   overrides: Partial<SkillPersistedDefinition> = {}
@@ -27,25 +33,25 @@ const createMockPersistedSkill = (
   ...overrides,
 });
 
-const createMockClient = (): jest.Mocked<SkillClient> => ({
-  has: jest.fn(),
-  get: jest.fn(),
-  bulkGet: jest.fn(),
-  list: jest.fn(),
-  create: jest.fn(),
-  bulkCreate: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  deleteByPluginId: jest.fn(),
+const createMockClient = (): Mocked<SkillClient> => ({
+  has: vi.fn(),
+  get: vi.fn(),
+  bulkGet: vi.fn(),
+  list: vi.fn(),
+  create: vi.fn(),
+  bulkCreate: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
+  deleteByPluginId: vi.fn(),
 });
 
 describe('createPersistedSkillProvider', () => {
-  let mockClient: jest.Mocked<SkillClient>;
+  let mockClient: Mocked<SkillClient>;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
     mockClient = createMockClient();
-    const { createClient } = jest.requireMock('./client');
+    const { createClient } = (await vi.importMock('./client'));
     createClient.mockReturnValue(mockClient);
   });
 
@@ -53,7 +59,7 @@ describe('createPersistedSkillProvider', () => {
     createPersistedSkillProvider({
       space: 'default',
       esClient: {} as any,
-      logger: { warn: jest.fn() } as any,
+      logger: { warn: vi.fn() } as any,
     });
 
   it('has id "persisted" and readonly false', () => {

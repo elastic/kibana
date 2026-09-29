@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import sinon from 'sinon';
 import { of, BehaviorSubject } from 'rxjs';
 import { none } from 'fp-ts/Option';
@@ -25,7 +27,7 @@ describe('TaskPoller', () => {
     const pollInterval = 100;
     const halfInterval = Math.floor(pollInterval / 2);
 
-    const work = jest.fn(async () => true);
+    const work = vi.fn(async () => true);
     createTaskPoller<void, boolean>({
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
@@ -55,7 +57,7 @@ describe('TaskPoller', () => {
     const pollInterval = 100;
     const pollInterval$ = new BehaviorSubject(pollInterval);
 
-    const work = jest.fn(async () => true);
+    const work = vi.fn(async () => true);
     createTaskPoller<void, boolean>({
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
@@ -92,7 +94,7 @@ describe('TaskPoller', () => {
     const pollInterval = 100;
     const pollInterval$ = new BehaviorSubject(pollInterval);
 
-    const work = jest.fn(async () => true);
+    const work = vi.fn(async () => true);
     const logger = loggingSystemMock.create().get();
     createTaskPoller<void, boolean>({
       initialPollInterval: pollInterval,
@@ -141,7 +143,7 @@ describe('TaskPoller', () => {
   test('filters interval polling on capacity', async () => {
     const pollInterval = 100;
 
-    const work = jest.fn(async () => true);
+    const work = vi.fn(async () => true);
 
     let hasCapacity = true;
     createTaskPoller<void, boolean>({
@@ -195,7 +197,7 @@ describe('TaskPoller', () => {
 
     const { promise: worker, resolve: resolveWorker } = createResolvablePromise();
 
-    const handler = jest.fn();
+    const handler = vi.fn();
     const poller = createTaskPoller<string, string[]>({
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
@@ -233,7 +235,7 @@ describe('TaskPoller', () => {
   test('returns an error when polling for work fails', async () => {
     const pollInterval = 100;
 
-    const handler = jest.fn();
+    const handler = vi.fn();
     const workError = new Error('failed to work');
     const poller = createTaskPoller<string, string[]>({
       initialPollInterval: pollInterval,
@@ -263,7 +265,7 @@ describe('TaskPoller', () => {
   test('still logs errors when they are thrown as strings', async () => {
     const pollInterval = 100;
 
-    const handler = jest.fn();
+    const handler = vi.fn();
     const workError = 'failed to work';
     const poller = createTaskPoller<string, string[]>({
       initialPollInterval: pollInterval,
@@ -293,10 +295,10 @@ describe('TaskPoller', () => {
   test('continues polling after work fails', async () => {
     const pollInterval = 100;
 
-    const handler = jest.fn();
+    const handler = vi.fn();
     let callCount = 0;
     const workError = new Error('failed to work');
-    const work = jest.fn(async () => {
+    const work = vi.fn(async () => {
       callCount++;
       if (callCount === 2) {
         throw workError;
@@ -340,9 +342,9 @@ describe('TaskPoller', () => {
   test('continues polling if getCapacity throws error fails', async () => {
     const pollInterval = 100;
 
-    const handler = jest.fn();
+    const handler = vi.fn();
     let callCount = 0;
-    const work = jest.fn(async () => callCount);
+    const work = vi.fn(async () => callCount);
     const poller = createTaskPoller<string, number>({
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
@@ -385,7 +387,7 @@ describe('TaskPoller', () => {
   test(`doesn't start polling until start is called`, async () => {
     const pollInterval = 100;
 
-    const work = jest.fn(async () => true);
+    const work = vi.fn(async () => true);
     const taskPoller = createTaskPoller<void, boolean>({
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
@@ -417,7 +419,7 @@ describe('TaskPoller', () => {
   test(`stops polling after stop is called`, async () => {
     const pollInterval = 100;
 
-    const work = jest.fn(async () => true);
+    const work = vi.fn(async () => true);
     const taskPoller = createTaskPoller<void, boolean>({
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),

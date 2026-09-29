@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import {
@@ -43,9 +46,9 @@ const createWorkflowSystemAction = (workflowId = WORKFLOW_ID) =>
 // A filter that requires both (e.g. the attached count under the `not_attached` filter) matches
 // nothing, mirroring the contradictory KQL. The id-based path (getRulesByIds) passes an enriched id
 // filter with no `actionRef`, so it falls through to the full set like the real client does.
-const createRulesClient = (rules: RuleAlertType[]): jest.Mocked<RulesClient> =>
+const createRulesClient = (rules: RuleAlertType[]): Mocked<RulesClient> =>
   ({
-    find: jest.fn().mockImplementation(async ({ options } = {}) => {
+    find: vi.fn().mockImplementation(async ({ options } = {}) => {
       const { filter = '', page = 1, perPage = 0, sortField, sortOrder } = options ?? {};
 
       let matched = rules;
@@ -76,7 +79,7 @@ const createRulesClient = (rules: RuleAlertType[]): jest.Mocked<RulesClient> =>
 
       return { data, total, page, perPage };
     }),
-  } as Partial<jest.Mocked<RulesClient>> as jest.Mocked<RulesClient>);
+  } as Partial<Mocked<RulesClient>> as Mocked<RulesClient>);
 
 const createBulkEditDependencies = () => ({
   actionsClient: {} as ActionsClient,
@@ -326,12 +329,12 @@ describe('alert analysis workflow rule attachments', () => {
       actions: [createConnectorAction()],
       systemActions: [createWorkflowSystemAction()],
     });
-    const bulkEditRulesFn = jest.fn().mockResolvedValue({
+    const bulkEditRulesFn = vi.fn().mockResolvedValue({
       rules: [missingWorkflowRule],
       skipped: [],
       errors: [],
       total: 1,
-    }) as jest.MockedFunction<typeof bulkEditRules>;
+    }) as MockedFunction<typeof bulkEditRules>;
     const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient: createRulesClient([
         createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
@@ -410,7 +413,7 @@ describe('alert analysis workflow rule attachments', () => {
   });
 
   it('does not bulk edit rules during dry run', async () => {
-    const bulkEditRulesFn = jest.fn() as jest.MockedFunction<typeof bulkEditRules>;
+    const bulkEditRulesFn = vi.fn() as MockedFunction<typeof bulkEditRules>;
     const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient: createRulesClient([
         createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
@@ -435,7 +438,7 @@ describe('alert analysis workflow rule attachments', () => {
   });
 
   it('does not bulk edit selected rules that already have the workflow action', async () => {
-    const bulkEditRulesFn = jest.fn() as jest.MockedFunction<typeof bulkEditRules>;
+    const bulkEditRulesFn = vi.fn() as MockedFunction<typeof bulkEditRules>;
     const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient: createRulesClient([
         createRule({ id: 'rule-1', systemActions: [createWorkflowSystemAction()] }),
@@ -463,12 +466,12 @@ describe('alert analysis workflow rule attachments', () => {
     const rules = Array.from({ length: ruleCount }, (_, index) =>
       createRule({ id: `rule-${index}`, actions: [createWorkflowAction()] })
     );
-    const bulkEditRulesFn = jest.fn().mockImplementation(async ({ rules: editedRules }) => ({
+    const bulkEditRulesFn = vi.fn().mockImplementation(async ({ rules: editedRules }) => ({
       rules: editedRules,
       skipped: [],
       errors: [],
       total: editedRules.length,
-    })) as jest.MockedFunction<typeof bulkEditRules>;
+    })) as MockedFunction<typeof bulkEditRules>;
     const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient: createRulesClient(rules),
       workflowId: WORKFLOW_ID,
@@ -503,13 +506,13 @@ describe('alert analysis workflow rule attachments', () => {
     );
     let active = 0;
     let maxActive = 0;
-    const bulkEditRulesFn = jest.fn().mockImplementation(async ({ rules: editedRules }) => {
+    const bulkEditRulesFn = vi.fn().mockImplementation(async ({ rules: editedRules }) => {
       active += 1;
       maxActive = Math.max(maxActive, active);
       await new Promise((resolve) => setTimeout(resolve, 1));
       active -= 1;
       return { rules: editedRules, skipped: [], errors: [], total: editedRules.length };
-    }) as jest.MockedFunction<typeof bulkEditRules>;
+    }) as MockedFunction<typeof bulkEditRules>;
     const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient: createRulesClient(rules),
       workflowId: WORKFLOW_ID,
@@ -541,12 +544,12 @@ describe('alert analysis workflow rule attachments', () => {
     );
     // One rule's detach rejects at the transport level; the others must still be attempted
     // rather than aborted, and the failure must be surfaced.
-    const bulkEditRulesFn = jest.fn().mockImplementation(async ({ rules: editedRules }) => {
+    const bulkEditRulesFn = vi.fn().mockImplementation(async ({ rules: editedRules }) => {
       if (editedRules[0].id === 'rule-2') {
         throw new Error('transport error');
       }
       return { rules: editedRules, skipped: [], errors: [], total: editedRules.length };
-    }) as jest.MockedFunction<typeof bulkEditRules>;
+    }) as MockedFunction<typeof bulkEditRules>;
     const service = createAlertAnalysisWorkflowRuleAttachmentService({
       rulesClient: createRulesClient(rules),
       workflowId: WORKFLOW_ID,

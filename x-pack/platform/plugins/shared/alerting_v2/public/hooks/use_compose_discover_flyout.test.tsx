@@ -5,62 +5,82 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
 import type { RuleApiResponse } from '../services/rules_api';
 
-const mockCreateMutate = jest.fn();
-const mockUpdateMutate = jest.fn();
+const mockCreateMutate = vi.fn();
+const mockUpdateMutate = vi.fn();
 
 let capturedFlyoutProps: Record<string, unknown> = {};
 
-const mockParseState = jest.fn();
+const mockParseState = vi.fn();
 
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  ComposeDiscoverFlyout: (props: Record<string, unknown>) => {
-    capturedFlyoutProps = props;
-    return <div data-test-subj="mockComposeDiscoverFlyout" />;
-  },
-  RULE_BUILDER_REGISTRY: {
-    threshold: { parseState: (...args: unknown[]) => mockParseState(...args) },
-  },
-}));
+vi.mock('@kbn/alerting-v2-rule-form', () => {
+      const mocked = {
+      ComposeDiscoverFlyout: (props: Record<string, unknown>) => {
+        capturedFlyoutProps = props;
+        return <div data-test-subj="mockComposeDiscoverFlyout" />;
+      },
+      RULE_BUILDER_REGISTRY: {
+        threshold: { parseState: (...args: unknown[]) => mockParseState(...args) },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-schemas', () => ({
-  getBreachEsqlQuery: (query: { base?: string; breach?: { segment: string } } | null) =>
-    query?.breach ? `${query.base} | ${query.breach.segment}` : query?.base ?? '',
-  getRecoverEsqlQuery: () => undefined,
-}));
+vi.mock('@kbn/alerting-v2-schemas', () => {
+      const mocked = {
+      getBreachEsqlQuery: (query: { base?: string; breach?: { segment: string } } | null) =>
+        query?.breach ? `${query.base} | ${query.breach.segment}` : query?.base ?? '',
+      getRecoverEsqlQuery: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_create_rule', () => ({
-  useCreateRule: () => ({ mutate: mockCreateMutate, isLoading: false }),
-}));
-jest.mock('./use_update_rule', () => ({
-  useUpdateRule: () => ({ mutate: mockUpdateMutate, isLoading: false }),
-}));
+vi.mock('./use_create_rule', () => {
+      const mocked = {
+      useCreateRule: () => ({ mutate: mockCreateMutate, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_update_rule', () => {
+      const mocked = {
+      useUpdateRule: () => ({ mutate: mockUpdateMutate, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockNavigateToUrl = jest.fn();
-const mockAddWarning = jest.fn();
+const mockNavigateToUrl = vi.fn();
+const mockAddWarning = vi.fn();
 
-jest.mock('@kbn/core-di', () => ({
-  PluginStart: (key: string) => `plugin:${key}`,
-}));
-jest.mock('@kbn/core-di-browser', () => ({
-  CoreStart: (key: string) => `core:${key}`,
-  useService: (key: unknown) => {
-    switch (key) {
-      case 'core:http':
-        return { basePath: { prepend: (path: string) => path } };
-      case 'core:notifications':
-        return { toasts: { addWarning: mockAddWarning, addInfo: jest.fn() } };
-      case 'core:application':
-        return { navigateToUrl: mockNavigateToUrl };
-      default:
-        return {};
-    }
-  },
-}));
+vi.mock('@kbn/core-di', () => {
+      const mocked = {
+      PluginStart: (key: string) => `plugin:${key}`,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      CoreStart: (key: string) => `core:${key}`,
+      useService: (key: unknown) => {
+        switch (key) {
+          case 'core:http':
+            return { basePath: { prepend: (path: string) => path } };
+          case 'core:notifications':
+            return { toasts: { addWarning: mockAddWarning, addInfo: vi.fn() } };
+          case 'core:application':
+            return { navigateToUrl: mockNavigateToUrl };
+          default:
+            return {};
+        }
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useComposeDiscoverFlyout } from './use_compose_discover_flyout';
 
@@ -120,7 +140,7 @@ const callOnUpdateRule = () => {
 
 describe('useComposeDiscoverFlyout — create submission wiring', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedFlyoutProps = {};
     hookApi = undefined;
     mockCreateMutate.mockImplementation((_payload, opts) => opts?.onSuccess?.());
@@ -149,7 +169,7 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
 
 describe('useComposeDiscoverFlyout — edit submission wiring', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedFlyoutProps = {};
     hookApi = undefined;
     mockUpdateMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
@@ -184,7 +204,7 @@ describe('useComposeDiscoverFlyout — builder-to-ES|QL confirmation', () => {
   } as unknown as RuleApiResponse;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedFlyoutProps = {};
     hookApi = undefined;
   });

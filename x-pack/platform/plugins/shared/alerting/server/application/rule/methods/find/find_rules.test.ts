@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { nodeTypes, fromKueryExpression, toKqlExpression } from '@kbn/es-query';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
@@ -21,9 +24,9 @@ import { formatLegacyActions } from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRulesClientMockParams } from '../../../../test_utils';
 
-jest.mock('../../../../rules_client/lib/siem_legacy_actions/format_legacy_actions', () => {
+vi.mock('../../../../rules_client/lib/siem_legacy_actions/format_legacy_actions', () => {
   return {
-    formatLegacyActions: jest.fn(),
+    formatLegacyActions: vi.fn(),
   };
 });
 
@@ -35,19 +38,22 @@ const {
   authorization,
   auditLogger,
 } = getRulesClientMockParams({
-  isSystemAction: jest.fn().mockImplementation((id) => id === 'system_action-id'),
+  isSystemAction: vi.fn().mockImplementation((id) => id === 'system_action-id'),
 });
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 setGlobalDate();
 
-jest.mock('../../../../rules_client/common/map_sort_field', () => ({
-  mapSortField: jest.fn(),
-}));
+vi.mock('../../../../rules_client/common/map_sort_field', () => {
+      const mocked = {
+      mapSortField: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('find()', () => {
   const listedTypes = new Map<string, RegistryRuleType>([
@@ -448,7 +454,7 @@ describe('find()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     await rulesClient.find({ options: { sortField: 'name' } });
     expect(
-      jest.requireMock('../../../../rules_client/common/map_sort_field').mapSortField
+      (await vi.importMock('../../../../rules_client/common/map_sort_field')).mapSortField
     ).toHaveBeenCalledWith('name');
   });
 
@@ -483,12 +489,12 @@ describe('find()', () => {
   });
 
   test('should call useSavedObjectReferences.injectReferences if defined for rule type', async () => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
     });
 
-    const injectReferencesFn = jest.fn().mockReturnValue({
+    const injectReferencesFn = vi.fn().mockReturnValue({
       bar: true,
       parameterThatIsSavedObjectId: '9',
     });
@@ -569,7 +575,7 @@ describe('find()', () => {
       producer: 'alerts',
       solution: 'stack',
       useSavedObjectReferences: {
-        extractReferences: jest.fn(),
+        extractReferences: vi.fn(),
         injectReferences: injectReferencesFn,
       },
       validate: {
@@ -761,12 +767,12 @@ describe('find()', () => {
   });
 
   test('throws an error if useSavedObjectReferences.injectReferences throws an error', async () => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
     });
 
-    const injectReferencesFn = jest.fn().mockImplementation(() => {
+    const injectReferencesFn = vi.fn().mockImplementation(() => {
       throw new Error('something went wrong!');
     });
 
@@ -847,7 +853,7 @@ describe('find()', () => {
       producer: 'alerts',
       solution: 'stack',
       useSavedObjectReferences: {
-        extractReferences: jest.fn(),
+        extractReferences: vi.fn(),
         injectReferences: injectReferencesFn,
       },
       validate: {
@@ -973,7 +979,7 @@ describe('find()', () => {
     });
 
     test('ensures authorization even when the fields required to authorize are omitted from the find', async () => {
-      const ensureRuleTypeIsAuthorized = jest.fn();
+      const ensureRuleTypeIsAuthorized = vi.fn();
       authorization.getFindAuthorizationFilter.mockResolvedValue({
         ensureRuleTypeIsAuthorized,
       });
@@ -1127,7 +1133,7 @@ describe('find()', () => {
     test('logs audit event when not authorised to search rule type', async () => {
       const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       authorization.getFindAuthorizationFilter.mockResolvedValue({
-        ensureRuleTypeIsAuthorized: jest.fn(() => {
+        ensureRuleTypeIsAuthorized: vi.fn(() => {
           throw new Error('Unauthorized');
         }),
       });
@@ -1314,7 +1320,7 @@ describe('find()', () => {
     test('should call formatLegacyActions', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
 
-      (formatLegacyActions as jest.Mock).mockResolvedValueOnce([
+      (formatLegacyActions as Mock).mockResolvedValueOnce([
         { ...siemRule1, migrated: true },
         { ...siemRule2, migrated: true },
       ]);

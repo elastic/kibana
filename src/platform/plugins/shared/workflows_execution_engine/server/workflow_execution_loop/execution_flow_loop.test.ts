@@ -7,21 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { executionFlowLoop } from './execution_flow_loop';
 import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 
-jest.mock('./run_node', () => ({
-  runNode: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./run_node', () => {
+      const mocked = {
+      runNode: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { runNode } = require('./run_node');
 
 describe('executionFlowLoop', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (runNode as jest.Mock).mockResolvedValue(undefined);
+    vi.clearAllMocks();
+    (runNode as Mock).mockResolvedValue(undefined);
   });
 
   it('calls runNode while the execution cursor is executing', async () => {
@@ -41,7 +47,7 @@ describe('executionFlowLoop', () => {
       workflowExecutionCursor,
       workflowRuntime: {
         executionCursor: workflowExecutionCursor,
-        saveState: jest.fn().mockResolvedValue(undefined),
+        saveState: vi.fn().mockResolvedValue(undefined),
       },
     } as any;
 
@@ -60,7 +66,7 @@ describe('executionFlowLoop', () => {
       workflowExecutionCursor,
       workflowRuntime: {
         executionCursor: workflowExecutionCursor,
-        saveState: jest.fn().mockResolvedValue(undefined),
+        saveState: vi.fn().mockResolvedValue(undefined),
       },
     } as any;
 
@@ -74,11 +80,11 @@ describe('executionFlowLoop', () => {
     const workflowExecutionCursor = createMockWorkflowExecutionCursor({
       currentNode: { id: 'wait-node' } as GraphNodeUnion,
     });
-    (runNode as jest.Mock).mockImplementation(async () => {
+    (runNode as Mock).mockImplementation(async () => {
       workflowExecutionCursor.stop();
     });
 
-    const saveState = jest.fn().mockResolvedValue(undefined);
+    const saveState = vi.fn().mockResolvedValue(undefined);
     const params = {
       workflowExecutionCursor,
       workflowRuntime: {
@@ -107,7 +113,7 @@ describe('executionFlowLoop', () => {
       workflowExecutionCursor,
       workflowRuntime: {
         executionCursor: workflowExecutionCursor,
-        saveState: jest.fn().mockResolvedValue(undefined),
+        saveState: vi.fn().mockResolvedValue(undefined),
       },
     } as any;
 

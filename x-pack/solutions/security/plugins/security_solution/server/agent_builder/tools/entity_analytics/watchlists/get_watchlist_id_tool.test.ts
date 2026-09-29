@@ -5,25 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { createToolTestMocks, setupMockCoreStartServices } from '../../../__mocks__/test_helpers';
 
-const mockGetUserWatchlistPrivileges = jest.fn();
-jest.mock(
+const mockGetUserWatchlistPrivileges = vi.fn();
+vi.mock(
   '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges',
-  () => ({
-    getUserWatchlistPrivileges: (...args: unknown[]) => mockGetUserWatchlistPrivileges(...args),
-  })
+  () => {
+      const mocked = {
+        getUserWatchlistPrivileges: (...args: unknown[]) => mockGetUserWatchlistPrivileges(...args),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 import { getWatchlistIdTool } from './get_watchlist_id_tool';
 import type { ExperimentalFeatures } from '../../../../../common';
 
-const soGet = jest.fn();
-const soFind = jest.fn();
+const soGet = vi.fn();
+const soFind = vi.fn();
 
 const { mockCore, mockEsClient } = createToolTestMocks();
 

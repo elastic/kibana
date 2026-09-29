@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import stackedSeries from '../../../fixtures/mock_data/date_histogram/_stacked_series';
 import { vislibPointSeriesTypes } from './point_series';
 
@@ -89,9 +91,9 @@ describe('vislibPointSeriesTypes', () => {
     });
 
     it('should use the formatter of the first series matching the axis if there is a descriptor', () => {
-      const axisFormatter1 = jest.fn();
-      const axisFormatter2 = jest.fn();
-      const axisFormatter3 = jest.fn();
+      const axisFormatter1 = vi.fn();
+      const axisFormatter2 = vi.fn();
+      const axisFormatter3 = vi.fn();
       const parsedConfig = vislibPointSeriesTypes.heatmap(
         {
           valueAxes: [

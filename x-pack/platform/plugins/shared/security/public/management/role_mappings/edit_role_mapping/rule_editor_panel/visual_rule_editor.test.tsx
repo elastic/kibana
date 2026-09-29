@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import React from 'react';
 
@@ -23,8 +25,8 @@ describe('VisualRuleEditor', () => {
     const props = {
       rules: null,
       maxDepth: 0,
-      onSwitchEditorMode: jest.fn(),
-      onChange: jest.fn(),
+      onSwitchEditorMode: vi.fn(),
+      onChange: vi.fn(),
     };
     const wrapper = mountWithEuiProvider(<VisualRuleEditor {...props} />);
 
@@ -40,8 +42,8 @@ describe('VisualRuleEditor', () => {
     const props = {
       rules: null,
       maxDepth: 0,
-      onSwitchEditorMode: jest.fn(),
-      onChange: jest.fn(),
+      onSwitchEditorMode: vi.fn(),
+      onChange: vi.fn(),
     };
     const wrapper = mountWithEuiProvider(<VisualRuleEditor {...props} />);
     expect(findTestSubject(wrapper, 'roleMappingsNoRulesDefined')).toHaveLength(1);
@@ -52,8 +54,8 @@ describe('VisualRuleEditor', () => {
     const props = {
       rules: null,
       maxDepth: 0,
-      onSwitchEditorMode: jest.fn(),
-      onChange: jest.fn(),
+      onSwitchEditorMode: vi.fn(),
+      onChange: vi.fn(),
     };
     const wrapper = mountWithEuiProvider(<VisualRuleEditor {...props} />);
     findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
@@ -83,8 +85,8 @@ describe('VisualRuleEditor', () => {
         new ExceptAllRule([new FieldRule('realm.name', '*')]),
       ]),
       maxDepth: 4,
-      onSwitchEditorMode: jest.fn(),
-      onChange: jest.fn(),
+      onSwitchEditorMode: vi.fn(),
+      onChange: vi.fn(),
     };
     const wrapper = mountWithEuiProvider(<VisualRuleEditor {...props} />);
 
@@ -123,8 +125,8 @@ describe('VisualRuleEditor', () => {
         ]),
       ]),
       maxDepth: 11,
-      onSwitchEditorMode: jest.fn(),
-      onChange: jest.fn(),
+      onSwitchEditorMode: vi.fn(),
+      onChange: vi.fn(),
     };
     const wrapper = mountWithEuiProvider(<VisualRuleEditor {...props} />);
     expect(findTestSubject(wrapper, 'roleMappingsRulesTooComplex')).toHaveLength(1);
@@ -135,8 +137,8 @@ describe('VisualRuleEditor', () => {
       const props = {
         rules: null,
         maxDepth: 0,
-        onSwitchEditorMode: jest.fn(),
-        onChange: jest.fn(),
+        onSwitchEditorMode: vi.fn(),
+        onChange: vi.fn(),
         readOnly: true,
       };
       const wrapper = mountWithEuiProvider(<VisualRuleEditor {...props} />);
@@ -155,8 +157,8 @@ describe('VisualRuleEditor', () => {
           new ExceptAllRule([new FieldRule('realm.name', '*')]),
         ]),
         maxDepth: 4,
-        onSwitchEditorMode: jest.fn(),
-        onChange: jest.fn(),
+        onSwitchEditorMode: vi.fn(),
+        onChange: vi.fn(),
         readOnly: true,
       };
       const wrapper = mountWithEuiProvider(<VisualRuleEditor {...props} />);

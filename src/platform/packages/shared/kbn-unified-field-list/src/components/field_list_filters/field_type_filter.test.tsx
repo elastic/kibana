@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -31,8 +33,8 @@ const setup = (props: Partial<FieldTypeFilterProps<DataViewField>> = {}) => {
     allFields: dataView.fields,
     docLinks,
     'data-test-subj': DATA_TEST_SUBJ,
-    getCustomFieldType: jest.fn((field) => field.type),
-    onChange: jest.fn(),
+    getCustomFieldType: vi.fn((field) => field.type),
+    onChange: vi.fn(),
     ...props,
   };
 
@@ -84,7 +86,7 @@ describe('<FieldTypeFilter />', () => {
     describe('when there are supported fields', () => {
       it('should just include them', async () => {
         // Given
-        const onSupportedFieldFilter = jest.fn((field) => ['number', 'date'].includes(field.type));
+        const onSupportedFieldFilter = vi.fn((field) => ['number', 'date'].includes(field.type));
 
         // When
         const { user } = setup({

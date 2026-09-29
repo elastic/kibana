@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -22,24 +25,27 @@ import { DefaultEditorAggParams } from './agg_params';
 import { AGGS_ACTION_KEYS } from './agg_group_state';
 import type { EditorVisState } from './sidebar/state/reducers';
 
-jest.mock('./agg_params', () => ({
-  DefaultEditorAggParams: () => null,
-}));
+vi.mock('./agg_params', () => {
+      const mocked = {
+      DefaultEditorAggParams: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DefaultEditorAgg component', () => {
   let defaultProps: DefaultEditorAggProps;
-  let setAggParamValue: jest.Mock;
-  let setStateParamValue: jest.Mock;
-  let onToggleEnableAgg: jest.Mock;
-  let removeAgg: jest.Mock;
-  let setAggsState: jest.Mock;
+  let setAggParamValue: Mock;
+  let setStateParamValue: Mock;
+  let onToggleEnableAgg: Mock;
+  let removeAgg: Mock;
+  let setAggsState: Mock;
 
   beforeEach(() => {
-    setAggParamValue = jest.fn();
-    setStateParamValue = jest.fn();
-    onToggleEnableAgg = jest.fn();
-    removeAgg = jest.fn();
-    setAggsState = jest.fn();
+    setAggParamValue = vi.fn();
+    setStateParamValue = vi.fn();
+    onToggleEnableAgg = vi.fn();
+    removeAgg = vi.fn();
+    setAggsState = vi.fn();
 
     defaultProps = {
       agg: {

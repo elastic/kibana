@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../common/mock';
 import { EqlQueryBarFooter } from './footer';
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const originalModule = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...originalModule,
     useKibana: () => ({
@@ -26,7 +28,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 describe('EQL footer', () => {
   describe('EQL Settings', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('EQL settings button is enable when popover is NOT open', () => {
@@ -35,7 +37,7 @@ describe('EQL footer', () => {
           <EqlQueryBarFooter
             errors={[]}
             dataView={{ title: '', fields: [] }}
-            onEqlOptionsChange={jest.fn()}
+            onEqlOptionsChange={vi.fn()}
           />
         </TestProviders>
       );
@@ -51,7 +53,7 @@ describe('EQL footer', () => {
           <EqlQueryBarFooter
             errors={[]}
             dataView={{ title: '', fields: [] }}
-            onEqlOptionsChange={jest.fn()}
+            onEqlOptionsChange={vi.fn()}
           />
         </TestProviders>
       );

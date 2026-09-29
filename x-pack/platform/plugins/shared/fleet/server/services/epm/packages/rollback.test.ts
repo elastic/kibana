@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
 import { agentPolicyService, appContextService, packagePolicyService } from '../..';
 import type { PackagePolicyClient } from '../../package_policy_service';
@@ -23,42 +26,48 @@ import {
   rollbackInstallation,
 } from './rollback';
 
-jest.mock('../..', () => ({
-  appContextService: {
-    getLogger: jest
-      .fn()
-      .mockReturnValue({ info: jest.fn(), debug: jest.fn(), warn: jest.fn() } as any),
-    getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
-    getTelemetryEventsSender: jest.fn(),
-    getConfig: jest.fn().mockReturnValue({}),
-    getInternalUserSOClient: jest.fn(),
-    getExperimentalFeatures: jest.fn().mockReturnValue({}),
-  },
-  packagePolicyService: {
-    getPackagePolicySavedObjects: jest.fn(),
-    rollback: jest.fn(),
-    restoreRollback: jest.fn(),
-    cleanupRollbackSavedObjects: jest.fn(),
-    bumpAgentPolicyRevisionAfterRollback: jest.fn(),
-    findAllForAgentPolicy: jest.fn().mockResolvedValue([]),
-  },
-  agentPolicyService: {
-    getByIds: jest.fn().mockResolvedValue([]),
-    update: jest.fn().mockResolvedValue({ has_agent_version_conditions: false }),
-  },
-}));
+vi.mock('../..', () => {
+      const mocked = {
+      appContextService: {
+        getLogger: vi
+          .fn()
+          .mockReturnValue({ info: vi.fn(), debug: vi.fn(), warn: vi.fn() } as any),
+        getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
+        getTelemetryEventsSender: vi.fn(),
+        getConfig: vi.fn().mockReturnValue({}),
+        getInternalUserSOClient: vi.fn(),
+        getExperimentalFeatures: vi.fn().mockReturnValue({}),
+      },
+      packagePolicyService: {
+        getPackagePolicySavedObjects: vi.fn(),
+        rollback: vi.fn(),
+        restoreRollback: vi.fn(),
+        cleanupRollbackSavedObjects: vi.fn(),
+        bumpAgentPolicyRevisionAfterRollback: vi.fn(),
+        findAllForAgentPolicy: vi.fn().mockResolvedValue([]),
+      },
+      agentPolicyService: {
+        getByIds: vi.fn().mockResolvedValue([]),
+        update: vi.fn().mockResolvedValue({ has_agent_version_conditions: false }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../agents', () => ({
-  getAgentsByKuery: jest.fn().mockResolvedValue({ total: 0, agents: [] }),
-  reassignAgents: jest.fn().mockResolvedValue({}),
-}));
+vi.mock('../../agents', () => {
+      const mocked = {
+      getAgentsByKuery: vi.fn().mockResolvedValue({ total: 0, agents: [] }),
+      reassignAgents: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../audit_logging');
+vi.mock('../../audit_logging');
 
-jest.mock('../../upgrade_sender');
+vi.mock('../../upgrade_sender');
 
-const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
-const agentPolicyServiceMock = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+const packagePolicyServiceMock = packagePolicyService as Mocked<PackagePolicyClient>;
+const agentPolicyServiceMock = agentPolicyService as Mocked<typeof agentPolicyService>;
 
 const esClient = {} as any;
 const pkgName = 'test-package';
@@ -66,28 +75,37 @@ const oldPkgVersion = '1.0.0';
 const newPkgVersion = '1.5.0';
 const spaceId = 'default';
 
-const sendTelemetryEventsMock = sendTelemetryEvents as jest.Mock;
+const sendTelemetryEventsMock = sendTelemetryEvents as Mock;
 
-jest.mock('./install', () => ({
-  installPackage: jest.fn(),
-}));
+vi.mock('./install', () => {
+      const mocked = {
+      installPackage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./remove', () => ({
-  removeInstallation: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('./remove', () => {
+      const mocked = {
+      removeInstallation: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../registry', () => ({
-  fetchInfo: jest.fn().mockResolvedValue({}),
-}));
+vi.mock('../registry', () => {
+      const mocked = {
+      fetchInfo: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('rollbackInstallation', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should throw an error if the package is not installed', async () => {
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
-      find: jest.fn().mockResolvedValue({
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [],
       }),
     });
@@ -97,8 +115,8 @@ describe('rollbackInstallation', () => {
   });
 
   it('should throw an error if no previous package version is found', async () => {
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
-      find: jest.fn().mockResolvedValue({
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: pkgName,
@@ -115,8 +133,8 @@ describe('rollbackInstallation', () => {
   });
 
   it('should throw an error if the package was not installed from the registry', async () => {
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
-      find: jest.fn().mockResolvedValue({
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: pkgName,
@@ -133,8 +151,8 @@ describe('rollbackInstallation', () => {
   });
 
   it('should throw an error if TTL expired', async () => {
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
-      find: jest.fn().mockResolvedValue({
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: pkgName,
@@ -155,8 +173,8 @@ describe('rollbackInstallation', () => {
   });
 
   it('should throw an error if at least one package policy does not have a previous version', async () => {
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
-      find: jest.fn().mockResolvedValue({
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: pkgName,
@@ -196,9 +214,9 @@ describe('rollbackInstallation', () => {
   });
 
   it('should rollback if one package policy is not upgraded to the current package version', async () => {
-    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
+    (installPackage as Mock).mockResolvedValue({ pkgName });
     const savedObjectsClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: pkgName,
@@ -212,7 +230,7 @@ describe('rollbackInstallation', () => {
         ],
       }),
     } as any;
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       savedObjectsClient
     );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
@@ -275,8 +293,8 @@ describe('rollbackInstallation', () => {
   });
 
   it('should throw an error if at least one package policy has a different previous version', async () => {
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
-      find: jest.fn().mockResolvedValue({
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: pkgName,
@@ -328,9 +346,9 @@ describe('rollbackInstallation', () => {
   });
 
   it('should throw an error and cancel the rollback if the package could not be installed on the previous version', async () => {
-    (installPackage as jest.Mock).mockResolvedValue({ error: new Error('Installation failed') });
+    (installPackage as Mock).mockResolvedValue({ error: new Error('Installation failed') });
     const savedObjectsClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: pkgName,
@@ -344,7 +362,7 @@ describe('rollbackInstallation', () => {
         ],
       }),
     } as any;
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       savedObjectsClient
     );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
@@ -405,9 +423,9 @@ describe('rollbackInstallation', () => {
   });
 
   it('should rollback package policies and install the package on the previous version', async () => {
-    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
+    (installPackage as Mock).mockResolvedValue({ pkgName });
     const savedObjectsClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: pkgName,
@@ -421,7 +439,7 @@ describe('rollbackInstallation', () => {
         ],
       }),
     } as any;
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       savedObjectsClient
     );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
@@ -478,9 +496,9 @@ describe('rollbackInstallation', () => {
   });
 
   it('should rollback package policies if some package policies are not upgraded', async () => {
-    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
+    (installPackage as Mock).mockResolvedValue({ pkgName });
     const savedObjectsClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: pkgName,
@@ -494,7 +512,7 @@ describe('rollbackInstallation', () => {
         ],
       }),
     } as any;
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       savedObjectsClient
     );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
@@ -546,9 +564,9 @@ describe('rollbackInstallation', () => {
   });
 
   it('should throw error on rollback when package policy is managed', async () => {
-    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
+    (installPackage as Mock).mockResolvedValue({ pkgName });
     const savedObjectsClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: pkgName,
@@ -558,7 +576,7 @@ describe('rollbackInstallation', () => {
         ],
       }),
     } as any;
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       savedObjectsClient
     );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
@@ -602,9 +620,9 @@ describe('rollbackInstallation', () => {
   });
 
   it('should throw error on rollback when current user does not have access to all package policies', async () => {
-    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
+    (installPackage as Mock).mockResolvedValue({ pkgName });
     const savedObjectsClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: pkgName,
@@ -618,7 +636,7 @@ describe('rollbackInstallation', () => {
         ],
       }),
     } as any;
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       savedObjectsClient
     );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
@@ -658,15 +676,15 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
   const depPreviousVersion = '1.0.0';
 
   beforeEach(() => {
-    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
-    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+    (installPackage as Mock).mockResolvedValue({ pkgName });
+    (appContextService.getExperimentalFeatures as Mock).mockReturnValue({
       enableResolveDependencies: true,
     });
   });
 
   afterEach(() => {
-    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({});
-    jest.clearAllMocks();
+    (appContextService.getExperimentalFeatures as Mock).mockReturnValue({});
+    vi.clearAllMocks();
   });
 
   const buildSavedObjectsClient = (
@@ -674,7 +692,7 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
     depIsDependencyOf: Array<{ name: string; version: string }>
   ) => {
     return {
-      find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+      find: vi.fn().mockImplementation(({ search }: { search: string }) => {
         if (search === pkgName) {
           return Promise.resolve({
             saved_objects: [
@@ -708,7 +726,7 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
         }
         return Promise.resolve({ saved_objects: [] });
       }),
-      update: jest.fn().mockResolvedValue({}),
+      update: vi.fn().mockResolvedValue({}),
     } as any;
   };
 
@@ -717,7 +735,7 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
       [{ name: depName, previous_version: depPreviousVersion }],
       [{ name: pkgName, version: newPkgVersion }]
     );
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       savedObjectsClient
     );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
@@ -739,7 +757,7 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
       [{ name: depName, previous_version: null }],
       [{ name: pkgName, version: newPkgVersion }]
     );
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       savedObjectsClient
     );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
@@ -763,7 +781,7 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
         { name: 'other-composable', version: '2.0.0' },
       ]
     );
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       savedObjectsClient
     );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
@@ -784,14 +802,14 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
       [{ name: depName, previous_version: depPreviousVersion }],
       [{ name: pkgName, version: newPkgVersion }]
     );
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       savedObjectsClient
     );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
       saved_objects: [],
     } as any);
     // Make installPackage fail on the first call (the dep reinstall), succeed on subsequent calls.
-    (installPackage as jest.Mock)
+    (installPackage as Mock)
       .mockRejectedValueOnce(new Error('registry unavailable'))
       .mockResolvedValue({ pkgName });
 
@@ -812,7 +830,7 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
   it('does not clear the snapshot when dependency rollback partially fails', async () => {
     const dep2Name = 'dep-pkg-2';
     const savedObjectsClient = {
-      find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+      find: vi.fn().mockImplementation(({ search }: { search: string }) => {
         if (search === pkgName) {
           return Promise.resolve({
             saved_objects: [
@@ -846,16 +864,16 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
           ],
         });
       }),
-      update: jest.fn().mockResolvedValue({}),
+      update: vi.fn().mockResolvedValue({}),
     } as any;
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       savedObjectsClient
     );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
       saved_objects: [],
     } as any);
     // First dep succeeds, second fails.
-    (installPackage as jest.Mock)
+    (installPackage as Mock)
       .mockResolvedValueOnce({ pkgName })
       .mockRejectedValueOnce(new Error('dep2 unavailable'));
 
@@ -873,13 +891,13 @@ describe('rollbackInstallation - dependency rollback (enableResolveDependencies=
 
 describe('rollbackInstallation - feature flag disabled with existing snapshot', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not roll back dependencies or clear snapshot when enableResolveDependencies is false', async () => {
     const depName = 'dep-pkg';
     const savedObjectsClient = {
-      find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+      find: vi.fn().mockImplementation(({ search }: { search: string }) => {
         if (search === pkgName) {
           return Promise.resolve({
             saved_objects: [
@@ -898,15 +916,15 @@ describe('rollbackInstallation - feature flag disabled with existing snapshot', 
         }
         return Promise.resolve({ saved_objects: [] });
       }),
-      update: jest.fn().mockResolvedValue({}),
+      update: vi.fn().mockResolvedValue({}),
     } as any;
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       savedObjectsClient
     );
-    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+    (appContextService.getExperimentalFeatures as Mock).mockReturnValue({
       enableResolveDependencies: false,
     });
-    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
+    (installPackage as Mock).mockResolvedValue({ pkgName });
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
       saved_objects: [],
     } as any);
@@ -929,24 +947,24 @@ describe('rollbackInstallation - feature flag disabled with existing snapshot', 
 
 describe('rollbackInstallation - version-specific policy cleanup (enableVersionSpecificPolicies=true)', () => {
   const mockEsClient = {
-    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+    deleteByQuery: vi.fn().mockResolvedValue({ deleted: 0 }),
   } as any;
 
   beforeEach(() => {
-    (installPackage as jest.Mock).mockResolvedValue({ pkgName });
-    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+    (installPackage as Mock).mockResolvedValue({ pkgName });
+    (appContextService.getExperimentalFeatures as Mock).mockReturnValue({
       enableVersionSpecificPolicies: true,
     });
   });
 
   afterEach(() => {
-    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({});
-    jest.clearAllMocks();
+    (appContextService.getExperimentalFeatures as Mock).mockReturnValue({});
+    vi.clearAllMocks();
   });
 
   const buildSoClient = () =>
     ({
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: pkgName,
@@ -963,7 +981,7 @@ describe('rollbackInstallation - version-specific policy cleanup (enableVersionS
 
   it('triggers variant cleanup when no remaining version conditions after rollback', async () => {
     const soClient = buildSoClient();
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       soClient
     );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
@@ -1011,7 +1029,7 @@ describe('rollbackInstallation - version-specific policy cleanup (enableVersionS
       previousVersionPolicies: { default: [] },
     } as any);
     packagePolicyServiceMock.findAllForAgentPolicy.mockResolvedValue([]);
-    (agentPolicyService.update as jest.Mock).mockResolvedValue({
+    (agentPolicyService.update as Mock).mockResolvedValue({
       has_agent_version_conditions: false,
     });
 
@@ -1034,7 +1052,7 @@ describe('rollbackInstallation - version-specific policy cleanup (enableVersionS
 
   it('skips variant deletion when rolled-back package still has version conditions', async () => {
     const soClient = buildSoClient();
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       soClient
     );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
@@ -1082,7 +1100,7 @@ describe('rollbackInstallation - version-specific policy cleanup (enableVersionS
       previousVersionPolicies: { default: [] },
     } as any);
     packagePolicyServiceMock.findAllForAgentPolicy.mockResolvedValue([]);
-    (agentPolicyService.update as jest.Mock).mockResolvedValue({
+    (agentPolicyService.update as Mock).mockResolvedValue({
       has_agent_version_conditions: true,
     });
 
@@ -1099,7 +1117,7 @@ describe('rollbackInstallation - version-specific policy cleanup (enableVersionS
 
   it('skips cleanup for a policy that still has another package with version conditions', async () => {
     const soClient = buildSoClient();
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       soClient
     );
     packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
@@ -1176,7 +1194,7 @@ describe('isIntegrationRollbackTTLExpired', () => {
   });
 
   it('should return true if integration rollback TTL is expired with changed config', () => {
-    (appContextService.getConfig as jest.Mock).mockReturnValue({
+    (appContextService.getConfig as Mock).mockReturnValue({
       integrationRollbackTTL: '1h',
     });
     const installStartedAt = new Date(Date.now() - 60 * 60 * 1000 - 100).toISOString();
@@ -1185,7 +1203,7 @@ describe('isIntegrationRollbackTTLExpired', () => {
   });
 
   it('should return false if integration rollback TTL is not expired with changed config', () => {
-    (appContextService.getConfig as jest.Mock).mockReturnValue({
+    (appContextService.getConfig as Mock).mockReturnValue({
       integrationRollbackTTL: '1h',
     });
     const installStartedAt = new Date(Date.now() - 60 * 60 * 1000 + 100).toISOString();
@@ -1196,8 +1214,8 @@ describe('isIntegrationRollbackTTLExpired', () => {
 
 describe('rollbackAvailableCheck', () => {
   beforeEach(() => {
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
-      find: jest.fn().mockResolvedValue({
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: pkgName,
@@ -1215,7 +1233,7 @@ describe('rollbackAvailableCheck', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return isAvailable: true if all package policies are upgraded to the current package version', async () => {
@@ -1314,21 +1332,21 @@ describe('rollbackAvailableCheck', () => {
 
   describe('dependency rollback availability (enableResolveDependencies=true)', () => {
     beforeEach(() => {
-      (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+      (appContextService.getExperimentalFeatures as Mock).mockReturnValue({
         enableResolveDependencies: true,
       });
     });
 
     afterEach(() => {
-      (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({});
-      jest.clearAllMocks();
+      (appContextService.getExperimentalFeatures as Mock).mockReturnValue({});
+      vi.clearAllMocks();
     });
 
     it('returns unavailable when a freshly-installed dependency is still needed by another composable package', async () => {
       const depName = 'dep-pkg';
-      (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
         {
-          find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+          find: vi.fn().mockImplementation(({ search }: { search: string }) => {
             if (search === pkgName) {
               return Promise.resolve({
                 saved_objects: [
@@ -1381,10 +1399,10 @@ describe('rollbackAvailableCheck', () => {
 
     it('returns unavailable when the previous registry version of an upgraded dependency is no longer available', async () => {
       const depName = 'dep-pkg';
-      (fetchInfo as jest.Mock).mockRejectedValueOnce(new Error('404 Not Found'));
-      (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      (fetchInfo as Mock).mockRejectedValueOnce(new Error('404 Not Found'));
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
         {
-          find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+          find: vi.fn().mockImplementation(({ search }: { search: string }) => {
             if (search === pkgName) {
               return Promise.resolve({
                 saved_objects: [
@@ -1434,9 +1452,9 @@ describe('rollbackAvailableCheck', () => {
 
     it('returns unavailable when rolling back a dependency would violate another package constraint', async () => {
       const depName = 'dep-pkg';
-      (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
         {
-          find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+          find: vi.fn().mockImplementation(({ search }: { search: string }) => {
             if (search === pkgName) {
               return Promise.resolve({
                 saved_objects: [
@@ -1504,9 +1522,9 @@ describe('rollbackAvailableCheck', () => {
 
     it('returns available when rolling back a dependency still satisfies all other packages constraints', async () => {
       const depName = 'dep-pkg';
-      (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
         {
-          find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+          find: vi.fn().mockImplementation(({ search }: { search: string }) => {
             if (search === pkgName) {
               return Promise.resolve({
                 saved_objects: [
@@ -1572,9 +1590,9 @@ describe('rollbackAvailableCheck', () => {
     it('returns unavailable when a dependency TTL is expired', async () => {
       const depName = 'dep-pkg';
       const eightDaysAgo = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
-      (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
         {
-          find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+          find: vi.fn().mockImplementation(({ search }: { search: string }) => {
             if (search === pkgName) {
               return Promise.resolve({
                 saved_objects: [
@@ -1624,9 +1642,9 @@ describe('rollbackAvailableCheck', () => {
 
     it('returns unavailable when multiple saved objects match a dependency name', async () => {
       const depName = 'aws';
-      (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
         {
-          find: jest.fn().mockImplementation(({ search }: { search: string }) => {
+          find: vi.fn().mockImplementation(({ search }: { search: string }) => {
             if (search === pkgName) {
               return Promise.resolve({
                 saved_objects: [

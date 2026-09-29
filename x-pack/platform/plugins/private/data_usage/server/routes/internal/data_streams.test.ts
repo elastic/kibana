@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CoreSetup } from '@kbn/core/server';
 import { registerDataStreamsRoute } from './data_streams';
@@ -21,8 +24,8 @@ import { getMeteringStats } from '../../utils/get_metering_stats';
 import { CustomHttpRequestError } from '../../utils';
 import { NoIndicesMeteringError, NoPrivilegeMeteringError } from '../../errors';
 
-jest.mock('../../utils/get_metering_stats');
-const mockGetMeteringStats = getMeteringStats as jest.Mock;
+vi.mock('../../utils/get_metering_stats');
+const mockGetMeteringStats = getMeteringStats as Mock;
 
 describe('registerDataStreamsRoute', () => {
   let mockCore: MockedKeys<CoreSetup<{}, DataUsageServerStart>>;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
@@ -17,7 +19,7 @@ import {
   type NightshiftSignificantEventsQueryData,
 } from './use_fetch_significant_events';
 
-const mockSignificantEventsFetch = jest.fn();
+const mockSignificantEventsFetch = vi.fn();
 
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
   ({
@@ -33,46 +35,52 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
     ...overrides,
   } as SignificantEvent);
 
-jest.mock('./use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        capabilities: {
-          nightshift: {
-            show: true,
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            capabilities: {
+              nightshift: {
+                show: true,
+              },
+            },
+          },
+          significantEvents: {
+            significantEventsRepositoryClient: { fetch: mockSignificantEventsFetch },
           },
         },
-      },
-      significantEvents: {
-        significantEventsRepositoryClient: { fetch: mockSignificantEventsFetch },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let capturedQueryFn: ((args: { signal?: AbortSignal }) => Promise<unknown>) | undefined;
 let capturedRefetchInterval:
   | ((data: NightshiftSignificantEventsQueryData | undefined) => number | false)
   | undefined;
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: (params: {
-    queryKey: readonly string[];
-    queryFn: (args: { signal?: AbortSignal }) => Promise<unknown>;
-    refetchInterval: (data: NightshiftSignificantEventsQueryData | undefined) => number | false;
-  }) => {
-    capturedQueryFn = params.queryFn;
-    capturedRefetchInterval = params.refetchInterval;
-    return {
-      data: undefined,
-      isLoading: true,
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: (params: {
+        queryKey: readonly string[];
+        queryFn: (args: { signal?: AbortSignal }) => Promise<unknown>;
+        refetchInterval: (data: NightshiftSignificantEventsQueryData | undefined) => number | false;
+      }) => {
+        capturedQueryFn = params.queryFn;
+        capturedRefetchInterval = params.refetchInterval;
+        return {
+          data: undefined,
+          isLoading: true,
+        };
+      },
     };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
 describe('useFetchSignificantEvents', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     clearPendingInvestigationCompletionsForTests();
     mockSignificantEventsFetch.mockResolvedValue({
       hits: [],
@@ -144,7 +152,7 @@ describe('markEventInvestigationCompleteInCache', () => {
       total: 1,
     };
     const queryClient = {
-      setQueryData: jest.fn(
+      setQueryData: vi.fn(
         (
           queryKey: typeof NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
           updater: (
@@ -179,7 +187,7 @@ describe('markEventInvestigationCompleteInCache', () => {
       total: 1,
     };
     const queryClient = {
-      setQueryData: jest.fn(
+      setQueryData: vi.fn(
         (
           _queryKey: typeof NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
           updater: (

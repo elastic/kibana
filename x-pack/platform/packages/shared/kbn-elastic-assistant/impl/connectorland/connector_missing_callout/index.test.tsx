@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { render } from '@testing-library/react';
@@ -27,7 +29,7 @@ describe('connectorMissingCallout', () => {
             <ConnectorMissingCallout
               isConnectorConfigured={false}
               isSettingsModalVisible={false}
-              setIsSettingsModalVisible={jest.fn()}
+              setIsSettingsModalVisible={vi.fn()}
             />
           </TestProviders>
         );
@@ -41,7 +43,7 @@ describe('connectorMissingCallout', () => {
             <ConnectorMissingCallout
               isConnectorConfigured={true}
               isSettingsModalVisible={false}
-              setIsSettingsModalVisible={jest.fn()}
+              setIsSettingsModalVisible={vi.fn()}
             />
           </TestProviders>
         );
@@ -64,7 +66,7 @@ describe('connectorMissingCallout', () => {
             <ConnectorMissingCallout
               isConnectorConfigured={true}
               isSettingsModalVisible={false}
-              setIsSettingsModalVisible={jest.fn()}
+              setIsSettingsModalVisible={vi.fn()}
             />
           </TestProviders>
         );

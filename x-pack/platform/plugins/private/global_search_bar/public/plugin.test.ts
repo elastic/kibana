@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
 import { GlobalSearchBarPlugin } from './plugin';
@@ -12,14 +15,17 @@ import type { SearchModalProps } from './components/types';
 
 let lastSearchModalProps: SearchModalProps | undefined;
 
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: (node: React.ReactElement) => {
-    if (node?.props) {
-      lastSearchModalProps = node.props as SearchModalProps;
-    }
-    return () => () => undefined;
-  },
-}));
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = {
+      toMountPoint: (node: React.ReactElement) => {
+        if (node?.props) {
+          lastSearchModalProps = node.props as SearchModalProps;
+        }
+        return () => () => undefined;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('GlobalSearchBarPlugin', () => {
   beforeEach(() => {
@@ -44,7 +50,7 @@ describe('GlobalSearchBarPlugin', () => {
 
       const coreStart = coreMock.createStart();
 
-      const setSpy = jest.spyOn(coreStart.chrome.controls.globalSearch, 'set');
+      const setSpy = vi.spyOn(coreStart.chrome.controls.globalSearch, 'set');
 
       service.start(coreStart, {
         globalSearch: globalSearchPluginMock.createStartContract(),
@@ -65,13 +71,13 @@ describe('GlobalSearchBarPlugin', () => {
         resolveClose = resolve;
       });
       const overlayRef = {
-        close: jest.fn().mockReturnValue(onClosePromise),
+        close: vi.fn().mockReturnValue(onClosePromise),
         onClose: onClosePromise,
       };
-      coreStart.overlays.openModal = jest.fn().mockReturnValue(overlayRef);
+      coreStart.overlays.openModal = vi.fn().mockReturnValue(overlayRef);
 
       const order: string[] = [];
-      jest.spyOn(coreStart.application, 'navigateToUrl').mockImplementation(async () => {
+      vi.spyOn(coreStart.application, 'navigateToUrl').mockImplementation(async () => {
         order.push('navigate');
       });
 
@@ -79,7 +85,7 @@ describe('GlobalSearchBarPlugin', () => {
         globalSearch: globalSearchPluginMock.createStartContract(),
       });
 
-      const onClick = (coreStart.chrome.controls.globalSearch.set as jest.Mock).mock.calls[0][0]
+      const onClick = (coreStart.chrome.controls.globalSearch.set as Mock).mock.calls[0][0]
         .onClick as () => void;
       onClick();
 

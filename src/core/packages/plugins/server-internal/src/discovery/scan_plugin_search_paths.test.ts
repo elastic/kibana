@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import mockFs from 'mock-fs';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { toArray } from 'rxjs';
@@ -53,7 +55,7 @@ describe('scanPluginSearchPaths', () => {
     // jest relies on the filesystem to get sourcemaps when using console.log
     // which breaks with the mocked FS, see https://github.com/tschaub/mock-fs/issues/234
     // hijacking logging to process.stdout as a workaround for this suite.
-    jest.spyOn(console, 'log').mockImplementation((...args) => {
+    vi.spyOn(console, 'log').mockImplementation((...args) => {
       process.stdout.write(args + '\n');
     });
   });
@@ -61,7 +63,7 @@ describe('scanPluginSearchPaths', () => {
   afterEach(() => {
     mockFs.restore();
     // restore the console.log behavior
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const extract = (

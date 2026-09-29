@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { z } from '@kbn/zod';
 import { stripUnmappedKeys } from './scope_tooling';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
-const mockGetTransforms = jest.fn();
+const mockGetTransforms = vi.fn();
 
 beforeAll(() => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires

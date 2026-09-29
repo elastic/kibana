@@ -46,12 +46,16 @@ describe('custom time range badge action', () => {
     expect(await action.isCompatible(emptyContext)).toBe(false);
   });
 
-  it('getCompatibilityChangesSubject emits when time range changes', (done) => {
-    updateTimeRange(mockTimeRange);
-    const subject = action.getCompatibilityChangesSubject(context);
-    subject?.pipe(take(1)).subscribe(() => {
-      done();
-    });
-    updateTimeRange(undefined);
-  });
+  it('getCompatibilityChangesSubject emits when time range changes', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+          updateTimeRange(mockTimeRange);
+          const subject = action.getCompatibilityChangesSubject(context);
+          subject?.pipe(take(1)).subscribe(() => {
+            done();
+          });
+          updateTimeRange(undefined);
+        
+      }));
 });

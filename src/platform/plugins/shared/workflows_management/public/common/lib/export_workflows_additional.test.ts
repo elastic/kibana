@@ -7,23 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { findMissingReferencedIds, resolveAllReferences } from './export_workflows';
 
 // Mock downloadFileAs (required by module but not used in these tests)
-jest.mock('@kbn/share-plugin/public', () => ({
-  downloadFileAs: jest.fn(),
-}));
+vi.mock('@kbn/share-plugin/public', () => {
+      const mocked = {
+      downloadFileAs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-yaml', () => ({
-  stringifyWorkflowDefinition: (def: unknown) => `stringified:${JSON.stringify(def)}`,
-}));
+vi.mock('@kbn/workflows-yaml', () => {
+      const mocked = {
+      stringifyWorkflowDefinition: (def: unknown) => `stringified:${JSON.stringify(def)}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock extractReferencedWorkflowIds
-const mockExtractReferencedWorkflowIds = jest.fn();
-jest.mock('./export/extract_workflow_references', () => ({
-  extractReferencedWorkflowIds: (...args: unknown[]) => mockExtractReferencedWorkflowIds(...args),
-}));
+const mockExtractReferencedWorkflowIds = vi.fn();
+vi.mock('./export/extract_workflow_references', () => {
+      const mocked = {
+      extractReferencedWorkflowIds: (...args: unknown[]) => mockExtractReferencedWorkflowIds(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createWorkflow = (
   id: string,
@@ -43,7 +54,7 @@ const createWorkflow = (
 
 describe('export_workflows - additional coverage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockExtractReferencedWorkflowIds.mockReturnValue([]);
   });
 

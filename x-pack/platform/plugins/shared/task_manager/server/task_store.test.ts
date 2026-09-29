@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance, Mocked } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import type { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
@@ -45,20 +48,23 @@ import { TaskValidator } from './task_validator';
 import { EsApiKeyStrategy } from './api_key_strategy';
 import { asSpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 
-let mockGetValidatedTaskInstanceFromReading: jest.SpyInstance;
-let mockGetValidatedTaskInstanceForUpdating: jest.SpyInstance;
+let mockGetValidatedTaskInstanceFromReading: MockInstance;
+let mockGetValidatedTaskInstanceForUpdating: MockInstance;
 
-jest.mock('./lib/api_key_utils', () => ({
-  getApiKeyAndUserScope: jest.fn(),
-}));
+vi.mock('./lib/api_key_utils', () => {
+      const mocked = {
+      getApiKeyAndUserScope: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClientOptions) {
   return {
-    getDecryptedAsInternalUser: jest.fn(),
-    createPointInTimeFinderDecryptedAsInternalUser: jest.fn((findOptions, deps) =>
+    getDecryptedAsInternalUser: vi.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: vi.fn((findOptions, deps) =>
       savedObjectsClientMock.create().createPointInTimeFinder(findOptions, deps)
     ),
-  } as unknown as jest.Mocked<EncryptedSavedObjectsClient>;
+  } as unknown as Mocked<EncryptedSavedObjectsClient>;
 }
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
@@ -75,13 +81,13 @@ const coreStart = coreMock.createStart();
 const mockExecutionContextStart = executionContextServiceMock.createSetupContract();
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 
-  mockGetValidatedTaskInstanceFromReading = jest
+  mockGetValidatedTaskInstanceFromReading = vi
     .spyOn(TaskValidator.prototype, 'getValidatedTaskInstanceFromReading')
     .mockImplementation((task) => task);
 
-  mockGetValidatedTaskInstanceForUpdating = jest
+  mockGetValidatedTaskInstanceForUpdating = vi
     .spyOn(TaskValidator.prototype, 'getValidatedTaskInstanceForUpdating')
     .mockImplementation((task) => task);
 
@@ -115,15 +121,15 @@ taskDefinitions.registerTaskDefinitions({
         up: (doc) => doc,
       },
     },
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
   dernstraight: {
     title: 'dernstraight',
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
   yawn: {
     title: 'yawn',
-    createTaskRunner: jest.fn(),
+    createTaskRunner: vi.fn(),
   },
 });
 
@@ -155,7 +161,7 @@ describe('TaskStore', () => {
 
     afterEach(() => {
       adHocTaskCounter.reset();
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     async function testSchedule(task: unknown, options?: Record<string, unknown>) {
@@ -344,7 +350,7 @@ describe('TaskStore', () => {
         apiKey: mockApiKey,
         userScope: mockUserScope,
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (getApiKeyAndUserScope as Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
 
       scopedSavedObjectsClient.create.mockImplementation(
@@ -459,7 +465,7 @@ describe('TaskStore', () => {
         traceparent: 'apmTraceparent',
       };
 
-      (getApiKeyAndUserScope as jest.Mock).mockRejectedValueOnce(
+      (getApiKeyAndUserScope as Mock).mockRejectedValueOnce(
         new Error('Something went wrong!')
       );
 
@@ -492,7 +498,7 @@ describe('TaskStore', () => {
           spaceId: 'testSpace',
         },
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (getApiKeyAndUserScope as Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
       coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
       scopedSavedObjectsClient.create.mockRejectedValueOnce(
@@ -539,7 +545,7 @@ describe('TaskStore', () => {
           spaceId: 'testSpace',
         },
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (getApiKeyAndUserScope as Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
       coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
       scopedSavedObjectsClient.create.mockRejectedValueOnce(
@@ -728,8 +734,8 @@ describe('TaskStore', () => {
 
     beforeEach(() => {
       const mockSerializer = savedObjectsServiceMock.createSerializer();
-      mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
-      mockSerializer.rawToSavedObject = jest.fn().mockImplementation((doc) => ({
+      mockSerializer.isRawSavedObject = vi.fn().mockReturnValue(true);
+      mockSerializer.rawToSavedObject = vi.fn().mockImplementation((doc) => ({
         id: 'task1',
         version: '123',
         type: 'task',
@@ -758,8 +764,8 @@ describe('TaskStore', () => {
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
 
-      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
-        close: jest.fn(),
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = vi.fn().mockResolvedValue({
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield {
             saved_objects: [
@@ -892,8 +898,8 @@ describe('TaskStore', () => {
     test('returns all API keys when first getApiKeys search misses a key, but finds after refresh', async () => {
       const logger = mockLogger();
       const mockSerializer = savedObjectsServiceMock.createSerializer();
-      mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
-      mockSerializer.rawToSavedObject = jest
+      mockSerializer.isRawSavedObject = vi.fn().mockReturnValue(true);
+      mockSerializer.rawToSavedObject = vi
         .fn()
         .mockImplementation((doc: { _source?: { task?: { id?: string } } }) => ({
           id: doc._source?.task?.id ?? 'task1',
@@ -904,7 +910,7 @@ describe('TaskStore', () => {
         }));
 
       const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const indicesRefreshSpy = jest
+      const indicesRefreshSpy = vi
         .spyOn(mockEsClient.indices, 'refresh')
         .mockResolvedValue({} as never);
 
@@ -927,12 +933,12 @@ describe('TaskStore', () => {
       });
 
       let getApiKeysCallCount = 0;
-      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = vi
         .fn()
         .mockImplementation(() => {
           getApiKeysCallCount++;
           return Promise.resolve({
-            close: jest.fn(),
+            close: vi.fn(),
             find: function* finder() {
               if (getApiKeysCallCount === 1) {
                 yield {
@@ -997,8 +1003,8 @@ describe('TaskStore', () => {
 
     test('returns partial API keys when first getApiKeys search misses a key, and second search after refresh still does not find it', async () => {
       const mockSerializer = savedObjectsServiceMock.createSerializer();
-      mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
-      mockSerializer.rawToSavedObject = jest
+      mockSerializer.isRawSavedObject = vi.fn().mockReturnValue(true);
+      mockSerializer.rawToSavedObject = vi
         .fn()
         .mockImplementation((doc: { _source?: { task?: { id?: string } } }) => ({
           id: doc._source?.task?.id ?? 'task1',
@@ -1009,7 +1015,7 @@ describe('TaskStore', () => {
         }));
 
       const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.spyOn(mockEsClient.indices, 'refresh').mockResolvedValue({} as never);
+      vi.spyOn(mockEsClient.indices, 'refresh').mockResolvedValue({} as never);
       const logger = mockLogger();
 
       const refreshStore = new TaskStore({
@@ -1031,12 +1037,12 @@ describe('TaskStore', () => {
       });
 
       let getApiKeysCallCount = 0;
-      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = vi
         .fn()
         .mockImplementation(() => {
           getApiKeysCallCount++;
           return Promise.resolve({
-            close: jest.fn(),
+            close: vi.fn(),
             find: function* finder() {
               if (getApiKeysCallCount === 1) {
                 yield {
@@ -1095,8 +1101,8 @@ describe('TaskStore', () => {
 
     test('returns partial API keys when refresh fails', async () => {
       const mockSerializer = savedObjectsServiceMock.createSerializer();
-      mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
-      mockSerializer.rawToSavedObject = jest
+      mockSerializer.isRawSavedObject = vi.fn().mockReturnValue(true);
+      mockSerializer.rawToSavedObject = vi
         .fn()
         .mockImplementation((doc: { _source?: { task?: { id?: string } } }) => ({
           id: doc._source?.task?.id ?? 'task1',
@@ -1107,7 +1113,7 @@ describe('TaskStore', () => {
         }));
 
       const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.spyOn(mockEsClient.indices, 'refresh').mockRejectedValue(new Error('bad refresh'));
+      vi.spyOn(mockEsClient.indices, 'refresh').mockRejectedValue(new Error('bad refresh'));
       const logger = mockLogger();
 
       const refreshStore = new TaskStore({
@@ -1129,12 +1135,12 @@ describe('TaskStore', () => {
       });
 
       let getApiKeysCallCount = 0;
-      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = vi
         .fn()
         .mockImplementation(() => {
           getApiKeysCallCount++;
           return Promise.resolve({
-            close: jest.fn(),
+            close: vi.fn(),
             find: function* finder() {
               if (getApiKeysCallCount === 1) {
                 yield {
@@ -1548,7 +1554,7 @@ describe('TaskStore', () => {
   describe('bulkUpdate', () => {
     let store: TaskStore;
     const logger = mockLogger();
-    let mockGetScopedClient: jest.Mock;
+    let mockGetScopedClient: Mock;
 
     const bulkUpdateTask = {
       runAt: mockedDate,
@@ -1575,10 +1581,10 @@ describe('TaskStore', () => {
     };
 
     beforeEach(() => {
-      mockGetScopedClient = jest.fn();
+      mockGetScopedClient = vi.fn();
       const mockSavedObjectsService = {
         getScopedClient: mockGetScopedClient,
-        getUnsafeInternalClient: jest.fn().mockReturnValue(invalidationSoClientMock),
+        getUnsafeInternalClient: vi.fn().mockReturnValue(invalidationSoClientMock),
       };
       store = new TaskStore({
         logger,
@@ -1601,7 +1607,7 @@ describe('TaskStore', () => {
 
     afterEach(() => {
       adHocTaskCounter.reset();
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     test(`doesn't validate whenever validate:false is passed-in`, async () => {
@@ -1799,7 +1805,7 @@ describe('TaskStore', () => {
 
     test('bulk update task with API key when api key, user scope and request are available', async () => {
       const mockScopedClient = {
-        bulkUpdate: jest.fn().mockResolvedValue({
+        bulkUpdate: vi.fn().mockResolvedValue({
           saved_objects: [
             {
               id: 'task:324242',
@@ -1863,7 +1869,7 @@ describe('TaskStore', () => {
 
     test('bulk update task with regenerated API key when api key, user scope, request, and regenerate api key flag are available', async () => {
       const mockScopedClient = {
-        bulkUpdate: jest.fn().mockResolvedValue({
+        bulkUpdate: vi.fn().mockResolvedValue({
           saved_objects: [
             {
               id: 'task:324242',
@@ -1894,7 +1900,7 @@ describe('TaskStore', () => {
         apiKey: mockUpdatedApiKey,
         userScope: mockUpdatedUserScope,
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (getApiKeyAndUserScope as Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       await store.bulkUpdate(
         [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
@@ -1953,7 +1959,7 @@ describe('TaskStore', () => {
 
     test('bulk update task with regenerated API key when api key but do not invalidate user created api keys', async () => {
       const mockScopedClient = {
-        bulkUpdate: jest.fn().mockResolvedValue({
+        bulkUpdate: vi.fn().mockResolvedValue({
           saved_objects: [
             {
               id: 'task:324242',
@@ -1984,7 +1990,7 @@ describe('TaskStore', () => {
         apiKey: mockUpdatedApiKey,
         userScope: mockUpdatedUserScope,
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (getApiKeyAndUserScope as Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       await store.bulkUpdate(
         [
@@ -2054,7 +2060,7 @@ describe('TaskStore', () => {
 
     test('bulk update task with regenerated API key invalidates the unused new key but keeps the in-use old key if the update fails', async () => {
       const mockScopedClient = {
-        bulkUpdate: jest.fn().mockResolvedValue({
+        bulkUpdate: vi.fn().mockResolvedValue({
           saved_objects: [
             {
               id: 'task:324242',
@@ -2092,7 +2098,7 @@ describe('TaskStore', () => {
         apiKey: mockUpdatedApiKey,
         userScope: mockUpdatedUserScope,
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (getApiKeyAndUserScope as Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       await store.bulkUpdate(
         [
@@ -2169,7 +2175,7 @@ describe('TaskStore', () => {
 
     test('bulk update invalidates the regenerated API key of a doc omitted during local validation', async () => {
       const mockScopedClient = {
-        bulkUpdate: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        bulkUpdate: vi.fn().mockResolvedValue({ saved_objects: [] }),
       };
       mockGetScopedClient.mockReturnValue(mockScopedClient);
 
@@ -2185,7 +2191,7 @@ describe('TaskStore', () => {
         apiKey: mockUpdatedApiKey,
         userScope: mockUpdatedUserScope,
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (getApiKeyAndUserScope as Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       // The doc fails local validation after the key was regenerated, so it never reaches the
       // bulk update and gets no entry in the bulk response.
@@ -2381,7 +2387,7 @@ describe('TaskStore', () => {
       };
 
       const mockScopedClient = {
-        bulkUpdate: jest.fn().mockResolvedValue({
+        bulkUpdate: vi.fn().mockResolvedValue({
           saved_objects: [
             {
               id: 'task:324242',
@@ -3213,7 +3219,7 @@ describe('TaskStore', () => {
     };
 
     beforeEach(() => {
-      (coreStart.savedObjects.getUnsafeInternalClient as jest.Mock).mockReturnValue(
+      (coreStart.savedObjects.getUnsafeInternalClient as Mock).mockReturnValue(
         invalidationSoClientMock
       );
       store = new TaskStore({
@@ -3234,8 +3240,8 @@ describe('TaskStore', () => {
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
 
-      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
-        close: jest.fn(),
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = vi.fn().mockResolvedValue({
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [mockTask] };
         },
@@ -3339,7 +3345,7 @@ describe('TaskStore', () => {
     const tasksIdsToDelete = [randomId(), randomId()];
 
     beforeEach(() => {
-      (coreStart.savedObjects.getUnsafeInternalClient as jest.Mock).mockReturnValue(
+      (coreStart.savedObjects.getUnsafeInternalClient as Mock).mockReturnValue(
         invalidationSoClientMock
       );
       store = new TaskStore({
@@ -3360,8 +3366,8 @@ describe('TaskStore', () => {
         apiKeyStrategy: new EsApiKeyStrategy(),
       });
 
-      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
-        close: jest.fn(),
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = vi.fn().mockResolvedValue({
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [mockTask1, mockTask2] };
         },
@@ -3416,15 +3422,15 @@ describe('TaskStore', () => {
     });
 
     test('marks API keys for invalidation when task has uiamApiKey but no apiKey', async () => {
-      const getApiKeyIdsForInvalidation = jest
+      const getApiKeyIdsForInvalidation = vi
         .fn()
         .mockReturnValue([{ apiKeyId: 'uiamApiKeyId', uiamApiKey: 'essu_uiam-api-key' }]);
-      const markForInvalidation = jest.fn().mockResolvedValue(undefined);
+      const markForInvalidation = vi.fn().mockResolvedValue(undefined);
       const spyStrategy = {
         shouldGrantUiam: true,
         typeToUse: 'uiam',
-        grantApiKeys: jest.fn(),
-        getApiKeyForFakeRequest: jest.fn(),
+        grantApiKeys: vi.fn(),
+        getApiKeyForFakeRequest: vi.fn(),
         getApiKeyIdsForInvalidation,
         markForInvalidation,
       };
@@ -3476,8 +3482,8 @@ describe('TaskStore', () => {
         version: '123',
       };
 
-      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
-        close: jest.fn(),
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = vi.fn().mockResolvedValue({
+        close: vi.fn(),
         find: function* asyncGenerator() {
           yield { saved_objects: [uiamOnlyTask] };
         },
@@ -3832,7 +3838,7 @@ describe('TaskStore', () => {
 
     afterEach(() => {
       adHocTaskCounter.reset();
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     async function testBulkSchedule(task: unknown) {
@@ -3975,7 +3981,7 @@ describe('TaskStore', () => {
         apiKey: mockApiKey,
         userScope: mockUserScope,
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (getApiKeyAndUserScope as Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
 
@@ -4092,7 +4098,7 @@ describe('TaskStore', () => {
         apiKey: Buffer.from('yawnApiKeyId:apiKey').toString('base64'),
         userScope: { apiKeyId: 'yawnApiKeyId', apiKeyCreatedByUser: false },
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (getApiKeyAndUserScope as Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
       coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
@@ -4117,7 +4123,7 @@ describe('TaskStore', () => {
     test('invalidates API keys created before a later grant fails', async () => {
       const task1 = { id: 'task1', params: {}, state: { foo: 'bar' }, taskType: 'report' };
       const task2 = { id: 'task2', params: {}, state: { foo: 'bar' }, taskType: 'yawn' };
-      (getApiKeyAndUserScope as jest.Mock).mockImplementationOnce(
+      (getApiKeyAndUserScope as Mock).mockImplementationOnce(
         async (_tasks, _request, _security, options) => {
           options.onApiKeyCreated({ apiKeyId: 'partially-granted-key-id' });
           throw new Error('second grant failed');
@@ -4152,7 +4158,7 @@ describe('TaskStore', () => {
         apiKey: Buffer.from('yawnApiKeyId:apiKey').toString('base64'),
         userScope: { apiKeyId: 'yawnApiKeyId', apiKeyCreatedByUser: false },
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (getApiKeyAndUserScope as Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
       coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
@@ -4211,7 +4217,7 @@ describe('TaskStore', () => {
     test('invalidates the granted API key when an id-less task fails to be created', async () => {
       const task = { params: {}, state: { foo: 'bar' }, taskType: 'report' };
       let generatedTaskId: string | undefined;
-      (getApiKeyAndUserScope as jest.Mock).mockImplementationOnce(async ([taskWithId]) => {
+      (getApiKeyAndUserScope as Mock).mockImplementationOnce(async ([taskWithId]) => {
         generatedTaskId = taskWithId.id;
         return new Map([
           [
@@ -4273,7 +4279,7 @@ describe('TaskStore', () => {
       const apiKeyAndUserScopeMap = new Map();
       apiKeyAndUserScopeMap.set('task1', sharedApiKeyFields);
       apiKeyAndUserScopeMap.set('task2', sharedApiKeyFields);
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (getApiKeyAndUserScope as Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
       coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
@@ -4304,7 +4310,7 @@ describe('TaskStore', () => {
         apiKey: Buffer.from('yawnApiKeyId:apiKey').toString('base64'),
         userScope: { apiKeyId: 'yawnApiKeyId', apiKeyCreatedByUser: false },
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (getApiKeyAndUserScope as Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       // task2 fails local validation, so it never reaches the bulk create.
       mockGetValidatedTaskInstanceForUpdating.mockImplementation((task) => {
@@ -4373,7 +4379,7 @@ describe('TaskStore', () => {
         apiKey: Buffer.from('unregisteredApiKeyId:apiKey').toString('base64'),
         userScope: { apiKeyId: 'unregisteredApiKeyId', apiKeyCreatedByUser: false },
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (getApiKeyAndUserScope as Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
       coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
@@ -4560,7 +4566,7 @@ describe('TaskStore', () => {
         traceparent: 'apmTraceparent',
       };
 
-      (getApiKeyAndUserScope as jest.Mock).mockRejectedValueOnce(
+      (getApiKeyAndUserScope as Mock).mockRejectedValueOnce(
         new Error('Something went wrong!')
       );
 

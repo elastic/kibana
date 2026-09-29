@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -26,13 +29,13 @@ const renderComponent = (props: Partial<Props> = {}) =>
   );
 
 describe('Runtime field form', () => {
-  let onChange: jest.Mock<Props['onChange']> = jest.fn();
+  let onChange: Mock<Props['onChange']> = vi.fn();
 
   const lastOnChangeCall = (): FormState =>
     onChange.mock.calls[onChange.mock.calls.length - 1][0] as FormState;
 
   beforeEach(() => {
-    onChange = jest.fn();
+    onChange = vi.fn();
   });
 
   test('should render expected 3 fields (name, returnType, script)', () => {

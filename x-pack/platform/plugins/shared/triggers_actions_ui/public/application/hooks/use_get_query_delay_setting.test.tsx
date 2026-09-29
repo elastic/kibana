@@ -4,16 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useGetQueryDelaySettings } from './use_get_query_delay_settings';
 
-jest.mock('../lib/rule_api/get_query_delay_settings', () => ({
-  getQueryDelaySettings: jest.fn(),
-}));
+vi.mock('../lib/rule_api/get_query_delay_settings', () => {
+      const mocked = {
+      getQueryDelaySettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getQueryDelaySettings } = jest.requireMock('../lib/rule_api/get_query_delay_settings');
+const { getQueryDelaySettings } = (await vi.importMock('../lib/rule_api/get_query_delay_settings'));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -28,7 +33,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('useGetQueryDelaySettings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call getQueryDelaySettings', async () => {

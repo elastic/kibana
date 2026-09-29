@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -25,7 +27,7 @@ const createTool = (
     experimental: false,
     tags: [],
     getSchema: () => z.object({}),
-    execute: jest.fn(),
+    execute: vi.fn(),
     ...parts,
   };
 };
@@ -69,7 +71,7 @@ describe('toolToLangchain', () => {
     const tool = createTool('toolA', {
       description: 'desc',
       getSchema: () => z.object({ hello: z.string() }),
-      execute: jest
+      execute: vi
         .fn()
         .mockResolvedValue({ results: [{ type: ToolResultType.other, data: 'foo' }] }),
     });
@@ -91,12 +93,12 @@ describe('toolToLangchain', () => {
     const tool = createTool('toolA', {
       description: 'desc',
       getSchema: () => z.object({ hello: z.string() }),
-      execute: jest
+      execute: vi
         .fn()
         .mockResolvedValue({ results: [{ type: ToolResultType.other, data: 'foo' }] }),
     });
 
-    const buildContent = jest.fn().mockReturnValue('custom-content');
+    const buildContent = vi.fn().mockReturnValue('custom-content');
 
     const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger, buildContent });
     const results = await langchainTool.invoke({ hello: 'world' });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import rison from '@kbn/rison';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
@@ -14,12 +16,15 @@ import {
 } from '../../../../../../common/environment_filter_values';
 import { useAlertsHref } from './use_alerts_href';
 
-const mockPrepend = jest.fn().mockImplementation((path: string) => path);
+const mockPrepend = vi.fn().mockImplementation((path: string) => path);
 
-const mockUseServiceFlyoutContext = jest.fn();
-jest.mock('../../service_flyout_context', () => ({
-  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
-}));
+const mockUseServiceFlyoutContext = vi.fn();
+vi.mock('../../service_flyout_context', () => {
+      const mocked = {
+      useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function buildContext(
   overrides: {
@@ -69,7 +74,7 @@ function getKuery(href: string): string {
 
 describe('useAlertsHref', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns undefined when the user lacks the alerting:show capability', () => {

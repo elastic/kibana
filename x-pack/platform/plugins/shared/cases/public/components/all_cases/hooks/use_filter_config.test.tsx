@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { FilterConfig, FilterConfigRenderParams } from '../types';
 import { useFilterConfig } from './use_filter_config';
@@ -16,9 +19,9 @@ import { FieldType } from '../../../../common/types/domain/template/fields';
 import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from '../../../containers/constants';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 
-jest.mock('../../../common/use_cases_local_storage');
+vi.mock('../../../common/use_cases_local_storage');
 
-const useCasesLocalStorageMock = useCasesLocalStorage as jest.Mock;
+const useCasesLocalStorageMock = useCasesLocalStorage as Mock;
 
 const emptyFilterOptions: FilterOptions = {
   search: '',
@@ -37,8 +40,8 @@ const emptyFilterOptions: FilterOptions = {
 };
 
 describe('useFilterConfig', () => {
-  const onFilterOptionsChange = jest.fn();
-  const getEmptyOptions = jest.fn().mockReturnValue({ severity: [] });
+  const onFilterOptionsChange = vi.fn();
+  const getEmptyOptions = vi.fn().mockReturnValue({ severity: [] });
   const filters: FilterConfig[] = [
     {
       key: 'severity',
@@ -63,12 +66,12 @@ describe('useFilterConfig', () => {
   beforeEach(() => {
     useCasesLocalStorageMock.mockImplementation((_key: string, initialValue: unknown) => [
       initialValue,
-      jest.fn(),
+      vi.fn(),
     ]);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should remove a selected option if the filter is deleted', async () => {
@@ -108,7 +111,7 @@ describe('useFilterConfig', () => {
 
     useCasesLocalStorageMock.mockImplementation(() => [
       [{ key: uiCustomFieldKey, isActive: false }],
-      jest.fn(),
+      vi.fn(),
     ]);
 
     const { result } = renderHook(useFilterConfig, {
@@ -181,7 +184,7 @@ describe('useFilterConfig', () => {
 
     useCasesLocalStorageMock.mockImplementation(() => [
       [{ key: efKey, isActive: false }],
-      jest.fn(),
+      vi.fn(),
     ]);
 
     const { result } = renderHook(useFilterConfig, {
@@ -218,7 +221,7 @@ describe('useFilterConfig', () => {
         { key: 'severity', isActive: true },
         { key: 'tags', isActive: true },
       ],
-      jest.fn(),
+      vi.fn(),
     ]);
 
     const { result } = renderHook(useFilterConfig, {

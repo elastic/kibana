@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render } from '@testing-library/react';
 
@@ -17,7 +19,7 @@ import userEvent from '@testing-library/user-event';
 
 describe('AddToNewCaseAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render add to new case link', () => {
@@ -65,7 +67,7 @@ describe('AddToNewCaseAction', () => {
   describe('when clicking on add to new case link', () => {
     it('should open create case flyout with header content and provided markdown', async () => {
       let headerContent: HTMLElement | null = null;
-      const openCreateCaseFlyout = jest.fn(({ headerContent: _headerContent }) => {
+      const openCreateCaseFlyout = vi.fn(({ headerContent: _headerContent }) => {
         headerContent = render(_headerContent).container;
       });
       render(

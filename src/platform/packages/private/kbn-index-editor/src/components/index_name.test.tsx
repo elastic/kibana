@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
@@ -15,14 +18,17 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { IndexName } from './index_name';
 
-jest.mock('@kbn/kibana-react-plugin/public');
-jest.mock('@kbn/file-upload', () => ({
-  ...jest.requireActual('@kbn/file-upload'),
-  useFileUploadContext: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/file-upload', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/file-upload')),
+      useFileUploadContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseFileUploadContext = useFileUploadContext as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseFileUploadContext = useFileUploadContext as Mock;
 
 describe('IndexName', () => {
   let indexName$: BehaviorSubject<string | null>;
@@ -44,13 +50,13 @@ describe('IndexName', () => {
     };
 
     mockFileUpload = {
-      checkIndexExists: jest.fn().mockResolvedValue(false),
+      checkIndexExists: vi.fn().mockResolvedValue(false),
     };
 
     mockFileUploadContext = {
       indexName: '',
-      setIndexName: jest.fn(),
-      setIndexValidationStatus: jest.fn(),
+      setIndexName: vi.fn(),
+      setIndexValidationStatus: vi.fn(),
     };
 
     mockUseKibana.mockReturnValue({

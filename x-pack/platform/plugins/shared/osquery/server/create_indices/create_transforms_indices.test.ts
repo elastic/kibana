@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { actionsMapping } from './actions_mapping';
 import { actionResponsesMapping } from './action_responses_mapping';
 import {
@@ -31,11 +34,11 @@ interface IndexTemplateResponse {
 
 interface MockEsClient {
   indices: {
-    exists: jest.Mock<Promise<boolean>>;
-    putIndexTemplate: jest.Mock<Promise<{ acknowledged: boolean }>>;
-    create: jest.Mock<Promise<{ acknowledged: boolean }>>;
-    getIndexTemplate: jest.Mock<Promise<IndexTemplateResponse>>;
-    putMapping: jest.Mock<Promise<{ acknowledged: boolean }>>;
+    exists: Mock<Promise<boolean>>;
+    putIndexTemplate: Mock<Promise<{ acknowledged: boolean }>>;
+    create: Mock<Promise<{ acknowledged: boolean }>>;
+    getIndexTemplate: Mock<Promise<IndexTemplateResponse>>;
+    putMapping: Mock<Promise<{ acknowledged: boolean }>>;
   };
 }
 
@@ -45,10 +48,10 @@ interface EsIndexMappings {
 
 const createMockEsClient = (): MockEsClient => ({
   indices: {
-    exists: jest.fn().mockResolvedValue(false),
-    putIndexTemplate: jest.fn().mockResolvedValue({ acknowledged: true }),
-    create: jest.fn().mockResolvedValue({ acknowledged: true }),
-    getIndexTemplate: jest.fn().mockResolvedValue({
+    exists: vi.fn().mockResolvedValue(false),
+    putIndexTemplate: vi.fn().mockResolvedValue({ acknowledged: true }),
+    create: vi.fn().mockResolvedValue({ acknowledged: true }),
+    getIndexTemplate: vi.fn().mockResolvedValue({
       index_templates: [
         {
           name: 'test',
@@ -60,15 +63,15 @@ const createMockEsClient = (): MockEsClient => ({
         },
       ],
     }),
-    putMapping: jest.fn().mockResolvedValue({ acknowledged: true }),
+    putMapping: vi.fn().mockResolvedValue({ acknowledged: true }),
   },
 });
 
 const logger: Logger = {
-  debug: jest.fn(),
-  info: jest.fn(),
-  error: jest.fn(),
-  get: jest.fn(() => logger),
+  debug: vi.fn(),
+  info: vi.fn(),
+  error: vi.fn(),
+  get: vi.fn(() => logger),
 } as Partial<Logger> as Logger;
 
 let mockEsClient: ReturnType<typeof createMockEsClient>;
@@ -131,7 +134,7 @@ function makeEsIndexMappings(
 
 describe('createTransformIndices', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('isSubsetMapping', () => {
     it('returns true for exact match', () => {
@@ -321,7 +324,7 @@ describe('createTransformIndices', () => {
   describe('createIndexIfNotExists', () => {
     beforeEach(() => {
       mockEsClient = createMockEsClient();
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should create index and template if they do not exist', async () => {
@@ -424,7 +427,7 @@ describe('createTransformIndices', () => {
   describe('initializeTransformsIndices', () => {
     beforeEach(() => {
       mockEsClient = createMockEsClient();
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should initialize both actions and action responses indices', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -15,8 +17,8 @@ const renderMenu = (props: Partial<React.ComponentProps<typeof SandboxSettingsMe
     <IntlProvider locale="en">
       <SandboxSettingsMenu
         manualSplitEnabled={false}
-        onEnableManualSplit={jest.fn()}
-        onDisableManualSplit={jest.fn()}
+        onEnableManualSplit={vi.fn()}
+        onDisableManualSplit={vi.fn()}
         {...props}
       />
     </IntlProvider>
@@ -38,7 +40,7 @@ describe('SandboxSettingsMenu', () => {
   });
 
   it('enables manual split when the split item is clicked', () => {
-    const onEnableManualSplit = jest.fn();
+    const onEnableManualSplit = vi.fn();
     renderMenu({ onEnableManualSplit });
 
     fireEvent.click(screen.getByTestId('querySandboxSettingsButton'));
@@ -48,7 +50,7 @@ describe('SandboxSettingsMenu', () => {
   });
 
   it('offers "Use single editor" when manual split is already enabled', () => {
-    const onDisableManualSplit = jest.fn();
+    const onDisableManualSplit = vi.fn();
     renderMenu({ manualSplitEnabled: true, onDisableManualSplit });
 
     fireEvent.click(screen.getByTestId('querySandboxSettingsButton'));

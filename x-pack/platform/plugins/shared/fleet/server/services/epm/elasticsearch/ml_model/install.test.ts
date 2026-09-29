@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -19,7 +21,7 @@ import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 
 import { installMlModel } from './install';
 
-jest.mock('../../packages/es_assets_reference');
+vi.mock('../../packages/es_assets_reference');
 
 const MODEL_A_PATH = 'test_pkg-1.0.0/elasticsearch/ml_model/test_model_a.json';
 const MODEL_B_PATH = 'test_pkg-1.0.0/elasticsearch/ml_model/test_model_b.json';
@@ -48,11 +50,11 @@ describe('installMlModel', () => {
     esClient = elasticsearchClientMock.createInternalClient();
     soClient = savedObjectsClientMock.create();
     logger = loggerMock.create();
-    jest.mocked(updateEsAssetReferences).mockResolvedValue([]);
+    vi.mocked(updateEsAssetReferences).mockResolvedValue([]);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call putTrainedModel for each model in the package', async () => {
@@ -73,7 +75,7 @@ describe('installMlModel', () => {
 
   it('should traverse the archive exactly once for multiple models', async () => {
     const archiveIterator = createArchiveIteratorFromMap(twoModelAssetsMap);
-    const traverseSpy = jest.spyOn(archiveIterator, 'traverseEntries');
+    const traverseSpy = vi.spyOn(archiveIterator, 'traverseEntries');
     const ctx = {
       ...makeContext([MODEL_A_PATH, MODEL_B_PATH], twoModelAssetsMap),
       archiveIterator,
@@ -94,7 +96,7 @@ describe('installMlModel', () => {
     const ilmPath = 'test_pkg-1.0.0/elasticsearch/ilm_policy/logs.json';
     const assetsMap = new Map([...twoModelAssetsMap, [ilmPath, Buffer.from('{}')]]);
     const archiveIterator = createArchiveIteratorFromMap(assetsMap);
-    const traverseSpy = jest.spyOn(archiveIterator, 'traverseEntries');
+    const traverseSpy = vi.spyOn(archiveIterator, 'traverseEntries');
     const ctx = { ...makeContext([MODEL_A_PATH], assetsMap), archiveIterator };
 
     await installMlModel(
@@ -128,7 +130,7 @@ describe('installMlModel', () => {
     const ilmPath = 'test_pkg-1.0.0/elasticsearch/ilm_policy/logs.json';
     const assetsMap = new Map([[ilmPath, Buffer.from('{}')]]);
     const archiveIterator = createArchiveIteratorFromMap(assetsMap);
-    const traverseSpy = jest.spyOn(archiveIterator, 'traverseEntries');
+    const traverseSpy = vi.spyOn(archiveIterator, 'traverseEntries');
     const ctx = { ...makeContext([ilmPath], assetsMap), archiveIterator };
     const refs: EsAssetReference[] = [{ id: 'existing', type: ElasticsearchAssetType.ilmPolicy }];
 

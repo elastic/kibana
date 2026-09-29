@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   DEFAULT_RUN_QUOTA_SETTINGS,
   type RunQuotaConsumeRequest,
@@ -26,20 +28,26 @@ import {
 } from '../../../lib/run_quotas';
 import { internalRunQuotaRoutes } from './route';
 
-jest.mock('../../utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../utils/assert_significant_events_access', () => {
+      const mocked = {
+      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/run_quotas', () => ({
-  ...jest.requireActual('../../../lib/run_quotas'),
-  assertCanManageRunQuotas: jest.fn(),
-  canManageRunQuotas: jest.fn(),
-  consumeRunQuota: jest.fn(),
-  createRunQuotaInternalRepository: jest.fn(),
-  patchRunQuotaSettings: jest.fn(),
-  readRunQuotaLedger: jest.fn(),
-  readRunQuotaSettings: jest.fn(),
-}));
+vi.mock('../../../lib/run_quotas', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../lib/run_quotas')),
+      assertCanManageRunQuotas: vi.fn(),
+      canManageRunQuotas: vi.fn(),
+      consumeRunQuota: vi.fn(),
+      createRunQuotaInternalRepository: vi.fn(),
+      patchRunQuotaSettings: vi.fn(),
+      readRunQuotaLedger: vi.fn(),
+      readRunQuotaSettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getRoute = internalRunQuotaRoutes['GET /internal/significant_events/run_quotas'];
 const putRoute = internalRunQuotaRoutes['PUT /internal/significant_events/run_quotas'];
@@ -58,7 +66,7 @@ const defaultSettings: RunQuotaSettingsAttributes = {
 const handlerParams = {
   request,
   server,
-  getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
+  getScopedClients: vi.fn().mockResolvedValue({ licensing: {} }),
 };
 
 const mockLedgerCounts = (counts: {
@@ -66,7 +74,7 @@ const mockLedgerCounts = (counts: {
   investigation: number;
   ki_extraction: number;
 }) => {
-  jest.mocked(readRunQuotaLedger).mockImplementation(async (_repository, date, group) => ({
+  vi.mocked(readRunQuotaLedger).mockImplementation(async (_repository, date, group) => ({
     date,
     group,
     count: counts[group],
@@ -75,23 +83,23 @@ const mockLedgerCounts = (counts: {
 
 describe('Significant Events run quota routes', () => {
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-09-03T08:30:00.000Z'));
-    jest.mocked(assertCanManageRunQuotas).mockReset().mockResolvedValue(undefined);
-    jest.mocked(canManageRunQuotas).mockReset().mockResolvedValue(false);
-    jest.mocked(consumeRunQuota).mockReset().mockResolvedValue({ allowed: true });
-    jest
+    vi.useFakeTimers().setSystemTime(new Date('2026-09-03T08:30:00.000Z'));
+    vi.mocked(assertCanManageRunQuotas).mockReset().mockResolvedValue(undefined);
+    vi.mocked(canManageRunQuotas).mockReset().mockResolvedValue(false);
+    vi.mocked(consumeRunQuota).mockReset().mockResolvedValue({ allowed: true });
+    vi
       .mocked(createRunQuotaInternalRepository)
       .mockReset()
       .mockReturnValue(repository as never);
-    jest.mocked(patchRunQuotaSettings).mockReset();
-    jest.mocked(readRunQuotaSettings).mockReset().mockResolvedValue(defaultSettings);
-    jest.mocked(readRunQuotaLedger).mockReset();
+    vi.mocked(patchRunQuotaSettings).mockReset();
+    vi.mocked(readRunQuotaSettings).mockReset().mockResolvedValue(defaultSettings);
+    vi.mocked(readRunQuotaLedger).mockReset();
     mockLedgerCounts({ detection: 0, investigation: 0, ki_extraction: 0 });
     handlerParams.getScopedClients.mockClear();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('registers exactly the three routes with their space-scoped privileges', () => {
@@ -167,8 +175,8 @@ describe('Significant Events run quota routes', () => {
         ki_extraction: 0,
       },
     };
-    jest.mocked(readRunQuotaSettings).mockResolvedValue(settings);
-    jest.mocked(canManageRunQuotas).mockResolvedValue(false);
+    vi.mocked(readRunQuotaSettings).mockResolvedValue(settings);
+    vi.mocked(canManageRunQuotas).mockResolvedValue(false);
     mockLedgerCounts({ detection: 17, investigation: 8, ki_extraction: 4 });
 
     const response = await getRoute.handler({
@@ -206,7 +214,7 @@ describe('Significant Events run quota routes', () => {
         ki_extraction: 20,
       },
     };
-    jest.mocked(patchRunQuotaSettings).mockResolvedValue(updated);
+    vi.mocked(patchRunQuotaSettings).mockResolvedValue(updated);
     mockLedgerCounts({ detection: 2, investigation: 3, ki_extraction: 4 });
 
     const response = await putRoute.handler({

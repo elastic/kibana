@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type {
   MlAnomalyRecordDoc,
   MlCustomUrlAnomalyRecordDoc,
@@ -682,7 +684,7 @@ describe('ML - custom URL utils', () => {
 
     beforeEach(() => {
       delete (window as any).open;
-      const mockOpen = jest.fn();
+      const mockOpen = vi.fn();
       window.open = mockOpen;
     });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as buildQuery from './query.host_details.dsl';
 import { hostDetails } from '.';
 import {
@@ -27,7 +29,7 @@ const mockDeps = {
 };
 
 describe('hostDetails search strategy', () => {
-  const buildHostDetailsQuery = jest.spyOn(buildQuery, 'buildHostDetailsQuery');
+  const buildHostDetailsQuery = vi.spyOn(buildQuery, 'buildHostDetailsQuery');
 
   afterEach(() => {
     buildHostDetailsQuery.mockClear();

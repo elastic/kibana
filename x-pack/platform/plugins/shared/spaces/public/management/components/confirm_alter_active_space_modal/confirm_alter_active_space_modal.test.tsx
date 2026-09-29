@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
@@ -17,8 +19,8 @@ describe('ConfirmAlterActiveSpaceModal', () => {
       shallowWithIntl(
         <ConfirmAlterActiveSpaceModal.WrappedComponent
           intl={null as any}
-          onConfirm={jest.fn()}
-          onCancel={jest.fn()}
+          onConfirm={vi.fn()}
+          onCancel={vi.fn()}
         />
       )
     ).toMatchSnapshot();

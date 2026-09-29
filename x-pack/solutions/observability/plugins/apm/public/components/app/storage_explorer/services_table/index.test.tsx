@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
@@ -18,28 +20,40 @@ import type { APIReturnType } from '../../../../services/rest/create_call_apm_ap
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 
 // Mock the hooks
-const mockUseProgressiveFetcher = jest.fn<any, any>();
-const mockUseApmParams = jest.fn<any, any>();
-const mockUseTimeRange = jest.fn<any, any>();
+const mockUseProgressiveFetcher = vi.fn<any, any>();
+const mockUseApmParams = vi.fn<any, any>();
+const mockUseTimeRange = vi.fn<any, any>();
 
-jest.mock('../../../../hooks/use_progressive_fetcher', () => ({
-  useProgressiveFetcher: () => mockUseProgressiveFetcher(),
-}));
+vi.mock('../../../../hooks/use_progressive_fetcher', () => {
+      const mocked = {
+      useProgressiveFetcher: () => mockUseProgressiveFetcher(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_apm_params', () => ({
-  useApmParams: () => mockUseApmParams(),
-}));
+vi.mock('../../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useApmParams: () => mockUseApmParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_time_range', () => ({
-  useTimeRange: () => mockUseTimeRange(),
-}));
+vi.mock('../../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => mockUseTimeRange(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock child components
-jest.mock('./storage_details_per_service', () => ({
-  StorageDetailsPerService: ({ serviceName }: { serviceName: string }) => (
-    <div data-test-subj={`storage-details-${serviceName}`}>Storage Details for {serviceName}</div>
-  ),
-}));
+vi.mock('./storage_details_per_service', () => {
+      const mocked = {
+      StorageDetailsPerService: ({ serviceName }: { serviceName: string }) => (
+        <div data-test-subj={`storage-details-${serviceName}`}>Storage Details for {serviceName}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -109,7 +123,7 @@ describe('ServicesTable', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseApmParams.mockReturnValue(defaultParams);
     mockUseTimeRange.mockReturnValue(defaultTimeRange);
 

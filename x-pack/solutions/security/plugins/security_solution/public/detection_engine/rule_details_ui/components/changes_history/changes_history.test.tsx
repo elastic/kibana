@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RuleChangesHistory } from './changes_history';
@@ -17,9 +20,9 @@ import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/tel
 
 // IntersectionObserver is used by the rule changes history timeline's scroll-to-load-more sentinel but is absent in jsdom.
 class MockIntersectionObserver {
-  observe = jest.fn();
-  unobserve = jest.fn();
-  disconnect = jest.fn();
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
 }
 
 Object.defineProperty(window, 'IntersectionObserver', {
@@ -28,28 +31,28 @@ Object.defineProperty(window, 'IntersectionObserver', {
   value: MockIntersectionObserver,
 });
 
-jest.mock('../../../rule_management/api/hooks/use_infinite_change_history');
+vi.mock('../../../rule_management/api/hooks/use_infinite_change_history');
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana'));
 
   return {
     ...original,
     useKibana: () => ({
       services: {
-        application: { navigateToApp: jest.fn() },
+        application: { navigateToApp: vi.fn() },
         telemetry: mockedTelemetry,
       },
     }),
   };
 });
 
-const mockUseInfiniteChangeHistory = useInfiniteChangeHistory as jest.Mock;
+const mockUseInfiniteChangeHistory = useInfiniteChangeHistory as Mock;
 
 describe('RuleChangesHistory', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('selects the first active item of the new rule when ruleId changes', async () => {
@@ -397,7 +400,7 @@ function createHistoryItem(
 
 interface MockUseInfiniteQueryResultOptions {
   hasNextPage?: boolean;
-  fetchNextPage?: jest.Mock;
+  fetchNextPage?: Mock;
   isFetching?: boolean;
 }
 
@@ -405,7 +408,7 @@ function mockUseInfiniteQueryResult(
   items: RuleHistoryItem[],
   {
     hasNextPage = false,
-    fetchNextPage = jest.fn(),
+    fetchNextPage = vi.fn(),
     isFetching = false,
   }: MockUseInfiniteQueryResultOptions = {}
 ) {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -18,13 +21,13 @@ import {
 } from '../../../../hooks/use_significant_events_run_quotas';
 import { RunLimitsSection } from './run_limits_section';
 
-jest.mock('../../../../hooks/use_significant_events_run_quotas');
+vi.mock('../../../../hooks/use_significant_events_run_quotas');
 
-const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas>;
-const mockUseUpdateRunQuotas = useUpdateRunQuotas as jest.MockedFunction<typeof useUpdateRunQuotas>;
+const mockUseRunQuotas = useRunQuotas as MockedFunction<typeof useRunQuotas>;
+const mockUseUpdateRunQuotas = useUpdateRunQuotas as MockedFunction<typeof useUpdateRunQuotas>;
 
-const save = jest.fn<Promise<RunQuotasResponse>, [RunQuotaSettingsUpdate]>();
-const refetch = jest.fn();
+const save = vi.fn<Promise<RunQuotasResponse>, [RunQuotaSettingsUpdate]>();
+const refetch = vi.fn();
 
 const response = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse => ({
   enabled: true,
@@ -70,7 +73,7 @@ const setup = (data: RunQuotasResponse = response()) => {
 
 describe('RunLimitsSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('hides category details while enforcement is off and shows suggested limits when enabled', () => {

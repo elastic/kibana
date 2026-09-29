@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -23,17 +25,17 @@ const draft: DraftPolicy = {
 };
 
 const renderCreateStep = ({ isLoading = false }: { isLoading?: boolean } = {}) => {
-  const onSubmit = jest.fn();
-  const onBack = jest.fn();
+  const onSubmit = vi.fn();
+  const onBack = vi.fn();
 
   render(
     <I18nProvider>
       <CreatePolicyContext.Provider
         value={{
           draft,
-          updateDraft: jest.fn(),
+          updateDraft: vi.fn(),
           completionState: { configurationStep: true, fieldsSelectionStep: true },
-          updateCompletionState: jest.fn(),
+          updateCompletionState: vi.fn(),
         }}
       >
         <CreateStep onSubmit={onSubmit} onBack={onBack} isLoading={isLoading} />

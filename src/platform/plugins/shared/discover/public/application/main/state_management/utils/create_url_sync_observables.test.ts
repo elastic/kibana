@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { from } from 'rxjs';
 import { FilterStateStore } from '@kbn/es-query-constants';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
@@ -386,7 +388,7 @@ describe('createUrlSyncObservables', () => {
         },
       })
     );
-    jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+    vi.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
       ...contexts,
       dataSourceContext: {
         ...contexts.dataSourceContext,

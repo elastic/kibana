@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import * as api from './api';
@@ -13,17 +16,17 @@ import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { useGetTags } from './use_get_tags';
 import { useToasts } from '../common/lib/kibana';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
 describe('useGetTags', () => {
   const abortCtrl = new AbortController();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls getTags api', async () => {
-    const spyOnGetTags = jest.spyOn(api, 'getTags');
+    const spyOnGetTags = vi.spyOn(api, 'getTags');
     renderHook(() => useGetTags(), {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => (
         <TestProviders>{children}</TestProviders>
@@ -38,9 +41,9 @@ describe('useGetTags', () => {
   });
 
   it('displays and error toast when an error occurs', async () => {
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
-    const spyOnGetTags = jest.spyOn(api, 'getTags');
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addError });
+    const spyOnGetTags = vi.spyOn(api, 'getTags');
     spyOnGetTags.mockImplementation(() => {
       throw new Error('Something went wrong');
     });

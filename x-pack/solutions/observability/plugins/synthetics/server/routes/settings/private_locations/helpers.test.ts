@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   allLocationsToClientContract,
   toClientContract,
@@ -13,13 +16,16 @@ import {
 import type { RouteContext } from '../../types';
 
 // Mock the syncEditedMonitorBulk module
-jest.mock('../../monitor_cruds/bulk_cruds/edit_monitor_bulk', () => ({
-  syncEditedMonitorBulk: jest.fn().mockResolvedValue({
-    failedConfigs: [],
-    errors: [],
-    editedMonitors: [],
-  }),
-}));
+vi.mock('../../monitor_cruds/bulk_cruds/edit_monitor_bulk', () => {
+      const mocked = {
+      syncEditedMonitorBulk: vi.fn().mockResolvedValue({
+        failedConfigs: [],
+        errors: [],
+        editedMonitors: [],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Import the mocked function
 import { syncEditedMonitorBulk } from '../../monitor_cruds/bulk_cruds/edit_monitor_bulk';
@@ -134,7 +140,7 @@ describe('toClientContract', () => {
 
 describe('updatePrivateLocationMonitors', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const LOCATION_ID = 'test-location-id';
@@ -238,7 +244,7 @@ describe('updatePrivateLocationMonitors', () => {
   });
 
   it('throws when a monitor rewrite reports failed configs so the location flag is not persisted', async () => {
-    (syncEditedMonitorBulk as jest.Mock).mockResolvedValueOnce({
+    (syncEditedMonitorBulk as Mock).mockResolvedValueOnce({
       failedConfigs: {
         [FIRST_MONITOR_ID]: { config: mockMonitors[0].attributes, error: new Error('fleet') },
       },

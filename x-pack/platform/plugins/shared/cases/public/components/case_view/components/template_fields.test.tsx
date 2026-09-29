@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,28 +16,40 @@ import type { ParsedTemplate } from '../../../../common/types/domain/template/v1
 import { FieldType } from '../../../../common/types/domain/template/fields';
 import { TemplateFields } from './template_fields';
 
-const mockUseGetTemplate = jest.fn();
-jest.mock('../../templates_v2/hooks/use_get_template', () => ({
-  useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
-}));
+const mockUseGetTemplate = vi.fn();
+vi.mock('../../templates_v2/hooks/use_get_template', () => {
+      const mocked = {
+      useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The field renderer reads update permissions from the cases context; this suite renders without
 // the CasesProvider, so supply the context directly.
-jest.mock('../../cases_context/use_cases_context', () => ({
-  useCasesContext: () => ({ owner: ['securitySolution'], permissions: { update: true } }),
-}));
+vi.mock('../../cases_context/use_cases_context', () => {
+      const mocked = {
+      useCasesContext: () => ({ owner: ['securitySolution'], permissions: { update: true } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetFieldDefinitions = jest.fn();
-jest.mock('../../field_library/hooks/use_get_field_definitions', () => ({
-  useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
-}));
+const mockUseGetFieldDefinitions = vi.fn();
+vi.mock('../../field_library/hooks/use_get_field_definitions', () => {
+      const mocked = {
+      useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../field_library/hooks/use_resolved_fields', () => ({
-  useResolvedFields: (fields: unknown[]) => ({
-    resolvedFields: fields,
-    isLoading: false,
-  }),
-}));
+vi.mock('../../field_library/hooks/use_resolved_fields', () => {
+      const mocked = {
+      useResolvedFields: (fields: unknown[]) => ({
+        resolvedFields: fields,
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockTemplate: ParsedTemplate = {
   templateId: 'template-1',
@@ -73,7 +87,7 @@ const defaultCaseData = {
   },
 } as unknown as CaseUI;
 
-const onUpdateField = jest.fn();
+const onUpdateField = vi.fn();
 
 const defaultProps = {
   caseData: defaultCaseData,
@@ -84,7 +98,7 @@ const defaultProps = {
 
 describe('TemplateFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     onUpdateField.mockImplementation(({ onSuccess }) => onSuccess?.());
     mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
     mockUseGetFieldDefinitions.mockReturnValue({

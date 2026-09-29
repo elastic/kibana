@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -12,10 +14,10 @@ import { EntityComponent } from './entity';
 import { TestProviders } from '../../mock/test_providers';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,

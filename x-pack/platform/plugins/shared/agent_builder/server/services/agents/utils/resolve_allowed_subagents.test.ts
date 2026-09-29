@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
 import { resolveAllowedSubagents } from './resolve_allowed_subagents';
 
 type MockValue = { description?: string } | 'deny' | 'missing';
 
 const makeRegistry = (map: Record<string, MockValue>) => ({
-  get: jest.fn(async (id: string) => {
+  get: vi.fn(async (id: string) => {
     const v = map[id];
     if (v === undefined || v === 'missing') throw new Error('not found');
     if (v === 'deny') throw new Error('forbidden');

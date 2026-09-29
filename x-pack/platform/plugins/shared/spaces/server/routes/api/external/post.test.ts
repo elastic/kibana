@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as Rx from 'rxjs';
 
 import { AIChatExperience } from '@kbn/ai-assistant-common';
@@ -46,10 +48,10 @@ describe('Spaces Public API', () => {
 
     const coreStart = coreMock.createStart();
     const internalSavedObjectsRepository = {
-      update: jest.fn().mockResolvedValue({}),
-      create: jest.fn().mockResolvedValue({}),
+      update: vi.fn().mockResolvedValue({}),
+      create: vi.fn().mockResolvedValue({}),
     };
-    coreStart.savedObjects.createInternalRepository = jest
+    coreStart.savedObjects.createInternalRepository = vi
       .fn()
       .mockReturnValue(internalSavedObjectsRepository);
 
@@ -57,7 +59,7 @@ describe('Spaces Public API', () => {
 
     const log = loggingSystemMock.create().get('spaces');
 
-    const clientService = new SpacesClientService(jest.fn(), 'traditional');
+    const clientService = new SpacesClientService(vi.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -104,18 +106,18 @@ describe('Spaces Public API', () => {
 
   const setupWithCps = async (options: { cpsEnabled: boolean; canPut?: boolean }) => {
     const npreClient: INpreClient = {
-      getNpre: jest.fn().mockResolvedValue(undefined),
-      canGetNpre: jest.fn().mockResolvedValue(false),
-      putNpre: jest.fn().mockResolvedValue(undefined),
-      deleteNpre: jest.fn().mockResolvedValue(undefined),
-      canPutNpre: jest.fn().mockResolvedValue(options.canPut),
+      getNpre: vi.fn().mockResolvedValue(undefined),
+      canGetNpre: vi.fn().mockResolvedValue(false),
+      putNpre: vi.fn().mockResolvedValue(undefined),
+      deleteNpre: vi.fn().mockResolvedValue(undefined),
+      canPutNpre: vi.fn().mockResolvedValue(options.canPut),
     };
 
     const mockCpsStart = options.cpsEnabled
       ? {
-          createNpreClient: jest.fn().mockReturnValue(npreClient),
-          getLinkedProjects: jest.fn().mockResolvedValue([]),
-          isCpsActive: jest.fn().mockResolvedValue(false),
+          createNpreClient: vi.fn().mockReturnValue(npreClient),
+          getLinkedProjects: vi.fn().mockResolvedValue([]),
+          isCpsActive: vi.fn().mockResolvedValue(false),
         }
       : undefined;
 
@@ -437,7 +439,7 @@ describe('Spaces Public API', () => {
       };
 
       const { routeHandler, internalSavedObjectsRepository, log } = await setup();
-      const warnSpy = jest.spyOn(log, 'warn');
+      const warnSpy = vi.spyOn(log, 'warn');
       internalSavedObjectsRepository.update.mockRejectedValueOnce(new Error('seed failed'));
 
       const request = httpServerMock.createKibanaRequest({

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
@@ -20,7 +23,7 @@ import {
   validatePackagePoliciesUniqueNameAcrossSpaces,
 } from './policy_namespaces';
 
-jest.mock('../app_context');
+vi.mock('../app_context');
 
 describe('validatePolicyNamespaceForSpace', () => {
   function createSavedsClientMock(settingsAttributes?: any) {
@@ -36,13 +39,13 @@ describe('validatePolicyNamespaceForSpace', () => {
       );
     }
 
-    jest.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReturnValue(client);
+    vi.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReturnValue(client);
 
     return client;
   }
 
   beforeEach(() => {
-    jest
+    vi
       .mocked(appContextService.getExperimentalFeatures)
       .mockReturnValue({ useSpaceAwareness: true } as any);
   });
@@ -113,7 +116,7 @@ describe('validatePolicyNamespaceForSpace', () => {
   });
 
   it('should not validate if feature flag is off', async () => {
-    jest
+    vi
       .mocked(appContextService.getExperimentalFeatures)
       .mockReturnValue({ useSpaceAwareness: false } as any);
     createSavedsClientMock({ allowed_namespace_prefixes: ['tata', 'test', 'toto'] });
@@ -148,30 +151,30 @@ const packagePolicy1 = {
   spaceIds: ['space1'],
 };
 
-const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
+const packagePolicyServiceMock = packagePolicyService as Mocked<PackagePolicyClient>;
 
-jest.mock(
+vi.mock(
   '../package_policy',
   (): {
-    packagePolicyService: jest.Mocked<PackagePolicyClient>;
+    packagePolicyService: Mocked<PackagePolicyClient>;
   } => {
     return {
       packagePolicyService: {
-        buildPackagePolicyFromPackage: jest.fn(),
-        bulkCreate: jest.fn(),
-        create: jest.fn(),
-        delete: jest.fn(),
-        get: jest.fn(),
-        getByIDs: jest.fn(),
-        list: jest.fn(),
-        listIds: jest.fn(),
-        update: jest.fn(),
+        buildPackagePolicyFromPackage: vi.fn(),
+        bulkCreate: vi.fn(),
+        create: vi.fn(),
+        delete: vi.fn(),
+        get: vi.fn(),
+        getByIDs: vi.fn(),
+        list: vi.fn(),
+        listIds: vi.fn(),
+        update: vi.fn(),
 
-        runExternalCallbacks: jest.fn(),
-        upgrade: jest.fn(),
-        bulkUpgrade: jest.fn(),
-        getUpgradeDryRunDiff: jest.fn(),
-        enrichPolicyWithDefaultsFromPackage: jest.fn(),
+        runExternalCallbacks: vi.fn(),
+        upgrade: vi.fn(),
+        bulkUpgrade: vi.fn(),
+        getUpgradeDryRunDiff: vi.fn(),
+        enrichPolicyWithDefaultsFromPackage: vi.fn(),
       } as any,
     };
   }
@@ -179,7 +182,7 @@ jest.mock(
 
 describe('validatePackagePoliciesUniqueNameAcrossSpaces', () => {
   const soClient = savedObjectsClientMock.create();
-  jest
+  vi
     .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension)
     .mockReturnValue(soClient);
 

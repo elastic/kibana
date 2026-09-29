@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { SUB_ACTION } from '@kbn/connector-schemas/mcp/constants';
@@ -18,7 +20,7 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 describe('MCP ParamsFields', () => {
   it('should default subAction to "initialize" when missing', () => {
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const actionParams: Partial<MCPActionParams> = {};
 
     render(
@@ -44,7 +46,7 @@ describe('MCP ParamsFields', () => {
     const { getByLabelText } = render(
       <ParamsFields
         actionParams={actionParams}
-        editAction={jest.fn()}
+        editAction={vi.fn()}
         index={0}
         errors={{ subActionParams: [] }}
         messageVariables={[]}
@@ -63,7 +65,7 @@ describe('MCP ParamsFields', () => {
     const { queryByLabelText } = render(
       <ParamsFields
         actionParams={actionParams}
-        editAction={jest.fn()}
+        editAction={vi.fn()}
         index={0}
         errors={{ subActionParams: [] }}
         messageVariables={[]}
@@ -75,7 +77,7 @@ describe('MCP ParamsFields', () => {
   });
 
   it('should initialize "call_tool" params when missing', () => {
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const actionParams: Partial<MCPActionParams> = {
       subAction: SUB_ACTION.CALL_TOOL,
     };

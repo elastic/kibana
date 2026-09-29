@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getIncidentTypes, getSeverity } from './api';
 
@@ -46,7 +48,7 @@ const severityResponse = {
 describe('Resilient API', () => {
   const http = httpServiceMock.createStartContract();
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   describe('getIncidentTypes', () => {
     test('should call get choices API', async () => {

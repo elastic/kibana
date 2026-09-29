@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { AlertFieldNumber, handleAlertFieldNumberChange } from './alert_field_number';
 
 describe('AlertFieldNumber', () => {
   describe('handleAlertFieldNumberChange', () => {
-    let mockSetIsInvalid: jest.Mock;
-    let mockSetFieldValue: jest.Mock;
+    let mockSetIsInvalid: Mock;
+    let mockSetFieldValue: Mock;
 
     beforeEach(() => {
-      mockSetIsInvalid = jest.fn();
-      mockSetFieldValue = jest.fn();
+      mockSetIsInvalid = vi.fn();
+      mockSetFieldValue = vi.fn();
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('sets a valid number', () => {
@@ -90,7 +93,7 @@ describe('AlertFieldNumber', () => {
 
   describe('AlertFieldNumber', () => {
     it('responds with correct number value when a valid number is specified', () => {
-      const mockValueHandler = jest.fn();
+      const mockValueHandler = vi.fn();
       const component = mountWithIntl(
         <AlertFieldNumber
           aria-label="test label"
@@ -112,7 +115,7 @@ describe('AlertFieldNumber', () => {
     });
 
     it('does not set an invalid number value', () => {
-      const mockValueHandler = jest.fn();
+      const mockValueHandler = vi.fn();
       const component = mountWithIntl(
         <AlertFieldNumber
           aria-label="test label"
@@ -128,7 +131,7 @@ describe('AlertFieldNumber', () => {
     });
 
     it('does not set a number value less than 1', () => {
-      const mockValueHandler = jest.fn();
+      const mockValueHandler = vi.fn();
       const component = mountWithIntl(
         <AlertFieldNumber
           aria-label="test label"

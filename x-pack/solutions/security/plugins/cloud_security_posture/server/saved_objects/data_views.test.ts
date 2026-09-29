@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClient, ISavedObjectsRepository } from '@kbn/core/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
@@ -29,41 +32,41 @@ import {
 } from './data_views';
 
 describe('data_views', () => {
-  let mockSoClient: jest.Mocked<ISavedObjectsRepository>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockLogger: jest.Mocked<Logger>;
-  let mockSpacesService: jest.Mocked<SpacesServiceStart>;
-  let mockDataViewsService: jest.Mocked<DataViewsServerPluginStart>;
-  let mockRequest: jest.Mocked<KibanaRequest>;
+  let mockSoClient: Mocked<ISavedObjectsRepository>;
+  let mockEsClient: Mocked<ElasticsearchClient>;
+  let mockLogger: Mocked<Logger>;
+  let mockSpacesService: Mocked<SpacesServiceStart>;
+  let mockDataViewsService: Mocked<DataViewsServerPluginStart>;
+  let mockRequest: Mocked<KibanaRequest>;
 
   beforeEach(() => {
     mockSoClient = {
-      get: jest.fn(),
-      find: jest.fn(),
-      delete: jest.fn(),
-      create: jest.fn(),
-      bulkGet: jest.fn(),
+      get: vi.fn(),
+      find: vi.fn(),
+      delete: vi.fn(),
+      create: vi.fn(),
+      bulkGet: vi.fn(),
     } as any;
 
     mockEsClient = {} as any;
 
     mockLogger = {
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      debug: jest.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
     } as any;
 
     mockSpacesService = {
-      getSpaceId: jest.fn().mockReturnValue(DEFAULT_SPACE_ID),
+      getSpaceId: vi.fn().mockReturnValue(DEFAULT_SPACE_ID),
     } as any;
 
     const mockDataViewsClient = {
-      createAndSave: jest.fn(),
+      createAndSave: vi.fn(),
     };
 
     mockDataViewsService = {
-      dataViewsServiceFactory: jest.fn().mockResolvedValue(mockDataViewsClient),
+      dataViewsServiceFactory: vi.fn().mockResolvedValue(mockDataViewsClient),
     } as any;
 
     mockRequest = {} as any;
@@ -74,7 +77,7 @@ describe('data_views', () => {
       mockSoClient.get.mockRejectedValue(new Error('Not found'));
 
       const mockDataViewsClient = {
-        createAndSave: jest.fn(),
+        createAndSave: vi.fn(),
       };
       mockDataViewsService.dataViewsServiceFactory.mockResolvedValue(mockDataViewsClient as any);
 
@@ -112,7 +115,7 @@ describe('data_views', () => {
       });
 
       const mockDataViewsClient = {
-        createAndSave: jest.fn(),
+        createAndSave: vi.fn(),
       };
       mockDataViewsService.dataViewsServiceFactory.mockResolvedValue(mockDataViewsClient as any);
 
@@ -158,7 +161,7 @@ describe('data_views', () => {
       mockSoClient.get.mockRejectedValue(new Error('Not found'));
 
       const mockDataViewsClient = {
-        createAndSave: jest.fn(),
+        createAndSave: vi.fn(),
       };
       mockDataViewsService.dataViewsServiceFactory.mockResolvedValue(mockDataViewsClient as any);
 
@@ -634,7 +637,7 @@ describe('data_views', () => {
       mockSoClient.get.mockRejectedValue(new Error('Not found'));
 
       const mockDataViewsClient = {
-        createAndSave: jest.fn(),
+        createAndSave: vi.fn(),
       };
       mockDataViewsService.dataViewsServiceFactory.mockResolvedValue(mockDataViewsClient as any);
 

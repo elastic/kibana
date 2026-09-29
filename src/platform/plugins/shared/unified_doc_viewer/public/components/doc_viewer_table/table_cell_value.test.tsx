@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -22,7 +24,7 @@ const truncationStyles = {
 };
 
 let mockScrollHeight = 0;
-jest.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(() => mockScrollHeight);
+vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(() => mockScrollHeight);
 
 describe('TableFieldValue', () => {
   afterEach(() => {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,20 +21,23 @@ import { DataSourceBrowser } from './data_source_browser';
 import { DataSourceSelectionChange } from '../types';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getDatasets: jest.fn(),
-  getESQLSources: jest.fn(),
-  getTimeseriesIndices: jest.fn(),
-  getViews: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getDatasets: vi.fn(),
+      getESQLSources: vi.fn(),
+      getTimeseriesIndices: vi.fn(),
+      getViews: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getViewsMock = getViews as unknown as jest.MockedFunction<
+const getViewsMock = getViews as unknown as MockedFunction<
   (http: unknown) => Promise<EsqlViewsResult>
 >;
-const getDatasetsMock = getDatasets as unknown as jest.MockedFunction<
+const getDatasetsMock = getDatasets as unknown as MockedFunction<
   () => Promise<{ datasets: [] }>
 >;
-const getESQLSourcesMock = getESQLSources as jest.MockedFunction<typeof getESQLSources>;
+const getESQLSourcesMock = getESQLSources as MockedFunction<typeof getESQLSources>;
 
 const views: EsqlView[] = [
   { name: 'errors_view', query: 'FROM logs-* | WHERE log.level == "error"' },
@@ -51,10 +57,10 @@ const mockViews = (result: EsqlViewsResult) => {
 const http = {};
 
 const renderBrowser = ({
-  onSelect = jest.fn(),
+  onSelect = vi.fn(),
   esql,
 }: {
-  onSelect?: jest.Mock;
+  onSelect?: Mock;
   esql?: { enrichViews?: (views: EsqlView[]) => Promise<EsqlView[]> };
 } = {}) => {
   render(
@@ -62,7 +68,7 @@ const renderBrowser = ({
       <DataSourceBrowser
         isOpen
         isTimeseries={false}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
         onSelect={onSelect}
         position={{ top: 0, left: 0 }}
       />
@@ -86,7 +92,7 @@ const clickTypeFilterOption = async (label: string) => {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   viewsCallContext = undefined;
   getESQLSourcesMock.mockResolvedValue([
     { name: 'logs-*', hidden: false, type: SOURCES_TYPES.DATA_STREAM },
@@ -116,9 +122,9 @@ describe('DataSourceBrowser views', () => {
   });
 
   it('keeps listing the views when enriching them fails', async () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     renderBrowser({
-      esql: { enrichViews: jest.fn().mockRejectedValue(new Error('Streams unavailable')) },
+      esql: { enrichViews: vi.fn().mockRejectedValue(new Error('Streams unavailable')) },
     });
 
     expect(

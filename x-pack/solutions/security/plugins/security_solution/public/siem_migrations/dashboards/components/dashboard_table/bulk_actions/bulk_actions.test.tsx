@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { BulkActions } from './bulk_actions';
@@ -18,14 +21,14 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import type { SiemMigrationsService } from '../../../../service';
 import { getDashboardMigrationDashboardMock } from '../../../../../../common/siem_migrations/model/__mocks__';
 
-jest.mock('../../../../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+vi.mock('../../../../../common/lib/kibana');
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const mockSiemMigrationsService = {
   dashboards: {
-    getMissingCapabilities: jest.fn(),
+    getMissingCapabilities: vi.fn(),
   },
-} as unknown as jest.MockedObjectDeep<SiemMigrationsService>;
+} as unknown as Mocked<SiemMigrationsService>;
 
 describe('BulkActions', () => {
   beforeEach(() => {
@@ -38,7 +41,7 @@ describe('BulkActions', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the bulk actions component', () => {
@@ -120,7 +123,7 @@ describe('BulkActions', () => {
         failed: 2,
       },
     };
-    const reprocessFailedDashboards = jest.fn();
+    const reprocessFailedDashboards = vi.fn();
     const { getByTestId } = render(
       <TestProviders>
         <BulkActions
@@ -221,7 +224,7 @@ describe('BulkActions', () => {
         failed: 2,
       },
     };
-    const installTranslatedDashboards = jest.fn();
+    const installTranslatedDashboards = vi.fn();
     const { getByTestId } = render(
       <TestProviders>
         <BulkActions
@@ -298,7 +301,7 @@ describe('BulkActions', () => {
         translation_result: MigrationTranslationResult.FULL,
       }),
     ];
-    const installSelectedDashboards = jest.fn();
+    const installSelectedDashboards = vi.fn();
     const { getByTestId } = render(
       <TestProviders>
         <BulkActions
@@ -344,7 +347,7 @@ describe('BulkActions', () => {
           selectedDashboards={selectedDashboards}
           translationStats={mockTranslationStats}
           isTableLoading={false}
-          installSelectedDashboards={jest.fn()}
+          installSelectedDashboards={vi.fn()}
         />
       </TestProviders>
     );

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -15,7 +17,7 @@ describe('SecurityCallout', () => {
     wasKeyCreatedBefore: true,
     hasApiKey: false,
     isDismissed: false,
-    onDismiss: jest.fn(),
+    onDismiss: vi.fn(),
   };
 
   it('renders the title and body when a key was created before', () => {
@@ -52,7 +54,7 @@ describe('SecurityCallout', () => {
   });
 
   it('calls onDismiss when the dismiss button is clicked', async () => {
-    const onDismiss = jest.fn();
+    const onDismiss = vi.fn();
     render(<SecurityCallout {...defaultProps} onDismiss={onDismiss} />);
 
     await userEvent.click(screen.getByTestId('euiDismissCalloutButton'));

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
@@ -19,14 +21,17 @@ import { FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID } from '../../../flyout/documen
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import type { OpenFlyoutLinkRenderer } from './open_flyout_link';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+      ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../../common/lib/kibana'));
   return {
     ...actual,
     useKibana: () => ({
@@ -36,7 +41,7 @@ jest.mock('../../../common/lib/kibana', () => {
         telemetry: mockedTelemetry,
       },
     }),
-    useUiSetting: jest.fn().mockReturnValue(false),
+    useUiSetting: vi.fn().mockReturnValue(false),
   };
 });
 
@@ -66,8 +71,8 @@ const hostIpValues = ['127.0.0.1', '::1', '10.1.2.3', 'fe80::4001:aff:fec8:32'];
 
 describe('TableFieldValueCell', () => {
   beforeAll(() => {
-    jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.clearAllMocks();
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
   describe('common behavior', () => {

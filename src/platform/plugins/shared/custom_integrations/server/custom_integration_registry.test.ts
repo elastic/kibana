@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { CustomIntegrationRegistry } from './custom_integration_registry';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -180,7 +182,7 @@ describe('CustomIntegrationsRegistry', () => {
   describe('registerDeferredInitializer', () => {
     test('deferred initializer is called exactly once before the first read', () => {
       const registry = new CustomIntegrationRegistry(mockLogger, false);
-      const init = jest.fn(() => {
+      const init = vi.fn(() => {
         registry.registerCustomIntegration(integration);
       });
 

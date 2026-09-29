@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import * as buildQuery from './query.users_network.dsl';
 import { networkUsers } from '.';
@@ -16,7 +18,7 @@ import {
 import type { NetworkUsersRequestOptions } from '../../../../../../common/api/search_strategy';
 
 describe('networkUsers search strategy', () => {
-  const buildUsersQuery = jest.spyOn(buildQuery, 'buildUsersQuery');
+  const buildUsersQuery = vi.spyOn(buildQuery, 'buildUsersQuery');
 
   afterEach(() => {
     buildUsersQuery.mockClear();

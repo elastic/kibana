@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CaseMetricsFeature } from '../../common/types/api';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { bulkGetCases, getCases, getCasesMetrics } from '.';
@@ -12,7 +14,7 @@ import { allCases, allCasesSnake, casesSnake } from '../containers/mock';
 
 describe('api', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getCases', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -21,8 +24,8 @@ const mockLocators = createMockLocators();
 // Real `EuiHealth` renders its `color` prop as an icon fill with no queryable text or
 // data-test-subj of its own, so the color mapping (e.g. success vs. danger) has no way to be
 // asserted through the public DOM without this. Forwards every other prop untouched.
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiHealth: ({ color, children, ...rest }: EuiHealthProps) => (
@@ -33,30 +36,42 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/alerting-v2-browser-shared', () => ({
-  useRuleAutoAttach: jest.fn(),
-}));
+vi.mock('@kbn/alerting-v2-browser-shared', () => {
+      const mocked = {
+      useRuleAutoAttach: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_rule_audit_metadata', () => ({
-  useRuleAuditMetadata: () => ({
-    createdByDisplay: 'Alice',
-    createdAtFormatted: 'Mar 1, 2026',
-    updatedByDisplay: 'Bob',
-    updatedAtFormatted: 'Mar 4, 2026',
-  }),
-}));
+vi.mock('../../../../hooks/use_rule_audit_metadata', () => {
+      const mocked = {
+      useRuleAuditMetadata: () => ({
+        createdByDisplay: 'Alice',
+        createdAtFormatted: 'Mar 1, 2026',
+        updatedByDisplay: 'Bob',
+        updatedAtFormatted: 'Mar 4, 2026',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchRuleExecutions = jest.fn();
-jest.mock('../../../../hooks/use_fetch_rule_executions', () => ({
-  useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
-}));
+const mockUseFetchRuleExecutions = vi.fn();
+vi.mock('../../../../hooks/use_fetch_rule_executions', () => {
+      const mocked = {
+      useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../services/user_capabilities', () => ({
-  UserCapabilities: 'UserCapabilities',
-}));
+vi.mock('../../../../services/user_capabilities', () => {
+      const mocked = {
+      UserCapabilities: 'UserCapabilities',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di-browser', () => {
-  const canRead = jest.fn(() => true);
+vi.mock('@kbn/core-di-browser', () => {
+  const canRead = vi.fn(() => true);
   return {
     useService: (token: unknown) => {
       if (token === 'http') {
@@ -72,27 +87,39 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-const { mockCanRead } = jest.requireMock('@kbn/core-di-browser') as {
-  mockCanRead: jest.Mock;
+const { mockCanRead } = (await vi.importMock('@kbn/core-di-browser')) as {
+  mockCanRead: Mock;
 };
 
-jest.mock('../../rule_conditions', () => ({
-  RuleConditions: ({ variant }: { variant?: string }) => (
-    <div data-test-subj="mockRuleConditions" data-variant={variant} />
-  ),
-}));
+vi.mock('../../rule_conditions', () => {
+      const mocked = {
+      RuleConditions: ({ variant }: { variant?: string }) => (
+        <div data-test-subj="mockRuleConditions" data-variant={variant} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../rule_details/overview/artifacts/dashboard_artifacts_subsection', () => ({
-  DashboardArtifactsSubsection: () => <div data-test-subj="mockDashboardArtifacts" />,
-}));
+vi.mock('../../../rule_details/overview/artifacts/dashboard_artifacts_subsection', () => {
+      const mocked = {
+      DashboardArtifactsSubsection: () => <div data-test-subj="mockDashboardArtifacts" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../rule_details/overview/artifacts/action_policies_artifacts_subsection', () => ({
-  ActionPoliciesArtifactsSubsection: () => <div data-test-subj="mockActionPoliciesArtifacts" />,
-}));
+vi.mock('../../../rule_details/overview/artifacts/action_policies_artifacts_subsection', () => {
+      const mocked = {
+      ActionPoliciesArtifactsSubsection: () => <div data-test-subj="mockActionPoliciesArtifacts" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../rule_summary/rule_summary_runbook_card', () => ({
-  RuleSummaryRunbookCard: () => <div data-test-subj="mockRunbookCard" />,
-}));
+vi.mock('../../rule_summary/rule_summary_runbook_card', () => {
+      const mocked = {
+      RuleSummaryRunbookCard: () => <div data-test-subj="mockRunbookCard" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',
@@ -109,17 +136,17 @@ const baseRule: RuleApiResponse = {
   updated_at: '2026-03-04T12:00:00.000Z',
 };
 
-const mockUseRuleAutoAttach = jest.mocked(useRuleAutoAttach);
+const mockUseRuleAutoAttach = vi.mocked(useRuleAutoAttach);
 
 const renderFlyout = (overrides: Partial<RuleSummaryFlyoutProps> = {}) => {
   const props: RuleSummaryFlyoutProps = {
     rule: baseRule,
-    onClose: jest.fn(),
-    onEdit: jest.fn(),
-    onClone: jest.fn(),
-    onDelete: jest.fn(),
-    onToggleEnabled: jest.fn(),
-    onRun: jest.fn(),
+    onClose: vi.fn(),
+    onEdit: vi.fn(),
+    onClone: vi.fn(),
+    onDelete: vi.fn(),
+    onToggleEnabled: vi.fn(),
+    onRun: vi.fn(),
     session: 'never',
     ...overrides,
   };
@@ -319,7 +346,7 @@ describe('RuleSummaryFlyout', () => {
       openMenu();
 
       const { rulesLocators } = mockLocators;
-      const useUrlCall = jest
+      const useUrlCall = vi
         .mocked(rulesLocators.useUrl)
         .mock.calls.find(([p]) => p.ruleId === 'rule-1');
       const location = await AlertingV2RulesLocatorDefinition.getLocation(useUrlCall![0]);
@@ -356,7 +383,7 @@ describe('RuleSummaryFlyout', () => {
       fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
       const { rulesLocators } = mockLocators;
-      const useUrlCall = jest
+      const useUrlCall = vi
         .mocked(rulesLocators.useUrl)
         .mock.calls.find(([p]) => p.ruleId === 'rule with spaces/and slash');
       const location = await AlertingV2RulesLocatorDefinition.getLocation(useUrlCall![0]);
@@ -367,7 +394,7 @@ describe('RuleSummaryFlyout', () => {
     });
 
     it('forwards write action callbacks with the rule', () => {
-      const { props } = renderFlyout({ onUpdateApiKey: jest.fn() });
+      const { props } = renderFlyout({ onUpdateApiKey: vi.fn() });
       openMenu();
 
       fireEvent.click(screen.getByTestId('editRule-rule-1'));
@@ -395,7 +422,7 @@ describe('RuleSummaryFlyout', () => {
     });
 
     it('renders the actions in grouped order separated by dividers', () => {
-      renderFlyout({ onUpdateApiKey: jest.fn() });
+      renderFlyout({ onUpdateApiKey: vi.fn() });
       openMenu();
 
       const expectedOrder = [
@@ -426,7 +453,7 @@ describe('RuleSummaryFlyout', () => {
     });
 
     it('shows only read actions when canWrite is false', () => {
-      renderFlyout({ canWrite: false, onViewChangeHistory: jest.fn() });
+      renderFlyout({ canWrite: false, onViewChangeHistory: vi.fn() });
       openMenu();
 
       expect(screen.getByTestId('viewRuleDetails-rule-1')).toBeInTheDocument();
@@ -436,7 +463,7 @@ describe('RuleSummaryFlyout', () => {
     });
 
     it('shows View change history in the read group when onViewChangeHistory is provided', () => {
-      const onViewChangeHistory = jest.fn();
+      const onViewChangeHistory = vi.fn();
       renderFlyout({ onViewChangeHistory });
       openMenu();
 

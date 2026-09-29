@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ConstructorOptions } from '../alerts_client';
 import { AlertsClient } from '../alerts_client';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -14,22 +17,25 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
 import type { JsonObject } from '@kbn/utility-types';
 
-jest.mock('uuid', () => ({ v4: () => 'unique-value' }));
+vi.mock('uuid', () => {
+      const mocked = { v4: () => 'unique-value' };
+      return { ...mocked, default: mocked };
+    });
 
 const alertingAuthMock = alertingAuthorizationMock.create();
 const esClientMock = elasticsearchClientMock.createElasticsearchClient();
 const auditLogger = auditLoggerMock.create();
 
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const alertsClientParams: Mocked<ConstructorOptions> = {
   logger: loggingSystemMock.create().get(),
   authorization: alertingAuthMock,
   esClient: esClientMock,
   esClientScoped: esClientMock,
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
-  getRuleType: jest.fn(),
-  getRuleList: jest.fn(),
-  getAlertIndicesAlias: jest.fn().mockReturnValue(['stack-index']),
+  getRuleType: vi.fn(),
+  getRuleList: vi.fn(),
+  getAlertIndicesAlias: vi.fn().mockReturnValue(['stack-index']),
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';
@@ -96,18 +102,18 @@ const filter = {
 
 describe('getAlertSummary()', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     alertingAuthMock.getSpaceId.mockImplementation(() => DEFAULT_SPACE);
     alertingAuthMock.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(authorizedRuleTypes);
     alertingAuthMock.getAuthorizationFilter.mockResolvedValue({
       filter: filter as unknown as JsonObject,
-      ensureRuleTypeIsAuthorized: jest.fn(),
+      ensureRuleTypeIsAuthorized: vi.fn(),
     });
   });
 
   test('calls find() with the correct params', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams) as jest.Mocked<AlertsClient>;
-    alertsClient.find = jest.fn().mockResolvedValue({ aggregations: {} });
+    const alertsClient = new AlertsClient(alertsClientParams) as Mocked<AlertsClient>;
+    alertsClient.find = vi.fn().mockResolvedValue({ aggregations: {} });
 
     const ruleTypeIds = ['.es-query'];
     const consumers = ['stackAlerts'];

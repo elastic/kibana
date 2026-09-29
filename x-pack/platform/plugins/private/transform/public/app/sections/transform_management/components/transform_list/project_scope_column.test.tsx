@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
@@ -49,17 +51,17 @@ const renderProjectScopeColumn = (cpsManager: ICPSManager, projectRouting?: stri
 };
 
 describe('ProjectScopeColumn', () => {
-  const fetchProjects = jest.fn().mockResolvedValue({
+  const fetchProjects = vi.fn().mockResolvedValue({
     origin: originProject,
     linkedProjects: [linkedProject],
   });
   const cpsManager = {
     fetchProjects,
-    getTotalProjectCount: jest.fn(() => 2),
+    getTotalProjectCount: vi.fn(() => 2),
   } as unknown as ICPSManager;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('opens a read-only project list without routing buttons', async () => {
@@ -102,7 +104,7 @@ describe('ProjectScopeColumn', () => {
     renderProjectScopeColumn(
       {
         ...cpsManager,
-        getTotalProjectCount: jest.fn(() => 10),
+        getTotalProjectCount: vi.fn(() => 10),
       } as unknown as ICPSManager,
       'custom-project-routing'
     );
@@ -123,7 +125,7 @@ describe('ProjectScopeColumn', () => {
     renderProjectScopeColumn(
       {
         ...cpsManager,
-        getTotalProjectCount: jest.fn(() => 10),
+        getTotalProjectCount: vi.fn(() => 10),
       } as unknown as ICPSManager,
       '_id:origin-project'
     );

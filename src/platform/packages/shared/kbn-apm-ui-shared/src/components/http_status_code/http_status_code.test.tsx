@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -14,10 +17,13 @@ import { HttpStatusCode } from '.';
 import { httpStatusCodes } from './http_status_codes';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: jest.fn(),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiTheme: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const euiColorVisGrey0 = '111';
 const euiColorVisSuccess0 = '222';
@@ -31,7 +37,7 @@ const expectTextInBadge = (text: string) =>
 
 describe('HttpStatusCode', () => {
   beforeEach(() => {
-    (useEuiTheme as jest.Mock).mockReturnValue({
+    (useEuiTheme as Mock).mockReturnValue({
       euiTheme: {
         colors: {
           vis: {
@@ -46,7 +52,7 @@ describe('HttpStatusCode', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the status code and its description correctly', () => {

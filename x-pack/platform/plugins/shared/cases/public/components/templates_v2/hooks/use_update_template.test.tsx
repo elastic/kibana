@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import type { Template } from '../../../../common/types/domain/template/v1';
@@ -13,9 +16,9 @@ import { useUpdateTemplate } from './use_update_template';
 import * as api from '../api/api';
 import type { TemplateUpdateRequest } from '../types';
 
-jest.mock('../api/api');
+vi.mock('../api/api');
 
-const apiMock = api as jest.Mocked<typeof api>;
+const apiMock = api as Mocked<typeof api>;
 
 describe('useUpdateTemplate', () => {
   const mockUpdateRequest: TemplateUpdateRequest = {
@@ -40,7 +43,7 @@ describe('useUpdateTemplate', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     apiMock.patchTemplate.mockResolvedValue(mockTemplateResponse);
   });
 
@@ -111,7 +114,7 @@ describe('useUpdateTemplate', () => {
   });
 
   it('calls onSuccess callback with template data on successful update', async () => {
-    const onSuccessMock = jest.fn();
+    const onSuccessMock = vi.fn();
     const queryClient = createTestQueryClient();
 
     const { result } = renderHook(() => useUpdateTemplate({ onSuccess: onSuccessMock }), {
@@ -132,7 +135,7 @@ describe('useUpdateTemplate', () => {
   });
 
   it('does not show default success toast when disableDefaultSuccessToast is true', async () => {
-    const onSuccessMock = jest.fn();
+    const onSuccessMock = vi.fn();
     const queryClient = createTestQueryClient();
 
     const { result } = renderHook(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,13 +19,13 @@ import { getMaintenanceWindowsMapMock } from '../mocks/maintenance_windows.mock'
 import { useAlertSnoozedState } from '../hooks/use_alert_snoozed_state';
 import { useAlertMutedState } from '../hooks/use_alert_muted_state';
 
-jest.mock('../hooks/use_alert_snoozed_state');
-jest.mock('../hooks/use_alert_muted_state');
+vi.mock('../hooks/use_alert_snoozed_state');
+vi.mock('../hooks/use_alert_muted_state');
 
-const mockUseAlertSnoozedState = useAlertSnoozedState as jest.MockedFunction<
+const mockUseAlertSnoozedState = useAlertSnoozedState as MockedFunction<
   typeof useAlertSnoozedState
 >;
-const mockUseAlertMutedState = useAlertMutedState as jest.MockedFunction<typeof useAlertMutedState>;
+const mockUseAlertMutedState = useAlertMutedState as MockedFunction<typeof useAlertMutedState>;
 
 describe('AlertLifecycleStatusCell', () => {
   const casesMap = getCasesMapMock();

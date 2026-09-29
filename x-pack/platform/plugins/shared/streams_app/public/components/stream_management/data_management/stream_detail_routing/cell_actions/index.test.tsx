@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
@@ -12,7 +15,7 @@ import type { FlattenRecord } from '@kbn/streams-schema';
 import { buildCellActions } from '.';
 
 const mockRoutingSnapshot = {
-  matches: jest.fn(),
+  matches: vi.fn(),
   context: {
     currentRuleId: 'test-rule-id',
     routing: [
@@ -26,15 +29,18 @@ const mockRoutingSnapshot = {
   },
 };
 
-jest.mock('../state_management/stream_routing_state_machine', () => ({
-  useStreamsRoutingSelector: jest.fn((selector) => selector(mockRoutingSnapshot)),
-  selectCurrentRule: jest.fn((context) => context.routing[0]),
-}));
+vi.mock('../state_management/stream_routing_state_machine', () => {
+      const mocked = {
+      useStreamsRoutingSelector: vi.fn((selector) => selector(mockRoutingSnapshot)),
+      selectCurrentRule: vi.fn((context) => context.routing[0]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('buildCellActions', () => {
-  let mockOnCreate: jest.Mock;
-  let mockOnFilter: jest.Mock;
-  let mockComponent: jest.Mock;
+  let mockOnCreate: Mock;
+  let mockOnFilter: Mock;
+  let mockComponent: Mock;
 
   const createMockCellActionProps = (
     rowIndex: number,
@@ -48,10 +54,10 @@ describe('buildCellActions', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockOnCreate = jest.fn();
-    mockOnFilter = jest.fn();
-    mockComponent = jest.fn(({ onClick, iconType, title, 'data-test-subj': testSubj }) => (
+    vi.clearAllMocks();
+    mockOnCreate = vi.fn();
+    mockOnFilter = vi.fn();
+    mockComponent = vi.fn(({ onClick, iconType, title, 'data-test-subj': testSubj }) => (
       <button onClick={onClick} title={title} data-icon={iconType} data-test-subj={testSubj}>
         {title}
       </button>

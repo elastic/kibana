@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import type { ApprovalAction, ApprovalDecision } from '@kbn/proposals-ui';
@@ -21,149 +24,173 @@ import type { ProposalWithMetadata } from '@kbn/proposals-common';
 
 // ── Mock heavy external deps ──────────────────────────────────────────────────
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: () => ({ euiTheme: { size: { m: '16px', s: '8px' } } }),
-  EuiLoadingSpinner: ({ size }: { size: string }) => (
-    <div data-test-subj="loading-spinner" data-size={size} />
-  ),
-  EuiSpacer: () => <div />,
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiTheme: () => ({ euiTheme: { size: { m: '16px', s: '8px' } } }),
+      EuiLoadingSpinner: ({ size }: { size: string }) => (
+        <div data-test-subj="loading-spinner" data-size={size} />
+      ),
+      EuiSpacer: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/ui-callout', () => ({
-  KbnDangerCallout: ({ title }: { title: string }) => (
-    <div data-test-subj="danger-callout">{title}</div>
-  ),
-  KbnWarningCallout: ({ title }: { title: string }) => (
-    <div data-test-subj="warning-callout">{title}</div>
-  ),
-}));
+vi.mock('@kbn/ui-callout', () => {
+      const mocked = {
+      KbnDangerCallout: ({ title }: { title: string }) => (
+        <div data-test-subj="danger-callout">{title}</div>
+      ),
+      KbnWarningCallout: ({ title }: { title: string }) => (
+        <div data-test-subj="warning-callout">{title}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /** Set by the `ApprovalContent` mock on every render, so a test can invoke an action directly
  *  (e.g. to assert what its promise rejects with) without going through a simulated click. */
 let latestPrimaryAction: ApprovalAction | undefined;
 
-jest.mock('@kbn/proposals-ui', () => ({
-  ...jest.requireActual('@kbn/proposals-ui'),
-  ApprovalContent: ({
-    children,
-    primaryAction,
-    secondaryActions,
-    tone,
-    comment,
-    decision,
-    isSubmitting,
-    currentActorName,
-  }: {
-    children?: React.ReactNode;
-    tone?: string;
-    comment?: string;
-    decision?: ApprovalDecision;
-    isSubmitting?: 'applying' | 'declining';
-    currentActorName?: string;
-    primaryAction?: {
-      label: string;
-      onClick: () => void | Promise<void>;
-      isDisabled?: boolean;
-      'data-test-subj'?: string;
-    };
-    secondaryActions?: Array<{
-      label: string;
-      onClick: () => void;
-      isDisabled?: boolean;
-      'data-test-subj'?: string;
-    }>;
-  }) => {
-    latestPrimaryAction = primaryAction;
-    return (
-      <div data-test-subj="approval-content" data-tone={tone}>
-        {primaryAction && (
-          <button
-            onClick={primaryAction.onClick}
-            disabled={primaryAction.isDisabled}
-            data-test-subj={primaryAction['data-test-subj']}
-          >
-            {primaryAction.label}
-          </button>
-        )}
-        {secondaryActions?.map((a) => (
-          <button
-            key={a.label}
-            onClick={a.onClick}
-            disabled={a.isDisabled}
-            data-test-subj={a['data-test-subj']}
-          >
-            {a.label}
-          </button>
-        ))}
-        {/* Surfaced so the comment and decision are observable: the real component renders
-            them as props rather than as children. */}
-        <div data-test-subj="approval-comment">{comment}</div>
-        {decision && (
-          <div data-test-subj="approval-decision">
-            {decision.status}:{decision.actorName}
-            {decision.reason ? `:${decision.reason}` : ''}
+vi.mock('@kbn/proposals-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/proposals-ui')),
+      ApprovalContent: ({
+        children,
+        primaryAction,
+        secondaryActions,
+        tone,
+        comment,
+        decision,
+        isSubmitting,
+        currentActorName,
+      }: {
+        children?: React.ReactNode;
+        tone?: string;
+        comment?: string;
+        decision?: ApprovalDecision;
+        isSubmitting?: 'applying' | 'declining';
+        currentActorName?: string;
+        primaryAction?: {
+          label: string;
+          onClick: () => void | Promise<void>;
+          isDisabled?: boolean;
+          'data-test-subj'?: string;
+        };
+        secondaryActions?: Array<{
+          label: string;
+          onClick: () => void;
+          isDisabled?: boolean;
+          'data-test-subj'?: string;
+        }>;
+      }) => {
+        latestPrimaryAction = primaryAction;
+        return (
+          <div data-test-subj="approval-content" data-tone={tone}>
+            {primaryAction && (
+              <button
+                onClick={primaryAction.onClick}
+                disabled={primaryAction.isDisabled}
+                data-test-subj={primaryAction['data-test-subj']}
+              >
+                {primaryAction.label}
+              </button>
+            )}
+            {secondaryActions?.map((a) => (
+              <button
+                key={a.label}
+                onClick={a.onClick}
+                disabled={a.isDisabled}
+                data-test-subj={a['data-test-subj']}
+              >
+                {a.label}
+              </button>
+            ))}
+            {/* Surfaced so the comment and decision are observable: the real component renders
+                them as props rather than as children. */}
+            <div data-test-subj="approval-comment">{comment}</div>
+            {decision && (
+              <div data-test-subj="approval-decision">
+                {decision.status}:{decision.actorName}
+                {decision.reason ? `:${decision.reason}` : ''}
+              </div>
+            )}
+            {currentActorName && <div data-test-subj="approval-current-actor">{currentActorName}</div>}
+            {isSubmitting && <div data-test-subj="approval-is-submitting">{isSubmitting}</div>}
+            {children}
           </div>
-        )}
-        {currentActorName && <div data-test-subj="approval-current-actor">{currentActorName}</div>}
-        {isSubmitting && <div data-test-subj="approval-is-submitting">{isSubmitting}</div>}
-        {children}
-      </div>
-    );
-  },
-}));
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-http-browser', () => ({
-  isHttpFetchError: (e: unknown) => {
-    return (e as { _isHttpFetchError?: boolean })?._isHttpFetchError === true;
-  },
-}));
+vi.mock('@kbn/core-http-browser', () => {
+      const mocked = {
+      isHttpFetchError: (e: unknown) => {
+        return (e as { _isHttpFetchError?: boolean })?._isHttpFetchError === true;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_proposals_api', () => ({
-  useProposal: jest.fn(),
-  useApproveProposal: jest.fn(),
-  useDismissProposal: jest.fn(),
-  useIsApprovingProposal: jest.fn(),
-  useIsDecliningProposal: jest.fn(),
-}));
+vi.mock('../hooks/use_proposals_api', () => {
+      const mocked = {
+      useProposal: vi.fn(),
+      useApproveProposal: vi.fn(),
+      useDismissProposal: vi.fn(),
+      useIsApprovingProposal: vi.fn(),
+      useIsDecliningProposal: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_current_user_profile', () => ({
-  useCurrentUserProfile: jest.fn(),
-}));
+vi.mock('../hooks/use_current_user_profile', () => {
+      const mocked = {
+      useCurrentUserProfile: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/user-profile-components', () => ({
-  getUserDisplayName: (user: { username?: string }) => user?.username ?? '',
-}));
+vi.mock('@kbn/user-profile-components', () => {
+      const mocked = {
+      getUserDisplayName: (user: { username?: string }) => user?.username ?? '',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./proposal_dismiss_form', () => ({
-  ProposalDismissForm: ({
-    'data-test-subj': testSubj,
-    onRationaleChange,
-  }: {
-    'data-test-subj'?: string;
-    onRationaleChange: (v: string) => void;
-    dismissReason: string;
-    rationale: string;
-    onDismissReasonChange: (r: string) => void;
-  }) => (
-    <div data-test-subj={testSubj ?? 'dismiss-form'}>
-      <input data-test-subj="rationale-input" onChange={(e) => onRationaleChange(e.target.value)} />
-    </div>
-  ),
-}));
+vi.mock('./proposal_dismiss_form', () => {
+      const mocked = {
+      ProposalDismissForm: ({
+        'data-test-subj': testSubj,
+        onRationaleChange,
+      }: {
+        'data-test-subj'?: string;
+        onRationaleChange: (v: string) => void;
+        dismissReason: string;
+        rationale: string;
+        onDismissReasonChange: (r: string) => void;
+      }) => (
+        <div data-test-subj={testSubj ?? 'dismiss-form'}>
+          <input data-test-subj="rationale-input" onChange={(e) => onRationaleChange(e.target.value)} />
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const useProposalMock = useProposal as jest.MockedFunction<typeof useProposal>;
-const useApproveProposalMock = useApproveProposal as jest.MockedFunction<typeof useApproveProposal>;
-const useDismissProposalMock = useDismissProposal as jest.MockedFunction<typeof useDismissProposal>;
-const useIsApprovingProposalMock = useIsApprovingProposal as jest.MockedFunction<
+const useProposalMock = useProposal as MockedFunction<typeof useProposal>;
+const useApproveProposalMock = useApproveProposal as MockedFunction<typeof useApproveProposal>;
+const useDismissProposalMock = useDismissProposal as MockedFunction<typeof useDismissProposal>;
+const useIsApprovingProposalMock = useIsApprovingProposal as MockedFunction<
   typeof useIsApprovingProposal
 >;
-const useIsDecliningProposalMock = useIsDecliningProposal as jest.MockedFunction<
+const useIsDecliningProposalMock = useIsDecliningProposal as MockedFunction<
   typeof useIsDecliningProposal
 >;
-const useCurrentUserProfileMock = useCurrentUserProfile as jest.MockedFunction<
+const useCurrentUserProfileMock = useCurrentUserProfile as MockedFunction<
   typeof useCurrentUserProfile
 >;
 
@@ -182,8 +209,8 @@ const baseProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWi
 });
 
 const noopMutation = {
-  mutateAsync: jest.fn(),
-  reset: jest.fn(),
+  mutateAsync: vi.fn(),
+  reset: vi.fn(),
   isLoading: false,
   error: null,
 };
@@ -217,7 +244,7 @@ describe('ProposalApprovalCard', () => {
   const PROPOSAL_ID = 'proposal-1';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     latestPrimaryAction = undefined;
   });
 
@@ -505,7 +532,7 @@ describe('ProposalApprovalCard', () => {
 
   describe('approve flow', () => {
     it('calls approveProposal.mutateAsync when the Approve button is clicked', async () => {
-      const mutateAsync = jest.fn().mockResolvedValue({ id: PROPOSAL_ID });
+      const mutateAsync = vi.fn().mockResolvedValue({ id: PROPOSAL_ID });
       setupMocks();
       useApproveProposalMock.mockReturnValue({
         ...noopMutation,
@@ -534,7 +561,7 @@ describe('ProposalApprovalCard', () => {
     });
 
     it('rejects with a friendly message rather than the raw generic error', async () => {
-      const mutateAsync = jest.fn().mockRejectedValue(new Error('Network failure'));
+      const mutateAsync = vi.fn().mockRejectedValue(new Error('Network failure'));
       useApproveProposalMock.mockReturnValue({
         ...noopMutation,
         mutateAsync,
@@ -551,7 +578,7 @@ describe('ProposalApprovalCard', () => {
 
     it('rejects with a conflict-specific message for a 409', async () => {
       const conflictError = { _isHttpFetchError: true, response: { status: 409 } };
-      const mutateAsync = jest.fn().mockRejectedValue(conflictError);
+      const mutateAsync = vi.fn().mockRejectedValue(conflictError);
       setupMocks();
       useApproveProposalMock.mockReturnValue({
         ...noopMutation,
@@ -564,7 +591,7 @@ describe('ProposalApprovalCard', () => {
 
     it('rejects with an expiry-specific message for a 410', async () => {
       const expiredError = { _isHttpFetchError: true, response: { status: 410 } };
-      const mutateAsync = jest.fn().mockRejectedValue(expiredError);
+      const mutateAsync = vi.fn().mockRejectedValue(expiredError);
       setupMocks();
       useApproveProposalMock.mockReturnValue({
         ...noopMutation,
@@ -654,7 +681,7 @@ describe('ProposalApprovalCard', () => {
     });
 
     it('calls dismissProposal.mutateAsync with the reason and rationale on confirm', async () => {
-      const mutateAsync = jest.fn().mockResolvedValue({ id: PROPOSAL_ID });
+      const mutateAsync = vi.fn().mockResolvedValue({ id: PROPOSAL_ID });
       setupMocks();
       useDismissProposalMock.mockReturnValue({
         ...noopMutation,
@@ -692,7 +719,7 @@ describe('ProposalApprovalCard', () => {
     });
 
     it('closes the inline dismiss form once the dismissal succeeds, rather than leaving it up beside the outcome', async () => {
-      const mutateAsync = jest.fn().mockResolvedValue({ id: PROPOSAL_ID });
+      const mutateAsync = vi.fn().mockResolvedValue({ id: PROPOSAL_ID });
       setupMocks();
       useDismissProposalMock.mockReturnValue({
         ...noopMutation,

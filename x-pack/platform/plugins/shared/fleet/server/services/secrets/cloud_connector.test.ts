@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -14,11 +17,14 @@ import { CloudConnectorInvalidVarsError } from '../../errors';
 import { extractAndCreateCloudConnectorSecrets } from './cloud_connector';
 import { createSecrets } from './common';
 
-jest.mock('./common', () => ({
-  createSecrets: jest.fn(),
-}));
+vi.mock('./common', () => {
+      const mocked = {
+      createSecrets: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCreateSecrets = createSecrets as jest.MockedFunction<typeof createSecrets>;
+const mockCreateSecrets = createSecrets as MockedFunction<typeof createSecrets>;
 
 describe('extractAndCreateCloudConnectorSecrets', () => {
   let esClient: ElasticsearchClient;
@@ -52,7 +58,7 @@ describe('extractAndCreateCloudConnectorSecrets', () => {
     } as unknown as NewPackagePolicy);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient = {} as ElasticsearchClient;
     logger = loggingSystemMock.createLogger();
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type {
@@ -202,7 +204,7 @@ describe('buildSecurityApi', () => {
     const params = { name: 'nightshift-relay', roles: ['viewer'] };
 
     it('resolves the service lazily rather than at build time', () => {
-      const getServiceAccounts = jest.fn().mockReturnValue(serviceAccounts);
+      const getServiceAccounts = vi.fn().mockReturnValue(serviceAccounts);
 
       buildSecurityApi({
         getAuthc: () => authc,
@@ -293,7 +295,7 @@ describe('buildSecurityApi', () => {
     });
 
     it('delegates withScopedRequest, passing the callback through', async () => {
-      const fn = jest.fn();
+      const fn = vi.fn();
 
       await api.serviceAccounts.withScopedRequestForWorkload('alerting', WORKLOAD_IN_SPACE, fn);
 
@@ -332,7 +334,7 @@ describe('buildSecurityApi', () => {
           api.serviceAccounts.withScopedRequestForWorkload(
             'alerting',
             WORKLOAD_IN_SPACE,
-            jest.fn()
+            vi.fn()
           ),
       ],
     ])('rejects %s when service accounts are not enabled', async (_name, invoke) => {
@@ -392,7 +394,7 @@ describe('buildSecurityApi', () => {
 
       it('should properly delegate getInternalCallerAttestationHeaders to the service', () => {
         const attestationHeaders = { 'x-some-attestation': 'some-attestation' };
-        jest
+        vi
           .mocked(authc.apiKeys.uiam!.getInternalCallerAttestationHeaders)
           .mockReturnValue(attestationHeaders);
 
@@ -407,7 +409,7 @@ describe('buildSecurityApi', () => {
       });
 
       it('should properly delegate isOwnClientAuthentication to the service', () => {
-        jest.mocked(authc.apiKeys.uiam!.isOwnClientAuthentication).mockReturnValue(true);
+        vi.mocked(authc.apiKeys.uiam!.isOwnClientAuthentication).mockReturnValue(true);
 
         expect(api.authc.apiKeys.uiam!.isOwnClientAuthentication('kibana-shared-secret')).toBe(
           true
@@ -419,7 +421,7 @@ describe('buildSecurityApi', () => {
       });
 
       it('should properly delegate isExternalApiKey to the service', () => {
-        jest.mocked(authc.apiKeys.uiam!.isExternalApiKey).mockReturnValue(true);
+        vi.mocked(authc.apiKeys.uiam!.isExternalApiKey).mockReturnValue(true);
         const request = httpServerMock.createKibanaRequest();
 
         expect(api.authc.apiKeys.uiam!.isExternalApiKey(request)).toBe(true);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
@@ -14,7 +16,7 @@ describe('fetchIndexStats lib function', () => {
   const mockClient = {
     asCurrentUser: {
       indices: {
-        stats: jest.fn(),
+        stats: vi.fn(),
       },
     },
     asInternalUser: {},

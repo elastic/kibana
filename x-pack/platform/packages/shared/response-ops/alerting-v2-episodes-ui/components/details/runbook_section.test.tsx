@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -19,9 +21,9 @@ import {
 } from '../../hooks/test_utils';
 import { AlertEpisodeRunbookSection } from './runbook_section';
 
-jest.mock('../../utils/run_esql_async_search');
+vi.mock('../../utils/run_esql_async_search');
 
-const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
+const runEsqlAsyncSearchMock = vi.mocked(runEsqlAsyncSearch);
 
 const mockHttp = httpServiceMock.createStartContract();
 const mockServices = createMockServices({ http: mockHttp });
@@ -46,7 +48,7 @@ const wrapper = createQueryClientWrapper(queryClient);
 
 describe('AlertEpisodeRunbookSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 
@@ -153,7 +155,7 @@ describe('AlertEpisodeRunbookSection', () => {
     };
 
     it('renders the Runbook heading', async () => {
-      renderWithFullGuide(jest.fn());
+      renderWithFullGuide(vi.fn());
 
       expect(await screen.findByTestId('alertingV2EpisodeRunbookSectionTitle')).toHaveTextContent(
         'Runbook'
@@ -161,7 +163,7 @@ describe('AlertEpisodeRunbookSection', () => {
     });
 
     it('clamps to a preview and calls onShowFullGuide from the link', async () => {
-      const onShowFullGuide = jest.fn();
+      const onShowFullGuide = vi.fn();
       renderWithFullGuide(onShowFullGuide);
 
       expect(
@@ -176,7 +178,7 @@ describe('AlertEpisodeRunbookSection', () => {
     });
 
     it('puts the link in the title row, above the content', async () => {
-      renderWithFullGuide(jest.fn());
+      renderWithFullGuide(vi.fn());
 
       const title = await screen.findByTestId('alertingV2EpisodeRunbookSectionTitle');
       const link = screen.getByTestId('alertingV2EpisodeRunbookShowFullGuide');

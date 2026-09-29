@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,53 +16,74 @@ import type {
 } from './security_redux_embedded_provider';
 import { SecurityReduxEmbeddedProvider } from './security_redux_embedded_provider';
 
-jest.mock('../../common/lib/kibana/kibana_react', () => ({
-  KibanaContextProvider: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="kibanaContextProviderMock">{children}</div>
-  ),
-}));
+vi.mock('../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      KibanaContextProvider: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="kibanaContextProviderMock">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/upselling_provider', () => ({
-  UpsellingProvider: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="upsellingProviderMock">{children}</div>
-  ),
-}));
+vi.mock('../../common/components/upselling_provider', () => {
+      const mocked = {
+      UpsellingProvider: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="upsellingProviderMock">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../cases/components/provider/provider', () => ({
-  CaseProvider: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="caseProviderMock">{children}</div>
-  ),
-}));
+vi.mock('../../cases/components/provider/provider', () => {
+      const mocked = {
+      CaseProvider: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="caseProviderMock">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/cell-actions', () => ({
-  CellActionsProvider: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="cellActionsProviderMock">{children}</div>
-  ),
-}));
+vi.mock('@kbn/cell-actions', () => {
+      const mocked = {
+      CellActionsProvider: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="cellActionsProviderMock">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  ExpandableFlyoutProvider: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="expandableFlyoutProviderMock">{children}</div>
-  ),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      ExpandableFlyoutProvider: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="expandableFlyoutProviderMock">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/security-solution-navigation', () => ({
-  NavigationProvider: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="navigationProviderMock">{children}</div>
-  ),
-}));
+vi.mock('@kbn/security-solution-navigation', () => {
+      const mocked = {
+      NavigationProvider: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="navigationProviderMock">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-redux-v7', () => ({
-  Provider: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="reduxProviderMock">{children}</div>
-  ),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      Provider: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="reduxProviderMock">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const fakeBundle = (): SecurityCanvasEmbeddedBundle =>
   ({
-    store: { dispatch: jest.fn(), getState: jest.fn(), subscribe: jest.fn() },
+    store: { dispatch: vi.fn(), getState: vi.fn(), subscribe: vi.fn() },
     kibanaServices: {
-      uiActions: { getTriggerCompatibleActions: jest.fn() },
+      uiActions: { getTriggerCompatibleActions: vi.fn() },
       upselling: {},
     },
   } as unknown as SecurityCanvasEmbeddedBundle);
@@ -88,7 +111,7 @@ describe('SecurityReduxEmbeddedProvider', () => {
 
   it('mounts the children (and nested providers) once the bundle resolves', async () => {
     const bundle = fakeBundle();
-    const resolveCanvasContext = jest.fn(async () => bundle);
+    const resolveCanvasContext = vi.fn(async () => bundle);
 
     await act(async () => {
       renderProvider(resolveCanvasContext);

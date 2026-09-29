@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { TutorialRedirect } from './redirect';
 
-const mockNavigateToApp = jest.fn();
+const mockNavigateToApp = vi.fn();
 let mockServerlessOnboarding = false;
 
-jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => ({
-    config: { serverlessOnboarding: mockServerlessOnboarding },
-    core: {
-      application: { navigateToApp: mockNavigateToApp },
-    },
-  }),
-}));
+vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
+      const mocked = {
+      useApmPluginContext: () => ({
+        config: { serverlessOnboarding: mockServerlessOnboarding },
+        core: {
+          application: { navigateToApp: mockNavigateToApp },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function renderRedirect(initialEntry: string) {
   return render(

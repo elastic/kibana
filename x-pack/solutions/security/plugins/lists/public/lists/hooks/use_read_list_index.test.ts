@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useReadListIndex } from '@kbn/securitysolution-list-hooks';
 import * as Api from '@kbn/securitysolution-list-api';
@@ -13,7 +16,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getAcknowledgeSchemaResponseMock } from '../../../common/schemas/response/acknowledge_schema.mock';
 import { createQueryWrapperMock } from '../mocks/query_wrapper';
 
-jest.mock('@kbn/securitysolution-list-api');
+vi.mock('@kbn/securitysolution-list-api');
 
 const { wrapper: queryWrapper } = createQueryWrapperMock();
 
@@ -24,8 +27,8 @@ describe('useReadListIndex', () => {
 
   beforeEach(() => {
     httpMock = httpServiceMock.createStartContract();
-    (Api.readListIndex as jest.Mock).mockResolvedValue(getAcknowledgeSchemaResponseMock());
-    jest.resetAllMocks();
+    (Api.readListIndex as Mock).mockResolvedValue(getAcknowledgeSchemaResponseMock());
+    vi.resetAllMocks();
   });
 
   it('should call Api.readListIndex when is enabled', async () => {
@@ -45,8 +48,8 @@ describe('useReadListIndex', () => {
   });
 
   it('calls onError callback when apiCall fails', async () => {
-    const onError = jest.fn();
-    jest.spyOn(Api, 'readListIndex').mockRejectedValue(new Error('Mocked error'));
+    const onError = vi.fn();
+    vi.spyOn(Api, 'readListIndex').mockRejectedValue(new Error('Mocked error'));
 
     renderHook(() => useReadListIndex({ http: httpMock, isEnabled: true, onError }), {
       wrapper: queryWrapper,

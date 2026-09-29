@@ -7,14 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { DependenciesByOwner } from './dependency_ownership';
 import { identifyDependencyOwnership } from './dependency_ownership';
 import { parseConfig } from './parse_config';
 import { ruleFilter } from './rule';
 
-jest.mock('./parse_config', () => ({
-  parseConfig: jest.fn(),
-}));
+vi.mock('./parse_config', () => {
+      const mocked = {
+      parseConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('identifyDependencyOwnership', () => {
   const mockConfig = {
@@ -56,7 +62,7 @@ describe('identifyDependencyOwnership', () => {
   };
 
   beforeEach(() => {
-    (parseConfig as jest.Mock).mockReturnValue(mockConfig);
+    (parseConfig as Mock).mockReturnValue(mockConfig);
   });
 
   it('returns prod and dev dependencies for a specific owner, considering only enabled rules', () => {
@@ -141,7 +147,7 @@ describe('identifyDependencyOwnership', () => {
   });
 
   it('handles scenarios with no matching rules or dependencies', () => {
-    (parseConfig as jest.Mock).mockReturnValue({
+    (parseConfig as Mock).mockReturnValue({
       renovateRules: [],
       packageDependencies: ['lodash', 'react'],
       packageDevDependencies: ['jest'],

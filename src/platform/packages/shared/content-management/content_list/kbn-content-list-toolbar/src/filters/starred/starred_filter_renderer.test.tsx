@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Query } from '@elastic/eui';
@@ -18,7 +20,7 @@ import {
 } from '@kbn/content-list-provider';
 import { StarredFilterRenderer } from './starred_filter_renderer';
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({
     items: [],
     total: 0,
@@ -51,7 +53,7 @@ const createWrapper = (options?: { favoritesService?: FavoritesClientPublic }) =
 
 describe('StarredFilterRenderer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the starred filter button when starred is available', () => {
@@ -94,7 +96,7 @@ describe('StarredFilterRenderer', () => {
   });
 
   it('calls `onChange` with `is:starred` added when clicking the inactive button', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     render(<StarredFilterRenderer query={Query.parse('')} onChange={onChange} />, {
       wrapper: createWrapper({ favoritesService: mockFavoritesService }),
@@ -108,7 +110,7 @@ describe('StarredFilterRenderer', () => {
   });
 
   it('calls `onChange` with `is:starred` removed when clicking the active button', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const activeQuery = Query.parse('').addMustIsClause('starred');
 
     render(<StarredFilterRenderer query={activeQuery} onChange={onChange} />, {

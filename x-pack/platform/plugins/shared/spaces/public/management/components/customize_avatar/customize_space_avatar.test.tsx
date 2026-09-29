@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiColorPicker, EuiFieldText, EuiLink } from '@elastic/eui';
 import React from 'react';
 
@@ -22,14 +24,14 @@ const validator = new SpaceValidator({ shouldValidate: true });
 
 test('renders without crashing', () => {
   const wrapper = shallowWithIntl(
-    <CustomizeSpaceAvatar space={space} validator={validator} onChange={jest.fn()} />
+    <CustomizeSpaceAvatar space={space} validator={validator} onChange={vi.fn()} />
   );
   expect(wrapper).toMatchSnapshot();
 });
 
 test('shows customization fields', () => {
   const wrapper = mountWithIntl(
-    <CustomizeSpaceAvatar space={space} validator={validator} onChange={jest.fn()} />
+    <CustomizeSpaceAvatar space={space} validator={validator} onChange={vi.fn()} />
   );
 
   expect(wrapper.find(EuiLink)).toHaveLength(0);
@@ -45,7 +47,7 @@ test('invokes onChange callback when avatar is customized', () => {
     color: '#ABCDEF',
   };
 
-  const changeHandler = jest.fn();
+  const changeHandler = vi.fn();
 
   const wrapper = mountWithIntl(
     <CustomizeSpaceAvatar space={customizedSpace} validator={validator} onChange={changeHandler} />

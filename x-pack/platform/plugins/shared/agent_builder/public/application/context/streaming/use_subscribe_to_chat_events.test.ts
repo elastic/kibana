@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { Subject } from 'rxjs';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { ChatEventType, EventActorType, TimelineEventType } from '@kbn/agent-builder-common';
 import type { ConversationActions } from '../conversation/use_conversation_actions';
 import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
 
-const buildActionsMock = (): jest.Mocked<ConversationActions> =>
+const buildActionsMock = (): Mocked<ConversationActions> =>
   ({
-    invalidateConversation: jest.fn(),
-    onExecutionStarted: jest.fn(),
-    onExecutionTerminated: jest.fn(),
-    deleteConversation: jest.fn(),
-    renameConversation: jest.fn(),
-  } as unknown as jest.Mocked<ConversationActions>);
+    invalidateConversation: vi.fn(),
+    onExecutionStarted: vi.fn(),
+    onExecutionTerminated: vi.fn(),
+    deleteConversation: vi.fn(),
+    renameConversation: vi.fn(),
+  } as unknown as Mocked<ConversationActions>);
 
 const run = async (events: ChatEvent[]) => {
   const events$ = new Subject<ChatEvent>();

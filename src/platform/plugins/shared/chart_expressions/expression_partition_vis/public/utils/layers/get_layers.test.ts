@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ArrayEntry, ArrayNode } from '@elastic/charts';
 
 import type { BucketColumns } from '../../../common/types';
@@ -25,7 +27,7 @@ import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-commo
 describe('getLayers', () => {
   // use the current fieldFormatRegistry
   const fieldFormatsRegistry = getFieldFormatsRegistry({
-    uiSettings: { get: jest.fn() },
+    uiSettings: { get: vi.fn() },
   } as unknown as CoreSetup);
 
   // attach the required aggsFormats to allow formatting special charts in esaggs

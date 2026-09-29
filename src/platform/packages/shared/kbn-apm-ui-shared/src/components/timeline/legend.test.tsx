@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -56,7 +58,7 @@ describe('Legend', () => {
 
   describe('onClick', () => {
     it('calls onClick when clicked', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const { container } = renderWithTheme(<Legend onClick={onClick} text="clickable" />);
 
       fireEvent.click(container.firstElementChild!);
@@ -99,7 +101,7 @@ describe('Legend', () => {
     });
 
     it('applies pointer cursor when onClick is provided (even without clickable)', () => {
-      const { container } = renderWithTheme(<Legend onClick={jest.fn()} />);
+      const { container } = renderWithTheme(<Legend onClick={vi.fn()} />);
 
       expect(container.firstElementChild).toHaveStyle({ cursor: 'pointer' });
     });

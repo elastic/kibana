@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   checkReferences,
   checkForDataLayerType,
@@ -27,7 +29,7 @@ import {
 } from '../../../../../user_messages_ids';
 
 // Mock prevents issue with circular loading
-jest.mock('..');
+vi.mock('..');
 
 describe('utils', () => {
   beforeEach(() => {

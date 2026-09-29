@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import * as fs from 'fs';
 import { ProxyAgent } from 'undici';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -16,9 +19,9 @@ import {
   getSecurityLabsArtifactName,
 } from '@kbn/product-doc-common';
 
-jest.mock('fs');
+vi.mock('fs');
 
-const fetchMock = jest.spyOn(global, 'fetch');
+const fetchMock = vi.spyOn(global, 'fetch');
 
 const createResponse = ({
   artifactNames,
@@ -68,7 +71,7 @@ const expectVersions = (
 describe('fetchArtifactVersions', () => {
   beforeEach(() => {
     fetchMock.mockReset();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const mockResponse = (responseText: string) => {
@@ -80,7 +83,7 @@ describe('fetchArtifactVersions', () => {
 
   const mockFileResponse = (responseText: string) => {
     const mockData = Buffer.from(responseText);
-    (fs.readFile as unknown as jest.Mock).mockImplementation((path, callback) => {
+    (fs.readFile as unknown as Mock).mockImplementation((path, callback) => {
       callback(null, mockData);
     });
   };
@@ -116,7 +119,7 @@ describe('fetchArtifactVersions', () => {
       artifactRepositoryUrl: localArtifactRepositoryUrl,
     });
 
-    expect(fs.readFile as unknown as jest.Mock).toHaveBeenCalledWith(
+    expect(fs.readFile as unknown as Mock).toHaveBeenCalledWith(
       '/local/local_artifacts/index.xml',
       expect.any(Function)
     );
@@ -146,7 +149,7 @@ describe('fetchArtifactVersions', () => {
       artifactRepositoryUrl: 'file:///C:/path/local_artifacts',
     });
 
-    expect(fs.readFile as unknown as jest.Mock).toHaveBeenCalledWith(
+    expect(fs.readFile as unknown as Mock).toHaveBeenCalledWith(
       'C:/path/local_artifacts/index.xml',
       expect.any(Function)
     );
@@ -213,7 +216,7 @@ describe('fetchArtifactVersions', () => {
 describe('fetchSecurityLabsVersions', () => {
   beforeEach(() => {
     fetchMock.mockReset();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const mockResponse = (responseText: string) => {

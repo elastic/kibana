@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineStatusEnum } from '../../../../common/api/timeline';
@@ -14,7 +17,7 @@ import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mo
 import type { TimelineModel } from '../model';
 import { parse } from 'uuid';
 
-jest.mock('../../containers/api');
+vi.mock('../../containers/api');
 
 describe('Timeline middleware helpers', () => {
   describe('ensureTimelineIsSaved', () => {
@@ -24,7 +27,7 @@ describe('Timeline middleware helpers', () => {
       const dataView = getMockDataViewWithMatchedIndices();
       dataView.version = 'is-persisted';
 
-      (kibanaMock.plugins.onStart as jest.Mock).mockReturnValue({
+      (kibanaMock.plugins.onStart as Mock).mockReturnValue({
         dataViews: {
           found: true,
           contract: { get: () => dataView },
@@ -32,7 +35,7 @@ describe('Timeline middleware helpers', () => {
       });
 
       store = createMockStore(undefined, undefined, kibanaMock);
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should return the given timeline if it has a `savedObjectId`', async () => {
@@ -51,7 +54,7 @@ describe('Timeline middleware helpers', () => {
 
     it('should return a draft timeline with a savedObjectId when an unsaved timeline is passed', async () => {
       const mockSavedObjectId = 'mockSavedObjectId';
-      (persistTimeline as jest.Mock).mockResolvedValue({
+      (persistTimeline as Mock).mockResolvedValue({
         ...mockGlobalState.timeline.timelineById[TimelineId.test],
         savedObjectId: mockSavedObjectId,
       });

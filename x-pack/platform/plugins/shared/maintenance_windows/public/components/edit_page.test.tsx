@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
@@ -12,29 +15,36 @@ import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { MaintenanceWindowsEditPage } from './edit_page';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ maintenanceWindowId: 'mw-1' }),
-}));
-jest.mock('../hooks/use_breadcrumbs', () => ({
-  useBreadcrumbs: jest.fn(),
-}));
-jest.mock('../hooks/use_get_maintenance_window');
-jest.mock('./create_maintenance_windows_form', () => ({
-  CreateMaintenanceWindowForm: () => <div data-test-subj="createMaintenanceWindowForm" />,
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: () => ({ maintenanceWindowId: 'mw-1' }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_breadcrumbs', () => {
+      const mocked = {
+      useBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_get_maintenance_window');
+vi.mock('./create_maintenance_windows_form', () => {
+      const mocked = {
+      CreateMaintenanceWindowForm: () => <div data-test-subj="createMaintenanceWindowForm" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useGetMaintenanceWindow: useGetMaintenanceWindowMock } = jest.requireMock(
-  '../hooks/use_get_maintenance_window'
-);
+const { useGetMaintenanceWindow: useGetMaintenanceWindowMock } = (await vi.importMock('../hooks/use_get_maintenance_window'));
 
 describe('MaintenanceWindowsEditPage', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
-    (appMockRenderer.coreStart.application.getUrlForApp as jest.Mock).mockReturnValue(
+    (appMockRenderer.coreStart.application.getUrlForApp as Mock).mockReturnValue(
       '/app/management/insightsAndAlerting/maintenanceWindows'
     );
   });

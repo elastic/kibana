@@ -5,28 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType, type EsqlResults, type ErrorResult } from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  executeEsql: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      executeEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('attackDiscoverySearchTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const tool = attackDiscoverySearchTool(mockCore, mockLogger);
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2024-01-15T12:00:00Z'));
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-15T12:00:00Z'));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('schema', () => {
@@ -67,7 +73,7 @@ describe('attackDiscoverySearchTool', () => {
         columns: [{ name: '_id', type: 'keyword' }],
         values: [['attack-discovery-1']],
       };
-      (executeEsql as jest.Mock).mockResolvedValue(mockEsqlResponse);
+      (executeEsql as Mock).mockResolvedValue(mockEsqlResponse);
 
       await tool.handler(
         { alertIds: ['alert-1', 'alert-2'] },
@@ -75,7 +81,7 @@ describe('attackDiscoverySearchTool', () => {
       );
 
       expect(executeEsql).toHaveBeenCalled();
-      const callArgs = (executeEsql as jest.Mock).mock.calls[0][0];
+      const callArgs = (executeEsql as Mock).mock.calls[0][0];
       expect(callArgs.query).toContain('FROM .alerts-security.attack.discovery.alerts-default*');
       expect(callArgs.query).toContain(
         'MV_CONTAINS(kibana.alert.attack_discovery.alert_ids,"alert-1")'
@@ -88,14 +94,14 @@ describe('attackDiscoverySearchTool', () => {
     });
 
     it('uses handler context spaceId in ES|QL index pattern', async () => {
-      (executeEsql as jest.Mock).mockResolvedValue({ columns: [], values: [] });
+      (executeEsql as Mock).mockResolvedValue({ columns: [], values: [] });
 
       await tool.handler(
         { alertIds: ['alert-1'] },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger, { spaceId: 'custom-space' })
       );
 
-      const callArgs = (executeEsql as jest.Mock).mock.calls[0][0];
+      const callArgs = (executeEsql as Mock).mock.calls[0][0];
       expect(callArgs.query).toContain(
         'FROM .alerts-security.attack.discovery.alerts-custom-space*'
       );
@@ -112,7 +118,7 @@ describe('attackDiscoverySearchTool', () => {
           ['attack-discovery-2', 'Another Attack Discovery'],
         ],
       };
-      (executeEsql as jest.Mock).mockResolvedValue(mockEsqlResponse);
+      (executeEsql as Mock).mockResolvedValue(mockEsqlResponse);
 
       const result = (await tool.handler(
         { alertIds: ['alert-1'] },
@@ -132,14 +138,14 @@ describe('attackDiscoverySearchTool', () => {
         columns: [{ name: '_id', type: 'keyword' }],
         values: Array.from({ length: 10 }, (_, i) => [`attack-discovery-${i}`]),
       };
-      (executeEsql as jest.Mock).mockResolvedValue(mockEsqlResponse);
+      (executeEsql as Mock).mockResolvedValue(mockEsqlResponse);
 
       await tool.handler(
         { alertIds: ['alert-1'] },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const callArgs = (executeEsql as jest.Mock).mock.calls[0][0];
+      const callArgs = (executeEsql as Mock).mock.calls[0][0];
       expect(callArgs.query).toContain('LIMIT 10');
     });
 
@@ -158,7 +164,7 @@ describe('attackDiscoverySearchTool', () => {
 
     it('handles query failures', async () => {
       const error = new Error('ES|QL query failed');
-      (executeEsql as jest.Mock).mockRejectedValue(error);
+      (executeEsql as Mock).mockRejectedValue(error);
 
       const result = (await tool.handler(
         { alertIds: ['alert-1'] },
@@ -173,14 +179,14 @@ describe('attackDiscoverySearchTool', () => {
     });
 
     it('filters out alert IDs with unsafe characters', async () => {
-      (executeEsql as jest.Mock).mockResolvedValue({ columns: [], values: [] });
+      (executeEsql as Mock).mockResolvedValue({ columns: [], values: [] });
 
       await tool.handler(
         { alertIds: ['valid-id', 'injection"attempt', 'also-valid'] },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const callArgs = (executeEsql as jest.Mock).mock.calls[0][0];
+      const callArgs = (executeEsql as Mock).mock.calls[0][0];
       expect(callArgs.query).toContain(
         'MV_CONTAINS(kibana.alert.attack_discovery.alert_ids,"valid-id")'
       );
@@ -208,14 +214,14 @@ describe('attackDiscoverySearchTool', () => {
         columns: [{ name: '_id', type: 'keyword' }],
         values: [],
       };
-      (executeEsql as jest.Mock).mockResolvedValue(mockEsqlResponse);
+      (executeEsql as Mock).mockResolvedValue(mockEsqlResponse);
 
       await tool.handler(
         { alertIds: ['alert-1'] },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const callArgs = (executeEsql as jest.Mock).mock.calls[0][0];
+      const callArgs = (executeEsql as Mock).mock.calls[0][0];
       const query = callArgs.query;
       expect(query).toContain('@timestamp >=');
       expect(query).toContain('@timestamp <=');

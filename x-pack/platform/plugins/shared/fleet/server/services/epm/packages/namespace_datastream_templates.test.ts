@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -25,36 +28,36 @@ import {
   syncNamespaceTemplates,
 } from './namespace_datastream_templates';
 
-jest.mock('./get');
-jest.mock('../elasticsearch/template/template', () => {
-  const actual = jest.requireActual('../elasticsearch/template/template');
+vi.mock('./get');
+vi.mock('../elasticsearch/template/template', async () => {
+  const actual = (await vi.importActual('../elasticsearch/template/template'));
   return {
     ...actual,
-    updateCurrentWriteIndices: jest.fn(),
+    updateCurrentWriteIndices: vi.fn(),
   };
 });
-jest.mock('./es_assets_reference');
-jest.mock('../../app_context');
+vi.mock('./es_assets_reference');
+vi.mock('../../app_context');
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 mockedAppContextService.getLogger.mockReturnValue({
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
 } as any);
 
-const mockedGetInstalledPackageWithAssets = getInstalledPackageWithAssets as jest.MockedFunction<
+const mockedGetInstalledPackageWithAssets = getInstalledPackageWithAssets as MockedFunction<
   typeof getInstalledPackageWithAssets
 >;
-const mockedGetInstallation = getInstallation as jest.MockedFunction<typeof getInstallation>;
-const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.MockedFunction<
+const mockedGetInstallation = getInstallation as MockedFunction<typeof getInstallation>;
+const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as MockedFunction<
   typeof updateCurrentWriteIndices
 >;
-const mockedUpdateEsAssetReferences = updateEsAssetReferences as jest.MockedFunction<
+const mockedUpdateEsAssetReferences = updateEsAssetReferences as MockedFunction<
   typeof updateEsAssetReferences
 >;
 
@@ -128,7 +131,7 @@ describe('isNamespaceCustomizationEnabledForPackage', () => {
   const soClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns true when namespace is in the opt-in list', async () => {
@@ -232,12 +235,12 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
   const dataStreams = [{ dataset: 'nginx.access', type: 'logs' }] as any[];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedAppContextService.getLogger.mockReturnValue({
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     } as any);
     mockedUpdateCurrentWriteIndices.mockResolvedValue(undefined);
     mockedUpdateEsAssetReferences.mockResolvedValue([]);
@@ -289,7 +292,7 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
       dataStreams,
     });
 
-    const putCalls = (esClient.indices.putIndexTemplate as unknown as jest.Mock).mock.calls;
+    const putCalls = (esClient.indices.putIndexTemplate as unknown as Mock).mock.calls;
     const templateNames = putCalls.map((c: any) => c[0].name).sort();
     expect(templateNames).toEqual([
       'logs-nginx.access@namespace.production',
@@ -336,12 +339,12 @@ describe('syncNamespaceTemplates', () => {
   const soClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedAppContextService.getLogger.mockReturnValue({
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     } as any);
     mockedUpdateCurrentWriteIndices.mockResolvedValue(undefined);
     mockedUpdateEsAssetReferences.mockResolvedValue([]);
@@ -608,10 +611,10 @@ describe('syncNamespaceTemplates', () => {
       template: { mappings: {}, settings: {}, aliases: {} },
     } as any);
     const logger = {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     } as any;
     mockedAppContextService.getLogger.mockReturnValue(logger);
 
@@ -644,12 +647,12 @@ describe('runNamespacePreflightCheck', () => {
   const soClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedAppContextService.getLogger.mockReturnValue({
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     } as any);
   });
 

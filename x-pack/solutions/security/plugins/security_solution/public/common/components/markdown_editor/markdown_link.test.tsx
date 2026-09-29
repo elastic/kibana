@@ -5,31 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n as render } from '@kbn/test-jest-helpers';
 import { MarkdownLink } from './markdown_link';
 
-const mockPrepend = jest.fn((path: string) => `/kbn${path}`);
-const mockGet = jest.fn(() => '/kbn');
+const mockPrepend = vi.fn((path: string) => `/kbn${path}`);
+const mockGet = vi.fn(() => '/kbn');
 
-jest.mock('../../lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: {
-        basePath: {
-          prepend: (path: string) => mockPrepend(path),
-          get: () => mockGet(),
+vi.mock('../../lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: {
+            basePath: {
+              prepend: (path: string) => mockPrepend(path),
+              get: () => mockGet(),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MarkdownLink', () => {
   const defaultProps = { children: 'link text' };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('prepends the base path to app-internal links', () => {

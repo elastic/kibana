@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { EuiTableComputedColumnType, EuiTableFieldDataColumnType } from '@elastic/eui';
@@ -49,13 +51,13 @@ const mockWorkflowRow: ScheduleRunRow = {
 
 describe('getColumns', () => {
   it('returns three columns', () => {
-    const columns = getColumns(jest.fn());
+    const columns = getColumns(vi.fn());
 
     expect(columns).toHaveLength(3);
   });
 
   it('renders an inspect button for a run with workflow data', () => {
-    const onViewDetails = jest.fn();
+    const onViewDetails = vi.fn();
     const columns = getColumns(onViewDetails);
     const actionColumn = columns[0] as EuiTableComputedColumnType<ScheduleRunRow>;
 
@@ -65,7 +67,7 @@ describe('getColumns', () => {
   });
 
   it('renders nothing for a run without workflow data', () => {
-    const onViewDetails = jest.fn();
+    const onViewDetails = vi.fn();
     const columns = getColumns(onViewDetails);
     const actionColumn = columns[0] as EuiTableComputedColumnType<ScheduleRunRow>;
 
@@ -75,7 +77,7 @@ describe('getColumns', () => {
   });
 
   it('calls onViewDetails with the row when the inspect button is clicked', () => {
-    const onViewDetails = jest.fn();
+    const onViewDetails = vi.fn();
     const columns = getColumns(onViewDetails);
     const actionColumn = columns[0] as EuiTableComputedColumnType<ScheduleRunRow>;
 
@@ -87,7 +89,7 @@ describe('getColumns', () => {
   });
 
   it('renders the start value in the start column', () => {
-    const columns = getColumns(jest.fn());
+    const columns = getColumns(vi.fn());
     const startColumn = columns[1] as EuiTableFieldDataColumnType<ScheduleRunRow>;
 
     const { container } = render(<>{startColumn.render?.('2026-04-07T12:00:00.000Z', mockRow)}</>);
@@ -96,7 +98,7 @@ describe('getColumns', () => {
   });
 
   it('renders the status value in the status column', () => {
-    const columns = getColumns(jest.fn());
+    const columns = getColumns(vi.fn());
     const statusColumn = columns[2] as EuiTableFieldDataColumnType<ScheduleRunRow>;
 
     const { container } = render(<>{statusColumn.render?.('failure', mockRow)}</>);

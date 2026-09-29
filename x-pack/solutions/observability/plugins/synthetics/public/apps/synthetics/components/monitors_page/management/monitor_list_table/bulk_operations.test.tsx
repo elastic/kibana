@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
@@ -18,30 +21,39 @@ import { useEnablement } from '../../../../hooks';
 import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 import { BulkOperations } from './bulk_operations';
 
-jest.mock('../../../../../../hooks/use_capabilities', () => ({
-  ...jest.requireActual('../../../../../../hooks/use_capabilities'),
-  useCanEditSynthetics: jest.fn(),
-  useCanUsePublicLocationsPermission: jest.fn(),
-}));
+vi.mock('../../../../../../hooks/use_capabilities', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../../hooks/use_capabilities')),
+      useCanEditSynthetics: vi.fn(),
+      useCanUsePublicLocationsPermission: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks', () => ({
-  ...jest.requireActual('../../../../hooks'),
-  useEnablement: jest.fn(),
-}));
+vi.mock('../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../hooks')),
+      useEnablement: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_monitor_integration_health', () => ({
-  useMonitorIntegrationHealth: jest.fn(),
-}));
+vi.mock('../../../common/hooks/use_monitor_integration_health', () => {
+      const mocked = {
+      useMonitorIntegrationHealth: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useCanEditSyntheticsMock = useCanEditSynthetics as jest.MockedFunction<
+const useCanEditSyntheticsMock = useCanEditSynthetics as MockedFunction<
   typeof useCanEditSynthetics
 >;
 const useCanUsePublicLocationsPermissionMock =
-  useCanUsePublicLocationsPermission as jest.MockedFunction<
+  useCanUsePublicLocationsPermission as MockedFunction<
     typeof useCanUsePublicLocationsPermission
   >;
-const useEnablementMock = useEnablement as jest.MockedFunction<typeof useEnablement>;
-const useMonitorIntegrationHealthMock = useMonitorIntegrationHealth as jest.MockedFunction<
+const useEnablementMock = useEnablement as MockedFunction<typeof useEnablement>;
+const useMonitorIntegrationHealthMock = useMonitorIntegrationHealth as MockedFunction<
   typeof useMonitorIntegrationHealth
 >;
 
@@ -62,19 +74,19 @@ const makeMonitor = (
   } as unknown as EncryptedSyntheticsSavedMonitor);
 
 describe('<BulkOperations />', () => {
-  const setMonitorPendingStatusUpdate = jest.fn();
+  const setMonitorPendingStatusUpdate = vi.fn();
 
   const renderMenu = (selectedItems: EncryptedSyntheticsSavedMonitor[]) => {
     const utils = render(
       <BulkOperations
         selectedItems={selectedItems}
-        setMonitorPendingDeletion={jest.fn()}
-        setMonitorPendingReset={jest.fn()}
+        setMonitorPendingDeletion={vi.fn()}
+        setMonitorPendingReset={vi.fn()}
         setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
-        setBulkEditAction={jest.fn()}
-        setIsLocationsFlyoutOpen={jest.fn()}
-        setIsScheduleFlyoutOpen={jest.fn()}
-        setIsMaintenanceWindowsFlyoutOpen={jest.fn()}
+        setBulkEditAction={vi.fn()}
+        setIsLocationsFlyoutOpen={vi.fn()}
+        setIsScheduleFlyoutOpen={vi.fn()}
+        setIsMaintenanceWindowsFlyoutOpen={vi.fn()}
       />
     );
     fireEvent.click(utils.getByTestId('syntheticsBulkActionsButton'));
@@ -82,7 +94,7 @@ describe('<BulkOperations />', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useCanEditSyntheticsMock.mockReturnValue(true);
     useCanUsePublicLocationsPermissionMock.mockReturnValue(true);
     useEnablementMock.mockReturnValue({ isServiceAllowed: true } as ReturnType<
@@ -185,13 +197,13 @@ describe('<BulkOperations />', () => {
     const { getByTestId } = render(
       <BulkOperations
         selectedItems={[]}
-        setMonitorPendingDeletion={jest.fn()}
-        setMonitorPendingReset={jest.fn()}
+        setMonitorPendingDeletion={vi.fn()}
+        setMonitorPendingReset={vi.fn()}
         setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
-        setBulkEditAction={jest.fn()}
-        setIsLocationsFlyoutOpen={jest.fn()}
-        setIsScheduleFlyoutOpen={jest.fn()}
-        setIsMaintenanceWindowsFlyoutOpen={jest.fn()}
+        setBulkEditAction={vi.fn()}
+        setIsLocationsFlyoutOpen={vi.fn()}
+        setIsScheduleFlyoutOpen={vi.fn()}
+        setIsMaintenanceWindowsFlyoutOpen={vi.fn()}
       />
     );
 

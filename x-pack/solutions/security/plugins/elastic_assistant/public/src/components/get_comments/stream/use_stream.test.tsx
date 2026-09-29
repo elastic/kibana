@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useStream } from './use_stream';
 
 // Minimum spacing between emissions enforced by the stream observable (stream_observable.ts).
 const MIN_DELAY = 10;
 
-const refetchCurrentConversation = jest.fn();
-const reader = jest.fn();
-const cancel = jest.fn();
+const refetchCurrentConversation = vi.fn();
+const reader = vi.fn();
+const cancel = vi.fn();
 // LangChain `{ type: 'content', payload }` lines, matching what the observable parser consumes.
 const chunk1 = `{"payload":"","type":"content"}
 {"payload":"My","type":"content"}
@@ -42,8 +44,8 @@ const readerComplete = {
       done: true,
     }),
   cancel,
-  releaseLock: jest.fn(),
-  closed: jest.fn().mockResolvedValue(true),
+  releaseLock: vi.fn(),
+  closed: vi.fn().mockResolvedValue(true),
 } as unknown as ReadableStreamDefaultReader<Uint8Array>;
 
 const defaultProps = {
@@ -54,14 +56,14 @@ const defaultProps = {
 
 describe('useStream', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Should stream response. isLoading/isStreaming are true while streaming, isLoading/isStreaming are false when streaming completes', async () => {
     // Fake timers make the observable's wall-clock throttling (MIN_DELAY-spaced
     // emissions) deterministic, so the transient streaming states can be observed
     // without racing against real timers.
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
       const { result } = renderHook(() => useStream(defaultProps));
       expect(reader).toHaveBeenCalledTimes(1);
@@ -69,7 +71,7 @@ describe('useStream', () => {
       // Seed emission (emitted with no delay): loading has started but no message
       // content has arrived yet.
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(0);
+        await vi.advanceTimersByTimeAsync(0);
       });
       expect(result.current).toEqual({
         error: undefined,
@@ -81,7 +83,7 @@ describe('useStream', () => {
 
       // First content chunk: streaming is now in progress.
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(MIN_DELAY);
+        await vi.advanceTimersByTimeAsync(MIN_DELAY);
       });
       expect(result.current).toEqual({
         error: undefined,
@@ -93,7 +95,7 @@ describe('useStream', () => {
 
       // Drain the remaining chunks through to completion.
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(MIN_DELAY * 10);
+        await vi.advanceTimersByTimeAsync(MIN_DELAY * 10);
       });
       expect(result.current).toEqual({
         error: undefined,
@@ -104,7 +106,7 @@ describe('useStream', () => {
       });
       expect(reader).toHaveBeenCalledTimes(4);
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 
@@ -121,7 +123,7 @@ describe('useStream', () => {
   it('should handle a stream error and update UseStream object accordingly', async () => {
     const errorMessage = 'Test error message';
     const errorReader = {
-      read: jest
+      read: vi
         .fn()
         .mockResolvedValueOnce({
           done: false,
@@ -129,8 +131,8 @@ describe('useStream', () => {
         })
         .mockRejectedValue(new Error(errorMessage)),
       cancel,
-      releaseLock: jest.fn(),
-      closed: jest.fn().mockResolvedValue(true),
+      releaseLock: vi.fn(),
+      closed: vi.fn().mockResolvedValue(true),
     } as unknown as ReadableStreamDefaultReader<Uint8Array>;
     const { result } = renderHook(() =>
       useStream({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createAnalytics } from '@elastic/ebt/client';
 
 import type { RequestHandler } from '@kbn/core/server';
@@ -23,13 +25,13 @@ import { AnalyticsService } from '../../analytics/analytics_service';
 import type { SecurityRequestHandlerContext } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 
-jest.useFakeTimers().setSystemTime(new Date('2023-10-23'));
+vi.useFakeTimers().setSystemTime(new Date('2023-10-23'));
 
 function getMockContext(
   licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
 ) {
   return {
-    licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
+    licensing: { license: { check: vi.fn().mockReturnValue(licenseCheckResult) } },
   } as unknown as SecurityRequestHandlerContext;
 }
 

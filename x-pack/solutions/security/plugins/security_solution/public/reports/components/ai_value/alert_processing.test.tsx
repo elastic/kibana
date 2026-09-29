@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AlertProcessing } from './alert_processing';
@@ -14,22 +17,25 @@ import { AlertProcessingDonut } from './alert_processing_donut_lens';
 import { formatPercent } from './metrics';
 import type { ValueMetrics } from './metrics';
 
-jest.mock('./alert_processing_key_insight');
-jest.mock('./alert_processing_table');
-jest.mock('./alert_processing_donut_lens');
+vi.mock('./alert_processing_key_insight');
+vi.mock('./alert_processing_table');
+vi.mock('./alert_processing_donut_lens');
 
-jest.mock('./metrics', () => ({
-  formatPercent: jest.fn(),
-}));
+vi.mock('./metrics', () => {
+      const mocked = {
+      formatPercent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFormatPercent = formatPercent as jest.MockedFunction<typeof formatPercent>;
-const mockAlertProcessingKeyInsight = AlertProcessingKeyInsight as jest.MockedFunction<
+const mockFormatPercent = formatPercent as MockedFunction<typeof formatPercent>;
+const mockAlertProcessingKeyInsight = AlertProcessingKeyInsight as MockedFunction<
   typeof AlertProcessingKeyInsight
 >;
-const mockAlertsProcessingTable = AlertsProcessingTable as jest.MockedFunction<
+const mockAlertsProcessingTable = AlertsProcessingTable as MockedFunction<
   typeof AlertsProcessingTable
 >;
-const mockAlertProcessingDonut = AlertProcessingDonut as jest.MockedFunction<
+const mockAlertProcessingDonut = AlertProcessingDonut as MockedFunction<
   typeof AlertProcessingDonut
 >;
 
@@ -53,7 +59,7 @@ const defaultProps = {
 
 describe('AlertProcessing', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockFormatPercent.mockImplementation((value) => `${value.toFixed(2)}%`);
   });

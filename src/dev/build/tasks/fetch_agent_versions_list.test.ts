@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import fetch from 'node-fetch';
 import pRetry from 'p-retry';
 
@@ -16,15 +19,15 @@ import { FetchAgentVersionsList } from './fetch_agent_versions_list';
 import { Build, write } from '../lib';
 import { getMockConfig } from '../lib/__mocks__/get_config';
 
-jest.mock('node-fetch');
-jest.mock('p-retry');
-jest.mock('../lib');
+vi.mock('node-fetch');
+vi.mock('p-retry');
+vi.mock('../lib');
 
 const config = getMockConfig();
 
-const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
-const mockedPRetry = pRetry as jest.MockedFunction<typeof pRetry>;
-const mockedWrite = write as jest.MockedFunction<typeof write>;
+const mockedFetch = fetch as MockedFunction<typeof fetch>;
+const mockedPRetry = pRetry as MockedFunction<typeof pRetry>;
+const mockedWrite = write as MockedFunction<typeof write>;
 const mockedBuild = new Build(config);
 
 mockedPRetry.mockImplementation((fn: any) => {
@@ -42,7 +45,7 @@ describe('FetchAgentVersionsList', () => {
     };
 
     mockedFetch.mockReset();
-    (mockedBuild.resolvePath as jest.Mock<any>).mockReset();
+    (mockedBuild.resolvePath as Mock<any>).mockReset();
     mockedWrite.mockReset();
   });
 
@@ -64,7 +67,7 @@ describe('FetchAgentVersionsList', () => {
     it('does not throw', async () => {
       mockedFetch.mockResolvedValueOnce({
         status: 200,
-        text: jest.fn().mockResolvedValueOnce(
+        text: vi.fn().mockResolvedValueOnce(
           JSON.stringify([
             [
               {
@@ -90,7 +93,7 @@ describe('FetchAgentVersionsList', () => {
     it('throws', async () => {
       mockedFetch.mockResolvedValueOnce({
         status: 503,
-        text: jest.fn().mockResolvedValueOnce('Gateway timeout'),
+        text: vi.fn().mockResolvedValueOnce('Gateway timeout'),
       } as any);
 
       try {
@@ -106,7 +109,7 @@ describe('FetchAgentVersionsList', () => {
     it('throws', async () => {
       mockedFetch.mockResolvedValueOnce({
         status: 200,
-        text: jest.fn().mockResolvedValueOnce('not json'),
+        text: vi.fn().mockResolvedValueOnce('not json'),
       } as any);
 
       try {

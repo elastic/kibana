@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import '@kbn/code-editor-mock/jest_helper';
@@ -16,13 +18,16 @@ import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { JSONRuleEditor } from './json_rule_editor';
 import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: jest.fn().mockReturnValue({
-    services: { docLinks: { links: { apis: { createRoleMapping: 'createRoleMappingLink' } } } },
-  }),
-  useDarkMode: jest.fn().mockReturnValue(false),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+      useKibana: vi.fn().mockReturnValue({
+        services: { docLinks: { links: { apis: { createRoleMapping: 'createRoleMappingLink' } } } },
+      }),
+      useDarkMode: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('JSONRuleEditor', () => {
   const mockChangeEvent = {} as monaco.editor.IModelContentChangedEvent;
@@ -31,7 +36,7 @@ describe('JSONRuleEditor', () => {
   };
 
   it('renders an empty rule set', () => {
-    const props = { rules: null, onChange: jest.fn(), onValidityChange: jest.fn() };
+    const props = { rules: null, onChange: vi.fn(), onValidityChange: vi.fn() };
     const wrapper = renderView(props);
 
     expect(props.onChange).not.toHaveBeenCalled();
@@ -51,8 +56,8 @@ describe('JSONRuleEditor', () => {
         ]),
         new ExceptAllRule([new FieldRule('realm.name', '*')]),
       ]),
-      onChange: jest.fn(),
-      onValidityChange: jest.fn(),
+      onChange: vi.fn(),
+      onValidityChange: vi.fn(),
     };
     const wrapper = renderView(props);
 
@@ -82,7 +87,7 @@ describe('JSONRuleEditor', () => {
   });
 
   it('notifies when input contains invalid JSON', () => {
-    const props = { rules: null, onChange: jest.fn(), onValidityChange: jest.fn() };
+    const props = { rules: null, onChange: vi.fn(), onValidityChange: vi.fn() };
     const wrapper = renderView(props);
 
     const allRule = JSON.stringify(new AllRule().toRaw());
@@ -99,7 +104,7 @@ describe('JSONRuleEditor', () => {
   });
 
   it('notifies when input contains an invalid rule set, even if it is valid JSON', () => {
-    const props = { rules: null, onChange: jest.fn(), onValidityChange: jest.fn() };
+    const props = { rules: null, onChange: vi.fn(), onValidityChange: vi.fn() };
     const wrapper = renderView(props);
 
     const invalidRule = JSON.stringify({
@@ -122,7 +127,7 @@ describe('JSONRuleEditor', () => {
   });
 
   it('fires onChange when a valid rule set is provided after being previously invalidated', () => {
-    const props = { rules: null, onChange: jest.fn(), onValidityChange: jest.fn() };
+    const props = { rules: null, onChange: vi.fn(), onValidityChange: vi.fn() };
     const wrapper = renderView(props);
 
     const allRule = JSON.stringify(new AllRule().toRaw());
@@ -161,8 +166,8 @@ describe('JSONRuleEditor', () => {
         ]),
         new ExceptAllRule([new FieldRule('realm.name', '*')]),
       ]),
-      onChange: jest.fn(),
-      onValidityChange: jest.fn(),
+      onChange: vi.fn(),
+      onValidityChange: vi.fn(),
       readOnly: true,
     };
     const wrapper = renderView(props);

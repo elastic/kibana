@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, within, fireEvent } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -23,11 +25,11 @@ import {
   DEFAULT_PINNED_CONTROL_STATE,
 } from '@kbn/controls-constants';
 
-jest.mock('@kbn/esql-utils', () => {
-  const actual = jest.requireActual('@kbn/esql-utils');
+vi.mock('@kbn/esql-utils', async () => {
+  const actual = (await vi.importActual('@kbn/esql-utils'));
   return {
-    getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
-    getValuesFromQueryField: jest.fn().mockReturnValue('field'),
+    getESQLQueryColumnsRaw: vi.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
+    getValuesFromQueryField: vi.fn().mockReturnValue('field'),
     getVariableNamePrefix: actual.getVariableNamePrefix,
   };
 });
@@ -36,9 +38,9 @@ const core = coreMock.createStart();
 const defaultProps = {
   initialVariableType: ESQLVariableType.FIELDS,
   queryString: 'FROM foo | WHERE field ==',
-  onSaveControl: jest.fn(),
-  closeFlyout: jest.fn(),
-  onCancelControl: jest.fn(),
+  onSaveControl: vi.fn(),
+  closeFlyout: vi.fn(),
+  onCancelControl: vi.fn(),
   search: dataPluginMock.createStartContract().search.search,
   cursorPosition: { column: 19, lineNumber: 1 } as monaco.Position,
   esqlVariables: [],
@@ -53,7 +55,7 @@ const services = {
 
 describe('IdentifierControlForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Field type', () => {
@@ -108,7 +110,7 @@ describe('IdentifierControlForm', () => {
     });
 
     it('should call the onCreateControl callback, if no initialState is given', async () => {
-      const onCreateControlSpy = jest.fn();
+      const onCreateControlSpy = vi.fn();
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
           <KibanaContextProvider services={services}>
@@ -133,7 +135,7 @@ describe('IdentifierControlForm', () => {
     });
 
     it('should call the onCancelControl callback, if Cancel button is clicked', async () => {
-      const onCancelControlSpy = jest.fn();
+      const onCancelControlSpy = vi.fn();
       const { findByTestId } = render(
         <IntlProvider locale="en">
           <KibanaContextProvider services={services}>
@@ -193,7 +195,7 @@ describe('IdentifierControlForm', () => {
         esql_query: 'FROM foo | STATS BY',
         control_type: EsqlControlType.STATIC_VALUES,
       } as OptionsListESQLControlState;
-      const onEditControlSpy = jest.fn();
+      const onEditControlSpy = vi.fn();
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
           <KibanaContextProvider services={services}>

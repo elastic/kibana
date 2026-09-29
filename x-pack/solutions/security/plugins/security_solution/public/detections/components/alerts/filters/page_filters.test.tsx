@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React, { useEffect } from 'react';
 import { render } from '@testing-library/react';
 import { PageFilters } from './page_filters';
@@ -16,12 +19,12 @@ import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
 import type { Filter } from '@kbn/es-query';
 
-jest.mock('@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls');
-jest.mock(
+vi.mock('@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls');
+vi.mock(
   '@kbn/kibana-utils-plugin/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage'
 );
-jest.mock('../../../../common/hooks/use_space_id');
-jest.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../common/hooks/use_space_id');
+vi.mock('../../../../common/hooks/use_experimental_features');
 
 const stubSecurityDataView = createStubDataView({
   spec: {
@@ -36,22 +39,22 @@ const mockDataViewsService = {
   clearInstanceCache: () => Promise.resolve(),
 };
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana'));
 
   return {
     ...original,
-    useUiSetting$: jest.fn().mockReturnValue([]),
+    useUiSetting$: vi.fn().mockReturnValue([]),
     useKibana: () => ({
       services: {
         dataViews: mockDataViewsService,
         notifications: {
           toasts: {
-            addWarning: jest.fn(),
-            addError: jest.fn(),
-            addSuccess: jest.fn(),
-            addDanger: jest.fn(),
-            remove: jest.fn(),
+            addWarning: vi.fn(),
+            addError: vi.fn(),
+            addSuccess: vi.fn(),
+            addDanger: vi.fn(),
+            remove: vi.fn(),
           },
         },
       },
@@ -59,34 +62,34 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest
+vi
   .spyOn(alertFilterControlsPackage, 'AlertFilterControls')
   .mockImplementation(() => <span data-test-subj="filter-group__loading" />);
 
 const filters: Filter[] = [];
-const onFiltersChange = jest.fn();
+const onFiltersChange = vi.fn();
 const query = { query: '', language: 'kql' };
 const timeRange = { from: 'now-15m', to: 'now' };
-const onInit = jest.fn();
+const onInit = vi.fn();
 const dataView = createStubDataView({ spec: {} });
 
 describe('PageFilters', () => {
-  const set = jest.fn();
-  const get = jest.fn();
+  const set = vi.fn();
+  const get = vi.fn();
 
   beforeAll(() => {
-    (createKbnUrlStateStorage as jest.Mock).mockReturnValue({
+    (createKbnUrlStateStorage as Mock).mockReturnValue({
       set,
       get,
     });
   });
 
   beforeEach(() => {
-    (useSpaceId as jest.Mock).mockReturnValue('default');
+    (useSpaceId as Mock).mockReturnValue('default');
   });
 
   it('renders null if a spaceId is missing', () => {
-    (useSpaceId as jest.Mock).mockReturnValue(undefined);
+    (useSpaceId as Mock).mockReturnValue(undefined);
     const { container } = render(
       <PageFilters
         filters={filters}
@@ -125,7 +128,7 @@ describe('PageFilters', () => {
         hide_exists: true,
       },
     ];
-    jest
+    vi
       .spyOn(alertFilterControlsPackage, 'AlertFilterControls')
       .mockImplementationOnce((props) => {
         useEffect(() => {

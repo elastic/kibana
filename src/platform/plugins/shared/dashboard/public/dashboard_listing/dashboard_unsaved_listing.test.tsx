@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { I18nProvider } from '@kbn/i18n-react';
@@ -22,20 +24,23 @@ import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 const renderDashboardUnsavedListing = (props: Partial<DashboardUnsavedListingProps> = {}) =>
   render(
     <DashboardUnsavedListing
-      goToDashboard={jest.fn()}
+      goToDashboard={vi.fn()}
       unsavedDashboardIds={['dashboardUnsavedOne', 'dashboardUnsavedTwo', 'dashboardUnsavedThree']}
-      refreshUnsavedDashboards={jest.fn()}
+      refreshUnsavedDashboards={vi.fn()}
       {...props}
     />,
     { wrapper: I18nProvider }
   );
 
-const mockFindByIds = jest.fn();
-jest.mock('../dashboard_client', () => ({
-  findService: {
-    findByIds: (ids: string[]) => mockFindByIds(ids),
-  },
-}));
+const mockFindByIds = vi.fn();
+vi.mock('../dashboard_client', () => {
+      const mocked = {
+      findService: {
+        findByIds: (ids: string[]) => mockFindByIds(ids),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Unsaved listing', () => {
   const dashboardBackupService = getDashboardBackupService();
@@ -80,7 +85,7 @@ describe('Unsaved listing', () => {
   });
 
   it('Redirects to the requested dashboard in edit mode when continue editing clicked', async () => {
-    const goToDashboard = jest.fn();
+    const goToDashboard = vi.fn();
     renderDashboardUnsavedListing({ goToDashboard });
     const editButton = await screen.findByTestId('edit-unsaved-Dashboard-Unsaved-One');
     editButton.click();
@@ -88,7 +93,7 @@ describe('Unsaved listing', () => {
   });
 
   it('Redirects to new dashboard when continue editing clicked', async () => {
-    const goToDashboard = jest.fn();
+    const goToDashboard = vi.fn();
     renderDashboardUnsavedListing({
       unsavedDashboardIds: [DASHBOARD_PANELS_UNSAVED_ID],
       goToDashboard,

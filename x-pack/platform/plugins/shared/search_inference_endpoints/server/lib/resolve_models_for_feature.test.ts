@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { type InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
@@ -35,7 +38,7 @@ const createUiSettingsClient = ({
   defaultConnectorOnly,
 }: UiSettings = {}): IUiSettingsClient =>
   ({
-    get: jest.fn(async (key: string) => {
+    get: vi.fn(async (key: string) => {
       if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return defaultConnectorId;
       if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY)
         return defaultConnectorOnly ?? false;
@@ -45,16 +48,16 @@ const createUiSettingsClient = ({
 
 describe('resolveModelsForFeature', () => {
   let logger: Logger;
-  let getForFeature: jest.Mock;
-  let getConnectorList: jest.Mock;
-  let getConnectorById: jest.Mock;
+  let getForFeature: Mock;
+  let getConnectorList: Mock;
+  let getConnectorById: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggingSystemMock.createLogger();
-    getForFeature = jest.fn();
-    getConnectorList = jest.fn();
-    getConnectorById = jest.fn();
+    getForFeature = vi.fn();
+    getConnectorList = vi.fn();
+    getConnectorById = vi.fn();
   });
 
   const resolve = (

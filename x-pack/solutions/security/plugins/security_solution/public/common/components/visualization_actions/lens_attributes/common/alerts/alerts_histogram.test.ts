@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { wrapper } from '../../../mocks';
 
@@ -14,23 +16,29 @@ import { getAlertsHistogramLensAttributes } from './alerts_histogram';
 import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('generated-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('generated-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../utils/route/use_route_spy', () => ({
-  useRouteSpy: jest.fn().mockReturnValue([
-    {
-      detailName: 'mockRule',
-      pageName: 'rules',
-      tabName: 'alerts',
-    },
-  ]),
-}));
+vi.mock('../../../../../utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: vi.fn().mockReturnValue([
+        {
+          detailName: 'mockRule',
+          pageName: 'rules',
+          tabName: 'alerts',
+        },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getAlertsHistogramLensAttributes', () => {
   beforeAll(() => {
-    jest
+    vi
       .mocked(useDataView)
       .mockReturnValue(withIndices(['signal-index'], 'security-solution-my-test'));
   });

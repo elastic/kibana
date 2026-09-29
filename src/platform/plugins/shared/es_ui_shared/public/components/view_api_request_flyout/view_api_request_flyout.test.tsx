@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -23,13 +25,13 @@ const payload = {
   title: 'Test title',
   description: 'Test description',
   request: 'Hello world',
-  closeFlyout: jest.fn(),
+  closeFlyout: vi.fn(),
 };
 
 const urlServiceMock = {
   locators: {
-    get: jest.fn().mockReturnValue({
-      useUrl: jest.fn().mockImplementation((value) => {
+    get: vi.fn().mockReturnValue({
+      useUrl: vi.fn().mockImplementation((value) => {
         return `devToolsUrl_${value?.loadFrom}`;
       }),
     }),

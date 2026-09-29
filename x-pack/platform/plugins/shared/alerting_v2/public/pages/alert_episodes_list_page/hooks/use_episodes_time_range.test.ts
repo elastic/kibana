@@ -5,23 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import { useEpisodesTimeRange } from './use_episodes_time_range';
 
 describe('useEpisodesTimeRange', () => {
-  const mockSetTime = jest.fn();
-  const mockGetTime = jest.fn().mockReturnValue({ from: 'now-24h', to: 'now' });
+  const mockSetTime = vi.fn();
+  const mockGetTime = vi.fn().mockReturnValue({ from: 'now-24h', to: 'now' });
   const timeUpdate$ = new Subject<void>();
 
   const mockTimefilter = {
-    getTimeUpdate$: jest.fn().mockReturnValue(timeUpdate$),
+    getTimeUpdate$: vi.fn().mockReturnValue(timeUpdate$),
     getTime: mockGetTime,
     setTime: mockSetTime,
   } as unknown as Parameters<typeof useEpisodesTimeRange>[0];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetTime.mockReturnValue({ from: 'now-24h', to: 'now' });
   });
 

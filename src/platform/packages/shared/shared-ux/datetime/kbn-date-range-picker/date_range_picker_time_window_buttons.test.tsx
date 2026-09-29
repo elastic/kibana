@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import moment from 'moment';
 import { fireEvent, screen, act } from '@testing-library/react';
@@ -19,7 +21,7 @@ import {
 } from './date_range_picker_time_window_buttons';
 
 function renderPicker(overrides: Partial<DateRangePickerProps> = {}) {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const props: DateRangePickerProps = {
     defaultValue: '-15m to now',
     onChange,

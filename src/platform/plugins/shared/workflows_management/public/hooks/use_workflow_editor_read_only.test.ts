@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { Route } from '@kbn/shared-ux-router';
@@ -22,13 +25,16 @@ import {
 } from '../entities/workflows/store/workflow_detail/slice';
 import { getTestProvider } from '../shared/mocks/test_providers';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: jest.fn(),
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      useWorkflowsCapabilities: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useWorkflowsCapabilities } = jest.requireMock('@kbn/workflows-ui') as {
-  useWorkflowsCapabilities: jest.Mock;
+const { useWorkflowsCapabilities } = (await vi.importMock('@kbn/workflows-ui')) as {
+  useWorkflowsCapabilities: Mock;
 };
 
 const EXECUTION_ID = 'execution-1';
@@ -105,7 +111,7 @@ describe('useWorkflowEditorReadOnly', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('keeps an executor read-only despite the feature edit privilege', () => {

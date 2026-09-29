@@ -7,21 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { api } from './api';
 import type { ExternalService } from './types';
 
 describe('Workflows API', () => {
-  let mockLogger: jest.Mocked<Logger>;
-  let mockExternalService: jest.Mocked<ExternalService>;
+  let mockLogger: Mocked<Logger>;
+  let mockExternalService: Mocked<ExternalService>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+    vi.resetAllMocks();
+    mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
     mockExternalService = {
-      runWorkflow: jest.fn(),
-      scheduleWorkflow: jest.fn(),
+      runWorkflow: vi.fn(),
+      scheduleWorkflow: vi.fn(),
     };
   });
 

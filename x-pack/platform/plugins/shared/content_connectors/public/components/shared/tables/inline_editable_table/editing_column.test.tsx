@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { screen } from '@testing-library/react';
@@ -17,8 +19,8 @@ describe('EditingColumn', () => {
   const column = {
     name: 'foo',
     field: 'foo',
-    render: jest.fn(),
-    editingRender: jest.fn().mockReturnValue(<div data-test-subj="editing-view" />),
+    render: vi.fn(),
+    editingRender: vi.fn().mockReturnValue(<div data-test-subj="editing-view" />),
   };
 
   const requiredProps = {
@@ -32,11 +34,11 @@ describe('EditingColumn', () => {
   };
 
   const mockActions = {
-    setEditingItemValue: jest.fn(),
+    setEditingItemValue: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockActions(mockActions);
     setMockValues(mockValues);
   });

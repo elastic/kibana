@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 
@@ -38,7 +40,7 @@ describe('options list type-specific search queries', () => {
 
   describe('suggestion aggregation', () => {
     test('for unsupported field types, return exact match search instead', () => {
-      const exactMatchSpy = jest.spyOn(ExactMatch, 'getExactMatchAggregationBuilder');
+      const exactMatchSpy = vi.spyOn(ExactMatch, 'getExactMatchAggregationBuilder');
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'success',

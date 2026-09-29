@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CoreProviders } from '../../../apps/common_providers';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -21,15 +23,18 @@ import {
 } from '../shared/constants';
 import { metricByField } from './use_host_metrics_table';
 
-jest.mock('../../../pages/link_to/use_asset_details_redirect', () => ({
-  useAssetDetailsRedirect: jest.fn(() => ({
-    getAssetDetailUrl: jest.fn(() => ({
-      app: 'metrics',
-      pathname: 'link-to/host-detail/example-01',
-      search: { from: '1546340400000', to: '1546344000000' },
-    })),
-  })),
-}));
+vi.mock('../../../pages/link_to/use_asset_details_redirect', () => {
+      const mocked = {
+      useAssetDetailsRedirect: vi.fn(() => ({
+        getAssetDetailUrl: vi.fn(() => ({
+          app: 'metrics',
+          pathname: 'link-to/host-detail/example-01',
+          search: { from: '1546340400000', to: '1546344000000' },
+        })),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('HostMetricsTable', () => {
   const timerange = {
@@ -109,8 +114,8 @@ describe('HostMetricsTable', () => {
         <HostMetricsTable
           data={{ state: 'unknown' }}
           isLoading={true}
-          setCurrentPageIndex={jest.fn()}
-          setSortState={jest.fn()}
+          setCurrentPageIndex={vi.fn()}
+          setSortState={vi.fn()}
           sortState={{ field: 'name', direction: 'asc' }}
           timerange={{ from: new Date().toISOString(), to: new Date().toISOString() }}
         />
@@ -128,8 +133,8 @@ describe('HostMetricsTable', () => {
         <HostMetricsTable
           data={{ state: 'no-indices' }}
           isLoading={false}
-          setCurrentPageIndex={jest.fn()}
-          setSortState={jest.fn()}
+          setCurrentPageIndex={vi.fn()}
+          setSortState={vi.fn()}
           sortState={{ field: 'name', direction: 'asc' }}
           timerange={{ from: new Date().toISOString(), to: new Date().toISOString() }}
         />

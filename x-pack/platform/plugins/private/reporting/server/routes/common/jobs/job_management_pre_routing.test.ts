@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import type { ReportingCore } from '../../..';
@@ -18,18 +21,18 @@ import {
 import { jobsQueryFactory } from './jobs_query';
 import { jobManagementPreRouting } from './job_management_pre_routing';
 
-jest.mock('../../../lib/content_stream');
-jest.mock('./jobs_query');
+vi.mock('../../../lib/content_stream');
+vi.mock('./jobs_query');
 
 const mockReportingConfig = createMockConfigSchema();
 let mockCore: ReportingCore;
 let mockSetupDeps: ReportingInternalSetup;
 let mockStartDeps: ReportingInternalStart;
-const mockJobsQueryFactory = jobsQueryFactory as jest.Mocked<any>;
+const mockJobsQueryFactory = jobsQueryFactory as Mocked<any>;
 const mockResponseFactory = httpServerMock.createResponseFactory();
 const mockCounters = {
-  usageCounter: jest.fn(),
-  errorCounter: jest.fn(),
+  usageCounter: vi.fn(),
+  errorCounter: vi.fn(),
 };
 const mockUser = { username: 'joeuser' } as ReportingUser;
 const options = { isInternal: false };
@@ -54,7 +57,7 @@ beforeEach(async () => {
 
 it(`should return 404 if the docId isn't resolve`, async function () {
   mockJobsQueryFactory.mockReturnValue({
-    get: jest.fn(),
+    get: vi.fn(),
   });
 
   let handlerCalled = false;
@@ -82,7 +85,7 @@ it(`should return 404 if the docId isn't resolve`, async function () {
 
 it(`should call callback when document is available`, async function () {
   mockJobsQueryFactory.mockReturnValue({
-    get: jest.fn(() => ({ jobtype: 'csv_searchsource' })),
+    get: vi.fn(() => ({ jobtype: 'csv_searchsource' })),
   });
 
   let handlerCalled = false;
@@ -115,7 +118,7 @@ describe('usage counters', () => {
 
   it(`should track valid usage`, async function () {
     mockJobsQueryFactory.mockReturnValue({
-      get: jest.fn(() => ({ jobtype: 'csv_searchsource' })),
+      get: vi.fn(() => ({ jobtype: 'csv_searchsource' })),
     });
 
     const handler = async () => ({
@@ -140,7 +143,7 @@ describe('usage counters', () => {
 
   it(`should track error case`, async function () {
     mockJobsQueryFactory.mockReturnValue({
-      get: jest.fn(() => ({ jobtype: 'csv_searchsource' })),
+      get: vi.fn(() => ({ jobtype: 'csv_searchsource' })),
     });
 
     const handler = async () => {

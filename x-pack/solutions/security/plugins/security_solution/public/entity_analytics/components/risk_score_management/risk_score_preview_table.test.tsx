@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render as rtlRender, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -17,12 +20,12 @@ import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/ty
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
-jest.mock('../../../flyout_v2/use_flyout_api');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../../../flyout_v2/use_flyout_api');
 
-const mockOpenEntityFlyout = jest.fn();
-const mockOpenRightPanel = jest.fn();
+const mockOpenEntityFlyout = vi.fn();
+const mockOpenRightPanel = vi.fn();
 const TestProviders: React.FC<React.PropsWithChildren> = ({ children }) => (
   <I18nProvider>
     <EuiProvider>{children}</EuiProvider>
@@ -45,12 +48,12 @@ const riskScoreRecord: EntityRiskScoreRecord = {
 
 describe('RiskScorePreviewTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
-    (useFlyoutApi as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useIsNewFlyoutEnabled as Mock).mockReturnValue(true);
+    (useFlyoutApi as Mock).mockReturnValue({
       openEntityFlyout: mockOpenEntityFlyout,
     });
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
+    (useExpandableFlyoutApi as Mock).mockReturnValue({
       openRightPanel: mockOpenRightPanel,
     });
   });

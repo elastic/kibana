@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { monaco } from '@kbn/code-editor';
 import {
@@ -12,25 +14,28 @@ import {
   computeChangedLines,
 } from './use_line_differences_decorations';
 
-jest.mock('@kbn/code-editor', () => ({
-  monaco: {
-    Range: jest.fn((startLine, startCol, endLine, endCol) => ({
-      startLineNumber: startLine,
-      startColumn: startCol,
-      endLineNumber: endLine,
-      endColumn: endCol,
-    })),
-  },
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      monaco: {
+        Range: vi.fn((startLine, startCol, endLine, endCol) => ({
+          startLineNumber: startLine,
+          startColumn: startCol,
+          endLineNumber: endLine,
+          endColumn: endCol,
+        })),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockEditor = () => {
-  const clearFn = jest.fn();
-  const createDecorationsCollectionFn = jest.fn().mockReturnValue({ clear: clearFn });
-  const getLineMaxColumnFn = jest.fn().mockReturnValue(80);
+  const clearFn = vi.fn();
+  const createDecorationsCollectionFn = vi.fn().mockReturnValue({ clear: clearFn });
+  const getLineMaxColumnFn = vi.fn().mockReturnValue(80);
 
   return {
     editor: {
-      getModel: jest.fn().mockReturnValue({
+      getModel: vi.fn().mockReturnValue({
         getLineMaxColumn: getLineMaxColumnFn,
       }),
       createDecorationsCollection: createDecorationsCollectionFn,

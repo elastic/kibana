@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type React from 'react';
 import { act } from '@testing-library/react';
 import type { UseHostIsolationActionProps } from './use_host_isolation_action';
@@ -30,9 +33,9 @@ import {
 } from '../..';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 
-jest.mock('../../../user_privileges');
+vi.mock('../../../user_privileges');
 
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
 
 describe('useHostIsolationAction', () => {
   let appContextMock: AppContextTestRender;
@@ -63,7 +66,7 @@ describe('useHostIsolationAction', () => {
   // presence of `cps.cpsManager`. Tests exercising that path must enable it explicitly.
   const enableCps = () => {
     appContextMock.startServices.cps = {
-      cpsManager: { whenReady: jest.fn().mockResolvedValue(undefined) } as unknown as ICPSManager,
+      cpsManager: { whenReady: vi.fn().mockResolvedValue(undefined) } as unknown as ICPSManager,
       isTierEligible: true,
     };
   };
@@ -73,9 +76,9 @@ describe('useHostIsolationAction', () => {
     generator = new EndpointMetadataGenerator('test');
     authMockSetter = appContextMock.getUserPrivilegesMockSetter(useUserPrivilegesMock);
     hookProps = {
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       detailsData: endpointAlertDataMock.generateEndpointAlertDetailsItemData(),
-      onAddIsolationStatusClick: jest.fn(),
+      onAddIsolationStatusClick: vi.fn(),
     };
     apiMock = agentStatusGetHttpMock(appContextMock.coreStart.http);
     metadataApiMock = endpointMetadataHttpMocks(appContextMock.coreStart.http);

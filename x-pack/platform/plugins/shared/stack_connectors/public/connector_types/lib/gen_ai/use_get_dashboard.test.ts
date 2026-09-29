@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useGetDashboard } from './use_get_dashboard';
 import { getDashboard } from './api';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 
-jest.mock('./api');
-const mockToasts = { addDanger: jest.fn() };
+vi.mock('./api');
+const mockToasts = { addDanger: vi.fn() };
 const mockSpace = {
   id: 'space',
   name: 'space',
   disabledFeatures: [],
 };
-const mockHttp = jest.fn();
-const mockGetRedirectUrl = jest.fn();
-jest.mock('@kbn/triggers-actions-ui-plugin/public');
+const mockHttp = vi.fn();
+const mockGetRedirectUrl = vi.fn();
+vi.mock('@kbn/triggers-actions-ui-plugin/public');
 const connectorId = '123';
 
 const mockServices = {
@@ -39,17 +42,17 @@ const mockServices = {
     },
   },
   spaces: {
-    getActiveSpace: jest.fn().mockResolvedValue(mockSpace),
+    getActiveSpace: vi.fn().mockResolvedValue(mockSpace),
   },
 };
-const mockDashboard = getDashboard as jest.Mock;
-const mockKibana = useKibana as jest.Mock;
+const mockDashboard = getDashboard as Mock;
+const mockKibana = useKibana as Mock;
 
 const defaultArgs = { connectorId, selectedProvider: 'OpenAI' };
 
 describe('useGetDashboard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockDashboard.mockResolvedValue({ data: { available: true } });
     mockKibana.mockReturnValue({
       services: mockServices,

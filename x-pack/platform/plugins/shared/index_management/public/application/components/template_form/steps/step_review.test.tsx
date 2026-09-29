@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,14 +16,17 @@ import type { TemplateDeserialized } from '../../../../../common';
 import { StepReview } from './step_review';
 import { useAppContext } from '../../../app_context';
 
-jest.mock('../../../app_context', () => ({
-  useAppContext: jest.fn(),
-}));
+vi.mock('../../../app_context', () => {
+      const mocked = {
+      useAppContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAppContext = useAppContext as jest.MockedFunction<typeof useAppContext>;
+const mockUseAppContext = useAppContext as MockedFunction<typeof useAppContext>;
 
-const mockSimulateTemplatePropsSpy = jest.fn();
-jest.mock('../../index_templates', () => ({
+const mockSimulateTemplatePropsSpy = vi.fn();
+vi.mock('../../index_templates', () => ({
   __esModule: true,
   SimulateTemplate: (props: unknown) => {
     mockSimulateTemplatePropsSpy(props);
@@ -30,7 +36,7 @@ jest.mock('../../index_templates', () => ({
 
 describe('StepReview', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSimulateTemplatePropsSpy.mockClear();
     mockUseAppContext.mockReturnValue({
       config: { isServerless: false },
@@ -57,7 +63,7 @@ describe('StepReview', () => {
     it('SHOULD render Summary, Preview, and Request tabs', () => {
       render(
         <I18nProvider>
-          <StepReview template={makeTemplate()} navigateToStep={jest.fn()} />
+          <StepReview template={makeTemplate()} navigateToStep={vi.fn()} />
         </I18nProvider>
       );
 
@@ -76,7 +82,7 @@ describe('StepReview', () => {
             template={makeTemplate({
               _kbnMeta: { type: 'default', hasDatastream: false, isLegacy: true },
             })}
-            navigateToStep={jest.fn()}
+            navigateToStep={vi.fn()}
           />
         </I18nProvider>
       );
@@ -89,7 +95,7 @@ describe('StepReview', () => {
 
   describe('WHEN index patterns contain a wildcard', () => {
     it('SHOULD show a warning and wire the edit link', () => {
-      const navigateToStep = jest.fn();
+      const navigateToStep = vi.fn();
       render(
         <I18nProvider>
           <StepReview
@@ -119,7 +125,7 @@ describe('StepReview', () => {
                 lifecycle: { enabled: true },
               },
             })}
-            navigateToStep={jest.fn()}
+            navigateToStep={vi.fn()}
           />
         </I18nProvider>
       );
@@ -139,7 +145,7 @@ describe('StepReview', () => {
                 lifecycle: { enabled: true, frozen_after: '30d' },
               },
             })}
-            navigateToStep={jest.fn()}
+            navigateToStep={vi.fn()}
           />
         </I18nProvider>
       );
@@ -152,7 +158,7 @@ describe('StepReview', () => {
     it('SHOULD render the SimulateTemplate component', () => {
       render(
         <I18nProvider>
-          <StepReview template={makeTemplate()} navigateToStep={jest.fn()} />
+          <StepReview template={makeTemplate()} navigateToStep={vi.fn()} />
         </I18nProvider>
       );
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { conflict, notFound } from '@hapi/boom';
 import type { CortexPage } from '../../common/cortex';
 import { archiveCortexPageRoute } from './archive_cortex_page';
@@ -13,9 +15,9 @@ const { handler, params } = archiveCortexPageRoute['DELETE /internal/nightshift/
 
 const run = (id: string, resolved: CortexPage | undefined, version?: string) => {
   const store = {
-    pruneDuplicates: jest.fn().mockResolvedValue(0),
-    get: jest.fn().mockResolvedValue(resolved),
-    archive: jest.fn().mockImplementation(async (pageId: string) => ({
+    pruneDuplicates: vi.fn().mockResolvedValue(0),
+    get: vi.fn().mockResolvedValue(resolved),
+    archive: vi.fn().mockImplementation(async (pageId: string) => ({
       ...resolved,
       id: pageId,
       status: 'archived',

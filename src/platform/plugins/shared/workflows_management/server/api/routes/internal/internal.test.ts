@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { KQLSyntaxError } from '@kbn/es-query';
@@ -46,20 +49,20 @@ describe('Internal Routes', () => {
 
   let routeHandlers: Record<string, { handler: MockRouteHandler }>;
   let mockApi: {
-    disableAllWorkflows: jest.MockedFunction<
+    disableAllWorkflows: MockedFunction<
       (spaceId: string, request: unknown) => Promise<unknown>
     >;
-    getHistoryForWorkflow: jest.Mock;
-    restoreWorkflowVersion: jest.Mock;
+    getHistoryForWorkflow: Mock;
+    restoreWorkflowVersion: Mock;
   };
   let mockAudit: {
-    logWorkflowAccessed: jest.Mock;
-    logWorkflowUpdated: jest.Mock;
-    logWorkflowRestored: jest.Mock;
+    logWorkflowAccessed: Mock;
+    logWorkflowUpdated: Mock;
+    logWorkflowRestored: Mock;
   };
   let mockTriggerEventsIsEnabled: boolean;
-  let mockSearch: jest.Mock;
-  const mockSearchTriggerEventLog = jest.fn<
+  let mockSearch: Mock;
+  const mockSearchTriggerEventLog = vi.fn<
     Promise<SearchTriggerEventLogResult>,
     [TriggerEventLogSearchCall]
   >();
@@ -67,19 +70,19 @@ describe('Internal Routes', () => {
   const mockContext = {
     workflows: Promise.resolve({
       isWorkflowsAvailable: true,
-      emitEvent: jest.fn(),
+      emitEvent: vi.fn(),
       managedWorkflows: {
-        install: jest.fn(),
-        uninstall: jest.fn(),
-        getWorkflowStatus: jest.fn(),
-        execute: jest.fn(),
+        install: vi.fn(),
+        uninstall: vi.fn(),
+        getWorkflowStatus: vi.fn(),
+        execute: vi.fn(),
       },
     }),
     licensing: Promise.resolve({
       license: {
         isAvailable: true,
         isActive: true,
-        hasAtLeast: jest.fn().mockReturnValue(true),
+        hasAtLeast: vi.fn().mockReturnValue(true),
         type: 'enterprise',
       },
     }),
@@ -90,7 +93,7 @@ describe('Internal Routes', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     routeHandlers = {};
     mockTriggerEventsIsEnabled = true;
     mockSearchTriggerEventLog.mockResolvedValue({
@@ -100,27 +103,27 @@ describe('Internal Routes', () => {
       size: 10,
     });
     mockApi = {
-      disableAllWorkflows: jest.fn(),
-      getHistoryForWorkflow: jest.fn(),
-      restoreWorkflowVersion: jest.fn(),
+      disableAllWorkflows: vi.fn(),
+      getHistoryForWorkflow: vi.fn(),
+      restoreWorkflowVersion: vi.fn(),
     };
     mockAudit = {
-      logWorkflowAccessed: jest.fn(),
-      logWorkflowUpdated: jest.fn(),
-      logWorkflowRestored: jest.fn(),
+      logWorkflowAccessed: vi.fn(),
+      logWorkflowUpdated: vi.fn(),
+      logWorkflowRestored: vi.fn(),
     };
-    mockSearch = jest.fn().mockResolvedValue({
+    mockSearch = vi.fn().mockResolvedValue({
       hits: { hits: [], total: { value: 0, relation: 'eq' } },
     });
 
     const mockWorkflowsService = {
-      getWorkflowsExecutionEngine: jest.fn().mockImplementation(async () => ({
+      getWorkflowsExecutionEngine: vi.fn().mockImplementation(async () => ({
         triggerEvents: {
           isEnabled: mockTriggerEventsIsEnabled,
           searchTriggerEventLog: mockSearchTriggerEventLog,
         },
       })),
-      getCoreStart: jest.fn().mockResolvedValue({
+      getCoreStart: vi.fn().mockResolvedValue({
         elasticsearch: {
           client: {
             asInternalUser: {
@@ -132,20 +135,20 @@ describe('Internal Routes', () => {
     };
 
     const createVersionedRoute = (method: string, path: string) => ({
-      addVersion: jest.fn().mockImplementation((_config: unknown, handler: MockRouteHandler) => {
+      addVersion: vi.fn().mockImplementation((_config: unknown, handler: MockRouteHandler) => {
         routeHandlers[`${method}:${path}`] = { handler };
-        return { addVersion: jest.fn() };
+        return { addVersion: vi.fn() };
       }),
     });
 
     const mockRouter = {
       versioned: {
-        get: jest
+        get: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('GET', config.path)
           ),
-        post: jest
+        post: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('POST', config.path)
@@ -154,10 +157,10 @@ describe('Internal Routes', () => {
     };
 
     const logger: Logger = {
-      error: jest.fn(),
-      warn: jest.fn(),
-      info: jest.fn(),
-      debug: jest.fn(),
+      error: vi.fn(),
+      warn: vi.fn(),
+      info: vi.fn(),
+      debug: vi.fn(),
     } as unknown as Logger;
 
     const routeDependencies: RouteDependencies = {
@@ -165,7 +168,7 @@ describe('Internal Routes', () => {
       api: mockApi,
       workflowsService: mockWorkflowsService,
       logger,
-      spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+      spaces: { getSpaceId: vi.fn().mockReturnValue('default') },
       audit: mockAudit,
     } as unknown as RouteDependencies;
 
@@ -173,7 +176,7 @@ describe('Internal Routes', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should register the config route handler', () => {

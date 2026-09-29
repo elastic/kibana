@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, within, act } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import './mocks';
@@ -22,15 +24,15 @@ describe('Edit Auto-follow pattern', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
     httpRequestsMockHelpers.setGetAutoFollowPatternResponse(
       AUTO_FOLLOW_PATTERN_EDIT_NAME,
@@ -49,7 +51,7 @@ describe('Edit Auto-follow pattern', () => {
       ({ user } = setup());
       // Advance timers to resolve HTTP mocks (required with fake timers)
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 
@@ -100,7 +102,7 @@ describe('Edit Auto-follow pattern', () => {
       await user.click(submitButton);
 
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
 
       type PutCall = [string | { path: string }, { body?: string } | undefined];
@@ -133,7 +135,7 @@ describe('Edit Auto-follow pattern', () => {
       ({ user } = setup());
       // Advance timers once to resolve HTTP mocks
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
@@ -17,21 +20,24 @@ import CaseView from '.';
 import { screen } from '@testing-library/react';
 import { caseViewProps, defaultGetCase } from './mocks';
 
-jest.mock('../../containers/use_get_case');
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/navigation/hooks');
-jest.mock('../../containers/api');
-jest.mock('./case_view_page', () => ({
-  CaseViewPage: () => <div data-test-subj="case-view-page" />,
-}));
+vi.mock('../../containers/use_get_case');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/navigation/hooks');
+vi.mock('../../containers/api');
+vi.mock('./case_view_page', () => {
+      const mocked = {
+      CaseViewPage: () => <div data-test-subj="case-view-page" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useFetchCaseMock = useGetCase as jest.Mock;
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useFetchCaseMock = useGetCase as Mock;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const spacesUiApiMock = {
-  redirectLegacyUrl: jest.fn().mockResolvedValue(undefined),
+  redirectLegacyUrl: vi.fn().mockResolvedValue(undefined),
   components: {
-    getLegacyUrlConflict: jest.fn(() => <div data-test-subj="conflict-component" />),
+    getLegacyUrlConflict: vi.fn(() => <div data-test-subj="conflict-component" />),
   },
 };
 
@@ -49,7 +55,7 @@ describe('CaseView', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetCase();
     useKibanaMock().services.spaces = { ui: spacesUiApiMock } as unknown as SpacesApi;
   });

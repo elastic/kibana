@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
 import { fireEvent, screen, within, act } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
@@ -23,15 +25,15 @@ describe('Create Auto-follow pattern', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
@@ -60,7 +62,7 @@ describe('Create Auto-follow pattern', () => {
     beforeEach(async () => {
       ({ user } = setup());
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 
@@ -98,7 +100,7 @@ describe('Create Auto-follow pattern', () => {
       ]);
       ({ user } = setup());
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 
@@ -186,7 +188,7 @@ describe('Create Auto-follow pattern', () => {
       beforeEach(async () => {
         ({ user } = setup());
         await act(async () => {
-          await jest.runOnlyPendingTimersAsync();
+          await vi.runOnlyPendingTimersAsync();
         });
       });
 
@@ -271,7 +273,7 @@ describe('Create Auto-follow pattern', () => {
           httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
           ({ user } = setup());
           await act(async () => {
-            await jest.runOnlyPendingTimersAsync();
+            await vi.runOnlyPendingTimersAsync();
           });
         });
 
@@ -308,7 +310,7 @@ describe('Create Auto-follow pattern', () => {
         ]);
         ({ user } = setup());
         await act(async () => {
-          await jest.runOnlyPendingTimersAsync();
+          await vi.runOnlyPendingTimersAsync();
         });
       });
 
@@ -358,7 +360,7 @@ describe('Create Auto-follow pattern', () => {
     beforeEach(async () => {
       ({ user } = setup());
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 

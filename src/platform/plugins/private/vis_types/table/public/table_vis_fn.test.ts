@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createTableVisFn } from './table_vis_fn';
 import { tableVisResponseHandler } from './utils';
 import type { TableVisConfig } from './types';
@@ -15,11 +17,14 @@ import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 
-jest.mock('./utils', () => ({
-  tableVisResponseHandler: jest.fn().mockReturnValue({
-    tables: [{ columns: [], rows: [] }],
-  }),
-}));
+vi.mock('./utils', () => {
+      const mocked = {
+      tableVisResponseHandler: vi.fn().mockReturnValue({
+        tables: [{ columns: [], rows: [] }],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('interpreter/functions#table', () => {
   const fn = functionWrapper(createTableVisFn());
@@ -62,7 +67,7 @@ describe('interpreter/functions#table', () => {
   } as ExecutionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns an object with the correct structure', async () => {

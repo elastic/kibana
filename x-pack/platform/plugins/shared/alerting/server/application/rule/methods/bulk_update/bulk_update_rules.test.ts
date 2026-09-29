@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { SavedObject } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
@@ -25,17 +28,26 @@ import {
 } from '../../../../rules_client/common/constants';
 import type { RawRule } from '../../../../types';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
-  bulkMarkApiKeysForInvalidation: jest.fn(),
-}));
+vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
+      const mocked = {
+      bulkMarkApiKeysForInvalidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../get_schedule_frequency', () => ({
-  validateScheduleLimit: jest.fn(),
-}));
+vi.mock('../get_schedule_frequency', () => {
+      const mocked = {
+      validateScheduleLimit: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => ({
-  bulkMigrateLegacyActions: jest.fn(),
-}));
+vi.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
+      const mocked = {
+      bulkMigrateLegacyActions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const {
   rulesClientParams,
@@ -157,16 +169,16 @@ const echoBulkCreate = () => {
 
 describe('bulkUpdateRules', () => {
   let rulesClient: RulesClient;
-  let actionsClient: jest.Mocked<ActionsClient>;
+  let actionsClient: Mocked<ActionsClient>;
   const mockPit = (...pages: Array<Array<SavedObject<Partial<RawRule>>>>) => {
     let i = 0;
-    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
       .fn()
       .mockImplementation(async () => {
         const savedObjects = pages[Math.min(i, pages.length - 1)] ?? [];
         i += 1;
         return {
-          close: jest.fn(),
+          close: vi.fn(),
           async *find() {
             yield { saved_objects: savedObjects };
           },
@@ -176,13 +188,13 @@ describe('bulkUpdateRules', () => {
 
   beforeEach(async () => {
     getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-    (auditLogger.log as jest.Mock).mockClear();
-    (bulkMarkApiKeysForInvalidation as jest.Mock).mockReset();
-    (validateScheduleLimit as jest.Mock).mockReset();
-    (bulkMigrateLegacyActions as jest.Mock).mockReset();
-    (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue([]);
+    (auditLogger.log as Mock).mockClear();
+    (bulkMarkApiKeysForInvalidation as Mock).mockReset();
+    (validateScheduleLimit as Mock).mockReset();
+    (bulkMigrateLegacyActions as Mock).mockReset();
+    (bulkMigrateLegacyActions as Mock).mockResolvedValue([]);
     rulesClient = new RulesClient(rulesClientParams);
-    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    actionsClient = (await rulesClientParams.getActionsClient()) as Mocked<ActionsClient>;
     actionsClient.getBulk.mockResolvedValue([
       createMockConnector({ id: '1', actionTypeId: 'test', name: 'a' }),
     ]);
@@ -211,7 +223,7 @@ describe('bulkUpdateRules', () => {
 
     test('disabled: overwrite SO, no key mint, enabled stays false, migrate then write', async () => {
       const order: string[] = [];
-      (bulkMigrateLegacyActions as jest.Mock).mockImplementation(async () => {
+      (bulkMigrateLegacyActions as Mock).mockImplementation(async () => {
         order.push('migrate');
         return [];
       });
@@ -430,7 +442,7 @@ describe('bulkUpdateRules', () => {
 
     test('authz rejection throws, BULK_UPDATE failure audit, no write', async () => {
       mockPit([so('id-1'), so('id-2')]);
-      (authorization.bulkEnsureAuthorized as jest.Mock).mockRejectedValueOnce(
+      (authorization.bulkEnsureAuthorized as Mock).mockRejectedValueOnce(
         new Error('not authorized')
       );
 
@@ -439,7 +451,7 @@ describe('bulkUpdateRules', () => {
       ).rejects.toThrow('not authorized');
 
       expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
-      const failAudits = (auditLogger.log as jest.Mock).mock.calls
+      const failAudits = (auditLogger.log as Mock).mock.calls
         .map(([event]) => event)
         .filter(
           (e: { event?: { action: string; outcome?: string } }) =>
@@ -450,7 +462,7 @@ describe('bulkUpdateRules', () => {
 
     test('authz throw on later batch: earlier batch already written, call throws (current behavior)', async () => {
       mockPit(nSos(20));
-      (authorization.bulkEnsureAuthorized as jest.Mock)
+      (authorization.bulkEnsureAuthorized as Mock)
         .mockResolvedValueOnce(undefined)
         .mockRejectedValueOnce(new Error('not authorized'));
 
@@ -477,7 +489,7 @@ describe('bulkUpdateRules', () => {
           so(`id-${i + 20}`, { enabled: true, schedule: { interval: '1m' } })
         )
       );
-      (validateScheduleLimit as jest.Mock)
+      (validateScheduleLimit as Mock)
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce({ interval: 100, intervalAvailable: 50 });
 
@@ -502,7 +514,7 @@ describe('bulkUpdateRules', () => {
         nSos(10),
         nSos(10).map((_, i) => so(`id-${i + 10}`))
       );
-      (bulkMigrateLegacyActions as jest.Mock)
+      (bulkMigrateLegacyActions as Mock)
         .mockResolvedValueOnce([])
         .mockRejectedValueOnce(new Error('es down'));
 
@@ -704,9 +716,9 @@ describe('bulkUpdateRules', () => {
         { interval: '5m' }
       );
 
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-      (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue([]);
+      (bulkMigrateLegacyActions as Mock).mockResolvedValue([]);
       echoBulkCreate();
       rulesClient = new RulesClient(rulesClientParams);
       mockPit([
@@ -734,7 +746,7 @@ describe('bulkUpdateRules', () => {
 
       expect(result.successfulIds).toEqual(['id-1']);
       expect(result.errors).toEqual([]);
-      expect((rulesClientParams.logger.error as jest.Mock).mock.calls).toEqual(
+      expect((rulesClientParams.logger.error as Mock).mock.calls).toEqual(
         expect.arrayContaining([expect.arrayContaining([expect.stringContaining('TM down')])])
       );
     });
@@ -853,7 +865,7 @@ describe('bulkUpdateRules', () => {
 
       await rulesClient.bulkUpdateRules({ rules: [item('id-1')] });
 
-      const events = (auditLogger.log as jest.Mock).mock.calls
+      const events = (auditLogger.log as Mock).mock.calls
         .map(([event]) => event)
         .filter(
           (e: { event?: { action: string } }) => e?.event?.action === RuleAuditAction.BULK_UPDATE
@@ -867,9 +879,9 @@ describe('bulkUpdateRules', () => {
 
   describe('change tracking', () => {
     const createChangeTrackingService = () => ({
-      log: jest.fn().mockResolvedValue(undefined),
-      logBulk: jest.fn().mockResolvedValue(undefined),
-      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+      log: vi.fn().mockResolvedValue(undefined),
+      logBulk: vi.fn().mockResolvedValue(undefined),
+      getHistory: vi.fn().mockResolvedValue({ items: [], total: 0 }),
     });
 
     const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
@@ -881,7 +893,7 @@ describe('bulkUpdateRules', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-        executor: jest.fn(),
+        executor: vi.fn(),
         category: 'test',
         validate: { params: { validate: (params: unknown) => params } },
         solution: 'stack',

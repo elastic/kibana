@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
@@ -14,9 +16,12 @@ import { APP_MENU_TEST_SUBJECTS } from '@kbn/ui-app-menu';
 import { AppHeaderLoadingView } from './app_header_loading';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
-jest.mock('@kbn/ui-chrome-layout', () => ({
-  useCurrentChromeApplicationBreakpoint: () => 'xl',
-}));
+vi.mock('@kbn/ui-chrome-layout', () => {
+      const mocked = {
+      useCurrentChromeApplicationBreakpoint: () => 'xl',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AppHeaderLoadingView', () => {
   it('skeletons the title and the default overflow + primary menu', () => {

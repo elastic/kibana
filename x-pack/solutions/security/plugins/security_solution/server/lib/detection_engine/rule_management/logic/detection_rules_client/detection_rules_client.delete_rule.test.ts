@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -17,15 +20,15 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 import { getMockRulesAuthz } from '../../__mocks__/authz';
 
-jest.mock('../../../../machine_learning/authz');
+vi.mock('../../../../machine_learning/authz');
 
 describe('DetectionRulesClient.deleteRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
 
-  const mlAuthz = (buildMlAuthz as jest.Mock)();
+  const mlAuthz = (buildMlAuthz as Mock)();
   const rulesAuthz = getMockRulesAuthz();
-  const actionsClient: jest.Mocked<ActionsClient> = {} as unknown as jest.Mocked<ActionsClient>;
+  const actionsClient: Mocked<ActionsClient> = {} as unknown as Mocked<ActionsClient>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();

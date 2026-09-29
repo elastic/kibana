@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import Boom from '@hapi/boom';
 import { RelatedDashboardsClient } from './related_dashboards_client';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
@@ -15,19 +18,19 @@ import { ReferencedPanelManager } from './referenced_panel_manager';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 describe('RelatedDashboardsClient', () => {
-  const mockGetDashboard = jest.fn();
-  const mockScanDashboards = jest.fn();
-  let logger: jest.Mocked<Logger>;
-  let alertsClient: jest.Mocked<InvestigateAlertsClient>;
+  const mockGetDashboard = vi.fn();
+  const mockScanDashboards = vi.fn();
+  let logger: Mocked<Logger>;
+  let alertsClient: Mocked<InvestigateAlertsClient>;
   let alertId: string;
   let client: RelatedDashboardsClient;
 
-  let soClientMock: jest.Mocked<SavedObjectsClientContract>;
+  let soClientMock: Mocked<SavedObjectsClientContract>;
   const baseMockAlert = {
-    getAllRelevantFields: jest.fn().mockReturnValue(['field1', 'field2']),
-    getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
-    getRuleId: jest.fn().mockReturnValue('rule-id'),
-    getRuleTypeId: jest.fn().mockReturnValue(OBSERVABILITY_THRESHOLD_RULE_TYPE_ID),
+    getAllRelevantFields: vi.fn().mockReturnValue(['field1', 'field2']),
+    getRuleQueryIndex: vi.fn().mockReturnValue('index1'),
+    getRuleId: vi.fn().mockReturnValue('rule-id'),
+    getRuleTypeId: vi.fn().mockReturnValue(OBSERVABILITY_THRESHOLD_RULE_TYPE_ID),
   } as unknown as AlertData;
 
   beforeEach(() => {
@@ -42,23 +45,23 @@ describe('RelatedDashboardsClient', () => {
     });
 
     logger = {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      fatal: jest.fn(),
-      trace: jest.fn(),
-      log: jest.fn(),
-    } as unknown as jest.Mocked<Logger>;
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      fatal: vi.fn(),
+      trace: vi.fn(),
+      log: vi.fn(),
+    } as unknown as Mocked<Logger>;
 
     alertsClient = {
-      getAlertById: jest.fn(),
-      getRuleById: jest.fn().mockResolvedValue({
+      getAlertById: vi.fn(),
+      getRuleById: vi.fn().mockResolvedValue({
         artifacts: {
           dashboards: [],
         },
       }),
-    } as unknown as jest.Mocked<InvestigateAlertsClient>;
+    } as unknown as Mocked<InvestigateAlertsClient>;
 
     alertId = 'test-alert-id';
 
@@ -73,7 +76,7 @@ describe('RelatedDashboardsClient', () => {
       new ReferencedPanelManager(logger, soClientMock)
     );
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('fetchSuggestedDashboards', () => {
@@ -102,8 +105,8 @@ describe('RelatedDashboardsClient', () => {
     it('should sort dashboards by score', async () => {
       const mockAlert = {
         ...baseMockAlert,
-        getAllRelevantFields: jest.fn().mockReturnValue(['field1']),
-        getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
+        getAllRelevantFields: vi.fn().mockReturnValue(['field1']),
+        getRuleQueryIndex: vi.fn().mockReturnValue('index1'),
       } as unknown as AlertData;
 
       alertsClient.getAlertById.mockResolvedValue(mockAlert);
@@ -188,8 +191,8 @@ describe('RelatedDashboardsClient', () => {
     it('should return only the top 10 results', async () => {
       const mockAlert = {
         ...baseMockAlert,
-        getAllRelevantFields: jest.fn().mockReturnValue(['field1']),
-        getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
+        getAllRelevantFields: vi.fn().mockReturnValue(['field1']),
+        getRuleQueryIndex: vi.fn().mockReturnValue('index1'),
       } as unknown as AlertData;
 
       alertsClient.getAlertById.mockResolvedValue(mockAlert);
@@ -229,8 +232,8 @@ describe('RelatedDashboardsClient', () => {
     it('should deduplicate dashboards found by field and index', async () => {
       const mockAlert = {
         ...baseMockAlert,
-        getAllRelevantFields: jest.fn().mockReturnValue(['field1']),
-        getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
+        getAllRelevantFields: vi.fn().mockReturnValue(['field1']),
+        getRuleQueryIndex: vi.fn().mockReturnValue('index1'),
       } as unknown as AlertData;
 
       alertsClient.getAlertById.mockResolvedValue(mockAlert);
@@ -283,7 +286,7 @@ describe('RelatedDashboardsClient', () => {
     it('should not fetch suggested dashboards when the rule type id is not supported', async () => {
       const mockAlert = {
         ...baseMockAlert,
-        getRuleTypeId: jest.fn().mockReturnValue('unsupported-type-id'),
+        getRuleTypeId: vi.fn().mockReturnValue('unsupported-type-id'),
       } as unknown as AlertData;
       alertsClient.getAlertById.mockResolvedValue(mockAlert);
 
@@ -546,8 +549,8 @@ describe('RelatedDashboardsClient', () => {
     it('should calculate the relevance score for a dashboard', () => {
       const mockAlert = {
         ...baseMockAlert,
-        getAllRelevantFields: jest.fn().mockReturnValue(['field1', 'field2']),
-        getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
+        getAllRelevantFields: vi.fn().mockReturnValue(['field1', 'field2']),
+        getRuleQueryIndex: vi.fn().mockReturnValue('index1'),
       } as unknown as AlertData;
 
       // @ts-ignore next-line
@@ -588,7 +591,7 @@ describe('RelatedDashboardsClient', () => {
       it('should return an empty array if no rule ID is found', async () => {
         const mockAlert = {
           ...baseMockAlert,
-          getRuleId: jest.fn().mockReturnValue(null),
+          getRuleId: vi.fn().mockReturnValue(null),
         } as unknown as AlertData;
 
         // @ts-ignore next-line
@@ -602,12 +605,12 @@ describe('RelatedDashboardsClient', () => {
 
       it('should return an empty array if no rule is found', async () => {
         const mockAlert = {
-          getRuleId: jest.fn().mockReturnValue('rule-id'),
+          getRuleId: vi.fn().mockReturnValue('rule-id'),
         } as unknown as AlertData;
 
         // @ts-ignore next-line
         client.setAlert(mockAlert);
-        alertsClient.getRuleById = jest.fn().mockResolvedValue(null);
+        alertsClient.getRuleById = vi.fn().mockResolvedValue(null);
 
         // @ts-ignore next-line
         await expect(client.getLinkedDashboards()).rejects.toThrow(
@@ -617,13 +620,13 @@ describe('RelatedDashboardsClient', () => {
 
       it('should return linked dashboards based on rule artifacts', async () => {
         const mockAlert = {
-          getRuleId: jest.fn().mockReturnValue('rule-id'),
+          getRuleId: vi.fn().mockReturnValue('rule-id'),
         } as unknown as AlertData;
 
         // @ts-ignore next-line
         client.setAlert(mockAlert);
 
-        alertsClient.getRuleById = jest.fn().mockResolvedValue({
+        alertsClient.getRuleById = vi.fn().mockResolvedValue({
           artifacts: {
             dashboards: [{ id: 'dashboard1' }, { id: 'dashboard2' }],
           },
@@ -654,13 +657,13 @@ describe('RelatedDashboardsClient', () => {
 
       it('should handle linked dashboards not found gracefully', async () => {
         const mockAlert = {
-          getRuleId: jest.fn().mockReturnValue('rule-id'),
+          getRuleId: vi.fn().mockReturnValue('rule-id'),
         } as unknown as AlertData;
 
         // @ts-ignore next-line
         client.setAlert(mockAlert);
 
-        alertsClient.getRuleById = jest.fn().mockResolvedValue({
+        alertsClient.getRuleById = vi.fn().mockResolvedValue({
           artifacts: {
             dashboards: [{ id: 'dashboard1' }, { id: 'dashboard2' }],
           },
@@ -739,8 +742,8 @@ describe('RelatedDashboardsClient', () => {
     it('should deduplicate suggested and linked dashboards', async () => {
       const mockAlert = {
         ...baseMockAlert,
-        getAllRelevantFields: jest.fn().mockReturnValue(['field1']),
-        getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
+        getAllRelevantFields: vi.fn().mockReturnValue(['field1']),
+        getRuleQueryIndex: vi.fn().mockReturnValue('index1'),
       } as unknown as AlertData;
 
       alertsClient.getAlertById.mockResolvedValue(mockAlert);

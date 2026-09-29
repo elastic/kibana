@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
@@ -13,7 +16,7 @@ import { TestProviders } from '../../../../../common/mock';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
 const renderCreateButton = (onClick?: () => void) => {
   render(
@@ -25,12 +28,12 @@ const renderCreateButton = (onClick?: () => void) => {
 
 describe('CreateButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when enabled update capability', () => {
     beforeEach(() => {
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           application: {
             capabilities: {
@@ -40,10 +43,10 @@ describe('CreateButton', () => {
             },
           },
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(false),
+            useBooleanValue: vi.fn().mockReturnValue(false),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(false),
+            get: vi.fn().mockReturnValue(false),
           },
         },
       });
@@ -57,7 +60,7 @@ describe('CreateButton', () => {
     });
 
     it('should call create schedule button handler', async () => {
-      const onClickMock = jest.fn();
+      const onClickMock = vi.fn();
       renderCreateButton(onClickMock);
 
       const createButton = screen.getByTestId('createSchedule');
@@ -79,7 +82,7 @@ describe('CreateButton', () => {
 
   describe('when disabled update capability', () => {
     beforeEach(() => {
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           application: {
             capabilities: {
@@ -89,10 +92,10 @@ describe('CreateButton', () => {
             },
           },
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(false),
+            useBooleanValue: vi.fn().mockReturnValue(false),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(false),
+            get: vi.fn().mockReturnValue(false),
           },
         },
       });
@@ -106,7 +109,7 @@ describe('CreateButton', () => {
     });
 
     it('should not call create schedule button handler', async () => {
-      const onClickMock = jest.fn();
+      const onClickMock = vi.fn();
       renderCreateButton(onClickMock);
 
       const createButton = screen.getByTestId('createSchedule');
@@ -132,7 +135,7 @@ describe('CreateButton', () => {
 
   describe('when the workflows execute privilege is missing', () => {
     beforeEach(() => {
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           application: {
             capabilities: {
@@ -145,10 +148,10 @@ describe('CreateButton', () => {
             },
           },
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(true),
+            useBooleanValue: vi.fn().mockReturnValue(true),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(true),
+            get: vi.fn().mockReturnValue(true),
           },
         },
       });
@@ -163,7 +166,7 @@ describe('CreateButton', () => {
     });
 
     it('should not call the create schedule button handler', async () => {
-      const onClickMock = jest.fn();
+      const onClickMock = vi.fn();
       renderCreateButton(onClickMock);
 
       await waitFor(() => {

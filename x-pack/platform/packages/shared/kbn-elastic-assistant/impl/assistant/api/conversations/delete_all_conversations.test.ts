@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import {
   API_VERSIONS,
@@ -12,7 +14,7 @@ import {
 import { deleteAllConversations } from './delete_all_conversations';
 import type { IToasts } from '@kbn/core/public';
 
-const mockAddError = jest.fn();
+const mockAddError = vi.fn();
 const toasts = {
   addError: mockAddError,
 } as unknown as IToasts;
@@ -23,7 +25,7 @@ describe('deleteAllConversations', () => {
   beforeEach(() => {
     httpMock = httpServiceMock.createSetupContract();
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should send a POST request with the correct parameters and receive a successful response', async () => {

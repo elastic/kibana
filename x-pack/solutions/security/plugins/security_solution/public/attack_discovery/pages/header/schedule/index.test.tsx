@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -14,12 +16,12 @@ import { SCHEDULE, SCHEDULE_TOOLTIP } from './translations';
 
 const defaultProps = {
   isLoading: false,
-  openFlyout: jest.fn(),
+  openFlyout: vi.fn(),
 };
 
 describe('Schedule', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the button with the expected text', () => {

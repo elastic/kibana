@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import type {
   ISavedObjectsImporter,
   SavedObjectsImportFailure,
@@ -14,18 +17,21 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { KibanaSavedObjectType } from '../../../../../common/types/models/epm';
 
-jest.mock('timers/promises', () => ({
-  async setTimeout() {},
-}));
+vi.mock('timers/promises', () => {
+      const mocked = {
+      async setTimeout() {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { replaceIdsInKibanaAsset, type ArchiveAsset } from './install';
 import { createSavedObjectKibanaAsset, installKibanaSavedObjects } from './install';
 
 const mockLogger = loggingSystemMock.createLogger();
 
-const mockImporter: jest.Mocked<ISavedObjectsImporter> = {
-  import: jest.fn(),
-  resolveImportErrors: jest.fn(),
+const mockImporter: Mocked<ISavedObjectsImporter> = {
+  import: vi.fn(),
+  resolveImportErrors: vi.fn(),
 };
 
 const createImportError = (so: ArchiveAsset, type: string) =>

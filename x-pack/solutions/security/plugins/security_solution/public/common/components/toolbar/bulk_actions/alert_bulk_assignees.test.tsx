@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
@@ -17,9 +20,9 @@ import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
 
-jest.mock('../../user_profiles/use_get_current_user_profile');
-jest.mock('../../user_profiles/use_bulk_get_user_profiles');
-jest.mock('../../user_profiles/use_suggest_users');
+vi.mock('../../user_profiles/use_get_current_user_profile');
+vi.mock('../../user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../user_profiles/use_suggest_users');
 
 const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'user1' }, data: {} },
@@ -55,24 +58,24 @@ const mockAlertsWithAssignees = [
   },
 ];
 
-(useGetCurrentUserProfile as jest.Mock).mockReturnValue({
+(useGetCurrentUserProfile as Mock).mockReturnValue({
   isLoading: false,
   data: mockUserProfiles[0],
 });
-(useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+(useBulkGetUserProfiles as Mock).mockReturnValue({
   isLoading: false,
   data: mockUserProfiles,
 });
-(useSuggestUsers as jest.Mock).mockReturnValue({
+(useSuggestUsers as Mock).mockReturnValue({
   isLoading: false,
   data: mockSuggestedUserProfiles,
 });
 
 const renderAssigneesMenu = (
   items: TimelineItem[],
-  closePopover: () => void = jest.fn(),
-  onSubmit: () => Promise<void> = jest.fn(),
-  setIsLoading: () => void = jest.fn()
+  closePopover: () => void = vi.fn(),
+  onSubmit: () => Promise<void> = vi.fn(),
+  setIsLoading: () => void = vi.fn()
 ) => {
   return render(
     <TestProviders>
@@ -88,7 +91,7 @@ const renderAssigneesMenu = (
 
 describe('BulkAlertAssigneesPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it renders', () => {
@@ -168,9 +171,9 @@ describe('BulkAlertAssigneesPanel', () => {
   });
 
   test('it calls expected functions on submit when alerts have changed', () => {
-    const mockedClosePopover = jest.fn();
-    const mockedOnSubmit = jest.fn();
-    const mockedSetIsLoading = jest.fn();
+    const mockedClosePopover = vi.fn();
+    const mockedOnSubmit = vi.fn();
+    const mockedSetIsLoading = vi.fn();
 
     const wrapper = renderAssigneesMenu(
       mockAlertsWithAssignees,

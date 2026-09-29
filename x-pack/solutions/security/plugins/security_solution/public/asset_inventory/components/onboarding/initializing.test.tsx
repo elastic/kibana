@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { renderWithTestProvider } from '../../test/test_provider';
 import { Initializing } from './initializing';
@@ -12,26 +15,29 @@ import { screen } from '@testing-library/react';
 import { mockUseAddIntegrationPath } from './hooks/use_add_integration_path.mock';
 import { useAddIntegrationPath } from './hooks/use_add_integration_path';
 
-jest.mock('./hooks/use_add_integration_path');
+vi.mock('./hooks/use_add_integration_path');
 
-const mockNavigateToApp = jest.fn();
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: mockNavigateToApp,
-      },
-    },
-  }),
-}));
+const mockNavigateToApp = vi.fn();
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            navigateToApp: mockNavigateToApp,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Initializing', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should render and have the correct add integration link href and enabled state', () => {
-    (useAddIntegrationPath as jest.Mock).mockReturnValue(
+    (useAddIntegrationPath as Mock).mockReturnValue(
       mockUseAddIntegrationPath({ addIntegrationPath: '/test-integration-path', isLoading: false })
     );
 
@@ -46,7 +52,7 @@ describe('Initializing', () => {
   });
 
   it('should disable the add integration button when loading', () => {
-    (useAddIntegrationPath as jest.Mock).mockReturnValue(
+    (useAddIntegrationPath as Mock).mockReturnValue(
       mockUseAddIntegrationPath({ isLoading: true })
     );
 

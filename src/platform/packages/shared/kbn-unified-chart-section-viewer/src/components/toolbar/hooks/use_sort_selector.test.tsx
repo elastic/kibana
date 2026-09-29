@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useSortSelector } from './use_sort_selector';
 import { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from '../../../common/constants';
 import type { MetricsSort } from '../../../types';
 
 const renderSortSelector = (sort: MetricsSort) => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const { result } = renderHook(() => useSortSelector({ sort, onChange }));
   return { result, onChange };
 };

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ExplainCollectionEnabled } from './collection_enabled';
@@ -15,7 +17,7 @@ let component;
 
 describe('ExplainCollectionEnabled', () => {
   beforeEach(() => {
-    enabler.enableCollectionEnabled = jest.fn();
+    enabler.enableCollectionEnabled = vi.fn();
     const reason = {
       property: 'xpack.monitoring.collection.enabled',
       data: '-1',

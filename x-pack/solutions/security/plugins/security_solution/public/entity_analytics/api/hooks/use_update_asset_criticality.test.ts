@@ -5,36 +5,50 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { useUpdateAssetCriticality } from './use_update_asset_criticality';
 import type { Entity } from '../../../../common/api/entity_analytics';
 import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
-const mockBulkUpdateEntities = jest.fn();
-jest.mock('@kbn/entity-store/public', () => ({
-  bulkUpdateEntities: (...args: unknown[]) => mockBulkUpdateEntities(...args),
-}));
+const mockBulkUpdateEntities = vi.fn();
+vi.mock('@kbn/entity-store/public', () => {
+      const mocked = {
+      bulkUpdateEntities: (...args: unknown[]) => mockBulkUpdateEntities(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockApplyEntityStoreSearchCachePatch = jest.fn();
-jest.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
-  applyEntityStoreSearchCachePatch: (...args: unknown[]) =>
-    mockApplyEntityStoreSearchCachePatch(...args),
-}));
+const mockApplyEntityStoreSearchCachePatch = vi.fn();
+vi.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => {
+      const mocked = {
+      applyEntityStoreSearchCachePatch: (...args: unknown[]) =>
+        mockApplyEntityStoreSearchCachePatch(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAddError = jest.fn();
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: jest.fn().mockReturnValue({
-    addError: (...args: unknown[]) => mockAddError(...args),
-  }),
-}));
+const mockAddError = vi.fn();
+vi.mock('../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: vi.fn().mockReturnValue({
+        addError: (...args: unknown[]) => mockAddError(...args),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockHttp = {};
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({ services: { http: mockHttp } }),
-}));
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({ services: { http: mockHttp } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOnSuccess = jest.fn();
+const mockOnSuccess = vi.fn();
 
 const hostRecord: Entity = {
   entity: { id: 'host-123' },
@@ -43,7 +57,7 @@ const hostRecord: Entity = {
 
 describe('useUpdateAssetCriticality', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockBulkUpdateEntities.mockResolvedValue({});
   });
 

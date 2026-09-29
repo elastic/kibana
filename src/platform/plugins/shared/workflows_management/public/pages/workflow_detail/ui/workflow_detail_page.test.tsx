@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -33,116 +36,167 @@ interface WorkflowDetailPageProps {
   id?: string;
 }
 
-const mockUseWorkflowsBreadcrumbs = jest.fn();
-const mockUseWorkflowUrlState = jest.fn();
-const mockUseGlobalExecutionsViewEnabled = jest.fn();
+const mockUseWorkflowsBreadcrumbs = vi.fn();
+const mockUseWorkflowUrlState = vi.fn();
+const mockUseGlobalExecutionsViewEnabled = vi.fn();
 
-let mockLoadConnectors = jest.fn();
-let mockLoadWorkflow = jest.fn();
+let mockLoadConnectors = vi.fn();
+let mockLoadWorkflow = vi.fn();
 let mockAsyncThunkState: { isLoading: boolean; error: unknown | null } = {
   isLoading: false,
   error: null,
 };
 
-jest.mock('../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => ({
-  useWorkflowsBreadcrumbs: () => mockUseWorkflowsBreadcrumbs(),
-}));
-jest.mock('../../../hooks/use_workflow_url_state', () => ({
-  useWorkflowUrlState: () => mockUseWorkflowUrlState(),
-}));
-jest.mock('../../../hooks/use_global_executions_view_enabled', () => ({
-  useGlobalExecutionsViewEnabled: () => mockUseGlobalExecutionsViewEnabled(),
-}));
+vi.mock('../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => {
+      const mocked = {
+      useWorkflowsBreadcrumbs: () => mockUseWorkflowsBreadcrumbs(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_workflow_url_state', () => {
+      const mocked = {
+      useWorkflowUrlState: () => mockUseWorkflowUrlState(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_global_executions_view_enabled', () => {
+      const mocked = {
+      useGlobalExecutionsViewEnabled: () => mockUseGlobalExecutionsViewEnabled(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: jest.fn(),
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      useWorkflowsCapabilities: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
 >;
 
-jest.mock('../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk', () => ({
-  loadConnectorsThunk: (...args: unknown[]) => mockLoadConnectors(...args),
-}));
-jest.mock('../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk', () => ({
-  loadWorkflowThunk: (...args: unknown[]) => mockLoadWorkflow(...args),
-}));
+vi.mock('../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk', () => {
+      const mocked = {
+      loadConnectorsThunk: (...args: unknown[]) => mockLoadConnectors(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk', () => {
+      const mocked = {
+      loadWorkflowThunk: (...args: unknown[]) => mockLoadWorkflow(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./workflow_not_found_page', () => ({
-  WorkflowNotFoundPage: ({ onBackToWorkflows }: { onBackToWorkflows: () => void }) => (
-    <div data-test-subj="workflow-not-found-page">
-      <button
-        type="button"
-        data-test-subj="workflowDetailBackToWorkflowsButton"
-        onClick={onBackToWorkflows}
-      >
-        {'Back to Workflows'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./workflow_not_found_page', () => {
+      const mocked = {
+      WorkflowNotFoundPage: ({ onBackToWorkflows }: { onBackToWorkflows: () => void }) => (
+        <div data-test-subj="workflow-not-found-page">
+          <button
+            type="button"
+            data-test-subj="workflowDetailBackToWorkflowsButton"
+            onClick={onBackToWorkflows}
+          >
+            {'Back to Workflows'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./workflow_detail_header', () => ({
-  WorkflowDetailHeader: ({ onOpenExecutionList }: { onOpenExecutionList?: () => void }) => (
-    <div data-test-subj="workflow-detail-header">
-      <button
-        type="button"
-        data-test-subj="workflowDetailExecutionsButton"
-        onClick={onOpenExecutionList}
-      >
-        {'Executions'}
-      </button>
-    </div>
-  ),
-}));
-jest.mock('./workflow_detail_editor', () => ({
-  WorkflowDetailEditor: () => <div data-test-subj="workflow-detail-editor">{'Editor'}</div>,
-}));
-jest.mock('./workflow_detail_layout', () => ({
-  WorkflowEditorLayout: ({ editor, executionList, executionDetail }: any) => (
-    <div data-test-subj="workflow-editor-layout">
-      {editor}
-      {executionList}
-      {executionDetail}
-    </div>
-  ),
-}));
-jest.mock('./workflow_detail_test_modal', () => ({
-  WorkflowDetailTestModal: () => (
-    <div data-test-subj="workflow-detail-test-modal">{'Test Modal'}</div>
-  ),
-}));
-jest.mock('./workflow_detail_test_step_modal', () => ({
-  WorkflowDetailTestStepModal: () => (
-    <div data-test-subj="workflow-detail-test-step-modal">{'Test Step Modal'}</div>
-  ),
-}));
-jest.mock('../../../features/workflow_execution_detail', () => ({
-  WorkflowExecutionFlyout: ({ executionId }: { executionId: string }) => (
-    <div data-test-subj="workflow-execution-flyout">{executionId}</div>
-  ),
-}));
-jest.mock('../../../features/workflow_execution_detail_old', () => ({
-  WorkflowExecutionDetail: ({ executionId }: { executionId: string }) => (
-    <div data-test-subj="workflow-execution-detail">{executionId}</div>
-  ),
-}));
-jest.mock('../../../features/workflow_execution_list_old', () => ({
-  WorkflowExecutionList: ({ workflowId }: { workflowId: string }) => (
-    <div data-test-subj="workflow-execution-list">{workflowId}</div>
-  ),
-}));
-jest.mock('../../../features/workflow_execution_list/ui/workflow_execution_list_flyout', () => ({
-  WorkflowExecutionListFlyout: ({ workflowId }: { workflowId: string }) => (
-    <div data-test-subj="workflow-execution-list-flyout">{workflowId}</div>
-  ),
-}));
+vi.mock('./workflow_detail_header', () => {
+      const mocked = {
+      WorkflowDetailHeader: ({ onOpenExecutionList }: { onOpenExecutionList?: () => void }) => (
+        <div data-test-subj="workflow-detail-header">
+          <button
+            type="button"
+            data-test-subj="workflowDetailExecutionsButton"
+            onClick={onOpenExecutionList}
+          >
+            {'Executions'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./workflow_detail_editor', () => {
+      const mocked = {
+      WorkflowDetailEditor: () => <div data-test-subj="workflow-detail-editor">{'Editor'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./workflow_detail_layout', () => {
+      const mocked = {
+      WorkflowEditorLayout: ({ editor, executionList, executionDetail }: any) => (
+        <div data-test-subj="workflow-editor-layout">
+          {editor}
+          {executionList}
+          {executionDetail}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./workflow_detail_test_modal', () => {
+      const mocked = {
+      WorkflowDetailTestModal: () => (
+        <div data-test-subj="workflow-detail-test-modal">{'Test Modal'}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./workflow_detail_test_step_modal', () => {
+      const mocked = {
+      WorkflowDetailTestStepModal: () => (
+        <div data-test-subj="workflow-detail-test-step-modal">{'Test Step Modal'}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../features/workflow_execution_detail', () => {
+      const mocked = {
+      WorkflowExecutionFlyout: ({ executionId }: { executionId: string }) => (
+        <div data-test-subj="workflow-execution-flyout">{executionId}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../features/workflow_execution_detail_old', () => {
+      const mocked = {
+      WorkflowExecutionDetail: ({ executionId }: { executionId: string }) => (
+        <div data-test-subj="workflow-execution-detail">{executionId}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../features/workflow_execution_list_old', () => {
+      const mocked = {
+      WorkflowExecutionList: ({ workflowId }: { workflowId: string }) => (
+        <div data-test-subj="workflow-execution-list">{workflowId}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../features/workflow_execution_list/ui/workflow_execution_list_flyout', () => {
+      const mocked = {
+      WorkflowExecutionListFlyout: ({ workflowId }: { workflowId: string }) => (
+        <div data-test-subj="workflow-execution-list-flyout">{workflowId}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_async_thunk', () => ({
-  useAsyncThunkState: (mockedThunk: Function) => [mockedThunk, mockAsyncThunkState],
-}));
+vi.mock('../../../hooks/use_async_thunk', () => {
+      const mocked = {
+      useAsyncThunkState: (mockedThunk: Function) => [mockedThunk, mockAsyncThunkState],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowDetailPage', () => {
   const mockWorkflow = {
@@ -175,7 +229,7 @@ describe('WorkflowDetailPage', () => {
     }
 
     const services = createStartServicesMock();
-    const navigateToApp = jest.spyOn(services.application, 'navigateToApp');
+    const navigateToApp = vi.spyOn(services.application, 'navigateToApp');
 
     // Captures the MemoryRouter history so tests can mutate the URL query the
     // way `useWorkflowUrlState` does (e.g. `?view=graph` on view toggle).
@@ -199,14 +253,14 @@ describe('WorkflowDetailPage', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockAsyncThunkState = {
       isLoading: false,
       error: null,
     };
-    mockLoadConnectors = jest.fn().mockReturnValue(Promise.resolve());
-    mockLoadWorkflow = jest.fn().mockReturnValue(Promise.resolve());
+    mockLoadConnectors = vi.fn().mockReturnValue(Promise.resolve());
+    mockLoadWorkflow = vi.fn().mockReturnValue(Promise.resolve());
 
     mockUseWorkflowsBreadcrumbs.mockImplementation(() => undefined);
     mockUseGlobalExecutionsViewEnabled.mockReturnValue(false);
@@ -214,8 +268,8 @@ describe('WorkflowDetailPage', () => {
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow' as const,
       selectedExecutionId: undefined,
-      setSelectedExecution: jest.fn(),
-      setActiveTab: jest.fn(),
+      setSelectedExecution: vi.fn(),
+      setActiveTab: vi.fn(),
     });
   });
 
@@ -231,7 +285,7 @@ describe('WorkflowDetailPage', () => {
 
     it('should set default yaml when no id is provided', () => {
       const store = createMockStore();
-      const dispatchSpy = jest.spyOn(store, 'dispatch');
+      const dispatchSpy = vi.spyOn(store, 'dispatch');
 
       renderWithProviders({ id: undefined }, () => store);
 
@@ -336,8 +390,8 @@ describe('WorkflowDetailPage', () => {
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'executions' as const,
         selectedExecutionId: undefined,
-        setSelectedExecution: jest.fn(),
-        setActiveTab: jest.fn(),
+        setSelectedExecution: vi.fn(),
+        setActiveTab: vi.fn(),
       });
 
       renderWithProviders({ id: 'test-workflow-123' }, (s) => {
@@ -351,8 +405,8 @@ describe('WorkflowDetailPage', () => {
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'executions' as const,
         selectedExecutionId: 'execution-123',
-        setSelectedExecution: jest.fn(),
-        setActiveTab: jest.fn(),
+        setSelectedExecution: vi.fn(),
+        setActiveTab: vi.fn(),
       });
 
       renderWithProviders({ id: 'test-workflow-123' }, (s) => {
@@ -368,8 +422,8 @@ describe('WorkflowDetailPage', () => {
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'workflow' as const,
         selectedExecutionId: undefined,
-        setSelectedExecution: jest.fn(),
-        setActiveTab: jest.fn(),
+        setSelectedExecution: vi.fn(),
+        setActiveTab: vi.fn(),
       });
 
       renderWithProviders({ id: 'test-workflow-123' }, (s) => {
@@ -393,8 +447,8 @@ describe('WorkflowDetailPage', () => {
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'executions' as const,
         selectedExecutionId: undefined,
-        setSelectedExecution: jest.fn(),
-        setActiveTab: jest.fn(),
+        setSelectedExecution: vi.fn(),
+        setActiveTab: vi.fn(),
       });
 
       renderWithProviders({ id: 'test-workflow-123' }, (s) => {
@@ -410,8 +464,8 @@ describe('WorkflowDetailPage', () => {
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'executions' as const,
         selectedExecutionId: 'execution-123',
-        setSelectedExecution: jest.fn(),
-        setActiveTab: jest.fn(),
+        setSelectedExecution: vi.fn(),
+        setActiveTab: vi.fn(),
       });
 
       renderWithProviders({ id: 'test-workflow-123' }, (s) => {
@@ -427,12 +481,12 @@ describe('WorkflowDetailPage', () => {
     });
 
     it('opens the list flyout on Executions click and closes it on the next click', () => {
-      const setSelectedExecution = jest.fn();
+      const setSelectedExecution = vi.fn();
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'workflow' as const,
         selectedExecutionId: undefined,
         setSelectedExecution,
-        setActiveTab: jest.fn(),
+        setActiveTab: vi.fn(),
       });
 
       renderWithProviders({ id: 'test-workflow-123' }, (s) => {
@@ -450,12 +504,12 @@ describe('WorkflowDetailPage', () => {
     });
 
     it('closes the detail and list flyouts when Executions is clicked while a run is selected', () => {
-      const setSelectedExecution = jest.fn();
+      const setSelectedExecution = vi.fn();
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'workflow' as const,
         selectedExecutionId: 'execution-123',
         setSelectedExecution,
-        setActiveTab: jest.fn(),
+        setActiveTab: vi.fn(),
       });
 
       renderWithProviders({ id: 'test-workflow-123' }, (s) => {
@@ -547,8 +601,8 @@ describe('WorkflowDetailPage', () => {
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'executions' as const,
         selectedExecutionId: 'execution-123',
-        setSelectedExecution: jest.fn(),
-        setActiveTab: jest.fn(),
+        setSelectedExecution: vi.fn(),
+        setActiveTab: vi.fn(),
       });
 
       renderWithProviders({ id: 'test-workflow-123' }, (s) => {
@@ -561,7 +615,7 @@ describe('WorkflowDetailPage', () => {
 
   describe('readWorkflowExecution gate', () => {
     it('switches to workflow tab when executions tab is not allowed', () => {
-      const setActiveTab = jest.fn();
+      const setActiveTab = vi.fn();
       mockUseWorkflowsCapabilities.mockReturnValue({
         ...mockWorkflowsManagementCapabilities,
         canReadWorkflowExecution: false,
@@ -569,7 +623,7 @@ describe('WorkflowDetailPage', () => {
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'executions' as const,
         selectedExecutionId: undefined,
-        setSelectedExecution: jest.fn(),
+        setSelectedExecution: vi.fn(),
         setActiveTab,
       });
 
@@ -581,7 +635,7 @@ describe('WorkflowDetailPage', () => {
     });
 
     it('clears selected execution on workflow tab when execution read is not allowed', () => {
-      const setSelectedExecution = jest.fn();
+      const setSelectedExecution = vi.fn();
       mockUseWorkflowsCapabilities.mockReturnValue({
         ...mockWorkflowsManagementCapabilities,
         canReadWorkflowExecution: false,
@@ -590,7 +644,7 @@ describe('WorkflowDetailPage', () => {
         activeTab: 'workflow' as const,
         selectedExecutionId: 'execution-123',
         setSelectedExecution,
-        setActiveTab: jest.fn(),
+        setActiveTab: vi.fn(),
       });
 
       renderWithProviders({ id: 'test-workflow-123' }, (s) => {
@@ -608,8 +662,8 @@ describe('WorkflowDetailPage', () => {
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'executions' as const,
         selectedExecutionId: undefined,
-        setSelectedExecution: jest.fn(),
-        setActiveTab: jest.fn(),
+        setSelectedExecution: vi.fn(),
+        setActiveTab: vi.fn(),
       });
 
       renderWithProviders({ id: 'test-workflow-123' }, (s) => {

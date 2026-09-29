@@ -5,28 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
-const mockAddError = jest.fn();
-const mockRemove = jest.fn();
-const mockPost = jest.fn();
+const mockAddError = vi.fn();
+const mockRemove = vi.fn();
+const mockPost = vi.fn();
 
-jest.mock('../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: { post: mockPost },
-      executionContext: { get: jest.fn() },
-      notifications: {
-        toasts: {
-          addError: mockAddError,
-          remove: mockRemove,
+vi.mock('../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: { post: mockPost },
+          executionContext: { get: vi.fn() },
+          notifications: {
+            toasts: {
+              addError: mockAddError,
+              remove: mockRemove,
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useCreateLiveQuery } from './use_create_live_query_action';
 
@@ -44,7 +49,7 @@ const createWrapper = () => {
 
 describe('useCreateLiveQuery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls setErrorToast with Forbidden error when API returns 403', async () => {
@@ -56,7 +61,7 @@ describe('useCreateLiveQuery', () => {
     };
     mockPost.mockRejectedValueOnce(forbiddenError);
 
-    const { result } = renderHook(() => useCreateLiveQuery({ onSuccess: jest.fn() }), {
+    const { result } = renderHook(() => useCreateLiveQuery({ onSuccess: vi.fn() }), {
       wrapper: createWrapper(),
     });
 
@@ -86,7 +91,7 @@ describe('useCreateLiveQuery', () => {
   });
 
   it('calls onSuccess and clears error toast on successful creation', async () => {
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const mockResponse = {
       data: { action_id: 'test-123', queries: [], agents: [] },
     };

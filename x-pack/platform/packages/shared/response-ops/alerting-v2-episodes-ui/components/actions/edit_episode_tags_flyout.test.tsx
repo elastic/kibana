@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,9 +20,9 @@ import {
   createQueryClientWrapper,
 } from '../../hooks/test_utils';
 
-jest.mock('../../hooks/use_fetch_alert_episode_tag_suggestions');
+vi.mock('../../hooks/use_fetch_alert_episode_tag_suggestions');
 
-const useFetchAlertEpisodeTagSuggestionsMock = jest.mocked(useFetchAlertEpisodeTagSuggestions);
+const useFetchAlertEpisodeTagSuggestionsMock = vi.mocked(useFetchAlertEpisodeTagSuggestions);
 
 const mockExpressions = expressionsPluginMock.createStartContract();
 const mockSpaces = createMockSpaces();
@@ -31,8 +33,8 @@ const queryWrapper = createQueryClientWrapper(queryClient);
 describe('AlertEpisodeTagsFlyout', () => {
   const defaultProps = {
     isOpen: true,
-    onClose: jest.fn(),
-    onSave: jest.fn(),
+    onClose: vi.fn(),
+    onSave: vi.fn(),
     currentTags: [] as string[],
     services: { expressions: mockExpressions, spaces: mockSpaces },
   };
@@ -106,7 +108,7 @@ describe('AlertEpisodeTagsFlyout', () => {
 
   it('shows an error and disables save when a selected tag exceeds the max length', async () => {
     const user = userEvent.setup();
-    const mockOnSave = jest.fn();
+    const mockOnSave = vi.fn();
     const longTag = 'x'.repeat(MAX_TAG_LENGTH + 1);
     render(
       <AlertEpisodeTagsFlyout {...defaultProps} onSave={mockOnSave} currentTags={[longTag]} />,
@@ -128,8 +130,8 @@ describe('AlertEpisodeTagsFlyout', () => {
 
   it('calls onSave with the current tag selection and closes on save', async () => {
     const user = userEvent.setup();
-    const mockOnSave = jest.fn();
-    const mockOnClose = jest.fn();
+    const mockOnSave = vi.fn();
+    const mockOnClose = vi.fn();
 
     render(
       <AlertEpisodeTagsFlyout
@@ -149,7 +151,7 @@ describe('AlertEpisodeTagsFlyout', () => {
 
   it('invokes onClose when cancel is clicked', async () => {
     const user = userEvent.setup();
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     render(<AlertEpisodeTagsFlyout {...defaultProps} onClose={onClose} />, {
       wrapper: queryWrapper,
     });

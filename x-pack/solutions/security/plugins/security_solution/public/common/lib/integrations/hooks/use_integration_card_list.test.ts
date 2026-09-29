@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useIntegrationCardList } from './use_integration_card_list';
 import { mockReportLinkClick } from './__mocks__/mocks';
 import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
 import type { IntegrationTabId, Tab } from '../types';
 
-jest.mock('./integration_context');
+vi.mock('./integration_context');
 
-jest.mock('../../kibana', () => ({
-  ...jest.requireActual('../../kibana'),
-  useNavigation: jest.fn().mockReturnValue({
-    navigateTo: jest.fn(),
-    getAppUrl: jest.fn().mockReturnValue(''),
-  }),
-}));
+vi.mock('../../kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../kibana')),
+      useNavigation: vi.fn().mockReturnValue({
+        navigateTo: vi.fn(),
+        getAppUrl: vi.fn().mockReturnValue(''),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const selectedTab: Tab = {
   id: 'test' as IntegrationTabId,
@@ -30,7 +35,7 @@ const selectedTab: Tab = {
 };
 
 describe('useIntegrationCardList', () => {
-  const mockOnCardClick = jest.fn();
+  const mockOnCardClick = vi.fn();
   const mockIntegrationsList = [
     {
       id: 'epr:endpoint',
@@ -79,7 +84,7 @@ describe('useIntegrationCardList', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns filtered integration cards when featuredCardIds are not provided', () => {

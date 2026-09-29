@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { InternalOverlayBannersStart } from './banners_service';
 import { OverlayBannersService } from './banners_service';
 import { take } from 'rxjs';
@@ -32,17 +34,17 @@ describe('OverlayBannersService', () => {
 
   describe('adding banners', () => {
     test('adds a single banner', async () => {
-      const mount = jest.fn();
+      const mount = vi.fn();
       const banner = service.add(mount);
       expect(await currentBanners()).toEqual([{ id: banner, mount, priority: 0 }]);
     });
 
     test('sorts banners by priority', async () => {
-      const mount1 = jest.fn();
+      const mount1 = vi.fn();
       const banner1 = service.add(mount1);
-      const mount2 = jest.fn();
+      const mount2 = vi.fn();
       const banner2 = service.add(mount2, 10);
-      const mount3 = jest.fn();
+      const mount3 = vi.fn();
       const banner3 = service.add(mount3, 5);
       expect(await currentBanners()).toEqual([
         { id: banner2, mount: mount2, priority: 10 },
@@ -54,7 +56,7 @@ describe('OverlayBannersService', () => {
 
   describe('removing banners', () => {
     test('removes a single banner', async () => {
-      const mount = jest.fn();
+      const mount = vi.fn();
       const banner = service.add(mount);
       expect(service.remove(banner)).toBe(true);
       expect(await currentBanners()).toEqual([]);
@@ -62,11 +64,11 @@ describe('OverlayBannersService', () => {
     });
 
     test('preserves priority order', async () => {
-      const mount1 = jest.fn();
+      const mount1 = vi.fn();
       const banner1 = service.add(mount1);
-      const mount2 = jest.fn();
+      const mount2 = vi.fn();
       const banner2 = service.add(mount2, 10);
-      const mount3 = jest.fn();
+      const mount3 = vi.fn();
       const banner3 = service.add(mount3, 5);
       service.remove(banner2);
       expect(await currentBanners()).toEqual([
@@ -78,19 +80,19 @@ describe('OverlayBannersService', () => {
 
   describe('replacing banners', () => {
     test('replaces mount function', async () => {
-      const mount1 = jest.fn();
+      const mount1 = vi.fn();
       const banner = service.add(mount1);
-      const mount2 = jest.fn();
+      const mount2 = vi.fn();
       const updatedBanner = service.replace(banner, mount2);
       expect(await currentBanners()).toEqual([{ id: updatedBanner, mount: mount2, priority: 0 }]);
     });
 
     test('updates priority', async () => {
-      const mount1 = jest.fn();
+      const mount1 = vi.fn();
       const banner1 = service.add(mount1);
-      const mount2 = jest.fn();
+      const mount2 = vi.fn();
       const banner2 = service.add(mount2, 10);
-      const mount3 = jest.fn();
+      const mount3 = vi.fn();
       const banner3 = service.add(mount3, 5);
       const updatedBanner2 = service.replace(banner2, mount2, -10);
       expect(await currentBanners()).toEqual([
@@ -101,13 +103,13 @@ describe('OverlayBannersService', () => {
     });
 
     test('can be replaced multiple times using new id', async () => {
-      const mount1 = jest.fn();
+      const mount1 = vi.fn();
       const banner = service.add(mount1);
-      const mount2 = jest.fn();
+      const mount2 = vi.fn();
       const updatedBanner = service.replace(banner, mount2);
       expect(banner).not.toEqual(updatedBanner);
       // Make sure we can use the new id to replace again
-      const mount3 = jest.fn();
+      const mount3 = vi.fn();
       const updatedBanner2 = service.replace(updatedBanner, mount3);
       expect(updatedBanner2).not.toEqual(updatedBanner);
       // Should only be a single banner

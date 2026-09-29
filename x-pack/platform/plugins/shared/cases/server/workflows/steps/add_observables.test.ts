@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import type { CasesClient } from '../../client';
@@ -16,9 +18,9 @@ const createContext = (input: unknown) =>
 
 describe('addObservablesStepDefinition', () => {
   it('adds observables to a case', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkAddObservables = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkAddObservables = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkAddObservables },
     } as unknown as CasesClient);
     const definition = addObservablesStepDefinition(getCasesClient);

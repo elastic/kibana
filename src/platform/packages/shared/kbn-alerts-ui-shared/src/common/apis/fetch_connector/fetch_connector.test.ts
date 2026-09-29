@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { ActionConnectorProps } from '../../types';
 import { fetchConnector } from './fetch_connector';
@@ -14,7 +16,7 @@ import { createMockActionConnector } from '../../test_utils/connector.mock';
 
 const http = httpServiceMock.createStartContract();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('fetchConnector', () => {
   it('should call get connector API', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loadReportHuntContext } from './load_report_context';
@@ -316,7 +318,7 @@ describe('loadReportHuntContext', () => {
 
   it('scopes the lookup to the acting space', async () => {
     await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
-    const query = (esClient.search as unknown as jest.Mock).mock.calls[0][0].query;
+    const query = (esClient.search as unknown as Mock).mock.calls[0][0].query;
     expect(query.bool.filter[0]).toEqual({
       terms: { space_id: expect.arrayContaining(['hunt-a']) },
     });

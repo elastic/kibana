@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { searchAlerts } from './alerts_route';
 import { mockAlerts } from '../../common/mocks/constants/session_view_process.mock';
@@ -20,7 +22,7 @@ const getEmptyResponse = async () => {
 
 describe('alerts_route.ts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('searchAlerts(client, sessionEntityId)', () => {

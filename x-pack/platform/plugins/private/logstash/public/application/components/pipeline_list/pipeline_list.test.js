@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { PipelineList } from './pipeline_list';
@@ -28,9 +30,9 @@ describe('PipelineList component', () => {
 
   beforeEach(() => {
     pipelines = [{ id: 'test', description: 'test description' }];
-    addDanger = jest.fn();
-    addSuccess = jest.fn();
-    addWarning = jest.fn();
+    addDanger = vi.fn();
+    addSuccess = vi.fn();
+    addWarning = vi.fn();
     props = {
       clusterService: {
         isClusterInfoAvailable: getIsClusterInfoAvailable(true),
@@ -38,9 +40,9 @@ describe('PipelineList component', () => {
       },
       history: {
         createHref: ({ pathname }) => pathname,
-        push: jest.fn(),
+        push: vi.fn(),
       },
-      createPipeline: jest.fn(),
+      createPipeline: vi.fn(),
       isServerless: false,
       isReadOnly: false,
       licenseService: {

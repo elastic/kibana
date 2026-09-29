@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import {
@@ -19,8 +22,8 @@ import { toExecutionError } from '../step/errors';
 // Core's HTTP self client is the transport. `asScoped(request).fetch(path, options)` is mocked so we
 // assert what the helper hands to Core (path, query, body, the headers Core does not manage, and the
 // access/rawResponse flags) and drive its response-shaping contract from the mocked raw `Response`.
-const mockSelfFetch = jest.fn();
-const mockAsScoped = jest.fn(() => ({ fetch: mockSelfFetch }));
+const mockSelfFetch = vi.fn();
+const mockAsScoped = vi.fn(() => ({ fetch: mockSelfFetch }));
 
 function createMockReadableStream(payload: Uint8Array) {
   let consumed = false;
@@ -32,7 +35,7 @@ function createMockReadableStream(payload: Uint8Array) {
         return { done: false, value: payload };
       },
       releaseLock: () => {},
-      cancel: jest.fn(),
+      cancel: vi.fn(),
     }),
   } as unknown as ReadableStream<Uint8Array>;
 }
@@ -91,7 +94,7 @@ function createCoreStart({ serverBasePath = '' }: { serverBasePath?: string } = 
     http: {
       basePath: {
         serverBasePath,
-        prepend: jest.fn((path: string) => `${serverBasePath}${path}`),
+        prepend: vi.fn((path: string) => `${serverBasePath}${path}`),
       },
       selfClient: { asScoped: mockAsScoped },
     },
@@ -148,7 +151,7 @@ describe('callKibanaApi', () => {
   it('delegates server base path resolution to Core', async () => {
     mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
     const coreStart = createCoreStart({ serverBasePath: '/configured-base-path' });
-    const prependBasePath = coreStart.http.basePath.prepend as jest.Mock;
+    const prependBasePath = coreStart.http.basePath.prepend as Mock;
     prependBasePath.mockReturnValue('/core-resolved-base-path/api/status');
 
     await callKibanaApi(

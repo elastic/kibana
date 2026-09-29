@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of } from 'rxjs';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -22,7 +25,7 @@ const mockComputedFields = (
   index: string,
   runtimeFields: Record<string, unknown>
 ) => {
-  dataViewsStart.find = jest.fn().mockReturnValue([
+  dataViewsStart.find = vi.fn().mockReturnValue([
     {
       title: index,
       getComputedFields: () => ({
@@ -78,13 +81,13 @@ describe('extendSearchParamsWithRuntimeFields', () => {
 });
 
 describe('SearchAPI', () => {
-  let mockSearch: jest.Mock;
+  let mockSearch: Mock;
   let dataViewsStart: DataViewsPublicPluginStart;
   let mockDependencies: any;
 
   beforeEach(() => {
     dataViewsStart = dataViewPluginMocks.createStartContract();
-    mockSearch = jest.fn().mockReturnValue(
+    mockSearch = vi.fn().mockReturnValue(
       of({
         rawResponse: [],
         isPartial: false,
@@ -97,69 +100,81 @@ describe('SearchAPI', () => {
       },
       indexPatterns: dataViewsStart,
       uiSettings: {
-        get: jest.fn(),
+        get: vi.fn(),
       },
     };
     mockComputedFields(dataViewsStart, 'test-index', {});
   });
 
   describe('search', () => {
-    test('should call search with the correct params', (done) => {
-      const searchAPI = new SearchAPI(mockDependencies);
-      const searchRequest: SearchRequest<estypes.SearchRequest> = {
-        index: 'test-index',
-        runtime_mappings: {},
-      };
-      searchAPI.search([searchRequest]).subscribe(() => {
-        expect(mockSearch).toHaveBeenCalled();
-        const searchRequestParams = mockSearch.mock.calls[0][0].params;
-        expect(searchRequestParams).toMatchObject(searchRequest);
-        done();
-      });
-    });
+    test('should call search with the correct params', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-    test('should include and elevate body params in the search request', (done) => {
-      const searchAPI = new SearchAPI(mockDependencies);
-      const searchRequest: SearchRequest<estypes.SearchRequest> = {
-        index: 'test-index',
-        body: {
-          // @ts-expect-error - testing deprecated body params
-          runtime_mappings: {},
-        },
-      };
-      searchAPI.search([searchRequest]).subscribe(() => {
-        expect(mockSearch).toHaveBeenCalled();
-        const searchRequestParams = mockSearch.mock.calls[0][0].params;
-        expect(searchRequestParams).toEqual({
-          index: 'test-index',
-          runtime_mappings: {},
-        });
-        done();
-      });
-    });
+              const searchAPI = new SearchAPI(mockDependencies);
+              const searchRequest: SearchRequest<estypes.SearchRequest> = {
+                index: 'test-index',
+                runtime_mappings: {},
+              };
+              searchAPI.search([searchRequest]).subscribe(() => {
+                expect(mockSearch).toHaveBeenCalled();
+                const searchRequestParams = mockSearch.mock.calls[0][0].params;
+                expect(searchRequestParams).toMatchObject(searchRequest);
+                done();
+              });
+            
+        }));
 
-    test('should use root params over body params in the search request', (done) => {
-      const searchAPI = new SearchAPI(mockDependencies);
-      const searchRequest: SearchRequest<estypes.SearchRequest> = {
-        index: 'test-index',
-        body: {
-          // @ts-expect-error - testing deprecated body params
-          runtime_mappings: {
-            test: { type: 'keyword' },
-          },
-        },
-        runtime_mappings: {},
-      };
-      searchAPI.search([searchRequest]).subscribe(() => {
-        expect(mockSearch).toHaveBeenCalled();
-        const searchRequestParams = mockSearch.mock.calls[0][0].params;
-        expect(searchRequestParams).toEqual({
-          index: 'test-index',
-          runtime_mappings: {},
-        });
-        done();
-      });
-    });
+    test('should include and elevate body params in the search request', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              const searchAPI = new SearchAPI(mockDependencies);
+              const searchRequest: SearchRequest<estypes.SearchRequest> = {
+                index: 'test-index',
+                body: {
+                  // @ts-expect-error - testing deprecated body params
+                  runtime_mappings: {},
+                },
+              };
+              searchAPI.search([searchRequest]).subscribe(() => {
+                expect(mockSearch).toHaveBeenCalled();
+                const searchRequestParams = mockSearch.mock.calls[0][0].params;
+                expect(searchRequestParams).toEqual({
+                  index: 'test-index',
+                  runtime_mappings: {},
+                });
+                done();
+              });
+            
+        }));
+
+    test('should use root params over body params in the search request', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              const searchAPI = new SearchAPI(mockDependencies);
+              const searchRequest: SearchRequest<estypes.SearchRequest> = {
+                index: 'test-index',
+                body: {
+                  // @ts-expect-error - testing deprecated body params
+                  runtime_mappings: {
+                    test: { type: 'keyword' },
+                  },
+                },
+                runtime_mappings: {},
+              };
+              searchAPI.search([searchRequest]).subscribe(() => {
+                expect(mockSearch).toHaveBeenCalled();
+                const searchRequestParams = mockSearch.mock.calls[0][0].params;
+                expect(searchRequestParams).toEqual({
+                  index: 'test-index',
+                  runtime_mappings: {},
+                });
+                done();
+              });
+            
+        }));
 
     describe('projectRouting', () => {
       const testProjectRouting = (
@@ -187,85 +202,109 @@ describe('SearchAPI', () => {
         });
       };
 
-      test('should include project_routing in ES params when projectRouting is provided', (done) => {
-        testProjectRouting('_alias:_origin', '_alias:_origin', done);
-      });
+      test('should include project_routing in ES params when projectRouting is provided', () =>
+          new Promise<void>((resolve, reject) => {
+          const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      test('should not include project_routing in ES params when projectRouting is undefined', (done) => {
-        testProjectRouting(undefined, undefined, done);
-      });
+                  testProjectRouting('_alias:_origin', '_alias:_origin', done);
+                
+          }));
+
+      test('should not include project_routing in ES params when projectRouting is undefined', () =>
+          new Promise<void>((resolve, reject) => {
+          const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+                  testProjectRouting(undefined, undefined, done);
+                
+          }));
     });
   });
 
   describe('searchEsql', () => {
     const esqlRequest = { query: 'FROM logs-*', name: 'esql-request' };
 
-    test('should call search with the esql_async strategy', (done) => {
-      const searchAPI = new SearchAPI(mockDependencies);
-      searchAPI.searchEsql([esqlRequest]).subscribe(() => {
-        expect(mockSearch).toHaveBeenCalled();
-        const searchOptions = mockSearch.mock.calls[0][1];
-        expect(searchOptions.strategy).toBe('esql_async');
-        done();
-      });
-    });
+    test('should call search with the esql_async strategy', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-    test('should include approximation in search options when isApproximate is true', (done) => {
-      const searchAPI = new SearchAPI(
-        mockDependencies,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        true
-      );
-      searchAPI.searchEsql([esqlRequest]).subscribe(() => {
-        const searchOptions = mockSearch.mock.calls[0][1];
-        expect(searchOptions.approximation).toBe(true);
-        done();
-      });
-    });
+              const searchAPI = new SearchAPI(mockDependencies);
+              searchAPI.searchEsql([esqlRequest]).subscribe(() => {
+                expect(mockSearch).toHaveBeenCalled();
+                const searchOptions = mockSearch.mock.calls[0][1];
+                expect(searchOptions.strategy).toBe('esql_async');
+                done();
+              });
+            
+        }));
 
-    test('should default approximation to false when isApproximate is not provided', (done) => {
-      const searchAPI = new SearchAPI(mockDependencies);
-      searchAPI.searchEsql([esqlRequest]).subscribe(() => {
-        const searchOptions = mockSearch.mock.calls[0][1];
-        expect(searchOptions.approximation).toBe(false);
-        done();
-      });
-    });
+    test('should include approximation in search options when isApproximate is true', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-    test('should include projectRouting and approximation in the inspector request json', (done) => {
-      const jsonMock = jest.fn();
-      const inspectorAdapters = {
-        requests: {
-          start: jest.fn().mockReturnValue({
-            json: jsonMock,
-            stats: jest.fn().mockReturnThis(),
-            ok: jest.fn(),
-          }),
-        },
-      };
-      const searchAPI = new SearchAPI(
-        mockDependencies,
-        undefined,
-        inspectorAdapters as any,
-        undefined,
-        undefined,
-        '_alias:_origin',
-        true
-      );
-      searchAPI.searchEsql([esqlRequest]).subscribe(() => {
-        expect(jsonMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            query: 'FROM logs-*',
-            projectRouting: '_alias:_origin',
-            approximation: true,
-          })
-        );
-        done();
-      });
-    });
+              const searchAPI = new SearchAPI(
+                mockDependencies,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                true
+              );
+              searchAPI.searchEsql([esqlRequest]).subscribe(() => {
+                const searchOptions = mockSearch.mock.calls[0][1];
+                expect(searchOptions.approximation).toBe(true);
+                done();
+              });
+            
+        }));
+
+    test('should default approximation to false when isApproximate is not provided', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              const searchAPI = new SearchAPI(mockDependencies);
+              searchAPI.searchEsql([esqlRequest]).subscribe(() => {
+                const searchOptions = mockSearch.mock.calls[0][1];
+                expect(searchOptions.approximation).toBe(false);
+                done();
+              });
+            
+        }));
+
+    test('should include projectRouting and approximation in the inspector request json', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              const jsonMock = vi.fn();
+              const inspectorAdapters = {
+                requests: {
+                  start: vi.fn().mockReturnValue({
+                    json: jsonMock,
+                    stats: vi.fn().mockReturnThis(),
+                    ok: vi.fn(),
+                  }),
+                },
+              };
+              const searchAPI = new SearchAPI(
+                mockDependencies,
+                undefined,
+                inspectorAdapters as any,
+                undefined,
+                undefined,
+                '_alias:_origin',
+                true
+              );
+              searchAPI.searchEsql([esqlRequest]).subscribe(() => {
+                expect(jsonMock).toHaveBeenCalledWith(
+                  expect.objectContaining({
+                    query: 'FROM logs-*',
+                    projectRouting: '_alias:_origin',
+                    approximation: true,
+                  })
+                );
+                done();
+              });
+            
+        }));
   });
 });

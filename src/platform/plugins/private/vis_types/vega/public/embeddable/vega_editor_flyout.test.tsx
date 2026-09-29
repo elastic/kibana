@@ -7,33 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VegaEditorFlyout } from './vega_editor_flyout';
 
-jest.mock('../components/vega_vis_editor', () => ({
-  VegaSpecEditor: ({
-    editorValue,
-    onChange,
-  }: {
-    editorValue: string;
-    onChange: (value: string) => void;
-  }) => (
-    <textarea
-      aria-label="Vega spec"
-      value={editorValue}
-      onChange={(event) => onChange(event.target.value)}
-    />
-  ),
-}));
+vi.mock('../components/vega_vis_editor', () => {
+      const mocked = {
+      VegaSpecEditor: ({
+        editorValue,
+        onChange,
+      }: {
+        editorValue: string;
+        onChange: (value: string) => void;
+      }) => (
+        <textarea
+          aria-label="Vega spec"
+          value={editorValue}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('VegaEditorFlyout', () => {
   const renderFlyout = ({ isNewPanel = false }: { isNewPanel?: boolean } = {}) => {
-    const closeFlyout = jest.fn();
-    const onRevert = jest.fn();
-    const onPreview = jest.fn();
-    const onSave = jest.fn();
+    const closeFlyout = vi.fn();
+    const onRevert = vi.fn();
+    const onPreview = vi.fn();
+    const onSave = vi.fn();
     const { unmount } = render(
       <VegaEditorFlyout
         ariaLabelledBy="vega-flyout-title"

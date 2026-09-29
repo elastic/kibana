@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
@@ -28,7 +31,7 @@ import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_window
 import type { KibanaRequest } from '@kbn/core/server';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 
-jest.mock('../alerts_client');
+vi.mock('../alerts_client');
 
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 const alertingEventLogger = alertingEventLoggerMock.create();
@@ -49,7 +52,7 @@ const fakeRequest = {
       url: '/',
     },
   },
-  getSavedObjectsClient: jest.fn(),
+  getSavedObjectsClient: vi.fn(),
 } as unknown as KibanaRequest;
 
 const SimulateTemplateResponse = {
@@ -219,7 +222,7 @@ const getContextInitialized = async (
 };
 
 const alertsClient = alertsClientMock.create();
-const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
+const ruleType: Mocked<UntypedNormalizedRuleType> = {
   id: 'test.rule-type',
   name: 'My test rule',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -227,7 +230,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   minimumLicenseRequired: 'basic',
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
-  executor: jest.fn(),
+  executor: vi.fn(),
   category: 'test',
   producer: 'alerts',
   solution: 'stack',
@@ -240,7 +243,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   validLegacyConsumers: [],
 };
 
-const ruleTypeWithAlertDefinition: jest.Mocked<UntypedNormalizedRuleType> = {
+const ruleTypeWithAlertDefinition: Mocked<UntypedNormalizedRuleType> = {
   ...ruleType,
   alerts: TestRegistrationContext as IRuleTypeAlerts<{}>,
 };
@@ -250,10 +253,10 @@ describe('Alerts Service', () => {
   const elasticsearchAndSOAvailability$ = of(true);
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     logger = loggingSystemMock.createLogger();
     pluginStop$ = new ReplaySubject(1);
-    jest.spyOn(global.Math, 'random').mockReturnValue(0.01);
+    vi.spyOn(global.Math, 'random').mockReturnValue(0.01);
     clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
     clusterClient.indices.simulateIndexTemplate.mockImplementation(
       async () => SimulateTemplateResponse
@@ -307,7 +310,7 @@ describe('Alerts Service', () => {
         });
 
         test('should install common resources under a cluster-wide lock when a lock manager is provided', async () => {
-          const withLock = jest.fn(async (_lockId: string, cb: () => Promise<void>) => cb());
+          const withLock = vi.fn(async (_lockId: string, cb: () => Promise<void>) => cb());
           const alertsService = new AlertsService({
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
@@ -334,7 +337,7 @@ describe('Alerts Service', () => {
         });
 
         test('should retry common resource installation once the cluster-wide lock is released', async () => {
-          const withLock = jest
+          const withLock = vi
             .fn()
             .mockRejectedValueOnce(new LockAcquisitionError('held'))
             .mockImplementation(async (_lockId: string, cb: () => Promise<void>) => cb());
@@ -1580,7 +1583,7 @@ describe('Alerts Service', () => {
       describe('createAlertsClient()', () => {
         let alertsService: AlertsService;
         beforeEach(async () => {
-          (AlertsClient as jest.Mock).mockImplementation(() => alertsClient);
+          (AlertsClient as Mock).mockImplementation(() => alertsClient);
         });
 
         test('should create new AlertsClient', async () => {

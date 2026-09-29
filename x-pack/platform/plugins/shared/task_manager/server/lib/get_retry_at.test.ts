@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import sinon from 'sinon';
 import { calculateDelayBasedOnAttempts, getRetryDate, getRetryAt } from './get_retry_at';
 import { createRetryableError } from '../task_running';
@@ -103,7 +105,7 @@ describe('getRetryAt', () => {
     const definition = {
       type: 'type',
       cost: 2,
-      createTaskRunner: jest.fn(),
+      createTaskRunner: vi.fn(),
       timeout: '5m',
     };
     expect(getRetryAt(task, definition)).toEqual(new Date('2021-01-01T12:05:00.000Z'));
@@ -114,7 +116,7 @@ describe('getRetryAt', () => {
     const definition = {
       type: 'type',
       cost: 2,
-      createTaskRunner: jest.fn(),
+      createTaskRunner: vi.fn(),
       timeout: '1d',
     };
     expect(getRetryAt(task, definition)).toEqual(new Date('2021-01-01T12:05:30.000Z'));

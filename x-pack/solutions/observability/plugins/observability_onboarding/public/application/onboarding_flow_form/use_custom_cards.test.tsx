@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -15,23 +18,26 @@ import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_featur
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
 import { useCustomCards } from './use_custom_cards';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../quickstart_flows/shared/use_pricing_feature');
-jest.mock('../shared/use_managed_otlp_service_availability');
+vi.mock('../quickstart_flows/shared/use_pricing_feature');
+vi.mock('../shared/use_managed_otlp_service_availability');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUsePricingFeature = usePricingFeature as jest.MockedFunction<typeof usePricingFeature>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUsePricingFeature = usePricingFeature as MockedFunction<typeof usePricingFeature>;
 const mockUseManagedOtlpServiceAvailability =
-  useManagedOtlpServiceAvailability as jest.MockedFunction<
+  useManagedOtlpServiceAvailability as MockedFunction<
     typeof useManagedOtlpServiceAvailability
   >;
 
 const CardsProbe: React.FC = () => {
-  const cards = useCustomCards(jest.fn());
+  const cards = useCustomCards(vi.fn());
 
   return (
     <dl>
@@ -56,17 +62,17 @@ describe('useCustomCards', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
-          getUrlForApp: jest.fn(() => '/app/mock'),
+          getUrlForApp: vi.fn(() => '/app/mock'),
         },
         http: {
           staticAssets: {
-            getPluginAssetHref: jest.fn(
+            getPluginAssetHref: vi.fn(
               (asset: string) => `/plugins/observabilityOnboarding/${asset}`
             ),
           },
         },
         featureFlags: {
-          useBooleanValue: jest.fn(() => false),
+          useBooleanValue: vi.fn(() => false),
         },
         context: {
           isCloud: false,
@@ -76,7 +82,7 @@ describe('useCustomCards', () => {
         share: {
           url: {
             locators: {
-              get: jest.fn(() => ({ getRedirectUrl: jest.fn(() => '/app/redirect') })),
+              get: vi.fn(() => ({ getRedirectUrl: vi.fn(() => '/app/redirect') })),
             },
           },
         },

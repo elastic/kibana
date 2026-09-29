@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { logWorkflowChanges } from './log_workflow_changes';
@@ -17,15 +20,15 @@ import {
 import type { IScopedWorkflowChangeHistoryService } from '../services/workflow_change_history_types';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
-jest.mock('@kbn/occ', () => {
-  const actual = jest.requireActual('@kbn/occ');
+vi.mock('@kbn/occ', async () => {
+  const actual = (await vi.importActual('@kbn/occ'));
   return {
     ...actual,
-    delayMs: jest.fn().mockResolvedValue(undefined),
+    delayMs: vi.fn().mockResolvedValue(undefined),
   };
 });
 
-const { delayMs } = jest.requireMock('@kbn/occ') as { delayMs: jest.Mock };
+const { delayMs } = (await vi.importMock('@kbn/occ')) as { delayMs: Mock };
 
 const REFERENCE_TIMESTAMP_MS = Date.UTC(2026, 0, 15, 12, 30, 45, 678);
 const REFERENCE_TIMESTAMP_ISO = new Date(REFERENCE_TIMESTAMP_MS).toISOString();
@@ -51,15 +54,15 @@ const makeDocument = (overrides: Partial<WorkflowProperties> = {}): WorkflowProp
   } as WorkflowProperties);
 
 describe('logWorkflowChanges', () => {
-  let scopedChangeHistory: jest.Mocked<IScopedWorkflowChangeHistoryService>;
+  let scopedChangeHistory: Mocked<IScopedWorkflowChangeHistoryService>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     scopedChangeHistory = {
-      log: jest.fn().mockResolvedValue(undefined),
-      logBulk: jest.fn().mockResolvedValue(undefined),
-      getHistory: jest.fn(),
+      log: vi.fn().mockResolvedValue(undefined),
+      logBulk: vi.fn().mockResolvedValue(undefined),
+      getHistory: vi.fn(),
     };
     logger = loggingSystemMock.createLogger();
   });

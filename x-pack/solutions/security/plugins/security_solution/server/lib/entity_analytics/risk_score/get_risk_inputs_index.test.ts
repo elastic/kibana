@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
@@ -20,7 +22,7 @@ describe('getRiskInputsIndex', () => {
   });
 
   it('returns an index and runtimeMappings for an existing dataView', async () => {
-    (soClient.get as jest.Mock).mockResolvedValueOnce(buildDataViewResponseMock());
+    (soClient.get as Mock).mockResolvedValueOnce(buildDataViewResponseMock());
     const {
       id,
       attributes: { runtimeFieldMap, title },

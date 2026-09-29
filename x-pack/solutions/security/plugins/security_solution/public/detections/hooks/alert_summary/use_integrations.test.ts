@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useIntegrations } from './use_integrations';
 import { useKibana } from '../../../common/lib/kibana';
@@ -12,20 +15,20 @@ import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 import { RELATED_INTEGRATION } from '../../constants';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 describe('useIntegrations', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return a checked integration', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         data: {
           query: {
             filterManager: {
-              getFilters: jest.fn().mockReturnValue([]),
+              getFilters: vi.fn().mockReturnValue([]),
             },
           },
         },
@@ -57,12 +60,12 @@ describe('useIntegrations', () => {
   });
 
   it('should return an un-checked integration', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         data: {
           query: {
             filterManager: {
-              getFilters: jest.fn().mockReturnValue([
+              getFilters: vi.fn().mockReturnValue([
                 {
                   meta: {
                     alias: null,

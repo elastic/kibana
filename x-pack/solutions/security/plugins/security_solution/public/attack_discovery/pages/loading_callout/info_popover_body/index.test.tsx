@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -16,7 +18,7 @@ const averageSuccessfulDurationNanoseconds = 191_000_000_000; // 191 seconds
 
 describe('InfoPopoverBody', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the expected average time', () => {

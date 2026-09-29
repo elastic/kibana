@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import fs from 'fs';
 import path from 'path';
 import { getCompositeSLOParamsSchema } from '@kbn/slo-schema';
@@ -14,7 +16,7 @@ const ENDPOINT = 'GET /api/observability/slo_composites/{id} 2023-10-31';
 
 describe('createCompositeSloServerRoute', () => {
   const createRouteHandler = () => {
-    const innerHandler = jest.fn().mockResolvedValue({ ok: true });
+    const innerHandler = vi.fn().mockResolvedValue({ ok: true });
     const routes = createCompositeSloServerRoute({
       endpoint: ENDPOINT,
       options: { access: 'public' },
@@ -42,13 +44,13 @@ describe('createCompositeSloServerRoute', () => {
         context: {
           core: Promise.resolve({
             featureFlags: {
-              getBooleanValue: jest.fn().mockResolvedValue(false),
+              getBooleanValue: vi.fn().mockResolvedValue(false),
             },
           }),
         },
         plugins: {
           licensing: {
-            start: jest.fn(),
+            start: vi.fn(),
           },
         },
       } as never)
@@ -66,15 +68,15 @@ describe('createCompositeSloServerRoute', () => {
         context: {
           core: Promise.resolve({
             featureFlags: {
-              getBooleanValue: jest.fn().mockResolvedValue(true),
+              getBooleanValue: vi.fn().mockResolvedValue(true),
             },
           }),
         },
         plugins: {
           licensing: {
-            start: jest.fn().mockResolvedValue({
-              getLicense: jest.fn().mockResolvedValue({
-                hasAtLeast: jest.fn().mockReturnValue(false),
+            start: vi.fn().mockResolvedValue({
+              getLicense: vi.fn().mockResolvedValue({
+                hasAtLeast: vi.fn().mockReturnValue(false),
               }),
             }),
           },
@@ -94,15 +96,15 @@ describe('createCompositeSloServerRoute', () => {
         context: {
           core: Promise.resolve({
             featureFlags: {
-              getBooleanValue: jest.fn().mockResolvedValue(true),
+              getBooleanValue: vi.fn().mockResolvedValue(true),
             },
           }),
         },
         plugins: {
           licensing: {
-            start: jest.fn().mockResolvedValue({
-              getLicense: jest.fn().mockResolvedValue({
-                hasAtLeast: jest.fn().mockReturnValue(true),
+            start: vi.fn().mockResolvedValue({
+              getLicense: vi.fn().mockResolvedValue({
+                hasAtLeast: vi.fn().mockReturnValue(true),
               }),
             }),
           },
@@ -157,7 +159,7 @@ describe('composite SLO route enforcement', () => {
     expect(discoveredRoutes.length).toBeGreaterThanOrEqual(routeFiles.length);
   });
 
-  const guardNotEnforced = jest
+  const guardNotEnforced = vi
     .fn()
     .mockRejectedValue(
       new Error(
@@ -172,10 +174,10 @@ describe('composite SLO route enforcement', () => {
           request: {},
           context: {
             core: Promise.resolve({
-              featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(false) },
+              featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(false) },
             }),
           },
-          plugins: { licensing: { start: jest.fn() } },
+          plugins: { licensing: { start: vi.fn() } },
           getScopedClients: guardNotEnforced,
         } as never)
       ).rejects.toMatchObject({ output: { statusCode: 404 } });
@@ -189,14 +191,14 @@ describe('composite SLO route enforcement', () => {
           request: {},
           context: {
             core: Promise.resolve({
-              featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+              featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
             }),
           },
           plugins: {
             licensing: {
-              start: jest.fn().mockResolvedValue({
-                getLicense: jest.fn().mockResolvedValue({
-                  hasAtLeast: jest.fn().mockReturnValue(false),
+              start: vi.fn().mockResolvedValue({
+                getLicense: vi.fn().mockResolvedValue({
+                  hasAtLeast: vi.fn().mockReturnValue(false),
                 }),
               }),
             },

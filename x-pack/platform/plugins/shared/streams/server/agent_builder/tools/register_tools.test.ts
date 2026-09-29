@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolAvailabilityConfig } from '@kbn/agent-builder-server';
@@ -24,12 +26,12 @@ const createMockServer = (): Pick<StreamsServer, 'isServerless' | 'core'> => ({
 
 const mockAvailability: ToolAvailabilityConfig = {
   cacheMode: 'space',
-  handler: jest.fn().mockResolvedValue({ status: 'available' }),
+  handler: vi.fn().mockResolvedValue({ status: 'available' }),
 };
 
 describe('registerAgentBuilderTools', () => {
   const telemetry = {
-    trackAgentBuilderKnowledgeIndicatorCreated: jest.fn(),
+    trackAgentBuilderKnowledgeIndicatorCreated: vi.fn(),
   } as unknown as EbtTelemetryClient;
 
   it('registers all expected tools', () => {

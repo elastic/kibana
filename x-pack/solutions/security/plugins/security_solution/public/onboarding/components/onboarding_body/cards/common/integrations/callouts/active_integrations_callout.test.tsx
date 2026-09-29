@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ActiveIntegrationsCallout } from './active_integrations_callout';
-jest.mock('./agent_required_callout');
-jest.mock('./manage_integrations_callout');
+vi.mock('./agent_required_callout');
+vi.mock('./manage_integrations_callout');
 
 describe('ActiveIntegrationsCallout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the callout and available packages when integrations are installed', () => {

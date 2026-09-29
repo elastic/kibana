@@ -5,20 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // Mock the mlJobService that is imported for saving rules.
-jest.mock('../../services/job_service', () => 'mlJobService');
+vi.mock('../../services/job_service', () => 'mlJobService');
 
 // Create a mock for the canGetFilters privilege check.
 // The mock is hoisted to the top, so need to prefix the mock function
 // with 'mock' so it can be used lazily.
-const mockCheckPermission = jest.fn(() => true);
-jest.mock('../../capabilities/check_capabilities', () => ({
-  checkPermission: (privilege) => mockCheckPermission(privilege),
-}));
+const mockCheckPermission = vi.fn(() => true);
+vi.mock('../../capabilities/check_capabilities', () => {
+      const mocked = {
+      checkPermission: (privilege) => mockCheckPermission(privilege),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../contexts/kibana/use_create_url', () => ({
-  useCreateAndNavigateToManagementMlLink: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('../../contexts/kibana/use_create_url', () => {
+      const mocked = {
+      useCreateAndNavigateToManagementMlLink: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -37,8 +45,8 @@ describe('ScopeSection', () => {
     },
   };
 
-  const onEnabledChange = jest.fn();
-  const updateScope = jest.fn();
+  const onEnabledChange = vi.fn();
+  const updateScope = vi.fn();
 
   const requiredProps = {
     filterListIds: testFilterListIds,
@@ -111,11 +119,11 @@ describe('ScopeSection', () => {
 
 describe('ScopeSection false canGetFilters privilege', () => {
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
   });
 
-  const onEnabledChange = jest.fn();
-  const updateScope = jest.fn();
+  const onEnabledChange = vi.fn();
+  const updateScope = vi.fn();
 
   const requiredProps = {
     onEnabledChange,

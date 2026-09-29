@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
@@ -59,16 +62,16 @@ const execution = (status: ExecutionStatus, message?: string): ExecutionSummary 
 });
 
 const createMockInvestigations = () => ({
-  findAcrossSpaces: jest.fn().mockResolvedValue(page([])),
-  updateInSpace: jest.fn().mockResolvedValue(undefined),
-  deleteAllAcrossSpaces: jest.fn().mockResolvedValue({ deleted: 0, failures: [] }),
+  findAcrossSpaces: vi.fn().mockResolvedValue(page([])),
+  updateInSpace: vi.fn().mockResolvedValue(undefined),
+  deleteAllAcrossSpaces: vi.fn().mockResolvedValue({ deleted: 0, failures: [] }),
 });
 
 const setup = () => {
   const investigationSweepRepository = createMockInvestigations();
-  const getExecutionSummaries: jest.MockedFunction<
+  const getExecutionSummaries: MockedFunction<
     ReconcileInvestigationStatusesDeps['getExecutionSummaries']
-  > = jest.fn().mockResolvedValue(new Map());
+  > = vi.fn().mockResolvedValue(new Map());
   const abortController = new AbortController();
 
   /** Resolves every id in the batch to the same execution. */

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type {
   KibanaResponseFactory,
   RequestHandler,
@@ -71,15 +74,15 @@ import type { estypes } from '@elastic/elasticsearch';
 
 describe('test endpoint routes', () => {
   let routerMock: SecuritySolutionPluginRouterMock;
-  let mockResponse: jest.Mocked<KibanaResponseFactory>;
+  let mockResponse: Mocked<KibanaResponseFactory>;
   let mockClusterClient: ClusterClientMock;
   let mockScopedClient: ScopedClusterClientMock;
-  let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockSavedObjectClient: Mocked<SavedObjectsClientContract>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeHandler: RequestHandler<any, any, any, any>;
   let routeConfig: VersionedRouteConfig<RouteMethod>;
-  let mockAgentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;
-  let mockAgentClient: jest.Mocked<AgentClient>;
+  let mockAgentPolicyService: Mocked<AgentPolicyServiceInterface>;
+  let mockAgentClient: Mocked<AgentClient>;
   let endpointAppContextService: EndpointAppContextService;
   let startContract: EndpointAppContextServiceStartContract;
   const noUnenrolledAgent = {
@@ -100,7 +103,7 @@ describe('test endpoint routes', () => {
     startContract = createMockEndpointAppContextServiceStartContract();
 
     (
-      startContract.fleetStartServices.packagePolicyService as jest.Mocked<PackagePolicyClient>
+      startContract.fleetStartServices.packagePolicyService as Mocked<PackagePolicyClient>
     ).list.mockImplementation(() => {
       return Promise.resolve({
         items: [],
@@ -117,9 +120,9 @@ describe('test endpoint routes', () => {
       esClient: mockScopedClient.asInternalUser,
     });
     mockAgentClient = startContract.fleetStartServices.agentService
-      .asInternalUser as jest.Mocked<AgentClient>;
+      .asInternalUser as Mocked<AgentClient>;
     mockAgentPolicyService = startContract.fleetStartServices
-      .agentPolicyService as jest.Mocked<AgentPolicyServiceInterface>;
+      .agentPolicyService as Mocked<AgentPolicyServiceInterface>;
 
     registerEndpointRoutes(routerMock, {
       ...createMockEndpointAppContext(),
@@ -149,7 +152,7 @@ describe('test endpoint routes', () => {
       );
       mockAgentClient.getAgentStatusById.mockResolvedValue('error');
       mockAgentClient.listAgents.mockResolvedValue(noUnenrolledAgent);
-      mockAgentPolicyService.getByIds = jest.fn().mockResolvedValueOnce([]);
+      mockAgentPolicyService.getByIds = vi.fn().mockResolvedValueOnce([]);
       mockScopedClient.asInternalUser.search.mockResponseOnce(searchListResponse);
     });
 
@@ -327,7 +330,7 @@ describe('test endpoint routes', () => {
     it('should use space id when retrieving Endpoint Metadata service client', async () => {
       const mockRequest = httpServerMock.createKibanaRequest();
       const mockContext = createRouteHandlerContext(mockScopedClient, mockSavedObjectClient);
-      (mockContext.securitySolution.getSpaceId as jest.Mock).mockReturnValue('foo');
+      (mockContext.securitySolution.getSpaceId as Mock).mockReturnValue('foo');
 
       ({ routeHandler, routeConfig } = getRegisteredVersionedRouteMock(
         routerMock,
@@ -335,7 +338,7 @@ describe('test endpoint routes', () => {
         HOST_METADATA_LIST_ROUTE,
         '2023-10-31'
       ));
-      const getEndpointMetadataServiceSpy = jest.spyOn(
+      const getEndpointMetadataServiceSpy = vi.spyOn(
         endpointAppContextService,
         'getEndpointMetadataService'
       );
@@ -578,7 +581,7 @@ describe('test endpoint routes', () => {
       const esSearchMock = mockScopedClient.asInternalUser.search;
       mockAgentClient.getAgent.mockResolvedValue(agentGenerator.generate({ status: 'online' }));
       esSearchMock.mockResponseOnce(response);
-      const getEndpointMetadataServiceSpy = jest.spyOn(
+      const getEndpointMetadataServiceSpy = vi.spyOn(
         endpointAppContextService,
         'getEndpointMetadataService'
       );
@@ -589,7 +592,7 @@ describe('test endpoint routes', () => {
         '2023-10-31'
       ));
       const mockContext = createRouteHandlerContext(mockScopedClient, mockSavedObjectClient);
-      (mockContext.securitySolution.getSpaceId as jest.Mock).mockReturnValue('foo');
+      (mockContext.securitySolution.getSpaceId as Mock).mockReturnValue('foo');
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 

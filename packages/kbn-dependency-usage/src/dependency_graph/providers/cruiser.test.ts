@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { identifyDependencyUsageWithCruiser as identifyDependencyUsage } from './cruiser.ts';
 import { cruise } from 'dependency-cruiser';
 
@@ -36,9 +39,12 @@ const codeOwners: Record<string, string[]> = {
   ],
 };
 
-jest.mock('dependency-cruiser', () => ({
-  cruise: jest.fn(),
-}));
+vi.mock('dependency-cruiser', () => {
+      const mocked = {
+      cruise: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockCruiseResult = {
   output: {
@@ -85,18 +91,21 @@ const mockCruiseResult = {
   },
 };
 
-jest.mock('../../lib/code_owners', () => ({
-  getCodeOwnersForFile: jest.fn().mockImplementation((filePath: string) => codeOwners[filePath]),
-  getPathsWithOwnersReversed: () => ({}),
-}));
+vi.mock('../../lib/code_owners', () => {
+      const mocked = {
+      getCodeOwnersForFile: vi.fn().mockImplementation((filePath: string) => codeOwners[filePath]),
+      getPathsWithOwnersReversed: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('identifyDependencyUsage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should respect collapseDepth param', async () => {
-    (cruise as jest.Mock).mockResolvedValue(mockCruiseResult);
+    (cruise as Mock).mockResolvedValue(mockCruiseResult);
 
     await identifyDependencyUsage([], 'rxjs', {
       groupBy: 'owner',
@@ -110,8 +119,8 @@ describe('identifyDependencyUsage', () => {
       summary: false,
     });
 
-    const [, configWithDepth2] = (cruise as jest.Mock).mock.calls[0];
-    const [, configWithDepth1] = (cruise as jest.Mock).mock.calls[1];
+    const [, configWithDepth2] = (cruise as Mock).mock.calls[0];
+    const [, configWithDepth1] = (cruise as Mock).mock.calls[1];
 
     expect(configWithDepth2.collapse).toMatchInlineSnapshot(
       `"^(x-pack/solutions/observability/plugins|x-pack/solutions/observability/packages|x-pack/solutions/security/plugins|x-pack/solutions/security/packages|x-pack/solutions/search/plugins|x-pack/solutions/search/packages|x-pack/solutions/workplaceai/plugins|x-pack/solutions/workplaceai/packages|x-pack/solutions/vectordb/plugins|x-pack/solutions/vectordb/packages|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|test)/([^/]+)/([^/]+)"`
@@ -123,8 +132,8 @@ describe('identifyDependencyUsage', () => {
   });
 
   it('should group dependencies by codeowners', async () => {
-    (cruise as jest.Mock).mockResolvedValue(mockCruiseResult);
-    const groupFilesByOwnersSpy = jest.spyOn(groupBy, 'groupFilesByOwners');
+    (cruise as Mock).mockResolvedValue(mockCruiseResult);
+    const groupFilesByOwnersSpy = vi.spyOn(groupBy, 'groupFilesByOwners');
 
     const result = await identifyDependencyUsage([], undefined, {
       groupBy: 'owner',
@@ -155,8 +164,8 @@ describe('identifyDependencyUsage', () => {
   });
 
   it('should group dependencies by source directory', async () => {
-    (cruise as jest.Mock).mockResolvedValue(mockCruiseResult);
-    const groupFilesByOwnersSpy = jest.spyOn(groupBySource, 'groupBySource');
+    (cruise as Mock).mockResolvedValue(mockCruiseResult);
+    const groupFilesByOwnersSpy = vi.spyOn(groupBySource, 'groupBySource');
 
     const result = await identifyDependencyUsage([], undefined, {
       collapseDepth: 1,
@@ -175,7 +184,7 @@ describe('identifyDependencyUsage', () => {
   });
 
   it('should search for specific dependency and return full dependents list', async () => {
-    (cruise as jest.Mock).mockResolvedValue(mockCruiseResult);
+    (cruise as Mock).mockResolvedValue(mockCruiseResult);
     const result = await identifyDependencyUsage([], 'rxjs', {
       collapseDepth: 1,
       summary: false,
@@ -203,7 +212,7 @@ describe('identifyDependencyUsage', () => {
   });
 
   it('should search for specific dependency and return only summary', async () => {
-    (cruise as jest.Mock).mockResolvedValue(mockCruiseResult);
+    (cruise as Mock).mockResolvedValue(mockCruiseResult);
     const result = await identifyDependencyUsage([], 'rxjs', {
       collapseDepth: 1,
       summary: true,
@@ -222,7 +231,7 @@ describe('identifyDependencyUsage', () => {
   });
 
   it('should handle empty cruise result', async () => {
-    (cruise as jest.Mock).mockResolvedValue({
+    (cruise as Mock).mockResolvedValue({
       output: { summary: { violations: [] }, modules: [] },
     });
 
@@ -236,7 +245,7 @@ describe('identifyDependencyUsage', () => {
   });
 
   it('should handle no violations', async () => {
-    (cruise as jest.Mock).mockResolvedValue({
+    (cruise as Mock).mockResolvedValue({
       output: { summary: { violations: [] }, modules: mockCruiseResult.output.modules },
     });
 
@@ -250,7 +259,7 @@ describe('identifyDependencyUsage', () => {
   });
 
   it('should return empty structure if specific dependency name does not exist', async () => {
-    (cruise as jest.Mock).mockResolvedValue({
+    (cruise as Mock).mockResolvedValue({
       output: { summary: { violations: [] }, modules: mockCruiseResult.output.modules },
     });
 
@@ -278,7 +287,7 @@ describe('identifyDependencyUsage', () => {
         modules: [],
       },
     };
-    (cruise as jest.Mock).mockResolvedValue(customCruiseResult);
+    (cruise as Mock).mockResolvedValue(customCruiseResult);
 
     const result = await identifyDependencyUsage([], undefined, {
       groupBy: 'owner',
@@ -331,7 +340,7 @@ describe('identifyDependencyUsage', () => {
         modules: [],
       },
     };
-    (cruise as jest.Mock).mockResolvedValue(customCruiseResult);
+    (cruise as Mock).mockResolvedValue(customCruiseResult);
 
     const result = await identifyDependencyUsage([], 'lodash', {
       groupBy: 'owner',

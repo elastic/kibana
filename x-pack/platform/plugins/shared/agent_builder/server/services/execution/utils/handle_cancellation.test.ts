@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of, Subject, toArray, firstValueFrom } from 'rxjs';
 import { isRequestAbortedError } from '@kbn/agent-builder-common';
 import { handleCancellation } from './handle_cancellation';
 
 describe('handleCancellation', () => {
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('mirrors the source when the abort signal is not triggered', async () => {
@@ -87,7 +89,7 @@ describe('handleCancellation', () => {
   });
 
   it('cuts the source and errors after the deadline if the source never terminates', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const abortController = new AbortController();
     const source$ = new Subject<number>();
     let thrown: unknown;
@@ -102,19 +104,19 @@ describe('handleCancellation', () => {
     expect(thrown).toBeUndefined();
     expect(source$.observed).toBe(true);
 
-    jest.advanceTimersByTime(999);
+    vi.advanceTimersByTime(999);
     expect(thrown).toBeUndefined();
 
-    jest.advanceTimersByTime(1);
+    vi.advanceTimersByTime(1);
     expect(isRequestAbortedError(thrown)).toBe(true);
     expect(source$.observed).toBe(false);
   });
 
   it('does not fire the deadline once the source has terminated', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const abortController = new AbortController();
     const source$ = new Subject<number>();
-    const error = jest.fn();
+    const error = vi.fn();
 
     source$.pipe(handleCancellation(abortController.signal, { deadlineMs: 1000 })).subscribe({
       error,
@@ -122,7 +124,7 @@ describe('handleCancellation', () => {
 
     abortController.abort();
     source$.complete();
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
 
     expect(error).toHaveBeenCalledTimes(1);
   });
@@ -144,10 +146,10 @@ describe('handleCancellation', () => {
   });
 
   it('tears down the source and the deadline on unsubscribe', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const abortController = new AbortController();
     const source$ = new Subject<number>();
-    const error = jest.fn();
+    const error = vi.fn();
 
     const subscription = source$
       .pipe(handleCancellation(abortController.signal, { deadlineMs: 1000 }))
@@ -155,7 +157,7 @@ describe('handleCancellation', () => {
 
     abortController.abort();
     subscription.unsubscribe();
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
 
     expect(source$.observed).toBe(false);
     expect(error).not.toHaveBeenCalled();

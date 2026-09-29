@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { HttpSetup } from '@kbn/core/public';
 
@@ -12,38 +15,47 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 import { useGenerateWorkflow } from '.';
 import { useInvalidateListWorkflows } from '../use_list_workflows';
 
-jest.mock('../../../../../../common/lib/kibana');
-jest.mock('../use_list_workflows', () => ({
-  useInvalidateListWorkflows: jest.fn(),
-}));
+vi.mock('../../../../../../common/lib/kibana');
+vi.mock('../use_list_workflows', () => {
+      const mocked = {
+      useInvalidateListWorkflows: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: jest.fn((node: unknown) => node),
-}));
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = {
+      toMountPoint: vi.fn((node: unknown) => node),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseInvalidateListWorkflows = useInvalidateListWorkflows as jest.MockedFunction<
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseInvalidateListWorkflows = useInvalidateListWorkflows as MockedFunction<
   typeof useInvalidateListWorkflows
 >;
 
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
-const mockAddInfo = jest.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
+const mockAddInfo = vi.fn();
 
-jest.mock('../../../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addError: mockAddError,
-    addInfo: mockAddInfo,
-    addSuccess: mockAddSuccess,
-  }),
-}));
+vi.mock('../../../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addError: mockAddError,
+        addInfo: mockAddInfo,
+        addSuccess: mockAddSuccess,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const GENERATE_WORKFLOW_URL = '/internal/attack_discovery/_generate_workflow';
 
 describe('useGenerateWorkflow', () => {
-  const mockInvalidateListWorkflows = jest.fn();
-  const mockHttpPost = jest.fn();
-  const mockGetUrlForApp = jest.fn(
+  const mockInvalidateListWorkflows = vi.fn();
+  const mockHttpPost = vi.fn();
+  const mockGetUrlForApp = vi.fn(
     (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
   );
 
@@ -52,7 +64,7 @@ describe('useGenerateWorkflow', () => {
   } as unknown as HttpSetup;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {

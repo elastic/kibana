@@ -7,17 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const configureClientMock = jest.fn();
-jest.doMock('./configure_client', () => ({
-  configureClient: configureClientMock,
-}));
+import { vi } from 'vitest';
 
-export const createTransportMock = jest.fn();
-jest.doMock('./create_transport', () => ({
-  createTransport: createTransportMock,
-}));
+export const configureClientMock = vi.fn();
+vi.doMock('./configure_client', () => {
+      const mocked = {
+      configureClient: configureClientMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const createInternalErrorHandlerMock = jest.fn();
-jest.doMock('./retry_unauthorized', () => ({
-  createInternalErrorHandler: createInternalErrorHandlerMock,
-}));
+export const createTransportMock = vi.fn();
+vi.doMock('./create_transport', () => {
+      const mocked = {
+      createTransport: createTransportMock,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+export const createInternalErrorHandlerMock = vi.fn();
+vi.doMock('./retry_unauthorized', () => {
+      const mocked = {
+      createInternalErrorHandler: createInternalErrorHandlerMock,
+    };
+      return { ...mocked, default: mocked };
+    });

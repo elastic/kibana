@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -21,36 +23,36 @@ import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 import { allowedExperimentalValues } from '../../../../../common';
 
-const mockUpsertSources = jest.fn();
-jest.mock('./initialisation_sources_service', () => {
+const mockUpsertSources = vi.fn();
+vi.mock('./initialisation_sources_service', () => {
   return {
     createInitialisationSourcesService: () => () => mockUpsertSources(),
   };
 });
 
-const mockStartPrivilegeMonitoringTask = jest.fn();
-jest.mock('../tasks/privilege_monitoring_task', () => {
+const mockStartPrivilegeMonitoringTask = vi.fn();
+vi.mock('../tasks/privilege_monitoring_task', () => {
   return {
     startPrivilegeMonitoringTask: () => mockStartPrivilegeMonitoringTask(),
-    removePrivilegeMonitoringTask: jest.fn().mockResolvedValue(undefined),
+    removePrivilegeMonitoringTask: vi.fn().mockResolvedValue(undefined),
   };
 });
 
-const mockEngineDescriptorInit = jest.fn();
-const mockFind = jest.fn().mockResolvedValue({
+const mockEngineDescriptorInit = vi.fn();
+const mockFind = vi.fn().mockResolvedValue({
   saved_objects: [],
   total: 0,
 });
-jest.mock('../saved_objects', () => {
+vi.mock('../saved_objects', () => {
   return {
-    MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
-      findByIndex: jest.fn(),
-      create: jest.fn(),
+    MonitoringEntitySourceDescriptorClient: vi.fn().mockImplementation(() => ({
+      findByIndex: vi.fn(),
+      create: vi.fn(),
       find: mockFind,
     })),
-    PrivilegeMonitoringEngineDescriptorClient: jest.fn().mockImplementation(() => ({
+    PrivilegeMonitoringEngineDescriptorClient: vi.fn().mockImplementation(() => ({
       init: mockEngineDescriptorInit,
-      update: jest.fn(),
+      update: vi.fn(),
     })),
   };
 });
@@ -59,7 +61,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const loggerMock = loggingSystemMock.createLogger();
-  const auditMock = { log: jest.fn().mockReturnValue(undefined) } as unknown as AuditLogger;
+  const auditMock = { log: vi.fn().mockReturnValue(undefined) } as unknown as AuditLogger;
   const telemetryMock = analyticsServiceMock.createAnalyticsServiceSetup();
 
   const savedObjectServiceMock = savedObjectsServiceMock.createStartContract();
@@ -79,7 +81,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
   let dataClient: PrivilegeMonitoringDataClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     dataClient = new PrivilegeMonitoringDataClient(deps);
     initService = createInitialisationService(dataClient, mockSavedObjectClient);
   });
@@ -109,8 +111,8 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
       const fakeError = new Error('Something went wrong');
       mockUpsertSources.mockRejectedValue(fakeError);
 
-      const mockAudit = jest.fn();
-      const mockLog = jest.fn();
+      const mockAudit = vi.fn();
+      const mockLog = vi.fn();
 
       dataClient.audit = mockAudit;
       dataClient.log = mockLog;

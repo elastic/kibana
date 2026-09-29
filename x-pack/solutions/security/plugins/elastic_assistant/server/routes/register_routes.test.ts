@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
@@ -62,122 +65,122 @@ import { getMissingIndexPrivilegesInternalRoute } from './attack_discovery/privi
 import { suggestUsersRoute } from './users/suggest';
 import { createAttackDiscoveryAlertsRoute } from './test_internal/create_attack_discovery_alerts_route';
 
-jest.mock('./alert_summary/find_route');
-const findAlertSummaryRouteMock = findAlertSummaryRoute as jest.Mock;
+vi.mock('./alert_summary/find_route');
+const findAlertSummaryRouteMock = findAlertSummaryRoute as Mock;
 
 // Attack Discovery
-jest.mock('./attack_discovery/public/get/find_attack_discoveries');
-const findAttackDiscoveriesRouteMock = findAttackDiscoveriesRoute as jest.Mock;
+vi.mock('./attack_discovery/public/get/find_attack_discoveries');
+const findAttackDiscoveriesRouteMock = findAttackDiscoveriesRoute as Mock;
 
-jest.mock('./attack_discovery/public/get/get_attack_discovery_generation');
-const getAttackDiscoveryGenerationRouteMock = getAttackDiscoveryGenerationRoute as jest.Mock;
+vi.mock('./attack_discovery/public/get/get_attack_discovery_generation');
+const getAttackDiscoveryGenerationRouteMock = getAttackDiscoveryGenerationRoute as Mock;
 
-jest.mock('./attack_discovery/public/post/post_attack_discovery_bulk');
-const postAttackDiscoveryBulkRouteMock = postAttackDiscoveryBulkRoute as jest.Mock;
+vi.mock('./attack_discovery/public/post/post_attack_discovery_bulk');
+const postAttackDiscoveryBulkRouteMock = postAttackDiscoveryBulkRoute as Mock;
 
-jest.mock('./attack_discovery/public/get/get_attack_discovery_generations');
-const getAttackDiscoveryGenerationsRouteMock = getAttackDiscoveryGenerationsRoute as jest.Mock;
+vi.mock('./attack_discovery/public/get/get_attack_discovery_generations');
+const getAttackDiscoveryGenerationsRouteMock = getAttackDiscoveryGenerationsRoute as Mock;
 
-jest.mock('./attack_discovery/public/post/post_attack_discovery_generations_dismiss');
+vi.mock('./attack_discovery/public/post/post_attack_discovery_generations_dismiss');
 const postAttackDiscoveryGenerationsDismissRouteMock =
-  postAttackDiscoveryGenerationsDismissRoute as jest.Mock;
+  postAttackDiscoveryGenerationsDismissRoute as Mock;
 
-jest.mock('./attack_discovery/public/post/post_attack_discovery_generate');
-const postAttackDiscoveryGenerateRouteMock = postAttackDiscoveryGenerateRoute as jest.Mock;
+vi.mock('./attack_discovery/public/post/post_attack_discovery_generate');
+const postAttackDiscoveryGenerateRouteMock = postAttackDiscoveryGenerateRoute as Mock;
 
 // Attack Discovery Schedules
-jest.mock('./attack_discovery/schedules/public/post/create');
-const createAttackDiscoverySchedulesRouteMock = createAttackDiscoverySchedulesRoute as jest.Mock;
+vi.mock('./attack_discovery/schedules/public/post/create');
+const createAttackDiscoverySchedulesRouteMock = createAttackDiscoverySchedulesRoute as Mock;
 
-jest.mock('./attack_discovery/schedules/public/get/get');
-const getAttackDiscoverySchedulesRouteMock = getAttackDiscoverySchedulesRoute as jest.Mock;
+vi.mock('./attack_discovery/schedules/public/get/get');
+const getAttackDiscoverySchedulesRouteMock = getAttackDiscoverySchedulesRoute as Mock;
 
-jest.mock('./attack_discovery/schedules/public/get/find');
-const findAttackDiscoverySchedulesRouteMock = findAttackDiscoverySchedulesRoute as jest.Mock;
+vi.mock('./attack_discovery/schedules/public/get/find');
+const findAttackDiscoverySchedulesRouteMock = findAttackDiscoverySchedulesRoute as Mock;
 
-jest.mock('./attack_discovery/privileges/get_missing_privileges');
+vi.mock('./attack_discovery/privileges/get_missing_privileges');
 const getMissingIndexPrivilegesInternalRouteMock =
-  getMissingIndexPrivilegesInternalRoute as jest.Mock;
+  getMissingIndexPrivilegesInternalRoute as Mock;
 
-jest.mock('./attack_discovery/schedules/public/put/update');
-const updateAttackDiscoverySchedulesRouteMock = updateAttackDiscoverySchedulesRoute as jest.Mock;
+vi.mock('./attack_discovery/schedules/public/put/update');
+const updateAttackDiscoverySchedulesRouteMock = updateAttackDiscoverySchedulesRoute as Mock;
 
-jest.mock('./attack_discovery/schedules/public/delete/delete');
-const deleteAttackDiscoverySchedulesRouteMock = deleteAttackDiscoverySchedulesRoute as jest.Mock;
+vi.mock('./attack_discovery/schedules/public/delete/delete');
+const deleteAttackDiscoverySchedulesRouteMock = deleteAttackDiscoverySchedulesRoute as Mock;
 
-jest.mock('./attack_discovery/schedules/public/post/disable');
-const disableAttackDiscoverySchedulesRouteMock = disableAttackDiscoverySchedulesRoute as jest.Mock;
+vi.mock('./attack_discovery/schedules/public/post/disable');
+const disableAttackDiscoverySchedulesRouteMock = disableAttackDiscoverySchedulesRoute as Mock;
 
-jest.mock('./attack_discovery/schedules/public/post/enable');
-const enableAttackDiscoverySchedulesRouteMock = enableAttackDiscoverySchedulesRoute as jest.Mock;
-jest.mock('./attack_discovery/schedules/public/post/bulk_delete');
+vi.mock('./attack_discovery/schedules/public/post/enable');
+const enableAttackDiscoverySchedulesRouteMock = enableAttackDiscoverySchedulesRoute as Mock;
+vi.mock('./attack_discovery/schedules/public/post/bulk_delete');
 const bulkDeleteAttackDiscoverySchedulesRouteMock =
-  bulkDeleteAttackDiscoverySchedulesRoute as jest.Mock;
-jest.mock('./attack_discovery/schedules/public/post/bulk_disable');
+  bulkDeleteAttackDiscoverySchedulesRoute as Mock;
+vi.mock('./attack_discovery/schedules/public/post/bulk_disable');
 const bulkDisableAttackDiscoverySchedulesRouteMock =
-  bulkDisableAttackDiscoverySchedulesRoute as jest.Mock;
-jest.mock('./attack_discovery/schedules/public/post/bulk_enable');
+  bulkDisableAttackDiscoverySchedulesRoute as Mock;
+vi.mock('./attack_discovery/schedules/public/post/bulk_enable');
 const bulkEnableAttackDiscoverySchedulesRouteMock =
-  bulkEnableAttackDiscoverySchedulesRoute as jest.Mock;
-jest.mock('./users/suggest');
-const suggestUsersRouteMock = suggestUsersRoute as jest.Mock;
-jest.mock('./test_internal/create_attack_discovery_alerts_route');
-const createAttackDiscoveryAlertsRouteMock = createAttackDiscoveryAlertsRoute as jest.Mock;
+  bulkEnableAttackDiscoverySchedulesRoute as Mock;
+vi.mock('./users/suggest');
+const suggestUsersRouteMock = suggestUsersRoute as Mock;
+vi.mock('./test_internal/create_attack_discovery_alerts_route');
+const createAttackDiscoveryAlertsRouteMock = createAttackDiscoveryAlertsRoute as Mock;
 
-jest.mock('./user_conversations/create_route');
-const createConversationRouteMock = createConversationRoute as jest.Mock;
-jest.mock('./user_conversations/delete_route');
-const deleteConversationRouteMock = deleteConversationRoute as jest.Mock;
-jest.mock('./user_conversations/read_route');
-const readConversationRouteMock = readConversationRoute as jest.Mock;
-jest.mock('./user_conversations/update_route');
-const updateConversationRouteMock = updateConversationRoute as jest.Mock;
-jest.mock('./user_conversations/find_route');
-const findUserConversationsRouteMock = findUserConversationsRoute as jest.Mock;
-jest.mock('./user_conversations/bulk_actions_route');
-const bulkActionConversationsRouteMock = bulkActionConversationsRoute as jest.Mock;
-jest.mock('./user_conversations/append_conversation_messages_route');
-const appendConversationMessageRouteMock = appendConversationMessageRoute as jest.Mock;
-jest.mock('./knowledge_base/get_knowledge_base_status');
-const getKnowledgeBaseStatusRouteMock = getKnowledgeBaseStatusRoute as jest.Mock;
-jest.mock('./knowledge_base/post_knowledge_base');
-const postKnowledgeBaseRouteMock = postKnowledgeBaseRoute as jest.Mock;
-jest.mock('./evaluate/get_evaluate');
-const getEvaluateRouteMock = getEvaluateRoute as jest.Mock;
-jest.mock('./evaluate/post_evaluate');
-const postEvaluateRouteMock = postEvaluateRoute as jest.Mock;
-jest.mock('./capabilities/get_capabilities_route');
-const getCapabilitiesRouteMock = getCapabilitiesRoute as jest.Mock;
-jest.mock('./prompts/bulk_actions_route');
-const bulkPromptsRouteMock = bulkPromptsRoute as jest.Mock;
-jest.mock('./prompts/find_route');
-const findPromptsRouteMock = findPromptsRoute as jest.Mock;
-jest.mock('./anonymization_fields/bulk_actions_route');
-const bulkActionAnonymizationFieldsRouteMock = bulkActionAnonymizationFieldsRoute as jest.Mock;
-jest.mock('./anonymization_fields/find_route');
-const findAnonymizationFieldsRouteMock = findAnonymizationFieldsRoute as jest.Mock;
-jest.mock('./chat/chat_complete_route');
-const chatCompleteRouteMock = chatCompleteRoute as jest.Mock;
-jest.mock('./post_actions_connector_execute');
-const postActionsConnectorExecuteRouteMock = postActionsConnectorExecuteRoute as jest.Mock;
-jest.mock('./knowledge_base/entries/bulk_actions_route');
-const bulkActionKnowledgeBaseEntriesRouteMock = bulkActionKnowledgeBaseEntriesRoute as jest.Mock;
-jest.mock('./knowledge_base/entries/create_route');
-const createKnowledgeBaseEntryRouteMock = createKnowledgeBaseEntryRoute as jest.Mock;
-jest.mock('./knowledge_base/entries/find_route');
-const findKnowledgeBaseEntriesRouteMock = findKnowledgeBaseEntriesRoute as jest.Mock;
-jest.mock('./defend_insights');
-const getDefendInsightRouteMock = getDefendInsightRoute as jest.Mock;
-const getDefendInsightsRouteMock = getDefendInsightsRoute as jest.Mock;
-const postDefendInsightsRouteMock = postDefendInsightsRoute as jest.Mock;
-jest.mock('./knowledge_base/entries/delete_route');
-const deleteKnowledgeBaseEntryRouteMock = deleteKnowledgeBaseEntryRoute as jest.Mock;
-jest.mock('./knowledge_base/entries/update_route');
-const updateKnowledgeBaseEntryRouteMock = updateKnowledgeBaseEntryRoute as jest.Mock;
-jest.mock('./knowledge_base/entries/get_route');
-const getKnowledgeBaseEntryRouteMock = getKnowledgeBaseEntryRoute as jest.Mock;
-jest.mock('./alert_summary/bulk_actions_route');
-const bulkAlertSummaryRouteMock = bulkAlertSummaryRoute as jest.Mock;
+vi.mock('./user_conversations/create_route');
+const createConversationRouteMock = createConversationRoute as Mock;
+vi.mock('./user_conversations/delete_route');
+const deleteConversationRouteMock = deleteConversationRoute as Mock;
+vi.mock('./user_conversations/read_route');
+const readConversationRouteMock = readConversationRoute as Mock;
+vi.mock('./user_conversations/update_route');
+const updateConversationRouteMock = updateConversationRoute as Mock;
+vi.mock('./user_conversations/find_route');
+const findUserConversationsRouteMock = findUserConversationsRoute as Mock;
+vi.mock('./user_conversations/bulk_actions_route');
+const bulkActionConversationsRouteMock = bulkActionConversationsRoute as Mock;
+vi.mock('./user_conversations/append_conversation_messages_route');
+const appendConversationMessageRouteMock = appendConversationMessageRoute as Mock;
+vi.mock('./knowledge_base/get_knowledge_base_status');
+const getKnowledgeBaseStatusRouteMock = getKnowledgeBaseStatusRoute as Mock;
+vi.mock('./knowledge_base/post_knowledge_base');
+const postKnowledgeBaseRouteMock = postKnowledgeBaseRoute as Mock;
+vi.mock('./evaluate/get_evaluate');
+const getEvaluateRouteMock = getEvaluateRoute as Mock;
+vi.mock('./evaluate/post_evaluate');
+const postEvaluateRouteMock = postEvaluateRoute as Mock;
+vi.mock('./capabilities/get_capabilities_route');
+const getCapabilitiesRouteMock = getCapabilitiesRoute as Mock;
+vi.mock('./prompts/bulk_actions_route');
+const bulkPromptsRouteMock = bulkPromptsRoute as Mock;
+vi.mock('./prompts/find_route');
+const findPromptsRouteMock = findPromptsRoute as Mock;
+vi.mock('./anonymization_fields/bulk_actions_route');
+const bulkActionAnonymizationFieldsRouteMock = bulkActionAnonymizationFieldsRoute as Mock;
+vi.mock('./anonymization_fields/find_route');
+const findAnonymizationFieldsRouteMock = findAnonymizationFieldsRoute as Mock;
+vi.mock('./chat/chat_complete_route');
+const chatCompleteRouteMock = chatCompleteRoute as Mock;
+vi.mock('./post_actions_connector_execute');
+const postActionsConnectorExecuteRouteMock = postActionsConnectorExecuteRoute as Mock;
+vi.mock('./knowledge_base/entries/bulk_actions_route');
+const bulkActionKnowledgeBaseEntriesRouteMock = bulkActionKnowledgeBaseEntriesRoute as Mock;
+vi.mock('./knowledge_base/entries/create_route');
+const createKnowledgeBaseEntryRouteMock = createKnowledgeBaseEntryRoute as Mock;
+vi.mock('./knowledge_base/entries/find_route');
+const findKnowledgeBaseEntriesRouteMock = findKnowledgeBaseEntriesRoute as Mock;
+vi.mock('./defend_insights');
+const getDefendInsightRouteMock = getDefendInsightRoute as Mock;
+const getDefendInsightsRouteMock = getDefendInsightsRoute as Mock;
+const postDefendInsightsRouteMock = postDefendInsightsRoute as Mock;
+vi.mock('./knowledge_base/entries/delete_route');
+const deleteKnowledgeBaseEntryRouteMock = deleteKnowledgeBaseEntryRoute as Mock;
+vi.mock('./knowledge_base/entries/update_route');
+const updateKnowledgeBaseEntryRouteMock = updateKnowledgeBaseEntryRoute as Mock;
+vi.mock('./knowledge_base/entries/get_route');
+const getKnowledgeBaseEntryRouteMock = getKnowledgeBaseEntryRoute as Mock;
+vi.mock('./alert_summary/bulk_actions_route');
+const bulkAlertSummaryRouteMock = bulkAlertSummaryRoute as Mock;
 
 describe('registerRoutes', () => {
   const loggerMock = loggingSystemMock.createLogger();
@@ -185,7 +188,7 @@ describe('registerRoutes', () => {
   const config = { elserInferenceId: defaultInferenceEndpoints.ELSER, responseTimeout: 60000 };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     server = serverMock.create();
     registerRoutes(server.router, loggerMock, config, false);
@@ -392,7 +395,7 @@ describe('registerRoutes with data generator routes enabled', () => {
   const config = { elserInferenceId: defaultInferenceEndpoints.ELSER, responseTimeout: 60000 };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     server = serverMock.create();
     registerRoutes(server.router, loggerMock, config, true);

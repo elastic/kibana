@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   coreMock,
   elasticsearchServiceMock,
@@ -49,7 +51,7 @@ const setup = () => {
     client,
     binding,
     params: {
-      getSpaceId: jest.fn().mockReturnValue('default'),
+      getSpaceId: vi.fn().mockReturnValue('default'),
       core,
       bindings,
       logger: loggingSystemMock.createLogger(),
@@ -57,8 +59,8 @@ const setup = () => {
       spaceId: 'default',
       request: httpServerMock.createKibanaRequest(),
       accountId: 'a',
-      write: jest.fn().mockResolvedValue('saved'),
-      getWorkflowRevision: jest.fn().mockResolvedValue(null),
+      write: vi.fn().mockResolvedValue('saved'),
+      getWorkflowRevision: vi.fn().mockResolvedValue(null),
     },
   };
 };

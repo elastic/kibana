@@ -7,20 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { File } from '../file';
 import { lintFiles } from './lint_files';
 
-jest.mock('execa', () => jest.fn());
-jest.mock('./constants', () => ({
-  LINT_LOG_PREFIX: '[oxlint]',
-  OXLINT_CONFIG_PATH: '.oxlintrc.json',
-  oxlintBinPath: '/bin/oxlint',
-}));
+vi.mock('execa', () => vi.fn());
+vi.mock('./constants', () => {
+      const mocked = {
+      LINT_LOG_PREFIX: '[oxlint]',
+      OXLINT_CONFIG_PATH: '.oxlintrc.json',
+      oxlintBinPath: '/bin/oxlint',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockExeca = jest.requireMock('execa') as jest.Mock;
+const mockExeca = (await vi.importMock('execa')) as Mock;
 
 interface FakeRun {
   exitCode: number;

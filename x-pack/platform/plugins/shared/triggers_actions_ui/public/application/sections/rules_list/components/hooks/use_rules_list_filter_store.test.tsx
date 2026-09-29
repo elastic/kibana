@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import * as useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useRulesListFilterStore } from './use_rules_list_filter_store';
 
-jest.mock('@kbn/kibana-utils-plugin/public');
-const { createKbnUrlStateStorage } = jest.requireMock('@kbn/kibana-utils-plugin/public');
+vi.mock('@kbn/kibana-utils-plugin/public');
+const { createKbnUrlStateStorage } = (await vi.importMock('@kbn/kibana-utils-plugin/public'));
 
-const useUrlStateStorageGetMock = jest.fn();
-const useUrlStateStorageSetMock = jest.fn();
-const setRulesListFilterLocalMock = jest.fn();
+const useUrlStateStorageGetMock = vi.fn();
+const useUrlStateStorageSetMock = vi.fn();
+const setRulesListFilterLocalMock = vi.fn();
 const LOCAL_STORAGE_KEY = 'test_local';
 describe('useRulesListFilterStore', () => {
   beforeAll(() => {
@@ -25,14 +27,14 @@ describe('useRulesListFilterStore', () => {
   });
 
   beforeEach(() => {
-    jest
+    vi
       .spyOn(useLocalStorage, 'default')
       .mockImplementation(() => [null, setRulesListFilterLocalMock, () => {}]);
     useUrlStateStorageGetMock.mockReturnValue(null);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Should return empty filter when url query param and local storage and props are empty', async () => {
@@ -84,7 +86,7 @@ describe('useRulesListFilterStore', () => {
   });
 
   it('Should return the local storage params as filter when url query param is empty', () => {
-    jest.spyOn(useLocalStorage, 'default').mockImplementation(() => [
+    vi.spyOn(useLocalStorage, 'default').mockImplementation(() => [
       {
         actionTypes: ['localStorage-actionType-filter'],
         lastResponse: ['localStorage-lastResponse-filter'],
@@ -126,7 +128,7 @@ describe('useRulesListFilterStore', () => {
   });
 
   it('Should return the url params as filter when url query param is empty', () => {
-    jest.spyOn(useLocalStorage, 'default').mockImplementation(() => [
+    vi.spyOn(useLocalStorage, 'default').mockImplementation(() => [
       {
         actionTypes: ['localStorage-actionType-filter'],
         lastResponse: ['localStorage-lastResponse-filter'],

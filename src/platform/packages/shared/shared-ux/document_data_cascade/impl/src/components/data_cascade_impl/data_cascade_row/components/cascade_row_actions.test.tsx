@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -17,22 +19,22 @@ const defaultHeaderRowActions = [
   {
     label: 'Action 1',
     iconType: 'pencil',
-    onClick: jest.fn(),
+    onClick: vi.fn(),
   },
   {
     label: 'Action 2',
     iconType: 'trash',
-    onClick: jest.fn(),
+    onClick: vi.fn(),
   },
   {
     label: 'Action 3',
     iconType: 'eye',
-    onClick: jest.fn(),
+    onClick: vi.fn(),
   },
   {
     label: 'Action 4',
     iconType: 'inspect',
-    onClick: jest.fn(),
+    onClick: vi.fn(),
   },
 ];
 

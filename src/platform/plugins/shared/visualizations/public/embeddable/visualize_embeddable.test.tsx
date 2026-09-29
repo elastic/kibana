@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import { waitFor } from '@testing-library/react';
 import { apiPublishesEsql } from '@kbn/presentation-publishing';
@@ -17,14 +19,17 @@ import { BehaviorSubject } from 'rxjs';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import type { SerializedVis } from '../vis';
 
-jest.mock('./get_expression_renderer_props', () => ({
-  getExpressionRendererProps: jest.fn(async () => ({
-    params: { expression: 'mock expression' },
-    abortController: new AbortController(),
-  })),
-}));
+vi.mock('./get_expression_renderer_props', () => {
+      const mocked = {
+      getExpressionRendererProps: vi.fn(async () => ({
+        params: { expression: 'mock expression' },
+        abortController: new AbortController(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetExpressionRendererProps = jest.mocked(getExpressionRendererProps);
+const mockGetExpressionRendererProps = vi.mocked(getExpressionRendererProps);
 
 const mockVisTypeRegistry: Record<
   string,
@@ -43,7 +48,7 @@ const mockVisTypeRegistry: Record<
   'vega-no-esql': { name: 'vega' },
 };
 
-jest.mock('./create_vis_instance', () => {
+vi.mock('./create_vis_instance', () => {
   return {
     createVisInstance: async (serializedVis: SerializedVis) => ({
       ...serializedVis,
@@ -52,8 +57,8 @@ jest.mock('./create_vis_instance', () => {
       },
       serialize: () => serializedVis,
       uiState: {
-        on: jest.fn(),
-        off: jest.fn(),
+        on: vi.fn(),
+        off: vi.fn(),
       },
     }),
   };
@@ -61,78 +66,86 @@ jest.mock('./create_vis_instance', () => {
 
 describe('visualizeEmbeddable', () => {
   let embeddableApi: VisualizeApi;
-  beforeEach((done) => {
-    mockGetExpressionRendererProps.mockClear();
-    const parent = {};
-    const uuid = '1';
-    const finalizeApi = (api: any) => ({
-      ...api,
-      uuid,
-      parent,
-      type: VISUALIZE_EMBEDDABLE_TYPE,
-      phase$: new BehaviorSubject(undefined),
-    });
-    visualizeEmbeddableFactory
-      .buildEmbeddable({
-        initializeDrilldownsManager,
-        initialState: {
-          savedVis: {
-            title: 'count',
-            type: 'metric',
-            data: {
-              aggs: [
-                {
-                  id: '1',
-                  enabled: true,
-                  type: 'count',
-                  params: {
-                    emptyAsNull: false,
+  beforeEach(() =>
+  new Promise<void>((resolve, reject) => {
+  const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+      mockGetExpressionRendererProps.mockClear();
+      const parent = {};
+      const uuid = '1';
+      const finalizeApi = (api: any) => ({
+        ...api,
+        uuid,
+        parent,
+        type: VISUALIZE_EMBEDDABLE_TYPE,
+        phase$: new BehaviorSubject(undefined),
+      });
+      visualizeEmbeddableFactory
+        .buildEmbeddable({
+          initializeDrilldownsManager,
+          initialState: {
+            savedVis: {
+              title: 'count',
+              type: 'metric',
+              data: {
+                aggs: [
+                  {
+                    id: '1',
+                    enabled: true,
+                    type: 'count',
+                    params: {
+                      emptyAsNull: false,
+                    },
+                    schema: 'metric',
                   },
-                  schema: 'metric',
+                ],
+                searchSource: {
+                  query: {
+                    query: '',
+                    language: 'kuery',
+                  },
+                  filter: [],
+                  index: '90943e30-9a47-11e8-b64d-95841ca0b247',
                 },
-              ],
-              searchSource: {
-                query: {
-                  query: '',
-                  language: 'kuery',
-                },
-                filter: [],
-                index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+              },
+              params: {
+                type: 'metric',
+                metric: {},
               },
             },
-            params: {
-              type: 'metric',
-              metric: {},
-            },
           },
-        },
-        finalizeApi,
-        uuid: '1',
-        parentApi: {},
-      })
-      .then(({ api }) => {
-        embeddableApi = api;
-        done();
-      })
-      .catch(done);
-  });
+          finalizeApi,
+          uuid: '1',
+          parentApi: {},
+        })
+        .then(({ api }) => {
+          embeddableApi = api;
+          done();
+        })
+        .catch(done);
+    
+  }));
 
   describe('anyStateChange$', () => {
-    test('should not emit on subscribe and emit when any state changes', (done) => {
-      embeddableApi.anyStateChange$.subscribe(() => {
-        try {
-          const { title } = embeddableApi.serializeState();
-          expect(title).toBe('cute puppies');
-        } catch (error) {
-          // title assertion fails when
-          // anyStateChange$ emits on subscribe
-          done(error);
-          return;
-        }
-        done();
-      });
-      embeddableApi.setTitle('cute puppies');
-    });
+    test('should not emit on subscribe and emit when any state changes', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              embeddableApi.anyStateChange$.subscribe(() => {
+                try {
+                  const { title } = embeddableApi.serializeState();
+                  expect(title).toBe('cute puppies');
+                } catch (error) {
+                  // title assertion fails when
+                  // anyStateChange$ emits on subscribe
+                  done(error);
+                  return;
+                }
+                done();
+              });
+              embeddableApi.setTitle('cute puppies');
+            
+        }));
   });
 
   describe('esql$', () => {

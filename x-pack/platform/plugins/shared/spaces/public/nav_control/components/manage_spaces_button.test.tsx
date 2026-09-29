@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
@@ -15,7 +17,7 @@ describe('ManageSpacesButton', () => {
   it('renders as expected', () => {
     const component = (
       <ManageSpacesButton
-        navigateToApp={jest.fn()}
+        navigateToApp={vi.fn()}
         capabilities={{
           navLinks: {},
           management: {},
@@ -32,7 +34,7 @@ describe('ManageSpacesButton', () => {
   it(`doesn't render if user profile forbids managing spaces`, () => {
     const component = (
       <ManageSpacesButton
-        navigateToApp={jest.fn()}
+        navigateToApp={vi.fn()}
         capabilities={{
           navLinks: {},
           management: {},

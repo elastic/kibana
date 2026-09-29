@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { AggParamsTerms, IAggConfig } from '@kbn/data-plugin/common';
 import { METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-plugin/common';
@@ -15,15 +17,21 @@ import type { TermsColumn } from './types';
 import type { SchemaConfig } from '../../..';
 import type { AnyMetricColumnWithSourceFieldWithMeta } from '../../types';
 
-const mockConvertMetricToColumns = jest.fn();
+const mockConvertMetricToColumns = vi.fn();
 
-jest.mock('../metrics', () => ({
-  convertMetricToColumns: jest.fn(() => mockConvertMetricToColumns()),
-}));
+vi.mock('../metrics', () => {
+      const mocked = {
+      convertMetricToColumns: vi.fn(() => mockConvertMetricToColumns()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../vis_schemas', () => ({
-  convertToSchemaConfig: jest.fn(() => ({})),
-}));
+vi.mock('../../../vis_schemas', () => {
+      const mocked = {
+      convertToSchemaConfig: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('convertToDateHistogramColumn', () => {
   const visType = 'heatmap';
@@ -68,7 +76,7 @@ describe('convertToDateHistogramColumn', () => {
   ];
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test.each<

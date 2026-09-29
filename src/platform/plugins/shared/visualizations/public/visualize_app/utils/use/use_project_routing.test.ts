@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import type { ProjectRouting } from '@kbn/es-query';
@@ -16,7 +19,7 @@ import { createVisualizeServicesMock } from '../mocks';
 import type { CPSPluginStart } from '@kbn/cps/public';
 
 describe('useProjectRouting', () => {
-  let mockServices: jest.Mocked<VisualizeServices>;
+  let mockServices: Mocked<VisualizeServices>;
   let mockProjectRouting$: BehaviorSubject<ProjectRouting | undefined>;
 
   beforeEach(() => {
@@ -46,8 +49,8 @@ describe('useProjectRouting', () => {
     const mockProjectRouting: ProjectRouting = `alias:_*`;
     mockServices.cps = {
       cpsManager: {
-        getProjectRouting: jest.fn(() => mockProjectRouting),
-        getProjectRouting$: jest.fn(() => mockProjectRouting$),
+        getProjectRouting: vi.fn(() => mockProjectRouting),
+        getProjectRouting$: vi.fn(() => mockProjectRouting$),
       },
     } as unknown as CPSPluginStart;
 
@@ -66,8 +69,8 @@ describe('useProjectRouting', () => {
 
     mockServices.cps = {
       cpsManager: {
-        getProjectRouting: jest.fn(() => mockProjectRouting),
-        getProjectRouting$: jest.fn(() => mockProjectRouting$),
+        getProjectRouting: vi.fn(() => mockProjectRouting),
+        getProjectRouting$: vi.fn(() => mockProjectRouting$),
       },
     } as unknown as CPSPluginStart;
 
@@ -80,8 +83,8 @@ describe('useProjectRouting', () => {
     const mockProjectRouting: ProjectRouting = `_alias:_origin`;
     mockServices.cps = {
       cpsManager: {
-        getProjectRouting: jest.fn(() => mockProjectRouting),
-        getProjectRouting$: jest.fn(() => mockProjectRouting$),
+        getProjectRouting: vi.fn(() => mockProjectRouting),
+        getProjectRouting$: vi.fn(() => mockProjectRouting$),
       },
     } as unknown as CPSPluginStart;
 
@@ -112,8 +115,8 @@ describe('useProjectRouting', () => {
 
     mockServices.cps = {
       cpsManager: {
-        getProjectRouting: jest.fn(() => mockProjectRouting),
-        getProjectRouting$: jest.fn(() => mockProjectRouting$),
+        getProjectRouting: vi.fn(() => mockProjectRouting),
+        getProjectRouting$: vi.fn(() => mockProjectRouting$),
       },
     } as unknown as CPSPluginStart;
 
@@ -137,15 +140,15 @@ describe('useProjectRouting', () => {
   });
 
   it('should cleanup subscriptions on unmount', () => {
-    const unsubscribeMock = jest.fn();
+    const unsubscribeMock = vi.fn();
     mockProjectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
     const originalSubscribe = mockProjectRouting$.subscribe.bind(mockProjectRouting$);
 
     // Spy on subscribe to track unsubscribe calls
-    mockProjectRouting$.subscribe = jest.fn((...args: any[]) => {
+    mockProjectRouting$.subscribe = vi.fn((...args: any[]) => {
       const subscription = originalSubscribe(...args);
       const originalUnsubscribe = subscription.unsubscribe.bind(subscription);
-      subscription.unsubscribe = jest.fn(() => {
+      subscription.unsubscribe = vi.fn(() => {
         unsubscribeMock();
         originalUnsubscribe();
       });
@@ -154,8 +157,8 @@ describe('useProjectRouting', () => {
 
     mockServices.cps = {
       cpsManager: {
-        getProjectRouting: jest.fn(() => undefined),
-        getProjectRouting$: jest.fn(() => mockProjectRouting$),
+        getProjectRouting: vi.fn(() => undefined),
+        getProjectRouting$: vi.fn(() => mockProjectRouting$),
       },
     } as any;
 
@@ -176,8 +179,8 @@ describe('useProjectRouting', () => {
 
     mockServices.cps = {
       cpsManager: {
-        getProjectRouting: jest.fn(() => mockProjectRouting),
-        getProjectRouting$: jest.fn(() => mockProjectRouting$),
+        getProjectRouting: vi.fn(() => mockProjectRouting),
+        getProjectRouting$: vi.fn(() => mockProjectRouting$),
       },
     } as unknown as CPSPluginStart;
 

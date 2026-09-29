@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act } from '@testing-library/react';
 
@@ -23,12 +25,12 @@ describe.skip('step select agent policy', () => {
   const render = () =>
     (renderResult = testRenderer.render(
       <AgentPolicySelection
-        setSelectedPolicyId={jest.fn()}
+        setSelectedPolicyId={vi.fn()}
         selectedPolicyId={agentPolicies[0].id}
         agentPolicies={agentPolicies}
         withKeySelection={false}
         excludeFleetServer={true}
-        onClickCreatePolicy={jest.fn()}
+        onClickCreatePolicy={vi.fn()}
         isFleetServerPolicy={false}
       />
     ));

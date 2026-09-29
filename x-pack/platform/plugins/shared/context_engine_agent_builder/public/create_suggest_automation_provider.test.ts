@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ChatEventType, ToolResultType } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -48,7 +50,7 @@ const createProvider = ({
   hasWorkflowsCreatePrivilege?: boolean;
   hasWorkflowsExecutePrivilege?: boolean;
 } = {}) => {
-  const openChat = jest.fn();
+  const openChat = vi.fn();
   const activeConversation$ = new BehaviorSubject<{ id?: string } | null>({
     id: 'conversation-1',
   });
@@ -56,7 +58,7 @@ const createProvider = ({
     type: ChatEventType;
     data: Record<string, unknown>;
   }>();
-  const getChatEvents$ = jest.fn().mockReturnValue(chatEvents$);
+  const getChatEvents$ = vi.fn().mockReturnValue(chatEvents$);
 
   const agentBuilder = hasAgentBuilder
     ? ({
@@ -137,7 +139,7 @@ describe('createSuggestAutomationProvider', () => {
   it('keeps skill ids out of the message the user reads, since the attachment carries them', () => {
     const { provider, openChat } = createProvider();
 
-    provider.suggestAutomation({ aiIndex, onSaved: jest.fn() });
+    provider.suggestAutomation({ aiIndex, onSaved: vi.fn() });
 
     const { initialMessage } = openChat.mock.calls[0][0];
     expect(initialMessage).not.toMatch(/skill:\/\//);
@@ -150,7 +152,7 @@ describe('createSuggestAutomationProvider', () => {
 
     provider.suggestAutomation({
       aiIndex: { ...aiIndex, description: longDescription },
-      onSaved: jest.fn(),
+      onSaved: vi.fn(),
     });
 
     expect(openChat).toHaveBeenCalledWith(
@@ -170,7 +172,7 @@ describe('createSuggestAutomationProvider', () => {
   it('opens agent builder chat with the AI index attachment', () => {
     const { provider, openChat } = createProvider();
 
-    provider.suggestAutomation({ aiIndex, onSaved: jest.fn() });
+    provider.suggestAutomation({ aiIndex, onSaved: vi.fn() });
 
     expect(openChat).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -199,7 +201,7 @@ describe('createSuggestAutomationProvider', () => {
   });
 
   it('refreshes the page when save automation succeeds for the current AI index', () => {
-    const onSaved = jest.fn();
+    const onSaved = vi.fn();
     const { provider, chatEvents$, getChatEvents$ } = createProvider();
 
     const unsubscribe = provider.subscribeToAutomationSaved('my-ai-index', onSaved);
@@ -230,7 +232,7 @@ describe('createSuggestAutomationProvider', () => {
   });
 
   it('refreshes the page when save automation persists and attaches for the current AI index', () => {
-    const onSaved = jest.fn();
+    const onSaved = vi.fn();
     const { provider, chatEvents$ } = createProvider();
 
     provider.subscribeToAutomationSaved('my-ai-index', onSaved);
@@ -258,7 +260,7 @@ describe('createSuggestAutomationProvider', () => {
   });
 
   it('does not refresh when save automation fails', () => {
-    const onSaved = jest.fn();
+    const onSaved = vi.fn();
     const { provider, chatEvents$ } = createProvider();
 
     provider.subscribeToAutomationSaved('my-ai-index', onSaved);
@@ -284,7 +286,7 @@ describe('createSuggestAutomationProvider', () => {
   });
 
   it('does not refresh when save automation succeeds for a different AI index', () => {
-    const onSaved = jest.fn();
+    const onSaved = vi.fn();
     const { provider, chatEvents$ } = createProvider();
 
     provider.subscribeToAutomationSaved('my-ai-index', onSaved);

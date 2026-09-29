@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -14,27 +17,30 @@ import { getDefaultAlertRetrievalStepDefinition } from './default_alert_retrieva
 import { DefaultAlertRetrievalStepTypeId } from '../../../common/step_types/default_alert_retrieval_step';
 import { getAnonymizedAlerts } from '@kbn/discoveries/impl/attack_discovery/graphs';
 
-jest.mock('@kbn/discoveries/impl/attack_discovery/graphs', () => ({
-  ...jest.requireActual('@kbn/discoveries/impl/attack_discovery/graphs'),
-  getAnonymizedAlerts: jest.fn(),
-}));
+vi.mock('@kbn/discoveries/impl/attack_discovery/graphs', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/discoveries/impl/attack_discovery/graphs')),
+      getAnonymizedAlerts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetAnonymizedAlerts = getAnonymizedAlerts as jest.Mock;
+const mockGetAnonymizedAlerts = getAnonymizedAlerts as Mock;
 
 describe('DefaultAlertRetrievalStepDefinition', () => {
   const mockLogger: Logger = loggerMock.create();
   const mockCoreStart = coreMock.createStart();
   const mockActionsClient = actionsClientMock.create();
   const mockEsClient = mockCoreStart.elasticsearch.client.asScoped({} as any).asCurrentUser;
-  const mockEventLogger = { logEvent: jest.fn() };
-  const mockGetEventLogger = jest.fn().mockResolvedValue(mockEventLogger);
-  const mockGetEventLogIndex = jest.fn().mockResolvedValue('.kibana-event-log-*');
+  const mockEventLogger = { logEvent: vi.fn() };
+  const mockGetEventLogger = vi.fn().mockResolvedValue(mockEventLogger);
+  const mockGetEventLogIndex = vi.fn().mockResolvedValue('.kibana-event-log-*');
 
-  const mockGetStartServices = jest.fn().mockResolvedValue({
+  const mockGetStartServices = vi.fn().mockResolvedValue({
     coreStart: mockCoreStart,
     pluginsStart: {
       actions: {
-        getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
+        getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClient),
       },
     },
   });
@@ -68,7 +74,7 @@ describe('DefaultAlertRetrievalStepDefinition', () => {
   const mockContext = {
     abortSignal: undefined,
     contextManager: {
-      getContext: jest.fn().mockReturnValue({
+      getContext: vi.fn().mockReturnValue({
         execution: {
           id: 'test-execution-id',
         },
@@ -77,7 +83,7 @@ describe('DefaultAlertRetrievalStepDefinition', () => {
           spaceId: 'default',
         },
       }),
-      getFakeRequest: jest.fn().mockReturnValue({}),
+      getFakeRequest: vi.fn().mockReturnValue({}),
     },
     input: defaultProps,
     logger: mockLogger,
@@ -97,7 +103,7 @@ describe('DefaultAlertRetrievalStepDefinition', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockActionsClient.get.mockResolvedValue({
       id: 'test-connector',
       name: 'Test Connector',
@@ -479,7 +485,7 @@ describe('DefaultAlertRetrievalStepDefinition', () => {
     };
 
     it('uses ES|QL query when esql_query is provided', async () => {
-      (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+      (mockEsClient.esql.query as Mock).mockResolvedValue({
         columns: [{ name: 'host.name' }],
         values: [['server-1']],
       });
@@ -496,7 +502,7 @@ describe('DefaultAlertRetrievalStepDefinition', () => {
     });
 
     it('does NOT call getAnonymizedAlerts when esql_query is provided', async () => {
-      (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+      (mockEsClient.esql.query as Mock).mockResolvedValue({
         columns: [{ name: 'host.name' }],
         values: [['server-1']],
       });
@@ -509,7 +515,7 @@ describe('DefaultAlertRetrievalStepDefinition', () => {
     });
 
     it('does NOT pass a filter to the ES|QL query', async () => {
-      (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+      (mockEsClient.esql.query as Mock).mockResolvedValue({
         columns: [{ name: 'host.name' }],
         values: [['server-1']],
       });
@@ -518,7 +524,7 @@ describe('DefaultAlertRetrievalStepDefinition', () => {
 
       await stepDefinition.handler(esqlContext as any);
 
-      const callArgs = (mockEsClient.esql.query as jest.Mock).mock.calls[0][0] as Record<
+      const callArgs = (mockEsClient.esql.query as Mock).mock.calls[0][0] as Record<
         string,
         unknown
       >;
@@ -527,7 +533,7 @@ describe('DefaultAlertRetrievalStepDefinition', () => {
     });
 
     it('returns alerts from ES|QL results', async () => {
-      (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
+      (mockEsClient.esql.query as Mock).mockResolvedValue({
         columns: [{ name: 'host.name' }, { name: 'user.name' }],
         values: [
           ['server-1', 'admin'],

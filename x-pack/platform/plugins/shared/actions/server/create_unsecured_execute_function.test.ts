@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -22,7 +24,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const mockActionsConfig = actionsConfigMock.create();
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   mockTaskManager.aggregate.mockResolvedValue({
     took: 1,
     timed_out: false,

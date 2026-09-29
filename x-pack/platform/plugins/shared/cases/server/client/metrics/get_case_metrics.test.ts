@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { getCaseMetrics } from './get_case_metrics';
@@ -45,13 +47,13 @@ describe('getCaseMetrics', () => {
     client = createMockClient();
     ({ mockServices, clientArgs } = createMockClientArgs());
 
-    jest.clearAllMocks();
-    jest.useFakeTimers();
-    jest.setSystemTime(currentTime);
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(currentTime);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns the lifespan metrics', async () => {

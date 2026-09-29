@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getAllConnectorsIncludingSystemRoute } from './get_all_system';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../lib/license_state.mock';
@@ -20,13 +23,16 @@ const actionsConfigUtils = (inboundEventsEnabled = false) => {
   return utils;
 };
 
-jest.mock('../../verify_access_and_context', () => ({
-  verifyAccessAndContext: jest.fn(),
-}));
+vi.mock('../../verify_access_and_context', () => {
+      const mocked = {
+      verifyAccessAndContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
-  (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
+  vi.resetAllMocks();
+  (verifyAccessAndContext as Mock).mockImplementation((license, handler) => handler);
 });
 
 describe('getAllConnectorsIncludingSystemRoute', () => {
@@ -117,7 +123,7 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    (verifyAccessAndContext as jest.Mock).mockImplementation(() => async () => {
+    (verifyAccessAndContext as Mock).mockImplementation(() => async () => {
       throw new Error('OMG');
     });
 

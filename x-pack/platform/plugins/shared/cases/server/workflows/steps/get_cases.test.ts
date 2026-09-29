@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import type { CasesClient } from '../../client';
 import { getCasesStepDefinition } from './get_cases';
@@ -15,7 +17,7 @@ const createContext = (input: unknown) =>
 
 describe('getCasesStepDefinition', () => {
   it('creates expected step definition structure', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     const definition = getCasesStepDefinition(getCasesClient);
 
     expect(definition.id).toBe('cases.getCases');
@@ -24,11 +26,11 @@ describe('getCasesStepDefinition', () => {
   });
 
   it('calls cases.bulkGet with correct params and returns cases and errors', async () => {
-    const bulkGet = jest.fn().mockResolvedValue({
+    const bulkGet = vi.fn().mockResolvedValue({
       cases: [createCaseResponseFixture],
       errors: [],
     });
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { bulkGet },
     } as unknown as CasesClient);
     const definition = getCasesStepDefinition(getCasesClient);
@@ -45,13 +47,13 @@ describe('getCasesStepDefinition', () => {
   });
 
   it('includes errors for unfound case IDs in the output', async () => {
-    const bulkGet = jest.fn().mockResolvedValue({
+    const bulkGet = vi.fn().mockResolvedValue({
       cases: [createCaseResponseFixture],
       errors: [
         { error: 'Not Found', message: 'case not found', status: 404, caseId: 'case-missing' },
       ],
     });
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { bulkGet },
     } as unknown as CasesClient);
     const definition = getCasesStepDefinition(getCasesClient);
@@ -71,8 +73,8 @@ describe('getCasesStepDefinition', () => {
   });
 
   it('returns error when cases.bulkGet throws', async () => {
-    const bulkGet = jest.fn().mockRejectedValue(new Error('unauthorized'));
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const bulkGet = vi.fn().mockRejectedValue(new Error('unauthorized'));
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { bulkGet },
     } as unknown as CasesClient);
     const definition = getCasesStepDefinition(getCasesClient);

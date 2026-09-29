@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, Mocked } from 'vitest';
+
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -59,9 +62,9 @@ describe('check metadata transforms task', () => {
 
   let mockTask: CheckMetadataTransformsTask;
   let mockCore: CoreSetup;
-  let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
+  let mockTaskManagerSetup: Mocked<TaskManagerSetupContract>;
   let mockEndpointAppContext: EndpointAppContext;
-  let getInstallationSpy: jest.SpyInstance;
+  let getInstallationSpy: MockInstance;
   beforeEach(() => {
     mockCore = coreSetupMock();
     mockTaskManagerSetup = tmSetupMock();
@@ -71,7 +74,7 @@ describe('check metadata transforms task', () => {
       core: mockCore,
       taskManager: mockTaskManagerSetup,
     });
-    getInstallationSpy = jest
+    getInstallationSpy = vi
       .spyOn(mockEndpointAppContext.service.getInternalFleetServices().packages, 'getInstallation')
       .mockResolvedValue({
         installed_es: installedTransformAssets,
@@ -80,7 +83,7 @@ describe('check metadata transforms task', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('task lifecycle', () => {
@@ -331,12 +334,12 @@ describe('check metadata transforms task', () => {
     });
 
     describe('transforms reinstall', () => {
-      let getPackageSpy: jest.SpyInstance;
-      let reinstallEsAssetsSpy: jest.SpyInstance;
-      let mockPackageClient: jest.Mocked<PackageClient>;
+      let getPackageSpy: MockInstance;
+      let reinstallEsAssetsSpy: MockInstance;
+      let mockPackageClient: Mocked<PackageClient>;
 
       beforeEach(() => {
-        jest
+        vi
           .spyOn(
             mockEndpointAppContext.service.getEndpointMetadataService(),
             'getAllEndpointPackagePolicies'
@@ -344,9 +347,9 @@ describe('check metadata transforms task', () => {
           .mockResolvedValue([{} as PackagePolicy]);
 
         mockPackageClient = mockEndpointAppContext.service.getInternalFleetServices()
-          .packages as jest.Mocked<PackageClient>;
-        getPackageSpy = jest.spyOn(mockPackageClient, 'getPackage');
-        reinstallEsAssetsSpy = jest.spyOn(mockPackageClient, 'reinstallEsAssets');
+          .packages as Mocked<PackageClient>;
+        getPackageSpy = vi.spyOn(mockPackageClient, 'getPackage');
+        reinstallEsAssetsSpy = vi.spyOn(mockPackageClient, 'reinstallEsAssets');
 
         const transformStatsResponseMock = {
           body: {

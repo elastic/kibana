@@ -6,15 +6,21 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
 import crypto from 'crypto';
 import { NEVER } from 'rxjs';
 
-jest.mock('../../shared/get_search_csv_job_params', () => ({
-  getSearchCsvJobParams: jest.fn(() => ({
-    reportType: 'csv_v2',
-    decoratedJobParams: {},
-  })),
-}));
+vi.mock('../../shared/get_search_csv_job_params', () => {
+      const mocked = {
+      getSearchCsvJobParams: vi.fn(() => ({
+        reportType: 'csv_v2',
+        decoratedJobParams: {},
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { getSearchCsvJobParams } from '../../shared/get_search_csv_job_params';
 import { getCsvReportParams, getShareMenuItems } from './csv_export_config';
@@ -66,9 +72,9 @@ describe('csv export config', () => {
     });
 
     const makeClassicSharingData = () => {
-      const getSearchSource = jest.fn(
+      const getSearchSource = vi.fn(
         (_args: { addGlobalTimeFilter?: boolean; absoluteTime?: boolean }) => ({})
-      ) as jest.MockedFunction<ReportingCSVSharingData['getSearchSource']>;
+      ) as MockedFunction<ReportingCSVSharingData['getSearchSource']>;
       const sharingData: ReportingCSVSharingData = {
         isTextBased: false,
         locatorParams: [],
@@ -116,17 +122,17 @@ describe('csv export config', () => {
               },
             },
           ],
-          getSearchSource: jest.fn(),
+          getSearchSource: vi.fn(),
           columns: [],
           absoluteTimeRange,
           title: 'test',
         };
 
         const apiClient = {
-          createReportingShareJob: jest.fn(() => new Promise(() => {})),
-          getManagementLink: jest.fn(),
-          getReportingPublicJobPath: jest.fn(),
-          getDecoratedJobParams: jest.fn((params) => params),
+          createReportingShareJob: vi.fn(() => new Promise(() => {})),
+          getManagementLink: vi.fn(),
+          getReportingPublicJobPath: vi.fn(),
+          getDecoratedJobParams: vi.fn((params) => params),
         };
 
         const shareMenu = getShareMenuItems({
@@ -140,11 +146,11 @@ describe('csv export config', () => {
           shareableUrlLocatorParams: undefined,
         } as unknown as Parameters<ReturnType<typeof getShareMenuItems>>[0]);
 
-        (getSearchCsvJobParams as jest.Mock).mockClear();
+        (getSearchCsvJobParams as Mock).mockClear();
 
         // attempt to generate the asset export
         void shareMenu.generateAssetExport({
-          intl: { formatMessage: jest.fn() },
+          intl: { formatMessage: vi.fn() },
         } as unknown as Parameters<typeof shareMenu.generateAssetExport>[0]);
 
         expect(getSearchCsvJobParams).toHaveBeenCalledWith(

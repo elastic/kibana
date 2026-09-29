@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, renderHook, act } from '@testing-library/react';
 import { TelemetryContextProvider, useTelemetry } from './telemetry_context';
 import { AutomaticImportTelemetryEventType } from '../../common';
 
-const mockReportEvent = jest.fn();
-let mockTelemetryService: { reportEvent: jest.Mock } | undefined = {
+const mockReportEvent = vi.fn();
+let mockTelemetryService: { reportEvent: Mock } | undefined = {
   reportEvent: mockReportEvent,
 };
 
-jest.mock('../common/hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      get telemetry() {
-        return mockTelemetryService;
-      },
-    },
-  }),
-}));
+vi.mock('../common/hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          get telemetry() {
+            return mockTelemetryService;
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TelemetryContextProvider>{children}</TelemetryContextProvider>
@@ -31,7 +37,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('useTelemetry', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a stable sessionId', () => {
@@ -195,7 +201,7 @@ describe('useTelemetry', () => {
 
 describe('TelemetryContextProvider without telemetry service', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockTelemetryService = undefined;
   });
 

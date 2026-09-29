@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -22,21 +25,25 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFlyoutApi } from '../../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../../flyout_v2/use_flyout_api.mock';
 
-jest.mock('../../../../../../common/lib/kibana');
-jest.mock('../../../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
-  useAgentBuilderAvailability: jest.fn(),
-}));
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../../../flyout_v2/use_flyout_api');
+vi.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../agent_builder/hooks/use_agent_builder_availability', () => {
+      const mocked = {
+      useAgentBuilderAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../../../../../flyout_v2/use_flyout_api');
 
-jest.mock(
+vi.mock(
   '../../../attack_discovery_markdown_formatter/field_markdown_renderer/use_entity_euid_from_alerts',
-  () => ({
-    useEntityEuidFromAlerts: jest.fn(() => ({ euid: undefined, isLoading: false })),
-    ENTITY_TYPE_BY_FIELD: jest.requireActual(
-      '../../../attack_discovery_markdown_formatter/field_markdown_renderer/helpers'
-    ).ENTITY_TYPE_BY_FIELD,
-  })
+  async () => {
+      const mocked = {
+        useEntityEuidFromAlerts: vi.fn(() => ({ euid: undefined, isLoading: false })),
+        ENTITY_TYPE_BY_FIELD: (await vi.importActual('../../../attack_discovery_markdown_formatter/field_markdown_renderer/helpers')).ENTITY_TYPE_BY_FIELD,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 describe('AttackDiscoveryTab', () => {
@@ -47,24 +54,24 @@ describe('AttackDiscoveryTab', () => {
     '2da30969-4127-4ddb-ba0c-2d8ac44d15d7': 'Administrator',
   };
 
-  const mockOpenRightPanel = jest.fn();
-  const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.MockedFunction<
+  const mockOpenRightPanel = vi.fn();
+  const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as MockedFunction<
     typeof useExpandableFlyoutApi
   >;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jest
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    vi
       .mocked(useAgentBuilderAvailability)
       .mockImplementation(
-        jest.requireActual('../../../../../../agent_builder/hooks/use_agent_builder_availability')
+        (await vi.importActual('../../../../../../agent_builder/hooks/use_agent_builder_availability'))
           .useAgentBuilderAvailability
       );
     mockUseExpandableFlyoutApi.mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openRightPanel: mockOpenRightPanel,
     });
-    jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
+    vi.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
   });
 
   describe('when showAnonymized is false', () => {
@@ -251,15 +258,15 @@ The user Administrator opened a malicious Microsoft Word document (C:\\Program F
 
   describe('when configurations capabilities is defined (for EASE)', () => {
     beforeEach(() => {
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           data: {
             search: {
-              search: jest.fn().mockReturnValue({ toPromise: jest.fn().mockResolvedValue({}) }),
+              search: vi.fn().mockReturnValue({ toPromise: vi.fn().mockResolvedValue({}) }),
             },
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(false),
+            get: vi.fn().mockReturnValue(false),
           },
           application: {
             capabilities: {
@@ -306,7 +313,7 @@ The user Administrator opened a malicious Microsoft Word document (C:\\Program F
 
   describe('Add to chat', () => {
     beforeEach(() => {
-      jest.mocked(useAgentBuilderAvailability).mockReturnValue({
+      vi.mocked(useAgentBuilderAvailability).mockReturnValue({
         hasAgentBuilderPrivilege: true,
         hasValidAgentBuilderLicense: true,
         isAgentBuilderEnabled: true,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React, { Profiler, useImperativeHandle, useRef, useState } from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -20,22 +22,25 @@ const mockCustomLocalStorageKey = 'test-restorable-state';
 let mockStoredValue: string | undefined;
 
 // mock localStorage
-jest.mock('@kbn/kibana-utils-plugin/public', () => ({
-  Storage: jest.fn().mockImplementation(() => ({
-    get: jest.fn((key) => {
-      if (key !== mockCustomLocalStorageKey) {
-        throw new Error(`Unexpected key: ${key}`);
-      }
-      return mockStoredValue !== undefined ? JSON.parse(mockStoredValue) : undefined;
-    }),
-    set: jest.fn((key, value) => {
-      if (key !== mockCustomLocalStorageKey) {
-        throw new Error(`Unexpected key: ${key}`);
-      }
-      mockStoredValue = JSON.stringify(value);
-    }),
-  })),
-}));
+vi.mock('@kbn/kibana-utils-plugin/public', () => {
+      const mocked = {
+      Storage: vi.fn().mockImplementation(() => ({
+        get: vi.fn((key) => {
+          if (key !== mockCustomLocalStorageKey) {
+            throw new Error(`Unexpected key: ${key}`);
+          }
+          return mockStoredValue !== undefined ? JSON.parse(mockStoredValue) : undefined;
+        }),
+        set: vi.fn((key, value) => {
+          if (key !== mockCustomLocalStorageKey) {
+            throw new Error(`Unexpected key: ${key}`);
+          }
+          mockStoredValue = JSON.stringify(value);
+        }),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 interface RestorableState {
   count?: number;
@@ -90,7 +95,7 @@ describe('createRestorableStateProvider', () => {
     let mockStoredState: RestorableState | undefined;
     const props: ComponentProps<typeof WrappedComponent> = {
       initialState: undefined,
-      onInitialStateChange: jest.fn((state) => {
+      onInitialStateChange: vi.fn((state) => {
         mockStoredState = state;
       }),
     };
@@ -119,7 +124,7 @@ describe('createRestorableStateProvider', () => {
 
     const propsWithSavedState: ComponentProps<typeof WrappedComponent> = {
       initialState: { message: 'Hi', anotherMessage: '---' },
-      onInitialStateChange: jest.fn((state) => {
+      onInitialStateChange: vi.fn((state) => {
         mockStoredState = state;
       }),
     };
@@ -181,7 +186,7 @@ describe('createRestorableStateProvider', () => {
     let mockStoredState: RestorableState | undefined;
     const props: ComponentProps<typeof WrappedComponent> = {
       initialState: undefined,
-      onInitialStateChange: jest.fn((state) => {
+      onInitialStateChange: vi.fn((state) => {
         mockStoredState = state;
       }),
     };

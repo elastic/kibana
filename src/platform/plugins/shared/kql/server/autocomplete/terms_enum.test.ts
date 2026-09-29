@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { termsEnumSuggestions } from './terms_enum';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
@@ -15,7 +18,7 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { TermsEnumResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 
-let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
+let savedObjectsClientMock: Mocked<SavedObjectsClientContract>;
 let esClientMock: DeeplyMockedKeys<ElasticsearchClient>;
 const configMock = {
   autocomplete: { valueSuggestions: { tiers: ['data_hot', 'data_warm', 'data_content'] } },
@@ -28,7 +31,7 @@ const dataViewFieldMock = {
 } as DataViewField;
 const mockResponse = { terms: ['whoa', 'amazing'] };
 
-jest.mock('../data_views');
+vi.mock('../data_views');
 
 describe('_terms_enum suggestions', () => {
   beforeEach(() => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import '@kbn/code-editor-mock/jest_helper';
@@ -18,15 +20,15 @@ import { ExportJsonFlyoutContent } from './export_json_flyout_content';
 
 describe('ExportJsonFlyoutContent', () => {
   it('renders consumer-provided header content and gets the current state without arguments', async () => {
-    const getExportJson = jest.fn(() => ({ title: 'My object' }));
+    const getExportJson = vi.fn(() => ({ title: 'My object' }));
 
     renderWithI18n(
       <ExportJsonFlyoutContent
         title="My object"
         objectType="Object"
-        closeFlyout={jest.fn()}
+        closeFlyout={vi.fn()}
         dataTestSubjPrefix="test"
-        downloadExportJson={jest.fn()}
+        downloadExportJson={vi.fn()}
         getExportJson={getExportJson}
         headerActions={<div data-test-subj="headerAction" />}
         headerNotice={<div data-test-subj="headerNotice" />}
@@ -54,9 +56,9 @@ describe('ExportJsonFlyoutContent', () => {
       <ExportJsonFlyoutContent
         title="My object"
         objectType="Object"
-        closeFlyout={jest.fn()}
+        closeFlyout={vi.fn()}
         dataTestSubjPrefix="test"
-        downloadExportJson={jest.fn()}
+        downloadExportJson={vi.fn()}
         getExportJson={() => ({ title: 'My object' })}
         isTechnicalPreview={false}
         prepareExportJson={async (state) => ({ data: state, warnings: [] })}
@@ -75,8 +77,8 @@ describe('ExportJsonFlyoutContent', () => {
     const downloadPromise = new Promise<void>((resolve) => {
       resolveDownload = resolve;
     });
-    const downloadExportJson = jest.fn(() => downloadPromise);
-    const closeFlyout = jest.fn();
+    const downloadExportJson = vi.fn(() => downloadPromise);
+    const closeFlyout = vi.fn();
 
     renderWithI18n(
       <ExportJsonFlyoutContent

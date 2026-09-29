@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { countExistingDashboards, fetchDashboardsCount } from './dashboards';
 
@@ -12,7 +14,7 @@ describe('fetchDashboardsCount', () => {
   const logger = loggingSystemMock.createLogger();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the total from the saved objects client', async () => {
@@ -46,7 +48,7 @@ describe('countExistingDashboards', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('skips the lookup when nothing is starred', async () => {

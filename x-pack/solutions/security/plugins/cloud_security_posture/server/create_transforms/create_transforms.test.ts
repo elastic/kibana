@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTransformIfNotExists, startTransformIfNotStarted } from './create_transforms';
@@ -17,7 +19,7 @@ describe('createTransformIfNotExist', () => {
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('expect not to create if already exists', async () => {
@@ -79,7 +81,7 @@ describe('startTransformIfNotStarted', () => {
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   ['stopping', 'started', 'aborting', 'indexing'].forEach((state) =>

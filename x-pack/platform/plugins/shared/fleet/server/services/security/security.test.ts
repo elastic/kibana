@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { deepFreeze } from '@kbn/std';
 import type { SecurityPluginStart, CheckPrivilegesDynamically } from '@kbn/security-plugin/server';
 
@@ -15,7 +18,7 @@ import type { FleetAuthz } from '../../../common';
 
 import { calculateRouteAuthz, getAuthzFromRequest, isDebugAuthorized } from './security';
 
-jest.mock('../app_context');
+vi.mock('../app_context');
 
 describe('When using calculateRouteAuthz()', () => {
   const fleetAuthz = deepFreeze({
@@ -559,14 +562,14 @@ describe('When using calculateRouteAuthz()', () => {
 
 describe('getAuthzFromRequest', () => {
   let mockSecurityCore: SecurityStartMock;
-  let mockSecurity: jest.MockedObjectDeep<SecurityPluginStart>;
-  let checkPrivileges: jest.MockedFn<CheckPrivilegesDynamically>;
+  let mockSecurity: Mocked<SecurityPluginStart>;
+  let checkPrivileges: MockedFunction<CheckPrivilegesDynamically>;
   beforeEach(() => {
-    checkPrivileges = jest.fn();
+    checkPrivileges = vi.fn();
     mockSecurityCore = securityServiceMock.createStart();
     mockSecurity = {
       authz: {
-        checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
+        checkPrivilegesDynamicallyWithRequest: vi.fn().mockReturnValue(checkPrivileges),
         actions: {
           ui: {
             get: (s: string) => `ui:${s}`,
@@ -576,14 +579,14 @@ describe('getAuthzFromRequest', () => {
           },
         },
         mode: {
-          useRbacForRequest: jest.fn(),
+          useRbacForRequest: vi.fn(),
         },
       },
-    } as unknown as jest.MockedObjectDeep<SecurityPluginStart>;
+    } as unknown as Mocked<SecurityPluginStart>;
 
-    jest.mocked(appContextService.getSecurityCore).mockReturnValue(mockSecurityCore);
-    jest.mocked(appContextService.getSecurity).mockReturnValue(mockSecurity);
-    jest.mocked(appContextService.getSecurityLicense).mockReturnValue({
+    vi.mocked(appContextService.getSecurityCore).mockReturnValue(mockSecurityCore);
+    vi.mocked(appContextService.getSecurity).mockReturnValue(mockSecurity);
+    vi.mocked(appContextService.getSecurityLicense).mockReturnValue({
       isEnabled: () => true,
     } as any);
   });
@@ -1036,19 +1039,19 @@ describe('isDebugAuthorized', () => {
   let mockSecurityCore: SecurityStartMock;
 
   const setCurrentUser = (user: { roles: string[] } | null) => {
-    jest.mocked(mockSecurityCore.authc.getCurrentUser).mockReturnValue(user as any);
+    vi.mocked(mockSecurityCore.authc.getCurrentUser).mockReturnValue(user as any);
   };
 
   beforeEach(() => {
     mockSecurityCore = securityServiceMock.createStart();
-    jest.mocked(appContextService.getSecurityCore).mockReturnValue(mockSecurityCore);
-    jest.mocked(appContextService.getSecurityLicense).mockReturnValue({
+    vi.mocked(appContextService.getSecurityCore).mockReturnValue(mockSecurityCore);
+    vi.mocked(appContextService.getSecurityLicense).mockReturnValue({
       isEnabled: () => true,
     } as any);
   });
 
   it('should not authorize when security is disabled', () => {
-    jest.mocked(appContextService.getSecurityLicense).mockReturnValue({
+    vi.mocked(appContextService.getSecurityLicense).mockReturnValue({
       isEnabled: () => false,
     } as any);
     setCurrentUser({ roles: ['superuser'] });

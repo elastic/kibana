@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import fetch, { FetchError } from 'node-fetch';
 
@@ -22,15 +25,15 @@ import { licenseService } from '../../services/license';
 
 import { getRemoteSyncedIntegrationsInfoByOutputId } from './get_remote_status';
 
-jest.mock('../../services/app_context');
+vi.mock('../../services/app_context');
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
-const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
+const mockedOutputService = outputService as Mocked<typeof outputService>;
 
-jest.mock('../../services/output');
-jest.mock('node-fetch');
+vi.mock('../../services/output');
+vi.mock('node-fetch');
 
-let mockedLogger: jest.Mocked<Logger>;
+let mockedLogger: Mocked<Logger>;
 
 describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   let soClientMock: any;
@@ -42,7 +45,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     is_default_monitoring: true,
     name: 'Remote Output',
   };
-  const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
+  const mockedFetch = fetch as MockedFunction<typeof fetch>;
 
   const statusRes = {
     integrations: [
@@ -68,16 +71,16 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     soClientMock = savedObjectsClientMock.create();
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
-    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+    vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
   });
 
   afterEach(() => {
     mockedFetch.mockReset();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should return empty integrations array if feature flag is not available', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: false } as any);
     expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
@@ -86,10 +89,10 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should return empty integrations array if license is not at least Enterprise', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
-    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+    vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
 
     expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
       integrations: [],
@@ -97,7 +100,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should return response with error if the passed outputId is not found', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockRejectedValue({ isBoom: true, output: { statusCode: 404 } } as any);
@@ -116,7 +119,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
       is_default_monitoring: true,
       name: 'ES Output',
     } as any;
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockResolvedValue(outputEs);
@@ -127,7 +130,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should throw error if the output has sync_integrations = false', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockResolvedValue({ ...output, sync_integrations: false } as any);
@@ -138,7 +141,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should throw error if kibanaUrl is not present', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockResolvedValue({ ...output, sync_integrations: true } as any);
@@ -149,7 +152,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should throw error if kibanaApiKey is not present', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockResolvedValue({
@@ -166,7 +169,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should return an error if it cannot establish a connection with remote kibana', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockResolvedValue({
@@ -190,7 +193,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should return the response from the remote status api', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockResolvedValue({
@@ -212,7 +215,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should work if kibanaUrl has a trailing slash', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockResolvedValue({
@@ -234,7 +237,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should not throw if the remote status api has errors in the body', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockResolvedValue({
@@ -263,7 +266,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should return an error if the remote api returns error', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockResolvedValue({
@@ -284,7 +287,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should return an error if kibanaUrl is not found', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockResolvedValue({
@@ -307,7 +310,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should return error if the fetch returns invalid-json error', async () => {
-    jest
+    vi
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockResolvedValue({

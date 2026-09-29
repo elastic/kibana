@@ -5,20 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { faker } from '@faker-js/faker';
 import { render, screen } from '@testing-library/react';
 import { CustomIconModal } from './custom_icon_modal';
 
-jest.mock('../../../../../kibana_services', () => ({
-  getUsageCollection: () => {
-    return {
-      reportUiCounter: () => {},
+vi.mock('../../../../../kibana_services', () => {
+      const mocked = {
+      getUsageCollection: () => {
+        return {
+          reportUiCounter: () => {},
+        };
+      },
     };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./icon_preview', () => ({ IconPreview: () => <div data-test-subj="iconPreview" /> }));
+vi.mock('./icon_preview', () => {
+      const mocked = { IconPreview: () => <div data-test-subj="iconPreview" /> };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
   cutoff: 0.25,

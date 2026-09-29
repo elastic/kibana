@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { hasDocReferences, useCheckDocumentAttachments } from './use_check_alert_attachments';
 import { useFindCasesContainingAllSelectedDocuments } from './use_find_cases_containing_all_selected_alerts';
 
-jest.mock('./use_find_cases_containing_all_selected_alerts');
-jest.mock('../components/cases_context/use_cases_context');
+vi.mock('./use_find_cases_containing_all_selected_alerts');
+vi.mock('../components/cases_context/use_cases_context');
 
-const mockUseCasesContext = useCasesContext as jest.Mock;
+const mockUseCasesContext = useCasesContext as Mock;
 
 const cases = [{ id: 'case-1' }, { id: 'case-2' }];
 
@@ -46,16 +49,16 @@ describe('hasDocReferences', () => {
 
 describe('useCheckDocumentAttachments', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCasesContext.mockReturnValue({ owner: ['securitySolution'] });
-    (useFindCasesContainingAllSelectedDocuments as jest.Mock).mockReturnValue({
+    (useFindCasesContainingAllSelectedDocuments as Mock).mockReturnValue({
       data: { casesWithAllAttachments: [] },
       isFetching: false,
     });
   });
 
   it('calls useFindCasesContainingAllSelectedDocuments with selected document IDs and case IDs', () => {
-    const getAttachments = jest
+    const getAttachments = vi
       .fn()
       .mockReturnValue([
         { alertId: 'alert-1' },
@@ -76,7 +79,7 @@ describe('useCheckDocumentAttachments', () => {
 
   it('calls getAttachments with theCase undefined when no owner is in context', () => {
     mockUseCasesContext.mockReturnValue({ owner: [] });
-    const getAttachments = jest.fn().mockReturnValue([]);
+    const getAttachments = vi.fn().mockReturnValue([]);
 
     renderHook(() => useCheckDocumentAttachments({ cases, getAttachments }));
 
@@ -86,7 +89,7 @@ describe('useCheckDocumentAttachments', () => {
   it('collects document IDs for callbacks that branch on theCase being defined', () => {
     // mirrors consumers (e.g. ML, Osquery) whose getAttachments returns [] when theCase
     // is falsy; a synthesized owner-only theCase must still be truthy for them to work
-    const getAttachments = jest
+    const getAttachments = vi
       .fn()
       .mockImplementation(({ theCase }) => (theCase ? [{ alertId: 'alert-1' }] : []));
 
@@ -100,7 +103,7 @@ describe('useCheckDocumentAttachments', () => {
 
   it('extracts the attachmentId from an entity attachment so entities participate in dedup', () => {
     const entityId = 'user:alice@host@default';
-    const getAttachments = jest.fn().mockReturnValue([
+    const getAttachments = vi.fn().mockReturnValue([
       {
         type: 'security.entity',
         attachmentId: entityId,
@@ -117,7 +120,7 @@ describe('useCheckDocumentAttachments', () => {
   });
 
   it('filters out empty document IDs', () => {
-    const getAttachments = jest
+    const getAttachments = vi
       .fn()
       .mockReturnValue([
         { alertId: '' },
@@ -138,7 +141,7 @@ describe('useCheckDocumentAttachments', () => {
   });
 
   it('flattens array-based document references including externalReferenceId', () => {
-    const getAttachments = jest
+    const getAttachments = vi
       .fn()
       .mockReturnValue([
         { alertId: ['alert-1', 'alert-2'] },
@@ -156,7 +159,7 @@ describe('useCheckDocumentAttachments', () => {
   });
 
   it('returns disabled cases and loading state from query results', () => {
-    (useFindCasesContainingAllSelectedDocuments as jest.Mock).mockReturnValue({
+    (useFindCasesContainingAllSelectedDocuments as Mock).mockReturnValue({
       data: { casesWithAllAttachments: ['case-2'] },
       isFetching: true,
     });
@@ -173,7 +176,7 @@ describe('useCheckDocumentAttachments', () => {
   });
 
   it('returns an empty disabled cases set when query data is not available', () => {
-    (useFindCasesContainingAllSelectedDocuments as jest.Mock).mockReturnValue({
+    (useFindCasesContainingAllSelectedDocuments as Mock).mockReturnValue({
       data: undefined,
       isFetching: false,
     });

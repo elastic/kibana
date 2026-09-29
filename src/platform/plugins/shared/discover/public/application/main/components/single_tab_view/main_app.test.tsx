@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
@@ -19,9 +21,12 @@ import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_sta
 import { internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 
-jest.mock('../top_nav/discover_topnav', () => ({
-  DiscoverTopNav: jest.fn(() => <div data-test-subj="discoverTopNavMock" />),
-}));
+vi.mock('../top_nav/discover_topnav', () => {
+      const mocked = {
+      DiscoverTopNav: vi.fn(() => <div data-test-subj="discoverTopNavMock" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DiscoverMainApp', () => {
   test('renders', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useCopyExportQueryStep } from '.';
 import type { CopyExportQueryStepProps } from '.';
@@ -24,7 +26,7 @@ describe('useCopyExportQueryStep', () => {
     const result = renderCopyExportQueryStep({
       migrationSource: MigrationSource.SPLUNK,
       status: 'incomplete',
-      onCopied: jest.fn(),
+      onCopied: vi.fn(),
     });
     expect(result.current).toEqual({
       children: expect.anything(),
@@ -37,7 +39,7 @@ describe('useCopyExportQueryStep', () => {
     const result = renderCopyExportQueryStep({
       migrationSource: MigrationSource.SPLUNK,
       status: 'complete',
-      onCopied: jest.fn(),
+      onCopied: vi.fn(),
     });
     expect(result.current).toEqual({
       children: expect.anything(),
@@ -50,7 +52,7 @@ describe('useCopyExportQueryStep', () => {
     const result = renderCopyExportQueryStep({
       migrationSource: MigrationSource.SPLUNK,
       status: 'disabled',
-      onCopied: jest.fn(),
+      onCopied: vi.fn(),
     });
     expect(result.current).toEqual({
       children: expect.anything(),
@@ -63,7 +65,7 @@ describe('useCopyExportQueryStep', () => {
     const result = renderCopyExportQueryStep({
       migrationSource: MigrationSource.SPLUNK,
       status: 'loading',
-      onCopied: jest.fn(),
+      onCopied: vi.fn(),
     });
     expect(result.current).toEqual({
       children: expect.anything(),
@@ -76,7 +78,7 @@ describe('useCopyExportQueryStep', () => {
     const result = renderCopyExportQueryStep({
       migrationSource: MigrationSource.SPLUNK,
       status: 'warning',
-      onCopied: jest.fn(),
+      onCopied: vi.fn(),
     });
     expect(result.current).toEqual({
       children: expect.anything(),
@@ -89,7 +91,7 @@ describe('useCopyExportQueryStep', () => {
     const result = renderCopyExportQueryStep({
       migrationSource: MigrationSource.SPLUNK,
       status: 'danger',
-      onCopied: jest.fn(),
+      onCopied: vi.fn(),
     });
     expect(result.current).toEqual({
       children: expect.anything(),
@@ -102,7 +104,7 @@ describe('useCopyExportQueryStep', () => {
     const result = renderCopyExportQueryStep({
       migrationSource: MigrationSource.SPLUNK,
       status: 'current',
-      onCopied: jest.fn(),
+      onCopied: vi.fn(),
     });
     expect(result.current).toEqual({
       children: expect.anything(),

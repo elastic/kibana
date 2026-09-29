@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { Transform } from 'stream';
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core/server';
@@ -15,7 +17,7 @@ describe('Access Control Transforms', () => {
   // Mock type registry (expand to satisfy ISavedObjectTypeRegistry)
   const typeRegistry = {
     supportsAccessControl: (type: string) => type === 'dashboard',
-  } as unknown as jest.Mocked<ISavedObjectTypeRegistry>;
+  } as unknown as Mocked<ISavedObjectTypeRegistry>;
 
   // Full AuthenticatedUser mock
   // const makeUser = (profileUid: string | null): AuthenticatedUser | null =>

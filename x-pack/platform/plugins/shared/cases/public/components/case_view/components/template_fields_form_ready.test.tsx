@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { MutableRefObject } from 'react';
@@ -13,9 +15,12 @@ import type { TemplateFieldsFormApi } from './template_fields_form_ready';
 import { FieldType } from '../../../../common/types/domain/template/fields';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
 
-jest.mock('../../templates_v2/field_types/field_renderer', () => ({
-  FieldsRenderer: () => null,
-}));
+vi.mock('../../templates_v2/field_types/field_renderer', () => {
+      const mocked = {
+      FieldsRenderer: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Helper: mount in batch mode and read form values after mount
 const getInitialValues = (

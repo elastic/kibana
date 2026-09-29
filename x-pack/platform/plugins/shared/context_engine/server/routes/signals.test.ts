@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { registerSignalRoutes } from './signals';
@@ -26,13 +29,13 @@ describe('signals routes', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
   let feedbackLoopEnabled: boolean;
-  let search: jest.Mock;
+  let search: Mock;
 
   const createContext = () =>
     ({
       core: Promise.resolve({
         uiSettings: {
-          client: { get: jest.fn().mockImplementation(async () => featureFlagEnabled) },
+          client: { get: vi.fn().mockImplementation(async () => featureFlagEnabled) },
         },
         elasticsearch: {
           client: { asCurrentUser: { search } },
@@ -56,7 +59,7 @@ describe('signals routes', () => {
     featureFlagEnabled = true;
     feedbackLoopEnabled = true;
     response = httpServerMock.createResponseFactory();
-    search = jest.fn();
+    search = vi.fn();
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
       addVersion: (versionConfig: { validate: unknown }, handler: RequestHandler) => {
@@ -65,7 +68,7 @@ describe('signals routes', () => {
     });
 
     const router = {
-      versioned: { get: jest.fn(createVersionedRoute('GET')) },
+      versioned: { get: vi.fn(createVersionedRoute('GET')) },
     } as unknown as IRouter;
 
     registerSignalRoutes({

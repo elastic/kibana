@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedClass } from 'vitest';
+
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { ElasticsearchOtlpExporter, EvalSpanProcessor } from '@kbn/tracing';
 import { initInferenceTracerProvider } from '@kbn/inference-tracing';
@@ -14,66 +17,87 @@ import { registerTracingExporter } from './register_tracing';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
 import { DATA_STREAM_NAMESPACE_ATTR } from './agent_builder_context';
 
-jest.mock('@kbn/inference-tracing', () => ({
-  initInferenceTracerProvider: jest.fn(),
-  shutdownInferenceTracerProvider: jest.fn().mockResolvedValue(undefined),
-  EXECUTION_ID_BAGGAGE_KEY: 'execution.id.baggage.key',
-  EVAL_EXPERIMENT_ID_BAGGAGE_KEY: 'experiment.id.baggage.key',
-  EVALUATOR_NAME_BAGGAGE_KEY: 'evaluator.name.baggage.key',
-}));
+vi.mock('@kbn/inference-tracing', () => {
+      const mocked = {
+      initInferenceTracerProvider: vi.fn(),
+      shutdownInferenceTracerProvider: vi.fn().mockResolvedValue(undefined),
+      EXECUTION_ID_BAGGAGE_KEY: 'execution.id.baggage.key',
+      EVAL_EXPERIMENT_ID_BAGGAGE_KEY: 'experiment.id.baggage.key',
+      EVALUATOR_NAME_BAGGAGE_KEY: 'evaluator.name.baggage.key',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./global_bridge_processor', () => ({
-  GlobalBridgeProcessor: jest.fn(),
-}));
+vi.mock('./global_bridge_processor', () => {
+      const mocked = {
+      GlobalBridgeProcessor: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./opik_distributed_tracing', () => ({
-  OpikDistributedTracingSpanProcessor: jest.fn(),
-}));
+vi.mock('./opik_distributed_tracing', () => {
+      const mocked = {
+      OpikDistributedTracingSpanProcessor: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockResource = {
   attributes: { 'service.name': 'kibana' },
-  waitForAsyncAttributes: jest.fn().mockResolvedValue(undefined),
+  waitForAsyncAttributes: vi.fn().mockResolvedValue(undefined),
 };
 
-jest.mock('@kbn/telemetry', () => ({
-  buildOtelResources: jest.fn(() => mockResource),
-}));
+vi.mock('@kbn/telemetry', () => {
+      const mocked = {
+      buildOtelResources: vi.fn(() => mockResource),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockLateBindingInstance = {
-  onStart: jest.fn(),
-  onEnd: jest.fn(),
-  forceFlush: jest.fn().mockResolvedValue(undefined),
-  shutdown: jest.fn().mockResolvedValue(undefined),
+  onStart: vi.fn(),
+  onEnd: vi.fn(),
+  forceFlush: vi.fn().mockResolvedValue(undefined),
+  shutdown: vi.fn().mockResolvedValue(undefined),
 };
 
-jest.mock('@kbn/tracing', () => ({
-  LateBindingSpanProcessor: {
-    register: jest.fn(() => jest.fn().mockResolvedValue(undefined)),
-    hasInstance: jest.fn(() => false),
-    get: jest.fn(() => mockLateBindingInstance),
-  },
-  ElasticsearchOtlpExporter: jest.fn(),
-  EvalSpanProcessor: jest.fn(),
-}));
+vi.mock('@kbn/tracing', () => {
+      const mocked = {
+      LateBindingSpanProcessor: {
+        register: vi.fn(() => vi.fn().mockResolvedValue(undefined)),
+        hasInstance: vi.fn(() => false),
+        get: vi.fn(() => mockLateBindingInstance),
+      },
+      ElasticsearchOtlpExporter: vi.fn(),
+      EvalSpanProcessor: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@opentelemetry/exporter-trace-otlp-proto', () => ({
-  OTLPTraceExporter: jest.fn(),
-}));
+vi.mock('@opentelemetry/exporter-trace-otlp-proto', () => {
+      const mocked = {
+      OTLPTraceExporter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./agent_builder_span_processor', () => ({
-  AgentBuilderSpanProcessor: jest.fn(),
-}));
+vi.mock('./agent_builder_span_processor', () => {
+      const mocked = {
+      AgentBuilderSpanProcessor: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type TracingConfig = AgentBuilderConfig['tracing'];
 
-const MockedOtlpExporter = OTLPTraceExporter as jest.MockedClass<typeof OTLPTraceExporter>;
-const MockedEsOtlpExporter = ElasticsearchOtlpExporter as jest.MockedClass<
+const MockedOtlpExporter = OTLPTraceExporter as MockedClass<typeof OTLPTraceExporter>;
+const MockedEsOtlpExporter = ElasticsearchOtlpExporter as MockedClass<
   typeof ElasticsearchOtlpExporter
 >;
-const MockedAgentBuilderProcessor = AgentBuilderSpanProcessor as jest.MockedClass<
+const MockedAgentBuilderProcessor = AgentBuilderSpanProcessor as MockedClass<
   typeof AgentBuilderSpanProcessor
 >;
-const MockedEvalSpanProcessor = EvalSpanProcessor as jest.MockedClass<typeof EvalSpanProcessor>;
+const MockedEvalSpanProcessor = EvalSpanProcessor as MockedClass<typeof EvalSpanProcessor>;
 
 describe('registerTracingExporter', () => {
   function createCore() {
@@ -81,7 +105,7 @@ describe('registerTracingExporter', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('always initializes the tracing pipeline (ES exporter is always set up for uiSetting-based toggling)', async () => {
@@ -174,14 +198,14 @@ describe('registerTracingExporter', () => {
       { baggageKey: 'evaluator.name.baggage.key', attributeKey: 'evaluator.name' },
       { baggageKey: 'agent_builder.space_id', attributeKey: DATA_STREAM_NAMESPACE_ATTR },
     ]);
-    const [providerOpts] = jest.mocked(initInferenceTracerProvider).mock.calls[0];
+    const [providerOpts] = vi.mocked(initInferenceTracerProvider).mock.calls[0];
     expect(providerOpts.processors).toHaveLength(3);
     expect(providerOpts.resource).toBe(mockResource);
     expect(mockResource.waitForAsyncAttributes).toHaveBeenCalledTimes(1);
   });
 
   it('teardown shuts down processors', async () => {
-    const { shutdownInferenceTracerProvider } = jest.requireMock('@kbn/inference-tracing');
+    const { shutdownInferenceTracerProvider } = (await vi.importMock('@kbn/inference-tracing'));
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
       exporters: [],

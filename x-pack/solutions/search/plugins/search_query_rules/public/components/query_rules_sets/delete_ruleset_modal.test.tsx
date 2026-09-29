@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { DeleteRulesetModal } from './delete_ruleset_modal';
@@ -12,11 +15,14 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useDeleteRuleset } from '../../hooks/use_delete_query_rules_ruleset';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
-jest.mock('../../hooks/use_delete_query_rules_ruleset', () => ({
-  useDeleteRuleset: jest.fn(() => ({
-    mutate: jest.fn(),
-  })),
-}));
+vi.mock('../../hooks/use_delete_query_rules_ruleset', () => {
+      const mocked = {
+      useDeleteRuleset: vi.fn(() => ({
+        mutate: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DeleteRulesetModal', () => {
   const queryClient = new QueryClient();
@@ -25,13 +31,13 @@ describe('DeleteRulesetModal', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should not use mutation when cancel is pressed', () => {
-    const onClose = jest.fn();
-    const mutate = jest.fn();
-    (useDeleteRuleset as unknown as jest.Mock).mockReturnValue({
+    const onClose = vi.fn();
+    const mutate = vi.fn();
+    (useDeleteRuleset as unknown as Mock).mockReturnValue({
       mutate,
     });
     render(
@@ -50,10 +56,10 @@ describe('DeleteRulesetModal', () => {
   });
 
   it('should delete the ruleset when delete is pressed', () => {
-    const onClose = jest.fn();
-    const mutate = jest.fn();
+    const onClose = vi.fn();
+    const mutate = vi.fn();
 
-    (useDeleteRuleset as unknown as jest.Mock).mockReturnValue({
+    (useDeleteRuleset as unknown as Mock).mockReturnValue({
       mutate,
     });
 
@@ -78,10 +84,10 @@ describe('DeleteRulesetModal', () => {
   });
 
   it('should show error message if ruleset is attached to an index', () => {
-    const onClose = jest.fn();
-    const mutate = jest.fn();
+    const onClose = vi.fn();
+    const mutate = vi.fn();
 
-    (useDeleteRuleset as unknown as jest.Mock).mockReturnValue({
+    (useDeleteRuleset as unknown as Mock).mockReturnValue({
       mutate,
     });
 
@@ -105,7 +111,7 @@ describe('DeleteRulesetModal', () => {
     expect(mutate).toHaveBeenCalledWith({ rulesetId: '123' });
 
     act(() => {
-      (useDeleteRuleset as unknown as jest.Mock).mock.calls[0][1](
+      (useDeleteRuleset as unknown as Mock).mock.calls[0][1](
         'Ruleset is attached to an index'
       );
     });

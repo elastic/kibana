@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { Installation, PackageInfo } from '../../types';
@@ -12,10 +15,10 @@ import { getPackageInfo, getInstallation } from '../epm/packages';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 
-jest.mock('../epm/packages');
+vi.mock('../epm/packages');
 
-const mockedGetInstallation = getInstallation as jest.Mock<ReturnType<typeof getInstallation>>;
-const mockedGetPackageInfo = getPackageInfo as jest.Mock<ReturnType<typeof getPackageInfo>>;
+const mockedGetInstallation = getInstallation as Mock<ReturnType<typeof getInstallation>>;
+const mockedGetPackageInfo = getPackageInfo as Mock<ReturnType<typeof getPackageInfo>>;
 
 describe('getMonitoringPermissions', () => {
   describe('Without elastic agent package installed', () => {

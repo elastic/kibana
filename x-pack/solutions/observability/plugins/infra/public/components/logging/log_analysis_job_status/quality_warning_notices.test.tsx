@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -15,7 +17,7 @@ const renderQualityWarnings = (qualityWarnings: QualityWarning[]) =>
   renderWithKibanaRenderContext(
     <CategoryQualityWarnings
       hasSetupCapabilities={true}
-      onRecreateMlJob={jest.fn()}
+      onRecreateMlJob={vi.fn()}
       qualityWarnings={qualityWarnings}
     />
   );

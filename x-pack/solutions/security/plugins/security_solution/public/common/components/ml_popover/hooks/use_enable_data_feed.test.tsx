@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useEnableDataFeed } from './use_enable_data_feed';
@@ -31,19 +33,22 @@ const JOB = {
   isCompatible: true,
 } as SecurityJob;
 
-const mockSetupMlJob = jest.fn();
-const mockStartDatafeeds = jest.fn();
-const mockStopDatafeeds = jest.fn();
+const mockSetupMlJob = vi.fn();
+const mockStartDatafeeds = vi.fn();
+const mockStopDatafeeds = vi.fn();
 
-jest.mock('../api', () => ({
-  setupMlJob: () => mockSetupMlJob(),
-  startDatafeeds: (...params: unknown[]) => mockStartDatafeeds(...params),
-  stopDatafeeds: () => mockStopDatafeeds(),
-}));
+vi.mock('../api', () => {
+      const mocked = {
+      setupMlJob: () => mockSetupMlJob(),
+      startDatafeeds: (...params: unknown[]) => mockStartDatafeeds(...params),
+      stopDatafeeds: () => mockStopDatafeeds(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../lib/kibana', () => {
-  const original = jest.requireActual('../../../lib/kibana');
+vi.mock('../../../lib/kibana', async () => {
+  const original = (await vi.importActual('../../../lib/kibana'));
 
   return {
     ...original,
@@ -126,7 +131,7 @@ describe('useSecurityJobsHelpers', () => {
     });
 
     it('calls startDatafeeds with 2 weeks old start date', async () => {
-      jest.useFakeTimers().setSystemTime(new Date('1989-03-07'));
+      vi.useFakeTimers().setSystemTime(new Date('1989-03-07'));
 
       const { result } = renderHook(() => useEnableDataFeed(), {
         wrapper,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { useSelector } from 'react-redux-v7';
 import { render } from '@testing-library/react';
@@ -16,17 +19,17 @@ import {
 import { METRIC_TYPE } from '../../lib/ui_metric';
 import type { ExpressionContext, ResolvedArgType } from '../../../types';
 
-jest.mock('react-redux-v7', () => {
-  const originalModule = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const originalModule = require('react-redux-v7');
 
   return {
     ...originalModule,
-    useSelector: jest.fn(),
+    useSelector: vi.fn(),
   };
 });
 
-const trackMetric = jest.fn();
-const useSelectorMock = useSelector as jest.Mock;
+const trackMetric = vi.fn();
+const useSelectorMock = useSelector as Mock;
 
 const Component = withUnconnectedElementsLoadedTelemetry(() => <div />, trackMetric);
 

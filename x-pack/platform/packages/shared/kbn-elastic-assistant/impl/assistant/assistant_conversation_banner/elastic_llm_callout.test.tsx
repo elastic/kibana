@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { ElasticLlmCallout } from './elastic_llm_callout';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 
-jest.mock('react-use/lib/useLocalStorage');
+vi.mock('react-use/lib/useLocalStorage');
 
 describe('ElasticLlmCallout', () => {
   const defaultProps = {
@@ -18,8 +21,8 @@ describe('ElasticLlmCallout', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
+    vi.clearAllMocks();
+    (useLocalStorage as Mock).mockReturnValue([false, vi.fn()]);
   });
 
   it('should not render when showEISCallout is false', () => {
@@ -30,7 +33,7 @@ describe('ElasticLlmCallout', () => {
   });
 
   it('should not render when tour is completed', () => {
-    (useLocalStorage as jest.Mock).mockReturnValue([true, jest.fn()]);
+    (useLocalStorage as Mock).mockReturnValue([true, vi.fn()]);
     const { queryByTestId } = render(
       <TestProviders>
         <ElasticLlmCallout {...defaultProps} />

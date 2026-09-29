@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ProfilingSetupOptions } from './setup';
 import {
   MAX_BUCKETS,
@@ -15,8 +17,8 @@ import {
 
 describe('cluster_settings validators', () => {
   function createSetupOptions() {
-    const getSettings = jest.fn();
-    const profilingStatus = jest.fn();
+    const getSettings = vi.fn();
+    const profilingStatus = vi.fn();
 
     const client = {
       getEsClient: () => ({

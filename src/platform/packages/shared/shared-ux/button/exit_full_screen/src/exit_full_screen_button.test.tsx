@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount as enzymeMount } from 'enzyme';
@@ -38,18 +40,18 @@ export const kibanaMount = (element: JSX.Element) =>
 
 describe('<ExitFullScreenButton />', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('with manual services', () => {
     test('is rendered', () => {
-      const component = componentMount(<ExitFullScreenButton onExit={jest.fn()} />);
+      const component = componentMount(<ExitFullScreenButton onExit={vi.fn()} />);
       expect(component.render()).toMatchSnapshot();
     });
 
     test('passing `false` to toggleChrome does not toggle chrome', () => {
       const component = componentMount(
-        <ExitFullScreenButton onExit={jest.fn()} toggleChrome={false} />
+        <ExitFullScreenButton onExit={vi.fn()} toggleChrome={false} />
       );
       expect(componentServices.setIsFullscreen).toHaveBeenCalledTimes(0);
 
@@ -58,7 +60,7 @@ describe('<ExitFullScreenButton />', () => {
     });
 
     describe('onExit', () => {
-      const onExitHandler = jest.fn();
+      const onExitHandler = vi.fn();
       let component: ReactWrapper;
 
       beforeEach(() => {
@@ -92,13 +94,13 @@ describe('<ExitFullScreenButton />', () => {
 
   describe('with kibana services', () => {
     test('is rendered', () => {
-      const component = kibanaMount(<ExitFullScreenButton onExit={jest.fn()} />);
+      const component = kibanaMount(<ExitFullScreenButton onExit={vi.fn()} />);
       expect(component.render()).toMatchSnapshot();
     });
 
     test('passing `false` to toggleChrome does not toggle chrome', () => {
       const component = kibanaMount(
-        <ExitFullScreenButton onExit={jest.fn()} toggleChrome={false} />
+        <ExitFullScreenButton onExit={vi.fn()} toggleChrome={false} />
       );
       expect(kibanaServices.coreStart.chrome.setIsVisible).toHaveBeenCalledTimes(0);
 
@@ -111,13 +113,13 @@ describe('<ExitFullScreenButton />', () => {
         logo: 'imageSrcAsBase64encodedstring',
       });
       const component = kibanaMount(
-        <ExitFullScreenButton onExit={jest.fn()} toggleChrome={false} />
+        <ExitFullScreenButton onExit={vi.fn()} toggleChrome={false} />
       );
       expect(component.render()).toMatchSnapshot();
     });
 
     describe('onExit', () => {
-      const onExitHandler = jest.fn();
+      const onExitHandler = vi.fn();
       let component: ReactWrapper;
 
       beforeEach(() => {

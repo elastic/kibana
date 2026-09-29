@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ReactElement } from 'react';
 import { isValidElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -17,7 +19,7 @@ import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import type { CoreSetup } from '@kbn/core/public';
 
 const mockUiSettings = {
-  get: jest.fn((item: keyof typeof mockUiSettings) => mockUiSettings[item]),
+  get: vi.fn((item: keyof typeof mockUiSettings) => mockUiSettings[item]),
   [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
   [FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN]: '0,0.[000]',
 } as unknown as CoreSetup['uiSettings'];

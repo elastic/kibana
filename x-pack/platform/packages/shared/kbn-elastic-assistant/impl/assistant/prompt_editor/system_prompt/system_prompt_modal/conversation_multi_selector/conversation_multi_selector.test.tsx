@@ -5,22 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { ConversationMultiSelector } from './conversation_multi_selector';
 import { alertConvo, welcomeConvo, customConvo } from '../../../../../mock/conversation';
 
-const onConversationSelectionChange = jest.fn();
+const onConversationSelectionChange = vi.fn();
 const testProps = {
   conversations: [alertConvo, welcomeConvo, customConvo],
   onConversationSelectionChange,
   selectedConversations: [welcomeConvo],
-  setPaginationObserver: jest.fn(),
+  setPaginationObserver: vi.fn(),
 };
 
 describe('ConversationMultiSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('Selects an existing quick prompt', () => {
     const { getByTestId } = render(<ConversationMultiSelector {...testProps} />);

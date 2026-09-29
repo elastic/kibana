@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import moment from 'moment-timezone';
 import { waitFor, screen, within, renderHook } from '@testing-library/react';
@@ -57,38 +60,44 @@ import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import * as i18n from './translations';
 
-jest.mock('../../containers/configure/use_get_case_configuration');
-jest.mock('../../containers/use_get_cases');
-jest.mock('../../containers/use_get_tags');
-jest.mock('../../containers/use_get_categories');
-jest.mock('../../containers/user_profiles/use_get_current_user_profile');
-jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
-jest.mock('../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/navigation/hooks');
-jest.mock('../app/use_available_owners', () => ({
-  useAvailableCasesOwners: () => ['securitySolution', 'observability'],
-}));
-jest.mock('../../containers/use_update_case');
-jest.mock('../../common/use_license');
-jest.mock('../../containers/user_profiles/use_suggest_user_profiles');
-jest.mock('./hooks/use_view_mode', () => ({
-  useViewMode: jest.fn(),
-}));
+vi.mock('../../containers/configure/use_get_case_configuration');
+vi.mock('../../containers/use_get_cases');
+vi.mock('../../containers/use_get_tags');
+vi.mock('../../containers/use_get_categories');
+vi.mock('../../containers/user_profiles/use_get_current_user_profile');
+vi.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../containers/configure/use_get_supported_action_connectors');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/navigation/hooks');
+vi.mock('../app/use_available_owners', () => {
+      const mocked = {
+      useAvailableCasesOwners: () => ['securitySolution', 'observability'],
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../containers/use_update_case');
+vi.mock('../../common/use_license');
+vi.mock('../../containers/user_profiles/use_suggest_user_profiles');
+vi.mock('./hooks/use_view_mode', () => {
+      const mocked = {
+      useViewMode: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useViewModeMock = useViewModeModule.useViewMode as jest.Mock;
+const useViewModeMock = useViewModeModule.useViewMode as Mock;
 
-const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
-const useGetCasesMock = useGetCases as jest.Mock;
-const useGetTagsMock = useGetTags as jest.Mock;
-const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
-const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
-const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useUpdateCaseMock = useUpdateCase as jest.Mock;
-const useLicenseMock = useLicense as jest.Mock;
-const useGetCategoriesMock = useGetCategories as jest.Mock;
-const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as Mock;
+const useGetCasesMock = useGetCases as Mock;
+const useGetTagsMock = useGetTags as Mock;
+const useGetCurrentUserProfileMock = useGetCurrentUserProfile as Mock;
+const useBulkGetUserProfilesMock = useBulkGetUserProfiles as Mock;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
+const useGetConnectorsMock = useGetSupportedActionConnectors as Mock;
+const useUpdateCaseMock = useUpdateCase as Mock;
+const useLicenseMock = useLicense as Mock;
+const useGetCategoriesMock = useGetCategories as Mock;
+const useSuggestUserProfilesMock = useSuggestUserProfiles as Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
@@ -150,8 +159,8 @@ const patchGetComputedStyle = () => {
 };
 
 describe('AllCasesListGeneric', () => {
-  const onRowClick = jest.fn();
-  const updateCaseProperty = jest.fn();
+  const onRowClick = vi.fn();
+  const updateCaseProperty = vi.fn();
 
   const defaultGetCases = {
     ...useGetCasesMockState,
@@ -159,7 +168,7 @@ describe('AllCasesListGeneric', () => {
 
   const defaultColumnArgs = {
     filterStatus: [CaseStatuses.open],
-    handleIsLoading: jest.fn(),
+    handleIsLoading: vi.fn(),
     isLoadingCases: [],
     isLoadingColumns: false,
     isSelectorView: false,
@@ -185,11 +194,11 @@ describe('AllCasesListGeneric', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useViewModeMock.mockReturnValue({
       viewMode: VIEW_TOGGLE_TABLE_ID,
-      setViewMode: jest.fn(),
+      setViewMode: vi.fn(),
     });
     useGetCasesMock.mockReturnValue(defaultGetCases);
     useGetTagsMock.mockReturnValue({ data: ['coke', 'pepsi'], isLoading: false });
@@ -398,7 +407,7 @@ describe('AllCasesListGeneric', () => {
   it('should force table view when isSelectorView=true even if stored preference is list', async () => {
     useViewModeMock.mockReturnValue({
       viewMode: VIEW_TOGGLE_LIST_ID,
-      setViewMode: jest.fn(),
+      setViewMode: vi.fn(),
     });
 
     renderWithTestingProviders(<AllCasesList isSelectorView={true} />);
@@ -746,8 +755,8 @@ describe('AllCasesListGeneric', () => {
   });
 
   describe('Actions', () => {
-    const updateCasesSpy = jest.spyOn(api, 'updateCases');
-    const deleteCasesSpy = jest.spyOn(api, 'deleteCases');
+    const updateCasesSpy = vi.spyOn(api, 'updateCases');
+    const deleteCasesSpy = vi.spyOn(api, 'deleteCases');
 
     describe('Bulk actions', () => {
       it('Renders bulk action', async () => {
@@ -1179,7 +1188,7 @@ describe('AllCasesListGeneric', () => {
     beforeEach(() => {
       useViewModeMock.mockReturnValue({
         viewMode: VIEW_TOGGLE_LIST_ID,
-        setViewMode: jest.fn(),
+        setViewMode: vi.fn(),
       });
     });
 
@@ -1228,7 +1237,7 @@ describe('AllCasesListGeneric', () => {
 
     it('should not clear selection when switching from list to table view', async () => {
       let currentViewMode: ViewToggleId = VIEW_TOGGLE_LIST_ID;
-      const setViewMode = jest.fn((mode: ViewToggleId) => {
+      const setViewMode = vi.fn((mode: ViewToggleId) => {
         currentViewMode = mode;
       });
       useViewModeMock.mockImplementation(() => ({
@@ -1261,7 +1270,7 @@ describe('AllCasesListGeneric', () => {
 
     it('should not clear selection when switching from table to list while sorted by createdAt', async () => {
       let currentViewMode: ViewToggleId = VIEW_TOGGLE_TABLE_ID;
-      const setViewMode = jest.fn((mode: ViewToggleId) => {
+      const setViewMode = vi.fn((mode: ViewToggleId) => {
         currentViewMode = mode;
       });
       useViewModeMock.mockImplementation(() => ({
@@ -1295,7 +1304,7 @@ describe('AllCasesListGeneric', () => {
 
     it('should clear selection when switching from table to list while sorted by a non-createdAt field', async () => {
       let currentViewMode: ViewToggleId = VIEW_TOGGLE_TABLE_ID;
-      const setViewMode = jest.fn((mode: ViewToggleId) => {
+      const setViewMode = vi.fn((mode: ViewToggleId) => {
         currentViewMode = mode;
       });
       useViewModeMock.mockImplementation(() => ({
@@ -1387,7 +1396,7 @@ describe('AllCasesListGeneric', () => {
     });
 
     describe('Bulk actions', () => {
-      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+      const updateCasesSpy = vi.spyOn(api, 'updateCases');
 
       afterEach(() => {
         updateCasesSpy.mockClear();
@@ -1446,7 +1455,7 @@ describe('AllCasesListGeneric', () => {
     it('reports a cases_list_page_view EBT event on load in list view mode with the selected fields', async () => {
       useViewModeMock.mockReturnValue({
         viewMode: VIEW_TOGGLE_LIST_ID,
-        setViewMode: jest.fn(),
+        setViewMode: vi.fn(),
       });
 
       renderWithTestingProviders(<AllCasesList />);
@@ -1477,7 +1486,7 @@ describe('AllCasesListGeneric', () => {
     });
 
     it('reports a cases_list_view_mode_changed EBT event when the view toggle is clicked', async () => {
-      const setViewMode = jest.fn();
+      const setViewMode = vi.fn();
       useViewModeMock.mockReturnValue({
         viewMode: VIEW_TOGGLE_TABLE_ID,
         setViewMode,

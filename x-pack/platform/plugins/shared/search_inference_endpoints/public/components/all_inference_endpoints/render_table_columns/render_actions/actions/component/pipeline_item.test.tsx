@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -12,9 +15,9 @@ import { PipelineItem } from './pipeline_item';
 import type { InferenceUsageInfo } from '../../../../types';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 
-jest.mock('../../../../../../hooks/use_kibana');
-const mockUseKibana = useKibana as jest.Mock;
-const mockNavigateToApp = jest.fn();
+vi.mock('../../../../../../hooks/use_kibana');
+const mockUseKibana = useKibana as Mock;
+const mockNavigateToApp = vi.fn();
 
 describe('Pipeline item', () => {
   const item: InferenceUsageInfo = {

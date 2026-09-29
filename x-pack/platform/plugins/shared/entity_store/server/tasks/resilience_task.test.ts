@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
@@ -13,40 +16,46 @@ import { createAssetManagerClient } from './factories';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 import type { EntityStoreCoreSetup } from '../types';
 
-jest.mock('./factories');
-jest.mock('./should_delete_orphaned_task');
+vi.mock('./factories');
+vi.mock('./should_delete_orphaned_task');
 // wrapTaskRun adds a tracing span around the run callback; here it just invokes it.
-jest.mock('../telemetry/traces', () => ({
-  wrapTaskRun: jest.fn(({ run }: { run: () => Promise<unknown> }) => run()),
-}));
-jest.mock('../telemetry/events', () => ({
-  createReportEvent: jest.fn().mockReturnValue({ reportEvent: jest.fn() }),
-}));
+vi.mock('../telemetry/traces', () => {
+      const mocked = {
+      wrapTaskRun: vi.fn(({ run }: { run: () => Promise<unknown> }) => run()),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../telemetry/events', () => {
+      const mocked = {
+      createReportEvent: vi.fn().mockReturnValue({ reportEvent: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const createAssetManagerClientMock = createAssetManagerClient as jest.Mock;
-const shouldDeleteOrphanedEntityStoreTaskMock = shouldDeleteOrphanedEntityStoreTask as jest.Mock;
+const createAssetManagerClientMock = createAssetManagerClient as Mock;
+const shouldDeleteOrphanedEntityStoreTaskMock = shouldDeleteOrphanedEntityStoreTask as Mock;
 
 const NAMESPACE = 'default';
 
 describe('resilience task', () => {
   let logger: MockedLogger;
-  let reinstallSharedAssetsIfMissing: jest.Mock;
+  let reinstallSharedAssetsIfMissing: Mock;
 
   const runResilienceTask = async ({
     namespace = NAMESPACE,
     hasFakeRequest = true,
   }: { namespace?: string; hasFakeRequest?: boolean } = {}) => {
     const taskManager = {
-      registerTaskDefinitions: jest.fn(),
+      registerTaskDefinitions: vi.fn(),
     } as unknown as TaskManagerSetupContract;
     const core = {
       analytics: {},
-      getStartServices: jest.fn().mockResolvedValue([{}]),
+      getStartServices: vi.fn().mockResolvedValue([{}]),
     } as unknown as EntityStoreCoreSetup;
 
     registerResilienceTask({ taskManager, logger, core });
 
-    const [definitions] = (taskManager.registerTaskDefinitions as jest.Mock).mock.calls[0];
+    const [definitions] = (taskManager.registerTaskDefinitions as Mock).mock.calls[0];
     const [taskType] = Object.keys(definitions);
     const runner = definitions[taskType].createTaskRunner({
       taskInstance: { id: `resilience:${namespace}`, state: { namespace } },
@@ -57,9 +66,9 @@ describe('resilience task', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggerMock.create();
-    reinstallSharedAssetsIfMissing = jest.fn().mockResolvedValue(false);
+    reinstallSharedAssetsIfMissing = vi.fn().mockResolvedValue(false);
 
     shouldDeleteOrphanedEntityStoreTaskMock.mockResolvedValue(false);
     createAssetManagerClientMock.mockResolvedValue({
@@ -93,13 +102,13 @@ describe('resilience task', () => {
 
   it('throws when namespace is missing from task state', async () => {
     const taskManager = {
-      registerTaskDefinitions: jest.fn(),
+      registerTaskDefinitions: vi.fn(),
     } as unknown as TaskManagerSetupContract;
     const core = { analytics: {} } as unknown as EntityStoreCoreSetup;
 
     registerResilienceTask({ taskManager, logger, core });
 
-    const [definitions] = (taskManager.registerTaskDefinitions as jest.Mock).mock.calls[0];
+    const [definitions] = (taskManager.registerTaskDefinitions as Mock).mock.calls[0];
     const [taskType] = Object.keys(definitions);
     const runner = definitions[taskType].createTaskRunner({
       taskInstance: { id: 'resilience:missing', state: {} },

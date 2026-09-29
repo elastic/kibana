@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -14,17 +17,17 @@ import {
 } from './connector_missing_callout';
 import { useNavigateTo } from '@kbn/security-solution-navigation';
 
-jest.mock('@kbn/security-solution-navigation');
-jest.mock('../../../../common/lib/kibana', () => {
+vi.mock('@kbn/security-solution-navigation');
+vi.mock('../../../../common/lib/kibana', async () => {
   return {
-    ...jest.requireActual('../../../../common/lib/kibana'),
+    ...(await vi.importActual('../../../../common/lib/kibana')),
   };
 });
 
 describe('ConnectorMissingCallout', () => {
   it('should render component', () => {
-    (useNavigateTo as jest.Mock).mockReturnValue({
-      navigateTo: jest.fn(),
+    (useNavigateTo as Mock).mockReturnValue({
+      navigateTo: vi.fn(),
     });
 
     const { getByTestId } = render(<ConnectorMissingCallout canSeeAdvancedSettings={true} />);
@@ -39,8 +42,8 @@ describe('ConnectorMissingCallout', () => {
   });
 
   it('should call navigateTo when clicking on link', () => {
-    const navigateTo = jest.fn();
-    (useNavigateTo as jest.Mock).mockReturnValue({
+    const navigateTo = vi.fn();
+    (useNavigateTo as Mock).mockReturnValue({
       navigateTo,
     });
 
@@ -55,8 +58,8 @@ describe('ConnectorMissingCallout', () => {
   });
 
   it('should show different text when user cannot see advanced settings', () => {
-    (useNavigateTo as jest.Mock).mockReturnValue({
-      navigateTo: jest.fn(),
+    (useNavigateTo as Mock).mockReturnValue({
+      navigateTo: vi.fn(),
     });
 
     const { getByTestId } = render(<ConnectorMissingCallout canSeeAdvancedSettings={false} />);

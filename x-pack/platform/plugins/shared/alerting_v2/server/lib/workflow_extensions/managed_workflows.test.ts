@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DATADOG_ALERT_TRANSLATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type {
@@ -20,7 +22,7 @@ import {
 describe('alerting v2 managed workflows', () => {
   it('registers the alerting v2 plugin as an owner', () => {
     const workflowsExtensions = {
-      registerManagedWorkflowOwner: jest.fn(),
+      registerManagedWorkflowOwner: vi.fn(),
     } as unknown as WorkflowsExtensionsServerPluginSetup;
 
     registerAlertingV2ManagedWorkflowOwner(workflowsExtensions);
@@ -32,12 +34,12 @@ describe('alerting v2 managed workflows', () => {
 
   it('installs the Datadog workflow globally when datadog.alert is registered', async () => {
     const managedWorkflowsClient = {
-      install: jest.fn().mockResolvedValue(undefined),
-      ready: jest.fn().mockResolvedValue(undefined),
+      install: vi.fn().mockResolvedValue(undefined),
+      ready: vi.fn().mockResolvedValue(undefined),
     };
     const workflowsExtensions = {
-      getTriggerDefinition: jest.fn().mockReturnValue({ id: 'datadog.alert' }),
-      initManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
+      getTriggerDefinition: vi.fn().mockReturnValue({ id: 'datadog.alert' }),
+      initManagedWorkflowsClient: vi.fn().mockResolvedValue(managedWorkflowsClient),
     } as unknown as WorkflowsExtensionsServerPluginStart;
 
     await installAlertingV2ManagedWorkflows(workflowsExtensions);
@@ -54,12 +56,12 @@ describe('alerting v2 managed workflows', () => {
 
   it('marks the owner ready without installing when datadog.alert is not registered', async () => {
     const managedWorkflowsClient = {
-      install: jest.fn(),
-      ready: jest.fn().mockResolvedValue(undefined),
+      install: vi.fn(),
+      ready: vi.fn().mockResolvedValue(undefined),
     };
     const workflowsExtensions = {
-      getTriggerDefinition: jest.fn().mockReturnValue(undefined),
-      initManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
+      getTriggerDefinition: vi.fn().mockReturnValue(undefined),
+      initManagedWorkflowsClient: vi.fn().mockResolvedValue(managedWorkflowsClient),
     } as unknown as WorkflowsExtensionsServerPluginStart;
 
     await installAlertingV2ManagedWorkflows(workflowsExtensions);

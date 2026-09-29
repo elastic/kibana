@@ -4,20 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { fetchLicenses } from './fetch_licenses';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      config: {
-        ui: {
-          ccs: { enabled: true },
+vi.mock('../../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          config: {
+            ui: {
+              ccs: { enabled: true },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 import { Globals } from '../../static_globals';
 
 describe('fetchLicenses', () => {

@@ -7,33 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import { BehaviorSubject, of } from 'rxjs';
 import type { ExportJSONActionApi } from './export_json_action';
 import { ExportJSONAction } from './export_json_action';
 import * as ExportJsonFlyout from '../dashboard_app/top_nav/share/export_json/flyout/export_json_flyout';
 
-const mockOpenLazyFlyout = jest.fn();
-jest.mock('@kbn/presentation-util', () => ({
-  openLazyFlyout: (...args: unknown[]) => mockOpenLazyFlyout(...args),
-}));
+const mockOpenLazyFlyout = vi.fn();
+vi.mock('@kbn/presentation-util', () => {
+      const mocked = {
+      openLazyFlyout: (...args: unknown[]) => mockOpenLazyFlyout(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const exportJsonFlyoutSpy = jest
+const exportJsonFlyoutSpy = vi
   .spyOn(ExportJsonFlyout, 'DashboardPanelExportJsonFlyout')
   .mockImplementation(() => null as any);
 
-jest.mock('../services/kibana_services', () => ({
-  coreServices: {
-    http: { post: jest.fn() },
-  },
-}));
+vi.mock('../services/kibana_services', () => {
+      const mocked = {
+      coreServices: {
+        http: { post: vi.fn() },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Export JSON action', () => {
   let action: ExportJSONAction;
   let context: { embeddable: ExportJSONActionApi };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     action = new ExportJSONAction();
     context = {
       embeddable: {
@@ -42,8 +51,8 @@ describe('Export JSON action', () => {
         type: 'testEmbeddable',
         title$: new BehaviorSubject<string | undefined>('My Panel'),
         hideTitle$: new BehaviorSubject<boolean | undefined>(false),
-        serializeState: jest.fn().mockReturnValue({ rawState: { key: 'value' } }),
-        applySerializedState: jest.fn(),
+        serializeState: vi.fn().mockReturnValue({ rawState: { key: 'value' } }),
+        applySerializedState: vi.fn(),
         anyStateChange$: new BehaviorSubject<void>(undefined),
         latestState$: of({ key: 'value' }),
       },
@@ -84,14 +93,14 @@ describe('Export JSON action', () => {
   });
 
   describe('getExportJson branching', () => {
-    let getSerializedStateByValueMock: jest.Mock;
+    let getSerializedStateByValueMock: Mock;
     let embeddableWithLibrary: ExportJSONActionApi;
 
     const renderFlyoutContent = async () => {
       const { loadContent } = mockOpenLazyFlyout.mock.calls[0][0];
       render(
         await loadContent({
-          closeFlyout: jest.fn(),
+          closeFlyout: vi.fn(),
           ariaLabelledBy: 'dashboardExportJsonFlyoutTitle',
         })
       );
@@ -99,15 +108,15 @@ describe('Export JSON action', () => {
     };
 
     beforeEach(() => {
-      getSerializedStateByValueMock = jest.fn().mockReturnValue({ rawState: { byValue: true } });
+      getSerializedStateByValueMock = vi.fn().mockReturnValue({ rawState: { byValue: true } });
       embeddableWithLibrary = {
         ...context.embeddable,
-        canLinkToLibrary: jest.fn().mockResolvedValue(false),
-        canUnlinkFromLibrary: jest.fn().mockResolvedValue(false),
-        saveToLibrary: jest.fn().mockResolvedValue('id'),
-        getSerializedStateByReference: jest.fn().mockReturnValue({}),
+        canLinkToLibrary: vi.fn().mockResolvedValue(false),
+        canUnlinkFromLibrary: vi.fn().mockResolvedValue(false),
+        saveToLibrary: vi.fn().mockResolvedValue('id'),
+        getSerializedStateByReference: vi.fn().mockReturnValue({}),
         getSerializedStateByValue: getSerializedStateByValueMock,
-        hasLibraryItemWithTitle: jest.fn().mockResolvedValue(false),
+        hasLibraryItemWithTitle: vi.fn().mockResolvedValue(false),
       };
     });
 

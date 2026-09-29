@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -18,7 +20,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.ERROR}
-        onEmptyButtonStateClick={jest.fn()}
+        onEmptyButtonStateClick={vi.fn()}
       />
     );
 
@@ -33,7 +35,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.ERROR}
-        onEmptyButtonStateClick={jest.fn()}
+        onEmptyButtonStateClick={vi.fn()}
         title="Error title"
         body="Error body"
       />
@@ -48,7 +50,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.LOADING}
-        onEmptyButtonStateClick={jest.fn()}
+        onEmptyButtonStateClick={vi.fn()}
       />
     );
 
@@ -59,7 +61,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.EMPTY_SEARCH}
-        onEmptyButtonStateClick={jest.fn()}
+        onEmptyButtonStateClick={vi.fn()}
       />
     );
 
@@ -76,7 +78,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.EMPTY_SEARCH}
-        onEmptyButtonStateClick={jest.fn()}
+        onEmptyButtonStateClick={vi.fn()}
         title="Empty search title"
         body="Empty search body"
       />
@@ -91,7 +93,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.EMPTY}
-        onEmptyButtonStateClick={jest.fn()}
+        onEmptyButtonStateClick={vi.fn()}
         body="There are no endpoint exceptions."
         buttonText="Add endpoint exception"
       />
@@ -107,7 +109,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.EMPTY}
-        onEmptyButtonStateClick={jest.fn()}
+        onEmptyButtonStateClick={vi.fn()}
       />
     );
 
@@ -124,7 +126,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={false}
         viewerStatus={ViewerStatus.EMPTY}
-        onEmptyButtonStateClick={jest.fn()}
+        onEmptyButtonStateClick={vi.fn()}
         listType={ListTypeText.ENDPOINT}
       />
     );
@@ -142,7 +144,7 @@ describe('EmptyViewerState', () => {
       <EmptyViewerState
         isReadOnly={true}
         viewerStatus={ViewerStatus.EMPTY}
-        onEmptyButtonStateClick={jest.fn()}
+        onEmptyButtonStateClick={vi.fn()}
         listType={ListTypeText.ENDPOINT}
       />
     );

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type {
   CreateExceptionListSchema,
   ExceptionListItemSchema,
@@ -38,13 +41,13 @@ describe.each(listType)('Policy details %s artifact delete modal', (type) => {
   let mockedContext: AppContextTestRender;
   let exception: ExceptionListItemSchema;
   let mockedApi: ReturnType<typeof exceptionsListAllHttpMocks>;
-  let onCloseMock: () => jest.Mock;
+  let onCloseMock: () => Mock;
 
   beforeEach(() => {
     policyId = uuidv4();
     mockedContext = createAppRootMockRenderer();
     exception = getExceptionListItemSchemaMock();
-    onCloseMock = jest.fn();
+    onCloseMock = vi.fn();
     mockedApi = exceptionsListAllHttpMocks(mockedContext.coreStart.http);
     render = async () => {
       await act(async () => {

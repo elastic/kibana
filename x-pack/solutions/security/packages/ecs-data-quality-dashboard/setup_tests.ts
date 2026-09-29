@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@testing-library/jest-dom';
 
 // context:
 // https://github.com/elastic/eui/issues/4408#issuecomment-754125867
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
-  htmlIdGenerator: () => () => `id-${Math.random()}`,
-}));
+vi.mock('@elastic/eui/lib/services/accessibility/html_id_generator', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui/lib/services/accessibility/html_id_generator')),
+      htmlIdGenerator: () => () => `id-${Math.random()}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // https://github.com/jsdom/jsdom/issues/1695
-window.HTMLElement.prototype.scrollIntoView = jest.fn();
+window.HTMLElement.prototype.scrollIntoView = vi.fn();

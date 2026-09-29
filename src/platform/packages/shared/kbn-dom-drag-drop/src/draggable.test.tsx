@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,12 +22,12 @@ import {
   EXACT,
 } from './test_utils';
 
-jest.useFakeTimers({ legacyFakeTimers: true });
+vi.useFakeTimers({ legacyFakeTimers: true });
 
 describe('Draggable', () => {
   const renderDraggable = (propsOverrides = {}) => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
     const rtlRender = renderWithDragDropContext(
       <>
@@ -40,7 +42,7 @@ describe('Draggable', () => {
         <Droppable
           order={[2, 0, 1, 1]}
           value={generateDragDropValue()}
-          onDrop={jest.fn()}
+          onDrop={vi.fn()}
           dropTypes={['field_replace']}
         >
           <button>Drop here</button>
@@ -59,39 +61,39 @@ describe('Draggable', () => {
       startDragging: () => {
         fireEvent.dragStart(draggable, { dataTransfer });
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       startDraggingByKeyboard: async () => {
         draggableKeyboardHandler.focus();
         await user.keyboard('{enter}');
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       dragOverToNextByKeyboard: async () => {
         await user.keyboard('{arrowright}');
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       endDragging: () => {
         fireEvent.dragEnd(draggable, { dataTransfer });
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       dragOver: () => {
         fireEvent.dragOver(droppable);
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
     };
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('makes component draggable', () => {
@@ -100,8 +102,8 @@ describe('Draggable', () => {
   });
 
   test('removes selection on mouse down before dragging', async () => {
-    const removeAllRanges = jest.fn();
-    global.getSelection = jest.fn(() => ({ removeAllRanges } as unknown as Selection));
+    const removeAllRanges = vi.fn();
+    global.getSelection = vi.fn(() => ({ removeAllRanges } as unknown as Selection));
     const { draggable } = renderDraggable();
     fireEvent.mouseDown(draggable);
     expect(global.getSelection).toHaveBeenCalled();

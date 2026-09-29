@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
@@ -55,9 +58,9 @@ const expectedEvents = [
 ];
 
 describe('EventLogStart', () => {
-  const savedObjectGetter = jest.fn();
-  let esContext: jest.Mocked<EsContext> & {
-    esAdapter: jest.Mocked<IClusterClientAdapter>;
+  const savedObjectGetter = vi.fn();
+  let esContext: Mocked<EsContext> & {
+    esAdapter: Mocked<IClusterClientAdapter>;
   };
   let eventLogClient: EventLogClient;
   beforeEach(() => {
@@ -69,7 +72,7 @@ describe('EventLogStart', () => {
     });
   });
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('findEventsBySavedObjectIds', () => {
@@ -397,7 +400,7 @@ function fakeEvent(overrides = {}) {
 }
 
 function FakeRequest(): KibanaRequest {
-  const savedObjectGetter = jest.fn();
+  const savedObjectGetter = vi.fn();
 
   return {
     headers: {},

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
@@ -28,10 +30,10 @@ import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 
 const createMockLogger = (): Logger =>
   ({
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 const createDeferred = <T>() => {
@@ -786,7 +788,7 @@ describe('executeDashboardOperations', () => {
   });
 
   it('adds non-visualization section panels without invoking the visualization resolver', async () => {
-    const resolvePanelContent = jest.fn<
+    const resolvePanelContent = vi.fn<
       ReturnType<ResolvePanelContent>,
       Parameters<ResolvePanelContent>
     >();
@@ -839,7 +841,7 @@ describe('executeDashboardOperations', () => {
   it('resolves inline panels for multiple section creations in parallel', async () => {
     const firstSectionPanel = createDeferred<PanelContentAttempt>();
     const secondSectionPanel = createDeferred<PanelContentAttempt>();
-    const resolvePanelContent = jest.fn<
+    const resolvePanelContent = vi.fn<
       ReturnType<ResolvePanelContent>,
       Parameters<ResolvePanelContent>
     >(async ({ nlQuery }) => {
@@ -940,7 +942,7 @@ describe('executeDashboardOperations', () => {
   it('pre-resolves top-level visualization creations alongside section creations', async () => {
     const sectionPanel = createDeferred<PanelContentAttempt>();
     const topLevelPanel = createDeferred<PanelContentAttempt>();
-    const resolvePanelContent = jest.fn<
+    const resolvePanelContent = vi.fn<
       ReturnType<ResolvePanelContent>,
       Parameters<ResolvePanelContent>
     >(async ({ nlQuery }) => {
@@ -1562,7 +1564,7 @@ describe('executeDashboardOperations', () => {
     });
 
     it('does not resolve visualization edits for panels removed earlier in the sequence', async () => {
-      const resolvePanelContent = jest.fn<
+      const resolvePanelContent = vi.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
       >(async () =>
@@ -1722,7 +1724,7 @@ describe('executeDashboardOperations', () => {
         ['panel-2', createDeferred<PanelContentAttempt>()],
       ]);
 
-      const resolvePanelContent = jest.fn<
+      const resolvePanelContent = vi.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
       >(({ identifier }) => {
@@ -1810,7 +1812,7 @@ describe('executeDashboardOperations', () => {
     });
 
     it('records a failure for each occurrence when a panelId is duplicated within one op', async () => {
-      const resolvePanelContent = jest.fn<
+      const resolvePanelContent = vi.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
       >(async ({ identifier }) =>
@@ -1885,7 +1887,7 @@ describe('executeDashboardOperations', () => {
     });
 
     it('edits a markdown panel content in place by panelId', async () => {
-      const resolvePanelContent = jest.fn<
+      const resolvePanelContent = vi.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
       >();
@@ -1928,7 +1930,7 @@ describe('executeDashboardOperations', () => {
     });
 
     it('records a failure when a markdown config-source edit targets a non-markdown panel', async () => {
-      const resolvePanelContent = jest.fn<
+      const resolvePanelContent = vi.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
       >();
@@ -1976,7 +1978,7 @@ describe('executeDashboardOperations', () => {
     });
 
     it('edits an ML anomaly charts panel in place by panelId', async () => {
-      const resolvePanelContent = jest.fn<
+      const resolvePanelContent = vi.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
       >();
@@ -2027,7 +2029,7 @@ describe('executeDashboardOperations', () => {
     });
 
     it('records a failure when an ML charts config-source edit targets a non-ML panel', async () => {
-      const resolvePanelContent = jest.fn<
+      const resolvePanelContent = vi.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
       >();
@@ -2066,7 +2068,7 @@ describe('executeDashboardOperations', () => {
     });
 
     it('edits an ML anomaly swimlane panel in place by panelId', async () => {
-      const resolvePanelContent = jest.fn<
+      const resolvePanelContent = vi.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
       >();
@@ -2119,7 +2121,7 @@ describe('executeDashboardOperations', () => {
     });
 
     it('records a failure when an ML swimlane config-source edit targets a non-swimlane panel', async () => {
-      const resolvePanelContent = jest.fn<
+      const resolvePanelContent = vi.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
       >();
@@ -2158,7 +2160,7 @@ describe('executeDashboardOperations', () => {
     });
 
     it('edits an ML single metric viewer panel in place by panelId', async () => {
-      const resolvePanelContent = jest.fn<
+      const resolvePanelContent = vi.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
       >();
@@ -2209,7 +2211,7 @@ describe('executeDashboardOperations', () => {
     });
 
     it('records a failure when an ML single metric viewer config-source edit targets a non-SMV panel', async () => {
-      const resolvePanelContent = jest.fn<
+      const resolvePanelContent = vi.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
       >();
@@ -2248,11 +2250,11 @@ describe('executeDashboardOperations', () => {
     });
 
     it('edits a custom_content panel in place by panelId, passing the existing template to the resolver', async () => {
-      const resolvePanelContent = jest.fn<
+      const resolvePanelContent = vi.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
       >();
-      const resolveCustomContentTemplate = jest
+      const resolveCustomContentTemplate = vi
         .fn()
         .mockResolvedValue({ template: '<div>Server generated</div>', height: 320 });
 
@@ -2313,7 +2315,7 @@ describe('executeDashboardOperations', () => {
     });
 
     it('removes esqlQuery when null is passed in a custom_content config-source edit', async () => {
-      const resolveCustomContentTemplate = jest
+      const resolveCustomContentTemplate = vi
         .fn()
         .mockResolvedValue({ template: '<div>Server generated</div>', height: 320 });
 
@@ -2344,7 +2346,7 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelContent: jest.fn(),
+        resolvePanelContent: vi.fn(),
         resolveCustomContentTemplate,
       });
 
@@ -2356,7 +2358,7 @@ describe('executeDashboardOperations', () => {
     });
 
     it('records a failure when a custom_content config-source edit targets a non-custom_content panel', async () => {
-      const resolvePanelContent = jest.fn<
+      const resolvePanelContent = vi.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
       >();
@@ -2427,7 +2429,7 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelContent: jest.fn(),
+        resolvePanelContent: vi.fn(),
         // resolveCustomContentTemplate intentionally absent
       });
 
@@ -2438,7 +2440,7 @@ describe('executeDashboardOperations', () => {
 
     it('mixes markdown and visualization edits in one op, parallelizing only the visualization resolves', async () => {
       const deferred = createDeferred<PanelContentAttempt>();
-      const resolvePanelContent = jest.fn<
+      const resolvePanelContent = vi.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
       >(() => deferred.promise);
@@ -2684,10 +2686,10 @@ describe('executeDashboardOperations', () => {
 
 describe('add_controls / remove_controls operations', () => {
   const logger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as import('@kbn/core/server').Logger;
 
   const emptyDashboard: DashboardAttachmentData = { title: 'Test', panels: [] };
@@ -2936,7 +2938,7 @@ describe('add_controls / remove_controls operations', () => {
     // The point of the source: the model places a visualization it already created without
     // copying its payload back through the tool call.
     it('adds a panel from a visualization attachment without a config in the input', async () => {
-      const resolveAttachmentPanel = jest.fn().mockReturnValue({
+      const resolveAttachmentPanel = vi.fn().mockReturnValue({
         type: 'success',
         panelContent: { type: 'lens', config: { type: 'lnsXY' } },
       });
@@ -2969,7 +2971,7 @@ describe('add_controls / remove_controls operations', () => {
     // add_section takes the same panel inputs as add_panels, so it needs the same resolver wired
     // in. Without it the materializer throws, which fails the whole dashboard rather than a panel.
     it('adds an attachment panel inside a new section', async () => {
-      const resolveAttachmentPanel = jest.fn().mockReturnValue({
+      const resolveAttachmentPanel = vi.fn().mockReturnValue({
         type: 'success',
         panelContent: { type: 'lens', config: { type: 'lnsXY' } },
       });
@@ -3000,7 +3002,7 @@ describe('add_controls / remove_controls operations', () => {
     });
 
     it('keeps the section when an attachment inside it cannot be resolved', async () => {
-      const resolveAttachmentPanel = jest.fn().mockReturnValue({
+      const resolveAttachmentPanel = vi.fn().mockReturnValue({
         type: 'failure',
         failure: { type: 'add_section', identifier: 'att-missing', error: 'not found' },
       });
@@ -3032,7 +3034,7 @@ describe('add_controls / remove_controls operations', () => {
     });
 
     it('places the resolvable panels when one attachment in the batch fails', async () => {
-      const resolveAttachmentPanel = jest.fn((attachmentId: string) =>
+      const resolveAttachmentPanel = vi.fn((attachmentId: string) =>
         attachmentId === 'att-missing'
           ? ({
               type: 'failure',
@@ -3068,7 +3070,7 @@ describe('add_controls / remove_controls operations', () => {
     });
 
     it('records a failure and skips the panel when the attachment cannot be resolved', async () => {
-      const resolveAttachmentPanel = jest.fn().mockReturnValue({
+      const resolveAttachmentPanel = vi.fn().mockReturnValue({
         type: 'failure',
         failure: { type: 'add_panels', identifier: 'att-missing', error: 'not found' },
       });

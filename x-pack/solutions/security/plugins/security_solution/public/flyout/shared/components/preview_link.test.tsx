@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -24,7 +27,7 @@ import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../common/lib/kibana', () => {
+vi.mock('../../../common/lib/kibana', () => {
   return {
     useKibana: () => ({
       services: {
@@ -35,26 +38,32 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../entity_details/shared/hooks/use_entity_from_store', () => ({
-  useEntityFromStore: jest.fn().mockReturnValue({
-    entity: null,
-    entityRecord: null,
-    firstSeen: null,
-    lastSeen: null,
-    isLoading: false,
-    error: null,
-    refetch: jest.fn(),
-  }),
-}));
+vi.mock('../../entity_details/shared/hooks/use_entity_from_store', () => {
+      const mocked = {
+      useEntityFromStore: vi.fn().mockReturnValue({
+        entity: null,
+        entityRecord: null,
+        firstSeen: null,
+        lastSeen: null,
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+      ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/components/user_privileges');
 
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+const mockUseUserPrivileges = useUserPrivileges as Mock;
 
 const renderPreviewLink = (
   p0: string,
@@ -84,11 +93,11 @@ const renderPreviewLink = (
 
 describe('<PreviewLink />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseUserPrivileges.mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {

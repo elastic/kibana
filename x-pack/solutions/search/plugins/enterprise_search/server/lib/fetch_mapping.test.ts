@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import { fetchMapping } from './fetch_mapping';
@@ -13,7 +15,7 @@ describe('fetchMapping lib function', () => {
   const mockClient = {
     asCurrentUser: {
       indices: {
-        getMapping: jest.fn(),
+        getMapping: vi.fn(),
       },
     },
   };
@@ -37,7 +39,7 @@ describe('fetchMapping lib function', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return regular mapping information', async () => {

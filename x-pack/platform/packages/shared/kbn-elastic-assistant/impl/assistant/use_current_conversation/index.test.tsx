@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { Props } from '.';
 import { useCurrentConversation } from '.';
@@ -18,11 +21,11 @@ import { MOCK_CURRENT_USER } from '../../mock/conversation';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 // Mock dependencies
-jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
-jest.mock('../use_conversation');
-jest.mock('../helpers');
-jest.mock('fast-deep-equal');
-jest.mock('lodash');
+vi.mock('react-use/lib/useLocalStorage', () => vi.fn());
+vi.mock('../use_conversation');
+vi.mock('../helpers');
+vi.mock('fast-deep-equal');
+vi.mock('lodash');
 const MOCK_DATE = '2025-02-19T23:28:54.962Z';
 const defaultConnectorMock: AIConnector = createMockActionConnector({
   actionTypeId: '.gen-ai',
@@ -63,32 +66,32 @@ const mockData = {
     users: [MOCK_CURRENT_USER],
   },
 };
-const setLastConversationMock = jest.fn();
+const setLastConversationMock = vi.fn();
 
 describe('useCurrentConversation', () => {
   const mockUseConversation = {
-    createConversation: jest.fn(),
-    deleteConversation: jest.fn(),
-    getConversation: jest.fn(),
-    setApiConfig: jest.fn(),
+    createConversation: vi.fn(),
+    deleteConversation: vi.fn(),
+    getConversation: vi.fn(),
+    setApiConfig: vi.fn(),
   };
   beforeAll(() => {
     const mockDate = new Date(MOCK_DATE);
-    jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
+    vi.spyOn(global, 'Date').mockImplementation(() => mockDate);
   });
   beforeEach(() => {
-    (useConversation as jest.Mock).mockReturnValue(mockUseConversation);
-    (deepEqual as jest.Mock).mockReturnValue(false);
-    (find as jest.Mock).mockReturnValue(undefined);
-    (useLocalStorage as jest.Mock).mockReturnValue([undefined, jest.fn()]);
+    (useConversation as Mock).mockReturnValue(mockUseConversation);
+    (deepEqual as Mock).mockReturnValue(false);
+    (find as Mock).mockReturnValue(undefined);
+    (useLocalStorage as Mock).mockReturnValue([undefined, vi.fn()]);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {
-    (Date as unknown as jest.Mock).mockRestore();
+    (Date as unknown as Mock).mockRestore();
   });
 
   const defaultProps: Props = {
@@ -97,7 +100,7 @@ describe('useCurrentConversation', () => {
     lastConversation: { id: '' },
     conversations: {},
     mayUpdateConversations: true,
-    refetchCurrentUserConversations: jest.fn().mockResolvedValue({ data: mockData }),
+    refetchCurrentUserConversations: vi.fn().mockResolvedValue({ data: mockData }),
     setLastConversation: setLastConversationMock,
     spaceId: 'default',
   };
@@ -123,7 +126,7 @@ describe('useCurrentConversation', () => {
   });
 
   it('should initialize with apiConfig if defaultConnector is provided', () => {
-    (useLocalStorage as jest.Mock).mockReturnValue(['456', jest.fn()]);
+    (useLocalStorage as Mock).mockReturnValue(['456', vi.fn()]);
     const { result } = setupHook({
       defaultConnector: defaultConnectorMock,
     });
@@ -146,7 +149,7 @@ describe('useCurrentConversation', () => {
   });
 
   it('should update apiConfig if defaultConnector goes from undefined to defined', async () => {
-    (useLocalStorage as jest.Mock).mockReturnValue(['456', jest.fn()]);
+    (useLocalStorage as Mock).mockReturnValue(['456', vi.fn()]);
     const initialProps = { ...defaultProps, defaultConnector: undefined };
     const { result, rerender } = renderHook(
       ({
@@ -204,7 +207,7 @@ describe('useCurrentConversation', () => {
   });
 
   it('should initialize with local storage connectorId if app is security solution and local storage connectorId exists', () => {
-    (useLocalStorage as jest.Mock).mockReturnValue(['456', jest.fn()]);
+    (useLocalStorage as Mock).mockReturnValue(['456', vi.fn()]);
     const { result } = setupHook({
       currentAppId: 'securitySolutionUI',
       connectors: [
@@ -308,7 +311,7 @@ describe('useCurrentConversation', () => {
     const { result } = setupHook({
       lastConversation: { id: mockData.welcome_id.id },
       conversations: mockConversations,
-      refetchCurrentUserConversations: jest.fn().mockResolvedValue({
+      refetchCurrentUserConversations: vi.fn().mockResolvedValue({
         data: mockConversations,
       }),
     });
@@ -332,7 +335,7 @@ describe('useCurrentConversation', () => {
     const { result } = setupHook({
       lastConversation: { id: mockData.welcome_id.id },
       conversations: mockData,
-      refetchCurrentUserConversations: jest.fn().mockResolvedValue({
+      refetchCurrentUserConversations: vi.fn().mockResolvedValue({
         data: mockData,
       }),
     });
@@ -367,7 +370,7 @@ describe('useCurrentConversation', () => {
     const { result } = setupHook({
       lastConversation: { id: mockData.welcome_id.id },
       conversations: mockData,
-      refetchCurrentUserConversations: jest.fn().mockResolvedValue({
+      refetchCurrentUserConversations: vi.fn().mockResolvedValue({
         data: mockData,
       }),
     });

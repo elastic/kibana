@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -25,10 +27,10 @@ describe('publicBaseUrl warning', () => {
   const theme = themeServiceMock.createStartContract();
   const userProfile = userProfileServiceMock.createStart();
   const startServices = { notifications, analytics, i18n: i18nStart, theme, userProfile };
-  const addWarningToastSpy = jest.spyOn(notifications.toasts, 'addWarning');
+  const addWarningToastSpy = vi.spyOn(notifications.toasts, 'addWarning');
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('does not show any toast on localhost', () => {

@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { findFleetPoliciesUsingSecrets } from './fleet_policies';
 
-const mockWarn = jest.fn();
-const mockDebug = jest.fn();
+const mockWarn = vi.fn();
+const mockDebug = vi.fn();
 
-jest.mock('../app_context', () => ({
-  appContextService: {
-    getLogger: jest.fn().mockReturnValue({
-      warn: (...args: unknown[]) => mockWarn(...args),
-      debug: (...args: unknown[]) => mockDebug(...args),
-      info: jest.fn(),
-      error: jest.fn(),
-    }),
-  },
-}));
+vi.mock('../app_context', () => {
+      const mocked = {
+      appContextService: {
+        getLogger: vi.fn().mockReturnValue({
+          warn: (...args: unknown[]) => mockWarn(...args),
+          debug: (...args: unknown[]) => mockDebug(...args),
+          info: vi.fn(),
+          error: vi.fn(),
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 interface PolicyEntry {
   policyId: string;

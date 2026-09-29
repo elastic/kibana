@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { stringify as yamlStringify } from 'yaml';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import {
@@ -44,7 +47,7 @@ describe('create', () => {
 
   const caseSO = mockCases[0];
   const casesClientMock = createCasesClientMock();
-  casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+  casesClientMock.configure.get = vi.fn().mockResolvedValue([]);
 
   describe('workflow events', () => {
     it('emits a caseCreated event on successful create', async () => {
@@ -66,7 +69,7 @@ describe('create', () => {
     clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('notifies single assignees', async () => {
@@ -195,7 +198,7 @@ describe('create', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
       clientArgs.config = { ...clientArgs.config, assigneeIdentity: { enabled: true } };
     });
@@ -249,7 +252,7 @@ describe('create', () => {
     });
 
     it('is non-fatal: stores assignees uid-only when profile resolution fails', async () => {
-      (clientArgs.securityStartPlugin.userProfiles.bulkGet as jest.Mock).mockRejectedValue(
+      (clientArgs.securityStartPlugin.userProfiles.bulkGet as Mock).mockRejectedValue(
         new Error('profiles service down')
       );
 
@@ -270,7 +273,7 @@ describe('create', () => {
     clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should throw an error when an excess field exists', async () => {
@@ -288,7 +291,7 @@ describe('create', () => {
     clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it(`should not throw an error if the title is non empty and less than ${MAX_TITLE_LENGTH} characters`, async () => {
@@ -343,7 +346,7 @@ describe('create', () => {
     clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it(`should not throw an error if the description is non empty and less than ${MAX_DESCRIPTION_LENGTH} characters`, async () => {
@@ -406,7 +409,7 @@ describe('create', () => {
     clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should not throw an error if the tags array is empty', async () => {
@@ -471,7 +474,7 @@ describe('create', () => {
     clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should not throw an error if the category is null', async () => {
@@ -554,8 +557,8 @@ describe('create', () => {
     ];
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      casesClient.configure.get = jest.fn().mockResolvedValue([
+      vi.clearAllMocks();
+      casesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: theCase.owner,
           customFields: defaultCustomFieldsConfiguration,
@@ -600,7 +603,7 @@ describe('create', () => {
     });
 
     it('should throw an error when required customFields are null', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
+      casesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: theCase.owner,
           customFields: [
@@ -636,7 +639,7 @@ describe('create', () => {
     });
 
     it('should throw an error when required customFields are undefined and missing a default value', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
+      casesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: theCase.owner,
           customFields: [
@@ -777,14 +780,14 @@ describe('create', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     const casesClient = createCasesClientMock();
     const clientArgs = createCasesClientMockArgs();
     clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
-    casesClient.configure.get = jest.fn().mockResolvedValue([
+    casesClient.configure.get = vi.fn().mockResolvedValue([
       {
         owner: caseWithOptionalFields.owner,
         customFields: [
@@ -892,7 +895,7 @@ describe('create', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.templatesService.getTemplate.mockResolvedValue(usageTemplateSO as never);
     });
 
@@ -980,7 +983,7 @@ describe('create', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.templatesService.getTemplate.mockResolvedValue(
         counterTemplateSO as never
       );
@@ -1094,7 +1097,7 @@ describe('create', () => {
     clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
         fieldDefinitions: [],
         total: 0,
@@ -1289,8 +1292,8 @@ describe('create', () => {
     ];
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      adapterCasesClientMock.configure.get = jest
+      vi.clearAllMocks();
+      adapterCasesClientMock.configure.get = vi
         .fn()
         .mockResolvedValue([{ owner: theCase.owner, customFields: adapterCustomFieldsCfg }]);
     });
@@ -1471,7 +1474,7 @@ describe('create', () => {
       // "missing" even though pairing would have produced a fully valid final map.
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
-      adapterCasesClientMock.configure.get = jest.fn().mockResolvedValue([
+      adapterCasesClientMock.configure.get = vi.fn().mockResolvedValue([
         {
           owner: theCase.owner,
           customFields: adapterCustomFieldsCfg.map((cf) => ({ ...cf, required: true })),
@@ -1545,7 +1548,7 @@ describe('create', () => {
     const minimalRequest = omit(theCase, ['severity', 'assignees']);
 
     const expansionCasesClientMock = createCasesClientMock();
-    expansionCasesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+    expansionCasesClientMock.configure.get = vi.fn().mockResolvedValue([]);
 
     const createClientArgs = ({ templatesEnabled = true } = {}) => {
       const clientArgs = createCasesClientMockArgs();
@@ -1557,7 +1560,7 @@ describe('create', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('expands template defaults into the persisted case and pins the resolved version', async () => {
@@ -1869,7 +1872,7 @@ describe('create', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('applies global field defaults when the request has no extended_fields', async () => {
@@ -2006,7 +2009,7 @@ describe('create', () => {
       );
       expect(firstUserActionsByType.extended_fields).toBeUndefined();
 
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
       await create(
@@ -2159,7 +2162,7 @@ describe('create', () => {
 
         const v1LinkedClient = (customFieldsConfiguration: unknown[]) => {
           const client = createCasesClientMock();
-          client.configure.get = jest.fn().mockResolvedValue([
+          client.configure.get = vi.fn().mockResolvedValue([
             {
               owner: SECURITY_SOLUTION_OWNER,
               customFields: customFieldsConfiguration,
@@ -2383,7 +2386,7 @@ describe('create', () => {
     const createClientArgsWithConfig = (extractObservables: boolean) => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
-      extractObservablesCasesClient.configure.get = jest.fn().mockResolvedValue([
+      extractObservablesCasesClient.configure.get = vi.fn().mockResolvedValue([
         {
           owner: theCase.owner,
           customFields: [],
@@ -2427,7 +2430,7 @@ describe('create', () => {
     it('falls back to true when no space configuration exists', async () => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
-      extractObservablesCasesClient.configure.get = jest.fn().mockResolvedValue([]);
+      extractObservablesCasesClient.configure.get = vi.fn().mockResolvedValue([]);
 
       await create(theCase, clientArgs, extractObservablesCasesClient);
 

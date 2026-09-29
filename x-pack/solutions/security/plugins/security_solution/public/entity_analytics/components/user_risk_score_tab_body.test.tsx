@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
@@ -14,18 +17,18 @@ import { UsersType } from '../../explore/users/store/model';
 import { useEntityStoreRiskScore } from '../api/hooks/use_entity_store_risk_score';
 import { useEntityStoreRiskScoreKpi } from '../api/hooks/use_entity_store_risk_score_kpi';
 
-jest.mock('../api/hooks/use_entity_store_risk_score');
-jest.mock('../api/hooks/use_entity_store_risk_score_kpi');
-jest.mock('../../common/containers/query_toggle');
-jest.mock('../../common/lib/kibana');
+vi.mock('../api/hooks/use_entity_store_risk_score');
+vi.mock('../api/hooks/use_entity_store_risk_score_kpi');
+vi.mock('../../common/containers/query_toggle');
+vi.mock('../../common/lib/kibana');
 
 describe('All users query tab body', () => {
-  const mockUseEntityStoreRiskScore = useEntityStoreRiskScore as jest.Mock;
-  const mockUseEntityStoreRiskScoreKpi = useEntityStoreRiskScoreKpi as jest.Mock;
-  const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  const mockUseEntityStoreRiskScore = useEntityStoreRiskScore as Mock;
+  const mockUseEntityStoreRiskScoreKpi = useEntityStoreRiskScoreKpi as Mock;
+  const mockUseQueryToggle = useQueryToggle as Mock;
   const defaultProps = {
     indexNames: [],
-    setQuery: jest.fn(),
+    setQuery: vi.fn(),
     skip: false,
     startDate: '2019-06-25T04:31:59.345Z',
     endDate: '2019-06-25T06:31:59.345Z',
@@ -33,8 +36,8 @@ describe('All users query tab body', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+    vi.clearAllMocks();
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: vi.fn() });
 
     mockUseEntityStoreRiskScore.mockReturnValue({
       loading: false,
@@ -44,7 +47,7 @@ describe('All users query tab body', () => {
       inspect: { dsl: [], response: [] },
       isAuthorized: true,
       isInspected: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       totalCount: 0,
     });
     mockUseEntityStoreRiskScoreKpi.mockReturnValue({
@@ -52,7 +55,7 @@ describe('All users query tab body', () => {
       error: undefined,
       inspect: { dsl: [], response: [] },
       isModuleDisabled: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       severityCount: {
         unknown: 0,
         low: 0,
@@ -74,7 +77,7 @@ describe('All users query tab body', () => {
   });
 
   it('toggleStatus=false, skip', () => {
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: vi.fn() });
     render(
       <TestProviders>
         <UserRiskScoreQueryTabBody {...defaultProps} />

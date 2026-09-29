@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ElementRegistry, applyEditChanges, revertEdits } from './element_registry';
 import type { StyleEdit, TextEdit, MediaEdit } from './element_registry';
 import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../lib/constants';
@@ -126,7 +128,7 @@ describe('ElementRegistry', () => {
     });
 
     it('should call cleanup callback', () => {
-      const cleanup = jest.fn();
+      const cleanup = vi.fn();
       const session = makeSession({ cleanup });
       registry.set(session);
 

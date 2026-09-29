@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ArtifactFormComponentProps } from '../../components/artifact_list_page';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { useLicense } from '../../../common/hooks/use_license';
@@ -17,9 +20,9 @@ import {
 import { useCanAssignArtifactPerPolicy } from './use_can_assign_artifact_per_policy';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
 
-jest.mock('../../../common/hooks/use_license');
+vi.mock('../../../common/hooks/use_license');
 
-const useLicenseMock = useLicense as jest.Mock<jest.Mocked<LicenseService>>;
+const useLicenseMock = useLicense as Mock<Mocked<LicenseService>>;
 
 describe('useCanAssignArtifactPerPolicy()', () => {
   let item: ArtifactFormComponentProps['item'];
@@ -48,7 +51,7 @@ describe('useCanAssignArtifactPerPolicy()', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return `true` when license is platinum plus', () => {

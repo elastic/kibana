@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 
@@ -12,21 +14,24 @@ import { TestProviders } from '../../../../../../../common/mock';
 import * as i18n from './translations';
 import { useChartSettingsPopoverConfiguration } from '.';
 
-const mockHandleClick = jest.fn();
+const mockHandleClick = vi.fn();
 
-jest.mock('../../../../../../../common/components/inspect/use_inspect', () => ({
-  useInspect: () => ({ handleClick: mockHandleClick }),
-}));
+vi.mock('../../../../../../../common/components/inspect/use_inspect', () => {
+      const mocked = {
+      useInspect: () => ({ handleClick: mockHandleClick }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useChartSettingsPopoverConfiguration', () => {
-  const onResetStackByFields = jest.fn();
+  const onResetStackByFields = vi.fn();
   const queryId = 'abcd';
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <TestProviders>{children}</TestProviders>
   );
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   test('it returns the expected defaultInitialPanelId', () => {
     const { result } = renderHook(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -13,29 +16,38 @@ import { OnboardingPage } from '.';
 import { useCloudConnectedAppContext } from '../../app_context';
 import type { CloudConnectedAppContextValue } from '../../app_context';
 
-jest.mock('../../app_context');
-jest.mock('@elastic/eui-illustrations', () => ({
-  arrowDeployCloud: {
-    id: 'arrow-deploy-cloud',
-    title: 'Arrow deploy cloud',
-    light: '<svg></svg>',
-    dark: '<svg></svg>',
-  },
-}));
-jest.mock('./connection_wizard', () => ({
-  ConnectionWizard: ({ onConnect }: { onConnect: () => void }) => (
-    <div data-test-subj="connection-wizard">Connection Wizard Mock</div>
-  ),
-}));
-jest.mock('./service_cards', () => ({
-  ServiceCards: ({ hasPermissions }: { hasPermissions?: boolean }) => (
-    <div data-test-subj="service-cards">
-      Service Cards Mock - hasPermissions: {String(hasPermissions)}
-    </div>
-  ),
-}));
+vi.mock('../../app_context');
+vi.mock('@elastic/eui-illustrations', () => {
+      const mocked = {
+      arrowDeployCloud: {
+        id: 'arrow-deploy-cloud',
+        title: 'Arrow deploy cloud',
+        light: '<svg></svg>',
+        dark: '<svg></svg>',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./connection_wizard', () => {
+      const mocked = {
+      ConnectionWizard: ({ onConnect }: { onConnect: () => void }) => (
+        <div data-test-subj="connection-wizard">Connection Wizard Mock</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./service_cards', () => {
+      const mocked = {
+      ServiceCards: ({ hasPermissions }: { hasPermissions?: boolean }) => (
+        <div data-test-subj="service-cards">
+          Service Cards Mock - hasPermissions: {String(hasPermissions)}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as jest.MockedFunction<
+const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as MockedFunction<
   typeof useCloudConnectedAppContext
 >;
 
@@ -48,11 +60,11 @@ const renderWithIntl = (component: React.ReactElement) => {
 };
 
 describe('OnboardingPage', () => {
-  const mockOnConnect = jest.fn();
+  const mockOnConnect = vi.fn();
   const mockContext: Partial<CloudConnectedAppContextValue> = {
     http: {
       basePath: {
-        prepend: jest.fn((path: string) => `/base${path}`),
+        prepend: vi.fn((path: string) => `/base${path}`),
       },
     } as any,
     docLinks: {
@@ -66,7 +78,7 @@ describe('OnboardingPage', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCloudConnectedAppContext.mockReturnValue(mockContext as CloudConnectedAppContextValue);
   });
 

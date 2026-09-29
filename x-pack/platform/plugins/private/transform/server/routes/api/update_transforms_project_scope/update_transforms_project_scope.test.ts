@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { updateTransformsProjectScope } from './update_transforms_project_scope';
 
 describe('updateTransformsProjectScope', () => {
@@ -27,8 +29,8 @@ describe('updateTransformsProjectScope', () => {
   const createEsClient = (transforms = [createTransform('transform-1')]) =>
     ({
       transform: {
-        getTransform: jest.fn().mockResolvedValue({ transforms }),
-        updateTransform: jest.fn().mockResolvedValue({ acknowledged: true }),
+        getTransform: vi.fn().mockResolvedValue({ transforms }),
+        updateTransform: vi.fn().mockResolvedValue({ acknowledged: true }),
       },
     } as any);
 

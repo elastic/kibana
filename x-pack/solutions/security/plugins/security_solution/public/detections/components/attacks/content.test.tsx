@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { of } from 'rxjs';
@@ -24,93 +27,120 @@ import { AttacksEventTypes } from '../../../common/lib/telemetry';
 
 import { useAttackDiscoveryControls } from '../../../attack_discovery/pages/use_attack_discovery_controls';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
-jest.mock('./kpis/kpis_section', () => ({
-  KPIsSection: () => <div data-test-subj="attacks-kpis-section" />,
-  KPIS_SECTION: 'attacks-kpis-section',
-}));
+vi.mock('./kpis/kpis_section', () => {
+      const mocked = {
+      KPIsSection: () => <div data-test-subj="attacks-kpis-section" />,
+      KPIS_SECTION: 'attacks-kpis-section',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./search_bar/search_bar_section', () => ({
-  SearchBarSection: () => <div data-test-subj="search-bar-section" />,
-}));
+vi.mock('./search_bar/search_bar_section', () => {
+      const mocked = {
+      SearchBarSection: () => <div data-test-subj="search-bar-section" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./filters/type_filter', () => ({
-  TypeFilter: () => <div data-test-subj="mock-type-filter" />,
-}));
+vi.mock('./filters/type_filter', () => {
+      const mocked = {
+      TypeFilter: () => <div data-test-subj="mock-type-filter" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover',
-  () => ({
-    FilterByAssigneesPopover: () => <div data-test-subj="mock-filter-by-assignees-popover" />,
-  })
+  () => {
+      const mocked = {
+        FilterByAssigneesPopover: () => <div data-test-subj="mock-filter-by-assignees-popover" />,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('./table/table_section', () => ({
-  TableSection: () => <div data-test-subj="attacks-page-table-section" />,
-  TABLE_SECTION_TEST_ID: 'attacks-page-table-section',
-}));
+vi.mock('./table/table_section', () => {
+      const mocked = {
+      TableSection: () => <div data-test-subj="attacks-page-table-section" />,
+      TABLE_SECTION_TEST_ID: 'attacks-page-table-section',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../attack_discovery/pages/use_attack_discovery_controls', () => ({
-  useAttackDiscoveryControls: jest.fn().mockReturnValue({
-    connectorId: 'test-connector',
-    isLoading: false,
-    onGenerate: jest.fn(),
-    openFlyout: jest.fn(),
-    settingsFlyout: null,
-  }),
-}));
+vi.mock('../../../attack_discovery/pages/use_attack_discovery_controls', () => {
+      const mocked = {
+      useAttackDiscoveryControls: vi.fn().mockReturnValue({
+        connectorId: 'test-connector',
+        isLoading: false,
+        onGenerate: vi.fn(),
+        openFlyout: vi.fn(),
+        settingsFlyout: null,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn().mockReturnValue({ data: undefined }),
-}));
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn().mockReturnValue({ data: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./generations_control_center', () => ({
-  GenerationsControlCenterFlyout: () => (
-    <div data-test-subj="generationsControlCenterFlyout">
-      {'Mock GenerationsControlCenterFlyout'}
-    </div>
-  ),
-}));
+vi.mock('./generations_control_center', () => {
+      const mocked = {
+      GenerationsControlCenterFlyout: () => (
+        <div data-test-subj="generationsControlCenterFlyout">
+          {'Mock GenerationsControlCenterFlyout'}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
-  ...jest.requireActual('../../../attack_discovery/pages/use_find_attack_discoveries'),
-  useFindAttackDiscoveries: jest.fn().mockReturnValue({ data: undefined }),
-}));
+vi.mock('../../../attack_discovery/pages/use_find_attack_discoveries', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../attack_discovery/pages/use_find_attack_discoveries')),
+      useFindAttackDiscoveries: vi.fn().mockReturnValue({ data: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const dataView: DataView = createStubDataView({ spec: {} });
 
 describe('AttacksPageContent', () => {
-  const reportEvent = jest.fn();
+  const reportEvent = vi.fn();
 
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: { capabilities: { advancedSettings: { save: true } } },
-        featureFlags: { useBooleanValue: jest.fn().mockReturnValue(false) },
+        featureFlags: { useBooleanValue: vi.fn().mockReturnValue(false) },
         settings: {
           client: {
-            get: jest.fn(),
-            get$: jest.fn().mockReturnValue(of(undefined)),
-            getUpdate$: jest.fn().mockReturnValue(of()),
+            get: vi.fn(),
+            get$: vi.fn().mockReturnValue(of(undefined)),
+            getUpdate$: vi.fn().mockReturnValue(of()),
           },
         },
         uiSettings: {
-          get: jest.fn().mockReturnValue(false),
-          set: jest.fn(),
+          get: vi.fn().mockReturnValue(false),
+          set: vi.fn(),
         },
         notifications: {
           tours: {
-            isEnabled: jest.fn().mockReturnValue(false),
+            isEnabled: vi.fn().mockReturnValue(false),
           },
         },
         telemetry: {
           reportEvent,
         },
         storage: {
-          get: jest.fn(),
-          set: jest.fn(),
-          remove: jest.fn(),
+          get: vi.fn(),
+          set: vi.fn(),
+          remove: vi.fn(),
         },
       },
     });
@@ -131,11 +161,11 @@ describe('AttacksPageContent', () => {
   });
 
   it('should render `Schedule` button and report telemetry when clicked', async () => {
-    const openFlyoutMock = jest.fn();
-    (useAttackDiscoveryControls as jest.Mock).mockReturnValue({
+    const openFlyoutMock = vi.fn();
+    (useAttackDiscoveryControls as Mock).mockReturnValue({
       connectorId: 'test-connector',
       isLoading: false,
-      onGenerate: jest.fn(),
+      onGenerate: vi.fn(),
       openFlyout: openFlyoutMock,
       settingsFlyout: null,
     });
@@ -159,11 +189,11 @@ describe('AttacksPageContent', () => {
   });
 
   it('should render `Settings` button and report telemetry when clicked', async () => {
-    const openFlyoutMock = jest.fn();
-    (useAttackDiscoveryControls as jest.Mock).mockReturnValue({
+    const openFlyoutMock = vi.fn();
+    (useAttackDiscoveryControls as Mock).mockReturnValue({
       connectorId: 'test-connector',
       isLoading: false,
-      onGenerate: jest.fn(),
+      onGenerate: vi.fn(),
       openFlyout: openFlyoutMock,
       settingsFlyout: null,
     });
@@ -187,12 +217,12 @@ describe('AttacksPageContent', () => {
   });
 
   it('should render `Run` button and report telemetry when clicked', async () => {
-    const onGenerateMock = jest.fn();
-    (useAttackDiscoveryControls as jest.Mock).mockReturnValue({
+    const onGenerateMock = vi.fn();
+    (useAttackDiscoveryControls as Mock).mockReturnValue({
       connectorId: 'test-connector',
       isLoading: false,
       onGenerate: onGenerateMock,
-      openFlyout: jest.fn(),
+      openFlyout: vi.fn(),
       settingsFlyout: null,
     });
 

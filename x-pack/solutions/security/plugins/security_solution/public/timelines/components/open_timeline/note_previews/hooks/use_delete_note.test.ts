@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
@@ -16,40 +19,46 @@ import { mockTimelineResults } from '../../../../../common/mock/timeline_results
 import { TestProviders } from '../../../../../common/mock';
 import { useDeleteNote } from './use_delete_note';
 
-const mockDispatch = jest.fn();
+const mockDispatch = vi.fn();
 
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
   };
 });
 
-jest.mock('@kbn/react-query', () => {
-  const originalModule = jest.requireActual('@kbn/react-query');
+vi.mock('@kbn/react-query', async () => {
+  const originalModule = (await vi.importActual('@kbn/react-query'));
   return {
     ...originalModule,
-    useMutation: jest.fn((...args) => originalModule.useMutation(...args)),
+    useMutation: vi.fn((...args) => originalModule.useMutation(...args)),
   };
 });
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
-jest.mock('../../../../../common/hooks/use_selector');
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../common/hooks/use_selector');
 
-jest.mock('../../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: jest.fn(),
-}));
+vi.mock('../../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useDeleteNote', () => {
   const mockHttp = {
-    fetch: jest.fn(),
+    fetch: vi.fn(),
   };
 
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         http: mockHttp,
       },
@@ -58,14 +67,14 @@ describe('useDeleteNote', () => {
       ...mockTimelineResults[0],
       confirmingNoteId: 'noteId1',
     };
-    (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
-    (useAppToasts as jest.Mock).mockReturnValue({
-      addError: jest.fn(),
+    (useDeepEqualSelector as Mock).mockReturnValue(timeline);
+    (useAppToasts as Mock).mockReturnValue({
+      addError: vi.fn(),
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call the API to delete a note', async () => {
@@ -152,8 +161,8 @@ describe('useDeleteNote', () => {
     const noteId = '123';
     const errorMessage = 'Failed to delete note';
     mockHttp.fetch.mockRejectedValueOnce(new Error(errorMessage));
-    const addError = jest.fn();
-    (useAppToasts as jest.Mock).mockReturnValue({
+    const addError = vi.fn();
+    (useAppToasts as Mock).mockReturnValue({
       addError,
     });
 

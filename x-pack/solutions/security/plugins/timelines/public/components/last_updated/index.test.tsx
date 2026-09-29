@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { LastUpdatedAt } from '.';
 
-jest.mock('@kbn/i18n-react', () => {
-  const originalModule = jest.requireActual('@kbn/i18n-react');
-  const { i18n } = jest.requireActual('@kbn/i18n');
+vi.mock('@kbn/i18n-react', async () => {
+  const originalModule = (await vi.importActual('@kbn/i18n-react'));
+  const { i18n } = (await vi.importActual('@kbn/i18n'));
   i18n.init({ locale: 'en' });
-  const FormattedRelative = jest.fn();
+  const FormattedRelative = vi.fn();
   FormattedRelative.mockImplementation(() => '2 minutes ago');
 
   return {

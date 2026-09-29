@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -32,55 +35,67 @@ import { getAnyCloudConnectorIacTemplateUrl } from '../utils';
 
 import { CloudConnectorPoliciesFlyout } from '.';
 
-jest.mock('@kbn/kibana-react-plugin/public');
-jest.mock('../hooks/use_cloud_connector_usage');
-jest.mock('../hooks/use_update_cloud_connector', () => ({
-  useUpdateCloudConnector: jest.fn(),
-  updateCloudConnector: jest.fn(() => Promise.resolve({})),
-}));
-jest.mock('../hooks/use_delete_cloud_connector');
-jest.mock('../hooks/use_verify_iac_key');
-jest.mock('../../../hooks/use_request/cloud_connector', () => ({
-  sendVerifyCloudConnectorIacKey: jest.fn(() => Promise.resolve({ data: {}, error: undefined })),
-}));
-jest.mock('../hooks/use_cloud_connector_template');
-jest.mock('../../../hooks', () => ({
-  useIacProvisioner: jest.fn(),
-  useStartServices: jest.fn(),
-  useGetPackageInfoByKeyQuery: jest.fn(),
-}));
-jest.mock('../utils', () => ({
-  ...jest.requireActual('../utils'),
-  getAnyCloudConnectorIacTemplateUrl: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public');
+vi.mock('../hooks/use_cloud_connector_usage');
+vi.mock('../hooks/use_update_cloud_connector', () => {
+      const mocked = {
+      useUpdateCloudConnector: vi.fn(),
+      updateCloudConnector: vi.fn(() => Promise.resolve({})),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_delete_cloud_connector');
+vi.mock('../hooks/use_verify_iac_key');
+vi.mock('../../../hooks/use_request/cloud_connector', () => {
+      const mocked = {
+      sendVerifyCloudConnectorIacKey: vi.fn(() => Promise.resolve({ data: {}, error: undefined })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_cloud_connector_template');
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useIacProvisioner: vi.fn(),
+      useStartServices: vi.fn(),
+      useGetPackageInfoByKeyQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('../utils')),
+      getAnyCloudConnectorIacTemplateUrl: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseCloudConnectorUsage = useCloudConnectorUsage as jest.MockedFunction<
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseCloudConnectorUsage = useCloudConnectorUsage as MockedFunction<
   typeof useCloudConnectorUsage
 >;
-const mockUseUpdateCloudConnector = useUpdateCloudConnector as jest.MockedFunction<
+const mockUseUpdateCloudConnector = useUpdateCloudConnector as MockedFunction<
   typeof useUpdateCloudConnector
 >;
-const mockUpdateCloudConnector = updateCloudConnector as jest.MockedFunction<
+const mockUpdateCloudConnector = updateCloudConnector as MockedFunction<
   typeof updateCloudConnector
 >;
-const mockUseDeleteCloudConnector = useDeleteCloudConnector as jest.MockedFunction<
+const mockUseDeleteCloudConnector = useDeleteCloudConnector as MockedFunction<
   typeof useDeleteCloudConnector
 >;
-const mockUseVerifyIacKey = useVerifyIacKey as jest.MockedFunction<typeof useVerifyIacKey>;
-const mockUseCloudConnectorTemplate = useCloudConnectorTemplate as jest.MockedFunction<
+const mockUseVerifyIacKey = useVerifyIacKey as MockedFunction<typeof useVerifyIacKey>;
+const mockUseCloudConnectorTemplate = useCloudConnectorTemplate as MockedFunction<
   typeof useCloudConnectorTemplate
 >;
-const mockUseIacProvisioner = useIacProvisioner as jest.MockedFunction<typeof useIacProvisioner>;
-const mockUseStartServices = useStartServices as jest.MockedFunction<typeof useStartServices>;
-const mockSendVerify = sendVerifyCloudConnectorIacKey as jest.MockedFunction<
+const mockUseIacProvisioner = useIacProvisioner as MockedFunction<typeof useIacProvisioner>;
+const mockUseStartServices = useStartServices as MockedFunction<typeof useStartServices>;
+const mockSendVerify = sendVerifyCloudConnectorIacKey as MockedFunction<
   typeof sendVerifyCloudConnectorIacKey
 >;
-const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.MockedFunction<
+const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as MockedFunction<
   typeof useGetPackageInfoByKeyQuery
 >;
 const mockGetAnyCloudConnectorIacTemplateUrl =
-  getAnyCloudConnectorIacTemplateUrl as jest.MockedFunction<
+  getAnyCloudConnectorIacTemplateUrl as MockedFunction<
     typeof getAnyCloudConnectorIacTemplateUrl
   >;
 
@@ -101,12 +116,12 @@ const DEFAULT_INTEGRATIONS = [
 
 describe('CloudConnectorPoliciesFlyout', () => {
   let queryClient: QueryClient;
-  const mockOnClose = jest.fn();
-  const mockNavigateToApp = jest.fn();
-  const mockReportEvent = jest.fn();
-  const mockAddWarning = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockNavigateToApp = vi.fn();
+  const mockReportEvent = vi.fn();
+  const mockAddWarning = vi.fn();
   const mockHttp = {} as ReturnType<typeof useStartServices>['http'];
-  const mockLaunchOnClick = jest.fn(() => Promise.resolve());
+  const mockLaunchOnClick = vi.fn(() => Promise.resolve());
 
   const defaultProps = {
     cloudConnectorId: 'connector-123',
@@ -173,13 +188,13 @@ describe('CloudConnectorPoliciesFlyout', () => {
       error: null,
     } as unknown as UseQueryResult<{ items: CloudConnectorUsageItem[]; total: number; page: number; perPage: number }>);
 
-    const mockMutate = jest.fn();
+    const mockMutate = vi.fn();
     mockUseUpdateCloudConnector.mockReturnValue({
       mutate: mockMutate,
       isLoading: false,
     } as unknown as ReturnType<typeof useUpdateCloudConnector>);
 
-    const mockDeleteMutate = jest.fn();
+    const mockDeleteMutate = vi.fn();
     mockUseDeleteCloudConnector.mockReturnValue({
       mutate: mockDeleteMutate,
       isLoading: false,
@@ -193,7 +208,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
       launchButtonProps: { onClick: mockLaunchOnClick },
       isDisabled: false,
       isGeneratingTemplate: false,
-      clearIacConfirm: jest.fn(),
+      clearIacConfirm: vi.fn(),
       isIacProvisionerEnabled: true,
     });
 
@@ -314,7 +329,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
   it('should call mutate when save button is clicked', async () => {
     const user = userEvent.setup();
-    const mockMutate = jest.fn();
+    const mockMutate = vi.fn();
     mockUseUpdateCloudConnector.mockReturnValue({
       mutate: mockMutate,
       isLoading: false,
@@ -686,7 +701,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
     it('should open confirmation modal when delete button is clicked', async () => {
       const user = userEvent.setup();
       mockUseDeleteCloudConnector.mockReturnValue({
-        mutate: jest.fn(),
+        mutate: vi.fn(),
         isLoading: false,
       } as unknown as ReturnType<typeof useDeleteCloudConnector>);
 
@@ -716,7 +731,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
     it('should call delete mutate when confirm button is clicked in modal', async () => {
       const user = userEvent.setup();
-      const mockDeleteMutate = jest.fn();
+      const mockDeleteMutate = vi.fn();
       mockUseDeleteCloudConnector.mockReturnValue({
         mutate: mockDeleteMutate,
         isLoading: false,
@@ -751,7 +766,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
     it('should close modal when cancel button is clicked', async () => {
       const user = userEvent.setup();
       mockUseDeleteCloudConnector.mockReturnValue({
-        mutate: jest.fn(),
+        mutate: vi.fn(),
         isLoading: false,
       } as unknown as ReturnType<typeof useDeleteCloudConnector>);
 
@@ -791,7 +806,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
     it('should show loading state on delete button when deletion is in progress', () => {
       mockUseDeleteCloudConnector.mockReturnValue({
-        mutate: jest.fn(),
+        mutate: vi.fn(),
         isLoading: true,
       } as unknown as ReturnType<typeof useDeleteCloudConnector>);
 
@@ -891,7 +906,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
     it('(f) editing deployment ID to a valid ARN enables Save; Save calls updateConnector with iac_deployment_id only', async () => {
       const user = userEvent.setup();
-      const mockMutate = jest.fn();
+      const mockMutate = vi.fn();
       mockUseUpdateCloudConnector.mockReturnValue({
         mutate: mockMutate,
         isLoading: false,
@@ -999,7 +1014,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
         },
         isDisabled: false,
         isGeneratingTemplate: false,
-        clearIacConfirm: jest.fn(),
+        clearIacConfirm: vi.fn(),
         isIacProvisionerEnabled: true,
       }));
       type WrittenConnector = Awaited<ReturnType<typeof updateCloudConnector>>;
@@ -1010,7 +1025,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
             resolveWrite = () => resolve({} as WrittenConnector);
           })
       );
-      const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+      const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
 
       const { rerender } = renderFlyout({
         provider: 'aws',
@@ -1096,11 +1111,11 @@ describe('CloudConnectorPoliciesFlyout', () => {
         },
         isDisabled: false,
         isGeneratingTemplate: false,
-        clearIacConfirm: jest.fn(),
+        clearIacConfirm: vi.fn(),
         isIacProvisionerEnabled: true,
       }));
       mockUpdateCloudConnector.mockRejectedValue(new Error('403 Forbidden'));
-      const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+      const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
       const user = userEvent.setup();
 
       renderFlyout({
@@ -1195,7 +1210,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
     });
 
     it('(i-open-is-a-read) opening the flyout writes nothing, compares nothing and invalidates nothing', async () => {
-      const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+      const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
 
       renderFlyout({ provider: 'aws', iacUpgradeStatus: 'upgrade_available' });
       await waitFor(() => {
@@ -1219,7 +1234,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
           launchButtonProps: { onClick: mockLaunchOnClick },
           isDisabled: false,
           isGeneratingTemplate: false,
-          clearIacConfirm: jest.fn(),
+          clearIacConfirm: vi.fn(),
           isIacProvisionerEnabled: true,
         };
       });
@@ -1256,7 +1271,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
           launchButtonProps: { onClick: mockLaunchOnClick },
           isDisabled: false,
           isGeneratingTemplate: false,
-          clearIacConfirm: jest.fn(),
+          clearIacConfirm: vi.fn(),
           isIacProvisionerEnabled: true,
         };
       });
@@ -1321,7 +1336,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
         launchButtonProps: { onClick: mockLaunchOnClick },
         isDisabled: false,
         isGeneratingTemplate: false,
-        clearIacConfirm: jest.fn(),
+        clearIacConfirm: vi.fn(),
         templateGenerationError: 'boom',
         isIacProvisionerEnabled: true,
       });
@@ -1343,7 +1358,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
         launchButtonProps: { onClick: mockLaunchOnClick },
         isDisabled: false,
         isGeneratingTemplate: false,
-        clearIacConfirm: jest.fn(),
+        clearIacConfirm: vi.fn(),
         templateGenerationError: 'boom',
         isIacProvisionerEnabled: true,
       });
@@ -1602,10 +1617,10 @@ describe('CloudConnectorPoliciesFlyout', () => {
         },
         isDisabled: false,
         isGeneratingTemplate: false,
-        clearIacConfirm: jest.fn(),
+        clearIacConfirm: vi.fn(),
         isIacProvisionerEnabled: true,
       }));
-      const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+      const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
 
       renderFlyout({
         provider: 'aws',
@@ -1655,7 +1670,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
         launchButtonProps: { onClick: mockLaunchOnClick },
         isDisabled: false,
         isGeneratingTemplate: false,
-        clearIacConfirm: jest.fn(),
+        clearIacConfirm: vi.fn(),
         templateGenerationError: 'boom',
         isIacProvisionerEnabled: true,
       });
@@ -1696,7 +1711,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
         launchButtonProps: { onClick: mockLaunchOnClick },
         isDisabled: false,
         isGeneratingTemplate: false,
-        clearIacConfirm: jest.fn(),
+        clearIacConfirm: vi.fn(),
         templateGenerationError: 'boom',
         isIacProvisionerEnabled: true,
       });
@@ -1893,10 +1908,10 @@ describe('CloudConnectorPoliciesFlyout', () => {
         },
         isDisabled: false,
         isGeneratingTemplate: false,
-        clearIacConfirm: jest.fn(),
+        clearIacConfirm: vi.fn(),
         isIacProvisionerEnabled: true,
       }));
-      const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+      const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
 
       renderFlyout({ provider: 'aws' });
       await user.click(screen.getByTestId(LAUNCH));
@@ -1932,7 +1947,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
         launchButtonProps: { onClick: mockLaunchOnClick },
         isDisabled: false,
         isGeneratingTemplate: false,
-        clearIacConfirm: jest.fn(),
+        clearIacConfirm: vi.fn(),
         templateGenerationError: 'boom',
         isIacProvisionerEnabled: true,
       });
@@ -1960,7 +1975,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
         },
         isDisabled: false,
         isGeneratingTemplate: false,
-        clearIacConfirm: jest.fn(),
+        clearIacConfirm: vi.fn(),
         isIacProvisionerEnabled: true,
       }));
 

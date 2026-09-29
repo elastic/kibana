@@ -5,27 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 // Instruments are created once at module load, so the meter is replaced before `./metrics` is
 // imported. The registries live inside the factory closure to stay clear of the temporal dead
 // zone that module-scope consts would hit when the factory runs.
-jest.mock('@opentelemetry/api', () => {
-  const actual = jest.requireActual('@opentelemetry/api');
-  const counters = new Map<string, { add: jest.Mock }>();
-  const histograms = new Map<string, { record: jest.Mock }>();
+vi.mock('@opentelemetry/api', () => {
+  const actual = require('@opentelemetry/api');
+  const counters = new Map<string, { add: Mock }>();
+  const histograms = new Map<string, { record: Mock }>();
 
   return {
     ...actual,
     __counters: counters,
     __histograms: histograms,
     metrics: {
-      getMeter: jest.fn(() => ({
+      getMeter: vi.fn(() => ({
         createCounter: (name: string) => {
-          const instrument = { add: jest.fn() };
+          const instrument = { add: vi.fn() };
           counters.set(name, instrument);
           return instrument;
         },
         createHistogram: (name: string) => {
-          const instrument = { record: jest.fn() };
+          const instrument = { record: vi.fn() };
           histograms.set(name, instrument);
           return instrument;
         },
@@ -38,8 +41,8 @@ import * as otel from '@opentelemetry/api';
 import { entityStoreMetrics } from './metrics';
 
 const { __counters: counters, __histograms: histograms } = otel as unknown as {
-  __counters: Map<string, { add: jest.Mock }>;
-  __histograms: Map<string, { record: jest.Mock }>;
+  __counters: Map<string, { add: Mock }>;
+  __histograms: Map<string, { record: Mock }>;
 };
 
 const registeredNames = () => [...counters.keys(), ...histograms.keys()];

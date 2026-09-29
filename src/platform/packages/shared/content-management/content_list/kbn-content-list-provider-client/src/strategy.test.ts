@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { FindItemsParams } from '@kbn/content-list-provider';
 import { createClientStrategy } from './strategy';
@@ -36,8 +39,8 @@ describe('createClientStrategy', () => {
 
   const createMockFindItems = (
     items: UserContentCommonSchema[] = []
-  ): jest.Mock<ReturnType<TableListViewFindItemsFn>> => {
-    return jest.fn().mockResolvedValue({ hits: items, total: items.length });
+  ): Mock<ReturnType<TableListViewFindItemsFn>> => {
+    return vi.fn().mockResolvedValue({ hits: items, total: items.length });
   };
 
   const createdByFilter = defineContentListFilter({
@@ -147,7 +150,7 @@ describe('createClientStrategy', () => {
     });
 
     it('propagates errors from consumer findItems', async () => {
-      const mockFindItems = jest.fn().mockRejectedValue(new Error('Network error'));
+      const mockFindItems = vi.fn().mockRejectedValue(new Error('Network error'));
       const { findItems } = createClientStrategy(mockFindItems);
 
       await expect(findItems(createParams())).rejects.toThrow('Network error');
@@ -246,7 +249,7 @@ describe('createClientStrategy', () => {
     });
 
     it('picks up server changes after invalidation', async () => {
-      const mockFindItems = jest
+      const mockFindItems = vi
         .fn<ReturnType<TableListViewFindItemsFn>, Parameters<TableListViewFindItemsFn>>()
         .mockResolvedValueOnce({
           hits: [createMockItem('1'), createMockItem('2')],

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -15,26 +18,26 @@ import { ProductDocBasePlugin } from './plugin';
 import type { ProductDocBaseSetupDependencies, ProductDocBaseStartDependencies } from './types';
 import { PRODUCT_DOC_INSTALL_LOCK_ID } from './services/install_lock';
 
-jest.mock('@kbn/lock-manager');
-jest.mock('./services/package_installer');
-jest.mock('./services/search');
-jest.mock('./services/doc_install_status');
-jest.mock('./services/doc_manager');
-jest.mock('./routes');
-jest.mock('./tasks');
+vi.mock('@kbn/lock-manager');
+vi.mock('./services/package_installer');
+vi.mock('./services/search');
+vi.mock('./services/doc_install_status');
+vi.mock('./services/doc_manager');
+vi.mock('./routes');
+vi.mock('./tasks');
 import { registerRoutes } from './routes';
 import { PackageInstaller } from './services/package_installer';
 import { registerTaskDefinitions, scheduleEnsureUpToDateTask } from './tasks';
 import { DocumentationManager } from './services/doc_manager';
 
-const PackageInstallMock = PackageInstaller as jest.Mock;
-const DocumentationManagerMock = DocumentationManager as jest.Mock;
-const LockManagerServiceMock = LockManagerService as jest.Mock;
+const PackageInstallMock = PackageInstaller as Mock;
+const DocumentationManagerMock = DocumentationManager as Mock;
+const LockManagerServiceMock = LockManagerService as Mock;
 
-const callOrderOf = (fn: jest.Mock): number => fn.mock.invocationCallOrder[0];
+const callOrderOf = (fn: Mock): number => fn.mock.invocationCallOrder[0];
 
 const mockEisAvailable = (coreStart: ReturnType<typeof coreMock.createStart>) => {
-  coreStart.elasticsearch.client.asInternalUser.inference.get = jest.fn().mockResolvedValue({
+  coreStart.elasticsearch.client.asInternalUser.inference.get = vi.fn().mockResolvedValue({
     endpoints: [
       {
         inference_id: defaultInferenceEndpoints.JINAv5,
@@ -47,7 +50,7 @@ const mockEisAvailable = (coreStart: ReturnType<typeof coreMock.createStart>) =>
 };
 
 const mockEisUnavailable = (coreStart: ReturnType<typeof coreMock.createStart>) => {
-  coreStart.elasticsearch.client.asInternalUser.inference.get = jest.fn().mockResolvedValue({
+  coreStart.elasticsearch.client.asInternalUser.inference.get = vi.fn().mockResolvedValue({
     endpoints: [
       {
         inference_id: defaultInferenceEndpoints.ELSER,
@@ -77,31 +80,31 @@ describe('ProductDocBasePlugin', () => {
     };
 
     PackageInstallMock.mockReturnValue({
-      purgeArtifactsFolder: jest.fn().mockResolvedValue(undefined),
+      purgeArtifactsFolder: vi.fn().mockResolvedValue(undefined),
     });
     LockManagerServiceMock.mockReset();
     LockManagerServiceMock.mockImplementation(() => ({
-      withLock: jest.fn((_lockId: string, callback: () => Promise<unknown>) => callback()),
+      withLock: vi.fn((_lockId: string, callback: () => Promise<unknown>) => callback()),
     }));
 
     DocumentationManagerMock.mockReturnValue({
-      install: jest.fn().mockResolvedValue({}),
-      update: jest.fn().mockResolvedValue({}),
-      uninstall: jest.fn().mockResolvedValue({}),
-      getStatus: jest.fn().mockResolvedValue({}),
-      getStatuses: jest.fn().mockResolvedValue({}),
-      updateAll: jest.fn().mockResolvedValue({}),
-      ensureDefaultProductDocumentation: jest.fn().mockResolvedValue(undefined),
-      ensureDefaultSecurityLabs: jest.fn().mockResolvedValue(undefined),
-      installSecurityLabs: jest.fn().mockResolvedValue({}),
-      uninstallSecurityLabs: jest.fn().mockResolvedValue({}),
-      getSecurityLabsStatus: jest.fn().mockResolvedValue({}),
-      updateSecurityLabsAll: jest.fn().mockResolvedValue({}),
+      install: vi.fn().mockResolvedValue({}),
+      update: vi.fn().mockResolvedValue({}),
+      uninstall: vi.fn().mockResolvedValue({}),
+      getStatus: vi.fn().mockResolvedValue({}),
+      getStatuses: vi.fn().mockResolvedValue({}),
+      updateAll: vi.fn().mockResolvedValue({}),
+      ensureDefaultProductDocumentation: vi.fn().mockResolvedValue(undefined),
+      ensureDefaultSecurityLabs: vi.fn().mockResolvedValue(undefined),
+      installSecurityLabs: vi.fn().mockResolvedValue({}),
+      uninstallSecurityLabs: vi.fn().mockResolvedValue({}),
+      getSecurityLabsStatus: vi.fn().mockResolvedValue({}),
+      updateSecurityLabsAll: vi.fn().mockResolvedValue({}),
     });
   });
 
   afterEach(() => {
-    (scheduleEnsureUpToDateTask as jest.Mock).mockReset();
+    (scheduleEnsureUpToDateTask as Mock).mockReset();
   });
 
   describe('#setup', () => {
@@ -168,7 +171,7 @@ describe('ProductDocBasePlugin', () => {
       await new Promise((resolve) => setImmediate(resolve));
 
       const lockManager = LockManagerServiceMock.mock.results[0].value as {
-        withLock: jest.Mock;
+        withLock: Mock;
       };
       expect(lockManager.withLock).toHaveBeenCalledWith(
         PRODUCT_DOC_INSTALL_LOCK_ID,
@@ -200,14 +203,14 @@ describe('ProductDocBasePlugin', () => {
         const coreStart = coreMock.createStart();
         mockEisAvailable(coreStart);
         const disabledAiClient = {
-          get: jest.fn().mockImplementation((key: string) => {
+          get: vi.fn().mockImplementation((key: string) => {
             if (key === 'genAiSettings:defaultAIConnector')
               return Promise.resolve(disabledSentinel);
             if (key === 'genAiSettings:defaultAIConnectorOnly') return Promise.resolve(true);
             return Promise.resolve(undefined);
           }),
         };
-        (coreStart.uiSettings.asScopedToClient as jest.Mock).mockReturnValue(disabledAiClient);
+        (coreStart.uiSettings.asScopedToClient as Mock).mockReturnValue(disabledAiClient);
 
         plugin.setup(coreMock.createSetup(), pluginSetupDeps);
         plugin.start(coreStart, pluginStartDeps);

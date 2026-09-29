@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -66,7 +68,7 @@ describe('MetricVisValue', () => {
   });
 
   it('should add -isfilterable class if onFilter is provided', () => {
-    const onFilter = jest.fn();
+    const onFilter = vi.fn();
     const component = shallow(
       <MetricVisValue
         style={font}
@@ -94,7 +96,7 @@ describe('MetricVisValue', () => {
   });
 
   it('should call onFilter callback if provided', () => {
-    const onFilter = jest.fn();
+    const onFilter = vi.fn();
     const component = shallow(
       <MetricVisValue
         style={font}

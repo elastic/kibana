@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -31,12 +34,12 @@ import type {
   DispatchConnectorEventsResult,
 } from './types';
 
-jest.mock('@kbn/connector-specs', () => {
-  const actual = jest.requireActual('@kbn/connector-specs');
+vi.mock('@kbn/connector-specs', async () => {
+  const actual = (await vi.importActual('@kbn/connector-specs'));
   return {
     ...actual,
-    getConnectorSpec: jest.fn(),
-    connectorTypeIsDual: jest.fn((actionTypeId: string) =>
+    getConnectorSpec: vi.fn(),
+    connectorTypeIsDual: vi.fn((actionTypeId: string) =>
       actual.connectorTypeIsDual(actionTypeId)
     ),
   };
@@ -44,17 +47,17 @@ jest.mock('@kbn/connector-specs', () => {
 
 import { connectorTypeIsDual, getConnectorSpec } from '@kbn/connector-specs';
 
-const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
+const getConnectorSpecMock = getConnectorSpec as MockedFunction<typeof getConnectorSpec>;
 
 describe('ingestInboundEvent', () => {
   const logger = loggingSystemMock.createLogger();
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-  const getUnsecuredSavedObjectsClient = jest.fn().mockResolvedValue(unsecuredSavedObjectsClient);
-  const emitConnectorEvents = jest
+  const getUnsecuredSavedObjectsClient = vi.fn().mockResolvedValue(unsecuredSavedObjectsClient);
+  const emitConnectorEvents = vi
     .fn<Promise<DispatchConnectorEventsResult>, []>()
     .mockResolvedValue({ ok: true });
   const storedApiKey = encodeApiKey('es-id', 'es-secret')!;
-  const getDecryptedConnectorAttributes = jest.fn<Promise<RawAction>, [string, string]>();
+  const getDecryptedConnectorAttributes = vi.fn<Promise<RawAction>, [string, string]>();
 
   const connectorId = 'connector-1';
   const credentialId = 'cred-1';
@@ -96,7 +99,7 @@ describe('ingestInboundEvent', () => {
     },
   });
 
-  const createFakeSpec = (handleEvents: jest.Mock) =>
+  const createFakeSpec = (handleEvents: Mock) =>
     ({
       metadata: {
         id: '.myConnector',
@@ -121,9 +124,9 @@ describe('ingestInboundEvent', () => {
     } as ReturnType<typeof getConnectorSpec>);
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (connectorTypeIsDual as jest.Mock).mockImplementation((actionTypeId: string) =>
-      jest.requireActual('@kbn/connector-specs').connectorTypeIsDual(actionTypeId)
+    vi.clearAllMocks();
+    (connectorTypeIsDual as Mock).mockImplementation(async (actionTypeId: string) =>
+      (await vi.importActual('@kbn/connector-specs')).connectorTypeIsDual(actionTypeId)
     );
     emitConnectorEvents.mockResolvedValue({ ok: true });
     getDecryptedConnectorAttributes.mockResolvedValue({
@@ -211,8 +214,8 @@ describe('ingestInboundEvent', () => {
   });
 
   it('returns 404 when a dual connector is not enabled for inbound events', async () => {
-    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
-    const handleEvents = jest.fn();
+    (connectorTypeIsDual as Mock).mockReturnValue(true);
+    const handleEvents = vi.fn();
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
     );
@@ -223,8 +226,8 @@ describe('ingestInboundEvent', () => {
   });
 
   it('accepts a dual connector that still has inbound events enabled', async () => {
-    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
-    const handleEvents = jest.fn().mockResolvedValue({ type: 'emit', events: [] });
+    (connectorTypeIsDual as Mock).mockReturnValue(true);
+    const handleEvents = vi.fn().mockResolvedValue({ type: 'emit', events: [] });
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
     );
@@ -250,7 +253,7 @@ describe('ingestInboundEvent', () => {
 
   it('returns 404 when the connector type is disabled in config', async () => {
     getConnectorSpecMock.mockReturnValue(
-      createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
+      createFakeSpec(vi.fn()) as ReturnType<typeof getConnectorSpec>
     );
     const { response: res } = await run({ isActionTypeEnabled: () => false });
     expect(res.notFound).toHaveBeenCalled();
@@ -269,7 +272,7 @@ describe('ingestInboundEvent', () => {
 
   it('returns 404 when loadInboundConnector returns undefined (type mismatch / miss)', async () => {
     getConnectorSpecMock.mockReturnValue(
-      createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
+      createFakeSpec(vi.fn()) as ReturnType<typeof getConnectorSpec>
     );
     unsecuredSavedObjectsClient.get.mockImplementation(async (type, id) => {
       if (type === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE) {
@@ -299,7 +302,7 @@ describe('ingestInboundEvent', () => {
 
   it('returns 404 when the ingest credential is missing', async () => {
     getConnectorSpecMock.mockReturnValue(
-      createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
+      createFakeSpec(vi.fn()) as ReturnType<typeof getConnectorSpec>
     );
     unsecuredSavedObjectsClient.get.mockImplementation(async (type, id) => {
       if (type === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE) {
@@ -315,7 +318,7 @@ describe('ingestInboundEvent', () => {
 
   it('returns 404 when the token is missing', async () => {
     getConnectorSpecMock.mockReturnValue(
-      createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
+      createFakeSpec(vi.fn()) as ReturnType<typeof getConnectorSpec>
     );
     const { response: res } = await run({ query: {} });
     expect(res.notFound).toHaveBeenCalled();
@@ -331,7 +334,7 @@ describe('ingestInboundEvent', () => {
     'returns 404 without loading a credential for unparseable token %j',
     async (badToken) => {
       getConnectorSpecMock.mockReturnValue(
-        createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
+        createFakeSpec(vi.fn()) as ReturnType<typeof getConnectorSpec>
       );
       const { response: res } = await run({ query: { token: badToken } });
       expect(res.notFound).toHaveBeenCalled();
@@ -353,7 +356,7 @@ describe('ingestInboundEvent', () => {
       token: rotatedToken,
     });
     const eventId = buildEventId('.myConnector', 'received');
-    const handleEvents = jest.fn().mockResolvedValue({
+    const handleEvents = vi.fn().mockResolvedValue({
       type: 'emit',
       events: [{ eventId, correlationKey: 'corr-1', payload: { body: { hello: 'world' } } }],
     });
@@ -385,7 +388,7 @@ describe('ingestInboundEvent', () => {
 
   it('accepts Authorization Bearer when query token is absent', async () => {
     const eventId = buildEventId('.myConnector', 'received');
-    const handleEvents = jest.fn().mockResolvedValue({
+    const handleEvents = vi.fn().mockResolvedValue({
       type: 'emit',
       events: [{ eventId, correlationKey: 'corr-1', payload: { body: { hello: 'world' } } }],
     });
@@ -403,7 +406,7 @@ describe('ingestInboundEvent', () => {
 
   it('returns 202 and emits on the happy path without secrets', async () => {
     const eventId = buildEventId('.myConnector', 'received');
-    const handleEvents = jest.fn().mockResolvedValue({
+    const handleEvents = vi.fn().mockResolvedValue({
       type: 'emit',
       events: [
         {
@@ -448,7 +451,7 @@ describe('ingestInboundEvent', () => {
 
   it('returns 202 for an empty events list', async () => {
     getConnectorSpecMock.mockReturnValue(
-      createFakeSpec(jest.fn().mockResolvedValue({ type: 'emit', events: [] })) as ReturnType<
+      createFakeSpec(vi.fn().mockResolvedValue({ type: 'emit', events: [] })) as ReturnType<
         typeof getConnectorSpec
       >
     );
@@ -468,7 +471,7 @@ describe('ingestInboundEvent', () => {
     });
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           type: 'emit',
           events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
         })
@@ -490,7 +493,7 @@ describe('ingestInboundEvent', () => {
     emitConnectorEvents.mockRejectedValueOnce(new Error('adapter threw'));
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           type: 'emit',
           events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
         })
@@ -515,7 +518,7 @@ describe('ingestInboundEvent', () => {
       .mockResolvedValueOnce({ ok: true });
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           type: 'emit',
           events: [
             { eventId, correlationKey: 'corr-1', payload: { body: {} } },
@@ -539,7 +542,7 @@ describe('ingestInboundEvent', () => {
     const eventId = buildEventId('.myConnector', 'received');
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           type: 'emit',
           events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
         })
@@ -561,11 +564,11 @@ describe('ingestInboundEvent', () => {
   it('returns 202 with emit_partial when production dispatch emitter throws', async () => {
     const eventId = buildEventId('.myConnector', 'received');
     const emitter: ConnectorEventEmitter = {
-      emit: jest.fn().mockRejectedValue(new Error('bridge down')),
+      emit: vi.fn().mockRejectedValue(new Error('bridge down')),
     };
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           type: 'emit',
           events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
         })
@@ -586,7 +589,7 @@ describe('ingestInboundEvent', () => {
 
   it('returns 500 when handleEvents throws', async () => {
     getConnectorSpecMock.mockReturnValue(
-      createFakeSpec(jest.fn().mockRejectedValue(new Error('spoke failed'))) as ReturnType<
+      createFakeSpec(vi.fn().mockRejectedValue(new Error('spoke failed'))) as ReturnType<
         typeof getConnectorSpec
       >
     );
@@ -599,7 +602,7 @@ describe('ingestInboundEvent', () => {
   it('returns spoke HTTP without emitters when handleEvents type is http', async () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           type: 'http',
           httpResponse: {
             status: 200,
@@ -625,7 +628,7 @@ describe('ingestInboundEvent', () => {
   it('returns 500 when handleEvents http includes Location', async () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           type: 'http',
           httpResponse: {
             status: 200,
@@ -649,7 +652,7 @@ describe('ingestInboundEvent', () => {
   it('returns 500 when handleEvents http body is not JSON-serializable', async () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           type: 'http',
           httpResponse: {
             status: 200,
@@ -672,7 +675,7 @@ describe('ingestInboundEvent', () => {
   it('returns 500 when handleEvents http status is out of range', async () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           type: 'http',
           httpResponse: { status: 99 },
         })
@@ -688,7 +691,7 @@ describe('ingestInboundEvent', () => {
   it('returns 500 when handleEvents returns an unknown type', async () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           type: 'http',
           status: 200,
           body: {},
@@ -709,7 +712,7 @@ describe('ingestInboundEvent', () => {
       payload: { body: {} },
     }));
     getConnectorSpecMock.mockReturnValue(
-      createFakeSpec(jest.fn().mockResolvedValue({ type: 'emit', events })) as ReturnType<
+      createFakeSpec(vi.fn().mockResolvedValue({ type: 'emit', events })) as ReturnType<
         typeof getConnectorSpec
       >
     );
@@ -727,7 +730,7 @@ describe('ingestInboundEvent', () => {
       payload: { body: {} },
     }));
     getConnectorSpecMock.mockReturnValue(
-      createFakeSpec(jest.fn().mockResolvedValue({ type: 'emit', events })) as ReturnType<
+      createFakeSpec(vi.fn().mockResolvedValue({ type: 'emit', events })) as ReturnType<
         typeof getConnectorSpec
       >
     );
@@ -744,7 +747,7 @@ describe('ingestInboundEvent', () => {
       payload: { body: {} },
     }));
     getConnectorSpecMock.mockReturnValue(
-      createFakeSpec(jest.fn().mockResolvedValue({ type: 'emit', events })) as ReturnType<
+      createFakeSpec(vi.fn().mockResolvedValue({ type: 'emit', events })) as ReturnType<
         typeof getConnectorSpec
       >
     );
@@ -756,7 +759,7 @@ describe('ingestInboundEvent', () => {
   it('returns 500 when the emit payload exceeds a tighter maxBodyBytes', async () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           type: 'emit',
           events: [
             {
@@ -777,7 +780,7 @@ describe('ingestInboundEvent', () => {
   it('returns 500 when emitted events fail validation', async () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           type: 'emit',
           events: [
             {
@@ -806,7 +809,7 @@ describe('ingestInboundEvent', () => {
     });
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           type: 'emit',
           events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
         })
@@ -828,7 +831,7 @@ describe('ingestInboundEvent', () => {
     getDecryptedConnectorAttributes.mockRejectedValueOnce(new Error('cannot decrypt'));
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
-        jest.fn().mockResolvedValue({
+        vi.fn().mockResolvedValue({
           type: 'emit',
           events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
         })

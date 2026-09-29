@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID } from '@kbn/anonymization-common';
 import { TARGET_TYPE_DATA_VIEW, TARGET_TYPE_INDEX } from '../../common/target_types';
@@ -12,17 +14,17 @@ import type { TargetType } from '../types';
 import { useTargetIdSelectionActions } from './use_target_id_selection_actions';
 
 const targetLookupClient = {
-  getDataViews: jest.fn(),
-  getDataViewById: jest.fn(),
-  resolveIndex: jest.fn(),
-  getFieldsForWildcard: jest.fn(),
+  getDataViews: vi.fn(),
+  getDataViewById: vi.fn(),
+  resolveIndex: vi.fn(),
+  getFieldsForWildcard: vi.fn(),
 };
 
-const fetchQuery = jest.fn();
+const fetchQuery = vi.fn();
 
 describe('useTargetIdSelectionActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('sets async error when index validation fails', async () => {
@@ -33,7 +35,7 @@ describe('useTargetIdSelectionActions', () => {
         targetType: TARGET_TYPE_INDEX,
         targetId: 'logs-*',
         includeHiddenAndSystemIndices: false,
-        onFieldRulesChange: jest.fn(),
+        onFieldRulesChange: vi.fn(),
         queryClient: { fetchQuery },
         targetLookupClient,
       })
@@ -56,7 +58,7 @@ describe('useTargetIdSelectionActions', () => {
         targetType: TARGET_TYPE_INDEX,
         targetId: GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
         includeHiddenAndSystemIndices: false,
-        onFieldRulesChange: jest.fn(),
+        onFieldRulesChange: vi.fn(),
         queryClient: { fetchQuery },
         targetLookupClient,
       })
@@ -85,7 +87,7 @@ describe('useTargetIdSelectionActions', () => {
       }
       return { indices: [] };
     });
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
 
     const { result } = renderHook(() =>
       useTargetIdSelectionActions({
@@ -128,7 +130,7 @@ describe('useTargetIdSelectionActions', () => {
       }
       return { indices: [] };
     });
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
 
     const { result } = renderHook(() =>
       useTargetIdSelectionActions({
@@ -164,7 +166,7 @@ describe('useTargetIdSelectionActions', () => {
       }
       return { indices: [] };
     });
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
 
     const { result } = renderHook(() =>
       useTargetIdSelectionActions({
@@ -217,7 +219,7 @@ describe('useTargetIdSelectionActions', () => {
       return Promise.resolve({ indices: [] });
     });
 
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
 
     const { result } = renderHook(() =>
       useTargetIdSelectionActions({
@@ -278,7 +280,7 @@ describe('useTargetIdSelectionActions', () => {
       return Promise.resolve({ indices: [] });
     });
 
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
     const initialProps: { targetType: TargetType; targetId: string } = {
       targetType: TARGET_TYPE_DATA_VIEW,
       targetId: 'dv-1',
@@ -340,7 +342,7 @@ describe('useTargetIdSelectionActions', () => {
       return Promise.resolve({ indices: [] });
     });
 
-    const onFieldRulesChange = jest.fn();
+    const onFieldRulesChange = vi.fn();
     const { result, rerender } = renderHook(
       ({ targetId }: { targetId: string }) =>
         useTargetIdSelectionActions({
@@ -388,7 +390,7 @@ describe('useTargetIdSelectionActions', () => {
         targetType: TARGET_TYPE_INDEX,
         targetId: 'logs-1',
         includeHiddenAndSystemIndices: false,
-        onFieldRulesChange: jest.fn(),
+        onFieldRulesChange: vi.fn(),
         queryClient: { fetchQuery },
         targetLookupClient,
       })
@@ -412,7 +414,7 @@ describe('useTargetIdSelectionActions', () => {
         targetType: TARGET_TYPE_INDEX,
         targetId: 'logs-1',
         includeHiddenAndSystemIndices: true,
-        onFieldRulesChange: jest.fn(),
+        onFieldRulesChange: vi.fn(),
         queryClient: { fetchQuery },
         targetLookupClient,
       })

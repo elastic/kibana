@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiFieldText } from '@elastic/eui';
@@ -80,7 +82,7 @@ describe('SuggestionsDropdown', () => {
   });
 
   it('calls onSelect with the clicked suggestion', () => {
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     render(
       <SuggestionsDropdown
         input={<EuiFieldText value="" onChange={() => {}} compressed />}

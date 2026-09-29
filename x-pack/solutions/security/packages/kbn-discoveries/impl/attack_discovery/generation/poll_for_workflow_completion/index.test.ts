@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import type { Logger } from '@kbn/core/server';
@@ -21,8 +23,8 @@ describe('pollForWorkflowCompletion', () => {
   const spaceId = 'default';
 
   const mockLogger = {
-    debug: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
   const createExecution = (
@@ -41,22 +43,22 @@ describe('pollForWorkflowCompletion', () => {
     } as unknown as WorkflowStepExecutionDto);
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   it('returns when execution is terminal', async () => {
     const workflowsManagementApi: WorkflowsManagementApi = {
-      getWorkflow: jest.fn(),
-      getWorkflowExecution: jest.fn().mockResolvedValue(createExecution('completed')),
-      runWorkflow: jest.fn(),
-      scheduleWorkflow: jest.fn(),
+      getWorkflow: vi.fn(),
+      getWorkflowExecution: vi.fn().mockResolvedValue(createExecution('completed')),
+      runWorkflow: vi.fn(),
+      scheduleWorkflow: vi.fn(),
     };
 
     const result = await pollForWorkflowCompletion({
@@ -72,10 +74,10 @@ describe('pollForWorkflowCompletion', () => {
 
   it('passes includeOutput: true so step output is available after polling', async () => {
     const workflowsManagementApi: WorkflowsManagementApi = {
-      getWorkflow: jest.fn(),
-      getWorkflowExecution: jest.fn().mockResolvedValue(createExecution('completed')),
-      runWorkflow: jest.fn(),
-      scheduleWorkflow: jest.fn(),
+      getWorkflow: vi.fn(),
+      getWorkflowExecution: vi.fn().mockResolvedValue(createExecution('completed')),
+      runWorkflow: vi.fn(),
+      scheduleWorkflow: vi.fn(),
     };
 
     await pollForWorkflowCompletion({
@@ -94,14 +96,14 @@ describe('pollForWorkflowCompletion', () => {
 
   it('polls until execution becomes terminal', async () => {
     const workflowsManagementApi: WorkflowsManagementApi = {
-      getWorkflow: jest.fn(),
+      getWorkflow: vi.fn(),
       // running (status poll) -> completed (status poll) -> completed (terminal full fetch)
-      getWorkflowExecution: jest
+      getWorkflowExecution: vi
         .fn()
         .mockResolvedValueOnce(createExecution('running'))
         .mockResolvedValue(createExecution('completed')),
-      runWorkflow: jest.fn(),
-      scheduleWorkflow: jest.fn(),
+      runWorkflow: vi.fn(),
+      scheduleWorkflow: vi.fn(),
     };
 
     const promise = pollForWorkflowCompletion({
@@ -113,7 +115,7 @@ describe('pollForWorkflowCompletion', () => {
       workflowsManagementApi,
     });
 
-    await jest.advanceTimersByTimeAsync(500);
+    await vi.advanceTimersByTimeAsync(500);
 
     const result = await promise;
 
@@ -122,10 +124,10 @@ describe('pollForWorkflowCompletion', () => {
 
   it('throws when execution is not found', async () => {
     const workflowsManagementApi: WorkflowsManagementApi = {
-      getWorkflow: jest.fn(),
-      getWorkflowExecution: jest.fn().mockResolvedValue(null),
-      runWorkflow: jest.fn(),
-      scheduleWorkflow: jest.fn(),
+      getWorkflow: vi.fn(),
+      getWorkflowExecution: vi.fn().mockResolvedValue(null),
+      runWorkflow: vi.fn(),
+      scheduleWorkflow: vi.fn(),
     };
 
     await expect(
@@ -141,10 +143,10 @@ describe('pollForWorkflowCompletion', () => {
 
   it('throws when max wait is exceeded', async () => {
     const workflowsManagementApi: WorkflowsManagementApi = {
-      getWorkflow: jest.fn(),
-      getWorkflowExecution: jest.fn().mockResolvedValue(createExecution('running')),
-      runWorkflow: jest.fn(),
-      scheduleWorkflow: jest.fn(),
+      getWorkflow: vi.fn(),
+      getWorkflowExecution: vi.fn().mockResolvedValue(createExecution('running')),
+      runWorkflow: vi.fn(),
+      scheduleWorkflow: vi.fn(),
     };
 
     const promise = pollForWorkflowCompletion({
@@ -161,7 +163,7 @@ describe('pollForWorkflowCompletion', () => {
       `Workflow timed out after 1000ms (execution: ${executionId})`
     );
 
-    await jest.advanceTimersByTimeAsync(1500);
+    await vi.advanceTimersByTimeAsync(1500);
 
     await expectation;
   });
@@ -169,10 +171,10 @@ describe('pollForWorkflowCompletion', () => {
   describe('isReady predicate (step metadata race condition workaround)', () => {
     it('returns immediately when terminal and no isReady predicate is provided', async () => {
       const workflowsManagementApi: WorkflowsManagementApi = {
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn().mockResolvedValue(createExecution('completed')),
-        runWorkflow: jest.fn(),
-        scheduleWorkflow: jest.fn(),
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi.fn().mockResolvedValue(createExecution('completed')),
+        runWorkflow: vi.fn(),
+        scheduleWorkflow: vi.fn(),
       };
 
       const result = await pollForWorkflowCompletion({
@@ -195,10 +197,10 @@ describe('pollForWorkflowCompletion', () => {
       ]);
 
       const workflowsManagementApi: WorkflowsManagementApi = {
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn().mockResolvedValue(executionWithSteps),
-        runWorkflow: jest.fn(),
-        scheduleWorkflow: jest.fn(),
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi.fn().mockResolvedValue(executionWithSteps),
+        runWorkflow: vi.fn(),
+        scheduleWorkflow: vi.fn(),
       };
 
       const isReady = (exec: WorkflowExecutionDto): boolean =>
@@ -228,14 +230,14 @@ describe('pollForWorkflowCompletion', () => {
       ]);
 
       const workflowsManagementApi: WorkflowsManagementApi = {
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi
           .fn()
           .mockResolvedValueOnce(terminalWithoutSteps)
           .mockResolvedValueOnce(terminalWithoutSteps)
           .mockResolvedValueOnce(terminalWithSteps),
-        runWorkflow: jest.fn(),
-        scheduleWorkflow: jest.fn(),
+        runWorkflow: vi.fn(),
+        scheduleWorkflow: vi.fn(),
       };
 
       const isReady = (exec: WorkflowExecutionDto): boolean =>
@@ -253,7 +255,7 @@ describe('pollForWorkflowCompletion', () => {
         workflowsManagementApi,
       });
 
-      await jest.advanceTimersByTimeAsync(200);
+      await vi.advanceTimersByTimeAsync(200);
 
       const result = await promise;
 
@@ -265,10 +267,10 @@ describe('pollForWorkflowCompletion', () => {
       const terminalWithoutSteps = createExecution('completed');
 
       const workflowsManagementApi: WorkflowsManagementApi = {
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn().mockResolvedValue(terminalWithoutSteps),
-        runWorkflow: jest.fn(),
-        scheduleWorkflow: jest.fn(),
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi.fn().mockResolvedValue(terminalWithoutSteps),
+        runWorkflow: vi.fn(),
+        scheduleWorkflow: vi.fn(),
       };
 
       const isReady = (_exec: WorkflowExecutionDto): boolean => false;
@@ -283,7 +285,7 @@ describe('pollForWorkflowCompletion', () => {
         workflowsManagementApi,
       });
 
-      await jest.advanceTimersByTimeAsync(600);
+      await vi.advanceTimersByTimeAsync(600);
 
       const result = await promise;
 
@@ -295,10 +297,10 @@ describe('pollForWorkflowCompletion', () => {
       const terminalWithoutSteps = createExecution('completed');
 
       const workflowsManagementApi: WorkflowsManagementApi = {
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn().mockResolvedValue(terminalWithoutSteps),
-        runWorkflow: jest.fn(),
-        scheduleWorkflow: jest.fn(),
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi.fn().mockResolvedValue(terminalWithoutSteps),
+        runWorkflow: vi.fn(),
+        scheduleWorkflow: vi.fn(),
       };
 
       const isReady = (_exec: WorkflowExecutionDto): boolean => false;
@@ -313,7 +315,7 @@ describe('pollForWorkflowCompletion', () => {
         workflowsManagementApi,
       });
 
-      await jest.advanceTimersByTimeAsync(600);
+      await vi.advanceTimersByTimeAsync(600);
 
       await promise;
 
@@ -326,10 +328,10 @@ describe('pollForWorkflowCompletion', () => {
       const failedExecution = createExecution('failed');
 
       const workflowsManagementApi: WorkflowsManagementApi = {
-        getWorkflow: jest.fn(),
-        getWorkflowExecution: jest.fn().mockResolvedValue(failedExecution),
-        runWorkflow: jest.fn(),
-        scheduleWorkflow: jest.fn(),
+        getWorkflow: vi.fn(),
+        getWorkflowExecution: vi.fn().mockResolvedValue(failedExecution),
+        runWorkflow: vi.fn(),
+        scheduleWorkflow: vi.fn(),
       };
 
       const isReady = (exec: WorkflowExecutionDto): boolean =>
@@ -358,15 +360,15 @@ describe('pollForWorkflowCompletion', () => {
       ]);
 
       const workflowsManagementApi: WorkflowsManagementApi = {
-        getWorkflow: jest.fn(),
+        getWorkflow: vi.fn(),
         // status poll (terminal) -> full fetch (no steps yet) -> readiness re-poll (steps ready)
-        getWorkflowExecution: jest
+        getWorkflowExecution: vi
           .fn()
           .mockResolvedValueOnce(terminalWithoutSteps)
           .mockResolvedValueOnce(terminalWithoutSteps)
           .mockResolvedValueOnce(terminalWithSteps),
-        runWorkflow: jest.fn(),
-        scheduleWorkflow: jest.fn(),
+        runWorkflow: vi.fn(),
+        scheduleWorkflow: vi.fn(),
       };
 
       const isReady = (exec: WorkflowExecutionDto): boolean =>
@@ -387,7 +389,7 @@ describe('pollForWorkflowCompletion', () => {
 
       // Advancing only the 100ms readiness interval (not the 500ms poll interval)
       // is enough to trigger the readiness re-poll and resolve.
-      await jest.advanceTimersByTimeAsync(100);
+      await vi.advanceTimersByTimeAsync(100);
 
       const result = await promise;
 
@@ -398,16 +400,16 @@ describe('pollForWorkflowCompletion', () => {
 
   describe('polling cost controls', () => {
     it('polls status-only (includeOutput: false) while running and fetches the full payload once terminal', async () => {
-      const getWorkflowExecution = jest
+      const getWorkflowExecution = vi
         .fn()
         .mockResolvedValueOnce(createExecution('running'))
         .mockResolvedValue(createExecution('completed'));
 
       const workflowsManagementApi: WorkflowsManagementApi = {
-        getWorkflow: jest.fn(),
+        getWorkflow: vi.fn(),
         getWorkflowExecution,
-        runWorkflow: jest.fn(),
-        scheduleWorkflow: jest.fn(),
+        runWorkflow: vi.fn(),
+        scheduleWorkflow: vi.fn(),
       };
 
       const promise = pollForWorkflowCompletion({
@@ -419,7 +421,7 @@ describe('pollForWorkflowCompletion', () => {
         workflowsManagementApi,
       });
 
-      await jest.advanceTimersByTimeAsync(500);
+      await vi.advanceTimersByTimeAsync(500);
 
       await promise;
 
@@ -436,13 +438,13 @@ describe('pollForWorkflowCompletion', () => {
     });
 
     it('backs off the polling interval for long-running executions', async () => {
-      const getWorkflowExecution = jest.fn().mockResolvedValue(createExecution('running'));
+      const getWorkflowExecution = vi.fn().mockResolvedValue(createExecution('running'));
 
       const workflowsManagementApi: WorkflowsManagementApi = {
-        getWorkflow: jest.fn(),
+        getWorkflow: vi.fn(),
         getWorkflowExecution,
-        runWorkflow: jest.fn(),
-        scheduleWorkflow: jest.fn(),
+        runWorkflow: vi.fn(),
+        scheduleWorkflow: vi.fn(),
       };
 
       pollForWorkflowCompletion({
@@ -461,15 +463,15 @@ describe('pollForWorkflowCompletion', () => {
       expect(getWorkflowExecution).toHaveBeenCalledTimes(1);
 
       // First interval is 500ms.
-      await jest.advanceTimersByTimeAsync(500);
+      await vi.advanceTimersByTimeAsync(500);
       expect(getWorkflowExecution).toHaveBeenCalledTimes(2);
 
       // Next interval backs off to 750ms (500 * 1.5): 600ms is not yet enough...
-      await jest.advanceTimersByTimeAsync(600);
+      await vi.advanceTimersByTimeAsync(600);
       expect(getWorkflowExecution).toHaveBeenCalledTimes(2);
 
       // ...but the remaining 150ms completes the 750ms interval.
-      await jest.advanceTimersByTimeAsync(150);
+      await vi.advanceTimersByTimeAsync(150);
       expect(getWorkflowExecution).toHaveBeenCalledTimes(3);
     });
   });

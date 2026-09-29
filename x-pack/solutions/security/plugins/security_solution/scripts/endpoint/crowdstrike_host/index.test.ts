@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { cli } from '.';
 import { run } from '@kbn/dev-cli-runner';
 
-jest.mock('@kbn/dev-cli-runner');
-jest.mock('./services/create_detection_engine_rule');
-jest.mock('./services/install_crowdstrike_agent');
-jest.mock('./services/create_crowdstrike_connector');
-jest.mock('../common/vm_services');
-jest.mock('../common/stack_services');
-jest.mock('../common/spaces');
+vi.mock('@kbn/dev-cli-runner');
+vi.mock('./services/create_detection_engine_rule');
+vi.mock('./services/install_crowdstrike_agent');
+vi.mock('./services/create_crowdstrike_connector');
+vi.mock('../common/vm_services');
+vi.mock('../common/stack_services');
+vi.mock('../common/spaces');
 
-const mockedRun = run as jest.MockedFunction<typeof run>;
+const mockedRun = run as MockedFunction<typeof run>;
 
 describe('CrowdStrike Host CLI', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should setup CLI with correct configuration', async () => {

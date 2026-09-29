@@ -5,26 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ProposalDismissForm } from './proposal_dismiss_form';
 import type { ProposalDismissFormProps } from './proposal_dismiss_form';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: () => ({ euiTheme: { size: { m: '16px' } } }),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiTheme: () => ({ euiTheme: { size: { m: '16px' } } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps: ProposalDismissFormProps = {
   dismissReason: 'wrong',
   rationale: '',
-  onDismissReasonChange: jest.fn(),
-  onRationaleChange: jest.fn(),
+  onDismissReasonChange: vi.fn(),
+  onRationaleChange: vi.fn(),
 };
 
 describe('ProposalDismissForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders without crashing', () => {
@@ -56,7 +61,7 @@ describe('ProposalDismissForm', () => {
   });
 
   it('calls onDismissReasonChange with the new value when the select changes', () => {
-    const onDismissReasonChange = jest.fn();
+    const onDismissReasonChange = vi.fn();
     const { container } = render(
       <ProposalDismissForm
         {...defaultProps}
@@ -72,7 +77,7 @@ describe('ProposalDismissForm', () => {
   });
 
   it('calls onRationaleChange with the new value when the textarea changes', () => {
-    const onRationaleChange = jest.fn();
+    const onRationaleChange = vi.fn();
     const { container } = render(
       <ProposalDismissForm
         {...defaultProps}

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CPSProject } from '../../../../../types';
 import type { useProjectPickerActions } from '../../../state';
 import type { ProjectPickerState } from '../../../state/reducers';
@@ -53,8 +55,8 @@ const createMenuState = (overrides: Partial<ProjectPickerState> = {}): ProjectPi
 
 describe('getProjectPickerListContextMenuConfig', () => {
   const actions = {
-    includeOnlyProvidedProjectId: jest.fn(),
-    excludeOnlyProvidedProjectId: jest.fn(),
+    includeOnlyProvidedProjectId: vi.fn(),
+    excludeOnlyProvidedProjectId: vi.fn(),
   } as unknown as ReturnType<typeof useProjectPickerActions>;
 
   const [includeOnlyItem, excludeOnlyItem] = getProjectPickerListContextMenuConfig(actions);

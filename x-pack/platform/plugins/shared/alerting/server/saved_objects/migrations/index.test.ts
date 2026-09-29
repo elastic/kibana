@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from '.';
@@ -21,11 +23,11 @@ import { RULE_SAVED_OBJECT_TYPE } from '..';
 const migrationContext = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
 
-const isPreconfigured = jest.fn();
+const isPreconfigured = vi.fn();
 
 describe('successful migrations', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     encryptedSavedObjectsSetup.createMigration.mockImplementation(({ migration }) => migration);
   });
 
@@ -2978,7 +2980,7 @@ describe('search source migration', () => {
 
 describe('handles errors during migrations', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     encryptedSavedObjectsSetup.createMigration.mockImplementation(() => () => {
       throw new Error(`Can't migrate!`);
     });

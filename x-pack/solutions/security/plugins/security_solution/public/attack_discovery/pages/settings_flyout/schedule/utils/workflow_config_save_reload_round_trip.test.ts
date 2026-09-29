@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { AIConnector } from '@kbn/elastic-assistant';
 import {
@@ -20,9 +23,9 @@ import { convertToBuildEsQuery } from '../../../../../common/lib/kuery';
 import { getGenAiConfig } from '../../../use_attack_discovery/helpers';
 import { parseFilterQuery } from '../../parse_filter_query';
 
-jest.mock('../../../../../common/lib/kuery');
-jest.mock('../../../use_attack_discovery/helpers');
-jest.mock('../../parse_filter_query');
+vi.mock('../../../../../common/lib/kuery');
+vi.mock('../../../use_attack_discovery/helpers');
+vi.mock('../../parse_filter_query');
 
 /**
  * CRUD6 — the exact past regression, as a full-chain integration round-trip.
@@ -43,7 +46,7 @@ const CONNECTOR = {
   name: 'Test Connector',
 } as unknown as AIConnector;
 
-const UI_SETTINGS = { get: jest.fn() } as unknown as IUiSettingsClient;
+const UI_SETTINGS = { get: vi.fn() } as unknown as IUiSettingsClient;
 
 const baseFormData = {
   actions: [],
@@ -104,10 +107,10 @@ const saveThenReload = (
 
 describe('workflowConfig save -> reload round-trip (CRUD6)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (convertToBuildEsQuery as jest.Mock).mockReturnValue(['test-filter-query']);
-    (getGenAiConfig as jest.Mock).mockReturnValue({ defaultModel: 'test-model' });
-    (parseFilterQuery as jest.Mock).mockReturnValue({ bool: {} });
+    vi.clearAllMocks();
+    (convertToBuildEsQuery as Mock).mockReturnValue(['test-filter-query']);
+    (getGenAiConfig as Mock).mockReturnValue({ defaultModel: 'test-model' });
+    (parseFilterQuery as Mock).mockReturnValue({ bool: {} });
   });
 
   it('reloads an esql + workflows + skill-OFF config exactly as saved (create)', () => {

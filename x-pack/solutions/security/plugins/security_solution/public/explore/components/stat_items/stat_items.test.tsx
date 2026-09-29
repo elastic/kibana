@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { StatItemsComponent } from './stat_items';
@@ -12,10 +15,13 @@ import type { LensAttributes } from '../../../common/components/visualization_ac
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useToggleStatus } from './use_toggle_status';
 
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
-jest.mock('./use_toggle_status', () => ({
-  useToggleStatus: jest.fn().mockReturnValue({ isToggleExpanded: true, onToggle: jest.fn() }),
-}));
+vi.mock('../../../common/components/visualization_actions/visualization_embeddable');
+vi.mock('./use_toggle_status', () => {
+      const mocked = {
+      useToggleStatus: vi.fn().mockReturnValue({ isToggleExpanded: true, onToggle: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('StatItemsComponent', () => {
   const mockStatItems = {
@@ -52,9 +58,9 @@ describe('StatItemsComponent', () => {
   });
 
   it('toggles visualizations', () => {
-    (useToggleStatus as jest.Mock).mockReturnValue({
+    (useToggleStatus as Mock).mockReturnValue({
       isToggleExpanded: false,
-      onToggle: jest.fn(),
+      onToggle: vi.fn(),
     });
 
     const { getByTestId, getAllByTestId } = render(<StatItemsComponent {...mockProps} />, {

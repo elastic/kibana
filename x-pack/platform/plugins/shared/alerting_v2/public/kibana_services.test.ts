@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AlertingV2KibanaServices } from './kibana_services';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -32,7 +34,7 @@ describe('kibana_services', () => {
   let untilPluginStartServicesReady: typeof import('./kibana_services').untilPluginStartServicesReady;
 
   beforeEach(async () => {
-    jest.resetModules();
+    vi.resetModules();
     // Re-import to get a fresh BehaviorSubject for each test
     const mod = await import('./kibana_services');
     setKibanaServices = mod.setKibanaServices;

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -25,29 +28,35 @@ import {
 import { WorkflowExecuteAlertForm } from './workflow_execute_alert_form';
 import { useKibana } from '../../../hooks/use_kibana';
 
-const mockFetchAlertsIndexNames = fetchAlertsIndexNames as jest.MockedFunction<
+const mockFetchAlertsIndexNames = fetchAlertsIndexNames as MockedFunction<
   typeof fetchAlertsIndexNames
 >;
 
-jest.mock('../../../hooks/use_kibana');
-jest.mock('@kbn/unified-search-plugin/public', () => ({
-  SearchBar: MockSearchBar,
-}));
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names', () => ({
-  fetchAlertsIndexNames: jest.fn(),
-}));
+vi.mock('../../../hooks/use_kibana');
+vi.mock('@kbn/unified-search-plugin/public', () => {
+      const mocked = {
+      SearchBar: MockSearchBar,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names', () => {
+      const mocked = {
+      fetchAlertsIndexNames: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 const mockTheme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
 const mockUiSettings = {
-  get: jest.fn(),
-  isDefault: jest.fn(() => true),
+  get: vi.fn(),
+  isDefault: vi.fn(() => true),
 };
 const mockStorage = {
-  get: jest.fn(),
-  set: jest.fn(),
-  clear: jest.fn(),
-  remove: jest.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
+  clear: vi.fn(),
+  remove: vi.fn(),
 };
 
 const queryClient = new QueryClient(testQueryClientConfig);
@@ -63,12 +72,12 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('WorkflowExecuteAlertForm', () => {
-  const mockSetValue = jest.fn();
-  const mockSetErrors = jest.fn();
+  const mockSetValue = vi.fn();
+  const mockSetErrors = vi.fn();
   const { mockSearchSource, mockData } = createEventFormKibanaMocks();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetchAlertsIndexNames.mockResolvedValue(['.alerts-security.alerts-default']);
     mockUseKibana.mockReturnValue({
       services: {

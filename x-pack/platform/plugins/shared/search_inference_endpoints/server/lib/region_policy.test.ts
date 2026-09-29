@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getRegionPolicy, putRegionPolicy, deleteRegionPolicy } from './region_policy';
 
 describe('region_policy lib', () => {
@@ -13,7 +15,7 @@ describe('region_policy lib', () => {
   beforeEach(() => {
     mockClient = {
       transport: {
-        request: jest.fn(),
+        request: vi.fn(),
       },
     };
   });

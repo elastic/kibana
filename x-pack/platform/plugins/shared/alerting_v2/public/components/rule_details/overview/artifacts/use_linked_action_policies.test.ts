@@ -5,22 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
 import type { UseMatchedActionPoliciesResult } from '@kbn/alerting-v2-rule-form';
 import { useLinkedActionPolicies, sortMatchedActionPolicies } from './use_linked_action_policies';
 
-const mockUseMatchedActionPolicies = jest.fn<UseMatchedActionPoliciesResult, [unknown]>();
+const mockUseMatchedActionPolicies = vi.fn<UseMatchedActionPoliciesResult, [unknown]>();
 const mockHttp = { fake: 'http-start-contract' };
 
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  useMatchedActionPolicies: (params: unknown) => mockUseMatchedActionPolicies(params),
-}));
+vi.mock('@kbn/alerting-v2-rule-form', () => {
+      const mocked = {
+      useMatchedActionPolicies: (params: unknown) => mockUseMatchedActionPolicies(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => (token === 'CoreStart(http)' ? mockHttp : {}),
-  CoreStart: (key: string) => `CoreStart(${key})`,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => (token === 'CoreStart(http)' ? mockHttp : {}),
+      CoreStart: (key: string) => `CoreStart(${key})`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const RULE_TAGS = ['prod'];
 
@@ -66,7 +74,7 @@ describe('sortMatchedActionPolicies', () => {
   });
 
   it('compares names with a fixed English locale', () => {
-    const localeCompare = jest.spyOn(String.prototype, 'localeCompare');
+    const localeCompare = vi.spyOn(String.prototype, 'localeCompare');
 
     try {
       sortMatchedActionPolicies([
@@ -83,7 +91,7 @@ describe('sortMatchedActionPolicies', () => {
 
 describe('useLinkedActionPolicies', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       isPreviousData: false,

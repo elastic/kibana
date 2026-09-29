@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { act, render, screen } from '@testing-library/react';
@@ -17,9 +19,9 @@ describe('ConnectorSelectable', () => {
   const renderComponent = (props: ConnectorSelectableProps) =>
     render(<ConnectorSelectable {...props} />, { wrapper: EuiThemeProvider });
 
-  const onValueChange = jest.fn();
-  const onAddConnectorClick = jest.fn();
-  const onManageConnectorsClick = jest.fn();
+  const onValueChange = vi.fn();
+  const onAddConnectorClick = vi.fn();
+  const onManageConnectorsClick = vi.fn();
 
   const defaultProps: ConnectorSelectableProps = {
     preConfiguredConnectors: [
@@ -39,7 +41,7 @@ describe('ConnectorSelectable', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders panel with pre-configured and custom connectors', async () => {

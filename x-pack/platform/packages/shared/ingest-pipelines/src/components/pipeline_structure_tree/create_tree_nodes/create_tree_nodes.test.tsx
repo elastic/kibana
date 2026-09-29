@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { createTreeNodesFromPipelines } from './create_tree_nodes';
@@ -18,8 +20,8 @@ const renderTreeNode = (node: ReturnType<typeof createTreeNodesFromPipelines>) =
 
 describe('createTreeNodesFromPipelines', () => {
   it('renders a basic pipeline node label', () => {
-    const clickTreeNode = jest.fn();
-    const clickMorePipelines = jest.fn();
+    const clickTreeNode = vi.fn();
+    const clickMorePipelines = vi.fn();
     const pipeline: PipelineTreeNode = {
       pipelineName: 'root-pipeline',
       isManaged: false,
@@ -34,8 +36,8 @@ describe('createTreeNodesFromPipelines', () => {
   });
 
   it('renders managed and deprecated icons', () => {
-    const clickTreeNode = jest.fn();
-    const clickMorePipelines = jest.fn();
+    const clickTreeNode = vi.fn();
+    const clickMorePipelines = vi.fn();
     const pipeline: PipelineTreeNode = {
       pipelineName: 'managed-deprecated',
       isManaged: true,
@@ -51,8 +53,8 @@ describe('createTreeNodesFromPipelines', () => {
   });
 
   it('calls clickTreeNode when node label is clicked', () => {
-    const clickTreeNode = jest.fn();
-    const clickMorePipelines = jest.fn();
+    const clickTreeNode = vi.fn();
+    const clickMorePipelines = vi.fn();
     const pipeline: PipelineTreeNode = {
       pipelineName: 'test-pipeline',
       isManaged: false,
@@ -68,8 +70,8 @@ describe('createTreeNodesFromPipelines', () => {
   });
 
   it('adds active class when selectedPipeline matches', () => {
-    const clickTreeNode = jest.fn();
-    const clickMorePipelines = jest.fn();
+    const clickTreeNode = vi.fn();
+    const clickMorePipelines = vi.fn();
     const pipeline: PipelineTreeNode = {
       pipelineName: 'selected-one',
       isManaged: false,
@@ -88,8 +90,8 @@ describe('createTreeNodesFromPipelines', () => {
   });
 
   it('adds a "+ more pipelines" label when max depth is reached', () => {
-    const clickTreeNode = jest.fn();
-    const clickMorePipelines = jest.fn();
+    const clickTreeNode = vi.fn();
+    const clickMorePipelines = vi.fn();
 
     // Create a deeply nested tree exceeding MAX_TREE_LEVEL
     const deepTree = (level: number): PipelineTreeNode => {
@@ -124,8 +126,8 @@ describe('createTreeNodesFromPipelines', () => {
   });
 
   it('calls clickMorePipelines when "+ more pipelines" is clicked', () => {
-    const clickTreeNode = jest.fn();
-    const clickMorePipelines = jest.fn();
+    const clickTreeNode = vi.fn();
+    const clickMorePipelines = vi.fn();
     const pipeline: PipelineTreeNode = {
       pipelineName: 'test-pipeline',
       isManaged: false,

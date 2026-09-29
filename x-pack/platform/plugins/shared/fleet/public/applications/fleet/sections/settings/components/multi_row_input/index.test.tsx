@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 
@@ -15,7 +17,7 @@ import { MultiRowInput } from '.';
 function renderInput(
   value = ['http://host1.com'],
   errors: Array<{ message: string; index?: number }> = [],
-  mockOnChange: (...args: any[]) => void = jest.fn()
+  mockOnChange: (...args: any[]) => void = vi.fn()
 ) {
   const renderer = createFleetTestRendererMock();
 
@@ -101,7 +103,7 @@ test('Should display errors in order', async () => {
 });
 
 test('Should remove error when item deleted', async () => {
-  const mockOnChange = jest.fn();
+  const mockOnChange = vi.fn();
   const errors = [
     { message: 'Error 1', index: 0 },
     { message: 'Error 2', index: 1 },

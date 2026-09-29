@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
@@ -61,7 +63,7 @@ describe('EmitStatsPlugin.writeStatsSync', () => {
 
 describe('EmitStatsPlugin.apply', () => {
   it('taps into afterDone hook', () => {
-    const tapFn = jest.fn();
+    const tapFn = vi.fn();
     const mockCompiler = {
       hooks: {
         afterDone: { tap: tapFn },

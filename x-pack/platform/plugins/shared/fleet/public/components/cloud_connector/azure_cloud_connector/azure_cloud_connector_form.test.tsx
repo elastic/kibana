@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -22,33 +24,36 @@ import type { CloudConnectorFormProps } from '../types';
 import { AzureCloudConnectorForm } from './azure_cloud_connector_form';
 
 // Mock the LazyPackagePolicyInputVarField
-jest.mock('../../..', () => ({
-  LazyPackagePolicyInputVarField: jest.fn(({ varDef, onChange, value }) => {
-    // Extract the field name from the varDef - use the last part of multi_fields path or name
-    const fieldName = varDef.multi_fields?.[0] || varDef.name || 'unknown';
-    // Use hardcoded test subject values to avoid accessing out-of-scope variables
-    const testSubjMap: Record<string, string> = {
-      tenant_id: 'textInput-tenant-id',
-      'azure.tenant_id': 'textInput-tenant-id',
-      client_id: 'textInput-client-id',
-      'azure.client_id': 'textInput-client-id',
-    };
-    const testSubj = testSubjMap[fieldName] || `mock-var-field-${fieldName}`;
+vi.mock('../../..', () => {
+      const mocked = {
+      LazyPackagePolicyInputVarField: vi.fn(({ varDef, onChange, value }) => {
+        // Extract the field name from the varDef - use the last part of multi_fields path or name
+        const fieldName = varDef.multi_fields?.[0] || varDef.name || 'unknown';
+        // Use hardcoded test subject values to avoid accessing out-of-scope variables
+        const testSubjMap: Record<string, string> = {
+          tenant_id: 'textInput-tenant-id',
+          'azure.tenant_id': 'textInput-tenant-id',
+          client_id: 'textInput-client-id',
+          'azure.client_id': 'textInput-client-id',
+        };
+        const testSubj = testSubjMap[fieldName] || `mock-var-field-${fieldName}`;
 
-    return (
-      <input
-        data-test-subj={testSubj}
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={varDef.title}
-      />
-    );
-  }),
-}));
+        return (
+          <input
+            data-test-subj={testSubj}
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={varDef.title}
+          />
+        );
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AzureCloudConnectorForm', () => {
-  const mockUpdatePolicy = jest.fn();
-  const mockSetCredentials = jest.fn();
+  const mockUpdatePolicy = vi.fn();
+  const mockSetCredentials = vi.fn();
 
   const createMockInput = (overrides = {}): NewPackagePolicyInput => ({
     type: 'cloudbeat/cis_azure',
@@ -175,7 +180,7 @@ describe('AzureCloudConnectorForm', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {

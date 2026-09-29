@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { parse } from '@kbn/tinymath';
@@ -47,7 +49,7 @@ const stringOperation = (): OperationMetadata => ({ dataType: 'string', isBucket
 // Only one of each type is needed
 const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   sum: createOperationDefinitionMock('sum', {
-    getPossibleOperationForField: jest.fn((field: IndexPatternField) =>
+    getPossibleOperationForField: vi.fn((field: IndexPatternField) =>
       field.type === 'number' ? numericOperation() : undefined
     ),
   }),

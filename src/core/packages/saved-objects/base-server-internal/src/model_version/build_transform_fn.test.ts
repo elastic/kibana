@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
   SavedObjectsModelChange,
@@ -17,8 +20,8 @@ import type {
 import { buildModelVersionTransformFn } from './build_transform_fn';
 
 describe('buildModelVersionTransformFn', () => {
-  const stubDatabackfill = (): jest.MockedFn<SavedObjectModelDataBackfillFn> =>
-    jest.fn().mockImplementation((doc: SavedObjectModelTransformationDoc) => ({}));
+  const stubDatabackfill = (): MockedFunction<SavedObjectModelDataBackfillFn> =>
+    vi.fn().mockImplementation((doc: SavedObjectModelTransformationDoc) => ({}));
 
   const createContext = (): SavedObjectModelTransformationContext => ({
     log: loggerMock.create(),
@@ -50,7 +53,7 @@ describe('buildModelVersionTransformFn', () => {
 
   describe('converting `data_backfill` changes', () => {
     it('calls the backfillFn with the correct parameters', () => {
-      const backfillFn = jest.fn().mockImplementation(() => ({}));
+      const backfillFn = vi.fn().mockImplementation(() => ({}));
       const changes: SavedObjectsModelChange[] = [
         {
           type: 'data_backfill',
@@ -181,7 +184,7 @@ describe('buildModelVersionTransformFn', () => {
 
   describe('converting `unsafe_transform` changes', () => {
     it('calls the transformFn with the correct parameters', () => {
-      const transformFn = jest.fn().mockImplementation((document) => ({ document }));
+      const transformFn = vi.fn().mockImplementation((document) => ({ document }));
       const changes: SavedObjectsModelChange[] = [
         {
           type: 'unsafe_transform',

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -124,7 +126,7 @@ describe('AggsService - public', () => {
     let barSubject$: BehaviorSubject<string>;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       fooSubject$ = new BehaviorSubject('fooVal');
       barSubject$ = new BehaviorSubject('barVal');

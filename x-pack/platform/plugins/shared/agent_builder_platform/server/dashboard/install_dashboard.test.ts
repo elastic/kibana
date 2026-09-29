@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { overviewDashboardId, setAgentBuilderDashboard } from './install_dashboard';
@@ -33,14 +35,14 @@ describe('setAgentBuilderDashboard', () => {
 
   function buildImporterMock() {
     return {
-      import: jest.fn().mockResolvedValue({
+      import: vi.fn().mockResolvedValue({
         success: true,
         successCount: 1,
         errors: [],
         warnings: [],
         successResults: [],
       }),
-      resolveImportErrors: jest.fn(),
+      resolveImportErrors: vi.fn(),
     };
   }
 
@@ -52,8 +54,8 @@ describe('setAgentBuilderDashboard', () => {
 
     const coreStart = {
       savedObjects: {
-        createInternalRepository: jest.fn(() => soClient as any),
-        createImporter: jest.fn(() => importerMock),
+        createInternalRepository: vi.fn(() => soClient as any),
+        createImporter: vi.fn(() => importerMock),
       },
     };
 

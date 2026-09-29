@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { graphlib } from '@dagrejs/dagre';
 import { getAllPredecessors, getTriggerLabel } from './graph_utils';
 
 type MockGraph = Pick<graphlib.Graph, 'predecessors'>;
 
 const createMockGraph = (adjacency: Record<string, string[] | undefined>): MockGraph => ({
-  predecessors: jest.fn((nodeId: string) => adjacency[nodeId]),
+  predecessors: vi.fn((nodeId: string) => adjacency[nodeId]),
 });
 
 describe('getAllPredecessors', () => {

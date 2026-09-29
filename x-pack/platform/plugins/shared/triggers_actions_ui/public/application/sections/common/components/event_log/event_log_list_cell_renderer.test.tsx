@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import moment from 'moment';
 import { render, screen } from '@testing-library/react';
@@ -12,45 +14,57 @@ import { EventLogListCellRenderer, DEFAULT_DATE_FORMAT } from './event_log_list_
 import { EventLogListStatus } from './event_log_list_status';
 import { RuleDurationFormat } from '../../../rules_list/components/rule_duration_format';
 
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
-    location: {
-      pathname: '/logs',
-    },
-    push: jest.fn(),
-  }),
-}));
-
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useSpacesData: () => ({
-    spacesMap: new Map([
-      ['space1', { id: 'space1', name: 'Space 1' }],
-      ['space2', { id: 'space2', name: 'Space 2' }],
-    ]),
-    activeSpaceId: 'space1',
-  }),
-  useKibana: () => ({
-    services: {
-      http: {
-        basePath: {
-          get: () => '/basePath',
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: () => ({
+        location: {
+          pathname: '/logs',
         },
-      },
-    },
-  }),
-}));
+        push: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../rules_list/components/rule_duration_format', () => ({
-  RuleDurationFormat: jest.fn(({ duration }) => (
-    <span data-test-subj="rule-duration">{duration}</span>
-  )),
-}));
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useSpacesData: () => ({
+        spacesMap: new Map([
+          ['space1', { id: 'space1', name: 'Space 1' }],
+          ['space2', { id: 'space2', name: 'Space 2' }],
+        ]),
+        activeSpaceId: 'space1',
+      }),
+      useKibana: () => ({
+        services: {
+          http: {
+            basePath: {
+              get: () => '/basePath',
+            },
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./event_log_list_status', () => ({
-  EventLogListStatus: jest.fn((props) => (
-    <span data-test-subj="event-log-status">{props.status}</span>
-  )),
-}));
+vi.mock('../../../rules_list/components/rule_duration_format', () => {
+      const mocked = {
+      RuleDurationFormat: vi.fn(({ duration }) => (
+        <span data-test-subj="rule-duration">{duration}</span>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('./event_log_list_status', () => {
+      const mocked = {
+      EventLogListStatus: vi.fn((props) => (
+        <span data-test-subj="event-log-status">{props.status}</span>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EventLogListCellRenderer', () => {
   let originalLocation: Location;
@@ -63,9 +77,9 @@ describe('EventLogListCellRenderer', () => {
     window.location = {
       ...originalLocation,
       ancestorOrigins: {} as DOMStringList,
-      assign: jest.fn(),
-      reload: jest.fn(),
-      replace: jest.fn(),
+      assign: vi.fn(),
+      reload: vi.fn(),
+      replace: vi.fn(),
       href: 'https://localhost/app/management/insightsAndAlerting/triggersActions/logs',
     };
   });
@@ -75,7 +89,7 @@ describe('EventLogListCellRenderer', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders primitive values correctly', () => {

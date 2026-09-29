@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { savedObjectsRepositoryMock, metricsServiceMock } from '@kbn/core/server/mocks';
 import { startTrackingEventLoopDelaysUsage } from './track_delays';
@@ -17,8 +19,8 @@ describe('startTrackingEventLoopDelaysUsage', () => {
   const stopMonitoringEventLoop$ = new Subject<void>();
   const instanceUuid = 'mock_uuid';
 
-  beforeAll(() => jest.useFakeTimers());
-  beforeEach(() => jest.clearAllMocks());
+  beforeAll(() => vi.useFakeTimers());
+  beforeEach(() => vi.clearAllMocks());
   afterEach(() => stopMonitoringEventLoop$.next());
 
   it('collects eventLoopDelaysMonitor metrics after start delay', () => {
@@ -34,7 +36,7 @@ describe('startTrackingEventLoopDelaysUsage', () => {
     );
 
     expect(eventLoopDelaysMonitor.collect).toHaveBeenCalledTimes(0);
-    jest.advanceTimersByTime(collectionStartDelay);
+    vi.advanceTimersByTime(collectionStartDelay);
     expect(eventLoopDelaysMonitor.collect).toHaveBeenCalledTimes(1);
   });
 
@@ -53,11 +55,11 @@ describe('startTrackingEventLoopDelaysUsage', () => {
     );
 
     expect(mockInternalRepository.create).toHaveBeenCalledTimes(0);
-    jest.advanceTimersByTime(collectionStartDelay);
+    vi.advanceTimersByTime(collectionStartDelay);
     expect(mockInternalRepository.create).toHaveBeenCalledTimes(1);
-    jest.advanceTimersByTime(collectionInterval);
+    vi.advanceTimersByTime(collectionInterval);
     expect(mockInternalRepository.create).toHaveBeenCalledTimes(2);
-    jest.advanceTimersByTime(collectionInterval);
+    vi.advanceTimersByTime(collectionInterval);
     expect(mockInternalRepository.create).toHaveBeenCalledTimes(3);
   });
 
@@ -79,9 +81,9 @@ describe('startTrackingEventLoopDelaysUsage', () => {
     );
 
     expect(eventLoopDelaysMonitor.reset).toHaveBeenCalledTimes(0);
-    jest.advanceTimersByTime(collectionInterval * 5);
+    vi.advanceTimersByTime(collectionInterval * 5);
     expect(eventLoopDelaysMonitor.reset).toHaveBeenCalledTimes(1);
-    jest.advanceTimersByTime(collectionInterval * 5);
+    vi.advanceTimersByTime(collectionInterval * 5);
     expect(eventLoopDelaysMonitor.reset).toHaveBeenCalledTimes(2);
   });
 

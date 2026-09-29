@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { WorkflowIntegrityResult } from '../types';
@@ -36,14 +39,14 @@ const makeRepairFailedResult = (): WorkflowIntegrityResult => ({
 describe('validatePreExecution', () => {
   let mockLogger: MockedLogger;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let mockResolveConnector: jest.Mock;
-  let mockWorkflowsManagementApi: Record<string, jest.Mock>;
+  let mockResolveConnector: Mock;
+  let mockWorkflowsManagementApi: Record<string, Mock>;
 
   beforeEach(() => {
     mockLogger = loggerMock.create();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockResolveConnector = jest.fn().mockResolvedValue({ id: 'test-connector', name: 'Test' });
-    mockWorkflowsManagementApi = { getWorkflow: jest.fn() };
+    mockResolveConnector = vi.fn().mockResolvedValue({ id: 'test-connector', name: 'Test' });
+    mockWorkflowsManagementApi = { getWorkflow: vi.fn() };
 
     mockEsClient.indices.exists.mockResolvedValue(true);
   });

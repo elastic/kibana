@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../../../../common/agent_builder_attachments';
@@ -14,14 +16,17 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import { createSaveAutomationTool, normalizeSaveAutomationParams } from './tool';
 import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
-  hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
-}));
+vi.mock('@kbn/agent-builder-tools-base/workflows', () => {
+      const mocked = {
+      hasWorkflowReadPrivilege: vi.fn().mockResolvedValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { hasWorkflowReadPrivilege } = jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+const { hasWorkflowReadPrivilege } = (await vi.importMock('@kbn/agent-builder-tools-base/workflows'));
 
 describe('save_automation tool', () => {
-  const getWorkflowMock = jest.fn();
+  const getWorkflowMock = vi.fn();
 
   const createTool = () =>
     createSaveAutomationTool({
@@ -40,7 +45,7 @@ describe('save_automation tool', () => {
 
   const createAttachments = (): AttachmentStateManager =>
     ({
-      getAll: jest.fn().mockReturnValue([
+      getAll: vi.fn().mockReturnValue([
         {
           id: 'attachment-1',
           type: WORKFLOW_YAML_ATTACHMENT_TYPE,
@@ -264,7 +269,7 @@ describe('save_automation tool', () => {
       const tool = createTool();
       getWorkflowMock.mockResolvedValue({ id: 'workflow-7', name: 'Index Metadata Pilot' });
       const attachments = {
-        getAll: jest.fn().mockReturnValue([
+        getAll: vi.fn().mockReturnValue([
           {
             id: 'attachment-1',
             type: WORKFLOW_YAML_ATTACHMENT_TYPE,

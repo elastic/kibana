@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -28,11 +31,14 @@ import {
 import { queryKeys } from '../query_keys';
 import { proposalDecisionSignal } from './proposal_decision_signal';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -45,8 +51,8 @@ const createWrapper = () => {
 };
 
 const makeHttp = () => ({
-  get: jest.fn(),
-  post: jest.fn(),
+  get: vi.fn(),
+  post: vi.fn(),
 });
 
 const makeHttpFetchError = (status: number): IHttpFetchError => {
@@ -345,7 +351,7 @@ describe('useApproveProposal', () => {
     >);
 
     const { Wrapper, queryClient } = createWrapper();
-    jest.spyOn(queryClient, 'invalidateQueries');
+    vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
 
@@ -385,7 +391,7 @@ describe('useApproveProposal', () => {
     >);
 
     const { Wrapper, queryClient } = createWrapper();
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
     await result.current.mutateAsync({ id: 'p-1', body: {} });
@@ -405,7 +411,7 @@ describe('useApproveProposal', () => {
     >);
 
     const { Wrapper } = createWrapper();
-    const bumpSpy = jest.spyOn(proposalDecisionSignal, 'bump');
+    const bumpSpy = vi.spyOn(proposalDecisionSignal, 'bump');
 
     const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
     await result.current.mutateAsync({ id: 'p-1', body: {} });
@@ -503,7 +509,7 @@ describe('useDismissProposal', () => {
     >);
 
     const { Wrapper, queryClient } = createWrapper();
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useDismissProposal(), { wrapper: Wrapper });
     await result.current.mutateAsync({ id: 'p-1', body: { dismissReason: 'wrong' } });

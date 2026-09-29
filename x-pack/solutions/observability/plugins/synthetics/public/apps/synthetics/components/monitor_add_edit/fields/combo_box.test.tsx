@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { FormattedComboBox } from './combo_box';
 
 describe('<FormattedComboBox />', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const selectedOptions: string[] = [];
 
   it('renders ComboBox', () => {
@@ -23,7 +25,7 @@ describe('<FormattedComboBox />', () => {
   });
 
   it('calls onBlur', () => {
-    const onBlur = jest.fn();
+    const onBlur = vi.fn();
     const { getByTestId } = render(
       <FormattedComboBox selectedOptions={selectedOptions} onChange={onChange} onBlur={onBlur} />
     );
@@ -36,7 +38,7 @@ describe('<FormattedComboBox />', () => {
   });
 
   it('splits a pasted comma-separated value into multiple tags', () => {
-    const onChangeMock = jest.fn();
+    const onChangeMock = vi.fn();
     const { getByTestId } = render(
       <FormattedComboBox selectedOptions={[]} onChange={onChangeMock} />
     );
@@ -49,7 +51,7 @@ describe('<FormattedComboBox />', () => {
   });
 
   it('trims and ignores empty and duplicate tags', () => {
-    const onChangeMock = jest.fn();
+    const onChangeMock = vi.fn();
     const { getByTestId } = render(
       <FormattedComboBox selectedOptions={['tag1']} onChange={onChangeMock} />
     );
@@ -62,7 +64,7 @@ describe('<FormattedComboBox />', () => {
   });
 
   it('splits a pasted newline-separated value into multiple tags', () => {
-    const onChangeMock = jest.fn();
+    const onChangeMock = vi.fn();
     const { getByTestId } = render(
       <FormattedComboBox selectedOptions={[]} onChange={onChangeMock} />
     );

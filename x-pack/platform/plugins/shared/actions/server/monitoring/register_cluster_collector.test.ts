@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { CoreSetup } from '@kbn/core/server';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
@@ -12,16 +15,16 @@ import { registerClusterCollector } from './register_cluster_collector';
 import type { ActionsPluginsStart } from '../plugin';
 import type { ClusterActionsMetric } from './types';
 
-jest.useFakeTimers();
-jest.setSystemTime(new Date('2020-03-09').getTime());
+vi.useFakeTimers();
+vi.setSystemTime(new Date('2020-03-09').getTime());
 
 describe('registerClusterCollector()', () => {
   const monitoringCollection = monitoringCollectionMock.createSetup();
   const coreSetup = coreMock.createSetup() as unknown as CoreSetup<ActionsPluginsStart, unknown>;
-  const taskManagerAggregate = jest.fn();
+  const taskManagerAggregate = vi.fn();
 
   beforeEach(() => {
-    (coreSetup.getStartServices as jest.Mock).mockImplementation(async () => {
+    (coreSetup.getStartServices as Mock).mockImplementation(async () => {
       return [
         undefined,
         {

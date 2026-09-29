@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import * as api from '@kbn/securitysolution-list-api';
 import { useApi } from '@kbn/securitysolution-list-hooks';
@@ -24,29 +26,32 @@ import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/res
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getCreateExceptionListItemSchemaMock } from '../../../common/schemas/request/create_exception_list_item_schema.mock';
 
-jest.mock('@kbn/securitysolution-list-api');
+vi.mock('@kbn/securitysolution-list-api');
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('123'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('123'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockKibanaHttpService = coreMock.createStart().http;
 
 // TODO: Once the mocks are figured out and the types are moved into kbn core this test should be moved next to the file: x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_api/index.test.ts
 
 describe('useApi', () => {
-  const onErrorMock = jest.fn();
+  const onErrorMock = vi.fn();
 
   afterEach(() => {
     onErrorMock.mockClear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('deleteExceptionItem', () => {
     test('it invokes "deleteExceptionListItemById" when "deleteExceptionItem" used', async () => {
       const payload = getExceptionListItemSchemaMock();
-      const onSuccessMock = jest.fn();
-      const spyOnDeleteExceptionListItemById = jest
+      const onSuccessMock = vi.fn();
+      const spyOnDeleteExceptionListItemById = vi
         .spyOn(api, 'deleteExceptionListItemById')
         .mockResolvedValue(payload);
 
@@ -59,7 +64,7 @@ describe('useApi', () => {
         await result.current.deleteExceptionItem({
           id,
           namespaceType,
-          onError: jest.fn(),
+          onError: vi.fn(),
           onSuccess: onSuccessMock,
         });
       });
@@ -77,7 +82,7 @@ describe('useApi', () => {
 
     test('invokes "onError" callback if "deleteExceptionListItemById" fails', async () => {
       const mockError = new Error('failed to delete item');
-      jest.spyOn(api, 'deleteExceptionListItemById').mockRejectedValue(mockError);
+      vi.spyOn(api, 'deleteExceptionListItemById').mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useApi(mockKibanaHttpService));
       await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -89,7 +94,7 @@ describe('useApi', () => {
           id,
           namespaceType,
           onError: onErrorMock,
-          onSuccess: jest.fn(),
+          onSuccess: vi.fn(),
         });
       });
 
@@ -100,8 +105,8 @@ describe('useApi', () => {
   describe('deleteExceptionList', () => {
     test('it invokes "deleteExceptionListById" when "deleteExceptionList" used', async () => {
       const payload = getExceptionListSchemaMock();
-      const onSuccessMock = jest.fn();
-      const spyOnDeleteExceptionListById = jest
+      const onSuccessMock = vi.fn();
+      const spyOnDeleteExceptionListById = vi
         .spyOn(api, 'deleteExceptionListById')
         .mockResolvedValue(payload);
 
@@ -114,7 +119,7 @@ describe('useApi', () => {
         await result.current.deleteExceptionList({
           id,
           namespaceType,
-          onError: jest.fn(),
+          onError: vi.fn(),
           onSuccess: onSuccessMock,
         });
       });
@@ -132,7 +137,7 @@ describe('useApi', () => {
 
     test('invokes "onError" callback if "deleteExceptionListById" fails', async () => {
       const mockError = new Error('failed to delete item');
-      jest.spyOn(api, 'deleteExceptionListById').mockRejectedValue(mockError);
+      vi.spyOn(api, 'deleteExceptionListById').mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useApi(mockKibanaHttpService));
       await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -144,7 +149,7 @@ describe('useApi', () => {
           id,
           namespaceType,
           onError: onErrorMock,
-          onSuccess: jest.fn(),
+          onSuccess: vi.fn(),
         });
       });
 
@@ -155,8 +160,8 @@ describe('useApi', () => {
   describe('getExceptionItem', () => {
     test('it invokes "fetchExceptionListItemById" when "getExceptionItem" used', async () => {
       const payload = getExceptionListItemSchemaMock();
-      const onSuccessMock = jest.fn();
-      const spyOnFetchExceptionListItemById = jest
+      const onSuccessMock = vi.fn();
+      const spyOnFetchExceptionListItemById = vi
         .spyOn(api, 'fetchExceptionListItemById')
         .mockResolvedValue(payload);
 
@@ -169,7 +174,7 @@ describe('useApi', () => {
         await result.current.getExceptionItem({
           id,
           namespaceType,
-          onError: jest.fn(),
+          onError: vi.fn(),
           onSuccess: onSuccessMock,
         });
       });
@@ -191,7 +196,7 @@ describe('useApi', () => {
 
     test('invokes "onError" callback if "fetchExceptionListItemById" fails', async () => {
       const mockError = new Error('failed to delete item');
-      jest.spyOn(api, 'fetchExceptionListItemById').mockRejectedValue(mockError);
+      vi.spyOn(api, 'fetchExceptionListItemById').mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useApi(mockKibanaHttpService));
       await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -203,7 +208,7 @@ describe('useApi', () => {
           id,
           namespaceType,
           onError: onErrorMock,
-          onSuccess: jest.fn(),
+          onSuccess: vi.fn(),
         });
       });
 
@@ -214,8 +219,8 @@ describe('useApi', () => {
   describe('getExceptionList', () => {
     test('it invokes "fetchExceptionListById" when "getExceptionList" used', async () => {
       const payload = getExceptionListSchemaMock();
-      const onSuccessMock = jest.fn();
-      const spyOnFetchExceptionListById = jest
+      const onSuccessMock = vi.fn();
+      const spyOnFetchExceptionListById = vi
         .spyOn(api, 'fetchExceptionListById')
         .mockResolvedValue(payload);
 
@@ -228,7 +233,7 @@ describe('useApi', () => {
         await result.current.getExceptionList({
           id,
           namespaceType,
-          onError: jest.fn(),
+          onError: vi.fn(),
           onSuccess: onSuccessMock,
         });
       });
@@ -246,7 +251,7 @@ describe('useApi', () => {
 
     test('invokes "onError" callback if "fetchExceptionListById" fails', async () => {
       const mockError = new Error('failed to delete item');
-      jest.spyOn(api, 'fetchExceptionListById').mockRejectedValue(mockError);
+      vi.spyOn(api, 'fetchExceptionListById').mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useApi(mockKibanaHttpService));
       await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -258,7 +263,7 @@ describe('useApi', () => {
           id,
           namespaceType,
           onError: onErrorMock,
-          onSuccess: jest.fn(),
+          onSuccess: vi.fn(),
         });
       });
 
@@ -269,8 +274,8 @@ describe('useApi', () => {
   describe('getExceptionListsItems', () => {
     test('it invokes "fetchExceptionListsItemsByListIds" when "getExceptionListsItems" used', async () => {
       const output = getFoundExceptionListItemSchemaMock();
-      const onSuccessMock = jest.fn();
-      const spyOnFetchExceptionListsItemsByListIds = jest
+      const onSuccessMock = vi.fn();
+      const spyOnFetchExceptionListsItemsByListIds = vi
         .spyOn(api, 'fetchExceptionListsItemsByListIds')
         .mockResolvedValue(output);
 
@@ -282,7 +287,7 @@ describe('useApi', () => {
           lists: [
             { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
           ],
-          onError: jest.fn(),
+          onError: vi.fn(),
           onSuccess: onSuccessMock,
           pagination: {
             page: 1,
@@ -319,8 +324,8 @@ describe('useApi', () => {
 
     test('it does not invoke "fetchExceptionListsItemsByListIds" if no listIds', async () => {
       const output = getFoundExceptionListItemSchemaMock();
-      const onSuccessMock = jest.fn();
-      const spyOnFetchExceptionListsItemsByListIds = jest
+      const onSuccessMock = vi.fn();
+      const spyOnFetchExceptionListsItemsByListIds = vi
         .spyOn(api, 'fetchExceptionListsItemsByListIds')
         .mockResolvedValue(output);
 
@@ -332,7 +337,7 @@ describe('useApi', () => {
           lists: [
             { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
           ],
-          onError: jest.fn(),
+          onError: vi.fn(),
           onSuccess: onSuccessMock,
           pagination: {
             page: 1,
@@ -357,7 +362,7 @@ describe('useApi', () => {
 
     test('invokes "onError" callback if "fetchExceptionListsItemsByListIds" fails', async () => {
       const mockError = new Error('failed to delete item');
-      jest.spyOn(api, 'fetchExceptionListsItemsByListIds').mockRejectedValue(mockError);
+      vi.spyOn(api, 'fetchExceptionListsItemsByListIds').mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useApi(mockKibanaHttpService));
       await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -368,7 +373,7 @@ describe('useApi', () => {
             { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
           ],
           onError: onErrorMock,
-          onSuccess: jest.fn(),
+          onSuccess: vi.fn(),
           pagination: {
             page: 1,
             perPage: 20,
@@ -387,7 +392,7 @@ describe('useApi', () => {
     test('it removes exception item entry ids', async () => {
       const payload = getExceptionListItemSchemaMock();
       const itemToCreate = { ...getCreateExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS };
-      const spyOnFetchExceptionListItemById = jest
+      const spyOnFetchExceptionListItemById = vi
         .spyOn(api, 'addExceptionListItem')
         .mockResolvedValue(payload);
 
@@ -414,7 +419,7 @@ describe('useApi', () => {
     test('it removes exception item entry ids', async () => {
       const payload = getExceptionListItemSchemaMock();
       const itemToUpdate = { ...getUpdateExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS };
-      const spyOnUpdateExceptionListItem = jest
+      const spyOnUpdateExceptionListItem = vi
         .spyOn(api, 'updateExceptionListItem')
         .mockResolvedValue(payload);
 
@@ -439,8 +444,8 @@ describe('useApi', () => {
 
   describe('duplicateExceptionList', () => {
     test('it invokes "onSuccess" when duplication does not throw', async () => {
-      const onSuccessMock = jest.fn();
-      const spyOnDuplicateExceptionList = jest
+      const onSuccessMock = vi.fn();
+      const spyOnDuplicateExceptionList = vi
         .spyOn(api, 'duplicateExceptionList')
         .mockResolvedValue(getExceptionListSchemaMock());
 
@@ -452,7 +457,7 @@ describe('useApi', () => {
           includeExpiredExceptions: false,
           listId: 'my_list',
           namespaceType: 'single',
-          onError: jest.fn(),
+          onError: vi.fn(),
           onSuccess: onSuccessMock,
         });
       });
@@ -471,7 +476,7 @@ describe('useApi', () => {
 
     test('invokes "onError" callback if "duplicateExceptionList" fails', async () => {
       const mockError = new Error('failed to duplicate item');
-      jest.spyOn(api, 'duplicateExceptionList').mockRejectedValue(mockError);
+      vi.spyOn(api, 'duplicateExceptionList').mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useApi(mockKibanaHttpService));
       await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -482,7 +487,7 @@ describe('useApi', () => {
           listId: 'my_list',
           namespaceType: 'single',
           onError: onErrorMock,
-          onSuccess: jest.fn(),
+          onSuccess: vi.fn(),
         });
       });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
@@ -22,28 +25,31 @@ import { RULE_PREVIEW_BANNER, RulePreviewPanelKey } from '../../../../../flyout/
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
-jest.mock('../hooks/use_paginated_alerts');
-jest.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../../common/hooks/is_in_security_app');
-jest.mock('../../../../../common/components/user_privileges', () => ({
-  useUserPrivileges: () => ({
-    timelinePrivileges: {
-      read: true,
-    },
-    rulesPrivileges: {
-      rules: {
-        read: true,
-      },
-    },
-  }),
-}));
+vi.mock('../hooks/use_paginated_alerts');
+vi.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../../../../common/hooks/is_in_security_app');
+vi.mock('../../../../../common/components/user_privileges', () => {
+      const mocked = {
+      useUserPrivileges: () => ({
+        timelinePrivileges: {
+          read: true,
+        },
+        rulesPrivileges: {
+          rules: {
+            read: true,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
+const useAlertsPrivilegesMock = useAlertsPrivileges as Mock;
 
 const TEST_ID = 'TEST';
 const alertIds = ['id1', 'id2', 'id3'];
-const mockOnShowAlert = jest.fn();
+const mockOnShowAlert = vi.fn();
 
 const renderCorrelationsTable = ({
   scopeId = mockContextValue.scopeId,
@@ -81,11 +87,11 @@ describe('CorrelationsDetailsAlertsTable', () => {
     useAlertsPrivilegesMock.mockReturnValue({
       hasAlertsRead: true,
     });
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    jest.mocked(useIsInSecurityApp).mockReturnValue(true);
-    jest.mocked(usePaginatedAlerts).mockReturnValue({
-      setPagination: jest.fn(),
-      setSorting: jest.fn(),
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.mocked(useIsInSecurityApp).mockReturnValue(true);
+    vi.mocked(usePaginatedAlerts).mockReturnValue({
+      setPagination: vi.fn(),
+      setSorting: vi.fn(),
       data: [
         {
           _id: '1',
@@ -129,7 +135,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
     expect(getByTestId(`${TEST_ID}Table`)).toBeInTheDocument();
     expect(getAllByTestId(`${TEST_ID}AlertPreviewButton`)).toHaveLength(2);
 
-    expect(jest.mocked(usePaginatedAlerts)).toHaveBeenCalled();
+    expect(vi.mocked(usePaginatedAlerts)).toHaveBeenCalled();
 
     expect(queryAllByRole('columnheader').length).toBe(5);
     expect(queryAllByRole('row').length).toBe(3); // 1 header row and 2 data rows
@@ -168,7 +174,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
   });
 
   it('does not render InvestigateInTimeline button when not in Security Solution', () => {
-    jest.mocked(useIsInSecurityApp).mockReturnValue(false);
+    vi.mocked(useIsInSecurityApp).mockReturnValue(false);
     const { queryByTestId } = renderCorrelationsTable();
     expect(queryByTestId(`${TEST_ID}InvestigateInTimeline`)).not.toBeInTheDocument();
   });
@@ -196,9 +202,9 @@ describe('CorrelationsDetailsAlertsTable', () => {
       },
     ];
 
-    jest.mocked(usePaginatedAlerts).mockReturnValue({
-      setPagination: jest.fn(),
-      setSorting: jest.fn(),
+    vi.mocked(usePaginatedAlerts).mockReturnValue({
+      setPagination: vi.fn(),
+      setSorting: vi.fn(),
       data: [
         {
           _id: '1',

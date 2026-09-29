@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { of } from '@kbn/kibana-utils-plugin/common';
 import type { TestLocatorState } from './setup';
 import { testLocator, urlServiceTestSetup } from './setup';
@@ -83,7 +85,7 @@ describe('locators', () => {
         service: { locators },
         deps,
       } = urlServiceTestSetup({
-        navigate: jest.fn(async () => {}),
+        navigate: vi.fn(async () => {}),
       });
       const locator = locators.create(testLocator);
       const [, error] = await of(
@@ -113,7 +115,7 @@ describe('locators', () => {
         service: { locators },
         deps,
       } = urlServiceTestSetup({
-        navigate: jest.fn(async () => {}),
+        navigate: vi.fn(async () => {}),
       });
       const locator = locators.create(testLocator);
 

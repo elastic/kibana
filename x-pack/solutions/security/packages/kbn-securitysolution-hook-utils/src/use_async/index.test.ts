@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook, act } from '@testing-library/react';
 
 import { useAsync } from '.';
@@ -24,12 +27,12 @@ describe('useAsync', () => {
    */
   const timeout = 20_000;
 
-  let fn: jest.Mock<TestReturn, TestArgs[]>;
+  let fn: Mock<TestReturn, TestArgs[]>;
   let args: TestArgs;
 
   beforeEach(() => {
     args = { n: 1, s: 's' };
-    fn = jest.fn().mockResolvedValue(false);
+    fn = vi.fn().mockResolvedValue(false);
   });
 
   it('does not invoke fn if start was not called', () => {

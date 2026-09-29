@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { isInternalError } from '@kbn/agent-builder-common';
 import { createClient, type ToolHealthClient } from './client';
@@ -37,22 +40,25 @@ const createMockHealthDoc = (
 
 // Mock ES client with proper typing
 interface MockEsClient {
-  search: jest.Mock;
-  index: jest.Mock;
-  delete: jest.Mock;
+  search: Mock;
+  index: Mock;
+  delete: Mock;
 }
 
 const mockEsClient: MockEsClient = {
-  search: jest.fn(),
-  index: jest.fn(),
-  delete: jest.fn(),
+  search: vi.fn(),
+  index: vi.fn(),
+  delete: vi.fn(),
 };
 
-jest.mock('./storage', () => ({
-  createStorage: jest.fn(() => ({
-    getClient: jest.fn(() => mockEsClient),
-  })),
-}));
+vi.mock('./storage', () => {
+      const mocked = {
+      createStorage: vi.fn(() => ({
+        getClient: vi.fn(() => mockEsClient),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ToolHealthClient', () => {
   let client: ToolHealthClient;
@@ -60,7 +66,7 @@ describe('ToolHealthClient', () => {
 
   beforeEach(() => {
     logger = loggerMock.create();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     client = createClient({
       space: testSpace,

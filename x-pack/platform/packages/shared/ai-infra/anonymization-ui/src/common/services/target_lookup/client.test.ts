@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createTargetLookupClient } from './client';
 
 describe('createTargetLookupClient', () => {
   it('returns empty resolveIndex response on top-level 404', async () => {
-    const fetch = jest.fn().mockRejectedValue({ statusCode: 404 });
+    const fetch = vi.fn().mockRejectedValue({ statusCode: 404 });
     const client = createTargetLookupClient({ fetch });
 
     await expect(client.resolveIndex('logs-*')).resolves.toEqual({
@@ -20,7 +22,7 @@ describe('createTargetLookupClient', () => {
   });
 
   it('returns empty resolveIndex response on meta statusCode 404', async () => {
-    const fetch = jest.fn().mockRejectedValue({ meta: { statusCode: 404 } });
+    const fetch = vi.fn().mockRejectedValue({ meta: { statusCode: 404 } });
     const client = createTargetLookupClient({ fetch });
 
     await expect(client.resolveIndex('logs-*')).resolves.toEqual({
@@ -31,7 +33,7 @@ describe('createTargetLookupClient', () => {
   });
 
   it('returns empty resolveIndex response on response.status 404', async () => {
-    const fetch = jest.fn().mockRejectedValue({ response: { status: 404 } });
+    const fetch = vi.fn().mockRejectedValue({ response: { status: 404 } });
     const client = createTargetLookupClient({ fetch });
 
     await expect(client.resolveIndex('logs-*')).resolves.toEqual({
@@ -43,7 +45,7 @@ describe('createTargetLookupClient', () => {
 
   it('rethrows non-404 resolveIndex errors', async () => {
     const error = { statusCode: 500, body: { message: 'boom' } };
-    const fetch = jest.fn().mockRejectedValue(error);
+    const fetch = vi.fn().mockRejectedValue(error);
     const client = createTargetLookupClient({ fetch });
 
     await expect(client.resolveIndex('logs-*')).rejects.toBe(error);

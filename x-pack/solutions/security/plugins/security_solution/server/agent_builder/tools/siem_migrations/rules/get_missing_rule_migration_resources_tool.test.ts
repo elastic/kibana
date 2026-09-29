@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import {
@@ -16,7 +19,7 @@ import type { ProductFeaturesService } from '../../../../lib/product_features_se
 import { getMissingRuleMigrationResourcesTool } from './get_missing_rule_migration_resources_tool';
 
 const mockProductFeaturesService = {
-  isEnabled: jest.fn().mockReturnValue(true),
+  isEnabled: vi.fn().mockReturnValue(true),
 } as unknown as ProductFeaturesService;
 
 describe('getMissingRuleMigrationResourcesTool', () => {
@@ -27,13 +30,13 @@ describe('getMissingRuleMigrationResourcesTool', () => {
     mockLogger,
     mockProductFeaturesService
   );
-  let mockFetch: jest.Mock;
+  let mockFetch: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient, mockSecurityStart);
-    mockFetch = jest.fn();
-    (mockCoreStart.http.selfClient.asScoped as unknown as jest.Mock).mockReturnValue({
+    mockFetch = vi.fn();
+    (mockCoreStart.http.selfClient.asScoped as unknown as Mock).mockReturnValue({
       fetch: mockFetch,
     });
   });

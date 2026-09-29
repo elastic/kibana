@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { monaco } from '@kbn/code-editor';
 import { CURSOR_PAUSE_MS, getGhostHintKind, useGhostLineHint } from './use_ghost_line_hint';
@@ -19,9 +22,9 @@ const buildModel = (
 } => {
   let current = lines;
   const model = {
-    getLineContent: jest.fn((lineNumber: number) => current[lineNumber - 1] ?? ''),
-    getLineMaxColumn: jest.fn((lineNumber: number) => (current[lineNumber - 1] ?? '').length + 1),
-    getValueLength: jest.fn(() => current.join('\n').length),
+    getLineContent: vi.fn((lineNumber: number) => current[lineNumber - 1] ?? ''),
+    getLineMaxColumn: vi.fn((lineNumber: number) => (current[lineNumber - 1] ?? '').length + 1),
+    getValueLength: vi.fn(() => current.join('\n').length),
   } as unknown as monaco.editor.ITextModel;
   return {
     model,
@@ -69,20 +72,20 @@ describe('useGhostLineHint', () => {
     const contentListeners: Array<() => void> = [];
 
     const decorationsCollection = {
-      clear: jest.fn(),
+      clear: vi.fn(),
     };
 
     const editor = {
-      onDidChangeCursorPosition: jest.fn((cb: () => void) => {
+      onDidChangeCursorPosition: vi.fn((cb: () => void) => {
         cursorListeners.push(cb);
-        return { dispose: jest.fn() };
+        return { dispose: vi.fn() };
       }),
-      onDidChangeModelContent: jest.fn((cb: () => void) => {
+      onDidChangeModelContent: vi.fn((cb: () => void) => {
         contentListeners.push(cb);
-        return { dispose: jest.fn() };
+        return { dispose: vi.fn() };
       }),
-      createDecorationsCollection: jest.fn(() => decorationsCollection),
-      getPosition: jest.fn(() => new monaco.Position(2, 1)),
+      createDecorationsCollection: vi.fn(() => decorationsCollection),
+      getPosition: vi.fn(() => new monaco.Position(2, 1)),
     } as unknown as monaco.editor.IStandaloneCodeEditor;
 
     return {
@@ -94,7 +97,7 @@ describe('useGhostLineHint', () => {
   };
 
   const lastDecorationClassName = (editor: monaco.editor.IStandaloneCodeEditor): string => {
-    const calls = (editor.createDecorationsCollection as jest.Mock).mock.calls;
+    const calls = (editor.createDecorationsCollection as Mock).mock.calls;
     const lastDecoration = calls[calls.length - 1][0][0];
     return lastDecoration.options.afterContentClassName;
   };
@@ -132,11 +135,11 @@ describe('useGhostLineHint', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('shows the empty-line hint after the cursor has been still for the debounce window', () => {
@@ -148,7 +151,7 @@ describe('useGhostLineHint', () => {
     expect(stubs.editor.createDecorationsCollection).not.toHaveBeenCalled();
 
     act(() => {
-      jest.advanceTimersByTime(CURSOR_PAUSE_MS);
+      vi.advanceTimersByTime(CURSOR_PAUSE_MS);
     });
 
     expect(stubs.editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
@@ -163,7 +166,7 @@ describe('useGhostLineHint', () => {
     act(() => {
       // Simulates the user typing the comment: a content change followed by a pause.
       stubs.fireContentChange();
-      jest.advanceTimersByTime(CURSOR_PAUSE_MS);
+      vi.advanceTimersByTime(CURSOR_PAUSE_MS);
     });
 
     expect(stubs.editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
@@ -175,15 +178,15 @@ describe('useGhostLineHint', () => {
 
     act(() => {
       stubs.fireCursorChange();
-      jest.advanceTimersByTime(CURSOR_PAUSE_MS - 100);
+      vi.advanceTimersByTime(CURSOR_PAUSE_MS - 100);
       // User keeps typing before the 400ms is up — debounce restarts.
       stubs.fireContentChange();
-      jest.advanceTimersByTime(CURSOR_PAUSE_MS - 100);
+      vi.advanceTimersByTime(CURSOR_PAUSE_MS - 100);
     });
     expect(stubs.editor.createDecorationsCollection).not.toHaveBeenCalled();
 
     act(() => {
-      jest.advanceTimersByTime(CURSOR_PAUSE_MS);
+      vi.advanceTimersByTime(CURSOR_PAUSE_MS);
     });
     expect(stubs.editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
   });
@@ -193,7 +196,7 @@ describe('useGhostLineHint', () => {
 
     act(() => {
       stubs.fireCursorChange();
-      jest.advanceTimersByTime(CURSOR_PAUSE_MS);
+      vi.advanceTimersByTime(CURSOR_PAUSE_MS);
     });
 
     expect(stubs.editor.createDecorationsCollection).not.toHaveBeenCalled();
@@ -220,7 +223,7 @@ describe('useGhostLineHint', () => {
 
     act(() => {
       stubs.fireCursorChange();
-      jest.advanceTimersByTime(CURSOR_PAUSE_MS);
+      vi.advanceTimersByTime(CURSOR_PAUSE_MS);
     });
 
     expect(stubs.editor.createDecorationsCollection).not.toHaveBeenCalled();
@@ -244,7 +247,7 @@ describe('useGhostLineHint', () => {
     act(() => {
       result.current.setupGhostLineHint(stubs.editor);
       stubs.fireCursorChange();
-      jest.advanceTimersByTime(CURSOR_PAUSE_MS);
+      vi.advanceTimersByTime(CURSOR_PAUSE_MS);
     });
     expect(stubs.editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
 
@@ -262,7 +265,7 @@ describe('useGhostLineHint', () => {
 
     act(() => {
       stubs.fireCursorChange();
-      jest.advanceTimersByTime(CURSOR_PAUSE_MS);
+      vi.advanceTimersByTime(CURSOR_PAUSE_MS);
     });
     expect(stubs.editor.createDecorationsCollection).not.toHaveBeenCalled();
 
@@ -274,7 +277,7 @@ describe('useGhostLineHint', () => {
 
     act(() => {
       stubs.fireCursorChange();
-      jest.advanceTimersByTime(CURSOR_PAUSE_MS);
+      vi.advanceTimersByTime(CURSOR_PAUSE_MS);
     });
     expect(stubs.editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { StatusError } from '../streams/errors/status_error';
 import { validateUnitForWrite } from './validate_unit';
@@ -38,7 +40,7 @@ const unit: StreamsUnit.Configuration = {
 
 describe('validateUnitForWrite', () => {
   it('delegates duplicate ids to the distributor hook', async () => {
-    const validate = jest.fn().mockResolvedValue({});
+    const validate = vi.fn().mockResolvedValue({});
     const withDuplicate: StreamsUnit.Configuration = {
       ...unit,
       destinations: [{ id: 'otlp-input', type: 'debug', supported_telemetry: ['logs'] }],
@@ -50,7 +52,7 @@ describe('validateUnitForWrite', () => {
   });
 
   it('delegates semantic validation to the injected distributor hook', async () => {
-    const validate = jest.fn().mockRejectedValue(new StatusError('OTTL parse error', 400));
+    const validate = vi.fn().mockRejectedValue(new StatusError('OTTL parse error', 400));
 
     await expect(validateUnitForWrite(unit, { validate })).rejects.toMatchObject({
       message: 'OTTL parse error',
@@ -60,7 +62,7 @@ describe('validateUnitForWrite', () => {
   });
 
   it('still calls the distributor hook for incomplete units', async () => {
-    const validate = jest.fn().mockResolvedValue({});
+    const validate = vi.fn().mockResolvedValue({});
     const incomplete: StreamsUnit.Configuration = {
       sources: unit.sources,
       destinations: [],
@@ -73,7 +75,7 @@ describe('validateUnitForWrite', () => {
   });
 
   it('returns compiled_config from the distributor hook', async () => {
-    const validate = jest.fn().mockResolvedValue({ compiled_config: 'receivers: {}' });
+    const validate = vi.fn().mockResolvedValue({ compiled_config: 'receivers: {}' });
 
     await expect(validateUnitForWrite(unit, { validate })).resolves.toEqual({
       compiled_config: 'receivers: {}',

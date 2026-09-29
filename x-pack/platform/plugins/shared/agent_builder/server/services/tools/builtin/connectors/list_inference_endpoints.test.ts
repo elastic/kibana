@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
@@ -14,9 +16,9 @@ import type {
 import { createListInferenceEndpointsTool } from './list_inference_endpoints';
 import type { ConnectorToolsOptions } from './types';
 
-const mockGetConnectorList = jest.fn();
+const mockGetConnectorList = vi.fn();
 
-const getInference: ConnectorToolsOptions['getInference'] = jest.fn(() =>
+const getInference: ConnectorToolsOptions['getInference'] = vi.fn(() =>
   Promise.resolve({
     getConnectorList: mockGetConnectorList,
   } as unknown as ReturnType<ConnectorToolsOptions['getInference']>)
@@ -24,14 +26,14 @@ const getInference: ConnectorToolsOptions['getInference'] = jest.fn(() =>
 
 // execute_connector_sub_action requires getActions; list_inference_endpoints only uses getInference,
 // but ConnectorToolsOptions requires both, so provide a minimal stub.
-const getActions: ConnectorToolsOptions['getActions'] = jest.fn(() =>
+const getActions: ConnectorToolsOptions['getActions'] = vi.fn(() =>
   Promise.resolve({} as unknown as ReturnType<ConnectorToolsOptions['getActions']>)
 );
 
 const mockContext = {
   spaceId: 'default',
   request: { id: 'test-request' },
-  logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() },
+  logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
   callContext: {
     toolId: platformCoreTools.listInferenceEndpoints,
     toolCallId: 'call-1',
@@ -41,7 +43,7 @@ const mockContext = {
 
 describe('createListInferenceEndpointsTool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return only identifiers, names, and types for all inference-compatible entries', async () => {

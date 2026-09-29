@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { DynamicStructuredTool } from '@langchain/core/tools';
@@ -20,12 +23,12 @@ import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/imp
 import { isString } from 'lodash';
 
 // Mock dependencies
-jest.mock('@elastic/elasticsearch');
-jest.mock('lodash');
+vi.mock('@elastic/elasticsearch');
+vi.mock('lodash');
 
 describe('isModelAlreadyExistsError', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should return true if error is resource_not_found_exception', () => {
     const error = new errors.ResponseError({
@@ -158,8 +161,8 @@ describe('getKBVectorSearchQuery', () => {
 
 describe('getStructuredToolForIndexEntry', () => {
   const mockLogger = {
-    debug: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
   } as unknown as Logger;
 
   const mockEsClient = {} as ElasticsearchClient;
@@ -186,7 +189,7 @@ describe('getStructuredToolForIndexEntry', () => {
   });
 
   it('should execute func correctly and return expected results', async () => {
-    (isString as unknown as jest.Mock).mockReturnValue(true);
+    (isString as unknown as Mock).mockReturnValue(true);
     const mockSearchResult = {
       hits: {
         hits: [
@@ -206,7 +209,7 @@ describe('getStructuredToolForIndexEntry', () => {
       },
     };
 
-    mockEsClient.search = jest.fn().mockResolvedValue(mockSearchResult);
+    mockEsClient.search = vi.fn().mockResolvedValue(mockSearchResult);
 
     const tool = getStructuredToolForIndexEntry({
       indexEntry: mockIndexEntry,
@@ -215,7 +218,7 @@ describe('getStructuredToolForIndexEntry', () => {
       contentReferencesStore,
     });
 
-    (contentReferencesStore.add as jest.Mock).mockImplementation(
+    (contentReferencesStore.add as Mock).mockImplementation(
       (creator: Parameters<ContentReferencesStore['add']>[0]) => {
         const reference = creator({ id: 'exampleContentReferenceId' });
         expect(reference).toEqual(
@@ -242,7 +245,7 @@ describe('getStructuredToolForIndexEntry', () => {
 
   it('should log an error and return error message on Elasticsearch error', async () => {
     const mockError = new Error('Elasticsearch error');
-    mockEsClient.search = jest.fn().mockRejectedValue(mockError);
+    mockEsClient.search = vi.fn().mockRejectedValue(mockError);
 
     const tool = getStructuredToolForIndexEntry({
       indexEntry: mockIndexEntry,

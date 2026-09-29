@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { LastResponseSummaryChart } from './last_response_summary_chart';
@@ -12,18 +15,24 @@ import { useGetSpaceHealth } from '../../api/hooks/use_get_space_health';
 import { useRulesTableContext } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useRulesTableContextMock } from '../../../rule_management_ui/components/rules_table/rules_table/__mocks__/rules_table_context';
 
-jest.mock('../../api/hooks/use_get_space_health');
-jest.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
-jest.mock('../../../../common/components/charts/donutchart', () => ({
-  DonutChart: jest.fn(() => <div data-test-subj="mock-donut-chart" />),
-}));
+vi.mock('../../api/hooks/use_get_space_health');
+vi.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
+vi.mock('../../../../common/components/charts/donutchart', () => {
+      const mocked = {
+      DonutChart: vi.fn(() => <div data-test-subj="mock-donut-chart" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetSpaceHealth = useGetSpaceHealth as jest.Mock;
-const mockInvalidate = jest.fn();
-jest.mock('../../api/hooks/use_get_space_health', () => ({
-  useGetSpaceHealth: jest.fn(),
-  useInvalidateGetSpaceHealthQuery: () => mockInvalidate,
-}));
+const mockUseGetSpaceHealth = useGetSpaceHealth as Mock;
+const mockInvalidate = vi.fn();
+vi.mock('../../api/hooks/use_get_space_health', () => {
+      const mocked = {
+      useGetSpaceHealth: vi.fn(),
+      useInvalidateGetSpaceHealthQuery: () => mockInvalidate,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createSpaceHealthResponse = ({
   succeeded = 0,
@@ -52,8 +61,8 @@ const createSpaceHealthResponse = ({
 
 describe('LastResponseSummaryChart', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useRulesTableContext as jest.Mock).mockReturnValue(useRulesTableContextMock.create());
+    vi.clearAllMocks();
+    (useRulesTableContext as Mock).mockReturnValue(useRulesTableContextMock.create());
   });
 
   it('renders a loading spinner when data is loading', () => {

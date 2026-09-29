@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
+
 import { storeApplicationUsageMock } from './store_ui_report.test.mocks';
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
@@ -113,7 +115,7 @@ describe('store_ui_report', () => {
         ],
       ]
     `);
-    expect((usageCounterMock.incrementCounter as jest.Mock).mock.calls).toMatchInlineSnapshot(`
+    expect((usageCounterMock.incrementCounter as Mock).mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           Object {

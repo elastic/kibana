@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useLocalStorage } from './use_local_storage';
 
@@ -66,7 +68,7 @@ describe('useLocalStorage', () => {
   });
 
   it('silently ignores write errors from storage', () => {
-    const setItemSpy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('storage full');
     });
 

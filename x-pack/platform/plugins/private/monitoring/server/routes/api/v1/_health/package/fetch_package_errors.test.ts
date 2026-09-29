@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import assert from 'assert';
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
@@ -104,7 +106,7 @@ describe(__filename, () => {
         },
       };
 
-      const searchFn = jest.fn().mockResolvedValueOnce(response);
+      const searchFn = vi.fn().mockResolvedValueOnce(response);
 
       const monitoredClusters = await fetchPackageErrors({
         timeout: 10,

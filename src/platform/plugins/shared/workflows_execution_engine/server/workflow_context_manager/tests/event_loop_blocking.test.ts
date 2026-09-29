@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
@@ -24,35 +26,38 @@ import type { StepIoService } from '../step_io_service';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 
-jest.mock('../../utils', () => ({
-  ...jest.requireActual<typeof import('../../utils')>('../../utils'),
-  buildStepExecutionId: jest.fn().mockImplementation((executionId: string, stepId: string) => {
-    return `${stepId}_generated`;
-  }),
-  getKibanaUrl: jest.fn().mockReturnValue('http://localhost:5601'),
-  buildWorkflowExecutionUrl: jest
-    .fn()
-    .mockImplementation(
-      (
-        kibanaUrl: string,
-        spaceId: string,
-        workflowId: string,
-        executionId: string,
-        stepExecutionId?: string
-      ) => {
-        const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
-        const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
-        const params = new URLSearchParams({
-          executionId,
-          tab: 'executions',
-        });
-        if (stepExecutionId) {
-          params.set('stepExecutionId', stepExecutionId);
-        }
-        return `${baseUrl}?${params.toString()}`;
-      }
-    ),
-}));
+vi.mock('../../utils', async () => {
+      const mocked = {
+      ...(await vi.importActual<typeof import('../../utils')>('../../utils')),
+      buildStepExecutionId: vi.fn().mockImplementation((executionId: string, stepId: string) => {
+        return `${stepId}_generated`;
+      }),
+      getKibanaUrl: vi.fn().mockReturnValue('http://localhost:5601'),
+      buildWorkflowExecutionUrl: vi
+        .fn()
+        .mockImplementation(
+          (
+            kibanaUrl: string,
+            spaceId: string,
+            workflowId: string,
+            executionId: string,
+            stepExecutionId?: string
+          ) => {
+            const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
+            const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
+            const params = new URLSearchParams({
+              executionId,
+              tab: 'executions',
+            });
+            if (stepExecutionId) {
+              params.set('stepExecutionId', stepExecutionId);
+            }
+            return `${baseUrl}?${params.toString()}`;
+          }
+        ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const dependencies = mockContextDependencies();
 
@@ -109,7 +114,7 @@ const createBroaderSurfaceContainer = () => {
     fetchCaseC: createLargeStepOutput('fetchCaseC'),
   } as const;
 
-  const renderSpy = jest.fn();
+  const renderSpy = vi.fn();
 
   const workflow: WorkflowYaml = {
     name: 'Broader Surface Repro Workflow',
@@ -160,11 +165,11 @@ const createBroaderSurfaceContainer = () => {
 
   const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
   const workflowExecutionState: WorkflowExecutionState = {} as WorkflowExecutionState;
-  workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+  workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
     scopeStack: [] as StackFrame[],
     workflowDefinition: workflow,
   } as EsWorkflowExecution);
-  workflowExecutionState.getLatestStepExecution = jest
+  workflowExecutionState.getLatestStepExecution = vi
     .fn()
     .mockImplementation((stepId: string): Partial<EsWorkflowStepExecution> | undefined => {
       if (stepId in largeStepOutputs) {
@@ -179,37 +184,37 @@ const createBroaderSurfaceContainer = () => {
 
       return undefined;
     });
-  workflowExecutionState.getStepExecution = jest.fn().mockReturnValue(undefined);
-  workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([]);
+  workflowExecutionState.getStepExecution = vi.fn().mockReturnValue(undefined);
+  workflowExecutionState.getAllStepExecutions = vi.fn().mockReturnValue([]);
 
   const esClient = {
-    search: jest.fn(),
-    index: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    search: vi.fn(),
+    index: vi.fn(),
+    get: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   } as unknown as ElasticsearchClient;
 
   const templatingEngine = new WorkflowTemplatingEngine();
   const actualRender = templatingEngine.render.bind(templatingEngine);
-  jest.spyOn(templatingEngine, 'render').mockImplementation((obj, context) => {
+  vi.spyOn(templatingEngine, 'render').mockImplementation((obj, context) => {
     renderSpy(context);
     return actualRender(obj, context);
   });
 
   // IO maps live entirely in the service mock now (state holds metadata only).
   const stepIoService = {
-    hasEvictedOutputs: jest.fn().mockReturnValue(false),
-    prepareForRead: jest.fn().mockResolvedValue(undefined),
-    releaseReadPins: jest.fn(),
-    releaseTransientlyRehydratedOutputs: jest.fn(),
-    getStepInput: jest.fn().mockReturnValue(undefined),
-    getStepOutput: jest.fn(
+    hasEvictedOutputs: vi.fn().mockReturnValue(false),
+    prepareForRead: vi.fn().mockResolvedValue(undefined),
+    releaseReadPins: vi.fn(),
+    releaseTransientlyRehydratedOutputs: vi.fn(),
+    getStepInput: vi.fn().mockReturnValue(undefined),
+    getStepOutput: vi.fn(
       (id: string) =>
         (largeStepOutputs as Record<string, unknown>)[id as keyof typeof largeStepOutputs]
     ),
-    getStepError: jest.fn().mockReturnValue(undefined),
-    getLatestStepIO: jest.fn((stepId: string) => {
+    getStepError: vi.fn().mockReturnValue(undefined),
+    getLatestStepIO: vi.fn((stepId: string) => {
       if (stepId in largeStepOutputs) {
         return {
           input: undefined,
@@ -219,7 +224,7 @@ const createBroaderSurfaceContainer = () => {
       }
       return undefined;
     }),
-    getDataSetVariables: jest.fn((): Record<string, unknown> => ({})),
+    getDataSetVariables: vi.fn((): Record<string, unknown> => ({})),
   } as unknown as StepIoService;
 
   const contextManager = new WorkflowContextManager({

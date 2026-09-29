@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { Type } from '@kbn/config-schema';
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -20,7 +22,7 @@ import { routeDefinitionParamsMock } from '../index.mock';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
 describe('SAML authentication routes', () => {
-  let router: jest.Mocked<SecurityRouter>;
+  let router: Mocked<SecurityRouter>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();

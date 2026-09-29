@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { getIndexVersion } from '../../routes/index/get_index_version';
@@ -16,22 +19,25 @@ import { getSharedParamsMock } from '../__mocks__/shared_params';
 import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
-jest.mock('../../routes/index/get_index_version');
-jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
+vi.mock('../../routes/index/get_index_version');
+vi.mock('../utils/get_data_tier_filter', () => {
+      const mocked = { getDataTierFilter: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const getDataTierFilterMock = getDataTierFilter as jest.Mock;
+const getDataTierFilterMock = getDataTierFilter as Mock;
 
 describe('eql_executor', () => {
   let ruleServices: PersistenceExecutorOptionsMock;
-  (getIndexVersion as jest.Mock).mockReturnValue(SIGNALS_TEMPLATE_VERSION);
+  (getIndexVersion as Mock).mockReturnValue(SIGNALS_TEMPLATE_VERSION);
   const params = getEqlRuleParams();
   const mockExperimentalFeatures = {} as ExperimentalFeatures;
-  const mockScheduleNotificationResponseActionsService = jest.fn();
+  const mockScheduleNotificationResponseActionsService = vi.fn();
 
   const sharedParams = getSharedParamsMock({ ruleParams: params });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ruleServices = createPersistenceExecutorOptionsMock();
     ruleServices.scopedClusterClient.asCurrentUser.eql.search.mockResolvedValue({
       hits: {
@@ -51,7 +57,7 @@ describe('eql_executor', () => {
             rewrites: { unprocessedExceptions: [getExceptionListItemSchemaMock()] },
           }),
           services: ruleServices,
-          wrapSuppressedHits: jest.fn(),
+          wrapSuppressedHits: vi.fn(),
           isAlertSuppressionActive: false,
           experimentalFeatures: mockExperimentalFeatures,
           scheduleNotificationResponseActionsService:
@@ -74,7 +80,7 @@ describe('eql_executor', () => {
       const { result } = await eqlExecutor({
         sharedParams,
         services: ruleServices,
-        wrapSuppressedHits: jest.fn(),
+        wrapSuppressedHits: vi.fn(),
         isAlertSuppressionActive: true,
         experimentalFeatures: mockExperimentalFeatures,
         scheduleNotificationResponseActionsService: mockScheduleNotificationResponseActionsService,
@@ -86,7 +92,7 @@ describe('eql_executor', () => {
       const { result } = await eqlExecutor({
         sharedParams,
         services: ruleServices,
-        wrapSuppressedHits: jest.fn(),
+        wrapSuppressedHits: vi.fn(),
         isAlertSuppressionActive: false,
         experimentalFeatures: mockExperimentalFeatures,
         scheduleNotificationResponseActionsService: mockScheduleNotificationResponseActionsService,
@@ -113,7 +119,7 @@ describe('eql_executor', () => {
       await eqlExecutor({
         sharedParams,
         services: ruleServices,
-        wrapSuppressedHits: jest.fn(),
+        wrapSuppressedHits: vi.fn(),
         isAlertSuppressionActive: true,
         experimentalFeatures: mockExperimentalFeatures,
         scheduleNotificationResponseActionsService: mockScheduleNotificationResponseActionsService,

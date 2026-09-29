@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { MigrationNameInput } from './migration_name_input';
 import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
 import type { UserProfile } from '@kbn/security-plugin-types-common';
@@ -12,15 +15,18 @@ import { renderHook } from '@testing-library/react';
 import type { MigrationNameStepProps } from '.';
 import { useMigrationNameStep } from '.';
 
-jest.mock('../../../../common/components/user_profiles/use_get_current_user_profile');
-const mockUseGetCurrentUserProfile = useGetCurrentUserProfile as jest.MockedFunction<
+vi.mock('../../../../common/components/user_profiles/use_get_current_user_profile');
+const mockUseGetCurrentUserProfile = useGetCurrentUserProfile as MockedFunction<
   typeof useGetCurrentUserProfile
 >;
 
-jest.mock('./migration_name_input', () => ({
-  MigrationNameInput: jest.fn(),
-}));
-let MockMigrationNameInputComp = MigrationNameInput as unknown as jest.Mock<
+vi.mock('./migration_name_input', () => {
+      const mocked = {
+      MigrationNameInput: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+let MockMigrationNameInputComp = MigrationNameInput as unknown as Mock<
   typeof MigrationNameInput
 >;
 
@@ -35,7 +41,7 @@ function renderTestHook(args: Partial<MigrationNameStepProps> = {}) {
   return renderHook(() =>
     useMigrationNameStep({
       status: 'incomplete',
-      setMigrationName: jest.fn(),
+      setMigrationName: vi.fn(),
       migrationName: undefined,
       ...args,
     })
@@ -44,7 +50,7 @@ function renderTestHook(args: Partial<MigrationNameStepProps> = {}) {
 
 describe('useMigrationNameStep', () => {
   beforeEach(() => {
-    MockMigrationNameInputComp = jest.fn();
+    MockMigrationNameInputComp = vi.fn();
     mockUseGetCurrentUserProfile.mockReturnValue({
       data: mockUser,
       isLoading: false,
@@ -52,7 +58,7 @@ describe('useMigrationNameStep', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return null in case of loading', async () => {

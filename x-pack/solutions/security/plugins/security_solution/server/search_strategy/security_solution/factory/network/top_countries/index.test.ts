@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as buildQuery from './query.top_countries_network.dsl';
 import { networkTopCountries } from '.';
 import {
@@ -14,7 +16,7 @@ import {
 } from './__mocks__';
 
 describe('networkTopCountries search strategy', () => {
-  const buildTopCountriesQuery = jest.spyOn(buildQuery, 'buildTopCountriesQuery');
+  const buildTopCountriesQuery = vi.spyOn(buildQuery, 'buildTopCountriesQuery');
 
   afterEach(() => {
     buildTopCountriesQuery.mockClear();

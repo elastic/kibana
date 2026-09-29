@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 
@@ -14,7 +16,7 @@ import { TestProviders } from '../../common/mock';
 import * as i18n from '../all_cases/translations';
 
 describe('StatusActionButton', () => {
-  const onStatusChanged = jest.fn();
+  const onStatusChanged = vi.fn();
   const defaultProps = {
     status: CaseStatuses.open,
     totalAlerts: 0,

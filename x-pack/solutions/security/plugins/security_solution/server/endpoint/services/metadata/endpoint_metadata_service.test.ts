@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import { uniq } from 'lodash';
 import type { EndpointMetadataServiceTestContextMock } from './mocks';
 import { createEndpointMetadataServiceTestContextMock } from './mocks';
@@ -49,7 +52,7 @@ describe('EndpointMetadataService', () => {
     metadataService = testMockedContext.endpointMetadataService;
     esClient = testMockedContext.esClient;
     soClient = savedObjectsClientMock.create();
-    soClient.find = jest.fn().mockResolvedValue({ saved_objects: [] });
+    soClient.find = vi.fn().mockResolvedValue({ saved_objects: [] });
     fleetAppContextService.start(
       fleetCreateAppContextStartContractMock({}, false, {
         withoutSpaceExtensions: soClient,
@@ -113,7 +116,7 @@ describe('EndpointMetadataService', () => {
   });
 
   describe('#getHostMetadataList', () => {
-    let agentPolicyServiceMock: jest.Mocked<AgentPolicyServiceInterface>;
+    let agentPolicyServiceMock: Mocked<AgentPolicyServiceInterface>;
 
     beforeEach(() => {
       agentPolicyServiceMock = testMockedContext.agentPolicyService;
@@ -253,7 +256,7 @@ describe('EndpointMetadataService', () => {
   });
 
   describe('#getHostMetadataList - policy_id suffix stripping', () => {
-    let agentPolicyServiceMock: jest.Mocked<AgentPolicyServiceInterface>;
+    let agentPolicyServiceMock: Mocked<AgentPolicyServiceInterface>;
     let queryOptions: Parameters<typeof metadataService.getHostMetadataList>[0];
 
     beforeEach(() => {
@@ -590,7 +593,7 @@ describe('EndpointMetadataService', () => {
           new Error('agent is not visible in this space')
         );
         // No locally enrolled agent → the document belongs to the linked project
-        (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
+        (testMockedContext.fleetServices.fetchAgentsById as Mock).mockResolvedValue([]);
 
         const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
         await expect(
@@ -643,7 +646,7 @@ describe('EndpointMetadataService', () => {
         testMockedContext.fleetServices.ensureInCurrentSpace.mockRejectedValue(
           new Error('agent is not visible in this space')
         );
-        (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
+        (testMockedContext.fleetServices.fetchAgentsById as Mock).mockResolvedValue([]);
 
         const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
         await expect(
@@ -685,7 +688,7 @@ describe('EndpointMetadataService', () => {
         testMockedContext.fleetServices.ensureInCurrentSpace.mockRejectedValue(
           new Error('agent is not visible in this space')
         );
-        (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
+        (testMockedContext.fleetServices.fetchAgentsById as Mock).mockResolvedValue([]);
 
         const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
         await expect(
@@ -727,7 +730,7 @@ describe('EndpointMetadataService', () => {
         testMockedContext.fleetServices.ensureInCurrentSpace.mockRejectedValue(
           new Error('agent is not visible in this space')
         );
-        (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
+        (testMockedContext.fleetServices.fetchAgentsById as Mock).mockResolvedValue([]);
 
         const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
         await expect(
@@ -780,7 +783,7 @@ describe('EndpointMetadataService', () => {
         testMockedContext.fleetServices.ensureInCurrentSpace.mockRejectedValue(
           new Error('agent is not visible in this space')
         );
-        (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
+        (testMockedContext.fleetServices.fetchAgentsById as Mock).mockResolvedValue([]);
 
         // Build a scoped object where getSpace rejects — the space does not exist on this project
         const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
@@ -821,7 +824,7 @@ describe('EndpointMetadataService', () => {
         const localAgent = new FleetAgentGenerator('seed').generate({
           id: endpointMetadataDoc.agent.id,
         });
-        (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([
+        (testMockedContext.fleetServices.fetchAgentsById as Mock).mockResolvedValue([
           localAgent,
         ]);
 

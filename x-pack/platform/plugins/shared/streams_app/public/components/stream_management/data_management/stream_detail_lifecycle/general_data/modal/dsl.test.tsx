@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -19,8 +21,8 @@ describe('DslField', () => {
     retention ? ({ dsl: { data_retention: retention } } as any) : ({} as any);
 
   it('initializes from existing retention value', () => {
-    const setLifecycle = jest.fn();
-    const setSaveDisabled = jest.fn();
+    const setLifecycle = vi.fn();
+    const setSaveDisabled = vi.fn();
     renderI18n(
       <DslField
         initialValue={makeInitialValue('30d')}
@@ -37,8 +39,8 @@ describe('DslField', () => {
   });
 
   it('updates lifecycle and enables save on valid integer change', async () => {
-    const setLifecycle = jest.fn();
-    const setSaveDisabled = jest.fn();
+    const setLifecycle = vi.fn();
+    const setSaveDisabled = vi.fn();
     renderI18n(
       <DslField
         initialValue={makeInitialValue('30d')}
@@ -56,8 +58,8 @@ describe('DslField', () => {
   });
 
   it('shows error and disables save for invalid values', async () => {
-    const setLifecycle = jest.fn();
-    const setSaveDisabled = jest.fn();
+    const setLifecycle = vi.fn();
+    const setSaveDisabled = vi.fn();
     renderI18n(
       <DslField
         initialValue={makeInitialValue('30d')}
@@ -78,8 +80,8 @@ describe('DslField', () => {
   });
 
   it('changes unit via popover and updates lifecycle', async () => {
-    const setLifecycle = jest.fn();
-    const setSaveDisabled = jest.fn();
+    const setLifecycle = vi.fn();
+    const setSaveDisabled = vi.fn();
     renderI18n(
       <DslField
         initialValue={makeInitialValue('30d')}
@@ -98,8 +100,8 @@ describe('DslField', () => {
   });
 
   it('respects isDisabled prop, preventing edits', () => {
-    const setLifecycle = jest.fn();
-    const setSaveDisabled = jest.fn();
+    const setLifecycle = vi.fn();
+    const setSaveDisabled = vi.fn();
     renderI18n(
       <DslField
         initialValue={makeInitialValue('15d')}

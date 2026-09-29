@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { WorkflowsBaseTelemetry } from './telemetry';
 import { WorkflowImportExportEventTypes } from '../lib/telemetry/events/workflows/import_export/types';
 
 describe('WorkflowsBaseTelemetry – import/export events', () => {
-  let reportEvent: jest.Mock;
+  let reportEvent: Mock;
   let telemetry: WorkflowsBaseTelemetry;
 
   beforeEach(() => {
-    reportEvent = jest.fn();
+    reportEvent = vi.fn();
     telemetry = new WorkflowsBaseTelemetry({ reportEvent });
   });
 

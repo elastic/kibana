@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { AGG_TYPE } from '../../../../../common/constants';
 import type { DataFilters } from '../../../../../common/descriptor_types';
 import type { BucketProperties, PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { ESTermSource, extractPropertiesMap } from './es_term_source';
 
-jest.mock('../../../layers/vector_layer', () => {});
+vi.mock('../../../layers/vector_layer', () => {});
 
 const termFieldName = 'myTermField';
 const sumFieldName = 'myFieldGettingSummed';

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,10 +22,10 @@ describe('getRowControlColumn', () => {
   };
 
   it('should render the Control button', () => {
-    const mockClick = jest.fn();
+    const mockClick = vi.fn();
     const props = {
       id: 'test_row_control',
-      render: jest.fn((Control, rowProps) => (
+      render: vi.fn((Control, rowProps) => (
         <Control label={`test-${rowProps.rowIndex}`} iconType="heart" onClick={mockClick} />
       )),
     };
@@ -32,7 +34,7 @@ describe('getRowControlColumn', () => {
       <UnifiedDataTableContext.Provider value={contextMock}>
         <RowControlColumn
           rowIndex={1}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
           columnId={props.id}
           colIndex={0}
           isDetails={false}
@@ -52,7 +54,7 @@ describe('getRowControlColumn', () => {
   it('should wrap the Control button with a tooltip when tooltipContent is passed', async () => {
     const props = {
       id: 'test_row_control',
-      render: jest.fn((Control, rowProps) => (
+      render: vi.fn((Control, rowProps) => (
         <Control
           label={`test-${rowProps.rowIndex}`}
           tooltipContent="Control tooltip text!"
@@ -66,7 +68,7 @@ describe('getRowControlColumn', () => {
       <UnifiedDataTableContext.Provider value={contextMock}>
         <RowControlColumn
           rowIndex={1}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
           columnId={props.id}
           colIndex={0}
           isDetails={false}

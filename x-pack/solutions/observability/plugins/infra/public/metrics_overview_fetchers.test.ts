@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -17,7 +19,7 @@ function setup() {
   const core = coreMock.createStart();
   const pluginStart = createInfraPluginStartMock();
 
-  const mockedGetStartServices = jest.fn(() => {
+  const mockedGetStartServices = vi.fn(() => {
     const deps = {};
     return Promise.resolve([
       core as CoreStart,

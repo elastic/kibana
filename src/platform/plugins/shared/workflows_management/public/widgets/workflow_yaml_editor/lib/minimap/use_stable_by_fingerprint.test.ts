@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useStableByFingerprint } from './use_stable_by_fingerprint';
 
@@ -39,7 +41,7 @@ describe('useStableByFingerprint', () => {
     // The hook signature changed from (value, getFingerprint) to (value, fingerprint).
     // This test confirms the pre-computed string is passed directly (not built inside
     // the hook), so the caller controls how many times the O(steps) map+join runs.
-    const computeFingerprint = jest.fn((v: { id: string }) => v.id);
+    const computeFingerprint = vi.fn((v: { id: string }) => v.id);
     const valueA = { id: 'a' };
 
     const { rerender } = renderHook(

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useInspector } from './use_inspector';
 import type { Adapters } from '@kbn/inspector-plugin/common';
@@ -39,9 +41,9 @@ describe('test useInspector', () => {
   test('inspector open function is executed, expanded doc is closed', async () => {
     const services = createDiscoverServicesMock();
     let adapters: Adapters | undefined;
-    jest.spyOn(services.inspector, 'open').mockImplementation((localAdapters) => {
+    vi.spyOn(services.inspector, 'open').mockImplementation((localAdapters) => {
       adapters = localAdapters;
-      return { close: jest.fn() } as unknown as OverlayRef;
+      return { close: vi.fn() } as unknown as OverlayRef;
     });
     const requests = new RequestAdapter();
     const lensRequests = new RequestAdapter();

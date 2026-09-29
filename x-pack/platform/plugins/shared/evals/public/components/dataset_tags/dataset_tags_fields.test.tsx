@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,8 +19,8 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 const renderFields = (props: Partial<React.ComponentProps<typeof DatasetTagsFields>> = {}) => {
-  const onTagsChange = jest.fn();
-  const onMaturityChange = jest.fn();
+  const onTagsChange = vi.fn();
+  const onMaturityChange = vi.fn();
 
   render(
     <DatasetTagsFields

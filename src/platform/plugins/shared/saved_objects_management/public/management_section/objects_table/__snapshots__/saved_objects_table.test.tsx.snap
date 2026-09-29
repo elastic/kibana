@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
+exports[`SavedObjectsTable > delete > should show a confirm modal 1`] = `
 <DeleteConfirmModal
   allowedTypes={
     Array [
@@ -57,7 +57,7 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
 />
 `;
 
-exports[`SavedObjectsTable export should allow the user to choose when exporting all 1`] = `
+exports[`SavedObjectsTable > export > should allow the user to choose when exporting all 1`] = `
 <ExportModal
   filteredItemCount={5}
   includeReferences={true}
@@ -101,7 +101,7 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
 />
 `;
 
-exports[`SavedObjectsTable should render normally 1`] = `
+exports[`SavedObjectsTable > should render normally 1`] = `
 <div>
   <div
     aria-live="polite"

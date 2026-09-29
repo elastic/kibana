@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { BoundedNumberField } from './bounded_number_field';
 
 const renderField = (value = 21) => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   render(
     <BoundedNumberField
       value={value}
@@ -74,7 +76,7 @@ describe('BoundedNumberField', () => {
   });
 
   it('commits on Enter and does not publish the same value twice on the following blur', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     // A real parent writes the committed value back into `value`; a bare mock would not.
     const Harness = () => {
       const [value, setValue] = useState(21);
@@ -113,7 +115,7 @@ describe('BoundedNumberField', () => {
   });
 
   it('re-syncs the input when the saved value changes from outside', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const { rerender } = render(
       <BoundedNumberField
         value={21}

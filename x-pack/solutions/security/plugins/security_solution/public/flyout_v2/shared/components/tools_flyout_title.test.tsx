@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { ToolsFlyoutTitle } from './tools_flyout_title';
@@ -13,7 +15,7 @@ import { TOOLS_FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 describe('<ToolsFlyoutTitle />', () => {
   it('renders the label', () => {
     const { getByText, getByTestId } = render(
-      <ToolsFlyoutTitle onTitleClick={jest.fn()} label="my-host" iconType="storage" />
+      <ToolsFlyoutTitle onTitleClick={vi.fn()} label="my-host" iconType="storage" />
     );
     expect(getByTestId(TOOLS_FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('my-host');
     expect(getByText('my-host')).toHaveStyle({
@@ -24,7 +26,7 @@ describe('<ToolsFlyoutTitle />', () => {
   });
 
   it('calls onTitleClick when clicked', () => {
-    const onTitleClick = jest.fn();
+    const onTitleClick = vi.fn();
     const { getByTestId } = render(
       <ToolsFlyoutTitle onTitleClick={onTitleClick} label="my-host" iconType="storage" />
     );
@@ -34,7 +36,7 @@ describe('<ToolsFlyoutTitle />', () => {
 
   it('shows the full label in a tooltip', async () => {
     const { getByTestId } = render(
-      <ToolsFlyoutTitle onTitleClick={jest.fn()} label="my-host" iconType="storage" />
+      <ToolsFlyoutTitle onTitleClick={vi.fn()} label="my-host" iconType="storage" />
     );
 
     fireEvent.mouseOver(getByTestId(TOOLS_FLYOUT_HEADER_TITLE_TEST_ID));

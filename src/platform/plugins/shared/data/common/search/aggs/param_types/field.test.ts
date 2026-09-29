@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BaseParamType } from './base';
 import { FieldParamType } from './field';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../..';
@@ -37,7 +39,7 @@ describe('Field', () => {
   };
 
   const agg = {
-    getIndexPattern: jest.fn(() => indexPattern),
+    getIndexPattern: vi.fn(() => indexPattern),
   } as unknown as IAggConfig;
 
   describe('constructor', () => {

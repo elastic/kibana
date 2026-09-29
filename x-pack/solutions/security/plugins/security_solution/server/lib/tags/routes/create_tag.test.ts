@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { Logger } from '@kbn/core/server';
 import { INTERNAL_TAGS_URL } from '../../../../common/constants';
 import {
@@ -19,7 +21,7 @@ describe('createTagRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
 
-  const logger = { error: jest.fn() } as unknown as Logger;
+  const logger = { error: vi.fn() } as unknown as Logger;
 
   const mockPutRequest = requestMock.create({
     method: 'put',
@@ -30,7 +32,7 @@ describe('createTagRoute', () => {
   const savedObjectCreateResponse = mockGetTagsResult[0];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
 
@@ -38,8 +40,8 @@ describe('createTagRoute', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should return tags with the exact name', async () => {

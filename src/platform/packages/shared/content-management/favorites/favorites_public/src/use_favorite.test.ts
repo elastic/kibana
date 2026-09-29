@@ -7,23 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useFavorite } from './use_favorite';
 import { useAddFavorite, useFavorites, useRemoveFavorite } from './favorites_query';
 import { useFavoritesClient } from './favorites_context';
 
-jest.mock('./favorites_query');
-jest.mock('./favorites_context');
+vi.mock('./favorites_query');
+vi.mock('./favorites_context');
 
-const mockUseFavorites = useFavorites as jest.MockedFunction<typeof useFavorites>;
-const mockUseAddFavorite = useAddFavorite as jest.MockedFunction<typeof useAddFavorite>;
-const mockUseRemoveFavorite = useRemoveFavorite as jest.MockedFunction<typeof useRemoveFavorite>;
-const mockUseFavoritesClient = useFavoritesClient as jest.MockedFunction<typeof useFavoritesClient>;
+const mockUseFavorites = useFavorites as MockedFunction<typeof useFavorites>;
+const mockUseAddFavorite = useAddFavorite as MockedFunction<typeof useAddFavorite>;
+const mockUseRemoveFavorite = useRemoveFavorite as MockedFunction<typeof useRemoveFavorite>;
+const mockUseFavoritesClient = useFavoritesClient as MockedFunction<typeof useFavoritesClient>;
 
-const addMutate = jest.fn();
-const removeMutate = jest.fn();
-const reportAddFavoriteClick = jest.fn();
-const reportRemoveFavoriteClick = jest.fn();
+const addMutate = vi.fn();
+const removeMutate = vi.fn();
+const reportAddFavoriteClick = vi.fn();
+const reportRemoveFavoriteClick = vi.fn();
 const favoritesClient = {
   reportAddFavoriteClick,
   reportRemoveFavoriteClick,
@@ -55,7 +58,7 @@ const setMocks = ({
 
 describe('useFavorite', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns undefined when id is missing', () => {

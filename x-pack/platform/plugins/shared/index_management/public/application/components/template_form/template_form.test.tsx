@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useEffect } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -18,15 +20,18 @@ import { TemplateForm } from './template_form';
 import { AppContextProvider } from '../../app_context';
 import type { AppDependencies } from '../../app_context';
 
-jest.mock('@kbn/code-editor');
+vi.mock('@kbn/code-editor');
 
-jest.mock('../../services/documentation', () => ({
-  documentationService: {
-    getEsDocsBase: () => 'https://es-docs',
-    getTemplatesDocumentationLink: () => 'https://es-docs/templates',
-    getDataStreamsDocumentationLink: () => 'https://es-docs/data-streams',
-  },
-}));
+vi.mock('../../services/documentation', () => {
+      const mocked = {
+      documentationService: {
+        getEsDocsBase: () => 'https://es-docs',
+        getTemplatesDocumentationLink: () => 'https://es-docs/templates',
+        getDataStreamsDocumentationLink: () => 'https://es-docs/data-streams',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /**
  * Lightweight step mocks that interact with the wizard's Forms.useContent() hook
@@ -133,29 +138,38 @@ let mockMappingsData: WizardContent['mappings'];
 let mockAliasesData: WizardContent['aliases'];
 let mockIsEditing: boolean | undefined;
 
-jest.mock('./steps', () => ({
-  StepLogisticsContainer: (props: { isEditing?: boolean; isLegacy?: boolean }) => (
-    <MockStepLogistics
-      isEditing={props.isEditing ?? mockIsEditing}
-      isLegacy={props.isLegacy}
-      logisticsData={mockLogisticsData}
-    />
-  ),
-  StepComponentContainer: () => <MockStepComponents componentsData={mockComponentsData} />,
-  StepReviewContainer: () => <MockStepReview />,
-}));
+vi.mock('./steps', () => {
+      const mocked = {
+      StepLogisticsContainer: (props: { isEditing?: boolean; isLegacy?: boolean }) => (
+        <MockStepLogistics
+          isEditing={props.isEditing ?? mockIsEditing}
+          isLegacy={props.isLegacy}
+          logisticsData={mockLogisticsData}
+        />
+      ),
+      StepComponentContainer: () => <MockStepComponents componentsData={mockComponentsData} />,
+      StepReviewContainer: () => <MockStepReview />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../shared', () => ({
-  StepSettingsContainer: () => <MockStepSettings settingsData={mockSettingsData} />,
-  StepMappingsContainer: () => <MockStepMappings mappingsData={mockMappingsData} />,
-  StepAliasesContainer: () => <MockStepAliases aliasesData={mockAliasesData} />,
-}));
+vi.mock('../shared', () => {
+      const mocked = {
+      StepSettingsContainer: () => <MockStepSettings settingsData={mockSettingsData} />,
+      StepMappingsContainer: () => <MockStepMappings mappingsData={mockMappingsData} />,
+      StepAliasesContainer: () => <MockStepAliases aliasesData={mockAliasesData} />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../index_templates', () => ({
-  SimulateTemplateFlyoutContent: () => <div />,
-  simulateTemplateFlyoutProps: {},
-  LegacyIndexTemplatesDeprecation: () => null,
-}));
+vi.mock('../index_templates', () => {
+      const mocked = {
+      SimulateTemplateFlyoutContent: () => <div />,
+      simulateTemplateFlyoutProps: {},
+      LegacyIndexTemplatesDeprecation: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
@@ -166,8 +180,8 @@ const appCtx = {
 const renderTemplateForm = (props: Partial<React.ComponentProps<typeof TemplateForm>> = {}) => {
   const defaultProps: React.ComponentProps<typeof TemplateForm> = {
     title: props.title ?? 'Test Form',
-    onSave: props.onSave ?? jest.fn(),
-    clearSaveError: props.clearSaveError ?? jest.fn(),
+    onSave: props.onSave ?? vi.fn(),
+    clearSaveError: props.clearSaveError ?? vi.fn(),
     isSaving: props.isSaving ?? false,
     saveError: props.saveError ?? null,
     isEditing: props.isEditing,
@@ -194,7 +208,7 @@ const clickNextButton = () => {
 
 describe('TemplateForm wizard integration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsEditing = undefined;
   });
 
@@ -218,7 +232,7 @@ describe('TemplateForm wizard integration', () => {
     });
 
     it('SHOULD assemble correct payload through the full wizard flow', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       renderTemplateForm({ onSave });
 
       // Step 1: Logistics
@@ -321,7 +335,7 @@ describe('TemplateForm wizard integration', () => {
     });
 
     it('SHOULD preserve _kbnMeta and ignoreMissingComponentTemplates from initial template', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       renderTemplateForm({
         onSave,
         isEditing: true,
@@ -412,7 +426,7 @@ describe('TemplateForm wizard integration', () => {
     });
 
     it('SHOULD produce a payload matching the original template shape', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       renderTemplateForm({
         onSave,
         defaultValue: originalTemplate,
@@ -463,7 +477,7 @@ describe('TemplateForm wizard integration', () => {
     });
 
     it('SHOULD omit empty template sections from the payload', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       renderTemplateForm({ onSave });
 
       clickNextButton();
@@ -509,7 +523,7 @@ describe('TemplateForm wizard integration', () => {
     });
 
     it('SHOULD serialize lifecycle into template.lifecycle and remove top-level lifecycle', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       renderTemplateForm({ onSave });
 
       clickNextButton();

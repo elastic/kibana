@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { take } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { NewsfeedPublicPlugin } from './plugin';
@@ -17,11 +19,11 @@ describe('Newsfeed plugin', () => {
   let plugin: NewsfeedPublicPlugin;
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
@@ -38,11 +40,11 @@ describe('Newsfeed plugin', () => {
        * We assume for these tests that the newsfeed stream exposed by start will fetch newsfeed items
        * on the first tick for new subscribers
        */
-      jest.spyOn(window, 'fetch');
+      vi.spyOn(window, 'fetch');
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('base case', () => {
@@ -54,7 +56,7 @@ describe('Newsfeed plugin', () => {
           .createNewsFeed$(NewsfeedApiEndpoint.KIBANA) // Any endpoint will do
           .pipe(take(1))
           .subscribe(() => {});
-        jest.runOnlyPendingTimers();
+        vi.runOnlyPendingTimers();
         expect(window.fetch).toHaveBeenCalled();
         sub.unsubscribe();
       });
@@ -71,7 +73,7 @@ describe('Newsfeed plugin', () => {
           .createNewsFeed$(NewsfeedApiEndpoint.KIBANA) // Any endpoint will do
           .pipe(take(1))
           .subscribe(() => {});
-        jest.runOnlyPendingTimers();
+        vi.runOnlyPendingTimers();
         expect(window.fetch).not.toHaveBeenCalled();
         sub.unsubscribe();
       });

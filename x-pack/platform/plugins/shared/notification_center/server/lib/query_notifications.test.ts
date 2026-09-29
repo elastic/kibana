@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { READ_ALL_BEFORE_DEFAULT } from '../storage/user_storage';
@@ -22,7 +24,7 @@ const doc = (id: string, ts: string, overrides: Record<string, unknown> = {}) =>
 });
 
 const setup = (docs: Array<Record<string, unknown>> = []) => {
-  const search = jest.fn().mockResolvedValue({
+  const search = vi.fn().mockResolvedValue({
     hits: { hits: docs.map((source, i) => ({ _id: `doc-${i}`, _source: source })) },
   });
   const dataStreams = dataStreamServiceMock.createStartContract();

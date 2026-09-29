@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -29,9 +31,9 @@ describe('WrappedPageTemplate', () => {
       return <div />;
     };
     const observabilityShared = {
-      navigation: { PageTemplate, registerSections: jest.fn() },
+      navigation: { PageTemplate, registerSections: vi.fn() },
       locators: {} as unknown as ClientPluginsStart['observabilityShared']['locators'],
-      updateGlobalNavigation: jest.fn(),
+      updateGlobalNavigation: vi.fn(),
     } as unknown as ClientPluginsStart['observabilityShared'];
 
     render<Pick<ClientPluginsStart, 'observabilityShared'>>(
@@ -79,9 +81,9 @@ describe('WrappedPageTemplate', () => {
       return <div />;
     };
     const observabilityShared = {
-      navigation: { PageTemplate, registerSections: jest.fn() },
+      navigation: { PageTemplate, registerSections: vi.fn() },
       locators: {} as unknown as ClientPluginsStart['observabilityShared']['locators'],
-      updateGlobalNavigation: jest.fn(),
+      updateGlobalNavigation: vi.fn(),
     } as unknown as ClientPluginsStart['observabilityShared'];
 
     rtlRender(

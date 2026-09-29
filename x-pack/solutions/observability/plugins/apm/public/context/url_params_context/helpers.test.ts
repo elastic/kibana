@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import datemath from '@kbn/datemath';
 import moment from 'moment-timezone';
 import * as helpers from './helpers';
 
 describe('url_params_context helpers', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
   describe('getDateRange', () => {
     describe('when rangeFrom and rangeTo are not changed', () => {
@@ -37,7 +39,7 @@ describe('url_params_context helpers', () => {
     describe('when rangeFrom or rangeTo are falsy', () => {
       it('returns the previous state', () => {
         // Disable console warning about not receiving a valid date for rangeFrom
-        jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
+        vi.spyOn(console, 'warn').mockImplementationOnce(() => {});
 
         expect(
           helpers.getDateRange({
@@ -58,7 +60,7 @@ describe('url_params_context helpers', () => {
     describe('when the start or end are invalid', () => {
       it('returns the previous state', () => {
         const endDate = moment('2021-06-04T18:03:24.211Z');
-        jest.spyOn(datemath, 'parse').mockReturnValueOnce(undefined).mockReturnValueOnce(endDate);
+        vi.spyOn(datemath, 'parse').mockReturnValueOnce(undefined).mockReturnValueOnce(endDate);
 
         expect(
           helpers.getDateRange({
@@ -78,7 +80,7 @@ describe('url_params_context helpers', () => {
 
     describe('when rangeFrom or rangeTo have changed', () => {
       it('returns new state', () => {
-        jest.spyOn(Date, 'now').mockReturnValue(moment(0).unix());
+        vi.spyOn(Date, 'now').mockReturnValue(moment(0).unix());
 
         expect(
           helpers.getDateRange({

@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import type { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
 import { getExtraFields } from './get_extra_fields';
 
-const formatFactory = jest.fn() as jest.MockedFunction<FormatFactory>;
+const formatFactory = vi.fn() as MockedFunction<FormatFactory>;
 
 const row: PointEventAnnotationRow = {
   id: 'ann1',

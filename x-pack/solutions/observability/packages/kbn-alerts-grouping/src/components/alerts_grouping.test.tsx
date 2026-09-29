@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 /**
  * Adapted from x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.test.tsx
  */
@@ -29,32 +32,41 @@ import {
   mockOptions,
 } from '../mocks/grouping_props.mock';
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_alerts_group_aggregations_query', () => ({
-  useGetAlertsGroupAggregationsQuery: jest.fn(),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_alerts_group_aggregations_query', () => {
+      const mocked = {
+      useGetAlertsGroupAggregationsQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view', () => ({
-  useAlertsDataView: jest.fn().mockReturnValue({ dataView: { fields: [] } }),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view', () => {
+      const mocked = {
+      useAlertsDataView: vi.fn().mockReturnValue({ dataView: { fields: [] } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../contexts/alerts_grouping_context', () => {
-  const original = jest.requireActual('../contexts/alerts_grouping_context');
+vi.mock('../contexts/alerts_grouping_context', async () => {
+  const original = (await vi.importActual('../contexts/alerts_grouping_context'));
   return {
     ...original,
-    useAlertsGroupingState: jest.fn(),
+    useAlertsGroupingState: vi.fn(),
   };
 });
 
-const mockUseAlertsGroupingState = useAlertsGroupingState as jest.Mock;
+const mockUseAlertsGroupingState = useAlertsGroupingState as Mock;
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('test-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('test-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetAlertsGroupAggregationsQuery = useGetAlertsGroupAggregationsQuery as jest.Mock;
+const mockUseGetAlertsGroupAggregationsQuery = useGetAlertsGroupAggregationsQuery as Mock;
 
-const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer/polyfilled');
+const mockUseResizeObserver: Mock = useResizeObserver as Mock;
+vi.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 const renderChildComponent = (_groupingFilters: Filter[]) => <p data-test-subj="alerts-table" />;
@@ -87,7 +99,7 @@ const mockAlertsGroupingState = {
     options: mockOptions,
     activeGroups: ['kibana.alert.rule.name'],
   },
-  updateGrouping: jest.fn(),
+  updateGrouping: vi.fn(),
 };
 
 const expandGroup = (groupElement: HTMLElement) => {
@@ -122,7 +134,7 @@ describe('AlertsGrouping', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders empty grouping table when group is selected without data', () => {

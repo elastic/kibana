@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ToolMessage } from '@langchain/core/messages';
 import {
   AIMessage,
@@ -881,7 +883,7 @@ describe('prepareMessages', () => {
       const conversation = createConversation({ previousRounds, nextInput });
 
       // Custom transformer that modifies all results from a tool call
-      const customTransformer: ToolCallResultTransformer = jest.fn(async (toolCallArg) => {
+      const customTransformer: ToolCallResultTransformer = vi.fn(async (toolCallArg) => {
         return toolCallArg.results.map(
           (result): ToolResult => ({
             tool_result_id: result.tool_result_id,
@@ -947,7 +949,7 @@ describe('prepareMessages', () => {
       const conversation = createConversation({ previousRounds, nextInput });
 
       // Transformer that aggregates results
-      const customTransformer: ToolCallResultTransformer = jest.fn(async (toolCallArg) => {
+      const customTransformer: ToolCallResultTransformer = vi.fn(async (toolCallArg) => {
         // Aggregate all results into one
         const aggregated: ToolResult[] = [
           {

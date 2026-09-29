@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type { Logger } from '@kbn/core/server';
 import { Readable } from 'stream';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -22,14 +25,14 @@ const createMockStream = (data: string): HapiReadableStream => {
 
 const createMockEntityStoreClient = () =>
   ({
-    listEntities: jest.fn(),
-    bulkUpdateEntity: jest.fn().mockResolvedValue({
+    listEntities: vi.fn(),
+    bulkUpdateEntity: vi.fn().mockResolvedValue({
       stats: { successful: 0, failed: 0, total: 0 },
       errors: [],
     }),
-    upsertEntity: jest.fn(),
-    upsertEntitiesBulk: jest.fn(),
-    deleteEntity: jest.fn(),
+    upsertEntity: vi.fn(),
+    upsertEntitiesBulk: vi.fn(),
+    deleteEntity: vi.fn(),
   } as unknown as EntityStoreCRUDClient);
 
 describe('csvUploadV2', () => {
@@ -40,7 +43,7 @@ describe('csvUploadV2', () => {
     entityStoreClient = createMockEntityStoreClient();
     logger = loggingSystemMock.createLogger();
 
-    (entityStoreClient.listEntities as jest.Mock).mockResolvedValue({
+    (entityStoreClient.listEntities as Mock).mockResolvedValue({
       entities: [],
       nextSearchAfter: undefined,
     });
@@ -139,11 +142,11 @@ describe('csvUploadV2', () => {
       });
 
       it('sends null asset criticality when criticality_level is "unassign"', async () => {
-        (entityStoreClient.listEntities as jest.Mock).mockResolvedValueOnce({
+        (entityStoreClient.listEntities as Mock).mockResolvedValueOnce({
           entities: [{ entity: { id: 'host:my-host' } }],
           nextSearchAfter: undefined,
         });
-        (entityStoreClient.bulkUpdateEntity as jest.Mock).mockResolvedValueOnce([]);
+        (entityStoreClient.bulkUpdateEntity as Mock).mockResolvedValueOnce([]);
 
         const csv = 'type,host.name,criticality_level\nhost,my-host,unassign\n';
         await csvUploadV2({ entityStoreClient, fileStream: createMockStream(csv), logger });
@@ -289,7 +292,7 @@ describe('csvUploadV2', () => {
         const firstPage = Array.from({ length: 100 }, (_, i) => ({ id: `e${i}` }));
         const secondPage = [{ id: 'e100' }];
 
-        (entityStoreClient.listEntities as jest.Mock)
+        (entityStoreClient.listEntities as Mock)
           .mockResolvedValueOnce({ entities: firstPage, nextSearchAfter: ['e99'] })
           .mockResolvedValueOnce({ entities: secondPage, nextSearchAfter: undefined });
 
@@ -319,12 +322,12 @@ describe('csvUploadV2', () => {
       });
 
       it('marks a row as failed when bulk update returns an error for one of its matched entities', async () => {
-        (entityStoreClient.listEntities as jest.Mock).mockResolvedValueOnce({
+        (entityStoreClient.listEntities as Mock).mockResolvedValueOnce({
           entities: [{ entity: { id: 'host:my-host-1' } }, { entity: { id: 'host:my-host-2' } }],
           nextSearchAfter: undefined,
         });
 
-        (entityStoreClient.bulkUpdateEntity as jest.Mock).mockResolvedValueOnce([
+        (entityStoreClient.bulkUpdateEntity as Mock).mockResolvedValueOnce([
           {
             _id: hashEuid('host:my-host-1'),
             status: 404,
@@ -355,7 +358,7 @@ describe('csvUploadV2', () => {
         // Row 2: 0 entities matched (unmatched)
         // Row 3: 3 entities matched, 1 update fails
         // Row 4: 1 entity matched, update fails
-        (entityStoreClient.listEntities as jest.Mock)
+        (entityStoreClient.listEntities as Mock)
           .mockResolvedValueOnce({
             entities: [{ entity: { id: 'host:r0-e1' } }, { entity: { id: 'host:r0-e2' } }],
             nextSearchAfter: undefined,
@@ -378,7 +381,7 @@ describe('csvUploadV2', () => {
             nextSearchAfter: undefined,
           });
 
-        (entityStoreClient.bulkUpdateEntity as jest.Mock).mockResolvedValueOnce([
+        (entityStoreClient.bulkUpdateEntity as Mock).mockResolvedValueOnce([
           {
             _id: hashEuid('host:r3-e2'),
             status: 429,

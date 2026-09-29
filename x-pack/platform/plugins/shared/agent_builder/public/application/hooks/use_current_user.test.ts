@@ -5,33 +5,41 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useCurrentUser } from './use_current_user';
 
-const mockGetCurrent = jest.fn();
+const mockGetCurrent = vi.fn();
 
-jest.mock('./use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      userProfile: {
-        getCurrent: mockGetCurrent,
-      },
-    },
-  }),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          userProfile: {
+            getCurrent: mockGetCurrent,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseQuery = jest.fn();
-jest.mock('@kbn/react-query', () => ({
-  useQuery: (options: {
-    queryKey: string[];
-    queryFn: () => Promise<{ uid: string; user: { username: string }; data?: unknown }>;
-    enabled: boolean;
-  }) => mockUseQuery(options),
-}));
+const mockUseQuery = vi.fn();
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: (options: {
+        queryKey: string[];
+        queryFn: () => Promise<{ uid: string; user: { username: string }; data?: unknown }>;
+        enabled: boolean;
+      }) => mockUseQuery(options),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useCurrentUser', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQuery.mockReturnValue({ data: undefined, isLoading: false });
   });
 

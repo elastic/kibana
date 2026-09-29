@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import {
@@ -20,28 +23,34 @@ import { textAnalysisSettings } from '../indices/text_analysis';
 
 import { addConnector } from './add_connector';
 
-jest.mock('@kbn/search-connectors', () => ({
-  createConnector: jest.fn(),
-  deleteConnectorById: jest.fn(),
-  fetchConnectorByIndexName: jest.fn(),
-}));
-jest.mock('../indices/generate_api_key', () => ({ generateApiKey: jest.fn() }));
+vi.mock('@kbn/search-connectors', () => {
+      const mocked = {
+      createConnector: vi.fn(),
+      deleteConnectorById: vi.fn(),
+      fetchConnectorByIndexName: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../indices/generate_api_key', () => {
+      const mocked = { generateApiKey: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 describe('addConnector lib function', () => {
   const mockClient = {
     asCurrentUser: {
-      index: jest.fn(),
+      index: vi.fn(),
       indices: {
-        create: jest.fn(),
-        exists: jest.fn(),
-        getMapping: jest.fn(),
+        create: vi.fn(),
+        exists: vi.fn(),
+        getMapping: vi.fn(),
       },
     },
     asInternalUser: {},
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const connectorsIndicesMapping = {
@@ -62,14 +71,14 @@ describe('addConnector lib function', () => {
 
   it('should add connector', async () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
-    (createConnector as jest.Mock).mockImplementation(() => ({
+    (createConnector as Mock).mockImplementation(() => ({
       id: 'fakeId',
       index_name: 'index_name',
     }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
-    (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
+    (fetchConnectorByIndexName as Mock).mockImplementation(() => undefined);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
-    (generateApiKey as jest.Mock).mockImplementation(() => undefined);
+    (generateApiKey as Mock).mockImplementation(() => undefined);
 
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
@@ -103,14 +112,14 @@ describe('addConnector lib function', () => {
 
   it('should add a native connector', async () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
-    (createConnector as jest.Mock).mockImplementation(() => ({
+    (createConnector as Mock).mockImplementation(() => ({
       id: 'fakeId',
       index_name: 'index_name',
     }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
-    (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
+    (fetchConnectorByIndexName as Mock).mockImplementation(() => undefined);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
-    (generateApiKey as jest.Mock).mockImplementation(() => ({
+    (generateApiKey as Mock).mockImplementation(() => ({
       id: 'api-key-id',
       encoded: 'encoded-api-key',
     }));
@@ -147,12 +156,12 @@ describe('addConnector lib function', () => {
 
   it('should reject if index already exists', async () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
-    (createConnector as jest.Mock).mockImplementation(() => ({
+    (createConnector as Mock).mockImplementation(() => ({
       id: 'fakeId',
       index_name: 'index_name',
     }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => true);
-    (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
+    (fetchConnectorByIndexName as Mock).mockImplementation(() => undefined);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
 
     await expect(
@@ -169,7 +178,7 @@ describe('addConnector lib function', () => {
   it('should reject if connector already exists', async () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
-    (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => true);
+    (fetchConnectorByIndexName as Mock).mockImplementation(() => true);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
 
     await expect(
@@ -186,7 +195,7 @@ describe('addConnector lib function', () => {
   it('should reject with index already exists if connector and index already exist', async () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => true);
-    (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => true);
+    (fetchConnectorByIndexName as Mock).mockImplementation(() => true);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
 
     await expect(
@@ -203,14 +212,14 @@ describe('addConnector lib function', () => {
 
   it('should replace connector if deleteExistingConnector flag is true', async () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
-    (createConnector as jest.Mock).mockImplementation(() => ({
+    (createConnector as Mock).mockImplementation(() => ({
       id: 'fakeId',
       index_name: 'index_name',
     }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
-    (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => ({ id: 'connectorId' }));
+    (fetchConnectorByIndexName as Mock).mockImplementation(() => ({ id: 'connectorId' }));
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
-    (generateApiKey as jest.Mock).mockImplementation(() => ({
+    (generateApiKey as Mock).mockImplementation(() => ({
       id: 'api-key-id',
       encoded: 'encoded-api-key',
     }));

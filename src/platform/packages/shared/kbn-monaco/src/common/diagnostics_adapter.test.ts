@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '../__jest__/jest.mocks'; // Make sure this is the first import
 
 import type { Subscription } from 'rxjs';
@@ -17,7 +19,7 @@ import { monaco } from '../monaco_imports';
 
 import { DiagnosticsAdapter } from './diagnostics_adapter';
 
-const getSyntaxErrors = jest.fn(async (): Promise<string[] | undefined> => undefined);
+const getSyntaxErrors = vi.fn(async (): Promise<string[] | undefined> => undefined);
 
 const getMockWorker = async () => {
   return {
@@ -28,7 +30,7 @@ const getMockWorker = async () => {
 const ID = 'painless';
 
 const flushPromises = () =>
-  new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
+  new Promise((resolve) => require('timers').setImmediate(resolve));
 
 describe('DiagnosticAdapter', () => {
   let diagnosticAdapter: DiagnosticsAdapter;
@@ -37,11 +39,11 @@ describe('DiagnosticAdapter', () => {
   let validation: LangValidation;
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(async () => {
@@ -70,7 +72,7 @@ describe('DiagnosticAdapter', () => {
     await flushPromises();
     expect(validation!.isValidating).toBe(true);
 
-    jest.advanceTimersByTime(500); // there is a 500ms debounce for the validate() to trigger
+    vi.advanceTimersByTime(500); // there is a 500ms debounce for the validate() to trigger
     await flushPromises();
 
     expect(validation!.isValidating).toBe(false);
@@ -98,16 +100,16 @@ describe('DiagnosticAdapter', () => {
     expect(validation!.isValidating).toBe(false);
 
     model.setValue('foo');
-    jest.advanceTimersByTime(300); // only 300ms out of the 500ms
+    vi.advanceTimersByTime(300); // only 300ms out of the 500ms
 
     model.setValue('bar'); // This will cancel the first setTimeout
 
-    jest.advanceTimersByTime(300); // Again, only 300ms out of the 500ms.
+    vi.advanceTimersByTime(300); // Again, only 300ms out of the 500ms.
     await flushPromises();
 
     expect(validation!.isValidating).toBe(true); // we are still validating
 
-    jest.advanceTimersByTime(200); // rest of the 500ms
+    vi.advanceTimersByTime(200); // rest of the 500ms
     await flushPromises();
 
     expect(validation!.isValidating).toBe(false);
@@ -126,19 +128,19 @@ describe('DiagnosticAdapter', () => {
     model.setValue('foo');
     // By now we are waiting on the worker to await getSyntaxErrors()
     // we won't flush the promise to not pass this point in time just yet
-    jest.advanceTimersByTime(700);
+    vi.advanceTimersByTime(700);
 
     // We change the value at the same moment
     model.setValue('bar');
     // now we pass the await getSyntaxErrors() point but its result (errors1) should be stale and discarted
     await flushPromises();
 
-    jest.advanceTimersByTime(300);
+    vi.advanceTimersByTime(300);
     await flushPromises();
 
     expect(validation!.isValidating).toBe(true); // we are still validating value "bar"
 
-    jest.advanceTimersByTime(200); // rest of the 500ms
+    vi.advanceTimersByTime(200); // rest of the 500ms
     await flushPromises();
 
     expect(validation!.isValidating).toBe(false);

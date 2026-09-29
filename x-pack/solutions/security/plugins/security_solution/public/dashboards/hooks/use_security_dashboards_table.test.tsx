@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, waitFor, renderHook } from '@testing-library/react';
@@ -25,18 +28,18 @@ import { DEFAULT_DASHBOARDS_RESPONSE } from '../../common/containers/dashboards/
 import { DashboardContextProvider } from '../context/dashboard_context';
 import type { HttpStart } from '@kbn/core/public';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/containers/tags/api');
-jest.mock('../../common/containers/dashboards/api');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/containers/tags/api');
+vi.mock('../../common/containers/dashboards/api');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 const securityDashboardsCaption = i18n.translate('useSecurityDashboardsTable.tableCaption', {
   defaultMessage: 'Security dashboards',
 });
 
-const spyUseGetSecuritySolutionUrl = jest.spyOn(linkTo, 'useGetSecuritySolutionUrl');
-const spyTrack = jest.spyOn(telemetry, 'track');
+const spyUseGetSecuritySolutionUrl = vi.spyOn(linkTo, 'useGetSecuritySolutionUrl');
+const spyTrack = vi.spyOn(telemetry, 'track');
 const {
   id: mockReturnDashboardId,
   attributes: { title: mockReturnDashboardTitle, description: mockReturnDashboardDescription },
@@ -60,20 +63,20 @@ const tagsColumn = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('Security Dashboards Table hooks', () => {
-  let mockTaggingGetTableColumnDefinition: jest.Mock;
+  let mockTaggingGetTableColumnDefinition: Mock;
 
   beforeEach(() => {
     useKibanaMock().services.dashboard = {
-      locator: { getRedirectUrl: jest.fn(() => '/path') },
+      locator: { getRedirectUrl: vi.fn(() => '/path') },
     } as unknown as DashboardStart;
     useKibanaMock().services.http = {} as unknown as HttpStart;
 
     mockTaggingGetTableColumnDefinition = useKibanaMock().services.savedObjectsTagging?.ui
-      .getTableColumnDefinition as jest.Mock;
+      .getTableColumnDefinition as Mock;
 
     mockTaggingGetTableColumnDefinition.mockReturnValue(tagsColumn);
   });
@@ -236,7 +239,7 @@ describe('Security Dashboards Table hooks', () => {
   });
 
   it('should land on SecuritySolution dashboard view page when dashboard title clicked', async () => {
-    const mockGetSecuritySolutionUrl = jest.fn();
+    const mockGetSecuritySolutionUrl = vi.fn();
     spyUseGetSecuritySolutionUrl.mockImplementation(() => mockGetSecuritySolutionUrl);
     const { result: itemsResult } = renderUseSecurityDashboardsTableItems();
     const { result: columnsResult } = renderUseDashboardsTableColumns();

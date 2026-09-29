@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -17,9 +20,9 @@ import {
   useFetchExecutionHistory,
 } from './use_fetch_execution_history';
 
-jest.mock('@kbn/core-di-browser');
+vi.mock('@kbn/core-di-browser');
 
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
+const mockUseService = useService as MockedFunction<typeof useService>;
 
 const item: PolicyExecutionHistoryItem = {
   dispatched_at: '2026-05-05T10:00:00.000Z',
@@ -44,12 +47,12 @@ const createWrapper = () => {
 };
 
 describe('useFetchExecutionHistory', () => {
-  const mockListActionPolicyExecutions: jest.MockedFunction<
+  const mockListActionPolicyExecutions: MockedFunction<
     ExecutionHistoryApi['listActionPolicyExecutions']
-  > = jest.fn();
+  > = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseService.mockImplementation((service: unknown) => {
       if (service === ExecutionHistoryApi) {
         return { listActionPolicyExecutions: mockListActionPolicyExecutions } as any;

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // Mock the mlJobService that is imported for saving rules.
-jest.mock('../../services/job_service', () => 'mlJobService');
+vi.mock('../../services/job_service', () => 'mlJobService');
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -16,7 +18,7 @@ import { ScopeExpression } from './scope_expression';
 
 describe('ScopeExpression', () => {
   const testFilterListIds = ['web_domains', 'safe_domains', 'uk_domains'];
-  const updateScope = jest.fn();
+  const updateScope = vi.fn();
 
   const requiredProps = {
     fieldName: 'domain',

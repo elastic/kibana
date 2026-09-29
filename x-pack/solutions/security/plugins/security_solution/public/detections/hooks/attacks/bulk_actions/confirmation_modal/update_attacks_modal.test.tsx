@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import React from 'react';
@@ -17,27 +19,27 @@ import {
 } from './update_attacks_modal';
 
 // Mock EUI hooks and components
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     useEuiTheme: () => ({ euiTheme: { size: { m: '8px', xxxl: '32px' } } }),
-    useGeneratedHtmlId: jest.fn(() => 'generated-id'),
+    useGeneratedHtmlId: vi.fn(() => 'generated-id'),
   };
 });
 
 const defaultProps = {
   alertsCount: 5,
   attackDiscoveriesCount: 2,
-  onCancel: jest.fn(),
-  onClose: jest.fn(),
-  onConfirm: jest.fn(),
+  onCancel: vi.fn(),
+  onClose: vi.fn(),
+  onConfirm: vi.fn(),
   actionType: 'workflow_status' as const,
 };
 
 describe('UpdateAttacksModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render modal with correct title', () => {
@@ -63,7 +65,7 @@ describe('UpdateAttacksModal', () => {
   });
 
   it('should call onCancel when cancel button is clicked', () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
     render(<UpdateAttacksModal {...defaultProps} onCancel={onCancel} />);
 
     fireEvent.click(screen.getByTestId(UPDATE_ATTACKS_MODAL_CANCEL_TEST_ID));
@@ -82,7 +84,7 @@ describe('UpdateAttacksModal', () => {
   });
 
   it('should call onConfirm with updateAlerts false when update attacks only is clicked', async () => {
-    const onConfirm = jest.fn().mockResolvedValue(undefined);
+    const onConfirm = vi.fn().mockResolvedValue(undefined);
     render(<UpdateAttacksModal {...defaultProps} onConfirm={onConfirm} />);
 
     fireEvent.click(screen.getByTestId(UPDATE_ATTACKS_MODAL_UPDATE_ATTACKS_ONLY_TEST_ID));
@@ -101,7 +103,7 @@ describe('UpdateAttacksModal', () => {
   });
 
   it('should call onConfirm with updateAlerts true when update attacks and alerts is clicked', async () => {
-    const onConfirm = jest.fn().mockResolvedValue(undefined);
+    const onConfirm = vi.fn().mockResolvedValue(undefined);
     render(<UpdateAttacksModal {...defaultProps} onConfirm={onConfirm} />);
 
     fireEvent.click(screen.getByTestId(UPDATE_ATTACKS_MODAL_UPDATE_ATTACKS_AND_ALERTS_TEST_ID));

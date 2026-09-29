@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import {
   mockGetConvertedObjectId,
   validateTypeMigrationsMock,
@@ -1306,10 +1309,10 @@ describe('DocumentMigrator', () => {
 
     describe('`typeMigrationVersion` core migration', () => {
       let migrator: DocumentMigrator;
-      let noop: jest.MockedFunction<(doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc>;
+      let noop: MockedFunction<(doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc>;
 
       beforeEach(() => {
-        noop = jest.fn((doc) => doc);
+        noop = vi.fn((doc) => doc);
         migrator = new DocumentMigrator({
           ...testOpts(),
           typeRegistry: createRegistry({
@@ -1497,11 +1500,11 @@ describe('DocumentMigrator', () => {
   });
 
   describe('typeVersionGuesser', () => {
-    const migrationV1 = jest.fn((doc: SavedObjectUnsanitizedDoc) => ({
+    const migrationV1 = vi.fn((doc: SavedObjectUnsanitizedDoc) => ({
       ...doc,
       attributes: { ...(doc.attributes as Record<string, unknown>), v1: true },
     }));
-    const migrationV2 = jest.fn((doc: SavedObjectUnsanitizedDoc) => ({
+    const migrationV2 = vi.fn((doc: SavedObjectUnsanitizedDoc) => ({
       ...doc,
       attributes: { ...(doc.attributes as Record<string, unknown>), v2: true },
     }));
@@ -1577,7 +1580,7 @@ describe('DocumentMigrator', () => {
     });
 
     it('is not called when the document already has a typeMigrationVersion', () => {
-      const typeVersionGuesser = jest.fn(() => '0.0.0');
+      const typeVersionGuesser = vi.fn(() => '0.0.0');
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry({
@@ -1597,7 +1600,7 @@ describe('DocumentMigrator', () => {
     });
 
     it('receives the original document as argument', () => {
-      const typeVersionGuesser = jest.fn(() => '0.0.0');
+      const typeVersionGuesser = vi.fn(() => '0.0.0');
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry({

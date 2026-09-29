@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useInstallMigrationRules } from './use_install_migration_rules';
 import { installMigrationRules } from '../api';
@@ -16,30 +19,42 @@ import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { MigrationSource } from '../../common/types';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 
-jest.mock('../api');
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: jest.fn().mockReturnValue({
-    addSuccess: jest.fn(),
-    addError: jest.fn(),
-  }),
-}));
-jest.mock('./use_get_migration_rules', () => ({
-  useInvalidateGetMigrationRules: jest.fn(),
-}));
-jest.mock('./use_get_migration_translation_stats', () => ({
-  useInvalidateGetMigrationTranslationStats: jest.fn(),
-}));
-jest.mock('../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../api');
+vi.mock('../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: vi.fn().mockReturnValue({
+        addSuccess: vi.fn(),
+        addError: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_get_migration_rules', () => {
+      const mocked = {
+      useInvalidateGetMigrationRules: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_get_migration_translation_stats', () => {
+      const mocked = {
+      useInvalidateGetMigrationTranslationStats: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockResponse = { installed: 2 };
 const mockError = new Error('API error');
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
-const invalidateRules = jest.fn();
-const invalidateStats = jest.fn();
-const mockReportTranslatedItemBulkInstall = jest.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
+const invalidateRules = vi.fn();
+const invalidateStats = vi.fn();
+const mockReportTranslatedItemBulkInstall = vi.fn();
 const defaultMigrationStats = {
   id: 'mig-1',
   name: 'test-migration',
@@ -52,14 +67,14 @@ const defaultMigrationStats = {
 
 describe('useInstallMigrationRules', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAppToasts as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAppToasts as Mock).mockReturnValue({
       addSuccess: mockAddSuccess,
       addError: mockAddError,
     });
-    (useInvalidateGetMigrationRules as jest.Mock).mockReturnValue(invalidateRules);
-    (useInvalidateGetMigrationTranslationStats as jest.Mock).mockReturnValue(invalidateStats);
-    (useKibana as jest.Mock).mockReturnValue({
+    (useInvalidateGetMigrationRules as Mock).mockReturnValue(invalidateRules);
+    (useInvalidateGetMigrationTranslationStats as Mock).mockReturnValue(invalidateStats);
+    (useKibana as Mock).mockReturnValue({
       services: {
         siemMigrations: {
           rules: {
@@ -74,7 +89,7 @@ describe('useInstallMigrationRules', () => {
 
   describe('on success', () => {
     beforeEach(() => {
-      (installMigrationRules as jest.Mock).mockResolvedValue(mockResponse);
+      (installMigrationRules as Mock).mockResolvedValue(mockResponse);
     });
 
     it('shows a success toast', async () => {
@@ -103,7 +118,7 @@ describe('useInstallMigrationRules', () => {
 
   describe('on error', () => {
     beforeEach(() => {
-      (installMigrationRules as jest.Mock).mockRejectedValue(mockError);
+      (installMigrationRules as Mock).mockRejectedValue(mockError);
     });
 
     it('shows an error toast', async () => {

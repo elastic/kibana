@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, waitFor } from '@testing-library/react';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 
@@ -17,7 +19,7 @@ import {
 } from '../helpers/actions/enrich_policies_actions';
 import { NotificationService } from '../../../public/application/services/notification';
 
-jest.mock('@kbn/code-editor');
+vi.mock('@kbn/code-editor');
 
 describe('Enrich policies tab', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
@@ -25,8 +27,8 @@ describe('Enrich policies tab', () => {
   let setDelayResponse: ReturnType<typeof setupEnvironment>['setDelayResponse'];
 
   beforeEach(() => {
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
     const mockEnvironment = setupEnvironment();
     httpSetup = mockEnvironment.httpSetup;
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
@@ -97,14 +99,14 @@ describe('Enrich policies tab', () => {
       await screen.findByTestId('enrichPoliciesTable');
       const actions = createEnrichPoliciesActions();
 
-      const requestsBefore = jest.mocked(httpSetup.get).mock.calls.length;
+      const requestsBefore = vi.mocked(httpSetup.get).mock.calls.length;
 
       actions.clickReloadPoliciesButton();
 
       // Should have made a call to load the policies after the reload
       // button is clicked.
       await waitFor(() => {
-        expect(jest.mocked(httpSetup.get).mock.calls.length).toBeGreaterThan(requestsBefore);
+        expect(vi.mocked(httpSetup.get).mock.calls.length).toBeGreaterThan(requestsBefore);
       });
     });
 

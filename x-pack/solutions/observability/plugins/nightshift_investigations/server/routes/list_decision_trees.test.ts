@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { notFound } from '@hapi/boom';
 import type { DecisionTreeSummary } from '../../common/decision_trees';
 import { listDecisionTreesRoute } from './list_decision_trees';
@@ -37,7 +39,7 @@ const run = ({
     request: {},
     params: { query: status ? { status } : {} },
     isDecisionTreesEnabled: () => enabled,
-    getDecisionTreeStore: () => ({ list: jest.fn().mockResolvedValue(trees) }),
+    getDecisionTreeStore: () => ({ list: vi.fn().mockResolvedValue(trees) }),
   } as never);
 
 it('throws when decision trees are disabled', async () => {

@@ -5,48 +5,61 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import { createSkillService } from './skill_service';
 
-const mockPersistedSkillNotFoundError = () =>
-  jest
-    .requireActual<typeof import('@kbn/agent-builder-common')>('@kbn/agent-builder-common')
+const mockPersistedSkillNotFoundError = async () =>
+  (await vi.importActual<typeof import('@kbn/agent-builder-common')>('@kbn/agent-builder-common'))
     .createSkillNotFoundError({ skillId: 'missing' });
 
-jest.mock('@kbn/agent-builder-server/skills', () => {
-  const actual = jest.requireActual('@kbn/agent-builder-server/skills');
+vi.mock('@kbn/agent-builder-server/skills', async () => {
+  const actual = (await vi.importActual('@kbn/agent-builder-server/skills'));
   return {
     ...actual,
-    validateSkillDefinition: jest.fn(async (skill) => skill),
+    validateSkillDefinition: vi.fn(async (skill) => skill),
   };
 });
 
-jest.mock('@kbn/agent-builder-server/allow_lists', () => ({
-  ...jest.requireActual('@kbn/agent-builder-server/allow_lists'),
-  isAllowedSkillRegistration: jest.fn().mockReturnValue(true),
-}));
+vi.mock('@kbn/agent-builder-server/allow_lists', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/agent-builder-server/allow_lists')),
+      isAllowedSkillRegistration: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../execution/runner/store/volumes/skills/utils', () => ({
-  getSkillEntryPath: jest.fn(({ skill }) => `${skill.basePath}/${skill.name}/SKILL.md`),
-}));
+vi.mock('../execution/runner/store/volumes/skills/utils', () => {
+      const mocked = {
+      getSkillEntryPath: vi.fn(({ skill }) => `${skill.basePath}/${skill.name}/SKILL.md`),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./persisted/client', () => ({
-  createClient: jest.fn(() => ({
-    has: jest.fn().mockResolvedValue(false),
-    get: jest.fn().mockRejectedValue(mockPersistedSkillNotFoundError()),
-    list: jest.fn().mockResolvedValue([]),
-    create: jest.fn(),
-    bulkCreate: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    deleteByPluginId: jest.fn(),
-  })),
-}));
+vi.mock('./persisted/client', () => {
+      const mocked = {
+      createClient: vi.fn(() => ({
+        has: vi.fn().mockResolvedValue(false),
+        get: vi.fn().mockRejectedValue(mockPersistedSkillNotFoundError()),
+        list: vi.fn().mockResolvedValue([]),
+        create: vi.fn(),
+        bulkCreate: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
+        deleteByPluginId: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/spaces', () => ({
-  getCurrentSpaceId: jest.fn().mockReturnValue('default'),
-}));
+vi.mock('../../utils/spaces', () => {
+      const mocked = {
+      getCurrentSpaceId: vi.fn().mockReturnValue('default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockSkillDefinition = (overrides: Partial<SkillDefinition> = {}): SkillDefinition => ({
   id: 'test-skill-1',
@@ -60,12 +73,12 @@ const createMockSkillDefinition = (overrides: Partial<SkillDefinition> = {}): Sk
 
 const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
   ({
-    has: jest.fn(async (id: string) => toolIds.includes(id)),
+    has: vi.fn(async (id: string) => toolIds.includes(id)),
   } as unknown as ToolRegistry);
 
 describe('createSkillService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('setup().registerSkill', () => {
@@ -77,10 +90,8 @@ describe('createSkillService', () => {
       expect(() => registerSkill(skill)).not.toThrow();
     });
 
-    it('throws when registering a skill id not in the allow-list', () => {
-      const { isAllowedSkillRegistration } = jest.requireMock(
-        '@kbn/agent-builder-server/allow_lists'
-      );
+    it('throws when registering a skill id not in the allow-list', async () => {
+      const { isAllowedSkillRegistration } = (await vi.importMock('@kbn/agent-builder-server/allow_lists'));
       isAllowedSkillRegistration.mockReturnValueOnce(false);
 
       const service = createSkillService();
@@ -142,14 +153,14 @@ describe('createSkillService', () => {
 
   describe('start().getRegistry', () => {
     it('returns a registry that includes registered built-in skills', async () => {
-      const { createClient: mockCreateClient } = jest.requireMock('./persisted/client/client');
+      const { createClient: mockCreateClient } = (await vi.importMock('./persisted/client/client'));
       mockCreateClient.mockReturnValue({
-        has: jest.fn().mockResolvedValue(false),
-        get: jest.fn().mockRejectedValue(mockPersistedSkillNotFoundError()),
-        list: jest.fn().mockResolvedValue([]),
-        create: jest.fn(),
-        update: jest.fn(),
-        delete: jest.fn(),
+        has: vi.fn().mockResolvedValue(false),
+        get: vi.fn().mockRejectedValue(mockPersistedSkillNotFoundError()),
+        list: vi.fn().mockResolvedValue([]),
+        create: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
       });
 
       const mockToolRegistry = createMockToolRegistry();
@@ -159,19 +170,19 @@ describe('createSkillService', () => {
       const skill = createMockSkillDefinition({ id: 'builtin-1' });
       registerSkill(skill);
 
-      const mockSoClient = { get: jest.fn() } as any;
+      const mockSoClient = { get: vi.fn() } as any;
       const mockUiSettings = {
-        asScopedToClient: jest.fn().mockReturnValue({ get: jest.fn().mockResolvedValue(false) }),
-        globalAsScopedToClient: jest
+        asScopedToClient: vi.fn().mockReturnValue({ get: vi.fn().mockResolvedValue(false) }),
+        globalAsScopedToClient: vi
           .fn()
-          .mockReturnValue({ get: jest.fn().mockResolvedValue(false) }),
+          .mockReturnValue({ get: vi.fn().mockResolvedValue(false) }),
       } as any;
-      const mockSavedObjects = { getScopedClient: jest.fn().mockReturnValue(mockSoClient) } as any;
+      const mockSavedObjects = { getScopedClient: vi.fn().mockReturnValue(mockSoClient) } as any;
 
       const { getRegistry } = service.start({
         elasticsearch: { client: { asInternalUser: {} } } as any,
-        logger: { warn: jest.fn() } as any,
-        getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+        logger: { warn: vi.fn() } as any,
+        getToolRegistry: vi.fn().mockResolvedValue(mockToolRegistry),
         uiSettings: mockUiSettings,
         savedObjects: mockSavedObjects,
       });
@@ -194,16 +205,16 @@ describe('createSkillService', () => {
       registerSkill(skill);
 
       const mockUiSettings = {
-        asScopedToClient: jest.fn().mockReturnValue({ get: jest.fn(namespaceGet) }),
-        globalAsScopedToClient: jest.fn().mockReturnValue({ get: jest.fn(globalGet) }),
+        asScopedToClient: vi.fn().mockReturnValue({ get: vi.fn(namespaceGet) }),
+        globalAsScopedToClient: vi.fn().mockReturnValue({ get: vi.fn(globalGet) }),
       } as any;
 
       return service.start({
         elasticsearch: { client: { asInternalUser: {} } } as any,
-        logger: { warn: jest.fn() } as any,
-        getToolRegistry: jest.fn().mockResolvedValue(createMockToolRegistry()),
+        logger: { warn: vi.fn() } as any,
+        getToolRegistry: vi.fn().mockResolvedValue(createMockToolRegistry()),
         uiSettings: mockUiSettings,
-        savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } as any,
+        savedObjects: { getScopedClient: vi.fn().mockReturnValue({}) } as any,
       });
     };
 

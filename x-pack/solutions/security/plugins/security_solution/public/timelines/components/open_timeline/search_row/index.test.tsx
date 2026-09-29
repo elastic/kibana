@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EuiFilterButtonProps } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
@@ -29,8 +31,8 @@ describe('SearchRow', () => {
       <ThemeProvider theme={mockTheme}>
         <SearchRow
           onlyFavorites={false}
-          onQueryChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
+          onQueryChange={vi.fn()}
+          onToggleOnlyFavorites={vi.fn()}
           query=""
           timelineType={TimelineTypeEnum.default}
         />
@@ -49,8 +51,8 @@ describe('SearchRow', () => {
         <ThemeProvider theme={mockTheme}>
           <SearchRow
             onlyFavorites={false}
-            onQueryChange={jest.fn()}
-            onToggleOnlyFavorites={jest.fn()}
+            onQueryChange={vi.fn()}
+            onToggleOnlyFavorites={vi.fn()}
             query=""
             timelineType={TimelineTypeEnum.default}
           />
@@ -63,13 +65,13 @@ describe('SearchRow', () => {
     });
 
     test('it invokes onToggleOnlyFavorites when clicked', () => {
-      const onToggleOnlyFavorites = jest.fn();
+      const onToggleOnlyFavorites = vi.fn();
 
       const wrapper = mountWithIntl(
         <ThemeProvider theme={mockTheme}>
           <SearchRow
             onlyFavorites={false}
-            onQueryChange={jest.fn()}
+            onQueryChange={vi.fn()}
             onToggleOnlyFavorites={onToggleOnlyFavorites}
             query=""
             timelineType={TimelineTypeEnum.default}
@@ -87,8 +89,8 @@ describe('SearchRow', () => {
         <ThemeProvider theme={mockTheme}>
           <SearchRow
             onlyFavorites={true}
-            onQueryChange={jest.fn()}
-            onToggleOnlyFavorites={jest.fn()}
+            onQueryChange={vi.fn()}
+            onToggleOnlyFavorites={vi.fn()}
             query=""
             timelineType={TimelineTypeEnum.default}
           />
@@ -108,8 +110,8 @@ describe('SearchRow', () => {
         <ThemeProvider theme={mockTheme}>
           <SearchRow
             onlyFavorites={false}
-            onQueryChange={jest.fn()}
-            onToggleOnlyFavorites={jest.fn()}
+            onQueryChange={vi.fn()}
+            onToggleOnlyFavorites={vi.fn()}
             query=""
             timelineType={TimelineTypeEnum.default}
           />
@@ -126,7 +128,7 @@ describe('SearchRow', () => {
   });
 
   describe('#onQueryChange', () => {
-    const onQueryChange = jest.fn();
+    const onQueryChange = vi.fn();
 
     test('it invokes onQueryChange when the user enters a query', () => {
       const wrapper = mountWithIntl(
@@ -134,7 +136,7 @@ describe('SearchRow', () => {
           <SearchRow
             onlyFavorites={false}
             onQueryChange={onQueryChange}
-            onToggleOnlyFavorites={jest.fn()}
+            onToggleOnlyFavorites={vi.fn()}
             query=""
             timelineType={TimelineTypeEnum.default}
           />

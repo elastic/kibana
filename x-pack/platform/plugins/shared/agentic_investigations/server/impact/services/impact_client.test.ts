@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ImpactPrivilegesChecker } from './check_impact_privileges';
 import { ImpactForbiddenError } from './errors';
@@ -14,17 +17,17 @@ import type { ImpactService } from './impact_service';
 const request = httpServerMock.createKibanaRequest();
 
 const createClient = ({
-  listByConversationIds = jest.fn().mockResolvedValue([]),
-  assertCanRead = jest.fn().mockResolvedValue(undefined),
-  getSpaceId = jest.fn().mockReturnValue('space-from-request'),
+  listByConversationIds = vi.fn().mockResolvedValue([]),
+  assertCanRead = vi.fn().mockResolvedValue(undefined),
+  getSpaceId = vi.fn().mockReturnValue('space-from-request'),
 }: {
-  listByConversationIds?: jest.Mock;
-  assertCanRead?: jest.Mock;
-  getSpaceId?: jest.Mock;
+  listByConversationIds?: Mock;
+  assertCanRead?: Mock;
+  getSpaceId?: Mock;
 } = {}) => {
   const privileges: ImpactPrivilegesChecker = {
     assertCanRead,
-    assertCanManage: jest.fn(),
+    assertCanManage: vi.fn(),
   };
   const client = createImpactClient({
     getImpactService: () => ({ listByConversationIds } as unknown as ImpactService),
@@ -48,7 +51,7 @@ describe('createImpactClient', () => {
 
   it('should refuse before searching when the principal cannot manage investigations', async () => {
     const { client, listByConversationIds, getSpaceId } = createClient({
-      assertCanRead: jest.fn().mockRejectedValue(new ImpactForbiddenError('nope')),
+      assertCanRead: vi.fn().mockRejectedValue(new ImpactForbiddenError('nope')),
     });
 
     await expect(client.listByConversationIds(['c1'])).rejects.toBeInstanceOf(ImpactForbiddenError);

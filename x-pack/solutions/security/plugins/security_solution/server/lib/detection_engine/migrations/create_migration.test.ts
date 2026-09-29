@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { createMigrationIndex } from './create_migration_index';
 import { createMigration } from './create_migration';
 
-jest.mock('./create_migration_index');
+vi.mock('./create_migration_index');
 
 describe('createMigration', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -44,7 +47,7 @@ describe('createMigration', () => {
   });
 
   it('returns info about the created migration', async () => {
-    (createMigrationIndex as jest.Mock).mockResolvedValueOnce('destinationIndex');
+    (createMigrationIndex as Mock).mockResolvedValueOnce('destinationIndex');
     esClient.reindex.mockResponseOnce({ task: 'reindexTaskId' });
 
     const migration = await createMigration({

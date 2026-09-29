@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import React from 'react';
@@ -15,78 +17,114 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { IndexLifecyclePhaseSelectOption } from '../../../../common/storage_explorer_types';
 
 // Mock the hooks
-const mockUseFetcher = jest.fn();
-const mockUseProgressiveFetcher = jest.fn();
-const mockUseApmParams = jest.fn();
-const mockUseTimeRange = jest.fn();
-const mockUseLocalStorage = jest.fn();
+const mockUseFetcher = vi.fn();
+const mockUseProgressiveFetcher = vi.fn();
+const mockUseApmParams = vi.fn();
+const mockUseTimeRange = vi.fn();
+const mockUseLocalStorage = vi.fn();
 
-jest.mock('../../../hooks/use_fetcher', () => ({
-  useFetcher: () => mockUseFetcher(),
-  FETCH_STATUS: {
-    LOADING: 'loading',
-    SUCCESS: 'success',
-    FAILURE: 'failure',
-    NOT_INITIATED: 'not_initiated',
-  },
-  isPending: jest.fn((status) => status === 'loading'),
-}));
+vi.mock('../../../hooks/use_fetcher', () => {
+      const mocked = {
+      useFetcher: () => mockUseFetcher(),
+      FETCH_STATUS: {
+        LOADING: 'loading',
+        SUCCESS: 'success',
+        FAILURE: 'failure',
+        NOT_INITIATED: 'not_initiated',
+      },
+      isPending: vi.fn((status) => status === 'loading'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_progressive_fetcher', () => ({
-  useProgressiveFetcher: () => mockUseProgressiveFetcher(),
-}));
+vi.mock('../../../hooks/use_progressive_fetcher', () => {
+      const mocked = {
+      useProgressiveFetcher: () => mockUseProgressiveFetcher(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_apm_params', () => ({
-  useApmParams: () => mockUseApmParams(),
-}));
+vi.mock('../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useApmParams: () => mockUseApmParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_time_range', () => ({
-  useTimeRange: () => mockUseTimeRange(),
-}));
+vi.mock('../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => mockUseTimeRange(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_local_storage', () => ({
-  useLocalStorage: () => mockUseLocalStorage(),
-}));
+vi.mock('../../../hooks/use_local_storage', () => {
+      const mocked = {
+      useLocalStorage: () => mockUseLocalStorage(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock child components
-jest.mock('../../shared/environment_filter', () => ({
-  ApmEnvironmentFilter: () => <div data-test-subj="environment-filter">Environment Filter</div>,
-}));
+vi.mock('../../shared/environment_filter', () => {
+      const mocked = {
+      ApmEnvironmentFilter: () => <div data-test-subj="environment-filter">Environment Filter</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./index_lifecycle_phase_select', () => ({
-  IndexLifecyclePhaseSelect: () => (
-    <div data-test-subj="lifecycle-phase-select">Lifecycle Phase Select</div>
-  ),
-}));
+vi.mock('./index_lifecycle_phase_select', () => {
+      const mocked = {
+      IndexLifecyclePhaseSelect: () => (
+        <div data-test-subj="lifecycle-phase-select">Lifecycle Phase Select</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./summary_stats', () => ({
-  SummaryStats: ({ summaryStatsData }: { summaryStatsData: any }) => (
-    <div data-test-subj="summary-stats">
-      Summary Stats: {summaryStatsData ? 'with data' : 'no data'}
-    </div>
-  ),
-}));
+vi.mock('./summary_stats', () => {
+      const mocked = {
+      SummaryStats: ({ summaryStatsData }: { summaryStatsData: any }) => (
+        <div data-test-subj="summary-stats">
+          Summary Stats: {summaryStatsData ? 'with data' : 'no data'}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./storage_chart', () => ({
-  StorageChart: () => <div data-test-subj="storage-chart">Storage Chart</div>,
-}));
+vi.mock('./storage_chart', () => {
+      const mocked = {
+      StorageChart: () => <div data-test-subj="storage-chart">Storage Chart</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./services_table', () => ({
-  ServicesTable: ({ summaryStatsData, loadingSummaryStats }: any) => (
-    <div data-test-subj="services-table">
-      Services Table: {loadingSummaryStats ? 'loading' : 'loaded'}, Data:{' '}
-      {summaryStatsData ? 'present' : 'absent'}
-    </div>
-  ),
-}));
+vi.mock('./services_table', () => {
+      const mocked = {
+      ServicesTable: ({ summaryStatsData, loadingSummaryStats }: any) => (
+        <div data-test-subj="services-table">
+          Services Table: {loadingSummaryStats ? 'loading' : 'loaded'}, Data:{' '}
+          {summaryStatsData ? 'present' : 'absent'}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./prompts/permission_denied', () => ({
-  PermissionDenied: () => <div data-test-subj="permission-denied">Permission Denied</div>,
-}));
+vi.mock('./prompts/permission_denied', () => {
+      const mocked = {
+      PermissionDenied: () => <div data-test-subj="permission-denied">Permission Denied</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./resources/tips_and_resources', () => ({
-  TipsAndResources: () => <div data-test-subj="tips-and-resources">Tips and Resources</div>,
-}));
+vi.mock('./resources/tips_and_resources', () => {
+      const mocked = {
+      TipsAndResources: () => <div data-test-subj="tips-and-resources">Tips and Resources</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -118,11 +156,11 @@ describe('StorageExplorer', () => {
 
   const defaultLocalStorage = [
     { crossClusterSearch: false, optimizePerformance: false },
-    jest.fn(),
+    vi.fn(),
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseApmParams.mockReturnValue(defaultParams);
     mockUseTimeRange.mockReturnValue(defaultTimeRange);
     mockUseLocalStorage.mockReturnValue(defaultLocalStorage);
@@ -236,7 +274,7 @@ describe('StorageExplorer', () => {
     it('shows optimize performance callout when not dismissed', () => {
       const localStorageWithCallout = [
         { crossClusterSearch: false, optimizePerformance: false },
-        jest.fn(),
+        vi.fn(),
       ];
       mockUseLocalStorage.mockReturnValue(localStorageWithCallout);
 
@@ -258,7 +296,7 @@ describe('StorageExplorer', () => {
     it('hides callouts when dismissed', () => {
       const localStorageWithDismissedCallouts = [
         { crossClusterSearch: true, optimizePerformance: true },
-        jest.fn(),
+        vi.fn(),
       ];
       mockUseLocalStorage.mockReturnValue(localStorageWithDismissedCallouts);
 

@@ -5,30 +5,38 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { FlyoutTopLevelProperties } from './flyout_top_level_properties';
 
-jest.mock('../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: () => ({
-    query: {
-      kuery: '',
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-      environment: 'ENVIRONMENT_ALL',
-      comparisonEnabled: false,
-      offset: '1d',
-    },
-  }),
-}));
+vi.mock('../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useAnyOfApmParams: () => ({
+        query: {
+          kuery: '',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          environment: 'ENVIRONMENT_ALL',
+          comparisonEnabled: false,
+          offset: '1d',
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_apm_router', () => ({
-  useApmRouter: () => ({
-    link: jest.fn().mockReturnValue('/mock-link'),
-  }),
-}));
+vi.mock('../../../hooks/use_apm_router', () => {
+      const mocked = {
+      useApmRouter: () => ({
+        link: vi.fn().mockReturnValue('/mock-link'),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseTransaction = {
   '@timestamp': '2024-01-01T00:00:00.000Z',

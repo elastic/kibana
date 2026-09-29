@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
@@ -44,7 +46,7 @@ describe('WorkflowExecutionListFooter', () => {
     triggeredBy: 'manual',
   };
 
-  const defaultConfirm = jest.fn().mockResolvedValue(undefined);
+  const defaultConfirm = vi.fn().mockResolvedValue(undefined);
 
   const renderFooter = (
     overrides: Partial<React.ComponentProps<typeof WorkflowExecutionListFooter>> = {}
@@ -62,7 +64,7 @@ describe('WorkflowExecutionListFooter', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('hides the bulk-cancel footer when all loaded executions are terminal', () => {
@@ -90,7 +92,7 @@ describe('WorkflowExecutionListFooter', () => {
   });
 
   it('opens the modal and closes on Cancel without calling the confirm handler', async () => {
-    const onConfirm = jest.fn().mockResolvedValue(undefined);
+    const onConfirm = vi.fn().mockResolvedValue(undefined);
     renderFooter({
       loadedExecutions: [runningExecution],
       onConfirmCancel: onConfirm,
@@ -109,7 +111,7 @@ describe('WorkflowExecutionListFooter', () => {
   });
 
   it('calls onConfirmCancel when the modal is confirmed', async () => {
-    const onConfirm = jest.fn().mockResolvedValue(undefined);
+    const onConfirm = vi.fn().mockResolvedValue(undefined);
     renderFooter({
       loadedExecutions: [runningExecution],
       onConfirmCancel: onConfirm,

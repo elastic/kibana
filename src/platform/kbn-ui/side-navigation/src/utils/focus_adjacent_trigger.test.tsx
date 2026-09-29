@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { forwardRef } from 'react';
 import { render } from '@testing-library/react';
 
@@ -31,14 +33,14 @@ describe('focusAdjacentTrigger', () => {
 
     const triggers = Array.from(container.querySelectorAll<HTMLButtonElement>('[data-menu-item]'));
     triggers.forEach((trigger) => {
-      jest.spyOn(trigger, 'focus');
+      vi.spyOn(trigger, 'focus');
     });
 
     return { ref, triggers, container, unmount };
   };
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('does nothing when `ref.current` is `null`', () => {
@@ -109,7 +111,7 @@ describe('focusAdjacentTrigger', () => {
   it('skips `display: none;` or `visibility: hidden;` triggers', () => {
     const { ref, triggers } = setup();
 
-    jest.spyOn(window, 'getComputedStyle').mockImplementation((el: Element) => {
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((el: Element) => {
       if (el === triggers[1]) {
         return { display: 'none', visibility: 'visible' } as CSSStyleDeclaration;
       }
@@ -136,7 +138,7 @@ describe('focusAdjacentTrigger', () => {
   it('handles missing navigation root gracefully', () => {
     const { ref, triggers, unmount } = setup();
 
-    const querySpy = jest
+    const querySpy = vi
       .spyOn(document, 'querySelector')
       .mockImplementation((selector: string) => {
         if (selector === `#${NAVIGATION_ROOT_SELECTOR}`) {

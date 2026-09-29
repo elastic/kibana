@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -12,14 +15,14 @@ import { OBSERVABILITY_ONBOARDING_APP_ID } from '@kbn/deeplinks-observability';
 import type { ObservabilityOnboardingAppServices } from '..';
 import { CloudwatchIntegrationRedirect } from './cloudwatch_integration_redirect';
 
-jest.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 const setup = ({ isAddDataPageV2Enabled = false }: { isAddDataPageV2Enabled?: boolean } = {}) => {
-  const get = jest.fn().mockResolvedValue({ item: { version: '0.2.1' } });
-  const navigateToApp = jest.fn();
-  const getUrlForApp = jest.fn(
+  const get = vi.fn().mockResolvedValue({ item: { version: '0.2.1' } });
+  const navigateToApp = vi.fn();
+  const getUrlForApp = vi.fn(
     () => `/app/observabilityOnboarding${isAddDataPageV2Enabled ? '' : '?category=cloud'}`
   );
 
@@ -27,7 +30,7 @@ const setup = ({ isAddDataPageV2Enabled = false }: { isAddDataPageV2Enabled?: bo
     services: {
       http: { get },
       application: { navigateToApp, getUrlForApp },
-      featureFlags: { useBooleanValue: jest.fn().mockReturnValue(isAddDataPageV2Enabled) },
+      featureFlags: { useBooleanValue: vi.fn().mockReturnValue(isAddDataPageV2Enabled) },
     },
   } as unknown as ReturnType<typeof useKibana<ObservabilityOnboardingAppServices>>);
 
@@ -35,7 +38,7 @@ const setup = ({ isAddDataPageV2Enabled = false }: { isAddDataPageV2Enabled?: bo
 };
 
 describe('CloudwatchIntegrationRedirect', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('resolves the package version and redirects to the Fleet add-integration page with back-link state', async () => {
     const { get, navigateToApp, getUrlForApp } = setup();

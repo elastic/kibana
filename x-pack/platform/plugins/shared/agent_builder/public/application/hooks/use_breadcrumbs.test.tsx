@@ -5,30 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useBreadcrumb } from './use_breadcrumbs';
 
-const mockSetBreadcrumbs = jest.fn();
-const mockGetUrlForApp = jest.fn((appId: string, { path }: { path?: string } = {}) => {
+const mockSetBreadcrumbs = vi.fn();
+const mockGetUrlForApp = vi.fn((appId: string, { path }: { path?: string } = {}) => {
   return `/app/${appId}${path ?? ''}`;
 });
 
-jest.mock('./use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      chrome: {
-        setBreadcrumbs: mockSetBreadcrumbs,
-      },
-      application: {
-        getUrlForApp: mockGetUrlForApp,
-      },
-    },
-  }),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          chrome: {
+            setBreadcrumbs: mockSetBreadcrumbs,
+          },
+          application: {
+            getUrlForApp: mockGetUrlForApp,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useBreadcrumb', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('emits a single root breadcrumb for the root page', () => {

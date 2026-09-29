@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -13,23 +15,29 @@ import type { UseAgentBuilderAttachmentParams } from '../../../../agent_builder/
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import { AddRulePreviewAttachmentToChatButton } from './add_rule_preview_attachment_to_chat_button';
 
-const mockOpenAgentBuilderFlyout = jest.fn();
-const mockUseAgentBuilderAttachment = jest.fn();
+const mockOpenAgentBuilderFlyout = vi.fn();
+const mockUseAgentBuilderAttachment = vi.fn();
 
-jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => ({
-  useAgentBuilderAttachment: (attachment: unknown) => {
-    mockUseAgentBuilderAttachment(attachment);
-    return { openAgentBuilderFlyout: mockOpenAgentBuilderFlyout };
-  },
-}));
+vi.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => {
+      const mocked = {
+      useAgentBuilderAttachment: (attachment: unknown) => {
+        mockUseAgentBuilderAttachment(attachment);
+        return { openAgentBuilderFlyout: mockOpenAgentBuilderFlyout };
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../agent_builder/components/new_agent_builder_attachment', () => ({
-  NewAgentBuilderAttachment: (props: NewAgentBuilderAttachmentProps) => (
-    <button type="button" data-test-subj="newAgentBuilderAttachmentMock" onClick={props.onClick}>
-      {'Add to chat'}
-    </button>
-  ),
-}));
+vi.mock('../../../../agent_builder/components/new_agent_builder_attachment', () => {
+      const mocked = {
+      NewAgentBuilderAttachment: (props: NewAgentBuilderAttachmentProps) => (
+        <button type="button" data-test-subj="newAgentBuilderAttachmentMock" onClick={props.onClick}>
+          {'Add to chat'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getCapturedAttachment = (): UseAgentBuilderAttachmentParams => {
   const [attachment] = mockUseAgentBuilderAttachment.mock.calls[0] as [
@@ -40,7 +48,7 @@ const getCapturedAttachment = (): UseAgentBuilderAttachmentParams => {
 
 describe('AddRulePreviewAttachmentToChatButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('opens agent builder with a rule preview attachment', async () => {

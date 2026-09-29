@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import * as reactRedux from 'react-redux-v7';
@@ -17,16 +20,16 @@ const Wrapper = ({ children }: React.PropsWithChildren) =>
   React.createElement(WrappedHelper, null, children);
 
 describe('useMonitorStatusData', () => {
-  let dispatchMock: jest.Mock;
+  let dispatchMock: Mock;
   beforeEach(() => {
-    dispatchMock = jest.fn();
-    jest.spyOn(reactRedux, 'useDispatch').mockReturnValue(dispatchMock);
-    jest.spyOn(selectedLocationHook, 'useSelectedLocation').mockReturnValue({
+    dispatchMock = vi.fn();
+    vi.spyOn(reactRedux, 'useDispatch').mockReturnValue(dispatchMock);
+    vi.spyOn(selectedLocationHook, 'useSelectedLocation').mockReturnValue({
       id: 'us-east-1',
       label: 'us-east-1',
       isServiceManaged: true,
     });
-    jest.spyOn(selectedMonitorHook, 'useSelectedMonitor').mockReturnValue({
+    vi.spyOn(selectedMonitorHook, 'useSelectedMonitor').mockReturnValue({
       monitor: {
         id: 'testMonitorId',
         type: 'browser',
@@ -58,7 +61,7 @@ describe('useMonitorStatusData', () => {
     } as any);
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not request status data when interval is invalid', async () => {

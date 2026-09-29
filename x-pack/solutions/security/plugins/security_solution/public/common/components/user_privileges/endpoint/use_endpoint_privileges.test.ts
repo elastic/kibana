@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 
@@ -20,11 +23,11 @@ import { getEndpointPrivilegesInitialStateMock } from './mocks';
 import { getEndpointPrivilegesInitialState } from './utils';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
-jest.mock('../../../lib/kibana');
-jest.mock('../../../hooks/use_license', () => {
+vi.mock('../../../lib/kibana');
+vi.mock('../../../hooks/use_license', () => {
   const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
-    isEnterprise: jest.fn(() => true),
+    isPlatinumPlus: vi.fn(),
+    isEnterprise: vi.fn(() => true),
   };
   return {
     licenseService: licenseServiceInstance,
@@ -34,9 +37,9 @@ jest.mock('../../../hooks/use_license', () => {
   };
 });
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
-const KibanaServicesMock = KibanaServices as jest.Mocked<typeof KibanaServices>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+const licenseServiceMock = licenseService as Mocked<typeof licenseService>;
+const KibanaServicesMock = KibanaServices as Mocked<typeof KibanaServices>;
 
 describe('When using useEndpointPrivileges hook', () => {
   let authenticatedUser: AuthenticatedUser;
@@ -49,7 +52,7 @@ describe('When using useEndpointPrivileges hook', () => {
       roles: ['superuser'],
     });
 
-    (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
+    (useCurrentUser as Mock).mockReturnValue(authenticatedUser);
     useKibanaMock().services.fleet!.authz = createFleetAuthzMock();
     useKibanaMock().services.application.capabilities = {
       catalogue: {},
@@ -72,19 +75,19 @@ describe('When using useEndpointPrivileges hook', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     unmount();
   });
 
   it('should return `loading: true` while retrieving privileges', async () => {
-    (useCurrentUser as jest.Mock).mockReturnValue(null);
+    (useCurrentUser as Mock).mockReturnValue(null);
 
     const { rerender } = render();
 
     expect(result.current).toEqual(getEndpointPrivilegesInitialState());
 
     // Make user service available
-    (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
+    (useCurrentUser as Mock).mockReturnValue(authenticatedUser);
     rerender();
 
     expect(result.current).toEqual({
@@ -93,7 +96,7 @@ describe('When using useEndpointPrivileges hook', () => {
   });
 
   it('should return initial state when no user authz', async () => {
-    (useCurrentUser as jest.Mock).mockReturnValue({});
+    (useCurrentUser as Mock).mockReturnValue({});
 
     render();
     expect(result.current).toEqual({ ...getEndpointPrivilegesInitialState(), loading: false });

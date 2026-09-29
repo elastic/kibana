@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -23,13 +25,13 @@ describe('assertContextEngineWriteAccess', () => {
   } = {}) => {
     const security = securityMock.createStart();
     security.authz.checkPrivilegesWithRequest.mockReturnValue({
-      atSpace: jest.fn().mockResolvedValue({ hasAllRequested }),
+      atSpace: vi.fn().mockResolvedValue({ hasAllRequested }),
     });
     return security;
   };
 
   it('throws when the security plugin is unavailable', async () => {
-    const getCoreStart = jest.fn().mockResolvedValue(coreMock.createStart());
+    const getCoreStart = vi.fn().mockResolvedValue(coreMock.createStart());
 
     await expect(
       assertContextEngineWriteAccess({
@@ -43,8 +45,8 @@ describe('assertContextEngineWriteAccess', () => {
 
   it('throws when Context Engine is disabled in the space', async () => {
     const coreStart = coreMock.createStart();
-    coreStart.uiSettings.asScopedToClient = jest.fn().mockReturnValue({
-      get: jest.fn().mockResolvedValue(false),
+    coreStart.uiSettings.asScopedToClient = vi.fn().mockReturnValue({
+      get: vi.fn().mockResolvedValue(false),
     });
 
     await expect(
@@ -59,8 +61,8 @@ describe('assertContextEngineWriteAccess', () => {
 
   it('throws when the user lacks write privileges', async () => {
     const coreStart = coreMock.createStart();
-    coreStart.uiSettings.asScopedToClient = jest.fn().mockReturnValue({
-      get: jest.fn().mockResolvedValue(true),
+    coreStart.uiSettings.asScopedToClient = vi.fn().mockReturnValue({
+      get: vi.fn().mockResolvedValue(true),
     });
     const security = createSecurityStart({ hasAllRequested: false });
 
@@ -77,9 +79,9 @@ describe('assertContextEngineWriteAccess', () => {
   it('passes when Context Engine is enabled and the user can write', async () => {
     const coreStart = coreMock.createStart();
     const uiSettingsClient = {
-      get: jest.fn().mockResolvedValue(true),
+      get: vi.fn().mockResolvedValue(true),
     };
-    coreStart.uiSettings.asScopedToClient = jest.fn().mockReturnValue(uiSettingsClient);
+    coreStart.uiSettings.asScopedToClient = vi.fn().mockReturnValue(uiSettingsClient);
     const security = createSecurityStart();
     const marketingSpaceId = 'marketing';
 

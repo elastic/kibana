@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 
 import { KibanaAssetType } from '../../../types';
@@ -19,27 +22,39 @@ import {
   buildRequiredActions,
 } from './upload_preflight_authz';
 
-jest.mock('../../app_context', () => ({
-  appContextService: {
-    getSecurity: jest.fn(),
-    getConfig: jest.fn(),
-    getInternalUserSOClientForSpaceId: jest.fn(),
-  },
-}));
+vi.mock('../../app_context', () => {
+      const mocked = {
+      appContextService: {
+        getSecurity: vi.fn(),
+        getConfig: vi.fn(),
+        getInternalUserSOClientForSpaceId: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../archive', () => ({
-  getPathParts: jest.requireActual('../archive').getPathParts,
-  traverseArchiveEntries: jest.fn(),
-}));
+vi.mock('../archive', async () => {
+      const mocked = {
+      getPathParts: (await vi.importActual('../archive')).getPathParts,
+      traverseArchiveEntries: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./streaming_packages', () => ({
-  PACKAGES_TO_INSTALL_WITH_STREAMING: ['security_detection_engine'],
-}));
+vi.mock('./streaming_packages', () => {
+      const mocked = {
+      PACKAGES_TO_INSTALL_WITH_STREAMING: ['security_detection_engine'],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../archive/parse', () => ({
-  filterAssetPathForParseAndVerifyArchive: jest.fn().mockReturnValue(false),
-  parseAndVerifyArchive: jest.fn().mockReturnValue({ name: 'mock-package', version: '1.0.0' }),
-}));
+vi.mock('../archive/parse', () => {
+      const mocked = {
+      filterAssetPathForParseAndVerifyArchive: vi.fn().mockReturnValue(false),
+      parseAndVerifyArchive: vi.fn().mockReturnValue({ name: 'mock-package', version: '1.0.0' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockRequest = {} as KibanaRequest;
 const mockSpaceId = 'default';
@@ -51,7 +66,7 @@ function makeAssetBuffer(attributes: Record<string, unknown>): Buffer {
 }
 
 function mockTraverseEntries(entries: Array<{ path: string; buffer?: Buffer }>) {
-  (traverseArchiveEntries as jest.Mock).mockImplementation(
+  (traverseArchiveEntries as Mock).mockImplementation(
     async (_buf: Buffer, _type: string, onEntry: any, readBuffer?: (path: string) => boolean) => {
       for (const entry of entries) {
         const shouldRead = readBuffer ? readBuffer(entry.path) : false;
@@ -70,8 +85,8 @@ function makeSecurity(hasAllRequested: boolean, missingPrivileges: string[] = []
           get: (name: string) => `api:${name}`,
         },
       },
-      checkPrivilegesWithRequest: jest.fn().mockReturnValue({
-        atSpaces: jest.fn().mockResolvedValue({
+      checkPrivilegesWithRequest: vi.fn().mockReturnValue({
+        atSpaces: vi.fn().mockResolvedValue({
           hasAllRequested,
           privileges: { kibana: kibanaPrivileges },
         }),
@@ -84,7 +99,7 @@ function makeSavedObjectsClient(
   rules: Array<{ id: string; attributes?: Record<string, unknown>; error?: object }> = []
 ) {
   return {
-    bulkGet: jest.fn().mockResolvedValue({
+    bulkGet: vi.fn().mockResolvedValue({
       saved_objects: rules.map((r) => ({
         id: r.id,
         type: 'security-rule',
@@ -100,7 +115,7 @@ const mockSavedObjectsClient = makeSavedObjectsClient() as any;
 
 describe('collectArchiveSignals', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty signals for archives with no gated asset types', async () => {
@@ -162,7 +177,7 @@ describe('collectArchiveSignals', () => {
     await collectArchiveSignals(mockArchiveBuffer, mockContentType);
 
     // 4th argument to traverseArchiveEntries is the readBuffer predicate
-    const readBufferFn = (traverseArchiveEntries as jest.Mock).mock.calls[0][3]!;
+    const readBufferFn = (traverseArchiveEntries as Mock).mock.calls[0][3]!;
     expect(readBufferFn('mypackage-1.0.0/kibana/security_ai_prompt/my-prompt.json')).toBe(false);
     expect(readBufferFn('mypackage-1.0.0/kibana/security_rule/my-rule.json')).toBe(true);
   });
@@ -187,7 +202,7 @@ describe('parsePackageAndCollectSignals — signal collection parity with collec
   // These tests use the production entry point (parsePackageAndCollectSignals) so that any drift
   // between the two scanning paths is caught by the same test matrix as collectArchiveSignals.
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty signals for archives with no gated asset types', async () => {
@@ -303,13 +318,13 @@ describe('buildRequiredActions', () => {
 
 describe('checkUploadPackageAssetPrivileges', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSavedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
   });
 
   it('allows upload when archive contains no gated asset types', async () => {
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     await expect(
       checkUploadPackageAssetPrivileges({
@@ -327,7 +342,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('checks rules-all for non-ML security_rule package', async () => {
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
@@ -354,7 +369,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('checks rules-all + ml:canCreateJob for ML security_rule package', async () => {
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
@@ -379,7 +394,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('throws FleetUnauthorizedError when caller lacks ml:canCreateJob for ML rule package', async () => {
     const security = makeSecurity(false, ['api:ml:canCreateJob']);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     await expect(
       checkUploadPackageAssetPrivileges({
@@ -398,7 +413,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('throws FleetUnauthorizedError when caller lacks rules-all for security_rule package', async () => {
     const security = makeSecurity(false, ['api:rules-all']);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     await expect(
       checkUploadPackageAssetPrivileges({
@@ -417,7 +432,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('checks elasticAssistant for security_ai_prompt package', async () => {
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
@@ -440,7 +455,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('accumulates union of required actions for mixed gated types', async () => {
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     await checkUploadPackageAssetPrivileges({
       request: mockRequest,
@@ -468,7 +483,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
   });
 
   it('throws FleetUnauthorizedError when security plugin is unavailable (fail closed)', async () => {
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(null);
+    (appContextService.getSecurity as Mock).mockReturnValue(null);
 
     await expect(
       checkUploadPackageAssetPrivileges({
@@ -487,7 +502,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('fans out to all additional spaces when upgrading from primary space', async () => {
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     const installation = {
       attributes: {
@@ -517,7 +532,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('checks only the request space when uploading from an additional (non-primary) space', async () => {
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     const installation = {
       attributes: {
@@ -548,7 +563,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('returns all destination spaces for a primary-space upgrade (used to cap propagation)', async () => {
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     const installation = {
       attributes: {
@@ -575,7 +590,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('returns only the request space for an additional-space install (no fan-out)', async () => {
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     const installation = {
       attributes: {
@@ -601,7 +616,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('checks privileges when archive has no gated types but existing install has security_rule refs (gated-to-benign removal)', async () => {
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     const installation = {
       attributes: {
@@ -631,7 +646,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('throws FleetUnauthorizedError when caller lacks privileges to remove gated types', async () => {
     const security = makeSecurity(false, ['api:rules-all']);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     const installation = {
       attributes: {
@@ -655,7 +670,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('skips privilege check when archive and existing install both have no gated types', async () => {
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     const installation = {
       attributes: {
@@ -685,7 +700,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
     // Preflight must read the same source — otherwise additional_spaces_installed_kibana[spaceId]
     // is empty, the check is skipped, and cleanup removes the security rule via internal client.
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     const installation = {
       attributes: {
@@ -721,7 +736,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
     // security_detection_engine uses streaming install, which writes only to the request Space.
     // Preflight must mirror that — do not require privileges in the other Spaces.
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     const installation = {
       attributes: {
@@ -758,8 +773,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
     // upload fans out to space-a and cleanUpUnusedKibanaAssetsStep would delete
     // the security-rule SO there. Preflight must detect this and require rules-all.
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-    (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue(
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
+    (appContextService.getInternalUserSOClientForSpaceId as Mock).mockReturnValue(
       makeSavedObjectsClient([{ id: 'old-rule', attributes: { type: 'query' } }])
     );
 
@@ -802,8 +817,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
     // in both spaces, rejecting a caller who has each privilege in only its own Space.
     // Per-space: space-a needs only rules-all, space-b needs only elasticAssistant.
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-    (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue(
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
+    (appContextService.getInternalUserSOClientForSpaceId as Mock).mockReturnValue(
       makeSavedObjectsClient([{ id: 'old-rule', attributes: { type: 'query' } }])
     );
 
@@ -842,7 +857,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('skips privilege check when benign archive and additional Space refs are all non-gated', async () => {
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     const installation = {
       attributes: {
@@ -873,7 +888,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
     // cleanUpUnusedKibanaAssetsStep will delete the ML rule via the internal client.
     // Preflight must detect the ML subtype from the SO and require ml:canCreateJob.
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     const installation = {
       attributes: {
@@ -916,7 +931,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('fails closed (requires ml:canCreateJob) when savedObjectsClient.bulkGet throws during ML subtype detection', async () => {
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     const installation = {
       attributes: {
@@ -953,8 +968,8 @@ describe('checkUploadPackageAssetPrivileges', () => {
     // attributes.type === 'machine_learning'. The archive is benign (no security rules).
     // Without per-space SO reads, the ML subtype is not detected and ml:canCreateJob is omitted.
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-    (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue(
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
+    (appContextService.getInternalUserSOClientForSpaceId as Mock).mockReturnValue(
       makeSavedObjectsClient([
         { id: 'ml-rule-in-space-a', attributes: { type: 'machine_learning' } },
       ])
@@ -993,9 +1008,9 @@ describe('checkUploadPackageAssetPrivileges', () => {
 
   it('fails closed (requires ml:canCreateJob) when internal client bulkGet throws for an additional Space ML check', async () => {
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
-    (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue({
-      bulkGet: jest.fn().mockRejectedValue(new Error('internal client read failed')),
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
+    (appContextService.getInternalUserSOClientForSpaceId as Mock).mockReturnValue({
+      bulkGet: vi.fn().mockRejectedValue(new Error('internal client read failed')),
     });
 
     const installation = {
@@ -1031,7 +1046,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
   it('fails closed (requires ml:canCreateJob) when bulkGet returns a non-404 per-object error for an existing security rule', async () => {
     // Non-404 errors (e.g. 403 Forbidden) are unexpected — fail closed.
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     const installation = {
       attributes: {
@@ -1072,7 +1087,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
   it('does not require ml:canCreateJob when bulkGet returns 404 for an incoming rule ID (rule does not exist yet)', async () => {
     // 404 = rule doesn't exist — not ML, no ml:canCreateJob needed.
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     mockSavedObjectsClient.bulkGet.mockResolvedValue({
       saved_objects: [
@@ -1109,7 +1124,7 @@ describe('checkUploadPackageAssetPrivileges', () => {
     // An incoming non-ML rule whose SO id matches an existing ML rule would overwrite it via
     // Fleet's overwrite semantics. Detect this during preflight and require ml:canCreateJob.
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     mockSavedObjectsClient.bulkGet.mockResolvedValue({
       saved_objects: [
@@ -1151,12 +1166,12 @@ describe('checkUploadPackageAssetPrivileges', () => {
     // outside Fleet). The old guard `space === spaceId` skipped incomingRuleIds for space-a, so
     // the ML collision went undetected and ml:canCreateJob was not required.
     const security = makeSecurity(true);
-    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+    (appContextService.getSecurity as Mock).mockReturnValue(security);
 
     const internalClientForSpaceA = makeSavedObjectsClient([
       { id: 'colliding-id', attributes: { type: 'machine_learning' } },
     ]);
-    (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientForSpaceId as Mock).mockReturnValue(
       internalClientForSpaceA
     );
 

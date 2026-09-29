@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
@@ -14,14 +17,14 @@ import { exportExceptionListAndItems } from './export_exception_list_and_items';
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 import { getExceptionList } from './get_exception_list';
 
-jest.mock('./get_exception_list');
-jest.mock('./find_exception_list_item_point_in_time_finder');
+vi.mock('./get_exception_list');
+vi.mock('./find_exception_list_item_point_in_time_finder');
 
 describe('export_exception_list_and_items', () => {
   describe('exportExceptionListAndItems', () => {
     test('it should return null if no matching exception list found', async () => {
-      (getExceptionList as jest.Mock).mockResolvedValue(null);
-      (findExceptionListItemPointInTimeFinder as jest.Mock).mockImplementationOnce(
+      (getExceptionList as Mock).mockResolvedValue(null);
+      (findExceptionListItemPointInTimeFinder as Mock).mockImplementationOnce(
         ({ executeFunctionOnStream }) => {
           executeFunctionOnStream({ data: [getExceptionListItemSchemaMock()] });
         }
@@ -38,8 +41,8 @@ describe('export_exception_list_and_items', () => {
     });
 
     test('it should return stringified list and items', async () => {
-      (getExceptionList as jest.Mock).mockResolvedValue(getExceptionListSchemaMock());
-      (findExceptionListItemPointInTimeFinder as jest.Mock).mockImplementationOnce(
+      (getExceptionList as Mock).mockResolvedValue(getExceptionListSchemaMock());
+      (findExceptionListItemPointInTimeFinder as Mock).mockImplementationOnce(
         ({ executeFunctionOnStream }) => {
           executeFunctionOnStream({ data: [getExceptionListItemSchemaMock()] });
         }
@@ -71,8 +74,8 @@ describe('export_exception_list_and_items', () => {
       ${'with expired exceptions'}     | ${true}        | ${'^tags: foo$'}
       ${'with OUT expired exceptions'} | ${false}       | ${'^\\(tags: foo\\) AND \\(exception-list.attributes.expire_time'}
     `('it should use a `filter` $title', async ({ includeExpired, expectedStringMatch }) => {
-      (getExceptionList as jest.Mock).mockResolvedValue(getExceptionListSchemaMock());
-      (findExceptionListItemPointInTimeFinder as jest.Mock).mockImplementationOnce(
+      (getExceptionList as Mock).mockResolvedValue(getExceptionListSchemaMock());
+      (findExceptionListItemPointInTimeFinder as Mock).mockImplementationOnce(
         ({ executeFunctionOnStream }) => {
           executeFunctionOnStream({ data: [getExceptionListItemSchemaMock()] });
         }

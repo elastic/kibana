@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { render as reactRender, type RenderResult } from '@testing-library/react';
 import MicrosoftDefenderEndpointParamsFields from './microsoft_defender_endpoint_params';
 import type { ActionParamsProps } from '@kbn/alerts-ui-shared';
@@ -18,7 +20,7 @@ describe('Microsoft Defender for Endpoint Params.', () => {
   beforeEach(() => {
     renderProps = {
       errors: {},
-      editAction: jest.fn(),
+      editAction: vi.fn(),
       actionParams: {},
       index: 0,
     };

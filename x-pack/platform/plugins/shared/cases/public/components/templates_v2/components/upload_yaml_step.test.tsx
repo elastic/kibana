@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,14 +15,14 @@ import { UploadYamlStep } from './upload_yaml_step';
 import { useValidateYaml } from '../hooks/use_validate_yaml';
 import type { ValidatedFile, FileValidationError } from '../hooks/use_validate_yaml';
 
-jest.mock('../hooks/use_validate_yaml');
+vi.mock('../hooks/use_validate_yaml');
 
-const mockUseValidateYaml = useValidateYaml as jest.MockedFunction<typeof useValidateYaml>;
+const mockUseValidateYaml = useValidateYaml as MockedFunction<typeof useValidateYaml>;
 
 describe('UploadYamlStep', () => {
-  const mockOnValidationStart = jest.fn();
-  const mockOnValidationComplete = jest.fn();
-  const mockValidateFiles = jest.fn();
+  const mockOnValidationStart = vi.fn();
+  const mockOnValidationComplete = vi.fn();
+  const mockValidateFiles = vi.fn();
 
   const mockValidatedFile: ValidatedFile = {
     file: new File(['name: Test\nfields: []'], 'template.yaml', { type: 'application/x-yaml' }),
@@ -32,7 +35,7 @@ describe('UploadYamlStep', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseValidateYaml.mockReturnValue({
       validateFiles: mockValidateFiles,
     });

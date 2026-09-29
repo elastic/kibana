@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { alertDeletePreviewRoute } from './get_alert_delete_preview_route';
@@ -11,16 +14,22 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { alertDeletionClientMock } from '../../../../alert_deletion/alert_deletion_client.mock';
 import { rulesClientMock } from '../../../../rules_client.mock';
 
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/track_legacy_terminology', () => ({
-  trackLegacyTerminology: jest.fn(),
-}));
+vi.mock('../../../lib/track_legacy_terminology', () => {
+      const mocked = {
+      trackLegacyTerminology: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 const alertDeletionClient = alertDeletionClientMock.create();
@@ -58,8 +67,8 @@ describe('alertDeletePreviewRoute', () => {
       `"/internal/alerting/rules/settings/_alert_delete_preview"`
     );
 
-    (rulesClient.getSpaceId as jest.Mock).mockResolvedValueOnce('default');
-    (alertDeletionClient.previewTask as jest.Mock).mockResolvedValueOnce(100);
+    (rulesClient.getSpaceId as Mock).mockResolvedValueOnce('default');
+    (alertDeletionClient.previewTask as Mock).mockResolvedValueOnce(100);
 
     const [context, req, res] = mockHandlerArguments(
       {

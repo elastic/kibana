@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
 
@@ -20,19 +23,19 @@ import { AuthType, WebhookMethods, SSLCertType } from '@kbn/connector-schemas/co
 import { CRT_FILE, KEY_FILE } from '@kbn/connector-schemas/common/auth/mocks';
 import type { ExternalService } from './types';
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
+  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
   return {
     ...originalUtils,
-    request: jest.fn(),
+    request: vi.fn(),
   };
 });
 
-axios.create = jest.fn(() => axios);
+axios.create = vi.fn(() => axios);
 
-const requestMock = request as jest.Mock;
+const requestMock = request as Mock;
 const configurationUtilities = actionsConfigMock.create();
 
 const config: CasesWebhookPublicConfigurationType = {
@@ -116,15 +119,15 @@ describe('Cases webhook service', () => {
       configurationUtilities,
       connectorUsageCollector
     );
-    jest.useFakeTimers();
-    jest.setSystemTime(mockTime);
+    vi.useFakeTimers();
+    vi.setSystemTime(mockTime);
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('createExternalService', () => {
@@ -1808,7 +1811,7 @@ describe('Cases webhook service', () => {
         logger,
         {
           ...configurationUtilities,
-          ensureUriAllowed: jest.fn().mockImplementation(() => {
+          ensureUriAllowed: vi.fn().mockImplementation(() => {
             throw new Error('Uri not allowed');
           }),
         },
@@ -1817,7 +1820,7 @@ describe('Cases webhook service', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     it('getIncident- throws for bad url', async () => {
       await expect(service.getIncident('whack')).rejects.toThrow(
@@ -1892,7 +1895,7 @@ describe('Cases webhook service', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     it('getIncident- throws for bad protocol', async () => {
       await expect(service.getIncident('whack')).rejects.toThrow(
@@ -1971,7 +1974,7 @@ describe('Cases webhook service', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     it('getIncident- escapes url', async () => {
       await service.getIncident('../../malicious-app/malicious-endpoint/');

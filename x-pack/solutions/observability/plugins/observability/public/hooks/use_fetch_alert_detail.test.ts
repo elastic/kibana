@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { kibanaStartMock } from '../utils/kibana_react.mock';
 import * as pluginContext from './use_plugin_context';
@@ -14,9 +16,9 @@ import { useFetchAlertDetail } from './use_fetch_alert_detail';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
-jest.mock('../utils/kibana_react', () => ({
+vi.mock('../utils/kibana_react', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+  useKibana: vi.fn(() => mockUseKibanaReturnValue),
 }));
 
 describe('useFetchAlertDetail', () => {
@@ -51,7 +53,7 @@ describe('useFetchAlertDetail', () => {
 
   beforeEach(() => {
     mockUseKibanaReturnValue.services.http.get.mockImplementation(async () => getResult);
-    jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(
+    vi.spyOn(pluginContext, 'usePluginContext').mockImplementation(
       () =>
         ({
           observabilityRuleTypeRegistry: ruleType,
@@ -60,7 +62,7 @@ describe('useFetchAlertDetail', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('initially is loading and does not have data', () => {

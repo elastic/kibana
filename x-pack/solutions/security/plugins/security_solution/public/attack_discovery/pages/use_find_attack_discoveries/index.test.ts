@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import '@kbn/react-query/mock';
 import { useQueryClient, QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -21,24 +24,27 @@ import type { AttackDiscoveryFindResponse } from '@kbn/elastic-assistant-common'
 import { useFindAttackDiscoveries, useInvalidateFindAttackDiscoveries } from '.';
 import { ERROR_FINDING_ATTACK_DISCOVERIES } from './translations';
 
-const mockAddError = jest.fn();
-const useQueryClientMock = useQueryClient as unknown as jest.MockedFn<typeof useQueryClient>;
+const mockAddError = vi.fn();
+const useQueryClientMock = useQueryClient as unknown as MockedFunction<typeof useQueryClient>;
 
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addError: mockAddError,
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    addInfo: jest.fn(),
-    remove: jest.fn(),
-  }),
-  get mockAddError() {
-    return mockAddError;
-  },
-}));
+vi.mock('../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addError: mockAddError,
+        addSuccess: vi.fn(),
+        addWarning: vi.fn(),
+        addInfo: vi.fn(),
+        remove: vi.fn(),
+      }),
+      get mockAddError() {
+        return mockAddError;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockHttp: HttpSetup = {
-  fetch: jest.fn(),
+  fetch: vi.fn(),
 } as unknown as HttpSetup;
 
 let queryClient: QueryClient;
@@ -53,7 +59,7 @@ function wrapper(props: { children: React.ReactNode }) {
 
 describe('useFindAttackDiscoveries', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     queryClient = new QueryClient();
   });
@@ -61,7 +67,7 @@ describe('useFindAttackDiscoveries', () => {
   it('calls addError with the expected title', async () => {
     const errorBody = { message: 'Server error message' };
     const error = { body: errorBody };
-    (mockHttp.fetch as jest.Mock).mockRejectedValueOnce(error);
+    (mockHttp.fetch as Mock).mockRejectedValueOnce(error);
 
     renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
       wrapper,
@@ -76,7 +82,7 @@ describe('useFindAttackDiscoveries', () => {
   it('returns an error when a server error body is present', async () => {
     const errorBody = { message: 'Server error message' };
     const error = { body: errorBody };
-    (mockHttp.fetch as jest.Mock).mockRejectedValueOnce(error);
+    (mockHttp.fetch as Mock).mockRejectedValueOnce(error);
 
     const { result } = renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
       wrapper,
@@ -111,7 +117,7 @@ describe('useFindAttackDiscoveries', () => {
       unique_alert_ids_count: 1,
     };
 
-    (mockHttp.fetch as jest.Mock).mockResolvedValueOnce(apiResponse);
+    (mockHttp.fetch as Mock).mockResolvedValueOnce(apiResponse);
 
     const expected = {
       connector_names: apiResponse.connector_names,
@@ -133,7 +139,7 @@ describe('useFindAttackDiscoveries', () => {
   });
 
   it('calls GET with the public API route', async () => {
-    (mockHttp.fetch as jest.Mock).mockResolvedValue({});
+    (mockHttp.fetch as Mock).mockResolvedValue({});
     renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
       wrapper,
     });
@@ -149,7 +155,7 @@ describe('useFindAttackDiscoveries', () => {
   });
 
   it('calls GET with the public API version', async () => {
-    (mockHttp.fetch as jest.Mock).mockResolvedValue({});
+    (mockHttp.fetch as Mock).mockResolvedValue({});
     renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
       wrapper,
     });
@@ -165,7 +171,7 @@ describe('useFindAttackDiscoveries', () => {
   });
 
   it('includes `with_replacements: false` in the request query', async () => {
-    (mockHttp.fetch as jest.Mock).mockResolvedValue({});
+    (mockHttp.fetch as Mock).mockResolvedValue({});
     renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
       wrapper,
     });
@@ -181,7 +187,7 @@ describe('useFindAttackDiscoveries', () => {
   });
 
   it('includes `enable_field_rendering: true` in the request query', async () => {
-    (mockHttp.fetch as jest.Mock).mockResolvedValue({});
+    (mockHttp.fetch as Mock).mockResolvedValue({});
     renderHook(() => useFindAttackDiscoveries({ ...defaultProps }), {
       wrapper,
     });
@@ -199,7 +205,7 @@ describe('useFindAttackDiscoveries', () => {
 
 describe('useInvalidateFindAttackDiscoveries', () => {
   it('calls invalidateQueries with the public API route', () => {
-    const invalidateQueries = jest.fn();
+    const invalidateQueries = vi.fn();
     useQueryClientMock.mockReturnValue({ invalidateQueries } as unknown as ReturnType<
       typeof useQueryClient
     >);

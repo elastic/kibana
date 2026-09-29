@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type {
   Datatable,
@@ -150,12 +152,12 @@ describe('datatableFn', () => {
 
   it('should ask inspector Data to show the table dash for missing values', async () => {
     const tables = {
-      reset: jest.fn(function (this: { missingValueDisplay: 'text' | 'table' }) {
+      reset: vi.fn(function (this: { missingValueDisplay: 'text' | 'table' }) {
         this.missingValueDisplay = 'text';
       }),
       allowCsvExport: false,
       missingValueDisplay: 'text' as const,
-      logDatatable: jest.fn(),
+      logDatatable: vi.fn(),
     };
     const ctx = {
       ...context,

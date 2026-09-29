@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useRelatedDashboards } from './use_related_dashboards';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
@@ -34,19 +36,22 @@ const TEST_DASHBOARD_3 = {
   description: 'This is dashboard 3',
 };
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
+vi.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+  useKibana: vi.fn(() => mockUseKibanaReturnValue),
 }));
 
-const mockUseQuery = jest.fn();
-jest.mock('@kbn/react-query', () => ({
-  useQuery: (params: { queryKey: string[]; queryFn: () => Promise<any> }) => mockUseQuery(params),
-}));
+const mockUseQuery = vi.fn();
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQuery: (params: { queryKey: string[]; queryFn: () => Promise<any> }) => mockUseQuery(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useRelatedDashboards', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibanaReturnValue.services.http.get.mockClear();
 
     // Default mock setup for loading state

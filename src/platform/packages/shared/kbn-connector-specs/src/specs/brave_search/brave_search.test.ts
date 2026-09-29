@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { BraveSearchConnector } from './brave_search';
 
 describe('BraveSearchConnector', () => {
   const mockClient = {
-    get: jest.fn(),
+    get: vi.fn(),
   };
 
   const mockContext = {
@@ -31,7 +33,7 @@ describe('BraveSearchConnector', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Default mock implementation
     mockClient.get.mockResolvedValue(createMockResponse());
   });

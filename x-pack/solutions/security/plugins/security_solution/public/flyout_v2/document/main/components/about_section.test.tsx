@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { act, render } from '@testing-library/react';
@@ -16,43 +18,67 @@ import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { ABOUT_SECTION_TEST_ID, AboutSection } from './about_section';
 import { ABOUT_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 
-jest.mock('../../../use_flyout_api');
+vi.mock('../../../use_flyout_api');
 
 // Capture the `onShowRuleSummary` prop passed to AlertDescription so the test can invoke it.
 let capturedOnShowRuleSummary: (() => void) | undefined;
-jest.mock('./alert_description', () => ({
-  AlertDescription: ({ onShowRuleSummary }: { onShowRuleSummary?: () => void }) => {
-    capturedOnShowRuleSummary = onShowRuleSummary;
-    return <div>{'AlertDescription'}</div>;
-  },
-}));
+vi.mock('./alert_description', () => {
+      const mocked = {
+      AlertDescription: ({ onShowRuleSummary }: { onShowRuleSummary?: () => void }) => {
+        capturedOnShowRuleSummary = onShowRuleSummary;
+        return <div>{'AlertDescription'}</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./alert_reason', () => ({
-  AlertReason: () => <div>{'AlertReason'}</div>,
-}));
+vi.mock('./alert_reason', () => {
+      const mocked = {
+      AlertReason: () => <div>{'AlertReason'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./alert_status', () => ({
-  AlertStatus: () => <div>{'AlertStatus'}</div>,
-}));
-jest.mock('./mitre_attack', () => ({
-  MitreAttack: () => <div>{'MitreAttack'}</div>,
-}));
+vi.mock('./alert_status', () => {
+      const mocked = {
+      AlertStatus: () => <div>{'AlertStatus'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./mitre_attack', () => {
+      const mocked = {
+      MitreAttack: () => <div>{'MitreAttack'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./event_category_description', () => ({
-  EventCategoryDescription: () => <div>{'EventCategoryDescription'}</div>,
-}));
+vi.mock('./event_category_description', () => {
+      const mocked = {
+      EventCategoryDescription: () => <div>{'EventCategoryDescription'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./event_kind_description', () => ({
-  EventKindDescription: () => <div>{'EventKindDescription'}</div>,
-}));
+vi.mock('./event_kind_description', () => {
+      const mocked = {
+      EventKindDescription: () => <div>{'EventKindDescription'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./event_renderer', () => ({
-  EventRenderer: () => <div>{'EventRenderer'}</div>,
-}));
+vi.mock('./event_renderer', () => {
+      const mocked = {
+      EventRenderer: () => <div>{'EventRenderer'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
+vi.mock('../../../shared/hooks/use_expand_section', () => {
+      const mocked = {
+      useExpandSection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -69,13 +95,13 @@ const alertHit = createMockHit({
 });
 
 describe('AboutSection', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseExpandSection = vi.mocked(useExpandSection);
   const flyoutApi = createFlyoutApiMock();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedOnShowRuleSummary = undefined;
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
   });
 
   it('renders the About expandable section', () => {

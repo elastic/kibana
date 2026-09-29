@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -387,8 +390,8 @@ describe('deriveScoutConfigsForFiles', () => {
 describe('resolveScoutTestingScope', () => {
   let tmpRoot: string;
   let log: ToolingLog;
-  let infoSpy: jest.SpyInstance;
-  let warningSpy: jest.SpyInstance;
+  let infoSpy: MockInstance;
+  let warningSpy: MockInstance;
 
   const touch = (rel: string) => {
     const abs = path.join(tmpRoot, rel);
@@ -405,13 +408,13 @@ describe('resolveScoutTestingScope', () => {
   beforeEach(() => {
     tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'scout-testing-scope-'));
     log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
-    infoSpy = jest.spyOn(log, 'info').mockImplementation(jest.fn());
-    warningSpy = jest.spyOn(log, 'warning').mockImplementation(jest.fn());
+    infoSpy = vi.spyOn(log, 'info').mockImplementation(vi.fn());
+    warningSpy = vi.spyOn(log, 'warning').mockImplementation(vi.fn());
   });
 
   afterEach(() => {
     fs.rmSync(tmpRoot, { recursive: true, force: true });
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns full/selective-disabled when selectiveTesting is false', () => {

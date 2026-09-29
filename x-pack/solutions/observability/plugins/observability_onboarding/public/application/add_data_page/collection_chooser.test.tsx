@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,13 +16,13 @@ import { MemoryRouter } from '@kbn/shared-ux-router';
 import { CollectionChooser } from './collection_chooser';
 import { FleetCardsProvider } from './fleet_cards_provider';
 
-const mockUseAvailablePackages = jest.fn();
+const mockUseAvailablePackages = vi.fn();
 
 // Stub the Fleet public bundle; this suite only renders members.
-jest.mock('@kbn/fleet-plugin/public', () => {
-  const ReactActual = jest.requireActual('react');
+vi.mock('@kbn/fleet-plugin/public', () => {
+  const ReactActual = require('react');
   return {
-    LocalSearchHook: () => Promise.resolve({ useLocalSearch: jest.fn() }),
+    LocalSearchHook: () => Promise.resolve({ useLocalSearch: vi.fn() }),
     AvailablePackagesHook: () =>
       Promise.resolve({ useAvailablePackages: mockUseAvailablePackages }),
     useGetSettingsQuery: () => ({ data: undefined }),
@@ -114,7 +116,7 @@ const renderChooser = ({
             <CollectionChooser
               collection={collection}
               searchTerm={searchTerm}
-              onClose={jest.fn()}
+              onClose={vi.fn()}
             />
             <div data-test-subj="probeMounted" />
           </FleetCardsProvider>
@@ -134,7 +136,7 @@ const memberIds = () =>
     .map((row) => row.getAttribute('data-test-subj')?.replace('collectionVariantRow-', ''));
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseAvailablePackages.mockReturnValue({
     isLoading: false,
     eprPackageLoadingError: undefined,

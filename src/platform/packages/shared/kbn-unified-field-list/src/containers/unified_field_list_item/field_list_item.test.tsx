@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { UnifiedFieldListItemProps } from './field_list_item';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
@@ -19,25 +21,28 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { UnifiedFieldListItem } from './field_list_item';
 
-jest.mock('../../services/field_stats', () => ({
-  loadFieldStats: jest.fn().mockResolvedValue({
-    totalDocuments: 1624,
-    sampledDocuments: 1624,
-    sampledValues: 3248,
-    topValues: {
-      buckets: [
-        {
-          count: 2042,
-          key: 'osx',
+vi.mock('../../services/field_stats', () => {
+      const mocked = {
+      loadFieldStats: vi.fn().mockResolvedValue({
+        totalDocuments: 1624,
+        sampledDocuments: 1624,
+        sampledValues: 3248,
+        topValues: {
+          buckets: [
+            {
+              count: 2042,
+              key: 'osx',
+            },
+            {
+              count: 1206,
+              key: 'winx',
+            },
+          ],
         },
-        {
-          count: 1206,
-          key: 'winx',
-        },
-      ],
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderComponent = async ({
   canFilter = true,
@@ -79,16 +84,16 @@ const renderComponent = async ({
     isEmpty: false,
     isSelected: selected,
     itemIndex: 0,
-    onAddFieldToWorkspace: jest.fn(),
-    onEditField: jest.fn(),
-    onRemoveFieldFromWorkspace: jest.fn(),
+    onAddFieldToWorkspace: vi.fn(),
+    onEditField: vi.fn(),
+    onRemoveFieldFromWorkspace: vi.fn(),
     searchMode: 'documents',
     services: getServicesMock(),
     size: 'xs',
     stateService,
     workspaceSelectedFieldNames: [],
-    ...(canFilter && { onAddFilter: jest.fn() }),
-    ...(isBreakdownSupported && { onAddBreakdownField: jest.fn() }),
+    ...(canFilter && { onAddFilter: vi.fn() }),
+    ...(isBreakdownSupported && { onAddBreakdownField: vi.fn() }),
   };
 
   const user = userEvent.setup();

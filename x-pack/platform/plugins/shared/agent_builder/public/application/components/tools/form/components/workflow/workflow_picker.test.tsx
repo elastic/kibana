@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,11 +14,14 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { WorkflowPicker } from './workflow_picker';
 
-const mockUseListWorkflows = jest.fn();
+const mockUseListWorkflows = vi.fn();
 
-jest.mock('../../../../../hooks/tools/use_list_workflows', () => ({
-  useListWorkflows: () => mockUseListWorkflows(),
-}));
+vi.mock('../../../../../hooks/tools/use_list_workflows', () => {
+      const mocked = {
+      useListWorkflows: () => mockUseListWorkflows(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockWorkflows = [
   { id: 'wf-1', name: 'Workflow One', description: 'First workflow' },
@@ -48,7 +53,7 @@ function TestWrapper({
 
 describe('WorkflowPicker', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseListWorkflows.mockReturnValue({
       data: mockWorkflows,
       isLoading: false,

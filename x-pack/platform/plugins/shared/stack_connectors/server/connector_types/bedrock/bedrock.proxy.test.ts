@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedClass } from 'vitest';
+
 import { DEFAULT_URL } from '@kbn/connector-schemas/bedrock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
@@ -15,9 +18,9 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 // Asserting on the options the connector hands to NodeHttpHandler keeps these
 // tests pinned to our own agent-selection logic rather than to @smithy's
 // internal resolved-config shape, which has changed across minor versions.
-jest.mock('@smithy/node-http-handler');
+vi.mock('@smithy/node-http-handler');
 
-const nodeHttpHandlerMock = NodeHttpHandler as jest.MockedClass<typeof NodeHttpHandler>;
+const nodeHttpHandlerMock = NodeHttpHandler as MockedClass<typeof NodeHttpHandler>;
 
 const logger = loggingSystemMock.createLogger();
 
@@ -44,7 +47,7 @@ describe('Bedrock with proxy config', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: PROXY_URL_HTTP,
       proxySSLSettings: {

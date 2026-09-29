@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   extractImageInfo,
   getCommitUrl,
@@ -14,12 +16,12 @@ import {
   getServerlessImageTag,
 } from './extract_image_info';
 
-jest.mock('execa');
-const execa = jest.requireMock('execa');
+vi.mock('execa');
+const execa = (await vi.importMock('execa'));
 
 describe('extractImageInfo', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls docker, once, and only once for one image', async () => {

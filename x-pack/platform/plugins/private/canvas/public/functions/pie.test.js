@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fontStyle, functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { testPie } from '../../canvas_plugin_src/functions/common/__fixtures__/test_pointseries';
 import {
@@ -56,7 +58,7 @@ describe('pie', () => {
   describe('args', () => {
     describe('palette', () => {
       it('sets the color palette', () => {
-        const mockedColors = jest.fn(() => ['#FFFFFF', '#888888', '#000000']);
+        const mockedColors = vi.fn(() => ['#FFFFFF', '#888888', '#000000']);
         const mockedFn = functionWrapper(
           pieFunctionFactory({
             get: () => ({

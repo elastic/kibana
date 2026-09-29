@@ -7,28 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getSampleDashboardState } from '../../mocks';
 import { saveDashboard } from './save_dashboard';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
-const mockCreate = jest.fn();
-const mockUpdate = jest.fn();
-const mockShowDashboardSavedToast = jest.fn();
+const mockCreate = vi.fn();
+const mockUpdate = vi.fn();
+const mockShowDashboardSavedToast = vi.fn();
 
-jest.mock('../../dashboard_client', () => ({
-  dashboardClient: {
-    create: (dashboardState: DashboardState) => mockCreate(dashboardState),
-    update: (id: string, dashboardState: DashboardState) => mockUpdate(id, dashboardState),
-  },
-}));
+vi.mock('../../dashboard_client', () => {
+      const mocked = {
+      dashboardClient: {
+        create: (dashboardState: DashboardState) => mockCreate(dashboardState),
+        update: (id: string, dashboardState: DashboardState) => mockUpdate(id, dashboardState),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./show_dashboard_saved_toast', () => ({
-  showDashboardSavedToast: (params: unknown) => mockShowDashboardSavedToast(params),
-}));
+vi.mock('./show_dashboard_saved_toast', () => {
+      const mocked = {
+      showDashboardSavedToast: (params: unknown) => mockShowDashboardSavedToast(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Save dashboard state', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should save the dashboard using the same ID', async () => {

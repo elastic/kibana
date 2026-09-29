@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getDocLinksMock = jest.fn();
-export const getDocLinksMetaMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('@kbn/doc-links', () => ({
-  getDocLinks: getDocLinksMock,
-  getDocLinksMeta: getDocLinksMetaMock,
-}));
+export const getDocLinksMock = vi.fn();
+export const getDocLinksMetaMock = vi.fn();
+
+vi.doMock('@kbn/doc-links', () => {
+      const mocked = {
+      getDocLinks: getDocLinksMock,
+      getDocLinksMeta: getDocLinksMetaMock,
+    };
+      return { ...mocked, default: mocked };
+    });

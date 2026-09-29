@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { apm } from '@elastic/apm-rum';
 import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { isAbortError, isExpectedTransportFailure, reportFetchError } from './report_fetch_error';
@@ -91,10 +94,10 @@ describe('report_fetch_error', () => {
   });
 
   describe('reportFetchError', () => {
-    let captureErrorSpy: jest.SpyInstance;
+    let captureErrorSpy: MockInstance;
 
     beforeEach(() => {
-      captureErrorSpy = jest.spyOn(apm, 'captureError').mockImplementation(() => {});
+      captureErrorSpy = vi.spyOn(apm, 'captureError').mockImplementation(() => {});
     });
 
     afterEach(() => {

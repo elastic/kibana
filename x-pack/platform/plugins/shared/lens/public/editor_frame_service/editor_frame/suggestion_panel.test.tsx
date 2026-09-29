@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type {
   Visualization,
@@ -45,9 +48,9 @@ const SELECTORS = {
   SUGGESTION_TILE_BUTTON: 'button[data-test-subj="lnsSuggestion"]',
 };
 
-jest.mock('./suggestion_helpers');
+vi.mock('./suggestion_helpers');
 
-const getSuggestionsMock = getSuggestions as jest.Mock;
+const getSuggestionsMock = getSuggestions as Mock;
 
 describe('suggestion_panel', () => {
   let mockVisualization: Visualization;
@@ -109,7 +112,7 @@ describe('suggestion_panel', () => {
       ExpressionRenderer: expressionRendererMock,
       frame: createMockFramePublicAPI(),
       getUserMessages: () => [],
-      nowProvider: { get: jest.fn(() => new Date()) },
+      nowProvider: { get: vi.fn(() => new Date()) },
       core: coreMock.createStart(),
     };
 
@@ -373,11 +376,11 @@ describe('suggestion_panel', () => {
       },
     ] as Suggestion[]);
 
-    (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce(undefined);
-    (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce('test | expression');
+    (mockVisualization.toPreviewExpression as Mock).mockReturnValueOnce(undefined);
+    (mockVisualization.toPreviewExpression as Mock).mockReturnValueOnce('test | expression');
 
     // this call will go to the currently active visualization
-    (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce('current | preview');
+    (mockVisualization.toPreviewExpression as Mock).mockReturnValueOnce('current | preview');
 
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
@@ -450,7 +453,7 @@ describe('suggestion_panel', () => {
 
   it('should render preview expression if there is one', () => {
     mockDatasource.getLayers.mockReturnValue(['first']);
-    (getSuggestions as jest.Mock).mockReturnValue([
+    (getSuggestions as Mock).mockReturnValue([
       {
         datasourceState: {},
         previewIcon: 'empty',
@@ -469,7 +472,7 @@ describe('suggestion_panel', () => {
       },
     ] as Suggestion[]);
 
-    (mockVisualization.toPreviewExpression as jest.Mock)
+    (mockVisualization.toPreviewExpression as Mock)
       .mockReturnValue(undefined)
       .mockReturnValueOnce('test | expression');
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
@@ -484,7 +487,7 @@ describe('suggestion_panel', () => {
     );
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
-    const passedExpression = (expressionRendererMock as jest.Mock).mock.calls[0][0].expression;
+    const passedExpression = (expressionRendererMock as Mock).mock.calls[0][0].expression;
 
     expect(passedExpression).toMatchInlineSnapshot(`
       "test

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchEventsAndScopedAlerts } from './process_events_route';
 import {
@@ -37,7 +39,7 @@ const getResponse = async () => {
 
 describe('process_events_route.ts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('fetchEventsAndScopedAlerts(client, entityId, cursor, forward)', () => {

@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, of, Subject, throwError, toArray } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { chatApiPath } from '../../common/constants';
 import { chatPayloadSchema, registerChatApiRoutes } from './chat_api';
 
-const mockObservableIntoEventSourceStream = jest.fn();
-jest.mock('@kbn/sse-utils-server', () => ({
-  observableIntoEventSourceStream: (observable: unknown, options: unknown) =>
-    mockObservableIntoEventSourceStream(observable, options),
-  cloudProxyBufferSize: 4096,
-}));
+const mockObservableIntoEventSourceStream = vi.fn();
+vi.mock('@kbn/sse-utils-server', () => {
+      const mocked = {
+      observableIntoEventSourceStream: (observable: unknown, options: unknown) =>
+        mockObservableIntoEventSourceStream(observable, options),
+      cloudProxyBufferSize: 4096,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const conversationCreatedEvent = {
   type: ChatEventType.conversationCreated,
@@ -25,21 +30,21 @@ const conversationCreatedEvent = {
 
 const activeContext = (flagEnabled: boolean) => ({
   core: Promise.resolve({
-    uiSettings: { client: { get: jest.fn().mockResolvedValue(flagEnabled) } },
+    uiSettings: { client: { get: vi.fn().mockResolvedValue(flagEnabled) } },
   }),
   licensing: Promise.resolve({
-    license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+    license: { status: 'active', hasAtLeast: vi.fn().mockReturnValue(true) },
   }),
 });
 
 const buildResponse = () => ({
-  ok: jest.fn(({ body }: { body: unknown }) => ({ status: 200, payload: body })),
-  notFound: jest.fn(() => ({ status: 404 })),
-  customError: jest.fn(({ body, statusCode }: { body: unknown; statusCode: number }) => ({
+  ok: vi.fn(({ body }: { body: unknown }) => ({ status: 200, payload: body })),
+  notFound: vi.fn(() => ({ status: 404 })),
+  customError: vi.fn(({ body, statusCode }: { body: unknown; statusCode: number }) => ({
     status: statusCode,
     payload: body,
   })),
-  forbidden: jest.fn(() => ({ status: 403 })),
+  forbidden: vi.fn(() => ({ status: 403 })),
 });
 
 // Captures the handler registered for a given path so the test can invoke it directly.
@@ -47,8 +52,8 @@ const captureHandlers = () => {
   const handlers: Record<string, Function> = {};
   const router = {
     versioned: {
-      post: jest.fn().mockImplementation((config: { path: string }) => ({
-        addVersion: jest.fn().mockImplementation((_v: unknown, handler: Function) => {
+      post: vi.fn().mockImplementation((config: { path: string }) => ({
+        addVersion: vi.fn().mockImplementation((_v: unknown, handler: Function) => {
           handlers[config.path] = handler;
         }),
       })),
@@ -62,16 +67,16 @@ describe('registerChatApiRoutes', () => {
     const postConfigs: Array<{ path: string; access?: string; options?: any }> = [];
     const router = {
       versioned: {
-        post: jest.fn().mockImplementation((config: { path: string }) => {
+        post: vi.fn().mockImplementation((config: { path: string }) => {
           postConfigs.push(config);
-          return { addVersion: jest.fn() };
+          return { addVersion: vi.fn() };
         }),
       },
     };
 
     registerChatApiRoutes({
       router,
-      getInternalServices: jest.fn(),
+      getInternalServices: vi.fn(),
       coreSetup: {} as never,
       pluginsSetup: {},
       logger: loggingSystemMock.createLogger(),
@@ -93,16 +98,16 @@ describe('registerChatApiRoutes', () => {
 
   it('returns the conversation with its timeline after a sync converse', async () => {
     const { router, handlers } = captureHandlers();
-    const maybeExecuteAgent = jest
+    const maybeExecuteAgent = vi
       .fn()
       .mockResolvedValue({ events$: of(conversationCreatedEvent) });
     const conversation = { id: 'conv-1', events: [{ id: 'e1' }], rounds: [] };
-    const get = jest.fn().mockResolvedValue(conversation);
-    const getScopedClient = jest.fn().mockResolvedValue({ get });
+    const get = vi.fn().mockResolvedValue(conversation);
+    const getScopedClient = vi.fn().mockResolvedValue({ get });
 
     registerChatApiRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         execution: { maybeExecuteAgent },
         conversations: { getScopedClient },
       }),
@@ -125,17 +130,17 @@ describe('registerChatApiRoutes', () => {
 
   it('serves the sync route when the experimental feature flag is disabled', async () => {
     const { router, handlers } = captureHandlers();
-    const maybeExecuteAgent = jest
+    const maybeExecuteAgent = vi
       .fn()
       .mockResolvedValue({ events$: of(conversationCreatedEvent) });
     const conversation = { id: 'conv-1', events: [], rounds: [] };
-    const getScopedClient = jest
+    const getScopedClient = vi
       .fn()
-      .mockResolvedValue({ get: jest.fn().mockResolvedValue(conversation) });
+      .mockResolvedValue({ get: vi.fn().mockResolvedValue(conversation) });
 
     registerChatApiRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         execution: { maybeExecuteAgent },
         conversations: { getScopedClient },
       }),
@@ -158,14 +163,14 @@ describe('registerChatApiRoutes', () => {
 
   it('returns a 500 when the run emits no conversation event', async () => {
     const { router, handlers } = captureHandlers();
-    const maybeExecuteAgent = jest.fn().mockResolvedValue({ events$: of() });
-    const get = jest.fn();
+    const maybeExecuteAgent = vi.fn().mockResolvedValue({ events$: of() });
+    const get = vi.fn();
 
     registerChatApiRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         execution: { maybeExecuteAgent },
-        conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
+        conversations: { getScopedClient: vi.fn().mockResolvedValue({ get }) },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},
@@ -185,15 +190,15 @@ describe('registerChatApiRoutes', () => {
 
   it('surfaces a 500 when the agent stream errors mid-run', async () => {
     const { router, handlers } = captureHandlers();
-    const maybeExecuteAgent = jest
+    const maybeExecuteAgent = vi
       .fn()
       .mockResolvedValue({ events$: throwError(() => new Error('stream boom')) });
 
     registerChatApiRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         execution: { maybeExecuteAgent },
-        conversations: { getScopedClient: jest.fn() },
+        conversations: { getScopedClient: vi.fn() },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},
@@ -239,7 +244,7 @@ describe('registerChatApiRoutes', () => {
         access_control: { access_mode: 'private', entries: [] },
       },
     };
-    const maybeExecuteAgent = jest.fn().mockResolvedValue({
+    const maybeExecuteAgent = vi.fn().mockResolvedValue({
       events$: of(
         roundCompleteEvent,
         executionStartedEvent,
@@ -252,12 +257,12 @@ describe('registerChatApiRoutes', () => {
 
     registerChatApiRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         execution: { maybeExecuteAgent },
-        conversations: { getScopedClient: jest.fn() },
+        conversations: { getScopedClient: vi.fn() },
       }),
       coreSetup: {
-        getStartServices: jest.fn().mockResolvedValue([{}, { cloud: { isCloudEnabled: false } }]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { cloud: { isCloudEnabled: false } }]),
       },
       pluginsSetup: {},
       logger: loggingSystemMock.createLogger(),
@@ -290,7 +295,7 @@ describe('registerChatApiRoutes', () => {
 
   it('serves the streaming route when the experimental feature flag is disabled', async () => {
     const { router, handlers } = captureHandlers();
-    const maybeExecuteAgent = jest
+    const maybeExecuteAgent = vi
       .fn()
       .mockResolvedValue({ events$: of(conversationCreatedEvent) });
     mockObservableIntoEventSourceStream.mockReset();
@@ -298,12 +303,12 @@ describe('registerChatApiRoutes', () => {
 
     registerChatApiRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         execution: { maybeExecuteAgent },
-        conversations: { getScopedClient: jest.fn() },
+        conversations: { getScopedClient: vi.fn() },
       }),
       coreSetup: {
-        getStartServices: jest.fn().mockResolvedValue([{}, { cloud: { isCloudEnabled: false } }]),
+        getStartServices: vi.fn().mockResolvedValue([{}, { cloud: { isCloudEnabled: false } }]),
       },
       pluginsSetup: {},
       logger: loggingSystemMock.createLogger(),
@@ -332,16 +337,16 @@ describe('user message requests', () => {
 
   const converse = async (body: Record<string, unknown>) => {
     const { router, handlers } = captureHandlers();
-    const maybeExecuteAgent = jest
+    const maybeExecuteAgent = vi
       .fn()
       .mockResolvedValue({ events$: of(conversationCreatedEvent) });
-    const get = jest.fn().mockResolvedValue(conversation);
+    const get = vi.fn().mockResolvedValue(conversation);
 
     registerChatApiRoutes({
       router,
-      getInternalServices: jest.fn().mockReturnValue({
+      getInternalServices: vi.fn().mockReturnValue({
         execution: { maybeExecuteAgent },
-        conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
+        conversations: { getScopedClient: vi.fn().mockResolvedValue({ get }) },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},

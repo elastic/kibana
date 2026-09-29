@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -12,36 +14,48 @@ import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import { ConnectorSelector } from './connector_selector';
 
-const mockGetAddConnectorFlyout = jest.fn(() => <div data-test-subj="addConnectorFlyout" />);
-const mockInvalidateQueries = jest.fn();
-const mockSetQueryData = jest.fn();
+const mockGetAddConnectorFlyout = vi.fn(() => <div data-test-subj="addConnectorFlyout" />);
+const mockInvalidateQueries = vi.fn();
+const mockSetQueryData = vi.fn();
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') return {};
-    if (token === 'plugin.start.triggersActionsUi') {
-      return { getAddConnectorFlyout: mockGetAddConnectorFlyout };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (token === 'application') return {};
+        if (token === 'plugin.start.triggersActionsUi') {
+          return { getAddConnectorFlyout: mockGetAddConnectorFlyout };
+        }
+        return {};
+      },
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di', () => ({
-  PluginStart: (key: string) => `plugin.start.${key}`,
-}));
+vi.mock('@kbn/core-di', () => {
+      const mocked = {
+      PluginStart: (key: string) => `plugin.start.${key}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_fetch_connectors_by_type', () => ({
-  ALL_CONNECTORS_KEY: ['alertingV2', 'actionForm', 'connectors'],
-  useFetchConnectorsByType: () => ({ data: [], isLoading: false }),
-}));
+vi.mock('../hooks/use_fetch_connectors_by_type', () => {
+      const mocked = {
+      ALL_CONNECTORS_KEY: ['alertingV2', 'actionForm', 'connectors'],
+      useFetchConnectorsByType: () => ({ data: [], isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-query', () => ({
-  useQueryClient: () => ({
-    invalidateQueries: mockInvalidateQueries,
-    setQueryData: mockSetQueryData,
-  }),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useQueryClient: () => ({
+        invalidateQueries: mockInvalidateQueries,
+        setQueryData: mockSetQueryData,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderSelector = (
   connectorCreation?: { mode: 'flyout' } | { mode: 'new-tab'; href: string }
@@ -51,7 +65,7 @@ const renderSelector = (
       <ConnectorSelector
         connectorTypeId=".email"
         value={null}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         connectorCreationConfig={connectorCreation}
       />
     </I18nProvider>
@@ -59,7 +73,7 @@ const renderSelector = (
 
 describe('ConnectorSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('opens connector management in a new tab when configured', () => {

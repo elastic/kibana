@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 
@@ -16,8 +18,8 @@ import { renderWithTestingProviders } from '../../common/mock';
 describe('TemplatesList', () => {
   let user: UserEvent;
 
-  const onDeleteTemplate = jest.fn();
-  const onEditTemplate = jest.fn();
+  const onDeleteTemplate = vi.fn();
+  const onEditTemplate = vi.fn();
 
   const props = {
     templates: templatesConfigurationMock,
@@ -26,17 +28,17 @@ describe('TemplatesList', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
   });
 
   it('renders correctly', () => {

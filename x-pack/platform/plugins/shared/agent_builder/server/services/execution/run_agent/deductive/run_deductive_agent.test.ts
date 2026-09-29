@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { createAgentHandlerContextMock } from '../../../../test_utils/runner';
 import { shouldUseDeductive } from './config';
 import * as deductiveClient from './deductive_client';
 import { DeductiveSessionUnavailableError, DeductiveError } from './deductive_client';
 import { runDeductiveAgent } from './run_deductive_agent';
 
-jest.mock('./deductive_client', () => {
-  const actual = jest.requireActual('./deductive_client');
+vi.mock('./deductive_client', async () => {
+  const actual = (await vi.importActual('./deductive_client'));
   return {
     ...actual,
-    createDeductiveSession: jest.fn(),
-    sendDeductiveMessageAndReadSse: jest.fn(),
-    refreshDeductiveToken: jest.fn(),
+    createDeductiveSession: vi.fn(),
+    sendDeductiveMessageAndReadSse: vi.fn(),
+    refreshDeductiveToken: vi.fn(),
   };
 });
 
-const clientMock = deductiveClient as jest.Mocked<typeof deductiveClient>;
+const clientMock = deductiveClient as Mocked<typeof deductiveClient>;
 
 const baseParams = (conversation?: any): any => ({
   agentId: 'deductive.ai',
@@ -33,7 +36,7 @@ const baseParams = (conversation?: any): any => ({
 
 const context = (deductiveOverride?: any): any => {
   const ctx = createAgentHandlerContextMock() as any;
-  ctx.conversationClient.update = jest.fn().mockResolvedValue({});
+  ctx.conversationClient.update = vi.fn().mockResolvedValue({});
   // default: a passing runner-resolved config (flag + setting + key all present)
   ctx.deductive = {
     enabled: true,
@@ -45,7 +48,7 @@ const context = (deductiveOverride?: any): any => {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   process.env.DEDUCTIVE_API_KEY = 'dak_test-token';
   clientMock.createDeductiveSession.mockResolvedValue({
     sessionId: 'sess-1',

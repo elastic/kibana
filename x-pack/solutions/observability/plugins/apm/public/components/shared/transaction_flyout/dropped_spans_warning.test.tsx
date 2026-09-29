@@ -4,15 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { DroppedSpansWarning } from './dropped_spans_warning';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-jest.mock('../../../context/apm_plugin/use_apm_plugin_context');
+vi.mock('../../../context/apm_plugin/use_apm_plugin_context');
 
-const mockUseApmPluginContext = useApmPluginContext as jest.MockedFunction<
+const mockUseApmPluginContext = useApmPluginContext as MockedFunction<
   typeof useApmPluginContext
 >;
 

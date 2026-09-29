@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // Mock the services required for reading and writing job data.
-const mockGetJob = jest.fn(() => ({
+const mockGetJob = vi.fn(() => ({
   job_id: 'farequote_no_by',
   description: 'Overall response time',
   analysis_config: {
@@ -40,31 +42,43 @@ const mockGetJob = jest.fn(() => ({
   },
 }));
 
-jest.mock('../../services/job_service', () => ({
-  mlJobServiceFactory: () => ({
-    getJob: mockGetJob,
-  }),
-}));
-jest.mock('../../capabilities/check_capabilities', () => ({
-  checkPermission: () => true,
-}));
+vi.mock('../../services/job_service', () => {
+      const mocked = {
+      mlJobServiceFactory: () => ({
+        getJob: mockGetJob,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../capabilities/check_capabilities', () => {
+      const mocked = {
+      checkPermission: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  withKibana: (comp) => {
-    return comp;
-  },
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      withKibana: (comp) => {
+        return comp;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./select_rule_action', () => ({
-  SelectRuleAction: jest.fn().mockImplementation(({ job, anomaly }) => {
-    const React = jest.requireActual('react');
-    return React.createElement(
-      'div',
-      { 'data-testid': 'mock-select-rule-action' },
-      `Mock SelectRuleAction for job ${job?.job_id} and detector ${anomaly?.detectorIndex}`
-    );
-  }),
-}));
+vi.mock('./select_rule_action', () => {
+      const mocked = {
+      SelectRuleAction: vi.fn().mockImplementation(({ job, anomaly }) => {
+        const React = require('react');
+        return React.createElement(
+          'div',
+          { 'data-testid': 'mock-select-rule-action' },
+          `Mock SelectRuleAction for job ${job?.job_id} and detector ${anomaly?.detectorIndex}`
+        );
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -74,8 +88,8 @@ import { RuleEditorFlyout } from './rule_editor_flyout';
 describe('RuleEditorFlyout', () => {
   // Common props used across all tests
   const getRequiredProps = () => ({
-    setShowFunction: jest.fn(),
-    unsetShowFunction: jest.fn(),
+    setShowFunction: vi.fn(),
+    unsetShowFunction: vi.fn(),
     kibana: {
       services: {
         docLinks: {
@@ -88,7 +102,7 @@ describe('RuleEditorFlyout', () => {
         mlServices: { mlApi: {} },
         notifications: {
           toasts: {
-            addDanger: jest.fn(),
+            addDanger: vi.fn(),
           },
         },
       },

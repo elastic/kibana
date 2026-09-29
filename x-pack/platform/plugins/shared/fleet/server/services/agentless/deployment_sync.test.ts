@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../../mocks';
@@ -14,22 +16,22 @@ import { isAgentlessEnabled } from '../utils/agentless';
 
 import { syncAgentlessDeployments } from './deployment_sync';
 
-jest.mock('../agent_policy');
-jest.mock('../utils/agentless');
+vi.mock('../agent_policy');
+vi.mock('../utils/agentless');
 
 function mockDependencies() {
-  jest.mocked(isAgentlessEnabled).mockReturnValue(true);
+  vi.mocked(isAgentlessEnabled).mockReturnValue(true);
 
   const logger = loggingSystemMock.createLogger();
   const agentlessAgentService = {
-    listAgentlessDeployments: jest.fn(),
-    createAgentlessAgent: jest.fn().mockResolvedValue({}),
-    deleteAgentlessAgent: jest.fn().mockResolvedValue({}),
+    listAgentlessDeployments: vi.fn(),
+    createAgentlessAgent: vi.fn().mockResolvedValue({}),
+    deleteAgentlessAgent: vi.fn().mockResolvedValue({}),
   };
 
-  jest.mocked(agentPolicyService.update).mockResolvedValue({} as AgentPolicy);
+  vi.mocked(agentPolicyService.update).mockResolvedValue({} as AgentPolicy);
 
-  jest.mocked(agentPolicyService.getByIds).mockImplementation(async (_, ids) => {
+  vi.mocked(agentPolicyService.getByIds).mockImplementation(async (_, ids) => {
     ids = ids.filter((id) => (id as string).match(/^policy[0-9]+$/));
 
     return ids.map((id) => ({
@@ -41,7 +43,7 @@ function mockDependencies() {
     })) as unknown as AgentPolicy[];
   });
 
-  jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+  vi.mocked(agentPolicyService.list).mockResolvedValueOnce({
     items: [
       { id: 'policy1', revision: 10, keep_monitoring_alive: true },
       { id: 'policy2', revision: 10, keep_monitoring_alive: true },
@@ -64,7 +66,7 @@ function mockDependencies() {
 
 describe('Agentless Deployment Sync', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   describe('no action needed', () => {
     it('retrieve all deployments through multiple pages and does nothing if there is nothing to sync', async () => {
@@ -464,12 +466,12 @@ describe('Agentless Deployment Sync', () => {
 
   describe('agentless not enabled', () => {
     it('skips sync when agentless is not enabled', async () => {
-      jest.mocked(isAgentlessEnabled).mockReturnValue(false);
+      vi.mocked(isAgentlessEnabled).mockReturnValue(false);
       const logger = loggingSystemMock.createLogger();
       const agentlessAgentService = {
-        listAgentlessDeployments: jest.fn(),
-        createAgentlessAgent: jest.fn(),
-        deleteAgentlessAgent: jest.fn(),
+        listAgentlessDeployments: vi.fn(),
+        createAgentlessAgent: vi.fn(),
+        deleteAgentlessAgent: vi.fn(),
       };
 
       await syncAgentlessDeployments({ logger, agentlessAgentService });
@@ -490,7 +492,7 @@ describe('Agentless Deployment Sync', () => {
         deployments: [{ policy_id: 'policy1', revision_idx: 10, cluster_id: 'cluster-abc' }],
       });
 
-      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+      vi.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
         {
           id: 'policy1',
           name: 'Agentless policy policy1',
@@ -501,8 +503,8 @@ describe('Agentless Deployment Sync', () => {
           agentless: {},
         },
       ] as unknown as AgentPolicy[]);
-      jest.mocked(agentPolicyService.list).mockReset();
-      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+      vi.mocked(agentPolicyService.list).mockReset();
+      vi.mocked(agentPolicyService.list).mockResolvedValueOnce({
         items: [] as AgentPolicy[],
         total: 0,
         page: 0,
@@ -529,7 +531,7 @@ describe('Agentless Deployment Sync', () => {
         deployments: [{ policy_id: 'policy1', revision_idx: 10, cluster_id: 'cluster-abc' }],
       });
 
-      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+      vi.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
         {
           id: 'policy1',
           name: 'Agentless policy policy1',
@@ -540,8 +542,8 @@ describe('Agentless Deployment Sync', () => {
           agentless: { cloud_connectors: { enabled: true, target_csp: 'aws' } },
         },
       ] as unknown as AgentPolicy[]);
-      jest.mocked(agentPolicyService.list).mockReset();
-      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+      vi.mocked(agentPolicyService.list).mockReset();
+      vi.mocked(agentPolicyService.list).mockResolvedValueOnce({
         items: [] as AgentPolicy[],
         total: 0,
         page: 0,
@@ -570,7 +572,7 @@ describe('Agentless Deployment Sync', () => {
         deployments: [{ policy_id: 'policy1', revision_idx: 10, cluster_id: 'cluster-abc' }],
       });
 
-      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+      vi.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
         {
           id: 'policy1',
           name: 'Agentless policy policy1',
@@ -581,8 +583,8 @@ describe('Agentless Deployment Sync', () => {
           agentless: { cluster_id: 'cluster-abc' },
         },
       ] as unknown as AgentPolicy[]);
-      jest.mocked(agentPolicyService.list).mockReset();
-      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+      vi.mocked(agentPolicyService.list).mockReset();
+      vi.mocked(agentPolicyService.list).mockResolvedValueOnce({
         items: [] as AgentPolicy[],
         total: 0,
         page: 0,
@@ -601,7 +603,7 @@ describe('Agentless Deployment Sync', () => {
         deployments: [{ policy_id: 'policy1', revision_idx: 10 }],
       });
 
-      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+      vi.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
         {
           id: 'policy1',
           name: 'Agentless policy policy1',
@@ -612,8 +614,8 @@ describe('Agentless Deployment Sync', () => {
           agentless: {},
         },
       ] as unknown as AgentPolicy[]);
-      jest.mocked(agentPolicyService.list).mockReset();
-      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+      vi.mocked(agentPolicyService.list).mockReset();
+      vi.mocked(agentPolicyService.list).mockResolvedValueOnce({
         items: [] as AgentPolicy[],
         total: 0,
         page: 0,
@@ -632,7 +634,7 @@ describe('Agentless Deployment Sync', () => {
         deployments: [{ policy_id: 'policy1', revision_idx: 10, cluster_id: 'cluster-abc' }],
       });
 
-      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+      vi.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
         {
           id: 'policy1',
           name: 'Agentless policy policy1',
@@ -643,8 +645,8 @@ describe('Agentless Deployment Sync', () => {
           agentless: {},
         },
       ] as unknown as AgentPolicy[]);
-      jest.mocked(agentPolicyService.list).mockReset();
-      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+      vi.mocked(agentPolicyService.list).mockReset();
+      vi.mocked(agentPolicyService.list).mockResolvedValueOnce({
         items: [] as AgentPolicy[],
         total: 0,
         page: 0,
@@ -665,7 +667,7 @@ describe('Agentless Deployment Sync', () => {
         deployments: [{ policy_id: 'policy1', revision_idx: 9, cluster_id: 'cluster-abc' }],
       });
 
-      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+      vi.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
         {
           id: 'policy1',
           name: 'Agentless policy policy1',
@@ -676,8 +678,8 @@ describe('Agentless Deployment Sync', () => {
           agentless: {},
         },
       ] as unknown as AgentPolicy[]);
-      jest.mocked(agentPolicyService.list).mockReset();
-      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+      vi.mocked(agentPolicyService.list).mockReset();
+      vi.mocked(agentPolicyService.list).mockResolvedValueOnce({
         items: [] as AgentPolicy[],
         total: 0,
         page: 0,
@@ -707,7 +709,7 @@ describe('Agentless Deployment Sync', () => {
         deployments: [{ policy_id: 'policy1', revision_idx: 10, cluster_id: 'cluster-abc' }],
       });
 
-      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+      vi.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
         {
           id: 'policy1',
           name: 'Agentless policy policy1',
@@ -718,14 +720,14 @@ describe('Agentless Deployment Sync', () => {
           agentless: {},
         },
       ] as unknown as AgentPolicy[]);
-      jest.mocked(agentPolicyService.list).mockReset();
-      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+      vi.mocked(agentPolicyService.list).mockReset();
+      vi.mocked(agentPolicyService.list).mockResolvedValueOnce({
         items: [] as AgentPolicy[],
         total: 0,
         page: 0,
         perPage: 100,
       });
-      jest.mocked(agentPolicyService.update).mockRejectedValueOnce(new Error('Update failed'));
+      vi.mocked(agentPolicyService.update).mockRejectedValueOnce(new Error('Update failed'));
 
       await syncAgentlessDeployments({ logger, agentlessAgentService });
 
@@ -743,7 +745,7 @@ describe('Agentless Deployment Sync', () => {
         deployments: [{ policy_id: 'policy1', revision_idx: 10 }],
       });
 
-      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+      vi.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
         {
           id: 'policy1',
           name: `Agentless policy policy1`,
@@ -753,8 +755,8 @@ describe('Agentless Deployment Sync', () => {
           monitoring_enabled: ['logs'],
         },
       ] as unknown as AgentPolicy[]);
-      jest.mocked(agentPolicyService.list).mockReset();
-      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+      vi.mocked(agentPolicyService.list).mockReset();
+      vi.mocked(agentPolicyService.list).mockResolvedValueOnce({
         items: [] as AgentPolicy[],
         total: 0,
         page: 10,
@@ -787,7 +789,7 @@ describe('Agentless Deployment Sync', () => {
         deployments: [{ policy_id: 'policy1', revision_idx: 10 }],
       });
 
-      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+      vi.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
         {
           id: 'policy1',
           name: `Agentless policy policy1`,
@@ -797,8 +799,8 @@ describe('Agentless Deployment Sync', () => {
           monitoring_enabled: [],
         },
       ] as unknown as AgentPolicy[]);
-      jest.mocked(agentPolicyService.list).mockReset();
-      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+      vi.mocked(agentPolicyService.list).mockReset();
+      vi.mocked(agentPolicyService.list).mockResolvedValueOnce({
         items: [] as AgentPolicy[],
         total: 0,
         page: 10,
@@ -831,7 +833,7 @@ describe('Agentless Deployment Sync', () => {
         deployments: [{ policy_id: 'policy1', revision_idx: 10 }],
       });
 
-      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+      vi.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
         {
           id: 'policy1',
           name: `Agentless policy policy1`,
@@ -841,8 +843,8 @@ describe('Agentless Deployment Sync', () => {
           monitoring_enabled: [],
         },
       ] as unknown as AgentPolicy[]);
-      jest.mocked(agentPolicyService.list).mockReset();
-      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+      vi.mocked(agentPolicyService.list).mockReset();
+      vi.mocked(agentPolicyService.list).mockResolvedValueOnce({
         items: [] as AgentPolicy[],
         total: 0,
         page: 10,

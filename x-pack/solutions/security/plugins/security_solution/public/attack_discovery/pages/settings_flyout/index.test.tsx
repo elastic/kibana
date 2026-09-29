@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -17,15 +20,18 @@ import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { SCHEDULE_TAB_ID, SETTINGS_TAB_ID } from './constants';
 
-jest.mock('../../../common/hooks/use_experimental_features');
-jest.mock('../../../common/lib/kibana');
-jest.mock('react-router-dom', () => ({
-  matchPath: jest.fn(),
-  useLocation: jest.fn().mockReturnValue({
-    search: '',
-  }),
-  withRouter: jest.fn(),
-}));
+vi.mock('../../../common/hooks/use_experimental_features');
+vi.mock('../../../common/lib/kibana');
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      matchPath: vi.fn(),
+      useLocation: vi.fn().mockReturnValue({
+        search: '',
+      }),
+      withRouter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockFilter = {
   meta: {
@@ -53,15 +59,15 @@ const createMockProps = (overrides = {}) => ({
   end: undefined,
   filters: undefined,
   localStorageAttackDiscoveryMaxAlerts: undefined,
-  onClose: jest.fn(),
-  onConnectorIdSelected: jest.fn(),
-  onGenerate: jest.fn(),
+  onClose: vi.fn(),
+  onConnectorIdSelected: vi.fn(),
+  onGenerate: vi.fn(),
   query: undefined,
-  setEnd: jest.fn(),
-  setFilters: jest.fn(),
-  setLocalStorageAttackDiscoveryMaxAlerts: jest.fn(),
-  setQuery: jest.fn(),
-  setStart: jest.fn(),
+  setEnd: vi.fn(),
+  setFilters: vi.fn(),
+  setLocalStorageAttackDiscoveryMaxAlerts: vi.fn(),
+  setQuery: vi.fn(),
+  setStart: vi.fn(),
   start: undefined,
   stats: null,
   ...overrides,
@@ -69,20 +75,20 @@ const createMockProps = (overrides = {}) => ({
 
 const defaultProps = createMockProps();
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 const setupMocks = (overrides = {}) => {
   mockUseKibana.mockReturnValue({
     services: {
       featureFlags: {
-        useBooleanValue: jest.fn().mockReturnValue(false),
+        useBooleanValue: vi.fn().mockReturnValue(false),
       },
       lens: {
         EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
       },
-      telemetry: { reportEvent: jest.fn() },
+      telemetry: { reportEvent: vi.fn() },
       uiSettings: {
-        get: jest.fn(),
+        get: vi.fn(),
       },
       unifiedSearch: {
         ui: {
@@ -90,7 +96,7 @@ const setupMocks = (overrides = {}) => {
         },
       },
     },
-  } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+  } as unknown as Mocked<ReturnType<typeof useKibana>>);
 };
 
 const renderComponent = (props = defaultProps) => {
@@ -156,7 +162,7 @@ const testResetButtonWithDefaults = (props: typeof defaultProps) => {
 
 describe('SettingsFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupMocks();
   });
 

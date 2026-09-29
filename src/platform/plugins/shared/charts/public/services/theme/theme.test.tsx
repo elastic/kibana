@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { cloneDeep } from 'lodash';
 import { from } from 'rxjs';
@@ -129,7 +131,7 @@ describe('ThemeService', () => {
       themeService.init(setUpMockTheme);
       const { useChartsBaseTheme } = themeService;
 
-      const renderCounter = jest.fn();
+      const renderCounter = vi.fn();
       const Wrapper = () => {
         useChartsBaseTheme();
         renderCounter();

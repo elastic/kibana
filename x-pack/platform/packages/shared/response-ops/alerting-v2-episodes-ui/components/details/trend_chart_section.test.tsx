@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,18 +15,21 @@ import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useFetchEpisodeTrendQuery } from '../../hooks/use_fetch_episode_trend_query';
 import { AlertEpisodeTrendChartSection } from './trend_chart_section';
 
-jest.mock('../../hooks/use_fetch_episode_query');
-jest.mock('../../hooks/use_fetch_rule');
-jest.mock('../../hooks/use_fetch_episode_trend_query');
-jest.mock('./trend_chart', () => ({
-  AlertEpisodeTrendChart: ({ series }: { series: { label: string } }) => (
-    <div data-test-subj="trend-chart-stub" data-metric={series.label} />
-  ),
-}));
+vi.mock('../../hooks/use_fetch_episode_query');
+vi.mock('../../hooks/use_fetch_rule');
+vi.mock('../../hooks/use_fetch_episode_trend_query');
+vi.mock('./trend_chart', () => {
+      const mocked = {
+      AlertEpisodeTrendChart: ({ series }: { series: { label: string } }) => (
+        <div data-test-subj="trend-chart-stub" data-metric={series.label} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchEpisodeQuery = jest.mocked(useFetchEpisodeQuery);
-const mockUseFetchRule = jest.mocked(useFetchRule);
-const mockUseFetchEpisodeTrendQuery = jest.mocked(useFetchEpisodeTrendQuery);
+const mockUseFetchEpisodeQuery = vi.mocked(useFetchEpisodeQuery);
+const mockUseFetchRule = vi.mocked(useFetchRule);
+const mockUseFetchEpisodeTrendQuery = vi.mocked(useFetchEpisodeTrendQuery);
 
 const mockServices = { data: {}, http: {}, spaces: {} } as never;
 
@@ -60,7 +65,7 @@ const asQuery = (data: unknown, extra: object = {}) =>
   ({ data, isLoading: false, isError: false, ...extra } as never);
 
 describe('AlertEpisodeTrendChartSection', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders nothing for a non-threshold rule', () => {
     mockUseFetchEpisodeQuery.mockReturnValue(asQuery(episode));

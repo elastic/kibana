@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -13,24 +16,24 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { UncommonProcessQueryTabBody } from './uncommon_process_query_tab_body';
 import { HostsType } from '../../store/model';
 
-jest.mock('../../containers/uncommon_processes');
-jest.mock('../../../../common/containers/query_toggle');
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../containers/uncommon_processes');
+vi.mock('../../../../common/containers/query_toggle');
+vi.mock('../../../../common/lib/kibana');
 
 describe('Uncommon process query tab body', () => {
-  const mockUseUncommonProcesses = useUncommonProcesses as jest.Mock;
-  const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  const mockUseUncommonProcesses = useUncommonProcesses as Mock;
+  const mockUseQueryToggle = useQueryToggle as Mock;
   const defaultProps = {
     indexNames: [],
-    setQuery: jest.fn(),
+    setQuery: vi.fn(),
     skip: false,
     startDate: '2019-06-25T04:31:59.345Z',
     endDate: '2019-06-25T06:31:59.345Z',
     type: HostsType.page,
   };
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+    vi.clearAllMocks();
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: vi.fn() });
     mockUseUncommonProcesses.mockReturnValue([
       false,
       {
@@ -43,8 +46,8 @@ describe('Uncommon process query tab body', () => {
         isInspected: false,
         totalCount: 0,
         pageInfo: { activePage: 1, fakeTotalCount: 100, showMorePagesIndicator: false },
-        loadPage: jest.fn(),
-        refetch: jest.fn(),
+        loadPage: vi.fn(),
+        refetch: vi.fn(),
       },
     ]);
   });
@@ -57,7 +60,7 @@ describe('Uncommon process query tab body', () => {
     expect(mockUseUncommonProcesses.mock.calls[0][0].skip).toEqual(false);
   });
   it('toggleStatus=false, skip', () => {
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: vi.fn() });
     render(
       <TestProviders>
         <UncommonProcessQueryTabBody {...defaultProps} />

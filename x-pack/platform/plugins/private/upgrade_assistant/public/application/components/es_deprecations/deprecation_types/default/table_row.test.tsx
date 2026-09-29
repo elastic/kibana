@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
@@ -14,11 +16,11 @@ import type { DeprecationTableColumns } from '../../../types';
 import { mockDefaultDeprecation } from '../../__fixtures__/es_deprecations';
 import { DefaultTableRow } from './table_row';
 
-const mockAddContent = jest.fn<void, [params: { id: string }]>();
-const mockRemoveContent = jest.fn<void, [id: string]>();
+const mockAddContent = vi.fn<void, [params: { id: string }]>();
+const mockRemoveContent = vi.fn<void, [id: string]>();
 
-jest.mock('../../../../../shared_imports', () => {
-  const actual = jest.requireActual('../../../../../shared_imports');
+vi.mock('../../../../../shared_imports', async () => {
+  const actual = (await vi.importActual('../../../../../shared_imports'));
 
   return {
     ...actual,

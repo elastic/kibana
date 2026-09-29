@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAlertDeleteLastRun } from './use_alert_delete_last_run';
@@ -14,9 +17,12 @@ import { getAlertDeleteLastRun } from './get_alert_delete_last_run';
 
 const http = httpServiceMock.createStartContract();
 
-jest.mock('./get_alert_delete_last_run', () => ({
-  getAlertDeleteLastRun: jest.fn(),
-}));
+vi.mock('./get_alert_delete_last_run', () => {
+      const mocked = {
+      getAlertDeleteLastRun: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useAlertDeleteLastRun', () => {
   const queryClient = new QueryClient();
@@ -27,11 +33,11 @@ describe('useAlertDeleteLastRun', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the API with correct parameters', async () => {
-    (getAlertDeleteLastRun as jest.Mock).mockResolvedValueOnce({ lastRun: testDate });
+    (getAlertDeleteLastRun as Mock).mockResolvedValueOnce({ lastRun: testDate });
 
     const { result } = renderHook(
       () =>
@@ -54,7 +60,7 @@ describe('useAlertDeleteLastRun', () => {
   });
 
   it('handles API errors gracefully', async () => {
-    (getAlertDeleteLastRun as jest.Mock).mockRejectedValueOnce(new Error('API Error'));
+    (getAlertDeleteLastRun as Mock).mockRejectedValueOnce(new Error('API Error'));
 
     const { result } = renderHook(
       () =>
@@ -85,7 +91,7 @@ describe('useAlertDeleteLastRun', () => {
   });
 
   it('does not call the API again if modal is already open (wasModalClosed is false)', () => {
-    (getAlertDeleteLastRun as jest.Mock).mockResolvedValueOnce({ lastRun: testDate });
+    (getAlertDeleteLastRun as Mock).mockResolvedValueOnce({ lastRun: testDate });
 
     const { rerender } = renderHook(
       () =>

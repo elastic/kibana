@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ATTACK_DISCOVERY_AD_HOC_RULE_ID,
   ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
@@ -47,7 +49,7 @@ describe('Transform attack discoveries to alert documents', () => {
     };
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it(`returns the expected ${ALERT_ATTACK_DISCOVERY_ALERT_IDS} field`, () => {

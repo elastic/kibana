@@ -5,6 +5,9 @@
  * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import Handlebars, { type HelperOptions } from '../..';
 import { expectTemplate, forEachCompileFunctionName } from '../__jest__/test_bench';
 
@@ -334,7 +337,7 @@ describe('Regressions', () => {
 
   describe('GH-1598: Performance degradation for partials since v4.3.0', () => {
     let newHandlebarsInstance: typeof Handlebars;
-    let spy: jest.SpyInstance;
+    let spy: MockInstance;
     beforeEach(() => {
       newHandlebarsInstance = Handlebars.create();
     });
@@ -348,11 +351,11 @@ describe('Regressions', () => {
         let calls;
         switch (compileName) {
           case 'compile':
-            spy = jest.spyOn(newHandlebarsInstance, 'template');
+            spy = vi.spyOn(newHandlebarsInstance, 'template');
             calls = 3;
             break;
           case 'compileAST':
-            spy = jest.spyOn(newHandlebarsInstance, 'compileAST');
+            spy = vi.spyOn(newHandlebarsInstance, 'compileAST');
             calls = 2;
             break;
         }

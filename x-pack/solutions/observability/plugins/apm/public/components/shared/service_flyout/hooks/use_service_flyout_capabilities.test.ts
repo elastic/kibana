@@ -5,19 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useServiceFlyoutCapabilities } from './use_service_flyout_capabilities';
 
-const mockUseAbortableAsync = jest.fn();
+const mockUseAbortableAsync = vi.fn();
 
-jest.mock('@kbn/react-hooks', () => ({
-  useAbortableAsync: (...args: unknown[]) => mockUseAbortableAsync(...args),
-}));
+vi.mock('@kbn/react-hooks', () => {
+      const mocked = {
+      useAbortableAsync: (...args: unknown[]) => mockUseAbortableAsync(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCallApmApi = jest.fn();
-jest.mock('../../../../plugin', () => ({
-  getApmInternalServices: () => ({ callApmApi: mockCallApmApi }),
-}));
+const mockCallApmApi = vi.fn();
+vi.mock('../../../../plugin', () => {
+      const mocked = {
+      getApmInternalServices: () => ({ callApmApi: mockCallApmApi }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseParams = {
   serviceName: 'opbeans-java',

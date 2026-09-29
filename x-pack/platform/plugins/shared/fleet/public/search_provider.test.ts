@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { TestScheduler } from 'rxjs/testing';
 import { NEVER } from 'rxjs';
 
@@ -18,16 +21,16 @@ import {
 } from './search_provider';
 import type { GetPackagesResponse } from './types';
 
-jest.mock('./hooks/use_request/epm', () => {
+vi.mock('./hooks/use_request/epm', async () => {
   return {
-    ...jest.requireActual('./hooks/use_request/epm'),
-    sendGetPackages: jest.fn(),
+    ...(await vi.importActual('./hooks/use_request/epm')),
+    sendGetPackages: vi.fn(),
   };
 });
 
 import { sendGetPackages } from './hooks';
 
-const mockSendGetPackages = sendGetPackages as jest.Mock;
+const mockSendGetPackages = sendGetPackages as Mock;
 
 const testResponse: GetPackagesResponse['items'] = [
   {
@@ -248,7 +251,7 @@ describe('Package search provider', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('#find', () => {
@@ -692,18 +695,18 @@ describe('Custom Integrations search provider', () => {
 
   beforeEach(() => {
     customIntegrationsMock = {
-      getReplacementCustomIntegrations: jest.fn(),
+      getReplacementCustomIntegrations: vi.fn(),
     } as unknown as CustomIntegrationsSetup;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('#find', () => {
     test('returns formatted results', () => {
       getTestScheduler().run(({ expectObservable, hot }) => {
-        (customIntegrationsMock.getReplacementCustomIntegrations as jest.Mock).mockReturnValue(
+        (customIntegrationsMock.getReplacementCustomIntegrations as Mock).mockReturnValue(
           hot('--a|', { a: customIntegrationsMockData })
         );
 
@@ -742,7 +745,7 @@ describe('Custom Integrations search provider', () => {
 
     test('returns empty array if no term is provided', () => {
       getTestScheduler().run(({ expectObservable, hot }) => {
-        (customIntegrationsMock.getReplacementCustomIntegrations as jest.Mock).mockReturnValue(
+        (customIntegrationsMock.getReplacementCustomIntegrations as Mock).mockReturnValue(
           hot('--a|', { a: [] })
         );
 
@@ -764,7 +767,7 @@ describe('Custom Integrations search provider', () => {
 
     test('completes without returning results if aborted', () => {
       getTestScheduler().run(({ expectObservable, hot }) => {
-        (customIntegrationsMock.getReplacementCustomIntegrations as jest.Mock).mockReturnValue(
+        (customIntegrationsMock.getReplacementCustomIntegrations as Mock).mockReturnValue(
           hot('--a|', { a: customIntegrationsMockData })
         );
         const aborted$ = hot('-a', { a: undefined });
@@ -784,7 +787,7 @@ describe('Custom Integrations search provider', () => {
 
     test('respects maximum results', () => {
       getTestScheduler().run(({ hot, expectObservable }) => {
-        (customIntegrationsMock.getReplacementCustomIntegrations as jest.Mock).mockReturnValue(
+        (customIntegrationsMock.getReplacementCustomIntegrations as Mock).mockReturnValue(
           hot('--a|', { a: customIntegrationsMockData })
         );
 

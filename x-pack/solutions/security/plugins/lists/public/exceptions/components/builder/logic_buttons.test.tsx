@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -19,10 +21,10 @@ describe('BuilderLogicButtons', () => {
         isNestedDisabled={false}
         isNested={false}
         showNestedButton={false}
-        onOrClicked={jest.fn()}
-        onAndClicked={jest.fn()}
-        onNestedClicked={jest.fn()}
-        onAddClickWhenNested={jest.fn()}
+        onOrClicked={vi.fn()}
+        onAndClicked={vi.fn()}
+        onNestedClicked={vi.fn()}
+        onAddClickWhenNested={vi.fn()}
       />
     );
 
@@ -43,10 +45,10 @@ describe('BuilderLogicButtons', () => {
         isNestedDisabled={false}
         isNested={false}
         showNestedButton={false}
-        onOrClicked={jest.fn()}
-        onAndClicked={jest.fn()}
-        onNestedClicked={jest.fn()}
-        onAddClickWhenNested={jest.fn()}
+        onOrClicked={vi.fn()}
+        onAndClicked={vi.fn()}
+        onNestedClicked={vi.fn()}
+        onAddClickWhenNested={vi.fn()}
       />
     );
 
@@ -54,7 +56,7 @@ describe('BuilderLogicButtons', () => {
   });
 
   test('it invokes "onOrClicked" when "or" button is clicked', () => {
-    const onOrClicked = jest.fn();
+    const onOrClicked = vi.fn();
 
     const wrapper = mount(
       <BuilderLogicButtons
@@ -64,9 +66,9 @@ describe('BuilderLogicButtons', () => {
         isNested={false}
         showNestedButton={false}
         onOrClicked={onOrClicked}
-        onAndClicked={jest.fn()}
-        onNestedClicked={jest.fn()}
-        onAddClickWhenNested={jest.fn()}
+        onAndClicked={vi.fn()}
+        onNestedClicked={vi.fn()}
+        onAddClickWhenNested={vi.fn()}
       />
     );
 
@@ -76,7 +78,7 @@ describe('BuilderLogicButtons', () => {
   });
 
   test('it invokes "onAndClicked" when "and" button is clicked and "isNested" is "false"', () => {
-    const onAndClicked = jest.fn();
+    const onAndClicked = vi.fn();
 
     const wrapper = mount(
       <BuilderLogicButtons
@@ -85,10 +87,10 @@ describe('BuilderLogicButtons', () => {
         isNestedDisabled={false}
         isNested={false}
         showNestedButton={false}
-        onOrClicked={jest.fn()}
+        onOrClicked={vi.fn()}
         onAndClicked={onAndClicked}
-        onNestedClicked={jest.fn()}
-        onAddClickWhenNested={jest.fn()}
+        onNestedClicked={vi.fn()}
+        onAddClickWhenNested={vi.fn()}
       />
     );
 
@@ -98,7 +100,7 @@ describe('BuilderLogicButtons', () => {
   });
 
   test('it invokes "onAddClickWhenNested" when "and" button is clicked and "isNested" is "true"', () => {
-    const onAddClickWhenNested = jest.fn();
+    const onAddClickWhenNested = vi.fn();
 
     const wrapper = mount(
       <BuilderLogicButtons
@@ -107,9 +109,9 @@ describe('BuilderLogicButtons', () => {
         isNestedDisabled={false}
         isNested
         showNestedButton={false}
-        onOrClicked={jest.fn()}
-        onAndClicked={jest.fn()}
-        onNestedClicked={jest.fn()}
+        onOrClicked={vi.fn()}
+        onAndClicked={vi.fn()}
+        onNestedClicked={vi.fn()}
         onAddClickWhenNested={onAddClickWhenNested}
       />
     );
@@ -127,10 +129,10 @@ describe('BuilderLogicButtons', () => {
         isNestedDisabled={false}
         isNested={false}
         isAndDisabled
-        onOrClicked={jest.fn()}
-        onAndClicked={jest.fn()}
-        onNestedClicked={jest.fn()}
-        onAddClickWhenNested={jest.fn()}
+        onOrClicked={vi.fn()}
+        onAndClicked={vi.fn()}
+        onNestedClicked={vi.fn()}
+        onAddClickWhenNested={vi.fn()}
       />
     );
 
@@ -147,10 +149,10 @@ describe('BuilderLogicButtons', () => {
         isAndDisabled={false}
         isNestedDisabled={false}
         isNested={false}
-        onOrClicked={jest.fn()}
-        onAndClicked={jest.fn()}
-        onNestedClicked={jest.fn()}
-        onAddClickWhenNested={jest.fn()}
+        onOrClicked={vi.fn()}
+        onAndClicked={vi.fn()}
+        onNestedClicked={vi.fn()}
+        onAddClickWhenNested={vi.fn()}
       />
     );
 
@@ -167,10 +169,10 @@ describe('BuilderLogicButtons', () => {
         isAndDisabled={false}
         isNestedDisabled
         isNested={false}
-        onOrClicked={jest.fn()}
-        onAndClicked={jest.fn()}
-        onNestedClicked={jest.fn()}
-        onAddClickWhenNested={jest.fn()}
+        onOrClicked={vi.fn()}
+        onAndClicked={vi.fn()}
+        onNestedClicked={vi.fn()}
+        onAddClickWhenNested={vi.fn()}
       />
     );
 
@@ -180,7 +182,7 @@ describe('BuilderLogicButtons', () => {
   });
 
   test('it invokes "onNestedClicked" when "isNested" is "false" and "nested" button is clicked', () => {
-    const onNestedClicked = jest.fn();
+    const onNestedClicked = vi.fn();
 
     const wrapper = mount(
       <BuilderLogicButtons
@@ -189,10 +191,10 @@ describe('BuilderLogicButtons', () => {
         isNestedDisabled={false}
         isNested={false}
         showNestedButton
-        onOrClicked={jest.fn()}
-        onAndClicked={jest.fn()}
+        onOrClicked={vi.fn()}
+        onAndClicked={vi.fn()}
         onNestedClicked={onNestedClicked}
-        onAddClickWhenNested={jest.fn()}
+        onAddClickWhenNested={vi.fn()}
       />
     );
 
@@ -202,7 +204,7 @@ describe('BuilderLogicButtons', () => {
   });
 
   test('it invokes "onAndClicked" when "isNested" is "true" and "nested" button is clicked', () => {
-    const onAndClicked = jest.fn();
+    const onAndClicked = vi.fn();
 
     const wrapper = mount(
       <BuilderLogicButtons
@@ -211,10 +213,10 @@ describe('BuilderLogicButtons', () => {
         isNestedDisabled={false}
         isNested
         showNestedButton
-        onOrClicked={jest.fn()}
+        onOrClicked={vi.fn()}
         onAndClicked={onAndClicked}
-        onNestedClicked={jest.fn()}
-        onAddClickWhenNested={jest.fn()}
+        onNestedClicked={vi.fn()}
+        onAddClickWhenNested={vi.fn()}
       />
     );
 

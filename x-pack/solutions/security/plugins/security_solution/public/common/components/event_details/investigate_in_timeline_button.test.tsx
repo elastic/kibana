@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -15,13 +18,13 @@ import { useUserPrivileges } from '../user_privileges';
 
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../detections/components/alerts_table/translations';
 
-jest.mock('../../lib/kibana');
-jest.mock('../user_privileges');
+vi.mock('../../lib/kibana');
+vi.mock('../user_privileges');
 
 describe('InvestigateInTimelineButton', () => {
   describe('When all props are provided', () => {
     test('it should display the add to timeline button', () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         timelinePrivileges: { read: true },
       });
       const dataProviders = ['127.0.0.1', '::1', '10.1.2.3', '2001:0DB8:AC10:FE01::'].map(
@@ -41,7 +44,7 @@ describe('InvestigateInTimelineButton', () => {
     });
 
     it('should be disabled when the user has insufficient privileges', () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         timelinePrivileges: { read: false },
       });
       const dataProviders = ['127.0.0.1', '::1', '10.1.2.3', '2001:0DB8:AC10:FE01::'].map(
@@ -58,7 +61,7 @@ describe('InvestigateInTimelineButton', () => {
     });
 
     it('should apply the size prop to the empty button', () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         timelinePrivileges: { read: true },
       });
       const dataProviders = [getDataProvider('host.ip', '', '127.0.0.1')];

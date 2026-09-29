@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { screen, render } from '@testing-library/react';
 import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
@@ -12,21 +15,21 @@ import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
 import { AreaChartBaseComponent, AreaChartComponent } from './areachart';
 import type { ChartSeriesData } from './common';
 
-jest.mock('../../lib/kibana');
-jest.mock('@elastic/charts', () => {
-  const actual = jest.requireActual('@elastic/charts');
+vi.mock('../../lib/kibana');
+vi.mock('@elastic/charts', () => {
+  const actual = require('@elastic/charts');
 
   return {
     ...actual,
-    AreaSeries: jest.fn(() => <div data-test-subj="area-series-mock" />),
-    Axis: jest.fn(() => <div data-test-subj="axis-mock" />),
-    Chart: jest.fn((props) => <div data-test-subj="chart-mock">{props.children}</div>),
-    Settings: jest.fn(() => <div data-test-subj="settings-mock" />),
+    AreaSeries: vi.fn(() => <div data-test-subj="area-series-mock" />),
+    Axis: vi.fn(() => <div data-test-subj="axis-mock" />),
+    Chart: vi.fn((props) => <div data-test-subj="chart-mock">{props.children}</div>),
+    Settings: vi.fn(() => <div data-test-subj="settings-mock" />),
   };
 });
 
-const MockedAreaSeries = AreaSeries as jest.MockedFunction<typeof AreaSeries>;
-const MockedAxis = Axis as jest.MockedFunction<typeof Axis>;
+const MockedAreaSeries = AreaSeries as MockedFunction<typeof AreaSeries>;
+const MockedAxis = Axis as MockedFunction<typeof Axis>;
 
 const customHeight = '100px';
 const customWidth = '120px';
@@ -155,7 +158,7 @@ const chartHolderDataSets = [
 ];
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('AreaChartBaseComponent', () => {
@@ -188,8 +191,8 @@ describe('AreaChartBaseComponent', () => {
   });
 
   describe('should render with customized configs', () => {
-    const mockTimeFormatter = jest.fn();
-    const mockNumberFormatter = jest.fn();
+    const mockTimeFormatter = vi.fn();
+    const mockNumberFormatter = vi.fn();
     const configs = {
       series: {
         xScaleType: ScaleType.Time,
@@ -286,8 +289,8 @@ describe('AreaChartComponent', () => {
       stackAccessors: ['g'],
     },
     axis: {
-      xTickFormatter: jest.fn(),
-      yTickFormatter: jest.fn(),
+      xTickFormatter: vi.fn(),
+      yTickFormatter: vi.fn(),
       tickSize: 8,
     },
     customHeight: 324,

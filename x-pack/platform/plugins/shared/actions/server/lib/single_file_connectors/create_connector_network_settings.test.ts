@@ -5,13 +5,22 @@
  * 2.0.
  */
 
-jest.mock('node:dns/promises', () => ({
-  resolveSrv: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
-jest.mock('@kbn/actions-utils', () => ({
-  getNodeSSLOptions: jest.fn(),
-}));
+vi.mock('node:dns/promises', () => {
+      const mocked = {
+      resolveSrv: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/actions-utils', () => {
+      const mocked = {
+      getNodeSSLOptions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { resolveSrv } from 'node:dns/promises';
 import { getNodeSSLOptions } from '@kbn/actions-utils';
@@ -23,24 +32,24 @@ import {
 import { AllowlistDeniedError } from './connector_network_errors';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 
-const mockResolveSrv = resolveSrv as jest.Mock;
-const mockGetNodeSSLOptions = getNodeSSLOptions as jest.Mock;
+const mockResolveSrv = resolveSrv as Mock;
+const mockGetNodeSSLOptions = getNodeSSLOptions as Mock;
 
 const makeConfigUtils = () =>
   ({
-    ensureUriAllowed: jest.fn(),
-    ensureHostnameAllowed: jest.fn(),
-    getSSLSettings: jest.fn().mockReturnValue({ verificationMode: 'full' }),
-    getProxySettings: jest.fn(),
-    getCustomHostSettings: jest.fn().mockReturnValue(undefined),
-    getResponseSettings: jest.fn(),
+    ensureUriAllowed: vi.fn(),
+    ensureHostnameAllowed: vi.fn(),
+    getSSLSettings: vi.fn().mockReturnValue({ verificationMode: 'full' }),
+    getProxySettings: vi.fn(),
+    getCustomHostSettings: vi.fn().mockReturnValue(undefined),
+    getResponseSettings: vi.fn(),
   } as unknown as ActionsConfigurationUtilities);
 
 describe('createConnectorNetworkSettings', () => {
   let mockConfigUtils: ActionsConfigurationUtilities;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockConfigUtils = makeConfigUtils();
   });
 
@@ -70,7 +79,7 @@ describe('createConnectorNetworkSettings', () => {
 
   it('wraps an ensureUriAllowed denial in AllowlistDeniedError, preserving message and cause', () => {
     const original = new Error('URI not allowed');
-    (mockConfigUtils.ensureUriAllowed as jest.Mock).mockImplementation(() => {
+    (mockConfigUtils.ensureUriAllowed as Mock).mockImplementation(() => {
       throw original;
     });
     const network = createConnectorNetworkSettings(mockConfigUtils);
@@ -89,7 +98,7 @@ describe('createConnectorNetworkSettings', () => {
   });
 
   it('wraps an ensureHostnameAllowed denial in AllowlistDeniedError', () => {
-    (mockConfigUtils.ensureHostnameAllowed as jest.Mock).mockImplementation(() => {
+    (mockConfigUtils.ensureHostnameAllowed as Mock).mockImplementation(() => {
       throw new Error('hostname not allowed');
     });
     const network = createConnectorNetworkSettings(mockConfigUtils);
@@ -103,7 +112,7 @@ describe('createConnectorNetworkSettings', () => {
   it('delegates getSslSettings and re-reads current settings', () => {
     const firstValue = { verificationMode: 'full' as const };
     const secondValue = { verificationMode: 'none' as const };
-    (mockConfigUtils.getSSLSettings as jest.Mock)
+    (mockConfigUtils.getSSLSettings as Mock)
       .mockReturnValueOnce(firstValue)
       .mockReturnValueOnce(secondValue);
     const network = createConnectorNetworkSettings(mockConfigUtils);
@@ -116,7 +125,7 @@ describe('createConnectorNetworkSettings', () => {
   it('delegates getProxySettings and re-reads current settings', () => {
     const firstValue = { proxyUrl: 'https://proxy-one.example.com' };
     const secondValue = { proxyUrl: 'https://proxy-two.example.com' };
-    (mockConfigUtils.getProxySettings as jest.Mock)
+    (mockConfigUtils.getProxySettings as Mock)
       .mockReturnValueOnce(firstValue)
       .mockReturnValueOnce(secondValue);
     const network = createConnectorNetworkSettings(mockConfigUtils);
@@ -129,7 +138,7 @@ describe('createConnectorNetworkSettings', () => {
   it('delegates getCustomHostSettings for each URL and re-reads current settings', () => {
     const firstValue = { ca: 'first' };
     const secondValue = { ca: 'second' };
-    (mockConfigUtils.getCustomHostSettings as jest.Mock)
+    (mockConfigUtils.getCustomHostSettings as Mock)
       .mockReturnValueOnce(firstValue)
       .mockReturnValueOnce(secondValue);
     const network = createConnectorNetworkSettings(mockConfigUtils);
@@ -143,7 +152,7 @@ describe('createConnectorNetworkSettings', () => {
   it('delegates getResponseSettings and re-reads current settings', () => {
     const firstValue = { timeout: 1000, maxContentLength: 100 };
     const secondValue = { timeout: 2000, maxContentLength: 200 };
-    (mockConfigUtils.getResponseSettings as jest.Mock)
+    (mockConfigUtils.getResponseSettings as Mock)
       .mockReturnValueOnce(firstValue)
       .mockReturnValueOnce(secondValue);
     const network = createConnectorNetworkSettings(mockConfigUtils);
@@ -156,10 +165,10 @@ describe('createConnectorNetworkSettings', () => {
 
 describe('createPlatformServices', () => {
   let mockConfigUtils: ActionsConfigurationUtilities;
-  const fakeLogger = { warn: jest.fn() } as unknown as Logger;
+  const fakeLogger = { warn: vi.fn() } as unknown as Logger;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockConfigUtils = makeConfigUtils();
   });
 
@@ -194,7 +203,7 @@ describe('createPlatformServices', () => {
 
   it('buildTlsOptions calls getNodeSSLOptions with global ssl when no per-host override', () => {
     const globalSsl = { verificationMode: 'full' as const };
-    (mockConfigUtils.getSSLSettings as jest.Mock).mockReturnValue(globalSsl);
+    (mockConfigUtils.getSSLSettings as Mock).mockReturnValue(globalSsl);
     const tlsResult = { rejectUnauthorized: true };
     mockGetNodeSSLOptions.mockReturnValue(tlsResult);
     const platform = createPlatformServices(mockConfigUtils);
@@ -211,8 +220,8 @@ describe('createPlatformServices', () => {
   it('buildTlsOptions prefers customHostSettings verificationMode over global', () => {
     const globalSsl = { verificationMode: 'full' as const };
     const hostSsl = { verificationMode: 'none' as const };
-    (mockConfigUtils.getSSLSettings as jest.Mock).mockReturnValue(globalSsl);
-    (mockConfigUtils.getCustomHostSettings as jest.Mock).mockReturnValue({ ssl: hostSsl });
+    (mockConfigUtils.getSSLSettings as Mock).mockReturnValue(globalSsl);
+    (mockConfigUtils.getCustomHostSettings as Mock).mockReturnValue({ ssl: hostSsl });
     mockGetNodeSSLOptions.mockReturnValue({});
     const platform = createPlatformServices(mockConfigUtils);
 
@@ -227,7 +236,7 @@ describe('createPlatformServices', () => {
   it('buildTlsOptions splices in certificateAuthoritiesData as ca when present', () => {
     const certData = Buffer.from('cert-data').toString('base64');
     const hostSsl = { verificationMode: 'full' as const, certificateAuthoritiesData: certData };
-    (mockConfigUtils.getCustomHostSettings as jest.Mock).mockReturnValue({ ssl: hostSsl });
+    (mockConfigUtils.getCustomHostSettings as Mock).mockReturnValue({ ssl: hostSsl });
     const tlsResult = { rejectUnauthorized: true } as ReturnType<typeof getNodeSSLOptions>;
     mockGetNodeSSLOptions.mockReturnValue(tlsResult);
     const platform = createPlatformServices(mockConfigUtils);
@@ -242,7 +251,7 @@ describe('createPlatformServices', () => {
 
   it('buildTlsOptions uses a single custom host entry for multi-host URIs', () => {
     const hostSsl = { verificationMode: 'none' as const };
-    (mockConfigUtils.getCustomHostSettings as jest.Mock).mockImplementation((url: string) =>
+    (mockConfigUtils.getCustomHostSettings as Mock).mockImplementation((url: string) =>
       url === 'https://rs0.example.com:27017' ? { ssl: hostSsl } : undefined
     );
     mockGetNodeSSLOptions.mockReturnValue({});
@@ -260,7 +269,7 @@ describe('createPlatformServices', () => {
   });
 
   it('buildTlsOptions throws when multiple hosts have conflicting customHostSettings entries', () => {
-    (mockConfigUtils.getCustomHostSettings as jest.Mock).mockImplementation((url: string) => {
+    (mockConfigUtils.getCustomHostSettings as Mock).mockImplementation((url: string) => {
       if (url === 'https://rs0.example.com:27017')
         return { ssl: { verificationMode: 'none' as const } };
       if (url === 'https://rs1.example.com:27017')
@@ -282,7 +291,7 @@ describe('createPlatformServices', () => {
 
   it('buildTlsOptions throws when a per-host CA would only cover some members of a multi-host URI', () => {
     const certData = Buffer.from('custom-ca').toString('base64');
-    (mockConfigUtils.getCustomHostSettings as jest.Mock).mockImplementation((url: string) =>
+    (mockConfigUtils.getCustomHostSettings as Mock).mockImplementation((url: string) =>
       url === 'https://rs0.example.com:27017'
         ? { ssl: { verificationMode: 'full' as const, certificateAuthoritiesData: certData } }
         : undefined
@@ -302,7 +311,7 @@ describe('createPlatformServices', () => {
 
   it('buildTlsOptions allows a per-host CA on a single-host connection', () => {
     const certData = Buffer.from('custom-ca').toString('base64');
-    (mockConfigUtils.getCustomHostSettings as jest.Mock).mockReturnValue({
+    (mockConfigUtils.getCustomHostSettings as Mock).mockReturnValue({
       ssl: { verificationMode: 'full' as const, certificateAuthoritiesData: certData },
     });
     const tlsResult = { rejectUnauthorized: true } as ReturnType<typeof getNodeSSLOptions>;

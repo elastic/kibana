@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const copyFileMock = jest.fn();
-export const renameMock = jest.fn();
-export const unlinkMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('fs/promises', () => {
-  const actual = jest.requireActual('fs/promises');
+export const copyFileMock = vi.fn();
+export const renameMock = vi.fn();
+export const unlinkMock = vi.fn();
+
+vi.doMock('fs/promises', () => {
+  const actual = require('fs/promises');
   return {
     ...actual,
     copyFile: copyFileMock,

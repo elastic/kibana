@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
@@ -16,22 +18,22 @@ describe('UnifiedFieldList <FieldNameSearch />', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
   });
 
   it('should render correctly', async () => {
     const props: FieldNameSearchProps = {
       nameFilter: '',
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       screenReaderDescriptionId: 'htmlId',
       'data-test-subj': 'searchInput',
     };
@@ -39,7 +41,7 @@ describe('UnifiedFieldList <FieldNameSearch />', () => {
     const input = screen.getByRole('searchbox', { name: 'Search field names' });
     expect(input).toHaveAttribute('aria-describedby', 'htmlId');
     await user.type(input, 'hey');
-    jest.advanceTimersByTime(256);
+    vi.advanceTimersByTime(256);
     expect(props.onChange).toHaveBeenCalledWith('hey');
     expect(props.onChange).toHaveBeenCalledTimes(1);
   });
@@ -49,7 +51,7 @@ describe('UnifiedFieldList <FieldNameSearch />', () => {
       const [nameFilter, setNameFilter] = useState(defaultNameFilter);
       const props: FieldNameSearchProps = {
         nameFilter,
-        onChange: jest.fn(),
+        onChange: vi.fn(),
         screenReaderDescriptionId: 'htmlId',
         'data-test-subj': 'searchInput',
       };

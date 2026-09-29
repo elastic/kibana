@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -18,18 +21,21 @@ import {
 } from './use_relay_app_connection';
 import { useKibana } from '../../../../../hooks/use_kibana';
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 const POLL_INTERVAL_MS = 3_000;
 const POLL_TIMEOUT_MS = 2 * 60 * 1_000;
 
-const httpGet = jest.fn();
-const httpPost = jest.fn();
-const addError = jest.fn();
+const httpGet = vi.fn();
+const httpPost = vi.fn();
+const addError = vi.fn();
 
 const statusResponse = (
   status: SlackAppStatusResponse['status'],
@@ -39,8 +45,8 @@ const statusResponse = (
 const createFakeAuthWindow = () => ({
   closed: false,
   opener: window as unknown as Window | null,
-  location: { replace: jest.fn() },
-  close: jest.fn(),
+  location: { replace: vi.fn() },
+  close: vi.fn(),
 });
 
 const createSetup = () => {
@@ -55,16 +61,16 @@ const createSetup = () => {
 
 // Flushes the microtask queue alongside any pending timers, so the async
 // http.get/post mocks resolve without needing to run for real wall-clock time.
-const flush = (ms = 0) => act(() => jest.advanceTimersByTimeAsync(ms));
+const flush = (ms = 0) => act(() => vi.advanceTimersByTimeAsync(ms));
 
 describe('useRelayAppConnection', () => {
   let authWindow: ReturnType<typeof createFakeAuthWindow>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
     authWindow = createFakeAuthWindow();
-    jest.spyOn(window, 'open').mockImplementation(() => authWindow as unknown as Window);
+    vi.spyOn(window, 'open').mockImplementation(() => authWindow as unknown as Window);
     mockUseKibana.mockReturnValue({
       core: {
         http: { get: httpGet, post: httpPost },
@@ -74,7 +80,7 @@ describe('useRelayAppConnection', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('does not poll when the connection is not in progress', async () => {
@@ -190,7 +196,7 @@ describe('useRelayAppConnection', () => {
   });
 
   it('closes the pre-opened tab when the connect request fails', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.notConnected));
     httpPost.mockRejectedValue(new Error('relay down'));
     const { wrapper } = createSetup();
@@ -207,7 +213,7 @@ describe('useRelayAppConnection', () => {
   });
 
   it('does not throw when the browser blocks the pre-opened tab', async () => {
-    jest.spyOn(window, 'open').mockReturnValue(null);
+    vi.spyOn(window, 'open').mockReturnValue(null);
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.notConnected));
     httpPost.mockResolvedValue({ authorizeUrl: 'https://slack/oauth' });
     const { wrapper } = createSetup();
@@ -266,7 +272,7 @@ describe('useRelayAppConnection', () => {
   });
 
   it('surfaces a toast error when connect fails', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.notConnected));
     httpPost.mockRejectedValue(new Error('relay down'));
     const { wrapper } = createSetup();
@@ -282,7 +288,7 @@ describe('useRelayAppConnection', () => {
   });
 
   it('surfaces the relay reason from the response body as the connect toast message', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.notConnected));
     httpPost.mockRejectedValue(
       Object.assign(new Error('Bad Gateway'), { body: { message: 'workspace already bound' } })
@@ -303,7 +309,7 @@ describe('useRelayAppConnection', () => {
   });
 
   it('surfaces a toast error when disconnect fails', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.connected));
     httpPost.mockRejectedValue(new Error('relay down'));
     const { wrapper } = createSetup();

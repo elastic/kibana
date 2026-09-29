@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -15,15 +18,15 @@ import { useApplyAttackAssignees } from './use_apply_attack_assignees';
 import { useSetAttacksAssignees } from '../../../../../common/containers/attacks/hooks/use_set_attacks_assignees';
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/containers/attacks/hooks/use_set_attacks_assignees');
-jest.mock('../confirmation_modal/use_update_attacks_modal');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/containers/attacks/hooks/use_set_attacks_assignees');
+vi.mock('../confirmation_modal/use_update_attacks_modal');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSetAttacksAssignees = useSetAttacksAssignees as jest.MockedFunction<
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseSetAttacksAssignees = useSetAttacksAssignees as MockedFunction<
   typeof useSetAttacksAssignees
 >;
-const mockUseUpdateAttacksModal = useUpdateAttacksModal as jest.MockedFunction<
+const mockUseUpdateAttacksModal = useUpdateAttacksModal as MockedFunction<
   typeof useUpdateAttacksModal
 >;
 
@@ -34,12 +37,12 @@ function wrapper(props: { children: React.ReactNode }) {
 }
 
 describe('useApplyAttackAssignees', () => {
-  const mockAttacksMutateAsync = jest.fn();
-  const mockShowModal = jest.fn();
-  const mockReportEvent = jest.fn();
+  const mockAttacksMutateAsync = vi.fn();
+  const mockShowModal = vi.fn();
+  const mockReportEvent = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient();
 
     mockUseKibana.mockReturnValue({
@@ -104,8 +107,8 @@ describe('useApplyAttackAssignees', () => {
     mockAttacksMutateAsync.mockResolvedValue({ updated: 2 });
 
     const { result } = renderHook(() => useApplyAttackAssignees(), { wrapper });
-    const setIsLoading = jest.fn();
-    const onSuccess = jest.fn();
+    const setIsLoading = vi.fn();
+    const onSuccess = vi.fn();
 
     await act(async () => {
       await result.current.applyAssignees({
@@ -136,8 +139,8 @@ describe('useApplyAttackAssignees', () => {
     mockAttacksMutateAsync.mockResolvedValue({ updated: 4 });
 
     const { result } = renderHook(() => useApplyAttackAssignees(), { wrapper });
-    const setIsLoading = jest.fn();
-    const onSuccess = jest.fn();
+    const setIsLoading = vi.fn();
+    const onSuccess = vi.fn();
 
     await act(async () => {
       await result.current.applyAssignees({
@@ -165,8 +168,8 @@ describe('useApplyAttackAssignees', () => {
     mockShowModal.mockResolvedValue(null);
 
     const { result } = renderHook(() => useApplyAttackAssignees(), { wrapper });
-    const setIsLoading = jest.fn();
-    const onSuccess = jest.fn();
+    const setIsLoading = vi.fn();
+    const onSuccess = vi.fn();
 
     await act(async () => {
       await result.current.applyAssignees({
@@ -206,7 +209,7 @@ describe('useApplyAttackAssignees', () => {
     mockAttacksMutateAsync.mockRejectedValue(new Error('Mutation failed'));
 
     const { result } = renderHook(() => useApplyAttackAssignees(), { wrapper });
-    const setIsLoading = jest.fn();
+    const setIsLoading = vi.fn();
 
     await act(async () => {
       try {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -68,14 +70,14 @@ describe('TagBadge', () => {
 
   describe('with onClick handler', () => {
     it('renders as clickable badge', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       render(<TagBadge tag={mockTag} onClick={onClick} />);
       const badge = screen.getByText('Test Tag').closest('button');
       expect(badge).toBeInTheDocument();
     });
 
     it('calls onClick with tag and false when clicked normally', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const user = userEvent.setup();
       render(<TagBadge tag={mockTag} onClick={onClick} />);
 
@@ -87,7 +89,7 @@ describe('TagBadge', () => {
     });
 
     it('calls onClick with tag when clicked with Meta key', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const user = userEvent.setup();
 
       render(<TagBadge tag={mockTag} onClick={onClick} />);
@@ -105,7 +107,7 @@ describe('TagBadge', () => {
     });
 
     it('calls onClick with tag when clicked with Ctrl key', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const user = userEvent.setup();
 
       render(<TagBadge tag={mockTag} onClick={onClick} />);
@@ -122,7 +124,7 @@ describe('TagBadge', () => {
     });
 
     it('detects modifier key based on platform', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const user = userEvent.setup();
 
       render(<TagBadge tag={mockTag} onClick={onClick} />);
@@ -156,7 +158,7 @@ describe('TagBadge', () => {
     });
 
     it('has proper aria label for accessibility', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       render(<TagBadge tag={mockTag} onClick={onClick} />);
 
       const badge = screen.getByText('Test Tag').closest('button');
@@ -164,8 +166,8 @@ describe('TagBadge', () => {
     });
 
     it('does not propagate event if onClick is defined', async () => {
-      const onClick = jest.fn();
-      const onContainerClick = jest.fn();
+      const onClick = vi.fn();
+      const onContainerClick = vi.fn();
       const user = userEvent.setup();
 
       render(

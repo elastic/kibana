@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { actionsConfigMock } from '../../../../actions_config.mock';
 import type { ActionTypeRegistryOpts } from '../../../../action_type_registry';
 import { ActionTypeRegistry } from '../../../../action_type_registry';
@@ -31,7 +34,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
 import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
 
-let mockedLicenseState: jest.Mocked<ILicenseState>;
+let mockedLicenseState: Mocked<ILicenseState>;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
 let actionTypeRegistry: ActionTypeRegistry;
 let authTypeRegistry: AuthTypeRegistry;
@@ -40,7 +43,7 @@ describe('listTypes()', () => {
   let actionsClient: ActionsClient;
 
   beforeEach(async () => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockedLicenseState = licenseStateMock.create();
     actionTypeRegistryParams = {
       licensing: licensingMock.createSetup(),
@@ -69,14 +72,14 @@ describe('listTypes()', () => {
       unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
       inMemoryConnectors: [],
       actionExecutor: actionExecutorMock.create(),
-      bulkExecutionEnqueuer: jest.fn(),
+      bulkExecutionEnqueuer: vi.fn(),
       request: httpServerMock.createKibanaRequest(),
       authorization: actionsAuthorizationMock.create() as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
-      getEventLogClient: jest.fn(),
+      getEventLogClient: vi.fn(),
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
       isESOCanEncrypt: true,
-      getAxiosInstanceWithAuth: jest.fn(),
+      getAxiosInstanceWithAuth: vi.fn(),
     });
   });
 

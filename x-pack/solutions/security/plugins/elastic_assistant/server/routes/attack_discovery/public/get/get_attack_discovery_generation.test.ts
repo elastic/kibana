@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -42,12 +45,12 @@ const mockAlertData = [
 describe('getAttackDiscoveryGenerationRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let mockContext: {
-    resolve: jest.Mock;
+    resolve: Mock;
     elasticAssistant: Promise<{
       logger: ReturnType<typeof loggingSystemMock.createLogger>;
       eventLogIndex: string;
       getSpaceId: () => string;
-      getAttackDiscoveryDataClient: jest.Mock;
+      getAttackDiscoveryDataClient: Mock;
     }>;
     core: Promise<{
       elasticsearch: {
@@ -65,21 +68,21 @@ describe('getAttackDiscoveryGenerationRoute', () => {
   let mockRequest: Partial<KibanaRequest<unknown, unknown, unknown>>;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
   let mockDataClient: {
-    getAttackDiscoveryGenerationById: jest.Mock;
-    findAttackDiscoveryAlerts: jest.Mock;
+    getAttackDiscoveryGenerationById: Mock;
+    findAttackDiscoveryAlerts: Mock;
   };
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
-  let addVersionMock: jest.Mock;
+  let addVersionMock: Mock;
   let getHandler: (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     router = httpServiceMock.createRouter();
     mockLogger = loggingSystemMock.createLogger();
     mockDataClient = {
-      getAttackDiscoveryGenerationById: jest.fn().mockResolvedValue(mockGeneration),
-      findAttackDiscoveryAlerts: jest.fn().mockResolvedValue({
+      getAttackDiscoveryGenerationById: vi.fn().mockResolvedValue(mockGeneration),
+      findAttackDiscoveryAlerts: vi.fn().mockResolvedValue({
         data: mockAlertData,
         total: 1,
         page: 1,
@@ -89,7 +92,7 @@ describe('getAttackDiscoveryGenerationRoute', () => {
       }),
     };
     mockContext = {
-      resolve: jest.fn().mockResolvedValue({
+      resolve: vi.fn().mockResolvedValue({
         core: {
           elasticsearch: {
             client: {
@@ -109,7 +112,7 @@ describe('getAttackDiscoveryGenerationRoute', () => {
         logger: mockLogger,
         eventLogIndex: 'event-log-index',
         getSpaceId: () => 'default',
-        getAttackDiscoveryDataClient: jest.fn().mockResolvedValue(mockDataClient),
+        getAttackDiscoveryDataClient: vi.fn().mockResolvedValue(mockDataClient),
       }),
       core: Promise.resolve({
         elasticsearch: {
@@ -123,7 +126,7 @@ describe('getAttackDiscoveryGenerationRoute', () => {
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockResolvedValue(true),
+          getBooleanValue: vi.fn().mockResolvedValue(true),
         },
       }),
     };
@@ -131,19 +134,19 @@ describe('getAttackDiscoveryGenerationRoute', () => {
       params: { execution_uuid: 'test-uuid' },
     };
     mockResponse = httpServerMock.createResponseFactory();
-    mockResponse.custom = jest.fn().mockReturnThis();
-    jest
+    mockResponse.custom = vi.fn().mockReturnThis();
+    vi
       .spyOn(helpers, 'performChecks')
       .mockResolvedValue({ isSuccess: true, currentUser: mockAuthenticatedUser });
 
-    addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({ addVersion: addVersionMock });
     getAttackDiscoveryGenerationRoute(router);
     getHandler = addVersionMock.mock.calls[0][1];
   });
   describe('successful flow', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('calls getAttackDiscoveryGenerationById with correct parameters', async () => {
@@ -161,7 +164,7 @@ describe('getAttackDiscoveryGenerationRoute', () => {
 
     describe('with_replacements query handling', () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('passes withReplacements: true to the data client when with_replacements is true in the query', async () => {
@@ -211,7 +214,7 @@ describe('getAttackDiscoveryGenerationRoute', () => {
 
     describe('enable_field_rendering query handling', () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it('passes enableFieldRendering: true to the data client when enable_field_rendering is true in the query', async () => {
@@ -354,7 +357,7 @@ describe('getAttackDiscoveryGenerationRoute', () => {
         statusCode: 401,
         body: { message: 'Unauthorized' },
       });
-      (helpers.performChecks as jest.Mock).mockResolvedValueOnce({
+      (helpers.performChecks as Mock).mockResolvedValueOnce({
         isSuccess: false,
         response: mockError,
       });

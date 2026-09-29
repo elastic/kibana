@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { i18n as i18nLib } from '@kbn/i18n';
 
 import { createRedirectHtmlPage } from './html_page_utils';
 
-jest.mock('@kbn/i18n');
+vi.mock('@kbn/i18n');
 
 describe('createRedirectHtmlPage', () => {
-  const mockGetLocale = i18nLib.getLocale as jest.MockedFunction<typeof i18nLib.getLocale>;
-  const mockTranslate = i18nLib.translate as jest.MockedFunction<typeof i18nLib.translate>;
+  const mockGetLocale = i18nLib.getLocale as MockedFunction<typeof i18nLib.getLocale>;
+  const mockTranslate = i18nLib.translate as MockedFunction<typeof i18nLib.translate>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetLocale.mockReturnValue('en');
     mockTranslate.mockReturnValue('Click here if you are not redirected automatically');
   });

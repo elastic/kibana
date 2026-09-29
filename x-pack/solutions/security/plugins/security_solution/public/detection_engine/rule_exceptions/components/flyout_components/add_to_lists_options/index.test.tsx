@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { shallow } from 'enzyme';
 
 import { ExceptionsAddToListsOptions } from '.';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../rule_management/logic/use_find_rules');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../rule_management/logic/use_find_rules');
 
 describe('ExceptionsAddToListsOptions', () => {
   it('it displays radio option as disabled if there are no "sharedLists"', () => {
@@ -21,8 +23,8 @@ describe('ExceptionsAddToListsOptions', () => {
         rulesCount={1}
         selectedRadioOption="add_to_rule"
         sharedLists={[]}
-        onListsSelectionChange={jest.fn()}
-        onRadioChange={jest.fn()}
+        onListsSelectionChange={vi.fn()}
+        onRadioChange={vi.fn()}
       />
     );
 
@@ -45,8 +47,8 @@ describe('ExceptionsAddToListsOptions', () => {
             type: ExceptionListTypeEnum.DETECTION,
           },
         ]}
-        onListsSelectionChange={jest.fn()}
-        onRadioChange={jest.fn()}
+        onListsSelectionChange={vi.fn()}
+        onRadioChange={vi.fn()}
       />
     );
 
@@ -69,8 +71,8 @@ describe('ExceptionsAddToListsOptions', () => {
             type: ExceptionListTypeEnum.DETECTION,
           },
         ]}
-        onListsSelectionChange={jest.fn()}
-        onRadioChange={jest.fn()}
+        onListsSelectionChange={vi.fn()}
+        onRadioChange={vi.fn()}
       />
     );
 

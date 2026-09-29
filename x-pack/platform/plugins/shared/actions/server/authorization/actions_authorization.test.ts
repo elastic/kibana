@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { ActionsAuthorization } from './actions_authorization';
@@ -22,7 +25,7 @@ function mockSecurity() {
   const authorization = security.authz;
   // typescript is having trouble inferring jest's automocking
   (
-    authorization.actions.savedObject.get as jest.MockedFunction<
+    authorization.actions.savedObject.get as MockedFunction<
       typeof authorization.actions.savedObject.get
     >
   ).mockImplementation(mockAuthorizationAction);
@@ -31,7 +34,7 @@ function mockSecurity() {
 }
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('ensureAuthorized', () => {
@@ -56,9 +59,9 @@ describe('ensureAuthorized', () => {
 
   test('ensures the user has privileges to use the operation on the Actions Saved Object type', async () => {
     const { authorization } = mockSecurity();
-    const checkPrivileges: jest.MockedFunction<
+    const checkPrivileges: MockedFunction<
       ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-    > = jest.fn();
+    > = vi.fn();
     authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
     const actionsAuthorization = new ActionsAuthorization({
       request,
@@ -86,9 +89,9 @@ describe('ensureAuthorized', () => {
 
   test('ensures the user has privileges to execute an Actions Saved Object type', async () => {
     const { authorization } = mockSecurity();
-    const checkPrivileges: jest.MockedFunction<
+    const checkPrivileges: MockedFunction<
       ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-    > = jest.fn();
+    > = vi.fn();
     authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
     const actionsAuthorization = new ActionsAuthorization({
       request,
@@ -126,9 +129,9 @@ describe('ensureAuthorized', () => {
 
   test('throws if user lacks the required privieleges', async () => {
     const { authorization } = mockSecurity();
-    const checkPrivileges: jest.MockedFunction<
+    const checkPrivileges: MockedFunction<
       ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-    > = jest.fn();
+    > = vi.fn();
     authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
     const actionsAuthorization = new ActionsAuthorization({
       request,
@@ -157,9 +160,9 @@ describe('ensureAuthorized', () => {
 
   test('checks additional privileges correctly', async () => {
     const { authorization } = mockSecurity();
-    const checkPrivileges: jest.MockedFunction<
+    const checkPrivileges: MockedFunction<
       ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-    > = jest.fn();
+    > = vi.fn();
 
     authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
     const actionsAuthorization = new ActionsAuthorization({

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
@@ -14,9 +17,9 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import { resolveConnectorId } from './resolve_connector_id';
 
 describe('resolveConnectorId', () => {
-  let mockInferencePlugin: jest.Mocked<InferenceServerStart>;
-  let mockKibanaRequest: jest.Mocked<KibanaRequest>;
-  let mockSearchInferenceEndpoints: jest.Mocked<SearchInferenceEndpointsPluginStart>;
+  let mockInferencePlugin: Mocked<InferenceServerStart>;
+  let mockKibanaRequest: Mocked<KibanaRequest>;
+  let mockSearchInferenceEndpoints: Mocked<SearchInferenceEndpointsPluginStart>;
 
   const createMockConnector = (partial: Partial<InferenceConnector>): InferenceConnector => ({
     type: InferenceConnectorType.OpenAI,
@@ -30,20 +33,20 @@ describe('resolveConnectorId', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    mockKibanaRequest = {} as jest.Mocked<KibanaRequest>;
+    mockKibanaRequest = {} as Mocked<KibanaRequest>;
 
     mockInferencePlugin = {
-      getDefaultConnector: jest.fn(),
-      getConnectorList: jest.fn(),
-      getConnectorById: jest.fn(),
+      getDefaultConnector: vi.fn(),
+      getConnectorList: vi.fn(),
+      getConnectorById: vi.fn(),
     } as any;
 
     mockSearchInferenceEndpoints = {
       features: {} as any,
       endpoints: {
-        getForFeature: jest.fn(),
+        getForFeature: vi.fn(),
       },
     } as any;
   });
@@ -85,7 +88,7 @@ describe('resolveConnectorId', () => {
     describe('when searchInferenceEndpoints and featureId are provided', () => {
       it('should use the first feature endpoint when available', async () => {
         const featureConnectorId = 'feature-connector-id';
-        (mockSearchInferenceEndpoints.endpoints.getForFeature as jest.Mock).mockResolvedValue({
+        (mockSearchInferenceEndpoints.endpoints.getForFeature as Mock).mockResolvedValue({
           endpoints: [
             createMockConnector({ connectorId: featureConnectorId }),
             createMockConnector({ connectorId: 'second-connector-id' }),
@@ -109,7 +112,7 @@ describe('resolveConnectorId', () => {
 
       it('should fall back to getDefaultConnector when feature returns no endpoints', async () => {
         const defaultConnectorId = 'default-connector-id';
-        (mockSearchInferenceEndpoints.endpoints.getForFeature as jest.Mock).mockResolvedValue({
+        (mockSearchInferenceEndpoints.endpoints.getForFeature as Mock).mockResolvedValue({
           endpoints: [],
           warnings: [],
           soEntryFound: false,

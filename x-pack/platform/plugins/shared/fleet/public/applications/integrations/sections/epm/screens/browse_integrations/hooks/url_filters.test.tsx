@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useHistory } from 'react-router-dom';
 
@@ -15,23 +18,29 @@ import { dataTypes } from '../../../../../../../../common/constants';
 
 import { useAddUrlFilters, useUrlFilters } from './url_filters';
 
-jest.mock('react-router-dom', () => ({
-  useHistory: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../hooks', () => ({
-  useUrlParams: jest.fn(),
-}));
+vi.mock('../../../../../../../hooks', () => {
+      const mocked = {
+      useUrlParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useUrlFilters', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns undefined for status when not in URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: {},
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -40,9 +49,9 @@ describe('useUrlFilters', () => {
   });
 
   it('returns STATUS_DEPRECATED when status=deprecated in URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { status: 'deprecated' },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -51,9 +60,9 @@ describe('useUrlFilters', () => {
   });
 
   it('ignores invalid status values', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { status: 'invalid' },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -62,9 +71,9 @@ describe('useUrlFilters', () => {
   });
 
   it('filters out invalid values from array', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { status: ['invalid', STATUS_DEPRECATED] },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -73,9 +82,9 @@ describe('useUrlFilters', () => {
   });
 
   it('parses search query from URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { q: 'apache' },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -84,9 +93,9 @@ describe('useUrlFilters', () => {
   });
 
   it('parses sort parameter from URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { sort: 'a-z' },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -95,9 +104,9 @@ describe('useUrlFilters', () => {
   });
 
   it('returns undefined for setupMethod when not in URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: {},
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -106,9 +115,9 @@ describe('useUrlFilters', () => {
   });
 
   it('parses single setupMethod from URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { setupMethod: 'agentless' },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -117,9 +126,9 @@ describe('useUrlFilters', () => {
   });
 
   it('parses setupMethod array from URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { setupMethod: ['agentless', 'elastic_agent'] },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -131,9 +140,9 @@ describe('useUrlFilters', () => {
   });
 
   it('ignores invalid setupMethod values', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { setupMethod: 'invalid' },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -142,9 +151,9 @@ describe('useUrlFilters', () => {
   });
 
   it('filters out invalid setupMethod values from array', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { setupMethod: ['invalid', 'agentless'] },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -153,9 +162,9 @@ describe('useUrlFilters', () => {
   });
 
   it('returns undefined for signal when not in URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: {},
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -164,9 +173,9 @@ describe('useUrlFilters', () => {
   });
 
   it('parses single signal from URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { signal: 'logs' },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -175,9 +184,9 @@ describe('useUrlFilters', () => {
   });
 
   it('parses signal array from URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { signal: ['logs', 'metrics'] },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -186,9 +195,9 @@ describe('useUrlFilters', () => {
   });
 
   it('ignores invalid signal values', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { signal: 'invalid' },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -197,9 +206,9 @@ describe('useUrlFilters', () => {
   });
 
   it('filters out invalid signal values from array', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { signal: ['invalid', 'logs'] },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -208,9 +217,9 @@ describe('useUrlFilters', () => {
   });
 
   it('parses single traces signal from URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { signal: 'traces' },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -219,9 +228,9 @@ describe('useUrlFilters', () => {
   });
 
   it('parses signal array with traces from URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { signal: ['logs', 'metrics', 'traces'] },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -230,9 +239,9 @@ describe('useUrlFilters', () => {
   });
 
   it('returns undefined for showContent when not in URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: {},
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -241,9 +250,9 @@ describe('useUrlFilters', () => {
   });
 
   it('returns true for showContent when showContent=true in URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { showContent: 'true' },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -252,9 +261,9 @@ describe('useUrlFilters', () => {
   });
 
   it('returns undefined for showContent when value is not "true"', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { showContent: 'false' },
-      toUrlParams: jest.fn(),
+      toUrlParams: vi.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
@@ -264,9 +273,9 @@ describe('useUrlFilters', () => {
 });
 
 describe('useAddUrlFilters', () => {
-  const mockPush = jest.fn();
-  const mockReplace = jest.fn();
-  const mockToUrlParams = jest.fn((params) => {
+  const mockPush = vi.fn();
+  const mockReplace = vi.fn();
+  const mockToUrlParams = vi.fn((params) => {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (Array.isArray(value)) {
@@ -279,12 +288,12 @@ describe('useAddUrlFilters', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useHistory as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useHistory as Mock).mockReturnValue({
       push: mockPush,
       replace: mockReplace,
     });
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: {},
       toUrlParams: mockToUrlParams,
     });
@@ -303,7 +312,7 @@ describe('useAddUrlFilters', () => {
   });
 
   it('removes status from URL when set to undefined', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { status: 'deprecated' },
       toUrlParams: mockToUrlParams,
     });
@@ -320,7 +329,7 @@ describe('useAddUrlFilters', () => {
   });
 
   it('removes status from URL when set to empty array', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { status: 'deprecated' },
       toUrlParams: mockToUrlParams,
     });
@@ -337,7 +346,7 @@ describe('useAddUrlFilters', () => {
   });
 
   it('preserves search query when updating filters', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { q: 'apache' },
       toUrlParams: mockToUrlParams,
     });
@@ -395,7 +404,7 @@ describe('useAddUrlFilters', () => {
   });
 
   it('removes setupMethod from URL when set to undefined', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { setupMethod: 'agentless' },
       toUrlParams: mockToUrlParams,
     });
@@ -412,7 +421,7 @@ describe('useAddUrlFilters', () => {
   });
 
   it('removes setupMethod from URL when set to empty array', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { setupMethod: 'agentless' },
       toUrlParams: mockToUrlParams,
     });
@@ -429,7 +438,7 @@ describe('useAddUrlFilters', () => {
   });
 
   it('preserves other filters when updating setupMethod', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { q: 'apache', status: 'deprecated' },
       toUrlParams: mockToUrlParams,
     });
@@ -479,7 +488,7 @@ describe('useAddUrlFilters', () => {
   });
 
   it('removes signal from URL when set to undefined', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { signal: 'logs' },
       toUrlParams: mockToUrlParams,
     });
@@ -496,7 +505,7 @@ describe('useAddUrlFilters', () => {
   });
 
   it('removes signal from URL when set to empty array', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { signal: 'logs' },
       toUrlParams: mockToUrlParams,
     });
@@ -513,7 +522,7 @@ describe('useAddUrlFilters', () => {
   });
 
   it('preserves other filters when updating signal', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { q: 'apache', status: 'deprecated', setupMethod: 'agentless' },
       toUrlParams: mockToUrlParams,
     });
@@ -551,7 +560,7 @@ describe('useAddUrlFilters', () => {
   });
 
   it('removes showContent from URL when showContent is undefined', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { showContent: 'true' },
       toUrlParams: mockToUrlParams,
     });
@@ -568,7 +577,7 @@ describe('useAddUrlFilters', () => {
   });
 
   it('preserves other filters when toggling showContent', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
+    (useUrlParams as Mock).mockReturnValue({
       urlParams: { q: 'apache', status: 'deprecated' },
       toUrlParams: mockToUrlParams,
     });

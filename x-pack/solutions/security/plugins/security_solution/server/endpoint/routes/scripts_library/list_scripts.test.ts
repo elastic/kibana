@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
 import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
@@ -45,7 +47,7 @@ describe('GET: fetch list of scripts', () => {
       },
     });
 
-    ((await httpHandlerContextMock.securitySolution).getSpaceId as jest.Mock).mockReturnValue(
+    ((await httpHandlerContextMock.securitySolution).getSpaceId as Mock).mockReturnValue(
       'space_a'
     );
 
@@ -65,7 +67,7 @@ describe('GET: fetch list of scripts', () => {
 
     it('should error if user has no authz to api', async () => {
       (
-        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
+        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock
       ).mockResolvedValue(
         getEndpointAuthzInitialStateMock({
           canWriteScriptsLibrary: false,

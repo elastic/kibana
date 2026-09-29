@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -24,7 +26,7 @@ describe.skip('MultipleAgentPolicySummaryLine', () => {
       <MultipleAgentPoliciesSummaryLine
         policies={agentPolicies}
         packagePolicyId="policy1"
-        onAgentPoliciesChange={jest.fn()}
+        onAgentPoliciesChange={vi.fn()}
       />
     );
 

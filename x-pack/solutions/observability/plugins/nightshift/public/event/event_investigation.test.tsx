@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import moment from 'moment';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -14,23 +16,29 @@ import type { InvestigationState, SignificantEvent } from '@kbn/significant-even
 import type { InvestigationStatus } from '@kbn/investigation-output';
 import { EventInvestigation } from './event_investigation';
 
-const mockOpenChat = jest.fn();
-const mockGetRedirectUrl = jest.fn<string | undefined, [unknown]>();
+const mockOpenChat = vi.fn();
+const mockGetRedirectUrl = vi.fn<string | undefined, [unknown]>();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      agentBuilder: { openChat: mockOpenChat },
-      share: {
-        url: { locators: { get: () => ({ getRedirectUrl: mockGetRedirectUrl }) } },
-      },
-    },
-  }),
-}));
+vi.mock('../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          agentBuilder: { openChat: mockOpenChat },
+          share: {
+            url: { locators: { get: () => ({ getRedirectUrl: mockGetRedirectUrl }) } },
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-07-10T12:00:00Z',

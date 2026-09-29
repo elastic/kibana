@@ -7,26 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { measureInteraction } from '.';
 import { perfomanceMarkers } from '../../performance_markers';
 
 describe('measureInteraction', () => {
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('Initial load', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
-      performance.mark = jest.fn();
-      performance.measure = jest.fn();
+      vi.clearAllMocks();
+      performance.mark = vi.fn();
+      performance.measure = vi.fn();
 
-      performance.getEntriesByName = jest
+      performance.getEntriesByName = vi
         .fn()
         .mockReturnValueOnce([{ name: 'start::pageChange' }])
         .mockReturnValueOnce([{ name: 'end::pageReady' }])
         .mockReturnValueOnce([]);
-      performance.clearMarks = jest.fn();
+      performance.clearMarks = vi.fn();
     });
 
     it('should mark the start of the page change', () => {
@@ -87,7 +89,7 @@ describe('measureInteraction', () => {
     it('should handle absolute date format correctly', () => {
       const pathname = '/test-path';
       const interaction = measureInteraction(pathname);
-      jest.spyOn(global.Date, 'now').mockReturnValue(1733704200000); // 2024-12-09T00:30:00Z
+      vi.spyOn(global.Date, 'now').mockReturnValue(1733704200000); // 2024-12-09T00:30:00Z
 
       const eventData = {
         meta: { rangeFrom: '2024-12-09T00:00:00Z', rangeTo: '2024-12-09T00:30:00Z' },
@@ -116,7 +118,7 @@ describe('measureInteraction', () => {
     it('should handle negative offset when rangeTo is in the past', () => {
       const pathname = '/test-path';
       const interaction = measureInteraction(pathname);
-      jest.spyOn(global.Date, 'now').mockReturnValue(1733704200000); // 2024-12-09T00:30:00Z
+      vi.spyOn(global.Date, 'now').mockReturnValue(1733704200000); // 2024-12-09T00:30:00Z
 
       const eventData = {
         meta: { rangeFrom: '2024-12-08T00:00:00Z', rangeTo: '2024-12-09T00:00:00Z' },
@@ -146,7 +148,7 @@ describe('measureInteraction', () => {
       const pathname = '/test-path';
 
       const interaction = measureInteraction(pathname);
-      jest.spyOn(global.Date, 'now').mockReturnValue(1733704200000); // 2024-12-09T00:30:00Z
+      vi.spyOn(global.Date, 'now').mockReturnValue(1733704200000); // 2024-12-09T00:30:00Z
 
       const eventData = {
         meta: { rangeFrom: '2024-12-08T01:00:00Z', rangeTo: '2024-12-09T01:00:00Z' },
@@ -177,7 +179,7 @@ describe('measureInteraction', () => {
 
   describe('Refresh', () => {
     beforeEach(() => {
-      performance.getEntriesByName = jest
+      performance.getEntriesByName = vi
         .fn()
         .mockReturnValue([{ name: 'start::pageRefresh' }])
         .mockReturnValue([{ name: 'end::pageReady' }]);
@@ -186,7 +188,7 @@ describe('measureInteraction', () => {
       const pathname = '/test-path';
       const interaction = measureInteraction(pathname);
 
-      jest.spyOn(global.Date, 'now').mockReturnValue(1733704200000); // 2024-12-09T00:30:00Z
+      vi.spyOn(global.Date, 'now').mockReturnValue(1733704200000); // 2024-12-09T00:30:00Z
 
       const eventData = {
         meta: { rangeFrom: '2024-12-08T01:00:00Z', rangeTo: '2024-12-09T01:00:00Z' },

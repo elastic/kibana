@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -71,7 +73,7 @@ describe('TabbedContent', () => {
         }}
         onEBTEvent={onEBTEvent}
         onTabLimitReached={onTabLimitReached}
-        onClearRecentlyClosed={jest.fn()}
+        onClearRecentlyClosed={vi.fn()}
         renderContent={
           !disableRenderContent
             ? (item) => <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>
@@ -88,8 +90,8 @@ describe('TabbedContent', () => {
       pointerEventsCheck: 0,
     });
     const initialItems = [{ id: 'tab1', label: 'Tab 1' }];
-    const onChanged = jest.fn();
-    const onEBTEvent = jest.fn();
+    const onChanged = vi.fn();
+    const onEBTEvent = vi.fn();
 
     let counter = 0;
     const createItem = () => {
@@ -136,9 +138,9 @@ describe('TabbedContent', () => {
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
     ];
-    const onChanged = jest.fn();
-    const onEBTEvent = jest.fn();
-    const createItem = jest.fn(() => NEW_TAB);
+    const onChanged = vi.fn();
+    const onEBTEvent = vi.fn();
+    const createItem = vi.fn(() => NEW_TAB);
     const recentlyClosedItems = [
       { id: 'closed1', label: 'Closed Tab 1', closedAt: Date.now() - 60_000 },
     ];
@@ -175,10 +177,10 @@ describe('TabbedContent', () => {
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
     ];
-    const onChanged = jest.fn();
-    const onEBTEvent = jest.fn();
-    const onTabLimitReached = jest.fn();
-    const createItem = jest.fn(() => NEW_TAB);
+    const onChanged = vi.fn();
+    const onEBTEvent = vi.fn();
+    const onTabLimitReached = vi.fn();
+    const createItem = vi.fn(() => NEW_TAB);
 
     const closedAt = Date.now() - 60_000;
     const recentlyClosedItems = [
@@ -216,8 +218,8 @@ describe('TabbedContent', () => {
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
     ];
-    const onChanged = jest.fn();
-    const onEBTEvent = jest.fn();
+    const onChanged = vi.fn();
+    const onEBTEvent = vi.fn();
 
     render(
       <TabsWrapper
@@ -256,8 +258,8 @@ describe('TabbedContent', () => {
     const firstTab = initialItems[0];
     const secondTab = initialItems[1];
 
-    const onChanged = jest.fn();
-    const onEBTEvent = jest.fn();
+    const onChanged = vi.fn();
+    const onEBTEvent = vi.fn();
 
     render(
       <TabsWrapper
@@ -301,8 +303,8 @@ describe('TabbedContent', () => {
     ];
     const firstTab = initialItems[0];
     const secondTab = initialItems[1];
-    const onChanged = jest.fn();
-    const onEBTEvent = jest.fn();
+    const onChanged = vi.fn();
+    const onEBTEvent = vi.fn();
 
     render(
       <TabsWrapper
@@ -357,8 +359,8 @@ describe('TabbedContent', () => {
       { id: 'tab4', label: 'Tab 2' },
     ];
     const firstTab = initialItems[0];
-    const onChanged = jest.fn();
-    const onEBTEvent = jest.fn();
+    const onChanged = vi.fn();
+    const onEBTEvent = vi.fn();
 
     render(
       <TabsWrapper
@@ -393,8 +395,8 @@ describe('TabbedContent', () => {
 
     const tabWithSpecialChars = { id: 'tab1', label: 'Tab (1+2)*.?' };
     const initialItems = [tabWithSpecialChars, { id: 'tab2', label: 'Regular Tab' }];
-    const onChanged = jest.fn();
-    const onEBTEvent = jest.fn();
+    const onChanged = vi.fn();
+    const onEBTEvent = vi.fn();
 
     render(
       <TabsWrapper
@@ -433,8 +435,8 @@ describe('TabbedContent', () => {
       { id: 'tab2', label: 'Tab 2' },
     ];
     const secondTab = initialItems[1];
-    const onChanged = jest.fn();
-    const onEBTEvent = jest.fn();
+    const onChanged = vi.fn();
+    const onEBTEvent = vi.fn();
 
     render(
       <TabsWrapper
@@ -469,8 +471,8 @@ describe('TabbedContent', () => {
       { id: 'tab3', label: 'Tab 3' },
     ];
     const firstTab = initialItems[0];
-    const onChanged = jest.fn();
-    const onEBTEvent = jest.fn();
+    const onChanged = vi.fn();
+    const onEBTEvent = vi.fn();
 
     render(
       <TabsWrapper
@@ -517,8 +519,8 @@ describe('TabbedContent', () => {
     ];
     const firstTab = initialItems[0];
     const secondTab = initialItems[1];
-    const onChanged = jest.fn();
-    const onEBTEvent = jest.fn();
+    const onChanged = vi.fn();
+    const onEBTEvent = vi.fn();
 
     render(
       <TabsWrapper
@@ -558,8 +560,8 @@ describe('TabbedContent', () => {
       { id: 'tab2', label: 'Tab 2' },
     ];
     const firstTab = initialItems[0];
-    const onChanged = jest.fn();
-    const onEBTEvent = jest.fn();
+    const onChanged = vi.fn();
+    const onEBTEvent = vi.fn();
 
     render(
       <TabsWrapper
@@ -594,8 +596,8 @@ describe('TabbedContent', () => {
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
     ];
-    const onChanged = jest.fn();
-    const onEBTEvent = jest.fn();
+    const onChanged = vi.fn();
+    const onEBTEvent = vi.fn();
 
     render(
       <TabsWrapper
@@ -618,8 +620,8 @@ describe('TabbedContent', () => {
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
     ];
-    const onChanged = jest.fn();
-    const onEBTEvent = jest.fn();
+    const onChanged = vi.fn();
+    const onEBTEvent = vi.fn();
 
     render(
       <TabsWrapper
@@ -644,7 +646,7 @@ describe('TabbedContent', () => {
     ];
 
     it('wraps the tabs bar when wrapTabsBar is provided', () => {
-      const wrapTabsBar = jest.fn((tabsBar) => (
+      const wrapTabsBar = vi.fn((tabsBar) => (
         <div data-test-subj="custom-tabs-header">{tabsBar}</div>
       ));
 
@@ -652,8 +654,8 @@ describe('TabbedContent', () => {
         <TabsWrapper
           initialItems={initialItems}
           initialSelectedItemId={initialItems[0].id}
-          onChanged={jest.fn()}
-          onEBTEvent={jest.fn()}
+          onChanged={vi.fn()}
+          onEBTEvent={vi.fn()}
           disableRenderContent
           wrapTabsBar={wrapTabsBar}
         />
@@ -668,14 +670,14 @@ describe('TabbedContent', () => {
     });
 
     it('passes null to wrapTabsBar when hideTabsBar is true', () => {
-      const wrapTabsBar = jest.fn(() => <div data-test-subj="custom-tabs-header" />);
+      const wrapTabsBar = vi.fn(() => <div data-test-subj="custom-tabs-header" />);
 
       render(
         <TabsWrapper
           initialItems={initialItems}
           initialSelectedItemId={initialItems[0].id}
-          onChanged={jest.fn()}
-          onEBTEvent={jest.fn()}
+          onChanged={vi.fn()}
+          onEBTEvent={vi.fn()}
           disableRenderContent
           hideTabsBar
           wrapTabsBar={wrapTabsBar}

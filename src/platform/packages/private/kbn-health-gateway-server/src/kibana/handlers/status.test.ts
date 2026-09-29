@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { Server } from '@hapi/hapi';
 import { duration } from 'moment';
 import { URL } from 'url';
@@ -22,7 +25,7 @@ describe('StatusHandler', () => {
   let server: Server;
 
   beforeAll(async () => {
-    jest.spyOn(await import('node-fetch'), 'default');
+    vi.spyOn(await import('node-fetch'), 'default');
   });
 
   beforeEach(async () => {
@@ -42,11 +45,11 @@ describe('StatusHandler', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('handler', () => {
@@ -78,7 +81,7 @@ describe('StatusHandler', () => {
     `(
       "should return '$status' with $code when Kibana host returns $config.status",
       async ({ config, status, code }) => {
-        (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(
+        (fetch as MockedFunction<typeof fetch>).mockResolvedValueOnce(
           new Response('', config)
         );
 
@@ -106,7 +109,7 @@ describe('StatusHandler', () => {
     );
 
     it("should return 'failure' with 502 when `fetch` throws an error", async () => {
-      (fetch as jest.MockedFunction<typeof fetch>).mockRejectedValueOnce(new Error('Fetch Error'));
+      (fetch as MockedFunction<typeof fetch>).mockRejectedValueOnce(new Error('Fetch Error'));
       const response = server.inject({
         method: 'get',
         url: '/',
@@ -129,19 +132,19 @@ describe('StatusHandler', () => {
     });
 
     it("should return 'timeout' with 504 when `fetch` timeouts", async () => {
-      (fetch as jest.MockedFunction<typeof fetch>).mockImplementationOnce(
+      (fetch as MockedFunction<typeof fetch>).mockImplementationOnce(
         (url, { signal } = {}) => {
           return new Promise((resolve, reject) => {
             signal?.addEventListener('abort', () => {
               reject(new DOMException('Fetch Aborted', 'AbortError'));
             });
 
-            jest.advanceTimersByTime(60000);
+            vi.advanceTimersByTime(60000);
           });
         }
       );
 
-      jest.useFakeTimers({ doNotFake: ['nextTick'] });
+      vi.useFakeTimers({ doNotFake: ['nextTick'] });
 
       const response = server.inject({
         method: 'get',
@@ -164,7 +167,7 @@ describe('StatusHandler', () => {
           })
         );
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 
@@ -191,7 +194,7 @@ describe('StatusHandler', () => {
     it("should return 'healthy' only when all the hosts healthy", async () => {
       kibanaConfig.hosts.push('http://localhost:5602');
 
-      (fetch as jest.MockedFunction<typeof fetch>)
+      (fetch as MockedFunction<typeof fetch>)
         .mockResolvedValueOnce(new Response('', ok))
         .mockResolvedValueOnce(new Response('', unauthorized));
 
@@ -225,7 +228,7 @@ describe('StatusHandler', () => {
     it("should return 'unhealthy' when at least one host is not healthy", async () => {
       kibanaConfig.hosts.push('http://localhost:5602');
 
-      (fetch as jest.MockedFunction<typeof fetch>)
+      (fetch as MockedFunction<typeof fetch>)
         .mockResolvedValueOnce(new Response('', ok))
         .mockResolvedValueOnce(new Response('', serverError));
 
@@ -260,7 +263,7 @@ describe('StatusHandler', () => {
       kibanaConfig.hosts.splice(0, kibanaConfig.hosts.length);
       kibanaConfig.hosts.push('http://localhost:5601', 'http://localhost:5602');
 
-      (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue(new Response('', ok));
+      (fetch as MockedFunction<typeof fetch>).mockResolvedValue(new Response('', ok));
 
       await server.inject({
         method: 'get',
@@ -282,7 +285,7 @@ describe('StatusHandler', () => {
       kibanaConfig.hosts.splice(0, kibanaConfig.hosts.length);
       kibanaConfig.hosts.push('http://localhost:5601/prefix', 'http://localhost:5602/other/path');
 
-      (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue(new Response('', ok));
+      (fetch as MockedFunction<typeof fetch>).mockResolvedValue(new Response('', ok));
 
       await server.inject({
         method: 'get',

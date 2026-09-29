@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -27,8 +30,8 @@ import {
   RULE_DETAILS_ACTIONS_CONTENT_TEST_ID,
 } from './test_ids';
 
-const mockGetStepsData = getStepsData as jest.Mock;
-jest.mock('../../../detection_engine/common/helpers');
+const mockGetStepsData = getStepsData as Mock;
+vi.mock('../../../detection_engine/common/helpers');
 
 const rule = { name: 'rule name', description: 'rule description' } as RuleResponse;
 

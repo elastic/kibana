@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -44,7 +46,7 @@ import {
 import { setupEnvironment, WithAppDependencies } from '../helpers/setup_environment';
 import { renderIndexDetailsPage } from './index_details_page.helpers';
 
-jest.mock('@kbn/code-editor');
+vi.mock('@kbn/code-editor');
 
 const getTypeLabel = (typeValue: string): string => {
   const typeDef = TYPE_DEFINITION[typeValue as keyof typeof TYPE_DEFINITION];
@@ -62,8 +64,8 @@ describe('<IndexDetailsPage />', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
-  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
-  jest.spyOn(documentationService, 'setup');
+  vi.spyOn(breadcrumbService, 'setBreadcrumbs');
+  vi.spyOn(documentationService, 'setup');
 
   const renderPage = async (initialEntry?: string, deps: Record<string, unknown> = {}) =>
     renderIndexDetailsPage({
@@ -75,7 +77,7 @@ describe('<IndexDetailsPage />', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const mockEnvironment = setupEnvironment();
     ({ httpSetup, httpRequestsMockHelpers } = mockEnvironment);
 
@@ -120,7 +122,7 @@ describe('<IndexDetailsPage />', () => {
           </MemoryRouter>
         ),
         httpSetup,
-        { url: { locators: { get: () => ({ navigate: jest.fn(), getUrl: jest.fn() }) } } }
+        { url: { locators: { get: () => ({ navigate: vi.fn(), getUrl: vi.fn() }) } } }
       );
       render(<Comp />);
       await screen.findByTestId('indexDetailsErrorLoadingDetails');
@@ -152,12 +154,12 @@ describe('<IndexDetailsPage />', () => {
           </MemoryRouter>
         ),
         httpSetup,
-        { url: { locators: { get: () => ({ navigate: jest.fn(), getUrl: jest.fn() }) } } }
+        { url: { locators: { get: () => ({ navigate: vi.fn(), getUrl: vi.fn() }) } } }
       );
       render(<Comp />);
       await screen.findByTestId('indexDetailsErrorLoadingDetails');
 
-      const getMock = jest.mocked(httpSetup.get);
+      const getMock = vi.mocked(httpSetup.get);
       const requestsBefore = getMock.mock.calls.length;
 
       fireEvent.click(screen.getByTestId('indexDetailsReloadDetailsButton'));
@@ -185,7 +187,7 @@ describe('<IndexDetailsPage />', () => {
           </MemoryRouter>
         ),
         httpSetup,
-        { url: { locators: { get: () => ({ navigate: jest.fn(), getUrl: jest.fn() }) } } }
+        { url: { locators: { get: () => ({ navigate: vi.fn(), getUrl: vi.fn() }) } } }
       );
       render(<Comp />);
       await screen.findByTestId('indexDetailsNoIndexNameError');
@@ -210,8 +212,8 @@ describe('<IndexDetailsPage />', () => {
           ml: {
             mlApi: {
               trainedModels: {
-                getModelsDownloadStatus: jest.fn().mockResolvedValue({}),
-                getTrainedModels: jest.fn().mockResolvedValue([
+                getModelsDownloadStatus: vi.fn().mockResolvedValue({}),
+                getTrainedModels: vi.fn().mockResolvedValue([
                   {
                     model_id: '.elser_model_2',
                     model_type: 'pytorch',
@@ -229,7 +231,7 @@ describe('<IndexDetailsPage />', () => {
                     tags: ['elastic'],
                   },
                 ]),
-                getTrainedModelStats: jest.fn().mockResolvedValue({
+                getTrainedModelStats: vi.fn().mockResolvedValue({
                   count: 1,
                   trained_model_stats: [
                     {
@@ -327,7 +329,7 @@ describe('<IndexDetailsPage />', () => {
         fireEvent.click(screen.getByTestId('indexDetailsTab-stats'));
         await screen.findByTestId('indexDetailsStatsError');
 
-        const getMock = jest.mocked(httpSetup.get);
+        const getMock = vi.mocked(httpSetup.get);
         const requestsBefore = getMock.mock.calls.length;
 
         fireEvent.click(screen.getByTestId('reloadIndexStatsButton'));
@@ -474,7 +476,7 @@ describe('<IndexDetailsPage />', () => {
           `Data streamUnable to load data stream detailsReloadLast update`
         );
 
-        const getMock = jest.mocked(httpSetup.get);
+        const getMock = vi.mocked(httpSetup.get);
         const requestsBefore = getMock.mock.calls.length;
         fireEvent.click(screen.getByTestId('indexDetailsDataStreamReload'));
         await waitFor(() => {
@@ -591,7 +593,7 @@ describe('<IndexDetailsPage />', () => {
         fireEvent.click(screen.getByTestId('indexDetailsTab-settings'));
         await screen.findByTestId('indexDetailsSettingsError');
 
-        const getMock = jest.mocked(httpSetup.get);
+        const getMock = vi.mocked(httpSetup.get);
         const requestsBefore = getMock.mock.calls.length;
         fireEvent.click(screen.getByTestId('indexDetailsSettingsReloadButton'));
         await waitFor(() => {
@@ -630,7 +632,7 @@ describe('<IndexDetailsPage />', () => {
         fireEvent.click(screen.getByTestId('indexDetailsSettingsEditModeSwitch'));
         const editor = await screen.findByTestId('indexDetailsSettingsEditor');
 
-        const getMock = jest.mocked(httpSetup.get);
+        const getMock = vi.mocked(httpSetup.get);
         const requestsBefore = getMock.mock.calls.length;
 
         const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
@@ -668,7 +670,7 @@ describe('<IndexDetailsPage />', () => {
         fireEvent.click(screen.getByTestId('indexDetailsSettingsEditModeSwitch'));
         const editor = await screen.findByTestId('indexDetailsSettingsEditor');
 
-        const getMock = jest.mocked(httpSetup.get);
+        const getMock = vi.mocked(httpSetup.get);
         const requestsBefore = getMock.mock.calls.length;
 
         const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
@@ -740,7 +742,7 @@ describe('<IndexDetailsPage />', () => {
 
     it('closes an index', async () => {
       await renderPage();
-      const getMock = jest.mocked(httpSetup.get);
+      const getMock = vi.mocked(httpSetup.get);
       const requestsBefore = getMock.mock.calls.length;
 
       await openManageIndexMenu();
@@ -764,7 +766,7 @@ describe('<IndexDetailsPage />', () => {
       });
       await renderPage();
 
-      const getMock = jest.mocked(httpSetup.get);
+      const getMock = vi.mocked(httpSetup.get);
       const requestsBefore = getMock.mock.calls.length;
 
       await openManageIndexMenu();
@@ -782,7 +784,7 @@ describe('<IndexDetailsPage />', () => {
 
     it('forcemerges an index', async () => {
       await renderPage();
-      const getMock = jest.mocked(httpSetup.get);
+      const getMock = vi.mocked(httpSetup.get);
       const requestsBefore = getMock.mock.calls.length;
 
       await openManageIndexMenu();
@@ -805,7 +807,7 @@ describe('<IndexDetailsPage />', () => {
 
     it('refreshes an index', async () => {
       await renderPage();
-      const getMock = jest.mocked(httpSetup.get);
+      const getMock = vi.mocked(httpSetup.get);
       const requestsBefore = getMock.mock.calls.length;
 
       await openManageIndexMenu();
@@ -824,7 +826,7 @@ describe('<IndexDetailsPage />', () => {
 
     it(`clears an index's cache`, async () => {
       await renderPage();
-      const getMock = jest.mocked(httpSetup.get);
+      const getMock = vi.mocked(httpSetup.get);
       const requestsBefore = getMock.mock.calls.length;
 
       await openManageIndexMenu();
@@ -843,7 +845,7 @@ describe('<IndexDetailsPage />', () => {
 
     it(`flushes an index`, async () => {
       await renderPage();
-      const getMock = jest.mocked(httpSetup.get);
+      const getMock = vi.mocked(httpSetup.get);
       const requestsBefore = getMock.mock.calls.length;
 
       await openManageIndexMenu();
@@ -953,7 +955,7 @@ describe('<IndexDetailsPage />', () => {
       fireEvent.click(screen.getByTestId('indexDetailsSettingsEditModeSwitch'));
       const editor = await screen.findByTestId('indexDetailsSettingsEditor');
 
-      const getMock = jest.mocked(httpSetup.get);
+      const getMock = vi.mocked(httpSetup.get);
       const requestsBefore = getMock.mock.calls.length;
 
       const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
@@ -1115,9 +1117,9 @@ describe('<IndexDetailsPage />', () => {
       plugins: {
         licensing: {
           license$: {
-            subscribe: jest.fn((callback) => {
-              callback({ isActive: true, hasAtLeast: jest.fn(() => true) });
-              return { unsubscribe: jest.fn() };
+            subscribe: vi.fn((callback) => {
+              callback({ isActive: true, hasAtLeast: vi.fn(() => true) });
+              return { unsubscribe: vi.fn() };
             }),
           },
         },
@@ -1533,7 +1535,7 @@ describe('<IndexDetailsPage />', () => {
           expect(screen.getByTestId('indexDetailsMappingsSaveMappings')).not.toBeDisabled()
         );
 
-        const getMock = jest.mocked(httpSetup.get);
+        const getMock = vi.mocked(httpSetup.get);
         const requestsBefore = getMock.mock.calls.length;
 
         await user.click(screen.getByTestId('indexDetailsMappingsSaveMappings'));
@@ -1588,7 +1590,7 @@ describe('<IndexDetailsPage />', () => {
       const customInferenceModel = 'my-elser-model';
       const mockLicense = {
         isActive: true,
-        hasAtLeast: jest.fn(() => true),
+        hasAtLeast: vi.fn(() => true),
       };
 
       const setupAddSemanticTextField = async ({
@@ -1629,19 +1631,19 @@ describe('<IndexDetailsPage />', () => {
                 locators: {
                   // The share mock's `url` is a singleton shared with the top-level `url` dependency,
                   // so this locator must also satisfy consumers that call `getUrl`/`navigate`.
-                  get: jest.fn(() => ({
-                    useUrl: jest.fn().mockReturnValue('https://redirect.me/to/inference_endpoints'),
-                    getUrl: jest.fn(),
-                    navigate: jest.fn(),
+                  get: vi.fn(() => ({
+                    useUrl: vi.fn().mockReturnValue('https://redirect.me/to/inference_endpoints'),
+                    getUrl: vi.fn(),
+                    navigate: vi.fn(),
                   })),
                 },
               },
             },
             licensing: {
               license$: {
-                subscribe: jest.fn((callback) => {
+                subscribe: vi.fn((callback) => {
                   callback(mockLicense);
-                  return { unsubscribe: jest.fn() };
+                  return { unsubscribe: vi.fn() };
                 }),
               },
             },
@@ -1763,7 +1765,7 @@ describe('<IndexDetailsPage />', () => {
 
         await screen.findByTestId('indexDetailsMappingsError');
 
-        const getMock = jest.mocked(httpSetup.get);
+        const getMock = vi.mocked(httpSetup.get);
         const requestsBefore = getMock.mock.calls.length;
         fireEvent.click(screen.getByTestId('indexDetailsMappingsReloadButton'));
 

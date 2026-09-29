@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedClass } from 'vitest';
+
 import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
@@ -26,19 +29,19 @@ import { resolveChatModel } from '../../../../lib/entity_analytics/lead_generati
 import { RiskScoreDataClient } from '../../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
 
-jest.mock('../../../../lib/entity_analytics/lead_generation/saved_object');
-jest.mock('../../../../lib/entity_analytics/lead_generation/run_pipeline');
-jest.mock('../../../../lib/entity_analytics/lead_generation/utils');
-jest.mock('../../../../lib/entity_analytics/lead_generation/entity_conversion');
-jest.mock('../../../../lib/entity_analytics/risk_score/risk_score_data_client');
-jest.mock('../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges');
+vi.mock('../../../../lib/entity_analytics/lead_generation/saved_object');
+vi.mock('../../../../lib/entity_analytics/lead_generation/run_pipeline');
+vi.mock('../../../../lib/entity_analytics/lead_generation/utils');
+vi.mock('../../../../lib/entity_analytics/lead_generation/entity_conversion');
+vi.mock('../../../../lib/entity_analytics/risk_score/risk_score_data_client');
+vi.mock('../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges');
 
-const mockGetLeadGenerationConfig = getLeadGenerationConfig as jest.Mock;
-const mockUpsertLeadGenerationConfig = upsertLeadGenerationConfig as jest.Mock;
-const mockRunLeadGenerationPipeline = runLeadGenerationPipeline as jest.Mock;
-const mockResolveChatModel = resolveChatModel as jest.Mock;
-const MockRiskScoreDataClient = RiskScoreDataClient as jest.MockedClass<typeof RiskScoreDataClient>;
-const mockGetUserLeadPrivileges = getUserLeadPrivileges as jest.Mock;
+const mockGetLeadGenerationConfig = getLeadGenerationConfig as Mock;
+const mockUpsertLeadGenerationConfig = upsertLeadGenerationConfig as Mock;
+const mockRunLeadGenerationPipeline = runLeadGenerationPipeline as Mock;
+const mockResolveChatModel = resolveChatModel as Mock;
+const MockRiskScoreDataClient = RiskScoreDataClient as MockedClass<typeof RiskScoreDataClient>;
+const mockGetUserLeadPrivileges = getUserLeadPrivileges as Mock;
 
 const mockExperimentalFeatures = { leadGenerationEnabled: true } as ExperimentalFeatures;
 
@@ -48,11 +51,11 @@ const CONNECTOR_NAME = 'OpenAI Production';
 describe('generateLeadsTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
 
-  const mockGetStartServices = jest.fn();
-  const mockCreateCRUDClient = jest.fn().mockReturnValue({});
-  const mockCreateRelationshipsClient = jest.fn().mockReturnValue({});
-  const mockActionsGetAll = jest.fn();
-  const mockGetActionsClientWithRequest = jest
+  const mockGetStartServices = vi.fn();
+  const mockCreateCRUDClient = vi.fn().mockReturnValue({});
+  const mockCreateRelationshipsClient = vi.fn().mockReturnValue({});
+  const mockActionsGetAll = vi.fn();
+  const mockGetActionsClientWithRequest = vi
     .fn()
     .mockResolvedValue({ getAll: mockActionsGetAll });
 
@@ -79,7 +82,7 @@ describe('generateLeadsTool', () => {
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
     mockGetStartServices.mockResolvedValue([mockPipelineCoreStart, mockStartPlugins, {}]);
     mockActionsGetAll.mockResolvedValue([
@@ -135,10 +138,10 @@ describe('generateLeadsTool', () => {
   describe('handler — HITL', () => {
     it('returns a confirmation prompt when status is unprompted', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.unprompted,
       });
-      (ctx.prompts.askForConfirmation as jest.Mock).mockReturnValue({ type: 'confirmation' });
+      (ctx.prompts.askForConfirmation as Mock).mockReturnValue({ type: 'confirmation' });
 
       const result = await tool.handler({}, ctx);
 
@@ -151,7 +154,7 @@ describe('generateLeadsTool', () => {
 
     it('returns cancelled error when status is rejected', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.rejected,
       });
 
@@ -168,7 +171,7 @@ describe('generateLeadsTool', () => {
   describe('handler — accepted', () => {
     const acceptedCtx = () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
       return ctx;
@@ -349,10 +352,10 @@ describe('generateLeadsTool', () => {
   describe('handler — telemetry', () => {
     it('does not report telemetry while only asking for confirmation', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.unprompted,
       });
-      (ctx.prompts.askForConfirmation as jest.Mock).mockReturnValue({ type: 'confirmation' });
+      (ctx.prompts.askForConfirmation as Mock).mockReturnValue({ type: 'confirmation' });
 
       await tool.handler({}, ctx);
 
@@ -361,7 +364,7 @@ describe('generateLeadsTool', () => {
 
     it('reports userConfirmationOutcome=accepted and success=true after a successful start', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
 
@@ -382,7 +385,7 @@ describe('generateLeadsTool', () => {
 
     it('reports userConfirmationOutcome=rejected when the user declines the prompt', async () => {
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.rejected,
       });
 
@@ -427,7 +430,7 @@ describe('generateLeadsTool', () => {
     it('reports success=false when no connector is configured (validation error)', async () => {
       mockGetLeadGenerationConfig.mockResolvedValue({ connectorId: undefined });
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
 
@@ -450,7 +453,7 @@ describe('generateLeadsTool', () => {
     it('reports success=false and errorMessage when getStartServices throws', async () => {
       mockGetStartServices.mockRejectedValue(new Error('boom'));
       const ctx = handlerContext();
-      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      (ctx.prompts.checkConfirmationStatus as Mock).mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
 

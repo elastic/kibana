@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { SaveTimelineCallout } from './save_timeline';
@@ -13,11 +16,11 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../../common
 import { TimelineId } from '../../../../common/types';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
-jest.mock('../../../common/components/user_privileges');
+vi.mock('../../../common/components/user_privileges');
 
 describe('SaveTimelineCallout', () => {
   it('should render the callout and save components', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { crud: true },
     });
 

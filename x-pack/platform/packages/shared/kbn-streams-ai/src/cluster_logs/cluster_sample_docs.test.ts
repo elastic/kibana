@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /*
  * Tests for clusterSampleDocs utility
  */
@@ -13,12 +15,12 @@ import { clusterSampleDocs } from './cluster_sample_docs';
 import * as dbscanModule from './dbscan';
 
 // mock ai-tools heavy functions to keep test deterministic and focused
-jest.mock('@kbn/ai-tools', () => {
-  const module = jest.requireActual('@kbn/ai-tools');
+vi.mock('@kbn/ai-tools', async () => {
+  const module = (await vi.importActual('@kbn/ai-tools'));
 
   return {
     formatDocumentAnalysis: module.formatDocumentAnalysis,
-    mergeSampleDocumentsWithSchema: jest.fn().mockImplementation(({ hits }) => {
+    mergeSampleDocumentsWithSchema: vi.fn().mockImplementation(({ hits }) => {
       return {
         total: hits.length,
         sampled: hits.length > 0 ? Object.keys(hits[0]._source || {}) : [],
@@ -30,7 +32,7 @@ jest.mock('@kbn/ai-tools', () => {
 
 describe('clusterSampleDocs', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns empty result when no hits', () => {
@@ -239,7 +241,7 @@ describe('clusterSampleDocs', () => {
   });
 
   it('skips high-cardinality field values while retaining schema membership', () => {
-    const dbscanSpy = jest
+    const dbscanSpy = vi
       .spyOn(dbscanModule, 'dbscan')
       .mockImplementation(() => ({ clusters: [], noise: [] }));
 

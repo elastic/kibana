@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -12,10 +15,10 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { useScanUsage } from './use_scan_usage';
 import { useKibana } from './use_kibana';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockDelete = jest.fn().mockResolvedValue({
+const mockUseKibana = useKibana as Mock;
+const mockDelete = vi.fn().mockResolvedValue({
   acknowledge: true,
   error_message: 'inference id is being used',
   indexes: ['index1', 'index2'],
@@ -39,7 +42,7 @@ describe('useScanUsage', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should call API endpoint with the correct parameters and return response', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest, RequestHandlerContext, SavedObject } from '@kbn/core/server';
@@ -18,27 +21,33 @@ import { requestContextMock } from '../../../detection_engine/routes/__mocks__/r
 import { noteFieldsMigrator } from './field_migrator';
 import { pickSavedNote, persistNote, createNote, updateNote } from './saved_object';
 
-jest.mock('uuid', () => ({
-  v1: jest.fn().mockReturnValue('7ba7a520-03f4-11eb-9d9d-ffba20fabba8'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v1: vi.fn().mockReturnValue('7ba7a520-03f4-11eb-9d9d-ffba20fabba8'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./saved_object', () => {
-  const originalModule = jest.requireActual('./saved_object');
+vi.mock('./saved_object', async () => {
+  const originalModule = (await vi.importActual('./saved_object'));
   return {
     ...originalModule,
-    createNote: jest.fn(originalModule.createNote),
-    updateNote: jest.fn(originalModule.updateNote),
-    persistNote: jest.fn(originalModule.persistNote),
+    createNote: vi.fn(originalModule.createNote),
+    updateNote: vi.fn(originalModule.updateNote),
+    persistNote: vi.fn(originalModule.persistNote),
   };
 });
 
-jest.mock('./field_migrator', () => ({
-  noteFieldsMigrator: {
-    extractFieldsToReferences: jest.fn(),
-    populateFieldsFromReferences: jest.fn(),
-    populateFieldsFromReferencesForPatch: jest.fn(),
-  },
-}));
+vi.mock('./field_migrator', () => {
+      const mocked = {
+      noteFieldsMigrator: {
+        extractFieldsToReferences: vi.fn(),
+        populateFieldsFromReferences: vi.fn(),
+        populateFieldsFromReferencesForPatch: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('saved_object pick', () => {
   const mockDateNow = new Date('2020-04-03T23:00:00.000Z').valueOf();
@@ -54,13 +63,13 @@ describe('saved_object pick', () => {
   });
 
   beforeAll(() => {
-    Date = jest.fn(() => ({
-      valueOf: jest.fn().mockReturnValue(mockDateNow),
+    Date = vi.fn(() => ({
+      valueOf: vi.fn().mockReturnValue(mockDateNow),
     })) as unknown as DateConstructor;
   });
 
   afterAll(() => {
-    (Date as unknown as jest.Mock).mockRestore();
+    (Date as unknown as Mock).mockRestore();
   });
 
   describe('Set create / update time correctly ', () => {
@@ -200,7 +209,7 @@ describe('persistNote', () => {
         client: mockSavedObjectClient,
       },
     },
-    resolve: jest.fn(),
+    resolve: vi.fn(),
   } as unknown as RequestHandlerContext;
   const mockNote = { eventId: 'id', note: 'test note', timelineId: '' };
   const mockRequest: FrameworkRequest = {
@@ -239,23 +248,23 @@ describe('persistNote', () => {
     version: 'WzQ0ODEsMV0=',
   };
   beforeAll(() => {
-    Date = jest.fn(() => ({
-      valueOf: jest.fn().mockReturnValue(mockDateNow),
+    Date = vi.fn(() => ({
+      valueOf: vi.fn().mockReturnValue(mockDateNow),
     })) as unknown as DateConstructor;
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSavedObjectClient.get.mockResolvedValue(mockNoteSavedObject);
     mockSavedObjectClient.create.mockResolvedValue(mockNoteSavedObject);
-    (noteFieldsMigrator.extractFieldsToReferences as jest.Mock).mockReturnValue({
+    (noteFieldsMigrator.extractFieldsToReferences as Mock).mockReturnValue({
       transformedFields: mockMigratedAttributes,
       references: mockReferences,
     });
-    (noteFieldsMigrator.populateFieldsFromReferences as jest.Mock).mockReturnValue({
+    (noteFieldsMigrator.populateFieldsFromReferences as Mock).mockReturnValue({
       ...mockNoteSavedObject,
       attributes: { ...mockNoteSavedObject.attributes, timelineId: '' },
     });
-    (noteFieldsMigrator.populateFieldsFromReferencesForPatch as jest.Mock).mockReturnValue({
+    (noteFieldsMigrator.populateFieldsFromReferencesForPatch as Mock).mockReturnValue({
       ...mockNoteSavedObject,
       attributes: { ...mockNoteSavedObject.attributes, timelineId: '' },
     });
@@ -268,7 +277,7 @@ describe('persistNote', () => {
       page: 0,
     });
 
-    (createNote as jest.Mock).mockResolvedValue({ code: 200, message: 'success', note: mockNote });
+    (createNote as Mock).mockResolvedValue({ code: 200, message: 'success', note: mockNote });
 
     const result = await persistNote({ request: mockRequest, noteId: null, note: mockNote });
 
@@ -288,7 +297,7 @@ describe('persistNote', () => {
       page: 0,
     });
 
-    (updateNote as jest.Mock).mockResolvedValue({ code: 200, message: 'success', note: mockNote });
+    (updateNote as Mock).mockResolvedValue({ code: 200, message: 'success', note: mockNote });
 
     const result = await persistNote({ request: mockRequest, noteId, note: mockNote });
 
@@ -302,7 +311,7 @@ describe('persistNote', () => {
       per_page: 0,
       page: 0,
     });
-    (createNote as jest.Mock).mockResolvedValue({
+    (createNote as Mock).mockResolvedValue({
       code: 403,
       message:
         'Cannot create more than 100 notes per document without associating them to a timeline',

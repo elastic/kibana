@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { VirusTotalConnector } from './virustotal';
 
@@ -21,8 +23,8 @@ interface HttpError extends Error {
 
 describe('VirusTotalConnector', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
   };
 
   const mockContext = {
@@ -31,7 +33,7 @@ describe('VirusTotalConnector', () => {
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('scanFileHash action', () => {

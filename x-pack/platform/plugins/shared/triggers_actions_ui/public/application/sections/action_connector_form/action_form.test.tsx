@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import {
   RecoveredActionGroup,
@@ -21,30 +24,36 @@ import type { GenericValidationResult, RuleUiAction, ValidationResult } from '..
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import ActionForm from './action_form';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('react-window', () => ({
-  FixedSizeList: ({ children, itemCount, itemData }: any) => (
-    <div>
-      {Array.from({ length: itemCount }, (_, index) =>
-        children({ index, style: {}, data: itemData })
-      )}
-    </div>
-  ),
-  VariableSizeList: ({ children, itemCount, itemData }: any) => (
-    <div>
-      {Array.from({ length: itemCount }, (_, index) =>
-        children({ index, style: {}, data: itemData })
-      )}
-    </div>
-  ),
-}));
-jest.mock('../../lib/action_connector_api', () => ({
-  loadAllActions: jest.fn(),
-  loadActionTypes: jest.fn(),
-}));
-const { loadActionTypes, loadAllActions } = jest.requireMock('../../lib/action_connector_api');
+vi.mock('../../../common/lib/kibana');
+vi.mock('react-window', () => {
+      const mocked = {
+      FixedSizeList: ({ children, itemCount, itemData }: any) => (
+        <div>
+          {Array.from({ length: itemCount }, (_, index) =>
+            children({ index, style: {}, data: itemData })
+          )}
+        </div>
+      ),
+      VariableSizeList: ({ children, itemCount, itemData }: any) => (
+        <div>
+          {Array.from({ length: itemCount }, (_, index) =>
+            children({ index, style: {}, data: itemData })
+          )}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/action_connector_api', () => {
+      const mocked = {
+      loadAllActions: vi.fn(),
+      loadActionTypes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const { loadActionTypes, loadAllActions } = (await vi.importMock('../../lib/action_connector_api'));
 
-const setHasActionsWithBrokenConnector = jest.fn();
+const setHasActionsWithBrokenConnector = vi.fn();
 describe('action_form', () => {
   const mockedActionParamsFields = lazy(async () => ({
     default() {
@@ -234,7 +243,7 @@ describe('action_form', () => {
     },
   ];
 
-  const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+  const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
   async function setup(
     customActions?: RuleUiAction[],

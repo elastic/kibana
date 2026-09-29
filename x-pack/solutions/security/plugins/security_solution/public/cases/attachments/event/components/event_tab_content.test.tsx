@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { CaseUI } from '@kbn/cases-plugin/common';
@@ -12,20 +14,23 @@ import { SECURITY_EVENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { EventTabContent } from './event_tab_content';
 import type { Event } from './table';
 
-jest.mock('./table', () => ({
-  EventsTableForCases: ({ events }: { events: Event[] }) => (
-    <div data-test-subj="events-table-mock">
-      {events.length} {'events'}
-      {events.map((e) => (
-        <span key={String(e.eventId)} data-test-subj={`event-${String(e.eventId)}`}>
-          {e.eventId}
-          {':'}
-          {e.index}
-        </span>
-      ))}
-    </div>
-  ),
-}));
+vi.mock('./table', () => {
+      const mocked = {
+      EventsTableForCases: ({ events }: { events: Event[] }) => (
+        <div data-test-subj="events-table-mock">
+          {events.length} {'events'}
+          {events.map((e) => (
+            <span key={String(e.eventId)} data-test-subj={`event-${String(e.eventId)}`}>
+              {e.eventId}
+              {':'}
+              {e.index}
+            </span>
+          ))}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EventTabContent', () => {
   it('renders events table with unified event attachments', () => {

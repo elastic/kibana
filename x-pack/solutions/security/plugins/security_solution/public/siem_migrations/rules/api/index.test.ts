@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import {
@@ -29,8 +32,8 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import * as api from '.';
 import { migrationRules } from '../__mocks__';
 
-jest.mock('../../../common/lib/kibana');
-const mockKibanaServices = KibanaServices.get as jest.Mock;
+vi.mock('../../../common/lib/kibana');
+const mockKibanaServices = KibanaServices.get as Mock;
 
 const migrationId = 'test-migration-id';
 const signal = {} as AbortSignal;
@@ -45,7 +48,7 @@ describe('SIEM Rules API', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getRuleMigrationStats', () => {

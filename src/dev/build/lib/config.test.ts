@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { resolve } from 'path';
 
 import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
@@ -14,16 +16,19 @@ import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { Config } from './config';
 
-jest.mock('./version_info', () => ({
-  getVersionInfo: () => ({
-    buildSha: 'abc1234',
-    buildVersion: '8.0.0',
-    buildNumber: 1234,
-    buildDate: '2023-05-15T23:12:09+0000',
-  }),
-}));
+vi.mock('./version_info', () => {
+      const mocked = {
+      getVersionInfo: () => ({
+        buildSha: 'abc1234',
+        buildVersion: '8.0.0',
+        buildNumber: 1234,
+        buildDate: '2023-05-15T23:12:09+0000',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const versionInfo = jest.requireMock('./version_info').getVersionInfo();
+const versionInfo = (await vi.importMock('./version_info')).getVersionInfo();
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 

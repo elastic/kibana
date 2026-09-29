@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
@@ -16,7 +18,7 @@ describe('POST role mappings', () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     const mockContext = {
       core: coreMock.createRequestHandlerContext(),
-      licensing: { license: { check: jest.fn().mockReturnValue({ state: 'valid' }) } } as any,
+      licensing: { license: { check: vi.fn().mockReturnValue({ state: 'valid' }) } } as any,
     };
     mockContext.core.elasticsearch.client.asCurrentUser.security.putRoleMapping.mockResponse({
       created: true,
@@ -76,7 +78,7 @@ describe('POST role mappings', () => {
         core: coreMock.createRequestHandlerContext(),
         licensing: {
           license: {
-            check: jest.fn().mockReturnValue({
+            check: vi.fn().mockReturnValue({
               state: 'invalid',
               message: 'test forbidden message',
             }),

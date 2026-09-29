@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockKibanaValues } from '../../__mocks__/kea_logic';
 import { mockHistory } from '../../__mocks__/react_router';
 
@@ -12,7 +14,7 @@ import { generateReactRouterProps } from '.';
 
 describe('generateReactRouterProps', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('generates React-Router-friendly href and onClick props', () => {
@@ -35,7 +37,7 @@ describe('generateReactRouterProps', () => {
       const mockEvent = {
         button: 0,
         target: { getAttribute: () => '_self' },
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as any;
 
       const { onClick } = generateReactRouterProps({ to: '/test' });
@@ -52,7 +54,7 @@ describe('generateReactRouterProps', () => {
       const mockEvent = {
         button: 0,
         target: { getAttribute: () => '_self' },
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as any;
 
       const { onClick } = generateReactRouterProps({
@@ -70,7 +72,7 @@ describe('generateReactRouterProps', () => {
 
     it('does not prevent default browser behavior on new tab/window clicks', () => {
       const mockEvent = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
         shiftKey: true,
         target: { getAttribute: () => '_blank' },
       } as any;
@@ -82,8 +84,8 @@ describe('generateReactRouterProps', () => {
     });
 
     it('calls inherited onClick actions in addition to default navigation', () => {
-      const mockEvent = { preventDefault: jest.fn() } as any;
-      const customOnClick = jest.fn(); // Can be anything from telemetry to a state reset
+      const mockEvent = { preventDefault: vi.fn() } as any;
+      const customOnClick = vi.fn(); // Can be anything from telemetry to a state reset
 
       const { onClick } = generateReactRouterProps({ to: '/test', onClick: customOnClick });
       onClick(mockEvent);

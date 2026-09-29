@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { loggerMock } from '@kbn/logging-mocks';
 
 import type { CreateExceptionListItemOptions } from '../exception_lists/exception_list_client_types';
@@ -27,8 +30,8 @@ describe('When using the ExtensionPointStorageClient', () => {
   let logger: ReturnType<typeof loggerMock.create>;
   let extensionPointStorage: ExtensionPointStorageInterface;
   let callbackContext: ServerExtensionCallbackContext;
-  let preCreateExtensionPointMock1: jest.Mocked<ExceptionsListPreCreateItemServerExtension>;
-  let extensionPointsMocks: Array<jest.Mocked<ExtensionPoint>>;
+  let preCreateExtensionPointMock1: Mocked<ExceptionsListPreCreateItemServerExtension>;
+  let extensionPointsMocks: Array<Mocked<ExtensionPoint>>;
   let callbackRunLog: string;
 
   const addAllExtensionPoints = (): void => {
@@ -64,7 +67,7 @@ describe('When using the ExtensionPointStorageClient', () => {
       return data;
     };
     preCreateExtensionPointMock1 = {
-      callback: jest.fn(
+      callback: vi.fn(
         callbackFn.bind(window, 1) as ExceptionsListPreCreateItemServerExtension['callback']
       ),
       type: 'exceptionsListPreCreateItem',
@@ -72,25 +75,25 @@ describe('When using the ExtensionPointStorageClient', () => {
     extensionPointsMocks = [
       preCreateExtensionPointMock1,
       {
-        callback: jest.fn(
+        callback: vi.fn(
           callbackFn.bind(window, 2) as ExceptionsListPreCreateItemServerExtension['callback']
         ),
         type: 'exceptionsListPreCreateItem',
       },
       {
-        callback: jest.fn(
+        callback: vi.fn(
           callbackFn.bind(window, 3) as ExceptionsListPreUpdateItemServerExtension['callback']
         ),
         type: 'exceptionsListPreUpdateItem',
       },
       {
-        callback: jest.fn(
+        callback: vi.fn(
           callbackFn.bind(window, 4) as ExceptionsListPreCreateItemServerExtension['callback']
         ),
         type: 'exceptionsListPreCreateItem',
       },
       {
-        callback: jest.fn(
+        callback: vi.fn(
           callbackFn.bind(window, 5) as ExceptionsListPreCreateItemServerExtension['callback']
         ),
         type: 'exceptionsListPreCreateItem',

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createEsqlDataSource } from '../../../common/data_sources';
 import {
   FEATURE_ID_1,
@@ -32,7 +34,7 @@ const createExampleProfileToolkit = () => {
 
 describe('registerEnabledProfileProviders', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should register all profile providers', async () => {
@@ -62,7 +64,7 @@ describe('registerEnabledProfileProviders', () => {
   });
 
   it('should not register experimental profile providers by default', async () => {
-    jest.spyOn(exampleRootProfileProvider.profile, 'getCellRenderers');
+    vi.spyOn(exampleRootProfileProvider.profile, 'getCellRenderers');
     const profileProviderServices = createProfileProviderSharedServicesMock();
     const { rootProfileServiceMock } = createContextAwarenessMocks({
       shouldRegisterProviders: false,
@@ -85,7 +87,7 @@ describe('registerEnabledProfileProviders', () => {
   });
 
   it('should register experimental profile providers when enabled by config', async () => {
-    jest.spyOn(exampleRootProfileProvider.profile, 'getCellRenderers');
+    vi.spyOn(exampleRootProfileProvider.profile, 'getCellRenderers');
     const profileProviderServices = createProfileProviderSharedServicesMock();
     const { rootProfileServiceMock, rootProfileProviderMock } = createContextAwarenessMocks({
       shouldRegisterProviders: false,
@@ -120,7 +122,7 @@ describe('registerEnabledProfileProviders', () => {
       });
 
     // Mock feature availability
-    jest
+    vi
       .spyOn(profileProviderServices.core.pricing, 'isFeatureAvailable')
       .mockImplementation((featureId) => {
         if (featureId === FEATURE_ID_1) {
@@ -166,7 +168,7 @@ describe('registerEnabledProfileProviders', () => {
       });
 
     // Mock feature availability
-    jest
+    vi
       .spyOn(profileProviderServices.core.pricing, 'isFeatureAvailable')
       .mockImplementation((featureId) => {
         if (featureId === FEATURE_ID_2) {

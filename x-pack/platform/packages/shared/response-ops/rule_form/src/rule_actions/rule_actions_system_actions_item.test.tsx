@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { RuleType } from '@kbn/alerting-types';
@@ -21,26 +23,35 @@ import type { RuleActionsMessageProps } from './rule_actions_message';
 import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('../hooks', () => ({
-  useRuleFormState: jest.fn(),
-  useRuleFormDispatch: jest.fn(),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useRuleFormState: vi.fn(),
+      useRuleFormDispatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./rule_actions_message', () => ({
-  RuleActionsMessage: ({ onParamsChange, warning }: RuleActionsMessageProps) => (
-    <div>
-      RuleActionsMessage
-      <button onClick={() => onParamsChange('param', { paramKey: 'someValue' })}>
-        RuleActionsMessageButton
-      </button>
-      {warning && <div>{warning}</div>}
-    </div>
-  ),
-}));
+vi.mock('./rule_actions_message', () => {
+      const mocked = {
+      RuleActionsMessage: ({ onParamsChange, warning }: RuleActionsMessageProps) => (
+        <div>
+          RuleActionsMessage
+          <button onClick={() => onParamsChange('param', { paramKey: 'someValue' })}>
+            RuleActionsMessageButton
+          </button>
+          {warning && <div>{warning}</div>}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../validation/validate_params_for_warnings', () => ({
-  validateParamsForWarnings: jest.fn(),
-}));
+vi.mock('../validation/validate_params_for_warnings', () => {
+      const mocked = {
+      validateParamsForWarnings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ruleType = {
   id: '.es-query',
@@ -74,19 +85,17 @@ const ruleType = {
   enabledInLicense: true,
 } as unknown as RuleType;
 
-const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
+const { useRuleFormState, useRuleFormDispatch } = (await vi.importMock('../hooks'));
 
-const { validateParamsForWarnings } = jest.requireMock(
-  '../validation/validate_params_for_warnings'
-);
+const { validateParamsForWarnings } = (await vi.importMock('../validation/validate_params_for_warnings'));
 
 const mockConnectors = [getConnector('1', { id: 'action-1', isSystemAction: true })];
 
 const mockActionTypes = [getActionType('1')];
 
-const mockOnChange = jest.fn();
+const mockOnChange = vi.fn();
 
-const mockValidate = jest.fn().mockResolvedValue({
+const mockValidate = vi.fn().mockResolvedValue({
   errors: {},
 });
 
@@ -119,7 +128,7 @@ describe('ruleActionsSystemActionsItem', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should render correctly', () => {

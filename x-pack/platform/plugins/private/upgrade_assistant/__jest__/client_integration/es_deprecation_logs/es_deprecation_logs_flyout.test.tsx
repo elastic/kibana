@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act } from 'react-dom/test-utils';
 import '@testing-library/jest-dom';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
@@ -21,13 +23,13 @@ import { advanceTime } from '../helpers/time_manipulation';
 // Once the logs team register the kibana locators in their app, we should be able
 // to remove this mock and follow a similar approach to how discover link is tested.
 // See: https://github.com/elastic/kibana/issues/104855
-jest.mock('../../../public/application/lib/logs_checkpoint', () => {
-  const originalModule = jest.requireActual('../../../public/application/lib/logs_checkpoint');
+vi.mock('../../../public/application/lib/logs_checkpoint', async () => {
+  const originalModule = (await vi.importActual('../../../public/application/lib/logs_checkpoint'));
 
   return {
     __esModule: true,
     ...originalModule,
-    loadLogsCheckpoint: jest.fn().mockReturnValue('2021-09-05T10:49:01.805Z'),
+    loadLogsCheckpoint: vi.fn().mockReturnValue('2021-09-05T10:49:01.805Z'),
   };
 });
 
@@ -239,7 +241,7 @@ describe('ES deprecation logs flyout', () => {
       // Initially we want to have the callout to have a warning state
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 10 });
 
-      const addDanger = jest.fn();
+      const addDanger = vi.fn();
       await setupESDeprecationLogsPage(httpSetup, {
         services: {
           core: {
@@ -267,7 +269,7 @@ describe('ES deprecation logs flyout', () => {
 
     describe('Poll for logs count', () => {
       beforeEach(async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
 
         // First request should make the step be complete
         httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
@@ -279,10 +281,10 @@ describe('ES deprecation logs flyout', () => {
 
       afterEach(async () => {
         await act(async () => {
-          await jest.runOnlyPendingTimersAsync();
+          await vi.runOnlyPendingTimersAsync();
         });
-        jest.clearAllTimers();
-        jest.useRealTimers();
+        vi.clearAllTimers();
+        vi.useRealTimers();
       });
 
       test('success state is followed by an error state', async () => {

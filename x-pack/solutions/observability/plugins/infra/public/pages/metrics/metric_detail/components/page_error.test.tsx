@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -14,9 +16,12 @@ import type { InfraHttpError } from '../../../../types';
 import { useDocumentTitle } from '../../../../hooks/use_document_title';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('../../../../hooks/use_document_title', () => ({
-  useDocumentTitle: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_document_title', () => {
+      const mocked = {
+      useDocumentTitle: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderErrorPage = () =>
   render(

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
 import type {
@@ -25,20 +27,23 @@ import {
 } from './helpers';
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
 
-jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
-  loadFieldStats: jest.fn().mockResolvedValue({
-    topValues: {
-      buckets: [
-        {
-          key: 'A',
+vi.mock('@kbn/unified-field-list/src/services/field_stats', () => {
+      const mocked = {
+      loadFieldStats: vi.fn().mockResolvedValue({
+        topValues: {
+          buckets: [
+            {
+              key: 'A',
+            },
+            {
+              key: 'B',
+            },
+          ],
         },
-        {
-          key: 'B',
-        },
-      ],
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const indexPattern = createMockedIndexPattern();
 const dataMock = dataPluginMock.createStartContract();

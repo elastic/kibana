@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -19,28 +21,28 @@ import { PipelinesList } from './main';
 import type { PipelineTable } from './table';
 import type { SectionLoading, useKibana } from '../../../shared_imports';
 
-const mockUseKibana = jest.fn();
-const mockUseCheckManageProcessorsPrivileges = jest.fn();
+const mockUseKibana = vi.fn();
+const mockUseCheckManageProcessorsPrivileges = vi.fn();
 
 type MockServices = ReturnType<typeof useKibana>['services'];
 type DeepPartialMockServices = DeepPartial<MockServices>;
 
 const createMockServices = (overrides: DeepPartialMockServices = {}): DeepPartialMockServices => ({
   api: {
-    useLoadPipelines: jest.fn(),
-    useLoadPipeline: jest.fn(),
+    useLoadPipelines: vi.fn(),
+    useLoadPipeline: vi.fn(),
   },
   metric: {
-    trackUiMetric: jest.fn(),
+    trackUiMetric: vi.fn(),
   },
   breadcrumbs: {
-    setBreadcrumbs: jest.fn(),
+    setBreadcrumbs: vi.fn(),
   },
   config: {
     enableManageProcessors: false,
   },
   documentation: {
-    getIngestNodeUrl: jest.fn().mockReturnValue('http://docs'),
+    getIngestNodeUrl: vi.fn().mockReturnValue('http://docs'),
   },
   consolePlugin: undefined,
   ...overrides,
@@ -53,96 +55,114 @@ const createServicesWithLoadPipelines = (
   return createMockServices({
     ...overrides,
     api: {
-      useLoadPipelines: jest.fn().mockReturnValue({
+      useLoadPipelines: vi.fn().mockReturnValue({
         data: undefined,
         isLoading: false,
         error: null,
-        resendRequest: jest.fn(),
+        resendRequest: vi.fn(),
         ...loadReturn,
       }),
-      useLoadPipeline: jest.fn(),
+      useLoadPipeline: vi.fn(),
     },
   });
 };
 
-jest.mock('../../../shared_imports', () => ({
-  ...jest.requireActual('../../../shared_imports'),
-  useKibana: () => mockUseKibana(),
-  SectionLoading: ({ children }: ComponentProps<typeof SectionLoading>) => (
-    <div data-test-subj="sectionLoading">{children}</div>
-  ),
-}));
+vi.mock('../../../shared_imports', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../shared_imports')),
+      useKibana: () => mockUseKibana(),
+      SectionLoading: ({ children }: ComponentProps<typeof SectionLoading>) => (
+        <div data-test-subj="sectionLoading">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../manage_processors', () => ({
-  ...jest.requireActual('../manage_processors'),
-  useCheckManageProcessorsPrivileges: () => mockUseCheckManageProcessorsPrivileges(),
-}));
+vi.mock('../manage_processors', async () => {
+      const mocked = {
+      ...(await vi.importActual('../manage_processors')),
+      useCheckManageProcessorsPrivileges: () => mockUseCheckManageProcessorsPrivileges(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./empty_list', () => ({
-  ...jest.requireActual('./empty_list'),
-  EmptyList: () => <div data-test-subj="emptyList">EMPTY_LIST</div>,
-}));
+vi.mock('./empty_list', async () => {
+      const mocked = {
+      ...(await vi.importActual('./empty_list')),
+      EmptyList: () => <div data-test-subj="emptyList">EMPTY_LIST</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const editName = 'p!@# name';
 const cloneName = 'clone$%^name';
 const unknownCreateName = 'create&*()name';
 
-jest.mock('./table', () => ({
-  ...jest.requireActual('./table'),
-  PipelineTable: (props: ComponentProps<typeof PipelineTable>) => (
-    <div data-test-subj="pipelineTable">
-      PIPELINE_TABLE
-      <button
-        data-test-subj="openFlyout"
-        onClick={() => {
-          props.openFlyout('from-table');
-        }}
-      >
-        openFlyout
-      </button>
-      <button
-        data-test-subj="editPipeline"
-        onClick={() => {
-          props.onEditPipelineClick(editName);
-        }}
-      >
-        edit
-      </button>
-      <button
-        data-test-subj="clonePipeline"
-        onClick={() => {
-          props.onClonePipelineClick(cloneName);
-        }}
-      >
-        clone
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./table', async () => {
+      const mocked = {
+      ...(await vi.importActual('./table')),
+      PipelineTable: (props: ComponentProps<typeof PipelineTable>) => (
+        <div data-test-subj="pipelineTable">
+          PIPELINE_TABLE
+          <button
+            data-test-subj="openFlyout"
+            onClick={() => {
+              props.openFlyout('from-table');
+            }}
+          >
+            openFlyout
+          </button>
+          <button
+            data-test-subj="editPipeline"
+            onClick={() => {
+              props.onEditPipelineClick(editName);
+            }}
+          >
+            edit
+          </button>
+          <button
+            data-test-subj="clonePipeline"
+            onClick={() => {
+              props.onClonePipelineClick(cloneName);
+            }}
+          >
+            clone
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./delete_modal', () => ({
-  ...jest.requireActual('./delete_modal'),
-  PipelineDeleteModal: ({ pipelinesToDelete }: { pipelinesToDelete?: unknown[] }) => (
-    <div data-test-subj="pipelineDeleteModal">DELETE {pipelinesToDelete?.length ?? 0}</div>
-  ),
-}));
+vi.mock('./delete_modal', async () => {
+      const mocked = {
+      ...(await vi.importActual('./delete_modal')),
+      PipelineDeleteModal: ({ pipelinesToDelete }: { pipelinesToDelete?: unknown[] }) => (
+        <div data-test-subj="pipelineDeleteModal">DELETE {pipelinesToDelete?.length ?? 0}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./pipeline_flyout', () => ({
-  ...jest.requireActual('./pipeline_flyout'),
-  PipelineFlyout: (props: { ingestPipeline: string; onCreateClick: (name: string) => void }) => (
-    <div data-test-subj="pipelineFlyout">
-      <h1>FLYOUT {props.ingestPipeline}</h1>
-      <button
-        data-test-subj="createUnknownPipeline"
-        onClick={() => {
-          props.onCreateClick(props.ingestPipeline);
-        }}
-      >
-        Create pipeline
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./pipeline_flyout', async () => {
+      const mocked = {
+      ...(await vi.importActual('./pipeline_flyout')),
+      PipelineFlyout: (props: { ingestPipeline: string; onCreateClick: (name: string) => void }) => (
+        <div data-test-subj="pipelineFlyout">
+          <h1>FLYOUT {props.ingestPipeline}</h1>
+          <button
+            data-test-subj="createUnknownPipeline"
+            onClick={() => {
+              props.onCreateClick(props.ingestPipeline);
+            }}
+          >
+            Create pipeline
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderList = (
   history: ReturnType<typeof createMemoryHistory>,
@@ -169,7 +189,7 @@ const renderPipelinesList = (path: string, services: DeepPartialMockServices) =>
 
 describe('PipelinesList section', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('WHEN mounting the PipelinesList route', () => {
@@ -189,7 +209,7 @@ describe('PipelinesList section', () => {
 
     describe('AND the API reports an error', () => {
       it('SHOULD render the error prompt and call resendRequest when clicking Try again', () => {
-        const resendRequest = jest.fn();
+        const resendRequest = vi.fn();
         const services = createServicesWithLoadPipelines({
           error: {
             message: 'boom',
@@ -237,7 +257,7 @@ describe('PipelinesList section', () => {
 
       it('SHOULD render the PipelineTable and allow opening the flyout via table callback', () => {
         const history = createMemoryHistory({ initialEntries: ['/'] });
-        const historyPushSpy = jest.spyOn(history, 'push');
+        const historyPushSpy = vi.spyOn(history, 'push');
         renderList(history, services);
 
         expect(screen.getByTestId('pipelineTable')).toBeInTheDocument();
@@ -249,7 +269,7 @@ describe('PipelinesList section', () => {
       describe('AND WHEN the user clicks edit on a pipeline in the list', () => {
         it('SHOULD double encode pipeline name and push encoded path', () => {
           const history = createMemoryHistory({ initialEntries: ['/'] });
-          const historyPushSpy = jest.spyOn(history, 'push');
+          const historyPushSpy = vi.spyOn(history, 'push');
           renderList(history, services);
 
           fireEvent.click(screen.getByTestId('editPipeline'));
@@ -263,8 +283,8 @@ describe('PipelinesList section', () => {
       describe('AND WHEN the user clicks clone on a pipeline in the list', () => {
         it('SHOULD double encode cloned pipeline name and push encoded path', () => {
           const history = createMemoryHistory({ initialEntries: ['/'] });
-          const historyPushSpy = jest.spyOn(history, 'push');
-          jest.spyOn(console, 'warn').mockImplementation(() => {});
+          const historyPushSpy = vi.spyOn(history, 'push');
+          vi.spyOn(console, 'warn').mockImplementation(() => {});
           renderList(history, services);
 
           fireEvent.click(screen.getByTestId('clonePipeline'));
@@ -290,7 +310,7 @@ describe('PipelinesList section', () => {
               const history = createMemoryHistory({
                 initialEntries: [`/?pipeline=${encodeURIComponent(unknownCreateName)}`],
               });
-              const historyPushSpy = jest.spyOn(history, 'push');
+              const historyPushSpy = vi.spyOn(history, 'push');
               renderList(history, services);
 
               expect(screen.getByTestId('pipelineFlyout')).toBeInTheDocument();

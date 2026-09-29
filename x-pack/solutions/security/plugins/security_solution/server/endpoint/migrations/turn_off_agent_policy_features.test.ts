@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/logging';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 
@@ -42,7 +44,7 @@ describe('Turn Off Agent Policy Features Migration', () => {
       await callTurnOffAgentPolicyFeatures();
 
       expect(
-        fleetServices.agentPolicy.turnOffAgentTamperProtections as jest.Mock
+        fleetServices.agentPolicy.turnOffAgentTamperProtections as Mock
       ).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenLastCalledWith(
         'App feature [endpoint_agent_tamper_protection] is enabled. Nothing to do!'
@@ -58,7 +60,7 @@ describe('Turn Off Agent Policy Features Migration', () => {
     });
 
     it('should log proper message if all agent policies are already protected', async () => {
-      (fleetServices.agentPolicy.turnOffAgentTamperProtections as jest.Mock).mockResolvedValueOnce({
+      (fleetServices.agentPolicy.turnOffAgentTamperProtections as Mock).mockResolvedValueOnce({
         updatedPolicies: null,
         failedPolicies: [],
       });
@@ -67,7 +69,7 @@ describe('Turn Off Agent Policy Features Migration', () => {
     });
 
     it('should log proper message if all agent policies are updated successfully', async () => {
-      (fleetServices.agentPolicy.turnOffAgentTamperProtections as jest.Mock).mockResolvedValueOnce({
+      (fleetServices.agentPolicy.turnOffAgentTamperProtections as Mock).mockResolvedValueOnce({
         updatedPolicies: [{ id: 'policy 1' }, { id: 'policy 2' }],
         failedPolicies: [],
       });
@@ -78,7 +80,7 @@ describe('Turn Off Agent Policy Features Migration', () => {
     });
 
     it('should log proper message if all agent policies fail to update', async () => {
-      (fleetServices.agentPolicy.turnOffAgentTamperProtections as jest.Mock).mockResolvedValueOnce({
+      (fleetServices.agentPolicy.turnOffAgentTamperProtections as Mock).mockResolvedValueOnce({
         updatedPolicies: null,
         failedPolicies: [
           { id: 'policy1', error: 'error1' },
@@ -92,7 +94,7 @@ describe('Turn Off Agent Policy Features Migration', () => {
     });
 
     it('should log proper message if some agent policies fail to update', async () => {
-      (fleetServices.agentPolicy.turnOffAgentTamperProtections as jest.Mock).mockResolvedValueOnce({
+      (fleetServices.agentPolicy.turnOffAgentTamperProtections as Mock).mockResolvedValueOnce({
         updatedPolicies: [{ id: 'policy3' }],
         failedPolicies: [{ id: 'policy1', error: 'error1' }],
       });

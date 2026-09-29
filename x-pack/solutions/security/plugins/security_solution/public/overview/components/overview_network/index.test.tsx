@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { screen, render, fireEvent } from '@testing-library/react';
 import React from 'react';
 
@@ -14,10 +17,10 @@ import { useNetworkOverview } from '../../containers/overview_network';
 import { SecurityPageName } from '../../../app/types';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
-jest.mock('../../../common/components/link_to');
-const mockNavigateToApp = jest.fn();
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
+vi.mock('../../../common/components/link_to');
+const mockNavigateToApp = vi.fn();
+vi.mock('../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../common/lib/kibana'));
 
   return {
     ...original,
@@ -25,20 +28,20 @@ jest.mock('../../../common/lib/kibana', () => {
       services: {
         application: {
           navigateToApp: mockNavigateToApp,
-          getUrlForApp: jest.fn(),
+          getUrlForApp: vi.fn(),
         },
         data: {
           search: {
             session: {
-              start: jest.fn(),
-              clear: jest.fn(),
+              start: vi.fn(),
+              clear: vi.fn(),
             },
           },
         },
       },
     }),
-    useUiSetting$: jest.fn().mockReturnValue([]),
-    useGetUserSavedObjectPermissions: jest.fn(),
+    useUiSetting$: vi.fn().mockReturnValue([]),
+    useGetUserSavedObjectPermissions: vi.fn(),
   };
 });
 
@@ -48,7 +51,7 @@ const defaultProps = {
   endDate,
   filterQuery: '',
   startDate,
-  setQuery: jest.fn(),
+  setQuery: vi.fn(),
   indexNames: [],
 };
 
@@ -66,16 +69,16 @@ const MOCKED_RESPONSE = {
   },
 };
 
-jest.mock('../../../common/containers/query_toggle');
-jest.mock('../../containers/overview_network');
-const useNetworkOverviewMock = useNetworkOverview as jest.Mock;
-const mockUseQueryToggle = useQueryToggle as jest.Mock;
+vi.mock('../../../common/containers/query_toggle');
+vi.mock('../../containers/overview_network');
+const useNetworkOverviewMock = useNetworkOverview as Mock;
+const mockUseQueryToggle = useQueryToggle as Mock;
 
 describe('OverviewNetwork', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useNetworkOverviewMock.mockReturnValue([false, MOCKED_RESPONSE]);
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: vi.fn() });
   });
 
   test('it renders the expected widget title', () => {
@@ -144,7 +147,7 @@ describe('OverviewNetwork', () => {
     expect(screen.queryByTestId('overview-network-stats')).toBeInTheDocument();
   });
   it('toggleStatus=false, skip', () => {
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: vi.fn() });
     render(
       <TestProviders>
         <OverviewNetwork {...defaultProps} />

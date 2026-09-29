@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IStdDevAggConfig } from './std_deviation';
 import { getStdDeviationMetricAgg } from './std_deviation';
 import { AggConfigs } from '../agg_configs';
@@ -48,7 +50,7 @@ describe('AggTypeMetricStandardDeviationProvider class', () => {
         },
       ],
       { typesRegistry },
-      jest.fn()
+      vi.fn()
     );
   };
 

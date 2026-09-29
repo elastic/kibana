@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { setFormatService } from '../services';
 
-jest.mock('./helpers', () => ({
-  buildPointSeriesData: jest.fn(() => ({})),
-}));
+vi.mock('./helpers', () => {
+      const mocked = {
+      buildPointSeriesData: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // @ts-ignore
 import { vislibSeriesResponseHandler } from './response_handler';
@@ -22,7 +27,7 @@ describe('response_handler', () => {
     beforeAll(() => {
       setFormatService({
         deserialize: () => ({
-          convertToText: jest.fn((v) => v),
+          convertToText: vi.fn((v) => v),
         }),
       } as any);
     });

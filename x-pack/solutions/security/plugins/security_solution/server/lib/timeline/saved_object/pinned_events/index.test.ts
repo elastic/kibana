@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FrameworkRequest } from '../../../framework';
 
 import { getAllPinnedEventsByTimelineId, PINNED_EVENTS_PER_PAGE } from '.';
 
 describe('pinned events', () => {
-  let mockFindSavedObject: jest.Mock;
+  let mockFindSavedObject: Mock;
   let mockRequest: FrameworkRequest;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    mockFindSavedObject = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+    mockFindSavedObject = vi.fn().mockResolvedValue({ saved_objects: [], total: 0 });
     mockRequest = {
       user: {
         username: 'username',

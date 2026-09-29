@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import {
@@ -17,15 +20,18 @@ import {
 import type { PromptContext } from '@kbn/elastic-assistant';
 import { useDocumentSummary } from '../hooks/use_document_summary';
 
-jest.mock('../hooks/use_document_summary');
-jest.mock('@kbn/security-solution-navigation', () => ({
-  useNavigateTo: () => ({ navigateTo: jest.fn() }),
-}));
+vi.mock('../hooks/use_document_summary');
+vi.mock('@kbn/security-solution-navigation', () => {
+      const mocked = {
+      useNavigateTo: () => ({ navigateTo: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const promptContext: PromptContext = {
   category: 'alert',
   description: 'Alert summary',
-  getPromptContext: jest
+  getPromptContext: vi
     .fn()
     .mockResolvedValue('{ host.name: "test-host", more.data: 123, "user.name": "test-user"}'),
   id: '_promptContextId',
@@ -38,7 +44,7 @@ const defaultProps = {
   canSeeAdvancedSettings: true,
   defaultConnectorId: 'test-connector-id',
   promptContext,
-  setHasSummary: jest.fn(),
+  setHasSummary: vi.fn(),
   showAnonymizedValues: false,
 };
 
@@ -47,7 +53,7 @@ const baseHookReturn = {
   generatedAt: null as number | null,
   recommendedActions: '',
   hasSummary: false,
-  fetchAISummary: jest.fn(),
+  fetchAISummary: vi.fn(),
   isConnectorMissing: false,
   isLoading: false,
   messageAndReplacements: {
@@ -58,12 +64,12 @@ const baseHookReturn = {
 
 describe('DocumentSummary', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useDocumentSummary as jest.Mock).mockReturnValue(baseHookReturn);
+    vi.clearAllMocks();
+    (useDocumentSummary as Mock).mockReturnValue(baseHookReturn);
   });
 
   it('renders the loading panel when `isLoading` is true', () => {
-    (useDocumentSummary as jest.Mock).mockReturnValue({
+    (useDocumentSummary as Mock).mockReturnValue({
       ...baseHookReturn,
       hasSummary: true,
       isLoading: true,
@@ -77,7 +83,7 @@ describe('DocumentSummary', () => {
   });
 
   it('renders the alert summary, recommended actions, footer timestamp, and footer icons when `hasSummary` is true', () => {
-    (useDocumentSummary as jest.Mock).mockReturnValue({
+    (useDocumentSummary as Mock).mockReturnValue({
       ...baseHookReturn,
       summary: 'Test alert summary',
       recommendedActions: 'Test recommended actions',
@@ -96,7 +102,7 @@ describe('DocumentSummary', () => {
   });
 
   it('omits the footer timestamp when `generatedAt` is null', () => {
-    (useDocumentSummary as jest.Mock).mockReturnValue({
+    (useDocumentSummary as Mock).mockReturnValue({
       ...baseHookReturn,
       summary: 'Test alert summary',
       recommendedActions: '',
@@ -110,8 +116,8 @@ describe('DocumentSummary', () => {
   });
 
   it('renders the pre-generation panel with description and Generate button when `hasSummary` is false', () => {
-    const fetchAISummary = jest.fn();
-    (useDocumentSummary as jest.Mock).mockReturnValue({
+    const fetchAISummary = vi.fn();
+    (useDocumentSummary as Mock).mockReturnValue({
       ...baseHookReturn,
       hasSummary: false,
       fetchAISummary,
@@ -131,8 +137,8 @@ describe('DocumentSummary', () => {
   });
 
   it('clicking the footer regenerate icon triggers a refetch when `hasSummary` is true', () => {
-    const fetchAISummary = jest.fn();
-    (useDocumentSummary as jest.Mock).mockReturnValue({
+    const fetchAISummary = vi.fn();
+    (useDocumentSummary as Mock).mockReturnValue({
       ...baseHookReturn,
       summary: 'Test alert summary',
       recommendedActions: 'Test recommended actions',
@@ -147,7 +153,7 @@ describe('DocumentSummary', () => {
   });
 
   it('renders the error callout above the existing summary when `hasSummary` is true and `fetchError` is set', () => {
-    (useDocumentSummary as jest.Mock).mockReturnValue({
+    (useDocumentSummary as Mock).mockReturnValue({
       ...baseHookReturn,
       summary: 'Existing summary',
       hasSummary: true,

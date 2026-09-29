@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { apm } from '@elastic/apm-rum';
 import { fetchSpanLinks } from './span_links';
 import { FETCHER_OPERATION_IDS } from '../../hooks/fetcher_operation_ids';
@@ -13,13 +16,13 @@ import * as plugin from '../../plugin';
 const signal = new AbortController().signal;
 
 describe('fetchSpanLinks', () => {
-  const callApmApi = jest.fn();
-  let captureErrorSpy: jest.SpyInstance;
+  const callApmApi = vi.fn();
+  let captureErrorSpy: MockInstance;
 
   beforeEach(() => {
-    captureErrorSpy = jest.spyOn(apm, 'captureError').mockImplementation(() => {});
-    jest.spyOn(plugin, 'getApmInternalServices').mockReturnValue({ callApmApi } as any);
-    jest.clearAllMocks();
+    captureErrorSpy = vi.spyOn(apm, 'captureError').mockImplementation(() => {});
+    vi.spyOn(plugin, 'getApmInternalServices').mockReturnValue({ callApmApi } as any);
+    vi.clearAllMocks();
   });
 
   afterEach(() => {

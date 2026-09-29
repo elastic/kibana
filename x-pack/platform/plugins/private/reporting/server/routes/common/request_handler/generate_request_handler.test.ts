@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-jest.mock('uuid', () => ({ v4: () => 'mock-report-id' }));
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('uuid', () => {
+      const mocked = { v4: () => 'mock-report-id' };
+      return { ...mocked, default: mocked };
+    });
 
 import rison from '@kbn/rison';
 
@@ -26,11 +32,14 @@ import type {
 } from '../../../types';
 import { GenerateRequestHandler } from './generate_request_handler';
 
-jest.mock('@kbn/reporting-server/crypto', () => ({
-  cryptoFactory: () => ({
-    encrypt: () => `hello mock cypher text`,
-  }),
-}));
+vi.mock('@kbn/reporting-server/crypto', () => {
+      const mocked = {
+      cryptoFactory: () => ({
+        encrypt: () => `hello mock cypher text`,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getMockContext = () =>
   ({
@@ -76,7 +85,7 @@ describe('Handle request to generate', () => {
     reportingCore = await createMockReportingCore(createMockConfigSchema({}));
     reportingCore.getStore = () =>
       Promise.resolve({
-        addReport: jest
+        addReport: vi
           .fn()
           .mockImplementation(
             (report) => new Report({ ...report, _index: '.reporting-foo-index-234' })
@@ -86,9 +95,9 @@ describe('Handle request to generate', () => {
     mockRequest = getMockRequest();
 
     mockResponseFactory = getMockResponseFactory();
-    (mockResponseFactory.ok as jest.Mock) = jest.fn((args: unknown) => args);
-    (mockResponseFactory.forbidden as jest.Mock) = jest.fn((args: unknown) => args);
-    (mockResponseFactory.badRequest as jest.Mock) = jest.fn((args: unknown) => args);
+    (mockResponseFactory.ok as Mock) = vi.fn((args: unknown) => args);
+    (mockResponseFactory.forbidden as Mock) = vi.fn((args: unknown) => args);
+    (mockResponseFactory.badRequest as Mock) = vi.fn((args: unknown) => args);
 
     mockContext = getMockContext();
     mockContext.reporting = Promise.resolve({} as ReportingSetup);
@@ -231,7 +240,7 @@ describe('Handle request to generate', () => {
     });
 
     test('disallows unsupporting license', async () => {
-      (reportingCore.getLicenseInfo as jest.Mock) = jest.fn(() => ({
+      (reportingCore.getLicenseInfo as Mock) = vi.fn(() => ({
         csv_searchsource: {
           enableLinks: false,
           message: `seeing this means the license isn't supported`,

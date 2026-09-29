@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import type { History } from 'history';
 import { createBrowserHistory } from 'history';
@@ -32,14 +35,17 @@ import { createSpyMiddleware } from '../../../../common/store/test_utils';
 import { getEndpointListPath } from '../../../common/routing';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
 
-jest.mock('../../../services/policies/ingest', () => ({
-  sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
-  sendGetEndpointSecurityPackage: () => Promise.resolve({}),
-}));
+vi.mock('../../../services/policies/ingest', () => {
+      const mocked = {
+      sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
+      sendGetEndpointSecurityPackage: () => Promise.resolve({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 describe('endpoint list pagination: ', () => {
-  let fakeCoreStart: jest.Mocked<CoreStart>;
+  let fakeCoreStart: Mocked<CoreStart>;
   let depsStart: DepsStartMock;
-  let fakeHttpServices: jest.Mocked<HttpSetup>;
+  let fakeHttpServices: Mocked<HttpSetup>;
   let history: History<AppLocation['state']>;
   let store: Store;
   let queryParams: () => EndpointIndexUIQueryParams;
@@ -53,7 +59,7 @@ describe('endpoint list pagination: ', () => {
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart();
     depsStart = depsStartMock();
-    fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
+    fakeHttpServices = fakeCoreStart.http as Mocked<HttpSetup>;
     history = createBrowserHistory();
     const middleware = endpointMiddlewareFactory(fakeCoreStart, depsStart);
     ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<EndpointState>());

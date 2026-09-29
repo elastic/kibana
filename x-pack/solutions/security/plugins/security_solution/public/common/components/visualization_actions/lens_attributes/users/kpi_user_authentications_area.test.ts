@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { wrapper } from '../../mocks';
 
@@ -14,24 +16,30 @@ import { getKpiUserAuthenticationsAreaLensAttributes } from './kpi_user_authenti
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('uuid', () => ({
-  ...jest.requireActual('uuid'),
-  v4: jest.fn().mockReturnValue('generated-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      ...require('uuid'),
+      v4: vi.fn().mockReturnValue('generated-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../utils/route/use_route_spy', () => ({
-  useRouteSpy: jest.fn().mockReturnValue([
-    {
-      detailName: 'elastic',
-      pageName: 'users',
-      tabName: 'events',
-    },
-  ]),
-}));
+vi.mock('../../../../utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: vi.fn().mockReturnValue([
+        {
+          detailName: 'elastic',
+          pageName: 'users',
+          tabName: 'events',
+        },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getKpiUserAuthenticationsAreaLensAttributes', () => {
   beforeAll(() => {
-    jest
+    vi
       .mocked(useDataView)
       .mockReturnValue(withIndices(['auditbeat-mytest-*'], 'security-solution-my-test'));
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -13,12 +15,12 @@ import { ValueWithSpaceWarning } from '..';
 
 import * as useValueWithSpaceWarningMock from '../use_value_with_space_warning';
 
-jest.mock('../use_value_with_space_warning');
+vi.mock('../use_value_with_space_warning');
 
 describe('ValueWithSpaceWarning', () => {
   beforeEach(() => {
     // @ts-ignore
-    useValueWithSpaceWarningMock.useValueWithSpaceWarning = jest
+    useValueWithSpaceWarningMock.useValueWithSpaceWarning = vi
       .fn()
       .mockReturnValue({ showSpaceWarningIcon: true, warningText: 'Warning Text' });
   });
@@ -32,7 +34,7 @@ describe('ValueWithSpaceWarning', () => {
   });
   it('should not render if showSpaceWarning is falsy', () => {
     // @ts-ignore
-    useValueWithSpaceWarningMock.useValueWithSpaceWarning = jest
+    useValueWithSpaceWarningMock.useValueWithSpaceWarning = vi
       .fn()
       .mockReturnValue({ showSpaceWarningIcon: false, warningText: '' });
 

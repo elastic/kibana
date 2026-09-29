@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
@@ -15,8 +17,8 @@ const defaultProps: SettingsActionsProps = {
   isFormDisabled: false,
   isFormDirty: false,
   isFormValid: true,
-  onApply: jest.fn(),
-  onCancel: jest.fn(),
+  onApply: vi.fn(),
+  onCancel: vi.fn(),
   errors: null,
 };
 

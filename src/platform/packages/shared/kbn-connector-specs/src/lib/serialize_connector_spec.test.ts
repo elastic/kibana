@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import * as connectorsSpecs from '../all_specs';
 import * as generateSecretsModule from './generate_secrets_schema_from_spec';
@@ -283,7 +285,7 @@ describe('serializeConnectorSpec', () => {
         test: { handler: async () => ({}), enabled: false },
       };
 
-      const spy = jest.spyOn(generateSecretsModule, 'generateSecretsSchemaFromSpec');
+      const spy = vi.spyOn(generateSecretsModule, 'generateSecretsSchemaFromSpec');
 
       serializeConnectorSpec(spec, {
         isPfxEnabled: false,

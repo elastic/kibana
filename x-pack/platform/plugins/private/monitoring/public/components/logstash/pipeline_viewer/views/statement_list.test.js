@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { StatementList } from './statement_list';
 import { Statement } from './statement';
@@ -15,7 +17,7 @@ describe('StatementList', () => {
   let onShowVertexDetails;
 
   beforeEach(() => {
-    onShowVertexDetails = jest.fn();
+    onShowVertexDetails = vi.fn();
     props = {
       elements: [
         {

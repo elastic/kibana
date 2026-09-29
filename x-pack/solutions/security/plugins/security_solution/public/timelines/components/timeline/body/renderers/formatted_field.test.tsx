@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { shallow } from 'enzyme';
 import { get } from 'lodash/fp';
 import React from 'react';
@@ -16,16 +18,16 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 import { FormattedFieldValue } from './formatted_field';
 import { HOST_NAME_FIELD_NAME } from './constants';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
   };
 });
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/components/link_to');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/components/link_to');
 
 describe('Events', () => {
   const mount = useMountAppended();

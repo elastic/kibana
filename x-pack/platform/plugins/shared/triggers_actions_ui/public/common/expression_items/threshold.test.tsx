@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -22,8 +24,8 @@ const renderWithIntl = (ui: React.ReactElement) => {
 describe('threshold expression', () => {
   it('renders of builtin comparators', async () => {
     const user = userEvent.setup();
-    const onChangeSelectedThreshold = jest.fn();
-    const onChangeSelectedThresholdComparator = jest.fn();
+    const onChangeSelectedThreshold = vi.fn();
+    const onChangeSelectedThresholdComparator = vi.fn();
 
     renderWithIntl(
       <ThresholdExpression
@@ -44,8 +46,8 @@ describe('threshold expression', () => {
   });
 
   it('renders with threshold title', () => {
-    const onChangeSelectedThreshold = jest.fn();
-    const onChangeSelectedThresholdComparator = jest.fn();
+    const onChangeSelectedThreshold = vi.fn();
+    const onChangeSelectedThresholdComparator = vi.fn();
 
     renderWithIntl(
       <ThresholdExpression
@@ -61,8 +63,8 @@ describe('threshold expression', () => {
 
   it('fires onChangeSelectedThreshold only when threshold actually changed', async () => {
     const user = userEvent.setup();
-    const onChangeSelectedThreshold = jest.fn();
-    const onChangeSelectedThresholdComparator = jest.fn();
+    const onChangeSelectedThreshold = vi.fn();
+    const onChangeSelectedThresholdComparator = vi.fn();
 
     renderWithIntl(
       <ThresholdExpression
@@ -89,7 +91,7 @@ describe('threshold expression', () => {
     });
     expect(onChangeSelectedThresholdComparator).not.toHaveBeenCalled();
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const comparatorSelect = screen.getByTestId('comparatorOptionsComboBox');
     await user.selectOptions(comparatorSelect, '<');
@@ -97,7 +99,7 @@ describe('threshold expression', () => {
     expect(onChangeSelectedThreshold).not.toHaveBeenCalled();
     expect(onChangeSelectedThresholdComparator).toHaveBeenCalled();
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     await user.selectOptions(comparatorSelect, 'between');
 
@@ -111,8 +113,8 @@ describe('threshold expression', () => {
         thresholdComparator={'>'}
         threshold={[10]}
         errors={{ threshold0: [], threshold1: [] }}
-        onChangeSelectedThreshold={jest.fn()}
-        onChangeSelectedThresholdComparator={jest.fn()}
+        onChangeSelectedThreshold={vi.fn()}
+        onChangeSelectedThresholdComparator={vi.fn()}
         unit="%"
       />
     );
@@ -127,8 +129,8 @@ describe('threshold expression', () => {
         thresholdComparator={'>'}
         threshold={[10]}
         errors={{ threshold0: [], threshold1: [] }}
-        onChangeSelectedThreshold={jest.fn()}
-        onChangeSelectedThresholdComparator={jest.fn()}
+        onChangeSelectedThreshold={vi.fn()}
+        onChangeSelectedThresholdComparator={vi.fn()}
       />
     );
 
@@ -154,8 +156,8 @@ describe('threshold expression', () => {
 
   it('is valid when the threshold value is 0', async () => {
     const user = userEvent.setup();
-    const onChangeSelectedThreshold = jest.fn();
-    const onChangeSelectedThresholdComparator = jest.fn();
+    const onChangeSelectedThreshold = vi.fn();
+    const onChangeSelectedThresholdComparator = vi.fn();
 
     renderWithIntl(
       <ThresholdExpression
@@ -180,8 +182,8 @@ describe('threshold expression', () => {
       <ThresholdExpression
         thresholdComparator={'>'}
         errors={{ threshold0: [], threshold1: [] }}
-        onChangeSelectedThreshold={jest.fn()}
-        onChangeSelectedThresholdComparator={jest.fn()}
+        onChangeSelectedThreshold={vi.fn()}
+        onChangeSelectedThresholdComparator={vi.fn()}
       />
     );
 
@@ -193,8 +195,8 @@ describe('threshold expression', () => {
       <ThresholdExpression
         thresholdComparator={'>'}
         errors={{ threshold0: [], threshold1: [] }}
-        onChangeSelectedThreshold={jest.fn()}
-        onChangeSelectedThresholdComparator={jest.fn()}
+        onChangeSelectedThreshold={vi.fn()}
+        onChangeSelectedThresholdComparator={vi.fn()}
         initialPopoverOpen
       />
     );
@@ -208,8 +210,8 @@ describe('threshold expression', () => {
         thresholdComparator={'>'}
         threshold={[10]}
         errors={{ threshold0: [], threshold1: [] }}
-        onChangeSelectedThreshold={jest.fn()}
-        onChangeSelectedThresholdComparator={jest.fn()}
+        onChangeSelectedThreshold={vi.fn()}
+        onChangeSelectedThresholdComparator={vi.fn()}
         badge={<span data-test-subj="myBadge">Warning</span>}
       />
     );
@@ -224,8 +226,8 @@ describe('threshold expression', () => {
       <ThresholdExpression
         thresholdComparator={'>'}
         errors={{ threshold0: ['Threshold is required.'], threshold1: [] }}
-        onChangeSelectedThreshold={jest.fn()}
-        onChangeSelectedThresholdComparator={jest.fn()}
+        onChangeSelectedThreshold={vi.fn()}
+        onChangeSelectedThresholdComparator={vi.fn()}
         badge={<span data-test-subj="myBadge">Warning</span>}
       />
     );

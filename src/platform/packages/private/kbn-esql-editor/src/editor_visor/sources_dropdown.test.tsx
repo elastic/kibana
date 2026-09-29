@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { act, waitFor } from '@testing-library/react';
@@ -16,9 +19,12 @@ import type { ESQLSourceResult } from '@kbn/esql-types';
 import { getESQLSources } from '@kbn/esql-utils';
 import { SourcesDropdown } from './sources_dropdown';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLSources: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getESQLSources: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createDeferred = <T,>() => {
   let resolve!: (value: T) => void;
@@ -34,15 +40,15 @@ describe('SourcesDropdown', () => {
   it('does not repeatedly fetch sources on rerenders while options are empty', async () => {
     const coreStart = coreMock.createStart();
     const deferred = createDeferred<ESQLSourceResult[]>();
-    const getESQLSourcesMock = getESQLSources as jest.MockedFunction<typeof getESQLSources>;
+    const getESQLSourcesMock = getESQLSources as MockedFunction<typeof getESQLSources>;
     getESQLSourcesMock.mockReturnValue(deferred.promise);
 
     const services = {
       core: coreStart,
-      esql: { getLicense: jest.fn() },
+      esql: { getLicense: vi.fn() },
     };
 
-    const onChangeSpy = jest.fn();
+    const onChangeSpy = vi.fn();
     const makeOnChange = () => (newSources: string[]) => onChangeSpy(newSources);
 
     const { rerender } = renderWithI18n(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionPolicyClient } from '../../lib/action_policy_client';
@@ -13,8 +16,8 @@ import { MatchActionPoliciesRoute } from './match_action_policies_route';
 
 const createMocks = () => {
   const deps = createRouteDependencies();
-  const actionPolicyClient: jest.Mocked<Pick<ActionPolicyClient, 'matchActionPolicies'>> = {
-    matchActionPolicies: jest.fn().mockResolvedValue({
+  const actionPolicyClient: Mocked<Pick<ActionPolicyClient, 'matchActionPolicies'>> = {
+    matchActionPolicies: vi.fn().mockResolvedValue({
       items: [],
       evaluated_count: 0,
       is_truncated: false,
@@ -73,7 +76,7 @@ describe('MatchActionPoliciesRoute', () => {
 
     await route.handle();
 
-    const okCall = (mocks.deps.response.ok as jest.Mock).mock.calls[0][0];
+    const okCall = (mocks.deps.response.ok as Mock).mock.calls[0][0];
     expect(okCall.body).toEqual(clientResult);
   });
 

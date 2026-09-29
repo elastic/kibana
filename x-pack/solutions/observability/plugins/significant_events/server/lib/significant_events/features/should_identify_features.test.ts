@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { COMPUTED_FEATURE_TYPES, INFERRED_FEATURE_TYPES } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { shouldIdentifyFeatures } from './should_identify_features';
@@ -28,7 +30,7 @@ const createMockKiClient = ({
   computed?: Timestamp;
 } = {}) =>
   ({
-    getLatestRevisionTimestamp: jest
+    getLatestRevisionTimestamp: vi
       .fn()
       .mockImplementation((_stream: string, options?: { types?: string[] }) =>
         Promise.resolve(isInferredCall(options) ? inferred : computed)

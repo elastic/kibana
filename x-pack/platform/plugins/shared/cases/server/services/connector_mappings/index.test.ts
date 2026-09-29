@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants';
 import type { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -21,7 +23,7 @@ describe('CaseConfigureService', () => {
   let service: ConnectorMappingsService;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     service = new ConnectorMappingsService(mockLogger);
   });
 

@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import sinon from 'sinon';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Alert } from './alert';
 import { createAlertFactory, getPublicAlertFactory } from './create_alert_factory';
 import { processAlerts } from '../lib';
 
-jest.mock('../lib', () => ({
-  processAlerts: jest.fn(),
-}));
+vi.mock('../lib', () => {
+      const mocked = {
+      processAlerts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let clock: sinon.SinonFakeTimers;
 const logger = loggingSystemMock.create().get();
@@ -91,7 +97,7 @@ describe('createAlertFactory()', () => {
       autoRecoverAlerts: true,
       snoozedInstancesMap: new Map([['1', snoozeConfig]]),
     });
-    const setSnoozeConfigSpy = jest.spyOn(Alert.prototype, 'setSnoozeConfig');
+    const setSnoozeConfigSpy = vi.spyOn(Alert.prototype, 'setSnoozeConfig');
     alertFactory.create('1');
     expect(setSnoozeConfigSpy).toHaveBeenCalledWith(snoozeConfig);
     setSnoozeConfigSpy.mockRestore();
@@ -99,7 +105,7 @@ describe('createAlertFactory()', () => {
 
   test('does not set snooze config on existing alert when called via create()', () => {
     const existingAlert = new Alert('1');
-    const setSnoozeConfigSpy = jest.spyOn(Alert.prototype, 'setSnoozeConfig');
+    const setSnoozeConfigSpy = vi.spyOn(Alert.prototype, 'setSnoozeConfig');
     const alertFactory = createAlertFactory({
       alerts: { '1': existingAlert },
       logger,
@@ -246,7 +252,7 @@ describe('createAlertFactory()', () => {
   });
 
   test('returns recovered alerts when setsRecoveryContext is true', () => {
-    (processAlerts as jest.Mock).mockReturnValueOnce({
+    (processAlerts as Mock).mockReturnValueOnce({
       recoveredAlerts: {
         z: {
           id: 'z',
@@ -287,7 +293,7 @@ describe('createAlertFactory()', () => {
   });
 
   test('returns empty array if no recovered alerts', () => {
-    (processAlerts as jest.Mock).mockReturnValueOnce({ recoveredAlerts: {} });
+    (processAlerts as Mock).mockReturnValueOnce({ recoveredAlerts: {} });
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
@@ -314,7 +320,7 @@ describe('createAlertFactory()', () => {
   });
 
   test('returns empty array if recovered alerts are null', () => {
-    (processAlerts as jest.Mock).mockReturnValueOnce({ recoveredAlerts: null });
+    (processAlerts as Mock).mockReturnValueOnce({ recoveredAlerts: null });
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,

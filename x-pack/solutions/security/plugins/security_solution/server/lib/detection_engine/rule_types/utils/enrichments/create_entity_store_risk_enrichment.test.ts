@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createEntityStoreEnrichment } from './create_entity_store_risk_enrichment';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 import { createAlert } from './__mocks__/alerts';
@@ -13,13 +16,16 @@ import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { ALERT_ENTITY_ID } from '../../../../../../common/field_maps/field_names';
 
-jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
-  euid: {
-    getEuidFromObjectForSearch: jest.fn(),
-  },
-}));
+vi.mock('@kbn/entity-store/common/euid_helpers', () => {
+      const mocked = {
+      euid: {
+        getEuidFromObjectForSearch: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetEuidForSearch = euid.getEuidFromObjectForSearch as jest.Mock;
+const mockGetEuidForSearch = euid.getEuidFromObjectForSearch as Mock;
 
 const makeEntity = (id: string, extraFields: Record<string, unknown> = {}) => ({
   entity: { id },
@@ -30,7 +36,7 @@ const makeEntityStoreCrudClient = (
   entities: Array<ReturnType<typeof makeEntity>> = []
 ): EntityStoreCRUDClient =>
   ({
-    listEntities: jest.fn().mockResolvedValue({ entities }),
+    listEntities: vi.fn().mockResolvedValue({ entities }),
   } as unknown as EntityStoreCRUDClient);
 
 describe('createEntityStoreEnrichment', () => {
@@ -38,7 +44,7 @@ describe('createEntityStoreEnrichment', () => {
   const enrichFn: EnrichmentFunction = (a) => a;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = ruleExecutionLogMock.forExecutors.create();
     mockGetEuidForSearch.mockReset();
   });
@@ -216,7 +222,7 @@ describe('createEntityStoreEnrichment', () => {
 
     // listEntities returns a slice of entities matching the requested chunk
     const crudClient = {
-      listEntities: jest.fn().mockImplementation(({ filter }) => {
+      listEntities: vi.fn().mockImplementation(({ filter }) => {
         const requestedIds: string[] = filter.terms['entity.id'];
         return Promise.resolve({
           entities: allEntities.filter((e) => requestedIds.includes(e.entity.id)),
@@ -235,7 +241,7 @@ describe('createEntityStoreEnrichment', () => {
     });
 
     // 2500 unique EUIDs → 3 chunks (1000 + 1000 + 500)
-    expect((crudClient.listEntities as jest.Mock).mock.calls.length).toBe(3);
+    expect((crudClient.listEntities as Mock).mock.calls.length).toBe(3);
     expect(Object.keys(result).length).toBe(totalEvents);
   });
 
@@ -243,7 +249,7 @@ describe('createEntityStoreEnrichment', () => {
     mockGetEuidForSearch.mockReturnValue('host:server1');
 
     const crudClient = {
-      listEntities: jest.fn().mockRejectedValue(new Error('ES error')),
+      listEntities: vi.fn().mockRejectedValue(new Error('ES error')),
     } as unknown as EntityStoreCRUDClient;
 
     const result = await createEntityStoreEnrichment({

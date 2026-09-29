@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useAvailablePackages } from '../../home/hooks/use_available_packages';
@@ -16,25 +19,28 @@ import { useUrlFilters } from './url_filters';
 import { useUrlCategories, useUrlDefaultCategories, useSetUrlCategory } from './url_categories';
 import { useLocalSearch } from '../../../../../hooks';
 
-jest.mock('../../home/hooks/use_available_packages');
-jest.mock('./url_filters');
-jest.mock('./url_categories');
-jest.mock('../../../../../hooks', () => ({
-  searchIdField: 'id',
-  useLocalSearch: jest.fn(),
-}));
+vi.mock('../../home/hooks/use_available_packages');
+vi.mock('./url_filters');
+vi.mock('./url_categories');
+vi.mock('../../../../../hooks', () => {
+      const mocked = {
+      searchIdField: 'id',
+      useLocalSearch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useBrowseIntegrationHook', () => {
-  const mockSetUrlCategory = jest.fn();
+  const mockSetUrlCategory = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useUrlCategories as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useUrlCategories as Mock).mockReturnValue({
       category: '',
       subCategory: undefined,
     });
-    (useUrlDefaultCategories as jest.Mock).mockReturnValue([]);
-    (useSetUrlCategory as jest.Mock).mockReturnValue(mockSetUrlCategory);
+    (useUrlDefaultCategories as Mock).mockReturnValue([]);
+    (useSetUrlCategory as Mock).mockReturnValue(mockSetUrlCategory);
   });
 
   const mockUseAvailablePackages = (
@@ -47,7 +53,7 @@ describe('useBrowseIntegrationHook', () => {
       mainCategories?: Array<{ id: string; title: string; count: number }>;
     } = {}
   ) => {
-    (useAvailablePackages as jest.Mock).mockReturnValue({
+    (useAvailablePackages as Mock).mockReturnValue({
       initialSelectedCategory: '',
       allCategories,
       mainCategories,
@@ -72,7 +78,7 @@ describe('useBrowseIntegrationHook', () => {
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
         status: ['deprecated'],
@@ -94,7 +100,7 @@ describe('useBrowseIntegrationHook', () => {
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
         status: undefined,
@@ -119,7 +125,7 @@ describe('useBrowseIntegrationHook', () => {
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
         status: undefined,
@@ -148,7 +154,7 @@ describe('useBrowseIntegrationHook', () => {
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: 'a-z',
         status: undefined,
@@ -173,7 +179,7 @@ describe('useBrowseIntegrationHook', () => {
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: 'z-a',
         status: undefined,
@@ -233,7 +239,7 @@ describe('useBrowseIntegrationHook', () => {
       const mainCategories = allCategories;
 
       mockUseAvailablePackages(cards as IntegrationCardItem[], { allCategories, mainCategories });
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
         status: undefined,
@@ -274,7 +280,7 @@ describe('useBrowseIntegrationHook', () => {
       const mainCategories = allCategories;
 
       mockUseAvailablePackages(cards as IntegrationCardItem[], { allCategories, mainCategories });
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
         status: undefined,
@@ -308,7 +314,7 @@ describe('useBrowseIntegrationHook', () => {
       const mainCategories = allCategories;
 
       mockUseAvailablePackages(cards as IntegrationCardItem[], { allCategories, mainCategories });
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
         status: undefined,
@@ -339,11 +345,11 @@ describe('useBrowseIntegrationHook', () => {
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
 
       // Simulate URL now showing security category (user changed from apm)
-      (useUrlCategories as jest.Mock).mockReturnValue({
+      (useUrlCategories as Mock).mockReturnValue({
         category: 'security',
         subCategory: undefined,
       });
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
         status: undefined,
@@ -384,11 +390,11 @@ describe('useBrowseIntegrationHook', () => {
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
 
       // URL no longer has setupMethod filter (user removed it)
-      (useUrlCategories as jest.Mock).mockReturnValue({
+      (useUrlCategories as Mock).mockReturnValue({
         category: '',
         subCategory: undefined,
       });
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
         status: undefined,
@@ -418,8 +424,8 @@ describe('useBrowseIntegrationHook', () => {
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
-      (useUrlDefaultCategories as jest.Mock).mockReturnValue(['observability', 'opentelemetry']);
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlDefaultCategories as Mock).mockReturnValue(['observability', 'opentelemetry']);
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
         status: undefined,
@@ -480,11 +486,11 @@ describe('useBrowseIntegrationHook', () => {
         ]);
 
         mockUseAvailablePackages([collection] as IntegrationCardItem[]);
-        (useUrlCategories as jest.Mock).mockReturnValue({
+        (useUrlCategories as Mock).mockReturnValue({
           category: 'opentelemetry',
           subCategory: undefined,
         });
-        (useUrlFilters as jest.Mock).mockReturnValue(baseUrlFilters);
+        (useUrlFilters as Mock).mockReturnValue(baseUrlFilters);
 
         const { result } = renderHook(() =>
           useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
@@ -507,11 +513,11 @@ describe('useBrowseIntegrationHook', () => {
         ]);
 
         mockUseAvailablePackages([collection] as IntegrationCardItem[]);
-        (useUrlCategories as jest.Mock).mockReturnValue({
+        (useUrlCategories as Mock).mockReturnValue({
           category: 'opentelemetry',
           subCategory: undefined,
         });
-        (useUrlFilters as jest.Mock).mockReturnValue(baseUrlFilters);
+        (useUrlFilters as Mock).mockReturnValue(baseUrlFilters);
 
         const { result } = renderHook(() =>
           useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
@@ -528,11 +534,11 @@ describe('useBrowseIntegrationHook', () => {
         ]);
 
         mockUseAvailablePackages([collection] as IntegrationCardItem[]);
-        (useUrlCategories as jest.Mock).mockReturnValue({
+        (useUrlCategories as Mock).mockReturnValue({
           category: 'opentelemetry',
           subCategory: undefined,
         });
-        (useUrlFilters as jest.Mock).mockReturnValue(baseUrlFilters);
+        (useUrlFilters as Mock).mockReturnValue(baseUrlFilters);
 
         const { result } = renderHook(() =>
           useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
@@ -551,7 +557,7 @@ describe('useBrowseIntegrationHook', () => {
         ]);
 
         mockUseAvailablePackages([collection] as IntegrationCardItem[]);
-        (useUrlFilters as jest.Mock).mockReturnValue({
+        (useUrlFilters as Mock).mockReturnValue({
           ...baseUrlFilters,
           setupMethod: ['agentless'],
         });
@@ -577,7 +583,7 @@ describe('useBrowseIntegrationHook', () => {
         ]);
 
         mockUseAvailablePackages([collection] as IntegrationCardItem[]);
-        (useUrlFilters as jest.Mock).mockReturnValue({
+        (useUrlFilters as Mock).mockReturnValue({
           ...baseUrlFilters,
           setupMethod: ['agentless'],
           status: undefined,
@@ -602,7 +608,7 @@ describe('useBrowseIntegrationHook', () => {
         ]);
 
         mockUseAvailablePackages([collection] as IntegrationCardItem[]);
-        (useUrlFilters as jest.Mock).mockReturnValue({
+        (useUrlFilters as Mock).mockReturnValue({
           ...baseUrlFilters,
           signal: ['logs'],
         });
@@ -638,11 +644,11 @@ describe('useBrowseIntegrationHook', () => {
 
         // A-Z: apache collection (A) comes before nginx (N) in the pre-filter sort
         mockUseAvailablePackages([apacheCollection, nginxCard] as IntegrationCardItem[]);
-        (useUrlCategories as jest.Mock).mockReturnValue({
+        (useUrlCategories as Mock).mockReturnValue({
           category: 'opentelemetry',
           subCategory: undefined,
         });
-        (useUrlFilters as jest.Mock).mockReturnValue({ ...baseUrlFilters, sort: 'a-z' });
+        (useUrlFilters as Mock).mockReturnValue({ ...baseUrlFilters, sort: 'a-z' });
 
         const { result } = renderHook(() =>
           useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
@@ -655,8 +661,8 @@ describe('useBrowseIntegrationHook', () => {
 
     describe('search revalidation after member filtering', () => {
       const mockSearchReturning = (cards: IntegrationCardItem[]) => {
-        (useLocalSearch as jest.Mock).mockReturnValue({
-          search: jest.fn().mockReturnValue(cards),
+        (useLocalSearch as Mock).mockReturnValue({
+          search: vi.fn().mockReturnValue(cards),
         });
       };
 
@@ -679,7 +685,7 @@ describe('useBrowseIntegrationHook', () => {
         ]);
         mockUseAvailablePackages([collection] as IntegrationCardItem[]);
         mockSearchReturning([collection]);
-        (useUrlFilters as jest.Mock).mockReturnValue({
+        (useUrlFilters as Mock).mockReturnValue({
           ...baseUrlFilters,
           q: 'ecs',
           setupMethod: ['agentless'],
@@ -718,7 +724,7 @@ describe('useBrowseIntegrationHook', () => {
         ]);
         mockUseAvailablePackages([collection] as IntegrationCardItem[]);
         mockSearchReturning([collection]);
-        (useUrlFilters as jest.Mock).mockReturnValue({
+        (useUrlFilters as Mock).mockReturnValue({
           ...baseUrlFilters,
           q: 'nginx',
           setupMethod: ['agentless'],
@@ -746,7 +752,7 @@ describe('useBrowseIntegrationHook', () => {
         } as IntegrationCardItem;
         mockUseAvailablePackages([collection] as IntegrationCardItem[]);
         mockSearchReturning([collection]);
-        (useUrlFilters as jest.Mock).mockReturnValue({
+        (useUrlFilters as Mock).mockReturnValue({
           ...baseUrlFilters,
           q: 'observability',
         });
@@ -779,7 +785,7 @@ describe('useBrowseIntegrationHook', () => {
         ]);
         mockUseAvailablePackages([collection] as IntegrationCardItem[]);
         mockSearchReturning([collection]);
-        (useUrlFilters as jest.Mock).mockReturnValue({
+        (useUrlFilters as Mock).mockReturnValue({
           ...baseUrlFilters,
           q: 'ecs',
           signal: ['traces'],
@@ -804,7 +810,7 @@ describe('useBrowseIntegrationHook', () => {
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: 'a-z',
         status: ['deprecated'],
@@ -846,7 +852,7 @@ describe('useBrowseIntegrationHook', () => {
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
         status: undefined,
@@ -882,7 +888,7 @@ describe('useBrowseIntegrationHook', () => {
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
         status: undefined,
@@ -920,7 +926,7 @@ describe('useBrowseIntegrationHook', () => {
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[], { allCategories });
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
         status: undefined,
@@ -952,7 +958,7 @@ describe('useBrowseIntegrationHook', () => {
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
-      (useUrlFilters as jest.Mock).mockReturnValue({
+      (useUrlFilters as Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
         status: undefined,

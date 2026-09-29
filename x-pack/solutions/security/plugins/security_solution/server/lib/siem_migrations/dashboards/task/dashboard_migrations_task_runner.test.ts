@@ -5,26 +5,32 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import { DashboardMigrationTaskRunner } from './dashboard_migrations_task_runner';
 
-const mockGetResources = jest.fn().mockResolvedValue({});
-jest.mock('./retrievers', () => ({
-  ...jest.requireActual('./retrievers'),
-  DashboardMigrationsRetriever: jest.fn().mockImplementation(() => ({
-    initialize: jest.fn().mockResolvedValue(undefined),
-    resources: {
-      getResources: mockGetResources,
-    },
-  })),
-}));
+const mockGetResources = vi.fn().mockResolvedValue({});
+vi.mock('./retrievers', async () => {
+      const mocked = {
+      ...(await vi.importActual('./retrievers')),
+      DashboardMigrationsRetriever: vi.fn().mockImplementation(() => ({
+        initialize: vi.fn().mockResolvedValue(undefined),
+        resources: {
+          getResources: mockGetResources,
+        },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockLogger = loggerMock.create();
 const inferenceService = inferenceMock.createStartContract();
-const mockDependencies: jest.Mocked<SiemMigrationsClientDependencies> = {
+const mockDependencies: Mocked<SiemMigrationsClientDependencies> = {
   rulesClient: {},
   savedObjectsClient: {},
   inferenceService,
@@ -36,13 +42,13 @@ const mockUser = {} as unknown as AuthenticatedUser;
 
 describe('DashboardMigrationTaskRunner', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetResources.mockResolvedValue({});
   });
 
   describe('prepareTaskInput', () => {
     it('should enrich relevant lookup resources with runtime mapping fields', async () => {
-      const getMapping = jest.fn().mockResolvedValue({
+      const getMapping = vi.fn().mockResolvedValue({
         lookup_default_panel_lookup: {
           mappings: {
             runtime: {

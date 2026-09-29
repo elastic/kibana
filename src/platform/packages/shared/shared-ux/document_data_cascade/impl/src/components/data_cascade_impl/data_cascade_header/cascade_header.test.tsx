@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { DataCascadeProvider } from '../../../store_provider';
@@ -24,7 +26,7 @@ describe('CascadeHeaderPrimitive', () => {
           id="test-id"
           tableInstance={null as any} // Ignored in test
           tableTitleSlot={() => <div>Table Title</div>}
-          onCascadeGroupingChange={jest.fn()}
+          onCascadeGroupingChange={vi.fn()}
         />
       </DataCascadeProvider>
     );
@@ -46,7 +48,7 @@ describe('CascadeHeaderPrimitive', () => {
             <div>Custom Header - Selected: {props.currentSelectedColumns.join(', ')}</div>
           )}
           tableTitleSlot={() => <div>Table Title</div>}
-          onCascadeGroupingChange={jest.fn()}
+          onCascadeGroupingChange={vi.fn()}
         />
       </DataCascadeProvider>
     );

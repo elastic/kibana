@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -23,15 +25,15 @@ import { ByteSizeValue } from '@kbn/config-schema';
 
 describe('migrationsStateActionMachine', () => {
   beforeAll(() => {
-    jest
+    vi
       .spyOn(global.Date, 'now')
       .mockImplementation(() => new Date('2021-04-12T16:00:00.000Z').valueOf());
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  const abort = jest.fn();
+  const abort = vi.fn();
   const mockLogger = loggingSystemMock.create();
   const typeRegistry = typeRegistryMock.create();
   typeRegistry.getLegacyTypes.mockReturnValue([
@@ -78,7 +80,7 @@ describe('migrationsStateActionMachine', () => {
     logger: mockLogger.get(),
   });
 
-  const next = jest.fn((s: State) => {
+  const next = vi.fn((s: State) => {
     if (s.controlState === 'DONE' || s.controlState === 'FATAL') {
       return null;
     } else {

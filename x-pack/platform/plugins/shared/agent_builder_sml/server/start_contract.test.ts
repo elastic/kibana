@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SmlService } from './services/sml/types';
@@ -14,20 +17,20 @@ import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 // `elasticsearch.client.asInternalUser` and `savedObjects.getScopedClient`.
 const buildDeps = ({ spaceFromRequest }: { spaceFromRequest?: string } = {}) => {
   const smlService = {
-    indexAttachment: jest.fn().mockResolvedValue(undefined),
-    deleteAttachment: jest.fn().mockResolvedValue(undefined),
-  } as unknown as jest.Mocked<Pick<SmlService, 'indexAttachment' | 'deleteAttachment'>> &
+    indexAttachment: vi.fn().mockResolvedValue(undefined),
+    deleteAttachment: vi.fn().mockResolvedValue(undefined),
+  } as unknown as Mocked<Pick<SmlService, 'indexAttachment' | 'deleteAttachment'>> &
     SmlService;
   const soClient = {};
   const savedObjects = {
-    getScopedClient: jest.fn().mockReturnValue(soClient),
+    getScopedClient: vi.fn().mockReturnValue(soClient),
   } as any;
   const esInternalClient = {};
   const elasticsearch = {
     client: { asInternalUser: esInternalClient },
   } as any;
   const spaces = spaceFromRequest
-    ? ({ spacesService: { getSpaceId: jest.fn().mockReturnValue(spaceFromRequest) } } as any)
+    ? ({ spacesService: { getSpaceId: vi.fn().mockReturnValue(spaceFromRequest) } } as any)
     : undefined;
   const logger = loggerMock.create();
 

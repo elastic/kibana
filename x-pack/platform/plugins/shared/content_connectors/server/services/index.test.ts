@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -27,7 +30,7 @@ import { FleetUnauthorizedError } from '@kbn/fleet-plugin/server';
 import type { AgentlessPolicy, PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { createAgentlessPolicyMock, createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 
-jest.mock('@kbn/fleet-plugin/server/services/epm/packages', () => {
+vi.mock('@kbn/fleet-plugin/server/services/epm/packages', () => {
   const mockedGetPackageInfo = ({ pkgName }: { pkgName: string }) => {
     if (pkgName === 'elastic_connectors') {
       const pkg = {
@@ -65,16 +68,16 @@ jest.mock('@kbn/fleet-plugin/server/services/epm/packages', () => {
     }
   };
   return {
-    getPackageInfo: jest.fn().mockImplementation(mockedGetPackageInfo),
+    getPackageInfo: vi.fn().mockImplementation(mockedGetPackageInfo),
   };
 });
 
 describe('AgentlessConnectorsInfraService', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
+  let soClient: Mocked<SavedObjectsClientContract>;
   let esClient: ElasticsearchClientMock;
-  let packagePolicyService: jest.Mocked<PackagePolicyClient>;
-  let agentlessPoliciesService: jest.Mocked<AgentlessPoliciesService>;
-  let agentClient: jest.Mocked<AgentClient>;
+  let packagePolicyService: Mocked<PackagePolicyClient>;
+  let agentlessPoliciesService: Mocked<AgentlessPoliciesService>;
+  let agentClient: Mocked<AgentClient>;
   let logger: MockedLogger;
   let service: AgentlessConnectorsInfraService;
 
@@ -94,7 +97,7 @@ describe('AgentlessConnectorsInfraService', () => {
       logger
     );
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getNativeConnectors', () => {
@@ -380,7 +383,7 @@ describe('AgentlessConnectorsInfraService', () => {
       packagePolicyService.fetchAllItems.mockResolvedValue(
         getMockPolicyFetchAllItems([[packagePolicy]])
       );
-      (agentClient.listAgents as jest.Mock).mockResolvedValue({
+      (agentClient.listAgents as Mock).mockResolvedValue({
         agents: [],
         total: 0,
       });
@@ -390,7 +393,7 @@ describe('AgentlessConnectorsInfraService', () => {
         agentClient,
       });
 
-      expect(agentClient.listAgents as jest.Mock).toHaveBeenCalledWith(
+      expect(agentClient.listAgents as Mock).toHaveBeenCalledWith(
         expect.objectContaining({
           kuery:
             '(fleet-agents.policy_id:"this-is-agent-policy-id" or fleet-agents.policy_id:this-is-agent-policy-id#*)',
@@ -417,7 +420,7 @@ describe('AgentlessConnectorsInfraService', () => {
       packagePolicyService.fetchAllItems.mockResolvedValue(
         getMockPolicyFetchAllItems([[packagePolicy]])
       );
-      (agentClient.listAgents as jest.Mock).mockRejectedValue(
+      (agentClient.listAgents as Mock).mockRejectedValue(
         new FleetUnauthorizedError(
           'User does not have adequate permissions to access Fleet agents.'
         )

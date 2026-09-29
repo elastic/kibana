@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 
 import type { ActionStatus } from '../../../../../../../common/types';
@@ -13,28 +16,31 @@ import { sendGetActionStatus, sendPostCancelAction, useStartServices } from '../
 
 import { useActionStatus } from './use_action_status';
 
-jest.mock('../../../../hooks', () => ({
-  sendGetActionStatus: jest.fn(),
-  sendPostCancelAction: jest.fn(),
-  useStartServices: jest.fn().mockReturnValue({
-    notifications: {
-      toasts: {
-        addError: jest.fn(),
-      },
-    },
-    overlays: {
-      openConfirm: jest.fn(),
-    },
-  }),
-}));
+vi.mock('../../../../hooks', () => {
+      const mocked = {
+      sendGetActionStatus: vi.fn(),
+      sendPostCancelAction: vi.fn(),
+      useStartServices: vi.fn().mockReturnValue({
+        notifications: {
+          toasts: {
+            addError: vi.fn(),
+          },
+        },
+        overlays: {
+          openConfirm: vi.fn(),
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useActionStatus', () => {
-  const mockSendGetActionStatus = sendGetActionStatus as jest.Mock;
-  const mockSendPostCancelAction = sendPostCancelAction as jest.Mock;
+  const mockSendGetActionStatus = sendGetActionStatus as Mock;
+  const mockSendPostCancelAction = sendPostCancelAction as Mock;
   const startServices = useStartServices();
-  const mockOpenConfirm = startServices.overlays.openConfirm as jest.Mock;
-  const mockErrorToast = startServices.notifications.toasts.addError as jest.Mock;
-  const mockOnAbortSuccess = jest.fn();
+  const mockOpenConfirm = startServices.overlays.openConfirm as Mock;
+  const mockErrorToast = startServices.notifications.toasts.addError as Mock;
+  const mockOnAbortSuccess = vi.fn();
   const mockActionStatuses = [
     {
       actionId: 'action1',

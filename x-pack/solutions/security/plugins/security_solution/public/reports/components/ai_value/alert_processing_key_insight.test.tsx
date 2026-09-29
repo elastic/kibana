@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -36,16 +39,16 @@ describe('AlertProcessingKeyInsight', () => {
       </TestProviders>
     );
 
-  let formatThousandsSpy: jest.SpyInstance;
-  let formatPercentSpy: jest.SpyInstance;
+  let formatThousandsSpy: MockInstance;
+  let formatPercentSpy: MockInstance;
 
   beforeEach(() => {
-    formatThousandsSpy = jest.spyOn(metrics, 'formatThousands');
-    formatPercentSpy = jest.spyOn(metrics, 'formatPercent');
+    formatThousandsSpy = vi.spyOn(metrics, 'formatThousands');
+    formatPercentSpy = vi.spyOn(metrics, 'formatPercent');
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   [

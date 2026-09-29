@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import './model.test.mocks';
 import * as Either from 'fp-ts/Either';
 import type { MockedMigratorContext } from '../test_helpers';
@@ -24,7 +26,7 @@ describe('model', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const baseState: BaseState = {

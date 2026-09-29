@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TextWithEdit } from '.';
@@ -43,7 +45,7 @@ describe('TextWithEdit', () => {
     fireEvent.click(editIcon);
   });
   it('should call onEdit', () => {
-    const onEdit = jest.fn();
+    const onEdit = vi.fn();
 
     const wrapper = render(
       <TextWithEdit

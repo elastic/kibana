@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
@@ -48,7 +50,7 @@ describe('AssetCriticalityService', () => {
       mockAssetCriticalityDataClient = assetCriticalityDataClientMock.create();
       baseIdentifier = { id_field: 'host.name', id_value: 'not-found' };
 
-      (mockAssetCriticalityDataClient.search as jest.Mock).mockResolvedValueOnce({
+      (mockAssetCriticalityDataClient.search as Mock).mockResolvedValueOnce({
         hits: { hits: [] },
       });
       service = assetCriticalityServiceFactory({
@@ -66,7 +68,7 @@ describe('AssetCriticalityService', () => {
 
       it('returns a single criticality if identifier is found', async () => {
         const hits = [buildMockCriticalityHit()];
-        (mockAssetCriticalityDataClient.search as jest.Mock).mockReset().mockResolvedValueOnce({
+        (mockAssetCriticalityDataClient.search as Mock).mockReset().mockResolvedValueOnce({
           hits: { hits },
         });
 
@@ -92,7 +94,7 @@ describe('AssetCriticalityService', () => {
         await service.getCriticalitiesByIdentifiers(multipleIdentifiers);
 
         expect(mockAssetCriticalityDataClient.search).toHaveBeenCalledTimes(1);
-        const query = (mockAssetCriticalityDataClient.search as jest.Mock).mock.calls[0][0].query;
+        const query = (mockAssetCriticalityDataClient.search as Mock).mock.calls[0][0].query;
         expect(query).toMatchObject({
           bool: {
             filter: {
@@ -121,7 +123,7 @@ describe('AssetCriticalityService', () => {
         await service.getCriticalitiesByIdentifiers(duplicateIdentifiers);
 
         expect(mockAssetCriticalityDataClient.search).toHaveBeenCalledTimes(1);
-        const query = (mockAssetCriticalityDataClient.search as jest.Mock).mock.calls[0][0].query;
+        const query = (mockAssetCriticalityDataClient.search as Mock).mock.calls[0][0].query;
         expect(query).toMatchObject({
           bool: {
             filter: {
@@ -152,7 +154,7 @@ describe('AssetCriticalityService', () => {
           }),
         ];
 
-        (mockAssetCriticalityDataClient.search as jest.Mock).mockReset().mockResolvedValueOnce({
+        (mockAssetCriticalityDataClient.search as Mock).mockReset().mockResolvedValueOnce({
           hits: {
             hits,
           },
@@ -202,7 +204,7 @@ describe('AssetCriticalityService', () => {
 
     describe('error conditions', () => {
       it('throws an error if the client does', async () => {
-        (mockAssetCriticalityDataClient.search as jest.Mock)
+        (mockAssetCriticalityDataClient.search as Mock)
           .mockReset()
           .mockRejectedValueOnce(new Error('foo'));
         await expect(() => service.getCriticalitiesByIdentifiers([baseIdentifier])).rejects.toThrow(

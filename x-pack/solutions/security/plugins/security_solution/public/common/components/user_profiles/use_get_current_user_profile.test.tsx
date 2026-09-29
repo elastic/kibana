@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
@@ -16,18 +19,18 @@ import { useAppToastsMock } from '../../hooks/use_app_toasts.mock';
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../mock';
 
-jest.mock('../../lib/kibana');
-jest.mock('../../hooks/use_app_toasts');
+vi.mock('../../lib/kibana');
+vi.mock('../../hooks/use_app_toasts');
 
 describe('useGetCurrentUserProfile hook', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
     const security = securityMock.createStart();
     security.userProfiles.getCurrent.mockReturnValue(Promise.resolve(mockCurrentUserProfile));
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         ...createStartServicesMock(),
         security,
@@ -37,7 +40,7 @@ describe('useGetCurrentUserProfile hook', () => {
 
   it('returns current user', async () => {
     const userProfiles = useKibana().services.security.userProfiles;
-    const spyOnUserProfiles = jest.spyOn(userProfiles, 'getCurrent');
+    const spyOnUserProfiles = vi.spyOn(userProfiles, 'getCurrent');
     const { result } = renderHook(() => useGetCurrentUserProfile(), {
       wrapper: TestProviders,
     });

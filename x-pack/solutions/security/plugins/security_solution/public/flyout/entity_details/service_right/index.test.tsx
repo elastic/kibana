@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
@@ -30,54 +32,72 @@ const mockProps: ServicePanelProps = {
   scopeId: 'test-scope-id',
 };
 
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
+vi.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
-const mockedUseRiskScore = jest.fn().mockReturnValue(mockServiceRiskScoreState);
-jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
-  useRiskScore: () => mockedUseRiskScore(),
-}));
+const mockedUseRiskScore = vi.fn().mockReturnValue(mockServiceRiskScoreState);
+vi.mock('../../../entity_analytics/api/hooks/use_risk_score', () => {
+      const mocked = {
+      useRiskScore: () => mockedUseRiskScore(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseEntityRiskScores = jest.fn();
-jest.mock('../../../entity_analytics/api/hooks/use_entity_risk_scores', () => ({
-  useEntityRiskScores: () => mockedUseEntityRiskScores(),
-}));
+const mockedUseEntityRiskScores = vi.fn();
+vi.mock('../../../entity_analytics/api/hooks/use_entity_risk_scores', () => {
+      const mocked = {
+      useEntityRiskScores: () => mockedUseEntityRiskScores(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseObservedService = jest.fn().mockReturnValue(mockObservedService);
+const mockedUseObservedService = vi.fn().mockReturnValue(mockObservedService);
 
-jest.mock('./hooks/use_observed_service', () => ({
-  useObservedService: () => mockedUseObservedService(),
-}));
+vi.mock('./hooks/use_observed_service', () => {
+      const mocked = {
+      useObservedService: () => mockedUseObservedService(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(true);
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => mockedUseIsExperimentalFeatureEnabled(),
-}));
+const mockedUseIsExperimentalFeatureEnabled = vi.fn().mockReturnValue(true);
+vi.mock('../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: () => mockedUseIsExperimentalFeatureEnabled(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const flyoutContextValue = {
-  closeLeftPanel: jest.fn(),
+  closeLeftPanel: vi.fn(),
 } as unknown as ExpandableFlyoutApi;
 
 const flyoutHistory: FlyoutPanelHistory[] = [
   { lastOpen: Date.now(), panel: { id: 'id1', params: {} } },
 ];
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  useExpandableFlyoutHistory: jest.fn(),
-  useExpandableFlyoutState: jest.fn(),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+      useExpandableFlyoutHistory: vi.fn(),
+      useExpandableFlyoutState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/utils/timeline/use_show_timeline', () => ({
-  useShowTimeline: jest.fn(() => [true]),
-}));
+vi.mock('../../../common/utils/timeline/use_show_timeline', () => {
+      const mocked = {
+      useShowTimeline: vi.fn(() => [true]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ServicePanel', () => {
   beforeEach(() => {
     mockedUseRiskScore.mockReturnValue(mockServiceRiskScoreState);
     mockedUseObservedService.mockReturnValue(mockObservedService);
     mockedUseEntityRiskScores.mockReturnValue(mockServiceEntityRiskScores);
-    jest.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
-    jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+    vi.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
+    vi.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
   it('renders', () => {

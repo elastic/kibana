@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server';
@@ -59,8 +61,8 @@ describe('isRecoverablePromoteRunSoonError', () => {
 });
 
 describe('drainConcurrencyQueueSlots', () => {
-  const runSoonMock = jest.fn().mockResolvedValue(undefined);
-  const promoteQueuedRunTask = jest.fn().mockImplementation(async () => {
+  const runSoonMock = vi.fn().mockResolvedValue(undefined);
+  const promoteQueuedRunTask = vi.fn().mockImplementation(async () => {
     runSoonMock();
   });
   const workflowTaskManager = {
@@ -69,29 +71,29 @@ describe('drainConcurrencyQueueSlots', () => {
 
   const baseParams = {
     workflowTaskManager,
-    logger: { debug: jest.fn(), warn: jest.fn() } as unknown as Logger,
+    logger: { debug: vi.fn(), warn: vi.fn() } as unknown as Logger,
     spaceId: 'default',
     concurrencyGroupKey: 'g1',
     concurrencySettings: { key: 'g1', strategy: 'queue' as const, max: 1 },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('promotes at most one queued execution per drain when max is 1', async () => {
-    const countMock = jest.fn().mockResolvedValueOnce(0).mockResolvedValue(1);
+    const countMock = vi.fn().mockResolvedValueOnce(0).mockResolvedValue(1);
     const workflowExecutionRepository = {
       countExecutionsByConcurrencyGroupAndStatuses: countMock,
-      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-queued-1'),
-      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
-      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+      getOldestQueuedExecutionIdByConcurrencyGroup: vi.fn().mockResolvedValue('exec-queued-1'),
+      tryCasPromoteQueuedWorkflowExecutionToPending: vi.fn().mockResolvedValue(true),
+      getWorkflowExecutionById: vi.fn().mockResolvedValue({
         id: 'exec-queued-1',
         spaceId: 'default',
         triggeredBy: 'manual',
         status: ExecutionStatus.PENDING,
       }),
-      updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+      updateWorkflowExecution: vi.fn().mockResolvedValue(undefined),
     } as unknown as WorkflowExecutionRepository;
 
     await drainConcurrencyQueueSlots({
@@ -108,18 +110,18 @@ describe('drainConcurrencyQueueSlots', () => {
   });
 
   it('promotes twice in one drain when max is 2 and slot count stays below max', async () => {
-    const countMock = jest
+    const countMock = vi
       .fn()
       .mockResolvedValueOnce(0)
       .mockResolvedValueOnce(1)
       .mockResolvedValue(2);
-    const oldestMock = jest
+    const oldestMock = vi
       .fn()
       .mockResolvedValueOnce('exec-q1')
       .mockResolvedValueOnce('exec-q2')
       .mockResolvedValue(null);
-    const promoteMock = jest.fn().mockResolvedValue(true);
-    const getByIdMock = jest.fn().mockImplementation((_id: string) =>
+    const promoteMock = vi.fn().mockResolvedValue(true);
+    const getByIdMock = vi.fn().mockImplementation((_id: string) =>
       Promise.resolve({
         id: _id,
         spaceId: 'default',
@@ -133,7 +135,7 @@ describe('drainConcurrencyQueueSlots', () => {
       getOldestQueuedExecutionIdByConcurrencyGroup: oldestMock,
       tryCasPromoteQueuedWorkflowExecutionToPending: promoteMock,
       getWorkflowExecutionById: getByIdMock,
-      updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+      updateWorkflowExecution: vi.fn().mockResolvedValue(undefined),
     } as unknown as WorkflowExecutionRepository;
 
     await drainConcurrencyQueueSlots({
@@ -146,21 +148,21 @@ describe('drainConcurrencyQueueSlots', () => {
   });
 
   it('retries runSoon after a short delay when the dormant task is not ready yet', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     promoteQueuedRunTask
       .mockRejectedValueOnce(new Error('task not found'))
       .mockRejectedValueOnce(new Error('task not found'))
       .mockResolvedValueOnce(undefined);
 
-    const updateMock = jest.fn().mockResolvedValue(undefined);
+    const updateMock = vi.fn().mockResolvedValue(undefined);
     const workflowExecutionRepository = {
-      countExecutionsByConcurrencyGroupAndStatuses: jest
+      countExecutionsByConcurrencyGroupAndStatuses: vi
         .fn()
         .mockResolvedValueOnce(0)
         .mockResolvedValue(1),
-      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-queued-1'),
-      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
-      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+      getOldestQueuedExecutionIdByConcurrencyGroup: vi.fn().mockResolvedValue('exec-queued-1'),
+      tryCasPromoteQueuedWorkflowExecutionToPending: vi.fn().mockResolvedValue(true),
+      getWorkflowExecutionById: vi.fn().mockResolvedValue({
         id: 'exec-queued-1',
         spaceId: 'default',
         triggeredBy: 'manual',
@@ -174,7 +176,7 @@ describe('drainConcurrencyQueueSlots', () => {
       workflowExecutionRepository,
     });
 
-    await jest.advanceTimersByTimeAsync(500);
+    await vi.advanceTimersByTimeAsync(500);
     await drainPromise;
 
     expect(promoteQueuedRunTask).toHaveBeenCalledTimes(3);
@@ -182,22 +184,22 @@ describe('drainConcurrencyQueueSlots', () => {
       expect.objectContaining({ status: ExecutionStatus.QUEUED }),
       expect.anything()
     );
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('marks corrupt promoted docs as skipped and continues draining', async () => {
-    const countMock = jest
+    const countMock = vi
       .fn()
       .mockResolvedValueOnce(0)
       .mockResolvedValueOnce(0)
       .mockResolvedValue(1);
-    const oldestMock = jest
+    const oldestMock = vi
       .fn()
       .mockResolvedValueOnce('exec-corrupt')
       .mockResolvedValueOnce('exec-valid')
       .mockResolvedValue(null);
-    const updateMock = jest.fn().mockResolvedValue(undefined);
-    const getByIdMock = jest
+    const updateMock = vi.fn().mockResolvedValue(undefined);
+    const getByIdMock = vi
       .fn()
       .mockResolvedValueOnce({
         status: ExecutionStatus.PENDING,
@@ -213,7 +215,7 @@ describe('drainConcurrencyQueueSlots', () => {
     const workflowExecutionRepository = {
       countExecutionsByConcurrencyGroupAndStatuses: countMock,
       getOldestQueuedExecutionIdByConcurrencyGroup: oldestMock,
-      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
+      tryCasPromoteQueuedWorkflowExecutionToPending: vi.fn().mockResolvedValue(true),
       getWorkflowExecutionById: getByIdMock,
       updateWorkflowExecution: updateMock,
     } as unknown as WorkflowExecutionRepository;
@@ -240,18 +242,18 @@ describe('drainConcurrencyQueueSlots', () => {
   });
 
   it('defaults missing triggeredBy to manual when promoting', async () => {
-    const countMock = jest.fn().mockResolvedValueOnce(0).mockResolvedValue(1);
+    const countMock = vi.fn().mockResolvedValueOnce(0).mockResolvedValue(1);
     const workflowExecutionRepository = {
       countExecutionsByConcurrencyGroupAndStatuses: countMock,
-      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-queued-1'),
-      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
-      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+      getOldestQueuedExecutionIdByConcurrencyGroup: vi.fn().mockResolvedValue('exec-queued-1'),
+      tryCasPromoteQueuedWorkflowExecutionToPending: vi.fn().mockResolvedValue(true),
+      getWorkflowExecutionById: vi.fn().mockResolvedValue({
         id: 'exec-queued-1',
         spaceId: 'default',
         triggeredBy: undefined,
         status: ExecutionStatus.PENDING,
       }),
-      updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+      updateWorkflowExecution: vi.fn().mockResolvedValue(undefined),
     } as unknown as WorkflowExecutionRepository;
 
     await drainConcurrencyQueueSlots({
@@ -266,7 +268,7 @@ describe('drainConcurrencyQueueSlots', () => {
   });
 
   it('marks failed when runSoon fails permanently (task not found) and continues draining', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     promoteQueuedRunTask.mockImplementation(async ({ executionId }: { executionId: string }) => {
       if (executionId === 'exec-missing') {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(
@@ -276,18 +278,18 @@ describe('drainConcurrencyQueueSlots', () => {
       }
     });
 
-    const countMock = jest
+    const countMock = vi
       .fn()
       .mockResolvedValueOnce(0)
       .mockResolvedValueOnce(0)
       .mockResolvedValue(1);
-    const oldestMock = jest
+    const oldestMock = vi
       .fn()
       .mockResolvedValueOnce('exec-missing')
       .mockResolvedValueOnce('exec-valid')
       .mockResolvedValue(null);
-    const updateMock = jest.fn().mockResolvedValue(undefined);
-    const getByIdMock = jest.fn().mockImplementation((id: string) =>
+    const updateMock = vi.fn().mockResolvedValue(undefined);
+    const getByIdMock = vi.fn().mockImplementation((id: string) =>
       Promise.resolve({
         id,
         spaceId: 'default',
@@ -299,7 +301,7 @@ describe('drainConcurrencyQueueSlots', () => {
     const workflowExecutionRepository = {
       countExecutionsByConcurrencyGroupAndStatuses: countMock,
       getOldestQueuedExecutionIdByConcurrencyGroup: oldestMock,
-      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
+      tryCasPromoteQueuedWorkflowExecutionToPending: vi.fn().mockResolvedValue(true),
       getWorkflowExecutionById: getByIdMock,
       updateWorkflowExecution: updateMock,
     } as unknown as WorkflowExecutionRepository;
@@ -311,7 +313,7 @@ describe('drainConcurrencyQueueSlots', () => {
     });
 
     // 3 delays between 4 not-found attempts for the missing task
-    await jest.advanceTimersByTimeAsync(750);
+    await vi.advanceTimersByTimeAsync(750);
     await drainPromise;
 
     expect(updateMock).toHaveBeenCalledWith(
@@ -338,21 +340,21 @@ describe('drainConcurrencyQueueSlots', () => {
       expect.objectContaining({ status: ExecutionStatus.QUEUED }),
       expect.anything()
     );
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('reverts to queued on recoverable runSoon failures', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     promoteQueuedRunTask.mockRejectedValue(
       SavedObjectsErrorHelpers.decorateEsUnavailableError(new Error('ES unavailable'))
     );
 
-    const updateMock = jest.fn().mockResolvedValue(undefined);
+    const updateMock = vi.fn().mockResolvedValue(undefined);
     const workflowExecutionRepository = {
-      countExecutionsByConcurrencyGroupAndStatuses: jest.fn().mockResolvedValue(0),
-      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-queued-1'),
-      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
-      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+      countExecutionsByConcurrencyGroupAndStatuses: vi.fn().mockResolvedValue(0),
+      getOldestQueuedExecutionIdByConcurrencyGroup: vi.fn().mockResolvedValue('exec-queued-1'),
+      tryCasPromoteQueuedWorkflowExecutionToPending: vi.fn().mockResolvedValue(true),
+      getWorkflowExecutionById: vi.fn().mockResolvedValue({
         id: 'exec-queued-1',
         spaceId: 'default',
         triggeredBy: 'manual',
@@ -366,7 +368,7 @@ describe('drainConcurrencyQueueSlots', () => {
       workflowExecutionRepository,
     });
 
-    await jest.advanceTimersByTimeAsync(750);
+    await vi.advanceTimersByTimeAsync(750);
     await drainPromise;
 
     expect(updateMock).toHaveBeenCalledWith(
@@ -374,22 +376,22 @@ describe('drainConcurrencyQueueSlots', () => {
       { refresh: 'wait_for' }
     );
     expect(promoteQueuedRunTask).toHaveBeenCalledTimes(4);
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('marks failed on unknown runSoon errors', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     promoteQueuedRunTask.mockRejectedValue(new Error('unexpected boom'));
 
-    const updateMock = jest.fn().mockResolvedValue(undefined);
+    const updateMock = vi.fn().mockResolvedValue(undefined);
     const workflowExecutionRepository = {
-      countExecutionsByConcurrencyGroupAndStatuses: jest
+      countExecutionsByConcurrencyGroupAndStatuses: vi
         .fn()
         .mockResolvedValueOnce(0)
         .mockResolvedValue(1),
-      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-queued-1'),
-      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
-      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+      getOldestQueuedExecutionIdByConcurrencyGroup: vi.fn().mockResolvedValue('exec-queued-1'),
+      tryCasPromoteQueuedWorkflowExecutionToPending: vi.fn().mockResolvedValue(true),
+      getWorkflowExecutionById: vi.fn().mockResolvedValue({
         id: 'exec-queued-1',
         spaceId: 'default',
         triggeredBy: 'manual',
@@ -403,7 +405,7 @@ describe('drainConcurrencyQueueSlots', () => {
       workflowExecutionRepository,
     });
 
-    await jest.advanceTimersByTimeAsync(750);
+    await vi.advanceTimersByTimeAsync(750);
     await drainPromise;
 
     expect(promoteQueuedRunTask).toHaveBeenCalledTimes(4);
@@ -418,7 +420,7 @@ describe('drainConcurrencyQueueSlots', () => {
       }),
       { refresh: 'wait_for' }
     );
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('leaves pending when runSoon reports the task is already running', async () => {
@@ -426,15 +428,15 @@ describe('drainConcurrencyQueueSlots', () => {
       new TaskAlreadyRunningError('workflow:exec-queued-1:manual')
     );
 
-    const updateMock = jest.fn().mockResolvedValue(undefined);
+    const updateMock = vi.fn().mockResolvedValue(undefined);
     const workflowExecutionRepository = {
-      countExecutionsByConcurrencyGroupAndStatuses: jest
+      countExecutionsByConcurrencyGroupAndStatuses: vi
         .fn()
         .mockResolvedValueOnce(0)
         .mockResolvedValue(1),
-      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-queued-1'),
-      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
-      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+      getOldestQueuedExecutionIdByConcurrencyGroup: vi.fn().mockResolvedValue('exec-queued-1'),
+      tryCasPromoteQueuedWorkflowExecutionToPending: vi.fn().mockResolvedValue(true),
+      getWorkflowExecutionById: vi.fn().mockResolvedValue({
         id: 'exec-queued-1',
         spaceId: 'default',
         triggeredBy: 'manual',
@@ -454,24 +456,24 @@ describe('drainConcurrencyQueueSlots', () => {
 });
 
 describe('maybeDrainConcurrencyQueueAfterTerminal', () => {
-  const promoteQueuedRunTask = jest.fn().mockResolvedValue(undefined);
+  const promoteQueuedRunTask = vi.fn().mockResolvedValue(undefined);
   const workflowTaskManager = {
     promoteQueuedRunTask,
   } as unknown as WorkflowTaskManager;
-  const debugMock = jest.fn();
+  const debugMock = vi.fn();
   const baseParams = {
     workflowTaskManager,
-    logger: { debug: debugMock, warn: jest.fn() } as unknown as Logger,
+    logger: { debug: debugMock, warn: vi.fn() } as unknown as Logger,
     workflowRunId: 'exec-finished',
     spaceId: 'default',
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('drains when the execution is terminal under queue concurrency', async () => {
-    const getByIdMock = jest
+    const getByIdMock = vi
       .fn()
       .mockResolvedValueOnce({
         id: 'exec-finished',
@@ -495,13 +497,13 @@ describe('maybeDrainConcurrencyQueueAfterTerminal', () => {
       });
     const workflowExecutionRepository = {
       getWorkflowExecutionById: getByIdMock,
-      countExecutionsByConcurrencyGroupAndStatuses: jest
+      countExecutionsByConcurrencyGroupAndStatuses: vi
         .fn()
         .mockResolvedValueOnce(0)
         .mockResolvedValue(1),
-      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-q1'),
-      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
-      updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+      getOldestQueuedExecutionIdByConcurrencyGroup: vi.fn().mockResolvedValue('exec-q1'),
+      tryCasPromoteQueuedWorkflowExecutionToPending: vi.fn().mockResolvedValue(true),
+      updateWorkflowExecution: vi.fn().mockResolvedValue(undefined),
     } as unknown as WorkflowExecutionRepository;
 
     await maybeDrainConcurrencyQueueAfterTerminal({
@@ -517,7 +519,7 @@ describe('maybeDrainConcurrencyQueueAfterTerminal', () => {
 
   it('does not drain when the execution is not terminal', async () => {
     const workflowExecutionRepository = {
-      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+      getWorkflowExecutionById: vi.fn().mockResolvedValue({
         id: 'exec-finished',
         status: ExecutionStatus.QUEUED,
         concurrencyGroupKey: 'g1',
@@ -538,7 +540,7 @@ describe('maybeDrainConcurrencyQueueAfterTerminal', () => {
 
   it('does not drain when concurrency strategy is not queue', async () => {
     const workflowExecutionRepository = {
-      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+      getWorkflowExecutionById: vi.fn().mockResolvedValue({
         id: 'exec-finished',
         status: ExecutionStatus.FAILED,
         concurrencyGroupKey: 'g1',
@@ -558,7 +560,7 @@ describe('maybeDrainConcurrencyQueueAfterTerminal', () => {
 
   it('logs debug and swallows drain errors', async () => {
     const workflowExecutionRepository = {
-      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+      getWorkflowExecutionById: vi.fn().mockResolvedValue({
         id: 'exec-finished',
         status: ExecutionStatus.FAILED,
         concurrencyGroupKey: 'g1',
@@ -566,7 +568,7 @@ describe('maybeDrainConcurrencyQueueAfterTerminal', () => {
           settings: { concurrency: { key: 'g1', strategy: 'queue', max: 1 } },
         },
       }),
-      countExecutionsByConcurrencyGroupAndStatuses: jest
+      countExecutionsByConcurrencyGroupAndStatuses: vi
         .fn()
         .mockRejectedValue(new Error('ES unavailable')),
     } as unknown as WorkflowExecutionRepository;

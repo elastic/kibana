@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ListRuleChangeHistoryResponse } from '@kbn/alerting-v2-schemas';
@@ -73,7 +75,7 @@ describe('ListRuleChangeHistoryRoute', () => {
 
     await route.handle();
 
-    expect((mocks.deps.response.ok as jest.Mock).mock.calls[0][0].body).toEqual(clientResult);
+    expect((mocks.deps.response.ok as Mock).mock.calls[0][0].body).toEqual(clientResult);
   });
 
   it('lets errors propagate so BaseAlertingRoute.onError handles the response', async () => {

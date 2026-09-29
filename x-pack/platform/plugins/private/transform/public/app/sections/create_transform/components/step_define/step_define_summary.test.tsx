@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -18,7 +20,7 @@ import type { SearchItems } from '../../../../hooks/use_search_items';
 import type { StepDefineExposedState } from './common';
 import { StepDefineSummary } from './step_define_summary';
 
-jest.mock('../../../../app_dependencies');
+vi.mock('../../../../app_dependencies');
 
 describe('Transform: <DefinePivotSummary />', () => {
   test('Minimal initialization', async () => {

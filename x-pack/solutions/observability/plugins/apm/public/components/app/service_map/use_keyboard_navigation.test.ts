@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { MarkerType } from '@xyflow/react';
 import { useKeyboardNavigation } from './use_keyboard_navigation';
@@ -64,14 +66,14 @@ const defaultProps = {
   selectedNodeId: null,
   selectedNodeForPopover: null,
   selectedEdgeForPopover: null,
-  onNodeSelect: jest.fn(),
-  onEdgeSelect: jest.fn(),
-  onPopoverClose: jest.fn(),
+  onNodeSelect: vi.fn(),
+  onEdgeSelect: vi.fn(),
+  onPopoverClose: vi.fn(),
 };
 
 describe('useKeyboardNavigation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('findNodeInDirection', () => {
@@ -391,7 +393,7 @@ describe('useKeyboardNavigation', () => {
         useKeyboardNavigation({
           ...defaultProps,
           nodes,
-          onNodeSelect: jest.fn(),
+          onNodeSelect: vi.fn(),
         })
       );
 
@@ -420,7 +422,7 @@ describe('useKeyboardNavigation', () => {
         useKeyboardNavigation({
           ...defaultProps,
           nodes,
-          onNodeSelect: jest.fn(),
+          onNodeSelect: vi.fn(),
         })
       );
 
@@ -477,7 +479,7 @@ describe('useKeyboardNavigation', () => {
 
   describe('keyboard event handling', () => {
     it('calls onPopoverClose when Escape is pressed with open node popover', () => {
-      const onPopoverClose = jest.fn();
+      const onPopoverClose = vi.fn();
       const selectedNode = createNode('a', 100, 100);
 
       renderHook(() =>
@@ -497,7 +499,7 @@ describe('useKeyboardNavigation', () => {
     });
 
     it('calls onPopoverClose when Escape is pressed with open edge popover', () => {
-      const onPopoverClose = jest.fn();
+      const onPopoverClose = vi.fn();
       const selectedEdge = createEdge('a', 'b');
 
       renderHook(() =>
@@ -517,7 +519,7 @@ describe('useKeyboardNavigation', () => {
     });
 
     it('does not call onPopoverClose when Escape is pressed without open popover', () => {
-      const onPopoverClose = jest.fn();
+      const onPopoverClose = vi.fn();
 
       renderHook(() =>
         useKeyboardNavigation({
@@ -550,7 +552,7 @@ describe('useKeyboardNavigation', () => {
     });
 
     it('calls onNodeSelect when Enter is pressed on a focused node', () => {
-      const onNodeSelect = jest.fn();
+      const onNodeSelect = vi.fn();
       const nodes = [createNode('test-node', 100, 100, 'Test Node')];
 
       renderHook(() =>
@@ -572,7 +574,7 @@ describe('useKeyboardNavigation', () => {
     });
 
     it('calls onNodeSelect when Space is pressed on a focused node', () => {
-      const onNodeSelect = jest.fn();
+      const onNodeSelect = vi.fn();
       const nodes = [createNode('test-node', 100, 100, 'Test Node')];
 
       renderHook(() =>
@@ -594,7 +596,7 @@ describe('useKeyboardNavigation', () => {
     });
 
     it('calls onPopoverClose when Enter is pressed on already selected node', () => {
-      const onPopoverClose = jest.fn();
+      const onPopoverClose = vi.fn();
       const nodes = [createNode('test-node', 100, 100, 'Test Node')];
 
       renderHook(() =>
@@ -617,7 +619,7 @@ describe('useKeyboardNavigation', () => {
     });
 
     it('does not call onNodeSelect when node is not found in nodes array', () => {
-      const onNodeSelect = jest.fn();
+      const onNodeSelect = vi.fn();
       const nodes = [createNode('other-node', 100, 100)];
 
       renderHook(() =>
@@ -663,7 +665,7 @@ describe('useKeyboardNavigation', () => {
     };
 
     it('calls onEdgeSelect when Enter is pressed on a focused edge', () => {
-      const onEdgeSelect = jest.fn();
+      const onEdgeSelect = vi.fn();
       const edges = [createEdge('a', 'b')];
 
       renderHook(() =>
@@ -680,7 +682,7 @@ describe('useKeyboardNavigation', () => {
     });
 
     it('calls onEdgeSelect when Space is pressed on a focused edge', () => {
-      const onEdgeSelect = jest.fn();
+      const onEdgeSelect = vi.fn();
       const edges = [createEdge('a', 'b')];
 
       renderHook(() =>
@@ -697,7 +699,7 @@ describe('useKeyboardNavigation', () => {
     });
 
     it('calls onPopoverClose when Enter is pressed on already selected edge', () => {
-      const onPopoverClose = jest.fn();
+      const onPopoverClose = vi.fn();
       const edges = [createEdge('a', 'b')];
 
       renderHook(() =>
@@ -715,7 +717,7 @@ describe('useKeyboardNavigation', () => {
     });
 
     it('does not call onEdgeSelect when edge data-id is missing', () => {
-      const onEdgeSelect = jest.fn();
+      const onEdgeSelect = vi.fn();
       const edges = [createEdge('a', 'b')];
       edgeElement.removeAttribute('data-id');
 
@@ -733,7 +735,7 @@ describe('useKeyboardNavigation', () => {
     });
 
     it('does not call onEdgeSelect when edge is not found in edges array', () => {
-      const onEdgeSelect = jest.fn();
+      const onEdgeSelect = vi.fn();
       const edges = [createEdge('x', 'y')];
 
       renderHook(() =>
@@ -879,7 +881,7 @@ describe('useKeyboardNavigation', () => {
 
   describe('cleanup', () => {
     it('removes event listener on unmount', () => {
-      const removeEventListenerSpy = jest.spyOn(document, 'removeEventListener');
+      const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
 
       const { unmount } = renderHook(() => useKeyboardNavigation(defaultProps));
 

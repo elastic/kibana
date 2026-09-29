@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -18,15 +20,15 @@ describe('useNlToEsqlCheck', () => {
 
   const validLicense = {
     status: 'active' as const,
-    hasAtLeast: jest.fn().mockReturnValue(true),
+    hasAtLeast: vi.fn().mockReturnValue(true),
   };
 
   const invalidLicense = {
     status: 'active' as const,
-    hasAtLeast: jest.fn().mockReturnValue(false),
+    hasAtLeast: vi.fn().mockReturnValue(false),
   };
 
-  const getLicenseMock = jest.fn();
+  const getLicenseMock = vi.fn();
 
   const createWrapper =
     (esqlService?: { getLicense: typeof getLicenseMock }) =>
@@ -38,7 +40,7 @@ describe('useNlToEsqlCheck', () => {
       );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getLicenseMock.mockResolvedValue(validLicense);
   });
 

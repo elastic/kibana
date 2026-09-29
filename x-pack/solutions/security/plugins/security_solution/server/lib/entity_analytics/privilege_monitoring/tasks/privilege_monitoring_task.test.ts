@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // jest.mock calls are hoisted before imports. Keep them at the top and avoid
 // referencing outer bindings (temporal dead zone).
-jest.mock('../auth/api_key', () => ({
-  getApiKeyManager: jest.fn().mockReturnValue({
-    getClient: jest.fn().mockResolvedValue(undefined),
-  }),
-}));
+vi.mock('../auth/api_key', () => {
+      const mocked = {
+      getApiKeyManager: vi.fn().mockReturnValue({
+        getClient: vi.fn().mockResolvedValue(undefined),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -32,11 +37,11 @@ describe('registerPrivilegeMonitoringTask — execution context wrap', () => {
   } as unknown as ConcreteTaskInstance;
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('wraps the task run in coreStart.executionContext.withContext with the expected label and id', async () => {
-    const withContext = jest.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn());
+    const withContext = vi.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn());
     const mockCore = {
       executionContext: { withContext },
     };
@@ -48,7 +53,7 @@ describe('registerPrivilegeMonitoringTask — execution context wrap', () => {
       security: {},
       encryptedSavedObjects: {},
     };
-    const getStartServicesMock = jest.fn().mockResolvedValue([mockCore, mockStartDeps]);
+    const getStartServicesMock = vi.fn().mockResolvedValue([mockCore, mockStartDeps]);
 
     const mockTaskManager = taskManagerMock.createSetup();
     registerPrivilegeMonitoringTask({

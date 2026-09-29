@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import type { UseRuleDetailsParams, UseRuleDetailsResult } from './use_rule_details';
 import { useRuleDetails } from './use_rule_details';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
-const mockUseRuleWithFallback = useRuleWithFallback as jest.Mock;
-jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
+const mockUseRuleWithFallback = useRuleWithFallback as Mock;
+vi.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 
 const initialProps: UseRuleDetailsParams = {
   ruleId: 'ruleId',

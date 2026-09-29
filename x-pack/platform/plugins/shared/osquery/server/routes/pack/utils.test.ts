@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -1652,7 +1654,7 @@ describe('fetchAllPackagePolicies (shared keyset drain for create/delete/update/
 
   const serviceYielding = (batches: unknown[][]) =>
     ({
-      fetchAllItems: jest.fn().mockImplementation(async function* asyncGenerator() {
+      fetchAllItems: vi.fn().mockImplementation(async function* asyncGenerator() {
         for (const batch of batches) {
           yield batch;
         }

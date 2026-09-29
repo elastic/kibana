@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 
 import { useDefaultRepository } from './use_default_repository';
 
-const mockGetDefaultRepository = jest.fn();
-const mockSetDefaultRepository = jest.fn();
+const mockGetDefaultRepository = vi.fn();
+const mockSetDefaultRepository = vi.fn();
 
-jest.mock('./http/repository_requests', () => ({
-  getDefaultRepository: (...args: unknown[]) => mockGetDefaultRepository(...args),
-  setDefaultRepository: (...args: unknown[]) => mockSetDefaultRepository(...args),
-}));
+vi.mock('./http/repository_requests', () => {
+      const mocked = {
+      getDefaultRepository: (...args: unknown[]) => mockGetDefaultRepository(...args),
+      setDefaultRepository: (...args: unknown[]) => mockSetDefaultRepository(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useDefaultRepository', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('normalizes empty string repositoryName to null', async () => {

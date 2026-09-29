@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
@@ -42,8 +44,8 @@ describe('ServiceAccountsService', () => {
       isServerless: true,
       license: licenseMock.create(),
       uiam: uiamServiceMock.create(),
-      checkPrivilegesWithRequest: jest.fn(),
-      getCurrentUser: jest.fn(),
+      checkPrivilegesWithRequest: vi.fn(),
+      getCurrentUser: vi.fn(),
       cloudProjectContext: {
         organizationId: 'organization-id',
         projectId: 'project-id',
@@ -53,8 +55,8 @@ describe('ServiceAccountsService', () => {
       savedObjects: savedObjectsServiceMock.createStartContract(),
       encryptedSavedObjects,
       canEncrypt: true,
-      getCurrentUserProfileId: jest.fn().mockResolvedValue(null),
-      getSpaceId: jest.fn().mockReturnValue('default'),
+      getCurrentUserProfileId: vi.fn().mockResolvedValue(null),
+      getSpaceId: vi.fn().mockReturnValue('default'),
       ...overrides,
     };
   };
@@ -120,7 +122,7 @@ describe('ServiceAccountsService', () => {
     );
 
     it('passes the configured refresh lifetime to the UIAM backend', async () => {
-      jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+      vi.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
       try {
         const params = startParams({ serviceAccounts: { enabled: true, requestLifetime: '1s' } });
         params.license.isEnabled.mockReturnValue(true);
@@ -128,11 +130,11 @@ describe('ServiceAccountsService', () => {
         if (!start) throw new Error('Expected UIAM backend');
         const { backend } = start;
         const request = await backend.createFakeRequest({ serviceAccountId: 'sa-id' });
-        jest.advanceTimersByTime(1_000);
+        vi.advanceTimersByTime(1_000);
         await expect(backend.reauthenticateFakeRequest(request)).resolves.toBeNull();
         expect(params.uiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(1);
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 

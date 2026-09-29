@@ -7,20 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import mockDispatchDataD3 from '../../fixtures/dispatch_heatmap_d3.json';
 import { Dispatch } from './dispatch';
 import mockdataPoint from '../../fixtures/dispatch_heatmap_data_point.json';
 import mockConfigPercentage from '../../fixtures/dispatch_heatmap_config.json';
 
-jest.mock('d3', () => ({
-  event: {
-    target: {
-      nearestViewportElement: {
-        __data__: mockDispatchDataD3,
+vi.mock('d3', () => {
+      const mocked = {
+      event: {
+        target: {
+          nearestViewportElement: {
+            __data__: mockDispatchDataD3,
+          },
+        },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function getHandlerMock(config = {}, data = {}) {
   return {

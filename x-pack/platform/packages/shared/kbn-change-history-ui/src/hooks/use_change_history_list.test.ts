@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useChangeHistoryList } from './use_change_history_list';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
@@ -13,7 +15,7 @@ import { createChangeHistoryHookWrapper } from '../test_utils/create_change_hist
 
 describe('useChangeHistoryList', () => {
   it('loads paginated changes and appends on loadMore', async () => {
-    const listChanges = jest
+    const listChanges = vi
       .fn()
       .mockResolvedValueOnce({
         items: [
@@ -30,7 +32,7 @@ describe('useChangeHistoryList', () => {
 
     const adapter: ChangeHistoryAdapter = {
       listChanges,
-      getChange: jest.fn(),
+      getChange: vi.fn(),
     };
 
     const { wrapper } = createChangeHistoryHookWrapper({ adapter });
@@ -76,7 +78,7 @@ describe('useChangeHistoryList', () => {
 
   it('clears items immediately when objectId changes', async () => {
     let resolveFirst: ((value: unknown) => void) | undefined;
-    const listChanges = jest.fn().mockImplementation(({ objectId }) => {
+    const listChanges = vi.fn().mockImplementation(({ objectId }) => {
       if (objectId === 'obj-1') {
         return new Promise((resolve) => {
           resolveFirst = resolve;
@@ -93,7 +95,7 @@ describe('useChangeHistoryList', () => {
 
     const adapter: ChangeHistoryAdapter = {
       listChanges,
-      getChange: jest.fn(),
+      getChange: vi.fn(),
     };
 
     const { wrapper } = createChangeHistoryHookWrapper({ adapter });
@@ -133,7 +135,7 @@ describe('useChangeHistoryList', () => {
   });
 
   it('applies updatedItems from later pages onto earlier rows', async () => {
-    const listChanges = jest
+    const listChanges = vi
       .fn()
       .mockResolvedValueOnce({
         items: [
@@ -159,7 +161,7 @@ describe('useChangeHistoryList', () => {
 
     const adapter: ChangeHistoryAdapter = {
       listChanges,
-      getChange: jest.fn(),
+      getChange: vi.fn(),
     };
 
     const { wrapper } = createChangeHistoryHookWrapper({ adapter });
@@ -193,7 +195,7 @@ describe('useChangeHistoryList', () => {
   });
 
   it('refetch reloads the first page', async () => {
-    const listChanges = jest
+    const listChanges = vi
       .fn()
       .mockResolvedValueOnce({
         items: [
@@ -231,7 +233,7 @@ describe('useChangeHistoryList', () => {
 
     const adapter: ChangeHistoryAdapter = {
       listChanges,
-      getChange: jest.fn(),
+      getChange: vi.fn(),
     };
 
     const { wrapper } = createChangeHistoryHookWrapper({ adapter });
@@ -269,7 +271,7 @@ describe('useChangeHistoryList', () => {
       snapshot: { content: 'draft' },
     };
 
-    const listChanges = jest.fn().mockResolvedValue({
+    const listChanges = vi.fn().mockResolvedValue({
       items: [
         {
           id: 'evt-current',
@@ -285,7 +287,7 @@ describe('useChangeHistoryList', () => {
 
     const adapter: ChangeHistoryAdapter = {
       listChanges,
-      getChange: jest.fn(),
+      getChange: vi.fn(),
       getPendingChange: () => pendingChange,
     };
 
@@ -314,7 +316,7 @@ describe('useChangeHistoryList', () => {
   });
 
   it('ignores getPendingChange when unsavedChanges is disabled', async () => {
-    const listChanges = jest.fn().mockResolvedValue({
+    const listChanges = vi.fn().mockResolvedValue({
       items: [
         {
           id: 'evt-current',
@@ -330,7 +332,7 @@ describe('useChangeHistoryList', () => {
 
     const adapter: ChangeHistoryAdapter = {
       listChanges,
-      getChange: jest.fn(),
+      getChange: vi.fn(),
       getPendingChange: () => ({
         id: '__pending__',
         timestamp: '2026-07-03T12:00:00.000Z',

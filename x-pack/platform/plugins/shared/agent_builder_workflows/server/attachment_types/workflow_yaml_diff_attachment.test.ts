@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerWorkflowYamlDiffAttachment } from './workflow_yaml_diff_attachment';
 import { WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
@@ -27,7 +29,7 @@ const registerAndCapture = () => {
   let registeredType: RegisteredDiffType | undefined;
   const mockAgentBuilder = {
     attachments: {
-      registerType: jest.fn((type: unknown) => {
+      registerType: vi.fn((type: unknown) => {
         registeredType = type as RegisteredDiffType;
       }),
     },

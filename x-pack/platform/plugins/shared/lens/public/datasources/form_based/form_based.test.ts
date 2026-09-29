@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ReactElement } from 'react';
 import React from 'react';
 
@@ -61,12 +64,15 @@ import { createMockDataViewsState } from '../../data_views_service/mocks';
 import type { Query } from '@kbn/es-query';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 
-jest.mock('./loader');
-jest.mock('../../id_generator');
-jest.mock('./operations');
-jest.mock('./dimension_panel/reference_editor', () => ({
-  ReferenceEditor: () => null,
-}));
+vi.mock('./loader');
+vi.mock('../../id_generator');
+vi.mock('./operations');
+vi.mock('./dimension_panel/reference_editor', () => {
+      const mocked = {
+      ReferenceEditor: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const nowInstant = new Date();
 
@@ -212,7 +218,7 @@ describe('IndexPattern Data Source', () => {
 
   beforeEach(() => {
     const data = dataPluginMock.createStartContract();
-    data.query.timefilter.timefilter.getAbsoluteTime = jest.fn(() => ({
+    data.query.timefilter.timefilter.getAbsoluteTime = vi.fn(() => ({
       from: '',
       to: '',
     }));
@@ -1410,7 +1416,7 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const optimizeMock = jest.spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs');
+        const optimizeMock = vi.spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs');
 
         FormBasedDatasource.toExpression(
           queryBaseState,
@@ -1478,7 +1484,7 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const optimizeMock = jest
+        const optimizeMock = vi
           .spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs')
           .mockImplementation((aggs, esAggsIdMap) => {
             // change the order of the aggregations
@@ -3051,7 +3057,7 @@ describe('IndexPattern Data Source', () => {
     describe('getMaxPossibleNumValues', () => {
       it('should pass it on to the operation when available', () => {
         const prediction = 23;
-        const operationPredictSpy = jest
+        const operationPredictSpy = vi
           .spyOn(operationDefinitionMap.terms, 'getMaxPossibleNumValues')
           .mockReturnValue(prediction);
         const columnId = 'col1';
@@ -3109,8 +3115,8 @@ describe('IndexPattern Data Source', () => {
   describe('#getUserMessages', () => {
     describe('error messages', () => {
       it('should generate error messages for a single layer', () => {
-        (getErrorMessages as jest.Mock).mockClear();
-        (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
+        (getErrorMessages as Mock).mockClear();
+        (getErrorMessages as Mock).mockReturnValueOnce(['error 1', 'error 2']);
         const state: FormBasedPrivateState = {
           layers: {
             first: {
@@ -3160,8 +3166,8 @@ describe('IndexPattern Data Source', () => {
       });
 
       it('should prepend each error with its layer number on multi-layer chart', () => {
-        (getErrorMessages as jest.Mock).mockClear();
-        (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
+        (getErrorMessages as Mock).mockClear();
+        (getErrorMessages as Mock).mockReturnValueOnce(['error 1', 'error 2']);
         const state: FormBasedPrivateState = {
           layers: {
             first: {
@@ -3264,8 +3270,8 @@ describe('IndexPattern Data Source', () => {
         };
 
         it('should generate generic error if column invalid', () => {
-          (getErrorMessages as jest.Mock).mockClear();
-          (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
+          (getErrorMessages as Mock).mockClear();
+          (getErrorMessages as Mock).mockReturnValueOnce([]);
 
           const messages = FormBasedDatasource.getUserMessages(state, {
             frame: createMockFramePublicAPI({
@@ -3300,8 +3306,8 @@ describe('IndexPattern Data Source', () => {
         });
 
         it('should override generic error if operation generates something specific', () => {
-          (getErrorMessages as jest.Mock).mockClear();
-          (getErrorMessages as jest.Mock).mockReturnValueOnce([
+          (getErrorMessages as Mock).mockClear();
+          (getErrorMessages as Mock).mockReturnValueOnce([
             {
               displayLocations: [{ id: 'dimensionButton', dimensionId: 'col1' }],
               message: 'specific error',
@@ -3345,7 +3351,7 @@ describe('IndexPattern Data Source', () => {
       let framePublicAPI: FramePublicAPI;
 
       beforeEach(() => {
-        (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
+        (getErrorMessages as Mock).mockReturnValueOnce([]);
 
         const termsColumn: TermsIndexPatternColumn = {
           operationType: 'terms',
@@ -3569,7 +3575,7 @@ describe('IndexPattern Data Source', () => {
       }
 
       beforeEach(() => {
-        (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
+        (getErrorMessages as Mock).mockReturnValueOnce([]);
       });
 
       it.each`

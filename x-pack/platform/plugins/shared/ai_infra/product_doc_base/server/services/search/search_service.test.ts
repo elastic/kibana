@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { SearchService } from './search_service';
@@ -12,8 +15,8 @@ import { getIndicesForResourceTypes } from './utils';
 
 import { performSearch } from './perform_search';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-jest.mock('./perform_search');
-const performSearchMock = performSearch as jest.MockedFn<typeof performSearch>;
+vi.mock('./perform_search');
+const performSearchMock = performSearch as MockedFunction<typeof performSearch>;
 
 describe('SearchService', () => {
   let logger: MockedLogger;

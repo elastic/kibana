@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { TestProvider } from '../../../../common/test_utils';
 import { render, type RenderResult } from '@testing-library/react';
@@ -12,21 +14,24 @@ import { ChartsFilter, type ChartsFilterProps } from './charts_filter';
 import type { FilterName } from '../../hooks';
 import { mockUseKibana, generateDataStreams } from '../../mocks';
 
-const mockUseLocation = jest.fn(() => ({ pathname: '/' }));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: () => mockUseLocation(),
-  useHistory: jest.fn().mockReturnValue({
-    push: jest.fn(),
-    listen: jest.fn(),
-    location: {
-      search: '',
-    },
-  }),
-}));
+const mockUseLocation = vi.fn(() => ({ pathname: '/' }));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: () => mockUseLocation(),
+      useHistory: vi.fn().mockReturnValue({
+        push: vi.fn(),
+        listen: vi.fn(),
+        location: {
+          search: '',
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...original,
     useKibana: () => mockUseKibana,
@@ -45,29 +50,29 @@ describe('Charts Filters', () => {
       appendOptions: {},
       selectedOptions: [],
       options: generateDataStreams(8).map((ds) => ds.name),
-      onChangeFilterOptions: jest.fn(),
+      onChangeFilterOptions: vi.fn(),
     },
   };
 
   let renderComponent: (props: ChartsFilterProps) => RenderResult;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     renderComponent = (props: ChartsFilterProps) =>
       render(
         <TestProvider>
           <ChartsFilter data-test-subj={testIdFilter} {...props} />
         </TestProvider>
       );
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime, pointerEventsCheck: 0 });
   });
 
   it('renders data streams filter with all options selected', async () => {

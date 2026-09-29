@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useKibana } from '../../../../common/lib/kibana';
@@ -19,11 +22,11 @@ import {
   INITIALIZATION_FLOW_STATUS_ERROR,
 } from '../../../../../common/api/initialization';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('./use_lists_privileges');
-jest.mock('../../../../common/components/initialization');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('./use_lists_privileges');
+vi.mock('../../../../common/components/initialization');
 
-const useSecuritySolutionInitializationMock = useSecuritySolutionInitialization as jest.Mock;
+const useSecuritySolutionInitializationMock = useSecuritySolutionInitialization as Mock;
 
 const mockInitState = (
   overrides?: Partial<
@@ -42,7 +45,7 @@ describe('useListsConfig', () => {
 
   beforeEach(() => {
     listsPrivilegesMock = getUseListsPrivilegesMock();
-    (useListsPrivileges as jest.Mock).mockReturnValue(listsPrivilegesMock);
+    (useListsPrivileges as Mock).mockReturnValue(listsPrivilegesMock);
     useSecuritySolutionInitializationMock.mockReturnValue(mockInitState());
     useKibana().services.lists = {};
   });

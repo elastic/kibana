@@ -5,23 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { fetchQueryRulesSets } from './fetch_query_rules_sets';
 
 describe('fetch query rules sets lib function', () => {
   const mockClient = {
     security: {
-      hasPrivileges: jest.fn(),
+      hasPrivileges: vi.fn(),
     },
     queryRules: {
-      listRulesets: jest.fn(),
+      listRulesets: vi.fn(),
     },
   };
 
   const client = () => mockClient as unknown as ElasticsearchClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should return query rules sets', async () => {
     mockClient.queryRules.listRulesets.mockResolvedValue({

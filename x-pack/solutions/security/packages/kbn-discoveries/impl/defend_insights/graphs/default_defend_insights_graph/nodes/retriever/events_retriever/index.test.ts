@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { DefendInsightType } from '@kbn/elastic-assistant-common';
@@ -14,19 +17,22 @@ import { getAnonymizedEvents } from './get_events';
 import { mockAnonymizedEvents } from '../../../mock/mock_anonymized_events';
 import { AnonymizedEventsRetriever } from '.';
 
-jest.mock('./get_events', () => ({
-  getAnonymizedEvents: jest.fn(),
-}));
+vi.mock('./get_events', () => {
+      const mocked = {
+      getAnonymizedEvents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AnonymizedEventsRetriever', () => {
   let esClient: ElasticsearchClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
 
-    (getAnonymizedEvents as jest.Mock).mockResolvedValue([...mockAnonymizedEvents]);
+    (getAnonymizedEvents as Mock).mockResolvedValue([...mockAnonymizedEvents]);
   });
 
   it('returns the expected pageContent and metadata', async () => {
@@ -54,7 +60,7 @@ describe('AnonymizedEventsRetriever', () => {
   });
 
   it('calls getAnonymizedEvents with the expected parameters', async () => {
-    const onNewReplacements = jest.fn();
+    const onNewReplacements = vi.fn();
     const mockReplacements = {
       replacement1: 'SRVMAC08',
       replacement2: 'SRVWIN01',
@@ -87,7 +93,7 @@ describe('AnonymizedEventsRetriever', () => {
   });
 
   it('handles empty anonymized events', async () => {
-    (getAnonymizedEvents as jest.Mock).mockResolvedValue([]);
+    (getAnonymizedEvents as Mock).mockResolvedValue([]);
 
     const retriever = new AnonymizedEventsRetriever({
       insightType: 'incompatible_antivirus' as DefendInsightType,

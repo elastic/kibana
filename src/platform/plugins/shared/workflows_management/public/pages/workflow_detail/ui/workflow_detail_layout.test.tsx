@@ -7,23 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 // Mock react-reverse-portal to simplify rendering
-jest.mock('react-reverse-portal', () => {
+vi.mock('react-reverse-portal', () => {
   const R = require('react');
   return {
-    createHtmlPortalNode: jest.fn(() => ({ element: globalThis.document.createElement('div') })),
+    createHtmlPortalNode: vi.fn(() => ({ element: globalThis.document.createElement('div') })),
     InPortal: (p: Record<string, unknown>) => R.createElement(R.Fragment, null, p.children),
     OutPortal: () => R.createElement('div', { 'data-test-subj': 'out-portal' }),
   };
 });
 
 // Mock ResizableLayout
-jest.mock('@kbn/resizable-layout', () => {
+vi.mock('@kbn/resizable-layout', () => {
   const R = require('react');
   return {
     ResizableLayout: (p: Record<string, unknown>) =>
@@ -40,9 +42,9 @@ jest.mock('@kbn/resizable-layout', () => {
 });
 
 // Mock useLocalStorage
-jest.mock('react-use/lib/useLocalStorage', () => ({
+vi.mock('react-use/lib/useLocalStorage', () => ({
   __esModule: true,
-  default: jest.fn(() => [500, jest.fn()]),
+  default: vi.fn(() => [500, vi.fn()]),
 }));
 
 describe('WorkflowEditorLayout', () => {

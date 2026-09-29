@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import fs from 'fs';
 import undici from 'undici';
 
@@ -29,11 +32,14 @@ import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import { ConfigSchema } from '../config';
 import { securityTelemetry } from '../otel/instrumentation';
 
-jest.mock('../otel/instrumentation', () => ({
-  securityTelemetry: {
-    recordOAuthTokenExchangeAttempt: jest.fn(),
-  },
-}));
+vi.mock('../otel/instrumentation', () => {
+      const mocked = {
+      securityTelemetry: {
+        recordOAuthTokenExchangeAttempt: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const AGENT_MOCK = { name: "I'm the danger. I'm the one who knocks." };
 
@@ -52,15 +58,15 @@ function createUiamRequest(sharedSecret?: string) {
 
 describe('UiamService', () => {
   let uiamService: UiamService;
-  let readFileSyncSpy: jest.SpyInstance;
-  let agentSpy: jest.SpyInstance;
-  let fetchSpy: jest.SpyInstance;
+  let readFileSyncSpy: MockInstance;
+  let agentSpy: MockInstance;
+  let fetchSpy: MockInstance;
   beforeEach(() => {
-    readFileSyncSpy = jest
+    readFileSyncSpy = vi
       .spyOn(fs, 'readFileSync')
       .mockImplementation((path) => `mocked file content for ${path}`);
-    agentSpy = jest.spyOn(undici, 'Agent').mockImplementation(() => AGENT_MOCK as any);
-    fetchSpy = jest.spyOn(window, 'fetch');
+    agentSpy = vi.spyOn(undici, 'Agent').mockImplementation(() => AGENT_MOCK as any);
+    fetchSpy = vi.spyOn(window, 'fetch');
 
     uiamService = new UiamService(
       loggingSystemMock.createLogger(),
@@ -648,7 +654,7 @@ describe('UiamService', () => {
 
   describe('#exchangeOAuthToken', () => {
     beforeEach(() => {
-      (securityTelemetry.recordOAuthTokenExchangeAttempt as jest.Mock).mockClear();
+      (securityTelemetry.recordOAuthTokenExchangeAttempt as Mock).mockClear();
     });
 
     it('properly calls UIAM service to exchange an OAuth token for an ephemeral token', async () => {
@@ -1627,8 +1633,8 @@ describe('UiamService', () => {
     const exchangeLogger = loggingSystemMock.createLogger();
 
     beforeEach(() => {
-      jest.mocked(exchangeLogger.debug).mockClear();
-      jest.mocked(exchangeLogger.error).mockClear();
+      vi.mocked(exchangeLogger.debug).mockClear();
+      vi.mocked(exchangeLogger.error).mockClear();
       uiamService = new UiamService(
         exchangeLogger,
         ConfigSchema.validate(
@@ -1726,7 +1732,7 @@ describe('UiamService', () => {
       expect(exchangeLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('service-account-id')
       );
-      for (const call of jest.mocked(exchangeLogger.error).mock.calls) {
+      for (const call of vi.mocked(exchangeLogger.error).mock.calls) {
         expect(String(call[0])).not.toContain('secret-credential');
       }
     });
@@ -1736,8 +1742,8 @@ describe('UiamService', () => {
     const authenticateLogger = loggingSystemMock.createLogger();
 
     beforeEach(() => {
-      jest.mocked(authenticateLogger.debug).mockClear();
-      jest.mocked(authenticateLogger.error).mockClear();
+      vi.mocked(authenticateLogger.debug).mockClear();
+      vi.mocked(authenticateLogger.error).mockClear();
       uiamService = new UiamService(
         authenticateLogger,
         ConfigSchema.validate(
@@ -1850,7 +1856,7 @@ describe('UiamService', () => {
       expect(authenticateLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('HTTP status: unavailable')
       );
-      for (const call of jest.mocked(authenticateLogger.error).mock.calls) {
+      for (const call of vi.mocked(authenticateLogger.error).mock.calls) {
         expect(String(call[0])).not.toContain('secret-credential');
       }
     });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -19,17 +21,26 @@ import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
 import { KibanaPrivilegesRegion } from './kibana_privileges_region';
 import { RoleValidator } from '../../validate_role';
 
-jest.mock('./simple_privilege_section', () => ({
-  SimplePrivilegeSection: () => <div data-test-subj="simplePrivilegeSection" />,
-}));
+vi.mock('./simple_privilege_section', () => {
+      const mocked = {
+      SimplePrivilegeSection: () => <div data-test-subj="simplePrivilegeSection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./space_aware_privilege_section', () => ({
-  SpaceAwarePrivilegeSection: () => <div data-test-subj="spaceAwarePrivilegeSection" />,
-}));
+vi.mock('./space_aware_privilege_section', () => {
+      const mocked = {
+      SpaceAwarePrivilegeSection: () => <div data-test-subj="spaceAwarePrivilegeSection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./transform_error_section', () => ({
-  TransformErrorSection: () => <div data-test-subj="transformErrorSection" />,
-}));
+vi.mock('./transform_error_section', () => {
+      const mocked = {
+      TransformErrorSection: () => <div data-test-subj="transformErrorSection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const spacesManager = spacesManagerMock.create();
 const { getStartServices } = coreMock.createSetup();
@@ -81,7 +92,7 @@ const buildProps = () => {
       },
     },
     editable: true,
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     validator: new RoleValidator(),
     canCustomizeSubFeaturePrivileges: true,
     spacesEnabled: true,

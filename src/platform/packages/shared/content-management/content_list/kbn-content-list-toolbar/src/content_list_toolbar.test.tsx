@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,7 +21,7 @@ import {
 import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
 import { ContentListToolbar } from './content_list_toolbar';
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({
     items: [],
     total: 0,
@@ -32,7 +34,7 @@ const mockTags = [
   { id: 'tag-3', name: 'New World', description: '', color: '#0000FF', managed: false },
 ];
 
-const mockParseSearchQuery = jest.fn((queryText: string) => {
+const mockParseSearchQuery = vi.fn((queryText: string) => {
   // Simple mock: extract `tag:Name` and `tag:"Multi Word"` patterns, resolve names
   // to IDs via `mockTags`, and return the remaining text as `searchQuery`.
   // This mirrors the real `parseSearchQueryCore` which resolves names to IDs.
@@ -102,7 +104,7 @@ const createWrapper = (options: CreateWrapperOptions = {}) => {
 
 describe('ContentListToolbar', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -131,7 +133,7 @@ describe('ContentListToolbar', () => {
       // cache from replaying a previous test's resolved data here.
       contentListQueryClient.cancelQueries();
       contentListQueryClient.clear();
-      const neverResolves = jest.fn(
+      const neverResolves = vi.fn(
         (_params: FindItemsParams) => new Promise<FindItemsResult>(() => undefined)
       );
 

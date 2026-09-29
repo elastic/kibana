@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent } from '@testing-library/react';
 
@@ -19,37 +22,40 @@ import { useGetAgentPolicies, useAuthz } from '../../../../../hooks';
 
 import { AgentActivityFlyout } from '.';
 
-jest.mock('../../hooks');
-jest.mock('../../../../../../../hooks/use_request/agent_policy');
-jest.mock('../../../../../../../hooks/use_authz');
+vi.mock('../../hooks');
+vi.mock('../../../../../../../hooks/use_request/agent_policy');
+vi.mock('../../../../../../../hooks/use_authz');
 
-jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
-  RedirectAppLinks: ({ children }: { children: React.ReactNode }) => children,
-}));
+vi.mock('@kbn/shared-ux-link-redirect-app', () => {
+      const mocked = {
+      RedirectAppLinks: ({ children }: { children: React.ReactNode }) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseActionStatus = useActionStatus as jest.Mock;
-const mockUseGetAgentPolicies = useGetAgentPolicies as jest.Mock;
+const mockUseActionStatus = useActionStatus as Mock;
+const mockUseGetAgentPolicies = useGetAgentPolicies as Mock;
 
-const mockedUseAuthz = useAuthz as jest.Mock;
+const mockedUseAuthz = useAuthz as Mock;
 
-jest.mock('@kbn/logs-shared-plugin/common', () => {
-  const originalModule = jest.requireActual('@kbn/logs-shared-plugin/common');
+vi.mock('@kbn/logs-shared-plugin/common', async () => {
+  const originalModule = (await vi.importActual('@kbn/logs-shared-plugin/common'));
   return {
     ...originalModule,
-    getLogsLocatorFromUrlService: jest
+    getLogsLocatorFromUrlService: vi
       .fn()
-      .mockReturnValue({ getRedirectUrl: jest.fn(() => 'https://discover-redirect-url') }),
+      .mockReturnValue({ getRedirectUrl: vi.fn(() => 'https://discover-redirect-url') }),
   };
 });
 
 describe('AgentActivityFlyout', () => {
-  const mockOnClose = jest.fn();
-  const mockOnAbortSuccess = jest.fn();
-  const mockAbortUpgrade = jest.fn();
-  const mockAbortUnenroll = jest.fn();
-  const mockSetSearch = jest.fn();
-  const mockSetSelectedStatus = jest.fn();
-  const mockOpenManageAutoUpgradeModal = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockOnAbortSuccess = vi.fn();
+  const mockAbortUpgrade = vi.fn();
+  const mockAbortUnenroll = vi.fn();
+  const mockSetSearch = vi.fn();
+  const mockSetSelectedStatus = vi.fn();
+  const mockOpenManageAutoUpgradeModal = vi.fn();
 
   const component = (refreshAgentActivity: boolean = false) => (
     <IntlProvider timeZone="UTC" locale="en">
@@ -91,11 +97,11 @@ describe('AgentActivityFlyout', () => {
   });
 
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2022-09-15T10:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2022-09-15T10:00:00.000Z'));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should render a loader while actions are loading and then render actions', async () => {

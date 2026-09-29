@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -14,7 +17,7 @@ import { ResourceManager } from './resource_manager';
 import type { IResourceInitializer } from './resource_manager';
 
 describe('ResourceManager', () => {
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
   let loggerService: LoggerService;
 
   function createManager() {
@@ -29,13 +32,13 @@ describe('ResourceManager', () => {
   }
 
   function createInitializer(initializeFn: () => Promise<void>): IResourceInitializer & {
-    initialize: jest.Mock;
+    initialize: Mock;
   } {
-    return { initialize: jest.fn(initializeFn) };
+    return { initialize: vi.fn(initializeFn) };
   }
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('starts all registered resources and waitUntilReady resolves', async () => {
@@ -82,7 +85,7 @@ describe('ResourceManager', () => {
 
     manager.registerResource('r1', init);
 
-    const unhandled = jest.fn();
+    const unhandled = vi.fn();
     process.on('unhandledRejection', unhandled);
 
     try {

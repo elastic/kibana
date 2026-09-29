@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { normalizeQuery } from './normalize_query';
 
 describe('normalizeQuery', () => {
@@ -57,7 +59,7 @@ describe('normalizeQuery', () => {
   });
 
   beforeEach(() => {
-    next = jest.fn((x) => x);
+    next = vi.fn((x) => x);
     panel = {};
     series = {
       id: seriesId,

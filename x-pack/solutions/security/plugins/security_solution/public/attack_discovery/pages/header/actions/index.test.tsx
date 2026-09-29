@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 
@@ -12,13 +14,13 @@ import { Actions } from '.';
 
 const defaultProps = {
   isLoading: false,
-  onGenerate: jest.fn(),
-  openFlyout: jest.fn(),
+  onGenerate: vi.fn(),
+  openFlyout: vi.fn(),
 };
 
 describe('Actions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering action buttons', () => {

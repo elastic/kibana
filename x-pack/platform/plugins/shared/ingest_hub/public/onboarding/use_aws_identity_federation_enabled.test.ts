@@ -5,25 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { AWS_IDENTITY_FEDERATION_ENABLED_FLAG } from '@kbn/fleet-plugin/common';
 import { useAwsIdentityFederationEnabled } from './use_aws_identity_federation_enabled';
 
-const mockUseBooleanValue = jest.fn();
+const mockUseBooleanValue = vi.fn();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      featureFlags: {
-        useBooleanValue: mockUseBooleanValue,
-      },
-    },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          featureFlags: {
+            useBooleanValue: mockUseBooleanValue,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useAwsIdentityFederationEnabled', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('reads the Fleet flag and defaults to enabled', () => {

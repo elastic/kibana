@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { welcomeConvo } from '../../mock/conversation';
 import { useAssistantContext } from '../../assistant_context';
 import { fireEvent, render, act } from '@testing-library/react';
@@ -16,14 +19,14 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { QUICK_PROMPTS_TAB, SYSTEM_PROMPTS_TAB } from './const';
 
 const mockSystemUpdater = {
-  onConversationSelectionChange: jest.fn(),
-  onNewConversationDefaultChange: jest.fn(),
-  onPromptContentChange: jest.fn(),
-  onSystemPromptDelete: jest.fn(),
-  onSystemPromptSelect: jest.fn(),
-  refetchSystemPromptConversations: jest.fn(),
-  resetSystemPromptSettings: jest.fn(),
-  saveSystemPromptSettings: jest
+  onConversationSelectionChange: vi.fn(),
+  onNewConversationDefaultChange: vi.fn(),
+  onPromptContentChange: vi.fn(),
+  onSystemPromptDelete: vi.fn(),
+  onSystemPromptSelect: vi.fn(),
+  refetchSystemPromptConversations: vi.fn(),
+  resetSystemPromptSettings: vi.fn(),
+  saveSystemPromptSettings: vi
     .fn()
     .mockResolvedValue({ success: true, conversationUpdates: { updates: [] } }),
   selectedSystemPrompt: undefined,
@@ -31,24 +34,24 @@ const mockSystemUpdater = {
 };
 
 const mockQuickUpdater = {
-  onPromptContentChange: jest.fn(),
-  onQuickPromptColorChange: jest.fn(),
-  onQuickPromptContextChange: jest.fn(),
-  onQuickPromptDelete: jest.fn(),
-  onQuickPromptSelect: jest.fn(),
+  onPromptContentChange: vi.fn(),
+  onQuickPromptColorChange: vi.fn(),
+  onQuickPromptContextChange: vi.fn(),
+  onQuickPromptDelete: vi.fn(),
+  onQuickPromptSelect: vi.fn(),
   quickPromptSettings: [],
-  resetQuickPromptSettings: jest.fn(),
-  saveQuickPromptSettings: jest.fn(),
+  resetQuickPromptSettings: vi.fn(),
+  saveQuickPromptSettings: vi.fn(),
   selectedQuickPrompt: undefined,
 };
 const mockConversationsUpdater = {
-  resetConversationsSettings: jest.fn(),
-  saveConversationsSettings: jest.fn(),
-  setConversationsSettingsBulkActions: jest.fn(),
+  resetConversationsSettings: vi.fn(),
+  saveConversationsSettings: vi.fn(),
+  setConversationsSettingsBulkActions: vi.fn(),
   conversationsSettingsBulkActions: {},
 };
 
-const setSelectedSettingsTab = jest.fn();
+const setSelectedSettingsTab = vi.fn();
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
   setSelectedSettingsTab,
@@ -58,9 +61,9 @@ const mockContext = {
     isAssistantEnabled: true,
   },
 };
-const onClose = jest.fn();
-const onSave = jest.fn().mockResolvedValue(() => {});
-const onConversationSelected = jest.fn();
+const onClose = vi.fn();
+const onSave = vi.fn().mockResolvedValue(() => {});
+const onConversationSelected = vi.fn();
 
 const testProps = {
   conversationsLoaded: true,
@@ -72,41 +75,44 @@ const testProps = {
   onConversationSelected,
   conversations: {},
   anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
-  refetchAnonymizationFieldsResults: jest.fn(),
-  setPaginationObserver: jest.fn(),
+  refetchAnonymizationFieldsResults: vi.fn(),
+  setPaginationObserver: vi.fn(),
 };
-jest.mock('../../assistant_context');
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn(() => {
-    return {
-      data: [],
-      error: null,
-      isSuccess: true,
+vi.mock('../../assistant_context');
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn(() => {
+        return {
+          data: [],
+          error: null,
+          isSuccess: true,
+        };
+      }),
     };
-  }),
-}));
-jest.mock('./use_settings_updater/use_conversations_updater', () => {
-  const original = jest.requireActual('./use_settings_updater/use_conversations_updater');
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_settings_updater/use_conversations_updater', async () => {
+  const original = (await vi.importActual('./use_settings_updater/use_conversations_updater'));
   return {
     ...original,
-    useConversationsUpdater: jest.fn().mockImplementation(() => mockConversationsUpdater),
+    useConversationsUpdater: vi.fn().mockImplementation(() => mockConversationsUpdater),
   };
 });
-jest.mock('./use_settings_updater/use_system_prompt_updater', () => {
-  const original = jest.requireActual('./use_settings_updater/use_system_prompt_updater');
+vi.mock('./use_settings_updater/use_system_prompt_updater', async () => {
+  const original = (await vi.importActual('./use_settings_updater/use_system_prompt_updater'));
   return {
     ...original,
-    useSystemPromptUpdater: jest.fn().mockImplementation(() => mockSystemUpdater),
+    useSystemPromptUpdater: vi.fn().mockImplementation(() => mockSystemUpdater),
   };
 });
-jest.mock('./use_settings_updater/use_quick_prompt_updater', () => {
-  const original = jest.requireActual('./use_settings_updater/use_quick_prompt_updater');
+vi.mock('./use_settings_updater/use_quick_prompt_updater', async () => {
+  const original = (await vi.importActual('./use_settings_updater/use_quick_prompt_updater'));
   return {
     ...original,
-    useQuickPromptUpdater: jest.fn().mockImplementation(() => mockQuickUpdater),
+    useQuickPromptUpdater: vi.fn().mockImplementation(() => mockQuickUpdater),
   };
 });
-jest.mock('.', () => {
+vi.mock('.', () => {
   return {
     QuickPromptSettings: () => <span data-test-subj="quick_prompts-tab" />,
     SystemPromptSettings: () => <span data-test-subj="system_prompts-tab" />,
@@ -121,8 +127,8 @@ const wrapper = (props: { children: React.ReactNode }) => (
 
 describe('AssistantSettings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAssistantContext as jest.Mock).mockImplementation(() => mockContext);
+    vi.clearAllMocks();
+    (useAssistantContext as Mock).mockImplementation(() => mockContext);
   });
 
   it('saves changes to quick prompts', async () => {
@@ -138,7 +144,7 @@ describe('AssistantSettings', () => {
   });
 
   it('saves changes to system prompts', async () => {
-    (useAssistantContext as jest.Mock).mockImplementation(() => ({
+    (useAssistantContext as Mock).mockImplementation(() => ({
       ...mockContext,
       selectedSettingsTab: SYSTEM_PROMPTS_TAB,
     }));
@@ -169,7 +175,7 @@ describe('AssistantSettings', () => {
 
   describe.each([QUICK_PROMPTS_TAB, SYSTEM_PROMPTS_TAB])('%s', (tab) => {
     it('renders with the correct tab open', () => {
-      (useAssistantContext as jest.Mock).mockImplementation(() => ({
+      (useAssistantContext as Mock).mockImplementation(() => ({
         ...mockContext,
         selectedSettingsTab: tab,
       }));

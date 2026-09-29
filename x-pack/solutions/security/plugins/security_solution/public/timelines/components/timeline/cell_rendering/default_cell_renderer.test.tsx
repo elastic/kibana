@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
@@ -19,12 +22,12 @@ import { DefaultCellRenderer } from './default_cell_renderer';
 import type { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock('../body/renderers/get_column_renderer');
-const getColumnRendererMock = getColumnRenderer as jest.Mock;
+vi.mock('../body/renderers/get_column_renderer');
+const getColumnRendererMock = getColumnRenderer as Mock;
 const mockImplementation = {
-  renderColumn: jest.fn(),
+  renderColumn: vi.fn(),
 };
 
 describe('DefaultCellRenderer', () => {
@@ -35,13 +38,13 @@ describe('DefaultCellRenderer', () => {
   const linkValues = ['foo', 'bar', '@baz'];
   const rowIndex = 3;
   const colIndex = 0;
-  const setCellProps = jest.fn();
+  const setCellProps = vi.fn();
   const scopeId = 'test';
   const ecsData = {} as Ecs;
   const browserFields = {} as BrowserFields;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getColumnRendererMock.mockImplementation(() => mockImplementation);
   });
 
@@ -132,10 +135,8 @@ describe('host link rendering', () => {
   const data = cloneDeep(mockTimelineData[0].data);
   const hostNameHeader = cloneDeep(defaultHeaders[4]);
 
-  beforeEach(() => {
-    const { getColumnRenderer: realGetColumnRenderer } = jest.requireActual(
-      '../body/renderers/get_column_renderer'
-    );
+  beforeEach(async () => {
+    const { getColumnRenderer: realGetColumnRenderer } = (await vi.importActual('../body/renderers/get_column_renderer'));
 
     getColumnRendererMock.mockImplementation(realGetColumnRenderer); // link rendering tests must use the real renderer
   });
@@ -162,7 +163,7 @@ describe('host link rendering', () => {
               linkValues={[]}
               rowIndex={3}
               colIndex={0}
-              setCellProps={jest.fn()}
+              setCellProps={vi.fn()}
               scopeId={'timeline-1-query'}
             />
           </DroppableWrapper>
@@ -195,7 +196,7 @@ describe('host link rendering', () => {
               linkValues={[]}
               rowIndex={3}
               colIndex={0}
-              setCellProps={jest.fn()}
+              setCellProps={vi.fn()}
               scopeId={'timeline-1-query'}
             />
           </DroppableWrapper>
@@ -229,7 +230,7 @@ describe('host link rendering', () => {
               linkValues={[]}
               rowIndex={3}
               colIndex={0}
-              setCellProps={jest.fn()}
+              setCellProps={vi.fn()}
               scopeId={'timeline-1-query'}
             />
           </DroppableWrapper>

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { EditTimelineActionsComponent } from '.';
@@ -12,11 +14,11 @@ import { EditTimelineActionsComponent } from '.';
 describe('EditTimelineActionsComponent', () => {
   describe('render', () => {
     const props = {
-      deleteTimelines: jest.fn(),
+      deleteTimelines: vi.fn(),
       ids: ['id1'],
       isEnableDownloader: false,
       isDeleteTimelineModalOpen: false,
-      onComplete: jest.fn(),
+      onComplete: vi.fn(),
       title: 'mockTitle',
     };
 

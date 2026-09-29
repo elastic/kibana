@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -14,27 +16,30 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowChangeHistoryPreviewFooter } from './workflow_change_history_preview_footer';
 
-jest.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion', () => ({
-  WorkflowYamlValidationAccordion: ({
-    validationErrors,
-    isLoading,
-    error,
-  }: {
-    validationErrors?: YamlValidationResult[] | null;
-    isLoading?: boolean;
-    error?: Error | null;
-  }) => (
-    <div data-test-subj="workflowYamlEditorValidationErrorsList">
-      {isLoading || validationErrors === null
-        ? 'Initializing validation...'
-        : error
-        ? `Validation failed: ${error.message}`
-        : !validationErrors || validationErrors.length === 0
-        ? 'No validation errors'
-        : `${validationErrors.length} error(s)`}
-    </div>
-  ),
-}));
+vi.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion', () => {
+      const mocked = {
+      WorkflowYamlValidationAccordion: ({
+        validationErrors,
+        isLoading,
+        error,
+      }: {
+        validationErrors?: YamlValidationResult[] | null;
+        isLoading?: boolean;
+        error?: Error | null;
+      }) => (
+        <div data-test-subj="workflowYamlEditorValidationErrorsList">
+          {isLoading || validationErrors === null
+            ? 'Initializing validation...'
+            : error
+            ? `Validation failed: ${error.message}`
+            : !validationErrors || validationErrors.length === 0
+            ? 'No validation errors'
+            : `${validationErrors.length} error(s)`}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const sampleError: YamlValidationResult = {
   id: 'custom-error',

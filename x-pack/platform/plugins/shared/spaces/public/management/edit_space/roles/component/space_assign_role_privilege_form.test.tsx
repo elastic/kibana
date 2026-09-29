@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import { EuiThemeProvider } from '@elastic/eui';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -66,17 +69,17 @@ const space: Space = {
   disabledFeatures: [],
 };
 
-const spacesClientsInvocatorMock = jest.fn((fn) =>
+const spacesClientsInvocatorMock = vi.fn((fn) =>
   fn({
     rolesClient: rolesAPIClient,
     privilegesClient: privilegeAPIClient,
   })
 );
-const dispatchMock = jest.fn();
-const onSaveCompleted = jest.fn();
-const closeFlyout = jest.fn();
+const dispatchMock = vi.fn();
+const onSaveCompleted = vi.fn();
+const closeFlyout = vi.fn();
 const licenseMock = {
-  getFeatures: jest.fn(() => ({})),
+  getFeatures: vi.fn(() => ({})),
 } as unknown as SecurityLicense;
 
 const renderPrivilegeRolesForm = ({
@@ -100,8 +103,8 @@ const renderPrivilegeRolesForm = ({
             notifications,
             spacesManager,
             serverBasePath: '',
-            getUrlForApp: jest.fn((_) => _),
-            navigateToUrl: jest.fn(),
+            getUrlForApp: vi.fn((_) => _),
+            navigateToUrl: vi.fn(),
             license: licenseMock,
             isRoleManagementEnabled: true,
             capabilities: {
@@ -135,18 +138,18 @@ const renderPrivilegeRolesForm = ({
 };
 
 describe('PrivilegesRolesForm', () => {
-  let getRolesSpy: jest.SpiedFunction<ReturnType<typeof createRolesAPIClientMock>['getRoles']>;
-  let getAllKibanaPrivilegeSpy: jest.SpiedFunction<
+  let getRolesSpy: MockInstance<ReturnType<typeof createRolesAPIClientMock>['getRoles']>;
+  let getAllKibanaPrivilegeSpy: MockInstance<
     ReturnType<typeof createPrivilegeAPIClientMock>['getAll']
   >;
 
   beforeAll(() => {
-    getRolesSpy = jest.spyOn(rolesAPIClient, 'getRoles');
-    getAllKibanaPrivilegeSpy = jest.spyOn(privilegeAPIClient, 'getAll');
+    getRolesSpy = vi.spyOn(rolesAPIClient, 'getRoles');
+    getAllKibanaPrivilegeSpy = vi.spyOn(privilegeAPIClient, 'getAll');
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("would open the 'manage roles' link in a new tab", async () => {
@@ -553,7 +556,7 @@ describe('PrivilegesRolesForm', () => {
       ];
 
       // enable sub feature privileges
-      (licenseMock.getFeatures as jest.Mock).mockReturnValue({
+      (licenseMock.getFeatures as Mock).mockReturnValue({
         allowSubFeaturePrivileges: true,
       });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -41,8 +43,8 @@ describe('ruleActionsNotifyWhen', () => {
         frequency={frequency}
         throttle={throttle}
         throttleUnit={throttleUnit}
-        onChange={jest.fn()}
-        onUseDefaultMessage={jest.fn()}
+        onChange={vi.fn()}
+        onUseDefaultMessage={vi.fn()}
         hasAlertsMappings={hasAlertsMappings}
       />
     );
@@ -68,8 +70,8 @@ describe('ruleActionsNotifyWhen', () => {
         frequency={DEFAULT_FREQUENCY}
         throttle={defaultThrottleProps.throttle}
         throttleUnit={defaultThrottleProps.throttleUnit}
-        onChange={jest.fn()}
-        onUseDefaultMessage={jest.fn()}
+        onChange={vi.fn()}
+        onUseDefaultMessage={vi.fn()}
         hasAlertsMappings
       />
     );
@@ -88,8 +90,8 @@ describe('ruleActionsNotifyWhen', () => {
         frequency={throttleFrequency}
         throttle={throttleProps.throttle}
         throttleUnit={throttleProps.throttleUnit}
-        onChange={jest.fn()}
-        onUseDefaultMessage={jest.fn()}
+        onChange={vi.fn()}
+        onUseDefaultMessage={vi.fn()}
         hasAlertsMappings
       />
     );

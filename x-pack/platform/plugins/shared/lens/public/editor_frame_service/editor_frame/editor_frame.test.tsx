@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { act, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -43,7 +46,7 @@ function wrapDataViewsContract() {
   const dataViewsContract = dataViewPluginMocks.createStartContract();
   return {
     ...dataViewsContract,
-    getIdsWithTitle: jest.fn(async () => [
+    getIdsWithTitle: vi.fn(async () => [
       { id: '1', title: 'IndexPatternTitle' },
       { id: '2', title: 'OtherIndexPatternTitle' },
     ]),
@@ -53,12 +56,12 @@ function wrapDataViewsContract() {
 function getDefaultProps() {
   const defaultProps = {
     store: {
-      save: jest.fn(),
-      load: jest.fn(),
+      save: vi.fn(),
+      load: vi.fn(),
     },
-    redirectTo: jest.fn(),
-    onError: jest.fn(),
-    onChange: jest.fn(),
+    redirectTo: vi.fn(),
+    onError: vi.fn(),
+    onChange: vi.fn(),
     dateRange: { fromDate: '', toDate: '' },
     query: { query: '', language: 'lucene' },
     core: coreMock.createStart(),
@@ -72,7 +75,7 @@ function getDefaultProps() {
     },
     palettes: chartPluginMock.createPaletteRegistry(),
     lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
-    showNoDataPopover: jest.fn(),
+    showNoDataPopover: vi.fn(),
     indexPatternService: createIndexPatternServiceMock(),
     getUserMessages: () => [],
     addUserMessages: () => () => {},
@@ -82,10 +85,10 @@ function getDefaultProps() {
 }
 
 describe('editor_frame', () => {
-  let mockVisualization: jest.Mocked<Visualization>;
+  let mockVisualization: Mocked<Visualization>;
   let mockDatasource: DatasourceMock;
 
-  let mockVisualization2: jest.Mocked<Visualization>;
+  let mockVisualization2: Mocked<Visualization>;
   let mockDatasource2: DatasourceMock;
 
   let visualizationMap: VisualizationMap;
@@ -94,7 +97,7 @@ describe('editor_frame', () => {
   beforeEach(() => {
     mockVisualization = {
       ...createMockVisualization(),
-      FlyoutToolbarComponent: jest.fn(() => <div />),
+      FlyoutToolbarComponent: vi.fn(() => <div />),
     };
 
     mockVisualization2 = createMockVisualization('testVis2', ['second']);
@@ -267,7 +270,7 @@ describe('editor_frame', () => {
     it('should re-render data panel after state update', async () => {
       renderEditorFrame();
 
-      const setDatasourceState = (mockDatasource.DataPanelComponent as jest.Mock).mock.calls[0][0]
+      const setDatasourceState = (mockDatasource.DataPanelComponent as Mock).mock.calls[0][0]
         .setState;
 
       mockDatasource.DataPanelComponent.mockClear();
@@ -293,19 +296,19 @@ describe('editor_frame', () => {
 
       const updatedPublicAPI: DatasourcePublicAPI = {
         datasourceId: 'formBased',
-        getOperationForColumnId: jest.fn(),
-        getTableSpec: jest.fn(),
-        getVisualDefaults: jest.fn(),
-        getSourceId: jest.fn(),
-        getFilters: jest.fn(),
-        getMaxPossibleNumValues: jest.fn(),
-        isTextBasedLanguage: jest.fn(() => false),
-        hasDefaultTimeField: jest.fn(() => true),
+        getOperationForColumnId: vi.fn(),
+        getTableSpec: vi.fn(),
+        getVisualDefaults: vi.fn(),
+        getSourceId: vi.fn(),
+        getFilters: vi.fn(),
+        getMaxPossibleNumValues: vi.fn(),
+        isTextBasedLanguage: vi.fn(() => false),
+        hasDefaultTimeField: vi.fn(() => true),
       };
       mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
       mockVisualization.getConfiguration.mockClear();
 
-      const setDatasourceState = (mockDatasource.DataPanelComponent as jest.Mock).mock.calls[0][0]
+      const setDatasourceState = (mockDatasource.DataPanelComponent as Mock).mock.calls[0][0]
         .setState;
 
       act(() => {

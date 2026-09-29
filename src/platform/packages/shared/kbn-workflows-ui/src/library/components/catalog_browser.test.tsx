@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { Template } from '@kbn/workflows-library';
@@ -14,20 +16,29 @@ import { CatalogBrowser } from './catalog_browser';
 import { useActiveSolution } from '../hooks/use_active_solution';
 import { useCatalog } from '../hooks/use_catalog';
 
-jest.mock('@kbn/connector-specs/icons', () => ({
-  ConnectorIconsMap: new Map(),
-}));
-jest.mock('../../context/workflows_ui_services');
+vi.mock('@kbn/connector-specs/icons', () => {
+      const mocked = {
+      ConnectorIconsMap: new Map(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../context/workflows_ui_services');
 
-jest.mock('../hooks/use_catalog', () => ({
-  useCatalog: jest.fn(),
-}));
+vi.mock('../hooks/use_catalog', () => {
+      const mocked = {
+      useCatalog: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_active_solution', () => ({
-  useActiveSolution: jest.fn(),
-}));
+vi.mock('../hooks/use_active_solution', () => {
+      const mocked = {
+      useActiveSolution: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const renderBrowser = (onSelect = jest.fn()) => render(<CatalogBrowser onSelect={onSelect} />);
+const renderBrowser = (onSelect = vi.fn()) => render(<CatalogBrowser onSelect={onSelect} />);
 
 const buildTemplate = (overrides: Partial<Template> = {}): Template => ({
   slug: 'ip-reputation-check',
@@ -43,8 +54,8 @@ const buildTemplate = (overrides: Partial<Template> = {}): Template => ({
   ...overrides,
 });
 
-const mockUseCatalog = jest.mocked(useCatalog);
-const mockUseActiveSolution = jest.mocked(useActiveSolution);
+const mockUseCatalog = vi.mocked(useCatalog);
+const mockUseActiveSolution = vi.mocked(useActiveSolution);
 
 function mockCatalogState(overrides: Partial<ReturnType<typeof useCatalog>>) {
   mockUseCatalog.mockReturnValue({
@@ -52,14 +63,14 @@ function mockCatalogState(overrides: Partial<ReturnType<typeof useCatalog>>) {
     allTemplates: [],
     isLoading: false,
     isError: false,
-    refetch: jest.fn(),
+    refetch: vi.fn(),
     ...overrides,
   } as unknown as ReturnType<typeof useCatalog>);
 }
 
 describe('CatalogBrowser', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseActiveSolution.mockReturnValue(undefined);
   });
 
@@ -72,7 +83,7 @@ describe('CatalogBrowser', () => {
   });
 
   it('shows an error state with a retry action on API failure', () => {
-    const refetch = jest.fn();
+    const refetch = vi.fn();
     mockCatalogState({ isError: true, refetch });
 
     renderBrowser();
@@ -120,7 +131,7 @@ describe('CatalogBrowser', () => {
   it('calls onSelect when a template card is clicked', () => {
     const template = buildTemplate();
     mockCatalogState({ templates: [template], allTemplates: [template] });
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
 
     renderBrowser(onSelect);
     fireEvent.click(screen.getByText('IP Reputation Check'));

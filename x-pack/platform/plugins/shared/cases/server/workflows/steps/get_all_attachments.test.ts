@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CasesClient } from '../../client';
 import { getAllAttachmentsStepDefinition } from './get_all_attachments';
 import { createStepHandlerContext } from './test_utils';
@@ -44,7 +46,7 @@ const legacyCommentFixture = {
 
 describe('getAllAttachmentsStepDefinition', () => {
   it('creates expected step definition structure', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     const definition = getAllAttachmentsStepDefinition(getCasesClient);
 
     expect(definition.id).toBe('cases.getAllAttachments');
@@ -53,8 +55,8 @@ describe('getAllAttachmentsStepDefinition', () => {
   });
 
   it('calls attachments.getAll with correct params and converts unified attachments back to the legacy wire shape', async () => {
-    const getAll = jest.fn().mockResolvedValue([unifiedCommentFixture]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getAll = vi.fn().mockResolvedValue([unifiedCommentFixture]);
+    const getCasesClient = vi.fn().mockResolvedValue({
       attachments: { getAll },
     } as unknown as CasesClient);
     const definition = getAllAttachmentsStepDefinition(getCasesClient);
@@ -68,8 +70,8 @@ describe('getAllAttachmentsStepDefinition', () => {
   });
 
   it('returns empty attachments array when case has none', async () => {
-    const getAll = jest.fn().mockResolvedValue([]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getAll = vi.fn().mockResolvedValue([]);
+    const getCasesClient = vi.fn().mockResolvedValue({
       attachments: { getAll },
     } as unknown as CasesClient);
     const definition = getAllAttachmentsStepDefinition(getCasesClient);
@@ -80,8 +82,8 @@ describe('getAllAttachmentsStepDefinition', () => {
   });
 
   it('returns error when attachments.getAll throws', async () => {
-    const getAll = jest.fn().mockRejectedValue(new Error('not found'));
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getAll = vi.fn().mockRejectedValue(new Error('not found'));
+    const getCasesClient = vi.fn().mockResolvedValue({
       attachments: { getAll },
     } as unknown as CasesClient);
     const definition = getAllAttachmentsStepDefinition(getCasesClient);

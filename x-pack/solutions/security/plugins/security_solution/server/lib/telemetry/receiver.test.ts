@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { TelemetryReceiver } from './receiver';
 import type { TelemetryQueryConfiguration } from './types';
@@ -13,7 +16,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 describe('TelemetryReceiver', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let receiver: TelemetryReceiver;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockEsClient: Mocked<ElasticsearchClient>;
 
   const createMockQueryConfig = (excludeValue: boolean): TelemetryQueryConfiguration => ({
     pageSize: 500,
@@ -27,12 +30,12 @@ describe('TelemetryReceiver', () => {
     receiver = new TelemetryReceiver(logger);
 
     mockEsClient = {
-      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
-    } as unknown as jest.Mocked<ElasticsearchClient>;
+      search: vi.fn().mockResolvedValue({ hits: { hits: [] } }),
+    } as unknown as Mocked<ElasticsearchClient>;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('tierFilter', () => {
@@ -148,7 +151,7 @@ describe('TelemetryReceiver', () => {
       // eslint-disable-next-line dot-notation
       receiver['queryConfig'] = mockQueryConfig;
 
-      const tierFilterSpy = jest.spyOn(receiver, 'tierFilter');
+      const tierFilterSpy = vi.spyOn(receiver, 'tierFilter');
 
       await receiver.fetchTimelineEvents(['entity-id-1']);
 

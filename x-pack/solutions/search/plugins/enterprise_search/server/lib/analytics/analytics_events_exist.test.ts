@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import { analyticsEventsExist } from './analytics_events_exist';
@@ -12,12 +14,12 @@ import { analyticsEventsExist } from './analytics_events_exist';
 describe('analytics collection events exists function', () => {
   const mockClient = {
     asCurrentUser: {
-      count: jest.fn(),
+      count: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('checking if analytics events index exists', () => {

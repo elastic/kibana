@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor, screen, render } from '@testing-library/react';
 
@@ -14,7 +16,7 @@ import { CreateCaseOwnerSelector } from './owner_selector';
 import userEvent from '@testing-library/user-event';
 
 describe('Case Owner Selection', () => {
-  const onOwnerChange = jest.fn();
+  const onOwnerChange = vi.fn();
   const selectedOwner = SECURITY_SOLUTION_OWNER;
 
   it('renders all options', async () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { EuiBreakpointSize } from '@elastic/eui';
@@ -17,12 +19,15 @@ import { AppMenuLoading } from './app_menu_loading';
 let mockCurrentBreakpoint: EuiBreakpointSize | undefined = 'xl';
 let mockViewportBreakpoint: EuiBreakpointSize = 'xl';
 
-jest.mock('@kbn/ui-chrome-layout', () => ({
-  useCurrentChromeApplicationBreakpoint: () => mockCurrentBreakpoint,
-}));
+vi.mock('@kbn/ui-chrome-layout', () => {
+      const mocked = {
+      useCurrentChromeApplicationBreakpoint: () => mockCurrentBreakpoint,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
 
   return {
     ...actual,

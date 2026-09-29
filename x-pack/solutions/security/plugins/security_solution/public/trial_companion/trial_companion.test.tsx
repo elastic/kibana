@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, render, waitFor } from '@testing-library/react';
 import { filterAvailableTODOs, sameArrays, TrialCompanion } from './trial_companion';
@@ -28,15 +31,21 @@ import {
   type ProductFeatureKeyType,
 } from '@kbn/security-solution-features/src/product_features_keys';
 
-jest.mock('../common/lib/kibana');
-jest.mock('./hooks/use_get_nba');
-jest.mock('../common/hooks/use_experimental_features');
-jest.mock('./api', () => ({
-  postNBADismiss: jest.fn(),
-}));
-jest.mock('../common/hooks/use_product_feature_keys', () => ({
-  useProductFeatureKeys: jest.fn(),
-}));
+vi.mock('../common/lib/kibana');
+vi.mock('./hooks/use_get_nba');
+vi.mock('../common/hooks/use_experimental_features');
+vi.mock('./api', () => {
+      const mocked = {
+      postNBADismiss: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../common/hooks/use_product_feature_keys', () => {
+      const mocked = {
+      useProductFeatureKeys: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 interface NBAResponse {
   value?: { openTODOs?: Milestone[]; dismiss?: boolean } | undefined;
@@ -46,22 +55,22 @@ interface NBAResponse {
 
 // Mock useInterval to capture the callback
 let intervalCallback: (() => void) | null = null;
-jest.mock('react-use/lib/useInterval', () => {
-  return jest.fn((callback: () => void) => {
+vi.mock('react-use/lib/useInterval', () => {
+  return vi.fn((callback: () => void) => {
     intervalCallback = callback;
   });
 });
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseGetNBA = useGetNBA as jest.Mock;
-const mockPostNBADismiss = postNBADismiss as jest.Mock;
-const mockUseProductFeatureKeys = useProductFeatureKeys as jest.Mock;
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseGetNBA = useGetNBA as Mock;
+const mockPostNBADismiss = postNBADismiss as Mock;
+const mockUseProductFeatureKeys = useProductFeatureKeys as Mock;
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as Mock;
 
 describe('TrialCompanion', () => {
   const defaultMockServices = {
     cloud: {
-      isInTrial: jest.fn().mockReturnValue(true),
+      isInTrial: vi.fn().mockReturnValue(true),
     },
   };
 
@@ -72,7 +81,7 @@ describe('TrialCompanion', () => {
   ]);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     intervalCallback = null;
 
     mockUseKibana.mockReturnValue({
@@ -87,7 +96,7 @@ describe('TrialCompanion', () => {
     const notInTrialServices = {
       ...defaultMockServices,
       cloud: {
-        isInTrial: jest.fn().mockReturnValue(false),
+        isInTrial: vi.fn().mockReturnValue(false),
       },
     };
 

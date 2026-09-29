@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import mockFs from 'mock-fs';
 import axios from 'axios';
 import { createHash } from 'crypto';
@@ -18,7 +21,7 @@ const TEMP_FILE = resolvePath(TEMP_DIR, 'foo/bar/download');
 
 describe('fetch', () => {
   beforeEach(() => {
-    jest.spyOn(axios, 'request').mockResolvedValue({
+    vi.spyOn(axios, 'request').mockResolvedValue({
       data: new Readable({
         read() {
           this.push('foobar');
@@ -32,7 +35,7 @@ describe('fetch', () => {
 
   afterEach(() => {
     mockFs.restore();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('downloads the url to the path', async () => {
@@ -48,7 +51,7 @@ describe('fetch', () => {
   });
 
   test('throws if request emits an error', async () => {
-    (axios.request as jest.Mock).mockImplementationOnce(async () => {
+    (axios.request as Mock).mockImplementationOnce(async () => {
       throw new Error('foo');
     });
 

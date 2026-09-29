@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { testConfig, testConfigs } from './test_config';
 import { readKibanaModuleManifest } from '../helpers/read_manifest';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -15,11 +18,14 @@ import fg from 'fast-glob';
 import path from 'node:path';
 import { testChannels } from '@kbn/scout-info';
 
-jest.mock('node:fs');
-jest.mock('fast-glob');
-jest.mock('../helpers/read_manifest', () => ({
-  readKibanaModuleManifest: jest.fn(),
-}));
+vi.mock('node:fs');
+vi.mock('fast-glob');
+vi.mock('../helpers/read_manifest', () => {
+      const mocked = {
+      readKibanaModuleManifest: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const dummyManifestProps = {
   exists: false,
@@ -28,13 +34,13 @@ const dummyManifestProps = {
   tests: [],
 };
 
-const mockReadKibanaModuleManifest = readKibanaModuleManifest as jest.MockedFunction<
+const mockReadKibanaModuleManifest = readKibanaModuleManifest as MockedFunction<
   typeof readKibanaModuleManifest
 >;
 
 describe('test_config module', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockReadKibanaModuleManifest.mockReset();
   });
 
@@ -144,8 +150,8 @@ describe('test_config module', () => {
           `/.meta/${expected.testCategory}/${expected.configType}.json`
         );
 
-        jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-        jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify(validManifestContent));
+        vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+        vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify(validManifestContent));
 
         const config = testConfig.fromPath(configPath);
 
@@ -179,7 +185,7 @@ describe('test_config module', () => {
       const configPath = path.join(scoutRoot, '/api/playwright.config.ts');
       const manifestPath = path.join(scoutRoot, '/.meta/api/standard.json');
 
-      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+      vi.spyOn(fs, 'existsSync').mockReturnValue(false);
 
       const config = testConfig.fromPath(configPath);
 
@@ -237,7 +243,7 @@ describe('test_config module', () => {
         owner: [],
       });
 
-      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+      vi.spyOn(fs, 'existsSync').mockReturnValue(false);
 
       const config = testConfig.fromPath(configPath);
 
@@ -270,8 +276,8 @@ describe('test_config module', () => {
       const moduleRoot = path.join('src/platform/plugins/shared', moduleName);
       const scoutRoot = path.join(moduleRoot, 'test/scout');
 
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue('{"invalid": JSON }');
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'readFileSync').mockReturnValue('{"invalid": JSON }');
 
       const configPath = path.join(scoutRoot, '/api/playwright.config.ts');
       const manifestPath = path.join(scoutRoot, '/.meta/api/standard.json');
@@ -325,11 +331,11 @@ describe('test_config module', () => {
     ];
 
     it('are lazy loaded', () => {
-      jest
+      vi
         .spyOn(fg, 'globSync')
         .mockReturnValue(expectedConfigs.map((config) => path.join(REPO_ROOT, config.path)));
-      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
-      const loadSpy = jest.spyOn(testConfigs, '_load');
+      vi.spyOn(fs, 'existsSync').mockReturnValue(false);
+      const loadSpy = vi.spyOn(testConfigs, '_load');
 
       expect(testConfigs._configs).toBe(null);
       expect(testConfigs.all).toEqual(expectedConfigs);
@@ -341,13 +347,13 @@ describe('test_config module', () => {
     });
 
     it('are returning data from cache when available', () => {
-      const loadSpy = jest.spyOn(testConfigs, '_load');
+      const loadSpy = vi.spyOn(testConfigs, '_load');
       expect(testConfigs.all).toHaveLength(expectedConfigs.length); // configs are returned from cache
       expect(loadSpy).toHaveBeenCalledTimes(0); // _load should not have been called
     });
 
     it('are reloaded when demanded', () => {
-      const loadSpy = jest.spyOn(testConfigs, '_load');
+      const loadSpy = vi.spyOn(testConfigs, '_load');
       testConfigs.reload();
       expect(loadSpy).toHaveBeenCalledTimes(1); // _load should have been called
     });
@@ -365,10 +371,10 @@ describe('test_config module', () => {
     const moduleRoot = 'src/platform/plugins/shared/mixy_mc_mixface';
 
     const mockGlobPaths = (relativePaths: string[]) => {
-      jest
+      vi
         .spyOn(fg, 'globSync')
         .mockReturnValue(relativePaths.map((relativePath) => path.join(REPO_ROOT, relativePath)));
-      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+      vi.spyOn(fs, 'existsSync').mockReturnValue(false);
     };
 
     beforeEach(() => {

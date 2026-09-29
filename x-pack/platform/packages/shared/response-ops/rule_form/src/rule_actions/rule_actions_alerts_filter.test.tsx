@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,17 +20,23 @@ import { RuleActionsAlertsFilter } from './rule_actions_alerts_filter';
 
 const http = httpServiceMock.createStartContract();
 
-jest.mock('../hooks', () => ({
-  useRuleFormState: jest.fn(),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useRuleFormState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerts-ui-shared', () => ({
-  AlertsSearchBar: jest.fn(),
-}));
+vi.mock('@kbn/alerts-ui-shared', () => {
+      const mocked = {
+      AlertsSearchBar: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useRuleFormState } = jest.requireMock('../hooks');
+const { useRuleFormState } = (await vi.importMock('../hooks'));
 
-const mockOnChange = jest.fn();
+const mockOnChange = vi.fn();
 
 describe('ruleActionsAlertsFilter', () => {
   beforeEach(() => {
@@ -56,7 +65,7 @@ describe('ruleActionsAlertsFilter', () => {
     });
   });
 
-  (AlertsSearchBar as jest.Mock<any, any>).mockImplementation(
+  (AlertsSearchBar as Mock<any, any>).mockImplementation(
     ({ onFiltersUpdated, onQueryChange, onQuerySubmit }: AlertsSearchBarProps) => (
       <div>
         AlertsSearchBar
@@ -97,7 +106,7 @@ describe('ruleActionsAlertsFilter', () => {
   );
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should render correctly', () => {
@@ -199,7 +208,7 @@ describe('ruleActionsAlertsFilter', () => {
       },
     ];
 
-    (AlertsSearchBar as jest.Mock<any, any>).mockImplementation(
+    (AlertsSearchBar as Mock<any, any>).mockImplementation(
       ({ onFiltersUpdated, onQueryChange, onQuerySubmit }: AlertsSearchBarProps) => (
         <div>
           AlertsSearchBar
@@ -270,7 +279,7 @@ describe('ruleActionsAlertsFilter', () => {
       },
     };
 
-    (AlertsSearchBar as jest.Mock<any, any>).mockImplementation(
+    (AlertsSearchBar as Mock<any, any>).mockImplementation(
       ({ onFiltersUpdated }: AlertsSearchBarProps) => (
         <div>
           AlertsSearchBar

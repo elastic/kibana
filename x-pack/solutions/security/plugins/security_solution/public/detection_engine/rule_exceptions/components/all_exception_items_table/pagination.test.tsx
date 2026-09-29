@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 
@@ -12,7 +14,7 @@ import { ExceptionsViewerPagination } from './pagination';
 
 describe('ExceptionsViewerPagination', () => {
   it('it invokes "onPaginationChange" when per page item is clicked', () => {
-    const mockOnPaginationChange = jest.fn();
+    const mockOnPaginationChange = vi.fn();
     const wrapper = mount(
       <ExceptionsViewerPagination
         pagination={{
@@ -32,7 +34,7 @@ describe('ExceptionsViewerPagination', () => {
   });
 
   it('it invokes "onPaginationChange" when next clicked', () => {
-    const mockOnPaginationChange = jest.fn();
+    const mockOnPaginationChange = vi.fn();
     const wrapper = mount(
       <ExceptionsViewerPagination
         pagination={{
@@ -51,7 +53,7 @@ describe('ExceptionsViewerPagination', () => {
   });
 
   it('it invokes "onPaginationChange" when page clicked', () => {
-    const mockOnPaginationChange = jest.fn();
+    const mockOnPaginationChange = vi.fn();
     const wrapper = mount(
       <ExceptionsViewerPagination
         pagination={{

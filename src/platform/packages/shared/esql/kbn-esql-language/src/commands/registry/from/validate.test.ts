@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import { Parser, isSubQuery } from '@elastic/esql';
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { validate } from './validate';
@@ -18,7 +20,7 @@ const fromExpectErrors = (query: string, expectedErrors: string[], context = moc
 
 describe('FROM Validation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('FROM <sources> [ METADATA <indices> ]', () => {

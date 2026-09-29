@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { gapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
 import {
@@ -28,8 +31,8 @@ import type {
 } from '../../../../routes/__mocks__/request_context';
 import { getGapFilteredRuleIds } from '../../../logic/search/get_gap_filtered_rule_ids';
 
-jest.mock('../../../logic/search/get_gap_filtered_rule_ids');
-const mockGetGapFilteredRuleIds = getGapFilteredRuleIds as jest.MockedFunction<
+vi.mock('../../../logic/search/get_gap_filtered_rule_ids');
+const mockGetGapFilteredRuleIds = getGapFilteredRuleIds as MockedFunction<
   typeof getGapFilteredRuleIds
 >;
 
@@ -53,8 +56,8 @@ describe('Find rules route', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('status codes', () => {

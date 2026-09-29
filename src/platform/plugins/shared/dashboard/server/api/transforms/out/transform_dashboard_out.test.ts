@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import { timeSliderControlSchema } from '@kbn/controls-schemas';
 
@@ -28,7 +30,7 @@ embeddable.registerEmbeddableServerDefinition(TIME_SLIDER_CONTROL, {
   },
   getTransforms: () => {
     return {
-      transformOut: jest.fn().mockImplementation((val) => val),
+      transformOut: vi.fn().mockImplementation((val) => val),
       schema: timeSliderControlSchema,
     };
   },

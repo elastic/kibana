@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
@@ -14,28 +16,40 @@ import { createAttachmentItem } from './timeline_item.factory';
 import { createVersionedAttachment } from './versioned_attachment.factory';
 import { AttachmentEvent } from './attachment_event';
 
-const mockAttachmentsService = { hasAttachmentType: jest.fn() };
+const mockAttachmentsService = { hasAttachmentType: vi.fn() };
 
-jest.mock('../../../../hooks/use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({ attachmentsService: mockAttachmentsService }),
-}));
-jest.mock('../../../../context/conversation/use_conversation_id', () => ({
-  useConversationId: jest.fn(),
-}));
-jest.mock('../../../../context/conversation/conversation_context', () => ({
-  useConversationContext: () => ({ isEmbeddedContext: true }),
-}));
-jest.mock('../response/attachments/inline_attachment_with_actions', () => ({
-  InlineAttachmentWithActions: jest.fn(() => <div data-test-subj="inlineCard" />),
-}));
+vi.mock('../../../../hooks/use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: () => ({ attachmentsService: mockAttachmentsService }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../context/conversation/use_conversation_id', () => {
+      const mocked = {
+      useConversationId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../context/conversation/conversation_context', () => {
+      const mocked = {
+      useConversationContext: () => ({ isEmbeddedContext: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../response/attachments/inline_attachment_with_actions', () => {
+      const mocked = {
+      InlineAttachmentWithActions: vi.fn(() => <div data-test-subj="inlineCard" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockInlineCard = jest.mocked(InlineAttachmentWithActions);
+const mockInlineCard = vi.mocked(InlineAttachmentWithActions);
 const lastCardProps = () => mockInlineCard.mock.calls.at(-1)![0];
 
 describe('AttachmentEvent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useConversationId).mockReturnValue('conv-1');
+    vi.clearAllMocks();
+    vi.mocked(useConversationId).mockReturnValue('conv-1');
   });
 
   it('draws the inline card for the resolved version', () => {
@@ -96,7 +110,7 @@ describe('AttachmentEvent', () => {
   });
 
   it('renders nothing without a conversation id', () => {
-    jest.mocked(useConversationId).mockReturnValue(undefined);
+    vi.mocked(useConversationId).mockReturnValue(undefined);
 
     const { container } = render(<AttachmentEvent item={createAttachmentItem()} />);
 

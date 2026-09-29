@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityanalytics_entra_id: targets-per-actor ES|QL is locked (no watermark) 1`] = `
 "SET unmapped_fields=\\"nullify\\";

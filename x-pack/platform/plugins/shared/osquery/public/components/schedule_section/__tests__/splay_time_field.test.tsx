@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { SplayTimeField } from '../splay_time_field';
@@ -22,7 +24,7 @@ describe('SplayTimeField', () => {
   describe('toggle visibility', () => {
     it('hides the value/unit inputs when splay is disabled', () => {
       renderWithProviders(
-        <SplayTimeField value={baseSplay({ enabled: false })} onChange={jest.fn()} />
+        <SplayTimeField value={baseSplay({ enabled: false })} onChange={vi.fn()} />
       );
 
       expect(screen.queryByTestId('osquery-schedule-splay-value')).not.toBeInTheDocument();
@@ -31,7 +33,7 @@ describe('SplayTimeField', () => {
 
     it('shows the value/unit inputs when splay is enabled', () => {
       renderWithProviders(
-        <SplayTimeField value={baseSplay({ enabled: true })} onChange={jest.fn()} />
+        <SplayTimeField value={baseSplay({ enabled: true })} onChange={vi.fn()} />
       );
 
       expect(screen.getByTestId('osquery-schedule-splay-value')).toBeInTheDocument();
@@ -41,7 +43,7 @@ describe('SplayTimeField', () => {
 
   describe('change handling', () => {
     it('clears `rawCompound` when the user toggles splay on', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <SplayTimeField
           value={baseSplay({ enabled: false, rawCompound: '1h30m' })}
@@ -60,7 +62,7 @@ describe('SplayTimeField', () => {
     });
 
     it('clears `rawCompound` when the user edits the numeric value', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <SplayTimeField
           value={baseSplay({ enabled: true, rawCompound: '1h30m', value: 30 })}
@@ -78,7 +80,7 @@ describe('SplayTimeField', () => {
     });
 
     it('clamps numeric values below 1 to 1', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <SplayTimeField value={baseSplay({ enabled: true, value: 5 })} onChange={onChange} />
       );
@@ -92,7 +94,7 @@ describe('SplayTimeField', () => {
     });
 
     it('switches the unit and clears `rawCompound`', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(
         <SplayTimeField
           value={baseSplay({ enabled: true, value: 30, unit: 'seconds' })}
@@ -116,7 +118,7 @@ describe('SplayTimeField', () => {
       renderWithProviders(
         <SplayTimeField
           value={baseSplay({ enabled: false, value: 13, unit: 'hours' })}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       );
 
@@ -127,7 +129,7 @@ describe('SplayTimeField', () => {
       renderWithProviders(
         <SplayTimeField
           value={baseSplay({ enabled: true, value: 13, unit: 'hours' })}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       );
 
@@ -138,7 +140,7 @@ describe('SplayTimeField', () => {
       renderWithProviders(
         <SplayTimeField
           value={baseSplay({ enabled: true, value: 12, unit: 'hours' })}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       );
 
@@ -156,7 +158,7 @@ describe('SplayTimeField', () => {
             unit: 'hours',
             rawCompound: '1h30m',
           })}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       );
 
@@ -174,7 +176,7 @@ describe('SplayTimeField', () => {
             unit: 'hours',
             rawCompound: '13h0m',
           })}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
         />
       );
 
@@ -187,7 +189,7 @@ describe('SplayTimeField', () => {
       renderWithProviders(
         <SplayTimeField
           value={baseSplay({ enabled: false })}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           isRecurrence
           frequency="daily"
         />
@@ -200,7 +202,7 @@ describe('SplayTimeField', () => {
       renderWithProviders(
         <SplayTimeField
           value={baseSplay({ enabled: false })}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           isRecurrence
           frequency="custom"
         />
@@ -213,7 +215,7 @@ describe('SplayTimeField', () => {
       renderWithProviders(
         <SplayTimeField
           value={baseSplay({ enabled: true })}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           isRecurrence
           frequency="daily"
         />
@@ -226,7 +228,7 @@ describe('SplayTimeField', () => {
       renderWithProviders(
         <SplayTimeField
           value={baseSplay({ enabled: false })}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           isRecurrence={false}
           frequency="daily"
         />
@@ -237,7 +239,7 @@ describe('SplayTimeField', () => {
 
     it('does NOT render the advisory when frequency is undefined', () => {
       renderWithProviders(
-        <SplayTimeField value={baseSplay({ enabled: false })} onChange={jest.fn()} isRecurrence />
+        <SplayTimeField value={baseSplay({ enabled: false })} onChange={vi.fn()} isRecurrence />
       );
 
       expect(screen.queryByText(SPLAY_QUERY_STORM_WARNING)).not.toBeInTheDocument();

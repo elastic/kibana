@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DEFAULT_ACTIVITY_TIME_RANGE, resolveGteLte } from './time_range';
 
 const ABSOLUTE_FROM = '2026-08-01T00:00:00.000Z';
@@ -27,12 +29,12 @@ describe('resolveGteLte', () => {
     const fallbackWindow = { windowStartMs: nowMs - DAY_MS, windowEndMs: nowMs };
 
     beforeEach(() => {
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date(NOW));
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(NOW));
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('resolves the default relative range', () => {

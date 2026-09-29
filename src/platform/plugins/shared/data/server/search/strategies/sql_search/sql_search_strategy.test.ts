@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { merge } from 'lodash';
 import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
@@ -27,10 +29,10 @@ const mockSqlResponse = {
 };
 
 describe('SQL search strategy', () => {
-  const mockSqlGetAsync = jest.fn();
-  const mockSqlQuery = jest.fn();
-  const mockSqlDelete = jest.fn();
-  const mockSqlClearCursor = jest.fn();
+  const mockSqlGetAsync = vi.fn();
+  const mockSqlQuery = vi.fn();
+  const mockSqlDelete = vi.fn();
+  const mockSqlClearCursor = vi.fn();
   const mockLogger: any = {
     debug: () => {},
   };

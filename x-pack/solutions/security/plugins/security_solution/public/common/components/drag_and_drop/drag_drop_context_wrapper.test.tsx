@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
@@ -13,7 +15,7 @@ import { TestProviders } from '../../mock';
 
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
 describe('DragDropContextWrapper', () => {
   describe('rendering', () => {

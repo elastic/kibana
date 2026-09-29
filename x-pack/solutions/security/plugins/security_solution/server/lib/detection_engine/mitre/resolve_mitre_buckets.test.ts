@@ -5,47 +5,53 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import { resolveMitreBuckets, resetResolveMitreBucketsCache } from './resolve_mitre_buckets';
 
 // Minimal fixture that satisfies the legacy blob shape so the real
 // transformLegacyMitreData adapter can be exercised without loading the full blob.
-jest.mock('../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => ({
-  tactics: [
-    {
-      id: 'TA0001',
-      name: 'Initial Access',
-      reference: 'https://attack.mitre.org/tactics/TA0001/',
-      value: 'initialAccess',
-      label: 'Initial Access (TA0001)',
-    },
-  ],
-  techniques: [
-    {
-      id: 'T1078',
-      name: 'Valid Accounts',
-      reference: 'https://attack.mitre.org/techniques/T1078/',
-      value: 'validAccounts',
-      label: 'Valid Accounts (T1078)',
-      tactics: ['initial-access'],
-    },
-  ],
-  subtechniques: [],
-}));
+vi.mock('../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => {
+      const mocked = {
+      tactics: [
+        {
+          id: 'TA0001',
+          name: 'Initial Access',
+          reference: 'https://attack.mitre.org/tactics/TA0001/',
+          value: 'initialAccess',
+          label: 'Initial Access (TA0001)',
+        },
+      ],
+      techniques: [
+        {
+          id: 'T1078',
+          name: 'Valid Accounts',
+          reference: 'https://attack.mitre.org/techniques/T1078/',
+          value: 'validAccounts',
+          label: 'Valid Accounts (T1078)',
+          tactics: ['initial-access'],
+        },
+      ],
+      subtechniques: [],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const makeClient = (empty = false): { client: MitreAttackDataClient; mockList: jest.Mock } => {
-  const mockList = jest.fn().mockResolvedValue({
+const makeClient = (empty = false): { client: MitreAttackDataClient; mockList: Mock } => {
+  const mockList = vi.fn().mockResolvedValue({
     framework: 'enterprise' as const,
     tactics: empty ? [] : [{ id: 'TA0099', name: 'Managed Tactic' }],
     techniques: empty ? [] : [{ id: 'T9001', name: 'Managed Technique' }],
     subtechniques: [],
   });
-  const client: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+  const client: MitreAttackDataClient = { list: mockList, getById: vi.fn() };
   return { client, mockList };
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   resetResolveMitreBucketsCache();
 });
 
@@ -84,7 +90,7 @@ describe('resolveMitreBuckets — managed path', () => {
   });
 
   it('does not poison the cache when list() throws, and retries on the next call', async () => {
-    const mockList = jest
+    const mockList = vi
       .fn()
       .mockRejectedValueOnce(new Error('SO unavailable'))
       .mockResolvedValueOnce({
@@ -93,7 +99,7 @@ describe('resolveMitreBuckets — managed path', () => {
         techniques: [],
         subtechniques: [],
       });
-    const client: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+    const client: MitreAttackDataClient = { list: mockList, getById: vi.fn() };
 
     await expect(resolveMitreBuckets(client)).rejects.toThrow('SO unavailable');
     const result = await resolveMitreBuckets(client);

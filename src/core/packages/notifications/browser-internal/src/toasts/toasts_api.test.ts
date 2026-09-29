@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { firstValueFrom } from 'rxjs';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
 
@@ -16,17 +19,20 @@ import { apm } from '@elastic/apm-rum';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 
-jest.mock('@elastic/apm-rum', () => ({
-  apm: {
-    captureError: jest.fn(),
-  },
-}));
+vi.mock('@elastic/apm-rum', () => {
+      const mocked = {
+      apm: {
+        captureError: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 async function getCurrentToasts(toasts: ToastsApi) {
   return await firstValueFrom(toasts.get$());
 }
 
-type MockedUnmount = jest.MockedFunction<UnmountCallback>;
+type MockedUnmount = MockedFunction<UnmountCallback>;
 
 function uiSettingsMock() {
   const mock = uiSettingsServiceMock.createSetupContract();
@@ -61,7 +67,7 @@ function startDeps() {
 describe('#get$()', () => {
   it('returns observable that emits NEW toast list when something added or removed', () => {
     const toasts = new ToastsApi(toastDeps());
-    const onToasts = jest.fn();
+    const onToasts = vi.fn();
 
     toasts.get$().subscribe(onToasts);
     const foo = toasts.add('foo');
@@ -88,7 +94,7 @@ describe('#get$()', () => {
 
   it('does not emit a new toast list when unknown toast is passed to remove()', () => {
     const toasts = new ToastsApi(toastDeps());
-    const onToasts = jest.fn();
+    const onToasts = vi.fn();
 
     toasts.get$().subscribe(onToasts);
     toasts.add('foo');
@@ -223,7 +229,7 @@ describe('#addDanger()', () => {
       // eslint-disable-next-line no-unsanitized/property
       container.innerHTML = content;
       root.appendChild(container);
-      const unmount = jest.fn(() => container.remove());
+      const unmount = vi.fn(() => container.remove());
       unmounts[id] = unmount;
       return unmount;
     };

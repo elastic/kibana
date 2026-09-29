@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { ConfigurationFormItems } from './configuration_form_items';
 import { render, screen } from '@testing-library/react';
@@ -31,7 +33,7 @@ describe('ConfigurationFormItems', () => {
   const defaultProps = {
     isLoading: false,
     items: mockItems,
-    setConfigEntry: jest.fn(),
+    setConfigEntry: vi.fn(),
   };
 
   it('renders link when isInternalProvider is true and key is model_id', () => {
@@ -69,7 +71,7 @@ describe('ConfigurationFormItems', () => {
     const props = {
       isLoading: false,
       items: numAllocations,
-      setConfigEntry: jest.fn(),
+      setConfigEntry: vi.fn(),
     };
 
     render(<ConfigurationFormItems {...props} isInternalProvider={true} />);

@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EntitySummaryGridMini } from './entity_summary_grid';
 
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      http: {
-        fetch: (...args: unknown[]) => mockFetch(...args),
-      },
-    },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: {
+            fetch: (...args: unknown[]) => mockFetch(...args),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeClient = () =>
   new QueryClient({

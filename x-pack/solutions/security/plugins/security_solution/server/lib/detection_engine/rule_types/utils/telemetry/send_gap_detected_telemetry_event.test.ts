@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { Mocked } from 'vitest';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import moment from 'moment';
@@ -14,7 +16,7 @@ import { sendGapDetectedTelemetryEvent } from './send_gap_detected_telemetry_eve
 import type { RuleParams } from '../../../rule_schema';
 
 describe('sendGapDetectedTelemetryEvent', () => {
-  let mockAnalytics: jest.Mocked<AnalyticsServiceSetup>;
+  let mockAnalytics: Mocked<AnalyticsServiceSetup>;
   let mockCore: ReturnType<typeof coreMock.createSetup>;
 
   beforeEach(() => {

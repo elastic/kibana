@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from 'react-dom';
 import { render as renderTestingLibrary, fireEvent } from '@testing-library/react';
@@ -90,7 +92,7 @@ describe('<FlyoutFrame>', () => {
     });
 
     test('calls onClose prop when close button clicked', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const el = renderTestingLibrary(<FlyoutFrame onClose={onClose} />);
 
       const closeButton = el.queryByText('Close');

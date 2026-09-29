@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import * as api from './api';
@@ -15,8 +18,8 @@ import { mockCase } from './mock';
 import type { AddObservableRequest } from '../../common/types/api';
 import { TestProviders, createTestQueryClient } from '../common/mock';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
 const observableMock: AddObservableRequest = {
   observable: {
@@ -27,17 +30,17 @@ const observableMock: AddObservableRequest = {
 };
 
 describe('usePostObservables', () => {
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
+  const addSuccess = vi.fn();
+  const addError = vi.fn();
 
-  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+  (useToasts as Mock).mockReturnValue({ addSuccess, addError });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'postObservable');
+    const spy = vi.spyOn(api, 'postObservable');
     const { result } = renderHook(() => usePostObservable(mockCase.id), {
       wrapper: TestProviders,
     });
@@ -53,7 +56,7 @@ describe('usePostObservables', () => {
 
   it('invalidates the queries correctly', async () => {
     const queryClient = createTestQueryClient();
-    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const queryClientSpy = vi.spyOn(queryClient, 'invalidateQueries');
     const { result } = renderHook(() => usePostObservable(mockCase.id), {
       wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
     });
@@ -78,7 +81,7 @@ describe('usePostObservables', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    jest
+    vi
       .spyOn(api, 'postObservable')
       .mockRejectedValue(new Error('usePostObservables: Test error'));
 

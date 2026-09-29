@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type {
   MonitoringEntitySource,
   MonitoringLabel,
@@ -14,48 +17,60 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PrivMatchersAggregation } from '../types';
 import { createPatternMatcherService } from './privileged_status_match';
 
-const mockBuildPrivilegedSearchBody = jest.fn();
-jest.mock('../queries', () => ({
-  buildPrivilegedSearchBody: (...args: unknown[]) => mockBuildPrivilegedSearchBody(...args),
-}));
+const mockBuildPrivilegedSearchBody = vi.fn();
+vi.mock('../queries', () => {
+      const mocked = {
+      buildPrivilegedSearchBody: (...args: unknown[]) => mockBuildPrivilegedSearchBody(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type GenerateMonitoringLabelsFn =
   typeof import('./generate_monitoring_labels').generateMonitoringLabels;
-const mockGenerateMonitoringLabels = jest.fn<
+const mockGenerateMonitoringLabels = vi.fn<
   MonitoringLabel[],
   Parameters<GenerateMonitoringLabelsFn>
 >(() => []);
-jest.mock('./generate_monitoring_labels', () => ({
-  generateMonitoringLabels: (...args: Parameters<GenerateMonitoringLabelsFn>) =>
-    mockGenerateMonitoringLabels(...args),
-}));
+vi.mock('./generate_monitoring_labels', () => {
+      const mocked = {
+      generateMonitoringLabels: (...args: Parameters<GenerateMonitoringLabelsFn>) =>
+        mockGenerateMonitoringLabels(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockSearchService = {
-  getExistingUsersMap: jest.fn(),
+  getExistingUsersMap: vi.fn(),
 };
-jest.mock('../../../../users/search', () => ({
-  createSearchService: () => mockSearchService,
-}));
+vi.mock('../../../../users/search', () => {
+      const mocked = {
+      createSearchService: () => mockSearchService,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockSyncMarkersService = {
-  getLastProcessedMarker: jest.fn(),
-  updateLastProcessedMarker: jest.fn(),
+  getLastProcessedMarker: vi.fn(),
+  updateLastProcessedMarker: vi.fn(),
 };
-jest.mock('../../sync_markers', () => ({
-  createSyncMarkersService: () => mockSyncMarkersService,
-}));
+vi.mock('../../sync_markers', () => {
+      const mocked = {
+      createSyncMarkersService: () => mockSyncMarkersService,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createDataClient = (): PrivilegeMonitoringDataClient =>
   ({
     deps: {
       clusterClient: {
         asCurrentUser: {
-          search: jest.fn(),
+          search: vi.fn(),
         },
       },
     },
     index: 'unit-test-index',
-    log: jest.fn(),
+    log: vi.fn(),
   } as unknown as PrivilegeMonitoringDataClient);
 
 // Defaults to integration type source, can be overridden for index usage.
@@ -68,7 +83,7 @@ const createSource = (overrides: Partial<MonitoringEntitySource> = {}): Monitori
 });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('createPatternMatcherService', () => {
@@ -76,7 +91,7 @@ describe('createPatternMatcherService', () => {
 
   it('calls sync marker updates in integrations mode, when there are matchers', async () => {
     const dataClient = createDataClient();
-    const searchMock = dataClient.deps.clusterClient.asCurrentUser.search as jest.Mock;
+    const searchMock = dataClient.deps.clusterClient.asCurrentUser.search as Mock;
     const source = createSource({
       matchers: [
         {
@@ -130,7 +145,7 @@ describe('createPatternMatcherService', () => {
 
   it('processes index mode even when matchers are empty and skips sync marker updates', async () => {
     const dataClient = createDataClient();
-    const searchMock = dataClient.deps.clusterClient.asCurrentUser.search as jest.Mock;
+    const searchMock = dataClient.deps.clusterClient.asCurrentUser.search as Mock;
     const source = createSource({ type: 'index', matchers: [] }); // update to index source.
 
     mockSearchService.getExistingUsersMap.mockResolvedValue(new Map());

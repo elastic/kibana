@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { findGapsSearchAfter } from './find_gaps';
 import { processAllRuleGaps } from './process_all_rule_gaps';
@@ -14,16 +17,16 @@ import { gapStatus } from '../../../common/constants';
 import { chunk, concat, groupBy } from 'lodash';
 import pMap from 'p-map';
 
-jest.mock('./find_gaps', () => {
+vi.mock('./find_gaps', () => {
   return {
-    findGapsSearchAfter: jest.fn(),
+    findGapsSearchAfter: vi.fn(),
   };
 });
 
-jest.mock('p-map', () => jest.fn());
+vi.mock('p-map', () => vi.fn());
 
-const findGapsSearchAfterMock = findGapsSearchAfter as jest.Mock;
-const pMapMock = pMap as jest.Mock;
+const findGapsSearchAfterMock = findGapsSearchAfter as Mock;
+const pMapMock = pMap as Mock;
 
 const range = (rangeStart: string, rangeEnd: string) => ({
   gte: new Date(rangeStart),
@@ -93,16 +96,16 @@ describe('processAllRuleGaps', () => {
   const mockLogger = loggerMock.create();
   const mockEventLogClient = eventLogClientMock.create();
 
-  let processGapsBatchMock: jest.Mock;
+  let processGapsBatchMock: Mock;
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   beforeEach(() => {
     let processGapsBatchCall = 1;
-    processGapsBatchMock = jest.fn(async () => processGapsBatchCall++);
-    const pMapActual = jest.requireActual('p-map');
+    processGapsBatchMock = vi.fn(async () => processGapsBatchCall++);
+    const pMapActual = require('p-map');
     pMapMock.mockImplementation(pMapActual);
   });
 

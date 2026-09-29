@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { mockUxSeries, render } from '../../rtl_helpers';
@@ -42,7 +44,7 @@ describe.skip('SeriesChartTypesSelect', function () {
 
   describe('XYChartTypesSelect', function () {
     it('should render properly', async function () {
-      render(<XYChartTypesSelect value={'line'} onChange={jest.fn()} label={'Chart type'} />);
+      render(<XYChartTypesSelect value={'line'} onChange={vi.fn()} label={'Chart type'} />);
 
       await waitFor(() => {
         screen.getByText(/chart type/i);

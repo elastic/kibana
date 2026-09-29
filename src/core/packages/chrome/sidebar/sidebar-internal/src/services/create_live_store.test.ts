@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import { createSidebarStore, type SidebarContext } from '@kbn/core-chrome-sidebar';
 import { createLiveStore, type SidebarStorage } from './create_live_store';
@@ -14,21 +17,21 @@ import { createLiveStore, type SidebarStorage } from './create_live_store';
 const createMockStorage = (
   initial: Record<string, unknown> = {}
 ): SidebarStorage & {
-  get: jest.Mock;
-  set: jest.Mock;
+  get: Mock;
+  set: Mock;
 } => {
   const data = new Map(Object.entries(initial));
   return {
-    get: jest.fn((key: string) => data.get(key) ?? null) as SidebarStorage['get'] & jest.Mock,
-    set: jest.fn((key: string, value: unknown) => data.set(key, value)) as SidebarStorage['set'] &
-      jest.Mock,
+    get: vi.fn((key: string) => data.get(key) ?? null) as SidebarStorage['get'] & Mock,
+    set: vi.fn((key: string, value: unknown) => data.set(key, value)) as SidebarStorage['set'] &
+      Mock,
   };
 };
 
 const createMockContext = (): SidebarContext => ({
-  open: jest.fn(),
-  close: jest.fn(),
-  isCurrent: jest.fn(() => false),
+  open: vi.fn(),
+  close: vi.fn(),
+  isCurrent: vi.fn(() => false),
 });
 
 describe('createLiveStore', () => {

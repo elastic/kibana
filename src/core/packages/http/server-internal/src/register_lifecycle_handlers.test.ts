@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('./lifecycle_handlers', () => {
-  const actual = jest.requireActual('./lifecycle_handlers');
+import { vi } from 'vitest';
+
+vi.mock('./lifecycle_handlers', async () => {
+  const actual = await vi.importActual('./lifecycle_handlers');
   return {
     ...actual,
-    createVersionCheckPostAuthHandler: jest.fn(actual.createVersionCheckPostAuthHandler),
-    createBuildNrMismatchLoggerPreResponseHandler: jest.fn(
+    createVersionCheckPostAuthHandler: vi.fn(actual.createVersionCheckPostAuthHandler),
+    createBuildNrMismatchLoggerPreResponseHandler: vi.fn(
       actual.createBuildNrMismatchLoggerPreResponseHandler
     ),
-    createXsrfPostAuthHandler: jest.fn(actual.createXsrfPostAuthHandler),
+    createXsrfPostAuthHandler: vi.fn(actual.createXsrfPostAuthHandler),
   };
 });
 
@@ -31,14 +33,14 @@ import {
 } from './lifecycle_handlers';
 import { loggerMock } from '@kbn/logging-mocks';
 
-const createRegistrarMock = (authGet = jest.fn()) =>
+const createRegistrarMock = (authGet = vi.fn()) =>
   ({
-    registerAuth: jest.fn(),
-    registerOnPostAuth: jest.fn(),
-    registerOnPreAuth: jest.fn(),
-    registerOnPreResponse: jest.fn(),
-    registerOnPreRouting: jest.fn(),
-    auth: { get: authGet, isAuthenticated: jest.fn() },
+    registerAuth: vi.fn(),
+    registerOnPostAuth: vi.fn(),
+    registerOnPreAuth: vi.fn(),
+    registerOnPreResponse: vi.fn(),
+    registerOnPreRouting: vi.fn(),
+    auth: { get: authGet, isAuthenticated: vi.fn() },
   } as unknown as CoreHandlerDependencies);
 
 const createConfigMock = () =>
@@ -53,7 +55,7 @@ const createConfigMock = () =>
 
 describe('registerCoreHandlers', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('registers client version checking only when strictClientVersionCheck is enabled', () => {
@@ -72,7 +74,7 @@ describe('registerCoreHandlers', () => {
   });
 
   it('gives the xsrf post-auth handler the registrar auth accessor', () => {
-    const authGet = jest.fn();
+    const authGet = vi.fn();
     const registrarMock = createRegistrarMock(authGet);
     const config = createConfigMock();
     const logger = loggerMock.create();

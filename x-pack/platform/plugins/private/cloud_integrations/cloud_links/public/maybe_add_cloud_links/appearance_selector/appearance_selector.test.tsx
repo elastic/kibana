@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 
@@ -13,35 +16,38 @@ import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { useUpdateUserProfile } from '@kbn/user-profile-components';
 import { AppearanceSelector } from './appearance_selector';
 
-jest.mock('./appearance_modal', () => ({
-  AppearanceModal: jest.fn().mockImplementation(({ closeModal, uiSettingsClient }) => {
-    return (
-      <div data-test-subj="appearance-modal">
-        <div data-test-subj="color-mode-group" />
-        <div data-test-subj="contrast-mode-group" />
-        <button data-test-subj="appearanceModalDiscardButton" onClick={closeModal}>
-          Discard
-        </button>
-        <button
-          data-test-subj="appearanceModalSaveButton"
-          onClick={async () => {
-            await uiSettingsClient.set('theme:darkMode', 'dark');
-            await uiSettingsClient.set('theme:contrastMode', 'high');
-            closeModal();
-          }}
-        >
-          Save changes
-        </button>
-      </div>
-    );
-  }),
-}));
+vi.mock('./appearance_modal', () => {
+      const mocked = {
+      AppearanceModal: vi.fn().mockImplementation(({ closeModal, uiSettingsClient }) => {
+        return (
+          <div data-test-subj="appearance-modal">
+            <div data-test-subj="color-mode-group" />
+            <div data-test-subj="contrast-mode-group" />
+            <button data-test-subj="appearanceModalDiscardButton" onClick={closeModal}>
+              Discard
+            </button>
+            <button
+              data-test-subj="appearanceModalSaveButton"
+              onClick={async () => {
+                await uiSettingsClient.set('theme:darkMode', 'dark');
+                await uiSettingsClient.set('theme:contrastMode', 'high');
+                closeModal();
+              }}
+            >
+              Save changes
+            </button>
+          </div>
+        );
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/user-profile-components', () => {
-  const original = jest.requireActual('@kbn/user-profile-components');
+vi.mock('@kbn/user-profile-components', async () => {
+  const original = (await vi.importActual('@kbn/user-profile-components'));
   return {
     ...original,
-    useUpdateUserProfile: jest.fn().mockImplementation(() => ({
+    useUpdateUserProfile: vi.fn().mockImplementation(() => ({
       userProfileData: {
         userSettings: {
           darkMode: 'light',
@@ -49,14 +55,14 @@ jest.mock('@kbn/user-profile-components', () => {
         },
       },
       isLoading: false,
-      update: jest.fn(),
+      update: vi.fn(),
       userProfileLoaded: true,
     })),
   };
 });
 
 describe('AppearanceSelector', () => {
-  const closePopover = jest.fn();
+  const closePopover = vi.fn();
   let core: ReturnType<typeof coreMock.createStart>;
   let security: ReturnType<typeof securityMock.createStart>;
 
@@ -64,7 +70,7 @@ describe('AppearanceSelector', () => {
     core = coreMock.createStart();
     security = securityMock.createStart();
 
-    (useUpdateUserProfile as jest.Mock).mockImplementation(() => ({
+    (useUpdateUserProfile as Mock).mockImplementation(() => ({
       userProfileData: {
         userSettings: {
           darkMode: 'light',
@@ -72,13 +78,13 @@ describe('AppearanceSelector', () => {
         },
       },
       isLoading: false,
-      update: jest.fn(),
+      update: vi.fn(),
       userProfileLoaded: true,
     }));
 
     // Mock the openModal to return a ref with proper close method
     core.overlays.openModal.mockImplementation(() => ({
-      close: jest.fn(),
+      close: vi.fn(),
       onClose: Promise.resolve(),
     }));
   });
@@ -101,10 +107,10 @@ describe('AppearanceSelector', () => {
   });
 
   it('does not render when appearance is not visible', () => {
-    (useUpdateUserProfile as jest.Mock).mockImplementation(() => ({
+    (useUpdateUserProfile as Mock).mockImplementation(() => ({
       userProfileData: null,
       isLoading: false,
-      update: jest.fn(),
+      update: vi.fn(),
       userProfileLoaded: true,
     }));
 

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 
 import { validateCandidateAlertIds } from '.';
 
 const getLogger = (): Logger =>
   ({
-    warn: jest.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 describe('validateCandidateAlertIds', () => {
@@ -50,7 +53,7 @@ describe('validateCandidateAlertIds', () => {
       logger,
     });
 
-    expect((logger.warn as jest.Mock).mock.calls[0][0]).toContain('2 of 3');
+    expect((logger.warn as Mock).mock.calls[0][0]).toContain('2 of 3');
   });
 
   it('does not log a warning when every candidate carries an _id', () => {

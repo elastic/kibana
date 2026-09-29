@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { EuiComboBox } from '@elastic/eui';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -14,15 +17,15 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ClusterPrivileges } from './cluster_privileges';
 import type { Role } from '../../../../../../common';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    EuiComboBox: jest.fn((props: any) => <actual.EuiComboBox {...props} />),
+    EuiComboBox: vi.fn((props: any) => <actual.EuiComboBox {...props} />),
   };
 });
 
-const MockedEuiComboBox = EuiComboBox as unknown as jest.Mock;
+const MockedEuiComboBox = EuiComboBox as unknown as Mock;
 
 const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
@@ -41,7 +44,7 @@ test('it renders without crashing', () => {
   const { container } = renderWithIntl(
     <ClusterPrivileges
       role={role}
-      onChange={jest.fn()}
+      onChange={vi.fn()}
       builtinClusterPrivileges={['all', 'manage', 'monitor']}
     />
   );
@@ -64,7 +67,7 @@ test('it renders fields as disabled when not editable', () => {
   renderWithIntl(
     <ClusterPrivileges
       role={role}
-      onChange={jest.fn()}
+      onChange={vi.fn()}
       builtinClusterPrivileges={['all', 'manage', 'monitor']}
       editable={false}
     />
@@ -87,7 +90,7 @@ test('it allows for custom cluster privileges', () => {
     kibana: [],
   };
 
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   renderWithIntl(
     <ClusterPrivileges
       role={role}

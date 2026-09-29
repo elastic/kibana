@@ -5,26 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { renderHook } from '@testing-library/react';
 import { useHeaderData } from './use_header_data';
 import { useAttackDetailsContext } from '../context';
 import { getField } from '../../document_details/shared/utils';
 
-jest.mock('../context', () => ({
-  useAttackDetailsContext: jest.fn(),
-}));
+vi.mock('../context', () => {
+      const mocked = {
+      useAttackDetailsContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../document_details/shared/utils', () => ({
-  getField: jest.fn(),
-}));
+vi.mock('../../document_details/shared/utils', () => {
+      const mocked = {
+      getField: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useHeaderData', () => {
-  const getFieldsDataMock = jest.fn();
+  const getFieldsDataMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAttackDetailsContext as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAttackDetailsContext as Mock).mockReturnValue({
       getFieldsData: getFieldsDataMock,
     });
   });
@@ -47,7 +56,7 @@ describe('useHeaderData', () => {
       }
     });
 
-    (getField as jest.Mock).mockImplementation((value) => value);
+    (getField as Mock).mockImplementation((value) => value);
 
     const { result } = renderHook(() => useHeaderData());
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
@@ -83,26 +86,26 @@ describe('routes utils', () => {
   describe('fetchOsqueryPackagePolicyIds', () => {
     const mockSoClient = {} as SavedObjectsClientContract;
     const mockLogger = {
-      debug: jest.fn(),
+      debug: vi.fn(),
     };
     const mockLogFactory = {
-      get: jest.fn().mockReturnValue(mockLogger),
+      get: vi.fn().mockReturnValue(mockLogger),
     };
 
-    const createMockContext = (packagePolicyService?: { fetchAllItemIds: jest.Mock }) =>
+    const createMockContext = (packagePolicyService?: { fetchAllItemIds: Mock }) =>
       ({
         logFactory: mockLogFactory,
         service: {
-          getPackagePolicyService: jest.fn().mockReturnValue(packagePolicyService),
+          getPackagePolicyService: vi.fn().mockReturnValue(packagePolicyService),
         },
       } as unknown as OsqueryAppContext);
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('returns all osquery package policy ids', async () => {
-      const fetchAllItemIds = jest
+      const fetchAllItemIds = vi
         .fn()
         .mockResolvedValue(createIdIterable([['policy-1'], ['policy-2', 'policy-3']]));
       const mockContext = createMockContext({ fetchAllItemIds });

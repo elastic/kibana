@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type {
   AgentAvailabilityContext,
   AgentAvailabilityConfig,
@@ -16,12 +19,12 @@ import { AgentAvailabilityCache } from './availability_cache';
 
 describe('AgentAvailabilityCache', () => {
   let cache: AgentAvailabilityCache;
-  let mockHandler: jest.Mock<Promise<AgentAvailabilityResult>>;
+  let mockHandler: Mock<Promise<AgentAvailabilityResult>>;
   let context: AgentAvailabilityContext;
 
   beforeEach(() => {
     cache = new AgentAvailabilityCache();
-    mockHandler = jest.fn();
+    mockHandler = vi.fn();
     context = {
       request: httpServerMock.createKibanaRequest(),
       uiSettings: uiSettingsServiceMock.createClient(),
@@ -201,8 +204,8 @@ describe('AgentAvailabilityCache', () => {
 
     it('allows different tools to have different TTL configurations', async () => {
       const result: AgentAvailabilityResult = { status: 'available' };
-      const handler1 = jest.fn().mockResolvedValue(result);
-      const handler2 = jest.fn().mockResolvedValue(result);
+      const handler1 = vi.fn().mockResolvedValue(result);
+      const handler2 = vi.fn().mockResolvedValue(result);
 
       const shortTtlConfig: AgentAvailabilityConfig = {
         handler: handler1,

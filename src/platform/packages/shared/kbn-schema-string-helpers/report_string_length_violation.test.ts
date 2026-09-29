@@ -7,26 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { metrics, ValueType } from '@opentelemetry/api';
 import { reportStringLengthViolation } from './report_string_length_violation';
 
-jest.mock('@opentelemetry/api', () => {
-  const histogram = { record: jest.fn() };
-  const meter = { createHistogram: jest.fn(() => histogram) };
-  const provider = { getMeter: jest.fn(() => meter) };
+vi.mock('@opentelemetry/api', () => {
+  const histogram = { record: vi.fn() };
+  const meter = { createHistogram: vi.fn(() => histogram) };
+  const provider = { getMeter: vi.fn(() => meter) };
   return {
-    ...jest.requireActual('@opentelemetry/api'),
-    metrics: { getMeterProvider: jest.fn(() => provider) },
+    ...require('@opentelemetry/api'),
+    metrics: { getMeterProvider: vi.fn(() => provider) },
   };
 });
 
 const provider = metrics.getMeterProvider();
 const meter = provider.getMeter('test');
 const histogram = meter.createHistogram('test');
-jest.mocked(provider.getMeter).mockClear();
-jest.mocked(meter.createHistogram).mockClear();
+vi.mocked(provider.getMeter).mockClear();
+vi.mocked(meter.createHistogram).mockClear();
 
-beforeEach(() => jest.mocked(histogram.record).mockReset());
+beforeEach(() => vi.mocked(histogram.record).mockReset());
 
 test('creates one shared integer histogram with the proposed name', () => {
   reportStringLengthViolation({
@@ -86,7 +88,7 @@ test('omits an absent label', () => {
 });
 
 test('does not fail validation if the metric provider throws', () => {
-  jest.mocked(histogram.record).mockImplementation(() => {
+  vi.mocked(histogram.record).mockImplementation(() => {
     throw new Error('Exporter failure');
   });
   expect(() =>

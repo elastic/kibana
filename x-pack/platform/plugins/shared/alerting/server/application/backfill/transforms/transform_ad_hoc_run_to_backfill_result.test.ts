@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import type { SavedObject } from '@kbn/core/server';
 import { adHocRunStatus } from '../../../../common/constants';
@@ -14,7 +16,7 @@ import {
 } from './transform_ad_hoc_run_to_backfill_result';
 import type { RawRule } from '../../../types';
 
-const isSystemAction = jest.fn().mockReturnValue(false);
+const isSystemAction = vi.fn().mockReturnValue(false);
 
 function getMockAdHocRunAttributes({
   ruleId,

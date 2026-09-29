@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { tabifyGetColumns } from './get_columns';
 import type { TabbedAggColumn } from './types';
 import { AggConfigs } from '../aggs';
@@ -34,7 +36,7 @@ describe('get columns', () => {
       },
     } as any;
 
-    return new AggConfigs(indexPattern, aggs, { typesRegistry }, jest.fn());
+    return new AggConfigs(indexPattern, aggs, { typesRegistry }, vi.fn());
   };
 
   test('should inject the metric after each bucket if the vis is hierarchical', () => {

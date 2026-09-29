@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,14 +19,20 @@ import { useSignals } from '../../hooks/use_signals';
 import { SignalGroupFlyout } from './signal_group_flyout';
 import { buildSignal } from './signal_test_fixtures';
 
-jest.mock('../../hooks/use_signals', () => ({ useSignals: jest.fn() }));
-jest.mock('@kbn/llm-trace-waterfall', () => ({
-  TraceWaterfall: () => <div data-test-subj="mockTraceWaterfall" />,
-  createEsTraceFetcher: () => async () => ({ spans: [], durationMs: 0 }),
-  useTraceSpans: () => ({ spans: [], durationMs: 0, isLoading: false, error: null }),
-}));
+vi.mock('../../hooks/use_signals', () => {
+      const mocked = { useSignals: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/llm-trace-waterfall', () => {
+      const mocked = {
+      TraceWaterfall: () => <div data-test-subj="mockTraceWaterfall" />,
+      createEsTraceFetcher: () => async () => ({ spans: [], durationMs: 0 }),
+      useTraceSpans: () => ({ spans: [], durationMs: 0, isLoading: false, error: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSignals = jest.mocked(useSignals);
+const mockUseSignals = vi.mocked(useSignals);
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
@@ -42,15 +50,15 @@ const signalsResult = (overrides = {}) => ({
   total: 0,
   isLoading: false,
   error: undefined,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
   ...overrides,
 });
 
 const renderFlyout = ({ chatOpener }: { chatOpener?: ChatOpener } = {}) => {
-  const onClose = jest.fn();
+  const onClose = vi.fn();
   const services = {
     ...coreMock.createStart(),
-    data: { search: { search: jest.fn() } },
+    data: { search: { search: vi.fn() } },
     spaces: undefined,
     getChatOpener: () => chatOpener,
   };
@@ -72,7 +80,7 @@ const renderFlyout = ({ chatOpener }: { chatOpener?: ChatOpener } = {}) => {
 
 describe('SignalGroupFlyout', () => {
   beforeEach(() => mockUseSignals.mockReturnValue(signalsResult()));
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('renders the loading skeleton while signals load', () => {
     mockUseSignals.mockReturnValue(signalsResult({ isLoading: true }));
@@ -108,7 +116,7 @@ describe('SignalGroupFlyout', () => {
   });
 
   it('invokes the chat opener with the group tag when Analyze & improve is clicked', () => {
-    const opener = jest.fn();
+    const opener = vi.fn();
     mockUseSignals.mockReturnValue(signalsResult({ signals: [buildSignal()], total: 1 }));
     renderFlyout({ chatOpener: opener });
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createSearchSource } from './create_search_source';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../../../__mocks__/services';
@@ -17,7 +19,7 @@ describe('createSearchSource', () => {
   const services = discoverServiceMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('data view configuration', () => {

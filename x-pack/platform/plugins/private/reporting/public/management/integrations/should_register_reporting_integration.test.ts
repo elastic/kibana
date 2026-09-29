@@ -5,27 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { queryClient } from '../../query_client';
 import { shouldRegisterReportingIntegration } from './should_register_reporting_integration';
 
-jest.mock('../hooks/use_get_reporting_health_query', () => ({
-  getKey: jest.fn(() => 'reportingHealthKey'),
-}));
-jest.mock('../apis/get_reporting_health', () => ({
-  getReportingHealth: jest.fn(),
-}));
+vi.mock('../hooks/use_get_reporting_health_query', () => {
+      const mocked = {
+      getKey: vi.fn(() => 'reportingHealthKey'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../apis/get_reporting_health', () => {
+      const mocked = {
+      getReportingHealth: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('shouldRegisterReportingIntegration', () => {
   const http = {} as any;
-  let fetchQuerySpy: jest.SpyInstance;
+  let fetchQuerySpy: MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     if (fetchQuerySpy) {
       fetchQuerySpy.mockRestore();
     }
-    fetchQuerySpy = jest.spyOn(queryClient, 'fetchQuery');
+    fetchQuerySpy = vi.spyOn(queryClient, 'fetchQuery');
   });
 
   it('should return true when secure and has encryption key', async () => {

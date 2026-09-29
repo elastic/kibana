@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { EMPTY_LABEL } from '@kbn/field-formats-common';
@@ -93,26 +95,26 @@ describe('UnifiedFieldList <FieldTopValuesBucket />', () => {
   });
 
   it('does not render filter buttons when field.filterable is false', () => {
-    renderBucket({ field: nonFilterableField, onAddFilter: jest.fn() });
+    renderBucket({ field: nonFilterableField, onAddFilter: vi.fn() });
 
     expect(screen.queryAllByRole('button')).toHaveLength(0);
   });
 
   it('renders filter buttons when onAddFilter provided and field.filterable is true', () => {
-    renderBucket({ onAddFilter: jest.fn() });
+    renderBucket({ onAddFilter: vi.fn() });
 
     expect(screen.getAllByRole('button')).toHaveLength(2);
   });
 
   it('renders 48px placeholder instead of buttons when type is "other"', () => {
-    renderBucket({ type: 'other', onAddFilter: jest.fn() });
+    renderBucket({ type: 'other', onAddFilter: vi.fn() });
 
     expect(screen.queryAllByRole('button')).toHaveLength(0);
     expect(screen.getByTestId('test-filterActions-placeholder')).toBeInTheDocument();
   });
 
   it('calls onAddFilter with "+" when plus button is clicked', async () => {
-    const mockAddFilter = jest.fn();
+    const mockAddFilter = vi.fn();
 
     renderBucket({ onAddFilter: mockAddFilter });
 
@@ -122,7 +124,7 @@ describe('UnifiedFieldList <FieldTopValuesBucket />', () => {
   });
 
   it('calls onAddFilter with "-" when minus button is clicked', async () => {
-    const mockAddFilter = jest.fn();
+    const mockAddFilter = vi.fn();
 
     renderBucket({ onAddFilter: mockAddFilter });
 
@@ -142,7 +144,7 @@ describe('UnifiedFieldList <FieldTopValuesBucket />', () => {
       subType: { multi: { parent: 'extension' } },
     });
 
-    renderBucket({ field: multiField, onAddFilter: jest.fn() });
+    renderBucket({ field: multiField, onAddFilter: vi.fn() });
 
     expect(
       screen.getByRole('button', { name: 'Filter for extension: "sourceA"' })
@@ -150,7 +152,7 @@ describe('UnifiedFieldList <FieldTopValuesBucket />', () => {
   });
 
   it('falls back to field.name when not a multi-field', () => {
-    renderBucket({ onAddFilter: jest.fn() });
+    renderBucket({ onAddFilter: vi.fn() });
 
     expect(
       screen.getByRole('button', { name: 'Filter for extension: "sourceA"' })
@@ -158,7 +160,7 @@ describe('UnifiedFieldList <FieldTopValuesBucket />', () => {
   });
 
   it('calls overrideFieldTopValueBar and applies returned overrides', () => {
-    const overrideFieldTopValueBar = jest.fn(() => ({
+    const overrideFieldTopValueBar = vi.fn(() => ({
       formattedPercentage: '99.0%',
     }));
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CollapsibleSection } from '../../grid_section';
 import { getGridLayoutStateManagerMock } from '../../test_utils/mocks';
 import { getSampleOrderedLayout } from '../../test_utils/sample_layout';
@@ -40,18 +42,18 @@ describe('row state manager actions', () => {
       });
       gridLayoutStateManager.sectionRefs.current = {
         'main-0': {
-          getBoundingClientRect: jest.fn().mockReturnValue({ top: 0, height: 100, bottom: 100 }),
+          getBoundingClientRect: vi.fn().mockReturnValue({ top: 0, height: 100, bottom: 100 }),
         } as any as HTMLDivElement,
         third: {
-          getBoundingClientRect: jest.fn().mockReturnValue({ top: 200, height: 100, bottom: 300 }),
+          getBoundingClientRect: vi.fn().mockReturnValue({ top: 200, height: 100, bottom: 300 }),
         } as any as HTMLDivElement,
       };
       gridLayoutStateManager.headerRefs.current = {
         second: {
-          getBoundingClientRect: jest.fn().mockReturnValue({ top: 100, height: 50, bottom: 150 }),
+          getBoundingClientRect: vi.fn().mockReturnValue({ top: 100, height: 50, bottom: 150 }),
         } as any as HTMLDivElement,
         third: {
-          getBoundingClientRect: jest.fn().mockReturnValue({ top: 150, height: 50, bottom: 200 }),
+          getBoundingClientRect: vi.fn().mockReturnValue({ top: 150, height: 50, bottom: 200 }),
         } as any as HTMLDivElement,
       };
     });
@@ -89,7 +91,7 @@ describe('row state manager actions', () => {
       it('no target section id', () => {
         // "move" the second section up so that it overlaps with nothing
         gridLayoutStateManager.headerRefs.current.second = {
-          getBoundingClientRect: jest.fn().mockReturnValue({ top: -100, height: 50, bottom: -50 }),
+          getBoundingClientRect: vi.fn().mockReturnValue({ top: -100, height: 50, bottom: -50 }),
         } as any as HTMLDivElement;
         moveAction(gridLayoutStateManager, { clientX: 0, clientY: 0 }, { clientX: 0, clientY: 0 });
 
@@ -103,7 +105,7 @@ describe('row state manager actions', () => {
       it('targeting a non-main section', () => {
         // "move" the second section so that it overlaps the third section
         gridLayoutStateManager.headerRefs.current.second = {
-          getBoundingClientRect: jest.fn().mockReturnValue({ top: 260, height: 50, bottom: 310 }),
+          getBoundingClientRect: vi.fn().mockReturnValue({ top: 260, height: 50, bottom: 310 }),
         } as any as HTMLDivElement;
         moveAction(gridLayoutStateManager, { clientX: 0, clientY: 0 }, { clientX: 0, clientY: 0 });
 
@@ -117,7 +119,7 @@ describe('row state manager actions', () => {
       it('targeting a main section', () => {
         // "move" the second section so that it overlaps the first main section
         gridLayoutStateManager.headerRefs.current.second = {
-          getBoundingClientRect: jest.fn().mockReturnValue({ top: 50, height: 50, bottom: 100 }),
+          getBoundingClientRect: vi.fn().mockReturnValue({ top: 50, height: 50, bottom: 100 }),
         } as any as HTMLDivElement;
         moveAction(gridLayoutStateManager, { clientX: 0, clientY: 0 }, { clientX: 0, clientY: 0 });
 

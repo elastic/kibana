@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { getSupportedSchemas } from './supported_schemas';
 import * as securityModules from './security_modules';
 
-const actualSecurityModules = jest.requireActual('./security_modules');
+const actualSecurityModules = (await vi.importActual('./security_modules'));
 
-jest.mock('./security_modules', () => ({
-  ...jest.requireActual('./security_modules'),
-  getSecurityModuleDatasets: jest.fn(),
-  getAllSecurityModules: jest.fn(),
-}));
+vi.mock('./security_modules', async () => {
+      const mocked = {
+      ...(await vi.importActual('./security_modules')),
+      getSecurityModuleDatasets: vi.fn(),
+      getAllSecurityModules: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockGetSecurityModuleDatasets =
-  securityModules.getSecurityModuleDatasets as jest.MockedFunction<
+  securityModules.getSecurityModuleDatasets as MockedFunction<
     typeof securityModules.getSecurityModuleDatasets
   >;
 
 describe('getSupportedSchemas', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetSecurityModuleDatasets.mockImplementation(
       actualSecurityModules.getSecurityModuleDatasets
     );

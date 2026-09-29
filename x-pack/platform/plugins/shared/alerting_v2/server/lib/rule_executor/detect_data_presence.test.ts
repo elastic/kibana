@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { QueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';
 import { errors } from '@elastic/elasticsearch';
@@ -99,7 +101,7 @@ describe('detectDataPresence', () => {
         labels: expect.objectContaining({ rule_id: input.ruleId }),
       })
     );
-    const debugMessage = (mockLogger.debug as jest.Mock).mock.calls[0][0] as string;
+    const debugMessage = (mockLogger.debug as Mock).mock.calls[0][0] as string;
     expect(debugMessage).not.toContain('FROM metrics');
     expect(debugMessage).not.toContain('host.name');
   });

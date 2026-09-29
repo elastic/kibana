@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 
 import { SPACES_USAGE_STATS_ID, SPACES_USAGE_STATS_TYPE } from './constants';
@@ -21,7 +23,7 @@ import {
 
 describe('UsageStatsClient', () => {
   const setup = () => {
-    const debugLoggerMock = jest.fn();
+    const debugLoggerMock = vi.fn();
     const repositoryMock = savedObjectsRepositoryMock.create();
     const usageStatsClient = new UsageStatsClient(debugLoggerMock, Promise.resolve(repositoryMock));
     return { usageStatsClient, debugLoggerMock, repositoryMock };

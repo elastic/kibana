@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import {
@@ -18,12 +20,12 @@ describe('SyntheticsRefreshContextProvider', () => {
 
   beforeEach(() => {
     window.localStorage.clear();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   afterEach(() => {
     window.localStorage.clear();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('initializes `lastRefresh` to a non-zero timestamp on mount', () => {

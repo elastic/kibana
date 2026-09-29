@@ -5,43 +5,49 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 
 import { buildDefaultEsqlQuery } from '@kbn/discoveries/impl/lib/build_default_esql_query';
 import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 
-jest.mock('@kbn/discoveries/impl/lib/build_default_esql_query');
-jest.mock('@kbn/discoveries/impl/lib/helpers/get_space_id');
-jest.mock('../../../lib/assert_workflows_enabled', () => ({
-  assertWorkflowsEnabled: jest.fn().mockResolvedValue(null),
-}));
+vi.mock('@kbn/discoveries/impl/lib/build_default_esql_query');
+vi.mock('@kbn/discoveries/impl/lib/helpers/get_space_id');
+vi.mock('../../../lib/assert_workflows_enabled', () => {
+      const mocked = {
+      assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockBuildDefaultEsqlQuery = buildDefaultEsqlQuery as jest.MockedFunction<
+const mockBuildDefaultEsqlQuery = buildDefaultEsqlQuery as MockedFunction<
   typeof buildDefaultEsqlQuery
 >;
-const mockGetSpaceId = getSpaceId as jest.MockedFunction<typeof getSpaceId>;
+const mockGetSpaceId = getSpaceId as MockedFunction<typeof getSpaceId>;
 
 const mockEsClient = {
-  search: jest.fn(),
+  search: vi.fn(),
 } as unknown as ElasticsearchClient;
 
 const mockLogger = {
-  debug: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 const mockRequest = {
   headers: {},
 } as never;
 
-const mockGetStartServices = jest.fn().mockResolvedValue({
+const mockGetStartServices = vi.fn().mockResolvedValue({
   coreStart: {
     elasticsearch: {
       client: {
-        asScoped: jest.fn().mockReturnValue({
+        asScoped: vi.fn().mockReturnValue({
           asCurrentUser: mockEsClient,
         }),
       },
@@ -56,7 +62,7 @@ const mockGetStartServices = jest.fn().mockResolvedValue({
 
 describe('GET /internal/attack_discovery/attack_discovery/queries/esql/default', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetSpaceId.mockReturnValue('default');
     mockBuildDefaultEsqlQuery.mockResolvedValue(
       [
@@ -165,8 +171,8 @@ describe('registerGetDefaultEsqlQueryRoute feature flag', () => {
     const { registerGetDefaultEsqlQueryRoute } = await import('./get_default_esql_query');
 
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerGetDefaultEsqlQueryRoute(router, mockLogger, {
       getStartServices: mockGetStartServices,
@@ -187,8 +193,8 @@ describe('registerGetDefaultEsqlQueryRoute feature flag', () => {
     const { registerGetDefaultEsqlQueryRoute } = await import('./get_default_esql_query');
 
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerGetDefaultEsqlQueryRoute(router, mockLogger, {
       getStartServices: mockGetStartServices,
@@ -207,7 +213,7 @@ describe('registerGetDefaultEsqlQueryRoute feature flag', () => {
 
   it('returns 404 when the feature flag is disabled', async () => {
     const { assertWorkflowsEnabled } = await import('../../../lib/assert_workflows_enabled');
-    (assertWorkflowsEnabled as jest.Mock).mockImplementationOnce(
+    (assertWorkflowsEnabled as Mock).mockImplementationOnce(
       ({ response: r }: { response: ReturnType<typeof httpServerMock.createResponseFactory> }) =>
         r.notFound({ body: { message: 'Attack Discovery workflows are not enabled' } })
     );
@@ -215,8 +221,8 @@ describe('registerGetDefaultEsqlQueryRoute feature flag', () => {
     const { registerGetDefaultEsqlQueryRoute } = await import('./get_default_esql_query');
 
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerGetDefaultEsqlQueryRoute(router, mockLogger, {
       getStartServices: mockGetStartServices,

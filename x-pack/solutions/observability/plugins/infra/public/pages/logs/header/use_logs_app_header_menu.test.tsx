@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { act, render, renderHook } from '@testing-library/react';
 import React from 'react';
@@ -45,8 +47,8 @@ function collectEbt(
   return collected;
 }
 
-const mockGetRedirectUrl = jest.fn(() => '/app/observabilityOnboarding');
-const mockNavigateToUrl = jest.fn();
+const mockGetRedirectUrl = vi.fn(() => '/app/observabilityOnboarding');
+const mockNavigateToUrl = vi.fn();
 const mockCapabilities = {
   logs: { save: true },
 };
@@ -54,32 +56,41 @@ const mockLogView = {
   isPersistedLogView: true,
 };
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({
-    services: {
-      application: { capabilities: mockCapabilities, navigateToUrl: mockNavigateToUrl },
-      observability: {
-        useRulesLink: () => ({ href: '/app/observability/alerts/rules' }),
-      },
-      share: {
-        url: {
-          locators: {
-            get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibanaContextForPlugin: () => ({
+        services: {
+          application: { capabilities: mockCapabilities, navigateToUrl: mockNavigateToUrl },
+          observability: {
+            useRulesLink: () => ({ href: '/app/observability/alerts/rules' }),
+          },
+          share: {
+            url: {
+              locators: {
+                get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+              },
+            },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/logs-shared-plugin/public', () => ({
-  useLogViewContext: () => mockLogView,
-}));
+vi.mock('@kbn/logs-shared-plugin/public', () => {
+      const mocked = {
+      useLogViewContext: () => mockLogView,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../alerting/log_threshold/components/alert_flyout', () => ({
-  AlertFlyout: ({ visible }: { visible: boolean }) =>
-    visible ? <div data-test-subj="logsAlertFlyout" /> : null,
-}));
+vi.mock('../../../alerting/log_threshold/components/alert_flyout', () => {
+      const mocked = {
+      AlertFlyout: ({ visible }: { visible: boolean }) =>
+        visible ? <div data-test-subj="logsAlertFlyout" /> : null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function findItem(
   items: AppHeaderMenu['items'],
@@ -156,7 +167,7 @@ describe('useLogsAppHeaderMenu', () => {
   });
 
   it('uses Manage ML Jobs as the primary action', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     const { result } = renderHook(() =>
       useLogsAppHeaderMenu({
         primaryActionItem: getManageMlJobsPrimaryAction(onClick),
@@ -177,7 +188,7 @@ describe('useLogsAppHeaderMenu', () => {
       useLogsAppHeaderMenu({
         primaryActionItem: getRecreateMlJobPrimaryAction({
           hasSetupCapabilities: false,
-          onClick: jest.fn(),
+          onClick: vi.fn(),
         }),
       })
     );

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import React from 'react';
 import { Route } from '@kbn/shared-ux-router';
@@ -56,7 +58,7 @@ const mockCore: () => [() => ChromeBreadcrumb[], any] = () => {
   const core = {
     application: {
       getUrlForApp: (app: string) => (app === 'uptime' ? '/app/uptime' : '/app/observability'),
-      navigateToUrl: jest.fn(),
+      navigateToUrl: vi.fn(),
     },
     chrome: {
       setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpStart } from '@kbn/core/public';
 
 import type { DataSourceWithSecrets } from '../common';
@@ -12,9 +15,9 @@ import { DATA_SOURCES_LIST_ROUTE_PATH, getDataSourceByIdApiPath, type DataSource
 import { DataSourcesClient } from './data_sources_client';
 
 const createHttpMock = (): Pick<HttpStart, 'get' | 'put' | 'delete'> => ({
-  get: jest.fn(),
-  put: jest.fn(),
-  delete: jest.fn(),
+  get: vi.fn(),
+  put: vi.fn(),
+  delete: vi.fn(),
 });
 
 describe('DataSourcesClient', () => {
@@ -28,7 +31,7 @@ describe('DataSourcesClient', () => {
         { type: 'gcs', name: 'b', description: '', settings: {} },
       ];
 
-      (http.get as jest.Mock).mockResolvedValue({ data_sources: sources });
+      (http.get as Mock).mockResolvedValue({ data_sources: sources });
 
       await expect(client.get()).resolves.toEqual(sources);
       expect(http.get).toHaveBeenCalledWith(DATA_SOURCES_LIST_ROUTE_PATH);
@@ -48,7 +51,7 @@ describe('DataSourcesClient', () => {
       const client = new DataSourcesClient(http as unknown as HttpStart);
 
       const response: DataSource = { type: 's3', name: 'x', description: '', settings: {} };
-      (http.get as jest.Mock).mockResolvedValue(response);
+      (http.get as Mock).mockResolvedValue(response);
 
       await expect(client.getById('  my_id  ')).resolves.toEqual(response);
       expect(http.get).toHaveBeenCalledWith(getDataSourceByIdApiPath('my_id'));
@@ -108,7 +111,7 @@ describe('DataSourcesClient', () => {
         },
       };
 
-      (http.put as jest.Mock).mockResolvedValue(undefined);
+      (http.put as Mock).mockResolvedValue(undefined);
 
       await expect(client.add(data)).resolves.toBeUndefined();
 
@@ -158,7 +161,7 @@ describe('DataSourcesClient', () => {
         },
       };
 
-      (http.put as jest.Mock).mockResolvedValue(undefined);
+      (http.put as Mock).mockResolvedValue(undefined);
 
       await expect(client.update(data)).resolves.toBeUndefined();
 
@@ -189,7 +192,7 @@ describe('DataSourcesClient', () => {
         },
       };
 
-      (http.put as jest.Mock).mockResolvedValue(undefined);
+      (http.put as Mock).mockResolvedValue(undefined);
 
       await client.update(data);
 
@@ -220,7 +223,7 @@ describe('DataSourcesClient', () => {
         },
       };
 
-      (http.put as jest.Mock).mockResolvedValue(undefined);
+      (http.put as Mock).mockResolvedValue(undefined);
 
       await client.update(data);
 
@@ -253,7 +256,7 @@ describe('DataSourcesClient', () => {
         },
       };
 
-      (http.put as jest.Mock).mockResolvedValue(undefined);
+      (http.put as Mock).mockResolvedValue(undefined);
 
       await client.update(data);
 
@@ -289,7 +292,7 @@ describe('DataSourcesClient', () => {
         },
       };
 
-      (http.put as jest.Mock).mockResolvedValue(undefined);
+      (http.put as Mock).mockResolvedValue(undefined);
 
       await client.update(data);
 
@@ -320,7 +323,7 @@ describe('DataSourcesClient', () => {
         },
       };
 
-      (http.put as jest.Mock).mockResolvedValue(undefined);
+      (http.put as Mock).mockResolvedValue(undefined);
 
       await client.update(data);
 
@@ -354,7 +357,7 @@ describe('DataSourcesClient', () => {
         },
       };
 
-      (http.put as jest.Mock).mockResolvedValue(undefined);
+      (http.put as Mock).mockResolvedValue(undefined);
 
       await client.update(data);
 
@@ -384,7 +387,7 @@ describe('DataSourcesClient', () => {
         },
       };
 
-      (http.put as jest.Mock).mockResolvedValue(undefined);
+      (http.put as Mock).mockResolvedValue(undefined);
 
       await client.update(data);
 
@@ -407,7 +410,7 @@ describe('DataSourcesClient', () => {
       const http = createHttpMock();
       const client = new DataSourcesClient(http as unknown as HttpStart);
 
-      (http.delete as jest.Mock).mockResolvedValue(undefined);
+      (http.delete as Mock).mockResolvedValue(undefined);
 
       await expect(client.delete('a')).resolves.toBeUndefined();
       expect(http.delete).toHaveBeenCalledWith(getDataSourceByIdApiPath('a'));
@@ -417,7 +420,7 @@ describe('DataSourcesClient', () => {
       const http = createHttpMock();
       const client = new DataSourcesClient(http as unknown as HttpStart);
 
-      (http.delete as jest.Mock).mockResolvedValue(undefined);
+      (http.delete as Mock).mockResolvedValue(undefined);
 
       await expect(client.delete(['a', 'b'])).resolves.toBeUndefined();
       expect(http.delete).toHaveBeenNthCalledWith(1, getDataSourceByIdApiPath('a'));

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { adHocRunStatus, backfillInitiator } from '../../common/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type {
@@ -29,14 +32,17 @@ import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { eventLogClientMock, eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 
-jest.mock('../lib/rule_gaps/update/update_gaps', () => ({
-  updateGaps: jest.fn(),
-}));
-jest.mock('./lib/calculate_schedule', () => {
-  const actual = jest.requireActual('./lib/calculate_schedule');
+vi.mock('../lib/rule_gaps/update/update_gaps', () => {
+      const mocked = {
+      updateGaps: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./lib/calculate_schedule', async () => {
+  const actual = (await vi.importActual('./lib/calculate_schedule'));
   return {
     ...actual,
-    calculateSchedule: jest.fn(actual.calculateSchedule),
+    calculateSchedule: vi.fn(actual.calculateSchedule),
   };
 });
 import { calculateSchedule } from './lib/calculate_schedule';
@@ -71,7 +77,7 @@ function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfill
   };
 }
 
-const mockRuleType: jest.Mocked<UntypedNormalizedRuleType> = {
+const mockRuleType: Mocked<UntypedNormalizedRuleType> = {
   id: 'myType',
   name: 'Test',
   actionGroups: [
@@ -82,7 +88,7 @@ const mockRuleType: jest.Mocked<UntypedNormalizedRuleType> = {
   minimumLicenseRequired: 'basic',
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
-  executor: jest.fn(),
+  executor: vi.fn(),
   category: 'test',
   producer: 'alerts',
   solution: 'stack',
@@ -231,8 +237,8 @@ const mockCreatePointInTimeFinderAsInternalUser = (
     ],
   }
 ) => {
-  unsecuredSavedObjectsClient.createPointInTimeFinder = jest.fn().mockResolvedValue({
-    close: jest.fn(),
+  unsecuredSavedObjectsClient.createPointInTimeFinder = vi.fn().mockResolvedValue({
+    close: vi.fn(),
     find: function* asyncGenerator() {
       yield response;
     },
@@ -241,19 +247,17 @@ const mockCreatePointInTimeFinderAsInternalUser = (
 
 describe('BackfillClient', () => {
   let backfillClient: BackfillClient;
-  let isSystemAction: jest.Mock;
+  let isSystemAction: Mock;
 
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2024-01-30T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2024-01-30T00:00:00.000Z'));
   });
 
-  beforeEach(() => {
-    jest.resetAllMocks();
-    const { calculateSchedule: realCalculateSchedule } = jest.requireActual(
-      './lib/calculate_schedule'
-    );
-    (calculateSchedule as jest.Mock).mockImplementation(realCalculateSchedule);
-    isSystemAction = jest.fn().mockReturnValue(false);
+  beforeEach(async () => {
+    vi.resetAllMocks();
+    const { calculateSchedule: realCalculateSchedule } = (await vi.importActual('./lib/calculate_schedule'));
+    (calculateSchedule as Mock).mockImplementation(realCalculateSchedule);
+    isSystemAction = vi.fn().mockReturnValue(false);
     actionsClient.isSystemAction.mockImplementation(isSystemAction);
 
     ruleTypeRegistry.get.mockReturnValue(mockRuleType);
@@ -265,7 +269,7 @@ describe('BackfillClient', () => {
     });
   });
 
-  afterAll(() => jest.useRealTimers());
+  afterAll(() => vi.useRealTimers());
 
   describe('constructor', () => {
     test('should register backfill task type', async () => {
@@ -1665,8 +1669,8 @@ describe('BackfillClient', () => {
       const rule1 = getMockRule();
       const mockRules = [rule1];
 
-      (calculateSchedule as jest.Mock).mockImplementation((interval: string, ranges: unknown[]) => {
-        const { calculateSchedule: realCalc } = jest.requireActual('./lib/calculate_schedule');
+      (calculateSchedule as Mock).mockImplementation(async (interval: string, ranges: unknown[]) => {
+        const { calculateSchedule: realCalc } = (await vi.importActual('./lib/calculate_schedule'));
         const result = realCalc(interval, ranges);
         return { ...result, truncated: true };
       });
@@ -2377,7 +2381,7 @@ describe('BackfillClient', () => {
       };
 
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce(bulkCreateResult);
-      (updateGaps as jest.Mock).mockRejectedValueOnce(new Error('Failed to update gaps'));
+      (updateGaps as Mock).mockRejectedValueOnce(new Error('Failed to update gaps'));
 
       await backfillClient.bulkQueue({
         auditLogger,
@@ -2586,7 +2590,7 @@ describe('BackfillClient', () => {
     });
 
     test('should handle errors from createPointInTimeFinder', async () => {
-      unsecuredSavedObjectsClient.createPointInTimeFinder = jest
+      unsecuredSavedObjectsClient.createPointInTimeFinder = vi
         .fn()
         .mockRejectedValueOnce(new Error('error!'));
 
@@ -2978,8 +2982,8 @@ describe('BackfillClient', () => {
       const mockStart = new Date('2024-01-01T00:00:00.000Z');
       const mockEnd = new Date('2024-01-02T00:00:00.000Z');
 
-      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockResolvedValue({
-        close: jest.fn(),
+      mockSavedObjectsRepository.createPointInTimeFinder = vi.fn().mockResolvedValue({
+        close: vi.fn(),
         find: function* asyncGenerator() {
           throw new Error('Failed to find');
         },

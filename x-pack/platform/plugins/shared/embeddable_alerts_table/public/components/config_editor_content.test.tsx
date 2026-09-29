@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable no-console */
 
 import React from 'react';
@@ -25,8 +27,8 @@ import { CONFIG_EDITOR_CLEAR_FILTERS_LABEL } from '../translations';
 
 const core = coreMock.createStart();
 
-jest.mock('@kbn/response-ops-rules-apis/apis/get_internal_rule_types');
-const mockGetInternalRuleTypes = jest.mocked(getInternalRuleTypes);
+vi.mock('@kbn/response-ops-rules-apis/apis/get_internal_rule_types');
+const mockGetInternalRuleTypes = vi.mocked(getInternalRuleTypes);
 mockGetInternalRuleTypes.mockResolvedValue([
   { id: 'test-o11y-rule-type', name: 'Test o11y rule type', solution: 'observability' },
   { id: 'test-sec-rule-type', name: 'Test sec rule type', solution: 'security' },
@@ -47,7 +49,7 @@ const queryClient = new QueryClient({
 
 describe('ConfigEditorContent', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 
@@ -56,8 +58,8 @@ describe('ConfigEditorContent', () => {
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <ConfigEditorContent
-            onSave={jest.fn()}
-            onCancel={jest.fn()}
+            onSave={vi.fn()}
+            onCancel={vi.fn()}
             services={core}
             ariaLabelledBy="configEditorFlyout"
           />
@@ -72,8 +74,8 @@ describe('ConfigEditorContent', () => {
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <ConfigEditorContent
-            onSave={jest.fn()}
-            onCancel={jest.fn()}
+            onSave={vi.fn()}
+            onCancel={vi.fn()}
             initialConfig={{
               solution: 'observability',
               query: {
@@ -99,8 +101,8 @@ describe('ConfigEditorContent', () => {
         <QueryClientProvider client={queryClient}>
           <ConfigEditorContent
             ariaLabelledBy="configEditorFlyout"
-            onSave={jest.fn()}
-            onCancel={jest.fn()}
+            onSave={vi.fn()}
+            onCancel={vi.fn()}
             initialConfig={{
               solution: 'observability',
               query: {
@@ -125,8 +127,8 @@ describe('ConfigEditorContent', () => {
         <QueryClientProvider client={queryClient}>
           <ConfigEditorContent
             ariaLabelledBy="configEditorFlyout"
-            onSave={jest.fn()}
-            onCancel={jest.fn()}
+            onSave={vi.fn()}
+            onCancel={vi.fn()}
             initialConfig={{
               solution: 'observability',
               query: {

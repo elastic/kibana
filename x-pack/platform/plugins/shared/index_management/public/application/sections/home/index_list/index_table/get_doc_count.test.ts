@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { INTERNAL_API_BASE_PATH } from '../../../../../../common/constants';
 
 import { docCountApi, RequestResultType } from './get_doc_count';
@@ -26,20 +29,20 @@ const deferred = <T>() => {
 
 describe('docCountApi', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
     // rxjs bufferTime uses timers internally; ensure we don't leave any scheduled work around.
-    jest.runOnlyPendingTimers();
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   it('buffers requests within 100ms and posts a single batched request', async () => {
     const httpSetup = {
-      post: jest.fn().mockResolvedValue({}),
+      post: vi.fn().mockResolvedValue({}),
     } as any;
 
     const api = docCountApi(httpSetup);
@@ -50,7 +53,7 @@ describe('docCountApi', () => {
     api.getByName('index-a');
     api.getByName('index-b');
 
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     await flushPromises();
 
     expect(httpSetup.post).toHaveBeenCalledTimes(1);
@@ -70,7 +73,7 @@ describe('docCountApi', () => {
 
   it('accumulates results across multiple batches', async () => {
     const httpSetup = {
-      post: jest
+      post: vi
         .fn()
         .mockResolvedValueOnce({ 'index-a': 1 })
         .mockResolvedValueOnce({ 'index-b': 2 }),
@@ -82,7 +85,7 @@ describe('docCountApi', () => {
     const sub = api.getObservable().subscribe((v) => emissions.push(v));
 
     api.getByName('index-a');
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     await flushPromises();
 
     expect(emissions[emissions.length - 1]).toEqual({
@@ -90,7 +93,7 @@ describe('docCountApi', () => {
     });
 
     api.getByName('index-b');
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     await flushPromises();
 
     expect(emissions[emissions.length - 1]).toEqual({
@@ -103,7 +106,7 @@ describe('docCountApi', () => {
 
   it('marks only indices from a failed batch as errored and does not override existing successes', async () => {
     const httpSetup = {
-      post: jest
+      post: vi
         .fn()
         .mockResolvedValueOnce({ 'index-a': 3 })
         .mockRejectedValueOnce(new Error('boom')),
@@ -116,13 +119,13 @@ describe('docCountApi', () => {
 
     // First: index-a succeeds
     api.getByName('index-a');
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     await flushPromises();
 
     // Second: batch with index-a (already known) and index-b fails; only index-b should become error
     api.getByName('index-a');
     api.getByName('index-b');
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     await flushPromises();
 
     expect(emissions[emissions.length - 1]).toEqual({
@@ -135,7 +138,7 @@ describe('docCountApi', () => {
 
   it('replays the latest accumulated map to a late subscriber without issuing a new request', async () => {
     const httpSetup = {
-      post: jest.fn().mockResolvedValue({ 'index-a': 42 }),
+      post: vi.fn().mockResolvedValue({ 'index-a': 42 }),
     } as any;
 
     const api = docCountApi(httpSetup);
@@ -145,7 +148,7 @@ describe('docCountApi', () => {
     const earlySub = api.getObservable().subscribe((v) => earlyEmissions.push(v));
 
     api.getByName('index-a');
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     await flushPromises();
 
     expect(httpSetup.post).toHaveBeenCalledTimes(1);
@@ -172,7 +175,7 @@ describe('docCountApi', () => {
   it('does not emit error results for an aborted in-flight request', async () => {
     const d = deferred<Record<string, number>>();
     const httpSetup = {
-      post: jest.fn(() => d.promise),
+      post: vi.fn(() => d.promise),
     } as any;
 
     const api = docCountApi(httpSetup);
@@ -181,11 +184,11 @@ describe('docCountApi', () => {
     const sub = api.getObservable().subscribe((v) => emissions.push(v));
 
     api.getByName('index-a');
-    jest.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
     await flushPromises();
 
     expect(httpSetup.post).toHaveBeenCalledTimes(1);
-    const signal = (httpSetup.post as jest.Mock).mock.calls[0]?.[1]?.signal as AbortSignal;
+    const signal = (httpSetup.post as Mock).mock.calls[0]?.[1]?.signal as AbortSignal;
     expect(signal).toBeInstanceOf(AbortSignal);
 
     api.abort();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { ReactElement } from 'react';
 import { renderHook } from '@testing-library/react';
 import type { WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
@@ -23,31 +26,32 @@ const createCapabilities = (
   ...overrides,
 });
 
-jest.mock('@kbn/workflows-ui');
-jest.mock('../use_attacks_privileges');
-jest.mock('../../../../../common/lib/kibana');
-jest.mock(
+vi.mock('@kbn/workflows-ui');
+vi.mock('../use_attacks_privileges');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock(
   '../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel',
-  () => ({
-    ...jest.requireActual(
-      '../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel'
-    ),
-    AlertWorkflowsPanel: () => null,
-  })
+  async () => {
+      const mocked = {
+        ...(await vi.importActual('../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel')),
+        AlertWorkflowsPanel: () => null,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
 >;
-const mockUseWorkflowsUIEnabledSetting = useWorkflowsUIEnabledSetting as jest.MockedFunction<
+const mockUseWorkflowsUIEnabledSetting = useWorkflowsUIEnabledSetting as MockedFunction<
   typeof useWorkflowsUIEnabledSetting
 >;
-const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
+const mockUseAttacksPrivileges = useAttacksPrivileges as MockedFunction<
   typeof useAttacksPrivileges
 >;
 
-const reportEventMock = jest.fn();
-(useKibana as jest.Mock).mockReturnValue({
+const reportEventMock = vi.fn();
+(useKibana as Mock).mockReturnValue({
   services: {
     telemetry: {
       reportEvent: reportEventMock,
@@ -65,7 +69,7 @@ const defaultAlertItems = [
 
 describe('useBulkAttackRunWorkflowItems', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseAttacksPrivileges.mockReturnValue({
       hasIndexWrite: true,
@@ -101,11 +105,11 @@ describe('useBulkAttackRunWorkflowItems', () => {
     it('should pass alert ids with the provided concrete index to panel content', () => {
       const { result } = renderHook(() => useBulkAttackRunWorkflowItems());
 
-      const closePopoverMenu = jest.fn();
+      const closePopoverMenu = vi.fn();
       const panelContent = result.current.panels[0].renderContent({
         alertItems: defaultAlertItems,
         closePopoverMenu,
-        setIsBulkActionsLoading: jest.fn(),
+        setIsBulkActionsLoading: vi.fn(),
       }) as ReactElement;
       expect(panelContent.props.alertIds).toEqual([
         { _id: 'attack-1', _index: '.alerts-security.attack.discovery.alerts-default-000001' },
@@ -120,11 +124,11 @@ describe('useBulkAttackRunWorkflowItems', () => {
 
       const { result } = renderHook(() => useBulkAttackRunWorkflowItems());
 
-      const closePopoverMenu = jest.fn();
+      const closePopoverMenu = vi.fn();
       const panelContent = result.current.panels[0].renderContent({
         alertItems: alertItemsWithIndex,
         closePopoverMenu,
-        setIsBulkActionsLoading: jest.fn(),
+        setIsBulkActionsLoading: vi.fn(),
       }) as ReactElement;
       expect(panelContent.props.alertIds).toEqual([{ _id: 'attack-1', _index: concreteIndex }]);
     });
@@ -133,11 +137,11 @@ describe('useBulkAttackRunWorkflowItems', () => {
       const { result } = renderHook(() => useBulkAttackRunWorkflowItems());
 
       const alertItemsWithoutIndex = [{ _id: 'attack-1', data: [], ecs: { _id: 'attack-1' } }];
-      const closePopoverMenu = jest.fn();
+      const closePopoverMenu = vi.fn();
       const panelContent = result.current.panels[0].renderContent({
         alertItems: alertItemsWithoutIndex,
         closePopoverMenu,
-        setIsBulkActionsLoading: jest.fn(),
+        setIsBulkActionsLoading: vi.fn(),
       }) as ReactElement;
       expect(panelContent.props.alertIds).toEqual([]);
     });
@@ -145,11 +149,11 @@ describe('useBulkAttackRunWorkflowItems', () => {
     it('should pass closePopoverMenu to the panel onClose', () => {
       const { result } = renderHook(() => useBulkAttackRunWorkflowItems());
 
-      const closePopoverMenu = jest.fn();
+      const closePopoverMenu = vi.fn();
       const panelContent = result.current.panels[0].renderContent({
         alertItems: defaultAlertItems,
         closePopoverMenu,
-        setIsBulkActionsLoading: jest.fn(),
+        setIsBulkActionsLoading: vi.fn(),
       }) as ReactElement;
       panelContent.props.onClose();
       expect(closePopoverMenu).toHaveBeenCalledTimes(1);

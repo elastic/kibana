@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Enabler } from '.';
 import { forbidden } from '@hapi/boom';
 
-const updateModelSpy = jest.fn((properties) => properties);
+const updateModelSpy = vi.fn((properties) => properties);
 
 describe('Settings Enabler Class for calling API to update Elasticsearch Settings', () => {
   test('should return status from successfully calling API', async () => {

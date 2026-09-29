@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
@@ -18,9 +20,12 @@ import { BehaviorSubject, of } from 'rxjs';
 import { AddDiscoverSessionPanelAction } from './add_discover_session_panel_action';
 import { mockControlState } from '../../__mocks__/esql_controls';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'generated-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn(() => 'generated-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createEsqlControlApi = (uuid: string, state: OptionsListESQLControlState) => ({
   uuid,
@@ -47,18 +52,18 @@ describe('AddDiscoverSessionPanelAction', () => {
   const trigger: Trigger = { id: 'TEST_TRIGGER' };
   const application = coreMock.createStart().application;
   const locator = {
-    getLocation: jest.fn().mockResolvedValue({ app: 'discover', path: '/new-discover-session' }),
+    getLocation: vi.fn().mockResolvedValue({ app: 'discover', path: '/new-discover-session' }),
   };
-  const navigateToEditor = jest.fn();
+  const navigateToEditor = vi.fn();
   const embeddable = {
     ...embeddablePluginMock.createStartContract(),
-    getStateTransfer: jest.fn().mockReturnValue({
+    getStateTransfer: vi.fn().mockReturnValue({
       navigateToEditor,
     }),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     locator.getLocation.mockResolvedValue({ app: 'discover', path: '/new-discover-session' });
     embeddable.getStateTransfer.mockReturnValue({ navigateToEditor });
   });
@@ -92,9 +97,9 @@ describe('AddDiscoverSessionPanelAction', () => {
     const embeddableApi = {
       ...getMockPresentationContainer(),
       children$: new BehaviorSubject<Record<string, unknown>>({}),
-      getAppContext: jest.fn().mockReturnValue({
+      getAppContext: vi.fn().mockReturnValue({
         currentAppId: 'dashboard',
-        getCurrentPath: jest.fn().mockReturnValue('/dashboard/edit'),
+        getCurrentPath: vi.fn().mockReturnValue('/dashboard/edit'),
       }),
     };
     embeddableApi.children$.next({
@@ -119,9 +124,9 @@ describe('AddDiscoverSessionPanelAction', () => {
 
   it('leaves dashboardControlGroupState undefined when the embeddable is not a presentation container', async () => {
     const embeddableApi = {
-      getAppContext: jest.fn().mockReturnValue({
+      getAppContext: vi.fn().mockReturnValue({
         currentAppId: 'dashboard',
-        getCurrentPath: jest.fn().mockReturnValue('/dashboard/edit'),
+        getCurrentPath: vi.fn().mockReturnValue('/dashboard/edit'),
       }),
     };
     const { action, actionContext } = createAction({ embeddableApi });

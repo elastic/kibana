@@ -107,21 +107,21 @@ describe('collapse_fn', () => {
   });
 
   it('throws error if number of functions and metrics do not match', async () => {
-    expect(() =>
-      runFn(
-        {
-          type: 'datatable',
-          columns: [
-            { id: 'val', name: 'val', meta: { type: 'number' } },
-            { id: 'val2', name: 'val2', meta: { type: 'number' } },
-            { id: 'val3', name: 'val3', meta: { type: 'number' } },
-            { id: 'split', name: 'split', meta: { type: 'string' } },
-          ],
-          rows: [{ val: 1, val2: 1, val3: 1, split: 'A' }],
-        },
-        { metric: ['val', 'val2', 'val3'], fn: ['sum', 'min'] }
-      )
-    ).rejects.toMatchInlineSnapshot(`
+    await expect(() =>
+            runFn(
+              {
+                type: 'datatable',
+                columns: [
+                  { id: 'val', name: 'val', meta: { type: 'number' } },
+                  { id: 'val2', name: 'val2', meta: { type: 'number' } },
+                  { id: 'val3', name: 'val3', meta: { type: 'number' } },
+                  { id: 'split', name: 'split', meta: { type: 'string' } },
+                ],
+                rows: [{ val: 1, val2: 1, val3: 1, split: 'A' }],
+              },
+              { metric: ['val', 'val2', 'val3'], fn: ['sum', 'min'] }
+            )
+          ).rejects.toMatchInlineSnapshot(`
       [Error: lens_collapse - Called with 3 metrics and 2 collapse functions. 
       Must be called with either a single collapse function for all metrics,
       or a number of collapse functions matching the number of metrics.]

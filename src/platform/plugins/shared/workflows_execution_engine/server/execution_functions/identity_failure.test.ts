@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { usageApiPluginMock } from '@kbn/usage-api-plugin/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
@@ -32,14 +34,14 @@ import {
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
-jest.mock('./setup_dependencies');
-jest.mock('../concurrency/concurrency_queue_drainer');
+vi.mock('./setup_dependencies');
+vi.mock('../concurrency/concurrency_queue_drainer');
 
 const setup = () => {
   const dependencies = mockContextDependencies();
   const accounts = dependencies.coreStart.security.serviceAccounts;
-  jest.spyOn(accounts, 'isEnabled').mockReturnValue(true);
-  jest
+  vi.spyOn(accounts, 'isEnabled').mockReturnValue(true);
+  vi
     .spyOn(accounts, 'withScopedRequestForWorkload')
     .mockRejectedValue(new Error('Binding changed'));
   let execution: EsWorkflowExecution = {
@@ -92,9 +94,9 @@ const setup = () => {
     return { errors: false, items: [{ id: 'child', index: '.workflows-executions' }] };
   });
   const repository = new WorkflowExecutionRepository(dataClient);
-  jest.spyOn(repository, 'tryUpdateWorkflowExecutionWithVersion');
-  jest.spyOn(repository, 'getWorkflowExecutionById').mockImplementation(async () => execution);
-  jest.spyOn(repository, 'updateWorkflowExecution').mockImplementation(async (update) => {
+  vi.spyOn(repository, 'tryUpdateWorkflowExecutionWithVersion');
+  vi.spyOn(repository, 'getWorkflowExecutionById').mockImplementation(async () => execution);
+  vi.spyOn(repository, 'updateWorkflowExecution').mockImplementation(async (update) => {
     execution = { ...execution, ...update };
     seqNo++;
   });
@@ -102,7 +104,7 @@ const setup = () => {
     usageApiPluginMock.createSetupContract().usageReporting,
     createMockLogger()
   );
-  jest.spyOn(meteringService, 'reportWorkflowExecution').mockResolvedValue(undefined);
+  vi.spyOn(meteringService, 'reportWorkflowExecution').mockResolvedValue(undefined);
   return {
     accounts,
     dataClient,
@@ -121,7 +123,7 @@ const setup = () => {
       fakeRequest: createFakeKibanaRequest(),
       dependencies,
       workflowsExecutionEngine: workflowsExecutionEngineMock.createStart(),
-      internalResumeWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+      internalResumeWorkflowExecution: vi.fn().mockResolvedValue(undefined),
       meteringService,
       workflowExecutionRepository: repository,
       stepExecutionRepository: createMockStepExecutionRepository(),
@@ -134,8 +136,8 @@ describe.each([
   ['resume', resumeWorkflow],
 ] as const)('%s identity failure', (_name, execute) => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(drainConcurrencyQueueSlots).mockReset();
+    vi.clearAllMocks();
+    vi.mocked(drainConcurrencyQueueSlots).mockReset();
   });
 
   it('finalizes the execution and immediately wakes its parent, drains the queue and reports metering', async () => {
@@ -260,7 +262,7 @@ describe.each([
     });
     if (when === 'terminal after last conflict') {
       let conflicts = 0;
-      jest
+      vi
         .mocked(params.workflowExecutionRepository.tryUpdateWorkflowExecutionWithVersion)
         .mockImplementation(async () => {
           if (++conflicts === 3) await cancel();
@@ -268,7 +270,7 @@ describe.each([
         });
     }
     if (when === 'before cleanup') {
-      jest.mocked(accounts.withScopedRequestForWorkload).mockImplementationOnce(async () => {
+      vi.mocked(accounts.withScopedRequestForWorkload).mockImplementationOnce(async () => {
         await cancel();
         throw new Error('Binding changed');
       });
@@ -345,7 +347,7 @@ describe.each([
     const { params, accounts } = setup();
     const repository = params.workflowExecutionRepository;
     const execution = await repository.getWorkflowExecutionById('child', 'default');
-    jest
+    vi
       .spyOn(repository, 'getWorkflowExecutionById')
       .mockResolvedValueOnce(execution)
       .mockRejectedValueOnce(new Error('Transient post-execution read failure'));
@@ -364,7 +366,7 @@ describe.each([
     expect(repository.updateWorkflowExecution).toHaveBeenCalledTimes(1);
     expect({
       parentResumes: params.internalResumeWorkflowExecution.mock.calls,
-      queueDrains: jest.mocked(drainConcurrencyQueueSlots).mock.calls,
+      queueDrains: vi.mocked(drainConcurrencyQueueSlots).mock.calls,
     }).toEqual({
       parentResumes: [['parent', 'default', undefined]],
       queueDrains: [[expect.objectContaining({ concurrencyGroupKey: 'group' })]],
@@ -374,9 +376,9 @@ describe.each([
   it('keeps parent cleanup pending when wake-up and fail-closed recovery fail', async () => {
     const { params, accounts } = setup();
     const repository = params.workflowExecutionRepository;
-    const read = jest.mocked(repository.getWorkflowExecutionById).getMockImplementation();
+    const read = vi.mocked(repository.getWorkflowExecutionById).getMockImplementation();
     if (!read) throw new Error('Missing test repository implementation');
-    jest.mocked(repository.getWorkflowExecutionById).mockImplementation(async (id, space) => {
+    vi.mocked(repository.getWorkflowExecutionById).mockImplementation(async (id, space) => {
       if (id === 'parent') throw new Error('Parent read unavailable');
       return read(id, space);
     });
@@ -421,7 +423,7 @@ describe.each([
   });
   it('retries failed queue cleanup and retains the marker until it succeeds', async () => {
     const { params } = setup();
-    jest.mocked(drainConcurrencyQueueSlots).mockRejectedValueOnce(new Error('ES unavailable'));
+    vi.mocked(drainConcurrencyQueueSlots).mockRejectedValueOnce(new Error('ES unavailable'));
     await expect(execute(params)).rejects.toThrow('queue cleanup is still pending');
     expect(
       (await params.workflowExecutionRepository.getWorkflowExecutionById('child', 'default'))
@@ -446,12 +448,12 @@ describe.each([
           cancelRequested: true,
         });
       if (when === 'during minting') {
-        jest.mocked(accounts.withScopedRequestForWorkload).mockImplementationOnce(async () => {
+        vi.mocked(accounts.withScopedRequestForWorkload).mockImplementationOnce(async () => {
           await cancel();
           throw new Error('Binding changed');
         });
       } else {
-        jest
+        vi
           .mocked(params.stepExecutionRepository.markNonTerminalStepsFailed)
           .mockImplementationOnce(cancel);
       }
@@ -466,7 +468,7 @@ describe.each([
 
   it('finalizes a pending cancellation instead of emitting an identity-failure event', async () => {
     const { params, accounts } = setup();
-    jest.mocked(accounts.withScopedRequestForWorkload).mockImplementationOnce(async () => {
+    vi.mocked(accounts.withScopedRequestForWorkload).mockImplementationOnce(async () => {
       await params.workflowExecutionRepository.updateWorkflowExecution({
         id: 'child',
         cancelRequested: true,

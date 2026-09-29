@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
@@ -40,10 +43,10 @@ import { createFromHostEsSearchResponseMock, createHapiReadableStreamMock } from
 
 import type { HostUploadedFileMetadata } from './types';
 
-jest.mock('@kbn/files-plugin/server');
+vi.mock('@kbn/files-plugin/server');
 
-const createEsFileClientMock = _createEsFileClient as jest.Mock;
-const createFileHashTransformMock = _createFileHashTransform as jest.Mock;
+const createEsFileClientMock = _createEsFileClient as Mock;
+const createFileHashTransformMock = _createFileHashTransform as Mock;
 
 describe('FleetToHostFilesClient', () => {
   let esClientMock: ElasticsearchClientMock;
@@ -202,8 +205,7 @@ describe('FleetToHostFilesClient', () => {
     });
 
     it('should upload a file and use transform to create hash', async () => {
-      const hashTransform = jest
-        .requireActual('@kbn/files-plugin/server')
+      const hashTransform = (await vi.importActual('@kbn/files-plugin/server'))
         .createFileHashTransform();
 
       createFileHashTransformMock.mockReturnValue(hashTransform);

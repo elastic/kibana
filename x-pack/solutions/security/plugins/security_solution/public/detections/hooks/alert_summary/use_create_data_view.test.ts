@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useCreateEaseAlertsDataView } from './use_create_data_view';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
@@ -12,19 +15,19 @@ import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
-jest.mock('../../../common/hooks/use_space_id');
-jest.mock('../../../common/hooks/use_create_data_view');
+vi.mock('../../../common/hooks/use_space_id');
+vi.mock('../../../common/hooks/use_create_data_view');
 
 const dataView: DataView = createStubDataView({ spec: {} });
 
 describe('useCreateEaseAlertsDataView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return undefined and loading true while spaceId is undefined', () => {
-    (useSpaceId as jest.Mock).mockReturnValue(undefined);
-    (useCreateDataView as jest.Mock).mockReturnValue({ dataView: undefined, loading: true });
+    (useSpaceId as Mock).mockReturnValue(undefined);
+    (useCreateDataView as Mock).mockReturnValue({ dataView: undefined, loading: true });
 
     const { result } = renderHook(() => useCreateEaseAlertsDataView());
 
@@ -33,8 +36,8 @@ describe('useCreateEaseAlertsDataView', () => {
   });
 
   it('should return undefined and loading true while dataView is being created', () => {
-    (useSpaceId as jest.Mock).mockReturnValue('spaceId');
-    (useCreateDataView as jest.Mock).mockReturnValue({ dataView: undefined, loading: true });
+    (useSpaceId as Mock).mockReturnValue('spaceId');
+    (useCreateDataView as Mock).mockReturnValue({ dataView: undefined, loading: true });
 
     const { result } = renderHook(() => useCreateEaseAlertsDataView());
 
@@ -43,8 +46,8 @@ describe('useCreateEaseAlertsDataView', () => {
   });
 
   it('should return dataView and loading false when ready', () => {
-    (useSpaceId as jest.Mock).mockReturnValue('spaceId');
-    (useCreateDataView as jest.Mock).mockReturnValue({ dataView, loading: false });
+    (useSpaceId as Mock).mockReturnValue('spaceId');
+    (useCreateDataView as Mock).mockReturnValue({ dataView, loading: false });
 
     const { result } = renderHook(() => useCreateEaseAlertsDataView());
 

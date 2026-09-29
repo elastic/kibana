@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   InferenceServiceFormFields,
   isProviderForSolutions,
@@ -24,11 +26,14 @@ import { INTERNAL_OVERRIDE_FIELDS, ServiceProviderKeys } from '../constants';
 // Note: Variable must be prefixed with 'mock' to be allowed in jest.mock()
 let mockClonedProviders: InferenceProvider[];
 
-jest.mock('../hooks/use_providers', () => ({
-  useProviders: jest.fn(() => ({
-    data: mockClonedProviders,
-  })),
-}));
+vi.mock('../hooks/use_providers', () => {
+      const mocked = {
+      useProviders: vi.fn(() => ({
+        data: mockClonedProviders,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const httpMock = httpServiceMock.createStartContract();
 const notificationsMock = notificationServiceMock.createStartContract();

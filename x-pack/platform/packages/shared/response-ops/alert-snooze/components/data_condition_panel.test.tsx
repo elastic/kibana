@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -44,10 +46,10 @@ const createEntry = (overrides: Partial<DataConditionEntry> = {}): DataCondition
 });
 
 describe('DataConditionPanel', () => {
-  const onChangeMock = jest.fn();
+  const onChangeMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders editable inputs when the entry is not confirmed', () => {

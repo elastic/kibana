@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('../../../library', () => {
-  const actual = jest.requireActual('../../../library');
+import { vi } from 'vitest';
+import type { Mock, MockedClass } from 'vitest';
+
+vi.mock('../../../library', async () => {
+  const actual = (await vi.importActual('../../../library'));
   return {
     ...actual,
-    LibraryService: jest.fn(),
+    LibraryService: vi.fn(),
   };
 });
 
@@ -49,7 +52,7 @@ steps:
     connector-id: __install__.demo-connector
 `);
 
-const MockedLibraryService = LibraryService as jest.MockedClass<typeof LibraryService>;
+const MockedLibraryService = LibraryService as MockedClass<typeof LibraryService>;
 
 describe('Library Routes', () => {
   type MockRouteHandler = (
@@ -60,14 +63,14 @@ describe('Library Routes', () => {
 
   let routeHandlers: Record<string, { handler: MockRouteHandler }>;
   let mockLibraryService: {
-    listTemplates: jest.Mock;
-    getTemplate: jest.Mock;
-    getHealth: jest.Mock;
+    listTemplates: Mock;
+    getTemplate: Mock;
+    getHealth: Mock;
   };
-  let mockGlobalUiSettings: { get: jest.Mock };
-  let mockApi: { createWorkflow: jest.Mock };
-  let mockSpaces: { getSpaceId: jest.Mock };
-  let mockAudit: { logWorkflowCreated: jest.Mock; logWorkflowCreateFailed: jest.Mock };
+  let mockGlobalUiSettings: { get: Mock };
+  let mockApi: { createWorkflow: Mock };
+  let mockSpaces: { getSpaceId: Mock };
+  let mockAudit: { logWorkflowCreated: Mock; logWorkflowCreateFailed: Mock };
 
   const setToggle = (value: boolean) => mockGlobalUiSettings.get.mockResolvedValue(value);
 
@@ -77,7 +80,7 @@ describe('Library Routes', () => {
       license: {
         isAvailable: true,
         isActive: true,
-        hasAtLeast: jest.fn().mockReturnValue(true),
+        hasAtLeast: vi.fn().mockReturnValue(true),
         type: 'enterprise',
       },
     }),
@@ -91,35 +94,35 @@ describe('Library Routes', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     routeHandlers = {};
     mockLibraryService = {
-      listTemplates: jest.fn(),
-      getTemplate: jest.fn(),
-      getHealth: jest.fn(),
+      listTemplates: vi.fn(),
+      getTemplate: vi.fn(),
+      getHealth: vi.fn(),
     };
-    mockGlobalUiSettings = { get: jest.fn().mockResolvedValue(true) };
-    mockApi = { createWorkflow: jest.fn() };
-    mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') };
-    mockAudit = { logWorkflowCreated: jest.fn(), logWorkflowCreateFailed: jest.fn() };
+    mockGlobalUiSettings = { get: vi.fn().mockResolvedValue(true) };
+    mockApi = { createWorkflow: vi.fn() };
+    mockSpaces = { getSpaceId: vi.fn().mockReturnValue('default') };
+    mockAudit = { logWorkflowCreated: vi.fn(), logWorkflowCreateFailed: vi.fn() };
 
     MockedLibraryService.mockImplementation(() => mockLibraryService as unknown as LibraryService);
 
     const createVersionedRoute = (method: string, path: string) => ({
-      addVersion: jest.fn().mockImplementation((_config: unknown, handler: MockRouteHandler) => {
+      addVersion: vi.fn().mockImplementation((_config: unknown, handler: MockRouteHandler) => {
         routeHandlers[`${method}:${path}`] = { handler };
-        return { addVersion: jest.fn() };
+        return { addVersion: vi.fn() };
       }),
     });
 
     const mockRouter = {
       versioned: {
-        get: jest
+        get: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('GET', config.path)
           ),
-        post: jest
+        post: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('POST', config.path)
@@ -128,11 +131,11 @@ describe('Library Routes', () => {
     };
 
     const logger: Logger = {
-      error: jest.fn(),
-      warn: jest.fn(),
-      info: jest.fn(),
-      debug: jest.fn(),
-      get: jest.fn().mockReturnThis(),
+      error: vi.fn(),
+      warn: vi.fn(),
+      info: vi.fn(),
+      debug: vi.fn(),
+      get: vi.fn().mockReturnThis(),
     } as unknown as Logger;
 
     const routeDependencies: RouteDependencies = {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createMockStore, mockGlobalState } from '../../../../common/mock';
 import { createFilterOutCellActionFactory } from './filter_out';
 import type { SecurityCellActionExecutionContext } from '../../types';
@@ -42,7 +44,7 @@ describe('createFilterOutCellActionFactory', () => {
   const filterOutAction = filterOutActionFactory({ id: 'testAction' });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const context = {

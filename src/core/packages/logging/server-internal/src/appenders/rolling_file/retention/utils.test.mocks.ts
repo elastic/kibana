@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { getFileInfo } from './fs';
 
-export const getFileInfoMock: jest.MockedFn<typeof getFileInfo> = jest.fn();
+export const getFileInfoMock: MockedFunction<typeof getFileInfo> = vi.fn();
 
-jest.doMock('./fs', () => {
-  const actual = jest.requireActual('./fs');
+vi.doMock('./fs', async () => {
+  const actual = (await vi.importActual('./fs'));
   return {
     ...actual,
     getFileInfo: getFileInfoMock,

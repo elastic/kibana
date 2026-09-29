@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import * as React from 'react';
 import { ClosablePopoverTitle } from './closable_popover_title';
 
 describe('closable popover title', () => {
   it('renders with defined options', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     const children = <div role="code">hello_world()</div>;
     const { getByRole } = render(
       <ClosablePopoverTitle onClose={onClose}>{children}</ClosablePopoverTitle>
@@ -22,7 +24,7 @@ describe('closable popover title', () => {
   });
 
   it('onClose function gets called', async () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     const children = <div className="foo" />;
     const { getByRole } = render(
       <ClosablePopoverTitle onClose={onClose}>{children}</ClosablePopoverTitle>

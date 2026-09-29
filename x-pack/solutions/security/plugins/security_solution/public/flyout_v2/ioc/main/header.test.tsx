@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { Header } from './header';
@@ -23,7 +25,7 @@ import {
 const mockIndicator = generateMockIndicator();
 const tabs = getTabsDisplayed({
   indicator: mockIndicator,
-  onViewAllFieldsInTable: jest.fn(),
+  onViewAllFieldsInTable: vi.fn(),
   renderCellActions: noopCellActionRenderer,
 });
 
@@ -35,7 +37,7 @@ describe('<Header />', () => {
           indicator={mockIndicator}
           tabs={tabs}
           selectedTabId="overview"
-          setSelectedTabId={jest.fn()}
+          setSelectedTabId={vi.fn()}
           renderCellActions={noopCellActionRenderer}
         />
       </TestProviders>
@@ -52,7 +54,7 @@ describe('<Header />', () => {
           indicator={mockIndicator}
           tabs={tabs}
           selectedTabId="overview"
-          setSelectedTabId={jest.fn()}
+          setSelectedTabId={vi.fn()}
           renderCellActions={noopCellActionRenderer}
         />
       </TestProviders>
@@ -64,7 +66,7 @@ describe('<Header />', () => {
   });
 
   it('should call setSelectedTabId when tab is clicked', () => {
-    const setSelectedTabId = jest.fn();
+    const setSelectedTabId = vi.fn();
     const { getByTestId } = render(
       <TestProviders>
         <Header

@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { regenerateIds } from './regenerate_ids';
 
-jest.mock('uuid', () => ({
-  v4: jest
-    .fn()
-    .mockReturnValueOnce('uuidv4 #1')
-    .mockReturnValueOnce('uuidv4 #2')
-    .mockReturnValueOnce('uuidv4 #3'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi
+        .fn()
+        .mockReturnValueOnce('uuidv4 #1')
+        .mockReturnValueOnce('uuidv4 #2')
+        .mockReturnValueOnce('uuidv4 #3'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('#regenerateIds', () => {
   const objects = [

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { EuiPaginationTestHarness, EuiTableTestHarness } from '@kbn/test-eui-helpers';
 
@@ -23,16 +25,16 @@ import {
   renderIndexApp,
 } from './index_table.helpers';
 
-jest.mock('react-use/lib/useObservable', () => () => jest.fn());
+vi.mock('react-use/lib/useObservable', () => () => vi.fn());
 
 describe('index table', () => {
   beforeEach(() => {
     // NOTE: This suite intentionally uses fake timers for performance.
     // Some tests use delayed HTTP responses to assert intermediate UI states (e.g. "flushing..."),
     // which would otherwise require waiting real-time seconds in CI.
-    jest.useFakeTimers();
-    jest.clearAllTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllTimers();
+    vi.clearAllMocks();
     localStorage.clear();
   });
 
@@ -46,8 +48,8 @@ describe('index table', () => {
     }
 
     await runPendingTimers();
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   test('should change pages when a pagination link is clicked on', async () => {

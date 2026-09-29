@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticAssistantAppContext } from './app_context';
 import { appContextService } from './app_context';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -26,29 +28,29 @@ describe('AppContextService', () => {
     name: 'ToolOne',
     description: 'Description 1',
     sourceRegister: 'Source1',
-    isSupported: jest.fn(),
-    getTool: jest.fn(),
+    isSupported: vi.fn(),
+    getTool: vi.fn(),
   };
   const toolTwo: AssistantTool = {
     id: 'tool-two',
     name: 'ToolTwo',
     description: 'Description 2',
     sourceRegister: 'Source2',
-    isSupported: jest.fn(),
-    getTool: jest.fn(),
+    isSupported: vi.fn(),
+    getTool: vi.fn(),
   };
   const toolThree: AssistantTool = {
     id: 'tool-three',
     name: 'ToolThree',
     description: 'Description 3',
     sourceRegister: 'Source3',
-    isSupported: jest.fn(),
-    getTool: jest.fn(),
+    isSupported: vi.fn(),
+    getTool: vi.fn(),
   };
 
   beforeEach(() => {
     appContextService.stop();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('starting and stopping', () => {

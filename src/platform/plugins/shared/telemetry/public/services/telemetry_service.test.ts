@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 // ESLint disabled dot-notation we can access the private key telemetryService['http']
 /* eslint-disable dot-notation */
 
@@ -37,7 +40,7 @@ describe('TelemetryService', () => {
   describe('fetchExample', () => {
     it('calls fetchTelemetry with unencrypted: true, refreshCache: true', async () => {
       const telemetryService = mockTelemetryService();
-      telemetryService.fetchTelemetry = jest.fn();
+      telemetryService.fetchTelemetry = vi.fn();
       await telemetryService.fetchExample();
       expect(telemetryService.fetchTelemetry).toHaveBeenCalledWith({
         unencrypted: true,
@@ -122,7 +125,7 @@ describe('TelemetryService', () => {
         reportOptInStatusChange: false,
         config: { allowChangingOptInStatus: true },
       });
-      telemetryService['http'].post = jest.fn().mockImplementation((url: string) => {
+      telemetryService['http'].post = vi.fn().mockImplementation((url: string) => {
         if (url === OptInRoute) {
           throw Error('failed to update opt in.');
         }
@@ -141,7 +144,7 @@ describe('TelemetryService', () => {
         config: { allowChangingOptInStatus: true },
       });
 
-      telemetryService['reportOptInStatus'] = jest.fn().mockImplementation(() => {
+      telemetryService['reportOptInStatus'] = vi.fn().mockImplementation(() => {
         throw Error('failed to report OptIn Status.');
       });
 
@@ -215,7 +218,7 @@ describe('TelemetryService', () => {
         config: { telemetryNotifyUserAboutOptInDefault: undefined },
       });
 
-      telemetryService['http'].put = jest.fn().mockImplementation((url: string) => {
+      telemetryService['http'].put = vi.fn().mockImplementation((url: string) => {
         if (url === UserHasSeenNoticeRoute) {
           throw Error('failed to update opt in.');
         }
@@ -280,13 +283,13 @@ describe('TelemetryService', () => {
 
   describe('reportOptInStatus', () => {
     let originalFetch: (typeof window)['fetch'];
-    let mockFetch: jest.Mock<(typeof window)['fetch']>;
+    let mockFetch: Mock<(typeof window)['fetch']>;
 
     beforeAll(() => {
       originalFetch = window.fetch;
     });
 
-    beforeEach(() => (window.fetch = mockFetch = jest.fn()));
+    beforeEach(() => (window.fetch = mockFetch = vi.fn()));
     afterAll(() => (window.fetch = originalFetch));
 
     it('reports opt-in status to telemetry url', async () => {
@@ -296,7 +299,7 @@ describe('TelemetryService', () => {
       const mockPayload = [{ clusterUuid: 'mk_uuid', stats: 'mock_hashed_opt_in_status_payload' }];
       const mockUrl = 'mock_telemetry_optin_status_url';
 
-      const mockGetOptInStatusUrl = jest.fn().mockReturnValue(mockUrl);
+      const mockGetOptInStatusUrl = vi.fn().mockReturnValue(mockUrl);
       telemetryService.getOptInStatusUrl = mockGetOptInStatusUrl;
       const result = await telemetryService['reportOptInStatus'](mockPayload);
       expect(result).toBeUndefined();
@@ -327,7 +330,7 @@ describe('TelemetryService', () => {
       const mockPayload = [{ clusterUuid: 'mk_uuid', stats: 'mock_hashed_opt_in_status_payload' }];
       const mockUrl = 'mock_telemetry_optin_status_url';
 
-      const mockGetOptInStatusUrl = jest.fn().mockReturnValue(mockUrl);
+      const mockGetOptInStatusUrl = vi.fn().mockReturnValue(mockUrl);
       mockFetch.mockImplementation(() => {
         throw Error('Error sending usage');
       });
@@ -515,7 +518,7 @@ describe('TelemetryService', () => {
       response = deferred<ReturnType<typeof serverConfigResponse>>()
     ) => {
       let receivedSignal: AbortSignal | undefined;
-      telemetryService['http'].get = jest.fn().mockImplementation((_path, { signal }) => {
+      telemetryService['http'].get = vi.fn().mockImplementation((_path, { signal }) => {
         receivedSignal = signal;
         signal.addEventListener('abort', () => response.reject(new Error('aborted')));
         return response.promise;
@@ -567,7 +570,7 @@ describe('TelemetryService', () => {
 
     it('applies the fetched opt-in when no write raced with the refresh', async () => {
       const telemetryService = mockTelemetryService({ config: { optIn: false } });
-      telemetryService['http'].get = jest.fn().mockResolvedValue(serverConfigResponse(true));
+      telemetryService['http'].get = vi.fn().mockResolvedValue(serverConfigResponse(true));
 
       await telemetryService.refreshConfig();
 
@@ -578,7 +581,7 @@ describe('TelemetryService', () => {
     it('shares the in-flight refresh result instead of starting another request', async () => {
       const telemetryService = mockTelemetryService({ config: { optIn: false } });
       const fetched = deferred<ReturnType<typeof serverConfigResponse>>();
-      telemetryService['http'].get = jest.fn().mockReturnValue(fetched.promise);
+      telemetryService['http'].get = vi.fn().mockReturnValue(fetched.promise);
 
       const firstRefresh = telemetryService.refreshConfig();
       const secondRefresh = telemetryService.refreshConfig();
@@ -593,7 +596,7 @@ describe('TelemetryService', () => {
 
     it('starts a new request after the previous refresh completes', async () => {
       const telemetryService = mockTelemetryService({ config: { optIn: false } });
-      telemetryService['http'].get = jest
+      telemetryService['http'].get = vi
         .fn()
         .mockResolvedValueOnce(serverConfigResponse(false))
         .mockResolvedValueOnce(serverConfigResponse(true));

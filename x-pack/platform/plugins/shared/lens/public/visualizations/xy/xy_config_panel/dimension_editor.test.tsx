@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { render, screen } from '@testing-library/react';
@@ -56,19 +58,19 @@ describe('XY Config panels', () => {
         <DataDimensionEditor
           layerId={state.layers[0].layerId}
           frame={frame}
-          setState={jest.fn()}
+          setState={vi.fn()}
           accessor="bar"
           groupId="left"
           state={{
             ...state,
             layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYDataLayerConfig],
           }}
-          formatFactory={jest.fn()}
+          formatFactory={vi.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           palettes={getKbnPalettes({ name: 'amsterdam', darkMode: false })}
           panelRef={React.createRef()}
-          addLayer={jest.fn()}
-          removeLayer={jest.fn()}
+          addLayer={vi.fn()}
+          removeLayer={vi.fn()}
           datasource={{} as DatasourcePublicAPI}
           isDarkMode={false}
         />
@@ -88,16 +90,16 @@ describe('XY Config panels', () => {
         <DataDimensionEditor
           layerId={state.layers[0].layerId}
           frame={frame}
-          setState={jest.fn()}
+          setState={vi.fn()}
           accessor="bar"
           groupId="left"
           state={state}
-          formatFactory={jest.fn()}
+          formatFactory={vi.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           palettes={getKbnPalettes({ name: 'amsterdam', darkMode: false })}
           panelRef={React.createRef()}
-          addLayer={jest.fn()}
-          removeLayer={jest.fn()}
+          addLayer={vi.fn()}
+          removeLayer={vi.fn()}
           datasource={{} as DatasourcePublicAPI}
           isDarkMode={false}
         />
@@ -138,16 +140,16 @@ describe('XY Config panels', () => {
               },
             },
           }}
-          setState={jest.fn()}
+          setState={vi.fn()}
           accessor="bar"
           groupId="left"
           state={state}
-          formatFactory={jest.fn()}
+          formatFactory={vi.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           palettes={getKbnPalettes({ name: 'amsterdam', darkMode: false })}
           panelRef={React.createRef()}
-          addLayer={jest.fn()}
-          removeLayer={jest.fn()}
+          addLayer={vi.fn()}
+          removeLayer={vi.fn()}
           datasource={{} as DatasourcePublicAPI}
           isDarkMode={false}
         />
@@ -185,16 +187,16 @@ describe('XY Config panels', () => {
               },
             },
           }}
-          setState={jest.fn()}
+          setState={vi.fn()}
           accessor="bar"
           groupId="left"
           state={state}
-          formatFactory={jest.fn()}
+          formatFactory={vi.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           palettes={getKbnPalettes({ name: 'amsterdam', darkMode: false })}
           panelRef={React.createRef()}
-          addLayer={jest.fn()}
-          removeLayer={jest.fn()}
+          addLayer={vi.fn()}
+          removeLayer={vi.fn()}
           datasource={{} as DatasourcePublicAPI}
           isDarkMode={false}
         />
@@ -239,16 +241,16 @@ describe('XY Config panels', () => {
                 },
               },
             }}
-            setState={jest.fn()}
+            setState={vi.fn()}
             accessor="breakdownAccessor"
             groupId={'breakdown'}
             state={state}
-            formatFactory={jest.fn()}
+            formatFactory={vi.fn()}
             paletteService={chartPluginMock.createPaletteRegistry()}
             palettes={getKbnPalettes({ name: 'amsterdam', darkMode: false })}
             panelRef={React.createRef()}
-            addLayer={jest.fn()}
-            removeLayer={jest.fn()}
+            addLayer={vi.fn()}
+            removeLayer={vi.fn()}
             datasource={{} as DatasourcePublicAPI}
             isDarkMode={false}
           />
@@ -263,8 +265,8 @@ describe('XY Config panels', () => {
       }
     );
     test('does not apply incorrect color', () => {
-      jest.useFakeTimers();
-      const setState = jest.fn();
+      vi.useFakeTimers();
+      const setState = vi.fn();
       const state = {
         ...testState(),
         layers: [
@@ -297,12 +299,12 @@ describe('XY Config panels', () => {
           accessor="bar"
           groupId="left"
           state={state}
-          formatFactory={jest.fn()}
+          formatFactory={vi.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           palettes={getKbnPalettes({ name: 'amsterdam', darkMode: false })}
           panelRef={React.createRef()}
-          addLayer={jest.fn()}
-          removeLayer={jest.fn()}
+          addLayer={vi.fn()}
+          removeLayer={vi.fn()}
           datasource={{} as DatasourcePublicAPI}
           isDarkMode={false}
         />
@@ -316,7 +318,7 @@ describe('XY Config panels', () => {
           });
       });
       component.update();
-      jest.advanceTimersByTime(256);
+      vi.advanceTimersByTime(256);
       expect(component.find(EuiColorPicker).prop('color')).toEqual('INCORRECT_COLOR');
       expect(setState).not.toHaveBeenCalled();
 
@@ -328,10 +330,10 @@ describe('XY Config panels', () => {
           });
       });
       component.update();
-      jest.advanceTimersByTime(256);
+      vi.advanceTimersByTime(256);
       expect(component.find(EuiColorPicker).prop('color')).toEqual('666666');
       expect(setState).toHaveBeenCalled();
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 });

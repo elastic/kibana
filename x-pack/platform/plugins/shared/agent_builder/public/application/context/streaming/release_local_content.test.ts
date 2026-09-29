@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Conversation } from '@kbn/agent-builder-common';
 import { createExecutionFailedEvent } from '../../components/conversations/timeline/items/execution_failed_event.factory';
 import { releaseLocalContent } from './release_local_content';
 
-const refetchWith = (events: Conversation['events']) => jest.fn().mockResolvedValue({ events });
+const refetchWith = (events: Conversation['events']) => vi.fn().mockResolvedValue({ events });
 
 describe('releaseLocalContent', () => {
   it('clears the live execution once its failed terminal is saved', async () => {
-    const clearExecution = jest.fn();
+    const clearExecution = vi.fn();
 
     await releaseLocalContent({
       refetch: refetchWith([createExecutionFailedEvent({ execution_id: 'exec-1' })]),
@@ -25,7 +27,7 @@ describe('releaseLocalContent', () => {
   });
 
   it('keeps the live execution while no terminal for it is saved', async () => {
-    const clearExecution = jest.fn();
+    const clearExecution = vi.fn();
 
     await releaseLocalContent({ refetch: refetchWith([]), executionId: 'exec-1', clearExecution });
 

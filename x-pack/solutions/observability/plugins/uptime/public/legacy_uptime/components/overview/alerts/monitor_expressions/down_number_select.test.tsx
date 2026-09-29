@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { DownNoExpressionSelect } from './down_number_select';
@@ -12,14 +14,14 @@ import { DownNoExpressionSelect } from './down_number_select';
 describe('DownNoExpressionSelect component', () => {
   it('should shallow renders against props', function () {
     const component = shallowWithIntl(
-      <DownNoExpressionSelect hasFilters={true} setRuleParams={jest.fn()} />
+      <DownNoExpressionSelect hasFilters={true} setRuleParams={vi.fn()} />
     );
     expect(component).toMatchSnapshot();
   });
 
   it('should renders against props', function () {
     const component = renderWithIntl(
-      <DownNoExpressionSelect hasFilters={true} setRuleParams={jest.fn()} />
+      <DownNoExpressionSelect hasFilters={true} setRuleParams={vi.fn()} />
     );
     expect(component).toMatchSnapshot();
   });

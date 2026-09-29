@@ -5,32 +5,40 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cleanupLegacyRiskEngine } from './cleanup_previous_risk_engine';
 import { coreMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { getLatestTransformId } from '../../utils/transforms';
 
-const mockStopTransform = jest.fn();
-const mockDeleteTransform = jest.fn();
-const mockRemoveRiskScoringTask = jest.fn();
+const mockStopTransform = vi.fn();
+const mockDeleteTransform = vi.fn();
+const mockRemoveRiskScoringTask = vi.fn();
 
-jest.mock('../../utils/transforms', () => ({
-  ...jest.requireActual('../../utils/transforms'),
-  stopTransform: (...args: unknown[]) => mockStopTransform(...args),
-  deleteTransform: (...args: unknown[]) => mockDeleteTransform(...args),
-}));
+vi.mock('../../utils/transforms', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../utils/transforms')),
+      stopTransform: (...args: unknown[]) => mockStopTransform(...args),
+      deleteTransform: (...args: unknown[]) => mockDeleteTransform(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../risk_score/tasks/risk_scoring_task', () => ({
-  ...jest.requireActual('../../risk_score/tasks/risk_scoring_task'),
-  removeRiskScoringTask: (...args: unknown[]) => mockRemoveRiskScoringTask(...args),
-}));
+vi.mock('../../risk_score/tasks/risk_scoring_task', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../risk_score/tasks/risk_scoring_task')),
+      removeRiskScoringTask: (...args: unknown[]) => mockRemoveRiskScoringTask(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('cleanupLegacyRiskEngine', () => {
   const logger = loggingSystemMock.createLogger();
   const coreStart = coreMock.createStart();
   const soClient = savedObjectsClientMock.create();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  const taskManager = { remove: jest.fn() };
+  const taskManager = { remove: vi.fn() };
 
   const mockSavedObjectsResponseDefaults = {
     total: 0,
@@ -39,7 +47,7 @@ describe('cleanupLegacyRiskEngine', () => {
     saved_objects: [],
   };
 
-  const getStartServicesMock = jest.fn();
+  const getStartServicesMock = vi.fn();
 
   const buildSavedObject = (namespace: string) => ({
     namespaces: [namespace],
@@ -51,7 +59,7 @@ describe('cleanupLegacyRiskEngine', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockStopTransform.mockResolvedValue(undefined);
     mockDeleteTransform.mockResolvedValue(undefined);
     mockRemoveRiskScoringTask.mockResolvedValue(undefined);
@@ -59,7 +67,7 @@ describe('cleanupLegacyRiskEngine', () => {
       {
         ...coreStart,
         savedObjects: {
-          createInternalRepository: jest.fn().mockReturnValue(soClient),
+          createInternalRepository: vi.fn().mockReturnValue(soClient),
         },
         elasticsearch: { client: { asInternalUser: esClient } },
       },
@@ -140,7 +148,7 @@ describe('cleanupLegacyRiskEngine', () => {
       {
         ...coreStart,
         savedObjects: {
-          createInternalRepository: jest.fn().mockReturnValue(soClient),
+          createInternalRepository: vi.fn().mockReturnValue(soClient),
         },
         elasticsearch: { client: { asInternalUser: esClient } },
       },

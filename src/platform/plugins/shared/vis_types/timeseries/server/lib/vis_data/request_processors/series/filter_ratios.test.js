@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ratios } from './filter_ratios';
 
 describe('ratios(req, panel, series, esQueryConfig, seriesIndex)', () => {
@@ -50,7 +52,7 @@ describe('ratios(req, panel, series, esQueryConfig, seriesIndex)', () => {
   });
 
   test('calls next when finished', () => {
-    const next = jest.fn();
+    const next = vi.fn();
     ratios(req, panel, series, esQueryConfig, indexPattern)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });

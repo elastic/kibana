@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
@@ -16,14 +19,17 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AlertsSearchBar } from './alerts_search_bar';
 
 const mockDataPlugin = dataPluginMock.createStartContract();
-jest.mock('@kbn/kibana-utils-plugin/public');
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-utils-plugin/public');
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mocked(useAlertsDataView).mockReturnValue({
+vi.mocked(useAlertsDataView).mockReturnValue({
   isLoading: false,
   dataView: {
     title: '.alerts-*',
@@ -38,9 +44,9 @@ jest.mocked(useAlertsDataView).mockReturnValue({
   },
 });
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
-const unifiedSearchBarMock = jest.fn().mockImplementation((props) => (
+const unifiedSearchBarMock = vi.fn().mockImplementation((props) => (
   <button
     data-test-subj="querySubmitButton"
     onClick={() => props.onQuerySubmit({ dateRange: { from: 'now', to: 'now' } })}
@@ -52,7 +58,7 @@ const unifiedSearchBarMock = jest.fn().mockImplementation((props) => (
 
 describe('AlertsSearchBar', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -62,7 +68,7 @@ describe('AlertsSearchBar', () => {
             SearchBar: unifiedSearchBarMock,
           },
         },
-        notifications: { toasts: { addWarning: jest.fn() } } as unknown as NotificationsStart,
+        notifications: { toasts: { addWarning: vi.fn() } } as unknown as NotificationsStart,
       },
     });
   });
@@ -73,10 +79,10 @@ describe('AlertsSearchBar', () => {
         rangeFrom="now/d"
         rangeTo="now/d"
         query=""
-        onQuerySubmit={jest.fn()}
-        onFiltersUpdated={jest.fn()}
-        onSavedQueryUpdated={jest.fn()}
-        onClearSavedQuery={jest.fn()}
+        onQuerySubmit={vi.fn()}
+        onFiltersUpdated={vi.fn()}
+        onSavedQueryUpdated={vi.fn()}
+        onClearSavedQuery={vi.fn()}
         appName={'test'}
       />
     );
@@ -84,7 +90,7 @@ describe('AlertsSearchBar', () => {
   });
 
   it('calls onQuerySubmit correctly', async () => {
-    const onQuerySubmitMock = jest.fn();
+    const onQuerySubmitMock = vi.fn();
 
     render(
       <AlertsSearchBar
@@ -92,9 +98,9 @@ describe('AlertsSearchBar', () => {
         rangeTo="now/d"
         query=""
         onQuerySubmit={onQuerySubmitMock}
-        onFiltersUpdated={jest.fn()}
-        onSavedQueryUpdated={jest.fn()}
-        onClearSavedQuery={jest.fn()}
+        onFiltersUpdated={vi.fn()}
+        onSavedQueryUpdated={vi.fn()}
+        onClearSavedQuery={vi.fn()}
         appName={'test'}
       />
     );
@@ -107,7 +113,7 @@ describe('AlertsSearchBar', () => {
   });
 
   it('calls onFiltersUpdated correctly', async () => {
-    const onFiltersUpdatedMock = jest.fn();
+    const onFiltersUpdatedMock = vi.fn();
     const filters: Filter[] = [
       {
         meta: {
@@ -127,7 +133,7 @@ describe('AlertsSearchBar', () => {
         data: mockDataPlugin,
         unifiedSearch: {
           ui: {
-            SearchBar: jest.fn().mockImplementation((props) => (
+            SearchBar: vi.fn().mockImplementation((props) => (
               <button
                 data-test-subj="filtersSubmitButton"
                 onClick={() => props.onFiltersUpdated(filters)}
@@ -138,7 +144,7 @@ describe('AlertsSearchBar', () => {
             )),
           },
         },
-        notifications: { toasts: { addWarning: jest.fn() } } as unknown as NotificationsStart,
+        notifications: { toasts: { addWarning: vi.fn() } } as unknown as NotificationsStart,
       },
     });
 
@@ -147,10 +153,10 @@ describe('AlertsSearchBar', () => {
         rangeFrom="now/d"
         rangeTo="now/d"
         query=""
-        onQuerySubmit={jest.fn()}
+        onQuerySubmit={vi.fn()}
         onFiltersUpdated={onFiltersUpdatedMock}
-        onSavedQueryUpdated={jest.fn()}
-        onClearSavedQuery={jest.fn()}
+        onSavedQueryUpdated={vi.fn()}
+        onClearSavedQuery={vi.fn()}
         appName={'test'}
       />
     );
@@ -169,9 +175,9 @@ describe('AlertsSearchBar', () => {
         rangeFrom="now/d"
         rangeTo="now/d"
         query=""
-        onQuerySubmit={jest.fn()}
+        onQuerySubmit={vi.fn()}
         appName={'test'}
-        onFiltersUpdated={jest.fn()}
+        onFiltersUpdated={vi.fn()}
         ruleTypeIds={['siem.esqlRuleType', '.esQuery']}
       />
     );
@@ -192,9 +198,9 @@ describe('AlertsSearchBar', () => {
         rangeFrom="now/d"
         rangeTo="now/d"
         query=""
-        onQuerySubmit={jest.fn()}
+        onQuerySubmit={vi.fn()}
         appName={'test'}
-        onFiltersUpdated={jest.fn()}
+        onFiltersUpdated={vi.fn()}
         ruleTypeIds={['.esQuery']}
       />
     );
@@ -215,9 +221,9 @@ describe('AlertsSearchBar', () => {
         rangeFrom="now/d"
         rangeTo="now/d"
         query=""
-        onQuerySubmit={jest.fn()}
+        onQuerySubmit={vi.fn()}
         appName={'test'}
-        onFiltersUpdated={jest.fn()}
+        onFiltersUpdated={vi.fn()}
         ruleTypeIds={['.esQuery', 'apm.anomaly']}
       />
     );
@@ -245,9 +251,9 @@ describe('AlertsSearchBar', () => {
         rangeFrom="now/d"
         rangeTo="now/d"
         query=""
-        onQuerySubmit={jest.fn()}
+        onQuerySubmit={vi.fn()}
         appName={'test'}
-        onFiltersUpdated={jest.fn()}
+        onFiltersUpdated={vi.fn()}
       />
     );
 
@@ -269,7 +275,7 @@ describe('AlertsSearchBar', () => {
   });
 
   it('calls the unifiedSearchBar with correct index patters without data views', async () => {
-    jest.mocked(useAlertsDataView).mockReturnValue({
+    vi.mocked(useAlertsDataView).mockReturnValue({
       isLoading: false,
       dataView: undefined,
     });
@@ -279,9 +285,9 @@ describe('AlertsSearchBar', () => {
         rangeFrom="now/d"
         rangeTo="now/d"
         query=""
-        onQuerySubmit={jest.fn()}
+        onQuerySubmit={vi.fn()}
         appName={'test'}
-        onFiltersUpdated={jest.fn()}
+        onFiltersUpdated={vi.fn()}
       />
     );
 

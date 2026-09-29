@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { IToasts } from '@kbn/core/public';
 import { type AnyActorRef, createActor, type Snapshot, waitFor } from 'xstate';
 import type { DataStreamDocsStat, NonAggregatableDatasets } from '../../../../common/api_types';
@@ -23,15 +26,15 @@ import { fetchTotalDocsFailedNotifier } from './notifications';
 
 // Mock only the notification that has a known issue accessing meta._event.origin
 // when called from the provided action with `{}` as meta.
-jest.mock('./notifications', () => {
-  const actual = jest.requireActual('./notifications');
+vi.mock('./notifications', async () => {
+  const actual = (await vi.importActual('./notifications'));
   return {
     ...actual,
-    fetchTotalDocsFailedNotifier: jest.fn(),
+    fetchTotalDocsFailedNotifier: vi.fn(),
   };
 });
 
-const mockedFetchTotalDocsFailedNotifier = fetchTotalDocsFailedNotifier as jest.Mock;
+const mockedFetchTotalDocsFailedNotifier = fetchTotalDocsFailedNotifier as Mock;
 
 /**
  * XState v5's strict TypeScript types don't accept dot-notation strings
@@ -56,17 +59,17 @@ const waitForPredicate = async (
     timeout: WAIT_FOR_TIMEOUT,
   });
 
-const createMockToasts = (): jest.Mocked<IToasts> =>
+const createMockToasts = (): Mocked<IToasts> =>
   ({
-    addDanger: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    addError: jest.fn(),
-    addInfo: jest.fn(),
-    add: jest.fn(),
-    remove: jest.fn(),
-    get$: jest.fn(),
-  } as unknown as jest.Mocked<IToasts>);
+    addDanger: vi.fn(),
+    addSuccess: vi.fn(),
+    addWarning: vi.fn(),
+    addError: vi.fn(),
+    addInfo: vi.fn(),
+    add: vi.fn(),
+    remove: vi.fn(),
+    get$: vi.fn(),
+  } as unknown as Mocked<IToasts>);
 
 const createForbiddenError = () => {
   const error = new Error('Forbidden');
@@ -160,26 +163,26 @@ const defaultNonAggregatableDatasetsResponse: NonAggregatableDatasets = {
 const defaultIntegrationsResponse: Integration[] = [];
 
 const createMockDataStreamStatsClient = (
-  overrides: Partial<Record<keyof IDataStreamsStatsClient, jest.Mock>> = {}
+  overrides: Partial<Record<keyof IDataStreamsStatsClient, Mock>> = {}
 ) =>
   ({
-    getDataStreamsTypesPrivileges: jest.fn().mockResolvedValue(defaultTypesPrivilegesResponse),
-    getDataStreamsStats: jest.fn().mockResolvedValue(defaultDataStreamStatsResponse),
-    getDataStreamsDegradedStats: jest.fn().mockResolvedValue(defaultDegradedDocsResponse),
-    getDataStreamsFailedStats: jest.fn().mockResolvedValue(defaultFailedDocsResponse),
-    getDataStreamsTotalDocs: jest.fn().mockResolvedValue(defaultTotalDocsResponse),
-    getIntegrations: jest.fn().mockResolvedValue(defaultIntegrationsResponse),
-    getNonAggregatableDatasets: jest.fn().mockResolvedValue(defaultNonAggregatableDatasetsResponse),
-    updateFailureStore: jest.fn().mockResolvedValue({ headers: {} }),
+    getDataStreamsTypesPrivileges: vi.fn().mockResolvedValue(defaultTypesPrivilegesResponse),
+    getDataStreamsStats: vi.fn().mockResolvedValue(defaultDataStreamStatsResponse),
+    getDataStreamsDegradedStats: vi.fn().mockResolvedValue(defaultDegradedDocsResponse),
+    getDataStreamsFailedStats: vi.fn().mockResolvedValue(defaultFailedDocsResponse),
+    getDataStreamsTotalDocs: vi.fn().mockResolvedValue(defaultTotalDocsResponse),
+    getIntegrations: vi.fn().mockResolvedValue(defaultIntegrationsResponse),
+    getNonAggregatableDatasets: vi.fn().mockResolvedValue(defaultNonAggregatableDatasetsResponse),
+    updateFailureStore: vi.fn().mockResolvedValue({ headers: {} }),
     ...overrides,
-  } as unknown as jest.Mocked<IDataStreamsStatsClient>);
+  } as unknown as Mocked<IDataStreamsStatsClient>);
 
 const buildStateMachine = (
   overrides: Partial<DatasetQualityControllerStateMachineDependencies> = {}
 ) => {
   const toasts = createMockToasts();
   const dataStreamStatsClient =
-    (overrides.dataStreamStatsClient as jest.Mocked<IDataStreamsStatsClient>) ??
+    (overrides.dataStreamStatsClient as Mocked<IDataStreamsStatsClient>) ??
     createMockDataStreamStatsClient();
 
   const deps: DatasetQualityControllerStateMachineDependencies = {
@@ -196,7 +199,7 @@ const buildStateMachine = (
 
 describe('DatasetQualityControllerStateMachine', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initialization', () => {
@@ -229,7 +232,7 @@ describe('DatasetQualityControllerStateMachine', () => {
     it('should transition to emptyState when no types are authorized', async () => {
       const { machine } = buildStateMachine({
         dataStreamStatsClient: createMockDataStreamStatsClient({
-          getDataStreamsTypesPrivileges: jest.fn().mockResolvedValue(noPrivilegesResponse),
+          getDataStreamsTypesPrivileges: vi.fn().mockResolvedValue(noPrivilegesResponse),
         }),
       });
       const actor = createActor(machine);
@@ -245,7 +248,7 @@ describe('DatasetQualityControllerStateMachine', () => {
     it('should transition to initializationFailed on privileges fetch error', async () => {
       const { machine, toasts } = buildStateMachine({
         dataStreamStatsClient: createMockDataStreamStatsClient({
-          getDataStreamsTypesPrivileges: jest.fn().mockRejectedValue(createGenericError()),
+          getDataStreamsTypesPrivileges: vi.fn().mockRejectedValue(createGenericError()),
         }),
       });
       const actor = createActor(machine);
@@ -335,7 +338,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       it('should transition datasets to loaded and notify on fetch error', async () => {
         const { machine, toasts } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getDataStreamsStats: jest.fn().mockRejectedValue(createGenericError()),
+            getDataStreamsStats: vi.fn().mockRejectedValue(createGenericError()),
           }),
         });
         const actor = createActor(machine);
@@ -363,7 +366,7 @@ describe('DatasetQualityControllerStateMachine', () => {
 
         const { machine } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getDataStreamsStats: jest.fn().mockResolvedValue({
+            getDataStreamsStats: vi.fn().mockResolvedValue({
               dataStreamsStats: mockStats,
               datasetUserPrivileges: { datasetsPrivilages: {}, canViewIntegrations: true },
             }),
@@ -408,7 +411,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       it('should transition degradedDocs to unauthorized on 403 error', async () => {
         const { machine } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getDataStreamsDegradedStats: jest.fn().mockRejectedValue(createForbiddenError()),
+            getDataStreamsDegradedStats: vi.fn().mockRejectedValue(createForbiddenError()),
           }),
         });
         const actor = createActor(machine);
@@ -426,7 +429,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       it('should transition degradedDocs to loaded and notify on non-403 error', async () => {
         const { machine, toasts } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getDataStreamsDegradedStats: jest.fn().mockRejectedValue(createGenericError()),
+            getDataStreamsDegradedStats: vi.fn().mockRejectedValue(createGenericError()),
           }),
         });
         const actor = createActor(machine);
@@ -447,7 +450,7 @@ describe('DatasetQualityControllerStateMachine', () => {
 
         const { machine } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getDataStreamsDegradedStats: jest.fn().mockResolvedValue(mockDegradedDocs),
+            getDataStreamsDegradedStats: vi.fn().mockResolvedValue(mockDegradedDocs),
           }),
         });
         const actor = createActor(machine);
@@ -489,7 +492,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       it('should transition failedDocs to unauthorized on 403 error', async () => {
         const { machine } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getDataStreamsFailedStats: jest.fn().mockRejectedValue(createForbiddenError()),
+            getDataStreamsFailedStats: vi.fn().mockRejectedValue(createForbiddenError()),
           }),
         });
         const actor = createActor(machine);
@@ -505,7 +508,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       it('should transition failedDocs to notImplemented on 501 error', async () => {
         const { machine } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getDataStreamsFailedStats: jest.fn().mockRejectedValue(createNotImplementedError()),
+            getDataStreamsFailedStats: vi.fn().mockRejectedValue(createNotImplementedError()),
           }),
         });
         const actor = createActor(machine);
@@ -523,7 +526,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       it('should transition failedDocs to loaded and notify on generic error', async () => {
         const { machine, toasts } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getDataStreamsFailedStats: jest.fn().mockRejectedValue(createGenericError()),
+            getDataStreamsFailedStats: vi.fn().mockRejectedValue(createGenericError()),
           }),
         });
         const actor = createActor(machine);
@@ -605,7 +608,7 @@ describe('DatasetQualityControllerStateMachine', () => {
             },
           },
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getDataStreamsTotalDocs: jest.fn().mockImplementation(({ type }) => {
+            getDataStreamsTotalDocs: vi.fn().mockImplementation(({ type }) => {
               if (type === 'logs') return Promise.resolve(logsDocs);
               if (type === 'metrics') return Promise.resolve(metricsDocs);
               return Promise.resolve([]);
@@ -627,7 +630,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       it('should transition docsStats to unauthorized on 403 error from any type', async () => {
         const { machine } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getDataStreamsTotalDocs: jest.fn().mockImplementation(({ type }) => {
+            getDataStreamsTotalDocs: vi.fn().mockImplementation(({ type }) => {
               if (type === 'logs') return Promise.reject(createForbiddenError());
               return Promise.resolve([]);
             }),
@@ -646,7 +649,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       it('should transition docsStats to loaded on non-403 error', async () => {
         const { machine } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getDataStreamsTotalDocs: jest.fn().mockImplementation(({ type }) => {
+            getDataStreamsTotalDocs: vi.fn().mockImplementation(({ type }) => {
               if (type === 'logs') return Promise.reject(createGenericError());
               return Promise.resolve([]);
             }),
@@ -666,7 +669,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       it('should not get stuck in fetching when a type fails', async () => {
         const { machine } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getDataStreamsTotalDocs: jest.fn().mockRejectedValue(createGenericError()),
+            getDataStreamsTotalDocs: vi.fn().mockRejectedValue(createGenericError()),
           }),
         });
         const actor = createActor(machine);
@@ -734,7 +737,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       it('should transition to unauthorized on 403 error', async () => {
         const { machine } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getNonAggregatableDatasets: jest.fn().mockRejectedValue(createForbiddenError()),
+            getNonAggregatableDatasets: vi.fn().mockRejectedValue(createForbiddenError()),
           }),
         });
         const actor = createActor(machine);
@@ -752,7 +755,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       it('should transition to loaded and notify on non-403 error', async () => {
         const { machine, toasts } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getNonAggregatableDatasets: jest.fn().mockRejectedValue(createGenericError()),
+            getNonAggregatableDatasets: vi.fn().mockRejectedValue(createGenericError()),
           }),
         });
         const actor = createActor(machine);
@@ -776,7 +779,7 @@ describe('DatasetQualityControllerStateMachine', () => {
 
         const { machine } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getNonAggregatableDatasets: jest.fn().mockResolvedValue(mockDatasets),
+            getNonAggregatableDatasets: vi.fn().mockResolvedValue(mockDatasets),
           }),
         });
         const actor = createActor(machine);
@@ -818,7 +821,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       it('should transition integrations to loaded and notify on error', async () => {
         const { machine, toasts } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getIntegrations: jest.fn().mockRejectedValue(createGenericError()),
+            getIntegrations: vi.fn().mockRejectedValue(createGenericError()),
           }),
         });
         const actor = createActor(machine);
@@ -839,7 +842,7 @@ describe('DatasetQualityControllerStateMachine', () => {
 
         const { machine } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getIntegrations: jest.fn().mockResolvedValue(mockIntegrations),
+            getIntegrations: vi.fn().mockResolvedValue(mockIntegrations),
           }),
         });
         const actor = createActor(machine);
@@ -855,7 +858,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       it('should set empty integrations on fetch error', async () => {
         const { machine } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getIntegrations: jest.fn().mockRejectedValue(createGenericError()),
+            getIntegrations: vi.fn().mockRejectedValue(createGenericError()),
           }),
         });
         const actor = createActor(machine);
@@ -1128,7 +1131,7 @@ describe('DatasetQualityControllerStateMachine', () => {
 
     it('should notify failure when updateFailureStore fails', async () => {
       const dataStreamStatsClient = createMockDataStreamStatsClient({
-        updateFailureStore: jest.fn().mockRejectedValue(createGenericError()),
+        updateFailureStore: vi.fn().mockRejectedValue(createGenericError()),
       });
       const toasts = createMockToasts();
 

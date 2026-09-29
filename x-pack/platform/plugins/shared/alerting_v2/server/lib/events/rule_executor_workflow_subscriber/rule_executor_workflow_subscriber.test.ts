@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -47,12 +50,12 @@ const failedEvent: RuleExecutionFailedEvent = {
 };
 
 describe('RuleExecutorWorkflowSubscriber', () => {
-  let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
+  let bus: Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
   let workflowService: WorkflowService;
-  let workflowsExtensions: jest.Mocked<WorkflowsExtensionsServerPluginStart>;
-  let mockEmitEvent: jest.Mock;
+  let workflowsExtensions: Mocked<WorkflowsExtensionsServerPluginStart>;
+  let mockEmitEvent: Mock;
   let loggerService: LoggerService;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
   let subscriber: RuleExecutorWorkflowSubscriber;
   let request: KibanaRequest;
 
@@ -151,9 +154,9 @@ describe('RuleExecutorWorkflowSubscriber', () => {
 
   describe('stop()', () => {
     it('unsubscribes every active subscription and clears internal state', () => {
-      const unsubscribers: jest.Mock[] = [];
+      const unsubscribers: Mock[] = [];
       bus.subscribe.mockImplementation(() => {
-        const unsubscribe = jest.fn();
+        const unsubscribe = vi.fn();
         unsubscribers.push(unsubscribe);
         return { unsubscribe } satisfies Subscription;
       });

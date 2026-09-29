@@ -7,27 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { MondayCom } from './monday_com';
 
 // Mock withMcpClient so handlers don't need a real MCP transport.
 // callToolJson/callToolContent also route through withMcpClient internally.
-const mockCallTool = jest.fn();
-const mockListTools = jest.fn();
+const mockCallTool = vi.fn();
+const mockListTools = vi.fn();
 
-jest.mock('../../lib/mcp/with_mcp_client', () => ({
-  withMcpClient: jest.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
-    return fn({ callTool: mockCallTool, listTools: mockListTools });
-  }),
-}));
+vi.mock('../../lib/mcp/with_mcp_client', () => {
+      const mocked = {
+      withMcpClient: vi.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
+        return fn({ callTool: mockCallTool, listTools: mockListTools });
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Apply Zod defaults the way the framework does before invoking a handler.
 const parse = <K extends keyof typeof MondayCom.actions>(action: K, raw: Record<string, unknown>) =>
   MondayCom.actions[action].input.parse(raw);
 
 describe('MondayCom', () => {
-  const mockPost = jest.fn();
+  const mockPost = vi.fn();
   const mockContext = {
     client: { post: mockPost },
     log: {},
@@ -38,7 +43,7 @@ describe('MondayCom', () => {
   const mockContent = [{ type: 'text', text: JSON.stringify(mockJson) }];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCallTool.mockResolvedValue({ content: mockContent });
     mockListTools.mockResolvedValue({
       tools: Array.from({ length: 62 }, (_, i) => ({ name: `tool_${i}` })),
@@ -576,7 +581,7 @@ describe('MondayCom', () => {
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
-      const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
+      const { withMcpClient } = (await vi.importMock('../../lib/mcp/with_mcp_client'));
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
       await expect(MondayCom.test.handler(mockContext)).rejects.toThrow('connection refused');
     });

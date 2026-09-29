@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockTelemetryActions } from '../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -15,7 +17,7 @@ import { SendEnterpriseSearchTelemetry } from '.';
 
 describe('Telemetry component helpers', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('SendEnterpriseSearchTelemetry', () => {

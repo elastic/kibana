@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EuiThemeComputed } from '@elastic/eui';
 import { renderHook } from '@testing-library/react';
 import { wrapper } from '../../mocks';
@@ -15,19 +17,25 @@ import { getAuthenticationLensAttributes } from './authentication';
 import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_manager/mocks/mock_data_view';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('generated-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('generated-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../utils/route/use_route_spy', () => ({
-  useRouteSpy: jest.fn().mockReturnValue([
-    {
-      detailName: 'mockHost',
-      pageName: 'hosts',
-      tabName: 'events',
-    },
-  ]),
-}));
+vi.mock('../../../../utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: vi.fn().mockReturnValue([
+        {
+          detailName: 'mockHost',
+          pageName: 'hosts',
+          tabName: 'events',
+        },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockEuiTheme = {
   colors: {
@@ -43,7 +51,7 @@ describe('getAuthenticationLensAttributes', () => {
     const dataView = getMockDataViewWithMatchedIndices(['auditbeat-mytest-*']);
     dataView.id = 'security-solution-my-test';
 
-    jest.mocked(useDataView).mockReturnValue({
+    vi.mocked(useDataView).mockReturnValue({
       dataView,
       status: 'ready',
     });

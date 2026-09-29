@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { useKibana } from '../../common/lib/kibana';
 import { useCanOpenAgentConversation } from './use_can_open_agent_conversation';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mock;
-const mockGet = jest.fn();
-const mockOpenChat = jest.fn();
+const useKibanaMock = useKibana as Mock;
+const mockGet = vi.fn();
+const mockOpenChat = vi.fn();
 
 const mockServices = ({
   show = true,
@@ -34,7 +37,7 @@ const mockServices = ({
 
 describe('useCanOpenAgentConversation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGet.mockResolvedValue({});
     mockServices();
   });

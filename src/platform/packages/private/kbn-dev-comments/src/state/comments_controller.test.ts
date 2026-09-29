@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { DISPLAY_NAME_STORAGE_KEY, GUIDE_HANDOFF_STORAGE_KEY } from '../constants';
 import {
   createComment,
@@ -25,11 +28,11 @@ const target = () => query('#target');
 /** A host at `/app/one?x=1` whose API is mocked and whose navigation changes the location. */
 const createHost = () => {
   const { location, navigate } = createLocation('/app/one?x=1');
-  const api: jest.Mocked<CommentsApi> = {
-    list: jest.fn(async () => []),
-    getSnapshot: jest.fn(async (_id: string) => undefined),
-    create: jest.fn(async (input) => ({ ...input, ...createComment('created'), text: input.text })),
-    update: jest.fn(async (id, patch) =>
+  const api: Mocked<CommentsApi> = {
+    list: vi.fn(async () => []),
+    getSnapshot: vi.fn(async (_id: string) => undefined),
+    create: vi.fn(async (input) => ({ ...input, ...createComment('created'), text: input.text })),
+    update: vi.fn(async (id, patch) =>
       createComment(id, {
         resolved: patch.resolved ?? false,
         replies: patch.reply ? [{ id: 'reply', createdAt: '', ...patch.reply }] : [],
@@ -39,8 +42,8 @@ const createHost = () => {
   const services: CommentsHostServices = {
     api,
     location,
-    navigateToPath: jest.fn(async (next: string) => navigate(next)),
-    getCurrentUser: jest.fn(async () => ({ username: 'capybara', fullName: 'Capybara Designer' })),
+    navigateToPath: vi.fn(async (next: string) => navigate(next)),
+    getCurrentUser: vi.fn(async () => ({ username: 'capybara', fullName: 'Capybara Designer' })),
   };
   return { api, services };
 };
@@ -181,7 +184,7 @@ describe('createCommentsController', () => {
         displayName: 'D.',
       });
 
-      const setItem = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
         throw new Error('QuotaExceededError');
       });
       try {
@@ -250,7 +253,7 @@ describe('createCommentsController', () => {
     describe('with a screenshot', () => {
       mockCanvas();
 
-      const captureViewport = jest.fn(async () => {
+      const captureViewport = vi.fn(async () => {
         const canvas = document.createElement('canvas');
         canvas.width = 800;
         canvas.height = 600;
@@ -477,7 +480,7 @@ describe('createCommentsController', () => {
       controller.start();
       // Same page, other state: the page key does not tell the two apart.
       const navigation = deferred<void>();
-      (services.navigateToPath as jest.Mock).mockReturnValueOnce(navigation.promise);
+      (services.navigateToPath as Mock).mockReturnValueOnce(navigation.promise);
       const otherState = createComment('other', {
         route: { pageKey: '/app/one', path: '/app/one?x=2' },
       });
@@ -499,7 +502,7 @@ describe('createCommentsController', () => {
       const controller = createCommentsController(services);
       controller.start();
       const navigation = deferred<void>();
-      (services.navigateToPath as jest.Mock).mockReturnValueOnce(navigation.promise);
+      (services.navigateToPath as Mock).mockReturnValueOnce(navigation.promise);
 
       const guiding = controller.guideTo(
         createComment('slow', { route: { pageKey: '/app/two', path: '/app/two' } })
@@ -515,7 +518,7 @@ describe('createCommentsController', () => {
       const controller = createCommentsController(services);
       controller.start();
 
-      (services.navigateToPath as jest.Mock).mockRejectedValueOnce(new Error('no such app'));
+      (services.navigateToPath as Mock).mockRejectedValueOnce(new Error('no such app'));
       await controller.guideTo(createComment('gone', { route: { pageKey: '/x', path: '/x' } }));
       expect(controller.store.getState().guide).toBeNull();
       expect(controller.store.getState().notice).toEqual(
@@ -536,7 +539,7 @@ describe('createCommentsController', () => {
       controller.start();
       controller.store.setState({ active: true });
       // Another space: the host loads the page anew, and the location does not change before that.
-      (services.navigateToPath as jest.Mock).mockResolvedValueOnce(undefined);
+      (services.navigateToPath as Mock).mockResolvedValueOnce(undefined);
       await controller.guideTo(far);
       expect(controller.store.getState().guide).toEqual({ id: 'far', navigating: false });
 
@@ -589,7 +592,7 @@ describe('createCommentsController', () => {
       const controller = createCommentsController(services);
       controller.start();
       const navigation = deferred<void>();
-      (services.navigateToPath as jest.Mock).mockReturnValueOnce(navigation.promise);
+      (services.navigateToPath as Mock).mockReturnValueOnce(navigation.promise);
 
       const guiding = controller.guideTo(
         createComment('slow', { route: { pageKey: '/app/two', path: '/app/two' } })

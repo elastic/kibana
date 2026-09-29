@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { HostItem } from '../../../../../common/search_strategy/security_solution/hosts';
@@ -64,9 +66,9 @@ describe('host_to_criteria', () => {
     const entityRecord = { 'host.name': 'host-name' } as unknown as EntityStoreRecord;
     const euid = {
       dsl: {
-        getEuidFilterBasedOnDocument: jest.fn().mockReturnValue({ bool: { filter: [] } }),
+        getEuidFilterBasedOnDocument: vi.fn().mockReturnValue({ bool: { filter: [] } }),
       },
-      getEntityIdentifiersFromDocument: jest.fn(),
+      getEntityIdentifiersFromDocument: vi.fn(),
     } as unknown as EntityStoreEuid;
 
     expect(hostToCriteria({ hostItem, entityRecord, euid })).toEqual([]);
@@ -81,9 +83,9 @@ describe('host_to_criteria', () => {
     } as unknown as EntityStoreRecord;
     const euid = {
       dsl: {
-        getEuidFilterBasedOnDocument: jest.fn().mockReturnValue(undefined),
+        getEuidFilterBasedOnDocument: vi.fn().mockReturnValue(undefined),
       },
-      getEntityIdentifiersFromDocument: jest.fn().mockReturnValue({
+      getEntityIdentifiersFromDocument: vi.fn().mockReturnValue({
         'host.id': 'eid-1',
         'host.name': 'host-name',
       }),

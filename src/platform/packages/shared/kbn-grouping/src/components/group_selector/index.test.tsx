@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import { GroupSelector } from '..';
 import React from 'react';
 
-const onGroupChange = jest.fn();
+const onGroupChange = vi.fn();
 const testProps = {
   groupingId: 'test-grouping-id',
   fields: [
@@ -73,7 +75,7 @@ const testProps = {
 };
 describe('group selector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('Sets the selected group from the groupSelected prop', () => {
     const { getByTestId } = render(<GroupSelector {...testProps} />);

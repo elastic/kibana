@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
 import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 
-jest.mock('../hooks/use_inference_endpoints', () => ({
-  useInferenceEndpoints: () => ({
-    inferenceEndpoints: [{ inference_id: 'id1' }, { inference_id: 'id2' }],
-    isLoading: false,
-  }),
-}));
+vi.mock('../hooks/use_inference_endpoints', () => {
+      const mocked = {
+      useInferenceEndpoints: () => ({
+        inferenceEndpoints: [{ inference_id: 'id1' }, { inference_id: 'id2' }],
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function createMockKnowledgeBase(
   partial: Partial<UseKnowledgeBaseResult> = {}
@@ -43,7 +48,7 @@ function createMockKnowledgeBase(
       },
       loading: false,
       error: undefined,
-      refresh: jest.fn(),
+      refresh: vi.fn(),
     },
   };
 }
@@ -54,13 +59,13 @@ function renderComponent(kb: UseKnowledgeBaseResult) {
 
 describe('WelcomeMessageKnowledgeBase', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(`renders the "not set up" state if server returns errorMessage (no model exists) but user hasn't started installing`, async () => {
     const kb = createMockKnowledgeBase({
       isInstalling: false,
-      install: jest.fn(async (_id: string) => {}),
+      install: vi.fn(async (_id: string) => {}),
       status: {
         value: {
           enabled: true,
@@ -72,7 +77,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
           productDocStatus: 'uninstalled',
         },
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       },
     });
 
@@ -96,7 +101,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
           productDocStatus: 'uninstalled',
         },
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       },
     });
     renderComponent(kb);
@@ -120,7 +125,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
           productDocStatus: 'uninstalled',
         },
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       },
     });
     const { rerender } = renderComponent(kb);
@@ -144,7 +149,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
           productDocStatus: 'uninstalled',
         },
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       },
     };
 
@@ -181,7 +186,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
           productDocStatus: 'uninstalled',
         },
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       },
     });
     renderComponent(kb);
@@ -216,7 +221,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
           productDocStatus: 'uninstalled',
         },
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       },
     });
     renderComponent(kb);
@@ -251,7 +256,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
           productDocStatus: 'uninstalled',
         },
         loading: false,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       },
     });
     renderComponent(kb);
@@ -273,7 +278,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
         },
         loading: false,
         error: undefined,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       },
     });
     renderComponent(kb);

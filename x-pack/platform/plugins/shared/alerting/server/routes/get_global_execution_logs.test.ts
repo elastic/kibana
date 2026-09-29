@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
@@ -13,12 +15,15 @@ import { rulesClientMock } from '../rules_client.mock';
 import type { IExecutionLogResult } from '../../common';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('getRuleExecutionLogRoute', () => {

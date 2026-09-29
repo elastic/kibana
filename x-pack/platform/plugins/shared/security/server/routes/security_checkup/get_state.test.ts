@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // eslint-disable-next-line import/order
 import { mockCreateClusterDataCheck } from './get_state.test.mock';
 
@@ -35,7 +37,7 @@ function setup({ showInsecureClusterWarning, allowRbac, doesClusterHaveUserData 
   const featuresSubject = new BehaviorSubject({ allowRbac } as SecurityLicenseFeatures);
   licenseWithFeatures.features$ = featuresSubject.asObservable();
 
-  const mockClusterDataCheck = jest.fn().mockResolvedValue(doesClusterHaveUserData);
+  const mockClusterDataCheck = vi.fn().mockResolvedValue(doesClusterHaveUserData);
   mockCreateClusterDataCheck.mockReturnValue(mockClusterDataCheck);
 
   const mockContext = securityRequestHandlerContextMock.create();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
@@ -19,25 +21,28 @@ import {
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { useModelConnectors } from '../../hooks/use_model_connectors';
 
-jest.mock('../../hooks/use_online_eval_workflows');
-jest.mock('../../hooks/use_evals_permissions');
-jest.mock('../../hooks/use_model_connectors');
-jest.mock('../../components/create_online_eval_flyout', () => ({
-  CreateOnlineEvalFlyout: ({ onClose }: { onClose: () => void }) => (
-    <div data-test-subj="createOnlineEvalFlyoutMock">
-      <button onClick={onClose} type="button">
-        close
-      </button>
-      create flyout mock
-    </div>
-  ),
-}));
+vi.mock('../../hooks/use_online_eval_workflows');
+vi.mock('../../hooks/use_evals_permissions');
+vi.mock('../../hooks/use_model_connectors');
+vi.mock('../../components/create_online_eval_flyout', () => {
+      const mocked = {
+      CreateOnlineEvalFlyout: ({ onClose }: { onClose: () => void }) => (
+        <div data-test-subj="createOnlineEvalFlyoutMock">
+          <button onClick={onClose} type="button">
+            close
+          </button>
+          create flyout mock
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseOnlineEvalWorkflows = jest.mocked(useOnlineEvalWorkflows);
-const mockedUseToggleOnlineEvalWorkflow = jest.mocked(useToggleOnlineEvalWorkflow);
-const mockedUseDeleteOnlineEvalWorkflow = jest.mocked(useDeleteOnlineEvalWorkflow);
-const mockedUseEvalsPermissions = jest.mocked(useEvalsPermissions);
-const mockedUseModelConnectors = jest.mocked(useModelConnectors);
+const mockedUseOnlineEvalWorkflows = vi.mocked(useOnlineEvalWorkflows);
+const mockedUseToggleOnlineEvalWorkflow = vi.mocked(useToggleOnlineEvalWorkflow);
+const mockedUseDeleteOnlineEvalWorkflow = vi.mocked(useDeleteOnlineEvalWorkflow);
+const mockedUseEvalsPermissions = vi.mocked(useEvalsPermissions);
+const mockedUseModelConnectors = vi.mocked(useModelConnectors);
 
 const renderPage = () => {
   const history = createMemoryHistory({ initialEntries: ['/online'] });
@@ -78,11 +83,11 @@ describe('OnlineEvalsListPage', () => {
       error: null,
     });
     mockedUseToggleOnlineEvalWorkflow.mockReturnValue({
-      mutate: jest.fn(),
+      mutate: vi.fn(),
       isLoading: false,
     } as unknown as ReturnType<typeof useToggleOnlineEvalWorkflow>);
     mockedUseDeleteOnlineEvalWorkflow.mockReturnValue({
-      mutate: jest.fn(),
+      mutate: vi.fn(),
       isLoading: false,
     } as unknown as ReturnType<typeof useDeleteOnlineEvalWorkflow>);
   });
@@ -97,7 +102,7 @@ describe('OnlineEvalsListPage', () => {
       },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useOnlineEvalWorkflows>);
 
     renderPage();
@@ -109,7 +114,7 @@ describe('OnlineEvalsListPage', () => {
   });
 
   it('calls PUT toggle mutation when enabled switch changes', () => {
-    const mutate = jest.fn();
+    const mutate = vi.fn();
     mockedUseToggleOnlineEvalWorkflow.mockReturnValue({
       mutate,
       isLoading: false,
@@ -123,7 +128,7 @@ describe('OnlineEvalsListPage', () => {
       },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useOnlineEvalWorkflows>);
 
     const { container, history } = renderPage();
@@ -137,7 +142,7 @@ describe('OnlineEvalsListPage', () => {
   });
 
   it('calls DELETE mutation after confirm modal submit', () => {
-    const mutate = jest.fn();
+    const mutate = vi.fn();
     mockedUseDeleteOnlineEvalWorkflow.mockReturnValue({
       mutate,
       isLoading: false,
@@ -151,7 +156,7 @@ describe('OnlineEvalsListPage', () => {
       },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useOnlineEvalWorkflows>);
 
     const { history } = renderPage();
@@ -173,7 +178,7 @@ describe('OnlineEvalsListPage', () => {
       },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useOnlineEvalWorkflows>);
 
     const { container } = renderPage();
@@ -199,7 +204,7 @@ describe('OnlineEvalsListPage', () => {
       },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useOnlineEvalWorkflows>);
 
     const { container } = renderPage();
@@ -220,7 +225,7 @@ describe('OnlineEvalsListPage', () => {
       },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useOnlineEvalWorkflows>);
 
     const { container, history } = renderPage();
@@ -244,7 +249,7 @@ describe('OnlineEvalsListPage', () => {
       },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useOnlineEvalWorkflows>);
 
     const { container } = renderPage();
@@ -268,7 +273,7 @@ describe('OnlineEvalsListPage', () => {
       },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useOnlineEvalWorkflows>);
 
     const { container } = renderPage();

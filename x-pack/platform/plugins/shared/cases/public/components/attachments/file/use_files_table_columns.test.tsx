@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FilesTableColumnsProps } from './use_files_table_columns';
 import { useFilesTableColumns } from './use_files_table_columns';
 
@@ -19,7 +21,7 @@ describe('useFilesTableColumns', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('return all files table columns correctly', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
@@ -33,7 +35,7 @@ describe('open in discover action', () => {
       // setup
       const lensApi = {
         ...compatibleEmbeddableApi,
-        canViewUnderlyingData$: { getValue: jest.fn(() => true) },
+        canViewUnderlyingData$: { getValue: vi.fn(() => true) },
       };
 
       let hasDiscoverAccess = true;
@@ -64,7 +66,7 @@ describe('open in discover action', () => {
       // setup
       const embeddable = {
         ...compatibleEmbeddableApi,
-        canViewUnderlyingData$: { getValue: jest.fn(() => false) },
+        canViewUnderlyingData$: { getValue: vi.fn(() => false) },
       };
 
       // test false
@@ -81,7 +83,7 @@ describe('open in discover action', () => {
       expect(embeddable.canViewUnderlyingData$.getValue).toHaveBeenCalledTimes(1);
 
       // test true
-      embeddable.canViewUnderlyingData$.getValue = jest.fn(() => true);
+      embeddable.canViewUnderlyingData$.getValue = vi.fn(() => true);
 
       expect(
         await createOpenInDiscoverAction(
@@ -109,15 +111,15 @@ describe('open in discover action', () => {
 
     const embeddable = {
       ...compatibleEmbeddableApi,
-      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
+      getViewUnderlyingDataArgs: vi.fn(() => viewUnderlyingDataArgs),
     };
 
     const discoverUrl = 'https://discover-redirect-url';
     const locator = {
-      getRedirectUrl: jest.fn(() => discoverUrl),
+      getRedirectUrl: vi.fn(() => discoverUrl),
     } as unknown as DiscoverAppLocator;
 
-    globalThis.open = jest.fn();
+    globalThis.open = vi.fn();
 
     await createOpenInDiscoverAction(
       locator,
@@ -157,16 +159,16 @@ describe('open in discover action', () => {
 
     const embeddable = {
       ...compatibleEmbeddableApi,
-      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
-      isTextBasedLanguage: jest.fn(() => true),
+      getViewUnderlyingDataArgs: vi.fn(() => viewUnderlyingDataArgs),
+      isTextBasedLanguage: vi.fn(() => true),
     };
 
     const discoverUrl = 'https://discover-redirect-url';
     const locator = {
-      getRedirectUrl: jest.fn(() => discoverUrl),
+      getRedirectUrl: vi.fn(() => discoverUrl),
     } as unknown as DiscoverAppLocator;
 
-    globalThis.open = jest.fn();
+    globalThis.open = vi.fn();
 
     await createOpenInDiscoverAction(
       locator,
@@ -203,8 +205,8 @@ describe('open in discover action', () => {
 
     const embeddable = {
       ...compatibleEmbeddableApi,
-      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
-      isTextBasedLanguage: jest.fn(() => true),
+      getViewUnderlyingDataArgs: vi.fn(() => viewUnderlyingDataArgs),
+      isTextBasedLanguage: vi.fn(() => true),
       parentApi: {
         query$: { getValue: () => ({ language: 'kuery', query: 'host.name : "web-1"' }) },
         filters$: { getValue: () => [] },
@@ -214,10 +216,10 @@ describe('open in discover action', () => {
 
     const discoverUrl = 'https://discover-redirect-url';
     const locator = {
-      getRedirectUrl: jest.fn(() => discoverUrl),
+      getRedirectUrl: vi.fn(() => discoverUrl),
     } as unknown as DiscoverAppLocator;
 
-    globalThis.open = jest.fn();
+    globalThis.open = vi.fn();
 
     await createOpenInDiscoverAction(
       locator,
@@ -252,16 +254,16 @@ describe('open in discover action', () => {
 
     const embeddable = {
       ...compatibleEmbeddableApi,
-      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
-      isTextBasedLanguage: jest.fn(() => true),
+      getViewUnderlyingDataArgs: vi.fn(() => viewUnderlyingDataArgs),
+      isTextBasedLanguage: vi.fn(() => true),
     };
 
     const discoverUrl = 'https://discover-redirect-url';
     const locator = {
-      getRedirectUrl: jest.fn(() => discoverUrl),
+      getRedirectUrl: vi.fn(() => discoverUrl),
     } as unknown as DiscoverAppLocator;
 
-    globalThis.open = jest.fn();
+    globalThis.open = vi.fn();
 
     await createOpenInDiscoverAction(
       locator,
@@ -297,8 +299,8 @@ describe('open in discover action', () => {
 
     const embeddable = {
       ...compatibleEmbeddableApi,
-      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
-      isTextBasedLanguage: jest.fn(() => true),
+      getViewUnderlyingDataArgs: vi.fn(() => viewUnderlyingDataArgs),
+      isTextBasedLanguage: vi.fn(() => true),
       parentApi: {
         isApproximate$: { value: true },
       },
@@ -306,10 +308,10 @@ describe('open in discover action', () => {
 
     const discoverUrl = 'https://discover-redirect-url';
     const locator = {
-      getRedirectUrl: jest.fn(() => discoverUrl),
+      getRedirectUrl: vi.fn(() => discoverUrl),
     } as unknown as DiscoverAppLocator;
 
-    globalThis.open = jest.fn();
+    globalThis.open = vi.fn();
 
     await createOpenInDiscoverAction(
       locator,

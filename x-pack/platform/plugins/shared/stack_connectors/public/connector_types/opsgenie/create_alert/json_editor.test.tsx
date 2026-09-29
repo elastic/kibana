@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render, within, fireEvent, waitFor } from '@testing-library/react';
 import JsonEditor from './json_editor';
 
 describe('JsonEditor', () => {
-  const editAction = jest.fn();
+  const editAction = vi.fn();
 
   const options = {
     index: 0,
     editAction,
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('sets the default value for the json editor to {}', () => {
     render(<JsonEditor {...options} />);

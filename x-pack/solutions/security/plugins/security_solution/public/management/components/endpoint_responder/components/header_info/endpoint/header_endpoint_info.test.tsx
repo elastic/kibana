@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { EndpointActionGenerator } from '../../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import type { HostInfo } from '../../../../../../../common/endpoint/types';
@@ -17,11 +20,11 @@ import { HeaderEndpointInfo } from './header_endpoint_info';
 import { agentStatusGetHttpMock } from '../../../../../mocks';
 import { waitFor } from '@testing-library/react';
 
-jest.mock('../../../../../hooks/endpoint/use_get_endpoint_details');
-jest.mock('../../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary');
+vi.mock('../../../../../hooks/endpoint/use_get_endpoint_details');
+vi.mock('../../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary');
 
-const useGetEndpointDetailsMock = _useGetEndpointDetails as jest.Mock;
-const getPendingActions = useGetEndpointPendingActionsSummary as jest.Mock;
+const useGetEndpointDetailsMock = _useGetEndpointDetails as Mock;
+const getPendingActions = useGetEndpointPendingActionsSummary as Mock;
 
 describe('Responder header endpoint info', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -52,7 +55,7 @@ describe('Responder header endpoint info', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('should show endpoint name', async () => {
     const name = await renderResult.findByTestId('responseConsole-hostName');

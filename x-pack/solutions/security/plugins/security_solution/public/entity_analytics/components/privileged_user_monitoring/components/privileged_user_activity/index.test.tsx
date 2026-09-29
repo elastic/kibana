@@ -5,35 +5,46 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { UserActivityPrivilegedUsersPanel } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import { act } from 'react-dom/test-utils';
 
-jest.mock('../../../../../common/containers/use_global_time', () => ({
-  useGlobalTime: () => ({
-    from: '2023-01-01T00:00:00.000Z',
-    to: '2023-01-02T00:00:00.000Z',
-  }),
-}));
+vi.mock('../../../../../common/containers/use_global_time', () => {
+      const mocked = {
+      useGlobalTime: () => ({
+        from: '2023-01-01T00:00:00.000Z',
+        to: '2023-01-02T00:00:00.000Z',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../privileged_user_monitoring_onboarding/components/esql_dashboard_panel/esql_dashboard_panel',
-  () => ({
-    EsqlDashboardPanel: () => <div data-test-subj="esql-dashboard-panel" />,
-  })
+  () => {
+      const mocked = {
+        EsqlDashboardPanel: () => <div data-test-subj="esql-dashboard-panel" />,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn().mockReturnValue('default'),
-}));
+vi.mock('../../../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn().mockReturnValue('default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../queries/helpers', () => {
-  const originalModule = jest.requireActual('../../queries/helpers');
+vi.mock('../../queries/helpers', async () => {
+  const originalModule = (await vi.importActual('../../queries/helpers'));
   return {
     ...originalModule,
-    removeInvalidForkBranchesFromESQL: jest.fn((fields, esql) => esql),
+    removeInvalidForkBranchesFromESQL: vi.fn((fields, esql) => esql),
   };
 });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type { KbnPaletteId } from '@kbn/palettes';
@@ -39,7 +42,7 @@ function createTestFormat(options: { id: string; title: string }) {
     static title = options.title;
 
     textConvert: FieldFormat['textConvert'] = (value) => String(value);
-  })(undefined, jest.fn());
+  })(undefined, vi.fn());
 }
 
 describe('data table dimension editor', () => {
@@ -71,16 +74,16 @@ describe('data table dimension editor', () => {
   }
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     btnGroups = {
       colorMode: new EuiComboBoxTestHarness('lnsDatatable_dynamicColoring_groups'),
       alignment: new EuiButtonGroupTestHarness('lnsDatatable_alignment_groups'),
@@ -112,19 +115,19 @@ describe('data table dimension editor', () => {
       groupId: 'columns',
       layerId: 'first',
       state,
-      setState: jest.fn(),
+      setState: vi.fn(),
       isDarkMode: false,
       paletteService: chartPluginMock.createPaletteRegistry(),
       palettes: getKbnPalettes({ name: 'amsterdam', darkMode: false }),
       panelRef: React.createRef(),
-      addLayer: jest.fn(),
-      removeLayer: jest.fn(),
+      addLayer: vi.fn(),
+      removeLayer: vi.fn(),
       datasource: {} as DatasourcePublicAPI,
       formatFactory: fieldFormatsMock.deserialize,
     };
 
     mockOperationForFirstColumn = (overrides: Partial<OperationDescriptor> = {}) => {
-      frame!.datasourceLayers!.first!.getOperationForColumnId = jest.fn().mockReturnValue({
+      frame!.datasourceLayers!.first!.getOperationForColumnId = vi.fn().mockReturnValue({
         label: 'label',
         isBucketed: false,
         dataType: 'string',
@@ -191,7 +194,7 @@ describe('data table dimension editor', () => {
     ];
     renderTableDimensionEditor();
     await user.click(screen.getByRole('button', { name: 'Center' }));
-    await act(async () => jest.advanceTimersByTime(256));
+    await act(async () => vi.advanceTimersByTime(256));
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
       columns: [
@@ -248,7 +251,7 @@ describe('data table dimension editor', () => {
     state.columns = [{ columnId: 'foo' }, { columnId: 'bar' }];
     renderTableDimensionEditor();
     await btnGroups.colorMode.select(getDynamicColoringLabel('cell'));
-    await act(async () => jest.advanceTimersByTime(256));
+    await act(async () => vi.advanceTimersByTime(256));
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
       columns: [
@@ -268,7 +271,7 @@ describe('data table dimension editor', () => {
     state.columns = [{ columnId: 'foo' }, { columnId: 'bar' }];
     renderTableDimensionEditor();
     await btnGroups.colorMode.select(getDynamicColoringLabel('badge'));
-    await act(async () => jest.advanceTimersByTime(256));
+    await act(async () => vi.advanceTimersByTime(256));
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
       columns: [
@@ -302,7 +305,7 @@ describe('data table dimension editor', () => {
     ];
     renderTableDimensionEditor();
     await btnGroups.colorMode.select('Text');
-    await act(async () => jest.advanceTimersByTime(256));
+    await act(async () => vi.advanceTimersByTime(256));
 
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
@@ -329,7 +332,7 @@ describe('data table dimension editor', () => {
       renderTableDimensionEditor();
 
       await user.click(screen.getByLabelText('Edit colors'));
-      await act(async () => jest.advanceTimersByTime(256));
+      await act(async () => vi.advanceTimersByTime(256));
 
       expect(screen.getByTestId(`lns-palettePanel-${flyout}`)).toBeInTheDocument();
     }
@@ -351,7 +354,7 @@ describe('data table dimension editor', () => {
       renderTableDimensionEditor();
 
       await user.click(screen.getByLabelText('Edit colors'));
-      await act(async () => jest.advanceTimersByTime(256));
+      await act(async () => vi.advanceTimersByTime(256));
 
       expect(screen.getByTestId(`lns-palettePanel-${flyout}`)).toBeInTheDocument();
     }
@@ -373,10 +376,10 @@ describe('data table dimension editor', () => {
     renderTableDimensionEditor();
 
     await user.click(screen.getByLabelText('Edit colors'));
-    await act(async () => jest.advanceTimersByTime(256));
+    await act(async () => vi.advanceTimersByTime(256));
 
     await user.click(screen.getByTestId('lns_colorMappingOrLegacyPalette_switch'));
-    await act(async () => jest.advanceTimersByTime(256));
+    await act(async () => vi.advanceTimersByTime(256));
 
     expect(props.setState).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -404,7 +407,7 @@ describe('data table dimension editor', () => {
 
     await btnGroups.colorMode.select(getDynamicColoringLabel('none'));
 
-    await act(async () => jest.advanceTimersByTime(256));
+    await act(async () => vi.advanceTimersByTime(256));
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
       columns: [
@@ -439,7 +442,7 @@ describe('data table dimension editor', () => {
       renderTableDimensionEditor();
 
       await btnGroups.colorMode.select(getDynamicColoringLabel('progress'));
-      await act(async () => jest.advanceTimersByTime(256));
+      await act(async () => vi.advanceTimersByTime(256));
 
       expect(props.setState).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -453,10 +456,10 @@ describe('data table dimension editor', () => {
       renderTableDimensionEditor();
 
       await btnGroups.colorMode.select(getDynamicColoringLabel('progress'));
-      await act(async () => jest.advanceTimersByTime(256));
+      await act(async () => vi.advanceTimersByTime(256));
 
       // No "progress" colorMode should ever be produced for a terms column.
-      const calls = (props.setState as jest.Mock).mock.calls;
+      const calls = (props.setState as Mock).mock.calls;
       const producedProgress = calls.some(([next]) =>
         next?.columns?.some((c: ColumnState) => c.colorMode === 'progress')
       );
@@ -469,7 +472,7 @@ describe('data table dimension editor', () => {
       renderTableDimensionEditor();
 
       await btnGroups.colorMode.select(getDynamicColoringLabel('progress'));
-      await act(async () => jest.advanceTimersByTime(256));
+      await act(async () => vi.advanceTimersByTime(256));
 
       expect(props.setState).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -601,7 +604,7 @@ describe('data table dimension editor', () => {
 
       // Toggle the value range to Auto.
       await act(async () => screen.getByTestId('lnsDatatable_progressBar_valueRange_auto').click());
-      await act(async () => jest.advanceTimersByTime(256));
+      await act(async () => vi.advanceTimersByTime(256));
 
       expect(props.setState).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -626,11 +629,11 @@ describe('data table dimension editor', () => {
       renderTableDimensionEditor();
 
       await act(async () => screen.getByTestId('lnsDatatable_progressBar_valueRange_auto').click());
-      await act(async () => jest.advanceTimersByTime(256));
+      await act(async () => vi.advanceTimersByTime(256));
       await act(async () =>
         screen.getByTestId('lnsDatatable_progressBar_valueRange_custom').click()
       );
-      await act(async () => jest.advanceTimersByTime(256));
+      await act(async () => vi.advanceTimersByTime(256));
 
       expect(props.setState).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -658,7 +661,7 @@ describe('data table dimension editor', () => {
       await act(async () =>
         screen.getByTestId('lnsDatatable_progressBar_valueRange_custom').click()
       );
-      await act(async () => jest.advanceTimersByTime(256));
+      await act(async () => vi.advanceTimersByTime(256));
 
       expect(props.setState).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -680,7 +683,7 @@ describe('data table dimension editor', () => {
       renderTableDimensionEditor();
 
       await btnGroups.colorMode.select('Background');
-      await act(async () => jest.advanceTimersByTime(256));
+      await act(async () => vi.advanceTimersByTime(256));
 
       expect(props.setState).toHaveBeenCalledWith(
         expect.objectContaining({

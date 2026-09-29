@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { fetchIndexPlatforms } from './fetch_index_platforms';
 
 const logger = {
-  warn: jest.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 interface IndexBucketInput {
@@ -51,7 +53,7 @@ const makeBucket = ({
 
 const makeEsClient = (buckets: IndexBucketInput[]): ElasticsearchClient =>
   ({
-    search: jest.fn().mockResolvedValue({
+    search: vi.fn().mockResolvedValue({
       aggregations: {
         by_index: {
           buckets: buckets.map(makeBucket),
@@ -62,7 +64,7 @@ const makeEsClient = (buckets: IndexBucketInput[]): ElasticsearchClient =>
 
 describe('fetchIndexPlatforms', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('composes vendor + OS for endpoint data with event.module', async () => {
@@ -208,7 +210,7 @@ describe('fetchIndexPlatforms', () => {
 
   it('returns an empty map and logs when the aggregation fails', async () => {
     const esClient = {
-      search: jest.fn().mockRejectedValue(new Error('search failed')),
+      search: vi.fn().mockRejectedValue(new Error('search failed')),
     } as unknown as ElasticsearchClient;
 
     const result = await fetchIndexPlatforms({ esClient, logger });

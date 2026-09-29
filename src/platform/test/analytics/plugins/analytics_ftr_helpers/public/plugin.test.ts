@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import type { ReplaySubject } from 'rxjs';
 import type { AnalyticsServiceSetup, Event } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -19,7 +21,7 @@ import { withTimeout } from '@kbn/std';
 describe('AnalyticsFTRHelpers', () => {
   let plugin: AnalyticsFTRHelpers;
   let events$: ReplaySubject<Event>;
-  let analyticsMock: jest.Mocked<AnalyticsServiceSetup>;
+  let analyticsMock: Mocked<AnalyticsServiceSetup>;
 
   beforeEach(() => {
     plugin = new AnalyticsFTRHelpers();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Query } from '@kbn/data-plugin/common';
@@ -21,12 +24,15 @@ import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import Expressions, { getNoDataBehaviorValue } from './custom_threshold_rule_expression';
 import type { AlertParams, CustomThresholdPrefillOptions } from './types';
 
-jest.mock('../../utils/kibana_react');
-jest.mock('../rule_condition_chart/rule_condition_chart', () => ({
-  RuleConditionChart: jest.fn(() => <div data-test-subj="RuleConditionChart" />),
-}));
+vi.mock('../../utils/kibana_react');
+vi.mock('../rule_condition_chart/rule_condition_chart', () => {
+      const mocked = {
+      RuleConditionChart: vi.fn(() => <div data-test-subj="RuleConditionChart" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -38,7 +44,7 @@ const dataViewMock = dataViewPluginMocks.createStartContract();
 
 describe('Expression', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibana();
   });
 
@@ -77,7 +83,7 @@ describe('Expression', () => {
           setRuleProperty={() => {}}
           metadata={metadata}
           dataViews={dataViewMock}
-          onChangeMetaData={jest.fn()}
+          onChangeMetaData={vi.fn()}
         />
       </QueryClientProvider>
     );
@@ -108,9 +114,9 @@ describe('Expression', () => {
       fields: {
         index: mockedIndex,
       },
-      getField: jest.fn(() => mockedDataView),
-      setField: jest.fn(),
-      getSerializedFields: jest.fn().mockReturnValue({ index: mockedIndex }),
+      getField: vi.fn(() => mockedDataView),
+      setField: vi.fn(),
+      getSerializedFields: vi.fn().mockReturnValue({ index: mockedIndex }),
       dependencies: {
         aggs: {
           types: {},
@@ -124,21 +130,21 @@ describe('Expression', () => {
         ...kibanaMock.services,
         data: {
           dataViews: {
-            create: jest.fn(),
-            getDefaultDataView: jest.fn(),
+            create: vi.fn(),
+            getDefaultDataView: vi.fn(),
           },
           query: {
             timefilter: {
-              timefilter: jest.fn(),
+              timefilter: vi.fn(),
             },
             queryString: {
-              getDefaultQuery: jest.fn(),
+              getDefaultQuery: vi.fn(),
             },
           },
           search: {
             searchSource: {
-              create: jest.fn(() => mockedSearchSource),
-              createEmpty: jest.fn(() => mockedSearchSource),
+              create: vi.fn(() => mockedSearchSource),
+              createEmpty: vi.fn(() => mockedSearchSource),
             },
           },
         },
@@ -232,16 +238,16 @@ describe('Expression', () => {
         ...kibanaMock.services,
         data: {
           dataViews: {
-            create: jest.fn(),
+            create: vi.fn(),
           },
           query: {
             timefilter: {
-              timefilter: jest.fn(),
+              timefilter: vi.fn(),
             },
           },
           search: {
             searchSource: {
-              create: jest.fn(() => {
+              create: vi.fn(() => {
                 throw new Error(errorMessage);
               }),
             },
@@ -275,7 +281,7 @@ describe('Expression', () => {
 
   it('should re-add $state to saved filters before passing them to the SearchBar', async () => {
     const kibanaMock = kibanaStartMock.startContract();
-    const searchBarMock = kibanaMock.services.unifiedSearch.ui.SearchBar as jest.Mock;
+    const searchBarMock = kibanaMock.services.unifiedSearch.ui.SearchBar as Mock;
     searchBarMock.mockClear();
     useKibanaMock.mockReturnValue(kibanaMock);
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 
@@ -23,7 +26,7 @@ const prompts = {
 
 describe('parseCombinedOrThrow', () => {
   const mockLogger: Logger = {
-    debug: jest.fn(),
+    debug: vi.fn(),
   } as unknown as Logger;
 
   const nodeName = 'testNodeName';
@@ -80,7 +83,7 @@ describe('parseCombinedOrThrow', () => {
       generationAttempts,
     });
 
-    expect((mockLogger.debug as jest.Mock).mock.calls[0][0]()).toBe(
+    expect((mockLogger.debug as Mock).mock.calls[0][0]()).toBe(
       `${nodeName} node is parsing extractedJson (${llmType}) from attempt ${generationAttempts}`
     );
   });
@@ -93,7 +96,7 @@ describe('parseCombinedOrThrow', () => {
       generationAttempts,
     });
 
-    expect((mockLogger.debug as jest.Mock).mock.calls[1][0]()).toBe(
+    expect((mockLogger.debug as Mock).mock.calls[1][0]()).toBe(
       `${nodeName} node is validating combined response (${llmType}) from attempt ${generationAttempts}`
     );
   });
@@ -106,7 +109,7 @@ describe('parseCombinedOrThrow', () => {
       generationAttempts,
     });
 
-    expect((mockLogger.debug as jest.Mock).mock.calls[2][0]()).toBe(
+    expect((mockLogger.debug as Mock).mock.calls[2][0]()).toBe(
       `${nodeName} node successfully validated insights response (${llmType}) from attempt ${generationAttempts}`
     );
   });

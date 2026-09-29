@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,51 +18,55 @@ import { AppContextProvider } from '../../../../../app_context';
 import type { AppDependencies } from '../../../../../app_context';
 import { NotificationService } from '../../../../../services/notification';
 
-jest.mock('../../../../../services/routing', () => ({
-  ...jest.requireActual('../../../../../services/routing'),
-  getIndexDetailsLink: jest.fn().mockReturnValue('/mocked-link'),
-}));
+vi.mock('../../../../../services/routing', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../services/routing')),
+      getIndexDetailsLink: vi.fn().mockReturnValue('/mocked-link'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let notificationService: NotificationService;
-let showSuccessToastSpy: jest.SpyInstance;
+let showSuccessToastSpy: MockInstance;
 
-jest.mock(
+vi.mock(
   '../../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal_container',
-  () => ({
-    ...jest.requireActual(
-      '../../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal_container'
-    ),
-    ConvertToLookupIndexModalContainer: ({
-      onCloseModal,
-      onSuccess,
-    }: {
-      onCloseModal: () => void;
-      onSuccess: (lookupIndexName: string) => void;
-    }) => (
-      <div data-test-subj="mockConvertToLookup">
-        <button data-test-subj="convert-success" onClick={() => onSuccess('lookup-my-index')} />
-        <button data-test-subj="convert-close" onClick={onCloseModal} />
-      </div>
-    ),
-  })
+  async () => {
+      const mocked = {
+        ...(await vi.importActual('../../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal_container')),
+        ConvertToLookupIndexModalContainer: ({
+          onCloseModal,
+          onSuccess,
+        }: {
+          onCloseModal: () => void;
+          onSuccess: (lookupIndexName: string) => void;
+        }) => (
+          <div data-test-subj="mockConvertToLookup">
+            <button data-test-subj="convert-success" onClick={() => onSuccess('lookup-my-index')} />
+            <button data-test-subj="convert-close" onClick={onCloseModal} />
+          </div>
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 const baseProps: React.ComponentProps<typeof ModalHost> = {
   indexNames: ['index-1'],
   indices: [{ name: 'index-1' }] as unknown as React.ComponentProps<typeof ModalHost>['indices'],
   indicesListURLParams: '',
-  resetSelection: jest.fn(),
-  forcemergeIndices: jest.fn(async (_: string) => {}),
-  deleteIndices: jest.fn(async () => {}),
-  reloadIndices: jest.fn(),
+  resetSelection: vi.fn(),
+  forcemergeIndices: vi.fn(async (_: string) => {}),
+  deleteIndices: vi.fn(async () => {}),
+  reloadIndices: vi.fn(),
   extensionsService: {
     actions: [],
     columns: [],
     banners: [],
     toggles: [],
   } as unknown as React.ComponentProps<typeof ModalHost>['extensionsService'],
-  getUrlForApp: jest.fn() as React.ComponentProps<typeof ModalHost>['getUrlForApp'],
-  history: { push: jest.fn() } as unknown as React.ComponentProps<typeof ModalHost>['history'],
+  getUrlForApp: vi.fn() as React.ComponentProps<typeof ModalHost>['getUrlForApp'],
+  history: { push: vi.fn() } as unknown as React.ComponentProps<typeof ModalHost>['history'],
 };
 
 const renderWithI18n = (ui: React.ReactElement) => {
@@ -78,10 +85,10 @@ const renderWithI18n = (ui: React.ReactElement) => {
 
 describe('ModalHost', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    const toasts = { add: jest.fn() } as any;
+    vi.clearAllMocks();
+    const toasts = { add: vi.fn() } as any;
     notificationService = new NotificationService(toasts);
-    showSuccessToastSpy = jest.spyOn(notificationService, 'showSuccessToast');
+    showSuccessToastSpy = vi.spyOn(notificationService, 'showSuccessToast');
   });
 
   describe('WHEN rendering and opening modals', () => {

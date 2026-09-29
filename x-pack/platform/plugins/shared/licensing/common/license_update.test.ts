@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, Subject } from 'rxjs';
 import { take, toArray } from 'rxjs';
 
@@ -17,7 +19,7 @@ const stop$ = new Subject<void>();
 describe('licensing update', () => {
   it('loads updates when triggered', async () => {
     const trigger$ = new Subject<void>();
-    const fetcher = jest
+    const fetcher = vi
       .fn()
       .mockResolvedValueOnce(licenseMock.createLicense({ license: { type: 'basic' } }))
       .mockResolvedValueOnce(licenseMock.createLicense({ license: { type: 'gold' } }));
@@ -40,7 +42,7 @@ describe('licensing update', () => {
     const fetchedLicense = licenseMock.createLicense({ license: { type: 'gold' } });
     const trigger$ = new Subject<void>();
 
-    const fetcher = jest.fn().mockResolvedValue(fetchedLicense);
+    const fetcher = vi.fn().mockResolvedValue(fetchedLicense);
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, initialLicense);
     trigger$.next();
     const [first, second] = await firstValueFrom(license$.pipe(take(2), toArray()));
@@ -53,7 +55,7 @@ describe('licensing update', () => {
   it('does not emit if license has not changed', async () => {
     const trigger$ = new Subject<void>();
 
-    const fetcher = jest
+    const fetcher = vi
       .fn()
       .mockResolvedValueOnce(licenseMock.createLicense())
       .mockResolvedValueOnce(licenseMock.createLicense())
@@ -80,7 +82,7 @@ describe('licensing update', () => {
   it('new subscriptions does not force re-fetch', async () => {
     const trigger$ = new Subject<void>();
 
-    const fetcher = jest.fn().mockResolvedValue(licenseMock.createLicense());
+    const fetcher = vi.fn().mockResolvedValue(licenseMock.createLicense());
 
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
 
@@ -94,7 +96,7 @@ describe('licensing update', () => {
 
   it('ignores trigger if license fetching is delayed ', async () => {
     const delayMs = 100;
-    const fetcher = jest.fn().mockImplementationOnce(
+    const fetcher = vi.fn().mockImplementationOnce(
       () =>
         new Promise((resolve) => {
           setTimeout(
@@ -120,7 +122,7 @@ describe('licensing update', () => {
 
   it('completes license$ stream when stop$ is triggered', () => {
     const trigger$ = new Subject<void>();
-    const fetcher = jest.fn().mockResolvedValue(licenseMock.createLicense());
+    const fetcher = vi.fn().mockResolvedValue(licenseMock.createLicense());
 
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
     let completed = false;
@@ -132,7 +134,7 @@ describe('licensing update', () => {
 
   it('stops fetching when stop$ is triggered', () => {
     const trigger$ = new Subject<void>();
-    const fetcher = jest.fn().mockResolvedValue(licenseMock.createLicense());
+    const fetcher = vi.fn().mockResolvedValue(licenseMock.createLicense());
 
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
     const values: ILicense[] = [];
@@ -149,7 +151,7 @@ describe('licensing update', () => {
     const firstLicense = licenseMock.createLicense({ license: { uid: 'first', type: 'basic' } });
     const secondLicense = licenseMock.createLicense({ license: { uid: 'second', type: 'gold' } });
 
-    const fetcher = jest
+    const fetcher = vi
       .fn()
       .mockImplementationOnce(async () => {
         await delay(2);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { cloneDeep } from 'lodash';
@@ -19,7 +22,7 @@ import type { PerOsAntivirusRegistrationCardProps } from './per_os_antivirus_reg
 import { PerOsAntivirusRegistrationCard } from './per_os_antivirus_registration_card';
 import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 describe('PerOsAntivirusRegistrationCard', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').perOsAntivirusRegistration;
   let policy: PolicyConfig;
@@ -35,7 +38,7 @@ describe('PerOsAntivirusRegistrationCard', () => {
   };
 
   const getUpdatedPolicy = (): PolicyConfig => {
-    const onChange = props.onChange as jest.Mock;
+    const onChange = props.onChange as Mock;
     return onChange.mock.calls[onChange.mock.calls.length - 1][0].updatedPolicy;
   };
 
@@ -45,7 +48,7 @@ describe('PerOsAntivirusRegistrationCard', () => {
       .config.policy.value;
     props = {
       policy,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': testSubj.card,
     };

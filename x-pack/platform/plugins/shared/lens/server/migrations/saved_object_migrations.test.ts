@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cloneDeep } from 'lodash';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import type { LensDocShape } from './saved_object_migrations';
@@ -1743,7 +1745,7 @@ describe('Lens migrations', () => {
       },
     };
 
-    const migrationFn = jest.fn((oldState: { oldState: boolean }) => ({
+    const migrationFn = vi.fn((oldState: { oldState: boolean }) => ({
       newState: oldState.oldState,
     }));
 

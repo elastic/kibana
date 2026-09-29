@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useFooterItems } from './footer_items';
 import { OnboardingFooterLinkItemId } from './constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { BehaviorSubject } from 'rxjs';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 describe('useFooterItems', () => {
-  const mockUseKibana = useKibana as jest.Mock;
+  const mockUseKibana = useKibana as Mock;
 
   const createMockServices = ({
     projectUrl,

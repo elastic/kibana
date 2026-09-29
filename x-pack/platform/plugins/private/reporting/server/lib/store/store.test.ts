@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { estypes } from '@elastic/elasticsearch';
 import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -458,7 +460,7 @@ describe('ReportingStore', () => {
       mockEsClient.ilm.putLifecycle.mockResponse({} as any);
 
       const store = new TestReportingStore(mockCore, mockLogger);
-      const createIlmPolicySpy = jest.spyOn(store, 'createIlmPolicy');
+      const createIlmPolicySpy = vi.spyOn(store, 'createIlmPolicy');
       await store.start();
 
       expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
@@ -481,7 +483,7 @@ describe('ReportingStore', () => {
       mockEsClient.ilm.getLifecycle.mockResponse({});
 
       const store = new TestReportingStore(mockCore, mockLogger);
-      const createIlmPolicySpy = jest.spyOn(store, 'createIlmPolicy');
+      const createIlmPolicySpy = vi.spyOn(store, 'createIlmPolicy');
       await store.start();
 
       expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
@@ -496,7 +498,7 @@ describe('ReportingStore', () => {
       mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
 
       const store = new TestReportingStore(mockCore, mockLogger);
-      const createIlmPolicySpy = jest.spyOn(store, 'createIlmPolicy');
+      const createIlmPolicySpy = vi.spyOn(store, 'createIlmPolicy');
       await store.start();
 
       expect(createIlmPolicySpy).not.toHaveBeenCalled();

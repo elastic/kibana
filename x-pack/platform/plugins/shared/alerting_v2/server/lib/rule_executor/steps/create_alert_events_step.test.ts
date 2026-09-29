@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
@@ -24,7 +26,7 @@ import type { PluginConfig } from '../../../config';
 
 describe('CreateAlertEventsStep', () => {
   let step: CreateAlertEventsStep;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
 
   function createStep(rulesConfigOverrides?: Partial<PluginConfig['rules']>) {
     const config: PluginConfig = {

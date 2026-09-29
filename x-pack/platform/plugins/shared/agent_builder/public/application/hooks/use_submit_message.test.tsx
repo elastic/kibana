@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { PropsWithChildren } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
@@ -18,25 +20,49 @@ import { useNavigation } from './use_navigation';
 import { useToasts } from './use_toasts';
 import { useSubmitMessage } from './use_submit_message';
 
-jest.mock('../context/conversation/conversation_context', () => ({
-  useConversationContext: jest.fn(),
-}));
-jest.mock('../context/conversation/use_conversation_id', () => ({ useConversationId: jest.fn() }));
-jest.mock('./use_agent_builder_service', () => ({ useAgentBuilderServices: jest.fn() }));
-jest.mock('./use_conversation', () => ({ useAgentId: () => 'agent-1' }));
-jest.mock('./use_conversation_stream', () => ({ useConversationStream: jest.fn() }));
-jest.mock('./use_navigation', () => ({ useNavigation: jest.fn() }));
-jest.mock('./use_toasts', () => ({ useToasts: jest.fn() }));
-jest.mock('@kbn/agent-builder-browser', () => ({
-  formatAgentBuilderErrorMessage: (error: Error) => error.message,
-}));
+vi.mock('../context/conversation/conversation_context', () => {
+      const mocked = {
+      useConversationContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../context/conversation/use_conversation_id', () => {
+      const mocked = { useConversationId: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_agent_builder_service', () => {
+      const mocked = { useAgentBuilderServices: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_conversation', () => {
+      const mocked = { useAgentId: () => 'agent-1' };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_conversation_stream', () => {
+      const mocked = { useConversationStream: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_navigation', () => {
+      const mocked = { useNavigation: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_toasts', () => {
+      const mocked = { useToasts: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/agent-builder-browser', () => {
+      const mocked = {
+      formatAgentBuilderErrorMessage: (error: Error) => error.message,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const created = { id: 'conv-1', agent_id: 'agent-1', events: [], rounds: [] };
-const create = jest.fn();
-const sendMessage = jest.fn();
-const navigateToAgentBuilderUrl = jest.fn();
-const setConversationId = jest.fn();
-const addErrorToast = jest.fn();
+const create = vi.fn();
+const sendMessage = vi.fn();
+const navigateToAgentBuilderUrl = vi.fn();
+const setConversationId = vi.fn();
+const addErrorToast = vi.fn();
 
 const setState = ({
   conversationId,
@@ -45,17 +71,17 @@ const setState = ({
   conversationId?: string;
   isEmbeddedContext?: boolean;
 }) => {
-  jest.mocked(useConversationId).mockReturnValue(conversationId);
-  jest.mocked(useConversationContext).mockReturnValue({
+  vi.mocked(useConversationId).mockReturnValue(conversationId);
+  vi.mocked(useConversationContext).mockReturnValue({
     isEmbeddedContext,
     setConversationId,
   } as never);
-  jest.mocked(useAgentBuilderServices).mockReturnValue({
+  vi.mocked(useAgentBuilderServices).mockReturnValue({
     conversationsService: { create },
   } as never);
-  jest.mocked(useConversationStream).mockReturnValue({ sendMessage } as never);
-  jest.mocked(useNavigation).mockReturnValue({ navigateToAgentBuilderUrl } as never);
-  jest.mocked(useToasts).mockReturnValue({ addErrorToast } as never);
+  vi.mocked(useConversationStream).mockReturnValue({ sendMessage } as never);
+  vi.mocked(useNavigation).mockReturnValue({ navigateToAgentBuilderUrl } as never);
+  vi.mocked(useToasts).mockReturnValue({ addErrorToast } as never);
 };
 
 describe('useSubmitMessage', () => {
@@ -65,14 +91,14 @@ describe('useSubmitMessage', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient();
     create.mockResolvedValue(created);
   });
 
   it('creates the conversation, caches it, then sends and navigates to it', async () => {
     setState({});
-    const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries');
     const { result } = renderHook(() => useSubmitMessage(), { wrapper });
 
     await act(() => result.current.submitMessage('hello'));

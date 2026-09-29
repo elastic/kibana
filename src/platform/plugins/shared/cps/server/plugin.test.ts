@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { CPSServerPlugin } from './plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import { CPS_TIER_ELIGIBLE_FEATURE } from '@kbn/cps-common';
 import { registerRoutes } from './routes';
 
-jest.mock('./routes', () => ({
-  registerRoutes: jest.fn(),
-}));
+vi.mock('./routes', () => {
+      const mocked = {
+      registerRoutes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CPSServerPlugin', () => {
   let plugin: CPSServerPlugin;

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -25,14 +28,17 @@ import { useWithArtifactEnableDisable as _useWithArtifactEnableDisable } from '.
 import { ArtifactEnabledSwitch, type ArtifactEnabledSwitchProps } from './artifact_enabled_switch';
 import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../hooks/use_with_artifact_enable_disable', () => ({
-  ...jest.requireActual('../hooks/use_with_artifact_enable_disable'),
-  useWithArtifactEnableDisable: jest.fn(),
-}));
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../hooks/use_with_artifact_enable_disable', async () => {
+      const mocked = {
+      ...(await vi.importActual('../hooks/use_with_artifact_enable_disable')),
+      useWithArtifactEnableDisable: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
-const useWithArtifactEnableDisableMock = _useWithArtifactEnableDisable as jest.MockedFunction<
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
+const useWithArtifactEnableDisableMock = _useWithArtifactEnableDisable as MockedFunction<
   typeof _useWithArtifactEnableDisable
 >;
 
@@ -43,10 +49,10 @@ describe('ArtifactEnabledSwitch', () => {
     props?: Partial<ArtifactEnabledSwitchProps>
   ) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
-  let setArtifactEnabled: jest.MockedFunction<
+  let setArtifactEnabled: MockedFunction<
     ReturnType<typeof _useWithArtifactEnableDisable>['setArtifactEnabled']
   >;
-  let onSuccess: jest.Mock;
+  let onSuccess: Mock;
   let item: ExceptionListItemSchema;
   let apiClient: ExceptionsListApiClient;
   let defaultProps: ArtifactEnabledSwitchProps;
@@ -57,12 +63,12 @@ describe('ArtifactEnabledSwitch', () => {
     });
 
     const mockedContext = createAppRootMockRenderer();
-    onSuccess = jest.fn();
+    onSuccess = vi.fn();
     item = generator.generate({
       name: 'YARA rule one',
       tags: [GLOBAL_ARTIFACT_TAG],
     });
-    setArtifactEnabled = jest.fn().mockResolvedValue(item);
+    setArtifactEnabled = vi.fn().mockResolvedValue(item);
     useWithArtifactEnableDisableMock.mockReturnValue({
       setArtifactEnabled,
       isLoading: false,

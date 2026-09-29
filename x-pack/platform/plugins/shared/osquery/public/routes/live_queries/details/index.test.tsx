@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { LiveQueryDetailsPage } from '.';
@@ -17,57 +20,75 @@ import {
 } from '../../../__test_helpers__/create_mock_kibana_services';
 import type { LiveQueryDetailsItem } from '../../../actions/use_live_query_details';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ actionId: 'action-123' }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: () => ({ actionId: 'action-123' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../actions/use_live_query_details');
-jest.mock('./use_save_query_from_details');
-jest.mock('../../../common/hooks/use_breadcrumbs');
-jest.mock('../../../common/experimental_features_context', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-  useExperimentalFeatures: jest
-    .fn()
-    .mockReturnValue({ exportResults: false, rruleScheduling: false, crossProjectSearch: false }),
-  ExperimentalFeaturesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('../../../results/export_filters_context', () => ({
-  useExportFilters: jest.fn().mockReturnValue(undefined),
-  ExportFiltersProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  useExportFiltersContext: jest.fn().mockReturnValue(null),
-}));
-const mockResultTabs = jest.fn();
+vi.mock('../../../actions/use_live_query_details');
+vi.mock('./use_save_query_from_details');
+vi.mock('../../../common/hooks/use_breadcrumbs');
+vi.mock('../../../common/experimental_features_context', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+      useExperimentalFeatures: vi
+        .fn()
+        .mockReturnValue({ exportResults: false, rruleScheduling: false, crossProjectSearch: false }),
+      ExperimentalFeaturesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../results/export_filters_context', () => {
+      const mocked = {
+      useExportFilters: vi.fn().mockReturnValue(undefined),
+      ExportFiltersProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      useExportFiltersContext: vi.fn().mockReturnValue(null),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockResultTabs = vi.fn();
 
-jest.mock('../../saved_queries/edit/tabs', () => ({
-  ResultTabs: (props: { actionId: string }) => {
-    mockResultTabs(props);
+vi.mock('../../saved_queries/edit/tabs', () => {
+      const mocked = {
+      ResultTabs: (props: { actionId: string }) => {
+        mockResultTabs(props);
 
-    return <div data-test-subj="result-tabs">{`ResultTabs:${props.actionId}`}</div>;
-  },
-}));
-jest.mock('../../../live_queries/form/pack_queries_status_table', () => ({
-  PackQueriesStatusTable: () => <div data-test-subj="pack-queries-status-table" />,
-  ViewResultsActionButtonType: { icon: 'icon', button: 'button', menuItem: 'menuItem' },
-}));
-jest.mock('./query_details_header', () => ({
-  QueryDetailsHeader: ({ actionId }: { actionId: string }) => (
-    <div data-test-subj="query-details-header">{`Header:${actionId}`}</div>
-  ),
-}));
+        return <div data-test-subj="result-tabs">{`ResultTabs:${props.actionId}`}</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../live_queries/form/pack_queries_status_table', () => {
+      const mocked = {
+      PackQueriesStatusTable: () => <div data-test-subj="pack-queries-status-table" />,
+      ViewResultsActionButtonType: { icon: 'icon', button: 'button', menuItem: 'menuItem' },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./query_details_header', () => {
+      const mocked = {
+      QueryDetailsHeader: ({ actionId }: { actionId: string }) => (
+        <div data-test-subj="query-details-header">{`Header:${actionId}`}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseLiveQueryDetails = useLiveQueryDetails as jest.MockedFunction<
+const mockUseLiveQueryDetails = useLiveQueryDetails as MockedFunction<
   typeof useLiveQueryDetails
 >;
-const mockUseSaveQueryFromDetails = useSaveQueryFromDetails as jest.MockedFunction<
+const mockUseSaveQueryFromDetails = useSaveQueryFromDetails as MockedFunction<
   typeof useSaveQueryFromDetails
 >;
 
 const mockSaveQueryFromDetails = {
   canSave: false,
   showSavedQueryFlyout: false,
-  handleShowSaveQueryFlyout: jest.fn(),
-  handleCloseSaveQueryFlyout: jest.fn(),
+  handleShowSaveQueryFlyout: vi.fn(),
+  handleCloseSaveQueryFlyout: vi.fn(),
   savedQueryDefaultValue: {},
 };
 
@@ -101,8 +122,8 @@ const renderPage = () => {
 
 describe('LiveQueryDetailsPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useBreadcrumbs as jest.Mock).mockReturnValue(undefined);
+    vi.clearAllMocks();
+    (useBreadcrumbs as Mock).mockReturnValue(undefined);
     mockUseSaveQueryFromDetails.mockReturnValue(
       mockSaveQueryFromDetails as ReturnType<typeof useSaveQueryFromDetails>
     );

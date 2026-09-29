@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import { setTimeout as timer } from 'timers/promises';
 import { of, BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 
@@ -38,7 +40,7 @@ expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
 describe('StatusService', () => {
   let service: StatusService;
-  let logger: jest.Mocked<ILoggingSystem>;
+  let logger: Mocked<ILoggingSystem>;
 
   beforeEach(() => {
     logger = loggingSystemMock.create();
@@ -580,7 +582,7 @@ describe('StatusService', () => {
     });
 
     describe('analytics', () => {
-      let analyticsMock: jest.Mocked<AnalyticsServiceSetup>;
+      let analyticsMock: Mocked<AnalyticsServiceSetup>;
       let setup: InternalStatusServiceSetup;
 
       beforeEach(async () => {

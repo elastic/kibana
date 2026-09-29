@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, waitFor, screen } from '@testing-library/react';
@@ -22,12 +24,12 @@ describe('EditTagsFlyout', () => {
 
   const props = {
     selectedAlerts: [mockAlert],
-    onClose: jest.fn(),
-    onSaveTags: jest.fn(),
+    onClose: vi.fn(),
+    onSaveTags: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

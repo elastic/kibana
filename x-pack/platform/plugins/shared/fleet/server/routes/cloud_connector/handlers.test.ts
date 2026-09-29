@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
@@ -13,16 +15,22 @@ import { verifyCloudConnectorIacKey } from '../../services/cloud_connectors';
 
 import { verifyCloudConnectorIacKeyHandler } from './handlers';
 
-jest.mock('../../services/app_context');
-jest.mock('../../services', () => ({
-  cloudConnectorService: {},
-  packagePolicyService: {},
-}));
-jest.mock('../../services/cloud_connectors', () => ({
-  verifyCloudConnectorIacKey: jest.fn(),
-}));
+vi.mock('../../services/app_context');
+vi.mock('../../services', () => {
+      const mocked = {
+      cloudConnectorService: {},
+      packagePolicyService: {},
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../services/cloud_connectors', () => {
+      const mocked = {
+      verifyCloudConnectorIacKey: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedVerify = jest.mocked(verifyCloudConnectorIacKey);
+const mockedVerify = vi.mocked(verifyCloudConnectorIacKey);
 
 const buildContext = () => ({ fleet: Promise.resolve({ internalSoClient: {} }) } as any);
 
@@ -30,9 +38,9 @@ describe('verifyCloudConnectorIacKeyHandler', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     response = httpServerMock.createResponseFactory();
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(loggingSystemMock.createLogger());
+    vi.spyOn(appContextService, 'getLogger').mockReturnValue(loggingSystemMock.createLogger());
   });
 
   it('returns the verification result', async () => {

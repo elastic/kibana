@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { uiSettingsServiceMock, settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { NotificationsService } from './notifications_service';
 
-jest.mock('react-dom', () => ({
-  render: jest.fn(),
-  unmountComponentAtNode: jest.fn(),
-}));
+vi.mock('react-dom', () => {
+      const mocked = {
+      render: vi.fn(),
+      unmountComponentAtNode: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('NotificationsService', () => {
   const setupAndStart = (targetDomElement: HTMLElement) => {

@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useDashboardsFileUploadStep } from '.';
 import { TestProviders } from '../../../../../../../../common/mock';
 import { useCreateMigration } from '../../../../../../service/hooks/use_create_migration';
 
-jest.mock('../../../../../../service/hooks/use_create_migration', () => ({
-  useCreateMigration: jest.fn(),
-}));
+vi.mock('../../../../../../service/hooks/use_create_migration', () => {
+      const mocked = {
+      useCreateMigration: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useDashboardsFileUploadStep', () => {
-  const mockUseCreateMigration = useCreateMigration as jest.Mock;
+  const mockUseCreateMigration = useCreateMigration as Mock;
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns step props with incomplete status', () => {
     mockUseCreateMigration.mockReturnValue({
-      createMigration: jest.fn(),
+      createMigration: vi.fn(),
       isLoading: false,
       error: null,
     });
@@ -34,7 +40,7 @@ describe('useDashboardsFileUploadStep', () => {
           status: 'incomplete',
           migrationStats: undefined,
           migrationName: 'test',
-          onMigrationCreated: jest.fn(),
+          onMigrationCreated: vi.fn(),
         }),
       { wrapper: TestProviders }
     );
@@ -48,7 +54,7 @@ describe('useDashboardsFileUploadStep', () => {
 
   it('returns step props with loading status', () => {
     mockUseCreateMigration.mockReturnValue({
-      createMigration: jest.fn(),
+      createMigration: vi.fn(),
       isLoading: true,
       error: null,
     });
@@ -59,7 +65,7 @@ describe('useDashboardsFileUploadStep', () => {
           status: 'incomplete',
           migrationStats: undefined,
           migrationName: 'test',
-          onMigrationCreated: jest.fn(),
+          onMigrationCreated: vi.fn(),
         }),
       { wrapper: TestProviders }
     );
@@ -73,7 +79,7 @@ describe('useDashboardsFileUploadStep', () => {
 
   it('returns step props with danger status on error', () => {
     mockUseCreateMigration.mockReturnValue({
-      createMigration: jest.fn(),
+      createMigration: vi.fn(),
       isLoading: false,
       error: new Error('test error'),
     });
@@ -84,7 +90,7 @@ describe('useDashboardsFileUploadStep', () => {
           status: 'incomplete',
           migrationStats: undefined,
           migrationName: 'test',
-          onMigrationCreated: jest.fn(),
+          onMigrationCreated: vi.fn(),
         }),
       { wrapper: TestProviders }
     );

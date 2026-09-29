@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { TimelineStatusEnum } from '../../../../common/api/timeline';
@@ -14,67 +16,94 @@ import { MAX_SUPER_TIMELINE_COUNT, useOpenSuperTimeline } from './use_open_super
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
-const mockAddWarning = jest.fn();
-const mockAddError = jest.fn();
-const mockOpenConfirm = jest.fn();
-const mockUpdateTimeline = jest.fn();
-const mockResolveTimeline = jest.fn();
-const mockFormatTimelineResponseToModel = jest.fn();
-const mockBuildSuperTimelineModel = jest.fn();
+const mockAddWarning = vi.fn();
+const mockAddError = vi.fn();
+const mockOpenConfirm = vi.fn();
+const mockUpdateTimeline = vi.fn();
+const mockResolveTimeline = vi.fn();
+const mockFormatTimelineResponseToModel = vi.fn();
+const mockBuildSuperTimelineModel = vi.fn();
 
 // Active timeline state — mutated per test; referenced inside the factory via closure.
 // The key 'timeline-1' is the literal value of TimelineId.active (enum checked in index.ts).
 let mockActiveTimeline: Partial<TimelineModel> = {};
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useSelector: (selector: (s: unknown) => unknown) =>
-    selector({
-      timeline: {
-        timelineById: {
-          'timeline-1': mockActiveTimeline,
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useSelector: (selector: (s: unknown) => unknown) =>
+        selector({
+          timeline: {
+            timelineById: {
+              'timeline-1': mockActiveTimeline,
+            },
+          },
+        }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          uiSettings: {},
+          notifications: { toasts: { addWarning: mockAddWarning, addError: mockAddError } },
+          overlays: { openConfirm: mockOpenConfirm },
         },
-      },
-    }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      uiSettings: {},
-      notifications: { toasts: { addWarning: mockAddWarning, addError: mockAddError } },
-      overlays: { openConfirm: mockOpenConfirm },
-    },
-  }),
-}));
+vi.mock('@kbn/data-plugin/common', () => {
+      const mocked = {
+      getEsQueryConfig: () => ({ allowLeadingWildcards: true, queryStringOptions: {} }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/data-plugin/common', () => ({
-  getEsQueryConfig: () => ({ allowLeadingWildcards: true, queryStringOptions: {} }),
-}));
+vi.mock('../../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: () => ({ dataView: { id: 'mock-dv', fields: [] }, status: 'ready' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: () => ({ dataView: { id: 'mock-dv', fields: [] }, status: 'ready' }),
-}));
+vi.mock('../../../data_view_manager/hooks/use_browser_fields', () => {
+      const mocked = {
+      useBrowserFields: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../data_view_manager/hooks/use_browser_fields', () => ({
-  useBrowserFields: () => ({}),
-}));
+vi.mock('../open_timeline/use_update_timeline', () => {
+      const mocked = {
+      useUpdateTimeline: () => mockUpdateTimeline,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../open_timeline/use_update_timeline', () => ({
-  useUpdateTimeline: () => mockUpdateTimeline,
-}));
+vi.mock('../../containers/api', () => {
+      const mocked = {
+      resolveTimeline: (...args: unknown[]) => mockResolveTimeline(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../containers/api', () => ({
-  resolveTimeline: (...args: unknown[]) => mockResolveTimeline(...args),
-}));
+vi.mock('../open_timeline/helpers', () => {
+      const mocked = {
+      formatTimelineResponseToModel: (...args: unknown[]) => mockFormatTimelineResponseToModel(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../open_timeline/helpers', () => ({
-  formatTimelineResponseToModel: (...args: unknown[]) => mockFormatTimelineResponseToModel(...args),
-}));
-
-jest.mock('./build_super_timeline_model', () => ({
-  buildSuperTimelineModel: (...args: unknown[]) => mockBuildSuperTimelineModel(...args),
-}));
+vi.mock('./build_super_timeline_model', () => {
+      const mocked = {
+      buildSuperTimelineModel: (...args: unknown[]) => mockBuildSuperTimelineModel(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -110,7 +139,7 @@ const setupHappyPath = (ids: string[] = ['id-1', 'id-2']) => {
 // ── Tests ────────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockActiveTimeline = {};
   mockOpenConfirm.mockResolvedValue(true);
 });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { keywords, builtinFunctions } from '../../sql/lexer_rules';
 import type { monaco } from '../../../monaco_imports';
 
@@ -17,8 +19,8 @@ const getNextState = (
   return typeof action.next === 'string' ? action.next : undefined;
 };
 
-jest.mock('../../sql/lexer_rules', () => {
-  const actual = jest.requireActual('../../sql/lexer_rules');
+vi.mock('../../sql/lexer_rules', async () => {
+  const actual = (await vi.importActual('../../sql/lexer_rules'));
   return {
     ...actual,
     lexerRules: {
@@ -103,9 +105,9 @@ describe('Console nested SQL lexer rules', () => {
     });
 
     it('handles missing string and strings arrays gracefully', () => {
-      jest.resetModules();
-      jest.doMock('../../sql/lexer_rules', () => {
-        const actual = jest.requireActual('../../sql/lexer_rules');
+      vi.resetModules();
+      vi.doMock('../../sql/lexer_rules', async () => {
+        const actual = (await vi.importActual('../../sql/lexer_rules'));
         return {
           ...actual,
           lexerRules: {

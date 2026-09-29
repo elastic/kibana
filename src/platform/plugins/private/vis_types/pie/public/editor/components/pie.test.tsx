@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ReactWrapper } from 'enzyme';
@@ -58,7 +60,7 @@ describe('PalettePicker', function () {
           show: true,
         },
       },
-      setValue: jest.fn(),
+      setValue: vi.fn(),
     } as unknown as PieOptionsProps;
   });
 

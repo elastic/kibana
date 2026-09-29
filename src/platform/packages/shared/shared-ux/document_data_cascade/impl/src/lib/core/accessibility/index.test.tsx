@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { v4 as uuid } from 'uuid';
 import React, { useState, type FC } from 'react';
 import { renderHook, render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -22,7 +24,7 @@ const createMockedRowInstance = (overrides: Partial<Row<any>> = {}) => {
     get: (target, prop) => {
       // catch all for function getters not explicitly catered for
       if (/get[a-zA-Z]/.test(prop as string) && !(prop in target)) {
-        return jest.fn(() => prop);
+        return vi.fn(() => prop);
       }
 
       return Reflect.get(target, prop) ?? prop;
@@ -65,7 +67,7 @@ describe('accessibility', () => {
 
     it('should return the correct aria-expanded for the tree grid row based on the table row expanded value', () => {
       const mockedRowInstance = createMockedRowInstance({
-        getIsExpanded: jest.fn(() => true),
+        getIsExpanded: vi.fn(() => true),
       });
 
       const { result } = renderHook(() =>
@@ -108,7 +110,7 @@ describe('accessibility', () => {
       useRegisterCascadeAccessibilityHelpers<any>({
         tableRows,
         tableWrapperElement: wrapperElRef,
-        scrollToRowIndex: jest.fn(),
+        scrollToRowIndex: vi.fn(),
       });
 
       return (
@@ -132,7 +134,7 @@ describe('accessibility', () => {
     describe('keyboard interaction', () => {
       describe('pressing ArrowRight when focus is on a row element', () => {
         it('should invoke the rowToggle function if the row is not expanded', async () => {
-          const rowToggleFn = jest.fn(() => {
+          const rowToggleFn = vi.fn(() => {
             /* noop row expander */
           });
 
@@ -141,7 +143,7 @@ describe('accessibility', () => {
           const tableRows = Array.from(new Array(rowCount)).map(() =>
             createMockedRowInstance({
               // all rows are configured not to be expanded
-              getIsExpanded: jest.fn(() => false),
+              getIsExpanded: vi.fn(() => false),
               getToggleExpandedHandler: () => rowToggleFn,
             })
           );
@@ -163,7 +165,7 @@ describe('accessibility', () => {
         });
 
         it('should not invoke the rowToggle function if the row is expanded and has no children', async () => {
-          const rowToggleFn = jest.fn(() => {
+          const rowToggleFn = vi.fn(() => {
             /* noop row expander */
           });
 
@@ -173,7 +175,7 @@ describe('accessibility', () => {
 
           const tableRows = Array.from(new Array(rowCount)).map((_, idx) =>
             createMockedRowInstance({
-              getIsExpanded: jest.fn(() => (expandedRowIndex === idx ? true : false)),
+              getIsExpanded: vi.fn(() => (expandedRowIndex === idx ? true : false)),
               getToggleExpandedHandler: () => rowToggleFn,
             })
           );
@@ -195,7 +197,7 @@ describe('accessibility', () => {
 
       describe('pressing ArrowLeft when focus is on a row element', () => {
         it('should not invoke the rowToggle function if the row is not expanded', async () => {
-          const rowToggleFn = jest.fn(() => {
+          const rowToggleFn = vi.fn(() => {
             /* noop row expander */
           });
 
@@ -204,7 +206,7 @@ describe('accessibility', () => {
           const tableRows = Array.from(new Array(rowCount)).map(() =>
             createMockedRowInstance({
               // all rows are configured not to be expanded
-              getIsExpanded: jest.fn(() => false),
+              getIsExpanded: vi.fn(() => false),
               getToggleExpandedHandler: () => rowToggleFn,
             })
           );
@@ -226,7 +228,7 @@ describe('accessibility', () => {
         });
 
         it('should invoke the rowToggle function if the row is expanded', async () => {
-          const rowToggleFn = jest.fn(() => {
+          const rowToggleFn = vi.fn(() => {
             /* noop row expander */
           });
 
@@ -236,7 +238,7 @@ describe('accessibility', () => {
 
           const tableRows = Array.from(new Array(rowCount)).map((_, idx) =>
             createMockedRowInstance({
-              getIsExpanded: jest.fn(() => (expandedRowIndex === idx ? true : false)),
+              getIsExpanded: vi.fn(() => (expandedRowIndex === idx ? true : false)),
               getToggleExpandedHandler: () => rowToggleFn,
             })
           );

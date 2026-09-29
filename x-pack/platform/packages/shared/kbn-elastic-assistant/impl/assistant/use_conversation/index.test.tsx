@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useConversation } from '.';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
@@ -20,7 +23,7 @@ import {
 import { emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
 import type { IToasts } from '@kbn/core-notifications-browser';
 
-jest.mock('../api/conversations');
+vi.mock('../api/conversations');
 const message = {
   content: 'You are a robot',
   role: 'user' as MessageRole,
@@ -44,15 +47,15 @@ const mockConvo = {
   },
 };
 
-const getConversationById = _getConversationById as jest.Mock;
-const createConversation = _createConversationApi as jest.Mock;
-const updateConversation = _updateConversation as jest.Mock;
+const getConversationById = _getConversationById as Mock;
+const createConversation = _createConversationApi as Mock;
+const updateConversation = _updateConversation as Mock;
 describe('useConversation', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
-  const toastsMock = { addSuccess: jest.fn(), addError: jest.fn() } as unknown as IToasts;
+  const toastsMock = { addSuccess: vi.fn(), addError: vi.fn() } as unknown as IToasts;
   beforeEach(() => {
     httpMock = httpServiceMock.createSetupContract();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('conversation create', () => {
@@ -307,9 +310,9 @@ describe('useConversation', () => {
       });
       await act(async () => {
         await result.current.duplicateConversation({
-          refetchCurrentUserConversations: jest.fn(),
+          refetchCurrentUserConversations: vi.fn(),
           selectedConversation: undefined,
-          setCurrentConversation: jest.fn(),
+          setCurrentConversation: vi.fn(),
         });
       });
       expect(toastsMock?.addError).toHaveBeenCalled();
@@ -324,16 +327,16 @@ describe('useConversation', () => {
       });
       await act(async () => {
         await result.current.duplicateConversation({
-          refetchCurrentUserConversations: jest.fn(),
+          refetchCurrentUserConversations: vi.fn(),
           selectedConversation: { ...mockConvo, id: '' },
-          setCurrentConversation: jest.fn(),
+          setCurrentConversation: vi.fn(),
         });
       });
       expect(toastsMock?.addError).toHaveBeenCalled();
     });
     it('should fetch conversation details if messages are empty during duplicateConversation', async () => {
-      const refetchMock = jest.fn();
-      const setCurrentMock = jest.fn();
+      const refetchMock = vi.fn();
+      const setCurrentMock = vi.fn();
 
       const { result } = renderHook(() => useConversation(), {
         wrapper: ({ children }: React.PropsWithChildren<{}>) => (
@@ -366,8 +369,8 @@ describe('useConversation', () => {
       expect(toastsMock.addSuccess).toHaveBeenCalled();
     });
     it('should handle failed duplicateConversation', async () => {
-      const refetchMock = jest.fn();
-      const setCurrentMock = jest.fn();
+      const refetchMock = vi.fn();
+      const setCurrentMock = vi.fn();
 
       const { result } = renderHook(() => useConversation(), {
         wrapper: ({ children }: React.PropsWithChildren<{}>) => (
@@ -397,8 +400,8 @@ describe('useConversation', () => {
           </TestProviders>
         ),
       });
-      Object.assign(window.navigator, { clipboard: { writeText: jest.fn() } });
-      httpMock.basePath.prepend = jest
+      Object.assign(window.navigator, { clipboard: { writeText: vi.fn() } });
+      httpMock.basePath.prepend = vi
         .fn()
         .mockReturnValue('/app/security/get_started?assistant=new-convo');
       await act(async () => {
@@ -428,7 +431,7 @@ describe('useConversation', () => {
           </TestProviders>
         ),
       });
-      httpMock.basePath.prepend = jest.fn().mockReturnValue(undefined);
+      httpMock.basePath.prepend = vi.fn().mockReturnValue(undefined);
       await act(async () => {
         await result.current.copyConversationUrl(mockConvo);
       });

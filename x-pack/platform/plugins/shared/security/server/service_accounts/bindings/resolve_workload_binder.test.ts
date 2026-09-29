@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './resolve_workload_binder';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 
 describe('resolveWorkloadBinder', () => {
-  let resolveUserProfileId: jest.Mock<Promise<string | undefined>, []>;
+  let resolveUserProfileId: Mock<Promise<string | undefined>, []>;
 
   beforeEach(() => {
-    resolveUserProfileId = jest.fn().mockResolvedValue('resolved-profile-uid');
+    resolveUserProfileId = vi.fn().mockResolvedValue('resolved-profile-uid');
   });
 
   it('records the profile the user is already authenticated with, without a lookup', async () => {
@@ -135,7 +138,7 @@ describe('bestEffortUserProfileIdResolver', () => {
   });
 
   it('resolves the profile the lookup reports', async () => {
-    const getCurrentUserProfileId = jest.fn().mockResolvedValue('profile-uid');
+    const getCurrentUserProfileId = vi.fn().mockResolvedValue('profile-uid');
 
     await expect(
       bestEffortUserProfileIdResolver(getCurrentUserProfileId, request, logger)()
@@ -145,7 +148,7 @@ describe('bestEffortUserProfileIdResolver', () => {
   });
 
   it('resolves undefined when the caller has no profile', async () => {
-    const getCurrentUserProfileId = jest.fn().mockResolvedValue(null);
+    const getCurrentUserProfileId = vi.fn().mockResolvedValue(null);
 
     await expect(
       bestEffortUserProfileIdResolver(getCurrentUserProfileId, request, logger)()
@@ -155,7 +158,7 @@ describe('bestEffortUserProfileIdResolver', () => {
   // The lookup reaches Elasticsearch on most of its paths, and losing attribution is worth far
   // less than the operation the caller is entitled to perform.
   it('swallows a rejected lookup rather than failing the operation behind it', async () => {
-    const getCurrentUserProfileId = jest.fn().mockRejectedValue(new Error('profile index down'));
+    const getCurrentUserProfileId = vi.fn().mockRejectedValue(new Error('profile index down'));
 
     await expect(
       bestEffortUserProfileIdResolver(getCurrentUserProfileId, request, logger)()

@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  sendDeleteAgentlessPolicy: jest.fn(),
-  sendUpdateAgentlessPolicy: jest.fn(),
-  sendGetPackageInfoByKey: jest.fn(),
-  sendGetAgentlessPolicy: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('@kbn/fleet-plugin/public', () => {
+      const mocked = {
+      sendDeleteAgentlessPolicy: vi.fn(),
+      sendUpdateAgentlessPolicy: vi.fn(),
+      sendGetPackageInfoByKey: vi.fn(),
+      sendGetAgentlessPolicy: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   sendDeleteAgentlessPolicy,
@@ -23,10 +29,10 @@ import { cleanupManagedIntegrationsPolicies } from './policy_cleanup_managed_int
 import type { ServiceInstance } from '../service_settings_step/use_service_settings';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 
-const mockDeleteAgentless = sendDeleteAgentlessPolicy as jest.Mock;
-const mockUpdateAgentless = sendUpdateAgentlessPolicy as jest.Mock;
-const mockGetPackageInfo = sendGetPackageInfoByKey as jest.Mock;
-const mockGetAgentlessPolicy = sendGetAgentlessPolicy as jest.Mock;
+const mockDeleteAgentless = sendDeleteAgentlessPolicy as Mock;
+const mockUpdateAgentless = sendUpdateAgentlessPolicy as Mock;
+const mockGetPackageInfo = sendGetPackageInfoByKey as Mock;
+const mockGetAgentlessPolicy = sendGetAgentlessPolicy as Mock;
 
 function makeInstance(instanceId: string, serviceId: string = instanceId): ServiceInstance {
   return { instanceId, serviceId, name: `AWS ${serviceId}`, isDuplicate: false };
@@ -56,7 +62,7 @@ const BASE_OPTS = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockGetPackageInfo.mockResolvedValue({ data: { item: { version: '3.0.0', vars: [] } } });
   mockGetAgentlessPolicy.mockResolvedValue({
     item: { name: 'existing-agentless-name', package: { version: '2.5.0' } },

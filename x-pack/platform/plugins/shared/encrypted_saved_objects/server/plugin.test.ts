@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { ConfigSchema } from './config';
@@ -86,7 +88,7 @@ describe('EncryptedSavedObjects Plugin', () => {
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
         const setupContract = plugin.setup(coreMock.createSetup());
 
-        const mockTypeRegistry = { isNamespaceAgnostic: jest.fn() } as any;
+        const mockTypeRegistry = { isNamespaceAgnostic: vi.fn() } as any;
         const extension = setupContract.__testCreateDangerousExtension(mockTypeRegistry, []);
 
         expect(extension).toBeDefined();
@@ -100,7 +102,7 @@ describe('EncryptedSavedObjects Plugin', () => {
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
         const setupContract = plugin.setup(coreMock.createSetup());
 
-        const mockTypeRegistry = { isNamespaceAgnostic: jest.fn() } as any;
+        const mockTypeRegistry = { isNamespaceAgnostic: vi.fn() } as any;
         const typeRegistration = {
           type: 'test-type',
           attributesToEncrypt: new Set(['secret']),
@@ -125,7 +127,7 @@ describe('EncryptedSavedObjects Plugin', () => {
           attributesToEncrypt: new Set(['password']),
         });
 
-        const mockTypeRegistry = { isNamespaceAgnostic: jest.fn() } as any;
+        const mockTypeRegistry = { isNamespaceAgnostic: vi.fn() } as any;
 
         const extension = setupContract.__testCreateDangerousExtension(mockTypeRegistry, []);
 
@@ -144,7 +146,7 @@ describe('EncryptedSavedObjects Plugin', () => {
           attributesToEncrypt: new Set(['oldSecret']),
         });
 
-        const mockTypeRegistry = { isNamespaceAgnostic: jest.fn() } as any;
+        const mockTypeRegistry = { isNamespaceAgnostic: vi.fn() } as any;
 
         const overrideRegistration = {
           type: 'shared-type',
@@ -176,7 +178,7 @@ describe('EncryptedSavedObjects Plugin', () => {
           attributesToEncrypt: new Set(['secret2']),
         });
 
-        const mockTypeRegistry = { isNamespaceAgnostic: jest.fn() } as any;
+        const mockTypeRegistry = { isNamespaceAgnostic: vi.fn() } as any;
 
         const overrideRegistration = {
           type: 'override-type',
@@ -199,7 +201,7 @@ describe('EncryptedSavedObjects Plugin', () => {
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
         const setupContract = plugin.setup(coreMock.createSetup());
 
-        const mockTypeRegistry = { isNamespaceAgnostic: jest.fn() } as any;
+        const mockTypeRegistry = { isNamespaceAgnostic: vi.fn() } as any;
 
         const extension = setupContract.__testCreateDangerousExtension(mockTypeRegistry, []);
 
@@ -214,9 +216,9 @@ describe('EncryptedSavedObjects Plugin', () => {
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
         const setupContract = plugin.setup(coreMock.createSetup());
 
-        const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
+        const registerTypeSpy = vi.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
 
-        const mockTypeRegistry = { isNamespaceAgnostic: jest.fn() } as any;
+        const mockTypeRegistry = { isNamespaceAgnostic: vi.fn() } as any;
 
         setupContract.__testCreateDangerousExtension(mockTypeRegistry, [
           {
@@ -245,9 +247,9 @@ describe('EncryptedSavedObjects Plugin', () => {
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
         const setupContract = plugin.setup(coreMock.createSetup());
 
-        const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
+        const registerTypeSpy = vi.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
 
-        const mockTypeRegistry = { isNamespaceAgnostic: jest.fn() } as any;
+        const mockTypeRegistry = { isNamespaceAgnostic: vi.fn() } as any;
 
         setupContract.__testCreateDangerousExtension(mockTypeRegistry, [
           {
@@ -281,9 +283,9 @@ describe('EncryptedSavedObjects Plugin', () => {
           attributesToEncrypt: new Set(['secret']),
         });
 
-        const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
+        const registerTypeSpy = vi.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
 
-        const mockTypeRegistry = { isNamespaceAgnostic: jest.fn() } as any;
+        const mockTypeRegistry = { isNamespaceAgnostic: vi.fn() } as any;
 
         setupContract.__testCreateDangerousExtension(mockTypeRegistry, []);
 
@@ -304,9 +306,9 @@ describe('EncryptedSavedObjects Plugin', () => {
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
         const setupContract = plugin.setup(coreMock.createSetup());
 
-        const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
+        const registerTypeSpy = vi.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
 
-        const mockTypeRegistry = { isNamespaceAgnostic: jest.fn() } as any;
+        const mockTypeRegistry = { isNamespaceAgnostic: vi.fn() } as any;
 
         setupContract.__testCreateDangerousExtension(mockTypeRegistry, [
           {
@@ -330,9 +332,9 @@ describe('EncryptedSavedObjects Plugin', () => {
         const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
         const setupContract = plugin.setup(coreMock.createSetup());
 
-        const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
+        const registerTypeSpy = vi.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
 
-        const mockTypeRegistry = { isNamespaceAgnostic: jest.fn() } as any;
+        const mockTypeRegistry = { isNamespaceAgnostic: vi.fn() } as any;
 
         setupContract.__testCreateDangerousExtension(mockTypeRegistry, [
           {

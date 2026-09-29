@@ -5,20 +5,28 @@
  * 2.0.
  */
 
-jest.mock('../../components/vector_style_editor', () => ({
-  VectorStyleEditor: () => {
-    return <div>mockVectorStyleEditor</div>;
-  },
-}));
+import { vi } from 'vitest';
 
-jest.mock('../../components/legend/size', () => ({
-  MarkerSizeLegend: () => {
-    return <div>mockMarkerSizeLegend</div>;
-  },
-  OrdinalLegend: () => {
-    return <div>mockMarkerSizeLegend</div>;
-  },
-}));
+vi.mock('../../components/vector_style_editor', () => {
+      const mocked = {
+      VectorStyleEditor: () => {
+        return <div>mockVectorStyleEditor</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../components/legend/size', () => {
+      const mocked = {
+      MarkerSizeLegend: () => {
+        return <div>mockMarkerSizeLegend</div>;
+      },
+      OrdinalLegend: () => {
+        return <div>mockMarkerSizeLegend</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 import { shallow } from 'enzyme';

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useAttackDiscoveryBulk } from '.';
 import { TestProviders } from '../../../common/mock';
@@ -12,14 +15,14 @@ import * as appToastsModule from '../../../common/hooks/use_app_toasts';
 import * as invalidateModule from '../use_find_attack_discoveries';
 import * as kibanaModule from '../../../common/lib/kibana';
 
-jest.mock('../../../common/hooks/use_app_toasts');
-jest.mock('../use_find_attack_discoveries');
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/hooks/use_app_toasts');
+vi.mock('../use_find_attack_discoveries');
+vi.mock('../../../common/lib/kibana');
 
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
-const mockInvalidate = jest.fn();
-const mockHttpPost = jest.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
+const mockInvalidate = vi.fn();
+const mockHttpPost = vi.fn();
 
 const defaultIds = ['id1', 'id2'];
 const defaultStatus = 'closed';
@@ -32,15 +35,15 @@ const getHook = () =>
 
 describe('useAttackDiscoveryBulk', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (appToastsModule.useAppToasts as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (appToastsModule.useAppToasts as Mock).mockReturnValue({
       addSuccess: mockAddSuccess,
       addError: mockAddError,
     });
-    (invalidateModule.useInvalidateFindAttackDiscoveries as jest.Mock).mockReturnValue(
+    (invalidateModule.useInvalidateFindAttackDiscoveries as Mock).mockReturnValue(
       mockInvalidate
     );
-    (kibanaModule.KibanaServices.get as jest.Mock).mockReturnValue({
+    (kibanaModule.KibanaServices.get as Mock).mockReturnValue({
       http: { post: mockHttpPost },
     });
   });

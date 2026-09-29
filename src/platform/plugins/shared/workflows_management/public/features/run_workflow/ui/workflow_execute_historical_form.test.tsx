@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -16,37 +18,49 @@ import {
   WorkflowExecuteHistoricalForm,
 } from './workflow_execute_historical_form';
 
-const mockUseWorkflowExecution = jest.fn();
-jest.mock('../../../entities/workflows/model/use_workflow_execution', () => ({
-  useWorkflowExecution: (...args: any[]) => mockUseWorkflowExecution(...args),
-}));
+const mockUseWorkflowExecution = vi.fn();
+vi.mock('../../../entities/workflows/model/use_workflow_execution', () => {
+      const mocked = {
+      useWorkflowExecution: (...args: any[]) => mockUseWorkflowExecution(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWorkflowExecutions = jest.fn();
-jest.mock('../../../entities/workflows/model/use_workflow_executions', () => ({
-  useWorkflowExecutions: (...args: any[]) => mockUseWorkflowExecutions(...args),
-}));
+const mockUseWorkflowExecutions = vi.fn();
+vi.mock('../../../entities/workflows/model/use_workflow_executions', () => {
+      const mocked = {
+      useWorkflowExecutions: (...args: any[]) => mockUseWorkflowExecutions(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/ui/use_formatted_date', () => ({
-  useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
-}));
+vi.mock('../../../shared/ui/use_formatted_date', () => {
+      const mocked = {
+      useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({
-    value,
-    onChange,
-    dataTestSubj,
-  }: {
-    value: string;
-    onChange: (v: string) => void;
-    dataTestSubj: string;
-  }) => (
-    <textarea
-      data-test-subj={dataTestSubj}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    />
-  ),
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: ({
+        value,
+        onChange,
+        dataTestSubj,
+      }: {
+        value: string;
+        onChange: (v: string) => void;
+        dataTestSubj: string;
+      }) => (
+        <textarea
+          data-test-subj={dataTestSubj}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (component: React.ReactElement) => {
   return render(component, { wrapper: I18nProvider });
@@ -56,13 +70,13 @@ describe('WorkflowExecuteHistoricalForm', () => {
   const defaultProps = {
     workflowId: 'workflow-1',
     value: '{}',
-    setValue: jest.fn(),
+    setValue: vi.fn(),
     errors: null as string | null,
-    setErrors: jest.fn(),
+    setErrors: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseWorkflowExecution.mockReturnValue({ data: null, isLoading: false });
     mockUseWorkflowExecutions.mockReturnValue({ data: null });
   });

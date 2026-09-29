@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { AvailabilityContext } from '@kbn/agent-builder-server';
@@ -15,7 +17,7 @@ describe('aiIndexToolsAvailability', () => {
     request: httpServerMock.createKibanaRequest(),
     spaceId: 'default',
     uiSettings: {
-      get: jest.fn(async (key: string) => {
+      get: vi.fn(async (key: string) => {
         const value = settings[key];
         if (value instanceof Error) {
           throw value;

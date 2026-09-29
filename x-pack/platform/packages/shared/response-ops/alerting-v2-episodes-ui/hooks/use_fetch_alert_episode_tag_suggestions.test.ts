@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import {
@@ -14,9 +16,9 @@ import {
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchAlertEpisodeTagSuggestions } from './use_fetch_alert_episode_tag_suggestions';
 
-jest.mock('../apis/fetch_alert_action_tag_suggestions');
+vi.mock('../apis/fetch_alert_action_tag_suggestions');
 
-const fetchAlertActionTagSuggestionsMock = jest.mocked(fetchAlertActionTagSuggestions);
+const fetchAlertActionTagSuggestionsMock = vi.mocked(fetchAlertActionTagSuggestions);
 const mockExpressions = {} as ExpressionsStart;
 const mockSpaces = createMockSpaces();
 
@@ -25,7 +27,7 @@ const wrapper = createQueryClientWrapper(queryClient);
 
 describe('useFetchAlertEpisodeTagSuggestions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {

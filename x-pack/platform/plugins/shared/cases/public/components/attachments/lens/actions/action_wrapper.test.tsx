@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { SECURITY_SOLUTION_OWNER } from '../../../../../common';
@@ -14,19 +17,19 @@ import { ActionWrapper } from './action_wrapper';
 import { getMockServices } from './mocks';
 import type { CasesActionContextProps } from './types';
 
-jest.mock('../../../cases_context', () =>
-  jest.fn().mockImplementation(({ children, ...props }) => <div {...props}>{children}</div>)
+vi.mock('../../../cases_context', () =>
+  vi.fn().mockImplementation(({ children, ...props }) => <div {...props}>{children}</div>)
 );
 
-jest.mock('../../../../client/helpers/can_use_cases', () => {
-  const actual = jest.requireActual('../../../../client/helpers/can_use_cases');
+vi.mock('../../../../client/helpers/can_use_cases', async () => {
+  const actual = (await vi.importActual('../../../../client/helpers/can_use_cases'));
   return {
     ...actual,
-    canUseCases: jest.fn(),
+    canUseCases: vi.fn(),
   };
 });
 
-const mockCasePermissions = jest.fn().mockReturnValue({ create: true, update: true });
+const mockCasePermissions = vi.fn().mockReturnValue({ create: true, update: true });
 
 describe('ActionWrapper', () => {
   const props = {
@@ -36,8 +39,8 @@ describe('ActionWrapper', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (canUseCases as jest.Mock).mockReturnValue(mockCasePermissions);
+    vi.clearAllMocks();
+    (canUseCases as Mock).mockReturnValue(mockCasePermissions);
   });
 
   it('reads cases permissions', () => {
@@ -55,7 +58,7 @@ describe('ActionWrapper', () => {
         <div />
       </ActionWrapper>
     );
-    expect((CasesProvider as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
+    expect((CasesProvider as Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
       Object {
         "owner": Array [
           "securitySolution",
@@ -75,7 +78,7 @@ describe('ActionWrapper', () => {
       </ActionWrapper>
     );
 
-    expect((CasesProvider as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
+    expect((CasesProvider as Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
       Object {
         "owner": Array [
           "cases",
@@ -95,7 +98,7 @@ describe('ActionWrapper', () => {
       </ActionWrapper>
     );
 
-    expect((CasesProvider as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
+    expect((CasesProvider as Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
       Object {
         "owner": Array [
           "observability",
@@ -115,7 +118,7 @@ describe('ActionWrapper', () => {
       </ActionWrapper>
     );
 
-    expect((CasesProvider as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
+    expect((CasesProvider as Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
       Object {
         "owner": Array [],
         "permissions": Object {

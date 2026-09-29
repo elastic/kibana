@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useFindTemplatesQuery } from './use_find_templates_query';
 import { findRuleTemplates } from '../apis/find_rule_templates';
@@ -30,8 +32,8 @@ const MOCK_TEMPLATES = [
   },
 ];
 
-jest.mock('../apis/find_rule_templates');
-const mockFindRuleTemplates = jest.mocked(findRuleTemplates);
+vi.mock('../apis/find_rule_templates');
+const mockFindRuleTemplates = vi.mocked(findRuleTemplates);
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -54,7 +56,7 @@ describe('useFindTemplatesQuery', () => {
 
   afterEach(() => {
     queryClient.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call the findRuleTemplates API and return templates', async () => {

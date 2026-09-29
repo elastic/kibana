@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -24,18 +26,18 @@ describe('CaseSettingsPopover', () => {
 
   const defaultProps = {
     syncAlerts: true,
-    onSyncAlertsChange: jest.fn(),
+    onSyncAlertsChange: vi.fn(),
     extractObservables: true,
-    onExtractObservablesChange: jest.fn(),
+    onExtractObservablesChange: vi.fn(),
     showMetrics: true,
-    onShowMetricsChange: jest.fn(),
+    onShowMetricsChange: vi.fn(),
     isOpen: true,
-    onClose: jest.fn(),
+    onClose: vi.fn(),
     anchorElement,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the popover with title', async () => {

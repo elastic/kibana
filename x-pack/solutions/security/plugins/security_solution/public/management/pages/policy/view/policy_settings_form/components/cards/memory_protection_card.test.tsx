@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
@@ -24,9 +27,9 @@ import { createLicenseServiceMock } from '../../../../../../../../common/license
 import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
 
-jest.mock('../../../../../../../common/hooks/use_license');
+vi.mock('../../../../../../../common/hooks/use_license');
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 
 describe('Policy Memory Protections Card', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').memory;
@@ -48,7 +51,7 @@ describe('Policy Memory Protections Card', () => {
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
         .config.policy.value,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': testSubj.card,
     };
@@ -87,7 +90,7 @@ describe('Policy Memory Protections Card', () => {
 
     // The server strips a leftover `true` to absent when the flag is off; the client must not
     // pre-emptively clear it to `false`, which the server would otherwise never touch again.
-    const updatedPolicy = (formProps.onChange as jest.Mock).mock.calls[0][0].updatedPolicy;
+    const updatedPolicy = (formProps.onChange as Mock).mock.calls[0][0].updatedPolicy;
     expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(true);
     expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(true);
     expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(true);
@@ -244,7 +247,7 @@ describe('Policy Memory Protections Card', () => {
 
       await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
 
-      const updatedPolicy = (formProps.onChange as jest.Mock).mock.calls[0][0].updatedPolicy;
+      const updatedPolicy = (formProps.onChange as Mock).mock.calls[0][0].updatedPolicy;
       expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(false);
       expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(false);
       expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(false);
@@ -259,7 +262,7 @@ describe('Policy Memory Protections Card', () => {
 
       await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
 
-      const updatedPolicy = (formProps.onChange as jest.Mock).mock.calls[0][0].updatedPolicy;
+      const updatedPolicy = (formProps.onChange as Mock).mock.calls[0][0].updatedPolicy;
       expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(true);
       expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(true);
       expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(true);
@@ -281,7 +284,7 @@ describe('Policy Memory Protections Card', () => {
         renderResult.getByTestId(testSubj.customYaraSignaturesEnableDisableSwitch)
       );
 
-      const updatedPolicy = (formProps.onChange as jest.Mock).mock.calls[0][0].updatedPolicy;
+      const updatedPolicy = (formProps.onChange as Mock).mock.calls[0][0].updatedPolicy;
       expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(true);
       expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(true);
       expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(true);
@@ -320,7 +323,7 @@ describe('Policy Memory Protections Card', () => {
 
         await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
 
-        const updatedPolicy = (formProps.onChange as jest.Mock).mock.calls[0][0].updatedPolicy;
+        const updatedPolicy = (formProps.onChange as Mock).mock.calls[0][0].updatedPolicy;
         expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(false);
         expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(false);
         expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(false);
@@ -335,7 +338,7 @@ describe('Policy Memory Protections Card', () => {
 
         await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
 
-        const updatedPolicy = (formProps.onChange as jest.Mock).mock.calls[0][0].updatedPolicy;
+        const updatedPolicy = (formProps.onChange as Mock).mock.calls[0][0].updatedPolicy;
         expect(updatedPolicy.windows.memory_protection).not.toHaveProperty(
           'custom_yara_signatures'
         );
@@ -374,7 +377,7 @@ describe('Policy Memory Protections Card', () => {
 
         // Same rationale as the flag-off case: the product-feature gate is absorbed server-side
         // without ever reaching license validation, so the client must leave the field alone.
-        const updatedPolicy = (formProps.onChange as jest.Mock).mock.calls[0][0].updatedPolicy;
+        const updatedPolicy = (formProps.onChange as Mock).mock.calls[0][0].updatedPolicy;
         expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(true);
         expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(true);
         expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(true);

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -15,20 +18,26 @@ import { MetricFlyoutBody } from './metrics_flyout_body';
 import { useMetricsExperienceState } from '../observability/metrics/context/metrics_experience_state_provider';
 import type { FlyoutState } from '../../restorable_state';
 
-jest.mock('../observability/metrics/context/metrics_experience_state_provider', () => ({
-  useMetricsExperienceState: jest.fn(),
-}));
+vi.mock('../observability/metrics/context/metrics_experience_state_provider', () => {
+      const mocked = {
+      useMetricsExperienceState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./tabs', () => ({
-  OverviewTab: jest.fn(() => <div data-test-subj="overviewTab" />),
-  EsqlQueryTab: jest.fn(() => <div data-test-subj="esqlQueryTab" />),
-}));
+vi.mock('./tabs', () => {
+      const mocked = {
+      OverviewTab: vi.fn(() => <div data-test-subj="overviewTab" />),
+      EsqlQueryTab: vi.fn(() => <div data-test-subj="esqlQueryTab" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useMetricsExperienceStateMock = useMetricsExperienceState as jest.Mock;
+const useMetricsExperienceStateMock = useMetricsExperienceState as Mock;
 
 const buildContext = (overrides: {
   flyoutState?: FlyoutState;
-  onFlyoutSelectedTabChange?: jest.Mock;
+  onFlyoutSelectedTabChange?: Mock;
 }) => ({
   profileId: 'test-profile',
   currentPage: 0,
@@ -36,12 +45,12 @@ const buildContext = (overrides: {
   isFullscreen: false,
   selectedDimensions: [],
   flyoutState: overrides.flyoutState,
-  onPageChange: jest.fn(),
-  onDimensionsChange: jest.fn(),
-  onSearchTermChange: jest.fn(),
-  onToggleFullscreen: jest.fn(),
-  onFlyoutStateChange: jest.fn(),
-  onFlyoutSelectedTabChange: overrides.onFlyoutSelectedTabChange ?? jest.fn(),
+  onPageChange: vi.fn(),
+  onDimensionsChange: vi.fn(),
+  onSearchTermChange: vi.fn(),
+  onToggleFullscreen: vi.fn(),
+  onFlyoutStateChange: vi.fn(),
+  onFlyoutSelectedTabChange: overrides.onFlyoutSelectedTabChange ?? vi.fn(),
 });
 
 const metricItem: ParsedMetricItem = {
@@ -55,7 +64,7 @@ const metricItem: ParsedMetricItem = {
 
 describe('MetricFlyoutBody', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('defaults to the Overview tab when flyoutState has no selectedTabId', () => {
@@ -88,7 +97,7 @@ describe('MetricFlyoutBody', () => {
   });
 
   it('calls onFlyoutSelectedTabChange with the clicked tab id', () => {
-    const onFlyoutSelectedTabChange = jest.fn();
+    const onFlyoutSelectedTabChange = vi.fn();
     useMetricsExperienceStateMock.mockReturnValue(
       buildContext({
         flyoutState: {

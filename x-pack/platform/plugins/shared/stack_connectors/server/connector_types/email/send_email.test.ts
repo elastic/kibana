@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { sendEmail } from './send_email';
@@ -17,38 +20,47 @@ import { sendEmailGraphApi } from './send_email_graph_api';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
 
-jest.mock('nodemailer', () => ({
-  createTransport: jest.fn(),
-}));
-jest.mock('./send_email_graph_api', () => ({
-  sendEmailGraphApi: jest.fn(),
-}));
-jest.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => ({
-  getOAuthClientCredentialsAccessToken: jest.fn(),
-}));
+vi.mock('nodemailer', () => {
+      const mocked = {
+      createTransport: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./send_email_graph_api', () => {
+      const mocked = {
+      sendEmailGraphApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => {
+      const mocked = {
+      getOAuthClientCredentialsAccessToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('axios');
+vi.mock('axios');
 const mockAxiosInstanceInterceptor = {
-  request: { eject: jest.fn(), use: jest.fn() },
-  response: { eject: jest.fn(), use: jest.fn() },
+  request: { eject: vi.fn(), use: vi.fn() },
+  response: { eject: vi.fn(), use: vi.fn() },
 };
 
-const createTransportMock = nodemailer.createTransport as jest.Mock;
+const createTransportMock = nodemailer.createTransport as Mock;
 const sendMailMockResult = { result: 'does not matter' };
-const sendMailMock = jest.fn();
-const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const sendMailMock = vi.fn();
+const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 
 const connectorTokenClient = connectorTokenClientMock.create();
 let connectorUsageCollector: ConnectorUsageCollector;
 
 describe('send_email module', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     createTransportMock.mockReturnValue({ sendMail: sendMailMock });
     sendMailMock.mockResolvedValue(sendMailMockResult);
 
-    axios.create = jest.fn(() => {
-      const actual = jest.requireActual('axios');
+    axios.create = vi.fn(() => {
+      const actual = require('axios');
       return {
         ...actual.create,
         interceptors: mockAxiosInstanceInterceptor,
@@ -220,9 +232,9 @@ describe('send_email module', () => {
   });
 
   test('uses OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
-    const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
+    const sendEmailGraphApiMock = sendEmailGraphApi as Mock;
     const getOAuthClientCredentialsAccessTokenMock =
-      getOAuthClientCredentialsAccessToken as jest.Mock;
+      getOAuthClientCredentialsAccessToken as Mock;
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         service: 'exchange_server',
@@ -315,9 +327,9 @@ describe('send_email module', () => {
   });
 
   test('uses custom graph API scope if configured for OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
-    const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
+    const sendEmailGraphApiMock = sendEmailGraphApi as Mock;
     const getOAuthClientCredentialsAccessTokenMock =
-      getOAuthClientCredentialsAccessToken as jest.Mock;
+      getOAuthClientCredentialsAccessToken as Mock;
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         service: 'exchange_server',
@@ -354,9 +366,9 @@ describe('send_email module', () => {
   });
 
   test('uses custom exchange URL if configured for OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
-    const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
+    const sendEmailGraphApiMock = sendEmailGraphApi as Mock;
     const getOAuthClientCredentialsAccessTokenMock =
-      getOAuthClientCredentialsAccessToken as jest.Mock;
+      getOAuthClientCredentialsAccessToken as Mock;
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         service: 'exchange_server',
@@ -393,9 +405,9 @@ describe('send_email module', () => {
   });
 
   test('throws error if null access token returned when using OAuth 2.0 Client Credentials authentication', async () => {
-    const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
+    const sendEmailGraphApiMock = sendEmailGraphApi as Mock;
     const getOAuthClientCredentialsAccessTokenMock =
-      getOAuthClientCredentialsAccessToken as jest.Mock;
+      getOAuthClientCredentialsAccessToken as Mock;
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         service: 'exchange_server',
@@ -912,7 +924,7 @@ describe('send_email module', () => {
   });
 
   test('deletes saved access tokens if 4xx response received', async () => {
-    const createAxiosInstanceMock = axios.create as jest.Mock;
+    const createAxiosInstanceMock = axios.create as Mock;
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         service: 'exchange_server',
@@ -921,7 +933,7 @@ describe('send_email module', () => {
         clientSecret: 'sdfhkdsjhfksdjfh',
       },
     });
-    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(
+    (getOAuthClientCredentialsAccessToken as Mock).mockResolvedValueOnce(
       'Bearer clienttokentokentoken'
     );
 
@@ -930,7 +942,7 @@ describe('send_email module', () => {
     expect(createAxiosInstanceMock).toHaveBeenCalledWith();
     expect(mockAxiosInstanceInterceptor.response.use).toHaveBeenCalledTimes(1);
 
-    const mockResponseCallback = (mockAxiosInstanceInterceptor.response.use as jest.Mock).mock
+    const mockResponseCallback = (mockAxiosInstanceInterceptor.response.use as Mock).mock
       .calls[0][1];
 
     const errorResponse = {
@@ -955,7 +967,7 @@ describe('send_email module', () => {
   });
 
   test('does not delete saved access token if not 4xx error response received', async () => {
-    const createAxiosInstanceMock = axios.create as jest.Mock;
+    const createAxiosInstanceMock = axios.create as Mock;
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         service: 'exchange_server',
@@ -964,7 +976,7 @@ describe('send_email module', () => {
         clientSecret: 'sdfhkdsjhfksdjfh',
       },
     });
-    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(
+    (getOAuthClientCredentialsAccessToken as Mock).mockResolvedValueOnce(
       'Bearer clienttokentokentoken'
     );
 
@@ -973,7 +985,7 @@ describe('send_email module', () => {
     expect(createAxiosInstanceMock).toHaveBeenCalledWith();
     expect(mockAxiosInstanceInterceptor.response.use).toHaveBeenCalledTimes(1);
 
-    const mockResponseCallback = (mockAxiosInstanceInterceptor.response.use as jest.Mock).mock
+    const mockResponseCallback = (mockAxiosInstanceInterceptor.response.use as Mock).mock
       .calls[0][1];
 
     const errorResponse = {

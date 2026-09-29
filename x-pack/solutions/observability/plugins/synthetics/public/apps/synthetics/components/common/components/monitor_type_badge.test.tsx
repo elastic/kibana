@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -23,7 +25,7 @@ describe('MonitorTypeBadge', () => {
   });
 
   it('announces the visible badge text before the filter instructions', () => {
-    render(<MonitorTypeBadge monitorType="browser" onClick={jest.fn()} />);
+    render(<MonitorTypeBadge monitorType="browser" onClick={vi.fn()} />);
 
     expect(
       screen.getByRole('button', {
@@ -33,7 +35,7 @@ describe('MonitorTypeBadge', () => {
   });
 
   it('announces the visible badge text for non-browser monitors', () => {
-    render(<MonitorTypeBadge monitorType="http" onClick={jest.fn()} />);
+    render(<MonitorTypeBadge monitorType="http" onClick={vi.fn()} />);
 
     expect(
       screen.getByRole('button', {
@@ -43,7 +45,7 @@ describe('MonitorTypeBadge', () => {
   });
 
   it('calls onClick when the badge is activated', async () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     render(<MonitorTypeBadge monitorType="browser" onClick={onClick} />);
 
     await userEvent.click(screen.getByRole('button'));

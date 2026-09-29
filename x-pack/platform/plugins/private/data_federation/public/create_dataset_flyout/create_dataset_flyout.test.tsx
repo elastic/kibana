@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render } from '@testing-library/react';
@@ -40,7 +43,7 @@ const renderFlyout = ({
   initialDataSet?: DataSetWithName;
   dataSources: DataSource[];
   existingDataSetNames: readonly string[];
-  onSave: jest.Mock;
+  onSave: Mock;
 }) =>
   render(
     <EuiProvider>
@@ -49,7 +52,7 @@ const renderFlyout = ({
           initialDataSet={initialDataSet}
           existingDataSetNames={existingDataSetNames}
           dataSources={dataSources}
-          onClose={jest.fn()}
+          onClose={vi.fn()}
           onSave={onSave}
         />
       </KibanaContextProvider>
@@ -65,7 +68,7 @@ describe('CreateDatasetFlyout', () => {
     const { queryByTestId, getByTestId } = renderFlyout({
       dataSources,
       existingDataSetNames: [],
-      onSave: jest.fn().mockResolvedValue(null),
+      onSave: vi.fn().mockResolvedValue(null),
     });
 
     expect(queryByTestId('createDatasetFlyoutResource')).toBeNull();

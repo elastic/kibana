@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   getAssignedColorConfig,
   getColorAssignments,
@@ -113,7 +115,7 @@ describe('color_assignment', () => {
 
     it('should format non-primitive values and count them correctly', () => {
       const complexObject = { aProp: 123 };
-      const formatMock = jest.fn((x) => 'formatted');
+      const formatMock = vi.fn((x) => 'formatted');
       const assignments = getColorAssignments(
         layers,
         {
@@ -323,9 +325,9 @@ describe('color_assignment', () => {
         },
       };
       const assignments = getColorAssignments([lineLayer], data, formatFactory);
-      const getCategoricalColor = jest.fn(() => '#16c5c0');
+      const getCategoricalColor = vi.fn(() => '#16c5c0');
       const paletteService = {
-        get: jest.fn().mockReturnValue({ getCategoricalColor }),
+        get: vi.fn().mockReturnValue({ getCategoricalColor }),
       };
 
       getAssignedColorConfig(
@@ -356,9 +358,9 @@ describe('color_assignment', () => {
         },
       };
       const assignments = getColorAssignments([layerWithUnsupportedPalette], data, formatFactory);
-      const defaultGetCategoricalColor = jest.fn(() => '#54b399');
+      const defaultGetCategoricalColor = vi.fn(() => '#54b399');
       const paletteService = {
-        get: jest.fn((name: string) => {
+        get: vi.fn((name: string) => {
           if (name === 'default') {
             return { getCategoricalColor: defaultGetCategoricalColor };
           }

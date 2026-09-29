@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -12,11 +15,11 @@ import { TestProviders } from '../../../../common/mock';
 import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { MlJobCompatibilityCallout } from '.';
 
-jest.mock('../../../../common/components/ml/hooks/use_installed_security_jobs');
+vi.mock('../../../../common/components/ml/hooks/use_installed_security_jobs');
 
 describe('MlJobCompatibilityCallout', () => {
   it('renders when new affected jobs are installed', () => {
-    (useInstalledSecurityJobs as jest.Mock).mockReturnValue({
+    (useInstalledSecurityJobs as Mock).mockReturnValue({
       loading: false,
       jobs: [{ id: 'v2_linux_rare_metadata_process' }],
     });
@@ -29,7 +32,7 @@ describe('MlJobCompatibilityCallout', () => {
   });
 
   it('renders when old affected jobs are installed', () => {
-    (useInstalledSecurityJobs as jest.Mock).mockReturnValue({
+    (useInstalledSecurityJobs as Mock).mockReturnValue({
       loading: false,
       jobs: [{ id: 'linux_rare_metadata_process' }],
     });
@@ -42,7 +45,7 @@ describe('MlJobCompatibilityCallout', () => {
   });
 
   it('does not render if no affected jobs are installed', () => {
-    (useInstalledSecurityJobs as jest.Mock).mockReturnValue({
+    (useInstalledSecurityJobs as Mock).mockReturnValue({
       loading: false,
       jobs: [{ id: 'high_count_network_denies' }],
     });
@@ -55,7 +58,7 @@ describe('MlJobCompatibilityCallout', () => {
   });
 
   it('does not render while jobs are loading', () => {
-    (useInstalledSecurityJobs as jest.Mock).mockReturnValue({
+    (useInstalledSecurityJobs as Mock).mockReturnValue({
       loading: true,
       jobs: [],
     });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { HttpSetup } from '@kbn/core/public';
 
 import {
@@ -13,12 +15,12 @@ import {
   WORKFLOW_ID_ALIASES_TO_TAGS,
 } from '.';
 
-const mockHttpFetch = jest.fn();
+const mockHttpFetch = vi.fn();
 const mockHttp = { fetch: mockHttpFetch } as unknown as HttpSetup;
 
 describe('resolveWorkflowIdFromAlias', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     clearResolvedWorkflowIdCache();
   });
 

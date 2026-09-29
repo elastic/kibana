@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { OpenFeature, type Provider } from '@openfeature/server-sdk';
 import { setProviderWithRetries } from './set_provider_with_retries';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
@@ -16,26 +18,26 @@ describe('setProviderWithRetries', () => {
   let logger: MockedLogger;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     logger = loggerMock.create();
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   test('sets the provider and logs the success', async () => {
     expect.assertions(3);
-    const spy = jest.spyOn(OpenFeature, 'setProviderAndWait');
+    const spy = vi.spyOn(OpenFeature, 'setProviderAndWait');
 
     setProviderWithRetries(fakeProvider, logger);
 
     expect(spy).toHaveBeenCalledWith(fakeProvider);
     expect(spy).toHaveBeenCalledTimes(1);
 
-    await jest.runAllTimersAsync();
+    await vi.runAllTimersAsync();
 
     expect(logger.info.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -48,7 +50,7 @@ describe('setProviderWithRetries', () => {
 
   test('should retry up to 5 times (and does not throw/reject)', async () => {
     expect.assertions(15);
-    const spy = jest
+    const spy = vi
       .spyOn(OpenFeature, 'setProviderAndWait')
       .mockRejectedValue(new Error('Something went terribly wrong!'));
 
@@ -61,13 +63,13 @@ describe('setProviderWithRetries', () => {
 
     // 5 retries
     for (let i = 0; i < 5; i++) {
-      await jest.advanceTimersByTimeAsync(1000 * Math.pow(2, i)); // exponential backoff of factor 2
+      await vi.advanceTimersByTimeAsync(1000 * Math.pow(2, i)); // exponential backoff of factor 2
       expect(spy).toHaveBeenCalledTimes(i + 2);
       expect(logger.warn).toHaveBeenCalledTimes(i + 2);
     }
 
     // Given up retrying
-    await jest.advanceTimersByTimeAsync(32000);
+    await vi.advanceTimersByTimeAsync(32000);
     expect(spy).toHaveBeenCalledTimes(6);
 
     expect(logger.warn.mock.calls).toMatchInlineSnapshot(`

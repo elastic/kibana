@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { waitFor, renderHook } from '@testing-library/react';
 
@@ -26,25 +29,25 @@ import type {
 import { useFetchOrCreateRuleExceptionList } from './use_fetch_or_create_rule_exception_list';
 
 const mockKibanaHttpService = coreMock.createStart().http;
-jest.mock('../../rule_management/api/api');
-jest.mock('@kbn/securitysolution-list-api');
+vi.mock('../../rule_management/api/api');
+vi.mock('@kbn/securitysolution-list-api');
 
 describe('useFetchOrCreateRuleExceptionList', () => {
-  let fetchRuleById: jest.SpyInstance<ReturnType<typeof rulesApi.fetchRuleById>>;
-  let patchRule: jest.SpyInstance<ReturnType<typeof rulesApi.patchRule>>;
-  let addExceptionList: jest.SpyInstance<ReturnType<typeof listsApi.addExceptionList>>;
-  let addEndpointExceptionList: jest.SpyInstance<
+  let fetchRuleById: MockInstance<ReturnType<typeof rulesApi.fetchRuleById>>;
+  let patchRule: MockInstance<ReturnType<typeof rulesApi.patchRule>>;
+  let addExceptionList: MockInstance<ReturnType<typeof listsApi.addExceptionList>>;
+  let addEndpointExceptionList: MockInstance<
     ReturnType<typeof listsApi.addEndpointExceptionList>
   >;
-  let fetchExceptionListById: jest.SpyInstance<Promise<ExceptionListSchema>>;
+  let fetchExceptionListById: MockInstance<Promise<ExceptionListSchema>>;
   let render: (
     listType?: UseFetchOrCreateRuleExceptionListProps['exceptionListType']
   ) => RenderHookResult<
     ReturnUseFetchOrCreateRuleExceptionList,
     UseFetchOrCreateRuleExceptionListProps
   >;
-  const onError = jest.fn();
-  const onSuccess = jest.fn();
+  const onError = vi.fn();
+  const onSuccess = vi.fn();
   const error = new Error('Something went wrong');
   const ruleId = 'myRuleId';
   const abortCtrl = new AbortController();
@@ -77,19 +80,19 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   };
 
   beforeEach(() => {
-    fetchRuleById = jest.spyOn(rulesApi, 'fetchRuleById').mockResolvedValue(ruleWithExceptionLists);
+    fetchRuleById = vi.spyOn(rulesApi, 'fetchRuleById').mockResolvedValue(ruleWithExceptionLists);
 
-    patchRule = jest.spyOn(rulesApi, 'patchRule');
+    patchRule = vi.spyOn(rulesApi, 'patchRule');
 
-    addExceptionList = jest
+    addExceptionList = vi
       .spyOn(listsApi, 'addExceptionList')
       .mockResolvedValue(newDetectionExceptionList);
 
-    addEndpointExceptionList = jest
+    addEndpointExceptionList = vi
       .spyOn(listsApi, 'addEndpointExceptionList')
       .mockResolvedValue(newEndpointExceptionList);
 
-    fetchExceptionListById = jest
+    fetchExceptionListById = vi
       .spyOn(listsApi, 'fetchExceptionListById')
       .mockResolvedValue(detectionExceptionList);
 
@@ -106,7 +109,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('initializes hook', async () => {
@@ -131,7 +134,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
   describe('when the rule does not have exception list references', () => {
     beforeEach(() => {
-      fetchRuleById = jest
+      fetchRuleById = vi
         .spyOn(rulesApi, 'fetchRuleById')
         .mockResolvedValue(ruleWithoutExceptionLists);
     });
@@ -183,7 +186,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
     describe("but the rule does not have a reference to 'detection' type exception list", () => {
       beforeEach(() => {
-        fetchExceptionListById = jest
+        fetchExceptionListById = vi
           .spyOn(listsApi, 'fetchExceptionListById')
           .mockResolvedValue(endpointExceptionList);
       });
@@ -205,11 +208,11 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
   describe("when the rule has exception list references and 'endpoint' is passed in", () => {
     beforeEach(() => {
-      fetchExceptionListById = jest
+      fetchExceptionListById = vi
         .spyOn(listsApi, 'fetchExceptionListById')
         .mockResolvedValue(endpointExceptionList);
 
-      addExceptionList = jest
+      addExceptionList = vi
         .spyOn(listsApi, 'addExceptionList')
         .mockResolvedValue(newEndpointExceptionList);
     });
@@ -233,7 +236,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
     describe("but the rule does not have a reference to 'endpoint' type exception list", () => {
       beforeEach(() => {
-        fetchExceptionListById = jest
+        fetchExceptionListById = vi
           .spyOn(listsApi, 'fetchExceptionListById')
           .mockResolvedValue(detectionExceptionList);
       });
@@ -255,7 +258,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
   describe('when rule api returns an error', () => {
     beforeEach(() => {
-      fetchRuleById = jest.spyOn(rulesApi, 'fetchRuleById').mockRejectedValue(error);
+      fetchRuleById = vi.spyOn(rulesApi, 'fetchRuleById').mockRejectedValue(error);
     });
 
     it('exception list should be null', async () => {

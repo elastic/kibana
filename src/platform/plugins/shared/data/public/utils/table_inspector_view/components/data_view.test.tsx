@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { InspectorViewDescription } from '@kbn/inspector-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -18,14 +20,20 @@ import { getTableViewDescription } from '..';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { TablesAdapter, type Datatable } from '@kbn/expressions-plugin/common';
 
-jest.mock('@kbn/share-plugin/public', () => ({
-  downloadMultipleAs: jest.fn(),
-}));
+vi.mock('@kbn/share-plugin/public', () => {
+      const mocked = {
+      downloadMultipleAs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common', () => ({
-  datatableToCSV: jest.fn().mockReturnValue('csv'),
-  tableHasFormulas: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../../common', () => {
+      const mocked = {
+      datatableToCSV: vi.fn().mockReturnValue('csv'),
+      tableHasFormulas: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Inspector Data View', () => {
   let DataView: InspectorViewDescription;
@@ -39,12 +47,12 @@ describe('Inspector Data View', () => {
   beforeEach(() => {
     DataView = getTableViewDescription(() => ({
       fieldFormats: {
-        deserialize: jest.fn().mockReturnValue({
+        deserialize: vi.fn().mockReturnValue({
           convertToText: (v: unknown) => (v == null ? '(null)' : String(v)),
           convertToReact: (v: unknown) => (v == null ? '-' : String(v)),
         }),
       } as unknown as FieldFormatsStart,
-      isFilterable: jest.fn(),
+      isFilterable: vi.fn(),
       uiActions: {} as UiActionsStart,
       uiSettings: { get: (_key: string, value: string) => value } as IUiSettingsClient,
     }));

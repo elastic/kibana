@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { UseCriticalAlerts } from './use_alert_count_query';
 import { useAlertCountQuery } from './use_alert_count_query';
@@ -16,11 +19,11 @@ import {
   mockAlertsQuery,
 } from '../../detections/containers/detection_engine/alerts/mock';
 
-jest.mock('../../detections/containers/detection_engine/alerts/use_query');
-jest.mock('../../common/lib/kibana');
+vi.mock('../../detections/containers/detection_engine/alerts/use_query');
+vi.mock('../../common/lib/kibana');
 
-const mockSetQuery = jest.fn();
-const mockUseQueryAlerts = useQueryAlertsModule as jest.Mocked<typeof useQueryAlertsModule>;
+const mockSetQuery = vi.fn();
+const mockUseQueryAlerts = useQueryAlertsModule as Mocked<typeof useQueryAlertsModule>;
 
 const defaultArgs: UseCriticalAlerts = {
   from: 'now-15m',
@@ -31,13 +34,13 @@ const defaultArgs: UseCriticalAlerts = {
 
 describe('useAlertCountQuery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: { uiSettings: {} },
     });
     mockUseQueryAlerts.useQueryAlerts.mockReturnValue({
       loading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       data: alertsMock,
       response: JSON.stringify(alertsMock, null, 2),
       request: JSON.stringify({ index: [''], body: mockAlertsQuery }, null, 2),

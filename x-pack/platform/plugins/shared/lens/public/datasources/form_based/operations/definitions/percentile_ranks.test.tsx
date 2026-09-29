@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -40,8 +42,8 @@ const defaultProps = {
   } as IndexPattern,
   operationDefinitionMap: {},
   isFullscreen: false,
-  toggleFullscreen: jest.fn(),
-  setIsCloseable: jest.fn(),
+  toggleFullscreen: vi.fn(),
+  setIsCloseable: vi.fn(),
   layerId: '1',
 };
 
@@ -49,10 +51,10 @@ describe('percentile ranks', () => {
   let layer: FormBasedLayer;
   const InlineOptions = percentileRanksOperation.paramEditor!;
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
@@ -240,7 +242,7 @@ describe('percentile ranks', () => {
   describe('isTransferable', () => {
     it('should transfer from number to histogram', () => {
       const indexPattern = createMockedIndexPattern();
-      indexPattern.getFieldByName = jest.fn().mockReturnValue({
+      indexPattern.getFieldByName = vi.fn().mockReturnValue({
         name: 'response_time',
         displayName: 'response_time',
         type: 'histogram',
@@ -268,7 +270,7 @@ describe('percentile ranks', () => {
 
   describe('param editor', () => {
     it('should render current percentile rank', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       render(
         <InlineOptions
           {...defaultProps}
@@ -283,8 +285,8 @@ describe('percentile ranks', () => {
 
     it('should update state on change', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      const updateLayerSpy = jest.fn();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      const updateLayerSpy = vi.fn();
       render(
         <InlineOptions
           {...defaultProps}
@@ -297,7 +299,7 @@ describe('percentile ranks', () => {
 
       const input = screen.getByLabelText('Percentile ranks value');
       await user.type(input, '{backspace}{backspace}{backspace}103');
-      jest.advanceTimersByTime(256);
+      vi.advanceTimersByTime(256);
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer.columns.col2,
@@ -310,8 +312,8 @@ describe('percentile ranks', () => {
 
     it('should not update on invalid input, but show invalid value locally', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      const updateLayerSpy = jest.fn();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      const updateLayerSpy = vi.fn();
       render(
         <InlineOptions
           {...defaultProps}
@@ -323,7 +325,7 @@ describe('percentile ranks', () => {
       );
       const input = screen.getByLabelText('Percentile ranks value');
       await user.type(input, '{backspace}{backspace}{backspace}');
-      jest.advanceTimersByTime(256);
+      vi.advanceTimersByTime(256);
       expect(updateLayerSpy).not.toHaveBeenCalled();
       expect(screen.getByTestId('lns-indexPattern-percentile_ranks-input')).toHaveValue(null);
       expect(screen.getByText('Percentile ranks value must be a number')).toBeInTheDocument();
@@ -331,8 +333,8 @@ describe('percentile ranks', () => {
 
     it('should support decimals on dimension edit', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      const updateLayerSpy = jest.fn();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      const updateLayerSpy = vi.fn();
       render(
         <InlineOptions
           {...defaultProps}
@@ -345,14 +347,14 @@ describe('percentile ranks', () => {
 
       const input = screen.getByLabelText('Percentile ranks value');
       await user.type(input, '{backspace}{backspace}{backspace}10.5');
-      jest.advanceTimersByTime(256);
+      vi.advanceTimersByTime(256);
       expect(updateLayerSpy).toHaveBeenCalled();
     });
 
     it('should not support decimals on inline edit', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      const updateLayerSpy = jest.fn();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      const updateLayerSpy = vi.fn();
       const { container } = render(
         <InlineOptions
           {...defaultProps}
@@ -366,7 +368,7 @@ describe('percentile ranks', () => {
 
       const input = screen.getByLabelText('Percentile ranks value');
       await user.type(input, '{backspace}{backspace}{backspace}10.5');
-      jest.advanceTimersByTime(256);
+      vi.advanceTimersByTime(256);
       expect(updateLayerSpy).not.toHaveBeenCalled();
       expect(screen.getByTestId('lns-indexPattern-percentile_ranks-input')).toHaveValue(10.5);
       expect(container.querySelector('[data-euiicon-type="warning"]')).toBeInTheDocument();

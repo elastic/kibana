@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { addUpdatedField, useFilterUpdate } from './use_filter_update';
 import * as params from './use_url_params';
@@ -12,15 +15,15 @@ import * as params from './use_url_params';
 describe('useFilterUpdate', () => {
   describe('useFilterUpdate hook', () => {
     let getUrlParamsSpy;
-    let updateUrlSpy: jest.Mock;
+    let updateUrlSpy: Mock;
 
     beforeEach(() => {
-      getUrlParamsSpy = jest.fn().mockReturnValue({
+      getUrlParamsSpy = vi.fn().mockReturnValue({
         filters: '[["testField",["tag1"]]]',
         excludedFilters: '[["testField",["tag2"]]]',
       });
-      updateUrlSpy = jest.fn();
-      jest.spyOn(params, 'useUrlParams').mockReturnValue([getUrlParamsSpy, updateUrlSpy]);
+      updateUrlSpy = vi.fn();
+      vi.spyOn(params, 'useUrlParams').mockReturnValue([getUrlParamsSpy, updateUrlSpy]);
     });
 
     it('does not update url when filters have not been updated', () => {

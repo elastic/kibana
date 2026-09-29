@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -13,9 +16,9 @@ import { sendVerifyCloudConnectorIacKey } from '../../../hooks/use_request/cloud
 
 import { VERIFY_IAC_KEY_QUERY_KEY, useVerifyIacKey } from './use_verify_iac_key';
 
-jest.mock('../../../hooks/use_request/cloud_connector');
+vi.mock('../../../hooks/use_request/cloud_connector');
 
-const mockSendVerify = sendVerifyCloudConnectorIacKey as jest.MockedFunction<
+const mockSendVerify = sendVerifyCloudConnectorIacKey as MockedFunction<
   typeof sendVerifyCloudConnectorIacKey
 >;
 

@@ -5,24 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 
 import { useCaseRefreshRef } from './use_case_refresh_ref';
 import { TestProviders } from '../../../common/mock';
 
-const mockRefreshCaseViewPage = jest.fn();
+const mockRefreshCaseViewPage = vi.fn();
 
-jest.mock('../use_on_refresh_case_view_page', () => ({
-  useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
-}));
+vi.mock('../use_on_refresh_case_view_page', () => {
+      const mocked = {
+      useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(TestProviders, null, children);
 
 describe('useCaseRefreshRef', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('assigns refreshCase to ref.current', () => {

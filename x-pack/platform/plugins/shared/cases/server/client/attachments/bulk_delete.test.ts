@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { File } from '@kbn/files-plugin/common';
 import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
@@ -19,7 +21,7 @@ describe('bulk_delete', () => {
       const clientArgs = createCasesClientMockArgs();
 
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       it(`throws 400 when trying to delete more than ${MAX_DELETE_FILES} files at a time`, async () => {
@@ -38,7 +40,7 @@ describe('bulk_delete', () => {
     const mockLogger = loggerMock.create();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('returns an empty array when the results is an empty array', () => {

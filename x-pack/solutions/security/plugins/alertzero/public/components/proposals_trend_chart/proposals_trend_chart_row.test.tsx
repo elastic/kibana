@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -12,34 +15,40 @@ import type { ProposalChartsSummaryResponse } from '@kbn/proposals-common';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { ProposalsTrendChartRow } from './proposals_trend_chart_row';
 
-jest.mock('../../hooks/use_proposal_charts_summary', () => ({
-  DEFAULT_WINDOW_HOURS: 24,
-  DEFAULT_BUCKET_MINUTES: 30,
-  useProposalChartsSummary: jest.fn(),
-}));
+vi.mock('../../hooks/use_proposal_charts_summary', () => {
+      const mocked = {
+      DEFAULT_WINDOW_HOURS: 24,
+      DEFAULT_BUCKET_MINUTES: 30,
+      useProposalChartsSummary: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // @elastic/charts wants a real canvas; what this row owns is which series and
 // which window reach the chart, so the chart itself stands in as its props.
-jest.mock('./trend_sparkline', () => ({
-  SPARKLINE_HEIGHT_SIZE: 'xxxl',
-  TrendSparkline: ({
-    series,
-    panelId,
-    bucketMinutes,
-  }: {
-    series: Array<{ x: number; y: number }>;
-    panelId: string;
-    bucketMinutes: number;
-  }) => (
-    <div
-      data-test-subj={`sparkline-${panelId}`}
-      data-series={JSON.stringify(series)}
-      data-bucket-minutes={bucketMinutes}
-    />
-  ),
-}));
+vi.mock('./trend_sparkline', () => {
+      const mocked = {
+      SPARKLINE_HEIGHT_SIZE: 'xxxl',
+      TrendSparkline: ({
+        series,
+        panelId,
+        bucketMinutes,
+      }: {
+        series: Array<{ x: number; y: number }>;
+        panelId: string;
+        bucketMinutes: number;
+      }) => (
+        <div
+          data-test-subj={`sparkline-${panelId}`}
+          data-series={JSON.stringify(series)}
+          data-bucket-minutes={bucketMinutes}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
+const mockUseProposalChartsSummary = useProposalChartsSummary as Mock;
 
 const summary: ProposalChartsSummaryResponse = {
   currentOpen: 10,
@@ -74,7 +83,7 @@ const setup = (
 
 describe('ProposalsTrendChartRow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render one card per panel, counting the most recent bucket', () => {

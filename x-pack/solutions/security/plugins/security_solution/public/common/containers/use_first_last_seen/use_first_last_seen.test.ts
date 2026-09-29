@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { Direction } from '../../../../common/search_strategy';
@@ -13,12 +16,15 @@ import { useFirstLastSeen } from './use_first_last_seen';
 
 import { useSearchStrategy } from '../use_search_strategy';
 
-jest.mock('../use_search_strategy', () => ({
-  useSearchStrategy: jest.fn(),
-}));
+vi.mock('../use_search_strategy', () => {
+      const mocked = {
+      useSearchStrategy: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
-const mockSearch = jest.fn();
+const mockUseSearchStrategy = useSearchStrategy as Mock;
+const mockSearch = vi.fn();
 
 const renderUseFirstLastSeen = (overrides?: Partial<UseFirstLastSeen>) =>
   renderHook(() =>
@@ -33,7 +39,7 @@ const renderUseFirstLastSeen = (overrides?: Partial<UseFirstLastSeen>) =>
 
 describe('useFistLastSeen', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return default values', () => {
@@ -41,7 +47,7 @@ describe('useFistLastSeen', () => {
       loading: true,
       result: initialResult,
       search: mockSearch,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       inspect: {},
     }));
 
@@ -64,7 +70,7 @@ describe('useFistLastSeen', () => {
         firstSeen: '2022-06-03T19:48:36.165Z',
       },
       search: mockSearch,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       inspect: {},
     }));
 
@@ -93,7 +99,7 @@ describe('useFistLastSeen', () => {
         lastSeen: '2022-06-13T19:48:36.165Z',
       },
       search: mockSearch,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       inspect: {},
     }));
 
@@ -122,7 +128,7 @@ describe('useFistLastSeen', () => {
       result: {},
       error: new Error(msg),
       search: mockSearch,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       inspect: {},
     }));
 
@@ -136,7 +142,7 @@ describe('useFistLastSeen', () => {
       loading: false,
       result: {},
       search: mockSearch,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       inspect: {},
     }));
 

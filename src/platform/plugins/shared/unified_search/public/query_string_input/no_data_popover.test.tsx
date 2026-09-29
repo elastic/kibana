@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ReactElement } from 'react';
 import React from 'react';
 import { NoDataPopover } from './no_data_popover';
@@ -16,10 +18,10 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 
 describe('NoDataPopover', () => {
   const createMockStorage = () => ({
-    get: jest.fn(),
-    set: jest.fn(),
-    remove: jest.fn(),
-    clear: jest.fn(),
+    get: vi.fn(),
+    set: vi.fn(),
+    remove: vi.fn(),
+    clear: vi.fn(),
   });
 
   const renderComponent = (

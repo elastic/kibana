@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import {
   aliasJudgeVerdicts,
@@ -117,7 +120,7 @@ describe('queryMatrixTraces example fetching', () => {
     } as unknown as EvaluationScoreDocument);
 
   const makeClient = (opts: { filtered: boolean }) => {
-    const getExampleScores = jest.fn(
+    const getExampleScores = vi.fn(
       async (_exampleId: string, filters?: { executionId?: string }) =>
         // A legacy server ignores the filters and returns every execution.
         opts.filtered
@@ -125,7 +128,7 @@ describe('queryMatrixTraces example fetching', () => {
           : [completeDoc('exec-a'), completeDoc('exec-b')]
     );
     const client = {
-      getExperimentScores: jest.fn(
+      getExperimentScores: vi.fn(
         async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
       ),
       getExampleScores,
@@ -141,8 +144,8 @@ describe('queryMatrixTraces example fetching', () => {
   ];
 
   const logStub = {
-    debug: jest.fn(),
-    warning: jest.fn(),
+    debug: vi.fn(),
+    warning: vi.fn(),
   };
 
   it('round 8: applies the global scoring policy to suites without an override', async () => {
@@ -154,12 +157,12 @@ describe('queryMatrixTraces example fetching', () => {
       evaluator: { name: 'Correctness', score: 1, model: { id: 'model-x' } },
     } as unknown as EvaluationScoreDocument;
     const client = makeClient({ filtered: true });
-    (client.getExampleScores as jest.Mock).mockImplementation(
+    (client.getExampleScores as Mock).mockImplementation(
       async (_e: string, filters?: { executionId?: string }) => [selfJudgedDoc]
     );
     void client;
     const independent = makeClient({ filtered: true });
-    (independent.getExampleScores as jest.Mock).mockImplementation(async () => [selfJudgedDoc]);
+    (independent.getExampleScores as Mock).mockImplementation(async () => [selfJudgedDoc]);
     const traces = await queryMatrixTraces(
       independent as never,
       logStub as never,
@@ -198,12 +201,12 @@ describe('queryMatrixTraces example fetching', () => {
   it('arms the legacy fallback when a later response reveals unfiltered scores', async () => {
     // First response is empty (inconclusive); the second returns mixed executions.
     let call = 0;
-    const getExampleScores = jest.fn(async () => {
+    const getExampleScores = vi.fn(async () => {
       call += 1;
       return call === 1 ? [] : [completeDoc('exec-a'), completeDoc('exec-b')];
     });
     const client = {
-      getExperimentScores: jest.fn(
+      getExperimentScores: vi.fn(
         async () =>
           [
             { example: { id: 'example-1' } },
@@ -212,7 +215,7 @@ describe('queryMatrixTraces example fetching', () => {
       ),
       getExampleScores,
     };
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const log = { debug: vi.fn(), warning: vi.fn() };
     await queryMatrixTraces(client as never, log as never, aggregatedFor('exec-a') as never);
 
     expect(log.warning).toHaveBeenCalledWith(
@@ -230,12 +233,12 @@ describe('queryMatrixTraces example fetching', () => {
     } as unknown as EvaluationScoreDocument;
 
     const client = {
-      getExperimentScores: jest.fn(
+      getExperimentScores: vi.fn(
         async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
       ),
-      getExampleScores: jest.fn(async () => [incomplete, completeDoc('exec-a')]),
+      getExampleScores: vi.fn(async () => [incomplete, completeDoc('exec-a')]),
     };
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const log = { debug: vi.fn(), warning: vi.fn() };
 
     const traces = await queryMatrixTraces(
       client as never,
@@ -267,12 +270,12 @@ describe('queryMatrixTraces example fetching', () => {
     } as unknown as EvaluationScoreDocument;
 
     const client = {
-      getExperimentScores: jest.fn(
+      getExperimentScores: vi.fn(
         async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
       ),
-      getExampleScores: jest.fn(async () => [judged]),
+      getExampleScores: vi.fn(async () => [judged]),
     };
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const log = { debug: vi.fn(), warning: vi.fn() };
     const judgeVerdicts: JudgeVerdict[] = [];
 
     await queryMatrixTraces(
@@ -321,16 +324,16 @@ describe('queryMatrixTraces example fetching', () => {
       } as unknown as EvaluationScoreDocument);
 
     const client = {
-      getExperimentScores: jest.fn(
+      getExperimentScores: vi.fn(
         async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
       ),
-      getExampleScores: jest.fn(async () => [
+      getExampleScores: vi.fn(async () => [
         judgedDoc(0.4, 'grounded', 'judge-a'),
         judgedDoc(0.8, 'grounded', 'judge-b'),
         judgedDoc(0.9, 'not-a-verdict', 'judge-c'),
       ]),
     };
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const log = { debug: vi.fn(), warning: vi.fn() };
     const judgeVerdicts: JudgeVerdict[] = [];
 
     await queryMatrixTraces(
@@ -371,12 +374,12 @@ describe('queryMatrixTraces example fetching', () => {
       } as unknown as EvaluationScoreDocument);
 
     const client = {
-      getExperimentScores: jest.fn(
+      getExperimentScores: vi.fn(
         async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
       ),
-      getExampleScores: jest.fn(async () => [heavy(44, 44)]),
+      getExampleScores: vi.fn(async () => [heavy(44, 44)]),
     };
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const log = { debug: vi.fn(), warning: vi.fn() };
     await queryMatrixTraces(
       client as never,
       log as never,
@@ -410,12 +413,12 @@ describe('queryMatrixTraces example fetching', () => {
       } as unknown as EvaluationScoreDocument);
 
     const client = {
-      getExperimentScores: jest.fn(
+      getExperimentScores: vi.fn(
         async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
       ),
-      getExampleScores: jest.fn(async () => [scoredWithTrail(115, 29)]),
+      getExampleScores: vi.fn(async () => [scoredWithTrail(115, 29)]),
     };
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const log = { debug: vi.fn(), warning: vi.fn() };
     await queryMatrixTraces(
       client as never,
       log as never,
@@ -446,12 +449,12 @@ describe('queryMatrixTraces example fetching', () => {
     } as unknown as EvaluationScoreDocument;
 
     const client = {
-      getExperimentScores: jest.fn(
+      getExperimentScores: vi.fn(
         async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
       ),
-      getExampleScores: jest.fn(async () => [noTrailDoc]),
+      getExampleScores: vi.fn(async () => [noTrailDoc]),
     };
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const log = { debug: vi.fn(), warning: vi.fn() };
     await queryMatrixTraces(
       client as never,
       log as never,
@@ -467,7 +470,7 @@ describe('queryMatrixTraces example fetching', () => {
 
   it('does not report tool loops when the threshold is disabled', async () => {
     const client = makeClient({ filtered: true });
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const log = { debug: vi.fn(), warning: vi.fn() };
     await queryMatrixTraces(client as never, log as never, aggregatedFor('exec-a') as never);
 
     expect(log.warning).not.toHaveBeenCalledWith(
@@ -476,14 +479,14 @@ describe('queryMatrixTraces example fetching', () => {
   });
 
   it('does not treat an empty response as proof the server honours filters', async () => {
-    const empty = jest.fn(async () => [] as EvaluationScoreDocument[]);
+    const empty = vi.fn(async () => [] as EvaluationScoreDocument[]);
     const client = {
-      getExperimentScores: jest.fn(
+      getExperimentScores: vi.fn(
         async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
       ),
       getExampleScores: empty,
     };
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const log = { debug: vi.fn(), warning: vi.fn() };
     await queryMatrixTraces(client as never, log as never, aggregatedFor('exec-a') as never);
 
     expect(log.warning).toHaveBeenCalledWith(
@@ -493,7 +496,7 @@ describe('queryMatrixTraces example fetching', () => {
 
   it('stays quiet about total trace loss when documents do come back', async () => {
     const client = makeClient({ filtered: true });
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const log = { debug: vi.fn(), warning: vi.fn() };
     await queryMatrixTraces(client as never, log as never, aggregatedFor('exec-a') as never);
 
     expect(log.warning).not.toHaveBeenCalledWith(
@@ -583,19 +586,19 @@ describe('queryMatrixTraces example fetching', () => {
         },
       } as unknown as EvaluationScoreDocument);
 
-    const getExperimentScores = jest.fn(
+    const getExperimentScores = vi.fn(
       async (_experimentId: string, { executionId }: { executionId?: string }) =>
         executionId === 'sweep-9-s1of2::suite::model-x'
           ? [shardedDoc('sweep-9-s1of2::suite::model-x', 'example-1')]
           : [shardedDoc('sweep-9-s2of2::suite::model-x', 'example-2')]
     );
-    const getExampleScores = jest.fn(
+    const getExampleScores = vi.fn(
       async (_exampleId: string, { executionId }: { executionId?: string }) => [
         shardedDoc(executionId ?? '?', _exampleId),
       ]
     );
     const client = { getExperimentScores, getExampleScores };
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const log = { debug: vi.fn(), warning: vi.fn() };
 
     const aggregated = [
       {
@@ -625,9 +628,9 @@ describe('queryMatrixTraces example fetching', () => {
   });
 
   it('enumerates each shard under its own experiment id, not the row experimentId', async () => {
-    const getExperimentScores = jest.fn(async () => []);
-    const client = { getExperimentScores, getExampleScores: jest.fn(async () => []) };
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const getExperimentScores = vi.fn(async () => []);
+    const client = { getExperimentScores, getExampleScores: vi.fn(async () => []) };
+    const log = { debug: vi.fn(), warning: vi.fn() };
 
     const aggregated = [
       {
@@ -689,15 +692,15 @@ describe('queryMatrixTraces example fetching', () => {
       } as unknown as EvaluationScoreDocument);
 
     const client = {
-      getExperimentScores: jest.fn(
+      getExperimentScores: vi.fn(
         async (_experimentId: string, filters?: { suiteId?: string }) =>
           [{ example: { id: 'shared-example' } }] as EvaluationScoreDocument[]
       ),
-      getExampleScores: jest.fn(async (_exampleId: string, filters?: { executionId?: string }) => [
+      getExampleScores: vi.fn(async (_exampleId: string, filters?: { executionId?: string }) => [
         suiteDoc(filters?.executionId === 'exec-s2' ? 's2' : 's1'),
       ]),
     };
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const log = { debug: vi.fn(), warning: vi.fn() };
     const aggregated = [
       {
         modelId: 'model-x',
@@ -735,12 +738,12 @@ describe('queryMatrixTraces example fetching', () => {
     } as unknown as EvaluationScoreDocument;
 
     const client = {
-      getExperimentScores: jest.fn(
+      getExperimentScores: vi.fn(
         async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
       ),
-      getExampleScores: jest.fn(async () => [rankableDoc]),
+      getExampleScores: vi.fn(async () => [rankableDoc]),
     };
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const log = { debug: vi.fn(), warning: vi.fn() };
     const traces = await queryMatrixTraces(
       client as never,
       log as never,
@@ -756,7 +759,7 @@ describe('queryMatrixTraces example fetching', () => {
   it('bounds example-fetch concurrency and overlaps work across runs', async () => {
     let inFlight = 0;
     let maxInFlight = 0;
-    const getExampleScores = jest.fn(
+    const getExampleScores = vi.fn(
       async (_exampleId: string, filters?: { executionId?: string }) => {
         inFlight += 1;
         maxInFlight = Math.max(maxInFlight, inFlight);
@@ -766,7 +769,7 @@ describe('queryMatrixTraces example fetching', () => {
       }
     );
     const client = {
-      getExperimentScores: jest.fn(
+      getExperimentScores: vi.fn(
         async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
       ),
       getExampleScores,
@@ -781,14 +784,14 @@ describe('queryMatrixTraces example fetching', () => {
 
   it('warns with model and example names when some scored cells lose their trace', async () => {
     const client = {
-      getExperimentScores: jest.fn(
+      getExperimentScores: vi.fn(
         async () => [{ example: { id: 'example-1' } }, { example: { id: 'example-2' } }] as never
       ),
-      getExampleScores: jest.fn(async (exampleId: string) =>
+      getExampleScores: vi.fn(async (exampleId: string) =>
         exampleId === 'example-1' ? [completeDoc('exec-a')] : []
       ),
     };
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const log = { debug: vi.fn(), warning: vi.fn() };
     const traces = await queryMatrixTraces(
       client as never,
       log as never,
@@ -802,13 +805,13 @@ describe('queryMatrixTraces example fetching', () => {
 
   it('retries a transient fetch failure once before dropping the trace', async () => {
     let calls = 0;
-    const getExampleScores = jest.fn(async () => {
+    const getExampleScores = vi.fn(async () => {
       calls += 1;
       if (calls === 1) throw new Error('503 Service Unavailable');
       return [completeDoc('exec-a')];
     });
     const client = {
-      getExperimentScores: jest.fn(
+      getExperimentScores: vi.fn(
         async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
       ),
       getExampleScores,
@@ -825,7 +828,7 @@ describe('queryMatrixTraces example fetching', () => {
   it('enumerates experiments concurrently in phase 1', async () => {
     let inFlight = 0;
     let maxInFlight = 0;
-    const getExperimentScores = jest.fn(async () => {
+    const getExperimentScores = vi.fn(async () => {
       inFlight += 1;
       maxInFlight = Math.max(maxInFlight, inFlight);
       await new Promise((resolve) => setTimeout(resolve, 5));
@@ -834,7 +837,7 @@ describe('queryMatrixTraces example fetching', () => {
     });
     const client = {
       getExperimentScores,
-      getExampleScores: jest.fn(async () => [completeDoc('exec-a')]),
+      getExampleScores: vi.fn(async () => [completeDoc('exec-a')]),
     };
     const aggregated = Array.from({ length: 8 }, (_, i) => aggregatedFor(`exec-${i}`)).flat();
     await queryMatrixTraces(client as never, logStub as never, aggregated as never);
@@ -861,7 +864,7 @@ describe('queryMatrixTraces example fetching', () => {
       },
     } as unknown as EvaluationScoreDocument;
 
-    const log = { debug: jest.fn(), warning: jest.fn() };
+    const log = { debug: vi.fn(), warning: vi.fn() };
     await queryMatrixTraces(
       makeClient({ filtered: true }) as never,
       log as never,
@@ -1121,13 +1124,13 @@ describe('round 8 review findings: trace policy filtering', () => {
     } as unknown as EvaluationScoreDocument);
 
   const makeClient = (docs: EvaluationScoreDocument[]) => ({
-    getExperimentScores: jest.fn(
+    getExperimentScores: vi.fn(
       async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
     ),
-    getExampleScores: jest.fn(async () => docs),
+    getExampleScores: vi.fn(async () => docs),
   });
 
-  const logStub = { debug: jest.fn(), warning: jest.fn() };
+  const logStub = { debug: vi.fn(), warning: vi.fn() };
 
   const aggregatedFor = () => [
     {

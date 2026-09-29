@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
@@ -17,11 +19,11 @@ import type { Anomalies } from '../types';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 import { waitFor } from '@testing-library/react';
 
-jest.mock('../../../lib/kibana');
+vi.mock('../../../lib/kibana');
 
 const startDate: string = '2020-07-07T08:20:18.966Z';
 const endDate: string = '3000-01-01T00:00:00.000Z';
-const narrowDateRange = jest.fn();
+const narrowDateRange = vi.fn();
 describe('anomaly_scores', () => {
   let anomalies: Anomalies = cloneDeep(mockAnomalies);
   const mount = useMountAppended();

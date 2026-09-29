@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import * as api from './api';
 
@@ -12,16 +15,16 @@ import { TestProviders } from '../../common/mock';
 import { useGetActionTypes } from './use_action_types';
 import { useToasts } from '../../common/lib/kibana';
 
-jest.mock('./api');
-jest.mock('../../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../../common/lib/kibana');
 
 describe('useActionTypes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should fetch action types', async () => {
-    const spy = jest.spyOn(api, 'fetchActionTypes');
+    const spy = vi.spyOn(api, 'fetchActionTypes');
 
     renderHook(() => useGetActionTypes(), {
       wrapper: TestProviders,
@@ -31,15 +34,15 @@ describe('useActionTypes', () => {
   });
 
   it('should show a toast error message if failed to fetch', async () => {
-    const spyOnFetchActionTypes = jest.spyOn(api, 'fetchActionTypes');
+    const spyOnFetchActionTypes = vi.spyOn(api, 'fetchActionTypes');
 
     spyOnFetchActionTypes.mockRejectedValue(() => {
       throw new Error('Something went wrong');
     });
 
-    const addErrorMock = jest.fn();
+    const addErrorMock = vi.fn();
 
-    (useToasts as jest.Mock).mockReturnValue({ addError: addErrorMock });
+    (useToasts as Mock).mockReturnValue({ addError: addErrorMock });
 
     renderHook(() => useGetActionTypes(), {
       wrapper: TestProviders,

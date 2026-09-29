@@ -5,27 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { validateAndSanitizeFileData } from './file_content';
 
 // Mock the magic-bytes.js module
-jest.mock('magic-bytes.js', () => ({
-  filetypemime: jest.fn(),
-}));
+vi.mock('magic-bytes.js', () => {
+      const mocked = {
+      filetypemime: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the sanitizeSvg function
-jest.mock('../sanitizations/svg', () => ({
-  sanitizeSvg: jest.fn(),
-}));
+vi.mock('../sanitizations/svg', () => {
+      const mocked = {
+      sanitizeSvg: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { filetypemime } from 'magic-bytes.js';
 import { sanitizeSvg } from '../sanitizations/svg';
 
-const mockFiletypemime = filetypemime as jest.MockedFunction<typeof filetypemime>;
-const mockSanitizeSvg = sanitizeSvg as jest.MockedFunction<typeof sanitizeSvg>;
+const mockFiletypemime = filetypemime as MockedFunction<typeof filetypemime>;
+const mockSanitizeSvg = sanitizeSvg as MockedFunction<typeof sanitizeSvg>;
 
 describe('validateAndSanitizeFileData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('input type conversion', () => {
@@ -84,7 +93,7 @@ describe('validateAndSanitizeFileData', () => {
 
     it('should skip validation for streaming content (Stream)', () => {
       const mockStream = {
-        pipe: jest.fn(),
+        pipe: vi.fn(),
       } as any;
 
       const result = validateAndSanitizeFileData(mockStream, 'test.txt');

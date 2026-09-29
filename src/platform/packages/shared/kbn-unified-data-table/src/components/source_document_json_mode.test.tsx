@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -147,7 +150,7 @@ describe('SourceDocumentJsonMode', () => {
 
   describe('filter for / filter out leaf actions', () => {
     it('renders filter buttons on a filterable leaf and calls onFilter with the field, value and mode', async () => {
-      const onFilter = jest.fn();
+      const onFilter = vi.fn();
       renderCell({ _id: '1', _index: 'test', _source: { bytes: 100 } }, { onFilter });
 
       await userEvent.click(screen.getByTestId(filterForTestId('bytes')));
@@ -161,7 +164,7 @@ describe('SourceDocumentJsonMode', () => {
       // `message` is not searchable in the mock data view, so it is not filterable.
       renderCell(
         { _id: '1', _index: 'test', _source: { message: 'hello' } },
-        { onFilter: jest.fn() }
+        { onFilter: vi.fn() }
       );
 
       expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
@@ -172,7 +175,7 @@ describe('SourceDocumentJsonMode', () => {
     it('does not render filter buttons for a field that is absent from the data view', () => {
       renderCell(
         { _id: '1', _index: 'test', _source: { unknownField: 'x' } },
-        { onFilter: jest.fn() }
+        { onFilter: vi.fn() }
       );
 
       expect(screen.queryByTestId(filterForTestId('unknownField'))).not.toBeInTheDocument();
@@ -186,7 +189,7 @@ describe('SourceDocumentJsonMode', () => {
     });
 
     it('filters on the exact clicked element of a multi-value field', async () => {
-      const onFilter = jest.fn();
+      const onFilter = vi.fn();
       renderCell(
         { _id: '1', _index: 'test', _source: { bytes: [100, 200] } },
         { onFilter, jsonModeSettings: { defaultRenderedNodes: 0 } }
@@ -200,7 +203,7 @@ describe('SourceDocumentJsonMode', () => {
     });
 
     it('wraps a multi-value element as an array in ES|QL so the query builder can use MV_CONTAINS', async () => {
-      const onFilter = jest.fn();
+      const onFilter = vi.fn();
       renderCell(
         { _id: '1', _index: 'test', _source: { bytes: [100, 200] } },
         { onFilter, isPlainRecord: true, jsonModeSettings: { defaultRenderedNodes: 0 } }
@@ -214,7 +217,7 @@ describe('SourceDocumentJsonMode', () => {
     });
 
     it('renders filter buttons for an ES|QL computed column resolved from column meta', async () => {
-      const onFilter: jest.MockedFunction<DocViewFilterFn> = jest.fn();
+      const onFilter: MockedFunction<DocViewFilterFn> = vi.fn();
       renderCell(
         { _id: '1', _index: 'test', _source: { computedField: 42 } },
         { onFilter, columnsMeta: { computedField: { type: 'number' } } }
@@ -232,7 +235,7 @@ describe('SourceDocumentJsonMode', () => {
       renderCell(
         { _id: '1', _index: 'test', _source: { computedField: 42 } },
         {
-          onFilter: jest.fn(),
+          onFilter: vi.fn(),
           columnsMeta: { computedField: { type: 'number' } },
           hideFilteringOnComputedColumns: true,
         }
@@ -250,7 +253,7 @@ describe('SourceDocumentJsonMode', () => {
           _source: { extension: 'a-very-long-extension', bytes: 100 },
           _ignored: ['extension'],
         },
-        { onFilter: jest.fn() }
+        { onFilter: vi.fn() }
       );
 
       expect(screen.queryByTestId(filterForTestId('extension'))).not.toBeInTheDocument();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useBulkAddEventsToCaseActions } from './use_bulk_event_actions';
 import { TestProviders } from '../../../../common/mock';
@@ -12,41 +14,44 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { SECURITY_EVENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { BULK_ADD_TO_CASE_ACTION_ID } from '../../../../common/constants/action_ids';
 
-const mockOpenExistingCase = jest.fn();
-const mockCanUseCases = jest.fn(() => ({
+const mockOpenExistingCase = vi.fn();
+const mockCanUseCases = vi.fn(() => ({
   create: true,
   createComment: true,
   read: true,
   update: false,
 }));
-const mockGetCasesContext = jest.fn(() => ({}));
-const mockUseCasesAddToExistingCaseModal = jest.fn(() => ({
+const mockGetCasesContext = vi.fn(() => ({}));
+const mockUseCasesAddToExistingCaseModal = vi.fn(() => ({
   open: mockOpenExistingCase,
 }));
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      cases: {
-        helpers: {
-          canUseCases: mockCanUseCases,
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          cases: {
+            helpers: {
+              canUseCases: mockCanUseCases,
+            },
+            ui: {
+              getCasesContext: mockGetCasesContext,
+            },
+            hooks: {
+              useCasesAddToExistingCaseModal: mockUseCasesAddToExistingCaseModal,
+            },
+          },
         },
-        ui: {
-          getCasesContext: mockGetCasesContext,
-        },
-        hooks: {
-          useCasesAddToExistingCaseModal: mockUseCasesAddToExistingCaseModal,
-        },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useBulkAddEventsToCaseActions', () => {
-  const clearSelection = jest.fn();
+  const clearSelection = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns one action when permissions and services are available', () => {

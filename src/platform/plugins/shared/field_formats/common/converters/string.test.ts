@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { EMPTY_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 import { StringFormat } from './string';
 import { highlightTags } from '../utils/highlight/highlight_tags';
@@ -25,7 +27,7 @@ describe('String Format', () => {
       {
         transform: 'lower',
       },
-      jest.fn()
+      vi.fn()
     );
     expect(string.convertToText('Kibana')).toBe('kibana');
     expect(string.convertToReact('Kibana')).toBe('kibana');
@@ -36,7 +38,7 @@ describe('String Format', () => {
       {
         transform: 'upper',
       },
-      jest.fn()
+      vi.fn()
     );
     expect(string.convertToText('Kibana')).toBe('KIBANA');
     expect(string.convertToReact('Kibana')).toBe('KIBANA');
@@ -47,7 +49,7 @@ describe('String Format', () => {
       {
         transform: 'base64',
       },
-      jest.fn()
+      vi.fn()
     );
     expect(string.convertToText('Zm9vYmFy')).toBe('foobar');
     expect(string.convertToReact('Zm9vYmFy')).toBe('foobar');
@@ -58,7 +60,7 @@ describe('String Format', () => {
       {
         transform: 'base64',
       },
-      jest.fn()
+      vi.fn()
     );
     const base64 = Buffer.from('été', 'utf8').toString('base64');
     expect(string.convertToText(base64)).toBe('été');
@@ -70,7 +72,7 @@ describe('String Format', () => {
       {
         transform: 'base64',
       },
-      jest.fn()
+      vi.fn()
     );
     const originalAtob = window.atob;
     Object.defineProperty(window, 'atob', { value: undefined, configurable: true, writable: true });
@@ -91,7 +93,7 @@ describe('String Format', () => {
       {
         transform: 'title',
       },
-      jest.fn()
+      vi.fn()
     );
     expect(string.convertToText('PLEASE DO NOT SHOUT')).toBe('Please Do Not Shout');
     expect(string.convertToReact('PLEASE DO NOT SHOUT')).toBe('Please Do Not Shout');
@@ -110,7 +112,7 @@ describe('String Format', () => {
       {
         transform: 'short',
       },
-      jest.fn()
+      vi.fn()
     );
     expect(string.convertToText('dot.notated.string')).toBe('d.n.string');
     expect(string.convertToReact('dot.notated.string')).toBe('d.n.string');
@@ -121,7 +123,7 @@ describe('String Format', () => {
       {
         transform: 'unknown_transform',
       },
-      jest.fn()
+      vi.fn()
     );
     const value = 'test test test';
     expect(string.convertToText(value)).toBe(value);
@@ -133,7 +135,7 @@ describe('String Format', () => {
       {
         transform: 'urlparam',
       },
-      jest.fn()
+      vi.fn()
     );
     expect(string.convertToText('%EC%95%88%EB%85%95%20%ED%82%A4%EB%B0%94%EB%82%98')).toBe(
       '안녕 키바나'
@@ -177,7 +179,7 @@ describe('String Format', () => {
       snippets: string[],
       fieldName = 'foo'
     ) => {
-      const string = new StringFormat(transform ? { transform } : {}, jest.fn());
+      const string = new StringFormat(transform ? { transform } : {}, vi.fn());
       return renderReactNode(
         string.convertToReact(value, {
           field: { name: fieldName },

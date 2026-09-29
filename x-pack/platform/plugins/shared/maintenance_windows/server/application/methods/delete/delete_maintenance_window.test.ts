@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { deleteMaintenanceWindow } from './delete_maintenance_window';
 import {
   savedObjectsClientMock,
@@ -17,20 +20,20 @@ import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../common';
 const savedObjectsClient = savedObjectsClientMock.create();
 const uiSettings = uiSettingsServiceMock.createClient();
 
-const mockContext: jest.Mocked<MaintenanceWindowClientContext> = {
+const mockContext: Mocked<MaintenanceWindowClientContext> = {
   logger: loggingSystemMock.create().get(),
-  getModificationMetadata: jest.fn(),
+  getModificationMetadata: vi.fn(),
   savedObjectsClient,
   uiSettings,
 };
 
 describe('MaintenanceWindowClient - delete', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should delete maintenance window by id', async () => {

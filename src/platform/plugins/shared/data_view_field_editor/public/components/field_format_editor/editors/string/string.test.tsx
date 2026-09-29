@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { createFieldFormatMock } from '../test_utils';
 import { formatId } from './constants';
@@ -17,10 +19,10 @@ import { StringFormatEditor } from './string';
 const fieldType = 'string';
 
 const format = createFieldFormatMock({
-  getParamDefaults: jest.fn().mockImplementation(() => {
+  getParamDefaults: vi.fn().mockImplementation(() => {
     return { transform: 'upper' };
   }),
-  convertToReact: jest.fn().mockImplementation((input: string) => input.toUpperCase()),
+  convertToReact: vi.fn().mockImplementation((input: string) => input.toUpperCase()),
   type: {
     transformOptions: [
       {
@@ -35,8 +37,8 @@ const formatParams = {
   transform: '',
 };
 
-const onChange = jest.fn();
-const onError = jest.fn();
+const onChange = vi.fn();
+const onError = vi.fn();
 
 const renderStringFormatEditor = () =>
   renderWithI18n(

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CoreStart, CoreSetup } from '@kbn/core/public';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { ILicense } from '@kbn/licensing-types';
@@ -14,21 +16,27 @@ import { ADD_APM_SERVICE_MAP_PANEL_ACTION_ID, APM_SERVICE_MAP_EMBEDDABLE } from 
 import { createAddServiceMapPanelAction } from './create_add_service_map_panel_action';
 import type { EmbeddableDeps } from '../types';
 
-const mockApiIsPresentationContainer = jest.fn();
-const mockApiPublishesTimeRange = jest.fn();
-const mockOpenLazyFlyout = jest.fn();
+const mockApiIsPresentationContainer = vi.fn();
+const mockApiPublishesTimeRange = vi.fn();
+const mockOpenLazyFlyout = vi.fn();
 
-jest.mock('@kbn/presentation-publishing', () => ({
-  apiIsPresentationContainer: (...args: unknown[]) => mockApiIsPresentationContainer(...args),
-  apiPublishesTimeRange: (...args: unknown[]) => mockApiPublishesTimeRange(...args),
-}));
+vi.mock('@kbn/presentation-publishing', () => {
+      const mocked = {
+      apiIsPresentationContainer: (...args: unknown[]) => mockApiIsPresentationContainer(...args),
+      apiPublishesTimeRange: (...args: unknown[]) => mockApiPublishesTimeRange(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/presentation-util', () => ({
-  openLazyFlyout: (...args: unknown[]) => mockOpenLazyFlyout(...args),
-}));
+vi.mock('@kbn/presentation-util', () => {
+      const mocked = {
+      openLazyFlyout: (...args: unknown[]) => mockOpenLazyFlyout(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockCoreStart = {
-  overlays: { openFlyout: jest.fn() },
+  overlays: { openFlyout: vi.fn() },
 } as unknown as CoreStart;
 
 function createMockDeps(
@@ -55,7 +63,7 @@ const mockDeps = createMockDeps();
 
 describe('createAddServiceMapPanelAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockApiPublishesTimeRange.mockReturnValue(false);
   });
 
@@ -120,8 +128,8 @@ describe('createAddServiceMapPanelAction', () => {
   });
 
   it('opens configuration flyout when executed', async () => {
-    const embeddable = { addNewPanel: jest.fn() };
-    const returnFocus = jest.fn();
+    const embeddable = { addNewPanel: vi.fn() };
+    const returnFocus = vi.fn();
     mockApiIsPresentationContainer.mockReturnValue(true);
     const action = createAddServiceMapPanelAction(mockDeps);
 
@@ -155,7 +163,7 @@ describe('createAddServiceMapPanelAction', () => {
     const action = createAddServiceMapPanelAction(disabledDeps);
 
     await expect(
-      action.execute({ embeddable: { addNewPanel: jest.fn() } } as never)
+      action.execute({ embeddable: { addNewPanel: vi.fn() } } as never)
     ).rejects.toBeInstanceOf(IncompatibleActionError);
     expect(mockOpenLazyFlyout).not.toHaveBeenCalled();
   });
@@ -170,7 +178,7 @@ describe('createAddServiceMapPanelAction', () => {
     const action = createAddServiceMapPanelAction(basicLicenseDeps);
 
     await expect(
-      action.execute({ embeddable: { addNewPanel: jest.fn() } } as never)
+      action.execute({ embeddable: { addNewPanel: vi.fn() } } as never)
     ).rejects.toBeInstanceOf(IncompatibleActionError);
     expect(mockOpenLazyFlyout).not.toHaveBeenCalled();
   });
@@ -178,7 +186,7 @@ describe('createAddServiceMapPanelAction', () => {
   it('extracts time range from parent when apiPublishesTimeRange returns true', async () => {
     const mockTimeRange = { from: '2021-10-10T00:00:00.000Z', to: '2021-10-10T00:15:00.000Z' };
     const embeddable = {
-      addNewPanel: jest.fn(),
+      addNewPanel: vi.fn(),
       timeRange$: { getValue: () => mockTimeRange },
     };
     mockApiIsPresentationContainer.mockReturnValue(true);
@@ -192,7 +200,7 @@ describe('createAddServiceMapPanelAction', () => {
   });
 
   it('passes undefined time range when apiPublishesTimeRange returns false', async () => {
-    const embeddable = { addNewPanel: jest.fn() };
+    const embeddable = { addNewPanel: vi.fn() };
     mockApiIsPresentationContainer.mockReturnValue(true);
     mockApiPublishesTimeRange.mockReturnValue(false);
     const action = createAddServiceMapPanelAction(mockDeps);
@@ -209,7 +217,7 @@ describe('createAddServiceMapPanelAction', () => {
     }
 
     it('returns ServiceMapEditorFlyout component wrapped in ApmEmbeddableContext', async () => {
-      const embeddable = { addNewPanel: jest.fn() };
+      const embeddable = { addNewPanel: vi.fn() };
       mockApiIsPresentationContainer.mockReturnValue(true);
       mockApiPublishesTimeRange.mockReturnValue(false);
       const action = createAddServiceMapPanelAction(mockDeps);
@@ -217,7 +225,7 @@ describe('createAddServiceMapPanelAction', () => {
       await action.execute({ embeddable } as never);
 
       const { loadContent } = mockOpenLazyFlyout.mock.calls[0][0];
-      const closeFlyout = jest.fn();
+      const closeFlyout = vi.fn();
       const result = await loadContent({ closeFlyout, ariaLabelledBy: 'test-aria-label' });
 
       expect(result).toBeDefined();
@@ -228,7 +236,7 @@ describe('createAddServiceMapPanelAction', () => {
     });
 
     it('calls embeddable.addNewPanel and closeFlyout when onSave is invoked', async () => {
-      const addNewPanel = jest.fn();
+      const addNewPanel = vi.fn();
       const embeddable = { addNewPanel };
       mockApiIsPresentationContainer.mockReturnValue(true);
       mockApiPublishesTimeRange.mockReturnValue(false);
@@ -237,7 +245,7 @@ describe('createAddServiceMapPanelAction', () => {
       await action.execute({ embeddable } as never);
 
       const { loadContent } = mockOpenLazyFlyout.mock.calls[0][0];
-      const closeFlyout = jest.fn();
+      const closeFlyout = vi.fn();
       const result = await loadContent({ closeFlyout, ariaLabelledBy: 'test-aria-label' });
 
       const state = { environment: 'production', service_name: 'test-service' };
@@ -257,7 +265,7 @@ describe('createAddServiceMapPanelAction', () => {
     it('passes time range to flyout when available', async () => {
       const mockTimeRange = { from: 'now-1h', to: 'now' };
       const embeddable = {
-        addNewPanel: jest.fn(),
+        addNewPanel: vi.fn(),
         timeRange$: { getValue: () => mockTimeRange },
       };
       mockApiIsPresentationContainer.mockReturnValue(true);
@@ -267,7 +275,7 @@ describe('createAddServiceMapPanelAction', () => {
       await action.execute({ embeddable } as never);
 
       const { loadContent } = mockOpenLazyFlyout.mock.calls[0][0];
-      const result = await loadContent({ closeFlyout: jest.fn(), ariaLabelledBy: 'test' });
+      const result = await loadContent({ closeFlyout: vi.fn(), ariaLabelledBy: 'test' });
 
       const flyoutProps = getFlyoutProps(result);
       expect(flyoutProps.timeRange).toEqual(mockTimeRange);

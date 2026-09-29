@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Capabilities, ScopedHistory } from '@kbn/core/public';
 import type { AlertingV2PageProps } from '@kbn/alerting-v2-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -90,7 +92,7 @@ const mockAlertingVTwo = {
     />
   ),
   CreateRuleOptionsFlyout: () => null,
-  createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) => ({
+  createAlertingV2HostApp: vi.fn((appId: string, paths: Record<string, string>) => ({
     rules: { app: appId, pathPrefix: paths.rules },
     ruleLibrary: { app: appId, pathPrefix: paths.ruleLibrary },
     episodes: { app: appId, pathPrefix: paths.episodes },
@@ -102,12 +104,12 @@ const mockAlertingVTwo = {
 const createTestHistory = (pathname: string): ScopedHistory => {
   const history = createMemoryHistory({ initialEntries: [pathname] });
   return Object.assign(history, {
-    createSubHistory: jest.fn(() => history),
+    createSubHistory: vi.fn(() => history),
   }) as unknown as ScopedHistory;
 };
 
 const mockTriggersActionsUi = {
-  getClassicRulesPage: jest.fn(({ tabs }: ClassicRulesPageProps) => (
+  getClassicRulesPage: vi.fn(({ tabs }: ClassicRulesPageProps) => (
     <>
       <Placeholder name="classicRulesPage" />
       <HostTabs tabs={tabs} />
@@ -142,7 +144,7 @@ const renderAt = (pathname: string, capabilities?: Capabilities) => {
         alertingVTwo={mockAlertingVTwo}
         triggersActionsUi={mockTriggersActionsUi}
         history={history}
-        setBreadcrumbs={jest.fn()}
+        setBreadcrumbs={vi.fn()}
       />
     </Router>
   );

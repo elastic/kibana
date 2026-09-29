@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
@@ -61,7 +63,7 @@ describe('filterHallucinatedAlerts', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Default: all alerts exist
     mockEsClient.search.mockResponse({
       hits: {

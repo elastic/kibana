@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -30,7 +32,7 @@ describe('InferenceHistoryLogic', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mountFetchMlInferencePipelineHistoryApiLogic();
     mount();
   });

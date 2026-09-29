@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import Fsp from 'fs/promises';
 import { ToolingLog } from '@kbn/tooling-log';
 import { writeDeprecationDueByTeam } from './write_deprecations_due_by_team';
@@ -22,9 +25,9 @@ import {
   createMockPlugin,
 } from '../__test_helpers__/mocks';
 
-jest.mock('fs/promises');
+vi.mock('fs/promises');
 
-const mockFsp = Fsp as jest.Mocked<typeof Fsp>;
+const mockFsp = Fsp as Mocked<typeof Fsp>;
 
 const log = new ToolingLog({
   level: 'debug',
@@ -33,7 +36,7 @@ const log = new ToolingLog({
 
 describe('writeDeprecationDueByTeam', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFsp.writeFile.mockResolvedValue(undefined);
   });
 

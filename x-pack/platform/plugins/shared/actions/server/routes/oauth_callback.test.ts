@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-jest.mock('./verify_access_and_context', () => ({
-  verifyAccessAndContext: jest.fn(),
-}));
-jest.mock('../lib/oauth_state_client');
-jest.mock('../lib/user_connector_token_client');
-jest.mock('../lib/request_oauth_authorization_code_token');
-jest.mock('../lib/ears/request_ears_token');
+import { vi } from 'vitest';
+import type { Mock, MockedClass, MockedFunction } from 'vitest';
+
+vi.mock('./verify_access_and_context', () => {
+      const mocked = {
+      verifyAccessAndContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/oauth_state_client');
+vi.mock('../lib/user_connector_token_client');
+vi.mock('../lib/request_oauth_authorization_code_token');
+vi.mock('../lib/ears/request_ears_token');
 
 import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
@@ -26,54 +32,54 @@ import { asSpaceId } from '@kbn/core-spaces-common';
 
 const KIBANA_URL = 'https://kibana.example.com';
 
-const MockOAuthStateClient = OAuthStateClient as jest.MockedClass<typeof OAuthStateClient>;
-const MockUserConnectorTokenClient = UserConnectorTokenClient as jest.MockedClass<
+const MockOAuthStateClient = OAuthStateClient as MockedClass<typeof OAuthStateClient>;
+const MockUserConnectorTokenClient = UserConnectorTokenClient as MockedClass<
   typeof UserConnectorTokenClient
 >;
 const mockRequestOAuthAuthorizationCodeToken =
-  requestOAuthAuthorizationCodeToken as jest.MockedFunction<
+  requestOAuthAuthorizationCodeToken as MockedFunction<
     typeof requestOAuthAuthorizationCodeToken
   >;
-const mockRequestEarsToken = requestEarsToken as jest.MockedFunction<typeof requestEarsToken>;
+const mockRequestEarsToken = requestEarsToken as MockedFunction<typeof requestEarsToken>;
 
 const configurationUtilities = actionsConfigMock.create();
 const mockLogger = loggingSystemMock.create().get();
 
 const mockOAuthStateClientInstance = {
-  get: jest.fn(),
-  create: jest.fn(),
-  delete: jest.fn(),
-  cleanupExpiredStates: jest.fn(),
+  get: vi.fn(),
+  create: vi.fn(),
+  delete: vi.fn(),
+  cleanupExpiredStates: vi.fn(),
 };
 
 const mockConnectorTokenClientInstance = {
-  deleteConnectorTokens: jest.fn(),
-  createWithRefreshToken: jest.fn(),
+  deleteConnectorTokens: vi.fn(),
+  createWithRefreshToken: vi.fn(),
 };
 
 const mockActionsClient = {
-  evictClientPool: jest.fn(),
+  evictClientPool: vi.fn(),
 };
 
 const mockEncryptedSavedObjectsClient = {
-  getClient: jest.fn().mockReturnValue({
-    getDecryptedAsInternalUser: jest.fn(),
+  getClient: vi.fn().mockReturnValue({
+    getDecryptedAsInternalUser: vi.fn(),
   }),
 };
 
 const mockSpacesService = {
-  getSpaceId: jest.fn().mockReturnValue('default'),
-  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+  getSpaceId: vi.fn().mockReturnValue('default'),
+  spaceIdToNamespace: vi.fn().mockReturnValue(undefined),
 };
 
 const mockRateLimiter = {
-  log: jest.fn(),
-  isRateLimited: jest.fn().mockReturnValue(false),
-  getLogs: jest.fn(),
+  log: vi.fn(),
+  isRateLimited: vi.fn().mockReturnValue(false),
+  getLogs: vi.fn(),
 };
 
 const createMockCoreSetup = () => ({
-  getStartServices: jest.fn().mockResolvedValue([
+  getStartServices: vi.fn().mockResolvedValue([
     {
       http: {
         basePath: {
@@ -97,15 +103,15 @@ const createMockContext = (
   core: Promise.resolve({
     security: {
       authc: {
-        getCurrentUser: jest.fn().mockReturnValue(currentUser),
+        getCurrentUser: vi.fn().mockReturnValue(currentUser),
       },
     },
     savedObjects: {
-      getClient: jest.fn().mockReturnValue({}),
+      getClient: vi.fn().mockReturnValue({}),
     },
   }),
   actions: Promise.resolve({
-    getActionsClient: jest.fn().mockReturnValue(mockActionsClient),
+    getActionsClient: vi.fn().mockReturnValue(mockActionsClient),
   }),
 });
 
@@ -113,16 +119,16 @@ describe('oauthCallbackRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     router = httpServiceMock.createRouter();
-    (verifyAccessAndContext as jest.Mock).mockImplementation((_license, handler) => handler);
+    (verifyAccessAndContext as Mock).mockImplementation((_license, handler) => handler);
 
     // Restore mock implementations cleared by resetAllMocks
-    (mockLogger.get as jest.Mock).mockReturnValue(mockLogger);
+    (mockLogger.get as Mock).mockReturnValue(mockLogger);
     mockRateLimiter.isRateLimited.mockReturnValue(false);
     mockSpacesService.spaceIdToNamespace.mockReturnValue(undefined);
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
-      getDecryptedAsInternalUser: jest.fn(),
+      getDecryptedAsInternalUser: vi.fn(),
     });
     mockActionsClient.evictClientPool.mockReset();
 
@@ -314,7 +320,7 @@ describe('oauthCallbackRoute', () => {
     mockOAuthStateClientInstance.get.mockResolvedValue(mockOAuthState);
 
     const connectorEncryptedClient = {
-      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+      getDecryptedAsInternalUser: vi.fn().mockResolvedValue({
         attributes: {
           config: { tokenUrl: 'https://provider.example.com/token' },
           secrets: {
@@ -424,7 +430,7 @@ describe('oauthCallbackRoute', () => {
       createdBy: 'test-profile-uid',
     });
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
-      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+      getDecryptedAsInternalUser: vi.fn().mockResolvedValue({
         attributes: {
           config: { authType: 'ears' },
           secrets: { provider: 'test-provider' },
@@ -483,7 +489,7 @@ describe('oauthCallbackRoute', () => {
     mockOAuthStateClientInstance.get.mockResolvedValue(mockOAuthState);
 
     const connectorEncryptedClient = {
-      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+      getDecryptedAsInternalUser: vi.fn().mockResolvedValue({
         attributes: {
           config: {},
           secrets: {
@@ -531,7 +537,7 @@ describe('oauthCallbackRoute', () => {
     mockOAuthStateClientInstance.get.mockResolvedValue(mockOAuthState);
 
     const connectorEncryptedClient = {
-      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+      getDecryptedAsInternalUser: vi.fn().mockResolvedValue({
         attributes: {
           config: {},
           secrets: { clientId: 'client-id' }, // missing clientSecret and tokenUrl
@@ -642,7 +648,7 @@ describe('oauthCallbackRoute', () => {
       createdBy: 'test-profile-uid',
     });
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
-      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+      getDecryptedAsInternalUser: vi.fn().mockResolvedValue({
         attributes: {
           config: {},
           secrets: {
@@ -697,7 +703,7 @@ describe('oauthCallbackRoute', () => {
     mockOAuthStateClientInstance.get.mockResolvedValue(mockOAuthState);
 
     const connectorEncryptedClient = {
-      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+      getDecryptedAsInternalUser: vi.fn().mockResolvedValue({
         attributes: {
           config: { tokenUrl: 'https://slack.com/api/oauth.v2.access' },
           secrets: {
@@ -776,7 +782,7 @@ describe('oauthCallbackRoute', () => {
       createdBy: 'test-profile-uid',
     });
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
-      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+      getDecryptedAsInternalUser: vi.fn().mockResolvedValue({
         attributes: {
           config: {},
           secrets: {
@@ -829,7 +835,7 @@ describe('oauthCallbackRoute', () => {
       createdBy: 'test-profile-uid',
     });
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
-      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+      getDecryptedAsInternalUser: vi.fn().mockResolvedValue({
         attributes: {
           config: {},
           secrets: {

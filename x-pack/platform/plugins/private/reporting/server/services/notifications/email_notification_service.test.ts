@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
@@ -20,7 +22,7 @@ describe('EmailNotificationService', () => {
   let mockCore: ReportingCore;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     notifications.isEmailServiceAvailable.mockReturnValue(true);
     emailNotificationService = new EmailNotificationService({
       notifications,

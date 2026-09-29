@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { DefaultCellRenderer } from '../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { render } from '@testing-library/react';
@@ -16,9 +19,9 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 
-jest.mock('../../timelines/components/timeline/cell_rendering/default_cell_renderer');
+vi.mock('../../timelines/components/timeline/cell_rendering/default_cell_renderer');
 
-const DefaultCellRendererMock = DefaultCellRenderer as unknown as jest.Mock<React.ReactElement>;
+const DefaultCellRendererMock = DefaultCellRenderer as unknown as Mock<React.ReactElement>;
 
 /**
  * Mocking DefaultCellRenderer here because it will be renderered
@@ -27,12 +30,12 @@ const DefaultCellRendererMock = DefaultCellRenderer as unknown as jest.Mock<Reac
  * Actual working of Cell Renderer will be tested in Discover's functional tests
  *
  * */
-const mockDefaultCellRenderer = jest.fn((props) => {
+const mockDefaultCellRenderer = vi.fn((props) => {
   return <div data-test-subj="mocked-default-cell-render" />;
 });
 
 const mockDataView = dataViewMock;
-mockDataView.getFieldByName = jest.fn().mockReturnValue({ type: 'string' } as DataViewField);
+mockDataView.getFieldByName = vi.fn().mockReturnValue({ type: 'string' } as DataViewField);
 
 const mockServices = {} as StartServices;
 const mockStore = {} as SecurityAppStore;
@@ -44,7 +47,7 @@ describe('getCellRendererForGivenRecord', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return cell renderer correctly for allowed fields with correct data format', () => {
@@ -64,12 +67,12 @@ describe('getCellRendererForGivenRecord', () => {
         },
       },
       dataView: mockDataView,
-      setCellProps: jest.fn(),
+      setCellProps: vi.fn(),
       isExpandable: false,
       rowIndex: 0,
       colIndex: 0,
       fieldFormats: fieldFormatsMock,
-      closePopover: jest.fn(),
+      closePopover: vi.fn(),
       columnsMeta: undefined,
     };
     const CellRenderer = cellRenderer as React.FC<DataGridCellValueElementProps>;

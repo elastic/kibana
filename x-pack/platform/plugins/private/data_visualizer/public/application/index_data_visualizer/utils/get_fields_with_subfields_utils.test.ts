@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getFieldsWithSubFields } from './get_fields_with_subfields_utils';
 
 describe('getFieldsWithSubFields', () => {
@@ -19,12 +21,12 @@ describe('getFieldsWithSubFields', () => {
       { name: 'field2' },
       {
         name: 'field2.keyword',
-        getSubtypeMulti: jest.fn().mockReturnValue({ multi: { parent: 'field2' } }),
+        getSubtypeMulti: vi.fn().mockReturnValue({ multi: { parent: 'field2' } }),
       },
       { name: 'field3' },
       {
         name: 'field3.keyword',
-        getSubtypeMulti: jest.fn().mockReturnValue({ multi: { parent: 'field3' } }),
+        getSubtypeMulti: vi.fn().mockReturnValue({ multi: { parent: 'field3' } }),
       },
       { name: 'field4' },
       {
@@ -37,7 +39,7 @@ describe('getFieldsWithSubFields', () => {
         },
       },
     ],
-    getRuntimeMappings: jest.fn().mockReturnValue({
+    getRuntimeMappings: vi.fn().mockReturnValue({
       exampleRuntimeField: {
         type: 'keyword',
         script: {

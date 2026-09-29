@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`context successors function fetchSuccessors should perform multiple queries until the expected hit count is returned 1`] = `
 Array [

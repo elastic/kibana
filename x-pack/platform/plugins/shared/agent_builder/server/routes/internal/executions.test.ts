@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Observable } from 'rxjs';
 import { firstValueFrom, of, Subject, toArray } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -18,12 +20,15 @@ import { internalApiPath } from '../../../common/constants';
 import { AGENT_SOCKET_TIMEOUT_MS } from '../utils';
 import { registerInternalExecutionRoutes } from './executions';
 
-const mockObservableIntoEventSourceStream = jest.fn();
-jest.mock('@kbn/sse-utils-server', () => ({
-  observableIntoEventSourceStream: (observable: unknown, options: unknown) =>
-    mockObservableIntoEventSourceStream(observable, options),
-  cloudProxyBufferSize: 4096,
-}));
+const mockObservableIntoEventSourceStream = vi.fn();
+vi.mock('@kbn/sse-utils-server', () => {
+      const mocked = {
+      observableIntoEventSourceStream: (observable: unknown, options: unknown) =>
+        mockObservableIntoEventSourceStream(observable, options),
+      cloudProxyBufferSize: 4096,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const reattachPath = `${internalApiPath}/executions/{executionId}/reattach`;
 
@@ -53,12 +58,12 @@ const setup = ({
   const register = (config: RouteConfig, handler: Function) => {
     routes[config.path] = { config, handler };
   };
-  const followExecution = jest
+  const followExecution = vi
     .fn()
     .mockReturnValue(
       of(executionStarted, messageChunk, roundComplete, executionTerminated, conversationUpdated)
     );
-  const getExecution = jest.fn().mockResolvedValue(
+  const getExecution = vi.fn().mockResolvedValue(
     executionSpaceId === null
       ? undefined
       : {
@@ -69,10 +74,10 @@ const setup = ({
         }
   );
   const getConversation = conversationAccessError
-    ? jest.fn().mockRejectedValue(conversationAccessError)
-    : jest.fn().mockResolvedValue({ id: 'conv-1' });
-  const getScopedClient = jest.fn().mockResolvedValue({
-    exists: jest.fn().mockResolvedValue(true),
+    ? vi.fn().mockRejectedValue(conversationAccessError)
+    : vi.fn().mockResolvedValue({ id: 'conv-1' });
+  const getScopedClient = vi.fn().mockResolvedValue({
+    exists: vi.fn().mockResolvedValue(true),
     get: getConversation,
   });
 

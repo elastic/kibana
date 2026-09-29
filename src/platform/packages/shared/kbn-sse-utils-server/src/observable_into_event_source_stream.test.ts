@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/logging';
 import { observableIntoEventSourceStream } from './observable_into_event_source_stream';
 import type { PassThrough } from 'node:stream';
@@ -20,7 +23,7 @@ import {
 } from '@kbn/sse-utils/src/errors';
 
 describe('observableIntoEventSourceStream', () => {
-  let logger: jest.Mocked<Logger>;
+  let logger: Mocked<Logger>;
 
   let controller: AbortController;
 
@@ -28,14 +31,14 @@ describe('observableIntoEventSourceStream', () => {
   let source$: Subject<ServerSentEvent>;
 
   let data: string[];
-  let streamFlushSpy: jest.SpyInstance;
+  let streamFlushSpy: MockInstance;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     logger = {
-      debug: jest.fn(),
-      error: jest.fn(),
-    } as unknown as jest.Mocked<Logger>;
+      debug: vi.fn(),
+      error: vi.fn(),
+    } as unknown as Mocked<Logger>;
 
     controller = new AbortController();
     source$ = new Subject();
@@ -45,18 +48,18 @@ describe('observableIntoEventSourceStream', () => {
     stream.on('data', (chunk) => {
       data.push(chunk.toString());
     });
-    streamFlushSpy = jest.spyOn(stream, 'flush');
+    streamFlushSpy = vi.spyOn(stream, 'flush');
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   it('writes events into the stream in SSE format', () => {
     source$.next({ type: ServerSentEventType.data, data: { foo: 'bar' } });
     source$.complete();
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(data).toEqual(['event: data\ndata: {"data":{"foo":"bar"}}\n\n']);
     expect(streamFlushSpy).toHaveBeenCalledTimes(1);
@@ -71,15 +74,15 @@ describe('observableIntoEventSourceStream', () => {
 
     expect(streamFlushSpy).toHaveBeenCalledTimes(1); // on the first message
 
-    jest.advanceTimersByTime(50); // Advance half the throttling time
+    vi.advanceTimersByTime(50); // Advance half the throttling time
 
     expect(streamFlushSpy).toHaveBeenCalledTimes(1); // still the first flush only
 
-    jest.advanceTimersByTime(50); // Advance throttling time
+    vi.advanceTimersByTime(50); // Advance throttling time
 
     expect(streamFlushSpy).toHaveBeenCalledTimes(2); // on the first message, and after the throttling time
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(data).toEqual([
       'event: data\ndata: {"data":{"foo":"bar-1"}}\n\n',
@@ -95,7 +98,7 @@ describe('observableIntoEventSourceStream', () => {
 
     source$.error(sseError);
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(logger.error).toHaveBeenCalledWith(sseError);
     expect(logger.debug).toHaveBeenCalled();
@@ -127,7 +130,7 @@ describe('observableIntoEventSourceStream', () => {
 
     source$.error(sseError);
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(logger.error).toHaveBeenCalledWith(sseError);
     expect(logger.debug).toHaveBeenCalled();
@@ -163,7 +166,7 @@ describe('observableIntoEventSourceStream', () => {
 
     source$.error(error);
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(logger.error).toHaveBeenCalledWith(error);
     expect(data).toEqual([
@@ -177,24 +180,24 @@ describe('observableIntoEventSourceStream', () => {
   });
 
   it('should send keep-alive comments every 10 seconds', () => {
-    jest.advanceTimersByTime(10000);
+    vi.advanceTimersByTime(10000);
     expect(data.filter((d) => d === ': keep-alive\n')).toHaveLength(1);
     expect(streamFlushSpy).toHaveBeenCalledTimes(1);
 
-    jest.advanceTimersByTime(10000);
+    vi.advanceTimersByTime(10000);
     expect(data.filter((d) => d === ': keep-alive\n')).toHaveLength(2);
     expect(streamFlushSpy).toHaveBeenCalledTimes(2);
   });
 
   describe('without fake timers', () => {
     beforeEach(() => {
-      jest.useFakeTimers({ doNotFake: ['nextTick'] });
+      vi.useFakeTimers({ doNotFake: ['nextTick'] });
     });
 
     it('should end the stream when the observable completes', async () => {
-      jest.useFakeTimers({ doNotFake: ['nextTick'] });
+      vi.useFakeTimers({ doNotFake: ['nextTick'] });
 
-      const endSpy = jest.fn();
+      const endSpy = vi.fn();
       stream.on('end', endSpy);
 
       source$.complete();
@@ -206,7 +209,7 @@ describe('observableIntoEventSourceStream', () => {
     });
 
     it('should end stream when signal is aborted', async () => {
-      const endSpy = jest.fn();
+      const endSpy = vi.fn();
       stream.on('end', endSpy);
 
       // Emit some data
@@ -230,7 +233,7 @@ describe('observableIntoEventSourceStream', () => {
     });
 
     afterEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
   });
 });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import _ from 'lodash';
 import sinon from 'sinon';
 import type { FillPoolResult } from './fill_pool';
@@ -17,7 +19,7 @@ import { TaskStatus } from '../task';
 import type { TaskManagerRunner } from '../task_running/task_runner';
 import type { ClaimOwnershipResult } from '../queries/task_claiming';
 
-jest.mock('../task_running/task_runner');
+vi.mock('../task_running/task_runner');
 
 describe('fillPool', () => {
   function mockFetchAvailableTasks(

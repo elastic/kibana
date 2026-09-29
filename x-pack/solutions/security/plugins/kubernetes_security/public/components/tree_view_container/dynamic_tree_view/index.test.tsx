@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import type { AppContextTestRender } from '../../../test';
@@ -30,7 +32,7 @@ describe('DynamicTreeView component', () => {
   } as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedContext = createAppRootMockRenderer();
     mockedApi = mockedContext.coreStart.http.get;
     mockedApi.mockResolvedValue(clusterResponseMock);
@@ -123,7 +125,7 @@ describe('DynamicTreeView component', () => {
     });
 
     it('should trigger a callback when tree node is clicked', async () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       render({ tree, onSelect: callback });
 
       await waitFor(() => {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Readable } from 'stream';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
@@ -26,8 +29,8 @@ describe('upload', () => {
   let ctx: FileKindsRequestHandlerContext;
   let fileService: DeeplyMockedKeys<FileServiceStart>;
 
-  let uploadContent: jest.Mock<ReturnType<File['uploadContent']>>;
-  let deleteFn: jest.Mock<ReturnType<File['delete']>>;
+  let uploadContent: Mock<ReturnType<File['uploadContent']>>;
+  let deleteFn: Mock<ReturnType<File['delete']>>;
 
   const testErrorMessage = 'stop';
   const stopFn = async () => {
@@ -36,8 +39,8 @@ describe('upload', () => {
 
   beforeEach(async () => {
     ({ ctx, fileService } = createFileKindsRequestHandlerContextMock());
-    uploadContent = jest.fn();
-    deleteFn = jest.fn(async () => {}); // We need it to be a promise, or it'll crash because of missing `.catch`
+    uploadContent = vi.fn();
+    deleteFn = vi.fn(async () => {}); // We need it to be a promise, or it'll crash because of missing `.catch`
     fileService.getById.mockResolvedValueOnce({
       id: 'test',
       data: { size: 1, fileKind: 'test' },

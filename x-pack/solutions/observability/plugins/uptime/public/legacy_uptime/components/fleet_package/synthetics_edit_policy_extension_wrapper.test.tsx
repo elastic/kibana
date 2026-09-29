@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import 'jest-canvas-mock';
 
 import React from 'react';
@@ -13,19 +15,25 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { SyntheticsPolicyEditExtensionWrapper } from './synthetics_policy_edit_extension_wrapper';
 
 // ensures that fields appropriately match to their label
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
-  htmlIdGenerator: () => () => `id-${Math.random()}`,
-}));
+vi.mock('@elastic/eui/lib/services/accessibility/html_id_generator', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui/lib/services/accessibility/html_id_generator')),
+      htmlIdGenerator: () => () => `id-${Math.random()}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // ensures that fields appropriately match to their label
-jest.mock('@elastic/eui/lib/services/accessibility', () => ({
-  ...jest.requireActual('@elastic/eui/lib/services/accessibility'),
-  useGeneratedHtmlId: () => `id-${Math.random()}`,
-}));
+vi.mock('@elastic/eui/lib/services/accessibility', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui/lib/services/accessibility')),
+      useGeneratedHtmlId: () => `id-${Math.random()}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
+vi.mock('@kbn/code-editor', async () => {
+  const original = (await vi.importActual('@kbn/code-editor'));
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -340,7 +348,7 @@ const defaultCurrentPolicy: any = {
 };
 
 describe('<SyntheticsPolicyEditExtension />', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const WrappedComponent = ({ policy = defaultCurrentPolicy, newPolicy = defaultNewPolicy }) => {
     return (
       <SyntheticsPolicyEditExtensionWrapper

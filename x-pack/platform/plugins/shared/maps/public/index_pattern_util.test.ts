@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-jest.mock('./kibana_services', () => ({}));
-jest.mock('./licensed_features', () => ({}));
+import { vi } from 'vitest';
+
+vi.mock('./kibana_services', () => {
+      const mocked = {};
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./licensed_features', () => {
+      const mocked = {};
+      return { ...mocked, default: mocked };
+    });
 
 import {
   getSourceFields,

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
@@ -30,19 +33,25 @@ const metadata = (workflow: Record<string, unknown>) =>
   extractWorkflowMetadata(workflow as Partial<WorkflowYaml>);
 
 // Mock parseWorkflowYamlForAutocomplete for extractStepInfoFromWorkflowYaml tests
-jest.mock('@kbn/workflows-yaml', () => ({
-  parseWorkflowYamlForAutocomplete: jest.fn(),
-}));
+vi.mock('@kbn/workflows-yaml', () => {
+      const mocked = {
+      parseWorkflowYamlForAutocomplete: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Format-shape coverage of `inputs` is owned by `getInputsFromDefinition` unit
 // tests. We mock the helper here so tests can drive `inputCount` without caring
 // about the workflow's input format.
-jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
-  ...jest.requireActual('@kbn/workflows/spec/lib/field_conversion'),
-  getInputsFromDefinition: jest.fn(),
-}));
+vi.mock('@kbn/workflows/spec/lib/field_conversion', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows/spec/lib/field_conversion')),
+      getInputsFromDefinition: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetInputsFromDefinition = getInputsFromDefinition as jest.MockedFunction<
+const mockGetInputsFromDefinition = getInputsFromDefinition as MockedFunction<
   typeof getInputsFromDefinition
 >;
 
@@ -50,8 +59,8 @@ const setInputsSchema = (schema: JsonModelSchemaType | undefined) => {
   mockGetInputsFromDefinition.mockReturnValue(schema);
 };
 
-const { parseWorkflowYamlForAutocomplete } = jest.requireMock('@kbn/workflows-yaml') as {
-  parseWorkflowYamlForAutocomplete: jest.Mock;
+const { parseWorkflowYamlForAutocomplete } = (await vi.importMock('@kbn/workflows-yaml')) as {
+  parseWorkflowYamlForAutocomplete: Mock;
 };
 
 /** Runtime triggers can include registered custom trigger ids (e.g. cases.updated). */
@@ -695,7 +704,7 @@ describe('extractWorkflowMetadata', () => {
 
 describe('extractStepInfoFromWorkflowYaml', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns null for null yaml', () => {

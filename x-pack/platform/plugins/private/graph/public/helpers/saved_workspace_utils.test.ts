@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { GraphWorkspaceSavedObject } from '../types';
@@ -31,7 +33,7 @@ describe('saved_workspace_utils', () => {
         {
           ...core,
           contentClient: {
-            create: jest.fn().mockReturnValue(Promise.resolve({ item: { id: '456' } })),
+            create: vi.fn().mockReturnValue(Promise.resolve({ item: { id: '456' } })),
           } as unknown as ContentClient,
         }
       );

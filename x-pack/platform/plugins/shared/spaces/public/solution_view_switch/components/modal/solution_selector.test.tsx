@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,7 +19,7 @@ import { SolutionSelector } from './solution_selector';
 describe('SolutionSelector', () => {
   test('renders options and calls onSolutionChange', async () => {
     const user = userEvent.setup();
-    const onSolutionChange = jest.fn();
+    const onSolutionChange = vi.fn();
 
     renderWithI18n(<SolutionSelector selectedSolution="es" onSolutionChange={onSolutionChange} />);
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
@@ -69,10 +72,10 @@ describe('set attacks assignees', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
   let ruleDataClient: RuleDataClientMock;
   let telemetrySenderMock: ITelemetryEventsSender;
-  let reportEBT: jest.Mock;
+  let reportEBT: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
@@ -80,7 +83,7 @@ describe('set attacks assignees', () => {
     );
     ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
 
-    reportEBT = jest.fn();
+    reportEBT = vi.fn();
     telemetrySenderMock = {
       ...createMockTelemetryEventsSender(),
       reportEBT,
@@ -90,8 +93,8 @@ describe('set attacks assignees', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('update_related_alerts: false (attacks only)', () => {
@@ -329,15 +332,15 @@ describe('set attacks assignees', () => {
 
   describe('workflow trigger emission', () => {
     let mockEventBus: {
-      emitAttackAssigneesChanged: jest.Mock;
-      emitAlertAssigneesChanged: jest.Mock;
+      emitAttackAssigneesChanged: Mock;
+      emitAlertAssigneesChanged: Mock;
     };
 
     beforeEach(() => {
       server = serverMock.create();
       mockEventBus = {
-        emitAttackAssigneesChanged: jest.fn(),
-        emitAlertAssigneesChanged: jest.fn(),
+        emitAttackAssigneesChanged: vi.fn(),
+        emitAlertAssigneesChanged: vi.fn(),
       };
       setAttacksAssigneesRoute(
         server.router,

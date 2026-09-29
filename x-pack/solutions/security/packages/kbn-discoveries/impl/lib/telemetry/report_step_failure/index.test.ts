@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { AttackDiscoveryError } from '../../errors/attack_discovery_error';
@@ -315,7 +317,7 @@ describe('classifyErrorCategory', () => {
 
 describe('reportStepFailure', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('reports a step failure event with all fields', () => {

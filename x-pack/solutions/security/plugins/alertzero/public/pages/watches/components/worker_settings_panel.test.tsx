@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -49,14 +51,14 @@ const renderPanel = (workflowId: string | null, isAccordion: boolean) => {
         worker={createWorker(workflowId)}
         isAccordion={isAccordion}
         isExpanded
-        onToggle={jest.fn()}
+        onToggle={vi.fn()}
         enabled
         settings={createWorker(workflowId).settings}
         settingsLocked={false}
         isSaving={false}
         canWrite
-        onEnabledChange={jest.fn()}
-        onSettingsChange={jest.fn()}
+        onEnabledChange={vi.fn()}
+        onSettingsChange={vi.fn()}
       />
     </KibanaContextProvider>
   );

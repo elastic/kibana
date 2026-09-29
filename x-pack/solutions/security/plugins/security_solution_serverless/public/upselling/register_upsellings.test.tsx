@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerUpsellings } from './register_upsellings';
 import { upsellingMessages, upsellingPages, upsellingSections } from './upsellings';
 import { ProductLine, ProductTier } from '../../common/product';
@@ -15,23 +17,26 @@ import type { UpsellingService } from '@kbn/security-solution-upselling/service'
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import { of } from 'rxjs';
 
-const mockGetEnabledProductFeatures = jest.fn();
-const mockGetRequiredProductTypesForFeature = jest.fn();
-jest.mock('../../common/pli/pli_features', () => ({
-  getEnabledProductFeatures: () => mockGetEnabledProductFeatures(),
-  getRequiredProductTypesForFeature: () => mockGetRequiredProductTypesForFeature(),
-}));
+const mockGetEnabledProductFeatures = vi.fn();
+const mockGetRequiredProductTypesForFeature = vi.fn();
+vi.mock('../../common/pli/pli_features', () => {
+      const mocked = {
+      getEnabledProductFeatures: () => mockGetEnabledProductFeatures(),
+      getRequiredProductTypesForFeature: () => mockGetRequiredProductTypesForFeature(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const setPages = jest.fn();
-const setSections = jest.fn();
-const setMessages = jest.fn();
+const setPages = vi.fn();
+const setSections = vi.fn();
+const setMessages = vi.fn();
 const upselling = {
   setPages,
   setSections,
   setMessages,
   sections$: of([]),
 } as unknown as UpsellingService;
-mockServices.securitySolution.getUpselling = jest.fn(() => upselling);
+mockServices.securitySolution.getUpselling = vi.fn(() => upselling);
 
 const allProductTypes: SecurityProductTypes = [
   { product_line: ProductLine.security, product_tier: ProductTier.complete },
@@ -41,7 +46,7 @@ const allProductTypes: SecurityProductTypes = [
 
 describe('registerUpsellings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should not register anything when all PLIs features are enabled', () => {

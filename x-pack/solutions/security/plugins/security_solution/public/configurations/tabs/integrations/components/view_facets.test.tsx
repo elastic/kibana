@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { IntegrationsFacets } from '../../../constants';
@@ -11,21 +14,24 @@ import { IntegrationViewFacets, ALL, INSTALLED } from './view_facets';
 import { useNavigation } from '../../../../common/lib/kibana';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useNavigation: jest.fn(),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useNavigation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('IntegrationViewFacets', () => {
-  const mockNavigateTo = jest.fn();
+  const mockNavigateTo = vi.fn();
 
   beforeEach(() => {
-    (useNavigation as jest.Mock).mockReturnValue({
+    (useNavigation as Mock).mockReturnValue({
       navigateTo: mockNavigateTo,
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const defaultProps = {

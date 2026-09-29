@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ConstantComponent, ObjectComponent, type AutocompleteComponent } from './components';
 import { compileBodyDescription } from './body_completer';
 import type { AutocompleteMatch } from './components/autocomplete_component';
@@ -99,7 +101,7 @@ describe('ScopeResolver fallback rules', () => {
 
     const globalOpen = new ConstantComponent('{');
     const globalTerm = new ConstantComponent('global_term', globalOpen);
-    const globalGetTerms = jest.spyOn(globalTerm, 'getTerms');
+    const globalGetTerms = vi.spyOn(globalTerm, 'getTerms');
     const context: TestContext = {
       endpointComponentResolver: () => [linkedObject],
       globalComponentResolver: (term) => (term === 'query' ? [globalOpen] : null),

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, within } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
@@ -160,7 +162,7 @@ describe('CustomTimeRangePanel', () => {
 
   describe('apply', () => {
     it('applies the typed absolute range as ISO bounds', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderCustomTimeRangePanel({ defaultValue: '2024-01-01 to 2024-02-01', onChange });
       openCustomPanel();
 
@@ -282,7 +284,7 @@ describe('CustomTimeRangePanel', () => {
     });
 
     it('calls onPresetSave with the correct bounds and label when Apply is clicked', () => {
-      const onPresetSave = jest.fn();
+      const onPresetSave = vi.fn();
       renderCustomTimeRangePanel({ onPresetSave });
       openCustomPanel();
 

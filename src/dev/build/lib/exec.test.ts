@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import Path from 'path';
 
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
@@ -28,23 +31,26 @@ expect.addSnapshotSerializer(
   )
 );
 
-jest.mock('./build', () => ({
-  Build: jest.fn().mockImplementation(() => ({
-    getBufferLogs: jest.fn().mockReturnValue(true),
-    getBuildDesc: jest.fn().mockReturnValue('test-build'),
-  })),
-}));
+vi.mock('./build', () => {
+      const mocked = {
+      Build: vi.fn().mockImplementation(() => ({
+        getBufferLogs: vi.fn().mockReturnValue(true),
+        getBuildDesc: vi.fn().mockReturnValue('test-build'),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const config = getMockConfig();
 
 describe('exec', () => {
-  let mockBuild: jest.Mocked<Build>;
+  let mockBuild: Mocked<Build>;
 
   beforeEach(() => {
     testWriter.messages.length = 0;
 
-    jest.clearAllMocks();
-    mockBuild = new Build(config, true) as jest.Mocked<Build>;
+    vi.clearAllMocks();
+    mockBuild = new Build(config, true) as Mocked<Build>;
   });
 
   it('executes a command, logs the command, and logs the output', async () => {

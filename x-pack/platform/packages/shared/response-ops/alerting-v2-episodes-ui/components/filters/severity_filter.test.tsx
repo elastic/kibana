@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AlertEpisodesSeverityFilter } from './severity_filter';
@@ -26,7 +28,7 @@ const renderFilter = (
     <EpisodeDataSourceProvider dataSource={dataSource}>
       <AlertEpisodesSeverityFilter
         selectedSeverities={null}
-        onSeveritiesChange={jest.fn()}
+        onSeveritiesChange={vi.fn()}
         data-test-subj="test-severity-filter"
         {...props}
       />
@@ -36,7 +38,7 @@ const renderFilter = (
 
 describe('AlertEpisodesSeverityFilter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the filter button with correct label', () => {
@@ -60,7 +62,7 @@ describe('AlertEpisodesSeverityFilter', () => {
   });
 
   it('emits extension severity values when selected', () => {
-    const onSeveritiesChange = jest.fn();
+    const onSeveritiesChange = vi.fn();
     renderFilter({ onSeveritiesChange }, true);
     fireEvent.click(screen.getByTestId('test-severity-filter-button'));
     fireEvent.click(screen.getByTestId('test-severity-filter-popover-option-warning'));

@@ -5,28 +5,39 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { ListActionPoliciesPage } from './list_action_policies_page';
 
-jest.mock('../../application/breadcrumb_context', () => ({
-  useSetBreadcrumbs: () => jest.fn(),
-}));
+vi.mock('../../application/breadcrumb_context', () => {
+      const mocked = {
+      useSetBreadcrumbs: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'chrome') {
-      return { docTitle: { change: jest.fn() }, setBreadcrumbs: jest.fn() };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (token === 'chrome') {
+          return { docTitle: { change: vi.fn() }, setBreadcrumbs: vi.fn() };
+        }
+        return {};
+      },
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/action_policies_table', () => ({
-  ActionPoliciesTable: () => <div data-test-subj="mockedActionPoliciesTable" />,
-}));
+vi.mock('./components/action_policies_table', () => {
+      const mocked = {
+      ActionPoliciesTable: () => <div data-test-subj="mockedActionPoliciesTable" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderPage = () =>
   render(

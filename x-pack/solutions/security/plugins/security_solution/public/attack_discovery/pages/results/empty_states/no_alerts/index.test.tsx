@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -13,7 +15,7 @@ import { ATTACK_DISCOVERY_ONLY, LEARN_MORE, NO_ALERTS_TO_ANALYZE } from './trans
 
 describe('NoAlerts', () => {
   beforeEach(() => {
-    render(<NoAlerts isDisabled={false} isLoading={false} onGenerate={jest.fn()} />);
+    render(<NoAlerts isDisabled={false} isLoading={false} onGenerate={vi.fn()} />);
   });
 
   it('renders the avatar', () => {

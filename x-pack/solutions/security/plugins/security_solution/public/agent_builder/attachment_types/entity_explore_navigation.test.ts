@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
@@ -274,13 +277,13 @@ describe('entity_explore_navigation', () => {
     const EA_HOME_PATH = '/app/security/entity_analytics_home_page';
     const OTHER_PATH = '/app/security/alerts';
 
-    const buildApplicationMock = (): jest.Mocked<ApplicationStart> =>
+    const buildApplicationMock = (): Mocked<ApplicationStart> =>
       ({
-        navigateToApp: jest.fn(),
-      } as unknown as jest.Mocked<ApplicationStart>);
+        navigateToApp: vi.fn(),
+      } as unknown as Mocked<ApplicationStart>);
 
-    const buildSearchSessionMock = (): jest.Mocked<Pick<ISessionService, 'clear'>> => ({
-      clear: jest.fn(),
+    const buildSearchSessionMock = (): Mocked<Pick<ISessionService, 'clear'>> => ({
+      clear: vi.fn(),
     });
 
     const buildChromeMock = (sidebarAppId: string | null = 'agentBuilder') =>
@@ -288,11 +291,11 @@ describe('entity_explore_navigation', () => {
         sidebar: { getCurrentAppId: () => sidebarAppId },
       } as never);
 
-    const buildAgentBuilderNavigationMock = (): jest.Mocked<
+    const buildAgentBuilderNavigationMock = (): Mocked<
       Pick<AgentBuilderPluginStart, 'toggleChat' | 'openChat'>
     > => ({
-      toggleChat: jest.fn(),
-      openChat: jest.fn(),
+      toggleChat: vi.fn(),
+      openChat: vi.fn(),
     });
 
     beforeEach(() => {
@@ -506,11 +509,11 @@ describe('entity_explore_navigation', () => {
         });
 
         afterEach(() => {
-          jest.useRealTimers();
+          vi.useRealTimers();
         });
 
         it('opens chat via agentBuilder.openChat with sessionTag: security and the stored agentId', () => {
-          jest.useFakeTimers();
+          vi.useFakeTimers();
           const application = buildApplicationMock();
           const agentBuilder = buildAgentBuilderNavigationMock();
           const storedAgentId = 'my-agent';
@@ -522,7 +525,7 @@ describe('entity_explore_navigation', () => {
             agentBuilder: agentBuilder as unknown as AgentBuilderPluginStart,
           });
 
-          jest.runAllTimers();
+          vi.runAllTimers();
 
           expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
           expect(agentBuilder.openChat).toHaveBeenCalledWith({

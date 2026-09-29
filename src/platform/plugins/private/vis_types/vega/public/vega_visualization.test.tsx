@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import 'jest-canvas-mock';
 import { render, screen } from '@testing-library/react';
 
@@ -27,9 +29,12 @@ import type { VegaVisualizationDependencies } from './plugin';
 import React from 'react';
 import { TimeCache } from './data_model/time_cache';
 
-jest.mock('./default_spec', () => ({
-  getDefaultSpec: () => jest.requireActual('./test_utils/default.spec.json'),
-}));
+vi.mock('./default_spec', () => {
+      const mocked = {
+      getDefaultSpec: async () => (await vi.importActual('./test_utils/default.spec.json')),
+    };
+      return { ...mocked, default: mocked };
+    });
 const theme = { darkMode: false, name: 'borealis' };
 
 describe('VegaVisualizations', () => {
@@ -52,13 +57,13 @@ describe('VegaVisualizations', () => {
     mockedHeightValue = height;
 
     // rtl does not update client dimensions on element, see https://github.com/testing-library/react-testing-library/issues/353
-    jest
+    vi
       .spyOn(Element.prototype, 'clientHeight', 'get')
       .mockImplementation(() => mockedHeightValue);
-    jest.spyOn(Element.prototype, 'clientWidth', 'get').mockImplementation(() => mockedWidthValue);
+    vi.spyOn(Element.prototype, 'clientWidth', 'get').mockImplementation(() => mockedWidthValue);
   };
 
-  const mockGetServiceSettings = jest.fn() as any;
+  const mockGetServiceSettings = vi.fn() as any;
 
   beforeEach(() => {
     setInjectedVars({
@@ -86,7 +91,7 @@ describe('VegaVisualizations', () => {
     test('should show vegalite graph and update on resize (may fail in dev env)', async () => {
       let vegaVis: InstanceType<VegaVisType>;
       try {
-        vegaVis = new VegaVisualization(domNode, jest.fn());
+        vegaVis = new VegaVisualization(domNode, vi.fn());
 
         const vegaParser = new VegaParser(
           JSON.stringify(vegaliteGraph),
@@ -119,7 +124,7 @@ describe('VegaVisualizations', () => {
     test('should show vega graph (may fail in dev env)', async () => {
       let vegaVis;
       try {
-        vegaVis = new VegaVisualization(domNode, jest.fn());
+        vegaVis = new VegaVisualization(domNode, vi.fn());
 
         const vegaParser = new VegaParser(
           JSON.stringify(vegaGraph),

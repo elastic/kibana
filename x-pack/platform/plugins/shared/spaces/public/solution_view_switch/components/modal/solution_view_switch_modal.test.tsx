@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -16,8 +18,8 @@ import { SolutionViewSwitchModal } from './solution_view_switch_modal';
 describe('SolutionViewSwitchModal', () => {
   test('calls onSwitch with currentSolution by default', async () => {
     const user = userEvent.setup();
-    const onClose = jest.fn();
-    const onSwitch = jest.fn();
+    const onClose = vi.fn();
+    const onSwitch = vi.fn();
 
     renderWithI18n(
       <SolutionViewSwitchModal

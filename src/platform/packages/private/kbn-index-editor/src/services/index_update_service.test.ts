@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { BehaviorSubject } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -26,11 +29,11 @@ import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { LOOKUP_INDEX_RECREATE_ROUTE } from '@kbn/esql-types';
 
-jest.mock('@kbn/esql-utils', () => {
-  const actual = jest.requireActual('@kbn/esql-utils');
+vi.mock('@kbn/esql-utils', async () => {
+  const actual = (await vi.importActual('@kbn/esql-utils'));
   return {
     ...actual,
-    getESQLAdHocDataview: jest.fn(),
+    getESQLAdHocDataview: vi.fn(),
   };
 });
 
@@ -54,7 +57,7 @@ describe('IndexUpdateService', () => {
       'esql_hover'
     );
 
-    (getESQLAdHocDataview as jest.Mock).mockResolvedValue({
+    (getESQLAdHocDataview as Mock).mockResolvedValue({
       fields: {
         getByName: () => {},
         create: () => ({}),
@@ -67,7 +70,7 @@ describe('IndexUpdateService', () => {
 
   afterEach(() => {
     service.destroy();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('ESQL query', () => {
@@ -198,12 +201,12 @@ describe('IndexUpdateService', () => {
 
   describe('flush operations', () => {
     it('should call telemetry on successful flush', async () => {
-      (http.post as jest.Mock).mockResolvedValue({
+      (http.post as Mock).mockResolvedValue({
         errors: false,
         items: [],
         took: 0,
       } satisfies BulkResponse);
-      const telemetrySpy = jest.spyOn(indexEditorTelemetryService, 'trackSaveSubmitted');
+      const telemetrySpy = vi.spyOn(indexEditorTelemetryService, 'trackSaveSubmitted');
 
       service.setIndexName('my-index');
       service.setIndexCreated(true);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
@@ -148,7 +150,7 @@ describe('Query roles', () => {
       const versionedRouterMock = mockRouteDefinitionParams.router
         .versioned as MockedVersionedRouter;
       mockRouteDefinitionParams.authz.applicationName = application;
-      mockRouteDefinitionParams.getFeatures = jest.fn().mockResolvedValue(features);
+      mockRouteDefinitionParams.getFeatures = vi.fn().mockResolvedValue(features);
       mockRouteDefinitionParams.subFeaturePrivilegeIterator =
         featuresPluginMock.createSetup().subFeaturePrivilegeIterator;
 
@@ -160,7 +162,7 @@ describe('Query roles', () => {
 
       const mockCoreContext = coreMock.createRequestHandlerContext();
       const mockLicensingContext = {
-        license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
+        license: { check: vi.fn().mockReturnValue(licenseCheckResult) },
       } as any;
       const mockContext = coreMock.createCustomRequestHandlerContext({
         core: mockCoreContext,

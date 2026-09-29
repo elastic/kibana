@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -13,9 +15,12 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { HostsPage } from '.';
 import { hostsTitle } from '../../../translations';
 
-jest.mock('@kbn/core/public', () => ({
-  APP_WRAPPER_CLASS: 'kbnAppWrapper',
-}));
+vi.mock('@kbn/core/public', () => {
+      const mocked = {
+      APP_WRAPPER_CLASS: 'kbnAppWrapper',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type MockFetchStatus = 'loading' | 'success' | 'failure' | 'not_initiated' | 'pending';
 
@@ -24,94 +29,127 @@ const mockFetcherState: { hasData: boolean; status: MockFetchStatus } = {
   status: 'success',
 };
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useTrackPageview: jest.fn(),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useTrackPageview: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_metrics_breadcrumbs', () => ({
-  useMetricsBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../../hooks/use_metrics_breadcrumbs', () => {
+      const mocked = {
+      useMetricsBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetcher', () => ({
-  FETCH_STATUS: {
-    LOADING: 'loading',
-    SUCCESS: 'success',
-    FAILURE: 'failure',
-    NOT_INITIATED: 'not_initiated',
-    PENDING: 'pending',
-  },
-  isPending: (status: string) =>
-    status === 'loading' || status === 'not_initiated' || status === 'pending',
-  isSuccess: (status: string) => status === 'success',
-  useFetcher: () => ({
-    data: mockFetcherState.status === 'failure' ? undefined : { hasData: mockFetcherState.hasData },
-    status: mockFetcherState.status,
-  }),
-}));
-
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({
-    services: {
-      share: {
-        url: {
-          locators: {
-            get: () => ({ getRedirectUrl: () => '/app/observabilityOnboarding' }),
-          },
-        },
+vi.mock('../../../hooks/use_fetcher', () => {
+      const mocked = {
+      FETCH_STATUS: {
+        LOADING: 'loading',
+        SUCCESS: 'success',
+        FAILURE: 'failure',
+        NOT_INITIATED: 'not_initiated',
+        PENDING: 'pending',
       },
-      docLinks: { links: { observability: { guide: 'https://docs.elastic.co' } } },
-    },
-  }),
-}));
+      isPending: (status: string) =>
+        status === 'loading' || status === 'not_initiated' || status === 'pending',
+      isSuccess: (status: string) => status === 'success',
+      useFetcher: () => ({
+        data: mockFetcherState.status === 'failure' ? undefined : { hasData: mockFetcherState.hasData },
+        status: mockFetcherState.status,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/shared-ux-page-no-data', () => ({
-  NoDataPage: () => <div data-test-subj="kbnNoDataPage" />,
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibanaContextForPlugin: () => ({
+        services: {
+          share: {
+            url: {
+              locators: {
+                get: () => ({ getRedirectUrl: () => '/app/observabilityOnboarding' }),
+              },
+            },
+          },
+          docLinks: { links: { observability: { guide: 'https://docs.elastic.co' } } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/shared-ux-page-no-data', () => {
+      const mocked = {
+      NoDataPage: () => <div data-test-subj="kbnNoDataPage" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let lastInfraPageTemplateProps: { hasDataOverride?: boolean } = {};
 
-jest.mock('../../../components/shared/templates/infra_page_template', () => ({
-  InfraPageTemplate: ({
-    children,
-    hasDataOverride,
-    header,
-  }: {
-    children: React.ReactNode;
-    hasDataOverride?: boolean;
-    header?: React.ReactNode;
-  }) => {
-    lastInfraPageTemplateProps = { hasDataOverride };
-    return (
-      <div data-test-subj="infraPageTemplate">
-        {header}
-        {children}
-      </div>
-    );
-  },
-}));
+vi.mock('../../../components/shared/templates/infra_page_template', () => {
+      const mocked = {
+      InfraPageTemplate: ({
+        children,
+        hasDataOverride,
+        header,
+      }: {
+        children: React.ReactNode;
+        hasDataOverride?: boolean;
+        header?: React.ReactNode;
+      }) => {
+        lastInfraPageTemplateProps = { hasDataOverride };
+        return (
+          <div data-test-subj="infraPageTemplate">
+            {header}
+            {children}
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/hosts_container', () => ({
-  HostsContainer: () => <div data-test-subj="hostsContainer" />,
-}));
+vi.mock('./components/hosts_container', () => {
+      const mocked = {
+      HostsContainer: () => <div data-test-subj="hostsContainer" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/search_bar/search_bar', () => ({
-  SearchBar: () => <div data-test-subj="hostsSearchBar" />,
-}));
+vi.mock('./components/search_bar/search_bar', () => {
+      const mocked = {
+      SearchBar: () => <div data-test-subj="hostsSearchBar" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_unified_search', () => ({
-  UnifiedSearchProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+vi.mock('./hooks/use_unified_search', () => {
+      const mocked = {
+      UnifiedSearchProvider: ({ children }: { children: React.ReactNode }) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_hosts_metadata_provider', () => ({
-  HostsTimeRangeMetadataProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+vi.mock('./hooks/use_hosts_metadata_provider', () => {
+      const mocked = {
+      HostsTimeRangeMetadataProvider: ({ children }: { children: React.ReactNode }) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../header/use_metrics_app_header_menu', () => ({
-  useMetricsAppHeaderMenu: () => ({
-    menu: { items: [] },
-    flyouts: null,
-  }),
-}));
+vi.mock('../header/use_metrics_app_header_menu', () => {
+      const mocked = {
+      useMetricsAppHeaderMenu: () => ({
+        menu: { items: [] },
+        flyouts: null,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderHostsPage = () =>
   render(

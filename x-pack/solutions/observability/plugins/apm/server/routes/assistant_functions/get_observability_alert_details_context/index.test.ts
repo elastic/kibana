@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getAlertDetailsContextHandler } from '.';
 import { getLogRateAnalysisForAlert } from '../get_log_rate_analysis_for_alert';
 import { getLogCategories } from '../get_log_categories';
@@ -17,65 +20,65 @@ import { getRandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getExitSpanChangePoints, getServiceChangePoints } from '../get_changepoints';
 import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
 
-jest.mock('../get_log_rate_analysis_for_alert');
-jest.mock('../get_log_categories');
-jest.mock('./get_service_name_from_signals');
-jest.mock('./get_container_id_from_signals');
-jest.mock('../../../lib/helpers/get_apm_event_client');
-jest.mock('../../../lib/helpers/get_apm_alerts_client');
-jest.mock('../../../lib/helpers/get_ml_client');
-jest.mock('../../../lib/helpers/get_random_sampler');
-jest.mock('../get_apm_service_summary');
-jest.mock('../get_apm_downstream_dependencies');
-jest.mock('../get_changepoints');
-jest.mock('../get_apm_service_summary/get_anomalies');
-jest.mock('./get_apm_errors');
+vi.mock('../get_log_rate_analysis_for_alert');
+vi.mock('../get_log_categories');
+vi.mock('./get_service_name_from_signals');
+vi.mock('./get_container_id_from_signals');
+vi.mock('../../../lib/helpers/get_apm_event_client');
+vi.mock('../../../lib/helpers/get_apm_alerts_client');
+vi.mock('../../../lib/helpers/get_ml_client');
+vi.mock('../../../lib/helpers/get_random_sampler');
+vi.mock('../get_apm_service_summary');
+vi.mock('../get_apm_downstream_dependencies');
+vi.mock('../get_changepoints');
+vi.mock('../get_apm_service_summary/get_anomalies');
+vi.mock('./get_apm_errors');
 
-const mockLogRateAnalysis = jest.mocked(getLogRateAnalysisForAlert);
-const mockLogCategories = jest.mocked(getLogCategories);
-const mockGetServiceName = jest.mocked(getServiceNameFromSignals);
-const mockGetContainerId = jest.mocked(getContainerIdFromSignals);
+const mockLogRateAnalysis = vi.mocked(getLogRateAnalysisForAlert);
+const mockLogCategories = vi.mocked(getLogCategories);
+const mockGetServiceName = vi.mocked(getServiceNameFromSignals);
+const mockGetContainerId = vi.mocked(getContainerIdFromSignals);
 
 function buildMocks() {
-  (getApmEventClient as jest.Mock).mockResolvedValue({});
-  (getApmAlertsClient as jest.Mock).mockResolvedValue({});
-  (getMlClient as jest.Mock).mockResolvedValue({});
-  (getRandomSampler as jest.Mock).mockResolvedValue({});
-  (getExitSpanChangePoints as jest.Mock).mockResolvedValue([]);
-  (getServiceChangePoints as jest.Mock).mockResolvedValue([]);
-  (getAnomalies as jest.Mock).mockResolvedValue([]);
+  (getApmEventClient as Mock).mockResolvedValue({});
+  (getApmAlertsClient as Mock).mockResolvedValue({});
+  (getMlClient as Mock).mockResolvedValue({});
+  (getRandomSampler as Mock).mockResolvedValue({});
+  (getExitSpanChangePoints as Mock).mockResolvedValue([]);
+  (getServiceChangePoints as Mock).mockResolvedValue([]);
+  (getAnomalies as Mock).mockResolvedValue([]);
 
   mockLogRateAnalysis.mockResolvedValue({ logRateAnalysisType: 'spike', significantItems: [] });
   mockLogCategories.mockResolvedValue({ logCategories: [], entities: [] });
 }
 
 const mockApmCore = {
-  start: jest.fn().mockResolvedValue({}),
+  start: vi.fn().mockResolvedValue({}),
 } as any;
 
 const mockResourcePlugins = {
   observability: {
     setup: {
-      getScopedAnnotationsClient: jest.fn().mockResolvedValue(undefined),
+      getScopedAnnotationsClient: vi.fn().mockResolvedValue(undefined),
     },
   },
   alerting: {
-    start: jest.fn().mockResolvedValue({ getRulesClientWithRequest: jest.fn() }),
+    start: vi.fn().mockResolvedValue({ getRulesClientWithRequest: vi.fn() }),
   },
   ruleRegistry: {
-    start: jest.fn().mockResolvedValue({ getRacClientWithRequest: jest.fn() }),
+    start: vi.fn().mockResolvedValue({ getRacClientWithRequest: vi.fn() }),
   },
   logsDataAccess: {
-    start: jest.fn().mockResolvedValue({
+    start: vi.fn().mockResolvedValue({
       services: {
         logSourcesServiceFactory: {
-          getScopedLogSourcesService: jest.fn().mockResolvedValue({}),
+          getScopedLogSourcesService: vi.fn().mockResolvedValue({}),
         },
       },
     }),
   },
   apmDataAccess: {
-    setup: { getApmIndices: jest.fn().mockResolvedValue({}) },
+    setup: { getApmIndices: vi.fn().mockResolvedValue({}) },
   },
 } as any;
 
@@ -99,11 +102,11 @@ const baseQuery = {
   'transaction.name': undefined,
 } as any;
 
-const mockLogger = { error: jest.fn() } as any;
+const mockLogger = { error: vi.fn() } as any;
 
 describe('getAlertDetailsContextHandler', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     buildMocks();
     mockGetServiceName.mockResolvedValue(undefined);
     mockGetContainerId.mockResolvedValue(undefined);

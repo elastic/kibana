@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadRuleAggregationsWithKueryFilter } from './aggregate_kuery_filter';
 
 const http = httpServiceMock.createStartContract();
 
 describe('loadRuleAggregationsWithKueryFilter', () => {
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   test('should call aggregate API with base parameters', async () => {
     const resolvedValue = {

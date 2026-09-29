@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -14,7 +17,7 @@ import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 const mockEsClient = {
-  search: jest.fn().mockResolvedValue({}),
+  search: vi.fn().mockResolvedValue({}),
 } as unknown as ElasticsearchClient;
 
 const mockRequest = {
@@ -48,7 +51,7 @@ const validParams: AssistantToolParams = {
 
 describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be supported with valid parameters', () => {
@@ -113,7 +116,7 @@ describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
       },
     };
 
-    (mockEsClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+    (mockEsClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
     const tool = await ASSET_MISCONFIGURATIONS_TOOL.getTool(validParams);
     expect(tool).not.toBeNull();
@@ -155,7 +158,7 @@ describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
       },
     };
 
-    (mockEsClient.search as jest.Mock).mockResolvedValue(mockEmptyResponse);
+    (mockEsClient.search as Mock).mockResolvedValue(mockEmptyResponse);
 
     const tool = await ASSET_MISCONFIGURATIONS_TOOL.getTool(validParams);
     const result = await tool?.invoke({ resource_id: 'test-resource-id' });
@@ -224,12 +227,12 @@ describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
       },
     };
 
-    (mockEsClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+    (mockEsClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
     const tool = await ASSET_MISCONFIGURATIONS_TOOL.getTool(validParams);
     await tool?.invoke({ resource_id: 'test-resource-id' });
 
-    const searchCall = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+    const searchCall = (mockEsClient.search as Mock).mock.calls[0][0];
     expect(searchCall.fields).toEqual([
       { field: 'resource.name', include_unmapped: true },
       { field: 'rule.name', include_unmapped: true },
@@ -252,7 +255,7 @@ describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
       },
     };
 
-    (mockEsClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+    (mockEsClient.search as Mock).mockResolvedValue(mockSearchResponse);
 
     const tool = await ASSET_MISCONFIGURATIONS_TOOL.getTool(validParams);
     const result = await tool?.invoke({ resource_id: 'test-resource-id' });

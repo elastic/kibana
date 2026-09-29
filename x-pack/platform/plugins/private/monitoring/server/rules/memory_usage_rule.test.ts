@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { MemoryUsageRule } from './memory_usage_rule';
 import { RULE_MEMORY_USAGE } from '../../common/constants';
 import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
@@ -14,26 +17,35 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_memory_usage_node_stats', () => ({
-  fetchMemoryUsageNodeStats: jest.fn(),
-}));
-jest.mock('../lib/alerts/fetch_clusters', () => ({
-  fetchClusters: jest.fn(),
-}));
-jest.mock('../static_globals', () => ({
-  Globals: {
-    app: {
-      getLogger: () => ({ debug: jest.fn() }),
-      url: 'http://localhost:5601',
-      config: {
-        ui: {
-          ccs: { enabled: true },
-          container: { elasticsearch: { enabled: false } },
+vi.mock('../lib/alerts/fetch_memory_usage_node_stats', () => {
+      const mocked = {
+      fetchMemoryUsageNodeStats: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/alerts/fetch_clusters', () => {
+      const mocked = {
+      fetchClusters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          getLogger: () => ({ debug: vi.fn() }),
+          url: 'http://localhost:5601',
+          config: {
+            ui: {
+              ccs: { enabled: true },
+              container: { elasticsearch: { enabled: false } },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MemoryUsageRule', () => {
   it('should have defaults', () => {
@@ -84,17 +96,17 @@ describe('MemoryUsageRule', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchMemoryUsageNodeStats as jest.Mock).mockImplementation(() => {
+      (fetchMemoryUsageNodeStats as Mock).mockImplementation(() => {
         return [stat];
       });
-      (fetchClusters as jest.Mock).mockImplementation(() => {
+      (fetchClusters as Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
       });
     });
 
     afterEach(() => {
       Date = RealDate;
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('should fire action', async () => {
@@ -233,7 +245,7 @@ describe('MemoryUsageRule', () => {
     });
 
     it('should not fire actions if under threshold', async () => {
-      (fetchMemoryUsageNodeStats as jest.Mock).mockImplementation(() => {
+      (fetchMemoryUsageNodeStats as Mock).mockImplementation(() => {
         return [
           {
             ...stat,
@@ -253,7 +265,7 @@ describe('MemoryUsageRule', () => {
 
     it('should handle ccs', async () => {
       const ccs = 'testCluster';
-      (fetchMemoryUsageNodeStats as jest.Mock).mockImplementation(() => {
+      (fetchMemoryUsageNodeStats as Mock).mockImplementation(() => {
         return [
           {
             ...stat,

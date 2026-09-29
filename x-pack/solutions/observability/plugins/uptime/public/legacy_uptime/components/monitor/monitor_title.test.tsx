@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import moment from 'moment';
 import { screen } from '@testing-library/react';
@@ -15,17 +17,17 @@ import * as reactRouterDom from 'react-router-dom';
 import type { Ping } from '../../../../common/runtime_types';
 import { MonitorPageTitle } from './monitor_title';
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const originalModule = require('react-router-dom');
 
   return {
     ...originalModule,
-    useParams: jest.fn(),
+    useParams: vi.fn(),
   };
 });
 
 export function mockReactRouterDomHooks({ useParamsResponse }: { useParamsResponse: any }) {
-  jest.spyOn(reactRouterDom, 'useParams').mockReturnValue(useParamsResponse);
+  vi.spyOn(reactRouterDom, 'useParams').mockReturnValue(useParamsResponse);
 }
 
 describe('MonitorTitle component', () => {

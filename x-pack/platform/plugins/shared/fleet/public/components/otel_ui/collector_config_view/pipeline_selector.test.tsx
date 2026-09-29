@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 
@@ -17,11 +20,11 @@ import { PipelineSelector } from './pipeline_selector';
 
 describe('PipelineSelector', () => {
   let testRenderer: TestRenderer;
-  let onChange: jest.Mock;
+  let onChange: Mock;
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
-    onChange = jest.fn();
+    onChange = vi.fn();
   });
 
   const render = (pipelineIds: string[], selectedPipelineId: string = ALL_PIPELINES) =>

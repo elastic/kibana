@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { InputCheckbox, PageSelectionCheckbox } from './table_selection_checkbox';
@@ -16,8 +18,8 @@ describe('PageSelectionCheckbox', () => {
         conversationOptions={[]}
         deletedConversationsIds={[]}
         excludedIds={[]}
-        handlePageChecked={jest.fn()}
-        handlePageUnchecked={jest.fn()}
+        handlePageChecked={vi.fn()}
+        handlePageUnchecked={vi.fn()}
         isExcludedMode={false}
         totalItemCount={0}
       />
@@ -32,8 +34,8 @@ describe('PageSelectionCheckbox', () => {
     ];
     const deletedConversationsIds: string[] = [];
     const excludedIds: string[] = ['conversation2'];
-    const handlePageChecked = jest.fn();
-    const handlePageUnchecked = jest.fn();
+    const handlePageChecked = vi.fn();
+    const handlePageUnchecked = vi.fn();
     const isExcludedMode = true;
     const totalItemCount = 2;
 
@@ -59,8 +61,8 @@ describe('PageSelectionCheckbox', () => {
     ];
     const deletedConversationsIds: string[] = ['conversation2'];
     const excludedIds: string[] = ['conversation1'];
-    const handlePageChecked = jest.fn();
-    const handlePageUnchecked = jest.fn();
+    const handlePageChecked = vi.fn();
+    const handlePageUnchecked = vi.fn();
     const isExcludedMode = true;
     const totalItemCount = 2;
     const { getByTestId } = render(
@@ -86,8 +88,8 @@ describe('PageSelectionCheckbox', () => {
     ];
     const deletedConversationsIds: string[] = ['conversation1', 'conversation2'];
     const excludedIds: string[] = [];
-    const handlePageChecked = jest.fn();
-    const handlePageUnchecked = jest.fn();
+    const handlePageChecked = vi.fn();
+    const handlePageUnchecked = vi.fn();
     const isExcludedMode = false;
     const totalItemCount = 2;
     const { getByTestId } = render(
@@ -113,8 +115,8 @@ describe('PageSelectionCheckbox', () => {
     ];
     const deletedConversationsIds: string[] = ['conversation1'];
     const excludedIds: string[] = [];
-    const handlePageChecked = jest.fn();
-    const handlePageUnchecked = jest.fn();
+    const handlePageChecked = vi.fn();
+    const handlePageUnchecked = vi.fn();
     const isExcludedMode = false;
     const totalItemCount = 2;
     const { getByTestId } = render(
@@ -142,8 +144,8 @@ describe('InputCheckbox', () => {
     } as ConversationTableItem;
     const deletedConversationsIds: string[] = ['conversation2'];
     const excludedIds: string[] = ['conversation2'];
-    const handleRowChecked = jest.fn();
-    const handleRowUnChecked = jest.fn();
+    const handleRowChecked = vi.fn();
+    const handleRowUnChecked = vi.fn();
     const isExcludedMode = true;
     const totalItemCount = 1;
     const { getByTestId } = render(
@@ -169,8 +171,8 @@ describe('InputCheckbox', () => {
     } as ConversationTableItem;
     const deletedConversationsIds: string[] = ['conversation2'];
     const excludedIds: string[] = ['conversation1'];
-    const handleRowChecked = jest.fn();
-    const handleRowUnChecked = jest.fn();
+    const handleRowChecked = vi.fn();
+    const handleRowUnChecked = vi.fn();
     const isExcludedMode = true;
     const totalItemCount = 1;
     const { getByTestId } = render(
@@ -196,8 +198,8 @@ describe('InputCheckbox', () => {
     } as ConversationTableItem;
     const deletedConversationsIds: string[] = ['conversation1'];
     const excludedIds: string[] = [];
-    const handleRowChecked = jest.fn();
-    const handleRowUnChecked = jest.fn();
+    const handleRowChecked = vi.fn();
+    const handleRowUnChecked = vi.fn();
     const isExcludedMode = false;
     const totalItemCount = 1;
     const { getByTestId } = render(
@@ -223,8 +225,8 @@ describe('InputCheckbox', () => {
     } as ConversationTableItem;
     const deletedConversationsIds: string[] = [];
     const excludedIds: string[] = [];
-    const handleRowChecked = jest.fn();
-    const handleRowUnChecked = jest.fn();
+    const handleRowChecked = vi.fn();
+    const handleRowUnChecked = vi.fn();
     const isExcludedMode = false;
     const totalItemCount = 1;
     const { getByTestId } = render(

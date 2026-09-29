@@ -5,24 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { SeverityCell } from './severity_cell';
 
-jest.mock('@kbn/ml-anomaly-utils', () => ({
-  getFormattedSeverityScore: (score: number) => {
-    if (score < 1) return '< 1';
-    return Math.round(score).toString();
-  },
-  useSeverityColor: (score: number) => {
-    if (score >= 75) return '#ff0000';
-    if (score >= 50) return '#ff9900';
-    if (score >= 25) return '#ffcc00';
-    if (score >= 3) return '#a6d8ec';
-    if (score >= 0) return '#dceef7';
-    return '#ffffff';
-  },
-}));
+vi.mock('@kbn/ml-anomaly-utils', () => {
+      const mocked = {
+      getFormattedSeverityScore: (score: number) => {
+        if (score < 1) return '< 1';
+        return Math.round(score).toString();
+      },
+      useSeverityColor: (score: number) => {
+        if (score >= 75) return '#ff0000';
+        if (score >= 50) return '#ff9900';
+        if (score >= 25) return '#ffcc00';
+        if (score >= 3) return '#a6d8ec';
+        if (score >= 0) return '#dceef7';
+        return '#ffffff';
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('SeverityCell', () => {
   test('should render a single-bucket marker with rounded severity score', () => {

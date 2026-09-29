@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { editSyntheticsMonitorRoute, syncEditedMonitor } from './edit_monitor';
 import type { SavedObject } from '@kbn/core/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
@@ -16,36 +19,48 @@ import type {
 } from '../../../common/runtime_types';
 import { getRouteContextMock } from '../../mocks/route_context_mock';
 
-jest.mock('@kbn/fleet-plugin/server/services/package_policy', () => ({
-  getPackagePolicySavedObjectType: jest.fn().mockResolvedValue('fleet-package-policies'),
-}));
+vi.mock('@kbn/fleet-plugin/server/services/package_policy', () => {
+      const mocked = {
+      getPackagePolicySavedObjectType: vi.fn().mockResolvedValue('fleet-package-policies'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../telemetry/monitor_upgrade_sender', () => ({
-  sendTelemetryEvents: jest.fn(),
-  formatTelemetryUpdateEvent: jest.fn(),
-}));
+vi.mock('../telemetry/monitor_upgrade_sender', () => {
+      const mocked = {
+      sendTelemetryEvents: vi.fn(),
+      formatTelemetryUpdateEvent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Only used by editSyntheticsMonitorRoute (not syncEditedMonitor, tested below),
 // mocked here to reach the route's space-authorization check without exercising
 // the full monitor/location validation and normalization pipeline.
-jest.mock('./monitor_locations_utils', () => ({
-  assertCanPerformMonitorBulkActionInAllSpaces: jest.fn(),
-  validateMonitorPrivateLocationSpaces: jest.fn().mockReturnValue(null),
-}));
+vi.mock('./monitor_locations_utils', () => {
+      const mocked = {
+      assertCanPerformMonitorBulkActionInAllSpaces: vi.fn(),
+      validateMonitorPrivateLocationSpaces: vi.fn().mockReturnValue(null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./monitor_validation', () => {
-  const actual = jest.requireActual('./monitor_validation');
+vi.mock('./monitor_validation', async () => {
+  const actual = (await vi.importActual('./monitor_validation'));
   return {
     ...actual,
-    validateMonitor: jest.fn(),
-    normalizeAPIConfig: jest.fn(),
+    validateMonitor: vi.fn(),
+    normalizeAPIConfig: vi.fn(),
   };
 });
 
-jest.mock('./formatters/saved_object_to_monitor', () => ({
-  mergeSourceMonitor: jest.fn(),
-  mapSavedObjectToMonitor: jest.fn(),
-}));
+vi.mock('./formatters/saved_object_to_monitor', () => {
+      const mocked = {
+      mergeSourceMonitor: vi.fn(),
+      mapSavedObjectToMonitor: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('syncEditedMonitor', () => {
   const editedMonitor = {
@@ -79,11 +94,11 @@ describe('syncEditedMonitor', () => {
   } as SavedObject<EncryptedSyntheticsMonitorAttributes>;
 
   const { routeContext, syntheticsService, serverMock } = getRouteContextMock();
-  syntheticsService.editConfig = jest.fn();
-  syntheticsService.getMaintenanceWindows = jest.fn();
+  syntheticsService.editConfig = vi.fn();
+  syntheticsService.getMaintenanceWindows = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('includes the isEdit flag', async () => {
@@ -123,14 +138,14 @@ describe('syncEditedMonitor', () => {
       ],
     } as unknown as SyntheticsMonitor;
 
-    (serverMock.authSavedObjectsClient?.update as jest.Mock).mockResolvedValue({
+    (serverMock.authSavedObjectsClient?.update as Mock).mockResolvedValue({
       id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
       type: 'synthetics-monitor',
       attributes: {},
       references: [],
     });
 
-    routeContext.syntheticsMonitorClient.editMonitors = jest.fn().mockResolvedValue({
+    routeContext.syntheticsMonitorClient.editMonitors = vi.fn().mockResolvedValue({
       failedPolicyUpdates: [],
       publicSyncErrors: [],
     });
@@ -181,10 +196,10 @@ describe('syncEditedMonitor', () => {
 describe('editSyntheticsMonitorRoute', () => {
   const monitorId = '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d';
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
 
-    const { validateMonitor, normalizeAPIConfig } = jest.requireMock('./monitor_validation');
+    const { validateMonitor, normalizeAPIConfig } = (await vi.importMock('./monitor_validation'));
     normalizeAPIConfig.mockImplementation((m: Record<string, unknown>) => ({ formattedConfig: m }));
     validateMonitor.mockImplementation((m: Record<string, unknown>) => ({
       valid: true,
@@ -197,7 +212,7 @@ describe('editSyntheticsMonitorRoute', () => {
     // Drop the previous monitor's `locations` from the merge so the edit is
     // treated as a private-only, location-unchanged update - keeping this test
     // focused on space authorization instead of the location-parsing paths.
-    const { mergeSourceMonitor } = jest.requireMock('./formatters/saved_object_to_monitor');
+    const { mergeSourceMonitor } = (await vi.importMock('./formatters/saved_object_to_monitor'));
     mergeSourceMonitor.mockImplementation(
       (prevAttrs: Record<string, unknown>, patch: Record<string, unknown>) => {
         const { locations, ...restPrev } = prevAttrs;
@@ -207,9 +222,7 @@ describe('editSyntheticsMonitorRoute', () => {
   });
 
   it("authorizes the union of the monitor's previous and newly-submitted spaces, not just the new ones", async () => {
-    const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
-      './monitor_locations_utils'
-    );
+    const { assertCanPerformMonitorBulkActionInAllSpaces } = (await vi.importMock('./monitor_locations_utils'));
     const forbidden = { status: 403 };
     assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
 
@@ -220,7 +233,7 @@ describe('editSyntheticsMonitorRoute', () => {
       body: { [ConfigKey.KIBANA_SPACES]: ['space-a'] },
     } as any;
     routeContext.spaceId = 'default';
-    routeContext.monitorConfigRepository.getDecrypted = jest.fn().mockResolvedValue({
+    routeContext.monitorConfigRepository.getDecrypted = vi.fn().mockResolvedValue({
       decryptedMonitor: {
         id: monitorId,
         type: 'synthetics-monitor-multi-space',

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { type HostNodeRow, useHostsTable } from './use_hosts_table';
 import { renderHook } from '@testing-library/react';
 import type { InfraEntityMetricsItem } from '../../../../../common/http_api';
@@ -16,34 +19,34 @@ import * as useHostsTableUrlStateHooks from './use_hosts_table_url_state';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 
-jest.mock('./use_unified_search');
-jest.mock('./use_hosts_view');
-jest.mock('../../../../containers/metrics_source');
-jest.mock('../../../../hooks/use_kibana');
-jest.mock('./use_hosts_table_url_state');
-jest.mock('react-use/lib/useAsync', () => jest.fn(() => ({ value: undefined })));
+vi.mock('./use_unified_search');
+vi.mock('./use_hosts_view');
+vi.mock('../../../../containers/metrics_source');
+vi.mock('../../../../hooks/use_kibana');
+vi.mock('./use_hosts_table_url_state');
+vi.mock('react-use/lib/useAsync', () => vi.fn(() => ({ value: undefined })));
 
 const mockUseUnifiedSearchContext =
-  useUnifiedSearchHooks.useUnifiedSearchContext as jest.MockedFunction<
+  useUnifiedSearchHooks.useUnifiedSearchContext as MockedFunction<
     typeof useUnifiedSearchHooks.useUnifiedSearchContext
   >;
-const mockUseHostsViewContext = useHostsViewHooks.useHostsViewContext as jest.MockedFunction<
+const mockUseHostsViewContext = useHostsViewHooks.useHostsViewContext as MockedFunction<
   typeof useHostsViewHooks.useHostsViewContext
 >;
 const mockUseMetricsDataViewContext =
-  useMetricsDataViewHooks.useMetricsDataViewContext as jest.MockedFunction<
+  useMetricsDataViewHooks.useMetricsDataViewContext as MockedFunction<
     typeof useMetricsDataViewHooks.useMetricsDataViewContext
   >;
 
 const mockUseKibanaContextForPlugin =
-  useKibanaContextForPluginHook.useKibanaContextForPlugin as jest.MockedFunction<
+  useKibanaContextForPluginHook.useKibanaContextForPlugin as MockedFunction<
     typeof useKibanaContextForPluginHook.useKibanaContextForPlugin
   >;
 const mockUseHostsTableUrlState =
-  useHostsTableUrlStateHooks.useHostsTableUrlState as jest.MockedFunction<
+  useHostsTableUrlStateHooks.useHostsTableUrlState as MockedFunction<
     typeof useHostsTableUrlStateHooks.useHostsTableUrlState
   >;
-const setTableProperties = jest.fn();
+const setTableProperties = vi.fn();
 
 const mockHostNode: InfraEntityMetricsItem[] = [
   {
@@ -155,7 +158,7 @@ describe('useHostTable hook', () => {
       },
       error: undefined,
       loading: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as ReturnType<typeof useMetricsDataViewHooks.useMetricsDataViewContext>);
 
     mockUseKibanaContextForPlugin.mockReturnValue({

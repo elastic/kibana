@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS, AppHeader as MockAppHeaderComponent } from '@kbn/app-header';
@@ -12,37 +14,52 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { ApmMainTemplateHeaderProps } from '../../routing/templates/apm_main_template';
 import { DiagnosticsTemplate } from '.';
 
-const mockLink = jest.fn((path: string) => `/link${path}`);
+const mockLink = vi.fn((path: string) => `/link${path}`);
 
-jest.mock('../../../hooks/use_apm_router', () => ({
-  useApmRouter: () => ({ link: mockLink }),
-}));
+vi.mock('../../../hooks/use_apm_router', () => {
+      const mocked = {
+      useApmRouter: () => ({ link: mockLink }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_apm_params', () => ({
-  useApmParams: () => ({ query: { rangeFrom: 'now-15m', rangeTo: 'now' } }),
-}));
+vi.mock('../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useApmParams: () => ({ query: { rangeFrom: 'now-15m', rangeTo: 'now' } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockRoutePath = { current: '/diagnostics' };
-jest.mock('../../../hooks/use_apm_route_path', () => ({
-  useApmRoutePath: () => mockRoutePath.current,
-}));
+vi.mock('../../../hooks/use_apm_route_path', () => {
+      const mocked = {
+      useApmRoutePath: () => mockRoutePath.current,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetcher', () => ({
-  isPending: (status: string) => status === 'loading',
-}));
+vi.mock('../../../hooks/use_fetcher', () => {
+      const mocked = {
+      isPending: (status: string) => status === 'loading',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Configurable context so individual tests can toggle loading/imported state and tab statuses.
 const mockDiagnosticsContext = {
   diagnosticsBundle: undefined as unknown,
   status: 'success',
   isImported: false,
-  refetch: jest.fn(),
-  setImportedDiagnosticsBundle: jest.fn(),
+  refetch: vi.fn(),
+  setImportedDiagnosticsBundle: vi.fn(),
 };
 
-jest.mock('./context/use_diagnostics', () => ({
-  useDiagnosticsContext: () => mockDiagnosticsContext,
-}));
+vi.mock('./context/use_diagnostics', () => {
+      const mocked = {
+      useDiagnosticsContext: () => mockDiagnosticsContext,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Tab status helpers are configurable per test; tab components are stubbed out to keep the
 // module graph light (only the template itself is under test).
@@ -54,48 +71,84 @@ const mockTabStatuses = {
   indicesOk: true,
 };
 
-jest.mock('./summary_tab', () => ({
-  DiagnosticsSummary: () => null,
-  getIsCrossCluster: () => mockTabStatuses.isCrossCluster,
-}));
-jest.mock('./index_pattern_settings_tab', () => ({
-  DiagnosticsIndexPatternSettings: () => null,
-  getIsIndexPatternTabOk: () => mockTabStatuses.indexPatternOk,
-}));
-jest.mock('./summary_tab/index_templates_status', () => ({
-  getIsIndexTemplateOk: () => mockTabStatuses.indexTemplateOk,
-}));
-jest.mock('./summary_tab/data_streams_status', () => ({
-  getIsDataStreamTabOk: () => mockTabStatuses.dataStreamOk,
-}));
-jest.mock('./summary_tab/indicies_status', () => ({
-  getIsIndicesTabOk: () => mockTabStatuses.indicesOk,
-}));
-jest.mock('./index_templates_tab', () => ({ DiagnosticsIndexTemplates: () => null }));
-jest.mock('./indices_tab', () => ({ DiagnosticsIndices: () => null }));
-jest.mock('./data_stream_tab', () => ({ DiagnosticsDataStreams: () => null }));
-jest.mock('./import_export_tab', () => ({ DiagnosticsImportExport: () => null }));
-jest.mock('./apm_documents_tab', () => ({ DiagnosticsApmDocuments: () => null }));
-jest.mock('./context/diagnostics_context', () => ({
-  DiagnosticsContextProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+vi.mock('./summary_tab', () => {
+      const mocked = {
+      DiagnosticsSummary: () => null,
+      getIsCrossCluster: () => mockTabStatuses.isCrossCluster,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./index_pattern_settings_tab', () => {
+      const mocked = {
+      DiagnosticsIndexPatternSettings: () => null,
+      getIsIndexPatternTabOk: () => mockTabStatuses.indexPatternOk,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./summary_tab/index_templates_status', () => {
+      const mocked = {
+      getIsIndexTemplateOk: () => mockTabStatuses.indexTemplateOk,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./summary_tab/data_streams_status', () => {
+      const mocked = {
+      getIsDataStreamTabOk: () => mockTabStatuses.dataStreamOk,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./summary_tab/indicies_status', () => {
+      const mocked = {
+      getIsIndicesTabOk: () => mockTabStatuses.indicesOk,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./index_templates_tab', () => {
+      const mocked = { DiagnosticsIndexTemplates: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./indices_tab', () => {
+      const mocked = { DiagnosticsIndices: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./data_stream_tab', () => {
+      const mocked = { DiagnosticsDataStreams: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./import_export_tab', () => {
+      const mocked = { DiagnosticsImportExport: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./apm_documents_tab', () => {
+      const mocked = { DiagnosticsApmDocuments: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./context/diagnostics_context', () => {
+      const mocked = {
+      DiagnosticsContextProvider: ({ children }: { children: React.ReactNode }) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Render ApmMainTemplate as a thin wrapper that passes `header` straight into a real AppHeader
 // (so we exercise the full tab/menu-building logic without the template's own dependencies).
-jest.mock('../../routing/templates/apm_main_template', () => ({
-  ApmMainTemplate: ({
-    header,
-    children,
-  }: {
-    header?: ApmMainTemplateHeaderProps;
-    children?: React.ReactNode;
-  }) => (
-    <>
-      {header ? <MockAppHeaderComponent {...header} /> : null}
-      {children}
-    </>
-  ),
-}));
+vi.mock('../../routing/templates/apm_main_template', () => {
+      const mocked = {
+      ApmMainTemplate: ({
+        header,
+        children,
+      }: {
+        header?: ApmMainTemplateHeaderProps;
+        children?: React.ReactNode;
+      }) => (
+        <>
+          {header ? <MockAppHeaderComponent {...header} /> : null}
+          {children}
+        </>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ALL_TAB_TEST_SUBJECTS = [
   'summary-tab',
@@ -119,7 +172,7 @@ function renderTemplate() {
 
 describe('DiagnosticsTemplate', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockRoutePath.current = '/diagnostics';
     mockDiagnosticsContext.diagnosticsBundle = undefined;
     mockDiagnosticsContext.status = 'success';

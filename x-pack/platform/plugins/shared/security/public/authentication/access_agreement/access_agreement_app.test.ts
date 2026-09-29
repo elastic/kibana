@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-jest.mock('./access_agreement_page');
+import { vi } from 'vitest';
+
+vi.mock('./access_agreement_page');
 
 import type { AppMount } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
@@ -47,14 +49,14 @@ describe('accessAgreementApp', () => {
     const appMountParams = {
       element: document.createElement('div'),
       appBasePath: '',
-      onAppLeave: jest.fn(),
-      setHeaderActionMenu: jest.fn(),
+      onAppLeave: vi.fn(),
+      setHeaderActionMenu: vi.fn(),
       history: scopedHistoryMock.create(),
       theme$: themeServiceMock.createTheme$(),
     };
     await (mount as AppMount)(appMountParams);
 
-    const mockRenderApp = jest.requireMock('./access_agreement_page').renderAccessAgreementPage;
+    const mockRenderApp = (await vi.importMock('./access_agreement_page')).renderAccessAgreementPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(
       coreStartMock,

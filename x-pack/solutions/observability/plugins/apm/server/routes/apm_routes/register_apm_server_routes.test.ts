@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type {
   RouteParamsRT,
   ServerRoute,
@@ -29,10 +31,10 @@ const disabledAuthz = {
 type RegisterRouteDependencies = Parameters<typeof registerRoutes>[0];
 
 const getRegisterRouteDependencies = () => {
-  const get = jest.fn();
-  const post = jest.fn();
-  const put = jest.fn();
-  const createRouter = jest.fn().mockReturnValue({
+  const get = vi.fn();
+  const post = vi.fn();
+  const put = vi.fn();
+  const createRouter = vi.fn().mockReturnValue({
     get,
     post,
     put,
@@ -45,7 +47,7 @@ const getRegisterRouteDependencies = () => {
   } as unknown as CoreSetup;
 
   const logger = {
-    error: jest.fn(),
+    error: vi.fn(),
   } as unknown as Logger;
 
   return {
@@ -103,8 +105,8 @@ const initApi = (
   });
 
   const responseMock = {
-    ok: jest.fn(),
-    custom: jest.fn(),
+    ok: vi.fn(),
+    custom: vi.fn(),
   };
 
   const simulateRequest = (request: {
@@ -284,7 +286,7 @@ describe('createApi', () => {
     });
 
     it('passes params straight through to the handler without re-decoding them', async () => {
-      const handlerMock = jest.fn().mockResolvedValue({});
+      const handlerMock = vi.fn().mockResolvedValue({});
       const {
         simulateRequest,
         mocks: { response },
@@ -318,7 +320,7 @@ describe('createApi', () => {
     });
 
     it('defaults `_inspect` to false when omitted', async () => {
-      const handlerMock = jest.fn().mockResolvedValue({});
+      const handlerMock = vi.fn().mockResolvedValue({});
       const {
         simulateRequest,
         mocks: { response },

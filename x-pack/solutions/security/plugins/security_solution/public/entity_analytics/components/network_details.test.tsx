@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -20,24 +22,24 @@ import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../flyout_v2/use_flyout_api.mock';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 
-jest.mock('../../common/hooks/use_is_new_flyout_enabled');
-jest.mock('../../flyout_v2/use_flyout_api');
+vi.mock('../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../../flyout_v2/use_flyout_api');
 
-const mockOpenFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout');
+const mockOpenFlyout = vi.fn();
+vi.mock('@kbn/expandable-flyout');
 
 describe('NetworkDetails', () => {
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+    vi.clearAllMocks();
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
     });
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   it('renders the ip address', () => {
@@ -51,7 +53,7 @@ describe('NetworkDetails', () => {
   });
 
   it('when new flyout is disabled, opens the legacy network expandable flyout', async () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
 
     render(
       <TestProviders>
@@ -74,7 +76,7 @@ describe('NetworkDetails', () => {
   });
 
   it('when new flyout is enabled, opens the new network flyout', async () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
     render(
       <TestProviders>

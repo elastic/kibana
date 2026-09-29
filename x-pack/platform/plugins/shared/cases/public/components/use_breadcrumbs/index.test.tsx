@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ReactNode } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react';
@@ -12,15 +14,15 @@ import { TestProviders } from '../../common/mock';
 import { useCasesBreadcrumbs, useCasesTitleBreadcrumbs } from '.';
 import { CasesDeepLinkId } from '../../common/navigation';
 
-const mockSetBreadcrumbs = jest.fn();
-const mockSetTitle = jest.fn();
-const mockSetServerlessBreadcrumbs = jest.fn();
-const mockGetKibanaServices = jest.fn((): unknown => ({
+const mockSetBreadcrumbs = vi.fn();
+const mockSetTitle = vi.fn();
+const mockSetServerlessBreadcrumbs = vi.fn();
+const mockGetKibanaServices = vi.fn((): unknown => ({
   serverless: { setBreadcrumbs: mockSetServerlessBreadcrumbs },
 }));
 
-jest.mock('../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana', async () => {
+  const originalModule = (await vi.importActual('../../common/lib/kibana'));
   return {
     ...originalModule,
     KibanaServices: {
@@ -30,8 +32,8 @@ jest.mock('../../common/lib/kibana', () => {
         incrementalId: { enabled: true },
       }),
     },
-    useNavigation: jest.fn().mockReturnValue({
-      getAppUrl: jest.fn((params?: { deepLinkId: string }) => params?.deepLinkId ?? '/test'),
+    useNavigation: vi.fn().mockReturnValue({
+      getAppUrl: vi.fn((params?: { deepLinkId: string }) => params?.deepLinkId ?? '/test'),
     }),
     useKibana: () => {
       const { services } = originalModule.useKibana();
@@ -51,7 +53,7 @@ const wrapper = ({ children }: { children?: ReactNode }) => (
 
 describe('useCasesBreadcrumbs', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('set all_cases breadcrumbs', () => {

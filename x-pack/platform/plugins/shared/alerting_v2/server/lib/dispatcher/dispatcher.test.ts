@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, Mocked } from 'vitest';
+
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -66,7 +69,7 @@ import {
 import type { AlertEpisode, AlertEpisodeSuppression, DispatcherHaltReason } from './types';
 
 function mockRulesFindByIds(
-  spy: jest.SpyInstance,
+  spy: MockInstance,
   ruleIds: string[],
   overrides?: Partial<RuleSavedObjectAttributes>
 ) {
@@ -80,7 +83,7 @@ function mockRulesFindByIds(
 }
 
 function mockNpFindAllDecrypted(
-  spy: jest.SpyInstance,
+  spy: MockInstance,
   policies: Array<string | { id: string; spaceId: string }>,
   overrides: Partial<ActionPolicySavedObjectAttributes> = {}
 ) {
@@ -111,17 +114,17 @@ function mockNpFindAllDecrypted(
   );
 }
 
-const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> =>
+const createMockWorkflowsManagement = (): Mocked<WorkflowsServerPluginSetup['management']> =>
   ({
-    getWorkflowsByIdsForRequests: jest.fn(
+    getWorkflowsByIdsForRequests: vi.fn(
       async (
         lookups: Parameters<
           WorkflowsServerPluginSetup['management']['getWorkflowsByIdsForRequests']
         >[0]
       ) => lookups.map(() => ({ status: 'fulfilled' as const, value: [] }))
     ),
-    getClient: jest.fn(() => ({ bulkScheduleWorkflow: jest.fn().mockResolvedValue([]) })),
-  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
+    getClient: vi.fn(() => ({ bulkScheduleWorkflow: vi.fn().mockResolvedValue([]) })),
+  } as unknown as Mocked<WorkflowsServerPluginSetup['management']>);
 
 function buildDispatcherService(deps: {
   queryService: QueryServiceContract;
@@ -155,13 +158,13 @@ describe('DispatcherService', () => {
   let queryService: QueryServiceContract;
   let storageService: StorageServiceContract;
   let queryEsClient: DeeplyMockedApi<ElasticsearchClient>;
-  let storageEsClient: jest.Mocked<ElasticsearchClient>;
+  let storageEsClient: Mocked<ElasticsearchClient>;
   let rulesSoService: RulesSavedObjectServiceContract;
   let npSoService: ActionPolicySavedObjectServiceContract;
-  let mockFindByIds: jest.SpyInstance;
-  let mockFindAllDecrypted: jest.SpyInstance;
-  let mockWfm: jest.Mocked<WorkflowsServerPluginSetup['management']>;
-  let mockMwService: jest.Mocked<MaintenanceWindowServiceContract>;
+  let mockFindByIds: MockInstance;
+  let mockFindAllDecrypted: MockInstance;
+  let mockWfm: Mocked<WorkflowsServerPluginSetup['management']>;
+  let mockMwService: Mocked<MaintenanceWindowServiceContract>;
   let mockEventLogService: EventLogServiceContract;
 
   beforeEach(() => {
@@ -194,7 +197,7 @@ describe('DispatcherService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('run', () => {
@@ -902,9 +905,9 @@ describe('DispatcherService', () => {
   });
 
   describe('executionUuid', () => {
-    function buildMockPipeline(): jest.Mocked<DispatcherPipelineContract> {
+    function buildMockPipeline(): Mocked<DispatcherPipelineContract> {
       return {
-        execute: jest.fn().mockResolvedValue({
+        execute: vi.fn().mockResolvedValue({
           completed: true,
           finalState: {
             input: {
@@ -982,7 +985,7 @@ describe('DispatcherService', () => {
   describe('rna-program#436 regression: truncated tick must not advance watermark past deferred tail', () => {
     function buildMockTruncatedPipeline(
       lastEpisodeTs: string
-    ): jest.Mocked<DispatcherPipelineContract> {
+    ): Mocked<DispatcherPipelineContract> {
       const episodes = [
         createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
         createAlertEpisode({ episode_id: 'e2', last_event_timestamp: lastEpisodeTs }),
@@ -996,7 +999,7 @@ describe('DispatcherService', () => {
         signal: new AbortController().signal,
       };
       return {
-        execute: jest.fn().mockResolvedValue({
+        execute: vi.fn().mockResolvedValue({
           completed: true,
           finalState: {
             input: mockInput,
@@ -1061,8 +1064,8 @@ describe('DispatcherService', () => {
         executionUuid: 'test-uuid-2',
         signal: new AbortController().signal,
       };
-      const pipeline2: jest.Mocked<DispatcherPipelineContract> = {
-        execute: jest.fn().mockResolvedValue({
+      const pipeline2: Mocked<DispatcherPipelineContract> = {
+        execute: vi.fn().mockResolvedValue({
           completed: true,
           finalState: {
             input: tick2MockInput,
@@ -1088,11 +1091,11 @@ describe('DispatcherService', () => {
 
   // ── Phase 4: soft deadline ───────────────────────────────────────────────────
   describe('soft deadline (TICK_DEADLINE_MS)', () => {
-    function buildNeverResolvingPipeline(): jest.Mocked<DispatcherPipelineContract> {
+    function buildNeverResolvingPipeline(): Mocked<DispatcherPipelineContract> {
       return {
         // Pipeline that fires the deadline by returning an aborted result after
         // the fake-timer advance triggers the deadline controller's timeout.
-        execute: jest.fn().mockImplementation(({ signal }: { signal: AbortSignal }) => {
+        execute: vi.fn().mockImplementation(({ signal }: { signal: AbortSignal }) => {
           return new Promise((resolve) => {
             signal.addEventListener('abort', () => {
               resolve({
@@ -1117,11 +1120,11 @@ describe('DispatcherService', () => {
     }
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('run() resolves after TICK_DEADLINE_MS even when the pipeline never completes', async () => {
@@ -1139,7 +1142,7 @@ describe('DispatcherService', () => {
       });
 
       // Advance fake timers past the deadline
-      jest.advanceTimersByTime(TICK_DEADLINE_MS + 1);
+      vi.advanceTimersByTime(TICK_DEADLINE_MS + 1);
 
       const result = await resultPromise;
 
@@ -1160,7 +1163,7 @@ describe('DispatcherService', () => {
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
       const resultPromise = service.run({ eventWatermark, taskId: 'task-1' });
 
-      jest.advanceTimersByTime(TICK_DEADLINE_MS + 1);
+      vi.advanceTimersByTime(TICK_DEADLINE_MS + 1);
 
       const result = await resultPromise;
 
@@ -1178,7 +1181,7 @@ describe('DispatcherService', () => {
         eventWatermark: new Date('2026-01-22T07:30:00.000Z'),
         taskId: 'task-1',
       });
-      jest.advanceTimersByTime(TICK_DEADLINE_MS + 1);
+      vi.advanceTimersByTime(TICK_DEADLINE_MS + 1);
       await resultPromise;
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -1224,9 +1227,9 @@ describe('DispatcherService', () => {
     function buildStuckPipeline(
       episodes: AlertEpisode[],
       haltReason: DispatcherHaltReason = 'aborted'
-    ): jest.Mocked<DispatcherPipelineContract> {
+    ): Mocked<DispatcherPipelineContract> {
       return {
-        execute: jest
+        execute: vi
           .fn()
           .mockImplementation(
             ({ signal, eventWatermark, windowStart, windowEnd, startedAt, executionUuid }) => {
@@ -1278,8 +1281,8 @@ describe('DispatcherService', () => {
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
 
       // Pipeline that advances the watermark (no_episodes → windowEnd > eventWatermark)
-      const advancingPipeline: jest.Mocked<DispatcherPipelineContract> = {
-        execute: jest
+      const advancingPipeline: Mocked<DispatcherPipelineContract> = {
+        execute: vi
           .fn()
           .mockImplementation(
             ({ signal, eventWatermark: ew, windowStart, windowEnd, startedAt, executionUuid }) => {

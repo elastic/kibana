@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -24,15 +26,15 @@ const mockLastControlsContext: { current: ESQLControlsContext | undefined } = {
 
 // Avoid mounting the Monaco editor in tests; we only care about the orchestration
 // between the toggle, the preview, the validation callback, and the controlsContext wiring.
-jest.mock('@kbn/esql/public', () => ({
+vi.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: ({ controlsContext }: { controlsContext?: ESQLControlsContext }) => {
     mockLastControlsContext.current = controlsContext;
     return <div data-test-subj="mock-esql-editor" />;
   },
 }));
 
-const mockGetESQLSingleColumnValues = jest.fn();
-jest.mock('../../../../common/options_list/get_esql_single_column_values', () => {
+const mockGetESQLSingleColumnValues = vi.fn();
+vi.mock('../../../../common/options_list/get_esql_single_column_values', () => {
   const fn = (...args: unknown[]) => mockGetESQLSingleColumnValues(...args);
   fn.isSuccess = (result: unknown) => !!result && 'values' in (result as Record<string, unknown>);
   fn.isMultiColumnError = (result: unknown) =>
@@ -43,14 +45,14 @@ jest.mock('../../../../common/options_list/get_esql_single_column_values', () =>
   return { getESQLSingleColumnValues: fn };
 });
 
-jest.mock('../../utils/get_controls_timezone', () => ({
+vi.mock('../../utils/get_controls_timezone', () => ({
   getControlsTimezone: () => 'UTC',
 }));
 
 const baseProps = {
   selectedDataView: undefined,
   isEdit: false,
-  setESQLQueryValidation: jest.fn(),
+  setESQLQueryValidation: vi.fn(),
 };
 
 const renderConfigureValuesQuery = (
@@ -65,7 +67,7 @@ const renderConfigureValuesQuery = (
     <I18nProvider>
       <ConfigureValuesQuery
         editorState={editorState}
-        updateEditorState={jest.fn()}
+        updateEditorState={vi.fn()}
         {...baseProps}
         {...overrides}
       />
@@ -75,7 +77,7 @@ const renderConfigureValuesQuery = (
 
 describe('ConfigureValuesQuery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockLastControlsContext.current = undefined;
   });
 
@@ -88,7 +90,7 @@ describe('ConfigureValuesQuery', () => {
       ],
       column: { name: 'os', type: 'keyword' },
     });
-    const setESQLQueryValidation = jest.fn();
+    const setESQLQueryValidation = vi.fn();
 
     renderConfigureValuesQuery({ isEdit: true, setESQLQueryValidation });
 
@@ -102,7 +104,7 @@ describe('ConfigureValuesQuery', () => {
       values: [],
       column: { name: 'os', type: 'keyword' },
     });
-    const setESQLQueryValidation = jest.fn();
+    const setESQLQueryValidation = vi.fn();
 
     renderConfigureValuesQuery({ isEdit: true, setESQLQueryValidation });
 
@@ -118,9 +120,9 @@ describe('ConfigureValuesQuery', () => {
     });
 
     it('adds a new ESQL control panel and reopens the editor with the spliced query on save', async () => {
-      const addNewPanel = jest.fn().mockResolvedValue(undefined);
-      const reopenEditor = jest.fn();
-      const updateEditorState = jest.fn();
+      const addNewPanel = vi.fn().mockResolvedValue(undefined);
+      const reopenEditor = vi.fn();
+      const updateEditorState = vi.fn();
 
       renderConfigureValuesQuery({
         parentApi: { addNewPanel },
@@ -150,8 +152,8 @@ describe('ConfigureValuesQuery', () => {
     });
 
     it('falls back to in-place state update when no reopenEditor is provided', async () => {
-      const addNewPanel = jest.fn().mockResolvedValue(undefined);
-      const updateEditorState = jest.fn();
+      const addNewPanel = vi.fn().mockResolvedValue(undefined);
+      const updateEditorState = vi.fn();
       mockGetESQLSingleColumnValues.mockResolvedValueOnce({
         values: ['kanagawa', 'rose-pine', 'gruvbox'],
         column: { name: 'theme', type: 'keyword' },
@@ -204,9 +206,9 @@ describe('ConfigureValuesQuery', () => {
     });
 
     it('reopens the editor unchanged on cancel', () => {
-      const reopenEditor = jest.fn();
+      const reopenEditor = vi.fn();
       renderConfigureValuesQuery({
-        parentApi: { addNewPanel: jest.fn() },
+        parentApi: { addNewPanel: vi.fn() },
         reopenEditor,
       });
 
@@ -217,17 +219,17 @@ describe('ConfigureValuesQuery', () => {
     });
 
     it('prefers addPinnedPanel when the parent supports pinning', async () => {
-      const addPinnedPanel = jest.fn().mockResolvedValue(undefined);
-      const addNewPanel = jest.fn();
+      const addPinnedPanel = vi.fn().mockResolvedValue(undefined);
+      const addNewPanel = vi.fn();
       const parentApi = {
         addPinnedPanel,
         addNewPanel,
-        pinPanel: jest.fn(),
-        unpinPanel: jest.fn(),
-        panelIsPinned: jest.fn(),
+        pinPanel: vi.fn(),
+        unpinPanel: vi.fn(),
+        panelIsPinned: vi.fn(),
       };
 
-      renderConfigureValuesQuery({ parentApi, reopenEditor: jest.fn() });
+      renderConfigureValuesQuery({ parentApi, reopenEditor: vi.fn() });
 
       await act(async () => {
         await mockLastControlsContext.current?.onSaveControl(

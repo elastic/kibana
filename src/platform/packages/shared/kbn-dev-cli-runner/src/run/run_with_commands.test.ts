@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { ProcRunner } from '@kbn/dev-proc-runner';
 
-jest.mock('../metrics');
+vi.mock('../metrics');
 
 import { FlagsReader } from '../flags/flags_reader';
 import { RunWithCommands } from './run_with_commands';
@@ -37,7 +39,7 @@ const testCli = new RunWithCommands({
 
 beforeEach(() => {
   process.argv = ['node', 'scripts/test_cli', 'foo', '--some-bool'];
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 it('extends the context using extendContext()', async () => {

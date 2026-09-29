@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import {
   generateFilterDSL,
@@ -219,21 +222,21 @@ const mockOptions = (
 };
 
 describe('status check alert', () => {
-  let toISOStringSpy: jest.SpyInstance<string, []>;
+  let toISOStringSpy: MockInstance<string, []>;
   const mockDate = new Date('2021-05-13T12:33:37.000Z');
   beforeEach(() => {
-    toISOStringSpy = jest.spyOn(Date.prototype, 'toISOString');
-    Date.now = jest.fn().mockReturnValue(mockDate);
+    toISOStringSpy = vi.spyOn(Date.prototype, 'toISOString');
+    Date.now = vi.fn().mockReturnValue(mockDate);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('executor', () => {
     it('does not trigger when there are no monitors down', async () => {
       expect.assertions(5);
-      const mockGetter = jest.fn();
+      const mockGetter = vi.fn();
       mockGetter.mockReturnValue([]);
       const { server, libs, plugins } = bootstrapDependencies({ getMonitorStatus: mockGetter });
       const alert = statusCheckAlertFactory(server, libs, plugins);
@@ -269,7 +272,7 @@ describe('status check alert', () => {
 
     it('triggers when monitors are down and provides expected state', async () => {
       toISOStringSpy.mockImplementation(() => 'foo date string');
-      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+      const mockGetter: Mock<GetMonitorStatusResult[]> = vi.fn();
 
       mockGetter.mockReturnValue(mockMonitors);
       const { server, libs, plugins } = bootstrapDependencies({ getMonitorStatus: mockGetter });
@@ -385,7 +388,7 @@ describe('status check alert', () => {
 
     it('supports auto generated monitor status alerts', async () => {
       toISOStringSpy.mockImplementation(() => 'foo date string');
-      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+      const mockGetter: Mock<GetMonitorStatusResult[]> = vi.fn();
 
       mockGetter.mockReturnValue(mockMonitors);
       const { server, libs, plugins } = bootstrapDependencies({ getMonitorStatus: mockGetter });
@@ -473,12 +476,12 @@ describe('status check alert', () => {
 
     it('supports 7.7 alert format', async () => {
       toISOStringSpy.mockImplementation(() => '7.7 date');
-      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+      const mockGetter: Mock<GetMonitorStatusResult[]> = vi.fn();
 
       mockGetter.mockReturnValue(mockMonitors);
       const { server, libs, plugins } = bootstrapDependencies({
         getMonitorStatus: mockGetter,
-        getIndexPattern: jest.fn(),
+        getIndexPattern: vi.fn(),
       });
       const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
@@ -571,12 +574,12 @@ describe('status check alert', () => {
     it('supports 7.8 alert format', async () => {
       expect.assertions(8);
       toISOStringSpy.mockImplementation(() => 'foo date string');
-      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+      const mockGetter: Mock<GetMonitorStatusResult[]> = vi.fn();
 
       mockGetter.mockReturnValueOnce(mockMonitors);
       const { server, libs, plugins } = bootstrapDependencies({
         getMonitorStatus: mockGetter,
-        getIndexPattern: jest.fn(),
+        getIndexPattern: vi.fn(),
       });
       const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
@@ -795,10 +798,10 @@ describe('status check alert', () => {
 
     it('supports searches', async () => {
       toISOStringSpy.mockImplementation(() => 'search test');
-      const mockGetter = jest.fn();
+      const mockGetter = vi.fn();
       mockGetter.mockReturnValue([]);
       const { server, libs, plugins } = bootstrapDependencies({
-        getIndexPattern: jest.fn(),
+        getIndexPattern: vi.fn(),
         getMonitorStatus: mockGetter,
       });
       const alert = statusCheckAlertFactory(server, libs, plugins);
@@ -864,7 +867,7 @@ describe('status check alert', () => {
     it('supports availability checks', async () => {
       // expect.assertions(13);
       toISOStringSpy.mockImplementation(() => 'availability test');
-      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+      const mockGetter: Mock<GetMonitorStatusResult[]> = vi.fn();
       mockGetter.mockReturnValue([]);
       const mockAvailabilityMonitors = [
         {
@@ -919,12 +922,12 @@ describe('status check alert', () => {
           }),
         },
       ];
-      const mockAvailability: jest.Mock<GetMonitorAvailabilityResult[]> = jest.fn();
+      const mockAvailability: Mock<GetMonitorAvailabilityResult[]> = vi.fn();
       mockAvailability.mockReturnValue(mockAvailabilityMonitors);
       const { server, libs, plugins } = bootstrapDependencies({
         getMonitorAvailability: mockAvailability,
         getMonitorStatus: mockGetter,
-        getIndexPattern: jest.fn(),
+        getIndexPattern: vi.fn(),
       });
       const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
@@ -1097,13 +1100,13 @@ describe('status check alert', () => {
     it('supports availability checks with search', async () => {
       expect.assertions(3);
       toISOStringSpy.mockImplementation(() => 'availability with search');
-      const mockGetter = jest.fn();
+      const mockGetter = vi.fn();
       mockGetter.mockReturnValue([]);
-      const mockAvailability = jest.fn();
+      const mockAvailability = vi.fn();
       mockAvailability.mockReturnValue([]);
       const { server, libs, plugins } = bootstrapDependencies({
         getMonitorAvailability: mockAvailability,
-        getIndexPattern: jest.fn(),
+        getIndexPattern: vi.fn(),
       });
       const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
@@ -1134,13 +1137,13 @@ describe('status check alert', () => {
     it('supports availability checks with no filter or search', async () => {
       expect.assertions(2);
       toISOStringSpy.mockImplementation(() => 'availability with search');
-      const mockGetter = jest.fn();
+      const mockGetter = vi.fn();
       mockGetter.mockReturnValue([]);
-      const mockAvailability = jest.fn();
+      const mockAvailability = vi.fn();
       mockAvailability.mockReturnValue([]);
       const { server, libs, plugins } = bootstrapDependencies({
         getMonitorAvailability: mockAvailability,
-        getIndexPattern: jest.fn(),
+        getIndexPattern: vi.fn(),
       });
       const alert = statusCheckAlertFactory(server, libs, plugins);
       const availability = {
@@ -1169,7 +1172,7 @@ describe('status check alert', () => {
 
     it('sets alert recovery context for recovered alerts', async () => {
       toISOStringSpy.mockImplementation(() => 'foo date string');
-      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+      const mockGetter: Mock<GetMonitorStatusResult[]> = vi.fn();
 
       mockGetter.mockReturnValue(mockMonitors);
       const { server, libs, plugins } = bootstrapDependencies({ getMonitorStatus: mockGetter });
@@ -1241,10 +1244,10 @@ describe('status check alert', () => {
   });
 
   it('generates timespan and @timestamp ranges appropriately', async () => {
-    const mockGetter = jest.fn();
+    const mockGetter = vi.fn();
     mockGetter.mockReturnValue([]);
     const { server, libs, plugins } = bootstrapDependencies({
-      getIndexPattern: jest.fn(),
+      getIndexPattern: vi.fn(),
       getMonitorStatus: mockGetter,
     });
     const alert = statusCheckAlertFactory(server, libs, plugins);
@@ -1278,10 +1281,10 @@ describe('status check alert', () => {
   });
 
   it('uses the larger of alert interval and timerange when defining timestampRange', async () => {
-    const mockGetter = jest.fn();
+    const mockGetter = vi.fn();
     mockGetter.mockReturnValue([]);
     const { server, libs, plugins } = bootstrapDependencies({
-      getIndexPattern: jest.fn(),
+      getIndexPattern: vi.fn(),
       getMonitorStatus: mockGetter,
     });
     const alert = statusCheckAlertFactory(server, libs, plugins);
@@ -1347,7 +1350,7 @@ describe('status check alert', () => {
   });
 
   describe('genFilterString', () => {
-    const mockGetIndexPattern = jest.fn();
+    const mockGetIndexPattern = vi.fn();
     mockGetIndexPattern.mockReturnValue(undefined);
 
     it('returns `undefined` for no filters or search', async () => {

@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useDebouncedCallback } from './use_debounced_callback';
 
 describe('useDebouncedCallback', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('basic functionality', () => {
     it('should debounce callback execution', async () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const { result } = renderHook(() => useDebouncedCallback(callback, 300));
 
       act(() => {
@@ -29,7 +31,7 @@ describe('useDebouncedCallback', () => {
       expect(callback).not.toHaveBeenCalled();
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       expect(callback).toHaveBeenCalledTimes(1);
@@ -37,7 +39,7 @@ describe('useDebouncedCallback', () => {
     });
 
     it('should cancel previous timeout when triggered multiple times', async () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const { result } = renderHook(() => useDebouncedCallback(callback, 300));
 
       act(() => {
@@ -45,7 +47,7 @@ describe('useDebouncedCallback', () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(100);
+        await vi.advanceTimersByTimeAsync(100);
       });
 
       act(() => {
@@ -53,7 +55,7 @@ describe('useDebouncedCallback', () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(100);
+        await vi.advanceTimersByTimeAsync(100);
       });
 
       act(() => {
@@ -63,7 +65,7 @@ describe('useDebouncedCallback', () => {
       expect(callback).not.toHaveBeenCalled();
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       // Should only call with the last argument
@@ -72,7 +74,7 @@ describe('useDebouncedCallback', () => {
     });
 
     it('should handle multiple arguments', async () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const { result } = renderHook(() => useDebouncedCallback(callback, 300));
 
       act(() => {
@@ -80,7 +82,7 @@ describe('useDebouncedCallback', () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       expect(callback).toHaveBeenCalledWith('arg1', 'arg2', 'arg3');
@@ -89,7 +91,7 @@ describe('useDebouncedCallback', () => {
 
   describe('cancel functionality', () => {
     it('should cancel pending callback', async () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const { result } = renderHook(() => useDebouncedCallback(callback, 300));
 
       act(() => {
@@ -97,7 +99,7 @@ describe('useDebouncedCallback', () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(100);
+        await vi.advanceTimersByTimeAsync(100);
       });
 
       act(() => {
@@ -105,14 +107,14 @@ describe('useDebouncedCallback', () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       expect(callback).not.toHaveBeenCalled();
     });
 
     it('should be safe to call cancel multiple times', async () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const { result } = renderHook(() => useDebouncedCallback(callback, 300));
 
       act(() => {
@@ -126,14 +128,14 @@ describe('useDebouncedCallback', () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       expect(callback).not.toHaveBeenCalled();
     });
 
     it('should be safe to call cancel when no callback is pending', () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const { result } = renderHook(() => useDebouncedCallback(callback, 300));
 
       expect(() => {
@@ -146,8 +148,8 @@ describe('useDebouncedCallback', () => {
 
   describe('callback updates', () => {
     it('should always call the latest callback', async () => {
-      const firstCallback = jest.fn();
-      const secondCallback = jest.fn();
+      const firstCallback = vi.fn();
+      const secondCallback = vi.fn();
 
       const { result, rerender } = renderHook(
         ({ callback }) => useDebouncedCallback(callback, 300),
@@ -162,7 +164,7 @@ describe('useDebouncedCallback', () => {
       rerender({ callback: secondCallback });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       expect(firstCallback).not.toHaveBeenCalled();
@@ -192,7 +194,7 @@ describe('useDebouncedCallback', () => {
       rerender({ value: 2 });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       // Should use the latest value
@@ -202,7 +204,7 @@ describe('useDebouncedCallback', () => {
 
   describe('delay changes', () => {
     it('should use updated delay for new triggers', async () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const { result, rerender } = renderHook(
         ({ delay }) => useDebouncedCallback(callback, delay),
         { initialProps: { delay: 300 } }
@@ -213,7 +215,7 @@ describe('useDebouncedCallback', () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       expect(callback).toHaveBeenCalledWith('first');
@@ -227,13 +229,13 @@ describe('useDebouncedCallback', () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       expect(callback).not.toHaveBeenCalled();
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(200);
+        await vi.advanceTimersByTimeAsync(200);
       });
 
       expect(callback).toHaveBeenCalledWith('second');
@@ -242,7 +244,7 @@ describe('useDebouncedCallback', () => {
 
   describe('cleanup', () => {
     it('should cancel pending callback on unmount', async () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const { result, unmount } = renderHook(() => useDebouncedCallback(callback, 300));
 
       act(() => {
@@ -250,13 +252,13 @@ describe('useDebouncedCallback', () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(100);
+        await vi.advanceTimersByTimeAsync(100);
       });
 
       unmount();
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       expect(callback).not.toHaveBeenCalled();
@@ -265,7 +267,7 @@ describe('useDebouncedCallback', () => {
 
   describe('function stability', () => {
     it('should return stable trigger and cancel functions', () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const { result, rerender } = renderHook(({ cb }) => useDebouncedCallback(cb, 300), {
         initialProps: { cb: callback },
       });
@@ -274,14 +276,14 @@ describe('useDebouncedCallback', () => {
       const initialCancel = result.current.cancel;
 
       // Rerender with new callback
-      rerender({ cb: jest.fn() });
+      rerender({ cb: vi.fn() });
 
       expect(result.current.trigger).toBe(initialTrigger);
       expect(result.current.cancel).toBe(initialCancel);
     });
 
     it('should update trigger function when delay changes', () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const { result, rerender } = renderHook(
         ({ delay }) => useDebouncedCallback(callback, delay),
         { initialProps: { delay: 300 } }
@@ -299,7 +301,7 @@ describe('useDebouncedCallback', () => {
 
   describe('edge cases', () => {
     it('should handle zero delay', async () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const { result } = renderHook(() => useDebouncedCallback(callback, 0));
 
       act(() => {
@@ -307,14 +309,14 @@ describe('useDebouncedCallback', () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(0);
+        await vi.advanceTimersByTimeAsync(0);
       });
 
       expect(callback).toHaveBeenCalledWith('arg1');
     });
 
     it('should handle async callbacks', async () => {
-      const callback = jest.fn(async (value: string) => {
+      const callback = vi.fn(async (value: string) => {
         return `processed-${value}`;
       });
 
@@ -325,14 +327,14 @@ describe('useDebouncedCallback', () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       expect(callback).toHaveBeenCalledWith('test');
     });
 
     it('should handle callbacks that throw errors', async () => {
-      const callback = jest.fn((value: string) => {
+      const callback = vi.fn((value: string) => {
         throw new Error('Test error');
       });
 
@@ -346,7 +348,7 @@ describe('useDebouncedCallback', () => {
       let thrownError: Error | null = null;
       try {
         await act(async () => {
-          await jest.advanceTimersByTimeAsync(300);
+          await vi.advanceTimersByTimeAsync(300);
         });
       } catch (error) {
         thrownError = error as Error;
@@ -360,7 +362,7 @@ describe('useDebouncedCallback', () => {
 
   describe('real-world usage patterns', () => {
     it('should handle rapid successive triggers (simulating fast typing)', async () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const { result } = renderHook(() => useDebouncedCallback(callback, 300));
 
       // Simulate rapid typing
@@ -368,19 +370,19 @@ describe('useDebouncedCallback', () => {
         result.current.trigger('a');
       });
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(50);
+        await vi.advanceTimersByTimeAsync(50);
       });
       act(() => {
         result.current.trigger('ab');
       });
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(50);
+        await vi.advanceTimersByTimeAsync(50);
       });
       act(() => {
         result.current.trigger('abc');
       });
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(50);
+        await vi.advanceTimersByTimeAsync(50);
       });
       act(() => {
         result.current.trigger('abcd');
@@ -390,7 +392,7 @@ describe('useDebouncedCallback', () => {
 
       // Wait for debounce to complete
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       // Should only call once with the final value
@@ -399,7 +401,7 @@ describe('useDebouncedCallback', () => {
     });
 
     it('should handle trigger after long pause (simulating user stopping typing)', async () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const { result } = renderHook(() => useDebouncedCallback(callback, 300));
 
       act(() => {
@@ -407,7 +409,7 @@ describe('useDebouncedCallback', () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       expect(callback).toHaveBeenCalledWith('first');
@@ -415,7 +417,7 @@ describe('useDebouncedCallback', () => {
 
       // Long pause, then trigger again
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(1000);
+        await vi.advanceTimersByTimeAsync(1000);
       });
 
       act(() => {
@@ -423,7 +425,7 @@ describe('useDebouncedCallback', () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       expect(callback).toHaveBeenCalledWith('second');

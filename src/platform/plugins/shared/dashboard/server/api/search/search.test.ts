@@ -7,31 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { findWithTagFilter } from '@kbn/as-code-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
 import { search } from './search';
 
-jest.mock('@kbn/as-code-utils', () => ({
-  findWithTagFilter: jest.fn(),
-}));
+vi.mock('@kbn/as-code-utils', () => {
+      const mocked = {
+      findWithTagFilter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../transforms', () => ({
-  transformDashboardOut: jest.fn().mockReturnValue({
-    dashboardState: {
-      title: 'Test',
-      description: undefined,
-      tags: undefined,
-      time_range: undefined,
-    },
-  }),
-}));
+vi.mock('../transforms', () => {
+      const mocked = {
+      transformDashboardOut: vi.fn().mockReturnValue({
+        dashboardState: {
+          title: 'Test',
+          description: undefined,
+          tags: undefined,
+          time_range: undefined,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const findWithTagFilterMock = findWithTagFilter as jest.MockedFunction<typeof findWithTagFilter>;
+const findWithTagFilterMock = findWithTagFilter as MockedFunction<typeof findWithTagFilter>;
 
 const createRequestCtx = (): RequestHandlerContext =>
   ({
-    resolve: jest.fn().mockResolvedValue({
+    resolve: vi.fn().mockResolvedValue({
       core: { savedObjects: { client: {} } },
     }),
   } as unknown as RequestHandlerContext);
@@ -47,11 +56,11 @@ describe('dashboard search sort options', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('passes updated_at desc when query is omitted', async () => {
-    await search(createRequestCtx(), { page: 1, per_page: 20 }, jest.fn() as never);
+    await search(createRequestCtx(), { page: 1, per_page: 20 }, vi.fn() as never);
 
     expect(findWithTagFilterMock.mock.calls[0][1]).toEqual(
       expect.objectContaining({
@@ -62,7 +71,7 @@ describe('dashboard search sort options', () => {
   });
 
   it('omits sort options when query is present', async () => {
-    await search(createRequestCtx(), { page: 1, per_page: 20, query: 'sales' }, jest.fn() as never);
+    await search(createRequestCtx(), { page: 1, per_page: 20, query: 'sales' }, vi.fn() as never);
 
     const findOptions = findWithTagFilterMock.mock.calls[0][1];
     expect(findOptions).not.toHaveProperty('sortField');

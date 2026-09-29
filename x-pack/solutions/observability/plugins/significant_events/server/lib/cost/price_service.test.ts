@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createPriceService, type PriceService, type PriceServiceFetch } from './price_service';
 
-const mockFetchFn = (): jest.Mock<ReturnType<PriceServiceFetch>, Parameters<PriceServiceFetch>> =>
-  jest.fn<ReturnType<PriceServiceFetch>, Parameters<PriceServiceFetch>>();
+const mockFetchFn = (): Mock<ReturnType<PriceServiceFetch>, Parameters<PriceServiceFetch>> =>
+  vi.fn<ReturnType<PriceServiceFetch>, Parameters<PriceServiceFetch>>();
 
 const FIXTURE: unknown[] = JSON.parse(
   readFileSync(resolve(__dirname, '__fixtures__/base_prices.json'), 'utf8')
@@ -77,12 +80,12 @@ const createService = ({
 
 describe('createPriceService', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(NOW);
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('parses operations from id, ignores embeddings, rerank, and cache-write forms, and preserves provider prefixes', async () => {
@@ -405,7 +408,7 @@ describe('createPriceService', () => {
     });
 
     const pending = createService({ fetchFn, timeoutMs: 10_000 }).getPrices();
-    await jest.advanceTimersByTimeAsync(10_000);
+    await vi.advanceTimersByTimeAsync(10_000);
     await expect(pending).resolves.toBeNull();
   });
 
@@ -447,7 +450,7 @@ describe('createPriceService', () => {
       .mockResolvedValueOnce(jsonResponse(FIXTURE))
       .mockRejectedValueOnce(new Error('network down'))
       .mockResolvedValueOnce(jsonResponse(refreshedFixture));
-    const getNow = jest.fn(() => new Date(NOW));
+    const getNow = vi.fn(() => new Date(NOW));
     const service = createService({ fetchFn, getNow });
 
     const fresh = await service.getPrices();

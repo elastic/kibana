@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useWindowWidth } from './use_window_width';
 import { useDispatch } from '../store/redux';
 import { setDefaultWidthsAction } from '../store/actions';
 
-jest.mock('../store/redux');
+vi.mock('../store/redux');
 
 describe('useWindowWidth', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should return the window size and dispatch setDefaultWidthsAction', () => {
     global.innerWidth = 1024;
 
-    const mockUseDispatch = jest.fn();
-    (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
+    const mockUseDispatch = vi.fn();
+    (useDispatch as Mock).mockImplementation(() => mockUseDispatch);
 
     const hookResult = renderHook(() => useWindowWidth());
 
@@ -32,8 +35,8 @@ describe('useWindowWidth', () => {
   it('should not dispatch action if window.innerWidth is 0', () => {
     global.innerWidth = 0;
 
-    const mockUseDispatch = jest.fn();
-    (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
+    const mockUseDispatch = vi.fn();
+    (useDispatch as Mock).mockImplementation(() => mockUseDispatch);
 
     const hookResult = renderHook(() => useWindowWidth());
 
@@ -44,8 +47,8 @@ describe('useWindowWidth', () => {
   it('should handle screens below 380px', () => {
     global.innerWidth = 300;
 
-    const mockUseDispatch = jest.fn();
-    (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
+    const mockUseDispatch = vi.fn();
+    (useDispatch as Mock).mockImplementation(() => mockUseDispatch);
 
     const hookResult = renderHook(() => useWindowWidth());
 
@@ -65,8 +68,8 @@ describe('useWindowWidth', () => {
   it('should handle screens between 380px and 992px', () => {
     global.innerWidth = 500;
 
-    const mockUseDispatch = jest.fn();
-    (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
+    const mockUseDispatch = vi.fn();
+    (useDispatch as Mock).mockImplementation(() => mockUseDispatch);
 
     const hookResult = renderHook(() => useWindowWidth());
 
@@ -86,8 +89,8 @@ describe('useWindowWidth', () => {
   it('should handle screens between 992px and 1600px', () => {
     global.innerWidth = 1000;
 
-    const mockUseDispatch = jest.fn();
-    (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
+    const mockUseDispatch = vi.fn();
+    (useDispatch as Mock).mockImplementation(() => mockUseDispatch);
 
     const hookResult = renderHook(() => useWindowWidth());
 
@@ -114,8 +117,8 @@ describe('useWindowWidth', () => {
   it('should handle screens between 1600px and 1920', () => {
     global.innerWidth = 1800;
 
-    const mockUseDispatch = jest.fn();
-    (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
+    const mockUseDispatch = vi.fn();
+    (useDispatch as Mock).mockImplementation(() => mockUseDispatch);
 
     const hookResult = renderHook(() => useWindowWidth());
 
@@ -142,8 +145,8 @@ describe('useWindowWidth', () => {
   it('should handle screens between 1920px and 2560px', () => {
     global.innerWidth = 2400;
 
-    const mockUseDispatch = jest.fn();
-    (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
+    const mockUseDispatch = vi.fn();
+    (useDispatch as Mock).mockImplementation(() => mockUseDispatch);
 
     const hookResult = renderHook(() => useWindowWidth());
 
@@ -168,8 +171,8 @@ describe('useWindowWidth', () => {
   it('should handle screens above 2560px', () => {
     global.innerWidth = 3800;
 
-    const mockUseDispatch = jest.fn();
-    (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
+    const mockUseDispatch = vi.fn();
+    (useDispatch as Mock).mockImplementation(() => mockUseDispatch);
 
     const hookResult = renderHook(() => useWindowWidth());
 

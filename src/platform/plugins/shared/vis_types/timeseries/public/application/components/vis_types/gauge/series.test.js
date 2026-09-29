@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { GaugeSeries } from './series';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -15,11 +17,11 @@ const defaultProps = {
   disableAdd: true,
   disableDelete: true,
   dragHandleProps: {},
-  toggleVisible: jest.fn(),
-  onAdd: jest.fn(),
-  onChange: jest.fn(),
-  onClone: jest.fn(),
-  onDelete: jest.fn(),
+  toggleVisible: vi.fn(),
+  onAdd: vi.fn(),
+  onChange: vi.fn(),
+  onClone: vi.fn(),
+  onDelete: vi.fn(),
 };
 
 it('should disable add data', () => {

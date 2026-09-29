@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AssistantBody } from '.';
@@ -19,16 +21,16 @@ const baseProps = {
   conversationSharedState: ConversationSharedState.PRIVATE,
   currentConversation: welcomeConvo,
   currentSystemPromptId: undefined,
-  handleOnConversationSelected: jest.fn(),
-  setCurrentSystemPromptId: jest.fn(),
-  http: { get: jest.fn(), basePath: { get: jest.fn() } } as unknown as HttpSetup,
+  handleOnConversationSelected: vi.fn(),
+  setCurrentSystemPromptId: vi.fn(),
+  http: { get: vi.fn(), basePath: { get: vi.fn() } } as unknown as HttpSetup,
   isAssistantEnabled: true,
   isConversationOwner: true,
   isLoading: false,
   isSettingsModalVisible: false,
   isWelcomeSetup: false,
-  setIsSettingsModalVisible: jest.fn(),
-  setUserPrompt: jest.fn(),
+  setIsSettingsModalVisible: vi.fn(),
+  setUserPrompt: vi.fn(),
 };
 
 describe('AssistantBody', () => {

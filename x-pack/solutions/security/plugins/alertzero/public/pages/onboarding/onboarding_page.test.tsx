@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -15,9 +17,12 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { OnboardingPage } from './onboarding_page';
 
-jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
-  ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
-}));
+vi.mock('../../components/scan_failure_callout/scan_failure_callout', () => {
+      const mocked = {
+      ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderPage = ({ canWrite = false }: { canWrite?: boolean } = {}) => {
   const core = coreMock.createStart();

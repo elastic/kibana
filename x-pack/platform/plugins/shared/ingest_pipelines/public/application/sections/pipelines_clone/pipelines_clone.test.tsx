@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -18,39 +21,45 @@ import { PipelinesClone } from './pipelines_clone';
 import type { useKibana } from '../../../shared_imports';
 import { createMemoryHistory } from 'history';
 
-const mockUseKibana = jest.fn();
+const mockUseKibana = vi.fn();
 
-jest.mock('../../../shared_imports', () => ({
-  ...jest.requireActual('../../../shared_imports'),
-  useKibana: () => mockUseKibana(),
-}));
+vi.mock('../../../shared_imports', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../shared_imports')),
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../pipelines_create', () => ({
-  ...jest.requireActual('../pipelines_create'),
-  PipelinesCreate: (props: ComponentProps<typeof PipelinesCreate>) => (
-    <div data-test-subj="pipelinesCreate">
-      <h1>PIPELINES_CREATE</h1>
-      <div data-test-subj="sourcePipelineName">
-        {props.sourcePipeline ? props.sourcePipeline.name : 'no-source'}
-      </div>
-    </div>
-  ),
-}));
+vi.mock('../pipelines_create', async () => {
+      const mocked = {
+      ...(await vi.importActual('../pipelines_create')),
+      PipelinesCreate: (props: ComponentProps<typeof PipelinesCreate>) => (
+        <div data-test-subj="pipelinesCreate">
+          <h1>PIPELINES_CREATE</h1>
+          <div data-test-subj="sourcePipelineName">
+            {props.sourcePipeline ? props.sourcePipeline.name : 'no-source'}
+          </div>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type MockServices = ReturnType<typeof useKibana>['services'];
 type DeepPartialMockServices = DeepPartial<MockServices>;
 
 const createMockServices = (overrides: DeepPartialMockServices = {}): DeepPartialMockServices => ({
   api: {
-    useLoadPipeline: jest.fn(),
+    useLoadPipeline: vi.fn(),
   },
   notifications: {
     toasts: {
-      addError: jest.fn(),
+      addError: vi.fn(),
     },
   },
   documentation: {
-    getCreatePipelineUrl: jest.fn().mockReturnValue('http://docs'),
+    getCreatePipelineUrl: vi.fn().mockReturnValue('http://docs'),
   },
   ...overrides,
 });
@@ -62,8 +71,8 @@ const createServicesWithLoad = (
   return createMockServices({
     ...overrides,
     api: {
-      useLoadPipeline: jest.fn().mockReturnValue({
-        resendRequest: jest.fn(),
+      useLoadPipeline: vi.fn().mockReturnValue({
+        resendRequest: vi.fn(),
         error: null,
         data: undefined,
         isLoading: false,
@@ -103,7 +112,7 @@ const renderWithRoute = (initialRouteEntry: string, services: DeepPartialMockSer
 
 describe('PipelinesClone section', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -132,7 +141,7 @@ describe('PipelinesClone section', () => {
 
     describe('AND the load pipeline fails after request', () => {
       it('SHOULD show toast error and still render create form', () => {
-        const mockAddError = jest.fn();
+        const mockAddError = vi.fn();
         const services = createServicesWithLoad(
           {
             error: {
@@ -153,7 +162,7 @@ describe('PipelinesClone section', () => {
 
     describe('AND the load returns no data and no error after request', () => {
       it('SHOULD render create form without calling toasts', () => {
-        const mockAddError = jest.fn();
+        const mockAddError = vi.fn();
         const services = createServicesWithLoad(
           {},
           { notifications: { toasts: { addError: mockAddError } } }
@@ -188,7 +197,7 @@ describe('PipelinesClone section', () => {
 
     describe('AND pipeline name contains special characters', () => {
       it('SHOULD properly decode the name', () => {
-        const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {}); // to suppress history v4 warning
+        const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {}); // to suppress history v4 warning
         // we omit . and * characters which are handled on input validation level
         // see https://github.com/elastic/kibana/pull/174830
         const pipelineName = 'my-p!@#$%^&()_+|}{":?><./;\'[]\\=-`~ipeline';
@@ -207,7 +216,7 @@ describe('PipelinesClone section', () => {
 
         renderWithRoute(initialRoute, services);
 
-        const useLoadPipelineMock = services.api?.useLoadPipeline as jest.Mock;
+        const useLoadPipelineMock = services.api?.useLoadPipeline as Mock;
 
         const firstCallArg = useLoadPipelineMock.mock.calls[0][0];
 

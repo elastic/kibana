@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -206,7 +208,7 @@ describe('logsDataSourceProfileProvider', () => {
         ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         actions: {
           ...EMPTY_CONTEXT_AWARENESS_TOOLKIT.actions,
-          addFilter: jest.fn(),
+          addFilter: vi.fn(),
         },
       };
       const getCellRenderers = logsDataSourceProfileProvider.profile.getCellRenderers?.(
@@ -234,7 +236,7 @@ describe('logsDataSourceProfileProvider', () => {
         ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         actions: {
           ...EMPTY_CONTEXT_AWARENESS_TOOLKIT.actions,
-          setExpandedDoc: jest.fn(),
+          setExpandedDoc: vi.fn(),
         },
       };
       const getRowAdditionalLeadingControls =

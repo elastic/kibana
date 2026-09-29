@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IAggConfig } from '@kbn/data-plugin/common';
 import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -37,11 +39,14 @@ import {
 } from './utils';
 import type { Schemas } from '../vis_schemas';
 
-const mockConvertBucketToColumns = jest.fn();
+const mockConvertBucketToColumns = vi.fn();
 
-jest.mock('../../common/convert_to_lens/lib/buckets', () => ({
-  convertBucketToColumns: jest.fn(() => mockConvertBucketToColumns()),
-}));
+vi.mock('../../common/convert_to_lens/lib/buckets', () => {
+      const mocked = {
+      convertBucketToColumns: vi.fn(() => mockConvertBucketToColumns()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('isReferenced', () => {
   const columnId = 'col1';
@@ -218,7 +223,7 @@ describe('getBucketColumns', () => {
   const visType = 'heatmap';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should skip empty schemas and return empty array', () => {

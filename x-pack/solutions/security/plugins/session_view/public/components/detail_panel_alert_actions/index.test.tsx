@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -23,13 +25,13 @@ describe('DetailPanelAlertActions component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
-  let mockShowAlertDetails = jest.fn((uuid) => uuid);
-  let mockOnJumpToEvent = jest.fn((event: ProcessEvent) => event);
+  let mockShowAlertDetails = vi.fn((uuid) => uuid);
+  let mockOnJumpToEvent = vi.fn((event: ProcessEvent) => event);
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    mockShowAlertDetails = jest.fn((uuid) => uuid);
-    mockOnJumpToEvent = jest.fn((process) => process);
+    mockShowAlertDetails = vi.fn((uuid) => uuid);
+    mockOnJumpToEvent = vi.fn((process) => process);
   });
 
   describe('When DetailPanelAlertActions is mounted', () => {

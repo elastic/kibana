@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
@@ -12,13 +15,19 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRulesClientMockParams } from '../../../../test_utils';
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
-  bulkMarkApiKeysForInvalidation: jest.fn(),
-}));
+vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
+      const mocked = {
+      bulkMarkApiKeysForInvalidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => ({
-  v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const eventLogger = eventLoggerMock.create();
 
@@ -51,7 +60,7 @@ beforeEach(() => {
     },
     ownerId: null,
   });
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 setGlobalDate();

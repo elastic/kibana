@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mount } from 'enzyme';
 import React from 'react';
 
 import { globalNode, HookWrapper } from '../../mock';
 import { useScrollToTop } from '.';
 
-const spyScroll = jest.fn();
-const spyScrollTo = jest.fn();
+const spyScroll = vi.fn();
+const spyScrollTo = vi.fn();
 
 describe('Scroll to top', () => {
   beforeEach(() => {

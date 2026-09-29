@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -29,12 +31,12 @@ const hit = createMockHit({
 
 describe('EnhancedIOCFlyoutFooter', () => {
   it('renders the security solution ioc footer feature', () => {
-    const renderFooterFeature = jest.fn().mockReturnValue(<div>IOC Footer</div>);
+    const renderFooterFeature = vi.fn().mockReturnValue(<div>IOC Footer</div>);
     const providerServices = {
       discoverShared: {
         features: {
           registry: {
-            getById: jest.fn().mockReturnValue({
+            getById: vi.fn().mockReturnValue({
               id: 'security-solution-ioc-flyout-footer',
               renderFooter: renderFooterFeature,
             }),
@@ -63,12 +65,12 @@ describe('EnhancedIOCFlyoutFooter', () => {
   });
 
   it('falls back to the previous renderFooter when feature is unavailable', () => {
-    const fallbackRenderFooter = jest.fn().mockReturnValue(<div>Fallback Footer</div>);
+    const fallbackRenderFooter = vi.fn().mockReturnValue(<div>Fallback Footer</div>);
     const providerServices = {
       discoverShared: {
         features: {
           registry: {
-            getById: jest.fn().mockReturnValue(undefined),
+            getById: vi.fn().mockReturnValue(undefined),
           },
         },
       },

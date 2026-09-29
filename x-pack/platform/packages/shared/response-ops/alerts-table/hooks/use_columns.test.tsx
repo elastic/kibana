@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { FunctionComponent } from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
@@ -83,8 +85,8 @@ describe('useColumns', () => {
     it('should remove initialWidth from last column to make it fill the available space', async () => {
       const columns = [...defaultColumns];
       const visibleColumns = columns.map((col) => col.id);
-      const setColumns = jest.fn();
-      const setVisibleColumns = jest.fn();
+      const setColumns = vi.fn();
+      const setVisibleColumns = vi.fn();
       const { result } = renderHook(
         () =>
           useColumns({
@@ -108,8 +110,8 @@ describe('useColumns', () => {
     it('should add isSortable flag to columns', async () => {
       const columns = [...defaultColumns, { id: 'test', displayAsText: 'test' }];
       const visibleColumns = columns.map((col) => col.id);
-      const setColumns = jest.fn();
-      const setVisibleColumns = jest.fn();
+      const setColumns = vi.fn();
+      const setVisibleColumns = vi.fn();
       const { result } = renderHook(
         () =>
           useColumns({
@@ -137,10 +139,10 @@ describe('useColumns', () => {
     it('should restore the columns to their default value', () => {
       let columns = [...defaultColumns];
       let visibleColumns = columns.map((col) => col.id);
-      const setColumns = jest.fn((updater) => {
+      const setColumns = vi.fn((updater) => {
         columns = typeof updater === 'function' ? updater(columns) : updater;
       });
-      const setVisibleColumns = jest.fn((updater) => {
+      const setVisibleColumns = vi.fn((updater) => {
         visibleColumns = typeof updater === 'function' ? updater(visibleColumns) : updater;
       });
 
@@ -183,10 +185,10 @@ describe('useColumns', () => {
     it('should correctly update columns and visibleColumns when toggling off a column', () => {
       let columns = [...defaultColumns];
       let visibleColumns = columns.map((col) => col.id);
-      const setColumns = jest.fn((updater) => {
+      const setColumns = vi.fn((updater) => {
         columns = updater(columns);
       });
-      const setVisibleColumns = jest.fn((updater) => {
+      const setVisibleColumns = vi.fn((updater) => {
         visibleColumns = typeof updater === 'function' ? updater(visibleColumns) : updater;
       });
       const { result } = renderHook(
@@ -212,10 +214,10 @@ describe('useColumns', () => {
     it('should correctly update columns and visibleColumns when toggling on a column', () => {
       let columns = [...defaultColumns].slice(1);
       let visibleColumns = columns.map((col) => col.id);
-      const setColumns = jest.fn((updater) => {
+      const setColumns = vi.fn((updater) => {
         columns = updater(columns);
       });
-      const setVisibleColumns = jest.fn((updater) => {
+      const setVisibleColumns = vi.fn((updater) => {
         visibleColumns = typeof updater === 'function' ? updater(visibleColumns) : updater;
       });
       const { result } = renderHook(
@@ -242,7 +244,7 @@ describe('useColumns', () => {
   describe('onColumnResize', () => {
     it("should update the columns state changing the resized column's initialWidth", async () => {
       let columns = [...defaultColumns];
-      const setColumnsMock = jest.fn((updater) => {
+      const setColumnsMock = vi.fn((updater) => {
         columns = updater(columns);
       });
       const { result, rerender } = renderHook(
@@ -252,7 +254,7 @@ describe('useColumns', () => {
             updateColumns: setColumnsMock,
             defaultColumns,
             visibleColumns: columns.map((col) => col.id),
-            updateVisibleColumns: jest.fn(),
+            updateVisibleColumns: vi.fn(),
             defaultVisibleColumns,
             alertsFields,
           }),

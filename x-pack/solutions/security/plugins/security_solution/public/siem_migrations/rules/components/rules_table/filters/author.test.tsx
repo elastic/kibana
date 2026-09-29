@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { AuthorFilterButton } from './author';
@@ -23,7 +25,7 @@ describe('AuthorFilterButton', () => {
   });
 
   it('calls author changed handler on `Elastic` author selection', async () => {
-    const onAuthorChanged = jest.fn();
+    const onAuthorChanged = vi.fn();
     const { getByTestId, getByText } = render(
       <TestProviders>
         <AuthorFilterButton onAuthorChanged={onAuthorChanged} />
@@ -39,7 +41,7 @@ describe('AuthorFilterButton', () => {
   });
 
   it('calls author changed handler on `Custom` author selection', async () => {
-    const onAuthorChanged = jest.fn();
+    const onAuthorChanged = vi.fn();
     const { getByTestId, getByText } = render(
       <TestProviders>
         <AuthorFilterButton onAuthorChanged={onAuthorChanged} />
@@ -55,7 +57,7 @@ describe('AuthorFilterButton', () => {
   });
 
   it('calls author changed handler on deselection', async () => {
-    const onAuthorChanged = jest.fn();
+    const onAuthorChanged = vi.fn();
     const { getByTestId, getByText } = render(
       <TestProviders>
         <AuthorFilterButton onAuthorChanged={onAuthorChanged} author={AuthorFilter.CUSTOM} />

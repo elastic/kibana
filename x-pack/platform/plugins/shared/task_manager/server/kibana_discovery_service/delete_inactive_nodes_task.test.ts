@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockLogger } from '../test_utils';
 import {
   coreMock,
@@ -69,7 +71,7 @@ describe('Delete inactive background task nodes', () => {
   ]);
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('deletes the inactive nodes', async () => {

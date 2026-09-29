@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,21 +17,27 @@ import { ADD_CUSTOM_CONTENT_ACTION_ID } from '../../common/constants';
 import { CustomContentIcon } from './custom_content_icon';
 import { apiIsPresentationContainer, hasEditCapabilities } from '@kbn/presentation-publishing';
 
-jest.mock('@kbn/presentation-publishing', () => ({
-  apiIsPresentationContainer: jest.fn(),
-  hasEditCapabilities: jest.fn(),
-}));
+vi.mock('@kbn/presentation-publishing', () => {
+      const mocked = {
+      apiIsPresentationContainer: vi.fn(),
+      hasEditCapabilities: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockTrackPanelAdded = jest.fn();
+const mockTrackPanelAdded = vi.fn();
 
-jest.mock('../telemetry', () => ({
-  getTelemetry: () => ({ trackPanelAdded: mockTrackPanelAdded }),
-}));
+vi.mock('../telemetry', () => {
+      const mocked = {
+      getTelemetry: () => ({ trackPanelAdded: mockTrackPanelAdded }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.MockedFunction<
+const mockApiIsPresentationContainer = apiIsPresentationContainer as MockedFunction<
   typeof apiIsPresentationContainer
 >;
-const mockHasEditCapabilities = hasEditCapabilities as jest.MockedFunction<
+const mockHasEditCapabilities = hasEditCapabilities as MockedFunction<
   typeof hasEditCapabilities
 >;
 
@@ -36,7 +45,7 @@ describe('getAddCustomContentAction', () => {
   const action = getAddCustomContentAction();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockTrackPanelAdded.mockReset();
   });
 
@@ -88,9 +97,9 @@ describe('getAddCustomContentAction', () => {
     });
 
     it('calls addNewPanel and then onEdit on the returned api', async () => {
-      const mockOnEdit = jest.fn().mockResolvedValue(undefined);
+      const mockOnEdit = vi.fn().mockResolvedValue(undefined);
       const mockPanelApi = { onEdit: mockOnEdit };
-      const mockAddNewPanel = jest.fn().mockResolvedValue(mockPanelApi);
+      const mockAddNewPanel = vi.fn().mockResolvedValue(mockPanelApi);
       const mockEmbeddable = { addNewPanel: mockAddNewPanel };
 
       mockApiIsPresentationContainer.mockReturnValue(true);
@@ -107,7 +116,7 @@ describe('getAddCustomContentAction', () => {
     });
 
     it('does not call onEdit when addNewPanel returns undefined', async () => {
-      const mockAddNewPanel = jest.fn().mockResolvedValue(undefined);
+      const mockAddNewPanel = vi.fn().mockResolvedValue(undefined);
       const mockEmbeddable = { addNewPanel: mockAddNewPanel };
 
       mockApiIsPresentationContainer.mockReturnValue(true);

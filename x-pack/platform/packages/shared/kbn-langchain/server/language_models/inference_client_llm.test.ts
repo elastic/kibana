@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { InferenceClientLlm } from './inference_client_llm';
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { Logger } from '@kbn/core/server';
 
 describe('InferenceClientLlm', () => {
-  let mockInferenceClient: jest.Mocked<InferenceClient>;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockInferenceClient: Mocked<InferenceClient>;
+  let mockLogger: Mocked<Logger>;
 
   beforeEach(() => {
     mockInferenceClient = {
-      chatComplete: jest.fn().mockResolvedValue({ content: 'mocked response' }),
-    } as unknown as jest.Mocked<InferenceClient>;
+      chatComplete: vi.fn().mockResolvedValue({ content: 'mocked response' }),
+    } as unknown as Mocked<InferenceClient>;
 
     mockLogger = {
-      debug: jest.fn(),
-      error: jest.fn(),
-    } as unknown as jest.Mocked<Logger>;
+      debug: vi.fn(),
+      error: vi.fn(),
+    } as unknown as Mocked<Logger>;
   });
 
   it('returns the correct content from inferenceClient.chatComplete()', async () => {

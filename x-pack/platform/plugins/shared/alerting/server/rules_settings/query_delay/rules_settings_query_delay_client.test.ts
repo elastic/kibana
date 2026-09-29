@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RulesSettings } from '../../../common';
@@ -33,11 +36,11 @@ const getMockRulesSettings = (): RulesSettings => {
   };
 };
 
-const rulesSettingsQueryDelayClientParams: jest.Mocked<RulesSettingsQueryDelayClientConstructorOptions> =
+const rulesSettingsQueryDelayClientParams: Mocked<RulesSettingsQueryDelayClientConstructorOptions> =
   {
     logger: loggingSystemMock.create().get(),
     isServerless: false,
-    getModificationMetadata: jest.fn(),
+    getModificationMetadata: vi.fn(),
     savedObjectsClient,
   };
 
@@ -61,17 +64,17 @@ describe('RulesSettingsQueryDelayClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date(mockDateString));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(mockDateString));
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   test('can get query delay settings', async () => {

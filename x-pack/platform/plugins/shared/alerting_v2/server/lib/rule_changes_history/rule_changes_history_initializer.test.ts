@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ChangeHistoryClient } from '@kbn/change-history';
 import { RuleChangesHistoryInitializer } from './rule_changes_history_initializer';
 
 describe('RuleChangesHistoryInitializer', () => {
   const createClientMock = () =>
-    ({ initialize: jest.fn().mockResolvedValue(undefined) } as unknown as jest.Mocked<
+    ({ initialize: vi.fn().mockResolvedValue(undefined) } as unknown as Mocked<
       Pick<ChangeHistoryClient, 'initialize'>
     >);
 

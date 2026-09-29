@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Feature } from 'geojson';
 import type { ESTermSourceDescriptor } from '../../../common/descriptor_types';
 import type { IVectorSource } from '../sources/vector_source';
@@ -12,8 +14,8 @@ import type { IField } from '../fields/field';
 import { createJoinSource, InnerJoin } from './inner_join';
 import { AGG_TYPE, SOURCE_TYPES } from '../../../common/constants';
 
-jest.mock('../../kibana_services', () => {});
-jest.mock('../layers/vector_layer', () => {});
+vi.mock('../../kibana_services', () => {});
+vi.mock('../layers/vector_layer', () => {});
 
 const rightSource = {
   type: SOURCE_TYPES.ES_TERM_SOURCE,

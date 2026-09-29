@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import type { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
@@ -20,7 +22,7 @@ const name = 'Some text field';
 const id = 'some:text:field';
 
 describe('TextInput', () => {
-  const onInputChange = jest.fn();
+  const onInputChange = vi.fn();
   const defaultProps: TextInputProps = {
     onInputChange,
     field: {
@@ -41,7 +43,7 @@ describe('TextInput', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('renders without errors', () => {
@@ -68,7 +70,7 @@ describe('TextInput', () => {
 
   it('calls the onInputChange prop with an error when the value fails validation', async () => {
     const services = createFieldInputServicesMock();
-    services.validateChange = jest.fn().mockResolvedValue({
+    services.validateChange = vi.fn().mockResolvedValue({
       successfulValidation: true,
       valid: false,
       errorMessage: 'Invalid value',
@@ -89,11 +91,11 @@ describe('TextInput', () => {
   });
 
   it('ignores an out-of-order validation response for a stale value', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const resolvers: Array<(value: ValueValidation) => void> = [];
     const services = createFieldInputServicesMock();
-    services.validateChange = jest
+    services.validateChange = vi
       .fn()
       .mockImplementation(() => new Promise<ValueValidation>((resolve) => resolvers.push(resolve)));
 
@@ -102,11 +104,11 @@ describe('TextInput', () => {
 
     // First edit: its validation is requested but will resolve last (out of order).
     fireEvent.change(input, { target: { value: 'first' } });
-    act(() => jest.advanceTimersByTime(500));
+    act(() => vi.advanceTimersByTime(500));
 
     // Second edit: its validation is requested next and will resolve first.
     fireEvent.change(input, { target: { value: 'second' } });
-    act(() => jest.advanceTimersByTime(500));
+    act(() => vi.advanceTimersByTime(500));
 
     expect(services.validateChange).toHaveBeenNthCalledWith(1, id, 'first');
     expect(services.validateChange).toHaveBeenNthCalledWith(2, id, 'second');

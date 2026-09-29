@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import { fetchAnalyticsCollections } from './fetch_analytics_collection';
@@ -13,14 +15,14 @@ describe('fetch analytics collection lib function', () => {
   const mockClient = {
     asCurrentUser: {
       searchApplication: {
-        getBehavioralAnalytics: jest.fn(),
+        getBehavioralAnalytics: vi.fn(),
       },
     },
     asInternalUser: {},
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('fetch collections', () => {

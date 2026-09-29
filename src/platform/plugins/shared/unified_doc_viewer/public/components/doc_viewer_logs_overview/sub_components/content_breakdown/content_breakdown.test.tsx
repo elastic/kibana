@@ -7,43 +7,54 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ContentBreakdown } from './content_breakdown';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiCodeBlock: ({ children }: { children?: React.ReactNode }) => (
-    <pre>
-      <code data-test-subj="codeBlock">{children}</code>
-    </pre>
-  ),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiCodeBlock: ({ children }: { children?: React.ReactNode }) => (
+        <pre>
+          <code data-test-subj="codeBlock">{children}</code>
+        </pre>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hover_popover_action', () => ({
-  HoverActionPopover: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../hover_popover_action', () => {
+      const mocked = {
+      HoverActionPopover: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockConvertToReact = jest.fn((value: unknown) => value);
+const mockConvertToReact = vi.fn((value: unknown) => value);
 
-jest.mock('../../../../plugin', () => ({
-  getUnifiedDocViewerServices: () => ({
-    fieldFormats: {
-      getDefaultInstance: () => ({
-        convertToReact: mockConvertToReact,
+vi.mock('../../../../plugin', () => {
+      const mocked = {
+      getUnifiedDocViewerServices: () => ({
+        fieldFormats: {
+          getDefaultInstance: () => ({
+            convertToReact: mockConvertToReact,
+          }),
+        },
       }),
-    },
-  }),
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDataView = {
   fields: {
     getAll: () => [],
     getByName: () => undefined,
   },
-  getFormatterForField: jest.fn(() => ({ convertToText: (value: unknown) => value })),
+  getFormatterForField: vi.fn(() => ({ convertToText: (value: unknown) => value })),
 } as unknown as DataView;
 
 const buildHit = (fields: Record<string, unknown> = {}, highlight?: Record<string, string[]>) =>

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { CloudConnectorSOAttributes } from '../../types/so_attributes';
@@ -34,23 +36,32 @@ import {
 } from './iac_integrations';
 import { getIacKeyOutcome, verifyCloudConnectorIacKey } from './iac_key_verification';
 
-jest.mock('../app_context');
-jest.mock('../iac_provisioner', () => ({ iacProvisionerService: { renderTemplate: jest.fn() } }));
-jest.mock('../iac_provisioner_integrations', () => ({
-  ...jest.requireActual('../iac_provisioner_integrations'),
-  buildIacProvisionerIntegrations: jest.fn(),
-}));
-jest.mock('../utils/iac_provisioner');
-jest.mock('../telemetry/iac_provisioner_telemetry');
-jest.mock('./iac_integrations', () => ({
-  ...jest.requireActual('./iac_integrations'),
-  getCloudConnectorIntegrationSelections: jest.fn(),
-}));
+vi.mock('../app_context');
+vi.mock('../iac_provisioner', () => {
+      const mocked = { iacProvisionerService: { renderTemplate: vi.fn() } };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../iac_provisioner_integrations', async () => {
+      const mocked = {
+      ...(await vi.importActual('../iac_provisioner_integrations')),
+      buildIacProvisionerIntegrations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../utils/iac_provisioner');
+vi.mock('../telemetry/iac_provisioner_telemetry');
+vi.mock('./iac_integrations', async () => {
+      const mocked = {
+      ...(await vi.importActual('./iac_integrations')),
+      getCloudConnectorIntegrationSelections: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedRender = jest.mocked(iacProvisionerService.renderTemplate);
-const mockedSupported = jest.mocked(isIacProvisionerSupportedFor);
-const mockedSelections = jest.mocked(getCloudConnectorIntegrationSelections);
-const mockedResolve = jest.mocked(buildIacProvisionerIntegrations);
+const mockedRender = vi.mocked(iacProvisionerService.renderTemplate);
+const mockedSupported = vi.mocked(isIacProvisionerSupportedFor);
+const mockedSelections = vi.mocked(getCloudConnectorIntegrationSelections);
+const mockedResolve = vi.mocked(buildIacProvisionerIntegrations);
 
 /** The lookup's answer for a connector whose stored set fits under the render cap. */
 const stored = (integrations: IacIntegrationSelection[]) => ({ integrations, exceedsCap: false });
@@ -105,8 +116,8 @@ describe('getIacKeyOutcome', () => {
   const keyless = { cloudProvider: 'aws', iac_key: undefined } as const;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(loggingSystemMock.createLogger());
+    vi.clearAllMocks();
+    vi.spyOn(appContextService, 'getLogger').mockReturnValue(loggingSystemMock.createLogger());
     mockedSupported.mockResolvedValue(true);
     mockedResolve.mockResolvedValue(RESOLVED_AWS);
   });
@@ -254,7 +265,7 @@ describe('getIacKeyOutcome', () => {
     // The render route the browser then calls rejects that very entry, so an "upgrade available"
     // verdict over the surviving entries would be a dead end.
     const logger = loggingSystemMock.createLogger();
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
+    vi.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
     mockedResolve.mockResolvedValueOnce(STALE_BUILD_ERROR);
 
     const result = await getIacKeyOutcome(soClient, keyed, selections, opts);
@@ -285,9 +296,9 @@ describe('verifyCloudConnectorIacKey', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggingSystemMock.createLogger();
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
+    vi.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
     soClient.update.mockResolvedValue({} as any);
     mockedSupported.mockResolvedValue(true);
     mockedSelections.mockResolvedValue(

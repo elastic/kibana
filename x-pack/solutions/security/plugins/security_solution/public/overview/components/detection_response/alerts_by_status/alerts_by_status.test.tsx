@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AlertsByStatus } from './alerts_by_status';
@@ -16,28 +19,34 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { useAlertsByStatus } from './use_alerts_by_status';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../common/lib/kibana/kibana_react');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/lib/kibana/kibana_react');
 
-jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
-jest.mock('./chart_label', () => {
+vi.mock('../../../../common/components/visualization_actions/visualization_embeddable');
+vi.mock('./chart_label', () => {
   return {
-    ChartLabel: jest.fn((props) => <span data-test-subj="chart-label" {...props} />),
+    ChartLabel: vi.fn((props) => <span data-test-subj="chart-label" {...props} />),
   };
 });
-jest.mock('./use_alerts_by_status', () => ({
-  useAlertsByStatus: jest.fn().mockReturnValue({
-    items: [],
-    isLoading: true,
-  }),
-}));
+vi.mock('./use_alerts_by_status', () => {
+      const mocked = {
+      useAlertsByStatus: vi.fn().mockReturnValue({
+        items: [],
+        isLoading: true,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/containers/use_global_time', () => ({
-  useGlobalTime: jest.fn().mockReturnValue({
-    from: '2022-04-08T12:00:00.000Z',
-    to: '2022-04-09T12:00:00.000Z',
-  }),
-}));
+vi.mock('../../../../common/containers/use_global_time', () => {
+      const mocked = {
+      useGlobalTime: vi.fn().mockReturnValue({
+        from: '2022-04-08T12:00:00.000Z',
+        to: '2022-04-09T12:00:00.000Z',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 describe('AlertsByStatus', () => {
   const mockCases = mockCasesContract();
 
@@ -46,22 +55,22 @@ describe('AlertsByStatus', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: {
         cases: mockCases,
         application: {
           capabilities: { [CASES_FEATURE_ID]: { crud_cases: true, read_cases: true } },
-          getUrlForApp: jest.fn(),
+          getUrlForApp: vi.fn(),
         },
         theme: {},
       },
     });
-    (useAlertsByStatus as jest.Mock).mockReturnValue({
+    (useAlertsByStatus as Mock).mockReturnValue({
       items: [],
       isLoading: true,
     });
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { read: true },
     });
   });
@@ -110,7 +119,7 @@ describe('AlertsByStatus', () => {
   });
 
   test('shows correct names when entity filter IS provided AND user does not have timeline privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: {},
     });
     const { getByText, getByTestId } = render(
@@ -137,7 +146,7 @@ describe('AlertsByStatus', () => {
       ...props,
       isInitialLoading: false,
     };
-    (useAlertsByStatus as jest.Mock).mockReturnValue({
+    (useAlertsByStatus as Mock).mockReturnValue({
       items: parsedMockAlertsData,
       isLoading: false,
     });
@@ -156,7 +165,7 @@ describe('AlertsByStatus', () => {
       isInitialLoading: false,
     };
 
-    (useAlertsByStatus as jest.Mock).mockReturnValue({
+    (useAlertsByStatus as Mock).mockReturnValue({
       items: parsedMockAlertsData,
       isLoading: false,
     });

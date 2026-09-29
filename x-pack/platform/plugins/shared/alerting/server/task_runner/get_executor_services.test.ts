@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
@@ -19,32 +22,44 @@ import { ruleResultServiceMock } from '../monitoring/rule_result_service.mock';
 import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
 import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 
-jest.mock('../lib/wrap_scoped_cluster_client', () => ({
-  createWrappedScopedClusterClientFactory: jest.fn().mockReturnValue({}),
-}));
+vi.mock('../lib/wrap_scoped_cluster_client', () => {
+      const mocked = {
+      createWrappedScopedClusterClientFactory: vi.fn().mockReturnValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/wrap_search_source_client', () => ({
-  wrapSearchSourceClient: jest.fn().mockResolvedValue({}),
-}));
+vi.mock('../lib/wrap_search_source_client', () => {
+      const mocked = {
+      wrapSearchSourceClient: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/wrap_async_search_client', () => ({
-  wrapAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn(), getMetrics: jest.fn() }),
-}));
+vi.mock('../lib/wrap_async_search_client', () => {
+      const mocked = {
+      wrapAsyncSearchClient: vi.fn().mockReturnValue({ search: vi.fn(), getMetrics: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./resolve_cps_data', () => ({
-  resolveCpsData: jest.fn().mockResolvedValue({ linkedProjects: [] }),
-}));
+vi.mock('./resolve_cps_data', () => {
+      const mocked = {
+      resolveCpsData: vi.fn().mockResolvedValue({ linkedProjects: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const projectRouting: AsScopedOptions = { projectRouting: 'space' };
 
-function createMockContext(): jest.Mocked<TaskRunnerContext> {
+function createMockContext(): Mocked<TaskRunnerContext> {
   const elasticsearch = elasticsearchServiceMock.createInternalStart();
   const dataPlugin = dataPluginMock.createStartContract();
-  const asScopedDataSearch = jest.fn().mockReturnValue({ search: jest.fn() });
-  const asScopedSearchSource = jest.fn().mockResolvedValue({});
+  const asScopedDataSearch = vi.fn().mockReturnValue({ search: vi.fn() });
+  const asScopedSearchSource = vi.fn().mockResolvedValue({});
   const searchMock = dataPlugin.search as unknown as {
-    asScoped: jest.Mock;
-    searchSource: { asScoped: jest.Mock };
+    asScoped: Mock;
+    searchSource: { asScoped: Mock };
   };
   searchMock.asScoped = asScopedDataSearch;
   searchMock.searchSource = { asScoped: asScopedSearchSource };
@@ -55,10 +70,10 @@ function createMockContext(): jest.Mocked<TaskRunnerContext> {
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     dataViews: {
-      dataViewsServiceFactory: jest.fn().mockResolvedValue({}),
-      getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
+      dataViewsServiceFactory: vi.fn().mockResolvedValue({}),
+      getScriptedFieldsEnabled: vi.fn().mockReturnValue(true),
     } as TaskRunnerContext['dataViews'],
-  } as unknown as jest.Mocked<TaskRunnerContext>;
+  } as unknown as Mocked<TaskRunnerContext>;
 }
 
 function createFakeRequest(): KibanaRequest {
@@ -81,11 +96,11 @@ describe('getExecutorServices', () => {
   };
   const ruleMonitoringService = ruleMonitoringServiceMock.create();
   const ruleResultService = ruleResultServiceMock.create();
-  (ruleMonitoringService.getSetters as jest.Mock).mockReturnValue({});
-  (ruleResultService.getLastRunSetters as jest.Mock).mockReturnValue({});
+  (ruleMonitoringService.getSetters as Mock).mockReturnValue({});
+  (ruleResultService.getLastRunSetters as Mock).mockReturnValue({});
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('projectRouting', () => {
@@ -114,7 +129,7 @@ describe('getExecutorServices', () => {
       const context = createMockContext();
       const fakeRequest = createFakeRequest();
       const searchSourceAsScoped = (
-        context.data.search as unknown as { searchSource: { asScoped: jest.Mock } }
+        context.data.search as unknown as { searchSource: { asScoped: Mock } }
       ).searchSource.asScoped;
 
       const executorServices = getExecutorServices({
@@ -136,7 +151,7 @@ describe('getExecutorServices', () => {
     it('calls data.search.asScoped with fakeRequest and projectRouting', () => {
       const context = createMockContext();
       const fakeRequest = createFakeRequest();
-      const dataSearchAsScoped = (context.data.search as unknown as { asScoped: jest.Mock })
+      const dataSearchAsScoped = (context.data.search as unknown as { asScoped: Mock })
         .asScoped;
 
       const executorServices = getExecutorServices({
@@ -173,7 +188,7 @@ describe('getExecutorServices', () => {
 
       await executorServices.getDataViews();
 
-      const scopedClusterClient = (context.elasticsearch.client.asScoped as jest.Mock).mock
+      const scopedClusterClient = (context.elasticsearch.client.asScoped as Mock).mock
         .results[0].value;
       expect(context.dataViews.dataViewsServiceFactory).toHaveBeenCalledWith(
         expect.anything(),
@@ -199,7 +214,7 @@ describe('getExecutorServices', () => {
 
       await executorServices.getCpsData();
 
-      const scopedClusterClient = (context.elasticsearch.client.asScoped as jest.Mock).mock
+      const scopedClusterClient = (context.elasticsearch.client.asScoped as Mock).mock
         .results[0].value;
       expect(resolveCpsData).toHaveBeenCalledWith(
         scopedClusterClient.asInternalUser,

@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { RecoveredActionGroup } from '../../../common';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { extractReferences } from './extract_references';
 import type { RulesClientContext } from '..';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 
-const loggerErrorMock = jest.fn();
-const getBulkMock = jest.fn();
+const loggerErrorMock = vi.fn();
+const getBulkMock = vi.fn();
 
-const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
+const ruleType: Mocked<UntypedNormalizedRuleType> = {
   id: 'test.rule-type',
   name: 'My test rule',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -22,7 +25,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   minimumLicenseRequired: 'basic',
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
-  executor: jest.fn(),
+  executor: vi.fn(),
   producer: 'alerts',
   solution: 'stack',
   cancelAlertsOnRuleTimeout: true,

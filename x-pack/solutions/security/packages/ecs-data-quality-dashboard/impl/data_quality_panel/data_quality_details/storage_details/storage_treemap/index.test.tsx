@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { DARK_THEME, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
@@ -47,7 +50,7 @@ const flattenedBuckets = getFlattenedBuckets({
   patternRollups,
 });
 
-const onIndexSelected = jest.fn();
+const onIndexSelected = vi.fn();
 
 const defaultProps: Props = {
   accessor: 'sizeInBytes',
@@ -58,11 +61,11 @@ const defaultProps: Props = {
   valueFormatter: formatBytes,
 };
 
-jest.mock('@elastic/charts', () => {
-  const actual = jest.requireActual('@elastic/charts');
+vi.mock('@elastic/charts', () => {
+  const actual = require('@elastic/charts');
   return {
     ...actual,
-    Settings: jest.fn().mockReturnValue(null),
+    Settings: vi.fn().mockReturnValue(null),
   };
 });
 
@@ -73,7 +76,7 @@ const primaryColor = 'test-primary-color';
 describe('StorageTreemap', () => {
   describe('when data is provided', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       render(
         <TestExternalProviders>
@@ -93,7 +96,7 @@ describe('StorageTreemap', () => {
     });
 
     test('it uses a theme with the expected `minFontSize` to show more labels at various screen resolutions', () => {
-      expect((Settings as jest.Mock).mock.calls[0][0].theme[0].partition.minFontSize).toEqual(4);
+      expect((Settings as Mock).mock.calls[0][0].theme[0].partition.minFontSize).toEqual(4);
     });
 
     describe('legend items', () => {

@@ -7,24 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
 import { EmailInput } from './email_input';
 
-const mockGetCurrentUserEmail = jest.fn();
+const mockGetCurrentUserEmail = vi.fn();
 
 const mockProps = {
   email: '',
-  handleChangeEmail: jest.fn(),
-  onValidationChange: jest.fn(),
+  handleChangeEmail: vi.fn(),
+  onValidationChange: vi.fn(),
   getCurrentUserEmail: mockGetCurrentUserEmail,
 };
 
 describe('EmailInput', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetCurrentUserEmail.mockResolvedValue(undefined);
   });
 

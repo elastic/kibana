@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import userEvent from '@testing-library/user-event';
@@ -27,11 +29,11 @@ describe('external link component', () => {
   };
 
   beforeEach(async () => {
-    window.open = jest.fn();
+    window.open = vi.fn();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('by default opens in new tab and renders external icon', async () => {
@@ -66,7 +68,7 @@ describe('external link component', () => {
     const link = await screen.findByTestId('externalLink--https://example.com');
     expect(link).toHaveTextContent('https://example.com');
     const clickEvent = createEvent.click(link, { ctrlKey: true });
-    const preventDefault = jest.spyOn(clickEvent, 'preventDefault');
+    const preventDefault = vi.spyOn(clickEvent, 'preventDefault');
     fireEvent(link, clickEvent);
     expect(preventDefault).toHaveBeenCalledTimes(0);
   });

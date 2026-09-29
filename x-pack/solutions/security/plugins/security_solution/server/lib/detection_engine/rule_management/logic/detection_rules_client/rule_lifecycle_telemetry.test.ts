@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import {
   getRulesSchemaMock,
@@ -22,20 +25,20 @@ import {
 } from './rule_lifecycle_telemetry';
 
 const mockAnalytics = (): AnalyticsServiceSetup =>
-  ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup);
+  ({ reportEvent: vi.fn() } as unknown as AnalyticsServiceSetup);
 
 const mockLogger = (): Logger =>
   ({
-    trace: jest.fn(),
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    trace: vi.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as unknown as Logger);
 
 describe('sendRuleLifecycleTelemetryEvent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('reports isPrebuilt false and isCustomized false for an internal rule', () => {
@@ -45,7 +48,7 @@ describe('sendRuleLifecycleTelemetryEvent', () => {
     sendRuleLifecycleTelemetryEvent(analytics, DETECTION_RULE_INSTALL_EVENT, rule);
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    const [eventType, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [eventType, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
     expect(eventType).toBe(DETECTION_RULE_INSTALL_EVENT.eventType);
     expect(payload).toEqual({
@@ -70,7 +73,7 @@ describe('sendRuleLifecycleTelemetryEvent', () => {
 
     sendRuleLifecycleTelemetryEvent(analytics, DETECTION_RULE_INSTALL_EVENT, rule);
 
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(payload.isPrebuilt).toBe(true);
     expect(payload.isCustomized).toBe(false);
   });
@@ -89,7 +92,7 @@ describe('sendRuleLifecycleTelemetryEvent', () => {
 
     sendRuleLifecycleTelemetryEvent(analytics, DETECTION_RULE_INSTALL_EVENT, rule);
 
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(payload.isPrebuilt).toBe(true);
     expect(payload.isCustomized).toBe(true);
   });
@@ -100,7 +103,7 @@ describe('sendRuleLifecycleTelemetryEvent', () => {
 
     sendRuleLifecycleTelemetryEvent(analytics, DETECTION_RULE_INSTALL_EVENT, rule);
 
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(payload.ruleType).toBe('eql');
   });
 
@@ -110,7 +113,7 @@ describe('sendRuleLifecycleTelemetryEvent', () => {
 
     sendRuleLifecycleTelemetryEvent(analytics, DETECTION_RULE_INSTALL_EVENT, rule);
 
-    const [eventType] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [eventType] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(eventType).toBe('detection_rule_install');
   });
 
@@ -120,7 +123,7 @@ describe('sendRuleLifecycleTelemetryEvent', () => {
 
     sendRuleLifecycleTelemetryEvent(analytics, DETECTION_RULE_INSTALL_EVENT, rule);
 
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(Object.keys(payload).sort()).toEqual(
       ['isCustomized', 'isPrebuilt', 'ruleId', 'ruleType'].sort()
     );
@@ -131,7 +134,7 @@ describe('sendRuleLifecycleTelemetryEvent', () => {
     const logger = mockLogger();
     const rule = getRulesSchemaMock();
 
-    (analytics.reportEvent as jest.Mock).mockImplementation(() => {
+    (analytics.reportEvent as Mock).mockImplementation(() => {
       throw new Error('Analytics service error');
     });
 
@@ -150,7 +153,7 @@ describe('sendRuleLifecycleTelemetryEvent', () => {
     const analytics = mockAnalytics();
     const rule = getRulesSchemaMock();
 
-    (analytics.reportEvent as jest.Mock).mockImplementation(() => {
+    (analytics.reportEvent as Mock).mockImplementation(() => {
       throw new Error('Analytics service error');
     });
 
@@ -162,7 +165,7 @@ describe('sendRuleLifecycleTelemetryEvent', () => {
 
 describe('sendRuleDuplicateTelemetryEvent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('reports isPrebuiltSource false and isCustomizedSource false for a rule duplicated from an internal rule', () => {
@@ -173,7 +176,7 @@ describe('sendRuleDuplicateTelemetryEvent', () => {
     sendRuleDuplicateTelemetryEvent(analytics, { createdRule, sourceRule });
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    const [eventType, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [eventType, payload] = (analytics.reportEvent as Mock).mock.calls[0];
 
     expect(eventType).toBe(DETECTION_RULE_DUPLICATE_EVENT.eventType);
     expect(payload).toEqual({
@@ -194,7 +197,7 @@ describe('sendRuleDuplicateTelemetryEvent', () => {
 
     sendRuleDuplicateTelemetryEvent(analytics, { createdRule, sourceRule });
 
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(payload.isPrebuiltSource).toBe(true);
     expect(payload.isCustomizedSource).toBe(false);
   });
@@ -208,7 +211,7 @@ describe('sendRuleDuplicateTelemetryEvent', () => {
 
     sendRuleDuplicateTelemetryEvent(analytics, { createdRule, sourceRule });
 
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(payload.isPrebuiltSource).toBe(true);
     expect(payload.isCustomizedSource).toBe(true);
   });
@@ -220,7 +223,7 @@ describe('sendRuleDuplicateTelemetryEvent', () => {
 
     sendRuleDuplicateTelemetryEvent(analytics, { createdRule, sourceRule });
 
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(payload.ruleType).toBe('eql');
   });
 
@@ -233,7 +236,7 @@ describe('sendRuleDuplicateTelemetryEvent', () => {
 
     sendRuleDuplicateTelemetryEvent(analytics, { createdRule, sourceRule });
 
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(payload.ruleId).toBe('created-rule-id');
     expect(payload.sourceRuleId).toBe('source-rule-id');
   });
@@ -245,7 +248,7 @@ describe('sendRuleDuplicateTelemetryEvent', () => {
 
     sendRuleDuplicateTelemetryEvent(analytics, { createdRule, sourceRule });
 
-    const [, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
+    const [, payload] = (analytics.reportEvent as Mock).mock.calls[0];
     expect(Object.keys(payload).sort()).toEqual(
       ['isCustomizedSource', 'isPrebuiltSource', 'ruleId', 'ruleType', 'sourceRuleId'].sort()
     );
@@ -257,7 +260,7 @@ describe('sendRuleDuplicateTelemetryEvent', () => {
     const sourceRule = getRuleMock(getQueryRuleParams({ ruleSource: { type: 'internal' } }));
     const createdRule = getRuleMock(getQueryRuleParams());
 
-    (analytics.reportEvent as jest.Mock).mockImplementation(() => {
+    (analytics.reportEvent as Mock).mockImplementation(() => {
       throw new Error('Analytics service error');
     });
 
@@ -277,7 +280,7 @@ describe('sendRuleDuplicateTelemetryEvent', () => {
     const sourceRule = getRuleMock(getQueryRuleParams({ ruleSource: { type: 'internal' } }));
     const createdRule = getRuleMock(getQueryRuleParams());
 
-    (analytics.reportEvent as jest.Mock).mockImplementation(() => {
+    (analytics.reportEvent as Mock).mockImplementation(() => {
       throw new Error('Analytics service error');
     });
 

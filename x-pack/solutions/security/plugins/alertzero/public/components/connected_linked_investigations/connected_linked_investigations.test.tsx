@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -16,12 +19,15 @@ import { useLinkedInvestigations } from '@kbn/agentic-investigations-plugin/publ
 import { statusSignal } from '../connected_status/status_signal';
 import { ConnectedLinkedInvestigations } from './connected_linked_investigations';
 
-jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
-  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
-  useLinkedInvestigations: jest.fn(),
-}));
+vi.mock('@kbn/agentic-investigations-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/agentic-investigations-plugin/public')),
+      useLinkedInvestigations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseLinkedInvestigations = useLinkedInvestigations as jest.Mock;
+const mockUseLinkedInvestigations = useLinkedInvestigations as Mock;
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
@@ -40,12 +46,12 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 const defaultProps = {
   escalationId: 'escalation-1',
   linkedInvestigationIds: ['inv-1', 'inv-2'],
-  onOpenInvestigation: jest.fn(),
+  onOpenInvestigation: vi.fn(),
 };
 
 describe('ConnectedLinkedInvestigations', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('passes the loading state to the list', () => {
@@ -53,7 +59,7 @@ describe('ConnectedLinkedInvestigations', () => {
       data: undefined,
       isLoading: true,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(<ConnectedLinkedInvestigations {...defaultProps} />, { wrapper });
@@ -66,7 +72,7 @@ describe('ConnectedLinkedInvestigations', () => {
       data: undefined,
       isLoading: false,
       isError: true,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(<ConnectedLinkedInvestigations {...defaultProps} />, { wrapper });
@@ -82,7 +88,7 @@ describe('ConnectedLinkedInvestigations', () => {
       ],
       isLoading: false,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(<ConnectedLinkedInvestigations {...defaultProps} />, { wrapper });
@@ -92,12 +98,12 @@ describe('ConnectedLinkedInvestigations', () => {
   });
 
   it('calls onOpenInvestigation with the correct conversationId and agentId when a row is clicked', () => {
-    const onOpenInvestigation = jest.fn();
+    const onOpenInvestigation = vi.fn();
     mockUseLinkedInvestigations.mockReturnValue({
       data: [{ id: 'inv-1', title: 'Mass file encryption', status: 'open', agent_id: 'agent-1' }],
       isLoading: false,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     render(
@@ -118,7 +124,7 @@ describe('ConnectedLinkedInvestigations', () => {
       data: [],
       isLoading: false,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     const ids = ['inv-x', 'inv-y'];
 
@@ -132,7 +138,7 @@ describe('ConnectedLinkedInvestigations', () => {
   });
 
   it('calls refetch when the status signal fires', () => {
-    const refetch = jest.fn();
+    const refetch = vi.fn();
     mockUseLinkedInvestigations.mockReturnValue({
       data: [],
       isLoading: false,

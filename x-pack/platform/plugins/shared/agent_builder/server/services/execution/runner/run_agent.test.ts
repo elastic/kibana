@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { getAgentFromRunContext, type ScopedRunnerRunAgentParams } from '@kbn/agent-builder-server';
 import { ConversationOriginType, ConversationRoundStatus } from '@kbn/agent-builder-common';
 
@@ -24,16 +27,16 @@ import {
 } from '../../../test_utils';
 import { createAgentHandler } from '../run_agent/create_handler';
 
-jest.mock('../run_agent/create_handler');
+vi.mock('../run_agent/create_handler');
 
-const createAgentHandlerMock = createAgentHandler as jest.MockedFn<typeof createAgentHandler>;
+const createAgentHandlerMock = createAgentHandler as MockedFunction<typeof createAgentHandler>;
 
 describe('runAgent', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
   let runnerManager: RunnerManager;
   let agent: MockedInternalAgent;
   let agentClient: AgentRegistryMock;
-  let agentHandler: jest.MockedFn<any>;
+  let agentHandler: MockedFunction<any>;
 
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
@@ -50,7 +53,7 @@ describe('runAgent', () => {
       async ({ agent: a }) => a.configuration
     );
 
-    agentHandler = jest.fn();
+    agentHandler = vi.fn();
     agentHandler.mockResolvedValue({
       result: { success: true },
     });
@@ -77,7 +80,7 @@ describe('runAgent', () => {
   });
 
   it('records the agent name on the run context stack', async () => {
-    const createChild = jest.spyOn(runnerManager, 'createChild');
+    const createChild = vi.spyOn(runnerManager, 'createChild');
 
     await runAgent({
       agentExecutionParams: {
@@ -98,7 +101,7 @@ describe('runAgent', () => {
 
   describe('origin on the run context stack', () => {
     const runAndReadAgentEntry = async (agentParams: ScopedRunnerRunAgentParams['agentParams']) => {
-      const createChild = jest.spyOn(runnerManager, 'createChild');
+      const createChild = vi.spyOn(runnerManager, 'createChild');
 
       await runAgent({
         agentExecutionParams: { agentId: 'test-agent', agentParams },

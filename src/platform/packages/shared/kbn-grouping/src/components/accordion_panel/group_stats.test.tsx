@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { GroupStats } from './group_stats';
 import { EuiContextMenu } from '@elastic/eui';
 
-const onTakeActionsOpen = jest.fn();
+const onTakeActionsOpen = vi.fn();
 const testProps = {
   bucketKey: '9nk5mo2fby',
   groupFilter: [],
@@ -44,7 +46,7 @@ const testProps = {
 };
 describe('Group stats', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders each stat item', () => {
@@ -106,7 +108,7 @@ describe('Group stats', () => {
 
 describe('Additional action buttons', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders additional action buttons when provided', () => {

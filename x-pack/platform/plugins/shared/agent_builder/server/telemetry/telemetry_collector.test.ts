@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -13,21 +16,24 @@ import { registerTelemetryCollector } from './telemetry_collector';
 import { AGENTBUILDER_USAGE_DOMAIN } from './usage_counters';
 
 // Mock the QueryUtils class
-jest.mock('./query_utils', () => ({
-  QueryUtils: jest.fn().mockImplementation(() => ({
-    getCustomToolsMetrics: jest.fn(),
-    getCustomAgentsMetrics: jest.fn(),
-    getSkillsMetrics: jest.fn(),
-    getPluginsCount: jest.fn(),
-    getConversationMetrics: jest.fn(),
-    getCountersByPrefix: jest.fn(),
-    getAllRoundMetrics: jest.fn(),
-  })),
-  isIndexNotFoundError: jest.fn(),
-}));
+vi.mock('./query_utils', () => {
+      const mocked = {
+      QueryUtils: vi.fn().mockImplementation(() => ({
+        getCustomToolsMetrics: vi.fn(),
+        getCustomAgentsMetrics: vi.fn(),
+        getSkillsMetrics: vi.fn(),
+        getPluginsCount: vi.fn(),
+        getConversationMetrics: vi.fn(),
+        getCountersByPrefix: vi.fn(),
+        getAllRoundMetrics: vi.fn(),
+      })),
+      isIndexNotFoundError: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('telemetry_collector', () => {
-  let mockUsageCollection: jest.Mocked<UsageCollectionSetup>;
+  let mockUsageCollection: Mocked<UsageCollectionSetup>;
   let logger: MockedLogger;
   let registeredCollector: any;
 
@@ -35,18 +41,18 @@ describe('telemetry_collector', () => {
     registeredCollector = null;
 
     mockUsageCollection = {
-      makeUsageCollector: jest.fn().mockImplementation((config) => {
+      makeUsageCollector: vi.fn().mockImplementation((config) => {
         registeredCollector = config;
         return config;
       }),
-      registerCollector: jest.fn(),
-    } as unknown as jest.Mocked<UsageCollectionSetup>;
+      registerCollector: vi.fn(),
+    } as unknown as Mocked<UsageCollectionSetup>;
 
     logger = loggerMock.create();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('registerTelemetryCollector', () => {
@@ -193,25 +199,25 @@ describe('telemetry_collector', () => {
     let mockContext: any;
     let mockQueryUtils: any;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       // Reset the mock for QueryUtils - using require since jest.mock hoists
-      const { QueryUtils } = jest.requireMock('./query_utils');
+      const { QueryUtils } = (await vi.importMock('./query_utils'));
       mockQueryUtils = {
-        getCustomToolsMetrics: jest.fn().mockResolvedValue({
+        getCustomToolsMetrics: vi.fn().mockResolvedValue({
           total: 10,
           by_type: [
             { type: 'esql', count: 5 },
             { type: 'workflow', count: 5 },
           ],
         }),
-        getCustomAgentsMetrics: jest.fn().mockResolvedValue(3),
-        getSkillsMetrics: jest.fn().mockResolvedValue({
+        getCustomAgentsMetrics: vi.fn().mockResolvedValue(3),
+        getSkillsMetrics: vi.fn().mockResolvedValue({
           total: 12,
           custom: 3,
           plugin: 4,
         }),
-        getPluginsCount: jest.fn().mockResolvedValue(7),
-        getConversationMetrics: jest.fn().mockResolvedValue({
+        getPluginsCount: vi.fn().mockResolvedValue(7),
+        getConversationMetrics: vi.fn().mockResolvedValue({
           total: 100,
           total_rounds: 500,
           avg_rounds_per_conversation: 5,
@@ -221,7 +227,7 @@ describe('telemetry_collector', () => {
           tokens_output: 20000,
           average_tokens_per_conversation: 500,
         }),
-        getAllRoundMetrics: jest.fn().mockResolvedValue({
+        getAllRoundMetrics: vi.fn().mockResolvedValue({
           ttft: {
             p50: 100,
             p75: 200,
@@ -271,7 +277,7 @@ describe('telemetry_collector', () => {
             },
           ],
         }),
-        getCountersByPrefix: jest.fn().mockImplementation((domain, prefix) => {
+        getCountersByPrefix: vi.fn().mockImplementation((domain, prefix) => {
           if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_query_to_result_time_`) {
             return Promise.resolve(
               new Map([

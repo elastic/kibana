@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
@@ -20,13 +22,13 @@ import { screen } from '@testing-library/react';
 describe('UserCommentPropertyActions', () => {
   const props = {
     isLoading: false,
-    onEdit: jest.fn(),
-    onQuote: jest.fn(),
-    onDelete: jest.fn(),
+    onEdit: vi.fn(),
+    onQuote: vi.fn(),
+    onDelete: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the correct number of actions', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AxiosError } from 'axios';
 import { OpenAIConnector } from './openai';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
@@ -25,11 +28,11 @@ import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server
 
 const DEFAULT_OTHER_OPENAI_MODEL = 'local-model';
 
-jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
-const mockTee = jest.fn();
+vi.mock('../lib/gen_ai/create_gen_ai_dashboard');
+const mockTee = vi.fn();
 
-const mockCreate = jest.fn().mockImplementation(() => ({
-  tee: mockTee.mockReturnValue([jest.fn(), jest.fn()]),
+const mockCreate = vi.fn().mockImplementation(() => ({
+  tee: mockTee.mockReturnValue([vi.fn(), vi.fn()]),
 }));
 const mockDefaults = {
   timeout: DEFAULT_TIMEOUT_MS,
@@ -37,9 +40,9 @@ const mockDefaults = {
   method: 'post',
   responseSchema: RunActionResponseSchema,
 };
-jest.mock('openai', () => ({
+vi.mock('openai', () => ({
   __esModule: true,
-  default: jest.fn().mockImplementation(() => ({
+  default: vi.fn().mockImplementation(() => ({
     api_key: '123',
     chat: {
       completions: {
@@ -50,8 +53,8 @@ jest.mock('openai', () => ({
 }));
 
 describe('OpenAIConnector', () => {
-  let mockRequest: jest.Mock;
-  let mockError: jest.Mock;
+  let mockRequest: Mock;
+  let mockError: Mock;
   let connectorUsageCollector: ConnectorUsageCollector;
 
   const logger = loggingSystemMock.createLogger();
@@ -85,8 +88,8 @@ describe('OpenAIConnector', () => {
       logger,
       connectorId: 'test-connector-id',
     });
-    mockRequest = jest.fn().mockResolvedValue(mockResponse);
-    mockError = jest.fn().mockImplementation(() => {
+    mockRequest = vi.fn().mockResolvedValue(mockResponse);
+    mockError = vi.fn().mockImplementation(() => {
       throw new Error('API Error');
     });
   });
@@ -121,7 +124,7 @@ describe('OpenAIConnector', () => {
     beforeEach(() => {
       // @ts-ignore
       connector.request = mockRequest;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('runApi', () => {
@@ -261,7 +264,7 @@ describe('OpenAIConnector', () => {
       });
 
       it('passes timeout and signal to runApi', async () => {
-        const signal = jest.fn();
+        const signal = vi.fn();
         const timeout = 12345;
         await connector.runApi(
           { body: JSON.stringify({ messages: [] }), signal, timeout },
@@ -430,7 +433,7 @@ describe('OpenAIConnector', () => {
           streamMock.write(chunk);
         });
         streamMock.complete();
-        mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: streamMock.transform });
+        mockRequest = vi.fn().mockResolvedValue({ ...mockResponse, data: streamMock.transform });
         return mockRequest;
       };
       beforeEach(() => {
@@ -464,7 +467,7 @@ describe('OpenAIConnector', () => {
       });
 
       it('signal is properly passed to streamApi', async () => {
-        const signal = jest.fn();
+        const signal = vi.fn();
         await connector.invokeStream({ ...sampleOpenAiBody, signal }, connectorUsageCollector);
 
         expect(mockRequest).toHaveBeenCalledWith(
@@ -559,7 +562,7 @@ describe('OpenAIConnector', () => {
       });
 
       it('signal is properly passed to runApi', async () => {
-        const signal = jest.fn();
+        const signal = vi.fn();
         await connector.invokeAI({ ...sampleOpenAiBody, signal }, connectorUsageCollector);
 
         expect(mockRequest).toHaveBeenCalledWith(
@@ -630,7 +633,7 @@ describe('OpenAIConnector', () => {
       });
       it('signal and timeout is properly passed', async () => {
         const timeout = 180000;
-        const signal = jest.fn();
+        const signal = vi.fn();
         await connector.invokeAsyncIterator(
           { ...sampleOpenAiBody, signal, timeout },
           connectorUsageCollector
@@ -782,7 +785,7 @@ describe('OpenAIConnector', () => {
     beforeEach(() => {
       // @ts-ignore
       connector.request = mockRequest;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('the OpenAI API call is successful with correct parameters', async () => {
@@ -839,7 +842,7 @@ describe('OpenAIConnector', () => {
     beforeEach(() => {
       // @ts-ignore
       connector.request = mockRequest;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('runApi', () => {
@@ -900,7 +903,7 @@ describe('OpenAIConnector', () => {
     beforeEach(() => {
       // @ts-ignore
       connector.request = mockRequest;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('runApi', () => {
@@ -1112,7 +1115,7 @@ describe('OpenAIConnector', () => {
           streamMock.write(chunk);
         });
         streamMock.complete();
-        mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: streamMock.transform });
+        mockRequest = vi.fn().mockResolvedValue({ ...mockResponse, data: streamMock.transform });
         return mockRequest;
       };
       beforeEach(() => {
@@ -1144,7 +1147,7 @@ describe('OpenAIConnector', () => {
       });
 
       it('signal is properly passed to streamApi', async () => {
-        const signal = jest.fn();
+        const signal = vi.fn();
         await connector.invokeStream({ ...sampleOpenAiBody, signal }, connectorUsageCollector);
 
         expect(mockRequest).toHaveBeenCalledWith(
@@ -1236,7 +1239,7 @@ describe('OpenAIConnector', () => {
       });
 
       it('signal is properly passed to runApi', async () => {
-        const signal = jest.fn();
+        const signal = vi.fn();
         await connector.invokeAI({ ...sampleOpenAiBody, signal }, connectorUsageCollector);
 
         expect(mockRequest).toHaveBeenCalledWith(
@@ -1320,7 +1323,7 @@ describe('OpenAIConnector', () => {
     beforeEach(() => {
       // @ts-ignore
       connector.request = mockRequest;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('runApi', () => {
@@ -1509,13 +1512,13 @@ describe('OpenAIConnector', () => {
       logger: loggingSystemMock.createLogger(),
       services: actionsMock.createServices(),
     });
-    const mockGenAi = initDashboard as jest.Mock;
+    const mockGenAi = initDashboard as Mock;
     beforeEach(() => {
       // @ts-ignore
       connector.esClient.transport.request = mockRequest;
       mockRequest.mockResolvedValue({ has_all_requested: true });
       mockGenAi.mockResolvedValue({ success: true });
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     it('the create dashboard API call returns available: true when user has correct permissions', async () => {
       const response = await connector.getDashboard({ dashboardId: '123' });
@@ -1631,7 +1634,7 @@ describe('OpenAIConnector', () => {
         services: actionsMock.createServices(),
       });
       // @ts-ignore
-      connector.request = jest.fn().mockResolvedValue({ data: {} });
+      connector.request = vi.fn().mockResolvedValue({ data: {} });
       // @ts-ignore
       connector.request = mockRequest;
       await connector.runApi(
@@ -1667,7 +1670,7 @@ describe('OpenAIConnector', () => {
         services: actionsMock.createServices(),
       });
       // @ts-ignore
-      connector.request = jest.fn().mockResolvedValue({ data: {} });
+      connector.request = vi.fn().mockResolvedValue({ data: {} });
       // @ts-ignore
       connector.request = mockRequest;
       await connector.runApi(

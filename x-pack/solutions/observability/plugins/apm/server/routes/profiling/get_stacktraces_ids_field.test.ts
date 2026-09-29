@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ELASTIC_PROFILER_STACK_TRACE_IDS,
   TRANSACTION_PROFILER_STACK_TRACE_IDS,
@@ -21,7 +23,7 @@ const defaultParams = {
 
 function createMockApmEventClient(hits: Array<{ fields?: Record<string, any> }>) {
   return {
-    search: jest.fn().mockResolvedValue({
+    search: vi.fn().mockResolvedValue({
       hits: { hits },
     }),
   } as any;

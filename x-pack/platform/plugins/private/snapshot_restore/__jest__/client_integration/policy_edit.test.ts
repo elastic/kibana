@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import './helpers/mocks';
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -63,7 +65,7 @@ describe('<PolicyEdit />', () => {
     });
 
     // Prevent route transitions after submit/cancel (not under test here).
-    jest.spyOn(renderResult.history, 'push').mockImplementation(() => {});
+    vi.spyOn(renderResult.history, 'push').mockImplementation(() => {});
 
     // Wait until the policy request has resolved and indices are still loading.
     await screen.findByText('Loading available indices…');
@@ -92,13 +94,13 @@ describe('<PolicyEdit />', () => {
     const renderResult = renderApp(httpSetup, { initialEntries: ['/add_policy'] });
 
     // Prevent route transitions after submit/cancel (not under test here).
-    jest.spyOn(renderResult.history, 'push').mockImplementation(() => {});
+    vi.spyOn(renderResult.history, 'push').mockImplementation(() => {});
 
     return renderResult;
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const env = setupEnvironment();
     httpSetup = env.httpSetup;

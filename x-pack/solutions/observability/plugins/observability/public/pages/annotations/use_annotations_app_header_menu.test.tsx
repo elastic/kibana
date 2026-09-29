@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
@@ -18,18 +20,18 @@ const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 const onboardingHref = '/app/observabilityOnboarding';
 const onboardingLocator = sharePluginMock.createLocator();
 onboardingLocator.useUrl.mockReturnValue(onboardingHref);
-jest
+vi
   .spyOn(mockUseKibanaReturnValue.services.share.url.locators, 'get')
   .mockReturnValue(onboardingLocator);
 
-jest.mock('../../utils/kibana_react', () => ({
+vi.mock('../../utils/kibana_react', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+  useKibana: vi.fn(() => mockUseKibanaReturnValue),
 }));
 
 describe('useAnnotationsAppHeaderMenu', () => {
   it('puts Add data first and Create annotation as the primary action', () => {
-    const onCreate = jest.fn();
+    const onCreate = vi.fn();
     const { result } = renderHook(() =>
       useAnnotationsAppHeaderMenu({
         includeCreate: true,
@@ -64,7 +66,7 @@ describe('useAnnotationsAppHeaderMenu', () => {
       useAnnotationsAppHeaderMenu({
         includeCreate: true,
         canWrite: false,
-        onCreate: jest.fn(),
+        onCreate: vi.fn(),
       })
     );
 

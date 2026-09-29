@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -21,7 +24,7 @@ import { appContextService } from '../services';
 
 import { DeleteUnenrolledAgentsTask, TYPE, VERSION } from './delete_unenrolled_agents_task';
 
-jest.mock('../services');
+vi.mock('../services');
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -44,8 +47,8 @@ describe('DeleteUnenrolledAgentsTask', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   let mockTask: DeleteUnenrolledAgentsTask;
   let mockCore: CoreSetup;
-  let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
-  const mockSettingsService = settingsService as jest.Mocked<typeof settingsService>;
+  let mockTaskManagerSetup: Mocked<TaskManagerSetupContract>;
+  const mockSettingsService = settingsService as Mocked<typeof settingsService>;
 
   beforeEach(() => {
     mockContract = createAppContextStartContractMock();
@@ -60,7 +63,7 @@ describe('DeleteUnenrolledAgentsTask', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Task lifecycle', () => {
@@ -97,7 +100,7 @@ describe('DeleteUnenrolledAgentsTask', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('Should delete unenrolled agents', async () => {

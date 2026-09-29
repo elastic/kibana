@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { findMigrationSavedObjects } from './find_migration_saved_objects';
 import { getMigrationSavedObjectsByIndex } from './get_migration_saved_objects_by_index';
 import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
 
-jest.mock('./find_migration_saved_objects');
+vi.mock('./find_migration_saved_objects');
 
 describe('getMigrationSavedObjectsByIndex', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
@@ -25,7 +28,7 @@ describe('getMigrationSavedObjectsByIndex', () => {
       getSignalsMigrationSavedObjectMock({ sourceIndex: index, version: 1 }),
       getSignalsMigrationSavedObjectMock({ sourceIndex: index, version: 2 }),
     ]);
-    (findMigrationSavedObjects as jest.Mock).mockResolvedValueOnce(migrations);
+    (findMigrationSavedObjects as Mock).mockResolvedValueOnce(migrations);
 
     const result = await getMigrationSavedObjectsByIndex({
       soClient,

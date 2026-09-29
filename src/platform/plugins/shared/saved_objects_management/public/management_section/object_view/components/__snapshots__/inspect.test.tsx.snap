@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Inspect component renders correctly 1`] = `
+exports[`Inspect component > renders correctly 1`] = `
 <CodeEditor
   aria-label="inspect MyIndexPattern*"
   enableFindAction={true}

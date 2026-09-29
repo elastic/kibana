@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { setStubKibanaServices } from '../../../services/mocks';
 import { dataService } from '../../../services/kibana_services';
 import { buildESQLPreFilter } from './filter_utils';
@@ -79,7 +81,7 @@ describe('buildESQLPreFilter', () => {
   });
 
   it('includes the dashboard time range as a DSL pre-filter when the query does not use time params', () => {
-    jest.spyOn(dataService.query.timefilter.timefilter, 'createFilter').mockReturnValue({
+    vi.spyOn(dataService.query.timefilter.timefilter, 'createFilter').mockReturnValue({
       meta: { type: 'range', key: '@timestamp' },
       query: { range: { '@timestamp': { gte: 'now-15m', lte: 'now' } } },
     } as any);

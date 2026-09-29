@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { join } from 'path';
 import type { PathConfigType } from '@kbn/utils';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -14,14 +17,20 @@ import { readFile, writeFile } from './fs';
 import { resolveInstanceUuid, UUID_7_6_0_BUG } from './resolve_uuid';
 import type { HttpConfigType } from './types';
 
-jest.mock('uuid', () => ({
-  v4: () => 'NEW_UUID',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => 'NEW_UUID',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./fs', () => ({
-  readFile: jest.fn(() => Promise.resolve('')),
-  writeFile: jest.fn(() => Promise.resolve('')),
-}));
+vi.mock('./fs', () => {
+      const mocked = {
+      readFile: vi.fn(() => Promise.resolve('')),
+      writeFile: vi.fn(() => Promise.resolve('')),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const DEFAULT_FILE_UUID = 'ffffffff-bbbb-0ccc-0ddd-eeeeeeeeeeee';
 const DEFAULT_CONFIG_UUID = 'cccccccc-bbbb-0ccc-0ddd-eeeeeeeeeeee';
@@ -36,7 +45,7 @@ const mockReadFile = ({
   uuid: string;
   error: any;
 }>) => {
-  (readFile as unknown as jest.Mock).mockImplementation(() => {
+  (readFile as unknown as Mock).mockImplementation(() => {
     if (error) {
       return Promise.reject(error);
     } else {
@@ -46,7 +55,7 @@ const mockReadFile = ({
 };
 
 const mockWriteFile = (error?: object) => {
-  (writeFile as unknown as jest.Mock).mockImplementation(() => {
+  (writeFile as unknown as Mock).mockImplementation(() => {
     if (error) {
       return Promise.reject(error);
     } else {
@@ -67,7 +76,7 @@ describe('resolveInstanceUuid', () => {
   let serverConfig: HttpConfigType;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockReadFile({ uuid: DEFAULT_FILE_UUID });
     mockWriteFile();
 

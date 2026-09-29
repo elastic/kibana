@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 
@@ -31,8 +33,8 @@ describe('TimeSliderControlApi', () => {
 
   const dashboardApi = {
     timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
-    lastSavedStateForChild$: jest.fn(),
-    getLastSavedStateForChild: jest.fn(),
+    lastSavedStateForChild$: vi.fn(),
+    getLastSavedStateForChild: vi.fn(),
   };
   const factory = getTimesliderControlFactory();
   const finalizeApi = getMockedFinalizeApi<TimeSliderControlState, TimeSliderControlApi>(
@@ -58,7 +60,7 @@ describe('TimeSliderControlApi', () => {
 
   test('Should set timeslice to the entire range when provided the default state', async () => {
     const { api } = await factory.buildEmbeddable({
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
       initialState: DEFAULT_TIME_SLIDER_STATE,
       finalizeApi,
       uuid,
@@ -75,7 +77,7 @@ describe('TimeSliderControlApi', () => {
 
   test('Should set timeslice to values within time range when state provides percentage of timeRange', async () => {
     const { api } = await factory.buildEmbeddable({
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
       initialState: {
         ...DEFAULT_TIME_SLIDER_STATE,
         start_percentage_of_time_range: 0.25,
@@ -97,7 +99,7 @@ describe('TimeSliderControlApi', () => {
 
   test('Should update timeslice when time range changes', async () => {
     const { api } = await factory.buildEmbeddable({
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
       initialState: {
         ...DEFAULT_TIME_SLIDER_STATE,
         start_percentage_of_time_range: 0.25,
@@ -127,7 +129,7 @@ describe('TimeSliderControlApi', () => {
 
   test('Clicking previous button should advance timeslice backward', async () => {
     const { api } = await factory.buildEmbeddable({
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
       initialState: {
         ...DEFAULT_TIME_SLIDER_STATE,
         start_percentage_of_time_range: 0.25,
@@ -155,7 +157,7 @@ describe('TimeSliderControlApi', () => {
 
   test('Clicking previous button should wrap when time range start is reached', async () => {
     const { api } = await factory.buildEmbeddable({
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
       initialState: {
         ...DEFAULT_TIME_SLIDER_STATE,
         start_percentage_of_time_range: 0.25,
@@ -184,7 +186,7 @@ describe('TimeSliderControlApi', () => {
 
   test('Clicking next button should advance timeslice forward', async () => {
     const { api } = await factory.buildEmbeddable({
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
       initialState: {
         ...DEFAULT_TIME_SLIDER_STATE,
         start_percentage_of_time_range: 0.25,
@@ -212,7 +214,7 @@ describe('TimeSliderControlApi', () => {
 
   test('Clicking next button should wrap when time range end is reached', async () => {
     const { api } = await factory.buildEmbeddable({
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
       initialState: {
         ...DEFAULT_TIME_SLIDER_STATE,
         start_percentage_of_time_range: 0.25,
@@ -248,7 +250,7 @@ describe('TimeSliderControlApi', () => {
     };
     dashboardApi.getLastSavedStateForChild.mockReturnValueOnce(controlState);
     const { api } = await factory.buildEmbeddable({
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
       initialState: controlState,
       finalizeApi,
       uuid,
@@ -288,7 +290,7 @@ describe('TimeSliderControlApi', () => {
         is_anchored: true,
       };
       const embeddable = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -304,7 +306,7 @@ describe('TimeSliderControlApi', () => {
     test('should not have unsaved changes when there are no changes', async () => {
       const initialState = timeSliderControlSchema.parse({});
       const embeddable = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -320,43 +322,55 @@ describe('TimeSliderControlApi', () => {
 
   describe('anyStateChange$', () => {
     let embeddableApi: TimeSliderControlApi;
-    beforeEach((done) => {
-      factory
-        .buildEmbeddable({
-          initializeDrilldownsManager: jest.fn(),
-          initialState: timeSliderControlSchema.parse({
-            start_percentage_of_time_range: 0.15,
-            end_percentage_of_time_range: 0.25,
-          }),
-          finalizeApi,
-          uuid,
-          parentApi: {},
-        })
-        .then(({ api }) => {
-          embeddableApi = api;
-          done();
-        })
-        .catch(done);
-    });
+    beforeEach(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+            fail: reject,
+          });
 
-    test('should not emit on subscribe and emit when any state changes', (done) => {
-      let emitCount = 0;
-      embeddableApi.anyStateChange$.subscribe(() => {
-        emitCount++;
-        // clearSelections updates start and stop. Only validate on first emit
-        if (emitCount > 1) return;
-        try {
-          const { start_percentage_of_time_range } = embeddableApi.serializeState();
-          expect(start_percentage_of_time_range).toBe(0);
-        } catch (error) {
-          // start_percentage_of_time_range assertion fails when
-          // anyStateChange$ emits on subscribe
-          done(error);
-          return;
-        }
-        done();
-      });
-      embeddableApi.clearSelections();
-    });
+          factory
+            .buildEmbeddable({
+              initializeDrilldownsManager: vi.fn(),
+              initialState: timeSliderControlSchema.parse({
+                start_percentage_of_time_range: 0.15,
+                end_percentage_of_time_range: 0.25,
+              }),
+              finalizeApi,
+              uuid,
+              parentApi: {},
+            })
+            .then(({ api }) => {
+              embeddableApi = api;
+              done();
+            })
+            .catch(done);
+        })
+    );
+
+    test('should not emit on subscribe and emit when any state changes', () =>
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
+
+        let emitCount = 0;
+        embeddableApi.anyStateChange$.subscribe(() => {
+          emitCount++;
+          // clearSelections updates start and stop. Only validate on first emit
+          if (emitCount > 1) return;
+          try {
+            const { start_percentage_of_time_range } = embeddableApi.serializeState();
+            expect(start_percentage_of_time_range).toBe(0);
+          } catch (error) {
+            // start_percentage_of_time_range assertion fails when
+            // anyStateChange$ emits on subscribe
+            done(error);
+            return;
+          }
+          done();
+        });
+        embeddableApi.clearSelections();
+      }));
   });
 });

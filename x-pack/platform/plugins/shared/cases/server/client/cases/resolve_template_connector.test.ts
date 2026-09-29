@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { ConnectorTypes } from '../../../common/types/domain';
@@ -15,7 +17,7 @@ describe('resolveTemplateConnector', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     actionsClient.get.mockRejectedValue(new Error('not found'));
   });
 

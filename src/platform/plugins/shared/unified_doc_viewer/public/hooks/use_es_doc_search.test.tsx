@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook, act } from '@testing-library/react';
 import { type EsDocSearchProps, buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { Subject } from 'rxjs';
@@ -22,7 +24,7 @@ const mockSearchResult = new Subject();
 setUnifiedDocViewerServices({
   data: {
     search: {
-      search: jest.fn(() => {
+      search: vi.fn(() => {
         return mockSearchResult;
       }),
     },

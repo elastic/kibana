@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -13,17 +16,20 @@ import { useFetchSLOSuggestions } from '../hooks/use_fetch_suggestions';
 import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
 import type { CreateSLOForm } from '../types';
 
-jest.mock('../hooks/use_fetch_suggestions');
+vi.mock('../hooks/use_fetch_suggestions');
 // The dashboards selector needs uiActions/embeddable wiring that is irrelevant to the
 // tags field under test; stub it out to keep the tags combo box the only combo box.
-jest.mock('@kbn/dashboards-selector', () => ({
-  DashboardsSelector: () => <div data-test-subj="dashboardsSelectorMock" />,
-}));
+vi.mock('@kbn/dashboards-selector', () => {
+      const mocked = {
+      DashboardsSelector: () => <div data-test-subj="dashboardsSelectorMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useFetchSLOSuggestionsMock = useFetchSLOSuggestions as jest.Mock;
+const useFetchSLOSuggestionsMock = useFetchSLOSuggestions as Mock;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   useFetchSLOSuggestionsMock.mockReturnValue({ suggestions: { tags: [] } });
 });
 

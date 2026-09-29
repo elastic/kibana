@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -15,7 +17,7 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('EditableTitle', () => {
   const mount = useMountAppended();
-  const submitTitle = jest.fn();
+  const submitTitle = vi.fn();
   const defaultProps: EditableTitleProps = {
     title: 'Test title',
     onSubmit: submitTitle,
@@ -23,7 +25,7 @@ describe('EditableTitle', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders', () => {

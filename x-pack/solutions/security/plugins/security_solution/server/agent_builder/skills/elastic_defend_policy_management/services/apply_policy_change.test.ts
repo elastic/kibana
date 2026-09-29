@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AuthenticatedUser, StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
@@ -87,8 +90,8 @@ const createWriteDeps = () => {
   const endpointAppContextService = createMockEndpointAppContextService();
   const request = httpServerMock.createKibanaRequest();
   const soClient = { sentinel: 'request-scoped-so-client' };
-  const getStartServices = jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) } },
+  const getStartServices = vi.fn(async () => [
+    { savedObjects: { getScopedClient: vi.fn().mockReturnValue(soClient) } },
   ]) as unknown as StartServicesAccessor;
 
   endpointAppContextService.getEndpointAuthz.mockResolvedValue(
@@ -101,22 +104,22 @@ const createWriteDeps = () => {
   Object.assign(endpointAppContextService, {
     security: {
       authc: {
-        getCurrentUser: jest.fn().mockReturnValue(authenticatedUser),
+        getCurrentUser: vi.fn().mockReturnValue(authenticatedUser),
       },
     },
   });
 
   const licenseService = endpointAppContextService.getLicenseService();
-  licenseService.getLicenseType = jest.fn(() => 'enterprise');
-  licenseService.getLicenseInformation = jest.fn(() => Enterprise);
-  licenseService.isPlatinumPlus = jest.fn(() => true);
-  licenseService.isEnterprise = jest.fn(() => true);
+  licenseService.getLicenseType = vi.fn(() => 'enterprise');
+  licenseService.getLicenseInformation = vi.fn(() => Enterprise);
+  licenseService.isPlatinumPlus = vi.fn(() => true);
+  licenseService.isEnterprise = vi.fn(() => true);
 
   const fleet = endpointAppContextService.getInternalFleetServices();
-  const getById = jest.spyOn(fleet.packagePolicy, 'get');
-  const listByName = jest.spyOn(fleet.packagePolicy, 'list');
-  const update = jest.spyOn(fleet.packagePolicy, 'update');
-  const ensureInCurrentSpace = jest.spyOn(fleet, 'ensureInCurrentSpace');
+  const getById = vi.spyOn(fleet.packagePolicy, 'get');
+  const listByName = vi.spyOn(fleet.packagePolicy, 'list');
+  const update = vi.spyOn(fleet.packagePolicy, 'update');
+  const ensureInCurrentSpace = vi.spyOn(fleet, 'ensureInCurrentSpace');
   ensureInCurrentSpace.mockResolvedValue(undefined);
 
   return {
@@ -137,7 +140,7 @@ const createWriteDeps = () => {
 
 describe('apply policy change', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('rejects oversized input before authorization or policy I/O', async () => {
@@ -167,7 +170,7 @@ describe('apply policy change', () => {
     const { deps, endpointAppContextService, getById, update } = createWriteDeps();
     (
       endpointAppContextService as unknown as {
-        security: { authc: { getCurrentUser: jest.Mock } };
+        security: { authc: { getCurrentUser: Mock } };
       }
     ).security.authc.getCurrentUser.mockReturnValue(null);
 
@@ -182,7 +185,7 @@ describe('apply policy change', () => {
   it('refuses a stale version before assessment blockers, enrollment, or Fleet update', async () => {
     const { deps, getById, update } = createWriteDeps();
     getById.mockResolvedValue(createEndpointPolicy());
-    const countSpy = jest.spyOn(countEndpointsModule, 'countEndpoints');
+    const countSpy = vi.spyOn(countEndpointsModule, 'countEndpoints');
 
     await expect(
       applyPolicyChange(deps, rawParams({ expectedVersion: `  ${EXPECTED_VERSION}  ` }), {
@@ -198,7 +201,7 @@ describe('apply policy change', () => {
     const policy = createEndpointPolicy();
     requireStoredPolicy(policy).windows.malware.mode = ProtectionModes.detect;
     getById.mockResolvedValue(policy);
-    const countSpy = jest.spyOn(countEndpointsModule, 'countEndpoints');
+    const countSpy = vi.spyOn(countEndpointsModule, 'countEndpoints');
 
     await expect(
       applyPolicyChange(
@@ -221,7 +224,7 @@ describe('apply policy change', () => {
     const policy = createEndpointPolicy();
     requireStoredPolicy(policy).windows.malware.mode = ProtectionModes.detect;
     getById.mockResolvedValue(policy);
-    const countSpy = jest.spyOn(countEndpointsModule, 'countEndpoints');
+    const countSpy = vi.spyOn(countEndpointsModule, 'countEndpoints');
 
     await expect(
       applyPolicyChange(deps, rawParams(), { callSource: 'agent' })
@@ -235,7 +238,7 @@ describe('apply policy change', () => {
     const policy = createEndpointPolicy({ is_managed: true });
     requireStoredPolicy(policy).windows.malware.mode = ProtectionModes.prevent;
     getById.mockResolvedValue(policy);
-    const countSpy = jest.spyOn(countEndpointsModule, 'countEndpoints');
+    const countSpy = vi.spyOn(countEndpointsModule, 'countEndpoints');
 
     await expect(
       applyPolicyChange(deps, rawParams(), { callSource: 'agent' })
@@ -255,7 +258,7 @@ describe('apply policy change', () => {
     });
     requireStoredPolicy(returned).windows.malware.mode = ProtectionModes.detect;
     update.mockResolvedValue(returned);
-    jest.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue({
+    vi.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue({
       population: 'enrolled_agents',
       source: 'fleet_status_aggregation',
       status: { all: 3 },
@@ -303,7 +306,7 @@ describe('apply policy change', () => {
     });
     requireStoredPolicy(returned).windows.malware.mode = ProtectionModes.prevent;
     update.mockResolvedValue(returned);
-    jest.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(emptyEnrollment);
+    vi.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(emptyEnrollment);
 
     const result = await applyPolicyChange(deps, rawParams(), { callSource: 'agent' });
 
@@ -326,8 +329,8 @@ describe('apply policy change', () => {
     requireStoredPolicy(observed).windows.malware.mode = ProtectionModes.detect;
     getById.mockResolvedValueOnce(policy).mockResolvedValueOnce(observed);
     update.mockRejectedValue(new Error('so version conflict'));
-    jest.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(emptyEnrollment);
-    const getByIdHelper = jest.spyOn(policyLookup, 'getPackagePolicyById');
+    vi.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(emptyEnrollment);
+    const getByIdHelper = vi.spyOn(policyLookup, 'getPackagePolicyById');
 
     await expect(
       applyPolicyChange(deps, rawParams(), { callSource: 'agent' })
@@ -352,7 +355,7 @@ describe('apply policy change', () => {
       package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
     });
     update.mockResolvedValue({ ...createEndpointPolicy(), package: undefined });
-    jest.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(emptyEnrollment);
+    vi.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(emptyEnrollment);
 
     const error = await applyPolicyChange(deps, rawParams(), { callSource: 'agent' }).catch(
       (caught) => caught
@@ -380,7 +383,7 @@ describe('apply policy change', () => {
       payload.inputs[0].config.policy.value.mac.ransomware.mode = ProtectionModes.off;
       return returned;
     });
-    jest.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(emptyEnrollment);
+    vi.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(emptyEnrollment);
 
     const result = await applyPolicyChange(deps, rawParams(), { callSource: 'agent' });
 
@@ -399,10 +402,10 @@ describe('apply policy change', () => {
     stored.windows.malware.mode = ProtectionModes.prevent;
     (stored.windows.popup.malware as { message?: string }).message = undefined;
     getById.mockResolvedValue(policy);
-    const countSpy = jest
+    const countSpy = vi
       .spyOn(countEndpointsModule, 'countEndpoints')
       .mockResolvedValue(emptyEnrollment);
-    const getByIdHelper = jest.spyOn(policyLookup, 'getPackagePolicyById');
+    const getByIdHelper = vi.spyOn(policyLookup, 'getPackagePolicyById');
 
     await expect(
       applyPolicyChange(deps, rawParams(), { callSource: 'agent' })
@@ -416,13 +419,13 @@ describe('apply policy change', () => {
 
   it('reads serverless from capabilities while preparing a shared assessment proposal', async () => {
     const { deps, endpointAppContextService, getById, update } = createWriteDeps();
-    const isServerlessSpy = jest
+    const isServerlessSpy = vi
       .spyOn(endpointAppContextService, 'isServerless')
       .mockReturnValue(true);
     const policy = createEndpointPolicy();
     requireStoredPolicy(policy).windows.ransomware.mode = ProtectionModes.off;
     getById.mockResolvedValue(policy);
-    jest.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(emptyEnrollment);
+    vi.spyOn(countEndpointsModule, 'countEndpoints').mockResolvedValue(emptyEnrollment);
 
     const preview = await previewApplyPolicyChange(deps, {
       idOrName: POLICY_ID,

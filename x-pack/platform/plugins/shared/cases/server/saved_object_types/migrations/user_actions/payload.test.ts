@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
@@ -48,7 +50,7 @@ const create_7_14_0_userAction = (params: {
 
 describe('user action migrations', () => {
   describe('8.1.0', () => {
-    let context: jest.Mocked<SavedObjectMigrationContext>;
+    let context: Mocked<SavedObjectMigrationContext>;
 
     beforeEach(() => {
       context = migrationMocks.createContext();

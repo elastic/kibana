@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import {
   buildOverviewSyntheticsIndices,
@@ -12,21 +14,30 @@ import {
 } from './use_overview_data_view_index_patterns';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
-const mockSettingsContext = jest.fn();
-jest.mock('../../../contexts', () => ({
-  useSyntheticsSettingsContext: () => mockSettingsContext(),
-}));
+const mockSettingsContext = vi.fn();
+vi.mock('../../../contexts', () => {
+      const mocked = {
+      useSyntheticsSettingsContext: () => mockSettingsContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetcher = jest.fn();
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useFetcher: () => mockUseFetcher(),
-}));
+const mockUseFetcher = vi.fn();
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useFetcher: () => mockUseFetcher(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Avoid pulling the real settings module (and its API/context deps) into the test.
-jest.mock('../../settings/remote_clusters/hooks/use_get_ccs_settings', () => ({
-  DEFAULT_CCS_SETTINGS: { useAllRemoteClusters: false, selectedRemoteClusters: [], spaces: [] },
-  fetchCCSSettings: jest.fn(),
-}));
+vi.mock('../../settings/remote_clusters/hooks/use_get_ccs_settings', () => {
+      const mocked = {
+      DEFAULT_CCS_SETTINGS: { useAllRemoteClusters: false, selectedRemoteClusters: [], spaces: [] },
+      fetchCCSSettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('buildOverviewSyntheticsIndices', () => {
   it('returns the local pattern when CCS is disabled, regardless of settings', () => {
@@ -73,7 +84,7 @@ describe('buildOverviewSyntheticsIndices', () => {
 });
 
 describe('useOverviewDataViewIndexPatterns', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('returns the local synthetics pattern and is not loading when CCS is disabled', () => {
     mockSettingsContext.mockReturnValue({ isCCSEnabled: false });

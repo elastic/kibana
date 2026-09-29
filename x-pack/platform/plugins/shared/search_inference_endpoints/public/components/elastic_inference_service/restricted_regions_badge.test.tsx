@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -44,10 +46,10 @@ const regionsPolicy: RegionPolicyResponse = {
 };
 
 describe('RestrictedRegionsBadge', () => {
-  const onManageRegions = jest.fn();
+  const onManageRegions = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderBadge = (props: Partial<React.ComponentProps<typeof RestrictedRegionsBadge>> = {}) =>

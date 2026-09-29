@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { query } from './query';
 
 describe('query', () => {
@@ -37,14 +39,14 @@ describe('query', () => {
     };
     series = { id: 'test' };
     seriesIndex = {};
-    buildSeriesMetaParams = jest.fn().mockResolvedValue({
+    buildSeriesMetaParams = vi.fn().mockResolvedValue({
       timeField: panel.time_field,
       interval: panel.interval,
     });
   });
 
   test('calls next when finished', async () => {
-    const next = jest.fn();
+    const next = vi.fn();
     await query(req, panel, series, config, seriesIndex, null, null, buildSeriesMetaParams)(next)(
       {}
     );

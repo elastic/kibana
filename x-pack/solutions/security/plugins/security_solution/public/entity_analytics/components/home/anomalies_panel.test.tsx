@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EntityAnalyticsRecentAnomalies } from './anomalies_panel';
@@ -12,10 +14,13 @@ import { TestProviders } from '../../../common/mock';
 
 const MOCK_ML_HREF = '/app/ml/explorer';
 
-jest.mock('@kbn/ml-plugin/public', () => ({
-  ...jest.requireActual('@kbn/ml-plugin/public'),
-  useMlHref: () => MOCK_ML_HREF,
-}));
+vi.mock('@kbn/ml-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/ml-plugin/public')),
+      useMlHref: () => MOCK_ML_HREF,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AnomaliesPanel', () => {
   it('should render the panel', () => {

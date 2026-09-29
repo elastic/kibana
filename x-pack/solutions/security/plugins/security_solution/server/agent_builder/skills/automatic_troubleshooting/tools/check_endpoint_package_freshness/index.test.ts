@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import type { PackageClient } from '@kbn/fleet-plugin/server';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
@@ -14,18 +17,18 @@ import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
 import { CHECK_ENDPOINT_PACKAGE_FRESHNESS_TOOL_ID } from '../..';
 import { checkEndpointPackageFreshnessTool } from '.';
 
-const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
+const mockLogger = { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() };
 const mockContext = { logger: mockLogger } as unknown as ToolHandlerContext;
 
 describe('checkEndpointPackageFreshnessTool', () => {
   let mockEndpointAppContextService: EndpointAppContextService;
-  let mockPackageClient: jest.Mocked<PackageClient>;
+  let mockPackageClient: Mocked<PackageClient>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockEndpointAppContextService = createMockEndpointAppContext().service;
     mockPackageClient = mockEndpointAppContextService.getInternalFleetServices()
-      .packages as jest.Mocked<PackageClient>;
+      .packages as Mocked<PackageClient>;
   });
 
   describe('tool definition', () => {

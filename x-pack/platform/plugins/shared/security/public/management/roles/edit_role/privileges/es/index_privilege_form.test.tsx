@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiButtonIcon, EuiComboBox, EuiTextArea } from '@elastic/eui';
 import React from 'react';
 
@@ -38,15 +40,15 @@ test('it renders without crashing', () => {
       allowDocumentLevelSecurity
       allowFieldLevelSecurity
       validator={new RoleValidator()}
-      onChange={jest.fn()}
-      onDelete={jest.fn()}
+      onChange={vi.fn()}
+      onDelete={vi.fn()}
     />
   );
   expect(wrapper).toMatchSnapshot();
 });
 
 test('it allows for custom index privileges', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const wrapper = mountWithIntl(
     <IndexPrivilegeForm
       indexType="indices"
@@ -67,7 +69,7 @@ test('it allows for custom index privileges', () => {
       allowFieldLevelSecurity={true}
       validator={new RoleValidator()}
       onChange={onChange}
-      onDelete={jest.fn()}
+      onDelete={vi.fn()}
     />
   );
 
@@ -100,8 +102,8 @@ test('should not render clusters field for local indices', () => {
       allowDocumentLevelSecurity
       allowFieldLevelSecurity
       validator={new RoleValidator()}
-      onChange={jest.fn()}
-      onDelete={jest.fn()}
+      onChange={vi.fn()}
+      onDelete={vi.fn()}
     />
   );
   expect(wrapper.find('[data-test-subj="clustersInput0"]')).toHaveLength(0);
@@ -126,8 +128,8 @@ describe('delete button', () => {
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
-    onChange: jest.fn(),
-    onDelete: jest.fn(),
+    onChange: vi.fn(),
+    onDelete: vi.fn(),
     intl: {} as any,
   };
 
@@ -179,8 +181,8 @@ describe(`document level security`, () => {
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
-    onChange: jest.fn(),
-    onDelete: jest.fn(),
+    onChange: vi.fn(),
+    onDelete: vi.fn(),
     intl: {} as any,
   };
 
@@ -251,8 +253,8 @@ describe('field level security', () => {
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
-    onChange: jest.fn(),
-    onDelete: jest.fn(),
+    onChange: vi.fn(),
+    onDelete: vi.fn(),
     intl: {} as any,
   };
 
@@ -300,7 +302,7 @@ describe('field level security', () => {
   });
 
   test('does not query for available fields when a request is already in flight', async () => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
 
     const testProps = {
       ...props,
@@ -326,11 +328,11 @@ describe('field level security', () => {
     expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledTimes(1);
 
     findTestSubject(wrapper, 'fieldInput0').simulate('focus');
-    jest.advanceTimersByTime(2000);
+    vi.advanceTimersByTime(2000);
     expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledTimes(1);
 
     findTestSubject(wrapper, 'fieldInput0').simulate('focus');
-    jest.advanceTimersByTime(4000);
+    vi.advanceTimersByTime(4000);
     expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledTimes(1);
   });
 

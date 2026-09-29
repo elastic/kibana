@@ -5,44 +5,56 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useNavigateVulnerabilities, useNavigateFindings } from './use_navigate_findings';
 import { useHistory } from 'react-router-dom';
 
-jest.mock('react-router-dom', () => ({
-  useHistory: jest.fn().mockReturnValue({ push: jest.fn() }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useHistory: vi.fn().mockReturnValue({ push: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      data: {
-        query: {
-          queryString: {
-            getDefaultQuery: jest.fn().mockReturnValue({
-              language: 'kuery',
-              query: '',
-            }),
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          data: {
+            query: {
+              queryString: {
+                getDefaultQuery: vi.fn().mockReturnValue({
+                  language: 'kuery',
+                  query: '',
+                }),
+              },
+            },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_data_view', () => ({
-  useDataView: jest.fn().mockReturnValue({
-    status: 'success',
-    data: {
-      id: 'data-view-id',
-    },
-  }),
-}));
+vi.mock('./use_data_view', () => {
+      const mocked = {
+      useDataView: vi.fn().mockReturnValue({
+        status: 'success',
+        data: {
+          id: 'data-view-id',
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useNavigateFindings', () => {
   it('creates a URL to findings page with correct path, filter and dataViewId', () => {
-    const push = jest.fn();
-    (useHistory as jest.Mock).mockReturnValueOnce({ push });
+    const push = vi.fn();
+    (useHistory as Mock).mockReturnValueOnce({ push });
 
     const { result } = renderHook(() => useNavigateFindings());
 
@@ -59,8 +71,8 @@ describe('useNavigateFindings', () => {
   });
 
   it('creates a URL to findings page with correct path and negated filter', () => {
-    const push = jest.fn();
-    (useHistory as jest.Mock).mockReturnValueOnce({ push });
+    const push = vi.fn();
+    (useHistory as Mock).mockReturnValueOnce({ push });
 
     const { result } = renderHook(() => useNavigateFindings());
 
@@ -77,8 +89,8 @@ describe('useNavigateFindings', () => {
   });
 
   it('creates a URL to vulnerabilities page with correct path, filter and dataViewId', () => {
-    const push = jest.fn();
-    (useHistory as jest.Mock).mockReturnValueOnce({ push });
+    const push = vi.fn();
+    (useHistory as Mock).mockReturnValueOnce({ push });
 
     const { result } = renderHook(() => useNavigateVulnerabilities());
 

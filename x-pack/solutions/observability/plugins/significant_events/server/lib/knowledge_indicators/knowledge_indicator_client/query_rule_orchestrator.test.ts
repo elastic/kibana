@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 import type { Streams } from '@kbn/streams-schema';
@@ -44,23 +47,23 @@ function createOrchestrator({
   currentLinks?: QueryLink[];
 } = {}) {
   const rulesManagementClient = {
-    createRule: jest.fn().mockResolvedValue(undefined),
-    bulkCreateRules: jest
+    createRule: vi.fn().mockResolvedValue(undefined),
+    bulkCreateRules: vi
       .fn()
       .mockImplementation((rules: Array<{ id: string }>) =>
         Promise.resolve({ createdIds: rules.map(({ id }) => id) })
       ),
-    updateRule: jest.fn().mockResolvedValue(undefined),
-    bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-  } as unknown as jest.Mocked<IRulesManagementClient>;
+    updateRule: vi.fn().mockResolvedValue(undefined),
+    bulkDeleteRules: vi.fn().mockResolvedValue(undefined),
+  } as unknown as Mocked<IRulesManagementClient>;
 
   const writer = {
-    bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
-  } as unknown as jest.Mocked<IndicatorWriter>;
+    bulk: vi.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
+  } as unknown as Mocked<IndicatorWriter>;
 
   const reader = {
-    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ [STREAM]: currentLinks }),
-  } as unknown as jest.Mocked<IndicatorReader>;
+    getStreamToQueryLinksMap: vi.fn().mockResolvedValue({ [STREAM]: currentLinks }),
+  } as unknown as Mocked<IndicatorReader>;
 
   const logger = loggerMock.create();
   const orchestrator = new QueryRuleOrchestrator(
@@ -236,7 +239,7 @@ describe('QueryRuleOrchestrator', () => {
       ).rejects.toBeInstanceOf(AggregateError);
 
       const [{ id: createdId }] = rulesManagementClient.bulkCreateRules.mock.calls[0][0];
-      const storedOperations = (writer.bulk as jest.Mock).mock.calls[0][1];
+      const storedOperations = (writer.bulk as Mock).mock.calls[0][1];
       expect(storedOperations[0].index.query.rule_id).toBe(createdId);
       expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledTimes(1);
       expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith([existing.rule_id]);
@@ -274,7 +277,7 @@ describe('QueryRuleOrchestrator', () => {
         }),
       ]);
 
-      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      const bulkOps = (writer.bulk as Mock).mock.calls[0][1];
       const lowSevOp = bulkOps.find(
         (op: { index?: { query?: { id?: string } } }) => op.index?.query?.id === 'low-sev'
       );
@@ -294,7 +297,7 @@ describe('QueryRuleOrchestrator', () => {
       await orchestrator.promoteQueries(definition, ['low-sev']);
 
       expect(rulesManagementClient.bulkCreateRules).toHaveBeenCalledTimes(1);
-      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      const bulkOps = (writer.bulk as Mock).mock.calls[0][1];
       expect(bulkOps[0].index.query.rule_backed).toBe(true);
     });
 
@@ -347,7 +350,7 @@ describe('QueryRuleOrchestrator', () => {
       await orchestrator.syncQueries(definition, [unsupported]);
 
       expect(rulesManagementClient.bulkCreateRules).not.toHaveBeenCalled();
-      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      const bulkOps = (writer.bulk as Mock).mock.calls[0][1];
       expect(bulkOps[0].index.query.rule_backed).toBe(false);
       expect(bulkOps[0].index.query.id).toBe('keep-before-where');
     });
@@ -372,7 +375,7 @@ describe('QueryRuleOrchestrator', () => {
 
       expect(rulesManagementClient.bulkCreateRules).not.toHaveBeenCalled();
       expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-was-backed']);
-      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      const bulkOps = (writer.bulk as Mock).mock.calls[0][1];
       expect(bulkOps[0].index.query.rule_backed).toBe(false);
     });
 
@@ -425,7 +428,7 @@ describe('QueryRuleOrchestrator', () => {
         makeQuery({ id: 'q1', expires_at: '2030-01-01T00:00:00.000Z' })
       );
 
-      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      const bulkOps = (writer.bulk as Mock).mock.calls[0][1];
       const op = bulkOps.find(
         (o: { index?: { query?: { id?: string } } }) => o.index?.query?.id === 'q1'
       );
@@ -441,7 +444,7 @@ describe('QueryRuleOrchestrator', () => {
         makeQuery({ id: 'q1', features: [{ id: 'feat-2' }] })
       );
 
-      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      const bulkOps = (writer.bulk as Mock).mock.calls[0][1];
       const op = bulkOps.find(
         (o: { index?: { query?: { id?: string } } }) => o.index?.query?.id === 'q1'
       );
@@ -503,39 +506,39 @@ describe('QueryRuleOrchestrator', () => {
       features = [] as Feature[],
     }: { links?: QueryLink[]; features?: Feature[] } = {}) {
       return {
-        getQueryLinks: jest.fn().mockResolvedValue(links),
-        getFeatures: jest.fn().mockResolvedValue({ hits: features }),
-      } as unknown as jest.Mocked<IndicatorReader>;
+        getQueryLinks: vi.fn().mockResolvedValue(links),
+        getFeatures: vi.fn().mockResolvedValue({ hits: features }),
+      } as unknown as Mocked<IndicatorReader>;
     }
 
-    function makeReconcileRulesClient(): jest.Mocked<IRulesManagementClient> {
+    function makeReconcileRulesClient(): Mocked<IRulesManagementClient> {
       return {
-        createRule: jest.fn().mockResolvedValue(undefined),
-        bulkCreateRules: jest
+        createRule: vi.fn().mockResolvedValue(undefined),
+        bulkCreateRules: vi
           .fn()
           .mockImplementation((rules: Array<{ id: string }>) =>
             Promise.resolve({ createdIds: rules.map(({ id }) => id) })
           ),
-        updateRule: jest.fn().mockResolvedValue(undefined),
-        bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
-        findExistingRuleIds: jest.fn().mockResolvedValue([]),
-        findOwnedRuleIds: jest.fn().mockResolvedValue([]),
-        findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue([]),
+        updateRule: vi.fn().mockResolvedValue(undefined),
+        bulkDeleteRules: vi.fn().mockResolvedValue(undefined),
+        findExistingRuleIds: vi.fn().mockResolvedValue([]),
+        findOwnedRuleIds: vi.fn().mockResolvedValue([]),
+        findStreamNamesWithOwnedRules: vi.fn().mockResolvedValue([]),
       };
     }
 
     function makeReconcileOrchestrator({
       rulesClient = makeReconcileRulesClient(),
       writer = {
-        bulk: jest.fn().mockResolvedValue({ applied: 0, skipped: 0 }),
-      } as unknown as jest.Mocked<IndicatorWriter>,
+        bulk: vi.fn().mockResolvedValue({ applied: 0, skipped: 0 }),
+      } as unknown as Mocked<IndicatorWriter>,
       reader = makeReconcileReader(),
       isEnabled = true,
       logger = loggerMock.create(),
     }: {
-      rulesClient?: jest.Mocked<IRulesManagementClient>;
-      writer?: jest.Mocked<IndicatorWriter>;
-      reader?: jest.Mocked<IndicatorReader>;
+      rulesClient?: Mocked<IRulesManagementClient>;
+      writer?: Mocked<IndicatorWriter>;
+      reader?: Mocked<IndicatorReader>;
       isEnabled?: boolean;
       logger?: Logger;
     } = {}) {
@@ -560,8 +563,8 @@ describe('QueryRuleOrchestrator', () => {
     it('tombstones an ungrounded rule-backed query and uninstalls its rule', async () => {
       const rulesClient = makeReconcileRulesClient();
       const writer = {
-        bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
-      } as unknown as jest.Mocked<IndicatorWriter>;
+        bulk: vi.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
+      } as unknown as Mocked<IndicatorWriter>;
       rulesClient.findOwnedRuleIds.mockResolvedValue(['rule-1']);
       const link = makeReconcileLink();
       const reader = makeReconcileReader({ links: [link], features: [] }); // feat-1 gone
@@ -580,8 +583,8 @@ describe('QueryRuleOrchestrator', () => {
     it('leaves grounded rule-backed queries untouched', async () => {
       const rulesClient = makeReconcileRulesClient();
       const writer = {
-        bulk: jest.fn().mockResolvedValue({ applied: 0, skipped: 0 }),
-      } as unknown as jest.Mocked<IndicatorWriter>;
+        bulk: vi.fn().mockResolvedValue({ applied: 0, skipped: 0 }),
+      } as unknown as Mocked<IndicatorWriter>;
       rulesClient.findOwnedRuleIds.mockResolvedValue(['rule-1']);
       const link = makeReconcileLink({ expires_at: '2099-01-01T00:00:00.000Z' });
       const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
@@ -597,8 +600,8 @@ describe('QueryRuleOrchestrator', () => {
     it('tombstones an expired, featureless, otherwise-grounded query and uninstalls its rule', async () => {
       const rulesClient = makeReconcileRulesClient();
       const writer = {
-        bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
-      } as unknown as jest.Mocked<IndicatorWriter>;
+        bulk: vi.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
+      } as unknown as Mocked<IndicatorWriter>;
       rulesClient.findOwnedRuleIds.mockResolvedValue(['rule-1']);
       const link = makeReconcileLink({
         expires_at: '2020-01-01T00:00:00.000Z',
@@ -620,8 +623,8 @@ describe('QueryRuleOrchestrator', () => {
     it('leaves durable queries (null expires_at) untouched even when features are gone', async () => {
       const rulesClient = makeReconcileRulesClient();
       const writer = {
-        bulk: jest.fn().mockResolvedValue({ applied: 0, skipped: 0 }),
-      } as unknown as jest.Mocked<IndicatorWriter>;
+        bulk: vi.fn().mockResolvedValue({ applied: 0, skipped: 0 }),
+      } as unknown as Mocked<IndicatorWriter>;
       rulesClient.findOwnedRuleIds.mockResolvedValue(['rule-1']);
       const link = makeReconcileLink({ expires_at: undefined });
       const reader = makeReconcileReader({ links: [link], features: [] });
@@ -647,8 +650,8 @@ describe('QueryRuleOrchestrator', () => {
 
     it('tombstones an ungrounded unbacked query with no alerting rule', async () => {
       const writer = {
-        bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
-      } as unknown as jest.Mocked<IndicatorWriter>;
+        bulk: vi.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
+      } as unknown as Mocked<IndicatorWriter>;
       const link = makeReconcileLink({
         rule_backed: false,
         rule_id: undefined,
@@ -696,8 +699,8 @@ describe('QueryRuleOrchestrator', () => {
     it('tombstones a rule-backed query whose rule was deleted out of band (seam)', async () => {
       const rulesClient = makeReconcileRulesClient();
       const writer = {
-        bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
-      } as unknown as jest.Mocked<IndicatorWriter>;
+        bulk: vi.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
+      } as unknown as Mocked<IndicatorWriter>;
       // The rule for 'rule-1' no longer exists in the alerting framework.
       rulesClient.findOwnedRuleIds.mockResolvedValue([]);
       const link = makeReconcileLink({ expires_at: undefined }); // durable, so grounding never applies
@@ -718,8 +721,8 @@ describe('QueryRuleOrchestrator', () => {
     it('does not tombstone via the seam when the rule is still live', async () => {
       const rulesClient = makeReconcileRulesClient();
       const writer = {
-        bulk: jest.fn().mockResolvedValue({ applied: 0, skipped: 0 }),
-      } as unknown as jest.Mocked<IndicatorWriter>;
+        bulk: vi.fn().mockResolvedValue({ applied: 0, skipped: 0 }),
+      } as unknown as Mocked<IndicatorWriter>;
       rulesClient.findOwnedRuleIds.mockResolvedValue(['rule-1']);
       const link = makeReconcileLink({ expires_at: undefined });
       const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
@@ -734,8 +737,8 @@ describe('QueryRuleOrchestrator', () => {
     it('counts a query only once when it is both ungrounded and seam-eligible', async () => {
       const rulesClient = makeReconcileRulesClient();
       const writer = {
-        bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
-      } as unknown as jest.Mocked<IndicatorWriter>;
+        bulk: vi.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
+      } as unknown as Mocked<IndicatorWriter>;
       // Expired (ground-truth candidate) and its rule isn't owned (seam candidate too).
       rulesClient.findOwnedRuleIds.mockResolvedValue([]);
       const link = makeReconcileLink({ expires_at: '2020-01-01T00:00:00.000Z' });

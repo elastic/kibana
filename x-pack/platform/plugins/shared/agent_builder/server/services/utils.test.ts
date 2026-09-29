@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   httpServerMock,
   securityServiceMock,
@@ -74,7 +76,7 @@ describe('toStableUserId', () => {
   });
 
   it('resolves API key creator profile uid via the injected callback', async () => {
-    const resolveApiKeyProfileUid = jest.fn().mockResolvedValue('profile-from-api-key');
+    const resolveApiKeyProfileUid = vi.fn().mockResolvedValue('profile-from-api-key');
 
     await expect(
       toStableUserId({
@@ -90,7 +92,7 @@ describe('toStableUserId', () => {
   });
 
   it('does not use the _es_api_key realm when no profile uid is available', async () => {
-    const resolveApiKeyProfileUid = jest.fn().mockResolvedValue(undefined);
+    const resolveApiKeyProfileUid = vi.fn().mockResolvedValue(undefined);
 
     await expect(
       toStableUserId({
@@ -106,7 +108,7 @@ describe('toStableUserId', () => {
   });
 
   it('does not call resolveApiKeyProfileUid when profile uid is already present', async () => {
-    const resolveApiKeyProfileUid = jest.fn();
+    const resolveApiKeyProfileUid = vi.fn();
 
     await expect(
       toStableUserId({

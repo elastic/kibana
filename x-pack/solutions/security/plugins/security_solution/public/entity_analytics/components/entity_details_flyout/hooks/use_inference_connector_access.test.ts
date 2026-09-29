@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { InferenceConnectorType } from '@kbn/inference-common';
 import { TestProviders } from '../../../../common/mock';
 import { useInferenceConnectorAccess } from './use_inference_connector_access';
 
-const mockHttpFetch = jest.fn();
+const mockHttpFetch = vi.fn();
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: {
-        fetch: mockHttpFetch,
-      },
-    },
-  }),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: {
+            fetch: mockHttpFetch,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useInferenceConnectorAccess', () => {
   const genAiConnector = {
@@ -35,7 +40,7 @@ describe('useInferenceConnectorAccess', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockHttpFetch.mockResolvedValue({ has_all_required: true });
   });
 

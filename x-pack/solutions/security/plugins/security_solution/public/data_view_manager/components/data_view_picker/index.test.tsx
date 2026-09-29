@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { DataViewPicker } from '.';
@@ -17,71 +19,80 @@ import { URL_PARAM_KEY } from '../../../common/hooks/constants';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { PageScope } from '../../constants';
 
-jest.mock('../../../common/utils/global_query_string', () => ({
-  useUpdateUrlParam: jest.fn(),
-}));
+vi.mock('../../../common/utils/global_query_string', () => {
+      const mocked = {
+      useUpdateUrlParam: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_data_view');
+vi.mock('../../hooks/use_data_view');
 
-jest.mock('../../hooks/use_select_data_view', () => ({
-  useSelectDataView: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('../../hooks/use_select_data_view', () => {
+      const mocked = {
+      useSelectDataView: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-redux-v7', () => {
+vi.mock('react-redux-v7', () => {
   return {
-    ...jest.requireActual('react-redux-v7'),
-    useDispatch: jest.fn(),
+    ...require('react-redux-v7'),
+    useDispatch: vi.fn(),
   };
 });
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
-jest.mock('@kbn/unified-search-plugin/public', () => ({
-  ...jest.requireActual('@kbn/unified-search-plugin/public'),
-  DataViewPicker: jest.fn((props) => (
-    <div data-test-subj="dataViewManager">
-      <button
-        type="button"
-        onClick={() => props.onChangeDataView('new-data-view-id')}
-        data-test-subj="changeDataView"
-      >
-        {'Change Data View'}
-      </button>
-      <button
-        type="button"
-        onClick={() => props.onDataViewCreated()}
-        data-test-subj="createDataView"
-      >
-        {'Create Data View'}
-      </button>
-      {props.onAddField && (
-        <button type="button" onClick={() => props.onAddField()} data-test-subj="addField">
-          {'Add Field'}
-        </button>
-      )}
-      {props.onEditDataView && (
-        <button type="button" onClick={() => props.onEditDataView()} data-test-subj="editDataView">
-          {'Edit Data View'}
-        </button>
-      )}
-      <div data-test-subj="currentDataViewId">{props.currentDataViewId}</div>
-      <div data-test-subj="trigger">{props.trigger.label}</div>
-    </div>
-  )),
-}));
+vi.mock('@kbn/unified-search-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/unified-search-plugin/public')),
+      DataViewPicker: vi.fn((props) => (
+        <div data-test-subj="dataViewManager">
+          <button
+            type="button"
+            onClick={() => props.onChangeDataView('new-data-view-id')}
+            data-test-subj="changeDataView"
+          >
+            {'Change Data View'}
+          </button>
+          <button
+            type="button"
+            onClick={() => props.onDataViewCreated()}
+            data-test-subj="createDataView"
+          >
+            {'Create Data View'}
+          </button>
+          {props.onAddField && (
+            <button type="button" onClick={() => props.onAddField()} data-test-subj="addField">
+              {'Add Field'}
+            </button>
+          )}
+          {props.onEditDataView && (
+            <button type="button" onClick={() => props.onEditDataView()} data-test-subj="editDataView">
+              {'Edit Data View'}
+            </button>
+          )}
+          <div data-test-subj="currentDataViewId">{props.currentDataViewId}</div>
+          <div data-test-subj="trigger">{props.trigger.label}</div>
+        </div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DataViewPicker', () => {
-  let mockDispatch = jest.fn();
-  const mockAddDanger = jest.fn();
+  let mockDispatch = vi.fn();
+  const mockAddDanger = vi.fn();
 
   beforeEach(() => {
-    jest.mocked(useUpdateUrlParam).mockReturnValue(jest.fn());
+    vi.mocked(useUpdateUrlParam).mockReturnValue(vi.fn());
 
-    mockDispatch = jest.fn();
+    mockDispatch = vi.fn();
 
-    jest.mocked(useDispatch).mockReturnValue(mockDispatch);
+    vi.mocked(useDispatch).mockReturnValue(mockDispatch);
 
-    jest.mocked(useKibana).mockReturnValue({
+    vi.mocked(useKibana).mockReturnValue({
       services: {
         ...mockUseKibana().services,
         notifications: {
@@ -89,16 +100,16 @@ describe('DataViewPicker', () => {
             addDanger: mockAddDanger,
           },
         },
-        dataViewFieldEditor: { openEditor: jest.fn() },
+        dataViewFieldEditor: { openEditor: vi.fn() },
         dataViewEditor: {
-          userPermissions: { editDataView: jest.fn().mockReturnValue(true) },
+          userPermissions: { editDataView: vi.fn().mockReturnValue(true) },
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with the current data view ID', () => {
@@ -121,7 +132,7 @@ describe('DataViewPicker', () => {
 
     fireEvent.click(screen.getByTestId('changeDataView'));
 
-    expect(jest.mocked(useSelectDataView())).toHaveBeenCalledWith({
+    expect(vi.mocked(useSelectDataView())).toHaveBeenCalledWith({
       id: 'new-data-view-id',
       scope: 'default',
     });
@@ -136,7 +147,7 @@ describe('DataViewPicker', () => {
 
     fireEvent.click(screen.getByTestId('changeDataView'));
 
-    expect(jest.mocked(useUpdateUrlParam(URL_PARAM_KEY.sourcerer))).toHaveBeenCalledWith({
+    expect(vi.mocked(useUpdateUrlParam(URL_PARAM_KEY.sourcerer))).toHaveBeenCalledWith({
       default: {
         id: 'new-data-view-id',
         selectedPatterns: [],
@@ -153,7 +164,7 @@ describe('DataViewPicker', () => {
 
     fireEvent.click(screen.getByTestId('changeDataView'));
 
-    expect(jest.mocked(useUpdateUrlParam(URL_PARAM_KEY.sourcerer))).toHaveBeenCalledWith({
+    expect(vi.mocked(useUpdateUrlParam(URL_PARAM_KEY.sourcerer))).toHaveBeenCalledWith({
       explore: {
         id: 'new-data-view-id',
         selectedPatterns: [],
@@ -162,8 +173,8 @@ describe('DataViewPicker', () => {
   });
 
   it('opens field editor when adding a field', async () => {
-    const mockFieldEditorClose = jest.fn();
-    jest
+    const mockFieldEditorClose = vi.fn();
+    vi
       .mocked(useKibana().services.dataViewFieldEditor.openEditor)
       .mockResolvedValue(mockFieldEditorClose);
 
@@ -176,15 +187,15 @@ describe('DataViewPicker', () => {
     fireEvent.click(screen.getByTestId('addField'));
 
     await waitFor(() => {
-      expect(jest.mocked(useKibana().services.data.dataViews.get)).toHaveBeenCalledWith(
+      expect(vi.mocked(useKibana().services.data.dataViews.get)).toHaveBeenCalledWith(
         'security-solution-default'
       );
-      expect(jest.mocked(useKibana().services.dataViewFieldEditor.openEditor)).toHaveBeenCalled();
+      expect(vi.mocked(useKibana().services.dataViewFieldEditor.openEditor)).toHaveBeenCalled();
     });
   });
 
   it('shows a danger toast when adding field fails to load data view', async () => {
-    jest
+    vi
       .mocked(useKibana().services.data.dataViews.get)
       .mockRejectedValue(new Error('conflict loading data view'));
 
@@ -206,7 +217,7 @@ describe('DataViewPicker', () => {
 
   describe('when user does not have editDataView permission', () => {
     it('does not render edit data view button', () => {
-      jest
+      vi
         .mocked(useKibana().services.dataViewEditor.userPermissions.editDataView)
         .mockReturnValue(false);
 
@@ -220,7 +231,7 @@ describe('DataViewPicker', () => {
     });
 
     it('does not render add field button', () => {
-      jest
+      vi
         .mocked(useKibana().services.dataViewEditor.userPermissions.editDataView)
         .mockReturnValue(false);
 

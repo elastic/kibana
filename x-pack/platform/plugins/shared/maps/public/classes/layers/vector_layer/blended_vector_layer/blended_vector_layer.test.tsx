@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SCALING_TYPES, SOURCE_TYPES } from '../../../../../common/constants';
 import { BlendedVectorLayer } from './blended_vector_layer';
 import { ESSearchSource } from '../../../sources/es_search_source';
@@ -14,7 +16,7 @@ import type {
   ESGeoGridSourceDescriptor,
 } from '../../../../../common/descriptor_types';
 
-jest.mock('../../../../kibana_services', () => {
+vi.mock('../../../../kibana_services', () => {
   return {
     getIsDarkMode() {
       return false;

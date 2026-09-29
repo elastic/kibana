@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of, throwError } from 'rxjs';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
@@ -22,7 +24,7 @@ const getEsqlArguments = () => {
 
 describe('executeEsqlQuery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should execute an ES|QL query and return the result', async () => {
@@ -39,8 +41,8 @@ describe('executeEsqlQuery', () => {
     };
 
     const mockExecutionContract = {
-      getData: jest.fn().mockReturnValue(of({ result: mockDatatable, partial: false })),
-      cancel: jest.fn(),
+      getData: vi.fn().mockReturnValue(of({ result: mockDatatable, partial: false })),
+      cancel: vi.fn(),
     };
 
     mockExpressionsService.execute.mockReturnValue(mockExecutionContract as any);
@@ -71,8 +73,8 @@ describe('executeEsqlQuery', () => {
     };
 
     const mockExecutionContract = {
-      getData: jest.fn().mockReturnValue(of({ result: mockDatatable, partial: false })),
-      cancel: jest.fn(),
+      getData: vi.fn().mockReturnValue(of({ result: mockDatatable, partial: false })),
+      cancel: vi.fn(),
     };
 
     mockExpressionsService.execute.mockReturnValue(mockExecutionContract as any);
@@ -100,8 +102,8 @@ describe('executeEsqlQuery', () => {
       rows: [],
     };
     const mockExecutionContract = {
-      getData: jest.fn().mockReturnValue(of({ result: mockDatatable, partial: false })),
-      cancel: jest.fn(),
+      getData: vi.fn().mockReturnValue(of({ result: mockDatatable, partial: false })),
+      cancel: vi.fn(),
     };
     mockExpressionsService.execute.mockReturnValue(mockExecutionContract as any);
 
@@ -126,8 +128,8 @@ describe('executeEsqlQuery', () => {
     };
 
     const mockExecutionContract = {
-      getData: jest.fn().mockReturnValue(of({ result: mockDatatable, partial: false })),
-      cancel: jest.fn(),
+      getData: vi.fn().mockReturnValue(of({ result: mockDatatable, partial: false })),
+      cancel: vi.fn(),
     };
 
     mockExpressionsService.execute.mockReturnValue(mockExecutionContract as any);
@@ -145,10 +147,10 @@ describe('executeEsqlQuery', () => {
   it('should throw when result type is error', async () => {
     const mockError = new Error('Query execution failed');
     const mockExecutionContract = {
-      getData: jest
+      getData: vi
         .fn()
         .mockReturnValue(of({ result: { type: 'error', error: mockError }, partial: false })),
-      cancel: jest.fn(),
+      cancel: vi.fn(),
     };
 
     mockExpressionsService.execute.mockReturnValue(mockExecutionContract as any);
@@ -165,8 +167,8 @@ describe('executeEsqlQuery', () => {
   it('should handle observable errors', async () => {
     const mockError = new Error('Observable error');
     const mockExecutionContract = {
-      getData: jest.fn().mockReturnValue(throwError(() => mockError)),
-      cancel: jest.fn(),
+      getData: vi.fn().mockReturnValue(throwError(() => mockError)),
+      cancel: vi.fn(),
     };
 
     mockExpressionsService.execute.mockReturnValue(mockExecutionContract as any);
@@ -189,14 +191,14 @@ describe('executeEsqlQuery', () => {
       };
 
       const mockExecutionContract = {
-        getData: jest.fn().mockReturnValue(of({ result: mockDatatable, partial: false })),
-        cancel: jest.fn(),
+        getData: vi.fn().mockReturnValue(of({ result: mockDatatable, partial: false })),
+        cancel: vi.fn(),
       };
 
       mockExpressionsService.execute.mockReturnValue(mockExecutionContract as any);
 
       const abortController = new AbortController();
-      const addEventListenerSpy = jest.spyOn(abortController.signal, 'addEventListener');
+      const addEventListenerSpy = vi.spyOn(abortController.signal, 'addEventListener');
 
       await executeEsqlQuery({
         expressions: mockExpressionsService,
@@ -216,8 +218,8 @@ describe('executeEsqlQuery', () => {
       };
 
       const mockExecutionContract = {
-        getData: jest.fn().mockReturnValue(of({ result: mockDatatable, partial: false })),
-        cancel: jest.fn(),
+        getData: vi.fn().mockReturnValue(of({ result: mockDatatable, partial: false })),
+        cancel: vi.fn(),
       };
 
       mockExpressionsService.execute.mockReturnValue(mockExecutionContract as any);
@@ -246,8 +248,8 @@ describe('executeEsqlQuery', () => {
       };
 
       const mockExecutionContract = {
-        getData: jest.fn().mockReturnValue(of({ result: mockDatatable, partial: false })),
-        cancel: jest.fn(),
+        getData: vi.fn().mockReturnValue(of({ result: mockDatatable, partial: false })),
+        cancel: vi.fn(),
       };
 
       mockExpressionsService.execute.mockReturnValue(mockExecutionContract as any);

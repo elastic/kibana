@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   createCommentsMigrations,
   migrateByValueLensVisualizations,
@@ -114,7 +117,7 @@ describe('comments migrations', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('lens migrations', () => {
@@ -292,8 +295,8 @@ describe('comments migrations', () => {
         typeof lensMigrations === 'function' ? lensMigrations() : lensMigrations || {};
       const lensMigrationObjectWithFakeMigration = {
         ...lensMigrationObject,
-        '8.9.0': jest.fn(),
-        '8.10.0': jest.fn(),
+        '8.9.0': vi.fn(),
+        '8.10.0': vi.fn(),
       };
 
       const lensVersions = Object.keys(lensMigrationObjectWithFakeMigration);
@@ -343,7 +346,7 @@ describe('comments migrations', () => {
           attributes: { ...persistableAttachmentState.attributes, foo: 'bar' },
         };
 
-        const migrateFunction = jest.fn().mockReturnValue(migratedPersistableAttachmentState);
+        const migrateFunction = vi.fn().mockReturnValue(migratedPersistableAttachmentState);
 
         const migrations = createCommentsMigrations({
           lensEmbeddableFactory: () => ({
@@ -370,7 +373,7 @@ describe('comments migrations', () => {
         const persistableAttachment =
           mockCaseComments[6] as SavedObject<PersistableStateAttachmentAttributes>;
 
-        const migrateFunction = jest.fn().mockImplementation(() => {
+        const migrateFunction = vi.fn().mockImplementation(() => {
           throw new Error('an error');
         });
 
@@ -388,7 +391,7 @@ describe('comments migrations', () => {
 
         expect(result).toEqual(persistableAttachment);
 
-        const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
+        const log = contextMock.log as Mocked<SavedObjectsMigrationLogger>;
         expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             "Failed to migrate comment persistable lens attachment with doc id: mock-comment-7 version: 8.0.0 error: an error",
@@ -452,7 +455,7 @@ describe('comments migrations', () => {
       // the comment should remain unchanged when there is an error
       expect(result.attributes.comment).toEqual(comment);
 
-      const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
+      const log = contextMock.log as Mocked<SavedObjectsMigrationLogger>;
       expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "Failed to migrate lens comment with doc id: 1cefd0d0-e86d-11eb-bae5-3d065cd16a32 version: 8.0.0 error: an error",
@@ -482,7 +485,7 @@ describe('comments migrations', () => {
         const mergedFunctions = mergeSavedObjectMigrationMaps(migrationObj1, migrationObj2);
         SavedObjectsUtils.getMigrationFunction(mergedFunctions['1.0.0'])(caseComment, contextMock);
 
-        const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
+        const log = contextMock.log as Mocked<SavedObjectsMigrationLogger>;
         expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             "Failed to migrate lens comment with doc id: 1cefd0d0-e86d-11eb-bae5-3d065cd16a32 version: 8.0.0 error: an error",
@@ -514,7 +517,7 @@ describe('comments migrations', () => {
           SavedObjectsUtils.getMigrationFunction(mergedFunctions['2.0.0'])(caseComment, contextMock)
         ).toThrow();
 
-        const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
+        const log = contextMock.log as Mocked<SavedObjectsMigrationLogger>;
         expect(log.error).not.toHaveBeenCalled();
       });
     });

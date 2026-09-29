@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import {
@@ -41,7 +43,7 @@ describe('update', () => {
   clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(`throws error when the case user actions become > ${MAX_USER_ACTIONS_PER_CASE}`, async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import crypto from 'crypto';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AndroidClassMap } from '../../lib/retracer_android';
@@ -15,10 +18,10 @@ function sha256(input: string) {
 }
 
 function makeMget(docs: Array<{ found: boolean; _source?: AndroidClassMap }>) {
-  return jest.fn().mockResolvedValue({ docs });
+  return vi.fn().mockResolvedValue({ docs });
 }
 
-function makeEsClient(mget: jest.Mock) {
+function makeEsClient(mget: Mock) {
   return { mget } as any;
 }
 
@@ -86,7 +89,7 @@ describe('retrace (Android ES fetcher)', () => {
     const indexNotFoundError = Object.assign(new Error('index_not_found_exception'), {
       meta: { body: { error: { type: 'index_not_found_exception' } } },
     });
-    const mget = jest.fn().mockRejectedValue(indexNotFoundError);
+    const mget = vi.fn().mockRejectedValue(indexNotFoundError);
 
     await expect(
       retrace({
@@ -100,7 +103,7 @@ describe('retrace (Android ES fetcher)', () => {
 
   it('throws RetraceMapNotFoundError when mget returns index_not_found inline in docs (ES 8+ behavior)', async () => {
     // Real ES returns HTTP 200 with per-doc error objects rather than throwing
-    const mget = jest.fn().mockResolvedValue({
+    const mget = vi.fn().mockResolvedValue({
       docs: [{ error: { type: 'index_not_found_exception' } }],
     });
 
@@ -118,7 +121,7 @@ describe('retrace (Android ES fetcher)', () => {
     const indexNotFoundError = Object.assign(new Error('index_not_found_exception'), {
       meta: { body: { error: { type: 'index_not_found_exception' } } },
     });
-    const mget = jest.fn().mockRejectedValue(indexNotFoundError);
+    const mget = vi.fn().mockRejectedValue(indexNotFoundError);
 
     await expect(
       retrace({
@@ -131,7 +134,7 @@ describe('retrace (Android ES fetcher)', () => {
   });
 
   it('logs a warning and returns the original stacktrace when mget throws a generic ES error', async () => {
-    const mget = jest.fn().mockRejectedValue(new Error('ES unavailable'));
+    const mget = vi.fn().mockRejectedValue(new Error('ES unavailable'));
     const stacktrace = '\tat f8.b(SourceFile:3)';
     const logger = loggingSystemMock.createLogger();
 
@@ -171,7 +174,7 @@ describe('retrace (Android ES fetcher)', () => {
   });
 
   it('returns the input untouched without querying ES when it contains no parseable frames', async () => {
-    const mget = jest.fn();
+    const mget = vi.fn();
     // No frame lines and no throwable class names — nothing to look up
     const stacktrace = 'not a stacktrace !!!';
     const logger = loggingSystemMock.createLogger();

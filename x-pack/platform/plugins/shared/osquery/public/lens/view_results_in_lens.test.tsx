@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
@@ -12,26 +14,32 @@ import { ViewResultsInLensAction, getLensAttributes } from './view_results_in_le
 import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
 import { TestProvidersWithServices } from '../__test_helpers__/create_mock_kibana_services';
 
-const mockNavigateToPrefilledEditor = jest.fn();
+const mockNavigateToPrefilledEditor = vi.fn();
 
-jest.mock('../common/hooks/use_logs_data_view', () => ({
-  useLogsDataView: jest.fn(() => ({
-    data: { id: 'logs-osquery-data-view-id', title: 'logs-osquery_manager.result*' },
-  })),
-}));
+vi.mock('../common/hooks/use_logs_data_view', () => {
+      const mocked = {
+      useLogsDataView: vi.fn(() => ({
+        data: { id: 'logs-osquery-data-view-id', title: 'logs-osquery_manager.result*' },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = jest.fn();
+const mockUseKibana = vi.fn();
 
-jest.mock('../common/lib/kibana', () => ({
-  ...jest.requireActual('../common/lib/kibana'),
-  useKibana: () => mockUseKibana(),
-}));
+vi.mock('../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../common/lib/kibana')),
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const setupKibana = (lensAvailable = true) => {
   mockUseKibana.mockReturnValue({
     services: {
       lens: {
-        canUseEditor: jest.fn().mockReturnValue(lensAvailable),
+        canUseEditor: vi.fn().mockReturnValue(lensAvailable),
         navigateToPrefilledEditor: mockNavigateToPrefilledEditor,
       },
       application: {
@@ -52,7 +60,7 @@ const setupKibana = (lensAvailable = true) => {
 
 describe('ViewResultsInLensAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupKibana();
   });
 
@@ -300,7 +308,7 @@ describe('ViewResultsInLensAction', () => {
       const buttonArgs = mockNavigateToPrefilledEditor.mock.calls[0];
 
       unmount();
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       render(
         <TestProvidersWithServices>

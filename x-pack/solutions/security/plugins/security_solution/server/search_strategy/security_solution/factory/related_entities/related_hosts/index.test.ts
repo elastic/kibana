@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { usersRelatedHosts } from '.';
 import { mockDeps, mockOptions, mockSearchStrategyResponse, mockRelatedHosts } from './__mocks__';
 import { get } from 'lodash/fp';
 import * as buildQuery from './query.related_hosts.dsl';
 
 describe('usersRelatedHosts search strategy', () => {
-  const buildRelatedHostsQuery = jest.spyOn(buildQuery, 'buildRelatedHostsQuery');
+  const buildRelatedHostsQuery = vi.spyOn(buildQuery, 'buildRelatedHostsQuery');
 
   afterEach(() => {
     buildRelatedHostsQuery.mockClear();

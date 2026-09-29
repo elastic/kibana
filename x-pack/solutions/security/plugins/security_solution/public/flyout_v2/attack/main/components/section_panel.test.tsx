@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -58,7 +60,7 @@ describe('SectionPanel', () => {
   });
 
   it('renders title as link when link prop is provided and invokes callback on click', () => {
-    const callback = jest.fn();
+    const callback = vi.fn();
     renderWithEui(
       <SectionPanel
         title="Entities"

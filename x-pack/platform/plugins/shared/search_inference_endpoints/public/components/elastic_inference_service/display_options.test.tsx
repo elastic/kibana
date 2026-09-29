@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -19,9 +21,9 @@ describe('DisplayOptions', () => {
     const { getByTestId } = renderDisplayOptions(
       <DisplayOptions
         value={DEFAULT_EIS_DISPLAY_OPTIONS}
-        onApply={jest.fn()}
+        onApply={vi.fn()}
         isTourOpen={false}
-        onDismissTour={jest.fn()}
+        onDismissTour={vi.fn()}
       />
     );
 
@@ -56,13 +58,13 @@ describe('DisplayOptions', () => {
   });
 
   it('enables Apply after a Show change and commits on Apply', async () => {
-    const onApply = jest.fn();
+    const onApply = vi.fn();
     const { getByTestId, queryByTestId } = renderDisplayOptions(
       <DisplayOptions
         value={DEFAULT_EIS_DISPLAY_OPTIONS}
         onApply={onApply}
         isTourOpen={false}
-        onDismissTour={jest.fn()}
+        onDismissTour={vi.fn()}
       />
     );
 
@@ -83,13 +85,13 @@ describe('DisplayOptions', () => {
   });
 
   it('discards draft changes when the popover is closed without Apply', () => {
-    const onApply = jest.fn();
+    const onApply = vi.fn();
     const { getByTestId } = renderDisplayOptions(
       <DisplayOptions
         value={DEFAULT_EIS_DISPLAY_OPTIONS}
         onApply={onApply}
         isTourOpen={false}
-        onDismissTour={jest.fn()}
+        onDismissTour={vi.fn()}
       />
     );
 

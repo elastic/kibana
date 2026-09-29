@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject, of } from 'rxjs';
 
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
@@ -70,7 +72,7 @@ describe('license features', function () {
       license$: rawLicense$,
     });
 
-    const subscriptionHandler = jest.fn();
+    const subscriptionHandler = vi.fn();
     const subscription = serviceSetup.license.features$.subscribe(subscriptionHandler);
     try {
       expect(serviceSetup.license.isLicenseAvailable()).toEqual(false);
@@ -130,7 +132,7 @@ describe('license features', function () {
       features: { security: { isEnabled: true, isAvailable: true } },
     });
 
-    const getFeatureSpy = jest.spyOn(mockRawLicense, 'getFeature');
+    const getFeatureSpy = vi.spyOn(mockRawLicense, 'getFeature');
 
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(mockRawLicense),

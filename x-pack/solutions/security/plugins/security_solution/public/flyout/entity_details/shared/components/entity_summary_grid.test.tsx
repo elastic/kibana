@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -12,14 +14,17 @@ import { EntitySummaryGrid } from './entity_summary_grid';
 import { mockEntityRecord } from '../../mocks';
 import type { Entity } from '../../../../../common/api/entity_analytics';
 
-jest.mock('../../../../entity_analytics/api/hooks/use_get_watchlists', () => ({
-  useGetWatchlists: jest.fn().mockReturnValue({
-    data: [
-      { id: 'watchlist-1', name: 'First Watchlist' },
-      { id: 'watchlist-2', name: 'Second Watchlist' },
-    ],
-  }),
-}));
+vi.mock('../../../../entity_analytics/api/hooks/use_get_watchlists', () => {
+      const mocked = {
+      useGetWatchlists: vi.fn().mockReturnValue({
+        data: [
+          { id: 'watchlist-1', name: 'First Watchlist' },
+          { id: 'watchlist-2', name: 'Second Watchlist' },
+        ],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const entityWithSource: Entity = {
   ...mockEntityRecord,
@@ -111,7 +116,7 @@ describe('EntitySummaryGrid', () => {
         <EntitySummaryGrid
           entityRecord={entityWithSource}
           criticalityLevel="high_impact"
-          onCriticalitySave={jest.fn()}
+          onCriticalitySave={vi.fn()}
         />
       </TestProviders>
     );
@@ -137,7 +142,7 @@ describe('EntitySummaryGrid', () => {
         <EntitySummaryGrid
           entityRecord={entityWithSource}
           criticalityLevel="high_impact"
-          onCriticalitySave={jest.fn()}
+          onCriticalitySave={vi.fn()}
         />
       </TestProviders>
     );

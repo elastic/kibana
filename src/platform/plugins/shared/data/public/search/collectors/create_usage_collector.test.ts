@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -30,7 +32,7 @@ describe('Search Usage Collector', () => {
         application: {
           currentAppId$: from(['foo/bar']),
         },
-      } as jest.Mocked<CoreStart>,
+      } as Mocked<CoreStart>,
       {} as any,
       {} as any,
     ]);

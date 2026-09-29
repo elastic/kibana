@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
@@ -21,8 +23,8 @@ describe('SessionExpirationModal', () => {
       expiresInMs: 60 * 1000,
       canBeExtended: true,
     });
-    const onExtend = jest.fn();
-    const onClose = jest.fn();
+    const onExtend = vi.fn();
+    const onClose = vi.fn();
 
     const { getByTestId } = render(
       <I18nProvider>
@@ -42,8 +44,8 @@ describe('SessionExpirationModal', () => {
 
   it('renders null when session state is not available', () => {
     const sessionState$ = of(null);
-    const onExtend = jest.fn();
-    const onClose = jest.fn();
+    const onExtend = vi.fn();
+    const onClose = vi.fn();
 
     const { container } = render(
       <I18nProvider>
@@ -65,8 +67,8 @@ describe('SessionExpirationModal', () => {
       expiresInMs: null,
       canBeExtended: true,
     });
-    const onExtend = jest.fn();
-    const onClose = jest.fn();
+    const onExtend = vi.fn();
+    const onClose = vi.fn();
 
     const { container } = render(
       <I18nProvider>
@@ -87,8 +89,8 @@ describe('SessionExpirationModal', () => {
       expiresInMs: 60 * 1000,
       canBeExtended: true,
     });
-    const onExtend = jest.fn();
-    const onClose = jest.fn();
+    const onExtend = vi.fn();
+    const onClose = vi.fn();
 
     const { queryByRole, getByText } = render(
       <I18nProvider>

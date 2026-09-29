@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Subject, of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { NavigationCustomization } from '@kbn/core-chrome-browser';
@@ -15,27 +18,36 @@ import { NavigationCustomizationService } from './navigation_customization_servi
 import { NAV_CUSTOMIZATION_STORAGE_KEY } from '../../common/constants';
 import { NAV_CUSTOMIZATION_EVENT_TYPE, NAV_LOADED_EVENT_TYPE } from './telemetry';
 
-jest.mock('@kbn/navigation-customization-components', () => ({
-  createCustomizeNavMenuLink: jest.fn((_openModal: () => void) => ({
-    iconType: 'controls',
-    label: 'Customize navigation',
-    href: '',
-    order: 500,
-    content: jest.fn(),
-  })),
-  openCustomizeNavigationModal: jest.fn(),
-}));
+vi.mock('@kbn/navigation-customization-components', () => {
+      const mocked = {
+      createCustomizeNavMenuLink: vi.fn((_openModal: () => void) => ({
+        iconType: 'controls',
+        label: 'Customize navigation',
+        href: '',
+        order: 500,
+        content: vi.fn(),
+      })),
+      openCustomizeNavigationModal: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The modal opener dynamically imports computeMoves; stub it so the import resolves.
-jest.mock('@kbn/core-chrome-navigation-customization', () => ({
-  computeMoves: jest.fn().mockReturnValue([]),
-}));
+vi.mock('@kbn/core-chrome-navigation-customization', () => {
+      const mocked = {
+      computeMoves: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-chrome-browser-navigation-utils', () => ({
-  getNavigationNodeIcon: jest.fn().mockReturnValue(undefined),
-}));
+vi.mock('@kbn/core-chrome-browser-navigation-utils', () => {
+      const mocked = {
+      getNavigationNodeIcon: vi.fn().mockReturnValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const openModalMock = openCustomizeNavigationModal as jest.Mock;
+const openModalMock = openCustomizeNavigationModal as Mock;
 
 /** Drain the microtask queue (dynamic import()s, resolved promise .then()s) before asserting. */
 const flushAsync = () => new Promise((resolve) => setImmediate(resolve));
@@ -50,7 +62,7 @@ const makeDeps = (overrides?: {
   core.userStorage.peek.mockReturnValue(overrides?.userStorageValue);
   core.userStorage.get$.mockReturnValue(userStorage$);
   // The per-load event is gated on this resolving (so EBT stamps context.userId).
-  (core.security.authc.getCurrentUser as jest.Mock).mockResolvedValue({ username: 'test-user' });
+  (core.security.authc.getCurrentUser as Mock).mockResolvedValue({ username: 'test-user' });
 
   const fakeNav = {
     renderableNodes: [
@@ -63,15 +75,15 @@ const makeDeps = (overrides?: {
 
   const chrome = {
     project: {
-      registerCustomizeNavigationHandler: jest.fn(),
-      setNavigationCustomization: jest.fn(),
-      getNavigation$: jest.fn().mockReturnValue(of(fakeNav)),
+      registerCustomizeNavigationHandler: vi.fn(),
+      setNavigationCustomization: vi.fn(),
+      getNavigation$: vi.fn().mockReturnValue(of(fakeNav)),
     },
   } as unknown as Parameters<NavigationCustomizationService['start']>[0]['chrome'];
 
   const security = {
     navControlService: {
-      addUserMenuLinks: jest.fn(),
+      addUserMenuLinks: vi.fn(),
     },
   } as unknown as NonNullable<
     Parameters<NavigationCustomizationService['enableUi']>[0]['security']
@@ -142,7 +154,7 @@ describe('NavigationCustomizationService', () => {
       service.start({ core, chrome, isUnauthenticated });
       // Ignore the synchronous seed fired during start(); this test covers the
       // get$ subscription specifically.
-      (chrome.project.setNavigationCustomization as jest.Mock).mockClear();
+      (chrome.project.setNavigationCustomization as Mock).mockClear();
       service.stop();
 
       userStorage$.next({ moves: [], hidden: [] });
@@ -180,7 +192,7 @@ describe('NavigationCustomizationService', () => {
       await flushAsync();
 
       expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
-      const [links] = (security.navControlService.addUserMenuLinks as jest.Mock).mock.calls[0];
+      const [links] = (security.navControlService.addUserMenuLinks as Mock).mock.calls[0];
       expect(links).toHaveLength(1);
       expect(links[0]).toMatchObject({ iconType: 'controls', order: 500 });
     });
@@ -227,7 +239,7 @@ describe('NavigationCustomizationService', () => {
   describe('per-load nav-state event', () => {
     it('emits once the solution resolves, gated on the user signal', async () => {
       const { core, chrome } = makeDeps();
-      const reportEvent = core.analytics.reportEvent as jest.Mock;
+      const reportEvent = core.analytics.reportEvent as Mock;
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome, solution: 'es' });
@@ -257,7 +269,7 @@ describe('NavigationCustomizationService', () => {
 
     it('does not report before the solution is resolved (handler-only registration)', async () => {
       const { core, chrome } = makeDeps();
-      const reportEvent = core.analytics.reportEvent as jest.Mock;
+      const reportEvent = core.analytics.reportEvent as Mock;
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome }); // no solution yet
@@ -275,17 +287,17 @@ describe('NavigationCustomizationService', () => {
       const { openCustomizeNavigationModal: openCustomizeNavigationModalModule } = await import(
         '@kbn/navigation-customization-components'
       );
-      (openCustomizeNavigationModalModule as jest.Mock).mockClear();
+      (openCustomizeNavigationModalModule as Mock).mockClear();
 
       const { core, chrome } = makeDeps();
-      (core.userStorage.peek as jest.Mock).mockReturnValue(savedCustomization);
+      (core.userStorage.peek as Mock).mockReturnValue(savedCustomization);
 
       const service = new NavigationCustomizationService();
       service.start({ core, chrome, isUnauthenticated: false });
       service.enableUi({ core, chrome });
       await flushAsync();
 
-      const [handler] = (chrome.project.registerCustomizeNavigationHandler as jest.Mock).mock
+      const [handler] = (chrome.project.registerCustomizeNavigationHandler as Mock).mock
         .calls[0];
       // openModal fires run() without awaiting it, so flush microtasks to let the
       // dynamic imports and getNavigationItems resolve before inspecting callbacks.
@@ -293,12 +305,12 @@ describe('NavigationCustomizationService', () => {
       await flushAsync();
       await flushAsync();
 
-      const callbacks = (openCustomizeNavigationModalModule as jest.Mock).mock.calls[0]?.[0];
+      const callbacks = (openCustomizeNavigationModalModule as Mock).mock.calls[0]?.[0];
       return { core, chrome, callbacks };
     };
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('onReset does not write to User Storage', async () => {
@@ -356,19 +368,19 @@ describe('NavigationCustomizationService', () => {
       deps: ReturnType<typeof makeDeps>
     ): Promise<{
       onSave: (c: NavigationCustomization, order: string[], hiddenIds: string[]) => void;
-      reportEvent: jest.Mock;
+      reportEvent: Mock;
     }> => {
       const { core, chrome } = deps;
       const service = new NavigationCustomizationService();
 
       service.enableUi({ core, chrome, solution: 'es' });
 
-      const handler = (chrome.project.registerCustomizeNavigationHandler as jest.Mock).mock
+      const handler = (chrome.project.registerCustomizeNavigationHandler as Mock).mock
         .calls[0][0] as () => void;
       handler();
       await flushAsync();
 
-      const reportEvent = core.analytics.reportEvent as jest.Mock;
+      const reportEvent = core.analytics.reportEvent as Mock;
       reportEvent.mockClear();
 
       const { onSave } = openModalMock.mock.calls[0][0];
@@ -400,8 +412,8 @@ describe('NavigationCustomizationService', () => {
       const deps = makeDeps();
       // Both the set (real customization) and remove (reset) paths can reject
       // on a User Storage write failure; fail both so either branch is covered.
-      (deps.core.userStorage.set as jest.Mock).mockRejectedValue(new Error('Forbidden'));
-      (deps.core.userStorage.remove as jest.Mock).mockRejectedValue(new Error('Forbidden'));
+      (deps.core.userStorage.set as Mock).mockRejectedValue(new Error('Forbidden'));
+      (deps.core.userStorage.remove as Mock).mockRejectedValue(new Error('Forbidden'));
       const { onSave, reportEvent } = await openModalAndGetOnSave(deps);
 
       onSave({ moves: [{ id: 'b', afterId: null }], hidden: [] }, ['b', 'a'], []);

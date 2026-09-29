@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { fireEvent, render } from '@testing-library/react';
@@ -48,7 +50,7 @@ const renderField = ({
 
 describe('RetentionPeriodField', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders value and unit fields', () => {

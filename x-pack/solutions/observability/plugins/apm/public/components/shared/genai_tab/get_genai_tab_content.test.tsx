@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -31,7 +33,7 @@ describe('getGenAiTabContent', () => {
         isGenAiSpan: false,
         genAi: undefined,
         ebt: { element: 'someTabs' },
-        reportEvent: jest.fn(),
+        reportEvent: vi.fn(),
       })
     ).toBeUndefined();
   });
@@ -41,7 +43,7 @@ describe('getGenAiTabContent', () => {
       isGenAiSpan: true,
       genAi,
       ebt: { element: 'spanFlyoutTabs' },
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     });
 
     expect(tab).toMatchObject({
@@ -53,7 +55,7 @@ describe('getGenAiTabContent', () => {
   });
 
   it('reports an impression for the provided surface element when the tab prepend renders', () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
 
     const tab = getGenAiTabContent({
       isGenAiSpan: true,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { getAlertSnoozeStateByRule } from './get_muted_alerts_instances_by_rule';
 
@@ -19,7 +21,7 @@ describe('getAlertSnoozeStateByRule', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     http.post.mockResolvedValueOnce(apiRes);
   });

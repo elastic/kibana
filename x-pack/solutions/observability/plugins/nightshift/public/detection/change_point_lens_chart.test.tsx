@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -12,9 +14,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { LifecycleDetection } from '@kbn/significant-events-schema';
 import { buildDetectionOccurrencesEsql, ChangePointLensChart } from './change_point_lens_chart';
 
-const mockBuild = jest.fn();
-const mockGetActiveSpace = jest.fn();
-const mockEmbeddableComponent = jest.fn(({ attributes }: { attributes: { title: string } }) => (
+const mockBuild = vi.fn();
+const mockGetActiveSpace = vi.fn();
+const mockEmbeddableComponent = vi.fn(({ attributes }: { attributes: { title: string } }) => (
   <div data-test-subj="mockLensEmbeddable">{attributes.title}</div>
 ));
 const mockServices = {
@@ -27,17 +29,23 @@ const mockServices = {
   },
 };
 
-jest.mock('@kbn/lens-embeddable-utils', () => ({
-  LensConfigBuilder: jest.fn().mockImplementation(() => ({
-    build: mockBuild,
-  })),
-}));
+vi.mock('@kbn/lens-embeddable-utils', () => {
+      const mocked = {
+      LensConfigBuilder: vi.fn().mockImplementation(() => ({
+        build: mockBuild,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: mockServices,
-  }),
-}));
+vi.mock('../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: mockServices,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ruleUuid = 'rule-uuid-001';
 const detection: LifecycleDetection = {

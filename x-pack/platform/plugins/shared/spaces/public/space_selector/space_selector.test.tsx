@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -21,7 +23,7 @@ import { spacesManagerMock } from '../spaces_manager/mocks';
 
 function getSpacesManager(spaces: Space[] = []) {
   const manager = spacesManagerMock.create();
-  manager.getSpaces = jest.fn().mockResolvedValue(spaces);
+  manager.getSpaces = vi.fn().mockResolvedValue(spaces);
   return manager;
 }
 
@@ -172,7 +174,7 @@ describe('initial solution setup', () => {
 
   it('renders setup and does not load spaces when enabled and required', async () => {
     const spacesManager = getSpacesManager(spaces);
-    spacesManager.getInitialSolutionSetup = jest.fn().mockResolvedValue({ required: true });
+    spacesManager.getInitialSolutionSetup = vi.fn().mockResolvedValue({ required: true });
 
     renderScreen({
       spacesManager,
@@ -193,7 +195,7 @@ describe('initial solution setup', () => {
 
   it('loads spaces when enabled and setup is not required', async () => {
     const spacesManager = getSpacesManager(spaces);
-    spacesManager.getInitialSolutionSetup = jest.fn().mockResolvedValue({ required: false });
+    spacesManager.getInitialSolutionSetup = vi.fn().mockResolvedValue({ required: false });
 
     renderScreen({
       spacesManager,
@@ -212,7 +214,7 @@ describe('initial solution setup', () => {
 
   it('loads spaces when setup-state check is unauthorized', async () => {
     const spacesManager = getSpacesManager(spaces);
-    spacesManager.getInitialSolutionSetup = jest
+    spacesManager.getInitialSolutionSetup = vi
       .fn()
       .mockRejectedValue(Object.assign(new Error('Forbidden'), { response: { status: 403 } }));
 
@@ -236,7 +238,7 @@ describe('initial solution setup', () => {
 
   it('loads spaces when setup-state check fails transiently', async () => {
     const spacesManager = getSpacesManager(spaces);
-    spacesManager.getInitialSolutionSetup = jest.fn().mockRejectedValue(new Error('boom'));
+    spacesManager.getInitialSolutionSetup = vi.fn().mockRejectedValue(new Error('boom'));
 
     renderScreen({
       spacesManager,

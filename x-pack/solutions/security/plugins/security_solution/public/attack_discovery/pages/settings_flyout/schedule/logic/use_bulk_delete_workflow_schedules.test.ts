@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { act } from '@testing-library/react';
 
 import { useBulkDeleteWorkflowSchedules } from './use_bulk_delete_workflow_schedules';
@@ -17,36 +20,36 @@ import { deleteWorkflowSchedule } from '../api/internal';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttackDiscoverySchedulesEventTypes } from '../../../../../common/lib/telemetry';
 
-jest.mock('./use_find_workflow_schedules');
-jest.mock('./use_get_workflow_schedule');
-jest.mock('../api/internal');
-jest.mock('../../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('./use_find_workflow_schedules');
+vi.mock('./use_get_workflow_schedule');
+vi.mock('../api/internal');
+vi.mock('../../../../../common/hooks/use_app_toasts');
+vi.mock('../../../../../common/lib/kibana');
 
-const deleteWorkflowScheduleMock = deleteWorkflowSchedule as jest.MockedFunction<
+const deleteWorkflowScheduleMock = deleteWorkflowSchedule as MockedFunction<
   typeof deleteWorkflowSchedule
 >;
 
-const invalidateFindWorkflowSchedulesMock = jest.fn();
+const invalidateFindWorkflowSchedulesMock = vi.fn();
 const mockUseInvalidateFindWorkflowSchedules =
-  useInvalidateFindWorkflowSchedules as jest.MockedFunction<
+  useInvalidateFindWorkflowSchedules as MockedFunction<
     typeof useInvalidateFindWorkflowSchedules
   >;
 
-const invalidateGetWorkflowScheduleMock = jest.fn();
+const invalidateGetWorkflowScheduleMock = vi.fn();
 const mockUseInvalidateGetWorkflowSchedule =
-  useInvalidateGetWorkflowSchedule as jest.MockedFunction<typeof useInvalidateGetWorkflowSchedule>;
+  useInvalidateGetWorkflowSchedule as MockedFunction<typeof useInvalidateGetWorkflowSchedule>;
 
 describe('useBulkDeleteWorkflowSchedules', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
-  let reportEventMock: jest.Mock;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let reportEventMock: Mock;
   const ids = ['test-0', 'test-1'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    reportEventMock = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue({
+    reportEventMock = vi.fn();
+    (useKibana as Mock).mockReturnValue({
       services: {
         telemetry: {
           reportEvent: reportEventMock,
@@ -55,19 +58,19 @@ describe('useBulkDeleteWorkflowSchedules', () => {
     });
 
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
 
     deleteWorkflowScheduleMock.mockResolvedValue(
       {} as unknown as Awaited<ReturnType<typeof deleteWorkflowSchedule>>
     );
 
     mockUseInvalidateFindWorkflowSchedules.mockReturnValue(
-      invalidateFindWorkflowSchedulesMock as unknown as jest.Mocked<
+      invalidateFindWorkflowSchedulesMock as unknown as Mocked<
         ReturnType<typeof useInvalidateFindWorkflowSchedules>
       >
     );
     mockUseInvalidateGetWorkflowSchedule.mockReturnValue(
-      invalidateGetWorkflowScheduleMock as unknown as jest.Mocked<
+      invalidateGetWorkflowScheduleMock as unknown as Mocked<
         ReturnType<typeof useInvalidateGetWorkflowSchedule>
       >
     );

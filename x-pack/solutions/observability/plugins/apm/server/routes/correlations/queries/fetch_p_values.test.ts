@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
@@ -17,23 +20,23 @@ import { fetchPValues } from './fetch_p_values';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchFailedEventsCorrelationPValues } from './fetch_failed_events_correlation_p_values';
 
-jest.mock('./fetch_duration_histogram_range_steps');
-jest.mock('./fetch_failed_events_correlation_p_values');
-jest.mock('@kbn/es-query');
+vi.mock('./fetch_duration_histogram_range_steps');
+vi.mock('./fetch_failed_events_correlation_p_values');
+vi.mock('@kbn/es-query');
 
 const mockFetchDurationHistogramRangeSteps =
-  fetchDurationHistogramRangeSteps as jest.MockedFunction<typeof fetchDurationHistogramRangeSteps>;
+  fetchDurationHistogramRangeSteps as MockedFunction<typeof fetchDurationHistogramRangeSteps>;
 const mockFetchFailedEventsCorrelationPValues =
-  fetchFailedEventsCorrelationPValues as jest.MockedFunction<
+  fetchFailedEventsCorrelationPValues as MockedFunction<
     typeof fetchFailedEventsCorrelationPValues
   >;
-const mockisNonLocalIndexName = isNonLocalIndexName as jest.MockedFunction<
+const mockisNonLocalIndexName = isNonLocalIndexName as MockedFunction<
   typeof isNonLocalIndexName
 >;
 
 describe('fetchPValues', () => {
   const mockApmEventClient = {
-    search: jest.fn(),
+    search: vi.fn(),
     indices: {
       transaction: 'apm-*-transaction-*',
       error: 'apm-*-error-*',
@@ -64,7 +67,7 @@ describe('fetchPValues', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockisNonLocalIndexName.mockReturnValue(false);
   });
 

@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getEsdsl } from './esdsl';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { EsdslExpressionFunctionDefinition } from '../../../common/search/expressions';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
-jest.mock('@kbn/i18n', () => {
+vi.mock('@kbn/i18n', () => {
   return {
     i18n: {
       translate: (id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
@@ -29,17 +31,17 @@ describe('esdsl', () => {
   let esdsl: EsdslExpressionFunctionDefinition;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     startDependencies = [
       {
         uiSettings: {
-          get: jest.fn().mockReturnValue(true),
+          get: vi.fn().mockReturnValue(true),
         },
       },
       {},
       {
         search: {
-          dsl: jest.fn(async (params: any) => ({
+          dsl: vi.fn(async (params: any) => ({
             rawResponse: {
               params: {
                 index: params.index,
@@ -51,7 +53,7 @@ describe('esdsl', () => {
         },
       },
     ];
-    getStartServices = jest
+    getStartServices = vi
       .fn()
       .mockResolvedValue(new Promise((resolve) => resolve(startDependencies)));
     esdsl = getEsdsl({ getStartServices });

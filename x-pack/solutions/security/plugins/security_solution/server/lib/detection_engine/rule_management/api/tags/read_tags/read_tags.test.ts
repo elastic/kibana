@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { readTags } from './read_tags';
 
 describe('read_tags', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('readTags', () => {

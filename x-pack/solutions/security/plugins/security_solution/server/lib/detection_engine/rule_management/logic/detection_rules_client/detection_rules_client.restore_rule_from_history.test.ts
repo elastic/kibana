@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -29,8 +32,8 @@ import {
   DETECTION_RULE_RESTORE_ERROR_EVENT,
 } from '../../../../telemetry/event_based/events';
 
-jest.mock('../../../../machine_learning/authz');
-jest.mock('../../../../machine_learning/validation');
+vi.mock('../../../../machine_learning/authz');
+vi.mock('../../../../machine_learning/validation');
 
 const RULE_ID = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';
 const CHANGE_ID = 'change-abc-123';
@@ -40,7 +43,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
   let detectionRulesClient: IDetectionRulesClient;
   let analytics: AnalyticsServiceSetup;
 
-  const mlAuthz = (buildMlAuthz as jest.Mock)();
+  const mlAuthz = (buildMlAuthz as Mock)();
   const rulesAuthz = getMockRulesAuthz();
 
   const liveAlertingRule = resolveRuleMock(getQueryRuleParams());
@@ -78,12 +81,12 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
       hits: { hits: [], total: { value: 0, relation: 'eq' } },
     } as never);
 
-    analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup;
+    analytics = { reportEvent: vi.fn() } as unknown as AnalyticsServiceSetup;
 
     detectionRulesClient = createDetectionRulesClient({
       actionsClient: {
-        isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
-      } as unknown as jest.Mocked<ActionsClient>,
+        isSystemAction: vi.fn((id: string) => id === 'system-connector-.cases'),
+      } as unknown as Mocked<ActionsClient>,
       rulesClient,
       userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
@@ -393,7 +396,7 @@ describe('DetectionRulesClient.restoreRuleFromHistory', () => {
   });
 
   it('throws if mlAuth fails', async () => {
-    (throwAuthzError as jest.Mock).mockImplementationOnce(() => {
+    (throwAuthzError as Mock).mockImplementationOnce(() => {
       throw new Error('mocked MLAuth error');
     });
 

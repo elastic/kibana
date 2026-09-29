@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
@@ -19,11 +22,11 @@ import type { PerOsProtectionMasterToggleProps } from './per_os_protection_maste
 import { PerOsProtectionMasterToggle } from './per_os_protection_master_toggle';
 import { adjustMalwareSubfeatures } from './per_os_malware_protections_card';
 
-jest.mock('../../../../../../common/hooks/use_license');
+vi.mock('../../../../../../common/hooks/use_license');
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 
 describe('PerOsProtectionMasterToggle', () => {
   let policy: PolicyConfig;
@@ -37,7 +40,7 @@ describe('PerOsProtectionMasterToggle', () => {
   };
 
   const getUpdatedPolicy = (): PolicyConfig =>
-    (props.onChange as jest.Mock).mock.calls[0][0].updatedPolicy as PolicyConfig;
+    (props.onChange as Mock).mock.calls[0][0].updatedPolicy as PolicyConfig;
 
   beforeEach(() => {
     useLicenseMock.mockReturnValue(licenseServiceMocked);
@@ -45,7 +48,7 @@ describe('PerOsProtectionMasterToggle', () => {
       .config.policy.value;
     props = {
       policy,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       protection: 'malware',
       protectionLabel: 'Malware protections',
@@ -164,7 +167,7 @@ describe('PerOsProtectionMasterToggle', () => {
     policy.windows.malware.on_write_scan = true;
     policy.mac.malware.on_write_scan = true;
     policy.linux.malware.on_write_scan = true;
-    props.additionalOnOsSwitchChange = jest.fn(adjustMalwareSubfeatures);
+    props.additionalOnOsSwitchChange = vi.fn(adjustMalwareSubfeatures);
     render();
 
     await userEvent.click(renderResult.getByTestId('test'));

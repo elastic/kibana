@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,7 +18,7 @@ import { Draggable } from './draggable';
 import { dataTransfer, generateDragDropValue, renderWithDragDropContext } from './test_utils';
 import { ReorderProvider } from './providers/reorder_provider';
 
-jest.useFakeTimers({ legacyFakeTimers: true });
+vi.useFakeTimers({ legacyFakeTimers: true });
 
 const originalOffsetHeight = Object.getOwnPropertyDescriptor(
   HTMLElement.prototype,
@@ -27,18 +29,18 @@ const expectLabel = (label: string) =>
   expect.objectContaining({ humanData: expect.objectContaining({ label }) });
 
 describe('Drag and drop reordering', () => {
-  const onDrop = jest.fn();
+  const onDrop = vi.fn();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   type MaximumThreeDroppablesProps = [
@@ -52,7 +54,7 @@ describe('Drag and drop reordering', () => {
     contextOverrides = {}
   ) => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
     const values = propsOverrides.map((props, index) => {
       return props?.value ? props.value : generateDragDropValue(`${index}`);
@@ -111,76 +113,76 @@ describe('Drag and drop reordering', () => {
         const draggable = screen.getByTestId(`domDragDrop_domDraggable_${index}`);
         fireEvent.dragStart(draggable, { dataTransfer });
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       drop: (droppableIndex = 0, options = {}) => {
         const dropEvent = new MouseEvent('drop', { ...options, bubbles: true });
         fireEvent(droppables[droppableIndex], dropEvent);
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       dragOver: (droppableIndex = 0, options = {}) => {
         fireEvent.dragOver(droppables[droppableIndex], options);
 
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       dragLeave: (droppableIndex = 0) => {
         fireEvent.dragLeave(droppables[droppableIndex]);
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       startDraggingByKeyboard: async (index = 0) => {
         draggableKeyboardHandlers[index].focus();
         await user.keyboard('[Enter]');
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       dropByKeyboard: async () => {
         await user.keyboard('[Enter]');
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       cancelByKeyboard: async () => {
         await user.keyboard('{Escape}');
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       reorderDownByKeyboard: async () => {
         await user.keyboard('[ArrowDown]');
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       reorderUpByKeyboard: async () => {
         await user.keyboard('[ArrowUp]');
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       dragOverToNextByKeyboard: async () => {
         await user.keyboard('[ArrowRight]');
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       dragOverToPreviousByKeyboard: async () => {
         await user.keyboard('[ArrowLeft]');
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       pressModifierKey: async (key: '{Shift>}' | '{Alt>}' | '{Control>}') => {
         await user.keyboard(key);
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       droppable,

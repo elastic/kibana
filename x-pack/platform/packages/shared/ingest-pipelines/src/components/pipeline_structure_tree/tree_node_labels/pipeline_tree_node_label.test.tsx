@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { PipelineTreeNodeLabel } from './pipeline_tree_node_label';
@@ -69,7 +71,7 @@ describe('PipelineTreeNodeLabel', () => {
   });
 
   it('calls onClick when clicked', () => {
-    const handleClick = jest.fn();
+    const handleClick = vi.fn();
     const { getByTestId } = render(
       <PipelineTreeNodeLabel
         pipelineName="clickable-pipeline"
@@ -87,7 +89,7 @@ describe('PipelineTreeNodeLabel', () => {
   });
 
   it('truncates long pipeline names', () => {
-    const handleClick = jest.fn();
+    const handleClick = vi.fn();
     const longName = 'a'.repeat(100);
     const { getByTestId } = render(
       <PipelineTreeNodeLabel

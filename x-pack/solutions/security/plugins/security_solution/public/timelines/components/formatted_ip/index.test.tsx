@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
@@ -22,46 +24,49 @@ import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../flyout_v2/use_flyout_api.mock';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 
-jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
-jest.mock('../../../flyout_v2/use_flyout_api');
+vi.mock('../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../../../flyout_v2/use_flyout_api');
 
-jest.mock('react-redux-v7', () => {
-  const origin = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const origin = require('react-redux-v7');
   return {
     ...origin,
-    useDispatch: jest.fn().mockReturnValue(jest.fn()),
+    useDispatch: vi.fn().mockReturnValue(vi.fn()),
   };
 });
 
-jest.mock('../../../common/lib/kibana/kibana_react', () => ({
-  ...jest.requireActual('../../../common/lib/kibana/kibana_react'),
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: {
-        getUrlForApp: jest.fn(),
-        navigateToApp: jest.fn(),
-      },
-    },
-  }),
-}));
+vi.mock('../../../common/lib/kibana/kibana_react', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/lib/kibana/kibana_react')),
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          application: {
+            getUrlForApp: vi.fn(),
+            navigateToApp: vi.fn(),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../store');
+vi.mock('../../store');
 
-const mockOpenFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout');
+const mockOpenFlyout = vi.fn();
+vi.mock('@kbn/expandable-flyout');
 
 describe('FormattedIp', () => {
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+    vi.clearAllMocks();
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
     });
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   const props = {
@@ -92,7 +97,7 @@ describe('FormattedIp', () => {
     };
 
     test('when new flyout is disabled, should open the legacy NetworkDetails expandable flyout', async () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+      vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
 
       render(
         <TestProviders>
@@ -118,7 +123,7 @@ describe('FormattedIp', () => {
     });
 
     test('when new flyout is enabled, should open the new network flyout', async () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+      vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
       render(
         <TestProviders>

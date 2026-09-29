@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { ApiKeyField } from './api_key_field';
@@ -14,7 +16,7 @@ describe('ApiKeyField', () => {
     isCreating: false,
     canCreate: true,
     wasKeyCreatedBefore: false,
-    onCreate: jest.fn(),
+    onCreate: vi.fn(),
   };
 
   it('shows the default placeholder when no key was ever created', () => {

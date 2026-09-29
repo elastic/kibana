@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -21,8 +23,8 @@ const mockInternalRuleTypes = [
   { id: 'c' },
 ] as unknown as InternalRuleType[];
 
-jest.mock('../apis/get_internal_rule_types');
-const mockGetInternalRuleTypes = jest.mocked(getInternalRuleTypes);
+vi.mock('../apis/get_internal_rule_types');
+const mockGetInternalRuleTypes = vi.mocked(getInternalRuleTypes);
 
 const http = httpServiceMock.createStartContract();
 
@@ -39,7 +41,7 @@ describe('useGetInternalRuleTypesQuery', () => {
 
   afterEach(() => {
     queryClient.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call the getInternalRuleTypes API', async () => {

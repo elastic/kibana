@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useBulkAlertActionItems, type UseBulkAlertActionItemsArgs } from './use_alert_actions';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -13,36 +16,54 @@ import { FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../../../../common/types';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 
-jest.mock('../../../common/hooks/use_app_toasts');
-jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true }),
-}));
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
-jest.mock('../../../common/lib/apm/use_start_transaction', () => ({
-  useStartTransaction: jest.fn().mockReturnValue({ startTransaction: jest.fn() }),
-}));
-jest.mock('../use_alert_close_info_modal', () => ({
-  useAlertCloseInfoModal: jest
-    .fn()
-    .mockReturnValue({ promptAlertCloseConfirmation: jest.fn().mockResolvedValue(true) }),
-}));
-jest.mock('@kbn/response-ops-detections-close-reason', () => ({
-  useBulkClosingReasonItems: jest
-    .fn()
-    .mockReturnValue({ item: { key: 'close-alert-with-reason', label: 'Close' }, panels: [] }),
-}));
-jest.mock('../../../common/components/toolbar/bulk_actions/update_alerts');
-jest.mock('../../components/alerts_table/helpers', () => ({
-  buildTimeRangeFilter: jest.fn().mockReturnValue([]),
-}));
+vi.mock('../../../common/hooks/use_app_toasts');
+vi.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => {
+      const mocked = {
+      useAlertsPrivileges: vi.fn().mockReturnValue({ hasAlertsUpdate: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/lib/apm/use_start_transaction', () => {
+      const mocked = {
+      useStartTransaction: vi.fn().mockReturnValue({ startTransaction: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../use_alert_close_info_modal', () => {
+      const mocked = {
+      useAlertCloseInfoModal: vi
+        .fn()
+        .mockReturnValue({ promptAlertCloseConfirmation: vi.fn().mockResolvedValue(true) }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/response-ops-detections-close-reason', () => {
+      const mocked = {
+      useBulkClosingReasonItems: vi
+        .fn()
+        .mockReturnValue({ item: { key: 'close-alert-with-reason', label: 'Close' }, panels: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/components/toolbar/bulk_actions/update_alerts');
+vi.mock('../../components/alerts_table/helpers', () => {
+      const mocked = {
+      buildTimeRangeFilter: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-(useAppToasts as jest.Mock).mockReturnValue({
-  addSuccess: jest.fn(),
-  addError: jest.fn(),
+(useAppToasts as Mock).mockReturnValue({
+  addSuccess: vi.fn(),
+  addError: vi.fn(),
 });
-(updateAlertStatus as jest.Mock).mockResolvedValue({ updated: 1, version_conflicts: 0 });
+(updateAlertStatus as Mock).mockResolvedValue({ updated: 1, version_conflicts: 0 });
 
 function renderUseBulkAlertActionItems(props?: Partial<UseBulkAlertActionItemsArgs>) {
   return renderHook(() =>
@@ -86,8 +107,8 @@ describe('useBulkAlertActionItems', () => {
 
   describe('onClick with isSelectAllChecked (query-based bulk close)', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
-      (updateAlertStatus as jest.Mock).mockResolvedValue({ updated: 1, version_conflicts: 0 });
+      vi.clearAllMocks();
+      (updateAlertStatus as Mock).mockResolvedValue({ updated: 1, version_conflicts: 0 });
     });
 
     const invokeOpenAction = async (props?: Partial<UseBulkAlertActionItemsArgs>) => {
@@ -97,7 +118,7 @@ describe('useBulkAlertActionItems', () => {
       ) as BulkActionsConfig;
 
       await act(async () => {
-        await openItem.onClick!([], true, jest.fn(), jest.fn(), jest.fn());
+        await openItem.onClick!([], true, vi.fn(), vi.fn(), vi.fn());
       });
     };
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   formatGroupingValue,
@@ -53,8 +55,8 @@ describe('formatGroupingValue', () => {
   ): DataView => {
     const fieldStub = { name: field };
     return {
-      getFieldByName: jest.fn((name: string) => (name === field ? fieldStub : undefined)),
-      getFormatterForField: jest.fn(() => ({ convertToText })),
+      getFieldByName: vi.fn((name: string) => (name === field ? fieldStub : undefined)),
+      getFormatterForField: vi.fn(() => ({ convertToText })),
     } as unknown as DataView;
   };
 

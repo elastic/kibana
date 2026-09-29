@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { resolveRuleAPIKey } from './resolve_rule_api_key';
 import type { RulesClientContext, CreateAPIKeyResult } from '../types';
 
@@ -23,10 +25,10 @@ const userKey: CreateAPIKeyResult = {
 
 const createMockContext = (overrides: Partial<RulesClientContext> = {}): RulesClientContext =>
   ({
-    createAPIKey: jest.fn().mockResolvedValue(grantedKey),
-    isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(false),
-    getAuthenticationAPIKey: jest.fn().mockReturnValue(userKey),
-    cloneAPIKey: jest.fn().mockResolvedValue(clonedKey),
+    createAPIKey: vi.fn().mockResolvedValue(grantedKey),
+    isAuthenticationTypeAPIKey: vi.fn().mockReturnValue(false),
+    getAuthenticationAPIKey: vi.fn().mockReturnValue(userKey),
+    cloneAPIKey: vi.fn().mockResolvedValue(clonedKey),
     cloneApiKeysOnCreate: false,
     ...overrides,
   } as unknown as RulesClientContext);
@@ -35,7 +37,7 @@ describe('resolveRuleAPIKey', () => {
   describe('when rule is disabled', () => {
     test('returns null regardless of context or existing state', async () => {
       const context = createMockContext({
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+        isAuthenticationTypeAPIKey: vi.fn().mockReturnValue(true),
       });
 
       const result = await resolveRuleAPIKey(context, 'test-rule', false, {
@@ -53,7 +55,7 @@ describe('resolveRuleAPIKey', () => {
 
     test('clones when request is API-key-authed', async () => {
       const context = createMockContext({
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+        isAuthenticationTypeAPIKey: vi.fn().mockReturnValue(true),
       });
 
       const result = await resolveRuleAPIKey(context, 'test-rule', true, existing);
@@ -77,8 +79,8 @@ describe('resolveRuleAPIKey', () => {
 
     test('propagates errors from cloneAPIKey', async () => {
       const context = createMockContext({
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
-        cloneAPIKey: jest.fn().mockRejectedValue(new Error('clone failed')),
+        isAuthenticationTypeAPIKey: vi.fn().mockReturnValue(true),
+        cloneAPIKey: vi.fn().mockRejectedValue(new Error('clone failed')),
       });
 
       await expect(resolveRuleAPIKey(context, 'test-rule', true, existing)).rejects.toThrow(
@@ -91,7 +93,7 @@ describe('resolveRuleAPIKey', () => {
     test('clones on create (no existing) when the request is API-key-authed', async () => {
       const context = createMockContext({
         cloneApiKeysOnCreate: true,
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+        isAuthenticationTypeAPIKey: vi.fn().mockReturnValue(true),
       });
 
       const result = await resolveRuleAPIKey(context, 'test-rule', true);
@@ -115,7 +117,7 @@ describe('resolveRuleAPIKey', () => {
     test('still clones on regen of a framework-managed rule (apiKeyCreatedByUser === false)', async () => {
       const context = createMockContext({
         cloneApiKeysOnCreate: true,
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+        isAuthenticationTypeAPIKey: vi.fn().mockReturnValue(true),
       });
 
       const result = await resolveRuleAPIKey(context, 'test-rule', true, {
@@ -130,7 +132,7 @@ describe('resolveRuleAPIKey', () => {
     test('clones on enable of a rule created disabled (null ownership), instead of persisting the borrowed key', async () => {
       const context = createMockContext({
         cloneApiKeysOnCreate: true,
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+        isAuthenticationTypeAPIKey: vi.fn().mockReturnValue(true),
       });
 
       const result = await resolveRuleAPIKey(context, 'test-rule', true, {
@@ -145,7 +147,7 @@ describe('resolveRuleAPIKey', () => {
     test('is overridden by an explicitly user-owned key (apiKeyCreatedByUser === true)', async () => {
       const context = createMockContext({
         cloneApiKeysOnCreate: true,
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+        isAuthenticationTypeAPIKey: vi.fn().mockReturnValue(true),
       });
 
       const result = await resolveRuleAPIKey(context, 'test-rule', true, {
@@ -175,7 +177,7 @@ describe('resolveRuleAPIKey', () => {
   describe('create path (no existing rule, cloneApiKeysOnCreate false)', () => {
     test('uses getAuthenticationAPIKey when request is API-key-authed', async () => {
       const context = createMockContext({
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+        isAuthenticationTypeAPIKey: vi.fn().mockReturnValue(true),
       });
 
       const result = await resolveRuleAPIKey(context, 'test-rule', true);
@@ -207,7 +209,7 @@ describe('resolveRuleAPIKey', () => {
   describe('cloneApiKey option (caller-declared borrowed credential)', () => {
     test('mints a framework-owned key instead of persisting the caller credential', async () => {
       const context = createMockContext({
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+        isAuthenticationTypeAPIKey: vi.fn().mockReturnValue(true),
       });
 
       const result = await resolveRuleAPIKey(context, 'test-rule', true, { cloneApiKey: true });
@@ -229,7 +231,7 @@ describe('resolveRuleAPIKey', () => {
 
     test('is overridden by an explicitly user-owned key: user-managed rules keep the caller credential', async () => {
       const context = createMockContext({
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+        isAuthenticationTypeAPIKey: vi.fn().mockReturnValue(true),
       });
 
       const result = await resolveRuleAPIKey(context, 'test-rule', true, {
@@ -244,7 +246,7 @@ describe('resolveRuleAPIKey', () => {
 
     test('applies to a rule with null ownership (created disabled or legacy): clones', async () => {
       const context = createMockContext({
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+        isAuthenticationTypeAPIKey: vi.fn().mockReturnValue(true),
       });
 
       const result = await resolveRuleAPIKey(context, 'test-rule', true, {
@@ -259,7 +261,7 @@ describe('resolveRuleAPIKey', () => {
 
     test('when not set, an external API-key caller still has its credential persisted', async () => {
       const context = createMockContext({
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+        isAuthenticationTypeAPIKey: vi.fn().mockReturnValue(true),
       });
 
       const result = await resolveRuleAPIKey(context, 'test-rule', true, { cloneApiKey: false });
@@ -275,7 +277,7 @@ describe('resolveRuleAPIKey', () => {
 
     test('uses getAuthenticationAPIKey when request is API-key-authed', async () => {
       const context = createMockContext({
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+        isAuthenticationTypeAPIKey: vi.fn().mockReturnValue(true),
       });
 
       const result = await resolveRuleAPIKey(context, 'test-rule', true, existing);
@@ -300,7 +302,7 @@ describe('resolveRuleAPIKey', () => {
 
     test('falls through to legacy logic', async () => {
       const context = createMockContext({
-        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+        isAuthenticationTypeAPIKey: vi.fn().mockReturnValue(true),
       });
 
       const result = await resolveRuleAPIKey(context, 'test-rule', true, existing);

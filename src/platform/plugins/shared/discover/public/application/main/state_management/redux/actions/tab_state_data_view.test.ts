@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
@@ -70,13 +72,13 @@ const setup = async ({ dataView = dataViewMockWithTimeField }: { dataView?: Data
 
 describe('tab_state_data_view actions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('assignNextDataView', () => {
     it('should update data view', async () => {
       const { internalState, tabId, runtimeStateManager } = await setup();
-      jest.spyOn(internalStateActions, 'pauseAutoRefreshInterval');
+      vi.spyOn(internalStateActions, 'pauseAutoRefreshInterval');
 
       expect(selectTabRuntimeState(runtimeStateManager, tabId)?.currentDataView$?.getValue()).toBe(
         dataViewMockWithTimeField
@@ -126,7 +128,7 @@ describe('tab_state_data_view actions', () => {
       });
       await toolkit.initializeSingleTab({ tabId: persistedTab.id });
 
-      const getDataView = jest.spyOn(services.dataViews, 'get').mockResolvedValue(dataView);
+      const getDataView = vi.spyOn(services.dataViews, 'get').mockResolvedValue(dataView);
 
       return {
         services,
@@ -269,7 +271,7 @@ describe('tab_state_data_view actions', () => {
       expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.getValue()).toBe(
         dataViewMockWithTimeField
       );
-      jest
+      vi
         .spyOn(services.dataViews, 'get')
         .mockImplementationOnce((id) =>
           id === dataViewAdHoc.id ? Promise.resolve(dataViewAdHoc) : Promise.reject()
@@ -295,7 +297,7 @@ describe('tab_state_data_view actions', () => {
   describe('onDataViewEdited', () => {
     test('onDataViewEdited - persisted data view', async () => {
       const { internalState, tabId, runtimeStateManager } = await setup();
-      const fetchDataSpy = jest.spyOn(tabStateActions, 'fetchData');
+      const fetchDataSpy = vi.spyOn(tabStateActions, 'fetchData');
 
       const selectedDataView$ = selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$;
       expect(selectedDataView$.getValue()).toEqual(dataViewMockWithTimeField);
@@ -313,7 +315,7 @@ describe('tab_state_data_view actions', () => {
 
     test('onDataViewEdited - ad-hoc data view', async () => {
       const { internalState, tabId, runtimeStateManager } = await setup();
-      const fetchDataSpy = jest.spyOn(tabStateActions, 'fetchData');
+      const fetchDataSpy = vi.spyOn(tabStateActions, 'fetchData');
 
       await internalState.dispatch(
         internalStateActions.onDataViewCreated({
@@ -355,7 +357,7 @@ describe('tab_state_data_view actions', () => {
     it('should generate new ID and create new data view', async () => {
       const { internalState, tabId, services } = await setup({ dataView: dataViewAdHoc });
 
-      const createSpy = jest.mocked(services.dataViews.create);
+      const createSpy = vi.mocked(services.dataViews.create);
       createSpy.mockClear();
 
       const result = await internalState.dispatch(
@@ -372,8 +374,8 @@ describe('tab_state_data_view actions', () => {
     it('should update filter references to new data view ID', async () => {
       const { internalState, tabId, services } = await setup({ dataView: dataViewAdHoc });
 
-      const mockExecute = jest.fn();
-      jest
+      const mockExecute = vi.fn();
+      vi
         .mocked(services.uiActions.getAction)
         .mockResolvedValue({ execute: mockExecute } as unknown as Action<object, object>);
 
@@ -445,7 +447,7 @@ describe('tab_state_data_view actions', () => {
       const { internalState, tabId, services } = await setup();
       // setup() initializes with dataViewMockWithTimeField which is persisted
 
-      const createSpy = jest.mocked(services.dataViews.create);
+      const createSpy = vi.mocked(services.dataViews.create);
       createSpy.mockClear();
 
       const result = await internalState.dispatch(

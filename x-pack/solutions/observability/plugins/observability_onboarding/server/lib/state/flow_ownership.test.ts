@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import {
   assertFlowOwnership,
@@ -84,7 +86,7 @@ describe('createObservabilityOnboardingInternalRepository', () => {
     const repo = savedObjectsRepositoryMock.create();
     const coreStart = {
       savedObjects: {
-        createInternalRepository: jest.fn().mockReturnValue(repo),
+        createInternalRepository: vi.fn().mockReturnValue(repo),
       },
     };
 

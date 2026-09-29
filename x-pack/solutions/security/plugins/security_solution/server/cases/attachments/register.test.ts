@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
@@ -37,7 +39,7 @@ describe('registerCaseAttachments', () => {
   } as ExperimentalFeatures;
 
   const buildFramework = () => ({
-    registerAttachment: jest.fn(),
+    registerAttachment: vi.fn(),
   });
 
   it('registers the unified security.endpoint attachment with the zod payload schema', () => {

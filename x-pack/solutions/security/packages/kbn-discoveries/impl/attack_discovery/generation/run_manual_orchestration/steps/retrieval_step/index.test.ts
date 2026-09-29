@@ -5,53 +5,76 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 
 import { runRetrievalStep } from '.';
 
-const mockLogHealthCheck = jest.fn();
+const mockLogHealthCheck = vi.fn();
 
-jest.mock('../../../../../lib/log_health_check', () => ({
-  logHealthCheck: (...args: unknown[]) => mockLogHealthCheck(...args),
-}));
+vi.mock('../../../../../lib/log_health_check', () => {
+      const mocked = {
+      logHealthCheck: (...args: unknown[]) => mockLogHealthCheck(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCreateDefaultRetrievalPromise = jest.fn();
-const mockInvokeCustomAlertRetrievalWorkflows = jest.fn();
-const mockResolveLegacySettledResult = jest.fn();
-const mockResolveCustomSettledResults = jest.fn();
-const mockValidateRetrievalResults = jest.fn();
-const mockCombineAlertRetrievalResults = jest.fn();
+const mockCreateDefaultRetrievalPromise = vi.fn();
+const mockInvokeCustomAlertRetrievalWorkflows = vi.fn();
+const mockResolveLegacySettledResult = vi.fn();
+const mockResolveCustomSettledResults = vi.fn();
+const mockValidateRetrievalResults = vi.fn();
+const mockCombineAlertRetrievalResults = vi.fn();
 
-jest.mock('./helpers/create_default_retrieval_promise', () => ({
-  createDefaultRetrievalPromise: (...args: unknown[]) => mockCreateDefaultRetrievalPromise(...args),
-}));
+vi.mock('./helpers/create_default_retrieval_promise', () => {
+      const mocked = {
+      createDefaultRetrievalPromise: (...args: unknown[]) => mockCreateDefaultRetrievalPromise(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../invoke_custom_alert_retrieval_workflows', () => ({
-  invokeCustomAlertRetrievalWorkflows: (...args: unknown[]) =>
-    mockInvokeCustomAlertRetrievalWorkflows(...args),
-}));
+vi.mock('../../../invoke_custom_alert_retrieval_workflows', () => {
+      const mocked = {
+      invokeCustomAlertRetrievalWorkflows: (...args: unknown[]) =>
+        mockInvokeCustomAlertRetrievalWorkflows(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers/resolve_default_settled_result', () => ({
-  resolveLegacySettledResult: (...args: unknown[]) => mockResolveLegacySettledResult(...args),
-}));
+vi.mock('./helpers/resolve_default_settled_result', () => {
+      const mocked = {
+      resolveLegacySettledResult: (...args: unknown[]) => mockResolveLegacySettledResult(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers/resolve_custom_settled_results', () => ({
-  resolveCustomSettledResults: (...args: unknown[]) => mockResolveCustomSettledResults(...args),
-}));
+vi.mock('./helpers/resolve_custom_settled_results', () => {
+      const mocked = {
+      resolveCustomSettledResults: (...args: unknown[]) => mockResolveCustomSettledResults(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers/validate_retrieval_results', () => ({
-  validateRetrievalResults: (...args: unknown[]) => mockValidateRetrievalResults(...args),
-}));
+vi.mock('./helpers/validate_retrieval_results', () => {
+      const mocked = {
+      validateRetrievalResults: (...args: unknown[]) => mockValidateRetrievalResults(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../combine_alert_retrieval_results', () => ({
-  combineAlertRetrievalResults: (...args: unknown[]) => mockCombineAlertRetrievalResults(...args),
-}));
+vi.mock('../../../combine_alert_retrieval_results', () => {
+      const mocked = {
+      combineAlertRetrievalResults: (...args: unknown[]) => mockCombineAlertRetrievalResults(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockLogger = {
-  debug: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 const baseParams = {
@@ -95,7 +118,7 @@ const mockCombinedResult = {
 
 describe('runRetrievalStep', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockCreateDefaultRetrievalPromise.mockResolvedValue(null);
     mockInvokeCustomAlertRetrievalWorkflows.mockResolvedValue([]);

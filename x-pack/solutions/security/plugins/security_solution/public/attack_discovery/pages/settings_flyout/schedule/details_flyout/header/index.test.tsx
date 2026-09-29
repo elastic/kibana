@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
@@ -56,7 +58,7 @@ const renderComponent = (params?: {
 
 describe('Header', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render title container', () => {

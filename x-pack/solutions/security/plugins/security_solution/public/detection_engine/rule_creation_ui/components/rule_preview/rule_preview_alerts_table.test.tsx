@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import moment from 'moment';
 import { render } from '@testing-library/react';
@@ -15,30 +18,42 @@ import { RulePreviewAlertsTable } from './rule_preview_alerts_table';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import type { EventsViewerProps } from '../../../../common/components/events_viewer';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/containers/use_full_screen', () => ({
-  useGlobalFullScreen: jest.fn().mockReturnValue({ globalFullScreen: false }),
-}));
-jest.mock('../../../../common/hooks/use_license', () => ({
-  useLicense: jest.fn(() => ({
-    isPlatinumPlus: jest.fn(() => false),
-    isEnterprise: jest.fn(() => false),
-  })),
-}));
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/containers/use_full_screen', () => {
+      const mocked = {
+      useGlobalFullScreen: vi.fn().mockReturnValue({ globalFullScreen: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/hooks/use_license', () => {
+      const mocked = {
+      useLicense: vi.fn(() => ({
+        isPlatinumPlus: vi.fn(() => false),
+        isEnterprise: vi.fn(() => false),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockStatefulEventsViewer = jest.fn((_props: EventsViewerProps) => null);
-jest.mock('../../../../common/components/events_viewer', () => ({
-  StatefulEventsViewer: (props: EventsViewerProps) => mockStatefulEventsViewer(props),
-}));
+const mockStatefulEventsViewer = vi.fn((_props: EventsViewerProps) => null);
+vi.mock('../../../../common/components/events_viewer', () => {
+      const mocked = {
+      StatefulEventsViewer: (props: EventsViewerProps) => mockStatefulEventsViewer(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../detections/configurations/security_solution_detections/cell_value_context',
-  () => ({
-    AlertTableCellContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  })
+  () => {
+      const mocked = {
+        AlertTableCellContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../../../common/utils/normalize_time_range');
+vi.mock('../../../../common/utils/normalize_time_range');
 
 const store = createMockStore({
   ...mockGlobalState,
@@ -66,8 +81,8 @@ const defaultProps = {
 
 describe('RulePreviewAlertsTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useGlobalFullScreen as jest.Mock).mockReturnValue({ globalFullScreen: false });
+    vi.clearAllMocks();
+    (useGlobalFullScreen as Mock).mockReturnValue({ globalFullScreen: false });
   });
 
   it('passes start date derived from timeframeStart to StatefulEventsViewer', () => {
@@ -122,7 +137,7 @@ describe('RulePreviewAlertsTable', () => {
   });
 
   it('sets container height to 100% when globalFullScreen is true', () => {
-    (useGlobalFullScreen as jest.Mock).mockReturnValue({ globalFullScreen: true });
+    (useGlobalFullScreen as Mock).mockReturnValue({ globalFullScreen: true });
 
     const { container } = render(
       <TestProviders store={store}>

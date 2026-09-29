@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cloneDeep } from 'lodash/fp';
 
 import { mockGlobalState } from '../../mock';
@@ -137,7 +139,7 @@ describe('Inputs', () => {
 
   describe('#upsertQuery', () => {
     test('make sure you can add a query', () => {
-      const refetch = jest.fn();
+      const refetch = vi.fn();
       const newQuery: UpdateQueryParams = {
         inputId: InputsModelId.global,
         id: 'myQuery',
@@ -159,7 +161,7 @@ describe('Inputs', () => {
     });
 
     test('make sure you can update a query', () => {
-      const refetch = jest.fn();
+      const refetch = vi.fn();
       const newQuery: UpdateQueryParams = {
         inputId: InputsModelId.global,
         id: 'myQuery',
@@ -186,7 +188,7 @@ describe('Inputs', () => {
   });
 
   describe('#setIsInspected', () => {
-    const refetch = jest.fn();
+    const refetch = vi.fn();
     beforeEach(() => {
       state = cloneDeep(mockGlobalState.inputs);
       const newQuery: UpdateQueryParams = {
@@ -336,7 +338,7 @@ describe('Inputs', () => {
 
   describe('#deleteOneQuery', () => {
     test('make sure that we only delete one query', () => {
-      const refetch = jest.fn();
+      const refetch = vi.fn();
       const newQuery: UpdateQueryParams = {
         inputId: InputsModelId.global,
         id: 'myQuery',

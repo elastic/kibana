@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
@@ -35,9 +37,9 @@ import { licenseMock } from '../../../../common/licensing/index.mock';
 import { userAPIClientMock } from '../../users/index.mock';
 import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } from '../index.mock';
 
-const MockedElasticsearchPrivileges = jest.fn();
-jest.mock('./privileges', () => {
-  const actual = jest.requireActual('./privileges');
+const MockedElasticsearchPrivileges = vi.fn();
+vi.mock('./privileges', async () => {
+  const actual = (await vi.importActual('./privileges'));
   return {
     ...actual,
     ElasticsearchPrivileges: (props: any) => {
@@ -52,21 +54,30 @@ jest.mock('./privileges', () => {
   };
 });
 
-jest.mock('./privileges/kibana/simple_privilege_section', () => ({
-  SimplePrivilegeSection: () => <div data-test-subj="simplePrivilegeSectionMock" />,
-}));
+vi.mock('./privileges/kibana/simple_privilege_section', () => {
+      const mocked = {
+      SimplePrivilegeSection: () => <div data-test-subj="simplePrivilegeSectionMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./privileges/kibana/space_aware_privilege_section', () => ({
-  SpaceAwarePrivilegeSection: ({ uiCapabilities }: any) => (
-    <div data-test-subj="spaceAwarePrivilegeSectionMock">
-      {!uiCapabilities?.spaces?.manage && <div data-test-subj="userCannotManageSpacesCallout" />}
-    </div>
-  ),
-}));
+vi.mock('./privileges/kibana/space_aware_privilege_section', () => {
+      const mocked = {
+      SpaceAwarePrivilegeSection: ({ uiCapabilities }: any) => (
+        <div data-test-subj="spaceAwarePrivilegeSectionMock">
+          {!uiCapabilities?.spaces?.manage && <div data-test-subj="userCannotManageSpacesCallout" />}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./privileges/kibana/transform_error_section', () => ({
-  TransformErrorSection: () => <div data-test-subj="transformErrorSectionMock" />,
-}));
+vi.mock('./privileges/kibana/transform_error_section', () => {
+      const mocked = {
+      TransformErrorSection: () => <div data-test-subj="transformErrorSectionMock" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const spacesManager = spacesManagerMock.create();
 const { getStartServices } = coreMock.createSetup();
@@ -202,7 +213,7 @@ function getProps({
 
   const dataViews = dataViewPluginMocks.createStartContract();
   // `undefined` titles can technically happen via import/export or other manual manipulation
-  dataViews.getTitles = jest.fn().mockResolvedValue(['foo*', 'bar*', undefined]);
+  dataViews.getTitles = vi.fn().mockResolvedValue(['foo*', 'bar*', undefined]);
 
   const indicesAPIClient = indicesAPIClientMock.create();
 
@@ -261,7 +272,7 @@ function getProps({
       return history;
     })(),
     overlays,
-    navigateToUrl: jest.fn(),
+    navigateToUrl: vi.fn(),
     spacesApiUi,
     buildFlavor,
     userProfile: userProfileMock,
@@ -276,7 +287,7 @@ describe('<EditRolePage />', () => {
   const coreStart = coreMock.createStart();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
       roles: {
@@ -879,7 +890,7 @@ describe('<EditRolePage />', () => {
 
   it('registers fatal error if features endpoint fails unexpectedly', async () => {
     const error = { response: { status: 500 } };
-    const getFeatures = jest.fn().mockRejectedValue(error);
+    const getFeatures = vi.fn().mockRejectedValue(error);
     const props = getProps({ action: 'edit' });
     render(
       <TestProviders>
@@ -896,7 +907,7 @@ describe('<EditRolePage />', () => {
 
   it('can render if features call is not allowed', async () => {
     const error = { response: { status: 403 } };
-    const getFeatures = jest.fn().mockRejectedValue(error);
+    const getFeatures = vi.fn().mockRejectedValue(error);
     const props = getProps({ action: 'edit' });
     render(
       <TestProviders>
@@ -915,7 +926,7 @@ describe('<EditRolePage />', () => {
 
   it('can render if index patterns are not available', async () => {
     const dataViews = dataViewPluginMocks.createStartContract();
-    dataViews.getTitles = jest.fn().mockRejectedValue({ response: { status: 403 } });
+    dataViews.getTitles = vi.fn().mockRejectedValue({ response: { status: 403 } });
 
     render(
       <TestProviders>
@@ -934,7 +945,7 @@ describe('<EditRolePage />', () => {
 
   it('can render for serverless buildFlavor', async () => {
     const dataViews = dataViewPluginMocks.createStartContract();
-    dataViews.getTitles = jest.fn().mockRejectedValue({ response: { status: 403 } });
+    dataViews.getTitles = vi.fn().mockRejectedValue({ response: { status: 403 } });
 
     render(
       <TestProviders>

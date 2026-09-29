@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,12 +22,15 @@ import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_f
 import { getFormattedEmailOptions, getEmailSender } from './email_params';
 import type { ActionConnector } from '@kbn/alerts-ui-shared/src/common/types/action_types';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
-jest.mock('../../common/get_experimental_features');
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/get_experimental_features');
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
@@ -53,9 +59,9 @@ const emailTestCases = [
 
 describe('EmailParamsFields renders', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibana();
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
   });
 
   test('all params fields is rendered', async () => {
@@ -111,7 +117,7 @@ describe('EmailParamsFields renders', () => {
   });
 
   test('sets the subject and message to the test message in test mode', () => {
-    const editAction = jest.fn();
+    const editAction = vi.fn();
 
     renderWithI18n(
       <EmailParamsFields
@@ -147,7 +153,7 @@ describe('EmailParamsFields renders', () => {
         message: 'test message',
       };
 
-      const editAction = jest.fn();
+      const editAction = vi.fn();
 
       renderWithI18n(
         <EmailParamsFields
@@ -179,7 +185,7 @@ describe('EmailParamsFields renders', () => {
       message: 'message',
     };
 
-    const editAction = jest.fn();
+    const editAction = vi.fn();
 
     renderWithI18n(
       <EmailParamsFields
@@ -212,7 +218,7 @@ describe('EmailParamsFields renders', () => {
       subject: 'test',
     };
 
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     renderWithI18n(
       <EmailParamsFields
         actionParams={actionParams}
@@ -234,7 +240,7 @@ describe('EmailParamsFields renders', () => {
       subject: 'test',
     };
 
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const { rerender } = renderWithI18n(
       <EmailParamsFields
         actionParams={actionParams}
@@ -270,7 +276,7 @@ describe('EmailParamsFields renders', () => {
       subject: 'test',
     };
 
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const { rerender } = renderWithI18n(
       <EmailParamsFields
         actionParams={actionParams}
@@ -331,7 +337,7 @@ describe('EmailParamsFields renders', () => {
       subject: 'test',
     };
 
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const { rerender } = renderWithI18n(
       <EmailParamsFields
         actionParams={{ ...actionParams, message: 'not the default message' }}
@@ -367,7 +373,7 @@ describe('EmailParamsFields renders', () => {
       subject: 'test',
     };
 
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const { rerender } = renderWithI18n(
       <EmailParamsFields
         actionParams={{ ...actionParams, message: 'not the default message' }}

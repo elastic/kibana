@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,11 +15,14 @@ import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { RuleStateStatus } from '../../../types/rule_state';
 import { RelatedAlertEpisodesList } from './related_list';
 
-jest.mock('../../related/related_alert_episode', () => ({
-  RelatedAlertEpisode: ({ episode, title }: { episode: AlertEpisode; title: React.ReactNode }) => (
-    <div data-test-subj="mockRelatedAlertEpisode">{title || episode['episode.id']}</div>
-  ),
-}));
+vi.mock('../../related/related_alert_episode', () => {
+      const mocked = {
+      RelatedAlertEpisode: ({ episode, title }: { episode: AlertEpisode; title: React.ReactNode }) => (
+        <div data-test-subj="mockRelatedAlertEpisode">{title || episode['episode.id']}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockRule = {
   id: 'rule-1',

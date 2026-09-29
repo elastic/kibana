@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { getSetAlertAssigneesRequestMock } from '../../../../../common/api/detection_engine/alert_assignees/mocks';
 import { DETECTION_ENGINE_ALERT_ASSIGNEES_URL } from '../../../../../common/constants';
@@ -24,15 +27,15 @@ describe('setAlertAssigneesRoute', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     setAlertAssigneesRoute(server.router);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('happy path', () => {
@@ -132,11 +135,11 @@ describe('setAlertAssigneesRoute', () => {
   });
 
   describe('workflow trigger emission', () => {
-    let mockEventBus: { emitAlertAssigneesChanged: jest.Mock };
+    let mockEventBus: { emitAlertAssigneesChanged: Mock };
 
     beforeEach(() => {
       server = serverMock.create();
-      mockEventBus = { emitAlertAssigneesChanged: jest.fn() };
+      mockEventBus = { emitAlertAssigneesChanged: vi.fn() };
       setAlertAssigneesRoute(server.router, mockEventBus as unknown as SecuritySolutionEventBus);
       // alert-1 has no current assignees, so adding 'user-1' would change it.
       context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue({

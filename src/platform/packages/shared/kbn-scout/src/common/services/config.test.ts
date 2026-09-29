@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -15,12 +17,12 @@ import type { ScoutTestConfig } from '../../types';
 import { createScoutConfig } from './config';
 
 const noopLogger: ScoutLogger = {
-  serviceMessage: jest.fn(),
-  serviceLoaded: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warning: jest.fn(),
-  error: jest.fn(),
+  serviceMessage: vi.fn(),
+  serviceLoaded: vi.fn(),
+  debug: vi.fn(),
+  info: vi.fn(),
+  warning: vi.fn(),
+  error: vi.fn(),
 } as unknown as ScoutLogger;
 
 const baseStatefulConfig = {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BasicAuthFields } from './basic_auth_fields';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -12,7 +14,7 @@ import userEvent from '@testing-library/user-event';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
 
 describe('BasicAuthFields', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   it('renders all fields', async () => {
     const testFormData = {
@@ -42,7 +44,7 @@ describe('BasicAuthFields', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('validation succeeds with correct fields', async () => {

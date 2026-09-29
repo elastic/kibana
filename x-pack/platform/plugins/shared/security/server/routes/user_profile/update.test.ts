@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ObjectType } from '@kbn/config-schema';
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -26,15 +29,15 @@ import { routeDefinitionParamsMock } from '../index.mock';
 function getMockContext() {
   return {
     licensing: {
-      license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
+      license: { check: vi.fn().mockReturnValue({ check: 'valid' }) },
     },
   } as unknown as SecurityRequestHandlerContext;
 }
 
 describe('Update profile routes', () => {
-  let router: jest.Mocked<SecurityRouter>;
-  let session: jest.Mocked<PublicMethodsOf<Session>>;
-  let userProfileService: jest.Mocked<UserProfileServiceStartInternal>;
+  let router: Mocked<SecurityRouter>;
+  let session: Mocked<PublicMethodsOf<Session>>;
+  let userProfileService: Mocked<UserProfileServiceStartInternal>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();

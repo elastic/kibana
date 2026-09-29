@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -22,11 +24,14 @@ import {
 
 // Stub @xyflow/react's Handle — it requires an internal React Flow context that
 // isn't available in unit tests, and we're not testing connection logic here.
-jest.mock('@xyflow/react', () => ({
-  ...jest.requireActual('@xyflow/react'),
-  Handle: () => null,
-  Position: { Top: 'top', Bottom: 'bottom' },
-}));
+vi.mock('@xyflow/react', () => {
+      const mocked = {
+      ...require('@xyflow/react'),
+      Handle: () => null,
+      Position: { Top: 'top', Bottom: 'bottom' },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Minimal NodeProps-shaped object for `WorkflowGraphNode`.
 const makeNodeProps = (
@@ -174,7 +179,7 @@ describe('WorkflowGraphNode', () => {
   });
 
   it('does not show run action in read-only mode', () => {
-    renderNode({}, false, { onStepRun: jest.fn(), canRunSteps: false });
+    renderNode({}, false, { onStepRun: vi.fn(), canRunSteps: false });
 
     fireEvent.mouseEnter(screen.getByRole('button', { name: /Test Step/ }));
 
@@ -182,7 +187,7 @@ describe('WorkflowGraphNode', () => {
   });
 
   it('shows run action when step runs are enabled', () => {
-    renderNode({}, false, { onStepRun: jest.fn(), canRunSteps: true });
+    renderNode({}, false, { onStepRun: vi.fn(), canRunSteps: true });
 
     fireEvent.mouseEnter(screen.getByRole('button', { name: /Test Step/ }));
 
@@ -190,7 +195,7 @@ describe('WorkflowGraphNode', () => {
   });
 
   it('calls onStepSelect with the node id when Enter is pressed', () => {
-    const onStepSelect = jest.fn();
+    const onStepSelect = vi.fn();
     renderNode({}, false, { onStepSelect });
 
     const node = screen.getByRole('button', { name: /Test Step/ });
@@ -199,7 +204,7 @@ describe('WorkflowGraphNode', () => {
   });
 
   it('calls onStepSelect with the node id when Space is pressed', () => {
-    const onStepSelect = jest.fn();
+    const onStepSelect = vi.fn();
     renderNode({}, false, { onStepSelect });
 
     const node = screen.getByRole('button', { name: /Test Step/ });
@@ -208,7 +213,7 @@ describe('WorkflowGraphNode', () => {
   });
 
   it('does not call onStepSelect on other key presses', () => {
-    const onStepSelect = jest.fn();
+    const onStepSelect = vi.fn();
     renderNode({}, false, { onStepSelect });
 
     const node = screen.getByRole('button', { name: /Test Step/ });

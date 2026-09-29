@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
@@ -14,12 +17,15 @@ import type { IExecutionLogResult } from '../../common';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
 const actionsClient = actionsClientMock.create();
-jest.mock('./verify_access_and_context', () => ({
-  verifyAccessAndContext: jest.fn(),
-}));
+vi.mock('./verify_access_and_context', () => {
+      const mocked = {
+      verifyAccessAndContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 beforeEach(() => {
-  jest.resetAllMocks();
-  (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
+  vi.resetAllMocks();
+  (verifyAccessAndContext as Mock).mockImplementation((license, handler) => handler);
 });
 
 describe('getRuleExecutionLogRoute', () => {

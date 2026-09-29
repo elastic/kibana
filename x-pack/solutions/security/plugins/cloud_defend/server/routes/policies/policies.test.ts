@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { policiesQueryParamsSchema } from '../../../common';
@@ -25,7 +28,7 @@ import { createCloudDefendRequestHandlerContextMock } from '../../mocks';
 
 describe('policies API', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('validate the API route path', async () => {
@@ -33,7 +36,7 @@ describe('policies API', () => {
 
     defineGetPoliciesRoute(router);
 
-    const [config] = (router.versioned.get as jest.Mock).mock.calls[0];
+    const [config] = (router.versioned.get as Mock).mock.calls[0];
 
     expect(config.path).toEqual('/internal/cloud_defend/policies');
   });
@@ -43,7 +46,7 @@ describe('policies API', () => {
 
     const route = defineGetPoliciesRoute(router);
 
-    const [_, handler] = (route.addVersion as jest.Mock).mock.calls[0];
+    const [_, handler] = (route.addVersion as Mock).mock.calls[0];
 
     const mockContext = createCloudDefendRequestHandlerContextMock();
     const mockResponse = httpServerMock.createResponseFactory();
@@ -60,7 +63,7 @@ describe('policies API', () => {
 
     const route = defineGetPoliciesRoute(router);
 
-    const [_, handler] = (route.addVersion as jest.Mock).mock.calls[0];
+    const [_, handler] = (route.addVersion as Mock).mock.calls[0];
 
     const mockContext = createCloudDefendRequestHandlerContextMock();
     mockContext.fleet.authz.fleet.all = false;
@@ -146,7 +149,7 @@ describe('policies API', () => {
   });
 
   describe('test policies utils', () => {
-    let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
+    let mockSoClient: Mocked<SavedObjectsClientContract>;
 
     beforeEach(() => {
       mockSoClient = savedObjectsClientMock.create();

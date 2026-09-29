@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, Mocked } from 'vitest';
+
 import type {
   SavedObject,
   SavedObjectMigrationContext,
@@ -17,16 +20,16 @@ import { removeRuleInformation } from './alerts';
 
 describe('alert user actions', () => {
   describe('removeRuleInformation', () => {
-    let context: jest.Mocked<SavedObjectMigrationContext>;
+    let context: Mocked<SavedObjectMigrationContext>;
 
     beforeEach(() => {
       context = migrationMocks.createContext();
     });
 
     describe('JSON.stringify throws an error', () => {
-      let jsonStringifySpy: jest.SpyInstance;
+      let jsonStringifySpy: MockInstance;
       beforeEach(() => {
-        jsonStringifySpy = jest.spyOn(JSON, 'stringify').mockImplementation(() => {
+        jsonStringifySpy = vi.spyOn(JSON, 'stringify').mockImplementation(() => {
           throw new Error('failed to stringify');
         });
       });
@@ -50,7 +53,7 @@ describe('alert user actions', () => {
 
         expect(removeRuleInformation(doc, context)).toEqual(doc);
 
-        const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
+        const log = context.log as Mocked<SavedObjectsMigrationLogger>;
         expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             "Failed to migrate user action alerts with doc id: 123 version: 8.0.0 error: failed to stringify",
@@ -67,9 +70,9 @@ describe('alert user actions', () => {
     });
 
     describe('JSON.parse spy', () => {
-      let jsonParseSpy: jest.SpyInstance;
+      let jsonParseSpy: MockInstance;
       beforeEach(() => {
-        jsonParseSpy = jest.spyOn(JSON, 'parse');
+        jsonParseSpy = vi.spyOn(JSON, 'parse');
       });
 
       afterEach(() => {
@@ -100,7 +103,7 @@ describe('alert user actions', () => {
 
           expect(jsonParseSpy).not.toHaveBeenCalled();
 
-          const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
+          const log = context.log as Mocked<SavedObjectsMigrationLogger>;
           expect(log.error).not.toHaveBeenCalled();
         }
       );
@@ -134,7 +137,7 @@ describe('alert user actions', () => {
 
       expect(removeRuleInformation(doc, context)).toEqual(doc);
 
-      const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
+      const log = context.log as Mocked<SavedObjectsMigrationLogger>;
       expect(log.error).not.toHaveBeenCalled();
     });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -15,15 +18,18 @@ import {
 } from './use_update_siem_migration';
 import { useKibana } from '../../../common/lib/kibana';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 // Toast mocks
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
 
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
-}));
+vi.mock('../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createWrapper = () => {
   const client = new QueryClient();
@@ -34,13 +40,13 @@ const createWrapper = () => {
 };
 
 describe('useUpdateSiemMigration', () => {
-  const updateRuleMigrationApiMock = jest.fn();
-  const updateDashboardMigrationMock = jest.fn();
+  const updateRuleMigrationApiMock = vi.fn();
+  const updateDashboardMigrationMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         siemMigrations: {
           rules: {
@@ -59,7 +65,7 @@ describe('useUpdateSiemMigration', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('rule', () => {
@@ -85,7 +91,7 @@ describe('useUpdateSiemMigration', () => {
     it('handles rule update error', async () => {
       const error = new Error('fail');
       updateRuleMigrationApiMock.mockRejectedValue(error);
-      const onError = jest.fn();
+      const onError = vi.fn();
       const wrapper = createWrapper();
       const { result } = renderHook(() => useUpdateSiemMigration('rule', { onError }), { wrapper });
 
@@ -124,7 +130,7 @@ describe('useUpdateSiemMigration', () => {
     it('handles dashboard update error', async () => {
       const error = new Error('dash fail');
       updateDashboardMigrationMock.mockRejectedValue(error);
-      const onError = jest.fn();
+      const onError = vi.fn();
       const wrapper = createWrapper();
       const { result } = renderHook(() => useUpdateSiemMigration('dashboard', { onError }), {
         wrapper,

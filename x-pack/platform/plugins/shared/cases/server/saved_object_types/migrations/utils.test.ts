@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsMigrationLogger } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { mockCaseComments } from '../../mocks';
@@ -20,12 +23,12 @@ describe('migration utils', () => {
   const context = migrationMocks.createContext();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('logError', () => {
     it('logs an error', () => {
-      const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
+      const log = context.log as Mocked<SavedObjectsMigrationLogger>;
 
       logError({
         id: '1',

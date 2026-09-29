@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -17,53 +19,65 @@ import type {
 import { SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
 import { DetectionFlyout } from './detection_flyout';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetRedirectUrl = jest.fn(() => '/app/discover#redirect');
-const mockOpenChat = jest.fn();
+const mockGetRedirectUrl = vi.fn(() => '/app/discover#redirect');
+const mockOpenChat = vi.fn();
 
-const mockStreamFeatures = jest.fn();
+const mockStreamFeatures = vi.fn();
 
-jest.mock('../hooks/use_fetch_stream_features', () => ({
-  useFetchStreamFeatures: () => mockStreamFeatures(),
-}));
+vi.mock('../hooks/use_fetch_stream_features', () => {
+      const mocked = {
+      useFetchStreamFeatures: () => mockStreamFeatures(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./change_point_lens_chart', () => ({
-  ChangePointLensChart: ({ detection }: { detection: LifecycleDetection }) => (
-    <div data-test-subj="nightshiftDetectionLensChart" data-rule-uuid={detection.rule_uuid}>
-      [Logs] Spike
-    </div>
-  ),
-}));
+vi.mock('./change_point_lens_chart', () => {
+      const mocked = {
+      ChangePointLensChart: ({ detection }: { detection: LifecycleDetection }) => (
+        <div data-test-subj="nightshiftDetectionLensChart" data-rule-uuid={detection.rule_uuid}>
+          [Logs] Spike
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: { basePath: { prepend: (path: string) => `/base${path}` } },
-      application: {
-        getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
-      },
-      charts: {
-        theme: {
-          useChartsBaseTheme: () => ({}),
-          useSparklineOverrides: () => ({}),
-        },
-      },
-      share: {
-        url: {
-          locators: {
-            get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+vi.mock('../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: { basePath: { prepend: (path: string) => `/base${path}` } },
+          application: {
+            getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
+          },
+          charts: {
+            theme: {
+              useChartsBaseTheme: () => ({}),
+              useSparklineOverrides: () => ({}),
+            },
+          },
+          share: {
+            url: {
+              locators: {
+                get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+              },
+            },
+          },
+          agentBuilder: {
+            openChat: mockOpenChat,
           },
         },
-      },
-      agentBuilder: {
-        openChat: mockOpenChat,
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const webFrontendFeature = {
   uuid: 'feat-web-frontend',
@@ -135,7 +149,7 @@ describe('DetectionFlyout', () => {
       isInitialLoading: false,
       isFetching: false,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
   });
 
@@ -147,7 +161,7 @@ describe('DetectionFlyout', () => {
             detection={mockDetection}
             event={mockEvent}
             signal={mockSignal}
-            onClose={jest.fn()}
+            onClose={vi.fn()}
             {...props}
           />
         </EuiProvider>
@@ -246,7 +260,7 @@ describe('DetectionFlyout', () => {
   });
 
   it('closes the entity flyout without closing the detection flyout', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     renderFlyout({ onClose });
 
     fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutEntityChip'));
@@ -265,7 +279,7 @@ describe('DetectionFlyout', () => {
       isInitialLoading: false,
       isFetching: false,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     renderFlyout();
 
@@ -286,7 +300,7 @@ describe('DetectionFlyout', () => {
       isInitialLoading: false,
       isFetching: false,
       isError: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     renderFlyout({
       event: {
@@ -378,7 +392,7 @@ describe('DetectionFlyout', () => {
   });
 
   it('calls onClose when the flyout is closed', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     renderFlyout({ onClose });
 
     fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));

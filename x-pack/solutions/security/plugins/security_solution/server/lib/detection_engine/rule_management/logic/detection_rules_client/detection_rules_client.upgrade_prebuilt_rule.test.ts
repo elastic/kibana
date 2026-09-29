@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -29,24 +32,24 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 import { getMockRulesAuthz } from '../../__mocks__/authz';
 
-jest.mock('../../../../machine_learning/authz');
-jest.mock('../../../../machine_learning/validation');
-jest.mock('./methods/get_rule_by_rule_id');
+vi.mock('../../../../machine_learning/authz');
+vi.mock('../../../../machine_learning/validation');
+vi.mock('./methods/get_rule_by_rule_id');
 
 describe('DetectionRulesClient.upgradePrebuiltRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
 
-  const mlAuthz = (buildMlAuthz as jest.Mock)();
+  const mlAuthz = (buildMlAuthz as Mock)();
   const rulesAuthz = getMockRulesAuthz();
   let actionsClient = {
-    isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
-  } as unknown as jest.Mocked<ActionsClient>;
+    isSystemAction: vi.fn((id: string) => id === 'system-connector-.cases'),
+  } as unknown as Mocked<ActionsClient>;
 
   beforeEach(() => {
     actionsClient = {
-      isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
-    } as unknown as jest.Mocked<ActionsClient>;
+      isSystemAction: vi.fn((id: string) => id === 'system-connector-.cases'),
+    } as unknown as Mocked<ActionsClient>;
     rulesClient = rulesClientMock.create();
     const savedObjectsClient = savedObjectsClientMock.create();
     detectionRulesClient = createDetectionRulesClient({
@@ -68,14 +71,14 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
       rule_id: 'rule-id',
     };
 
-    (getRuleByRuleId as jest.Mock).mockResolvedValue(null);
+    (getRuleByRuleId as Mock).mockResolvedValue(null);
     await expect(detectionRulesClient.upgradePrebuiltRule({ ruleAsset })).rejects.toThrow(
       `Failed to find rule ${ruleAsset.rule_id}`
     );
   });
 
   it('throws if mlAuth fails', async () => {
-    (throwAuthzError as jest.Mock).mockImplementationOnce(() => {
+    (throwAuthzError as Mock).mockImplementationOnce(() => {
       throw new Error('mocked MLAuth error');
     });
 
@@ -120,7 +123,7 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
 
     beforeEach(() => {
       rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-      (getRuleByRuleId as jest.Mock).mockResolvedValue(installedRule);
+      (getRuleByRuleId as Mock).mockResolvedValue(installedRule);
     });
 
     it('deletes the old rule', async () => {
@@ -207,7 +210,7 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
     ];
 
     beforeEach(() => {
-      (getRuleByRuleId as jest.Mock).mockResolvedValue(installedRule);
+      (getRuleByRuleId as Mock).mockResolvedValue(installedRule);
     });
 
     it('patches the existing rule with the new params from the rule asset', async () => {

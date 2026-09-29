@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import type { KibanaRequest } from '@kbn/core/server';
 import { ReservedPrivilegesSet } from '@kbn/core/server';
@@ -16,9 +18,12 @@ import { mockRouter as router } from '@kbn/core-http-router-server-mocks';
 import { registerDeleteUnusedUrlsRoute } from './register_delete_unused_urls_route';
 import { runDeleteUnusedUrlsTask } from './task';
 
-jest.mock('./task', () => ({
-  runDeleteUnusedUrlsTask: jest.fn().mockResolvedValue({ deletedCount: 5 }),
-}));
+vi.mock('./task', () => {
+      const mocked = {
+      runDeleteUnusedUrlsTask: vi.fn().mockResolvedValue({ deletedCount: 5 }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('registerDeleteUnusedUrlsRoute', () => {
   const mockRouter = router.create();

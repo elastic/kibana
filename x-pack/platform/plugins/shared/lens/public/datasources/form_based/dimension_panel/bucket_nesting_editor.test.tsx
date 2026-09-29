@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -50,7 +52,7 @@ describe('BucketNestingEditor', () => {
           },
           indexPatternId: 'foo',
         }}
-        setColumns={jest.fn()}
+        setColumns={vi.fn()}
       />
     );
     const nestingSwitch = screen.getByTestId('indexPattern-nesting-switch');
@@ -71,7 +73,7 @@ describe('BucketNestingEditor', () => {
           },
           indexPatternId: 'foo',
         }}
-        setColumns={jest.fn()}
+        setColumns={vi.fn()}
       />
     );
     const nestingSwitch = screen.getByTestId('indexPattern-nesting-switch');
@@ -79,7 +81,7 @@ describe('BucketNestingEditor', () => {
   });
 
   it('should reorder the columns when toggled', async () => {
-    const setColumns = jest.fn();
+    const setColumns = vi.fn();
     const { rerender } = render(
       <BucketNestingEditor
         columnId="a"
@@ -137,7 +139,7 @@ describe('BucketNestingEditor', () => {
           },
           indexPatternId: 'foo',
         }}
-        setColumns={jest.fn()}
+        setColumns={vi.fn()}
       />
     );
 
@@ -158,7 +160,7 @@ describe('BucketNestingEditor', () => {
           },
           indexPatternId: 'foo',
         }}
-        setColumns={jest.fn()}
+        setColumns={vi.fn()}
       />
     );
 
@@ -179,7 +181,7 @@ describe('BucketNestingEditor', () => {
           },
           indexPatternId: 'foo',
         }}
-        setColumns={jest.fn()}
+        setColumns={vi.fn()}
       />
     );
 
@@ -188,7 +190,7 @@ describe('BucketNestingEditor', () => {
   });
 
   it('should reorder the columns when a column is selected in the dropdown', async () => {
-    const setColumns = jest.fn();
+    const setColumns = vi.fn();
     render(
       <BucketNestingEditor
         columnId="a"
@@ -213,7 +215,7 @@ describe('BucketNestingEditor', () => {
   });
 
   it('should move to root if the first dropdown item is selected', async () => {
-    const setColumns = jest.fn();
+    const setColumns = vi.fn();
     render(
       <BucketNestingEditor
         columnId="a"
@@ -238,7 +240,7 @@ describe('BucketNestingEditor', () => {
   });
 
   it('should allow the last bucket to be moved', async () => {
-    const setColumns = jest.fn();
+    const setColumns = vi.fn();
     render(
       <BucketNestingEditor
         getFieldByName={getFieldByName}

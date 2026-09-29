@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -26,36 +29,36 @@ import {
   deleteSecrets,
 } from './secrets';
 
-jest.mock('./app_context');
-jest.mock('./agent_policy');
-jest.mock('./secrets');
+vi.mock('./app_context');
+vi.mock('./agent_policy');
+vi.mock('./secrets');
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
 
-const mockedIsSSLSecretStorageEnabled = isSSLSecretStorageEnabled as jest.MockedFunction<
+const mockedIsSSLSecretStorageEnabled = isSSLSecretStorageEnabled as MockedFunction<
   typeof isSSLSecretStorageEnabled
 >;
 const mockedIsDownloadSourceAuthSecretStorageEnabled =
-  isDownloadSourceAuthSecretStorageEnabled as jest.MockedFunction<
+  isDownloadSourceAuthSecretStorageEnabled as MockedFunction<
     typeof isDownloadSourceAuthSecretStorageEnabled
   >;
 const mockedExtractAndWriteDownloadSourcesSecrets =
-  extractAndWriteDownloadSourcesSecrets as jest.MockedFunction<
+  extractAndWriteDownloadSourcesSecrets as MockedFunction<
     typeof extractAndWriteDownloadSourcesSecrets
   >;
 const mockedExtractAndUpdateDownloadSourceSecrets =
-  extractAndUpdateDownloadSourceSecrets as jest.MockedFunction<
+  extractAndUpdateDownloadSourceSecrets as MockedFunction<
     typeof extractAndUpdateDownloadSourceSecrets
   >;
-const mockedDeleteDownloadSourceSecrets = deleteDownloadSourceSecrets as jest.MockedFunction<
+const mockedDeleteDownloadSourceSecrets = deleteDownloadSourceSecrets as MockedFunction<
   typeof deleteDownloadSourceSecrets
 >;
-const mockedDeleteSecrets = deleteSecrets as jest.MockedFunction<typeof deleteSecrets>;
+const mockedDeleteSecrets = deleteSecrets as MockedFunction<typeof deleteSecrets>;
 
 function mockDownloadSourceSO(id: string, attributes: any = {}) {
   return {
@@ -164,9 +167,9 @@ function getMockedSoClient(options: { defaultDownloadSourceId?: string; sameName
 }
 
 function getMockedEncryptedSoClient() {
-  const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
-    getDecryptedAsInternalUser: jest.fn(),
-    createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
+  const esoClientMock: Mocked<EncryptedSavedObjectsClient> = {
+    getDecryptedAsInternalUser: vi.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: vi.fn(),
   };
 
   esoClientMock.getDecryptedAsInternalUser.mockImplementation(async (type: string, id: string) => {
@@ -202,12 +205,12 @@ function getMockedEncryptedSoClient() {
   return esoClientMock;
 }
 
-let mockedLogger: jest.Mocked<Logger>;
+let mockedLogger: Mocked<Logger>;
 describe('Download Service', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
-    jest
+    vi
       .mocked(appContextService.getExperimentalFeatures)
       .mockReturnValue({ useSpaceAwareness: true } as any);
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({

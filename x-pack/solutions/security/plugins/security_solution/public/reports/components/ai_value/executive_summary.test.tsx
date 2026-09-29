@@ -5,42 +5,65 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ExecutiveSummary } from './executive_summary';
 
 // Mocks for dependencies
-jest.mock('./cost_savings', () => ({
-  CostSavings: () => <div data-test-subj="mockCostSavings" />,
-}));
-jest.mock('./time_saved', () => ({ TimeSaved: () => <div data-test-subj="mockTimeSaved" /> }));
-jest.mock('./compare_percentage', () => ({
-  ComparePercentage: () => <div data-test-subj="mockComparePercentage" />,
-}));
-jest.mock('./filtering_rate', () => ({
-  FilteringRate: () => <div data-test-subj="mockFilteringRate" />,
-}));
-jest.mock('../../../common/components/user_profiles/use_get_current_user_profile', () => ({
-  useGetCurrentUserProfile: () => ({
-    data: { user: { full_name: 'Test User', username: 'testuser' } },
-  }),
-}));
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
-  VisualizationEmbeddable: () => <div data-test-subj="mockVisualizationEmbeddable" />,
-}));
+vi.mock('./cost_savings', () => {
+      const mocked = {
+      CostSavings: () => <div data-test-subj="mockCostSavings" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./time_saved', () => {
+      const mocked = { TimeSaved: () => <div data-test-subj="mockTimeSaved" /> };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./compare_percentage', () => {
+      const mocked = {
+      ComparePercentage: () => <div data-test-subj="mockComparePercentage" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./filtering_rate', () => {
+      const mocked = {
+      FilteringRate: () => <div data-test-subj="mockFilteringRate" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/components/user_profiles/use_get_current_user_profile', () => {
+      const mocked = {
+      useGetCurrentUserProfile: () => ({
+        data: { user: { full_name: 'Test User', username: 'testuser' } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/components/visualization_actions/visualization_embeddable', () => {
+      const mocked = {
+      VisualizationEmbeddable: () => <div data-test-subj="mockVisualizationEmbeddable" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 // Mock useKibana
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      settings: {
-        client: {
-          get: jest.fn(() => 'mock-connector-id'),
-          set: jest.fn(),
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          settings: {
+            client: {
+              get: vi.fn(() => 'mock-connector-id'),
+              set: vi.fn(),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
   attackAlertIds: ['alert-1', 'alert-2', 'alert-3'],

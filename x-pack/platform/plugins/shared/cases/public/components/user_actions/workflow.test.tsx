@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { screen } from '@testing-library/react';
@@ -24,12 +27,12 @@ import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attach
 import { AttachmentActionType } from '../../../common/utils/attachment_actions';
 import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/navigation/hooks');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/navigation/hooks');
 
 // Bring in mocked modules so we can override per-test.
-const mockUseKibana = jest.requireMock('../../common/lib/kibana').useKibana;
-const mockUseAppUrl = jest.requireMock('../../common/lib/kibana').useAppUrl;
+const mockUseKibana = (await vi.importMock('../../common/lib/kibana')).useKibana;
+const mockUseAppUrl = (await vi.importMock('../../common/lib/kibana')).useAppUrl;
 
 const MOCK_EXECUTION_HREF = 'http://localhost/app/workflows/wf-1?tab=executions&executionId=exec-1';
 
@@ -38,8 +41,8 @@ interface BuildAndRenderOptions {
   /** Register a stub attachment type with getDocumentAction. */
   registerDocumentType?: {
     id: string;
-    getDocumentAction?: jest.Mock;
-    getWorkflowActivityLabel?: jest.Mock;
+    getDocumentAction?: Mock;
+    getWorkflowActivityLabel?: Mock;
   };
 }
 
@@ -77,7 +80,7 @@ const buildAndRender = ({ payloadOverride, registerDocumentType }: BuildAndRende
 
 describe('createWorkflowUserActionBuilder', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Default: no workflow capabilities → no link
     mockUseKibana.mockReturnValue({
       services: {
@@ -87,7 +90,7 @@ describe('createWorkflowUserActionBuilder', () => {
       },
     });
     mockUseAppUrl.mockReturnValue({
-      getAppUrl: jest.fn().mockReturnValue(MOCK_EXECUTION_HREF),
+      getAppUrl: vi.fn().mockReturnValue(MOCK_EXECUTION_HREF),
     });
   });
 
@@ -183,7 +186,7 @@ describe('createWorkflowUserActionBuilder', () => {
     });
 
     it('renders a generic attachment label through the registered attachment type', () => {
-      const getWorkflowActivityLabel = jest.fn(
+      const getWorkflowActivityLabel = vi.fn(
         ({ workflowName }: { workflowName: React.ReactNode }) => (
           <>
             {'ran '}
@@ -212,7 +215,7 @@ describe('createWorkflowUserActionBuilder', () => {
     });
 
     it('passes the stored count to a generic bulk attachment label', () => {
-      const getWorkflowActivityLabel = jest.fn(() => <>{'bulk label'}</>);
+      const getWorkflowActivityLabel = vi.fn(() => <>{'bulk label'}</>);
       buildAndRender({
         payloadOverride: makePayload(ATTACHMENTS_WORKFLOW_ORIGIN_TYPE, {
           attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
@@ -238,8 +241,8 @@ describe('createWorkflowUserActionBuilder', () => {
       origin: { type, id: 'alert-abc', ...extra },
     });
 
-    const makeDocumentAction = (testId: string): jest.Mock =>
-      jest.fn(() => ({
+    const makeDocumentAction = (testId: string): Mock =>
+      vi.fn(() => ({
         type: AttachmentActionType.CUSTOM as const,
         isPrimary: true,
         render: () => (
@@ -271,7 +274,7 @@ describe('createWorkflowUserActionBuilder', () => {
     });
 
     it('does not render the document action when getDocumentAction returns null', () => {
-      const getDocumentAction = jest.fn(() => null);
+      const getDocumentAction = vi.fn(() => null);
       buildAndRender({
         payloadOverride: makePayload(ATTACHMENT_WORKFLOW_ORIGIN_TYPE, {
           attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,

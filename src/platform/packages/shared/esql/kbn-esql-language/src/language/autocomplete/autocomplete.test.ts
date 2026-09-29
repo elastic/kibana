@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import type { MockedFunction } from 'vitest';
 import {
   esqlCommandRegistry,
   TIME_SYSTEM_PARAMS,
@@ -352,7 +354,7 @@ describe('autocomplete', () => {
       if (!getColumnsFor) {
         throw new Error('Expected getColumnsFor callback to be defined');
       }
-      const getColumnsForMock = getColumnsFor as jest.MockedFunction<typeof getColumnsFor>;
+      const getColumnsForMock = getColumnsFor as MockedFunction<typeof getColumnsFor>;
 
       expect(getColumnsForMock).toHaveBeenCalled();
       for (const [params] of getColumnsForMock.mock.calls) {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
@@ -27,31 +30,34 @@ import {
   populateAssignedAgentsCount,
 } from './handlers';
 
-jest.mock('../../services/agent_policy', () => {
+vi.mock('../../services/agent_policy', () => {
   return {
     agentPolicyService: {
-      get: jest.fn(),
-      getByIds: jest.fn(),
-      copy: jest.fn(),
-      listAllOutputsForPolicies: jest.fn(),
-      getFullAgentPolicy: jest.fn(),
-      getFleetServerPolicy: jest.fn(),
-      getFullAgentConfigMap: jest.fn(),
+      get: vi.fn(),
+      getByIds: vi.fn(),
+      copy: vi.fn(),
+      listAllOutputsForPolicies: vi.fn(),
+      getFullAgentPolicy: vi.fn(),
+      getFleetServerPolicy: vi.fn(),
+      getFullAgentConfigMap: vi.fn(),
     },
   };
 });
 
-jest.mock('../../services/agent_policy_create', () => {
+vi.mock('../../services/agent_policy_create', () => {
   return {
-    createAgentPolicyWithPackages: jest.fn(),
+    createAgentPolicyWithPackages: vi.fn(),
   };
 });
 
-jest.mock('../../services/fleet_proxies', () => ({
-  listFleetProxies: jest.fn().mockResolvedValue({ items: [] }),
-}));
+vi.mock('../../services/fleet_proxies', () => {
+      const mocked = {
+      listFleetProxies: vi.fn().mockResolvedValue({ items: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const agentPolicyServiceMock = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+const agentPolicyServiceMock = agentPolicyService as Mocked<typeof agentPolicyService>;
 
 describe('Agent policy API handlers', () => {
   let context: FleetRequestHandlerContext;
@@ -66,7 +72,7 @@ describe('Agent policy API handlers', () => {
     const createdAgentPolicy = { id: 'new-policy', name: 'New policy' } as AgentPolicy;
 
     beforeEach(() => {
-      (createAgentPolicyWithPackages as jest.Mock).mockResolvedValue(createdAgentPolicy);
+      (createAgentPolicyWithPackages as Mock).mockResolvedValue(createdAgentPolicy);
     });
 
     afterEach(() => {
@@ -126,7 +132,7 @@ describe('Agent policy API handlers', () => {
     const copiedAgentPolicy = { id: 'copied-policy', name: 'Copied policy' } as AgentPolicy;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       agentPolicyServiceMock.copy.mockResolvedValue(copiedAgentPolicy);
     });
 
@@ -252,7 +258,7 @@ describe('Agent policy API handlers', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('main composition path (no revision / no kubernetes)', () => {
@@ -465,7 +471,7 @@ describe('Agent policy API handlers', () => {
         await getFullAgentPolicy(context, request, response);
 
         expect(response.ok).toHaveBeenCalled();
-        const body = (response.ok as jest.Mock).mock.calls[0][0].body;
+        const body = (response.ok as Mock).mock.calls[0][0].body;
         // proxy-derived fields are redacted on the proxied output
         expect(body.item.outputs.default).not.toHaveProperty('proxy_headers');
         expect(body.item.outputs.default.ssl).not.toHaveProperty('key');
@@ -483,7 +489,7 @@ describe('Agent policy API handlers', () => {
         const fleetContext = (await context.fleet) as any;
         fleetContext.authz.fleet.readSettings = false;
         agentPolicyServiceMock.getFleetServerPolicy.mockResolvedValue(makeStoredDoc() as any);
-        (listFleetProxies as jest.Mock).mockResolvedValueOnce({
+        (listFleetProxies as Mock).mockResolvedValueOnce({
           items: [{ url: 'https://proxy.fr', certificate_key: 'PROXY_CERT_KEY' }],
         });
 
@@ -495,7 +501,7 @@ describe('Agent policy API handlers', () => {
         await getFullAgentPolicy(context, request, response);
 
         expect(response.ok).toHaveBeenCalled();
-        const body = (response.ok as jest.Mock).mock.calls[0][0].body;
+        const body = (response.ok as Mock).mock.calls[0][0].body;
         // fleet ssl.key is proxy-derived — must be redacted when proxy has certificate_key
         expect(body.item.fleet).not.toHaveProperty('proxy_headers');
         expect(body.item.fleet.ssl).not.toHaveProperty('key');
@@ -517,7 +523,7 @@ describe('Agent policy API handlers', () => {
         await getFullAgentPolicy(context, request, response);
 
         expect(response.ok).toHaveBeenCalled();
-        const body = (response.ok as jest.Mock).mock.calls[0][0].body;
+        const body = (response.ok as Mock).mock.calls[0][0].body;
         expect(body.item.outputs.default.proxy_headers).toEqual({ Authorization: 'Bearer SECRET' });
         expect(body.item.outputs.default.ssl?.key).toBe('PRIVATE_KEY');
       });
@@ -535,7 +541,7 @@ describe('Agent policy API handlers', () => {
         await downloadFullAgentPolicy(context, request, response);
 
         expect(response.ok).toHaveBeenCalled();
-        const yaml: string = (response.ok as jest.Mock).mock.calls[0][0].body;
+        const yaml: string = (response.ok as Mock).mock.calls[0][0].body;
         // proxy_headers (bearer tokens) must be gone
         expect(yaml).not.toContain('Bearer SECRET');
         // proxy_url (non-secret) must remain
@@ -596,14 +602,14 @@ describe('Agent policy API handlers', () => {
 
   describe('populateAssignedAgentsCount', () => {
     const makeAgentClient = (
-      listAgents: jest.Mock
-    ): { agentClient: AgentClient; listAgents: jest.Mock } => ({
+      listAgents: Mock
+    ): { agentClient: AgentClient; listAgents: Mock } => ({
       agentClient: { listAgents } as unknown as AgentClient,
       listAgents,
     });
 
     it('does not query agents when there are no policies', async () => {
-      const { agentClient, listAgents } = makeAgentClient(jest.fn());
+      const { agentClient, listAgents } = makeAgentClient(vi.fn());
 
       await populateAssignedAgentsCount(agentClient, []);
 
@@ -611,7 +617,7 @@ describe('Agent policy API handlers', () => {
     });
 
     it('populates counts for every policy from a single bucketed aggregation', async () => {
-      const listAgents = jest.fn().mockResolvedValue({
+      const listAgents = vi.fn().mockResolvedValue({
         aggregations: {
           policies: {
             buckets: {
@@ -675,7 +681,7 @@ describe('Agent policy API handlers', () => {
     });
 
     it('defaults counts to zero when a policy has no aggregation bucket', async () => {
-      const listAgents = jest.fn().mockResolvedValue({
+      const listAgents = vi.fn().mockResolvedValue({
         aggregations: { policies: { buckets: {} } },
       });
       const { agentClient } = makeAgentClient(listAgents);

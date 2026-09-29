@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -17,7 +20,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 describe('DatastreamInitializer', () => {
   let esClient: DeeplyMockedApi<ElasticsearchClient>;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
 
   const resourceDefinition: ResourceDefinition = {
     key: 'data_stream:.alerting-test',
@@ -33,7 +36,7 @@ describe('DatastreamInitializer', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockLogger = loggerMock.create();
     // data streams uses the esClient internally
     esClient = elasticsearchServiceMock.createElasticsearchClient();

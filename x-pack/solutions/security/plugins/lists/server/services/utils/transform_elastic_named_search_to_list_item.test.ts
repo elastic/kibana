@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getSearchListItemResponseMock } from '../../../common/schemas/response/search_list_item_schema.mock';
@@ -18,11 +20,11 @@ import { transformElasticNamedSearchToListItem } from './transform_elastic_named
 
 describe('transform_elastic_named_search_to_list_item', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('if given an empty array for values, it returns an empty array', () => {

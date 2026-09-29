@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SiemMigrationTaskStatus } from '../../../../../../../../common/siem_migrations/constants';
 import { createStartServicesMock } from '../../../../../../../common/lib/kibana/kibana_react.mock';
 import type { SiemMigrationsService } from '../../../../../../../siem_migrations/service';
@@ -15,8 +17,8 @@ describe('startMigrationCheckComplete', () => {
     // Arrange
     const siemMigrations = {
       rules: {
-        getMissingCapabilities: jest.fn().mockReturnValue([]),
-        isAvailable: jest.fn().mockReturnValue(false),
+        getMissingCapabilities: vi.fn().mockReturnValue([]),
+        isAvailable: vi.fn().mockReturnValue(false),
       },
     } as unknown as SiemMigrationsService;
 
@@ -36,9 +38,9 @@ describe('startMigrationCheckComplete', () => {
   it('should query Stats if siem migrations are available', async () => {
     const siemMigrations = {
       rules: {
-        getMissingCapabilities: jest.fn().mockReturnValue([]),
-        isAvailable: jest.fn().mockReturnValue(true),
-        getMigrationsStats: jest.fn().mockReturnValue([
+        getMissingCapabilities: vi.fn().mockReturnValue([]),
+        isAvailable: vi.fn().mockReturnValue(true),
+        getMigrationsStats: vi.fn().mockReturnValue([
           {
             status: SiemMigrationTaskStatus.FINISHED,
           },

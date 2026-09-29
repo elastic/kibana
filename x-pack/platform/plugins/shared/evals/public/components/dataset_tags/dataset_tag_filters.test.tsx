@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -25,8 +27,8 @@ const facets: DatasetFacets = {
 };
 
 const renderFilters = (props: Partial<React.ComponentProps<typeof DatasetTagFilters>> = {}) => {
-  const onTagsChange = jest.fn();
-  const onMaturityChange = jest.fn();
+  const onTagsChange = vi.fn();
+  const onMaturityChange = vi.fn();
 
   render(
     <DatasetTagFilters

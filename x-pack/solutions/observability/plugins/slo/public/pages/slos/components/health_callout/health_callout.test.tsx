@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { I18nProvider } from '@kbn/i18n-react';
 import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { render, screen } from '@testing-library/react';
@@ -19,9 +22,9 @@ import {
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
 import { HealthCallout } from './health_callout';
 
-jest.mock('../../../../hooks/use_fetch_slo_health');
+vi.mock('../../../../hooks/use_fetch_slo_health');
 
-const mockUseFetchSloHealth = useFetchSloHealth as jest.Mock;
+const mockUseFetchSloHealth = useFetchSloHealth as Mock;
 
 const mockSlo1: SLOWithSummaryResponse = cloneDeep({ ...baseSlo, id: '1', name: 'Test SLO 1' });
 const mockSlo2: SLOWithSummaryResponse = cloneDeep({ ...baseSlo, id: '2', name: 'Test SLO 2' });

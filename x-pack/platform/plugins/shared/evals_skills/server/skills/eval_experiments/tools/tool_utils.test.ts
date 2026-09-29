@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { GeneratedExperimentRun } from '@kbn/evals-plugin/server';
 import {
   EvalExperimentConfigError,
@@ -191,7 +193,7 @@ describe('buildWorkflowLink', () => {
 
 describe('assertDatasetsVisible', () => {
   const createDatasetService = (visibleBySpace: Record<string, string[]>) => {
-    const getClient = jest.fn(({ spaceId }: { spaceId: string }) => ({
+    const getClient = vi.fn(({ spaceId }: { spaceId: string }) => ({
       datasetExists: async (datasetId: string) =>
         (visibleBySpace[spaceId] ?? []).includes(datasetId),
     }));

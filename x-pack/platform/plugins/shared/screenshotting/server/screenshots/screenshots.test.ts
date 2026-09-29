@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { HttpServiceSetup } from '@kbn/core-http-server';
 import type { PackageInfo } from '@kbn/core/server';
@@ -19,7 +21,7 @@ import type { PngScreenshotOptions } from '..';
 import { HeadlessChromiumDriverFactory } from '../browsers';
 import { Screenshots } from './screenshots';
 
-jest.mock('puppeteer');
+vi.mock('puppeteer');
 
 describe('class Screenshots', () => {
   let mockConfig: ConfigType;
@@ -105,13 +107,13 @@ describe('class Screenshots', () => {
 
   describe('getScreenshots', () => {
     beforeAll(() => {
-      jest.mock('puppeteer'); // see __mocks__/puppeteer.ts
+      vi.doMock('puppeteer'); // see __mocks__/puppeteer.ts
     });
 
     beforeEach(() => {
-      jest.spyOn(browserDriverFactory, 'getBrowserLogger').mockReturnValue(Rx.EMPTY);
-      jest.spyOn(browserDriverFactory, 'getProcessLogger').mockReturnValue(Rx.EMPTY);
-      jest.spyOn(browserDriverFactory, 'getPageExit').mockReturnValue(Rx.EMPTY);
+      vi.spyOn(browserDriverFactory, 'getBrowserLogger').mockReturnValue(Rx.EMPTY);
+      vi.spyOn(browserDriverFactory, 'getProcessLogger').mockReturnValue(Rx.EMPTY);
+      vi.spyOn(browserDriverFactory, 'getPageExit').mockReturnValue(Rx.EMPTY);
     });
 
     it('getScreenshots with PngScreenshotOptions', async () => {
@@ -141,7 +143,7 @@ describe('class Screenshots', () => {
       // mock override
       const browser = await puppeteer.launch();
       const page = await browser.newPage(); // should be stubPage
-      const pageGotoSpy = jest.spyOn(page, 'goto');
+      const pageGotoSpy = vi.spyOn(page, 'goto');
       pageGotoSpy.mockImplementation(
         () =>
           new Promise((resolve) => {

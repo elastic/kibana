@@ -7,25 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { openLazyFlyout } from './open_lazy_flyout';
 import { getPanelContextMenuTriggerId } from './focus_helpers';
 import type { CoreStart } from '@kbn/core/public';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: jest.fn((x) => x), // identity for simplicity
-}));
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = {
+      toMountPoint: vi.fn((x) => x), // identity for simplicity
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const overlayRef = { close: jest.fn() } as unknown as OverlayRef;
-const openFlyout = jest.fn(() => overlayRef);
+const overlayRef = { close: vi.fn() } as unknown as OverlayRef;
+const openFlyout = vi.fn(() => overlayRef);
 const core = {
   overlays: { openFlyout },
   application: {
     currentAppId$: { pipe: () => ({ subscribe: () => {} }) },
   },
 } as unknown as CoreStart;
-const loadContent = jest.fn(async () => <div>Test Content</div>);
+const loadContent = vi.fn(async () => <div>Test Content</div>);
 const props = {
   core,
   loadContent,
@@ -36,7 +41,7 @@ const props = {
 
 describe('openLazyFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('opens flyout with default props and mounts LazyFlyout and return flyout ref', async () => {
@@ -62,7 +67,7 @@ describe('openLazyFlyout', () => {
   });
 
   it('calls overlayTracker.openOverlay when parentApi supports it', () => {
-    const parentApi = { openOverlay: jest.fn(), clearOverlays: jest.fn() };
+    const parentApi = { openOverlay: vi.fn(), clearOverlays: vi.fn() };
     openLazyFlyout({ core, parentApi, loadContent, flyoutProps: { focusedPanelId: 'abc' } });
     expect(parentApi.openOverlay).toHaveBeenCalledWith(overlayRef, { focusedPanelId: 'abc' });
   });
@@ -75,8 +80,8 @@ describe('openLazyFlyout', () => {
 
   it('uses overlay type when parent publishes panelFlyoutType overlay', () => {
     const parentApi = {
-      openOverlay: jest.fn(),
-      clearOverlays: jest.fn(),
+      openOverlay: vi.fn(),
+      clearOverlays: vi.fn(),
       panelFlyoutType: 'overlay' as const,
     };
 
@@ -93,8 +98,8 @@ describe('openLazyFlyout', () => {
 
   it('prefers explicit flyoutProps.type over parent panelFlyoutType', () => {
     const parentApi = {
-      openOverlay: jest.fn(),
-      clearOverlays: jest.fn(),
+      openOverlay: vi.fn(),
+      clearOverlays: vi.fn(),
       panelFlyoutType: 'overlay' as const,
     };
 
@@ -110,12 +115,12 @@ describe('openLazyFlyout', () => {
 
   describe('focus management', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.runOnlyPendingTimers();
-      jest.useRealTimers();
+      vi.runOnlyPendingTimers();
+      vi.useRealTimers();
       document.body.innerHTML = '';
     });
 
@@ -135,7 +140,7 @@ describe('openLazyFlyout', () => {
       insideFlyout.focus();
 
       getOnClose()();
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(document.activeElement).toBe(trigger);
     });
@@ -158,7 +163,7 @@ describe('openLazyFlyout', () => {
       refreshed.id = 'panelActionButton';
       document.body.appendChild(refreshed);
 
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(document.activeElement).toBe(refreshed);
     });
@@ -174,7 +179,7 @@ describe('openLazyFlyout', () => {
 
       expect(() => {
         getOnClose()();
-        jest.runAllTimers();
+        vi.runAllTimers();
       }).not.toThrow();
     });
 
@@ -189,7 +194,7 @@ describe('openLazyFlyout', () => {
       });
 
       getOnClose()();
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(document.activeElement).toBe(trigger);
     });
@@ -210,7 +215,7 @@ describe('openLazyFlyout', () => {
       expect(document.activeElement).not.toBe(trigger);
 
       trigger.disabled = false;
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(document.activeElement).toBe(trigger);
     });
@@ -229,7 +234,7 @@ describe('openLazyFlyout', () => {
       openLazyFlyout({ core, loadContent, flyoutProps: { focusedPanelId: panelId } });
 
       getOnClose()();
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(document.activeElement).toBe(toggle);
     });
@@ -249,7 +254,7 @@ describe('openLazyFlyout', () => {
       openLazyFlyout({ core, loadContent, flyoutProps: { focusedPanelId: panelId } });
 
       getOnClose()();
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(document.activeElement).toBe(quickAction);
     });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchRelatedEpisodes } from '../apis/fetch_related_episodes';
@@ -16,20 +18,20 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchSameRuleEpisodesQuery } from './use_fetch_same_rule_episodes_query';
 
-jest.mock('../apis/fetch_related_episodes');
+vi.mock('../apis/fetch_related_episodes');
 
-const fetchRelatedEpisodesMock = jest.mocked(fetchRelatedEpisodes);
+const fetchRelatedEpisodesMock = vi.mocked(fetchRelatedEpisodes);
 
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
 
 describe('useFetchSameRuleEpisodesQuery', () => {
-  const mockToastDanger = jest.fn();
+  const mockToastDanger = vi.fn();
   const mockExpressions = {} as ExpressionsStart;
   const mockSpaces = createMockSpaces();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {

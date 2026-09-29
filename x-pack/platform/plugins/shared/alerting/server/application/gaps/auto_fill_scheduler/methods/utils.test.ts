@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { rulesClientContextMock } from '../../../../rules_client/rules_client.mock';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -14,10 +17,10 @@ import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_sche
 import { getGapAutoFillSchedulerSO } from './utils';
 
 describe('getGapAutoFillSchedulerSO', () => {
-  let context: jest.Mocked<RulesClientContext>;
+  let context: Mocked<RulesClientContext>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     context = rulesClientContextMock.create();
   });
 
@@ -52,7 +55,7 @@ describe('getGapAutoFillSchedulerSO', () => {
       references: [],
     };
 
-    const getMock = context.unsecuredSavedObjectsClient.get as jest.Mock;
+    const getMock = context.unsecuredSavedObjectsClient.get as Mock;
     getMock.mockResolvedValue(so);
 
     const result = await getGapAutoFillSchedulerSO({
@@ -82,7 +85,7 @@ describe('getGapAutoFillSchedulerSO', () => {
   });
 
   test('throws when saved objects client throws', async () => {
-    const getMock = context.unsecuredSavedObjectsClient.get as jest.Mock;
+    const getMock = context.unsecuredSavedObjectsClient.get as Mock;
     getMock.mockRejectedValue(new Error('Unable to get'));
 
     await expect(

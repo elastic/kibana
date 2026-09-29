@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { join } from 'path';
 import { Readable } from 'stream';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -23,31 +26,31 @@ import {
 
 const DATA_PATH = join(REPO_ROOT, 'data');
 
-jest.mock('fs', () => {
-  const actual = jest.requireActual('fs');
+vi.mock('fs', () => {
+  const actual = require('fs');
   return {
     ...actual,
     promises: {
       ...actual.promises,
-      writeFile: jest.fn(),
-      appendFile: jest.fn(),
-      readFile: jest.fn(),
-      unlink: jest.fn(),
-      mkdir: jest.fn(),
-      rm: jest.fn(),
+      writeFile: vi.fn(),
+      appendFile: vi.fn(),
+      readFile: vi.fn(),
+      unlink: vi.fn(),
+      mkdir: vi.fn(),
+      rm: vi.fn(),
     },
-    existsSync: jest.fn(),
-    readFileSync: jest.fn().mockImplementation((path: string) => {
+    existsSync: vi.fn(),
+    readFileSync: vi.fn().mockImplementation((path: string) => {
       if (path.includes('package.json')) {
         return JSON.stringify({ name: 'kibana' });
       }
     }),
-    writeFileSync: jest.fn(),
-    appendFileSync: jest.fn(),
-    unlinkSync: jest.fn(),
-    mkdirSync: jest.fn(),
-    createWriteStream: jest.fn(),
-    createReadStream: jest.fn(),
+    writeFileSync: vi.fn(),
+    appendFileSync: vi.fn(),
+    unlinkSync: vi.fn(),
+    mkdirSync: vi.fn(),
+    createWriteStream: vi.fn(),
+    createReadStream: vi.fn(),
   };
 });
 
@@ -56,11 +59,11 @@ import fs from 'fs';
 describe('kbn-fs', () => {
   beforeEach(() => {
     // Clear all mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('writeFile', () => {
@@ -131,7 +134,7 @@ describe('kbn-fs', () => {
 
       await writeFile('no-override.txt', initialContent, { volume: 'test' });
 
-      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      (fs.existsSync as Mock).mockReturnValue(true);
 
       await expect(
         writeFile('no-override.txt', newContent, { override: false, volume: 'test' })

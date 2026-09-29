@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE,
@@ -17,19 +20,19 @@ describe('GET /internal/inference_connector/privileges', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let mockCheckPrivileges: jest.Mock;
+  let mockCheckPrivileges: Mock;
 
   beforeEach(() => {
     server = serverMock.create();
     logger = loggerMock.create();
     const { context: ctx } = requestContextMock.createTools();
     context = requestContextMock.convertContext(ctx);
-    mockCheckPrivileges = jest.fn();
+    mockCheckPrivileges = vi.fn();
 
     registerInferenceConnectorRoutes({
       router: server.router,
       logger,
-      getStartServices: jest.fn().mockResolvedValue([
+      getStartServices: vi.fn().mockResolvedValue([
         {},
         {
           security: {

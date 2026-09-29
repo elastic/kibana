@@ -4,18 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { defineGetComplianceDashboardRoute } from './compliance_dashboard';
 
-jest.mock('./get_trends', () => ({
-  getTrends: jest.fn().mockResolvedValue({ trends: [], namespaces: [] }),
-}));
+vi.mock('./get_trends', () => {
+      const mocked = {
+      getTrends: vi.fn().mockResolvedValue({ trends: [], namespaces: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../benchmark_rules/get_states/v1', () => ({
-  getMutedRulesFilterQuery: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('../benchmark_rules/get_states/v1', () => {
+      const mocked = {
+      getMutedRulesFilterQuery: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('compliance dashboard route PIT refresh', () => {
   const setup = () => {
@@ -40,8 +48,8 @@ describe('compliance dashboard route PIT refresh', () => {
     const { v1RouteHandler } = setup();
 
     const esClient = {
-      openPointInTime: jest.fn().mockResolvedValue({ id: 'pit-0' }),
-      search: jest
+      openPointInTime: vi.fn().mockResolvedValue({ id: 'pit-0' }),
+      search: vi
         .fn()
         .mockResolvedValueOnce({
           pit_id: 'pit-1',
@@ -59,10 +67,10 @@ describe('compliance dashboard route PIT refresh', () => {
           pit_id: 'pit-3',
           aggregations: { aggs_by_asset_identifier: { buckets: [] } },
         }),
-      closePointInTime: jest.fn().mockResolvedValue({ succeeded: true, num_freed: 1 }),
+      closePointInTime: vi.fn().mockResolvedValue({ succeeded: true, num_freed: 1 }),
     };
 
-    const logger = { warn: jest.fn(), error: jest.fn(), info: jest.fn(), debug: jest.fn() };
+    const logger = { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() };
 
     const mockRouteContext = {
       csp: Promise.resolve({
@@ -89,8 +97,8 @@ describe('compliance dashboard route PIT refresh', () => {
     const { v2RouteHandler } = setup();
 
     const esClient = {
-      openPointInTime: jest.fn().mockResolvedValue({ id: 'pit-0' }),
-      search: jest
+      openPointInTime: vi.fn().mockResolvedValue({ id: 'pit-0' }),
+      search: vi
         .fn()
         .mockResolvedValueOnce({
           pit_id: 'pit-1',
@@ -112,10 +120,10 @@ describe('compliance dashboard route PIT refresh', () => {
             },
           },
         }),
-      closePointInTime: jest.fn().mockResolvedValue({ succeeded: true, num_freed: 1 }),
+      closePointInTime: vi.fn().mockResolvedValue({ succeeded: true, num_freed: 1 }),
     };
 
-    const logger = { warn: jest.fn(), error: jest.fn(), info: jest.fn(), debug: jest.fn() };
+    const logger = { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() };
 
     const mockRouteContext = {
       csp: Promise.resolve({

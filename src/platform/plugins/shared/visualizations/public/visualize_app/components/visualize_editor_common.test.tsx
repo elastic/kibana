@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
@@ -14,39 +16,45 @@ import { VisualizeEditorCommon } from './visualize_editor_common';
 import type { VisualizeEditorVisInstance } from '../types';
 import { VisChartWarning } from './vis_chart_warning';
 
-const mockGetLegacyUrlConflict = jest.fn();
-const mockRedirectLegacyUrl = jest.fn(() => Promise.resolve());
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(() => ({
-    services: {
-      spaces: {
-        ui: {
-          redirectLegacyUrl: mockRedirectLegacyUrl,
-          components: {
-            getLegacyUrlConflict: mockGetLegacyUrlConflict,
+const mockGetLegacyUrlConflict = vi.fn();
+const mockRedirectLegacyUrl = vi.fn(() => Promise.resolve());
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(() => ({
+        services: {
+          spaces: {
+            ui: {
+              redirectLegacyUrl: mockRedirectLegacyUrl,
+              components: {
+                getLegacyUrlConflict: mockGetLegacyUrlConflict,
+              },
+            },
+          },
+          history: {
+            location: {
+              search: '?_g=test',
+            },
+          },
+          http: {
+            basePath: {
+              prepend: (url: string) => url,
+            },
           },
         },
-      },
-      history: {
-        location: {
-          search: '?_g=test',
-        },
-      },
-      http: {
-        basePath: {
-          prepend: (url: string) => url,
-        },
-      },
-    },
-  })),
-  withKibana: jest.fn((comp) => comp),
-}));
+      })),
+      withKibana: vi.fn((comp) => comp),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services', () => ({
-  getUISettings: jest.fn(() => ({
-    get: jest.fn(),
-  })),
-}));
+vi.mock('../../services', () => {
+      const mocked = {
+      getUISettings: vi.fn(() => ({
+        get: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('VisualizeEditorCommon', () => {
   it('should display a conflict callout if saved object conflicts', async () => {

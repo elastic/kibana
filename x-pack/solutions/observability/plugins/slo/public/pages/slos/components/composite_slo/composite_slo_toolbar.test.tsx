@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import { render } from '../../../../utils/test_helper';
@@ -16,13 +18,13 @@ const defaultProps = {
   selectedTags: [],
   availableTags: ['tag-a', 'tag-b'],
   hasActiveFilters: false,
-  onSearchChange: jest.fn(),
-  onTagSelectionChange: jest.fn(),
-  onClearFilters: jest.fn(),
+  onSearchChange: vi.fn(),
+  onTagSelectionChange: vi.fn(),
+  onClearFilters: vi.fn(),
 };
 
 describe('CompositeSloToolbar', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders the search field', () => {
     render(<CompositeSloToolbar {...defaultProps} />);
@@ -45,7 +47,7 @@ describe('CompositeSloToolbar', () => {
   });
 
   it('calls onClearFilters when the "Clear filters" button is clicked', () => {
-    const onClearFilters = jest.fn();
+    const onClearFilters = vi.fn();
     render(
       <CompositeSloToolbar
         {...defaultProps}
@@ -58,7 +60,7 @@ describe('CompositeSloToolbar', () => {
   });
 
   it('calls onSearchChange when the search field value changes', () => {
-    const onSearchChange = jest.fn();
+    const onSearchChange = vi.fn();
     render(<CompositeSloToolbar {...defaultProps} onSearchChange={onSearchChange} />);
     fireEvent.change(screen.getByTestId('compositeSloListSearch'), {
       target: { value: 'checkout' },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -16,47 +18,56 @@ import { queryClient } from '../query_client';
 import type { PackSavedObject } from './types';
 
 let mockWritePacks = true;
-const mockAddSuccess = jest.fn();
-const mockMutateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack', enabled: true } });
+const mockAddSuccess = vi.fn();
+const mockMutateAsync = vi.fn().mockResolvedValue({ data: { name: 'Test Pack', enabled: true } });
 
-jest.mock('../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        capabilities: {
-          osquery: { writePacks: mockWritePacks },
+vi.mock('../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            capabilities: {
+              osquery: { writePacks: mockWritePacks },
+            },
+          },
+          notifications: { toasts: { addSuccess: mockAddSuccess } },
         },
-      },
-      notifications: { toasts: { addSuccess: mockAddSuccess } },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../agent_policies/use_agent_policies', () => ({
-  useAgentPolicies: () => ({
-    data: {
-      agentPoliciesById: {
-        'policy-with-agents': { id: 'policy-with-agents', agents: 3 },
-        'policy-no-agents': { id: 'policy-no-agents', agents: 0 },
-      },
-    },
-  }),
-}));
+vi.mock('../agent_policies/use_agent_policies', () => {
+      const mocked = {
+      useAgentPolicies: () => ({
+        data: {
+          agentPoliciesById: {
+            'policy-with-agents': { id: 'policy-with-agents', agents: 3 },
+            'policy-no-agents': { id: 'policy-no-agents', agents: 0 },
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_update_pack', () => ({
-  useUpdatePack: ({ options }: { options?: { onSuccess?: (response: unknown) => void } }) => ({
-    isLoading: false,
-    mutateAsync: (...args: unknown[]) => {
-      const result = mockMutateAsync(...args);
+vi.mock('./use_update_pack', () => {
+      const mocked = {
+      useUpdatePack: ({ options }: { options?: { onSuccess?: (response: unknown) => void } }) => ({
+        isLoading: false,
+        mutateAsync: (...args: unknown[]) => {
+          const result = mockMutateAsync(...args);
 
-      return result.then((response: unknown) => {
-        options?.onSuccess?.(response);
+          return result.then((response: unknown) => {
+            options?.onSuccess?.(response);
 
-        return response;
-      });
-    },
-  }),
-}));
+            return response;
+          });
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const basePack = (
   overrides: Partial<PackSavedObject> = {}

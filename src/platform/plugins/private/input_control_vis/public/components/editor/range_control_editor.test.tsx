@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, waitFor, act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -30,18 +33,18 @@ const controlParams: ControlParams = {
   parent: '',
 };
 const deps = getDepsMock();
-let handleFieldNameChange: jest.MockedFunction<any>;
-let handleIndexPatternChange: jest.MockedFunction<any>;
-let handleOptionsChange: jest.MockedFunction<any>;
+let handleFieldNameChange: MockedFunction<any>;
+let handleIndexPatternChange: MockedFunction<any>;
+let handleOptionsChange: MockedFunction<any>;
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <I18nProvider>{children}</I18nProvider>
 );
 
 beforeEach(() => {
-  handleFieldNameChange = jest.fn();
-  handleIndexPatternChange = jest.fn();
-  handleOptionsChange = jest.fn();
+  handleFieldNameChange = vi.fn();
+  handleIndexPatternChange = vi.fn();
+  handleOptionsChange = vi.fn();
 });
 
 test('renders RangeControlEditor', async () => {

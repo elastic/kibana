@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as Rx from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
@@ -37,7 +39,7 @@ describe('GetCsvReportPanelAction', () => {
 
   const mockLicense$ = () => {
     const license = licensingMock.createLicense();
-    license.check = jest.fn(() => ({
+    license.check = vi.fn(() => ({
       message: `check-foo state: ${mockLicenseState}`,
       state: mockLicenseState,
     }));
@@ -67,7 +69,7 @@ describe('GetCsvReportPanelAction', () => {
     };
 
     apiClient = new ReportingAPIClient(core.http, core.uiSettings, '7.15.0');
-    jest.spyOn(apiClient, 'createReportingJob');
+    vi.spyOn(apiClient, 'createReportingJob');
 
     mockLicenseState = 'valid';
 
@@ -86,10 +88,10 @@ describe('GetCsvReportPanelAction', () => {
 
     mockSearchSource = {
       createCopy: () => mockSearchSource,
-      removeField: jest.fn(),
-      setField: jest.fn(),
-      getField: jest.fn(),
-      getSerializedFields: jest.fn().mockImplementation(() => ({})),
+      removeField: vi.fn(),
+      setField: vi.fn(),
+      getField: vi.fn(),
+      getSerializedFields: vi.fn().mockImplementation(() => ({})),
     } as unknown as SearchSource;
 
     context = {
@@ -115,7 +117,7 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('translates empty embeddable context into job params', async () => {
@@ -143,10 +145,10 @@ describe('GetCsvReportPanelAction', () => {
   it('translates embeddable context into job params', async () => {
     mockSearchSource = {
       createCopy: () => mockSearchSource,
-      removeField: jest.fn(),
-      setField: jest.fn(),
-      getField: jest.fn((name) => (name === 'index' ? dataViewMock : undefined)),
-      getSerializedFields: jest.fn().mockImplementation(() => ({ testData: 'testDataValue' })),
+      removeField: vi.fn(),
+      setField: vi.fn(),
+      getField: vi.fn((name) => (name === 'index' ? dataViewMock : undefined)),
+      getSerializedFields: vi.fn().mockImplementation(() => ({ testData: 'testDataValue' })),
     } as unknown as SearchSource;
     (context.embeddable as PublishesSavedSearch).savedSearch$ = new BehaviorSubject({
       searchSource: mockSearchSource,
@@ -177,13 +179,13 @@ describe('GetCsvReportPanelAction', () => {
   it('includes esqlVariables from parent api in ES|QL CSV job params', async () => {
     const esqlMockSearchSource = {
       createCopy: () => esqlMockSearchSource,
-      removeField: jest.fn(),
-      setField: jest.fn(),
-      getField: jest.fn((name: string) => {
+      removeField: vi.fn(),
+      setField: vi.fn(),
+      getField: vi.fn((name: string) => {
         if (name === 'query') return { esql: 'FROM test | WHERE crew.id == ?crew_id' };
         return undefined;
       }),
-      getSerializedFields: jest.fn().mockReturnValue({
+      getSerializedFields: vi.fn().mockReturnValue({
         query: { esql: 'FROM test | WHERE crew.id == ?crew_id' },
         parent: { filter: [] },
       }),
@@ -246,7 +248,7 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   it('shows a toast when it unsuccessfully fails', async () => {
-    apiClient.createReportingJob = jest.fn().mockRejectedValue('No more ram!');
+    apiClient.createReportingJob = vi.fn().mockRejectedValue('No more ram!');
     const panel = new ReportingCsvPanelAction({
       core,
       apiClient,

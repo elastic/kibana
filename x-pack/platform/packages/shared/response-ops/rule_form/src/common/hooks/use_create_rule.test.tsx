@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -67,19 +69,22 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-jest.mock('../apis/create_rule/create_rule', () => ({
-  createRule: jest.fn(),
-}));
+vi.mock('../apis/create_rule/create_rule', () => {
+      const mocked = {
+      createRule: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { createRule } = jest.requireMock('../apis/create_rule/create_rule');
+const { createRule } = (await vi.importMock('../apis/create_rule/create_rule'));
 
-const httpMock = jest.fn();
-const onSuccessMock = jest.fn();
-const onErrorMock = jest.fn();
+const httpMock = vi.fn();
+const onSuccessMock = vi.fn();
+const onErrorMock = vi.fn();
 
 describe('useCreateRule', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should call onSuccess if request succeeds', async () => {

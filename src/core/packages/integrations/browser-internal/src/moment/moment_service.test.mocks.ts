@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 export const momentMock = {
-  locale: jest.fn(() => 'default-locale'),
+  locale: vi.fn(() => 'default-locale'),
   tz: {
-    setDefault: jest.fn(),
-    guess: jest.fn(),
-    zone: jest.fn(
+    setDefault: vi.fn(),
+    guess: vi.fn(),
+    zone: vi.fn(
       (z) => [{ name: 'tz1' }, { name: 'tz2' }, { name: 'tz3' }].find((f) => z === f.name) || null
     ),
   },
-  weekdays: jest.fn(() => ['dow1', 'dow2', 'dow3']),
-  updateLocale: jest.fn(),
+  weekdays: vi.fn(() => ['dow1', 'dow2', 'dow3']),
+  updateLocale: vi.fn(),
 };
-jest.doMock('moment-timezone', () => momentMock);
+vi.doMock('moment-timezone', () => momentMock);

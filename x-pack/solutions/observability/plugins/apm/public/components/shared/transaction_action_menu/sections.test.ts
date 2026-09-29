@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { createMemoryHistory } from 'history';
 import rison from '@kbn/rison';
 import type { IBasePath } from '@kbn/core/public';
@@ -26,16 +29,16 @@ const apmRouter = {
 const uptimeLocator = sharePluginMock.createLocator();
 
 const mockAssetDetailsLocator = {
-  getRedirectUrl: jest
+  getRedirectUrl: vi
     .fn()
     .mockImplementation(
       ({ entityId, entityType, assetDetails }: AssetDetailsLocatorParams) =>
         `/node-mock/${entityType}/${entityId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
     ),
-} as unknown as jest.Mocked<AssetDetailsLocator>;
+} as unknown as Mocked<AssetDetailsLocator>;
 
 const mockDiscoverLocator = {
-  getRedirectUrl: jest.fn((params: { query?: { esql?: string } }) => {
+  getRedirectUrl: vi.fn((params: { query?: { esql?: string } }) => {
     const esql = params.query?.esql || '';
     return `/app/discover#/?_a=(query:(esql:'${esql}'))`;
   }),
@@ -65,7 +68,7 @@ describe('Transaction action menu', () => {
   const location = history.location;
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows required sections only', () => {

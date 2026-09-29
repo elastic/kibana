@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { calculateFlyoutContentHeight } from './get_height';
 
 describe('calculateFlyoutContentHeight', () => {
@@ -22,7 +24,7 @@ describe('calculateFlyoutContentHeight', () => {
 
   const createMockElement = (top: number): HTMLElement => {
     return {
-      getBoundingClientRect: jest.fn(() => ({
+      getBoundingClientRect: vi.fn(() => ({
         top,
         bottom: top + 100,
         left: 0,
@@ -31,7 +33,7 @@ describe('calculateFlyoutContentHeight', () => {
         height: 100,
         x: 0,
         y: top,
-        toJSON: jest.fn(),
+        toJSON: vi.fn(),
       })),
     } as unknown as HTMLElement;
   };
@@ -160,7 +162,7 @@ describe('calculateFlyoutContentHeight', () => {
     });
 
     const mockElement = createMockElement(200);
-    const getBoundingClientRectSpy = jest.spyOn(mockElement, 'getBoundingClientRect');
+    const getBoundingClientRectSpy = vi.spyOn(mockElement, 'getBoundingClientRect');
 
     calculateFlyoutContentHeight(mockElement);
 

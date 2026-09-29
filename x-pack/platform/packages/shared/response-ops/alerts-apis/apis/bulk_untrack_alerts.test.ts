@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { bulkUntrackAlerts } from './bulk_untrack_alerts';
 
@@ -12,7 +14,7 @@ const http = httpServiceMock.createStartContract();
 
 describe('bulkUntrackAlerts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should call bulk untrack API with correct parameters', async () => {

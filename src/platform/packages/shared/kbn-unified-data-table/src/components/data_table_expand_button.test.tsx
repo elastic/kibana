@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { dataTableContextMock } from '../../__mocks__/table_context';
@@ -26,7 +28,7 @@ describe('Data table view button ', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={0}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />
       </UnifiedDataTableContext.Provider>
     );
@@ -49,7 +51,7 @@ describe('Data table view button ', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={0}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />
       </UnifiedDataTableContext.Provider>
     );
@@ -67,7 +69,7 @@ describe('Data table view button ', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={0}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />
       </UnifiedDataTableContext.Provider>
     );
@@ -94,7 +96,7 @@ describe('Data table view button ', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={0}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />
       </UnifiedDataTableContext.Provider>
     );
@@ -118,7 +120,7 @@ describe('Data table view button ', () => {
           isExpandable={false}
           isExpanded={false}
           rowIndex={1}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
         />
       </UnifiedDataTableContext.Provider>
     );

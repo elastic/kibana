@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -20,15 +23,15 @@ import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { timelineActions } from '../../../timelines/store';
 import { TimelineId } from '../../../../common/types';
 
-jest.mock('../user_privileges');
+vi.mock('../user_privileges');
 
 describe('PinEventAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should disable button if user does NOT have Timeline crud privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { crud: false, read: true },
     });
 
@@ -51,7 +54,7 @@ describe('PinEventAction', () => {
   });
 
   it('should disable button if timeline type is template', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { crud: true, read: true },
     });
 
@@ -74,7 +77,7 @@ describe('PinEventAction', () => {
   });
 
   it('should disable button if there are some notes on that event', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { crud: true, read: true },
     });
 
@@ -97,9 +100,9 @@ describe('PinEventAction', () => {
   });
 
   it('should pin event', async () => {
-    const spy = jest.spyOn(timelineActions, 'pinEvent');
+    const spy = vi.spyOn(timelineActions, 'pinEvent');
 
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { crud: true, read: true },
     });
 
@@ -131,10 +134,10 @@ describe('PinEventAction', () => {
   it('should disable button and prevent pin/unpin when timeline is a Super Timeline', async () => {
     // WHY: Super Timeline is read-only / transient. Allowing pinning would silently persist the
     // aggregated timeline as a new saved object, defeating the "never persisted" contract.
-    const pinSpy = jest.spyOn(timelineActions, 'pinEvent');
-    const unPinSpy = jest.spyOn(timelineActions, 'unPinEvent');
+    const pinSpy = vi.spyOn(timelineActions, 'pinEvent');
+    const unPinSpy = vi.spyOn(timelineActions, 'unPinEvent');
 
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { crud: true, read: true },
     });
 
@@ -176,9 +179,9 @@ describe('PinEventAction', () => {
   });
 
   it('should unpin event', async () => {
-    const spy = jest.spyOn(timelineActions, 'unPinEvent');
+    const spy = vi.spyOn(timelineActions, 'unPinEvent');
 
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       timelinePrivileges: { crud: true, read: true },
     });
 
@@ -223,7 +226,7 @@ describe('PinEventAction', () => {
 
 describe('eventHasNotes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return false for when notes is empty', () => {
@@ -237,7 +240,7 @@ describe('eventHasNotes', () => {
 
 describe('getPinTooltipContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should indicate the event may NOT be unpinned when `isPinned` is `true` and the event has notes', () => {

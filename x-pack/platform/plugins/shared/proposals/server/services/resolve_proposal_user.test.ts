@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createProposalUserResolver } from './resolve_proposal_user';
@@ -12,8 +14,8 @@ import { createProposalUserResolver } from './resolve_proposal_user';
 const request = httpServerMock.createKibanaRequest();
 
 const createDeps = () => {
-  const userProfile = { getCurrent: jest.fn() };
-  const security = { authc: { getCurrentUser: jest.fn() } };
+  const userProfile = { getCurrent: vi.fn() };
+  const security = { authc: { getCurrentUser: vi.fn() } };
   return {
     userProfile,
     security,
@@ -27,7 +29,7 @@ const createDeps = () => {
 
 describe('createProposalUserResolver', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should prefer the profile, since its uid is what a UI resolves an avatar from', async () => {

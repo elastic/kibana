@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -21,20 +24,23 @@ import { RulePanelKey } from '../../../../../flyout/rule_details/right';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/components/link_to');
-jest.mock('../../../../../common/components/user_privileges');
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
-}));
-jest.mock('../../../../../flyout_v2/use_flyout_api');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/components/link_to');
+vi.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => {
+      const mocked = {
+      useIsNewFlyoutEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../flyout_v2/use_flyout_api');
 
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
-const useKibanaMock = useKibana as jest.Mock;
+const useUserPrivilegesMock = useUserPrivileges as Mock;
+const useKibanaMock = useKibana as Mock;
 
-const mockNavigateToApp = jest.fn();
-const mockOpenFlyout = jest.fn();
+const mockNavigateToApp = vi.fn();
+const mockOpenFlyout = vi.fn();
 
 const inTimelineContext = {
   enableHostDetailsFlyout: true,
@@ -53,18 +59,18 @@ const flyoutApi = createFlyoutApiMock();
 
 describe('RenderRuleName', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: {
         application: {
           navigateToApp: mockNavigateToApp,
-          getUrlForApp: jest.fn().mockReturnValue('/app/security/rules/id/rule-id-123'),
+          getUrlForApp: vi.fn().mockReturnValue('/app/security/rules/id/rule-id-123'),
         },
       },
     });
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
     });
@@ -159,7 +165,7 @@ describe('RenderRuleName', () => {
       );
 
     it('opens the legacy expandable flyout when the new flyout is disabled', () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+      vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
 
       renderInTimelineContext();
       fireEvent.click(screen.getByTestId('ruleName'));
@@ -177,7 +183,7 @@ describe('RenderRuleName', () => {
     });
 
     it('opens the new rule flyout when the new flyout is enabled', () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+      vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
       renderInTimelineContext();
       fireEvent.click(screen.getByTestId('ruleName'));

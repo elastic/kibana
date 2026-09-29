@@ -7,24 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 /* eslint-disable dot-notation */
-jest.mock('node-fetch');
-jest.mock('fs/promises');
+vi.mock('node-fetch');
+vi.mock('fs/promises');
 import type { AWSResponse } from './aws';
 import { AWSCloudService } from './aws';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const fetchMock = require('node-fetch') as jest.Mock;
+const fetchMock = require('node-fetch') as Mock;
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { readFile } = require('fs/promises') as { readFile: jest.Mock };
+const { readFile } = require('fs/promises') as { readFile: Mock };
 
 describe('AWS', () => {
-  const mockIsWindows = jest.fn();
+  const mockIsWindows = vi.fn();
   const awsService = new AWSCloudService();
   awsService['_isWindows'] = mockIsWindows.mockReturnValue(false);
   readFile.mockResolvedValue('eC2abcdef-ghijk\n');
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
   it('is named "aws"', () => {
     expect(awsService.getName()).toEqual('aws');
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as useIsExperimentalFeatureEnabledMock from '../../../common/hooks/use_experimental_features';
@@ -30,7 +32,7 @@ describe('useAlertSuppression', () => {
     });
   });
 
-  jest
+  vi
     .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
     .mockReturnValue(false);
   it('should return isSuppressionEnabled false for eql sequence query when feature flag is disabled', () => {

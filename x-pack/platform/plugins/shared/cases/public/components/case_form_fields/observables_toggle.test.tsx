@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, within, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,7 +17,7 @@ import { FormTestComponent } from '../../common/test_utils';
 const CASE_OBSERVABLES_TOGGLE_TEST_ID = 'caseObservablesToggle';
 
 describe('ObservablesToggle', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
   const defaultFormProps = {
     onSubmit,
     formDefaultValue: { extractObservables: true },
@@ -25,7 +27,7 @@ describe('ObservablesToggle', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('it render toggle correctly', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AiIndexRegistry } from './registry';
 import { AiIndexConflictError, AiIndexIdConflictError, InvalidAiIndexDestError } from './errors';
@@ -22,8 +25,8 @@ const makeProperties = (overrides: Partial<AiIndexProperties> = {}): AiIndexProp
   ...overrides,
 });
 
-const makeServiceMock = (): jest.Mocked<Pick<AiIndexService, 'putManaged'>> => ({
-  putManaged: jest.fn(),
+const makeServiceMock = (): Mocked<Pick<AiIndexService, 'putManaged'>> => ({
+  putManaged: vi.fn(),
 });
 
 describe('AiIndexRegistry', () => {

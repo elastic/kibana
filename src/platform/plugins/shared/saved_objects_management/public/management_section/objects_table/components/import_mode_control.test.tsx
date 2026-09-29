@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { shallowWithI18nProvider, mountWithIntl } from '@kbn/test-jest-helpers';
@@ -15,7 +17,7 @@ import { ImportModeControl } from './import_mode_control';
 
 describe('ImportModeControl', () => {
   const initialValues = { createNewCopies: false, overwrite: true }; // some test cases below make assumptions based on these initial values
-  const updateSelection = jest.fn();
+  const updateSelection = vi.fn();
 
   const getOverwriteRadio = (wrapper: ReactWrapper) =>
     wrapper.find(
@@ -31,7 +33,7 @@ describe('ImportModeControl', () => {
     wrapper.find('input[id="createNewCopiesEnabled"]');
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const props: ImportModeControlProps = { initialValues, updateSelection };

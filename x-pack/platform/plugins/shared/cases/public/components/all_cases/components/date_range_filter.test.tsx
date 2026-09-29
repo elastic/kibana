@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,12 +18,12 @@ import { useRefreshCases } from '../hooks/use_on_refresh_cases';
 import { useGetEarliestCase } from '../hooks/use_get_earliest_case';
 import { basicCase } from '../../../containers/mock';
 
-jest.mock('../hooks/use_on_refresh_cases');
-jest.mock('../hooks/use_get_earliest_case');
+vi.mock('../hooks/use_on_refresh_cases');
+vi.mock('../hooks/use_get_earliest_case');
 
-const mockRefreshCases = jest.fn();
-const mockDeselectCases = jest.fn();
-const mockOnFilterOptionsChange = jest.fn();
+const mockRefreshCases = vi.fn();
+const mockDeselectCases = vi.fn();
+const mockOnFilterOptionsChange = vi.fn();
 
 const defaultProps = {
   filterOptions: DEFAULT_FILTER_OPTIONS,
@@ -36,9 +39,9 @@ const REFRESH_BUTTON_TEST_SUBJ = 'superDatePickerApplyTimeButton';
 
 describe('DateRangeFilter', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useRefreshCases as jest.Mock).mockReturnValue(mockRefreshCases);
-    (useGetEarliestCase as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useRefreshCases as Mock).mockReturnValue(mockRefreshCases);
+    (useGetEarliestCase as Mock).mockReturnValue({
       earliestCase: basicCase,
       isLoading: false,
     });
@@ -106,7 +109,7 @@ describe('DateRangeFilter', () => {
   });
 
   it('should use DEFAULT_FROM_DATE when earliest case is not available and show all cases is clicked', async () => {
-    (useGetEarliestCase as jest.Mock).mockReturnValue({
+    (useGetEarliestCase as Mock).mockReturnValue({
       earliestCase: undefined,
       isLoading: false,
     });

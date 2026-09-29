@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowExecution } from '@kbn/workflows';
@@ -31,19 +34,19 @@ const buildExecution = (overrides: Partial<EsWorkflowExecution> = {}): EsWorkflo
 
 const buildRepository = (
   execution: EsWorkflowExecution | null
-): jest.Mocked<
+): Mocked<
   Pick<WorkflowExecutionRepository, 'getWorkflowExecutionById' | 'updateWorkflowExecution'>
 > => ({
-  getWorkflowExecutionById: jest.fn().mockResolvedValue(execution),
-  updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+  getWorkflowExecutionById: vi.fn().mockResolvedValue(execution),
+  updateWorkflowExecution: vi.fn().mockResolvedValue(undefined),
 });
 
-const buildTaskManager = (): jest.Mocked<
+const buildTaskManager = (): Mocked<
   Pick<WorkflowTaskManager, 'forceRunIdleTasks' | 'removeQueuedRunTask' | 'promoteQueuedRunTask'>
 > => ({
-  forceRunIdleTasks: jest.fn().mockResolvedValue(undefined),
-  removeQueuedRunTask: jest.fn().mockResolvedValue(undefined),
-  promoteQueuedRunTask: jest.fn().mockResolvedValue(undefined),
+  forceRunIdleTasks: vi.fn().mockResolvedValue(undefined),
+  removeQueuedRunTask: vi.fn().mockResolvedValue(undefined),
+  promoteQueuedRunTask: vi.fn().mockResolvedValue(undefined),
 });
 
 const buildCancelParams = ({
@@ -68,11 +71,11 @@ describe('cancelWorkflow', () => {
   const schedulingRequest = { headers: {} } as KibanaRequest;
 
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2025-08-05T20:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2025-08-05T20:00:00.000Z'));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('throws WorkflowExecutionNotFoundError when the execution does not exist', async () => {
@@ -219,8 +222,8 @@ describe('cancelWorkflow', () => {
           },
         })
       ),
-      countExecutionsByConcurrencyGroupAndStatuses: jest.fn().mockResolvedValue(0),
-      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue(null),
+      countExecutionsByConcurrencyGroupAndStatuses: vi.fn().mockResolvedValue(0),
+      getOldestQueuedExecutionIdByConcurrencyGroup: vi.fn().mockResolvedValue(null),
     };
     const workflowTaskManager = buildTaskManager();
 

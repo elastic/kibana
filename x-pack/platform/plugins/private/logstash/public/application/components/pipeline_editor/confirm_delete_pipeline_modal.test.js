@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { ConfirmDeletePipelineModal } from './confirm_delete_pipeline_modal';
@@ -15,8 +17,8 @@ describe('ConfirmDeletePipelineModal component', () => {
   beforeEach(() => {
     props = {
       id: 'the id',
-      cancelDeleteModal: jest.fn(),
-      confirmDeletePipeline: jest.fn(),
+      cancelDeleteModal: vi.fn(),
+      confirmDeletePipeline: vi.fn(),
     };
   });
 

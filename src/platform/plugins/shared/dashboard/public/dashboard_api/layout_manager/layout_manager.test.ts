@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { pick } from 'lodash';
 import { BehaviorSubject, of } from 'rxjs';
 import { waitFor } from '@testing-library/react';
@@ -31,19 +33,25 @@ import type { initializeViewModeManager } from '../view_mode_manager';
 import { deserializeLayout } from './deserialize_layout';
 import { initializeLayoutManager } from './layout_manager';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('54321'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('54321'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // disable distinctUntilChanged for the sake of testing
-jest.mock('rxjs', () => ({
-  ...jest.requireActual('rxjs'),
-  distinctUntilChanged: () => (v: any) => v, // pass through the value without filtering
-}));
+vi.mock('rxjs', () => {
+      const mocked = {
+      ...require('rxjs'),
+      distinctUntilChanged: () => (v: any) => v, // pass through the value without filtering
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const trackPanelMock = {
-  setScrollToPanelId: jest.fn(),
-  setHighlightPanelId: jest.fn(),
+  setScrollToPanelId: vi.fn(),
+  setHighlightPanelId: vi.fn(),
 } as unknown as ReturnType<typeof initializeTrackPanel>['api'];
 
 const viewModeManagerMock = { api: { viewMode$: new BehaviorSubject('view') } } as ReturnType<
@@ -52,7 +60,7 @@ const viewModeManagerMock = { api: { viewMode$: new BehaviorSubject('view') } } 
 
 describe('layout manager', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const PANEL_ONE_ID = 'panelOne';
@@ -98,7 +106,7 @@ describe('layout manager', () => {
     anyStateChange$: of(),
     latestState$: of(panel1.config),
     serializeState: () => titleManager.getLatestState(),
-    applySerializedState: jest.fn(),
+    applySerializedState: vi.fn(),
   };
 
   const section1 = {
@@ -129,7 +137,7 @@ describe('layout manager', () => {
       [],
       trackPanelMock
     );
-    const applySerializedState = jest.fn().mockResolvedValue(undefined);
+    const applySerializedState = vi.fn().mockResolvedValue(undefined);
 
     layoutManager.api.registerChildApi({
       ...panel1Api,
@@ -273,11 +281,11 @@ describe('layout manager', () => {
       );
       layoutManager.api.registerChildApi({
         ...panel1Api,
-        hasLibraryItemWithTitle: jest.fn(),
-        canLinkToLibrary: jest.fn(),
-        canUnlinkFromLibrary: jest.fn(),
-        saveToLibrary: jest.fn(),
-        getSerializedStateByReference: jest.fn(),
+        hasLibraryItemWithTitle: vi.fn(),
+        canLinkToLibrary: vi.fn(),
+        canUnlinkFromLibrary: vi.fn(),
+        saveToLibrary: vi.fn(),
+        getSerializedStateByReference: vi.fn(),
         getSerializedStateByValue: () => ({
           isByValue: true,
         }),
@@ -334,64 +342,76 @@ describe('layout manager', () => {
   });
 
   describe('getChildApi', () => {
-    test('should return api when api is available', (done) => {
-      const layoutManager = initializeLayoutManager(
-        viewModeManagerMock,
-        [panel1],
-        [],
-        trackPanelMock
-      );
+    test('should return api when api is available', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
-        expect(api).toBe(panel1Api);
-        done();
-      });
+              const layoutManager = initializeLayoutManager(
+                viewModeManagerMock,
+                [panel1],
+                [],
+                trackPanelMock
+              );
 
-      layoutManager.api.registerChildApi(panel1Api);
-    });
+              layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
+                expect(api).toBe(panel1Api);
+                done();
+              });
 
-    test('should return api from panel in open section when api is available', (done) => {
-      const layoutManager = initializeLayoutManager(
-        viewModeManagerMock,
-        [
-          {
-            ...section1,
-            collapsed: false,
-          },
-        ],
-        [],
-        trackPanelMock
-      );
+              layoutManager.api.registerChildApi(panel1Api);
+            
+        }));
 
-      layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
-        expect(api).toBe(panel1Api);
-        done();
-      });
+    test('should return api from panel in open section when api is available', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      layoutManager.api.registerChildApi(panel1Api);
-    });
+              const layoutManager = initializeLayoutManager(
+                viewModeManagerMock,
+                [
+                  {
+                    ...section1,
+                    collapsed: false,
+                  },
+                ],
+                [],
+                trackPanelMock
+              );
 
-    test('should return undefined from panel in closed section', (done) => {
-      const layoutManager = initializeLayoutManager(
-        viewModeManagerMock,
-        [
-          {
-            ...section1,
-            collapsed: true,
-          },
-        ],
-        [],
-        trackPanelMock
-      );
+              layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
+                expect(api).toBe(panel1Api);
+                done();
+              });
 
-      layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
-        expect(api).toBeUndefined();
-        done();
-      });
+              layoutManager.api.registerChildApi(panel1Api);
+            
+        }));
 
-      // do not call layoutManager.internalApi.registerChildApi
-      // because api will never become available
-    });
+    test('should return undefined from panel in closed section', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              const layoutManager = initializeLayoutManager(
+                viewModeManagerMock,
+                [
+                  {
+                    ...section1,
+                    collapsed: true,
+                  },
+                ],
+                [],
+                trackPanelMock
+              );
+
+              layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
+                expect(api).toBeUndefined();
+                done();
+              });
+
+              // do not call layoutManager.internalApi.registerChildApi
+              // because api will never become available
+            
+        }));
   });
 
   describe('pinned panels', () => {

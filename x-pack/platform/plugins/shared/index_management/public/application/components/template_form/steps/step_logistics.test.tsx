@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,34 +17,43 @@ import { StepLogistics } from './step_logistics';
 
 let mockIsServerless = false;
 
-jest.mock('../../../app_context', () => ({
-  useAppContext: () => ({
-    config: { isServerless: mockIsServerless, enableIndexMode: true },
-    plugins: { cloud: undefined },
-    core: {
-      application: { capabilities: { management: { stack: { license_management: true } } } },
-      getUrlForApp: () => 'http://localhost/app/management',
-    },
-  }),
-}));
+vi.mock('../../../app_context', () => {
+      const mocked = {
+      useAppContext: () => ({
+        config: { isServerless: mockIsServerless, enableIndexMode: true },
+        plugins: { cloud: undefined },
+        core: {
+          application: { capabilities: { management: { stack: { license_management: true } } } },
+          getUrlForApp: () => 'http://localhost/app/management',
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_license', () => ({
-  useLicense: () => ({ isAtLeastEnterprise: () => true }),
-}));
+vi.mock('../../../../hooks/use_license', () => {
+      const mocked = {
+      useLicense: () => ({ isAtLeastEnterprise: () => true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseLoadSnapshotRepositories = jest.fn(() => ({
+const mockUseLoadSnapshotRepositories = vi.fn(() => ({
   data: {
     hasDefaultRepository: true,
     defaultRepository: 'found-snapshots',
     hasRepositories: true,
     canCreateRepository: true,
   },
-  resendRequest: jest.fn(),
+  resendRequest: vi.fn(),
 }));
 
-jest.mock('../../../services/api', () => ({
-  useLoadSnapshotRepositories: () => mockUseLoadSnapshotRepositories(),
-}));
+vi.mock('../../../services/api', () => {
+      const mocked = {
+      useLoadSnapshotRepositories: () => mockUseLoadSnapshotRepositories(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('StepLogistics', () => {
   const baseDefaultValue = {
@@ -69,7 +80,7 @@ describe('StepLogistics', () => {
           <StepLogistics
             defaultValue={baseDefaultValue}
             isEditing={true}
-            onChange={jest.fn()}
+            onChange={vi.fn()}
             isLegacy={false}
           />
         </I18nProvider>
@@ -88,7 +99,7 @@ describe('StepLogistics', () => {
           <StepLogistics
             defaultValue={baseDefaultValue}
             isEditing={false}
-            onChange={jest.fn()}
+            onChange={vi.fn()}
             isLegacy={false}
           />
         </I18nProvider>
@@ -101,7 +112,7 @@ describe('StepLogistics', () => {
   });
 
   it('SHOULD block the step when data lifecycle is invalid', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     render(
       <I18nProvider>
@@ -127,7 +138,7 @@ describe('StepLogistics', () => {
   });
 
   it('SHOULD set the index mode to logsdb when the index pattern is logs-*-*', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     render(
       <I18nProvider>
@@ -150,7 +161,7 @@ describe('StepLogistics', () => {
     it('SHOULD render the Hot and Frozen phases and load snapshot repositories', async () => {
       render(
         <I18nProvider>
-          <StepLogistics defaultValue={baseDefaultValue} onChange={jest.fn()} isLegacy={false} />
+          <StepLogistics defaultValue={baseDefaultValue} onChange={vi.fn()} isLegacy={false} />
         </I18nProvider>
       );
 
@@ -169,7 +180,7 @@ describe('StepLogistics', () => {
     it('SHOULD only render the Delete phase', async () => {
       render(
         <I18nProvider>
-          <StepLogistics defaultValue={baseDefaultValue} onChange={jest.fn()} isLegacy={false} />
+          <StepLogistics defaultValue={baseDefaultValue} onChange={vi.fn()} isLegacy={false} />
         </I18nProvider>
       );
 
@@ -181,7 +192,7 @@ describe('StepLogistics', () => {
     it('SHOULD NOT load snapshot repositories', async () => {
       render(
         <I18nProvider>
-          <StepLogistics defaultValue={baseDefaultValue} onChange={jest.fn()} isLegacy={false} />
+          <StepLogistics defaultValue={baseDefaultValue} onChange={vi.fn()} isLegacy={false} />
         </I18nProvider>
       );
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fetchStatus } from './fetch_status';
 import type { AlertUiState, AlertState } from '../../../common/types/alerts';
 import { AlertSeverity } from '../../../common/enums';
@@ -15,20 +18,23 @@ import {
   RULE_MISSING_MONITORING_DATA,
 } from '../../../common/constants';
 
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      getLogger: jest.fn(),
-      config: {
-        ui: {
-          ccs: { enabled: true },
-          metricbeat: { index: 'metricbeat-*' },
-          container: { elasticsearch: { enabled: false } },
+vi.mock('../../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          getLogger: vi.fn(),
+          config: {
+            ui: {
+              ccs: { enabled: true },
+              metricbeat: { index: 'metricbeat-*' },
+              container: { elasticsearch: { enabled: false } },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('fetchStatus', () => {
   const alertType = RULE_CPU_USAGE;
@@ -46,7 +52,7 @@ describe('fetchStatus', () => {
   };
   let alertStates: AlertState[] = [];
   const rulesClient = {
-    find: jest.fn(() => ({
+    find: vi.fn(() => ({
       total: 1,
       data: [
         {
@@ -57,7 +63,7 @@ describe('fetchStatus', () => {
         },
       ],
     })),
-    getAlertState: jest.fn(() => ({
+    getAlertState: vi.fn(() => ({
       alertInstances: {
         abc: {
           state: {
@@ -69,8 +75,8 @@ describe('fetchStatus', () => {
   };
 
   afterEach(() => {
-    (rulesClient.find as jest.Mock).mockClear();
-    (rulesClient.getAlertState as jest.Mock).mockClear();
+    (rulesClient.find as Mock).mockClear();
+    (rulesClient.getAlertState as Mock).mockClear();
     alertStates.length = 0;
   });
 
@@ -113,13 +119,13 @@ describe('fetchStatus', () => {
 
   it('should pass in the right filter to the alerts client', async () => {
     await fetchStatus(rulesClient as any, alertTypes, [defaultClusterState.clusterUuid]);
-    expect((rulesClient.find as jest.Mock).mock.calls[0][0].options.filter).toBe(
+    expect((rulesClient.find as Mock).mock.calls[0][0].options.filter).toBe(
       `alert.attributes.alertTypeId:${alertType}`
     );
   });
 
   it('should return nothing if no alert state is found', async () => {
-    rulesClient.getAlertState = jest.fn(() => ({
+    rulesClient.getAlertState = vi.fn(() => ({
       alertTypeState: null,
     })) as any;
 
@@ -130,7 +136,7 @@ describe('fetchStatus', () => {
   });
 
   it('should return nothing if no alerts are found', async () => {
-    rulesClient.find = jest.fn(() => ({
+    rulesClient.find = vi.fn(() => ({
       total: 0,
       data: [],
     })) as any;
@@ -144,7 +150,7 @@ describe('fetchStatus', () => {
   // seems to only work with it.only(), holding state somewhere
   it.skip('should pass along the license service', async () => {
     const customLicenseService = {
-      getWatcherFeature: jest.fn().mockImplementation(() => ({
+      getWatcherFeature: vi.fn().mockImplementation(() => ({
         isAvailable: true,
         isEnabled: true,
       })),
@@ -155,7 +161,7 @@ describe('fetchStatus', () => {
 
   it('should sort the alerts', async () => {
     const customRulesClient = {
-      find: jest.fn(() => ({
+      find: vi.fn(() => ({
         total: 1,
         data: [
           {
@@ -163,7 +169,7 @@ describe('fetchStatus', () => {
           },
         ],
       })),
-      getAlertState: jest.fn(() => ({
+      getAlertState: vi.fn(() => ({
         alertInstances: {
           abc: {
             state: {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -18,11 +20,11 @@ import { getCreateListOptionsMock } from './create_list.mock';
 
 describe('create_list', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it returns a list as expected with the id changed out for the elastic id', async () => {

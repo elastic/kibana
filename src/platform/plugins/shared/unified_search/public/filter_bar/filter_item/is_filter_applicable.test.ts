@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
 import { getFilterKeys, isFilterApplicable } from './is_filter_applicable';
 
-const mockGetIndexPatternFromFilter = jest.fn();
+const mockGetIndexPatternFromFilter = vi.fn();
 
-jest.mock('@kbn/data-plugin/public', () => ({
-  getIndexPatternFromFilter: (...args: unknown[]) => mockGetIndexPatternFromFilter(...args),
-}));
+vi.mock('@kbn/data-plugin/public', () => {
+      const mocked = {
+      getIndexPatternFromFilter: (...args: unknown[]) => mockGetIndexPatternFromFilter(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('is_filter_applicable', () => {
   const dataView: DataView = createStubDataView({

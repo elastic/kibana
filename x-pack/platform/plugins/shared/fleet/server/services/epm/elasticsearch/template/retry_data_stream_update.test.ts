@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import pRetry from 'p-retry';
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
@@ -13,9 +15,9 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { retryDataStreamUpdateOnClusterEventTimeout } from './retry_data_stream_update';
 
 // Use 0ms delays so tests run synchronously without fake timers.
-jest.mock('p-retry', () => {
-  const actual = jest.requireActual<typeof import('p-retry')>('p-retry');
-  const mockFn = jest
+vi.mock('p-retry', () => {
+  const actual = (require('p-retry') as typeof import('p-retry'));
+  const mockFn = vi
     .fn()
     .mockImplementation((fn: Parameters<typeof actual.default>[0], options: any) =>
       actual.default(fn, { ...options, minTimeout: 0, maxTimeout: 0, randomize: false })
@@ -35,11 +37,11 @@ const buildResponseError = (statusCode: number, errorType: string): EsErrors.Res
 
 describe('retryDataStreamUpdateOnClusterEventTimeout', () => {
   beforeEach(() => {
-    jest.mocked(pRetry).mockClear();
+    vi.mocked(pRetry).mockClear();
   });
 
   it('resolves immediately when the operation succeeds on the first attempt', async () => {
-    const operation = jest.fn().mockResolvedValue('ok');
+    const operation = vi.fn().mockResolvedValue('ok');
     const logger = loggerMock.create();
 
     const result = await retryDataStreamUpdateOnClusterEventTimeout(operation, {
@@ -54,7 +56,7 @@ describe('retryDataStreamUpdateOnClusterEventTimeout', () => {
 
   it('retries on process_cluster_event_timeout_exception (body.error.type) and succeeds', async () => {
     const clusterTimeoutError = buildResponseError(503, 'process_cluster_event_timeout_exception');
-    const operation = jest
+    const operation = vi
       .fn()
       .mockRejectedValueOnce(clusterTimeoutError)
       .mockResolvedValueOnce('ok');
@@ -85,7 +87,7 @@ describe('retryDataStreamUpdateOnClusterEventTimeout', () => {
       meta: {} as any,
       warnings: [],
     });
-    const operation = jest
+    const operation = vi
       .fn()
       .mockRejectedValueOnce(clusterTimeoutError)
       .mockResolvedValueOnce('ok');
@@ -102,7 +104,7 @@ describe('retryDataStreamUpdateOnClusterEventTimeout', () => {
 
   it('retries on 429 TooManyRequests errors', async () => {
     const tooManyRequestsError = buildResponseError(429, 'circuit_breaking_exception');
-    const operation = jest
+    const operation = vi
       .fn()
       .mockRejectedValueOnce(tooManyRequestsError)
       .mockResolvedValueOnce('ok');
@@ -120,7 +122,7 @@ describe('retryDataStreamUpdateOnClusterEventTimeout', () => {
 
   it('aborts immediately (no retry) on non-ES errors', async () => {
     const arbitraryError = new Error('some unexpected error');
-    const operation = jest.fn().mockRejectedValue(arbitraryError);
+    const operation = vi.fn().mockRejectedValue(arbitraryError);
     const logger = loggerMock.create();
 
     await expect(
@@ -136,7 +138,7 @@ describe('retryDataStreamUpdateOnClusterEventTimeout', () => {
 
   it('aborts immediately on ES errors that are not cluster-event-timeout or 429', async () => {
     const illegalArgError = buildResponseError(400, 'illegal_argument_exception');
-    const operation = jest.fn().mockRejectedValue(illegalArgError);
+    const operation = vi.fn().mockRejectedValue(illegalArgError);
     const logger = loggerMock.create();
 
     await expect(
@@ -151,7 +153,7 @@ describe('retryDataStreamUpdateOnClusterEventTimeout', () => {
 
   it('stops retrying after exhausting the retry limit (4 retries = 5 total attempts)', async () => {
     const clusterTimeoutError = buildResponseError(503, 'process_cluster_event_timeout_exception');
-    const operation = jest.fn().mockRejectedValue(clusterTimeoutError);
+    const operation = vi.fn().mockRejectedValue(clusterTimeoutError);
     const logger = loggerMock.create();
 
     await expect(

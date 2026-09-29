@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
@@ -71,7 +73,7 @@ describe('ui settings global client', () => {
     };
   }
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   describe('#set()', () => {
     it('throws an error if setting is not registered', async () => {
@@ -79,9 +81,9 @@ describe('ui settings global client', () => {
       const setUnregisteredSetting = async () => {
         await uiSettingsClient.set('settingD', 'cde');
       };
-      expect(setUnregisteredSetting).rejects.toThrow(
-        'Global setting settingD is not registered. Global settings need to be registered before they can be set'
-      );
+      await expect(setUnregisteredSetting).rejects.toThrow(
+                'Global setting settingD is not registered. Global settings need to be registered before they can be set'
+              );
     });
 
     it('sets a value of a registered setting', async () => {
@@ -105,9 +107,9 @@ describe('ui settings global client', () => {
       const setSettings = async () => {
         await uiSettingsClient.setMany({ settingZ: 'cde', settingC: true });
       };
-      expect(setSettings).rejects.toThrow(
-        'Global setting settingZ is not registered. Global settings need to be registered before they can be set'
-      );
+      await expect(setSettings).rejects.toThrow(
+                'Global setting settingZ is not registered. Global settings need to be registered before they can be set'
+              );
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
     });
 
@@ -120,7 +122,7 @@ describe('ui settings global client', () => {
         );
         return 'done';
       };
-      expect(setSettings()).resolves.toBe('done');
+      await expect(setSettings()).resolves.toBe('done');
       expect(savedObjectsClient.update).toHaveBeenCalled();
     });
   });
@@ -131,9 +133,9 @@ describe('ui settings global client', () => {
       const setSettings = async () => {
         await uiSettingsClient.removeMany(['foo']);
       };
-      expect(setSettings).rejects.toThrow(
-        'Global setting foo is not registered. Global settings need to be registered before they can be set'
-      );
+      await expect(setSettings).rejects.toThrow(
+                'Global setting foo is not registered. Global settings need to be registered before they can be set'
+              );
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
     });
 
@@ -143,7 +145,7 @@ describe('ui settings global client', () => {
         await uiSettingsClient.removeMany(['foo'], { validateKeys: false });
         return 'done';
       };
-      expect(setSettings()).resolves.toBe('done');
+      await expect(setSettings()).resolves.toBe('done');
       expect(savedObjectsClient.update).toHaveBeenCalled();
     });
   });

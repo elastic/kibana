@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-jest.mock('../../actions', () => ({}));
+import { vi } from 'vitest';
+
+vi.mock('../../actions', () => {
+      const mocked = {};
+      return { ...mocked, default: mocked };
+    });
 
 import type { DataRequestMeta, DataRequestDescriptor } from '../../../common/descriptor_types';
 import {

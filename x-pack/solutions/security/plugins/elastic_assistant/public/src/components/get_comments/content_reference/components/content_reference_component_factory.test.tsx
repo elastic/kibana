@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ContentReference } from '@kbn/elastic-assistant-common';
 import { ContentReferenceComponentFactory } from './content_reference_component_factory';
 import React from 'react';
@@ -15,31 +17,40 @@ import type {
   UnresolvedContentReferenceNode,
 } from '../content_reference_parser';
 
-jest.mock('@kbn/elastic-assistant', () => ({
-  useAssistantContext: () => ({
-    assistantAvailability: {
-      hasSearchAILakeConfigurations: true,
-    },
-  }),
-}));
-jest.mock('@kbn/security-solution-navigation', () => ({
-  useNavigation: jest.fn().mockReturnValue({
-    navigateTo: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      useAssistantContext: () => ({
+        assistantAvailability: {
+          hasSearchAILakeConfigurations: true,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/security-solution-navigation', () => {
+      const mocked = {
+      useNavigation: vi.fn().mockReturnValue({
+        navigateTo: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../context/typed_kibana_context/typed_kibana_context', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      discover: {
-        locator: jest.fn(),
-      },
-      application: {
-        navigateToApp: jest.fn(),
-      },
-    },
-  }),
-}));
+vi.mock('../../../../context/typed_kibana_context/typed_kibana_context', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          discover: {
+            locator: vi.fn(),
+          },
+          application: {
+            navigateToApp: vi.fn(),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('contentReferenceComponentFactory', () => {
   it.each([

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import moment from 'moment';
 import type { Tag, TagAttributes } from '../../../common/types';
 import { TagsCache, type CacheRefreshHandler } from './tags_cache';
@@ -158,16 +161,16 @@ describe('TagsCache', () => {
   describe('when `refreshInterval` is provided', () => {
     const refreshInterval = moment.duration('15s');
 
-    let setIntervalSpy: jest.SpyInstance;
-    let clearIntervalSpy: jest.SpyInstance;
+    let setIntervalSpy: MockInstance;
+    let clearIntervalSpy: MockInstance;
 
     beforeEach(async () => {
       tagsCache = new TagsCache({
         refreshHandler,
         refreshInterval,
       });
-      setIntervalSpy = jest.spyOn(window, 'setInterval');
-      clearIntervalSpy = jest.spyOn(window, 'clearInterval');
+      setIntervalSpy = vi.spyOn(window, 'setInterval');
+      clearIntervalSpy = vi.spyOn(window, 'clearInterval');
     });
 
     it('calls `setInterval` during `initialize` with correct parameters', async () => {

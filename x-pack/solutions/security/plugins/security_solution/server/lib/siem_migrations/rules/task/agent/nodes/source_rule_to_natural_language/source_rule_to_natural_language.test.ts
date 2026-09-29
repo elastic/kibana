@@ -5,17 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getSourceRuleToNaturalLanguageNode } from './source_rule_to_natural_language';
 import type { MigrateRuleConfig, MigrateRuleState } from '../../types';
 
-jest.mock('../../../../../common/task/util/has_unsupported_function', () => ({
-  hasUnsupportedFunctions: jest.fn(),
-  UNSUPPORTED_FUNCTIONS: ['UnsupportedFunc_A', 'UnsupportedFunc_B'],
-}));
+vi.mock('../../../../../common/task/util/has_unsupported_function', () => {
+      const mocked = {
+      hasUnsupportedFunctions: vi.fn(),
+      UNSUPPORTED_FUNCTIONS: ['UnsupportedFunc_A', 'UnsupportedFunc_B'],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { hasUnsupportedFunctions } = jest.requireMock(
-  '../../../../../common/task/util/has_unsupported_function'
-) as { hasUnsupportedFunctions: jest.Mock };
+const { hasUnsupportedFunctions } = (await vi.importMock('../../../../../common/task/util/has_unsupported_function')) as { hasUnsupportedFunctions: Mock };
 
 const mockQRadarState = {
   original_rule: {
@@ -42,11 +46,11 @@ const mockSentinelState = {
 const mockConfig = {} as MigrateRuleConfig;
 
 describe('getSourceRuleToNaturalLanguageNode', () => {
-  const mockInvoke = jest.fn();
+  const mockInvoke = vi.fn();
   const node = getSourceRuleToNaturalLanguageNode({ model: { invoke: mockInvoke } as never });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('QRadar vendor', () => {

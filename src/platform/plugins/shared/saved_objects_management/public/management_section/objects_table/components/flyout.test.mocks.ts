@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const importFileMock = jest.fn();
-jest.doMock('../../../lib/import_file', () => ({
+import { vi } from 'vitest';
+
+export const importFileMock = vi.fn();
+vi.doMock('../../../lib/import_file', () => ({
   importFile: importFileMock,
 }));
 
-export const resolveImportErrorsMock = jest.fn();
-jest.doMock('../../../lib/resolve_import_errors', () => ({
+export const resolveImportErrorsMock = vi.fn();
+vi.doMock('../../../lib/resolve_import_errors', () => ({
   resolveImportErrors: resolveImportErrorsMock,
 }));

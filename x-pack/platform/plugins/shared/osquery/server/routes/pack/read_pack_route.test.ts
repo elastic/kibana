@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { API_VERSIONS } from '../../../common/constants';
@@ -12,14 +15,17 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { readPackRoute } from './read_pack_route';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
-jest.mock('../../utils/get_internal_saved_object_client', () => ({
-  createInternalSavedObjectsClientForSpaceId: jest.fn(),
-}));
+vi.mock('../../utils/get_internal_saved_object_client', () => {
+      const mocked = {
+      createInternalSavedObjectsClientForSpaceId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('readPackRoute', () => {
   let routeHandler: RequestHandler;
   let mockOsqueryContext: OsqueryAppContext;
-  let mockSavedObjectsClient: { get: jest.Mock };
+  let mockSavedObjectsClient: { get: Mock };
 
   const createMockRouter = () => {
     const httpService = httpServiceMock.createSetupContract();
@@ -49,19 +55,19 @@ describe('readPackRoute', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockOsqueryContext = {
       logFactory: {
-        get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()),
+        get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()),
       },
       experimentalFeatures: { rruleScheduling: false },
     } as unknown as OsqueryAppContext;
 
     mockSavedObjectsClient = {
-      get: jest.fn().mockResolvedValue(makePack()),
+      get: vi.fn().mockResolvedValue(makePack()),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
   });

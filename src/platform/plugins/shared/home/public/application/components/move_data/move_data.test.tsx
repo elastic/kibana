@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { MoveData } from './move_data';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
-const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
+const addBasePathMock = vi.fn((path: string) => (path ? path : 'path'));
 
 describe('MoveData', () => {
   test('renders as expected', () => {

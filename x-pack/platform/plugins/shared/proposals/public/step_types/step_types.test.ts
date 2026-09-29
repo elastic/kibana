@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import {
   CheckDecidePrivilegesStepId,
@@ -19,7 +21,7 @@ import { registerProposalsPublicStepDefinitions } from '.';
 type Loader = () => Promise<{ id: string } | undefined>;
 
 const register = () => {
-  const registerStepDefinition = jest.fn();
+  const registerStepDefinition = vi.fn();
   registerProposalsPublicStepDefinitions({
     registerStepDefinition,
   } as unknown as WorkflowsExtensionsPublicPluginSetup);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { assessRelevance, relevanceOutputSchema } from './assess_relevance';
@@ -22,10 +25,10 @@ const SAMPLE_OUTPUT: RelevanceOutput = {
 
 const buildModel = (
   output: RelevanceOutput = SAMPLE_OUTPUT
-): { model: ScopedModel; invoke: jest.Mock } => {
-  const invoke = jest.fn().mockResolvedValue({ raw: { response_metadata: {} }, parsed: output });
+): { model: ScopedModel; invoke: Mock } => {
+  const invoke = vi.fn().mockResolvedValue({ raw: { response_metadata: {} }, parsed: output });
   const structured = { invoke };
-  const withStructuredOutput = jest.fn().mockReturnValue(structured);
+  const withStructuredOutput = vi.fn().mockReturnValue(structured);
   const chatModel = { withStructuredOutput } as unknown as ScopedModel['chatModel'];
   const connector = { connectorId: 'test-connector' } as ScopedModel['connector'];
   return { model: { chatModel, connector } as ScopedModel, invoke };
@@ -33,7 +36,7 @@ const buildModel = (
 
 describe('assessRelevance', () => {
   const logger = loggingSystemMock.createLogger();
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns the parsed schema from the model', async () => {
     const { model } = buildModel();
@@ -78,7 +81,7 @@ describe('assessRelevance', () => {
 
   it('uses withStructuredOutput with includeRaw true', async () => {
     const { model } = buildModel();
-    const withStructuredOutput = jest.spyOn(model.chatModel, 'withStructuredOutput');
+    const withStructuredOutput = vi.spyOn(model.chatModel, 'withStructuredOutput');
     await assessRelevance(model, logger, { text: 'body' });
     expect(withStructuredOutput).toHaveBeenCalledWith(
       expect.objectContaining({ _def: expect.anything() }),

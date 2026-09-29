@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
@@ -17,13 +19,13 @@ import {
 
 describe('alert analysis workflow install', () => {
   const createManagedClient = () => ({
-    install: jest.fn().mockResolvedValue(undefined),
-    uninstall: jest.fn().mockResolvedValue(undefined),
-    ready: jest.fn().mockResolvedValue(undefined),
-    getWorkflowStatus: jest.fn().mockResolvedValue(undefined),
-    getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
-    listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
-    execute: jest.fn().mockResolvedValue('execution-id'),
+    install: vi.fn().mockResolvedValue(undefined),
+    uninstall: vi.fn().mockResolvedValue(undefined),
+    ready: vi.fn().mockResolvedValue(undefined),
+    getWorkflowStatus: vi.fn().mockResolvedValue(undefined),
+    getInstalledWorkflowState: vi.fn().mockResolvedValue(null),
+    listInstalledWorkflowStates: vi.fn().mockResolvedValue([]),
+    execute: vi.fn().mockResolvedValue('execution-id'),
   });
 
   it('installs the workflow once in the global space, without a suffix or template values', async () => {
@@ -39,7 +41,7 @@ describe('alert analysis workflow install', () => {
   describe('readSecurityAlertAnalysisWorkflowSettings', () => {
     it('reads the settings from the given uiSettings client', async () => {
       const uiSettingsClient = {
-        get: jest
+        get: vi
           .fn()
           .mockResolvedValueOnce(true)
           .mockResolvedValueOnce(true)

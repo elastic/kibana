@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -18,9 +21,9 @@ const renderDiscoverCellActions = ({
   value = 'my-host',
 }: {
   columns?: string[];
-  filter?: jest.Mock;
-  onAddColumn?: jest.Mock;
-  onRemoveColumn?: jest.Mock;
+  filter?: Mock;
+  onAddColumn?: Mock;
+  onRemoveColumn?: Mock;
   value?: string | string[] | undefined;
 }) => {
   const result = render(
@@ -50,7 +53,7 @@ const renderDiscoverCellActions = ({
 
 describe('DiscoverCellActions', () => {
   it('uses Discover filter callbacks for value and exists actions', () => {
-    const filter = jest.fn();
+    const filter = vi.fn();
     const { trigger } = renderDiscoverCellActions({ filter });
 
     fireEvent.mouseEnter(trigger);
@@ -68,7 +71,7 @@ describe('DiscoverCellActions', () => {
   });
 
   it('toggles an existing Discover column off', () => {
-    const onRemoveColumn = jest.fn();
+    const onRemoveColumn = vi.fn();
     const { trigger } = renderDiscoverCellActions({
       columns: ['host.name'],
       onRemoveColumn,
@@ -81,7 +84,7 @@ describe('DiscoverCellActions', () => {
   });
 
   it('toggles a missing Discover column on', () => {
-    const onAddColumn = jest.fn();
+    const onAddColumn = vi.fn();
     const { trigger } = renderDiscoverCellActions({
       columns: ['event.action'],
       onAddColumn,

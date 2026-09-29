@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { apm, timerange } from '@kbn/synthtrace-client';
 import { pick, range, sum } from 'lodash';
 import type { Readable } from 'stream';
@@ -29,9 +31,9 @@ describe('Synthtrace ES Client indexer', () => {
   beforeEach(() => {
     const opts = {
       logger: {
-        info: jest.fn(),
-        debug: jest.fn(),
-        error: jest.fn(),
+        info: vi.fn(),
+        debug: vi.fn(),
+        error: vi.fn(),
       },
       target: '',
       version: '',
@@ -95,7 +97,7 @@ describe('Synthtrace ES Client indexer', () => {
 
     const instance = apm.service('foo', 'production', 'java').instance('foo');
 
-    const generatorCallback = jest.fn((timestamp: number) => {
+    const generatorCallback = vi.fn((timestamp: number) => {
       return range(0, 50).map(() =>
         instance.transaction('GET /foo').duration(100).timestamp(timestamp).outcome('success')
       );

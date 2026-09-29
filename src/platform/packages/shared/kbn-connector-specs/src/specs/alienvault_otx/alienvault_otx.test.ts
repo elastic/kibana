@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { AlienVaultOTXConnector } from './alienvault_otx';
 
 describe('AlienVaultOTXConnector', () => {
   const mockClient = {
-    get: jest.fn(),
+    get: vi.fn(),
   };
 
   const mockContext = {
@@ -21,7 +23,7 @@ describe('AlienVaultOTXConnector', () => {
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getIndicator action', () => {

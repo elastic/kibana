@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -12,8 +14,8 @@ import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoin
 import { getPolicySettingsFormTestSubjects } from '../mocks';
 import { AdvancedSection } from './advanced_section';
 
-jest.mock('../../../../../../common/hooks/use_license');
-jest.setTimeout(15_000);
+vi.mock('../../../../../../common/hooks/use_license');
+vi.setConfig({ testTimeout: 15_000 });
 
 const OMITTED_KEY = 'mac.ransomware.mode';
 
@@ -26,7 +28,7 @@ describe('Policy Advanced Settings section omitted keys', () => {
     const renderResult = mockedContext.render(
       <AdvancedSection
         policy={policy}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         mode="edit"
         omitKeys={[OMITTED_KEY]}
         data-test-subj={testSubj.container}

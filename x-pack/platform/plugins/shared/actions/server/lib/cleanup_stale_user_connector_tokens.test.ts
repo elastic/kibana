@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import sinon from 'sinon';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import { cleanupStaleUserConnectorTokens } from './cleanup_stale_user_connector_tokens';
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
 let clock: sinon.SinonFakeTimers;
@@ -20,19 +23,19 @@ beforeAll(() => {
 });
 beforeEach(() => {
   clock.reset();
-  jest.resetAllMocks();
-  jest.restoreAllMocks();
+  vi.resetAllMocks();
+  vi.restoreAllMocks();
 });
 afterAll(() => clock.restore());
 
 describe('cleanupStaleUserConnectorTokens()', () => {
   const mockFinder = {
-    find: jest.fn(),
-    close: jest.fn(),
+    find: vi.fn(),
+    close: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockFinder.find.mockReset();
     mockFinder.close.mockResolvedValue(undefined);
     unsecuredSavedObjectsClient.createPointInTimeFinder.mockReturnValue(mockFinder);

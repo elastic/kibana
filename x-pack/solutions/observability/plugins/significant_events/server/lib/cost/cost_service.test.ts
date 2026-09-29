@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -114,7 +116,7 @@ const aggregations = ({
 
 const createEsClient = (impl: (params: Record<string, unknown>) => unknown): ElasticsearchClient =>
   ({
-    search: jest.fn(async (params: Record<string, unknown>) => impl(params)),
+    search: vi.fn(async (params: Record<string, unknown>) => impl(params)),
   } as unknown as ElasticsearchClient);
 
 const calculate = async ({

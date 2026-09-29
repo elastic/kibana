@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { KbnSearchError } from '../../report_search_error';
@@ -49,18 +51,18 @@ const mockRollupResponse = {
 };
 
 describe('ES search strategy', () => {
-  const mockApiCaller = jest.fn();
-  const mockRollupSearchCaller = jest.fn();
-  const mockGetCaller = jest.fn();
-  const mockSubmitCaller = jest.fn();
-  const mockDeleteCaller = jest.fn();
+  const mockApiCaller = vi.fn();
+  const mockRollupSearchCaller = vi.fn();
+  const mockGetCaller = vi.fn();
+  const mockSubmitCaller = vi.fn();
+  const mockDeleteCaller = vi.fn();
   const mockLogger: any = {
-    debug: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
   };
   const mockDeps = {
     uiSettingsClient: {
-      get: jest.fn(),
+      get: vi.fn(),
     },
     esClient: {
       asCurrentUser: {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -17,19 +19,19 @@ describe('useDebouncedYamlEdit', () => {
     <TestProviders>{children}</TestProviders>
   );
 
-  const mockOnChange = jest.fn();
+  const mockOnChange = vi.fn();
   const testStorageKey = LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState;
   const testInitialValue = exampleTemplateDefinition;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
     localStorage.clear();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   it('returns initial value from local storage or default', () => {
@@ -86,7 +88,7 @@ describe('useDebouncedYamlEdit', () => {
     expect(result.current.isSaving).toBe(true);
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     await waitFor(() => {
@@ -113,7 +115,7 @@ describe('useDebouncedYamlEdit', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     await waitFor(() => {
@@ -134,7 +136,7 @@ describe('useDebouncedYamlEdit', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     await waitFor(() => {
@@ -142,7 +144,7 @@ describe('useDebouncedYamlEdit', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     await waitFor(() => {
@@ -165,7 +167,7 @@ describe('useDebouncedYamlEdit', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
     });
 
     act(() => {
@@ -173,7 +175,7 @@ describe('useDebouncedYamlEdit', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
     });
 
     act(() => {
@@ -181,7 +183,7 @@ describe('useDebouncedYamlEdit', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     await waitFor(() => {
@@ -202,7 +204,7 @@ describe('useDebouncedYamlEdit', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     await waitFor(() => {
@@ -210,7 +212,7 @@ describe('useDebouncedYamlEdit', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(500);
+      vi.advanceTimersByTime(500);
     });
 
     act(() => {
@@ -218,7 +220,7 @@ describe('useDebouncedYamlEdit', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     await waitFor(() => {
@@ -226,7 +228,7 @@ describe('useDebouncedYamlEdit', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     await waitFor(() => {
@@ -285,7 +287,7 @@ describe('useDebouncedYamlEdit', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     act(() => {
@@ -293,7 +295,7 @@ describe('useDebouncedYamlEdit', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
 
     // Should not throw or cause issues
@@ -311,7 +313,7 @@ describe('useDebouncedYamlEdit', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     rerender();
@@ -330,7 +332,7 @@ describe('useDebouncedYamlEdit', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     await waitFor(() => {
@@ -350,7 +352,7 @@ describe('useDebouncedYamlEdit', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     await waitFor(() => {

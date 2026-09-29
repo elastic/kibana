@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -15,10 +18,10 @@ import { TestProviders } from '../../mock/test_providers/test_providers';
 import { useAssistantContext } from '../../..';
 import { KNOWLEDGE_BASE_TAB } from '../../assistant/settings/const';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-jest.mock('../../..');
-jest.mock('react-use/lib/useLocalStorage');
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('../../..');
+vi.mock('react-use/lib/useLocalStorage');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiTourStep: ({ children, footerAction, panelProps }: EuiTourStepProps) =>
@@ -35,9 +38,9 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const mockToursIsEnabled = jest.fn(() => true);
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const { notificationServiceMock } = jest.requireActual('@kbn/core/public/mocks');
+const mockToursIsEnabled = vi.fn(() => true);
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const { notificationServiceMock } = (await vi.importActual('@kbn/core/public/mocks'));
   return {
     useKibana: () => ({
       services: {
@@ -53,15 +56,15 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 
 describe('Attack discovery tour', () => {
-  const persistToLocalStorage = jest.fn();
-  const navigateToApp = jest.fn();
+  const persistToLocalStorage = vi.fn();
+  const navigateToApp = vi.fn();
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAssistantContext as Mock).mockReturnValue({
       navigateToApp,
       assistantAvailability: { hasSearchAILakeConfigurations: false },
     });
-    jest.mocked(useLocalStorage).mockReturnValue([
+    vi.mocked(useLocalStorage).mockReturnValue([
       {
         currentTourStep: 1,
         isTourActive: true,
@@ -72,7 +75,7 @@ describe('Attack discovery tour', () => {
   });
 
   it('should not render any tour steps when tour is not activated', () => {
-    jest.mocked(useLocalStorage).mockReturnValue([
+    vi.mocked(useLocalStorage).mockReturnValue([
       {
         currentTourStep: 1,
         isTourActive: false,
@@ -92,7 +95,7 @@ describe('Attack discovery tour', () => {
   });
 
   it('should not render any tour steps when tour is disabled', () => {
-    jest.mocked(useLocalStorage).mockReturnValue([
+    vi.mocked(useLocalStorage).mockReturnValue([
       {
         currentTourStep: 1,
         isTourActive: true,
@@ -113,7 +116,7 @@ describe('Attack discovery tour', () => {
   });
 
   it('should not render any tour steps when tour is on step 2 and page is not knowledge base', () => {
-    jest.mocked(useLocalStorage).mockReturnValue([
+    vi.mocked(useLocalStorage).mockReturnValue([
       {
         currentTourStep: 2,
         isTourActive: true,
@@ -160,7 +163,7 @@ describe('Attack discovery tour', () => {
   });
 
   it('should go to ai4dsoc kb settings', async () => {
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    (useAssistantContext as Mock).mockReturnValue({
       navigateToApp,
       assistantAvailability: { hasSearchAILakeConfigurations: true },
     });
@@ -181,7 +184,7 @@ describe('Attack discovery tour', () => {
   });
 
   it('should render tour video when tour is on step 2 and page is knowledge base', () => {
-    jest.mocked(useLocalStorage).mockReturnValue([
+    vi.mocked(useLocalStorage).mockReturnValue([
       {
         currentTourStep: 2,
         isTourActive: true,

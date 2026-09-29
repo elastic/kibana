@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -49,7 +51,7 @@ describe('transformSuccessfulGenerationsSearchResult', () => {
   const mockLogger = loggerMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns transformed successful generations metadata when the raw response is valid', () => {

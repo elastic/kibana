@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject, of } from 'rxjs';
 import type { ClonePanelActionApi } from './clone_panel_action';
@@ -28,7 +30,7 @@ describe('Clone panel action', () => {
         serializeState: () => ({}),
         applySerializedState: () => undefined,
         parentApi: {
-          duplicatePanel: jest.fn(),
+          duplicatePanel: vi.fn(),
         },
       },
     };

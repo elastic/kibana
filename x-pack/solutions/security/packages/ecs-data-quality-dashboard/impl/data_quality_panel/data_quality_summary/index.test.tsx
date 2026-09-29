@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -67,7 +69,7 @@ const totalSizeInBytes = getTotalSizeInBytes(patternRollups);
 
 describe('DataQualitySummary', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     render(
       <TestExternalProviders>

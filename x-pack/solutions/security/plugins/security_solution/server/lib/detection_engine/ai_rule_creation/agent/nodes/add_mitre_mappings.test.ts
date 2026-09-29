@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { formatMitreMapping, addMitreMappingsNode } from './add_mitre_mappings';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import {
@@ -16,46 +19,52 @@ import {
 import { resetResolveMitreBucketsCache } from '../../../mitre/resolve_mitre_buckets';
 
 // Mock the prompt so the LangChain chain doesn't need real models or prompt templates.
-jest.mock('./prompts', () => ({
-  MITRE_MAPPING_SELECTION_PROMPT: {
-    pipe: jest.fn(),
-  },
-}));
+vi.mock('./prompts', () => {
+      const mocked = {
+      MITRE_MAPPING_SELECTION_PROMPT: {
+        pipe: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // 3-entity fixture for the legacy blob path. Uses the legacy MitreTactic/MitreTechnique/MitreSubTechnique
 // shape so the real transformLegacyMitreData adapter can be exercised without loading the 8.4k-line blob.
-jest.mock('../../../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => ({
-  tactics: [
-    {
-      id: 'TA0001',
-      name: 'Initial Access',
-      reference: 'https://attack.mitre.org/tactics/TA0001/',
-      value: 'initialAccess',
-      label: 'Initial Access (TA0001)',
-    },
-  ],
-  techniques: [
-    {
-      id: 'T1078',
-      name: 'Valid Accounts',
-      reference: 'https://attack.mitre.org/techniques/T1078/',
-      value: 'validAccounts',
-      label: 'Valid Accounts (T1078)',
-      tactics: ['initial-access'],
-    },
-  ],
-  subtechniques: [
-    {
-      id: 'T1078.001',
-      name: 'Default Accounts',
-      reference: 'https://attack.mitre.org/techniques/T1078/001/',
-      value: 'defaultAccounts',
-      label: 'Default Accounts (T1078.001)',
-      tactics: ['initial-access'],
-      techniqueId: 'T1078',
-    },
-  ],
-}));
+vi.mock('../../../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => {
+      const mocked = {
+      tactics: [
+        {
+          id: 'TA0001',
+          name: 'Initial Access',
+          reference: 'https://attack.mitre.org/tactics/TA0001/',
+          value: 'initialAccess',
+          label: 'Initial Access (TA0001)',
+        },
+      ],
+      techniques: [
+        {
+          id: 'T1078',
+          name: 'Valid Accounts',
+          reference: 'https://attack.mitre.org/techniques/T1078/',
+          value: 'validAccounts',
+          label: 'Valid Accounts (T1078)',
+          tactics: ['initial-access'],
+        },
+      ],
+      subtechniques: [
+        {
+          id: 'T1078.001',
+          name: 'Default Accounts',
+          reference: 'https://attack.mitre.org/techniques/T1078/001/',
+          value: 'defaultAccounts',
+          label: 'Default Accounts (T1078.001)',
+          tactics: ['initial-access'],
+          techniqueId: 'T1078',
+        },
+      ],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { MITRE_MAPPING_SELECTION_PROMPT } from './prompts';
 
@@ -159,21 +168,21 @@ describe('formatMitreMapping', () => {
 
 describe('addMitreMappingsNode', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resetResolveMitreBucketsCache();
   });
 
   it('sources MITRE data from the managed client when mitreDataClient is provided', async () => {
-    const invoke = jest.fn().mockResolvedValue({
+    const invoke = vi.fn().mockResolvedValue({
       tactics: ['TA0001'],
       techniques: [{ id: 'T1078', subtechnique: ['T1078.001'] }],
     });
-    (MITRE_MAPPING_SELECTION_PROMPT.pipe as jest.Mock).mockReturnValue({
-      pipe: jest.fn().mockReturnValue({ invoke }),
+    (MITRE_MAPPING_SELECTION_PROMPT.pipe as Mock).mockReturnValue({
+      pipe: vi.fn().mockReturnValue({ invoke }),
     });
 
-    const mockList = jest.fn().mockResolvedValue({ framework: 'enterprise', ...testBuckets });
-    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+    const mockList = vi.fn().mockResolvedValue({ framework: 'enterprise', ...testBuckets });
+    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: vi.fn() };
 
     const node = addMitreMappingsNode({
       model: {} as Parameters<typeof addMitreMappingsNode>[0]['model'],
@@ -201,22 +210,22 @@ describe('addMitreMappingsNode', () => {
   });
 
   it('returns a rule without threat mappings (and a warning) when managed buckets are empty (population not yet complete)', async () => {
-    const invoke = jest.fn().mockResolvedValue({
+    const invoke = vi.fn().mockResolvedValue({
       tactics: ['TA0001'],
       techniques: [{ id: 'T1078' }],
     });
-    (MITRE_MAPPING_SELECTION_PROMPT.pipe as jest.Mock).mockReturnValue({
-      pipe: jest.fn().mockReturnValue({ invoke }),
+    (MITRE_MAPPING_SELECTION_PROMPT.pipe as Mock).mockReturnValue({
+      pipe: vi.fn().mockReturnValue({ invoke }),
     });
 
     // Simulates the state where the managed SO has not yet been populated.
-    const emptyList = jest.fn().mockResolvedValue({
+    const emptyList = vi.fn().mockResolvedValue({
       framework: 'enterprise',
       tactics: [],
       techniques: [],
       subtechniques: [],
     });
-    const mitreDataClient: MitreAttackDataClient = { list: emptyList, getById: jest.fn() };
+    const mitreDataClient: MitreAttackDataClient = { list: emptyList, getById: vi.fn() };
 
     const node = addMitreMappingsNode({
       model: {} as Parameters<typeof addMitreMappingsNode>[0]['model'],
@@ -241,12 +250,12 @@ describe('addMitreMappingsNode', () => {
 
   it('falls back to the adapted legacy blob when mitreDataClient is absent', async () => {
     // Model selects the fixture tactic/technique defined in the mock blob below.
-    const invoke = jest.fn().mockResolvedValue({
+    const invoke = vi.fn().mockResolvedValue({
       tactics: ['TA0001'],
       techniques: [{ id: 'T1078', subtechnique: ['T1078.001'] }],
     });
-    (MITRE_MAPPING_SELECTION_PROMPT.pipe as jest.Mock).mockReturnValue({
-      pipe: jest.fn().mockReturnValue({ invoke }),
+    (MITRE_MAPPING_SELECTION_PROMPT.pipe as Mock).mockReturnValue({
+      pipe: vi.fn().mockReturnValue({ invoke }),
     });
 
     const node = addMitreMappingsNode({

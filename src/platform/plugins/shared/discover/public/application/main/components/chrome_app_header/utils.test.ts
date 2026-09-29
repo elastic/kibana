@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type React from 'react';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
@@ -18,9 +20,9 @@ describe('getChromeHeaderTitle', () => {
   const { embeddableEditor } = discoverServiceMock;
 
   beforeEach(() => {
-    jest.spyOn(embeddableEditor, 'isEmbeddedEditor').mockReturnValue(false);
-    jest.spyOn(embeddableEditor, 'getEmbeddableId').mockReturnValue(undefined);
-    jest.spyOn(embeddableEditor, 'getByValueTab').mockReturnValue(undefined);
+    vi.spyOn(embeddableEditor, 'isEmbeddedEditor').mockReturnValue(false);
+    vi.spyOn(embeddableEditor, 'getEmbeddableId').mockReturnValue(undefined);
+    vi.spyOn(embeddableEditor, 'getByValueTab').mockReturnValue(undefined);
   });
 
   it('should return the persisted session title in standalone mode', () => {
@@ -38,8 +40,8 @@ describe('getChromeHeaderTitle', () => {
 
   describe('when editing an existing dashboard panel', () => {
     beforeEach(() => {
-      jest.spyOn(embeddableEditor, 'isEmbeddedEditor').mockReturnValue(true);
-      jest.spyOn(embeddableEditor, 'getEmbeddableId').mockReturnValue('panel-id');
+      vi.spyOn(embeddableEditor, 'isEmbeddedEditor').mockReturnValue(true);
+      vi.spyOn(embeddableEditor, 'getEmbeddableId').mockReturnValue('panel-id');
     });
 
     it('should return Editing {sessionTitle} for a by-reference saved session', () => {
@@ -52,7 +54,7 @@ describe('getChromeHeaderTitle', () => {
     });
 
     it('should prefer the by-value tab label over the persisted session title', () => {
-      jest
+      vi
         .spyOn(embeddableEditor, 'getByValueTab')
         .mockReturnValue({ label: 'Panel title' } as DiscoverSessionTab);
 
@@ -71,8 +73,8 @@ describe('getChromeHeaderTitle', () => {
 
   describe('when embedded from dashboard without an embeddable id (new session)', () => {
     beforeEach(() => {
-      jest.spyOn(embeddableEditor, 'isEmbeddedEditor').mockReturnValue(true);
-      jest.spyOn(embeddableEditor, 'getEmbeddableId').mockReturnValue(undefined);
+      vi.spyOn(embeddableEditor, 'isEmbeddedEditor').mockReturnValue(true);
+      vi.spyOn(embeddableEditor, 'getEmbeddableId').mockReturnValue(undefined);
     });
 
     it('should return New session', () => {
@@ -86,9 +88,9 @@ describe('getChromeHeaderBack', () => {
   const { embeddableEditor } = discoverServiceMock;
 
   beforeEach(() => {
-    jest.spyOn(embeddableEditor, 'isEmbeddedEditor').mockReturnValue(false);
-    jest.spyOn(embeddableEditor, 'getEmbeddableId').mockReturnValue(undefined);
-    jest.spyOn(embeddableEditor, 'getOriginatingPath').mockReturnValue(undefined);
+    vi.spyOn(embeddableEditor, 'isEmbeddedEditor').mockReturnValue(false);
+    vi.spyOn(embeddableEditor, 'getEmbeddableId').mockReturnValue(undefined);
+    vi.spyOn(embeddableEditor, 'getOriginatingPath').mockReturnValue(undefined);
   });
 
   it('should return undefined if not called from an embeddable', () => {
@@ -96,9 +98,9 @@ describe('getChromeHeaderBack', () => {
   });
 
   it('should return back navigation when editing from a dashboard', () => {
-    jest.spyOn(embeddableEditor, 'isEmbeddedEditor').mockReturnValue(true);
-    jest.spyOn(embeddableEditor, 'getEmbeddableId').mockReturnValue('panel-id');
-    jest.spyOn(embeddableEditor, 'getOriginatingPath').mockReturnValue('/app/dashboards#/view/abc');
+    vi.spyOn(embeddableEditor, 'isEmbeddedEditor').mockReturnValue(true);
+    vi.spyOn(embeddableEditor, 'getEmbeddableId').mockReturnValue('panel-id');
+    vi.spyOn(embeddableEditor, 'getOriginatingPath').mockReturnValue('/app/dashboards#/view/abc');
 
     const back = getChromeHeaderBack(embeddableEditor);
 
@@ -108,7 +110,7 @@ describe('getChromeHeaderBack', () => {
       label: 'Dashboard',
     });
 
-    const preventDefault = jest.fn();
+    const preventDefault = vi.fn();
     if (back && typeof back !== 'string' && back.onClick) {
       back.onClick({ preventDefault } as unknown as React.MouseEvent);
     }

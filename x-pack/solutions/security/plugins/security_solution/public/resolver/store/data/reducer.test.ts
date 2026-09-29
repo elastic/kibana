@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Store, AnyAction, Reducer } from 'redux-v4';
 import { createStore } from 'redux-v4';
 import { RelatedEventCategory } from '../../../../common/endpoint/generate_data';
@@ -21,16 +23,16 @@ import { appReceivedNewExternalProperties } from '../actions';
 
 type SourceAndSchemaFunction = () => { schema: ResolverSchema; dataSource: string };
 
-jest.mock('../../../common/utils/default_date_settings', () => {
-  const original = jest.requireActual('../../../common/utils/default_date_settings');
+vi.mock('../../../common/utils/default_date_settings', async () => {
+  const original = (await vi.importActual('../../../common/utils/default_date_settings'));
   return {
     ...original,
     getTimeRangeSettings: () => ({ to: '', from: '' }),
   };
 });
 
-jest.mock('../../../common/utils/normalize_time_range', () => {
-  const original = jest.requireActual('../../../common/utils/normalize_time_range');
+vi.mock('../../../common/utils/normalize_time_range', async () => {
+  const original = (await vi.importActual('../../../common/utils/normalize_time_range'));
   return {
     ...original,
     normalizeTimeRange: () => original.normalizeTimeRange(false),

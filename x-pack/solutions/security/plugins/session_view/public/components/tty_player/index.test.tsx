@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import {
@@ -40,9 +42,9 @@ describe('TTYPlayer component', () => {
       index: TEST_PROCESS_INDEX,
       sessionEntityId: mockSessionEntityId,
       sessionStartTime: TEST_SESSION_START_TIME,
-      onClose: jest.fn(),
-      onJumpToEvent: jest.fn(),
-      trackEvent: jest.fn(),
+      onClose: vi.fn(),
+      onJumpToEvent: vi.fn(),
+      trackEvent: vi.fn(),
     };
   });
 

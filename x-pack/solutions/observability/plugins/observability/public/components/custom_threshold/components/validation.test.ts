@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type {
@@ -15,9 +17,9 @@ import { EQUATION_REGEX, validateCustomThreshold } from './validation';
 
 const errorReason = 'this should appear as error reason';
 
-jest.mock('@kbn/es-query', () => {
+vi.mock('@kbn/es-query', () => {
   return {
-    buildEsQuery: jest.fn(() => {
+    buildEsQuery: vi.fn(() => {
       // eslint-disable-next-line no-throw-literal
       throw { shortMessage: errorReason };
     }),
@@ -67,7 +69,7 @@ describe('Metric Threshold Validation', () => {
   it('should throw an error when filter query is not valid with reason', () => {
     const res = validateCustomThreshold({
       uiSettings: {
-        get: jest.fn(),
+        get: vi.fn(),
       } as unknown as IUiSettingsClient,
       searchConfiguration: {
         index: 'test*',

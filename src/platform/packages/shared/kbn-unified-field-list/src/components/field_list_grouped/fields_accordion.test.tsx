@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { FieldsAccordion } from './fields_accordion';
@@ -15,11 +17,14 @@ import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiNotificationBadge } from '@elastic/eui';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiNotificationBadge: jest.fn(() => <div>MockBadge</div>),
-}));
-const MockEuiNotificationBadge = jest.mocked(EuiNotificationBadge);
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiNotificationBadge: vi.fn(() => <div>MockBadge</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
+const MockEuiNotificationBadge = vi.mocked(EuiNotificationBadge);
 
 beforeEach(() => {
   MockEuiNotificationBadge.mockImplementation((props) => (
@@ -30,7 +35,7 @@ beforeEach(() => {
 const setup = (props: Partial<React.ComponentProps<typeof FieldsAccordion>> = {}) => {
   const propsToUse: React.ComponentProps<typeof FieldsAccordion> = {
     initialIsOpen: true,
-    onToggle: jest.fn(),
+    onToggle: vi.fn(),
     groupIndex: 1,
     groupName: FieldsGroupNames.AvailableFields,
     id: 'id',

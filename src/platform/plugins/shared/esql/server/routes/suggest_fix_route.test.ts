@@ -7,34 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { registerSuggestFixRoute } from './suggest_fix_route';
 import { SUGGEST_FIX_ROUTE } from '@kbn/esql-types';
 import type { EsqlServerPluginStart } from '../types';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  generateEsql: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      generateEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers', () => ({
-  resolveConnectorId: jest.fn(),
-  createScopedModel: jest.fn(),
-  resolveIncludeDatasets: jest.fn(),
-}));
+vi.mock('./helpers', () => {
+      const mocked = {
+      resolveConnectorId: vi.fn(),
+      createScopedModel: vi.fn(),
+      resolveIncludeDatasets: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { generateEsql } = jest.requireMock('@kbn/agent-builder-genai-utils');
+const { generateEsql } = (await vi.importMock('@kbn/agent-builder-genai-utils'));
 const { resolveConnectorId, createScopedModel, resolveIncludeDatasets } =
-  jest.requireMock('./helpers');
+  (await vi.importMock('./helpers'));
 
 function buildMocks() {
-  const handler = jest.fn();
+  const handler = vi.fn();
   const router = {
-    post: jest.fn((_, h) => {
+    post: vi.fn((_, h) => {
       handler.mockImplementation(h);
     }),
   };
 
-  const uiSettingsClient = { get: jest.fn() };
+  const uiSettingsClient = { get: vi.fn() };
   const inference = {};
   const esClient = { asCurrentUser: {} };
   const core = {
@@ -46,14 +54,14 @@ function buildMocks() {
   };
   const request = { body: {}, headers: {} };
   const response = {
-    ok: jest.fn((r) => ({ status: 200, ...r })),
-    badRequest: jest.fn((r) => ({ status: 400, ...r })),
-    forbidden: jest.fn((r) => ({ status: 403, ...r })),
-    customError: jest.fn((r) => ({ status: r?.statusCode ?? 500, ...r })),
+    ok: vi.fn((r) => ({ status: 200, ...r })),
+    badRequest: vi.fn((r) => ({ status: 400, ...r })),
+    forbidden: vi.fn((r) => ({ status: 403, ...r })),
+    customError: vi.fn((r) => ({ status: r?.statusCode ?? 500, ...r })),
   };
 
-  const getStartServices = jest.fn().mockResolvedValue([{}, { inference }]);
-  const context = { logger: { get: () => ({ error: jest.fn() }) } };
+  const getStartServices = vi.fn().mockResolvedValue([{}, { inference }]);
+  const context = { logger: { get: () => ({ error: vi.fn() }) } };
 
   return {
     router: router as unknown as IRouter,
@@ -68,7 +76,7 @@ function buildMocks() {
 }
 
 describe('registerSuggestFixRoute', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('registers a POST handler at the correct path', () => {
     const { router, getStartServices, context } = buildMocks();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { renderHook } from '@testing-library/react';
@@ -27,7 +29,7 @@ describe('useIsAgentlessQueryParam', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns true when the isAgentless param is set and the agentless policies UI is enabled', () => {
@@ -46,7 +48,7 @@ describe('useIsAgentlessQueryParam', () => {
   });
 
   it('ignores the isAgentless param when the agentless policies UI is disabled', () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       enableAgentlessPoliciesUI: false,
       // disableAgentlessLegacyAPI forces the UI on, so it must be off to exercise the disabled path.

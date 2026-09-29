@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { setMockValues } from '../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -31,9 +34,9 @@ const mockCollection = {
 };
 const mockDataView = { id: 'test-data-view-id' };
 
-jest.mock('../utils/find_or_create_data_view', () => {
+vi.mock('../utils/find_or_create_data_view', () => {
   return {
-    findOrCreateDataView: jest.fn(),
+    findOrCreateDataView: vi.fn(),
   };
 });
 
@@ -50,17 +53,17 @@ describe('withLensData', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the wrapped component with the data prop', () => {
     const WrappedComponent = withLensData<MockComponentProps, MockComponentLensProps>(
       MockComponent,
       {
-        dataLoadTransform: jest.fn(() => {
+        dataLoadTransform: vi.fn(() => {
           return { data: 'initial data' };
         }),
-        getAttributes: jest.fn(),
+        getAttributes: vi.fn(),
         initialValues: { data: 'initial data' },
       }
     );
@@ -74,8 +77,8 @@ describe('withLensData', () => {
     const WrappedComponent = withLensData<MockComponentProps, MockComponentLensProps>(
       MockComponent,
       {
-        dataLoadTransform: jest.fn(),
-        getAttributes: jest.fn(),
+        dataLoadTransform: vi.fn(),
+        getAttributes: vi.fn(),
         initialValues: { data: 'initial data' },
       }
     );
@@ -94,13 +97,13 @@ describe('withLensData', () => {
   });
 
   it('should call getAttributes with the correct arguments when dataView and formula are available', async () => {
-    const getAttributes = jest.fn();
-    (findOrCreateDataView as jest.Mock).mockResolvedValueOnce(mockDataView);
+    const getAttributes = vi.fn();
+    (findOrCreateDataView as Mock).mockResolvedValueOnce(mockDataView);
 
     const WrappedComponent = withLensData<MockComponentProps, MockComponentLensProps>(
       MockComponent,
       {
-        dataLoadTransform: jest.fn(),
+        dataLoadTransform: vi.fn(),
         getAttributes,
         initialValues: { data: 'initial data' },
       }
@@ -120,13 +123,13 @@ describe('withLensData', () => {
   });
 
   it('should not call getAttributes when dataView is not available', async () => {
-    const getAttributes = jest.fn();
-    (findOrCreateDataView as jest.Mock).mockResolvedValueOnce(undefined);
+    const getAttributes = vi.fn();
+    (findOrCreateDataView as Mock).mockResolvedValueOnce(undefined);
 
     const WrappedComponent = withLensData<MockComponentProps, MockComponentLensProps>(
       MockComponent,
       {
-        dataLoadTransform: jest.fn(),
+        dataLoadTransform: vi.fn(),
         getAttributes,
         initialValues: { data: 'initial data' },
       }

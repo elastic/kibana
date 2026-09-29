@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -12,11 +14,14 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { EntityAttachmentIdentifier } from './types';
 import { useEntityForAttachment } from './use_entity_for_attachment';
 
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({ services: { http: { fetch: mockFetch } } }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({ services: { http: { fetch: mockFetch } } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createWrapper = () => {
   const client = new QueryClient({

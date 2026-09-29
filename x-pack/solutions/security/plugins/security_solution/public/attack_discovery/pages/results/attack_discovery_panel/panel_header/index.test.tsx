@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -12,10 +14,10 @@ import { PanelHeader } from '.';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { getMockAttackDiscoveryAlerts } from '../../../mock/mock_attack_discovery_alerts';
 
-const mockSetIsOpen = jest.fn();
-const mockSetSelectedAttackDiscoveries = jest.fn();
-const mockSetIsSelected = jest.fn();
-const mockOnToggle = jest.fn();
+const mockSetIsOpen = vi.fn();
+const mockSetSelectedAttackDiscoveries = vi.fn();
+const mockSetIsSelected = vi.fn();
+const mockOnToggle = vi.fn();
 
 const mockAttackDiscovery = getMockAttackDiscoveryAlerts()[0];
 
@@ -33,7 +35,7 @@ const defaultProps = {
 
 describe('PanelHeader', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the PrimaryInteractions', () => {

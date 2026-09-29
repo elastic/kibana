@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,7 +19,7 @@ describe('DatasetsSelector', () => {
       <DatasetsSelector
         availableDatasets={['available.dataset']}
         selectedDatasets={['missing.dataset']}
-        onChangeDatasetSelection={jest.fn()}
+        onChangeDatasetSelection={vi.fn()}
       />
     );
 
@@ -27,7 +29,7 @@ describe('DatasetsSelector', () => {
   });
 
   it('lets the user remove a selected dataset that is no longer available', async () => {
-    const onChangeDatasetSelection = jest.fn();
+    const onChangeDatasetSelection = vi.fn();
 
     renderWithKibanaRenderContext(
       <DatasetsSelector
@@ -48,7 +50,7 @@ describe('DatasetsSelector', () => {
         <DatasetsSelector
           availableDatasets={[]}
           selectedDatasets={[]}
-          onChangeDatasetSelection={jest.fn()}
+          onChangeDatasetSelection={vi.fn()}
           hasFailedLoading
         />
       );
@@ -61,9 +63,9 @@ describe('DatasetsSelector', () => {
         <DatasetsSelector
           availableDatasets={[]}
           selectedDatasets={[]}
-          onChangeDatasetSelection={jest.fn()}
+          onChangeDatasetSelection={vi.fn()}
           hasFailedLoading
-          onRetry={jest.fn()}
+          onRetry={vi.fn()}
         />
       );
 
@@ -75,13 +77,13 @@ describe('DatasetsSelector', () => {
     });
 
     it('calls onRetry when the retry link is clicked', () => {
-      const onRetry = jest.fn();
+      const onRetry = vi.fn();
 
       renderWithKibanaRenderContext(
         <DatasetsSelector
           availableDatasets={[]}
           selectedDatasets={[]}
-          onChangeDatasetSelection={jest.fn()}
+          onChangeDatasetSelection={vi.fn()}
           hasFailedLoading
           onRetry={onRetry}
         />

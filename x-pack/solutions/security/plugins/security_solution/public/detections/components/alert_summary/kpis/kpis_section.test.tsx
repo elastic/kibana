@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { KPIsSection } from './kpis_section';
@@ -13,20 +16,20 @@ import { TestProviders } from '../../../../common/mock';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useSummaryChartData } from '../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
 
-jest.mock('../../../../common/hooks/use_selector');
-jest.mock('../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data');
+vi.mock('../../../../common/hooks/use_selector');
+vi.mock('../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data');
 
 describe('<KPIsSection />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useSummaryChartData as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useSummaryChartData as Mock).mockReturnValue({
       items: [],
       isLoading: false,
     });
   });
 
   it('should render all components', () => {
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({
+    (useDeepEqualSelector as Mock).mockReturnValue({
       meta: {},
     });
 

@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useSidebarAccordionsState } from './use_sidebar_accordions_state';
 import { LOCAL_STORAGE_KEYS } from '../../../../../../common/constants';
 
-const mockUseCasesLocalStorage = jest.fn();
-jest.mock('../../../../../common/use_cases_local_storage', () => ({
-  useCasesLocalStorage: (...args: unknown[]) => mockUseCasesLocalStorage(...args),
-}));
+const mockUseCasesLocalStorage = vi.fn();
+vi.mock('../../../../../common/use_cases_local_storage', () => {
+      const mocked = {
+      useCasesLocalStorage: (...args: unknown[]) => mockUseCasesLocalStorage(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useSidebarAccordionsState', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseCasesLocalStorage.mockReturnValue([
       {
         attributes: true,
@@ -24,7 +29,7 @@ describe('useSidebarAccordionsState', () => {
         templateFields: false,
         connectors: true,
       },
-      jest.fn(),
+      vi.fn(),
     ]);
   });
 
@@ -52,7 +57,7 @@ describe('useSidebarAccordionsState', () => {
   });
 
   it('updates persisted state when toggling an accordion', () => {
-    const setAccordionsState = jest.fn();
+    const setAccordionsState = vi.fn();
     mockUseCasesLocalStorage.mockReturnValue([
       {
         attributes: true,

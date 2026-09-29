@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getElementFromPoint } from './get_element_from_point';
 import {
   MEASURE_OVERLAY_ID,
@@ -30,7 +32,7 @@ describe('getElementFromPoint', () => {
 
   it('should return the first HTML element', () => {
     const el = document.createElement('div');
-    document.elementsFromPoint = jest.fn().mockReturnValue([el]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([el]);
 
     expect(getElementFromPoint(mockEvent)).toBe(el);
     expect(document.elementsFromPoint).toHaveBeenCalledWith(100, 200);
@@ -41,7 +43,7 @@ describe('getElementFromPoint', () => {
     overlay.id = MEASURE_OVERLAY_ID;
     const target = document.createElement('div');
 
-    document.elementsFromPoint = jest.fn().mockReturnValue([overlay, target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([overlay, target]);
 
     expect(getElementFromPoint(mockEvent)).toBe(target);
   });
@@ -51,7 +53,7 @@ describe('getElementFromPoint', () => {
     overlay.id = EDIT_OVERLAY_ID;
     const target = document.createElement('div');
 
-    document.elementsFromPoint = jest.fn().mockReturnValue([overlay, target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([overlay, target]);
 
     expect(getElementFromPoint(mockEvent)).toBe(target);
   });
@@ -61,7 +63,7 @@ describe('getElementFromPoint', () => {
     overlay.id = LAYOUT_OVERLAY_ID;
     const target = document.createElement('div');
 
-    document.elementsFromPoint = jest.fn().mockReturnValue([overlay, target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([overlay, target]);
 
     expect(getElementFromPoint(mockEvent)).toBe(target);
   });
@@ -74,7 +76,7 @@ describe('getElementFromPoint', () => {
     document.body.appendChild(toolbar);
 
     const target = document.createElement('div');
-    document.elementsFromPoint = jest.fn().mockReturnValue([button, target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([button, target]);
 
     expect(getElementFromPoint(mockEvent)).toBe(target);
 
@@ -89,7 +91,7 @@ describe('getElementFromPoint', () => {
     document.body.appendChild(footer);
 
     const target = document.createElement('div');
-    document.elementsFromPoint = jest.fn().mockReturnValue([footer, target]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([footer, target]);
 
     expect(getElementFromPoint(mockEvent)).toBe(target);
 
@@ -103,7 +105,7 @@ describe('getElementFromPoint', () => {
     const parent = document.createElement('div');
     parent.appendChild(svg);
 
-    document.elementsFromPoint = jest.fn().mockReturnValue([rect]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([rect]);
 
     expect(getElementFromPoint(mockEvent)).toBe(parent);
   });
@@ -112,13 +114,13 @@ describe('getElementFromPoint', () => {
     const overlay = document.createElement('div');
     overlay.id = MEASURE_OVERLAY_ID;
 
-    document.elementsFromPoint = jest.fn().mockReturnValue([overlay]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([overlay]);
 
     expect(getElementFromPoint(mockEvent)).toBeNull();
   });
 
   it('should return null for empty elements array', () => {
-    document.elementsFromPoint = jest.fn().mockReturnValue([]);
+    document.elementsFromPoint = vi.fn().mockReturnValue([]);
 
     expect(getElementFromPoint(mockEvent)).toBeNull();
   });

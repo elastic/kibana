@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ChatEventType,
   ConversationOriginType,
@@ -22,9 +24,12 @@ import { RunTracker } from '../run_tracker';
 import { buildRoundInterruptedEvent } from './build_round_interrupted_event';
 import { getPendingTurn } from './conversation_turn';
 
-jest.mock('../../../../tracing', () => ({
-  getCurrentTraceId: () => 'trace-1',
-}));
+vi.mock('../../../../tracing', () => {
+      const mocked = {
+      getCurrentTraceId: () => 'trace-1',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('buildRoundInterruptedEvent', () => {
   const startTime = new Date('2026-01-01T00:00:00.000Z');
@@ -36,10 +41,10 @@ describe('buildRoundInterruptedEvent', () => {
     changes = [] as unknown[],
   } = {}) =>
     ({
-      getAccessedRefs: jest.fn(() => accessedRefs),
-      getAll: jest.fn(() => [{ id: 'a1' }]),
-      drainChanges: jest.fn(() => changes),
-      getAttachmentRecord: jest.fn(() => undefined),
+      getAccessedRefs: vi.fn(() => accessedRefs),
+      getAll: vi.fn(() => [{ id: 'a1' }]),
+      drainChanges: vi.fn(() => changes),
+      getAttachmentRecord: vi.fn(() => undefined),
     } as unknown as AttachmentStateManager);
 
   const modelProvider = { getUsageStats: () => ({ calls: [] }) } as unknown as ModelProvider;

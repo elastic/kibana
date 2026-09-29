@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
 import { toKqlExpression } from '@kbn/es-query';
@@ -138,12 +141,12 @@ type CheckPrivilegesResponseWithoutES = Omit<CheckPrivilegesResponse, 'privilege
 
 describe('AlertingAuthorization', () => {
   const spaceId = 'space1';
-  const getSpace = jest.fn();
+  const getSpace = vi.fn();
   const getSpaceId = () => spaceId;
   const allRegisteredConsumers = new Set<string>();
   const ruleTypesConsumersMap = new Map<string, Set<string>>();
 
-  const checkPrivileges = jest.fn<
+  const checkPrivileges = vi.fn<
     Promise<CheckPrivilegesResponseWithoutES>,
     [{ kibana: string[] }]
   >(async () => ({
@@ -151,7 +154,7 @@ describe('AlertingAuthorization', () => {
     hasAllRequested: true,
     privileges: { kibana: [] },
   }));
-  const atSpacesMock = jest.fn((_spaces: string[], privileges: { kibana: string[] }) =>
+  const atSpacesMock = vi.fn((_spaces: string[], privileges: { kibana: string[] }) =>
     checkPrivileges(privileges)
   );
 
@@ -188,10 +191,10 @@ describe('AlertingAuthorization', () => {
   let request: KibanaRequest;
   let ruleTypeRegistry = ruleTypeRegistryMock.create();
   let securityStart: ReturnType<typeof securityMock.createStart>;
-  let features: jest.Mocked<FeaturesPluginStart>;
+  let features: Mocked<FeaturesPluginStart>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     allRegisteredConsumers.clear();
     allRegisteredConsumers.clear();
     ruleTypesConsumersMap.clear();
@@ -232,7 +235,7 @@ describe('AlertingAuthorization', () => {
       ]),
     ]);
 
-    const alertingGet = securityStart.authz.actions.alerting.get as jest.Mock;
+    const alertingGet = securityStart.authz.actions.alerting.get as Mock;
     alertingGet.mockImplementation(mockAuthorizationAction);
 
     ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -247,7 +250,7 @@ describe('AlertingAuthorization', () => {
 
   describe('create', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       securityStart = securityMock.createStart();
       features = featuresPluginMock.createStart();
 
@@ -483,7 +486,7 @@ describe('AlertingAuthorization', () => {
    */
   describe('ensureAuthorized', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       allRegisteredConsumers.clear();
       allRegisteredConsumers.add('myApp');
     });
@@ -519,7 +522,7 @@ describe('AlertingAuthorization', () => {
 
   describe('bulkEnsureAuthorized', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       allRegisteredConsumers.clear();
       allRegisteredConsumers.add('myApp');
     });
@@ -631,7 +634,7 @@ describe('AlertingAuthorization', () => {
 
     it('throws if user lacks the required rule privileges for the consumer', async () => {
       securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-        jest.fn(async () => ({ hasAllRequested: false }))
+        vi.fn(async () => ({ hasAllRequested: false }))
       );
 
       const alertAuthorization = new AlertingAuthorization({
@@ -656,7 +659,7 @@ describe('AlertingAuthorization', () => {
 
     it('throws if user lacks the required alert privileges for the consumer', async () => {
       securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-        jest.fn(async () => ({ hasAllRequested: false }))
+        vi.fn(async () => ({ hasAllRequested: false }))
       );
 
       const alertAuthorization = new AlertingAuthorization({

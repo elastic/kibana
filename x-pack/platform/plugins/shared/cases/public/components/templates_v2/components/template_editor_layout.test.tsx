@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,55 +16,64 @@ import { renderWithTestingProviders } from '../../../common/mock';
 const SAVING_TEXT = 'Saving...';
 const SAVED_TEXT = 'Saved';
 
-jest.mock('./template_form', () => ({
-  TemplateYamlEditor: ({
-    value,
-    onChange,
-    isSaving,
-    isSaved,
-  }: {
-    value: string;
-    onChange: (val: string) => void;
-    isSaving: boolean;
-    isSaved: boolean;
-  }) => (
-    <div data-test-subj="mockYamlEditor">
-      <textarea value={value} onChange={(e) => onChange(e.target.value)} />
-      {isSaving && <span>{SAVING_TEXT}</span>}
-      {isSaved && <span>{SAVED_TEXT}</span>}
-    </div>
-  ),
-}));
+vi.mock('./template_form', () => {
+      const mocked = {
+      TemplateYamlEditor: ({
+        value,
+        onChange,
+        isSaving,
+        isSaved,
+      }: {
+        value: string;
+        onChange: (val: string) => void;
+        isSaving: boolean;
+        isSaved: boolean;
+      }) => (
+        <div data-test-subj="mockYamlEditor">
+          <textarea value={value} onChange={(e) => onChange(e.target.value)} />
+          {isSaving && <span>{SAVING_TEXT}</span>}
+          {isSaved && <span>{SAVED_TEXT}</span>}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./template_preview', () => ({
-  TemplatePreview: () => <div data-test-subj="mockTemplatePreview">{'Preview'}</div>,
-}));
+vi.mock('./template_preview', () => {
+      const mocked = {
+      TemplatePreview: () => <div data-test-subj="mockTemplatePreview">{'Preview'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./template_configuration_tab', () => ({
-  TemplateConfigurationTab: () => (
-    <div data-test-subj="mockConfigurationTab">{'Configuration'}</div>
-  ),
-}));
+vi.mock('./template_configuration_tab', () => {
+      const mocked = {
+      TemplateConfigurationTab: () => (
+        <div data-test-subj="mockConfigurationTab">{'Configuration'}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TemplateEditorLayout', () => {
   const user = userEvent.setup({ pointerEventsCheck: 0 });
   const defaultProps = {
     isLoading: false,
     yamlValue: 'fields: []',
-    onYamlChange: jest.fn(),
+    onYamlChange: vi.fn(),
     isYamlSaving: false,
     isYamlSaved: false,
     previewWidth: 400,
-    onPreviewWidthChange: jest.fn(),
-    onSettingsChange: jest.fn(),
-    onConnectorChange: jest.fn(),
+    onPreviewWidthChange: vi.fn(),
+    onSettingsChange: vi.fn(),
+    onConnectorChange: vi.fn(),
     metadata: { name: 'Template', description: '', tags: [] },
     metadataErrors: {},
-    onMetadataChange: jest.fn(),
+    onMetadataChange: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows loading spinner when isLoading is true', () => {

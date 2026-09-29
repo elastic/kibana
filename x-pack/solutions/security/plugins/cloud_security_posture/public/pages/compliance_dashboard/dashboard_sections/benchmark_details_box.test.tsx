@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProvider } from '../../../test/test_provider';
@@ -12,10 +14,13 @@ import { BenchmarkDetailsBox } from './benchmark_details_box';
 import { getBenchmarkMockData } from '../mock';
 import { FINDINGS_FILTER_OPTIONS } from '../../../common/constants';
 
-const mockNavToFindings = jest.fn();
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_navigate_findings', () => ({
-  useNavigateFindings: () => mockNavToFindings,
-}));
+const mockNavToFindings = vi.fn();
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_navigate_findings', () => {
+      const mocked = {
+      useNavigateFindings: () => mockNavToFindings,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('BenchmarkDetailsBox', () => {
   const renderBenchmarkDetails = () =>

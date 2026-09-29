@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { AnomalyDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
 import { ENVIRONMENT_ALL_VALUE } from '../../../common/environment_filter_values';
 import { getAnomalyDetectorIndex } from '../../../common/anomaly_detection/apm_ml_detectors';
@@ -13,20 +16,23 @@ import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_w
 import type { MlClient } from '../../lib/helpers/get_ml_client';
 import { getServiceAnomalies } from './get_service_anomalies';
 
-jest.mock('../../lib/anomaly_detection/anomaly_search', () => {
-  const actual = jest.requireActual('../../lib/anomaly_detection/anomaly_search');
+vi.mock('../../lib/anomaly_detection/anomaly_search', async () => {
+  const actual = (await vi.importActual('../../lib/anomaly_detection/anomaly_search'));
   return {
     ...actual,
-    anomalySearch: jest.fn(),
+    anomalySearch: vi.fn(),
   };
 });
 
-jest.mock('../../lib/anomaly_detection/get_ml_jobs_with_apm_group', () => ({
-  getMlJobsWithAPMGroup: jest.fn(),
-}));
+vi.mock('../../lib/anomaly_detection/get_ml_jobs_with_apm_group', () => {
+      const mocked = {
+      getMlJobsWithAPMGroup: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const anomalySearchMock = anomalySearch as jest.MockedFunction<typeof anomalySearch>;
-const getMlJobsWithAPMGroupMock = getMlJobsWithAPMGroup as jest.MockedFunction<
+const anomalySearchMock = anomalySearch as MockedFunction<typeof anomalySearch>;
+const getMlJobsWithAPMGroupMock = getMlJobsWithAPMGroup as MockedFunction<
   typeof getMlJobsWithAPMGroup
 >;
 
@@ -82,7 +88,7 @@ function mockJobs(jobs: Array<{ jobId: string; environment: string }>) {
 }
 
 const mlClient = {
-  mlSystem: { mlAnomalySearch: jest.fn() },
+  mlSystem: { mlAnomalySearch: vi.fn() },
   anomalyDetectors: {},
 } as unknown as MlClient;
 
@@ -95,7 +101,7 @@ const defaultArgs = {
 
 describe('getServiceAnomalies', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the detector type that produced the surfaced score', async () => {

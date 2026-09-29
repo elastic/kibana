@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { parse as parseYaml } from 'yaml';
 import { render, renderHook, screen, waitFor, act, within } from '@testing-library/react';
@@ -22,17 +24,23 @@ import { getFieldSnakeKey } from '../../../../common/utils';
 import { buildInitialDefaultValues, FieldsRenderer, TemplateFieldRenderer } from './field_renderer';
 import { controlRegistry } from './field_types_registry';
 
-jest.mock('../../field_library/hooks/use_resolved_fields', () => ({
-  useResolvedFields: (fields: Array<Record<string, unknown>>) => ({
-    // Inline fields have `control`; ref fields have `$ref` without `control`
-    resolvedFields: fields.filter((f) => 'control' in f),
-    isLoading: false,
-  }),
-}));
+vi.mock('../../field_library/hooks/use_resolved_fields', () => {
+      const mocked = {
+      useResolvedFields: (fields: Array<Record<string, unknown>>) => ({
+        // Inline fields have `control`; ref fields have `$ref` without `control`
+        resolvedFields: fields.filter((f) => 'control' in f),
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../cases_context/use_cases_context', () => ({
-  useCasesContext: () => ({ owner: ['cases'], permissions: { update: true } }),
-}));
+vi.mock('../../cases_context/use_cases_context', () => {
+      const mocked = {
+      useCasesContext: () => ({ owner: ['cases'], permissions: { update: true } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /**
  * Template with a required field whose show_when condition is false by default
@@ -238,7 +246,7 @@ describe('TemplateFieldRenderer — stable fields reference', () => {
   });
 
   it('does not call onFieldDefaultChange when TemplateFieldRenderer re-renders with identical field definitions', async () => {
-    const onFieldDefaultChange = jest.fn();
+    const onFieldDefaultChange = vi.fn();
     const parsedTemplate = parseParsedTemplate(radioTemplate);
 
     const { rerender } = render(
@@ -279,7 +287,7 @@ describe('TemplateFieldRenderer — stable fields reference', () => {
 
 describe('FieldsRenderer — hidden required fields', () => {
   it('does not block form submission when a required field is hidden by show_when', async () => {
-    const onSubmitResult = jest.fn();
+    const onSubmitResult = vi.fn();
 
     render(
       <FormWrapper templateDef={templateWithHiddenRequired} onSubmitResult={onSubmitResult} />
@@ -297,7 +305,7 @@ describe('FieldsRenderer — hidden required fields', () => {
   });
 
   it('blocks form submission when a required field is visible', async () => {
-    const onSubmitResult = jest.fn();
+    const onSubmitResult = vi.fn();
 
     render(
       <FormWrapper templateDef={templateWithHiddenRequired} onSubmitResult={onSubmitResult} />
@@ -391,7 +399,7 @@ describe('FieldsRenderer — field isolation', () => {
   });
 
   it('binds confirmation to the field name and type', async () => {
-    const onFieldConfirm = jest.fn();
+    const onFieldConfirm = vi.fn();
     render(<TestForm onFieldConfirm={onFieldConfirm} />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Confirm second' }));
@@ -423,7 +431,7 @@ fields:
 `;
 
   it('labels a required_on_close field "Required on close" instead of "Optional"', () => {
-    render(<FormWrapper templateDef={templateWithRequirementLabels} onSubmitResult={jest.fn()} />);
+    render(<FormWrapper templateDef={templateWithRequirementLabels} onSubmitResult={vi.fn()} />);
 
     // The plain optional field keeps the "Optional" label.
     const optionalField = within(screen.getByTestId('template-field-optional_field'));
@@ -456,7 +464,7 @@ describe('FieldsRenderer — case details view mode', () => {
 
       return (
         <FormProvider {...form}>
-          <FieldsRenderer resolvedFields={[field]} onFieldConfirm={jest.fn()} viewMode />
+          <FieldsRenderer resolvedFields={[field]} onFieldConfirm={vi.fn()} viewMode />
         </FormProvider>
       );
     };

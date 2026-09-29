@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 
-const mockCreateIndex = jest.fn().mockResolvedValue(undefined);
+const mockCreateIndex = vi.fn().mockResolvedValue(undefined);
 
-jest.mock('./indices/lead_index_service', () => ({
-  createLeadIndexService: () => ({
-    createIndex: mockCreateIndex,
-    doesIndexExist: jest.fn().mockResolvedValue(true),
-    deleteIndex: jest.fn(),
-  }),
-}));
+vi.mock('./indices/lead_index_service', () => {
+      const mocked = {
+      createLeadIndexService: () => ({
+        createIndex: mockCreateIndex,
+        doesIndexExist: vi.fn().mockResolvedValue(true),
+        deleteIndex: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { createLeadDataClient } from './lead_data_client';
 import type { LeadDataClient } from './lead_data_client';
@@ -78,7 +83,7 @@ describe('LeadDataClient', () => {
   let client: LeadDataClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggingSystemMock.createLogger();
     client = createLeadDataClient({ esClient, logger, spaceId });

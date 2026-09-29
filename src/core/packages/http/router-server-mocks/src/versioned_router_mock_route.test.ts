@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createVersionedRouterMock } from './versioned_router.mock';
 
 describe('createVersionedRouterMock#getRoute', () => {
@@ -55,7 +57,7 @@ describe('createVersionedRouterMock#getRoute', () => {
       }
     `);
 
-    const myHandler = jest.fn();
+    const myHandler = vi.fn();
     route
       .addVersion({ validate: false, version: '1' }, myHandler)
       .addVersion({ validate: false, version: '2' }, myHandler)

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { MlClient } from '../../lib/ml_client/types';
 import type { MLSavedObjectService } from '../../saved_objects';
@@ -18,7 +20,7 @@ const cpsServerless = { isServerless: true, cpsEnabled: true };
 
 const createMlClient = (): MlClient => {
   const mlClient: Pick<MlClient, 'getJobs'> = {
-    getJobs: jest.fn().mockResolvedValue({ count: 1, jobs: [{ job_id: JOB_ID }] }),
+    getJobs: vi.fn().mockResolvedValue({ count: 1, jobs: [{ job_id: JOB_ID }] }),
   };
   return mlClient as MlClient;
 };
@@ -82,7 +84,7 @@ describe('jobAuditMessagesProvider - getJobAuditMessages', () => {
     });
 
     const mlSavedObjectService: Pick<MLSavedObjectService, 'filterJobsForSpace'> = {
-      filterJobsForSpace: jest.fn().mockResolvedValue([]),
+      filterJobsForSpace: vi.fn().mockResolvedValue([]),
     };
 
     const { getJobAuditMessages } = jobAuditMessagesProvider(

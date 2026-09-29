@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -26,12 +29,12 @@ import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RULE_EXPLORATION_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 
-const mockOpenAgentBuilderFlyout = jest.fn();
-const mockUseAgentBuilderAttachment = jest.fn();
-const mockFormatRule = jest.fn();
-const mockNewAgentBuilderAttachment = jest.fn();
-const mockActivateFormSync = jest.fn();
-const mockReleaseBind = jest.fn();
+const mockOpenAgentBuilderFlyout = vi.fn();
+const mockUseAgentBuilderAttachment = vi.fn();
+const mockFormatRule = vi.fn();
+const mockNewAgentBuilderAttachment = vi.fn();
+const mockActivateFormSync = vi.fn();
+const mockReleaseBind = vi.fn();
 
 const getCapturedAttachment = (): UseAgentBuilderAttachmentParams => {
   const [attachment] = mockUseAgentBuilderAttachment.mock.calls[0] as [
@@ -56,7 +59,7 @@ const scheduleStepDataMock = {} as ScheduleStepRule;
 const actionsStepDataMock = {} as ActionsStepRule;
 const actionTypeRegistryMock = {} as ActionTypeRegistryContract;
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 const mockKibanaServices = () => ({
   services: {
@@ -68,32 +71,41 @@ const mockKibanaServices = () => ({
   },
 });
 
-jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => ({
-  useAgentBuilderAttachment: (attachment: unknown) => {
-    mockUseAgentBuilderAttachment(attachment);
-    return { openAgentBuilderFlyout: mockOpenAgentBuilderFlyout };
-  },
-}));
+vi.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => {
+      const mocked = {
+      useAgentBuilderAttachment: (attachment: unknown) => {
+        mockUseAgentBuilderAttachment(attachment);
+        return { openAgentBuilderFlyout: mockOpenAgentBuilderFlyout };
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../agent_builder/components/new_agent_builder_attachment', () => ({
-  NewAgentBuilderAttachment: (props: NewAgentBuilderAttachmentProps) => {
-    mockNewAgentBuilderAttachment(props);
-    return (
-      <button type="button" data-test-subj="newAgentBuilderAttachmentMock" onClick={props.onClick}>
-        {props.telemetry?.pathway ?? 'no-pathway'}
-      </button>
-    );
-  },
-}));
+vi.mock('../../../../agent_builder/components/new_agent_builder_attachment', () => {
+      const mocked = {
+      NewAgentBuilderAttachment: (props: NewAgentBuilderAttachmentProps) => {
+        mockNewAgentBuilderAttachment(props);
+        return (
+          <button type="button" data-test-subj="newAgentBuilderAttachmentMock" onClick={props.onClick}>
+            {props.telemetry?.pathway ?? 'no-pathway'}
+          </button>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../pages/rule_creation/helpers', () => ({
-  formatRule: (...args: unknown[]) => mockFormatRule(...args),
-}));
+vi.mock('../../pages/rule_creation/helpers', () => {
+      const mocked = {
+      formatRule: (...args: unknown[]) => mockFormatRule(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AddRuleAttachmentToChatButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue(mockKibanaServices());
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue(mockKibanaServices());
   });
 
   it('attaches a saved rule with data and origin so the card renders and shows Update', () => {

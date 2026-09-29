@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -18,19 +20,25 @@ let mockAgentBuilderSkillsRequirements = {
   isExperimentalFeaturesEnabled: true,
 };
 
-jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
-  useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
-  useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
-}));
+vi.mock('../../hooks/use_are_agent_builder_skills_available', () => {
+      const mocked = {
+      useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
+      useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
-  useAlertingV2ExperimentalFeatures: () => mockAlertingV2ExperimentalFeaturesEnabled,
-}));
+vi.mock('../../hooks/use_alerting_v2_experimental_features', () => {
+      const mocked = {
+      useAlertingV2ExperimentalFeatures: () => mockAlertingV2ExperimentalFeaturesEnabled,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const onClose = jest.fn();
-const onCreateEsqlRule = jest.fn();
-const onCreateWithAgent = jest.fn();
-const onCreateThresholdRule = jest.fn();
+const onClose = vi.fn();
+const onCreateEsqlRule = vi.fn();
+const onCreateWithAgent = vi.fn();
+const onCreateThresholdRule = vi.fn();
 
 const renderFlyout = () =>
   render(
@@ -46,7 +54,7 @@ const renderFlyout = () =>
 
 describe('RuleCreateOptionsFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockAreAgentBuilderSkillsAvailable = true;
     mockAlertingV2ExperimentalFeaturesEnabled = true;
     mockAgentBuilderSkillsRequirements = {

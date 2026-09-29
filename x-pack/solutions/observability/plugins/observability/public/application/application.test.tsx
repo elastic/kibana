@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { pricingServiceMock } from '@kbn/core-pricing-browser-mocks';
 import { noop } from 'lodash';
@@ -30,7 +32,7 @@ describe('renderApp', () => {
 
   beforeAll(() => {
     // mocks console to avoid polluting the test output
-    global.console = { error: jest.fn() } as unknown as typeof console;
+    global.console = { error: vi.fn() } as unknown as typeof console;
   });
 
   afterAll(() => {
@@ -39,18 +41,18 @@ describe('renderApp', () => {
 
   let pricingStart: ReturnType<typeof pricingServiceMock.createStartContract>;
 
-  const mockSearchSessionClear = jest.fn();
+  const mockSearchSessionClear = vi.fn();
 
   const plugins = {
     data: {
       query: {
         timefilter: {
           timefilter: {
-            setTime: jest.fn(),
-            getTime: jest.fn().mockReturnValue({}),
-            getTimeDefaults: jest.fn().mockReturnValue({}),
-            getRefreshInterval: jest.fn().mockReturnValue({}),
-            getRefreshIntervalDefaults: jest.fn().mockReturnValue({}),
+            setTime: vi.fn(),
+            getTime: vi.fn().mockReturnValue({}),
+            getTimeDefaults: vi.fn().mockReturnValue({}),
+            getRefreshInterval: vi.fn().mockReturnValue({}),
+            getRefreshIntervalDefaults: vi.fn().mockReturnValue({}),
           },
         },
       },
@@ -97,7 +99,7 @@ describe('renderApp', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('renders', async () => {
@@ -113,7 +115,7 @@ describe('renderApp', () => {
           components: {
             ApplicationUsageTrackingProvider: (props) => null,
           },
-          reportUiCounter: jest.fn(),
+          reportUiCounter: vi.fn(),
         },
         kibanaVersion: '8.8.0',
         telemetryClient: createTelemetryClientMock(),
@@ -134,7 +136,7 @@ describe('renderApp', () => {
         components: {
           ApplicationUsageTrackingProvider: (props) => null,
         },
-        reportUiCounter: jest.fn(),
+        reportUiCounter: vi.fn(),
       },
       kibanaVersion: '8.8.0',
       telemetryClient: createTelemetryClientMock(),

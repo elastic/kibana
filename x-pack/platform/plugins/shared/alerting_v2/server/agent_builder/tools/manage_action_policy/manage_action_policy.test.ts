@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-jest.mock('uuid', () => ({
-  v4: () => '00000000-0000-4000-8000-000000000001',
-}));
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => '00000000-0000-4000-8000-000000000001',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
@@ -16,24 +22,24 @@ import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { manageActionPolicyTool, type ManageActionPolicyToolDeps } from './manage_action_policy';
 
-const createLogger = (): jest.Mocked<
+const createLogger = (): Mocked<
   Pick<LoggerServiceContract, 'debug' | 'info' | 'warn' | 'error' | 'forSubsystem'>
 > => ({
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  forSubsystem: jest.fn(),
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  forSubsystem: vi.fn(),
 });
 
 const createDeps = (
   logger: LoggerServiceContract = createLogger() as unknown as LoggerServiceContract
 ): ManageActionPolicyToolDeps => ({
   logger,
-  getWorkflowClient: jest.fn(() => ({
-    getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
+  getWorkflowClient: vi.fn(() => ({
+    getWorkflow: vi.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
   })),
-  getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }),
+  getAvailableConnectors: vi.fn().mockResolvedValue({ connectorTypes: {} }),
 });
 
 const createContext = (): ToolHandlerContextMock => {
@@ -46,7 +52,7 @@ const createContext = (): ToolHandlerContextMock => {
     id: 'mock-attachment-id',
     current_version: 2,
   } as never);
-  (ctx.attachments as any).getActive = jest.fn().mockReturnValue([]);
+  (ctx.attachments as any).getActive = vi.fn().mockReturnValue([]);
   return ctx;
 };
 

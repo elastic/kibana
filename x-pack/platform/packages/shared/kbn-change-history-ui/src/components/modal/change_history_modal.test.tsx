@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -39,11 +41,11 @@ const detail: ChangeHistoryDetail = {
 };
 
 const createAdapter = (overrides?: Partial<ChangeHistoryAdapter>): ChangeHistoryAdapter => ({
-  listChanges: jest.fn().mockResolvedValue({
+  listChanges: vi.fn().mockResolvedValue({
     items: [listItem],
     total: 1,
   }),
-  getChange: jest.fn().mockResolvedValue(detail),
+  getChange: vi.fn().mockResolvedValue(detail),
   ...overrides,
 });
 
@@ -91,7 +93,7 @@ describe('ChangeHistoryModal', () => {
 
   it('shows list error prompt when listChanges fails', async () => {
     const adapter = createAdapter({
-      listChanges: jest.fn().mockRejectedValue(new Error('Network error')),
+      listChanges: vi.fn().mockRejectedValue(new Error('Network error')),
     });
 
     renderModal({ adapter });
@@ -104,7 +106,7 @@ describe('ChangeHistoryModal', () => {
 
   it('shows empty prompt when history has no items', async () => {
     const adapter = createAdapter({
-      listChanges: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+      listChanges: vi.fn().mockResolvedValue({ items: [], total: 0 }),
     });
 
     renderModal({ adapter });
@@ -132,11 +134,11 @@ describe('ChangeHistoryModal', () => {
     };
 
     const adapter = createAdapter({
-      listChanges: jest.fn().mockResolvedValue({
+      listChanges: vi.fn().mockResolvedValue({
         items: [listItem, secondItem],
         total: 2,
       }),
-      getChange: jest.fn().mockImplementation(({ changeId }) => {
+      getChange: vi.fn().mockImplementation(({ changeId }) => {
         if (changeId === 'evt-2') {
           return Promise.resolve(secondDetail);
         }
@@ -159,7 +161,7 @@ describe('ChangeHistoryModal', () => {
   });
 
   it('reports change_history_change_selected with auto_latest on auto-select', async () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
     renderModal({ scope: testScope, analytics: { reportEvent } });
     openModal();
 
@@ -177,7 +179,7 @@ describe('ChangeHistoryModal', () => {
   });
 
   it('reports change_history_change_selected when the user selects a row', async () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
     const secondItem = {
       id: 'evt-2',
       timestamp: '2026-06-15T12:00:00.000Z',
@@ -187,7 +189,7 @@ describe('ChangeHistoryModal', () => {
     };
 
     const adapter = createAdapter({
-      listChanges: jest.fn().mockResolvedValue({
+      listChanges: vi.fn().mockResolvedValue({
         items: [listItem, secondItem],
         total: 2,
       }),
@@ -212,7 +214,7 @@ describe('ChangeHistoryModal', () => {
   });
 
   it('reports both auto_latest and user_click when user selects a different row after auto-select', async () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
     const secondItem = {
       id: 'evt-2',
       timestamp: '2026-06-15T12:00:00.000Z',
@@ -222,7 +224,7 @@ describe('ChangeHistoryModal', () => {
     };
 
     const adapter = createAdapter({
-      listChanges: jest.fn().mockResolvedValue({
+      listChanges: vi.fn().mockResolvedValue({
         items: [listItem, secondItem],
         total: 2,
       }),
@@ -250,7 +252,7 @@ describe('ChangeHistoryModal', () => {
   });
 
   it('does not report duplicate change_history_change_selected for the same row and source', async () => {
-    const reportEvent = jest.fn();
+    const reportEvent = vi.fn();
     const secondItem = {
       id: 'evt-2',
       timestamp: '2026-06-15T12:00:00.000Z',
@@ -259,7 +261,7 @@ describe('ChangeHistoryModal', () => {
     };
 
     const adapter = createAdapter({
-      listChanges: jest.fn().mockResolvedValue({
+      listChanges: vi.fn().mockResolvedValue({
         items: [listItem, secondItem],
         total: 2,
       }),
@@ -285,7 +287,7 @@ describe('ChangeHistoryModal', () => {
 
   it('does not show history footer until all items are loaded', async () => {
     const adapter = createAdapter({
-      listChanges: jest.fn().mockResolvedValue({
+      listChanges: vi.fn().mockResolvedValue({
         items: [listItem],
         total: 3,
       }),
@@ -315,17 +317,17 @@ describe('ChangeHistoryModal', () => {
     };
 
     const adapter = createAdapter({
-      listChanges: jest.fn().mockResolvedValue({
+      listChanges: vi.fn().mockResolvedValue({
         items: [listItem, historicalItem],
         total: 2,
       }),
-      getChange: jest.fn().mockImplementation(({ changeId }) => {
+      getChange: vi.fn().mockImplementation(({ changeId }) => {
         if (changeId === 'evt-2') {
           return Promise.resolve(historicalDetail);
         }
         return Promise.resolve(detail);
       }),
-      restoreChange: jest.fn().mockResolvedValue(undefined),
+      restoreChange: vi.fn().mockResolvedValue(undefined),
     });
 
     renderModal({
@@ -372,14 +374,14 @@ describe('ChangeHistoryModal', () => {
       snapshot: TEST_SNAPSHOT,
     };
 
-    const listChanges = jest
+    const listChanges = vi
       .fn()
       .mockResolvedValueOnce({ items: [listItem, historicalItem], total: 2 })
       .mockResolvedValue({ items: [restoredItem, listItem, historicalItem], total: 3 });
 
     const adapter = createAdapter({
       listChanges,
-      getChange: jest.fn().mockImplementation(({ changeId }) => {
+      getChange: vi.fn().mockImplementation(({ changeId }) => {
         if (changeId === 'evt-2') {
           return Promise.resolve(historicalDetail);
         }
@@ -388,7 +390,7 @@ describe('ChangeHistoryModal', () => {
         }
         return Promise.resolve(detail);
       }),
-      restoreChange: jest.fn().mockResolvedValue(undefined),
+      restoreChange: vi.fn().mockResolvedValue(undefined),
     });
 
     renderModal({
@@ -427,7 +429,7 @@ describe('ChangeHistoryModal', () => {
 
   it('hides restore button for the current version', async () => {
     const adapter = createAdapter({
-      restoreChange: jest.fn().mockResolvedValue(undefined),
+      restoreChange: vi.fn().mockResolvedValue(undefined),
     });
 
     renderModal({

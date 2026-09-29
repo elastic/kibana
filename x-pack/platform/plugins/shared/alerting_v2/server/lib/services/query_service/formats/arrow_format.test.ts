@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import { Type } from 'apache-arrow/Arrow.node';
@@ -97,7 +99,7 @@ describe('arrowFormat', () => {
   });
 
   it('throws when the helper resolves without a reader', async () => {
-    mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(undefined));
+    mockHelpersEsqlToArrowReader(mockEsClient, vi.fn().mockResolvedValue(undefined));
 
     await expect(arrowFormat.open(mockEsClient, request, options)).rejects.toThrow(
       'toArrowReader returned undefined'
@@ -116,12 +118,12 @@ describe('arrowFormat', () => {
   it('does not cancel a reader that already closed itself', async () => {
     const reader: MockArrowReader = {
       closed: true,
-      cancel: jest.fn().mockResolvedValue(undefined),
+      cancel: vi.fn().mockResolvedValue(undefined),
       async *[Symbol.asyncIterator]() {
         // never iterated in this test
       },
     };
-    mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(reader));
+    mockHelpersEsqlToArrowReader(mockEsClient, vi.fn().mockResolvedValue(reader));
 
     const source = await arrowFormat.open(mockEsClient, request, options);
     await source.close?.();

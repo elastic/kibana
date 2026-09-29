@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import {
@@ -16,7 +18,7 @@ import { installInvestigationAgent } from './install_investigation_agent';
 describe('installInvestigationAgent', () => {
   it('ensures a system-owned persisted typed agent in the requested space', async () => {
     const agentBuilder = agentBuilderMocks.createStart();
-    const availability = { cacheMode: 'space' as const, handler: jest.fn() };
+    const availability = { cacheMode: 'space' as const, handler: vi.fn() };
 
     await installInvestigationAgent({ agentBuilder, spaceId: 'space-1', availability });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
@@ -22,13 +24,13 @@ function renderPopover(addItemsFn, canCreateFilter = true) {
 
 describe('AddItemPopover', () => {
   test('renders the popover', () => {
-    const addItems = jest.fn();
+    const addItems = vi.fn();
     const { container } = renderPopover(addItems);
     expect(container.firstChild).toMatchSnapshot();
   });
 
   test('opens the popover when clicking the button', async () => {
-    const addItems = jest.fn();
+    const addItems = vi.fn();
     renderPopover(addItems);
 
     // Find and click the button to open the popover
@@ -42,7 +44,7 @@ describe('AddItemPopover', () => {
   });
 
   test('calls addItems with one item on clicking Add button', async () => {
-    const addItems = jest.fn();
+    const addItems = vi.fn();
     renderPopover(addItems);
 
     // Open the popover
@@ -75,7 +77,7 @@ describe('AddItemPopover', () => {
   });
 
   test('calls addItems with multiple items on clicking Add button', async () => {
-    const addItems = jest.fn();
+    const addItems = vi.fn();
     renderPopover(addItems);
 
     // Open the popover
@@ -108,7 +110,7 @@ describe('AddItemPopover', () => {
   });
 
   test('button is disabled when canCreateFilter is false', async () => {
-    const addItems = jest.fn();
+    const addItems = vi.fn();
     renderPopover(addItems, false);
 
     // Find the button and verify it's disabled

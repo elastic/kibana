@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { TasksGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -75,8 +78,8 @@ const createMockTaskResponse = (completed: boolean, runningTimeInNanos?: number)
 
 describe('cleanupStaleInstances', () => {
   let esClient: ElasticsearchClientMock;
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let logger: jest.Mocked<MockedLogger>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let logger: Mocked<MockedLogger>;
   let signal: AbortSignal;
 
   beforeEach(() => {
@@ -84,7 +87,7 @@ describe('cleanupStaleInstances', () => {
     soClient = savedObjectsClientMock.create();
     logger = loggerMock.create();
     signal = new AbortController().signal;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('delete by query task state management', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { TimelineId } from '../../../../../../common/types';
 import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
@@ -12,10 +15,10 @@ import { fetchNotesBySavedObjectIds, ReqStatus } from '../../../../../notes';
 import type { State } from '../../../../../common/store';
 import { useNotesTabData } from './use_notes_tab_data';
 
-jest.mock('../../../../../notes', () => {
-  const actual = jest.requireActual('../../../../../notes');
+vi.mock('../../../../../notes', async () => {
+  const actual = (await vi.importActual('../../../../../notes'));
   return {
-    fetchNotesBySavedObjectIds: jest.fn((args) => ({ type: 'FETCH_NOTES', payload: args })),
+    fetchNotesBySavedObjectIds: vi.fn((args) => ({ type: 'FETCH_NOTES', payload: args })),
     makeSelectNotesBySavedObjectId: actual.makeSelectNotesBySavedObjectId,
     makeSelectNotesBySavedObjectIds: actual.makeSelectNotesBySavedObjectIds,
     selectFetchNotesBySavedObjectIdsStatus: actual.selectFetchNotesBySavedObjectIdsStatus,
@@ -66,12 +69,15 @@ const makeNotesState = (
   pendingDeleteIds: [],
 });
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useSelector: (selector: (s: unknown) => unknown) => selector(mockState as State),
-  useDispatch: () => mockDispatch,
-}));
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useSelector: (selector: (s: unknown) => unknown) => selector(mockState as State),
+      useDispatch: () => mockDispatch,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockState: Pick<State, 'timeline' | 'notes'>;
 
@@ -262,7 +268,7 @@ describe('useNotesTabData', () => {
   describe('fetch side-effect', () => {
     beforeEach(() => {
       mockDispatch.mockClear();
-      (fetchNotesBySavedObjectIds as unknown as jest.Mock).mockClear();
+      (fetchNotesBySavedObjectIds as unknown as Mock).mockClear();
     });
 
     it('dispatches fetchNotesBySavedObjectIds on mount for a saved regular timeline', () => {

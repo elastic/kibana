@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import Boom from '@hapi/boom';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
@@ -29,7 +32,7 @@ import type { SavedObject } from '@kbn/core/server';
 import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { transformSavedObjectToGapAutoFillSchedulerResult } from '../../transforms';
 const kibanaVersion = 'v8.0.0';
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -43,7 +46,7 @@ describe('getGapFillAutoScheduler()', () => {
   let rulesClient: RulesClient;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     rulesClient = new RulesClient({
       request: httpServerMock.createKibanaRequest(),
       taskManager,
@@ -53,25 +56,25 @@ describe('getGapFillAutoScheduler()', () => {
       actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
       spaceId: 'default',
       namespace: 'default',
-      getUserName: jest.fn(),
-      getProfileUid: jest.fn(),
-      createAPIKey: jest.fn(),
-      cloneAPIKey: jest.fn(),
+      getUserName: vi.fn(),
+      getProfileUid: vi.fn(),
+      createAPIKey: vi.fn(),
+      cloneAPIKey: vi.fn(),
       logger,
       internalSavedObjectsRepository,
       encryptedSavedObjectsClient: encryptedSavedObjects,
-      getActionsClient: jest.fn(),
-      getEventLogClient: jest.fn(),
+      getActionsClient: vi.fn(),
+      getEventLogClient: vi.fn(),
       kibanaVersion,
       auditLogger,
       maxScheduledPerMinute: 10000,
       minimumScheduleInterval: { value: '1m', enforce: false },
-      isAuthenticationTypeAPIKey: jest.fn(),
-      getAuthenticationAPIKey: jest.fn(),
-      getAlertIndicesAlias: jest.fn(),
+      isAuthenticationTypeAPIKey: vi.fn(),
+      getAuthenticationAPIKey: vi.fn(),
+      getAlertIndicesAlias: vi.fn(),
       alertsService: null,
       backfillClient: null as unknown as never,
-      isSystemAction: jest.fn(),
+      isSystemAction: vi.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       isServerless: false,
@@ -161,7 +164,7 @@ describe('getGapFillAutoScheduler()', () => {
       };
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(so);
 
-      (authorization.bulkEnsureAuthorized as jest.Mock).mockImplementationOnce(() => {
+      (authorization.bulkEnsureAuthorized as Mock).mockImplementationOnce(() => {
         throw new Error('Unauthorized');
       });
 

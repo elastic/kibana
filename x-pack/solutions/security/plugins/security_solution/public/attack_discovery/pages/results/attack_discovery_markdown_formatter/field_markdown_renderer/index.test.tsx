@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -17,22 +20,25 @@ import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_fl
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
-}));
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../../../../flyout_v2/use_flyout_api');
+vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => {
+      const mocked = {
+      useIsNewFlyoutEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('FieldMarkdownRenderer', () => {
-  const mockOpenRightPanel = jest.fn();
+  const mockOpenRightPanel = vi.fn();
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
-  const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.MockedFunction<
+  const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as MockedFunction<
     typeof useExpandableFlyoutApi
   >;
-  const mockUseFlyoutApi = useFlyoutApi as jest.MockedFunction<typeof useFlyoutApi>;
+  const mockUseFlyoutApi = useFlyoutApi as MockedFunction<typeof useFlyoutApi>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseExpandableFlyoutApi.mockReturnValue({
       ...createExpandableFlyoutApiMock(),
@@ -40,7 +46,7 @@ describe('FieldMarkdownRenderer', () => {
     });
     flyoutApi = createFlyoutApiMock();
     mockUseFlyoutApi.mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   it('renders the field value', () => {
@@ -84,7 +90,7 @@ describe('FieldMarkdownRenderer', () => {
   });
 
   it('opens the entity flyout API when the new flyout is enabled', async () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
     const icon = 'user';
     const name = 'user.name';
@@ -262,7 +268,7 @@ describe('FieldMarkdownRenderer', () => {
     });
 
     it('calls openFlyout (legacy) when alertIdButton is clicked with new flyout disabled', () => {
-      const mockOpenFlyout = jest.fn();
+      const mockOpenFlyout = vi.fn();
       mockUseExpandableFlyoutApi.mockReturnValue({
         ...createExpandableFlyoutApiMock(),
         openFlyout: mockOpenFlyout,
@@ -292,7 +298,7 @@ describe('FieldMarkdownRenderer', () => {
     });
 
     it('calls openDocumentFlyoutFromPattern (new flyout) when alertIdButton is clicked', async () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+      vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
       render(
         <TestProviders>

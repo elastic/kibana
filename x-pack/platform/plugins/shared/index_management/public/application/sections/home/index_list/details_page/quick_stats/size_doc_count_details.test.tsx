@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -12,11 +14,14 @@ import { useAppContext } from '../../../../../app_context';
 import type { DocCountState, VectorCountState } from './quick_stats';
 import { SizeDocCountDetails } from './size_doc_count_details';
 
-jest.mock('../../../../../app_context', () => ({
-  useAppContext: jest.fn(),
-}));
+vi.mock('../../../../../app_context', () => {
+      const mocked = {
+      useAppContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAppContext = jest.mocked(useAppContext);
+const mockUseAppContext = vi.mocked(useAppContext);
 
 const renderComponent = ({
   size = '10.5mb',
@@ -32,7 +37,7 @@ const renderComponent = ({
 
 describe('SizeDocCountDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAppContext.mockReturnValue({
       config: { enableSizeAndDocCount: true },
     } as ReturnType<typeof useAppContext>);

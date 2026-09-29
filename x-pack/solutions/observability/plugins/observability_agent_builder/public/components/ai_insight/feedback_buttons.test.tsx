@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { FeedbackButtons, type Feedback } from './feedback_buttons';
 import { useKibana } from '../../hooks/use_kibana';
 
-jest.mock('../../hooks/use_kibana');
+vi.mock('../../hooks/use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockAddSuccess = jest.fn();
-const mockIsEnabled = jest.fn();
+const mockUseKibana = useKibana as Mock;
+const mockAddSuccess = vi.fn();
+const mockIsEnabled = vi.fn();
 
 const POSITIVE_BUTTON_SELECTOR =
   '[data-test-subj="observabilityAgentBuilderFeedbackPositiveButton"]';
 const NEGATIVE_BUTTON_SELECTOR =
   '[data-test-subj="observabilityAgentBuilderFeedbackNegativeButton"]';
 
-const renderComponent = (onClickFeedback: jest.Mock) =>
+const renderComponent = (onClickFeedback: Mock) =>
   render(
     <EuiThemeProvider>
       <FeedbackButtons onClickFeedback={onClickFeedback} />
@@ -36,7 +39,7 @@ const getButtons = (container: HTMLElement) => ({
 
 describe('FeedbackButtons', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockIsEnabled.mockReturnValue(true);
     mockUseKibana.mockReturnValue({
@@ -56,7 +59,7 @@ describe('FeedbackButtons', () => {
   it('does not render when feedback is disabled', () => {
     mockIsEnabled.mockReturnValue(false);
 
-    const onClickFeedback = jest.fn();
+    const onClickFeedback = vi.fn();
     const { container, unmount } = renderComponent(onClickFeedback);
 
     const { positiveButton, negativeButton } = getButtons(container);
@@ -68,7 +71,7 @@ describe('FeedbackButtons', () => {
   });
 
   it('renders the feedback buttons when feedback is enabled', () => {
-    const onClickFeedback = jest.fn();
+    const onClickFeedback = vi.fn();
     const { getByText, container, unmount } = renderComponent(onClickFeedback);
 
     expect(getByText('Was this helpful?')).toBeTruthy();
@@ -87,7 +90,7 @@ describe('FeedbackButtons', () => {
     { feedback: 'positive', buttonSelector: POSITIVE_BUTTON_SELECTOR },
     { feedback: 'negative', buttonSelector: NEGATIVE_BUTTON_SELECTOR },
   ])('handles $feedback feedback button click correctly', ({ feedback, buttonSelector }) => {
-    const onClickFeedback = jest.fn();
+    const onClickFeedback = vi.fn();
     const { container, unmount } = renderComponent(onClickFeedback);
 
     const { positiveButton, negativeButton } = getButtons(container);

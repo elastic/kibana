@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { WORKFLOWS_AI_EDIT_RESULT_EVENT_TYPE } from './events/workflows_ai_edit_result';
 import { WorkflowsAiTelemetryClient } from './workflows_ai_telemetry_client';
 
 const createMockAnalytics = () => ({
-  reportEvent: jest.fn(),
-  optIn: jest.fn(),
-  registerEventType: jest.fn(),
-  registerContextProvider: jest.fn(),
-  removeContextProvider: jest.fn(),
-  registerShipper: jest.fn(),
+  reportEvent: vi.fn(),
+  optIn: vi.fn(),
+  registerEventType: vi.fn(),
+  registerContextProvider: vi.fn(),
+  removeContextProvider: vi.fn(),
+  registerShipper: vi.fn(),
   telemetryCounter$: {} as never,
 });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ComponentProps, FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 import QueryTabContent from '.';
@@ -62,13 +65,13 @@ const mockPatterns = [
   'journalbeat-*',
 ];
 
-jest.mock('../../../../../data_view_manager/hooks/use_browser_fields');
-jest.mock('../../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../../../../../data_view_manager/hooks/use_browser_fields');
+vi.mock('../../../../../flyout_v2/use_flyout_api');
+vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
 
-jest.mock('../../../../../common/utils/route/use_route_spy', () => {
+vi.mock('../../../../../common/utils/route/use_route_spy', () => {
   return {
-    useRouteSpy: jest.fn().mockReturnValue([
+    useRouteSpy: vi.fn().mockReturnValue([
       {
         pageName: 'timeline',
       },
@@ -76,23 +79,29 @@ jest.mock('../../../../../common/utils/route/use_route_spy', () => {
   };
 });
 
-jest.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/components/user_privileges');
 
-jest.mock('../../../../containers/details');
+vi.mock('../../../../containers/details');
 
-jest.mock('../../../fields_browser', () => ({
-  useFieldBrowserOptions: jest.fn(),
-}));
+vi.mock('../../../fields_browser', () => {
+      const mocked = {
+      useFieldBrowserOptions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../../common/hooks/use_experimental_features');
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn(() => ({
-    pathname: '',
-    search: '',
-  })),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: vi.fn(() => ({
+        pathname: '',
+        search: '',
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const { mockTimelineSearchSubscription } = getMockTimelineSearchSubscription();
 
@@ -100,18 +109,18 @@ const { mockTimelineSearchSubscription } = getMockTimelineSearchSubscription();
 // that is why we are increasing it.
 const SPECIAL_TEST_TIMEOUT = 50000;
 
-const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
+const useIsExperimentalFeatureEnabledMock = vi.fn((feature: keyof ExperimentalFeatures) => {
   return allowedExperimentalValues[feature];
 });
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
 // unified-field-list is reporting multiple analytics events
-jest.mock(`@elastic/ebt/client`);
+vi.mock(`@elastic/ebt/client`);
 
-const mockOpenFlyout = jest.fn();
-const mockCloseFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout');
+const mockOpenFlyout = vi.fn();
+const mockCloseFlyout = vi.fn();
+vi.mock('@kbn/expandable-flyout');
 
 const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) => {
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
@@ -194,15 +203,15 @@ const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponen
 
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
-const useTimelineEventsSpy = jest.spyOn(useTimelineEventsModule, 'useTimelineEvents');
+const useTimelineEventsSpy = vi.spyOn(useTimelineEventsModule, 'useTimelineEvents');
 
 // Failing: See https://github.com/elastic/kibana/issues/224186
 describe.skip('query tab with unified timeline', () => {
-  const fetchNotesSpy = jest.spyOn(notesApi, 'fetchNotesByDocumentIds');
+  const fetchNotesSpy = vi.spyOn(notesApi, 'fetchNotesByDocumentIds');
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
   beforeAll(() => {
-    fetchNotesSpy.mockImplementation(jest.fn());
-    jest.mocked(useExpandableFlyoutApi).mockImplementation(() => ({
+    fetchNotesSpy.mockImplementation(vi.fn());
+    vi.mocked(useExpandableFlyoutApi).mockImplementation(() => ({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
       closeFlyout: mockCloseFlyout,
@@ -231,7 +240,7 @@ describe.skip('query tab with unified timeline', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     storageMock.clear();
     fetchNotesSpy.mockClear();
     cleanup();
@@ -239,7 +248,7 @@ describe.skip('query tab with unified timeline', () => {
   });
 
   beforeEach(() => {
-    HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
+    HTMLElement.prototype.getBoundingClientRect = vi.fn(() => {
       return {
         width: 1000,
         height: 1000,
@@ -248,23 +257,23 @@ describe.skip('query tab with unified timeline', () => {
       } as DOMRect;
     });
 
-    (useKibana as jest.Mock).mockImplementation(() => {
+    (useKibana as Mock).mockImplementation(() => {
       return {
         services: kibanaServiceMock,
       };
     });
 
-    (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
+    (useTimelineEventsDetails as Mock).mockImplementation(() => [false, {}]);
 
-    jest.mocked(useDataView).mockReturnValue(withIndices(mockPatterns));
+    vi.mocked(useDataView).mockReturnValue(withIndices(mockPatterns));
 
-    jest.mocked(useBrowserFields).mockReturnValue(mockBrowserFields);
+    vi.mocked(useBrowserFields).mockReturnValue(mockBrowserFields);
 
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+    (useIsExperimentalFeatureEnabled as Mock).mockImplementation(
       useIsExperimentalFeatureEnabledMock
     );
 
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       notesPrivileges: { crud: true, read: true },
       timelinePrivileges: { crud: true, read: true },
       kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
@@ -273,8 +282,8 @@ describe.skip('query tab with unified timeline', () => {
     });
 
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   describe('render', () => {
@@ -362,7 +371,7 @@ describe.skip('query tab with unified timeline', () => {
       },
     };
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it(
@@ -1022,8 +1031,8 @@ describe.skip('query tab with unified timeline', () => {
 
   describe('Leading actions - notes', () => {
     beforeEach(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
-        jest.fn((feature: keyof ExperimentalFeatures) => allowedExperimentalValues[feature])
+      (useIsExperimentalFeatureEnabled as Mock).mockImplementation(
+        vi.fn((feature: keyof ExperimentalFeatures) => allowedExperimentalValues[feature])
       );
     });
 
@@ -1097,7 +1106,7 @@ describe.skip('query tab with unified timeline', () => {
     it(
       'should open the new notes flyout when the new flyout is enabled',
       async () => {
-        jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+        vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
         renderTestComponents();
         expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
@@ -1152,9 +1161,9 @@ describe.skip('query tab with unified timeline', () => {
             isPartial: false,
             shardFailures: [],
             timedOut: false,
-            loadNextBatch: jest.fn(),
+            loadNextBatch: vi.fn(),
             refreshedAt: 0,
-            refetch: jest.fn(),
+            refetch: vi.fn(),
           },
         ]);
 
@@ -1183,8 +1192,8 @@ describe.skip('query tab with unified timeline', () => {
 
   describe('Leading actions - pin', () => {
     beforeEach(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
-        jest.fn((feature: keyof ExperimentalFeatures) => allowedExperimentalValues[feature])
+      (useIsExperimentalFeatureEnabled as Mock).mockImplementation(
+        vi.fn((feature: keyof ExperimentalFeatures) => allowedExperimentalValues[feature])
       );
     });
     it(

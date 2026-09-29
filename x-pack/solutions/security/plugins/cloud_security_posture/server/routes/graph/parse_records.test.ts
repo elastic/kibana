@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import {
   ApiMessageCode,
   type EntityNodeDataModel,
@@ -15,13 +18,13 @@ import { parseRecords } from './parse_records';
 import type { EventEdge, RelationshipEdge } from './types';
 
 const mockLogger = {
-  trace: jest.fn(),
-  debug: jest.fn(),
+  trace: vi.fn(),
+  debug: vi.fn(),
 } as any;
 
 describe('parseRecords', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty nodes and edges for empty input', () => {
@@ -679,13 +682,16 @@ describe('parseRecords', () => {
   // Test for unknown target processing
   describe('unknown target processing', () => {
     // Mock uuid module for unknown target tests
-    jest.mock('uuid', () => ({
-      v4: jest.fn(),
-    }));
+    vi.doMock('uuid', () => {
+          const mocked = {
+              v4: vi.fn(),
+            };
+          return { ...mocked, default: mocked };
+        });
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { v4: uuidv4 } = require('uuid');
-    const mockUuidv4 = uuidv4 as jest.MockedFunction<typeof uuidv4>;
+    const mockUuidv4 = uuidv4 as MockedFunction<typeof uuidv4>;
 
     beforeEach(() => {
       // Set up a sequence of predictable UUIDs

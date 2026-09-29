@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
@@ -11,15 +13,18 @@ import { AlertsProgressBar } from './alerts_progress_bar';
 import { parsedAlerts } from './mock_data';
 import type { GroupBySelection } from './types';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/components/cell_actions', () => ({
-  ...jest.requireActual('../../../../common/components/cell_actions'),
-  SecurityCellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
-}));
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/components/cell_actions', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../common/components/cell_actions')),
+      SecurityCellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 
 describe('Alert by grouping', () => {
@@ -30,7 +35,7 @@ describe('Alert by grouping', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('progress bars renders correctly', () => {

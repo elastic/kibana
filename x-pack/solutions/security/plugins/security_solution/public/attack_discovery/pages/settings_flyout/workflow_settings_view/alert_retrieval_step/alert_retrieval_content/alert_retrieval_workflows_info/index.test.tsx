@@ -5,36 +5,41 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { AlertRetrievalWorkflowsInfo } from '.';
 import type { UseFetchDefaultEsqlQueryResult } from '../../../../workflow_configuration/hooks/use_fetch_default_esql_query';
 
-const mockGetActiveSpace = jest.fn();
-const mockGetUrlForApp = jest.fn();
+const mockGetActiveSpace = vi.fn();
+const mockGetUrlForApp = vi.fn();
 
-jest.mock('../../../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        getUrlForApp: mockGetUrlForApp,
-      },
-      spaces: {
-        getActiveSpace: mockGetActiveSpace,
-      },
-    },
-  }),
-}));
+vi.mock('../../../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            getUrlForApp: mockGetUrlForApp,
+          },
+          spaces: {
+            getActiveSpace: mockGetActiveSpace,
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const fetchDefaultEsqlQuery = jest.fn();
+const fetchDefaultEsqlQuery = vi.fn();
 
 const defaultFetchDefaultEsqlQueryResult: UseFetchDefaultEsqlQueryResult = {
   defaultEsqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 100',
   fetchDefaultEsqlQuery,
   isError: false,
   isLoading: false,
-  resetCache: jest.fn(),
+  resetCache: vi.fn(),
 };
 
 const openPopover = () => {
@@ -43,7 +48,7 @@ const openPopover = () => {
 
 describe('AlertRetrievalWorkflowsInfo', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetActiveSpace.mockResolvedValue({ id: 'default' });
     mockGetUrlForApp.mockReturnValue('app/workflows');
   });

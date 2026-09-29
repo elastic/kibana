@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { ALERT_GROUP } from '@kbn/rule-data-utils';
@@ -15,21 +18,24 @@ import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import type { Group } from '../../../../common/typings';
 import { SourceBar } from './source_bar';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../utils/kibana_react');
+vi.mock('../../../utils/kibana_react');
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       ...kibanaStartMock.startContract().services,
       http: {
         basePath: {
-          prepend: jest.fn(),
+          prepend: vi.fn(),
         },
       },
     },
@@ -38,7 +44,7 @@ const mockKibana = () => {
 
 describe('Source bar', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibana();
   });
 

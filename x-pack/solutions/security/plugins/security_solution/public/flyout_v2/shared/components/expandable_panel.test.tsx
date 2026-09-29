@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
@@ -82,7 +84,7 @@ describe('<ExpandablePanel />', () => {
     });
 
     it('should render a title button and invoke its callback when a link is provided', async () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const props = {
         ...defaultProps,
         header: { ...defaultProps.header, link: { callback, tooltip: 'test tooltip' } },

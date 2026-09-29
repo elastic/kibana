@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { RequestContext } from '@a2a-js/sdk/server';
 import type { ExecutionEventBus } from '@a2a-js/sdk/server';
@@ -14,15 +17,15 @@ import { ChatEventType } from '@kbn/agent-builder-common';
 import { KibanaAgentExecutor } from './kibana_agent_executor';
 
 describe('KibanaAgentExecutor', () => {
-  const createEventBusMock = (): jest.Mocked<ExecutionEventBus> =>
+  const createEventBusMock = (): Mocked<ExecutionEventBus> =>
     ({
-      publish: jest.fn(),
-      finished: jest.fn(),
-      on: jest.fn(),
-      off: jest.fn(),
-      once: jest.fn(),
-      removeAllListeners: jest.fn(),
-    } as unknown as jest.Mocked<ExecutionEventBus>);
+      publish: vi.fn(),
+      finished: vi.fn(),
+      on: vi.fn(),
+      off: vi.fn(),
+      once: vi.fn(),
+      removeAllListeners: vi.fn(),
+    } as unknown as Mocked<ExecutionEventBus>);
 
   const createUserMessage = (): Message => ({
     kind: 'message',
@@ -37,7 +40,7 @@ describe('KibanaAgentExecutor', () => {
   } as any);
 
   const createExecutionMock = () => ({
-    executeAgent: jest
+    executeAgent: vi
       .fn()
       .mockResolvedValue({ executionId: 'exec-1', events$: roundCompleteEvents$ }),
   });
@@ -48,7 +51,7 @@ describe('KibanaAgentExecutor', () => {
     isStreaming: boolean = false,
     abortSignal?: AbortSignal
   ) => {
-    const logger = { debug: jest.fn(), error: jest.fn() } as any;
+    const logger = { debug: vi.fn(), error: vi.fn() } as any;
     const kibanaRequest = { headers: {} } as unknown as KibanaRequest;
     const getInternalServices = () => ({ execution } as any);
     return new KibanaAgentExecutor({

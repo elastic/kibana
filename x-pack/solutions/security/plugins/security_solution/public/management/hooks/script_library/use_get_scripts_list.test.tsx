@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useGetEndpointScriptsList } from './use_get_scripts_list';
 import { useQuery as _useQuery } from '@kbn/react-query';
 import { scriptsLibraryHttpMocks } from '../../mocks/scripts_library_http_mocks';
@@ -15,14 +18,14 @@ import {
 } from '../../../common/mock/endpoint';
 import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
 
-const useQueryMock = _useQuery as jest.Mock;
+const useQueryMock = _useQuery as Mock;
 
-jest.mock('@kbn/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
+vi.mock('@kbn/react-query', async () => {
+  const actualReactQueryModule = (await vi.importActual('@kbn/react-query'));
 
   return {
     ...actualReactQueryModule,
-    useQuery: jest.fn((...args) => actualReactQueryModule.useQuery(...args)),
+    useQuery: vi.fn((...args) => actualReactQueryModule.useQuery(...args)),
   };
 });
 

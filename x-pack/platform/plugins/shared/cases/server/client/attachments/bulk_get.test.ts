@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
 import { mockCaseComments, mockCaseUnifiedAttachments } from '../../mocks';
@@ -29,7 +31,7 @@ describe('bulkGet', () => {
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it(`throws when trying to fetch more than ${MAX_BULK_GET_ATTACHMENTS} attachments`, async () => {
@@ -130,7 +132,7 @@ describe('bulkGet', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.authorization.getAndEnsureAuthorizedEntities.mockResolvedValue({
         authorized: [unifiedAttachmentSO],
         unauthorized: [],
@@ -165,7 +167,7 @@ describe('bulkGet', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       clientArgs.authorization.getAndEnsureAuthorizedEntities.mockResolvedValue({
         authorized: [legacyAttachmentSO],
         unauthorized: [],

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CancellationScope } from './cancellation_scope';
 
 describe('CancellationScope', () => {
   it('calls all disposers on disposeAll', async () => {
     const scope = new CancellationScope();
-    const disposer1 = jest.fn();
-    const disposer2 = jest.fn();
+    const disposer1 = vi.fn();
+    const disposer2 = vi.fn();
 
     scope.add(disposer1);
     scope.add(disposer2);
@@ -43,7 +45,7 @@ describe('CancellationScope', () => {
 
   it('handles async disposers', async () => {
     const scope = new CancellationScope();
-    const disposed = jest.fn();
+    const disposed = vi.fn();
 
     scope.add(async () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -63,11 +65,11 @@ describe('CancellationScope', () => {
 
   it('throws first error but still calls remaining disposers', async () => {
     const scope = new CancellationScope();
-    const disposer1 = jest.fn();
-    const disposer2 = jest.fn(() => {
+    const disposer1 = vi.fn();
+    const disposer2 = vi.fn(() => {
       throw new Error('disposer 2 failed');
     });
-    const disposer3 = jest.fn(() => {
+    const disposer3 = vi.fn(() => {
       throw new Error('disposer 3 failed');
     });
 
@@ -84,7 +86,7 @@ describe('CancellationScope', () => {
 
   it('clears disposers after disposeAll', async () => {
     const scope = new CancellationScope();
-    const disposer = jest.fn();
+    const disposer = vi.fn();
 
     scope.add(disposer);
     await scope.disposeAll();

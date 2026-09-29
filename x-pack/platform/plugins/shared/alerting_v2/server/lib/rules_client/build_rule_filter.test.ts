@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fromKueryExpression } from '@kbn/es-query';
 import { buildRuleSoFilter } from './build_rule_filter';
 
-jest.mock('@kbn/es-query', () => ({
+vi.mock('@kbn/es-query', () => ({
   __esModule: true,
-  fromKueryExpression: jest.fn((...args: unknown[]) =>
-    jest.requireActual('@kbn/es-query').fromKueryExpression(...args)
+  fromKueryExpression: vi.fn(async (...args: unknown[]) =>
+    (await vi.importActual('@kbn/es-query')).fromKueryExpression(...args)
   ),
-  toKqlExpression: (...args: unknown[]) =>
-    jest.requireActual('@kbn/es-query').toKqlExpression(...args),
+  toKqlExpression: async (...args: unknown[]) =>
+    (await vi.importActual('@kbn/es-query')).toKqlExpression(...args),
 }));
 
-const fromKueryExpressionMock = fromKueryExpression as jest.Mock;
+const fromKueryExpressionMock = fromKueryExpression as Mock;
 
 describe('buildRuleSoFilter', () => {
   describe('empty / match-all', () => {
@@ -164,8 +167,8 @@ describe('buildRuleSoFilter', () => {
     });
 
     it('throws on unsupported KQL function types', () => {
-      fromKueryExpressionMock.mockImplementationOnce((...args: unknown[]) => {
-        const ast = jest.requireActual('@kbn/es-query').fromKueryExpression(...args);
+      fromKueryExpressionMock.mockImplementationOnce(async (...args: unknown[]) => {
+        const ast = (await vi.importActual('@kbn/es-query')).fromKueryExpression(...args);
         ast.function = 'unknown_function';
         return ast;
       });
@@ -176,8 +179,8 @@ describe('buildRuleSoFilter', () => {
     });
 
     it('attaches UNSUPPORTED_FILTER_FUNCTION code with the offending function name', () => {
-      fromKueryExpressionMock.mockImplementationOnce((...args: unknown[]) => {
-        const ast = jest.requireActual('@kbn/es-query').fromKueryExpression(...args);
+      fromKueryExpressionMock.mockImplementationOnce(async (...args: unknown[]) => {
+        const ast = (await vi.importActual('@kbn/es-query')).fromKueryExpression(...args);
         ast.function = 'unknown_function';
         return ast;
       });

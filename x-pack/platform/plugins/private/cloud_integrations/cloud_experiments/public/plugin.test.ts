@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { duration } from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
@@ -14,10 +16,10 @@ import { CloudExperimentsPlugin } from './plugin';
 import { MetadataService } from '../common/metadata_service';
 
 describe('Cloud Experiments public plugin', () => {
-  jest.spyOn(console, 'debug').mockImplementation(); // silence console.debug logs
+  vi.spyOn(console, 'debug').mockImplementation(); // silence console.debug logs
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('constructor', () => {
@@ -162,7 +164,7 @@ describe('Cloud Experiments public plugin', () => {
 
     test('flushes the events on stop', () => {
       // eslint-disable-next-line dot-notation
-      const metadataServiceStopSpy = jest.spyOn(plugin['metadataService'], 'stop');
+      const metadataServiceStopSpy = vi.spyOn(plugin['metadataService'], 'stop');
       expect(() => plugin.stop()).not.toThrow();
       expect(metadataServiceStopSpy).toHaveBeenCalledTimes(1);
     });

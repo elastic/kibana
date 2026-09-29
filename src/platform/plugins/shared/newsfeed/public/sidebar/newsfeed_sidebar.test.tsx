@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, act } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -18,15 +20,18 @@ import type { NewsfeedApi } from '../lib/api';
 import type { FetchResult, NewsfeedItem } from '../types';
 import { NewsfeedSidebar } from './newsfeed_sidebar';
 
-jest.mock('@kbn/react-env', () => ({
-  useIsServerless: jest.fn().mockReturnValue(false),
-}));
+vi.mock('@kbn/react-env', () => {
+      const mocked = {
+      useIsServerless: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useIsServerless } from '@kbn/react-env';
 
 // SidebarHeader reads the panel context for its heading id, so the real components need a
 // provider. Supplying one keeps the real header/body in the tree rather than mocking them out.
-const panelContext = { headingId: 'newsfeedSidebarHeading', setOnFocusRescue: jest.fn() };
+const panelContext = { headingId: 'newsfeedSidebarHeading', setOnFocusRescue: vi.fn() };
 
 const createMockItem = (overrides: Partial<NewsfeedItem> = {}): NewsfeedItem => ({
   title: 'Test news item',
@@ -52,9 +57,9 @@ const renderSidebar = ({ fetchResult }: { fetchResult?: FetchResult | null } = {
   const fetchResults$ = new BehaviorSubject<FetchResult | void | null>(
     fetchResult !== undefined ? fetchResult : null
   );
-  const markAsRead = jest.fn();
+  const markAsRead = vi.fn();
   const newsfeedApi: NewsfeedApi = { fetchResults$, markAsRead };
-  const onClose = jest.fn();
+  const onClose = vi.fn();
 
   const result = renderWithKibanaRenderContext(
     <SidebarPanelContext.Provider value={panelContext}>
@@ -89,13 +94,13 @@ describe('NewsfeedSidebar', () => {
   });
 
   test('shows version label for non-serverless', () => {
-    jest.mocked(useIsServerless).mockReturnValue(false);
+    vi.mocked(useIsServerless).mockReturnValue(false);
     renderSidebar({ fetchResult: createFetchResult() });
     expect(screen.getByText(/Version 9\.5\.0/)).toBeInTheDocument();
   });
 
   test('hides version label for serverless', () => {
-    jest.mocked(useIsServerless).mockReturnValue(true);
+    vi.mocked(useIsServerless).mockReturnValue(true);
     renderSidebar({ fetchResult: createFetchResult() });
     expect(screen.queryByText(/Version/)).not.toBeInTheDocument();
   });

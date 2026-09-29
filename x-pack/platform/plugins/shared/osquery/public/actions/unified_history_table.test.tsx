@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
@@ -27,51 +30,63 @@ import {
 const renderWithProviders = (element: React.ReactElement) =>
   render(element, { wrapper: TestProviders });
 
-const mockPush = jest.fn();
-const mockReplace = jest.fn();
-const mockUseKibana = jest.fn();
+const mockPush = vi.fn();
+const mockReplace = vi.fn();
+const mockUseKibana = vi.fn();
 
-jest.mock('../common/lib/kibana', () => ({
-  ...jest.requireActual('../common/lib/kibana'),
-  useKibana: () => mockUseKibana(),
-  useRouterNavigate: (path: string) => ({ onClick: jest.fn(), href: path }),
-}));
+vi.mock('../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../common/lib/kibana')),
+      useKibana: () => mockUseKibana(),
+      useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({
-    push: mockPush,
-    replace: mockReplace,
-    location: { search: '', pathname: '/history' },
-  }),
-  useLocation: () => ({ search: '', pathname: '/history' }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => ({
+        push: mockPush,
+        replace: mockReplace,
+        location: { search: '', pathname: '/history' },
+      }),
+      useLocation: () => ({ search: '', pathname: '/history' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  formatDate: (value: unknown) => String(value),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      formatDate: (value: unknown) => String(value),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_unified_history');
-jest.mock('./use_user_profiles');
-jest.mock('../packs/use_packs');
-jest.mock('../common/use_persisted_page_size', () => ({
-  usePersistedPageSize: () => [10, jest.fn()],
-  PAGE_SIZE_OPTIONS: [10, 25, 50, 100],
-}));
+vi.mock('./use_unified_history');
+vi.mock('./use_user_profiles');
+vi.mock('../packs/use_packs');
+vi.mock('../common/use_persisted_page_size', () => {
+      const mocked = {
+      usePersistedPageSize: () => [10, vi.fn()],
+      PAGE_SIZE_OPTIONS: [10, 25, 50, 100],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useUnifiedHistoryMock = useUnifiedHistory as jest.MockedFunction<typeof useUnifiedHistory>;
-const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.MockedFunction<
+const useUnifiedHistoryMock = useUnifiedHistory as MockedFunction<typeof useUnifiedHistory>;
+const useBulkGetUserProfilesMock = useBulkGetUserProfiles as MockedFunction<
   typeof useBulkGetUserProfiles
 >;
-const usePacksMock = usePacks as jest.MockedFunction<typeof usePacks>;
+const usePacksMock = usePacks as MockedFunction<typeof usePacks>;
 
 const mockKibana = (permissions = defaultPermissions) => {
   mockUseKibana.mockReturnValue({
     services: {
       application: { capabilities: { osquery: permissions } },
-      http: { post: jest.fn(), get: jest.fn() },
-      notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+      http: { post: vi.fn(), get: vi.fn() },
+      notifications: { toasts: { addSuccess: vi.fn(), addError: vi.fn() } },
     },
   });
 };
@@ -104,13 +119,13 @@ const mockHistory = ({
     isLoading,
     isFetching,
     isPlaceholderData,
-    refetch: jest.fn(),
+    refetch: vi.fn(),
   } as never);
 };
 
 describe('UnifiedHistoryTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resetMockCounter();
     mockKibana();
     mockPacks();

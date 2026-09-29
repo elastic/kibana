@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ChangeHistoryClient } from '@kbn/change-history';
 import { RULE_CHANGES_HISTORY_OBJECT_TYPE } from './constants';
@@ -13,8 +15,8 @@ import type { LogRuleChangesParams } from './types';
 import { createRuleResponse } from '../test_utils';
 
 const createMockClient = () => ({
-  initialize: jest.fn().mockResolvedValue(undefined),
-  logBulk: jest.fn().mockResolvedValue(undefined),
+  initialize: vi.fn().mockResolvedValue(undefined),
+  logBulk: vi.fn().mockResolvedValue(undefined),
 });
 
 const rule = createRuleResponse({ id: 'rule-1', metadata: { name: 'my rule' } });
@@ -33,7 +35,7 @@ describe('RuleChangesHistoryService', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     clientMock = createMockClient();
     logger = loggingSystemMock.createLogger();
     service = new RuleChangesHistoryService(logger, clientMock as unknown as ChangeHistoryClient);

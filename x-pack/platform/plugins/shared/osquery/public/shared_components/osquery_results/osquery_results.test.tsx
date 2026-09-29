@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
@@ -22,14 +25,14 @@ import * as privileges from '../../action_results/use_action_privileges';
 import { defaultLiveQueryDetails, DETAILS_QUERY, getMockedKibanaConfig } from './test_utils';
 import type { OsqueryActionResultsProps } from './types';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const enablePrivileges = () => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  jest.spyOn(privileges, 'useActionResultsPrivileges').mockImplementation(() => ({
+  vi.spyOn(privileges, 'useActionResultsPrivileges').mockImplementation(() => ({
     data: true,
   }));
 };
@@ -85,7 +88,7 @@ describe('Osquery Results', () => {
   beforeAll(() => {
     mockKibana();
 
-    jest
+    vi
       .spyOn(useLiveQueryDetails, 'useLiveQueryDetails')
       .mockImplementation(() => defaultLiveQueryDetails);
   });

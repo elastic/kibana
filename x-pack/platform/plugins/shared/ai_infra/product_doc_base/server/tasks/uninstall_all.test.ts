@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { LockAcquisitionError } from '@kbn/lock-manager';
@@ -13,13 +16,13 @@ import { registerUninstallAllTaskDefinition, UNINSTALL_ALL_TASK_TYPE } from './u
 import { PRODUCT_DOC_INSTALL_LOCK_ID } from '../services/install_lock';
 
 describe('UninstallAll task', () => {
-  let uninstallAll: jest.Mock;
-  let withLock: jest.Mock;
+  let uninstallAll: Mock;
+  let withLock: Mock;
   let runTask: () => Promise<unknown>;
 
   beforeEach(() => {
-    uninstallAll = jest.fn().mockResolvedValue(undefined);
-    withLock = jest.fn((_lockId: string, callback: () => Promise<void>) => callback());
+    uninstallAll = vi.fn().mockResolvedValue(undefined);
+    withLock = vi.fn((_lockId: string, callback: () => Promise<void>) => callback());
     const taskManager = taskManagerMock.createSetup();
     registerUninstallAllTaskDefinition({
       taskManager,

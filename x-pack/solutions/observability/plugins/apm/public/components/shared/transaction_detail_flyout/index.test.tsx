@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
 import { TransactionDetailFlyout } from '.';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -22,50 +24,66 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('./latency_distribution', () => ({
-  TransactionDetailFlyoutLatencyDistribution: () => (
-    <div data-test-subj="transactionDetailFlyoutSection-latencyDistribution">latency</div>
-  ),
-}));
-jest.mock('./red_metrics', () => ({
-  TransactionDetailFlyoutRedMetrics: () => (
-    <div data-test-subj="transactionDetailFlyoutSection-redMetrics">red metrics</div>
-  ),
-}));
-jest.mock('./trace_sample', () => ({
-  TransactionDetailFlyoutTraceSample: () => {
-    const { useTransactionDetailFlyoutContext } = jest.requireActual(
-      './transaction_detail_flyout_context'
-    );
-    const { openFullTraceFlyout } = useTransactionDetailFlyoutContext();
-    return (
-      <button
-        type="button"
-        data-test-subj="openFullTraceMock"
-        onClick={() => openFullTraceFlyout({ traceId: 'trace-1', contextSpanIds: ['span-1'] })}
-      >
-        open full trace
-      </button>
-    );
-  },
-}));
-jest.mock('./summary', () => ({
-  TransactionDetailFlyoutSummary: () => (
-    <div data-test-subj="transactionDetailFlyoutSummary">summary</div>
-  ),
-}));
-jest.mock('./footer', () => ({
-  TransactionDetailFlyoutFooter: () => (
-    <div data-test-subj="transactionDetailFlyoutFooter">footer</div>
-  ),
-}));
+vi.mock('./latency_distribution', () => {
+      const mocked = {
+      TransactionDetailFlyoutLatencyDistribution: () => (
+        <div data-test-subj="transactionDetailFlyoutSection-latencyDistribution">latency</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./red_metrics', () => {
+      const mocked = {
+      TransactionDetailFlyoutRedMetrics: () => (
+        <div data-test-subj="transactionDetailFlyoutSection-redMetrics">red metrics</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./trace_sample', () => {
+      const mocked = {
+      TransactionDetailFlyoutTraceSample: async () => {
+        const { useTransactionDetailFlyoutContext } = (await vi.importActual('./transaction_detail_flyout_context'));
+        const { openFullTraceFlyout } = useTransactionDetailFlyoutContext();
+        return (
+          <button
+            type="button"
+            data-test-subj="openFullTraceMock"
+            onClick={() => openFullTraceFlyout({ traceId: 'trace-1', contextSpanIds: ['span-1'] })}
+          >
+            open full trace
+          </button>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./summary', () => {
+      const mocked = {
+      TransactionDetailFlyoutSummary: () => (
+        <div data-test-subj="transactionDetailFlyoutSummary">summary</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./footer', () => {
+      const mocked = {
+      TransactionDetailFlyoutFooter: () => (
+        <div data-test-subj="transactionDetailFlyoutFooter">footer</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockTraceWaterfallFlyout = jest.fn((_props: unknown) => (
+const mockTraceWaterfallFlyout = vi.fn((_props: unknown) => (
   <div data-test-subj="traceWaterfallFlyoutMock" />
 ));
-jest.mock('../../app/transaction_details/waterfall_with_summary/trace_waterfall_flyout', () => ({
-  TraceWaterfallFlyout: (props: unknown) => mockTraceWaterfallFlyout(props),
-}));
+vi.mock('../../app/transaction_details/waterfall_with_summary/trace_waterfall_flyout', () => {
+      const mocked = {
+      TraceWaterfallFlyout: (props: unknown) => mockTraceWaterfallFlyout(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const DEPS = {
   core: {} as CoreStart,
@@ -85,7 +103,7 @@ const FILTERS = {
 const BASE_PROPS = {
   deps: DEPS,
   filters: FILTERS,
-  onClose: jest.fn(),
+  onClose: vi.fn(),
 };
 
 describe('TransactionDetailFlyout', () => {

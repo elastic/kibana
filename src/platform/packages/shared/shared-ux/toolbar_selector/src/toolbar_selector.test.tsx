@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -53,7 +55,7 @@ describe('ToolbarSelector', () => {
 
   it('calls onChange for single selection', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <ToolbarSelector
         data-test-subj="toolbarSelectorTest"
@@ -71,7 +73,7 @@ describe('ToolbarSelector', () => {
 
   it('calls onChange for multi selection', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const multiOptions: SelectableEntry[] = [
       { label: 'A', value: 'a' },
       { label: 'B', value: 'b' },
@@ -126,7 +128,7 @@ describe('ToolbarSelector', () => {
 
   it('renders with searchable enabled and multi selection and preserves previously selected options', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     // Start with pre-selected options to test preservation
     const optionsWithPreselected: SelectableEntry[] = [

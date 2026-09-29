@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { ConsoleProps } from '..';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
@@ -30,7 +33,7 @@ describe('When using CommandExecutionOutput component', () => {
       throw new Error('cmd1 command not found in test mocks');
     }
 
-    (cmd1.RenderComponent as jest.Mock).mockImplementation(
+    (cmd1.RenderComponent as Mock).mockImplementation(
       (props: CommandExecutionComponentProps) => {
         setCmd1ToComplete = () => props.setStatus('success');
         setCmd1Status = (status) => props.setStatus(status);
@@ -47,24 +50,24 @@ describe('When using CommandExecutionOutput component', () => {
   });
 
   it('should show long running hint message if pending and >15s have passed', async () => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
     await render();
 
     expect(renderResult.queryByTestId('test-longRunningCommandHint')).toBeNull();
 
     act(() => {
-      jest.advanceTimersByTime(16 * 1000);
+      vi.advanceTimersByTime(16 * 1000);
     });
 
     expect(renderResult.getByTestId('test-longRunningCommandHint')).not.toBeNull();
   });
 
   it('should remove long running hint message if command completes', async () => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
     await render();
 
     act(() => {
-      jest.advanceTimersByTime(16 * 1000);
+      vi.advanceTimersByTime(16 * 1000);
     });
 
     expect(renderResult.getByTestId('test-longRunningCommandHint')).not.toBeNull();
@@ -77,7 +80,7 @@ describe('When using CommandExecutionOutput component', () => {
   });
 
   it('should not show the busy indicator or long running hint while status is `creating`', async () => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
     await render();
 
     act(() => {
@@ -85,7 +88,7 @@ describe('When using CommandExecutionOutput component', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(16 * 1000);
+      vi.advanceTimersByTime(16 * 1000);
     });
 
     expect(renderResult.container.querySelector('.busy-indicator')).toBeNull();
@@ -93,7 +96,7 @@ describe('When using CommandExecutionOutput component', () => {
   });
 
   it('should only start the long running hint timer once status becomes `pending`', async () => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
     await render();
 
     // While `creating`, the hint should not appear even after the long-running threshold elapses
@@ -101,7 +104,7 @@ describe('When using CommandExecutionOutput component', () => {
       setCmd1Status('creating');
     });
     act(() => {
-      jest.advanceTimersByTime(16 * 1000);
+      vi.advanceTimersByTime(16 * 1000);
     });
     expect(renderResult.queryByTestId('test-longRunningCommandHint')).toBeNull();
 
@@ -110,7 +113,7 @@ describe('When using CommandExecutionOutput component', () => {
       setCmd1Status('pending');
     });
     act(() => {
-      jest.advanceTimersByTime(16 * 1000);
+      vi.advanceTimersByTime(16 * 1000);
     });
     expect(renderResult.getByTestId('test-longRunningCommandHint')).not.toBeNull();
   });

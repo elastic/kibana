@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 /**
  * Self-calibrated YAML validation performance suite.  Fixes #261389.
  *
@@ -36,9 +38,9 @@
  * Use 2 significant figures — rounding up is fine. Re-run 3× to confirm stability.
  */
 
-const mockValidateQuery = jest.fn();
+const mockValidateQuery = vi.fn();
 
-jest.mock('@kbn/esql-language', () => ({
+vi.mock('@kbn/esql-language', () => ({
   __esModule: true,
   validateQuery: (...args: unknown[]) => mockValidateQuery(...args),
   // @kbn/monaco's Console ES|QL lexer reads this eagerly at module-load time to build its

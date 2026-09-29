@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 
 import type { RuleParams } from '../../../rule_schema';
 import { duplicateRule } from './duplicate_rule';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn(),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('duplicateRule', () => {
   const createTestRule = (): SanitizedRule<RuleParams> => ({
@@ -99,11 +105,11 @@ describe('duplicateRule', () => {
   });
 
   beforeAll(() => {
-    (uuidv4 as jest.Mock).mockReturnValue('new ruleId');
+    (uuidv4 as Mock).mockReturnValue('new ruleId');
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when duplicating any kind of rule', () => {

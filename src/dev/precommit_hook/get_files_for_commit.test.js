@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const mockDiff = jest.fn();
-const mockRaw = jest.fn();
+import { vi } from 'vitest';
 
-jest.mock('simple-git', () =>
-  jest.fn().mockImplementation(() => ({
+const mockDiff = vi.fn();
+const mockRaw = vi.fn();
+
+vi.mock('simple-git', () =>
+  vi.fn().mockImplementation(() => ({
     diff: mockDiff,
     raw: mockRaw,
   }))
@@ -22,7 +24,7 @@ import { getFilesForCommit } from './get_files_for_commit';
 
 describe('dev/precommit_hook/get_files_for_commit', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('uses the first ref when duplicate --ref flags are parsed as an array', async () => {

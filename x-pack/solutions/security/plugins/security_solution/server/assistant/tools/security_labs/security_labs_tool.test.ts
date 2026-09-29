@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { DynamicStructuredTool } from '@langchain/core/tools';
 import { SECURITY_LABS_KNOWLEDGE_BASE_TOOL } from './security_labs_tool';
 import type {
@@ -16,10 +19,10 @@ import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/imp
 import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { Document } from '@langchain/core/documents';
 import { getIsKnowledgeBaseInstalled } from '@kbn/elastic-assistant-plugin/server/routes/helpers';
-jest.mock('@kbn/elastic-assistant-plugin/server/routes/helpers');
+vi.mock('@kbn/elastic-assistant-plugin/server/routes/helpers');
 describe('SecurityLabsTool', () => {
   const contentReferencesStore = newContentReferencesStoreMock();
-  const getKnowledgeBaseDocumentEntries = jest.fn();
+  const getKnowledgeBaseDocumentEntries = vi.fn();
   const kbDataClient = { getKnowledgeBaseDocumentEntries };
   const defaultArgs = {
     isEnabledKnowledgeBase: true,
@@ -28,7 +31,7 @@ describe('SecurityLabsTool', () => {
   } as unknown as AssistantToolParams;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('DynamicStructuredTool', () => {
@@ -57,7 +60,7 @@ In previous publications,`,
         defaultArgs
       )) as DynamicStructuredTool;
 
-      (contentReferencesStore.add as jest.Mock).mockImplementation(
+      (contentReferencesStore.add as Mock).mockImplementation(
         (creator: Parameters<ContentReferencesStore['add']>[0]) => {
           const reference = creator({ id: 'exampleContentReferenceId' });
           expect(reference.type).toEqual('Href');
@@ -87,7 +90,7 @@ In previous publications,`,
         defaultArgs
       )) as DynamicStructuredTool;
 
-      (contentReferencesStore.add as jest.Mock).mockImplementation(
+      (contentReferencesStore.add as Mock).mockImplementation(
         (creator: Parameters<ContentReferencesStore['add']>[0]) => {
           const reference = creator({ id: 'exampleContentReferenceId' });
           expect(reference.type).toEqual('KnowledgeBaseEntry');
@@ -107,7 +110,7 @@ In previous publications,`,
     });
     it('Responds with The "AI Assistant knowledge base" needs to be installed... when no docs and no kb install', async () => {
       getKnowledgeBaseDocumentEntries.mockResolvedValue([]);
-      (getIsKnowledgeBaseInstalled as jest.Mock).mockResolvedValue(false);
+      (getIsKnowledgeBaseInstalled as Mock).mockResolvedValue(false);
       const tool = (await SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(
         defaultArgs
       )) as DynamicStructuredTool;
@@ -118,7 +121,7 @@ In previous publications,`,
     });
     it('Responds with empty response when no docs and kb is installed', async () => {
       getKnowledgeBaseDocumentEntries.mockResolvedValue([]);
-      (getIsKnowledgeBaseInstalled as jest.Mock).mockResolvedValue(true);
+      (getIsKnowledgeBaseInstalled as Mock).mockResolvedValue(true);
       const tool = (await SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(
         defaultArgs
       )) as DynamicStructuredTool;

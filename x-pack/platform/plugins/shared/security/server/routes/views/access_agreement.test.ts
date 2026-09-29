@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type {
   HttpResources,
   HttpResourcesRequestHandler,
@@ -28,11 +31,11 @@ import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types'
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Access agreement view routes', () => {
-  let httpResources: jest.Mocked<HttpResources>;
-  let router: jest.Mocked<SecurityRouter>;
+  let httpResources: Mocked<HttpResources>;
+  let router: Mocked<SecurityRouter>;
   let config: ConfigType;
-  let session: jest.Mocked<PublicMethodsOf<Session>>;
-  let license: jest.Mocked<SecurityLicense>;
+  let session: Mocked<PublicMethodsOf<Session>>;
+  let license: Mocked<SecurityLicense>;
   let mockContext: SecurityRequestHandlerContext;
 
   beforeEach(() => {
@@ -51,7 +54,7 @@ describe('Access agreement view routes', () => {
 
     mockContext = {
       licensing: {
-        license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
+        license: { check: vi.fn().mockReturnValue({ check: 'valid' }) },
       },
     } as unknown as SecurityRequestHandlerContext;
 

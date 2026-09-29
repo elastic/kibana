@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
@@ -13,8 +15,8 @@ import type { ConvertToLookupIndexModalProps } from './convert_to_lookup_index_m
 import { ConvertToLookupIndexModal } from './convert_to_lookup_index_modal';
 
 const defaultProps = {
-  onCloseModal: jest.fn(),
-  onConvert: jest.fn(),
+  onCloseModal: vi.fn(),
+  onConvert: vi.fn(),
   sourceIndexName: 'my-index',
   isConverting: false,
   errorMessage: '',
@@ -30,7 +32,7 @@ const renderModal = (props?: Partial<ConvertToLookupIndexModalProps>) => {
 
 describe('ConvertToLookupIndexModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the modal correctly and populate it with default values', async () => {

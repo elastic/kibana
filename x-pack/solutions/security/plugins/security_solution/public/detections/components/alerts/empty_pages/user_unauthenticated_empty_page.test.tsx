@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -12,7 +14,7 @@ import {
   UserUnauthenticatedEmptyPage,
 } from './user_unauthenticated_empty_page';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('UserUnauthenticatedEmptyPage', () => {
   it('renders correctly', () => {

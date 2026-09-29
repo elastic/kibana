@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -16,23 +19,26 @@ import type { PipelineDataResponse } from '../../hooks/use_pipeline_data';
 import { useWorkflowEditorLink } from '../../use_workflow_editor_link';
 import type { StepExecutionWithLink } from '../types';
 
-jest.mock('../../use_workflow_editor_link');
-jest.mock('../live_timer', () => ({
-  LiveTimer: jest.fn(({ render: renderProp, startedAt }) => {
-    // When using the render prop, invoke it with mock data
-    if (renderProp != null) {
-      return (
-        <span data-test-subj="liveTimer" data-started-at={startedAt ?? ''}>
-          {renderProp({ formattedDuration: '5s', liveTimeMs: 5000 })}
-        </span>
-      );
-    }
+vi.mock('../../use_workflow_editor_link');
+vi.mock('../live_timer', () => {
+      const mocked = {
+      LiveTimer: vi.fn(({ render: renderProp, startedAt }) => {
+        // When using the render prop, invoke it with mock data
+        if (renderProp != null) {
+          return (
+            <span data-test-subj="liveTimer" data-started-at={startedAt ?? ''}>
+              {renderProp({ formattedDuration: '5s', liveTimeMs: 5000 })}
+            </span>
+          );
+        }
 
-    return <span data-test-subj="liveTimer" data-started-at={startedAt ?? ''} />;
-  }),
-}));
+        return <span data-test-subj="liveTimer" data-started-at={startedAt ?? ''} />;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWorkflowEditorLink = useWorkflowEditorLink as jest.Mock;
+const mockUseWorkflowEditorLink = useWorkflowEditorLink as Mock;
 
 const createMockStep = (overrides: Partial<StepExecutionWithLink> = {}): StepExecutionWithLink => ({
   error: undefined,
@@ -58,7 +64,7 @@ const createMockStep = (overrides: Partial<StepExecutionWithLink> = {}): StepExe
 });
 
 describe('WorkflowPipelineMonitor', () => {
-  const mockNavigateToEditor = jest.fn();
+  const mockNavigateToEditor = vi.fn();
 
   const mockStepExecutions: StepExecutionWithLink[] = [
     createMockStep({
@@ -100,7 +106,7 @@ describe('WorkflowPipelineMonitor', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: 'http://localhost:5601/app/workflows/workflow-123',
       navigateToEditor: mockNavigateToEditor,
@@ -667,7 +673,7 @@ describe('WorkflowPipelineMonitor', () => {
     it('renders workflow name as plain text when editorUrl is not available', () => {
       mockUseWorkflowEditorLink.mockReturnValue({
         editorUrl: null,
-        navigateToEditor: jest.fn(),
+        navigateToEditor: vi.fn(),
         resolvedWorkflowId: null,
       });
 
@@ -2267,7 +2273,7 @@ describe('WorkflowPipelineMonitor', () => {
         <TestProviders>
           <WorkflowPipelineMonitor
             {...defaultProps}
-            onViewData={jest.fn()}
+            onViewData={vi.fn()}
             pipelineData={mockPipelineData}
             stepExecutions={allStepsCompleted}
           />
@@ -2308,7 +2314,7 @@ describe('WorkflowPipelineMonitor', () => {
     });
 
     it('calls onViewData with "retrieval" and metadata when alert retrieval Inspect is clicked', async () => {
-      const mockOnViewData = jest.fn();
+      const mockOnViewData = vi.fn();
 
       render(
         <TestProviders>
@@ -2331,7 +2337,7 @@ describe('WorkflowPipelineMonitor', () => {
     });
 
     it('calls onViewData with "generation" and metadata when generation Inspect is clicked', async () => {
-      const mockOnViewData = jest.fn();
+      const mockOnViewData = vi.fn();
 
       render(
         <TestProviders>
@@ -2354,7 +2360,7 @@ describe('WorkflowPipelineMonitor', () => {
     });
 
     it('calls onViewData with "validation" and metadata when validation Inspect is clicked', async () => {
-      const mockOnViewData = jest.fn();
+      const mockOnViewData = vi.fn();
 
       render(
         <TestProviders>
@@ -2386,7 +2392,7 @@ describe('WorkflowPipelineMonitor', () => {
         <TestProviders>
           <WorkflowPipelineMonitor
             {...defaultProps}
-            onViewData={jest.fn()}
+            onViewData={vi.fn()}
             pipelineData={partialPipelineData}
             stepExecutions={allStepsCompleted}
           />
@@ -2407,7 +2413,7 @@ describe('WorkflowPipelineMonitor', () => {
         <TestProviders>
           <WorkflowPipelineMonitor
             {...defaultProps}
-            onViewData={jest.fn()}
+            onViewData={vi.fn()}
             pipelineData={partialPipelineData}
             stepExecutions={allStepsCompleted}
           />
@@ -2429,7 +2435,7 @@ describe('WorkflowPipelineMonitor', () => {
         <TestProviders>
           <WorkflowPipelineMonitor
             {...defaultProps}
-            onViewData={jest.fn()}
+            onViewData={vi.fn()}
             pipelineData={partialPipelineData}
             stepExecutions={allStepsCompleted}
           />
@@ -2490,7 +2496,7 @@ describe('WorkflowPipelineMonitor', () => {
         <TestProviders>
           <WorkflowPipelineMonitor
             {...defaultProps}
-            onViewData={jest.fn()}
+            onViewData={vi.fn()}
             pipelineData={multiRetrievalPipelineData}
             stepExecutions={groupedSteps}
           />
@@ -2539,7 +2545,7 @@ describe('WorkflowPipelineMonitor', () => {
         <TestProviders>
           <WorkflowPipelineMonitor
             {...defaultProps}
-            onViewData={jest.fn()}
+            onViewData={vi.fn()}
             pipelineData={missingIdPipelineData}
             stepExecutions={groupedSteps}
           />
@@ -2586,7 +2592,7 @@ describe('WorkflowPipelineMonitor', () => {
         <TestProviders>
           <WorkflowPipelineMonitor
             {...defaultProps}
-            onViewData={jest.fn()}
+            onViewData={vi.fn()}
             pipelineData={noMissingIdPipelineData}
             stepExecutions={groupedSteps}
           />
@@ -2597,7 +2603,7 @@ describe('WorkflowPipelineMonitor', () => {
     });
 
     it('calls onViewData with "retrieval:<workflowRunId>" when per-workflow inspect buttons are clicked', async () => {
-      const mockOnViewData = jest.fn();
+      const mockOnViewData = vi.fn();
 
       const multiRetrievalPipelineData: PipelineDataResponse = {
         ...mockPipelineData,
@@ -2748,7 +2754,7 @@ describe('WorkflowPipelineMonitor', () => {
           <TestProviders>
             <WorkflowPipelineMonitor
               {...defaultProps}
-              onViewData={jest.fn()}
+              onViewData={vi.fn()}
               pipelineData={multiRetrievalPipelineData}
               stepExecutions={completedMultiRetrievalWithGenerationStarted}
             />
@@ -2800,7 +2806,7 @@ describe('WorkflowPipelineMonitor', () => {
           <TestProviders>
             <WorkflowPipelineMonitor
               {...defaultProps}
-              onViewData={jest.fn()}
+              onViewData={vi.fn()}
               pipelineData={multiRetrievalPipelineData}
               stepExecutions={stepsWithPendingGeneration}
               workflowRunId={null}
@@ -2838,7 +2844,7 @@ describe('WorkflowPipelineMonitor', () => {
           <TestProviders>
             <WorkflowPipelineMonitor
               {...defaultProps}
-              onViewData={jest.fn()}
+              onViewData={vi.fn()}
               pipelineData={multiRetrievalPipelineData}
               stepExecutions={singleRetrievalWithGenerationStarted}
             />
@@ -2888,7 +2894,7 @@ describe('WorkflowPipelineMonitor', () => {
           <TestProviders>
             <WorkflowPipelineMonitor
               {...defaultProps}
-              onViewData={jest.fn()}
+              onViewData={vi.fn()}
               pipelineData={multiRetrievalPipelineData}
               stepExecutions={sameWorkflowMultiStep}
             />
@@ -2899,7 +2905,7 @@ describe('WorkflowPipelineMonitor', () => {
       });
 
       it('calls onViewData with "combined_retrieval" when the combined inspect button is clicked', async () => {
-        const mockOnViewData = jest.fn();
+        const mockOnViewData = vi.fn();
 
         render(
           <TestProviders>
@@ -2922,7 +2928,7 @@ describe('WorkflowPipelineMonitor', () => {
           <TestProviders>
             <WorkflowPipelineMonitor
               {...defaultProps}
-              onViewData={jest.fn()}
+              onViewData={vi.fn()}
               pipelineData={multiRetrievalPipelineData}
               stepExecutions={completedMultiRetrievalWithGenerationStarted}
             />
@@ -2972,7 +2978,7 @@ describe('WorkflowPipelineMonitor', () => {
           <TestProviders>
             <WorkflowPipelineMonitor
               {...defaultProps}
-              onViewData={jest.fn()}
+              onViewData={vi.fn()}
               pipelineData={pipelineDataWithGateEntry}
               stepExecutions={completedMultiRetrievalWithGenerationStarted}
             />
@@ -2992,7 +2998,7 @@ describe('WorkflowPipelineMonitor', () => {
           <TestProviders>
             <WorkflowPipelineMonitor
               {...defaultProps}
-              onViewData={jest.fn()}
+              onViewData={vi.fn()}
               pipelineData={pipelineDataNoCombined}
               stepExecutions={completedMultiRetrievalWithGenerationStarted}
             />
@@ -3038,7 +3044,7 @@ describe('WorkflowPipelineMonitor', () => {
         <TestProviders>
           <WorkflowPipelineMonitor
             {...defaultProps}
-            onViewData={jest.fn()}
+            onViewData={vi.fn()}
             pipelineData={mockPipelineData}
             stepExecutions={groupedSteps}
           />
@@ -3056,7 +3062,7 @@ describe('WorkflowPipelineMonitor', () => {
         <TestProviders>
           <WorkflowPipelineMonitor
             {...defaultProps}
-            onViewData={jest.fn()}
+            onViewData={vi.fn()}
             pipelineData={mockPipelineData}
             stepExecutions={allStepsCompleted}
           />

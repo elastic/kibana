@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import type { FeatureFlagsStart } from '@kbn/core/server';
 import { SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG } from '../../../common/feature_flags';
@@ -12,7 +14,7 @@ import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './is_sign
 
 describe('isSignificantEventsSemanticCodeSearchGroundingEnabled', () => {
   it('reads the semantic code search grounding flag and defaults to false', async () => {
-    const getBooleanValue$ = jest.fn().mockReturnValue(of(false));
+    const getBooleanValue$ = vi.fn().mockReturnValue(of(false));
     const featureFlags = { getBooleanValue$ } as unknown as FeatureFlagsStart;
 
     await expect(isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags)).resolves.toBe(
@@ -26,7 +28,7 @@ describe('isSignificantEventsSemanticCodeSearchGroundingEnabled', () => {
 
   it('returns true when the flag is enabled', async () => {
     const featureFlags = {
-      getBooleanValue$: jest.fn().mockReturnValue(of(true)),
+      getBooleanValue$: vi.fn().mockReturnValue(of(true)),
     } as unknown as FeatureFlagsStart;
 
     await expect(isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags)).resolves.toBe(

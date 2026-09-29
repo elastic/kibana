@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -48,19 +51,22 @@ const mockActionTypes = [
 ];
 
 // Mock the useLoadConnectors hook
-const mockRefetch = jest.fn();
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn(() => ({
-    data: [],
-    isLoading: false,
-    refetch: jest.fn(),
-  })),
-}));
-const mockUseLoadConnectors = useLoadConnectors as jest.Mock;
+const mockRefetch = vi.fn();
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn(() => ({
+        data: [],
+        isLoading: false,
+        refetch: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockUseLoadConnectors = useLoadConnectors as Mock;
 
-const mockHttpGet = jest.fn();
-const mockSettingsGet = jest.fn().mockReturnValue(undefined);
-const mockGetAddConnectorFlyout = jest
+const mockHttpGet = vi.fn();
+const mockSettingsGet = vi.fn().mockReturnValue(undefined);
+const mockGetAddConnectorFlyout = vi
   .fn()
   .mockReturnValue(<div data-test-subj="addConnectorFlyout" />);
 
@@ -81,7 +87,7 @@ const createMockServices = () => {
       ...triggersActionsUiMock.createStart(),
       getAddConnectorFlyout: mockGetAddConnectorFlyout,
       actionTypeRegistry: {
-        get: jest.fn().mockReturnValue({ iconClass: 'logoOpenAI' }),
+        get: vi.fn().mockReturnValue({ iconClass: 'logoOpenAI' }),
       },
     },
     application: {
@@ -134,7 +140,7 @@ const renderConnectorSelector = async (props = {}) => {
   return result!;
 };
 
-const renderConnectorSetup = (props: { onClose: jest.Mock; onConnectorCreated?: jest.Mock }) => {
+const renderConnectorSetup = (props: { onClose: Mock; onConnectorCreated?: Mock }) => {
   return render(
     <TestProviders>
       <ConnectorSetup {...props} />
@@ -144,7 +150,7 @@ const renderConnectorSetup = (props: { onClose: jest.Mock; onConnectorCreated?: 
 
 describe('ConnectorSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseLoadConnectors.mockReturnValue({
       data: mockConnectors,
       isLoading: false,
@@ -293,7 +299,7 @@ describe('ConnectorSelector', () => {
 
 describe('ConnectorSetup', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockHttpGet.mockResolvedValue(mockActionTypes);
   });
 
@@ -301,14 +307,14 @@ describe('ConnectorSetup', () => {
     it('should show loading spinner while loading action types', async () => {
       mockHttpGet.mockImplementation(() => new Promise(() => {})); // Never resolves
 
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const { getByTestId } = renderConnectorSetup({ onClose });
 
       expect(getByTestId('connectorSetupLoading')).toBeInTheDocument();
     });
 
     it('should render flyout with AI connector types', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const { findByTestId, findByText } = renderConnectorSetup({ onClose });
 
       await findByTestId('connectorSetupPage');
@@ -321,7 +327,7 @@ describe('ConnectorSetup', () => {
     it('should show "No AI connector types available" when no types exist', async () => {
       mockHttpGet.mockResolvedValue([]);
 
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const { findByTestId } = renderConnectorSetup({ onClose });
 
       expect(await findByTestId('noConnectorTypes')).toBeInTheDocument();
@@ -334,7 +340,7 @@ describe('ConnectorSetup', () => {
         { id: '.slack', name: 'Slack', enabled: true }, // Non-AI connector
       ]);
 
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const { findByTestId, queryByText } = renderConnectorSetup({ onClose });
 
       await findByTestId('connectorSetupPage');
@@ -349,7 +355,7 @@ describe('ConnectorSetup', () => {
 
   describe('connector type selection', () => {
     it('should open add connector flyout when a connector type is clicked', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const { findByTestId } = renderConnectorSetup({ onClose });
 
       await findByTestId('connectorSetupPage');
@@ -368,7 +374,7 @@ describe('ConnectorSetup', () => {
 
   describe('callbacks', () => {
     it('should call onClose when flyout is closed', async () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       const { findByRole } = renderConnectorSetup({ onClose });
 
       // Find and click the close button
@@ -383,7 +389,7 @@ describe('ConnectorSetup', () => {
     it('should show error toast when loading action types fails', async () => {
       mockHttpGet.mockRejectedValue(new Error('Network error'));
 
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       renderConnectorSetup({ onClose });
 
       await waitFor(() => {

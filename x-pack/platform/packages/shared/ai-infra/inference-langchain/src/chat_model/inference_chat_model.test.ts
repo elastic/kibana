@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { of, Observable } from 'rxjs';
 import { z } from '@kbn/zod/v4';
 import type { AIMessageChunk } from '@langchain/core/messages';
@@ -107,11 +110,11 @@ const metadata = {
 };
 
 describe('InferenceChatModel', () => {
-  let chatComplete: ChatCompleteAPI & jest.MockedFn<ChatCompleteAPI>;
+  let chatComplete: ChatCompleteAPI & MockedFunction<ChatCompleteAPI>;
   let connector: InferenceConnector;
 
   beforeEach(() => {
-    chatComplete = jest.fn();
+    chatComplete = vi.fn();
     connector = createConnector();
   });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, forNearestButton } from '../rtl_helpers';
 import { fireEvent } from '@testing-library/react';
@@ -17,13 +19,13 @@ import { noCasesPermissions as mockUseGetCasesPermissions } from '@kbn/observabi
 describe('AddToCaseAction', function () {
   const coreRenderProps = {
     cases: {
-      ui: { getAllCasesSelectorModal: jest.fn() },
+      ui: { getAllCasesSelectorModal: vi.fn() },
       helpers: { canUseCases: () => mockUseGetCasesPermissions() },
     },
   };
 
   beforeEach(() => {
-    jest.spyOn(datePicker, 'parseRelativeDate').mockRestore();
+    vi.spyOn(datePicker, 'parseRelativeDate').mockRestore();
   });
 
   it('should render properly', async function () {
@@ -38,8 +40,8 @@ describe('AddToCaseAction', function () {
   });
 
   it('should parse relative data to the useAddToCase hook', async function () {
-    const useAddToCaseHook = jest.spyOn(useCaseHook, 'useAddToCase');
-    jest.spyOn(datePicker, 'parseRelativeDate').mockReturnValue(moment('2021-11-10T10:52:06.091Z'));
+    const useAddToCaseHook = vi.spyOn(useCaseHook, 'useAddToCase');
+    vi.spyOn(datePicker, 'parseRelativeDate').mockReturnValue(moment('2021-11-10T10:52:06.091Z'));
 
     const { findByText } = render(
       <AddToCaseAction
@@ -64,7 +66,7 @@ describe('AddToCaseAction', function () {
   });
 
   it('should use an empty time-range when timeRanges are empty', async function () {
-    const useAddToCaseHook = jest.spyOn(useCaseHook, 'useAddToCase');
+    const useAddToCaseHook = vi.spyOn(useCaseHook, 'useAddToCase');
 
     const { getByText } = render(
       <AddToCaseAction lensAttributes={null} timeRange={{ to: '', from: '' }} owner="security" />,

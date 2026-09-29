@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   storeHistogram,
   serializeSavedObjectId,
@@ -25,12 +27,12 @@ describe('serializeSavedObjectId', () => {
 describe('storeHistogram', () => {
   const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();
   const mockInternalRepository = savedObjectsRepositoryMock.create();
-  jest.useFakeTimers();
-  const mockNow = jest.getRealSystemTime();
-  jest.setSystemTime(mockNow);
+  vi.useFakeTimers();
+  const mockNow = vi.getRealSystemTime();
+  vi.setSystemTime(mockNow);
 
-  beforeEach(() => jest.clearAllMocks());
-  afterAll(() => jest.useRealTimers());
+  beforeEach(() => vi.clearAllMocks());
+  afterAll(() => vi.useRealTimers());
 
   it('stores histogram data in a savedObject', async () => {
     const mockHistogram = eventLoopDelaysMonitor.collect();
@@ -51,7 +53,7 @@ describe('deleteHistogramSavedObjects', () => {
   const mockInternalRepository = savedObjectsRepositoryMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockInternalRepository.find.mockResolvedValue({
       saved_objects: [{ id: 'test_obj_1' }, { id: 'test_obj_1' }],
     } as SavedObjectsFindResponse);

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { NoDataFound } from './no_data_found';
@@ -11,15 +14,15 @@ import { renderWithTestProvider } from '../../test/test_provider';
 import { mockUseAddIntegrationPath } from './hooks/use_add_integration_path.mock';
 import { useAddIntegrationPath } from './hooks/use_add_integration_path';
 
-jest.mock('./hooks/use_add_integration_path');
+vi.mock('./hooks/use_add_integration_path');
 
 describe('NoDataFound Component', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should render the No Data Found with an add integration link using the integration path', () => {
-    (useAddIntegrationPath as jest.Mock).mockReturnValue(
+    (useAddIntegrationPath as Mock).mockReturnValue(
       mockUseAddIntegrationPath({ addIntegrationPath: '/test-integration-path', isLoading: false })
     );
 
@@ -37,7 +40,7 @@ describe('NoDataFound Component', () => {
   });
 
   it('should disable the add integration button when loading', () => {
-    (useAddIntegrationPath as jest.Mock).mockReturnValue(
+    (useAddIntegrationPath as Mock).mockReturnValue(
       mockUseAddIntegrationPath({ isLoading: true })
     );
 

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { omit } from 'lodash';
 
 import { mockPluginInitializerProvider, runtimeResolverMock } from './plugins_service.test.mocks';
@@ -40,7 +43,7 @@ import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 
-type MockedPluginInitializer = jest.Mock<Plugin<unknown, unknown>>;
+type MockedPluginInitializer = Mock<Plugin<unknown, unknown>>;
 let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
 mockPluginInitializerProvider.mockImplementation((pluginName) => ({
@@ -49,7 +52,7 @@ mockPluginInitializerProvider.mockImplementation((pluginName) => ({
 
 let plugins: InjectedMetadataPlugin[];
 
-type DeeplyMocked<T> = { [P in keyof T]: jest.Mocked<T[P]> };
+type DeeplyMocked<T> = { [P in keyof T]: Mocked<T[P]> };
 
 const mockCoreContext = coreContextMock.create();
 let mockSetupDeps: DeeplyMocked<PluginsServiceSetupDeps>;
@@ -150,30 +153,30 @@ describe('PluginsService', () => {
     mockPluginInitializers = new Map<PluginName, MockedPluginInitializer>([
       [
         'pluginA',
-        jest.fn(() => ({
-          setup: jest.fn(() => ({ setupValue: 1 })),
-          start: jest.fn(() => ({ startValue: 2 })),
-          stop: jest.fn(),
+        vi.fn(() => ({
+          setup: vi.fn(() => ({ setupValue: 1 })),
+          start: vi.fn(() => ({ startValue: 2 })),
+          stop: vi.fn(),
         })),
       ],
       [
         'pluginB',
-        jest.fn(() => ({
-          setup: jest.fn((core, deps: any) => ({
+        vi.fn(() => ({
+          setup: vi.fn((core, deps: any) => ({
             pluginAPlusB: deps.pluginA.setupValue + 1,
           })),
-          start: jest.fn((core, deps: any) => ({
+          start: vi.fn((core, deps: any) => ({
             pluginAPlusB: deps.pluginA.startValue + 1,
           })),
-          stop: jest.fn(),
+          stop: vi.fn(),
         })),
       ],
       [
         'pluginC',
-        jest.fn(() => ({
-          setup: jest.fn(),
-          start: jest.fn(),
-          stop: jest.fn(),
+        vi.fn(() => ({
+          setup: vi.fn(),
+          start: vi.fn(),
+          stop: vi.fn(),
         })),
       ],
     ] as unknown as [[PluginName, any]]);
@@ -251,9 +254,9 @@ describe('PluginsService', () => {
       plugins = [{ id: 'pluginD', plugin: createManifest('pluginD', { optional: ['missing'] }) }];
       mockPluginInitializers.set(
         'pluginD',
-        jest.fn(() => ({
-          setup: jest.fn(),
-          start: jest.fn(),
+        vi.fn(() => ({
+          setup: vi.fn(),
+          start: vi.fn(),
         })) as any
       );
 
@@ -323,9 +326,9 @@ describe('PluginsService', () => {
       plugins = [{ id: 'pluginD', plugin: createManifest('pluginD', { optional: ['missing'] }) }];
       mockPluginInitializers.set(
         'pluginD',
-        jest.fn(() => ({
-          setup: jest.fn(),
-          start: jest.fn(),
+        vi.fn(() => ({
+          setup: vi.fn(),
+          start: vi.fn(),
         })) as any
       );
 

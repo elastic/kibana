@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedClass } from 'vitest';
+
 import { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
@@ -12,18 +15,21 @@ import type { InfraPluginRequestHandlerContext } from '../../types';
 import type { InfraBackendLibs } from '../infra_types';
 import { getApmDataAccessClient } from './get_apm_data_access_client';
 
-jest.mock('@kbn/apm-data-access-plugin/server', () => ({
-  APMEventClient: jest.fn(),
-}));
+vi.mock('@kbn/apm-data-access-plugin/server', () => {
+      const mocked = {
+      APMEventClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MockApmEventClient = APMEventClient as jest.MockedClass<typeof APMEventClient>;
+const MockApmEventClient = APMEventClient as MockedClass<typeof APMEventClient>;
 
 const createContext = () =>
   ({
     core: Promise.resolve({
       savedObjects: { client: {} },
       elasticsearch: { client: { asCurrentUser: {} } },
-      uiSettings: { client: { get: jest.fn().mockResolvedValue(false) } },
+      uiSettings: { client: { get: vi.fn().mockResolvedValue(false) } },
     }),
   } as unknown as InfraPluginRequestHandlerContext);
 
@@ -32,8 +38,8 @@ const createLibs = () =>
     plugins: {
       apmDataAccess: {
         setup: {
-          getApmIndices: jest.fn().mockResolvedValue({}),
-          getServices: jest.fn().mockReturnValue({ getDocumentSources: jest.fn() }),
+          getApmIndices: vi.fn().mockResolvedValue({}),
+          getServices: vi.fn().mockReturnValue({ getDocumentSources: vi.fn() }),
         },
       },
     },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { HttpResourcesRequestHandler, RouteConfig } from '@kbn/core/server';
 import { httpResourcesMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -15,7 +17,7 @@ import { sessionMock } from '../../session_management/session.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('LoggedOut view routes', () => {
-  let session: jest.Mocked<PublicMethodsOf<Session>>;
+  let session: Mocked<PublicMethodsOf<Session>>;
   let routeHandler: HttpResourcesRequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, 'get'>;
   beforeEach(() => {

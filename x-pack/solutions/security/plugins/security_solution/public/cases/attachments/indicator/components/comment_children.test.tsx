@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import {
@@ -24,24 +27,27 @@ import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
-const mockOpenFlyout = jest.fn();
+const mockOpenFlyout = vi.fn();
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_indicator_by_id');
-jest.mock('../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../hooks/use_indicator_by_id');
+vi.mock('../../../../flyout_v2/use_flyout_api');
+vi.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 
 describe('attachment_children initComponent', () => {
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   it('should render the basic values', () => {
@@ -52,7 +58,7 @@ describe('attachment_children initComponent', () => {
       indicatorType: 'indicatorType',
     };
 
-    (useIndicatorById as jest.MockedFunction<typeof useIndicatorById>).mockReturnValue({
+    (useIndicatorById as MockedFunction<typeof useIndicatorById>).mockReturnValue({
       indicator: generateMockFileIndicator(),
       isLoading: false,
     });
@@ -75,7 +81,7 @@ describe('attachment_children initComponent', () => {
       indicatorType: 'indicatorType',
     };
 
-    (useIndicatorById as jest.MockedFunction<typeof useIndicatorById>).mockReturnValue({
+    (useIndicatorById as MockedFunction<typeof useIndicatorById>).mockReturnValue({
       indicator: {} as Indicator,
       isLoading: true,
     });
@@ -97,7 +103,7 @@ describe('attachment_children initComponent', () => {
     };
     const indicator = generateMockFileIndicator();
 
-    (useIndicatorById as jest.MockedFunction<typeof useIndicatorById>).mockReturnValue({
+    (useIndicatorById as MockedFunction<typeof useIndicatorById>).mockReturnValue({
       indicator,
       isLoading: false,
     });
@@ -122,7 +128,7 @@ describe('attachment_children initComponent', () => {
   });
 
   it('should open the new IOC flyout when the new flyout is enabled and the indicator is defined', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
     const id: string = 'abc123';
     const metadata: IndicatorAttachmentMetadata = {
@@ -132,7 +138,7 @@ describe('attachment_children initComponent', () => {
     };
     const indicator = generateMockFileIndicator();
 
-    (useIndicatorById as jest.MockedFunction<typeof useIndicatorById>).mockReturnValue({
+    (useIndicatorById as MockedFunction<typeof useIndicatorById>).mockReturnValue({
       indicator,
       isLoading: false,
     });

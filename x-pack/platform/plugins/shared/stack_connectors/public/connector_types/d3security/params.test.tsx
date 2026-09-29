@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import D3ParamsFields from './params';
@@ -55,7 +57,7 @@ describe('D3SecurityParamsFields renders', () => {
         body: '{"key": "value"}',
       },
     };
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     const { getByTestId, rerender } = render(
       <D3ParamsFields
@@ -98,7 +100,7 @@ describe('D3SecurityParamsFields renders', () => {
         body: '{"key": "value"}',
       },
     };
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     render(
       <D3ParamsFields

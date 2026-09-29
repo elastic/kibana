@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   createAlertEventsBatchBuilder,
@@ -59,12 +61,12 @@ describe('resolveAlertEventType', () => {
 
 describe('createAlertEventsBatchBuilder', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('transforms ES|QL rows into alert documents', () => {
@@ -120,7 +122,7 @@ describe('createAlertEventsBatchBuilder', () => {
 
     const [firstBatchDoc] = buildBatch([{ 'host.name': 'host-a' }]);
 
-    jest.advanceTimersByTime(30_000);
+    vi.advanceTimersByTime(30_000);
 
     const [secondBatchDoc] = buildBatch([{ 'host.name': 'host-b' }]);
 
@@ -367,12 +369,12 @@ describe('createAlertEventsBatchBuilder', () => {
 
 describe('buildRecoveryAlertEvents', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('creates recovered events for active groups not in the breached set', () => {
@@ -502,12 +504,12 @@ describe('buildRecoveryAlertEvents', () => {
 
 describe('buildContinuedBreachAlertEvents', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('creates breached events with an empty data payload for the supplied group hashes', () => {
@@ -551,12 +553,12 @@ describe('buildContinuedBreachAlertEvents', () => {
 
 describe('buildNoDataAlertEvents', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('creates no_data events with an empty data payload for the supplied group hashes', () => {
@@ -615,12 +617,12 @@ describe('buildNoDataAlertEvents', () => {
 
 describe('buildQueryRecoveryAlertEvents', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('creates recovered events for active groups matching the recovery query', () => {

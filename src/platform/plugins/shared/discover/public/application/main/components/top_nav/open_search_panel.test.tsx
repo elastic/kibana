@@ -7,28 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { OpenSearchPanel } from './open_search_panel';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
-jest.mock('../../../../hooks/use_discover_services');
+vi.mock('../../../../hooks/use_discover_services');
 
-const useDiscoverServicesMock = jest.mocked(useDiscoverServices);
+const useDiscoverServicesMock = vi.mocked(useDiscoverServices);
 
 const mockUseDiscoverServicesMock = (capabilitiesOptions: object) => {
   useDiscoverServicesMock.mockReturnValue({
     addBasePath: (path: string) => path,
     capabilities: capabilitiesOptions,
     core: {},
-    savedObjectsFinder: { Finder: jest.fn() },
+    savedObjectsFinder: { Finder: vi.fn() },
   } as unknown as ReturnType<typeof useDiscoverServices>);
 };
 
 describe('OpenSearchPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders "manage discover sessions" button if user has permission', async () => {
@@ -36,7 +38,7 @@ describe('OpenSearchPanel', () => {
       savedObjectsManagement: { edit: true },
     });
 
-    renderWithI18n(<OpenSearchPanel onClose={jest.fn()} onOpenSavedSearch={jest.fn()} />);
+    renderWithI18n(<OpenSearchPanel onClose={vi.fn()} onOpenSavedSearch={vi.fn()} />);
 
     expect(await screen.findByTestId('loadSearchForm', {}, { timeout: 0 })).toBeVisible();
     expect(screen.getByText(/open discover session/i)).toBeVisible();
@@ -48,7 +50,7 @@ describe('OpenSearchPanel', () => {
       savedObjectsManagement: { edit: false, delete: false },
     });
 
-    renderWithI18n(<OpenSearchPanel onClose={jest.fn()} onOpenSavedSearch={jest.fn()} />);
+    renderWithI18n(<OpenSearchPanel onClose={vi.fn()} onOpenSavedSearch={vi.fn()} />);
     expect(await screen.findByTestId('loadSearchForm', {}, { timeout: 0 })).toBeVisible();
     expect(screen.getByText(/open discover session/i)).toBeVisible();
     expect(screen.queryByTestId('manageSearchesBtn')).not.toBeInTheDocument();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Parser } from '@elastic/esql';
 import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
 import { z } from '@kbn/zod/v4';
@@ -1663,13 +1665,13 @@ describe('rule field immutability classification', () => {
 
 describe('ES|QL query length cap', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const oversized = `FROM logs-* | WHERE ${'a'.repeat(MAX_ESQL_QUERY_LENGTH)}`;
 
   it('rejects an oversized base on length alone, without invoking the parser', () => {
-    const parseErrors = jest.spyOn(Parser, 'parseErrors');
+    const parseErrors = vi.spyOn(Parser, 'parseErrors');
 
     const result = createRuleDataSchema.safeParse({
       ...validCreateData,
@@ -1681,8 +1683,8 @@ describe('ES|QL query length cap', () => {
   });
 
   it('rejects an oversized base without composing the breach segment', () => {
-    const parseErrors = jest.spyOn(Parser, 'parseErrors');
-    const parse = jest.spyOn(Parser, 'parse');
+    const parseErrors = vi.spyOn(Parser, 'parseErrors');
+    const parse = vi.spyOn(Parser, 'parse');
 
     const result = createRuleDataSchema.safeParse({
       ...validCreateData,
@@ -1697,8 +1699,8 @@ describe('ES|QL query length cap', () => {
   });
 
   it('does not compose or parse an oversized segment', () => {
-    const parseErrors = jest.spyOn(Parser, 'parseErrors');
-    const parse = jest.spyOn(Parser, 'parse');
+    const parseErrors = vi.spyOn(Parser, 'parseErrors');
+    const parse = vi.spyOn(Parser, 'parse');
 
     const result = createRuleDataSchema.safeParse({
       ...validCreateData,
@@ -1716,7 +1718,7 @@ describe('ES|QL query length cap', () => {
   });
 
   it('rejects an oversized recovery query without invoking the parser', () => {
-    const parseErrors = jest.spyOn(Parser, 'parseErrors');
+    const parseErrors = vi.spyOn(Parser, 'parseErrors');
 
     const result = createRuleDataSchema.safeParse({
       ...validCreateData,
@@ -1730,7 +1732,7 @@ describe('ES|QL query length cap', () => {
   });
 
   it('still parses queries within the limit', () => {
-    const parseErrors = jest.spyOn(Parser, 'parseErrors');
+    const parseErrors = vi.spyOn(Parser, 'parseErrors');
 
     const result = createRuleDataSchema.safeParse(validCreateData);
 

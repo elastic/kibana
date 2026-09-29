@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { CommandMenuPopover } from './command_menu_popover';
@@ -51,8 +53,8 @@ const inactiveMatch: CommandMatchResult = {
 const activeMatch = buildMatch();
 
 const defaultProps = {
-  onSelect: jest.fn(),
-  onContentChange: jest.fn(),
+  onSelect: vi.fn(),
+  onContentChange: vi.fn(),
   commandMenuRef: { current: null } as React.RefObject<CommandMenuHandle>,
 };
 
@@ -163,7 +165,7 @@ describe('CommandMenuPopover', () => {
     });
 
     it('keeps the menu component mounted while hidden, so it can keep re-evaluating and recover on its own', () => {
-      const mountSpy = jest.fn();
+      const mountSpy = vi.fn();
       const MockMountTrackingMenuComponent = React.forwardRef<
         CommandMenuHandle,
         CommandMenuComponentProps
@@ -217,7 +219,7 @@ describe('CommandMenuPopover', () => {
     });
 
     it('forwards onContentChange, including the current query, to the mounted menu component', () => {
-      const onContentChange = jest.fn();
+      const onContentChange = vi.fn();
       render(
         <CommandMenuPopover
           commandMatch={buildMatch({

@@ -7,24 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { processNodeStackMonitoring } from './process_node_stack_monitoring';
 
-jest.mock('../cancel_workflow_if_requested', () => ({
-  cancelWorkflowIfRequested: jest.fn(),
-}));
+vi.mock('../cancel_workflow_if_requested', () => {
+      const mocked = {
+      cancelWorkflowIfRequested: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { cancelWorkflowIfRequested } = require('../cancel_workflow_if_requested');
 
 describe('processNodeStackMonitoring', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('invokes monitor on monitorable nodes and cancellation check', async () => {
-    const monitorFn = jest.fn();
-    const nodeWithMonitor = { monitor: monitorFn, run: jest.fn() };
-    const nodeWithoutMonitor = { run: jest.fn() };
+    const monitorFn = vi.fn();
+    const nodeWithMonitor = { monitor: monitorFn, run: vi.fn() };
+    const nodeWithoutMonitor = { run: vi.fn() };
 
     const stackFrames = [
       { stepId: 'scope-1', nestedScopes: [{ nodeId: 'node-a', nodeType: 'enter-retry' }] },
@@ -37,13 +42,13 @@ describe('processNodeStackMonitoring', () => {
 
     const params = {
       workflowRuntime: {
-        getCurrentNodeScope: jest.fn(() => stackFrames),
+        getCurrentNodeScope: vi.fn(() => stackFrames),
       },
       stepExecutionRuntimeFactory: {
-        createStepExecutionRuntime: jest.fn(() => ({})),
+        createStepExecutionRuntime: vi.fn(() => ({})),
       },
       nodesFactory: {
-        create: jest
+        create: vi
           .fn()
           .mockReturnValueOnce(nodeWithMonitor)
           .mockReturnValueOnce(nodeWithoutMonitor),
@@ -66,13 +71,13 @@ describe('processNodeStackMonitoring', () => {
 
     const params = {
       workflowRuntime: {
-        getCurrentNodeScope: jest.fn(() => []),
+        getCurrentNodeScope: vi.fn(() => []),
       },
       stepExecutionRuntimeFactory: {
-        createStepExecutionRuntime: jest.fn(),
+        createStepExecutionRuntime: vi.fn(),
       },
       nodesFactory: {
-        create: jest.fn(),
+        create: vi.fn(),
       },
       workflowExecutionRepository: {},
       workflowExecutionState: {},

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
 import type { IBasePath } from '@kbn/core/server';
 import { updateState, setRecoveredAlertsContext } from './common';
 import type {
@@ -19,14 +22,14 @@ const monitorId = '12345';
 const configId = '56789';
 
 describe('updateState', () => {
-  let spy: jest.SpyInstance<string, []>;
-  jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+  let spy: MockInstance<string, []>;
+  vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
   beforeEach(() => {
-    spy = jest.spyOn(Date.prototype, 'toISOString');
+    spy = vi.spyOn(Date.prototype, 'toISOString');
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('sets initial state values', () => {
@@ -239,10 +242,10 @@ describe('setRecoveredAlertsContext', () => {
 
   it('sets context correctly when monitor is deleted', () => {
     const alertsClientMock = {
-      report: jest.fn(),
-      getAlertLimitValue: jest.fn().mockReturnValue(10),
-      setAlertLimitReached: jest.fn(),
-      getRecoveredAlerts: jest.fn().mockReturnValue([
+      report: vi.fn(),
+      getAlertLimitValue: vi.fn().mockReturnValue(10),
+      setAlertLimitReached: vi.fn(),
+      getRecoveredAlerts: vi.fn().mockReturnValue([
         {
           alert: {
             getUuid: () => alertUuid,
@@ -250,7 +253,7 @@ describe('setRecoveredAlertsContext', () => {
             getState: () => ({
               downThreshold: 1,
             }),
-            setContext: jest.fn(),
+            setContext: vi.fn(),
           },
           hit: {
             'kibana.alert.instance.id': idWithLocation,
@@ -261,8 +264,8 @@ describe('setRecoveredAlertsContext', () => {
           },
         },
       ]),
-      setAlertData: jest.fn(),
-      isTrackedAlert: jest.fn(),
+      setAlertData: vi.fn(),
+      isTrackedAlert: vi.fn(),
     };
     const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {
       [idWithLocation]: {
@@ -345,10 +348,10 @@ describe('setRecoveredAlertsContext', () => {
 
   it('sets context correctly when location is removed', () => {
     const alertsClientMock = {
-      report: jest.fn(),
-      getAlertLimitValue: jest.fn().mockReturnValue(10),
-      setAlertLimitReached: jest.fn(),
-      getRecoveredAlerts: jest.fn().mockReturnValue([
+      report: vi.fn(),
+      getAlertLimitValue: vi.fn().mockReturnValue(10),
+      setAlertLimitReached: vi.fn(),
+      getRecoveredAlerts: vi.fn().mockReturnValue([
         {
           alert: {
             getUuid: () => alertUuid,
@@ -356,7 +359,7 @@ describe('setRecoveredAlertsContext', () => {
             getState: () => ({
               downThreshold: 1,
             }),
-            setContext: jest.fn(),
+            setContext: vi.fn(),
           },
           hit: {
             'kibana.alert.instance.id': idWithLocation,
@@ -366,8 +369,8 @@ describe('setRecoveredAlertsContext', () => {
           },
         },
       ]),
-      setAlertData: jest.fn(),
-      isTrackedAlert: jest.fn(),
+      setAlertData: vi.fn(),
+      isTrackedAlert: vi.fn(),
     };
     const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {
       [idWithLocation]: {
@@ -450,10 +453,10 @@ describe('setRecoveredAlertsContext', () => {
 
   it('sets context correctly when monitor is up', () => {
     const alertsClientMock = {
-      report: jest.fn(),
-      getAlertLimitValue: jest.fn().mockReturnValue(10),
-      setAlertLimitReached: jest.fn(),
-      getRecoveredAlerts: jest.fn().mockReturnValue([
+      report: vi.fn(),
+      getAlertLimitValue: vi.fn().mockReturnValue(10),
+      setAlertLimitReached: vi.fn(),
+      getRecoveredAlerts: vi.fn().mockReturnValue([
         {
           alert: {
             getId: () => idWithLocation,
@@ -461,7 +464,7 @@ describe('setRecoveredAlertsContext', () => {
             getState: () => ({
               downThreshold: 1,
             }),
-            setContext: jest.fn(),
+            setContext: vi.fn(),
           },
           hit: {
             'kibana.alert.instance.id': idWithLocation,
@@ -471,8 +474,8 @@ describe('setRecoveredAlertsContext', () => {
           },
         },
       ]),
-      setAlertData: jest.fn(),
-      isTrackedAlert: jest.fn(),
+      setAlertData: vi.fn(),
+      isTrackedAlert: vi.fn(),
     };
     const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {
       [idWithLocation]: {
@@ -551,10 +554,10 @@ describe('setRecoveredAlertsContext', () => {
 
   it('sets the correct default recovery summary', () => {
     const alertsClientMock = {
-      report: jest.fn(),
-      getAlertLimitValue: jest.fn().mockReturnValue(10),
-      setAlertLimitReached: jest.fn(),
-      getRecoveredAlerts: jest.fn().mockReturnValue([
+      report: vi.fn(),
+      getAlertLimitValue: vi.fn().mockReturnValue(10),
+      setAlertLimitReached: vi.fn(),
+      getRecoveredAlerts: vi.fn().mockReturnValue([
         {
           alert: {
             getId: () => idWithLocation,
@@ -562,7 +565,7 @@ describe('setRecoveredAlertsContext', () => {
             getState: () => ({
               downThreshold: 1,
             }),
-            setContext: jest.fn(),
+            setContext: vi.fn(),
           },
           hit: {
             'kibana.alert.instance.id': idWithLocation,
@@ -580,8 +583,8 @@ describe('setRecoveredAlertsContext', () => {
           },
         },
       ]),
-      setAlertData: jest.fn(),
-      isTrackedAlert: jest.fn(),
+      setAlertData: vi.fn(),
+      isTrackedAlert: vi.fn(),
     };
     const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {};
     setRecoveredAlertsContext({
@@ -637,10 +640,10 @@ describe('setRecoveredAlertsContext', () => {
 
   it('sets the recovery summary for recovered custom alerts', () => {
     const alertsClientMock = {
-      report: jest.fn(),
-      getAlertLimitValue: jest.fn().mockReturnValue(10),
-      setAlertLimitReached: jest.fn(),
-      getRecoveredAlerts: jest.fn().mockReturnValue([
+      report: vi.fn(),
+      getAlertLimitValue: vi.fn().mockReturnValue(10),
+      setAlertLimitReached: vi.fn(),
+      getRecoveredAlerts: vi.fn().mockReturnValue([
         {
           alert: {
             getId: () => idWithLocation,
@@ -649,7 +652,7 @@ describe('setRecoveredAlertsContext', () => {
               downThreshold: 1,
               configId,
             }),
-            setContext: jest.fn(),
+            setContext: vi.fn(),
           },
           hit: {
             'kibana.alert.instance.id': idWithLocation,
@@ -667,8 +670,8 @@ describe('setRecoveredAlertsContext', () => {
           },
         },
       ]),
-      setAlertData: jest.fn(),
-      isTrackedAlert: jest.fn(),
+      setAlertData: vi.fn(),
+      isTrackedAlert: vi.fn(),
     };
     const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {};
     setRecoveredAlertsContext({
@@ -723,10 +726,10 @@ describe('setRecoveredAlertsContext', () => {
 
   it('handles ungrouped recoveries', () => {
     const alertsClientMock = {
-      report: jest.fn(),
-      getAlertLimitValue: jest.fn().mockReturnValue(10),
-      setAlertLimitReached: jest.fn(),
-      getRecoveredAlerts: jest.fn().mockReturnValue([
+      report: vi.fn(),
+      getAlertLimitValue: vi.fn().mockReturnValue(10),
+      setAlertLimitReached: vi.fn(),
+      getRecoveredAlerts: vi.fn().mockReturnValue([
         {
           alert: {
             getId: () => idWithLocation,
@@ -735,7 +738,7 @@ describe('setRecoveredAlertsContext', () => {
               downThreshold: 1,
               configId,
             }),
-            setContext: jest.fn(),
+            setContext: vi.fn(),
           },
           hit: {
             'kibana.alert.instance.id': idWithLocation,
@@ -753,8 +756,8 @@ describe('setRecoveredAlertsContext', () => {
           },
         },
       ]),
-      setAlertData: jest.fn(),
-      isTrackedAlert: jest.fn(),
+      setAlertData: vi.fn(),
+      isTrackedAlert: vi.fn(),
     };
     const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {};
     setRecoveredAlertsContext({
@@ -810,16 +813,16 @@ describe('setRecoveredAlertsContext', () => {
   describe('findConfigKeyByAlertId prefix-match fallback', () => {
     it('matches staleDownConfigs by prefix when alert ID has no location suffix', () => {
       const alertsClientMock = {
-        report: jest.fn(),
-        getAlertLimitValue: jest.fn().mockReturnValue(10),
-        setAlertLimitReached: jest.fn(),
-        getRecoveredAlerts: jest.fn().mockReturnValue([
+        report: vi.fn(),
+        getAlertLimitValue: vi.fn().mockReturnValue(10),
+        setAlertLimitReached: vi.fn(),
+        getRecoveredAlerts: vi.fn().mockReturnValue([
           {
             alert: {
               getUuid: () => alertUuid,
               getId: () => configId,
               getState: () => ({ downThreshold: 1 }),
-              setContext: jest.fn(),
+              setContext: vi.fn(),
             },
             hit: {
               'kibana.alert.instance.id': configId,
@@ -830,8 +833,8 @@ describe('setRecoveredAlertsContext', () => {
             },
           },
         ]),
-        setAlertData: jest.fn(),
-        isTrackedAlert: jest.fn(),
+        setAlertData: vi.fn(),
+        isTrackedAlert: vi.fn(),
       };
       const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {
         [idWithLocation]: {
@@ -876,16 +879,16 @@ describe('setRecoveredAlertsContext', () => {
 
     it('matches stalePendingConfigs by prefix when alert ID has no location suffix', () => {
       const alertsClientMock = {
-        report: jest.fn(),
-        getAlertLimitValue: jest.fn().mockReturnValue(10),
-        setAlertLimitReached: jest.fn(),
-        getRecoveredAlerts: jest.fn().mockReturnValue([
+        report: vi.fn(),
+        getAlertLimitValue: vi.fn().mockReturnValue(10),
+        setAlertLimitReached: vi.fn(),
+        getRecoveredAlerts: vi.fn().mockReturnValue([
           {
             alert: {
               getUuid: () => alertUuid,
               getId: () => configId,
               getState: () => ({ downThreshold: 1 }),
-              setContext: jest.fn(),
+              setContext: vi.fn(),
             },
             hit: {
               'kibana.alert.instance.id': configId,
@@ -896,8 +899,8 @@ describe('setRecoveredAlertsContext', () => {
             },
           },
         ]),
-        setAlertData: jest.fn(),
-        isTrackedAlert: jest.fn(),
+        setAlertData: vi.fn(),
+        isTrackedAlert: vi.fn(),
       };
       const stalePendingConfigs: AlertOverviewStatus['stalePendingConfigs'] = {
         [idWithLocation]: {
@@ -947,16 +950,16 @@ describe('setRecoveredAlertsContext', () => {
 
     it('matches upConfigs by prefix when alert ID has no location suffix', () => {
       const alertsClientMock = {
-        report: jest.fn(),
-        getAlertLimitValue: jest.fn().mockReturnValue(10),
-        setAlertLimitReached: jest.fn(),
-        getRecoveredAlerts: jest.fn().mockReturnValue([
+        report: vi.fn(),
+        getAlertLimitValue: vi.fn().mockReturnValue(10),
+        setAlertLimitReached: vi.fn(),
+        getRecoveredAlerts: vi.fn().mockReturnValue([
           {
             alert: {
               getUuid: () => alertUuid,
               getId: () => configId,
               getState: () => ({ downThreshold: 1 }),
-              setContext: jest.fn(),
+              setContext: vi.fn(),
             },
             hit: {
               'kibana.alert.instance.id': configId,
@@ -967,8 +970,8 @@ describe('setRecoveredAlertsContext', () => {
             },
           },
         ]),
-        setAlertData: jest.fn(),
-        isTrackedAlert: jest.fn(),
+        setAlertData: vi.fn(),
+        isTrackedAlert: vi.fn(),
       };
       setRecoveredAlertsContext({
         alertsClient: alertsClientMock,
@@ -997,16 +1000,16 @@ describe('setRecoveredAlertsContext', () => {
 
     it('prefers staleDownConfigs over stalePendingConfigs on prefix match', () => {
       const alertsClientMock = {
-        report: jest.fn(),
-        getAlertLimitValue: jest.fn().mockReturnValue(10),
-        setAlertLimitReached: jest.fn(),
-        getRecoveredAlerts: jest.fn().mockReturnValue([
+        report: vi.fn(),
+        getAlertLimitValue: vi.fn().mockReturnValue(10),
+        setAlertLimitReached: vi.fn(),
+        getRecoveredAlerts: vi.fn().mockReturnValue([
           {
             alert: {
               getUuid: () => alertUuid,
               getId: () => configId,
               getState: () => ({ downThreshold: 1 }),
-              setContext: jest.fn(),
+              setContext: vi.fn(),
             },
             hit: {
               'kibana.alert.instance.id': configId,
@@ -1017,8 +1020,8 @@ describe('setRecoveredAlertsContext', () => {
             },
           },
         ]),
-        setAlertData: jest.fn(),
-        isTrackedAlert: jest.fn(),
+        setAlertData: vi.fn(),
+        isTrackedAlert: vi.fn(),
       };
       const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {
         [idWithLocation]: {
@@ -1083,16 +1086,16 @@ describe('setRecoveredAlertsContext', () => {
     it('does not prefix-match when alert ID does not match any config key', () => {
       const nonMatchingConfigId = 'no-match-config';
       const alertsClientMock = {
-        report: jest.fn(),
-        getAlertLimitValue: jest.fn().mockReturnValue(10),
-        setAlertLimitReached: jest.fn(),
-        getRecoveredAlerts: jest.fn().mockReturnValue([
+        report: vi.fn(),
+        getAlertLimitValue: vi.fn().mockReturnValue(10),
+        setAlertLimitReached: vi.fn(),
+        getRecoveredAlerts: vi.fn().mockReturnValue([
           {
             alert: {
               getUuid: () => alertUuid,
               getId: () => nonMatchingConfigId,
               getState: () => ({ downThreshold: 1 }),
-              setContext: jest.fn(),
+              setContext: vi.fn(),
             },
             hit: {
               'kibana.alert.instance.id': nonMatchingConfigId,
@@ -1103,8 +1106,8 @@ describe('setRecoveredAlertsContext', () => {
             },
           },
         ]),
-        setAlertData: jest.fn(),
-        isTrackedAlert: jest.fn(),
+        setAlertData: vi.fn(),
+        isTrackedAlert: vi.fn(),
       };
       const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {
         [idWithLocation]: {

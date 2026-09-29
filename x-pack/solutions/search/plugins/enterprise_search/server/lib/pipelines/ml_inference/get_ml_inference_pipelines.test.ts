@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
@@ -13,15 +15,15 @@ import { getMlInferencePipelines } from './get_ml_inference_pipelines';
 describe('getMlInferencePipelines', () => {
   const mockClient = {
     ingest: {
-      getPipeline: jest.fn(),
+      getPipeline: vi.fn(),
     },
   };
   const mockTrainedModelsProvider = {
-    getTrainedModels: jest.fn(),
+    getTrainedModels: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should throw an error if Machine Learning is disabled in the current space', async () => {

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { AutonomyLevelControl } from './autonomy_level_control';
@@ -12,7 +14,7 @@ const AD_WORKER_ID = 'system-security-floor-attack-discovery';
 const TRIAGE_WORKER_ID = 'system-security-floor-alert-triage';
 
 describe('AutonomyLevelControl (Sep 14 radios)', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   it('renders radio cards only for allowed levels', () => {
     render(<AutonomyLevelControl workerId={AD_WORKER_ID} current="manual" onChange={onChange} />);
@@ -156,7 +158,7 @@ describe('AutonomyLevelControl (Sep 14 radios)', () => {
     // calls the handler — which is why the fixed branch passes its own no-op rather than the save.
     it('saves nothing when the only level is clicked', () => {
       // Its own mock: the suite's shared one carries calls from the selection tests above.
-      const onFixedChange = jest.fn();
+      const onFixedChange = vi.fn();
       render(
         <AutonomyLevelControl
           workerId={TRIAGE_WORKER_ID}

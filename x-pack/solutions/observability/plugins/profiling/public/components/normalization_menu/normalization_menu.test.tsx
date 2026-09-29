@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -20,7 +22,7 @@ describe('NormalizationMenu', () => {
 
   const renderMenu = () =>
     render(
-      <NormalizationMenu mode={NormalizationMode.Scale} options={options} onChange={jest.fn()} />
+      <NormalizationMenu mode={NormalizationMode.Scale} options={options} onChange={vi.fn()} />
     );
 
   it('gives both scale factor fields an accessible name matching their visible label', async () => {

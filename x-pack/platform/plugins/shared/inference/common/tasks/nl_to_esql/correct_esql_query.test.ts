@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { correctCommonEsqlMistakes } from './correct_esql_query';
 
-jest.mock('./ast');
-jest.mock('./non_ast');
+vi.mock('./ast');
+vi.mock('./non_ast');
 import { correctQueryWithAst } from './ast';
 import { correctCommonEsqlMistakes as correctQueryWithoutAst } from './non_ast';
 
-const correctQueryWithAstMock = correctQueryWithAst as jest.MockedFn<typeof correctQueryWithAst>;
-const correctQueryWithoutAstMock = correctQueryWithoutAst as jest.MockedFn<
+const correctQueryWithAstMock = correctQueryWithAst as MockedFunction<typeof correctQueryWithAst>;
+const correctQueryWithoutAstMock = correctQueryWithoutAst as MockedFunction<
   typeof correctQueryWithoutAst
 >;
 

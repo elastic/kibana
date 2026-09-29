@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { Mocked } from 'vitest';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type { RuleParams } from '../../../rule_schema';
@@ -31,7 +33,7 @@ describe('suppressionDurationToSeconds', () => {
 });
 
 describe('sendAlertSuppressionTelemetryEvent', () => {
-  let mockAnalytics: jest.Mocked<AnalyticsServiceSetup>;
+  let mockAnalytics: Mocked<AnalyticsServiceSetup>;
   let mockCore: ReturnType<typeof coreMock.createSetup>;
   const ruleAttributes = { name: 'Detects suspicious activity on endpoint' } as SanitizedRuleConfig;
   beforeEach(() => {

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import { merge } from 'lodash';
 import { loggingSystemMock, docLinksServiceMock } from '@kbn/core/server/mocks';
 import type { TaskManagerConfig } from '../config';
@@ -14,22 +17,25 @@ import { logHealthMetrics, resetLastLogLevel } from './log_health_metrics';
 import type { Logger } from '@kbn/core/server';
 import { TaskPersistence } from '../task_events';
 
-jest.mock('./calculate_health_status', () => ({
-  calculateHealthStatus: jest.fn(),
-}));
+vi.mock('./calculate_health_status', () => {
+      const mocked = {
+      calculateHealthStatus: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('logHealthMetrics', () => {
   const docLinks = docLinksServiceMock.create().setup();
 
-  afterEach(() => {
-    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+  afterEach(async () => {
+    const { calculateHealthStatus } = (await vi.importMock('./calculate_health_status'));
     // Reset the last state by running through this as OK
     // (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.OK);
     resetLastLogLevel();
-    (calculateHealthStatus as jest.Mock<HealthStatus>).mockReset();
+    (calculateHealthStatus as Mock<HealthStatus>).mockReset();
   });
 
-  it('should log a warning message to enable verbose logging when the status goes from OK to Warning/Error', () => {
+  it('should log a warning message to enable verbose logging when the status goes from OK to Warning/Error', async () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
@@ -39,36 +45,36 @@ describe('logHealthMetrics', () => {
       },
     });
     const health = getMockMonitoredHealth();
-    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+    const { calculateHealthStatus } = (await vi.importMock('./calculate_health_status'));
 
     // We must change from OK to Warning
     (
-      calculateHealthStatus as jest.Mock<{ status: HealthStatus; reason?: string }>
+      calculateHealthStatus as Mock<{ status: HealthStatus; reason?: string }>
     ).mockImplementation(() => ({
       status: HealthStatus.OK,
     }));
     logHealthMetrics(health, logger, config, true, docLinks);
     (
-      calculateHealthStatus as jest.Mock<{ status: HealthStatus; reason?: string }>
+      calculateHealthStatus as Mock<{ status: HealthStatus; reason?: string }>
     ).mockImplementation(() => ({
       status: HealthStatus.Warning,
     }));
     logHealthMetrics(health, logger, config, true, docLinks);
     // We must change from OK to Error
     (
-      calculateHealthStatus as jest.Mock<{ status: HealthStatus; reason?: string }>
+      calculateHealthStatus as Mock<{ status: HealthStatus; reason?: string }>
     ).mockImplementation(() => ({
       status: HealthStatus.OK,
     }));
     logHealthMetrics(health, logger, config, true, docLinks);
     (
-      calculateHealthStatus as jest.Mock<{ status: HealthStatus; reason?: string }>
+      calculateHealthStatus as Mock<{ status: HealthStatus; reason?: string }>
     ).mockImplementation(() => ({
       status: HealthStatus.Error,
     }));
     logHealthMetrics(health, logger, config, true, docLinks);
 
-    const debugCalls = (logger as jest.Mocked<Logger>).debug.mock.calls;
+    const debugCalls = (logger as Mocked<Logger>).debug.mock.calls;
     const performanceMessage = /^Task Manager detected a degradation in performance/;
     const lastStatsMessage = /^Latest Monitored Stats: \{.*\}$/;
     expect(debugCalls[0][0] as string).toMatch(lastStatsMessage);
@@ -79,7 +85,7 @@ describe('logHealthMetrics', () => {
     expect(debugCalls[5][0] as string).toMatch(performanceMessage);
   });
 
-  it('should not log a warning message to enable verbose logging when the status goes from Warning to OK', () => {
+  it('should not log a warning message to enable verbose logging when the status goes from Warning to OK', async () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
@@ -89,19 +95,19 @@ describe('logHealthMetrics', () => {
       },
     });
     const health = getMockMonitoredHealth();
-    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+    const { calculateHealthStatus } = (await vi.importMock('./calculate_health_status'));
 
     // We must change from Warning to OK
-    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(
+    (calculateHealthStatus as Mock<HealthStatus>).mockImplementation(
       () => HealthStatus.Warning
     );
     logHealthMetrics(health, logger, config, true, docLinks);
-    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.OK);
+    (calculateHealthStatus as Mock<HealthStatus>).mockImplementation(() => HealthStatus.OK);
     logHealthMetrics(health, logger, config, true, docLinks);
-    expect((logger as jest.Mocked<Logger>).warn).not.toHaveBeenCalled();
+    expect((logger as Mocked<Logger>).warn).not.toHaveBeenCalled();
   });
 
-  it('should not log a warning message to enable verbose logging when the status goes from Error to OK', () => {
+  it('should not log a warning message to enable verbose logging when the status goes from Error to OK', async () => {
     // console.log('start', getLastLogLevel());
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
@@ -112,14 +118,14 @@ describe('logHealthMetrics', () => {
       },
     });
     const health = getMockMonitoredHealth();
-    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+    const { calculateHealthStatus } = (await vi.importMock('./calculate_health_status'));
 
     // We must change from Error to OK
-    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.Error);
+    (calculateHealthStatus as Mock<HealthStatus>).mockImplementation(() => HealthStatus.Error);
     logHealthMetrics(health, logger, config, true, docLinks);
-    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.OK);
+    (calculateHealthStatus as Mock<HealthStatus>).mockImplementation(() => HealthStatus.OK);
     logHealthMetrics(health, logger, config, true, docLinks);
-    expect((logger as jest.Mocked<Logger>).warn).not.toHaveBeenCalled();
+    expect((logger as Mocked<Logger>).warn).not.toHaveBeenCalled();
   });
 
   it('should log as debug if status is OK', () => {
@@ -136,7 +142,7 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config, true, docLinks);
 
     const firstDebug = JSON.parse(
-      ((logger as jest.Mocked<Logger>).debug.mock.calls[0][0] as string).replace(
+      ((logger as Mocked<Logger>).debug.mock.calls[0][0] as string).replace(
         'Latest Monitored Stats: ',
         ''
       )
@@ -158,7 +164,7 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config, true, docLinks);
 
     const firstInfo = JSON.parse(
-      ((logger as jest.Mocked<Logger>).info.mock.calls[0][0] as string).replace(
+      ((logger as Mocked<Logger>).info.mock.calls[0][0] as string).replace(
         'Latest Monitored Stats: ',
         ''
       )
@@ -180,7 +186,7 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config, true, docLinks);
 
     const firstDebug = JSON.parse(
-      ((logger as jest.Mocked<Logger>).debug.mock.calls[0][0] as string).replace(
+      ((logger as Mocked<Logger>).debug.mock.calls[0][0] as string).replace(
         'Latest Monitored Stats: ',
         ''
       )
@@ -188,7 +194,7 @@ describe('logHealthMetrics', () => {
     expect(firstDebug).toMatchObject(health);
   });
 
-  it('should log as warn if status is Warn', () => {
+  it('should log as warn if status is Warn', async () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
@@ -198,9 +204,9 @@ describe('logHealthMetrics', () => {
       },
     });
     const health = getMockMonitoredHealth();
-    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+    const { calculateHealthStatus } = (await vi.importMock('./calculate_health_status'));
     (
-      calculateHealthStatus as jest.Mock<{ status: HealthStatus; reason?: string }>
+      calculateHealthStatus as Mock<{ status: HealthStatus; reason?: string }>
     ).mockImplementation(() => ({
       status: HealthStatus.Warning,
     }));
@@ -208,7 +214,7 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config, true, docLinks);
 
     const logMessage = JSON.parse(
-      ((logger as jest.Mocked<Logger>).warn.mock.calls[0][0] as string).replace(
+      ((logger as Mocked<Logger>).warn.mock.calls[0][0] as string).replace(
         'Latest Monitored Stats: ',
         ''
       )
@@ -216,7 +222,7 @@ describe('logHealthMetrics', () => {
     expect(logMessage).toMatchObject(health);
   });
 
-  it('should log as error if status is Error', () => {
+  it('should log as error if status is Error', async () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
@@ -226,9 +232,9 @@ describe('logHealthMetrics', () => {
       },
     });
     const health = getMockMonitoredHealth();
-    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+    const { calculateHealthStatus } = (await vi.importMock('./calculate_health_status'));
     (
-      calculateHealthStatus as jest.Mock<{ status: HealthStatus; reason?: string }>
+      calculateHealthStatus as Mock<{ status: HealthStatus; reason?: string }>
     ).mockImplementation(() => ({
       status: HealthStatus.Error,
     }));
@@ -236,7 +242,7 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config, true, docLinks);
 
     const logMessage = JSON.parse(
-      ((logger as jest.Mocked<Logger>).error.mock.calls[0][0] as string).replace(
+      ((logger as Mocked<Logger>).error.mock.calls[0][0] as string).replace(
         'Latest Monitored Stats: ',
         ''
       )
@@ -275,12 +281,12 @@ describe('logHealthMetrics', () => {
 
     logHealthMetrics(health, logger, config, true, docLinks);
 
-    expect((logger as jest.Mocked<Logger>).warn.mock.calls[0][0] as string).toBe(
+    expect((logger as Mocked<Logger>).warn.mock.calls[0][0] as string).toBe(
       `Detected delay task start of 60s for task(s) \"taskType:test\" (which exceeds configured value of 60s)`
     );
 
     const secondMessage = JSON.parse(
-      ((logger as jest.Mocked<Logger>).warn.mock.calls[1][0] as string).replace(
+      ((logger as Mocked<Logger>).warn.mock.calls[1][0] as string).replace(
         `Latest Monitored Stats: `,
         ''
       )
@@ -319,12 +325,12 @@ describe('logHealthMetrics', () => {
 
     logHealthMetrics(health, logger, config, true, docLinks);
 
-    expect((logger as jest.Mocked<Logger>).warn.mock.calls[0][0] as string).toBe(
+    expect((logger as Mocked<Logger>).warn.mock.calls[0][0] as string).toBe(
       `Detected delay task start of 60s for task(s) \"taskType:test, taskType:test2\" (which exceeds configured value of 60s)`
     );
 
     const secondMessage = JSON.parse(
-      ((logger as jest.Mocked<Logger>).warn.mock.calls[1][0] as string).replace(
+      ((logger as Mocked<Logger>).warn.mock.calls[1][0] as string).replace(
         `Latest Monitored Stats: `,
         ''
       )
@@ -352,7 +358,7 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config, true, docLinks);
 
     const firstDebug = JSON.parse(
-      ((logger as jest.Mocked<Logger>).debug.mock.calls[0][0] as string).replace(
+      ((logger as Mocked<Logger>).debug.mock.calls[0][0] as string).replace(
         'Latest Monitored Stats: ',
         ''
       )
@@ -392,7 +398,7 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config, false, docLinks);
 
     const firstDebug = JSON.parse(
-      ((logger as jest.Mocked<Logger>).debug.mock.calls[0][0] as string).replace(
+      ((logger as Mocked<Logger>).debug.mock.calls[0][0] as string).replace(
         'Latest Monitored Stats: ',
         ''
       )
@@ -400,7 +406,7 @@ describe('logHealthMetrics', () => {
     expect(firstDebug).toMatchObject(health);
   });
 
-  it('should ignore capacity estimation status', () => {
+  it('should ignore capacity estimation status', async () => {
     const logger = loggingSystemMock.create().get();
     const config = getTaskManagerConfig({
       monitored_stats_health_verbose_log: {
@@ -419,7 +425,7 @@ describe('logHealthMetrics', () => {
 
     logHealthMetrics(health, logger, config, true, docLinks);
 
-    const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
+    const { calculateHealthStatus } = (await vi.importMock('./calculate_health_status'));
     expect(calculateHealthStatus).toHaveBeenCalledTimes(1);
     expect(calculateHealthStatus.mock.calls[0][0].stats.capacity_estimation).toBeUndefined();
   });

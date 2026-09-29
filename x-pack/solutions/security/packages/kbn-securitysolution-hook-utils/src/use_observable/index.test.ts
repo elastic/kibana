@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { Subject, throwError } from 'rxjs';
 
@@ -18,14 +21,14 @@ interface TestArgs {
 type TestReturn = Subject<unknown>;
 
 describe('useObservable', () => {
-  let fn: jest.Mock<TestReturn, TestArgs[]>;
+  let fn: Mock<TestReturn, TestArgs[]>;
   let subject: TestReturn;
   let args: TestArgs;
 
   beforeEach(() => {
     args = { n: 1, s: 's' };
     subject = new Subject();
-    fn = jest.fn().mockReturnValue(subject);
+    fn = vi.fn().mockReturnValue(subject);
   });
 
   it('does not invoke fn if start was not called', () => {

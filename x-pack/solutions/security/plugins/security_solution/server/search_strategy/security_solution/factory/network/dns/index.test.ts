@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as buildQuery from './query.dns_network.dsl';
 import { networkDns } from '.';
 import {
@@ -14,7 +16,7 @@ import {
 } from './__mocks__';
 
 describe('networkDns search strategy', () => {
-  const mockBuildDnsQuery = jest.spyOn(buildQuery, 'buildDnsQuery');
+  const mockBuildDnsQuery = vi.spyOn(buildQuery, 'buildDnsQuery');
 
   afterEach(() => {
     mockBuildDnsQuery.mockClear();

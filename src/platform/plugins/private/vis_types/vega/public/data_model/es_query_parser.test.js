@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
@@ -38,7 +40,7 @@ function create(min, max, dashboardCtx) {
   return inst;
 }
 
-jest.mock('../services');
+vi.mock('../services');
 
 describe(`EsQueryParser time`, () => {
   test(`roundInterval(4s)`, () => {
@@ -95,7 +97,7 @@ describe('EsQueryParser.populateData', () => {
 
   beforeEach(() => {
     searchApiStub = {
-      search: jest.fn(() => of(data)),
+      search: vi.fn(() => of(data)),
     };
     parser = new EsQueryParser({}, searchApiStub, undefined, undefined);
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as buildQuery from './query.http_network.dsl';
 import { networkHttp } from '.';
 import {
@@ -14,7 +16,7 @@ import {
 } from './__mocks__';
 
 describe('networkHttp search strategy', () => {
-  const buildHttpQuery = jest.spyOn(buildQuery, 'buildHttpQuery');
+  const buildHttpQuery = vi.spyOn(buildQuery, 'buildHttpQuery');
 
   afterEach(() => {
     buildHttpQuery.mockClear();

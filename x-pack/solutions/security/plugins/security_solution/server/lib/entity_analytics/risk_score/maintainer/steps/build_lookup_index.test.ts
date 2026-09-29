@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
@@ -17,10 +20,10 @@ const RUN_ID = 'run-123';
 
 const buildLogger = (): ScopedLogger =>
   ({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as unknown as ScopedLogger);
 
 describe('build_lookup_index', () => {
@@ -30,16 +33,16 @@ describe('build_lookup_index', () => {
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-    (esClient.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [] });
-    (esClient.indices.refresh as jest.Mock).mockResolvedValue({});
+    (esClient.bulk as Mock).mockResolvedValue({ errors: false, items: [] });
+    (esClient.indices.refresh as Mock).mockResolvedValue({});
     logger = buildLogger();
     crudClient = {
-      listEntities: jest.fn(),
+      listEntities: vi.fn(),
     } as unknown as EntityUpdateClient;
   });
 
   it('filters listEntities to only entities with resolved_to and writes alias rows', async () => {
-    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
+    (crudClient.listEntities as Mock).mockResolvedValueOnce({
       entities: [
         {
           entity: {
@@ -95,7 +98,7 @@ describe('build_lookup_index', () => {
     // Targets that aren't themselves iterated have no lookup row; Phase 2
     // ES|QL recovers their target_id via COALESCE(resolution_target_id,
     // entity_id) after the LOOKUP JOIN.
-    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
+    (crudClient.listEntities as Mock).mockResolvedValueOnce({
       entities: [
         {
           entity: {
@@ -134,7 +137,7 @@ describe('build_lookup_index', () => {
 
   it('returns early when aborted between pages', async () => {
     const abortController = new AbortController();
-    (crudClient.listEntities as jest.Mock).mockImplementationOnce(() => {
+    (crudClient.listEntities as Mock).mockImplementationOnce(() => {
       abortController.abort();
       return Promise.resolve({
         entities: [{ entity: { id: 'host:1' } }],
@@ -164,7 +167,7 @@ describe('build_lookup_index', () => {
   });
 
   it('skips bulk and still refreshes once for an empty entity store', async () => {
-    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
+    (crudClient.listEntities as Mock).mockResolvedValueOnce({
       entities: [],
       nextSearchAfter: undefined,
     });
@@ -184,7 +187,7 @@ describe('build_lookup_index', () => {
   });
 
   it('accumulates mixed bulk failures across pages and throws once at the end', async () => {
-    (crudClient.listEntities as jest.Mock)
+    (crudClient.listEntities as Mock)
       .mockResolvedValueOnce({
         entities: [{ entity: { id: 'host:1' } }, { entity: { id: 'host:2' } }],
         nextSearchAfter: ['cursor-1'],
@@ -193,7 +196,7 @@ describe('build_lookup_index', () => {
         entities: [{ entity: { id: 'host:3' } }, { entity: { id: 'host:4' } }],
         nextSearchAfter: undefined,
       });
-    (esClient.bulk as jest.Mock)
+    (esClient.bulk as Mock)
       .mockResolvedValueOnce({
         errors: true,
         items: [
@@ -229,11 +232,11 @@ describe('build_lookup_index', () => {
   // no `items`. We must charge the entire batch as failed under the catch-all
   // reason instead of silently treating the page as a no-op.
   it('charges all items as failed when bulk reports errors with no item details', async () => {
-    (crudClient.listEntities as jest.Mock).mockResolvedValueOnce({
+    (crudClient.listEntities as Mock).mockResolvedValueOnce({
       entities: [{ entity: { id: 'host:1' } }, { entity: { id: 'host:2' } }],
       nextSearchAfter: undefined,
     });
-    (esClient.bulk as jest.Mock).mockResolvedValueOnce({ errors: true, items: [] });
+    (esClient.bulk as Mock).mockResolvedValueOnce({ errors: true, items: [] });
 
     await expect(
       buildLookupIndex({

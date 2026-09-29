@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 /* eslint-disable dot-notation */
 import { TelemetrySender } from './telemetry_sender';
 import { mockTelemetryService } from '../mocks';
 import { REPORT_INTERVAL_MS, LOCALSTORAGE_KEY } from '../../common/constants';
 
 class LocalStorageMock implements Partial<Storage> {
-  getItem = jest.fn();
-  setItem = jest.fn();
+  getItem = vi.fn();
+  setItem = vi.fn();
 }
 const mockLocalStorage = new LocalStorageMock();
 const originalLocalStorage = window.localStorage;
@@ -23,9 +26,9 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 describe('TelemetrySender', () => {
-  let refreshConfigMock: jest.Mock;
+  let refreshConfigMock: Mock;
   beforeEach(() => {
-    refreshConfigMock = jest.fn();
+    refreshConfigMock = vi.fn();
     mockLocalStorage.getItem.mockClear();
     mockLocalStorage.setItem.mockClear();
   });
@@ -69,10 +72,10 @@ describe('TelemetrySender', () => {
   });
 
   describe('shouldSendReport', () => {
-    let hasFocus: jest.SpyInstance;
+    let hasFocus: MockInstance;
 
     beforeEach(() => {
-      hasFocus = jest.spyOn(document, 'hasFocus');
+      hasFocus = vi.spyOn(document, 'hasFocus');
       hasFocus.mockReturnValue(true); // Return true by default for all tests;
     });
 
@@ -83,8 +86,8 @@ describe('TelemetrySender', () => {
     it('returns false if the page is not visible', async () => {
       hasFocus.mockReturnValue(false);
       const telemetryService = mockTelemetryService();
-      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
-      telemetryService.fetchLastReported = jest.fn().mockResolvedValue(Date.now());
+      telemetryService.getIsOptedIn = vi.fn().mockReturnValue(true);
+      telemetryService.fetchLastReported = vi.fn().mockResolvedValue(Date.now());
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       const shouldSendReport = await telemetrySender['shouldSendReport']();
       expect(shouldSendReport).toBe(false);
@@ -95,7 +98,7 @@ describe('TelemetrySender', () => {
 
     it('returns false whenever optIn is false (no need to refresh the config)', async () => {
       const telemetryService = mockTelemetryService();
-      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
+      telemetryService.getIsOptedIn = vi.fn().mockReturnValue(false);
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       const shouldSendReport = await telemetrySender['shouldSendReport']();
 
@@ -106,8 +109,8 @@ describe('TelemetrySender', () => {
 
     it('returns true if lastReported is undefined (both local and global)', async () => {
       const telemetryService = mockTelemetryService();
-      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
-      telemetryService.fetchLastReported = jest.fn().mockResolvedValue(undefined);
+      telemetryService.getIsOptedIn = vi.fn().mockReturnValue(true);
+      telemetryService.fetchLastReported = vi.fn().mockResolvedValue(undefined);
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       const shouldSendReport = await telemetrySender['shouldSendReport']();
 
@@ -121,7 +124,7 @@ describe('TelemetrySender', () => {
       const lastReported = Date.now() - (REPORT_INTERVAL_MS + 1000);
 
       const telemetryService = mockTelemetryService();
-      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
+      telemetryService.getIsOptedIn = vi.fn().mockReturnValue(true);
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       telemetrySender['lastReported'] = lastReported;
       const shouldSendReport = await telemetrySender['shouldSendReport']();
@@ -133,7 +136,7 @@ describe('TelemetrySender', () => {
       const lastReported = Date.now() + 1000;
 
       const telemetryService = mockTelemetryService();
-      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
+      telemetryService.getIsOptedIn = vi.fn().mockReturnValue(true);
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       telemetrySender['lastReported'] = lastReported;
       const shouldSendReport = await telemetrySender['shouldSendReport']();
@@ -143,8 +146,8 @@ describe('TelemetrySender', () => {
 
     it('returns false if local lastReported is expired but the remote is within REPORT_INTERVAL_MS', async () => {
       const telemetryService = mockTelemetryService();
-      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
-      telemetryService.fetchLastReported = jest.fn().mockResolvedValue(Date.now() + 1000);
+      telemetryService.getIsOptedIn = vi.fn().mockReturnValue(true);
+      telemetryService.fetchLastReported = vi.fn().mockResolvedValue(Date.now() + 1000);
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       telemetrySender['lastReported'] = Date.now() - (REPORT_INTERVAL_MS + 1000);
       const shouldSendReport = await telemetrySender['shouldSendReport']();
@@ -154,7 +157,7 @@ describe('TelemetrySender', () => {
 
     it('returns true if lastReported is malformed', async () => {
       const telemetryService = mockTelemetryService();
-      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
+      telemetryService.getIsOptedIn = vi.fn().mockReturnValue(true);
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       telemetrySender['lastReported'] = `random_malformed_string` as unknown as number;
       const shouldSendReport = await telemetrySender['shouldSendReport']();
@@ -164,7 +167,7 @@ describe('TelemetrySender', () => {
 
     it('returns false if we are in screenshot mode', async () => {
       const telemetryService = mockTelemetryService({ isScreenshotMode: true });
-      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
+      telemetryService.getIsOptedIn = vi.fn().mockReturnValue(false);
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       const shouldSendReport = await telemetrySender['shouldSendReport']();
 
@@ -175,19 +178,19 @@ describe('TelemetrySender', () => {
   });
   describe('sendIfDue', () => {
     let originalFetch: (typeof window)['fetch'];
-    let mockFetch: jest.Mock<(typeof window)['fetch']>;
+    let mockFetch: Mock<(typeof window)['fetch']>;
 
     beforeAll(() => {
       originalFetch = window.fetch;
     });
 
-    beforeEach(() => (window.fetch = mockFetch = jest.fn()));
+    beforeEach(() => (window.fetch = mockFetch = vi.fn()));
     afterAll(() => (window.fetch = originalFetch));
 
     it('does not send if shouldSendReport returns false', async () => {
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
-      telemetrySender['shouldSendReport'] = jest.fn().mockReturnValue(false);
+      telemetrySender['shouldSendReport'] = vi.fn().mockReturnValue(false);
       telemetrySender['retryCount'] = 0;
       await telemetrySender['sendIfDue']();
 
@@ -208,9 +211,9 @@ describe('TelemetrySender', () => {
 
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
-      telemetrySender['shouldSendReport'] = jest.fn().mockReturnValue(true);
-      telemetrySender['sendUsageData'] = jest.fn().mockReturnValue(true);
-      telemetrySender['updateLastReported'] = jest.fn().mockImplementation((value) => {
+      telemetrySender['shouldSendReport'] = vi.fn().mockReturnValue(true);
+      telemetrySender['sendUsageData'] = vi.fn().mockReturnValue(true);
+      telemetrySender['updateLastReported'] = vi.fn().mockImplementation((value) => {
         expect(value).not.toBe(lastReported);
       });
       telemetrySender['lastReported'] = lastReported;
@@ -225,9 +228,9 @@ describe('TelemetrySender', () => {
     it('resets the retry counter when report is due', async () => {
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
-      telemetrySender['shouldSendReport'] = jest.fn().mockReturnValue(true);
-      telemetrySender['sendUsageData'] = jest.fn();
-      telemetrySender['updateLastReported'] = jest.fn();
+      telemetrySender['shouldSendReport'] = vi.fn().mockReturnValue(true);
+      telemetrySender['sendUsageData'] = vi.fn();
+      telemetrySender['updateLastReported'] = vi.fn();
       telemetrySender['retryCount'] = 9;
 
       await telemetrySender['sendIfDue']();
@@ -238,26 +241,26 @@ describe('TelemetrySender', () => {
 
   describe('sendUsageData', () => {
     let originalFetch: (typeof window)['fetch'];
-    let mockFetch: jest.Mock<(typeof window)['fetch']>;
-    let consoleWarnMock: jest.SpyInstance;
+    let mockFetch: Mock<(typeof window)['fetch']>;
+    let consoleWarnMock: MockInstance;
 
     beforeAll(() => {
       originalFetch = window.fetch;
     });
 
     beforeEach(() => {
-      window.fetch = mockFetch = jest.fn();
-      jest.useFakeTimers({ legacyFakeTimers: true });
-      consoleWarnMock = jest.spyOn(global.console, 'warn').mockImplementation(() => {});
+      window.fetch = mockFetch = vi.fn();
+      vi.useFakeTimers({ legacyFakeTimers: true });
+      consoleWarnMock = vi.spyOn(global.console, 'warn').mockImplementation(() => {});
     });
 
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     afterAll(() => {
       window.fetch = originalFetch;
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('sends the report', async () => {
@@ -269,9 +272,9 @@ describe('TelemetrySender', () => {
 
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
-      telemetryService.getTelemetryUrl = jest.fn().mockReturnValue(mockTelemetryUrl);
-      telemetryService.fetchTelemetry = jest.fn().mockReturnValue(mockTelemetryPayload);
-      telemetrySender['shouldSendReport'] = jest.fn().mockReturnValue(true);
+      telemetryService.getTelemetryUrl = vi.fn().mockReturnValue(mockTelemetryUrl);
+      telemetryService.fetchTelemetry = vi.fn().mockReturnValue(mockTelemetryPayload);
+      telemetrySender['shouldSendReport'] = vi.fn().mockReturnValue(true);
 
       await telemetrySender['sendUsageData']();
 
@@ -300,9 +303,9 @@ describe('TelemetrySender', () => {
 
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
-      telemetryService.getTelemetryUrl = jest.fn().mockReturnValue(mockTelemetryUrl);
-      telemetryService.fetchTelemetry = jest.fn().mockReturnValue(mockTelemetryPayload);
-      telemetrySender['shouldSendReport'] = jest.fn().mockReturnValue(true);
+      telemetryService.getTelemetryUrl = vi.fn().mockReturnValue(mockTelemetryUrl);
+      telemetryService.fetchTelemetry = vi.fn().mockReturnValue(mockTelemetryPayload);
+      telemetrySender['shouldSendReport'] = vi.fn().mockReturnValue(true);
       await telemetrySender['sendIfDue']();
 
       expect(telemetryService.fetchTelemetry).toHaveBeenCalledTimes(1);
@@ -315,10 +318,10 @@ describe('TelemetrySender', () => {
 
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
-      telemetryService.getTelemetryUrl = jest.fn().mockReturnValue(mockTelemetryUrl);
-      telemetryService.fetchTelemetry = jest.fn().mockReturnValue(mockTelemetryPayload);
-      telemetrySender['shouldSendReport'] = jest.fn().mockReturnValue(true);
-      telemetrySender['updateLastReported'] = jest.fn();
+      telemetryService.getTelemetryUrl = vi.fn().mockReturnValue(mockTelemetryUrl);
+      telemetryService.fetchTelemetry = vi.fn().mockReturnValue(mockTelemetryPayload);
+      telemetrySender['shouldSendReport'] = vi.fn().mockReturnValue(true);
+      telemetrySender['updateLastReported'] = vi.fn();
 
       await telemetrySender['sendUsageData']();
 
@@ -329,8 +332,8 @@ describe('TelemetrySender', () => {
     it('catches fetchTelemetry errors and retries again', async () => {
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
-      telemetryService.getTelemetryUrl = jest.fn();
-      telemetryService.fetchTelemetry = jest.fn().mockImplementation(() => {
+      telemetryService.getTelemetryUrl = vi.fn();
+      telemetryService.fetchTelemetry = vi.fn().mockImplementation(() => {
         throw Error('Error fetching usage');
       });
       await telemetrySender['sendUsageData']();
@@ -345,8 +348,8 @@ describe('TelemetrySender', () => {
       const mockTelemetryPayload = ['hashed_cluster_usage_data1', 'hashed_cluster_usage_data2'];
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
-      telemetryService.getTelemetryUrl = jest.fn();
-      telemetryService.fetchTelemetry = jest.fn().mockReturnValue(mockTelemetryPayload);
+      telemetryService.getTelemetryUrl = vi.fn();
+      telemetryService.fetchTelemetry = vi.fn().mockReturnValue(mockTelemetryPayload);
       mockFetch.mockImplementation(() => {
         throw Error('Error sending usage');
       });
@@ -367,8 +370,8 @@ describe('TelemetrySender', () => {
     it('stops trying to resend the data after 20 retries', async () => {
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
-      telemetryService.getTelemetryUrl = jest.fn();
-      telemetryService.fetchTelemetry = jest.fn().mockImplementation(() => {
+      telemetryService.getTelemetryUrl = vi.fn();
+      telemetryService.fetchTelemetry = vi.fn().mockImplementation(() => {
         throw Error('Error fetching usage');
       });
       telemetrySender['retryCount'] = 21;
@@ -381,8 +384,8 @@ describe('TelemetrySender', () => {
   });
 
   describe('getRetryDelay', () => {
-    beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
-    afterAll(() => jest.useRealTimers());
+    beforeEach(() => vi.useFakeTimers({ legacyFakeTimers: true }));
+    afterAll(() => vi.useRealTimers());
 
     it('sets a minimum retry delay of 60 seconds', () => {
       expect(TelemetrySender.getRetryDelay(0)).toBe(60000);
@@ -400,16 +403,16 @@ describe('TelemetrySender', () => {
   });
 
   describe('startChecking', () => {
-    beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
-    afterAll(() => jest.useRealTimers());
+    beforeEach(() => vi.useFakeTimers({ legacyFakeTimers: true }));
+    afterAll(() => vi.useRealTimers());
 
     it('calls sendIfDue every 60000 ms', () => {
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
-      telemetrySender['sendIfDue'] = jest.fn().mockResolvedValue(void 0);
+      telemetrySender['sendIfDue'] = vi.fn().mockResolvedValue(void 0);
       telemetrySender.startChecking();
       expect(telemetrySender['sendIfDue']).toHaveBeenCalledTimes(0);
-      jest.advanceTimersByTime(60000);
+      vi.advanceTimersByTime(60000);
       expect(telemetrySender['sendIfDue']).toHaveBeenCalledTimes(1);
     });
   });

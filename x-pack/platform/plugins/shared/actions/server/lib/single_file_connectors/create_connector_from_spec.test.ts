@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
@@ -16,14 +18,14 @@ import type { PluginSetupContract as ActionsPluginSetupContract } from '../../pl
 import { actionsConfigMock } from '../../actions_config.mock';
 
 describe('createConnectorTypeFromSpec', () => {
-  const mockGetAxiosInstanceWithAuth = jest.fn();
+  const mockGetAxiosInstanceWithAuth = vi.fn();
   const mockActionsConfigUtils = actionsConfigMock.create();
 
   const mockActionsPlugin: ActionsPluginSetupContract = {
     getActionsConfigurationUtilities: () => mockActionsConfigUtils,
     getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-    getCredential: jest.fn().mockReturnValue({ getAuthHeaders: jest.fn() }),
-    getClientLeasePool: jest.fn().mockReturnValue({ lease: jest.fn() }),
+    getCredential: vi.fn().mockReturnValue({ getAuthHeaders: vi.fn() }),
+    getClientLeasePool: vi.fn().mockReturnValue({ lease: vi.fn() }),
   } as unknown as ActionsPluginSetupContract;
 
   const createMockSpec = (overrides: Partial<ConnectorSpec> = {}): ConnectorSpec =>
@@ -43,15 +45,15 @@ describe('createConnectorTypeFromSpec', () => {
         testAction: {
           scope: 'read',
           input: z4.object({ test: z4.string() }),
-          handler: jest.fn(),
+          handler: vi.fn(),
         },
       },
-      test: overrides.test ?? { handler: jest.fn(), enabled: false },
+      test: overrides.test ?? { handler: vi.fn(), enabled: false },
       ...overrides,
     } as ConnectorSpec);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('uses _test as the reserved test subAction', () => {
@@ -64,7 +66,7 @@ describe('createConnectorTypeFromSpec', () => {
         testAction: {
           scope: 'read',
           input: z4.object({ test: z4.string() }),
-          handler: jest.fn(),
+          handler: vi.fn(),
         },
       },
     });
@@ -80,7 +82,7 @@ describe('createConnectorTypeFromSpec', () => {
   });
 
   it('builds the connector network from the actions configuration utilities', () => {
-    const createConnectorNetworkSettingsSpy = jest.spyOn(
+    const createConnectorNetworkSettingsSpy = vi.spyOn(
       createConnectorNetworkSettingsModule,
       'createConnectorNetworkSettings'
     );
@@ -133,7 +135,7 @@ describe('createConnectorTypeFromSpec', () => {
         testAction: {
           scope: 'read',
           input: z4.object({ test: z4.string() }),
-          handler: jest.fn(),
+          handler: vi.fn(),
         },
       },
     });
@@ -156,7 +158,7 @@ describe('createConnectorTypeFromSpec', () => {
         supportedFeatureIds: [WorkflowsConnectorFeatureId],
       },
       actions: {},
-      test: { handler: jest.fn(), enabled: false },
+      test: { handler: vi.fn(), enabled: false },
     });
 
     expect(() => createConnectorTypeFromSpec(spec, mockActionsPlugin)).toThrow(
@@ -174,7 +176,7 @@ describe('createConnectorTypeFromSpec', () => {
         supportedFeatureIds: [WorkflowsConnectorFeatureId],
       },
       actions: {},
-      test: { handler: jest.fn(), enabled: false },
+      test: { handler: vi.fn(), enabled: false },
       events: {
         definitions: {
           received: {
@@ -236,17 +238,17 @@ describe('createConnectorTypeFromSpec', () => {
           action1: {
             scope: 'read',
             input: z4.object({ field1: z4.string() }),
-            handler: jest.fn(),
+            handler: vi.fn(),
           },
           action2: {
             scope: 'read',
             input: z4.object({ field2: z4.number() }),
-            handler: jest.fn(),
+            handler: vi.fn(),
           },
           action3: {
             scope: 'read',
             input: z4.object({ field3: z4.boolean() }),
-            handler: jest.fn(),
+            handler: vi.fn(),
           },
         },
       });
@@ -277,7 +279,7 @@ describe('createConnectorTypeFromSpec', () => {
           testAction: {
             scope: 'read',
             input: z4.object({ test: z4.string() }),
-            handler: jest.fn(),
+            handler: vi.fn(),
           },
         },
       });
@@ -294,7 +296,7 @@ describe('createConnectorTypeFromSpec', () => {
           testAction: {
             scope: 'read',
             input: z4.object({ test: z4.string() }),
-            handler: jest.fn(),
+            handler: vi.fn(),
           },
         },
       });
@@ -311,7 +313,7 @@ describe('createConnectorTypeFromSpec', () => {
           testAction: {
             scope: 'read',
             input: z4.object({ test: z4.string() }),
-            handler: jest.fn(),
+            handler: vi.fn(),
           },
         },
       });
@@ -331,7 +333,7 @@ describe('createConnectorTypeFromSpec', () => {
           testAction: {
             scope: 'read',
             input: z4.object({ test: z4.string() }),
-            handler: jest.fn(),
+            handler: vi.fn(),
           },
         },
       });
@@ -358,7 +360,7 @@ describe('createConnectorTypeFromSpec', () => {
               }),
               optional: z4.string().optional(),
             }),
-            handler: jest.fn(),
+            handler: vi.fn(),
           },
         },
       });
@@ -409,7 +411,7 @@ describe('createConnectorTypeFromSpec', () => {
 
   describe('test support', () => {
     it('sets isTestable to true when spec defines an enabled test', () => {
-      const testHandler = jest.fn();
+      const testHandler = vi.fn();
       const spec = createMockSpec({
         test: { handler: testHandler, enabled: true },
       });
@@ -421,7 +423,7 @@ describe('createConnectorTypeFromSpec', () => {
 
     it('accepts _test params when spec defines an enabled test', () => {
       const spec = createMockSpec({
-        test: { handler: jest.fn(), enabled: true },
+        test: { handler: vi.fn(), enabled: true },
       });
 
       const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
@@ -438,7 +440,7 @@ describe('createConnectorTypeFromSpec', () => {
     });
 
     it('does not enable test support when test is present but enabled is falsy', async () => {
-      const testHandler = jest.fn();
+      const testHandler = vi.fn();
       const specWithOnlyDisabledTest = createMockSpec({
         actions: {},
         test: { handler: testHandler, enabled: false },
@@ -455,7 +457,7 @@ describe('createConnectorTypeFromSpec', () => {
 
       expect(connectorType.isTestable).toBe(false);
 
-      mockGetAxiosInstanceWithAuth.mockResolvedValue({ get: jest.fn() });
+      mockGetAxiosInstanceWithAuth.mockResolvedValue({ get: vi.fn() });
 
       await expect(
         connectorType.executor!({
@@ -464,10 +466,10 @@ describe('createConnectorTypeFromSpec', () => {
           secrets: {},
           params: { subAction: TEST_CONNECTOR_SUB_ACTION, subActionParams: {} },
           logger: {
-            error: jest.fn(),
-            debug: jest.fn(),
-            warn: jest.fn(),
-            info: jest.fn(),
+            error: vi.fn(),
+            debug: vi.fn(),
+            warn: vi.fn(),
+            info: vi.fn(),
           } as never,
           services: {} as never,
           configurationUtilities: mockActionsConfigUtils,
@@ -479,20 +481,20 @@ describe('createConnectorTypeFromSpec', () => {
     });
 
     it('routes _test subAction to spec.test.handler', async () => {
-      const testHandler = jest.fn().mockResolvedValue({ connected: true });
+      const testHandler = vi.fn().mockResolvedValue({ connected: true });
       const spec = createMockSpec({
         test: { handler: testHandler, enabled: true },
       });
 
       const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
-      mockGetAxiosInstanceWithAuth.mockResolvedValue({ get: jest.fn() });
+      mockGetAxiosInstanceWithAuth.mockResolvedValue({ get: vi.fn() });
 
       const result = await connectorType.executor!({
         actionId: 'connector-id',
         config: {},
         secrets: {},
         params: { subAction: TEST_CONNECTOR_SUB_ACTION, subActionParams: {} },
-        logger: { error: jest.fn(), debug: jest.fn(), warn: jest.fn(), info: jest.fn() } as never,
+        logger: { error: vi.fn(), debug: vi.fn(), warn: vi.fn(), info: vi.fn() } as never,
         services: {} as never,
         configurationUtilities: mockActionsConfigUtils,
         connectorUsageCollector: {} as never,
@@ -512,10 +514,10 @@ describe('createConnectorTypeFromSpec', () => {
           [TEST_CONNECTOR_SUB_ACTION]: {
             scope: 'read',
             input: z4.object({ test: z4.string() }),
-            handler: jest.fn(),
+            handler: vi.fn(),
           },
         },
-        test: { handler: jest.fn(), enabled: true },
+        test: { handler: vi.fn(), enabled: true },
       });
 
       expect(() => createConnectorTypeFromSpec(spec, mockActionsPlugin)).toThrow(
@@ -528,12 +530,12 @@ describe('createConnectorTypeFromSpec', () => {
         testAction: {
           scope: 'read' as const,
           input: z4.object({ test: z4.string() }),
-          handler: jest.fn(),
+          handler: vi.fn(),
         },
       };
       const spec = createMockSpec({
         actions,
-        test: { handler: jest.fn(), enabled: true },
+        test: { handler: vi.fn(), enabled: true },
       });
 
       createConnectorTypeFromSpec(spec, mockActionsPlugin);
@@ -545,7 +547,7 @@ describe('createConnectorTypeFromSpec', () => {
     it('throws when test is enabled without outbound actions', () => {
       const spec = createMockSpec({
         actions: {},
-        test: { handler: jest.fn(), enabled: true },
+        test: { handler: vi.fn(), enabled: true },
         events: {
           definitions: {
             received: {
@@ -567,7 +569,7 @@ describe('createConnectorTypeFromSpec', () => {
     it('creates executor and params validator for spec with only test and empty actions', () => {
       const spec = createMockSpec({
         actions: {},
-        test: { handler: jest.fn(), enabled: true },
+        test: { handler: vi.fn(), enabled: true },
       });
 
       const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);

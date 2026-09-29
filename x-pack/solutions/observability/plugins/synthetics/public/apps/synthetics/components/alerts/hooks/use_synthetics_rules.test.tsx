@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import * as redux from 'react-redux-v7';
@@ -27,26 +30,35 @@ import {
 } from '../../../../../../common/constants/synthetics_alerts';
 
 // Mock dependencies
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useDispatch: jest.fn(),
-  useSelector: jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useDispatch: vi.fn(),
+      useSelector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
-  RuleFormFlyout: () => <div data-test-subj="rule-form-flyout">Rule Form Flyout</div>,
-}));
+vi.mock('@kbn/response-ops-rule-form/flyout', () => {
+      const mocked = {
+      RuleFormFlyout: () => <div data-test-subj="rule-form-flyout">Rule Form Flyout</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDispatch = jest.fn();
-const mockUseSelector = redux.useSelector as jest.MockedFunction<typeof redux.useSelector>;
+const mockDispatch = vi.fn();
+const mockUseSelector = redux.useSelector as MockedFunction<typeof redux.useSelector>;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const kibanaModule = require('@kbn/kibana-react-plugin/public');
-const mockUseKibana = kibanaModule.useKibana as jest.MockedFunction<any>;
+const mockUseKibana = kibanaModule.useKibana as MockedFunction<any>;
 
 const mockUptimeCapabilities = (overrides: { save?: boolean; canManageRules?: boolean } = {}) => ({
   services: {
@@ -133,8 +145,8 @@ describe('useSyntheticsRules', () => {
     React.createElement(React.Fragment, {}, children);
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (redux.useDispatch as jest.Mock).mockReturnValue(mockDispatch);
+    vi.clearAllMocks();
+    (redux.useDispatch as Mock).mockReturnValue(mockDispatch);
 
     // Default mock implementations
     mockUseKibana.mockReturnValue(mockUptimeCapabilities());

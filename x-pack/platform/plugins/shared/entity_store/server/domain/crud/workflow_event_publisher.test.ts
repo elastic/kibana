@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { WorkflowEventPublisher, ALL_WORKFLOW_WATCHED_FIELDS } from './workflow_event_publisher';
 import {
@@ -14,11 +17,11 @@ import {
 import type { Entity } from '../../../common';
 import { runWithSpan } from '../../telemetry/traces';
 
-jest.mock('../../telemetry/traces', () => {
-  const actual = jest.requireActual('../../telemetry/traces');
+vi.mock('../../telemetry/traces', async () => {
+  const actual = (await vi.importActual('../../telemetry/traces'));
   return {
     ...actual,
-    runWithSpan: jest.fn(actual.runWithSpan),
+    runWithSpan: vi.fn(actual.runWithSpan),
   };
 });
 
@@ -26,17 +29,17 @@ jest.mock('../../telemetry/traces', () => {
 const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
 
 describe('WorkflowEventPublisher', () => {
-  let emit: jest.Mock;
-  let fetchDocsFn: jest.Mock;
+  let emit: Mock;
+  let fetchDocsFn: Mock;
   let logger: MockedLogger;
   let publisher: WorkflowEventPublisher;
 
   beforeEach(() => {
-    emit = jest.fn().mockResolvedValue(undefined);
-    fetchDocsFn = jest.fn().mockResolvedValue(new Map());
+    emit = vi.fn().mockResolvedValue(undefined);
+    fetchDocsFn = vi.fn().mockResolvedValue(new Map());
     logger = loggerMock.create();
     publisher = new WorkflowEventPublisher({ emit, fetchDocsFn, logger, namespace: 'default' });
-    (runWithSpan as jest.Mock).mockClear();
+    (runWithSpan as Mock).mockClear();
   });
 
   describe('maybeGetExistingDocs', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { screen } from '@testing-library/react';
@@ -19,57 +22,75 @@ import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_a
 import { useAgentlessPolicies } from './use_agentless_policies';
 import { PackagePoliciesPage } from './package_policies';
 
-jest.mock('../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../hooks'),
-  useConfirmForceInstall: jest.fn(),
-  useGetPackageInstallStatus: jest.fn().mockReturnValue(() => ({
-    status: 'installed',
-    version: '1.0.0',
-  })),
-  useGetPackageInfoByKeyQuery: jest.fn().mockReturnValue({ data: undefined, isLoading: false }),
-  useIsPackagePolicyUpgradable: jest.fn().mockReturnValue({
-    isPackagePolicyUpgradable: jest.fn().mockReturnValue(false),
-    getPackagePolicyUpgradeReview: jest.fn().mockReturnValue(undefined),
-    getKeepPoliciesUpToDate: jest.fn().mockReturnValue(false),
-    getUpgradeVersion: jest.fn().mockReturnValue(undefined),
-  }),
-}));
+vi.mock('../../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../hooks')),
+      useConfirmForceInstall: vi.fn(),
+      useGetPackageInstallStatus: vi.fn().mockReturnValue(() => ({
+        status: 'installed',
+        version: '1.0.0',
+      })),
+      useGetPackageInfoByKeyQuery: vi.fn().mockReturnValue({ data: undefined, isLoading: false }),
+      useIsPackagePolicyUpgradable: vi.fn().mockReturnValue({
+        isPackagePolicyUpgradable: vi.fn().mockReturnValue(false),
+        getPackagePolicyUpgradeReview: vi.fn().mockReturnValue(undefined),
+        getKeepPoliciesUpToDate: vi.fn().mockReturnValue(false),
+        getUpgradeVersion: vi.fn().mockReturnValue(undefined),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology',
-  () => ({
-    useAgentless: jest.fn().mockReturnValue({
-      getAgentlessStatusForPackage: jest.fn().mockReturnValue({ isAgentless: true }),
-    }),
-  })
+  () => {
+      const mocked = {
+        useAgentless: vi.fn().mockReturnValue({
+          getAgentlessStatusForPackage: vi.fn().mockReturnValue({ isAgentless: true }),
+        }),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('./use_package_policies_with_agent_policy', () => ({
-  usePackagePoliciesWithAgentPolicy: jest.fn().mockReturnValue({
-    data: undefined,
-    isLoading: false,
-    error: null,
-    resendRequest: jest.fn(),
-  }),
-}));
+vi.mock('./use_package_policies_with_agent_policy', () => {
+      const mocked = {
+      usePackagePoliciesWithAgentPolicy: vi.fn().mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: null,
+        resendRequest: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_agentless_policies', () => ({
-  useAgentlessPolicies: jest.fn().mockReturnValue({
-    data: undefined,
-    isLoading: false,
-    error: null,
-    resendRequest: jest.fn(),
-  }),
-}));
+vi.mock('./use_agentless_policies', () => {
+      const mocked = {
+      useAgentlessPolicies: vi.fn().mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: null,
+        resendRequest: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/agent_based_table', () => ({
-  AgentBasedPackagePoliciesTable: () => null,
-}));
+vi.mock('./components/agent_based_table', () => {
+      const mocked = {
+      AgentBasedPackagePoliciesTable: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAgentlessTable = jest.fn().mockReturnValue(null);
-jest.mock('./components/agentless_table', () => ({
-  AgentlessPackagePoliciesTable: (props: unknown) => mockAgentlessTable(props),
-}));
+const mockAgentlessTable = vi.fn().mockReturnValue(null);
+vi.mock('./components/agentless_table', () => {
+      const mocked = {
+      AgentlessPackagePoliciesTable: (props: unknown) => mockAgentlessTable(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const packageInfo = {
   name: 'cspm',
@@ -78,10 +99,10 @@ const packageInfo = {
   type: 'integration',
 } as PackageInfo;
 
-const getInstallStatusMock = jest.requireMock('../../../../../hooks')
-  .useGetPackageInstallStatus as jest.Mock;
-const useGetPackageInfoByKeyQueryMock = jest.requireMock('../../../../../hooks')
-  .useGetPackageInfoByKeyQuery as jest.Mock;
+const getInstallStatusMock = (await vi.importMock('../../../../../hooks'))
+  .useGetPackageInstallStatus as Mock;
+const useGetPackageInfoByKeyQueryMock = (await vi.importMock('../../../../../hooks'))
+  .useGetPackageInfoByKeyQuery as Mock;
 
 const renderPage = () => {
   getInstallStatusMock.mockReturnValue(() => ({
@@ -95,7 +116,7 @@ const renderPage = () => {
 // The agent-based table's kuery also contains the substring (as `AND NOT ... supports_agentless:
 // true`), so match only the positive filter of the legacy agentless source.
 const legacyAgentlessCall = () =>
-  jest
+  vi
     .mocked(usePackagePoliciesWithAgentPolicy)
     .mock.calls.find(
       ([query]) =>
@@ -107,23 +128,23 @@ describe('PackagePoliciesPage agentless table source', () => {
     // Re-establish defaults for mocks whose return values are overridden per test
     // (jest.clearAllMocks does not reset mockReturnValue implementations).
     useGetPackageInfoByKeyQueryMock.mockReturnValue({ data: undefined, isLoading: false });
-    jest.mocked(useAgentlessPolicies).mockReturnValue({
+    vi.mocked(useAgentlessPolicies).mockReturnValue({
       data: undefined,
       isLoading: false,
       error: null,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as unknown as ReturnType<typeof useAgentlessPolicies>);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('sources the agentless table from the managed integrations API when the agentless policies UI is enabled', () => {
     renderPage();
 
-    expect(jest.mocked(useAgentlessPolicies)).toHaveBeenCalledWith(
+    expect(vi.mocked(useAgentlessPolicies)).toHaveBeenCalledWith(
       expect.objectContaining({ kuery: 'package.name: "cspm"' }),
       { enabled: true }
     );
@@ -134,15 +155,15 @@ describe('PackagePoliciesPage agentless table source', () => {
 
   it('surfaces a full package info fetch failure in the agentless table and retries it', () => {
     const manifestError = new Error('registry unavailable');
-    const refetchFullPackageInfo = jest.fn();
+    const refetchFullPackageInfo = vi.fn();
     useGetPackageInfoByKeyQueryMock.mockReturnValue({
       data: undefined,
       isLoading: false,
       error: manifestError,
       refetch: refetchFullPackageInfo,
     });
-    const resendAgentlessRequest = jest.fn();
-    jest.mocked(useAgentlessPolicies).mockReturnValue({
+    const resendAgentlessRequest = vi.fn();
+    vi.mocked(useAgentlessPolicies).mockReturnValue({
       data: { items: [], total: 3, page: 1, perPage: 10 },
       isLoading: false,
       error: null,
@@ -162,7 +183,7 @@ describe('PackagePoliciesPage agentless table source', () => {
   });
 
   it('sources the agentless table from the legacy package-policy API when the agentless policies UI is disabled', () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       enableAgentlessPoliciesUI: false,
       // disableAgentlessLegacyAPI forces the UI on, so it must be off to exercise the disabled path.
@@ -171,7 +192,7 @@ describe('PackagePoliciesPage agentless table source', () => {
 
     renderPage();
 
-    expect(jest.mocked(useAgentlessPolicies)).toHaveBeenCalledWith(expect.anything(), {
+    expect(vi.mocked(useAgentlessPolicies)).toHaveBeenCalledWith(expect.anything(), {
       enabled: false,
     });
     const legacyCall = legacyAgentlessCall();
@@ -183,25 +204,25 @@ describe('PackagePoliciesPage agentless table source', () => {
 describe('PackagePoliciesPage agent-based section visibility', () => {
   beforeEach(() => {
     useGetPackageInfoByKeyQueryMock.mockReturnValue({ data: undefined, isLoading: false });
-    jest.mocked(useAgentlessPolicies).mockReturnValue({
+    vi.mocked(useAgentlessPolicies).mockReturnValue({
       data: undefined,
       isLoading: false,
       error: null,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as unknown as ReturnType<typeof useAgentlessPolicies>);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('hides the Agent-based section when the agent-based policy count is zero', () => {
-    jest.mocked(usePackagePoliciesWithAgentPolicy).mockReturnValue({
+    vi.mocked(usePackagePoliciesWithAgentPolicy).mockReturnValue({
       data: { items: [], total: 0, page: 1, perPage: 10 },
       isLoading: false,
       error: null,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as unknown as ReturnType<typeof usePackagePoliciesWithAgentPolicy>);
 
     renderPage();
@@ -210,11 +231,11 @@ describe('PackagePoliciesPage agent-based section visibility', () => {
   });
 
   it('shows the Agent-based section when the agent-based policy count is greater than zero', () => {
-    jest.mocked(usePackagePoliciesWithAgentPolicy).mockReturnValue({
+    vi.mocked(usePackagePoliciesWithAgentPolicy).mockReturnValue({
       data: { items: [], total: 2, page: 1, perPage: 10 },
       isLoading: false,
       error: null,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as unknown as ReturnType<typeof usePackagePoliciesWithAgentPolicy>);
 
     renderPage();
@@ -223,11 +244,11 @@ describe('PackagePoliciesPage agent-based section visibility', () => {
   });
 
   it('hides the Agent-based section while the agent-based data is still loading (data is undefined)', () => {
-    jest.mocked(usePackagePoliciesWithAgentPolicy).mockReturnValue({
+    vi.mocked(usePackagePoliciesWithAgentPolicy).mockReturnValue({
       data: undefined,
       isLoading: true,
       error: null,
-      resendRequest: jest.fn(),
+      resendRequest: vi.fn(),
     } as unknown as ReturnType<typeof usePackagePoliciesWithAgentPolicy>);
 
     renderPage();

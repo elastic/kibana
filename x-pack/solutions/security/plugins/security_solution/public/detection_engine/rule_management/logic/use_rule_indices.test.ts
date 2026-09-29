@@ -5,26 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useRuleIndices } from './use_rule_indices';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
 import { useSecurityJobs } from '../../../common/components/ml_popover/hooks/use_security_jobs';
 
-jest.mock('../../../common/components/ml/hooks/use_get_jobs');
-jest.mock('../../../common/components/ml_popover/hooks/use_security_jobs');
+vi.mock('../../../common/components/ml/hooks/use_get_jobs');
+vi.mock('../../../common/components/ml_popover/hooks/use_security_jobs');
 
 describe('useRuleIndices', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return handle undefined parameters', async () => {
-    (useSecurityJobs as jest.Mock).mockImplementation(() => ({
+    (useSecurityJobs as Mock).mockImplementation(() => ({
       jobs: [{ id: 'job1' }, { id: 'job2' }],
       loading: false,
     }));
-    (useGetInstalledJob as jest.Mock).mockImplementation((jobIds: string[]) => {
+    (useGetInstalledJob as Mock).mockImplementation((jobIds: string[]) => {
       expect(jobIds).toEqual([]);
       return { loading: false, jobs: [] };
     });
@@ -36,11 +39,11 @@ describe('useRuleIndices', () => {
   });
 
   it('should return default indices if ML job is not specified', async () => {
-    (useSecurityJobs as jest.Mock).mockImplementation(() => ({
+    (useSecurityJobs as Mock).mockImplementation(() => ({
       jobs: [{ id: 'job1' }, { id: 'job2' }],
       loading: false,
     }));
-    (useGetInstalledJob as jest.Mock).mockImplementation((jobIds: string[]) => {
+    (useGetInstalledJob as Mock).mockImplementation((jobIds: string[]) => {
       expect(jobIds).toEqual([]);
       return { loading: false, jobs: [] };
     });
@@ -54,14 +57,14 @@ describe('useRuleIndices', () => {
 
   it('should return default indices if ML job is not specified 1', async () => {
     const machineLearningJobId = ['ml-job-1', 'ml-job-2'];
-    (useSecurityJobs as jest.Mock).mockImplementation(() => ({
+    (useSecurityJobs as Mock).mockImplementation(() => ({
       jobs: [
         { id: 'ml-job-1', isInstalled: true },
         { id: 'ml-job-2', isInstalled: true },
       ],
       loading: false,
     }));
-    (useGetInstalledJob as jest.Mock).mockImplementation((jobIds: string[]) => {
+    (useGetInstalledJob as Mock).mockImplementation((jobIds: string[]) => {
       expect(jobIds).toEqual(machineLearningJobId);
       return {
         loading: false,
@@ -78,14 +81,14 @@ describe('useRuleIndices', () => {
 
   it('should return indices of installed jobs only', async () => {
     const machineLearningJobId = ['ml-job-1', 'ml-job-2'];
-    (useSecurityJobs as jest.Mock).mockImplementation(() => ({
+    (useSecurityJobs as Mock).mockImplementation(() => ({
       jobs: [
         { id: 'ml-job-1', isInstalled: false },
         { id: 'ml-job-2', isInstalled: true },
       ],
       loading: false,
     }));
-    (useGetInstalledJob as jest.Mock).mockImplementation((jobIds: string[]) => {
+    (useGetInstalledJob as Mock).mockImplementation((jobIds: string[]) => {
       expect(jobIds).toEqual(['ml-job-2']);
       return {
         loading: false,
@@ -102,14 +105,14 @@ describe('useRuleIndices', () => {
 
   it('should return default indices if ML jobs are not installed', async () => {
     const machineLearningJobId = ['ml-job-1', 'ml-job-2'];
-    (useSecurityJobs as jest.Mock).mockImplementation(() => ({
+    (useSecurityJobs as Mock).mockImplementation(() => ({
       jobs: [
         { id: 'ml-job-1', isInstalled: false },
         { id: 'ml-job-2', isInstalled: false },
       ],
       loading: false,
     }));
-    (useGetInstalledJob as jest.Mock).mockImplementation((jobIds: string[]) => {
+    (useGetInstalledJob as Mock).mockImplementation((jobIds: string[]) => {
       expect(jobIds).toEqual([]);
       return {
         loading: false,

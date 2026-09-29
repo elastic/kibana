@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('getos', () => jest.fn());
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('getos', () => vi.fn());
 
 import { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
 import getos from 'getos';
@@ -27,7 +30,7 @@ describe('getDefaultChromiumSandboxDisabled', () => {
     ${'linux'}  | ${'Debian'}        | ${'8'}      | ${true}
     ${'linux'}  | ${'Debian'}        | ${'9'}      | ${true}
   `('should return $expected for $dist $release', async ({ expected, ...os }) => {
-    (getos as jest.Mock).mockImplementation((cb) => cb(null, os));
+    (getos as Mock).mockImplementation((cb) => cb(null, os));
 
     await expect(getDefaultChromiumSandboxDisabled()).resolves.toHaveProperty(
       'disableSandbox',
@@ -40,7 +43,7 @@ describe('Docker', () => {
   const mockOs = { os: 'linux', dist: 'Ubuntu Linux', release: '20.01' };
 
   it('Non-Docker', async () => {
-    (getos as jest.Mock).mockImplementation((cb) => cb(null, mockOs));
+    (getos as Mock).mockImplementation((cb) => cb(null, mockOs));
 
     await expect(getDefaultChromiumSandboxDisabled()).resolves.toHaveProperty(
       'disableSandbox',
@@ -53,7 +56,7 @@ describe('Docker', () => {
     const env = { ...process.env };
     process.env.ELASTIC_CONTAINER = 'true';
 
-    (getos as jest.Mock).mockImplementation((cb) => cb(null, mockOs));
+    (getos as Mock).mockImplementation((cb) => cb(null, mockOs));
 
     await expect(getDefaultChromiumSandboxDisabled()).resolves.toHaveProperty(
       'disableSandbox',

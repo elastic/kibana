@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { mockFlyoutApi } from '../mocks/mock_flyout_context';
@@ -15,14 +18,14 @@ import { DocumentDetailsRightPanelKey, DocumentDetailsLeftPanelKey } from '../co
 import { useNavigateToGraphVisualization } from './use_navigate_to_graph_visualization';
 import { GRAPH_ID } from '../../left/components/graph_visualization';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../common/lib/kibana');
-jest.mock('./use_which_flyout');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('./use_which_flyout');
 
 const mockedUseKibana = mockUseKibana();
-(useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
+(useKibana as Mock).mockReturnValue(mockedUseKibana);
 
-const mockUseWhichFlyout = useWhichFlyout as jest.Mock;
+const mockUseWhichFlyout = useWhichFlyout as Mock;
 const FLYOUT_KEY = 'SecuritySolution';
 
 const eventId = 'eventId1';
@@ -31,8 +34,8 @@ const scopeId = 'scopeId1';
 
 describe('useNavigateToGraphVisualization', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.clearAllMocks();
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
   it('when isFlyoutOpen is true, should return callback that opens left and preview panels', () => {

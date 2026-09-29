@@ -5,27 +5,38 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import type { Feature } from '@kbn/significant-events-schema';
 import { useKnowledgeIndicatorsUrlState } from './use_knowledge_indicators_url_state';
 
-const mockPush = jest.fn();
-const mockReplace = jest.fn();
+const mockPush = vi.fn();
+const mockReplace = vi.fn();
 
 let mockQuery: Record<string, unknown> = {};
 
-jest.mock('../../../../hooks/use_significant_events_app_params', () => ({
-  useSignificantEventsAppParams: () => ({ query: mockQuery }),
-}));
+vi.mock('../../../../hooks/use_significant_events_app_params', () => {
+      const mocked = {
+      useSignificantEventsAppParams: () => ({ query: mockQuery }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_significant_events_app_router', () => ({
-  useSignificantEventsAppRouter: () => ({ push: mockPush, replace: mockReplace }),
-}));
+vi.mock('../../../../hooks/use_significant_events_app_router', () => {
+      const mocked = {
+      useSignificantEventsAppRouter: () => ({ push: mockPush, replace: mockReplace }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-hooks', () => ({
-  useDebouncedValue: (value: string) => value,
-}));
+vi.mock('@kbn/react-hooks', () => {
+      const mocked = {
+      useDebouncedValue: (value: string) => value,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function makeFeatureKI(
   overrides: Partial<Feature> & { uuid: string; stream_name: string } & Record<string, unknown>
@@ -65,13 +76,13 @@ function makeQueryKI(opts: {
 const defaultParams = {
   knowledgeIndicators: [] as KnowledgeIndicator[],
   isLoading: false,
-  resetPagination: jest.fn(),
-  clearSelection: jest.fn(),
+  resetPagination: vi.fn(),
+  clearSelection: vi.fn(),
 };
 
 describe('useKnowledgeIndicatorsUrlState', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockQuery = {};
   });
 
@@ -295,8 +306,8 @@ describe('useKnowledgeIndicatorsUrlState', () => {
 
   describe('handler callbacks', () => {
     it('handleStatusFilterChange updates statusFilter and calls clearSelection', () => {
-      const clearSelection = jest.fn();
-      const resetPagination = jest.fn();
+      const clearSelection = vi.fn();
+      const resetPagination = vi.fn();
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, clearSelection, resetPagination })
       );

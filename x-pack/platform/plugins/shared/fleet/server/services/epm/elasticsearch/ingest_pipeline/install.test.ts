@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -11,7 +13,7 @@ import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 
 import { prepareToInstallPipelines } from './install';
 
-jest.mock('../../archive/cache');
+vi.mock('../../archive/cache');
 
 describe('Install pipeline tests', () => {
   describe('prepareToInstallPipelines', () => {

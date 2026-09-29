@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
@@ -17,27 +20,33 @@ import { AuthenticationsUserTable } from './authentications_user_table';
 import { usersModel } from '../../users/store';
 import { AuthStackByField } from '../../../../common/search_strategy';
 
-jest.mock('../../../common/containers/query_toggle', () => ({
-  useQueryToggle: jest.fn().mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() }),
-}));
-jest.mock('../../containers/authentications', () => ({
-  useAuthentications: jest.fn().mockReturnValue([
-    false,
-    {
-      authentications: [],
-      totalCount: 0,
-      pageInfo: {},
-      loadPage: jest.fn(),
-      inspect: {},
-      isInspected: false,
-      refetch: jest.fn(),
-    },
-  ]),
-}));
+vi.mock('../../../common/containers/query_toggle', () => {
+      const mocked = {
+      useQueryToggle: vi.fn().mockReturnValue({ toggleStatus: true, setToggleStatus: vi.fn() }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../containers/authentications', () => {
+      const mocked = {
+      useAuthentications: vi.fn().mockReturnValue([
+        false,
+        {
+          authentications: [],
+          totalCount: 0,
+          pageInfo: {},
+          loadPage: vi.fn(),
+          inspect: {},
+          isInspected: false,
+          refetch: vi.fn(),
+        },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Authentication User Table Component', () => {
-  const mockUseAuthentications = useAuthentications as jest.Mock;
-  const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  const mockUseAuthentications = useAuthentications as Mock;
+  const mockUseQueryToggle = useQueryToggle as Mock;
 
   const startDate = '2020-07-07T08:20:18.966Z';
   const endDate = '3000-01-01T00:00:00.000Z';
@@ -46,12 +55,12 @@ describe('Authentication User Table Component', () => {
     startDate,
     endDate,
     skip: false,
-    setQuery: jest.fn(),
+    setQuery: vi.fn(),
     indexNames: [],
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {
@@ -76,7 +85,7 @@ describe('Authentication User Table Component', () => {
   });
 
   it('toggleStatus=false, skip', () => {
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: vi.fn() });
     render(
       <TestProviders>
         <AuthenticationsUserTable {...defaultProps} />

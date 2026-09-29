@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
@@ -17,18 +19,27 @@ import { createMockStore } from '../../../entities/workflows/store/__mocks__/sto
 import { setStepExecutionsTotal } from '../../../entities/workflows/store/workflow_detail/slice';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 
-jest.mock('../../../entities/workflows/model/use_workflow_execution_polling');
-jest.mock('../model/use_child_workflow_executions', () => ({
-  useChildWorkflowExecutions: () => ({ childExecutions: new Map(), isLoading: false }),
-}));
-jest.mock('./execution_take_action_split_button', () => ({
-  ExecutionTakeActionSplitButton: () => null,
-}));
-jest.mock('../../../shared/ui/execution_data_viewer/json_editor_common', () => ({
-  JSONCodeEditorCommonMemoized: ({ jsonValue }: { jsonValue: string }) => (
-    <pre data-test-subj="execution-json">{jsonValue}</pre>
-  ),
-}));
+vi.mock('../../../entities/workflows/model/use_workflow_execution_polling');
+vi.mock('../model/use_child_workflow_executions', () => {
+      const mocked = {
+      useChildWorkflowExecutions: () => ({ childExecutions: new Map(), isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./execution_take_action_split_button', () => {
+      const mocked = {
+      ExecutionTakeActionSplitButton: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../shared/ui/execution_data_viewer/json_editor_common', () => {
+      const mocked = {
+      JSONCodeEditorCommonMemoized: ({ jsonValue }: { jsonValue: string }) => (
+        <pre data-test-subj="execution-json">{jsonValue}</pre>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const execution: WorkflowExecutionDto = {
   id: 'exec-1',
@@ -52,12 +63,12 @@ describe('WorkflowExecutionFlyout loading errors', () => {
     ['without loaded data', undefined],
     ['with a previous snapshot', execution],
   ] as const)('shows a loading error on both tabs %s', (_scenario, workflowExecution) => {
-    jest.mocked(useWorkflowExecutionPolling).mockReturnValue({
+    vi.mocked(useWorkflowExecutionPolling).mockReturnValue({
       workflowExecution,
       isLoading: false,
       error: sizeError,
     });
-    render(<WorkflowExecutionFlyout executionId="exec-1" onClose={jest.fn()} />, {
+    render(<WorkflowExecutionFlyout executionId="exec-1" onClose={vi.fn()} />, {
       wrapper: getTestProvider({}),
     });
 
@@ -68,14 +79,14 @@ describe('WorkflowExecutionFlyout loading errors', () => {
   });
 
   it('shows the existing unavailable state on the JSON tab when reported steps are missing', () => {
-    jest.mocked(useWorkflowExecutionPolling).mockReturnValue({
+    vi.mocked(useWorkflowExecutionPolling).mockReturnValue({
       workflowExecution: execution,
       isLoading: false,
       error: null,
     });
     const store = createMockStore();
     store.dispatch(setStepExecutionsTotal(101));
-    render(<WorkflowExecutionFlyout executionId="exec-1" onClose={jest.fn()} />, {
+    render(<WorkflowExecutionFlyout executionId="exec-1" onClose={vi.fn()} />, {
       wrapper: getTestProvider({ store }),
     });
 
@@ -85,22 +96,22 @@ describe('WorkflowExecutionFlyout loading errors', () => {
   });
 
   it('restores JSON after a successful retry', () => {
-    const polling = jest.mocked(useWorkflowExecutionPolling);
+    const polling = vi.mocked(useWorkflowExecutionPolling);
     polling.mockReturnValue({ workflowExecution: execution, isLoading: false, error: null });
     const { rerender } = render(
-      <WorkflowExecutionFlyout executionId="exec-1" onClose={jest.fn()} />,
+      <WorkflowExecutionFlyout executionId="exec-1" onClose={vi.fn()} />,
       { wrapper: getTestProvider({}) }
     );
     fireEvent.click(screen.getByRole('tab', { name: 'JSON' }));
     expect(screen.getByTestId('execution-json')).toHaveTextContent('exec-1');
 
     polling.mockReturnValue({ workflowExecution: execution, isLoading: false, error: sizeError });
-    rerender(<WorkflowExecutionFlyout executionId="exec-1" onClose={jest.fn()} />);
+    rerender(<WorkflowExecutionFlyout executionId="exec-1" onClose={vi.fn()} />);
     expect(screen.getByText(sizeError.message)).toBeInTheDocument();
     expect(screen.queryByTestId('execution-json')).not.toBeInTheDocument();
 
     polling.mockReturnValue({ workflowExecution: execution, isLoading: false, error: null });
-    rerender(<WorkflowExecutionFlyout executionId="exec-1" onClose={jest.fn()} />);
+    rerender(<WorkflowExecutionFlyout executionId="exec-1" onClose={vi.fn()} />);
     expect(screen.queryByText(sizeError.message)).not.toBeInTheDocument();
     expect(screen.getByTestId('execution-json')).toHaveTextContent('exec-1');
   });

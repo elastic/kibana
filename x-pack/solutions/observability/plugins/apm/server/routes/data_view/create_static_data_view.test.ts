@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -43,11 +45,11 @@ function getMockedDataViewService(
   fieldFormatMap: Record<string, unknown> = expectedFieldFormats
 ) {
   return {
-    get: jest.fn(() => ({
+    get: vi.fn(() => ({
       getIndexPattern: () => existingDataViewTitle,
       fieldFormatMap,
     })),
-    createAndSave: jest.fn(),
+    createAndSave: vi.fn(),
     delete: () => {},
   } as unknown as DataViewsService;
 }
@@ -67,12 +69,12 @@ const coreMock = {
 } as unknown as APMCore;
 
 const logger = {
-  info: jest.fn,
-  debug: jest.fn,
+  info: vi.fn,
+  debug: vi.fn,
 } as unknown as Logger;
 
 const apmEventClientMock = {
-  search: jest.fn(),
+  search: vi.fn(),
   indices: {
     transaction: 'apm-*-transaction-*',
     span: 'apm-*-span-*',
@@ -98,7 +100,7 @@ describe('createStaticDataView', () => {
 
   it(`should not create data view if no APM data is found`, async () => {
     // does not have APM data
-    jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(false);
+    vi.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(false);
 
     const dataViewService = getMockedDataViewService('apm-*');
 
@@ -116,7 +118,7 @@ describe('createStaticDataView', () => {
 
   it(`should create data view`, async () => {
     // does have APM data
-    jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
+    vi.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
     const dataViewService = getMockedDataViewService('apm-*');
 
@@ -136,7 +138,7 @@ describe('createStaticDataView', () => {
 
   it(`should overwrite the data view if the new data view title does not match the old data view title`, async () => {
     // does have APM data
-    jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
+    vi.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
     const dataViewService = getMockedDataViewService('apm-*');
 
@@ -161,7 +163,7 @@ describe('createStaticDataView', () => {
 
   it(`should not overwrite an data view if the new data view title matches the old data view title`, async () => {
     // does have APM data
-    jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
+    vi.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
     const dataViewService = getMockedDataViewService(expectedDataViewIndexPattern);
 
@@ -181,7 +183,7 @@ describe('createStaticDataView', () => {
   });
 
   it(`should overwrite the data view if the field formats have changed`, async () => {
-    jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
+    vi.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
     const staleFieldFormats = {
       ...expectedFieldFormats,

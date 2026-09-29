@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { ENVIRONMENT_ALL_VALUE } from '../../../common/environment_filter_values';
 import { SERVICE_ENVIRONMENT } from '../../../common/es_fields/apm';
 import { getServiceMixedIngestion } from './get_service_mixed_ingestion';
 
-type SearchMock = jest.Mock<Promise<unknown>>;
+type SearchMock = Mock<Promise<unknown>>;
 
 const start = 1_700_000_000_000;
 const end = 1_700_000_900_000;
@@ -69,7 +72,7 @@ function getFilterClauses(search: SearchMock, callIndex = 0) {
 describe('getServiceMixedIngestion', () => {
   describe('environment filtering', () => {
     it('does not add an environment filter when ENVIRONMENT_ALL is used', async () => {
-      const search: SearchMock = jest.fn().mockResolvedValueOnce(mixedResponse());
+      const search: SearchMock = vi.fn().mockResolvedValueOnce(mixedResponse());
       const apmEventClient = { search } as unknown as APMEventClient;
 
       await getServiceMixedIngestion({ ...baseParams, apmEventClient });
@@ -82,7 +85,7 @@ describe('getServiceMixedIngestion', () => {
     });
 
     it('adds a term filter for a specific environment', async () => {
-      const search: SearchMock = jest.fn().mockResolvedValueOnce(mixedResponse());
+      const search: SearchMock = vi.fn().mockResolvedValueOnce(mixedResponse());
       const apmEventClient = { search } as unknown as APMEventClient;
 
       await getServiceMixedIngestion({
@@ -101,7 +104,7 @@ describe('getServiceMixedIngestion', () => {
 
   describe('kuery filtering', () => {
     it('does not add a kql filter when kuery is empty', async () => {
-      const search: SearchMock = jest.fn().mockResolvedValueOnce(mixedResponse());
+      const search: SearchMock = vi.fn().mockResolvedValueOnce(mixedResponse());
       const apmEventClient = { search } as unknown as APMEventClient;
 
       await getServiceMixedIngestion({ ...baseParams, apmEventClient });
@@ -111,7 +114,7 @@ describe('getServiceMixedIngestion', () => {
     });
 
     it('adds a kql filter when kuery is provided', async () => {
-      const search: SearchMock = jest.fn().mockResolvedValueOnce(mixedResponse());
+      const search: SearchMock = vi.fn().mockResolvedValueOnce(mixedResponse());
       const apmEventClient = { search } as unknown as APMEventClient;
 
       await getServiceMixedIngestion({
@@ -127,7 +130,7 @@ describe('getServiceMixedIngestion', () => {
 
   describe('response mapping', () => {
     it('returns hasMultipleAgentTypes true when both classic and otel data exist', async () => {
-      const search: SearchMock = jest
+      const search: SearchMock = vi
         .fn()
         .mockResolvedValueOnce(mixedResponse({ classicCount: 5, otelCount: 3 }));
       const apmEventClient = { search } as unknown as APMEventClient;
@@ -139,7 +142,7 @@ describe('getServiceMixedIngestion', () => {
     });
 
     it('returns hasMultipleAgentTypes false when only classic data exists', async () => {
-      const search: SearchMock = jest
+      const search: SearchMock = vi
         .fn()
         .mockResolvedValueOnce(mixedResponse({ classicCount: 5, otelCount: 0 }));
       const apmEventClient = { search } as unknown as APMEventClient;
@@ -151,7 +154,7 @@ describe('getServiceMixedIngestion', () => {
     });
 
     it('returns hasMultipleAgentTypes false when only otel data exists', async () => {
-      const search: SearchMock = jest
+      const search: SearchMock = vi
         .fn()
         .mockResolvedValueOnce(mixedResponse({ classicCount: 0, otelCount: 8 }));
       const apmEventClient = { search } as unknown as APMEventClient;
@@ -168,7 +171,7 @@ describe('getServiceMixedIngestion', () => {
       const otelFrom = start + 6000;
       const otelTo = end - 1000;
 
-      const search: SearchMock = jest
+      const search: SearchMock = vi
         .fn()
         .mockResolvedValueOnce(mixedResponse({ classicFrom, classicTo, otelFrom, otelTo }));
       const apmEventClient = { search } as unknown as APMEventClient;

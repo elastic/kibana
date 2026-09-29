@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SecurityAppStore } from '../../../../common/store/types';
 import { TimelineId } from '../../../../../common/types';
 import { addProvider } from '../../../../timelines/store/actions';
@@ -21,8 +23,8 @@ const mockWarningToast = services.notifications.toasts.addWarning;
 const currentAppIdSubject$ = new BehaviorSubject<string>(APP_UI_ID);
 services.application.currentAppId$ = currentAppIdSubject$.asObservable();
 
-const mockDispatch = jest.fn();
-const mockGetState = jest.fn(() => ({
+const mockDispatch = vi.fn();
+const mockGetState = vi.fn(() => ({
   timeline: { timelineById: { [TimelineId.active]: { isSuperTimeline: false } } },
 }));
 const store = {
@@ -70,7 +72,7 @@ describe('createAddToTimelineDiscoverCellActionFactory', () => {
 
   beforeEach(() => {
     currentAppIdSubject$.next(APP_UI_ID);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return display name', () => {

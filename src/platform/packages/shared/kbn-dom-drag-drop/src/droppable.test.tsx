@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,20 +21,20 @@ import {
   EXACT,
 } from './test_utils';
 
-jest.useFakeTimers({ legacyFakeTimers: true });
+vi.useFakeTimers({ legacyFakeTimers: true });
 
 const draggableValue = generateDragDropValue('drag_this');
 
 describe('Droppable', () => {
-  const onDrop = jest.fn();
+  const onDrop = vi.fn();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderTestComponents = (propsOverrides = [{}]) => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
     const rtlRender = renderWithDragDropContext(
       <>
@@ -66,14 +68,14 @@ describe('Droppable', () => {
       startDragging: () => {
         fireEvent.dragStart(draggable, { dataTransfer });
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       drop: (droppableIndex = 0, options = {}) => {
         const dropEvent = new MouseEvent('drop', { ...options, bubbles: true });
         fireEvent(droppables[droppableIndex], dropEvent);
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       dragOver: (droppableIndex = 0, options = {}) => {
@@ -83,45 +85,45 @@ describe('Droppable', () => {
         fireEvent.dragOver(droppables[droppableIndex], options);
 
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       dragLeave: (droppableIndex = 0) => {
         fireEvent.dragLeave(droppables[droppableIndex]);
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       startDraggingByKeyboard: async () => {
         draggableKeyboardHandler.focus();
         await user.keyboard('{enter}');
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       dropByKeyboard: async () => {
         draggableKeyboardHandler.focus();
         await user.keyboard('{enter}');
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       dragOverToNextByKeyboard: async () => {
         await user.keyboard('{arrowright}');
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       dragOverToPreviousByKeyboard: async () => {
         await user.keyboard('{arrowleft}');
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       pressModifierKey: async (key: '{Shift>}' | '{Alt>}' | '{Control>}') => {
         await user.keyboard(key);
         act(() => {
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       },
       droppable,
@@ -252,8 +254,8 @@ describe('Droppable', () => {
       expect(droppables[1]).toHaveClass('domDroppable', EXACT);
     });
     test('executes onDrop callback when drops on drop target', async () => {
-      const firstDroppableOnDrop = jest.fn();
-      const secondDroppableOnDrop = jest.fn();
+      const firstDroppableOnDrop = vi.fn();
+      const secondDroppableOnDrop = vi.fn();
       const { startDraggingByKeyboard, dropByKeyboard, dragOverToNextByKeyboard } =
         renderTestComponents([
           { dropTypes: ['field_add'], onDrop: firstDroppableOnDrop },

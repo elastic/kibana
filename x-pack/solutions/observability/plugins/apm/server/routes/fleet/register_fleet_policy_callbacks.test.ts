@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock, elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { get } from 'lodash';
 import {
@@ -17,30 +20,42 @@ import {
   SOURCE_MAP_API_KEY_PATH,
 } from './get_package_policy_decorators';
 
-jest.mock('./merge_package_policy_with_apm', () => ({
-  decoratePackagePolicyWithAgentConfigAndSourceMap: jest.fn(({ packagePolicy }) =>
-    Promise.resolve(packagePolicy)
-  ),
-}));
+vi.mock('./merge_package_policy_with_apm', () => {
+      const mocked = {
+      decoratePackagePolicyWithAgentConfigAndSourceMap: vi.fn(({ packagePolicy }) =>
+        Promise.resolve(packagePolicy)
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/helpers/get_internal_saved_objects_client', () => ({
-  getInternalSavedObjectsClient: jest.fn(),
-}));
+vi.mock('../../lib/helpers/get_internal_saved_objects_client', () => {
+      const mocked = {
+      getInternalSavedObjectsClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/helpers/create_es_client/create_internal_es_client', () => ({
-  createInternalESClient: jest.fn().mockResolvedValue({}),
-}));
+vi.mock('../../lib/helpers/create_es_client/create_internal_es_client', () => {
+      const mocked = {
+      createInternalESClient: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./api_keys/add_api_keys_to_policies_if_missing', () => ({
-  ...jest.requireActual('./api_keys/add_api_keys_to_policies_if_missing'),
-  addApiKeysToPackagePolicyIfMissing: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./api_keys/add_api_keys_to_policies_if_missing', async () => {
+      const mocked = {
+      ...(await vi.importActual('./api_keys/add_api_keys_to_policies_if_missing')),
+      addApiKeysToPackagePolicyIfMissing: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { addApiKeysToPackagePolicyIfMissing } from './api_keys/add_api_keys_to_policies_if_missing';
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 const newApmPackagePolicy = {
@@ -120,7 +135,7 @@ const apmPackagePolicyWithKeys = {
 
 function buildMocks() {
   const coreStart = coreMock.createStart();
-  (coreStart.elasticsearch.client.asInternalUser.security.createApiKey as jest.Mock) = jest
+  (coreStart.elasticsearch.client.asInternalUser.security.createApiKey as Mock) = vi
     .fn()
     .mockResolvedValue({ id: 'new-key-id', api_key: 'new-key-secret' });
 
@@ -129,15 +144,15 @@ function buildMocks() {
 
   const fleetPluginStart = {
     packagePolicyService: {
-      get: jest.fn(),
-      update: jest.fn(),
+      get: vi.fn(),
+      update: vi.fn(),
     },
   } as any;
 
-  const getApmIndices = jest.fn().mockResolvedValue({});
-  const logger = { debug: jest.fn(), error: jest.fn(), warn: jest.fn() } as any;
+  const getApmIndices = vi.fn().mockResolvedValue({});
+  const logger = { debug: vi.fn(), error: vi.fn(), warn: vi.fn() } as any;
 
-  (getInternalSavedObjectsClient as jest.Mock).mockResolvedValue(soClient);
+  (getInternalSavedObjectsClient as Mock).mockResolvedValue(soClient);
 
   return { coreStart, soClient, esClient, fleetPluginStart, getApmIndices, logger };
 }
@@ -159,9 +174,7 @@ describe('onPackagePolicyCreate', () => {
 
   it('decorates an apm policy with agent configurations and source maps', async () => {
     const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices } = buildMocks();
-    const { decoratePackagePolicyWithAgentConfigAndSourceMap } = jest.requireMock(
-      './merge_package_policy_with_apm'
-    );
+    const { decoratePackagePolicyWithAgentConfigAndSourceMap } = (await vi.importMock('./merge_package_policy_with_apm'));
     const decorated = { ...newApmPackagePolicy, _decorated: true };
     decoratePackagePolicyWithAgentConfigAndSourceMap.mockResolvedValueOnce(decorated);
 
@@ -293,7 +306,7 @@ describe('onPackagePolicyUpdate', () => {
 describe('onPackagePolicyPostCreate', () => {
   it('injects api keys for apm policies', async () => {
     const { coreStart, soClient, esClient, fleetPluginStart } = buildMocks();
-    const logger = { debug: jest.fn(), error: jest.fn(), warn: jest.fn() } as any;
+    const logger = { debug: vi.fn(), error: vi.fn(), warn: vi.fn() } as any;
 
     const cb = onPackagePolicyPostCreate({ fleet: fleetPluginStart, coreStart, logger });
     await cb(apmPackagePolicy as any, soClient, esClient);
@@ -305,7 +318,7 @@ describe('onPackagePolicyPostCreate', () => {
 
   it('skips non-apm policies', async () => {
     const { coreStart, soClient, esClient, fleetPluginStart } = buildMocks();
-    const logger = { debug: jest.fn(), error: jest.fn(), warn: jest.fn() } as any;
+    const logger = { debug: vi.fn(), error: vi.fn(), warn: vi.fn() } as any;
     const nonApmPolicy = {
       ...apmPackagePolicy,
       package: { name: 'system', title: 'System', version: '1.0.0' },

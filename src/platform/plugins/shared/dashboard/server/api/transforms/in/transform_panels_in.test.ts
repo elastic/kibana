@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { z } from '@kbn/zod';
 import { transformPanelsIn } from './transform_panels_in';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn(() => 'mock-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('transformPanelsIn', () => {
   it('should split panels into panelsJSON and sections', () => {

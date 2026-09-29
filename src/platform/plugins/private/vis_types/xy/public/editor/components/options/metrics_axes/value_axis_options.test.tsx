@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -24,16 +27,16 @@ import { valueAxis } from './mocks';
 const POSITION = 'position';
 
 describe('ValueAxisOptions component', () => {
-  let setParamByIndex: jest.Mock;
-  let onValueAxisPositionChanged: jest.Mock;
-  let setMultipleValidity: jest.Mock;
+  let setParamByIndex: Mock;
+  let onValueAxisPositionChanged: Mock;
+  let setMultipleValidity: Mock;
   let defaultProps: ValueAxisOptionsParams;
   let axis: ValueAxis;
 
   beforeEach(() => {
-    setParamByIndex = jest.fn();
-    setMultipleValidity = jest.fn();
-    onValueAxisPositionChanged = jest.fn();
+    setParamByIndex = vi.fn();
+    setMultipleValidity = vi.fn();
+    onValueAxisPositionChanged = vi.fn();
     axis = { ...valueAxis };
 
     defaultProps = {

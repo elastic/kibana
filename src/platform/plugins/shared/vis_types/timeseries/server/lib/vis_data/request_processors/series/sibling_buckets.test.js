@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { siblingBuckets } from './sibling_buckets';
 
 describe('siblingBuckets(req, panel, series)', () => {
@@ -49,14 +51,14 @@ describe('siblingBuckets(req, panel, series)', () => {
   });
 
   test('calls next when finished', async () => {
-    const next = jest.fn();
+    const next = vi.fn();
     await siblingBuckets(
       req,
       panel,
       series,
       {},
       {},
-      { maxBucketsLimit: 2000, getValidTimeInterval: jest.fn(() => '1d') },
+      { maxBucketsLimit: 2000, getValidTimeInterval: vi.fn(() => '1d') },
       uiSettings
     )(next)({});
     expect(next.mock.calls.length).toEqual(1);
@@ -70,7 +72,7 @@ describe('siblingBuckets(req, panel, series)', () => {
       series,
       {},
       {},
-      { maxBucketsLimit: 2000, getValidTimeInterval: jest.fn(() => '1d') },
+      { maxBucketsLimit: 2000, getValidTimeInterval: vi.fn(() => '1d') },
       uiSettings
     )(next)({});
 

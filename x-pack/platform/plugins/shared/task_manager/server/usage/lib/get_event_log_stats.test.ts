@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getEventLogStats, nanosToMillis } from './get_event_log_stats';
@@ -33,7 +35,7 @@ const mockSearchResponse = (
   } as unknown as estypes.SearchResponse);
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('nanosToMillis', () => {

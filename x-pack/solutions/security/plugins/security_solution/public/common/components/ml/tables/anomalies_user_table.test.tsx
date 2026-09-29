@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { AnomaliesUserTable } from './anomalies_user_table';
 import { TestProviders } from '../../../mock';
 import React from 'react';
@@ -16,23 +19,26 @@ import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security
 import { mockAnomalies } from '../mock';
 import { useMlHref } from '@kbn/ml-plugin/public';
 
-jest.mock('../../../containers/query_toggle');
-jest.mock('../anomaly/use_anomalies_table_data');
-jest.mock('../../../../../common/machine_learning/has_ml_user_permissions');
-jest.mock('../hooks/use_installed_security_jobs');
-jest.mock('@kbn/ml-plugin/public');
-jest.mock('@kbn/entity-store/public', () => ({
-  useEntityStoreEuidApi: jest.fn(() => ({ euid: undefined })),
-}));
+vi.mock('../../../containers/query_toggle');
+vi.mock('../anomaly/use_anomalies_table_data');
+vi.mock('../../../../../common/machine_learning/has_ml_user_permissions');
+vi.mock('../hooks/use_installed_security_jobs');
+vi.mock('@kbn/ml-plugin/public');
+vi.mock('@kbn/entity-store/public', () => {
+      const mocked = {
+      useEntityStoreEuidApi: vi.fn(() => ({ euid: undefined })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseQueryToggle = useQueryToggle as jest.Mock;
-const mockUseAnomaliesTableData = useAnomaliesTableData as jest.Mock;
-const mockUseInstalledSecurityJobNameById = useInstalledSecurityJobNameById as jest.Mock;
-const mockUseMlHref = useMlHref as jest.Mock;
+const mockUseQueryToggle = useQueryToggle as Mock;
+const mockUseAnomaliesTableData = useAnomaliesTableData as Mock;
+const mockUseInstalledSecurityJobNameById = useInstalledSecurityJobNameById as Mock;
+const mockUseMlHref = useMlHref as Mock;
 
-const mockSetToggle = jest.fn();
+const mockSetToggle = vi.fn();
 
-(hasMlUserPermissions as jest.Mock).mockReturnValue(true);
+(hasMlUserPermissions as Mock).mockReturnValue(true);
 mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
 mockUseMlHref.mockReturnValue('http://test');
 mockUseInstalledSecurityJobNameById.mockReturnValue({
@@ -44,7 +50,7 @@ const userName = 'cool_guy';
 const testProps = {
   startDate: '2019-07-17T20:00:00.000Z',
   endDate: '2019-07-18T20:00:00.000Z',
-  narrowDateRange: jest.fn(),
+  narrowDateRange: vi.fn(),
   userName,
   skip: false,
   type: UsersType.page,
@@ -87,7 +93,7 @@ describe('Anomalies user table', () => {
   });
   describe('toggle query', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockUseAnomaliesTableData.mockReturnValue([
         false,
         {

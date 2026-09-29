@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
@@ -13,68 +15,74 @@ import { MisconfigurationInsights } from '.';
 import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
-const openMisconfigurationFindingAsChild = jest.fn();
+const openMisconfigurationFindingAsChild = vi.fn();
 
-jest.mock('../../../../shared/components/tools_flyout_header', () => ({
-  ToolsFlyoutHeader: ({
-    title,
-    label,
-    iconType,
-    onTitleClick,
-  }: {
-    title: string;
-    label?: string;
-    iconType?: string;
-    onTitleClick?: () => void;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="mockToolsFlyoutHeader"
-      data-title={title}
-      data-label={label}
-      data-icon-type={iconType}
-      onClick={onTitleClick}
-    />
-  ),
-}));
+vi.mock('../../../../shared/components/tools_flyout_header', () => {
+      const mocked = {
+      ToolsFlyoutHeader: ({
+        title,
+        label,
+        iconType,
+        onTitleClick,
+      }: {
+        title: string;
+        label?: string;
+        iconType?: string;
+        onTitleClick?: () => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="mockToolsFlyoutHeader"
+          data-title={title}
+          data-label={label}
+          data-icon-type={iconType}
+          onClick={onTitleClick}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../../cloud_security_posture/components/csp_details/misconfiguration_findings_details_table',
-  () => ({
-    MisconfigurationFindingsDetailsTable: ({
-      field,
-      value,
-      entityId,
-      entityType,
-      onShowFinding,
-    }: {
-      field: string;
-      value: string;
-      entityId?: string;
-      entityType?: string;
-      onShowFinding?: (resourceId: string, ruleId: string, ruleName?: string) => void;
-    }) => (
-      <button
-        type="button"
-        data-test-subj="mockMisconfigurationFindingsDetailsTable"
-        data-field={field}
-        data-value={value}
-        data-entity-id={entityId ?? ''}
-        data-entity-type={entityType ?? ''}
-        onClick={() => onShowFinding?.('resource-1', 'rule-1', 'My Rule')}
-      >
-        {'misconfiguration-table'}
-      </button>
-    ),
-  })
+  () => {
+      const mocked = {
+        MisconfigurationFindingsDetailsTable: ({
+          field,
+          value,
+          entityId,
+          entityType,
+          onShowFinding,
+        }: {
+          field: string;
+          value: string;
+          entityId?: string;
+          entityType?: string;
+          onShowFinding?: (resourceId: string, ruleId: string, ruleName?: string) => void;
+        }) => (
+          <button
+            type="button"
+            data-test-subj="mockMisconfigurationFindingsDetailsTable"
+            data-field={field}
+            data-value={value}
+            data-entity-id={entityId ?? ''}
+            data-entity-type={entityType ?? ''}
+            onClick={() => onShowFinding?.('resource-1', 'rule-1', 'My Rule')}
+          >
+            {'misconfiguration-table'}
+          </button>
+        ),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../../../use_flyout_api');
+vi.mock('../../../../use_flyout_api');
 
 describe('<MisconfigurationInsights /> host', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useFlyoutApi).mockReturnValue({
+    vi.clearAllMocks();
+    vi.mocked(useFlyoutApi).mockReturnValue({
       openMisconfigurationFindingAsChild,
     } as unknown as ReturnType<typeof useFlyoutApi>);
   });
@@ -110,7 +118,7 @@ describe('<MisconfigurationInsights /> host', () => {
   });
 
   it('forwards onShowEntity to the header click handler', () => {
-    const onShowEntity = jest.fn();
+    const onShowEntity = vi.fn();
     const { getByTestId } = render(
       <MisconfigurationInsights
         entityType={EntityType.host}
@@ -137,8 +145,8 @@ describe('<MisconfigurationInsights /> host', () => {
 
 describe('<MisconfigurationInsights /> user', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useFlyoutApi).mockReturnValue({
+    vi.clearAllMocks();
+    vi.mocked(useFlyoutApi).mockReturnValue({
       openMisconfigurationFindingAsChild,
     } as unknown as ReturnType<typeof useFlyoutApi>);
   });

@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const systemThemeIsDarkMock = jest.fn();
-export const onSystemThemeChangeMock = jest.fn();
-export const browsersSupportsSystemThemeMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./system_theme', () => {
-  const actual = jest.requireActual('./utils');
+export const systemThemeIsDarkMock = vi.fn();
+export const onSystemThemeChangeMock = vi.fn();
+export const browsersSupportsSystemThemeMock = vi.fn();
+
+vi.doMock('./system_theme', async () => {
+  const actual = (await vi.importActual('./utils'));
   return {
     ...actual,
     systemThemeIsDark: systemThemeIsDarkMock,
@@ -21,20 +23,20 @@ jest.doMock('./system_theme', () => {
   };
 });
 
-export const createStyleSheetMock = jest.fn();
+export const createStyleSheetMock = vi.fn();
 
-jest.doMock('./utils', () => {
-  const actual = jest.requireActual('./utils');
+vi.doMock('./utils', async () => {
+  const actual = (await vi.importActual('./utils'));
   return {
     ...actual,
     createStyleSheet: createStyleSheetMock,
   };
 });
 
-export const setDarkModeMock = jest.fn();
+export const setDarkModeMock = vi.fn();
 
-jest.doMock('@kbn/ui-theme', () => {
-  const actual = jest.requireActual('@kbn/ui-theme');
+vi.doMock('@kbn/ui-theme', async () => {
+  const actual = (await vi.importActual('@kbn/ui-theme'));
   return {
     ...actual,
     _setDarkMode: setDarkModeMock,

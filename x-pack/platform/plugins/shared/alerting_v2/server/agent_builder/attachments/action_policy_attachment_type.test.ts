@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import Boom from '@hapi/boom';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
@@ -65,7 +68,7 @@ const createResolveContext = (spaceId: string = SPACE_ID) => ({
 describe('createActionPolicyAttachmentType', () => {
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
-  let getActionPolicy: jest.Mock;
+  let getActionPolicy: Mock;
   let definition: AttachmentTypeDefinition<
     typeof ACTION_POLICY_ATTACHMENT_TYPE,
     ActionPolicyAttachmentData
@@ -73,7 +76,7 @@ describe('createActionPolicyAttachmentType', () => {
 
   beforeEach(() => {
     ({ loggerService, mockLogger } = createLoggerService());
-    getActionPolicy = jest.fn();
+    getActionPolicy = vi.fn();
     const actionPolicyClient = { getActionPolicy } as unknown as ActionPolicyClient;
     definition = createActionPolicyAttachmentType({
       logger: loggerService,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
 import * as buildQuery from './query.all_users.dsl';
@@ -25,7 +27,7 @@ class IndexNotFoundException extends Error {
 }
 
 describe('allHosts search strategy', () => {
-  const buildAllHostsQuery = jest.spyOn(buildQuery, 'buildUsersQuery');
+  const buildAllHostsQuery = vi.spyOn(buildQuery, 'buildUsersQuery');
 
   afterEach(() => {
     buildAllHostsQuery.mockClear();
@@ -97,7 +99,7 @@ describe('allHosts search strategy', () => {
     });
 
     test('should query host risk only for hostNames in the current page', async () => {
-      const buildHostsRiskQuery = jest.spyOn(buildRiskQuery, 'buildRiskScoreQuery');
+      const buildHostsRiskQuery = vi.spyOn(buildRiskQuery, 'buildRiskScoreQuery');
       const mockedDeps = mockDeps();
       // @ts-expect-error incomplete type
       mockedDeps.esClient.asCurrentUser.search.mockResponse({ hits: { hits: [] } });

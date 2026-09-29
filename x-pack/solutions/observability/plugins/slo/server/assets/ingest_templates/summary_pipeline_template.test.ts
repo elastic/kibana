@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IBasePath } from '@kbn/core-http-server';
 import { createSLO, createSLOWithTimeslicesBudgetingMethod } from '../../services/fixtures/slo';
 import { getSummaryPipelineTemplate } from './summary_pipeline_template';
@@ -12,10 +14,10 @@ import { getSummaryPipelineTemplate } from './summary_pipeline_template';
 const createMockBasePath = (publicBaseUrl?: string): IBasePath => {
   return {
     publicBaseUrl,
-    get: jest.fn(),
-    set: jest.fn(),
-    prepend: jest.fn(),
-    remove: jest.fn(),
+    get: vi.fn(),
+    set: vi.fn(),
+    prepend: vi.fn(),
+    remove: vi.fn(),
     serverBasePath: '',
     assetsHrefBase: '',
   } as unknown as IBasePath;

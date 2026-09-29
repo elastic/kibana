@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import sinon from 'sinon';
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -51,7 +53,7 @@ const fakeRequest = {
       url: '/',
     },
   },
-  getSavedObjectsClient: jest.fn(),
+  getSavedObjectsClient: vi.fn(),
 } as unknown as KibanaRequest;
 
 describe('MaintenanceWindowsService', () => {
@@ -61,7 +63,7 @@ describe('MaintenanceWindowsService', () => {
 
   beforeEach(() => {
     fakeTimer.reset();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => fakeTimer.restore());
@@ -69,7 +71,7 @@ describe('MaintenanceWindowsService', () => {
   test('should load maintenance windows if none in cache', async () => {
     maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(maintenanceWindows);
     const maintenanceWindowsService = new MaintenanceWindowsService({
-      getMaintenanceWindowClient: jest.fn().mockReturnValue(maintenanceWindowClient),
+      getMaintenanceWindowClient: vi.fn().mockReturnValue(maintenanceWindowClient),
       logger,
     });
     // @ts-ignore - accessing private variable
@@ -103,7 +105,7 @@ describe('MaintenanceWindowsService', () => {
       throw new Error('Test error');
     });
     const maintenanceWindowsService = new MaintenanceWindowsService({
-      getMaintenanceWindowClient: jest.fn().mockReturnValue(maintenanceWindowClient),
+      getMaintenanceWindowClient: vi.fn().mockReturnValue(maintenanceWindowClient),
       logger,
     });
     // @ts-ignore - accessing private variable
@@ -139,7 +141,7 @@ describe('MaintenanceWindowsService', () => {
     maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(maintenanceWindows);
     maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(newSpaceMW);
     const maintenanceWindowsService = new MaintenanceWindowsService({
-      getMaintenanceWindowClient: jest.fn().mockReturnValue(maintenanceWindowClient),
+      getMaintenanceWindowClient: vi.fn().mockReturnValue(maintenanceWindowClient),
       logger,
     });
     // @ts-ignore - accessing private variable
@@ -190,7 +192,7 @@ describe('MaintenanceWindowsService', () => {
   test('should use cached windows if cache has not expired', async () => {
     maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(maintenanceWindows);
     const maintenanceWindowsService = new MaintenanceWindowsService({
-      getMaintenanceWindowClient: jest.fn().mockReturnValue(maintenanceWindowClient),
+      getMaintenanceWindowClient: vi.fn().mockReturnValue(maintenanceWindowClient),
       logger,
     });
 
@@ -226,7 +228,7 @@ describe('MaintenanceWindowsService', () => {
       maintenanceWindows[0],
     ]);
     const maintenanceWindowsService = new MaintenanceWindowsService({
-      getMaintenanceWindowClient: jest.fn().mockReturnValue(maintenanceWindowClient),
+      getMaintenanceWindowClient: vi.fn().mockReturnValue(maintenanceWindowClient),
       logger,
     });
 
@@ -263,7 +265,7 @@ describe('MaintenanceWindowsService', () => {
       throw new Error('Test error');
     });
     const maintenanceWindowsService = new MaintenanceWindowsService({
-      getMaintenanceWindowClient: jest.fn().mockReturnValue(maintenanceWindowClient),
+      getMaintenanceWindowClient: vi.fn().mockReturnValue(maintenanceWindowClient),
       logger,
     });
 
@@ -303,7 +305,7 @@ describe('MaintenanceWindowsService', () => {
     ];
     maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(mw);
     const maintenanceWindowsService = new MaintenanceWindowsService({
-      getMaintenanceWindowClient: jest.fn().mockReturnValue(maintenanceWindowClient),
+      getMaintenanceWindowClient: vi.fn().mockReturnValue(maintenanceWindowClient),
       logger,
     });
 
@@ -356,7 +358,7 @@ describe('MaintenanceWindowsService', () => {
     }));
     maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(mw);
     const maintenanceWindowsService = new MaintenanceWindowsService({
-      getMaintenanceWindowClient: jest.fn().mockReturnValue(maintenanceWindowClient),
+      getMaintenanceWindowClient: vi.fn().mockReturnValue(maintenanceWindowClient),
       logger,
     });
 
@@ -410,7 +412,7 @@ describe('MaintenanceWindowsService', () => {
     ];
     maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(mw);
     const maintenanceWindowsService = new MaintenanceWindowsService({
-      getMaintenanceWindowClient: jest.fn().mockReturnValue(maintenanceWindowClient),
+      getMaintenanceWindowClient: vi.fn().mockReturnValue(maintenanceWindowClient),
       logger,
     });
 

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { MigrationNameInputProps } from './migration_name_input';
 import { MigrationNameInput } from './migration_name_input';
 import * as i18n from './translations';
 
-const mockSetMigrationName = jest.fn();
+const mockSetMigrationName = vi.fn();
 
 const defaultProps: MigrationNameInputProps = {
   migrationName: 'Default Name',
@@ -20,7 +22,7 @@ const defaultProps: MigrationNameInputProps = {
 
 describe('MigrationNameInput', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with default name', () => {

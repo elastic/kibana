@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { LearningStore } from '../../decision_trees/learning_store';
@@ -14,11 +17,11 @@ import {
   createRecordToolLearningTool,
 } from './learning_tools';
 
-const createStore = (): jest.Mocked<LearningStore> =>
+const createStore = (): Mocked<LearningStore> =>
   ({
-    record: jest.fn(async (input) => ({ ...input, connector_name: undefined, updated_at: 'now' })),
-    list: jest.fn().mockResolvedValue([]),
-  } as unknown as jest.Mocked<LearningStore>);
+    record: vi.fn(async (input) => ({ ...input, connector_name: undefined, updated_at: 'now' })),
+    list: vi.fn().mockResolvedValue([]),
+  } as unknown as Mocked<LearningStore>);
 
 const context = { esClient: { asCurrentUser: {} } } as never;
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook, act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FC, PropsWithChildren } from 'react';
@@ -24,24 +27,24 @@ import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framew
 import { useAttachEventsEBT } from '../../../analytics/use_attach_events_ebt';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 
-jest.mock('../../../analytics/use_attach_events_ebt');
-jest.mock('../../../common/use_cases_toast');
-jest.mock('../../../common/lib/kibana/use_application');
-jest.mock('../../../containers/use_create_attachments');
-jest.mock('../../create/flyout/use_cases_add_to_new_case_flyout');
+vi.mock('../../../analytics/use_attach_events_ebt');
+vi.mock('../../../common/use_cases_toast');
+vi.mock('../../../common/lib/kibana/use_application');
+vi.mock('../../../containers/use_create_attachments');
+vi.mock('../../create/flyout/use_cases_add_to_new_case_flyout');
 // dummy mock, will call onRowclick when rendering
-jest.mock('./all_cases_selector_modal', () => {
+vi.mock('./all_cases_selector_modal', () => {
   return {
-    AllCasesSelectorModal: jest.fn(),
+    AllCasesSelectorModal: vi.fn(),
   };
 });
 
-const onSuccess = jest.fn();
-const getAttachments = jest.fn().mockReturnValue([alertComment]);
-const useCasesToastMock = useCasesToast as jest.Mock;
-const useCasesAddToNewCaseFlyoutMock = useCasesAddToNewCaseFlyout as jest.Mock;
-const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
-const openCreateNewCaseFlyout = jest.fn();
+const onSuccess = vi.fn();
+const getAttachments = vi.fn().mockReturnValue([alertComment]);
+const useCasesToastMock = useCasesToast as Mock;
+const useCasesAddToNewCaseFlyoutMock = useCasesAddToNewCaseFlyout as Mock;
+const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as Mock;
+const openCreateNewCaseFlyout = vi.fn();
 
 // test component to test the hook integration
 const TestComponent: React.FC<AddToExistingCaseModalProps> = (
@@ -56,16 +59,16 @@ const TestComponent: React.FC<AddToExistingCaseModalProps> = (
   return <button type="button" data-test-subj="open-modal" onClick={onClick} />;
 };
 
-const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+const useCreateAttachmentsMock = useCreateAttachments as Mock;
 
 const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
 
 describe('use cases add to existing case modal hook', () => {
   useCreateAttachmentsMock.mockReturnValue({
-    mutateAsync: jest.fn(),
+    mutateAsync: vi.fn(),
   });
 
-  const dispatch = jest.fn();
+  const dispatch = vi.fn();
 
   const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
     return (
@@ -97,7 +100,7 @@ describe('use cases add to existing case modal hook', () => {
     AllCasesSelectorModalMock.mockReset();
     openCreateNewCaseFlyout.mockReset();
     useCasesAddToNewCaseFlyoutMock.mockReturnValue({
-      close: jest.fn(),
+      close: vi.fn(),
       open: openCreateNewCaseFlyout,
     });
     onSuccess.mockReset();
@@ -209,7 +212,7 @@ describe('use cases add to existing case modal hook', () => {
 
     getAttachments.mockReturnValueOnce([]);
 
-    const mockedToastInfo = jest.fn();
+    const mockedToastInfo = vi.fn();
     useCasesToastMock.mockReturnValue({
       showInfoToast: mockedToastInfo,
     });
@@ -232,7 +235,7 @@ describe('use cases add to existing case modal hook', () => {
 
     getAttachments.mockReturnValueOnce([]);
 
-    const mockedToastInfo = jest.fn();
+    const mockedToastInfo = vi.fn();
     useCasesToastMock.mockReturnValue({
       showInfoToast: mockedToastInfo,
     });
@@ -246,12 +249,12 @@ describe('use cases add to existing case modal hook', () => {
   });
 
   it('should call createAttachments when a case is selected and show a toast message', async () => {
-    const mockBulkCreateAttachments = jest.fn();
+    const mockBulkCreateAttachments = vi.fn();
     useCreateAttachmentsMock.mockReturnValueOnce({
       mutateAsync: mockBulkCreateAttachments,
     });
 
-    const mockedToastSuccess = jest.fn();
+    const mockedToastSuccess = vi.fn();
     useCasesToastMock.mockReturnValue({
       showSuccessAttach: mockedToastSuccess,
     });
@@ -275,17 +278,17 @@ describe('use cases add to existing case modal hook', () => {
     });
     expect(mockedToastSuccess).toHaveBeenCalled();
 
-    expect(jest.mocked(useAttachEventsEBT())).toHaveBeenCalled();
+    expect(vi.mocked(useAttachEventsEBT())).toHaveBeenCalled();
   });
 
   it('should report an existing case when onSuccess is called after case selection', async () => {
-    const mockBulkCreateAttachments = jest.fn();
+    const mockBulkCreateAttachments = vi.fn();
 
     useCreateAttachmentsMock.mockReturnValueOnce({
       mutateAsync: mockBulkCreateAttachments,
     });
 
-    const mockedToastSuccess = jest.fn();
+    const mockedToastSuccess = vi.fn();
     useCasesToastMock.mockReturnValue({
       showSuccessAttach: mockedToastSuccess,
     });
@@ -304,12 +307,12 @@ describe('use cases add to existing case modal hook', () => {
   });
 
   it('should not call createAttachments nor show toast success when a case is not selected', async () => {
-    const mockBulkCreateAttachments = jest.fn();
+    const mockBulkCreateAttachments = vi.fn();
     useCreateAttachmentsMock.mockReturnValueOnce({
       mutateAsync: mockBulkCreateAttachments,
     });
 
-    const mockedToastSuccess = jest.fn();
+    const mockedToastSuccess = vi.fn();
     useCasesToastMock.mockReturnValue({
       showSuccessAttach: mockedToastSuccess,
     });
@@ -338,7 +341,7 @@ describe('use cases add to existing case modal hook', () => {
 
     // an owner-dependent getAttachments, like ML's or Osquery's, that can only build
     // the correct unified attachment once the (new) case's owner is known
-    const ownerDependentGetAttachments = jest
+    const ownerDependentGetAttachments = vi
       .fn()
       .mockImplementation(({ theCase }: { theCase?: CaseUI }) => (theCase ? [alertComment] : []));
 
@@ -371,12 +374,12 @@ describe('use cases add to existing case modal hook', () => {
   });
 
   it('should not show toast success when a case is selected with attachments and fails to update attachments', async () => {
-    const mockBulkCreateAttachments = jest.fn().mockRejectedValue(new Error('Impossible'));
+    const mockBulkCreateAttachments = vi.fn().mockRejectedValue(new Error('Impossible'));
     useCreateAttachmentsMock.mockReturnValueOnce({
       mutateAsync: mockBulkCreateAttachments,
     });
 
-    const mockedToast = jest.fn();
+    const mockedToast = vi.fn();
     useCasesToastMock.mockReturnValue({
       showSuccessAttach: mockedToast,
     });

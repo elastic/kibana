@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { bulkActionConversationsRoute } from './bulk_actions_route';
 import { serverMock } from '../../__mocks__/server';
@@ -40,7 +42,7 @@ describe('Perform bulk action route', () => {
     );
     (
       (await clients.elasticAssistant.getAIAssistantConversationsDataClient.getWriter())
-        .bulk as jest.Mock
+        .bulk as Mock
     ).mockResolvedValue({
       docs_created: [mockConversation, mockConversation],
       docs_updated: [mockConversation, mockConversation],
@@ -85,7 +87,7 @@ describe('Perform bulk action route', () => {
     it('returns partial failure error if update of few conversations fail', async () => {
       (
         (await clients.elasticAssistant.getAIAssistantConversationsDataClient.getWriter())
-          .bulk as jest.Mock
+          .bulk as Mock
       ).mockResolvedValue({
         docs_created: ['49403909-ca9b-49ba-9d7a-7e5320e68d04'],
         docs_updated: [],

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { QueryClient, CancelledError } from '@kbn/react-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { fetchEsqlQueryColumns } from '../../../logic/esql_query_columns';
@@ -12,11 +15,14 @@ import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components
 import { esqlQueryValidatorFactory } from './esql_query_validator_factory';
 import { ESQL_ERROR_CODES } from './error_codes';
 
-jest.mock('../../../logic/esql_query_columns', () => ({
-  fetchEsqlQueryColumns: jest.fn(),
-}));
+vi.mock('../../../logic/esql_query_columns', () => {
+      const mocked = {
+      fetchEsqlQueryColumns: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const fetchEsqlQueryColumnsMock = fetchEsqlQueryColumns as jest.Mock;
+const fetchEsqlQueryColumnsMock = fetchEsqlQueryColumns as Mock;
 
 describe('esqlQueryValidator', () => {
   beforeEach(() => {
@@ -170,7 +176,7 @@ describe('esqlQueryValidator', () => {
 
     it('aborts the previous in-flight request when a new validation starts', async () => {
       const previousController = new AbortController();
-      const abortSpy = jest.spyOn(previousController, 'abort');
+      const abortSpy = vi.spyOn(previousController, 'abort');
       const abortControllerRef = { current: previousController };
       const validator = createValidator({ abortControllerRef });
 

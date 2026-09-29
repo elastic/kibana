@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
@@ -15,22 +18,28 @@ import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 
-const mockNavigateTo = jest.fn();
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn().mockReturnValue('default'),
-}));
-jest.mock('../../agent_builder/hooks/use_agent_builder_availability', () => ({
-  useAgentBuilderAvailability: jest.fn(),
-}));
+const mockNavigateTo = vi.fn();
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn().mockReturnValue('default'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../agent_builder/hooks/use_agent_builder_availability', () => {
+      const mocked = {
+      useAgentBuilderAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AISettings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
-          navigateToApp: jest.fn(),
+          navigateToApp: vi.fn(),
           capabilities: {
             securitySolutionAssistant: { 'ai-assistant': true },
           },
@@ -38,10 +47,10 @@ describe('AISettings', () => {
         data: { dataViews: {} },
       },
     });
-    (useNavigation as jest.Mock).mockReturnValue({
+    (useNavigation as Mock).mockReturnValue({
       navigateTo: mockNavigateTo,
     });
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: false,
     });
   });
@@ -74,8 +83,8 @@ describe('AISettings', () => {
     });
   });
   it('navigates to the home app when securityAIAssistantEnabled is false', () => {
-    const mockNavigateToApp = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue({
+    const mockNavigateToApp = vi.fn();
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           navigateToApp: mockNavigateToApp,
@@ -99,7 +108,7 @@ describe('AISettings', () => {
   });
 
   it('navigates to integrations when isAgentChatExperienceEnabled is true', () => {
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: true,
     });
 

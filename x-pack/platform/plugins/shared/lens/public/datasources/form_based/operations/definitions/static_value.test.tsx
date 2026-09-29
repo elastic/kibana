@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -44,8 +46,8 @@ const defaultProps = {
   } as IndexPattern,
   operationDefinitionMap: {},
   isFullscreen: false,
-  toggleFullscreen: jest.fn(),
-  setIsCloseable: jest.fn(),
+  toggleFullscreen: vi.fn(),
+  setIsCloseable: vi.fn(),
   layerId: '1',
 };
 
@@ -83,10 +85,10 @@ describe('static_value', () => {
     };
   });
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   function getLayerWithStaticValue(newValue: string | null | undefined): FormBasedLayer {
@@ -329,7 +331,7 @@ describe('static_value', () => {
   describe('paramEditor', () => {
     const ParamEditor = staticValueOperation.paramEditor!;
     it('should render current static_value', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       render(
         <ParamEditor
           {...defaultProps}
@@ -344,7 +346,7 @@ describe('static_value', () => {
     });
 
     it('should allow 0 as initial value', () => {
-      const updateLayerSpy = jest.fn();
+      const updateLayerSpy = vi.fn();
       const zeroLayer = {
         ...layer,
         columns: {
@@ -373,8 +375,8 @@ describe('static_value', () => {
 
     it('should update state on change', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      const updateLayerSpy = jest.fn();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      const updateLayerSpy = vi.fn();
       render(
         <ParamEditor
           {...defaultProps}
@@ -385,7 +387,7 @@ describe('static_value', () => {
         />
       );
       await user.type(screen.getByRole('spinbutton'), '{backspace}{backspace}27');
-      jest.advanceTimersByTime(256);
+      vi.advanceTimersByTime(256);
       expect(updateLayerSpy).toHaveBeenCalledTimes(1);
       expect(updateLayerSpy.mock.calls[0][0](layer)).toEqual({
         ...layer,
@@ -404,8 +406,8 @@ describe('static_value', () => {
 
     it('should not update on invalid input, but show invalid value locally', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      const updateLayerSpy = jest.fn();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      const updateLayerSpy = vi.fn();
       render(
         <ParamEditor
           {...defaultProps}
@@ -417,7 +419,7 @@ describe('static_value', () => {
       );
 
       await user.type(screen.getByRole('spinbutton'), '{backspace}{backspace}');
-      jest.advanceTimersByTime(256);
+      vi.advanceTimersByTime(256);
       expect(updateLayerSpy).not.toHaveBeenCalled();
       expect(screen.getByRole('spinbutton')).toHaveValue(null);
     });

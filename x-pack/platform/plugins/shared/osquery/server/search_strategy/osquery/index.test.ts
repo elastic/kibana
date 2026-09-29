@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of, lastValueFrom } from 'rxjs';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
@@ -33,18 +36,21 @@ import { OSQUERY_SEARCH_STRATEGY_AUTHZ_ERROR } from '../constants';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 import { ID_BOUND_FACTORY_QUERY_TYPES, osquerySearchStrategyProvider } from '.';
 
-jest.mock('@kbn/data-plugin/server', () => ({
-  shimHitsTotal: (rawResponse: unknown) => rawResponse,
-}));
+vi.mock('@kbn/data-plugin/server', () => {
+      const mocked = {
+      shimHitsTotal: (rawResponse: unknown) => rawResponse,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Keep the real CCS prefixing so index-shape assertions exercise production
 // behaviour; only the remote-cluster probe (a network call) is stubbed.
-jest.mock('../../utils/ccs_utils', () => {
-  const actual = jest.requireActual('../../utils/ccs_utils');
+vi.mock('../../utils/ccs_utils', async () => {
+  const actual = (await vi.importActual('../../utils/ccs_utils'));
 
   return {
     ...actual,
-    hasConnectedRemoteClusters: jest.fn().mockResolvedValue(false),
+    hasConnectedRemoteClusters: vi.fn().mockResolvedValue(false),
   };
 });
 
@@ -68,9 +74,9 @@ describe('osquerySearchStrategyProvider space scoping', () => {
     newDataStreamIndexExists?: boolean;
     cpsActive?: boolean;
   } = {}) => {
-    const searchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
+    const searchMock = vi.fn().mockReturnValue(of(emptyRawResponse));
     const authorizedActions = new Set(authorizedPrivileges.map((privilege) => `api:${privilege}`));
-    const checkPrivileges = jest.fn(({ kibana }: { kibana: string[] }) =>
+    const checkPrivileges = vi.fn(({ kibana }: { kibana: string[] }) =>
       Promise.resolve({
         privileges: {
           kibana: kibana.map((privilege) => ({
@@ -80,22 +86,22 @@ describe('osquerySearchStrategyProvider space scoping', () => {
         },
       })
     );
-    const checkPrivilegesDynamicallyWithRequest = jest.fn().mockReturnValue(checkPrivileges);
-    const getApiAction = jest.fn((privilege: string) => `api:${privilege}`);
-    const getActiveSpace = jest
+    const checkPrivilegesDynamicallyWithRequest = vi.fn().mockReturnValue(checkPrivileges);
+    const getApiAction = vi.fn((privilege: string) => `api:${privilege}`);
+    const getActiveSpace = vi
       .fn()
       .mockResolvedValue(activeSpaceId === null ? undefined : { id: activeSpaceId });
 
-    const getSearchStrategy = jest.fn();
+    const getSearchStrategy = vi.fn();
 
     const data = {
       search: {
-        searchAsInternalUser: { search: searchMock, cancel: jest.fn() },
+        searchAsInternalUser: { search: searchMock, cancel: vi.fn() },
         getSearchStrategy,
       },
     } as any;
 
-    const indicesExists = jest.fn(({ index }: { index: string }) =>
+    const indicesExists = vi.fn(({ index }: { index: string }) =>
       Promise.resolve(
         index.startsWith(ACTION_RESPONSES_DATA_STREAM_INDEX)
           ? newDataStreamIndexExists
@@ -114,11 +120,11 @@ describe('osquerySearchStrategyProvider space scoping', () => {
         authz: {
           actions: { api: { get: getApiAction } },
           checkPrivilegesDynamicallyWithRequest,
-          mode: { useRbacForRequest: jest.fn().mockReturnValue(useRbac) },
+          mode: { useRbacForRequest: vi.fn().mockReturnValue(useRbac) },
         },
       },
       service: { getActiveSpace },
-      isCpsActive: jest.fn().mockResolvedValue(cpsActive),
+      isCpsActive: vi.fn().mockResolvedValue(cpsActive),
     } as unknown as Pick<OsqueryAppContext, 'security' | 'service' | 'isCpsActive'>;
 
     const provider = osquerySearchStrategyProvider(data, esClient, osqueryContext);
@@ -322,9 +328,9 @@ describe('osquerySearchStrategyProvider space scoping', () => {
     });
 
     it('routes osquery result reads to the enhanced strategy when CPS is enabled', async () => {
-      const enhancedSearchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
+      const enhancedSearchMock = vi.fn().mockReturnValue(of(emptyRawResponse));
       const { provider, searchMock, getSearchStrategy } = setup({ cpsActive: true });
-      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: vi.fn() });
 
       await search(provider);
 
@@ -344,12 +350,12 @@ describe('osquerySearchStrategyProvider space scoping', () => {
     } as StrategyRequestType<OsqueryQueries.actions>;
 
     it('routes actions metadata reads to the enhanced strategy when CPS is enabled', async () => {
-      const enhancedSearchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
+      const enhancedSearchMock = vi.fn().mockReturnValue(of(emptyRawResponse));
       const { provider, searchMock, getSearchStrategy } = setup({
         cpsActive: true,
         actionsIndexExists: true,
       });
-      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: vi.fn() });
 
       await lastValueFrom(provider.search(actionsRequest, {} as never, { request: {} } as never));
 
@@ -372,7 +378,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
     });
 
     it('adds CCS-prefixed index targets when remote clusters are connected', async () => {
-      (hasConnectedRemoteClusters as jest.Mock).mockResolvedValueOnce(true);
+      (hasConnectedRemoteClusters as Mock).mockResolvedValueOnce(true);
       const { provider, searchMock } = setup();
 
       await search(provider);
@@ -424,13 +430,13 @@ describe('osquerySearchStrategyProvider space scoping', () => {
     const legacyResponse = { rawResponse: { hits: { total: 3, hits: [{ _id: 'legacy' }] } } };
 
     it('routes actionResults reads to the enhanced strategy when CPS is enabled', async () => {
-      const enhancedSearchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
+      const enhancedSearchMock = vi.fn().mockReturnValue(of(emptyRawResponse));
       const { provider, searchMock, getSearchStrategy } = setup({
         cpsActive: true,
         actionsIndexExists: true,
         newDataStreamIndexExists: true,
       });
-      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: vi.fn() });
 
       await lastValueFrom(
         provider.search(actionResultsRequest, {} as never, { request: {} } as never)
@@ -471,7 +477,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
     });
 
     it('queries the new data stream as the request user when CPS is enabled even if the origin index is absent', async () => {
-      const enhancedSearchMock = jest
+      const enhancedSearchMock = vi
         .fn()
         .mockReturnValue(
           of({ rawResponse: { hits: { total: 5, hits: [{ _id: 'data-stream' }] } } })
@@ -480,7 +486,7 @@ describe('osquerySearchStrategyProvider space scoping', () => {
         cpsActive: true,
         newDataStreamIndexExists: false,
       });
-      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: vi.fn() });
       searchMock.mockReturnValue(of({ rawResponse: { hits: { total: 0, hits: [] } } }));
 
       const response = (await lastValueFrom(

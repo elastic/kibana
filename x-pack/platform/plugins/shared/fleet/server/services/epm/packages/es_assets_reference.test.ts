@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
@@ -13,7 +15,7 @@ import { ElasticsearchAssetType } from '../../../types';
 
 import { updateEsAssetReferences } from './es_assets_reference';
 
-jest.mock('../../audit_logging');
+vi.mock('../../audit_logging');
 
 const PACKAGES_SO_TYPE = 'epm-packages';
 

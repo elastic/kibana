@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
@@ -20,43 +23,49 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { EsQueryRuleParams, SearchType } from '../types';
 import { EsQueryExpression } from './es_query_expression';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const module = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const module = (await vi.importActual('@kbn/kibana-react-plugin/public'));
 
   return {
     ...module,
-    useKibana: jest.fn(),
+    useKibana: vi.fn(),
   };
 });
 
-jest.mock('@kbn/code-editor', () => ({
-  // Mocking CodeEditor
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      // Mocking CodeEditor
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  CodeEditor: (props: any) => (
-    <input
-      data-test-subj="mockCodeEditor"
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onChange={(syntheticEvent: any) => {
-        props.onChange(syntheticEvent.jsonString);
-      }}
-    />
-  ),
-}));
-jest.mock('@kbn/es-ui-shared-plugin/public', () => ({
-  XJson: {
-    useXJsonMode: jest.fn().mockReturnValue({
-      convertToJson: jest.fn(),
-      setXJson: jest.fn(),
-      xJson: jest.fn(),
-    }),
-  },
-}));
+      CodeEditor: (props: any) => (
+        <input
+          data-test-subj="mockCodeEditor"
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onChange={(syntheticEvent: any) => {
+            props.onChange(syntheticEvent.jsonString);
+          }}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/es-ui-shared-plugin/public', () => {
+      const mocked = {
+      XJson: {
+        useXJsonMode: vi.fn().mockReturnValue({
+          convertToJson: vi.fn(),
+          setXJson: vi.fn(),
+          xJson: vi.fn(),
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createDataPluginMock = () => {
   const dataMock = dataPluginMock.createStartContract() as DataPublicPluginStart & {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    search: ISearchStart & { search: jest.MockedFunction<any> };
+    search: ISearchStart & { search: MockedFunction<any> };
   };
   return dataMock;
 };
@@ -68,7 +77,7 @@ const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
 const dataMock = createDataPluginMock();
 const dataViewMock = {
   ...dataViewPluginMocks.createStartContract(),
-  getFieldsForWildcard: jest.fn().mockResolvedValue([
+  getFieldsForWildcard: vi.fn().mockResolvedValue([
     {
       name: '@timestamp',
       type: 'date',
@@ -86,7 +95,7 @@ const dataViewMock = {
       isMapped: true,
     },
   ]),
-  getIndices: jest.fn().mockResolvedValue([]),
+  getIndices: vi.fn().mockResolvedValue([]),
 };
 const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
@@ -107,7 +116,7 @@ const defaultEsQueryExpressionParams: EsQueryRuleParams<SearchType.esQuery> = {
 
 describe('EsQueryRuleTypeExpression', () => {
   beforeAll(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         docLinks: {
           ELASTIC_WEBSITE_URL: '',

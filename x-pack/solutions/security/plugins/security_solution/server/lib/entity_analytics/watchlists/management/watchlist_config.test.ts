@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SecurityServiceStart } from '@kbn/core/server';
 import {
   savedObjectsClientMock,
@@ -15,19 +17,28 @@ import { WatchlistConfigClient } from './watchlist_config';
 import { getIndexForWatchlist } from '../entities/utils';
 import { watchlistEntitySourceTypeName } from '../entity_sources/infra';
 
-jest.mock('../entities/utils', () => ({
-  getIndexForWatchlist: jest.fn().mockReturnValue('mock-watchlist-index'),
-}));
+vi.mock('../entities/utils', () => {
+      const mocked = {
+      getIndexForWatchlist: vi.fn().mockReturnValue('mock-watchlist-index'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockInvalidateEntitySourceApiKey = jest.fn();
-jest.mock('../entity_sources/entity_source_api_key', () => ({
-  invalidateEntitySourceApiKey: (...args: unknown[]) => mockInvalidateEntitySourceApiKey(...args),
-}));
+const mockInvalidateEntitySourceApiKey = vi.fn();
+vi.mock('../entity_sources/entity_source_api_key', () => {
+      const mocked = {
+      invalidateEntitySourceApiKey: (...args: unknown[]) => mockInvalidateEntitySourceApiKey(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCreateOrUpdateIndex = jest.fn();
-jest.mock('../../utils/create_or_update_index', () => ({
-  createOrUpdateIndex: (...args: unknown[]) => mockCreateOrUpdateIndex(...args),
-}));
+const mockCreateOrUpdateIndex = vi.fn();
+vi.mock('../../utils/create_or_update_index', () => {
+      const mocked = {
+      createOrUpdateIndex: (...args: unknown[]) => mockCreateOrUpdateIndex(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WatchlistConfigClient', () => {
   let soClientMock: ReturnType<typeof savedObjectsClientMock.create>;
@@ -54,7 +65,7 @@ describe('WatchlistConfigClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('create', () => {
@@ -183,7 +194,7 @@ describe('WatchlistConfigClient', () => {
 
   describe('getEntityCount', () => {
     it('should return the correct count for a single ID', async () => {
-      jest.spyOn(client, 'getEntityCounts').mockResolvedValue({ 'watchlist-1': 10 });
+      vi.spyOn(client, 'getEntityCounts').mockResolvedValue({ 'watchlist-1': 10 });
       const result = await client.getEntityCount('watchlist-1');
       expect(result).toBe(10);
       expect(client.getEntityCounts).toHaveBeenCalledWith(['watchlist-1']);
@@ -292,7 +303,7 @@ describe('WatchlistConfigClient', () => {
         per_page: 20,
       });
 
-      jest.spyOn(client, 'getEntityCounts');
+      vi.spyOn(client, 'getEntityCounts');
 
       const result = await client.list();
 
@@ -310,7 +321,7 @@ describe('WatchlistConfigClient', () => {
         attributes: { name: 'Watchlist 1' },
       });
 
-      jest.spyOn(client, 'getEntityCount').mockResolvedValue(42);
+      vi.spyOn(client, 'getEntityCount').mockResolvedValue(42);
 
       const result = await client.get('wl-1');
 

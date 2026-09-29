@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SyntheticsEsClient } from '../../lib';
 import { fetchTrends } from './overview_trends';
 
 const mockEsClient: Partial<SyntheticsEsClient> = {
-  msearch: jest.fn(),
+  msearch: vi.fn(),
 };
 
 describe('fetchTrends', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return correctly formatted trend data with valid input', async () => {
@@ -52,7 +55,7 @@ describe('fetchTrends', () => {
       ],
     };
 
-    (mockEsClient.msearch as jest.Mock).mockResolvedValueOnce(mockResponse);
+    (mockEsClient.msearch as Mock).mockResolvedValueOnce(mockResponse);
 
     const result = await fetchTrends(mockEsClient as SyntheticsEsClient, configs);
 
@@ -82,7 +85,7 @@ describe('fetchTrends', () => {
       responses: [],
     };
 
-    (mockEsClient.msearch as jest.Mock).mockResolvedValueOnce(mockResponse);
+    (mockEsClient.msearch as Mock).mockResolvedValueOnce(mockResponse);
 
     const result = await fetchTrends(mockEsClient as SyntheticsEsClient, configs);
 
@@ -103,7 +106,7 @@ describe('fetchTrends', () => {
       ],
     };
 
-    (mockEsClient.msearch as jest.Mock).mockResolvedValueOnce(mockResponse);
+    (mockEsClient.msearch as Mock).mockResolvedValueOnce(mockResponse);
 
     const result = await fetchTrends(mockEsClient as SyntheticsEsClient, configs);
 
@@ -116,7 +119,7 @@ describe('fetchTrends', () => {
       config1: { locations: ['location1'], interval: 10 },
     };
 
-    (mockEsClient.msearch as jest.Mock).mockRejectedValueOnce(new Error('Elasticsearch error'));
+    (mockEsClient.msearch as Mock).mockRejectedValueOnce(new Error('Elasticsearch error'));
 
     await expect(fetchTrends(mockEsClient as SyntheticsEsClient, configs)).rejects.toThrow(
       'Elasticsearch error'

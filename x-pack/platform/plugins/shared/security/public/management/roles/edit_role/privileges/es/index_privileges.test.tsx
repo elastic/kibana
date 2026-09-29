@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -43,7 +45,7 @@ test('it renders without crashing', async () => {
             run_as: [],
           },
         }}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         indexPatterns={[]}
         editable
         validator={new RoleValidator()}
@@ -98,7 +100,7 @@ test('it renders an IndexPrivilegeForm for each index privilege on the role', as
             run_as: [],
           },
         }}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         indexPatterns={[]}
         editable
         validator={new RoleValidator()}
@@ -156,7 +158,7 @@ test('it renders an IndexPrivilegeForm for each remote index privilege on the ro
             run_as: [],
           },
         }}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         indexPatterns={[]}
         editable
         validator={new RoleValidator()}
@@ -200,7 +202,7 @@ test('it renders fields as disabled when not editable', async () => {
         run_as: [],
       },
     },
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     indexPatterns: [],
     editable: false,
     validator: new RoleValidator(),

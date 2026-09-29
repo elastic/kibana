@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useBaseEsQuery } from './use_base_es_query';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -13,8 +16,8 @@ import { useDataViewContext } from '../data_view_context';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../data_view_context');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../data_view_context');
 
 const mockDataView = {
   id: 'test-data-view',
@@ -41,16 +44,16 @@ const mockDataView = {
 const uiSettings = coreMock.createStart().uiSettings;
 const notifications = coreMock.createStart().notifications;
 const filterManager = {
-  setAppFilters: jest.fn(),
+  setAppFilters: vi.fn(),
 };
 const queryString = {
-  setQuery: jest.fn(),
+  setQuery: vi.fn(),
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 
-  (useKibana as jest.Mock).mockReturnValue({
+  (useKibana as Mock).mockReturnValue({
     services: {
       notifications,
       uiSettings,
@@ -63,11 +66,11 @@ beforeEach(() => {
     },
   });
 
-  (useDataViewContext as jest.Mock).mockReturnValue({
+  (useDataViewContext as Mock).mockReturnValue({
     dataView: mockDataView,
   });
 
-  uiSettings.get = jest.fn().mockReturnValue(true);
+  uiSettings.get = vi.fn().mockReturnValue(true);
 });
 
 describe('useBaseEsQuery', () => {

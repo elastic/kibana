@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import moment from 'moment';
@@ -41,7 +43,7 @@ describe('Search Sessions Management API', () => {
 
   describe('listing', () => {
     test('fetchDataTable calls the listing endpoint', async () => {
-      sessionsClient.find = jest.fn().mockImplementation(async () => {
+      sessionsClient.find = vi.fn().mockImplementation(async () => {
         return {
           saved_objects: [
             {
@@ -84,7 +86,7 @@ describe('Search Sessions Management API', () => {
     });
 
     test('fetchDataTable returns saved objects for a specific appId', async () => {
-      sessionsClient.find = jest.fn().mockImplementation(async () => {
+      sessionsClient.find = vi.fn().mockImplementation(async () => {
         return {
           saved_objects: [
             {
@@ -138,7 +140,7 @@ describe('Search Sessions Management API', () => {
     });
 
     test('expired session is showed as expired', async () => {
-      sessionsClient.find = jest.fn().mockImplementation(async () => {
+      sessionsClient.find = vi.fn().mockImplementation(async () => {
         return {
           saved_objects: [
             {
@@ -170,7 +172,7 @@ describe('Search Sessions Management API', () => {
     });
 
     test('handle error from sessionsClient response', async () => {
-      sessionsClient.find = jest.fn().mockRejectedValue(new Error('implementation is so bad'));
+      sessionsClient.find = vi.fn().mockRejectedValue(new Error('implementation is so bad'));
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
@@ -195,7 +197,7 @@ describe('Search Sessions Management API', () => {
         },
       };
 
-      sessionsClient.find = jest.fn().mockImplementation(async () => {
+      sessionsClient.find = vi.fn().mockImplementation(async () => {
         return new Promise((resolve) => {
           setTimeout(resolve, 2000);
         });
@@ -216,7 +218,7 @@ describe('Search Sessions Management API', () => {
 
   describe('cancel', () => {
     beforeEach(() => {
-      sessionsClient.find = jest.fn().mockImplementation(async () => {
+      sessionsClient.find = vi.fn().mockImplementation(async () => {
         return {
           saved_objects: [
             {
@@ -242,7 +244,7 @@ describe('Search Sessions Management API', () => {
     });
 
     test('error if deleting shows a toast message', async () => {
-      sessionsClient.delete = jest.fn().mockRejectedValue(new Error('implementation is so bad'));
+      sessionsClient.delete = vi.fn().mockRejectedValue(new Error('implementation is so bad'));
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
@@ -260,7 +262,7 @@ describe('Search Sessions Management API', () => {
 
   describe('extend', () => {
     beforeEach(() => {
-      sessionsClient.extend = jest.fn().mockImplementation(async () => {
+      sessionsClient.extend = vi.fn().mockImplementation(async () => {
         return {
           saved_objects: [
             {
@@ -285,7 +287,7 @@ describe('Search Sessions Management API', () => {
     });
 
     test('displays error on reject', async () => {
-      sessionsClient.extend = jest.fn().mockRejectedValue({});
+      sessionsClient.extend = vi.fn().mockRejectedValue({});
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,

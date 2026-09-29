@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
@@ -14,15 +17,15 @@ import { useDisassociateExceptionList } from '../../../rule_management/logic/use
 import { ErrorCallout } from '.';
 import { savedRuleMock } from '../../../rule_management/logic/mock';
 
-jest.mock('../../../rule_management/logic/use_disassociate_exception_list');
+vi.mock('../../../rule_management/logic/use_disassociate_exception_list');
 
 const mockKibanaHttpService = coreMock.createStart().http;
 
 describe('ErrorCallout', () => {
-  const mockDisassociate = jest.fn();
+  const mockDisassociate = vi.fn();
 
   beforeEach(() => {
-    (useDisassociateExceptionList as jest.Mock).mockReturnValue([false, mockDisassociate]);
+    (useDisassociateExceptionList as Mock).mockReturnValue([false, mockDisassociate]);
   });
 
   it('it renders error details', () => {
@@ -36,9 +39,9 @@ describe('ErrorCallout', () => {
           listListId: null,
         }}
         rule={{ ...savedRuleMock, exceptions_list: [getListMock()] }}
-        onCancel={jest.fn()}
-        onSuccess={jest.fn()}
-        onError={jest.fn()}
+        onCancel={vi.fn()}
+        onSuccess={vi.fn()}
+        onError={vi.fn()}
       />
     );
 
@@ -54,7 +57,7 @@ describe('ErrorCallout', () => {
   });
 
   it('it invokes "onCancel" when cancel button clicked', () => {
-    const mockOnCancel = jest.fn();
+    const mockOnCancel = vi.fn();
     const wrapper = mountWithIntl(
       <ErrorCallout
         http={mockKibanaHttpService}
@@ -66,8 +69,8 @@ describe('ErrorCallout', () => {
         }}
         rule={{ ...savedRuleMock, exceptions_list: [getListMock()] }}
         onCancel={mockOnCancel}
-        onSuccess={jest.fn()}
-        onError={jest.fn()}
+        onSuccess={vi.fn()}
+        onError={vi.fn()}
       />
     );
 
@@ -87,9 +90,9 @@ describe('ErrorCallout', () => {
           listListId: null,
         }}
         rule={{ ...savedRuleMock, exceptions_list: [getListMock()] }}
-        onCancel={jest.fn()}
-        onSuccess={jest.fn()}
-        onError={jest.fn()}
+        onCancel={vi.fn()}
+        onSuccess={vi.fn()}
+        onError={vi.fn()}
       />
     );
 
@@ -116,9 +119,9 @@ describe('ErrorCallout', () => {
           listListId: null,
         }}
         rule={{ ...savedRuleMock, exceptions_list: [getListMock()] }}
-        onCancel={jest.fn()}
-        onSuccess={jest.fn()}
-        onError={jest.fn()}
+        onCancel={vi.fn()}
+        onSuccess={vi.fn()}
+        onError={vi.fn()}
       />
     );
 
@@ -145,9 +148,9 @@ describe('ErrorCallout', () => {
           listListId: null,
         }}
         rule={{ ...savedRuleMock, exceptions_list: [getListMock()] }}
-        onCancel={jest.fn()}
-        onSuccess={jest.fn()}
-        onError={jest.fn()}
+        onCancel={vi.fn()}
+        onSuccess={vi.fn()}
+        onError={vi.fn()}
       />
     );
 

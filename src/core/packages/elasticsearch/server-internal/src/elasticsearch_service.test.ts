@@ -7,17 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 // Mocking the module to avoid waiting for a valid ES connection during these unit tests
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 
-jest.mock('./is_valid_connection', () => ({
-  isValidConnection: jest.fn(),
-}));
+vi.mock('./is_valid_connection', () => {
+      const mocked = {
+      isValidConnection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mocking this module to force different statuses to help with the unit tests
-jest.mock('./version_check/ensure_es_version', () => ({
-  pollEsNodesVersion: jest.fn(),
-}));
+vi.mock('./version_check/ensure_es_version', () => {
+      const mocked = {
+      pollEsNodesVersion: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   MockClusterClient,
@@ -44,14 +53,12 @@ import { duration } from 'moment';
 import { isValidConnection } from './is_valid_connection';
 import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/ensure_es_version';
 
-const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
-  './version_check/ensure_es_version'
-);
+const { pollEsNodesVersion: pollEsNodesVersionActual } = (await vi.importActual('./version_check/ensure_es_version'));
 
-const isValidConnectionMock = isValidConnection as jest.Mock;
+const isValidConnectionMock = isValidConnection as Mock;
 
 const TICK = 10;
-const tick = (ticks = 1) => jest.advanceTimersByTime(TICK * ticks);
+const tick = (ticks = 1) => vi.advanceTimersByTime(TICK * ticks);
 
 const configService = configServiceMock.create();
 
@@ -77,7 +84,7 @@ beforeEach(() => {
 
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 
   mockConfig$ = new BehaviorSubject({
     hosts: ['http://1.2.3.4'],
@@ -111,8 +118,8 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
-  jest.clearAllMocks();
-  jest.useRealTimers();
+  vi.clearAllMocks();
+  vi.useRealTimers();
   MockClusterClient.mockClear();
   isScriptingEnabledMock.mockReset();
   getClusterInfoMock.mockReset();

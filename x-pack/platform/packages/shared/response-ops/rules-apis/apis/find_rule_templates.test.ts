@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FindRuleTemplatesApiResponse } from './find_rule_templates';
 import { findRuleTemplates, rewriteTemplatesBodyRes } from './find_rule_templates';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -13,7 +15,7 @@ const http = httpServiceMock.createStartContract();
 
 describe('findRuleTemplates', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call the find templates API with correct parameters', async () => {

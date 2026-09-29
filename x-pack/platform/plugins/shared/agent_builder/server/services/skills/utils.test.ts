@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { internalToPublicDefinition, internalToPublicSummary, resolveSkill } from './utils';
 
@@ -105,7 +107,7 @@ describe('internalToPublicDefinition', () => {
   it('does not include basePath or getInlineTools in the public definition', async () => {
     const skill = createMockInternalSkill({
       basePath: 'skills/platform',
-      getInlineTools: jest.fn(),
+      getInlineTools: vi.fn(),
     });
     const result = await internalToPublicDefinition(skill);
 

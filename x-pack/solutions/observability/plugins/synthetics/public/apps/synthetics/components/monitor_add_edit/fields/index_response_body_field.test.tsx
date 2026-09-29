@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
@@ -13,8 +15,8 @@ import { ResponseBodyIndexPolicy } from '../types';
 
 describe('<ResponseBodyIndexField/>', () => {
   const defaultDefaultValue = ResponseBodyIndexPolicy.ON_ERROR;
-  const onChange = jest.fn();
-  const onBlur = jest.fn();
+  const onChange = vi.fn();
+  const onBlur = vi.fn();
   const WrappedComponent = ({ defaultValue = defaultDefaultValue }) => {
     return (
       <ResponseBodyIndexField defaultValue={defaultValue} onChange={onChange} onBlur={onBlur} />
@@ -22,7 +24,7 @@ describe('<ResponseBodyIndexField/>', () => {
   };
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('renders ResponseBodyIndexField', () => {

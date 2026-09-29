@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -14,24 +17,33 @@ import { FailureSection } from '.';
 import { TroubleshootWithAi } from '../troubleshoot_with_ai';
 import { DiagnosticReport } from '../diagnostic_report';
 
-jest.mock('../failure_actions', () => ({
-  FailureActions: jest.fn(() => <div data-test-subj="failureActions">{'Mock FailureActions'}</div>),
-}));
+vi.mock('../failure_actions', () => {
+      const mocked = {
+      FailureActions: vi.fn(() => <div data-test-subj="failureActions">{'Mock FailureActions'}</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../troubleshoot_with_ai', () => ({
-  TroubleshootWithAi: jest.fn(() => (
-    <div data-test-subj="troubleshootWithAi">{'Mock TroubleshootWithAi'}</div>
-  )),
-}));
+vi.mock('../troubleshoot_with_ai', () => {
+      const mocked = {
+      TroubleshootWithAi: vi.fn(() => (
+        <div data-test-subj="troubleshootWithAi">{'Mock TroubleshootWithAi'}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../diagnostic_report', () => ({
-  DiagnosticReport: jest.fn(() => (
-    <div data-test-subj="diagnosticReport">{'Mock DiagnosticReport'}</div>
-  )),
-}));
+vi.mock('../diagnostic_report', () => {
+      const mocked = {
+      DiagnosticReport: vi.fn(() => (
+        <div data-test-subj="diagnosticReport">{'Mock DiagnosticReport'}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MockTroubleshootWithAi = TroubleshootWithAi as jest.MockedFunction<typeof TroubleshootWithAi>;
-const MockDiagnosticReport = DiagnosticReport as jest.MockedFunction<typeof DiagnosticReport>;
+const MockTroubleshootWithAi = TroubleshootWithAi as MockedFunction<typeof TroubleshootWithAi>;
+const MockDiagnosticReport = DiagnosticReport as MockedFunction<typeof DiagnosticReport>;
 
 const mockAggregatedExecution: AggregatedWorkflowExecution = {
   status: ExecutionStatus.FAILED,
@@ -46,7 +58,7 @@ const defaultProps = {
 
 describe('FailureSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders TroubleshootWithAi', () => {

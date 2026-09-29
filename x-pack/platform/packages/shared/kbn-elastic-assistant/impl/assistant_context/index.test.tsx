@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useAssistantContext } from '.';
 import { TestProviders } from '../mock/test_providers/test_providers';
 
 describe('AssistantContext', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   test('it throws an error when useAssistantContext hook is used without a SecurityAssistantContext', () => {
     expect(() => renderHook(useAssistantContext)).toThrow(

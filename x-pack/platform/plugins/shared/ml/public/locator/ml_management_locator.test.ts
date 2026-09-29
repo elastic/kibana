@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { MlManagementLocatorInternal } from './ml_management_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
@@ -12,7 +14,7 @@ import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 const mockShareService = {
   url: {
     locators: {
-      get: jest.fn(() => {
+      get: vi.fn(() => {
         // MlManagementLocatorInternal wraps the management locator (getUrl mocked below) and adds path formatting to match ML app paths
         return {
           getUrl: async ({ sectionId, appId }: { sectionId: string; appId: string }) => {

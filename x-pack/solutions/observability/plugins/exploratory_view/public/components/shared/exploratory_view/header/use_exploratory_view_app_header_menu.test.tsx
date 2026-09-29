@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import {
   ADD_TO_CASE_BUTTON_TEST_SUBJ,
@@ -16,14 +18,14 @@ import {
 
 describe('useExploratoryViewAppHeaderMenu', () => {
   const handlers = {
-    onSave: jest.fn(),
-    onOpenInLens: jest.fn(),
-    onAddToCase: jest.fn(),
-    onEmbed: jest.fn(),
+    onSave: vi.fn(),
+    onOpenInLens: vi.fn(),
+    onAddToCase: vi.fn(),
+    onEmbed: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('orders Open in Lens, Add to case, then overflow Embed, with Save as primary', () => {

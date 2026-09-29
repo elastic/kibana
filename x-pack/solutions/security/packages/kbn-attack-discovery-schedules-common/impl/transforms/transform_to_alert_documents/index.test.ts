@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { ALERT_URL } from '@kbn/rule-data-utils';
 
@@ -36,7 +38,7 @@ describe('Transform attack discoveries to alert documents', () => {
     const alertInstanceId = 'test-alert-instance-id';
 
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it(`returns the expected ${ALERT_ATTACK_DISCOVERY_ALERT_IDS} field`, () => {
@@ -223,7 +225,7 @@ describe('Transform attack discoveries to alert documents', () => {
   });
 
   describe('generateAttackDiscoveryAlertHash', () => {
-    const computeSha256Hash = jest.fn().mockReturnValue('mocked-hash');
+    const computeSha256Hash = vi.fn().mockReturnValue('mocked-hash');
 
     const defaultProps = {
       computeSha256Hash,

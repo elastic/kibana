@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
@@ -15,12 +17,12 @@ import { UserProfileDisplay } from './user_profile_display';
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
 
-const mockBulkGet = jest.fn();
+const mockBulkGet = vi.fn();
 const mockUserProfile = { bulkGet: mockBulkGet } as unknown as UserProfileService;
 
 describe('UserProfileDisplay', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 

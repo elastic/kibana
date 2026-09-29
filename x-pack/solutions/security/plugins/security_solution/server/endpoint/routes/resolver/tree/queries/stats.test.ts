@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { StatsQuery } from './stats';
@@ -90,19 +93,19 @@ describe('StatsQuery', () => {
     const buildScopedClient = () =>
       ({
         asCurrentUser: {
-          search: jest.fn().mockResolvedValue({ aggregations: { ids: { buckets: [] } } }),
+          search: vi.fn().mockResolvedValue({ aggregations: { ids: { buckets: [] } } }),
         },
         asInternalUser: {
-          search: jest.fn().mockResolvedValue({ aggregations: { ids: { buckets: [] } } }),
+          search: vi.fn().mockResolvedValue({ aggregations: { ids: { buckets: [] } } }),
         },
       } as unknown as IScopedClusterClient);
 
     const buildAlertsClient = () =>
       ({
-        find: jest
+        find: vi
           .fn()
           .mockResolvedValue({ aggregations: { ids: { buckets: [] } }, hits: { hits: [] } }),
-      } as unknown as jest.Mocked<AlertsClient>);
+      } as unknown as Mocked<AlertsClient>);
 
     it('requests alerts without `_source` so large hit responses are not buffered', async () => {
       const query = new StatsQuery({

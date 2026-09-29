@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EsWorkflow } from '@kbn/workflows';
 
@@ -16,8 +18,8 @@ import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 const logger = loggerMock.create();
 
 const mockTaskScheduler = {
-  unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
-  updateWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+  unscheduleWorkflowTasks: vi.fn().mockResolvedValue(undefined),
+  updateWorkflowTasks: vi.fn().mockResolvedValue(undefined),
 } as unknown as WorkflowTaskScheduler;
 
 const baseWorkflow: EsWorkflow = {
@@ -40,10 +42,10 @@ const baseWorkflow: EsWorkflow = {
 
 const mockRequest = {} as any;
 
-const makeGetWorkflow = (workflow: EsWorkflow | null) => jest.fn().mockResolvedValue(workflow);
+const makeGetWorkflow = (workflow: EsWorkflow | null) => vi.fn().mockResolvedValue(workflow);
 
 describe('syncSchedulerAfterSave', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('re-reads the workflow from storage via getWorkflow', async () => {
     const getWorkflow = makeGetWorkflow(baseWorkflow);

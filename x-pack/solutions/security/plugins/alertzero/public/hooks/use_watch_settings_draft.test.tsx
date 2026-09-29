@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import {
   RULE_TUNING_DEFAULT_EXTRAS,
@@ -16,9 +18,9 @@ import {
 import { useWatchSettingsDraft } from './use_watch_settings_draft';
 import { useUpdateWorker } from './use_workers_api';
 
-jest.mock('./use_workers_api');
+vi.mock('./use_workers_api');
 
-const mockUseUpdateWorker = jest.mocked(useUpdateWorker);
+const mockUseUpdateWorker = vi.mocked(useUpdateWorker);
 
 const createWorker = (overrides: Partial<Worker> & Pick<Worker, 'id' | 'name'>): Worker => ({
   watchIds: [SYSTEM_SECURITY_WATCH_DETECTION_ID],
@@ -54,10 +56,10 @@ const ruleCreation = createWorker({
 });
 
 describe('useWatchSettingsDraft', () => {
-  const mutateAsync = jest.fn();
+  const mutateAsync = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseUpdateWorker.mockReturnValue({ mutateAsync } as never);
   });
 

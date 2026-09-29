@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import sinon from 'sinon';
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -138,7 +140,7 @@ describe('Summary Action Scheduler', () => {
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockActionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     mockActionsPlugin.isActionExecutable.mockReturnValue(true);
     mockActionsPlugin.getActionsClientWithRequest.mockResolvedValue(actionsClient);

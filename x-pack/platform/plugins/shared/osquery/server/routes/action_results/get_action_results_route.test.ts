@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
@@ -29,13 +32,16 @@ import {
   createMockActionResultsResponse,
 } from './mocks';
 
-jest.mock('../../utils/find_osquery_action_metadata', () => ({
-  findOsqueryActionMetadata: jest.fn(),
-}));
+vi.mock('../../utils/find_osquery_action_metadata', () => {
+      const mocked = {
+      findOsqueryActionMetadata: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { findOsqueryActionMetadata } from '../../utils/find_osquery_action_metadata';
 
-const mockFindOsqueryActionMetadata = findOsqueryActionMetadata as jest.MockedFunction<
+const mockFindOsqueryActionMetadata = findOsqueryActionMetadata as MockedFunction<
   typeof findOsqueryActionMetadata
 >;
 
@@ -70,7 +76,7 @@ describe('getActionResultsRoute', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFindOsqueryActionMetadata.mockReset();
   });
 
@@ -251,7 +257,7 @@ describe('getActionResultsRoute', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const responseBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
 
       // Server returns ONLY real ES responses (2 agents responded)
       expect(responseBody.edges).toHaveLength(2);
@@ -404,7 +410,7 @@ describe('getActionResultsRoute', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const responseBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
 
       expect(responseBody.edges).toHaveLength(5);
 
@@ -462,7 +468,7 @@ describe('getActionResultsRoute', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const responseBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
 
       expect(responseBody.edges).toHaveLength(10);
 
@@ -504,7 +510,7 @@ describe('getActionResultsRoute', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const responseBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
 
       expect(responseBody.edges).toHaveLength(20);
 
@@ -541,7 +547,7 @@ describe('getActionResultsRoute', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const responseBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
 
       expect(responseBody.totalPages).toBe(0);
       expect(Number.isFinite(responseBody.totalPages)).toBe(true);
@@ -551,7 +557,7 @@ describe('getActionResultsRoute', () => {
   describe('Error Handling', () => {
     it('should return 500 error when search strategy throws error', async () => {
       const errorMessage = 'Elasticsearch connection failed';
-      const mockSearchFn = jest.fn().mockImplementation(() => {
+      const mockSearchFn = vi.fn().mockImplementation(() => {
         throw new Error(errorMessage);
       });
 
@@ -574,7 +580,7 @@ describe('getActionResultsRoute', () => {
 
     it('propagates a non-500 statusCode from the search strategy', async () => {
       const message = 'User is not authorized to access Osquery search results';
-      const mockSearchFn = jest.fn().mockImplementation(() => {
+      const mockSearchFn = vi.fn().mockImplementation(() => {
         throw Object.assign(new Error(message), { statusCode: 403 });
       });
 
@@ -644,7 +650,7 @@ describe('getActionResultsRoute', () => {
     it('passes a named active space to the search strategy', async () => {
       // Re-register the route against a context whose active space is named.
       const namedSpaceContext = createMockOsqueryContext();
-      (namedSpaceContext.service.getActiveSpace as jest.Mock).mockResolvedValue({
+      (namedSpaceContext.service.getActiveSpace as Mock).mockResolvedValue({
         id: 'my-space',
         name: 'My Space',
       });
@@ -672,40 +678,40 @@ describe('getActionResultsRoute', () => {
 
   describe('CPS metadata gate', () => {
     const mockEsClient = {
-      indices: { exists: jest.fn().mockResolvedValue(true) },
+      indices: { exists: vi.fn().mockResolvedValue(true) },
     };
 
     beforeEach(() => {
       mockFindOsqueryActionMetadata.mockResolvedValue(true);
     });
 
-    const createCpsContext = (mockSearchFn: jest.Mock) => {
-      const mockCpsSearch = jest.fn().mockReturnValue({ search: mockSearchFn });
+    const createCpsContext = (mockSearchFn: Mock) => {
+      const mockCpsSearch = vi.fn().mockReturnValue({ search: mockSearchFn });
       const context = createMockOsqueryContext();
-      (context.isCpsActive as jest.Mock).mockResolvedValue(true);
+      (context.isCpsActive as Mock).mockResolvedValue(true);
       const mockSavedObjectsClient = {
-        find: jest.fn(),
-        get: jest.fn(),
-        create: jest.fn(),
-        update: jest.fn(),
-        delete: jest.fn(),
+        find: vi.fn(),
+        get: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
       };
-      (context.getStartServices as jest.Mock).mockResolvedValue([
+      (context.getStartServices as Mock).mockResolvedValue([
         {
           savedObjects: {
-            getScopedClient: jest.fn().mockReturnValue(mockSavedObjectsClient),
-            createInternalRepository: jest.fn(),
+            getScopedClient: vi.fn().mockReturnValue(mockSavedObjectsClient),
+            createInternalRepository: vi.fn(),
           },
           http: {
             basePath: {
-              set: jest.fn(),
-              get: jest.fn().mockReturnValue(''),
+              set: vi.fn(),
+              get: vi.fn().mockReturnValue(''),
             },
           },
           elasticsearch: {
             client: {
               asInternalUser: mockEsClient,
-              asScoped: jest.fn().mockReturnValue({ asCurrentUser: { search: jest.fn() } }),
+              asScoped: vi.fn().mockReturnValue({ asCurrentUser: { search: vi.fn() } }),
             },
           },
         },
@@ -782,37 +788,37 @@ describe('getActionResultsRoute', () => {
       mockFindOsqueryActionMetadata.mockResolvedValue(true);
 
       const mockCpsSearchFn = createMockSearchStrategy(createMockActionResultsResponse(1));
-      const mockCpsSearch = jest.fn().mockReturnValue({ search: mockCpsSearchFn });
-      const contextSearchFn = jest.fn();
+      const mockCpsSearch = vi.fn().mockReturnValue({ search: mockCpsSearchFn });
+      const contextSearchFn = vi.fn();
 
       const cpsContext = createMockOsqueryContext();
-      (cpsContext.isCpsActive as jest.Mock).mockResolvedValue(true);
+      (cpsContext.isCpsActive as Mock).mockResolvedValue(true);
       const mockSavedObjectsClient = {
-        find: jest.fn(),
-        get: jest.fn(),
-        create: jest.fn(),
-        update: jest.fn(),
-        delete: jest.fn(),
+        find: vi.fn(),
+        get: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
       };
-      (cpsContext.getStartServices as jest.Mock).mockResolvedValue([
+      (cpsContext.getStartServices as Mock).mockResolvedValue([
         {
           savedObjects: {
-            getScopedClient: jest.fn().mockReturnValue(mockSavedObjectsClient),
-            createInternalRepository: jest.fn(),
+            getScopedClient: vi.fn().mockReturnValue(mockSavedObjectsClient),
+            createInternalRepository: vi.fn(),
           },
           http: {
             basePath: {
-              set: jest.fn(),
-              get: jest.fn().mockReturnValue(''),
+              set: vi.fn(),
+              get: vi.fn().mockReturnValue(''),
             },
           },
           elasticsearch: {
             client: {
               asInternalUser: {
-                search: jest.fn(),
-                indices: { exists: jest.fn().mockResolvedValue(true) },
+                search: vi.fn(),
+                indices: { exists: vi.fn().mockResolvedValue(true) },
               },
-              asScoped: jest.fn().mockReturnValue({ asCurrentUser: { search: jest.fn() } }),
+              asScoped: vi.fn().mockReturnValue({ asCurrentUser: { search: vi.fn() } }),
             },
           },
         },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { left, right } from 'fp-ts/Either';
 import { errors } from '@elastic/elasticsearch';
 import type { estypes } from '@elastic/elasticsearch';
@@ -65,10 +67,10 @@ function getRuleDataClientOptions({
 }
 
 describe('RuleDataClient', () => {
-  const getFieldsForWildcardMock = jest.fn();
+  const getFieldsForWildcardMock = vi.fn();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   for (const isUsingDataStreams of [false, true]) {
@@ -88,7 +90,7 @@ describe('RuleDataClient', () => {
 
       describe('getReader()', () => {
         beforeEach(() => {
-          jest.resetAllMocks();
+          vi.resetAllMocks();
           getFieldsForWildcardMock.mockResolvedValue({ fields: ['foo'] });
           IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
         });
@@ -232,7 +234,7 @@ describe('RuleDataClient', () => {
 
       describe('getWriter()', () => {
         beforeEach(() => {
-          jest.clearAllMocks();
+          vi.clearAllMocks();
         });
 
         test('throws error if writing is disabled', async () => {

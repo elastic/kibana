@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { appContextService } from '../../../app_context';
@@ -50,7 +52,7 @@ describe('removeRemoteClusterSourceIndicesOnServerless', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('on serverless', () => {

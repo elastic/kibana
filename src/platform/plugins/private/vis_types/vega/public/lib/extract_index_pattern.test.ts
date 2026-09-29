@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -16,13 +19,19 @@ import { setDataViews, setHttp } from '../services';
 import type { VegaSpec } from '../data_model/types';
 import { vegaVisType } from '../vega_type';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getIndexPatternFromESQLQuery: jest.fn(),
-  getESQLAdHocDataview: jest.fn(),
-}));
-jest.mock('../default_spec', () => ({
-  getDefaultSpec: jest.fn(() => ''),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getIndexPatternFromESQLQuery: vi.fn(),
+      getESQLAdHocDataview: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../default_spec', () => {
+      const mocked = {
+      getDefaultSpec: vi.fn(() => ''),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const getMockedSpec = (mockedObj: any) => mockedObj as unknown as VegaSpec;
 
@@ -35,17 +44,17 @@ describe('extractIndexPatternsFromSpec', () => {
   });
 
   beforeEach(() => {
-    (getIndexPatternFromESQLQuery as jest.Mock).mockImplementation((query: string) =>
+    (getIndexPatternFromESQLQuery as Mock).mockImplementation((query: string) =>
       query.replace(/^(?:FROM|TS)\s+([^\s|]+).*$/is, '$1')
     );
-    (getESQLAdHocDataview as jest.Mock).mockImplementation(async ({ query }) => {
-      const indexPattern = (getIndexPatternFromESQLQuery as jest.Mock)(query);
+    (getESQLAdHocDataview as Mock).mockImplementation(async ({ query }) => {
+      const indexPattern = (getIndexPatternFromESQLQuery as Mock)(query);
       return { id: `esql-${indexPattern}`, title: indexPattern };
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should not throw errors if no index is specified', async () => {
@@ -272,7 +281,7 @@ describe('extractIndexPatternsFromSpec', () => {
   });
 
   test('should return no data views when asynchronous data view resolution fails', async () => {
-    (getESQLAdHocDataview as jest.Mock).mockRejectedValueOnce(new Error('resolution failed'));
+    (getESQLAdHocDataview as Mock).mockRejectedValueOnce(new Error('resolution failed'));
 
     const getUsedIndexPattern = vegaVisType.getUsedIndexPattern;
     if (!getUsedIndexPattern) {

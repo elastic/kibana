@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -14,18 +17,21 @@ import { StepIcon } from './step_icon';
 import { useKibana } from '../../../hooks/use_kibana';
 
 // Activates the __mocks__/use_kibana.ts auto-mock which uses createStartServicesMock()
-jest.mock('../../../hooks/use_kibana');
-jest.mock('@kbn/connector-specs/icons', () => ({
-  ConnectorIconsMap: new Map([['.sharepoint-online', 'logoKibana']]),
-}));
+vi.mock('../../../hooks/use_kibana');
+vi.mock('@kbn/connector-specs/icons', () => {
+      const mocked = {
+      ConnectorIconsMap: new Map([['.sharepoint-online', 'logoKibana']]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Capture the services before any test resets mocks
-const mockServices = jest.mocked(useKibana)().services;
+const mockServices = vi.mocked(useKibana)().services;
 
 beforeEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
   // Re-establish the auto-mock return value since restoreAllMocks clears it
-  jest
+  vi
     .mocked(useKibana)
     .mockReturnValue({ services: mockServices } as ReturnType<typeof useKibana>);
 });
@@ -184,7 +190,7 @@ describe('StepIcon', () => {
   describe('custom step definitions', () => {
     it('does not render fallback plugs icon when a custom step definition has an icon', () => {
       const CustomIcon = () => React.createElement('svg', null);
-      (mockServices.workflowsExtensions.getStepDefinition as jest.Mock).mockReturnValue({
+      (mockServices.workflowsExtensions.getStepDefinition as Mock).mockReturnValue({
         icon: CustomIcon,
       });
 
@@ -198,8 +204,8 @@ describe('StepIcon', () => {
       // definition is registered under the bare base type but one exists for `${base}.X`, the
       // icon should be inherited from that family definition rather than falling through to
       // actionTypeRegistry or `plugs`.
-      (mockServices.workflowsExtensions.getStepDefinition as jest.Mock).mockReturnValue(undefined);
-      (mockServices.workflowsExtensions.getAllStepDefinitions as jest.Mock).mockReturnValue([
+      (mockServices.workflowsExtensions.getStepDefinition as Mock).mockReturnValue(undefined);
+      (mockServices.workflowsExtensions.getAllStepDefinitions as Mock).mockReturnValue([
         { id: 'cases.createCase', icon: 'briefcase' },
         { id: 'cases.getCase', icon: 'briefcase' },
       ]);
@@ -213,8 +219,8 @@ describe('StepIcon', () => {
       // Some family members (e.g. `cases.noop`) can be registered without an icon. Aggregating
       // by the base type must not latch onto the first (iconless) sibling and fall through to
       // the plugs fallback — pick a sibling that has an icon.
-      (mockServices.workflowsExtensions.getStepDefinition as jest.Mock).mockReturnValue(undefined);
-      (mockServices.workflowsExtensions.getAllStepDefinitions as jest.Mock).mockReturnValue([
+      (mockServices.workflowsExtensions.getStepDefinition as Mock).mockReturnValue(undefined);
+      (mockServices.workflowsExtensions.getAllStepDefinitions as Mock).mockReturnValue([
         { id: 'cases.noop' },
         { id: 'cases.createCase', icon: 'briefcase' },
       ]);
@@ -230,8 +236,8 @@ describe('StepIcon', () => {
       // The `ai.*` family spans multiple themes (prompt, summarize, classify, agent), so the
       // list's aggregate marker should be the AI category icon — not whichever sibling happens
       // to be registered first.
-      (mockServices.workflowsExtensions.getStepDefinition as jest.Mock).mockReturnValue(undefined);
-      (mockServices.workflowsExtensions.getAllStepDefinitions as jest.Mock).mockReturnValue([
+      (mockServices.workflowsExtensions.getStepDefinition as Mock).mockReturnValue(undefined);
+      (mockServices.workflowsExtensions.getAllStepDefinitions as Mock).mockReturnValue([
         { id: 'ai.prompt', icon: 'sparkles' },
         { id: 'ai.summarize', icon: 'sparkles' },
       ]);
@@ -244,8 +250,8 @@ describe('StepIcon', () => {
     it('renders the workflow.execute glyph for the bare "workflow" base type', () => {
       // `workflow.*` step defs are built-in (not registered via workflowsExtensions), so the
       // list aggregation for these steps lands on the bare `workflow` base type.
-      (mockServices.workflowsExtensions.getStepDefinition as jest.Mock).mockReturnValue(undefined);
-      (mockServices.workflowsExtensions.getAllStepDefinitions as jest.Mock).mockReturnValue([]);
+      (mockServices.workflowsExtensions.getStepDefinition as Mock).mockReturnValue(undefined);
+      (mockServices.workflowsExtensions.getAllStepDefinitions as Mock).mockReturnValue([]);
 
       const { container } = render(<StepIcon stepType="workflow" executionStatus={undefined} />);
       expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();

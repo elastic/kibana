@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { ESQLSource } from './esql_source';
@@ -22,7 +24,7 @@ describe('getIndexPatternId', () => {
       dataViewsService: dataStartService.dataViews,
       query: esql,
     });
-    const createSpecParameter = (dataStartService.dataViews.create as jest.Mock).mock.calls[0][0];
+    const createSpecParameter = (dataStartService.dataViews.create as Mock).mock.calls[0][0];
     expect(createSpecParameter.id).toBe(esqlSource.getIndexPatternId());
   });
 });

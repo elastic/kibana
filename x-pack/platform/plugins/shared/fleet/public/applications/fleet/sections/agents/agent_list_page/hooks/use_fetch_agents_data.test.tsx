@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, waitFor } from '@testing-library/react';
 
 import { useStartServices } from '../../../../hooks';
@@ -16,8 +19,8 @@ import { FLEET_PAGE_SIZE_OPTIONS } from '../../../../constants';
 
 import { useFetchAgentsData } from './use_fetch_agents_data';
 
-jest.mock('../../../../../../services/experimental_features');
-const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
+vi.mock('../../../../../../services/experimental_features');
+const mockedExperimentalFeaturesService = vi.mocked(ExperimentalFeaturesService);
 
 const defaultState = {
   search: '',
@@ -29,115 +32,118 @@ const defaultState = {
   page: { index: 0, size: 20 },
 };
 
-jest.mock('./use_session_agent_list_state', () => {
+vi.mock('./use_session_agent_list_state', () => {
   let currentMockState = { ...defaultState };
 
-  const mockUseSessionAgentListState = jest.fn(() => {
-    const mockUpdateTableState = jest.fn((updates: any) => {
+  const mockUseSessionAgentListState = vi.fn(() => {
+    const mockUpdateTableState = vi.fn((updates: any) => {
       currentMockState = { ...currentMockState, ...updates };
     });
 
     return {
       ...currentMockState,
       updateTableState: mockUpdateTableState,
-      onTableChange: jest.fn(),
-      clearFilters: jest.fn(),
-      resetToDefaults: jest.fn(),
+      onTableChange: vi.fn(),
+      clearFilters: vi.fn(),
+      resetToDefaults: vi.fn(),
     };
   });
 
   return {
     useSessionAgentListState: mockUseSessionAgentListState,
-    getDefaultAgentListState: jest.fn(() => defaultState),
+    getDefaultAgentListState: vi.fn(() => defaultState),
     defaultAgentListState: defaultState,
   };
 });
 
-jest.mock('../../../../hooks', () => ({
-  ...jest.requireActual('../../../../hooks'),
-  sendGetAgentsForRq: jest.fn().mockResolvedValue({
-    statusSummary: {},
-    items: [
-      {
-        id: 'agent123',
-        policy_id: 'agent-policy-1',
-      },
-    ],
-    total: 5,
-  }),
-  sendGetAgentStatus: jest.fn().mockResolvedValue({
-    data: {
-      results: {
-        inactive: 2,
-      },
-      totalInactive: 2,
-    },
-  }),
-  sendBulkGetAgentPoliciesForRq: jest.fn().mockReturnValue({
-    items: [
-      { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' },
-      {
-        id: 'agent-policy-managed',
-        name: 'Managed Agent policy',
-        namespace: 'default',
-        managed: true,
-      },
-    ],
-  }),
-  sendGetAgentPolicies: jest.fn().mockReturnValue({
-    data: {
-      items: [
-        { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' },
-        {
-          id: 'agent-policy-managed',
-          name: 'Managed Agent policy',
-          namespace: 'default',
-          managed: true,
+vi.mock('../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../hooks')),
+      sendGetAgentsForRq: vi.fn().mockResolvedValue({
+        statusSummary: {},
+        items: [
+          {
+            id: 'agent123',
+            policy_id: 'agent-policy-1',
+          },
+        ],
+        total: 5,
+      }),
+      sendGetAgentStatus: vi.fn().mockResolvedValue({
+        data: {
+          results: {
+            inactive: 2,
+          },
+          totalInactive: 2,
         },
-      ],
-    },
-  }),
-  useGetAgentPolicies: jest.fn().mockReturnValue({
-    data: {
-      items: [
-        { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' },
-        {
-          id: 'agent-policy-managed',
-          name: 'Managed Agent policy',
-          namespace: 'default',
-          managed: true,
+      }),
+      sendBulkGetAgentPoliciesForRq: vi.fn().mockReturnValue({
+        items: [
+          { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' },
+          {
+            id: 'agent-policy-managed',
+            name: 'Managed Agent policy',
+            namespace: 'default',
+            managed: true,
+          },
+        ],
+      }),
+      sendGetAgentPolicies: vi.fn().mockReturnValue({
+        data: {
+          items: [
+            { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' },
+            {
+              id: 'agent-policy-managed',
+              name: 'Managed Agent policy',
+              namespace: 'default',
+              managed: true,
+            },
+          ],
         },
-      ],
-    },
-    error: undefined,
-    isLoading: false,
-    resendRequest: jest.fn(),
-  } as any),
-  sendGetAgentTagsForRq: jest.fn().mockReturnValue({ items: ['tag1', 'tag2'] }),
-  sendGetActionStatus: jest.fn().mockResolvedValue({ data: { items: [] } }),
-  useStartServices: jest.fn().mockReturnValue({
-    notifications: {
-      toasts: {
-        addError: jest.fn(),
-      },
-    },
-    cloud: {},
-    data: { dataViews: { getFieldsForWildcard: jest.fn() } },
-  }),
-}));
+      }),
+      useGetAgentPolicies: vi.fn().mockReturnValue({
+        data: {
+          items: [
+            { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' },
+            {
+              id: 'agent-policy-managed',
+              name: 'Managed Agent policy',
+              namespace: 'default',
+              managed: true,
+            },
+          ],
+        },
+        error: undefined,
+        isLoading: false,
+        resendRequest: vi.fn(),
+      } as any),
+      sendGetAgentTagsForRq: vi.fn().mockReturnValue({ items: ['tag1', 'tag2'] }),
+      sendGetActionStatus: vi.fn().mockResolvedValue({ data: { items: [] } }),
+      useStartServices: vi.fn().mockReturnValue({
+        notifications: {
+          toasts: {
+            addError: vi.fn(),
+          },
+        },
+        cloud: {},
+        data: { dataViews: { getFieldsForWildcard: vi.fn() } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useFetchAgentsData', () => {
   const startServices = useStartServices();
-  const mockErrorToast = startServices.notifications.toasts.addError as jest.Mock;
+  const mockErrorToast = startServices.notifications.toasts.addError as Mock;
 
   beforeAll(() => {
     mockedExperimentalFeaturesService.get.mockReturnValue({} as any);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockErrorToast.mockReset();
     mockErrorToast.mockResolvedValue({});
-    const { sendGetAgentTagsForRq, sendGetActionStatus } = jest.requireMock('../../../../hooks');
+    const { sendGetAgentTagsForRq, sendGetActionStatus } = (await vi.importMock('../../../../hooks'));
     sendGetAgentTagsForRq.mockReturnValue({ items: ['tag1', 'tag2'] });
     sendGetActionStatus.mockResolvedValue({ data: { items: [] } });
   });
@@ -219,7 +225,7 @@ describe('useFetchAgentsData', () => {
 
   describe('allTags', () => {
     it('should be updated to empty array when all tags are removed', async () => {
-      const { sendGetAgentTagsForRq } = jest.requireMock('../../../../hooks');
+      const { sendGetAgentTagsForRq } = (await vi.importMock('../../../../hooks'));
 
       sendGetAgentTagsForRq.mockResolvedValueOnce({ items: ['tag1'] });
 
@@ -245,7 +251,7 @@ describe('useFetchAgentsData', () => {
     });
 
     it('should be updated when tags change from multiple to fewer', async () => {
-      const { sendGetAgentTagsForRq } = jest.requireMock('../../../../hooks');
+      const { sendGetAgentTagsForRq } = (await vi.importMock('../../../../hooks'));
 
       sendGetAgentTagsForRq.mockResolvedValueOnce({ items: ['tag1', 'tag2', 'tag3'] });
 
@@ -271,7 +277,7 @@ describe('useFetchAgentsData', () => {
     });
 
     it('should not be updated when they have not changed', async () => {
-      const { sendGetAgentTagsForRq } = jest.requireMock('../../../../hooks');
+      const { sendGetAgentTagsForRq } = (await vi.importMock('../../../../hooks'));
 
       sendGetAgentTagsForRq.mockResolvedValue({ items: ['tag1', 'tag2'] });
 
@@ -298,7 +304,7 @@ describe('useFetchAgentsData', () => {
 
   describe('error action ids', () => {
     it('calls sendGetActionStatus with latest window and accumulates error action ids', async () => {
-      const { sendGetActionStatus } = jest.requireMock('../../../../hooks');
+      const { sendGetActionStatus } = (await vi.importMock('../../../../hooks'));
       sendGetActionStatus.mockImplementation((opts: { scheduledOnly?: boolean }) => {
         if (opts.scheduledOnly) return Promise.resolve({ data: { items: [] } });
         return Promise.resolve({
@@ -328,7 +334,7 @@ describe('useFetchAgentsData', () => {
 
   describe('scheduledActionsCount', () => {
     it('returns 0 when there are no scheduled UNENROLL actions', async () => {
-      const { sendGetActionStatus } = jest.requireMock('../../../../hooks');
+      const { sendGetActionStatus } = (await vi.importMock('../../../../hooks'));
       sendGetActionStatus.mockResolvedValue({ data: { items: [] } });
 
       const renderer = createFleetTestRendererMock();
@@ -343,7 +349,7 @@ describe('useFetchAgentsData', () => {
 
     it('sums nbAgentsActioned for future UNENROLL actions', async () => {
       const futureTime = new Date(Date.now() + 3600_000).toISOString();
-      const { sendGetActionStatus } = jest.requireMock('../../../../hooks');
+      const { sendGetActionStatus } = (await vi.importMock('../../../../hooks'));
       sendGetActionStatus.mockImplementation(({ scheduledOnly }: { scheduledOnly?: boolean }) => {
         if (!scheduledOnly) return Promise.resolve({ data: { items: [] } });
         return Promise.resolve({
@@ -378,7 +384,7 @@ describe('useFetchAgentsData', () => {
 
     it('excludes non-UNENROLL scheduled actions', async () => {
       const futureTime = new Date(Date.now() + 3600_000).toISOString();
-      const { sendGetActionStatus } = jest.requireMock('../../../../hooks');
+      const { sendGetActionStatus } = (await vi.importMock('../../../../hooks'));
       sendGetActionStatus.mockImplementation(({ scheduledOnly }: { scheduledOnly?: boolean }) => {
         if (!scheduledOnly) return Promise.resolve({ data: { items: [] } });
         return Promise.resolve({
@@ -412,7 +418,7 @@ describe('useFetchAgentsData', () => {
     });
 
     it('calls sendGetActionStatus with scheduledOnly: true', async () => {
-      const { sendGetActionStatus } = jest.requireMock('../../../../hooks');
+      const { sendGetActionStatus } = (await vi.importMock('../../../../hooks'));
       sendGetActionStatus.mockResolvedValue({ data: { items: [] } });
 
       const renderer = createFleetTestRendererMock();

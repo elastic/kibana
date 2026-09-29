@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import type { PieVisConfig } from '../types/expression_renderers';
 import {
@@ -96,7 +98,7 @@ describe('interpreter/functions#pieVis', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns an object with the correct structure for pie', async () => {
@@ -139,7 +141,7 @@ describe('interpreter/functions#pieVis', () => {
           reset: () => {},
         },
       },
-      getExecutionContext: jest.fn(),
+      getExecutionContext: vi.fn(),
     } as unknown as ExecutionContext;
 
     await fn(context, visConfig, handlers as any);
@@ -155,7 +157,7 @@ describe('interpreter/functions#pieVis', () => {
     };
     const handlers = {
       variables: { overrides },
-      getExecutionContext: jest.fn(),
+      getExecutionContext: vi.fn(),
     } as unknown as ExecutionContext;
     const result = await fn(context, { ...visConfig, isDonut: false }, handlers);
 

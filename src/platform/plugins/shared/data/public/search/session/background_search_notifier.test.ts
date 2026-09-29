@@ -7,26 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { BackgroundSearchNotifier } from './background_search_notifier';
 import { getSessionsClientMock } from './mocks';
 import { getInProgressSessionIds, setInProgressSessionIds } from './in_progress_session';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
-jest.mock('./in_progress_session');
-const mockGetInProgressSessionIds = jest.mocked(getInProgressSessionIds);
-const mockSetInProgressSessionIds = jest.mocked(setInProgressSessionIds);
+vi.mock('./in_progress_session');
+const mockGetInProgressSessionIds = vi.mocked(getInProgressSessionIds);
+const mockSetInProgressSessionIds = vi.mocked(setInProgressSessionIds);
 
 const locatorsMock = sharePluginMock.createStartContract().url.locators;
 
 describe('BackgroundSearchNotifier', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('during polling', () => {
@@ -34,7 +36,7 @@ describe('BackgroundSearchNotifier', () => {
       it('should not call status endpoint', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
-          status: jest.fn().mockResolvedValue({ statuses: {}, sessions: {} }),
+          status: vi.fn().mockResolvedValue({ statuses: {}, sessions: {} }),
         });
         const coreStartMock = coreMock.createStart();
         const backgroundSearchNotifier = new BackgroundSearchNotifier(
@@ -46,7 +48,7 @@ describe('BackgroundSearchNotifier', () => {
 
         // When
         backgroundSearchNotifier.startPolling(1000);
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
 
         // Then
         expect(sessionsClientMock.status).not.toHaveBeenCalled();
@@ -57,7 +59,7 @@ describe('BackgroundSearchNotifier', () => {
       it('should keep tracking them', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
-          status: jest.fn().mockResolvedValue({
+          status: vi.fn().mockResolvedValue({
             statuses: {
               'session-1': { status: 'in_progress' },
               'session-2': { status: 'in_progress' },
@@ -75,7 +77,7 @@ describe('BackgroundSearchNotifier', () => {
 
         // When
         backgroundSearchNotifier.startPolling(1000);
-        await jest.advanceTimersByTimeAsync(1000);
+        await vi.advanceTimersByTimeAsync(1000);
 
         // Then
         expect(sessionsClientMock.status).toHaveBeenCalledWith(['session-1', 'session-2']);
@@ -89,7 +91,7 @@ describe('BackgroundSearchNotifier', () => {
       it('should show success notifications and remove from tracking', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
-          status: jest.fn().mockResolvedValue({
+          status: vi.fn().mockResolvedValue({
             statuses: {
               'session-1': { status: 'complete' },
               'session-2': { status: 'complete' },
@@ -122,7 +124,7 @@ describe('BackgroundSearchNotifier', () => {
 
         // When
         backgroundSearchNotifier.startPolling(1000);
-        await jest.advanceTimersByTimeAsync(1000);
+        await vi.advanceTimersByTimeAsync(1000);
         backgroundSearchNotifier.stopPolling();
 
         // Then
@@ -136,7 +138,7 @@ describe('BackgroundSearchNotifier', () => {
       it('should show error notifications and remove from tracking', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
-          status: jest.fn().mockResolvedValue({
+          status: vi.fn().mockResolvedValue({
             statuses: {
               'session-1': { status: 'error' },
               'session-2': { status: 'cancelled' },
@@ -169,7 +171,7 @@ describe('BackgroundSearchNotifier', () => {
 
         // When
         backgroundSearchNotifier.startPolling(1000);
-        await jest.advanceTimersByTimeAsync(1000);
+        await vi.advanceTimersByTimeAsync(1000);
         backgroundSearchNotifier.stopPolling();
 
         // Then
@@ -183,7 +185,7 @@ describe('BackgroundSearchNotifier', () => {
       it('should handle each status appropriately', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
-          status: jest.fn().mockResolvedValue({
+          status: vi.fn().mockResolvedValue({
             statuses: {
               'session-1': { status: 'in_progress' },
               'session-2': { status: 'complete' },
@@ -218,7 +220,7 @@ describe('BackgroundSearchNotifier', () => {
 
         // When
         backgroundSearchNotifier.startPolling(1000);
-        await jest.advanceTimersByTimeAsync(1000);
+        await vi.advanceTimersByTimeAsync(1000);
         backgroundSearchNotifier.stopPolling();
 
         // Then
@@ -232,7 +234,7 @@ describe('BackgroundSearchNotifier', () => {
       it('should silently remove them from tracking', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
-          status: jest.fn().mockResolvedValue({
+          status: vi.fn().mockResolvedValue({
             statuses: {
               'session-1': { status: 'in_progress' },
               // session-2 and session-3 not in response
@@ -250,7 +252,7 @@ describe('BackgroundSearchNotifier', () => {
 
         // When
         backgroundSearchNotifier.startPolling(1000);
-        await jest.advanceTimersByTimeAsync(1000);
+        await vi.advanceTimersByTimeAsync(1000);
 
         // Then
         expect(mockSetInProgressSessionIds).toHaveBeenCalledWith(['session-1']);
@@ -263,7 +265,7 @@ describe('BackgroundSearchNotifier', () => {
       it('should preserve the new session', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
-          status: jest.fn().mockResolvedValue({
+          status: vi.fn().mockResolvedValue({
             statuses: {
               'session-1': { status: 'in_progress' },
             },
@@ -284,7 +286,7 @@ describe('BackgroundSearchNotifier', () => {
 
         // When
         backgroundSearchNotifier.startPolling(1000);
-        await jest.advanceTimersByTimeAsync(1000);
+        await vi.advanceTimersByTimeAsync(1000);
         backgroundSearchNotifier.stopPolling();
 
         // Then
@@ -299,7 +301,7 @@ describe('BackgroundSearchNotifier', () => {
       it('should continue polling on the next tick', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
-          status: jest
+          status: vi
             .fn()
             .mockRejectedValueOnce(new Error('network'))
             .mockResolvedValueOnce({
@@ -329,7 +331,7 @@ describe('BackgroundSearchNotifier', () => {
 
         // When
         backgroundSearchNotifier.startPolling(1000);
-        await jest.advanceTimersByTimeAsync(1000);
+        await vi.advanceTimersByTimeAsync(1000);
         backgroundSearchNotifier.stopPolling();
 
         // Then
@@ -351,7 +353,7 @@ describe('BackgroundSearchNotifier', () => {
         });
 
         const sessionsClientMock = getSessionsClientMock({
-          status: jest.fn().mockReturnValue(deferred.promise),
+          status: vi.fn().mockReturnValue(deferred.promise),
         });
         const coreStartMock = coreMock.createStart();
         const backgroundSearchNotifier = new BackgroundSearchNotifier(
@@ -363,7 +365,7 @@ describe('BackgroundSearchNotifier', () => {
 
         // When
         backgroundSearchNotifier.startPolling(1000);
-        jest.advanceTimersByTime(3000);
+        vi.advanceTimersByTime(3000);
 
         // Then (no overlap while the first request is still in-flight)
         expect(sessionsClientMock.status).toHaveBeenCalledTimes(1);
@@ -375,8 +377,8 @@ describe('BackgroundSearchNotifier', () => {
           },
           sessions: {},
         });
-        await jest.advanceTimersByTimeAsync(0);
-        await jest.advanceTimersByTimeAsync(1000);
+        await vi.advanceTimersByTimeAsync(0);
+        await vi.advanceTimersByTimeAsync(1000);
 
         expect(sessionsClientMock.status).toHaveBeenCalledTimes(2);
         backgroundSearchNotifier.stopPolling();

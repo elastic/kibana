@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { ATTACK_DISCOVERY_MISCONFIGURATION_EVENT } from '../event_based_telemetry';
@@ -15,7 +17,7 @@ const mockLogger = loggingSystemMock.createLogger();
 
 describe('reportMisconfiguration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('reports a misconfiguration event with all fields', () => {

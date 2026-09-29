@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,7 +17,7 @@ import { getInputFromPolicy } from '../../../common/utils/helpers';
 import { INPUT_CONTROL } from '../../../common/constants';
 
 describe('<PolicySettings />', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   const WrappedComponent = ({ policy = getCloudDefendNewPolicyMock() }) => {
     return (

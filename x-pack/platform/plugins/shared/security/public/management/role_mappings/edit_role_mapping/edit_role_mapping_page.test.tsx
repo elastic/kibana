@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import React from 'react';
 
@@ -69,7 +71,7 @@ describe('EditRoleMappingPage', () => {
   beforeEach(() => {
     history.createHref.mockImplementation((location) => location.pathname ?? '/');
     rolesAPI = rolesAPIClientMock.create();
-    (rolesAPI as jest.Mocked<RolesAPIClient>).getRoles.mockResolvedValue([
+    (rolesAPI as Mocked<RolesAPIClient>).getRoles.mockResolvedValue([
       { name: 'foo_role' },
       { name: 'bar role' },
       { name: 'some-deprecated-role', metadata: { _deprecated: true } },

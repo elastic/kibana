@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AIAssistantDataClientParams } from '.';
 import { AIAssistantDataClient } from '.';
@@ -18,7 +20,7 @@ describe('AIAssistantDataClient', () => {
   let assistantDataClientParams: AIAssistantDataClientParams;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggingSystemMock.createLogger();
     assistantDataClientParams = {
       logger,
@@ -31,12 +33,12 @@ describe('AIAssistantDataClient', () => {
   });
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date(date));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(date));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('getWriter', () => {

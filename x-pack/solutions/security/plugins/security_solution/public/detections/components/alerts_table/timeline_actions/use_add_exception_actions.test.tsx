@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useAlertExceptionActions } from './use_add_exception_actions';
@@ -12,14 +15,14 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 
-jest.mock('../../../../common/components/user_privileges');
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+vi.mock('../../../../common/components/user_privileges');
+const mockUseUserPrivileges = useUserPrivileges as Mock;
 
-jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
-const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
+vi.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
+const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as Mock;
 
-jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
-const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
+vi.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
+const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;
 
 describe('useAlertExceptionActions', () => {
   beforeEach(() => {
@@ -27,7 +30,7 @@ describe('useAlertExceptionActions', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return both add rule exception and add endpoint exception menu items with all privileges', () => {
@@ -35,7 +38,7 @@ describe('useAlertExceptionActions', () => {
     mockUseEndpointExceptionsCapability.mockReturnValue(true);
 
     const { result } = renderHook(
-      () => useAlertExceptionActions({ isEndpointAlert: true, onAddExceptionTypeClick: jest.fn() }),
+      () => useAlertExceptionActions({ isEndpointAlert: true, onAddExceptionTypeClick: vi.fn() }),
       { wrapper: TestProviders }
     );
 
@@ -53,7 +56,7 @@ describe('useAlertExceptionActions', () => {
     mockUseEndpointExceptionsCapability.mockReturnValue(false);
 
     const { result } = renderHook(
-      () => useAlertExceptionActions({ isEndpointAlert: true, onAddExceptionTypeClick: jest.fn() }),
+      () => useAlertExceptionActions({ isEndpointAlert: true, onAddExceptionTypeClick: vi.fn() }),
       { wrapper: TestProviders }
     );
 
@@ -72,7 +75,7 @@ describe('useAlertExceptionActions', () => {
 
     const { result } = renderHook(
       () =>
-        useAlertExceptionActions({ isEndpointAlert: false, onAddExceptionTypeClick: jest.fn() }),
+        useAlertExceptionActions({ isEndpointAlert: false, onAddExceptionTypeClick: vi.fn() }),
       { wrapper: TestProviders }
     );
 
@@ -90,7 +93,7 @@ describe('useAlertExceptionActions', () => {
     mockUseEndpointExceptionsCapability.mockReturnValue(true);
 
     const { result } = renderHook(
-      () => useAlertExceptionActions({ isEndpointAlert: true, onAddExceptionTypeClick: jest.fn() }),
+      () => useAlertExceptionActions({ isEndpointAlert: true, onAddExceptionTypeClick: vi.fn() }),
       { wrapper: TestProviders }
     );
 
@@ -109,7 +112,7 @@ describe('useAlertExceptionActions', () => {
     mockUseAlertsPrivileges.mockReturnValue({ hasIndexWrite: false });
 
     const { result } = renderHook(
-      () => useAlertExceptionActions({ isEndpointAlert: true, onAddExceptionTypeClick: jest.fn() }),
+      () => useAlertExceptionActions({ isEndpointAlert: true, onAddExceptionTypeClick: vi.fn() }),
       { wrapper: TestProviders }
     );
 
@@ -127,7 +130,7 @@ describe('useAlertExceptionActions', () => {
     mockUseEndpointExceptionsCapability.mockReturnValue(false);
 
     const { result } = renderHook(
-      () => useAlertExceptionActions({ isEndpointAlert: true, onAddExceptionTypeClick: jest.fn() }),
+      () => useAlertExceptionActions({ isEndpointAlert: true, onAddExceptionTypeClick: vi.fn() }),
       { wrapper: TestProviders }
     );
 
@@ -141,7 +144,7 @@ describe('useAlertExceptionActions', () => {
 
     const { result } = renderHook(
       () =>
-        useAlertExceptionActions({ isEndpointAlert: false, onAddExceptionTypeClick: jest.fn() }),
+        useAlertExceptionActions({ isEndpointAlert: false, onAddExceptionTypeClick: vi.fn() }),
       { wrapper: TestProviders }
     );
 

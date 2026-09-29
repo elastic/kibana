@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -27,26 +30,26 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 import { getMockRulesAuthz } from '../../__mocks__/authz';
 
-jest.mock('../../../../machine_learning/authz');
-jest.mock('../../../../machine_learning/validation');
+vi.mock('../../../../machine_learning/authz');
+vi.mock('../../../../machine_learning/validation');
 
-jest.mock('./methods/get_rule_by_rule_id');
+vi.mock('./methods/get_rule_by_rule_id');
 
 describe('DetectionRulesClient.patchRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
 
-  const mlAuthz = (buildMlAuthz as jest.Mock)();
+  const mlAuthz = (buildMlAuthz as Mock)();
   const rulesAuthz = getMockRulesAuthz();
 
   let actionsClient = {
-    isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
-  } as unknown as jest.Mocked<ActionsClient>;
+    isSystemAction: vi.fn((id: string) => id === 'system-connector-.cases'),
+  } as unknown as Mocked<ActionsClient>;
 
   beforeEach(() => {
     actionsClient = {
-      isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
-    } as unknown as jest.Mocked<ActionsClient>;
+      isSystemAction: vi.fn((id: string) => id === 'system-connector-.cases'),
+    } as unknown as Mocked<ActionsClient>;
 
     rulesClient = rulesClientMock.create();
     const savedObjectsClient = savedObjectsClientMock.create();
@@ -65,7 +68,7 @@ describe('DetectionRulesClient.patchRule', () => {
   it('calls the rulesClient with expected params', async () => {
     // Mock the existing rule
     const existingRule = getRulesSchemaMock();
-    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+    (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
     // Mock the rule update
     const rulePatch = getCreateRulesSchemaMock('query-rule-id');
@@ -125,7 +128,7 @@ describe('DetectionRulesClient.patchRule', () => {
       ],
     };
     const existingRule = getRulesSchemaMock();
-    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+    (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
     rulesClient.update.mockResolvedValue(
       getRuleMock(getQueryRuleParams(), {
         actions: [
@@ -203,7 +206,7 @@ describe('DetectionRulesClient.patchRule', () => {
     // Mock the existing rule
     const existingRule = getRulesSchemaMock();
     existingRule.enabled = false;
-    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+    (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
     // Mock the rule update
     const rulePatch = { ...getCreateRulesSchemaMock(), enabled: true };
@@ -226,7 +229,7 @@ describe('DetectionRulesClient.patchRule', () => {
     // Mock the existing rule
     const existingRule = getRulesSchemaMock();
     existingRule.enabled = true;
-    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+    (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
     // Mock the rule update
     const rulePatch = { ...getCreateRulesSchemaMock(), enabled: false };
@@ -248,7 +251,7 @@ describe('DetectionRulesClient.patchRule', () => {
   it('calls the rulesClient with new ML params', async () => {
     // Mock the existing rule
     const existingRule = getRulesMlSchemaMock();
-    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+    (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
     // Mock the rule update
     const rulePatch = getCreateMachineLearningRulesSchemaMock();
@@ -273,7 +276,7 @@ describe('DetectionRulesClient.patchRule', () => {
   });
 
   it('throws if mlAuth fails', async () => {
-    (throwAuthzError as jest.Mock).mockImplementationOnce(() => {
+    (throwAuthzError as Mock).mockImplementationOnce(() => {
       throw new Error('mocked MLAuth error');
     });
 
@@ -292,7 +295,7 @@ describe('DetectionRulesClient.patchRule', () => {
       ...getRulesSchemaMock(),
       rule_source: { type: 'external', is_customized: true },
     };
-    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+    (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
     // Mock the rule update
     const rulePatch = getCreateRulesSchemaMock('query-rule-id');
@@ -311,7 +314,7 @@ describe('DetectionRulesClient.patchRule', () => {
     it("updates the rule's actions if provided", async () => {
       // Mock the existing rule
       const existingRule = getRulesSchemaMock();
-      (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+      (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
       // Mock the rule update
       const rulePatch = {
@@ -356,7 +359,7 @@ describe('DetectionRulesClient.patchRule', () => {
     it('does not update actions if none are specified', async () => {
       // Mock the existing rule
       const existingRule = getRulesSchemaMock();
-      (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+      (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
       existingRule.actions = [
         {
           action_type_id: '.slack',
@@ -421,8 +424,8 @@ describe('DetectionRulesClient.patchRule', () => {
 
     beforeEach(() => {
       actionsClient = {
-        isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
-      } as unknown as jest.Mocked<ActionsClient>;
+        isSystemAction: vi.fn((id: string) => id === 'system-connector-.cases'),
+      } as unknown as Mocked<ActionsClient>;
       rulesClient = rulesClientMock.create();
     });
 
@@ -434,7 +437,7 @@ describe('DetectionRulesClient.patchRule', () => {
 
         it('allows patching note field', async () => {
           const existingRule = getRulesSchemaMock();
-          (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+          (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
           const rulePatch = {
             rule_id: existingRule.rule_id,
@@ -472,7 +475,7 @@ describe('DetectionRulesClient.patchRule', () => {
 
         it('throws 403 when patching note', async () => {
           const existingRule = getRulesSchemaMock();
-          (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+          (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
           const rulePatch = {
             rule_id: existingRule.rule_id,
@@ -491,7 +494,7 @@ describe('DetectionRulesClient.patchRule', () => {
 
         it('throws 403 when unsetting note via null', async () => {
           const existingRule = getRulesSchemaMock();
-          (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+          (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
           const rulePatch = {
             rule_id: existingRule.rule_id,
@@ -520,7 +523,7 @@ describe('DetectionRulesClient.patchRule', () => {
 
         it('allows patching investigation_fields', async () => {
           const existingRule = getRulesSchemaMock();
-          (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+          (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
           const rulePatch = {
             rule_id: existingRule.rule_id,
@@ -560,7 +563,7 @@ describe('DetectionRulesClient.patchRule', () => {
 
         it('throws 403 when patching investigation_fields', async () => {
           const existingRule = getRulesSchemaMock();
-          (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+          (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
           const rulePatch = {
             rule_id: existingRule.rule_id,
@@ -587,7 +590,7 @@ describe('DetectionRulesClient.patchRule', () => {
 
         it('throws 403 when patching exceptions_list', async () => {
           const existingRule = getRulesSchemaMock();
-          (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+          (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
           const rulePatch = {
             rule_id: existingRule.rule_id,
@@ -618,7 +621,7 @@ describe('DetectionRulesClient.patchRule', () => {
 
         it('allows patching multiple read-auth fields', async () => {
           const existingRule = getRulesSchemaMock();
-          (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+          (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
           const rulePatch = {
             rule_id: existingRule.rule_id,
@@ -653,7 +656,7 @@ describe('DetectionRulesClient.patchRule', () => {
       it('enables a disabled rule when patching with enabled: true', async () => {
         const existingRule = getRulesSchemaMock();
         existingRule.enabled = false;
-        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+        (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
         const rulePatch = {
           rule_id: existingRule.rule_id,
@@ -680,7 +683,7 @@ describe('DetectionRulesClient.patchRule', () => {
       it('disables an enabled rule when patching with enabled: false', async () => {
         const existingRule = getRulesSchemaMock();
         existingRule.enabled = true;
-        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+        (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
         const rulePatch = {
           rule_id: existingRule.rule_id,
@@ -707,7 +710,7 @@ describe('DetectionRulesClient.patchRule', () => {
       it('does not toggle enabled state when it has not changed', async () => {
         const existingRule = getRulesSchemaMock();
         existingRule.enabled = true;
-        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+        (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
         const rulePatch = {
           rule_id: existingRule.rule_id,
@@ -737,7 +740,7 @@ describe('DetectionRulesClient.patchRule', () => {
       it('returns existing rule when bulkEditRuleParamsWithReadAuth skips the rule', async () => {
         const existingRule = getRulesSchemaMock();
         existingRule.note = 'Original note';
-        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+        (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
         const rulePatch = {
           rule_id: existingRule.rule_id,
@@ -762,7 +765,7 @@ describe('DetectionRulesClient.patchRule', () => {
         const existingRule = getRulesSchemaMock();
         existingRule.enabled = false;
         existingRule.note = 'Original note';
-        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+        (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
         const rulePatch = {
           rule_id: existingRule.rule_id,

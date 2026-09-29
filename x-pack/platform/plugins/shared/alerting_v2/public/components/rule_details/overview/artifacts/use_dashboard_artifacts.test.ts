@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { useDashboardArtifacts } from './use_dashboard_artifacts';
 
-const mockResolveDashboardsByIds = jest.fn();
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  getDashboardId: (artifact: { data: Record<string, unknown> }) =>
-    typeof artifact.data.dashboard_id === 'string' ? artifact.data.dashboard_id : undefined,
-  resolveDashboardsByIds: (...args: unknown[]) => mockResolveDashboardsByIds(...args),
-}));
+const mockResolveDashboardsByIds = vi.fn();
+vi.mock('@kbn/alerting-v2-rule-form', () => {
+      const mocked = {
+      getDashboardId: (artifact: { data: Record<string, unknown> }) =>
+        typeof artifact.data.dashboard_id === 'string' ? artifact.data.dashboard_id : undefined,
+      resolveDashboardsByIds: (...args: unknown[]) => mockResolveDashboardsByIds(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDashboard = {} as DashboardStart;
 
@@ -26,7 +31,7 @@ const dashboardArtifacts = [
 
 describe('useDashboardArtifacts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockResolveDashboardsByIds.mockResolvedValue({
       resolved: [{ id: 'dash-1', title: 'Ops Dashboard' }],
       missing: [],

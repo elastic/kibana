@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -12,9 +14,12 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ApiEndpointId } from '../../../common/api_endpoints';
 import { MoreEndpointsPopover } from './more_endpoints_popover';
 
-jest.mock('../shared/logo_icon', () => ({
-  LogoIcon: ({ logo }: { logo?: string }) => <div data-test-subj={`logoIconStub-${logo}`} />,
-}));
+vi.mock('../shared/logo_icon', () => {
+      const mocked = {
+      LogoIcon: ({ logo }: { logo?: string }) => <div data-test-subj={`logoIconStub-${logo}`} />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const vendors = [
   {
@@ -40,7 +45,7 @@ const defaultProps = {
   creatingEndpointId: undefined,
   canCreateApiKey: true,
   isLoading: false,
-  onCreateApiKey: jest.fn(),
+  onCreateApiKey: vi.fn(),
 };
 
 const renderPopover = (props: Partial<React.ComponentProps<typeof MoreEndpointsPopover>> = {}) =>
@@ -85,7 +90,7 @@ describe('MoreEndpointsPopover', () => {
   });
 
   it('creates a key for the vendor whose button was clicked', async () => {
-    const onCreateApiKey = jest.fn();
+    const onCreateApiKey = vi.fn();
     renderPopover({ onCreateApiKey });
     await openPopover();
 

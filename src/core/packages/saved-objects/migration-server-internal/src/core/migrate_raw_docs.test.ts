@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { set } from '@kbn/safer-lodash-set';
 import type * as Either from 'fp-ts/Either';
 import _ from 'lodash';
@@ -20,7 +22,7 @@ import { TransformSavedObjectDocumentError } from './transform_saved_object_docu
 
 describe('migrateRawDocs', () => {
   test('converts raw docs to saved objects', async () => {
-    const transform = jest.fn<any, any>((doc: any) => [
+    const transform = vi.fn<any, any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
     ]);
     const result = await migrateRawDocs(
@@ -97,7 +99,7 @@ describe('migrateRawDocs', () => {
   });
 
   test('throws when encountering a corrupt saved object document', async () => {
-    const transform = jest.fn<any, any>((doc: any) => [
+    const transform = vi.fn<any, any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'TADA'),
     ]);
     const result = migrateRawDocs(
@@ -109,15 +111,15 @@ describe('migrateRawDocs', () => {
       ]
     );
 
-    expect(result).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to migrate the corrupt saved object document with _id: 'foo:b'.]`
-    );
+    await expect(result).rejects.toMatchInlineSnapshot(
+            `[Error: Unable to migrate the corrupt saved object document with _id: 'foo:b'.]`
+          );
 
     expect(transform).toHaveBeenCalledTimes(0);
   });
 
   test('handles when one document is transformed into multiple documents', async () => {
-    const transform = jest.fn<any, any>((doc: any) => [
+    const transform = vi.fn<any, any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
       { id: 'bar', type: 'foo', attributes: { name: 'baz' } },
     ]);
@@ -150,7 +152,7 @@ describe('migrateRawDocs', () => {
   });
 
   test('rejects when the transform function throws an error', async () => {
-    const transform = jest.fn<any, any>((doc: any) => {
+    const transform = vi.fn<any, any>((doc: any) => {
       throw new Error('error during transform');
     });
     await expect(
@@ -163,11 +165,11 @@ describe('migrateRawDocs', () => {
 
 describe('migrateRawDocsSafely', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('converts raw docs to saved objects', async () => {
-    const transform = jest.fn<any, any>((doc: any) => [
+    const transform = vi.fn<any, any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
     ]);
     const task = migrateRawDocsSafely({
@@ -245,7 +247,7 @@ describe('migrateRawDocsSafely', () => {
   });
 
   test('returns a `left` tag when encountering a corrupt saved object document', async () => {
-    const transform = jest.fn<any, any>((doc: any) => [
+    const transform = vi.fn<any, any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'TADA'),
     ]);
     const task = migrateRawDocsSafely({
@@ -271,7 +273,7 @@ describe('migrateRawDocsSafely', () => {
   });
 
   test('handles when one document is transformed into multiple documents', async () => {
-    const transform = jest.fn<any, any>((doc: any) => [
+    const transform = vi.fn<any, any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
       { id: 'bar', type: 'foo', attributes: { name: 'baz' } },
     ]);
@@ -305,7 +307,7 @@ describe('migrateRawDocsSafely', () => {
   });
 
   test('instance of Either.left containing transform errors when the transform function throws a TransformSavedObjectDocument error', async () => {
-    const transform = jest.fn<any, any>((doc: any) => {
+    const transform = vi.fn<any, any>((doc: any) => {
       throw new TransformSavedObjectDocumentError(new Error('error during transform'), '8.0.0');
     });
     const task = migrateRawDocsSafely({

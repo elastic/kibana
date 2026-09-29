@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getClipboardMenuActions, monaco, setClipboardContextMenuLabels } from './monaco_imports';
 
 describe('WHEN the Monaco clipboard contribution is loaded', () => {
@@ -56,17 +58,17 @@ describe('monaco augmentation', () => {
     });
 
     it('registers a theme resolver to a specific ID and returns the same registered theme resolver using the same ID', () => {
-      const themeResolver = jest.fn();
+      const themeResolver = vi.fn();
       monaco.editor.registerLanguageThemeResolver('test', themeResolver);
       expect(monaco.editor.getLanguageThemeResolver('test')).toBe(themeResolver);
     });
 
     it('throws an error when attempting to register a different theme resolver if one exists for the specified theme ID', () => {
-      expect(() => monaco.editor.registerLanguageThemeResolver('test', jest.fn())).toThrow();
+      expect(() => monaco.editor.registerLanguageThemeResolver('test', vi.fn())).toThrow();
     });
 
     it('allows registering a different theme resolver for a theme ID with existing resolver definition by specifying the override flag', () => {
-      const alternateThemeResolver = jest.fn();
+      const alternateThemeResolver = vi.fn();
       monaco.editor.registerLanguageThemeResolver('test', alternateThemeResolver, true);
       expect(monaco.editor.getLanguageThemeResolver('test')).toBe(alternateThemeResolver);
     });

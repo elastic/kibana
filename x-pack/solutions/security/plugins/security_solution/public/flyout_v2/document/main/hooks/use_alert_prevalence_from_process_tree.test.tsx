@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import type {
@@ -18,18 +21,18 @@ import { useQuery } from '@kbn/react-query';
 import { useAlertDocumentAnalyzerSchema } from './use_alert_document_analyzer_schema';
 import { mockStatsNode } from '../../../../flyout/document_details/right/mocks/mock_analyzer_data';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../timelines/containers/use_timeline_data_filters');
-jest.mock('./use_alert_document_analyzer_schema');
-jest.mock('@kbn/react-query');
-jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../timelines/containers/use_timeline_data_filters');
+vi.mock('./use_alert_document_analyzer_schema');
+vi.mock('@kbn/react-query');
+vi.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
 
-jest.mock('react-redux-v7', () => {
-  const originalModule = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const originalModule = require('react-redux-v7');
 
   return {
     ...originalModule,
-    useSelector: jest.fn().mockReturnValue({ patternList: ['index'] }),
+    useSelector: vi.fn().mockReturnValue({ patternList: ['index'] }),
   };
 });
 
@@ -40,24 +43,24 @@ describe('useAlertPrevalenceFromProcessTree', () => {
   >;
 
   beforeEach(() => {
-    (useHttp as jest.Mock).mockReturnValue({
-      post: jest.fn(),
+    (useHttp as Mock).mockReturnValue({
+      post: vi.fn(),
     });
-    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
+    (useSecurityDefaultPatterns as Mock).mockReturnValue({
       indexPatterns: ['index'],
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return an error when entity lookup found nothing even if the tree query still reports loading', () => {
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as Mock).mockReturnValue({
       isLoading: true,
       data: {},
     });
-    (useAlertDocumentAnalyzerSchema as jest.Mock).mockReturnValue({
+    (useAlertDocumentAnalyzerSchema as Mock).mockReturnValue({
       loading: false,
       error: false,
       id: null,
@@ -84,11 +87,11 @@ describe('useAlertPrevalenceFromProcessTree', () => {
   });
 
   it('should return all properties when analyzer query is loading', () => {
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as Mock).mockReturnValue({
       isLoading: false,
       data: {},
     });
-    (useAlertDocumentAnalyzerSchema as jest.Mock).mockReturnValue({
+    (useAlertDocumentAnalyzerSchema as Mock).mockReturnValue({
       loading: true,
       error: false,
       id: null,
@@ -110,14 +113,14 @@ describe('useAlertPrevalenceFromProcessTree', () => {
   });
 
   it('should return all properties data exists', () => {
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as Mock).mockReturnValue({
       isLoading: false,
       data: {
         alertIds: ['alertIds'],
         statsNodes: [mockStatsNode],
       },
     });
-    (useAlertDocumentAnalyzerSchema as jest.Mock).mockReturnValue({
+    (useAlertDocumentAnalyzerSchema as Mock).mockReturnValue({
       loading: false,
       error: false,
       id: 'id',
@@ -139,10 +142,10 @@ describe('useAlertPrevalenceFromProcessTree', () => {
   });
 
   it('should return all properties data undefined', () => {
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as Mock).mockReturnValue({
       isLoading: false,
     });
-    (useAlertDocumentAnalyzerSchema as jest.Mock).mockReturnValue({
+    (useAlertDocumentAnalyzerSchema as Mock).mockReturnValue({
       loading: false,
       error: false,
       id: null,
@@ -165,10 +168,10 @@ describe('useAlertPrevalenceFromProcessTree', () => {
 
   describe('interval', () => {
     const setup = () => {
-      const postMock = jest.fn();
-      (useHttp as jest.Mock).mockReturnValue({ post: postMock });
-      (useQuery as jest.Mock).mockReturnValue({ isLoading: false, data: {} });
-      (useAlertDocumentAnalyzerSchema as jest.Mock).mockReturnValue({
+      const postMock = vi.fn();
+      (useHttp as Mock).mockReturnValue({ post: postMock });
+      (useQuery as Mock).mockReturnValue({ isLoading: false, data: {} });
+      (useAlertDocumentAnalyzerSchema as Mock).mockReturnValue({
         loading: false,
         error: false,
         id: 'id',
@@ -194,7 +197,7 @@ describe('useAlertPrevalenceFromProcessTree', () => {
         expect.any(Object)
       );
 
-      const queryFn = (useQuery as jest.Mock).mock.calls[0][1];
+      const queryFn = (useQuery as Mock).mock.calls[0][1];
       queryFn();
 
       expect(postMock).toHaveBeenCalledTimes(1);
@@ -220,7 +223,7 @@ describe('useAlertPrevalenceFromProcessTree', () => {
         expect.any(Object)
       );
 
-      const queryFn = (useQuery as jest.Mock).mock.calls[0][1];
+      const queryFn = (useQuery as Mock).mock.calls[0][1];
       queryFn();
 
       expect(postMock).toHaveBeenCalledTimes(1);
@@ -230,13 +233,13 @@ describe('useAlertPrevalenceFromProcessTree', () => {
   });
 
   it('exposes a refetch function that calls the underlying query refetch, bypassing the cache', () => {
-    const queryRefetchMock = jest.fn();
-    (useQuery as jest.Mock).mockReturnValue({
+    const queryRefetchMock = vi.fn();
+    (useQuery as Mock).mockReturnValue({
       isLoading: false,
       data: {},
       refetch: queryRefetchMock,
     });
-    (useAlertDocumentAnalyzerSchema as jest.Mock).mockReturnValue({
+    (useAlertDocumentAnalyzerSchema as Mock).mockReturnValue({
       loading: false,
       error: false,
       id: null,

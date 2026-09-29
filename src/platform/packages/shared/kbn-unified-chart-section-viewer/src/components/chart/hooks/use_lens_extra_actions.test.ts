@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useLensExtraActions } from './use_lens_extra_actions';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
@@ -24,7 +26,7 @@ describe('useLensExtraActions', () => {
 
   describe('copyToDashboard', () => {
     it('should return copyToDashboard action when config is provided', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const { result } = renderHook(() => useLensExtraActions({ copyToDashboard: { onClick } }));
 
       expect(result.current).toHaveLength(1);
@@ -42,7 +44,7 @@ describe('useLensExtraActions', () => {
     });
 
     it('should call onClick when execute is invoked', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const { result } = renderHook(() => useLensExtraActions({ copyToDashboard: { onClick } }));
 
       const action = result.current[0];
@@ -57,7 +59,7 @@ describe('useLensExtraActions', () => {
 
   describe('viewDetails', () => {
     it('should return viewDetails action when config is provided', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const { result } = renderHook(() => useLensExtraActions({ viewDetails: { onClick } }));
 
       expect(result.current).toHaveLength(1);
@@ -75,7 +77,7 @@ describe('useLensExtraActions', () => {
     });
 
     it('should call onClick when execute is invoked', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const { result } = renderHook(() => useLensExtraActions({ viewDetails: { onClick } }));
 
       const action = result.current[0];
@@ -90,7 +92,7 @@ describe('useLensExtraActions', () => {
 
   describe('exploreInDiscoverTab', () => {
     it('should return exploreInDiscoverTab action when config is provided', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const { result } = renderHook(() =>
         useLensExtraActions({ exploreInDiscoverTab: { onClick } })
       );
@@ -110,7 +112,7 @@ describe('useLensExtraActions', () => {
     });
 
     it('should call onClick when execute is invoked', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const { result } = renderHook(() =>
         useLensExtraActions({ exploreInDiscoverTab: { onClick } })
       );
@@ -125,7 +127,7 @@ describe('useLensExtraActions', () => {
     });
 
     it('should always be compatible', async () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const { result } = renderHook(() =>
         useLensExtraActions({ exploreInDiscoverTab: { onClick } })
       );
@@ -139,9 +141,9 @@ describe('useLensExtraActions', () => {
 
   describe('multiple actions', () => {
     it('should return all actions when all configs are provided', () => {
-      const copyOnClick = jest.fn();
-      const viewOnClick = jest.fn();
-      const exploreOnClick = jest.fn();
+      const copyOnClick = vi.fn();
+      const viewOnClick = vi.fn();
+      const exploreOnClick = vi.fn();
       const { result } = renderHook(() =>
         useLensExtraActions({
           copyToDashboard: { onClick: copyOnClick },

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { waitForDelay } from './wait_for_delay';
 
 const nextTick = () => new Promise<void>((resolve) => resolve());
@@ -14,21 +16,21 @@ const aFewTicks = () => nextTick().then(nextTick).then(nextTick);
 
 describe('waitForDelay', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('resolves after the specified amount of time', async () => {
-    const handler = jest.fn();
+    const handler = vi.fn();
 
     waitForDelay({ delayInSec: 5 })().then(handler);
 
     expect(handler).not.toHaveBeenCalled();
 
-    jest.advanceTimersByTime(5000);
+    vi.advanceTimersByTime(5000);
     await aFewTicks();
 
     expect(handler).toHaveBeenCalledTimes(1);

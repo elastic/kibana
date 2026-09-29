@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { QueryLink } from '@kbn/significant-events-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import {
@@ -42,7 +44,7 @@ const makeQueryLink = (
 });
 
 function createEsClient() {
-  const search = jest.fn();
+  const search = vi.fn();
   return {
     search,
     client: { search } as unknown as TracedElasticsearchClient,

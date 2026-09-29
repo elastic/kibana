@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   createRegex,
   detectRedosPatterns,
@@ -20,11 +22,11 @@ import {
 describe('regex_utils', () => {
   describe('validateInputLength', () => {
     const mockLogger = {
-      warn: jest.fn(),
+      warn: vi.fn(),
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should accept strings below max length', () => {
@@ -150,12 +152,12 @@ describe('regex_utils', () => {
 
   describe('createRegex', () => {
     const mockLogger = {
-      error: jest.fn(),
-      warn: jest.fn(),
+      error: vi.fn(),
+      warn: vi.fn(),
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should create valid regex without flags', () => {
@@ -228,7 +230,7 @@ describe('regex_utils', () => {
       const dangerousPatterns = ['(a+)+', '(a|aa)+', '(\\d+)+$', 'test++'];
 
       dangerousPatterns.forEach((pattern) => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         const result = createRegex(pattern, undefined, mockLogger);
 
         expect('error' in result).toBe(true);
@@ -297,11 +299,11 @@ describe('regex_utils', () => {
 
   describe('validateSourceInput', () => {
     const mockLogger = {
-      error: jest.fn(),
+      error: vi.fn(),
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should accept string input', () => {
@@ -345,8 +347,8 @@ describe('regex_utils', () => {
     it('should reject arrays exceeding max length', () => {
       const tooLargeArray = new Array(MAX_ARRAY_LENGTH + 1).fill('test');
       const mockLoggerWithWarn = {
-        error: jest.fn(),
-        warn: jest.fn(),
+        error: vi.fn(),
+        warn: vi.fn(),
       };
       const result = validateSourceInput(tooLargeArray, mockLoggerWithWarn);
 

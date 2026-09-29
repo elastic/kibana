@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 
 import { screen, render } from '@testing-library/react';
@@ -13,7 +15,7 @@ import { getEuiTableColumn } from './get_eui_table_column';
 
 describe('getEuiTableColumn ', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a name and a render function', async () => {

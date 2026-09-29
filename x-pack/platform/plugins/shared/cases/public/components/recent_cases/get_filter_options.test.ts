@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { getReporterFilter, getAssigneeFilter } from './get_filter_options';
 import type { ReporterFilter, AssigneeFilter } from './get_filter_options';
@@ -26,7 +28,7 @@ describe('filter options', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns reporters filters using currentUserProfile', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import type { IKibanaSearchRequest } from '@kbn/search-types';
@@ -96,7 +98,7 @@ describe('useLatestPartialDataSearchResponse hook', () => {
   });
 
   it("unsubscribes from the latest request's response observable on unmount", () => {
-    const onUnsubscribe = jest.fn();
+    const onUnsubscribe = vi.fn();
 
     const firstRequest = {
       abortController: new AbortController(),

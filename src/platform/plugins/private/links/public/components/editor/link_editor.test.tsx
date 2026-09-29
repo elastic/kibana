@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { LinkEditor } from './link_editor';
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 
-jest.mock('./link_destination', () => {
+vi.mock('./link_destination', () => {
   // mock this component to prevent handleDestinationPicked from being called on mount
   return { LinkDestination: () => <>LinkDestinationMock</> };
 });
@@ -34,12 +36,12 @@ describe('LinksEditor', () => {
       options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     },
     parentDashboardId: 'test',
-    onSave: jest.fn(),
-    onClose: jest.fn(),
+    onSave: vi.fn(),
+    onClose: vi.fn(),
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const getOptionAriaChecked = (option: string): string | null => {

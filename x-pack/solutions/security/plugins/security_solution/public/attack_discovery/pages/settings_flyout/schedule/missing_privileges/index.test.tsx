@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiFlexItem } from '@elastic/eui';
@@ -14,7 +17,7 @@ import { TestProviders } from '../../../../../common/mock';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
 interface MockKibanaOptions {
   executeWorkflow?: boolean;
@@ -27,7 +30,7 @@ const mockKibana = ({
   isWorkflowsEnabled = false,
   updateAttackDiscoverySchedule = false,
 }: MockKibanaOptions) => {
-  (useKibana as jest.Mock).mockReturnValue({
+  (useKibana as Mock).mockReturnValue({
     services: {
       application: {
         capabilities: {
@@ -40,10 +43,10 @@ const mockKibana = ({
         },
       },
       featureFlags: {
-        useBooleanValue: jest.fn().mockReturnValue(isWorkflowsEnabled),
+        useBooleanValue: vi.fn().mockReturnValue(isWorkflowsEnabled),
       },
       uiSettings: {
-        get: jest.fn().mockReturnValue(isWorkflowsEnabled),
+        get: vi.fn().mockReturnValue(isWorkflowsEnabled),
       },
     },
   });
@@ -64,7 +67,7 @@ const renderWithMissingPrivileges = (
 
 describe('WithMissingPrivileges', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when enabled update capability', () => {
@@ -139,7 +142,7 @@ describe('WithMissingPrivileges', () => {
     });
 
     it('should call children handler with `enabled` set to `false`', async () => {
-      const children = jest.fn(() => <EuiFlexItem data-test-subj="testChild1" />);
+      const children = vi.fn(() => <EuiFlexItem data-test-subj="testChild1" />);
 
       renderWithMissingPrivileges(children, true);
 
@@ -147,7 +150,7 @@ describe('WithMissingPrivileges', () => {
     });
 
     it('should render the missing workflows execute privileges tooltip', async () => {
-      const children = jest.fn(() => <EuiFlexItem data-test-subj="testChild1" />);
+      const children = vi.fn(() => <EuiFlexItem data-test-subj="testChild1" />);
 
       renderWithMissingPrivileges(children, true);
 
@@ -174,7 +177,7 @@ describe('WithMissingPrivileges', () => {
     });
 
     it('should call children handler with `enabled` set to `true`', async () => {
-      const children = jest.fn(() => <EuiFlexItem data-test-subj="testChild1" />);
+      const children = vi.fn(() => <EuiFlexItem data-test-subj="testChild1" />);
 
       renderWithMissingPrivileges(children, true);
 

@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useStartDashboardsMigrationModal } from './use_start_dashboard_migration_modal';
 import type { StartMigrationModalProps } from '../../common/components/start_migration_modal';
 
-jest.mock('../../common/components/start_migration_modal', () => ({
-  StartMigrationModal: (props: StartMigrationModalProps) => (
-    <div data-test-subj="start-migration-modal" {...props} />
-  ),
-}));
+vi.mock('../../common/components/start_migration_modal', () => {
+      const mocked = {
+      StartMigrationModal: (props: StartMigrationModalProps) => (
+        <div data-test-subj="start-migration-modal" {...props} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useStartDashboardsMigrationModal', () => {
-  const onStartMigrationWithSettings = jest.fn();
+  const onStartMigrationWithSettings = vi.fn();
 
   it('should not render modal initially', () => {
     const { result } = renderHook(() =>

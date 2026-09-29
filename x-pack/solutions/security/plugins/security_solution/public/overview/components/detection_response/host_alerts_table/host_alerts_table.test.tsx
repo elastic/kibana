@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { fireEvent, render } from '@testing-library/react';
@@ -14,14 +16,14 @@ import { parsedVulnerableHostsAlertsResult } from './mock_data';
 import type { UseHostAlertsItems } from './use_host_alerts_items';
 import { HostAlertsTable } from './host_alerts_table';
 
-const mockNavigateToAlertsPageWithFilters = jest.fn();
-jest.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
+const mockNavigateToAlertsPageWithFilters = vi.fn();
+vi.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
   return {
     useNavigateToAlertsPageWithFilters: () => mockNavigateToAlertsPageWithFilters,
   };
 });
 
-jest.mock('../../../../common/hooks/use_global_filter_query', () => {
+vi.mock('../../../../common/hooks/use_global_filter_query', () => {
   return {
     useGlobalFilterQuery: () => ({}),
   };
@@ -38,14 +40,17 @@ const defaultUseHostAlertsItemsReturn: UseHostAlertsItemsReturn = {
     setPage: () => null,
   },
 };
-const mockUseHostAlertsItems = jest.fn(() => defaultUseHostAlertsItemsReturn);
+const mockUseHostAlertsItems = vi.fn(() => defaultUseHostAlertsItemsReturn);
 const mockUseHostAlertsItemsReturn = (overrides: Partial<UseHostAlertsItemsReturn>) => {
   mockUseHostAlertsItems.mockReturnValueOnce({ ...defaultUseHostAlertsItemsReturn, ...overrides });
 };
 
-jest.mock('./use_host_alerts_items', () => ({
-  useHostAlertsItems: () => mockUseHostAlertsItems(),
-}));
+vi.mock('./use_host_alerts_items', () => {
+      const mocked = {
+      useHostAlertsItems: () => mockUseHostAlertsItems(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderComponent = () =>
   render(
@@ -56,7 +61,7 @@ const renderComponent = () =>
 
 describe('HostAlertsTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render empty table', () => {
@@ -110,7 +115,7 @@ describe('HostAlertsTable', () => {
   });
 
   it('should render the paginator if more than 4 results', () => {
-    const mockSetPage = jest.fn();
+    const mockSetPage = vi.fn();
 
     mockUseHostAlertsItemsReturn({
       pagination: {

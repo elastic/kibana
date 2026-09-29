@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getColorAssignments } from './color_assignment';
 import type { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
@@ -176,7 +178,7 @@ describe('color_assignment', () => {
 
     it('should format non-primitive values and count them correctly', () => {
       const complexObject = { aProp: 123 };
-      const formatMock = jest.fn((value) => (typeof value === 'object' ? 'formatted' : value));
+      const formatMock = vi.fn((value) => (typeof value === 'object' ? 'formatted' : value));
       const newLayers = [
         {
           ...layers[0],

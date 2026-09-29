@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { getContextMenuPanels, PRIMARY_PANEL_ID } from '.';
 import * as i18n from '../translations';
 
 describe('getContextMenuPanels', () => {
-  const closePopover = jest.fn();
-  const onListUpdated = jest.fn();
+  const closePopover = vi.fn();
+  const onListUpdated = vi.fn();
 
   const params = {
     disableAllow: false,
@@ -20,10 +22,10 @@ describe('getContextMenuPanels', () => {
     onListUpdated,
     selectedField: 'user.name',
     selectedFields: ['user.name'],
-    handleRowChecked: jest.fn(),
+    handleRowChecked: vi.fn(),
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('the first panel has a `primary-panel-id`', () => {
     const panels = getContextMenuPanels(params);

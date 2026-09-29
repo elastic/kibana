@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { populateStateFromSavedQuery } from './populate_state_from_saved_query';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DataPublicPluginStart, SavedQuery } from '@kbn/data-plugin/public';
@@ -14,7 +17,7 @@ import { FilterStateStore } from '@kbn/es-query';
 import { mockFilter } from '../../mocks/get_stub_filter';
 
 describe('populateStateFromSavedQuery', () => {
-  let dataMock: jest.Mocked<DataPublicPluginStart>;
+  let dataMock: Mocked<DataPublicPluginStart>;
 
   const baseSavedQuery: SavedQuery = {
     id: 'test',
@@ -31,8 +34,8 @@ describe('populateStateFromSavedQuery', () => {
 
   beforeEach(() => {
     dataMock = dataPluginMock.createStartContract();
-    dataMock.query.filterManager.setFilters = jest.fn();
-    dataMock.query.filterManager.getGlobalFilters = jest.fn().mockReturnValue([]);
+    dataMock.query.filterManager.setFilters = vi.fn();
+    dataMock.query.filterManager.getGlobalFilters = vi.fn().mockReturnValue([]);
   });
 
   it('should set query', async () => {
@@ -56,7 +59,7 @@ describe('populateStateFromSavedQuery', () => {
 
   it('should preserve global filters', async () => {
     const globalFilter = mockFilter('D1', FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-    dataMock.query.filterManager.getGlobalFilters = jest.fn().mockReturnValue([globalFilter]);
+    dataMock.query.filterManager.getGlobalFilters = vi.fn().mockReturnValue([globalFilter]);
     const savedQuery: SavedQuery = {
       ...baseSavedQuery,
     };
@@ -80,8 +83,8 @@ describe('populateStateFromSavedQuery', () => {
       },
     };
 
-    dataMock.query.timefilter.timefilter.setTime = jest.fn();
-    dataMock.query.timefilter.timefilter.setRefreshInterval = jest.fn();
+    dataMock.query.timefilter.timefilter.setTime = vi.fn();
+    dataMock.query.timefilter.timefilter.setRefreshInterval = vi.fn();
 
     populateStateFromSavedQuery(dataMock.query, savedQuery);
 

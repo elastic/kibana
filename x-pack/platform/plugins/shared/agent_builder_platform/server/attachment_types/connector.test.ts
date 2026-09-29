@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import {
@@ -17,17 +20,23 @@ import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import { createConnectorAttachmentType } from './connector';
 
-jest.mock('@kbn/connector-specs', () => ({
-  getConnectorSpec: jest.fn(),
-}));
+vi.mock('@kbn/connector-specs', () => {
+      const mocked = {
+      getConnectorSpec: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agent-builder-server', () => ({
-  ...jest.requireActual('@kbn/agent-builder-server'),
-  formatSchemaForLlm: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-server', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/agent-builder-server')),
+      formatSchemaForLlm: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
-const formatSchemaForLlmMock = formatSchemaForLlm as jest.MockedFunction<typeof formatSchemaForLlm>;
+const getConnectorSpecMock = getConnectorSpec as MockedFunction<typeof getConnectorSpec>;
+const formatSchemaForLlmMock = formatSchemaForLlm as MockedFunction<typeof formatSchemaForLlm>;
 
 const createAttachment = (
   data: ConnectorAttachmentData
@@ -52,7 +61,7 @@ describe('connector attachment type', () => {
   const connectorType = createConnectorAttachmentType();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('validate', () => {
@@ -114,7 +123,7 @@ describe('connector attachment type', () => {
             supportedFeatureIds: [],
           },
           actions: {},
-          test: { handler: jest.fn(), enabled: false },
+          test: { handler: vi.fn(), enabled: false },
         });
 
         const attachment = createAttachment(validData);
@@ -160,24 +169,24 @@ describe('connector attachment type', () => {
               scope: 'read' as const,
               description: 'Search Slack messages',
               input: inputSchema,
-              handler: jest.fn(),
+              handler: vi.fn(),
             },
             sendMessage: {
               isTool: true,
               scope: 'read' as const,
               description: 'Send a message to a channel',
               input: inputSchema,
-              handler: jest.fn(),
+              handler: vi.fn(),
             },
             internalAction: {
               isTool: false,
               scope: 'read' as const,
               description: 'Internal only',
               input: inputSchema,
-              handler: jest.fn(),
+              handler: vi.fn(),
             },
           },
-          test: { handler: jest.fn(), enabled: false },
+          test: { handler: vi.fn(), enabled: false },
         });
         formatSchemaForLlmMock.mockReturnValue('query (string, required): Search query');
 
@@ -218,10 +227,10 @@ describe('connector attachment type', () => {
               scope: 'read' as const,
               description: 'Send a message',
               input: inputSchema,
-              handler: jest.fn(),
+              handler: vi.fn(),
             },
           },
-          test: { handler: jest.fn(), enabled: false },
+          test: { handler: vi.fn(), enabled: false },
           skill: 'Always resolve channel ID before sending a message.',
         });
         formatSchemaForLlmMock.mockReturnValue('No parameters');
@@ -263,17 +272,17 @@ describe('connector attachment type', () => {
                 scope: 'write',
                 description: 'Send a message to a channel',
                 input: inputSchema,
-                handler: jest.fn(),
+                handler: vi.fn(),
               },
               searchMessages: {
                 isTool: true,
                 scope: 'read' as const,
                 description: 'Search messages',
                 input: inputSchema,
-                handler: jest.fn(),
+                handler: vi.fn(),
               },
             },
-            test: { handler: jest.fn(), enabled: false },
+            test: { handler: vi.fn(), enabled: false },
           });
 
           const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
@@ -305,10 +314,10 @@ describe('connector attachment type', () => {
                 scope: 'destroy',
                 description: 'Delete a message',
                 input: inputSchema,
-                handler: jest.fn(),
+                handler: vi.fn(),
               },
             },
-            test: { handler: jest.fn(), enabled: false },
+            test: { handler: vi.fn(), enabled: false },
           });
 
           const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
@@ -336,10 +345,10 @@ describe('connector attachment type', () => {
                 scope: 'read' as const,
                 description: 'Search messages',
                 input: inputSchema,
-                handler: jest.fn(),
+                handler: vi.fn(),
               },
             },
-            test: { handler: jest.fn(), enabled: false },
+            test: { handler: vi.fn(), enabled: false },
           });
 
           const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
@@ -385,10 +394,10 @@ describe('connector attachment type', () => {
               scope: 'read' as const,
               description: 'Search messages',
               input: inputSchema,
-              handler: jest.fn(),
+              handler: vi.fn(),
             },
           },
-          test: { handler: jest.fn(), enabled: false },
+          test: { handler: vi.fn(), enabled: false },
         });
 
         const attachment = createAttachment(validData);

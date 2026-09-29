@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import React from 'react';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -51,7 +54,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
         useChartsBaseTheme: () => ({}),
       },
     } as unknown as ChartsPluginStart,
-    data: { search: { esql: jest.fn() } },
+    data: { search: { esql: vi.fn() } },
   } as unknown as ProfileProviderServices;
 
   const provider = createChangePointDataSourceProfileProvider(mockServices);
@@ -79,7 +82,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
 
   /** Builds a registry mock and the spread form expected by docViewsRegistry. */
   const buildRegistry = () => {
-    const addMock = jest.fn();
+    const addMock = vi.fn();
     const registry = { add: addMock } as unknown as DocViewsRegistry;
     return { addMock, registryArg: { ...registry, clone: () => registry } as never };
   };
@@ -209,7 +212,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
       expect(config).toHaveProperty('my_pvalue');
       expect(
         config[SOURCE_COLUMN]!({
-          column: { id: SOURCE_COLUMN, cellActions: [jest.fn()] } as never,
+          column: { id: SOURCE_COLUMN, cellActions: [vi.fn()] } as never,
           headerRowHeight: 1,
         })
       ).toEqual(
@@ -255,7 +258,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
     });
 
     it('keeps Summary and prev renderers when pvalueColumnId is empty', () => {
-      const existingRenderer = jest.fn();
+      const existingRenderer = vi.fn();
       const prevRenderers = { some_col: existingRenderer };
       const getCellRenderers = provider.profile.getCellRenderers!(() => prevRenderers, {
         context: buildContext({ pvalueColumnId: '' }),
@@ -282,7 +285,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
     };
 
     describe('registered tab', () => {
-      let addMock: jest.Mock;
+      let addMock: Mock;
 
       beforeEach(() => {
         const { addMock: mock, registryArg } = buildRegistry();
@@ -300,8 +303,8 @@ describe('createChangePointDataSourceProfileProvider', () => {
     });
 
     it('chains the previous registry callback', () => {
-      const prevRegistry = { add: jest.fn() } as unknown as DocViewsRegistry;
-      const prevDocViewsRegistry = jest.fn(() => prevRegistry);
+      const prevRegistry = { add: vi.fn() } as unknown as DocViewsRegistry;
+      const prevDocViewsRegistry = vi.fn(() => prevRegistry);
       const getDocViewer = provider.profile.getDocViewer!(
         () => ({ title: undefined, docViewsRegistry: prevDocViewsRegistry }),
         { context: buildContext(), toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }

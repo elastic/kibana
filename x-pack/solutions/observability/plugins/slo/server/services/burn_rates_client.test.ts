@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -34,11 +36,11 @@ describe('SummaryClient', () => {
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    jest.useFakeTimers().setSystemTime(TEST_DATE);
+    vi.useFakeTimers().setSystemTime(TEST_DATE);
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('burnRatesClient', () => {

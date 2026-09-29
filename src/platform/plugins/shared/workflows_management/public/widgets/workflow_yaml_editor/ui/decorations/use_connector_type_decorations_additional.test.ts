@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
@@ -20,35 +22,47 @@ const mockConnectorsMap = new Map<string, { stability?: string }>([
   ['kibana.createCase', { stability: 'stable' }],
 ]);
 
-jest.mock('@kbn/workflows', () => ({
-  ...jest.requireActual('@kbn/workflows'),
-  isBuiltInStepType: (type: string) => mockBuiltInStepTypes.has(type),
-  getBuiltInStepStability: (type: string) => {
-    if (type === 'if') return 'tech_preview';
-    return undefined;
-  },
-  resolveKibanaStepTypeAlias: (type: string) =>
-    type === 'kibana.createCaseDefaultSpace' ? 'kibana.createCase' : type,
-}));
+vi.mock('@kbn/workflows', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows')),
+      isBuiltInStepType: (type: string) => mockBuiltInStepTypes.has(type),
+      getBuiltInStepStability: (type: string) => {
+        if (type === 'if') return 'tech_preview';
+        return undefined;
+      },
+      resolveKibanaStepTypeAlias: (type: string) =>
+        type === 'kibana.createCaseDefaultSpace' ? 'kibana.createCase' : type,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/step_schemas', () => ({
-  stepSchemas: {
-    getStepDefinition: jest.fn(() => undefined),
-  },
-}));
+vi.mock('../../../../../common/step_schemas', () => {
+      const mocked = {
+      stepSchemas: {
+        getStepDefinition: vi.fn(() => undefined),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/schema', () => ({
-  getCachedAllConnectorsMap: () => mockConnectorsMap,
-}));
+vi.mock('../../../../../common/schema', () => {
+      const mocked = {
+      getCachedAllConnectorsMap: () => mockConnectorsMap,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => ({
-  getBaseConnectorType: (type: string) => {
-    if (type.startsWith('elasticsearch.')) return 'elasticsearch';
-    if (type.startsWith('kibana.')) return 'kibana';
-    const normalized = type.startsWith('.') ? type.slice(1) : type;
-    return normalized.includes('.') ? normalized.split('.')[0] : normalized;
-  },
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      getBaseConnectorType: (type: string) => {
+        if (type.startsWith('elasticsearch.')) return 'elasticsearch';
+        if (type.startsWith('kibana.')) return 'kibana';
+        const normalized = type.startsWith('.') ? type.slice(1) : type;
+        return normalized.includes('.') ? normalized.split('.')[0] : normalized;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /**
  * The mock cannot reuse the factory one as jest.mock is hoisted to the top of the file before imports are resolved,
@@ -56,28 +70,31 @@ jest.mock('@kbn/workflows-ui', () => ({
  * The mockMonacoModule uses jest.requireActual inside, so it needs to be called lazily.
  * The mock need to be inlined to work here.
  */
-jest.mock('@kbn/monaco', () => ({
-  ...jest.requireActual('@kbn/monaco'),
-  monaco: {
-    ...jest.requireActual<typeof import('@kbn/monaco')>('@kbn/monaco').monaco,
-    Range: jest.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
-      startLineNumber: startLine,
-      startColumn: startCol,
-      endLineNumber: endLine,
-      endColumn: endCol,
-    })),
-  },
-}));
+vi.mock('@kbn/monaco', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/monaco')),
+      monaco: {
+        ...(await vi.importActual<typeof import('@kbn/monaco')>('@kbn/monaco')).monaco,
+        Range: vi.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
+          startLineNumber: startLine,
+          startColumn: startCol,
+          endLineNumber: endLine,
+          endColumn: endCol,
+        })),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.useFakeTimers();
+vi.useFakeTimers();
 
 describe('useConnectorTypeDecorations', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   it('returns a ref with null when editor is not mounted', () => {
@@ -92,7 +109,7 @@ describe('useConnectorTypeDecorations', () => {
       })
     );
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     expect(result.current.decorationCollectionRef.current).toBeNull();
   });
@@ -108,15 +125,15 @@ describe('useConnectorTypeDecorations', () => {
       })
     );
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     expect(result.current.decorationCollectionRef.current).toBeNull();
   });
 
   it('returns a ref with null when the model is null', () => {
     const mockEditor = {
-      createDecorationsCollection: jest.fn(),
-      getModel: jest.fn(() => null),
+      createDecorationsCollection: vi.fn(),
+      getModel: vi.fn(() => null),
     } as unknown as monaco.editor.IStandaloneCodeEditor;
 
     const yamlString = ['version: "1"', 'steps:', '  - type: elasticsearch.search'].join('\n');
@@ -130,7 +147,7 @@ describe('useConnectorTypeDecorations', () => {
       })
     );
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     expect(result.current.decorationCollectionRef.current).toBeNull();
   });
@@ -157,7 +174,7 @@ describe('useConnectorTypeDecorations', () => {
       })
     );
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     expect(editor.createDecorationsCollection).toHaveBeenCalled();
   });
@@ -183,7 +200,7 @@ describe('useConnectorTypeDecorations', () => {
       })
     );
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     expect(editor.createDecorationsCollection).toHaveBeenCalled();
   });
@@ -209,7 +226,7 @@ describe('useConnectorTypeDecorations', () => {
       })
     );
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     // Should not create decorations since the connector type is unknown
     expect(editor.createDecorationsCollection).not.toHaveBeenCalled();
@@ -235,7 +252,7 @@ describe('useConnectorTypeDecorations', () => {
       })
     );
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     expect(editor.createDecorationsCollection).not.toHaveBeenCalled();
   });
@@ -261,7 +278,7 @@ describe('useConnectorTypeDecorations', () => {
       })
     );
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     expect(editor.createDecorationsCollection).toHaveBeenCalled();
   });
@@ -288,13 +305,13 @@ describe('useConnectorTypeDecorations', () => {
       { initialProps: { yamlDoc: doc } }
     );
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     // Re-render to trigger a second effect run
     const doc2 = parseDocument(yamlString, { keepSourceTokens: true });
     rerender({ yamlDoc: doc2 });
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     expect(decorationsCollection.clear).toHaveBeenCalled();
   });
@@ -312,7 +329,7 @@ describe('useConnectorTypeDecorations', () => {
       })
     );
 
-    jest.advanceTimersByTime(200);
+    vi.advanceTimersByTime(200);
 
     // No decorations should be created when there are no steps
     expect(editor.createDecorationsCollection).not.toHaveBeenCalled();

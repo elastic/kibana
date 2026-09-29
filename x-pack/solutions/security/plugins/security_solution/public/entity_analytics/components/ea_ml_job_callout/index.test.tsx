@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -13,15 +15,18 @@ import { TestProviders } from '../../../common/mock';
 import { useInstalledSecurityJobs } from '../../../common/components/ml/hooks/use_installed_security_jobs';
 import { EaMlJobCallout } from '.';
 
-jest.mock('../../../common/components/ml/hooks/use_installed_security_jobs');
-jest.mock('../../../common/components/callouts/use_callout_storage', () => ({
-  useCallOutStorage: () => ({
-    isVisible: () => true,
-    dismiss: jest.fn(),
-  }),
-}));
+vi.mock('../../../common/components/ml/hooks/use_installed_security_jobs');
+vi.mock('../../../common/components/callouts/use_callout_storage', () => {
+      const mocked = {
+      useCallOutStorage: () => ({
+        isVisible: () => true,
+        dismiss: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseInstalledSecurityJobs = jest.mocked(useInstalledSecurityJobs);
+const mockUseInstalledSecurityJobs = vi.mocked(useInstalledSecurityJobs);
 
 describe('EaMlJobCallout', () => {
   it('renders when pre-EA jobs are installed', () => {

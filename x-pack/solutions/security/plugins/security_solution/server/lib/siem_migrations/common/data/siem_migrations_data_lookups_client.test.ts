@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SiemMigrationsDataLookupsClient } from './siem_migrations_data_lookups_client';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { LOOKUPS_INDEX_PREFIX } from '../../../../../common/siem_migrations/constants';
@@ -26,14 +28,14 @@ describe('SiemMigrationsDataLookupsClient', () => {
   let client: SiemMigrationsDataLookupsClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     client = new SiemMigrationsDataLookupsClient(currentUser, esClient, logger, spaceId);
   });
 
   describe('create', () => {
     it('should create index and index data for valid lookup name', async () => {
-      esClient.asCurrentUser.indices.create = jest.fn().mockResolvedValue({});
-      esClient.asCurrentUser.bulk = jest.fn().mockResolvedValue({});
+      esClient.asCurrentUser.indices.create = vi.fn().mockResolvedValue({});
+      esClient.asCurrentUser.bulk = vi.fn().mockResolvedValue({});
       const data = [{ foo: 'bar' }];
       const indexName = `${LOOKUPS_INDEX_PREFIX}${spaceId}_mitre-event-names`;
 
@@ -56,15 +58,15 @@ describe('SiemMigrationsDataLookupsClient', () => {
     });
 
     it('should not throw if index already exists', async () => {
-      esClient.asCurrentUser.indices.create = jest.fn().mockRejectedValue({
+      esClient.asCurrentUser.indices.create = vi.fn().mockRejectedValue({
         meta: { body: { error: { type: 'resource_already_exists_exception' } } },
       });
-      esClient.asCurrentUser.bulk = jest.fn().mockResolvedValue({});
+      esClient.asCurrentUser.bulk = vi.fn().mockResolvedValue({});
       await expect(client.create('test-lookup', [{ foo: 1 }])).resolves.toBeDefined();
     });
 
     it('should throw and logs error for other index creation errors', async () => {
-      esClient.asCurrentUser.indices.create = jest.fn().mockRejectedValue(new Error('ES error'));
+      esClient.asCurrentUser.indices.create = vi.fn().mockRejectedValue(new Error('ES error'));
       await expect(client.create('test-lookup', [])).rejects.toThrow('ES error');
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Error creating lookup index')
@@ -72,8 +74,8 @@ describe('SiemMigrationsDataLookupsClient', () => {
     });
 
     it('should throw and logs error for bulk indexing errors except 404', async () => {
-      esClient.asCurrentUser.indices.create = jest.fn().mockResolvedValue({});
-      esClient.asCurrentUser.bulk = jest
+      esClient.asCurrentUser.indices.create = vi.fn().mockResolvedValue({});
+      esClient.asCurrentUser.bulk = vi
         .fn()
         .mockRejectedValue({ statusCode: 500, message: 'Bulk error' });
       await expect(client.create('test-lookup', [{ foo: 1 }])).rejects.toEqual(
@@ -85,14 +87,14 @@ describe('SiemMigrationsDataLookupsClient', () => {
     });
 
     it('should ignore bulk indexing 404 errors', async () => {
-      esClient.asCurrentUser.indices.create = jest.fn().mockResolvedValue({});
-      esClient.asCurrentUser.bulk = jest.fn().mockRejectedValue({ statusCode: 404 });
+      esClient.asCurrentUser.indices.create = vi.fn().mockResolvedValue({});
+      esClient.asCurrentUser.bulk = vi.fn().mockRejectedValue({ statusCode: 404 });
       await expect(client.create('test-lookup', [{ foo: 1 }])).resolves.toBeDefined();
     });
 
     it('should skip bulk indexing if data is empty', async () => {
-      esClient.asCurrentUser.indices.create = jest.fn().mockResolvedValue({});
-      esClient.asCurrentUser.bulk = jest.fn();
+      esClient.asCurrentUser.indices.create = vi.fn().mockResolvedValue({});
+      esClient.asCurrentUser.bulk = vi.fn();
       await client.create('test-lookup', []);
       expect(esClient.asCurrentUser.bulk).not.toHaveBeenCalled();
     });
@@ -100,7 +102,7 @@ describe('SiemMigrationsDataLookupsClient', () => {
 
   describe('indexData', () => {
     it('should call bulk API with correct body', async () => {
-      esClient.asCurrentUser.bulk = jest.fn().mockResolvedValue({});
+      esClient.asCurrentUser.bulk = vi.fn().mockResolvedValue({});
       const indexName = 'test-index';
       const data = [{ a: 1 }, { b: 2 }];
       await client.indexData(indexName, data);
@@ -110,7 +112,7 @@ describe('SiemMigrationsDataLookupsClient', () => {
     });
 
     it('should throw and log error for bulk errors except 404', async () => {
-      esClient.asCurrentUser.bulk = jest
+      esClient.asCurrentUser.bulk = vi
         .fn()
         .mockRejectedValue({ statusCode: 500, message: 'Bulk error' });
       await expect(client.indexData('test-index', [{ foo: 1 }])).rejects.toEqual(
@@ -122,7 +124,7 @@ describe('SiemMigrationsDataLookupsClient', () => {
     });
 
     it('should ignore 404 errors', async () => {
-      esClient.asCurrentUser.bulk = jest.fn().mockRejectedValue({ statusCode: 404 });
+      esClient.asCurrentUser.bulk = vi.fn().mockRejectedValue({ statusCode: 404 });
       await expect(client.indexData('test-index', [{ foo: 1 }])).resolves.toBeUndefined();
     });
   });

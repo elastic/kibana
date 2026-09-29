@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createFilterIpPrefix } from './ip_prefix';
 import type { CreateAggConfigParams } from '../../agg_configs';
 import { AggConfigs } from '../../agg_configs';
@@ -34,7 +36,7 @@ describe('AggConfig Filters', () => {
         },
       } as any;
 
-      return new AggConfigs(indexPattern, aggs, { typesRegistry }, jest.fn());
+      return new AggConfigs(indexPattern, aggs, { typesRegistry }, vi.fn());
     };
 
     test('should return a range filter for ip_prefix agg - ipv4', () => {

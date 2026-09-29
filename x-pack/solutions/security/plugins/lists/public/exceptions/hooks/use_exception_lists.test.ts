@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type {
   ExceptionListSchema,
@@ -19,17 +21,17 @@ import { getFoundExceptionListSchemaMock } from '../../../common/schemas/respons
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const mockKibanaNotificationsService = coreMock.createStart().notifications;
-jest.mock('@kbn/securitysolution-list-api');
+vi.mock('@kbn/securitysolution-list-api');
 
 // TODO: Move this test to the kbn package: x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_exception_lists/index.test.ts once mocks are ported over
 
 describe('useExceptionLists', () => {
   beforeEach(() => {
-    jest.spyOn(api, 'fetchExceptionLists').mockResolvedValue(getFoundExceptionListSchemaMock());
+    vi.spyOn(api, 'fetchExceptionLists').mockResolvedValue(getFoundExceptionListSchemaMock());
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('initializes hook', async () => {
@@ -99,7 +101,7 @@ describe('useExceptionLists', () => {
   });
 
   test('does not fetch specific list id if it is added to the hideLists array', async () => {
-    const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
+    const spyOnfetchExceptionLists = vi.spyOn(api, 'fetchExceptionLists');
 
     renderHook(() =>
       useExceptionLists({
@@ -131,7 +133,7 @@ describe('useExceptionLists', () => {
   });
 
   test('applies filters to query', async () => {
-    const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
+    const spyOnfetchExceptionLists = vi.spyOn(api, 'fetchExceptionLists');
 
     renderHook(() =>
       useExceptionLists({
@@ -169,7 +171,7 @@ describe('useExceptionLists', () => {
   });
 
   test('fetches a new exception list and its items when props change', async () => {
-    const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
+    const spyOnfetchExceptionLists = vi.spyOn(api, 'fetchExceptionLists');
     const { rerender } = renderHook<ReturnExceptionLists, UseExceptionListsProps>(
       ({ errorMessage, filterOptions, http, initialPagination, namespaceTypes, notifications }) =>
         useExceptionLists({
@@ -215,7 +217,7 @@ describe('useExceptionLists', () => {
   });
 
   test('fetches list when refreshExceptionList callback invoked', async () => {
-    const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
+    const spyOnfetchExceptionLists = vi.spyOn(api, 'fetchExceptionLists');
     const { result } = renderHook<ReturnExceptionLists, UseExceptionListsProps>(() =>
       useExceptionLists({
         errorMessage: 'Uh oh',
@@ -244,7 +246,7 @@ describe('useExceptionLists', () => {
 
   test('invokes notifications service if "fetchExceptionLists" fails', async () => {
     const mockError = new Error('failed to fetches list items');
-    const spyOnfetchExceptionLists = jest
+    const spyOnfetchExceptionLists = vi
       .spyOn(api, 'fetchExceptionLists')
       .mockRejectedValue(mockError);
     renderHook(() =>

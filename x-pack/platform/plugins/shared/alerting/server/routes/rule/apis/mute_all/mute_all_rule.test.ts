@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { muteAllRuleRoute } from './mute_all_rule';
 import { httpServiceMock } from '@kbn/core/server/mocks';
@@ -14,16 +16,22 @@ import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled
 import { trackDeprecatedRouteUsage } from '../../../../lib/track_deprecated_route_usage';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../lib/track_deprecated_route_usage', () => ({
-  trackDeprecatedRouteUsage: jest.fn(),
-}));
+vi.mock('../../../../lib/track_deprecated_route_usage', () => {
+      const mocked = {
+      trackDeprecatedRouteUsage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('muteAllRuleRoute', () => {

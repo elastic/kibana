@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -15,7 +17,7 @@ describe('startAccessControlSyncApiLogic', () => {
   describe('startAccessControlSync', () => {
     const { http } = mockHttpValues;
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('calls correct api', async () => {

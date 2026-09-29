@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { requestContextMock } from '../../../__mocks__/request_context';
 import { serverMock } from '../../../__mocks__/server';
@@ -34,7 +36,7 @@ describe('Bulk actions knowledge base entry route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
-  const mockBulk = jest.fn().mockResolvedValue({
+  const mockBulk = vi.fn().mockResolvedValue({
     errors: [],
     docs_created: [],
     docs_deleted: [],
@@ -42,15 +44,15 @@ describe('Bulk actions knowledge base entry route', () => {
     took: 0,
   });
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date(date));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(date));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 

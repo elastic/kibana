@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { App, AppUpdater } from '@kbn/core-application-browser';
@@ -15,24 +18,36 @@ import { UptimePlugin } from './plugin';
 import type { ClientPluginsSetup, ClientPluginsStart } from './plugin';
 import { UptimeDataHelper } from './legacy_uptime/app/uptime_overview_fetcher';
 
-jest.mock('./legacy_uptime/app/uptime_overview_fetcher');
-jest.mock('./legacy_uptime/lib/alert_types', () => ({
-  legacyAlertTypeInitializers: [],
-  uptimeAlertTypeInitializers: [],
-}));
-jest.mock('./legacy_uptime/components/fleet_package', () => ({
-  LazySyntheticsPolicyCreateExtension: () => null,
-  LazySyntheticsPolicyEditExtension: () => null,
-}));
-jest.mock(
+vi.mock('./legacy_uptime/app/uptime_overview_fetcher');
+vi.mock('./legacy_uptime/lib/alert_types', () => {
+      const mocked = {
+      legacyAlertTypeInitializers: [],
+      uptimeAlertTypeInitializers: [],
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./legacy_uptime/components/fleet_package', () => {
+      const mocked = {
+      LazySyntheticsPolicyCreateExtension: () => null,
+      LazySyntheticsPolicyEditExtension: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock(
   './legacy_uptime/components/fleet_package/lazy_synthetics_custom_assets_extension',
-  () => ({
-    LazySyntheticsCustomAssetsExtension: () => null,
-  })
+  () => {
+      const mocked = {
+        LazySyntheticsCustomAssetsExtension: () => null,
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock('./kibana_services', () => ({ setStartServices: jest.fn() }));
+vi.mock('./kibana_services', () => {
+      const mocked = { setStartServices: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUptimeDataHelper = UptimeDataHelper as jest.MockedFunction<typeof UptimeDataHelper>;
+const mockUptimeDataHelper = UptimeDataHelper as MockedFunction<typeof UptimeDataHelper>;
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -44,19 +59,19 @@ const createInitContext = () =>
 
 const createPluginsSetup = () =>
   ({
-    observability: { dashboard: { register: jest.fn() } },
-    exploratoryView: { register: jest.fn() },
+    observability: { dashboard: { register: vi.fn() } },
+    exploratoryView: { register: vi.fn() },
   } as unknown as ClientPluginsSetup);
 
 const createPluginsStart = () =>
   ({
-    fleet: { registerExtension: jest.fn() },
-    observability: { observabilityRuleTypeRegistry: { register: jest.fn() } },
+    fleet: { registerExtension: vi.fn() },
+    observability: { observabilityRuleTypeRegistry: { register: vi.fn() } },
     triggersActionsUi: {
-      ruleTypeRegistry: { has: jest.fn().mockReturnValue(false), register: jest.fn() },
+      ruleTypeRegistry: { has: vi.fn().mockReturnValue(false), register: vi.fn() },
     },
-    share: { url: { locators: { create: jest.fn() } } },
-    observabilityShared: { navigation: { registerSections: jest.fn() } },
+    share: { url: { locators: { create: vi.fn() } } },
+    observabilityShared: { navigation: { registerSections: vi.fn() } },
   } as unknown as ClientPluginsStart);
 
 const getLatestStatus = (updater$: BehaviorSubject<AppUpdater>): AppStatus | undefined => {
@@ -78,7 +93,7 @@ interface Scenario {
 const setupPlugin = (scenario: Scenario = {}) => {
   const { legacyEnabled = false, hasUptimeCapability = true, indexStatus = 'no-data' } = scenario;
 
-  const indexStatusMock = jest.fn();
+  const indexStatusMock = vi.fn();
   if (indexStatus === 'data') {
     indexStatusMock.mockResolvedValue({ indexExists: true, indices: 'heartbeat-*' });
   } else if (indexStatus === 'no-data') {
@@ -91,13 +106,13 @@ const setupPlugin = (scenario: Scenario = {}) => {
 
   mockUptimeDataHelper.mockReturnValue({
     indexStatus: indexStatusMock,
-    overviewData: jest.fn(),
+    overviewData: vi.fn(),
   } as unknown as ReturnType<typeof UptimeDataHelper>);
 
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
 
-  (coreStart.uiSettings.get as jest.Mock).mockImplementation((key: string) =>
+  (coreStart.uiSettings.get as Mock).mockImplementation((key: string) =>
     key === enableLegacyUptimeApp ? legacyEnabled : undefined
   );
   (coreStart.application as unknown as { capabilities: Record<string, unknown> }).capabilities = {
@@ -108,7 +123,7 @@ const setupPlugin = (scenario: Scenario = {}) => {
   const plugin = new UptimePlugin(createInitContext());
   plugin.setup(coreSetup, createPluginsSetup());
 
-  const registerCall = (coreSetup.application.register as jest.Mock).mock.calls[0][0];
+  const registerCall = (coreSetup.application.register as Mock).mock.calls[0][0];
   const updater$ = registerCall.updater$ as BehaviorSubject<AppUpdater>;
 
   return { plugin, coreStart, updater$, indexStatusMock };
@@ -116,7 +131,7 @@ const setupPlugin = (scenario: Scenario = {}) => {
 
 describe('UptimePlugin app status', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('registers the app as inaccessible by default before the data check runs', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -27,11 +30,11 @@ import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { IHttpFetchError } from '@kbn/core/public';
 
-jest.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/components/user_privileges');
 
-jest.mock('../../../../../common/hooks/use_license', () => {
+vi.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
+    isPlatinumPlus: vi.fn(),
   };
   return {
     licenseService: licenseServiceInstance,
@@ -95,7 +98,7 @@ const blocklistOperatorFieldTestCases = [
 
 describe('blocklist form', () => {
   let user: UserEvent;
-  let onChangeSpy: jest.Mock;
+  let onChangeSpy: Mock;
   let render: (props?: ArtifactFormComponentProps) => ReturnType<AppContextTestRender['render']>;
   let mockedContext: AppContextTestRender;
 
@@ -155,18 +158,18 @@ describe('blocklist form', () => {
   }
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    onChangeSpy = jest.fn();
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    onChangeSpy = vi.fn();
+    (licenseService.isPlatinumPlus as Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
     render = (props = createProps()) => mockedContext.render(<BlockListForm {...props} />);
   });

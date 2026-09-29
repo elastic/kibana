@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { tz } from 'moment-timezone';
 
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
@@ -15,8 +18,8 @@ import { Job } from './job';
 import { ReportingAPIClient } from './reporting_api_client';
 
 describe('ReportingAPIClient', () => {
-  let uiSettingsClient: jest.Mocked<IUiSettingsClient>;
-  let httpClient: jest.Mocked<HttpSetup>;
+  let uiSettingsClient: Mocked<IUiSettingsClient>;
+  let httpClient: Mocked<HttpSetup>;
   let apiClient: ReportingAPIClient;
 
   beforeEach(() => {
@@ -35,11 +38,11 @@ describe('ReportingAPIClient', () => {
 
   describe('downloadReport', () => {
     beforeEach(() => {
-      jest.spyOn(window, 'open').mockReturnValue(window);
+      vi.spyOn(window, 'open').mockReturnValue(window);
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('should open a window with download URL', () => {
@@ -250,11 +253,11 @@ describe('ReportingAPIClient', () => {
 
   describe('getDecoratedJobParams', () => {
     beforeEach(() => {
-      jest.spyOn(tz, 'guess').mockReturnValue('UTC');
+      vi.spyOn(tz, 'guess').mockReturnValue('UTC');
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it(`should guess browser's timezone`, () => {

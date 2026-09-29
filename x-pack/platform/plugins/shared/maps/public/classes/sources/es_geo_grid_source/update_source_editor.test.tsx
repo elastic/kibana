@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('12345'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('12345'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
   bucketsName: 'clusters',

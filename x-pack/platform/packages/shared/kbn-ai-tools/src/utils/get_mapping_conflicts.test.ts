@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getMappingConflicts } from './get_mapping_conflicts';
 
 const signal = new AbortController().signal;
 
 const createEsClient = () => {
-  const query = jest.fn();
+  const query = vi.fn();
   return {
     esClient: { esql: { query } } as unknown as ElasticsearchClient,
     query,
@@ -20,7 +22,7 @@ const createEsClient = () => {
 
 describe('getMappingConflicts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('probes the full source with no time filter', async () => {

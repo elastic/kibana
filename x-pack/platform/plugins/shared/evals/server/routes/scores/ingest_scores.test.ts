@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -73,7 +76,7 @@ const getBasePayload = (): IngestScoresRequestBodyInput => ({
 });
 
 describe('POST /internal/evals/scores', () => {
-  const setup = (options?: { getSpaceId?: jest.Mock; checkManageEvalsPrivileges?: jest.Mock }) => {
+  const setup = (options?: { getSpaceId?: Mock; checkManageEvalsPrivileges?: Mock }) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
     registerIngestScoresRoute({
@@ -81,7 +84,7 @@ describe('POST /internal/evals/scores', () => {
       logger,
       canEncrypt: false,
       evaluatorRegistry: createEvaluatorRegistryMock(),
-      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+      getInferenceStart: async () => ({ getClient: vi.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
       getSpaceId: options?.getSpaceId,
@@ -95,7 +98,7 @@ describe('POST /internal/evals/scores', () => {
     const { handler } = route;
 
     const evaluationScoreService = {
-      write: jest.fn().mockResolvedValue({ ingested: 1, conflicted: 0, failed: [] }),
+      write: vi.fn().mockResolvedValue({ ingested: 1, conflicted: 0, failed: [] }),
     };
     const context = coreMock.createCustomRequestHandlerContext({
       evals: {
@@ -114,7 +117,7 @@ describe('POST /internal/evals/scores', () => {
     });
 
   const mockWriteResult = (
-    evaluationScoreService: { write: jest.Mock },
+    evaluationScoreService: { write: Mock },
     result: WriteResult
   ): void => {
     evaluationScoreService.write.mockResolvedValueOnce(result);
@@ -133,7 +136,7 @@ describe('POST /internal/evals/scores', () => {
   });
 
   it('stamps scores with the active space when no space_ids are provided', async () => {
-    const getSpaceId = jest.fn().mockResolvedValue('marketing');
+    const getSpaceId = vi.fn().mockResolvedValue('marketing');
     const { handler, context, evaluationScoreService } = setup({ getSpaceId });
     const payload = getBasePayload();
 
@@ -143,8 +146,8 @@ describe('POST /internal/evals/scores', () => {
   });
 
   it('honors explicit space_ids over the active space when the caller is authorized', async () => {
-    const getSpaceId = jest.fn().mockResolvedValue('marketing');
-    const checkManageEvalsPrivileges = jest.fn().mockResolvedValue(true);
+    const getSpaceId = vi.fn().mockResolvedValue('marketing');
+    const checkManageEvalsPrivileges = vi.fn().mockResolvedValue(true);
     const { handler, context, evaluationScoreService } = setup({
       getSpaceId,
       checkManageEvalsPrivileges,
@@ -159,8 +162,8 @@ describe('POST /internal/evals/scores', () => {
   });
 
   it('does not run a cross-space privilege check when the only target is the active space', async () => {
-    const getSpaceId = jest.fn().mockResolvedValue('marketing');
-    const checkManageEvalsPrivileges = jest.fn().mockResolvedValue(true);
+    const getSpaceId = vi.fn().mockResolvedValue('marketing');
+    const checkManageEvalsPrivileges = vi.fn().mockResolvedValue(true);
     const { handler, context, evaluationScoreService } = setup({
       getSpaceId,
       checkManageEvalsPrivileges,
@@ -174,8 +177,8 @@ describe('POST /internal/evals/scores', () => {
   });
 
   it('returns 403 and does not write when the caller lacks privileges in a target space', async () => {
-    const getSpaceId = jest.fn().mockResolvedValue('marketing');
-    const checkManageEvalsPrivileges = jest.fn().mockResolvedValue(false);
+    const getSpaceId = vi.fn().mockResolvedValue('marketing');
+    const checkManageEvalsPrivileges = vi.fn().mockResolvedValue(false);
     const { handler, context, evaluationScoreService } = setup({
       getSpaceId,
       checkManageEvalsPrivileges,
@@ -190,7 +193,7 @@ describe('POST /internal/evals/scores', () => {
   });
 
   it('fails closed with 403 for cross-space writes when no privilege checker is wired', async () => {
-    const getSpaceId = jest.fn().mockResolvedValue('marketing');
+    const getSpaceId = vi.fn().mockResolvedValue('marketing');
     const { handler, context, evaluationScoreService } = setup({ getSpaceId });
     const payload = { ...getBasePayload(), space_ids: ['sales'] };
 
@@ -401,7 +404,7 @@ describe('POST /internal/evals/scores', () => {
       logger,
       canEncrypt: false,
       evaluatorRegistry: createEvaluatorRegistryMock(),
-      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+      getInferenceStart: async () => ({ getClient: vi.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
     });

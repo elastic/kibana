@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
@@ -17,13 +19,13 @@ import { render } from '../../utils/test_helper';
 import { ObservabilityAlertSearchBar } from './alert_search_bar';
 import type { ObservabilityAlertSearchBarProps, Services } from './types';
 
-const getAlertsSearchBarMock = jest.fn();
+const getAlertsSearchBarMock = vi.fn();
 const ALERT_SEARCH_BAR_DATA_TEST_SUBJ = 'alerts-search-bar';
 const ALERT_UUID = '413a9631-1a29-4344-a8b4-9a1dc23421ee';
 
 describe('ObservabilityAlertSearchBar', () => {
   const { http, data, dataViews, notifications, spaces } = kibanaStartMock.startContract().services;
-  spaces.getActiveSpace = jest
+  spaces.getActiveSpace = vi
     .fn()
     .mockImplementation(() =>
       Promise.resolve({ id: 'space-id', name: 'space-name', disabledFeatures: [] })
@@ -37,15 +39,15 @@ describe('ObservabilityAlertSearchBar', () => {
       kuery: '',
       filters: [],
       filterControls: [],
-      onRangeFromChange: jest.fn(),
-      onRangeToChange: jest.fn(),
-      onKueryChange: jest.fn(),
-      onStatusChange: jest.fn(),
-      onEsQueryChange: jest.fn(),
-      onFiltersChange: jest.fn(),
-      onControlConfigsChange: jest.fn(),
-      onFilterControlsChange: jest.fn(),
-      setSavedQuery: jest.fn(),
+      onRangeFromChange: vi.fn(),
+      onRangeToChange: vi.fn(),
+      onKueryChange: vi.fn(),
+      onStatusChange: vi.fn(),
+      onEsQueryChange: vi.fn(),
+      onFiltersChange: vi.fn(),
+      onControlConfigsChange: vi.fn(),
+      onFilterControlsChange: vi.fn(),
+      setSavedQuery: vi.fn(),
       rangeTo: 'now',
       rangeFrom: 'now-15m',
       status: 'all',
@@ -55,7 +57,7 @@ describe('ObservabilityAlertSearchBar', () => {
         AlertsSearchBar: getAlertsSearchBarMock.mockReturnValue(
           <div data-test-subj={ALERT_SEARCH_BAR_DATA_TEST_SUBJ} />
         ),
-        useToasts: jest.fn(),
+        useToasts: vi.fn(),
         http,
         data,
         dataViews,
@@ -69,7 +71,7 @@ describe('ObservabilityAlertSearchBar', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render alert search bar', async () => {
@@ -96,7 +98,7 @@ describe('ObservabilityAlertSearchBar', () => {
   });
 
   it('should include defaultFilters in es query', async () => {
-    const mockedOnEsQueryChange = jest.fn();
+    const mockedOnEsQueryChange = vi.fn();
     const mockedFrom = '2022-11-15T09:38:13.604Z';
     const mockedTo = '2022-11-15T09:53:13.604Z';
     const defaultFilters: Filter[] = [
@@ -147,7 +149,7 @@ describe('ObservabilityAlertSearchBar', () => {
   });
 
   it('should include filterControls in es query', async () => {
-    const mockedOnEsQueryChange = jest.fn();
+    const mockedOnEsQueryChange = vi.fn();
     const mockedFrom = '2022-11-15T09:38:13.604Z';
     const mockedTo = '2022-11-15T09:53:13.604Z';
     const filterControls: Filter[] = [
@@ -198,7 +200,7 @@ describe('ObservabilityAlertSearchBar', () => {
   });
 
   it('should include filters in es query', async () => {
-    const mockedOnEsQueryChange = jest.fn();
+    const mockedOnEsQueryChange = vi.fn();
     const mockedFrom = '2022-11-15T09:38:13.604Z';
     const mockedTo = '2022-11-15T09:53:13.604Z';
     const filters = [
@@ -245,7 +247,7 @@ describe('ObservabilityAlertSearchBar', () => {
   });
 
   it('should include space filter in es query when spaceId is available', async () => {
-    const mockedOnEsQueryChange = jest.fn();
+    const mockedOnEsQueryChange = vi.fn();
     const mockedFrom = '2022-11-15T09:38:13.604Z';
     const mockedTo = '2022-11-15T09:53:13.604Z';
 
@@ -277,11 +279,11 @@ describe('ObservabilityAlertSearchBar', () => {
 
   it('should show error in a toast', async () => {
     const error = new Error('something is wrong in esQueryChange');
-    const mockedOnEsQueryChange = jest.fn().mockImplementation(() => {
+    const mockedOnEsQueryChange = vi.fn().mockImplementation(() => {
       throw error;
     });
-    const mockedAddError = jest.fn();
-    const mockedUseToast = jest.fn().mockImplementation(() => ({
+    const mockedAddError = vi.fn();
+    const mockedUseToast = vi.fn().mockImplementation(() => ({
       addError: mockedAddError,
     }));
 

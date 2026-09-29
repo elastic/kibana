@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { Mocked } from 'vitest';
 /* eslint-disable max-classes-per-file */
 
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
@@ -28,7 +30,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
 describe('TransformManager', () => {
   let scopedClusterClientMock: ScopedClusterClientMock;
-  let loggerMock: jest.Mocked<MockedLogger>;
+  let loggerMock: Mocked<MockedLogger>;
   const spaceId = 'default';
 
   beforeEach(() => {

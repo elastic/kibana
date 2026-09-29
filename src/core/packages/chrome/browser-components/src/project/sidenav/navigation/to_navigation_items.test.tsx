@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { waitFor } from '@testing-library/dom';
 import { toNavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
@@ -19,7 +21,7 @@ import type {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const navigationTree = require('./mocks/mock_security_tree.json') as NavigationTreeDefinitionUI;
 
-const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 // Mock panelStateManager for testing
 const mockPanelStateManager = new PanelStateManager();

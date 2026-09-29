@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getSuggestions } from './xy_suggestions';
 import type {
   TableSuggestionColumn,
@@ -19,7 +22,7 @@ import { KbnPalette } from '@kbn/palettes';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { getVisualizationSubtypeId } from './visualization_helpers';
 
-jest.mock('../../id_generator');
+vi.mock('../../id_generator');
 
 describe('xy_suggestions', () => {
   const DEFAULT_LINE_COLOR_MAPPING_CONFIG = {
@@ -137,7 +140,7 @@ describe('xy_suggestions', () => {
   }
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('partially maps invalid combinations, but hides them', () => {
@@ -191,7 +194,7 @@ describe('xy_suggestions', () => {
   });
 
   test('rejects the configuration when metric isStaticValue', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    (generateId as Mock).mockReturnValueOnce('aaa');
     const suggestions = getSuggestions({
       table: {
         isMultiRow: true,
@@ -234,7 +237,7 @@ describe('xy_suggestions', () => {
   });
 
   test('suggests all xy charts without changes to the state when switching among xy charts with malformed table', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    (generateId as Mock).mockReturnValueOnce('aaa');
     const suggestions = getSuggestions({
       table: {
         isMultiRow: false,
@@ -283,7 +286,7 @@ describe('xy_suggestions', () => {
   });
 
   test('suggests all basic x y charts when switching from another vis', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    (generateId as Mock).mockReturnValueOnce('aaa');
     const suggestions = getSuggestions({
       table: {
         isMultiRow: true,
@@ -311,7 +314,7 @@ describe('xy_suggestions', () => {
 
   // This limitation is acceptable for now, but is now tested
   test('is unable to generate layers when switching from a non-XY chart with multiple layers', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    (generateId as Mock).mockReturnValueOnce('aaa');
     const suggestions = getSuggestions({
       table: {
         isMultiRow: true,
@@ -341,7 +344,7 @@ describe('xy_suggestions', () => {
   });
 
   test('suggests all basic x y charts when switching from another x y chart', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    (generateId as Mock).mockReturnValueOnce('aaa');
     const suggestions = getSuggestions({
       table: {
         isMultiRow: true,
@@ -383,7 +386,7 @@ describe('xy_suggestions', () => {
   });
 
   test('suggests all basic x y charts when switching from another x y chart with multiple layers', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    (generateId as Mock).mockReturnValueOnce('aaa');
     const suggestions = getSuggestions({
       table: {
         isMultiRow: true,
@@ -445,7 +448,7 @@ describe('xy_suggestions', () => {
   });
 
   test('suggests mixed xy chart keeping original subType when switching from another x y chart with multiple layers', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    (generateId as Mock).mockReturnValueOnce('aaa');
     const suggestions = getSuggestions({
       allowMixed: true,
       table: {
@@ -508,7 +511,7 @@ describe('xy_suggestions', () => {
   });
 
   test('suggests all basic x y chart with date on x', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    (generateId as Mock).mockReturnValueOnce('aaa');
     const [suggestion, ...rest] = getSuggestions({
       table: {
         isMultiRow: true,
@@ -535,7 +538,7 @@ describe('xy_suggestions', () => {
   });
 
   test('suggests all basic x y chart with histogram on x', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    (generateId as Mock).mockReturnValueOnce('aaa');
     const [suggestion, ...rest] = getSuggestions({
       table: {
         isMultiRow: true,
@@ -1210,7 +1213,7 @@ describe('xy_suggestions', () => {
   });
 
   test('suggests a flipped chart for unchanged table and existing bar chart on ordinal x axis', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
+    (generateId as Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYVisualizationState = {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
@@ -1378,7 +1381,7 @@ describe('xy_suggestions', () => {
   });
 
   test('overwrites column to dimension mappings if a date dimension is added', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
+    (generateId as Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYVisualizationState = {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
@@ -1425,7 +1428,7 @@ describe('xy_suggestions', () => {
   });
 
   test('handles two numeric values', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('ddd');
+    (generateId as Mock).mockReturnValueOnce('ddd');
     const [suggestion] = getSuggestions({
       table: {
         isMultiRow: true,
@@ -1452,7 +1455,7 @@ describe('xy_suggestions', () => {
   });
 
   test('handles ip', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('ddd');
+    (generateId as Mock).mockReturnValueOnce('ddd');
     const [suggestion] = getSuggestions({
       table: {
         isMultiRow: true,
@@ -1489,7 +1492,7 @@ describe('xy_suggestions', () => {
   });
 
   test('handles unbucketed suggestions', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('eee');
+    (generateId as Mock).mockReturnValueOnce('eee');
     const [suggestion] = getSuggestions({
       table: {
         isMultiRow: true,

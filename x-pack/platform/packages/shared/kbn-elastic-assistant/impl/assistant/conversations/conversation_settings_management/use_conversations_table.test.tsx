@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { GetConversationsListParams } from './use_conversations_table';
 import { useConversationsTable } from './use_conversations_table';
@@ -15,18 +17,18 @@ import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin
 import type { ConversationTableItem } from './types';
 
 const mockActionTypeRegistry: ActionTypeRegistryContract = {
-  has: jest
+  has: vi
     .fn()
     .mockImplementation((id: string) =>
       mockActionTypes.some((actionType: { id: string }) => actionType.id === id)
     ),
-  get: jest
+  get: vi
     .fn()
     .mockImplementation((id: string) =>
       mockActionTypes.find((actionType: { id: string }) => actionType.id === id)
     ),
-  list: jest.fn().mockReturnValue(mockActionTypes),
-  register: jest.fn(),
+  list: vi.fn().mockReturnValue(mockActionTypes),
+  register: vi.fn(),
 };
 
 describe('useConversationsTable', () => {
@@ -36,15 +38,15 @@ describe('useConversationsTable', () => {
       conversationOptions: [],
       deletedConversationsIds: [],
       excludedIds: [],
-      handlePageChecked: jest.fn(),
-      handlePageUnchecked: jest.fn(),
-      handleRowChecked: jest.fn(),
-      handleRowUnChecked: jest.fn(),
-      isDeleteEnabled: jest.fn(),
-      isEditEnabled: jest.fn(),
+      handlePageChecked: vi.fn(),
+      handlePageUnchecked: vi.fn(),
+      handleRowChecked: vi.fn(),
+      handleRowUnChecked: vi.fn(),
+      isDeleteEnabled: vi.fn(),
+      isEditEnabled: vi.fn(),
       isExcludedMode: false,
-      onDeleteActionClicked: jest.fn(),
-      onEditActionClicked: jest.fn(),
+      onDeleteActionClicked: vi.fn(),
+      onEditActionClicked: vi.fn(),
       totalItemCount: 0,
     });
 

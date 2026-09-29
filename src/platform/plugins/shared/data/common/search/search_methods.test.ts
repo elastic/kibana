@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { of } from 'rxjs';
 import { SearchMethodsService } from './search_methods';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 
 describe('SearchMethodsService', () => {
-  let mockSearch: jest.MockedFunction<ISearchGeneric>;
+  let mockSearch: MockedFunction<ISearchGeneric>;
   let service: SearchMethodsService;
 
   beforeEach(() => {
-    mockSearch = jest.fn();
+    mockSearch = vi.fn();
     service = new SearchMethodsService(mockSearch);
   });
 

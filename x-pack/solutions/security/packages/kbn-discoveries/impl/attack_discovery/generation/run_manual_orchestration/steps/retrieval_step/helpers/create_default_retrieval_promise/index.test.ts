@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 
 import { createDefaultRetrievalPromise } from '.';
 
-const mockInvokeAlertRetrievalWorkflow = jest.fn();
+const mockInvokeAlertRetrievalWorkflow = vi.fn();
 
-jest.mock('../../../../../invoke_alert_retrieval_workflow', () => ({
-  invokeAlertRetrievalWorkflow: (...args: unknown[]) => mockInvokeAlertRetrievalWorkflow(...args),
-}));
+vi.mock('../../../../../invoke_alert_retrieval_workflow', () => {
+      const mocked = {
+      invokeAlertRetrievalWorkflow: (...args: unknown[]) => mockInvokeAlertRetrievalWorkflow(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockLogger = {
-  debug: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 const baseParams = {
@@ -44,7 +49,7 @@ const baseParams = {
 
 describe('createDefaultRetrievalPromise', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockInvokeAlertRetrievalWorkflow.mockResolvedValue({
       alerts: ['alert-1'],

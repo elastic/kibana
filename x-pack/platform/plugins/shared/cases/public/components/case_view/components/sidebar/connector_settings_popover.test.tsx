@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,16 +16,16 @@ import { ConnectorSettingsPopover } from './connector_settings_popover';
 import { renderWithTestingProviders } from '../../../../common/mock';
 import { useConfigureCasesNavigation } from '../../../../common/navigation/hooks';
 
-jest.mock('../../../../common/navigation/hooks');
+vi.mock('../../../../common/navigation/hooks');
 
 describe('ConnectorSettingsPopover', () => {
-  const navigateToConfigureCases = jest.fn();
+  const navigateToConfigureCases = vi.fn();
   const user = userEvent.setup({ pointerEventsCheck: 0 });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useConfigureCasesNavigation as jest.Mock).mockReturnValue({
-      getConfigureCasesUrl: jest.fn().mockReturnValue('/app/security/cases/configure'),
+    vi.clearAllMocks();
+    (useConfigureCasesNavigation as Mock).mockReturnValue({
+      getConfigureCasesUrl: vi.fn().mockReturnValue('/app/security/cases/configure'),
       navigateToConfigureCases,
     });
   });

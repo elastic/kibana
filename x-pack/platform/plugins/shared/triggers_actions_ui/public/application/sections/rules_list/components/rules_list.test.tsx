@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import { fetchUiConfig } from '@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/maintenance-windows-plugin/common';
@@ -47,65 +50,107 @@ import {
 } from './test_helper';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
-  useUiSetting: jest.fn(() => false),
-  useUiSetting$: jest.fn((value: string) => ['0,0']),
-}));
-jest.mock('../../../lib/action_connector_api', () => ({
-  loadActionTypes: jest.fn(),
-  loadAllActions: jest.fn(),
-}));
+vi.mock('../../../../common/lib/kibana');
+vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {
+      const mocked = {
+      useUiSetting: vi.fn(() => false),
+      useUiSetting$: vi.fn((value: string) => ['0,0']),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/action_connector_api', () => {
+      const mocked = {
+      loadActionTypes: vi.fn(),
+      loadAllActions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/rule_api/rules_kuery_filter', () => ({
-  loadRulesWithKueryFilter: jest.fn(),
-}));
-jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
-  getRuleTypes: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/aggregate_kuery_filter', () => ({
-  loadRuleAggregationsWithKueryFilter: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/update_api_key', () => ({
-  updateAPIKey: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/aggregate', () => ({
-  loadRuleTags: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/snooze', () => ({
-  bulkSnoozeRules: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/unsnooze', () => ({
-  bulkUnsnoozeRules: jest.fn(),
-}));
-jest.mock('../../../lib/rule_api/bulk_delete', () => ({
-  bulkDeleteRules: jest.fn().mockResolvedValue({ errors: [], total: 10 }),
-}));
-jest.mock('../../../lib/rule_api/update_api_key', () => ({
-  bulkUpdateAPIKey: jest.fn(),
-}));
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health', () => ({
-  fetchAlertingFrameworkHealth: jest.fn(() => ({
-    isSufficientlySecure: true,
-    hasPermanentEncryptionKey: true,
-  })),
-}));
+vi.mock('../../../lib/rule_api/rules_kuery_filter', () => {
+      const mocked = {
+      loadRulesWithKueryFilter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => {
+      const mocked = {
+      getRuleTypes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/aggregate_kuery_filter', () => {
+      const mocked = {
+      loadRuleAggregationsWithKueryFilter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/update_api_key', () => {
+      const mocked = {
+      updateAPIKey: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/aggregate', () => {
+      const mocked = {
+      loadRuleTags: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/snooze', () => {
+      const mocked = {
+      bulkSnoozeRules: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/unsnooze', () => {
+      const mocked = {
+      bulkUnsnoozeRules: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/bulk_delete', () => {
+      const mocked = {
+      bulkDeleteRules: vi.fn().mockResolvedValue({ errors: [], total: 10 }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/rule_api/update_api_key', () => {
+      const mocked = {
+      bulkUpdateAPIKey: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health', () => {
+      const mocked = {
+      fetchAlertingFrameworkHealth: vi.fn(() => ({
+        isSufficientlySecure: true,
+        hasPermanentEncryptionKey: true,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/rule_api/aggregate_kuery_filter');
-jest.mock('../../../lib/rule_api/rules_kuery_filter');
+vi.mock('../../../lib/rule_api/aggregate_kuery_filter');
+vi.mock('../../../lib/rule_api/rules_kuery_filter');
 
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status', () => ({
-  fetchUiHealthStatus: jest.fn(() => ({ isRulesAvailable: true })),
-}));
-jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
-  fetchUiConfig: jest
-    .fn()
-    .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
-}));
-jest.mock('react-router-dom', () => {
+vi.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status', () => {
+      const mocked = {
+      fetchUiHealthStatus: vi.fn(() => ({ isRulesAvailable: true })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => {
+      const mocked = {
+      fetchUiConfig: vi
+        .fn()
+        .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
   const history = {
-    push: jest.fn(),
-    createHref: jest.fn(({ pathname }: { pathname: string }) => pathname),
+    push: vi.fn(),
+    createHref: vi.fn(({ pathname }: { pathname: string }) => pathname),
   };
   return {
     useHistory: () => history,
@@ -115,38 +160,50 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-jest.mock('@kbn/alerts-ui-shared/src/maintenance_window_callout/api', () => ({
-  fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
-}));
-const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as jest.Mock;
+vi.mock('@kbn/alerts-ui-shared/src/maintenance_window_callout/api', () => {
+      const mocked = {
+      fetchActiveMaintenanceWindows: vi.fn(() => Promise.resolve([])),
+    };
+      return { ...mocked, default: mocked };
+    });
+const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as Mock;
 
-jest.mock('../../../lib/capabilities', () => ({
-  hasAllPrivilege: jest.fn(() => true),
-  hasSaveRulesCapability: jest.fn(() => true),
-  hasShowActionsCapability: jest.fn(() => true),
-  hasExecuteActionsCapability: jest.fn(() => true),
-}));
-jest.mock('../../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../../../lib/capabilities', () => {
+      const mocked = {
+      hasAllPrivilege: vi.fn(() => true),
+      hasSaveRulesCapability: vi.fn(() => true),
+      hasShowActionsCapability: vi.fn(() => true),
+      hasExecuteActionsCapability: vi.fn(() => true),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-utils-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/kibana-utils-plugin/public');
+vi.mock('@kbn/kibana-utils-plugin/public', async () => {
+  const originalModule = (await vi.importActual('@kbn/kibana-utils-plugin/public'));
   return {
     ...originalModule,
-    createKbnUrlStateStorage: jest.fn(() => ({
-      get: jest.fn(() => null),
-      set: jest.fn(() => null),
+    createKbnUrlStateStorage: vi.fn(() => ({
+      get: vi.fn(() => null),
+      set: vi.fn(() => null),
     })),
   };
 });
 
-jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
-jest.mock('@kbn/ebt-tools');
-jest.mock('@kbn/cps-utils', () => ({
-  ...jest.requireActual('@kbn/cps-utils'),
-  useRouteBasedCpsPickerAccess: jest.fn(),
-}));
+vi.mock('react-use/lib/useLocalStorage', () => vi.fn(() => [null, () => null]));
+vi.mock('@kbn/ebt-tools');
+vi.mock('@kbn/cps-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/cps-utils')),
+      useRouteBasedCpsPickerAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const license$ = new BehaviorSubject(
   licensingMock.createLicense({
@@ -154,24 +211,22 @@ const license$ = new BehaviorSubject(
   })
 );
 
-const mockUseRouteBasedCpsPickerAccess = jest.mocked(useRouteBasedCpsPickerAccess);
+const mockUseRouteBasedCpsPickerAccess = vi.mocked(useRouteBasedCpsPickerAccess);
 
-const usePerformanceContextMock = usePerformanceContext as jest.Mock;
-usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
+const usePerformanceContextMock = usePerformanceContext as Mock;
+usePerformanceContextMock.mockReturnValue({ onPageReady: vi.fn() });
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
-const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api/update_api_key');
-const { loadRuleTags } = jest.requireMock('../../../lib/rule_api/aggregate');
+const { getRuleTypes } = (await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types'));
+const { bulkUpdateAPIKey } = (await vi.importMock('../../../lib/rule_api/update_api_key'));
+const { loadRuleTags } = (await vi.importMock('../../../lib/rule_api/aggregate'));
 
-const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
-  '../../../lib/rule_api/aggregate_kuery_filter'
-);
-const { loadRulesWithKueryFilter } = jest.requireMock('../../../lib/rule_api/rules_kuery_filter');
-const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
+const { loadRuleAggregationsWithKueryFilter } = (await vi.importMock('../../../lib/rule_api/aggregate_kuery_filter'));
+const { loadRulesWithKueryFilter } = (await vi.importMock('../../../lib/rule_api/rules_kuery_filter'));
+const { loadActionTypes, loadAllActions } = (await vi.importMock('../../../lib/action_connector_api'));
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -194,12 +249,12 @@ const renderWithProviders = (ui: any) => {
 // Each test re-mounts the full RulesList and awaits multiple findBy* queries; the global
 // RTL asyncUtilTimeout (4500 ms) alone can exceed Jest's default 5000 ms budget under worker
 // contention. Raise the file-wide budget so every render-heavy test has headroom.
-jest.setTimeout(15_000);
+vi.setConfig({ testTimeout: 15_000 });
 
 describe('Update Api Key', () => {
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
-  const addDanger = jest.fn();
+  const addSuccess = vi.fn();
+  const addError = vi.fn();
+  const addDanger = vi.fn();
 
   beforeAll(() => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
@@ -235,7 +290,7 @@ describe('Update Api Key', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     cleanup();
   });
@@ -302,7 +357,7 @@ describe('rules_list component empty', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     cleanup();
   });
@@ -348,12 +403,12 @@ describe('rules_list component empty', () => {
     };
 
     beforeEach(() => {
-      window.IntersectionObserver = jest.fn().mockReturnValue({
-        observe: jest.fn(),
-        unobserve: jest.fn(),
-        disconnect: jest.fn(),
+      window.IntersectionObserver = vi.fn().mockReturnValue({
+        observe: vi.fn(),
+        unobserve: vi.fn(),
+        disconnect: vi.fn(),
       });
-      (useKibanaMock().services.http.get as jest.Mock).mockImplementation(async (path: string) => {
+      (useKibanaMock().services.http.get as Mock).mockImplementation(async (path: string) => {
         if (path.includes('rule_template/_find')) {
           return mockTemplatesResponse;
         }
@@ -362,7 +417,7 @@ describe('rules_list component empty', () => {
     });
 
     it('uses navigateToCreateRuleFromTemplateForm instead of the management app', async () => {
-      const navigateToCreateRuleFromTemplateForm = jest.fn();
+      const navigateToCreateRuleFromTemplateForm = vi.fn();
       const { navigateToApp } = useKibanaMock().services.application;
 
       renderWithProviders(
@@ -393,11 +448,11 @@ describe('rules_list component empty', () => {
 });
 
 describe('rules_list ', () => {
-  let ruleTypeRegistry: jest.Mocked<RuleTypeRegistryContract>;
-  let actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract<unknown, unknown>>;
+  let ruleTypeRegistry: Mocked<RuleTypeRegistryContract>;
+  let actionTypeRegistry: Mocked<ActionTypeRegistryContract<unknown, unknown>>;
 
   beforeEach(() => {
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
     loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
       perPage: 10000,
@@ -442,7 +497,7 @@ describe('rules_list ', () => {
       validate: () => {
         return { errors: {} };
       },
-      ruleParamsExpression: jest.fn(),
+      ruleParamsExpression: vi.fn(),
       requiresAppContext: false,
     };
 
@@ -456,7 +511,7 @@ describe('rules_list ', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     cleanup();
   });
@@ -470,8 +525,8 @@ describe('rules_list ', () => {
   });
 
   it('can filter by rule states', async () => {
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-    const onStatusFilterChangeMock = jest.fn();
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
+    const onStatusFilterChangeMock = vi.fn();
     renderWithProviders(
       <RulesList statusFilter={['disabled']} onStatusFilterChange={onStatusFilterChangeMock} />
     );
@@ -494,7 +549,7 @@ describe('rules_list ', () => {
   });
 
   it('can filter by last response', async () => {
-    const onLastRunOutcomeFilterChangeMock = jest.fn();
+    const onLastRunOutcomeFilterChangeMock = vi.fn();
     renderWithProviders(
       <RulesList
         lastRunOutcomeFilter={['failed']}
@@ -811,7 +866,7 @@ describe('rules_list ', () => {
     });
 
     it('renders license errors and manage license modal on click', async () => {
-      global.open = jest.fn();
+      global.open = vi.fn();
       renderWithProviders(<RulesList />);
       await waitFor(() => screen.getByTestId('ruleStatus-error-license-fix'));
       fireEvent.click(screen.getByTestId('ruleStatus-error-license-fix'));
@@ -878,7 +933,7 @@ describe('rules_list ', () => {
         validate: () => {
           return { errors: {} };
         },
-        ruleParamsExpression: jest.fn(),
+        ruleParamsExpression: vi.fn(),
         requiresAppContext: true,
       };
 
@@ -910,7 +965,7 @@ describe('rules_list ', () => {
     });
 
     it('renders the status filter if the experiment is on', async () => {
-      (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+      (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
@@ -925,7 +980,7 @@ describe('rules_list ', () => {
     });
 
     it('renders the tag filter if the experiment is on', async () => {
-      (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+      (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
@@ -942,7 +997,7 @@ describe('rules_list ', () => {
     });
 
     it('rule list items with actions are not editable if canExecuteAction is false', async () => {
-      const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
+      const { hasExecuteActionsCapability } = (await vi.importMock('../../../lib/capabilities'));
       hasExecuteActionsCapability.mockReturnValue(false);
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
@@ -956,7 +1011,7 @@ describe('rules_list ', () => {
     // This might be repeated later
     describe('rules_list component empty with show only capability', () => {
       beforeEach(() => {
-        (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+        (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
         loadActionTypes.mockResolvedValue([
           {
             id: 'test',
@@ -986,11 +1041,11 @@ describe('rules_list ', () => {
 });
 
 describe('internally managed rule', () => {
-  let ruleTypeRegistry: jest.Mocked<RuleTypeRegistryContract>;
-  let actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract<unknown, unknown>>;
+  let ruleTypeRegistry: Mocked<RuleTypeRegistryContract>;
+  let actionTypeRegistry: Mocked<ActionTypeRegistryContract<unknown, unknown>>;
 
   beforeEach(() => {
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
     const internallyManagedRule = {
       ...mockedRulesData[0],
       ruleTypeId: 'internally_managed_rule_type',
@@ -1013,7 +1068,7 @@ describe('internally managed rule', () => {
       validate: () => {
         return { errors: {} };
       },
-      ruleParamsExpression: jest.fn(),
+      ruleParamsExpression: vi.fn(),
       requiresAppContext: false,
     };
     getRuleTypes.mockResolvedValue([ruleTypeMock]);
@@ -1052,7 +1107,7 @@ describe('internally managed rule', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     cleanup();
   });
@@ -1077,8 +1132,8 @@ describe('internally managed rule', () => {
 describe('rule list with different rule types', () => {
   let allRulesData;
   let filteredRuleTypes: string[];
-  let ruleTypeRegistry: jest.Mocked<RuleTypeRegistryContract>;
-  let actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract<unknown, unknown>>;
+  let ruleTypeRegistry: Mocked<RuleTypeRegistryContract>;
+  let actionTypeRegistry: Mocked<ActionTypeRegistryContract<unknown, unknown>>;
   beforeEach(() => {
     filteredRuleTypes = ['test_rule_type2'];
     allRulesData = [
@@ -1246,7 +1301,7 @@ describe('rule list with different rule types', () => {
       validate: () => {
         return { errors: {} };
       },
-      ruleParamsExpression: jest.fn(),
+      ruleParamsExpression: vi.fn(),
       requiresAppContext: true,
     };
     actionTypeRegistry = actionTypeRegistryMock.create();
@@ -1258,7 +1313,7 @@ describe('rule list with different rule types', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     cleanup();
   });
@@ -1301,7 +1356,7 @@ describe('rules_list with show only capability', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     cleanup();
   });
@@ -1368,7 +1423,7 @@ describe('rules_list with show only capability', () => {
         validate: () => {
           return { errors: {} };
         },
-        ruleParamsExpression: jest.fn(),
+        ruleParamsExpression: vi.fn(),
         requiresAppContext: true,
       };
       const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -1389,7 +1444,7 @@ describe('rules_list with show only capability', () => {
     });
 
     it('renders table of rules with delete button disabled', async () => {
-      const { hasAllPrivilege } = jest.requireMock('../../../lib/capabilities');
+      const { hasAllPrivilege } = (await vi.importMock('../../../lib/capabilities'));
       hasAllPrivilege.mockReturnValue(false);
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
@@ -1548,7 +1603,7 @@ describe('MaintenanceWindowsMock', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     cleanup();
   });
@@ -1633,14 +1688,14 @@ describe('UIAM API Key Banner', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     cleanup();
   });
 
   it('renders UIAM API key banner when isServerless is true and apiKeyType is uiam', async () => {
     useKibanaMock().services.isServerless = true;
-    jest.mocked(fetchUiConfig).mockResolvedValue({
+    vi.mocked(fetchUiConfig).mockResolvedValue({
       isUsingSecurity: true,
       minimumScheduleInterval: { value: '1m', enforce: false },
       apiKeyType: 'uiam',
@@ -1653,7 +1708,7 @@ describe('UIAM API Key Banner', () => {
 
   it('does not render UIAM API key banner when isServerless is false', async () => {
     useKibanaMock().services.isServerless = false;
-    jest.mocked(fetchUiConfig).mockResolvedValue({
+    vi.mocked(fetchUiConfig).mockResolvedValue({
       isUsingSecurity: true,
       minimumScheduleInterval: { value: '1m', enforce: false },
       apiKeyType: 'uiam',
@@ -1678,7 +1733,7 @@ describe('UIAM API Key Banner', () => {
 
   it('displays correct banner content when rendered', async () => {
     useKibanaMock().services.isServerless = true;
-    jest.mocked(fetchUiConfig).mockResolvedValue({
+    vi.mocked(fetchUiConfig).mockResolvedValue({
       isUsingSecurity: true,
       minimumScheduleInterval: { value: '1m', enforce: false },
       apiKeyType: 'uiam',

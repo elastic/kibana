@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { EXPECTED_MAX_TAGS } from '../../../lib/detection_engine/rule_management/constants';
@@ -23,15 +25,15 @@ import { createFindRulesSkill } from './find_rules_skill';
 
 const createMockDeps = () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const findMock = jest.fn();
-  const aggregateMock = jest.fn();
+  const findMock = vi.fn();
+  const aggregateMock = vi.fn();
 
   const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
   mockCore.getStartServices.mockResolvedValue([
     mockCoreStart,
     {
       alerting: {
-        getRulesClientWithRequest: jest.fn().mockResolvedValue({
+        getRulesClientWithRequest: vi.fn().mockResolvedValue({
           find: findMock,
           aggregate: aggregateMock,
         }),

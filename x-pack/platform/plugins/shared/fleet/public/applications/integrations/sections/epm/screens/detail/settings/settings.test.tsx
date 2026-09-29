@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { fireEvent, waitFor } from '@testing-library/react';
@@ -13,24 +16,24 @@ import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
 import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 
-jest.mock('../../../../../hooks', () => {
+vi.mock('../../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../../hooks'),
-    useGetPackagePoliciesQuery: jest.fn().mockReturnValue({ data: { items: [] } }),
-    useBulkGetAgentPoliciesQuery: jest
+    ...(await vi.importActual('../../../../../hooks')),
+    useGetPackagePoliciesQuery: vi.fn().mockReturnValue({ data: { items: [] } }),
+    useBulkGetAgentPoliciesQuery: vi
       .fn()
       .mockReturnValue({ data: { items: [] }, isLoading: false }),
-    useGetPackageInstallStatus: jest.fn(),
-    useGetSettingsQuery: jest.fn().mockReturnValue({
+    useGetPackageInstallStatus: vi.fn(),
+    useGetSettingsQuery: vi.fn().mockReturnValue({
       data: { item: { integration_knowledge_enabled: true } },
     }),
-    useLink: jest.fn().mockReturnValue({ getHref: jest.fn() }),
-    useStartServices: jest.fn().mockReturnValue({
+    useLink: vi.fn().mockReturnValue({ getHref: vi.fn() }),
+    useStartServices: vi.fn().mockReturnValue({
       notifications: {
         toasts: {
-          addError: jest.fn(),
-          addSuccess: jest.fn(),
-          addWarning: jest.fn(),
+          addError: vi.fn(),
+          addSuccess: vi.fn(),
+          addWarning: vi.fn(),
         },
       },
       docLinks: {
@@ -41,52 +44,61 @@ jest.mock('../../../../../hooks', () => {
         },
       },
     }),
-    useUpgradePackagePolicyDryRunQuery: jest.fn().mockReturnValue({ data: null }),
-    useUpgradeAgentlessPoliciesDryRunQuery: jest.fn().mockReturnValue({ data: null }),
-    useUpdatePackageMutation: jest
+    useUpgradePackagePolicyDryRunQuery: vi.fn().mockReturnValue({ data: null }),
+    useUpgradeAgentlessPoliciesDryRunQuery: vi.fn().mockReturnValue({ data: null }),
+    useUpdatePackageMutation: vi
       .fn()
-      .mockReturnValue({ mutate: jest.fn(), isLoading: false, isPending: false }),
-    useNamespacePreflightCheckMutation: jest.fn().mockReturnValue({
-      mutateAsync: jest.fn().mockResolvedValue({ warnings: [] }),
+      .mockReturnValue({ mutate: vi.fn(), isLoading: false, isPending: false }),
+    useNamespacePreflightCheckMutation: vi.fn().mockReturnValue({
+      mutateAsync: vi.fn().mockResolvedValue({ warnings: [] }),
       isLoading: false,
     }),
-    useAuthz: jest.fn(),
-    useConfirmForceInstall: jest.fn().mockReturnValue(jest.fn()),
-    useInstallPackage: jest.fn().mockReturnValue(jest.fn()),
-    useRollbackPackage: jest.fn().mockReturnValue(jest.fn()),
-    useGetRollbackAvailableCheck: jest.fn().mockReturnValue({ isAvailable: true, reason: null }),
-    useLicense: jest.fn().mockReturnValue({ isEnterprise: () => true }),
+    useAuthz: vi.fn(),
+    useConfirmForceInstall: vi.fn().mockReturnValue(vi.fn()),
+    useInstallPackage: vi.fn().mockReturnValue(vi.fn()),
+    useRollbackPackage: vi.fn().mockReturnValue(vi.fn()),
+    useGetRollbackAvailableCheck: vi.fn().mockReturnValue({ isAvailable: true, reason: null }),
+    useLicense: vi.fn().mockReturnValue({ isEnterprise: () => true }),
   };
 });
 
-jest.mock('../hooks', () => ({
-  useChangelog: jest.fn().mockReturnValue({
-    changelog: [],
-    breakingChanges: null,
-    isLoading: false,
-    error: null,
-  }),
-}));
+vi.mock('../hooks', () => {
+      const mocked = {
+      useChangelog: vi.fn().mockReturnValue({
+        changelog: [],
+        breakingChanges: null,
+        isLoading: false,
+        error: null,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../services', () => ({
-  ExperimentalFeaturesService: {
-    get: jest.fn().mockReturnValue({ enablePackageRollback: true }),
-  },
-  isAgentlessPoliciesUIEnabled: jest.fn().mockReturnValue(true),
-}));
+vi.mock('../../../../../services', () => {
+      const mocked = {
+      ExperimentalFeaturesService: {
+        get: vi.fn().mockReturnValue({ enablePackageRollback: true }),
+      },
+      isAgentlessPoliciesUIEnabled: vi.fn().mockReturnValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../installed_integrations/hooks/use_installed_integrations_actions', () => ({
-  useInstalledIntegrationsActions: jest.fn().mockReturnValue({
-    actions: {
-      bulkRollbackIntegrationsWithConfirmModal: jest.fn(),
-    },
-  }),
-}));
+vi.mock('../../installed_integrations/hooks/use_installed_integrations_actions', () => {
+      const mocked = {
+      useInstalledIntegrationsActions: vi.fn().mockReturnValue({
+        actions: {
+          bulkRollbackIntegrationsWithConfirmModal: vi.fn(),
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Simplified stand-in that exposes onSave via test buttons without requiring EUI combo box
 // interactions. The rendered text/IDs preserve the assertions in existing tests.
-jest.mock('../components', () => {
-  const MockReact = jest.requireActual('react');
+vi.mock('../components', () => {
+  const MockReact = require('react');
   return {
     KeepPoliciesUpToDateSwitch: () => null,
     NamespaceCustomizationSection: ({
@@ -141,8 +153,8 @@ import { isAgentlessPoliciesUIEnabled } from '../../../../../services';
 
 import { SettingsPage } from './settings';
 
-const mockUseGetPackageInstallStatus = useGetPackageInstallStatus as jest.Mock;
-const mockUseAuthz = useAuthz as jest.Mock;
+const mockUseGetPackageInstallStatus = useGetPackageInstallStatus as Mock;
+const mockUseAuthz = useAuthz as Mock;
 
 function renderComponent(packageInfo: PackageInfo) {
   const renderer = createIntegrationsTestRendererMock();
@@ -180,7 +192,7 @@ describe('SettingsPage', () => {
   } as PackageInfo;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when the integration is not installed', () => {
@@ -289,17 +301,17 @@ describe('SettingsPage', () => {
         fleet: { readSettings: true },
         integrations: { installPackages: true, writePackageSettings: true },
       });
-      jest.mocked(useGetPackagePoliciesQuery).mockReturnValue({
+      vi.mocked(useGetPackagePoliciesQuery).mockReturnValue({
         data: { items: policies },
       } as any);
     });
 
     afterEach(() => {
-      jest.mocked(useGetPackagePoliciesQuery).mockReturnValue({ data: { items: [] } } as any);
-      jest
+      vi.mocked(useGetPackagePoliciesQuery).mockReturnValue({ data: { items: [] } } as any);
+      vi
         .mocked(useBulkGetAgentPoliciesQuery)
         .mockReturnValue({ data: { items: [] }, isLoading: false } as any);
-      jest.mocked(isAgentlessPoliciesUIEnabled).mockReturnValue(true);
+      vi.mocked(isAgentlessPoliciesUIEnabled).mockReturnValue(true);
     });
 
     const installedPackageInfo = {
@@ -310,30 +322,30 @@ describe('SettingsPage', () => {
     it('routes agentless policies to the agentless dry-run when the agentless policies UI is enabled', () => {
       renderComponent(installedPackageInfo);
 
-      expect(jest.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][0]).toEqual([
+      expect(vi.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][0]).toEqual([
         'agent-based-policy',
       ]);
-      expect(jest.mocked(useUpgradeAgentlessPoliciesDryRunQuery).mock.calls[0][0]).toEqual([
+      expect(vi.mocked(useUpgradeAgentlessPoliciesDryRunQuery).mock.calls[0][0]).toEqual([
         'agentless-policy',
       ]);
     });
 
     it('routes all policies to the legacy dry-run when the agentless policies UI is disabled', () => {
-      jest.mocked(isAgentlessPoliciesUIEnabled).mockReturnValue(false);
+      vi.mocked(isAgentlessPoliciesUIEnabled).mockReturnValue(false);
 
       renderComponent(installedPackageInfo);
 
-      expect(jest.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][0]).toEqual([
+      expect(vi.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][0]).toEqual([
         'agent-based-policy',
         'agentless-policy',
       ]);
-      expect(jest.mocked(useUpgradeAgentlessPoliciesDryRunQuery).mock.calls[0][0]).toEqual([]);
+      expect(vi.mocked(useUpgradeAgentlessPoliciesDryRunQuery).mock.calls[0][0]).toEqual([]);
     });
 
     it('routes a parent-only agentless policy (no own supports_agentless flag) to the agentless dry-run', () => {
       // Older agentless policies carry the flag only on their parent agent policy; the server's
       // block matches them via the parent, so the client must too or they poison the legacy batch.
-      jest.mocked(useGetPackagePoliciesQuery).mockReturnValue({
+      vi.mocked(useGetPackagePoliciesQuery).mockReturnValue({
         data: {
           items: [
             { id: 'agent-based-policy', supports_agentless: false, policy_ids: ['regular-agent'] },
@@ -341,7 +353,7 @@ describe('SettingsPage', () => {
           ],
         },
       } as any);
-      jest.mocked(useBulkGetAgentPoliciesQuery).mockReturnValue({
+      vi.mocked(useBulkGetAgentPoliciesQuery).mockReturnValue({
         data: {
           items: [
             { id: 'regular-agent', supports_agentless: false },
@@ -353,23 +365,23 @@ describe('SettingsPage', () => {
 
       renderComponent(installedPackageInfo);
 
-      expect(jest.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][0]).toEqual([
+      expect(vi.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][0]).toEqual([
         'agent-based-policy',
       ]);
-      expect(jest.mocked(useUpgradeAgentlessPoliciesDryRunQuery).mock.calls[0][0]).toEqual([
+      expect(vi.mocked(useUpgradeAgentlessPoliciesDryRunQuery).mock.calls[0][0]).toEqual([
         'legacy-agentless',
       ]);
     });
 
     it('holds the legacy dry-run (enabled: false) until the parent agent-policy lookup resolves', () => {
-      jest.mocked(useGetPackagePoliciesQuery).mockReturnValue({
+      vi.mocked(useGetPackagePoliciesQuery).mockReturnValue({
         data: {
           items: [
             { id: 'agent-based-policy', supports_agentless: false, policy_ids: ['regular-agent'] },
           ],
         },
       } as any);
-      jest.mocked(useBulkGetAgentPoliciesQuery).mockReturnValue({
+      vi.mocked(useBulkGetAgentPoliciesQuery).mockReturnValue({
         data: undefined,
         isLoading: true,
       } as any);
@@ -378,7 +390,7 @@ describe('SettingsPage', () => {
 
       // While the parent lookup is loading, the legacy dry-run must not fire (a still-hidden
       // parent-only agentless policy could otherwise 400 the whole batch).
-      expect(jest.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][2]?.enabled).toBe(false);
+      expect(vi.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][2]?.enabled).toBe(false);
     });
   });
 
@@ -527,9 +539,9 @@ describe('SettingsPage', () => {
     });
 
     describe('preflight → modal → confirm flow', () => {
-      const mockMutateAsync = jest.fn();
-      const mockMutate = jest.fn();
-      const mockAddWarning = jest.fn();
+      const mockMutateAsync = vi.fn();
+      const mockMutate = vi.fn();
+      const mockAddWarning = vi.fn();
       const conflictWarning = {
         dataStreamName: 'logs-nginx.access-staging',
         namespace: 'staging',
@@ -547,18 +559,18 @@ describe('SettingsPage', () => {
         mockMutateAsync.mockReset();
         mockMutate.mockReset();
         mockAddWarning.mockReset();
-        (useNamespacePreflightCheckMutation as jest.Mock).mockReturnValue({
+        (useNamespacePreflightCheckMutation as Mock).mockReturnValue({
           mutateAsync: mockMutateAsync,
           isLoading: false,
         });
-        (useUpdatePackageMutation as jest.Mock).mockReturnValue({
+        (useUpdatePackageMutation as Mock).mockReturnValue({
           mutate: mockMutate,
           isLoading: false,
           isPending: false,
         });
-        (useStartServices as jest.Mock).mockReturnValue({
+        (useStartServices as Mock).mockReturnValue({
           notifications: {
-            toasts: { addError: jest.fn(), addSuccess: jest.fn(), addWarning: mockAddWarning },
+            toasts: { addError: vi.fn(), addSuccess: vi.fn(), addWarning: mockAddWarning },
           },
           docLinks: { links: { fleet: { datastreams: '' } } },
         });

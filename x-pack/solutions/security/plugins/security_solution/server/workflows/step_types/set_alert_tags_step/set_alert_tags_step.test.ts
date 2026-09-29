@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { setAlertTagsStepDefinition } from './set_alert_tags_step';
 import { ExecutionError } from '@kbn/workflows/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
@@ -17,17 +20,17 @@ const createMockContext = (input: Record<string, unknown>) => {
     config: {},
     rawInput: input,
     contextManager: {
-      getContext: jest.fn(),
-      getScopedEsClient: jest.fn(),
-      renderInputTemplate: jest.fn(),
-      getFakeRequest: jest.fn(),
-      callKibanaApi: jest.fn(),
+      getContext: vi.fn(),
+      getScopedEsClient: vi.fn(),
+      renderInputTemplate: vi.fn(),
+      getFakeRequest: vi.fn(),
+      callKibanaApi: vi.fn(),
     },
     logger: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     },
     abortSignal: new AbortController().signal,
     stepId: 'test-step',
@@ -37,7 +40,7 @@ const createMockContext = (input: Record<string, unknown>) => {
 
 describe('setAlertTagsStepDefinition', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('handler', () => {
@@ -47,7 +50,7 @@ describe('setAlertTagsStepDefinition', () => {
         tags_to_add: ['triaged'],
         tags_to_remove: [],
       });
-      (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+      (mockContext.contextManager.callKibanaApi as Mock).mockResolvedValue({
         status: 200,
         body: {},
       });
@@ -79,7 +82,7 @@ describe('setAlertTagsStepDefinition', () => {
         tags_to_add: [],
         tags_to_remove: ['needs-review'],
       });
-      (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+      (mockContext.contextManager.callKibanaApi as Mock).mockResolvedValue({
         status: 200,
         body: {},
       });
@@ -111,7 +114,7 @@ describe('setAlertTagsStepDefinition', () => {
         tags_to_add: ['escalated'],
         tags_to_remove: ['needs-review'],
       });
-      (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+      (mockContext.contextManager.callKibanaApi as Mock).mockResolvedValue({
         status: 200,
         body: {},
       });
@@ -131,7 +134,7 @@ describe('setAlertTagsStepDefinition', () => {
         alert_ids: 'alert-1',
         tags_to_add: ['triaged'],
       });
-      (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+      (mockContext.contextManager.callKibanaApi as Mock).mockResolvedValue({
         status: 200,
         body: {},
       });
@@ -153,7 +156,7 @@ describe('setAlertTagsStepDefinition', () => {
         alert_ids: 'alert-1',
         tags_to_remove: ['needs-review'],
       });
-      (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
+      (mockContext.contextManager.callKibanaApi as Mock).mockResolvedValue({
         status: 200,
         body: {},
       });
@@ -176,7 +179,7 @@ describe('setAlertTagsStepDefinition', () => {
         tags_to_add: ['triaged'],
         tags_to_remove: [],
       });
-      (mockContext.contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
+      (mockContext.contextManager.callKibanaApi as Mock).mockRejectedValue(
         new KibanaApiCallError({
           status: 500,
           headers: { 'x-leaky-header': 'header-value' },
@@ -205,7 +208,7 @@ describe('setAlertTagsStepDefinition', () => {
         tags_to_add: ['triaged'],
         tags_to_remove: [],
       });
-      (mockContext.contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
+      (mockContext.contextManager.callKibanaApi as Mock).mockRejectedValue(
         new Error('Network error')
       );
 

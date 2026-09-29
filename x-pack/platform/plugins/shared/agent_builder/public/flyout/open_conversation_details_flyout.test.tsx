@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
@@ -15,7 +17,7 @@ import { openConversationDetailsFlyout } from './open_conversation_details_flyou
 describe('openConversationDetailsFlyout', () => {
   const setup = () => {
     const core = coreMock.createStart();
-    const close = jest.fn();
+    const close = vi.fn();
     let resolveClosed: () => void = () => {};
     const onClosed = new Promise<void>((resolve) => {
       resolveClosed = resolve;
@@ -28,7 +30,7 @@ describe('openConversationDetailsFlyout', () => {
     }: { onClose?: () => void; trailingActions?: EuiFlyoutMenuAction[] } = {}) =>
       openConversationDetailsFlyout({
         core,
-        conversationsService: { get: jest.fn() } as unknown as ConversationsService,
+        conversationsService: { get: vi.fn() } as unknown as ConversationsService,
         conversationTemplatesService: new ConversationTemplatesService(),
         conversationId: 'conversation',
         onClose,
@@ -59,7 +61,7 @@ describe('openConversationDetailsFlyout', () => {
     const copyLink: EuiFlyoutMenuAction = {
       iconType: 'link',
       'aria-label': 'Copy link',
-      onClick: jest.fn(),
+      onClick: vi.fn(),
     };
 
     await open({ trailingActions: [copyLink] });
@@ -81,7 +83,7 @@ describe('openConversationDetailsFlyout', () => {
 
   it('notifies the caller once the flyout closes', async () => {
     const { open, closeFlyout } = setup();
-    const onClose = jest.fn();
+    const onClose = vi.fn();
 
     await open({ onClose });
     await Promise.resolve();

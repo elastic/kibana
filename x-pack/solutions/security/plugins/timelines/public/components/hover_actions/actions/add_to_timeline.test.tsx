@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiButtonEmpty } from '@elastic/eui';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -24,18 +26,21 @@ import * as i18n from './translations';
 
 const coreStart = coreMock.createStart();
 
-const mockAddSuccess = jest.fn();
-jest.mock('../../../hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({
-    addSuccess: mockAddSuccess,
-  }),
-}));
+const mockAddSuccess = vi.fn();
+vi.mock('../../../hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({
+        addSuccess: mockAddSuccess,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_selector');
+vi.mock('../../../hooks/use_selector');
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const originalModule = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const originalModule = require('react-redux-v7');
 
   return {
     ...originalModule,
@@ -43,18 +48,18 @@ jest.mock('react-redux-v7', () => {
   };
 });
 
-const mockStartDragToTimeline = jest.fn();
-jest.mock('../../../hooks/use_add_to_timeline', () => {
-  const originalModule = jest.requireActual('../../../hooks/use_add_to_timeline');
+const mockStartDragToTimeline = vi.fn();
+vi.mock('../../../hooks/use_add_to_timeline', async () => {
+  const originalModule = (await vi.importActual('../../../hooks/use_add_to_timeline'));
 
   return {
     ...originalModule,
     useAddToTimeline: () => ({
-      beginDrag: jest.fn(),
-      cancelDrag: jest.fn(),
-      dragToLocation: jest.fn(),
-      endDrag: jest.fn(),
-      hasDraggableLock: jest.fn(),
+      beginDrag: vi.fn(),
+      cancelDrag: vi.fn(),
+      dragToLocation: vi.fn(),
+      endDrag: vi.fn(),
+      hasDraggableLock: vi.fn(),
       startDragToTimeline: mockStartDragToTimeline,
     }),
   };
@@ -92,7 +97,7 @@ const getButton = () => screen.getByTestId('add-to-timeline');
 
 describe('add to timeline', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const field = 'user.name';
@@ -270,7 +275,7 @@ describe('add to timeline', () => {
     });
 
     test('it invokes the `onClick` (callback) prop when the user clicks the button', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
 
       render(
         <TestProviders>
@@ -298,8 +303,8 @@ describe('add to timeline', () => {
       }) as unknown as React.KeyboardEvent;
 
       beforeEach(() => {
-        keyboardEvent.stopPropagation = jest.fn();
-        keyboardEvent.preventDefault = jest.fn();
+        keyboardEvent.stopPropagation = vi.fn();
+        keyboardEvent.preventDefault = vi.fn();
       });
 
       test('it stops propagation of the keyboard event', async () => {
@@ -366,8 +371,8 @@ describe('add to timeline', () => {
       }) as unknown as React.KeyboardEvent;
 
       beforeEach(() => {
-        keyboardEvent.stopPropagation = jest.fn();
-        keyboardEvent.preventDefault = jest.fn();
+        keyboardEvent.stopPropagation = vi.fn();
+        keyboardEvent.preventDefault = vi.fn();
       });
 
       test('it does NOT stop propagation of the keyboard event', async () => {

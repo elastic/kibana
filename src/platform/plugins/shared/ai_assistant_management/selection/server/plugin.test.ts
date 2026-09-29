@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
@@ -24,7 +27,7 @@ import { AIAssistantManagementSelectionPlugin } from './plugin';
 
 describe('plugin', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createPlugin = (config: Partial<AIAssistantManagementSelectionConfig> = {}) => {
@@ -35,11 +38,11 @@ describe('plugin', () => {
         },
       },
       config: {
-        get: jest.fn().mockReturnValue(config),
+        get: vi.fn().mockReturnValue(config),
       },
       logger: {
-        get: jest.fn().mockReturnValue({
-          error: jest.fn(),
+        get: vi.fn().mockReturnValue({
+          error: vi.fn(),
         }),
       },
     } as unknown as PluginInitializerContext;
@@ -50,7 +53,7 @@ describe('plugin', () => {
     plugin: AIAssistantManagementSelectionPlugin,
     options: {
       spaces?: ReturnType<typeof spacesMock.createStart>;
-      coreStart?: Partial<{ security: { authc: { getCurrentUser: jest.Mock } } }>;
+      coreStart?: Partial<{ security: { authc: { getCurrentUser: Mock } } }>;
     } = {}
   ) => {
     const coreSetup = coreMock.createSetup();
@@ -58,7 +61,7 @@ describe('plugin', () => {
     const coreStart = options.coreStart ?? {
       security: {
         authc: {
-          getCurrentUser: jest.fn().mockReturnValue({ username: 'test-user' }),
+          getCurrentUser: vi.fn().mockReturnValue({ username: 'test-user' }),
         },
       },
     };
@@ -67,7 +70,7 @@ describe('plugin', () => {
     const setupDeps = {
       management: {
         sections: {
-          getSection: jest.fn(),
+          getSection: vi.fn(),
         },
       },
     } as any;

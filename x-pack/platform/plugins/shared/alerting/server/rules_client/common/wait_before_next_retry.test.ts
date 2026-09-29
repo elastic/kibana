@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   getExponentialDelayMultiplier,
   randomDelayMs,
@@ -17,11 +19,11 @@ describe('waitBeforeNextRetry', () => {
   const randomDelayPart = 0.1;
 
   beforeEach(() => {
-    jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayPart);
-    jest.spyOn(window, 'setTimeout');
+    vi.spyOn(global.Math, 'random').mockReturnValue(randomDelayPart);
+    vi.spyOn(window, 'setTimeout');
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   for (let i = 1; i <= RETRY_IF_CONFLICTS_ATTEMPTS; i++) {

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getOperationTypesForField, getAvailableOperationsByMetadata } from '.';
 import { getFieldByNameFactory } from '../pure_helpers';
 
-jest.mock('../loader');
+vi.mock('../loader');
 
 const fields = [
   {

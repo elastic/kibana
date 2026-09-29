@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { BytesFormat } from '@kbn/field-formats-plugin/common';
 import { AggConfigs } from '../../agg_configs';
@@ -31,7 +33,7 @@ describe('AggConfig Filters', () => {
   describe('histogram', () => {
     const getConfig = (() => {}) as FieldFormatsGetConfigFn;
     const getAggConfigs = () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const field = {
         name: 'bytes',
         format: new BytesFormat({}, getConfig),
@@ -61,7 +63,7 @@ describe('AggConfig Filters', () => {
           },
         ],
         { typesRegistry: mockAggTypesRegistry() },
-        jest.fn()
+        vi.fn()
       );
     };
 

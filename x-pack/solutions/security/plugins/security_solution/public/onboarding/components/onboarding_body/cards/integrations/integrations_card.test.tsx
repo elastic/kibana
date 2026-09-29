@@ -5,24 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import IntegrationsCard from './integrations_card';
 import { render } from '@testing-library/react';
 
-jest.mock('../../../onboarding_context');
-jest.mock('../../../../../common/lib/integrations/components/security_integrations');
+vi.mock('../../../onboarding_context');
+vi.mock('../../../../../common/lib/integrations/components/security_integrations');
 
 const props = {
-  setComplete: jest.fn(),
-  checkComplete: jest.fn(),
-  setExpandedCardId: jest.fn(),
-  isCardAvailable: jest.fn(),
-  isCardComplete: jest.fn(),
+  setComplete: vi.fn(),
+  checkComplete: vi.fn(),
+  setExpandedCardId: vi.fn(),
+  isCardAvailable: vi.fn(),
+  isCardComplete: vi.fn(),
 };
 
 describe('IntegrationsCard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a loading spinner when checkCompleteMetadata is undefined', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { of } from 'rxjs';
 import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CoreSetup, LoggerFactory } from '@kbn/core/server';
@@ -26,18 +29,24 @@ import {
 import { computeAndPersistCompositeSummaries } from './compute_and_persist_composite_summaries';
 import { COMPOSITE_SLO_SUMMARY_TASK_SKIP_REASON } from './constants';
 
-jest.mock('@kbn/apm-utils', () => ({
-  addTransactionLabels: jest.fn(),
-}));
+vi.mock('@kbn/apm-utils', () => {
+      const mocked = {
+      addTransactionLabels: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./compute_and_persist_composite_summaries', () => ({
-  computeAndPersistCompositeSummaries: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./compute_and_persist_composite_summaries', () => {
+      const mocked = {
+      computeAndPersistCompositeSummaries: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const addTransactionLabelsMock = addTransactionLabels as jest.MockedFunction<
+const addTransactionLabelsMock = addTransactionLabels as MockedFunction<
   typeof addTransactionLabels
 >;
-const mockPersist = computeAndPersistCompositeSummaries as jest.MockedFunction<
+const mockPersist = computeAndPersistCompositeSummaries as MockedFunction<
   typeof computeAndPersistCompositeSummaries
 >;
 
@@ -61,7 +70,7 @@ function createConcreteTaskInstanceStub(id: string): ConcreteTaskInstance {
 function createStartPlugins(): SLOPluginStartDependencies {
   return {
     licensing: {
-      getLicense: jest.fn().mockResolvedValue({ hasAtLeast: jest.fn().mockReturnValue(true) }),
+      getLicense: vi.fn().mockResolvedValue({ hasAtLeast: vi.fn().mockReturnValue(true) }),
     },
     taskManager: taskManagerMock.createStart(),
   } as unknown as SLOPluginStartDependencies;
@@ -93,10 +102,10 @@ describe('CompositeSloSummaryTask', () => {
           },
         },
         savedObjects: {
-          createInternalRepository: jest.fn().mockReturnValue(savedObjectsRepositoryMock.create()),
+          createInternalRepository: vi.fn().mockReturnValue(savedObjectsRepositoryMock.create()),
         },
         featureFlags: {
-          getBooleanValue$: jest.fn().mockReturnValue(of(options?.compositeSloEnabled ?? true)),
+          getBooleanValue$: vi.fn().mockReturnValue(of(options?.compositeSloEnabled ?? true)),
         },
       } as never,
       {} as never,
@@ -112,7 +121,7 @@ describe('CompositeSloSummaryTask', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockPersist.mockResolvedValue(undefined);
     task = createTask();
   });

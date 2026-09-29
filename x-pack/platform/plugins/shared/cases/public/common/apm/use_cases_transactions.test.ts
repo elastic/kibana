@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import {
@@ -12,13 +14,16 @@ import {
   useCreateCaseWithAttachmentsTransaction,
 } from './use_cases_transactions';
 
-const mockAddLabels = jest.fn();
-const mockStartTransaction = jest.fn(() => ({ addLabels: mockAddLabels }));
-jest.mock('./use_start_transaction', () => ({
-  useStartTransaction: () => ({
-    startTransaction: mockStartTransaction,
-  }),
-}));
+const mockAddLabels = vi.fn();
+const mockStartTransaction = vi.fn(() => ({ addLabels: mockAddLabels }));
+vi.mock('./use_start_transaction', () => {
+      const mocked = {
+      useStartTransaction: () => ({
+        startTransaction: mockStartTransaction,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const appId = 'testAppId';
 
@@ -40,7 +45,7 @@ const renderUseAddAttachmentToExistingCaseTransaction = () =>
 
 describe('cases transactions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('useCreateCaseWithAttachmentsTransaction', () => {

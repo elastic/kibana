@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Readable } from 'stream';
 import type { Observable } from 'rxjs';
 import { toArray, firstValueFrom, map, filter } from 'rxjs';
@@ -100,7 +102,7 @@ describe('serdeEventstreamIntoObservable', () => {
   });
 
   it('destroys the stream and errors the subscriber when maxDurationMs is exceeded', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
       const stream = new Readable({ read: () => {} });
 
@@ -110,7 +112,7 @@ describe('serdeEventstreamIntoObservable', () => {
         });
       });
 
-      jest.advanceTimersByTime(1_001);
+      vi.advanceTimersByTime(1_001);
 
       const error = await error$;
       expect(stream.destroyed).toBe(true);
@@ -122,7 +124,7 @@ describe('serdeEventstreamIntoObservable', () => {
         })
       );
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 });

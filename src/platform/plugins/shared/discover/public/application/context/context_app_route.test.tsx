@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -25,37 +27,46 @@ import { TEST_PROFILE_STATE_DEF } from '../../context_awareness/__mocks__/profil
 
 let mockContextAppProps: ContextAppProps | undefined;
 
-jest.mock('./context_app', () => ({
-  ContextApp: (props: ContextAppProps) => {
-    mockContextAppProps = props;
-    return null;
-  },
-}));
+vi.mock('./context_app', () => {
+      const mocked = {
+      ContextApp: (props: ContextAppProps) => {
+        mockContextAppProps = props;
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_data_view', () => ({
-  useDataView: jest.fn(),
-}));
+vi.mock('../../hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../context_awareness/hooks/use_root_profile', () => ({
-  useRootProfile: jest.fn(),
-}));
+vi.mock('../../context_awareness/hooks/use_root_profile', () => {
+      const mocked = {
+      useRootProfile: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/unified-data-table', () => {
-  const actual = jest.requireActual('@kbn/unified-data-table');
+vi.mock('@kbn/unified-data-table', async () => {
+  const actual = (await vi.importActual('@kbn/unified-data-table'));
   return {
     ...actual,
-    popularizeField: jest.fn(actual.popularizeField),
+    popularizeField: vi.fn(actual.popularizeField),
   };
 });
 
 describe('ContextAppRoute', () => {
-  const useDataViewMock = jest.mocked(useDataView);
-  const useRootProfileMock = jest.mocked(useRootProfile);
-  const popularizeFieldSpy = jest.mocked(popularizeField);
+  const useDataViewMock = vi.mocked(useDataView);
+  const useRootProfileMock = vi.mocked(useRootProfile);
+  const popularizeFieldSpy = vi.mocked(popularizeField);
 
   beforeEach(() => {
     mockContextAppProps = undefined;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useDataViewMock.mockReturnValue({ dataView: dataViewMock, error: undefined });
     useRootProfileMock.mockReturnValue({
       rootProfileLoading: false,
@@ -85,7 +96,7 @@ describe('ContextAppRoute', () => {
     let capturedToolkit: ContextAwarenessToolkit | undefined;
 
     services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
-    jest
+    vi
       .spyOn(services.profilesManager, 'createScopedProfilesManager')
       .mockImplementation((args) => {
         capturedToolkit = args.toolkit;
@@ -114,10 +125,10 @@ describe('ContextAppRoute', () => {
     const services = createDiscoverServicesMock();
     const scopedEbtManager = services.ebtManager.createScopedEBTManager();
 
-    jest.spyOn(services.ebtManager, 'createScopedEBTManager').mockReturnValue(scopedEbtManager);
+    vi.spyOn(services.ebtManager, 'createScopedEBTManager').mockReturnValue(scopedEbtManager);
 
-    const trackFilterAdditionSpy = jest.spyOn(scopedEbtManager, 'trackFilterAddition');
-    const addFiltersSpy = jest.spyOn(services.filterManager, 'addFilters');
+    const trackFilterAdditionSpy = vi.spyOn(scopedEbtManager, 'trackFilterAddition');
+    const addFiltersSpy = vi.spyOn(services.filterManager, 'addFilters');
     const { props } = renderContextAppRoute(services);
     const expectedFilters = generateFilters(
       services.filterManager,
@@ -149,10 +160,10 @@ describe('ContextAppRoute', () => {
     const services = createDiscoverServicesMock();
     const scopedEbtManager = services.ebtManager.createScopedEBTManager();
 
-    jest.spyOn(services.ebtManager, 'createScopedEBTManager').mockReturnValue(scopedEbtManager);
+    vi.spyOn(services.ebtManager, 'createScopedEBTManager').mockReturnValue(scopedEbtManager);
 
-    const trackFilterAdditionSpy = jest.spyOn(scopedEbtManager, 'trackFilterAddition');
-    const addFiltersSpy = jest.spyOn(services.filterManager, 'addFilters');
+    const trackFilterAdditionSpy = vi.spyOn(scopedEbtManager, 'trackFilterAddition');
+    const addFiltersSpy = vi.spyOn(services.filterManager, 'addFilters');
     const { props } = renderContextAppRoute(services);
     const expectedFilters = generateFilters(
       services.filterManager,

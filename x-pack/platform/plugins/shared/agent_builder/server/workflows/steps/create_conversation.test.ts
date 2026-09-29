@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createAgentNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
 import { createConversationStepDefinition } from './create_conversation';
 import {
@@ -13,7 +15,7 @@ import {
   createWorkflowStepConversationClientMock,
 } from '../../test_utils/workflow_steps';
 
-const isExperimentalEnabled = jest.fn().mockResolvedValue(true);
+const isExperimentalEnabled = vi.fn().mockResolvedValue(true);
 
 describe('createConversationStepDefinition', () => {
   const baseInput = { title: 'New conversation' };
@@ -35,7 +37,7 @@ describe('createConversationStepDefinition', () => {
     const definition = createConversationStepDefinition({
       getConversationClient: conv.getConversationClient,
       getAgentRegistry: agents.getAgentRegistry,
-      getExecutionService: jest.fn(),
+      getExecutionService: vi.fn(),
       isExperimentalEnabled,
     });
     return { conv, agents, definition };
@@ -51,7 +53,7 @@ describe('createConversationStepDefinition', () => {
 
   it('creates a conversation and returns id, agent, metadata', async () => {
     const { conv, agents, definition } = buildDefinition({
-      create: jest.fn().mockResolvedValue(createdConversation),
+      create: vi.fn().mockResolvedValue(createdConversation),
     });
 
     const result = await definition.handler(
@@ -83,7 +85,7 @@ describe('createConversationStepDefinition', () => {
       metadata: { severity: 'high', services: ['checkout'] },
     };
     const { conv, definition } = buildDefinition({
-      create: jest.fn().mockResolvedValue(templated),
+      create: vi.fn().mockResolvedValue(templated),
     });
 
     const result = await definition.handler(
@@ -114,7 +116,7 @@ describe('createConversationStepDefinition', () => {
   it('returns an error when the agent cannot be resolved', async () => {
     const { definition } = buildDefinition(
       {},
-      { get: jest.fn().mockRejectedValue(createAgentNotFoundError({ agentId: 'nope' })) }
+      { get: vi.fn().mockRejectedValue(createAgentNotFoundError({ agentId: 'nope' })) }
     );
 
     const result = await definition.handler(
@@ -127,9 +129,9 @@ describe('createConversationStepDefinition', () => {
   });
 
   it('returns an error when the conversation id already exists', async () => {
-    const create = jest.fn();
+    const create = vi.fn();
     const { definition } = buildDefinition({
-      exists: jest.fn().mockResolvedValue(true),
+      exists: vi.fn().mockResolvedValue(true),
       create,
     });
 
@@ -149,7 +151,7 @@ describe('createConversationStepDefinition', () => {
 
   it('propagates template validation errors from the underlying client', async () => {
     const { definition } = buildDefinition({
-      create: jest.fn().mockRejectedValue(createBadRequestError('Template not found: missing')),
+      create: vi.fn().mockRejectedValue(createBadRequestError('Template not found: missing')),
     });
 
     const result = await definition.handler(
@@ -163,9 +165,9 @@ describe('createConversationStepDefinition', () => {
 
   describe('input schema', () => {
     const schema = createConversationStepDefinition({
-      getConversationClient: jest.fn(),
-      getAgentRegistry: jest.fn(),
-      getExecutionService: jest.fn(),
+      getConversationClient: vi.fn(),
+      getAgentRegistry: vi.fn(),
+      getExecutionService: vi.fn(),
       isExperimentalEnabled,
     }).inputSchema;
 

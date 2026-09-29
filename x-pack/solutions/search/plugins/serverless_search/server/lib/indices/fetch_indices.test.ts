@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { fetchIndices } from './fetch_indices';
 
 describe('fetch indices lib functions', () => {
   const mockClient = {
     indices: {
-      get: jest.fn(),
-      stats: jest.fn(),
+      get: vi.fn(),
+      stats: vi.fn(),
     },
     security: {
-      hasPrivileges: jest.fn(),
+      hasPrivileges: vi.fn(),
     },
     asInternalUser: {},
   };
@@ -27,7 +29,7 @@ describe('fetch indices lib functions', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('fetchIndices', () => {

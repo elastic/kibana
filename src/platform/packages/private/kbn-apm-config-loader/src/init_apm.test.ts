@@ -7,22 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mockLoadConfiguration } from './init_apm.test.mocks';
 
 import { initApm } from './init_apm';
 import apm from 'elastic-apm-node';
 
 describe('initApm', () => {
-  let apmAddFilterMock: jest.Mock;
-  let apmStartMock: jest.Mock;
-  let getConfig: jest.Mock;
-  let isUsersRedactionEnabled: jest.Mock;
+  let apmAddFilterMock: Mock;
+  let apmStartMock: Mock;
+  let getConfig: Mock;
+  let isUsersRedactionEnabled: Mock;
 
   beforeEach(() => {
-    apmAddFilterMock = apm.addFilter as jest.Mock;
-    apmStartMock = apm.start as jest.Mock;
-    getConfig = jest.fn();
-    isUsersRedactionEnabled = jest.fn();
+    apmAddFilterMock = apm.addFilter as Mock;
+    apmStartMock = apm.start as Mock;
+    getConfig = vi.fn();
+    isUsersRedactionEnabled = vi.fn();
 
     mockLoadConfiguration.mockImplementation(() => ({
       getConfig,

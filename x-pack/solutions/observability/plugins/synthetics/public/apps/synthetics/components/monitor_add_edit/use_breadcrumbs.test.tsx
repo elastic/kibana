@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { Route } from '@kbn/shared-ux-router';
@@ -161,7 +163,7 @@ const createBreadcrumbsCore = (): {
       application: {
         getUrlForApp: (app: string) =>
           app === 'synthetics' ? '/app/synthetics' : '/app/observability',
-        navigateToUrl: jest.fn(),
+        navigateToUrl: vi.fn(),
       } as unknown as CoreStart['application'],
       chrome: {
         ...defaultCoreMock.chrome,

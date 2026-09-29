@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { RefResolver } from '../ref_resolver';
 import type { Document } from '../document';
 import { processDocument } from './process_document';
 import type { DocumentNodeProcessor } from './document_processors/types/document_node_processor';
 
-jest.mock('../ref_resolver');
+vi.mock('../ref_resolver');
 
 describe('processDocument', () => {
   it('invokes processors in the provided order', async () => {
@@ -68,7 +71,7 @@ describe('processDocument', () => {
       bar: 'foo',
     };
 
-    (refResolver.resolveRef as jest.Mock).mockResolvedValue({
+    (refResolver.resolveRef as Mock).mockResolvedValue({
       absolutePath: '/path/to/document',
       document: {
         TestRef: refNode,
@@ -172,7 +175,7 @@ describe('processDocument', () => {
     };
     const refResolver = new RefResolver();
 
-    (refResolver.resolveRef as jest.Mock).mockResolvedValue({
+    (refResolver.resolveRef as Mock).mockResolvedValue({
       absolutePath: '/path/to/document',
       document,
       refNode: {
@@ -207,7 +210,7 @@ describe('processDocument', () => {
     };
     const refResolver = new RefResolver();
 
-    (refResolver.resolveRef as jest.Mock).mockImplementation((_, pointer) => ({
+    (refResolver.resolveRef as Mock).mockImplementation((_, pointer) => ({
       absolutePath: '/path/to/document',
       document,
       refNode: document[pointer.slice(1)],
@@ -312,7 +315,7 @@ describe('processDocument', () => {
 
         const refResolver = new RefResolver();
 
-        (refResolver.resolveRef as jest.Mock).mockImplementation((_, pointer) => ({
+        (refResolver.resolveRef as Mock).mockImplementation((_, pointer) => ({
           absolutePath: '/path/to/document',
           document: resolvedDocument.document,
           refNode: resolvedDocument.document[pointer.slice(1)],
@@ -347,7 +350,7 @@ describe('processDocument', () => {
 
         const refResolver = new RefResolver();
 
-        (refResolver.resolveRef as jest.Mock).mockImplementation((_, pointer) => ({
+        (refResolver.resolveRef as Mock).mockImplementation((_, pointer) => ({
           absolutePath: '/path/to/document',
           document: resolvedDocument.document,
           refNode: resolvedDocument.document[pointer.slice(1)],
@@ -507,7 +510,7 @@ describe('processDocument', () => {
 
         const refResolver = new RefResolver();
 
-        (refResolver.resolveRef as jest.Mock).mockImplementation((_, pointer) => ({
+        (refResolver.resolveRef as Mock).mockImplementation((_, pointer) => ({
           absolutePath: '/path/to/document',
           document: resolvedDocument.document,
           refNode: resolvedDocument.document[pointer.slice(1)],

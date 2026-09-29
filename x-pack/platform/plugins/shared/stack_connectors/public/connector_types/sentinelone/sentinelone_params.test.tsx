@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { SUB_ACTION } from '@kbn/connector-schemas/sentinelone/constants';
@@ -22,7 +24,7 @@ describe('SentinelOneParamsFields renders', () => {
       <SentinelOneParamsFields
         actionParams={actionParams}
         errors={{ body: [] }}
-        editAction={jest.fn()}
+        editAction={vi.fn()}
         index={0}
         messageVariables={[]}
       />

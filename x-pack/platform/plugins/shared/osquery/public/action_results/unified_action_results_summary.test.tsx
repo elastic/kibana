@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -17,26 +20,35 @@ import { UnifiedActionResultsSummary } from './unified_action_results_summary';
 import * as useActionResultsHook from './use_action_results';
 import { useKibana } from '../common/lib/kibana';
 
-jest.mock('./use_action_results');
-jest.mock('../common/lib/kibana');
-jest.mock('./use_action_results_data_view', () => ({
-  useActionResultsDataView: () => ({ id: 'osquery-status-dv' }),
-}));
-jest.mock('@kbn/unified-data-table', () => ({
-  // `loadingState` is surfaced as an attribute so the live-polling flag it is derived from
-  // can be asserted without the real grid.
-  UnifiedDataTable: ({ loadingState }: { loadingState: string }) => (
-    <div data-test-subj="unifiedDataTable" data-loading-state={loadingState} />
-  ),
-  DataLoadingState: { loading: 'loading', loaded: 'loaded' },
-  DataGridDensity: { EXPANDED: 'expanded' },
-}));
-jest.mock('@kbn/cell-actions', () => ({
-  CellActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('./use_action_results');
+vi.mock('../common/lib/kibana');
+vi.mock('./use_action_results_data_view', () => {
+      const mocked = {
+      useActionResultsDataView: () => ({ id: 'osquery-status-dv' }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/unified-data-table', () => {
+      const mocked = {
+      // `loadingState` is surfaced as an attribute so the live-polling flag it is derived from
+      // can be asserted without the real grid.
+      UnifiedDataTable: ({ loadingState }: { loadingState: string }) => (
+        <div data-test-subj="unifiedDataTable" data-loading-state={loadingState} />
+      ),
+      DataLoadingState: { loading: 'loading', loaded: 'loaded' },
+      DataGridDensity: { EXPANDED: 'expanded' },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/cell-actions', () => {
+      const mocked = {
+      CellActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
-const useActionResultsMock = useActionResultsHook.useActionResults as jest.MockedFunction<
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
+const useActionResultsMock = useActionResultsHook.useActionResults as MockedFunction<
   typeof useActionResultsHook.useActionResults
 >;
 
@@ -45,19 +57,19 @@ const createTestQueryClient = () =>
     defaultOptions: { queries: { retry: false, cacheTime: 0 } },
   });
 
-const mockHttpPost = jest.fn();
+const mockHttpPost = vi.fn();
 
 const mockKibanaServices = () => {
   useKibanaMock.mockReturnValue({
     services: {
       http: { post: mockHttpPost },
-      application: { getUrlForApp: jest.fn().mockReturnValue('/app/fleet') },
-      notifications: { toasts: { addError: jest.fn() } },
+      application: { getUrlForApp: vi.fn().mockReturnValue('/app/fleet') },
+      notifications: { toasts: { addError: vi.fn() } },
       appName: 'osquery',
       theme: {},
       uiSettings: {},
-      data: { fieldFormats: {}, dataViews: { create: jest.fn() } },
-      uiActions: { getTriggerCompatibleActions: jest.fn() },
+      data: { fieldFormats: {}, dataViews: { create: vi.fn() } },
+      uiActions: { getTriggerCompatibleActions: vi.fn() },
     },
   } as unknown as ReturnType<typeof useKibana>);
 };
@@ -107,7 +119,7 @@ const renderWithContext = (Element: React.ReactElement) =>
 
 describe('UnifiedActionResultsSummary - Pagination', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibanaServices();
   });
 
@@ -250,7 +262,7 @@ describe('UnifiedActionResultsSummary - Live polling', () => {
   const agentIds = ['agent-1', 'agent-2'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibanaServices();
   });
 
@@ -360,7 +372,7 @@ describe('UnifiedActionResultsSummary - Live polling', () => {
 
 describe('UnifiedActionResultsSummary - Per-page agent details fetch', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibanaServices();
   });
 

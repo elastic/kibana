@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Query } from '../../..';
 import { AggConfigs } from '../agg_configs';
 import type { AggTypesDependencies } from '../agg_types';
@@ -17,10 +19,10 @@ describe('Filters Agg', () => {
   let aggTypesDependencies: AggTypesDependencies;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     aggTypesDependencies = {
       ...mockAggTypesDependencies,
-      getConfig: jest.fn(),
+      getConfig: vi.fn(),
     };
   });
 
@@ -53,7 +55,7 @@ describe('Filters Agg', () => {
         {
           typesRegistry: mockAggTypesRegistry(aggTypesDependencies),
         },
-        jest.fn()
+        vi.fn()
       );
     };
 

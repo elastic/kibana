@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { TestProvider } from '../../../common/test_utils';
 import { render, type RenderResult } from '@testing-library/react';
@@ -14,15 +16,15 @@ describe('Page Component', () => {
   let renderComponent: (props: DataUsagePageProps) => RenderResult;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     renderComponent = (props: DataUsagePageProps) =>
       render(
         <TestProvider>

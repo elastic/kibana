@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
@@ -14,13 +17,16 @@ import { deleteBackfillRoute, deleteBackfillPublicRoute } from './delete_backfil
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('deleteBackfillRoute', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should delete the backfill', async () => {
@@ -60,7 +66,7 @@ describe('deleteBackfillRoute', () => {
 
     deleteBackfillRoute(router, licenseState);
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyApiAccess as Mock).mockImplementation(() => {
       throw new Error('Failure');
     });
     const [, handler] = router.delete.mock.calls[0];
@@ -71,7 +77,7 @@ describe('deleteBackfillRoute', () => {
 
 describe('deleteBackfillPublicRoute', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should register the public route with the correct path', async () => {

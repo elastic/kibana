@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { userProfileKeys } from './query_key_factory';
 import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
 
-const mockBulkGet = jest.fn();
+const mockBulkGet = vi.fn();
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'userProfile') {
-      return { bulkGet: mockBulkGet };
-    }
-    return undefined;
-  },
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (token === 'userProfile') {
+          return { bulkGet: mockBulkGet };
+        }
+        return undefined;
+      },
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ALICE_UID = 'u_alice_uid';
 const BOB_UID = 'u_bob_uid';

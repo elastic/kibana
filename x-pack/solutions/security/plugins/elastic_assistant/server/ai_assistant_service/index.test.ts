@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -31,9 +34,12 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
-jest.mock('../ai_assistant_data_clients/conversations', () => ({
-  AIAssistantConversationsDataClient: jest.fn(),
-}));
+vi.mock('../ai_assistant_data_clients/conversations', () => {
+      const mocked = {
+      AIAssistantConversationsDataClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const licensing = Promise.resolve(
   licensingMock.createRequestHandlerContext({
@@ -112,13 +118,13 @@ describe('AI Assistant Service', () => {
   let pluginStop$: Subject<void>;
   let assistantServiceOpts: AIAssistantServiceOpts;
   let ml: MlPluginSetup;
-  let adhocAttackDiscoveryDataClient: jest.Mocked<IRuleDataClient>;
+  let adhocAttackDiscoveryDataClient: Mocked<IRuleDataClient>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     logger = loggingSystemMock.createLogger();
     pluginStop$ = new ReplaySubject(1);
-    jest.spyOn(global.Math, 'random').mockReturnValue(0.01);
+    vi.spyOn(global.Math, 'random').mockReturnValue(0.01);
     clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
     clusterClient.indices.simulateIndexTemplate.mockImplementation(
       async () => SimulateTemplateResponse
@@ -128,12 +134,12 @@ describe('AI Assistant Service', () => {
     clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
     clusterClient.indices.get.mockResolvedValue({});
     ml = mlPluginMock.createSetupContract() as unknown as MlPluginSetup; // Missing SharedServices mock, so manually mocking trainedModelsProvider
-    ml.trainedModelsProvider = jest.fn().mockImplementation(() => ({
-      getELSER: jest.fn().mockImplementation(() => '.elser_model_2'),
+    ml.trainedModelsProvider = vi.fn().mockImplementation(() => ({
+      getELSER: vi.fn().mockImplementation(() => '.elser_model_2'),
     }));
     adhocAttackDiscoveryDataClient = {
-      getWriter: jest.fn().mockResolvedValue({}),
-    } as unknown as jest.Mocked<IRuleDataClient>;
+      getWriter: vi.fn().mockResolvedValue({}),
+    } as unknown as Mocked<IRuleDataClient>;
     assistantServiceOpts = {
       logger,
       elasticsearchClientPromise: Promise.resolve(clusterClient),
@@ -143,16 +149,16 @@ describe('AI Assistant Service', () => {
       ml,
       taskManager: taskManagerMock.createSetup(),
       productDocManager: Promise.resolve({
-        getStatus: jest.fn(),
-        getStatuses: jest.fn(),
-        install: jest.fn(),
-        installSecurityLabs: jest.fn(),
-        update: jest.fn(),
-        updateAll: jest.fn(),
-        updateSecurityLabsAll: jest.fn().mockResolvedValue({ inferenceIds: [] }),
-        uninstall: jest.fn(),
-        uninstallSecurityLabs: jest.fn(),
-        getSecurityLabsStatus: jest.fn(),
+        getStatus: vi.fn(),
+        getStatuses: vi.fn(),
+        install: vi.fn(),
+        installSecurityLabs: vi.fn(),
+        update: vi.fn(),
+        updateAll: vi.fn(),
+        updateSecurityLabsAll: vi.fn().mockResolvedValue({ inferenceIds: [] }),
+        uninstall: vi.fn(),
+        uninstallSecurityLabs: vi.fn(),
+        getSecurityLabsStatus: vi.fn(),
       }),
       adhocAttackDiscoveryDataClient,
     };
@@ -209,10 +215,10 @@ describe('AI Assistant Service', () => {
   describe('createAIAssistantConversationsDataClient()', () => {
     let assistantService: AIAssistantService;
     beforeEach(() => {
-      (AIAssistantConversationsDataClient as jest.Mock).mockImplementation(
+      (AIAssistantConversationsDataClient as Mock).mockImplementation(
         () => conversationsDataClient
       );
-      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+      (clusterClient.search as unknown as Mock).mockResolvedValue({
         hits: { hits: [], total: { value: 0 } },
       });
     });
@@ -875,7 +881,7 @@ describe('AI Assistant Service', () => {
         .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
         .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
         .mockResolvedValue({ acknowledged: true });
-      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+      (clusterClient.search as unknown as Mock).mockResolvedValue({
         hits: { hits: [], total: { value: 0 } },
       });
 
@@ -904,7 +910,7 @@ describe('AI Assistant Service', () => {
 
   describe('createDefaultAnonymizationFields', () => {
     test('should create default anonymization fields', async () => {
-      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+      (clusterClient.search as unknown as Mock).mockResolvedValue({
         hits: { hits: [], total: { value: 0 } },
       });
 
@@ -923,7 +929,7 @@ describe('AI Assistant Service', () => {
 
     test('should not create default anonymization fields if they already exist', async () => {
       const defaultAnonymizationFields = getDefaultAnonymizationFields('default');
-      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+      (clusterClient.search as unknown as Mock).mockResolvedValue({
         hits: {
           hits: [],
           total: { value: defaultAnonymizationFields.length },
@@ -942,7 +948,7 @@ describe('AI Assistant Service', () => {
       const storedFieldsLength = defaultAnonymizationFields.length - 1;
       const defaultFieldsExpectLast = defaultAnonymizationFields.slice(0, -1);
       const lastField = defaultAnonymizationFields[storedFieldsLength];
-      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+      (clusterClient.search as unknown as Mock).mockResolvedValue({
         hits: {
           hits: [...defaultFieldsExpectLast.map((field) => ({ _source: field }))],
           total: { value: storedFieldsLength },

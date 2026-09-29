@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   coreMock,
   elasticsearchServiceMock,
@@ -51,13 +53,13 @@ describe('Cloud Defend Plugin', () => {
 
     let plugin: CloudDefendPlugin;
 
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => vi.clearAllMocks());
 
     it('should initialize when new package is created', async () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      const onPackagePolicyPostCreateCallbackSpy = jest
+      const onPackagePolicyPostCreateCallbackSpy = vi
         .spyOn(onPackagePolicyPostCreateCallback, 'onPackagePolicyPostCreateCallback')
         .mockResolvedValue();
 

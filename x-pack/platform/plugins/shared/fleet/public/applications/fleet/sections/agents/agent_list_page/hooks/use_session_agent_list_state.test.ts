@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import { defaultAgentListState, useSessionAgentListState } from './use_session_agent_list_state';
 
 // Mock react-use/lib/useSessionStorage
-const mockSetSessionState = jest.fn();
-const mockSessionState = jest.fn();
+const mockSetSessionState = vi.fn();
+const mockSessionState = vi.fn();
 
-jest.mock('react-use/lib/useSessionStorage', () => {
-  return jest.fn(() => [mockSessionState(), mockSetSessionState]);
+vi.mock('react-use/lib/useSessionStorage', () => {
+  return vi.fn(() => [mockSessionState(), mockSetSessionState]);
 });
 
 describe('useSessionAgentListState', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Reset mock to return default state
     mockSessionState.mockReturnValue(defaultAgentListState);
   });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -16,21 +19,21 @@ import { SmlAuthzEnumerationIncompleteError, SmlCorpusTooLargeError } from './sm
 import { smlIndexName } from './sml_storage';
 import type { SmlTypeDefinition } from './types';
 
-jest.mock('./sml_storage', () => {
-  const actual = jest.requireActual('./sml_storage');
+vi.mock('./sml_storage', async () => {
+  const actual = (await vi.importActual('./sml_storage'));
   return {
     ...actual,
   };
 });
 
-const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
+const createMockEsClient = (): Mocked<ElasticsearchClient> =>
   ({
-    search: jest.fn(),
-    count: jest.fn(),
+    search: vi.fn(),
+    count: vi.fn(),
     esql: {
-      query: jest.fn(),
+      query: vi.fn(),
     },
-  } as unknown as jest.Mocked<ElasticsearchClient>);
+  } as unknown as Mocked<ElasticsearchClient>);
 
 const PRIVILEGES_PATH = 'permissions.kibana.privileges';
 const PERM_NAME_FIELD = `${PRIVILEGES_PATH}.name`;
@@ -230,7 +233,7 @@ const makeEsqlRow = (
 ];
 
 const createMockScopedClient = (
-  internalUser: jest.Mocked<ElasticsearchClient>
+  internalUser: Mocked<ElasticsearchClient>
 ): IScopedClusterClient => {
   return {
     asInternalUser: internalUser,
@@ -239,16 +242,16 @@ const createMockScopedClient = (
 };
 
 /** The first `search` call that is not the privilege-enumeration aggregation. */
-const docSearchCall = (esClient: jest.Mocked<ElasticsearchClient>) =>
+const docSearchCall = (esClient: Mocked<ElasticsearchClient>) =>
   esClient.search.mock.calls.map((c) => c[0] as any).find((a) => !a?.aggs)!;
 
 /** How many privilege-enumeration aggregation calls were issued. */
-const enumerationCallCount = (esClient: jest.Mocked<ElasticsearchClient>) =>
+const enumerationCallCount = (esClient: Mocked<ElasticsearchClient>) =>
   esClient.search.mock.calls.filter((c) => (c[0] as any)?.aggs).length;
 
 const createMockLogger = () => {
   const log = loggerMock.create();
-  log.get = jest.fn().mockReturnValue(log);
+  log.get = vi.fn().mockReturnValue(log);
   return log;
 };
 
@@ -256,7 +259,7 @@ const createMockLogger = () => {
  * Build a `checkPrivileges` mock that handles `kibana` privilege inputs.
  */
 const buildCheckPrivilegesMock = (authorizedKibana: Set<string>) =>
-  jest.fn().mockImplementation(async (req: { kibana?: string[] }) => ({
+  vi.fn().mockImplementation(async (req: { kibana?: string[] }) => ({
     privileges: {
       kibana: (req.kibana ?? []).map((privilege) => ({
         privilege,
@@ -268,7 +271,7 @@ const buildCheckPrivilegesMock = (authorizedKibana: Set<string>) =>
 const createMockSecurityAuthz = (authorizedPrivileges: string[]): AuthorizationServiceSetup => {
   const checkPrivileges = buildCheckPrivilegesMock(new Set(authorizedPrivileges));
   return {
-    checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
+    checkPrivilegesDynamicallyWithRequest: vi.fn().mockReturnValue(checkPrivileges),
   } as unknown as AuthorizationServiceSetup;
 };
 
@@ -281,7 +284,7 @@ const createMockSecurityAuthzPartial = (
   void unauthorized;
   const checkPrivileges = buildCheckPrivilegesMock(new Set(authorized));
   return {
-    checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
+    checkPrivilegesDynamicallyWithRequest: vi.fn().mockReturnValue(checkPrivileges),
   } as unknown as AuthorizationServiceSetup;
 };
 
@@ -289,9 +292,9 @@ const createMockSmlTypeDefinition = (
   overrides: Partial<SmlTypeDefinition> = {}
 ): SmlTypeDefinition => ({
   id: 'test-type',
-  list: jest.fn(),
-  getSmlEntry: jest.fn(),
-  toAttachment: jest.fn(),
+  list: vi.fn(),
+  getSmlEntry: vi.fn(),
+  toAttachment: vi.fn(),
   ...overrides,
 });
 
@@ -384,8 +387,8 @@ describe('isNotFoundError', () => {
 });
 
 describe('SmlService', () => {
-  let esClient: jest.Mocked<ElasticsearchClient>;
-  let esqlQueryMock: jest.Mock;
+  let esClient: Mocked<ElasticsearchClient>;
+  let esqlQueryMock: Mock;
   // Privilege enumeration and document fetches both go through `search`; these two hold the
   // response for each so a test can set one without having to model the other.
   let aggResponse: unknown;
@@ -397,7 +400,7 @@ describe('SmlService', () => {
   beforeEach(() => {
     esClient = createMockEsClient();
     // `jest.Mocked` does not unwrap overloaded functions, so extract as jest.Mock directly.
-    esqlQueryMock = (esClient as unknown as { esql: { query: jest.Mock } }).esql.query;
+    esqlQueryMock = (esClient as unknown as { esql: { query: Mock } }).esql.query;
     // Default to an empty permission universe; per-case tests override `aggResponse`.
     aggResponse = universeAgg([]);
     hitsResponse = { hits: { total: 0, hits: [] } };
@@ -430,7 +433,7 @@ describe('SmlService', () => {
       expect(esqlQueryMock).toHaveBeenCalledTimes(1);
       expect(esClient.search).not.toHaveBeenCalled();
       expect(
-        (scopedClient.asCurrentUser as jest.Mocked<ElasticsearchClient>).search
+        (scopedClient.asCurrentUser as Mocked<ElasticsearchClient>).search
       ).not.toHaveBeenCalled();
 
       const { query: esql } = esqlQueryMock.mock.calls[0]![0]! as {
@@ -2051,7 +2054,7 @@ describe('SmlService', () => {
         })
       );
       expect(
-        (scopedClient.asCurrentUser as jest.Mocked<ElasticsearchClient>).search
+        (scopedClient.asCurrentUser as Mocked<ElasticsearchClient>).search
       ).not.toHaveBeenCalled();
     });
 
@@ -2083,8 +2086,8 @@ describe('SmlService', () => {
         },
       } as any);
       const checkPrivileges = (
-        securityAuthz.checkPrivilegesDynamicallyWithRequest as jest.Mock
-      )() as jest.Mock;
+        securityAuthz.checkPrivilegesDynamicallyWithRequest as Mock
+      )() as Mock;
       checkPrivileges.mockRejectedValueOnce(new Error('cluster unreachable'));
 
       const result = await smlService.checkItemsAccess({
@@ -2388,7 +2391,7 @@ describe('SmlService', () => {
         })
       );
       expect(
-        (scopedClient.asCurrentUser as jest.Mocked<ElasticsearchClient>).search
+        (scopedClient.asCurrentUser as Mocked<ElasticsearchClient>).search
       ).not.toHaveBeenCalled();
     });
   });

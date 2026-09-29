@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject, firstValueFrom, of, Subject } from 'rxjs';
 
@@ -25,9 +27,9 @@ import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { RangeSliderControlApi } from './types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
-const mockGetESQLResults = jest.fn();
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
+const mockGetESQLResults = vi.fn();
+vi.mock('@kbn/esql-utils', async () => ({
+  ...(await vi.importActual('@kbn/esql-utils')),
   getESQLResults: (...args: unknown[]) => mockGetESQLResults(...args),
 }));
 
@@ -52,7 +54,7 @@ describe('RangeSliderControlApi', () => {
   let totalResults = DEFAULT_TOTAL_RESULTS;
   let min: estypes.AggregationsSingleMetricAggregateBase['value'] = DEFAULT_MIN;
   let max: estypes.AggregationsSingleMetricAggregateBase['value'] = DEFAULT_MAX;
-  dataService.search.searchSource.create = jest.fn().mockImplementation(() => {
+  dataService.search.searchSource.create = vi.fn().mockImplementation(() => {
     let isAggsRequest = false;
     return {
       setField: (key: string) => {
@@ -72,7 +74,7 @@ describe('RangeSliderControlApi', () => {
     };
   });
 
-  dataViewsService.get = jest.fn().mockImplementation(async (id: string): Promise<DataView> => {
+  dataViewsService.get = vi.fn().mockImplementation(async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
       throw new Error(`no data view found for id ${id}`);
     }
@@ -84,7 +86,7 @@ describe('RangeSliderControlApi', () => {
             displayName: 'My field name',
             name: 'myFieldName',
             type: 'number',
-            toSpec: jest.fn(),
+            toSpec: vi.fn(),
           },
         ].find((field) => fieldName === field.name);
       },
@@ -96,7 +98,7 @@ describe('RangeSliderControlApi', () => {
     } as unknown as DataView;
   });
 
-  dataViewsService.find = jest.fn().mockResolvedValue([{ id: 'myDataViewId' }]);
+  dataViewsService.find = vi.fn().mockResolvedValue([{ id: 'myDataViewId' }]);
 
   beforeEach(() => {
     totalResults = DEFAULT_TOTAL_RESULTS;
@@ -107,7 +109,7 @@ describe('RangeSliderControlApi', () => {
   describe('appliedFilters$', () => {
     test('should not set appliedFilters$ when value is not provided', async () => {
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
@@ -122,7 +124,7 @@ describe('RangeSliderControlApi', () => {
 
     test('should set appliedFilters$ when value is provided', async () => {
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
@@ -162,7 +164,7 @@ describe('RangeSliderControlApi', () => {
 
     test('should set blocking error when data view is not found', async () => {
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'notGonnaFindMeDataView',
@@ -186,7 +188,7 @@ describe('RangeSliderControlApi', () => {
       min = null; // simulate no results by returning min aggregation value of null
       max = null; // simulate no results by returning max aggregation value of null
       const { Component } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
@@ -207,7 +209,7 @@ describe('RangeSliderControlApi', () => {
   describe('min max', () => {
     test('bounds inputs should display min and max placeholders when there is no selected range', async () => {
       const { Component } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
@@ -235,7 +237,7 @@ describe('RangeSliderControlApi', () => {
       });
 
       const { Component } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_RANGE_SLIDER_STATE,
           values_source: ControlValuesSource.ESQL,
@@ -262,7 +264,7 @@ describe('RangeSliderControlApi', () => {
   describe('step state', () => {
     test('default value provided when state.step is undefined', async () => {
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
@@ -278,7 +280,7 @@ describe('RangeSliderControlApi', () => {
 
     test('retains value from initial state', async () => {
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
@@ -307,7 +309,7 @@ describe('RangeSliderControlApi', () => {
         data_view_id: 'newDataViewId',
       } as RangeSliderControlState;
       const embeddable = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -327,7 +329,7 @@ describe('RangeSliderControlApi', () => {
         field_name: 'myFieldName',
       });
       const embeddable = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -350,7 +352,7 @@ describe('RangeSliderControlApi', () => {
 
     test('api should have cancelRequests method', async () => {
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
@@ -367,7 +369,7 @@ describe('RangeSliderControlApi', () => {
     test('should abort pending minMax request when cancelRequests is called', async () => {
       let capturedAbortSignal: AbortSignal | undefined;
 
-      dataService.search.searchSource.create = jest.fn().mockImplementation(() => {
+      dataService.search.searchSource.create = vi.fn().mockImplementation(() => {
         let isAggsRequest = false;
         return {
           setField: (key: string) => {
@@ -388,7 +390,7 @@ describe('RangeSliderControlApi', () => {
       });
 
       const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
         initialState: {
           ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
@@ -411,39 +413,51 @@ describe('RangeSliderControlApi', () => {
 
   describe('anyStateChange$', () => {
     let embeddableApi: RangeSliderControlApi;
-    beforeEach((done) => {
-      factory
-        .buildEmbeddable({
-          initializeDrilldownsManager: jest.fn(),
-          initialState: rangeSliderControlSchema.parse({
-            data_view_id: 'oldDataViewId',
-            field_name: 'myFieldName',
-          }),
-          finalizeApi,
-          uuid,
-          parentApi: {},
-        })
-        .then(({ api }) => {
-          embeddableApi = api;
-          done();
-        })
-        .catch(done);
-    });
+    beforeEach(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+            fail: reject,
+          });
 
-    test('should not emit on subscribe and emit when any state changes', (done) => {
-      embeddableApi.anyStateChange$.subscribe(() => {
-        try {
-          const { title } = embeddableApi.serializeState();
-          expect(title).toBe('cute puppies');
-        } catch (error) {
-          // title assertion fails when
-          // anyStateChange$ emits on subscribe
-          done(error);
-          return;
-        }
-        done();
-      });
-      embeddableApi.setTitle('cute puppies');
-    });
+          factory
+            .buildEmbeddable({
+              initializeDrilldownsManager: vi.fn(),
+              initialState: rangeSliderControlSchema.parse({
+                data_view_id: 'oldDataViewId',
+                field_name: 'myFieldName',
+              }),
+              finalizeApi,
+              uuid,
+              parentApi: {},
+            })
+            .then(({ api }) => {
+              embeddableApi = api;
+              done();
+            })
+            .catch(done);
+        })
+    );
+
+    test('should not emit on subscribe and emit when any state changes', () =>
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
+
+        embeddableApi.anyStateChange$.subscribe(() => {
+          try {
+            const { title } = embeddableApi.serializeState();
+            expect(title).toBe('cute puppies');
+          } catch (error) {
+            // title assertion fails when
+            // anyStateChange$ emits on subscribe
+            done(error);
+            return;
+          }
+          done();
+        });
+        embeddableApi.setTitle('cute puppies');
+      }));
   });
 });

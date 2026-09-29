@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useRuleDetailsUrlPathWithLandingTab } from './use_rule_details_url_with_landing_tab';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { renderHook } from '@testing-library/react';
 
-jest.mock('../../../../common/components/user_privileges', () => ({
-  useUserPrivileges: jest.fn(),
-}));
+vi.mock('../../../../common/components/user_privileges', () => {
+      const mocked = {
+      useUserPrivileges: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+const useUserPrivilegesMock = useUserPrivileges as Mock;
 
 describe('useRuleDetailsUrlPathWithLandingTab', () => {
   const ruleId = 'test-rule-id';

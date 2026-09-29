@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { render } from '../../../../utils/testing/rtl_helpers';
@@ -20,7 +22,7 @@ describe('ActionsPopover', () => {
   let testMonitor: OverviewStatusMetaData;
 
   beforeEach(() => {
-    jest.spyOn(enablementHook, 'useEnablement').mockReturnValue({
+    vi.spyOn(enablementHook, 'useEnablement').mockReturnValue({
       isServiceAllowed: true,
       areApiKeysEnabled: true,
       canManageApiKeys: true,
@@ -46,7 +48,7 @@ describe('ActionsPopover', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('renders the popover button', () => {
@@ -54,7 +56,7 @@ describe('ActionsPopover', () => {
       <ActionsPopover
         position="relative"
         isPopoverOpen={false}
-        setIsPopoverOpen={jest.fn()}
+        setIsPopoverOpen={vi.fn()}
         monitor={testMonitor}
         locationId={testMonitor.locations[0].id}
       />
@@ -64,7 +66,7 @@ describe('ActionsPopover', () => {
   });
 
   it('opens the popover on click', async () => {
-    const setIsPopoverOpen = jest.fn();
+    const setIsPopoverOpen = vi.fn();
     const isPopoverOpen = false;
     const { getByLabelText } = render(
       <ActionsPopover
@@ -84,7 +86,7 @@ describe('ActionsPopover', () => {
   });
 
   it('closes the popover on subsequent click', async () => {
-    const setIsPopoverOpen = jest.fn();
+    const setIsPopoverOpen = vi.fn();
     const isPopoverOpen = true;
     const { getByLabelText } = render(
       <ActionsPopover
@@ -104,14 +106,14 @@ describe('ActionsPopover', () => {
   });
 
   it('contains link to edit page', async () => {
-    jest
+    vi
       .spyOn(editMonitorLocatorModule, 'useEditMonitorLocator')
       .mockReturnValue('/a/test/edit/url');
     const { getByTestId } = render(
       <ActionsPopover
         position="relative"
         isPopoverOpen={true}
-        setIsPopoverOpen={jest.fn()}
+        setIsPopoverOpen={vi.fn()}
         monitor={testMonitor}
         locationId={testMonitor.locations[0].id}
       />
@@ -121,14 +123,14 @@ describe('ActionsPopover', () => {
   });
 
   it('contains link to clone monitor', async () => {
-    jest
+    vi
       .spyOn(editMonitorLocatorModule, 'useEditMonitorLocator')
       .mockReturnValue('/a/test/edit/url');
     const { getByTestId } = render(
       <ActionsPopover
         position="relative"
         isPopoverOpen={true}
-        setIsPopoverOpen={jest.fn()}
+        setIsPopoverOpen={vi.fn()}
         monitor={testMonitor}
         locationId={testMonitor.locations[0].id}
       />
@@ -140,14 +142,14 @@ describe('ActionsPopover', () => {
   });
 
   it('contains link to detail page', async () => {
-    jest
+    vi
       .spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator')
       .mockReturnValue('/a/test/detail/url');
     const { getByTestId } = render(
       <ActionsPopover
         position="relative"
         isPopoverOpen={true}
-        setIsPopoverOpen={jest.fn()}
+        setIsPopoverOpen={vi.fn()}
         monitor={testMonitor}
         locationId={testMonitor.locations[0].id}
       />
@@ -158,8 +160,8 @@ describe('ActionsPopover', () => {
   });
 
   it('sets the enabled state', async () => {
-    const updateMonitorEnabledState = jest.fn();
-    jest.spyOn(monitorEnableHandlerModule, 'useMonitorEnableHandler').mockReturnValue({
+    const updateMonitorEnabledState = vi.fn();
+    vi.spyOn(monitorEnableHandlerModule, 'useMonitorEnableHandler').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       isEnabled: true,
       updateMonitorEnabledState,
@@ -168,7 +170,7 @@ describe('ActionsPopover', () => {
       <ActionsPopover
         isPopoverOpen={true}
         position="relative"
-        setIsPopoverOpen={jest.fn()}
+        setIsPopoverOpen={vi.fn()}
         monitor={testMonitor}
         locationId={testMonitor.locations[0].id}
       />
@@ -180,8 +182,8 @@ describe('ActionsPopover', () => {
   });
 
   it('sets enabled state to true', async () => {
-    const updateMonitorEnabledState = jest.fn();
-    jest.spyOn(monitorEnableHandlerModule, 'useMonitorEnableHandler').mockReturnValue({
+    const updateMonitorEnabledState = vi.fn();
+    vi.spyOn(monitorEnableHandlerModule, 'useMonitorEnableHandler').mockReturnValue({
       status: FETCH_STATUS.PENDING,
       isEnabled: null,
       updateMonitorEnabledState,
@@ -189,7 +191,7 @@ describe('ActionsPopover', () => {
     const { getByText } = render(
       <ActionsPopover
         isPopoverOpen={true}
-        setIsPopoverOpen={jest.fn()}
+        setIsPopoverOpen={vi.fn()}
         monitor={{ ...testMonitor, isEnabled: false }}
         position="relative"
         locationId={testMonitor.locations[0].id}
@@ -217,7 +219,7 @@ describe('ActionsPopover', () => {
       // `?remoteName=<alias>` is in the URL — so it is *not* part of the
       // 3-state remote-redirect set (Edit / Clone / Enable-Disable).
       it('keeps Go to monitor as in-app navigation (local detailUrl with remoteName)', () => {
-        jest
+        vi
           .spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator')
           .mockReturnValue('/a/test/detail/url?remoteName=cluster-1');
 
@@ -225,7 +227,7 @@ describe('ActionsPopover', () => {
           <ActionsPopover
             isPopoverOpen={true}
             position="relative"
-            setIsPopoverOpen={jest.fn()}
+            setIsPopoverOpen={vi.fn()}
             monitor={remoteMonitor}
             locationId={remoteMonitor.locations[0].id}
           />
@@ -237,7 +239,7 @@ describe('ActionsPopover', () => {
       });
 
       it('passes monitor.remote.remoteName through to useMonitorDetailLocator', () => {
-        const detailLocatorSpy = jest
+        const detailLocatorSpy = vi
           .spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator')
           .mockReturnValue('/a/test/detail/url');
 
@@ -245,7 +247,7 @@ describe('ActionsPopover', () => {
           <ActionsPopover
             isPopoverOpen={true}
             position="relative"
-            setIsPopoverOpen={jest.fn()}
+            setIsPopoverOpen={vi.fn()}
             monitor={remoteMonitor}
             locationId={remoteMonitor.locations[0].id}
           />
@@ -261,7 +263,7 @@ describe('ActionsPopover', () => {
           <ActionsPopover
             isPopoverOpen={true}
             position="relative"
-            setIsPopoverOpen={jest.fn()}
+            setIsPopoverOpen={vi.fn()}
             monitor={remoteMonitor}
             locationId={remoteMonitor.locations[0].id}
           />
@@ -290,7 +292,7 @@ describe('ActionsPopover', () => {
           <ActionsPopover
             isPopoverOpen={true}
             position="relative"
-            setIsPopoverOpen={jest.fn()}
+            setIsPopoverOpen={vi.fn()}
             monitor={remoteMonitor}
             locationId={remoteMonitor.locations[0].id}
           />
@@ -306,7 +308,7 @@ describe('ActionsPopover', () => {
           <ActionsPopover
             isPopoverOpen={true}
             position="relative"
-            setIsPopoverOpen={jest.fn()}
+            setIsPopoverOpen={vi.fn()}
             monitor={remoteMonitor}
             locationId={remoteMonitor.locations[0].id}
           />
@@ -322,7 +324,7 @@ describe('ActionsPopover', () => {
           <ActionsPopover
             isPopoverOpen={true}
             position="relative"
-            setIsPopoverOpen={jest.fn()}
+            setIsPopoverOpen={vi.fn()}
             monitor={remoteMonitor}
             locationId={remoteMonitor.locations[0].id}
           />
@@ -344,7 +346,7 @@ describe('ActionsPopover', () => {
           <ActionsPopover
             isPopoverOpen={true}
             position="relative"
-            setIsPopoverOpen={jest.fn()}
+            setIsPopoverOpen={vi.fn()}
             monitor={remoteMonitor}
             locationId={remoteMonitor.locations[0].id}
           />
@@ -372,7 +374,7 @@ describe('ActionsPopover', () => {
       // `kibanaUrl` (no destination URL handler today), so it isn't covered
       // by this scenario.
       it('disables Edit / Clone but keeps Go to monitor enabled', () => {
-        jest
+        vi
           .spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator')
           .mockReturnValue('/a/test/detail/url?remoteName=cluster-1');
 
@@ -380,7 +382,7 @@ describe('ActionsPopover', () => {
           <ActionsPopover
             isPopoverOpen={true}
             position="relative"
-            setIsPopoverOpen={jest.fn()}
+            setIsPopoverOpen={vi.fn()}
             monitor={remoteMonitorWithoutUrl}
             locationId={remoteMonitorWithoutUrl.locations[0].id}
           />
@@ -403,7 +405,7 @@ describe('ActionsPopover', () => {
           <ActionsPopover
             isPopoverOpen={true}
             position="relative"
-            setIsPopoverOpen={jest.fn()}
+            setIsPopoverOpen={vi.fn()}
             monitor={remoteMonitorWithoutUrl}
             locationId={remoteMonitorWithoutUrl.locations[0].id}
             kibanaUrl="https://from-prop.example.com"
@@ -426,7 +428,7 @@ describe('ActionsPopover', () => {
         <ActionsPopover
           isPopoverOpen={true}
           position="relative"
-          setIsPopoverOpen={jest.fn()}
+          setIsPopoverOpen={vi.fn()}
           monitor={remoteMonitor}
           locationId={remoteMonitor.locations[0].id}
           kibanaUrl="https://from-prop.example.com"
@@ -454,7 +456,7 @@ describe('ActionsPopover', () => {
     // action is read-only — unlike remote monitors there is no origin cluster
     // to deep-link to either.
     it('disables Edit and Clone with no href', () => {
-      jest
+      vi
         .spyOn(editMonitorLocatorModule, 'useEditMonitorLocator')
         .mockReturnValue('/a/test/edit/url');
 
@@ -462,7 +464,7 @@ describe('ActionsPopover', () => {
         <ActionsPopover
           isPopoverOpen={true}
           position="relative"
-          setIsPopoverOpen={jest.fn()}
+          setIsPopoverOpen={vi.fn()}
           monitor={heartbeatMonitor}
           locationId={heartbeatMonitor.locations[0].id}
         />
@@ -479,7 +481,7 @@ describe('ActionsPopover', () => {
         <ActionsPopover
           isPopoverOpen={true}
           position="relative"
-          setIsPopoverOpen={jest.fn()}
+          setIsPopoverOpen={vi.fn()}
           monitor={heartbeatMonitor}
           locationId={heartbeatMonitor.locations[0].id}
         />
@@ -494,7 +496,7 @@ describe('ActionsPopover', () => {
     // The read-only detail page isn't available yet (coming in a follow-up),
     // so "Go to monitor" is omitted for heartbeat monitors.
     it('omits Go to monitor', () => {
-      jest
+      vi
         .spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator')
         .mockReturnValue('/a/test/detail/url');
 
@@ -502,7 +504,7 @@ describe('ActionsPopover', () => {
         <ActionsPopover
           isPopoverOpen={true}
           position="relative"
-          setIsPopoverOpen={jest.fn()}
+          setIsPopoverOpen={vi.fn()}
           monitor={heartbeatMonitor}
           locationId={heartbeatMonitor.locations[0].id}
         />

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React, { useState } from 'react';
 import { render, act, fireEvent, waitFor } from '@testing-library/react';
 
@@ -45,29 +47,35 @@ const mockSeverityOptions: SeverityOption[] = [
 ];
 
 // Mock the useSeverityOptions hook
-jest.mock('../../../explorer/hooks/use_severity_options', () => ({
-  useSeverityOptions: () => mockSeverityOptions,
-}));
+vi.mock('../../../explorer/hooks/use_severity_options', () => {
+      const mocked = {
+      useSeverityOptions: () => mockSeverityOptions,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The following mock setup is necessary so that we can simulate
 // both triggering the update callback and the internal state update
 // to update the component to the new state.
-const mockUpdateCallback = jest.fn();
-const mockUseState = jest.fn().mockImplementation(useState);
+const mockUpdateCallback = vi.fn();
+const mockUseState = vi.fn().mockImplementation(useState);
 
-jest.mock('@kbn/ml-url-state', () => ({
-  usePageUrlState: () => {
-    // Start with default state (all severity options selected)
-    const [severity, setSeverity] = mockUseState({
-      val: mockSeverityOptions.map((option) => option.threshold), // Default to all selected
+vi.mock('@kbn/ml-url-state', () => {
+      const mocked = {
+      usePageUrlState: () => {
+        // Start with default state (all severity options selected)
+        const [severity, setSeverity] = mockUseState({
+          val: mockSeverityOptions.map((option) => option.threshold), // Default to all selected
+        });
+        return [severity, mockUpdateCallback.mockImplementation((d) => setSeverity(d))];
+      },
+    };
+      return { ...mocked, default: mocked };
     });
-    return [severity, mockUpdateCallback.mockImplementation((d) => setSeverity(d))];
-  },
-}));
 
 describe('SelectSeverity', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with default severity selection', () => {
@@ -139,7 +147,7 @@ describe('SelectSeverity', () => {
       {
         val: [mockSeverityOptions[2].threshold],
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
     const { getByTestId, getByRole } = render(<SelectSeverity />);
@@ -173,7 +181,7 @@ describe('SelectSeverity', () => {
       {
         val: [mockSeverityOptions[1].threshold, mockSeverityOptions[3].threshold],
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
     const { getByTestId } = render(<SelectSeverity />);
@@ -188,7 +196,7 @@ describe('SelectSeverity', () => {
       {
         val: [mockSeverityOptions[2].threshold],
       },
-      jest.fn(),
+      vi.fn(),
     ]);
 
     const { getByTestId } = render(<SelectSeverity />);
@@ -202,7 +210,7 @@ describe('SelectSeverity', () => {
 describe('SelectSeverityUI', () => {
   it('displays a custom open-ended floor as N-100 and checks overlapping bands', async () => {
     const { getByTestId, getByRole } = render(
-      <SelectSeverityUI severity={[{ min: 30 }]} onChange={jest.fn()} />
+      <SelectSeverityUI severity={[{ min: 30 }]} onChange={vi.fn()} />
     );
 
     const control = getByTestId('mlAnomalySeverityThresholdControls');
@@ -227,7 +235,7 @@ describe('SelectSeverityUI', () => {
   });
 
   it('drops the partial first band when deselecting a higher overlapping band', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const { getByTestId, getByRole } = render(
       <SelectSeverityUI severity={[{ min: 30 }]} onChange={onChange} />
     );
@@ -253,7 +261,7 @@ describe('SelectSeverityUI', () => {
   });
 
   it('drops the partial first band when deselecting a middle overlapping band', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     const { getByTestId, getByRole } = render(
       <SelectSeverityUI severity={[{ min: 30 }]} onChange={onChange} />
     );
@@ -280,7 +288,7 @@ describe('SelectSeverityUI', () => {
 
   it('displays the canonical critical band as 75-100', () => {
     const { getByTestId } = render(
-      <SelectSeverityUI severity={[{ min: 75 }]} onChange={jest.fn()} />
+      <SelectSeverityUI severity={[{ min: 75 }]} onChange={vi.fn()} />
     );
 
     const control = getByTestId('mlAnomalySeverityThresholdControls');

@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-jest.mock('./verify_access_and_context', () => ({
-  verifyAccessAndContext: jest.fn(),
-}));
-jest.mock('../lib/connector_token_client');
+import { vi } from 'vitest';
+import type { Mock, MockedClass } from 'vitest';
+
+vi.mock('./verify_access_and_context', () => {
+      const mocked = {
+      verifyAccessAndContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/connector_token_client');
 
 import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
@@ -17,7 +23,7 @@ import { verifyAccessAndContext } from './verify_access_and_context';
 import { oauthDisconnectRoute } from './oauth_disconnect';
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 
-const MockConnectorTokenClient = ConnectorTokenClient as jest.MockedClass<
+const MockConnectorTokenClient = ConnectorTokenClient as MockedClass<
   typeof ConnectorTokenClient
 >;
 
@@ -25,20 +31,20 @@ const mockLogger = loggingSystemMock.create().get();
 const configurationUtilities = actionsConfigMock.create();
 
 const mockConnectorTokenClientInstance = {
-  deleteConnectorTokens: jest.fn(),
+  deleteConnectorTokens: vi.fn(),
 };
 
 const mockEncryptedSavedObjectsClient = {
-  getClient: jest.fn().mockReturnValue({}),
+  getClient: vi.fn().mockReturnValue({}),
 };
 
 const mockActionsClient = {
-  get: jest.fn(),
-  evictClientPool: jest.fn(),
+  get: vi.fn(),
+  evictClientPool: vi.fn(),
 };
 
 const createMockCoreSetup = () => ({
-  getStartServices: jest.fn().mockResolvedValue([
+  getStartServices: vi.fn().mockResolvedValue([
     {},
     {
       encryptedSavedObjects: mockEncryptedSavedObjectsClient,
@@ -52,15 +58,15 @@ const createMockContext = (
   core: Promise.resolve({
     security: {
       authc: {
-        getCurrentUser: jest.fn().mockReturnValue(currentUser),
+        getCurrentUser: vi.fn().mockReturnValue(currentUser),
       },
     },
     savedObjects: {
-      getClient: jest.fn().mockReturnValue({ getCurrentNamespace: jest.fn() }),
+      getClient: vi.fn().mockReturnValue({ getCurrentNamespace: vi.fn() }),
     },
   }),
   actions: Promise.resolve({
-    getActionsClient: jest.fn().mockReturnValue(mockActionsClient),
+    getActionsClient: vi.fn().mockReturnValue(mockActionsClient),
   }),
 });
 
@@ -68,11 +74,11 @@ describe('oauthDisconnectRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     router = httpServiceMock.createRouter();
-    (verifyAccessAndContext as jest.Mock).mockImplementation((_license, handler) => handler);
+    (verifyAccessAndContext as Mock).mockImplementation((_license, handler) => handler);
 
-    (mockLogger.get as jest.Mock).mockReturnValue(mockLogger);
+    (mockLogger.get as Mock).mockReturnValue(mockLogger);
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue({});
 
     MockConnectorTokenClient.mockImplementation(() => mockConnectorTokenClientInstance as never);
@@ -217,7 +223,7 @@ describe('oauthDisconnectRoute', () => {
 
   it('passes authType from config when absent in secrets', async () => {
     const mockDecryptedClient = {
-      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+      getDecryptedAsInternalUser: vi.fn().mockResolvedValue({
         attributes: {
           config: { authType: 'ears' },
           secrets: { provider: 'google' },
@@ -274,8 +280,8 @@ describe('oauthDisconnectRoute', () => {
   });
 
   it('creates ConnectorTokenClient with the correct saved objects clients', async () => {
-    const mockEncryptedClient = { getDecryptedAsInternalUser: jest.fn() };
-    const mockUnsecuredClient = { find: jest.fn() };
+    const mockEncryptedClient = { getDecryptedAsInternalUser: vi.fn() };
+    const mockUnsecuredClient = { find: vi.fn() };
 
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue(mockEncryptedClient);
 
@@ -283,15 +289,15 @@ describe('oauthDisconnectRoute', () => {
       core: Promise.resolve({
         security: {
           authc: {
-            getCurrentUser: jest.fn().mockReturnValue({ profile_uid: 'test-profile-uid' }),
+            getCurrentUser: vi.fn().mockReturnValue({ profile_uid: 'test-profile-uid' }),
           },
         },
         savedObjects: {
-          getClient: jest.fn().mockReturnValue(mockUnsecuredClient),
+          getClient: vi.fn().mockReturnValue(mockUnsecuredClient),
         },
       }),
       actions: Promise.resolve({
-        getActionsClient: jest.fn().mockReturnValue(mockActionsClient),
+        getActionsClient: vi.fn().mockReturnValue(mockActionsClient),
       }),
     };
 

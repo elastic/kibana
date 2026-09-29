@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   isInboxActionConflictError,
@@ -54,13 +57,13 @@ const ctx = (overrides: { channel?: string } = {}) => ({
 
 const fakeApi = () => {
   const api: Partial<WorkflowsManagementApi> = {
-    listWaitingForInputSteps: jest.fn(async () => ({
+    listWaitingForInputSteps: vi.fn(async () => ({
       results: [buildStep()],
       total: 1,
       reasoningByStepId: new Map(),
       deletedWorkflowIds: new Set<string>(),
     })),
-    listProcessedWaitForInputSteps: jest.fn(async () => ({
+    listProcessedWaitForInputSteps: vi.fn(async () => ({
       results: [
         buildStep({
           id: 'step-exec-2',
@@ -73,10 +76,10 @@ const fakeApi = () => {
       reasoningByStepId: new Map(),
       deletedWorkflowIds: new Set<string>(),
     })),
-    resumeWorkflowExecution: jest.fn(async () => ({ resumedBy: 'user' })),
-    getStepExecution: jest.fn(async () => buildStep()),
+    resumeWorkflowExecution: vi.fn(async () => ({ resumedBy: 'user' })),
+    getStepExecution: vi.fn(async () => buildStep()),
   };
-  return api as jest.Mocked<WorkflowsManagementApi>;
+  return api as Mocked<WorkflowsManagementApi>;
 };
 
 describe('createWorkflowsInboxProvider', () => {
@@ -113,7 +116,7 @@ describe('createWorkflowsInboxProvider', () => {
 
     it('returns an empty list when the service returns no results', async () => {
       const api = fakeApi();
-      (api.listWaitingForInputSteps as jest.Mock).mockResolvedValueOnce({
+      (api.listWaitingForInputSteps as Mock).mockResolvedValueOnce({
         results: [],
         total: 0,
       });
@@ -159,7 +162,7 @@ describe('createWorkflowsInboxProvider', () => {
 
     it('flags history rows whose parent workflow has been deleted via source_deleted', async () => {
       const api = fakeApi();
-      (api.listProcessedWaitForInputSteps as jest.Mock).mockResolvedValueOnce({
+      (api.listProcessedWaitForInputSteps as Mock).mockResolvedValueOnce({
         results: [
           buildStep({
             id: 'step-exec-deleted',
@@ -194,7 +197,7 @@ describe('createWorkflowsInboxProvider', () => {
 
     it('returns an empty list when there is no processed history', async () => {
       const api = fakeApi();
-      (api.listProcessedWaitForInputSteps as jest.Mock).mockResolvedValueOnce({
+      (api.listProcessedWaitForInputSteps as Mock).mockResolvedValueOnce({
         results: [],
         total: 0,
       });
@@ -287,7 +290,7 @@ describe('createWorkflowsInboxProvider', () => {
 
     it('maps a lost first-writer-wins claim to InboxActionConflictError', async () => {
       const api = fakeApi();
-      (api.resumeWorkflowExecution as jest.Mock).mockRejectedValueOnce(
+      (api.resumeWorkflowExecution as Mock).mockRejectedValueOnce(
         new WorkflowExecutionInvalidStatusError('run-1', 'already responded', 'waiting_for_input')
       );
       const provider = createWorkflowsInboxProvider({
@@ -324,7 +327,7 @@ describe('createWorkflowsInboxProvider', () => {
     it('propagates resumeWorkflowExecution rejection', async () => {
       const api = fakeApi();
       const boom = new Error('engine unavailable');
-      (api.resumeWorkflowExecution as jest.Mock).mockRejectedValueOnce(boom);
+      (api.resumeWorkflowExecution as Mock).mockRejectedValueOnce(boom);
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
@@ -358,14 +361,14 @@ describe('createWorkflowsInboxProvider', () => {
       );
       // Verify the lookup happens before the resume call so a stale
       // response cannot race past the check.
-      const lookupOrder = (api.getStepExecution as jest.Mock).mock.invocationCallOrder[0];
-      const resumeOrder = (api.resumeWorkflowExecution as jest.Mock).mock.invocationCallOrder[0];
+      const lookupOrder = (api.getStepExecution as Mock).mock.invocationCallOrder[0];
+      const resumeOrder = (api.resumeWorkflowExecution as Mock).mock.invocationCallOrder[0];
       expect(lookupOrder).toBeLessThan(resumeOrder);
     });
 
     it('throws InboxActionConflictError when the step execution is not found', async () => {
       const api = fakeApi();
-      (api.getStepExecution as jest.Mock).mockResolvedValueOnce(null);
+      (api.getStepExecution as Mock).mockResolvedValueOnce(null);
       const provider = createWorkflowsInboxProvider({
         api,
         logger: loggerMock.create(),
@@ -381,7 +384,7 @@ describe('createWorkflowsInboxProvider', () => {
 
     it('throws InboxActionConflictError when the step is no longer in WAITING_FOR_INPUT status', async () => {
       const api = fakeApi();
-      (api.getStepExecution as jest.Mock).mockResolvedValueOnce(
+      (api.getStepExecution as Mock).mockResolvedValueOnce(
         buildStep({ status: ExecutionStatus.COMPLETED })
       );
       const provider = createWorkflowsInboxProvider({
@@ -400,7 +403,7 @@ describe('createWorkflowsInboxProvider', () => {
 
     it('throws InboxActionConflictError when the step execution is zombie-settled (finishedAt + status=waiting_for_input)', async () => {
       const api = fakeApi();
-      (api.getStepExecution as jest.Mock).mockResolvedValueOnce(
+      (api.getStepExecution as Mock).mockResolvedValueOnce(
         buildStep({
           status: ExecutionStatus.WAITING_FOR_INPUT,
           finishedAt: '2026-04-29T21:13:59.407Z',

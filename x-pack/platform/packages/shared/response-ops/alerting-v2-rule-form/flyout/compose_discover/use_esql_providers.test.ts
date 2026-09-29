@@ -5,100 +5,108 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { ESQLLang, ESQL_LANG_ID, monaco } from '@kbn/code-editor';
 import { createMockServices } from '../../test_utils';
 import { useEsqlCallbacks } from '../../form/hooks/use_esql_callbacks';
 import { useEsqlAutocomplete } from './use_esql_providers';
 
-const mockDisposeSuggestion = jest.fn();
-const mockDisposeSignature = jest.fn();
-const mockDisposeHover = jest.fn();
-const mockDisposeInlineCompletions = jest.fn();
-const mockDisposeCodeActions = jest.fn();
-const mockDisposeDocumentHighlight = jest.fn();
+const mockDisposeSuggestion = vi.fn();
+const mockDisposeSignature = vi.fn();
+const mockDisposeHover = vi.fn();
+const mockDisposeInlineCompletions = vi.fn();
+const mockDisposeCodeActions = vi.fn();
+const mockDisposeDocumentHighlight = vi.fn();
 
-jest.mock('@kbn/code-editor', () => ({
-  ESQL_LANG_ID: 'esql',
-  ESQLLang: {
-    getSuggestionProvider: jest.fn(),
-    getSignatureProvider: jest.fn(),
-    getHoverProvider: jest.fn(),
-    getInlineCompletionsProvider: jest.fn(),
-    getCodeActionProvider: jest.fn(),
-    getDocumentHighlightProvider: jest.fn(),
-  },
-  monaco: {
-    languages: {
-      registerCompletionItemProvider: jest.fn(),
-      registerSignatureHelpProvider: jest.fn(),
-      registerHoverProvider: jest.fn(),
-      registerInlineCompletionsProvider: jest.fn(),
-      registerCodeActionProvider: jest.fn(),
-      registerDocumentHighlightProvider: jest.fn(),
-    },
-    editor: {
-      addKeybindingRule: jest.fn(),
-    },
-    KeyCode: { Tab: 2 },
-  },
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      ESQL_LANG_ID: 'esql',
+      ESQLLang: {
+        getSuggestionProvider: vi.fn(),
+        getSignatureProvider: vi.fn(),
+        getHoverProvider: vi.fn(),
+        getInlineCompletionsProvider: vi.fn(),
+        getCodeActionProvider: vi.fn(),
+        getDocumentHighlightProvider: vi.fn(),
+      },
+      monaco: {
+        languages: {
+          registerCompletionItemProvider: vi.fn(),
+          registerSignatureHelpProvider: vi.fn(),
+          registerHoverProvider: vi.fn(),
+          registerInlineCompletionsProvider: vi.fn(),
+          registerCodeActionProvider: vi.fn(),
+          registerDocumentHighlightProvider: vi.fn(),
+        },
+        editor: {
+          addKeybindingRule: vi.fn(),
+        },
+        KeyCode: { Tab: 2 },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../form/hooks/use_esql_callbacks', () => ({
-  useEsqlCallbacks: jest.fn(),
-}));
+vi.mock('../../form/hooks/use_esql_callbacks', () => {
+      const mocked = {
+      useEsqlCallbacks: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useEsqlAutocomplete', () => {
   const services = createMockServices();
-  const getSources = jest.fn();
-  const getColumnsFor = jest.fn();
-  const suggestionProvider = { provideCompletionItems: jest.fn() };
+  const getSources = vi.fn();
+  const getColumnsFor = vi.fn();
+  const suggestionProvider = { provideCompletionItems: vi.fn() };
   const signatureProvider: monaco.languages.SignatureHelpProvider = {
     signatureHelpTriggerCharacters: ['('],
-    provideSignatureHelp: jest.fn(() => ({
+    provideSignatureHelp: vi.fn(() => ({
       value: {
         signatures: [],
         activeSignature: 0,
         activeParameter: 0,
       },
-      dispose: jest.fn(),
+      dispose: vi.fn(),
     })),
   };
-  const hoverProvider = { provideHover: jest.fn() };
+  const hoverProvider = { provideHover: vi.fn() };
   const inlineCompletionsProvider = {
-    provideInlineCompletions: jest.fn(),
-    freeInlineCompletions: jest.fn(),
+    provideInlineCompletions: vi.fn(),
+    freeInlineCompletions: vi.fn(),
   };
-  const codeActionProvider = { provideCodeActions: jest.fn() };
-  const documentHighlightProvider = { provideDocumentHighlights: jest.fn() };
+  const codeActionProvider = { provideCodeActions: vi.fn() };
+  const documentHighlightProvider = { provideDocumentHighlights: vi.fn() };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest
+    vi.clearAllMocks();
+    vi
       .mocked(monaco.languages.registerCompletionItemProvider)
       .mockReturnValue({ dispose: mockDisposeSuggestion });
-    jest
+    vi
       .mocked(monaco.languages.registerSignatureHelpProvider)
       .mockReturnValue({ dispose: mockDisposeSignature });
-    jest
+    vi
       .mocked(monaco.languages.registerHoverProvider)
       .mockReturnValue({ dispose: mockDisposeHover });
-    jest
+    vi
       .mocked(monaco.languages.registerInlineCompletionsProvider)
       .mockReturnValue({ dispose: mockDisposeInlineCompletions });
-    jest
+    vi
       .mocked(monaco.languages.registerCodeActionProvider)
       .mockReturnValue({ dispose: mockDisposeCodeActions });
-    jest
+    vi
       .mocked(monaco.languages.registerDocumentHighlightProvider)
       .mockReturnValue({ dispose: mockDisposeDocumentHighlight });
-    jest.mocked(ESQLLang.getSuggestionProvider).mockReturnValue(suggestionProvider);
-    jest.mocked(ESQLLang.getSignatureProvider!).mockReturnValue(signatureProvider);
-    jest.mocked(ESQLLang.getHoverProvider!).mockReturnValue(hoverProvider);
-    jest.mocked(ESQLLang.getInlineCompletionsProvider!).mockReturnValue(inlineCompletionsProvider);
-    jest.mocked(ESQLLang.getCodeActionProvider!).mockReturnValue(codeActionProvider);
-    jest.mocked(ESQLLang.getDocumentHighlightProvider!).mockReturnValue(documentHighlightProvider);
-    jest.mocked(useEsqlCallbacks).mockReturnValue({ getSources, getColumnsFor });
+    vi.mocked(ESQLLang.getSuggestionProvider).mockReturnValue(suggestionProvider);
+    vi.mocked(ESQLLang.getSignatureProvider!).mockReturnValue(signatureProvider);
+    vi.mocked(ESQLLang.getHoverProvider!).mockReturnValue(hoverProvider);
+    vi.mocked(ESQLLang.getInlineCompletionsProvider!).mockReturnValue(inlineCompletionsProvider);
+    vi.mocked(ESQLLang.getCodeActionProvider!).mockReturnValue(codeActionProvider);
+    vi.mocked(ESQLLang.getDocumentHighlightProvider!).mockReturnValue(documentHighlightProvider);
+    vi.mocked(useEsqlCallbacks).mockReturnValue({ getSources, getColumnsFor });
   });
 
   it('registers ES|QL autocomplete, signature help, and hover providers', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import type {
   CreateExceptionListSchema,
@@ -38,14 +40,14 @@ const getQueryParams = () => ({
 const apiVersion = '2023-10-31';
 
 describe('Exceptions List Api Client', () => {
-  let fakeCoreStart: jest.Mocked<CoreStart>;
-  let fakeHttpServices: jest.Mocked<HttpSetup>;
+  let fakeCoreStart: Mocked<CoreStart>;
+  let fakeHttpServices: Mocked<HttpSetup>;
   let getInstance: () => ExceptionsListApiClient;
 
   // Initialize mocks once as the ExceptionsListApiClient is a singleton
   beforeAll(() => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
-    fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
+    fakeHttpServices = fakeCoreStart.http as Mocked<HttpSetup>;
   });
 
   // Clear every function mock on each execution
@@ -317,7 +319,7 @@ describe('Exceptions List Api Client', () => {
       );
 
       fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
-      fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
+      fakeHttpServices = fakeCoreStart.http as Mocked<HttpSetup>;
 
       const newInstance = ExceptionsListApiClient.getInstance(
         fakeHttpServices,

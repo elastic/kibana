@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -19,34 +22,49 @@ import {
   ATTACK_STATUS_ACTION_IDS,
 } from '../../../../common/constants/action_ids';
 
-jest.mock('../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: () => 'default',
-}));
+vi.mock('../../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: () => 'default',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items',
-  () => ({
-    useAttackWorkflowStatusContextMenuItems: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        useAttackWorkflowStatusContextMenuItems: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
-  useInvalidateFindAttackDiscoveries: () => jest.fn(),
-}));
+vi.mock('../../../../attack_discovery/pages/use_find_attack_discoveries', () => {
+      const mocked = {
+      useInvalidateFindAttackDiscoveries: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../attack_discovery/pages/use_attack_discovery_bulk', () => ({
-  useAttackDiscoveryBulk: () => ({
-    mutateAsync: jest.fn().mockResolvedValue(undefined),
-  }),
-}));
+vi.mock('../../../../attack_discovery/pages/use_attack_discovery_bulk', () => {
+      const mocked = {
+      useAttackDiscoveryBulk: () => ({
+        mutateAsync: vi.fn().mockResolvedValue(undefined),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../attack_discovery/pages/results/take_action/use_update_alerts_status',
-  () => ({
-    useUpdateAlertsStatus: () => ({
-      mutateAsync: jest.fn().mockResolvedValue(undefined),
-    }),
-  })
+  () => {
+      const mocked = {
+        useUpdateAlertsStatus: () => ({
+          mutateAsync: vi.fn().mockResolvedValue(undefined),
+        }),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
 const buildHit = (overrides: Record<string, unknown> = {}): DataTableRecord =>
@@ -63,12 +81,12 @@ const buildHit = (overrides: Record<string, unknown> = {}): DataTableRecord =>
   } as unknown as DataTableRecord);
 
 describe('StatusPopoverButton (attack flyout v2)', () => {
-  const onAttackUpdated = jest.fn();
+  const onAttackUpdated = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useAttackWorkflowStatusContextMenuItems as jest.Mock).mockImplementation(
+    (useAttackWorkflowStatusContextMenuItems as Mock).mockImplementation(
       ({ onSuccess }: { onSuccess: () => void }) => ({
         items: [
           {
@@ -198,7 +216,7 @@ describe('StatusPopoverButton (attack flyout v2)', () => {
   });
 
   test('does not open the popover when there are no action items', async () => {
-    (useAttackWorkflowStatusContextMenuItems as jest.Mock).mockImplementation(() => ({
+    (useAttackWorkflowStatusContextMenuItems as Mock).mockImplementation(() => ({
       items: [],
       panels: [],
     }));

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { monaco } from '@kbn/code-editor';
@@ -28,31 +31,46 @@ import {
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 
 // Mock dependencies
-jest.mock('@kbn/esql-utils', () => ({
-  getLookupIndicesFromQuery: jest.fn(),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getLookupIndicesFromQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_lookup_index_privileges', () => ({
-  useLookupIndexPrivileges: jest.fn(),
-}));
+vi.mock('./use_lookup_index_privileges', () => {
+      const mocked = {
+      useLookupIndexPrivileges: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./append_index_to_join_command', () => ({
-  appendIndexToJoinCommandByName: jest.fn(),
-  appendIndexToJoinCommandByPosition: jest.fn(),
-}));
+vi.mock('./append_index_to_join_command', () => {
+      const mocked = {
+      appendIndexToJoinCommandByName: vi.fn(),
+      appendIndexToJoinCommandByPosition: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-hooks', () => ({
-  useDebounceFn: jest.fn((fn) => ({ run: fn })),
-}));
+vi.mock('@kbn/react-hooks', () => {
+      const mocked = {
+      useDebounceFn: vi.fn((fn) => ({ run: fn })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => ({
-  useEuiTheme: () => ({
-    euiTheme: {
-      colors: { textParagraph: '#000' },
-      border: { width: { thick: '2px' } },
-    },
-  }),
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      useEuiTheme: () => ({
+        euiTheme: {
+          colors: { textParagraph: '#000' },
+          border: { width: { thick: '2px' } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockServices = {
   ...coreMock.createStart(),
@@ -140,17 +158,17 @@ describe('getMonacoCommandString', () => {
 });
 
 describe('useCanCreateLookupIndex', () => {
-  const mockGetPermissions = jest.fn();
+  const mockGetPermissions = vi.fn();
 
   beforeEach(() => {
     mockServices.application.currentAppId$ = of('discover');
-    (useLookupIndexPrivileges as jest.Mock).mockReturnValue({
+    (useLookupIndexPrivileges as Mock).mockReturnValue({
       getPermissions: mockGetPermissions,
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return true when user has create permissions', async () => {
@@ -196,36 +214,36 @@ describe('useLookupIndexCommand', () => {
   const mockEditorModel = { current: undefined } as React.MutableRefObject<
     monaco.editor.ITextModel | undefined
   >;
-  const mockGetLookupIndices = jest.fn();
-  const mockOnIndexCreated = jest.fn();
-  const mockGetPermissions = jest.fn();
+  const mockGetLookupIndices = vi.fn();
+  const mockOnIndexCreated = vi.fn();
+  const mockGetPermissions = vi.fn();
   const mockQuery = { esql: 'FROM logs | LOOKUP JOIN test-index ON field' };
 
   const mockEditor = {
-    getPosition: jest.fn(),
-    createDecorationsCollection: jest.fn(),
-    getLineDecorations: jest.fn(() => []),
-    removeDecorations: jest.fn(),
+    getPosition: vi.fn(),
+    createDecorationsCollection: vi.fn(),
+    getLineDecorations: vi.fn(() => []),
+    removeDecorations: vi.fn(),
   } as unknown as monaco.editor.IStandaloneCodeEditor;
 
   const mockModel = {
-    getLineCount: jest.fn(() => 5),
-    findMatches: jest.fn(() => [
+    getLineCount: vi.fn(() => 5),
+    findMatches: vi.fn(() => [
       { range: { startLineNumber: 1, endLineNumber: 1, startColumn: 1, endColumn: 10 } },
     ]),
-    deltaDecorations: jest.fn(() => ['decoration-1']),
+    deltaDecorations: vi.fn(() => ['decoration-1']),
   } as unknown as monaco.editor.ITextModel;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     mockServices.application.currentAppId$ = of('discover');
 
-    (useLookupIndexPrivileges as jest.Mock).mockReturnValue({
+    (useLookupIndexPrivileges as Mock).mockReturnValue({
       getPermissions: mockGetPermissions,
     });
 
-    (getLookupIndicesFromQuery as jest.Mock).mockReturnValue(['test-index']);
+    (getLookupIndicesFromQuery as Mock).mockReturnValue(['test-index']);
 
     mockEditorRef.current = mockEditor;
     mockEditorModel.current = mockModel;
@@ -239,18 +257,18 @@ describe('useLookupIndexCommand', () => {
     });
 
     const mockTrigger = {
-      exec: jest.fn(),
-    } as unknown as jest.Mocked<Trigger>;
+      exec: vi.fn(),
+    } as unknown as Mocked<Trigger>;
     mockServices.uiActions.getTrigger.mockReturnValue(mockTrigger);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   it('should register monaco command on mount', () => {
-    const registerCommandSpy = jest.spyOn(monaco.editor, 'registerCommand');
+    const registerCommandSpy = vi.spyOn(monaco.editor, 'registerCommand');
 
     renderHook(
       () =>
@@ -285,7 +303,7 @@ describe('useLookupIndexCommand', () => {
 
     result.current.addLookupIndicesDecorator();
 
-    await jest.advanceTimersByTimeAsync(600);
+    await vi.advanceTimersByTimeAsync(600);
 
     expect(mockModel.deltaDecorations).toHaveBeenCalledWith(
       [],
@@ -321,7 +339,7 @@ describe('useLookupIndexCommand', () => {
 
     result.current.addLookupIndicesDecorator();
 
-    await jest.advanceTimersByTimeAsync(600);
+    await vi.advanceTimersByTimeAsync(600);
 
     expect(mockModel.deltaDecorations).toHaveBeenCalledWith(
       [],
@@ -337,13 +355,13 @@ describe('useLookupIndexCommand', () => {
       ])
     );
 
-    const call = (mockModel.deltaDecorations as jest.Mock).mock.calls[0];
+    const call = (mockModel.deltaDecorations as Mock).mock.calls[0];
     const decoration = call[1][0];
     expect(decoration.options.hoverMessage.value).not.toContain('command:');
   });
 
   it('should handle flyout close with index creation', async () => {
-    (appendIndexToJoinCommandByName as jest.Mock).mockReturnValue(
+    (appendIndexToJoinCommandByName as Mock).mockReturnValue(
       'FROM logs | JOIN new-index ON field'
     );
 
@@ -360,7 +378,7 @@ describe('useLookupIndexCommand', () => {
     );
 
     // Access the private onFlyoutClose function through the openFlyout mechanism
-    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+    (mockServices.uiActions.executeTriggerActions as Mock).mockImplementation(
       async (_, context) => {
         await context.onClose({
           indexName: 'new-index',
@@ -370,7 +388,7 @@ describe('useLookupIndexCommand', () => {
     );
 
     // Trigger the command
-    const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
+    const registerCommandCall = vi.mocked(monaco.editor.registerCommand).mock.calls[0];
     const commandHandler = registerCommandCall[1];
 
     await commandHandler(undefined, {
@@ -383,11 +401,11 @@ describe('useLookupIndexCommand', () => {
   });
 
   it('should handle cursor position when no initial index name', async () => {
-    (appendIndexToJoinCommandByPosition as jest.Mock).mockReturnValue(
+    (appendIndexToJoinCommandByPosition as Mock).mockReturnValue(
       'FROM logs | LOOKUP JOIN cursor-index ON field'
     );
 
-    (mockEditor.getPosition as jest.Mock).mockReturnValue({
+    (mockEditor.getPosition as Mock).mockReturnValue({
       lineNumber: 1,
       column: 15,
     } as monaco.Position);
@@ -404,7 +422,7 @@ describe('useLookupIndexCommand', () => {
       { wrapper: createWrapper }
     );
 
-    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+    (mockServices.uiActions.executeTriggerActions as Mock).mockImplementation(
       async (_, context) => {
         await context.onClose({
           indexName: 'cursor-index',
@@ -413,7 +431,7 @@ describe('useLookupIndexCommand', () => {
       }
     );
 
-    const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
+    const registerCommandCall = vi.mocked(monaco.editor.registerCommand).mock.calls[0];
     const commandHandler = registerCommandCall[1];
 
     await commandHandler(undefined, {
@@ -430,7 +448,7 @@ describe('useLookupIndexCommand', () => {
   });
 
   it('should throw error when no cursor position and no index name', async () => {
-    (mockEditor.getPosition as jest.Mock).mockReturnValue(null);
+    (mockEditor.getPosition as Mock).mockReturnValue(null);
 
     renderHook(
       () =>
@@ -445,7 +463,7 @@ describe('useLookupIndexCommand', () => {
     );
 
     await expect(async () => {
-      (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+      (mockServices.uiActions.executeTriggerActions as Mock).mockImplementation(
         async (_, context) => {
           await context.onClose({
             indexName: 'new-index',
@@ -454,7 +472,7 @@ describe('useLookupIndexCommand', () => {
         }
       );
 
-      const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
+      const registerCommandCall = vi.mocked(monaco.editor.registerCommand).mock.calls[0];
       const commandHandler = registerCommandCall[1];
 
       await commandHandler(undefined, {
@@ -478,7 +496,7 @@ describe('useLookupIndexCommand', () => {
       { wrapper: createWrapper }
     );
 
-    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+    (mockServices.uiActions.executeTriggerActions as Mock).mockImplementation(
       async (_, context) => {
         await context.onClose({
           indexName: null,
@@ -487,7 +505,7 @@ describe('useLookupIndexCommand', () => {
       }
     );
 
-    const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
+    const registerCommandCall = vi.mocked(monaco.editor.registerCommand).mock.calls[0];
     const commandHandler = registerCommandCall[1];
 
     await commandHandler(undefined, {
@@ -520,7 +538,7 @@ describe('useLookupIndexCommand', () => {
   });
 
   it('should call onNewFieldsAddedToIndex when a new field has been added', async () => {
-    const mockOnNewFieldsAddedToIndex = jest.fn();
+    const mockOnNewFieldsAddedToIndex = vi.fn();
 
     renderHook(
       () =>
@@ -536,7 +554,7 @@ describe('useLookupIndexCommand', () => {
     );
 
     // Access the onFlyoutClose function through the openFlyout mechanism
-    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+    (mockServices.uiActions.executeTriggerActions as Mock).mockImplementation(
       async (_, context) => {
         await context.onClose({
           indexName: 'test-index',
@@ -547,7 +565,7 @@ describe('useLookupIndexCommand', () => {
     );
 
     // Trigger the command
-    const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
+    const registerCommandCall = vi.mocked(monaco.editor.registerCommand).mock.calls[0];
     const commandHandler = registerCommandCall[1];
 
     await commandHandler(undefined, {
@@ -560,7 +578,7 @@ describe('useLookupIndexCommand', () => {
   });
 
   it('should not call onNewFieldsAddedToIndex when no new field has been added', async () => {
-    const mockOnNewFieldsAddedToIndex = jest.fn();
+    const mockOnNewFieldsAddedToIndex = vi.fn();
 
     renderHook(
       () =>
@@ -576,7 +594,7 @@ describe('useLookupIndexCommand', () => {
     );
 
     // Access the onFlyoutClose function through the openFlyout mechanism
-    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+    (mockServices.uiActions.executeTriggerActions as Mock).mockImplementation(
       async (_, context) => {
         await context.onClose({
           indexName: 'test-index',
@@ -587,7 +605,7 @@ describe('useLookupIndexCommand', () => {
     );
 
     // Trigger the command
-    const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
+    const registerCommandCall = vi.mocked(monaco.editor.registerCommand).mock.calls[0];
     const commandHandler = registerCommandCall[1];
 
     await commandHandler(undefined, {

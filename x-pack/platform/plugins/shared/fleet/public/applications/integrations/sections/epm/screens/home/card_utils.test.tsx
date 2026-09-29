@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { createIntegrationsTestRendererMock } from '../../../../../../mock';
@@ -382,7 +384,7 @@ describe('Card utils', () => {
     });
 
     it('does not put return params on package card hrefs', () => {
-      const getHrefWithValues: Parameters<typeof mapToCard>[0]['getHref'] = jest.fn(
+      const getHrefWithValues: Parameters<typeof mapToCard>[0]['getHref'] = vi.fn(
         (_page: string, values?: DynamicPagePathValues) =>
           `integration_details_overview?${new URLSearchParams(
             Object.entries(values ?? {}).map(([key, value]) => [key, String(value)])

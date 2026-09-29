@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { findMaintenanceWindows, getStatusFilter } from './find_maintenance_windows';
 import {
   savedObjectsClientMock,
@@ -20,20 +23,20 @@ import { findMaintenanceWindowsParamsSchema } from './schemas';
 const savedObjectsClient = savedObjectsClientMock.create();
 const uiSettings = uiSettingsServiceMock.createClient();
 
-const mockContext: jest.Mocked<MaintenanceWindowClientContext> = {
+const mockContext: Mocked<MaintenanceWindowClientContext> = {
   logger: loggingSystemMock.create().get(),
-  getModificationMetadata: jest.fn(),
+  getModificationMetadata: vi.fn(),
   savedObjectsClient,
   uiSettings,
 };
 
 describe('MaintenanceWindowClient - find', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('throws an error if page is string', async () => {
@@ -61,7 +64,7 @@ describe('MaintenanceWindowClient - find', () => {
   });
 
   it('throws an error if savedObjectsClient.find will throw an error', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     savedObjectsClient.find.mockImplementation(() => {
       throw new Error('something went wrong!');
@@ -75,8 +78,8 @@ describe('MaintenanceWindowClient - find', () => {
   });
 
   it('should find maintenance windows', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
-    const spy = jest.spyOn(findMaintenanceWindowsParamsSchema, 'validate');
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    const spy = vi.spyOn(findMaintenanceWindowsParamsSchema, 'validate');
 
     savedObjectsClient.find.mockResolvedValueOnce({
       saved_objects: [

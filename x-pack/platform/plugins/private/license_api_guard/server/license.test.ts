@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -42,7 +44,7 @@ describe('License API guard', () => {
     const license = new License();
 
     const logger = {
-      warn: jest.fn(),
+      warn: vi.fn(),
     };
 
     license.setup({ pluginName, logger });
@@ -54,9 +56,9 @@ describe('License API guard', () => {
       licensing,
     });
 
-    const route = jest.fn();
+    const route = vi.fn();
     const guardedRoute = license.guardApiRoute(route);
-    const forbidden = jest.fn();
+    const forbidden = vi.fn();
     const responseMock = httpServerMock.createResponseFactory();
     responseMock.forbidden = forbidden;
     const maybePromise = guardedRoute(

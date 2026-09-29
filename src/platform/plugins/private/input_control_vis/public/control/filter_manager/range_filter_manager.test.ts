@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import expect from '@kbn/expect';
 
 import { RangeFilterManager } from './range_filter_manager';
@@ -35,8 +38,8 @@ describe('RangeFilterManager', function () {
       },
     } as DataView;
     const indexPatternsServiceMock = {
-      get: jest.fn().mockReturnValue(Promise.resolve(indexPatternMock)),
-    } as unknown as jest.Mocked<DataViewsContract>;
+      get: vi.fn().mockReturnValue(Promise.resolve(indexPatternMock)),
+    } as unknown as Mocked<DataViewsContract>;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: RangeFilterManager;
     beforeEach(async () => {

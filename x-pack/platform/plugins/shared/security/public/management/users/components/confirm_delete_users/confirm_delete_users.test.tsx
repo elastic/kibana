@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -20,7 +22,7 @@ describe('ConfirmDeleteUsers', () => {
         userAPIClient={userAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
         usersToDelete={['foo']}
-        onCancel={jest.fn()}
+        onCancel={vi.fn()}
       />
     );
 
@@ -33,7 +35,7 @@ describe('ConfirmDeleteUsers', () => {
         userAPIClient={userAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
         usersToDelete={['foo', 'bar', 'baz']}
-        onCancel={jest.fn()}
+        onCancel={vi.fn()}
       />
     );
 
@@ -41,7 +43,7 @@ describe('ConfirmDeleteUsers', () => {
   });
 
   it('fires onCancel when the operation is cancelled', () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
     const wrapper = mountWithIntl(
       <ConfirmDeleteUsers
         userAPIClient={userAPIClientMock.create()}
@@ -59,7 +61,7 @@ describe('ConfirmDeleteUsers', () => {
   });
 
   it('deletes the requested users when confirmed', () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
     const apiClientMock = userAPIClientMock.create();
 
     const wrapper = mountWithIntl(
@@ -79,7 +81,7 @@ describe('ConfirmDeleteUsers', () => {
   });
 
   it('attempts to delete all users even if some fail', () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
 
     const apiClientMock = userAPIClientMock.create();
     apiClientMock.deleteUser.mockImplementation((user) => {

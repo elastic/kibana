@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useSetInitialValue } from './use_set_initial_value';
 import type { IToasts } from '@kbn/core-notifications-browser';
@@ -15,34 +18,46 @@ import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
 import { removeLoadFromParameter } from '../../../lib/load_from';
 import { useEditorActionContext } from '../../../contexts';
 
-jest.mock('lz-string', () => ({
-  decompressFromEncodedURIComponent: jest.fn(),
-}));
+vi.mock('lz-string', () => {
+      const mocked = {
+      decompressFromEncodedURIComponent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/load_from', () => ({
-  removeLoadFromParameter: jest.fn(),
-}));
+vi.mock('../../../lib/load_from', () => {
+      const mocked = {
+      removeLoadFromParameter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_set_initial_value', () => ({
-  ...jest.requireActual('./use_set_initial_value'),
-}));
+vi.mock('./use_set_initial_value', async () => {
+      const mocked = {
+      ...(await vi.importActual('./use_set_initial_value')),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../contexts', () => ({
-  useEditorActionContext: jest.fn(),
-}));
+vi.mock('../../../contexts', () => {
+      const mocked = {
+      useEditorActionContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseEditorActionContext = useEditorActionContext as jest.MockedFunction<
+const mockUseEditorActionContext = useEditorActionContext as MockedFunction<
   typeof useEditorActionContext
 >;
 
 describe('useSetInitialValue', () => {
-  const setValueMock = jest.fn();
-  const addWarningMock = jest.fn();
-  const editorDispatchMock = jest.fn();
+  const setValueMock = vi.fn();
+  const addWarningMock = vi.fn();
+  const editorDispatchMock = vi.fn();
   const toastsMock: IToasts = { addWarning: addWarningMock } as any;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseEditorActionContext.mockReturnValue(editorDispatchMock);
   });
 
@@ -125,11 +140,11 @@ describe('useSetInitialValue', () => {
     });
 
     // Mock fetch to return "remote data"
-    global.fetch = jest.fn(() =>
+    global.fetch = vi.fn(() =>
       Promise.resolve({
         text: () => Promise.resolve('remote data'),
       })
-    ) as jest.Mock;
+    ) as Mock;
 
     await act(async () => {
       renderHook(() =>
@@ -151,7 +166,7 @@ describe('useSetInitialValue', () => {
 
     // Verify fetch was called with the correct URL
     expect(fetch).toHaveBeenCalled();
-    const fetchCall = (fetch as jest.Mock).mock.calls[0];
+    const fetchCall = (fetch as Mock).mock.calls[0];
     expect(fetchCall[0].href).toBe('https://www.elastic.co/docs/some-data');
 
     // The initial value should still be set
@@ -202,7 +217,7 @@ describe('useSetInitialValue', () => {
         hash: '?load_from=data:text/plain,compressed-data',
       },
     });
-    (decompressFromEncodedURIComponent as jest.Mock).mockReturnValue('decompressed data');
+    (decompressFromEncodedURIComponent as Mock).mockReturnValue('decompressed data');
 
     await act(async () => {
       renderHook(() =>
@@ -239,7 +254,7 @@ describe('useSetInitialValue', () => {
         hash: '?load_from=data:text/plain,invalid-data',
       },
     });
-    (decompressFromEncodedURIComponent as jest.Mock).mockReturnValue(null);
+    (decompressFromEncodedURIComponent as Mock).mockReturnValue(null);
 
     await act(async () => {
       renderHook(() =>
@@ -271,7 +286,7 @@ describe('useSetInitialValue', () => {
         hash: '?load_from=data:text/plain,compressed-data',
       },
     });
-    (decompressFromEncodedURIComponent as jest.Mock).mockReturnValue('decompressed data');
+    (decompressFromEncodedURIComponent as Mock).mockReturnValue('decompressed data');
 
     await act(async () => {
       renderHook(() =>
@@ -302,7 +317,7 @@ describe('useSetInitialValue', () => {
       },
     });
 
-    global.fetch = jest.fn(() => Promise.reject(new Error('Network error'))) as jest.Mock;
+    global.fetch = vi.fn(() => Promise.reject(new Error('Network error'))) as Mock;
 
     await act(async () => {
       renderHook(() =>

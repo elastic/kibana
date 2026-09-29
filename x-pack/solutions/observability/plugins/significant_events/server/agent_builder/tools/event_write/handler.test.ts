@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { eventsWriteBulkHandler, eventsWriteHandler, type EventsWriteInput } from './handler';
 import type {
   SignificantEvent,
@@ -70,32 +73,32 @@ const makeStoredEvent = (
  * Override individual methods by passing a partial mock.
  */
 const makeEventClient = (
-  overrides: Partial<jest.Mocked<EventClient>> = {}
-): jest.Mocked<EventClient> =>
+  overrides: Partial<Mocked<EventClient>> = {}
+): Mocked<EventClient> =>
   ({
-    findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
-    findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
-    findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
-    bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
-    emitTrigger: jest.fn(),
+    findLatestActive: vi.fn().mockResolvedValue({ hits: [] }),
+    findLatestByEventIds: vi.fn().mockResolvedValue(new Map()),
+    findByEventId: vi.fn().mockResolvedValue({ hits: [] }),
+    bulkCreate: vi.fn().mockImplementation(successfulBulkCreate),
+    emitTrigger: vi.fn(),
     ...overrides,
-  } as jest.Mocked<EventClient>);
+  } as Mocked<EventClient>);
 
 const makeAlertEventsClient = (
-  overrides: Partial<jest.Mocked<AlertEventsClientApi>> = {}
-): jest.Mocked<AlertEventsClientApi> =>
+  overrides: Partial<Mocked<AlertEventsClientApi>> = {}
+): Mocked<AlertEventsClientApi> =>
   ({
-    createAlertEvent: jest.fn().mockResolvedValue(undefined),
+    createAlertEvent: vi.fn().mockResolvedValue(undefined),
     ...overrides,
-  } as jest.Mocked<AlertEventsClientApi>);
+  } as Mocked<AlertEventsClientApi>);
 
-const makeLogger = (): jest.Mocked<Logger> =>
+const makeLogger = (): Mocked<Logger> =>
   ({
-    error: jest.fn(),
-    warn: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+  } as unknown as Mocked<Logger>);
 
 describe('eventsWriteHandler', () => {
   it('writes a new event', async () => {
@@ -119,8 +122,8 @@ describe('eventsWriteHandler', () => {
   });
 
   it('skips latest-version lookup when event_id is absent', async () => {
-    const findLatestByEventIds = jest.fn();
-    const findByEventId = jest.fn();
+    const findLatestByEventIds = vi.fn();
+    const findByEventId = vi.fn();
     const eventClient = makeEventClient({
       findLatestByEventIds,
       findByEventId,
@@ -142,8 +145,8 @@ describe('eventsWriteHandler', () => {
   });
 
   it('treats an empty event_id as absent and generates a synthetic ID', async () => {
-    const findLatestByEventIds = jest.fn();
-    const bulkCreate = jest.fn().mockImplementation(successfulBulkCreate);
+    const findLatestByEventIds = vi.fn();
+    const bulkCreate = vi.fn().mockImplementation(successfulBulkCreate);
     const eventClient = makeEventClient({ findLatestByEventIds, bulkCreate });
 
     const result = await eventsWriteHandler({
@@ -163,7 +166,7 @@ describe('eventsWriteHandler', () => {
       status: 'closed',
     });
     const eventClient = makeEventClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+      findByEventId: vi.fn().mockResolvedValue({ hits: [stored] }),
     });
 
     const result = await eventsWriteHandler({
@@ -207,7 +210,7 @@ describe('eventsWriteHandler', () => {
       investigations: storedInvestigations,
     });
     const eventClient = makeEventClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+      findByEventId: vi.fn().mockResolvedValue({ hits: [stored] }),
     });
 
     await eventsWriteHandler({
@@ -222,9 +225,9 @@ describe('eventsWriteHandler', () => {
     it('returns EventsWriteNoOpResult when severity and status are unchanged for a snapshot candidate', async () => {
       const stored = makeStoredEvent('checkout-stable');
       const eventClient = makeEventClient({
-        findLatestByEventIds: jest.fn().mockResolvedValue(new Map([['checkout-stable', stored]])),
-        findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-        bulkCreate: jest.fn(),
+        findLatestByEventIds: vi.fn().mockResolvedValue(new Map([['checkout-stable', stored]])),
+        findByEventId: vi.fn().mockResolvedValue({ hits: [stored] }),
+        bulkCreate: vi.fn(),
       });
 
       const result = await eventsWriteHandler({
@@ -271,9 +274,9 @@ describe('eventsWriteHandler', () => {
         signals: [ruleOne],
       });
       const eventClient = makeEventClient({
-        findLatestByEventIds: jest.fn().mockResolvedValue(new Map([['checkout-stable', stored]])),
-        findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-        bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+        findLatestByEventIds: vi.fn().mockResolvedValue(new Map([['checkout-stable', stored]])),
+        findByEventId: vi.fn().mockResolvedValue({ hits: [stored] }),
+        bulkCreate: vi.fn().mockImplementation(successfulBulkCreate),
       });
 
       const result = await eventsWriteHandler({
@@ -309,11 +312,11 @@ describe('eventsWriteHandler', () => {
       };
       const latest = makeStoredEvent('checkout-stable');
       const eventClient = makeEventClient({
-        findLatestByEventIds: jest.fn().mockResolvedValue(new Map([['checkout-stable', latest]])),
-        findByEventId: jest.fn().mockResolvedValue({
+        findLatestByEventIds: vi.fn().mockResolvedValue(new Map([['checkout-stable', latest]])),
+        findByEventId: vi.fn().mockResolvedValue({
           hits: [makeStoredEvent('checkout-stable', { signals: [ruleOne] }), latest],
         }),
-        bulkCreate: jest.fn(),
+        bulkCreate: vi.fn(),
       });
 
       const result = await eventsWriteHandler({
@@ -333,7 +336,7 @@ describe('eventsWriteHandler', () => {
 
     it('throws when the bulk result is existing_active_event (wrapper does not swallow skips)', async () => {
       const eventClient = makeEventClient({
-        findLatestActive: jest.fn().mockResolvedValue({
+        findLatestActive: vi.fn().mockResolvedValue({
           hits: [makeStoredEvent('existing-event-id')],
         }),
       });
@@ -372,7 +375,7 @@ describe('eventsWriteBulkHandler', () => {
 
   it('returns aligned per-item bulk failures', async () => {
     const eventClient = makeEventClient({
-      bulkCreate: jest.fn().mockResolvedValue({
+      bulkCreate: vi.fn().mockResolvedValue({
         errors: true,
         items: [
           { create: { status: 201, result: 'created' } },
@@ -407,7 +410,7 @@ describe('eventsWriteBulkHandler', () => {
 
   it('returns per-item errors for duplicate event_ids without throwing', async () => {
     const eventClient = makeEventClient({
-      bulkCreate: jest.fn().mockResolvedValue({
+      bulkCreate: vi.fn().mockResolvedValue({
         errors: false,
         items: [{ create: { result: 'created', _id: 'doc-1', status: 201 } }],
       }),
@@ -429,8 +432,8 @@ describe('eventsWriteBulkHandler', () => {
   });
 
   it('routes to find-or-create (dedup scan) when event_id is absent', async () => {
-    const findLatestActive = jest.fn().mockResolvedValue({ hits: [] });
-    const findLatestByEventIds = jest.fn();
+    const findLatestActive = vi.fn().mockResolvedValue({ hits: [] });
+    const findLatestByEventIds = vi.fn();
     const eventClient = makeEventClient({ findLatestActive, findLatestByEventIds });
 
     const results = await eventsWriteBulkHandler({
@@ -449,7 +452,7 @@ describe('eventsWriteBulkHandler', () => {
     ['missing create result (item has no .create)', { errors: false, items: [{}] }],
   ])('classifies a %s bulk response as outcome unknown', async (_, response) => {
     const eventClient = makeEventClient({
-      bulkCreate: jest.fn().mockResolvedValue(response),
+      bulkCreate: vi.fn().mockResolvedValue(response),
     });
 
     await expect(
@@ -462,7 +465,7 @@ describe('eventsWriteBulkHandler', () => {
 
   it('classifies a rejected bulk request as outcome unknown', async () => {
     const eventClient = makeEventClient({
-      bulkCreate: jest.fn().mockRejectedValue(new Error('connection reset')),
+      bulkCreate: vi.fn().mockRejectedValue(new Error('connection reset')),
     });
 
     await expect(
@@ -475,7 +478,7 @@ describe('eventsWriteBulkHandler', () => {
 
   it('keeps the single-item wrapper throwing on an item failure', async () => {
     const eventClient = makeEventClient({
-      bulkCreate: jest.fn().mockResolvedValue({
+      bulkCreate: vi.fn().mockResolvedValue({
         errors: true,
         items: [
           { create: { status: 400, error: { type: 'mapper_parsing_exception', reason: 'bad' } } },
@@ -546,8 +549,8 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 
   it('skips write and returns existing event_id when an active duplicate is found', async () => {
     const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [makeActiveDedupEvent()] }),
-      bulkCreate: jest.fn(),
+      findLatestActive: vi.fn().mockResolvedValue({ hits: [makeActiveDedupEvent()] }),
+      bulkCreate: vi.fn(),
     });
 
     const results = await eventsWriteBulkHandler({
@@ -571,8 +574,8 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
       signals: [makeDetectionSignal({ change_point_type: 'spike' })],
     });
     const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [existingEvent] }),
-      bulkCreate: jest.fn(),
+      findLatestActive: vi.fn().mockResolvedValue({ hits: [existingEvent] }),
+      bulkCreate: vi.fn(),
     });
 
     const results = await eventsWriteBulkHandler({
@@ -594,8 +597,8 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     // Now dedup is time-unbounded: any active event with the same identity is a duplicate.
     const oldActiveEvent = makeActiveDedupEvent({ '@timestamp': '2000-01-01T00:00:00.000Z' });
     const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [oldActiveEvent] }),
-      bulkCreate: jest.fn(),
+      findLatestActive: vi.fn().mockResolvedValue({ hits: [oldActiveEvent] }),
+      bulkCreate: vi.fn(),
     });
 
     const results = await eventsWriteBulkHandler({
@@ -614,7 +617,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 
   it('returns duplicate_in_batch error for a second in-batch item with the same identity', async () => {
     const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findLatestActive: vi.fn().mockResolvedValue({ hits: [] }),
     });
 
     const results = await eventsWriteBulkHandler({
@@ -629,7 +632,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 
   it('treats two in-batch dedup items with same streams+rules as duplicate_in_batch regardless of change_point_type', async () => {
     const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findLatestActive: vi.fn().mockResolvedValue({ hits: [] }),
     });
 
     const results = await eventsWriteBulkHandler({
@@ -648,7 +651,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
   it('deduplicates a later in-batch item against an earlier one with the same change_point_type', async () => {
     const spikeInput = makeDedupInputWithChangePointType('spike');
     const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findLatestActive: vi.fn().mockResolvedValue({ hits: [] }),
     });
 
     const results = await eventsWriteBulkHandler({
@@ -663,7 +666,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 
   it('treats dedup items with same identity (change_point_type omitted vs explicit) as duplicate_in_batch', async () => {
     const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findLatestActive: vi.fn().mockResolvedValue({ hits: [] }),
     });
 
     const results = await eventsWriteBulkHandler({
@@ -680,7 +683,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
   });
 
   it('uses only one findLatestActive scan for multiple dedup candidates', async () => {
-    const findLatestActive = jest.fn().mockResolvedValue({ hits: [] });
+    const findLatestActive = vi.fn().mockResolvedValue({ hits: [] });
     const eventClient = makeEventClient({ findLatestActive });
 
     await eventsWriteBulkHandler({
@@ -701,7 +704,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
   ])(
     'omits $field from the scan when any candidate in the batch has none',
     async ({ field, override }) => {
-      const findLatestActive = jest.fn().mockResolvedValue({ hits: [] });
+      const findLatestActive = vi.fn().mockResolvedValue({ hits: [] });
       const eventClient = makeEventClient({ findLatestActive });
 
       await eventsWriteBulkHandler({
@@ -726,8 +729,8 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
       ],
     });
     const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [widerRuleEvent] }),
-      bulkCreate: jest.fn(),
+      findLatestActive: vi.fn().mockResolvedValue({ hits: [widerRuleEvent] }),
+      bulkCreate: vi.fn(),
     });
 
     const results = await eventsWriteBulkHandler({
@@ -748,7 +751,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     // Existing event covers [rule-abc]; candidate carries [rule-xyz] — genuinely new signal.
     const existingEvent = makeActiveDedupEvent({ signals: [makeDetectionSignal()] });
     const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [existingEvent] }),
+      findLatestActive: vi.fn().mockResolvedValue({ hits: [existingEvent] }),
     });
 
     const results = await eventsWriteBulkHandler({
@@ -770,8 +773,8 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
       stream_names: ['logs.checkout', 'logs.payments'],
     });
     const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [widerStreamEvent] }),
-      bulkCreate: jest.fn(),
+      findLatestActive: vi.fn().mockResolvedValue({ hits: [widerStreamEvent] }),
+      bulkCreate: vi.fn(),
     });
 
     const results = await eventsWriteBulkHandler({
@@ -792,7 +795,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     // Existing on [checkout]; candidate on [payments] — no stream intersection, no match.
     const checkoutEvent = makeActiveDedupEvent({ stream_names: ['logs.checkout'] });
     const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [checkoutEvent] }),
+      findLatestActive: vi.fn().mockResolvedValue({ hits: [checkoutEvent] }),
     });
 
     const results = await eventsWriteBulkHandler({
@@ -810,8 +813,8 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     });
 
     const eventClient = makeEventClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [existingEvent] }),
-      bulkCreate: jest.fn(),
+      findLatestActive: vi.fn().mockResolvedValue({ hits: [existingEvent] }),
+      bulkCreate: vi.fn(),
     });
 
     const results = await eventsWriteBulkHandler({
@@ -836,8 +839,8 @@ describe('eventsWriteBulkHandler — continuation status', () => {
     const eventId = `checkout-${status}`;
     const stored = makeStoredEvent(eventId, { status, severity: undefined });
     const eventClient = makeEventClient({
-      findLatestByEventIds: jest.fn().mockResolvedValue(new Map([[eventId, stored]])),
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+      findLatestByEventIds: vi.fn().mockResolvedValue(new Map([[eventId, stored]])),
+      findByEventId: vi.fn().mockResolvedValue({ hits: [stored] }),
     });
 
     const results = await eventsWriteBulkHandler({
@@ -852,8 +855,8 @@ describe('eventsWriteBulkHandler — continuation status', () => {
   it('no-op guard skips when both severity and status are identical to latest', async () => {
     const stored = makeStoredEvent('checkout-stable');
     const eventClient = makeEventClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-      bulkCreate: jest.fn(),
+      findByEventId: vi.fn().mockResolvedValue({ hits: [stored] }),
+      bulkCreate: vi.fn(),
     });
 
     const results = await eventsWriteBulkHandler({
@@ -884,8 +887,8 @@ describe('eventsWriteBulkHandler — continuation status', () => {
     async (_, inputOverrides, expectedStatus) => {
       const stored = makeStoredEvent('checkout-changing');
       const eventClient = makeEventClient({
-        findLatestByEventIds: jest.fn().mockResolvedValue(new Map([['checkout-changing', stored]])),
-        findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+        findLatestByEventIds: vi.fn().mockResolvedValue(new Map([['checkout-changing', stored]])),
+        findByEventId: vi.fn().mockResolvedValue({ hits: [stored] }),
       });
 
       const results = await eventsWriteBulkHandler({
@@ -931,8 +934,8 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
   it('calibrates before the no-op check and skips a same-rule severity change', async () => {
     const stored = makeInvestigatedEvent();
     const eventClient = makeEventClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
-      bulkCreate: jest.fn(),
+      findByEventId: vi.fn().mockResolvedValue({ hits: [stored] }),
+      bulkCreate: vi.fn(),
     });
 
     const [result] = await eventsWriteBulkHandler({
@@ -955,7 +958,7 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
   it('writes a new unconfirmed rule with the investigated severity', async () => {
     const stored = makeInvestigatedEvent();
     const eventClient = makeEventClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+      findByEventId: vi.fn().mockResolvedValue({ hits: [stored] }),
     });
 
     await eventsWriteBulkHandler({
@@ -977,7 +980,7 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
   it('accepts severity from a new confirmed rule', async () => {
     const stored = makeInvestigatedEvent();
     const eventClient = makeEventClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+      findByEventId: vi.fn().mockResolvedValue({ hits: [stored] }),
     });
 
     await eventsWriteBulkHandler({
@@ -1001,7 +1004,7 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
     ['reopen', makeInvestigatedEvent({ status: 'closed' }), 'open' as const],
   ])('accepts severity on %s', async (_, stored, status) => {
     const eventClient = makeEventClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+      findByEventId: vi.fn().mockResolvedValue({ hits: [stored] }),
     });
 
     await eventsWriteBulkHandler({
@@ -1128,7 +1131,7 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     stored.symptom_hypothesis = 'EIS auth route returns >=400 for all clients.';
 
     const eventClient = makeEventClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+      findByEventId: vi.fn().mockResolvedValue({ hits: [stored] }),
     });
 
     const [result] = await eventsWriteBulkHandler({
@@ -1159,7 +1162,7 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     stored.symptom_hypothesis = 'EIS auth route returns >=400 for all clients.';
 
     const eventClient = makeEventClient({
-      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+      findByEventId: vi.fn().mockResolvedValue({ hits: [stored] }),
     });
 
     const [result] = await eventsWriteBulkHandler({
@@ -1244,7 +1247,7 @@ describe('eventsWriteBulkHandler — dual-write to .rule-events (Writer 1)', () 
       ),
     });
     const eventClient = makeEventClient({
-      bulkCreate: jest.fn().mockImplementation(errorBulkCreate),
+      bulkCreate: vi.fn().mockImplementation(errorBulkCreate),
     });
     const alertEventsClient = makeAlertEventsClient();
 

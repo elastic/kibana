@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Observable } from 'rxjs';
 import type { Capabilities } from '@kbn/core/public';
 import type { TopNavConfigParams } from './get_top_nav_config';
@@ -66,18 +68,18 @@ const getMenuItemIds = (result: ReturnType<typeof getTopNavConfig>) =>
   result.menu.items?.map(({ id }) => id) ?? [];
 
 describe('getTopNavConfig', () => {
-  const stateContainerGetStateMock = jest.fn(() => visualizeAppStateStub);
+  const stateContainerGetStateMock = vi.fn(() => visualizeAppStateStub);
   const stateContainer = {
     getState: stateContainerGetStateMock,
     state$: new Observable(),
     transitions: {
-      updateVisState: jest.fn(),
-      set: jest.fn(),
+      updateVisState: vi.fn(),
+      set: vi.fn(),
     },
   } as unknown as VisualizeAppStateContainer;
   const mockServices = createVisualizeServicesMock();
   const share = sharePluginMock.createStartContract();
-  share.availableIntegrations = jest.fn().mockReturnValue([]);
+  share.availableIntegrations = vi.fn().mockReturnValue([]);
   const services = {
     ...mockServices,
     visualizeCapabilities: {
@@ -91,16 +93,16 @@ describe('getTopNavConfig', () => {
 
   const defaultParams = {
     hasUnsavedChanges: false,
-    setHasUnsavedChanges: jest.fn(),
+    setHasUnsavedChanges: vi.fn(),
     hasUnappliedChanges: false,
-    openInspector: jest.fn(),
-    setOriginatingApp: jest.fn(),
+    openInspector: vi.fn(),
+    setOriginatingApp: vi.fn(),
     stateContainer,
     visualizationIdFromUrl: undefined,
     inspectorAvailable: true,
     stateTransfer: {
       ...createEmbeddableStateTransferMock(),
-      getAppNameFromId: jest.fn((appId: string) => appId),
+      getAppNameFromId: vi.fn((appId: string) => appId),
     },
   };
 
@@ -156,7 +158,7 @@ describe('getTopNavConfig', () => {
       },
     } as VisualizeEditorVisInstance;
 
-    const availableExportIntegrationsSpy = jest.spyOn(share, 'availableIntegrations');
+    const availableExportIntegrationsSpy = vi.spyOn(share, 'availableIntegrations');
 
     availableExportIntegrationsSpy.mockImplementationOnce((_objectType, groupId) => {
       if (groupId === 'export') {
@@ -258,7 +260,7 @@ describe('getTopNavConfig', () => {
         },
       },
     } as VisualizeEditorVisInstance;
-    const mockNavigateToApp = jest.fn();
+    const mockNavigateToApp = vi.fn();
     const result = getTopNavConfig(
       {
         ...defaultParams,
@@ -270,7 +272,7 @@ describe('getTopNavConfig', () => {
         ...services,
         application: {
           navigateToApp: mockNavigateToApp,
-          getUrlForApp: jest.fn(() => '/app/testApp/testPath'),
+          getUrlForApp: vi.fn(() => '/app/testApp/testPath'),
         },
       } as unknown as VisualizeServices
     );

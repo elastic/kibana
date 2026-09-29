@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { FILE_FORMATS, NO_TIME_FORMAT } from '@kbn/file-upload-common';
 import type { AnalysisResult, InputOverrides } from '@kbn/file-upload-common';
 import {
@@ -18,10 +20,13 @@ import {
 } from './utils';
 
 // Keep UPLOAD_SIZE_MB * MB small so truncate tests do not need multi-MB buffers.
-jest.mock('@kbn/file-upload-common', () => ({
-  ...jest.requireActual('@kbn/file-upload-common'),
-  MB: 20,
-}));
+vi.mock('@kbn/file-upload-common', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/file-upload-common')),
+      MB: 20,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const UPLOAD_SIZE_BYTES = 5 * 20;
 

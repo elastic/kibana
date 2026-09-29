@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-jest.mock('./nav_link_helpers', () => ({
-  generateNavLink: jest.fn(({ to, items }) => ({ href: to, items })),
-}));
+import { vi } from 'vitest';
+
+vi.mock('./nav_link_helpers', () => {
+      const mocked = {
+      generateNavLink: vi.fn(({ to, items }) => ({ href: to, items })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
@@ -118,7 +123,7 @@ const defaultMockValues = {
 
 describe('useEnterpriseSearchContentNav', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibanaValues.uiSettings.get.mockReturnValue(false);
     mockKibanaValues.getNavLinks.mockReturnValue(mockNavLinks);
   });
@@ -134,7 +139,7 @@ describe('useEnterpriseSearchContentNav', () => {
 
 describe('useEnterpriseSearchApplicationNav', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockKibanaValues.getNavLinks.mockReturnValue(mockNavLinks);
     mockKibanaValues.uiSettings.get.mockReturnValue(true);
     setMockValues(defaultMockValues);
@@ -148,7 +153,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
 
 describe('useEnterpriseSearchAnalyticsNav', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues(defaultMockValues);
     mockKibanaValues.getNavLinks.mockReturnValue(mockNavLinks);
   });

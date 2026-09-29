@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { MAX_PROPOSALS_PAGE_OFFSET, MAX_PROPOSALS_PAGE_SIZE } from '@kbn/proposals-common';
@@ -16,11 +19,14 @@ import type {
   OpenProposalConversationIdsReader,
 } from '../../services/watches/hunt/common/build_candidate_query';
 
-jest.mock('../../services/watches/hunt/common/build_candidate_query', () => ({
-  buildCandidateQuery: jest.fn(),
-}));
+vi.mock('../../services/watches/hunt/common/build_candidate_query', () => {
+      const mocked = {
+      buildCandidateQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const buildCandidateQueryMock = buildCandidateQuery as jest.MockedFunction<
+const buildCandidateQueryMock = buildCandidateQuery as MockedFunction<
   typeof buildCandidateQuery
 >;
 
@@ -40,10 +46,10 @@ const pageOf = (size: number, total: number, offset: number) => ({
 });
 
 const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
-  const addVersion = jest.fn();
-  const router = { versioned: { post: jest.fn().mockReturnValue({ addVersion }) } };
+  const addVersion = vi.fn();
+  const router = { versioned: { post: vi.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
-  const list = jest.fn().mockResolvedValue({ total: 0, proposals: [] });
+  const list = vi.fn().mockResolvedValue({ total: 0, proposals: [] });
 
   registerCandidatesRoute({
     router: router as unknown as RouteDependencies['router'],
@@ -55,8 +61,8 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
       >),
   } as unknown as RouteDependencies);
 
-  const asCurrentUser = { search: jest.fn() };
-  const asInternalUser = { search: jest.fn() };
+  const asCurrentUser = { search: vi.fn() };
+  const asInternalUser = { search: vi.fn() };
   const context = {
     core: Promise.resolve({ elasticsearch: { client: { asCurrentUser, asInternalUser } } }),
   };

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
@@ -38,25 +41,25 @@ import {
 describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
   let router: RouterMock;
   let coreStart: ReturnType<typeof coreMock.createStart>;
-  let getStartServices: jest.MockedFunction<StartServicesAccessor<StartPlugins>>;
+  let getStartServices: MockedFunction<StartServicesAccessor<StartPlugins>>;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
-  let uiSettingsClient: { get: jest.Mock; setMany: jest.Mock };
-  let auditLogger: { log: jest.Mock };
-  let hasAtLeast: jest.Mock;
+  let uiSettingsClient: { get: Mock; setMany: Mock };
+  let auditLogger: { log: Mock };
+  let hasAtLeast: Mock;
   let managedWorkflowsClient: {
-    install: jest.Mock;
-    uninstall: jest.Mock;
-    ready: jest.Mock;
-    getWorkflowStatus: jest.Mock;
-    getInstalledWorkflowState: jest.Mock;
-    listInstalledWorkflowStates: jest.Mock;
-    execute: jest.Mock;
+    install: Mock;
+    uninstall: Mock;
+    ready: Mock;
+    getWorkflowStatus: Mock;
+    getInstalledWorkflowState: Mock;
+    listInstalledWorkflowStates: Mock;
+    execute: Mock;
   };
 
   const createContext = (): SecuritySolutionRequestHandlerContext => {
     const securitySolutionContext = {
-      getSpaceId: jest.fn().mockReturnValue('space-1'),
-      getAuditLogger: jest.fn().mockReturnValue(auditLogger),
+      getSpaceId: vi.fn().mockReturnValue('space-1'),
+      getAuditLogger: vi.fn().mockReturnValue(auditLogger),
     } as unknown as Pick<SecuritySolutionApiRequestHandlerContext, 'getSpaceId' | 'getAuditLogger'>;
 
     return {
@@ -78,28 +81,28 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
     router = httpServiceMock.createRouter() as unknown as RouterMock;
     coreStart = coreMock.createStart();
     mockResponse = httpServerMock.createResponseFactory();
-    auditLogger = { log: jest.fn() };
-    hasAtLeast = jest.fn().mockReturnValue(true);
+    auditLogger = { log: vi.fn() };
+    hasAtLeast = vi.fn().mockReturnValue(true);
     uiSettingsClient = {
-      get: jest.fn(),
-      setMany: jest.fn().mockResolvedValue(undefined),
+      get: vi.fn(),
+      setMany: vi.fn().mockResolvedValue(undefined),
     };
     managedWorkflowsClient = {
-      install: jest.fn().mockResolvedValue(undefined),
-      uninstall: jest.fn().mockResolvedValue(undefined),
-      ready: jest.fn().mockResolvedValue(undefined),
-      getWorkflowStatus: jest.fn().mockResolvedValue({ status: 'intact' }),
-      getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
-      listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
-      execute: jest.fn().mockResolvedValue('mock-execution-id'),
+      install: vi.fn().mockResolvedValue(undefined),
+      uninstall: vi.fn().mockResolvedValue(undefined),
+      ready: vi.fn().mockResolvedValue(undefined),
+      getWorkflowStatus: vi.fn().mockResolvedValue({ status: 'intact' }),
+      getInstalledWorkflowState: vi.fn().mockResolvedValue(null),
+      listInstalledWorkflowStates: vi.fn().mockResolvedValue([]),
+      execute: vi.fn().mockResolvedValue('mock-execution-id'),
     };
 
-    (coreStart.uiSettings.asScopedToClient as jest.Mock).mockReturnValue(uiSettingsClient);
+    (coreStart.uiSettings.asScopedToClient as Mock).mockReturnValue(uiSettingsClient);
 
     const workflowsExtensions = workflowsExtensionsMock.createStart();
     workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managedWorkflowsClient);
 
-    getStartServices = jest
+    getStartServices = vi
       .fn()
       .mockResolvedValue([
         coreStart,

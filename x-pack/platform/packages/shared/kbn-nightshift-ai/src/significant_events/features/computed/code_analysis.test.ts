@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CODE_ANALYSIS_FEATURE_TYPE, COMPUTED_FEATURE_TYPES } from '@kbn/significant-events-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AnalysisTarget } from '../../../shared/analysis_target';
@@ -25,7 +27,7 @@ const baseOptions = (
   start: 0,
   end: 1,
   esClient: {} as ElasticsearchClient,
-  logger: { debug: jest.fn() } as unknown as Logger,
+  logger: { debug: vi.fn() } as unknown as Logger,
   signal: new AbortController().signal,
   ...overrides,
 });
@@ -43,7 +45,7 @@ describe('codeAnalysisGenerator', () => {
 
   it('delegates to the injected provider and returns its value', async () => {
     const value = { repository: 'acme/checkout', verified_strings: ['x'], evidence: [] };
-    const provider = jest.fn().mockResolvedValue(value);
+    const provider = vi.fn().mockResolvedValue(value);
     const options = baseOptions({ providers: { [CODE_ANALYSIS_PROVIDER_KEY]: provider } });
 
     await expect(codeAnalysisGenerator.generate(options)).resolves.toBe(value);
@@ -51,7 +53,7 @@ describe('codeAnalysisGenerator', () => {
   });
 
   it('returns undefined when the provider produces no feature', async () => {
-    const provider = jest.fn().mockResolvedValue(undefined);
+    const provider = vi.fn().mockResolvedValue(undefined);
     const options = baseOptions({ providers: { [CODE_ANALYSIS_PROVIDER_KEY]: provider } });
 
     await expect(codeAnalysisGenerator.generate(options)).resolves.toBeUndefined();

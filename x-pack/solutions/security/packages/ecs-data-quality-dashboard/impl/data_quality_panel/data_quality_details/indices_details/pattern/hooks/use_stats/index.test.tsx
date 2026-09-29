@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
@@ -16,9 +18,9 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import type { Theme } from '@elastic/charts';
 import { mockStatsAuditbeatIndex } from '../../../../../mock/stats/mock_stats_auditbeat_index';
 
-const mockHttpFetch = jest.fn();
-const mockReportDataQualityIndexChecked = jest.fn();
-const mockReportDataQualityCheckAllClicked = jest.fn();
+const mockHttpFetch = vi.fn();
+const mockReportDataQualityIndexChecked = vi.fn();
+const mockReportDataQualityCheckAllClicked = vi.fn();
 const mockTelemetryEvents = {
   reportDataQualityIndexChecked: mockReportDataQualityIndexChecked,
   reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
@@ -34,16 +36,16 @@ const ContextWrapper: FC<PropsWithChildren<{ isILMAvailable?: boolean }>> = ({
     telemetryEvents={mockTelemetryEvents}
     isILMAvailable={isILMAvailable}
     toasts={toasts}
-    addSuccessToast={jest.fn()}
-    canUserCreateAndReadCases={jest.fn(() => true)}
+    addSuccessToast={vi.fn()}
+    canUserCreateAndReadCases={vi.fn(() => true)}
     endDate={null}
-    formatBytes={jest.fn()}
-    formatNumber={jest.fn()}
+    formatBytes={vi.fn()}
+    formatNumber={vi.fn()}
     isAssistantEnabled={true}
     lastChecked={'2023-03-28T22:27:28.159Z'}
-    openCreateCaseFlyout={jest.fn()}
+    openCreateCaseFlyout={vi.fn()}
     patterns={['auditbeat-*']}
-    setLastChecked={jest.fn()}
+    setLastChecked={vi.fn()}
     startDate={null}
     theme={{
       background: {
@@ -72,7 +74,7 @@ const ContextWrapper: FC<PropsWithChildren<{ isILMAvailable?: boolean }>> = ({
         value: 'unmanaged',
       },
     ]}
-    setSelectedIlmPhaseOptions={jest.fn()}
+    setSelectedIlmPhaseOptions={vi.fn()}
     defaultStartTime={'now-7d'}
     defaultEndTime={'now'}
   >
@@ -89,7 +91,7 @@ const params = {
 
 describe('useStats', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('query with date range when ILM is not available', () => {

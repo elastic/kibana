@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -17,7 +19,7 @@ const editableTitle = (
   overrides: Partial<AppHeaderEditableTitle> = {}
 ): AppHeaderEditableTitle => ({
   text: 'My dashboard',
-  onSave: jest.fn(),
+  onSave: vi.fn(),
   ...overrides,
 });
 
@@ -70,7 +72,7 @@ describe('Title', () => {
 
   describe('saving', () => {
     it('trims the value and calls onSave once, then exits edit mode', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
       render(<Title title={editableTitle({ onSave })} />);
 
       const input = enterEditMode();
@@ -83,7 +85,7 @@ describe('Title', () => {
     });
 
     it('does not call onSave when the value is unchanged but still exits edit mode', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       render(<Title title={editableTitle({ onSave })} />);
 
       const input = enterEditMode();
@@ -95,7 +97,7 @@ describe('Title', () => {
     });
 
     it('commits via onSave when the input is blurred (click away)', async () => {
-      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onSave = vi.fn().mockResolvedValue(undefined);
       render(<Title title={editableTitle({ onSave })} />);
 
       const input = enterEditMode();
@@ -107,7 +109,7 @@ describe('Title', () => {
 
     it('keeps the input disabled and busy while saving, then exits when resolved', async () => {
       let resolveSave: () => void;
-      const onSave = jest.fn().mockReturnValue(
+      const onSave = vi.fn().mockReturnValue(
         new Promise<void>((resolve) => {
           resolveSave = resolve;
         })
@@ -135,7 +137,7 @@ describe('Title', () => {
 
   describe('validation and errors', () => {
     it('shows the empty-title error and does not call onSave', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       render(<Title title={editableTitle({ onSave })} />);
 
       const input = enterEditMode();
@@ -148,7 +150,7 @@ describe('Title', () => {
     });
 
     it('surfaces an error string returned by onSave and keeps the editor open', async () => {
-      const onSave = jest.fn().mockResolvedValue('Name already taken');
+      const onSave = vi.fn().mockResolvedValue('Name already taken');
       render(<Title title={editableTitle({ onSave })} />);
 
       const input = enterEditMode();
@@ -160,7 +162,7 @@ describe('Title', () => {
     });
 
     it('surfaces a generic error when onSave rejects and keeps the editor open', async () => {
-      const onSave = jest.fn().mockRejectedValue(new Error('boom'));
+      const onSave = vi.fn().mockRejectedValue(new Error('boom'));
       render(<Title title={editableTitle({ onSave })} />);
 
       const input = enterEditMode();
@@ -174,7 +176,7 @@ describe('Title', () => {
 
   describe('cancelling', () => {
     it('discards the draft on Escape without calling onSave', async () => {
-      const onSave = jest.fn();
+      const onSave = vi.fn();
       render(<Title title={editableTitle({ onSave })} />);
 
       const input = enterEditMode();

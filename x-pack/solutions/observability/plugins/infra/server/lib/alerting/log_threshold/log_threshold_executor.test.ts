@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { LogThresholdAlertReporter } from './log_threshold_executor';
 import {
   getGroupedESQuery,
@@ -431,14 +434,14 @@ describe('Log threshold executor', () => {
   describe('Results processors', () => {
     describe('for ungrouped results', () => {
       it('handles the ALERT state correctly', () => {
-        const alertReporterMock: jest.MockedFunction<LogThresholdAlertReporter> = jest.fn();
+        const alertReporterMock: MockedFunction<LogThresholdAlertReporter> = vi.fn();
         const alertsClientMock = {
-          report: jest.fn(),
-          getAlertLimitValue: jest.fn().mockReturnValue(10),
-          setAlertLimitReached: jest.fn(),
-          getRecoveredAlerts: jest.fn(),
-          setAlertData: jest.fn(),
-          isTrackedAlert: jest.fn(),
+          report: vi.fn(),
+          getAlertLimitValue: vi.fn().mockReturnValue(10),
+          setAlertLimitReached: vi.fn(),
+          getRecoveredAlerts: vi.fn(),
+          setAlertData: vi.fn(),
+          isTrackedAlert: vi.fn(),
         };
 
         const ruleParams = {
@@ -471,14 +474,14 @@ describe('Log threshold executor', () => {
       });
 
       it('reports reaching a low limit when alerting', () => {
-        const alertReporterMock: jest.MockedFunction<LogThresholdAlertReporter> = jest.fn();
+        const alertReporterMock: MockedFunction<LogThresholdAlertReporter> = vi.fn();
         const alertsClientMock = {
-          report: jest.fn(),
-          getAlertLimitValue: jest.fn().mockReturnValue(1),
-          setAlertLimitReached: jest.fn(),
-          getRecoveredAlerts: jest.fn(),
-          setAlertData: jest.fn(),
-          isTrackedAlert: jest.fn(),
+          report: vi.fn(),
+          getAlertLimitValue: vi.fn().mockReturnValue(1),
+          setAlertLimitReached: vi.fn(),
+          getRecoveredAlerts: vi.fn(),
+          setAlertData: vi.fn(),
+          isTrackedAlert: vi.fn(),
         };
 
         const ruleParams = {
@@ -500,14 +503,14 @@ describe('Log threshold executor', () => {
       });
 
       it('reports not reaching a higher limit when alerting', () => {
-        const alertReporterMock: jest.MockedFunction<LogThresholdAlertReporter> = jest.fn();
+        const alertReporterMock: MockedFunction<LogThresholdAlertReporter> = vi.fn();
         const alertsClientMock = {
-          report: jest.fn(),
-          getAlertLimitValue: jest.fn().mockReturnValue(10),
-          setAlertLimitReached: jest.fn(),
-          getRecoveredAlerts: jest.fn(),
-          setAlertData: jest.fn(),
-          isTrackedAlert: jest.fn(),
+          report: vi.fn(),
+          getAlertLimitValue: vi.fn().mockReturnValue(10),
+          setAlertLimitReached: vi.fn(),
+          getRecoveredAlerts: vi.fn(),
+          setAlertData: vi.fn(),
+          isTrackedAlert: vi.fn(),
         };
 
         const ruleParams = {
@@ -529,14 +532,14 @@ describe('Log threshold executor', () => {
       });
 
       it('reports not reaching the limit without any alerts', () => {
-        const alertReporterMock: jest.MockedFunction<LogThresholdAlertReporter> = jest.fn();
+        const alertReporterMock: MockedFunction<LogThresholdAlertReporter> = vi.fn();
         const alertsClientMock = {
-          report: jest.fn(),
-          getAlertLimitValue: jest.fn().mockReturnValue(0),
-          setAlertLimitReached: jest.fn(),
-          getRecoveredAlerts: jest.fn(),
-          setAlertData: jest.fn(),
-          isTrackedAlert: jest.fn(),
+          report: vi.fn(),
+          getAlertLimitValue: vi.fn().mockReturnValue(0),
+          setAlertLimitReached: vi.fn(),
+          getRecoveredAlerts: vi.fn(),
+          setAlertData: vi.fn(),
+          isTrackedAlert: vi.fn(),
         };
 
         const ruleParams = {
@@ -560,14 +563,14 @@ describe('Log threshold executor', () => {
 
     describe('for grouped results', () => {
       it('handles the ALERT state correctly', () => {
-        const alertReporterMock: jest.MockedFunction<LogThresholdAlertReporter> = jest.fn();
+        const alertReporterMock: MockedFunction<LogThresholdAlertReporter> = vi.fn();
         const alertsClientMock = {
-          report: jest.fn(),
-          getAlertLimitValue: jest.fn().mockReturnValue(2),
-          setAlertLimitReached: jest.fn(),
-          getRecoveredAlerts: jest.fn(),
-          setAlertData: jest.fn(),
-          isTrackedAlert: jest.fn(),
+          report: vi.fn(),
+          getAlertLimitValue: vi.fn().mockReturnValue(2),
+          setAlertLimitReached: vi.fn(),
+          getRecoveredAlerts: vi.fn(),
+          setAlertData: vi.fn(),
+          isTrackedAlert: vi.fn(),
         };
 
         const ruleParams = {
@@ -699,14 +702,14 @@ describe('Log threshold executor', () => {
       });
 
       it('respects and reports reaching a low limit when alerting', () => {
-        const alertReporterMock: jest.MockedFunction<LogThresholdAlertReporter> = jest.fn();
+        const alertReporterMock: MockedFunction<LogThresholdAlertReporter> = vi.fn();
         const alertsClientMock = {
-          report: jest.fn(),
-          getAlertLimitValue: jest.fn().mockReturnValue(1),
-          setAlertLimitReached: jest.fn(),
-          getRecoveredAlerts: jest.fn(),
-          setAlertData: jest.fn(),
-          isTrackedAlert: jest.fn(),
+          report: vi.fn(),
+          getAlertLimitValue: vi.fn().mockReturnValue(1),
+          setAlertLimitReached: vi.fn(),
+          getRecoveredAlerts: vi.fn(),
+          setAlertData: vi.fn(),
+          isTrackedAlert: vi.fn(),
         };
 
         const ruleParams = {
@@ -788,14 +791,14 @@ describe('Log threshold executor', () => {
       });
 
       it('reports not reaching a higher limit when alerting', () => {
-        const alertReporterMock: jest.MockedFunction<LogThresholdAlertReporter> = jest.fn();
+        const alertReporterMock: MockedFunction<LogThresholdAlertReporter> = vi.fn();
         const alertsClientMock = {
-          report: jest.fn(),
-          getAlertLimitValue: jest.fn().mockReturnValue(10),
-          setAlertLimitReached: jest.fn(),
-          getRecoveredAlerts: jest.fn(),
-          setAlertData: jest.fn(),
-          isTrackedAlert: jest.fn(),
+          report: vi.fn(),
+          getAlertLimitValue: vi.fn().mockReturnValue(10),
+          setAlertLimitReached: vi.fn(),
+          getRecoveredAlerts: vi.fn(),
+          setAlertData: vi.fn(),
+          isTrackedAlert: vi.fn(),
         };
 
         const ruleParams = {

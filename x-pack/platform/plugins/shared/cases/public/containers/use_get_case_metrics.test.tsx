@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -16,8 +19,8 @@ import { TestProviders } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
 import { CaseMetricsFeature } from '../../common/types/api';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
 const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <TestProviders>{children}</TestProviders>
@@ -28,11 +31,11 @@ describe('useGetCaseMetrics', () => {
   const features: SingleCaseMetricsFeature[] = [CaseMetricsFeature.ALERTS_COUNT];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls getSingleCaseMetrics with correct arguments', async () => {
-    const spyOnGetCaseMetrics = jest.spyOn(api, 'getSingleCaseMetrics');
+    const spyOnGetCaseMetrics = vi.spyOn(api, 'getSingleCaseMetrics');
 
     renderHook(() => useGetCaseMetrics(basicCase.id, features), {
       wrapper,
@@ -44,10 +47,10 @@ describe('useGetCaseMetrics', () => {
   });
 
   it('shows an error toast when getSingleCaseMetrics throws', async () => {
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addError });
 
-    const spyOnGetCaseMetrics = jest.spyOn(api, 'getSingleCaseMetrics');
+    const spyOnGetCaseMetrics = vi.spyOn(api, 'getSingleCaseMetrics');
     spyOnGetCaseMetrics.mockImplementation(() => {
       throw new Error('Something went wrong');
     });

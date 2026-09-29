@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import {
   mockContext,
   lookupIndexFields,
@@ -136,9 +139,9 @@ describe('RERANK Autocomplete', () => {
   let mockCallbacks: ICommandCallbacks;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCallbacks = getMockCallbacks();
-    (mockCallbacks.getColumnsForQuery as jest.Mock).mockResolvedValue([...lookupIndexFields]);
+    (mockCallbacks.getColumnsForQuery as Mock).mockResolvedValue([...lookupIndexFields]);
   });
 
   // ============================================================================
@@ -149,7 +152,7 @@ describe('RERANK Autocomplete', () => {
     test('suggests query literal and target field after RERANK keyword', async () => {
       const expectedSuggestions = [QUERY_LITERAL, 'col0 = '];
 
-      (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
+      (mockCallbacks.getSuggestedUserDefinedColumnName as Mock).mockReturnValue('col0');
 
       await expectRerankSuggestions('from a | rerank', expectedSuggestions, mockCallbacks);
     });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import type { AgentService } from './agents_service';
 import { createPublicAgentsContract } from './create_public_agents_contract';
@@ -18,8 +20,8 @@ const buildAgent = (skillIds?: string[]): AgentDefinition =>
 describe('createPublicAgentsContract - addSkillToAgent', () => {
   it('appends the skill id to the existing skill_ids and updates the agent', async () => {
     const agentService = {
-      get: jest.fn().mockResolvedValue(buildAgent(['a'])),
-      update: jest.fn().mockResolvedValue(buildAgent(['a', 'b'])),
+      get: vi.fn().mockResolvedValue(buildAgent(['a'])),
+      update: vi.fn().mockResolvedValue(buildAgent(['a', 'b'])),
     } as unknown as AgentService;
     const contract = createPublicAgentsContract({ agentService });
 
@@ -33,8 +35,8 @@ describe('createPublicAgentsContract - addSkillToAgent', () => {
 
   it('treats missing skill_ids as an empty list', async () => {
     const agentService = {
-      get: jest.fn().mockResolvedValue(buildAgent(undefined)),
-      update: jest.fn().mockResolvedValue(buildAgent(['b'])),
+      get: vi.fn().mockResolvedValue(buildAgent(undefined)),
+      update: vi.fn().mockResolvedValue(buildAgent(['b'])),
     } as unknown as AgentService;
     const contract = createPublicAgentsContract({ agentService });
 
@@ -48,8 +50,8 @@ describe('createPublicAgentsContract - addSkillToAgent', () => {
   it('is idempotent when the skill is already attached', async () => {
     const existing = buildAgent(['a', 'b']);
     const agentService = {
-      get: jest.fn().mockResolvedValue(existing),
-      update: jest.fn(),
+      get: vi.fn().mockResolvedValue(existing),
+      update: vi.fn(),
     } as unknown as AgentService;
     const contract = createPublicAgentsContract({ agentService });
 

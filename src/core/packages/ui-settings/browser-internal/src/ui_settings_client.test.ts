@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { materialize, take, toArray } from 'rxjs';
 
@@ -20,13 +22,13 @@ let done$: Subject<unknown>;
 function setup(options: { defaults?: any; initialSettings?: any } = {}) {
   const { defaults = { dateFormat: { value: 'Browser' } }, initialSettings = {} } = options;
 
-  const batchSet = jest.fn(() => ({
+  const batchSet = vi.fn(() => ({
     settings: {},
   }));
-  const batchSetGlobal = jest.fn(() => ({
+  const batchSetGlobal = vi.fn(() => ({
     settings: {},
   }));
-  const validate = jest.fn(
+  const validate = vi.fn(
     (): ValidationApiResponse => ({
       valid: false,
       errorMessage: TEST_VALIDATION_ERROR_MESSAGE,
@@ -265,7 +267,7 @@ describe('#isCustom', () => {
 
 describe('#getUpdate$', () => {
   it('sends { key, newValue, oldValue } notifications when client changes', () => {
-    const handler = jest.fn();
+    const handler = vi.fn();
     const { client } = setup();
 
     client.getUpdate$().subscribe(handler);
@@ -282,7 +284,7 @@ describe('#getUpdate$', () => {
   });
 
   it('observables complete when client is stopped', () => {
-    const onComplete = jest.fn();
+    const onComplete = vi.fn();
     const { client } = setup();
 
     client.getUpdate$().subscribe({

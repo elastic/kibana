@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ConversationSettingsManagement } from '.';
@@ -16,38 +19,41 @@ import * as i18n from './translations';
 
 const mockChangeSharing = 'Change sharing';
 
-jest.mock('../../api');
-jest.mock('../../../assistant_context');
-jest.mock('../../settings/use_settings_updater/use_conversations_updater');
-jest.mock('../conversation_settings/conversation_settings_editor', () => ({
-  ConversationSettingsEditor: ({
-    selectedConversation,
-    setConversationsSettingsBulkActions,
-  }: {
-    selectedConversation: typeof alertConvo;
-    setConversationsSettingsBulkActions: jest.Mock;
-  }) => (
-    <button
-      data-test-subj="change-sharing"
-      onClick={() =>
-        setConversationsSettingsBulkActions({
-          update: {
-            [selectedConversation.id]: {
-              id: selectedConversation.id,
-              users: [],
-            },
-          },
-        })
-      }
-      type="button"
-    >
-      {mockChangeSharing}
-    </button>
-  ),
-}));
+vi.mock('../../api');
+vi.mock('../../../assistant_context');
+vi.mock('../../settings/use_settings_updater/use_conversations_updater');
+vi.mock('../conversation_settings/conversation_settings_editor', () => {
+      const mocked = {
+      ConversationSettingsEditor: ({
+        selectedConversation,
+        setConversationsSettingsBulkActions,
+      }: {
+        selectedConversation: typeof alertConvo;
+        setConversationsSettingsBulkActions: Mock;
+      }) => (
+        <button
+          data-test-subj="change-sharing"
+          onClick={() =>
+            setConversationsSettingsBulkActions({
+              update: {
+                [selectedConversation.id]: {
+                  id: selectedConversation.id,
+                  users: [],
+                },
+              },
+            })
+          }
+          type="button"
+        >
+          {mockChangeSharing}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSaveConversationsSettings = jest.fn().mockResolvedValue(true);
-const mockSetConversationsSettingsBulkActions = jest.fn();
+const mockSaveConversationsSettings = vi.fn().mockResolvedValue(true);
+const mockSetConversationsSettingsBulkActions = vi.fn();
 const mockConversations = {
   [alertConvo.id]: alertConvo,
   [welcomeConvo.id]: welcomeConvo,
@@ -58,40 +64,40 @@ const defaultProps = {
 
 describe('ConversationSettingsManagement', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSaveConversationsSettings.mockResolvedValue(true);
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    (useAssistantContext as Mock).mockReturnValue({
       actionTypeRegistry: {
-        get: jest.fn(),
-        has: jest.fn().mockReturnValue(false),
-        list: jest.fn().mockReturnValue([]),
-        register: jest.fn(),
+        get: vi.fn(),
+        has: vi.fn().mockReturnValue(false),
+        list: vi.fn().mockReturnValue([]),
+        register: vi.fn(),
       },
       assistantAvailability: { isAssistantEnabled: true },
       currentUser: MOCK_CURRENT_USER,
-      http: { fetch: jest.fn() },
+      http: { fetch: vi.fn() },
       nameSpace: 'default',
-      toasts: { addSuccess: jest.fn() },
+      toasts: { addSuccess: vi.fn() },
     });
-    (useFetchPrompts as jest.Mock).mockReturnValue({
+    (useFetchPrompts as Mock).mockReturnValue({
       data: { data: [] },
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
-    (useFetchCurrentUserConversations as jest.Mock).mockReturnValue({
+    (useFetchCurrentUserConversations as Mock).mockReturnValue({
       data: mockConversations,
       isFetched: true,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
-    (useConversationsUpdater as jest.Mock).mockReturnValue({
+    (useConversationsUpdater as Mock).mockReturnValue({
       assistantStreamingEnabled: true,
       conversationsSettingsBulkActions: { update: { [alertConvo.id]: { id: alertConvo.id } } },
-      onConversationsBulkDeleted: jest.fn(),
-      onConversationDeleted: jest.fn(),
-      resetConversationsSettings: jest.fn(),
+      onConversationsBulkDeleted: vi.fn(),
+      onConversationDeleted: vi.fn(),
+      resetConversationsSettings: vi.fn(),
       saveConversationsSettings: mockSaveConversationsSettings,
-      setConversationSettings: jest.fn(),
+      setConversationSettings: vi.fn(),
       setConversationsSettingsBulkActions: mockSetConversationsSettingsBulkActions,
-      setUpdatedAssistantStreamingEnabled: jest.fn(),
+      setUpdatedAssistantStreamingEnabled: vi.fn(),
     });
   });
 

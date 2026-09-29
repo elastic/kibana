@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -18,7 +20,7 @@ import { createInventoryViewMock } from '../../../common/inventory_views/invento
 import type { UpdateInventoryViewAttributesRequestPayload } from '../../../common/http_api/latest';
 
 describe('InventoryViewsClient class', () => {
-  const mockFindInventoryList = (savedObjectsClient: jest.Mocked<SavedObjectsClientContract>) => {
+  const mockFindInventoryList = (savedObjectsClient: Mocked<SavedObjectsClientContract>) => {
     const inventoryViewListMock = [
       createInventoryViewMock('0', {
         isDefault: true,

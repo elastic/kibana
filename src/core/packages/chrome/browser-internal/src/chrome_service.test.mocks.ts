@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const registerAnalyticsContextProviderMock = jest.fn();
-jest.doMock('./register_analytics_context_provider', () => {
+import { vi } from 'vitest';
+
+export const registerAnalyticsContextProviderMock = vi.fn();
+vi.doMock('./register_analytics_context_provider', () => {
   return {
     registerAnalyticsContextProvider: registerAnalyticsContextProviderMock,
   };

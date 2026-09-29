@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { deleteAttachmentStepDefinition } from './attachment_delete';
 import {
   createStepHandlerContext,
   createWorkflowStepAttachmentClientMock,
 } from '../../test_utils/workflow_steps';
 
-const experimentalEnabled = jest.fn().mockResolvedValue(true);
-const experimentalDisabled = jest.fn().mockResolvedValue(false);
+const experimentalEnabled = vi.fn().mockResolvedValue(true);
+const experimentalDisabled = vi.fn().mockResolvedValue(false);
 
 describe('deleteAttachmentStepDefinition', () => {
   it('creates the expected step definition structure', () => {
@@ -28,7 +30,7 @@ describe('deleteAttachmentStepDefinition', () => {
 
   it('soft-deletes by default', async () => {
     const { delete: del, getAttachmentClient } = createWorkflowStepAttachmentClientMock({
-      delete: jest.fn().mockResolvedValue(undefined),
+      delete: vi.fn().mockResolvedValue(undefined),
     });
 
     const definition = deleteAttachmentStepDefinition({
@@ -52,7 +54,7 @@ describe('deleteAttachmentStepDefinition', () => {
 
   it('permanently deletes when permanent=true', async () => {
     const { delete: del, getAttachmentClient } = createWorkflowStepAttachmentClientMock({
-      delete: jest.fn().mockResolvedValue(undefined),
+      delete: vi.fn().mockResolvedValue(undefined),
     });
 
     const definition = deleteAttachmentStepDefinition({
@@ -96,7 +98,7 @@ describe('deleteAttachmentStepDefinition', () => {
 
   it('returns an error when the client throws', async () => {
     const { getAttachmentClient } = createWorkflowStepAttachmentClientMock({
-      delete: jest.fn().mockRejectedValue(new Error('not found')),
+      delete: vi.fn().mockRejectedValue(new Error('not found')),
     });
 
     const definition = deleteAttachmentStepDefinition({

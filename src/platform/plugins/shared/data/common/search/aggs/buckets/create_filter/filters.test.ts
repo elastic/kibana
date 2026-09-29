@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createFilterFilters } from './filters';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
@@ -46,7 +48,7 @@ describe('AggConfig Filters', () => {
         {
           typesRegistry: mockAggTypesRegistry(),
         },
-        jest.fn()
+        vi.fn()
       );
     };
 

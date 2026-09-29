@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type {
   ISavedObjectsPointInTimeFinder,
   SavedObjectsClientContract,
@@ -60,7 +63,7 @@ const MATCH_COUNT_AGGS = { match_count: { value_count: { field: 'type' } } };
 
 describe('RulesSavedObjectService', () => {
   let rulesSavedObjectService: RulesSavedObjectService;
-  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockSavedObjectsClient: Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     ({ rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService());
@@ -227,7 +230,7 @@ describe('RulesSavedObjectService', () => {
      * Configures `createPointInTimeFinder` to yield the given pages.
      */
     const stubFinder = (pages: string[][]) => {
-      const close = jest.fn().mockResolvedValue(undefined);
+      const close = vi.fn().mockResolvedValue(undefined);
       const finder: ISavedObjectsPointInTimeFinder<unknown, unknown> = {
         find: async function* find() {
           for (const page of pages) {

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const INFERENCE_TYPE = 'inference';
 
 describe('Processor: Inference', () => {
-  let onUpdate: jest.Mock;
+  let onUpdate: Mock;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   const getToggleInput = () => screen.getByTestId('toggleInferenceInputMappingMode');
@@ -30,15 +33,15 @@ describe('Processor: Inference', () => {
 
   describe('add inference processor', () => {
     beforeEach(async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       ({ httpSetup } = setupEnvironment());
-      onUpdate = jest.fn();
+      onUpdate = vi.fn();
 
       renderProcessorEditor(httpSetup, {
         value: {
           processors: [],
         },
-        onFlyoutOpen: jest.fn(),
+        onFlyoutOpen: vi.fn(),
         onUpdate,
       });
 
@@ -218,9 +221,9 @@ describe('Processor: Inference', () => {
 
   describe('edit saved inference processor defaults', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       ({ httpSetup } = setupEnvironment());
-      onUpdate = jest.fn();
+      onUpdate = vi.fn();
     });
 
     test('defaults to input/output mode for a saved processor with neither input_output nor target_field/field_map', async () => {
@@ -234,7 +237,7 @@ describe('Processor: Inference', () => {
             },
           ],
         },
-        onFlyoutOpen: jest.fn(),
+        onFlyoutOpen: vi.fn(),
         onUpdate,
       });
 
@@ -262,7 +265,7 @@ describe('Processor: Inference', () => {
             },
           ],
         },
-        onFlyoutOpen: jest.fn(),
+        onFlyoutOpen: vi.fn(),
         onUpdate,
       });
 
@@ -287,7 +290,7 @@ describe('Processor: Inference', () => {
             },
           ],
         },
-        onFlyoutOpen: jest.fn(),
+        onFlyoutOpen: vi.fn(),
         onUpdate,
       });
 
@@ -312,7 +315,7 @@ describe('Processor: Inference', () => {
             },
           ],
         },
-        onFlyoutOpen: jest.fn(),
+        onFlyoutOpen: vi.fn(),
         onUpdate,
       });
 
@@ -347,7 +350,7 @@ describe('Processor: Inference', () => {
             },
           ],
         },
-        onFlyoutOpen: jest.fn(),
+        onFlyoutOpen: vi.fn(),
         onUpdate,
       });
 

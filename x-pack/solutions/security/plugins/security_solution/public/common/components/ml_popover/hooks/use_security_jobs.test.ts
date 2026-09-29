@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
@@ -21,29 +24,29 @@ import {
 import type { SecurityJob } from '../types';
 import { useSecurityJobs } from './use_security_jobs';
 
-jest.mock('../../../../../common/machine_learning/has_ml_admin_permissions');
-jest.mock('../../../../../common/machine_learning/has_ml_license');
-jest.mock('../../../lib/kibana');
-jest.mock('../../../hooks/use_app_toasts');
-jest.mock('../../ml/hooks/use_ml_capabilities');
-jest.mock('../../ml/api/get_jobs_summary');
-jest.mock('../api');
+vi.mock('../../../../../common/machine_learning/has_ml_admin_permissions');
+vi.mock('../../../../../common/machine_learning/has_ml_license');
+vi.mock('../../../lib/kibana');
+vi.mock('../../../hooks/use_app_toasts');
+vi.mock('../../ml/hooks/use_ml_capabilities');
+vi.mock('../../ml/api/get_jobs_summary');
+vi.mock('../api');
 
 describe('useSecurityJobs', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
   });
 
   describe('when user has valid permissions', () => {
     beforeEach(() => {
-      (hasMlAdminPermissions as jest.Mock).mockReturnValue(true);
-      (hasMlLicense as jest.Mock).mockReturnValue(true);
-      (getJobsSummary as jest.Mock).mockResolvedValue(mockJobsSummaryResponse);
-      (getModules as jest.Mock).mockResolvedValue(mockGetModuleResponse);
-      (checkRecognizer as jest.Mock).mockResolvedValue(checkRecognizerSuccess);
+      (hasMlAdminPermissions as Mock).mockReturnValue(true);
+      (hasMlLicense as Mock).mockReturnValue(true);
+      (getJobsSummary as Mock).mockResolvedValue(mockJobsSummaryResponse);
+      (getModules as Mock).mockResolvedValue(mockGetModuleResponse);
+      (checkRecognizer as Mock).mockResolvedValue(checkRecognizerSuccess);
     });
 
     it('combines multiple ML calls into an array of SecurityJobs', async () => {
@@ -89,7 +92,7 @@ describe('useSecurityJobs', () => {
     });
 
     it('renders a toast error if an ML call fails', async () => {
-      (getModules as jest.Mock).mockRejectedValue('whoops');
+      (getModules as Mock).mockRejectedValue('whoops');
       renderHook(() => useSecurityJobs(), {
         wrapper: TestProviders,
       });
@@ -106,8 +109,8 @@ describe('useSecurityJobs', () => {
 
   describe('when the user does not have valid permissions', () => {
     beforeEach(() => {
-      (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
-      (hasMlLicense as jest.Mock).mockReturnValue(false);
+      (hasMlAdminPermissions as Mock).mockReturnValue(false);
+      (hasMlLicense as Mock).mockReturnValue(false);
     });
 
     it('returns empty jobs and false predicates', () => {

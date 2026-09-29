@@ -4,32 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
 import { migrateOnRead } from './migrate_on_read';
 import { isNeverCondition } from '@kbn/streamlang';
 import { Streams } from '@kbn/streams-schema';
 
-jest.mock('@kbn/streamlang', () => ({
-  isNeverCondition: jest.fn(),
-}));
+vi.mock('@kbn/streamlang', () => {
+      const mocked = {
+      isNeverCondition: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./migrate_to_streamlang_on_read', () => ({
-  migrateRoutingIfConditionToStreamlang: jest.fn((definition) => definition),
-  migrateOldProcessingArrayToStreamlang: jest.fn((definition) => definition),
-  migrateWhereBlocksToCondition: jest.fn((steps) => ({ steps, migrated: false })),
-}));
+vi.mock('./migrate_to_streamlang_on_read', () => {
+      const mocked = {
+      migrateRoutingIfConditionToStreamlang: vi.fn((definition) => definition),
+      migrateOldProcessingArrayToStreamlang: vi.fn((definition) => definition),
+      migrateWhereBlocksToCondition: vi.fn((steps) => ({ steps, migrated: false })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/streams-schema', () => ({
-  Streams: {
-    all: {
-      Definition: {
-        asserts: jest.fn(),
+vi.mock('@kbn/streams-schema', () => {
+      const mocked = {
+      Streams: {
+        all: {
+          Definition: {
+            asserts: vi.fn(),
+          },
+        },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockIsNeverCondition = isNeverCondition as jest.MockedFunction<typeof isNeverCondition>;
-const mockStreamsAsserts = Streams.all.Definition.asserts as jest.MockedFunction<
+const mockIsNeverCondition = isNeverCondition as MockedFunction<typeof isNeverCondition>;
+const mockStreamsAsserts = Streams.all.Definition.asserts as MockedFunction<
   typeof Streams.all.Definition.asserts
 >;
 
@@ -93,7 +105,7 @@ function createRoutingRule(overrides: any = {}) {
 
 describe('migrateOnRead', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsNeverCondition.mockReturnValue(false);
     mockStreamsAsserts.mockImplementation(() => {});
   });

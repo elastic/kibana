@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { useUserPrivileges } from '../../components/user_privileges';
@@ -20,33 +23,39 @@ import {
   withMatchedIndices,
 } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('../../components/user_privileges');
-jest.mock('../../../helpers_access', () => ({ hasAccessToSecuritySolution: jest.fn(() => true) }));
+vi.mock('../../components/user_privileges');
+vi.mock('../../../helpers_access', () => {
+      const mocked = { hasAccessToSecuritySolution: vi.fn(() => true) };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseNormalizedAppLinks = jest.fn((): LinkInfo[] => []);
-jest.mock('../../links/links_hooks', () => ({
-  ...jest.requireActual('../../links/links_hooks'),
-  useNormalizedAppLinks: () => mockUseNormalizedAppLinks(),
-}));
+const mockUseNormalizedAppLinks = vi.fn((): LinkInfo[] => []);
+vi.mock('../../links/links_hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../links/links_hooks')),
+      useNormalizedAppLinks: () => mockUseNormalizedAppLinks(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/overview' });
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+const mockUseLocation = vi.fn().mockReturnValue({ pathname: '/overview' });
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
   return {
     ...original,
     useLocation: () => mockUseLocation(),
   };
 });
 
-jest.mocked(useDataView).mockImplementation(withMatchedIndices);
+vi.mocked(useDataView).mockImplementation(withMatchedIndices);
 
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+const mockUseUserPrivileges = useUserPrivileges as Mock;
 
 const renderUseShowTimeline = () => renderHook(useShowTimeline, { wrapper: TestProviders });
 
 describe('use show timeline', () => {
   beforeAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseUserPrivileges.mockReturnValue({ timelinePrivileges: { read: true } });
     mockUseNormalizedAppLinks.mockReturnValue([
@@ -120,7 +129,7 @@ describe('sourcererDataView', () => {
   });
 
   it('should show timeline even when indices do not exist (data view state does not gate visibility)', () => {
-    jest.mocked(useDataView).mockImplementation(defaultImplementation);
+    vi.mocked(useDataView).mockImplementation(defaultImplementation);
     const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([true]);
   });
@@ -128,13 +137,13 @@ describe('sourcererDataView', () => {
 
 describe('Security solution capabilities', () => {
   it('should show timeline when user has read capabilities', () => {
-    jest.mocked(useDataView).mockImplementation(withMatchedIndices);
+    vi.mocked(useDataView).mockImplementation(withMatchedIndices);
     const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([true]);
   });
 
   it('should not show timeline when user does not have read capabilities', () => {
-    jest.mocked(hasAccessToSecuritySolution).mockReturnValueOnce(false);
+    vi.mocked(hasAccessToSecuritySolution).mockReturnValueOnce(false);
     const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([false]);
   });

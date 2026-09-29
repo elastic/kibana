@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useScheduleApi } from './use_schedule_api';
@@ -30,13 +33,13 @@ import { useBulkEnableWorkflowSchedules } from './use_bulk_enable_workflow_sched
 import { useBulkDisableWorkflowSchedules } from './use_bulk_disable_workflow_schedules';
 import { useBulkDeleteWorkflowSchedules } from './use_bulk_delete_workflow_schedules';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 describe('useScheduleApi', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when the feature flag is ON but the per-space uiSetting is OFF', () => {
@@ -44,13 +47,13 @@ describe('useScheduleApi', () => {
       mockUseKibana.mockReturnValue({
         services: {
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(true),
+            useBooleanValue: vi.fn().mockReturnValue(true),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(false),
+            get: vi.fn().mockReturnValue(false),
           },
         },
-      } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+      } as unknown as Mocked<ReturnType<typeof useKibana>>);
     });
 
     it('returns isWorkflowsEnabled as false (FF on, setting off → legacy)', () => {
@@ -79,13 +82,13 @@ describe('useScheduleApi', () => {
       mockUseKibana.mockReturnValue({
         services: {
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(false),
+            useBooleanValue: vi.fn().mockReturnValue(false),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(true),
+            get: vi.fn().mockReturnValue(true),
           },
         },
-      } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+      } as unknown as Mocked<ReturnType<typeof useKibana>>);
     });
 
     it('returns isWorkflowsEnabled as false (FF off, setting on → legacy)', () => {
@@ -114,13 +117,13 @@ describe('useScheduleApi', () => {
       mockUseKibana.mockReturnValue({
         services: {
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(true),
+            useBooleanValue: vi.fn().mockReturnValue(true),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(true),
+            get: vi.fn().mockReturnValue(true),
           },
         },
-      } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+      } as unknown as Mocked<ReturnType<typeof useKibana>>);
     });
 
     it('returns isWorkflowsEnabled as true', () => {
@@ -205,13 +208,13 @@ describe('useScheduleApi', () => {
       mockUseKibana.mockReturnValue({
         services: {
           featureFlags: {
-            useBooleanValue: jest.fn().mockReturnValue(false),
+            useBooleanValue: vi.fn().mockReturnValue(false),
           },
           uiSettings: {
-            get: jest.fn().mockReturnValue(false),
+            get: vi.fn().mockReturnValue(false),
           },
         },
-      } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+      } as unknown as Mocked<ReturnType<typeof useKibana>>);
     });
 
     it('returns isWorkflowsEnabled as false', () => {

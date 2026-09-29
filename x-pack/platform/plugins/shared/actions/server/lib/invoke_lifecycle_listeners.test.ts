@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ConnectorLifecycleListener } from '../types';
 import { invokePostCreateListeners, invokePostDeleteListeners } from './invoke_lifecycle_listeners';
@@ -29,7 +31,7 @@ describe('invokePostCreateListeners', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not throw when listeners is undefined', async () => {
@@ -43,7 +45,7 @@ describe('invokePostCreateListeners', () => {
   });
 
   it('invokes onPostCreate for matching wildcard listener', async () => {
-    const onPostCreate = jest.fn();
+    const onPostCreate = vi.fn();
     const listeners: ConnectorLifecycleListener[] = [{ connectorTypes: '*', onPostCreate }];
 
     await invokePostCreateListeners(listeners, '.slack2', baseParams, logger);
@@ -52,7 +54,7 @@ describe('invokePostCreateListeners', () => {
   });
 
   it('invokes onPostCreate for matching specific type', async () => {
-    const onPostCreate = jest.fn();
+    const onPostCreate = vi.fn();
     const listeners: ConnectorLifecycleListener[] = [{ connectorTypes: ['.slack2'], onPostCreate }];
 
     await invokePostCreateListeners(listeners, '.slack2', baseParams, logger);
@@ -61,7 +63,7 @@ describe('invokePostCreateListeners', () => {
   });
 
   it('skips listeners that do not match the connector type', async () => {
-    const onPostCreate = jest.fn();
+    const onPostCreate = vi.fn();
     const listeners: ConnectorLifecycleListener[] = [{ connectorTypes: ['.github'], onPostCreate }];
 
     await invokePostCreateListeners(listeners, '.slack2', baseParams, logger);
@@ -70,7 +72,7 @@ describe('invokePostCreateListeners', () => {
   });
 
   it('logs error but does not throw when a listener throws', async () => {
-    const onPostCreate = jest.fn().mockRejectedValue(new Error('listener failure'));
+    const onPostCreate = vi.fn().mockRejectedValue(new Error('listener failure'));
     const listeners: ConnectorLifecycleListener[] = [{ connectorTypes: '*', onPostCreate }];
 
     await expect(
@@ -81,8 +83,8 @@ describe('invokePostCreateListeners', () => {
   });
 
   it('continues invoking remaining listeners after one fails', async () => {
-    const failingHook = jest.fn().mockRejectedValue(new Error('fail'));
-    const succeedingHook = jest.fn();
+    const failingHook = vi.fn().mockRejectedValue(new Error('fail'));
+    const succeedingHook = vi.fn();
     const listeners: ConnectorLifecycleListener[] = [
       { connectorTypes: '*', onPostCreate: failingHook },
       { connectorTypes: '*', onPostCreate: succeedingHook },
@@ -112,7 +114,7 @@ describe('invokePostDeleteListeners', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not throw when listeners is undefined', async () => {
@@ -122,7 +124,7 @@ describe('invokePostDeleteListeners', () => {
   });
 
   it('invokes onPostDelete for matching wildcard listener', async () => {
-    const onPostDelete = jest.fn();
+    const onPostDelete = vi.fn();
     const listeners: ConnectorLifecycleListener[] = [{ connectorTypes: '*', onPostDelete }];
 
     await invokePostDeleteListeners(listeners, '.slack2', baseParams, logger);
@@ -131,7 +133,7 @@ describe('invokePostDeleteListeners', () => {
   });
 
   it('skips listeners without onPostDelete hook', async () => {
-    const onPostCreate = jest.fn();
+    const onPostCreate = vi.fn();
     const listeners: ConnectorLifecycleListener[] = [{ connectorTypes: '*', onPostCreate }];
 
     await invokePostDeleteListeners(listeners, '.slack2', baseParams, logger);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import type { BuildFlavor } from '@kbn/config';
@@ -37,7 +39,7 @@ function getProps() {
       kibana: [],
     },
     editable: true,
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     runAsUsers: [],
     indexPatterns: [],
     validator: new RoleValidator(),

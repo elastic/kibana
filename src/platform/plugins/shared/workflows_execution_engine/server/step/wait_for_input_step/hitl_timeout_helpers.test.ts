@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   computeHitlWaitDeadlineMs,
@@ -126,11 +128,11 @@ describe('hitl_timeout_helpers', () => {
 
   describe('persistResolvedDynamicTimeout', () => {
     it('writes the rendered duration onto step state', () => {
-      const setCurrentStepState = jest.fn();
+      const setCurrentStepState = vi.fn();
       const stepExecutionRuntime = {
         stepExecution: { state: { resumeAt: undefined } },
         contextManager: {
-          renderValueAccordingToContext: jest.fn(() => '2h'),
+          renderValueAccordingToContext: vi.fn(() => '2h'),
         },
         setCurrentStepState,
       } as unknown as StepExecutionRuntime;

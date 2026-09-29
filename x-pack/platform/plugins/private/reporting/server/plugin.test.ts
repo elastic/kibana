@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance, Mocked } from 'vitest';
+
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES, type PackageInfo } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -34,12 +37,12 @@ describe('Reporting Plugin', () => {
   let coreStart: CoreStart;
   let pluginSetup: ReportingSetupDeps;
   let pluginStart: ReportingInternalStart;
-  let logger: jest.Mocked<Logger>;
+  let logger: Mocked<Logger>;
   let plugin: ReportingPlugin;
-  let featuresSetup: jest.Mocked<FeaturesPluginSetup>;
+  let featuresSetup: Mocked<FeaturesPluginSetup>;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     configSchema = createMockConfigSchema();
     initContext = coreMock.createPluginInitializerContext(configSchema);
@@ -128,7 +131,7 @@ describe('Reporting Plugin', () => {
   it('registers an advanced setting for PDF logos', async () => {
     plugin.setup(coreSetup, pluginSetup);
     expect(coreSetup.uiSettings.register).toHaveBeenCalled();
-    expect((coreSetup.uiSettings.register as jest.Mock).mock.calls[0][0]).toHaveProperty(
+    expect((coreSetup.uiSettings.register as Mock).mock.calls[0][0]).toHaveProperty(
       'xpackReporting:customPdfLogo'
     );
   });
@@ -174,7 +177,7 @@ describe('Reporting Plugin', () => {
 
     // create a way for an error to happen
     const reportingCore = (plugin as unknown as { reportingCore: ReportingCore }).reportingCore;
-    reportingCore.pluginStart = jest.fn().mockRejectedValueOnce('silly');
+    reportingCore.pluginStart = vi.fn().mockRejectedValueOnce('silly');
 
     // wait for the startup phase background work
     plugin.start(coreStart, pluginStart);
@@ -201,12 +204,12 @@ describe('Reporting Plugin', () => {
   });
 
   describe('config and export types registration', () => {
-    jest.mock('@kbn/reporting-server/export_types_registry');
-    ExportTypesRegistry.prototype.getAll = jest.fn(() => []); // code breaks if getAll returns undefined
-    let registerSpy: jest.SpyInstance;
+    vi.doMock('@kbn/reporting-server/export_types_registry');
+    ExportTypesRegistry.prototype.getAll = vi.fn(() => []); // code breaks if getAll returns undefined
+    let registerSpy: MockInstance;
 
     beforeEach(async () => {
-      registerSpy = jest.spyOn(ExportTypesRegistry.prototype, 'register');
+      registerSpy = vi.spyOn(ExportTypesRegistry.prototype, 'register');
       pluginSetup = createMockPluginSetup({}) as unknown as ReportingSetupDeps;
       pluginStart = await createMockPluginStart(coreStart, configSchema);
       plugin = new ReportingPlugin(initContext);
@@ -223,7 +226,7 @@ describe('Reporting Plugin', () => {
     });
 
     it('expect image report types not to be in registry if disabled', async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       configSchema = createMockConfigSchema({
         export_types: {

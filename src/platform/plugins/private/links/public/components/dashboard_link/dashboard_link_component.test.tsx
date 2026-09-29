@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
@@ -33,10 +35,10 @@ function createMockLinksParent({
   const parent = {
     ...getMockLinksParentApi({ title: 'Test', ref_id: '456' }),
     locator: {
-      getRedirectUrl: jest.fn().mockReturnValue('https://my-kibana.com/dashboard/123'),
-      navigate: jest.fn(),
+      getRedirectUrl: vi.fn().mockReturnValue('https://my-kibana.com/dashboard/123'),
+      navigate: vi.fn(),
     },
-    getSerializedStateForChild: jest.fn(),
+    getSerializedStateForChild: vi.fn(),
     query$: new BehaviorSubject<Query | AggregateQuery | undefined>(initialQuery),
     filters$: new BehaviorSubject<Filter[] | undefined>(initialFilters ?? []),
   };
@@ -86,11 +88,11 @@ describe('Dashboard link component', () => {
   };
 
   beforeEach(async () => {
-    window.open = jest.fn();
+    window.open = vi.fn();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('by default uses navigate to open in same tab', async () => {
@@ -122,7 +124,7 @@ describe('Dashboard link component', () => {
     renderComponent();
     const link = screen.getByTestId('dashboardLink--Dashboard 1');
     const clickEvent = createEvent.click(link, { ctrlKey: true });
-    const preventDefault = jest.spyOn(clickEvent, 'preventDefault');
+    const preventDefault = vi.spyOn(clickEvent, 'preventDefault');
     fireEvent(link, clickEvent);
     expect(preventDefault).toHaveBeenCalledTimes(0);
   });

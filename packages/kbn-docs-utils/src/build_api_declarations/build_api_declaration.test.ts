@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Path from 'path';
 import type { Node } from 'ts-morph';
 import { Project, SyntaxKind } from 'ts-morph';
@@ -560,7 +562,7 @@ describe('buildVariableDec edge cases', () => {
     const varDecl = sourceFile.getVariableDeclaration('test');
     expect(varDecl).toBeDefined();
 
-    const warnSpy = jest.spyOn(log, 'warning').mockImplementation();
+    const warnSpy = vi.spyOn(log, 'warning').mockImplementation();
 
     const result = buildVariableDec(varDecl!, {
       name: 'test',
@@ -608,7 +610,7 @@ describe('buildCallSignatureDec edge cases', () => {
     if (callSigs.length > 0) {
       // Create a mock signature with multiple declarations
       const mockSig = {
-        getParameters: jest.fn(() => [
+        getParameters: vi.fn(() => [
           {
             getName: () => 'param',
             getDeclarations: () => [varDecl, varDecl], // Multiple declarations
@@ -616,7 +618,7 @@ describe('buildCallSignatureDec edge cases', () => {
         ]),
       };
 
-      const warnSpy = jest.spyOn(log, 'warning').mockImplementation();
+      const warnSpy = vi.spyOn(log, 'warning').mockImplementation();
 
       // Cast to `any` is necessary here because we're creating a minimal mock
       // of the ts-morph Signature interface to test the multiple declarations path.

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { AggsCommonSetupDependencies, AggsCommonStartDependencies } from './aggs_service';
 import { AggsCommonService } from './aggs_service';
 import { getAggTypes } from './agg_types';
@@ -21,11 +23,11 @@ describe('Aggs service', () => {
   beforeEach(() => {
     service = new AggsCommonService();
     setupDeps = {
-      registerFunction: jest.fn(),
+      registerFunction: vi.fn(),
     };
     startDeps = {
-      getConfig: jest.fn(),
-      getIndexPattern: jest.fn(),
+      getConfig: vi.fn(),
+      getIndexPattern: vi.fn(),
     } as unknown as AggsCommonStartDependencies;
   });
 
@@ -40,7 +42,7 @@ describe('Aggs service', () => {
       const a = new AggsCommonService();
       const b = new AggsCommonService();
       const bSetupDeps = {
-        registerFunction: jest.fn(),
+        registerFunction: vi.fn(),
       };
 
       const aSetup = a.setup(setupDeps);

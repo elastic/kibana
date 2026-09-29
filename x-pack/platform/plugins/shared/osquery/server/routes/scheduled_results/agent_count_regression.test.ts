@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 /**
  * Regression repro for the "200k+ agents responded" report.
  *
@@ -38,9 +41,12 @@ import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getScheduledActionResultsRoute } from './get_scheduled_action_results_route';
 
-jest.mock('../../utils/get_internal_saved_object_client', () => ({
-  createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
-}));
+vi.mock('../../utils/get_internal_saved_object_client', () => {
+      const mocked = {
+      createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ROUTE_PATH = '/api/osquery/scheduled_results/{scheduleId}/{executionCount}';
 
@@ -103,10 +109,10 @@ const createMockScheduledResponse = ({
   inspect: { dsl: [] },
 });
 
-const createMockContext = (mockSearchFn: jest.Mock) => {
+const createMockContext = (mockSearchFn: Mock) => {
   const mockCoreContext = coreMock.createRequestHandlerContext();
   Object.assign(mockCoreContext.savedObjects.client, {
-    get: jest.fn().mockResolvedValue({
+    get: vi.fn().mockResolvedValue({
       attributes: {
         name: 'shadow-ai-discovery-windows',
         queries: [{ schedule_id: 'sched-1', name: 'ai_docker_containers', query: 'SELECT 1;' }],
@@ -118,14 +124,14 @@ const createMockContext = (mockSearchFn: jest.Mock) => {
     core: Promise.resolve(mockCoreContext),
     search: Promise.resolve({
       search: mockSearchFn,
-      saveSession: jest.fn(),
-      getSession: jest.fn(),
-      findSessions: jest.fn(),
-      updateSession: jest.fn(),
-      cancelSession: jest.fn(),
-      deleteSession: jest.fn(),
-      extendSession: jest.fn(),
-      getSessionStatus: jest.fn(),
+      saveSession: vi.fn(),
+      getSession: vi.fn(),
+      findSessions: vi.fn(),
+      updateSession: vi.fn(),
+      cancelSession: vi.fn(),
+      deleteSession: vi.fn(),
+      extendSession: vi.fn(),
+      getSessionStatus: vi.fn(),
     } as unknown as IScopedSearchClient),
   } as unknown as DataRequestHandlerContext;
 };
@@ -137,8 +143,8 @@ describe('scheduled execution details — agent count regression (InfoSec 200k r
     const httpService = httpServiceMock.createSetupContract();
     const mockRouter = httpService.createRouter();
     const mockOsqueryContext = {
-      isCpsActive: jest.fn().mockResolvedValue(false),
-      service: { getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }) },
+      isCpsActive: vi.fn().mockResolvedValue(false),
+      service: { getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }) },
     } as unknown as OsqueryAppContext;
 
     getScheduledActionResultsRoute(mockRouter, mockOsqueryContext);
@@ -153,7 +159,7 @@ describe('scheduled execution details — agent count regression (InfoSec 200k r
   };
 
   /** Runs the route and returns the response body it produced. */
-  const callRoute = async (mockSearchFn: jest.Mock) => {
+  const callRoute = async (mockSearchFn: Mock) => {
     registerRoute();
     const mockRequest = httpServerMock.createKibanaRequest({
       params: { scheduleId: 'sched-1', executionCount: 0 },
@@ -181,14 +187,14 @@ describe('scheduled execution details — agent count regression (InfoSec 200k r
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('production-scale reproduction', () => {
     it('should report 399 agents, not 226140 documents, for the reported execution bucket', async () => {
       // Exact production numbers from the affected cluster:
       // 226,140 docs in execution bucket 0, 399 distinct agents.
-      const mockSearchFn = jest.fn().mockReturnValue(
+      const mockSearchFn = vi.fn().mockReturnValue(
         of(
           createMockScheduledResponse({
             totalDocs: 226140,
@@ -212,7 +218,7 @@ describe('scheduled execution details — agent count regression (InfoSec 200k r
 
     it('should not multiply the agent count when one agent sends many responses', async () => {
       // 2 agents, 5 response documents — the minimal shape of the same bug.
-      const mockSearchFn = jest.fn().mockReturnValue(
+      const mockSearchFn = vi.fn().mockReturnValue(
         of(
           createMockScheduledResponse({
             totalDocs: 5,
@@ -234,7 +240,7 @@ describe('scheduled execution details — agent count regression (InfoSec 200k r
 
   describe('success / error split', () => {
     it('should count agents per outcome rather than documents per outcome', async () => {
-      const mockSearchFn = jest.fn().mockReturnValue(
+      const mockSearchFn = vi.fn().mockReturnValue(
         of(
           createMockScheduledResponse({
             totalDocs: 30,
@@ -257,7 +263,7 @@ describe('scheduled execution details — agent count regression (InfoSec 200k r
       // Guards the subtle trap: an agent with both a success and an error doc
       // would be double-counted by a naive `successful + failed` sum.
       // Overall cardinality is 4, but 3 + 2 = 5.
-      const mockSearchFn = jest.fn().mockReturnValue(
+      const mockSearchFn = vi.fn().mockReturnValue(
         of(
           createMockScheduledResponse({
             totalDocs: 30,
@@ -281,7 +287,7 @@ describe('scheduled execution details — agent count regression (InfoSec 200k r
     it('should keep `total` as the document count so status-table pagination stays correct', async () => {
       // The status grid renders one row per response document. If `total`
       // switched to agent cardinality, pagination would truncate the grid.
-      const mockSearchFn = jest.fn().mockReturnValue(
+      const mockSearchFn = vi.fn().mockReturnValue(
         of(
           createMockScheduledResponse({
             totalDocs: 226140,
@@ -303,7 +309,7 @@ describe('scheduled execution details — agent count regression (InfoSec 200k r
     it('should keep totalRowCount as the sum of osquery result rows', async () => {
       // Distinct concept from agents: this is `sum(action_response.osquery.count)`.
       // The InfoSec packs legitimately return 0 rows on Windows endpoints.
-      const mockSearchFn = jest.fn().mockReturnValue(
+      const mockSearchFn = vi.fn().mockReturnValue(
         of(
           createMockScheduledResponse({
             totalDocs: 175,

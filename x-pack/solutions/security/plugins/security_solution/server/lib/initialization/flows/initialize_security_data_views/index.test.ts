@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { DataView, DataViewListItem, DataViewsService } from '@kbn/data-views-plugin/common';
 import {
@@ -32,21 +35,21 @@ import {
 const SPACE_ID = 'default';
 const SIGNAL_INDEX = '.siem-signals-default';
 
-const createMockDataViewsService = (): jest.Mocked<DataViewsService> =>
+const createMockDataViewsService = (): Mocked<DataViewsService> =>
   ({
-    getIdsWithTitle: jest.fn().mockResolvedValue([]),
-    createAndSave: jest.fn().mockImplementation(async (spec) => ({
+    getIdsWithTitle: vi.fn().mockResolvedValue([]),
+    createAndSave: vi.fn().mockImplementation(async (spec) => ({
       id: spec.id,
       title: spec.title,
       name: spec.name,
     })),
-    get: jest.fn().mockImplementation(async (id: string) => ({
+    get: vi.fn().mockImplementation(async (id: string) => ({
       id,
       title: 'mock-title',
       name: 'mock-name',
     })),
-    updateSavedObject: jest.fn().mockResolvedValue(undefined),
-  } as unknown as jest.Mocked<DataViewsService>);
+    updateSavedObject: vi.fn().mockResolvedValue(undefined),
+  } as unknown as Mocked<DataViewsService>);
 
 const makeDataViewListItem = (id: string, title: string, name?: string): DataViewListItem =>
   ({
@@ -384,7 +387,7 @@ describe('initializeSecurityDataViewsFlow', () => {
   });
 
   describe('runFlow', () => {
-    let dataViewsService: jest.Mocked<DataViewsService>;
+    let dataViewsService: Mocked<DataViewsService>;
 
     beforeEach(() => {
       dataViewsService = createMockDataViewsService();
@@ -400,21 +403,21 @@ describe('initializeSecurityDataViewsFlow', () => {
       ({
         requestHandlerContext: {
           securitySolution: Promise.resolve({
-            getInternalDataViewsService: jest.fn().mockResolvedValue(dataViewsService),
-            getConfig: jest.fn().mockReturnValue({
+            getInternalDataViewsService: vi.fn().mockResolvedValue(dataViewsService),
+            getConfig: vi.fn().mockReturnValue({
               experimentalFeatures: {
                 enableAlertsAndAttacksAlignment: overrides?.enableAttackDataView ?? false,
               },
             }),
-            getRuleDataService: jest.fn().mockReturnValue({
-              getResourceName: jest.fn().mockReturnValue(SIGNAL_INDEX),
+            getRuleDataService: vi.fn().mockReturnValue({
+              getResourceName: vi.fn().mockReturnValue(SIGNAL_INDEX),
             }),
-            getSpaceId: jest.fn().mockReturnValue(SPACE_ID),
+            getSpaceId: vi.fn().mockReturnValue(SPACE_ID),
           }),
           core: Promise.resolve({
             uiSettings: {
               client: {
-                get: jest.fn().mockResolvedValue(overrides?.configPatternList ?? ['auditbeat-*']),
+                get: vi.fn().mockResolvedValue(overrides?.configPatternList ?? ['auditbeat-*']),
               },
             },
           }),

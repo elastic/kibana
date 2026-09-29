@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ESQLVariableType, type PartialFieldsMetadataClient } from '@kbn/esql-types';
 import { monaco } from '../../../../monaco_imports';
 import { ESQLLang, type ESQLDependencies } from '../../language';
@@ -32,12 +34,12 @@ export const getCompletionItemFromProvider = async (
 describe('suggestion_provider', () => {
   describe('resolveCompletionItem', () => {
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should resolve completion item with field metadata', async () => {
       const mockGetFieldsMetadata: Promise<PartialFieldsMetadataClient> = Promise.resolve({
-        find: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({
           fields: {
             'test.field': {
               type: 'keyword',
@@ -50,7 +52,7 @@ describe('suggestion_provider', () => {
 
       const suggestionProvider = ESQLLang.getSuggestionProvider({
         getFieldsMetadata: mockGetFieldsMetadata,
-        getColumnsFor: jest.fn(async () => [
+        getColumnsFor: vi.fn(async () => [
           createField('test.field'),
           createField('test.field.keyword'),
         ]),
@@ -90,7 +92,7 @@ describe('suggestion_provider', () => {
 
     it('should return original item if field metadata is not available', async () => {
       const mockGetFieldsMetadata: Promise<PartialFieldsMetadataClient> = Promise.resolve({
-        find: jest.fn().mockResolvedValue({
+        find: vi.fn().mockResolvedValue({
           fields: {},
           streamFields: {},
         }),
@@ -98,7 +100,7 @@ describe('suggestion_provider', () => {
 
       const suggestionProvider = ESQLLang.getSuggestionProvider({
         getFieldsMetadata: mockGetFieldsMetadata,
-        getColumnsFor: jest.fn(async () => [createField('test.field')]),
+        getColumnsFor: vi.fn(async () => [createField('test.field')]),
       });
 
       const model = createTextModel({ value: 'FROM index | WHERE EVAL test.field' });
@@ -112,7 +114,7 @@ describe('suggestion_provider', () => {
     });
 
     it('should never call metadata find API if not needed', async () => {
-      const mockFind = jest.fn().mockResolvedValue({
+      const mockFind = vi.fn().mockResolvedValue({
         fields: {},
         streamFields: {},
       });
@@ -122,7 +124,7 @@ describe('suggestion_provider', () => {
 
       const suggestionProvider = ESQLLang.getSuggestionProvider({
         getFieldsMetadata: mockGetFieldsMetadata,
-        getColumnsFor: jest.fn(async () => [createField('not.ecs.field')]),
+        getColumnsFor: vi.fn(async () => [createField('not.ecs.field')]),
       });
 
       // Use a wildcard query so streamNames is empty and stream fetch will not fire.
@@ -157,7 +159,7 @@ describe('suggestion_provider', () => {
 
     describe('stream descriptions', () => {
       it('should show stream description for a field when the query sources a stream', async () => {
-        const mockFind = jest.fn().mockImplementation(({ streamNames, source }) => {
+        const mockFind = vi.fn().mockImplementation(({ streamNames, source }) => {
           if (streamNames?.includes('logs-kibana.otel-default') && source?.includes('streams')) {
             return Promise.resolve({
               fields: {},
@@ -173,7 +175,7 @@ describe('suggestion_provider', () => {
 
         const suggestionProvider = ESQLLang.getSuggestionProvider({
           getFieldsMetadata: Promise.resolve({ find: mockFind }),
-          getColumnsFor: jest.fn(async () => [createField('body.text')]),
+          getColumnsFor: vi.fn(async () => [createField('body.text')]),
         });
 
         const model = createTextModel({ value: 'FROM logs-kibana.otel-default | WHERE ' });
@@ -192,7 +194,7 @@ describe('suggestion_provider', () => {
       });
 
       it('should combine ECS description and stream description separated by a divider', async () => {
-        const mockFind = jest.fn().mockImplementation(({ streamNames, source }) => {
+        const mockFind = vi.fn().mockImplementation(({ streamNames, source }) => {
           if (streamNames?.includes('logs-kibana.otel-default') && source?.includes('streams')) {
             return Promise.resolve({
               fields: {},
@@ -213,7 +215,7 @@ describe('suggestion_provider', () => {
 
         const suggestionProvider = ESQLLang.getSuggestionProvider({
           getFieldsMetadata: Promise.resolve({ find: mockFind }),
-          getColumnsFor: jest.fn(async () => [createField('body.text')]),
+          getColumnsFor: vi.fn(async () => [createField('body.text')]),
         });
 
         const model = createTextModel({ value: 'FROM logs-kibana.otel-default | WHERE ' });
@@ -233,7 +235,7 @@ describe('suggestion_provider', () => {
       });
 
       it('should show descriptions for multiple streams separated by a blank line', async () => {
-        const mockFind = jest.fn().mockImplementation(({ streamNames, source }) => {
+        const mockFind = vi.fn().mockImplementation(({ streamNames, source }) => {
           if (source?.includes('streams') && streamNames?.length) {
             const streamFields: Record<string, Record<string, unknown>> = {};
             if (streamNames.includes('stream-a')) {
@@ -253,7 +255,7 @@ describe('suggestion_provider', () => {
 
         const suggestionProvider = ESQLLang.getSuggestionProvider({
           getFieldsMetadata: Promise.resolve({ find: mockFind }),
-          getColumnsFor: jest.fn(async () => [createField('my.field')]),
+          getColumnsFor: vi.fn(async () => [createField('my.field')]),
         });
 
         const model = createTextModel({ value: 'FROM stream-a, stream-b | WHERE ' });
@@ -273,11 +275,11 @@ describe('suggestion_provider', () => {
       });
 
       it('should not fetch stream descriptions when no stream is in the FROM clause', async () => {
-        const mockFind = jest.fn().mockResolvedValue({ fields: {}, streamFields: {} });
+        const mockFind = vi.fn().mockResolvedValue({ fields: {}, streamFields: {} });
 
         const suggestionProvider = ESQLLang.getSuggestionProvider({
           getFieldsMetadata: Promise.resolve({ find: mockFind }),
-          getColumnsFor: jest.fn(async () => [createField('body.text')]),
+          getColumnsFor: vi.fn(async () => [createField('body.text')]),
         });
 
         // No FROM clause: streamNames will be empty, so no stream fetch.
@@ -294,7 +296,7 @@ describe('suggestion_provider', () => {
       });
 
       it('should strip .keyword suffix when looking up stream description', async () => {
-        const mockFind = jest.fn().mockImplementation(({ fieldNames, streamNames, source }) => {
+        const mockFind = vi.fn().mockImplementation(({ fieldNames, streamNames, source }) => {
           if (
             streamNames?.includes('logs-kibana.otel-default') &&
             source?.includes('streams') &&
@@ -314,7 +316,7 @@ describe('suggestion_provider', () => {
 
         const suggestionProvider = ESQLLang.getSuggestionProvider({
           getFieldsMetadata: Promise.resolve({ find: mockFind }),
-          getColumnsFor: jest.fn(async () => [createField('body.text')]),
+          getColumnsFor: vi.fn(async () => [createField('body.text')]),
         });
 
         const model = createTextModel({ value: 'FROM logs-kibana.otel-default | WHERE ' });
@@ -334,11 +336,11 @@ describe('suggestion_provider', () => {
       });
 
       it('should not fetch stream descriptions for wildcard sources', async () => {
-        const mockFind = jest.fn().mockResolvedValue({ fields: {}, streamFields: {} });
+        const mockFind = vi.fn().mockResolvedValue({ fields: {}, streamFields: {} });
 
         const suggestionProvider = ESQLLang.getSuggestionProvider({
           getFieldsMetadata: Promise.resolve({ find: mockFind }),
-          getColumnsFor: jest.fn(async () => [createField('body.text')]),
+          getColumnsFor: vi.fn(async () => [createField('body.text')]),
         });
 
         const model = createTextModel({ value: 'FROM wild-* | WHERE ' });
@@ -351,7 +353,7 @@ describe('suggestion_provider', () => {
     });
 
     it('should call onSuggestionsWithCustomCommandShown when suggestions contain custom commands', async () => {
-      const mockOnSuggestionsWithCustomCommandShown = jest.fn();
+      const mockOnSuggestionsWithCustomCommandShown = vi.fn();
 
       const mockDeps: ESQLDependencies = {
         canSuggestVariables: () => true,
@@ -362,7 +364,7 @@ describe('suggestion_provider', () => {
             type: ESQLVariableType.VALUES,
           },
         ],
-        getColumnsFor: jest.fn(async () => [createField('agent.name')]),
+        getColumnsFor: vi.fn(async () => [createField('agent.name')]),
         telemetry: {
           onSuggestionsWithCustomCommandShown: mockOnSuggestionsWithCustomCommandShown,
         },
@@ -393,7 +395,7 @@ describe('suggestion_provider', () => {
     it('getCompletion returns an empty list when the model is disposed without calling the model value', async () => {
       const disposedModel = createDisposedTextModel();
 
-      const getEditorsSpy = jest.spyOn(monaco.editor, 'getEditors').mockReturnValue([
+      const getEditorsSpy = vi.spyOn(monaco.editor, 'getEditors').mockReturnValue([
         {
           getModel: () => disposedModel,
           hasTextFocus: () => true,

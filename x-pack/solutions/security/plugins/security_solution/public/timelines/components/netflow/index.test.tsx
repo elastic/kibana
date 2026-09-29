@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { get } from 'lodash/fp';
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
@@ -63,9 +66,9 @@ import {
 import { getMockNetflowData } from '../../../common/mock/netflow';
 import { SecurityCellActions } from '../../../common/components/cell_actions';
 
-jest.mock('../../../common/components/cell_actions', () => {
+vi.mock('../../../common/components/cell_actions', () => {
   return {
-    SecurityCellActions: jest.fn(),
+    SecurityCellActions: vi.fn(),
     CellActionsMode: {
       HOVER_DOWN: 'hover-down',
       HOVER_RIGHT: 'hover-right',
@@ -77,14 +80,14 @@ jest.mock('../../../common/components/cell_actions', () => {
   };
 });
 
-const MockedSecurityCellActions = jest.fn(({ children }) => {
+const MockedSecurityCellActions = vi.fn(({ children }) => {
   return <div data-test-subj="mock-security-cell-actions">{children}</div>;
 });
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
@@ -153,12 +156,12 @@ const getNetflowInstance = () => (
   />
 );
 
-jest.mock('../../../common/components/links/link_props');
+vi.mock('../../../common/components/links/link_props');
 
 describe('Netflow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (SecurityCellActions as unknown as jest.Mock).mockImplementation(MockedSecurityCellActions);
+    vi.clearAllMocks();
+    (SecurityCellActions as unknown as Mock).mockImplementation(MockedSecurityCellActions);
   });
 
   test('renders correctly against snapshot', () => {

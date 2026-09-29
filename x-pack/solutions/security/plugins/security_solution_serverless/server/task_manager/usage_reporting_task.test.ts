@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { assign } from 'lodash';
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -40,11 +43,11 @@ describe('SecurityUsageReportingTask', () => {
   const { createSetup: tmSetupMock, createStart: tmStartMock } = taskManagerMock;
 
   let mockTask: SecurityUsageReportingTask;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockEsClient: Mocked<ElasticsearchClient>;
   let mockCore: CoreSetup;
-  let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
-  let reportUsageMock: jest.Mock;
-  let meteringCallbackMock: jest.Mock;
+  let mockTaskManagerSetup: Mocked<TaskManagerSetupContract>;
+  let reportUsageMock: Mock;
+  let meteringCallbackMock: Mock;
   let taskArgs: SecurityUsageReportingTaskSetupContract;
   let usageRecord: UsageRecord;
 
@@ -146,10 +149,10 @@ describe('SecurityUsageReportingTask', () => {
   async function setupBaseMocks() {
     mockCore = coreSetupMock();
     mockEsClient = (await mockCore.getStartServices())[0].elasticsearch.client
-      .asInternalUser as jest.Mocked<ElasticsearchClient>;
+      .asInternalUser as Mocked<ElasticsearchClient>;
     mockTaskManagerSetup = tmSetupMock();
     usageRecord = buildUsageRecord();
-    reportUsageMock = jest.fn();
+    reportUsageMock = vi.fn();
   }
 
   describe.skip('meteringCallback integration', () => {
@@ -171,7 +174,7 @@ describe('SecurityUsageReportingTask', () => {
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     describe('Multiple batches', () => {
@@ -230,7 +233,7 @@ describe('SecurityUsageReportingTask', () => {
   describe('Mocked meteringCallback', () => {
     async function setupMocks(backfillConfig?: { enabled: boolean; maxRecords?: number }) {
       await setupBaseMocks();
-      meteringCallbackMock = jest.fn().mockResolvedValueOnce({
+      meteringCallbackMock = vi.fn().mockResolvedValueOnce({
         latestRecordTimestamp: usageRecord.usage_timestamp,
         records: [usageRecord],
         shouldRunAgain: false,
@@ -249,7 +252,7 @@ describe('SecurityUsageReportingTask', () => {
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     describe('task lifecycle', () => {

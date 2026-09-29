@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -14,11 +17,14 @@ import qs from 'query-string';
 import { RouteSelfHealErrorBoundary } from './route_self_heal_error_boundary';
 import { InvalidRouteParamsException } from './errors';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: jest.fn(),
-  useLocation: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: vi.fn(),
+      useLocation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Captures errors that propagate out of RouteSelfHealErrorBoundary.
 let caughtError: Error | null = null;
@@ -43,19 +49,19 @@ class CatchAllBoundary extends React.Component<
 }
 
 describe('RouteSelfHealErrorBoundary', () => {
-  const mockReplace = jest.fn();
+  const mockReplace = vi.fn();
   const baseLocation = { pathname: '/test', search: '', hash: '' };
 
   beforeEach(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     mockReplace.mockClear();
     caughtError = null;
-    (useHistory as jest.Mock).mockReturnValue({ replace: mockReplace });
-    (useLocation as jest.Mock).mockReturnValue({ ...baseLocation });
+    (useHistory as Mock).mockReturnValue({ replace: mockReplace });
+    (useLocation as Mock).mockReturnValue({ ...baseLocation });
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('catches InvalidRouteParamsException and calls history.replace with the patched query', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor, within } from '@testing-library/react';
@@ -16,35 +19,38 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 // EuiComboBox uses VariableSizeList from react-window for virtualized rendering.
 // In jsdom the container has zero height so the list renders no items.
 // Mock it to render all items directly so options appear in the DOM.
-jest.mock('react-window', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  FixedSizeList: ({ children, itemCount, itemData }: any) => (
-    <div>
-      {Array.from({ length: itemCount }, (_, index) =>
-        children({ index, style: {}, data: itemData })
-      )}
-    </div>
-  ),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  VariableSizeList: ({ children, itemCount, itemData }: any) => (
-    <div>
-      {Array.from({ length: itemCount }, (_, index) =>
-        children({ index, style: {}, data: itemData })
-      )}
-    </div>
-  ),
-}));
+vi.mock('react-window', () => {
+      const mocked = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      FixedSizeList: ({ children, itemCount, itemData }: any) => (
+        <div>
+          {Array.from({ length: itemCount }, (_, index) =>
+            children({ index, style: {}, data: itemData })
+          )}
+        </div>
+      ),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      VariableSizeList: ({ children, itemCount, itemData }: any) => (
+        <div>
+          {Array.from({ length: itemCount }, (_, index) =>
+            children({ index, style: {}, data: itemData })
+          )}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('lodash', () => {
-  const module = jest.requireActual('lodash');
+vi.mock('lodash', () => {
+  const module = require('lodash');
   return {
     ...module,
     debounce: (fn: () => unknown) => fn,
   };
 });
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
-  const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
+vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/triggers-actions-ui-plugin/public'));
   return {
     ...original,
     getIndexPatterns: () => {
@@ -79,10 +85,10 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
 });
 
 const dataViewsMock =
-  dataViewPluginMocks.createStartContract() as jest.Mocked<DataViewsPublicPluginStart>;
+  dataViewPluginMocks.createStartContract() as Mocked<DataViewsPublicPluginStart>;
 
 const setupDataViewsMock = () => {
-  dataViewsMock.getFieldsForWildcard = jest.fn().mockResolvedValue([
+  dataViewsMock.getFieldsForWildcard = vi.fn().mockResolvedValue([
     {
       name: '@timestamp',
       type: 'date',
@@ -103,8 +109,8 @@ const setupDataViewsMock = () => {
 };
 
 describe('IndexSelectPopover', () => {
-  const onIndexChange = jest.fn();
-  const onTimeFieldChange = jest.fn();
+  const onIndexChange = vi.fn();
+  const onTimeFieldChange = vi.fn();
   const props = {
     index: [],
     esFields: [],
@@ -119,7 +125,7 @@ describe('IndexSelectPopover', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     setupDataViewsMock();
   });
 

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export const registerRoutesMock = jest.fn();
-jest.doMock('./routes', () => ({
-  registerRoutes: registerRoutesMock,
-}));
+import { vi } from 'vitest';
+
+export const registerRoutesMock = vi.fn();
+vi.doMock('./routes', () => {
+      const mocked = {
+      registerRoutes: registerRoutesMock,
+    };
+      return { ...mocked, default: mocked };
+    });

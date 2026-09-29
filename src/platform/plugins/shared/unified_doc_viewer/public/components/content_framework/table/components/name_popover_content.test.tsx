@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { NamePopoverContent } from './name_popover_content';
 
-jest.mock('@kbn/field-utils/src/components/field_icon', () => ({
-  FieldIcon: ({}: { type: string; size: string }) => <span data-test-subj="fieldIcon" />,
-}));
+vi.mock('@kbn/field-utils/src/components/field_icon', () => {
+      const mocked = {
+      FieldIcon: ({}: { type: string; size: string }) => <span data-test-subj="fieldIcon" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('NamePopoverContent', () => {
   it('renders the field name', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
@@ -29,11 +32,14 @@ import {
 import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
 import { EventKind } from '../../../../flyout_v2/document/main/constants/event_kinds';
 
-jest.mock('../../../../common/components/link_to');
-jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
-jest.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/components/link_to');
+vi.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => {
+      const mocked = {
+      useExpandSection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/components/user_privileges');
 
 const renderAboutSection = (searchHit = mockSearchHit) => {
   const contextValue = {
@@ -51,10 +57,10 @@ const renderAboutSection = (searchHit = mockSearchHit) => {
 };
 
 describe('<AboutSection />', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseExpandSection = vi.mocked(useExpandSection);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseExpandSection.mockReturnValue(true);
   });
 
@@ -120,7 +126,7 @@ describe('<AboutSection />', () => {
 
   describe('rule summary button', () => {
     beforeEach(() => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         rulesPrivileges: { rules: { read: true } },
       });
     });

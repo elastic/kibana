@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
@@ -18,10 +21,13 @@ import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events
 import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS } from '../../../../../common/endpoint/service/response_actions/constants';
 import { parseEcsFieldPath } from '../../../../common/lib/endpoint';
 
-jest.mock('../../../../common/experimental_features_service');
-jest.mock('../utils/get_timeline_events_details_from_record', () => ({
-  getTimelineEventsDetailsFromRecord: jest.fn(),
-}));
+vi.mock('../../../../common/experimental_features_service');
+vi.mock('../utils/get_timeline_events_details_from_record', () => {
+      const mocked = {
+      getTimelineEventsDetailsFromRecord: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 
@@ -39,7 +45,7 @@ const buildMockHit = (data: TimelineEventsDetailsItem[]): DataTableRecord => {
       )
       .values()
   );
-  (getTimelineEventsDetailsFromRecord as jest.Mock).mockReturnValue(dedupedByField);
+  (getTimelineEventsDetailsFromRecord as Mock).mockReturnValue(dedupedByField);
   return {
     flattened: data.reduce<Record<string, unknown>>((acc, item) => {
       acc[item.field] = item.originalValue ?? item.values;

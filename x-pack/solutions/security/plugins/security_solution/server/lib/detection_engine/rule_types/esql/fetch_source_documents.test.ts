@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Filter } from '@kbn/es-query';
@@ -51,7 +53,7 @@ const defaultArgs = {
 
 describe('fetchSourceDocuments', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
   });
 

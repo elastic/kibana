@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import { useKibana, useToasts } from '../../../common/lib/kibana';
@@ -14,10 +17,10 @@ import * as api from './api';
 import { TestProviders } from '../../../common/mock';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
-jest.mock('./api');
-jest.mock('../../../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 const fields = ['priority'];
 
 const connector: ActionConnector = createMockActionConnector({
@@ -36,11 +39,11 @@ describe('useGetChoices', () => {
   const { http } = useKibanaMock().services;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'getChoices');
+    const spy = vi.spyOn(api, 'getChoices');
     renderHook(
       () =>
         useGetChoices({
@@ -64,7 +67,7 @@ describe('useGetChoices', () => {
   });
 
   it('does not call the api when the connector is missing', async () => {
-    const spy = jest.spyOn(api, 'getChoices');
+    const spy = vi.spyOn(api, 'getChoices');
     renderHook(
       () =>
         useGetChoices({
@@ -78,13 +81,13 @@ describe('useGetChoices', () => {
   });
 
   it('calls addError when the getChoices api throws an error', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getChoices');
+    const spyOnGetCases = vi.spyOn(api, 'getChoices');
     spyOnGetCases.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addSuccess: vi.fn(), addError });
 
     renderHook(
       () =>
@@ -102,15 +105,15 @@ describe('useGetChoices', () => {
   });
 
   it('calls addError when the getChoices api returns successfully but contains an error', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getChoices');
+    const spyOnGetCases = vi.spyOn(api, 'getChoices');
     spyOnGetCases.mockResolvedValue({
       status: 'error',
       message: 'Error message',
       actionId: 'test',
     });
 
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addSuccess: vi.fn(), addError });
 
     renderHook(
       () =>

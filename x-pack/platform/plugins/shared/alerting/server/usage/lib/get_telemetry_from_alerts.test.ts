@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -19,7 +21,7 @@ let logger: MockedLogger;
 
 describe('kibana index telemetry', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     logger = loggerMock.create();
   });
 

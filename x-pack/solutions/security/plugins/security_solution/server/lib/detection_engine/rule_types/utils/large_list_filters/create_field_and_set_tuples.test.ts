@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createFieldAndSetTuples } from './create_field_and_set_tuples';
 import { sampleDocWithSortId } from '../../__mocks__/es_results';
 
@@ -21,9 +23,9 @@ describe('filterEventsAgainstList', () => {
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     listClient = listMock.getListClient();
-    listClient.searchListItemByValues = jest.fn(({ value }) =>
+    listClient.searchListItemByValues = vi.fn(({ value }) =>
       Promise.resolve(
         value.map((item) => ({
           ...getSearchListItemResponseMock(),
@@ -49,7 +51,7 @@ describe('filterEventsAgainstList', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('it returns an empty array if exceptionItem entries are empty', async () => {

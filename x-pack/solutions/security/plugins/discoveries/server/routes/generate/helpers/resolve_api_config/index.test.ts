@@ -5,25 +5,30 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { resolveApiConfig } from '.';
 
-const mockResolveConnectorDetails = jest.fn();
+const mockResolveConnectorDetails = vi.fn();
 
-jest.mock('../../../../workflows/helpers/resolve_connector_details', () => ({
-  resolveConnectorDetails: (...args: unknown[]) => mockResolveConnectorDetails(...args),
-}));
+vi.mock('../../../../workflows/helpers/resolve_connector_details', () => {
+      const mocked = {
+      resolveConnectorDetails: (...args: unknown[]) => mockResolveConnectorDetails(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('resolveApiConfig', () => {
-  const mockActionsClient = { get: jest.fn() };
-  const mockInference = { getConnectorById: jest.fn() };
-  const mockGetActionsClientWithRequest = jest.fn().mockResolvedValue(mockActionsClient);
+  const mockActionsClient = { get: vi.fn() };
+  const mockInference = { getConnectorById: vi.fn() };
+  const mockGetActionsClientWithRequest = vi.fn().mockResolvedValue(mockActionsClient);
   const mockPluginsStart = {
     actions: { getActionsClientWithRequest: mockGetActionsClientWithRequest },
     inference: mockInference,
   };
-  const mockGetStartServices = jest.fn().mockResolvedValue({
+  const mockGetStartServices = vi.fn().mockResolvedValue({
     coreStart: {},
     pluginsStart: mockPluginsStart,
   });
@@ -36,7 +41,7 @@ describe('resolveApiConfig', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockResolveConnectorDetails.mockResolvedValue({
       actionTypeId: '.inference',

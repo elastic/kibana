@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { EuiFormRow } from '@elastic/eui';
 import { render } from '@testing-library/react';
 import { Formik } from 'formik';
@@ -12,15 +15,15 @@ import React from 'react';
 
 import { FormRow } from './form_row';
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    EuiFormRow: jest.fn(({ children }: any) => <div>{children}</div>),
+    EuiFormRow: vi.fn(({ children }: any) => <div>{children}</div>),
   };
 });
 
-const MockedEuiFormRow = EuiFormRow as unknown as jest.Mock;
+const MockedEuiFormRow = EuiFormRow as unknown as Mock;
 
 describe('FormRow', () => {
   it('should render form row with correct error states', () => {
@@ -34,7 +37,7 @@ describe('FormRow', () => {
 
       render(
         <Formik
-          onSubmit={jest.fn()}
+          onSubmit={vi.fn()}
           initialValues={{ email: '' }}
           initialErrors={{ email: error }}
           initialTouched={{ email: touched }}

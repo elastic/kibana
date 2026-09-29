@@ -5,30 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { render, screen } from '@testing-library/react';
 import { SynonymSets } from './synonym_sets';
 
-jest.mock('../../hooks/use_fetch_synonyms_sets', () => ({
-  useFetchSynonymsSets: () => ({
-    data: {
-      data: [
-        {
-          synonyms_set: 'Synonyms Set 1',
-          count: 2,
+vi.mock('../../hooks/use_fetch_synonyms_sets', () => {
+      const mocked = {
+      useFetchSynonymsSets: () => ({
+        data: {
+          data: [
+            {
+              synonyms_set: 'Synonyms Set 1',
+              count: 2,
+            },
+            {
+              synonyms_set: 'Synonyms Set 2',
+              count: 3,
+            },
+          ],
+          _meta: { pageIndex: 0, pageSize: 10, totalItemCount: 2 },
         },
-        {
-          synonyms_set: 'Synonyms Set 2',
-          count: 3,
-        },
-      ],
-      _meta: { pageIndex: 0, pageSize: 10, totalItemCount: 2 },
-    },
-    isLoading: false,
-    isError: false,
-  }),
-}));
+        isLoading: false,
+        isError: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Search Synonym Sets list', () => {
   it('should render the list with synonym sets', () => {

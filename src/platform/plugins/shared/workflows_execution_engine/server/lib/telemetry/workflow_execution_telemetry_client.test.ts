@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -18,7 +21,7 @@ import { WorkflowExecutionTelemetryEventTypes } from './events/workflows_executi
 import { WorkflowExecutionTelemetryClient } from './workflow_execution_telemetry_client';
 
 describe('WorkflowExecutionTelemetryClient', () => {
-  let telemetry: jest.Mocked<AnalyticsServiceSetup>;
+  let telemetry: Mocked<AnalyticsServiceSetup>;
   let logger: MockedLogger;
   let client: WorkflowExecutionTelemetryClient;
 
@@ -29,7 +32,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createMockWorkflowExecution = (

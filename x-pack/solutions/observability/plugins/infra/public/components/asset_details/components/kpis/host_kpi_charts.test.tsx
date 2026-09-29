@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,16 +15,19 @@ import type { TimeRange } from '@kbn/es-query';
 import { HostKpiCharts } from './host_kpi_charts';
 import { useHostKpiCharts } from '../../hooks/use_host_metrics_charts';
 
-jest.mock('../../hooks/use_host_metrics_charts');
-jest.mock('./kpi', () => ({
-  // Kibana config sets Testing Library's testIdAttribute to `data-test-subj`,
-  // so `screen.getByTestId()` queries that attribute (not `data-testid`).
-  Kpi: ({ id, valueOverride }: { id: string; valueOverride?: number }) => (
-    <div data-test-subj={`kpi-${id}`} data-value-override={String(valueOverride)} />
-  ),
-}));
+vi.mock('../../hooks/use_host_metrics_charts');
+vi.mock('./kpi', () => {
+      const mocked = {
+      // Kibana config sets Testing Library's testIdAttribute to `data-test-subj`,
+      // so `screen.getByTestId()` queries that attribute (not `data-testid`).
+      Kpi: ({ id, valueOverride }: { id: string; valueOverride?: number }) => (
+        <div data-test-subj={`kpi-${id}`} data-value-override={String(valueOverride)} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useHostKpiChartsMock = useHostKpiCharts as jest.MockedFunction<typeof useHostKpiCharts>;
+const useHostKpiChartsMock = useHostKpiCharts as MockedFunction<typeof useHostKpiCharts>;
 
 const dateRange: TimeRange = {
   from: '2023-03-28T18:20:00.000Z',
@@ -41,7 +47,7 @@ describe('HostKpiCharts', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders KPI panels when loading', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import {
   elasticsearchClientMock,
@@ -35,8 +38,8 @@ const createMockAggregationResponse = (
 
 describe('cleanupOrphanSummaries', () => {
   let esClient: ElasticsearchClientMock;
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let logger: jest.Mocked<MockedLogger>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let logger: Mocked<MockedLogger>;
   let signal: AbortSignal;
 
   beforeEach(() => {
@@ -44,7 +47,7 @@ describe('cleanupOrphanSummaries', () => {
     soClient = savedObjectsClientMock.create();
     logger = loggerMock.create();
     signal = new AbortController().signal;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should do nothing when summary index is empty', async () => {

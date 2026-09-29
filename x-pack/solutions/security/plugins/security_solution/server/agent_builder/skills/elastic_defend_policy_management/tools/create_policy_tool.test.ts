@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ErrorResultData } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
@@ -50,9 +53,12 @@ import {
   createPolicyTool,
 } from './create_policy_tool';
 
-jest.mock('../services/endpoint_policy_management_service', () => ({
-  createEndpointPolicyManagementService: jest.fn(),
-}));
+vi.mock('../services/endpoint_policy_management_service', () => {
+      const mocked = {
+      createEndpointPolicyManagementService: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SPACE_ID = 'space-marketing';
 const TOOL_ID = 'security.policy_management.test_policy_tool';
@@ -85,16 +91,16 @@ const createContext = (
 };
 
 const createGetStartServices = (): StartServicesAccessor =>
-  jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
+  vi.fn(async () => [
+    { savedObjects: { getScopedClient: vi.fn().mockReturnValue({}) } },
   ]) as unknown as StartServicesAccessor;
 
-const mockedCreateEndpointPolicyManagementService = jest.mocked(
+const mockedCreateEndpointPolicyManagementService = vi.mocked(
   createEndpointPolicyManagementService
 );
 
 const getHandlerResult = async (
-  run: jest.Mock,
+  run: Mock,
   options: {
     logger?: ReturnType<typeof loggingSystemMock.createLogger>;
     maxResultTokens?: number;
@@ -106,7 +112,7 @@ const getHandlerResult = async (
   const getStartServices = createGetStartServices();
   const ctx = createContext(logger);
   const mockService = {
-    getPolicy: jest.fn(),
+    getPolicy: vi.fn(),
   } as unknown as EndpointPolicyManagementService;
   mockedCreateEndpointPolicyManagementService.mockClear();
   mockedCreateEndpointPolicyManagementService.mockReturnValue(mockService);
@@ -246,11 +252,11 @@ describe('createPolicyTool', () => {
   it('forwards optional confirmation unchanged and does not invoke getConfirmation', async () => {
     const confirmation: BuiltInToolConfirmationPolicy<TestParams> = {
       askUser: 'always',
-      getConfirmation: jest.fn(async () => {
+      getConfirmation: vi.fn(async () => {
         throw new Error('preview failed');
       }),
     };
-    const run = jest.fn(async () => ({ ok: true }));
+    const run = vi.fn(async () => ({ ok: true }));
     const { tool, result } = await getHandlerResult(run, { confirmation });
 
     expect(tool.confirmation).toBe(confirmation);
@@ -260,7 +266,7 @@ describe('createPolicyTool', () => {
   });
 
   it('constructs the request-scoped service from the handler request and spaceId and does not authorize in the wrapper', async () => {
-    const run = jest.fn(async () => ({ ok: true }));
+    const run = vi.fn(async () => ({ ok: true }));
     const { result, ctx, endpointAppContextService, getStartServices, mockService } =
       await getHandlerResult(run);
 
@@ -292,7 +298,7 @@ describe('createPolicyTool', () => {
     'returns a stable %s error result without internals and debug-logs expected faults',
     async (errorClass, thrown) => {
       const logger = createLogger();
-      const run = jest.fn(async () => {
+      const run = vi.fn(async () => {
         throw thrown;
       });
       const { result } = await getHandlerResult(run, { logger });
@@ -319,7 +325,7 @@ describe('createPolicyTool', () => {
         name: `name-${index + 1}`,
       })),
     ];
-    const run = jest.fn(async () => {
+    const run = vi.fn(async () => {
       throw new PolicyAmbiguousNameError(candidates, 12);
     });
     const { result } = await getHandlerResult(run, { logger });
@@ -343,7 +349,7 @@ describe('createPolicyTool', () => {
 
   it('returns write_unverified with unavailable observation when observed is absent', async () => {
     const logger = createLogger();
-    const run = jest.fn(async () => {
+    const run = vi.fn(async () => {
       throw new PolicyWriteUnverifiedError(WRITE_IDENTITY);
     });
     const { result } = await getHandlerResult(run, { logger });
@@ -381,7 +387,7 @@ describe('createPolicyTool', () => {
       revision: 5,
       version: overlongVersion,
     };
-    const run = jest.fn(async () => {
+    const run = vi.fn(async () => {
       throw new PolicyWriteUnverifiedError(before, observed);
     });
     const { result } = await getHandlerResult(run, { logger });
@@ -452,7 +458,7 @@ describe('createPolicyTool', () => {
     'returns a canned %s refusal without raw preparation text or paths and debug-logs it',
     async (errorClass, thrown, leakedFragments) => {
       const logger = createLogger();
-      const run = jest.fn(async () => {
+      const run = vi.fn(async () => {
         throw thrown;
       });
       const { result } = await getHandlerResult(run, { logger });
@@ -475,7 +481,7 @@ describe('createPolicyTool', () => {
 
   it('error-logs unknown faults and returns a stable non-sensitive message', async () => {
     const logger = createLogger();
-    const run = jest.fn(async () => {
+    const run = vi.fn(async () => {
       throw new Error('ECONNREFUSED es.internal.local:9200 secret-token');
     });
     const { result } = await getHandlerResult(run, { logger });

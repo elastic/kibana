@@ -7,28 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { getCodeOwnersEntries, getOwningTeamsForPath } from '@kbn/code-owners';
 
 import { getFailures, getLocationFromClassname, getReportNameFromClassname } from './get_failures';
 import { parseTestReport } from './test_report';
 import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT, TRANSFORMED_CYPRESS_REPORT } from './__fixtures__';
 
-jest.mock('@kbn/code-owners', () => ({
-  getCodeOwnersEntries: jest.fn(() => []),
-  // Deterministic owner so the fallback (used for Jest/Cypress) is testable
-  // without depending on the real CODEOWNERS file.
-  getOwningTeamsForPath: jest.fn(() => ['elastic/fake-team']),
-}));
+vi.mock('@kbn/code-owners', () => {
+      const mocked = {
+      getCodeOwnersEntries: vi.fn(() => []),
+      // Deterministic owner so the fallback (used for Jest/Cypress) is testable
+      // without depending on the real CODEOWNERS file.
+      getOwningTeamsForPath: vi.fn(() => ['elastic/fake-team']),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getOwningTeamsForPathMock = getOwningTeamsForPath as jest.MockedFunction<
+const getOwningTeamsForPathMock = getOwningTeamsForPath as MockedFunction<
   typeof getOwningTeamsForPath
 >;
-const getCodeOwnersEntriesMock = getCodeOwnersEntries as jest.MockedFunction<
+const getCodeOwnersEntriesMock = getCodeOwnersEntries as MockedFunction<
   typeof getCodeOwnersEntries
 >;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   getCodeOwnersEntriesMock.mockReturnValue([]);
   getOwningTeamsForPathMock.mockReturnValue(['elastic/fake-team']);
 });

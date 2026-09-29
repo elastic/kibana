@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useManagedOtlpServiceAvailability } from './use_managed_otlp_service_availability';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
+vi.mock('@kbn/kibana-react-plugin/public', () => {
   return {
-    useKibana: jest.fn(),
+    useKibana: vi.fn(),
   };
 });
 
 describe('useManagedOtlpServiceAvailability', () => {
   it('returns true when running in Serverless context even if feature flag is disabled', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         featureFlags: {
           useBooleanValue: () => false,
@@ -33,7 +36,7 @@ describe('useManagedOtlpServiceAvailability', () => {
   });
 
   it('returns false when OTLP feature is disabled even when OTLP service URL is available', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         featureFlags: {
           useBooleanValue: () => false,
@@ -49,7 +52,7 @@ describe('useManagedOtlpServiceAvailability', () => {
   });
 
   it('returns false when OTLP feature is enabled but no OTLP service URL is available', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         featureFlags: {
           useBooleanValue: () => true,
@@ -65,7 +68,7 @@ describe('useManagedOtlpServiceAvailability', () => {
   });
 
   it('returns true when OTLP feature is enabled and OTLP service URL is available', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         featureFlags: {
           useBooleanValue: () => true,
@@ -81,7 +84,7 @@ describe('useManagedOtlpServiceAvailability', () => {
   });
 
   it('reads the URL from the cloud plugin in preference to the observability fallback', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         featureFlags: {
           useBooleanValue: () => true,

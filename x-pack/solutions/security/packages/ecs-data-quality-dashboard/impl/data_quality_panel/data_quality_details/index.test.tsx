@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -19,7 +21,7 @@ const ilmPhases = ['hot', 'warm', 'unmanaged'];
 describe('DataQualityDetails', () => {
   describe('when ILM phases are provided', () => {
     beforeEach(async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       render(
         <TestExternalProviders>
@@ -43,7 +45,7 @@ describe('DataQualityDetails', () => {
 
   describe('when ILM phases are are empty', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       render(
         <TestExternalProviders>

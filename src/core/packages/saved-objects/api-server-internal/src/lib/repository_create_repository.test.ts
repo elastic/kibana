@@ -7,19 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from './repository';
 import { kibanaMigratorMock } from '../mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-jest.mock('./repository');
+vi.mock('./repository');
 
-const { SavedObjectsRepository: originalRepository } = jest.requireActual('./repository');
+const { SavedObjectsRepository: originalRepository } = (await vi.importActual('./repository'));
 
 describe('SavedObjectsRepository#createRepository', () => {
   let logger: MockedLogger;
-  const callAdminCluster = jest.fn();
+  const callAdminCluster = vi.fn();
 
   const typeRegistry = new SavedObjectTypeRegistry();
   typeRegistry.registerType({
@@ -60,7 +63,7 @@ describe('SavedObjectsRepository#createRepository', () => {
 
   const migrator = kibanaMigratorMock.create({ types: typeRegistry.getAllTypes() });
   const RepositoryConstructor =
-    SavedObjectsRepository as unknown as jest.Mock<SavedObjectsRepository>;
+    SavedObjectsRepository as unknown as Mock<SavedObjectsRepository>;
 
   beforeEach(() => {
     logger = loggerMock.create();

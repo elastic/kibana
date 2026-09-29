@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { nodeBuilder } from '@kbn/es-query';
@@ -44,51 +47,57 @@ import type { Document } from './converters';
 import { roundToEvents } from './rounds_to_events';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
 
-jest.mock('../templates/registry', () => ({ getTemplate: jest.fn() }));
+vi.mock('../templates/registry', () => {
+      const mocked = { getTemplate: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const getTemplateMock: jest.Mock = require('../templates/registry').getTemplate;
+const getTemplateMock: Mock = require('../templates/registry').getTemplate;
 
 const testSpace = 'default';
 
 const createConflictError = () => Object.assign(new Error('version conflict'), { statusCode: 409 });
 
 interface MockEsClient {
-  search: jest.Mock;
-  index: jest.Mock;
-  delete: jest.Mock;
+  search: Mock;
+  index: Mock;
+  delete: Mock;
 }
 
 const mockEsClient: MockEsClient = {
-  search: jest.fn(),
-  index: jest.fn(),
-  delete: jest.fn(),
+  search: vi.fn(),
+  index: vi.fn(),
+  delete: vi.fn(),
 };
 
 interface MockRawEsClient {
-  get: jest.Mock;
+  get: Mock;
 }
 
 const mockRawEsClient: MockRawEsClient = {
-  get: jest.fn(),
+  get: vi.fn(),
 };
 
 const TEST_CONVERSATION_INDEX = '.kibana_agent_builder_conversations';
 
 const mockConversationEvents: ConversationEventsServiceStart = {
-  getDefinition: jest.fn(),
-  list: jest.fn().mockReturnValue([]),
+  getDefinition: vi.fn(),
+  list: vi.fn().mockReturnValue([]),
 };
 
-jest.mock('./storage', () => ({
-  createStorage: jest.fn(() => ({
-    getClient: jest.fn(() => mockEsClient),
-  })),
-  conversationIndexName: '.kibana_agent_builder_conversations',
-}));
+vi.mock('./storage', () => {
+      const mocked = {
+      createStorage: vi.fn(() => ({
+        getClient: vi.fn(() => mockEsClient),
+      })),
+      conversationIndexName: '.kibana_agent_builder_conversations',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ConversationClient', () => {
   let client: ConversationClient;
-  let agentRegistry: jest.Mocked<Pick<AgentRegistry, 'get' | 'getIds'>>;
+  let agentRegistry: Mocked<Pick<AgentRegistry, 'get' | 'getIds'>>;
 
   const createConversationDocument = ({
     id = 'conversation-1',
@@ -260,7 +269,7 @@ describe('ConversationClient', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // `clearAllMocks` only clears call history — queued `mockResolvedValueOnce` /
     // `mockRejectedValueOnce` implementations survive it. Reset the ES client mocks fully so a
     // once-queued 409 left behind by a conflict test cannot leak into the next test (#289049).
@@ -272,8 +281,8 @@ describe('ConversationClient', () => {
     mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
 
     agentRegistry = {
-      get: jest.fn().mockResolvedValue({ id: 'agent-1' }),
-      getIds: jest.fn().mockResolvedValue(['agent-1']),
+      get: vi.fn().mockResolvedValue({ id: 'agent-1' }),
+      getIds: vi.fn().mockResolvedValue(['agent-1']),
     };
 
     getTemplateMock.mockReset();
@@ -1973,7 +1982,7 @@ describe('ConversationClient', () => {
 
   describe('applyTemplate', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockEsClient.index.mockResolvedValue({});
     });
 
@@ -2169,7 +2178,7 @@ describe('ConversationClient', () => {
 
   describe('patchMetadata', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
     });
 
@@ -2336,8 +2345,8 @@ describe('ConversationClient', () => {
       });
 
       const buildEventEmitter = () => ({
-        emitMetadataPatched: jest.fn(),
-        emitAttachmentEvents: jest.fn(),
+        emitMetadataPatched: vi.fn(),
+        emitAttachmentEvents: vi.fn(),
       });
 
       it('emits emitMetadataPatched with changed fields after a successful write', async () => {
@@ -2453,7 +2462,7 @@ describe('ConversationClient', () => {
 
   describe('create with template', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
       mockGetReturnsIndexedDocument();
     });
@@ -2660,11 +2669,11 @@ describe('ConversationClient', () => {
 
     beforeEach(() => {
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
-      jest.useFakeTimers().setSystemTime(new Date('2026-08-11T10:00:00.000Z'));
+      vi.useFakeTimers().setSystemTime(new Date('2026-08-11T10:00:00.000Z'));
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('stamps added_at on new entries and persists the requested mode', async () => {
@@ -2964,11 +2973,11 @@ describe('ConversationClient', () => {
       data: { message: 'hello' },
     });
 
-    let emitAttachmentEvents: jest.Mock;
+    let emitAttachmentEvents: Mock;
     let clientWithCb: ConversationClient;
 
     beforeEach(() => {
-      emitAttachmentEvents = jest.fn();
+      emitAttachmentEvents = vi.fn();
       clientWithCb = createClient({
         space: testSpace,
         logger: loggerMock.create(),
@@ -2976,7 +2985,7 @@ describe('ConversationClient', () => {
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
         conversationEvents: mockConversationEvents,
-        eventEmitter: { emitMetadataPatched: jest.fn(), emitAttachmentEvents },
+        eventEmitter: { emitMetadataPatched: vi.fn(), emitAttachmentEvents },
       });
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
     });
@@ -3354,7 +3363,7 @@ describe('ConversationClient', () => {
       });
 
       it('does not notify attachment events on a skipped write', async () => {
-        const onAttachmentEvents = jest.fn();
+        const onAttachmentEvents = vi.fn();
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
@@ -3363,7 +3372,7 @@ describe('ConversationClient', () => {
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           conversationEvents: mockConversationEvents,
           eventEmitter: {
-            emitMetadataPatched: jest.fn(),
+            emitMetadataPatched: vi.fn(),
             emitAttachmentEvents: onAttachmentEvents,
           },
         });
@@ -3669,7 +3678,7 @@ describe('ConversationClient', () => {
       }),
     };
     beforeEach(() => {
-      (mockConversationEvents.getDefinition as jest.Mock).mockReturnValue(mockEventType);
+      (mockConversationEvents.getDefinition as Mock).mockReturnValue(mockEventType);
     });
 
     it('calls appendEvents with access converse and returns materialized events', async () => {

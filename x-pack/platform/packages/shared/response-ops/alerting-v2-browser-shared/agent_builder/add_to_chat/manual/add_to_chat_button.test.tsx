@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,9 +15,9 @@ import { AddToChatButton } from './add_to_chat_button';
 import { useManualAddToChat, type ManualAddToChatServices } from './use_manual_add_to_chat';
 import type { AttachmentConverter } from '../../types';
 
-jest.mock('./use_manual_add_to_chat');
+vi.mock('./use_manual_add_to_chat');
 
-const mockUseManualAddToChat = jest.mocked(useManualAddToChat);
+const mockUseManualAddToChat = vi.mocked(useManualAddToChat);
 
 interface TestItem {
   id: string;
@@ -34,10 +36,10 @@ const converter: AttachmentConverter<TestItem> = {
 const services: ManualAddToChatServices = { agentBuilder: undefined };
 
 describe('AddToChatButton', () => {
-  const addToChat = jest.fn();
+  const addToChat = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseManualAddToChat.mockReturnValue({
       addToChat,
       isAddToChatAvailable: true,

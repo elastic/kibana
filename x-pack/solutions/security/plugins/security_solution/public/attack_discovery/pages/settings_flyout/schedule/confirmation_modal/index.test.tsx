@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 
@@ -18,13 +20,13 @@ import {
 } from './translations';
 
 const defaultProps = {
-  onCancel: jest.fn(),
-  onDiscard: jest.fn(),
+  onCancel: vi.fn(),
+  onDiscard: vi.fn(),
 };
 
 describe('ConfirmationModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a title with the expected text', () => {

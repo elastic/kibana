@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { BaseParams } from '@kbn/reporting-common/types';
 import { checkParamsVersion } from './check_params_version';
@@ -20,7 +22,7 @@ const baseParams: BaseParams = {
 
 describe('checkParamsVersion', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the version from job params when provided', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { createRef } from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -41,19 +43,28 @@ let mockUseSmlAutocompleteReturn: {
   error: null,
 };
 
-const mockUseSmlAutocomplete = jest.fn(() => mockUseSmlAutocompleteReturn);
+const mockUseSmlAutocomplete = vi.fn(() => mockUseSmlAutocompleteReturn);
 
-jest.mock('../../../../../../../hooks/sml/use_sml_autocomplete', () => ({
-  useSmlAutocomplete: (...args: unknown[]) => mockUseSmlAutocomplete(...(args as [])),
-}));
+vi.mock('../../../../../../../hooks/sml/use_sml_autocomplete', () => {
+      const mocked = {
+      useSmlAutocomplete: (...args: unknown[]) => mockUseSmlAutocomplete(...(args as [])),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../hooks/use_conversation', () => ({
-  useAgentId: () => 'test-agent-id',
-}));
+vi.mock('../../../../../../../hooks/use_conversation', () => {
+      const mocked = {
+      useAgentId: () => 'test-agent-id',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../hooks/agents/use_agent_by_id', () => ({
-  useAgentBuilderAgentById: () => ({ agent: null, isLoading: false, error: null }),
-}));
+vi.mock('../../../../../../../hooks/agents/use_agent_by_id', () => {
+      const mocked = {
+      useAgentBuilderAgentById: () => ({ agent: null, isLoading: false, error: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
   mockUseSmlAutocompleteReturn = {
@@ -72,7 +83,7 @@ const renderWithProvider = (ui: React.ReactElement) => {
 
 describe('Sml', () => {
   it('renders SML autocomplete results as type/title', () => {
-    const { container } = renderWithProvider(<Sml query="" onSelect={jest.fn()} />);
+    const { container } = renderWithProvider(<Sml query="" onSelect={vi.fn()} />);
 
     expect(container.textContent).toContain('visualization/Pacific Sales');
     expect(container.textContent).toContain('visualization/Atlantic Metrics');
@@ -87,13 +98,13 @@ describe('Sml', () => {
       error: null,
     };
 
-    renderWithProvider(<Sml query="" onSelect={jest.fn()} />);
+    renderWithProvider(<Sml query="" onSelect={vi.fn()} />);
 
     expect(screen.getByTestId('smlMenu-loading')).toBeInTheDocument();
   });
 
   it('calls onSelect with SML command id, entry id, and type/title label when a row is clicked', () => {
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     renderWithProvider(<Sml query="" onSelect={onSelect} />);
 
     fireEvent.click(screen.getByText('Pacific Sales'));
@@ -116,7 +127,7 @@ describe('Sml', () => {
       error: new Error('network'),
     };
 
-    renderWithProvider(<Sml query="" onSelect={jest.fn()} />);
+    renderWithProvider(<Sml query="" onSelect={vi.fn()} />);
 
     expect(screen.queryByTestId('smlMenu-loading')).not.toBeInTheDocument();
     expect(screen.queryByTestId('smlMenuError')).not.toBeInTheDocument();
@@ -132,7 +143,7 @@ describe('Sml', () => {
       error: new Error('stale'),
     };
 
-    const { container } = renderWithProvider(<Sml query="" onSelect={jest.fn()} />);
+    const { container } = renderWithProvider(<Sml query="" onSelect={vi.fn()} />);
 
     expect(container.textContent).toContain('visualization/Pacific Sales');
     expect(screen.queryByTestId('smlMenu-loading')).not.toBeInTheDocument();
@@ -140,15 +151,15 @@ describe('Sml', () => {
   });
 
   it('passes undefined constraints to useSmlAutocomplete when the agent has no connector constraints', () => {
-    renderWithProvider(<Sml query="git" onSelect={jest.fn()} />);
+    renderWithProvider(<Sml query="git" onSelect={vi.fn()} />);
 
     expect(mockUseSmlAutocomplete).toHaveBeenCalledWith('git', { constraints: undefined });
   });
 
   describe('reporting content presence via onContentChange', () => {
     it('reports content when there are results, for the current query', () => {
-      const onContentChange = jest.fn();
-      renderWithProvider(<Sml query="" onSelect={jest.fn()} onContentChange={onContentChange} />);
+      const onContentChange = vi.fn();
+      renderWithProvider(<Sml query="" onSelect={vi.fn()} onContentChange={onContentChange} />);
 
       expect(onContentChange).toHaveBeenCalledWith(true, '');
     });
@@ -161,9 +172,9 @@ describe('Sml', () => {
         isError: false,
         error: null,
       };
-      const onContentChange = jest.fn();
+      const onContentChange = vi.fn();
       renderWithProvider(
-        <Sml query="nosuchthing" onSelect={jest.fn()} onContentChange={onContentChange} />
+        <Sml query="nosuchthing" onSelect={vi.fn()} onContentChange={onContentChange} />
       );
 
       expect(onContentChange).toHaveBeenCalledWith(true, 'nosuchthing');
@@ -177,9 +188,9 @@ describe('Sml', () => {
         isError: false,
         error: null,
       };
-      const onContentChange = jest.fn();
+      const onContentChange = vi.fn();
       renderWithProvider(
-        <Sml query="nosuchthing" onSelect={jest.fn()} onContentChange={onContentChange} />
+        <Sml query="nosuchthing" onSelect={vi.fn()} onContentChange={onContentChange} />
       );
 
       expect(onContentChange).toHaveBeenCalledWith(false, 'nosuchthing');
@@ -189,7 +200,7 @@ describe('Sml', () => {
   describe('select on space for "type/name" queries', () => {
     it('selects the match on Space once the exact name is typed', () => {
       const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
+      const onSelect = vi.fn();
       renderWithProvider(<Sml ref={ref} query="visualization/Pacific Sales" onSelect={onSelect} />);
 
       expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(true);
@@ -208,7 +219,7 @@ describe('Sml', () => {
 
     it('does not claim Space for a partial name with no exact match yet, so it types through normally', () => {
       const ref = createRef<CommandMenuHandle>();
-      renderWithProvider(<Sml ref={ref} query="visualization/Pac" onSelect={jest.fn()} />);
+      renderWithProvider(<Sml ref={ref} query="visualization/Pac" onSelect={vi.fn()} />);
 
       expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
     });
@@ -223,7 +234,7 @@ describe('Sml', () => {
       };
 
       const ref = createRef<CommandMenuHandle>();
-      renderWithProvider(<Sml ref={ref} query="visualization/nosuchthing" onSelect={jest.fn()} />);
+      renderWithProvider(<Sml ref={ref} query="visualization/nosuchthing" onSelect={vi.fn()} />);
 
       expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
     });
@@ -238,21 +249,21 @@ describe('Sml', () => {
       };
 
       const ref = createRef<CommandMenuHandle>();
-      renderWithProvider(<Sml ref={ref} query="visualization/nosuchthing" onSelect={jest.fn()} />);
+      renderWithProvider(<Sml ref={ref} query="visualization/nosuchthing" onSelect={vi.fn()} />);
 
       expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
     });
 
     it('does not select on Space for a bare trailing slash with no name yet', () => {
       const ref = createRef<CommandMenuHandle>();
-      renderWithProvider(<Sml ref={ref} query="visualization/" onSelect={jest.fn()} />);
+      renderWithProvider(<Sml ref={ref} query="visualization/" onSelect={vi.fn()} />);
 
       expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
     });
 
     it('does not select on Space for a plain free-text query with no slash', () => {
       const ref = createRef<CommandMenuHandle>();
-      renderWithProvider(<Sml ref={ref} query="Pacific Sales" onSelect={jest.fn()} />);
+      renderWithProvider(<Sml ref={ref} query="Pacific Sales" onSelect={vi.fn()} />);
 
       expect(ref.current!.isKeyDownEventHandled({ key: ' ' } as React.KeyboardEvent)).toBe(false);
     });
@@ -270,7 +281,7 @@ describe('Sml', () => {
       };
 
       const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
+      const onSelect = vi.fn();
       renderWithProvider(<Sml ref={ref} query="connector/workday" onSelect={onSelect} />);
 
       act(() => {
@@ -298,7 +309,7 @@ describe('Sml', () => {
       };
 
       const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
+      const onSelect = vi.fn();
       renderWithProvider(<Sml ref={ref} query="connector/workday" onSelect={onSelect} />);
 
       act(() => {

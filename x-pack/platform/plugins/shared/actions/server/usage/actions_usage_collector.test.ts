@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import { registerActionsUsageCollector } from './actions_usage_collector';
@@ -18,17 +21,17 @@ import type {
 
 const mockTaskManagerStart = taskManagerMock.createStart();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('registerActionsUsageCollector', () => {
   let config: ActionsConfig;
-  let usageCollectionMock: jest.Mocked<UsageCollectionSetup>;
+  let usageCollectionMock: Mocked<UsageCollectionSetup>;
   beforeEach(() => {
     config = configSchema.validate({});
     usageCollectionMock = {
-      makeUsageCollector: jest.fn(),
-      registerCollector: jest.fn(),
-    } as unknown as jest.Mocked<UsageCollectionSetup>;
+      makeUsageCollector: vi.fn(),
+      registerCollector: vi.fn(),
+    } as unknown as Mocked<UsageCollectionSetup>;
   });
 
   it('should call registerCollector', () => {

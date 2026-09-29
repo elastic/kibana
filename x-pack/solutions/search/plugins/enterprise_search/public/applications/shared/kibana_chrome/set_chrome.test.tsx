@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 import { mockHistory } from '../../__mocks__/react_router';
 
@@ -12,22 +14,28 @@ import React from 'react';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
-jest.mock('./generate_breadcrumbs', () => ({
-  useGenerateBreadcrumbs: jest.requireActual('./generate_breadcrumbs').useGenerateBreadcrumbs,
-  useSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
-}));
+vi.mock('./generate_breadcrumbs', async () => {
+      const mocked = {
+      useGenerateBreadcrumbs: (await vi.importActual('./generate_breadcrumbs')).useGenerateBreadcrumbs,
+      useSearchBreadcrumbs: vi.fn(() => (crumbs: any) => crumbs),
+    };
+      return { ...mocked, default: mocked };
+    });
 import { useSearchBreadcrumbs } from './generate_breadcrumbs';
 
-jest.mock('./generate_title', () => ({
-  searchTitle: jest.fn((title: any) => title),
-}));
+vi.mock('./generate_title', () => {
+      const mocked = {
+      searchTitle: vi.fn((title: any) => title),
+    };
+      return { ...mocked, default: mocked };
+    });
 import { searchTitle } from './generate_title';
 
 import { SetSearchChrome } from '.';
 
 describe('Set Kibana Chrome helpers', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues({ history: mockHistory });
   });
 

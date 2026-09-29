@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import axios from 'axios';
 import { Request, Response, Headers } from 'undici';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -28,7 +30,7 @@ import {
 } from './types';
 
 // Use the server HTTP client under this package's jsdom test environment.
-jest.mock('axios', () => jest.requireActual('axios/dist/node/axios.cjs'));
+vi.mock('axios', () => require('axios/dist/node/axios.cjs'));
 
 let nock: typeof import('nock');
 
@@ -49,7 +51,7 @@ describe('ThreatQ', () => {
   beforeAll(() => {
     // Nock captures these classes on import; jsdom supplies incompatible fetch polyfills.
     Object.assign(globalThis, { Request, Response, Headers });
-    nock = jest.requireActual('nock');
+    nock = require('nock');
     nock.disableNetConnect();
   });
   beforeEach(async () => {
@@ -69,7 +71,7 @@ describe('ThreatQ', () => {
       config: { url: origin },
       secrets,
       log,
-      getClient: jest.fn(),
+      getClient: vi.fn(),
     };
   });
   const execute = (action: string, input: Record<string, JsonValue>) =>
@@ -416,7 +418,7 @@ describe('ThreatQ', () => {
   });
 
   it('uses a password grant token for user authentication', async () => {
-    const getToken = jest.fn().mockResolvedValue('Bearer user-token');
+    const getToken = vi.fn().mockResolvedValue('Bearer user-token');
     const userSecrets: Parameters<typeof OAuthPassword.configure>[2] = {
       tokenUrl: `${origin}/api/token`,
       username: 'user@example.com',
@@ -458,7 +460,7 @@ describe('ThreatQ', () => {
   });
 
   it('uses the token from the existing OAuth client credentials provider', async () => {
-    const getToken = jest.fn().mockResolvedValue('Bearer oauth-token');
+    const getToken = vi.fn().mockResolvedValue('Bearer oauth-token');
     ctx.client = await OAuth.configure(
       { getCustomHostSettings: () => undefined, getToken, logger: ctx.log, sslSettings: {} },
       ctx.client,

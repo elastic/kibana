@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import * as api from './api';
@@ -15,8 +18,8 @@ import { usePostCase } from './use_post_case';
 import { casesQueriesKeys } from './constants';
 import { TestProviders, createTestQueryClient } from '../common/mock';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../common/lib/kibana');
 
 describe('usePostCase', () => {
   const samplePost = {
@@ -36,17 +39,17 @@ describe('usePostCase', () => {
     owner: SECURITY_SOLUTION_OWNER,
   };
 
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
+  const addSuccess = vi.fn();
+  const addError = vi.fn();
 
-  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+  (useToasts as Mock).mockReturnValue({ addSuccess, addError });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'postCase');
+    const spy = vi.spyOn(api, 'postCase');
     const { result } = renderHook(() => usePostCase(), {
       wrapper: TestProviders,
     });
@@ -60,7 +63,7 @@ describe('usePostCase', () => {
 
   it('invalidates the queries correctly', async () => {
     const queryClient = createTestQueryClient();
-    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const queryClientSpy = vi.spyOn(queryClient, 'invalidateQueries');
     const { result } = renderHook(() => usePostCase(), {
       wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
     });
@@ -90,7 +93,7 @@ describe('usePostCase', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    jest.spyOn(api, 'postCase').mockRejectedValue(new Error('usePostCase: Test error'));
+    vi.spyOn(api, 'postCase').mockRejectedValue(new Error('usePostCase: Test error'));
 
     const { result } = renderHook(() => usePostCase(), {
       wrapper: TestProviders,

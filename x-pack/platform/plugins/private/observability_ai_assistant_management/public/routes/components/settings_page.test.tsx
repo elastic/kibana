@@ -5,25 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { coreStartMock, render } from '../../helpers/test_helper';
 import { waitFor, screen } from '@testing-library/react';
 import { SettingsPage } from './settings_page';
 import { useKnowledgeBase } from '@kbn/ai-assistant';
 
-jest.mock('@kbn/ai-assistant');
+vi.mock('@kbn/ai-assistant');
 
-const useKnowledgeBaseMock = useKnowledgeBase as jest.Mock;
+const useKnowledgeBaseMock = useKnowledgeBase as Mock;
 
 const createSpacesMock = (solution: string) =>
   ({
     spaces: {
-      getActiveSpace: jest.fn().mockResolvedValue({ solution }),
+      getActiveSpace: vi.fn().mockResolvedValue({ solution }),
     },
   } as any);
 
 const createServerlessMock = (projectType: 'observability' | 'search' = 'observability') => {
-  const setBreadcrumbs = jest.fn();
+  const setBreadcrumbs = vi.fn();
   return {
     ...createSpacesMock('classic'),
     serverless: { setBreadcrumbs },
@@ -79,7 +82,7 @@ describe('Settings Page', () => {
   });
 
   it('should set breadcrumbs', () => {
-    const setBreadcrumbs = jest.fn();
+    const setBreadcrumbs = vi.fn();
     render(<SettingsPage />, {
       appContextValue: { ...appContextValue, setBreadcrumbs },
     });
@@ -96,7 +99,7 @@ describe('Settings Page', () => {
   });
 
   it('should show Observability breadcrumb and title when space solution is oblt', async () => {
-    const setBreadcrumbs = jest.fn();
+    const setBreadcrumbs = vi.fn();
 
     render(<SettingsPage />, {
       coreStart: createSpacesMock('oblt'),
@@ -114,7 +117,7 @@ describe('Settings Page', () => {
   });
 
   it('should show Search breadcrumb and title when space solution is es', async () => {
-    const setBreadcrumbs = jest.fn();
+    const setBreadcrumbs = vi.fn();
 
     render(<SettingsPage />, {
       coreStart: createSpacesMock('es'),
@@ -132,7 +135,7 @@ describe('Settings Page', () => {
   });
 
   it('should show Observability and Search breadcrumb and title in a classic deployment', async () => {
-    const setBreadcrumbs = jest.fn();
+    const setBreadcrumbs = vi.fn();
 
     render(<SettingsPage />, {
       coreStart: createSpacesMock('classic'),

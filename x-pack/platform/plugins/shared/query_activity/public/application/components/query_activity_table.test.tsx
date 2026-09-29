@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { cleanup, screen, waitFor } from '@testing-library/react';
@@ -13,12 +16,12 @@ import type { RunningQuery } from '../../../common/types';
 import { QueryActivityTable } from './query_activity_table';
 import { useQueryActivityAppContext, type QueryActivityAppContextValue } from '../app_context';
 
-jest.mock('../app_context', () => ({
+vi.mock('../app_context', () => ({
   __esModule: true,
-  useQueryActivityAppContext: jest.fn(),
+  useQueryActivityAppContext: vi.fn(),
 }));
 
-const mockUseQueryActivityAppContext = useQueryActivityAppContext as jest.MockedFunction<
+const mockUseQueryActivityAppContext = useQueryActivityAppContext as MockedFunction<
   typeof useQueryActivityAppContext
 >;
 
@@ -40,17 +43,17 @@ const createQuery = (overrides: Partial<RunningQuery> = {}): RunningQuery => ({
 const mockContext = (overrides: Partial<QueryActivityAppContextValue> = {}) =>
   ({
     chrome: {} as any,
-    http: { basePath: { prepend: jest.fn((path: string) => path) } } as any,
+    http: { basePath: { prepend: vi.fn((path: string) => path) } } as any,
     notifications: {} as any,
     apiService: {
-      fetchQueryDetails: jest.fn().mockResolvedValue({
+      fetchQueryDetails: vi.fn().mockResolvedValue({
         data: { query: createQuery() },
         error: null,
       }),
     } as any,
     url: {
       locators: {
-        get: jest.fn(() => undefined),
+        get: vi.fn(() => undefined),
       },
     } as any,
     docLinks: {
@@ -78,7 +81,7 @@ const renderTable = async (params: {
   const user = userEvent.setup();
 
   const { queries, canCancelTasks = true } = params;
-  const onCancelQuery = params.onCancelQuery ?? jest.fn().mockResolvedValue(true);
+  const onCancelQuery = params.onCancelQuery ?? vi.fn().mockResolvedValue(true);
 
   mockUseQueryActivityAppContext.mockReturnValue(
     mockContext({
@@ -101,7 +104,7 @@ const renderTable = async (params: {
 
 describe('QueryActivityTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     window.localStorage.clear();
   });
 
@@ -135,7 +138,7 @@ describe('QueryActivityTable', () => {
 
   it('opens the query detail flyout when clicking the task id', async () => {
     const query = createQuery({ taskId: 'node1:flyout' });
-    const fetchQueryDetails = jest.fn().mockResolvedValue({
+    const fetchQueryDetails = vi.fn().mockResolvedValue({
       data: { query },
       error: null,
     });
@@ -154,7 +157,7 @@ describe('QueryActivityTable', () => {
 
   it('cancels a query after confirmation and shows the "Cancelling the query…" state', async () => {
     const query = createQuery({ taskId: 'node1:stop' });
-    const onCancelQuery = jest.fn().mockResolvedValue(true);
+    const onCancelQuery = vi.fn().mockResolvedValue(true);
     const { user } = await renderTable({ queries: [query], onCancelQuery });
 
     await user.click(await screen.findByLabelText('Cancel query'));

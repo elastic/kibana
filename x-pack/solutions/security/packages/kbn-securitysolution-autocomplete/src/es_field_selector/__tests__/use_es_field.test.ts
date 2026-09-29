@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { ReactElement } from 'react';
 import { act, renderHook } from '@testing-library/react';
@@ -12,17 +14,20 @@ import { act, renderHook } from '@testing-library/react';
 import { fields } from '../../fields/index.mock';
 import { useEsField } from '../use_es_field';
 
-jest.mock('../../translations', () => ({
-  BINARY_TYPE_NOT_SUPPORTED: 'Binary fields are currently unsupported',
-}));
+vi.mock('../../translations', () => {
+      const mocked = {
+      BINARY_TYPE_NOT_SUPPORTED: 'Binary fields are currently unsupported',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const indexPattern = { fields, title: 'title' };
-const onChangeMock = jest.fn();
+const onChangeMock = vi.fn();
 const selectedField = { name: '@timestamp', type: 'date' };
 describe('useField', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
+    vi.resetAllMocks();
+    vi.resetModules();
   });
 
   describe('comboOptions and selectedComboOptions', () => {
@@ -433,8 +438,8 @@ describe('useField', () => {
   });
   describe('handleValuesChange', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
-      jest.resetModules();
+      vi.resetAllMocks();
+      vi.resetModules();
     });
     it('should invoke onChange with one value if one option is sent', () => {
       const { result } = renderHook(() => useEsField({ indexPattern, onChange: onChangeMock }));

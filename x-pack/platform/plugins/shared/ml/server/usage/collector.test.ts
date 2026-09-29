@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import {
   createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
@@ -34,17 +37,17 @@ describe('ML usage collector', () => {
   };
 
   let usageCollectionMock: ReturnType<typeof createUsageCollectionSetupMock>;
-  let getIndexForType: jest.MockedFunction<(type: string) => Promise<string>>;
+  let getIndexForType: MockedFunction<(type: string) => Promise<string>>;
   let fetchContextMock: ReturnType<typeof createCollectorFetchContextMock>;
-  let getJobsMock: jest.Mock;
+  let getJobsMock: Mock;
 
   beforeEach(() => {
     usageCollectionMock = createUsageCollectionSetupMock();
-    getIndexForType = jest.fn().mockResolvedValue(alertIndex);
+    getIndexForType = vi.fn().mockResolvedValue(alertIndex);
     fetchContextMock = createCollectorFetchContextMock();
-    getJobsMock = jest.fn().mockResolvedValue({ jobs: [] });
+    getJobsMock = vi.fn().mockResolvedValue({ jobs: [] });
 
-    fetchContextMock.esClient.search = jest
+    fetchContextMock.esClient.search = vi
       .fn()
       .mockResolvedValueOnce(emptyAggResponse)
       .mockResolvedValueOnce(emptyHitsResponse);
@@ -52,9 +55,9 @@ describe('ML usage collector', () => {
     Object.defineProperty(fetchContextMock.esClient, 'ml', {
       value: {
         getJobs: getJobsMock,
-        getCalendars: jest.fn().mockResolvedValue({ calendars: [] }),
-        getCalendarEvents: jest.fn().mockResolvedValue({ events: [] }),
-        getFilters: jest.fn().mockResolvedValue({ filters: [] }),
+        getCalendars: vi.fn().mockResolvedValue({ calendars: [] }),
+        getCalendarEvents: vi.fn().mockResolvedValue({ events: [] }),
+        getFilters: vi.fn().mockResolvedValue({ filters: [] }),
       },
       writable: true,
       configurable: true,

@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { PinnedControlState } from '@kbn/controls-schemas';
 import { transformDashboardIn } from './transform_dashboard_in';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
 
-jest.mock('../../../kibana_services', () => ({
-  ...jest.requireActual('../../../kibana_services'),
-  embeddableService: {
-    getTransforms: jest.fn(),
-  },
-}));
+vi.mock('../../../kibana_services', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../kibana_services')),
+      embeddableService: {
+        getTransforms: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('transformDashboardIn', () => {
   test('should transform dashboard state to saved object', () => {

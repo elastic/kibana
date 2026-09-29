@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { backfillClientMock } from '../../../backfill_client/backfill_client.mock';
@@ -65,7 +67,7 @@ describe('gap auto fill task utils', () => {
       const res = await checkBackfillCapacity({
         rulesClient: rc,
         maxBackfills: 5,
-        logMessage: jest.fn(),
+        logMessage: vi.fn(),
         initiatorId: 'test',
       });
       expect(res.canSchedule).toBe(true);
@@ -81,7 +83,7 @@ describe('gap auto fill task utils', () => {
       const res = await checkBackfillCapacity({
         rulesClient: rc,
         maxBackfills: 4,
-        logMessage: jest.fn(),
+        logMessage: vi.fn(),
         initiatorId: 'test',
       });
       expect(res.canSchedule).toBe(false);
@@ -112,7 +114,7 @@ describe('gap auto fill task utils', () => {
 
       const ctx = {
         internalSavedObjectsRepository: sor,
-        getActionsClient: jest.fn().mockResolvedValue(actions),
+        getActionsClient: vi.fn().mockResolvedValue(actions),
         backfillClient: backfills,
       } as unknown as RulesClientContext;
 
@@ -127,7 +129,7 @@ describe('gap auto fill task utils', () => {
         }),
       ];
 
-      const filtered = await filterGapsWithOverlappingBackfills(gaps, ctx, jest.fn());
+      const filtered = await filterGapsWithOverlappingBackfills(gaps, ctx, vi.fn());
       expect(filtered).toHaveLength(1);
       expect(filtered[0].range.gte.toISOString()).toBe('2024-01-02T00:00:00.000Z');
     });

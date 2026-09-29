@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { Zabbix } from './zabbix';
@@ -16,17 +18,17 @@ const RPC_URL = 'https://zabbix.example.com/api_jsonrpc.php';
 
 describe('Zabbix', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
-    put: jest.fn(),
-    patch: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
   };
 
   const mockContext = {
     client: mockClient,
     config: { baseUrl: 'https://zabbix.example.com' },
-    log: { debug: jest.fn(), error: jest.fn() },
+    log: { debug: vi.fn(), error: vi.fn() },
   } as unknown as ActionContext;
 
   const mockRpcResult = (result: unknown) => {
@@ -39,7 +41,7 @@ describe('Zabbix', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import axios from 'axios';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -16,19 +19,19 @@ import { mappings } from './mocks';
 import type { ExternalService } from './types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 
-jest.mock('axios');
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+vi.mock('axios');
+vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
+  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
   return {
     ...originalUtils,
-    request: jest.fn(),
+    request: vi.fn(),
   };
 });
 
-axios.create = jest.fn(() => axios);
-const requestMock = request as jest.Mock;
+axios.create = vi.fn(() => axios);
+const requestMock = request as Mock;
 const configurationUtilities = actionsConfigMock.create();
 
 describe('Swimlane Service', () => {
@@ -77,7 +80,7 @@ describe('Swimlane Service', () => {
     );
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('createExternalService', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { HttpStart } from '@kbn/core/public';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { Cases } from '@kbn/cases-plugin/common';
@@ -14,31 +17,31 @@ import { useCaseLinks } from './use_case_links';
 import { useKibana } from '../../../utils/kibana_react';
 import { casesDetailLocatorID, casesOverviewLocatorID } from '../../../../common';
 
-jest.mock('../../../utils/kibana_react');
+vi.mock('../../../utils/kibana_react');
 
 const mockShare = {
   url: {
     locators: {
-      get: jest.fn(),
+      get: vi.fn(),
     },
   },
 };
 
-const mockHttp: jest.Mocked<HttpStart> = {
+const mockHttp: Mocked<HttpStart> = {
   // @ts-expect-error partial implementation for testing
   basePath: {
     serverBasePath: '/mock-base-path',
-    get: jest.fn(),
-    prepend: jest.fn(),
-    remove: jest.fn(),
+    get: vi.fn(),
+    prepend: vi.fn(),
+    remove: vi.fn(),
   },
 };
 
-const unsubscribeMock = jest.fn();
-const subscribeMock = jest.fn().mockReturnValue({ unsubscribe: unsubscribeMock });
+const unsubscribeMock = vi.fn();
+const subscribeMock = vi.fn().mockReturnValue({ unsubscribe: unsubscribeMock });
 
 const mockSpaces = {
-  getActiveSpace$: jest.fn().mockReturnValue({
+  getActiveSpace$: vi.fn().mockReturnValue({
     subscribe: subscribeMock,
     pipe: () => ({
       subscribe: subscribeMock,
@@ -101,8 +104,8 @@ const mockCase: Cases[0] = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  (useKibana as jest.Mock).mockReturnValue(mockKibana);
+  vi.clearAllMocks();
+  (useKibana as Mock).mockReturnValue(mockKibana);
 });
 
 describe('useCaseLinks', () => {
@@ -134,11 +137,11 @@ describe('useCaseLinks', () => {
     mockShare.url.locators.get.mockImplementation((id) => {
       if (id === casesOverviewLocatorID) {
         return {
-          getLocation: jest.fn().mockResolvedValue(mockOverviewLocation),
+          getLocation: vi.fn().mockResolvedValue(mockOverviewLocation),
         };
       } else if (id === casesDetailLocatorID) {
         return {
-          getLocation: jest.fn().mockResolvedValue(mockDetailLocation),
+          getLocation: vi.fn().mockResolvedValue(mockDetailLocation),
         };
       }
       return null;
@@ -160,8 +163,8 @@ describe('useCaseLinks', () => {
   });
 
   it('provides the space id when active space is not default', async () => {
-    const overviewGetLocation = jest.fn().mockResolvedValue(mockOverviewLocation);
-    const detailGetLocation = jest.fn().mockResolvedValue(mockDetailLocation);
+    const overviewGetLocation = vi.fn().mockResolvedValue(mockOverviewLocation);
+    const detailGetLocation = vi.fn().mockResolvedValue(mockDetailLocation);
     mockShare.url.locators.get.mockImplementation((id) => {
       if (id === casesOverviewLocatorID) {
         return {
@@ -174,7 +177,7 @@ describe('useCaseLinks', () => {
       }
       return null;
     });
-    const mockSubscribe = jest
+    const mockSubscribe = vi
       .fn()
       .mockImplementation((cb: (space: { id: string }) => { unsubscribe: () => unknown }) => {
         cb({ id: 'mock-space-id' });
@@ -209,8 +212,8 @@ describe('useCaseLinks', () => {
   });
 
   it('does not pass a space ID if the active space is the default space', async () => {
-    const overviewGetLocation = jest.fn().mockResolvedValue(mockOverviewLocation);
-    const detailGetLocation = jest.fn().mockResolvedValue(mockDetailLocation);
+    const overviewGetLocation = vi.fn().mockResolvedValue(mockOverviewLocation);
+    const detailGetLocation = vi.fn().mockResolvedValue(mockDetailLocation);
     mockShare.url.locators.get.mockImplementation((id) => {
       if (id === casesOverviewLocatorID) {
         return {
@@ -223,7 +226,7 @@ describe('useCaseLinks', () => {
       }
       return null;
     });
-    const mockSubscribe = jest
+    const mockSubscribe = vi
       .fn()
       .mockImplementation((cb: (space: { id: string }) => { unsubscribe: () => unknown }) => {
         cb({ id: 'default' });

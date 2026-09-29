@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCasesClientMock } from '../mocks';
 import type { CasesClientArgs } from '../types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -15,7 +17,7 @@ describe('Connectors', () => {
   const clientMock = createCasesClientMock();
   const logger = loggingSystemMock.createLogger();
   const userActionService = createUserActionServiceMock();
-  const getAuthorizationFilter = jest.fn().mockResolvedValue({});
+  const getAuthorizationFilter = vi.fn().mockResolvedValue({});
 
   const clientArgs = {
     logger,
@@ -30,7 +32,7 @@ describe('Connectors', () => {
   beforeAll(() => {});
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns zero as total if the are no connectors', async () => {

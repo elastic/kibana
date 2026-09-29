@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, render } from '@testing-library/react';
 import React from 'react';
 
@@ -14,10 +16,10 @@ import { TestProviders } from '../../mock';
 import { DEFAULT_WIDTH, MIN_LEGEND_HEIGHT, DraggableLegend } from './draggable_legend';
 import type { LegendItem } from './draggable_legend_item';
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,

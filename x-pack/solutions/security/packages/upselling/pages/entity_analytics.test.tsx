@@ -4,16 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EntityAnalyticsUpsellingPage } from './entity_analytics';
 
-jest.mock('@kbn/security-solution-navigation', () => {
-  const original = jest.requireActual('@kbn/security-solution-navigation');
+vi.mock('@kbn/security-solution-navigation', async () => {
+  const original = (await vi.importActual('@kbn/security-solution-navigation'));
   return {
     ...original,
     useNavigation: () => ({
-      navigateTo: jest.fn(),
+      navigateTo: vi.fn(),
     }),
   };
 });

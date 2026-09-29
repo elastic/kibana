@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 
@@ -15,8 +18,8 @@ import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/res
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { TestProviders } from '../../../common/mock';
 
-jest.mock('../../hooks');
-jest.mock('../../hooks/use_exceptions_list.card');
+vi.mock('../../hooks');
+vi.mock('../../hooks/use_exceptions_list.card');
 
 const getMockUseExceptionsListCard = () => ({
   listId: 'my-list',
@@ -41,29 +44,29 @@ const getMockUseExceptionsListCard = () => ({
       key: 'Export',
       icon: 'upload',
       label: 'Export',
-      onClick: jest.fn(),
+      onClick: vi.fn(),
     },
   ],
   listRulesCount: '5',
   listDescription: 'My exception list description',
-  exceptionItemsCount: jest.fn(),
-  onEditExceptionItem: jest.fn(),
-  onDeleteException: jest.fn(),
-  onPaginationChange: jest.fn(),
-  setToggleAccordion: jest.fn(),
+  exceptionItemsCount: vi.fn(),
+  onEditExceptionItem: vi.fn(),
+  onDeleteException: vi.fn(),
+  onPaginationChange: vi.fn(),
+  setToggleAccordion: vi.fn(),
   exceptionViewerStatus: '',
   showAddExceptionFlyout: false,
   showEditExceptionFlyout: false,
   exceptionToEdit: undefined,
-  onAddExceptionClick: jest.fn(),
-  handleConfirmExceptionFlyout: jest.fn(),
-  handleCancelExceptionItemFlyout: jest.fn(),
-  goToExceptionDetail: jest.fn(),
+  onAddExceptionClick: vi.fn(),
+  handleConfirmExceptionFlyout: vi.fn(),
+  handleCancelExceptionItemFlyout: vi.fn(),
+  goToExceptionDetail: vi.fn(),
   emptyViewerTitle: 'Empty View',
   emptyViewerBody: 'This is the empty view description.',
   emptyViewerButtonText: 'Take action',
-  handleCancelExpiredExceptionsModal: jest.fn(),
-  handleConfirmExpiredExceptionsModal: jest.fn(),
+  handleCancelExpiredExceptionsModal: vi.fn(),
+  handleConfirmExpiredExceptionsModal: vi.fn(),
   showIncludeExpiredExceptionsModal: false,
 });
 const getMockUseListDetailsView = () => ({
@@ -71,23 +74,23 @@ const getMockUseListDetailsView = () => ({
   showManageRulesFlyout: false,
   showManageButtonLoader: false,
   disableManageButton: false,
-  onManageRules: jest.fn(),
-  onSaveManageRules: jest.fn(),
-  onCancelManageRules: jest.fn(),
-  onRuleSelectionChange: jest.fn(),
+  onManageRules: vi.fn(),
+  onSaveManageRules: vi.fn(),
+  onCancelManageRules: vi.fn(),
+  onRuleSelectionChange: vi.fn(),
 });
 
 describe('ExceptionsListCard', () => {
   beforeEach(() => {
-    (useExceptionsListCard as jest.Mock).mockReturnValue(getMockUseExceptionsListCard());
-    (useListDetailsView as jest.Mock).mockReturnValue(getMockUseListDetailsView());
+    (useExceptionsListCard as Mock).mockReturnValue(getMockUseExceptionsListCard());
+    (useListDetailsView as Mock).mockReturnValue(getMockUseListDetailsView());
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should display expired exception confirmation modal when "showIncludeExpiredExceptionsModal" is "true"', () => {
-    (useExceptionsListCard as jest.Mock).mockReturnValue({
+    (useExceptionsListCard as Mock).mockReturnValue({
       ...getMockUseExceptionsListCard(),
       showIncludeExpiredExceptionsModal: true,
     });
@@ -96,9 +99,9 @@ describe('ExceptionsListCard', () => {
       <TestProviders>
         <ExceptionsListCard
           exceptionsList={{ ...getExceptionListSchemaMock(), rules: [] }}
-          handleDelete={jest.fn()}
-          handleExport={jest.fn()}
-          handleDuplicate={jest.fn()}
+          handleDelete={vi.fn()}
+          handleExport={vi.fn()}
+          handleDuplicate={vi.fn()}
           readOnly={false}
         />
       </TestProviders>
@@ -107,8 +110,8 @@ describe('ExceptionsListCard', () => {
   });
 
   describe('deleting an exception item', () => {
-    const renderCardAndOpenDeleteModal = (onDeleteException: jest.Mock) => {
-      (useExceptionsListCard as jest.Mock).mockReturnValue({
+    const renderCardAndOpenDeleteModal = (onDeleteException: Mock) => {
+      (useExceptionsListCard as Mock).mockReturnValue({
         ...getMockUseExceptionsListCard(),
         onDeleteException,
       });
@@ -117,9 +120,9 @@ describe('ExceptionsListCard', () => {
         <TestProviders>
           <ExceptionsListCard
             exceptionsList={{ ...getExceptionListSchemaMock(), rules: [] }}
-            handleDelete={jest.fn()}
-            handleExport={jest.fn()}
-            handleDuplicate={jest.fn()}
+            handleDelete={vi.fn()}
+            handleExport={vi.fn()}
+            handleDuplicate={vi.fn()}
             readOnly={false}
           />
         </TestProviders>
@@ -132,7 +135,7 @@ describe('ExceptionsListCard', () => {
     };
 
     it('shows the confirmation modal without deleting the item', () => {
-      const onDeleteException = jest.fn();
+      const onDeleteException = vi.fn();
       const wrapper = renderCardAndOpenDeleteModal(onDeleteException);
 
       expect(wrapper.getByTestId('exceptionItemDeleteConfirmModal')).toBeTruthy();
@@ -140,7 +143,7 @@ describe('ExceptionsListCard', () => {
     });
 
     it('deletes the item on confirm', () => {
-      const onDeleteException = jest.fn();
+      const onDeleteException = vi.fn();
       const wrapper = renderCardAndOpenDeleteModal(onDeleteException);
 
       fireEvent.click(wrapper.getByTestId('confirmModalConfirmButton'));
@@ -155,7 +158,7 @@ describe('ExceptionsListCard', () => {
     });
 
     it('does not delete the item on cancel', () => {
-      const onDeleteException = jest.fn();
+      const onDeleteException = vi.fn();
       const wrapper = renderCardAndOpenDeleteModal(onDeleteException);
 
       fireEvent.click(wrapper.getByTestId('confirmModalCancelButton'));

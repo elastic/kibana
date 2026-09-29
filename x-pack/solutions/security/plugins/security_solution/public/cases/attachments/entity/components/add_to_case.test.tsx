@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
@@ -12,7 +14,7 @@ import { TestProvidersComponent } from '../../../../threat_intelligence/mocks/te
 import type { EntityToAttach } from '..';
 import { AddToCase } from './add_to_case';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 const ENTITY: EntityToAttach = {
   id: 'entity-store-id-abc',
@@ -21,12 +23,12 @@ const ENTITY: EntityToAttach = {
 };
 
 describe('AddToCase', () => {
-  const mockOpen = jest.fn();
-  const mockOnClick = jest.fn();
+  const mockOpen = vi.fn();
+  const mockOnClick = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseKibana().services.cases.hooks.useCasesAddToExistingCaseModal = jest
+    vi.clearAllMocks();
+    mockUseKibana().services.cases.hooks.useCasesAddToExistingCaseModal = vi
       .fn()
       .mockReturnValue({ open: mockOpen });
   });

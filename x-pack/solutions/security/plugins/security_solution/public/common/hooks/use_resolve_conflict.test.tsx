@@ -4,38 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { useLocation } from 'react-router-dom';
 import { renderHook } from '@testing-library/react';
 import { useDeepEqualSelector } from './use_selector';
 import { useKibana } from '../lib/kibana';
 import { useResolveConflict } from './use_resolve_conflict';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
 
   return {
     ...original,
-    useLocation: jest.fn(),
+    useLocation: vi.fn(),
   };
 });
-jest.mock('../lib/kibana');
-jest.mock('./use_selector');
-jest.mock('../../timelines/store', () => ({
-  timelineSelectors: {
-    getTimelineByIdSelector: () => jest.fn(),
-  },
-}));
+vi.mock('../lib/kibana');
+vi.mock('./use_selector');
+vi.mock('../../timelines/store', () => {
+      const mocked = {
+      timelineSelectors: {
+        getTimelineByIdSelector: () => vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useResolveConflict', () => {
-  const mockGetLegacyUrlConflict = jest.fn().mockReturnValue('Test!');
+  const mockGetLegacyUrlConflict = vi.fn().mockReturnValue('Test!');
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Mock rison format in actual url
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as Mock).mockReturnValue({
       pathname: 'my/cool/path',
       search: 'timeline=(activeTab:query,id:%2704e8ffb0-2c2a-11ec-949c-39005af91f70%27,isOpen:!t)',
     });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         spaces: {
           ui: {
@@ -49,12 +55,12 @@ describe('useResolveConflict', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('resolve object is not provided', () => {
     it('should not show the conflict message', async () => {
-      (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
+      (useDeepEqualSelector as Mock).mockImplementation(() => ({
         savedObjectId: 'current-saved-object-id',
         activeTab: 'some-tab',
         show: false,
@@ -67,7 +73,7 @@ describe('useResolveConflict', () => {
 
   describe('outcome is exactMatch', () => {
     it('should not show the conflict message', async () => {
-      (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
+      (useDeepEqualSelector as Mock).mockImplementation(() => ({
         resolveTimelineConfig: {
           outcome: 'exactMatch',
         },
@@ -83,7 +89,7 @@ describe('useResolveConflict', () => {
 
   describe('outcome is aliasMatch', () => {
     it('should not show the conflict message', async () => {
-      (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
+      (useDeepEqualSelector as Mock).mockImplementation(() => ({
         resolveTimelineConfig: {
           outcome: 'aliasMatch',
           alias_target_id: 'new-id',
@@ -98,7 +104,7 @@ describe('useResolveConflict', () => {
   describe('outcome is conflict', () => {
     const mockTextContent = 'I am the visible conflict message';
     it('should show the conflict message', async () => {
-      (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
+      (useDeepEqualSelector as Mock).mockImplementation(() => ({
         resolveTimelineConfig: {
           outcome: 'conflict',
           alias_target_id: 'new-id',
@@ -123,11 +129,11 @@ describe('useResolveConflict', () => {
 
     describe('rison is unable to be decoded', () => {
       it('should use timeline values from redux to create the otherObjectPath', async () => {
-        (useLocation as jest.Mock).mockReturnValue({
+        (useLocation as Mock).mockReturnValue({
           pathname: 'my/cool/path',
           search: '?foo=bar',
         });
-        (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
+        (useDeepEqualSelector as Mock).mockImplementation(() => ({
           resolveTimelineConfig: {
             outcome: 'conflict',
             alias_target_id: 'new-id',

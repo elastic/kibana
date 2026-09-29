@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { coreMock, httpServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -19,14 +22,17 @@ import { ReportingPanelContent } from '.';
 import { ReportingAPIClient } from '../../..';
 import * as constants from './constants';
 
-jest.mock('./constants', () => ({
-  getMaxUrlLength: jest.fn(() => 9999999),
-}));
+vi.mock('./constants', () => {
+      const mocked = {
+      getMaxUrlLength: vi.fn(() => 9999999),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Capture the textToCopy prop passed to EuiCopy without executing execCommand (not available in jsdom)
 let capturedTextToCopy = '';
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiCopy: ({
@@ -144,7 +150,7 @@ describe('ReportingPanelContent', () => {
     });
 
     it('does not show the copy button when the URL is too long', () => {
-      (constants.getMaxUrlLength as jest.Mock).mockReturnValue(1);
+      (constants.getMaxUrlLength as Mock).mockReturnValue(1);
       const { rerender } = renderComponent({ requiresSavedState: false, isDirty: true });
 
       expect(screen.queryByTestId('shareReportingCopyURL')).not.toBeInTheDocument();

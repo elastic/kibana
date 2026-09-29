@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { useLoadRulesQuery as useLoadRules } from './use_load_rules_query';
@@ -16,16 +19,19 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../../common/lib/kibana';
 import type { IToasts } from '@kbn/core-notifications-browser';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../lib/rule_api/rules_kuery_filter', () => ({
-  loadRulesWithKueryFilter: jest.fn(),
-}));
+vi.mock('../../common/lib/kibana');
+vi.mock('../lib/rule_api/rules_kuery_filter', () => {
+      const mocked = {
+      loadRulesWithKueryFilter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
-const { loadRulesWithKueryFilter } = jest.requireMock('../lib/rule_api/rules_kuery_filter');
+const { loadRulesWithKueryFilter } = (await vi.importMock('../lib/rule_api/rules_kuery_filter'));
 
-const onPage = jest.fn();
+const onPage = vi.fn();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -251,13 +257,13 @@ const MOCK_RULE_DATA = {
 describe('useLoadRules', () => {
   beforeEach(() => {
     useKibanaMock().services.notifications.toasts = {
-      addDanger: jest.fn(),
+      addDanger: vi.fn(),
     } as unknown as IToasts;
     loadRulesWithKueryFilter.mockResolvedValue(MOCK_RULE_DATA);
   });
   afterEach(() => {
     queryClient.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call loadRules API and handle result', async () => {

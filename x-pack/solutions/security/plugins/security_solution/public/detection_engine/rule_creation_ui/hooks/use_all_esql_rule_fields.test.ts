@@ -5,21 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { useQuery } from '@kbn/react-query';
 import { useAllEsqlRuleFields } from './use_all_esql_rule_fields';
 import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
 
-jest.mock('@kbn/securitysolution-utils', () => ({ computeIsESQLQueryAggregating: jest.fn() }));
-jest.mock('@kbn/react-query', () => {
+vi.mock('@kbn/securitysolution-utils', () => {
+      const mocked = { computeIsESQLQueryAggregating: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/react-query', () => {
   return {
-    useQuery: jest.fn(),
+    useQuery: vi.fn(),
   };
 });
 
-const computeIsESQLQueryAggregatingMock = computeIsESQLQueryAggregating as jest.Mock;
-const mockUseQuery = useQuery as jest.Mock;
+const computeIsESQLQueryAggregatingMock = computeIsESQLQueryAggregating as Mock;
+const mockUseQuery = useQuery as Mock;
 const mockEsqlQuery = 'from auditbeat* metadata _id';
 const mockIndexPatternFields: DataViewFieldBase[] = [
   {
@@ -39,7 +45,7 @@ const mockEsqlDatatable = {
 
 describe('useAllEsqlRuleFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     computeIsESQLQueryAggregatingMock.mockReturnValue(false);
     mockUseQuery.mockImplementation((config) => {
       const data =
@@ -52,11 +58,11 @@ describe('useAllEsqlRuleFields', () => {
       return { data, isLoading: false };
     });
 
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should return loading true when esql fields still loading', () => {
@@ -103,7 +109,7 @@ describe('useAllEsqlRuleFields', () => {
         indexPatternsFields: mockIndexPatternFields,
       })
     );
-    act(() => jest.advanceTimersByTime(400));
+    act(() => vi.advanceTimersByTime(400));
 
     expect(result.current.fields).toEqual([
       {
@@ -123,7 +129,7 @@ describe('useAllEsqlRuleFields', () => {
         indexPatternsFields: mockIndexPatternFields,
       })
     );
-    act(() => jest.advanceTimersByTime(400));
+    act(() => vi.advanceTimersByTime(400));
 
     expect(result.current.fields).toEqual([
       {
@@ -142,7 +148,7 @@ describe('useAllEsqlRuleFields', () => {
         indexPatternsFields: mockIndexPatternFields,
       })
     );
-    act(() => jest.advanceTimersByTime(400));
+    act(() => vi.advanceTimersByTime(400));
 
     expect(result.current.fields).toEqual([
       {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -15,11 +18,11 @@ import { buildSlo } from '../../../data/slo/slo';
 import { SliChartPanel } from './sli_chart_panel';
 import type { ChartData } from '../../../typings/slo';
 
-jest.mock('../../../hooks/use_kibana');
-jest.mock('../../../hooks/use_fetch_apm_indices');
+vi.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_fetch_apm_indices');
 
-const useKibanaMock = useKibana as jest.Mock;
-const useFetchApmIndicesMock = useFetchApmIndices as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useFetchApmIndicesMock = useFetchApmIndices as Mock;
 
 const mockChartData: ChartData[] = [
   { key: new Date('2024-01-01').getTime(), value: 0.99 },
@@ -29,7 +32,7 @@ const mockChartData: ChartData[] = [
 
 describe('SliChartPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       services: {
         theme: {},

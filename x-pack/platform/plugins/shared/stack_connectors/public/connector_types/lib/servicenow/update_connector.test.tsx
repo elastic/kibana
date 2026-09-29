@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
@@ -12,7 +14,7 @@ import type { Props } from './update_connector';
 import { UpdateConnector } from './update_connector';
 import { screen, waitFor } from '@testing-library/react';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
 const renderUpdateConnector = (props: Partial<Props> = {}, isOAuth: boolean = false) => {
   return renderWithI18n(
@@ -120,7 +122,7 @@ describe('UpdateConnector renders', () => {
   });
 
   it('should confirm the update when submit button clicked', async () => {
-    const onConfirm = jest.fn();
+    const onConfirm = vi.fn();
 
     renderWithI18n(
       <UpdateConnector
@@ -163,7 +165,7 @@ describe('UpdateConnector renders', () => {
   });
 
   it('should cancel the update when cancel button clicked', async () => {
-    const onCancel = jest.fn();
+    const onCancel = vi.fn();
     renderUpdateConnector({ onCancel });
 
     expect(onCancel).not.toHaveBeenCalled();

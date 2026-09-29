@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { MLFlyoutView } from './ml_flyout';
 import { UptimeSettingsContext } from '../../../contexts';
@@ -29,15 +31,15 @@ describe('ML Flyout component', () => {
   };
 
   beforeEach(() => {
-    const spy = jest.spyOn(redux, 'useDispatch');
-    spy.mockReturnValue(jest.fn());
+    const spy = vi.spyOn(redux, 'useDispatch');
+    spy.mockReturnValue(vi.fn());
 
-    const spy1 = jest.spyOn(redux, 'useSelector');
+    const spy1 = vi.spyOn(redux, 'useSelector');
     spy1.mockReturnValue(true);
   });
 
   it('shows license info if no ml available', async () => {
-    const spy1 = jest.spyOn(redux, 'useSelector');
+    const spy1 = vi.spyOn(redux, 'useSelector');
 
     // return false value for no license
     spy1.mockReturnValue(false);

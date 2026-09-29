@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ThreadPoolSearchRejectionsRule } from './thread_pool_search_rejections_rule';
 import { RULE_THREAD_POOL_SEARCH_REJECTIONS } from '../../common/constants';
 import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
@@ -14,28 +17,37 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_thread_pool_rejections_stats', () => ({
-  fetchThreadPoolRejectionStats: jest.fn(),
-}));
-jest.mock('../lib/alerts/fetch_clusters', () => ({
-  fetchClusters: jest.fn(),
-}));
+vi.mock('../lib/alerts/fetch_thread_pool_rejections_stats', () => {
+      const mocked = {
+      fetchThreadPoolRejectionStats: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/alerts/fetch_clusters', () => {
+      const mocked = {
+      fetchClusters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../static_globals', () => ({
-  Globals: {
-    app: {
-      getLogger: () => ({ debug: jest.fn() }),
-      url: 'http://localhost:5601',
-      config: {
-        ui: {
-          show_license_expiration: true,
-          ccs: { enabled: true },
-          container: { elasticsearch: { enabled: false } },
+vi.mock('../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          getLogger: () => ({ debug: vi.fn() }),
+          url: 'http://localhost:5601',
+          config: {
+            ui: {
+              show_license_expiration: true,
+              ccs: { enabled: true },
+              container: { elasticsearch: { enabled: false } },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ThreadpoolSearchRejectionsRule', () => {
   it('should have defaults', () => {
@@ -90,17 +102,17 @@ describe('ThreadpoolSearchRejectionsRule', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchThreadPoolRejectionStats as jest.Mock).mockImplementation(() => {
+      (fetchThreadPoolRejectionStats as Mock).mockImplementation(() => {
         return stat;
       });
-      (fetchClusters as jest.Mock).mockImplementation(() => {
+      (fetchClusters as Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
       });
     });
 
     afterEach(() => {
       Date = RealDate;
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('should fire action', async () => {
@@ -239,7 +251,7 @@ describe('ThreadpoolSearchRejectionsRule', () => {
       });
     });
     it('should not fire actions if under threshold', async () => {
-      (fetchThreadPoolRejectionStats as jest.Mock).mockImplementation(() => {
+      (fetchThreadPoolRejectionStats as Mock).mockImplementation(() => {
         return [
           {
             ...stat[0],
@@ -259,7 +271,7 @@ describe('ThreadpoolSearchRejectionsRule', () => {
 
     it('should handle ccs', async () => {
       const ccs = 'testCluster';
-      (fetchThreadPoolRejectionStats as jest.Mock).mockImplementation(() => {
+      (fetchThreadPoolRejectionStats as Mock).mockImplementation(() => {
         return [
           {
             ...stat[0],

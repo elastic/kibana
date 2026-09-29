@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 /* eslint-disable dot-notation */
-jest.mock('node-fetch');
+vi.mock('node-fetch');
 import { GCPCloudService } from './gcp';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const fetchMock = require('node-fetch') as jest.Mock;
+const fetchMock = require('node-fetch') as Mock;
 
 describe('GCP', () => {
   const gcpService = new GCPCloudService();
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('is named "gcp"', () => {
     expect(gcpService.getName()).toEqual('gcp');

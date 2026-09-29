@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 
 import { useRafDebouncedCallback } from './use_raf_debounced';
@@ -50,7 +52,7 @@ describe('useRafDebouncedCallback', () => {
   };
 
   it('executes the latest callback on the next animation frame', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     const { result } = renderHook(() => useRafDebouncedCallback(fn));
 
     act(() => {
@@ -65,7 +67,7 @@ describe('useRafDebouncedCallback', () => {
   });
 
   it('cancels pending callbacks', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     const { result } = renderHook(() => useRafDebouncedCallback(fn));
 
     act(() => {

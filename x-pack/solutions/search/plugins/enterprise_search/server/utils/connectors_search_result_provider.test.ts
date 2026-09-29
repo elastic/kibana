@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { NEVER, lastValueFrom, of } from 'rxjs';
 
 import type { IScopedClusterClient } from '@kbn/core/server';
@@ -54,7 +56,7 @@ describe('Enterprise Search - connectors search provider', () => {
   const mockClient = {
     asCurrentUser: {
       transport: {
-        request: jest.fn(),
+        request: vi.fn(),
       },
     },
     asInternalUser: {},
@@ -78,7 +80,7 @@ describe('Enterprise Search - connectors search provider', () => {
   const mockSearchProviderContext = getSearchProviderContext({ enterpriseSearchEnabled: true });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   const client = mockClient as unknown as IScopedClusterClient;
   mockClient.asCurrentUser.transport.request.mockResolvedValue(mockConnectorResponse);

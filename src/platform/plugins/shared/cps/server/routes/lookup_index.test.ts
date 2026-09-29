@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 
 import { BULK_OPERATIONS_MAX_SIZE, registerLookupIndexRoutes } from './lookup_index';
@@ -16,7 +18,7 @@ describe('lookup_index routes', () => {
     const router = coreMock.createSetup().http.createRouter();
     registerLookupIndexRoutes(router, coreMock.createPluginInitializerContext());
 
-    const updateCall = (router.post as jest.Mock).mock.calls.find(
+    const updateCall = (router.post as Mock).mock.calls.find(
       ([config]) => config.path === '/internal/esql/lookup_index/{indexName}/update'
     );
 

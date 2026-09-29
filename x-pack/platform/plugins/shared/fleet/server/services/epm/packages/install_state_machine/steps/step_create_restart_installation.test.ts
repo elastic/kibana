@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
@@ -35,17 +38,17 @@ import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator'
 
 import { stepCreateRestartInstallation } from './step_create_restart_installation';
 
-jest.mock('../../../../audit_logging');
-jest.mock('../../install');
+vi.mock('../../../../audit_logging');
+vi.mock('../../install');
 
-const mockedRestartInstallation = jest.mocked(restartInstallation);
-const mockedCreateInstallation = createInstallation as jest.Mocked<typeof createInstallation>;
+const mockedRestartInstallation = vi.mocked(restartInstallation);
+const mockedCreateInstallation = createInstallation as Mocked<typeof createInstallation>;
 
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
 
 describe('stepCreateRestartInstallation', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let esClient: Mocked<ElasticsearchClient>;
   const logger = loggingSystemMock.createLogger();
 
   describe('When package is stuck in `installing`', () => {
@@ -81,7 +84,7 @@ describe('stepCreateRestartInstallation', () => {
       await stepCreateRestartInstallation({
         savedObjectsClient: soClient,
         // @ts-ignore
-        savedObjectsImporter: jest.fn(),
+        savedObjectsImporter: vi.fn(),
         esClient,
         logger,
         packageInstallContext: {
@@ -117,7 +120,7 @@ describe('stepCreateRestartInstallation', () => {
         const promise = stepCreateRestartInstallation({
           savedObjectsClient: soClient,
           // @ts-ignore
-          savedObjectsImporter: jest.fn(),
+          savedObjectsImporter: vi.fn(),
           esClient,
           logger,
           packageInstallContext: {
@@ -161,7 +164,7 @@ describe('stepCreateRestartInstallation', () => {
         await stepCreateRestartInstallation({
           savedObjectsClient: soClient,
           // @ts-ignore
-          savedObjectsImporter: jest.fn(),
+          savedObjectsImporter: vi.fn(),
           esClient,
           logger,
           packageInstallContext: {
@@ -205,7 +208,7 @@ describe('stepCreateRestartInstallation', () => {
         await stepCreateRestartInstallation({
           savedObjectsClient: soClient,
           // @ts-ignore
-          savedObjectsImporter: jest.fn(),
+          savedObjectsImporter: vi.fn(),
           esClient,
           logger,
           packageInstallContext: {

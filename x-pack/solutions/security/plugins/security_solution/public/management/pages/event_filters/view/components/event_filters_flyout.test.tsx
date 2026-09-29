@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { EventFiltersFlyoutProps } from './event_filters_flyout';
 import { EventFiltersFlyout } from './event_filters_flyout';
@@ -27,12 +30,12 @@ import { ExceptionsListItemGenerator } from '../../../../../../common/endpoint/d
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 // mocked modules
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/containers/source');
-jest.mock('../../../../services/policies/hooks');
-jest.mock('../../../../services/policies/policies');
-jest.mock('../../../../hooks/artifacts/use_create_artifact');
-jest.mock('../utils');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/containers/source');
+vi.mock('../../../../services/policies/hooks');
+vi.mock('../../../../services/policies/policies');
+vi.mock('../../../../hooks/artifacts/use_create_artifact');
+vi.mock('../utils');
 
 describe('Event filter flyout', () => {
   let user: UserEvent;
@@ -41,23 +44,23 @@ describe('Event filter flyout', () => {
     props?: Partial<EventFiltersFlyoutProps>
   ) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
-  let onCancelMock: jest.Mock;
+  let onCancelMock: Mock;
   const exceptionsGenerator = new ExceptionsListItemGenerator();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(async () => {
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     mockedContext = createAppRootMockRenderer();
-    onCancelMock = jest.fn();
+    onCancelMock = vi.fn();
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         docLinks: {
           links: {
@@ -117,7 +120,7 @@ describe('Event filter flyout', () => {
                   },
                 }),
               }),
-            get: jest
+            get: vi
               .fn()
               .mockImplementation(
                 async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
@@ -171,7 +174,7 @@ describe('Event filter flyout', () => {
               ),
           },
           search: {
-            search: jest.fn().mockImplementation(() => of(esResponseData())),
+            search: vi.fn().mockImplementation(() => of(esResponseData())),
           },
         },
         notifications: {},
@@ -179,25 +182,25 @@ describe('Event filter flyout', () => {
       },
     });
 
-    (useToasts as jest.Mock).mockReturnValue({
-      addSuccess: jest.fn(),
-      addError: jest.fn(),
-      addWarning: jest.fn(),
-      remove: jest.fn(),
+    (useToasts as Mock).mockReturnValue({
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
+      addWarning: vi.fn(),
+      remove: vi.fn(),
     });
 
-    (useCreateArtifact as jest.Mock).mockImplementation(() => {
+    (useCreateArtifact as Mock).mockImplementation(() => {
       return {
         isLoading: false,
-        mutateAsync: jest.fn(),
+        mutateAsync: vi.fn(),
       };
     });
 
-    (useGetEndpointSpecificPolicies as jest.Mock).mockImplementation(() => {
+    (useGetEndpointSpecificPolicies as Mock).mockImplementation(() => {
       return { isLoading: false, isRefetching: false };
     });
 
-    (useFetchIndex as jest.Mock).mockImplementation(() => [
+    (useFetchIndex as Mock).mockImplementation(() => [
       false,
       { indexPatterns: stubIndexPattern },
     ]);
@@ -212,8 +215,8 @@ describe('Event filter flyout', () => {
 
   afterEach(() => {
     cleanup();
-    jest.clearAllMocks();
-    jest.clearAllTimers();
+    vi.clearAllMocks();
+    vi.clearAllTimers();
   });
 
   describe('On initial render', () => {
@@ -236,7 +239,7 @@ describe('Event filter flyout', () => {
       name: '',
     });
     beforeEach(() => {
-      (getInitialExceptionFromEvent as jest.Mock).mockImplementation(() => {
+      (getInitialExceptionFromEvent as Mock).mockImplementation(() => {
         return exception;
       });
     });
@@ -255,7 +258,7 @@ describe('Event filter flyout', () => {
     });
 
     it('should show OS selector and trigger enrichment when rendering with event data', async () => {
-      const searchMock = (useKibana as jest.Mock)().services.data.search.search;
+      const searchMock = (useKibana as Mock)().services.data.search.search;
       const eventData = ecsEventMock();
 
       act(() => {
@@ -320,7 +323,7 @@ describe('Event filter flyout', () => {
 
     beforeEach(() => {
       const exception = exceptionsGenerator.generateEventFilterForCreate(exceptionOptions);
-      (getInitialExceptionFromEvent as jest.Mock).mockImplementation(() => {
+      (getInitialExceptionFromEvent as Mock).mockImplementation(() => {
         return exception;
       });
     });
@@ -341,8 +344,8 @@ describe('Event filter flyout', () => {
     });
 
     it('should prevent close when submitting data', async () => {
-      (useCreateArtifact as jest.Mock).mockImplementation(() => {
-        return { isLoading: true, mutateAsync: jest.fn() };
+      (useCreateArtifact as Mock).mockImplementation(() => {
+        return { isLoading: true, mutateAsync: vi.fn() };
       });
       render();
       const cancelButton = renderResult.getByTestId('cancelExceptionAddButton');
@@ -354,7 +357,7 @@ describe('Event filter flyout', () => {
 
     it('should close when exception has been submitted successfully and close flyout', async () => {
       // mock submit query
-      (useCreateArtifact as jest.Mock).mockImplementation(() => {
+      (useCreateArtifact as Mock).mockImplementation(() => {
         return {
           isLoading: false,
           mutateAsync: (

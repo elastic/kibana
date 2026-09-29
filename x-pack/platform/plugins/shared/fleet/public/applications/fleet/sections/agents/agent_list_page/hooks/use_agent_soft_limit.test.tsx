@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import { useConfig, sendGetAgents } from '../../../../hooks';
 
 import { useAgentSoftLimit } from './use_agent_soft_limit';
 
-jest.mock('../../../../hooks');
+vi.mock('../../../../hooks');
 
-const mockedSendGetAgents = jest.mocked(sendGetAgents);
-const mockedUseConfig = jest.mocked(useConfig);
+const mockedSendGetAgents = vi.mocked(sendGetAgents);
+const mockedUseConfig = vi.mocked(useConfig);
 
 describe('useAgentSoftLimit', () => {
   beforeEach(() => {

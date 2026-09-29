@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ReactElement } from 'react';
 import { ColorFormat } from './color';
 import {
@@ -56,7 +58,7 @@ describe('Color Format', () => {
             },
           ],
         },
-        jest.fn()
+        vi.fn()
       );
 
       expect(colorer.convertToText(99)).toBe('99');
@@ -84,7 +86,7 @@ describe('Color Format', () => {
             },
           ],
         },
-        jest.fn()
+        vi.fn()
       );
 
       expect(colorer.convertToText(99)).toBe('99');
@@ -105,7 +107,7 @@ describe('Color Format', () => {
             },
           ],
         },
-        jest.fn()
+        vi.fn()
       );
 
       expect(colorer.convertToText(true)).toBe('true');
@@ -131,7 +133,7 @@ describe('Color Format', () => {
             },
           ],
         },
-        jest.fn()
+        vi.fn()
       );
 
       expect(colorer.convertToText('B')).toBe('B');
@@ -161,7 +163,7 @@ describe('Color Format', () => {
             },
           ],
         },
-        jest.fn()
+        vi.fn()
       );
 
       expect(colorer.convertToText('<')).toBe('<');
@@ -182,7 +184,7 @@ describe('Color Format', () => {
             },
           ],
         },
-        jest.fn()
+        vi.fn()
       );
 
       expect(colorer.convertToText('<')).toBe('<');
@@ -193,7 +195,7 @@ describe('Color Format', () => {
   test('wraps a multi-value array with bracket notation', () => {
     const colorer = new ColorFormat(
       { fieldType: 'number', colors: [{ range: '0:200', text: 'blue', background: 'yellow' }] },
-      jest.fn()
+      vi.fn()
     );
 
     expect(colorer.convertToText([100, 200])).toBe('["100","200"]');
@@ -209,7 +211,7 @@ describe('Color Format', () => {
   test('returns the single element without brackets for a one-element array', () => {
     const colorer = new ColorFormat(
       { fieldType: 'number', colors: [{ range: '0:200', text: 'blue', background: 'yellow' }] },
-      jest.fn()
+      vi.fn()
     );
 
     expect(colorer.convertToText([100])).toBe('["100"]');

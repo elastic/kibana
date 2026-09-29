@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract, ISavedObjectsRepository } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { PartiallyUpdateableAdHocRunAttributes } from './partially_update_ad_hoc_run';
@@ -15,11 +18,11 @@ import { adHocRunStatus } from '../../../common/constants';
 
 const MockSavedObjectsClientContract = savedObjectsClientMock.create();
 const MockISavedObjectsRepository =
-  MockSavedObjectsClientContract as unknown as jest.Mocked<ISavedObjectsRepository>;
+  MockSavedObjectsClientContract as unknown as Mocked<ISavedObjectsRepository>;
 
 describe('partiallyUpdateAdHocRun', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   for (const [soClientName, soClient] of Object.entries(getMockSavedObjectClients()))
@@ -121,7 +124,7 @@ describe('partiallyUpdateAdHocRun', () => {
 
 function getMockSavedObjectClients(): Record<
   string,
-  jest.Mocked<SavedObjectsClientContract | ISavedObjectsRepository>
+  Mocked<SavedObjectsClientContract | ISavedObjectsRepository>
 > {
   return {
     SavedObjectsClientContract: MockSavedObjectsClientContract,

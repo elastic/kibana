@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { vi } from 'vitest';
+
 const dateMath = require('.');
 const moment = require('moment');
 
@@ -31,7 +33,7 @@ const moment = require('moment');
  * of moment, by resetting the jest require modules cache and require the library again.
  */
 function momentClone() {
-  jest.resetModules();
+  vi.resetModules();
   return require('moment');
 }
 
@@ -90,8 +92,8 @@ describe('dateMath', function () {
     let now;
 
     beforeEach(function () {
-      jest.useFakeTimers();
-      jest.setSystemTime(unix);
+      vi.useFakeTimers();
+      vi.setSystemTime(unix);
       now = moment();
       mmnt = moment(anchor);
       date = mmnt.toDate();
@@ -99,7 +101,7 @@ describe('dateMath', function () {
     });
 
     afterEach(function () {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should return the same moment if passed a moment', function () {
@@ -128,14 +130,14 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      jest.useFakeTimers();
-      jest.setSystemTime(unix);
+      vi.useFakeTimers();
+      vi.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
     afterEach(function () {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     [5, 12, 247].forEach((len) => {
@@ -166,14 +168,14 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      jest.useFakeTimers();
-      jest.setSystemTime(unix);
+      vi.useFakeTimers();
+      vi.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
     afterEach(function () {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     [5, 12, 247].forEach((len) => {
@@ -205,14 +207,14 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      jest.useFakeTimers();
-      jest.setSystemTime(unix);
+      vi.useFakeTimers();
+      vi.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
     afterEach(function () {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     spans.forEach((span) => {
@@ -247,14 +249,14 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      jest.useFakeTimers();
-      jest.setSystemTime(unix);
+      vi.useFakeTimers();
+      vi.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
     afterEach(function () {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should round to the nearest second with 0 value', function () {
@@ -319,7 +321,7 @@ describe('dateMath', function () {
 
   describe('used momentjs instance', function () {
     it('should use the default moment instance if parameter not specified', function () {
-      const momentSpy = jest.spyOn(moment, 'isMoment');
+      const momentSpy = vi.spyOn(moment, 'isMoment');
       dateMath.parse('now');
       expect(momentSpy).toHaveBeenCalled();
       momentSpy.mockRestore();
@@ -327,8 +329,8 @@ describe('dateMath', function () {
 
     it('should not use default moment instance if parameter is specified', function () {
       const m = momentClone();
-      const momentSpy = jest.spyOn(moment, 'isMoment');
-      const cloneSpy = jest.spyOn(m, 'isMoment');
+      const momentSpy = vi.spyOn(moment, 'isMoment');
+      const cloneSpy = vi.spyOn(m, 'isMoment');
       dateMath.parse('now', { momentInstance: m });
       expect(momentSpy).not.toHaveBeenCalled();
       expect(cloneSpy).toHaveBeenCalled();
@@ -339,8 +341,8 @@ describe('dateMath', function () {
     it('should work with multiple different instances', function () {
       const m1 = momentClone();
       const m2 = momentClone();
-      const m1Spy = jest.spyOn(m1, 'isMoment');
-      const m2Spy = jest.spyOn(m2, 'isMoment');
+      const m1Spy = vi.spyOn(m1, 'isMoment');
+      const m2Spy = vi.spyOn(m2, 'isMoment');
       dateMath.parse('now', { momentInstance: m1 });
       expect(m1Spy).toHaveBeenCalled();
       expect(m2Spy).not.toHaveBeenCalled();
@@ -355,8 +357,8 @@ describe('dateMath', function () {
 
     it('should use global instance after passing an instance', function () {
       const m = momentClone();
-      const momentSpy = jest.spyOn(moment, 'isMoment');
-      const cloneSpy = jest.spyOn(m, 'isMoment');
+      const momentSpy = vi.spyOn(moment, 'isMoment');
+      const cloneSpy = vi.spyOn(m, 'isMoment');
       dateMath.parse('now', { momentInstance: m });
       expect(momentSpy).not.toHaveBeenCalled();
       expect(cloneSpy).toHaveBeenCalled();

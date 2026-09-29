@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { encode as encodeRison } from '@kbn/rison';
 import { createStateHash, isStateHash } from './state_hash';
 
@@ -36,7 +38,7 @@ describe('stateHash', () => {
 
     it('calls existingJsonProvider if provided', () => {
       const json = JSON.stringify({ a: 'a' });
-      const existingJsonProvider = jest.fn(() => json);
+      const existingJsonProvider = vi.fn(() => json);
       createStateHash(json, existingJsonProvider);
       expect(existingJsonProvider).toHaveBeenCalled();
     });

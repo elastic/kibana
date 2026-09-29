@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { TimeExpressionSelect } from './time_expression_select';
 
 describe('TimeExpressionSelect component', () => {
   it('should shallow renders against props', function () {
-    const component = shallowWithIntl(<TimeExpressionSelect setRuleParams={jest.fn()} />);
+    const component = shallowWithIntl(<TimeExpressionSelect setRuleParams={vi.fn()} />);
     expect(component).toMatchSnapshot();
   });
 
   it('should renders against props', function () {
-    const component = renderWithIntl(<TimeExpressionSelect setRuleParams={jest.fn()} />);
+    const component = renderWithIntl(<TimeExpressionSelect setRuleParams={vi.fn()} />);
     expect(component).toMatchSnapshot();
   });
 });

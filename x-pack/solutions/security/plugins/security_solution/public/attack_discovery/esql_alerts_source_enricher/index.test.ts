@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
 import { createEsqlAlertsSourceEnricher } from '.';
 
 const buildMockGetStartServices = (spaceId: string) =>
-  jest.fn().mockResolvedValue([
+  vi.fn().mockResolvedValue([
     {},
     {
       spaces: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: spaceId }),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: spaceId }),
       },
     },
   ]);

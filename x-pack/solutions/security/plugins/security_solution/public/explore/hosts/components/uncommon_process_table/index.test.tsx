@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, render } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
@@ -18,20 +20,20 @@ import { getEmptyValue } from '../../../../common/components/empty_value';
 import { UncommonProcessTable } from '.';
 import { mockData } from './mock';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
   };
 });
 
-jest.mock('../../../../common/components/link_to');
+vi.mock('../../../../common/components/link_to');
 
 describe('Uncommon Process Table Component', () => {
-  const loadPage = jest.fn();
+  const loadPage = vi.fn();
 
   const defaultProps = {
     data: mockData.edges,
@@ -40,7 +42,7 @@ describe('Uncommon Process Table Component', () => {
     isInspect: false,
     loading: false,
     loadPage,
-    setQuerySkip: jest.fn(),
+    setQuerySkip: vi.fn(),
     showMorePagesIndicator: getOr(false, 'showMorePagesIndicator', mockData.pageInfo),
     totalCount: mockData.totalCount,
     type: hostsModel.HostsType.page,

@@ -7,26 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { validateAndProcessTestFiles } from './test_files';
 
 // Mock the kbn-repo-info module to return a predictable REPO_ROOT
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/mock/repo/root',
-}));
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/mock/repo/root',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the fs module
-jest.mock('fs', () => ({
-  existsSync: jest.fn(),
-  statSync: jest.fn(),
-  readdirSync: jest.fn(),
-}));
+vi.mock('fs', () => {
+      const mocked = {
+      existsSync: vi.fn(),
+      statSync: vi.fn(),
+      readdirSync: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import * as fs from 'fs';
-const mockFs = fs as jest.Mocked<typeof fs>;
+const mockFs = fs as Mocked<typeof fs>;
 
 describe('validateAndProcessTestFiles', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Default mocks for successful validation
     mockFs.existsSync.mockReturnValue(true);

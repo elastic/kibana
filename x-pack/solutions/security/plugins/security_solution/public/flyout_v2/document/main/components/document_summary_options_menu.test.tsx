@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
@@ -21,7 +23,7 @@ describe('DocumentSummaryOptionsMenu', () => {
       <DocumentSummaryOptionsMenu
         hasSummary={true}
         showAnonymizedValues={false}
-        setShowAnonymizedValues={jest.fn()}
+        setShowAnonymizedValues={vi.fn()}
       />
     );
 

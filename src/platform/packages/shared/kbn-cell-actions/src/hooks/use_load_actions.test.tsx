@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor, renderHook, act, screen } from '@testing-library/react';
 import { makeAction, makeActionContext } from '../mocks/helpers';
 import { useBulkLoadActions, useLoadActions, useLoadActionsFn } from './use_load_actions';
 
 const action = makeAction('action-1', 'icon', 1);
-const mockGetActions = jest.fn();
-jest.mock('../context/cell_actions_context', () => ({
-  useCellActionsContext: () => ({ getActions: mockGetActions }),
-}));
+const mockGetActions = vi.fn();
+vi.mock('../context/cell_actions_context', () => {
+      const mocked = {
+      useCellActionsContext: () => ({ getActions: mockGetActions }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 class ErrorCatcher extends React.Component<React.PropsWithChildren> {
   state: { error: Error | null } = { error: null };
@@ -38,7 +43,7 @@ describe('loadActions hooks', () => {
   const actionContext = makeActionContext();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetActions.mockResolvedValue([action]);
   });
   describe('useLoadActions', () => {

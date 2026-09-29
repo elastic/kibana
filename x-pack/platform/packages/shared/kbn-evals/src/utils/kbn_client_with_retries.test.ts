@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/kbn-client';
 import { wrapKbnClientWithRetries } from './kbn_client_with_retries';
@@ -25,15 +28,15 @@ function makeKbnClientRequesterError(status: number, message = `HTTP ${status}`)
 
 function createLog() {
   return {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
   } as unknown as ToolingLog & {
-    debug: jest.Mock;
-    info: jest.Mock;
-    warning: jest.Mock;
-    error: jest.Mock;
+    debug: Mock;
+    info: Mock;
+    warning: Mock;
+    error: Mock;
   };
 }
 
@@ -55,7 +58,7 @@ describe('wrapKbnClientWithRetries', () => {
   });
 
   it('retries transient 503 then succeeds', async () => {
-    const request = jest
+    const request = vi
       .fn()
       .mockRejectedValueOnce(makeStatusError(503))
       .mockResolvedValueOnce({ data: 'ok' });
@@ -75,7 +78,7 @@ describe('wrapKbnClientWithRetries', () => {
 
   it('does NOT retry on HTTP 500', async () => {
     const err = makeStatusError(500);
-    const request = jest.fn().mockRejectedValue(err);
+    const request = vi.fn().mockRejectedValue(err);
     const inner = { request } as unknown as KbnClient;
     const log = createLog();
 
@@ -90,7 +93,7 @@ describe('wrapKbnClientWithRetries', () => {
 
   it('logs distinct error and does not retry on 413', async () => {
     const err = makeStatusError(413, 'Payload Too Large');
-    const request = jest.fn().mockRejectedValue(err);
+    const request = vi.fn().mockRejectedValue(err);
     const inner = { request } as unknown as KbnClient;
     const log = createLog();
 
@@ -105,7 +108,7 @@ describe('wrapKbnClientWithRetries', () => {
   });
 
   it('retries KbnClientRequesterError with .status', async () => {
-    const request = jest
+    const request = vi
       .fn()
       .mockRejectedValueOnce(makeKbnClientRequesterError(502))
       .mockResolvedValueOnce({ data: 'ok' });
@@ -124,7 +127,7 @@ describe('wrapKbnClientWithRetries', () => {
 
   it('logs distinct 413 error when status is on KbnClientRequesterError', async () => {
     const err = makeKbnClientRequesterError(413, 'Payload Too Large');
-    const request = jest.fn().mockRejectedValue(err);
+    const request = vi.fn().mockRejectedValue(err);
     const inner = { request } as unknown as KbnClient;
     const log = createLog();
 
@@ -140,7 +143,7 @@ describe('wrapKbnClientWithRetries', () => {
 
   it('skips retries when params.retries is 0', async () => {
     const err = makeStatusError(503);
-    const request = jest.fn().mockRejectedValue(err);
+    const request = vi.fn().mockRejectedValue(err);
     const inner = { request } as unknown as KbnClient;
     const log = createLog();
 
@@ -158,7 +161,7 @@ describe('wrapKbnClientWithRetries', () => {
   });
 
   it('still retries when params.retries is not 0', async () => {
-    const request = jest
+    const request = vi
       .fn()
       .mockRejectedValueOnce(makeStatusError(429))
       .mockResolvedValueOnce({ data: 'ok' });

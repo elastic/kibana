@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -20,15 +23,15 @@ import { outputService } from '../output';
 import { validateOutputForPolicy } from '.';
 import { validateAgentPolicyOutputForIntegration } from './outputs_helpers';
 
-jest.mock('../app_context');
-jest.mock('../output');
+vi.mock('../app_context');
+vi.mock('../output');
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
+const mockedOutputService = outputService as Mocked<typeof outputService>;
 
 function mockHasLicence(res: boolean) {
   mockedAppContextService.getSecurityLicense.mockReturnValue({

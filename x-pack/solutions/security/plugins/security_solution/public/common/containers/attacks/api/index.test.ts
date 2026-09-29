@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   DETECTION_ENGINE_ATTACKS_SEARCH_URL,
@@ -15,8 +18,8 @@ import {
 import { KibanaServices } from '../../../lib/kibana';
 import * as api from '.';
 
-jest.mock('../../../lib/kibana');
-const mockKibanaServices = KibanaServices.get as jest.Mock;
+vi.mock('../../../lib/kibana');
+const mockKibanaServices = KibanaServices.get as Mock;
 
 const signal = {} as AbortSignal;
 const ATTACKS_API_VERSION = '2023-10-31';
@@ -31,7 +34,7 @@ describe('Attacks API', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('searchAttacks', () => {

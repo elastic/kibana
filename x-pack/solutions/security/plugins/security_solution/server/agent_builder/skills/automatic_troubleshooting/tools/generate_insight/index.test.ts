@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
@@ -19,15 +22,15 @@ import { GENERATE_INSIGHT_TOOL_ID } from '../..';
 import { createGenerateInsightGraph } from './graph';
 import { generateInsightTool } from '.';
 
-jest.mock('./graph');
+vi.mock('./graph');
 
-const mockCreateGenerateInsightGraph = createGenerateInsightGraph as jest.Mock;
+const mockCreateGenerateInsightGraph = createGenerateInsightGraph as Mock;
 
 const createTool = () => generateInsightTool(createMockEndpointAppContextService());
 
 describe('automaticTroubleshootingGenerateInsightTool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('tool definition', () => {
@@ -210,11 +213,11 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
 
   describe('handler', () => {
     let tool: ReturnType<typeof generateInsightTool>;
-    let mockEndpointAppContextService: jest.Mocked<EndpointAppContextService>;
-    let mockEnsureInCurrentSpace: jest.Mock;
+    let mockEndpointAppContextService: Mocked<EndpointAppContextService>;
+    let mockEnsureInCurrentSpace: Mock;
     let mockModelProvider: ToolHandlerContext['modelProvider'];
     let mockModel: ScopedModel;
-    let mockGraph: { invoke: jest.Mock };
+    let mockGraph: { invoke: Mock };
 
     const mockEsInternalUser = {} as unknown;
     const createHandlerContext = () =>
@@ -225,21 +228,21 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
           asInternalUser: mockEsInternalUser,
         },
         logger: {
-          error: jest.fn(),
+          error: vi.fn(),
         },
       } as unknown as ToolHandlerContext);
 
     beforeEach(() => {
       mockEndpointAppContextService = createMockEndpointAppContextService();
       const fleetServices = mockEndpointAppContextService.getInternalFleetServices();
-      mockEnsureInCurrentSpace = fleetServices.ensureInCurrentSpace as jest.Mock;
+      mockEnsureInCurrentSpace = fleetServices.ensureInCurrentSpace as Mock;
       mockEnsureInCurrentSpace.mockResolvedValue(undefined);
       mockEndpointAppContextService.getInternalFleetServices.mockClear();
 
       tool = generateInsightTool(mockEndpointAppContextService);
 
       mockGraph = {
-        invoke: jest.fn(),
+        invoke: vi.fn(),
       };
 
       mockModel = {
@@ -255,7 +258,7 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
       } as ScopedModel;
 
       mockModelProvider = {
-        getDefaultModel: jest.fn().mockResolvedValue(mockModel),
+        getDefaultModel: vi.fn().mockResolvedValue(mockModel),
       } as unknown as ToolHandlerContext['modelProvider'];
 
       mockCreateGenerateInsightGraph.mockReturnValue(mockGraph);
@@ -376,7 +379,7 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
       );
 
       const ensureOrder = mockEnsureInCurrentSpace.mock.invocationCallOrder[0];
-      const modelOrder = (mockModelProvider.getDefaultModel as jest.Mock).mock
+      const modelOrder = (mockModelProvider.getDefaultModel as Mock).mock
         .invocationCallOrder[0];
       const graphOrder = mockCreateGenerateInsightGraph.mock.invocationCallOrder[0];
 

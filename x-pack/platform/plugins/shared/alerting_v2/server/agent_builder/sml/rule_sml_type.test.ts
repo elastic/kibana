@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -53,8 +56,8 @@ const buildToAttachmentContext = () => ({
 });
 
 describe('createRuleSmlType', () => {
-  let getRule: jest.Mock;
-  let getIsAlertingV2Enabled: jest.Mock;
+  let getRule: Mock;
+  let getIsAlertingV2Enabled: Mock;
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let rulesClient: RulesClient;
 
@@ -65,7 +68,7 @@ describe('createRuleSmlType', () => {
   });
 
   const stubFinder = (find: () => AsyncGenerator<unknown>) => {
-    const close = jest.fn().mockResolvedValue(undefined);
+    const close = vi.fn().mockResolvedValue(undefined);
     soClient.createPointInTimeFinder.mockReturnValue({ find, close } as unknown as ReturnType<
       typeof soClient.createPointInTimeFinder
     >);
@@ -73,8 +76,8 @@ describe('createRuleSmlType', () => {
   };
 
   beforeEach(() => {
-    getRule = jest.fn();
-    getIsAlertingV2Enabled = jest.fn().mockResolvedValue(true);
+    getRule = vi.fn();
+    getIsAlertingV2Enabled = vi.fn().mockResolvedValue(true);
     soClient = savedObjectsClientMock.create();
     rulesClient = { getRule } as unknown as RulesClient;
   });

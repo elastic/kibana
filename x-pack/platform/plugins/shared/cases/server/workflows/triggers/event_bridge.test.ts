@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   createWorkflowsClientMock,
@@ -155,7 +157,7 @@ describe('registerCasesWorkflowEventBridge', () => {
 
   it('logs warning when forwarding fails', async () => {
     mockClient = createWorkflowsClientMock({
-      emitEvent: jest.fn().mockRejectedValue(new Error('boom')),
+      emitEvent: vi.fn().mockRejectedValue(new Error('boom')),
     });
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
     registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);
@@ -379,7 +381,7 @@ describe('registerCasesWorkflowEventBridge', () => {
 
       await flushMicrotasks();
 
-      const [, payload] = jest.mocked(mockClient.emitEvent).mock.calls[1];
+      const [, payload] = vi.mocked(mockClient.emitEvent).mock.calls[1];
       expect((payload as { changedFields: string[] }).changedFields).toEqual(['priority']);
     });
 
@@ -397,7 +399,7 @@ describe('registerCasesWorkflowEventBridge', () => {
 
       await flushMicrotasks();
 
-      const [, payload] = jest.mocked(mockClient.emitEvent).mock.calls[1];
+      const [, payload] = vi.mocked(mockClient.emitEvent).mock.calls[1];
       expect((payload as { changedFields: string[] }).changedFields).toEqual([
         'alpha',
         'beta',
@@ -419,7 +421,7 @@ describe('registerCasesWorkflowEventBridge', () => {
 
       await flushMicrotasks();
 
-      const [, payload] = jest.mocked(mockClient.emitEvent).mock.calls[1];
+      const [, payload] = vi.mocked(mockClient.emitEvent).mock.calls[1];
       expect(payload).not.toHaveProperty('extendedFields');
       expect(payload).not.toHaveProperty('previousExtendedFields');
       expect(payload).not.toHaveProperty('truncatedFields');
@@ -509,7 +511,7 @@ describe('registerCasesWorkflowEventBridge', () => {
 
       await flushMicrotasks();
 
-      const [, payload] = jest.mocked(mockClient.emitEvent).mock.calls[1];
+      const [, payload] = vi.mocked(mockClient.emitEvent).mock.calls[1];
       const p = payload as { changedFields: string[] };
       expect(p.changedFields).toEqual(['count']);
     });
@@ -536,7 +538,7 @@ describe('registerCasesWorkflowEventBridge', () => {
 
     it('logs a warning when emitEvent rejects for extendedFieldsUpdated', async () => {
       mockClient = createWorkflowsClientMock({
-        emitEvent: jest.fn().mockRejectedValue(new Error('trigger-boom')),
+        emitEvent: vi.fn().mockRejectedValue(new Error('trigger-boom')),
       });
       workflowsExtensions.getClient.mockResolvedValue(mockClient);
       registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);
@@ -600,7 +602,7 @@ describe('registerCasesWorkflowEventBridge', () => {
 
       await flushMicrotasks();
 
-      const [, payload] = jest.mocked(mockClient.emitEvent).mock.calls[0];
+      const [, payload] = vi.mocked(mockClient.emitEvent).mock.calls[0];
       expect(payload).not.toHaveProperty('value');
       expect(payload).not.toHaveProperty('description');
       expect(payload).not.toHaveProperty('observables');
@@ -608,7 +610,7 @@ describe('registerCasesWorkflowEventBridge', () => {
 
     it('logs a warning when forwarding fails', async () => {
       mockClient = createWorkflowsClientMock({
-        emitEvent: jest.fn().mockRejectedValue(new Error('workflows error')),
+        emitEvent: vi.fn().mockRejectedValue(new Error('workflows error')),
       });
       workflowsExtensions.getClient.mockResolvedValue(mockClient);
       registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import type {
   BooleanFieldDefinition,
@@ -26,13 +29,16 @@ import {
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useTracingEnabledState } from './use_tracing_enabled_state';
 
-jest.mock('../../contexts/settings_context');
-jest.mock('@kbn/management-settings-utilities', () => ({
-  hasUnsavedChange: jest.fn(),
-}));
+vi.mock('../../contexts/settings_context');
+vi.mock('@kbn/management-settings-utilities', () => {
+      const mocked = {
+      hasUnsavedChange: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSettingsContext = useSettingsContext as jest.MockedFunction<typeof useSettingsContext>;
-const mockHasUnsavedChange = hasUnsavedChange as jest.MockedFunction<typeof hasUnsavedChange>;
+const mockUseSettingsContext = useSettingsContext as MockedFunction<typeof useSettingsContext>;
+const mockHasUnsavedChange = hasUnsavedChange as MockedFunction<typeof hasUnsavedChange>;
 
 const dependentTracingSettingIds = [
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
@@ -99,7 +105,7 @@ const setup = ({
   dependentFields?: Record<string, FieldDefinition>;
   unsavedChanges?: Record<string, UnsavedFieldChange>;
 } = {}) => {
-  const handleFieldChange = jest.fn();
+  const handleFieldChange = vi.fn();
 
   const fields: Record<string, FieldDefinition> = { ...dependentFields };
   if (tracingEnabledField) {
@@ -110,11 +116,11 @@ const setup = ({
     fields,
     handleFieldChange,
     unsavedChanges,
-    saveAll: jest.fn(),
+    saveAll: vi.fn(),
     isSaving: false,
-    cleanUnsavedChanges: jest.fn(),
-    saveSingleSetting: jest.fn(),
-    setValidationErrors: jest.fn(),
+    cleanUnsavedChanges: vi.fn(),
+    saveSingleSetting: vi.fn(),
+    setValidationErrors: vi.fn(),
   });
 
   const { result } = renderHook(() => useTracingEnabledState());
@@ -124,7 +130,7 @@ const setup = ({
 
 describe('useTracingEnabledState', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockHasUnsavedChange.mockReturnValue(true);
   });
 

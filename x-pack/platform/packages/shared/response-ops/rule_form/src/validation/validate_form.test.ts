@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   validateRuleBase,
   validateRuleParams,
@@ -48,7 +50,7 @@ const formDataMock: RuleFormData = {
 };
 
 const ruleTypeModelMock = {
-  validate: jest.fn().mockReturnValue({
+  validate: vi.fn().mockReturnValue({
     errors: {
       someError: 'test',
     },

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 
 import { renderHook, act } from '@testing-library/react';
@@ -13,16 +16,16 @@ import { useKibana } from '../../common/lib/kibana';
 import { useCreateCaseModal } from '.';
 import { TestProviders } from '../../common/mock';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const onCaseCreated = jest.fn();
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+const onCaseCreated = vi.fn();
 
 describe('useCreateCaseModal', () => {
-  let navigateToApp: jest.Mock;
+  let navigateToApp: Mock;
 
   beforeEach(() => {
-    navigateToApp = jest.fn();
+    navigateToApp = vi.fn();
     useKibanaMock().services.application.navigateToApp = navigateToApp;
   });
 

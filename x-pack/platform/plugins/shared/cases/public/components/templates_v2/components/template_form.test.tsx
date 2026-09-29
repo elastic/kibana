@@ -5,40 +5,47 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TemplateYamlEditor } from './template_form';
 import { TestProviders } from '../../../common/mock';
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({ value, onChange }: { value: string; onChange: (code: string) => void }) => (
-    <textarea
-      data-test-subj="code-editor"
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-    />
-  ),
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: ({ value, onChange }: { value: string; onChange: (code: string) => void }) => (
+        <textarea
+          data-test-subj="code-editor"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_field_name_validation', () => ({
-  useFieldNameValidation: jest.fn(),
-}));
+vi.mock('../hooks/use_field_name_validation', () => {
+      const mocked = {
+      useFieldNameValidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_user_picker_validation', () => ({
-  useUserPickerValidation: jest.fn(),
-}));
+vi.mock('../hooks/use_user_picker_validation', () => {
+      const mocked = {
+      useUserPickerValidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-describe('TemplateFormFields', () => {
-  const mockOnChange = jest.fn();
-  const mockUseFieldNameValidation = jest.requireMock(
-    '../hooks/use_field_name_validation'
-  ).useFieldNameValidation;
-  const mockUseUserPickerValidation = jest.requireMock(
-    '../hooks/use_user_picker_validation'
-  ).useUserPickerValidation;
+describe('TemplateFormFields', async () => {
+  const mockOnChange = vi.fn();
+  const mockUseFieldNameValidation = (await vi.importMock('../hooks/use_field_name_validation')).useFieldNameValidation;
+  const mockUseUserPickerValidation = (await vi.importMock('../hooks/use_user_picker_validation')).useUserPickerValidation;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderFields = (definition: string, onChange = mockOnChange) => {

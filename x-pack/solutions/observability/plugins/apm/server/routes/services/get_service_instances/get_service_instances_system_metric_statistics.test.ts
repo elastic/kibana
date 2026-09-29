@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   METRIC_PROCESS_CPU_PERCENT,
@@ -25,7 +28,7 @@ import {
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getServiceInstancesSystemMetricStatistics } from './get_service_instances_system_metric_statistics';
 
-type SearchMock = jest.Mock<Promise<unknown>>;
+type SearchMock = Mock<Promise<unknown>>;
 
 const start = 1_700_000_000_000;
 const end = 1_700_000_900_000;
@@ -101,7 +104,7 @@ function getSearchParams(search: SearchMock, callIndex = 0) {
 
 describe('getServiceInstancesSystemMetricStatistics', () => {
   it('queries host SemConv, JVM field variants, and classic ECS together', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(aggregationResponse());
+    const search: SearchMock = vi.fn().mockResolvedValueOnce(aggregationResponse());
     const apmEventClient = { search } as unknown as APMEventClient;
 
     await getServiceInstancesSystemMetricStatistics({
@@ -159,7 +162,7 @@ describe('getServiceInstancesSystemMetricStatistics', () => {
   });
 
   it('prefers host SemConv over JVM and classic fields', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(
+    const search: SearchMock = vi.fn().mockResolvedValueOnce(
       aggregationResponse({
         cpu_usage_otel_system: { avg: { value: 0.31 } },
         cpu_usage_jvm_stable: { avg: { value: 0.9 } },
@@ -186,7 +189,7 @@ describe('getServiceInstancesSystemMetricStatistics', () => {
   });
 
   it('falls back to process.runtime.jvm fields when host SemConv is missing', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(
+    const search: SearchMock = vi.fn().mockResolvedValueOnce(
       aggregationResponse({
         cpu_usage_jvm_system: { avg: { value: 0.25 } },
         memory_usage_jvm_heap: { avg: { value: 0.48 } },
@@ -213,7 +216,7 @@ describe('getServiceInstancesSystemMetricStatistics', () => {
   });
 
   it('falls back to stable jvm.* fields when process.runtime.jvm is missing', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(
+    const search: SearchMock = vi.fn().mockResolvedValueOnce(
       aggregationResponse({
         cpu_usage_jvm_stable: { avg: { value: 0.26 } },
         memory_usage_jvm_stable_heap: { avg: { value: 0.334 } },
@@ -238,7 +241,7 @@ describe('getServiceInstancesSystemMetricStatistics', () => {
   });
 
   it('falls back to classic ECS when SemConv fields are missing', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(
+    const search: SearchMock = vi.fn().mockResolvedValueOnce(
       aggregationResponse({
         cpu_usage: { avg: { value: 0.42 } },
         memory_usage_system: { avg: { value: 0.55 } },
@@ -277,7 +280,7 @@ describe('getServiceInstancesSystemMetricStatistics', () => {
         { x: start + 60_000, y: 0.7 },
       ];
 
-      const search: SearchMock = jest.fn().mockResolvedValueOnce(
+      const search: SearchMock = vi.fn().mockResolvedValueOnce(
         aggregationResponse({
           cpu_usage_otel_system: timeseriesBucket(preferredCpu),
           cpu_usage_jvm_stable: timeseriesBucket([
@@ -327,7 +330,7 @@ describe('getServiceInstancesSystemMetricStatistics', () => {
         { x: start + 60_000, y: 0.34 },
       ];
 
-      const search: SearchMock = jest.fn().mockResolvedValueOnce(
+      const search: SearchMock = vi.fn().mockResolvedValueOnce(
         aggregationResponse({
           cpu_usage_otel_system: emptyTimeseries(),
           cpu_usage_jvm_system: emptyTimeseries(),

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,14 +15,14 @@ import { RulesCell } from './rules_cell';
 describe('RulesCell', () => {
   const props = {
     activeRuleId: null,
-    onRuleClick: jest.fn(),
+    onRuleClick: vi.fn(),
     maxVisibleRules: 3,
     canReadRules: true,
   };
 
   const rule = (id: string, name = `${id}-name`) => ({ id, name });
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders nothing when totalRuleCount === 0', () => {
     const { container } = render(<RulesCell {...props} rules={[]} totalRuleCount={0} />);
@@ -60,7 +62,7 @@ describe('RulesCell', () => {
   });
 
   it('calls onRuleClick with the rule id when a visible badge is clicked', async () => {
-    const onRuleClick = jest.fn();
+    const onRuleClick = vi.fn();
     render(
       <RulesCell {...props} onRuleClick={onRuleClick} rules={[rule('r-1')]} totalRuleCount={1} />
     );
@@ -111,7 +113,7 @@ describe('RulesCell', () => {
     });
 
     it('does not call onRuleClick when a badge is clicked', async () => {
-      const onRuleClick = jest.fn();
+      const onRuleClick = vi.fn();
       render(
         <RulesCell
           {...props}

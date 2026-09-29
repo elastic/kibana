@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mockReadFile } from './plugin_manifest_parser.test.mocks';
 
 import { resolve } from 'path';
@@ -28,7 +30,7 @@ const packageInfo: PackageInfo = {
 };
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 test('return error when manifest is empty', async () => {

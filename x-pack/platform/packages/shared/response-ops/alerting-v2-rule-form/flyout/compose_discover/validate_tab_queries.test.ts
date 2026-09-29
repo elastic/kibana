@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { validateQuery } from '@kbn/esql-language';
 import { validateTabQueries } from './validate_tab_queries';
 
-jest.mock('@kbn/esql-language', () => ({
-  validateQuery: jest.fn(),
-}));
+vi.mock('@kbn/esql-language', () => {
+      const mocked = {
+      validateQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockValidateQuery = validateQuery as jest.Mock;
+const mockValidateQuery = validateQuery as Mock;
 const callbacks = {};
 
 const noErrors = { errors: [], warnings: [] };

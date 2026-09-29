@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -32,7 +34,7 @@ describe('rollDataStreamIfRequired', () => {
   const rollMessage = 'rolling over the data stream';
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does nothing if there is no data stream', async () => {

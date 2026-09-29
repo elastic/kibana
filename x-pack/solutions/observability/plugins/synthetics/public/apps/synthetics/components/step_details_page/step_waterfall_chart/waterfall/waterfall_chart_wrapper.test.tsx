@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
@@ -29,7 +31,7 @@ const getHighLightedItems = (query: string, filters: string[]) => {
 
 describe('WaterfallChartWrapper', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   it('renders the correct sidebar items', () => {
@@ -59,7 +61,7 @@ describe('WaterfallChartWrapper', () => {
 
     // inout has debounce effect so hence the timer
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     const highlightedItemsLength = getHighLightedItems(searchText, []).length;
@@ -89,7 +91,7 @@ describe('WaterfallChartWrapper', () => {
 
     // inout has debounce effect so hence the timer
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     const highlightedItemsLength = getHighLightedItems('', [MimeType.XHR]).length;
@@ -113,7 +115,7 @@ describe('WaterfallChartWrapper', () => {
 
     // inout has debounce effect so hence the timer
     act(() => {
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
     });
 
     const highlightedItemsLength = getHighLightedItems('', [MimeType.Stylesheet]).length;

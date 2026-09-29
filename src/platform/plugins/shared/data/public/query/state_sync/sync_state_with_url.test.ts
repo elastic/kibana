@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Subscription } from 'rxjs';
 import type { History } from 'history';
 import { createBrowserHistory } from 'history';
@@ -54,7 +56,7 @@ describe('sync_query_state_with_url', () => {
   let history: History;
 
   let filterManagerChangeSub: Subscription;
-  let filterManagerChangeTriggered = jest.fn();
+  let filterManagerChangeTriggered = vi.fn();
 
   let gF: Filter;
   let aF: Filter;
@@ -78,7 +80,7 @@ describe('sync_query_state_with_url', () => {
     filterManager = queryServiceStart.filterManager;
     timefilter = queryServiceStart.timefilter.timefilter;
 
-    filterManagerChangeTriggered = jest.fn();
+    filterManagerChangeTriggered = vi.fn();
     filterManagerChangeSub = filterManager.getUpdates$().subscribe(filterManagerChangeTriggered);
 
     window.location.href = '/';
@@ -174,7 +176,7 @@ describe('sync_query_state_with_url', () => {
   test("if data didn't change, kbnUrlStateStorage.set shouldn't be called", () => {
     const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
     filterManager.setFilters([gF, aF]);
-    const spy = jest.spyOn(kbnUrlStateStorage, 'set');
+    const spy = vi.spyOn(kbnUrlStateStorage, 'set');
     filterManager.setFilters([gF]); // global filters didn't change
     expect(spy).not.toHaveBeenCalled();
     stop();

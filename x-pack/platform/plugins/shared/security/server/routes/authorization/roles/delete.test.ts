@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -34,7 +36,7 @@ describe('DELETE role', () => {
         .versioned as MockedVersionedRouter;
       const mockCoreContext = coreMock.createRequestHandlerContext();
       const mockLicensingContext = {
-        license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
+        license: { check: vi.fn().mockReturnValue(licenseCheckResult) },
       } as any;
       const mockContext = coreMock.createCustomRequestHandlerContext({
         core: mockCoreContext,

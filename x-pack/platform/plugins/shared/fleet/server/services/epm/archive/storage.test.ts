@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
@@ -19,7 +21,7 @@ describe('getAsset', () => {
   });
   it('should not throw error if saved object not found', async () => {
     const soClientMock = {
-      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      get: vi.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
     } as any;
     const result = await getAsset({
       savedObjectsClient: soClientMock,

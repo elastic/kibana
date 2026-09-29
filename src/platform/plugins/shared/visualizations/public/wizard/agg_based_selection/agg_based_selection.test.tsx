@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import type { TypesStart, BaseVisType } from '../../vis_types';
@@ -69,22 +71,22 @@ describe('AggBasedSelection', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
       value: {
-        assign: jest.fn(),
+        assign: vi.fn(),
       },
     });
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call the showMainDialog if the user clicks the goBack link', () => {
-    const showMainDialog = jest.fn();
+    const showMainDialog = vi.fn();
     const wrapper = mountWithIntl(
       <AggBasedSelection
         visTypesRegistry={visTypes}
         showMainDialog={showMainDialog}
-        onVisTypeSelected={jest.fn()}
+        onVisTypeSelected={vi.fn()}
       />
     );
     const aggBasedGroupCard = wrapper.find('[data-test-subj="goBackLink"]').last();
@@ -97,8 +99,8 @@ describe('AggBasedSelection', () => {
       const wrapper = mountWithIntl(
         <AggBasedSelection
           visTypesRegistry={visTypes}
-          showMainDialog={jest.fn()}
-          onVisTypeSelected={jest.fn()}
+          showMainDialog={vi.fn()}
+          onVisTypeSelected={vi.fn()}
         />
       );
 

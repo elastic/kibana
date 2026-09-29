@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { useObservable } from './use_observable';
@@ -95,7 +97,7 @@ describe('useObservable', () => {
   });
 
   it('warns when observable recreated every render', () => {
-    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
 
     const { rerender } = renderHook(() => useObservable(new BehaviorSubject(1)));
 

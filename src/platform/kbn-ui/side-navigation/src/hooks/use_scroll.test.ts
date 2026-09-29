@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useScroll } from './use_scroll';
 
-jest.mock('@elastic/eui', () => ({
-  useEuiOverflowScroll: jest.fn(),
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      useEuiOverflowScroll: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useEuiOverflowScroll } = jest.requireMock('@elastic/eui');
+const { useEuiOverflowScroll } = (await vi.importMock('@elastic/eui'));
 
 describe('useScroll', () => {
   beforeEach(() => {

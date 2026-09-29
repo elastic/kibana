@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { getGaugeVisualization, isNumericDynamicMetric, isNumericMetric } from './visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
@@ -34,10 +36,13 @@ const stops = [
   },
 ];
 
-jest.mock('@kbn/coloring', () => ({
-  ...jest.requireActual('@kbn/coloring'),
-  applyPaletteParams: jest.fn().mockReturnValue(stops),
-}));
+vi.mock('@kbn/coloring', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/coloring')),
+      applyPaletteParams: vi.fn().mockReturnValue(stops),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function exampleState(): GaugeVisualizationState {
   return {
@@ -58,7 +63,7 @@ describe('gauge', () => {
 
   beforeEach(() => {
     frame = createMockFramePublicAPI();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('#intialize', () => {

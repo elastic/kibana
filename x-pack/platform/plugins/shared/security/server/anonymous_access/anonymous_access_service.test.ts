@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 
 import type { Logger } from '@kbn/core/server';
@@ -28,11 +31,11 @@ const createSecurityConfig = (config: Record<string, any> = {}) => {
 
 describe('AnonymousAccessService', () => {
   let service: AnonymousAccessService;
-  let logger: jest.Mocked<Logger>;
-  let getConfigMock: jest.Mock;
+  let logger: Mocked<Logger>;
+  let getConfigMock: Mock;
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-    getConfigMock = jest.fn().mockReturnValue(createSecurityConfig());
+    getConfigMock = vi.fn().mockReturnValue(createSecurityConfig());
 
     service = new AnonymousAccessService(logger, getConfigMock);
   });

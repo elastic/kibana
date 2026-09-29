@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { loggerMock } from '@kbn/logging-mocks';
 import { fetchAgentsLatestVersion } from './fetch_agents_latest_version';
 
-const fetchMock = jest.spyOn(global, 'fetch');
+const fetchMock = vi.spyOn(global, 'fetch');
 const logger = loggerMock.create();
 
 describe('ApmFetchAgentslatestsVersion', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('when url is empty should not fetch latest versions', async () => {

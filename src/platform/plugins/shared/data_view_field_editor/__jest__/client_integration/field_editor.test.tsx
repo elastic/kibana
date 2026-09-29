@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Field } from '../../public/types';
 import type { FieldEditorFormState } from '../../public/components/field_editor/field_editor';
 import { act, screen } from '@testing-library/react';
@@ -19,7 +21,7 @@ import { setup } from './field_editor.helpers';
 describe('<FieldEditor />', () => {
   const { httpRequestsMockHelpers } = setupEnvironment();
 
-  let onChange = jest.fn();
+  let onChange = vi.fn();
 
   const lastOnChangeCall = (): FieldEditorFormState[] =>
     onChange.mock.calls[onChange.mock.calls.length - 1];
@@ -54,15 +56,15 @@ describe('<FieldEditor />', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(async () => {
-    onChange = jest.fn();
+    onChange = vi.fn();
     setSearchResponse(mockDocuments);
     httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['mockedScriptValue'] });
   });
@@ -126,7 +128,7 @@ describe('<FieldEditor />', () => {
       await fields.updateScript('echo("hello")');
 
       await act(async () => {
-        jest.advanceTimersByTime(1000); // Make sure our debounced error message is in the DOM
+        vi.advanceTimersByTime(1000); // Make sure our debounced error message is in the DOM
       });
 
       const lastState = getLastStateUpdate();

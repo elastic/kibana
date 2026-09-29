@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ContentFrameworkTableProps } from '.';
@@ -15,51 +17,66 @@ import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__m
 import { buildHitMock } from '../../../__mocks__';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: () => ({
-    euiTheme: {
-      font: { weight: { semiBold: 700 } },
-      border: { thin: '1px solid #ccc' },
-      size: { xs: '12px' },
-    },
-  }),
-  useEuiFontSize: () => ({ fontSize: '12px' }),
-  euiFontSize: (_themeContext: any, size: string) => ({ fontSize: size === 's' ? '12px' : '10px' }),
-}));
-
-jest.mock('../../../plugin', () => ({
-  getUnifiedDocViewerServices: () => ({
-    fieldsMetadata: {
-      useFieldsMetadata: () => ({
-        fieldsMetadata: {
-          fieldA: { short: 'Short desc A' },
-          fieldB: { short: 'Short desc B', type: 'keyword' },
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiTheme: () => ({
+        euiTheme: {
+          font: { weight: { semiBold: 700 } },
+          border: { thin: '1px solid #ccc' },
+          size: { xs: '12px' },
         },
       }),
-    },
-    fieldFormats: {},
-  }),
-}));
+      useEuiFontSize: () => ({ fontSize: '12px' }),
+      euiFontSize: (_themeContext: any, size: string) => ({ fontSize: size === 's' ? '12px' : '10px' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/field-utils/src/components/field_icon', () => ({
-  FieldIcon: () => <span data-test-subj="fieldIcon" />,
-}));
+vi.mock('../../../plugin', () => {
+      const mocked = {
+      getUnifiedDocViewerServices: () => ({
+        fieldsMetadata: {
+          useFieldsMetadata: () => ({
+            fieldsMetadata: {
+              fieldA: { short: 'Short desc A' },
+              fieldB: { short: 'Short desc B', type: 'keyword' },
+            },
+          }),
+        },
+        fieldFormats: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/discover-utils/src/utils/get_formatted_fields', () => ({
-  getFormattedFields: () => ({
-    fieldA: 'formattedA',
-    fieldB: 'formattedB',
-    fieldC: 'formattedC',
-  }),
-}));
-jest.mock('@kbn/discover-utils/src/utils/get_flattened_fields', () => ({
-  getFlattenedFields: () => ({
-    fieldA: 'valueA',
-    fieldB: 'valueB',
-    fieldC: null,
-  }),
-}));
+vi.mock('@kbn/field-utils/src/components/field_icon', () => {
+      const mocked = {
+      FieldIcon: () => <span data-test-subj="fieldIcon" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/discover-utils/src/utils/get_formatted_fields', () => {
+      const mocked = {
+      getFormattedFields: () => ({
+        fieldA: 'formattedA',
+        fieldB: 'formattedB',
+        fieldC: 'formattedC',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/discover-utils/src/utils/get_flattened_fields', () => {
+      const mocked = {
+      getFlattenedFields: () => ({
+        fieldA: 'valueA',
+        fieldB: 'valueB',
+        fieldC: null,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDataView = buildDataViewMock({
   name: 'data-view-mock',
@@ -91,9 +108,9 @@ const defaultProps: ContentFrameworkTableProps = {
   columnsMeta: {},
   columns: ['fieldA', 'fieldB'],
   id: 'Test Table',
-  filter: jest.fn(),
-  onAddColumn: jest.fn(),
-  onRemoveColumn: jest.fn(),
+  filter: vi.fn(),
+  onAddColumn: vi.fn(),
+  onRemoveColumn: vi.fn(),
 };
 
 describe('ContentFrameworkTable', () => {

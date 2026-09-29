@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { lastValueFrom, of, scan } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { Execution } from './execution';
@@ -83,7 +85,7 @@ describe('Execution', () => {
     const execution = createExecution('clog');
     /* eslint-disable no-console */
     const console$log = console.log;
-    const spy = (console.log = jest.fn());
+    const spy = (console.log = vi.fn());
     /* eslint-enable no-console */
 
     execution.start(123);
@@ -351,7 +353,7 @@ describe('Execution', () => {
     });
 
     test('it should reset the request adapter only on startup', async () => {
-      const inspectorAdapters = { requests: { reset: jest.fn() } };
+      const inspectorAdapters = { requests: { reset: vi.fn() } };
       await run('add val={add 5 | access "value"}', {
         inspectorAdapters,
       });
@@ -405,21 +407,21 @@ describe('Execution', () => {
     });
 
     test('result is undefined until execution completes', async () => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
       const execution = createExecution('sleep 10');
       expect(execution.state.get().result).toBe(undefined);
-      execution.start(null).subscribe(jest.fn());
+      execution.start(null).subscribe(vi.fn());
       expect(execution.state.get().result).toBe(undefined);
 
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
       await new Promise(process.nextTick);
       expect(execution.state.get().result).toBe(undefined);
 
-      jest.advanceTimersByTime(10);
+      vi.advanceTimersByTime(10);
       await new Promise(process.nextTick);
       expect(execution.state.get().result).toHaveProperty('result', null);
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     test('handles partial results when functions return observables', () => {
@@ -452,7 +454,7 @@ describe('Execution', () => {
         const c = 3;
         const arg = cold('     -a-b-c|', { a, b, c });
         const expected = '     ------(c|)';
-        const spyFn = jest.fn((value) => value);
+        const spyFn = vi.fn((value) => value);
         const executor = createUnitTestExecutor();
         executor.registerFunction({
           name: 'observable',
@@ -560,7 +562,7 @@ describe('Execution', () => {
         name: 'spy',
         args: {},
         help: '',
-        fn: jest.fn(),
+        fn: vi.fn(),
       };
       const executor = createUnitTestExecutor();
       executor.registerFunction(spy);
@@ -576,14 +578,14 @@ describe('Execution', () => {
         const b = 2;
         const c = 3;
         const observable$ = cold('abc|', { a, b, c });
-        const flakyFn = jest
+        const flakyFn = vi
           .fn()
           .mockImplementationOnce((value) => value)
           .mockImplementationOnce(() => {
             throw new Error('Some error.');
           })
           .mockImplementationOnce((value) => value);
-        const spyFn = jest.fn((value) => value);
+        const spyFn = vi.fn((value) => value);
 
         const executor = createUnitTestExecutor();
         executor.registerFunction({
@@ -641,12 +643,12 @@ describe('Execution', () => {
     });
 
     test('execution state is "pending" while execution is in progress', async () => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
       const execution = createExecution('sleep 20');
       execution.start(null);
-      jest.advanceTimersByTime(5);
+      vi.advanceTimersByTime(5);
       expect(execution.state.get().state).toBe('pending');
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     test('execution state is "result" when execution successfully completes', async () => {
@@ -837,7 +839,7 @@ describe('Execution', () => {
         const c = 3;
         const d = 4;
         const observable$ = cold('abcd|', { a, b, c, d });
-        const flakyFn = jest
+        const flakyFn = vi
           .fn()
           .mockImplementationOnce((value) => value)
           .mockImplementationOnce(() => {
@@ -845,7 +847,7 @@ describe('Execution', () => {
           })
           .mockReturnValueOnce({ type: 'something' })
           .mockImplementationOnce((value) => value);
-        const spyFn = jest.fn((input, { arg }) => arg);
+        const spyFn = vi.fn((input, { arg }) => arg);
 
         const executor = createUnitTestExecutor();
         executor.registerFunction({
@@ -910,7 +912,7 @@ describe('Execution', () => {
         const c = 3;
         const observable$ = cold('abc|', { a, b, c });
         const expected = '        ---(c|)';
-        const spyFn = jest.fn((input, { arg }) => arg);
+        const spyFn = vi.fn((input, { arg }) => arg);
 
         const executor = createUnitTestExecutor();
         executor.registerFunction({
@@ -961,7 +963,7 @@ describe('Execution', () => {
           },
         },
         help: '',
-        fn: jest.fn(),
+        fn: vi.fn(),
       };
       const executor = createUnitTestExecutor();
       executor.registerFunction(requiredArg);
@@ -1063,7 +1065,7 @@ describe('Execution', () => {
           },
         },
         help: '',
-        fn: jest.fn(),
+        fn: vi.fn(),
       };
       const executor = createUnitTestExecutor();
       executor.registerFunction(incorrectArg);

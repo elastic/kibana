@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import SearchBar from './search_bar';
@@ -25,10 +27,13 @@ const SAVED_SEARCH_NAME = 'Data discovery search';
 const INITIAL_SESSION_ID = '12345';
 const NEW_SESSION_ID = '67890';
 
-jest.mock('../query_string_input/query_bar_top_row', () => ({
-  QueryBarTopRow: jest.fn(() => <div />),
-}));
-const QueryBarTopRowMock = jest.mocked(QueryBarTopRow);
+vi.mock('../query_string_input/query_bar_top_row', () => {
+      const mocked = {
+      QueryBarTopRow: vi.fn(() => <div />),
+    };
+      return { ...mocked, default: mocked };
+    });
+const QueryBarTopRowMock = vi.mocked(QueryBarTopRow);
 
 const setup = ({
   props,
@@ -37,7 +42,7 @@ const setup = ({
 } = {}) => {
   const startMock = coreMock.createStart();
 
-  const save = jest.fn().mockResolvedValue({
+  const save = vi.fn().mockResolvedValue({
     id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
     type: 'search-session',
     attributes: {
@@ -58,8 +63,8 @@ const setup = ({
   const search = searchServiceMock.createStartContract({
     session: getSessionServiceMock({
       save,
-      getSessionId: jest.fn().mockReturnValue(INITIAL_SESSION_ID),
-      getSession$: jest.fn().mockReturnValue(getSessionObservable.asObservable()),
+      getSessionId: vi.fn().mockReturnValue(INITIAL_SESSION_ID),
+      getSession$: vi.fn().mockReturnValue(getSessionObservable.asObservable()),
     }),
   });
 
@@ -69,7 +74,7 @@ const setup = ({
     data: { query: {}, search },
     dataViewEditor: dataViewEditorPluginMock.createStartContract(),
     dataViews: {
-      getIdsWithTitle: jest.fn(() => []),
+      getIdsWithTitle: vi.fn(() => []),
     },
   };
 
@@ -91,7 +96,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('<SearchBarUI />', () => {

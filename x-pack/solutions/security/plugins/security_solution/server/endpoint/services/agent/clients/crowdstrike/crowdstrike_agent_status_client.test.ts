@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import {
   CrowdstrikeAgentStatusClient,
@@ -19,10 +22,13 @@ import { responseActionsClientMock } from '../../../actions/clients/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { RawCrowdstrikeInfo } from './types';
 
-jest.mock('../../..', () => ({
-  NormalizedExternalConnectorClient: jest.fn(),
-  getPendingActionsSummary: jest.fn().mockResolvedValue([]),
-}));
+vi.mock('../../..', () => {
+      const mocked = {
+      NormalizedExternalConnectorClient: vi.fn(),
+      getPendingActionsSummary: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseResponse = {
   took: 1,
@@ -86,7 +92,7 @@ describe('CrowdstrikeAgentStatusClient', () => {
   describe('getAgentStatusFromConnectorAction', () => {
     it('should get agent status from connector action', async () => {
       const agentIds = ['agent1', 'agent2'];
-      const mockExecute = jest.fn().mockResolvedValue({
+      const mockExecute = vi.fn().mockResolvedValue({
         data: {
           resources: [
             { id: 'agent1', state: CROWDSTRIKE_STATUS_RESPONSE.ONLINE },
@@ -95,8 +101,8 @@ describe('CrowdstrikeAgentStatusClient', () => {
         },
       });
 
-      (NormalizedExternalConnectorClient as jest.Mock).mockImplementation(() => ({
-        setup: jest.fn(),
+      (NormalizedExternalConnectorClient as Mock).mockImplementation(() => ({
+        setup: vi.fn(),
         execute: mockExecute,
       }));
 
@@ -122,10 +128,10 @@ describe('CrowdstrikeAgentStatusClient', () => {
   describe('getAgentStatuses', () => {
     beforeEach(() => {
       // @ts-expect-error private method
-      (client.getAgentStatusFromConnectorAction as Jest.Mock) = jest.fn();
+      (client.getAgentStatusFromConnectorAction as Jest.Mock) = vi.fn();
     });
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     it('should return found false when there is no agent.host.id', async () => {
       const agentIds = ['agent1'];

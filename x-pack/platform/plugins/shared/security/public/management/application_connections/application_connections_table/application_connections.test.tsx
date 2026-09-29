@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
@@ -17,15 +19,15 @@ import { securityMock } from '../../../mocks';
 import { Providers } from '../application_connections_management_app';
 import { ApplicationConnectionsPage } from '../application_connections_page';
 
-jest.mock('../assets/illustration_empty_state.svg', () => 'illustration-empty-state-mock.svg', {
+vi.mock('../assets/illustration_empty_state.svg', () => 'illustration-empty-state-mock.svg', {
   virtual: true,
 });
 
-jest.mock('@kbn/core-user-profile-browser-hooks', () => {
-  const actual = jest.requireActual('@kbn/core-user-profile-browser-hooks');
+vi.mock('@kbn/core-user-profile-browser-hooks', async () => {
+  const actual = (await vi.importActual('@kbn/core-user-profile-browser-hooks'));
   return {
     ...actual,
-    useCurrentUser: jest.fn(() => ({
+    useCurrentUser: vi.fn(() => ({
       isLoading: false,
       user: { username: 'current_user', displayName: 'Current User' },
     })),

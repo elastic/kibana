@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type {
   SavedObject,
   SavedObjectsClientContract,
@@ -36,10 +38,10 @@ function getMockSavedObject(savedObject?: Partial<SavedObject<any>>) {
   };
 }
 
-let mockEncryptionService: jest.Mocked<EncryptedSavedObjectsService>;
-let mockRetrieveClient: jest.Mocked<SavedObjectsClientContract>;
-let mockUpdateClient: jest.Mocked<SavedObjectsClientContract>;
-let mockSavedObjects: jest.Mocked<SavedObjectsServiceStart>;
+let mockEncryptionService: Mocked<EncryptedSavedObjectsService>;
+let mockRetrieveClient: Mocked<SavedObjectsClientContract>;
+let mockUpdateClient: Mocked<SavedObjectsClientContract>;
+let mockSavedObjects: Mocked<SavedObjectsServiceStart>;
 let service: EncryptionKeyRotationService;
 beforeEach(() => {
   mockEncryptionService = encryptedSavedObjectsServiceMock.create();

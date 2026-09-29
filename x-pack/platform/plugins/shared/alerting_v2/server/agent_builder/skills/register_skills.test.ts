@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import {
   ACTION_POLICY_MANAGEMENT_SKILL_ID,
   RULE_MANAGEMENT_SKILL_ID,
@@ -16,30 +19,36 @@ import { createActionPolicyManagementSkill } from './action_policy_management_sk
 import { createRuleManagementSkill } from './rule_management_skill';
 import { registerSkills } from './register_skills';
 
-jest.mock('./rule_management_skill', () => ({
-  createRuleManagementSkill: jest.fn(),
-}));
+vi.mock('./rule_management_skill', () => {
+      const mocked = {
+      createRuleManagementSkill: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./action_policy_management_skill', () => ({
-  createActionPolicyManagementSkill: jest.fn(),
-}));
+vi.mock('./action_policy_management_skill', () => {
+      const mocked = {
+      createActionPolicyManagementSkill: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const createRuleManagementSkillMock = createRuleManagementSkill as jest.MockedFunction<
+const createRuleManagementSkillMock = createRuleManagementSkill as MockedFunction<
   typeof createRuleManagementSkill
 >;
 const createActionPolicyManagementSkillMock =
-  createActionPolicyManagementSkill as jest.MockedFunction<
+  createActionPolicyManagementSkill as MockedFunction<
     typeof createActionPolicyManagementSkill
   >;
 
-const createLogger = (): jest.Mocked<
+const createLogger = (): Mocked<
   Pick<LoggerServiceContract, 'debug' | 'info' | 'warn' | 'error' | 'forSubsystem'>
 > => ({
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  forSubsystem: jest.fn(),
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  forSubsystem: vi.fn(),
 });
 
 const ruleSkill = { id: RULE_MANAGEMENT_SKILL_ID } as ReturnType<typeof createRuleManagementSkill>;
@@ -63,8 +72,8 @@ describe('registerSkills', () => {
   const deps = () =>
     ({
       logger: logger as unknown as LoggerServiceContract,
-      getWorkflowClient: jest.fn(() => ({ getWorkflow: jest.fn() })),
-      getAvailableConnectors: jest.fn(),
+      getWorkflowClient: vi.fn(() => ({ getWorkflow: vi.fn() })),
+      getAvailableConnectors: vi.fn(),
     } as const);
 
   it('registers both skills and logs success at debug', () => {
@@ -82,7 +91,7 @@ describe('registerSkills', () => {
       message: expect.any(Function),
       labels: { skill_id: ACTION_POLICY_MANAGEMENT_SKILL_ID },
     });
-    const debugMessages = (logger.debug as jest.Mock).mock.calls.map(
+    const debugMessages = (logger.debug as Mock).mock.calls.map(
       ([{ message }]) => (typeof message === 'function' ? message() : message) as string
     );
     expect(debugMessages).toEqual([
@@ -110,7 +119,7 @@ describe('registerSkills', () => {
       error: expect.any(Error),
     });
 
-    const debugMessages = (logger.debug as jest.Mock).mock.calls.map(
+    const debugMessages = (logger.debug as Mock).mock.calls.map(
       ([{ message }]) => (typeof message === 'function' ? message() : message) as string
     );
     expect(debugMessages).toEqual([

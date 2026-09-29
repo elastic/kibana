@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -30,7 +32,7 @@ describe('AlertsBadge', () => {
   });
 
   it('renders an interactive button that fires onClick', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     renderBadge({ count: 2, serviceName: 'svc', onClick });
 
     const badge = screen.getByTestId('apmAlertsBadge');
@@ -60,7 +62,7 @@ describe('AlertsBadge', () => {
     renderBadge({
       count: 1,
       serviceName: 'svc',
-      onClick: jest.fn(),
+      onClick: vi.fn(),
       ebt: { action: 'viewAlerts', element: 'serviceFlyoutAlertsBadge' },
     });
 
@@ -82,7 +84,7 @@ describe('AlertsBadge', () => {
 
   describe('navigationProps', () => {
     function makeNavigationProps(
-      getRedirectUrl = jest.fn().mockReturnValue('/app/apm/services/svc/alerts')
+      getRedirectUrl = vi.fn().mockReturnValue('/app/apm/services/svc/alerts')
     ) {
       return {
         navigationProps: {
@@ -91,7 +93,7 @@ describe('AlertsBadge', () => {
           environment: 'production' as const,
           rangeFrom: 'now-15m',
           rangeTo: 'now',
-          locators: { get: jest.fn().mockReturnValue({ getRedirectUrl }) } as any,
+          locators: { get: vi.fn().mockReturnValue({ getRedirectUrl }) } as any,
         },
         getRedirectUrl,
       };
@@ -138,7 +140,7 @@ describe('AlertsBadge', () => {
     });
 
     it('renders as a non-interactive badge when the locator returns no href', () => {
-      const { navigationProps } = makeNavigationProps(jest.fn().mockReturnValue(undefined));
+      const { navigationProps } = makeNavigationProps(vi.fn().mockReturnValue(undefined));
       renderBadge({ count: 2, serviceName: 'svc', navigationProps });
 
       const badge = screen.getByTestId('apmAlertsBadge');

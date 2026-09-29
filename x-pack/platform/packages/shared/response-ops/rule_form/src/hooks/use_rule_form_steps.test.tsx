@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useRuleFormHorizontalSteps, useRuleFormSteps } from './use_rule_form_steps';
@@ -18,25 +20,37 @@ import {
 import type { RuleFormData } from '../types';
 import { EuiSteps, EuiStepsHorizontal } from '@elastic/eui';
 
-jest.mock('../rule_definition', () => ({
-  RuleDefinition: () => <div />,
-}));
+vi.mock('../rule_definition', () => {
+      const mocked = {
+      RuleDefinition: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../rule_actions', () => ({
-  RuleActions: () => <div />,
-}));
+vi.mock('../rule_actions', () => {
+      const mocked = {
+      RuleActions: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../rule_details', () => ({
-  RuleDetails: () => <div />,
-}));
+vi.mock('../rule_details', () => {
+      const mocked = {
+      RuleDetails: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_rule_form_state', () => ({
-  useRuleFormState: jest.fn(),
-}));
+vi.mock('./use_rule_form_state', () => {
+      const mocked = {
+      useRuleFormState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useRuleFormState } = jest.requireMock('./use_rule_form_state');
+const { useRuleFormState } = (await vi.importMock('./use_rule_form_state'));
 
-const navigateToUrl = jest.fn();
+const navigateToUrl = vi.fn();
 
 const formDataMock: RuleFormData = {
   params: {
@@ -85,7 +99,7 @@ const ruleFormStateMock = {
 
 describe('useRuleFormSteps', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders correctly', () => {
@@ -174,7 +188,7 @@ test('renders actions as complete if there are more than 0 defined actions', asy
 
 describe('useRuleFormHorizontalSteps', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders correctly', () => {

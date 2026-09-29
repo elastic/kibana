@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { Mock } from 'vitest';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { trackLegacyTerminology, LEGACY_TERMS } from './track_legacy_terminology';
 
@@ -18,7 +20,7 @@ describe('trackLegacyTerminology', () => {
     );
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(LEGACY_TERMS.length);
     LEGACY_TERMS.forEach((legacyTerm, index) => {
-      expect((mockUsageCounter.incrementCounter as jest.Mock).mock.calls[index][0]).toStrictEqual({
+      expect((mockUsageCounter.incrementCounter as Mock).mock.calls[index][0]).toStrictEqual({
         counterName: `legacyTerm_${legacyTerm}`,
         counterType: 'legacyTerminology',
         incrementBy: 1,

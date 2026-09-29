@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
@@ -13,34 +16,40 @@ import type { Logger } from '@kbn/logging';
 import { createVisualizationGraph } from './graph_lens';
 import type { VisualizationConfig } from './types';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  generateEsql: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      generateEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./chart_type_registry', () => ({
-  chartTypeRegistry: new Proxy(
-    {},
-    {
-      get: () => ({
-        schema: {
-          parse: (config: unknown) => config,
-        },
-        prompt: {
-          selection: 'Mock chart description',
-        },
-      }),
-    }
-  ),
-}));
+vi.mock('./chart_type_registry', () => {
+      const mocked = {
+      chartTypeRegistry: new Proxy(
+        {},
+        {
+          get: () => ({
+            schema: {
+              parse: (config: unknown) => config,
+            },
+            prompt: {
+              selection: 'Mock chart description',
+            },
+          }),
+        }
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedGenerateEsql = jest.mocked(generateEsql);
+const mockedGenerateEsql = vi.mocked(generateEsql);
 
 const createMockLogger = (): Logger =>
   ({
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 const asAuthoringResponse = (
@@ -63,12 +72,12 @@ describe('createVisualizationGraph', () => {
       chatModel: {
         // invoke resolves to a message-like object; graph_lens reads `.content` via
         // extractTextFromMessage.
-        invoke: jest.fn().mockResolvedValue({ content: invokeResult }),
+        invoke: vi.fn().mockResolvedValue({ content: invokeResult }),
       },
     };
     return {
-      getDefaultModel: jest.fn().mockResolvedValue(scopedModel),
-      selectModel: jest.fn().mockResolvedValue(scopedModel),
+      getDefaultModel: vi.fn().mockResolvedValue(scopedModel),
+      selectModel: vi.fn().mockResolvedValue(scopedModel),
     } as const;
   };
 
@@ -257,7 +266,7 @@ describe('createVisualizationGraph', () => {
     );
     // Config generation must not run without a query: the prompt forbids the
     // model from emitting data_source, so validation could never succeed.
-    expect((await model.getDefaultModel()).chatModel.invoke as jest.Mock).not.toHaveBeenCalled();
+    expect((await model.getDefaultModel()).chatModel.invoke as Mock).not.toHaveBeenCalled();
   });
 
   it('injects the validated esql query, overwriting any query emitted by the config LLM', async () => {

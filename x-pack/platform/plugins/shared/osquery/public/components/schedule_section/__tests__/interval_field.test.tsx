@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { IntervalField, MAX_INTERVAL_SECONDS, MIN_INTERVAL_SECONDS } from '../interval_field';
@@ -13,14 +15,14 @@ import { renderWithProviders } from './test_helpers';
 describe('IntervalField', () => {
   describe('rendering', () => {
     it('renders the current value with the seconds unit append', () => {
-      renderWithProviders(<IntervalField value={3600} onChange={jest.fn()} />);
+      renderWithProviders(<IntervalField value={3600} onChange={vi.fn()} />);
 
       const input = screen.getByTestId('osquery-schedule-interval') as HTMLInputElement;
       expect(input.value).toBe('3600');
     });
 
     it('respects the `disabled` prop', () => {
-      renderWithProviders(<IntervalField value={60} onChange={jest.fn()} disabled />);
+      renderWithProviders(<IntervalField value={60} onChange={vi.fn()} disabled />);
 
       const input = screen.getByTestId('osquery-schedule-interval') as HTMLInputElement;
       expect(input).toBeDisabled();
@@ -29,7 +31,7 @@ describe('IntervalField', () => {
 
   describe('change handling', () => {
     it('propagates a clean integer change', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(<IntervalField value={60} onChange={onChange} />);
 
       fireEvent.change(screen.getByTestId('osquery-schedule-interval'), {
@@ -40,7 +42,7 @@ describe('IntervalField', () => {
     });
 
     it('clamps values below MIN to the minimum', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(<IntervalField value={60} onChange={onChange} />);
 
       fireEvent.change(screen.getByTestId('osquery-schedule-interval'), {
@@ -51,7 +53,7 @@ describe('IntervalField', () => {
     });
 
     it('clamps values above MAX to the maximum', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(<IntervalField value={60} onChange={onChange} />);
 
       fireEvent.change(screen.getByTestId('osquery-schedule-interval'), {
@@ -62,7 +64,7 @@ describe('IntervalField', () => {
     });
 
     it('truncates fractional input to an integer', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(<IntervalField value={60} onChange={onChange} />);
 
       fireEvent.change(screen.getByTestId('osquery-schedule-interval'), {
@@ -73,7 +75,7 @@ describe('IntervalField', () => {
     });
 
     it('clamps empty / unparseable input to the minimum (HTML number input filters non-digits)', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderWithProviders(<IntervalField value={60} onChange={onChange} />);
 
       // EuiFieldNumber backs a `<input type=number>`; non-numeric chars never

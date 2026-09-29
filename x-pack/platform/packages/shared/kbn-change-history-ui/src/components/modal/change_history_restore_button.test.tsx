@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -56,7 +59,7 @@ const renderButton = ({
   currentChange,
   features = { restore: true, unsavedChanges: true },
   permissions = { canRestore: true },
-  restoreChange = jest.fn().mockResolvedValue(undefined),
+  restoreChange = vi.fn().mockResolvedValue(undefined),
   reportEvent,
   getPendingChange,
 }: {
@@ -65,12 +68,12 @@ const renderButton = ({
   features?: ChangeHistoryFeatures;
   permissions?: { canRestore?: boolean };
   restoreChange?: ChangeHistoryAdapter['restoreChange'];
-  reportEvent?: jest.Mock;
+  reportEvent?: Mock;
   getPendingChange?: ChangeHistoryAdapter['getPendingChange'];
 } = {}) => {
   const adapter: ChangeHistoryAdapter = {
-    listChanges: jest.fn(),
-    getChange: jest.fn(),
+    listChanges: vi.fn(),
+    getChange: vi.fn(),
     restoreChange,
     ...(getPendingChange ? { getPendingChange } : {}),
   };
@@ -106,7 +109,7 @@ describe('ChangeHistoryRestoreButton', () => {
   });
 
   it('opens confirm modal and calls restoreChange on confirm', async () => {
-    const restoreChange = jest.fn().mockResolvedValue(undefined);
+    const restoreChange = vi.fn().mockResolvedValue(undefined);
     renderButton({ restoreChange });
 
     fireEvent.click(screen.getByTestId('changeHistoryRestoreButton'));
@@ -129,8 +132,8 @@ describe('ChangeHistoryRestoreButton', () => {
   });
 
   it('reports restore_confirmed and restore_completed telemetry on successful restore', async () => {
-    const reportEvent = jest.fn();
-    const restoreChange = jest.fn().mockResolvedValue(undefined);
+    const reportEvent = vi.fn();
+    const restoreChange = vi.fn().mockResolvedValue(undefined);
 
     renderButton({ restoreChange, reportEvent, currentChange: liveChange });
 
@@ -171,8 +174,8 @@ describe('ChangeHistoryRestoreButton', () => {
   });
 
   it('reports hadUnsavedLocalEdits on restore telemetry when host has pending changes', async () => {
-    const reportEvent = jest.fn();
-    const restoreChange = jest.fn().mockResolvedValue(undefined);
+    const reportEvent = vi.fn();
+    const restoreChange = vi.fn().mockResolvedValue(undefined);
 
     renderButton({
       restoreChange,
@@ -209,8 +212,8 @@ describe('ChangeHistoryRestoreButton', () => {
   });
 
   it('reports restore_failed telemetry when restore fails', async () => {
-    const reportEvent = jest.fn();
-    const restoreChange = jest.fn().mockRejectedValue({
+    const reportEvent = vi.fn();
+    const restoreChange = vi.fn().mockRejectedValue({
       body: {
         code: 'RESTORE_VALIDATION',
         message: 'Validation failed.',
@@ -235,7 +238,7 @@ describe('ChangeHistoryRestoreButton', () => {
   });
 
   it('shows structured restore errors in the confirm modal', async () => {
-    const restoreChange = jest.fn().mockRejectedValue({
+    const restoreChange = vi.fn().mockRejectedValue({
       body: {
         code: 'RESTORE_VALIDATION',
         message: 'Validation failed.',

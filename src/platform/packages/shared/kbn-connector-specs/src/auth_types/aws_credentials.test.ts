@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { AxiosHeaders } from 'axios';
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import type { AuthContext } from '../connector_spec';
 import { AwsCredentialsAuth } from './aws_credentials';
 
 // The jest environment has no Web Crypto; fake the hash/signature primitives.
-jest.mock('./aws_crypto_helpers', () => ({
-  sha256Hash: jest.fn(async () => 'aa'.repeat(32)),
-  calculateAWSA4Signature: jest.fn(async () => 'bb'.repeat(32)),
-}));
+vi.mock('./aws_crypto_helpers', () => {
+      const mocked = {
+      sha256Hash: vi.fn(async () => 'aa'.repeat(32)),
+      calculateAWSA4Signature: vi.fn(async () => 'bb'.repeat(32)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SECRET = {
   accessKeyId: 'AKIAIOSFODNN7EXAMPLE',

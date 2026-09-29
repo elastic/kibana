@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,34 +16,40 @@ import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/us
 import type { AIConnector } from './types';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
-jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_action_types');
-jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_action_types', () => ({
-  useLoadActionTypes: jest.fn(),
-}));
+vi.mock('@kbn/elastic-assistant/impl/connectorland/use_load_action_types');
+vi.mock('@kbn/elastic-assistant/impl/connectorland/use_load_action_types', () => {
+      const mocked = {
+      useLoadActionTypes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: () => ({
-    services: {
-      settings: {
-        client: { get: jest.fn() },
-      },
-      http: {
-        get: jest.fn(),
-      },
-      notifications: {
-        toasts: {
-          addDanger: jest.fn(),
-          addSuccess: jest.fn(),
+vi.mock('../../../../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          settings: {
+            client: { get: vi.fn() },
+          },
+          http: {
+            get: vi.fn(),
+          },
+          notifications: {
+            toasts: {
+              addDanger: vi.fn(),
+              addSuccess: vi.fn(),
+            },
+          },
+          triggersActionsUi: {
+            actionTypeRegistry: {
+              get: vi.fn(() => ({ iconClass: 'testIcon' })),
+            },
+          },
         },
-      },
-      triggersActionsUi: {
-        actionTypeRegistry: {
-          get: jest.fn(() => ({ iconClass: 'testIcon' })),
-        },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockConnectors: AIConnector[] = [
   createMockActionConnector({
@@ -57,7 +66,7 @@ const mockConnectors: AIConnector[] = [
 
 describe('ConnectorCards', () => {
   beforeEach(() => {
-    (useLoadActionTypes as jest.Mock).mockReturnValue({
+    (useLoadActionTypes as Mock).mockReturnValue({
       data: [
         {
           id: 'testType1',
@@ -79,20 +88,20 @@ describe('ConnectorCards', () => {
     const { container } = render(
       <ConnectorCards
         connectors={undefined}
-        onNewConnectorSaved={jest.fn()}
+        onNewConnectorSaved={vi.fn()}
         canCreateConnectors={true}
-        onConnectorSelected={jest.fn()}
+        onConnectorSelected={vi.fn()}
       />
     );
     expect(container.querySelector('[role="progressbar"]')).toBeInTheDocument();
   });
 
   it('calls onConnectorSelected when a connector is selected', async () => {
-    const onConnectorSelected = jest.fn();
+    const onConnectorSelected = vi.fn();
     render(
       <ConnectorCards
         connectors={mockConnectors}
-        onNewConnectorSaved={jest.fn()}
+        onNewConnectorSaved={vi.fn()}
         canCreateConnectors={true}
         onConnectorSelected={onConnectorSelected}
       />
@@ -107,9 +116,9 @@ describe('ConnectorCards', () => {
     render(
       <ConnectorCards
         connectors={[]}
-        onNewConnectorSaved={jest.fn()}
+        onNewConnectorSaved={vi.fn()}
         canCreateConnectors={false}
-        onConnectorSelected={jest.fn()}
+        onConnectorSelected={vi.fn()}
       />
     );
     expect(screen.getByText('Missing privileges')).toBeInTheDocument();

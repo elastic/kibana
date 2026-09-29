@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
 import AttachmentContentEvent from './endpoint_event';
 import { useNavigation } from '@kbn/security-solution-navigation/src/navigation';
 
-jest.mock('@kbn/security-solution-navigation/src/navigation', () => {
+vi.mock('@kbn/security-solution-navigation/src/navigation', () => {
   return {
-    useNavigation: jest.fn(),
+    useNavigation: vi.fn(),
   };
 });
 
 describe('AttachmentContentEvent', () => {
-  const mockNavigateTo = jest.fn();
+  const mockNavigateTo = vi.fn();
 
-  const mockUseNavigation = useNavigation as jest.Mocked<typeof useNavigation>;
-  (mockUseNavigation as jest.Mock).mockReturnValue({
-    getAppUrl: jest.fn(),
+  const mockUseNavigation = useNavigation as Mocked<typeof useNavigation>;
+  (mockUseNavigation as Mock).mockReturnValue({
+    getAppUrl: vi.fn(),
     navigateTo: mockNavigateTo,
   });
 
@@ -70,8 +73,8 @@ describe('AttachmentContentEvent', () => {
   });
 
   it('builds the endpoint details URL when agentType is endpoint and skips the hosts URL', () => {
-    const mockGetAppUrl = jest.fn().mockReturnValue('http://app.url');
-    (mockUseNavigation as jest.Mock).mockReturnValue({
+    const mockGetAppUrl = vi.fn().mockReturnValue('http://app.url');
+    (mockUseNavigation as Mock).mockReturnValue({
       getAppUrl: mockGetAppUrl,
       navigateTo: mockNavigateTo,
     });
@@ -85,8 +88,8 @@ describe('AttachmentContentEvent', () => {
   });
 
   it('builds the hosts URL with an encoded hostname for non-endpoint agent types', () => {
-    const mockGetAppUrl = jest.fn().mockReturnValue('http://app.url');
-    (mockUseNavigation as jest.Mock).mockReturnValue({
+    const mockGetAppUrl = vi.fn().mockReturnValue('http://app.url');
+    (mockUseNavigation as Mock).mockReturnValue({
       getAppUrl: mockGetAppUrl,
       navigateTo: mockNavigateTo,
     });
@@ -113,8 +116,8 @@ describe('AttachmentContentEvent', () => {
   });
 
   it('returns null when targets is empty without computing any URL', () => {
-    const mockGetAppUrl = jest.fn();
-    (mockUseNavigation as jest.Mock).mockReturnValue({
+    const mockGetAppUrl = vi.fn();
+    (mockUseNavigation as Mock).mockReturnValue({
       getAppUrl: mockGetAppUrl,
       navigateTo: mockNavigateTo,
     });

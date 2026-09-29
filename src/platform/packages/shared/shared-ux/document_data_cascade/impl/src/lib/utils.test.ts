@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { faker } from '@faker-js/faker';
 import { type Row } from '@tanstack/react-table';
 import { type GroupNode } from '../store_provider';
@@ -25,13 +27,13 @@ describe('cascade row utils', () => {
       customer_phone: faker.phone.number(),
       customer_email: faker.internet.email(),
     },
-    getParentRows: jest.fn(),
-    getToggleSelectedHandler: jest.fn(),
-    getToggleExpandedHandler: jest.fn(),
+    getParentRows: vi.fn(),
+    getToggleSelectedHandler: vi.fn(),
+    getToggleExpandedHandler: vi.fn(),
   };
 
   // TODO: implement mock for getParentRows
-  jest.spyOn(mockedRowInstance, 'getParentRows').mockImplementation(() => []);
+  vi.spyOn(mockedRowInstance, 'getParentRows').mockImplementation(() => []);
 
   describe('getCascadeRowNodePath', () => {
     it('should return the path of the row node in the group by hierarchy', () => {

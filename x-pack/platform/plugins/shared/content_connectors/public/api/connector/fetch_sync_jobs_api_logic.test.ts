@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -14,7 +16,7 @@ import { fetchSyncJobs } from './fetch_sync_jobs_api_logic';
 describe('FetchSyncJobs', () => {
   const http = httpServiceMock.createSetupContract();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('fetchSyncJobs', () => {
     it('calls correct api', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
@@ -14,10 +16,10 @@ import type { InitializationFlowContext } from '../../types';
 import { initDetectionRuleMonitoringFlow } from '.';
 
 const createMockHealthClient = () => ({
-  installAssetsForMonitoringHealth: jest.fn().mockResolvedValue(undefined),
-  calculateRuleHealth: jest.fn(),
-  calculateSpaceHealth: jest.fn(),
-  calculateClusterHealth: jest.fn(),
+  installAssetsForMonitoringHealth: vi.fn().mockResolvedValue(undefined),
+  calculateRuleHealth: vi.fn(),
+  calculateSpaceHealth: vi.fn(),
+  calculateClusterHealth: vi.fn(),
 });
 
 const createMockInitializationFlowContext = (
@@ -34,7 +36,7 @@ const createMockInitializationFlowContext = (
 
 describe('initDetectionRuleMonitoringFlow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('has the correct id', () => {

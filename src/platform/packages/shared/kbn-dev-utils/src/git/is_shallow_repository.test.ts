@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import execa from 'execa';
 
 import { isShallowRepository } from './is_shallow_repository';
 
-jest.mock('execa');
+vi.mock('execa');
 
-const mockExeca = execa as unknown as jest.Mock;
+const mockExeca = execa as unknown as Mock;
 
 describe('isShallowRepository', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns true for shallow repositories', async () => {

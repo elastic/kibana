@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -18,28 +20,37 @@ import {
   createMockWorkflowExecutionDto,
 } from '../../../shared/test_utils';
 
-jest.mock('../../../hooks/navigation/use_navigate_to_execution', () => ({
-  useNavigateToExecution: ({
-    workflowId,
-    executionId,
-  }: {
-    workflowId: string;
-    executionId?: string;
-  }) => ({
-    href: `/app/workflows/${workflowId}${executionId ? `?executionId=${executionId}` : ''}`,
-    navigate: jest.fn(),
-  }),
-}));
+vi.mock('../../../hooks/navigation/use_navigate_to_execution', () => {
+      const mocked = {
+      useNavigateToExecution: ({
+        workflowId,
+        executionId,
+      }: {
+        workflowId: string;
+        executionId?: string;
+      }) => ({
+        href: `/app/workflows/${workflowId}${executionId ? `?executionId=${executionId}` : ''}`,
+        navigate: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../entities/connectors/model/use_available_connectors', () => ({
-  useAvailableConnectors: () => undefined,
-  useFetchConnector: () => ({ data: undefined }),
-}));
+vi.mock('../../../entities/connectors/model/use_available_connectors', () => {
+      const mocked = {
+      useAvailableConnectors: () => undefined,
+      useFetchConnector: () => ({ data: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockChildExecutions = new Map();
-jest.mock('../model/use_child_workflow_executions', () => ({
-  useChildWorkflowExecutions: () => ({ childExecutions: mockChildExecutions, isLoading: false }),
-}));
+vi.mock('../model/use_child_workflow_executions', () => {
+      const mocked = {
+      useChildWorkflowExecutions: () => ({ childExecutions: mockChildExecutions, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockWaitingStepResume = {
   waitingStepExecutionId: undefined as string | undefined,
@@ -49,64 +60,79 @@ const mockWaitingStepResume = {
   approvalLabels: undefined,
 };
 
-jest.mock('../model/use_waiting_step_resume', () => ({
-  useWaitingStepResume: () => mockWaitingStepResume,
-}));
+vi.mock('../model/use_waiting_step_resume', () => {
+      const mocked = {
+      useWaitingStepResume: () => mockWaitingStepResume,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./resume_execution_button', () => ({
-  ResumeExecutionButton: (props: { autoOpen?: boolean; waitingStepExecutionId?: string }) => (
-    <div
-      data-test-subj="resume-execution-button"
-      data-auto-open={String(Boolean(props.autoOpen))}
-      data-waiting-step={props.waitingStepExecutionId ?? ''}
-    />
-  ),
-}));
+vi.mock('./resume_execution_button', () => {
+      const mocked = {
+      ResumeExecutionButton: (props: { autoOpen?: boolean; waitingStepExecutionId?: string }) => (
+        <div
+          data-test-subj="resume-execution-button"
+          data-auto-open={String(Boolean(props.autoOpen))}
+          data-waiting-step={props.waitingStepExecutionId ?? ''}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./workflow_step_execution_tree', () => ({
-  WorkflowStepExecutionTree: ({
-    onStepExecutionClick,
-  }: {
-    onStepExecutionClick: (id: string) => void;
-  }) => (
-    <>
-      <button
-        type="button"
-        data-test-subj="select-waiting-step"
-        onClick={() => onStepExecutionClick('step-wait')}
-      >
-        {'Select waiting step'}
-      </button>
-      <button
-        type="button"
-        data-test-subj="select-execute-step"
-        onClick={() => onStepExecutionClick('parent-execute')}
-      >
-        {'Select execute step'}
-      </button>
-      <button
-        type="button"
-        data-test-subj="select-child-step"
-        onClick={() => onStepExecutionClick('child-lookup')}
-      >
-        {'Select child step'}
-      </button>
-    </>
-  ),
-}));
+vi.mock('./workflow_step_execution_tree', () => {
+      const mocked = {
+      WorkflowStepExecutionTree: ({
+        onStepExecutionClick,
+      }: {
+        onStepExecutionClick: (id: string) => void;
+      }) => (
+        <>
+          <button
+            type="button"
+            data-test-subj="select-waiting-step"
+            onClick={() => onStepExecutionClick('step-wait')}
+          >
+            {'Select waiting step'}
+          </button>
+          <button
+            type="button"
+            data-test-subj="select-execute-step"
+            onClick={() => onStepExecutionClick('parent-execute')}
+          >
+            {'Select execute step'}
+          </button>
+          <button
+            type="button"
+            data-test-subj="select-child-step"
+            onClick={() => onStepExecutionClick('child-lookup')}
+          >
+            {'Select child step'}
+          </button>
+        </>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./execution_take_action_split_button', () => ({
-  ExecutionTakeActionSplitButton: () => <div data-test-subj="take-action" />,
-}));
+vi.mock('./execution_take_action_split_button', () => {
+      const mocked = {
+      ExecutionTakeActionSplitButton: () => <div data-test-subj="take-action" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockPollingResult = {
   workflowExecution: undefined as ReturnType<typeof createMockWorkflowExecutionDto> | undefined,
   error: null as Error | null,
 };
 
-jest.mock('../../../entities/workflows/model/use_workflow_execution_polling', () => ({
-  useWorkflowExecutionPolling: () => mockPollingResult,
-}));
+vi.mock('../../../entities/workflows/model/use_workflow_execution_polling', () => {
+      const mocked = {
+      useWorkflowExecutionPolling: () => mockPollingResult,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type UseStepExecutionParams = Parameters<
   typeof import('../model/use_step_execution').useStepExecution
@@ -117,7 +143,7 @@ interface UseStepExecutionQueryStub {
   isLoading: boolean;
 }
 
-const mockUseStepExecution = jest.fn<UseStepExecutionQueryStub, UseStepExecutionParams>(() => ({
+const mockUseStepExecution = vi.fn<UseStepExecutionQueryStub, UseStepExecutionParams>(() => ({
   data: {
     id: 'step-wait',
     stepId: 'request_approval',
@@ -128,9 +154,12 @@ const mockUseStepExecution = jest.fn<UseStepExecutionQueryStub, UseStepExecution
   isLoading: false,
 }));
 
-jest.mock('../model/use_step_execution', () => ({
-  useStepExecution: (...args: UseStepExecutionParams) => mockUseStepExecution(...args),
-}));
+vi.mock('../model/use_step_execution', () => {
+      const mocked = {
+      useStepExecution: (...args: UseStepExecutionParams) => mockUseStepExecution(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowExecutionFlyout resume', () => {
   const services = createStartServicesMock();
@@ -151,7 +180,7 @@ describe('WorkflowExecutionFlyout resume', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockWaitingStepResume.waitingStepExecutionId = undefined;
     mockWaitingStepResume.waitingStepStartedAt = undefined;
     mockWaitingStepResume.resumeMessage = undefined;
@@ -172,7 +201,7 @@ describe('WorkflowExecutionFlyout resume', () => {
 
   // The flyout reads `?resume=true` and the selected step from the URL.
   const renderFlyout = (search = '') =>
-    render(<WorkflowExecutionFlyout executionId="exec-1" onClose={jest.fn()} />, {
+    render(<WorkflowExecutionFlyout executionId="exec-1" onClose={vi.fn()} />, {
       wrapper: getTestProvider({ services, initialEntries: [`/${search}`] }),
     });
 
@@ -257,7 +286,7 @@ describe('WorkflowExecutionFlyout child workflow steps', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockChildExecutions.clear();
     mockChildExecutions.set('parent-execute', childExecution);
     mockPollingResult.workflowExecution = parentExecution;
@@ -274,7 +303,7 @@ describe('WorkflowExecutionFlyout child workflow steps', () => {
   });
 
   const renderFlyout = () =>
-    render(<WorkflowExecutionFlyout executionId="parent-exec" onClose={jest.fn()} />, {
+    render(<WorkflowExecutionFlyout executionId="parent-exec" onClose={vi.fn()} />, {
       wrapper: getTestProvider({ services }),
     });
 

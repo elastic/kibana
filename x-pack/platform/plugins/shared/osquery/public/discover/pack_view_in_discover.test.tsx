@@ -5,21 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
 import { PackViewInDiscoverAction } from './pack_view_in_discover';
 import { usePackQueryLastResults } from '../packs/use_pack_query_last_results';
 
-jest.mock('../packs/use_pack_query_last_results');
+vi.mock('../packs/use_pack_query_last_results');
 
-const mockViewResultsInDiscoverAction = jest.fn((_props: Record<string, unknown>) => null);
-jest.mock('./view_results_in_discover', () => ({
-  ViewResultsInDiscoverAction: (props: Record<string, unknown>) =>
-    mockViewResultsInDiscoverAction(props),
-}));
+const mockViewResultsInDiscoverAction = vi.fn((_props: Record<string, unknown>) => null);
+vi.mock('./view_results_in_discover', () => {
+      const mocked = {
+      ViewResultsInDiscoverAction: (props: Record<string, unknown>) =>
+        mockViewResultsInDiscoverAction(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const usePackQueryLastResultsMock = usePackQueryLastResults as jest.MockedFunction<
+const usePackQueryLastResultsMock = usePackQueryLastResults as MockedFunction<
   typeof usePackQueryLastResults
 >;
 
@@ -37,7 +43,7 @@ describe('PackViewInDiscoverAction', () => {
   const item = { action_id: 'action-query-1' };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockLastResultTime(['2026-08-10T09:48:47.000Z']);
   });
 

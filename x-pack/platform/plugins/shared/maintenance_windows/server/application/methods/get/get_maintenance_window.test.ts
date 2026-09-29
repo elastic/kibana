@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { getMaintenanceWindow } from './get_maintenance_window';
 import {
   savedObjectsClientMock,
@@ -19,24 +22,24 @@ import { getMockMaintenanceWindow } from '../../../data/test_helpers';
 const savedObjectsClient = savedObjectsClientMock.create();
 const uiSettings = uiSettingsServiceMock.createClient();
 
-const mockContext: jest.Mocked<MaintenanceWindowClientContext> = {
+const mockContext: Mocked<MaintenanceWindowClientContext> = {
   logger: loggingSystemMock.create().get(),
-  getModificationMetadata: jest.fn(),
+  getModificationMetadata: vi.fn(),
   savedObjectsClient,
   uiSettings,
 };
 
 describe('MaintenanceWindowClient - get', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should get maintenance window by id', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: new Date().toISOString(),
     });

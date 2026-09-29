@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import {
@@ -19,17 +22,17 @@ import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('AttacksTableSortSelect', () => {
   const defaultSort: GroupingSort = DEFAULT_ATTACKS_SORT;
-  const onChange = jest.fn();
-  const reportEventMock = jest.fn();
+  const onChange = vi.fn();
+  const reportEventMock = vi.fn();
 
   beforeEach(() => {
     onChange.mockClear();
     reportEventMock.mockClear();
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         telemetry: {
           reportEvent: reportEventMock,

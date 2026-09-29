@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { findRulesRoute } from './find_rules_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
@@ -18,16 +21,22 @@ const rulesClient = rulesClientMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-jest.mock('../../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../lib/track_legacy_terminology', () => ({
-  trackLegacyTerminology: jest.fn(),
-}));
+vi.mock('../../../../lib/track_legacy_terminology', () => {
+      const mocked = {
+      trackLegacyTerminology: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('findRulesRoute', () => {
@@ -372,7 +381,7 @@ describe('findRulesRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyApiAccess as Mock).mockImplementation(() => {
       throw new Error('OMG');
     });
 
@@ -423,7 +432,7 @@ describe('findRulesRoute', () => {
     );
     await handler(context, req, res);
     expect(trackLegacyTerminology).toHaveBeenCalledTimes(1);
-    expect((trackLegacyTerminology as jest.Mock).mock.calls[0][0]).toStrictEqual([
+    expect((trackLegacyTerminology as Mock).mock.calls[0][0]).toStrictEqual([
       'alertTypeId:2',
       ['alertTypeId:1', 'message:foo'],
       'alertTypeId',

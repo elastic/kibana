@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -16,22 +18,28 @@ import {
 } from '../../hooks/test_utils';
 import { AlertEpisodeTimelineHeatmapsSection } from './timeline_heatmaps_section';
 
-jest.mock('../../utils/run_esql_async_search');
+vi.mock('../../utils/run_esql_async_search');
 
 // Mock the heavy heatmap building blocks since the section dynamically imports them.
-jest.mock('./lifecycle_heatmap', () => ({
-  AlertEpisodeLifecycleHeatmap: ({ eventRows }: { eventRows: unknown[] }) => (
-    <div data-test-subj="alertingV2EpisodeLifecycleHeatmapMock">{eventRows.length}</div>
-  ),
-}));
+vi.mock('./lifecycle_heatmap', () => {
+      const mocked = {
+      AlertEpisodeLifecycleHeatmap: ({ eventRows }: { eventRows: unknown[] }) => (
+        <div data-test-subj="alertingV2EpisodeLifecycleHeatmapMock">{eventRows.length}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./severity_heatmap', () => ({
-  AlertEpisodeSeverityHeatmap: ({ eventRows }: { eventRows: unknown[] }) => (
-    <div data-test-subj="alertingV2EpisodeSeverityHeatmapMock">{eventRows.length}</div>
-  ),
-}));
+vi.mock('./severity_heatmap', () => {
+      const mocked = {
+      AlertEpisodeSeverityHeatmap: ({ eventRows }: { eventRows: unknown[] }) => (
+        <div data-test-subj="alertingV2EpisodeSeverityHeatmapMock">{eventRows.length}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
+const runEsqlAsyncSearchMock = vi.mocked(runEsqlAsyncSearch);
 
 const mockServices = createMockServices();
 
@@ -40,7 +48,7 @@ const wrapper = createQueryClientWrapper(queryClient);
 
 describe('AlertEpisodeTimelineHeatmapsSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createAttachmentServiceMock } from '../../../services/mocks';
 import { AlertLimiter } from './alerts';
 import { createAlertRequests, createUnifiedAlertRequests, createUserRequests } from '../test_utils';
@@ -16,7 +18,7 @@ describe('AlertLimiter', () => {
   const alert = new AlertLimiter(attachmentService);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     attachmentService.countAlertsWithinCase.mockResolvedValue(5);
   });
 

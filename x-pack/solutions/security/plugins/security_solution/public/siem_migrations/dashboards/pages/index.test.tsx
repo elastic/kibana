@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { render } from '@testing-library/react';
@@ -16,41 +19,59 @@ import { useInvalidateGetMigrationDashboards } from '../logic/use_get_migration_
 import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
 import { TestProviders } from '../../../common/mock/test_providers';
 
-jest.mock('../components/dashboard_table', () => ({
-  MigrationDashboardsTable: () => <div data-test-subj="migrationDashboardsTable" />,
-}));
+vi.mock('../components/dashboard_table', () => {
+      const mocked = {
+      MigrationDashboardsTable: () => <div data-test-subj="migrationDashboardsTable" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./empty', () => ({
-  EmptyMigrationDashboardsPage: () => <div data-test-subj="emptyMigrationDashboards" />,
-}));
+vi.mock('./empty', () => {
+      const mocked = {
+      EmptyMigrationDashboardsPage: () => <div data-test-subj="emptyMigrationDashboards" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/components/header_page', () => ({
-  HeaderPage: () => <div data-test-subj="headerPage" />,
-}));
+vi.mock('../../../common/components/header_page', () => {
+      const mocked = {
+      HeaderPage: () => <div data-test-subj="headerPage" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/migration_panels/migration_progress_panel', () => ({
-  MigrationProgressPanel: () => <div data-test-subj="migrationProgressPanel" />,
-}));
+vi.mock('../../common/components/migration_panels/migration_progress_panel', () => {
+      const mocked = {
+      MigrationProgressPanel: () => <div data-test-subj="migrationProgressPanel" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/migration_status_panels/migration_ready_panel', () => ({
-  MigrationReadyPanel: () => <div data-test-subj="migrationReadyPanel" />,
-}));
+vi.mock('../components/migration_status_panels/migration_ready_panel', () => {
+      const mocked = {
+      MigrationReadyPanel: () => <div data-test-subj="migrationReadyPanel" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/migration_status_panels/upload_missing_panel', () => ({
-  DashboardMigrationsUploadMissingPanel: () => (
-    <div data-test-subj="dashboardMigrationsUploadMissingPanel" />
-  ),
-}));
+vi.mock('../components/migration_status_panels/upload_missing_panel', () => {
+      const mocked = {
+      DashboardMigrationsUploadMissingPanel: () => (
+        <div data-test-subj="dashboardMigrationsUploadMissingPanel" />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../service/hooks/use_latest_stats');
-jest.mock('../../../common/lib/kibana');
-jest.mock('../logic/use_get_migration_dashboards');
-jest.mock('../logic/use_get_migration_translation_stats');
+vi.mock('../service/hooks/use_latest_stats');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../logic/use_get_migration_dashboards');
+vi.mock('../logic/use_get_migration_translation_stats');
 
-const refreshStats: jest.Mock = jest.fn();
-const navigateTo: jest.Mock = jest.fn();
-const invalidateGetMigrationDashboards: jest.Mock = jest.fn();
-const invalidateGetMigrationTranslationStats: jest.Mock = jest.fn();
+const refreshStats: Mock = vi.fn();
+const navigateTo: Mock = vi.fn();
+const invalidateGetMigrationDashboards: Mock = vi.fn();
+const invalidateGetMigrationTranslationStats: Mock = vi.fn();
 
 const renderComponent = (migrationId?: string) => {
   const mockMatch: RouteComponentProps<{ migrationId?: string }>['match'] = {
@@ -69,14 +90,14 @@ const renderComponent = (migrationId?: string) => {
     length: 0,
     action: 'PUSH',
     location: mockLocation,
-    push: jest.fn(),
-    replace: jest.fn(),
-    go: jest.fn(),
-    goBack: jest.fn(),
-    goForward: jest.fn(),
-    block: jest.fn(),
-    listen: jest.fn(),
-    createHref: jest.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
+    go: vi.fn(),
+    goBack: vi.fn(),
+    goForward: vi.fn(),
+    block: vi.fn(),
+    listen: vi.fn(),
+    createHref: vi.fn(),
   };
 
   return render(
@@ -88,22 +109,22 @@ const renderComponent = (migrationId?: string) => {
 
 describe('MigrationDashboardsPage', () => {
   beforeEach(() => {
-    (useNavigation as jest.Mock).mockReturnValue({ navigateTo });
-    (useInvalidateGetMigrationDashboards as jest.Mock).mockReturnValue(
+    (useNavigation as Mock).mockReturnValue({ navigateTo });
+    (useInvalidateGetMigrationDashboards as Mock).mockReturnValue(
       invalidateGetMigrationDashboards
     );
-    (useInvalidateGetMigrationTranslationStats as jest.Mock).mockReturnValue(
+    (useInvalidateGetMigrationTranslationStats as Mock).mockReturnValue(
       invalidateGetMigrationTranslationStats
     );
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when loading', () => {
     beforeEach(() => {
-      (useLatestStats as jest.Mock).mockReturnValue({
+      (useLatestStats as Mock).mockReturnValue({
         data: [],
         isLoading: true,
         refreshStats,
@@ -119,7 +140,7 @@ describe('MigrationDashboardsPage', () => {
 
   describe('when not loading', () => {
     beforeEach(() => {
-      (useLatestStats as jest.Mock).mockReturnValue({
+      (useLatestStats as Mock).mockReturnValue({
         data: [],
         isLoading: false,
         refreshStats,
@@ -135,7 +156,7 @@ describe('MigrationDashboardsPage', () => {
 
   describe('when there are no migrations', () => {
     beforeEach(() => {
-      (useLatestStats as jest.Mock).mockReturnValue({
+      (useLatestStats as Mock).mockReturnValue({
         data: [],
         isLoading: false,
         refreshStats,
@@ -167,7 +188,7 @@ describe('MigrationDashboardsPage', () => {
     ];
 
     beforeEach(() => {
-      (useLatestStats as jest.Mock).mockReturnValue({
+      (useLatestStats as Mock).mockReturnValue({
         data: migrations,
         isLoading: false,
         refreshStats,
@@ -196,7 +217,7 @@ describe('MigrationDashboardsPage', () => {
       ];
 
       beforeEach(() => {
-        (useLatestStats as jest.Mock).mockReturnValue({
+        (useLatestStats as Mock).mockReturnValue({
           data: runningMigrations,
           isLoading: false,
           refreshStats,
@@ -218,7 +239,7 @@ describe('MigrationDashboardsPage', () => {
       ];
 
       beforeEach(() => {
-        (useLatestStats as jest.Mock).mockReturnValue({
+        (useLatestStats as Mock).mockReturnValue({
           data: pendingMigrations,
           isLoading: false,
           refreshStats,
@@ -240,7 +261,7 @@ describe('MigrationDashboardsPage', () => {
       ];
 
       beforeEach(() => {
-        (useLatestStats as jest.Mock).mockReturnValue({
+        (useLatestStats as Mock).mockReturnValue({
           data: interruptedMigrations,
           isLoading: false,
           refreshStats,
@@ -262,7 +283,7 @@ describe('MigrationDashboardsPage', () => {
       ];
 
       beforeEach(() => {
-        (useLatestStats as jest.Mock).mockReturnValue({
+        (useLatestStats as Mock).mockReturnValue({
           data: stoppedMigrations,
           isLoading: false,
           refreshStats,
@@ -284,7 +305,7 @@ describe('MigrationDashboardsPage', () => {
       ];
 
       beforeEach(() => {
-        (useLatestStats as jest.Mock).mockReturnValue({
+        (useLatestStats as Mock).mockReturnValue({
           data: finishedMigrations,
           isLoading: false,
           refreshStats,

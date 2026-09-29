@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
@@ -26,12 +28,12 @@ import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 
-jest.mock('./hooks/use_context_app_fetch');
-jest.mock('./hooks/use_context_app_state');
+vi.mock('./hooks/use_context_app_fetch');
+vi.mock('./hooks/use_context_app_state');
 
 const services = createDiscoverServicesMock();
-const mockUseContextAppFetch = jest.mocked(useContextAppFetch);
-const mockUseContextAppState = jest.mocked(useContextAppState);
+const mockUseContextAppFetch = vi.mocked(useContextAppFetch);
+const mockUseContextAppState = vi.mocked(useContextAppState);
 
 const appState: AppState = {
   columns: ['message'],
@@ -49,12 +51,12 @@ const globalState: GlobalState = {
 const stateContainer: GetStateReturn = {
   appState: createStateContainer<AppState>(appState),
   globalState: createStateContainer<GlobalState>(globalState),
-  flushToUrl: jest.fn(),
-  getFilters: jest.fn(() => []),
-  setAppState: jest.fn(),
-  setFilters: jest.fn(),
-  startSync: jest.fn(),
-  stopSync: jest.fn(),
+  flushToUrl: vi.fn(),
+  getFilters: vi.fn(() => []),
+  setAppState: vi.fn(),
+  setFilters: vi.fn(),
+  startSync: vi.fn(),
+  stopSync: vi.fn(),
 };
 
 const anchorRecord = buildDataTableRecord(
@@ -89,8 +91,8 @@ const setDocViewerRegistry = (render: (props: DocViewRenderProps) => React.React
 };
 
 describe('ContextApp test', () => {
-  const addFilterMock = jest.fn();
-  const setExpandedDocMock = jest.fn();
+  const addFilterMock = vi.fn();
+  const setExpandedDocMock = vi.fn();
   const docViewerRef = React.createRef<DocViewerApi>();
   const defaultProps: ContextAppProps = {
     dataView: dataViewMock,
@@ -132,7 +134,7 @@ describe('ContextApp test', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     setDocViewerRegistry(() => <div data-test-subj="docViewTableMock" />);
 
@@ -154,10 +156,10 @@ describe('ContextApp test', () => {
         successorsInterceptedWarnings: [],
         successorsStatus: { value: LoadingStatus.LOADED },
       },
-      fetchAllRows: jest.fn(async () => settledVoidResults),
-      fetchContextRows: jest.fn(async () => settledVoidResults),
-      fetchSurroundingRows: jest.fn(async () => undefined),
-      resetFetchedState: jest.fn(),
+      fetchAllRows: vi.fn(async () => settledVoidResults),
+      fetchContextRows: vi.fn(async () => settledVoidResults),
+      fetchSurroundingRows: vi.fn(async () => undefined),
+      resetFetchedState: vi.fn(),
     });
   });
 

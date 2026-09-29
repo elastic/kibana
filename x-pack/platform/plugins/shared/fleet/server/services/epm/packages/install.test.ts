@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import fs from 'fs/promises';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -48,101 +51,110 @@ import { getBundledPackageByName, getBundledPackageByPkgKey } from './bundled_pa
 import { getInstallationObject, getPackageSavedObjects } from './get';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 
-jest.mock('../../data_streams');
-jest.mock('./get');
-jest.mock('./install_index_template_pipeline');
-jest.mock('./es_assets_reference');
-jest.mock('./exclude_datastreams_helper', () => ({
-  shouldIncludePackageWithDatastreamTypes: jest.fn(() => true),
-}));
-jest.mock('../../app_context', () => {
-  const logger = { error: jest.fn(), debug: jest.fn(), warn: jest.fn(), info: jest.fn() };
+vi.mock('../../data_streams');
+vi.mock('./get');
+vi.mock('./install_index_template_pipeline');
+vi.mock('./es_assets_reference');
+vi.mock('./exclude_datastreams_helper', () => {
+      const mocked = {
+      shouldIncludePackageWithDatastreamTypes: vi.fn(() => true),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../app_context', () => {
+  const logger = { error: vi.fn(), debug: vi.fn(), warn: vi.fn(), info: vi.fn() };
   const mockedSavedObjectTagging = {
-    createInternalAssignmentService: jest.fn(),
-    createTagClient: jest.fn(),
+    createInternalAssignmentService: vi.fn(),
+    createTagClient: vi.fn(),
   };
 
   return {
     appContextService: {
-      getLogger: jest.fn(() => {
+      getLogger: vi.fn(() => {
         return logger;
       }),
-      getTelemetryEventsSender: jest.fn(),
-      getSavedObjects: jest.fn(() => ({
-        createImporter: jest.fn(),
+      getTelemetryEventsSender: vi.fn(),
+      getSavedObjects: vi.fn(() => ({
+        createImporter: vi.fn(),
       })),
-      getConfig: jest.fn(() => ({})),
-      getSavedObjectsTagging: jest.fn(() => mockedSavedObjectTagging),
-      getInternalUserSOClientForSpaceId: jest.fn(),
-      getExperimentalFeatures: jest.fn(),
-      getCloud: jest.fn(),
-      getTaskManagerStart: jest.fn(() => ({ runSoon: jest.fn().mockResolvedValue({}) })),
-      getKibanaVersion: jest.fn(() => '8.0.0'),
+      getConfig: vi.fn(() => ({})),
+      getSavedObjectsTagging: vi.fn(() => mockedSavedObjectTagging),
+      getInternalUserSOClientForSpaceId: vi.fn(),
+      getExperimentalFeatures: vi.fn(),
+      getCloud: vi.fn(),
+      getTaskManagerStart: vi.fn(() => ({ runSoon: vi.fn().mockResolvedValue({}) })),
+      getKibanaVersion: vi.fn(() => '8.0.0'),
     },
   };
 });
 
-jest.mock('.');
-jest.mock('../registry', () => {
+vi.mock('.');
+vi.mock('../registry', async () => {
   return {
-    ...jest.requireActual('../registry'),
-    fetchFindLatestPackageOrThrow: jest.fn(),
-    getPackage: jest.fn(),
+    ...(await vi.importActual('../registry')),
+    fetchFindLatestPackageOrThrow: vi.fn(),
+    getPackage: vi.fn(),
   };
 });
-jest.mock('../../upgrade_sender');
-jest.mock('../../license');
-jest.mock('../../upgrade_sender');
-jest.mock('./cleanup');
-jest.mock('fs/promises');
-jest.mock('./bundled_packages');
-jest.mock('./utils', () => ({
-  ...jest.requireActual('./utils'),
-  getLastUploadInstallCache: jest.fn(),
-  setLastUploadInstallCache: jest.fn(),
-}));
-jest.mock('./install_state_machine/_state_machine_package_install', () => {
+vi.mock('../../upgrade_sender');
+vi.mock('../../license');
+vi.mock('../../upgrade_sender');
+vi.mock('./cleanup');
+vi.mock('fs/promises');
+vi.mock('./bundled_packages');
+vi.mock('./utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('./utils')),
+      getLastUploadInstallCache: vi.fn(),
+      setLastUploadInstallCache: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./install_state_machine/_state_machine_package_install', () => {
   return {
-    _stateMachineInstallPackage: jest.fn(() => Promise.resolve()),
+    _stateMachineInstallPackage: vi.fn(() => Promise.resolve()),
   };
 });
-jest.mock('../kibana/index_pattern/install', () => {
+vi.mock('../kibana/index_pattern/install', () => {
   return {
-    installIndexPatterns: jest.fn(() => Promise.resolve()),
+    installIndexPatterns: vi.fn(() => Promise.resolve()),
   };
 });
-jest.mock('../archive', () => {
+vi.mock('../archive', () => {
   return {
-    unpackBufferToAssetsMap: jest.fn(() =>
+    unpackBufferToAssetsMap: vi.fn(() =>
       Promise.resolve({
         assetsMap: new Map(),
         paths: [],
       })
     ),
-    setPackageInfo: jest.fn(),
-    deleteVerificationResult: jest.fn(),
+    setPackageInfo: vi.fn(),
+    deleteVerificationResult: vi.fn(),
   };
 });
-jest.mock('./upload_preflight_authz', () => ({
-  parsePackageAndCollectSignals: jest.fn(() =>
-    Promise.resolve({
-      packageInfo: { name: 'apache', version: '1.3.0' },
-      archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
-    })
-  ),
-  checkUploadPackageAssetPrivileges: jest.fn(),
-}));
-jest.mock('../../audit_logging');
+vi.mock('./upload_preflight_authz', () => {
+      const mocked = {
+      parsePackageAndCollectSignals: vi.fn(() =>
+        Promise.resolve({
+          packageInfo: { name: 'apache', version: '1.3.0' },
+          archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
+        })
+      ),
+      checkUploadPackageAssetPrivileges: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../audit_logging');
 
-jest.mock('../../utils/agentless', () => {
+vi.mock('../../utils/agentless', () => {
   return {
-    isAgentlessEnabled: jest.fn(),
-    isOnlyAgentlessIntegration: jest.fn(),
+    isAgentlessEnabled: vi.fn(),
+    isOnlyAgentlessIntegration: vi.fn(),
   };
 });
 
-const mockGetBundledPackageByPkgKey = jest.mocked(getBundledPackageByPkgKey);
-const mockedAuditLoggingService = jest.mocked(auditLoggingService);
+const mockGetBundledPackageByPkgKey = vi.mocked(getBundledPackageByPkgKey);
+const mockedAuditLoggingService = vi.mocked(auditLoggingService);
 
 const emptyPackageSavedObjects: SavedObjectsFindResponse<Installation> = {
   page: 1,
@@ -260,7 +272,7 @@ describe('createInstallation', () => {
 
   describe('es_index_patterns', () => {
     beforeEach(() => {
-      (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+      (appContextService.getExperimentalFeatures as Mock).mockReturnValue({
         enableOtelIntegrations: true,
       });
       soClient.create.mockClear();
@@ -299,10 +311,10 @@ describe('createInstallation', () => {
 
 describe('install', () => {
   beforeEach(() => {
-    jest
+    vi
       .mocked(Registry.fetchFindLatestPackageOrThrow)
       .mockImplementation(() => Promise.resolve({ version: '1.3.0' } as any));
-    jest.mocked(Registry.getPackage).mockImplementation(() =>
+    vi.mocked(Registry.getPackage).mockImplementation(() =>
       Promise.resolve({
         packageInfo: { license: 'basic', conditions: { elastic: { subscription: 'basic' } } },
         paths: [],
@@ -310,8 +322,8 @@ describe('install', () => {
     );
 
     mockGetBundledPackageByPkgKey.mockReset();
-    (installStateMachine._stateMachineInstallPackage as jest.Mock).mockClear();
-    jest.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReset();
+    (installStateMachine._stateMachineInstallPackage as Mock).mockClear();
+    vi.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReset();
   });
 
   describe('registry', () => {
@@ -342,7 +354,7 @@ describe('install', () => {
     });
 
     it('should bypass out-of-date check when allow_outdated_version is true', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
 
       const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -374,9 +386,9 @@ describe('install', () => {
     });
 
     it('should not bypass agentless guard when allow_outdated_version is true but not force', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      jest.mocked(isAgentlessEnabled).mockReturnValueOnce(false);
-      jest.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.mocked(isAgentlessEnabled).mockReturnValueOnce(false);
+      vi.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(true);
 
       const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -395,7 +407,7 @@ describe('install', () => {
     });
 
     it('should send telemetry on install failure, license error', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
@@ -418,8 +430,8 @@ describe('install', () => {
     });
 
     it('should send telemetry on install failure, datastream type exclusion', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      jest.mocked(shouldIncludePackageWithDatastreamTypes).mockReturnValueOnce(false);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.mocked(shouldIncludePackageWithDatastreamTypes).mockReturnValueOnce(false);
 
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -444,7 +456,7 @@ describe('install', () => {
     });
 
     it('should send telemetry on install success', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
@@ -466,11 +478,11 @@ describe('install', () => {
     });
 
     it('should send telemetry on update success', async () => {
-      jest
+      vi
         .mocked(getInstallationObject)
         .mockResolvedValueOnce({ attributes: { version: '1.2.0', installed_kibana: [] } } as any);
 
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
@@ -492,10 +504,10 @@ describe('install', () => {
     });
 
     it('should send telemetry on install failure, async error', async () => {
-      jest
+      vi
         .mocked(installStateMachine._stateMachineInstallPackage)
         .mockRejectedValue(new Error('error'));
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
 
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -519,8 +531,8 @@ describe('install', () => {
     });
 
     it('should install from bundled package if one exists', async () => {
-      (installStateMachine._stateMachineInstallPackage as jest.Mock).mockResolvedValue({});
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      (installStateMachine._stateMachineInstallPackage as Mock).mockResolvedValue({});
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       mockGetBundledPackageByPkgKey.mockResolvedValue({
         name: 'test_package',
         version: '1.0.0',
@@ -543,9 +555,9 @@ describe('install', () => {
     });
 
     it('skips upload validation for bundled installs', async () => {
-      (installStateMachine._stateMachineInstallPackage as jest.Mock).mockResolvedValue({});
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      jest
+      (installStateMachine._stateMachineInstallPackage as Mock).mockResolvedValue({});
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi
         .mocked(parsePackageAndCollectSignals)
         .mockResolvedValueOnce(parsedArchiveFixture({ name: 'bad.name', version: '1.0.0' }));
       mockGetBundledPackageByPkgKey.mockResolvedValue({
@@ -568,8 +580,8 @@ describe('install', () => {
       );
     });
 
-    describe('name-only install when registry is reachable', () => {
-      const actualBundledPackages = jest.requireActual('./bundled_packages');
+    describe('name-only install when registry is reachable', async () => {
+      const actualBundledPackages = (await vi.importActual('./bundled_packages'));
 
       beforeEach(() => {
         // Use the REAL getBundledPackageByPkgKey for this block so the
@@ -580,22 +592,22 @@ describe('install', () => {
         );
         actualBundledPackages._purgeBundledPackagesCache();
 
-        jest.mocked(appContextService.getConfig).mockReturnValue({
+        vi.mocked(appContextService.getConfig).mockReturnValue({
           isAirGapped: false,
           developer: {
             bundledPackageLocation: '/tmp/test',
           },
         } as any);
 
-        jest.mocked(fs.stat).mockResolvedValue({} as any);
-        jest.mocked(fs.readdir).mockResolvedValue(['test_package-1.0.0.zip'] as any);
-        jest.mocked(fs.readFile).mockResolvedValue(Buffer.from('test_package'));
+        vi.mocked(fs.stat).mockResolvedValue({} as any);
+        vi.mocked(fs.readdir).mockResolvedValue(['test_package-1.0.0.zip'] as any);
+        vi.mocked(fs.readFile).mockResolvedValue(Buffer.from('test_package'));
       });
 
       it('should resolve via registry and not short-circuit to bundled when bundled is present', async () => {
-        (installStateMachine._stateMachineInstallPackage as jest.Mock).mockResolvedValue({});
-        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-        jest
+        (installStateMachine._stateMachineInstallPackage as Mock).mockResolvedValue({});
+        vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        vi
           .mocked(Registry.fetchFindLatestPackageOrThrow)
           .mockImplementation(() =>
             Promise.resolve({ name: 'test_package', version: '1.3.0' } as any)
@@ -622,7 +634,7 @@ describe('install', () => {
     });
 
     it('should fetch latest version if version not provided', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
@@ -643,7 +655,7 @@ describe('install', () => {
     });
 
     it('should do nothing if same version is installed', async () => {
-      jest.mocked(getInstallationObject).mockResolvedValueOnce({
+      vi.mocked(getInstallationObject).mockResolvedValueOnce({
         attributes: {
           version: '1.2.0',
           install_status: 'installed',
@@ -651,7 +663,7 @@ describe('install', () => {
           installed_kibana: [],
         },
       } as any);
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
@@ -665,16 +677,16 @@ describe('install', () => {
 
     describe('agentless', () => {
       beforeEach(() => {
-        jest.mocked(appContextService.getConfig).mockClear();
-        jest.spyOn(licenseService, 'hasAtLeast').mockClear();
-        jest.mocked(isAgentlessEnabled).mockClear();
-        jest.mocked(isOnlyAgentlessIntegration).mockClear();
+        vi.mocked(appContextService.getConfig).mockClear();
+        vi.spyOn(licenseService, 'hasAtLeast').mockClear();
+        vi.mocked(isAgentlessEnabled).mockClear();
+        vi.mocked(isOnlyAgentlessIntegration).mockClear();
       });
 
       it('should not allow to install agentless only integration if agentless is not enabled', async () => {
-        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-        jest.mocked(isAgentlessEnabled).mockReturnValueOnce(false);
-        jest.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(true);
+        vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        vi.mocked(isAgentlessEnabled).mockReturnValueOnce(false);
+        vi.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(true);
 
         const response = await installPackage({
           spaceId: DEFAULT_SPACE_ID,
@@ -690,9 +702,9 @@ describe('install', () => {
       });
 
       it('should allow to install agentless only integration if agentless is not enabled but using force flag', async () => {
-        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-        jest.mocked(isAgentlessEnabled).mockReturnValueOnce(false);
-        jest.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(true);
+        vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        vi.mocked(isAgentlessEnabled).mockReturnValueOnce(false);
+        vi.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(true);
 
         const response = await installPackage({
           spaceId: DEFAULT_SPACE_ID,
@@ -706,9 +718,9 @@ describe('install', () => {
       });
 
       it('should allow to install agentless only integration if agentless is enabled', async () => {
-        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-        jest.mocked(isAgentlessEnabled).mockReturnValueOnce(true);
-        jest.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(true);
+        vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        vi.mocked(isAgentlessEnabled).mockReturnValueOnce(true);
+        vi.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(true);
 
         const response = await installPackage({
           spaceId: DEFAULT_SPACE_ID,
@@ -722,13 +734,13 @@ describe('install', () => {
     });
 
     it('should allow to install fleet_server if internal.fleetServerStandalone is configured', async () => {
-      jest.mocked(appContextService.getConfig).mockReturnValueOnce({
+      vi.mocked(appContextService.getConfig).mockReturnValueOnce({
         internal: {
           fleetServerStandalone: true,
         },
       } as any);
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValueOnce(true);
-      jest.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(false);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValueOnce(true);
+      vi.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(false);
 
       const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -742,7 +754,7 @@ describe('install', () => {
     });
 
     it('should use streaming installation for the detection rules package', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
 
       const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -760,12 +772,12 @@ describe('install', () => {
     });
 
     describe('content pack autodiscovery runSoon trigger', () => {
-      let mockRunSoon: jest.Mock;
+      let mockRunSoon: Mock;
 
       beforeEach(() => {
-        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-        mockRunSoon = jest.fn().mockResolvedValue({});
-        jest
+        vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        mockRunSoon = vi.fn().mockResolvedValue({});
+        vi
           .mocked(appContextService.getTaskManagerStart)
           .mockReturnValue({ runSoon: mockRunSoon } as any);
       });
@@ -796,7 +808,7 @@ describe('install', () => {
       });
 
       it('should not trigger runSoon for content package installs', async () => {
-        jest.mocked(Registry.getPackage).mockResolvedValueOnce({
+        vi.mocked(Registry.getPackage).mockResolvedValueOnce({
           packageInfo: {
             type: 'content',
             license: 'basic',
@@ -817,7 +829,7 @@ describe('install', () => {
       });
 
       it('should not trigger runSoon when the install fails', async () => {
-        jest
+        vi
           .mocked(installStateMachine._stateMachineInstallPackage)
           .mockRejectedValueOnce(new Error('install failed'));
 
@@ -836,17 +848,17 @@ describe('install', () => {
 
   describe('upload', () => {
     beforeEach(() => {
-      jest
+      vi
         .mocked(Registry.fetchFindLatestPackageOrThrow)
         .mockRejectedValue(new PackageNotFoundError('not found'));
-      jest.mocked(getPackageSavedObjects).mockResolvedValue(emptyPackageSavedObjects);
-      jest.mocked(getBundledPackageByName).mockResolvedValue(undefined);
-      jest.mocked(setPackageInfo).mockClear();
-      jest.mocked(deleteVerificationResult).mockClear();
+      vi.mocked(getPackageSavedObjects).mockResolvedValue(emptyPackageSavedObjects);
+      vi.mocked(getBundledPackageByName).mockResolvedValue(undefined);
+      vi.mocked(setPackageInfo).mockClear();
+      vi.mocked(deleteVerificationResult).mockClear();
     });
 
     it('validates real uploads and skips the install when validation fails', async () => {
-      jest
+      vi
         .mocked(parsePackageAndCollectSignals)
         .mockResolvedValueOnce(parsedArchiveFixture({ name: 'bad.name', version: '1.0.0' }));
 
@@ -894,7 +906,7 @@ describe('install', () => {
           },
         ],
       });
-      jest.mocked(parsePackageAndCollectSignals).mockResolvedValueOnce(
+      vi.mocked(parsePackageAndCollectSignals).mockResolvedValueOnce(
         parsedArchiveFixture({
           name: 'evilclaim',
           version: '1.0.0',
@@ -956,7 +968,7 @@ describe('install', () => {
           },
         ],
       });
-      jest.mocked(parsePackageAndCollectSignals).mockResolvedValueOnce(
+      vi.mocked(parsePackageAndCollectSignals).mockResolvedValueOnce(
         parsedArchiveFixture({
           name: 'evilclaim',
           version: '1.0.0',
@@ -993,9 +1005,9 @@ describe('install', () => {
     });
 
     it('does not query the registry when re-uploading an existing upload package', async () => {
-      jest.mocked(getInstallationObject).mockResolvedValueOnce(uploadedInstallationSO('1.2.0'));
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      jest
+      vi.mocked(getInstallationObject).mockResolvedValueOnce(uploadedInstallationSO('1.2.0'));
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi
         .mocked(Registry.fetchFindLatestPackageOrThrow)
         .mockResolvedValue(registryPackageFixture({ name: 'apache', version: '1.3.0' }));
 
@@ -1020,7 +1032,7 @@ describe('install', () => {
     });
 
     it('rejects a registry package name when skipUploadPackageValidation is unset', async () => {
-      jest
+      vi
         .mocked(Registry.fetchFindLatestPackageOrThrow)
         .mockResolvedValue(registryPackageFixture({ name: 'apache', version: '1.3.0' }));
 
@@ -1045,7 +1057,7 @@ describe('install', () => {
     });
 
     it('fails closed when the installation saved object lookup throws', async () => {
-      jest.mocked(getInstallationObject).mockRejectedValueOnce(new Error('so unavailable'));
+      vi.mocked(getInstallationObject).mockRejectedValueOnce(new Error('so unavailable'));
 
       const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -1068,14 +1080,14 @@ describe('install', () => {
     });
 
     it('proceeds with a bundled install when the installation saved object lookup throws', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      (installStateMachine._stateMachineInstallPackage as jest.Mock).mockResolvedValueOnce({});
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      (installStateMachine._stateMachineInstallPackage as Mock).mockResolvedValueOnce({});
       mockGetBundledPackageByPkgKey.mockResolvedValueOnce({
         name: 'test_package',
         version: '1.0.0',
         getBuffer: async () => Buffer.from('test_package'),
       });
-      jest
+      vi
         .mocked(getInstallationObject)
         .mockImplementationOnce(async ({ failOnUnexpectedError }) => {
           const error = new Error('so unavailable');
@@ -1105,8 +1117,8 @@ describe('install', () => {
     });
 
     it('rejects a legacy bundled installation recorded as upload', async () => {
-      jest.mocked(getInstallationObject).mockResolvedValueOnce(uploadedInstallationSO('1.2.0'));
-      jest.mocked(getBundledPackageByName).mockResolvedValue({
+      vi.mocked(getInstallationObject).mockResolvedValueOnce(uploadedInstallationSO('1.2.0'));
+      vi.mocked(getBundledPackageByName).mockResolvedValue({
         name: 'apache',
         version: '1.2.0',
         getBuffer: async () => Buffer.from(''),
@@ -1133,8 +1145,8 @@ describe('install', () => {
     });
 
     it('allows a first upload in air-gapped mode when the name has no bundled match', async () => {
-      jest.mocked(appContextService.getConfig).mockReturnValue({ isAirGapped: true } as any);
-      jest
+      vi.mocked(appContextService.getConfig).mockReturnValue({ isAirGapped: true } as any);
+      vi
         .mocked(parsePackageAndCollectSignals)
         .mockResolvedValueOnce(parsedArchiveFixture({ name: 'custom_probe', version: '1.0.0' }));
 
@@ -1160,16 +1172,16 @@ describe('install', () => {
           })
         );
       } finally {
-        jest.mocked(appContextService.getConfig).mockReturnValue({} as any);
+        vi.mocked(appContextService.getConfig).mockReturnValue({} as any);
       }
     });
 
     it('rejects a first upload in air-gapped mode when the name matches a bundled package', async () => {
-      jest.mocked(appContextService.getConfig).mockReturnValue({ isAirGapped: true } as any);
-      jest
+      vi.mocked(appContextService.getConfig).mockReturnValue({ isAirGapped: true } as any);
+      vi
         .mocked(parsePackageAndCollectSignals)
         .mockResolvedValueOnce(parsedArchiveFixture({ name: 'apache', version: '1.0.0' }));
-      jest.mocked(getBundledPackageByName).mockResolvedValue({
+      vi.mocked(getBundledPackageByName).mockResolvedValue({
         name: 'apache',
         version: '1.2.0',
         getBuffer: async () => Buffer.from(''),
@@ -1195,13 +1207,13 @@ describe('install', () => {
         );
         expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
       } finally {
-        jest.mocked(appContextService.getConfig).mockReturnValue({} as any);
+        vi.mocked(appContextService.getConfig).mockReturnValue({} as any);
       }
     });
 
     it('should send telemetry on update', async () => {
-      jest.mocked(getInstallationObject).mockResolvedValueOnce(uploadedInstallationSO('1.2.0'));
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.mocked(getInstallationObject).mockResolvedValueOnce(uploadedInstallationSO('1.2.0'));
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'upload',
@@ -1246,10 +1258,10 @@ describe('install', () => {
     });
 
     it('should send telemetry on install failure, async error', async () => {
-      jest
+      vi
         .mocked(installStateMachine._stateMachineInstallPackage)
         .mockRejectedValue(new Error('error'));
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'upload',
@@ -1275,31 +1287,31 @@ describe('install', () => {
 });
 
 describe('handleInstallPackageFailure', () => {
-  const mockedLogger = jest.mocked(appContextService.getLogger());
+  const mockedLogger = vi.mocked(appContextService.getLogger());
   const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     mockedLogger.error.mockClear();
-    jest.mocked(installStateMachine._stateMachineInstallPackage).mockClear();
-    jest.mocked(installStateMachine._stateMachineInstallPackage).mockClear();
+    vi.mocked(installStateMachine._stateMachineInstallPackage).mockClear();
+    vi.mocked(installStateMachine._stateMachineInstallPackage).mockClear();
     mockGetBundledPackageByPkgKey.mockReset();
 
-    jest.mocked(installStateMachine._stateMachineInstallPackage).mockResolvedValue({} as any);
+    vi.mocked(installStateMachine._stateMachineInstallPackage).mockResolvedValue({} as any);
     mockGetBundledPackageByPkgKey.mockResolvedValue(undefined);
-    jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-    jest.spyOn(Registry, 'splitPkgKey').mockImplementation((pkgKey: string) => {
+    vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+    vi.spyOn(Registry, 'splitPkgKey').mockImplementation((pkgKey: string) => {
       const [pkgName, pkgVersion] = pkgKey.split('-');
       return { pkgName, pkgVersion };
     });
-    jest
+    vi
       .spyOn(Registry, 'pkgToPkgKey')
       .mockImplementation((pkg: { name: string; version: string }) => {
         return `${pkg.name}-${pkg.version}`;
       });
-    jest
+    vi
       .spyOn(Registry, 'fetchFindLatestPackageOrThrow')
       .mockImplementation(() => Promise.resolve({ version: '2.0.0' } as any));
-    jest.spyOn(Registry, 'getPackage').mockImplementation((pkgName: string, pkgVersion: string) =>
+    vi.spyOn(Registry, 'getPackage').mockImplementation((pkgName: string, pkgVersion: string) =>
       Promise.resolve({
         packageInfo: { name: pkgName, version: pkgVersion },
       } as any)
@@ -1353,7 +1365,7 @@ describe('handleInstallPackageFailure', () => {
         },
       },
     } as any;
-    jest.mocked(getInstallationObject).mockResolvedValueOnce(installedPkg);
+    vi.mocked(getInstallationObject).mockResolvedValueOnce(installedPkg);
     await handleInstallPackageFailure({
       savedObjectsClient,
       error: new FleetError('test 123'),
@@ -1376,12 +1388,12 @@ describe('handleInstallPackageFailure', () => {
         }),
       })
     );
-    jest.mocked(getInstallationObject).mockReset();
+    vi.mocked(getInstallationObject).mockReset();
   });
 
   describe('when installtype is update', () => {
     it('should update the installation status to: install_failed on rollback error', async () => {
-      jest
+      vi
         .mocked(installStateMachine._stateMachineInstallPackage)
         .mockRejectedValue(new Error('test error'));
 
@@ -1433,7 +1445,7 @@ describe('handleInstallPackageFailure', () => {
 
   describe('when installtype is install', () => {
     it('should do nothing when installedPkg is not present', async () => {
-      jest
+      vi
         .mocked(installStateMachine._stateMachineInstallPackage)
         .mockRejectedValue(new Error('test error'));
 
@@ -1457,7 +1469,7 @@ describe('handleInstallPackageFailure', () => {
 
   describe('when installtype is reinstall', () => {
     it('should retry install from previous failed state', async () => {
-      jest
+      vi
         .mocked(installStateMachine._stateMachineInstallPackage)
         .mockRejectedValue(new Error('test error'));
 
@@ -1512,7 +1524,7 @@ describe('handleInstallPackageFailure', () => {
     });
 
     it('should retry install from previous failed state when MAX_REINSTALL_RETRIES is not reached', async () => {
-      jest
+      vi
         .mocked(installStateMachine._stateMachineInstallPackage)
         .mockRejectedValue(new Error('test error'));
 
@@ -1564,7 +1576,7 @@ describe('handleInstallPackageFailure', () => {
     });
 
     it('should not retry install from previous failed state and when 3 attempts have been done', async () => {
-      jest
+      vi
         .mocked(installStateMachine._stateMachineInstallPackage)
         .mockRejectedValue(new Error('test error'));
 
@@ -1618,11 +1630,11 @@ describe('handleInstallPackageFailure', () => {
 
 describe('isPackageVersionOrLaterInstalled', () => {
   beforeEach(() => {
-    jest.mocked(getInstallationObject).mockReset();
+    vi.mocked(getInstallationObject).mockReset();
   });
   it('should return true if package is installed in the same version as expected', async () => {
     const savedObjectsClient = savedObjectsClientMock.create();
-    jest.mocked(getInstallationObject).mockResolvedValueOnce({
+    vi.mocked(getInstallationObject).mockResolvedValueOnce({
       attributes: { name: 'test', version: '1.0.0', install_status: 'installed' },
     } as any);
     const res = await isPackageVersionOrLaterInstalled({
@@ -1644,7 +1656,7 @@ describe('isPackageVersionOrLaterInstalled', () => {
 
   it('should return true if package is installed in an higher version as expected', async () => {
     const savedObjectsClient = savedObjectsClientMock.create();
-    jest.mocked(getInstallationObject).mockResolvedValueOnce({
+    vi.mocked(getInstallationObject).mockResolvedValueOnce({
       attributes: { name: 'test', version: '1.2.0', install_status: 'installed' },
     } as any);
     const res = await isPackageVersionOrLaterInstalled({
@@ -1666,7 +1678,7 @@ describe('isPackageVersionOrLaterInstalled', () => {
 
   it('should return false if package is installed in an lower version as expected', async () => {
     const savedObjectsClient = savedObjectsClientMock.create();
-    jest.mocked(getInstallationObject).mockResolvedValueOnce({
+    vi.mocked(getInstallationObject).mockResolvedValueOnce({
       attributes: { name: 'test', version: '0.9.0', install_status: 'installed' },
     } as any);
     const res = await isPackageVersionOrLaterInstalled({
@@ -1680,13 +1692,13 @@ describe('isPackageVersionOrLaterInstalled', () => {
 
   it('should retry if package is currently installing', async () => {
     const savedObjectsClient = savedObjectsClientMock.create();
-    jest.mocked(getInstallationObject).mockResolvedValueOnce({
+    vi.mocked(getInstallationObject).mockResolvedValueOnce({
       attributes: { name: 'test', version: '1.0.0', install_status: 'installing' },
     } as any);
-    jest.mocked(getInstallationObject).mockResolvedValueOnce({
+    vi.mocked(getInstallationObject).mockResolvedValueOnce({
       attributes: { name: 'test', version: '1.0.0', install_status: 'installing' },
     } as any);
-    jest.mocked(getInstallationObject).mockResolvedValueOnce({
+    vi.mocked(getInstallationObject).mockResolvedValueOnce({
       attributes: { name: 'test', version: '1.0.0', install_status: 'installed' },
     } as any);
 
@@ -1711,7 +1723,7 @@ describe('isPackageVersionOrLaterInstalled', () => {
 
   it('should throw on unexpected error', async () => {
     const savedObjectsClient = savedObjectsClientMock.create();
-    jest.mocked(getInstallationObject).mockRejectedValueOnce(new Error('test unexpected error'));
+    vi.mocked(getInstallationObject).mockRejectedValueOnce(new Error('test unexpected error'));
 
     const res = isPackageVersionOrLaterInstalled({
       savedObjectsClient,
@@ -1865,7 +1877,7 @@ describe('saveKibanaAssetsRefs', () => {
     } as any);
 
     const mockLogger = appContextService.getLogger();
-    (mockLogger.error as jest.Mock).mockClear();
+    (mockLogger.error as Mock).mockClear();
 
     await saveKibanaAssetsRefs(
       soClient,

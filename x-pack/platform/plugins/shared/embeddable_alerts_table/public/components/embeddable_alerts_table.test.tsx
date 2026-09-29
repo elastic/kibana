@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable no-console */
 
 import React from 'react';
@@ -38,10 +40,13 @@ core.http.get.mockResolvedValue([
 ]);
 const services = core as unknown as AlertsTableProps['services'];
 
-jest.mock('@kbn/response-ops-alerts-table', () => ({
-  AlertsTable: jest.fn(() => <div data-test-subj="alertsTable" />),
-}));
-const { AlertsTable: mockAlertsTable } = jest.requireMock('@kbn/response-ops-alerts-table');
+vi.mock('@kbn/response-ops-alerts-table', () => {
+      const mocked = {
+      AlertsTable: vi.fn(() => <div data-test-subj="alertsTable" />),
+    };
+      return { ...mocked, default: mocked };
+    });
+const { AlertsTable: mockAlertsTable } = (await vi.importMock('@kbn/response-ops-alerts-table'));
 
 const TABLE_ID = `${PERSISTED_TABLE_CONFIG_KEY_PREFIX}-uuid`;
 
@@ -346,7 +351,7 @@ describe('EmbeddableAlertsTable', () => {
   });
 
   it("should propagate the table's loading state through `onLoadingChange`", async () => {
-    const onLoadingChange = jest.fn();
+    const onLoadingChange = vi.fn();
     render(
       <QueryClientProvider client={queryClient}>
         <EmbeddableAlertsTable

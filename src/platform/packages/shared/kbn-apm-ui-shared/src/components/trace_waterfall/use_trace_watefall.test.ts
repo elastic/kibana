@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import type { TraceItem } from '@kbn/apm-types';
 import { WaterfallLegendType } from '@kbn/apm-types';
 import { renderHook } from '@testing-library/react';
@@ -24,12 +26,15 @@ import {
   useTraceWaterfall,
 } from './use_trace_waterfall';
 
-jest.mock('@elastic/eui', () => ({
-  euiPaletteColorBlind: jest.fn(({ rotations }) => {
-    // Return a palette of 20 colors for testing
-    return Array.from({ length: 10 * rotations }, (_, i) => `color${i}`);
-  }),
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      euiPaletteColorBlind: vi.fn(({ rotations }) => {
+        // Return a palette of 20 colors for testing
+        return Array.from({ length: 10 * rotations }, (_, i) => `color${i}`);
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const root: TraceItem = {
   id: '1',
@@ -81,7 +86,7 @@ const grandchild: TraceItem = {
 
 describe('getFlattenedTraceWaterfall', () => {
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const parentChildMap = {
@@ -346,7 +351,7 @@ describe('getFlattenedTraceWaterfall', () => {
 
 describe('getLegends', () => {
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('assigns a unique color to each resource', () => {
     const traceItems: TraceItem[] = [
@@ -632,7 +637,7 @@ describe('getColorByType', () => {
 
 describe('createColorLookupMap', () => {
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('create map of colors', () => {
@@ -652,7 +657,7 @@ describe('createColorLookupMap', () => {
 
 describe('getTraceParentChildrenMap', () => {
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('maps root and children correctly', () => {
     const items: TraceItem[] = [
@@ -860,7 +865,7 @@ describe('getRootItemOrFallback', () => {
 
 describe('getTraceWaterfallDuration', () => {
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('returns the max sum of offset + skew + duration', () => {
     const items: TraceWaterfallItem[] = [
@@ -923,7 +928,7 @@ describe('getTraceWaterfallDuration', () => {
 
 describe('getclockSkew', () => {
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   const parent = {
     timestampUs: new Date('2024-01-01T00:00:00.000Z').getTime() * 1000,

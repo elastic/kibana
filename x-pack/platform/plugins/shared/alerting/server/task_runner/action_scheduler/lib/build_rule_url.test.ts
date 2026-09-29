@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { buildRuleUrl } from './build_rule_url';
@@ -15,7 +17,7 @@ const rule = getRule();
 
 describe('buildRuleUrl', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should return undefined if kibanaBaseUrl is not provided', () => {

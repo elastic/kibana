@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -14,23 +16,26 @@ import { TestProviders } from '../../mock';
 import type { LegendItem } from './draggable_legend_item';
 import { DraggableLegendItem } from './draggable_legend_item';
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
   };
 });
 
-const MockSecurityCellActions = jest.fn(({ children }: { children: React.ReactNode }) => (
+const MockSecurityCellActions = vi.fn(({ children }: { children: React.ReactNode }) => (
   <div data-test-subj="mockSecurityCellActions">{children}</div>
 ));
-jest.mock('../cell_actions', () => ({
-  ...jest.requireActual('../cell_actions'),
-  SecurityCellActions: (params: { children: React.ReactNode }) => MockSecurityCellActions(params),
-}));
+vi.mock('../cell_actions', async () => {
+      const mocked = {
+      ...(await vi.importActual('../cell_actions')),
+      SecurityCellActions: (params: { children: React.ReactNode }) => MockSecurityCellActions(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DraggableLegendItem', () => {
   const legendItem: LegendItem = {

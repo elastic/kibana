@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { Readable } from 'stream';
 import type { Logger } from '@kbn/logging';
 import type { EntityStoreCRUDClient, ResolutionClient } from '@kbn/entity-store/server';
@@ -29,32 +32,32 @@ const createMockEntity = (entityId: string, resolvedTo?: string): Entity =>
   } as unknown as Entity);
 
 describe('processResolutionCsvUpload', () => {
-  let mockCrudClient: jest.Mocked<EntityStoreCRUDClient>;
-  let mockResolutionClient: jest.Mocked<ResolutionClient>;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockCrudClient: Mocked<EntityStoreCRUDClient>;
+  let mockResolutionClient: Mocked<ResolutionClient>;
+  let mockLogger: Mocked<Logger>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockCrudClient = {
-      listEntities: jest.fn().mockResolvedValue({ entities: [], nextSearchAfter: undefined }),
-      updateEntity: jest.fn(),
-      bulkUpdateEntity: jest.fn(),
-      deleteEntity: jest.fn(),
-    } as unknown as jest.Mocked<EntityStoreCRUDClient>;
+      listEntities: vi.fn().mockResolvedValue({ entities: [], nextSearchAfter: undefined }),
+      updateEntity: vi.fn(),
+      bulkUpdateEntity: vi.fn(),
+      deleteEntity: vi.fn(),
+    } as unknown as Mocked<EntityStoreCRUDClient>;
 
     mockResolutionClient = {
-      linkEntities: jest.fn().mockResolvedValue({ linked: [], skipped: [], target_id: '' }),
-      unlinkEntities: jest.fn(),
-      getResolutionGroup: jest.fn(),
-    } as unknown as jest.Mocked<ResolutionClient>;
+      linkEntities: vi.fn().mockResolvedValue({ linked: [], skipped: [], target_id: '' }),
+      unlinkEntities: vi.fn(),
+      getResolutionGroup: vi.fn(),
+    } as unknown as Mocked<ResolutionClient>;
 
     mockLogger = {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    } as unknown as jest.Mocked<Logger>;
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    } as unknown as Mocked<Logger>;
   });
 
   const deps = () => ({

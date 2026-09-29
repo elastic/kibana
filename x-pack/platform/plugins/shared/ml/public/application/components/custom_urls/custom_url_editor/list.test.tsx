@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,31 +22,40 @@ import type { MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
 import { parseUrlState } from '@kbn/ml-url-state';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 
-jest.mock('@kbn/ml-url-state', () => ({
-  parseUrlState: jest.fn(),
-}));
+vi.mock('@kbn/ml-url-state', () => {
+      const mocked = {
+      parseUrlState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockDataViews = {
-  get: jest.fn(),
+  get: vi.fn(),
 };
 
-jest.mock('../../../contexts/kibana', () => ({
-  useMlKibana: () => ({
-    services: {
-      http: { basePath: { get: () => '' } },
-      data: { dataViews: mockDataViews },
-    },
-  }),
-  useMlApi: () => ({}),
-}));
-
-jest.mock('../../../services/toast_notification_service', () => ({
-  useToastNotificationService: () => {
-    return {
-      displayErrorToast: jest.fn(),
+vi.mock('../../../contexts/kibana', () => {
+      const mocked = {
+      useMlKibana: () => ({
+        services: {
+          http: { basePath: { get: () => '' } },
+          data: { dataViews: mockDataViews },
+        },
+      }),
+      useMlApi: () => ({}),
     };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../services/toast_notification_service', () => {
+      const mocked = {
+      useToastNotificationService: () => {
+        return {
+          displayErrorToast: vi.fn(),
+        };
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TEST_CUSTOM_URLS = {
   dashboard: {
@@ -153,10 +165,10 @@ const mockADJob: Job = {
   results_index_name: 'string',
 };
 
-const mockParseUrlState = parseUrlState as jest.MockedFunction<typeof parseUrlState>;
+const mockParseUrlState = parseUrlState as MockedFunction<typeof parseUrlState>;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 
   mockParseUrlState.mockImplementation((url: string) => {
     if (url?.includes('discover#') && url.includes('index:e532ba80-b76f-11e8-a9dc-37914a458883')) {
@@ -175,20 +187,20 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
-  jest.clearAllTimers();
+  vi.clearAllMocks();
+  vi.clearAllTimers();
 });
 
 function renderCustomUrlList(
   customUrls: any[],
   options: {
     job?: Job | DataFrameAnalyticsConfig;
-    onChange?: jest.Mock;
+    onChange?: Mock;
     dataViewListItems?: any[];
   } = {}
 ) {
   const {
-    onChange = jest.fn(),
+    onChange = vi.fn(),
     job = mockDFAJob,
     dataViewListItems = mockDataViewListItems,
   } = options;
@@ -208,7 +220,7 @@ function renderCustomUrlList(
 }
 
 describe('CustomUrlList', () => {
-  const setCustomUrls = jest.fn();
+  const setCustomUrls = vi.fn();
 
   test('renders a list of custom URLs', async () => {
     const customUrls = [
@@ -275,16 +287,16 @@ describe('CustomUrlList', () => {
 
 describe('checkTimeRangeVisibility', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Data Frame Analytics Job - Time Range Field Visibility', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('should display time range when', () => {

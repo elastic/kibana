@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ProposalTracker } from './proposal_tracker';
 import type { ProposalRecord } from './proposal_tracker';
 
@@ -68,7 +70,7 @@ describe('ProposalTracker', () => {
 
   describe('subscribe / unsubscribe', () => {
     it('notifies listeners on setRecord', () => {
-      const listener = jest.fn();
+      const listener = vi.fn();
       tracker.subscribe(listener);
       tracker.setRecord(createRecord('p1'));
       expect(listener).toHaveBeenCalledTimes(1);
@@ -76,14 +78,14 @@ describe('ProposalTracker', () => {
 
     it('notifies listeners on updateStatus', () => {
       tracker.setRecord(createRecord('p1'));
-      const listener = jest.fn();
+      const listener = vi.fn();
       tracker.subscribe(listener);
       tracker.updateStatus('p1', 'accepted');
       expect(listener).toHaveBeenCalledTimes(1);
     });
 
     it('unsubscribe stops notifications', () => {
-      const listener = jest.fn();
+      const listener = vi.fn();
       const unsub = tracker.subscribe(listener);
       tracker.setRecord(createRecord('p1'));
       expect(listener).toHaveBeenCalledTimes(1);
@@ -115,7 +117,7 @@ describe('ProposalTracker', () => {
 
   describe('onAllResolved', () => {
     it('fires when last pending record resolves', () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       tracker.onAllResolved(cb);
 
       tracker.setRecord(createRecord('p1'));
@@ -130,7 +132,7 @@ describe('ProposalTracker', () => {
     });
 
     it('does NOT fire if still pending', () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       tracker.onAllResolved(cb);
 
       tracker.setRecord(createRecord('p1'));
@@ -141,7 +143,7 @@ describe('ProposalTracker', () => {
     });
 
     it('unsubscribe stops callback', () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       const unsub = tracker.onAllResolved(cb);
       unsub();
 
@@ -196,7 +198,7 @@ describe('ProposalTracker', () => {
     });
 
     it('fires onAllResolved if cascade resolves all remaining pending proposals', () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       tracker.onAllResolved(cb);
 
       tracker.setRecord(createRecord('p1', { attachmentVersion: 1 }));

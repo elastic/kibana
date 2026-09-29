@@ -5,34 +5,48 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RedirectWithDefaultDateRange } from '.';
 
-const mockRedirect = jest.fn();
-const mockIsDateRangeSet = jest.fn();
+const mockRedirect = vi.fn();
+const mockIsDateRangeSet = vi.fn();
 
-jest.mock('../../../../hooks/use_date_range_redirect', () => ({
-  useDateRangeRedirect: () => ({
-    isDateRangeSet: mockIsDateRangeSet(),
-    redirect: mockRedirect,
-  }),
-}));
+vi.mock('../../../../hooks/use_date_range_redirect', () => {
+      const mocked = {
+      useDateRangeRedirect: () => ({
+        isDateRangeSet: mockIsDateRangeSet(),
+        redirect: mockRedirect,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_apm_router', () => ({
-  useApmRouter: () => ({}),
-}));
+vi.mock('../../../../hooks/use_apm_router', () => {
+      const mocked = {
+      useApmRouter: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: () => ({ pathname: '/services', search: '', hash: '', state: undefined }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: () => ({ pathname: '/services', search: '', hash: '', state: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockIsRouteWithTimeRange = jest.fn();
+const mockIsRouteWithTimeRange = vi.fn();
 
-jest.mock('../../../shared/is_route_with_time_range', () => ({
-  isRouteWithTimeRange: (...args: unknown[]) => mockIsRouteWithTimeRange(...args),
-}));
+vi.mock('../../../shared/is_route_with_time_range', () => {
+      const mocked = {
+      isRouteWithTimeRange: (...args: unknown[]) => mockIsRouteWithTimeRange(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderComponent = () =>
   render(
@@ -43,7 +57,7 @@ const renderComponent = () =>
 
 describe('RedirectWithDefaultDateRange', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsRouteWithTimeRange.mockReturnValue(true);
   });
 

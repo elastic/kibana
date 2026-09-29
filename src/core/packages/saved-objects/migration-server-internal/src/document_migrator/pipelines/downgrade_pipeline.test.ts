@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import _ from 'lodash';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import type { Transform, TypeTransforms, TransformFn, TypeVersionSchema } from '../types';
@@ -30,8 +33,8 @@ describe('DocumentMigratorPipeline', () => {
     ...parts,
   });
 
-  const createSchema = (): jest.MockedFunction<TypeVersionSchema> => {
-    return jest.fn().mockImplementation((doc: unknown) => doc);
+  const createSchema = (): MockedFunction<TypeVersionSchema> => {
+    return vi.fn().mockImplementation((doc: unknown) => doc);
   };
 
   const latestVersions = (
@@ -58,9 +61,9 @@ describe('DocumentMigratorPipeline', () => {
     };
   };
 
-  const createTransformFn = (impl?: TransformFn): jest.MockedFunction<TransformFn> => {
+  const createTransformFn = (impl?: TransformFn): MockedFunction<TransformFn> => {
     const defaultImpl: TransformFn = (doc) => ({ transformedDoc: doc, additionalDocs: [] });
-    return jest.fn().mockImplementation(impl ?? defaultImpl);
+    return vi.fn().mockImplementation(impl ?? defaultImpl);
   };
 
   it('calls multiple `Migrate` transform functions in order', () => {
@@ -411,13 +414,13 @@ describe('DocumentMigratorPipeline', () => {
       {
         transformType: TransformType.Migrate,
         version: '8.7.0',
-        transform: jest.fn(),
+        transform: vi.fn(),
         transformDown: migrate8_7_0_down,
       },
       {
         transformType: TransformType.Convert,
         version: '8.7.0',
-        transform: jest.fn(),
+        transform: vi.fn(),
         transformDown: convert8_7_0_down,
       },
     ]);
@@ -452,13 +455,13 @@ describe('DocumentMigratorPipeline', () => {
       {
         transformType: TransformType.Migrate,
         version: '8.7.0',
-        transform: jest.fn(),
+        transform: vi.fn(),
         transformDown: migrate8_7_0_down,
       },
       {
         transformType: TransformType.Reference,
         version: '8.7.0',
-        transform: jest.fn(),
+        transform: vi.fn(),
         transformDown: reference8_7_0_down,
       },
     ]);
@@ -493,13 +496,13 @@ describe('DocumentMigratorPipeline', () => {
       {
         transformType: TransformType.Migrate,
         version: '8.7.0',
-        transform: jest.fn(),
+        transform: vi.fn(),
         transformDown: migrate8_7_0_down,
       },
       {
         transformType: TransformType.Core,
         version: '8.7.0',
-        transform: jest.fn(),
+        transform: vi.fn(),
         transformDown: core8_7_0_down,
       },
     ]);
@@ -535,13 +538,13 @@ describe('DocumentMigratorPipeline', () => {
       {
         transformType: TransformType.Migrate,
         version: '8.7.0',
-        transform: jest.fn(),
+        transform: vi.fn(),
         transformDown: migrate8_7_0_down,
       },
       {
         transformType: TransformType.Core,
         version: '8.7.0',
-        transform: jest.fn(),
+        transform: vi.fn(),
         transformDown: core8_7_0_down,
       },
     ]);
@@ -579,19 +582,19 @@ describe('DocumentMigratorPipeline', () => {
       {
         transformType: TransformType.Core,
         version: '8.7.0',
-        transform: jest.fn(),
+        transform: vi.fn(),
         transformDown: core8_7_0_down,
       },
       {
         transformType: TransformType.Core,
         version: '8.8.0',
-        transform: jest.fn(),
+        transform: vi.fn(),
         transformDown: core8_8_0_down,
       },
       {
         transformType: TransformType.Core,
         version: '8.9.0',
-        transform: jest.fn(),
+        transform: vi.fn(),
         transformDown: core8_9_0_down,
       },
     ]);

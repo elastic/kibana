@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { screen } from '@testing-library/react';
@@ -13,19 +15,22 @@ import userEvent from '@testing-library/user-event';
 import { buildCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 import { AddFile } from './add_file';
 
-jest.mock('./upload_file_modal', () => ({
-  UploadFileModal: ({ onClose }: { onClose: () => void }) => (
-    <div data-test-subj="upload-file-modal-mock">
-      <button data-test-subj="upload-file-modal-mock-close" type="button" onClick={onClose}>
-        {'close'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('./upload_file_modal', () => {
+      const mocked = {
+      UploadFileModal: ({ onClose }: { onClose: () => void }) => (
+        <div data-test-subj="upload-file-modal-mock">
+          <button data-test-subj="upload-file-modal-mock-close" type="button" onClick={onClose}>
+            {'close'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AddFile', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the trigger button', async () => {

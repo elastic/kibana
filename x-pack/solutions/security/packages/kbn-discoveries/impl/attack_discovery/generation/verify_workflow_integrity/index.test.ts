@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 
 import type { DefaultWorkflowIds, WorkflowIntegrityResult } from '../types';
 import { verifyWorkflowIntegrity } from '.';
 
 const mockLogger = {
-  debug: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 const defaultWorkflowIds: DefaultWorkflowIds = {
@@ -32,7 +34,7 @@ const makeIntactResult = (): WorkflowIntegrityResult => ({
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('verifyWorkflowIntegrity', () => {
@@ -48,7 +50,7 @@ describe('verifyWorkflowIntegrity', () => {
     });
 
     it('returns null updatedIds with null integrityResult when defaultWorkflowIds is null', async () => {
-      const mockCheckIntegrity = jest.fn();
+      const mockCheckIntegrity = vi.fn();
 
       await expect(
         verifyWorkflowIntegrity({
@@ -65,7 +67,7 @@ describe('verifyWorkflowIntegrity', () => {
   describe('all_intact', () => {
     it('calls checkIntegrity and resolves when all workflows are intact', async () => {
       const intactResult = makeIntactResult();
-      const mockCheckIntegrity = jest.fn().mockResolvedValue(intactResult);
+      const mockCheckIntegrity = vi.fn().mockResolvedValue(intactResult);
 
       await expect(
         verifyWorkflowIntegrity({
@@ -81,7 +83,7 @@ describe('verifyWorkflowIntegrity', () => {
 
   describe('repaired (required workflows)', () => {
     it('returns updated DefaultWorkflowIds with the new IDs from repaired workflows', async () => {
-      const mockCheckIntegrity = jest.fn().mockResolvedValue({
+      const mockCheckIntegrity = vi.fn().mockResolvedValue({
         ...makeIntactResult(),
         repaired: [{ key: 'generation', workflowId: 'new-generation-id' }],
         status: 'repaired',
@@ -100,7 +102,7 @@ describe('verifyWorkflowIntegrity', () => {
     });
 
     it('returns updated DefaultWorkflowIds when multiple workflows are repaired', async () => {
-      const mockCheckIntegrity = jest.fn().mockResolvedValue({
+      const mockCheckIntegrity = vi.fn().mockResolvedValue({
         ...makeIntactResult(),
         repaired: [
           { key: 'generation', workflowId: 'new-generation-id' },
@@ -125,7 +127,7 @@ describe('verifyWorkflowIntegrity', () => {
 
   describe('optionalRepaired', () => {
     it('returns updated DefaultWorkflowIds including repaired optional workflow IDs', async () => {
-      const mockCheckIntegrity = jest.fn().mockResolvedValue({
+      const mockCheckIntegrity = vi.fn().mockResolvedValue({
         ...makeIntactResult(),
         optionalRepaired: [{ key: 'custom_validation_example', workflowId: 'custom-id' }],
       });
@@ -143,7 +145,7 @@ describe('verifyWorkflowIntegrity', () => {
     });
 
     it('returns updated DefaultWorkflowIds with optional repaired ID', async () => {
-      const mockCheckIntegrity = jest.fn().mockResolvedValue({
+      const mockCheckIntegrity = vi.fn().mockResolvedValue({
         ...makeIntactResult(),
         optionalRepaired: [{ key: 'run_example', workflowId: 'run-id' }],
       });
@@ -160,7 +162,7 @@ describe('verifyWorkflowIntegrity', () => {
 
   describe('optionalWarnings', () => {
     it('logs warnings for optional workflow failures without throwing', async () => {
-      const mockCheckIntegrity = jest.fn().mockResolvedValue({
+      const mockCheckIntegrity = vi.fn().mockResolvedValue({
         ...makeIntactResult(),
         optionalWarnings: [
           {
@@ -182,7 +184,7 @@ describe('verifyWorkflowIntegrity', () => {
     });
 
     it('does NOT throw for optional workflow failures', async () => {
-      const mockCheckIntegrity = jest.fn().mockResolvedValue({
+      const mockCheckIntegrity = vi.fn().mockResolvedValue({
         ...makeIntactResult(),
         optionalWarnings: [
           { error: 'some failure', key: 'run_example', workflowId: 'run-id' },
@@ -206,7 +208,7 @@ describe('verifyWorkflowIntegrity', () => {
 
   describe('repair_failed (required workflows)', () => {
     it('throws an error with a descriptive message listing unrepairable keys', async () => {
-      const mockCheckIntegrity = jest.fn().mockResolvedValue({
+      const mockCheckIntegrity = vi.fn().mockResolvedValue({
         ...makeIntactResult(),
         repaired: [],
         status: 'repair_failed',
@@ -226,7 +228,7 @@ describe('verifyWorkflowIntegrity', () => {
     });
 
     it('throws an error that includes the error details for each unrepairable workflow', async () => {
-      const mockCheckIntegrity = jest.fn().mockResolvedValue({
+      const mockCheckIntegrity = vi.fn().mockResolvedValue({
         ...makeIntactResult(),
         repaired: [],
         status: 'repair_failed',
@@ -245,7 +247,7 @@ describe('verifyWorkflowIntegrity', () => {
     });
 
     it('does NOT throw when repair_failed only affects optional workflows (status remains all_intact)', async () => {
-      const mockCheckIntegrity = jest.fn().mockResolvedValue({
+      const mockCheckIntegrity = vi.fn().mockResolvedValue({
         ...makeIntactResult(),
         optionalWarnings: [{ error: 'failed', key: 'run_example', workflowId: 'run-id' }],
         status: 'all_intact',

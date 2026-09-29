@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Priority } from './priority';
 
 describe('Priority', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   const options = {
     priority: undefined,
     onChange,
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders the priority selectable', () => {
     render(<Priority {...options} />);

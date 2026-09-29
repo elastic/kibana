@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { type ComponentProps } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { CascadeRowHeaderPrimitive } from './cascade_row_header';
@@ -21,15 +23,15 @@ const initialGroupColumn = [cascadeGroups[0]];
 const defaultProps: CascadeRowHeaderPrimitiveProps = {
   isGroupNode: true,
   isMobile: false,
-  onCascadeGroupNodeExpanded: jest.fn(),
-  onCascadeGroupNodeCollapsed: jest.fn(),
+  onCascadeGroupNodeExpanded: vi.fn(),
+  onCascadeGroupNodeCollapsed: vi.fn(),
   rowInstance: {
     id: '1',
     depth: 0,
     original: { id: '1', name: 'Test', [initialGroupColumn[0]]: 'value' },
-    getToggleSelectedHandler: jest.fn(),
-    getToggleExpandedHandler: jest.fn(),
-    getIsExpanded: jest.fn(() => true),
+    getToggleSelectedHandler: vi.fn(),
+    getToggleExpandedHandler: vi.fn(),
+    getIsExpanded: vi.fn(() => true),
     subRows: [],
   } as unknown as CascadeRowHeaderPrimitiveProps['rowInstance'],
   rowHeaderTitleSlot: () => <div>Test</div>,
@@ -58,13 +60,13 @@ describe('CascadeRowHeaderPrimitive', () => {
 
   describe('group node behaviour', () => {
     it('should invoke the onCascadeGroupNodeCollapsed callback when row is collapsed', async () => {
-      const onCascadeGroupNodeCollapsed = jest.fn();
+      const onCascadeGroupNodeCollapsed = vi.fn();
 
       const componentProps = {
         ...defaultProps,
         rowInstance: {
           ...defaultProps.rowInstance,
-          getIsExpanded: jest.fn(() => false),
+          getIsExpanded: vi.fn(() => false),
         },
       };
 

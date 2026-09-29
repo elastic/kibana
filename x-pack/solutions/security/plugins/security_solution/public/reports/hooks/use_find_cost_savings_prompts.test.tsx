@@ -5,32 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useFindPrompts } from '@kbn/elastic-assistant';
 import type { UseFindPromptContextsParams } from './use_find_cost_savings_prompts';
 import { useFindCostSavingsPrompts } from './use_find_cost_savings_prompts';
 
-jest.mock('@kbn/elastic-assistant');
+vi.mock('@kbn/elastic-assistant');
 
 describe('useFindCostSavingsPrompts', () => {
-  const mockUseFindPrompts = useFindPrompts as jest.MockedFunction<typeof useFindPrompts>;
+  const mockUseFindPrompts = useFindPrompts as MockedFunction<typeof useFindPrompts>;
 
   const defaultParams: UseFindPromptContextsParams = {
     context: {
       isAssistantEnabled: true,
-      httpFetch: jest.fn(),
+      httpFetch: vi.fn(),
       // @ts-ignore
       toasts: {
-        addError: jest.fn(),
-        addSuccess: jest.fn(),
-        addWarning: jest.fn(),
-        remove: jest.fn(),
+        addError: vi.fn(),
+        addSuccess: vi.fn(),
+        addWarning: vi.fn(),
+        remove: vi.fn(),
       },
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('handles various prompt scenarios correctly', () => {

@@ -5,18 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AgentDetailsFlyout } from './agent_details_flyout';
 import type { AgentStat } from '../../../../../../common/types';
 
-jest.mock('../../../contexts', () => ({
-  useSyntheticsSettingsContext: () => ({ basePath: '/s/default' }),
-}));
+vi.mock('../../../contexts', () => {
+      const mocked = {
+      useSyntheticsSettingsContext: () => ({ basePath: '/s/default' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks', () => ({
-  useFleetPermissions: () => ({ canReadAgents: true, canReadAgentPolicies: true }),
-}));
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useFleetPermissions: () => ({ canReadAgents: true, canReadAgentPolicies: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const agent: AgentStat = {
   host: 'host-a',
@@ -43,7 +51,7 @@ describe('AgentDetailsFlyout', () => {
         agent={agent}
         agentPolicyId="policy-1"
         monitorsRun={2}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 

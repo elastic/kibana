@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -83,7 +85,7 @@ describe('Panels toggle component', () => {
     expect(screen.getByTestId('dscHideTableButton')).toBeVisible();
     expect(screen.queryByTestId('dscShowTableButton')).not.toBeInTheDocument();
 
-    const storageSetSpy = jest.spyOn(toolkit.services.storage, 'set');
+    const storageSetSpy = vi.spyOn(toolkit.services.storage, 'set');
 
     await user.click(screen.getByTestId('dscShowSidebarButton'));
 
@@ -182,7 +184,7 @@ describe('Panels toggle component', () => {
       omitChartButton: false,
       omitTableButton: false,
     });
-    const storageSetSpy = jest.spyOn(toolkit.services.storage, 'set');
+    const storageSetSpy = vi.spyOn(toolkit.services.storage, 'set');
 
     await user.click(screen.getByTestId('dscHideHistogramButton'));
 
@@ -201,7 +203,7 @@ describe('Panels toggle component', () => {
       omitChartButton: false,
       omitTableButton: false,
     });
-    const storageSetSpy = jest.spyOn(toolkit.services.storage, 'set');
+    const storageSetSpy = vi.spyOn(toolkit.services.storage, 'set');
 
     await user.click(screen.getByTestId('dscHideTableButton'));
 

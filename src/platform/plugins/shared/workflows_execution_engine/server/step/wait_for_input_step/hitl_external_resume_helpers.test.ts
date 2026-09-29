@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { HITL_TOKEN_EXPIRES_AT_INPUT_FIELD, HITL_TOKEN_HASH_INPUT_FIELD } from '@kbn/workflows';
 import { computeTokenHmac } from '@kbn/workflows/server';
 import {
@@ -37,9 +39,9 @@ describe('mintHitlExternalResumeToken', () => {
   });
 
   it('ignores Date.now() when startedAt is earlier', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
-      jest.setSystemTime(new Date('2026-01-01T00:00:05.000Z'));
+      vi.setSystemTime(new Date('2026-01-01T00:00:05.000Z'));
 
       const result = mintHitlExternalResumeToken({
         stepExecutionRuntime: waitingRuntime,
@@ -51,7 +53,7 @@ describe('mintHitlExternalResumeToken', () => {
 
       expect(result.expiresAt).toBe('2026-01-01T00:00:30.000Z');
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 
@@ -114,7 +116,7 @@ describe('removeHitlExternalResumeTokenFields', () => {
 
 describe('invalidateHitlExternalResumeTokenIfPresent', () => {
   it('clears token metadata from the current step input', () => {
-    const setInput = jest.fn();
+    const setInput = vi.fn();
     const stepExecutionRuntime = {
       stepExecution: {
         input: {
@@ -132,7 +134,7 @@ describe('invalidateHitlExternalResumeTokenIfPresent', () => {
   });
 
   it('does nothing when token metadata is absent', () => {
-    const setInput = jest.fn();
+    const setInput = vi.fn();
     const stepExecutionRuntime = {
       stepExecution: { input: { message: 'Please respond' } },
       setInput,

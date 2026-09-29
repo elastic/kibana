@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAgentBuilderMcpUrl } from './use_mcp_url';
 import { useKibanaUrl } from './use_kibana_url';
 import { MCP_SERVER_PATH } from '@kbn/agent-builder-plugin/public';
 
-jest.mock('./use_kibana_url');
+vi.mock('./use_kibana_url');
 
-const mockUseKibanaUrl = useKibanaUrl as jest.Mock;
+const mockUseKibanaUrl = useKibanaUrl as Mock;
 
 describe('useAgentBuilderMcpUrl', () => {
   it('appends MCP_SERVER_PATH to the kibana URL', () => {

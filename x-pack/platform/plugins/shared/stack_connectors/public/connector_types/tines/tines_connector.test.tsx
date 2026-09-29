@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -12,13 +14,14 @@ import userEvent from '@testing-library/user-event';
 import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/tines/constants';
 import TinesConnectorFields from './tines_connector';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
-jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
-  ...jest.requireActual(
-    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
-  ),
-  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
-}));
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api')),
+      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const url = 'https://example.com';
 const email = 'some.email@test.com';
@@ -54,10 +57,10 @@ describe('TinesConnectorFields renders', () => {
   });
 
   describe('Validation', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should succeed validation when connector config is valid', async () => {

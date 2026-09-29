@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { UseRunQueryRuleset } from './use_run_query_ruleset';
@@ -13,28 +16,37 @@ import { useFetchQueryRuleset } from './use_fetch_query_ruleset';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 // Mock dependencies
-jest.mock('./use_kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_fetch_query_ruleset', () => ({
-  useFetchQueryRuleset: jest.fn(),
-}));
+vi.mock('./use_fetch_query_ruleset', () => {
+      const mocked = {
+      useFetchQueryRuleset: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/try-in-console', () => ({
-  TryInConsoleButton: jest.fn(() => (
-    <div data-test-subj="tryInConsoleButton">Try in Console Button</div>
-  )),
-}));
+vi.mock('@kbn/try-in-console', () => {
+      const mocked = {
+      TryInConsoleButton: vi.fn(() => (
+        <div data-test-subj="tryInConsoleButton">Try in Console Button</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('UseRunQueryRuleset', () => {
-  const mockApplication = { navigateToUrl: jest.fn() };
-  const mockShare = { toggleShareContextMenu: jest.fn() };
-  const mockConsole = { openInConsole: jest.fn() };
+  const mockApplication = { navigateToUrl: vi.fn() };
+  const mockShare = { toggleShareContextMenu: vi.fn() };
+  const mockConsole = { openInConsole: vi.fn() };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: mockApplication,
         share: mockShare,
@@ -43,7 +55,7 @@ describe('UseRunQueryRuleset', () => {
     });
 
     // Default mock for ruleset data
-    (useFetchQueryRuleset as jest.Mock).mockReturnValue({
+    (useFetchQueryRuleset as Mock).mockReturnValue({
       data: {
         rules: [
           {
@@ -85,7 +97,7 @@ describe('UseRunQueryRuleset', () => {
       expect.anything()
     );
 
-    const buttonProps = (TryInConsoleButton as jest.Mock).mock.calls[0][0];
+    const buttonProps = (TryInConsoleButton as Mock).mock.calls[0][0];
     // Verify that the request contains the index from the fetched data
     expect(buttonProps.request).toContain('test-index');
     // Verify the request contains retriever structure
@@ -110,7 +122,7 @@ describe('UseRunQueryRuleset', () => {
   });
 
   it('uses fallback index when ruleset data is not available', () => {
-    (useFetchQueryRuleset as jest.Mock).mockReturnValue({
+    (useFetchQueryRuleset as Mock).mockReturnValue({
       data: null,
       isInitialLoading: false,
       isError: false,
@@ -118,12 +130,12 @@ describe('UseRunQueryRuleset', () => {
 
     render(<UseRunQueryRuleset rulesetId="test-ruleset" />);
 
-    const buttonProps = (TryInConsoleButton as jest.Mock).mock.calls[0][0];
+    const buttonProps = (TryInConsoleButton as Mock).mock.calls[0][0];
     expect(buttonProps.request).toContain('my_index');
   });
 
   it('handles multiple indices from ruleset data', () => {
-    (useFetchQueryRuleset as jest.Mock).mockReturnValue({
+    (useFetchQueryRuleset as Mock).mockReturnValue({
       data: {
         rules: [
           {
@@ -142,12 +154,12 @@ describe('UseRunQueryRuleset', () => {
 
     render(<UseRunQueryRuleset rulesetId="test-ruleset" />);
 
-    const buttonProps = (TryInConsoleButton as jest.Mock).mock.calls[0][0];
+    const buttonProps = (TryInConsoleButton as Mock).mock.calls[0][0];
     expect(buttonProps.request).toContain('index1,index2');
   });
 
   it('creates match criteria from ruleset data', () => {
-    (useFetchQueryRuleset as jest.Mock).mockReturnValue({
+    (useFetchQueryRuleset as Mock).mockReturnValue({
       data: {
         rules: [
           {
@@ -172,13 +184,13 @@ describe('UseRunQueryRuleset', () => {
 
     render(<UseRunQueryRuleset rulesetId="test-ruleset" />);
 
-    const buttonProps = (TryInConsoleButton as jest.Mock).mock.calls[0][0];
+    const buttonProps = (TryInConsoleButton as Mock).mock.calls[0][0];
     expect(buttonProps.request).toContain('"user_query": "search term"');
     expect(buttonProps.request).toMatch(/"user_location":\s*"US"/);
   });
 
   it('handles complex nested criteria values', () => {
-    (useFetchQueryRuleset as jest.Mock).mockReturnValue({
+    (useFetchQueryRuleset as Mock).mockReturnValue({
       data: {
         rules: [
           {
@@ -200,7 +212,7 @@ describe('UseRunQueryRuleset', () => {
 
     render(<UseRunQueryRuleset rulesetId="test-ruleset" />);
 
-    const buttonProps = (TryInConsoleButton as jest.Mock).mock.calls[0][0];
+    const buttonProps = (TryInConsoleButton as Mock).mock.calls[0][0];
     expect(buttonProps.request).toContain('"nested_field": "nested value"');
     expect(buttonProps.request).toMatch(/"another_field":\s*"array"s*/);
   });

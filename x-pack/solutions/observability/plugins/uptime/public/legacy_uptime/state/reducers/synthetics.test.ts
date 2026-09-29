@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { isPendingBlock } from '../../../../common/runtime_types';
 import type { SyntheticsReducerState } from './synthetics';
 import {
@@ -20,7 +22,7 @@ import {
 const MIME = 'image/jpeg';
 
 describe('syntheticsReducer', () => {
-  jest.spyOn(Date, 'now').mockImplementation(() => 10);
+  vi.spyOn(Date, 'now').mockImplementation(() => 10);
 
   describe('isPendingBlock', () => {
     it('returns true for pending block', () => {

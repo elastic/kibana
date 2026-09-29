@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { DataSourceType } from '../../../../../common/data_sources';
@@ -49,12 +51,12 @@ describe('createContextAwarenessToolkit', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('wires updateESQLQuery to updateESQLQuery action with tab id', async () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
-    const updateEsqlQuerySpy = jest.spyOn(internalStateActions, 'updateESQLQuery');
+    const updateEsqlQuerySpy = vi.spyOn(internalStateActions, 'updateESQLQuery');
     const queryOrUpdater = 'FROM logs-*';
 
     createContextAwarenessToolkit({
@@ -68,7 +70,7 @@ describe('createContextAwarenessToolkit', () => {
 
   it('wires addFilter to addFilter action with tab id', async () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
-    const addFilterSpy = jest.spyOn(internalStateActions, 'addFilter');
+    const addFilterSpy = vi.spyOn(internalStateActions, 'addFilter');
 
     createContextAwarenessToolkit({
       internalState,
@@ -86,7 +88,7 @@ describe('createContextAwarenessToolkit', () => {
 
   it('maps setExpandedDoc options.initialTabId to initialDocViewerTabId', async () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
-    const setExpandedDocSpy = jest.spyOn(internalStateActions, 'setExpandedDoc');
+    const setExpandedDocSpy = vi.spyOn(internalStateActions, 'setExpandedDoc');
 
     createContextAwarenessToolkit({
       internalState,
@@ -105,7 +107,7 @@ describe('createContextAwarenessToolkit', () => {
 
   it('dispatches openInNewTab through openInNewTabExtPointAction', async () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
-    const openInNewTabSpy = jest.spyOn(internalStateActions, 'openInNewTabExtPointAction');
+    const openInNewTabSpy = vi.spyOn(internalStateActions, 'openInNewTabExtPointAction');
     const params = {
       query: { esql: 'FROM logs-*' },
       timeRange: { from: 'now-15m', to: 'now' },
@@ -123,7 +125,7 @@ describe('createContextAwarenessToolkit', () => {
 
   it('dispatches refreshData through fetchData with tab id', async () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
-    const fetchDataSpy = jest.spyOn(internalStateActions, 'fetchData');
+    const fetchDataSpy = vi.spyOn(internalStateActions, 'fetchData');
 
     createContextAwarenessToolkit({
       internalState,
@@ -136,7 +138,7 @@ describe('createContextAwarenessToolkit', () => {
 
   it('awaits updateAdHocDataViews dispatch', async () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
-    const updateAdHocDataViewsSpy = jest.spyOn(internalStateActions, 'updateAdHocDataViews');
+    const updateAdHocDataViewsSpy = vi.spyOn(internalStateActions, 'updateAdHocDataViews');
     const adHocDataViews = [dataViewMockWithTimeField];
 
     await createContextAwarenessToolkit({
@@ -273,7 +275,7 @@ describe('createContextAwarenessToolkit', () => {
 
   it('forwards profile state history options to Redux', async () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
-    const setProfileStateSpy = jest.spyOn(internalStateActions, 'setProfileState');
+    const setProfileStateSpy = vi.spyOn(internalStateActions, 'setProfileState');
     profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
 
     const stateAdapter = createContextAwarenessToolkit({

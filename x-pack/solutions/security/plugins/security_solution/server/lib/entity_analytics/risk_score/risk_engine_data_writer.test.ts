@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
@@ -32,7 +34,7 @@ describe('RiskEngineDataWriter', () => {
         host: [riskScoreServiceMock.createRiskScore(), riskScoreServiceMock.createRiskScore()],
       });
 
-      const [{ operations }] = (esClientMock.bulk as jest.Mock).mock.lastCall;
+      const [{ operations }] = (esClientMock.bulk as Mock).mock.lastCall;
 
       expect(operations).toMatchInlineSnapshot(`
         Array [
@@ -106,7 +108,7 @@ describe('RiskEngineDataWriter', () => {
         ],
       });
 
-      const [{ operations }] = (esClientMock.bulk as jest.Mock).mock.lastCall;
+      const [{ operations }] = (esClientMock.bulk as Mock).mock.lastCall;
 
       expect(operations).toMatchInlineSnapshot(`
         Array [
@@ -186,7 +188,7 @@ describe('RiskEngineDataWriter', () => {
         ],
       });
 
-      const [{ operations }] = (esClientMock.bulk as jest.Mock).mock.lastCall;
+      const [{ operations }] = (esClientMock.bulk as Mock).mock.lastCall;
 
       expect(operations).toMatchInlineSnapshot(`
         Array [
@@ -273,7 +275,7 @@ describe('RiskEngineDataWriter', () => {
     });
 
     it('returns an error if something went wrong', async () => {
-      (esClientMock.bulk as jest.Mock).mockRejectedValue(new Error('something went wrong'));
+      (esClientMock.bulk as Mock).mockRejectedValue(new Error('something went wrong'));
 
       const { errors } = await writer.bulk({
         host: [riskScoreServiceMock.createRiskScore()],
@@ -283,7 +285,7 @@ describe('RiskEngineDataWriter', () => {
     });
 
     it('returns the time it took to write the risk scores', async () => {
-      (esClientMock.bulk as jest.Mock).mockResolvedValue({
+      (esClientMock.bulk as Mock).mockResolvedValue({
         took: 123,
         items: [],
       });
@@ -296,7 +298,7 @@ describe('RiskEngineDataWriter', () => {
     });
 
     it('returns the number of docs written', async () => {
-      (esClientMock.bulk as jest.Mock).mockResolvedValue({
+      (esClientMock.bulk as Mock).mockResolvedValue({
         items: [{ create: { status: 201 } }, { create: { status: 200 } }],
       });
 
@@ -309,7 +311,7 @@ describe('RiskEngineDataWriter', () => {
 
     describe('when some documents failed to be written', () => {
       beforeEach(() => {
-        (esClientMock.bulk as jest.Mock).mockResolvedValue({
+        (esClientMock.bulk as Mock).mockResolvedValue({
           errors: true,
           items: [
             { create: { status: 201 } },

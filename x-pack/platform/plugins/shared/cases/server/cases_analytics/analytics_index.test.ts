@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
@@ -21,11 +24,11 @@ import type {
 import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import { scheduleCAIBackfillTask } from './tasks/backfill_task';
 
-jest.mock('@kbn/response-ops-retry-service/full_jitter_backoff');
-jest.mock('./tasks/backfill_task');
+vi.mock('@kbn/response-ops-retry-service/full_jitter_backoff');
+vi.mock('./tasks/backfill_task');
 
-const fullJitterBackoffFactoryMock = fullJitterBackoffFactory as jest.Mock;
-const scheduleCAIBackfillTaskMock = scheduleCAIBackfillTask as jest.Mock;
+const fullJitterBackoffFactoryMock = fullJitterBackoffFactory as Mock;
+const scheduleCAIBackfillTaskMock = scheduleCAIBackfillTask as Mock;
 
 describe('AnalyticsIndex', () => {
   const logger = loggingSystemMock.createLogger();
@@ -64,14 +67,14 @@ describe('AnalyticsIndex', () => {
   let index: AnalyticsIndex;
 
   // 1ms delay before retrying
-  const nextBackOff = jest.fn().mockReturnValue(1);
+  const nextBackOff = vi.fn().mockReturnValue(1);
 
   const backOffFactory = {
     create: () => ({ nextBackOff }),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     fullJitterBackoffFactoryMock.mockReturnValue(backOffFactory);
 

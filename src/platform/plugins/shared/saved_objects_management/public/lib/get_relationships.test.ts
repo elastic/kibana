@@ -49,6 +49,6 @@ describe('getRelationships', () => {
 
     await expect(
       getRelationships(httpMock, 'dashboard', '1', ['search', 'index-pattern'])
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Test error"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Test error]`);
   });
 });

@@ -7,21 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { LatencyAggregationType } from '@kbn/apm-types';
 import { useServiceFlyoutTransactionData } from './use_service_flyout_transaction_data';
 import { usePreferredTransactionDataSource } from './use_preferred_transaction_data_source';
 
-jest.mock('./use_preferred_transaction_data_source', () => ({
-  usePreferredTransactionDataSource: jest.fn().mockReturnValue({
-    dataSource: { documentType: 'transactionMetric', rollupInterval: '1m' },
-    isLoading: false,
-    error: undefined,
-  }),
-  parseIntervalSeconds: jest.requireActual('./use_preferred_transaction_data_source')
-    .parseIntervalSeconds,
-}));
+vi.mock('./use_preferred_transaction_data_source', async () => {
+      const mocked = {
+      usePreferredTransactionDataSource: vi.fn().mockReturnValue({
+        dataSource: { documentType: 'transactionMetric', rollupInterval: '1m' },
+        isLoading: false,
+        error: undefined,
+      }),
+      parseIntervalSeconds: (await vi.importActual('./use_preferred_transaction_data_source'))
+        .parseIntervalSeconds,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const START = '2024-01-01T00:00:00.000Z';
 const END = '2024-01-01T01:00:00.000Z';
@@ -29,7 +35,7 @@ const BUCKET_SIZE_IN_SECONDS = Math.ceil(
   (new Date(END).getTime() - new Date(START).getTime()) / 1000 / 20
 );
 
-const mockAddDanger = jest.fn();
+const mockAddDanger = vi.fn();
 
 const BASE_PARAMS = {
   notifications: { toasts: { addDanger: mockAddDanger } } as any,
@@ -69,11 +75,11 @@ const TRANSACTION_GROUPS = [
   },
 ];
 
-const mockedUsePreferredTransactionDataSource = usePreferredTransactionDataSource as jest.Mock;
+const mockedUsePreferredTransactionDataSource = usePreferredTransactionDataSource as Mock;
 
 function makeHttp(mainResponse: object, detailedResponse?: object) {
   return {
-    get: jest.fn().mockImplementation((url: string) => {
+    get: vi.fn().mockImplementation((url: string) => {
       if (url.includes('detailed_statistics')) {
         return Promise.resolve(detailedResponse ?? EMPTY_DETAILED_RESPONSE);
       }
@@ -84,7 +90,7 @@ function makeHttp(mainResponse: object, detailedResponse?: object) {
 
 describe('useServiceFlyoutTransactionData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedUsePreferredTransactionDataSource.mockReturnValue({
       dataSource: { documentType: 'transactionMetric', rollupInterval: '1m' },
       isLoading: false,
@@ -149,7 +155,7 @@ describe('useServiceFlyoutTransactionData', () => {
           expect.anything()
         )
       );
-      const options = (http.get as jest.Mock).mock.calls[0][1];
+      const options = (http.get as Mock).mock.calls[0][1];
       expect(options.headers).toBeUndefined();
     });
 
@@ -257,7 +263,7 @@ describe('useServiceFlyoutTransactionData', () => {
       const http = makeHttp(EMPTY_MAIN_RESPONSE);
 
       const mainCalls = () =>
-        (http.get as jest.Mock).mock.calls.filter((c) => c[0].includes('main_statistics'));
+        (http.get as Mock).mock.calls.filter((c) => c[0].includes('main_statistics'));
 
       const { rerender } = renderHook(
         ({ refreshToken }: { refreshToken: number }) =>
@@ -283,13 +289,13 @@ describe('useServiceFlyoutTransactionData', () => {
 
       await waitFor(() => expect(result.current.items).toHaveLength(2));
 
-      const mainCallsBefore = (http.get as jest.Mock).mock.calls.filter((c) =>
+      const mainCallsBefore = (http.get as Mock).mock.calls.filter((c) =>
         c[0].includes('main_statistics')
       ).length;
 
       rerender({ searchQuery: 'checkout' });
 
-      const mainCallsAfter = (http.get as jest.Mock).mock.calls.filter((c) =>
+      const mainCallsAfter = (http.get as Mock).mock.calls.filter((c) =>
         c[0].includes('main_statistics')
       ).length;
 
@@ -328,7 +334,7 @@ describe('useServiceFlyoutTransactionData', () => {
       let mainCall = 0;
 
       const http = {
-        get: jest.fn().mockImplementation((url: string) => {
+        get: vi.fn().mockImplementation((url: string) => {
           if (url.includes('detailed_statistics')) {
             return Promise.resolve(EMPTY_DETAILED_RESPONSE);
           }
@@ -377,7 +383,7 @@ describe('useServiceFlyoutTransactionData', () => {
       let mainCall = 0;
 
       const http = {
-        get: jest.fn().mockImplementation((url: string) => {
+        get: vi.fn().mockImplementation((url: string) => {
           if (url.includes('detailed_statistics')) {
             return Promise.resolve(EMPTY_DETAILED_RESPONSE);
           }
@@ -434,7 +440,7 @@ describe('useServiceFlyoutTransactionData', () => {
 
     it('resets maxCountExceeded when serviceName changes', async () => {
       const http = {
-        get: jest
+        get: vi
           .fn()
           .mockResolvedValueOnce({
             transactionGroups: [],
@@ -463,7 +469,7 @@ describe('useServiceFlyoutTransactionData', () => {
 
     it('resets maxCountExceeded when projectRouting changes', async () => {
       const http = {
-        get: jest
+        get: vi
           .fn()
           .mockResolvedValueOnce({
             transactionGroups: [],
@@ -591,7 +597,7 @@ describe('useServiceFlyoutTransactionData', () => {
         )
       );
 
-      const detailedCall = (http.get as jest.Mock).mock.calls.find((c) =>
+      const detailedCall = (http.get as Mock).mock.calls.find((c) =>
         c[0].includes('detailed_statistics')
       );
       expect(detailedCall[1].query).not.toHaveProperty('offset');
@@ -784,7 +790,7 @@ describe('useServiceFlyoutTransactionData', () => {
     it('returns isLoading true while main stats are in flight', async () => {
       let resolve!: (v: object) => void;
       const http = {
-        get: jest.fn(
+        get: vi.fn(
           () =>
             new Promise((r) => {
               resolve = r;
@@ -806,7 +812,7 @@ describe('useServiceFlyoutTransactionData', () => {
     it('returns isSparklineLoading true while detailed stats are in flight', async () => {
       let resolveDetailed!: (v: object) => void;
       const http = {
-        get: jest.fn().mockImplementation((url: string) => {
+        get: vi.fn().mockImplementation((url: string) => {
           if (url.includes('detailed_statistics')) {
             return new Promise((r) => {
               resolveDetailed = r;
@@ -848,7 +854,7 @@ describe('useServiceFlyoutTransactionData', () => {
     it('exposes a main statistics failure separately from a successful settle', async () => {
       const fetchError = new Error('main stats failed');
       const http = {
-        get: jest.fn().mockImplementation((url: string) => {
+        get: vi.fn().mockImplementation((url: string) => {
           if (url.includes('main_statistics')) {
             return Promise.reject(fetchError);
           }

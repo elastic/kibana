@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getOAuthAccessToken } from './get_oauth_access_token';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
@@ -13,15 +16,18 @@ import { verifyAccessAndContext } from './verify_access_and_context';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsClientMock } from '../actions_client/actions_client.mock';
 
-jest.mock('./verify_access_and_context', () => ({
-  verifyAccessAndContext: jest.fn(),
-}));
+vi.mock('./verify_access_and_context', () => {
+      const mocked = {
+      verifyAccessAndContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const configurationUtilities = actionsConfigMock.create();
 
 beforeEach(() => {
-  jest.resetAllMocks();
-  (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
+  vi.resetAllMocks();
+  (verifyAccessAndContext as Mock).mockImplementation((license, handler) => handler);
 });
 
 describe('getOAuthAccessToken', () => {
@@ -184,7 +190,7 @@ describe('getOAuthAccessToken', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    (verifyAccessAndContext as jest.Mock).mockImplementation(() => async () => {
+    (verifyAccessAndContext as Mock).mockImplementation(() => async () => {
       throw new Error('OMG');
     });
 

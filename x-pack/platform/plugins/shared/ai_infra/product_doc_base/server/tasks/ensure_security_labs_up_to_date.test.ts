@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { LockAcquisitionError } from '@kbn/lock-manager';
@@ -16,13 +19,13 @@ import {
 import { PRODUCT_DOC_INSTALL_LOCK_ID } from '../services/install_lock';
 
 describe('EnsureSecurityLabsUpToDate task', () => {
-  let ensureSecurityLabsUpToDate: jest.Mock;
-  let withLock: jest.Mock;
+  let ensureSecurityLabsUpToDate: Mock;
+  let withLock: Mock;
   let runTask: () => Promise<unknown>;
 
   beforeEach(() => {
-    ensureSecurityLabsUpToDate = jest.fn().mockResolvedValue(undefined);
-    withLock = jest.fn((_lockId: string, callback: () => Promise<void>) => callback());
+    ensureSecurityLabsUpToDate = vi.fn().mockResolvedValue(undefined);
+    withLock = vi.fn((_lockId: string, callback: () => Promise<void>) => callback());
     const taskManager = taskManagerMock.createSetup();
     registerEnsureSecurityLabsUpToDateTaskDefinition({
       taskManager,

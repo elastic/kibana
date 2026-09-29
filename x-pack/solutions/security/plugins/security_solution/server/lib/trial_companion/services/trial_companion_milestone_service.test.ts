@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { TrialCompanionMilestoneServiceImpl } from './trial_companion_milestone_service';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -24,18 +27,18 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
   const taskManagerStart = taskManagerMock.createStart();
   let abortController: AbortController;
   let mockCore: ReturnType<typeof coreMock.createSetup>;
-  let mockTelemetry: jest.Mocked<AnalyticsServiceSetup>;
-  const repo: jest.Mocked<TrialCompanionMilestoneRepository> = lazyObject({
-    getCurrent: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
+  let mockTelemetry: Mocked<AnalyticsServiceSetup>;
+  const repo: Mocked<TrialCompanionMilestoneRepository> = lazyObject({
+    getCurrent: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
   });
   beforeEach(() => {
     mockCore = coreMock.createSetup();
     mockTelemetry = mockCore.analytics;
     sut = new TrialCompanionMilestoneServiceImpl(loggingSystemMock.createLogger());
     abortController = new AbortController();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('setup', () => {
@@ -106,7 +109,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
     });
 
     it('runs detectors - store result if all done', async () => {
-      const mockDetectorUndefined = jest.fn(() => Promise.resolve(undefined));
+      const mockDetectorUndefined = vi.fn(() => Promise.resolve(undefined));
       await sut.start({
         taskManager: taskManagerStart,
         detectors: [
@@ -125,7 +128,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
     });
 
     it('does not run detectors if abort signal', async () => {
-      const mockDetectorUndefined = jest.fn(() => Promise.resolve(undefined));
+      const mockDetectorUndefined = vi.fn(() => Promise.resolve(undefined));
       await sut.start({
         taskManager: taskManagerStart,
         detectors: [mockDetectorUndefined, mockDetectorUndefined],
@@ -152,9 +155,9 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
     });
 
     it('runs detectors - runs all detectors', async () => {
-      const mockDetectorUndefined = jest.fn(() => Promise.resolve(undefined));
-      const mockDetectorM1 = jest.fn(() => Promise.resolve(Milestone.M1));
-      const mockDetectorM2 = jest.fn(() => Promise.resolve(Milestone.M2));
+      const mockDetectorUndefined = vi.fn(() => Promise.resolve(undefined));
+      const mockDetectorM1 = vi.fn(() => Promise.resolve(Milestone.M1));
+      const mockDetectorM2 = vi.fn(() => Promise.resolve(Milestone.M2));
       repo.getCurrent.mockResolvedValueOnce(undefined);
       await sut.start({
         taskManager: taskManagerStart,
@@ -176,8 +179,8 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
     });
 
     it('runs detectors - update existing milestone', async () => {
-      const mockDetectorUndefined = jest.fn(() => Promise.resolve(undefined));
-      const mockDetectorM2 = jest.fn(() => Promise.resolve(Milestone.M2));
+      const mockDetectorUndefined = vi.fn(() => Promise.resolve(undefined));
+      const mockDetectorM2 = vi.fn(() => Promise.resolve(Milestone.M2));
       repo.getCurrent.mockResolvedValueOnce({ openTODOs: [Milestone.M1], savedObjectId: 'abc' });
       await sut.start({
         taskManager: taskManagerStart,
@@ -203,9 +206,9 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
     });
 
     it('runs detectors - does not update the same TODO list', async () => {
-      const mockDetectorUndefined = jest.fn(() => Promise.resolve(undefined));
-      const mockDetectorM2 = jest.fn(() => Promise.resolve(Milestone.M2));
-      const mockDetectorM3 = jest.fn(() => Promise.resolve(Milestone.M3));
+      const mockDetectorUndefined = vi.fn(() => Promise.resolve(undefined));
+      const mockDetectorM2 = vi.fn(() => Promise.resolve(Milestone.M2));
+      const mockDetectorM3 = vi.fn(() => Promise.resolve(Milestone.M3));
       repo.getCurrent.mockResolvedValueOnce({
         openTODOs: [Milestone.M2, Milestone.M3],
         savedObjectId: 'abc',
@@ -230,7 +233,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
     });
 
     it('does not propagate an error from repo.getCurrent', async () => {
-      const mockDetectorM2 = jest.fn(() => Promise.resolve(Milestone.M2));
+      const mockDetectorM2 = vi.fn(() => Promise.resolve(Milestone.M2));
       repo.getCurrent.mockRejectedValueOnce(new Error('test error'));
       await sut.start({
         taskManager: taskManagerStart,
@@ -248,7 +251,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
     });
 
     it('does not propagate an error from repo.update', async () => {
-      const mockDetectorM2 = jest.fn(() => Promise.resolve(Milestone.M2));
+      const mockDetectorM2 = vi.fn(() => Promise.resolve(Milestone.M2));
       repo.getCurrent.mockResolvedValueOnce({ openTODOs: [Milestone.M1], savedObjectId: 'abc' });
       repo.update.mockRejectedValueOnce(new Error('test error'));
       await sut.start({
@@ -261,7 +264,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
     });
 
     it('does not propagate an error from repo.create', async () => {
-      const mockDetectorM2 = jest.fn(() => Promise.resolve(Milestone.M2));
+      const mockDetectorM2 = vi.fn(() => Promise.resolve(Milestone.M2));
       repo.getCurrent.mockResolvedValueOnce(undefined);
       repo.create.mockRejectedValueOnce(new Error('test error'));
       await sut.start({
@@ -274,7 +277,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
     });
 
     it('does not propagate an error from detectors', async () => {
-      const mockDetectorError = jest.fn(() => Promise.reject(new Error('test error')));
+      const mockDetectorError = vi.fn(() => Promise.reject(new Error('test error')));
       repo.getCurrent.mockResolvedValueOnce(undefined);
       await sut.start({
         taskManager: taskManagerStart,

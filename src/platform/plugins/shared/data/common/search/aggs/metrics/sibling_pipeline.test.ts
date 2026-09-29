@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getBucketSumMetricAgg } from './bucket_sum';
 import { getBucketAvgMetricAgg } from './bucket_avg';
 import { getBucketMinMetricAgg } from './bucket_min';
@@ -95,7 +97,7 @@ describe('sibling pipeline aggs', () => {
             },
           ],
           { typesRegistry },
-          jest.fn()
+          vi.fn()
         );
 
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
@@ -161,8 +163,8 @@ describe('sibling pipeline aggs', () => {
         init();
 
         const searchSource: any = {};
-        const customMetricSpy = jest.fn();
-        const customBucketSpy = jest.fn();
+        const customMetricSpy = vi.fn();
+        const customBucketSpy = vi.fn();
         const { customMetric, customBucket } = aggConfig.params;
 
         // Attach a modifyAggConfigOnSearchRequestStart with a spy to the first parameter

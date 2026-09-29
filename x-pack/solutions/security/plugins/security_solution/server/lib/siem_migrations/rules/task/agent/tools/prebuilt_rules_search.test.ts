@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { createRuleMigrationsRetrieverMock } from '../../retrievers/__mocks__/mocks';
 import { getPrebuiltRulesSearchTool } from './prebuilt_rules_search';
 
@@ -19,7 +21,7 @@ describe('getPrebuiltRulesSearchTool', () => {
       current: { id: 'current-id' },
       target: { id: 'target-id' },
     };
-    (ruleMigrationsRetriever.prebuiltRules.search as jest.Mock).mockResolvedValue([searchResult]);
+    (ruleMigrationsRetriever.prebuiltRules.search as Mock).mockResolvedValue([searchResult]);
 
     const { searchPrebuiltRules } = getPrebuiltRulesSearchTool({ ruleMigrationsRetriever });
     // Invoked as a `ToolCall` (as the real `ToolNode` invokes it), so the result is a `ToolMessage`
@@ -48,7 +50,7 @@ describe('getPrebuiltRulesSearchTool', () => {
 
   it('defaults technique_ids to an empty string', async () => {
     const ruleMigrationsRetriever = createRuleMigrationsRetrieverMock();
-    (ruleMigrationsRetriever.prebuiltRules.search as jest.Mock).mockResolvedValue([]);
+    (ruleMigrationsRetriever.prebuiltRules.search as Mock).mockResolvedValue([]);
 
     const { searchPrebuiltRules } = getPrebuiltRulesSearchTool({ ruleMigrationsRetriever });
     const result = await searchPrebuiltRules.invoke({

@@ -7,31 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import { convertToLens } from '.';
 import type { HeatmapVisParams } from '../types';
 
-const mockGetColumnsFromVis = jest.fn();
-const mockGetConfiguration = jest.fn().mockReturnValue({});
-const mockGetDataViewByIndexPatternId = jest.fn();
-const mockConvertToFiltersColumn = jest.fn();
+const mockGetColumnsFromVis = vi.fn();
+const mockGetConfiguration = vi.fn().mockReturnValue({});
+const mockGetDataViewByIndexPatternId = vi.fn();
+const mockConvertToFiltersColumn = vi.fn();
 
-jest.mock('../services', () => ({
-  getDataViewsStart: jest.fn(() => ({ get: () => ({}), getDefault: () => ({}) })),
-}));
+vi.mock('../services', () => {
+      const mocked = {
+      getDataViewsStart: vi.fn(() => ({ get: () => ({}), getDefault: () => ({}) })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/visualizations-plugin/public', () => ({
-  getConvertToLensModule: async () => ({
-    getColumnsFromVis: jest.fn(() => mockGetColumnsFromVis()),
-    convertToFiltersColumn: jest.fn(() => mockConvertToFiltersColumn()),
-  }),
-  getDataViewByIndexPatternId: jest.fn(() => mockGetDataViewByIndexPatternId()),
-}));
+vi.mock('@kbn/visualizations-plugin/public', () => {
+      const mocked = {
+      getConvertToLensModule: async () => ({
+        getColumnsFromVis: vi.fn(() => mockGetColumnsFromVis()),
+        convertToFiltersColumn: vi.fn(() => mockConvertToFiltersColumn()),
+      }),
+      getDataViewByIndexPatternId: vi.fn(() => mockGetDataViewByIndexPatternId()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./configurations', () => ({
-  getConfiguration: jest.fn(() => mockGetConfiguration()),
-}));
+vi.mock('./configurations', () => {
+      const mocked = {
+      getConfiguration: vi.fn(() => mockGetConfiguration()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const params: HeatmapVisParams = {
   addTooltip: false,
@@ -65,7 +76,7 @@ describe('convertToLens', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should return null if timefilter is undefined', async () => {

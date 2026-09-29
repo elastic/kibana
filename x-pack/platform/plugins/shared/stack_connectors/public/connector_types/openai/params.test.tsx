@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
@@ -45,7 +47,7 @@ describe('Gen AI Params Fields renders', () => {
         subAction: undefined,
         subActionParams: undefined,
       };
-      const editAction = jest.fn();
+      const editAction = vi.fn();
       const errors = {};
       const actionConnector = createMockActionConnector({
         secrets: {
@@ -91,7 +93,7 @@ describe('Gen AI Params Fields renders', () => {
         body: '{"key": "value"}',
       },
     };
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     render(
       <ParamsFields
@@ -107,7 +109,7 @@ describe('Gen AI Params Fields renders', () => {
   });
 
   it('calls editAction function with the correct arguments ', () => {
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const errors = {};
     const { getByTestId } = render(
       <ParamsFields

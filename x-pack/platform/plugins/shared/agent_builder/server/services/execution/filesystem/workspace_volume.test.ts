@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { IWorkspaceClient, WorkspaceFile, WorkspaceSnapshot } from '../../workspaces';
 import { WorkspaceVolume } from './workspace_volume';
 
-const mockWorkspaceClient = (): jest.Mocked<IWorkspaceClient> => ({
-  load: jest.fn().mockResolvedValue(undefined),
-  save: jest.fn().mockResolvedValue(undefined),
+const mockWorkspaceClient = (): Mocked<IWorkspaceClient> => ({
+  load: vi.fn().mockResolvedValue(undefined),
+  save: vi.fn().mockResolvedValue(undefined),
 });
 
 const persistedDoc = (files: Record<string, WorkspaceFile>): WorkspaceSnapshot => ({ files });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { authorizeRuleTypeParams } from './authorize_rule_type_params';
 import type { RuleTypeParams, RuleTypeParamsAuthorizer } from '../types';
@@ -18,7 +20,7 @@ test('resolves without calling anything when no authorizer is provided', async (
 });
 
 test('calls the authorizer with params and context', async () => {
-  const authorize = jest.fn().mockResolvedValue(undefined);
+  const authorize = vi.fn().mockResolvedValue(undefined);
   const authorizer: RuleTypeParamsAuthorizer<RuleTypeParams> = { authorize };
   const params = { foo: true };
   const previousParams = { foo: false };
@@ -32,7 +34,7 @@ test('calls the authorizer with params and context', async () => {
 test('propagates the error thrown by the authorizer without wrapping it', async () => {
   const error = new Error('not authorized');
   const authorizer: RuleTypeParamsAuthorizer<RuleTypeParams> = {
-    authorize: jest.fn().mockRejectedValue(error),
+    authorize: vi.fn().mockRejectedValue(error),
   };
 
   await expect(authorizeRuleTypeParams({ foo: true }, authorizer, { request })).rejects.toBe(error);

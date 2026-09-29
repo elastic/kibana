@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { MouseEvent } from 'react';
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -19,28 +21,28 @@ import { createDiscoverServicesMock } from '../__mocks__/services';
 
 const mockServices = {
   ...createDiscoverServicesMock(),
-  singleDocLocator: { getRedirectUrl: jest.fn(() => 'mock-doc-redirect-url'), navigate: jest.fn() },
+  singleDocLocator: { getRedirectUrl: vi.fn(() => 'mock-doc-redirect-url'), navigate: vi.fn() },
   contextLocator: {
-    getRedirectUrl: jest.fn(() => 'mock-context-redirect-url'),
-    navigate: jest.fn(),
+    getRedirectUrl: vi.fn(() => 'mock-context-redirect-url'),
+    navigate: vi.fn(),
   },
   locator: {
-    getUrl: jest.fn(() => Promise.resolve('mock-referrer')),
-    useUrl: jest.fn(() => 'mock-referrer'),
+    getUrl: vi.fn(() => Promise.resolve('mock-referrer')),
+    useUrl: vi.fn(() => 'mock-referrer'),
   },
   filterManager: {
-    getAppFilters: jest.fn(() => []),
-    getGlobalFilters: jest.fn(() => []),
+    getAppFilters: vi.fn(() => []),
+    getGlobalFilters: vi.fn(() => []),
   },
   data: {
     query: {
-      queryString: { getQuery: jest.fn(() => ({ query: 'response:200', language: 'kuery' })) },
-      timefilter: { timefilter: { getTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })) } },
+      queryString: { getQuery: vi.fn(() => ({ query: 'response:200', language: 'kuery' })) },
+      timefilter: { timefilter: { getTime: vi.fn(() => ({ from: 'now-15m', to: 'now' })) } },
     },
   },
 } as unknown as DiscoverServices;
-const mockContextLocatorNavigate = jest.spyOn(mockServices.contextLocator, 'navigate');
-const mockSingleDocLocatorNavigate = jest.spyOn(mockServices.singleDocLocator, 'navigate');
+const mockContextLocatorNavigate = vi.spyOn(mockServices.contextLocator, 'navigate');
+const mockSingleDocLocatorNavigate = vi.spyOn(mockServices.singleDocLocator, 'navigate');
 
 const dataViewMock = {
   id: '1',
@@ -88,14 +90,14 @@ describe('useNavigationProps', () => {
       referrer: 'mock-referrer',
     };
 
-    await result.current.onOpenContextView({ preventDefault: jest.fn() } as unknown as MouseEvent);
+    await result.current.onOpenContextView({ preventDefault: vi.fn() } as unknown as MouseEvent);
     expect(mockContextLocatorNavigate.mock.calls[0][0]).toEqual({
       ...commonParams,
       columns: ['mock-column'],
       filters: [],
     });
 
-    await result.current.onOpenSingleDoc({ preventDefault: jest.fn() } as unknown as MouseEvent);
+    await result.current.onOpenSingleDoc({ preventDefault: vi.fn() } as unknown as MouseEvent);
     expect(mockSingleDocLocatorNavigate.mock.calls[0][0]).toEqual({
       ...commonParams,
       rowIndex: 'mock-index',

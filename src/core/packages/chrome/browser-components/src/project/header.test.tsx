@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -56,7 +58,7 @@ describe('ChromeHeader', () => {
     chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
     chrome.help.getNewsfeedHandler$.mockReturnValue(
       new BehaviorSubject({
-        open: jest.fn(),
+        open: vi.fn(),
         hasNew$: new BehaviorSubject(false),
       })
     );
@@ -78,7 +80,7 @@ describe('ChromeHeader', () => {
     chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
     chrome.help.getNewsfeedHandler$.mockReturnValue(
       new BehaviorSubject({
-        open: jest.fn(),
+        open: vi.fn(),
         hasNew$: new Subject<boolean>(),
       })
     );
@@ -101,7 +103,7 @@ describe('ChromeHeader', () => {
     chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
     chrome.help.getNewsfeedHandler$.mockReturnValue(
       new BehaviorSubject({
-        open: jest.fn(),
+        open: vi.fn(),
         hasNew$,
       })
     );

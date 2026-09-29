@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RulesClientContext } from '../../../../rules_client';
 import { snoozeAlertInstance } from './snooze_instance';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -13,18 +15,18 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { MAX_SNOOZED_ALERT_INSTANCES } from '../../../../../common/max_alert_limit';
 
 describe('snooze alert instance', () => {
-  const loggerErrorMock = jest.fn();
+  const loggerErrorMock = vi.fn();
   const savedObjectsMock = savedObjectsRepositoryMock.create();
   const unsecuredSavedObjectsClient = savedObjectsMock;
-  const auditLoggerMock = { log: jest.fn() };
-  const authorizationMock = { ensureAuthorized: jest.fn() };
-  const actionsAuthorizationMock = { ensureAuthorized: jest.fn() };
-  const ruleTypeRegistryMock = { ensureRuleTypeEnabled: jest.fn() };
-  const getAlertIndicesAliasMock = jest.fn();
+  const auditLoggerMock = { log: vi.fn() };
+  const authorizationMock = { ensureAuthorized: vi.fn() };
+  const actionsAuthorizationMock = { ensureAuthorized: vi.fn() };
+  const ruleTypeRegistryMock = { ensureRuleTypeEnabled: vi.fn() };
+  const getAlertIndicesAliasMock = vi.fn();
   const alertsServiceMock = {
-    isExistingAlert: jest.fn(),
-    getAlertSnoozeSnapshot: jest.fn(),
-    muteAlertInstance: jest.fn(),
+    isExistingAlert: vi.fn(),
+    getAlertSnoozeSnapshot: vi.fn(),
+    muteAlertInstance: vi.fn(),
   };
 
   beforeEach(() => {
@@ -35,7 +37,7 @@ describe('snooze alert instance', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const context = {

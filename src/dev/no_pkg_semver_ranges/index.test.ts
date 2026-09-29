@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as fs from 'fs';
 
-jest.mock('fs', () => {
-  const fsReal = jest.requireActual('fs');
+vi.mock('fs', () => {
+  const fsReal = require('fs');
   return {
     ...fsReal,
-    readFileSync: jest.fn((filePath) => {
+    readFileSync: vi.fn((filePath) => {
       if (filePath.endsWith('package.json')) {
         return '{ "name": "kibana" }';
       } else if (filePath.endsWith('pnpm-lock.yaml')) {
@@ -21,7 +23,7 @@ jest.mock('fs', () => {
       }
       return '';
     }),
-    writeFileSync: jest.fn(),
+    writeFileSync: vi.fn(),
   };
 });
 

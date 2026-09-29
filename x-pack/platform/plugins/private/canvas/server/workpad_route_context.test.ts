@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import sinon from 'sinon';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { RequestHandlerContext, SavedObjectReference } from '@kbn/core/server';
@@ -17,27 +20,30 @@ import type { CanvasWorkpad } from '../types';
 
 import { createWorkpadRouteContext } from './workpad_route_context';
 
-jest.mock('./kibana_services', () => ({
-  embeddableService: {
-    getTransforms: () => ({
-      transformIn: jest.fn((config: any) => {
-        const { savedObjectId, ...remainingConfig } = config;
-        return {
-          state: { ...remainingConfig },
-          references: [
-            { id: savedObjectId, name: 'savedObjectRef', type: 'lens' },
-          ] as SavedObjectReference[],
-        };
-      }),
-      transformOut: jest.fn((config: any, references: SavedObjectReference[]) => {
-        return { ...config, savedObjectId: references![0].id };
-      }),
-    }),
-  },
-  logger: {
-    error: jest.fn(),
-  },
-}));
+vi.mock('./kibana_services', () => {
+      const mocked = {
+      embeddableService: {
+        getTransforms: () => ({
+          transformIn: vi.fn((config: any) => {
+            const { savedObjectId, ...remainingConfig } = config;
+            return {
+              state: { ...remainingConfig },
+              references: [
+                { id: savedObjectId, name: 'savedObjectRef', type: 'lens' },
+              ] as SavedObjectReference[],
+            };
+          }),
+          transformOut: vi.fn((config: any, references: SavedObjectReference[]) => {
+            return { ...config, savedObjectId: references![0].id };
+          }),
+        }),
+      },
+      logger: {
+        error: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const runtimeExpression = `embeddable type="vis" 
   config="${encode({
@@ -88,7 +94,7 @@ const mockContext = {
       client: savedObjectsClient,
     },
     featureFlags: {
-      getBooleanValue: jest.fn().mockResolvedValue(true),
+      getBooleanValue: vi.fn().mockResolvedValue(true),
     },
   },
 } as unknown as AwaitedProperties<RequestHandlerContext>;
@@ -101,7 +107,7 @@ describe('workpad route context', () => {
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     clock = sinon.useFakeTimers(now);
   });
 
@@ -124,7 +130,7 @@ describe('workpad route context', () => {
       );
 
       const soResponse = {};
-      (mockContext.core.savedObjects.client.create as jest.Mock).mockResolvedValue(soResponse);
+      (mockContext.core.savedObjects.client.create as Mock).mockResolvedValue(soResponse);
 
       const result = await canvasContext.workpad.create(runtimeWorkpad as CanvasWorkpad);
 
@@ -150,7 +156,7 @@ describe('workpad route context', () => {
         undefined as any
       );
 
-      (mockContext.core.savedObjects.client.get as jest.Mock).mockResolvedValue({
+      (mockContext.core.savedObjects.client.get as Mock).mockResolvedValue({
         attributes: storedWorkpad,
         references,
       });
@@ -172,7 +178,7 @@ describe('workpad route context', () => {
         undefined as any
       );
 
-      (mockContext.core.savedObjects.client.resolve as jest.Mock).mockResolvedValue({
+      (mockContext.core.savedObjects.client.resolve as Mock).mockResolvedValue({
         saved_object: { attributes: storedWorkpad, references },
         outcome: 'exactMatch',
       });
@@ -199,7 +205,7 @@ describe('workpad route context', () => {
         undefined as any
       );
 
-      (mockContext.core.savedObjects.client.get as jest.Mock).mockReturnValue({
+      (mockContext.core.savedObjects.client.get as Mock).mockReturnValue({
         attributes: {
           ...storedWorkpad,
           '@created': createdDate,

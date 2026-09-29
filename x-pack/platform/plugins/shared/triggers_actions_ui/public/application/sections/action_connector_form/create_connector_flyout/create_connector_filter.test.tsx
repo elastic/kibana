@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
@@ -14,8 +16,8 @@ import userEvent from '@testing-library/user-event';
 
 describe('CreateConnectorFilter', () => {
   let appMockRenderer: AppMockRenderer;
-  const mockOnSearchValueChange = jest.fn();
-  const mockOnSelectedFeatureIdsChange = jest.fn();
+  const mockOnSearchValueChange = vi.fn();
+  const mockOnSelectedFeatureIdsChange = vi.fn();
   const featureOptions = [
     { value: 'alerting', label: 'Alerting' },
     { value: 'cases', label: 'Cases' },
@@ -30,7 +32,7 @@ describe('CreateConnectorFilter', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
   });
 

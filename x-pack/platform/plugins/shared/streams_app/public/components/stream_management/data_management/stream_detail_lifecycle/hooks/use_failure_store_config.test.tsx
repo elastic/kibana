@@ -5,19 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { EffectiveFailureStore, Streams } from '@kbn/streams-schema';
 import { useFailureStoreConfig, transformFailureStoreConfig } from './use_failure_store_config';
 
 let mockIsServerless = false;
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({ isServerless: mockIsServerless }),
-}));
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({ isServerless: mockIsServerless }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_failure_store_default_retention', () => ({
-  useFailureStoreDefaultRetention: jest.fn(() => ({ clusterDefaultRetention: undefined })),
-}));
+vi.mock('./use_failure_store_default_retention', () => {
+      const mocked = {
+      useFailureStoreDefaultRetention: vi.fn(() => ({ clusterDefaultRetention: undefined })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createBaseDefinition = (name: string) => ({
   stream: {
@@ -225,11 +233,9 @@ describe('useFailureStoreConfig', () => {
       expect(result.current.inheritOptions.isCurrentlyInherited).toBe(false);
     });
 
-    it('should use cluster default retention in Serverless when stream has no default retention', () => {
+    it('should use cluster default retention in Serverless when stream has no default retention', async () => {
       mockIsServerless = true;
-      const { useFailureStoreDefaultRetention } = jest.requireMock(
-        './use_failure_store_default_retention'
-      );
+      const { useFailureStoreDefaultRetention } = (await vi.importMock('./use_failure_store_default_retention'));
       useFailureStoreDefaultRetention.mockReturnValueOnce({
         clusterDefaultRetention: '90d',
       });
@@ -259,10 +265,8 @@ describe('useFailureStoreConfig', () => {
       });
     });
 
-    it('should not surface the cluster default as effective retention in stateful (infinite retention, no delete phase), but still expose it for "Restore default"', () => {
-      const { useFailureStoreDefaultRetention } = jest.requireMock(
-        './use_failure_store_default_retention'
-      );
+    it('should not surface the cluster default as effective retention in stateful (infinite retention, no delete phase), but still expose it for "Restore default"', async () => {
+      const { useFailureStoreDefaultRetention } = (await vi.importMock('./use_failure_store_default_retention'));
       useFailureStoreDefaultRetention.mockReturnValueOnce({
         clusterDefaultRetention: '90d',
       });

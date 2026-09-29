@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
 import { createMockedIndexPattern } from '../../../mocks';
 import { formulaOperation, type GenericOperationDefinition } from '..';
@@ -22,12 +24,12 @@ import { getFilter } from '../helpers';
 import { createOperationDefinitionMock } from './mocks/operation_mocks';
 import { FORMULA_LAYER_ONLY_STATIC_VALUES } from '../../../../../user_messages_ids';
 
-jest.mock('../../layer_helpers', () => {
+vi.mock('../../layer_helpers', () => {
   return {
-    getColumnOrder: jest.fn(({ columns }: { columns: Record<string, GenericIndexPatternColumn> }) =>
+    getColumnOrder: vi.fn(({ columns }: { columns: Record<string, GenericIndexPatternColumn> }) =>
       Object.keys(columns)
     ),
-    getManagedColumnsFrom: jest
+    getManagedColumnsFrom: vi
       .fn()
       .mockImplementation(
         (
@@ -44,7 +46,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   sum: createOperationDefinitionMock('sum', { filterable: true }),
   last_value: createOperationDefinitionMock('last_value', {
     input: 'field',
-    getPossibleOperationForField: jest.fn(({ type }) => ({
+    getPossibleOperationForField: vi.fn(({ type }) => ({
       scale: type === 'string' ? 'ordinal' : 'ratio',
       isBucketed: false,
       dataType: type === 'string' ? type : 'number',
@@ -62,7 +64,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
     filterable: true,
-    getErrorMessage: jest.fn(() => []),
+    getErrorMessage: vi.fn(() => []),
     buildColumn: ({ referenceIds }, columnsParams) => ({
       label: 'moving_average',
       dataType: 'number',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { skip } from 'rxjs';
 import { initializeEsql } from './initialize_esql';
 import { SOURCE_DATA_REQUEST_ID, SOURCE_TYPES } from '../../common/constants';
@@ -87,7 +89,7 @@ describe('initializeEsql', () => {
     test('should emit updated queries when ESQL layer is added to store', () => {
       const { store, setLayerList } = createTestStore();
       const { api } = initializeEsql(store);
-      const onEmitMock = jest.fn();
+      const onEmitMock = vi.fn();
       const subscription = api.esql$.pipe(skip(1)).subscribe(onEmitMock);
 
       setLayerList([createEsqlLayerDescriptor('layer1', 'FROM logs*')]);
@@ -103,7 +105,7 @@ describe('initializeEsql', () => {
         createEsqlLayerDescriptor('layer1', 'FROM logs*'),
       ]);
       const { api } = initializeEsql(store);
-      const onEmitMock = jest.fn();
+      const onEmitMock = vi.fn();
       const subscription = api.esql$.pipe(skip(1)).subscribe(onEmitMock);
 
       setLayerList([]);
@@ -117,7 +119,7 @@ describe('initializeEsql', () => {
     test('should emit queries for multiple ESQL layers', () => {
       const { store, setLayerList } = createTestStore();
       const { api } = initializeEsql(store);
-      const onEmitMock = jest.fn();
+      const onEmitMock = vi.fn();
       const subscription = api.esql$.pipe(skip(1)).subscribe(onEmitMock);
 
       setLayerList([createEsqlLayerDescriptor('layer1', 'FROM logs*')]);
@@ -139,7 +141,7 @@ describe('initializeEsql', () => {
         createEsqlLayerDescriptor('layer1', 'FROM logs*'),
       ]);
       const { api } = initializeEsql(store);
-      const onEmitMock = jest.fn();
+      const onEmitMock = vi.fn();
       const subscription = api.esql$.pipe(skip(1)).subscribe(onEmitMock);
 
       setLayerList([createEsqlLayerDescriptor('layer1', 'FROM logs*')]);
@@ -154,7 +156,7 @@ describe('initializeEsql', () => {
         createEsqlLayerDescriptor('layer1', 'FROM logs*'),
       ]);
       const { api } = initializeEsql(store);
-      const onEmitMock = jest.fn();
+      const onEmitMock = vi.fn();
       const subscription = api.esql$.pipe(skip(1)).subscribe(onEmitMock);
 
       setLayerList([createEsqlLayerDescriptor('layer1', 'FROM logs* | LIMIT 100')]);
@@ -168,7 +170,7 @@ describe('initializeEsql', () => {
     test('should not include queries from non-ESQL layers', () => {
       const { store, setLayerList } = createTestStore();
       const { api } = initializeEsql(store);
-      const onEmitMock = jest.fn();
+      const onEmitMock = vi.fn();
       const subscription = api.esql$.pipe(skip(1)).subscribe(onEmitMock);
 
       setLayerList([createNonEsqlLayerDescriptor('layer2')]);
@@ -207,7 +209,7 @@ describe('initializeEsql', () => {
         createEsqlLayerDescriptor('layer1', 'FROM logs*'),
       ]);
       const { api } = initializeEsql(store);
-      const onEmitMock = jest.fn();
+      const onEmitMock = vi.fn();
       const subscription = api.approximationApplied$.pipe(skip(1)).subscribe(onEmitMock);
 
       setLayerList([createEsqlLayerDescriptor('layer1', 'FROM logs*', true)]);
@@ -223,7 +225,7 @@ describe('initializeEsql', () => {
         createEsqlLayerDescriptor('layer1', 'FROM logs*', true),
       ]);
       const { api } = initializeEsql(store);
-      const onEmitMock = jest.fn();
+      const onEmitMock = vi.fn();
       const subscription = api.approximationApplied$.pipe(skip(1)).subscribe(onEmitMock);
 
       setLayerList([createEsqlLayerDescriptor('layer1', 'FROM logs*')]);
@@ -239,7 +241,7 @@ describe('initializeEsql', () => {
         createEsqlLayerDescriptor('layer1', 'FROM logs*', true),
       ]);
       const { api } = initializeEsql(store);
-      const onEmitMock = jest.fn();
+      const onEmitMock = vi.fn();
       const subscription = api.approximationApplied$.pipe(skip(1)).subscribe(onEmitMock);
 
       setLayerList([createEsqlLayerDescriptor('layer1', 'FROM logs*', true)]);
@@ -254,7 +256,7 @@ describe('initializeEsql', () => {
     test('should stop syncing from store after cleanup', () => {
       const { store, setLayerList } = createTestStore();
       const { api, cleanup } = initializeEsql(store);
-      const onEmitMock = jest.fn();
+      const onEmitMock = vi.fn();
       const subscription = api.esql$.pipe(skip(1)).subscribe(onEmitMock);
 
       cleanup();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { Alert } from '@kbn/alerting-types';
@@ -15,12 +18,12 @@ import {
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EasePanelKey } from '../../../../flyout/ease/constants/panel_keys';
 
-jest.mock('@kbn/expandable-flyout');
+vi.mock('@kbn/expandable-flyout');
 
 describe('OpenFlyoutRowControlColumn', () => {
   it('should render button icon', () => {
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
-      openFlyout: jest.fn(),
+    (useExpandableFlyoutApi as Mock).mockReturnValue({
+      openFlyout: vi.fn(),
     });
 
     const alert: Alert = {
@@ -34,8 +37,8 @@ describe('OpenFlyoutRowControlColumn', () => {
   });
 
   it('should open flyout after click', () => {
-    const openFlyout = jest.fn();
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
+    const openFlyout = vi.fn();
+    (useExpandableFlyoutApi as Mock).mockReturnValue({
       openFlyout,
     });
 

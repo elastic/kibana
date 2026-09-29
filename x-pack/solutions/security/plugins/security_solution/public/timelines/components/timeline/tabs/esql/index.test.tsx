@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '@kbn/discover-plugin/common';
@@ -52,23 +54,23 @@ const renderEsqlTab = async ({
   setCurrentTabAppState(discoverState.stateContainer, currentTabAppState);
 
   const startServices = createStartServicesMock();
-  const DiscoverContainer = jest.fn<React.ReactElement, [DiscoverContainerProps]>(() => (
+  const DiscoverContainer = vi.fn<React.ReactElement, [DiscoverContainerProps]>(() => (
     <div data-test-subj="discover-container" />
   ));
   startServices.discover = { ...startServices.discover, DiscoverContainer };
   // The range the ES|QL search actually runs against, which is what the user is looking at.
-  startServices.customDataService.query.timefilter.timefilter.getTime = jest
+  startServices.customDataService.query.timefilter.timefilter.getTime = vi
     .fn()
     .mockReturnValue(IN_SESSION_TIME_RANGE);
 
   const restorePendingRef = { current: timelineRestorePending };
   const contextValue = {
     discoverStateContainer: { current: undefined },
-    setDiscoverStateContainer: jest.fn(),
-    resetDiscoverAppState: jest.fn(),
-    updateSavedSearch: jest.fn(),
-    initializeLocalSavedSearch: jest.fn(),
-    getAppStateFromSavedSearch: jest.fn(),
+    setDiscoverStateContainer: vi.fn(),
+    resetDiscoverAppState: vi.fn(),
+    updateSavedSearch: vi.fn(),
+    initializeLocalSavedSearch: vi.fn(),
+    getAppStateFromSavedSearch: vi.fn(),
     defaultDiscoverAppState: DEFAULT_APP_STATE,
     timelineRestorePending: restorePendingRef,
   } as unknown as DiscoverInTimelineContextType;

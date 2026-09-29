@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getNextRollingTimeMock = jest.fn();
-jest.doMock('./get_next_rolling_time', () => ({ getNextRollingTime: getNextRollingTimeMock }));
+import { vi } from 'vitest';
+
+export const getNextRollingTimeMock = vi.fn();
+vi.doMock('./get_next_rolling_time', () => {
+      const mocked = { getNextRollingTime: getNextRollingTimeMock };
+      return { ...mocked, default: mocked };
+    });

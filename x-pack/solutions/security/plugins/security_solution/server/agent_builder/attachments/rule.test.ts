@@ -5,32 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { createRuleAttachmentType } from './rule';
 import { readRules } from '../../lib/detection_engine/rule_management/logic/detection_rules_client/read_rules';
 import { transform } from '../../lib/detection_engine/rule_management/utils/utils';
 
-jest.mock('../../lib/detection_engine/rule_management/logic/detection_rules_client/read_rules');
-jest.mock('../../lib/detection_engine/rule_management/utils/utils');
+vi.mock('../../lib/detection_engine/rule_management/logic/detection_rules_client/read_rules');
+vi.mock('../../lib/detection_engine/rule_management/utils/utils');
 
-const readRulesMock = readRules as jest.MockedFunction<typeof readRules>;
-const transformMock = transform as jest.MockedFunction<typeof transform>;
+const readRulesMock = readRules as MockedFunction<typeof readRules>;
+const transformMock = transform as MockedFunction<typeof transform>;
 
 describe('createRuleAttachmentType', () => {
   const rulesClient = {};
   const startPlugins = {
-    alerting: { getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClient) },
+    alerting: { getRulesClientWithRequest: vi.fn().mockResolvedValue(rulesClient) },
   };
-  const getStartServices = jest.fn().mockResolvedValue([{}, startPlugins, {}]);
+  const getStartServices = vi.fn().mockResolvedValue([{}, startPlugins, {}]);
   const core = { getStartServices } as unknown as Parameters<typeof createRuleAttachmentType>[0];
-  const logger = { warn: jest.fn() } as unknown as Logger;
+  const logger = { warn: vi.fn() } as unknown as Logger;
 
   const makeType = () => createRuleAttachmentType(core, logger);
 
   const resolveCtx = { request: {} } as never;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getStartServices.mockResolvedValue([{}, startPlugins, {}]);
     startPlugins.alerting.getRulesClientWithRequest.mockResolvedValue(rulesClient);
   });

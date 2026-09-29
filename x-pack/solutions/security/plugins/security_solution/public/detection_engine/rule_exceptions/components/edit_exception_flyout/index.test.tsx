@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
@@ -32,31 +35,31 @@ import { useCreateOrUpdateException } from '../../logic/use_create_update_except
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../logic/use_create_update_exception');
-jest.mock('../../logic/use_exception_flyout_data');
-jest.mock('../../../../common/containers/source');
-jest.mock('../../logic/use_find_references');
-jest.mock('../../logic/use_fetch_or_create_rule_exception_list');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../../rule_management/logic/use_rule');
-jest.mock('@kbn/lists-plugin/public');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../logic/use_create_update_exception');
+vi.mock('../../logic/use_exception_flyout_data');
+vi.mock('../../../../common/containers/source');
+vi.mock('../../logic/use_find_references');
+vi.mock('../../logic/use_fetch_or_create_rule_exception_list');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../rule_management/logic/use_rule');
+vi.mock('@kbn/lists-plugin/public');
 
-const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as jest.Mock<
+const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as Mock<
   ReturnType<typeof getExceptionBuilderComponentLazy>
 >;
-const mockUseSignalIndex = useSignalIndex as jest.Mock<Partial<ReturnType<typeof useSignalIndex>>>;
-const mockUseFetchIndex = useFetchIndex as jest.Mock;
-const mockUseCurrentUser = useCurrentUser as jest.Mock<Partial<ReturnType<typeof useCurrentUser>>>;
-const mockFetchIndexPatterns = useFetchIndexPatterns as jest.Mock<
+const mockUseSignalIndex = useSignalIndex as Mock<Partial<ReturnType<typeof useSignalIndex>>>;
+const mockUseFetchIndex = useFetchIndex as Mock;
+const mockUseCurrentUser = useCurrentUser as Mock<Partial<ReturnType<typeof useCurrentUser>>>;
+const mockFetchIndexPatterns = useFetchIndexPatterns as Mock<
   ReturnType<typeof useFetchIndexPatterns>
 >;
-const mockUseAddOrUpdateException = useCreateOrUpdateException as jest.Mock<
+const mockUseAddOrUpdateException = useCreateOrUpdateException as Mock<
   ReturnType<typeof useCreateOrUpdateException>
 >;
-const mockUseFindExceptionListReferences = useFindExceptionListReferences as jest.Mock;
-const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
+const mockUseFindExceptionListReferences = useFindExceptionListReferences as Mock;
+const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;
 
 describe('When the edit exception modal is opened', () => {
   beforeEach(() => {
@@ -66,7 +69,7 @@ describe('When the edit exception modal is opened', () => {
       loading: false,
       signalIndexName: 'test-signal',
     });
-    mockUseAddOrUpdateException.mockImplementation(() => [false, jest.fn()]);
+    mockUseAddOrUpdateException.mockImplementation(() => [false, vi.fn()]);
     mockUseAlertsPrivileges.mockReturnValue({
       hasAlertsUpdate: true,
       hasAlertsRead: true,
@@ -148,12 +151,12 @@ describe('When the edit exception modal is opened', () => {
           ],
         },
       },
-      jest.fn(),
+      vi.fn(),
     ]);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when the modal is loading', () => {
@@ -170,8 +173,8 @@ describe('When the edit exception modal is opened', () => {
             list={getExceptionListSchemaMock()}
             itemToEdit={getExceptionListItemSchemaMock()}
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         </TestProviders>
       );
@@ -212,7 +215,7 @@ describe('When the edit exception modal is opened', () => {
             ],
           },
         },
-        jest.fn(),
+        vi.fn(),
       ]);
     });
 
@@ -243,8 +246,8 @@ describe('When the edit exception modal is opened', () => {
               }
               itemToEdit={getExceptionListItemSchemaMock()}
               showAlertCloseOptions
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
+              onCancel={vi.fn()}
+              onConfirm={vi.fn()}
             />
           </TestProviders>
         );
@@ -383,8 +386,8 @@ describe('When the edit exception modal is opened', () => {
               }}
               itemToEdit={exceptionItemMock}
               showAlertCloseOptions
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
+              onCancel={vi.fn()}
+              onConfirm={vi.fn()}
             />
           </TestProviders>
         );
@@ -427,8 +430,8 @@ describe('When the edit exception modal is opened', () => {
               }
               itemToEdit={getExceptionListItemSchemaMock()}
               showAlertCloseOptions
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
+              onCancel={vi.fn()}
+              onConfirm={vi.fn()}
             />
           </TestProviders>
         );
@@ -475,8 +478,8 @@ describe('When the edit exception modal is opened', () => {
             }
             itemToEdit={getExceptionListItemSchemaMock()}
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         </TestProviders>
       );
@@ -545,7 +548,7 @@ describe('When the edit exception modal is opened', () => {
             ],
           },
         },
-        jest.fn(),
+        vi.fn(),
       ]);
 
       render(
@@ -576,8 +579,8 @@ describe('When the edit exception modal is opened', () => {
             }
             itemToEdit={getExceptionListItemSchemaMock()}
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         </TestProviders>
       );
@@ -648,8 +651,8 @@ describe('When the edit exception modal is opened', () => {
             }
             itemToEdit={getExceptionListItemSchemaMock()}
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         </TestProviders>
       );
@@ -701,8 +704,8 @@ describe('When the edit exception modal is opened', () => {
             }
             itemToEdit={getExceptionListItemSchemaMock()}
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         </TestProviders>
       );
@@ -743,8 +746,8 @@ describe('When the edit exception modal is opened', () => {
             }
             itemToEdit={getExceptionListItemSchemaMock()}
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         </TestProviders>
       );
@@ -805,8 +808,8 @@ describe('When the edit exception modal is opened', () => {
             }
             itemToEdit={getExceptionListItemSchemaMock()}
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         </TestProviders>
       );
@@ -873,8 +876,8 @@ describe('When the edit exception modal is opened', () => {
             }
             itemToEdit={getExceptionListItemSchemaMock()}
             showAlertCloseOptions
-            onCancel={jest.fn()}
-            onConfirm={jest.fn()}
+            onCancel={vi.fn()}
+            onConfirm={vi.fn()}
           />
         </TestProviders>
       );

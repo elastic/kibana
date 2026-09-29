@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 import { resumeSyncParentIfNeeded } from './resume_sync_parent_if_needed';
@@ -15,15 +18,15 @@ import type { StepExecutionRepository } from '../repositories/step_execution_rep
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
-jest.mock('../lib/task_recovery', () => {
-  const actual = jest.requireActual('../lib/task_recovery');
+vi.mock('../lib/task_recovery', async () => {
+  const actual = (await vi.importActual('../lib/task_recovery'));
   return {
     ...actual,
-    markExecutionFailedTaskRecovery: jest.fn().mockResolvedValue(undefined),
+    markExecutionFailedTaskRecovery: vi.fn().mockResolvedValue(undefined),
   };
 });
 
-const mockMarkFailed = markExecutionFailedTaskRecovery as jest.MockedFunction<
+const mockMarkFailed = markExecutionFailedTaskRecovery as MockedFunction<
   typeof markExecutionFailedTaskRecovery
 >;
 
@@ -32,10 +35,10 @@ describe('resumeSyncParentIfNeeded', () => {
   const childExecId = 'child-execution-id';
   const spaceId = 'default';
   const logger = {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   } as unknown as Logger;
 
   const createChild = (overrides: Partial<EsWorkflowExecution> = {}): EsWorkflowExecution =>
@@ -51,19 +54,19 @@ describe('resumeSyncParentIfNeeded', () => {
     } as EsWorkflowExecution);
 
   const createDeps = () => {
-    const internalResumeWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+    const internalResumeWorkflowExecution = vi.fn().mockResolvedValue(undefined);
     const workflowExecutionRepository = {
-      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+      getWorkflowExecutionById: vi.fn().mockResolvedValue({
         id: parentExecId,
         status: ExecutionStatus.WAITING_FOR_CHILD,
       }),
-    } as unknown as jest.Mocked<WorkflowExecutionRepository>;
-    const stepExecutionRepository = {} as unknown as jest.Mocked<StepExecutionRepository>;
+    } as unknown as Mocked<WorkflowExecutionRepository>;
+    const stepExecutionRepository = {} as unknown as Mocked<StepExecutionRepository>;
     const workflowTaskManager = {
-      hasActiveTaskForExecution: jest.fn().mockResolvedValue(false),
-      runExistingResumeTask: jest.fn().mockResolvedValue(undefined),
-      scheduleAndRunImmediateResume: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<WorkflowTaskManager>;
+      hasActiveTaskForExecution: vi.fn().mockResolvedValue(false),
+      runExistingResumeTask: vi.fn().mockResolvedValue(undefined),
+      scheduleAndRunImmediateResume: vi.fn().mockResolvedValue(undefined),
+    } as unknown as Mocked<WorkflowTaskManager>;
 
     return {
       internalResumeWorkflowExecution,
@@ -74,15 +77,15 @@ describe('resumeSyncParentIfNeeded', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(global, 'setTimeout').mockImplementation(((callback: () => void) => {
+    vi.clearAllMocks();
+    vi.spyOn(global, 'setTimeout').mockImplementation(((callback: () => void) => {
       callback();
       return 0;
     }) as typeof setTimeout);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('resumes the parent without a request so it wakes its own pre-scheduled resume task', async () => {
@@ -173,7 +176,7 @@ describe('resumeSyncParentIfNeeded', () => {
       }
       throw new Error('not found');
     });
-    (workflowExecutionRepository.getWorkflowExecutionById as jest.Mock).mockResolvedValue({
+    (workflowExecutionRepository.getWorkflowExecutionById as Mock).mockResolvedValue({
       id: parentExecId,
       status: ExecutionStatus.WAITING_FOR_CHILD,
       context: {
@@ -213,7 +216,7 @@ describe('resumeSyncParentIfNeeded', () => {
   it('wakes an existing parent resume task instead of failing when one is already armed', async () => {
     const { internalResumeWorkflowExecution, workflowTaskManager, ...repos } = createDeps();
     internalResumeWorkflowExecution.mockRejectedValue(new Error('not found'));
-    (workflowTaskManager.hasActiveTaskForExecution as jest.Mock).mockResolvedValue(true);
+    (workflowTaskManager.hasActiveTaskForExecution as Mock).mockResolvedValue(true);
 
     await resumeSyncParentIfNeeded({
       childExecution: createChild(),
@@ -257,7 +260,7 @@ describe('resumeSyncParentIfNeeded', () => {
   it('does not fail-close the parent when it is already running', async () => {
     const { internalResumeWorkflowExecution, workflowExecutionRepository, ...repos } = createDeps();
     internalResumeWorkflowExecution.mockRejectedValue(new Error('not found'));
-    (workflowExecutionRepository.getWorkflowExecutionById as jest.Mock).mockResolvedValue({
+    (workflowExecutionRepository.getWorkflowExecutionById as Mock).mockResolvedValue({
       id: parentExecId,
       status: ExecutionStatus.RUNNING,
     });
@@ -277,7 +280,7 @@ describe('resumeSyncParentIfNeeded', () => {
   it('does not fail-close the parent when cancel has already been requested', async () => {
     const { internalResumeWorkflowExecution, workflowExecutionRepository, ...repos } = createDeps();
     internalResumeWorkflowExecution.mockRejectedValue(new Error('not found'));
-    (workflowExecutionRepository.getWorkflowExecutionById as jest.Mock).mockResolvedValue({
+    (workflowExecutionRepository.getWorkflowExecutionById as Mock).mockResolvedValue({
       id: parentExecId,
       status: ExecutionStatus.WAITING_FOR_CHILD,
       cancelRequested: true,

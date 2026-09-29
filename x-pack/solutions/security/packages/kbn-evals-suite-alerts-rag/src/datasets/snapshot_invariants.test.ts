@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ALERTS_RAG_DATASET_INVARIANTS, verifyAlertsRagSnapshot } from './snapshot_invariants';
@@ -42,14 +44,14 @@ const buildAggResponse = (overrides: AggResponseOverrides = {}) => {
 
 const createMocks = (overrides: AggResponseOverrides = {}) => {
   const esClient = {
-    search: jest.fn().mockResolvedValue(buildAggResponse(overrides)),
+    search: vi.fn().mockResolvedValue(buildAggResponse(overrides)),
   } as unknown as Client;
 
   const log = {
-    info: jest.fn(),
-    warning: jest.fn(),
-    debug: jest.fn(),
-    error: jest.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
   } as unknown as ToolingLog;
 
   return { esClient, log };

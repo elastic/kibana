@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import execa from 'execa';
 import {
   buildCandidateShaList,
@@ -14,14 +17,14 @@ import {
   resolveUpstreamRemote,
 } from './utils';
 
-jest.mock('execa');
-const mockedExeca = execa as jest.MockedFunction<typeof execa>;
+vi.mock('execa');
+const mockedExeca = execa as MockedFunction<typeof execa>;
 
 describe('utils', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     process.env = { ...originalEnv };
   });
 

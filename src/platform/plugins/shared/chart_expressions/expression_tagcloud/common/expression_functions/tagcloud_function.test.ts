@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { tagcloudFunction } from './tagcloud_function';
 
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
@@ -98,7 +100,7 @@ describe('interpreter/functions#tagcloud', () => {
           reset: () => {},
         },
       },
-      getExecutionContext: jest.fn(),
+      getExecutionContext: vi.fn(),
     } as unknown as ExecutionContext;
 
     await fn(context, { ...visConfig, ...numberAccessors } as Arguments, handlers);

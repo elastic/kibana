@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { RULE_PREBUILD_DESCRIPTION_FIELDS } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Rule, PrebuildFieldsMap } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { HttpSetup } from '@kbn/core/public';
@@ -13,14 +15,14 @@ import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls
 
 describe('synthetics getDescriptionFields', () => {
   const indexField = { type: 'indexPattern', value: 'synthetics-*' };
-  const mockPrebuildField = jest.fn();
+  const mockPrebuildField = vi.fn();
   const mockPrebuildFields = {
     [RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY]: mockPrebuildField,
-    [RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]: jest.fn().mockReturnValue(indexField),
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]: vi.fn().mockReturnValue(indexField),
   } as unknown as PrebuildFieldsMap;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return empty array when rule is not provided', () => {

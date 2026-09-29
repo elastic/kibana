@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SiemMigrationsDataResourcesClient } from '../../data/siem_migrations_data_resources_client';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { MigrationResources } from '../retrievers/resource_retriever';
@@ -15,13 +17,13 @@ import {
 
 describe('lookup resource mappings', () => {
   const logger = loggerMock.create();
-  const getMapping = jest.fn();
+  const getMapping = vi.fn();
   const resourcesDataClient = {
     getMapping,
   } as unknown as SiemMigrationsDataResourcesClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getRuntimeMappingFields', () => {

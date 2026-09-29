@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { synth, isSource } from '@elastic/esql';
 import { columnsAfter } from './columns_after';
@@ -182,7 +184,7 @@ describe('FROM columnsAfter', () => {
   it('batches multiple plain sources into a single fromFrom call', async () => {
     const command = synth.cmd`FROM index1, index2, index3`;
 
-    const fromFromMock = jest.fn().mockResolvedValue([
+    const fromFromMock = vi.fn().mockResolvedValue([
       { name: 'field1', type: 'keyword', userDefined: false },
       { name: 'field2', type: 'long', userDefined: false },
     ]);

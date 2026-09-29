@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import type { WaffleVisConfig } from '../types/expression_renderers';
 import { LabelPositions, ValueFormats, LegendDisplay } from '../types/expression_renderers';
@@ -74,7 +76,7 @@ describe('interpreter/functions#waffleVis', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns an object with the correct structure', async () => {
@@ -112,7 +114,7 @@ describe('interpreter/functions#waffleVis', () => {
           reset: () => {},
         },
       },
-      getExecutionContext: jest.fn(),
+      getExecutionContext: vi.fn(),
     } as unknown as ExecutionContext;
 
     await fn(context, visConfig, handlers);
@@ -128,7 +130,7 @@ describe('interpreter/functions#waffleVis', () => {
     };
     const handlers = {
       variables: { overrides },
-      getExecutionContext: jest.fn(),
+      getExecutionContext: vi.fn(),
     } as unknown as ExecutionContext;
     const result = await fn(context, visConfig, handlers);
 

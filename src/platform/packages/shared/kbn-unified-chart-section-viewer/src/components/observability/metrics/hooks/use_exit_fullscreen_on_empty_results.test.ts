@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import {
   useExitFullscreenOnEmptyResults,
@@ -14,7 +16,7 @@ import {
 } from './use_exit_fullscreen_on_empty_results';
 
 describe('useExitFullscreenOnEmptyResults', () => {
-  const onExitFullscreen = jest.fn();
+  const onExitFullscreen = vi.fn();
 
   const defaultParams: UseExitFullscreenOnEmptyResultsParams = {
     isFullscreen: true,
@@ -31,7 +33,7 @@ describe('useExitFullscreenOnEmptyResults', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('exits fullscreen when a settled fetch returns no metrics', () => {

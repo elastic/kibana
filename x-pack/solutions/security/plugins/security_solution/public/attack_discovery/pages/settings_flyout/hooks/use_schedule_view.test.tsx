@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
 
@@ -17,32 +20,35 @@ import { mockFindAttackDiscoverySchedules } from '../../mock/mock_find_attack_di
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../common/constants';
 
-jest.mock('react-router', () => ({
-  matchPath: jest.fn(),
-  useLocation: jest.fn().mockReturnValue({
-    search: '',
-  }),
-  withRouter: jest.fn(),
-}));
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../data_view_manager/hooks/use_data_view');
-jest.mock('../schedule/logic/use_schedule_api');
+vi.mock('react-router', () => {
+      const mocked = {
+      matchPath: vi.fn(),
+      useLocation: vi.fn().mockReturnValue({
+        search: '',
+      }),
+      withRouter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../data_view_manager/hooks/use_data_view');
+vi.mock('../schedule/logic/use_schedule_api');
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseDataView = useDataView as jest.MockedFunction<typeof useDataView>;
-const mockUseScheduleApi = useScheduleApi as jest.MockedFunction<typeof useScheduleApi>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseDataView = useDataView as MockedFunction<typeof useDataView>;
+const mockUseScheduleApi = useScheduleApi as MockedFunction<typeof useScheduleApi>;
 
-const mockUseFindSchedules = jest.fn();
-const mockMutateAsync = jest.fn();
-const mockUseCreateSchedule = jest
+const mockUseFindSchedules = vi.fn();
+const mockMutateAsync = vi.fn();
+const mockUseCreateSchedule = vi
   .fn()
   .mockReturnValue({ isLoading: false, mutateAsync: mockMutateAsync });
-const mockUseDeleteSchedule = jest.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
-const mockUseDisableSchedule = jest.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
-const mockUseEnableSchedule = jest.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
-const mockUseBulkDeleteSchedules = jest.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
-const mockUseBulkDisableSchedules = jest.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
-const mockUseBulkEnableSchedules = jest.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
+const mockUseDeleteSchedule = vi.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
+const mockUseDisableSchedule = vi.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
+const mockUseEnableSchedule = vi.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
+const mockUseBulkDeleteSchedules = vi.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
+const mockUseBulkDisableSchedules = vi.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
+const mockUseBulkEnableSchedules = vi.fn().mockReturnValue({ mutateAsync: mockMutateAsync });
 
 const setupUseKibana = (updateAttackDiscoverySchedule = true) => {
   mockUseKibana.mockReturnValue({
@@ -55,17 +61,17 @@ const setupUseKibana = (updateAttackDiscoverySchedule = true) => {
         },
       },
       featureFlags: {
-        useBooleanValue: jest.fn().mockReturnValue(false),
+        useBooleanValue: vi.fn().mockReturnValue(false),
       },
       lens: {
         EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
       },
-      telemetry: { reportEvent: jest.fn() },
+      telemetry: { reportEvent: vi.fn() },
       triggersActionsUi: {
         ...triggersActionsUiMock.createStart(),
       },
       uiSettings: {
-        get: jest.fn(),
+        get: vi.fn(),
       },
       unifiedSearch: {
         ui: {
@@ -73,19 +79,19 @@ const setupUseKibana = (updateAttackDiscoverySchedule = true) => {
         },
       },
     },
-  } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+  } as unknown as Mocked<ReturnType<typeof useKibana>>);
 };
 
 describe('useScheduleView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     setupUseKibana();
 
     mockUseDataView.mockReturnValue({
       dataView: { id: 'security', title: 'security' },
       status: 'ready',
-    } as unknown as jest.Mocked<ReturnType<typeof useDataView>>);
+    } as unknown as Mocked<ReturnType<typeof useDataView>>);
 
     mockUseFindSchedules.mockReturnValue({
       data: mockFindAttackDiscoverySchedules,
@@ -286,7 +292,7 @@ describe('useScheduleView', () => {
     };
 
     it('calls refetch when the create flyout closes, ensuring the schedule list updates', async () => {
-      const mockRefetch = jest.fn();
+      const mockRefetch = vi.fn();
       mockUseFindSchedules.mockReturnValue({
         data: { schedules: [], total: 0 },
         isLoading: false,

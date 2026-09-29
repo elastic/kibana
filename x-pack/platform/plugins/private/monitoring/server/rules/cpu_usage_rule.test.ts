@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { CpuUsageRule } from './cpu_usage_rule';
 import { RULE_CPU_USAGE } from '../../common/constants';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
@@ -14,26 +17,35 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_cpu_usage_node_stats', () => ({
-  fetchCpuUsageNodeStats: jest.fn(),
-}));
-jest.mock('../lib/alerts/fetch_clusters', () => ({
-  fetchClusters: jest.fn(),
-}));
-jest.mock('../static_globals', () => ({
-  Globals: {
-    app: {
-      getLogger: () => ({ debug: jest.fn() }),
-      url: 'http://localhost:5601',
-      config: {
-        ui: {
-          ccs: { enabled: true },
-          container: { elasticsearch: { enabled: false } },
+vi.mock('../lib/alerts/fetch_cpu_usage_node_stats', () => {
+      const mocked = {
+      fetchCpuUsageNodeStats: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/alerts/fetch_clusters', () => {
+      const mocked = {
+      fetchClusters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          getLogger: () => ({ debug: vi.fn() }),
+          url: 'http://localhost:5601',
+          config: {
+            ui: {
+              ccs: { enabled: true },
+              container: { elasticsearch: { enabled: false } },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('CpuUsageRule', () => {
   it('should have defaults', () => {
@@ -87,17 +99,17 @@ describe('CpuUsageRule', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchCpuUsageNodeStats as jest.Mock).mockImplementation(() => {
+      (fetchCpuUsageNodeStats as Mock).mockImplementation(() => {
         return [stat];
       });
-      (fetchClusters as jest.Mock).mockImplementation(() => {
+      (fetchClusters as Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
       });
     });
 
     afterEach(() => {
       Date = RealDate;
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('should fire action', async () => {
@@ -202,7 +214,7 @@ describe('CpuUsageRule', () => {
     });
 
     it('should not fire actions if under threshold', async () => {
-      (fetchCpuUsageNodeStats as jest.Mock).mockImplementation(() => {
+      (fetchCpuUsageNodeStats as Mock).mockImplementation(() => {
         return [
           {
             ...stat,
@@ -222,7 +234,7 @@ describe('CpuUsageRule', () => {
 
     it('should handle ccs', async () => {
       const ccs = 'testCluster';
-      (fetchCpuUsageNodeStats as jest.Mock).mockImplementation(() => {
+      (fetchCpuUsageNodeStats as Mock).mockImplementation(() => {
         return [
           {
             ...stat,

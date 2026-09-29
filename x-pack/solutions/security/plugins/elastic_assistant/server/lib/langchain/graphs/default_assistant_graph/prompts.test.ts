@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE, chatPromptFactory } from './prompts';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -13,17 +16,20 @@ import type { AIAssistantKnowledgeBaseDataClient } from '../../../../ai_assistan
 import { newContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
-jest.mock('../../../prompt', () => ({
-  ...jest.requireActual('../../../prompt'),
-  getPrompt: jest.fn().mockReturnValue('mocked user prompt'),
-}));
+vi.mock('../../../prompt', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../prompt')),
+      getPrompt: vi.fn().mockReturnValue('mocked user prompt'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('chatPromptFactory', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   const mockKbClient = {
-    getRequiredKnowledgeBaseDocumentEntries: jest.fn().mockResolvedValue([
+    getRequiredKnowledgeBaseDocumentEntries: vi.fn().mockResolvedValue([
       {
         text: 'test knowledge entry',
         id: 'test-id',
@@ -46,7 +52,7 @@ describe('chatPromptFactory', () => {
     ],
     logger: loggingSystemMock.createLogger(),
     formattedTime: '2023-10-01T00:00:00Z',
-    getInferenceConnectorById: jest.fn(),
+    getInferenceConnectorById: vi.fn(),
     savedObjectsClient: mockSavedObjectsClient,
     connectorId: 'test-connector-id',
     llmType: 'gemini',
@@ -100,7 +106,7 @@ test knowledge entry`),
   });
 
   it('produces correct prompt when there is no knowledge history', async () => {
-    (mockKbClient.getRequiredKnowledgeBaseDocumentEntries as jest.Mock).mockResolvedValueOnce([]);
+    (mockKbClient.getRequiredKnowledgeBaseDocumentEntries as Mock).mockResolvedValueOnce([]);
     const result = await chatPromptFactory(DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE, baseInputs);
     expect(result.messages).toEqual(
       expect.arrayContaining([

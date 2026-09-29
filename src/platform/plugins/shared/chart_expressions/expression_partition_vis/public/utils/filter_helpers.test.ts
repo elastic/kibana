@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import {
@@ -304,7 +306,7 @@ describe('getFilterPopoverTitle', () => {
       ...visParams,
       buckets: [],
     };
-    const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
+    const defaultFormatter = vi.fn((...args) => fieldFormatsMock.deserialize(...args));
 
     const title = getFilterPopoverTitle(newVisParams, visData, 0, defaultFormatter, series.key);
     expect(title).toBe('Kibana Airlines');
@@ -315,7 +317,7 @@ describe('getFilterPopoverTitle', () => {
       key: '0',
       specId: 'pie',
     };
-    const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
+    const defaultFormatter = vi.fn((...args) => fieldFormatsMock.deserialize(...args));
 
     getFilterPopoverTitle(visParams, visData, 1, defaultFormatter, series.key);
     expect(defaultFormatter).toHaveBeenCalled();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { getAllCasesSelectorModalNoProviderLazy } from '../../client/ui/get_all_cases_selector_modal';
 import { getCreateCaseFlyoutLazyNoProvider } from '../../client/ui/get_create_case_flyout';
@@ -13,12 +16,12 @@ import { renderWithTestingProviders } from '../../common/mock';
 import { getInitialCasesContextState } from './state/cases_context_reducer';
 import { CasesGlobalComponents } from './cases_global_components';
 
-jest.mock('../../client/ui/get_create_case_flyout');
-jest.mock('../../client/ui/get_all_cases_selector_modal');
+vi.mock('../../client/ui/get_create_case_flyout');
+vi.mock('../../client/ui/get_all_cases_selector_modal');
 
-const getCreateCaseFlyoutLazyNoProviderMock = getCreateCaseFlyoutLazyNoProvider as jest.Mock;
+const getCreateCaseFlyoutLazyNoProviderMock = getCreateCaseFlyoutLazyNoProvider as Mock;
 const getAllCasesSelectorModalNoProviderLazyMock =
-  getAllCasesSelectorModalNoProviderLazy as jest.Mock;
+  getAllCasesSelectorModalNoProviderLazy as Mock;
 
 describe('Cases context UI', () => {
   beforeEach(() => {
@@ -54,7 +57,7 @@ describe('Cases context UI', () => {
 
   describe('select case modal', () => {
     it('should render the select case modal when isModalOpen is true', async () => {
-      const onRowClick = jest.fn();
+      const onRowClick = vi.fn();
       const state = {
         ...getInitialCasesContextState(),
         selectCaseModal: {

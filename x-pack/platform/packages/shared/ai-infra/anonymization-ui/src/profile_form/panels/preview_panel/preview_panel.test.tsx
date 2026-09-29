@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { PreviewPanel } from './preview_panel';
@@ -18,20 +20,29 @@ import {
 } from '../../hooks/field_rule_actions';
 import { buildProfileFormContextValue } from '../../test_fixtures/profile_form_context_value';
 
-jest.mock('../../profile_form_context', () => ({
-  useProfileFormContext: jest.fn(),
-}));
+vi.mock('../../profile_form_context', () => {
+      const mocked = {
+      useProfileFormContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_preview_panel_state', () => ({
-  usePreviewPanelState: jest.fn(),
-}));
+vi.mock('../../hooks/use_preview_panel_state', () => {
+      const mocked = {
+      usePreviewPanelState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_resolve_anonymized_values', () => ({
-  useResolveAnonymizedValues: jest.fn(),
-}));
+vi.mock('../../../common/hooks/use_resolve_anonymized_values', () => {
+      const mocked = {
+      useResolveAnonymizedValues: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const setContext = (overrides = {}) =>
-  jest.mocked(useProfileFormContext).mockReturnValue(
+  vi.mocked(useProfileFormContext).mockReturnValue(
     buildProfileFormContextValue({
       targetId: 'logs-*',
       ...overrides,
@@ -40,11 +51,11 @@ const setContext = (overrides = {}) =>
 
 const createBasePreviewState = () => ({
   previewInput: '{"host":{"name":"web-1"}}',
-  setPreviewInput: jest.fn(),
+  setPreviewInput: vi.fn(),
   previewViewMode: 'table' as const,
-  setPreviewViewMode: jest.fn(),
+  setPreviewViewMode: vi.fn(),
   previewValueMode: 'original' as const,
-  setPreviewValueMode: jest.fn(),
+  setPreviewValueMode: vi.fn(),
   parsedPreviewDocument: { host: { name: 'web-1' } },
   previewRows: [
     {
@@ -64,7 +75,7 @@ const createBasePreviewState = () => ({
 });
 
 const setResolverState = (overrides = {}) => {
-  jest.mocked(useResolveAnonymizedValues).mockReturnValue({
+  vi.mocked(useResolveAnonymizedValues).mockReturnValue({
     resolveText: (value: string) => value,
     tokenToOriginalMap: {},
     isLoading: false,
@@ -74,7 +85,7 @@ const setResolverState = (overrides = {}) => {
 };
 
 const setPreviewState = (overrides = {}) => {
-  jest.mocked(usePreviewPanelState).mockReturnValue({
+  vi.mocked(usePreviewPanelState).mockReturnValue({
     ...createBasePreviewState(),
     ...overrides,
   });
@@ -82,7 +93,7 @@ const setPreviewState = (overrides = {}) => {
 
 describe('PreviewPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setContext();
     setPreviewState();
     setResolverState();

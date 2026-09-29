@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -16,26 +19,27 @@ import {
   resolveLatestEntitiesIndexName,
 } from '../asset_manager/resolve_entity_store_indices';
 
-jest.mock('../../infra/elasticsearch', () => ({
-  ...jest.createMockFromModule<typeof import('../../infra/elasticsearch')>(
-    '../../infra/elasticsearch'
-  ),
-  chunkByUrlLength: jest.requireActual<typeof import('../../infra/elasticsearch')>(
-    '../../infra/elasticsearch'
-  ).chunkByUrlLength,
-}));
-jest.mock('../asset_manager/resolve_entity_store_indices');
+vi.mock('../../infra/elasticsearch', async () => {
+      const mocked = {
+      ...jest.createMockFromModule<typeof import('../../infra/elasticsearch')>(
+        '../../infra/elasticsearch'
+      ),
+      chunkByUrlLength: (await vi.importActual<typeof import('../../infra/elasticsearch')>('../../infra/elasticsearch')).chunkByUrlLength,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../asset_manager/resolve_entity_store_indices');
 
-const mockCreateIndex = createIndex as jest.MockedFunction<typeof createIndex>;
-const mockReindex = reindex as jest.MockedFunction<typeof reindex>;
-const mockUpdateByQueryWithScript = updateByQueryWithScript as jest.MockedFunction<
+const mockCreateIndex = createIndex as MockedFunction<typeof createIndex>;
+const mockReindex = reindex as MockedFunction<typeof reindex>;
+const mockUpdateByQueryWithScript = updateByQueryWithScript as MockedFunction<
   typeof updateByQueryWithScript
 >;
 const mockResolveHistorySnapshotIndexPatterns =
-  resolveHistorySnapshotIndexPatterns as jest.MockedFunction<
+  resolveHistorySnapshotIndexPatterns as MockedFunction<
     typeof resolveHistorySnapshotIndexPatterns
   >;
-const mockResolveLatestEntitiesIndexName = resolveLatestEntitiesIndexName as jest.MockedFunction<
+const mockResolveLatestEntitiesIndexName = resolveLatestEntitiesIndexName as MockedFunction<
   typeof resolveLatestEntitiesIndexName
 >;
 
@@ -50,11 +54,11 @@ function createMockGlobalStateClient(overrides?: { status?: 'started' | 'stopped
     ...(overrides?.status && { status: overrides.status }),
   };
   return {
-    findOrThrow: jest.fn().mockResolvedValue({
+    findOrThrow: vi.fn().mockResolvedValue({
       ...mockGlobalStateStarted,
       historySnapshot,
     }),
-    update: jest.fn().mockResolvedValue(undefined),
+    update: vi.fn().mockResolvedValue(undefined),
   };
 }
 
@@ -62,15 +66,15 @@ function createMockTaskManager() {
   // Default: return the task in tasks[] so callers see it as "changed".
   // Tests that need the already-in-desired-state path override with tasks: [].
   return {
-    bulkEnable: jest.fn().mockResolvedValue({
+    bulkEnable: vi.fn().mockResolvedValue({
       tasks: [{ id: 'entity_store:v2:history_snapshot_task:default' }],
       errors: [],
     }),
-    bulkDisable: jest.fn().mockResolvedValue({
+    bulkDisable: vi.fn().mockResolvedValue({
       tasks: [{ id: 'entity_store:v2:history_snapshot_task:default' }],
       errors: [],
     }),
-    runSoon: jest.fn().mockResolvedValue({ id: 'entity_store:v2:history_snapshot_task:default' }),
+    runSoon: vi.fn().mockResolvedValue({ id: 'entity_store:v2:history_snapshot_task:default' }),
   };
 }
 
@@ -81,8 +85,8 @@ describe('HistorySnapshotClient', () => {
   const taskId = 'entity_store:v2:history_snapshot_task:default';
   const request = { headers: {} } as KibanaRequest;
   let mockLogger: ReturnType<typeof loggerMock.create>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockInternalEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockEsClient: Mocked<ElasticsearchClient>;
+  let mockInternalEsClient: Mocked<ElasticsearchClient>;
   let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
   let mockTaskManager: ReturnType<typeof createMockTaskManager>;
   let client: HistorySnapshotClient;
@@ -101,9 +105,9 @@ describe('HistorySnapshotClient', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockEsClient = {} as jest.Mocked<ElasticsearchClient>;
-    mockInternalEsClient = {} as jest.Mocked<ElasticsearchClient>;
+    vi.clearAllMocks();
+    mockEsClient = {} as Mocked<ElasticsearchClient>;
+    mockInternalEsClient = {} as Mocked<ElasticsearchClient>;
     mockGlobalStateClient = createMockGlobalStateClient();
     mockTaskManager = createMockTaskManager();
     mockResolveLatestEntitiesIndexName.mockResolvedValue('.entities.v2.latest.default-00001');
@@ -416,11 +420,11 @@ describe('HistorySnapshotClient', () => {
     });
 
     describe('with clearHistorySnapshots', () => {
-      let mockResolveIndex: jest.Mock;
-      let mockIndicesDelete: jest.Mock;
+      let mockResolveIndex: Mock;
+      let mockIndicesDelete: Mock;
 
       beforeEach(() => {
-        mockResolveIndex = jest.fn().mockResolvedValue({
+        mockResolveIndex = vi.fn().mockResolvedValue({
           indices: [
             { name: '.entities.v2.history.default.2024-01-01-00' },
             { name: '.entities.v2.history.default.2024-01-02-00' },
@@ -428,11 +432,11 @@ describe('HistorySnapshotClient', () => {
           aliases: [],
           data_streams: [],
         });
-        mockIndicesDelete = jest.fn().mockResolvedValue({});
+        mockIndicesDelete = vi.fn().mockResolvedValue({});
         mockInternalEsClient = {
           ...mockInternalEsClient,
           indices: { resolveIndex: mockResolveIndex, delete: mockIndicesDelete },
-        } as unknown as jest.Mocked<ElasticsearchClient>;
+        } as unknown as Mocked<ElasticsearchClient>;
         mockResolveHistorySnapshotIndexPatterns.mockResolvedValue([
           '.entities.v2.history.default.*',
         ]);

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import { AxiosError, type AxiosResponse } from 'axios';
 import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -15,23 +18,23 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { CONNECTOR_ID, PushToServiceIncidentSchema } from '@kbn/connector-schemas/resilient';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
-jest.mock('axios', () => {
-  const actual = jest.requireActual('axios');
+vi.mock('axios', () => {
+  const actual = require('axios');
   return {
     ...jest.createMockFromModule<typeof import('axios')>('axios'),
     AxiosError: actual.AxiosError,
     isAxiosError: actual.isAxiosError,
   };
 });
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
+  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
   return {
     ...originalUtils,
-    request: jest.fn(),
+    request: vi.fn(),
   };
 });
 
-const requestMock = request as jest.Mock;
+const requestMock = request as Mock;
 const TIMESTAMP = 1589391874472;
 const apiUrl = 'https://resilient.elastic.co/';
 const orgId = '201';
@@ -108,22 +111,22 @@ describe('IBM Resilient connector', () => {
   );
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
-  let getFieldsSpy: jest.SpyInstance = jest.fn();
+  let getFieldsSpy: MockInstance = vi.fn();
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.setSystemTime(TIMESTAMP);
+    vi.resetAllMocks();
+    vi.setSystemTime(TIMESTAMP);
     connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
-    getFieldsSpy = jest.spyOn(connector, 'getFields').mockResolvedValue(resilientFields);
+    getFieldsSpy = vi.spyOn(connector, 'getFields').mockResolvedValue(resilientFields);
   });
 
   afterEach(() => {

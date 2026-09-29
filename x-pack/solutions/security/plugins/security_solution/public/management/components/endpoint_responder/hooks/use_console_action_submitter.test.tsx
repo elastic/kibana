@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type {
   UseConsoleActionSubmitterOptions,
   ConsoleActionSubmitter,
@@ -27,7 +30,7 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let renderArgs: UseConsoleActionSubmitterOptions;
   let updateHookRenderArgs: () => void;
-  let hookRenderResultStorage: jest.Mock<(args: ConsoleActionSubmitter) => void>;
+  let hookRenderResultStorage: Mock<(args: ConsoleActionSubmitter) => void>;
   let releaseSuccessActionRequestApiResponse: DeferredInterface['resolve'];
   let releaseFailedActionRequestApiResponse: DeferredInterface['reject'];
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
@@ -63,7 +66,7 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
 
     apiMocks = responseActionsHttpMocks(coreStart.http);
 
-    hookRenderResultStorage = jest.fn();
+    hookRenderResultStorage = vi.fn();
     releaseSuccessActionRequestApiResponse = () =>
       deferred.resolve(actionGenerator.generateActionDetails({ id: '123' }));
     releaseFailedActionRequestApiResponse = deferred.reject;
@@ -77,7 +80,7 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
         endpoint_ids: ['123'],
       },
       actionCreator: {
-        mutateAsync: jest.fn(async () => {
+        mutateAsync: vi.fn(async () => {
           return {
             data: await deferred.promise,
           };
@@ -86,14 +89,14 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
       get status() {
         return status;
       },
-      setStatus: jest.fn((newStatus) => {
+      setStatus: vi.fn((newStatus) => {
         status = newStatus;
         updateHookRenderArgs();
       }),
       get store() {
         return commandStore;
       },
-      setStore: jest.fn((newStoreOrCallback: object | ((prevStore: object) => object)) => {
+      setStore: vi.fn((newStoreOrCallback: object | ((prevStore: object) => object)) => {
         if (typeof newStoreOrCallback === 'function') {
           commandStore = newStoreOrCallback(commandStore);
         } else {
@@ -102,7 +105,7 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
 
         updateHookRenderArgs();
       }),
-      ResultComponent: jest.fn(
+      ResultComponent: vi.fn(
         ({ children, showAs, 'data-test-subj': dataTestSubj }: CommandExecutionResultProps) => {
           return (
             <div data-show-as={showAs} data-test-subj={dataTestSubj}>

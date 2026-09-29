@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { deleteConnectorSecret } from './delete_connector_secret';
@@ -14,13 +16,13 @@ import { deleteConnectorSecret } from './delete_connector_secret';
 describe('deleteConnectorSecret lib function', () => {
   const mockClient = {
     transport: {
-      request: jest.fn(),
+      request: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   it('should delete a connector secret', async () => {
@@ -35,6 +37,6 @@ describe('deleteConnectorSecret lib function', () => {
       method: 'DELETE',
       path: '/_connector/_secret/secret-id',
     });
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });

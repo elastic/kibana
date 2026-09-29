@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 
 import { useAuthz } from '../../../../../hooks';
@@ -12,13 +14,19 @@ import { createFleetTestRendererMock } from '../../../../../../../mock';
 
 import { HeaderRightContent } from './right_content';
 
-jest.mock('../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../hooks'),
-  useAuthz: jest.fn(),
-}));
-jest.mock('../../../../../../../hooks/use_can_enable_auto_upgrades', () => ({
-  useCanEnableAutomaticAgentUpgrades: jest.fn(() => true),
-}));
+vi.mock('../../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../hooks')),
+      useAuthz: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../../../hooks/use_can_enable_auto_upgrades', () => {
+      const mocked = {
+      useCanEnableAutomaticAgentUpgrades: vi.fn(() => true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const agentPolicy = {
   id: 'policy-1',
@@ -31,7 +39,7 @@ const agentPolicy = {
 
 describe('HeaderRightContent', () => {
   beforeEach(() => {
-    jest.mocked(useAuthz).mockReturnValue({
+    vi.mocked(useAuthz).mockReturnValue({
       fleet: {
         allAgentPolicies: true,
         allAgents: true,
@@ -41,7 +49,7 @@ describe('HeaderRightContent', () => {
       },
     } as any);
 
-    jest.mocked(useCanEnableAutomaticAgentUpgrades).mockReturnValue(true);
+    vi.mocked(useCanEnableAutomaticAgentUpgrades).mockReturnValue(true);
   });
   describe('Auto-upgrade agents action', () => {
     const labelText = 'Auto-upgrade agents';
@@ -52,9 +60,9 @@ describe('HeaderRightContent', () => {
         <HeaderRightContent
           isLoading={false}
           agentPolicy={agentPolicy as any}
-          addAgent={jest.fn()}
+          addAgent={vi.fn()}
           isAddAgentHelpPopoverOpen={false}
-          setIsAddAgentHelpPopoverOpen={jest.fn()}
+          setIsAddAgentHelpPopoverOpen={vi.fn()}
         />
       );
 
@@ -63,7 +71,7 @@ describe('HeaderRightContent', () => {
     });
 
     it('does not show when user is unauthorized', () => {
-      jest.mocked(useAuthz).mockReturnValue({
+      vi.mocked(useAuthz).mockReturnValue({
         fleet: {
           allAgentPolicies: true,
           allAgents: false,
@@ -78,9 +86,9 @@ describe('HeaderRightContent', () => {
         <HeaderRightContent
           isLoading={false}
           agentPolicy={agentPolicy as any}
-          addAgent={jest.fn()}
+          addAgent={vi.fn()}
           isAddAgentHelpPopoverOpen={false}
-          setIsAddAgentHelpPopoverOpen={jest.fn()}
+          setIsAddAgentHelpPopoverOpen={vi.fn()}
         />
       );
 

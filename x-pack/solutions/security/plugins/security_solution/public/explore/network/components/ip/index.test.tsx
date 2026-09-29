@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock/test_providers';
@@ -19,13 +21,13 @@ import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../../common/lib/kibana', () => {
+vi.mock('../../../../common/lib/kibana', () => {
   return {
     useKibana: () => ({
       services: {
         telemetry: mockedTelemetry,
         uiSettings: {
-          get: jest.fn().mockReturnValue(false),
+          get: vi.fn().mockReturnValue(false),
         },
       },
     }),
@@ -33,45 +35,54 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
-  useEntityFromStore: jest.fn().mockReturnValue({
-    entity: null,
-    entityRecord: null,
-    firstSeen: null,
-    lastSeen: null,
-    isLoading: false,
-    error: null,
-    refetch: jest.fn(),
-  }),
-}));
+vi.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => {
+      const mocked = {
+      useEntityFromStore: vi.fn().mockReturnValue({
+        entity: null,
+        entityRecord: null,
+        firstSeen: null,
+        lastSeen: null,
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+      ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../flyout/document_details/shared/hooks/use_which_flyout', () => ({
-  useWhichFlyout: jest.fn(),
-}));
-jest.mock('../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../../../../flyout/document_details/shared/hooks/use_which_flyout', () => {
+      const mocked = {
+      useWhichFlyout: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../flyout_v2/use_flyout_api');
+vi.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
   };
 });
 
-jest.mock('../../../../common/components/links/link_props');
+vi.mock('../../../../common/components/links/link_props');
 
 describe('Port', () => {
   beforeEach(() => {
-    jest.mocked(useWhichFlyout).mockReturnValue(null);
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useWhichFlyout).mockReturnValue(null);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   test('renders correctly against snapshot', () => {

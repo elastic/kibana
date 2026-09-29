@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -16,7 +18,7 @@ import {
 } from './add_private_location';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 
-jest.mock('./migrate_legacy_private_locations');
+vi.mock('./migrate_legacy_private_locations');
 
 const agentPolicy = (space_ids?: string[]) => ({ space_ids } as AgentPolicy);
 
@@ -53,14 +55,14 @@ describe('addPrivateLocationRoute handler - space containment', () => {
     const response = httpServerMock.createResponseFactory();
     const internalSOClient = {};
     const agentPolicyService = {
-      get: jest.fn().mockResolvedValue({ id: 'ap', space_ids: policySpaceIds }),
+      get: vi.fn().mockResolvedValue({ id: 'ap', space_ids: policySpaceIds }),
     };
     const routeContext = {
       server: {
         logger: loggerMock.create(),
         fleet: { agentPolicyService },
         coreStart: {
-          savedObjects: { createInternalRepository: jest.fn().mockReturnValue(internalSOClient) },
+          savedObjects: { createInternalRepository: vi.fn().mockReturnValue(internalSOClient) },
         },
       },
       request: { body: { label: 'loc', agentPolicyId: 'ap', spaces: requestSpaces } },
@@ -75,10 +77,10 @@ describe('addPrivateLocationRoute handler - space containment', () => {
   // validation + SO create; stub those so tests that pass containment don't
   // touch Elasticsearch/Fleet internals.
   const stubDownstream = () => {
-    jest
+    vi
       .spyOn(PrivateLocationRepository.prototype, 'validatePrivateLocation')
       .mockResolvedValue(undefined);
-    return jest
+    return vi
       .spyOn(PrivateLocationRepository.prototype, 'createPrivateLocation')
       .mockResolvedValue({
         attributes: { label: 'loc', id: 'x', agentPolicyId: 'ap' },
@@ -86,7 +88,7 @@ describe('addPrivateLocationRoute handler - space containment', () => {
       } as any);
   };
 
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => vi.restoreAllMocks());
 
   it('rejects when a space-scoped agent policy does not contain the requested space', async () => {
     const { routeContext, response } = makeRouteContext({
@@ -166,7 +168,7 @@ describe('addPrivateLocationRoute handler - space containment', () => {
 describe('PrivateLocationRepository.getLocationSpaces', () => {
   const repo = () =>
     new PrivateLocationRepository({
-      server: { coreStart: { savedObjects: { createInternalRepository: jest.fn() } } },
+      server: { coreStart: { savedObjects: { createInternalRepository: vi.fn() } } },
     } as any);
 
   it('returns locationSpaces when provided', () => {

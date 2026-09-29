@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, Mocked } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
@@ -18,11 +21,11 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
   const createdDocumentIds = ['id-1', 'id-2'];
 
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let readDataClient: jest.Mocked<Pick<IRuleDataReader, 'search'>>;
+  let readDataClient: Mocked<Pick<IRuleDataReader, 'search'>>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-    readDataClient = { search: jest.fn() };
+    readDataClient = { search: vi.fn() };
   });
 
   it('returns alerts when given valid ids', async () => {
@@ -250,11 +253,11 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
   });
 
   describe('transformSearchResponseToAlerts invocation', () => {
-    let spy: jest.SpyInstance;
+    let spy: MockInstance;
     const mockResponse = getResponseMock();
 
     beforeEach(() => {
-      spy = jest.spyOn(transforms, 'transformSearchResponseToAlerts');
+      spy = vi.spyOn(transforms, 'transformSearchResponseToAlerts');
     });
 
     afterEach(() => {

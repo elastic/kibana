@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 
@@ -15,18 +17,21 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { SpaceSelectorComponent as SpaceSelector, type SpaceSelectorProps } from './space_selector';
 
-jest.mock('../../../../../../hooks/use_request/spaces');
-jest.mock('../../../../../../hooks/use_core', () => ({
-  ...jest.requireActual('../../../../../../hooks/use_core'),
-  useStartServices: jest.fn(),
-}));
+vi.mock('../../../../../../hooks/use_request/spaces');
+vi.mock('../../../../../../hooks/use_core', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../../hooks/use_core')),
+      useStartServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Space Selector', () => {
   beforeEach(() => {
-    jest.mocked(useStartServices).mockImplementation(
-      () =>
+    vi.mocked(useStartServices).mockImplementation(
+      async () =>
         ({
-          ...jest.requireActual('../../../../../../hooks/use_core').useStartServices(),
+          ...(await vi.importActual('../../../../../../hooks/use_core')).useStartServices(),
           spaces: {
             getActiveSpace: () => ({
               id: 'default',
@@ -47,7 +52,7 @@ describe('Space Selector', () => {
           },
         } as any)
     );
-    jest.mocked(useAgentPoliciesSpaces).mockReturnValue({
+    vi.mocked(useAgentPoliciesSpaces).mockReturnValue({
       data: {
         items: [
           {
@@ -64,8 +69,8 @@ describe('Space Selector', () => {
   });
   function render(defaultValue = [] as SpaceSelectorProps['value']) {
     const renderer = createFleetTestRendererMock();
-    const onChange = jest.fn();
-    const setInvalidSpaceError = jest.fn();
+    const onChange = vi.fn();
+    const setInvalidSpaceError = vi.fn();
     const result = renderer.render(
       <SpaceSelector
         setInvalidSpaceError={setInvalidSpaceError}

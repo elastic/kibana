@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { LeadEntity } from './types';
@@ -78,7 +80,7 @@ const interactionCountsResponse = (counts: Record<string, number>) => {
 
 describe('attachRelatedEntities', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('returns empty array without querying when there are no candidates', async () => {

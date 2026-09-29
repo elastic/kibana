@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useDeleteElement } from './use_delete_element';
 import { DEVTOOL_HIDDEN_ATTR, DEVELOPER_TOOLBAR_ID } from '../lib/constants';
 
 describe('useDeleteElement', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should soft-deletes an element by hiding it', () => {
-    const onDelete = jest.fn();
+    const onDelete = vi.fn();
     const { result } = renderHook(() => useDeleteElement(onDelete));
     const el = document.createElement('div');
     document.body.appendChild(el);
@@ -35,7 +37,7 @@ describe('useDeleteElement', () => {
     expect(onDelete).toHaveBeenCalledTimes(1);
 
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     expect(el.style.visibility).toBe('hidden');
@@ -94,7 +96,7 @@ describe('useDeleteElement', () => {
     act(() => {
       result.current.deleteElement(el1);
       result.current.deleteElement(el2);
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     expect(el1.style.visibility).toBe('hidden');

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -23,35 +26,44 @@ import { useKibana } from '../../hooks/use_kibana';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
-jest.mock('./use_model_settings_form');
-jest.mock('../../hooks/use_default_model_settings');
-jest.mock('../../hooks/use_default_model_validation');
-jest.mock('../../hooks/use_connectors');
-jest.mock('../../hooks/use_kibana');
-jest.mock('./no_models_empty_prompt', () => ({
-  NoModelsEmptyPrompt: () => <div data-test-subj="settings-no-models">NoModelsEmptyPrompt</div>,
-}));
-jest.mock('./feature_section', () => ({
-  FeatureSection: ({ parentName }: { parentName: string }) => (
-    <div data-test-subj={`featureSection-${parentName}`} />
-  ),
-}));
-jest.mock('./default_model_section', () => ({
-  DefaultModelSection: ({ disabled }: { disabled?: boolean }) => (
-    <div data-test-subj="defaultModelSection" data-disabled={String(Boolean(disabled))}>
-      DefaultModelSection
-    </div>
-  ),
-}));
+vi.mock('./use_model_settings_form');
+vi.mock('../../hooks/use_default_model_settings');
+vi.mock('../../hooks/use_default_model_validation');
+vi.mock('../../hooks/use_connectors');
+vi.mock('../../hooks/use_kibana');
+vi.mock('./no_models_empty_prompt', () => {
+      const mocked = {
+      NoModelsEmptyPrompt: () => <div data-test-subj="settings-no-models">NoModelsEmptyPrompt</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./feature_section', () => {
+      const mocked = {
+      FeatureSection: ({ parentName }: { parentName: string }) => (
+        <div data-test-subj={`featureSection-${parentName}`} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./default_model_section', () => {
+      const mocked = {
+      DefaultModelSection: ({ disabled }: { disabled?: boolean }) => (
+        <div data-test-subj="defaultModelSection" data-disabled={String(Boolean(disabled))}>
+          DefaultModelSection
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseModelSettingsForm = useModelSettingsForm as jest.Mock;
-const mockUseDefaultModelSettings = useDefaultModelSettings as jest.Mock;
-const mockUseDefaultModelValidation = useDefaultModelValidation as jest.Mock;
-const mockUseConnectors = useConnectors as jest.Mock;
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseModelSettingsForm = useModelSettingsForm as Mock;
+const mockUseDefaultModelSettings = useDefaultModelSettings as Mock;
+const mockUseDefaultModelValidation = useDefaultModelValidation as Mock;
+const mockUseConnectors = useConnectors as Mock;
+const mockUseKibana = useKibana as Mock;
 
-const mockNavigateToUrl = jest.fn();
-const mockBasePath = { prepend: jest.fn((path: string) => path) };
+const mockNavigateToUrl = vi.fn();
+const mockBasePath = { prepend: vi.fn((path: string) => path) };
 
 const childFeature: InferenceFeatureConfig = {
   featureId: 'child_1',
@@ -91,18 +103,18 @@ const defaultFormState = {
   invalidEndpointIds: new Set<string>(),
   hasSavedObject: {} as Record<string, boolean>,
   dirtyFeatureIds: new Set<string>() as ReadonlySet<string>,
-  updateEndpoints: jest.fn(),
-  save: jest.fn().mockResolvedValue(undefined),
+  updateEndpoints: vi.fn(),
+  save: vi.fn().mockResolvedValue(undefined),
 };
 
 const defaultModelSettingsState = {
   state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: true },
   isDirty: false,
-  setEnableAi: jest.fn(),
-  setDefaultModelId: jest.fn(),
-  setFeatureSpecificModels: jest.fn(),
-  save: jest.fn().mockResolvedValue(undefined),
-  reset: jest.fn(),
+  setEnableAi: vi.fn(),
+  setDefaultModelId: vi.fn(),
+  setFeatureSpecificModels: vi.fn(),
+  save: vi.fn().mockResolvedValue(undefined),
+  reset: vi.fn(),
 };
 
 const validValidation = {
@@ -122,7 +134,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('ModelSettings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseModelSettingsForm.mockReturnValue(defaultFormState);
     mockUseDefaultModelSettings.mockReturnValue(defaultModelSettingsState);
     mockUseDefaultModelValidation.mockReturnValue(validValidation);
@@ -263,8 +275,8 @@ describe('ModelSettings', () => {
   });
 
   it('clicking save is a no-op when validation fails', async () => {
-    const saveFeatures = jest.fn().mockResolvedValue(undefined);
-    const saveDefaultModel = jest.fn().mockResolvedValue(undefined);
+    const saveFeatures = vi.fn().mockResolvedValue(undefined);
+    const saveDefaultModel = vi.fn().mockResolvedValue(undefined);
 
     mockUseModelSettingsForm.mockReturnValue({
       ...defaultFormState,
@@ -294,8 +306,8 @@ describe('ModelSettings', () => {
   });
 
   it('calls both saveFeatures and defaultModelSettings.save when both are dirty', async () => {
-    const saveFeatures = jest.fn().mockResolvedValue(undefined);
-    const saveDefaultModel = jest.fn().mockResolvedValue(undefined);
+    const saveFeatures = vi.fn().mockResolvedValue(undefined);
+    const saveDefaultModel = vi.fn().mockResolvedValue(undefined);
 
     mockUseModelSettingsForm.mockReturnValue({
       ...defaultFormState,
@@ -349,7 +361,7 @@ describe('ModelSettings', () => {
   });
 
   it('shows unsaved changes modal and navigates away when discard is confirmed', async () => {
-    const resetDefaultModel = jest.fn();
+    const resetDefaultModel = vi.fn();
     const history = createMemoryHistory();
 
     mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { ShowLicenseInfo } from './license_info';
 import * as redux from 'react-redux-v7';
@@ -12,10 +14,10 @@ import { render } from '../../../lib/helper/rtl_helpers';
 
 describe('ShowLicenseInfo', () => {
   beforeEach(() => {
-    const spy = jest.spyOn(redux, 'useDispatch');
-    spy.mockReturnValue(jest.fn());
+    const spy = vi.spyOn(redux, 'useDispatch');
+    spy.mockReturnValue(vi.fn());
 
-    const spy1 = jest.spyOn(redux, 'useSelector');
+    const spy1 = vi.spyOn(redux, 'useSelector');
     spy1.mockReturnValue(true);
   });
 

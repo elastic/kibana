@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -15,43 +18,58 @@ import { ApiEndpoints } from './api_endpoints';
 import { useApiEndpoints } from './use_api_endpoints';
 import { useApiKeys } from './use_api_keys';
 
-jest.mock('./use_api_endpoints', () => ({
-  useApiEndpoints: jest.fn(),
-}));
+vi.mock('./use_api_endpoints', () => {
+      const mocked = {
+      useApiEndpoints: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_api_keys', () => ({
-  useApiKeys: jest.fn(),
-}));
+vi.mock('./use_api_keys', () => {
+      const mocked = {
+      useApiKeys: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./endpoint_field', () => ({
-  EndpointField: ({
-    label,
-    url,
-    dataTestSubjSuffix = '',
-  }: {
-    label?: string;
-    url?: string;
-    dataTestSubjSuffix?: string;
-  }) => (
-    <div data-test-subj={`endpointFieldStub${dataTestSubjSuffix}`} data-label={label ?? ''}>
-      {url}
-    </div>
-  ),
-}));
+vi.mock('./endpoint_field', () => {
+      const mocked = {
+      EndpointField: ({
+        label,
+        url,
+        dataTestSubjSuffix = '',
+      }: {
+        label?: string;
+        url?: string;
+        dataTestSubjSuffix?: string;
+      }) => (
+        <div data-test-subj={`endpointFieldStub${dataTestSubjSuffix}`} data-label={label ?? ''}>
+          {url}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./api_key_field', () => ({
-  ApiKeyField: ({ dataTestSubjSuffix = '' }: { dataTestSubjSuffix?: string }) => (
-    <div data-test-subj={`apiKeyFieldStub${dataTestSubjSuffix}`} />
-  ),
-}));
+vi.mock('./api_key_field', () => {
+      const mocked = {
+      ApiKeyField: ({ dataTestSubjSuffix = '' }: { dataTestSubjSuffix?: string }) => (
+        <div data-test-subj={`apiKeyFieldStub${dataTestSubjSuffix}`} />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseApiEndpoints = useApiEndpoints as jest.MockedFunction<typeof useApiEndpoints>;
-const mockUseApiKeys = useApiKeys as jest.MockedFunction<typeof useApiKeys>;
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseApiEndpoints = useApiEndpoints as MockedFunction<typeof useApiEndpoints>;
+const mockUseApiKeys = useApiKeys as MockedFunction<typeof useApiKeys>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 const renderApiEndpoints = () =>
   render(
@@ -80,7 +98,7 @@ describe('ApiEndpoints', () => {
     mockUseApiKeys.mockReturnValue({
       encodedApiKeys: {},
       keyCreatedBeforeByEndpointId: {},
-      createApiKey: jest.fn(),
+      createApiKey: vi.fn(),
     });
     mockUseKibana.mockReturnValue({
       services: {
@@ -94,15 +112,15 @@ describe('ApiEndpoints', () => {
         share: {
           url: {
             locators: {
-              get: jest.fn().mockReturnValue({
-                getUrl: jest.fn().mockReturnValue(new Promise<string>(() => {})),
+              get: vi.fn().mockReturnValue({
+                getUrl: vi.fn().mockReturnValue(new Promise<string>(() => {})),
               }),
             },
           },
         },
         http: {
           staticAssets: {
-            getPluginAssetHref: jest.fn().mockReturnValue('supabase.svg'),
+            getPluginAssetHref: vi.fn().mockReturnValue('supabase.svg'),
           },
         },
       },

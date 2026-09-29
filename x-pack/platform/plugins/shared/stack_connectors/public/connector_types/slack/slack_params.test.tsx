@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -34,7 +36,7 @@ describe('SlackParamsFields renders', () => {
       message: 'not the default message',
     };
 
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const { rerender } = renderWithI18n(
       <SlackParamsFields
         actionParams={actionParams}
@@ -67,7 +69,7 @@ describe('SlackParamsFields renders', () => {
       message: 'not the default message',
     };
 
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     const { rerender } = renderWithI18n(
       <SlackParamsFields
         actionParams={actionParams}

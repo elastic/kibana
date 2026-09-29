@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import * as redux from 'react-redux-v7';
 import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
@@ -12,20 +15,26 @@ import { useHasPendingMwChanges } from './use_has_pending_mw_changes';
 import { useFetchMaintenanceWindows } from '../../../hooks';
 import { selectDynamicSettings } from '../../../state/settings/selectors';
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useDispatch: jest.fn(),
-  useSelector: jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useDispatch: vi.fn(),
+      useSelector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks', () => ({
-  ...jest.requireActual('../../../hooks'),
-  useFetchMaintenanceWindows: jest.fn().mockReturnValue({ data: undefined }),
-}));
+vi.mock('../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../hooks')),
+      useFetchMaintenanceWindows: vi.fn().mockReturnValue({ data: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSelector = redux.useSelector as jest.MockedFunction<typeof redux.useSelector>;
-const mockDispatch = jest.fn();
-const mockUseFetchMWs = useFetchMaintenanceWindows as unknown as jest.MockedFunction<
+const mockUseSelector = redux.useSelector as MockedFunction<typeof redux.useSelector>;
+const mockDispatch = vi.fn();
+const mockUseFetchMWs = useFetchMaintenanceWindows as unknown as MockedFunction<
   () => {
     data?: {
       maintenanceWindows: Array<{
@@ -57,8 +66,8 @@ const setMWs = (mws: Array<ReturnType<typeof mockMW>>) => {
 
 describe('useHasPendingMwChanges', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (redux.useDispatch as jest.Mock).mockReturnValue(mockDispatch);
+    vi.clearAllMocks();
+    (redux.useDispatch as Mock).mockReturnValue(mockDispatch);
 
     mockUseFetchMWs.mockReturnValue({ data: undefined });
 

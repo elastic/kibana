@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getIndices, getIndicesViaResolve, responseToItemArray } from './get_indices';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { ResolveIndexResponseItemIndexAttrs } from '../types';
@@ -41,11 +43,11 @@ http.get.mockResolvedValue(successfulResolveResponse);
 
 describe('getIndices', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should work in a basic case', async () => {
-    const uncalledSearchClient = jest.fn();
+    const uncalledSearchClient = vi.fn();
     const result = await getIndices({
       http,
       pattern: 'kibana',
@@ -120,7 +122,7 @@ describe('getIndices', () => {
 
   describe('getIndicesViaResolve', () => {
     it('should encode the pattern for a working URI', async () => {
-      const spy = jest.spyOn(http, 'get');
+      const spy = vi.spyOn(http, 'get');
       const pattern = 'test-%';
       await getIndicesViaResolve({
         http,

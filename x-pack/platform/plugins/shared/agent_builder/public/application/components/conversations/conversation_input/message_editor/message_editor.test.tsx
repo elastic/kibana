@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MessageEditor } from './message_editor';
@@ -28,19 +30,22 @@ import {
 import { COMMAND_METADATA_ATTRIBUTE } from './command_badge/attributes';
 import { serializeEditorContent } from './serialize';
 
-jest.mock('./command_menu/cursor_rect', () => ({
-  getRectAtOffset: () => ({
-    left: 100,
-    top: 200,
-    bottom: 220,
-    right: 100,
-    width: 0,
-    height: 20,
-    x: 100,
-    y: 200,
-    toJSON: () => ({}),
-  }),
-}));
+vi.mock('./command_menu/cursor_rect', () => {
+      const mocked = {
+      getRectAtOffset: () => ({
+        left: 100,
+        top: 200,
+        bottom: 220,
+        right: 100,
+        width: 0,
+        height: 20,
+        x: 100,
+        y: 200,
+        toJSON: () => ({}),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const MockMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
   (_props, _ref) => <div />
@@ -63,7 +68,7 @@ const ClickableMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuCo
   )
 );
 
-const mockOnSubmit = jest.fn();
+const mockOnSubmit = vi.fn();
 
 const createMockMessageEditor = (): {
   messageEditor: MessageEditorInstance;
@@ -73,21 +78,21 @@ const createMockMessageEditor = (): {
   return {
     messageEditor: {
       ref: mockRef,
-      onChange: jest.fn(),
-      onFocus: jest.fn(),
+      onChange: vi.fn(),
+      onFocus: vi.fn(),
       commandMatch: { isActive: false, activeCommand: null, hasVisibleContent: true },
-      dismissActionMenu: jest.fn(),
-      handleCommandSelect: jest.fn(),
-      reportMenuContent: jest.fn(),
+      dismissActionMenu: vi.fn(),
+      handleCommandSelect: vi.fn(),
+      reportMenuContent: vi.fn(),
     },
     controller: {
-      clear: jest.fn(),
-      focus: jest.fn(),
-      getContent: jest.fn(() => ''),
-      setContent: jest.fn(),
+      clear: vi.fn(),
+      focus: vi.fn(),
+      getContent: vi.fn(() => ''),
+      setContent: vi.fn(),
       isEmpty: false,
-      getPlaceholderNames: jest.fn(() => []),
-      removePlaceholderByName: jest.fn(),
+      getPlaceholderNames: vi.fn(() => []),
+      removePlaceholderByName: vi.fn(),
     },
   };
 };
@@ -136,7 +141,7 @@ describe('createTextFragment', () => {
 
 describe('MessageEditor', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', () => {
@@ -469,7 +474,7 @@ describe('MessageEditor', () => {
   });
 
   it('calls onPasteFile and inserts a placeholder chip when pasting an image', () => {
-    const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
+    const onPasteFile = vi.fn().mockReturnValue('screenshot.png');
     const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
@@ -491,7 +496,7 @@ describe('MessageEditor', () => {
 
     const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
     const dataTransfer = {
-      getData: jest.fn().mockReturnValue(''),
+      getData: vi.fn().mockReturnValue(''),
       items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
     };
 
@@ -502,7 +507,7 @@ describe('MessageEditor', () => {
   });
 
   it('marks a pasted placeholder chip as uploading immediately', () => {
-    const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
+    const onPasteFile = vi.fn().mockReturnValue('screenshot.png');
     const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
@@ -526,7 +531,7 @@ describe('MessageEditor', () => {
     const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
     fireEvent.paste(editor, {
       clipboardData: {
-        getData: jest.fn().mockReturnValue(''),
+        getData: vi.fn().mockReturnValue(''),
         items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
       },
     });
@@ -537,7 +542,7 @@ describe('MessageEditor', () => {
   });
 
   it('removes data-uploading from a chip when its name leaves uploadingNames', () => {
-    const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
+    const onPasteFile = vi.fn().mockReturnValue('screenshot.png');
     const { messageEditor } = createMockMessageEditor();
     const { rerender } = render(
       <MessageEditor
@@ -561,7 +566,7 @@ describe('MessageEditor', () => {
     const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
     fireEvent.paste(editor, {
       clipboardData: {
-        getData: jest.fn().mockReturnValue(''),
+        getData: vi.fn().mockReturnValue(''),
         items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
       },
     });
@@ -583,7 +588,7 @@ describe('MessageEditor', () => {
   });
 
   it('pasting an image inserts a trailing non-breaking space and places the caret after it', () => {
-    const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
+    const onPasteFile = vi.fn().mockReturnValue('screenshot.png');
     const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
@@ -606,7 +611,7 @@ describe('MessageEditor', () => {
     const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
     fireEvent.paste(editor, {
       clipboardData: {
-        getData: jest.fn().mockReturnValue(''),
+        getData: vi.fn().mockReturnValue(''),
         items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
       },
     });
@@ -628,7 +633,7 @@ describe('MessageEditor', () => {
   });
 
   it('does not insert a placeholder when onPasteFile returns undefined', () => {
-    const onPasteFile = jest.fn().mockReturnValue(undefined);
+    const onPasteFile = vi.fn().mockReturnValue(undefined);
     const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
@@ -642,7 +647,7 @@ describe('MessageEditor', () => {
     const editor = screen.getByTestId('messageEditor');
     const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
     const dataTransfer = {
-      getData: jest.fn().mockReturnValue(''),
+      getData: vi.fn().mockReturnValue(''),
       items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
     };
 
@@ -652,7 +657,7 @@ describe('MessageEditor', () => {
   });
 
   it('plain-text paste still works when an image paste handler is registered', () => {
-    const onPasteFile = jest.fn();
+    const onPasteFile = vi.fn();
     const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
@@ -683,7 +688,7 @@ describe('MessageEditor', () => {
   });
 
   it('clicking the cross icon removes the chip and fires onChange and onAfterInput', () => {
-    const onAfterInput = jest.fn();
+    const onAfterInput = vi.fn();
     const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor

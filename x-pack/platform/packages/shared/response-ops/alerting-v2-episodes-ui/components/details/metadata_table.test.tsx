@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
@@ -16,7 +18,7 @@ const mockDataView = createStubDataView({ spec: { id: 'test-*', title: 'test-*' 
 
 describe('AlertEpisodeMetadataTable', () => {
   it('renders the provided table render function output', () => {
-    const renderTable = jest.fn(() => <div data-test-subj="mockTable" />);
+    const renderTable = vi.fn(() => <div data-test-subj="mockTable" />);
     render(
       <AlertEpisodeMetadataTable
         hit={mockHit}

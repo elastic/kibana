@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { applyMaxLagCutoff } from './extraction_window';
 
@@ -98,7 +100,7 @@ describe('applyMaxLagCutoff', () => {
 
     applyMaxLagCutoff({ fromDateISO, effectiveWindowEnd, lookbackPeriod, frequency, logger });
 
-    const warnArg = (logger.warn as jest.Mock).mock.calls[0][0] as string;
+    const warnArg = (logger.warn as Mock).mock.calls[0][0] as string;
     expect(warnArg).toContain(`from=${fromDateISO}`);
     expect(warnArg).toContain(`effectiveEnd=${effectiveWindowEnd}`);
   });

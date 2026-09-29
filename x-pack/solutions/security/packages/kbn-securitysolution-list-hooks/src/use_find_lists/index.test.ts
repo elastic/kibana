@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook, act } from '@testing-library/react';
 
 import { useFindLists } from '.';
@@ -13,14 +16,14 @@ import * as Api from '@kbn/securitysolution-list-api';
 
 import { getFoundListSchemaMock } from '../mocks/response/found_list_schema.mock';
 
-jest.mock('@kbn/securitysolution-list-api');
+vi.mock('@kbn/securitysolution-list-api');
 
 describe('useFindLists', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;
 
   beforeEach(() => {
     httpMock = httpServiceMock.createStartContract();
-    (Api.findLists as jest.Mock).mockResolvedValue(getFoundListSchemaMock());
+    (Api.findLists as Mock).mockResolvedValue(getFoundListSchemaMock());
   });
 
   it('invokes Api.findLists', async () => {

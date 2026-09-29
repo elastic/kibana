@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { logger } from 'elastic-apm-node';
 
 import type {
@@ -32,7 +34,7 @@ const dummyTypeSafeGuard = (
 
 describe('create ESO model version', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const inputType: EncryptedSavedObjectTypeRegistration = {
@@ -99,7 +101,7 @@ describe('create ESO model version', () => {
   });
 
   it('merges all applicable transforms', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
+    const instantiateServiceWithLegacyType = vi.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,
@@ -209,7 +211,7 @@ describe('create ESO model version', () => {
   });
 
   it('throws error on decryption failure if shouldTransformIfDecryptionFails is false', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
+    const instantiateServiceWithLegacyType = vi.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,
@@ -271,7 +273,7 @@ describe('create ESO model version', () => {
   });
 
   it('throws error on decryption failure if shouldTransformIfDecryptionFails is true but error is not encryption error', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
+    const instantiateServiceWithLegacyType = vi.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,
@@ -334,7 +336,7 @@ describe('create ESO model version', () => {
   });
 
   it('executes transformation on decryption failure if shouldTransformIfDecryptionFails is true and error is encryption error', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
+    const instantiateServiceWithLegacyType = vi.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,
@@ -414,7 +416,7 @@ describe('create ESO model version', () => {
   });
 
   it('throws error on transform failure', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
+    const instantiateServiceWithLegacyType = vi.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,
@@ -473,7 +475,7 @@ describe('create ESO model version', () => {
   });
 
   it('throws error on transform failure even if shouldMigrateIfDecryptionFails is true', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
+    const instantiateServiceWithLegacyType = vi.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,
@@ -533,7 +535,7 @@ describe('create ESO model version', () => {
   });
 
   it('throws error on encryption failure', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
+    const instantiateServiceWithLegacyType = vi.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,
@@ -602,7 +604,7 @@ describe('create ESO model version', () => {
   });
 
   it('throws error on encryption failure even if shouldMigrateIfDecryptionFails is true', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
+    const instantiateServiceWithLegacyType = vi.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,
@@ -674,7 +676,7 @@ describe('create ESO model version', () => {
   it('decrypts with input type, and encrypts with output type', () => {
     const serviceWithInputLegacyType = encryptedSavedObjectsServiceMock.create();
     const serviceWithOutputLegacyType = encryptedSavedObjectsServiceMock.create();
-    const instantiateServiceWithLegacyType = jest.fn();
+    const instantiateServiceWithLegacyType = vi.fn();
 
     function createEsoMv() {
       instantiateServiceWithLegacyType

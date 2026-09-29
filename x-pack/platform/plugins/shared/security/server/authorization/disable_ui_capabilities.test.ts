@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ElasticsearchFeature, KibanaFeature } from '@kbn/features-plugin/server';
 import { Actions } from '@kbn/security-authorization-core';
@@ -33,7 +35,7 @@ const createMockAuthz = (options: MockAuthzOptions) => {
   mock.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
     expect(request).toBe(mockRequest);
 
-    return jest.fn().mockImplementation((checkActions) => {
+    return vi.fn().mockImplementation((checkActions) => {
       if ('rejectCheckPrivileges' in options) {
         throw options.rejectCheckPrivileges;
       }
@@ -54,7 +56,7 @@ const createMockAuthz = (options: MockAuthzOptions) => {
   });
   mock.checkElasticsearchPrivilegesWithRequest.mockImplementation((request) => {
     expect(request).toBe(mockRequest);
-    return jest.fn().mockImplementation((privileges) => {});
+    return vi.fn().mockImplementation((privileges) => {});
   });
   return mock;
 };

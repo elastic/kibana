@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { Router } from '@kbn/shared-ux-router';
@@ -15,32 +17,44 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 
 import { CloneTransformSection } from './clone_transform_section';
 
-jest.mock('../../services/navigation');
+vi.mock('../../services/navigation');
 
-const mockUseSearchItems = jest.fn();
-const mockUseGetTransform = jest.fn();
+const mockUseSearchItems = vi.fn();
+const mockUseGetTransform = vi.fn();
 
-jest.mock('../../hooks', () => ({
-  useGetTransform: (...args: unknown[]) => mockUseGetTransform(...args),
-  useTransformCapabilities: () => ({
-    canGetTransform: true,
-    canPreviewTransform: true,
-    canCreateTransform: true,
-    canStartStopTransform: true,
-  }),
-}));
+vi.mock('../../hooks', () => {
+      const mocked = {
+      useGetTransform: (...args: unknown[]) => mockUseGetTransform(...args),
+      useTransformCapabilities: () => ({
+        canGetTransform: true,
+        canPreviewTransform: true,
+        canCreateTransform: true,
+        canStartStopTransform: true,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_documentation_links', () => ({
-  useDocumentationLinks: () => ({ esTransform: 'https://example.test' }),
-}));
+vi.mock('../../hooks/use_documentation_links', () => {
+      const mocked = {
+      useDocumentationLinks: () => ({ esTransform: 'https://example.test' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_search_items', () => ({
-  useSearchItems: () => mockUseSearchItems(),
-}));
+vi.mock('../../hooks/use_search_items', () => {
+      const mocked = {
+      useSearchItems: () => mockUseSearchItems(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../create_transform/components/wizard', () => ({
-  Wizard: () => <div data-test-subj="mockedCloneWizard" />,
-}));
+vi.mock('../create_transform/components/wizard', () => {
+      const mocked = {
+      Wizard: () => <div data-test-subj="mockedCloneWizard" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderCloneSection = (search = '?dataViewId=test-data-view') => {
   const history = createMemoryHistory({ initialEntries: [`/clone/transform-1${search}`] });
@@ -67,7 +81,7 @@ describe('Transform: <CloneTransformSection />', () => {
     mockUseSearchItems.mockReturnValue({
       error: undefined,
       searchItems: undefined,
-      setSavedObjectId: jest.fn(),
+      setSavedObjectId: vi.fn(),
     });
     mockUseGetTransform.mockReturnValue({
       data: undefined,
@@ -104,7 +118,7 @@ describe('Transform: <CloneTransformSection />', () => {
     mockUseSearchItems.mockReturnValue({
       error: undefined,
       searchItems: { id: 'test-data-view' },
-      setSavedObjectId: jest.fn(),
+      setSavedObjectId: vi.fn(),
     });
     mockUseGetTransform.mockReturnValue({
       data: {

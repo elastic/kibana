@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { BoundInferenceClient, Prompt, ToolMessage } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from './execute_as_reasoning_agent';
@@ -45,7 +48,7 @@ describe('external text with non-planning tool calls', () => {
   test('continues the loop instead of forcing completion, then completes normally', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest
+      prompt: vi
         .fn()
         .mockResolvedValueOnce({
           content: `internal${END_INTERNAL_REASONING_MARKER}${LONG_EXTERNAL}`,
@@ -62,15 +65,15 @@ describe('external text with non-planning tool calls', () => {
           tokens: 1,
         })
         .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
-    const fetchData = jest.fn().mockResolvedValue({ response: { result: 'ok' } });
+    const fetchData = vi.fn().mockResolvedValue({ response: { result: 'ok' } });
 
     const result = await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 2,
-      toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+      toolCallbacks: { fetch_data: fetchData, complete: vi.fn() },
       input: { foo: '' },
     });
 
@@ -100,7 +103,7 @@ describe('external text with non-planning tool calls', () => {
   test('executes two task tools and counts the turn once', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest
+      prompt: vi
         .fn()
         .mockResolvedValueOnce({
           content: `internal${END_INTERNAL_REASONING_MARKER}${LONG_EXTERNAL}`,
@@ -112,15 +115,15 @@ describe('external text with non-planning tool calls', () => {
         })
         .mockResolvedValueOnce({ content: 'mid', toolCalls: [], tokens: 1 })
         .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
-    const fetchData = jest.fn().mockResolvedValue({ response: { result: 'ok' } });
+    const fetchData = vi.fn().mockResolvedValue({ response: { result: 'ok' } });
 
     const result = await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 2,
-      toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+      toolCallbacks: { fetch_data: fetchData, complete: vi.fn() },
       input: { foo: '' },
     });
 
@@ -137,7 +140,7 @@ describe('external text with non-planning tool calls', () => {
   test('external text with only a reason tool call still completes', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest
+      prompt: vi
         .fn()
         .mockResolvedValueOnce({
           content: `internal${END_INTERNAL_REASONING_MARKER}${LONG_EXTERNAL}`,
@@ -147,13 +150,13 @@ describe('external text with non-planning tool calls', () => {
           tokens: 1,
         })
         .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
     const result = await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 2,
-      toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
+      toolCallbacks: { fetch_data: vi.fn(), complete: vi.fn() },
       input: { foo: '' },
     });
 
@@ -166,7 +169,7 @@ describe('external text with non-planning tool calls', () => {
   test('external text with no tool calls still forces a final response', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest
+      prompt: vi
         .fn()
         .mockResolvedValueOnce({
           content: `internal${END_INTERNAL_REASONING_MARKER}${LONG_EXTERNAL}`,
@@ -174,13 +177,13 @@ describe('external text with non-planning tool calls', () => {
           tokens: 1,
         })
         .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
     const result = await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 2,
-      toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
+      toolCallbacks: { fetch_data: vi.fn(), complete: vi.fn() },
       input: { foo: '' },
     });
 
@@ -192,7 +195,7 @@ describe('external text with non-planning tool calls', () => {
   test('low power continues correctly after external text with a task tool', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest
+      prompt: vi
         .fn()
         .mockResolvedValueOnce({
           content: `internal${END_INTERNAL_REASONING_MARKER}${LONG_EXTERNAL}`,
@@ -203,16 +206,16 @@ describe('external text with non-planning tool calls', () => {
         })
         .mockResolvedValueOnce({ content: 'mid', toolCalls: [], tokens: 1 })
         .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
-    const fetchData = jest.fn().mockResolvedValue({ response: { result: 'ok' } });
+    const fetchData = vi.fn().mockResolvedValue({ response: { result: 'ok' } });
 
     const result = await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       power: 'low',
       maxSteps: 2,
-      toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+      toolCallbacks: { fetch_data: fetchData, complete: vi.fn() },
       input: { foo: '' },
     });
 
@@ -236,21 +239,21 @@ describe('external text with non-planning tool calls', () => {
       tokens: 1,
     });
     const inferenceClient = {
-      prompt: jest
+      prompt: vi
         .fn()
         .mockResolvedValueOnce(externalTurn('x1'))
         .mockResolvedValueOnce(externalTurn('x2'))
         .mockResolvedValueOnce(externalTurn('x3'))
         .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
-    const fetchData = jest.fn().mockResolvedValue({ response: { result: 'ok' } });
+    const fetchData = vi.fn().mockResolvedValue({ response: { result: 'ok' } });
 
     const result = await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 3,
-      toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+      toolCallbacks: { fetch_data: fetchData, complete: vi.fn() },
       input: { foo: '' },
     });
 
@@ -267,7 +270,7 @@ describe('executeAsReasoningAgent', () => {
   test('returns final tool call when finalToolChoice is provided', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest.fn().mockResolvedValue({
+      prompt: vi.fn().mockResolvedValue({
         content: 'done',
         toolCalls: [
           {
@@ -278,15 +281,15 @@ describe('executeAsReasoningAgent', () => {
         ],
         tokens: 1,
       }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
     const result = await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 1,
       toolCallbacks: {
-        fetch_data: jest.fn(),
-        complete: jest.fn(),
+        fetch_data: vi.fn(),
+        complete: vi.fn(),
       },
       input: {
         foo: '',
@@ -302,7 +305,7 @@ describe('executeAsReasoningAgent', () => {
   test('throws when planning tool response includes additional tool calls', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest.fn().mockResolvedValue({
+      prompt: vi.fn().mockResolvedValue({
         content: 'thinking',
         toolCalls: [
           { type: 'function', function: { name: 'reason', arguments: {} }, toolCallId: 'a' },
@@ -310,14 +313,14 @@ describe('executeAsReasoningAgent', () => {
         ],
         tokens: 1,
       }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
     await expect(
       executeAsReasoningAgent({
         inferenceClient,
         prompt,
         maxSteps: 1,
-        toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
+        toolCallbacks: { fetch_data: vi.fn(), complete: vi.fn() },
         input: {
           foo: '',
         },
@@ -328,7 +331,7 @@ describe('executeAsReasoningAgent', () => {
   test('executes task tool callbacks and injects stepsLeft', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest
+      prompt: vi
         .fn()
         .mockResolvedValueOnce({
           content: 'call tool',
@@ -338,15 +341,15 @@ describe('executeAsReasoningAgent', () => {
           tokens: 1,
         })
         .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
-    const fetchData = jest.fn().mockResolvedValue({ response: { result: 'ok' } });
+    const fetchData = vi.fn().mockResolvedValue({ response: { result: 'ok' } });
 
     await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 1,
-      toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+      toolCallbacks: { fetch_data: fetchData, complete: vi.fn() },
       input: { foo: '' },
     });
 
@@ -362,7 +365,7 @@ describe('executeAsReasoningAgent', () => {
   test('accumulates token counts across every step', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest
+      prompt: vi
         .fn()
         .mockResolvedValueOnce({
           content: `reasoning${END_INTERNAL_REASONING_MARKER}`,
@@ -378,15 +381,15 @@ describe('executeAsReasoningAgent', () => {
           ],
           tokens: { prompt: 250, completion: 400, total: 650, cached: 10 },
         }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
     const result = await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 2,
       toolCallbacks: {
-        fetch_data: jest.fn().mockResolvedValue({ response: { result: 'ok' } }),
-        complete: jest.fn(),
+        fetch_data: vi.fn().mockResolvedValue({ response: { result: 'ok' } }),
+        complete: vi.fn(),
       },
       input: { foo: '' },
       finalToolChoice: { type: 'function', function: 'complete' },
@@ -399,7 +402,7 @@ describe('executeAsReasoningAgent', () => {
   test('completes next turn when content includes external part after END_INTERNAL marker', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest
+      prompt: vi
         .fn()
         .mockResolvedValueOnce({
           content: `internal${END_INTERNAL_REASONING_MARKER}this should trigger completion on next turn because it is long enough to pass threshold of buffer characters`,
@@ -407,13 +410,13 @@ describe('executeAsReasoningAgent', () => {
           tokens: 1,
         })
         .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
     await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 2,
-      toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
+      toolCallbacks: { fetch_data: vi.fn(), complete: vi.fn() },
       input: { foo: '' },
     });
 
@@ -423,7 +426,7 @@ describe('executeAsReasoningAgent', () => {
   test('tool callback error is captured and injected into tool response', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest
+      prompt: vi
         .fn()
         .mockResolvedValueOnce({
           content: 'call tool',
@@ -433,15 +436,15 @@ describe('executeAsReasoningAgent', () => {
           tokens: 1,
         })
         .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
-    const fetchData = jest.fn().mockRejectedValue(new Error('nope'));
+    const fetchData = vi.fn().mockRejectedValue(new Error('nope'));
 
     await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 1,
-      toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+      toolCallbacks: { fetch_data: fetchData, complete: vi.fn() },
       input: { foo: '' },
     });
 
@@ -463,7 +466,7 @@ describe('executeAsReasoningAgent', () => {
   test('string tool callback result is mapped to response.result', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest
+      prompt: vi
         .fn()
         .mockResolvedValueOnce({
           content: 'call tool',
@@ -473,15 +476,15 @@ describe('executeAsReasoningAgent', () => {
           tokens: 1,
         })
         .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
-    const fetchData = jest.fn().mockResolvedValue({ response: 'ok' });
+    const fetchData = vi.fn().mockResolvedValue({ response: 'ok' });
 
     await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 1,
-      toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+      toolCallbacks: { fetch_data: fetchData, complete: vi.fn() },
       input: { foo: '' },
     });
 
@@ -496,15 +499,15 @@ describe('executeAsReasoningAgent', () => {
   test('planning tools merged when not completing, omitted when completing; toolChoice set on completing', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest.fn().mockResolvedValue({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+      prompt: vi.fn().mockResolvedValue({ content: 'final', toolCalls: [], tokens: 1 }),
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
     // First call: not completing, planning tools should be merged
     await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 1,
-      toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
+      toolCallbacks: { fetch_data: vi.fn(), complete: vi.fn() },
       input: { foo: '' },
     });
     const firstCall = inferenceClient.prompt.mock.calls[0][0];
@@ -517,11 +520,11 @@ describe('executeAsReasoningAgent', () => {
       inferenceClient,
       prompt,
       maxSteps: 0,
-      toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
+      toolCallbacks: { fetch_data: vi.fn(), complete: vi.fn() },
       input: { foo: '' },
       finalToolChoice: { type: 'function', function: 'complete' },
     });
-    const completingCall = (inferenceClient.prompt as jest.Mock).mock.calls[0][0];
+    const completingCall = (inferenceClient.prompt as Mock).mock.calls[0][0];
 
     expect(completingCall.toolChoice).toEqual({ type: 'function', function: 'complete' });
   });
@@ -529,14 +532,14 @@ describe('executeAsReasoningAgent', () => {
   test('input is sanitized on completion (system tool calls removed)', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest.fn().mockResolvedValue({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+      prompt: vi.fn().mockResolvedValue({ content: 'final', toolCalls: [], tokens: 1 }),
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
     const res = await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 0,
-      toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
+      toolCallbacks: { fetch_data: vi.fn(), complete: vi.fn() },
       input: { foo: '' },
       finalToolChoice: { type: 'function', function: 'complete' },
     });
@@ -551,7 +554,7 @@ describe('executeAsReasoningAgent', () => {
   test('earlier reason tool calls are pruned', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest
+      prompt: vi
         .fn()
         .mockResolvedValueOnce({
           content: 'gathering-1',
@@ -568,15 +571,15 @@ describe('executeAsReasoningAgent', () => {
           tokens: 1,
         })
         .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
     await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 2,
       toolCallbacks: {
-        fetch_data: jest.fn().mockResolvedValue({ response: 'ok' }),
-        complete: jest.fn(),
+        fetch_data: vi.fn().mockResolvedValue({ response: 'ok' }),
+        complete: vi.fn(),
       },
       input: { foo: '' },
     });
@@ -602,7 +605,7 @@ describe('executeAsReasoningAgent', () => {
     const prompt = makePrompt();
     const maxDurationMs = 500;
     const inferenceClient = {
-      prompt: jest
+      prompt: vi
         .fn()
         .mockResolvedValueOnce({
           content: 'call tool',
@@ -622,22 +625,22 @@ describe('executeAsReasoningAgent', () => {
           ],
           tokens: 1,
         }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
-    const dateNowSpy = jest
+    const dateNowSpy = vi
       .spyOn(Date, 'now')
       .mockReturnValueOnce(0)
       .mockReturnValueOnce(100)
       .mockReturnValue(600);
 
-    const fetchData = jest.fn().mockResolvedValue({ response: { result: 'ok' } });
+    const fetchData = vi.fn().mockResolvedValue({ response: { result: 'ok' } });
 
     const result = await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxDurationMs,
       maxSteps: 2,
-      toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+      toolCallbacks: { fetch_data: fetchData, complete: vi.fn() },
       input: { foo: '' },
       finalToolChoice: { type: 'function', function: 'complete' },
     });
@@ -654,7 +657,7 @@ describe('executeAsReasoningAgent', () => {
   test('when maxDurationMs is omitted, duration budget is not applied', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest
+      prompt: vi
         .fn()
         .mockResolvedValueOnce({
           content: 'call tool',
@@ -674,22 +677,22 @@ describe('executeAsReasoningAgent', () => {
           ],
           tokens: 1,
         }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
     // Elapsed would exceed 500ms on second iteration, but we don't set maxDurationMs
-    const dateNowSpy = jest
+    const dateNowSpy = vi
       .spyOn(Date, 'now')
       .mockReturnValueOnce(0)
       .mockReturnValueOnce(100)
       .mockReturnValue(600);
 
-    const fetchData = jest.fn().mockResolvedValue({ response: { result: 'ok' } });
+    const fetchData = vi.fn().mockResolvedValue({ response: { result: 'ok' } });
 
     await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 2,
-      toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+      toolCallbacks: { fetch_data: fetchData, complete: vi.fn() },
       input: { foo: '' },
       finalToolChoice: { type: 'function', function: 'complete' },
     });
@@ -705,8 +708,8 @@ describe('executeAsReasoningAgent', () => {
   test('throws when abortSignal is already aborted before starting', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest.fn().mockResolvedValue({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+      prompt: vi.fn().mockResolvedValue({ content: 'final', toolCalls: [], tokens: 1 }),
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
     const abortController = new AbortController();
     abortController.abort();
@@ -717,7 +720,7 @@ describe('executeAsReasoningAgent', () => {
         prompt,
         maxSteps: 1,
         abortSignal: abortController.signal,
-        toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
+        toolCallbacks: { fetch_data: vi.fn(), complete: vi.fn() },
         input: { foo: '' },
       })
     ).rejects.toThrow('Request was aborted');
@@ -731,7 +734,7 @@ describe('executeAsReasoningAgent', () => {
 
     let callCount = 0;
     const inferenceClient = {
-      prompt: jest.fn().mockImplementation(() => {
+      prompt: vi.fn().mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
           return {
@@ -749,9 +752,9 @@ describe('executeAsReasoningAgent', () => {
         abortController.abort();
         return { content: 'final', toolCalls: [], tokens: 1 };
       }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
-    const fetchData = jest.fn().mockResolvedValue({ response: { result: 'ok' } });
+    const fetchData = vi.fn().mockResolvedValue({ response: { result: 'ok' } });
 
     await expect(
       executeAsReasoningAgent({
@@ -759,7 +762,7 @@ describe('executeAsReasoningAgent', () => {
         prompt,
         maxSteps: 3,
         abortSignal: abortController.signal,
-        toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+        toolCallbacks: { fetch_data: fetchData, complete: vi.fn() },
         input: { foo: '' },
       })
     ).rejects.toThrow('Request was aborted');
@@ -773,10 +776,10 @@ describe('executeAsReasoningAgent', () => {
     abortController.abort();
 
     const inferenceClient = {
-      prompt: jest.fn().mockResolvedValue({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+      prompt: vi.fn().mockResolvedValue({ content: 'final', toolCalls: [], tokens: 1 }),
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
-    const fetchData = jest.fn();
+    const fetchData = vi.fn();
 
     await expect(
       executeAsReasoningAgent({
@@ -784,7 +787,7 @@ describe('executeAsReasoningAgent', () => {
         prompt,
         maxSteps: 2,
         abortSignal: abortController.signal,
-        toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+        toolCallbacks: { fetch_data: fetchData, complete: vi.fn() },
         input: { foo: '' },
       })
     ).rejects.toThrow('Request was aborted');
@@ -798,15 +801,15 @@ describe('executeAsReasoningAgent', () => {
     const abortController = new AbortController();
 
     const inferenceClient = {
-      prompt: jest.fn().mockResolvedValue({ content: 'final', toolCalls: [], tokens: 1 }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+      prompt: vi.fn().mockResolvedValue({ content: 'final', toolCalls: [], tokens: 1 }),
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
     await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 1,
       abortSignal: abortController.signal,
-      toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
+      toolCallbacks: { fetch_data: vi.fn(), complete: vi.fn() },
       input: { foo: '' },
     });
 
@@ -821,20 +824,20 @@ describe('external text with a configured final tool', () => {
   test('returns the final tool immediately without an additional inference turn', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest.fn().mockResolvedValue({
+      prompt: vi.fn().mockResolvedValue({
         content: `internal${END_INTERNAL_REASONING_MARKER}${LONG_EXTERNAL}`,
         toolCalls: [
           { type: 'function', function: { name: 'complete', arguments: {} }, toolCallId: 'c' },
         ],
         tokens: 1,
       }),
-    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+    } as Partial<Mocked<BoundInferenceClient>> as Mocked<BoundInferenceClient>;
 
     const result = await executeAsReasoningAgent({
       inferenceClient,
       prompt,
       maxSteps: 2,
-      toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
+      toolCallbacks: { fetch_data: vi.fn(), complete: vi.fn() },
       input: { foo: '' },
       finalToolChoice: { type: 'function', function: 'complete' },
     });

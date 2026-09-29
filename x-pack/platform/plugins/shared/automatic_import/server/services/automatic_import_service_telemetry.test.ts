@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import expect from 'expect';
 import type { ReplaySubject } from 'rxjs';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -39,10 +42,10 @@ interface AutomaticImportServicePrivate {
   savedObjectService: AutomaticImportSavedObjectService | null;
   samplesIndexService:
     | AutomaticImportSamplesIndexService
-    | Partial<Record<'addSamplesToDataStream' | 'deleteSamplesForDataStream', jest.Mock>>;
+    | Partial<Record<'addSamplesToDataStream' | 'deleteSamplesForDataStream', Mock>>;
   taskManagerService:
     | TaskManagerService
-    | Partial<Record<'removeDataStreamCreationTask', jest.Mock>>;
+    | Partial<Record<'removeDataStreamCreationTask', Mock>>;
 }
 
 interface TaskManagerWithPrivate {
@@ -50,7 +53,7 @@ interface TaskManagerWithPrivate {
     | AutomaticImportSavedObjectService
     | Record<string, unknown>
     | null;
-  agentService: { invokeAutomaticImportAgent: jest.Mock };
+  agentService: { invokeAutomaticImportAgent: Mock };
   runTask: (...args: unknown[]) => Promise<unknown>;
 }
 
@@ -61,11 +64,11 @@ const asTaskManagerPrivate = (tm: TaskManagerService): TaskManagerWithPrivate =>
   tm as unknown as TaskManagerWithPrivate;
 
 // Mock the AutomaticImportSamplesIndexService
-jest.mock('./samples_index/index_service', () => {
+vi.mock('./samples_index/index_service', () => {
   return {
-    AutomaticImportSamplesIndexService: jest.fn().mockImplementation(() => ({
-      createSamplesDocs: jest.fn().mockResolvedValue(undefined),
-      initialize: jest.fn(),
+    AutomaticImportSamplesIndexService: vi.fn().mockImplementation(() => ({
+      createSamplesDocs: vi.fn().mockResolvedValue(undefined),
+      initialize: vi.fn(),
     })),
   };
 });
@@ -73,14 +76,14 @@ jest.mock('./samples_index/index_service', () => {
 describe('AutomaticImportSetupService', () => {
   let service: AutomaticImportService;
   let mockLoggerFactory: ReturnType<typeof loggerMock.create>;
-  let mockSavedObjectsSetup: jest.Mocked<SavedObjectsServiceSetup>;
+  let mockSavedObjectsSetup: Mocked<SavedObjectsServiceSetup>;
   let mockSavedObjectsClient: SavedObjectsClient;
-  let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
-  let mockTaskManagerStart: jest.Mocked<TaskManagerStartContract>;
+  let mockTaskManagerSetup: Mocked<TaskManagerSetupContract>;
+  let mockTaskManagerStart: Mocked<TaskManagerStartContract>;
   let mockCoreSetup: ReturnType<typeof createCoreSetupMock>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockLoggerFactory = loggerMock.create();
     mockSavedObjectsSetup = savedObjectsServiceMock.createSetupContract();
     mockSavedObjectsClient = savedObjectsClientMock.create() as unknown as SavedObjectsClient;
@@ -88,19 +91,19 @@ describe('AutomaticImportSetupService', () => {
 
     // Mock TaskManager contracts
     mockTaskManagerSetup = {
-      registerTaskDefinitions: jest.fn(),
-    } as unknown as jest.Mocked<TaskManagerSetupContract>;
+      registerTaskDefinitions: vi.fn(),
+    } as unknown as Mocked<TaskManagerSetupContract>;
 
     mockTaskManagerStart = {
-      schedule: jest.fn(),
-      runSoon: jest.fn(),
-      get: jest.fn(),
-      ensureScheduled: jest.fn(),
-    } as unknown as jest.Mocked<TaskManagerStartContract>;
+      schedule: vi.fn(),
+      runSoon: vi.fn(),
+      get: vi.fn(),
+      ensureScheduled: vi.fn(),
+    } as unknown as Mocked<TaskManagerStartContract>;
 
     const mockAnalytics = {
-      reportEvent: jest.fn(),
-      registerEventType: jest.fn(),
+      reportEvent: vi.fn(),
+      registerEventType: vi.fn(),
     } as unknown as AnalyticsServiceSetup;
 
     service = new AutomaticImportService(
@@ -113,10 +116,8 @@ describe('AutomaticImportSetupService', () => {
   });
 
   describe('constructor', () => {
-    it('should initialize the AutomaticImportSamplesIndexService with correct parameters', () => {
-      const { AutomaticImportSamplesIndexService: MockedService } = jest.requireMock(
-        './samples_index/index_service'
-      );
+    it('should initialize the AutomaticImportSamplesIndexService with correct parameters', async () => {
+      const { AutomaticImportSamplesIndexService: MockedService } = (await vi.importMock('./samples_index/index_service'));
 
       expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory);
     });
@@ -193,19 +194,19 @@ describe('AutomaticImportSetupService', () => {
 
   describe('approveIntegration', () => {
     it('should update integration status to approved and bump version (expectedVersion from request)', async () => {
-      const mockGetIntegration = jest.fn().mockResolvedValue({
+      const mockGetIntegration = vi.fn().mockResolvedValue({
         integration_id: 'integration-123',
         created_by: 'creator',
         status: 'pending',
         metadata: { title: 't', description: 'd', version: '0.0.1' },
       });
-      const mockGetAllDataStreams = jest
+      const mockGetAllDataStreams = vi
         .fn()
         .mockResolvedValue([
           { job_info: { status: 'completed' } },
           { job_info: { status: 'completed' } },
         ]);
-      const mockUpdateIntegration = jest.fn().mockResolvedValue({});
+      const mockUpdateIntegration = vi.fn().mockResolvedValue({});
 
       asPrivate(service).savedObjectService = {
         getIntegration: mockGetIntegration,
@@ -251,17 +252,17 @@ describe('AutomaticImportSetupService', () => {
           changes: [{ description: 'Initial release of t', type: 'enhancement', link: '' }],
         },
       ];
-      const mockGetIntegration = jest.fn().mockResolvedValue({
+      const mockGetIntegration = vi.fn().mockResolvedValue({
         integration_id: 'integration-123',
         created_by: 'creator',
         status: 'approved',
         metadata: { title: 't', description: 'd', version: '1.0.0' },
         changelog: existingChangelog,
       });
-      const mockGetAllDataStreams = jest
+      const mockGetAllDataStreams = vi
         .fn()
         .mockResolvedValue([{ job_info: { status: 'completed' } }]);
-      const mockUpdateIntegration = jest.fn().mockResolvedValue({});
+      const mockUpdateIntegration = vi.fn().mockResolvedValue({});
 
       asPrivate(service).savedObjectService = {
         getIntegration: mockGetIntegration,
@@ -286,14 +287,14 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should not approve integration with no data streams', async () => {
-      const mockGetIntegration = jest.fn().mockResolvedValue({
+      const mockGetIntegration = vi.fn().mockResolvedValue({
         integration_id: 'integration-empty',
         created_by: 'creator',
         status: 'pending',
         metadata: { title: 't', description: 'd', version: '0.0.1' },
       });
-      const mockGetAllDataStreams = jest.fn().mockResolvedValue([]);
-      const mockUpdateIntegration = jest.fn().mockResolvedValue({});
+      const mockGetAllDataStreams = vi.fn().mockResolvedValue([]);
+      const mockUpdateIntegration = vi.fn().mockResolvedValue({});
 
       asPrivate(service).savedObjectService = {
         getIntegration: mockGetIntegration,
@@ -316,19 +317,19 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should not approve integration if any data stream is not completed', async () => {
-      const mockGetIntegration = jest.fn().mockResolvedValue({
+      const mockGetIntegration = vi.fn().mockResolvedValue({
         integration_id: 'integration-123',
         created_by: 'creator',
         status: 'pending',
         metadata: { title: 't', description: 'd', version: '0.0.1' },
       });
-      const mockGetAllDataStreams = jest
+      const mockGetAllDataStreams = vi
         .fn()
         .mockResolvedValue([
           { job_info: { status: 'completed' } },
           { job_info: { status: 'processing' } },
         ]);
-      const mockUpdateIntegration = jest.fn();
+      const mockUpdateIntegration = vi.fn();
 
       asPrivate(service).savedObjectService = {
         getIntegration: mockGetIntegration,
@@ -351,16 +352,16 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should propagate errors from saved object service', async () => {
-      const mockGetIntegration = jest.fn().mockResolvedValue({
+      const mockGetIntegration = vi.fn().mockResolvedValue({
         integration_id: 'integration-123',
         created_by: 'creator',
         status: 'pending',
         metadata: { title: 't', description: 'd', version: '0.0.1' },
       });
-      const mockGetAllDataStreams = jest
+      const mockGetAllDataStreams = vi
         .fn()
         .mockResolvedValue([{ job_info: { status: 'completed' } }]);
-      const mockUpdateIntegration = jest
+      const mockUpdateIntegration = vi
         .fn()
         .mockRejectedValue(new Error('Failed to update integration'));
 
@@ -384,8 +385,8 @@ describe('AutomaticImportSetupService', () => {
   describe('stop', () => {
     it('should complete the pluginStop$ subject', () => {
       const pluginStop$ = asPrivate(service).pluginStop$;
-      const nextSpy = jest.spyOn(pluginStop$, 'next');
-      const completeSpy = jest.spyOn(pluginStop$, 'complete');
+      const nextSpy = vi.spyOn(pluginStop$, 'next');
+      const completeSpy = vi.spyOn(pluginStop$, 'complete');
 
       service.stop();
 
@@ -394,30 +395,34 @@ describe('AutomaticImportSetupService', () => {
       expect(completeSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should emit to all subscribers before completing', (done) => {
-      const pluginStop$ = asPrivate(service).pluginStop$;
-      let emittedValue: void | undefined;
-      let completed = false;
+    it('should emit to all subscribers before completing', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      pluginStop$.subscribe({
-        next: (value: void) => {
-          emittedValue = value;
-        },
-        complete: () => {
-          completed = true;
-          expect(emittedValue).toBeUndefined();
-          expect(completed).toBe(true);
-          done();
-        },
-      });
+              const pluginStop$ = asPrivate(service).pluginStop$;
+              let emittedValue: void | undefined;
+              let completed = false;
 
-      service.stop();
-    });
+              pluginStop$.subscribe({
+                next: (value: void) => {
+                  emittedValue = value;
+                },
+                complete: () => {
+                  completed = true;
+                  expect(emittedValue).toBeUndefined();
+                  expect(completed).toBe(true);
+                  done();
+                },
+              });
+
+              service.stop();
+            
+        }));
 
     it('should be safe to call multiple times', () => {
       const pluginStop$ = asPrivate(service).pluginStop$;
-      const nextSpy = jest.spyOn(pluginStop$, 'next');
-      const completeSpy = jest.spyOn(pluginStop$, 'complete');
+      const nextSpy = vi.spyOn(pluginStop$, 'next');
+      const completeSpy = vi.spyOn(pluginStop$, 'complete');
 
       service.stop();
       service.stop();
@@ -439,7 +444,7 @@ describe('AutomaticImportSetupService', () => {
       };
 
       const mockResult = { items: [], errors: false };
-      const mockAddSamples = jest.fn().mockResolvedValue(mockResult);
+      const mockAddSamples = vi.fn().mockResolvedValue(mockResult);
 
       asPrivate(service).samplesIndexService = {
         addSamplesToDataStream: mockAddSamples,
@@ -461,7 +466,7 @@ describe('AutomaticImportSetupService', () => {
       };
 
       const mockResult = { items: [], errors: false };
-      const mockAddSamples = jest.fn().mockResolvedValue(mockResult);
+      const mockAddSamples = vi.fn().mockResolvedValue(mockResult);
 
       asPrivate(service).samplesIndexService = {
         addSamplesToDataStream: mockAddSamples,
@@ -485,7 +490,7 @@ describe('AutomaticImportSetupService', () => {
         createdBy: 'admin',
       };
 
-      const mockAddSamples = jest.fn().mockResolvedValue({});
+      const mockAddSamples = vi.fn().mockResolvedValue({});
 
       asPrivate(service).samplesIndexService = {
         addSamplesToDataStream: mockAddSamples,
@@ -515,7 +520,7 @@ describe('AutomaticImportSetupService', () => {
       };
 
       const mockError = new Error('Failed to add samples');
-      const mockAddSamples = jest.fn().mockRejectedValue(mockError);
+      const mockAddSamples = vi.fn().mockRejectedValue(mockError);
 
       asPrivate(service).samplesIndexService = {
         addSamplesToDataStream: mockAddSamples,
@@ -535,10 +540,10 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should delete data stream and call all required services', async () => {
-      const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 5 });
-      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
-      const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
-      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
+      const mockDeleteSamples = vi.fn().mockResolvedValue({ deleted: 5 });
+      const mockRemoveTask = vi.fn().mockResolvedValue(undefined);
+      const mockDeleteSavedObject = vi.fn().mockResolvedValue(undefined);
+      const mockUpdateStatus = vi.fn().mockResolvedValue(undefined);
 
       asPrivate(service).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -549,7 +554,7 @@ describe('AutomaticImportSetupService', () => {
       asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
-        getIntegration: jest.fn().mockResolvedValue({ status: 'completed' }),
+        getIntegration: vi.fn().mockResolvedValue({ status: 'completed' }),
       } as unknown as AutomaticImportSavedObjectService;
 
       await service.deleteDataStream('integration-123', 'data-stream-456');
@@ -572,10 +577,10 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should pass options to saved object service delete', async () => {
-      const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
-      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
-      const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
-      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
+      const mockDeleteSamples = vi.fn().mockResolvedValue({ deleted: 0 });
+      const mockRemoveTask = vi.fn().mockResolvedValue(undefined);
+      const mockDeleteSavedObject = vi.fn().mockResolvedValue(undefined);
+      const mockUpdateStatus = vi.fn().mockResolvedValue(undefined);
       const options = { force: true };
 
       asPrivate(service).samplesIndexService = {
@@ -587,7 +592,7 @@ describe('AutomaticImportSetupService', () => {
       asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
-        getIntegration: jest.fn().mockResolvedValue({ status: 'completed' }),
+        getIntegration: vi.fn().mockResolvedValue({ status: 'completed' }),
       } as unknown as AutomaticImportSavedObjectService;
 
       await service.deleteDataStream('integration-123', 'data-stream-456', options);
@@ -608,10 +613,10 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should still delete saved object when task manager removal fails', async () => {
-      const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
-      const mockRemoveTask = jest.fn().mockRejectedValue(new Error('Task removal failed'));
-      const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
-      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
+      const mockDeleteSamples = vi.fn().mockResolvedValue({ deleted: 0 });
+      const mockRemoveTask = vi.fn().mockRejectedValue(new Error('Task removal failed'));
+      const mockDeleteSavedObject = vi.fn().mockResolvedValue(undefined);
+      const mockUpdateStatus = vi.fn().mockResolvedValue(undefined);
 
       asPrivate(service).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -622,7 +627,7 @@ describe('AutomaticImportSetupService', () => {
       asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
-        getIntegration: jest.fn().mockResolvedValue({ status: 'completed' }),
+        getIntegration: vi.fn().mockResolvedValue({ status: 'completed' }),
       } as unknown as AutomaticImportSavedObjectService;
 
       await service.deleteDataStream('integration-123', 'data-stream-456');
@@ -637,10 +642,10 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should still delete saved object when samples index deletion fails', async () => {
-      const mockDeleteSamples = jest.fn().mockRejectedValue(new Error('Sample deletion failed'));
-      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
-      const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
-      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
+      const mockDeleteSamples = vi.fn().mockRejectedValue(new Error('Sample deletion failed'));
+      const mockRemoveTask = vi.fn().mockResolvedValue(undefined);
+      const mockDeleteSavedObject = vi.fn().mockResolvedValue(undefined);
+      const mockUpdateStatus = vi.fn().mockResolvedValue(undefined);
 
       asPrivate(service).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -651,7 +656,7 @@ describe('AutomaticImportSetupService', () => {
       asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
-        getIntegration: jest.fn().mockResolvedValue({ status: 'completed' }),
+        getIntegration: vi.fn().mockResolvedValue({ status: 'completed' }),
       } as unknown as AutomaticImportSavedObjectService;
 
       await service.deleteDataStream('integration-123', 'data-stream-456');
@@ -666,12 +671,12 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should handle errors from saved object service', async () => {
-      const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
-      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
-      const mockDeleteSavedObject = jest
+      const mockDeleteSamples = vi.fn().mockResolvedValue({ deleted: 0 });
+      const mockRemoveTask = vi.fn().mockResolvedValue(undefined);
+      const mockDeleteSavedObject = vi
         .fn()
         .mockRejectedValue(new Error('Saved object deletion failed'));
-      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
+      const mockUpdateStatus = vi.fn().mockResolvedValue(undefined);
 
       asPrivate(service).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -691,17 +696,17 @@ describe('AutomaticImportSetupService', () => {
 
     it('should execute operations in correct order', async () => {
       const executionOrder: string[] = [];
-      const mockDeleteSamples = jest.fn().mockImplementation(async () => {
+      const mockDeleteSamples = vi.fn().mockImplementation(async () => {
         executionOrder.push('deleteSamples');
         return { deleted: 0 };
       });
-      const mockRemoveTask = jest.fn().mockImplementation(async () => {
+      const mockRemoveTask = vi.fn().mockImplementation(async () => {
         executionOrder.push('removeTask');
       });
-      const mockDeleteSavedObject = jest.fn().mockImplementation(async () => {
+      const mockDeleteSavedObject = vi.fn().mockImplementation(async () => {
         executionOrder.push('deleteSavedObject');
       });
-      const mockUpdateStatus = jest.fn().mockImplementation(async () => {
+      const mockUpdateStatus = vi.fn().mockImplementation(async () => {
         executionOrder.push('updateStatus');
       });
 
@@ -714,7 +719,7 @@ describe('AutomaticImportSetupService', () => {
       asPrivate(service).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
         updateDataStreamStatus: mockUpdateStatus,
-        getIntegration: jest.fn().mockResolvedValue({ status: 'completed' }),
+        getIntegration: vi.fn().mockResolvedValue({ status: 'completed' }),
       } as unknown as AutomaticImportSavedObjectService;
 
       await service.deleteDataStream('integration-123', 'data-stream-456');
@@ -730,7 +735,7 @@ describe('AutomaticImportSetupService', () => {
 
   describe('getDataStreamResults', () => {
     it('returns ingest_pipeline as JSON string and results when completed', async () => {
-      const mockGetDataStream = jest.fn().mockResolvedValue({
+      const mockGetDataStream = vi.fn().mockResolvedValue({
         attributes: {
           job_info: { status: 'completed' },
           result: {
@@ -750,7 +755,7 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('throws when data stream is not completed', async () => {
-      const mockGetDataStream = jest.fn().mockResolvedValue({
+      const mockGetDataStream = vi.fn().mockResolvedValue({
         attributes: {
           job_info: { status: 'processing' },
           result: {},
@@ -767,7 +772,7 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('throws when data stream is failed', async () => {
-      const mockGetDataStream = jest.fn().mockResolvedValue({
+      const mockGetDataStream = vi.fn().mockResolvedValue({
         attributes: {
           job_info: { status: 'failed' },
           result: {},
@@ -784,7 +789,7 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('returns empty pipeline and field_mapping when ingest pipeline is missing but completed', async () => {
-      const mockGetDataStream = jest.fn().mockResolvedValue({
+      const mockGetDataStream = vi.fn().mockResolvedValue({
         attributes: {
           job_info: { status: 'completed' },
           result: { pipeline_docs: [{ a: 1 }] },
@@ -805,9 +810,7 @@ describe('AutomaticImportSetupService', () => {
 
   describe('integration', () => {
     it('should properly initialize and setup the service', async () => {
-      const { AutomaticImportSamplesIndexService: MockedService } = jest.requireMock(
-        './samples_index/index_service'
-      );
+      const { AutomaticImportSamplesIndexService: MockedService } = (await vi.importMock('./samples_index/index_service'));
 
       // Verify constructor was called
       expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory);
@@ -833,10 +836,8 @@ describe('AutomaticImportSetupService', () => {
       expect(pluginStop$Before).toBe(pluginStop$After);
     });
 
-    it('should initialize samples index service with logger factory only', () => {
-      const { AutomaticImportSamplesIndexService: MockedService } = jest.requireMock(
-        './samples_index/index_service'
-      );
+    it('should initialize samples index service with logger factory only', async () => {
+      const { AutomaticImportSamplesIndexService: MockedService } = (await vi.importMock('./samples_index/index_service'));
 
       const constructorCall = MockedService.mock.calls[0];
       expect(constructorCall[0]).toBe(mockLoggerFactory);
@@ -886,8 +887,8 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should have task runner that updates SavedObjects when run', async () => {
-      const mockUpdateDataStream = jest.fn().mockResolvedValue(undefined);
-      const mockGetDataStream = jest.fn().mockResolvedValue({
+      const mockUpdateDataStream = vi.fn().mockResolvedValue(undefined);
+      const mockGetDataStream = vi.fn().mockResolvedValue({
         attributes: {
           data_stream_id: 'test-datastream',
           integration_id: 'test-integration',
@@ -898,7 +899,7 @@ describe('AutomaticImportSetupService', () => {
       // Mock the saved object service methods
       asPrivate(service).savedObjectService = {
         updateDataStreamSavedObjectAttributes: mockUpdateDataStream,
-        updateDataStreamPhase: jest.fn().mockResolvedValue(undefined),
+        updateDataStreamPhase: vi.fn().mockResolvedValue(undefined),
         getDataStream: mockGetDataStream,
       } as unknown as AutomaticImportSavedObjectService;
 
@@ -929,7 +930,7 @@ describe('AutomaticImportSetupService', () => {
       const mockCoreStart = {
         elasticsearch: {
           client: {
-            asScoped: jest.fn().mockReturnValue({
+            asScoped: vi.fn().mockReturnValue({
               asCurrentUser: {},
             }),
           },
@@ -938,22 +939,22 @@ describe('AutomaticImportSetupService', () => {
 
       const mockPluginsStart = {
         inference: {
-          getChatModel: jest.fn().mockResolvedValue({}),
+          getChatModel: vi.fn().mockResolvedValue({}),
         },
         fieldsMetadata: {
-          getClient: jest.fn().mockResolvedValue({
-            find: jest.fn().mockResolvedValue({ toPlain: () => ({}) }),
-            getByName: jest.fn(),
+          getClient: vi.fn().mockResolvedValue({
+            find: vi.fn().mockResolvedValue({ toPlain: () => ({}) }),
+            getByName: vi.fn(),
           }),
         },
       };
 
       const coreSetupMock = {
-        getStartServices: jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
+        getStartServices: vi.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
       };
 
       // Mock agent service - must return valid pipeline with at least one processor
-      const mockInvokeAgent = jest.fn().mockResolvedValue({
+      const mockInvokeAgent = vi.fn().mockResolvedValue({
         current_pipeline: { processors: [{ set: { field: 'test', value: true } }] },
         pipeline_generation_results: [],
       });
@@ -977,7 +978,7 @@ describe('AutomaticImportSetupService', () => {
       // Replace runTask to inject our mock core setup
       const tmForRunTask = asTaskManagerPrivate(taskManagerService);
       const originalRunTask = tmForRunTask.runTask;
-      tmForRunTask.runTask = jest
+      tmForRunTask.runTask = vi
         .fn()
         .mockImplementation(
           async (
@@ -1025,8 +1026,8 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should mark data stream as failed when task execution errors', async () => {
-      const mockUpdateDataStream = jest.fn().mockResolvedValue(undefined);
-      const mockGetDataStream = jest.fn().mockResolvedValue({
+      const mockUpdateDataStream = vi.fn().mockResolvedValue(undefined);
+      const mockGetDataStream = vi.fn().mockResolvedValue({
         attributes: {
           data_stream_id: 'test-datastream',
           integration_id: 'test-integration',
@@ -1061,7 +1062,7 @@ describe('AutomaticImportSetupService', () => {
       const mockCoreStart = {
         elasticsearch: {
           client: {
-            asScoped: jest.fn().mockReturnValue({
+            asScoped: vi.fn().mockReturnValue({
               asCurrentUser: {},
             }),
           },
@@ -1070,22 +1071,22 @@ describe('AutomaticImportSetupService', () => {
 
       const mockPluginsStart = {
         inference: {
-          getChatModel: jest.fn().mockRejectedValue(new Error('Agent invocation failed')),
+          getChatModel: vi.fn().mockRejectedValue(new Error('Agent invocation failed')),
         },
         fieldsMetadata: {
-          getClient: jest.fn().mockResolvedValue({
-            find: jest.fn().mockResolvedValue({ toPlain: () => ({}) }),
-            getByName: jest.fn(),
+          getClient: vi.fn().mockResolvedValue({
+            find: vi.fn().mockResolvedValue({ toPlain: () => ({}) }),
+            getByName: vi.fn(),
           }),
         },
       };
 
       const coreSetupMock = {
-        getStartServices: jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
+        getStartServices: vi.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
       };
 
       tmFailedTest.agentService = {
-        invokeAutomaticImportAgent: jest.fn(),
+        invokeAutomaticImportAgent: vi.fn(),
       };
 
       const taskRunner = createTaskRunner(
@@ -1096,7 +1097,7 @@ describe('AutomaticImportSetupService', () => {
       );
 
       const originalRunTask = tmFailedTest.runTask;
-      tmFailedTest.runTask = jest
+      tmFailedTest.runTask = vi
         .fn()
         .mockImplementation(
           async (
@@ -1130,7 +1131,7 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should throw unrecoverable error for non-recoverable failures (e.g. connector not found)', async () => {
-      const mockUpdateDataStream = jest.fn().mockResolvedValue(undefined);
+      const mockUpdateDataStream = vi.fn().mockResolvedValue(undefined);
 
       const mockSavedObjectService = {
         updateDataStreamSavedObjectAttributes: mockUpdateDataStream,
@@ -1163,7 +1164,7 @@ describe('AutomaticImportSetupService', () => {
       const mockCoreStart = {
         elasticsearch: {
           client: {
-            asScoped: jest.fn().mockReturnValue({
+            asScoped: vi.fn().mockReturnValue({
               asCurrentUser: {},
             }),
           },
@@ -1172,22 +1173,22 @@ describe('AutomaticImportSetupService', () => {
 
       const mockPluginsStart = {
         inference: {
-          getChatModel: jest.fn().mockRejectedValue(connectorNotFoundError),
+          getChatModel: vi.fn().mockRejectedValue(connectorNotFoundError),
         },
         fieldsMetadata: {
-          getClient: jest.fn().mockResolvedValue({
-            find: jest.fn().mockResolvedValue({ toPlain: () => ({}) }),
-            getByName: jest.fn(),
+          getClient: vi.fn().mockResolvedValue({
+            find: vi.fn().mockResolvedValue({ toPlain: () => ({}) }),
+            getByName: vi.fn(),
           }),
         },
       };
 
       const coreSetupMock = {
-        getStartServices: jest.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
+        getStartServices: vi.fn().mockResolvedValue([mockCoreStart, mockPluginsStart]),
       };
 
       tmUnrecoverable.agentService = {
-        invokeAutomaticImportAgent: jest.fn(),
+        invokeAutomaticImportAgent: vi.fn(),
       };
 
       const taskRunner = createTaskRunner(
@@ -1198,7 +1199,7 @@ describe('AutomaticImportSetupService', () => {
       );
 
       const originalRunTask = tmUnrecoverable.runTask;
-      tmUnrecoverable.runTask = jest
+      tmUnrecoverable.runTask = vi
         .fn()
         .mockImplementation(
           async (

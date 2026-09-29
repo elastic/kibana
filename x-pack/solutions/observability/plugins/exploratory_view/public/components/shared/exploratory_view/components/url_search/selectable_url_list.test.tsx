@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -15,10 +17,10 @@ import { I18LABELS } from './translations';
 import { render } from '../../rtl_helpers';
 
 describe('SelectableUrlList', () => {
-  jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+  vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
     data: {},
     status: fetcherHook.FETCH_STATUS.SUCCESS,
-    refetch: jest.fn(),
+    refetch: vi.fn(),
   });
 
   const customHistory = createMemoryHistory({
@@ -32,12 +34,12 @@ describe('SelectableUrlList', () => {
         initialValue={'blog'}
         loading={false}
         data={{ items: [], total: 0 }}
-        onSelectionChange={jest.fn()}
+        onSelectionChange={vi.fn()}
         searchValue={'blog'}
-        onInputChange={jest.fn()}
+        onInputChange={vi.fn()}
         popoverIsOpen={Boolean(isPopoverOpen)}
         setPopoverIsOpen={setIsPopoverOpen}
-        onSelectionApply={jest.fn()}
+        onSelectionApply={vi.fn()}
         hasChanged={() => true}
       />
     );
@@ -49,12 +51,12 @@ describe('SelectableUrlList', () => {
         initialValue={'blog'}
         loading={false}
         data={{ items: [], total: 0 }}
-        onSelectionChange={jest.fn()}
+        onSelectionChange={vi.fn()}
         searchValue={'blog'}
-        onInputChange={jest.fn()}
+        onInputChange={vi.fn()}
         popoverIsOpen={false}
-        setPopoverIsOpen={jest.fn()}
-        onSelectionApply={jest.fn()}
+        setPopoverIsOpen={vi.fn()}
+        onSelectionApply={vi.fn()}
         hasChanged={() => true}
       />,
       { history: customHistory }
@@ -68,12 +70,12 @@ describe('SelectableUrlList', () => {
         initialValue={'blog'}
         loading={false}
         data={{ items: [], total: 0 }}
-        onSelectionChange={jest.fn()}
+        onSelectionChange={vi.fn()}
         searchValue={'blog'}
-        onInputChange={jest.fn()}
+        onInputChange={vi.fn()}
         popoverIsOpen={false}
-        setPopoverIsOpen={jest.fn()}
-        onSelectionApply={jest.fn()}
+        setPopoverIsOpen={vi.fn()}
+        onSelectionApply={vi.fn()}
         hasChanged={() => true}
       />,
       { history: customHistory }

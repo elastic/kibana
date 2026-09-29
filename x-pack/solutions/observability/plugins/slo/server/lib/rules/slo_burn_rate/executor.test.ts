@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { addTransactionLabels, withSpan } from '@kbn/apm-utils';
 import apm from 'elastic-apm-node';
 import type { Rule, SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
@@ -78,13 +81,16 @@ import type {
 } from './types';
 import { AlertStates } from './types';
 
-jest.mock('@kbn/apm-utils', () => ({
-  addTransactionLabels: jest.fn(),
-  withSpan: jest.fn((_opts: unknown, cb: () => unknown) => cb()),
-}));
+vi.mock('@kbn/apm-utils', () => {
+      const mocked = {
+      addTransactionLabels: vi.fn(),
+      withSpan: vi.fn((_opts: unknown, cb: () => unknown) => cb()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('elastic-apm-node', () => ({
-  default: { setCustomContext: jest.fn() },
+vi.mock('elastic-apm-node', () => ({
+  default: { setCustomContext: vi.fn() },
   __esModule: true,
 }));
 
@@ -163,13 +169,13 @@ function getTimeRange() {
 
 describe('BurnRateRuleExecutor', () => {
   let esClientMock: ElasticsearchClientMock;
-  let soClientMock: jest.Mocked<SavedObjectsClientContract>;
-  let loggerMock: jest.Mocked<MockedLogger>;
+  let soClientMock: Mocked<SavedObjectsClientContract>;
+  let loggerMock: Mocked<MockedLogger>;
   const basePathMock = { publicBaseUrl: 'https://kibana.dev' } as IBasePath;
 
-  let searchSourceClientMock: jest.Mocked<ISearchStartSearchSource>;
-  let uiSettingsClientMock: jest.Mocked<IUiSettingsClient>;
-  let servicesMock: jest.Mocked<
+  let searchSourceClientMock: Mocked<ISearchStartSearchSource>;
+  let uiSettingsClientMock: Mocked<IUiSettingsClient>;
+  let servicesMock: Mocked<
     RuleExecutorServices<
       BurnRateAlertState,
       BurnRateAlertContext,
@@ -182,8 +188,8 @@ describe('BurnRateRuleExecutor', () => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     soClientMock = savedObjectsClientMock.create();
     loggerMock = loggingSystemMock.createLogger();
-    searchSourceClientMock = jest.fn() as any;
-    uiSettingsClientMock = jest.fn() as any;
+    searchSourceClientMock = vi.fn() as any;
+    uiSettingsClientMock = vi.fn() as any;
     servicesMock = {
       savedObjectsClient: soClientMock,
       scopedClusterClient: {
@@ -193,19 +199,19 @@ describe('BurnRateRuleExecutor', () => {
       },
       alertsClient: publicAlertsClientMock.create(),
       alertFactory: {
-        create: jest.fn(),
-        done: jest.fn(),
-        alertLimit: { getValue: jest.fn(), setLimitReached: jest.fn() },
+        create: vi.fn(),
+        done: vi.fn(),
+        alertLimit: { getValue: vi.fn(), setLimitReached: vi.fn() },
       },
-      getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceClientMock),
+      getSearchSourceClient: vi.fn().mockResolvedValue(searchSourceClientMock),
       uiSettingsClient: uiSettingsClientMock,
-      shouldWriteAlerts: jest.fn(),
-      shouldStopExecution: jest.fn(),
+      shouldWriteAlerts: vi.fn(),
+      shouldStopExecution: vi.fn(),
       share: {} as SharePluginStart,
-      getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
-      getMaintenanceWindowIds: jest.fn().mockResolvedValue([]),
-      getMaintenanceWindowNames: jest.fn().mockResolvedValue([]),
-      getAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn() }),
+      getDataViews: vi.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+      getMaintenanceWindowIds: vi.fn().mockResolvedValue([]),
+      getMaintenanceWindowNames: vi.fn().mockResolvedValue([]),
+      getAsyncSearchClient: vi.fn().mockReturnValue({ search: vi.fn() }),
     };
   });
 
@@ -921,11 +927,11 @@ describe('BurnRateRuleExecutor', () => {
   });
 
   describe('APM instrumentation', () => {
-    const addTransactionLabelsMock = addTransactionLabels as jest.MockedFunction<
+    const addTransactionLabelsMock = addTransactionLabels as MockedFunction<
       typeof addTransactionLabels
     >;
-    const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
-    const setCustomContextMock = apm.setCustomContext as jest.MockedFunction<
+    const withSpanMock = withSpan as MockedFunction<typeof withSpan>;
+    const setCustomContextMock = apm.setCustomContext as MockedFunction<
       typeof apm.setCustomContext
     >;
 

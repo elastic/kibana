@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { LinkToAlertsPageProps } from './link_to_alerts_page';
@@ -13,10 +16,10 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-const useKibanaContextForPluginMock = useKibanaContextForPlugin as jest.MockedFunction<
+const useKibanaContextForPluginMock = useKibanaContextForPlugin as MockedFunction<
   typeof useKibanaContextForPlugin
 >;
-jest.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../hooks/use_kibana');
 
 describe('LinkToAlertsPage component', () => {
   const mockUseKibana = () => {

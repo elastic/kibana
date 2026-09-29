@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -14,14 +16,14 @@ import { cancelKiIdentificationToolHandler } from './handler';
 describe('cancelKiIdentificationToolHandler', () => {
   it('cancels the latest workflow execution and returns cancel status', async () => {
     const managementApi = {
-      getWorkflowExecutions: jest.fn().mockResolvedValue({
+      getWorkflowExecutions: vi.fn().mockResolvedValue({
         results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }],
       }),
-      cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+      cancelWorkflowExecution: vi.fn().mockResolvedValue(undefined),
     };
-    const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
+    const telemetry = { trackOnboardingScheduled: vi.fn() } as never;
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
-      managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
+      managementApi: { ...managementApi, getClient: vi.fn(() => managementApi) } as never,
       telemetry,
     });
     const request = httpServerMock.createKibanaRequest();
@@ -46,12 +48,12 @@ describe('cancelKiIdentificationToolHandler', () => {
 
   it('returns cancel status with null execution_id when no execution is found', async () => {
     const managementApi = {
-      getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [] }),
-      cancelWorkflowExecution: jest.fn(),
+      getWorkflowExecutions: vi.fn().mockResolvedValue({ results: [] }),
+      cancelWorkflowExecution: vi.fn(),
     };
-    const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
+    const telemetry = { trackOnboardingScheduled: vi.fn() } as never;
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
-      managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
+      managementApi: { ...managementApi, getClient: vi.fn(() => managementApi) } as never,
       telemetry,
     });
     const request = httpServerMock.createKibanaRequest();

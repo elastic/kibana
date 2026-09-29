@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useSignalIndexWithDefault } from './use_signal_index_with_default';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 
-jest.mock('../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../../common/hooks/use_space_id');
+vi.mock('../../detections/containers/detection_engine/alerts/use_signal_index');
+vi.mock('../../common/hooks/use_space_id');
 
-const mockUseSignalIndex = useSignalIndex as jest.MockedFunction<typeof useSignalIndex>;
-const mockUseSpaceId = useSpaceId as jest.MockedFunction<typeof useSpaceId>;
+const mockUseSignalIndex = useSignalIndex as MockedFunction<typeof useSignalIndex>;
+const mockUseSpaceId = useSpaceId as MockedFunction<typeof useSpaceId>;
 
 describe('useSignalIndexWithDefault', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns signalIndexName when provided by useSignalIndex', () => {

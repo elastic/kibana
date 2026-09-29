@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConfigSchema } from '../config';
@@ -16,7 +19,7 @@ import { termsAggSuggestions } from './terms_agg';
 import type { estypes } from '@elastic/elasticsearch';
 import { duration } from 'moment';
 
-let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
+let savedObjectsClientMock: Mocked<SavedObjectsClientContract>;
 let esClientMock: DeeplyMockedKeys<ElasticsearchClient>;
 const configMock = {
   autocomplete: {
@@ -35,7 +38,7 @@ const mockResponse = {
   },
 } as estypes.SearchResponse<any>;
 
-jest.mock('../data_views');
+vi.mock('../data_views');
 
 describe('terms agg suggestions', () => {
   beforeEach(() => {

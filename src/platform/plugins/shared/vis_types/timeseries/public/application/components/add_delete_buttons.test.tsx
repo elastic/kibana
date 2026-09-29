@@ -7,27 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { AddDeleteButtons } from './add_delete_buttons';
 
 describe('AddDeleteButtons', () => {
   it('calls onAdd={handleAdd}', () => {
-    const handleAdd = jest.fn();
+    const handleAdd = vi.fn();
     const wrapper = shallowWithIntl(<AddDeleteButtons onAdd={handleAdd} />);
     wrapper.find('EuiButtonIcon').at(0).simulate('click');
     expect(handleAdd).toHaveBeenCalled();
   });
 
   it('calls onDelete={handleDelete}', () => {
-    const handleDelete = jest.fn();
+    const handleDelete = vi.fn();
     const wrapper = shallowWithIntl(<AddDeleteButtons onDelete={handleDelete} />);
     wrapper.find('EuiButtonIcon').at(1).simulate('click');
     expect(handleDelete).toHaveBeenCalled();
   });
 
   it('calls onClone={handleClone}', () => {
-    const handleClone = jest.fn();
+    const handleClone = vi.fn();
     const wrapper = shallowWithIntl(<AddDeleteButtons onClone={handleClone} />);
     wrapper.find('EuiButtonIcon').at(0).simulate('click');
     expect(handleClone).toHaveBeenCalled();
@@ -49,7 +51,7 @@ describe('AddDeleteButtons', () => {
   });
 
   it('should not display clone when disableAdd={true}', () => {
-    const fn = jest.fn();
+    const fn = vi.fn();
     const wrapper = shallowWithIntl(<AddDeleteButtons onClone={fn} disableAdd={true} />);
     expect(wrapper.find({ text: 'Clone' })).toHaveLength(0);
   });

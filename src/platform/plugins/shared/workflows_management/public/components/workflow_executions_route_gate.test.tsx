@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -22,9 +24,12 @@ const setExecutionsViewEnabled = (services: StartServicesMock, enabled: boolean)
   services.settings.globalClient.get$.mockReturnValue(of(enabled));
 };
 
-jest.mock('../pages/executions', () => ({
-  WorkflowExecutionsPage: () => <div data-test-subj="workflowExecutionsPage" />,
-}));
+vi.mock('../pages/executions', () => {
+      const mocked = {
+      WorkflowExecutionsPage: () => <div data-test-subj="workflowExecutionsPage" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const WorkflowsHomeStub = () => <div data-test-subj="workflowsHomeStub" />;
 

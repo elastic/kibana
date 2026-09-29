@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
@@ -25,7 +27,7 @@ const dataViewAdHoc = {
 } as unknown as DataView;
 
 const mockDataViewsService = dataViewPluginMocks.createStartContract();
-jest.mocked(mockDataViewsService.create).mockImplementation((spec) => {
+vi.mocked(mockDataViewsService.create).mockImplementation((spec) => {
   return Promise.resolve({
     ...dataViewMock,
     isPersisted: () => false,
@@ -44,14 +46,14 @@ describe('getEsqlDataView', () => {
   const services = {
     dataViews: mockDataViewsService,
     http: {
-      post: jest.fn().mockResolvedValue({}),
+      post: vi.fn().mockResolvedValue({}),
     } as unknown as HttpStart,
     cps: cpsPluginMock.createStartContract(),
   };
 
   const mockGetTimeFieldRoute = (query: string, timeFieldResponse: string) => {
     const originalHttpPost = services.http.post;
-    services.http.post = jest
+    services.http.post = vi
       .fn()
       .mockImplementation((url: string, options?: { body?: string }) => {
         const body = options?.body ? JSON.parse(options.body) : undefined;
@@ -65,20 +67,20 @@ describe('getEsqlDataView', () => {
 
   it('returns the current dataview if it is adhoc with no named params and query index pattern is the same as the dataview index pattern', async () => {
     const query = { esql: 'from data-view-ad-hoc-title' };
-    jest.mocked(services.cps.cpsManager!.getProjectRouting).mockReturnValue('_alias:_origin');
+    vi.mocked(services.cps.cpsManager!.getProjectRouting).mockReturnValue('_alias:_origin');
 
     const savedCreate = services.dataViews.create;
     const savedPost = services.http.post;
 
     // First call creates the DataView and registers it in the routing WeakMap
     const createdDataView = { ...dataViewAdHocNoAtTimestamp };
-    services.dataViews.create = jest.fn().mockResolvedValue(createdDataView);
-    services.http.post = jest.fn().mockResolvedValue({});
+    services.dataViews.create = vi.fn().mockResolvedValue(createdDataView);
+    services.http.post = vi.fn().mockResolvedValue({});
     const firstDataView = await getEsqlDataView(query, undefined, services);
 
     // Second call: same query + same routing → must return the same instance with no I/O
-    jest.mocked(services.dataViews.create).mockClear();
-    jest.mocked(services.http.post).mockClear();
+    vi.mocked(services.dataViews.create).mockClear();
+    vi.mocked(services.http.post).mockClear();
     const dataView = await getEsqlDataView(query, firstDataView, services);
 
     expect(dataView).toBe(firstDataView);
@@ -109,7 +111,7 @@ describe('getEsqlDataView', () => {
   });
 
   it('creates an adhoc dataview if the current dataview is ad hoc and query index pattern is different from the dataview index pattern', async () => {
-    services.dataViews.create = jest.fn().mockReturnValue({
+    services.dataViews.create = vi.fn().mockReturnValue({
       ...dataViewAdHoc,
       isPersisted: () => false,
       id: 'ad-hoc-id-1',
@@ -123,7 +125,7 @@ describe('getEsqlDataView', () => {
   });
 
   it('creates an adhoc ES|QL dataview if the query doesnt have from command', async () => {
-    services.dataViews.create = jest.fn().mockReturnValue({
+    services.dataViews.create = vi.fn().mockReturnValue({
       ...dataViewAdHoc,
       isPersisted: () => false,
       id: 'ad-hoc-id-1',
@@ -139,7 +141,7 @@ describe('getEsqlDataView', () => {
 
   it('creates a different data view when project routing changes for the same query', async () => {
     const query = { esql: 'from routing-aware-data-view' };
-    services.dataViews.create = jest.fn().mockImplementation((spec) =>
+    services.dataViews.create = vi.fn().mockImplementation((spec) =>
       Promise.resolve({
         ...dataViewAdHoc,
         id: spec.id,
@@ -148,8 +150,8 @@ describe('getEsqlDataView', () => {
         timeFieldName: spec.timeFieldName,
       })
     );
-    services.http.post = jest.fn().mockResolvedValue({ timeField: '@timestamp' });
-    const getProjectRouting = jest
+    services.http.post = vi.fn().mockResolvedValue({ timeField: '@timestamp' });
+    const getProjectRouting = vi
       .mocked(services.cps.cpsManager!.getProjectRouting)
       .mockReturnValue('_alias:_origin');
 

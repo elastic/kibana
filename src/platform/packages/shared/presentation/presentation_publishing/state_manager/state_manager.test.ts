@@ -77,49 +77,61 @@ describe('initializeStateManager', () => {
     expect(stateManager.getLatestState().camelCaseKey).toBe('updated');
   });
 
-  it('should update a state subject when using a setter', (done) => {
-    const stateManager = initializeStateManager<TestState>({}, defaultState);
-    stateManager.api.title$.subscribe((value) => {
-      if (value === 'new title') {
-        done();
-      }
-    });
-    stateManager.api.setTitle('new title');
-  });
+  it('should update a state subject when using a setter', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-  it('should update a state subject when using a case-converted setter', (done) => {
-    const stateManager = initializeStateManager<TestState>({}, defaultState);
-    stateManager.api.snakeCaseKey$.subscribe((value) => {
-      if (value === 'updated snake') {
-        expect(stateManager.getLatestState().snake_case_key).toBe('updated snake');
-        done();
-      }
-    });
-    stateManager.api.setSnakeCaseKey('updated snake');
-  });
+          const stateManager = initializeStateManager<TestState>({}, defaultState);
+          stateManager.api.title$.subscribe((value) => {
+            if (value === 'new title') {
+              done();
+            }
+          });
+          stateManager.api.setTitle('new title');
+        
+      }));
 
-  it('anyStateChange$ should not emit on subscribe and emit when any state changes', (done) => {
-    const stateManager = initializeStateManager<TestState>({}, defaultState);
-    let emitCount = 0;
-    stateManager.anyStateChange$.subscribe(() => {
-      emitCount++;
-      if (emitCount === 2) {
-        try {
-          const { title, count } = stateManager.getLatestState();
-          expect(title).toBe('new title');
-          expect(count).toBe(5);
-        } catch (error) {
-          // title and count assertions fail when
-          // anyStateChange$ emits on subscribe
-          done(error);
-          return;
-        }
-        done();
-      }
-    });
-    stateManager.api.setTitle('new title');
-    stateManager.api.setCount(5);
-  });
+  it('should update a state subject when using a case-converted setter', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+          const stateManager = initializeStateManager<TestState>({}, defaultState);
+          stateManager.api.snakeCaseKey$.subscribe((value) => {
+            if (value === 'updated snake') {
+              expect(stateManager.getLatestState().snake_case_key).toBe('updated snake');
+              done();
+            }
+          });
+          stateManager.api.setSnakeCaseKey('updated snake');
+        
+      }));
+
+  it('anyStateChange$ should not emit on subscribe and emit when any state changes', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+          const stateManager = initializeStateManager<TestState>({}, defaultState);
+          let emitCount = 0;
+          stateManager.anyStateChange$.subscribe(() => {
+            emitCount++;
+            if (emitCount === 2) {
+              try {
+                const { title, count } = stateManager.getLatestState();
+                expect(title).toBe('new title');
+                expect(count).toBe(5);
+              } catch (error) {
+                // title and count assertions fail when
+                // anyStateChange$ emits on subscribe
+                done(error);
+                return;
+              }
+              done();
+            }
+          });
+          stateManager.api.setTitle('new title');
+          stateManager.api.setCount(5);
+        
+      }));
 
   it('should reinitialize all state when no comparators provided', () => {
     const stateManager = initializeStateManager<TestState>(
@@ -167,17 +179,21 @@ describe('initializeStateManager', () => {
       expect(emitCount).toBe(1); // only initial value
     });
 
-    it('should emit when value changes', (done) => {
-      const stateManager = initializeStateManager<TestState>({}, defaultState, comparators);
-      let emitCount = 0;
-      stateManager.api.count$.subscribe((value) => {
-        emitCount++;
-        if (emitCount === 2 && value === 5) {
-          done();
-        }
-      });
-      stateManager.api.setCount(5);
-    });
+    it('should emit when value changes', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+              const stateManager = initializeStateManager<TestState>({}, defaultState, comparators);
+              let emitCount = 0;
+              stateManager.api.count$.subscribe((value) => {
+                emitCount++;
+                if (emitCount === 2 && value === 5) {
+                  done();
+                }
+              });
+              stateManager.api.setCount(5);
+            
+        }));
 
     it('should only reset changed keys on reinitialize', () => {
       const stateManager = initializeStateManager<TestState>(

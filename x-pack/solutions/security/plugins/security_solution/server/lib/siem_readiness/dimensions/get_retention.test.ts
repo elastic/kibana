@@ -5,19 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { getRetention } from './get_retention';
 import { fetchRetention } from '../fetchers';
 
-jest.mock('../fetchers', () => ({
-  fetchRetention: jest.fn(),
-}));
+vi.mock('../fetchers', () => {
+      const mocked = {
+      fetchRetention: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFetchRetention = fetchRetention as jest.Mock;
+const mockFetchRetention = fetchRetention as Mock;
 
 const esClient = {} as ElasticsearchClient;
-const logger = { error: jest.fn(), warn: jest.fn(), info: jest.fn() } as unknown as Logger;
+const logger = { error: vi.fn(), warn: vi.fn(), info: vi.fn() } as unknown as Logger;
 
 const makeItem = (overrides = {}) => ({
   indexName: 'logs-cloud.stream',
@@ -31,7 +37,7 @@ const makeItem = (overrides = {}) => ({
 });
 
 describe('getRetention', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('status', () => {
     it('returns noData when there are no items', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 
@@ -22,11 +25,11 @@ describe('createAttackDiscoveryAlerts', () => {
   const mockLogger = loggerMock.create();
   const mockNow = new Date('2025-04-24T17:36:25.812Z');
   const spaceId = 'default';
-  const bulkMock = jest.fn();
+  const bulkMock = vi.fn();
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.spyOn(global, 'Date').mockImplementation(() => mockNow);
+    vi.resetAllMocks();
+    vi.spyOn(global, 'Date').mockImplementation(() => mockNow);
   });
 
   it('returns an empty array if no alert documents are created', async () => {
@@ -63,7 +66,7 @@ describe('createAttackDiscoveryAlerts', () => {
         took: 1,
       },
     });
-    (ruleDataClientMock.getWriter as jest.Mock).mockResolvedValue({ bulk: bulkMock });
+    (ruleDataClientMock.getWriter as Mock).mockResolvedValue({ bulk: bulkMock });
 
     await expect(
       createAttackDiscoveryAlerts({
@@ -94,10 +97,10 @@ describe('createAttackDiscoveryAlerts', () => {
         took: 1,
       },
     });
-    (ruleDataClientMock.getWriter as jest.Mock).mockResolvedValue({ bulk: bulkMock });
+    (ruleDataClientMock.getWriter as Mock).mockResolvedValue({ bulk: bulkMock });
 
-    const searchMock = jest.fn().mockRejectedValue(new Error('Search error'));
-    (ruleDataClientMock.getReader as jest.Mock).mockReturnValue({ search: searchMock });
+    const searchMock = vi.fn().mockRejectedValue(new Error('Search error'));
+    (ruleDataClientMock.getReader as Mock).mockReturnValue({ search: searchMock });
 
     await expect(
       createAttackDiscoveryAlerts({
@@ -117,7 +120,7 @@ describe('createAttackDiscoveryAlerts', () => {
 
   it('returns an empty array if bulk response is undefined', async () => {
     bulkMock.mockResolvedValue({ body: undefined });
-    (ruleDataClientMock.getWriter as jest.Mock).mockResolvedValue({ bulk: bulkMock });
+    (ruleDataClientMock.getWriter as Mock).mockResolvedValue({ bulk: bulkMock });
 
     const result = await createAttackDiscoveryAlerts({
       adhocAttackDiscoveryDataClient: ruleDataClientMock,

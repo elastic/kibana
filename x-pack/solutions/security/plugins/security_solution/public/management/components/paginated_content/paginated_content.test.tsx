@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FC } from 'react';
 import React from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -26,11 +28,11 @@ describe('when using PaginatedContent', () => {
 
   type PropsForPaginatedContent = PaginatedContentProps<Foo, FC<ItemComponentProps>>;
 
-  const ItemComponent: ItemComponentType = jest.fn((props) => (
+  const ItemComponent: ItemComponentType = vi.fn((props) => (
     <div className="foo-item">{'hi'}</div>
   ));
 
-  const getPropsToRenderItem: PropsForPaginatedContent['itemComponentProps'] = jest.fn(
+  const getPropsToRenderItem: PropsForPaginatedContent['itemComponentProps'] = vi.fn(
     (item: Foo) => {
       return { item };
     }
@@ -45,7 +47,7 @@ describe('when using PaginatedContent', () => {
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
 
-    onChangeHandler = jest.fn();
+    onChangeHandler = vi.fn();
 
     render = (additionalProps) => {
       const props: PropsForPaginatedContent = {

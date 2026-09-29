@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -22,9 +24,9 @@ const defaultProps = {
   selectableAgents: 20,
   managedAgentsOnCurrentPage: 0,
   selectionMode: 'manual',
-  setSelectionMode: jest.fn(),
+  setSelectionMode: vi.fn(),
   selectedAgents: [],
-  setSelectedAgents: jest.fn(),
+  setSelectedAgents: vi.fn(),
 };
 
 function generateAgents(n: number) {

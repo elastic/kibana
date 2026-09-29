@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SecurityAppStore } from '../../../../common/store/types';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
@@ -15,10 +17,10 @@ import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_re
 import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 
 const services = createStartServicesMock();
-const mockToggleColumn = jest.fn();
+const mockToggleColumn = vi.fn();
 
-const mockDispatch = jest.fn();
-const mockGetState = jest.fn().mockReturnValue(mockGlobalState);
+const mockDispatch = vi.fn();
+const mockGetState = vi.fn().mockReturnValue(mockGlobalState);
 const store = {
   dispatch: mockDispatch,
   getState: mockGetState,
@@ -43,7 +45,7 @@ describe('createToggleColumnCellActionFactory', () => {
   const toggleColumnAction = toggleColumnActionFactory({ id: 'testAction' });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return display name', () => {

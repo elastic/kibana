@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterConditionBranchNodeImpl } from '../enter_condition_branch_node_impl';
 
@@ -20,8 +22,8 @@ describe('EnterConditionBranchNodeImpl', () => {
 
   beforeEach(() => {
     wfExecutionRuntimeManagerMock = {} as unknown as WorkflowExecutionRuntimeManager;
-    wfExecutionRuntimeManagerMock.navigateToNextNode = jest.fn();
-    wfExecutionRuntimeManagerMock.enterScope = jest.fn();
+    wfExecutionRuntimeManagerMock.navigateToNextNode = vi.fn();
+    wfExecutionRuntimeManagerMock.enterScope = vi.fn();
     impl = new EnterConditionBranchNodeImpl(conditionBranchNode, wfExecutionRuntimeManagerMock);
   });
 

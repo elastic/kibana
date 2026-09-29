@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RefObject } from 'react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
@@ -21,10 +24,10 @@ import { ProcessTreeNode } from '.';
 import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
 import { useDateFormat } from '../../hooks';
 
-jest.useFakeTimers();
+vi.useFakeTimers();
 
-jest.mock('../../hooks/use_date_format');
-const mockUseDateFormat = useDateFormat as jest.Mock;
+vi.mock('../../hooks/use_date_format');
+const mockUseDateFormat = useDateFormat as Mock;
 
 describe('ProcessTreeNode component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -43,12 +46,12 @@ describe('ProcessTreeNode component', () => {
         removeEventListener: () => {},
       },
     } as unknown as RefObject<HTMLDivElement>,
-    onChangeJumpToEventVisibility: jest.fn(),
-    onShowAlertDetails: jest.fn(),
-    onJumpToOutput: jest.fn(),
+    onChangeJumpToEventVisibility: vi.fn(),
+    onShowAlertDetails: vi.fn(),
+    onJumpToOutput: vi.fn(),
     showTimestamp: true,
     verboseMode: false,
-    trackEvent: jest.fn(),
+    trackEvent: vi.fn(),
   };
 
   beforeEach(() => {
@@ -98,7 +101,7 @@ describe('ProcessTreeNode component', () => {
         },
       };
 
-      const onChangeJumpToEventVisibility = jest.fn();
+      const onChangeJumpToEventVisibility = vi.fn();
       const scrollerRef = {
         current: {
           ...props.scrollerRef.current,
@@ -120,7 +123,7 @@ describe('ProcessTreeNode component', () => {
         />
       );
 
-      jest.advanceTimersByTime(DEBOUNCE_TIMEOUT);
+      vi.advanceTimersByTime(DEBOUNCE_TIMEOUT);
 
       expect(onChangeJumpToEventVisibility).toHaveBeenCalled();
     });
@@ -162,8 +165,8 @@ describe('ProcessTreeNode component', () => {
 
     it('executes callback function when user Clicks', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      const onProcessSelected = jest.fn();
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      const onProcessSelected = vi.fn();
 
       renderResult = mockedContext.render(
         <ProcessTreeNode {...props} process={processMock} onProcessSelected={onProcessSelected} />
@@ -175,11 +178,11 @@ describe('ProcessTreeNode component', () => {
 
     it('does not executes callback function when user is Clicking to copy text', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
-      const windowGetSelectionSpy = jest.spyOn(window, 'getSelection');
+      const windowGetSelectionSpy = vi.spyOn(window, 'getSelection');
 
-      const onProcessSelected = jest.fn();
+      const onProcessSelected = vi.fn();
 
       renderResult = mockedContext.render(
         <ProcessTreeNode {...props} process={processMock} onProcessSelected={onProcessSelected} />
@@ -255,7 +258,7 @@ describe('ProcessTreeNode component', () => {
       });
       it('toggle Alert Details button when Alert button is clicked', async () => {
         // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-        const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+        const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
         renderResult = mockedContext.render(
           <ProcessTreeNode {...props} process={sessionViewAlertProcessMock} />
         );
@@ -299,7 +302,7 @@ describe('ProcessTreeNode component', () => {
       });
       it('toggle Child processes nodes when Child processes button is clicked', async () => {
         // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-        const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+        const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
         const processMockWithChildren: typeof processMock = {
           ...processMock,
           getChildren: () => [childProcessMock],

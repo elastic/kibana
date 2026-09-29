@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor, within } from '@testing-library/react';
@@ -20,13 +22,13 @@ describe('Templates', () => {
     disabled: false,
     isLoading: false,
     templates: [],
-    onAddTemplate: jest.fn(),
-    onEditTemplate: jest.fn(),
-    onDeleteTemplate: jest.fn(),
+    onAddTemplate: vi.fn(),
+    onEditTemplate: vi.fn(),
+    onDeleteTemplate: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

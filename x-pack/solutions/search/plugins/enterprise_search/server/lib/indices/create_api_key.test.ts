@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 
 import { createApiKey } from './create_api_key';
@@ -22,10 +24,10 @@ describe('createApiKey lib function', () => {
     name: keyName,
   };
 
-  security.authc.apiKeys.create = jest.fn().mockReturnValue(createResponse);
+  security.authc.apiKeys.create = vi.fn().mockReturnValue(createResponse);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should create an api key via the security plugin', async () => {

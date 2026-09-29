@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, render, screen } from '@testing-library/react';
 import { CommentRenderingProvider, useCommentRenderingContext } from './comment_rendering_context';
@@ -49,7 +51,7 @@ describe('CommentRenderingContext', () => {
     });
 
     it('provides context to deeply nested children', () => {
-      const handleDelete = jest.fn();
+      const handleDelete = vi.fn();
       const utils = getMockCommentRenderingContext({
         handleDeleteComment: handleDelete,
       });

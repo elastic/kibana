@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { getLanguageService } from 'yaml-language-server';
@@ -16,8 +18,8 @@ import { useAvailableConnectors } from '../../../entities/connectors/model/use_a
 import { useKibana } from '../../../hooks/use_kibana';
 import { createStartServicesMock, createUseKibanaMockValue } from '../../../mocks';
 
-jest.mock('../../../entities/connectors/model/use_available_connectors');
-jest.mock('../../../hooks/use_kibana');
+vi.mock('../../../entities/connectors/model/use_available_connectors');
+vi.mock('../../../hooks/use_kibana');
 
 const createLanguageService = (schema: z.core.JSONSchema.JSONSchema | null) => {
   expect(schema).not.toBeNull();
@@ -54,9 +56,9 @@ describe.each([false, true])('service account schema completions (loose=%s)', (l
   const services = createStartServicesMock();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useAvailableConnectors).mockReturnValue(undefined);
-    jest.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(services));
+    vi.clearAllMocks();
+    vi.mocked(useAvailableConnectors).mockReturnValue(undefined);
+    vi.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(services));
   });
 
   it.each([false, true])('gates run_as suggestions with the SA flag (%s)', async (enabled) => {

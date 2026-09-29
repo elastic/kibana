@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { queryAssetCriticality } from './asset_criticality';
 import { ToolResultType } from '@kbn/agent-builder-common';
@@ -14,7 +16,7 @@ const index = 'asset-criticality-index';
 
 describe('QUERY_FNS', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('queryAssetCriticality', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { Parser } from '@elastic/esql';
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
@@ -24,13 +26,13 @@ import {
 
 function makeRulesClientMock() {
   return {
-    createRule: jest.fn(),
-    bulkCreateRules: jest.fn(),
-    updateRule: jest.fn(),
-    bulkDeleteRules: jest.fn(),
-    ruleExists: jest.fn(),
-    findRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 }),
-    getTags: jest.fn().mockResolvedValue([]),
+    createRule: vi.fn(),
+    bulkCreateRules: vi.fn(),
+    updateRule: vi.fn(),
+    bulkDeleteRules: vi.fn(),
+    ruleExists: vi.fn(),
+    findRules: vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 }),
+    getTags: vi.fn().mockResolvedValue([]),
   };
 }
 
@@ -79,7 +81,7 @@ function expectMetricSeriesBreach(query: string) {
 
 describe('RulesAdapterV2', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('v2 body mapping', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ObjectType } from '@kbn/config-schema';
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -22,15 +25,15 @@ import { routeDefinitionParamsMock } from '../index.mock';
 function getMockContext() {
   return coreMock.createCustomRequestHandlerContext({
     licensing: {
-      license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
+      license: { check: vi.fn().mockReturnValue({ check: 'valid' }) },
     },
   }) as unknown as SecurityRequestHandlerContext;
 }
 
 describe('Get current user profile routes', () => {
-  let router: jest.Mocked<SecurityRouter>;
+  let router: Mocked<SecurityRouter>;
   let mockContext: SecurityRequestHandlerContext;
-  let userProfileService: jest.Mocked<UserProfileServiceStartInternal>;
+  let userProfileService: Mocked<UserProfileServiceStartInternal>;
   let authenticationService: ReturnType<typeof authenticationServiceMock.createStart>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
@@ -88,7 +91,7 @@ describe('Get current user profile routes', () => {
       authenticationService.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
 
       const coreContextMock = await mockContext.core;
-      (coreContextMock.userProfile.getCurrent as jest.Mock).mockResolvedValue(null);
+      (coreContextMock.userProfile.getCurrent as Mock).mockResolvedValue(null);
 
       await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
         expect.objectContaining({ status: 404 })
@@ -104,7 +107,7 @@ describe('Get current user profile routes', () => {
       authenticationService.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
 
       const coreContextMock = await mockContext.core;
-      (coreContextMock.userProfile.getCurrent as jest.Mock).mockRejectedValue(unhandledException);
+      (coreContextMock.userProfile.getCurrent as Mock).mockRejectedValue(unhandledException);
 
       await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
         expect.objectContaining({ status: 500, payload: unhandledException })
@@ -123,7 +126,7 @@ describe('Get current user profile routes', () => {
       const mockProfile = userProfileMock.createWithSecurity({ uid: 'uid-1' });
 
       const coreContextMock = await mockContext.core;
-      (coreContextMock.userProfile.getCurrent as jest.Mock).mockResolvedValue(mockProfile);
+      (coreContextMock.userProfile.getCurrent as Mock).mockResolvedValue(mockProfile);
 
       await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
         expect.objectContaining({

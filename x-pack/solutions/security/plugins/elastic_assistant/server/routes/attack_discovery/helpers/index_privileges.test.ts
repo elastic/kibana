@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AttackDiscoveryAlertsPrivilegesParams } from './index_privileges';
 import {
   hasReadAttackDiscoveryAlertsPrivileges,
   hasReadWriteAttackDiscoveryAlertsPrivileges,
 } from './index_privileges';
 
-const getSpaceIdMock = jest.fn();
-const atSpaceMock = jest.fn();
+const getSpaceIdMock = vi.fn();
+const atSpaceMock = vi.fn();
 const contextMock = {
   elasticAssistant: {
     getSpaceId: getSpaceIdMock,
     checkPrivileges: () => ({ atSpace: atSpaceMock }),
   },
 };
-const responseMock = { forbidden: jest.fn() };
+const responseMock = { forbidden: vi.fn() };
 
 describe('Index privileges', () => {
   const defaultProps = {
@@ -28,7 +30,7 @@ describe('Index privileges', () => {
   } as unknown as AttackDiscoveryAlertsPrivilegesParams;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     getSpaceIdMock.mockReturnValue('space1');
     atSpaceMock.mockResolvedValue({ hasAllRequested: true });

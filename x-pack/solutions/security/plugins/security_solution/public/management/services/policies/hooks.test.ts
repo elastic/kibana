@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { UseQueryOptions } from '@kbn/react-query';
 import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
@@ -13,17 +16,17 @@ import { getFakeHttpService, renderQuery } from '../../hooks/test_utils';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { useHttp } from '../../../common/lib/kibana';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 describe('useGetEndpointSecurityPackage hook', () => {
   let result: ReturnType<typeof useGetEndpointSecurityPackage>;
-  let fakeHttpServices: jest.Mocked<HttpSetup>;
+  let fakeHttpServices: Mocked<HttpSetup>;
   let generator: EndpointDocGenerator;
   let options: UseQueryOptions<GetInfoResponse['item'], IHttpFetchError> | undefined;
 
   beforeEach(() => {
     fakeHttpServices = getFakeHttpService();
-    (useHttp as jest.Mock).mockReturnValue(fakeHttpServices);
+    (useHttp as Mock).mockReturnValue(fakeHttpServices);
     generator = new EndpointDocGenerator('endpoint-package');
   });
 
@@ -36,7 +39,7 @@ describe('useGetEndpointSecurityPackage hook', () => {
       item: [generator.generateEpmPackageInfo()],
     };
     fakeHttpServices.get.mockResolvedValue(apiResponse);
-    const onSuccessMock: jest.Mock = jest.fn();
+    const onSuccessMock: Mock = vi.fn();
     options = {
       enabled: true,
       onSuccess: onSuccessMock,
@@ -59,7 +62,7 @@ describe('useGetEndpointSecurityPackage hook', () => {
       },
     };
     fakeHttpServices.get.mockRejectedValue(error);
-    const onErrorMock: jest.Mock = jest.fn();
+    const onErrorMock: Mock = vi.fn();
     options = {
       enabled: true,
       onError: onErrorMock,

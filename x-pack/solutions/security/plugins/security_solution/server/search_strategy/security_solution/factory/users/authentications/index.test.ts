@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
 import * as buildQuery from './dsl/query.dsl';
@@ -17,7 +19,7 @@ import {
 import type { UserAuthenticationsRequestOptions } from '../../../../../../common/api/search_strategy';
 
 describe('authentications search strategy', () => {
-  const buildAuthenticationQuery = jest.spyOn(buildQuery, 'buildQuery');
+  const buildAuthenticationQuery = vi.spyOn(buildQuery, 'buildQuery');
 
   afterEach(() => {
     buildAuthenticationQuery.mockClear();

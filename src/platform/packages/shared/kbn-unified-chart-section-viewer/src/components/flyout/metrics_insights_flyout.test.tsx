@@ -7,48 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MetricInsightsFlyout } from './metrics_insights_flyout';
 import type { ParsedMetricItem } from '../../types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
-jest.mock('./metrics_flyout_body', () => ({
-  MetricFlyoutBody: jest.fn(() => <div data-test-subj="metricFlyoutBody" />),
-}));
+vi.mock('./metrics_flyout_body', () => {
+      const mocked = {
+      MetricFlyoutBody: vi.fn(() => <div data-test-subj="metricFlyoutBody" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_flyout_a11y', () => ({
-  useFlyoutA11y: jest.fn(() => ({
-    a11yProps: {},
-    screenReaderDescription: null,
-  })),
-}));
+vi.mock('./hooks/use_flyout_a11y', () => {
+      const mocked = {
+      useFlyoutA11y: vi.fn(() => ({
+        a11yProps: {},
+        screenReaderDescription: null,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../context/fields_metadata', () => ({
-  useFieldsMetadataContext: jest.fn(() => ({
-    fieldsMetadata: {},
-  })),
-}));
+vi.mock('../../context/fields_metadata', () => {
+      const mocked = {
+      useFieldsMetadataContext: vi.fn(() => ({
+        fieldsMetadata: {},
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-use/lib/useLocalStorage', () => {
-  return jest.fn(() => [544, jest.fn()]);
+vi.mock('react-use/lib/useLocalStorage', () => {
+  return vi.fn(() => [544, vi.fn()]);
 });
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
-    useIsWithinMinBreakpoint: jest.fn(() => true),
+    useIsWithinMinBreakpoint: vi.fn(() => true),
   };
 });
 
-describe('MetricInsightsFlyout', () => {
-  const mockMetricFlyoutBody = jest.requireMock('./metrics_flyout_body').MetricFlyoutBody;
-  const mockUseFlyoutA11y = jest.requireMock('./hooks/use_flyout_a11y').useFlyoutA11y;
-  const mockUseFieldsMetadataContext = jest.requireMock(
-    '../../context/fields_metadata'
-  ).useFieldsMetadataContext;
-  const mockUseIsWithinMinBreakpoint = jest.requireMock('@elastic/eui').useIsWithinMinBreakpoint;
+describe('MetricInsightsFlyout', async () => {
+  const mockMetricFlyoutBody = (await vi.importMock('./metrics_flyout_body')).MetricFlyoutBody;
+  const mockUseFlyoutA11y = (await vi.importMock('./hooks/use_flyout_a11y')).useFlyoutA11y;
+  const mockUseFieldsMetadataContext = (await vi.importMock('../../context/fields_metadata')).useFieldsMetadataContext;
+  const mockUseIsWithinMinBreakpoint = (await vi.importMock('@elastic/eui')).useIsWithinMinBreakpoint;
 
   const createMockMetric = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem =>
     ({
@@ -63,11 +72,11 @@ describe('MetricInsightsFlyout', () => {
 
   const defaultProps = {
     metricItem: createMockMetric(),
-    onClose: jest.fn(),
+    onClose: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseIsWithinMinBreakpoint.mockReturnValue(true); // Simulate XL screen (push mode)
     mockUseFieldsMetadataContext.mockReturnValue({ fieldsMetadata: {} });
     mockUseFlyoutA11y.mockReturnValue({ a11yProps: {}, screenReaderDescription: null });
@@ -91,7 +100,7 @@ describe('MetricInsightsFlyout', () => {
 
   describe('keyboard interactions', () => {
     it('calls onClose and prevents default when Escape key is pressed on the flyout', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       render(<MetricInsightsFlyout {...defaultProps} onClose={onClose} />);
 
       const flyout = screen.getByTestId('metricsExperienceFlyout');
@@ -100,8 +109,8 @@ describe('MetricInsightsFlyout', () => {
         bubbles: true,
         cancelable: true,
       });
-      const preventDefaultSpy = jest.spyOn(event, 'preventDefault');
-      const stopPropagationSpy = jest.spyOn(event, 'stopPropagation');
+      const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+      const stopPropagationSpy = vi.spyOn(event, 'stopPropagation');
 
       fireEvent(flyout, event);
 
@@ -111,7 +120,7 @@ describe('MetricInsightsFlyout', () => {
     });
 
     it('does not call onClose for non-Escape keys', () => {
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       render(<MetricInsightsFlyout {...defaultProps} onClose={onClose} />);
 
       const flyout = screen.getByTestId('metricsExperienceFlyout');
@@ -122,7 +131,7 @@ describe('MetricInsightsFlyout', () => {
 
     it('does not call onClose when Escape is pressed on non-XL screens', () => {
       mockUseIsWithinMinBreakpoint.mockReturnValue(false);
-      const onClose = jest.fn();
+      const onClose = vi.fn();
       render(<MetricInsightsFlyout {...defaultProps} onClose={onClose} />);
 
       const flyout = screen.getByTestId('metricsExperienceFlyout');

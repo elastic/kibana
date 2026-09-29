@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useCopyExportQueryStep } from '.';
 import type { CopyExportQueryStepProps } from '.';
@@ -21,7 +23,7 @@ describe('useCopyExportQueryStep', () => {
   it('returns step props with "incomplete" status', () => {
     const result = renderCopyExportQueryStep({
       status: 'incomplete',
-      onCopied: jest.fn(),
+      onCopied: vi.fn(),
     });
     expect(result.current).toEqual({
       children: expect.anything(),
@@ -33,7 +35,7 @@ describe('useCopyExportQueryStep', () => {
   it('returns step props with "complete" status', () => {
     const result = renderCopyExportQueryStep({
       status: 'complete',
-      onCopied: jest.fn(),
+      onCopied: vi.fn(),
     });
     expect(result.current).toEqual({
       children: expect.anything(),
@@ -45,7 +47,7 @@ describe('useCopyExportQueryStep', () => {
   it('returns step props with "disabled" status', () => {
     const result = renderCopyExportQueryStep({
       status: 'disabled',
-      onCopied: jest.fn(),
+      onCopied: vi.fn(),
     });
     expect(result.current).toEqual({
       children: expect.anything(),
@@ -57,7 +59,7 @@ describe('useCopyExportQueryStep', () => {
   it('returns step props with "loading" status', () => {
     const result = renderCopyExportQueryStep({
       status: 'loading',
-      onCopied: jest.fn(),
+      onCopied: vi.fn(),
     });
     expect(result.current).toEqual({
       children: expect.anything(),
@@ -69,7 +71,7 @@ describe('useCopyExportQueryStep', () => {
   it('returns step props with "warning" status', () => {
     const result = renderCopyExportQueryStep({
       status: 'warning',
-      onCopied: jest.fn(),
+      onCopied: vi.fn(),
     });
     expect(result.current).toEqual({
       children: expect.anything(),
@@ -81,7 +83,7 @@ describe('useCopyExportQueryStep', () => {
   it('returns step props with "danger" status', () => {
     const result = renderCopyExportQueryStep({
       status: 'danger',
-      onCopied: jest.fn(),
+      onCopied: vi.fn(),
     });
     expect(result.current).toEqual({
       children: expect.anything(),
@@ -93,7 +95,7 @@ describe('useCopyExportQueryStep', () => {
   it('returns step props with "current" status', () => {
     const result = renderCopyExportQueryStep({
       status: 'current',
-      onCopied: jest.fn(),
+      onCopied: vi.fn(),
     });
     expect(result.current).toEqual({
       children: expect.anything(),

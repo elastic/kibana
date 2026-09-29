@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -12,12 +14,12 @@ import { SelectInterval } from './select_interval';
 
 describe('SelectInterval', () => {
   it('selects the given interval', () => {
-    const { getByText } = render(<SelectInterval interval={'day'} onChange={jest.fn()} />);
+    const { getByText } = render(<SelectInterval interval={'day'} onChange={vi.fn()} />);
     expect((getByText('1 day') as HTMLOptionElement).selected).toBeTruthy();
   });
 
   it('calls onChange when clicked', async () => {
-    const onChangeCb = jest.fn();
+    const onChangeCb = vi.fn();
     const { getByText, getByTestId } = render(
       <SelectInterval interval={'day'} onChange={onChangeCb} />
     );

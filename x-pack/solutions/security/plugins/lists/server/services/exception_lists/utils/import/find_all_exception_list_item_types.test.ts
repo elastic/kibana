@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
@@ -17,7 +19,7 @@ import {
 } from './find_all_exception_list_item_types';
 
 describe('find_all_exception_list_item_types', () => {
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     savedObjectsClient = savedObjectsClientMock.create();

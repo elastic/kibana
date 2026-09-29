@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render } from '@testing-library/react';
 import { LinksList } from './links_list';
 import userEvent from '@testing-library/user-event';
 
 describe('LinksList', () => {
-  const editAction = jest.fn();
+  const editAction = vi.fn();
 
   const options = {
     index: 0,
@@ -22,7 +24,7 @@ describe('LinksList', () => {
     links: [],
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('the list is empty by default', () => {
     render(<LinksList {...options} />);

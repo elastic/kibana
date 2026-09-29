@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { AnalyticsMapReturnType, MapElements } from '@kbn/ml-data-frame-analytics-utils';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 import { useMlApi } from '../../../contexts/kibana';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
 
-jest.mock('../../../contexts/kibana');
+vi.mock('../../../contexts/kibana');
 
 const indexNode: MapElements = {
   data: {
@@ -52,11 +55,11 @@ const createMapResponse = (
 });
 
 describe('useFetchAnalyticsMapData', () => {
-  const getDataFrameAnalyticsMap = jest.fn();
+  const getDataFrameAnalyticsMap = vi.fn();
 
   beforeEach(() => {
     getDataFrameAnalyticsMap.mockReset();
-    (useMlApi as jest.Mock).mockImplementation(() => ({
+    (useMlApi as Mock).mockImplementation(() => ({
       dataFrameAnalytics: {
         getDataFrameAnalyticsMap,
       },

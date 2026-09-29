@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import type { WebDriver } from 'selenium-webdriver';
 import {
   InvalidArgumentError,
@@ -17,20 +20,20 @@ import {
 import { ToolingLog } from '@kbn/tooling-log';
 import { dismissOpenDialog, isBlockedByOpenDialogError } from './dismiss_open_dialog';
 
-const makeDriver = (accept: jest.Mock) =>
+const makeDriver = (accept: Mock) =>
   ({ switchTo: () => ({ alert: () => ({ accept }) }) } as unknown as WebDriver);
 
 describe('dismissOpenDialog', () => {
   let log: ToolingLog;
-  let warning: jest.SpyInstance;
+  let warning: MockInstance;
 
   beforeEach(() => {
     log = new ToolingLog();
-    warning = jest.spyOn(log, 'warning').mockImplementation(() => {});
+    warning = vi.spyOn(log, 'warning').mockImplementation(() => {});
   });
 
   it('accepts an open dialog and logs it', async () => {
-    const accept = jest.fn().mockResolvedValue(undefined);
+    const accept = vi.fn().mockResolvedValue(undefined);
 
     await dismissOpenDialog(makeDriver(accept), log);
 
@@ -41,7 +44,7 @@ describe('dismissOpenDialog', () => {
   });
 
   it('is silent when there is no open dialog', async () => {
-    const accept = jest.fn().mockRejectedValue(new NoSuchAlertError('no such alert'));
+    const accept = vi.fn().mockRejectedValue(new NoSuchAlertError('no such alert'));
 
     await dismissOpenDialog(makeDriver(accept), log);
 
@@ -49,7 +52,7 @@ describe('dismissOpenDialog', () => {
   });
 
   it('is silent when the session is already gone', async () => {
-    const accept = jest.fn().mockRejectedValue(new NoSuchSessionError('invalid session id'));
+    const accept = vi.fn().mockRejectedValue(new NoSuchSessionError('invalid session id'));
 
     await dismissOpenDialog(makeDriver(accept), log);
 
@@ -57,7 +60,7 @@ describe('dismissOpenDialog', () => {
   });
 
   it('logs and swallows any other failure so the caller surfaces the real error', async () => {
-    const accept = jest.fn().mockRejectedValue(new InvalidArgumentError('boom'));
+    const accept = vi.fn().mockRejectedValue(new InvalidArgumentError('boom'));
 
     await dismissOpenDialog(makeDriver(accept), log);
 

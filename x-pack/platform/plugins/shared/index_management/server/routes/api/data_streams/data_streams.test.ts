@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { addBasePath } from '..';
 import type { RequestMock } from '../../../test/helpers';
 import { RouterMock, routeDependencies } from '../../../test/helpers';
@@ -23,7 +25,7 @@ describe('Data streams API', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('Update data retention for DS - PUT /internal/index_management/data_retention', () => {

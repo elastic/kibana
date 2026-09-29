@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 import { mlUsageCollectionProvider } from './usage_collection';
 
 describe('usage_collection', () => {
-  let usageCollection: jest.Mocked<UsageCollectionSetup>;
+  let usageCollection: Mocked<UsageCollectionSetup>;
 
   beforeEach(() => {
     usageCollection = {
-      reportUiCounter: jest.fn(),
-    } as unknown as jest.Mocked<UsageCollectionSetup>;
+      reportUiCounter: vi.fn(),
+    } as unknown as Mocked<UsageCollectionSetup>;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should use usageCollection for usage events', () => {

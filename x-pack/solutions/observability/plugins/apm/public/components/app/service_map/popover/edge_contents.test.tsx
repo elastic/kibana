@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -22,25 +24,34 @@ import {
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 
-jest.mock('../../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: jest.fn(),
-}));
+vi.mock('../../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useAnyOfApmParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/links/discover_links/open_in_discover', () => ({
-  OpenInDiscover: jest.fn(() => (
-    <button type="button" data-test-subj="apmEdgeContentsOpenInDiscoverButton">
-      Explore traces
-    </button>
-  )),
-}));
+vi.mock('../../../shared/links/discover_links/open_in_discover', () => {
+      const mocked = {
+      OpenInDiscover: vi.fn(() => (
+        <button type="button" data-test-subj="apmEdgeContentsOpenInDiscoverButton">
+          Explore traces
+        </button>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_fetcher', () => ({
-  FETCH_STATUS: { LOADING: 'loading', SUCCESS: 'success' },
-  useFetcher: () => ({ data: {}, status: 'success' }),
-}));
+vi.mock('../../../../hooks/use_fetcher', () => {
+      const mocked = {
+      FETCH_STATUS: { LOADING: 'loading', SUCCESS: 'success' },
+      useFetcher: () => ({ data: {}, status: 'success' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseAnyOfApmParams = jest.mocked(useAnyOfApmParams);
-const mockedOpenInDiscover = jest.mocked(OpenInDiscover);
+const mockedUseAnyOfApmParams = vi.mocked(useAnyOfApmParams);
+const mockedOpenInDiscover = vi.mocked(OpenInDiscover);
 
 const TEST_SUBJ = 'apmServiceMapMessagingEdgeNoMetricsMessage';
 

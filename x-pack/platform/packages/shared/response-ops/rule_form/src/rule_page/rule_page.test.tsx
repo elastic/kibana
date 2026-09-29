@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { RulePage } from './rule_page';
@@ -15,29 +17,44 @@ import {
 } from '../translations';
 import type { RuleFormData } from '../types';
 
-jest.mock('../rule_definition', () => ({
-  RuleDefinition: () => <div />,
-}));
+vi.mock('../rule_definition', () => {
+      const mocked = {
+      RuleDefinition: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../rule_actions', () => ({
-  RuleActions: () => <div />,
-}));
+vi.mock('../rule_actions', () => {
+      const mocked = {
+      RuleActions: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../rule_details', () => ({
-  RuleDetails: () => <div />,
-}));
+vi.mock('../rule_details', () => {
+      const mocked = {
+      RuleDetails: () => <div />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_rule_form_state', () => ({
-  useRuleFormState: jest.fn(),
-}));
+vi.mock('../hooks/use_rule_form_state', () => {
+      const mocked = {
+      useRuleFormState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_rule_form_dispatch', () => ({
-  useRuleFormDispatch: jest.fn(),
-}));
+vi.mock('../hooks/use_rule_form_dispatch', () => {
+      const mocked = {
+      useRuleFormDispatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useRuleFormState } = jest.requireMock('../hooks/use_rule_form_state');
+const { useRuleFormState } = (await vi.importMock('../hooks/use_rule_form_state'));
 
-const navigateToUrl = jest.fn();
+const navigateToUrl = vi.fn();
 
 const formDataMock: RuleFormData = {
   params: {
@@ -62,7 +79,7 @@ const formDataMock: RuleFormData = {
   },
 };
 
-const onCancel = jest.fn();
+const onCancel = vi.fn();
 
 useRuleFormState.mockReturnValue({
   plugins: {
@@ -86,11 +103,11 @@ useRuleFormState.mockReturnValue({
   aadTemplateFields: [],
 });
 
-const onSave = jest.fn();
+const onSave = vi.fn();
 
 describe('rulePage', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders correctly', () => {

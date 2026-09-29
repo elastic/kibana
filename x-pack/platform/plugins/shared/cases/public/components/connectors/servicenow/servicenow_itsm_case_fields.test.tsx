@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -16,9 +19,9 @@ import Fields from './servicenow_itsm_case_fields';
 import { MockFormWrapperComponent } from '../test_utils';
 import { renderWithTestingProviders } from '../../../common/mock';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('./use_get_choices');
-const useGetChoicesMock = useGetChoices as jest.Mock;
+vi.mock('../../../common/lib/kibana');
+vi.mock('./use_get_choices');
+const useGetChoicesMock = useGetChoices as Mock;
 
 useGetChoicesMock.mockReturnValue({
   isLoading: false,
@@ -30,11 +33,11 @@ describe('ServiceNowITSM Fields', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   const fields = {
@@ -49,12 +52,12 @@ describe('ServiceNowITSM Fields', () => {
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
+      advanceTimers: vi.advanceTimersByTime,
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('all params fields are rendered', async () => {

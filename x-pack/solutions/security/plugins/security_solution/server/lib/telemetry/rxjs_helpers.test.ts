@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { CachedSubject, retryOnError$ } from './rxjs_helpers';
 import * as rx from 'rxjs';
 
@@ -13,15 +15,15 @@ describe('telemetry.helpers.rxjs.retryOnError$', () => {
   const delay = 100;
 
   beforeEach(() => {
-    jest.useFakeTimers({ advanceTimers: true });
+    vi.useFakeTimers({ advanceTimers: true });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should not retry if the computation does not fail', async () => {
-    const callback = jest.fn(() => 'success');
+    const callback = vi.fn(() => 'success');
 
     retryOnError$(1, 100, callback).subscribe({
       next: (response) => {
@@ -32,12 +34,12 @@ describe('telemetry.helpers.rxjs.retryOnError$', () => {
       },
     });
 
-    await jest.advanceTimersByTimeAsync(delay * 1.1);
+    await vi.advanceTimersByTimeAsync(delay * 1.1);
     expect(callback).toHaveBeenCalledTimes(1);
   });
 
   it('should retry runtime errors until the computation works', async () => {
-    const callback = jest
+    const callback = vi
       .fn()
       .mockImplementationOnce(() => {
         throw new Error('first');
@@ -56,13 +58,13 @@ describe('telemetry.helpers.rxjs.retryOnError$', () => {
       },
     });
 
-    await jest.advanceTimersByTimeAsync(delay * 2 * 1.1);
+    await vi.advanceTimersByTimeAsync(delay * 2 * 1.1);
 
     expect(callback).toHaveBeenCalledTimes(3);
   });
 
   it('should exhaust retries with runtime errors and emit an error', async () => {
-    const callback = jest.fn().mockImplementation(() => {
+    const callback = vi.fn().mockImplementation(() => {
       throw new Error('boom!');
     });
 
@@ -75,13 +77,13 @@ describe('telemetry.helpers.rxjs.retryOnError$', () => {
       },
     });
 
-    await jest.advanceTimersByTimeAsync(retries * delay * 1.1);
+    await vi.advanceTimersByTimeAsync(retries * delay * 1.1);
 
     expect(callback).toHaveBeenCalledTimes(retries + 1);
   });
 
   it('should exhaust retries with rejected promises and emit an error', async () => {
-    const callback = jest.fn().mockImplementation(() => Promise.reject(new Error('boom!')));
+    const callback = vi.fn().mockImplementation(() => Promise.reject(new Error('boom!')));
 
     retryOnError$(retries, delay, callback).subscribe({
       next: (response) => {
@@ -92,13 +94,13 @@ describe('telemetry.helpers.rxjs.retryOnError$', () => {
       },
     });
 
-    await jest.advanceTimersByTimeAsync(retries * delay * 1.1);
+    await vi.advanceTimersByTimeAsync(retries * delay * 1.1);
 
     expect(callback).toHaveBeenCalledTimes(retries + 1);
   });
 
   it('should retry rejected promises until the computation works', async () => {
-    const callback = jest
+    const callback = vi
       .fn()
       .mockImplementationOnce(() => Promise.reject(new Error('first')))
       .mockImplementationOnce(() => Promise.reject(new Error('second')))
@@ -113,13 +115,13 @@ describe('telemetry.helpers.rxjs.retryOnError$', () => {
       },
     });
 
-    await jest.advanceTimersByTimeAsync(delay * 3 * 1.1);
+    await vi.advanceTimersByTimeAsync(delay * 3 * 1.1);
 
     expect(callback).toHaveBeenCalledTimes(3);
   });
 
   it('should retry rejected promises and runtime errors until the computation works', async () => {
-    const callback = jest
+    const callback = vi
       .fn()
       .mockImplementationOnce(() => Promise.reject(new Error('first')))
       .mockImplementationOnce(() => {
@@ -136,7 +138,7 @@ describe('telemetry.helpers.rxjs.retryOnError$', () => {
       },
     });
 
-    await jest.advanceTimersByTimeAsync(delay * 3 * 1.1);
+    await vi.advanceTimersByTimeAsync(delay * 3 * 1.1);
 
     expect(callback).toHaveBeenCalledTimes(3);
   });

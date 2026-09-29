@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Client } from '@elastic/elasticsearch';
 import { getSnapshotMetadata } from './utils';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -20,7 +22,7 @@ describe('getSnapshotMetadata', () => {
   it('defaults to the latest SUCCESS snapshot (skips FAILED and in-progress snapshots)', async () => {
     const esClient = {
       snapshot: {
-        get: jest.fn().mockResolvedValue({
+        get: vi.fn().mockResolvedValue({
           snapshots: [
             { snapshot: 'snap-failed', state: 'FAILED', end_time_in_millis: 1704326400000 },
             { snapshot: 'snap-in-progress', state: 'SUCCESS' }, // no end_time
@@ -52,7 +54,7 @@ describe('getSnapshotMetadata', () => {
   it('uses the provided snapshotName when specified', async () => {
     const esClient = {
       snapshot: {
-        get: jest.fn().mockResolvedValue({
+        get: vi.fn().mockResolvedValue({
           snapshots: [
             {
               snapshot: 'my-snap',
@@ -82,7 +84,7 @@ describe('getSnapshotMetadata', () => {
   it('throws a clear error when the snapshotName is not found', async () => {
     const esClient = {
       snapshot: {
-        get: jest.fn().mockResolvedValue({ snapshots: [] }),
+        get: vi.fn().mockResolvedValue({ snapshots: [] }),
       },
     } as unknown as Client;
 
@@ -99,7 +101,7 @@ describe('getSnapshotMetadata', () => {
   it('selects the latest SUCCESS snapshot when snapshotName matches multiple snapshots', async () => {
     const esClient = {
       snapshot: {
-        get: jest.fn().mockResolvedValue({
+        get: vi.fn().mockResolvedValue({
           snapshots: [
             {
               snapshot: 'match-1',
@@ -136,7 +138,7 @@ describe('getSnapshotMetadata', () => {
   it('throws when no SUCCESS snapshots exist', async () => {
     const esClient = {
       snapshot: {
-        get: jest.fn().mockResolvedValue({
+        get: vi.fn().mockResolvedValue({
           snapshots: [
             { snapshot: 'snap-failed', state: 'FAILED', end_time_in_millis: 1704067200000 },
             { snapshot: 'snap-in-progress', state: 'SUCCESS' }, // no end_time

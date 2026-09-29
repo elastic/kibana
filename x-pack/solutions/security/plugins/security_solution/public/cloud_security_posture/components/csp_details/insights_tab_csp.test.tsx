@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock/test_providers';
@@ -14,79 +17,91 @@ import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
 import type { ExpandableFlyoutState } from '@kbn/expandable-flyout';
 
-const mockOpenPreviewPanel = jest.fn();
+const mockOpenPreviewPanel = vi.fn();
 
 // Mock the child components. Each exposes a clickable element that invokes the navigation
 // callback owned by `InsightsTabCsp`, so the lifted `openPreviewPanel` logic can be asserted.
-jest.mock('./misconfiguration_findings_details_table', () => ({
-  MisconfigurationFindingsDetailsTable: ({
-    onShowFinding,
-  }: {
-    onShowFinding: (resourceId: string, ruleId: string) => void;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="misconfiguration-table"
-      onClick={() => onShowFinding('resource-1', 'rule-1')}
-    >
-      {'Misconfiguration Table'}
-    </button>
-  ),
-}));
+vi.mock('./misconfiguration_findings_details_table', () => {
+      const mocked = {
+      MisconfigurationFindingsDetailsTable: ({
+        onShowFinding,
+      }: {
+        onShowFinding: (resourceId: string, ruleId: string) => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="misconfiguration-table"
+          onClick={() => onShowFinding('resource-1', 'rule-1')}
+        >
+          {'Misconfiguration Table'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./vulnerabilities_findings_details_table', () => ({
-  VulnerabilitiesFindingsDetailsTable: ({
-    onShowVulnerability,
-  }: {
-    onShowVulnerability: (params: {
-      vulnerabilityId: string;
-      resourceId: string;
-      packageName: string;
-      packageVersion: string;
-      eventId: string;
-    }) => void;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="vulnerabilities-table"
-      onClick={() =>
-        onShowVulnerability({
-          vulnerabilityId: 'CVE-1',
-          resourceId: 'resource-1',
-          packageName: 'pkg',
-          packageVersion: '1.0.0',
-          eventId: 'event-1',
-        })
-      }
-    >
-      {'Vulnerabilities Table'}
-    </button>
-  ),
-}));
+vi.mock('./vulnerabilities_findings_details_table', () => {
+      const mocked = {
+      VulnerabilitiesFindingsDetailsTable: ({
+        onShowVulnerability,
+      }: {
+        onShowVulnerability: (params: {
+          vulnerabilityId: string;
+          resourceId: string;
+          packageName: string;
+          packageVersion: string;
+          eventId: string;
+        }) => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="vulnerabilities-table"
+          onClick={() =>
+            onShowVulnerability({
+              vulnerabilityId: 'CVE-1',
+              resourceId: 'resource-1',
+              packageName: 'pkg',
+              packageVersion: '1.0.0',
+              eventId: 'event-1',
+            })
+          }
+        >
+          {'Vulnerabilities Table'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./alerts_findings_details_table', () => ({
-  AlertsDetailsTable: ({
-    onShowAlert,
-  }: {
-    onShowAlert: (eventId: string, indexName: string) => void;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="alerts-table"
-      onClick={() => onShowAlert('alert-1', 'index-1')}
-    >
-      {'Alerts Table'}
-    </button>
-  ),
-}));
+vi.mock('./alerts_findings_details_table', () => {
+      const mocked = {
+      AlertsDetailsTable: ({
+        onShowAlert,
+      }: {
+        onShowAlert: (eventId: string, indexName: string) => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="alerts-table"
+          onClick={() => onShowAlert('alert-1', 'index-1')}
+        >
+          {'Alerts Table'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the expandable flyout hooks
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutState: jest.fn(),
-  useExpandableFlyoutApi: jest.fn(() => ({ openPreviewPanel: mockOpenPreviewPanel })),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutState: vi.fn(),
+      useExpandableFlyoutApi: vi.fn(() => ({ openPreviewPanel: mockOpenPreviewPanel })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseExpandableFlyoutState = useExpandableFlyoutState as jest.MockedFunction<
+const mockUseExpandableFlyoutState = useExpandableFlyoutState as MockedFunction<
   typeof useExpandableFlyoutState
 >;
 
@@ -109,7 +124,7 @@ describe('InsightsTabCsp', () => {
   } as const;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseExpandableFlyoutState.mockReturnValue(mockPanels as unknown as ExpandableFlyoutState);
   });
 

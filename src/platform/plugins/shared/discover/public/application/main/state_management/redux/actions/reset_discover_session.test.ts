@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { cloneDeep } from 'lodash';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
@@ -75,7 +77,7 @@ export const setup = async () => {
 describe('resetDiscoverSession', () => {
   it('should do nothing when there is no persisted session', async () => {
     const { internalState, initializeTabs } = getDiscoverInternalStateMock();
-    const updateTabsSpy = jest.spyOn(tabsActions, 'updateTabs');
+    const updateTabsSpy = vi.spyOn(tabsActions, 'updateTabs');
 
     await initializeTabs();
 
@@ -128,7 +130,7 @@ describe('resetDiscoverSession', () => {
       persistedDiscoverSession,
     } = await setup();
 
-    jest.mocked(services.data.search.searchSource.create).mockClear();
+    vi.mocked(services.data.search.searchSource.create).mockClear();
 
     const tab1RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab1.id);
     const tab2RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab2.id);
@@ -136,7 +138,7 @@ describe('resetDiscoverSession', () => {
 
     expect(tab3RuntimeState.dataStateContainer$.getValue()).toBeUndefined();
 
-    const resetOnSavedSearchChangeSpy = jest.spyOn(
+    const resetOnSavedSearchChangeSpy = vi.spyOn(
       internalStateSlice.actions,
       'resetOnSavedSearchChange'
     );

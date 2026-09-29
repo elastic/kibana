@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RuleCreationResult } from '../rule_creation_client';
@@ -17,10 +19,10 @@ import {
 } from './tool_routing';
 
 const log = {
-  info: jest.fn(),
-  debug: jest.fn(),
-  warning: jest.fn(),
-  error: jest.fn(),
+  info: vi.fn(),
+  debug: vi.fn(),
+  warning: vi.fn(),
+  error: vi.fn(),
 } as unknown as ToolingLog;
 
 const esWith = (
@@ -30,7 +32,7 @@ const esWith = (
   }
 ) =>
   ({
-    esql: { query: jest.fn(async ({ query }: { query: string }) => handler(query)) },
+    esql: { query: vi.fn(async ({ query }: { query: string }) => handler(query)) },
   } as unknown as EsClient);
 
 const counts = (tool: number, required: number) => ({

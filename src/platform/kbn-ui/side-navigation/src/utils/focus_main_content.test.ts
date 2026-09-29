@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/ui-chrome-layout', () => ({
-  MAIN_CONTENT_SELECTORS: ['#main-content'],
-}));
+import { vi } from 'vitest';
+
+vi.mock('@kbn/ui-chrome-layout', () => {
+      const mocked = {
+      MAIN_CONTENT_SELECTORS: ['#main-content'],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { focusMainContent } from './focus_main_content';
 
@@ -18,7 +23,7 @@ describe('focusMainContent', () => {
     const main = document.createElement('div');
     main.id = 'main-content';
 
-    const focusSpy = jest.spyOn(main, 'focus');
+    const focusSpy = vi.spyOn(main, 'focus');
 
     document.body.appendChild(main);
 

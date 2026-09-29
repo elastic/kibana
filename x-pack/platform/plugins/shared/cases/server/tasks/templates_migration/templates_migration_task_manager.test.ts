@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { parse as parseYaml } from 'yaml';
 import type { CoreStart } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -31,27 +33,27 @@ import {
 import { CASE_BACKFILL_RESCHEDULE_DELAY_MS, MAX_CASE_BACKFILL_FAILED_RUNS } from './types';
 
 const createSavedObjectsRepositoryMock = () => ({
-  find: jest.fn(),
-  create: jest.fn(),
-  update: jest.fn(),
-  get: jest.fn(),
-  delete: jest.fn(),
-  bulkCreate: jest.fn(),
-  bulkUpdate: jest.fn(),
-  openPointInTimeForType: jest.fn(),
-  closePointInTime: jest.fn(),
+  find: vi.fn(),
+  create: vi.fn(),
+  update: vi.fn(),
+  get: vi.fn(),
+  delete: vi.fn(),
+  bulkCreate: vi.fn(),
+  bulkUpdate: vi.fn(),
+  openPointInTimeForType: vi.fn(),
+  closePointInTime: vi.fn(),
 });
 
 const createCoreMock = (repo: ReturnType<typeof createSavedObjectsRepositoryMock>) => ({
   savedObjects: {
-    createInternalRepository: jest.fn().mockReturnValue(repo),
+    createInternalRepository: vi.fn().mockReturnValue(repo),
   },
 });
 
 const createUsageCollectionMock = () => {
-  const counter = { incrementCounter: jest.fn() };
+  const counter = { incrementCounter: vi.fn() };
   const usageCollection = {
-    createUsageCounter: jest.fn().mockReturnValue(counter),
+    createUsageCounter: vi.fn().mockReturnValue(counter),
   };
   return { usageCollection, counter };
 };
@@ -2333,7 +2335,7 @@ describe('TemplatesMigrationTaskManager', () => {
       mockFindByType(configSO, [
         buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
       ]);
-      const hook = jest.fn().mockResolvedValue(undefined);
+      const hook = vi.fn().mockResolvedValue(undefined);
 
       const result = await getTaskRunner(await buildWithHook(hook)).run();
 
@@ -2355,7 +2357,7 @@ describe('TemplatesMigrationTaskManager', () => {
       mockFindByType(configSO, [
         buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
       ]);
-      const hook = jest.fn().mockResolvedValue(undefined);
+      const hook = vi.fn().mockResolvedValue(undefined);
 
       const result = await getTaskRunner(await buildWithHook(hook)).run();
 
@@ -2380,7 +2382,7 @@ describe('TemplatesMigrationTaskManager', () => {
           cf_text_as_keyword: 'x',
         }),
       ]);
-      const hook = jest.fn().mockResolvedValue(undefined);
+      const hook = vi.fn().mockResolvedValue(undefined);
 
       const result = await getTaskRunner(await buildWithHook(hook)).run();
 
@@ -2400,7 +2402,7 @@ describe('TemplatesMigrationTaskManager', () => {
         legacyCasesMigrated: true,
       });
       mockFindByType(configSO, []);
-      const hook = jest.fn().mockResolvedValue(undefined);
+      const hook = vi.fn().mockResolvedValue(undefined);
 
       await getTaskRunner(await buildWithHook(hook)).run();
 
@@ -2413,7 +2415,7 @@ describe('TemplatesMigrationTaskManager', () => {
         templates: [buildLegacyTemplate('T')],
       });
       mockFindByType(configSO, []);
-      const hook = jest.fn().mockResolvedValue(undefined);
+      const hook = vi.fn().mockResolvedValue(undefined);
 
       await getTaskRunner(await buildWithHook(hook)).run();
 
@@ -2446,7 +2448,7 @@ describe('TemplatesMigrationTaskManager', () => {
           ? Promise.resolve(fullPage)
           : Promise.resolve({ saved_objects: [], total: 0 })
       );
-      const hook = jest.fn().mockResolvedValue(undefined);
+      const hook = vi.fn().mockResolvedValue(undefined);
 
       const result = await getTaskRunner(await buildWithHook(hook)).run();
 
@@ -2467,7 +2469,7 @@ describe('TemplatesMigrationTaskManager', () => {
       repo.bulkUpdate.mockResolvedValue({
         saved_objects: [{ id: 'c1', type: CASE_SAVED_OBJECT, error: { message: 'boom' } }],
       });
-      const hook = jest.fn().mockResolvedValue(undefined);
+      const hook = vi.fn().mockResolvedValue(undefined);
 
       const result = await runTask(await buildWithHook(hook), {
         state: { failedRuns: MAX_CASE_BACKFILL_FAILED_RUNS - 1 },
@@ -2487,7 +2489,7 @@ describe('TemplatesMigrationTaskManager', () => {
       mockFindByType(configSO, [
         buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
       ]);
-      const hook = jest.fn().mockRejectedValue(new Error('analytics down'));
+      const hook = vi.fn().mockRejectedValue(new Error('analytics down'));
 
       const result = await getTaskRunner(await buildWithHook(hook)).run();
 

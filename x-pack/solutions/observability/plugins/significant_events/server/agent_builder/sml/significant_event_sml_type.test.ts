@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
@@ -14,9 +17,12 @@ import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/t
 import { EventService } from '../../lib/significant_events/events/event_service';
 import { createSignificantEventSmlType } from './significant_event_sml_type';
 
-jest.mock('../../lib/significant_events/events/event_service', () => ({
-  EventService: jest.fn(),
-}));
+vi.mock('../../lib/significant_events/events/event_service', () => {
+      const mocked = {
+      EventService: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const event: SignificantEvent = {
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -32,23 +38,23 @@ const event: SignificantEvent = {
   confidence: 0.8,
 };
 
-const findLatestPaginated = jest.fn();
-const findLatestByEventId = jest.fn();
-const getDataStreams = jest.fn().mockResolvedValue({
-  initializeClient: jest.fn().mockResolvedValue({}),
+const findLatestPaginated = vi.fn();
+const findLatestByEventId = vi.fn();
+const getDataStreams = vi.fn().mockResolvedValue({
+  initializeClient: vi.fn().mockResolvedValue({}),
 });
-const isAvailable = jest.fn().mockResolvedValue(true);
+const isAvailable = vi.fn().mockResolvedValue(true);
 
 const createGetScopedClients = (
   events: SignificantEvent[]
-): jest.MockedFunction<GetScopedClients> => {
-  const getEventClient = jest.fn(() => ({
-    findLatestByEventId: jest.fn().mockResolvedValue(events.at(-1)),
+): MockedFunction<GetScopedClients> => {
+  const getEventClient = vi.fn(() => ({
+    findLatestByEventId: vi.fn().mockResolvedValue(events.at(-1)),
   }));
 
-  return jest.fn().mockResolvedValue({
+  return vi.fn().mockResolvedValue({
     getEventClient,
-  } as unknown as RouteHandlerScopedClients) as jest.MockedFunction<GetScopedClients>;
+  } as unknown as RouteHandlerScopedClients) as MockedFunction<GetScopedClients>;
 };
 
 describe('createSignificantEventSmlType', () => {
@@ -57,10 +63,10 @@ describe('createSignificantEventSmlType', () => {
     findLatestByEventId.mockReset();
     getDataStreams.mockClear();
     isAvailable.mockReset().mockResolvedValue(true);
-    jest.mocked(EventService).mockImplementation(
+    vi.mocked(EventService).mockImplementation(
       () =>
         ({
-          getClient: jest.fn(() => ({
+          getClient: vi.fn(() => ({
             findLatestPaginated,
             findLatestByEventId,
           })),

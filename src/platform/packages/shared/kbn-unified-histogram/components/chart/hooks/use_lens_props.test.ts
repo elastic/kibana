@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { UnifiedHistogramFetchParams, UnifiedHistogramFetch$ } from '../../../types';
@@ -18,7 +20,7 @@ import { useLensProps } from './use_lens_props';
 describe('useLensProps', () => {
   it('should return lens props', async () => {
     const fetch$: UnifiedHistogramFetch$ = getFetch$Mock();
-    const onLoad = jest.fn();
+    const onLoad = vi.fn();
     const fetchParams: UnifiedHistogramFetchParams = getFetchParamsMock({
       relativeTimeRange: { from: '2025-09-30T22:00:00.000Z', to: '2025-10-31T13:16:54.878Z' },
     });
@@ -48,7 +50,7 @@ describe('useLensProps', () => {
 
   it('should return lens props for text based languages', async () => {
     const fetch$: UnifiedHistogramFetch$ = getFetch$Mock();
-    const onLoad = jest.fn();
+    const onLoad = vi.fn();
     const query = { esql: 'FROM logs* | WHERE ??field >= ?otherVar' };
     const esqlVariables: ESQLControlVariable[] = [
       { key: 'field', value: 'variableColumn', type: ESQLVariableType.FIELDS },
@@ -85,7 +87,7 @@ describe('useLensProps', () => {
 
   it('should only return lens props after fetch$ is triggered', async () => {
     const fetch$: UnifiedHistogramFetch$ = getFetch$Mock();
-    const onLoad = jest.fn();
+    const onLoad = vi.fn();
     const fetchParams: UnifiedHistogramFetchParams = getFetchParamsMock();
     const lensVisMock = await getLensVisMock({
       filters: fetchParams.filters,

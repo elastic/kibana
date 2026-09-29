@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,20 +17,23 @@ import { IntegrationFormProvider } from '../../forms/integration_form';
 
 const mockExistingPackageNames = ['existing_integration', 'my_custom_package', 'test_package'];
 
-jest.mock('../../../../common/lib/api', () => ({
-  getInstalledPackages: jest.fn(() =>
-    Promise.resolve({
-      items: mockExistingPackageNames.map((id) => ({ id })),
-    })
-  ),
-  getAllIntegrations: jest.fn(() => Promise.resolve([])),
-  getAllIntegrationNames: jest.fn(() => Promise.resolve([])),
-}));
+vi.mock('../../../../common/lib/api', () => {
+      const mocked = {
+      getInstalledPackages: vi.fn(() =>
+        Promise.resolve({
+          items: mockExistingPackageNames.map((id) => ({ id })),
+        })
+      ),
+      getAllIntegrations: vi.fn(() => Promise.resolve([])),
+      getAllIntegrationNames: vi.fn(() => Promise.resolve([])),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockServices = coreMock.createStart();
 
 const TestWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-  const mockOnSubmit = jest.fn();
+  const mockOnSubmit = vi.fn();
   return (
     <I18nProvider>
       <KibanaContextProvider services={mockServices}>
@@ -48,7 +53,7 @@ const renderIntegrationDetails = async () => {
 
 describe('IntegrationDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {

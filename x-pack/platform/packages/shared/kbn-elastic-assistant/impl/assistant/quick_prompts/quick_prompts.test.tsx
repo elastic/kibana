@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
@@ -13,22 +15,22 @@ import { QUICK_PROMPTS_TAB } from '../settings/const';
 import { QuickPrompts } from './quick_prompts';
 import { of } from 'rxjs';
 
-const setInput = jest.fn();
-const setIsSettingsModalVisible = jest.fn();
-const trackPrompt = jest.fn();
+const setInput = vi.fn();
+const setIsSettingsModalVisible = vi.fn();
+const trackPrompt = vi.fn();
 const testProps = {
   setInput,
   setIsSettingsModalVisible,
   trackPrompt,
   allPrompts: MOCK_QUICK_PROMPTS,
 };
-const setSelectedSettingsTab = jest.fn();
+const setSelectedSettingsTab = vi.fn();
 const mockUseAssistantContext = {
   setSelectedSettingsTab,
   promptContexts: {},
   allQuickPrompts: MOCK_QUICK_PROMPTS,
   chrome: {
-    getChromeStyle$: jest.fn(() => of('classic')),
+    getChromeStyle$: vi.fn(() => of('classic')),
   },
   assistantAvailability: {
     hasAssistantPrivilege: true,
@@ -39,21 +41,24 @@ const testTitle = 'SPL_QUERY_CONVERSION_TITLE';
 const testPrompt = 'SPL_QUERY_CONVERSION_PROMPT';
 const customTitle = 'A_CUSTOM_OPTION';
 
-jest.mock('react-use/lib/useMeasure', () => () => [
+vi.mock('react-use/lib/useMeasure', () => () => [
   () => {},
   {
     width: 500,
   },
 ]);
 
-jest.mock('../../assistant_context', () => ({
-  ...jest.requireActual('../../assistant_context'),
-  useAssistantContext: () => mockUseAssistantContext,
-}));
+vi.mock('../../assistant_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../assistant_context')),
+      useAssistantContext: () => mockUseAssistantContext,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('QuickPrompts', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('onClickAddQuickPrompt calls setInput with the prompt, and trackPrompt with the prompt title', () => {
     const { getByText } = render(

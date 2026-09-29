@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ExecutionRunTypeFilter } from '.';
@@ -12,13 +15,13 @@ import { RuleRunTypeEnum } from '../../../../../../../common/api/detection_engin
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { EventLogEventTypes } from '../../../../../../common/lib/telemetry';
 
-jest.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/lib/kibana');
 
 const mockTelemetry = {
-  reportEvent: jest.fn(),
+  reportEvent: vi.fn(),
 };
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 mockUseKibana.mockReturnValue({
   services: {
@@ -30,7 +33,7 @@ const items = [RuleRunTypeEnum.backfill, RuleRunTypeEnum.standard];
 
 describe('ExecutionRunTypeFilter', () => {
   it('calls telemetry.reportEvent on selection change', () => {
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
 
     render(<ExecutionRunTypeFilter items={items} selectedItems={[]} onChange={handleChange} />);
 

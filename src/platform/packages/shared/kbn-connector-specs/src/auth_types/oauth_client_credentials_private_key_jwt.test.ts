@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { AxiosInstance } from 'axios';
 import type { AuthContext } from '../connector_spec';
 import {
@@ -43,14 +45,14 @@ function createMockAxiosInstance(): AxiosInstance {
 
 function createMockContext(overrides: Partial<AuthContext> = {}): AuthContext {
   const ctx: Partial<AuthContext> = {
-    getToken: jest.fn().mockResolvedValue(ACCESS_TOKEN),
+    getToken: vi.fn().mockResolvedValue(ACCESS_TOKEN),
     logger: {
-      debug: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      info: jest.fn(),
+      debug: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      info: vi.fn(),
     } as unknown as AuthContext['logger'],
-    getCustomHostSettings: jest.fn(),
+    getCustomHostSettings: vi.fn(),
     sslSettings: {},
     ...overrides,
   };
@@ -177,7 +179,7 @@ describe('OAuthClientCredentialsPrivateKeyJwt', () => {
     it('wraps getToken failures with tokenUrl context and preserves cause', async () => {
       const rootCause = new Error('invalid_client');
       const ctx = createMockContext({
-        getToken: jest.fn().mockRejectedValue(rootCause),
+        getToken: vi.fn().mockRejectedValue(rootCause),
       });
       const axiosInstance = createMockAxiosInstance();
 
@@ -191,7 +193,7 @@ describe('OAuthClientCredentialsPrivateKeyJwt', () => {
 
     it('throws when getToken resolves to a falsy value', async () => {
       const ctx = createMockContext({
-        getToken: jest.fn().mockResolvedValue(null),
+        getToken: vi.fn().mockResolvedValue(null),
       });
       const axiosInstance = createMockAxiosInstance();
 

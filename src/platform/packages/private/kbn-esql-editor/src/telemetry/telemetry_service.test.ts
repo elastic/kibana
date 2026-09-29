@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import {
   ESQLEditorTelemetryService,
@@ -27,24 +30,27 @@ import {
 } from './events_registration';
 import { reportEsqlError } from '../report_error';
 
-jest.mock('../report_error', () => ({
-  reportEsqlError: jest.fn(),
-}));
+vi.mock('../report_error', () => {
+      const mocked = {
+      reportEsqlError: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ESQLEditorTelemetryService', () => {
-  let mockAnalytics: jest.Mocked<AnalyticsServiceStart>;
+  let mockAnalytics: Mocked<AnalyticsServiceStart>;
   let telemetryService: ESQLEditorTelemetryService;
 
   beforeEach(() => {
     mockAnalytics = {
-      reportEvent: jest.fn(),
-    } as unknown as jest.Mocked<AnalyticsServiceStart>;
+      reportEvent: vi.fn(),
+    } as unknown as Mocked<AnalyticsServiceStart>;
 
     telemetryService = new ESQLEditorTelemetryService(mockAnalytics);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('trackLookupJoinHoverActionShown', () => {
@@ -186,7 +192,7 @@ describe('ESQLEditorTelemetryService', () => {
         duration_ms: 1500,
         generated_query_length: 80,
       });
-      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1] as Record<
+      const payload = (mockAnalytics.reportEvent as Mock).mock.calls[0][1] as Record<
         string,
         unknown
       >;
@@ -209,7 +215,7 @@ describe('ESQLEditorTelemetryService', () => {
         duration_ms: 300,
         error_code: '500',
       });
-      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1] as Record<
+      const payload = (mockAnalytics.reportEvent as Mock).mock.calls[0][1] as Record<
         string,
         unknown
       >;
@@ -224,7 +230,7 @@ describe('ESQLEditorTelemetryService', () => {
         durationMs: 200,
       });
 
-      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1] as Record<
+      const payload = (mockAnalytics.reportEvent as Mock).mock.calls[0][1] as Record<
         string,
         unknown
       >;
@@ -271,7 +277,7 @@ describe('ESQLEditorTelemetryService', () => {
         duration_ms: 400,
         error_code: '503',
       });
-      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1] as Record<
+      const payload = (mockAnalytics.reportEvent as Mock).mock.calls[0][1] as Record<
         string,
         unknown
       >;
@@ -336,7 +342,7 @@ describe('ESQLEditorTelemetryService', () => {
         success: false,
         duration_ms: 500,
       });
-      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1] as Record<
+      const payload = (mockAnalytics.reportEvent as Mock).mock.calls[0][1] as Record<
         string,
         unknown
       >;
@@ -351,7 +357,7 @@ describe('ESQLEditorTelemetryService', () => {
         changedLineCount: 1,
       });
 
-      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1] as Record<
+      const payload = (mockAnalytics.reportEvent as Mock).mock.calls[0][1] as Record<
         string,
         unknown
       >;
@@ -405,7 +411,7 @@ describe('ESQLEditorTelemetryService', () => {
         action: 'add',
       });
 
-      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1] as Record<
+      const payload = (mockAnalytics.reportEvent as Mock).mock.calls[0][1] as Record<
         string,
         unknown
       >;

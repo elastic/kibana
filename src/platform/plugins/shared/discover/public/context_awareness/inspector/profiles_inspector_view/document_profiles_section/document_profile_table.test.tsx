@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import { DocumentProfileTable } from './document_profile_table';
 import React from 'react';
@@ -16,7 +18,7 @@ import { generateEsHit } from '@kbn/discover-utils/src/__mocks__';
 import { DocumentType } from '../../../profiles';
 
 const setup = (props: Partial<React.ComponentProps<typeof DocumentProfileTable>> = {}) => {
-  const onViewRecordDetails = jest.fn();
+  const onViewRecordDetails = vi.fn();
   const user = userEvent.setup();
 
   const allProps = {

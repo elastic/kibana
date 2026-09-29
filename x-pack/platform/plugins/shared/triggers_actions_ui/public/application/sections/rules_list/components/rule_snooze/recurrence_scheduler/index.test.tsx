@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import moment from 'moment';
@@ -16,7 +18,7 @@ describe('RecurrenceScheduler', () => {
   test('hydrates a monthly bymonthday schedule as custom on day N', async () => {
     const startDate = moment('11/23/2021');
     const endDate = moment('11/23/2021').add(2, 'hours');
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     renderWithI18n(
       <RecurrenceScheduler

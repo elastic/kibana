@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { IdBadgesProps } from './id_badges';
@@ -12,14 +14,17 @@ import { IdBadges } from './id_badges';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
-jest.mock('../../../contexts/kibana', () => ({
-  useMlKibana: () => ({
-    services: {
-      share: { url: { locators: jest.fn() } },
-      application: { navigateToUrl: jest.fn() },
-    },
-  }),
-}));
+vi.mock('../../../contexts/kibana', () => {
+      const mocked = {
+      useMlKibana: () => ({
+        services: {
+          share: { url: { locators: vi.fn() } },
+          application: { navigateToUrl: vi.fn() },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const props: IdBadgesProps = {
   page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
@@ -35,9 +40,9 @@ const props: IdBadgesProps = {
     },
   ],
   selectedJobIds: ['job1', 'job2', 'job3'],
-  onLinkClick: jest.fn(),
+  onLinkClick: vi.fn(),
   showAllBarBadges: false,
-  onRemoveJobId: jest.fn(),
+  onRemoveJobId: vi.fn(),
   selectedJobs: [
     {
       id: 'job1',

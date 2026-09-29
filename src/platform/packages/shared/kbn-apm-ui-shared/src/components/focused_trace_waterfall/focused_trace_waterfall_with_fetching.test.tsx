@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -15,28 +18,37 @@ import { FocusedTraceWaterfallWithFetching } from './focused_trace_waterfall_wit
 import * as FocusedTraceWaterfallModule from '.';
 import * as useGetServiceBadgeHrefFromCoreModule from '../trace_waterfall/use_get_service_badge_href_from_core';
 
-jest.mock('@kbn/react-hooks', () => ({
-  useAbortableAsync: jest.fn(),
-}));
+vi.mock('@kbn/react-hooks', () => {
+      const mocked = {
+      useAbortableAsync: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('.', () => ({
-  FocusedTraceWaterfall: jest.fn(() => <div data-test-subj="focusedTraceWaterfall" />),
-}));
+vi.mock('.', () => {
+      const mocked = {
+      FocusedTraceWaterfall: vi.fn(() => <div data-test-subj="focusedTraceWaterfall" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../trace_waterfall/use_get_service_badge_href_from_core', () => ({
-  useGetServiceBadgeHrefFromCore: jest.fn(),
-}));
+vi.mock('../trace_waterfall/use_get_service_badge_href_from_core', () => {
+      const mocked = {
+      useGetServiceBadgeHrefFromCore: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAbortableAsync = useAbortableAsyncModule.useAbortableAsync as jest.Mock;
-const mockFocusedTraceWaterfall = FocusedTraceWaterfallModule.FocusedTraceWaterfall as jest.Mock;
+const mockUseAbortableAsync = useAbortableAsyncModule.useAbortableAsync as Mock;
+const mockFocusedTraceWaterfall = FocusedTraceWaterfallModule.FocusedTraceWaterfall as Mock;
 const mockUseGetServiceBadgeHrefFromCore =
-  useGetServiceBadgeHrefFromCoreModule.useGetServiceBadgeHrefFromCore as jest.Mock;
+  useGetServiceBadgeHrefFromCoreModule.useGetServiceBadgeHrefFromCore as Mock;
 
-const mockGetServiceBadgeHref = jest.fn();
-const mockCallApmApi = jest.fn();
+const mockGetServiceBadgeHref = vi.fn();
+const mockCallApmApi = vi.fn();
 const mockCore = {
   application: {
-    getUrlForApp: jest.fn().mockReturnValue('/app/apm/services/my-service/overview'),
+    getUrlForApp: vi.fn().mockReturnValue('/app/apm/services/my-service/overview'),
   },
 } as any;
 
@@ -62,7 +74,7 @@ const renderComponent = (props = {}) =>
 
 describe('FocusedTraceWaterfallWithFetching', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseGetServiceBadgeHrefFromCore.mockReturnValue(mockGetServiceBadgeHref);
   });
 
@@ -113,7 +125,7 @@ describe('FocusedTraceWaterfallWithFetching', () => {
 
   it('forwards getErrorMarkerHref to FocusedTraceWaterfall when provided', () => {
     mockUseAbortableAsync.mockReturnValue({ value: mockData, loading: false });
-    const mockGetErrorMarkerHref = jest.fn();
+    const mockGetErrorMarkerHref = vi.fn();
 
     renderComponent({ getErrorMarkerHref: mockGetErrorMarkerHref });
 

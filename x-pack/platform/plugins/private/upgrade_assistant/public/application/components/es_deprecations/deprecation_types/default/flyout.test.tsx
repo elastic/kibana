@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { screen } from '@testing-library/react';
@@ -16,7 +18,7 @@ import { DefaultDeprecationFlyout } from './flyout';
 describe('DefaultDeprecationFlyout', () => {
   it('renders deprecation details', () => {
     renderWithI18n(
-      <DefaultDeprecationFlyout deprecation={mockDefaultDeprecation} closeFlyout={jest.fn()} />
+      <DefaultDeprecationFlyout deprecation={mockDefaultDeprecation} closeFlyout={vi.fn()} />
     );
 
     expect(screen.getByTestId('flyoutTitle')).toHaveTextContent(mockDefaultDeprecation.message);

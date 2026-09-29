@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { coreMock } from '@kbn/core/server/mocks';
 import { datasetQualityEbtEvents } from './telemetry_events';
 import { TelemetryService } from './telemetry_service';
@@ -18,9 +20,9 @@ import type {
 import { NavigationTarget, NavigationSource } from './types';
 
 // Mock uuidv4
-jest.mock('uuid', () => {
+vi.mock('uuid', () => {
   return {
-    v4: jest.fn(() => `mock-uuid-${Math.random()}`),
+    v4: vi.fn(() => `mock-uuid-${Math.random()}`),
   };
 });
 
@@ -72,15 +74,15 @@ describe('TelemetryService', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should register all events', () => {
@@ -117,7 +119,7 @@ describe('TelemetryService', () => {
     telemetry.startDatasetDetailsTracking();
 
     // Increment jest's internal timer to simulate user interaction delay
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
 
     telemetry.trackDatasetDetailsOpened(exampleEventData);
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
@@ -15,10 +17,10 @@ import userEvent from '@testing-library/user-event';
 import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 
 describe('Edit ', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const customField = customFieldsMock[1] as CaseCustomFieldToggle;
@@ -123,12 +125,12 @@ describe('Edit ', () => {
 });
 
 describe('Edit inline variant', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
   const customField = customFieldsMock[1] as CaseCustomFieldToggle;
   const customFieldConfiguration = customFieldsConfigurationMock[1];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with form-row label (no h4 header rule layout)', async () => {
@@ -152,13 +154,13 @@ describe('Edit inline variant', () => {
 });
 
 describe('Edit inline variant, section not editing', () => {
-  const onSubmit = jest.fn();
-  const onRequestSectionEdit = jest.fn();
+  const onSubmit = vi.fn();
+  const onRequestSectionEdit = vi.fn();
   const customField = customFieldsMock[1] as CaseCustomFieldToggle;
   const customFieldConfiguration = customFieldsConfigurationMock[1];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a label/value row instead of the switch', async () => {

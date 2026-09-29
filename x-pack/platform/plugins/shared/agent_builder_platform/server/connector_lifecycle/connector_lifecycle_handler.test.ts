@@ -5,43 +5,49 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import { createConnectorLifecycleHandler } from './connector_lifecycle_handler';
 
-jest.mock('@kbn/connector-specs', () => ({
-  connectorsSpecs: {},
-  getConnectorSpec: jest.fn(),
-}));
+vi.mock('@kbn/connector-specs', () => {
+      const mocked = {
+      connectorsSpecs: {},
+      getConnectorSpec: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
+const getConnectorSpecMock = getConnectorSpec as MockedFunction<typeof getConnectorSpec>;
 
 const createMockUiSettingsClient = (experimentalEnabled = true) => ({
-  get: jest.fn().mockImplementation(async (key: string) => {
+  get: vi.fn().mockImplementation(async (key: string) => {
     if (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) return experimentalEnabled;
     return undefined;
   }),
 });
 
 const createMockAgentBuilderSml = () => ({
-  indexAttachment: jest.fn().mockResolvedValue(undefined),
-  deleteAttachment: jest.fn().mockResolvedValue(undefined),
+  indexAttachment: vi.fn().mockResolvedValue(undefined),
+  deleteAttachment: vi.fn().mockResolvedValue(undefined),
 });
 
 const createMockGetStartServices = (
   uiSettingsClient = createMockUiSettingsClient(),
   agentBuilderSml = createMockAgentBuilderSml()
 ) =>
-  jest.fn().mockResolvedValue([
+  vi.fn().mockResolvedValue([
     {
       elasticsearch: { client: { asInternalUser: {} } },
-      savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) },
-      uiSettings: { asScopedToClient: jest.fn().mockReturnValue(uiSettingsClient) },
+      savedObjects: { getScopedClient: vi.fn().mockReturnValue({}) },
+      uiSettings: { asScopedToClient: vi.fn().mockReturnValue(uiSettingsClient) },
     },
     {
-      spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('default') } },
+      spaces: { spacesService: { getSpaceId: vi.fn().mockReturnValue('default') } },
       agentBuilderSml,
     },
     {},
@@ -64,11 +70,11 @@ describe('createConnectorLifecycleHandler', () => {
   const logger = loggingSystemMock.create().get('connector-lifecycle');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getConnectorSpecMock.mockReturnValue({
       metadata: { id: '.test', displayName: 'Test', description: '', minimumLicense: 'basic' },
       actions: {},
-      test: { handler: jest.fn(), enabled: false },
+      test: { handler: vi.fn(), enabled: false },
     } as never);
   });
 
@@ -197,7 +203,7 @@ describe('createConnectorLifecycleHandler', () => {
     });
 
     it('logs error when getStartServices fails', async () => {
-      const getStartServices = jest.fn().mockRejectedValue(new Error('start services failed'));
+      const getStartServices = vi.fn().mockRejectedValue(new Error('start services failed'));
       const handler = createConnectorLifecycleHandler({
         logger,
         getStartServices,

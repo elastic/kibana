@@ -5,35 +5,49 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useServiceBadgesData } from './use_service_badges_data';
 
-const mockUseFetcher = jest.fn();
-jest.mock('../../../../hooks/use_fetcher', () => ({
-  useFetcher: (...args: unknown[]) => mockUseFetcher(...args),
-  FETCH_STATUS: {
-    SUCCESS: 'success',
-    LOADING: 'loading',
-    NOT_INITIATED: 'not_initiated',
-    FAILURE: 'failure',
-  },
-}));
+const mockUseFetcher = vi.fn();
+vi.mock('../../../../hooks/use_fetcher', () => {
+      const mocked = {
+      useFetcher: (...args: unknown[]) => mockUseFetcher(...args),
+      FETCH_STATUS: {
+        SUCCESS: 'success',
+        LOADING: 'loading',
+        NOT_INITIATED: 'not_initiated',
+        FAILURE: 'failure',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseServiceFlyoutContext = jest.fn();
-jest.mock('../service_flyout_context', () => ({
-  useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
-}));
+const mockUseServiceFlyoutContext = vi.fn();
+vi.mock('../service_flyout_context', () => {
+      const mocked = {
+      useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_time_range', () => ({
-  useTimeRange: () => ({
-    start: '2024-01-01T00:00:00.000Z',
-    end: '2024-01-01T01:00:00.000Z',
-  }),
-}));
+vi.mock('../../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => ({
+        start: '2024-01-01T00:00:00.000Z',
+        end: '2024-01-01T01:00:00.000Z',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../alerting/utils/get_alerting_capabilities', () => ({
-  getAlertingCapabilities: () => ({ canReadAlerts: true, isAlertingAvailable: true }),
-}));
+vi.mock('../../../alerting/utils/get_alerting_capabilities', () => {
+      const mocked = {
+      getAlertingCapabilities: () => ({ canReadAlerts: true, isAlertingAvailable: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseParams = {
   serviceName: 'opbeans-java',
@@ -73,7 +87,7 @@ function setupFetchers({
 
 describe('useServiceBadgesData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupContext();
   });
 

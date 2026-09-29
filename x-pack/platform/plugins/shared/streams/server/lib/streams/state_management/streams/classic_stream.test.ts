@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Streams } from '@kbn/streams-schema';
 import { ClassicStream } from './classic_stream';
 import type { StateDependencies, StreamChange } from '../types';
@@ -40,19 +43,19 @@ describe('ClassicStream', () => {
     overrides?: Partial<{ replicated: boolean }>
   ): StateDependencies =>
     ({
-      logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+      logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
       isServerless: false,
       isWiredStreamViewsEnabled: true,
       isDev: false,
       streamsClient: {
-        getDataStream: jest.fn().mockResolvedValue({
+        getDataStream: vi.fn().mockResolvedValue({
           name: 'logs-test-default',
           replicated: overrides?.replicated ?? false,
         }),
       },
       esClient: {
         indices: {
-          getDataStreamSettings: jest.fn().mockResolvedValue({
+          getDataStreamSettings: vi.fn().mockResolvedValue({
             data_streams: [
               {
                 name: 'logs-test-default',
@@ -767,7 +770,7 @@ describe('ClassicStream', () => {
 
       // getDataStreamSettings should NOT have been called for replicated streams
       expect(
-        (deps.esClient as unknown as { indices: { getDataStreamSettings: jest.Mock } }).indices
+        (deps.esClient as unknown as { indices: { getDataStreamSettings: Mock } }).indices
           .getDataStreamSettings
       ).not.toHaveBeenCalled();
 
@@ -791,7 +794,7 @@ describe('ClassicStream', () => {
 
       // getDataStreamSettings SHOULD have been called for non-replicated streams
       expect(
-        (deps.esClient as unknown as { indices: { getDataStreamSettings: jest.Mock } }).indices
+        (deps.esClient as unknown as { indices: { getDataStreamSettings: Mock } }).indices
           .getDataStreamSettings
       ).toHaveBeenCalled();
     });

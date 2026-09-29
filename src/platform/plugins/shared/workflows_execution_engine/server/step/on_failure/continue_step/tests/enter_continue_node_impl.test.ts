@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { EnterContinueNode } from '@kbn/workflows/graph';
 import type { EsWorkflowStepExecution } from '@kbn/workflows/types/v1';
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
@@ -20,7 +23,7 @@ describe('EnterContinueNodeImpl', () => {
   let workflowRuntime: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
   let fakeFailedContext: StepExecutionRuntime;
-  let fakeFailedContextManager: jest.Mocked<StepExecutionRuntime['contextManager']>;
+  let fakeFailedContextManager: Mocked<StepExecutionRuntime['contextManager']>;
   let fakeStepExecutionDoc: Partial<EsWorkflowStepExecution>;
 
   beforeEach(() => {
@@ -36,8 +39,8 @@ describe('EnterContinueNodeImpl', () => {
     };
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
     workflowLogger = {} as unknown as IWorkflowEventLogger;
-    workflowLogger.logDebug = jest.fn();
-    workflowLogger.logError = jest.fn();
+    workflowLogger.logDebug = vi.fn();
+    workflowLogger.logError = vi.fn();
     underTest = new EnterContinueNodeImpl(node, workflowRuntime, workflowLogger);
     fakeStepExecutionDoc = {
       id: 'stepExec1',
@@ -48,8 +51,8 @@ describe('EnterContinueNodeImpl', () => {
       },
     };
 
-    fakeFailedContextManager = jest.mocked({
-      evaluateBooleanExpressionInContext: jest.fn(),
+    fakeFailedContextManager = vi.mocked({
+      evaluateBooleanExpressionInContext: vi.fn(),
     } as unknown as StepExecutionRuntime['contextManager']);
     fakeFailedContextManager.evaluateBooleanExpressionInContext.mockReturnValue(true);
     fakeFailedContext = {
@@ -60,7 +63,7 @@ describe('EnterContinueNodeImpl', () => {
 
   describe('run', () => {
     beforeEach(() => {
-      workflowRuntime.navigateToNextNode = jest.fn();
+      workflowRuntime.navigateToNextNode = vi.fn();
     });
 
     it('should go to next node', async () => {
@@ -71,8 +74,8 @@ describe('EnterContinueNodeImpl', () => {
 
   describe('catchError', () => {
     beforeEach(() => {
-      workflowRuntime.navigateToNode = jest.fn();
-      workflowRuntime.setWorkflowError = jest.fn();
+      workflowRuntime.navigateToNode = vi.fn();
+      workflowRuntime.setWorkflowError = vi.fn();
     });
 
     describe('when condition is not met', () => {

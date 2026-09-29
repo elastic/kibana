@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import moment from 'moment-timezone';
 import { useEuiTheme } from '@elastic/eui';
@@ -31,31 +33,34 @@ const { httpSetup } = init();
 initHttp(httpSetup);
 initUiMetric(usageCollectionPluginMock.createSetupContract());
 
-jest.mock('@kbn/index-management-plugin/public', async () => {
+vi.mock('@kbn/index-management-plugin/public', async () => {
   const { indexManagementMock } = await import('@kbn/index-management-plugin/public/mocks');
   return indexManagementMock.createSetup();
 });
 
 // Mock useEuiTheme to return the desired theme
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: () => ({
-    euiTheme: {
-      themeName: 'EUI_THEME_BOREALIS',
-      colors: {
-        vis: {
-          euiColorVis3: '#BFDBFF',
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiTheme: () => ({
+        euiTheme: {
+          themeName: 'EUI_THEME_BOREALIS',
+          colors: {
+            vis: {
+              euiColorVis3: '#BFDBFF',
+            },
+            severity: {
+              risk: '#FF995E',
+              warning: '#FCD883',
+              neutral: '#B5E5F2',
+            },
+            backgroundBaseSubdued: '#CAD3E2',
+          },
         },
-        severity: {
-          risk: '#FF995E',
-          warning: '#FCD883',
-          neutral: '#B5E5F2',
-        },
-        backgroundBaseSubdued: '#CAD3E2',
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const indexWithoutLifecyclePolicy: Index = {
   health: 'yellow',
@@ -331,7 +336,7 @@ describe('extend index management', () => {
         getUrlForApp,
       });
       expect(extension?.renderConfirmModal).toBeDefined();
-      const component = extension!.renderConfirmModal(jest.fn());
+      const component = extension!.renderConfirmModal(vi.fn());
       renderWithI18n(component);
 
       // Wait for the async componentDidMount to complete

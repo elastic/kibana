@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, waitFor } from '@testing-library/react';
@@ -17,79 +19,91 @@ import type { DataFederationKibanaServices } from './types';
 
 type MockDataSourcesClient = Pick<DataFederationKibanaServices['dataSourcesClient'], 'delete'>;
 
-jest.mock('./data_sources_table', () => ({
-  DataSourcesTable: (props: Record<string, unknown>) => {
-    const dataSources = (props.dataSources as any[]) ?? [];
-    const selectedDataSources = (props.selectedDataSources as any[]) ?? [];
+vi.mock('./data_sources_table', () => {
+      const mocked = {
+      DataSourcesTable: (props: Record<string, unknown>) => {
+        const dataSources = (props.dataSources as any[]) ?? [];
+        const selectedDataSources = (props.selectedDataSources as any[]) ?? [];
 
-    return (
-      <div data-test-subj="mockDataSourcesTable">
-        <button data-test-subj="mockCreate" onClick={() => (props.onCreate as any)()} />
-        <button
-          data-test-subj="mockDeleteFirst"
-          onClick={() => (props.onDelete as any)(dataSources[0])}
-        />
-        <button
-          data-test-subj="mockSelectFirst"
-          onClick={() => (props.onSelectionChange as any)([dataSources[0]])}
-        />
-        <button
-          data-test-subj="mockDeleteSelected"
-          onClick={() => (props.onDeleteSelected as any)(selectedDataSources)}
-        />
-        <button
-          data-test-subj="mockDeleteAll"
-          onClick={() => (props.onDeleteSelected as any)(dataSources)}
-        />
-        <div data-test-subj="mockSelectedCount">{String(selectedDataSources.length)}</div>
-      </div>
-    );
-  },
-}));
+        return (
+          <div data-test-subj="mockDataSourcesTable">
+            <button data-test-subj="mockCreate" onClick={() => (props.onCreate as any)()} />
+            <button
+              data-test-subj="mockDeleteFirst"
+              onClick={() => (props.onDelete as any)(dataSources[0])}
+            />
+            <button
+              data-test-subj="mockSelectFirst"
+              onClick={() => (props.onSelectionChange as any)([dataSources[0]])}
+            />
+            <button
+              data-test-subj="mockDeleteSelected"
+              onClick={() => (props.onDeleteSelected as any)(selectedDataSources)}
+            />
+            <button
+              data-test-subj="mockDeleteAll"
+              onClick={() => (props.onDeleteSelected as any)(dataSources)}
+            />
+            <div data-test-subj="mockSelectedCount">{String(selectedDataSources.length)}</div>
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./create_data_source_flyout', () => ({
-  CreateDataSourceFlyout: (props: { onClose: (result?: { savedChanges?: boolean }) => void }) => (
-    <div data-test-subj="mockCreateDataSourceFlyout">
-      <button
-        data-test-subj="mockFlyoutCloseSaved"
-        onClick={() => props.onClose({ savedChanges: true })}
-      />
-      <button data-test-subj="mockFlyoutClose" onClick={() => props.onClose()} />
-    </div>
-  ),
-}));
+vi.mock('./create_data_source_flyout', () => {
+      const mocked = {
+      CreateDataSourceFlyout: (props: { onClose: (result?: { savedChanges?: boolean }) => void }) => (
+        <div data-test-subj="mockCreateDataSourceFlyout">
+          <button
+            data-test-subj="mockFlyoutCloseSaved"
+            onClick={() => props.onClose({ savedChanges: true })}
+          />
+          <button data-test-subj="mockFlyoutClose" onClick={() => props.onClose()} />
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./confirm_delete_data_source_modal', () => ({
-  ConfirmDeleteDataSourceModal: (props: {
-    dataSourceName: string;
-    error?: string | null;
-    onConfirm: () => void;
-    onCancel: () => void;
-  }) => (
-    <div data-test-subj="mockConfirmDeleteDataSourceModal">
-      <div data-test-subj="mockDeleteName">{props.dataSourceName}</div>
-      {props.error ? <div data-test-subj="mockDeleteError">{props.error}</div> : null}
-      <button data-test-subj="mockConfirmDelete" onClick={props.onConfirm} />
-      <button data-test-subj="mockCancelDelete" onClick={props.onCancel} />
-    </div>
-  ),
-}));
+vi.mock('./confirm_delete_data_source_modal', () => {
+      const mocked = {
+      ConfirmDeleteDataSourceModal: (props: {
+        dataSourceName: string;
+        error?: string | null;
+        onConfirm: () => void;
+        onCancel: () => void;
+      }) => (
+        <div data-test-subj="mockConfirmDeleteDataSourceModal">
+          <div data-test-subj="mockDeleteName">{props.dataSourceName}</div>
+          {props.error ? <div data-test-subj="mockDeleteError">{props.error}</div> : null}
+          <button data-test-subj="mockConfirmDelete" onClick={props.onConfirm} />
+          <button data-test-subj="mockCancelDelete" onClick={props.onCancel} />
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./confirm_delete_data_sources_modal', () => ({
-  ConfirmDeleteDataSourcesModal: (props: {
-    dataSourceNames: string[];
-    error?: string | null;
-    onConfirm: () => void;
-    onCancel: () => void;
-  }) => (
-    <div data-test-subj="mockConfirmDeleteDataSourcesModal">
-      <div data-test-subj="mockDeleteNames">{props.dataSourceNames.join(',')}</div>
-      {props.error ? <div data-test-subj="mockDeleteManyError">{props.error}</div> : null}
-      <button data-test-subj="mockConfirmDeleteMany" onClick={props.onConfirm} />
-      <button data-test-subj="mockCancelDeleteMany" onClick={props.onCancel} />
-    </div>
-  ),
-}));
+vi.mock('./confirm_delete_data_sources_modal', () => {
+      const mocked = {
+      ConfirmDeleteDataSourcesModal: (props: {
+        dataSourceNames: string[];
+        error?: string | null;
+        onConfirm: () => void;
+        onCancel: () => void;
+      }) => (
+        <div data-test-subj="mockConfirmDeleteDataSourcesModal">
+          <div data-test-subj="mockDeleteNames">{props.dataSourceNames.join(',')}</div>
+          {props.error ? <div data-test-subj="mockDeleteManyError">{props.error}</div> : null}
+          <button data-test-subj="mockConfirmDeleteMany" onClick={props.onConfirm} />
+          <button data-test-subj="mockCancelDeleteMany" onClick={props.onCancel} />
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createDataSource = (name: string): DataSource => ({
   name,
@@ -111,8 +125,8 @@ const createServicesMock = ({
 }): DataFederationKibanaServices =>
   ({
     dataSourcesClient,
-    datasetsClient: { get: jest.fn() },
-    toasts: { addDanger: jest.fn(), addSuccess: jest.fn() },
+    datasetsClient: { get: vi.fn() },
+    toasts: { addDanger: vi.fn(), addSuccess: vi.fn() },
     docLinks: {
       links: {
         dataFederation: {
@@ -157,11 +171,11 @@ const renderComponent = async ({
 
 describe('DataSourcesTabContent', () => {
   it('opens the flyout and reloads on save', async () => {
-    const loadDataSources = jest.fn().mockResolvedValue(undefined);
+    const loadDataSources = vi.fn().mockResolvedValue(undefined);
     await renderComponent({
       dataSources: [createDataSource('ds1')],
       dataSets: [],
-      dataSourcesClient: { delete: jest.fn() },
+      dataSourcesClient: { delete: vi.fn() },
       loadDataSources,
     });
 
@@ -176,8 +190,8 @@ describe('DataSourcesTabContent', () => {
   });
 
   it('confirms single delete via client and reloads', async () => {
-    const loadDataSources = jest.fn().mockResolvedValue(undefined);
-    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const loadDataSources = vi.fn().mockResolvedValue(undefined);
+    const deleteMock = vi.fn().mockResolvedValue(undefined);
 
     await renderComponent({
       dataSources: [createDataSource('ds1')],
@@ -200,8 +214,8 @@ describe('DataSourcesTabContent', () => {
   });
 
   it('bulk delete refuses when any data source has related datasets', async () => {
-    const loadDataSources = jest.fn().mockResolvedValue(undefined);
-    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const loadDataSources = vi.fn().mockResolvedValue(undefined);
+    const deleteMock = vi.fn().mockResolvedValue(undefined);
 
     await renderComponent({
       dataSources: [createDataSource('connected')],

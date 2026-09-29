@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -17,16 +20,25 @@ import { useKibana } from '../../../common/lib/kibana';
 import { fetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings';
 import { getQueryDelaySettings } from '../../lib/rule_api/get_query_delay_settings';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => ({
-  fetchFlappingSettings: jest.fn(),
-}));
-jest.mock('../../lib/rule_api/get_query_delay_settings', () => ({
-  getQueryDelaySettings: jest.fn(),
-}));
-jest.mock('../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../common/lib/kibana');
+vi.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => {
+      const mocked = {
+      fetchFlappingSettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/rule_api/get_query_delay_settings', () => {
+      const mocked = {
+      getQueryDelaySettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,14 +49,14 @@ const queryClient = new QueryClient({
   },
 });
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 const mocks = coreMock.createSetup();
 
-const fetchFlappingSettingsMock = fetchFlappingSettings as unknown as jest.MockedFunction<
+const fetchFlappingSettingsMock = fetchFlappingSettings as unknown as MockedFunction<
   typeof fetchFlappingSettings
 >;
-const getQueryDelaySettingsMock = getQueryDelaySettings as unknown as jest.MockedFunction<
+const getQueryDelaySettingsMock = getQueryDelaySettings as unknown as MockedFunction<
   typeof getQueryDelaySettings
 >;
 
@@ -96,7 +108,7 @@ describe('rules_settings_link', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     cleanup();
   });

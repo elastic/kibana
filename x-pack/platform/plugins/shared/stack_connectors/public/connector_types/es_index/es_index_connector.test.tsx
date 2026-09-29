@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, screen, waitFor, render, within } from '@testing-library/react';
 import type { EuiComboBoxProps } from '@elastic/eui';
@@ -15,8 +17,8 @@ import userEvent from '@testing-library/user-event';
 
 // Capture the EuiComboBox onChange so tests can simulate index selection
 let latestComboBoxOnChange: EuiComboBoxProps<string>['onChange'] | undefined;
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiComboBox: (props: EuiComboBoxProps<string>) => {
@@ -28,38 +30,38 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
-jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
-  ...jest.requireActual(
-    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
-  ),
-  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
-}));
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api')),
+      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('lodash', () => {
-  const module = jest.requireActual('lodash');
+vi.mock('lodash', () => {
+  const module = require('lodash');
   return {
     ...module,
     debounce: (fn: () => unknown) => fn,
   };
 });
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/index_controls', () => ({
-  firstFieldOption: {
-    text: 'Select a field',
-    value: '',
-  },
-  getFields: jest.fn(),
-  getIndexOptions: jest.fn(),
-}));
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/index_controls', () => {
+      const mocked = {
+      firstFieldOption: {
+        text: 'Select a field',
+        value: '',
+      },
+      getFields: vi.fn(),
+      getIndexOptions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getIndexOptions } = jest.requireMock(
-  '@kbn/triggers-actions-ui-plugin/public/common/index_controls'
-);
+const { getIndexOptions } = (await vi.importMock('@kbn/triggers-actions-ui-plugin/public/common/index_controls'));
 
-const { getFields } = jest.requireMock(
-  '@kbn/triggers-actions-ui-plugin/public/common/index_controls'
-);
+const { getFields } = (await vi.importMock('@kbn/triggers-actions-ui-plugin/public/common/index_controls'));
 
 const ILLEGAL_INDEX_CHARACTERS = ['\\', '/', '?', '"', '<', '>', '|', '#', ',', ':'];
 
@@ -78,7 +80,7 @@ function setupGetFieldsResponse(getFieldsWithDateMapping: boolean) {
 
 describe('IndexActionConnectorFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders correctly when creating connector', async () => {
@@ -339,10 +341,10 @@ describe('IndexActionConnectorFields', () => {
 
   describe('Validation', () => {
     let appMockRenderer: AppMockRenderer;
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       appMockRenderer = createAppMockRenderer();
     });
 

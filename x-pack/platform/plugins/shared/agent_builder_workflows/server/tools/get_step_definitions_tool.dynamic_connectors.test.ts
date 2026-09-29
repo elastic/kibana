@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { registerGetStepDefinitionsTool } from './get_step_definitions_tool';
@@ -24,14 +26,14 @@ describe('get_step_definitions dynamic connector types', () => {
 
     const agentBuilder = {
       tools: {
-        register: jest.fn((tool: BuiltinToolDefinition) => {
+        register: vi.fn((tool: BuiltinToolDefinition) => {
           registeredTool = tool;
         }),
       },
     } as any;
 
     const api = {
-      getAvailableConnectors: jest.fn().mockResolvedValue({
+      getAvailableConnectors: vi.fn().mockResolvedValue({
         connectorTypes: {
           '.http': {
             actionTypeId: '.http',

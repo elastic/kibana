@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
 import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
@@ -26,18 +29,18 @@ import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator'
 
 import { stepInstallTransforms, cleanupTransformsStep } from './step_install_transforms';
 
-jest.mock('../../../elasticsearch/transform/install');
-jest.mock('../../remove', () => {
+vi.mock('../../../elasticsearch/transform/install');
+vi.mock('../../remove', async () => {
   return {
-    ...jest.requireActual('../../remove'),
-    cleanupTransforms: jest.fn(),
+    ...(await vi.importActual('../../remove')),
+    cleanupTransforms: vi.fn(),
   };
 });
-const mockedInstallTransforms = installTransforms as jest.MockedFunction<typeof installTransforms>;
-const mockCleanupTransforms = cleanupTransforms as jest.MockedFunction<typeof cleanupTransforms>;
+const mockedInstallTransforms = installTransforms as MockedFunction<typeof installTransforms>;
+const mockCleanupTransforms = cleanupTransforms as MockedFunction<typeof cleanupTransforms>;
 
-let soClient: jest.Mocked<SavedObjectsClientContract>;
-let esClient: jest.Mocked<ElasticsearchClient>;
+let soClient: Mocked<SavedObjectsClientContract>;
+let esClient: Mocked<ElasticsearchClient>;
 
 const packageInstallContext = {
   packageInfo: {
@@ -85,7 +88,7 @@ describe('stepInstallTransforms', () => {
     appContextService.start(createAppContextStartContractMock());
   });
   afterEach(async () => {
-    jest.mocked(mockedInstallTransforms).mockReset();
+    vi.mocked(mockedInstallTransforms).mockReset();
   });
 
   appContextService.start(
@@ -113,14 +116,14 @@ describe('stepInstallTransforms', () => {
   };
 
   it('Should update esReferences', async () => {
-    jest.mocked(mockedInstallTransforms).mockResolvedValue({
+    vi.mocked(mockedInstallTransforms).mockResolvedValue({
       installedTransforms: [],
       esReferences: [],
     });
     const res = await stepInstallTransforms({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -140,7 +143,7 @@ describe('stepInstallTransforms', () => {
   });
 
   it('Should call installTransforms and return updated esReferences', async () => {
-    jest.mocked(mockedInstallTransforms).mockResolvedValue({
+    vi.mocked(mockedInstallTransforms).mockResolvedValue({
       installedTransforms: [],
       esReferences: [
         {
@@ -152,7 +155,7 @@ describe('stepInstallTransforms', () => {
     const res = await stepInstallTransforms({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -227,7 +230,7 @@ describe('cleanupTransformsStep', () => {
     await cleanupTransformsStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -253,7 +256,7 @@ describe('cleanupTransformsStep', () => {
     await cleanupTransformsStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -280,7 +283,7 @@ describe('cleanupTransformsStep', () => {
     await cleanupTransformsStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -305,7 +308,7 @@ describe('cleanupTransformsStep', () => {
     await cleanupTransformsStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,
@@ -331,7 +334,7 @@ describe('cleanupTransformsStep', () => {
     await cleanupTransformsStep({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext,

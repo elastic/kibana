@@ -5,19 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { getContinuity } from './get_continuity';
 import { fetchPipelines } from '../fetchers';
 
-jest.mock('../fetchers', () => ({
-  fetchPipelines: jest.fn(),
-}));
+vi.mock('../fetchers', () => {
+      const mocked = {
+      fetchPipelines: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFetchPipelines = fetchPipelines as jest.Mock;
+const mockFetchPipelines = fetchPipelines as Mock;
 
 const esClient = {} as ElasticsearchClient;
-const logger = { error: jest.fn(), warn: jest.fn(), info: jest.fn() } as unknown as Logger;
+const logger = { error: vi.fn(), warn: vi.fn(), info: vi.fn() } as unknown as Logger;
 
 const makePipeline = (overrides = {}) => ({
   name: 'my-pipeline',
@@ -29,7 +35,7 @@ const makePipeline = (overrides = {}) => ({
 });
 
 describe('getContinuity', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('status', () => {
     it('returns noData when fetchPipelines returns an empty array', async () => {

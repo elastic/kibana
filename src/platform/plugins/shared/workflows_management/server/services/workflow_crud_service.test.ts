@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import {
   coreMock,
@@ -33,19 +36,25 @@ import * as workflowPrepare from '../api/lib/workflow_prepare';
 import { logWorkflowChanges } from '../lib/log_workflow_changes';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
-jest.mock('../lib/log_workflow_changes', () => ({
-  logWorkflowChanges: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../lib/log_workflow_changes', () => {
+      const mocked = {
+      logWorkflowChanges: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../api/lib/workflow_disable_all', () => ({
-  disableAllWorkflows: jest.fn(),
-}));
+vi.mock('../api/lib/workflow_disable_all', () => {
+      const mocked = {
+      disableAllWorkflows: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedLogWorkflowChanges = logWorkflowChanges as jest.MockedFunction<
+const mockedLogWorkflowChanges = logWorkflowChanges as MockedFunction<
   typeof logWorkflowChanges
 >;
 
-const mockedDisableAllWorkflowsLib = disableAllWorkflowsLib as jest.MockedFunction<
+const mockedDisableAllWorkflowsLib = disableAllWorkflowsLib as MockedFunction<
   typeof disableAllWorkflowsLib
 >;
 
@@ -80,16 +89,16 @@ const occSearchHit = (
 });
 
 const makeStorageClient = () => ({
-  search: jest.fn(),
-  index: jest.fn().mockResolvedValue({ result: 'created', _seq_no: 1, _primary_term: 1 }),
-  bulk: jest.fn(),
-  delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+  search: vi.fn(),
+  index: vi.fn().mockResolvedValue({ result: 'created', _seq_no: 1, _primary_term: 1 }),
+  bulk: vi.fn(),
+  delete: vi.fn().mockResolvedValue({ result: 'deleted' }),
 });
 
 const makeSecurityMock = (username: string = 'alice') =>
   ({
     authc: {
-      getCurrentUser: jest.fn().mockReturnValue({ username }),
+      getCurrentUser: vi.fn().mockReturnValue({ username }),
     },
   } as any);
 
@@ -99,19 +108,19 @@ const makeDeps = (
 ): { deps: WorkflowCrudDeps; client: ReturnType<typeof makeStorageClient> } => {
   const client = { ...makeStorageClient(), ...clientOverrides };
   const executionQueryService = {
-    getWorkflowExecutions: jest.fn().mockResolvedValue({ total: 0, results: [] }),
+    getWorkflowExecutions: vi.fn().mockResolvedValue({ total: 0, results: [] }),
   } as unknown as WorkflowExecutionQueryService;
   const validationService = {
-    getWorkflowZodSchema: jest.fn().mockResolvedValue({
+    getWorkflowZodSchema: vi.fn().mockResolvedValue({
       parse: (v: unknown) => v,
       safeParse: (v: unknown) => ({ success: true, data: v }),
     }),
   } as unknown as WorkflowValidationService;
   const workflowExecutionsDataClient = {
-    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+    deleteByQuery: vi.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as WorkflowExecutionsDataClient;
   const stepExecutionsDataClient = {
-    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+    deleteByQuery: vi.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as StepExecutionsDataClient;
   const deps: WorkflowCrudDeps = {
     getSpaceId: () => 'default',
@@ -126,8 +135,8 @@ const makeDeps = (
     getCoreStart: () => coreMock.createStart(),
     changeHistoryService: {
       isInitialized: () => false,
-      asScoped: jest.fn(),
-      asSystemUser: jest.fn(),
+      asScoped: vi.fn(),
+      asSystemUser: vi.fn(),
     } as any,
     workflowExecutionsDataClient,
     stepExecutionsDataClient,
@@ -137,10 +146,10 @@ const makeDeps = (
 };
 
 const makeTaskScheduler = () => ({
-  scheduleWorkflowTasks: jest.fn().mockResolvedValue([]),
-  scheduleWorkflowTask: jest.fn().mockResolvedValue('task-id'),
-  unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
-  updateWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+  scheduleWorkflowTasks: vi.fn().mockResolvedValue([]),
+  scheduleWorkflowTask: vi.fn().mockResolvedValue('task-id'),
+  unscheduleWorkflowTasks: vi.fn().mockResolvedValue(undefined),
+  updateWorkflowTasks: vi.fn().mockResolvedValue(undefined),
 });
 
 const lightweightWorkflowYaml = [
@@ -537,10 +546,10 @@ describe('WorkflowCrudService', () => {
     });
 
     it('logs workflow create to change history after a successful index', async () => {
-      const scopedChangeHistory = { logBulk: jest.fn() };
+      const scopedChangeHistory = { logBulk: vi.fn() };
       const changeHistoryService = {
         isInitialized: () => true,
-        asScoped: jest.fn().mockReturnValue(scopedChangeHistory),
+        asScoped: vi.fn().mockReturnValue(scopedChangeHistory),
       };
       const { deps, client } = makeDeps();
       deps.changeHistoryService = changeHistoryService as any;
@@ -1204,10 +1213,10 @@ describe('WorkflowCrudService', () => {
 
     it('overwrite=true logs create for new ids and update for existing ids', async () => {
       mockedLogWorkflowChanges.mockClear();
-      const scopedChangeHistory = { logBulk: jest.fn() };
+      const scopedChangeHistory = { logBulk: vi.fn() };
       const changeHistoryService = {
         isInitialized: () => true,
-        asScoped: jest.fn().mockReturnValue(scopedChangeHistory),
+        asScoped: vi.fn().mockReturnValue(scopedChangeHistory),
       };
       const { deps, client } = makeDeps();
       deps.changeHistoryService = changeHistoryService as any;
@@ -1371,10 +1380,10 @@ describe('WorkflowCrudService', () => {
 
     it('overwrite=true preserves version and skips history when YAML is unchanged', async () => {
       mockedLogWorkflowChanges.mockClear();
-      const scopedChangeHistory = { logBulk: jest.fn() };
+      const scopedChangeHistory = { logBulk: vi.fn() };
       const changeHistoryService = {
         isInitialized: () => true,
-        asScoped: jest.fn().mockReturnValue(scopedChangeHistory),
+        asScoped: vi.fn().mockReturnValue(scopedChangeHistory),
       };
       const { deps, client } = makeDeps();
       deps.changeHistoryService = changeHistoryService as any;
@@ -1942,10 +1951,10 @@ describe('WorkflowCrudService', () => {
     });
 
     it('logs workflow update to change history after a successful write', async () => {
-      const scopedChangeHistory = { logBulk: jest.fn() };
+      const scopedChangeHistory = { logBulk: vi.fn() };
       const changeHistoryService = {
         isInitialized: () => true,
-        asScoped: jest.fn().mockReturnValue(scopedChangeHistory),
+        asScoped: vi.fn().mockReturnValue(scopedChangeHistory),
       };
       const { deps, client } = makeDeps();
       deps.changeHistoryService = changeHistoryService as any;
@@ -1982,10 +1991,10 @@ describe('WorkflowCrudService', () => {
 
     it('preserves version and skips change history when YAML is unchanged', async () => {
       mockedLogWorkflowChanges.mockClear();
-      const scopedChangeHistory = { logBulk: jest.fn() };
+      const scopedChangeHistory = { logBulk: vi.fn() };
       const changeHistoryService = {
         isInitialized: () => true,
-        asScoped: jest.fn().mockReturnValue(scopedChangeHistory),
+        asScoped: vi.fn().mockReturnValue(scopedChangeHistory),
       };
       const { deps, client } = makeDeps();
       deps.changeHistoryService = changeHistoryService as any;
@@ -2015,10 +2024,10 @@ describe('WorkflowCrudService', () => {
 
     it('heals legacy missing version and writes change history when YAML is unchanged', async () => {
       mockedLogWorkflowChanges.mockClear();
-      const scopedChangeHistory = { logBulk: jest.fn() };
+      const scopedChangeHistory = { logBulk: vi.fn() };
       const changeHistoryService = {
         isInitialized: () => true,
-        asScoped: jest.fn().mockReturnValue(scopedChangeHistory),
+        asScoped: vi.fn().mockReturnValue(scopedChangeHistory),
       };
       const { deps, client } = makeDeps();
       deps.changeHistoryService = changeHistoryService as any;
@@ -2313,9 +2322,9 @@ describe('WorkflowCrudService', () => {
     });
 
     it('validates YAML once per request even when OCC retries after a conflict', async () => {
-      const applyYamlUpdateSpy = jest.spyOn(workflowPrepare, 'applyYamlUpdate');
+      const applyYamlUpdateSpy = vi.spyOn(workflowPrepare, 'applyYamlUpdate');
       const { deps, client } = makeDeps({
-        search: jest.fn(),
+        search: vi.fn(),
       });
       client.search
         .mockResolvedValueOnce({
@@ -2382,7 +2391,7 @@ describe('WorkflowCrudService', () => {
         steps: [],
       };
 
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      vi.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
         updatedDataPatch: {
           definition: parsedDefinition,
           name: 'Parsed Workflow',
@@ -2432,7 +2441,7 @@ describe('WorkflowCrudService', () => {
         })
       );
 
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('resolves enabled from fresh existingSource on YAML OCC retry when yaml omits top-level enabled', async () => {
@@ -2454,7 +2463,7 @@ describe('WorkflowCrudService', () => {
         steps: [],
       };
 
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      vi.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
         updatedDataPatch: {
           definition: parsedDefinition,
           name: 'Parsed Workflow',
@@ -2528,7 +2537,7 @@ describe('WorkflowCrudService', () => {
         })
       );
 
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('field-only enabled toggle syncs definition.enabled in the persisted document', async () => {
@@ -2582,7 +2591,7 @@ describe('WorkflowCrudService', () => {
     });
 
     it('re-applies field updates against fresh existingSource on each OCC retry', async () => {
-      const applyFieldUpdatesSpy = jest.spyOn(workflowPrepare, 'applyFieldUpdates');
+      const applyFieldUpdatesSpy = vi.spyOn(workflowPrepare, 'applyFieldUpdates');
       const { deps, client } = makeDeps();
       client.search
         .mockResolvedValueOnce({
@@ -2637,7 +2646,7 @@ describe('WorkflowCrudService', () => {
     });
 
     it('returns hoisted YAML validation errors without changing stored definition', async () => {
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      vi.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
         updatedDataPatch: {
           definition: null,
           enabled: false,
@@ -2691,14 +2700,14 @@ describe('WorkflowCrudService', () => {
         })
       );
 
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('spreads the name from the yaml patch into the stored document', async () => {
       // `applyYamlUpdate` is mocked, so this asserts that `updateWorkflow` spreads the
       // returned patch (including `name`) into the indexed document — not that the name
       // is recovered from the raw YAML (that parsing is covered in workflow_prepare.test.ts).
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      vi.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
         updatedDataPatch: {
           definition: null,
           enabled: false,
@@ -2738,13 +2747,13 @@ describe('WorkflowCrudService', () => {
         })
       );
 
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('skips YAML merge when the zod schema is unavailable', async () => {
-      const applyYamlUpdateSpy = jest.spyOn(workflowPrepare, 'applyYamlUpdate');
+      const applyYamlUpdateSpy = vi.spyOn(workflowPrepare, 'applyYamlUpdate');
       const { deps, client } = makeDeps();
-      (deps.validationService.getWorkflowZodSchema as jest.Mock).mockResolvedValue(undefined);
+      (deps.validationService.getWorkflowZodSchema as Mock).mockResolvedValue(undefined);
 
       client.search.mockResolvedValue({
         hits: {
@@ -3071,7 +3080,7 @@ describe('WorkflowCrudService', () => {
     );
 
     it('passes request to logWorkflowChangesAfterWrite when space-scoped', async () => {
-      const logSpy = jest
+      const logSpy = vi
         .spyOn(WorkflowCrudService.prototype, 'logWorkflowChangesAfterWrite')
         .mockResolvedValue(undefined);
       const { deps } = makeDeps();
@@ -3091,7 +3100,7 @@ describe('WorkflowCrudService', () => {
     });
 
     it('does not log history when spaceId is omitted', async () => {
-      const logSpy = jest
+      const logSpy = vi
         .spyOn(WorkflowCrudService.prototype, 'logWorkflowChangesAfterWrite')
         .mockResolvedValue(undefined);
       const { deps } = makeDeps();
@@ -3105,7 +3114,7 @@ describe('WorkflowCrudService', () => {
     });
 
     it('omits request on history log when space-scoped but request is not provided', async () => {
-      const logSpy = jest
+      const logSpy = vi
         .spyOn(WorkflowCrudService.prototype, 'logWorkflowChangesAfterWrite')
         .mockResolvedValue(undefined);
       const { deps } = makeDeps();
@@ -3125,9 +3134,9 @@ describe('WorkflowCrudService', () => {
 
     it('uses asScoped change history when request is provided', async () => {
       mockedLogWorkflowChanges.mockClear();
-      const scopedChangeHistory = { logBulk: jest.fn() };
-      const asScoped = jest.fn().mockReturnValue(scopedChangeHistory);
-      const asSystemUser = jest.fn();
+      const scopedChangeHistory = { logBulk: vi.fn() };
+      const asScoped = vi.fn().mockReturnValue(scopedChangeHistory);
+      const asSystemUser = vi.fn();
       const { deps } = makeDeps(undefined, {
         changeHistoryService: {
           isInitialized: () => true,
@@ -3397,7 +3406,7 @@ describe('batched ordinary workflow deletion', () => {
 });
 
 describe('bound workflow deletion errors', () => {
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => vi.restoreAllMocks());
 
   const setup = () => {
     const core = {
@@ -3464,7 +3473,7 @@ describe('bound workflow deletion errors', () => {
       },
     }));
     const conflict = new WorkflowConflictError('Workflow has an active execution', 'bound');
-    const deleteDocuments = jest
+    const deleteDocuments = vi
       .spyOn(workflowDeletion, 'deleteWorkflows')
       .mockImplementation(async ({ ids }) => {
         if (ids.includes('bound')) throw conflict;
@@ -3506,7 +3515,7 @@ describe('bound workflow deletion errors', () => {
 
   it('rejects active-execution deletion before touching the binding', async () => {
     const { service, request, deps, bindings, deleteDocuments } = setup();
-    jest
+    vi
       .mocked(deps.executionQueryService.getWorkflowExecutions)
       .mockResolvedValue({ total: 1, results: [], page: 1, size: 1 });
     await expect(
@@ -3579,7 +3588,7 @@ describe('bound workflow deletion errors', () => {
 });
 
 describe('trusted managed service account upgrades', () => {
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => vi.restoreAllMocks());
 
   const setup = () => {
     const core = {
@@ -3618,7 +3627,7 @@ describe('trusted managed service account upgrades', () => {
         settings: { run_as: 'account-a' },
       },
     });
-    const read = jest.spyOn(service, 'getWorkflowDocumentSource').mockResolvedValue(previous);
+    const read = vi.spyOn(service, 'getWorkflowDocumentSource').mockResolvedValue(previous);
     const document = { ...previous, name: 'Managed v2', managedVersion: 2 };
     const params = {
       document,
@@ -3776,7 +3785,7 @@ describe('trusted managed service account upgrades', () => {
 });
 
 describe('service account mutation race regressions', () => {
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => vi.restoreAllMocks());
 
   const setupProbe = (spaceId = 'default') => {
     const core = {

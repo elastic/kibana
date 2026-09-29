@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerErrorCountRuleType } from './register_error_count_rule_type';
 import { createRuleTypeMocks } from '../../test_utils';
 
@@ -1243,8 +1245,8 @@ describe('Error count alert', () => {
     services.alertsClient.getRecoveredAlerts.mockReturnValue([
       {
         alert: {
-          getId: jest.fn().mockReturnValue('test-id'),
-          getUuid: jest.fn().mockReturnValue('test-uuid'),
+          getId: vi.fn().mockReturnValue('test-id'),
+          getUuid: vi.fn().mockReturnValue('test-uuid'),
           scheduledExecutionOptions: undefined,
           meta: [],
           state: [],

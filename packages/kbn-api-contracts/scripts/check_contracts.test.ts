@@ -7,52 +7,85 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/dev-cli-runner', () => ({
-  run: jest.fn(),
-}));
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
 
-jest.mock('child_process', () => ({
-  execSync: jest.fn(),
-}));
+vi.mock('@kbn/dev-cli-runner', () => {
+      const mocked = {
+      run: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('fs', () => ({
-  writeFileSync: jest.fn(),
-  mkdirSync: jest.fn(),
-  rmSync: jest.fn(),
-}));
+vi.mock('child_process', () => {
+      const mocked = {
+      execSync: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../src/diff/run_oasdiff', () => ({
-  runOasdiff: jest.fn(),
-}));
+vi.mock('fs', () => {
+      const mocked = {
+      writeFileSync: vi.fn(),
+      mkdirSync: vi.fn(),
+      rmSync: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../src/diff/run_oasdiff_structural', () => ({
-  runOasdiffStructural: jest.fn(),
-}));
+vi.mock('../src/diff/run_oasdiff', () => {
+      const mocked = {
+      runOasdiff: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../src/diff/parse_oasdiff', () => ({
-  parseOasdiff: jest.fn(),
-}));
+vi.mock('../src/diff/run_oasdiff_structural', () => {
+      const mocked = {
+      runOasdiffStructural: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../src/input/load_oas', () => ({
-  loadOas: jest.fn().mockResolvedValue({
-    openapi: '3.0.0',
-    info: { title: 't', version: '1' },
-    paths: {},
-    components: { schemas: {} },
-  }),
-}));
+vi.mock('../src/diff/parse_oasdiff', () => {
+      const mocked = {
+      parseOasdiff: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../src/allowlist/load_allowlist', () => ({
-  loadAllowlist: jest.fn(),
-}));
+vi.mock('../src/input/load_oas', () => {
+      const mocked = {
+      loadOas: vi.fn().mockResolvedValue({
+        openapi: '3.0.0',
+        info: { title: 't', version: '1' },
+        paths: {},
+        components: { schemas: {} },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../src/diff/breaking_rules', () => ({
-  applyAllowlist: jest.fn(),
-}));
+vi.mock('../src/allowlist/load_allowlist', () => {
+      const mocked = {
+      loadAllowlist: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../src/report/format_failure', () => ({
-  formatFailure: jest.fn(),
-}));
+vi.mock('../src/diff/breaking_rules', () => {
+      const mocked = {
+      applyAllowlist: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../src/report/format_failure', () => {
+      const mocked = {
+      formatFailure: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { execSync } from 'child_process';
 import { writeFileSync, rmSync } from 'fs';
@@ -62,28 +95,28 @@ import { loadOas } from '../src/input/load_oas';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
 import { formatFailure } from '../src/report/format_failure';
 
-const mockRun = jest.requireMock('@kbn/dev-cli-runner').run as jest.Mock;
-const mockExecSync = execSync as jest.MockedFunction<typeof execSync>;
-const mockWriteFileSync = writeFileSync as jest.MockedFunction<typeof writeFileSync>;
-const mockRunOasdiff = runOasdiff as jest.MockedFunction<typeof runOasdiff>;
-const mockRunOasdiffStructural = runOasdiffStructural as jest.MockedFunction<
+const mockRun = (await vi.importMock('@kbn/dev-cli-runner')).run as Mock;
+const mockExecSync = execSync as MockedFunction<typeof execSync>;
+const mockWriteFileSync = writeFileSync as MockedFunction<typeof writeFileSync>;
+const mockRunOasdiff = runOasdiff as MockedFunction<typeof runOasdiff>;
+const mockRunOasdiffStructural = runOasdiffStructural as MockedFunction<
   typeof runOasdiffStructural
 >;
-const mockParseOasdiff = parseOasdiff as jest.MockedFunction<typeof parseOasdiff>;
-const mockLoadOas = loadOas as jest.MockedFunction<typeof loadOas>;
-const mockLoadAllowlist = loadAllowlist as jest.MockedFunction<typeof loadAllowlist>;
-const mockApplyAllowlist = applyAllowlist as jest.MockedFunction<typeof applyAllowlist>;
-const mockFormatFailure = formatFailure as jest.MockedFunction<typeof formatFailure>;
+const mockParseOasdiff = parseOasdiff as MockedFunction<typeof parseOasdiff>;
+const mockLoadOas = loadOas as MockedFunction<typeof loadOas>;
+const mockLoadAllowlist = loadAllowlist as MockedFunction<typeof loadAllowlist>;
+const mockApplyAllowlist = applyAllowlist as MockedFunction<typeof applyAllowlist>;
+const mockFormatFailure = formatFailure as MockedFunction<typeof formatFailure>;
 
 describe('check_contracts', () => {
   let runCallback: (args: { flags: Record<string, unknown>; log: MockLog }) => Promise<void>;
   let mockLog: MockLog;
 
   interface MockLog {
-    info: jest.Mock;
-    warning: jest.Mock;
-    success: jest.Mock;
-    error: jest.Mock;
+    info: Mock;
+    warning: Mock;
+    success: Mock;
+    error: Mock;
   }
 
   beforeAll(() => {
@@ -92,12 +125,12 @@ describe('check_contracts', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockLog = {
-      info: jest.fn(),
-      warning: jest.fn(),
-      success: jest.fn(),
-      error: jest.fn(),
+      info: vi.fn(),
+      warning: vi.fn(),
+      success: vi.fn(),
+      error: vi.fn(),
     };
     mockExecSync.mockReturnValue('openapi: 3.0.0\npaths: {}');
     mockLoadOas.mockResolvedValue({
@@ -566,8 +599,8 @@ describe('check_contracts', () => {
     });
   });
 
-  describe('additionalProperties tightening (E2E reverse-index path)', () => {
-    const realParseOasdiff = jest.requireActual('../src/diff/parse_oasdiff')
+  describe('additionalProperties tightening (E2E reverse-index path)', async () => {
+    const realParseOasdiff = (await vi.importActual('../src/diff/parse_oasdiff'))
       .parseOasdiff as typeof parseOasdiff;
 
     it('surfaces a synthetic component-level entry exactly once for the consumer endpoint', async () => {

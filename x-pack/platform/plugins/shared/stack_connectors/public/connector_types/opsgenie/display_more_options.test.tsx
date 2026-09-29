@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DisplayMoreOptions } from './display_more_options';
 
 describe('DisplayMoreOptions', () => {
-  const toggleShowingMoreOptions = jest.fn();
+  const toggleShowingMoreOptions = vi.fn();
 
   const options = {
     showingMoreOptions: false,
     toggleShowingMoreOptions,
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders the more options text', () => {
     render(<DisplayMoreOptions {...options} />);

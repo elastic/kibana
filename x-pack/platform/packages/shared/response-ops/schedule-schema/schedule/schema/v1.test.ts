@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getScheduleRequestSchema, scheduleRequestSchema } from './v1';
 
 const recurring = {
@@ -26,13 +28,13 @@ describe('scheduleRequestSchema', () => {
   const mockCurrentDate = new Date('2021-05-05T00:00:00.000Z');
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers().setSystemTime(mockCurrentDate);
+    vi.clearAllMocks();
+    vi.useFakeTimers().setSystemTime(mockCurrentDate);
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   it('validates correctly with all fields', () => {
@@ -236,12 +238,12 @@ describe('getScheduleRequestSchema with allowLastDayOfMonth', () => {
   const mockCurrentDate = new Date('2021-05-05T00:00:00.000Z');
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers().setSystemTime(mockCurrentDate);
+    vi.clearAllMocks();
+    vi.useFakeTimers().setSystemTime(mockCurrentDate);
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('accepts -1 for the last day of the month', async () => {

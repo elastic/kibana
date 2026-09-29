@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -18,16 +21,16 @@ import type { CaseRoute } from './types';
 import { extractWarningValueFromWarningHeader } from './utils';
 
 describe('registerRoutes', () => {
-  let router: jest.Mocked<CasesRouter>;
+  let router: Mocked<CasesRouter>;
   const logger = loggingSystemMock.createLogger();
   const response = httpServerMock.createResponseFactory();
   const telemetryUsageCounter = usageCollectionPluginMock
     .createSetupContract()
     .createUsageCounter('test');
 
-  const handler = jest.fn();
-  const customError = jest.fn();
-  const badRequest = jest.fn();
+  const handler = vi.fn();
+  const customError = vi.fn();
+  const badRequest = vi.fn();
 
   const routes = [
     createCasesRoute({
@@ -88,7 +91,7 @@ describe('registerRoutes', () => {
       context?: CasesRequestHandlerContext;
       headers?: Record<string, string>;
     }) => {
-      const registeredRoute = router[method] as jest.Mock;
+      const registeredRoute = router[method] as Mock;
       const [, registeredRouteHandler] =
         registeredRoute.mock.calls.find((call) => {
           return call[0].path === path;
@@ -152,7 +155,7 @@ describe('registerRoutes', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     router = httpServiceMock.createRouter();
   });
 

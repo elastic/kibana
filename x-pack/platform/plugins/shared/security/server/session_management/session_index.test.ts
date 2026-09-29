@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type {
   BulkResponse,
@@ -56,7 +58,7 @@ describe('Session index', () => {
     },
     signal: new AbortController().signal,
     executionUuid: 'test-execution-uuid',
-    setCustomTaskRunEventFields: jest.fn(),
+    setCustomTaskRunEventFields: vi.fn(),
   };
 
   const createSessionIndexOptions = (
@@ -461,7 +463,7 @@ describe('Session index', () => {
         hits: { hits: [sessionValue] },
       } as SearchResponse);
       mockElasticsearchClient.bulk.mockResponse({ items: [{}] } as BulkResponse);
-      jest.spyOn(Date, 'now').mockImplementation(() => now);
+      vi.spyOn(Date, 'now').mockImplementation(() => now);
     });
 
     it('uses refreshed `pit_id` for subsequent searches and closePointInTime', async () => {
@@ -1155,7 +1157,7 @@ describe('Session index', () => {
         },
         signal: new AbortController().signal,
         executionUuid: 'test-execution-uuid',
-        setCustomTaskRunEventFields: jest.fn(),
+        setCustomTaskRunEventFields: vi.fn(),
       };
 
       await expect(sessionIndex.cleanUp(runContext)).resolves.toEqual({

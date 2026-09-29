@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { OverviewPageComponent } from './overview';
 import { render } from '../lib/helper/rtl_helpers';
 
-jest.mock('@kbn/ebt-tools', () => ({
-  usePageReady: jest.fn(),
-}));
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      usePageReady: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MonitorPage', () => {
   it('renders expected elements for valid props', async () => {

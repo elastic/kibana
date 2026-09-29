@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -12,7 +14,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { ValidateJob } from './validate_job_view';
 
-const mockValidateJob = jest.fn().mockImplementation(({ job }) => {
+const mockValidateJob = vi.fn().mockImplementation(({ job }) => {
   console.log('job', job);
   if (job.job_id === 'job1') {
     return Promise.resolve([]);
@@ -34,23 +36,26 @@ const mockValidateJob = jest.fn().mockImplementation(({ job }) => {
 const mockKibanaContext = {
   services: {
     docLinks: { links: { ml: { anomalyDetectionJobTips: 'https://anomalyDetectionJobTips' } } },
-    notifications: { toasts: { addDanger: jest.fn(), addError: jest.fn() } },
+    notifications: { toasts: { addDanger: vi.fn(), addError: vi.fn() } },
     mlServices: { mlApi: { validateJob: mockValidateJob } },
   },
 };
 
 const mockReact = React;
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  withKibana: (type) => {
-    const EnhancedType = (props) => {
-      return mockReact.createElement(type, {
-        ...props,
-        kibana: mockKibanaContext,
-      });
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      withKibana: (type) => {
+        const EnhancedType = (props) => {
+          return mockReact.createElement(type, {
+            ...props,
+            kibana: mockKibanaContext,
+          });
+        };
+        return EnhancedType;
+      },
     };
-    return EnhancedType;
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
 const job = {
   job_id: 'job2',

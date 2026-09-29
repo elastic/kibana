@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { TaskManagerPlugin } from './plugin';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 
@@ -17,16 +20,16 @@ import type { TaskPollingLifecycle as TaskPollingLifecycleClass } from './pollin
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 let mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
-jest.mock('./polling_lifecycle', () => {
+vi.mock('./polling_lifecycle', () => {
   return {
-    TaskPollingLifecycle: jest.fn().mockImplementation(() => {
+    TaskPollingLifecycle: vi.fn().mockImplementation(() => {
       return mockTaskPollingLifecycle;
     }),
   };
 });
 
-const deleteCurrentNodeSpy = jest.spyOn(KibanaDiscoveryService.prototype, 'deleteCurrentNode');
-const discoveryIsStarted = jest.spyOn(KibanaDiscoveryService.prototype, 'isStarted');
+const deleteCurrentNodeSpy = vi.spyOn(KibanaDiscoveryService.prototype, 'deleteCurrentNode');
+const discoveryIsStarted = vi.spyOn(KibanaDiscoveryService.prototype, 'isStarted');
 
 const coreStart = coreMock.createStart();
 const pluginInitializerContextParams = {
@@ -84,7 +87,7 @@ const pluginInitializerContextParams = {
 describe('TaskManagerPlugin', () => {
   beforeEach(() => {
     mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
-    (TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).mockClear();
+    (TaskPollingLifecycle as Mock<TaskPollingLifecycleClass>).mockClear();
   });
 
   describe('setup', () => {
@@ -115,8 +118,8 @@ describe('TaskManagerPlugin', () => {
       const logger = pluginInitializerContext.logger.get();
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
-      expect((logger.warn as jest.Mock).mock.calls.length).toBe(1);
-      expect((logger.warn as jest.Mock).mock.calls[0][0]).toBe(
+      expect((logger.warn as Mock).mock.calls.length).toBe(1);
+      expect((logger.warn as Mock).mock.calls[0][0]).toBe(
         'Excluding task types from execution: *'
       );
     });
@@ -133,8 +136,8 @@ describe('TaskManagerPlugin', () => {
       const logger = pluginInitializerContext.logger.get();
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
-      expect((logger.warn as jest.Mock).mock.calls.length).toBe(1);
-      expect((logger.warn as jest.Mock).mock.calls[0][0]).toBe(
+      expect((logger.warn as Mock).mock.calls.length).toBe(1);
+      expect((logger.warn as Mock).mock.calls[0][0]).toBe(
         'Disabling authentication for background task utilization API'
       );
     });
@@ -153,7 +156,7 @@ describe('TaskManagerPlugin', () => {
         licensing: licensingMock.createStart(),
       });
 
-      expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
+      expect(TaskPollingLifecycle as Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
     });
 
     test('should not initialize task polling lifecycle if node.roles.backgroundTasks is false', async () => {
@@ -168,7 +171,7 @@ describe('TaskManagerPlugin', () => {
         licensing: licensingMock.createStart(),
       });
 
-      expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).not.toHaveBeenCalled();
+      expect(TaskPollingLifecycle as Mock<TaskPollingLifecycleClass>).not.toHaveBeenCalled();
     });
 
     test('passes the fake request enricher obtained at setup to TaskPollingLifecycle', async () => {
@@ -178,8 +181,8 @@ describe('TaskManagerPlugin', () => {
       pluginInitializerContext.node.roles.backgroundTasks = true;
 
       const coreSetup = coreMock.createSetup();
-      const enricher = jest.fn();
-      (coreSetup.security.acquireFakeRequestEnricher as jest.Mock).mockReturnValue(enricher);
+      const enricher = vi.fn();
+      (coreSetup.security.acquireFakeRequestEnricher as Mock).mockReturnValue(enricher);
 
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
       taskManagerPlugin.setup(coreSetup, { usageCollection: undefined });
@@ -189,7 +192,7 @@ describe('TaskManagerPlugin', () => {
       });
 
       expect(coreSetup.security.acquireFakeRequestEnricher).toHaveBeenCalledTimes(1);
-      const pollingLifecycleOpts = (TaskPollingLifecycle as jest.Mock).mock.calls[0][0];
+      const pollingLifecycleOpts = (TaskPollingLifecycle as Mock).mock.calls[0][0];
       expect(pollingLifecycleOpts.enrichFakeRequest).toBe(enricher);
     });
   });
@@ -207,7 +210,7 @@ describe('TaskManagerPlugin', () => {
         licensing: licensingMock.createStart(),
       });
 
-      expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
+      expect(TaskPollingLifecycle as Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
 
       await taskManagerPlugin.stop();
 

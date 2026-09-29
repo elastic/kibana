@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { useCanUpdateSchedule } from './use_can_update_schedule';
@@ -12,13 +15,13 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../common/constants';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('useCanUpdateSchedule', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -40,7 +43,7 @@ describe('useCanUpdateSchedule', () => {
   });
 
   it('returns `false` if capability is not granted', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -60,7 +63,7 @@ describe('useCanUpdateSchedule', () => {
   });
 
   it('returns `false` if capability is not specified', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         application: {
           capabilities: {

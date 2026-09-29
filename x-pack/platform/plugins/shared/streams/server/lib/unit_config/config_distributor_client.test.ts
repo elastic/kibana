@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createHash } from 'crypto';
 import YAML from 'yaml';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -58,7 +60,7 @@ const hashPublishPayload = (unitYaml: string, credentials: UnitCredential[] = []
 
 describe('createConfigDistributorClient', () => {
   it('logs an error and does not call the distributor when the URL is not configured', async () => {
-    const fetchImpl = jest.fn();
+    const fetchImpl = vi.fn();
     const logger = loggerMock.create();
     const { publish, validate } = createConfigDistributorClient({
       config: { ssl: {} },
@@ -78,7 +80,7 @@ describe('createConfigDistributorClient', () => {
   });
 
   it('PUTs authored unit YAML and a SHA-256 config hash without mutating the unit', async () => {
-    const fetchImpl = jest.fn().mockResolvedValue({
+    const fetchImpl = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       text: async () => '',
@@ -104,7 +106,7 @@ describe('createConfigDistributorClient', () => {
   });
 
   it('sends credentials as a sidecar after encrypting secrets under the project key', async () => {
-    const fetchImpl = jest.fn().mockResolvedValue({
+    const fetchImpl = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       text: async () => '',
@@ -114,7 +116,7 @@ describe('createConfigDistributorClient', () => {
       { name: 'es_api_key', ciphertext: 'cipher-es' },
       { name: 's3_secret', ciphertext: 'cipher-s3' },
     ];
-    const encryptCredentials = jest.fn().mockResolvedValue(credentials);
+    const encryptCredentials = vi.fn().mockResolvedValue(credentials);
     const { publish } = createConfigDistributorClient({
       config: { url: 'https://distributor.example:8443', ssl: {} },
       logger: loggerMock.create(),
@@ -132,7 +134,7 @@ describe('createConfigDistributorClient', () => {
   });
 
   it('publishes without a credentials sidecar when project-key encryption is not configured', async () => {
-    const fetchImpl = jest.fn().mockResolvedValue({
+    const fetchImpl = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       text: async () => '',
@@ -154,7 +156,7 @@ describe('createConfigDistributorClient', () => {
   });
 
   it('POSTs unit YAML to /v1/validate without credentials', async () => {
-    const fetchImpl = jest.fn().mockResolvedValue({
+    const fetchImpl = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       text: async () => JSON.stringify({ valid: true, diagnostics: [] }),
@@ -177,7 +179,7 @@ describe('createConfigDistributorClient', () => {
   });
 
   it('accepts a valid unit that includes warning diagnostics', async () => {
-    const fetchImpl = jest.fn().mockResolvedValue({
+    const fetchImpl = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       text: async () =>
@@ -206,7 +208,7 @@ describe('createConfigDistributorClient', () => {
         line: 4,
       },
     ];
-    const fetchImpl = jest.fn().mockResolvedValue({
+    const fetchImpl = vi.fn().mockResolvedValue({
       ok: false,
       status: 400,
       text: async () => JSON.stringify({ valid: false, diagnostics }),

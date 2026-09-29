@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { SeriesIdentifier, TooltipAction } from '@elastic/charts';
 import { Settings, TooltipType, Tooltip } from '@elastic/charts';
@@ -49,12 +51,12 @@ const visData = createMockVisData();
 
 const mockState = new Map();
 const uiState = {
-  get: jest
+  get: vi
     .fn()
     .mockImplementation((key, fallback) => (mockState.has(key) ? mockState.get(key) : fallback)),
-  set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
-  emit: jest.fn(),
-  setSilent: jest.fn(),
+  set: vi.fn().mockImplementation((key, value) => mockState.set(key, value)),
+  emit: vi.fn(),
+  setSilent: vi.fn(),
 } as any;
 
 describe('PartitionVisComponent', function () {
@@ -69,9 +71,9 @@ describe('PartitionVisComponent', function () {
       visType: ChartTypes.PIE,
       uiState,
       syncColors: false,
-      fireEvent: jest.fn(),
-      hasCompatibleActions: jest.fn(),
-      renderComplete: jest.fn(),
+      fireEvent: vi.fn(),
+      hasCompatibleActions: vi.fn(),
+      renderComplete: vi.fn(),
       interactive: true,
       columnCellValueActions: [],
       services: {
@@ -84,7 +86,7 @@ describe('PartitionVisComponent', function () {
 
   afterEach(() => {
     mockState.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render correct structure for pie', function () {

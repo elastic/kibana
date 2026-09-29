@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 import { formatRule } from './format_rule';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RecoveredActionGroup } from '../../types';
@@ -21,7 +24,7 @@ import {
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
 
-const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
+const ruleType: Mocked<UntypedNormalizedRuleType> = {
   id: 'test.rule-type',
   name: 'My test rule',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -29,7 +32,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   minimumLicenseRequired: 'basic',
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
-  executor: jest.fn(),
+  executor: vi.fn(),
   category: 'test',
   producer: 'alerts',
   solution: 'stack',

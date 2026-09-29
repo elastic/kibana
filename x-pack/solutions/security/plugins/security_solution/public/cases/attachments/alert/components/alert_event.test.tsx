@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -20,12 +23,12 @@ import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 import { RulePanelKey } from '../../../../flyout/rule_details/right';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../pages/use_fetch_alert_data');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
-jest.mock('../../../../flyout_v2/use_flyout_api');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../../pages/use_fetch_alert_data');
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../../../../flyout_v2/use_flyout_api');
 
 const savedObjectId = 'so1';
 const defaultProps = {
@@ -39,22 +42,22 @@ const ruleLinkTestId = `alert-rule-link-${savedObjectId}`;
 
 describe('AlertEvent', () => {
   const flyoutApi = createFlyoutApiMock();
-  const mockOpenFlyout = jest.fn();
+  const mockOpenFlyout = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useFetchAlertData as jest.Mock).mockReturnValue([false, {}, null]);
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useFetchAlertData as Mock).mockReturnValue([false, {}, null]);
+    (useAlertsPrivileges as Mock).mockReturnValue({
       loading: false,
       hasAlertsRead: true,
       hasAlertsAll: true,
     });
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       rulesPrivileges: { rules: { read: true } },
     });
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
     });
@@ -71,7 +74,7 @@ describe('AlertEvent', () => {
   });
 
   it('opens the legacy expandable flyout when the new flyout is disabled', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
 
     render(
       <TestProviders>
@@ -91,7 +94,7 @@ describe('AlertEvent', () => {
   });
 
   it('opens the new rule flyout when the new flyout is enabled', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
     render(
       <TestProviders>
@@ -110,7 +113,7 @@ describe('AlertEvent', () => {
   });
 
   it('does not open any flyout when the user cannot read rules', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       rulesPrivileges: { rules: { read: false } },
     });
 
@@ -128,12 +131,12 @@ describe('AlertEvent', () => {
 
   describe('while alert privileges are loading', () => {
     it('shows spinner instead of "Unknown rule" when privileges have not resolved yet', () => {
-      (useAlertsPrivileges as jest.Mock).mockReturnValue({
+      (useAlertsPrivileges as Mock).mockReturnValue({
         loading: true,
         hasAlertsRead: false,
         hasAlertsAll: false,
       });
-      (useFetchAlertData as jest.Mock).mockReturnValue([false, {}, null]);
+      (useFetchAlertData as Mock).mockReturnValue([false, {}, null]);
 
       const { container } = render(
         <TestProviders>
@@ -148,13 +151,13 @@ describe('AlertEvent', () => {
 
   describe('when the user cannot read alerts', () => {
     it('shows "Unknown rule" instead of an infinite spinner when the fetch is permanently skipped', () => {
-      (useAlertsPrivileges as jest.Mock).mockReturnValue({
+      (useAlertsPrivileges as Mock).mockReturnValue({
         loading: false,
         hasAlertsRead: false,
         hasAlertsAll: false,
       });
       // useQueryAlerts is skipped → refetch stays null forever; must not produce a permanent spinner
-      (useFetchAlertData as jest.Mock).mockReturnValue([false, {}, null]);
+      (useFetchAlertData as Mock).mockReturnValue([false, {}, null]);
 
       const { container } = render(
         <TestProviders>
@@ -174,7 +177,7 @@ describe('AlertEvent', () => {
       // useFetchAlertData starts with loading=false before useQueryAlerts fires its fetch effect.
       // refetchAlertData=null (the initial value before any fetch completes) signals this state,
       // so the spinner shows rather than "Unknown rule".
-      (useFetchAlertData as jest.Mock).mockReturnValue([false, {}, null]);
+      (useFetchAlertData as Mock).mockReturnValue([false, {}, null]);
 
       const { container } = render(
         <TestProviders>
@@ -187,7 +190,7 @@ describe('AlertEvent', () => {
     });
 
     it('shows spinner while the fetch is in progress', () => {
-      (useFetchAlertData as jest.Mock).mockReturnValue([true, {}, null]);
+      (useFetchAlertData as Mock).mockReturnValue([true, {}, null]);
 
       const { container } = render(
         <TestProviders>
@@ -200,8 +203,8 @@ describe('AlertEvent', () => {
 
     it('shows spinner (not "Unknown rule") when first fetch returns no data and retry is pending', () => {
       // Simulate: loading went true then false with no data — firstFetchReturnedNoData=true.
-      const mockUseFetchAlertData = useFetchAlertData as jest.Mock;
-      const mockRefetch = jest.fn();
+      const mockUseFetchAlertData = useFetchAlertData as Mock;
+      const mockRefetch = vi.fn();
 
       mockUseFetchAlertData.mockReturnValueOnce([true, {}, mockRefetch]);
       mockUseFetchAlertData.mockReturnValue([false, {}, mockRefetch]);
@@ -226,9 +229,9 @@ describe('AlertEvent', () => {
     });
 
     it('resolves the rule name when the retry fetch returns alert data', () => {
-      jest.useFakeTimers();
-      const mockUseFetchAlertData = useFetchAlertData as jest.Mock;
-      const mockRefetch = jest.fn();
+      vi.useFakeTimers();
+      const mockUseFetchAlertData = useFetchAlertData as Mock;
+      const mockRefetch = vi.fn();
 
       // First fetch: in progress, then completes with no data
       mockUseFetchAlertData.mockReturnValueOnce([true, {}, mockRefetch]);
@@ -247,7 +250,7 @@ describe('AlertEvent', () => {
       );
 
       // Retry fires; hook now returns alert data for a1
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
       mockUseFetchAlertData.mockReturnValue([
         false,
         {
@@ -265,13 +268,13 @@ describe('AlertEvent', () => {
         'Recovered rule'
       );
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('renders "Unknown rule" after fetch + retry both return no matching alert data', () => {
-      jest.useFakeTimers();
-      const mockUseFetchAlertData = useFetchAlertData as jest.Mock;
-      const mockRefetch = jest.fn();
+      vi.useFakeTimers();
+      const mockUseFetchAlertData = useFetchAlertData as Mock;
+      const mockRefetch = vi.fn();
 
       // First fetch: in progress, then completes with no data
       mockUseFetchAlertData.mockReturnValueOnce([true, {}, mockRefetch]);
@@ -295,7 +298,7 @@ describe('AlertEvent', () => {
       expect(container.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
 
       // Advance timer to fire the retry
-      jest.advanceTimersByTime(300);
+      vi.advanceTimersByTime(300);
       expect(mockRefetch).toHaveBeenCalledTimes(1);
 
       // Retry also returns no data. refetchAlertData stays non-null (useQueryAlerts never resets
@@ -311,7 +314,7 @@ describe('AlertEvent', () => {
         'Unknown rule'
       );
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient, KibanaRequest, SavedObject } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -691,11 +693,11 @@ describe('CasesAnalyticsV2DataViewService', () => {
       stubMissingDataView(dvService);
 
       await service.ensureForSpace(deps);
-      const fetchesAfterEnsure = (internalSoClient.find as jest.Mock).mock.calls.length;
+      const fetchesAfterEnsure = (internalSoClient.find as Mock).mock.calls.length;
 
       await service.refreshForSpace(deps);
 
-      expect((internalSoClient.find as jest.Mock).mock.calls.length).toBeGreaterThan(
+      expect((internalSoClient.find as Mock).mock.calls.length).toBeGreaterThan(
         fetchesAfterEnsure
       );
     });
@@ -882,7 +884,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       // own log calls; the parent mock's `.get` returns a child mock
       // by default, so the test resolves the actual instance for
       // assertions.
-      const childLogger = (parentLogger.get as jest.Mock).mock.results[0]?.value as ReturnType<
+      const childLogger = (parentLogger.get as Mock).mock.results[0]?.value as ReturnType<
         typeof loggerMock.create
       >;
       const deps = {
@@ -916,7 +918,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       expect(dvService.get).toHaveBeenCalledTimes(1);
       expect(dvService.createSavedObject).toHaveBeenCalledTimes(1);
       if (childLogger) {
-        const debugCalls = (childLogger.debug as jest.Mock).mock.calls.map(
+        const debugCalls = (childLogger.debug as Mock).mock.calls.map(
           ([msg]: [string]) => msg
         );
         expect(

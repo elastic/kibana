@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import Path from 'path';
 import Fs from 'fs/promises';
 import Os from 'os';
@@ -13,10 +15,10 @@ import { createArtifact } from './create_artifact';
 
 const createLog = (): ToolingLog =>
   ({
-    info: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-    warning: jest.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    warning: vi.fn(),
   } as unknown as ToolingLog);
 
 describe('createArtifact', () => {

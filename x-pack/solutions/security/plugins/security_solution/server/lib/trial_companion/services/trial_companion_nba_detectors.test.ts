@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { UsageCollectorDeps } from './trial_companion_nba_detectors';
 import {
@@ -32,20 +35,20 @@ import { CASE_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
 
 describe('Trial companion NBA detectors', () => {
   const logger = loggingSystemMock.createLogger();
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let esClient: Mocked<ElasticsearchClient>;
   let collectorContext: CollectorFetchContext;
-  const collector: jest.Mocked<Collector<unknown, object>> = {
-    fetch: jest.fn(),
-  } as unknown as jest.Mocked<Collector<unknown, object>>;
-  let usageCollection: jest.Mocked<ICollectorSet>;
+  const collector: Mocked<Collector<unknown, object>> = {
+    fetch: vi.fn(),
+  } as unknown as Mocked<Collector<unknown, object>>;
+  let usageCollection: Mocked<ICollectorSet>;
   let deps: UsageCollectorDeps;
   beforeEach(() => {
     soClient = savedObjectsClientMock.create();
     esClient = elasticsearchClientMock.createInternalClient();
     usageCollection = {
-      getCollectorByType: jest.fn(),
-    } as unknown as jest.Mocked<ICollectorSet>;
+      getCollectorByType: vi.fn(),
+    } as unknown as Mocked<ICollectorSet>;
     usageCollection.getCollectorByType.mockReturnValue(collector);
     collectorContext = {
       soClient,
@@ -56,7 +59,7 @@ describe('Trial companion NBA detectors', () => {
       collectorContext,
       usageCollection,
     };
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const buildCountResponse = (count: number): CountResponse => ({
@@ -78,15 +81,15 @@ describe('Trial companion NBA detectors', () => {
   });
 
   describe('installedPackagesM1', () => {
-    const packageClient: jest.Mocked<PackageClient> = {
-      getPackages: jest.fn(),
-    } as unknown as jest.Mocked<PackageClient>;
+    const packageClient: Mocked<PackageClient> = {
+      getPackages: vi.fn(),
+    } as unknown as Mocked<PackageClient>;
     const packageService: PackageService = lazyObject({
       asInternalUser: packageClient,
-      asScoped: jest.fn(),
+      asScoped: vi.fn(),
     });
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     const createPackageListItem = (name: string, status: string): PackageListItem =>
       ({
@@ -169,7 +172,7 @@ describe('Trial companion NBA detectors', () => {
       ['0 cases', 0, Milestone.M6],
       ['with cases', 3, undefined],
     ])('compares total count of cases saved objects - %s', async (_tcName, total, expected) => {
-      (collector.fetch as jest.Mock).mockResolvedValue({
+      (collector.fetch as Mock).mockResolvedValue({
         by_type: [{ type: CASE_SAVED_OBJECT, count: total }],
       });
       await expect(casesM6(deps)()).resolves.toEqual(expected);
@@ -207,7 +210,7 @@ describe('Trial companion NBA detectors', () => {
         ],
         ['empty telemetry', {}, Milestone.M3],
       ])('compares total count of rules - %s', async (_tcName, telemetry, expected) => {
-        (collector.fetch as jest.Mock).mockResolvedValue(telemetry);
+        (collector.fetch as Mock).mockResolvedValue(telemetry);
         await expect(detectionRulesInstalledM3(deps)()).resolves.toEqual(expected);
       });
     });
@@ -223,9 +226,9 @@ describe('Trial companion NBA detectors', () => {
       ])(
         'compares count of attack discovery alerts and assistant conversations - %s',
         async (_tcName, alerts, assistant, chart, expected) => {
-          (esClient.count as jest.Mock).mockResolvedValueOnce(buildCountResponse(alerts));
-          (esClient.count as jest.Mock).mockResolvedValueOnce(buildCountResponse(assistant));
-          (esClient.count as jest.Mock).mockResolvedValueOnce(buildCountResponse(chart));
+          (esClient.count as Mock).mockResolvedValueOnce(buildCountResponse(alerts));
+          (esClient.count as Mock).mockResolvedValueOnce(buildCountResponse(assistant));
+          (esClient.count as Mock).mockResolvedValueOnce(buildCountResponse(chart));
           await expect(aiFeaturesM5(esClient)()).resolves.toEqual(expected);
         }
       );

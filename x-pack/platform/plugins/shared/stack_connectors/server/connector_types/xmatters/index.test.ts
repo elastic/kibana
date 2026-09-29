@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type { XmattersConnectorType } from '.';
@@ -27,25 +30,25 @@ import type {
   ConnectorTypeSecretsType,
 } from '@kbn/connector-schemas/xmatters';
 
-jest.mock('axios');
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+vi.mock('axios');
+vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
+  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
   return {
     ...originalUtils,
-    request: jest.fn(),
-    patch: jest.fn(),
+    request: vi.fn(),
+    patch: vi.fn(),
   };
 });
 
-axios.create = jest.fn(() => axios);
-const requestMock = utils.request as jest.Mock;
-axios.create = jest.fn(() => axios);
+axios.create = vi.fn(() => axios);
+const requestMock = utils.request as Mock;
+axios.create = vi.fn(() => axios);
 
 const services: Services = actionsMock.createServices();
-const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+const mockedLogger: Mocked<Logger> = loggerMock.create();
 
 let connectorType: XmattersConnectorType;
-let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let configurationUtilities: Mocked<ActionsConfigurationUtilities>;
 let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {

@@ -5,26 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useHasEntityResolutionLicense } from './use_has_entity_resolution_license';
 import { useHasSecurityCapability } from '../../helper_hooks';
 import { useLicense } from './use_license';
 
-jest.mock('../../helper_hooks');
-jest.mock('./use_license');
+vi.mock('../../helper_hooks');
+vi.mock('./use_license');
 
 describe('useHasEntityResolutionLicense', () => {
-  const mockUseHasSecurityCapability = useHasSecurityCapability as jest.Mock;
-  const mockUseLicense = useLicense as jest.Mock;
+  const mockUseHasSecurityCapability = useHasSecurityCapability as Mock;
+  const mockUseLicense = useLicense as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns true when entity-analytics capability is enabled and license is Enterprise', () => {
     mockUseHasSecurityCapability.mockReturnValue(true);
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn(() => true),
+      isEnterprise: vi.fn(() => true),
     });
 
     const { result } = renderHook(() => useHasEntityResolutionLicense());
@@ -36,7 +39,7 @@ describe('useHasEntityResolutionLicense', () => {
   it('returns false when capability is enabled but license is not Enterprise (e.g. Platinum)', () => {
     mockUseHasSecurityCapability.mockReturnValue(true);
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn(() => false),
+      isEnterprise: vi.fn(() => false),
     });
 
     const { result } = renderHook(() => useHasEntityResolutionLicense());
@@ -47,7 +50,7 @@ describe('useHasEntityResolutionLicense', () => {
   it('returns false when license is Enterprise but entity-analytics capability is missing', () => {
     mockUseHasSecurityCapability.mockReturnValue(false);
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn(() => true),
+      isEnterprise: vi.fn(() => true),
     });
 
     const { result } = renderHook(() => useHasEntityResolutionLicense());
@@ -58,7 +61,7 @@ describe('useHasEntityResolutionLicense', () => {
   it('returns false when neither capability nor Enterprise license', () => {
     mockUseHasSecurityCapability.mockReturnValue(false);
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn(() => false),
+      isEnterprise: vi.fn(() => false),
     });
 
     const { result } = renderHook(() => useHasEntityResolutionLicense());

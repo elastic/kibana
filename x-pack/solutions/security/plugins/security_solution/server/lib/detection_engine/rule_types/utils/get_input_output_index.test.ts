@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -20,11 +22,11 @@ describe('get_input_output_index', () => {
   const logger: MockedLogger = loggerMock.create();
 
   beforeAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   let defaultProps: GetInputIndex;
   beforeEach(() => {

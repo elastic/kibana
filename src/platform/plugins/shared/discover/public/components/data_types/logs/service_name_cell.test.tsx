@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -33,8 +35,8 @@ const core = {
   },
 };
 
-jest.mock('../../../hooks/use_discover_services', () => {
-  const originalModule = jest.requireActual('../../../hooks/use_discover_services');
+vi.mock('../../../hooks/use_discover_services', async () => {
+  const originalModule = (await vi.importActual('../../../hooks/use_discover_services'));
   return {
     ...originalModule,
     useDiscoverServices: () => ({ core, share: {} }),
@@ -50,7 +52,7 @@ const renderCell = (
     ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     actions: {
       ...EMPTY_CONTEXT_AWARENESS_TOOLKIT.actions,
-      addFilter: jest.fn(),
+      addFilter: vi.fn(),
     },
   };
   const ServiceNameCell = getServiceNameCell(serviceNameField, toolkit);
@@ -105,8 +107,8 @@ describe('getServiceNameCell', () => {
   describe('when hit.highlight is present', () => {
     const mockFieldFormats = {
       ...fieldFormatsMock,
-      getDefaultInstance: jest.fn().mockReturnValue({
-        convertToReact: jest.fn().mockImplementation((value, options) => {
+      getDefaultInstance: vi.fn().mockReturnValue({
+        convertToReact: vi.fn().mockImplementation((value, options) => {
           if (options?.hit?.highlight?.bytes) {
             return <mark>{value}</mark>;
           }

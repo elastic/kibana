@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AuditLogger } from '@kbn/core/server';
 
 import {
@@ -17,35 +19,35 @@ import { MonitoringEntitySourceDescriptorClient } from '../saved_objects';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import { integrationsSourceIndex } from '../data_sources';
 
-const mockListByKuery = jest.fn().mockResolvedValue([]);
-const mockBulkUpsert = jest.fn();
-const mockList = jest.fn().mockResolvedValue({ sources: [], total: 0 });
-const mockBulkCreate = jest.fn();
+const mockListByKuery = vi.fn().mockResolvedValue([]);
+const mockBulkUpsert = vi.fn();
+const mockList = vi.fn().mockResolvedValue({ sources: [], total: 0 });
+const mockBulkCreate = vi.fn();
 
-jest.mock('../saved_objects', () => {
+vi.mock('../saved_objects', () => {
   return {
-    MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
+    MonitoringEntitySourceDescriptorClient: vi.fn().mockImplementation(() => ({
       bulkCreate: mockBulkCreate,
       list: mockList,
       bulkUpsert: mockBulkUpsert,
       listByKuery: mockListByKuery,
     })),
-    PrivilegeMonitoringEngineDescriptorClient: jest.fn().mockImplementation(() => ({
-      init: jest.fn(),
-      update: jest.fn(),
+    PrivilegeMonitoringEngineDescriptorClient: vi.fn().mockImplementation(() => ({
+      init: vi.fn(),
+      update: vi.fn(),
     })),
   };
 });
 
 describe('createInitialisationSourcesService', () => {
   const loggerMock = loggingSystemMock.createLogger();
-  const auditMock = { log: jest.fn().mockReturnValue(undefined) } as unknown as AuditLogger;
+  const auditMock = { log: vi.fn().mockReturnValue(undefined) } as unknown as AuditLogger;
   const namespace = 'default';
 
   let upsertSources: InitialisationSourcesService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockBulkUpsert.mockClear();
     const monitoringDescriptorClient = new MonitoringEntitySourceDescriptorClient({
       soClient: savedObjectsClientMock.create(),

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { fetchClassicAlertsHistogram } from './fetch_classic_histogram';
 import { CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS } from '../utils/map_alert';
@@ -21,7 +23,7 @@ const makeHit = (source: Record<string, unknown>) => ({
 
 describe('fetchClassicAlertsHistogram', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('fetches alert documents and requests the histogram source projection', async () => {

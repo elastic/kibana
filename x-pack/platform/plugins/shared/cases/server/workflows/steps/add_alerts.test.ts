@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import type { CasesClient } from '../../client';
 import { addAlertsStepDefinition } from './add_alerts';
@@ -15,9 +17,9 @@ const createContext = (input: unknown) =>
 
 describe('addAlertsStepDefinition', () => {
   it('adds alerts to a case', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get },
       attachments: { bulkCreate },
     } as unknown as CasesClient);
@@ -48,9 +50,9 @@ describe('addAlertsStepDefinition', () => {
   });
 
   it('creates a single alert attachment for multiple alerts for the same rule', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get },
       attachments: { bulkCreate },
     } as unknown as CasesClient);
@@ -91,9 +93,9 @@ describe('addAlertsStepDefinition', () => {
   });
 
   it('creates one alert attachment per distinct rule', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get },
       attachments: { bulkCreate },
     } as unknown as CasesClient);
@@ -143,9 +145,9 @@ describe('addAlertsStepDefinition', () => {
   });
 
   it('groups alerts without a rule id into a single attachment', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get },
       attachments: { bulkCreate },
     } as unknown as CasesClient);

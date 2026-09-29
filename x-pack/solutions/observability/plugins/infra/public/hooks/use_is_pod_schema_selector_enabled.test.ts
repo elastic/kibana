@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
@@ -14,9 +17,9 @@ import {
 import { useIsPodSchemaSelectorEnabled } from './use_is_pod_schema_selector_enabled';
 import { useKibanaContextForPlugin } from './use_kibana';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const useKibanaContextForPluginMock = useKibanaContextForPlugin as jest.MockedFunction<
+const useKibanaContextForPluginMock = useKibanaContextForPlugin as MockedFunction<
   typeof useKibanaContextForPlugin
 >;
 
@@ -40,7 +43,7 @@ const setupMocks = (resolvedValue?: boolean) => {
 
 describe('useIsPodSchemaSelectorEnabled', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('falls back to disabled when the flag is not defined', () => {

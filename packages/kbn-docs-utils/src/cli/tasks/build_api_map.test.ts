@@ -7,21 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Project } from 'ts-morph';
 import { ToolingLog } from '@kbn/tooling-log';
 import { buildApiMap } from './build_api_map';
 import type { CliOptions } from '../types';
 
 // Mock getPluginApiMap
-jest.mock('../../get_plugin_api_map', () => ({
-  getPluginApiMap: jest.fn(() => ({
-    pluginApiMap: {},
-    missingApiItems: {},
-    referencedDeprecations: {},
-    unreferencedDeprecations: {},
-    adoptionTrackedAPIs: {},
-  })),
-}));
+vi.mock('../../get_plugin_api_map', () => {
+      const mocked = {
+      getPluginApiMap: vi.fn(() => ({
+        pluginApiMap: {},
+        missingApiItems: {},
+        referencedDeprecations: {},
+        unreferencedDeprecations: {},
+        adoptionTrackedAPIs: {},
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { getPluginApiMap } from '../../get_plugin_api_map';
 
@@ -42,8 +47,8 @@ describe('buildApiMap', () => {
     });
 
     transaction = {
-      startSpan: jest.fn(() => ({
-        end: jest.fn(),
+      startSpan: vi.fn(() => ({
+        end: vi.fn(),
       })),
     };
 

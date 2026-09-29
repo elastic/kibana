@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { FieldType } from '../../../../common/types/domain/template/fields';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
@@ -50,7 +52,7 @@ describe('useGlobalToggleFieldsFilterConfig', () => {
         isSelectorView: false,
         globalInlineFields: [toggleField, textField],
         isLoading: false,
-        onFilterOptionsChange: jest.fn(),
+        onFilterOptionsChange: vi.fn(),
       })
     );
 
@@ -67,7 +69,7 @@ describe('useGlobalToggleFieldsFilterConfig', () => {
         isSelectorView: true,
         globalInlineFields: [toggleField],
         isLoading: false,
-        onFilterOptionsChange: jest.fn(),
+        onFilterOptionsChange: vi.fn(),
       })
     );
 
@@ -80,7 +82,7 @@ describe('useGlobalToggleFieldsFilterConfig', () => {
         isSelectorView: false,
         globalInlineFields: [toggleField],
         isLoading: false,
-        onFilterOptionsChange: jest.fn(),
+        onFilterOptionsChange: vi.fn(),
       })
     );
 

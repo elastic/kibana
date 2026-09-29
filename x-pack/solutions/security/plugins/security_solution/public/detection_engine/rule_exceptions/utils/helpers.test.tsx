@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
@@ -52,9 +54,12 @@ import {
 import { AGENT_ID } from './highlighted_fields_config';
 import { SUPPORTED_AGENT_ID_ALERT_FIELDS } from '../../../../common/endpoint/service/response_actions/constants';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('123'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('123'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Exception helpers', () => {
   beforeEach(() => {
@@ -2600,13 +2605,19 @@ describe('Exception helpers', () => {
         expect(res).toEqual(allHighlightFields);
       });
       it('should return all highlighted fields when there are no fields to be filtered out', () => {
-        jest.mock('./highlighted_fields_config', () => ({ highlightedFieldsPrefixToExclude: [] }));
+        vi.doMock('./highlighted_fields_config', () => {
+              const mocked = { highlightedFieldsPrefixToExclude: [] };
+              return { ...mocked, default: mocked };
+            });
 
         const res = getAlertHighlightedFields(alertData, []);
         expect(res).toEqual(allHighlightFields);
       });
       it('should exclude the "agent.id" from highlighted fields when agent.type is not "endpoint"', () => {
-        jest.mock('./highlighted_fields_config', () => ({ highlightedFieldsPrefixToExclude: [] }));
+        vi.doMock('./highlighted_fields_config', () => {
+              const mocked = { highlightedFieldsPrefixToExclude: [] };
+              return { ...mocked, default: mocked };
+            });
 
         const alertDataWithoutAgentType = { ...alertData, agent: { ...alertData.agent, type: '' } };
         const res = getAlertHighlightedFields(alertDataWithoutAgentType, []);
@@ -2614,7 +2625,10 @@ describe('Exception helpers', () => {
         expect(res).toEqual(allHighlightFields.filter((field) => field.id !== AGENT_ID));
       });
       it('should exclude the "agent.id" from highlighted fields when "kibana.alert.rule.uuid" is not part of the alertData', () => {
-        jest.mock('./highlighted_fields_config', () => ({ highlightedFieldsPrefixToExclude: [] }));
+        vi.doMock('./highlighted_fields_config', () => {
+              const mocked = { highlightedFieldsPrefixToExclude: [] };
+              return { ...mocked, default: mocked };
+            });
 
         const alertDataWithoutRuleUUID = { ...alertData, 'kibana.alert.rule.uuid': '' };
         const res = getAlertHighlightedFields(alertDataWithoutRuleUUID, []);
@@ -2628,7 +2642,7 @@ describe('Exception helpers', () => {
     });
     describe('getPrepopulatedRuleExceptionWithHighlightFields', () => {
       it('should not create any exception and return null if there are no highlighted fields', () => {
-        jest.spyOn(mockHelpers, 'getAlertHighlightedFields').mockReturnValue([]);
+        vi.spyOn(mockHelpers, 'getAlertHighlightedFields').mockReturnValue([]);
 
         const res = getPrepopulatedRuleExceptionWithHighlightFields({
           alertData: defaultAlertData,
@@ -2638,7 +2652,7 @@ describe('Exception helpers', () => {
         expect(res).toBe(null);
       });
       it('should not create any exception and return null if there are exception entries generated', () => {
-        jest.spyOn(mockHelpers, 'buildExceptionEntriesFromAlertFields').mockReturnValue([]);
+        vi.spyOn(mockHelpers, 'buildExceptionEntriesFromAlertFields').mockReturnValue([]);
 
         const res = getPrepopulatedRuleExceptionWithHighlightFields({
           alertData: defaultAlertData,

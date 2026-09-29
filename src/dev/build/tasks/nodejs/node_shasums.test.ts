@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 const mockResponse = `155ae63f0bb47050e0c31b4f8c17dadc79dcfa8e8f4ec9e3974fd7592afa9a4f  node-v8.9.4-aix-ppc64.tar.gz
 ca50f7d2035eb805306e303b644bb1cde170ce2615e0a2c6e95fb80881c48c24  node-v8.9.4-darwin-x64.tar.gz
 cb79e2da37d2b646a06adaddcda67ff6ba0f77f9ca733b041dabf3dad79c7468  node-v8.9.4-darwin-x64.tar.xz
@@ -48,14 +50,17 @@ c4edece2c0aa68e816c4e067f397eb12e9d0c81bb37b3d349dbaf47cf246b0b7  win-x86/node.l
 6a2ee7a0b0074ece27d171418d82ce25a60b87750ec30c5c9fbeaaca8c206fa5  win-x86/node_pdb.7z
 1b44176d888c1bc6a6b05fcc6234031b3b8a58da9de8b99661088f998ac5e269  win-x86/node_pdb.zip`;
 
-jest.mock('../../lib/download', () => ({
-  async downloadToString({ url }: { url: string }) {
-    expect(url).toBe(
-      'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v8.9.4/SHASUMS256.txt'
-    );
-    return mockResponse;
-  },
-}));
+vi.mock('../../lib/download', () => {
+      const mocked = {
+      async downloadToString({ url }: { url: string }) {
+        expect(url).toBe(
+          'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v8.9.4/SHASUMS256.txt'
+        );
+        return mockResponse;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { getNodeShasums } from './node_shasums';

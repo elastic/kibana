@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject, Observable } from 'rxjs';
 
@@ -47,9 +50,12 @@ import {
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 
-jest.mock('./utils/serialization_utils', () => ({
-  deserializeState: jest.fn(),
-}));
+vi.mock('./utils/serialization_utils', () => {
+      const mocked = {
+      deserializeState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('saved search embeddable', () => {
   setStubKibanaServices();
@@ -61,12 +67,12 @@ describe('saved search embeddable', () => {
     dataView = dataViewMock,
     partialState = {},
   }: {
-    searchMock?: jest.Mock;
+    searchMock?: Mock;
     dataView?: DataView;
     partialState?: Partial<SearchEmbeddableRuntimeState>;
   } = {}): SearchEmbeddableRuntimeState => {
     const searchSource = createSearchSourceMock({ index: dataView }, undefined, searchMock);
-    discoverServiceMock.data.search.searchSource.create = jest
+    discoverServiceMock.data.search.searchSource.create = vi
       .fn()
       .mockResolvedValueOnce(searchSource);
 
@@ -86,7 +92,7 @@ describe('saved search embeddable', () => {
   const defaultProfileStateRegistry = discoverServiceMock.profileStateRegistry;
 
   beforeEach(() => {
-    jest.mocked(deserializeState).mockImplementation(async () => runtimeState);
+    vi.mocked(deserializeState).mockImplementation(async () => runtimeState);
     mockedEditableDashboardApi.setFocusedPanelId.mockClear();
     mockedEditableDashboardApi.setViewMode.mockClear();
     mockedEditableDashboardApi.isEditableByUser = true;
@@ -101,8 +107,8 @@ describe('saved search embeddable', () => {
   const mockServices = {
     discoverServices: discoverServiceMock,
     startServices: {
-      executeTriggerActions: jest.fn(),
-      isEditable: jest.fn().mockReturnValue(true),
+      executeTriggerActions: vi.fn(),
+      isEditable: vi.fn().mockReturnValue(true),
     },
   };
 
@@ -144,7 +150,7 @@ describe('saved search embeddable', () => {
 
   const createSearchFnMock = (nrOfHits: number) => {
     let resolveSearch = () => {};
-    const search = jest.fn(() => {
+    const search = vi.fn(() => {
       return new Observable((subscriber) => {
         resolveSearch = () => {
           subscriber.next(getSearchResponse(nrOfHits));
@@ -157,7 +163,7 @@ describe('saved search embeddable', () => {
 
   const createSearchErrorFnMock = (error: Error) => {
     let rejectSearch = () => {};
-    const search = jest.fn(() => {
+    const search = vi.fn(() => {
       return new Observable((subscriber) => {
         rejectSearch = () => {
           subscriber.error(error);
@@ -181,13 +187,13 @@ describe('saved search embeddable', () => {
   const editableDashboardViewMode$ = new BehaviorSubject<'view' | 'edit'>('edit');
   const mockedEditableDashboardApi = {
     ...mockedDashboardApi,
-    getAppContext: jest.fn().mockReturnValue({
+    getAppContext: vi.fn().mockReturnValue({
       currentAppId: 'dashboard',
-      getCurrentPath: jest.fn().mockReturnValue('/dashboard'),
+      getCurrentPath: vi.fn().mockReturnValue('/dashboard'),
     }),
     isEditableByUser: true,
-    setFocusedPanelId: jest.fn(),
-    setViewMode: jest.fn((viewMode: 'view' | 'edit') => editableDashboardViewMode$.next(viewMode)),
+    setFocusedPanelId: vi.fn(),
+    setViewMode: vi.fn((viewMode: 'view' | 'edit') => editableDashboardViewMode$.next(viewMode)),
     viewMode$: editableDashboardViewMode$,
   };
 
@@ -239,7 +245,7 @@ describe('saved search embeddable', () => {
         partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
       });
 
-      discoverServiceMock.uiSettings.get = jest.fn().mockImplementation((key: string) => {
+      discoverServiceMock.uiSettings.get = vi.fn().mockImplementation((key: string) => {
         if (key === SHOW_FIELD_STATISTICS) return true;
       });
 
@@ -321,10 +327,10 @@ describe('saved search embeddable', () => {
   });
 
   describe('missing data view', () => {
-    const getNoDataViewRuntimeState = (searchMock?: jest.Mock): SearchEmbeddableRuntimeState => {
+    const getNoDataViewRuntimeState = (searchMock?: Mock): SearchEmbeddableRuntimeState => {
       const searchSource = createSearchSourceMock({}, undefined, searchMock);
       const parentSearchSource = createSearchSourceMock({});
-      discoverServiceMock.data.search.searchSource.create = jest
+      discoverServiceMock.data.search.searchSource.create = vi
         .fn()
         .mockResolvedValueOnce(searchSource)
         .mockResolvedValueOnce(parentSearchSource);
@@ -459,7 +465,7 @@ describe('saved search embeddable', () => {
         undefined,
         search
       );
-      discoverServiceMock.data.search.searchSource.create = jest
+      discoverServiceMock.data.search.searchSource.create = vi
         .fn()
         .mockResolvedValueOnce(esqlSearchSource);
 
@@ -498,10 +504,10 @@ describe('saved search embeddable', () => {
         partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
       });
 
-      discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockReturnValue({
-        navigateToEditor: jest.fn(),
+      discoverServiceMock.embeddable.getStateTransfer = vi.fn().mockReturnValue({
+        navigateToEditor: vi.fn(),
       });
-      (discoverServiceMock.locator.getLocation as jest.Mock).mockResolvedValue({
+      (discoverServiceMock.locator.getLocation as Mock).mockResolvedValue({
         app: 'discover',
         path: '/mock-url',
         state: {},
@@ -529,12 +535,12 @@ describe('saved search embeddable', () => {
         searchMock: search,
         partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL, savedObjectId: 'id' },
       });
-      const navigateToEditor = jest.fn();
+      const navigateToEditor = vi.fn();
 
-      discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockImplementation(() => ({
+      discoverServiceMock.embeddable.getStateTransfer = vi.fn().mockImplementation(() => ({
         navigateToEditor,
       }));
-      (discoverServiceMock.locator.getLocation as jest.Mock).mockResolvedValue({
+      (discoverServiceMock.locator.getLocation as Mock).mockResolvedValue({
         app: 'discover',
         path: '/mock-url',
         state: {},
@@ -581,42 +587,50 @@ describe('saved search embeddable', () => {
 
     describe('anyStateChange$', () => {
       let embeddableApi: SearchEmbeddableApi;
-      beforeEach((done) => {
-        const { search } = createSearchFnMock(1);
-        runtimeState = getInitialRuntimeState({
-          searchMock: search,
-          partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
-        });
-        factory
-          .buildEmbeddable({
-            initializeDrilldownsManager,
-            initialState: { ref_id: 'id', overrides: {} },
-            finalizeApi: finalizeApiMock,
-            uuid,
-            parentApi: mockedDashboardApi,
-          })
-          .then(({ api }) => {
-            embeddableApi = api;
-            done();
-          })
-          .catch(done);
-      });
+      beforeEach(() =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      test('should not emit on subscribe and emit when any state changes', (done) => {
-        embeddableApi.anyStateChange$.subscribe(() => {
-          try {
-            const title = embeddableApi.title$.value;
-            expect(title).toBe('cute puppies');
-          } catch (error) {
-            // title assertion fails when
-            // anyStateChange$ emits on subscribe
-            done(error);
-            return;
-          }
-          done();
-        });
-        embeddableApi.setTitle('cute puppies');
-      });
+              const { search } = createSearchFnMock(1);
+              runtimeState = getInitialRuntimeState({
+                searchMock: search,
+                partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
+              });
+              factory
+                .buildEmbeddable({
+                  initializeDrilldownsManager,
+                  initialState: { ref_id: 'id', overrides: {} },
+                  finalizeApi: finalizeApiMock,
+                  uuid,
+                  parentApi: mockedDashboardApi,
+                })
+                .then(({ api }) => {
+                  embeddableApi = api;
+                  done();
+                })
+                .catch(done);
+            
+      }));
+
+      test('should not emit on subscribe and emit when any state changes', () =>
+          new Promise<void>((resolve, reject) => {
+          const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+                  embeddableApi.anyStateChange$.subscribe(() => {
+                    try {
+                      const title = embeddableApi.title$.value;
+                      expect(title).toBe('cute puppies');
+                    } catch (error) {
+                      // title assertion fails when
+                      // anyStateChange$ emits on subscribe
+                      done(error);
+                      return;
+                    }
+                    done();
+                  });
+                  embeddableApi.setTitle('cute puppies');
+                
+          }));
     });
   });
 
@@ -723,17 +737,17 @@ describe('saved search embeddable', () => {
 
   describe('context awareness', () => {
     beforeAll(() => {
-      jest
+      vi
         .spyOn(discoverServiceMock.core.chrome, 'getActiveSolutionNavId$')
         .mockReturnValue(new BehaviorSubject(SolutionType.Search));
     });
 
     afterAll(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('should resolve root profile on init', async () => {
-      const resolveRootProfileSpy = jest.spyOn(
+      const resolveRootProfileSpy = vi.spyOn(
         discoverServiceMock.profilesManager,
         'resolveRootProfile'
       );
@@ -753,7 +767,7 @@ describe('saved search embeddable', () => {
     });
 
     it('should allow overriding the solutionNavId used to resolve the root profile', async () => {
-      const resolveRootProfileSpy = jest.spyOn(
+      const resolveRootProfileSpy = vi.spyOn(
         discoverServiceMock.profilesManager,
         'resolveRootProfile'
       );
@@ -783,11 +797,11 @@ describe('saved search embeddable', () => {
           toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
-      const resolveDataSourceProfileSpy = jest.spyOn(
+      const resolveDataSourceProfileSpy = vi.spyOn(
         scopedProfilesManager,
         'resolveDataSourceProfile'
       );
-      jest
+      vi
         .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
         .mockReturnValueOnce(scopedProfilesManager);
       runtimeState = getInitialRuntimeState();
@@ -859,7 +873,7 @@ describe('saved search embeddable', () => {
         discoverServiceMock.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
       }
 
-      jest
+      vi
         .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
         .mockImplementationOnce((args) => {
           capturedToolkit = args.toolkit;
@@ -902,7 +916,7 @@ describe('saved search embeddable', () => {
 
       discoverServiceMock.profileStateRegistry = createProfileStateRegistry();
 
-      jest
+      vi
         .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
         .mockImplementationOnce((args) => {
           capturedToolkit = args.toolkit;
@@ -953,7 +967,7 @@ describe('saved search embeddable', () => {
           discoverServiceMock.profilesManager
         );
 
-      jest
+      vi
         .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
         .mockImplementationOnce((args) => {
           capturedToolkit = args.toolkit;

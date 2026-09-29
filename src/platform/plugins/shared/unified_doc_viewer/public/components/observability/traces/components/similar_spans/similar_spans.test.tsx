@@ -7,59 +7,77 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { SimilarSpans, type SimilarSpansProps } from '.';
 
-jest.mock('../../../../content_framework/lazy_content_framework_section', () => ({
-  ContentFrameworkSection: ({ children, title, ...rest }: any) => (
-    <div data-test-subj="ContentFrameworkSection" {...rest}>
-      <h2>{title}</h2>
-      {children}
-    </div>
-  ),
-}));
-jest.mock('../../../../content_framework/chart', () => ({
-  ContentFrameworkChart: ({ children, title, ...rest }: any) => (
-    <div data-test-subj="ContentFrameworkChart" {...rest}>
-      <span>{title}</span>
-      {children}
-    </div>
-  ),
-}));
+vi.mock('../../../../content_framework/lazy_content_framework_section', () => {
+      const mocked = {
+      ContentFrameworkSection: ({ children, title, ...rest }: any) => (
+        <div data-test-subj="ContentFrameworkSection" {...rest}>
+          <h2>{title}</h2>
+          {children}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../content_framework/chart', () => {
+      const mocked = {
+      ContentFrameworkChart: ({ children, title, ...rest }: any) => (
+        <div data-test-subj="ContentFrameworkChart" {...rest}>
+          <span>{title}</span>
+          {children}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_data_sources', () => ({
-  useDataSourcesContext: () => ({
-    indexes: { apm: { traces: 'test-index' } },
-  }),
-}));
+vi.mock('../../../../../hooks/use_data_sources', () => {
+      const mocked = {
+      useDataSourcesContext: () => ({
+        indexes: { apm: { traces: 'test-index' } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../plugin', () => ({
-  getUnifiedDocViewerServices: () => ({
-    data: {
-      query: {
-        timefilter: {
-          timefilter: {
-            getAbsoluteTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })),
+vi.mock('../../../../../plugin', () => {
+      const mocked = {
+      getUnifiedDocViewerServices: () => ({
+        data: {
+          query: {
+            timefilter: {
+              timefilter: {
+                getAbsoluteTime: vi.fn(() => ({ from: 'now-15m', to: 'now' })),
+              },
+            },
           },
         },
-      },
-    },
-    share: {
-      url: {
-        locators: {
-          get: jest.fn(() => ({
-            getRedirectUrl: jest.fn(() => 'http://discover-url'),
-          })),
+        share: {
+          url: {
+            locators: {
+              get: vi.fn(() => ({
+                getRedirectUrl: vi.fn(() => 'http://discover-url'),
+              })),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_latency_chart', () => ({
-  useLatencyChart: jest.fn(),
-}));
+vi.mock('../../hooks/use_latency_chart', () => {
+      const mocked = {
+      useLatencyChart: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useLatencyChart } from '../../hooks/use_latency_chart';
 
@@ -86,11 +104,11 @@ describe('SimilarSpans', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the section and chart titles', () => {
-    (useLatencyChart as jest.Mock).mockReturnValue({
+    (useLatencyChart as Mock).mockReturnValue({
       data: {
         distributionChartData: mockChartData,
         percentileThresholdValue: 1000,
@@ -107,7 +125,7 @@ describe('SimilarSpans', () => {
   });
 
   it('renders DurationDistributionChart', () => {
-    (useLatencyChart as jest.Mock).mockReturnValue({
+    (useLatencyChart as Mock).mockReturnValue({
       data: {
         distributionChartData: mockChartData,
         percentileThresholdValue: 1000,
@@ -122,7 +140,7 @@ describe('SimilarSpans', () => {
   });
 
   it('renders DurationDistributionChart in loading state', () => {
-    (useLatencyChart as jest.Mock).mockReturnValue({
+    (useLatencyChart as Mock).mockReturnValue({
       data: null,
       loading: true,
       hasError: false,
@@ -135,7 +153,7 @@ describe('SimilarSpans', () => {
   });
 
   it('renders DurationDistributionChart with error', () => {
-    (useLatencyChart as jest.Mock).mockReturnValue({
+    (useLatencyChart as Mock).mockReturnValue({
       data: {
         distributionChartData: [],
         percentileThresholdValue: undefined,

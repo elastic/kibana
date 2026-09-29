@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { ConnectorSelector } from './form';
@@ -15,12 +18,12 @@ import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FormTestComponent } from '../../common/test_utils';
 import { connectorsMock } from '../../containers/mock';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 describe('ConnectorSelector', () => {
-  const handleChange = jest.fn();
+  const handleChange = vi.fn();
   const defaultProps = {
     connectors: [],
     handleChange,
@@ -31,11 +34,11 @@ describe('ConnectorSelector', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   beforeEach(() => {
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = vi.fn().mockReturnValue({
       actionTypeTitle: 'test',
       iconClass: 'logoSecurity',
     });

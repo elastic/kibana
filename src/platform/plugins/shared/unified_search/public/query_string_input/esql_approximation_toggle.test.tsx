@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -46,10 +48,10 @@ const renderToggle = (props: React.ComponentProps<typeof EsqlApproximationToggle
   );
 
 describe('EsqlApproximationToggle', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the bolt button with OFF aria-label when isApproximate is false', () => {

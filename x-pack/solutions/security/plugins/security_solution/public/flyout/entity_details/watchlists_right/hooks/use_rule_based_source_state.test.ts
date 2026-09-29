@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useRuleBasedSourceState } from './use_rule_based_source_state';
 import type { UseRuleBasedSourceStateParams } from './use_rule_based_source_state';
@@ -12,9 +15,9 @@ import type { EntitySourceInput } from './rule_based_source_helpers';
 import { EMPTY_QUERY } from './rule_based_source_helpers';
 import { useValidateIndexPatternTimestamp } from './use_validate_index_pattern_timestamp';
 
-jest.mock('./use_validate_index_pattern_timestamp');
+vi.mock('./use_validate_index_pattern_timestamp');
 const mockUseValidateIndexPatternTimestamp =
-  useValidateIndexPatternTimestamp as jest.MockedFunction<typeof useValidateIndexPatternTimestamp>;
+  useValidateIndexPatternTimestamp as MockedFunction<typeof useValidateIndexPatternTimestamp>;
 
 const mockTimestampResult = (hasTimestamp: boolean | undefined, isLoading = false) =>
   mockUseValidateIndexPatternTimestamp.mockReturnValue({ hasTimestamp, isLoading });
@@ -24,7 +27,7 @@ const baseParams: UseRuleBasedSourceStateParams = {
   isEditMode: false,
   isManaged: false,
   initialEntitySources: undefined,
-  onFieldChange: jest.fn(),
+  onFieldChange: vi.fn(),
 };
 
 const storeSrc: EntitySourceInput = {
@@ -43,7 +46,7 @@ const indexSrc: EntitySourceInput = {
 
 describe('useRuleBasedSourceState', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Default: timestamp present, not loading
     mockTimestampResult(true);
   });
@@ -97,7 +100,7 @@ describe('useRuleBasedSourceState', () => {
     });
 
     it('emits sources for non-managed watchlists on toggle', () => {
-      const onFieldChange = jest.fn();
+      const onFieldChange = vi.fn();
       const { result } = renderHook(() =>
         useRuleBasedSourceState({ ...baseParams, onFieldChange })
       );
@@ -110,7 +113,7 @@ describe('useRuleBasedSourceState', () => {
     });
 
     it('emits entity sources for managed watchlists on toggle', () => {
-      const onFieldChange = jest.fn();
+      const onFieldChange = vi.fn();
       const { result } = renderHook(() =>
         useRuleBasedSourceState({ ...baseParams, isManaged: true, onFieldChange })
       );
@@ -126,7 +129,7 @@ describe('useRuleBasedSourceState', () => {
 
   describe('onQueryChange', () => {
     it('updates the filter query and emits', () => {
-      const onFieldChange = jest.fn();
+      const onFieldChange = vi.fn();
       const { result } = renderHook(() =>
         useRuleBasedSourceState({ ...baseParams, onFieldChange })
       );
@@ -153,7 +156,7 @@ describe('useRuleBasedSourceState', () => {
 
   describe('onIndexPatternsChange', () => {
     it('updates index patterns and marks the index type dirty', () => {
-      const onFieldChange = jest.fn();
+      const onFieldChange = vi.fn();
       const { result } = renderHook(() =>
         useRuleBasedSourceState({
           ...baseParams,
@@ -185,7 +188,7 @@ describe('useRuleBasedSourceState', () => {
 
   describe('onRangeChange', () => {
     it('updates the range and emits for index source', () => {
-      const onFieldChange = jest.fn();
+      const onFieldChange = vi.fn();
       const { result } = renderHook(() =>
         useRuleBasedSourceState({ ...baseParams, onFieldChange })
       );
@@ -212,7 +215,7 @@ describe('useRuleBasedSourceState', () => {
 
   describe('onEntityFieldChange', () => {
     it('updates entity field for index type', () => {
-      const onFieldChange = jest.fn();
+      const onFieldChange = vi.fn();
       const { result } = renderHook(() =>
         useRuleBasedSourceState({
           ...baseParams,
@@ -235,7 +238,7 @@ describe('useRuleBasedSourceState', () => {
 
   describe('managed watchlist dirty tracking', () => {
     it('only emits store source when only store data is modified', () => {
-      const onFieldChange = jest.fn();
+      const onFieldChange = vi.fn();
       const { result } = renderHook(() =>
         useRuleBasedSourceState({
           ...baseParams,
@@ -260,7 +263,7 @@ describe('useRuleBasedSourceState', () => {
     });
 
     it('emits both when both types are modified', () => {
-      const onFieldChange = jest.fn();
+      const onFieldChange = vi.fn();
       const { result } = renderHook(() =>
         useRuleBasedSourceState({
           ...baseParams,
@@ -291,7 +294,7 @@ describe('useRuleBasedSourceState', () => {
     });
 
     it('returns undefined entitySources when nothing is dirty for managed', () => {
-      const onFieldChange = jest.fn();
+      const onFieldChange = vi.fn();
       renderHook(() =>
         useRuleBasedSourceState({
           ...baseParams,

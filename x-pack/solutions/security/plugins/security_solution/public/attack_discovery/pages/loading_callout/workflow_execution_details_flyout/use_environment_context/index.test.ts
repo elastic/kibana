@@ -5,29 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 
 import { KibanaServices } from '../../../../../common/lib/kibana';
 import { getEnvironmentContext } from '../helpers/get_environment_context';
 import { useEnvironmentContext } from '.';
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  KibanaServices: {
-    getKibanaVersion: jest.fn().mockReturnValue('8.0.0'),
-  },
-}));
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      KibanaServices: {
+        getKibanaVersion: vi.fn().mockReturnValue('8.0.0'),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../helpers/get_environment_context');
+vi.mock('../helpers/get_environment_context');
 
-const mockGetEnvironmentContext = getEnvironmentContext as jest.Mock;
+const mockGetEnvironmentContext = getEnvironmentContext as Mock;
 
 const mockSpaces = {
-  getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+  getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
 };
 
 describe('useEnvironmentContext', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockGetEnvironmentContext.mockResolvedValue({
       kibanaVersion: '8.0.0',

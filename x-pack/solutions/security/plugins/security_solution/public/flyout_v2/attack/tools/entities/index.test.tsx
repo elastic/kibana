@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,94 +22,100 @@ import {
   ATTACK_ENTITIES_TOOL_TEST_ID,
 } from './test_ids';
 
-jest.mock('./hooks/use_attack_entities_lists');
-jest.mock('../../../entity/use_entity_flyout_api');
-jest.mock('../../../shared/components/document_tools_flyout_header', () => ({
-  DocumentToolsFlyoutHeader: () => <div data-test-subj="mock-document-tools-flyout-header" />,
-}));
-jest.mock('../../../../flyout/attack_details/left/components/attack_entity_insight_rows', () => ({
-  AttackUserInsightsRow: ({
-    identityFields,
-    buildEntityOverrides,
-  }: {
-    identityFields: Record<string, string | undefined>;
-    buildEntityOverrides?: (opts: { name: string; entityId?: string }) => {
-      onPreviewEntity?: () => void;
-      onShowDetailsPanel?: (subTab: string) => void;
+vi.mock('./hooks/use_attack_entities_lists');
+vi.mock('../../../entity/use_entity_flyout_api');
+vi.mock('../../../shared/components/document_tools_flyout_header', () => {
+      const mocked = {
+      DocumentToolsFlyoutHeader: () => <div data-test-subj="mock-document-tools-flyout-header" />,
     };
-  }) => {
-    const name = identityFields['user.name'] ?? 'unknown-user';
-    const overrides = buildEntityOverrides?.({ name });
-    return (
-      <div data-test-subj="mock-user-insights-row">
-        <span>{name}</span>
-        {overrides?.onPreviewEntity && (
-          <button
-            type="button"
-            data-test-subj="mock-user-preview-button"
-            onClick={overrides.onPreviewEntity}
-          >
-            {'preview'}
-          </button>
-        )}
-        {overrides?.onShowDetailsPanel && (
-          <button
-            type="button"
-            data-test-subj="mock-user-alerts-button"
-            onClick={() => overrides.onShowDetailsPanel?.('alertsTabId')}
-          >
-            {'alerts'}
-          </button>
-        )}
-      </div>
-    );
-  },
-  AttackHostInsightsRow: ({
-    identityFields,
-    buildEntityOverrides,
-  }: {
-    identityFields: Record<string, string | undefined>;
-    buildEntityOverrides?: (opts: { name: string; entityId?: string }) => {
-      onPreviewEntity?: () => void;
-      onShowDetailsPanel?: (subTab: string) => void;
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../flyout/attack_details/left/components/attack_entity_insight_rows', () => {
+      const mocked = {
+      AttackUserInsightsRow: ({
+        identityFields,
+        buildEntityOverrides,
+      }: {
+        identityFields: Record<string, string | undefined>;
+        buildEntityOverrides?: (opts: { name: string; entityId?: string }) => {
+          onPreviewEntity?: () => void;
+          onShowDetailsPanel?: (subTab: string) => void;
+        };
+      }) => {
+        const name = identityFields['user.name'] ?? 'unknown-user';
+        const overrides = buildEntityOverrides?.({ name });
+        return (
+          <div data-test-subj="mock-user-insights-row">
+            <span>{name}</span>
+            {overrides?.onPreviewEntity && (
+              <button
+                type="button"
+                data-test-subj="mock-user-preview-button"
+                onClick={overrides.onPreviewEntity}
+              >
+                {'preview'}
+              </button>
+            )}
+            {overrides?.onShowDetailsPanel && (
+              <button
+                type="button"
+                data-test-subj="mock-user-alerts-button"
+                onClick={() => overrides.onShowDetailsPanel?.('alertsTabId')}
+              >
+                {'alerts'}
+              </button>
+            )}
+          </div>
+        );
+      },
+      AttackHostInsightsRow: ({
+        identityFields,
+        buildEntityOverrides,
+      }: {
+        identityFields: Record<string, string | undefined>;
+        buildEntityOverrides?: (opts: { name: string; entityId?: string }) => {
+          onPreviewEntity?: () => void;
+          onShowDetailsPanel?: (subTab: string) => void;
+        };
+      }) => {
+        const name = identityFields['host.name'] ?? 'unknown-host';
+        const overrides = buildEntityOverrides?.({ name });
+        return (
+          <div data-test-subj="mock-host-insights-row">
+            <span>{name}</span>
+            {overrides?.onPreviewEntity && (
+              <button
+                type="button"
+                data-test-subj="mock-host-preview-button"
+                onClick={overrides.onPreviewEntity}
+              >
+                {'preview'}
+              </button>
+            )}
+            {overrides?.onShowDetailsPanel && (
+              <button
+                type="button"
+                data-test-subj="mock-host-alerts-button"
+                onClick={() => overrides.onShowDetailsPanel?.('alertsTabId')}
+              >
+                {'alerts'}
+              </button>
+            )}
+          </div>
+        );
+      },
     };
-  }) => {
-    const name = identityFields['host.name'] ?? 'unknown-host';
-    const overrides = buildEntityOverrides?.({ name });
-    return (
-      <div data-test-subj="mock-host-insights-row">
-        <span>{name}</span>
-        {overrides?.onPreviewEntity && (
-          <button
-            type="button"
-            data-test-subj="mock-host-preview-button"
-            onClick={overrides.onPreviewEntity}
-          >
-            {'preview'}
-          </button>
-        )}
-        {overrides?.onShowDetailsPanel && (
-          <button
-            type="button"
-            data-test-subj="mock-host-alerts-button"
-            onClick={() => overrides.onShowDetailsPanel?.('alertsTabId')}
-          >
-            {'alerts'}
-          </button>
-        )}
-      </div>
-    );
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAttackEntitiesLists = useAttackEntitiesLists as jest.Mock;
-const mockUseEntityFlyoutApi = useEntityFlyoutApi as jest.Mock;
+const mockUseAttackEntitiesLists = useAttackEntitiesLists as Mock;
+const mockUseEntityFlyoutApi = useEntityFlyoutApi as Mock;
 
-const mockOpenUserFlyoutAsChild = jest.fn();
-const mockOpenHostFlyoutAsChild = jest.fn();
-const mockOpenEntityAlertsInsights = jest.fn();
-const mockOpenEntityMisconfigurationInsights = jest.fn();
-const mockOpenEntityVulnerabilityInsights = jest.fn();
+const mockOpenUserFlyoutAsChild = vi.fn();
+const mockOpenHostFlyoutAsChild = vi.fn();
+const mockOpenEntityAlertsInsights = vi.fn();
+const mockOpenEntityMisconfigurationInsights = vi.fn();
+const mockOpenEntityVulnerabilityInsights = vi.fn();
 
 const mockHit: DataTableRecord = {
   id: 'attack-1',
@@ -135,7 +144,7 @@ const renderTool = ({ alertIds = ['alert-id-1', 'alert-id-2'] }: { alertIds?: st
 
 describe('EntitiesDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAttackEntitiesLists.mockReturnValue(defaultEntitiesResult);
     mockUseEntityFlyoutApi.mockReturnValue({
       openUserFlyoutAsChild: mockOpenUserFlyoutAsChild,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -25,21 +28,21 @@ import { ModelProvider } from '@kbn/inference-common';
 import { AnalyticsService } from './analytics_service';
 
 describe('AnalyticsService', () => {
-  let analytics: jest.Mocked<Pick<AnalyticsServiceSetup, 'registerEventType' | 'reportEvent'>>;
+  let analytics: Mocked<Pick<AnalyticsServiceSetup, 'registerEventType' | 'reportEvent'>>;
   let logger: MockedLogger;
   let service: AnalyticsService;
 
   beforeEach(() => {
     analytics = {
-      registerEventType: jest.fn(),
-      reportEvent: jest.fn(),
+      registerEventType: vi.fn(),
+      reportEvent: vi.fn(),
     };
     logger = loggerMock.create();
     service = new AnalyticsService(analytics as unknown as AnalyticsServiceSetup, logger);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('registerAgentBuilderEventTypes', () => {

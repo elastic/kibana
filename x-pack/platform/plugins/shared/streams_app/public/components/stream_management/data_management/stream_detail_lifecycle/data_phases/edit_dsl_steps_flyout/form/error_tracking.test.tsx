@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import {
@@ -225,7 +227,7 @@ describe('useDslStepsFlyoutTabErrors', () => {
 
 describe('OnStepFieldErrorsChangeProvider / useOnStepFieldErrorsChange', () => {
   it('provides the callback via context', () => {
-    const callback = jest.fn();
+    const callback = vi.fn();
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <OnStepFieldErrorsChangeProvider value={callback}>{children}</OnStepFieldErrorsChangeProvider>

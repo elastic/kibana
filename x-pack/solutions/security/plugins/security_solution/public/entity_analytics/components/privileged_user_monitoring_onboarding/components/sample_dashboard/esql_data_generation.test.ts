@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getOrElse } from 'fp-ts/Either';
 import {
   generateESQLSource,
@@ -15,13 +17,13 @@ import {
   getToTime,
 } from './esql_data_generation';
 
-jest.mock('moment', () => {
-  return () => jest.requireActual('moment')('2025-03-07T12:00:00Z');
+vi.mock('moment', () => {
+  return () => require('moment')('2025-03-07T12:00:00Z');
 });
 
 const getValue = getOrElse(() => 'error');
 
-jest.spyOn(global.Math, 'random').mockReturnValue(0.123456789);
+vi.spyOn(global.Math, 'random').mockReturnValue(0.123456789);
 
 describe('esql_data_generation', () => {
   describe('getToTime', () => {

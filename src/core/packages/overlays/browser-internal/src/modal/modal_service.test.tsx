@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
 
 import React from 'react';
@@ -97,7 +99,7 @@ describe('ModalService', () => {
       });
 
       it('resolves onClose on the previous ref', async () => {
-        const onCloseComplete = jest.fn();
+        const onCloseComplete = vi.fn();
         ref1.onClose.then(onCloseComplete);
         modals.open(mountReactNode(<span>Flyout content 2</span>));
         await ref1.onClose;
@@ -183,7 +185,7 @@ describe('ModalService', () => {
       });
 
       it('resolves onClose on the previous ref', async () => {
-        const onCloseComplete = jest.fn();
+        const onCloseComplete = vi.fn();
         ref1.onClose.then(onCloseComplete);
         modals.openConfirm(SOME_CONFIRM);
         await ref1.onClose;
@@ -224,7 +226,7 @@ describe('ModalService', () => {
     it('resolves the onClose Promise', async () => {
       const ref = modals.open(mountReactNode(<span>Flyout content</span>));
 
-      const onCloseComplete = jest.fn();
+      const onCloseComplete = vi.fn();
       ref.onClose.then(onCloseComplete);
       await ref.close();
       await ref.close();
@@ -249,7 +251,7 @@ describe('ModalService', () => {
     it("on a stale ModalRef doesn't affect the active flyout", async () => {
       const ref1 = modals.open(mountReactNode(<span>`${MODAL_CONTENT}`</span>));
       const ref2 = modals.open(mountReactNode(<span>`${MODAL_CONTENT_TWO}`</span>));
-      const onCloseComplete = jest.fn();
+      const onCloseComplete = vi.fn();
       ref2.onClose.then(onCloseComplete);
       mockReactDomUnmount.mockClear();
       await ref1.close();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { generateOpenApiDocument } from '@kbn/router-to-openapispec';
 import type { OpenAPIV3 } from 'openapi-types';
 import { QuerySchema } from '../common';
@@ -33,7 +35,7 @@ const deref = (
 const buildRouters = (routes: Array<Record<string, unknown>>) => {
   const withDefaults = routes.map((route) => ({
     isVersioned: false,
-    handler: jest.fn(),
+    handler: vi.fn(),
     ...route,
   }));
   return [{ getRoutes: () => withDefaults }] as unknown as Parameters<

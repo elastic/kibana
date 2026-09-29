@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { IRouter } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -16,20 +19,29 @@ import { assertWorkflowsEnabled } from '../../lib/assert_workflows_enabled';
 import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../constants';
 import { registerGenerateRoute } from './post_generate';
 
-jest.mock('../../lib/assert_workflows_enabled', () => ({
-  assertWorkflowsEnabled: jest.fn().mockResolvedValue(null),
-}));
+vi.mock('../../lib/assert_workflows_enabled', () => {
+      const mocked = {
+      assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAnalytics = coreMock.createSetup().analytics;
 
-jest.mock('@kbn/discoveries/impl/attack_discovery/persistence/event_logging', () => ({
-  ...jest.requireActual('@kbn/discoveries/impl/attack_discovery/persistence/event_logging'),
-  writeAttackDiscoveryEvent: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('@kbn/discoveries/impl/attack_discovery/persistence/event_logging', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/discoveries/impl/attack_discovery/persistence/event_logging')),
+      writeAttackDiscoveryEvent: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'test-execution-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn(() => 'test-execution-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /**
  * Authorized-by-default authz mock: `hasAllRequested` is true so the route's
@@ -56,20 +68,23 @@ const createUnauthorizedAuthzMock = () => ({
   }),
 });
 
-const mockExecuteGenerationWorkflow = jest.fn().mockResolvedValue(undefined);
-const mockResolveApiConfig = jest.fn();
+const mockExecuteGenerationWorkflow = vi.fn().mockResolvedValue(undefined);
+const mockResolveApiConfig = vi.fn();
 
-jest.mock('./helpers', () => ({
-  executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
-  resolveApiConfig: (...args: unknown[]) => mockResolveApiConfig(...args),
-}));
+vi.mock('./helpers', () => {
+      const mocked = {
+      executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
+      resolveApiConfig: (...args: unknown[]) => mockResolveApiConfig(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('registerGenerateRoute', () => {
-  let mockRouter: jest.Mocked<IRouter>;
+  let mockRouter: Mocked<IRouter>;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let mockGetEventLogIndex: jest.Mock;
-  let mockGetEventLogger: jest.Mock;
-  let mockGetStartServices: jest.Mock;
+  let mockGetEventLogIndex: Mock;
+  let mockGetEventLogger: Mock;
+  let mockGetStartServices: Mock;
   let mockCoreStart: any;
   let mockPluginsStart: any;
   let mockRequest: any;
@@ -83,7 +98,7 @@ describe('registerGenerateRoute', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockResolveApiConfig.mockImplementation(
       ({ apiConfig }: { apiConfig: Record<string, unknown> }) =>
@@ -92,15 +107,15 @@ describe('registerGenerateRoute', () => {
 
     mockRouter = {
       versioned: {
-        post: jest.fn().mockReturnThis(),
-        addVersion: jest.fn(),
+        post: vi.fn().mockReturnThis(),
+        addVersion: vi.fn(),
       },
-    } as unknown as jest.Mocked<IRouter>;
+    } as unknown as Mocked<IRouter>;
 
     mockLogger = loggingSystemMock.createLogger();
 
-    mockGetEventLogIndex = jest.fn().mockResolvedValue('.kibana-event-log');
-    mockGetEventLogger = jest.fn().mockResolvedValue({} as unknown as IEventLogger);
+    mockGetEventLogIndex = vi.fn().mockResolvedValue('.kibana-event-log');
+    mockGetEventLogger = vi.fn().mockResolvedValue({} as unknown as IEventLogger);
 
     mockRequest = {
       body: {},
@@ -109,10 +124,10 @@ describe('registerGenerateRoute', () => {
     mockCoreStart = {
       elasticsearch: {
         client: {
-          asScoped: jest.fn().mockReturnValue({
+          asScoped: vi.fn().mockReturnValue({
             asCurrentUser: {
               security: {
-                authenticate: jest.fn().mockResolvedValue({
+                authenticate: vi.fn().mockResolvedValue({
                   authentication_provider: { name: 'basic', type: 'basic' },
                   email: 'test@example.com',
                   full_name: 'Test User',
@@ -125,14 +140,14 @@ describe('registerGenerateRoute', () => {
         },
       },
       savedObjects: {
-        getScopedClient: jest.fn(),
+        getScopedClient: vi.fn(),
       },
     };
 
     mockPluginsStart = {
       actions: {
-        getActionsClientWithRequest: jest.fn().mockResolvedValue({
-          get: jest.fn().mockResolvedValue({
+        getActionsClientWithRequest: vi.fn().mockResolvedValue({
+          get: vi.fn().mockResolvedValue({
             actionTypeId: '.gen-ai',
             name: 'Test Connector',
           }),
@@ -141,7 +156,7 @@ describe('registerGenerateRoute', () => {
       security: { authz: createAuthorizedAuthzMock() },
     };
 
-    mockGetStartServices = jest.fn().mockResolvedValue({
+    mockGetStartServices = vi.fn().mockResolvedValue({
       coreStart: mockCoreStart,
       pluginsStart: mockPluginsStart,
     });
@@ -219,7 +234,7 @@ describe('registerGenerateRoute', () => {
 
   it('returns 404 when workflows feature flag is disabled', async () => {
     const mockNotFoundResponse = { statusCode: 404 };
-    (assertWorkflowsEnabled as jest.Mock).mockResolvedValueOnce(mockNotFoundResponse);
+    (assertWorkflowsEnabled as Mock).mockResolvedValueOnce(mockNotFoundResponse);
 
     mockRequest.body = {
       alerts_index_pattern: '.alerts-security.alerts-default',
@@ -231,16 +246,16 @@ describe('registerGenerateRoute', () => {
     };
 
     const mockResponse = {
-      badRequest: jest.fn(),
-      customError: jest.fn(),
-      ok: jest.fn(),
+      badRequest: vi.fn(),
+      customError: vi.fn(),
+      ok: vi.fn(),
     };
 
     const mockContext = {};
     let versionHandler: Function | undefined;
 
-    (mockRouter.versioned.post as jest.Mock).mockReturnValue({
-      addVersion: jest.fn((config, handler) => {
+    (mockRouter.versioned.post as Mock).mockReturnValue({
+      addVersion: vi.fn((config, handler) => {
         versionHandler = handler;
       }),
     });
@@ -270,21 +285,21 @@ describe('registerGenerateRoute', () => {
     };
 
     const mockResponse = {
-      ok: jest.fn((obj) => obj),
-      badRequest: jest.fn(),
-      customError: jest.fn(),
+      ok: vi.fn((obj) => obj),
+      badRequest: vi.fn(),
+      customError: vi.fn(),
     };
 
     const mockContext = {
       core: Promise.resolve({
-        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
       }),
     };
 
     let versionHandler: Function | undefined;
 
-    (mockRouter.versioned.post as jest.Mock).mockReturnValue({
-      addVersion: jest.fn((config, handler) => {
+    (mockRouter.versioned.post as Mock).mockReturnValue({
+      addVersion: vi.fn((config, handler) => {
         versionHandler = handler;
       }),
     });
@@ -317,21 +332,21 @@ describe('registerGenerateRoute', () => {
     };
 
     const mockResponse = {
-      ok: jest.fn(),
-      badRequest: jest.fn((obj) => obj),
-      customError: jest.fn(),
+      ok: vi.fn(),
+      badRequest: vi.fn((obj) => obj),
+      customError: vi.fn(),
     };
 
     const mockContext = {
       core: Promise.resolve({
-        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
       }),
     };
 
     let versionHandler: Function | undefined;
 
-    (mockRouter.versioned.post as jest.Mock).mockReturnValue({
-      addVersion: jest.fn((config, handler) => {
+    (mockRouter.versioned.post as Mock).mockReturnValue({
+      addVersion: vi.fn((config, handler) => {
         versionHandler = handler;
       }),
     });
@@ -360,21 +375,21 @@ describe('registerGenerateRoute', () => {
     };
 
     const mockResponse = {
-      ok: jest.fn((obj) => obj),
-      badRequest: jest.fn(),
-      customError: jest.fn(),
+      ok: vi.fn((obj) => obj),
+      badRequest: vi.fn(),
+      customError: vi.fn(),
     };
 
     const mockContext = {
       core: Promise.resolve({
-        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
       }),
     };
 
     let versionHandler: Function | undefined;
 
-    (mockRouter.versioned.post as jest.Mock).mockReturnValue({
-      addVersion: jest.fn((config, handler) => {
+    (mockRouter.versioned.post as Mock).mockReturnValue({
+      addVersion: vi.fn((config, handler) => {
         versionHandler = handler;
       }),
     });
@@ -413,21 +428,21 @@ describe('registerGenerateRoute', () => {
       };
 
       const mockResponse = {
-        badRequest: jest.fn((obj) => obj),
-        customError: jest.fn(),
-        ok: jest.fn(),
+        badRequest: vi.fn((obj) => obj),
+        customError: vi.fn(),
+        ok: vi.fn(),
       };
 
       const mockContext = {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       };
 
       let versionHandler: Function | undefined;
 
-      (mockRouter.versioned.post as jest.Mock).mockReturnValue({
-        addVersion: jest.fn((config, handler) => {
+      (mockRouter.versioned.post as Mock).mockReturnValue({
+        addVersion: vi.fn((config, handler) => {
           versionHandler = handler;
         }),
       });
@@ -465,21 +480,21 @@ describe('registerGenerateRoute', () => {
       };
 
       const mockResponse = {
-        badRequest: jest.fn(),
-        customError: jest.fn(),
-        ok: jest.fn((obj) => obj),
+        badRequest: vi.fn(),
+        customError: vi.fn(),
+        ok: vi.fn((obj) => obj),
       };
 
       const mockContext = {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       };
 
       let versionHandler: Function | undefined;
 
-      (mockRouter.versioned.post as jest.Mock).mockReturnValue({
-        addVersion: jest.fn((config, handler) => {
+      (mockRouter.versioned.post as Mock).mockReturnValue({
+        addVersion: vi.fn((config, handler) => {
           versionHandler = handler;
         }),
       });
@@ -519,21 +534,21 @@ describe('registerGenerateRoute', () => {
       };
 
       const mockResponse = {
-        badRequest: jest.fn(),
-        customError: jest.fn(),
-        ok: jest.fn((obj) => obj),
+        badRequest: vi.fn(),
+        customError: vi.fn(),
+        ok: vi.fn((obj) => obj),
       };
 
       const mockContext = {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       };
 
       let versionHandler: Function | undefined;
 
-      (mockRouter.versioned.post as jest.Mock).mockReturnValue({
-        addVersion: jest.fn((config, handler) => {
+      (mockRouter.versioned.post as Mock).mockReturnValue({
+        addVersion: vi.fn((config, handler) => {
           versionHandler = handler;
         }),
       });
@@ -571,21 +586,21 @@ describe('registerGenerateRoute', () => {
       };
 
       const mockResponse = {
-        badRequest: jest.fn(),
-        customError: jest.fn(),
-        ok: jest.fn((obj) => obj),
+        badRequest: vi.fn(),
+        customError: vi.fn(),
+        ok: vi.fn((obj) => obj),
       };
 
       const mockContext = {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       };
 
       let versionHandler: Function | undefined;
 
-      (mockRouter.versioned.post as jest.Mock).mockReturnValue({
-        addVersion: jest.fn((config, handler) => {
+      (mockRouter.versioned.post as Mock).mockReturnValue({
+        addVersion: vi.fn((config, handler) => {
           versionHandler = handler;
         }),
       });
@@ -601,7 +616,7 @@ describe('registerGenerateRoute', () => {
       await handler(mockContext, mockRequest, mockResponse);
 
       expect(mockLogger.debug).toHaveBeenCalledWith(expect.any(Function));
-      const debugCall = (mockLogger.debug as jest.Mock).mock.calls.find((call) => {
+      const debugCall = (mockLogger.debug as Mock).mock.calls.find((call) => {
         const arg = call[0];
         return typeof arg === 'function' && arg().includes('Workflow configuration');
       });
@@ -619,21 +634,21 @@ describe('registerGenerateRoute', () => {
       };
 
       const mockResponse = {
-        badRequest: jest.fn(),
-        customError: jest.fn(),
-        ok: jest.fn((obj) => obj),
+        badRequest: vi.fn(),
+        customError: vi.fn(),
+        ok: vi.fn((obj) => obj),
       };
 
       const mockContext = {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       };
 
       let versionHandler: Function | undefined;
 
-      (mockRouter.versioned.post as jest.Mock).mockReturnValue({
-        addVersion: jest.fn((config, handler) => {
+      (mockRouter.versioned.post as Mock).mockReturnValue({
+        addVersion: vi.fn((config, handler) => {
           versionHandler = handler;
         }),
       });
@@ -660,8 +675,8 @@ describe('registerGenerateRoute', () => {
     const setVersionHandler = () => {
       let versionHandler: Function | undefined;
 
-      (mockRouter.versioned.post as jest.Mock).mockReturnValue({
-        addVersion: jest.fn((config, handler) => {
+      (mockRouter.versioned.post as Mock).mockReturnValue({
+        addVersion: vi.fn((config, handler) => {
           versionHandler = handler;
         }),
       });
@@ -679,14 +694,14 @@ describe('registerGenerateRoute', () => {
       };
 
       const mockResponse = {
-        badRequest: jest.fn(),
-        customError: jest.fn(),
-        ok: jest.fn((obj) => obj),
+        badRequest: vi.fn(),
+        customError: vi.fn(),
+        ok: vi.fn((obj) => obj),
       };
 
       const mockContext = {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       };
       const getHandler = setVersionHandler();
@@ -727,14 +742,14 @@ describe('registerGenerateRoute', () => {
       };
 
       const mockResponse = {
-        badRequest: jest.fn(),
-        customError: jest.fn(),
-        ok: jest.fn((obj) => obj),
+        badRequest: vi.fn(),
+        customError: vi.fn(),
+        ok: vi.fn((obj) => obj),
       };
 
       const mockContext = {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       };
       const getHandler = setVersionHandler();
@@ -769,14 +784,14 @@ describe('registerGenerateRoute', () => {
       };
 
       const mockResponse = {
-        badRequest: jest.fn(),
-        customError: jest.fn((obj) => obj),
-        ok: jest.fn(),
+        badRequest: vi.fn(),
+        customError: vi.fn((obj) => obj),
+        ok: vi.fn(),
       };
 
       const mockContext = {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       };
       const getHandler = setVersionHandler();
@@ -804,8 +819,8 @@ describe('registerGenerateRoute', () => {
     const setVersionHandler = () => {
       let versionHandler: Function | undefined;
 
-      (mockRouter.versioned.post as jest.Mock).mockReturnValue({
-        addVersion: jest.fn((config, handler) => {
+      (mockRouter.versioned.post as Mock).mockReturnValue({
+        addVersion: vi.fn((config, handler) => {
           versionHandler = handler;
         }),
       });
@@ -824,14 +839,14 @@ describe('registerGenerateRoute', () => {
       };
 
       const mockResponse = {
-        badRequest: jest.fn((obj) => obj),
-        customError: jest.fn(),
-        ok: jest.fn(),
+        badRequest: vi.fn((obj) => obj),
+        customError: vi.fn(),
+        ok: vi.fn(),
       };
 
       const mockContext = {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       };
       const getHandler = setVersionHandler();
@@ -863,14 +878,14 @@ describe('registerGenerateRoute', () => {
       };
 
       const mockResponse = {
-        badRequest: jest.fn(),
-        customError: jest.fn(),
-        ok: jest.fn((obj) => obj),
+        badRequest: vi.fn(),
+        customError: vi.fn(),
+        ok: vi.fn((obj) => obj),
       };
 
       const mockContext = {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       };
       const getHandler = setVersionHandler();
@@ -912,14 +927,14 @@ describe('registerGenerateRoute', () => {
       };
 
       const mockResponse = {
-        badRequest: jest.fn(),
-        customError: jest.fn(),
-        ok: jest.fn((obj) => obj),
+        badRequest: vi.fn(),
+        customError: vi.fn(),
+        ok: vi.fn((obj) => obj),
       };
 
       const mockContext = {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       };
       const getHandler = setVersionHandler();
@@ -953,15 +968,15 @@ describe('registerGenerateRoute', () => {
 
     const mockContext = {
       core: Promise.resolve({
-        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
       }),
     };
 
     const setVersionHandler = () => {
       let versionHandler: Function | undefined;
 
-      (mockRouter.versioned.post as jest.Mock).mockReturnValue({
-        addVersion: jest.fn((config, handler) => {
+      (mockRouter.versioned.post as Mock).mockReturnValue({
+        addVersion: vi.fn((config, handler) => {
           versionHandler = handler;
         }),
       });
@@ -974,10 +989,10 @@ describe('registerGenerateRoute', () => {
       mockRequest.body = validBody;
 
       const mockResponse = {
-        badRequest: jest.fn(),
-        customError: jest.fn(),
-        forbidden: jest.fn((obj) => obj),
-        ok: jest.fn(),
+        badRequest: vi.fn(),
+        customError: vi.fn(),
+        forbidden: vi.fn((obj) => obj),
+        ok: vi.fn(),
       };
       const getHandler = setVersionHandler();
 
@@ -998,10 +1013,10 @@ describe('registerGenerateRoute', () => {
       mockRequest.body = validBody;
 
       const mockResponse = {
-        badRequest: jest.fn(),
-        customError: jest.fn(),
-        forbidden: jest.fn((obj) => obj),
-        ok: jest.fn(),
+        badRequest: vi.fn(),
+        customError: vi.fn(),
+        forbidden: vi.fn((obj) => obj),
+        ok: vi.fn(),
       };
       const getHandler = setVersionHandler();
 
@@ -1021,10 +1036,10 @@ describe('registerGenerateRoute', () => {
       mockRequest.body = validBody;
 
       const mockResponse = {
-        badRequest: jest.fn(),
-        customError: jest.fn(),
-        forbidden: jest.fn(),
-        ok: jest.fn((obj) => obj),
+        badRequest: vi.fn(),
+        customError: vi.fn(),
+        forbidden: vi.fn(),
+        ok: vi.fn((obj) => obj),
       };
       const getHandler = setVersionHandler();
 

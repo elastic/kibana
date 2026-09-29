@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { conflict, notFound } from '@hapi/boom';
 import type { CortexPage } from '../../common/cortex';
 import { createCortexPageRoute, updateCortexPageRoute } from './write_cortex_page';
@@ -38,10 +40,10 @@ const setup = ({
   overrides = {},
 }: { existing?: CortexPage; enabled?: boolean; overrides?: Record<string, string> } = {}) => {
   const store = {
-    pruneDuplicates: jest.fn().mockResolvedValue(0),
-    get: jest.fn().mockResolvedValue(existing),
-    create: jest.fn().mockResolvedValue(existing ? undefined : page),
-    upsert: jest.fn().mockResolvedValue(page),
+    pruneDuplicates: vi.fn().mockResolvedValue(0),
+    get: vi.fn().mockResolvedValue(existing),
+    create: vi.fn().mockResolvedValue(existing ? undefined : page),
+    upsert: vi.fn().mockResolvedValue(page),
   };
   const context = {
     request: {},

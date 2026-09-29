@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mockSearchResult } from './test_helpers';
 import { getMonitorAlerts, getMonitorDetails } from './get_monitor_details';
 import * as statusCheck from '../alerts/status_check';
@@ -21,18 +24,18 @@ describe('getMonitorDetails', () => {
       monitorId: 'fooID',
       dateStart: 'now-15m',
       dateEnd: 'now',
-      rulesClient: { find: jest.fn().mockReturnValue({ data: [] }) },
+      rulesClient: { find: vi.fn().mockReturnValue({ data: [] }) },
     });
     expect(uptimeEsClient.baseESClient.search).toHaveBeenCalledTimes(1);
 
-    expect((uptimeEsClient.baseESClient.search as jest.Mock).mock.calls[0]).toMatchSnapshot();
+    expect((uptimeEsClient.baseESClient.search as Mock).mock.calls[0]).toMatchSnapshot();
   });
 
   describe('getMonitorAlerts', () => {
     it('should use expected filters for the query', async function () {
       const uptimeEsClient = mockSearchResult([{ _source: { id: 1 } }]);
 
-      jest.spyOn(statusCheck, 'formatFilterString').mockImplementation(async () => ({
+      vi.spyOn(statusCheck, 'formatFilterString').mockImplementation(async () => ({
         bool: {
           filter: [
             {
@@ -52,12 +55,12 @@ describe('getMonitorDetails', () => {
         uptimeEsClient,
         monitorId: 'fooID',
         rulesClient: {
-          find: jest.fn().mockReturnValue({ data: dummyAlertRules.data }),
+          find: vi.fn().mockReturnValue({ data: dummyAlertRules.data }),
         },
       });
       expect(uptimeEsClient.baseESClient.search).toHaveBeenCalledTimes(3);
 
-      const esParams = (uptimeEsClient.baseESClient.search as jest.Mock).mock.calls[0];
+      const esParams = (uptimeEsClient.baseESClient.search as Mock).mock.calls[0];
 
       expect(esParams[0].query).toEqual({
         bool: {

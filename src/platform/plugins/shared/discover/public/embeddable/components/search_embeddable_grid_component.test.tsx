@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { render, waitFor } from '@testing-library/react';
@@ -32,14 +34,17 @@ import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
 import { SearchEmbeddableGridComponent } from './search_embeddable_grid_component';
 
-const mockDiscoverGridEmbeddableProps = jest.fn();
+const mockDiscoverGridEmbeddableProps = vi.fn();
 
-jest.mock('./saved_search_grid', () => ({
-  DiscoverGridEmbeddable: (props: Record<string, unknown>) => {
-    mockDiscoverGridEmbeddableProps(props);
-    return <div data-test-subj="mockedDiscoverGridEmbeddable" />;
-  },
-}));
+vi.mock('./saved_search_grid', () => {
+      const mocked = {
+      DiscoverGridEmbeddable: (props: Record<string, unknown>) => {
+        mockDiscoverGridEmbeddableProps(props);
+        return <div data-test-subj="mockedDiscoverGridEmbeddable" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createStateManager = (): SearchEmbeddableStateManager => ({
   columns: new BehaviorSubject<string[] | undefined>(['message']),
@@ -108,7 +113,7 @@ describe('SearchEmbeddableGridComponent', () => {
   const getLastGridProps = () => mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderComponent = ({
@@ -151,8 +156,8 @@ describe('SearchEmbeddableGridComponent', () => {
           inlineEditing={{
             isActive: false,
             hasPendingChanges: false,
-            onApply: jest.fn(),
-            onCancel: jest.fn(),
+            onApply: vi.fn(),
+            onCancel: vi.fn(),
           }}
           docViewerRef={docViewerRef}
           expandedDoc={expandedDoc}
@@ -340,7 +345,7 @@ describe('SearchEmbeddableGridComponent', () => {
         expect(servicesWithAccess.locator.getRedirectUrl).toHaveBeenCalled();
       });
 
-      const params = jest.mocked(servicesWithAccess.locator.getRedirectUrl).mock.calls[0][0];
+      const params = vi.mocked(servicesWithAccess.locator.getRedirectUrl).mock.calls[0][0];
       expect(params.expandedDoc).toEqual(expandedDocRef);
       expect(params.timeRange).toEqual({
         from: '2024-01-01T00:00:00.000Z',
@@ -372,7 +377,7 @@ describe('SearchEmbeddableGridComponent', () => {
         expect(servicesWithAccess.locator.getRedirectUrl).toHaveBeenCalled();
       });
 
-      const params = jest.mocked(servicesWithAccess.locator.getRedirectUrl).mock.calls[0][0];
+      const params = vi.mocked(servicesWithAccess.locator.getRedirectUrl).mock.calls[0][0];
       expect(params.filters).toEqual([panelFilter, dashboardFilter]);
     });
 

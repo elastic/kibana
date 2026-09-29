@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { usePagination } from './use_pagination';
 
-const onPaginationChange = jest.fn();
+const onPaginationChange = vi.fn();
 
 describe('usePagination', () => {
   test('should return the correct EuiTablePagination props when all the pagination object properties are falsy', () => {

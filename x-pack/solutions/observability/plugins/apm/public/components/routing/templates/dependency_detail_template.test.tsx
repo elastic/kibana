@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS, AppHeader as MockAppHeaderComponent } from '@kbn/app-header';
@@ -13,11 +15,14 @@ import type { ApmMainTemplateHeaderProps } from './apm_main_template';
 import { DependencyDetailTemplate } from './dependency_detail_template';
 
 // Stable link stub — returns a recognisable string per path.
-const mockLink = jest.fn((path: string) => `/link${path}`);
+const mockLink = vi.fn((path: string) => `/link${path}`);
 
-jest.mock('../../../hooks/use_apm_router', () => ({
-  useApmRouter: () => ({ link: mockLink }),
-}));
+vi.mock('../../../hooks/use_apm_router', () => {
+      const mocked = {
+      useApmRouter: () => ({ link: mockLink }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Default params; individual tests override `mockPath` and `mockQuery` as needed.
 let mockPath = '/dependencies/overview';
@@ -33,38 +38,50 @@ const mockQuery = {
   offset: undefined,
 };
 
-jest.mock('../../../hooks/use_apm_params', () => ({
-  useApmParams: () => ({ query: mockQuery }),
-}));
+vi.mock('../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useApmParams: () => ({ query: mockQuery }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_apm_route_path', () => ({
-  useApmRoutePath: () => mockPath,
-}));
+vi.mock('../../../hooks/use_apm_route_path', () => {
+      const mocked = {
+      useApmRoutePath: () => mockPath,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Pass-through provider — neutralises the useFetcher(getApmIndexSettings) call that would
 // otherwise fire useKibana() against an undefined apmSourcesAccess service in jsdom.
-jest.mock('../../../context/apm_index_settings/apm_index_settings_context', () => ({
-  ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  ApmIndexSettingsContext: {},
-}));
+vi.mock('../../../context/apm_index_settings/apm_index_settings_context', () => {
+      const mocked = {
+      ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      ApmIndexSettingsContext: {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Render ApmMainTemplate as a thin wrapper that passes `header` straight into a real AppHeader
 // (so we exercise the full tab-building logic without wiring up the template's own dependencies).
 // MockAppHeaderComponent is aliased to start with "Mock" so Jest's factory out-of-scope check permits it.
-jest.mock('./apm_main_template', () => ({
-  ApmMainTemplate: ({
-    header,
-    children,
-  }: {
-    header?: ApmMainTemplateHeaderProps;
-    children?: React.ReactNode;
-  }) => (
-    <>
-      {header ? <MockAppHeaderComponent {...header} /> : null}
-      {children}
-    </>
-  ),
-}));
+vi.mock('./apm_main_template', () => {
+      const mocked = {
+      ApmMainTemplate: ({
+        header,
+        children,
+      }: {
+        header?: ApmMainTemplateHeaderProps;
+        children?: React.ReactNode;
+      }) => (
+        <>
+          {header ? <MockAppHeaderComponent {...header} /> : null}
+          {children}
+        </>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function renderTemplate(path: string = '/dependencies/overview') {
   mockPath = path;

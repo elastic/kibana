@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -25,16 +28,16 @@ const createMockSecurityService = (
     authenticationType?: string;
     uiam?: boolean;
   } = {}
-): jest.Mocked<SecurityServiceStart> => {
+): Mocked<SecurityServiceStart> => {
   const { username = 'test-user', authenticationType = 'token', uiam = false } = overrides;
 
-  const grantAsInternalUser = jest.fn().mockResolvedValue({
+  const grantAsInternalUser = vi.fn().mockResolvedValue({
     id: 'es-key-id',
     name: 'test-key',
     api_key: 'es-key-secret',
   });
 
-  const uiamGrant = jest.fn().mockResolvedValue({
+  const uiamGrant = vi.fn().mockResolvedValue({
     id: 'uiam-key-id',
     name: 'uiam-test-key',
     api_key: 'uiam-key-secret',
@@ -42,7 +45,7 @@ const createMockSecurityService = (
 
   return {
     authc: {
-      getCurrentUser: jest.fn().mockReturnValue(
+      getCurrentUser: vi.fn().mockReturnValue(
         username
           ? {
               username,
@@ -61,7 +64,7 @@ const createMockSecurityService = (
           : { uiam: undefined }),
       },
     },
-  } as unknown as jest.Mocked<SecurityServiceStart>;
+  } as unknown as Mocked<SecurityServiceStart>;
 };
 
 const createRequestWithApiKey = (id: string, key: string): KibanaRequest => {
@@ -113,7 +116,7 @@ describe('ApiKeyService', () => {
     it('throws when no current user is found', async () => {
       const request = httpServerMock.createKibanaRequest();
       const security = createMockSecurityService({ username: undefined });
-      security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
+      security.authc.getCurrentUser = vi.fn().mockReturnValue(null);
       const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
@@ -125,7 +128,7 @@ describe('ApiKeyService', () => {
     it('throws when ES API key grant returns null', async () => {
       const request = httpServerMock.createKibanaRequest();
       const security = createMockSecurityService();
-      security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValue(null);
+      security.authc.apiKeys.grantAsInternalUser = vi.fn().mockResolvedValue(null);
       const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
@@ -137,7 +140,7 @@ describe('ApiKeyService', () => {
     it('throws when UIAM grant returns null', async () => {
       const request = httpServerMock.createKibanaRequest();
       const security = createMockSecurityService({ uiam: true });
-      (security.authc.apiKeys.uiam!.grant as jest.Mock).mockResolvedValue(null);
+      (security.authc.apiKeys.uiam!.grant as Mock).mockResolvedValue(null);
       const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
@@ -210,12 +213,12 @@ describe('ApiKeyService', () => {
     const request = httpServerMock.createKibanaRequest();
     const security = createMockSecurityService();
     const logger = loggingSystemMock.create().get();
-    let invalidationSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+    let invalidationSavedObjectsClient: Mocked<SavedObjectsClientContract>;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       invalidationSavedObjectsClient = savedObjectsClientMock.create();
-      invalidationSavedObjectsClient.bulkCreate = jest.fn().mockResolvedValue({
+      invalidationSavedObjectsClient.bulkCreate = vi.fn().mockResolvedValue({
         saved_objects: [],
       });
     });
@@ -243,7 +246,7 @@ describe('ApiKeyService', () => {
         Buffer.from('123').toString('base64'),
         Buffer.from('id123:essu_uiam_value').toString('base64'),
       ];
-      invalidationSavedObjectsClient.bulkCreate = jest
+      invalidationSavedObjectsClient.bulkCreate = vi
         .fn()
         .mockResolvedValue(bulkCreateResponseFor(apiKeys));
 
@@ -272,7 +275,7 @@ describe('ApiKeyService', () => {
     it('includes uiamApiKey for UIAM credentials', async () => {
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
       const apiKeys = [Buffer.from('id123:essu_uiam_value').toString('base64')];
-      invalidationSavedObjectsClient.bulkCreate = jest
+      invalidationSavedObjectsClient.bulkCreate = vi
         .fn()
         .mockResolvedValue(bulkCreateResponseFor(apiKeys));
 
@@ -288,7 +291,7 @@ describe('ApiKeyService', () => {
 
     it('reports every key as failed and logs when bulkCreate throws', async () => {
       const err = new Error('bulkCreate failed');
-      invalidationSavedObjectsClient.bulkCreate = jest.fn().mockRejectedValue(err);
+      invalidationSavedObjectsClient.bulkCreate = vi.fn().mockRejectedValue(err);
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
       const apiKeys = [Buffer.from('123').toString('base64')];
 
@@ -307,7 +310,7 @@ describe('ApiKeyService', () => {
         Buffer.from('ok-id:secret').toString('base64'),
         Buffer.from('bad-id:secret').toString('base64'),
       ];
-      invalidationSavedObjectsClient.bulkCreate = jest.fn().mockResolvedValue({
+      invalidationSavedObjectsClient.bulkCreate = vi.fn().mockResolvedValue({
         saved_objects: [
           {
             id: 'pending-invalidation-0',
@@ -338,7 +341,7 @@ describe('ApiKeyService', () => {
 
     it('reports a key as failed when bulkCreate returns no entry for it', async () => {
       const apiKeys = [Buffer.from('lonely-id:secret').toString('base64')];
-      invalidationSavedObjectsClient.bulkCreate = jest
+      invalidationSavedObjectsClient.bulkCreate = vi
         .fn()
         .mockResolvedValue({ saved_objects: [] });
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);

@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { FailureStoreHoverLink } from './failure_store_link';
 import type { DataStreamStat } from '../../../../common/data_streams_stats';
 
-const mockUpdateFailureStore = jest.fn();
-jest.mock('../../../hooks', () => ({
-  useDatasetQualityTable: () => ({
-    updateFailureStore: mockUpdateFailureStore,
-  }),
-}));
+const mockUpdateFailureStore = vi.fn();
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useDatasetQualityTable: () => ({
+        updateFailureStore: mockUpdateFailureStore,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('FailureStoreHoverLink', () => {
   const mockDataStreamStat: DataStreamStat = {

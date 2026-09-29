@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SignificantEventsMaintenanceState } from '../../../common/maintenance/state_machine';
 import { SignificantEventsPausedError } from '../../lib/errors/significant_events_paused_error';
@@ -17,10 +19,10 @@ const makeService = (
   state: SignificantEventsMaintenanceState
 ): SignificantEventsMaintenanceService =>
   ({
-    getState: jest.fn(async () => state),
-    getStatus: jest.fn(async () => ({ state })),
-    pause: jest.fn(),
-    resume: jest.fn(),
+    getState: vi.fn(async () => state),
+    getStatus: vi.fn(async () => ({ state })),
+    pause: vi.fn(),
+    resume: vi.fn(),
   } as unknown as SignificantEventsMaintenanceService);
 
 describe('assertNotPaused', () => {

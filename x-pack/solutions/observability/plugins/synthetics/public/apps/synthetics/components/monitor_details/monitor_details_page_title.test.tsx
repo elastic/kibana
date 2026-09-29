@@ -5,24 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MonitorDetailsPageTitle } from './monitor_details_page_title';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 
-jest.mock('./hooks/use_selected_monitor', () => ({
-  useSelectedMonitor: jest.fn(),
-}));
+vi.mock('./hooks/use_selected_monitor', () => {
+      const mocked = {
+      useSelectedMonitor: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./monitor_selector/monitor_selector', () => ({
-  MonitorSelector: () => <div data-test-subj="monitorSelectorStub" />,
-}));
+vi.mock('./monitor_selector/monitor_selector', () => {
+      const mocked = {
+      MonitorSelector: () => <div data-test-subj="monitorSelectorStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSelectedMonitor = useSelectedMonitor as jest.MockedFunction<typeof useSelectedMonitor>;
+const mockUseSelectedMonitor = useSelectedMonitor as MockedFunction<typeof useSelectedMonitor>;
 
 describe('MonitorDetailsPageTitle', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders only the monitor name and no Remote badge for a local monitor', () => {

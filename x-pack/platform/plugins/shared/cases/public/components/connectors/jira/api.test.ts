@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getIssueTypes, getFieldsByIssueType, getIssues, getIssue } from './api';
 
@@ -105,7 +107,7 @@ const camelCasedIssuesResponse = {
 describe('Jira API', () => {
   const http = httpServiceMock.createStartContract();
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   describe('getIssueTypes', () => {
     test('should call get issue types API', async () => {

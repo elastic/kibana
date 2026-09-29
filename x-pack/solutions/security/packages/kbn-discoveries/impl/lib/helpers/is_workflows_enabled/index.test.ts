@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 
 import { ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG, isWorkflowsEnabled } from '.';
 
 describe('isWorkflowsEnabled', () => {
   it('queries the attackDiscoveryWorkflowsEnabled flag with a `true` default (ON by default)', async () => {
-    const getBooleanValue = jest.fn().mockResolvedValue(true);
+    const getBooleanValue = vi.fn().mockResolvedValue(true);
 
     await isWorkflowsEnabled({ getBooleanValue });
 
@@ -22,19 +24,19 @@ describe('isWorkflowsEnabled', () => {
   });
 
   it('returns true when the flag is enabled', async () => {
-    const getBooleanValue = jest.fn().mockResolvedValue(true);
+    const getBooleanValue = vi.fn().mockResolvedValue(true);
 
     expect(await isWorkflowsEnabled({ getBooleanValue })).toBe(true);
   });
 
   it('returns false when the flag is disabled', async () => {
-    const getBooleanValue = jest.fn().mockResolvedValue(false);
+    const getBooleanValue = vi.fn().mockResolvedValue(false);
 
     expect(await isWorkflowsEnabled({ getBooleanValue })).toBe(false);
   });
 
   it('reads the start-contract observable when it is available', async () => {
-    const getBooleanValue$ = jest.fn().mockReturnValue(of(true));
+    const getBooleanValue$ = vi.fn().mockReturnValue(of(true));
 
     expect(await isWorkflowsEnabled({ getBooleanValue$ })).toBe(true);
     expect(getBooleanValue$).toHaveBeenCalledWith(

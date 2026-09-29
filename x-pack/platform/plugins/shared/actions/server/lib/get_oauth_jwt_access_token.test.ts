@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
@@ -14,14 +17,20 @@ import { getOAuthJwtAccessToken } from './get_oauth_jwt_access_token';
 import { createJWTAssertion } from './create_jwt_assertion';
 import { requestOAuthJWTToken } from './request_oauth_jwt_token';
 
-jest.mock('./create_jwt_assertion', () => ({
-  createJWTAssertion: jest.fn(),
-}));
-jest.mock('./request_oauth_jwt_token', () => ({
-  requestOAuthJWTToken: jest.fn(),
-}));
+vi.mock('./create_jwt_assertion', () => {
+      const mocked = {
+      createJWTAssertion: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./request_oauth_jwt_token', () => {
+      const mocked = {
+      requestOAuthJWTToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const configurationUtilities = actionsConfigMock.create();
 const connectorTokenClient = connectorTokenClientMock.create();
 
@@ -55,8 +64,8 @@ describe('getOAuthJwtAccessToken', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.clearAllMocks();
+    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
 
   test('uses stored access token if it exists', async () => {
@@ -74,8 +83,8 @@ describe('getOAuthJwtAccessToken', () => {
     const accessToken = await getOAuthJwtAccessToken(getOAuthJwtAccessTokenOpts);
 
     expect(accessToken).toEqual('testtokenvalue');
-    expect(createJWTAssertion as jest.Mock).not.toHaveBeenCalled();
-    expect(requestOAuthJWTToken as jest.Mock).not.toHaveBeenCalled();
+    expect(createJWTAssertion as Mock).not.toHaveBeenCalled();
+    expect(requestOAuthJWTToken as Mock).not.toHaveBeenCalled();
   });
 
   test('creates new assertion if stored access token does not exist', async () => {
@@ -83,8 +92,8 @@ describe('getOAuthJwtAccessToken', () => {
       hasErrors: false,
       connectorToken: null,
     });
-    (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
-    (requestOAuthJWTToken as jest.Mock).mockResolvedValueOnce({
+    (createJWTAssertion as Mock).mockReturnValueOnce('newassertion');
+    (requestOAuthJWTToken as Mock).mockResolvedValueOnce({
       tokenType: 'access_token',
       accessToken: 'brandnewaccesstoken',
       expiresIn: 1000,
@@ -93,7 +102,7 @@ describe('getOAuthJwtAccessToken', () => {
     const accessToken = await getOAuthJwtAccessToken(getOAuthJwtAccessTokenOpts);
 
     expect(accessToken).toEqual('access_token brandnewaccesstoken');
-    expect(createJWTAssertion as jest.Mock).toHaveBeenCalledWith(
+    expect(createJWTAssertion as Mock).toHaveBeenCalledWith(
       logger,
       'privateKey',
       'privateKeyPassword',
@@ -104,7 +113,7 @@ describe('getOAuthJwtAccessToken', () => {
         keyId: 'jwtKeyId',
       }
     );
-    expect(requestOAuthJWTToken as jest.Mock).toHaveBeenCalledWith(
+    expect(requestOAuthJWTToken as Mock).toHaveBeenCalledWith(
       'https://dev23432523.service-now.com/oauth_token.do',
       { clientId: 'clientId', clientSecret: 'clientSecret', assertion: 'newassertion' },
       logger,
@@ -134,8 +143,8 @@ describe('getOAuthJwtAccessToken', () => {
         expiresAt,
       },
     });
-    (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
-    (requestOAuthJWTToken as jest.Mock).mockResolvedValueOnce({
+    (createJWTAssertion as Mock).mockReturnValueOnce('newassertion');
+    (requestOAuthJWTToken as Mock).mockResolvedValueOnce({
       tokenType: 'access_token',
       accessToken: 'brandnewaccesstoken',
       expiresIn: 1000,
@@ -144,7 +153,7 @@ describe('getOAuthJwtAccessToken', () => {
     const accessToken = await getOAuthJwtAccessToken(getOAuthJwtAccessTokenOpts);
 
     expect(accessToken).toEqual('access_token brandnewaccesstoken');
-    expect(createJWTAssertion as jest.Mock).toHaveBeenCalledWith(
+    expect(createJWTAssertion as Mock).toHaveBeenCalledWith(
       logger,
       'privateKey',
       'privateKeyPassword',
@@ -155,7 +164,7 @@ describe('getOAuthJwtAccessToken', () => {
         keyId: 'jwtKeyId',
       }
     );
-    expect(requestOAuthJWTToken as jest.Mock).toHaveBeenCalledWith(
+    expect(requestOAuthJWTToken as Mock).toHaveBeenCalledWith(
       'https://dev23432523.service-now.com/oauth_token.do',
       { clientId: 'clientId', clientSecret: 'clientSecret', assertion: 'newassertion' },
       logger,
@@ -216,7 +225,7 @@ describe('getOAuthJwtAccessToken', () => {
       hasErrors: false,
       connectorToken: null,
     });
-    (createJWTAssertion as jest.Mock).mockImplementationOnce(() => {
+    (createJWTAssertion as Mock).mockImplementationOnce(() => {
       throw new Error('createJWTAssertion error!!');
     });
 
@@ -230,8 +239,8 @@ describe('getOAuthJwtAccessToken', () => {
       hasErrors: false,
       connectorToken: null,
     });
-    (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
-    (requestOAuthJWTToken as jest.Mock).mockRejectedValueOnce(
+    (createJWTAssertion as Mock).mockReturnValueOnce('newassertion');
+    (requestOAuthJWTToken as Mock).mockRejectedValueOnce(
       new Error('requestOAuthJWTToken error!!')
     );
 
@@ -245,8 +254,8 @@ describe('getOAuthJwtAccessToken', () => {
       hasErrors: false,
       connectorToken: null,
     });
-    (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
-    (requestOAuthJWTToken as jest.Mock).mockResolvedValueOnce({
+    (createJWTAssertion as Mock).mockReturnValueOnce('newassertion');
+    (requestOAuthJWTToken as Mock).mockResolvedValueOnce({
       tokenType: 'access_token',
       accessToken: 'brandnewaccesstoken',
       expiresIn: 1000,
@@ -262,8 +271,8 @@ describe('getOAuthJwtAccessToken', () => {
   });
 
   test('gets access token if connectorId is not provided', async () => {
-    (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
-    (requestOAuthJWTToken as jest.Mock).mockResolvedValueOnce({
+    (createJWTAssertion as Mock).mockReturnValueOnce('newassertion');
+    (requestOAuthJWTToken as Mock).mockResolvedValueOnce({
       tokenType: 'access_token',
       accessToken: 'brandnewaccesstoken',
       expiresIn: 1000,
@@ -291,7 +300,7 @@ describe('getOAuthJwtAccessToken', () => {
     expect(connectorTokenClient.get).not.toHaveBeenCalled();
     expect(connectorTokenClient.updateOrReplace).not.toHaveBeenCalled();
     expect(accessToken).toEqual('access_token brandnewaccesstoken');
-    expect(createJWTAssertion as jest.Mock).toHaveBeenCalledWith(
+    expect(createJWTAssertion as Mock).toHaveBeenCalledWith(
       logger,
       'privateKey',
       'privateKeyPassword',
@@ -302,7 +311,7 @@ describe('getOAuthJwtAccessToken', () => {
         keyId: 'jwtKeyId',
       }
     );
-    expect(requestOAuthJWTToken as jest.Mock).toHaveBeenCalledWith(
+    expect(requestOAuthJWTToken as Mock).toHaveBeenCalledWith(
       'https://dev23432523.service-now.com/oauth_token.do',
       { clientId: 'clientId', clientSecret: 'clientSecret', assertion: 'newassertion' },
       logger,
@@ -311,8 +320,8 @@ describe('getOAuthJwtAccessToken', () => {
   });
 
   test('gets access token if connectorTokenClient is not provided', async () => {
-    (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
-    (requestOAuthJWTToken as jest.Mock).mockResolvedValueOnce({
+    (createJWTAssertion as Mock).mockReturnValueOnce('newassertion');
+    (requestOAuthJWTToken as Mock).mockResolvedValueOnce({
       tokenType: 'access_token',
       accessToken: 'brandnewaccesstoken',
       expiresIn: 1000,
@@ -340,7 +349,7 @@ describe('getOAuthJwtAccessToken', () => {
     expect(connectorTokenClient.get).not.toHaveBeenCalled();
     expect(connectorTokenClient.updateOrReplace).not.toHaveBeenCalled();
     expect(accessToken).toEqual('access_token brandnewaccesstoken');
-    expect(createJWTAssertion as jest.Mock).toHaveBeenCalledWith(
+    expect(createJWTAssertion as Mock).toHaveBeenCalledWith(
       logger,
       'privateKey',
       'privateKeyPassword',
@@ -351,7 +360,7 @@ describe('getOAuthJwtAccessToken', () => {
         keyId: 'jwtKeyId',
       }
     );
-    expect(requestOAuthJWTToken as jest.Mock).toHaveBeenCalledWith(
+    expect(requestOAuthJWTToken as Mock).toHaveBeenCalledWith(
       'https://dev23432523.service-now.com/oauth_token.do',
       { clientId: 'clientId', clientSecret: 'clientSecret', assertion: 'newassertion' },
       logger,

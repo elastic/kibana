@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useItemsState } from './use_items_state';
 
@@ -13,9 +15,9 @@ import type { ItemSelectableOption } from './types';
 import { TestProviders } from '../../common/mock';
 
 describe('useItemsState', () => {
-  const onChangeItems = jest.fn();
-  const fieldSelector = jest.fn();
-  const itemToSelectableOption = jest
+  const onChangeItems = vi.fn();
+  const fieldSelector = vi.fn();
+  const itemToSelectableOption = vi
     .fn()
     .mockImplementation((item) => ({ key: item.key, label: item.key, data: item.data }));
 
@@ -30,7 +32,7 @@ describe('useItemsState', () => {
   beforeEach(() => {
     fieldSelector.mockReturnValueOnce(['one', 'two']);
     fieldSelector.mockReturnValueOnce(['one', 'three']);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('inits the state correctly', async () => {

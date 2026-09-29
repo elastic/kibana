@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -27,68 +30,83 @@ import { useAlertSnooze } from '@kbn/response-ops-alert-snooze';
 import { paths } from '../../../../common/locators/paths';
 import { useInvestigateAlert } from '../../../hooks/use_investigate_alert';
 
-jest.mock('../../../utils/kibana_react');
-jest.mock('../../../hooks/use_fetch_rule');
-jest.mock('../hooks/use_alert_snooze_state');
-jest.mock('../../../hooks/use_investigate_alert', () => ({
-  useInvestigateAlert: jest.fn(),
-}));
+vi.mock('../../../utils/kibana_react');
+vi.mock('../../../hooks/use_fetch_rule');
+vi.mock('../hooks/use_alert_snooze_state');
+vi.mock('../../../hooks/use_investigate_alert', () => {
+      const mocked = {
+      useInvestigateAlert: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names', () => ({
-  useAlertFieldNames: () => ({ fieldNames: [], isLoading: false }),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names', () => {
+      const mocked = {
+      useAlertFieldNames: () => ({ fieldNames: [], isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/response-ops-alert-snooze', () => ({
-  useAlertSnooze: jest.fn(),
-  AlertSnoozePanelInline: jest.fn(({ onApply, onBack }) => (
-    <div data-test-subj="alertSnoozePanelInlineMock">
-      <button
-        type="button"
-        data-test-subj="applySnoozeMock"
-        onClick={() => onApply({ expiresAt: '2021-10-10T00:00:00.000Z' })}
-      >
-        apply
-      </button>
-      <button type="button" data-test-subj="backSnoozeMock" onClick={onBack}>
-        back
-      </button>
-    </div>
-  )),
-}));
+vi.mock('@kbn/response-ops-alert-snooze', () => {
+      const mocked = {
+      useAlertSnooze: vi.fn(),
+      AlertSnoozePanelInline: vi.fn(({ onApply, onBack }) => (
+        <div data-test-subj="alertSnoozePanelInlineMock">
+          <button
+            type="button"
+            data-test-subj="applySnoozeMock"
+            onClick={() => onApply({ expiresAt: '2021-10-10T00:00:00.000Z' })}
+          >
+            apply
+          </button>
+          <button type="button" data-test-subj="backSnoozeMock" onClick={onBack}>
+            back
+          </button>
+        </div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetRuleTypesPermissions = jest.fn(() => ({
+const mockUseGetRuleTypesPermissions = vi.fn(() => ({
   authorizedToReadRuleType: (): boolean => true,
 }));
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
-  ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
-  useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
+      useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mock;
-const useFetchRuleMock = useFetchRule as jest.Mock;
-const useAlertSnoozeStateMock = useAlertSnoozeState as jest.Mock;
-const useAlertSnoozeMock = useAlertSnooze as jest.Mock;
-const useInvestigateAlertMock = useInvestigateAlert as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useFetchRuleMock = useFetchRule as Mock;
+const useAlertSnoozeStateMock = useAlertSnoozeState as Mock;
+const useAlertSnoozeMock = useAlertSnooze as Mock;
+const useInvestigateAlertMock = useInvestigateAlert as Mock;
 const mockCases = casesPluginMock.createStartContract();
 
 const mockHttp = {
-  post: jest.fn(),
+  post: vi.fn(),
   basePath: {
     prepend: (url: string) => `wow${url}`,
   },
 };
 
 const mockNavigateToApp = {
-  mockNavigateToApp: jest.fn(),
+  mockNavigateToApp: vi.fn(),
   capabilities: { agentBuilder: { write: true } },
 };
 
-jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
-  RuleFormFlyout: jest.fn(() => <div data-test-subj="edit-rule-flyout">mocked component</div>),
-}));
+vi.mock('@kbn/response-ops-rule-form/flyout', () => {
+      const mocked = {
+      RuleFormFlyout: vi.fn(() => <div data-test-subj="edit-rule-flyout">mocked component</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockKibana = () => {
-  mockCases.helpers.canUseCases = jest.fn().mockReturnValue(allCasesPermissions());
+  mockCases.helpers.canUseCases = vi.fn().mockReturnValue(allCasesPermissions());
   useKibanaMock.mockReturnValue({
     services: {
       ...kibanaStartMock.startContract(),
@@ -109,7 +127,7 @@ const mockRuleTypeId = 'mocked-type-id';
 
 const mockUseFetchRuleWithData = () => {
   useFetchRuleMock.mockReturnValue({
-    reloadRule: jest.fn(),
+    reloadRule: vi.fn(),
     rule: {
       id: mockRuleId,
       name: mockRuleName,
@@ -118,7 +136,7 @@ const mockUseFetchRuleWithData = () => {
 };
 const mockUseFetchRuleWithoutData = () => {
   useFetchRuleMock.mockReturnValue({
-    reloadRule: jest.fn(),
+    reloadRule: vi.fn(),
     rule: null,
   });
 };
@@ -131,7 +149,7 @@ const snoozeStateWithoutInstance = {
   isMuted: false,
   isSnoozed: false,
   snoozedInstance: undefined,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
   isLoading: false,
 };
 
@@ -139,7 +157,7 @@ describe('Header Actions', () => {
   beforeEach(() => {
     useInvestigateAlertMock.mockReturnValue({
       showInvestigateAction: true,
-      handleInvestigate: jest.fn(),
+      handleInvestigate: vi.fn(),
       isInvestigating: false,
       investigateActionLabel: 'Investigate',
       viewInvestigationUrl: '/app/nightshift?investigationId=investigation-1',
@@ -147,13 +165,13 @@ describe('Header Actions', () => {
     });
     useAlertSnoozeStateMock.mockReturnValue(snoozeStateWithoutInstance);
     useAlertSnoozeMock.mockReturnValue({
-      snoozeAlert: jest.fn().mockResolvedValue(true),
-      unsnoozeAlert: jest.fn().mockResolvedValue(true),
+      snoozeAlert: vi.fn().mockResolvedValue(true),
+      unsnoozeAlert: vi.fn().mockResolvedValue(true),
     });
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   beforeEach(() => {
@@ -168,7 +186,7 @@ describe('Header Actions', () => {
     it('should offer an "Add to case" button which opens the add to case modal', async () => {
       let attachments: any[] = [];
 
-      const useCasesAddToExistingCaseModalMock: any = jest.fn().mockImplementation(() => ({
+      const useCasesAddToExistingCaseModalMock: any = vi.fn().mockImplementation(() => ({
         open: ({ getAttachments }: { getAttachments: () => any[] }) => {
           attachments = getAttachments();
         },
@@ -182,7 +200,7 @@ describe('Header Actions', () => {
           alertIndex={'alert-index'}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
-          refetch={jest.fn()}
+          refetch={vi.fn()}
           // @ts-expect-error partial implementation for testing
           rule={{
             id: mockRuleId,
@@ -211,7 +229,7 @@ describe('Header Actions', () => {
     });
 
     it('starts an investigation from the alert details menu', async () => {
-      const handleInvestigate = jest.fn();
+      const handleInvestigate = vi.fn();
       useInvestigateAlertMock.mockReturnValue({
         showInvestigateAction: true,
         handleInvestigate,
@@ -224,7 +242,7 @@ describe('Header Actions', () => {
           alertIndex="alert-index"
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
-          refetch={jest.fn()}
+          refetch={vi.fn()}
         />
       );
 
@@ -241,7 +259,7 @@ describe('Header Actions', () => {
           alertIndex="alert-index"
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
-          refetch={jest.fn()}
+          refetch={vi.fn()}
         />
       );
 
@@ -256,7 +274,7 @@ describe('Header Actions', () => {
     it('hides the view action when the alert has no completed investigation', async () => {
       useInvestigateAlertMock.mockReturnValue({
         showInvestigateAction: true,
-        handleInvestigate: jest.fn(),
+        handleInvestigate: vi.fn(),
         isInvestigating: false,
         investigateActionLabel: 'Investigate',
         viewInvestigationUrl: undefined,
@@ -268,7 +286,7 @@ describe('Header Actions', () => {
           alertIndex="alert-index"
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
-          refetch={jest.fn()}
+          refetch={vi.fn()}
         />
       );
 
@@ -279,7 +297,7 @@ describe('Header Actions', () => {
     it('hides the investigate action when no investigation connector is available', async () => {
       useInvestigateAlertMock.mockReturnValue({
         showInvestigateAction: false,
-        handleInvestigate: jest.fn(),
+        handleInvestigate: vi.fn(),
         isInvestigating: false,
         investigateActionLabel: 'Investigate',
       });
@@ -289,7 +307,7 @@ describe('Header Actions', () => {
           alertIndex="alert-index"
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
-          refetch={jest.fn()}
+          refetch={vi.fn()}
         />
       );
 
@@ -300,7 +318,7 @@ describe('Header Actions', () => {
     it('disables the investigate action while the request is in flight', async () => {
       useInvestigateAlertMock.mockReturnValue({
         showInvestigateAction: true,
-        handleInvestigate: jest.fn(),
+        handleInvestigate: vi.fn(),
         isInvestigating: true,
         investigateActionLabel: 'Investigating',
       });
@@ -310,7 +328,7 @@ describe('Header Actions', () => {
           alertIndex="alert-index"
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
-          refetch={jest.fn()}
+          refetch={vi.fn()}
         />
       );
 
@@ -319,7 +337,7 @@ describe('Header Actions', () => {
     });
 
     it('should NOT offer an "Add to case" button without cases privileges', async () => {
-      mockCases.helpers.canUseCases = jest.fn().mockReturnValue(noCasesPermissions());
+      mockCases.helpers.canUseCases = vi.fn().mockReturnValue(noCasesPermissions());
 
       const { queryByTestId, findByTestId } = render(
         <HeaderActions
@@ -327,7 +345,7 @@ describe('Header Actions', () => {
           alertIndex={'alert-index'}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
-          refetch={jest.fn()}
+          refetch={vi.fn()}
           // @ts-expect-error partial implementation for testing
           rule={{
             id: mockRuleId,
@@ -348,7 +366,7 @@ describe('Header Actions', () => {
           alertIndex={'alert-index'}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
-          refetch={jest.fn()}
+          refetch={vi.fn()}
           // @ts-expect-error partial implementation for testing
           rule={{
             id: mockRuleId,
@@ -366,7 +384,7 @@ describe('Header Actions', () => {
           alert={alertWithGroupsAndTags}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
-          refetch={jest.fn()}
+          refetch={vi.fn()}
         />
       );
       expect(queryByTestId('alert-details-header-actions-menu-button')).toBeTruthy();
@@ -379,7 +397,7 @@ describe('Header Actions', () => {
             alert={alertWithGroupsAndTags}
             alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
-            refetch={jest.fn()}
+            refetch={vi.fn()}
             // @ts-expect-error partial implementation for testing
             rule={{
               id: mockRuleId,
@@ -398,7 +416,7 @@ describe('Header Actions', () => {
             alert={alertWithGroupsAndTags}
             alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
-            refetch={jest.fn()}
+            refetch={vi.fn()}
             // @ts-expect-error partial implementation for testing
             rule={{
               id: mockRuleId,
@@ -418,7 +436,7 @@ describe('Header Actions', () => {
             alert={alertWithGroupsAndTags}
             alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
-            refetch={jest.fn()}
+            refetch={vi.fn()}
             // @ts-expect-error partial implementation for testing
             rule={{
               id: mockRuleId,
@@ -437,7 +455,7 @@ describe('Header Actions', () => {
             alert={alertWithGroupsAndTags}
             alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
-            refetch={jest.fn()}
+            refetch={vi.fn()}
             // @ts-expect-error partial implementation for testing
             rule={{
               id: mockRuleId,
@@ -461,7 +479,7 @@ describe('Header Actions', () => {
             alert={alertWithGroupsAndTags}
             alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
             onUntrackAlert={mockOnUntrackAlert}
-            refetch={jest.fn()}
+            refetch={vi.fn()}
             // @ts-expect-error partial implementation for testing
             rule={{
               id: mockRuleId,
@@ -488,7 +506,7 @@ describe('Header Actions', () => {
           alert={alertWithGroupsAndTags}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
-          refetch={jest.fn()}
+          refetch={vi.fn()}
         />
       );
 
@@ -502,7 +520,7 @@ describe('Header Actions', () => {
           alert={untrackedAlert}
           alertStatus={untrackedAlert.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
-          refetch={jest.fn()}
+          refetch={vi.fn()}
         />
       );
 
@@ -516,7 +534,7 @@ describe('Header Actions', () => {
           alert={alertWithGroupsAndTags}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
-          refetch={jest.fn()}
+          refetch={vi.fn()}
         />
       );
       fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
@@ -531,7 +549,7 @@ describe('Header Actions', () => {
       isMuted: false,
       isSnoozed: false,
       snoozedInstance: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       isLoading: false,
     };
 
@@ -546,7 +564,7 @@ describe('Header Actions', () => {
           alert={alertWithGroupsAndTags}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
-          refetch={jest.fn()}
+          refetch={vi.fn()}
           // @ts-expect-error partial implementation for testing
           rule={{
             id: mockRuleId,
@@ -567,8 +585,8 @@ describe('Header Actions', () => {
     });
 
     it('opens the inline snooze form and applies the snooze payload', async () => {
-      const snoozeAlert = jest.fn().mockResolvedValue(true);
-      useAlertSnoozeMock.mockReturnValue({ snoozeAlert, unsnoozeAlert: jest.fn() });
+      const snoozeAlert = vi.fn().mockResolvedValue(true);
+      useAlertSnoozeMock.mockReturnValue({ snoozeAlert, unsnoozeAlert: vi.fn() });
       useAlertSnoozeStateMock.mockReturnValue(snoozedState);
 
       const { findByTestId } = renderHeaderActions();
@@ -583,8 +601,8 @@ describe('Header Actions', () => {
     });
 
     it('offers an "Unsnooze the alert" button when the alert is snoozed and unsnoozes it on click', async () => {
-      const unsnoozeAlert = jest.fn().mockResolvedValue(true);
-      useAlertSnoozeMock.mockReturnValue({ snoozeAlert: jest.fn(), unsnoozeAlert });
+      const unsnoozeAlert = vi.fn().mockResolvedValue(true);
+      useAlertSnoozeMock.mockReturnValue({ snoozeAlert: vi.fn(), unsnoozeAlert });
       useAlertSnoozeStateMock.mockReturnValue({
         ...snoozedState,
         isSnoozed: true,

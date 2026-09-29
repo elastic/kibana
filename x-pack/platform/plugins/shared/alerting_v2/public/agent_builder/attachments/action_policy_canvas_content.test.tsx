@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
@@ -16,26 +19,35 @@ const flushPromises = async () => {
   });
 };
 
-const mockUpsertActionPolicy = jest.fn().mockResolvedValue({});
-const mockGetWorkflow = jest.fn().mockResolvedValue({ id: 'wf-1', name: 'Test Workflow' });
-const mockGetRule = jest.fn().mockResolvedValue({ id: 'abc', name: 'Test Rule' });
-const mockNavigateToUrl = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddDanger = jest.fn();
+const mockUpsertActionPolicy = vi.fn().mockResolvedValue({});
+const mockGetWorkflow = vi.fn().mockResolvedValue({ id: 'wf-1', name: 'Test Workflow' });
+const mockGetRule = vi.fn().mockResolvedValue({ id: 'abc', name: 'Test Rule' });
+const mockNavigateToUrl = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddDanger = vi.fn();
 const mockPrepend = (path: string) => `/base${path}`;
 let mockAlertingV2ExperimentalFeaturesEnabled = true;
 
-jest.mock('../../services/action_policies_api', () => ({
-  ActionPoliciesApi: 'ActionPoliciesApi',
-}));
+vi.mock('../../services/action_policies_api', () => {
+      const mocked = {
+      ActionPoliciesApi: 'ActionPoliciesApi',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/rules_api', () => ({
-  RulesApi: 'RulesApi',
-}));
+vi.mock('../../services/rules_api', () => {
+      const mocked = {
+      RulesApi: 'RulesApi',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => ({
-  WorkflowApi: 'WorkflowApi',
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      WorkflowApi: 'WorkflowApi',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockApplicationService = { navigateToUrl: (...a: unknown[]) => mockNavigateToUrl(...a) };
 const mockHttpService = { basePath: { prepend: mockPrepend } };
@@ -51,30 +63,36 @@ const mockActionPoliciesApiService = {
   upsertActionPolicy: (...a: unknown[]) => mockUpsertActionPolicy(...a),
 };
 
-jest.mock('@kbn/core-di-browser', () => ({
-  CoreStart: (key: string) => key,
-  useService: (token: unknown) => {
-    const services: Record<string, unknown> = {
-      application: mockApplicationService,
-      http: mockHttpService,
-      notifications: mockNotificationsService,
-      uiSettings: {
-        get: (id: string) =>
-          id === 'alerting:v2:experimentalFeatures' && mockAlertingV2ExperimentalFeaturesEnabled,
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      CoreStart: (key: string) => key,
+      useService: (token: unknown) => {
+        const services: Record<string, unknown> = {
+          application: mockApplicationService,
+          http: mockHttpService,
+          notifications: mockNotificationsService,
+          uiSettings: {
+            get: (id: string) =>
+              id === 'alerting:v2:experimentalFeatures' && mockAlertingV2ExperimentalFeaturesEnabled,
+          },
+          WorkflowApi: mockWorkflowApiService,
+          RulesApi: mockRulesApiService,
+          ActionPoliciesApi: mockActionPoliciesApiService,
+        };
+        return services[token as string] ?? {};
       },
-      WorkflowApi: mockWorkflowApiService,
-      RulesApi: mockRulesApiService,
-      ActionPoliciesApi: mockActionPoliciesApiService,
     };
-    return services[token as string] ?? {};
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/action_policy/details_flyout/action_policy_definition_list', () => ({
-  ActionPolicyDefinitionList: (props: Record<string, unknown>) => (
-    <div data-test-subj="mockDefinitionList">{JSON.stringify(Object.keys(props))}</div>
-  ),
-}));
+vi.mock('../../components/action_policy/details_flyout/action_policy_definition_list', () => {
+      const mocked = {
+      ActionPolicyDefinitionList: (props: Record<string, unknown>) => (
+        <div data-test-subj="mockDefinitionList">{JSON.stringify(Object.keys(props))}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultData = {
   name: 'My Policy',
@@ -99,12 +117,12 @@ const createAttachment = ({
 
 const renderCanvas = async (
   overrides: Parameters<typeof createAttachment>[0] = {},
-  callbackOverrides: Record<string, jest.Mock> = {}
+  callbackOverrides: Record<string, Mock> = {}
 ) => {
   const attachment = createAttachment(overrides);
-  const registerActionButtons = jest.fn();
-  const updateOrigin = jest.fn().mockResolvedValue(undefined);
-  const closeCanvas = jest.fn();
+  const registerActionButtons = vi.fn();
+  const updateOrigin = vi.fn().mockResolvedValue(undefined);
+  const closeCanvas = vi.fn();
 
   const result = render(
     <ActionPolicyCanvasContent
@@ -127,7 +145,7 @@ const renderCanvas = async (
 };
 
 const getLastRegisteredButtons = (
-  registerActionButtons: jest.Mock
+  registerActionButtons: Mock
 ): Array<{
   label: string;
   disabled?: boolean;
@@ -140,7 +158,7 @@ const getLastRegisteredButtons = (
 
 describe('ActionPolicyCanvasContent', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetWorkflow.mockResolvedValue({ id: 'wf-1', name: 'Test Workflow' });
     mockGetRule.mockResolvedValue({ id: 'abc', name: 'Test Rule' });
     mockAlertingV2ExperimentalFeaturesEnabled = true;
@@ -180,7 +198,7 @@ describe('ActionPolicyCanvasContent', () => {
     });
 
     it('Create policy handler calls upsertActionPolicy and updateOrigin', async () => {
-      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+      const updateOrigin = vi.fn().mockResolvedValue(undefined);
       const { registerActionButtons } = await renderCanvas(
         { data: { id: 'pre-assigned-id' } },
         { updateOrigin }

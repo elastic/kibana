@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { TabbedAggResponseWriter } from './response_writer';
 import { AggConfigs, BUCKET_TYPES, METRIC_TYPES } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
@@ -127,7 +129,7 @@ describe('TabbedAggResponseWriter class', () => {
     } as any;
 
     return new TabbedAggResponseWriter(
-      new AggConfigs(indexPattern, aggs, { typesRegistry }, jest.fn()),
+      new AggConfigs(indexPattern, aggs, { typesRegistry }, vi.fn()),
       {
         metricsAtAllLevels: false,
         partialRows: false,

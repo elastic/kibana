@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiContextMenuItem, EuiProvider } from '@elastic/eui';
 import React from 'react';
 
@@ -28,8 +30,8 @@ describe('RuleGroupEditor', () => {
       rule: new AllRule([]),
       allowAdd: true,
       ruleDepth: 0,
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
     };
     const wrapper = mountWithEuiProvider(<RuleGroupEditor {...props} />);
     expect(wrapper.find(RuleGroupEditor)).toHaveLength(1);
@@ -42,8 +44,8 @@ describe('RuleGroupEditor', () => {
       rule: new AllRule([new FieldRule('username', '*')]),
       allowAdd: true,
       ruleDepth: 0,
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
     };
     const wrapper = mountWithEuiProvider(<RuleGroupEditor {...props} />);
     expect(wrapper.find(RuleGroupEditor)).toHaveLength(1);
@@ -74,8 +76,8 @@ describe('RuleGroupEditor', () => {
       rule: new AllRule([new ExceptAnyRule([new FieldRule('my_custom_field', 'foo*')])]),
       allowAdd: true,
       ruleDepth: 0,
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
     };
     const wrapper = mountWithEuiProvider(<RuleGroupEditor {...props} />);
     expect(wrapper.find(RuleGroupEditor)).toHaveLength(2);
@@ -112,8 +114,8 @@ describe('RuleGroupEditor', () => {
       rule: new AllRule([new ExceptAnyRule([new FieldRule('username', '*')])]),
       allowAdd: true,
       ruleDepth: 0,
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
     };
     const wrapper = mountWithEuiProvider(<RuleGroupEditor {...props} />);
     expect(wrapper.find(RuleGroupEditor)).toHaveLength(2);
@@ -145,8 +147,8 @@ describe('RuleGroupEditor', () => {
       rule: new AllRule([]),
       allowAdd: false,
       ruleDepth: 0,
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
     };
     const wrapper = shallowWithEuiProvider(<RuleGroupEditor {...props} />);
     expect(wrapper.find(AddRuleButton)).toHaveLength(0);
@@ -157,8 +159,8 @@ describe('RuleGroupEditor', () => {
       rule: new AllRule([new ExceptAnyRule([new FieldRule('my_custom_field', 'foo*')])]),
       allowAdd: true,
       ruleDepth: 0,
-      onChange: jest.fn(),
-      onDelete: jest.fn(),
+      onChange: vi.fn(),
+      onDelete: vi.fn(),
       readOnly: true,
     };
     const wrapper = mountWithEuiProvider(<RuleGroupEditor {...props} />);

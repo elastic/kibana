@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   addEndpointExceptionList,
   addExceptionList,
@@ -698,11 +700,11 @@ describe('Exceptions Lists API', () => {
 
   describe('#exportExceptionList', () => {
     const blob: Blob = {
-      arrayBuffer: jest.fn(),
+      arrayBuffer: vi.fn(),
       size: 89,
-      slice: jest.fn(),
-      stream: jest.fn(),
-      text: jest.fn(),
+      slice: vi.fn(),
+      stream: vi.fn(),
+      text: vi.fn(),
       type: 'json',
     } as unknown as Blob;
 

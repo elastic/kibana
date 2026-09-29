@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getUserFromRequest } from '../utils';
 import { createClient } from './client';
 import { ConversationServiceImpl } from './conversation_service';
 
-jest.mock('../utils');
-jest.mock('./client');
+vi.mock('../utils');
+vi.mock('./client');
 
-const getUserFromRequestMock = getUserFromRequest as jest.MockedFunction<typeof getUserFromRequest>;
-const createClientMock = createClient as jest.MockedFunction<typeof createClient>;
+const getUserFromRequestMock = getUserFromRequest as MockedFunction<typeof getUserFromRequest>;
+const createClientMock = createClient as MockedFunction<typeof createClient>;
 
 const request = { headers: {} } as unknown as KibanaRequest;
 
@@ -25,7 +28,7 @@ const asInternalUser = { name: 'as-internal-user' } as never;
 
 const createService = ({
   agents = {},
-  attachments = { getTypeDefinition: jest.fn() },
+  attachments = { getTypeDefinition: vi.fn() },
   eventBus,
 }: { agents?: object; attachments?: object; eventBus?: object } = {}) => {
   return new ConversationServiceImpl({
@@ -33,26 +36,26 @@ const createService = ({
     security: {} as never,
     elasticsearch: {
       client: {
-        asScoped: jest.fn().mockReturnValue({ asCurrentUser, asInternalUser }),
+        asScoped: vi.fn().mockReturnValue({ asCurrentUser, asInternalUser }),
       },
     } as never,
     agents: agents as never,
-    conversationEvents: { getDefinition: jest.fn(), list: jest.fn().mockReturnValue([]) },
+    conversationEvents: { getDefinition: vi.fn(), list: vi.fn().mockReturnValue([]) },
     ...(eventBus ? { eventBus: eventBus as never } : {}),
   });
 };
 
 describe('ConversationServiceImpl', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getUserFromRequestMock.mockResolvedValue({ id: 'profile-1', username: 'jane', isAdmin: false });
   });
 
   describe('getScopedClient', () => {
-    const agents = { getRegistry: jest.fn().mockResolvedValue({ id: 'registry' }) };
+    const agents = { getRegistry: vi.fn().mockResolvedValue({ id: 'registry' }) };
 
     it('wires the scoped event emitter to the event bus with the request', async () => {
-      const eventBus = { emitMetadataPatched: jest.fn(), emitAttachmentEvents: jest.fn() };
+      const eventBus = { emitMetadataPatched: vi.fn(), emitAttachmentEvents: vi.fn() };
       await createService({ agents, eventBus }).getScopedClient({ request });
 
       const { eventEmitter } = createClientMock.mock.calls[0][0];

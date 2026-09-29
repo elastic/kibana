@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { of } from 'rxjs';
 
 import type { Capabilities } from '@kbn/core/public';
@@ -19,7 +22,7 @@ import type { ServiceAccountsAPIClient } from './service_accounts';
 
 describe('buildSecurityApi', () => {
   let authc: ReturnType<typeof authenticationMock.createSetup>;
-  let serviceAccounts: jest.Mocked<ServiceAccountsAPIClient>;
+  let serviceAccounts: Mocked<ServiceAccountsAPIClient>;
   let capabilities: Capabilities | undefined;
   let api: CoreSecurityDelegateContract;
 
@@ -33,7 +36,7 @@ describe('buildSecurityApi', () => {
 
   beforeEach(() => {
     authc = authenticationMock.createSetup();
-    serviceAccounts = { create: jest.fn() } as unknown as jest.Mocked<ServiceAccountsAPIClient>;
+    serviceAccounts = { create: vi.fn() } as unknown as Mocked<ServiceAccountsAPIClient>;
     capabilities = undefined;
     api = build();
   });
@@ -123,7 +126,7 @@ describe('buildSecurityApi', () => {
 });
 
 describe('buildUserProfileApi', () => {
-  let userProfile: jest.Mocked<UserProfileAPIClient>;
+  let userProfile: Mocked<UserProfileAPIClient>;
   let api: CoreUserProfileDelegateContract;
 
   beforeEach(() => {
@@ -132,11 +135,11 @@ describe('buildUserProfileApi', () => {
       userProfileLoaded$: of(false),
       enabled$: of(true),
       dataUpdates$: of({}),
-      getCurrent: jest.fn(),
-      bulkGet: jest.fn(),
-      suggest: jest.fn(),
-      update: jest.fn(),
-      partialUpdate: jest.fn(),
+      getCurrent: vi.fn(),
+      bulkGet: vi.fn(),
+      suggest: vi.fn(),
+      update: vi.fn(),
+      partialUpdate: vi.fn(),
     };
     api = buildUserProfileApi({ userProfile });
   });

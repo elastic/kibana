@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useGetCaseConfigurationsQuery } from './use_get_case_configurations_query';
 import * as api from './api';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -13,16 +16,16 @@ import { useToasts } from '../../common/lib/kibana';
 import { initialConfiguration } from './utils';
 import { TestProviders } from '../../common/mock';
 
-jest.mock('./api');
-jest.mock('../../common/lib/kibana');
+vi.mock('./api');
+vi.mock('../../common/lib/kibana');
 
 describe('Use get case configurations query hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'getCaseConfigure');
+    const spy = vi.spyOn(api, 'getCaseConfigure');
 
     renderHook(
       () => useGetCaseConfigurationsQuery({ select: (data) => data || initialConfiguration }),
@@ -39,10 +42,10 @@ describe('Use get case configurations query hook', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addError });
 
-    const spy = jest.spyOn(api, 'getCaseConfigure').mockRejectedValue(new Error('error'));
+    const spy = vi.spyOn(api, 'getCaseConfigure').mockRejectedValue(new Error('error'));
 
     renderHook(
       () => useGetCaseConfigurationsQuery({ select: (data) => data || initialConfiguration }),
@@ -61,8 +64,8 @@ describe('Use get case configurations query hook', () => {
   });
 
   it('calls select correctly', async () => {
-    const select = jest.fn();
-    const spy = jest.spyOn(api, 'getCaseConfigure');
+    const select = vi.fn();
+    const spy = vi.spyOn(api, 'getCaseConfigure');
     const data = [{ ...initialConfiguration, id: 'my-new-configuration' }];
 
     spy.mockResolvedValue(data);

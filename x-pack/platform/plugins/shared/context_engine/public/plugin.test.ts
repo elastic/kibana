@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { ContextEnginePlugin } from './plugin';
@@ -40,7 +42,7 @@ describe('ContextEnginePlugin', () => {
     const integration = {
       suggestAutomation: {
         canSuggest: () => false,
-        suggestAutomation: jest.fn(),
+        suggestAutomation: vi.fn(),
         subscribeToAutomationSaved: () => () => {},
       },
     };

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -35,51 +38,51 @@ import {
 import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
 import { buildAgentStatusRuntimeField } from './agents/build_status_runtime_field';
 
-jest.mock('./app_context');
-jest.mock('./agent_policy');
-jest.mock('./package_policy');
-jest.mock('./audit_logging');
-jest.mock('./secrets');
-jest.mock('./outputs/helpers');
-jest.mock('./agent_policies/agent_policy_agent_count');
-jest.mock('./agents/build_status_runtime_field');
+vi.mock('./app_context');
+vi.mock('./agent_policy');
+vi.mock('./package_policy');
+vi.mock('./audit_logging');
+vi.mock('./secrets');
+vi.mock('./outputs/helpers');
+vi.mock('./agent_policies/agent_policy_agent_count');
+vi.mock('./agents/build_status_runtime_field');
 
-const mockedGetAgentCountForAgentPolicies = getAgentCountForAgentPolicies as jest.MockedFunction<
+const mockedGetAgentCountForAgentPolicies = getAgentCountForAgentPolicies as MockedFunction<
   typeof getAgentCountForAgentPolicies
 >;
 
-const mockedBuildAgentStatusRuntimeField = buildAgentStatusRuntimeField as jest.MockedFunction<
+const mockedBuildAgentStatusRuntimeField = buildAgentStatusRuntimeField as MockedFunction<
   typeof buildAgentStatusRuntimeField
 >;
 
-const mockedFindAgentlessPolicies = findAgentlessPolicies as jest.MockedFunction<
+const mockedFindAgentlessPolicies = findAgentlessPolicies as MockedFunction<
   typeof findAgentlessPolicies
 >;
-const mockedCheckOtlpOutputAllowed = checkOtlpOutputAllowed as jest.MockedFunction<
+const mockedCheckOtlpOutputAllowed = checkOtlpOutputAllowed as MockedFunction<
   typeof checkOtlpOutputAllowed
 >;
 
-const mockedExtractAndWriteOutputSecrets = extractAndWriteOutputSecrets as jest.MockedFunction<
+const mockedExtractAndWriteOutputSecrets = extractAndWriteOutputSecrets as MockedFunction<
   typeof extractAndWriteOutputSecrets
 >;
-const mockedExtractAndUpdateOutputSecrets = extractAndUpdateOutputSecrets as jest.MockedFunction<
+const mockedExtractAndUpdateOutputSecrets = extractAndUpdateOutputSecrets as MockedFunction<
   typeof extractAndUpdateOutputSecrets
 >;
-const mockedIsOutputSecretStorageEnabled = isOutputSecretStorageEnabled as jest.MockedFunction<
+const mockedIsOutputSecretStorageEnabled = isOutputSecretStorageEnabled as MockedFunction<
   typeof isOutputSecretStorageEnabled
 >;
 
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
 const mockedLogger = {
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
 } as unknown as Logger;
 mockedAppContextService.getLogger.mockImplementation(() => {
   return mockedLogger;
@@ -87,8 +90,8 @@ mockedAppContextService.getLogger.mockImplementation(() => {
 
 mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
 
-const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
+const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
+const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
 
 const CLOUD_ID =
   'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==';
@@ -325,9 +328,9 @@ function getMockedSoClient(
 }
 
 function getMockedEncryptedSoClient() {
-  const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
-    getDecryptedAsInternalUser: jest.fn(),
-    createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
+  const esoClientMock: Mocked<EncryptedSavedObjectsClient> = {
+    getDecryptedAsInternalUser: vi.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: vi.fn(),
   };
 
   esoClientMock.getDecryptedAsInternalUser.mockImplementation(async (type: string, id: string) => {
@@ -4283,7 +4286,7 @@ describe('Output Service', () => {
 
   describe('bulkGet', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should decrypt and return multiple outputs', async () => {

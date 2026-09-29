@@ -5,41 +5,62 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-jest.mock('timers/promises', () => ({ setTimeout: jest.fn() }));
-jest.mock('../../packages/install', () => ({
-  saveKibanaAssetsRefs: jest.fn().mockResolvedValue([]),
-}));
-jest.mock('../../packages/remove', () => ({
-  deleteKibanaSavedObjectsAssets: jest.fn().mockResolvedValue(undefined),
-}));
-jest.mock('./saved_objects', () => ({
-  getSpaceAwareSaveobjectsClients: jest.fn().mockReturnValue({
-    savedObjectsImporter: {
-      import: jest.fn().mockResolvedValue({ successResults: [], errors: [], warnings: [] }),
-    },
-    savedObjectTagAssignmentService: { updateTagAssignments: jest.fn() },
-    savedObjectTagClient: { create: jest.fn(), get: jest.fn(), find: jest.fn() },
-  }),
-}));
-jest.mock('./tag_assets', () => ({
-  tagKibanaAssets: jest.fn().mockResolvedValue(undefined),
-}));
-jest.mock('../../..', () => ({
-  appContextService: {
-    getExperimentalFeatures: jest.fn().mockReturnValue({
-      enableAgentStatusAlerting: false,
-      enableSloTemplates: false,
-    }),
-    getSavedObjects: jest.fn().mockReturnValue({
-      getUnsafeInternalClient: jest.fn().mockReturnValue({
-        find: jest.fn().mockResolvedValue({ total: 0, page: 1, per_page: 100, saved_objects: [] }),
-        bulkDelete: jest.fn().mockResolvedValue({}),
+vi.mock('timers/promises', () => {
+      const mocked = { setTimeout: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../packages/install', () => {
+      const mocked = {
+      saveKibanaAssetsRefs: vi.fn().mockResolvedValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../packages/remove', () => {
+      const mocked = {
+      deleteKibanaSavedObjectsAssets: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./saved_objects', () => {
+      const mocked = {
+      getSpaceAwareSaveobjectsClients: vi.fn().mockReturnValue({
+        savedObjectsImporter: {
+          import: vi.fn().mockResolvedValue({ successResults: [], errors: [], warnings: [] }),
+        },
+        savedObjectTagAssignmentService: { updateTagAssignments: vi.fn() },
+        savedObjectTagClient: { create: vi.fn(), get: vi.fn(), find: vi.fn() },
       }),
-    }),
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./tag_assets', () => {
+      const mocked = {
+      tagKibanaAssets: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../..', () => {
+      const mocked = {
+      appContextService: {
+        getExperimentalFeatures: vi.fn().mockReturnValue({
+          enableAgentStatusAlerting: false,
+          enableSloTemplates: false,
+        }),
+        getSavedObjects: vi.fn().mockReturnValue({
+          getUnsafeInternalClient: vi.fn().mockReturnValue({
+            find: vi.fn().mockResolvedValue({ total: 0, page: 1, per_page: 100, saved_objects: [] }),
+            bulkDelete: vi.fn().mockResolvedValue({}),
+          }),
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { SavedObject } from '@kbn/core/server';
 
@@ -48,7 +69,7 @@ import type { Installation } from '../../../../../common/types';
 
 import { installKibanaAssetsAndReferencesMultispace } from './install';
 
-const mockSaveKibanaAssetsRefs = saveKibanaAssetsRefs as jest.MockedFunction<
+const mockSaveKibanaAssetsRefs = saveKibanaAssetsRefs as MockedFunction<
   typeof saveKibanaAssetsRefs
 >;
 
@@ -75,8 +96,8 @@ const makePackageInstallContext = () => ({
   packageInfo: { name: 'nginx', title: 'Nginx', version: '2.3.2' } as never,
   paths: [],
   archiveIterator: {
-    traverseEntries: jest.fn().mockResolvedValue(undefined),
-    getPaths: jest.fn().mockReturnValue([]),
+    traverseEntries: vi.fn().mockResolvedValue(undefined),
+    getPaths: vi.fn().mockReturnValue([]),
   },
 });
 
@@ -90,7 +111,7 @@ const baseArgs = () => ({
 
 describe('installKibanaAssetsAndReferencesMultispace', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when the requesting space is the primary (installed_kibana_space_id)', () => {

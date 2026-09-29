@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -27,10 +30,10 @@ import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
-const mockNavigateToApp = jest.fn();
-jest.mock('../../common/components/empty_prompt');
-jest.mock('../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../common/lib/kibana');
+const mockNavigateToApp = vi.fn();
+vi.mock('../../common/components/empty_prompt');
+vi.mock('../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../common/lib/kibana'));
 
   return {
     ...original,
@@ -48,45 +51,54 @@ jest.mock('../../common/lib/kibana', () => {
     }),
   };
 });
-jest.mock('../../common/containers/source');
-jest.mock('../../common/components/visualization_actions/lens_embeddable');
-jest.mock('../../common/containers/use_global_time', () => ({
-  useGlobalTime: jest.fn().mockReturnValue({
-    from: '2020-07-07T08:20:18.966Z',
-    isInitializing: false,
-    to: '2020-07-08T08:20:18.966Z',
-    setQuery: jest.fn(),
-  }),
-}));
+vi.mock('../../common/containers/source');
+vi.mock('../../common/components/visualization_actions/lens_embeddable');
+vi.mock('../../common/containers/use_global_time', () => {
+      const mocked = {
+      useGlobalTime: vi.fn().mockReturnValue({
+        from: '2020-07-07T08:20:18.966Z',
+        isInitializing: false,
+        to: '2020-07-08T08:20:18.966Z',
+        setQuery: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
-jest.mock('../../common/components/search_bar', () => ({
-  SiemSearchBar: () => null,
-}));
-jest.mock('../../common/components/query_bar', () => ({
-  QueryBar: () => null,
-}));
-jest.mock('../../common/components/user_privileges');
-jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../common/containers/local_storage/use_messages_storage');
-jest.mock('../containers/overview_cti_links');
-jest.mock('../../common/components/visualization_actions/actions');
-jest.mock('../../data_view_manager/hooks/use_data_view');
+vi.mock('../../common/components/search_bar', () => {
+      const mocked = {
+      SiemSearchBar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/components/query_bar', () => {
+      const mocked = {
+      QueryBar: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/components/user_privileges');
+vi.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../../common/containers/local_storage/use_messages_storage');
+vi.mock('../containers/overview_cti_links');
+vi.mock('../../common/components/visualization_actions/actions');
+vi.mock('../../data_view_manager/hooks/use_data_view');
 
-const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
+const useCtiDashboardLinksMock = useCtiDashboardLinks as Mock;
 useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
 
-jest.mock('../containers/overview_cti_links/use_all_ti_data_sources');
-const useAllTiDataSourcesMock = useAllTiDataSources as jest.Mock;
+vi.mock('../containers/overview_cti_links/use_all_ti_data_sources');
+const useAllTiDataSourcesMock = useAllTiDataSources as Mock;
 useAllTiDataSourcesMock.mockReturnValue(mockTiDataSources);
 
-jest.mock('../../entity_analytics/api/hooks/use_risk_score');
-const useRiskScoreMock = useRiskScore as jest.Mock;
+vi.mock('../../entity_analytics/api/hooks/use_risk_score');
+const useRiskScoreMock = useRiskScore as Mock;
 useRiskScoreMock.mockReturnValue({ loading: false, data: [], hasEngineBeenInstalled: false });
 
-jest.mock('../../common/hooks/use_experimental_features');
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+vi.mock('../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as Mock;
 useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
 
 const defaultAlertsPrivileges = {
@@ -112,10 +124,10 @@ const endpointNoticeMessage = (hasMessageValue: boolean) => {
   };
 };
 
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
-const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
-const mockUseFetchIndex = useFetchIndex as jest.Mock;
-const mockUseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
+const mockUseUserPrivileges = useUserPrivileges as Mock;
+const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;
+const mockUseFetchIndex = useFetchIndex as Mock;
+const mockUseMessagesStorage: Mock = useMessagesStorage as Mock<UseMessagesStorage>;
 
 describe('Overview', () => {
   const loadedUserPrivilegesState = (
@@ -139,9 +151,9 @@ describe('Overview', () => {
         indexExists: true,
       },
     ]);
-    (useDataView as jest.Mock).mockReturnValue({
+    (useDataView as Mock).mockReturnValue({
       dataView: {
-        hasMatchedIndices: jest.fn(),
+        hasMatchedIndices: vi.fn(),
         matchedIndices: ['index-1'],
       },
       status: 'ready',
@@ -252,7 +264,7 @@ describe('Overview', () => {
       });
 
       it('renders getting started page', () => {
-        (useDataView as jest.Mock).mockReturnValue({
+        (useDataView as Mock).mockReturnValue({
           dataView: {
             matchedIndices: [],
           },

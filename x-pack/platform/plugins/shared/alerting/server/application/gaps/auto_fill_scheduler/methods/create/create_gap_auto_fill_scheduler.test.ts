@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SavedObject, KibanaRequest } from '@kbn/core/server';
 import type { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
 import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
@@ -23,7 +26,7 @@ const {
   auditLogger,
 } = getRulesClientMockParams({
   kibanaVersion: 'v8.0.0',
-  getUserName: jest.fn().mockResolvedValue('elastic'),
+  getUserName: vi.fn().mockResolvedValue('elastic'),
   backfillClient: null as unknown as never,
 });
 
@@ -77,7 +80,7 @@ describe('createGapFillAutoScheduler()', () => {
   let rulesClient: RulesClient;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     rulesClient = new RulesClient(rulesClientParams);
 
     unsecuredSavedObjectsClient.find.mockResolvedValue({
@@ -286,7 +289,7 @@ describe('createGapFillAutoScheduler()', () => {
   });
 
   test('logs and rethrows when authorization fails', async () => {
-    (authorization.bulkEnsureAuthorized as jest.Mock).mockImplementationOnce(() => {
+    (authorization.bulkEnsureAuthorized as Mock).mockImplementationOnce(() => {
       throw new Error('no access');
     });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RulesDataInput } from './rules_data_input';
@@ -14,11 +16,11 @@ import { MigrationSource, SplunkDataInputStep } from '../../../../../common/type
 describe('RulesDataInput', () => {
   const defaultProps = {
     migrationStats: undefined,
-    onMigrationCreated: jest.fn(),
+    onMigrationCreated: vi.fn(),
     dataInputStep: SplunkDataInputStep.Upload,
     migrationSource: MigrationSource.SPLUNK,
-    setDataInputStep: jest.fn(),
-    onMissingResourcesFetched: jest.fn(),
+    setDataInputStep: vi.fn(),
+    onMissingResourcesFetched: vi.fn(),
     missingResourcesIndexed: { lookups: [], macros: [] },
   };
 

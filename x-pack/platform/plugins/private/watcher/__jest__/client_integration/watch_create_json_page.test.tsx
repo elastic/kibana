@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -38,12 +41,12 @@ const selectSimulateTab = async (user: ReturnType<typeof userEvent.setup>) => {
 describe('<JsonWatchEditPage /> create route', () => {
   let httpSetup: HttpSetup;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
-  let routerHistoryPush: jest.Mock;
+  let routerHistoryPush: Mock;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
-    routerHistoryPush = jest.fn();
+    routerHistoryPush = vi.fn();
     registerRouter({ history: { push: routerHistoryPush } });
 
     renderCreateJsonWatch(httpSetup);

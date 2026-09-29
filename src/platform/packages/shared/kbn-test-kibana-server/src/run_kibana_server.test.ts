@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { runKibanaServer } from './run_kibana_server';
 import type { KibanaTestServerLaunchConfig } from './kibana_test_server_launch_config';
@@ -35,12 +38,12 @@ const createConfig = (
   },
 });
 
-const createProcs = () => ({ run: jest.fn() } as unknown as ProcRunner);
+const createProcs = () => ({ run: vi.fn() } as unknown as ProcRunner);
 
-const getArgs = (procs: ProcRunner) => (procs.run as jest.Mock).mock.calls[0][1].args as string[];
+const getArgs = (procs: ProcRunner) => (procs.run as Mock).mock.calls[0][1].args as string[];
 
 const getEnv = (procs: ProcRunner) =>
-  (procs.run as jest.Mock).mock.calls[0][1].env as Record<string, string | undefined>;
+  (procs.run as Mock).mock.calls[0][1].env as Record<string, string | undefined>;
 
 describe('runKibanaServer()', () => {
   const originalEnvValue = process.env.KBN_DISALLOW_CODE_GEN_FROM_STRINGS;

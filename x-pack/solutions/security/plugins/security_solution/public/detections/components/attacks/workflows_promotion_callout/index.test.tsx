@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
@@ -22,11 +25,11 @@ import {
   WORKFLOWS_PROMOTION_CALLOUT_TEST_ID,
 } from '.';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/hooks/use_app_toasts');
 
-const useKibanaMock = useKibana as jest.Mock;
-const useAppToastsMockHook = useAppToasts as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useAppToastsMockHook = useAppToasts as Mock;
 
 const STORAGE_KEY = 'securitySolution.attacksPage.workflowsPromotionCalloutDismissed.v9.5';
 const DOCS_URL = 'https://docs.test/run-attack-discovery-in-a-workflow';
@@ -34,17 +37,17 @@ const DOCS_URL = 'https://docs.test/run-attack-discovery-in-a-workflow';
 const createStorageMock = (initial: Record<string, unknown> = {}) => {
   const store = new Map<string, unknown>(Object.entries(initial));
   return {
-    get: jest.fn((key: string) => store.get(key)),
-    set: jest.fn((key: string, value: unknown) => store.set(key, value)),
-    remove: jest.fn((key: string) => store.delete(key)),
+    get: vi.fn((key: string) => store.get(key)),
+    set: vi.fn((key: string, value: unknown) => store.set(key, value)),
+    remove: vi.fn((key: string) => store.delete(key)),
   };
 };
 
-let reportEvent: jest.Mock;
-let setUiSetting: jest.Mock;
+let reportEvent: Mock;
+let setUiSetting: Mock;
 let storageMock: ReturnType<typeof createStorageMock>;
 let appToasts: ReturnType<typeof useAppToastsMock.create>;
-const reloadMock = jest.fn();
+const reloadMock = vi.fn();
 
 const originalLocation = window.location;
 
@@ -63,8 +66,8 @@ const renderCallout = ({
   dismissed = false,
   setRejects = false,
 }: RenderOptions = {}) => {
-  reportEvent = jest.fn();
-  setUiSetting = jest.fn(() =>
+  reportEvent = vi.fn();
+  setUiSetting = vi.fn(() =>
     setRejects ? Promise.reject(new Error('boom')) : Promise.resolve(true)
   );
   storageMock = createStorageMock(dismissed ? { [STORAGE_KEY]: true } : {});
@@ -73,11 +76,11 @@ const renderCallout = ({
     services: {
       application: { capabilities: { advancedSettings: { save: canSaveAdvancedSettings } } },
       docLinks: { links: { siem: { runAttackDiscoveryInWorkflow: DOCS_URL } } },
-      featureFlags: { useBooleanValue: jest.fn(() => featureAvailable) },
+      featureFlags: { useBooleanValue: vi.fn(() => featureAvailable) },
       storage: storageMock,
       telemetry: { reportEvent },
       uiSettings: {
-        get: jest.fn((key: string, defaultValue: unknown) =>
+        get: vi.fn((key: string, defaultValue: unknown) =>
           key === ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING ? spaceEnabled : defaultValue
         ),
         set: setUiSetting,
@@ -100,7 +103,7 @@ describe('WorkflowsPromotionCallout', () => {
 
   afterEach(() => {
     Object.defineProperty(window, 'location', { configurable: true, value: originalLocation });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders when the feature is available, the space setting is off, and it is not dismissed', () => {

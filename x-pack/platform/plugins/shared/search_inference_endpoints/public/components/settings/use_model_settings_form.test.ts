@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { useModelSettingsForm } from './use_model_settings_form';
@@ -12,13 +15,13 @@ import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { useInferenceSettings, useSaveInferenceSettings } from '../../hooks/use_inference_settings';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 
-jest.mock('../../hooks/use_registered_features');
-jest.mock('../../hooks/use_inference_settings');
+vi.mock('../../hooks/use_registered_features');
+vi.mock('../../hooks/use_inference_settings');
 
-const mockUseRegisteredFeatures = useRegisteredFeatures as jest.Mock;
-const mockUseInferenceSettings = useInferenceSettings as jest.Mock;
-const mockUseSaveInferenceSettings = useSaveInferenceSettings as jest.Mock;
-const mockSaveSettings = jest.fn().mockResolvedValue(undefined);
+const mockUseRegisteredFeatures = useRegisteredFeatures as Mock;
+const mockUseInferenceSettings = useInferenceSettings as Mock;
+const mockUseSaveInferenceSettings = useSaveInferenceSettings as Mock;
+const mockSaveSettings = vi.fn().mockResolvedValue(undefined);
 
 const parentFeature: InferenceFeatureConfig = {
   featureId: 'search',
@@ -50,7 +53,7 @@ const allFeatures = [parentFeature, childFeature1, childFeature2];
 
 describe('useModelSettingsForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseRegisteredFeatures.mockReturnValue({ features: allFeatures, isLoading: false });
     mockUseInferenceSettings.mockReturnValue({ data: undefined, isLoading: false });
     mockUseSaveInferenceSettings.mockReturnValue({

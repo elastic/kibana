@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { readFile } from 'fs/promises';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -48,22 +51,28 @@ qPDlGRlOgVTd9xUfHFkzB52c70E=
 -----END PGP PUBLIC KEY BLOCK-----
 `;
 const testGpgKeyFileContent = Buffer.from(testGpgKey);
-const mockGetConfig = jest.fn();
-jest.mock('../../app_context', () => ({
-  appContextService: {
-    getConfig: () => mockGetConfig(),
-    getLogger: () => mockLogger,
-  },
-}));
+const mockGetConfig = vi.fn();
+vi.mock('../../app_context', () => {
+      const mocked = {
+      appContextService: {
+        getConfig: () => mockGetConfig(),
+        getLogger: () => mockLogger,
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('fs/promises', () => ({
-  readFile: jest.fn(),
-}));
+vi.mock('fs/promises', () => {
+      const mocked = {
+      readFile: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedReadFile = readFile as jest.MockedFunction<typeof readFile>;
+const mockedReadFile = readFile as MockedFunction<typeof readFile>;
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 describe('getGpgKeyOrUndefined', () => {
   it('should cache the gpg key after reading file once', async () => {

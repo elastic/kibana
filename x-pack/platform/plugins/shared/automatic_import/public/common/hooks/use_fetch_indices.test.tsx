@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { buildSelectableIndexAndDataStreamNames, useFetchIndices } from './use_fetch_indices';
 import { useKibana } from './use_kibana';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
-jest.mock('./use_kibana');
-const mockUseKibana = useKibana as jest.Mock;
+vi.mock('./use_kibana');
+const mockUseKibana = useKibana as Mock;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -79,10 +82,10 @@ describe('buildSelectableIndexAndDataStreamNames', () => {
 });
 
 describe('useFetchIndices', () => {
-  const mockHttpGet = jest.fn();
+  const mockHttpGet = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         http: {
@@ -137,7 +140,7 @@ describe('useFetchIndices', () => {
   });
 
   it('should handle API errors', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     mockHttpGet.mockRejectedValue(new Error('API Error'));
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   ALERT_RULE_TYPE_ID,
   ALERT_STATUS,
@@ -32,7 +34,7 @@ interface QueryFilter {
 }
 
 const createMockAlertsClient = () => ({
-  search: jest.fn().mockResolvedValue({
+  search: vi.fn().mockResolvedValue({
     aggregations: {
       services: {
         buckets: [],

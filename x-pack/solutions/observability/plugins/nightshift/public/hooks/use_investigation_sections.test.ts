@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { InvestigationStatus, Severity } from '@kbn/nightshift-investigations-plugin/common';
 import { useFetchInvestigations } from './use_fetch_investigations';
 import { useInvestigationSections } from './use_investigation_sections';
 
-jest.mock('./use_fetch_investigations', () => ({
-  useFetchInvestigations: jest.fn(),
-}));
+vi.mock('./use_fetch_investigations', () => {
+      const mocked = {
+      useFetchInvestigations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseInvestigationSection = useFetchInvestigations as jest.MockedFunction<
+const mockUseInvestigationSection = useFetchInvestigations as MockedFunction<
   typeof useFetchInvestigations
 >;
 
@@ -46,13 +52,13 @@ const sectionResult = ({
   isFetching: false,
   isPreviousData,
   error: null,
-  fetchNextPage: jest.fn(),
-  refetch: jest.fn(),
+  fetchNextPage: vi.fn(),
+  refetch: vi.fn(),
 });
 
 describe('useInvestigationSections', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseInvestigationSection.mockImplementation(({ statuses, severities }) => {
       if (statuses.includes('pending')) {
         return sectionResult({ total: 2, status: 'pending' });
@@ -171,8 +177,8 @@ describe('useInvestigationSections', () => {
       refetchFailed,
     }: {
       inProgressTotal: number;
-      refetchCritical: jest.Mock;
-      refetchFailed: jest.Mock;
+      refetchCritical: Mock;
+      refetchFailed: Mock;
     }) =>
     ({ statuses, severities }: { statuses: InvestigationStatus[]; severities?: Severity[] }) => {
       if (statuses.includes('pending')) {
@@ -190,8 +196,8 @@ describe('useInvestigationSections', () => {
     };
 
   it('refetches the sections work can land in once the last one finishes', () => {
-    const refetchCritical = jest.fn();
-    const refetchFailed = jest.fn();
+    const refetchCritical = vi.fn();
+    const refetchFailed = vi.fn();
 
     mockUseInvestigationSection.mockImplementation(
       implementationWithInProgressTotal({ inProgressTotal: 1, refetchCritical, refetchFailed })
@@ -210,8 +216,8 @@ describe('useInvestigationSections', () => {
   });
 
   it('refetches when one investigation finishes while others keep running', () => {
-    const refetchCritical = jest.fn();
-    const refetchFailed = jest.fn();
+    const refetchCritical = vi.fn();
+    const refetchFailed = vi.fn();
 
     mockUseInvestigationSection.mockImplementation(
       implementationWithInProgressTotal({ inProgressTotal: 3, refetchCritical, refetchFailed })
@@ -228,8 +234,8 @@ describe('useInvestigationSections', () => {
   });
 
   it('does not refetch when new work starts', () => {
-    const refetchCritical = jest.fn();
-    const refetchFailed = jest.fn();
+    const refetchCritical = vi.fn();
+    const refetchFailed = vi.fn();
 
     mockUseInvestigationSection.mockImplementation(
       implementationWithInProgressTotal({ inProgressTotal: 1, refetchCritical, refetchFailed })
@@ -253,8 +259,8 @@ describe('useInvestigationSections', () => {
     }: {
       ids: string[];
       isPreviousData?: boolean;
-      refetchCritical: jest.Mock;
-      refetchFailed: jest.Mock;
+      refetchCritical: Mock;
+      refetchFailed: Mock;
     }) =>
     ({ statuses, severities }: { statuses: InvestigationStatus[]; severities?: Severity[] }) => {
       if (statuses.includes('pending')) {
@@ -279,8 +285,8 @@ describe('useInvestigationSections', () => {
     };
 
   it('refetches when one finishes as another starts, leaving the in-progress total flat', () => {
-    const refetchCritical = jest.fn();
-    const refetchFailed = jest.fn();
+    const refetchCritical = vi.fn();
+    const refetchFailed = vi.fn();
 
     mockUseInvestigationSection.mockImplementation(
       implementationWithInProgressIds({
@@ -304,8 +310,8 @@ describe('useInvestigationSections', () => {
     expect(refetchFailed).toHaveBeenCalledTimes(1);
   });
   it('does not treat a search change as work finishing, since the rows are a different filter', () => {
-    const refetchCritical = jest.fn();
-    const refetchFailed = jest.fn();
+    const refetchCritical = vi.fn();
+    const refetchFailed = vi.fn();
 
     mockUseInvestigationSection.mockImplementation(
       implementationWithInProgressIds({
@@ -330,8 +336,8 @@ describe('useInvestigationSections', () => {
   });
 
   it('ignores the rows keepPreviousData is still serving from the outgoing search', () => {
-    const refetchCritical = jest.fn();
-    const refetchFailed = jest.fn();
+    const refetchCritical = vi.fn();
+    const refetchFailed = vi.fn();
 
     mockUseInvestigationSection.mockImplementation(
       implementationWithInProgressIds({

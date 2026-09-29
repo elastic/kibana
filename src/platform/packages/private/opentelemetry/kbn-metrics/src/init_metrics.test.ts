@@ -7,21 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { OTLPMetricExporter as OTLPMetricExporterGrpc } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { OTLPMetricExporter as OTLPMetricExporterHttp } from '@opentelemetry/exporter-metrics-otlp-http';
 import { duration } from 'moment';
 
-jest.mock('@elastic/opentelemetry-node/sdk', () => {
-  const actual = jest.requireActual('@elastic/opentelemetry-node/sdk');
+vi.mock('@elastic/opentelemetry-node/sdk', () => {
+  const actual = require('@elastic/opentelemetry-node/sdk');
 
   return {
     ...actual,
     metrics: {
       ...actual.metrics,
-      MeterProvider: jest.fn((options) => {
+      MeterProvider: vi.fn((options) => {
         return new actual.metrics.MeterProvider(options);
       }),
-      PeriodicExportingMetricReader: jest.fn((options) => {
+      PeriodicExportingMetricReader: vi.fn((options) => {
         return new actual.metrics.PeriodicExportingMetricReader(options);
       }),
     },
@@ -34,10 +37,10 @@ import type { MetricsExporterConfig } from '@kbn/metrics-config';
 
 describe('initMetrics', () => {
   const resource = resources.resourceFromAttributes({});
-  let MeterProviderMock: jest.Mock;
-  let PeriodicExportingMetricReader: jest.Mock;
+  let MeterProviderMock: Mock;
+  let PeriodicExportingMetricReader: Mock;
 
-  const { metrics } = jest.requireActual('@elastic/opentelemetry-node/sdk');
+  const { metrics } = require('@elastic/opentelemetry-node/sdk');
 
   const exporters: MetricsExporterConfig[] = [
     {
@@ -56,9 +59,9 @@ describe('initMetrics', () => {
     },
   ];
 
-  beforeEach(() => {
-    MeterProviderMock = jest.requireMock('@elastic/opentelemetry-node/sdk').metrics.MeterProvider;
-    PeriodicExportingMetricReader = jest.requireMock('@elastic/opentelemetry-node/sdk').metrics
+  beforeEach(async () => {
+    MeterProviderMock = (await vi.importMock('@elastic/opentelemetry-node/sdk')).metrics.MeterProvider;
+    PeriodicExportingMetricReader = (await vi.importMock('@elastic/opentelemetry-node/sdk')).metrics
       .PeriodicExportingMetricReader;
   });
 
@@ -66,7 +69,7 @@ describe('initMetrics', () => {
     PrometheusExporter.destroy();
     delete process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT;
     delete process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should register the prometheus exporter if enabled in config', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -14,9 +16,7 @@ import { PrivilegeChecker } from './privilege_checker';
 const spaceId = 'default';
 
 // securityMock stubs ApiActions, so pull the real class for actionFromRouteTag.
-const { ApiActions } = jest.requireActual(
-  '@kbn/security-authorization-core/src/actions/api'
-) as typeof import('@kbn/security-authorization-core/src/actions/api');
+const { ApiActions } = (await vi.importActual('@kbn/security-authorization-core/src/actions/api')) as typeof import('@kbn/security-authorization-core/src/actions/api');
 const apiActions = new ApiActions();
 
 const actionFor = (privilege: string) => apiActions.actionFromRouteTag(privilege);
@@ -31,18 +31,18 @@ const createRequestMock = (grantedPrivileges: string[]) => {
 const createSecurity = (privilegesByRequest: Map<KibanaRequest, string[]>) => {
   const security = securityMock.createStart();
 
-  jest
+  vi
     .mocked(security.authz.actions.api.actionFromRouteTag)
     .mockImplementation((tag: string) => apiActions.actionFromRouteTag(tag));
 
   security.authz.checkPrivilegesWithRequest.mockImplementation((req: KibanaRequest) => ({
-    globally: jest.fn(),
-    atSpace: jest.fn().mockImplementation((_sid: string, { kibana }: { kibana: string[] }) => {
+    globally: vi.fn(),
+    atSpace: vi.fn().mockImplementation((_sid: string, { kibana }: { kibana: string[] }) => {
       const granted = privilegesByRequest.get(req) ?? [];
       const hasAllRequested = kibana.every((action) => granted.includes(action));
       return Promise.resolve({ hasAllRequested });
     }),
-    atSpaces: jest.fn(),
+    atSpaces: vi.fn(),
   }));
 
   return security;

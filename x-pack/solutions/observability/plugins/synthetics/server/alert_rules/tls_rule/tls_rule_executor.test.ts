@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import moment from 'moment';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -23,7 +25,7 @@ describe('tlsRuleExecutor', () => {
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
   const logger = loggerMock.create();
   const soClient = savedObjectsClientMock.create();
-  jest.spyOn(locationsUtils, 'getAllLocations').mockResolvedValue({
+  vi.spyOn(locationsUtils, 'getAllLocations').mockResolvedValue({
     // @ts-ignore
     publicLocations: [
       {
@@ -51,7 +53,7 @@ describe('tlsRuleExecutor', () => {
     },
     spaces: {
       spacesService: {
-        getSpaceId: jest.fn().mockReturnValue('test-space'),
+        getSpaceId: vi.fn().mockReturnValue('test-space'),
       },
     },
     encryptedSavedObjects: mockEncryptedSO(),
@@ -89,7 +91,7 @@ describe('tlsRuleExecutor', () => {
   it('should only query enabled monitors', async () => {
     const tlsRule = new TLSRuleExecutor(...getTLSRuleExecutorParams());
     const configRepo = tlsRule.monitorConfigRepository;
-    const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+    const spy = vi.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
     const { certs } = await tlsRule.getExpiredCertificates();
 
@@ -105,7 +107,7 @@ describe('tlsRuleExecutor', () => {
       const monitorId = randomUUID();
       const tlsRule = new TLSRuleExecutor(...getTLSRuleExecutorParams({ monitorIds: [monitorId] }));
       const configRepo = tlsRule.monitorConfigRepository;
-      const getAllMock = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+      const getAllMock = vi.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       await tlsRule.getMonitors();
 
@@ -118,7 +120,7 @@ describe('tlsRuleExecutor', () => {
       const tag = 'myMonitor';
       const tlsRule = new TLSRuleExecutor(...getTLSRuleExecutorParams({ tags: [tag] }));
       const configRepo = tlsRule.monitorConfigRepository;
-      const getAllMock = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+      const getAllMock = vi.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       await tlsRule.getMonitors();
 
@@ -132,7 +134,7 @@ describe('tlsRuleExecutor', () => {
         ...getTLSRuleExecutorParams({ includeBrowserCerts: true })
       );
       const configRepo = tlsRule.monitorConfigRepository;
-      const getAllMock = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+      const getAllMock = vi.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       await tlsRule.getMonitors();
 
@@ -147,7 +149,7 @@ describe('tlsRuleExecutor', () => {
         ...getTLSRuleExecutorParams({ monitorTypes: [monitorType] })
       );
       const configRepo = tlsRule.monitorConfigRepository;
-      const getAllMock = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+      const getAllMock = vi.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       await tlsRule.getMonitors();
 

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import _ from 'lodash';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
@@ -55,9 +58,9 @@ describe('DocumentMigratorPipeline', () => {
     };
   };
 
-  const createTransformFn = (impl?: TransformFn): jest.MockedFunction<TransformFn> => {
+  const createTransformFn = (impl?: TransformFn): MockedFunction<TransformFn> => {
     const defaultImpl: TransformFn = (doc) => ({ transformedDoc: doc, additionalDocs: [] });
-    return jest.fn().mockImplementation(impl ?? defaultImpl);
+    return vi.fn().mockImplementation(impl ?? defaultImpl);
   };
 
   describe('upward conversions', () => {

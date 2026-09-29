@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
@@ -68,24 +71,24 @@ describe('CsvGenerator', () => {
   let mockEsClient: IScopedClusterClient;
   let mockDataClient: ISearchClient;
   let mockConfig: CsvConfigType;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
   let uiSettingsClient: IUiSettingsClient;
-  let stream: jest.Mocked<Writable>;
+  let stream: Mocked<Writable>;
   let content: string;
 
   const searchSourceMock = {
     ...searchSourceInstanceMock,
-    getSearchRequestBody: jest.fn(() => ({})),
+    getSearchRequestBody: vi.fn(() => ({})),
   };
 
-  const mockSearchSourceService: jest.Mocked<ISearchStartSearchSource> = {
-    create: jest.fn().mockReturnValue(searchSourceMock),
-    createLazy: jest.fn().mockReturnValue(searchSourceMock),
-    createEmpty: jest.fn().mockReturnValue(searchSourceMock),
-    telemetry: jest.fn(),
-    inject: jest.fn(),
-    extract: jest.fn(),
-    getAllMigrations: jest.fn(),
+  const mockSearchSourceService: Mocked<ISearchStartSearchSource> = {
+    create: vi.fn().mockReturnValue(searchSourceMock),
+    createLazy: vi.fn().mockReturnValue(searchSourceMock),
+    createEmpty: vi.fn().mockReturnValue(searchSourceMock),
+    telemetry: vi.fn(),
+    inject: vi.fn(),
+    extract: vi.fn(),
+    getAllMigrations: vi.fn(),
   };
 
   const mockCursorId = 'oju9fs3698s3902f02-8qg3-u9w36oiewiuyew6';
@@ -101,7 +104,7 @@ describe('CsvGenerator', () => {
     hits: { hits, total, max_score: 0 },
   });
 
-  const mockDataClientSearchDefault = jest.fn().mockImplementation(
+  const mockDataClientSearchDefault = vi.fn().mockImplementation(
     (): Rx.Observable<{ rawResponse: SearchResponse<unknown> }> =>
       Rx.of({
         rawResponse: getMockRawResponse(),
@@ -109,27 +112,27 @@ describe('CsvGenerator', () => {
   );
 
   const mockFieldFormatsRegistry = {
-    deserialize: jest.fn().mockImplementation(() => ({
+    deserialize: vi.fn().mockImplementation(() => ({
       id: 'string',
-      convertToText: jest.fn().mockImplementation(identity),
+      convertToText: vi.fn().mockImplementation(identity),
     })),
   } as unknown as FieldFormatsRegistry;
 
   beforeEach(async () => {
     content = '';
-    stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
+    stream = { write: vi.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
     mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
     mockDataClient = dataPluginMock.createStartContract().search.asScoped({} as any);
     mockDataClient.search = mockDataClientSearchDefault;
 
-    mockEsClient.asCurrentUser.openPointInTime = jest
+    mockEsClient.asCurrentUser.openPointInTime = vi
       .fn()
       .mockResolvedValueOnce({ id: mockCursorId });
 
     uiSettingsClient = uiSettingsServiceMock
       .createStartContract()
       .asScopedToClient(savedObjectsClientMock.create());
-    uiSettingsClient.get = jest.fn().mockImplementation((key): any => {
+    uiSettingsClient.get = vi.fn().mockImplementation((key): any => {
       switch (key) {
         case UI_SETTINGS_CSV_QUOTE_VALUES:
           return true;
@@ -159,9 +162,9 @@ describe('CsvGenerator', () => {
       },
     });
 
-    dataView.getFormatterForField = jest.fn();
+    dataView.getFormatterForField = vi.fn();
 
-    searchSourceMock.getField = jest.fn((key: string) => {
+    searchSourceMock.getField = vi.fn((key: string) => {
       switch (key) {
         case 'pit':
           return { id: mockCursorId };
@@ -199,7 +202,7 @@ describe('CsvGenerator', () => {
   });
 
   it('formats a search result to CSV content', async () => {
-    mockDataClient.search = jest.fn().mockImplementation(() =>
+    mockDataClient.search = vi.fn().mockImplementation(() =>
       Rx.of({
         rawResponse: getMockRawResponse([
           {
@@ -240,7 +243,7 @@ describe('CsvGenerator', () => {
   const HITS_TOTAL = 100;
 
   it('calculates the bytes of the content', async () => {
-    mockDataClient.search = jest.fn().mockImplementation(() =>
+    mockDataClient.search = vi.fn().mockImplementation(() =>
       Rx.of({
         rawResponse: getMockRawResponse(
           range(0, HITS_TOTAL).map(
@@ -291,7 +294,7 @@ describe('CsvGenerator', () => {
         maxSizeBytes: TEST_MAX_SIZE,
       });
 
-      mockDataClient.search = jest.fn().mockImplementation(() =>
+      mockDataClient.search = vi.fn().mockImplementation(() =>
         Rx.of({
           rawResponse: getMockRawResponse(
             range(0, HITS_TOTAL).map(
@@ -333,7 +336,7 @@ describe('CsvGenerator', () => {
     });
 
     it('uses the pit ID to page all the data', async () => {
-      mockDataClient.search = jest
+      mockDataClient.search = vi
         .fn()
         .mockImplementationOnce(() =>
           Rx.of({
@@ -424,7 +427,7 @@ describe('CsvGenerator', () => {
     });
 
     it('keeps order of the columns during the scroll', async () => {
-      mockDataClient.search = jest
+      mockDataClient.search = vi
         .fn()
         .mockImplementationOnce(() =>
           Rx.of({
@@ -475,7 +478,7 @@ describe('CsvGenerator', () => {
     });
 
     it('adds a warning if export was unable to close the PIT', async () => {
-      mockEsClient.asCurrentUser.closePointInTime = jest.fn().mockRejectedValueOnce(
+      mockEsClient.asCurrentUser.closePointInTime = vi.fn().mockRejectedValueOnce(
         new esErrors.ResponseError({
           statusCode: 419,
           warnings: [],
@@ -524,7 +527,7 @@ describe('CsvGenerator', () => {
 
     describe('debug logging', () => {
       it('logs the the total hits relation if relation is provided', async () => {
-        mockDataClient.search = jest.fn().mockImplementation(() =>
+        mockDataClient.search = vi.fn().mockImplementation(() =>
           Rx.of({
             rawResponse: {
               took: 1,
@@ -536,7 +539,7 @@ describe('CsvGenerator', () => {
           })
         );
 
-        const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+        const debugLogSpy = vi.spyOn(mockLogger, 'debug');
         const generateCsv = new CsvGenerator(
           mockJobUsingPitPaging,
           mockConfig,
@@ -562,7 +565,7 @@ describe('CsvGenerator', () => {
       });
 
       it('logs the the total hits relation as "unknown" if relation is not provided', async () => {
-        mockDataClient.search = jest.fn().mockImplementation(() =>
+        mockDataClient.search = vi.fn().mockImplementation(() =>
           Rx.of({
             rawResponse: {
               took: 1,
@@ -574,7 +577,7 @@ describe('CsvGenerator', () => {
           })
         );
 
-        const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+        const debugLogSpy = vi.spyOn(mockLogger, 'debug');
         const generateCsv = new CsvGenerator(
           mockJobUsingPitPaging,
           mockConfig,
@@ -602,10 +605,10 @@ describe('CsvGenerator', () => {
 
     describe('useInternalUser parameter', () => {
       beforeEach(() => {
-        mockEsClient.asInternalUser.openPointInTime = jest
+        mockEsClient.asInternalUser.openPointInTime = vi
           .fn()
           .mockResolvedValue({ id: mockCursorId });
-        mockEsClient.asInternalUser.closePointInTime = jest.fn().mockResolvedValue({});
+        mockEsClient.asInternalUser.closePointInTime = vi.fn().mockResolvedValue({});
       });
 
       it('uses internal user client when useInternalUser is true', async () => {
@@ -701,7 +704,7 @@ describe('CsvGenerator', () => {
     };
 
     let mockConfigWithAutoScrollDuration: ReportingConfigType['csv'];
-    let mockDataClientSearchFn: jest.MockedFunction<IScopedSearchClient['search']>;
+    let mockDataClientSearchFn: MockedFunction<IScopedSearchClient['search']>;
 
     beforeEach(() => {
       mockConfigWithAutoScrollDuration = {
@@ -712,14 +715,14 @@ describe('CsvGenerator', () => {
         },
       };
 
-      mockDataClientSearchFn = jest.fn();
+      mockDataClientSearchFn = vi.fn();
 
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.clearAllTimers();
-      jest.useRealTimers();
+      vi.clearAllTimers();
+      vi.useRealTimers();
 
       mockDataClientSearchFn.mockRestore();
     });
@@ -788,7 +791,7 @@ describe('CsvGenerator', () => {
         jobId
       ).generateData();
 
-      await jest.advanceTimersByTimeAsync(timeFromNowInMs);
+      await vi.advanceTimersByTimeAsync(timeFromNowInMs);
 
       expect(await generateCsvPromise).toEqual(
         expect.objectContaining({
@@ -874,7 +877,7 @@ describe('CsvGenerator', () => {
         jobId
       ).generateData();
 
-      await jest.advanceTimersByTimeAsync(requestDuration);
+      await vi.advanceTimersByTimeAsync(requestDuration);
 
       expect(await generateCsvPromise).toEqual(
         expect.objectContaining({
@@ -902,7 +905,7 @@ describe('CsvGenerator', () => {
     });
 
     beforeEach(() => {
-      mockDataClient.search = jest
+      mockDataClient.search = vi
         .fn()
         .mockImplementationOnce(() =>
           Rx.of({
@@ -1016,7 +1019,7 @@ describe('CsvGenerator', () => {
     });
 
     it('keeps order of the columns during the scroll', async () => {
-      mockDataClient.search = jest
+      mockDataClient.search = vi
         .fn()
         .mockImplementationOnce(() =>
           Rx.of({
@@ -1070,7 +1073,7 @@ describe('CsvGenerator', () => {
 
     describe('debug logging', () => {
       it('logs the the total hits relation if relation is provided', async () => {
-        mockDataClient.search = jest.fn().mockImplementation(() =>
+        mockDataClient.search = vi.fn().mockImplementation(() =>
           Rx.of({
             rawResponse: {
               took: 1,
@@ -1082,7 +1085,7 @@ describe('CsvGenerator', () => {
           })
         );
 
-        const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+        const debugLogSpy = vi.spyOn(mockLogger, 'debug');
         const generateCsv = new CsvGenerator(
           mockJobUsingScrollPaging,
           getMockConfig({
@@ -1110,7 +1113,7 @@ describe('CsvGenerator', () => {
       });
 
       it('logs the the total hits relation as "unknown" if relation is not provided', async () => {
-        const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+        const debugLogSpy = vi.spyOn(mockLogger, 'debug');
         const generateCsv = new CsvGenerator(
           mockJobUsingScrollPaging,
           getMockConfig({
@@ -1141,7 +1144,7 @@ describe('CsvGenerator', () => {
 
   describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
     it('cells can be multi-value', async () => {
-      mockDataClient.search = jest.fn().mockImplementation(() =>
+      mockDataClient.search = vi.fn().mockImplementation(() =>
         Rx.of({
           rawResponse: getMockRawResponse([
             {
@@ -1181,7 +1184,7 @@ describe('CsvGenerator', () => {
     });
 
     it('provides top-level underscored fields as columns', async () => {
-      mockDataClient.search = jest.fn().mockImplementation(() =>
+      mockDataClient.search = vi.fn().mockImplementation(() =>
         Rx.of({
           rawResponse: getMockRawResponse([
             {
@@ -1233,7 +1236,7 @@ describe('CsvGenerator', () => {
     });
 
     it('sorts the fields when they are to be used as table column names', async () => {
-      mockDataClient.search = jest.fn().mockImplementation(() =>
+      mockDataClient.search = vi.fn().mockImplementation(() =>
         Rx.of({
           rawResponse: getMockRawResponse([
             {
@@ -1292,7 +1295,7 @@ describe('CsvGenerator', () => {
 
   describe('fields from job.columns (7.13+ generated)', () => {
     it('cells can be multi-value', async () => {
-      mockDataClient.search = jest.fn().mockImplementation(() =>
+      mockDataClient.search = vi.fn().mockImplementation(() =>
         Rx.of({
           rawResponse: getMockRawResponse([
             {
@@ -1333,7 +1336,7 @@ describe('CsvGenerator', () => {
     });
 
     it('columns can be top-level fields such as _id and _index', async () => {
-      mockDataClient.search = jest.fn().mockImplementation(() =>
+      mockDataClient.search = vi.fn().mockImplementation(() =>
         Rx.of({
           rawResponse: getMockRawResponse([
             {
@@ -1374,7 +1377,7 @@ describe('CsvGenerator', () => {
     });
 
     it('default column names come from tabify', async () => {
-      mockDataClient.search = jest.fn().mockImplementation(() =>
+      mockDataClient.search = vi.fn().mockImplementation(() =>
         Rx.of({
           rawResponse: getMockRawResponse([
             {
@@ -1419,7 +1422,7 @@ describe('CsvGenerator', () => {
     const TEST_FORMULA = '=SUM(A1:A2)';
 
     it(`escapes formula values in a cell, doesn't warn the csv contains formulas`, async () => {
-      mockDataClient.search = jest.fn().mockImplementation(() =>
+      mockDataClient.search = vi.fn().mockImplementation(() =>
         Rx.of({
           rawResponse: getMockRawResponse([
             {
@@ -1460,7 +1463,7 @@ describe('CsvGenerator', () => {
     });
 
     it(`escapes formula values in a header, doesn't warn the csv contains formulas`, async () => {
-      mockDataClient.search = jest.fn().mockImplementation(() =>
+      mockDataClient.search = vi.fn().mockImplementation(() =>
         Rx.of({
           rawResponse: getMockRawResponse([
             {
@@ -1506,7 +1509,7 @@ describe('CsvGenerator', () => {
         escapeFormulaValues: false,
       });
 
-      mockDataClient.search = jest.fn().mockImplementation(() =>
+      mockDataClient.search = vi.fn().mockImplementation(() =>
         Rx.of({
           rawResponse: getMockRawResponse([
             {
@@ -1549,7 +1552,7 @@ describe('CsvGenerator', () => {
 
   it('can override ignoring frozen indices', async () => {
     const originalGet = uiSettingsClient.get;
-    uiSettingsClient.get = jest.fn().mockImplementation((key): any => {
+    uiSettingsClient.get = vi.fn().mockImplementation((key): any => {
       if (key === 'search:includeFrozen') {
         return true;
       }
@@ -1608,7 +1611,7 @@ describe('CsvGenerator', () => {
       columns: ['date', 'ip', 'message'],
       pagingStrategy: 'pit',
     });
-    mockDataClient.search = jest
+    mockDataClient.search = vi
       .fn()
       .mockImplementationOnce(() =>
         Rx.of({
@@ -1665,7 +1668,7 @@ describe('CsvGenerator', () => {
       false, // isServerless
       jobId
     );
-    const warnLogSpy = jest.spyOn(mockLogger, 'warn');
+    const warnLogSpy = vi.spyOn(mockLogger, 'warn');
     const csvResult = await generateCsv.generateData();
     expect(csvResult).toMatchInlineSnapshot(`
       Object {
@@ -1694,7 +1697,7 @@ describe('CsvGenerator', () => {
       columns: ['date', 'ip', 'message'],
       pagingStrategy: 'pit',
     });
-    mockDataClient.search = jest
+    mockDataClient.search = vi
       .fn()
       .mockImplementationOnce(() =>
         Rx.of({
@@ -1751,7 +1754,7 @@ describe('CsvGenerator', () => {
       true, // isServerless
       jobId
     );
-    const warnLogSpy = jest.spyOn(mockLogger, 'warn');
+    const warnLogSpy = vi.spyOn(mockLogger, 'warn');
     const csvResult = await generateCsv.generateData();
     expect(csvResult).toMatchInlineSnapshot(`
       Object {
@@ -1780,7 +1783,7 @@ describe('CsvGenerator', () => {
       columns: ['date', 'ip', 'message'],
       pagingStrategy: 'pit',
     });
-    mockDataClient.search = jest
+    mockDataClient.search = vi
       .fn()
       .mockImplementationOnce(() =>
         Rx.of({
@@ -1856,7 +1859,7 @@ describe('CsvGenerator', () => {
   });
 
   it('will return partial data if the scroll or search fails', async () => {
-    mockDataClient.search = jest.fn().mockImplementation(() => {
+    mockDataClient.search = vi.fn().mockImplementation(() => {
       throw new esErrors.ResponseError({
         statusCode: 500,
         meta: {} as any,
@@ -1916,8 +1919,8 @@ describe('CsvGenerator', () => {
   });
 
   it('handles unknown errors', async () => {
-    const streamWriteSpy = jest.spyOn(stream, 'write');
-    mockDataClient.search = jest.fn().mockImplementation(() => {
+    const streamWriteSpy = vi.spyOn(stream, 'write');
+    mockDataClient.search = vi.fn().mockImplementation(() => {
       throw new Error('An unknown error');
     });
     const generateCsv = new CsvGenerator(
@@ -1974,7 +1977,7 @@ describe('CsvGenerator', () => {
 
   describe('error codes', () => {
     it('returns the expected error code when authentication expires', async () => {
-      mockDataClient.search = jest
+      mockDataClient.search = vi
         .fn()
         .mockImplementationOnce(() =>
           Rx.of({

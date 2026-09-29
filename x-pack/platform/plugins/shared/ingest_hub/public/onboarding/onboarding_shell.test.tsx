@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router, Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('react-use/lib/useSessionStorage');
+vi.mock('react-use/lib/useSessionStorage');
 
 // Provide a minimal matrix so OnboardingShell renders without a real QueryClient
 // or live Fleet package manifests.
-jest.mock('./use_aws_service_matrix', () => {
+vi.mock('./use_aws_service_matrix', () => {
   const matrix = [
     {
       id: 'cloudtrail',
@@ -41,37 +44,40 @@ jest.mock('./use_aws_service_matrix', () => {
     },
   ];
   return {
-    useAwsServiceMatrix: jest.fn().mockReturnValue({ matrix, isError: false, refetch: jest.fn() }),
-    useAwsServicesMap: jest.fn().mockReturnValue(new Map(matrix.map((s) => [s.id, s]))),
+    useAwsServiceMatrix: vi.fn().mockReturnValue({ matrix, isError: false, refetch: vi.fn() }),
+    useAwsServicesMap: vi.fn().mockReturnValue(new Map(matrix.map((s) => [s.id, s]))),
   };
 });
 
 // Stub heavy step components — we only care about shell-level stepper and navigation.
-jest.mock('./step_components', () => ({
-  ServicesStep: ({ onContinue }: { onContinue: () => void }) => (
-    <button data-test-subj="servicesStep-continue" onClick={onContinue}>
-      Continue
-    </button>
-  ),
-  ServiceSettingsStep: ({ onContinue }: { onContinue: () => void }) => (
-    <button data-test-subj="serviceSettingsStep-continue" onClick={onContinue}>
-      Continue
-    </button>
-  ),
-  AuthenticateAndDeployStep: ({ onContinue }: { onContinue: () => void }) => (
-    <button data-test-subj="authenticateAndDeployStep-continue" onClick={onContinue}>
-      Continue
-    </button>
-  ),
-  DetectAndReviewStep: () => <div data-test-subj="detectAndReviewStep" />,
-}));
+vi.mock('./step_components', () => {
+      const mocked = {
+      ServicesStep: ({ onContinue }: { onContinue: () => void }) => (
+        <button data-test-subj="servicesStep-continue" onClick={onContinue}>
+          Continue
+        </button>
+      ),
+      ServiceSettingsStep: ({ onContinue }: { onContinue: () => void }) => (
+        <button data-test-subj="serviceSettingsStep-continue" onClick={onContinue}>
+          Continue
+        </button>
+      ),
+      AuthenticateAndDeployStep: ({ onContinue }: { onContinue: () => void }) => (
+        <button data-test-subj="authenticateAndDeployStep-continue" onClick={onContinue}>
+          Continue
+        </button>
+      ),
+      DetectAndReviewStep: () => <div data-test-subj="detectAndReviewStep" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { OnboardingFlowProvider, useOnboardingFlow } from './onboarding_flow_context';
 import { OnboardingShell } from './onboarding_shell';
 
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
-const mockUseSessionStorage = useSessionStorage as jest.MockedFunction<typeof useSessionStorage>;
+const mockUseSessionStorage = useSessionStorage as MockedFunction<typeof useSessionStorage>;
 
 beforeEach(() => {
   mockUseSessionStorage.mockImplementation((_key, initial) => React.useState(initial));

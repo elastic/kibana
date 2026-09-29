@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('./util', () => {
-  const module = jest.requireActual('./util');
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('./util', async () => {
+  const module = (await vi.importActual('./util'));
   return {
     ...module,
-    setXState: jest.fn(module.setXState),
+    setXState: vi.fn(module.setXState),
   };
 });
 
@@ -24,7 +27,7 @@ import type { VersionedRouterRoute } from '@kbn/core-http-server';
 import { createOpIdGenerator, setXState } from './util';
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('processVersionedRouter', () => {
@@ -83,7 +86,7 @@ describe('processVersionedRouter', () => {
     const routes = testRouter.getRoutes();
     expect(setXState).toHaveBeenCalledTimes(routes.length);
     routes.forEach((_, idx) => {
-      const [availability, operation, env] = (setXState as jest.Mock).mock.calls[idx];
+      const [availability, operation, env] = (setXState as Mock).mock.calls[idx];
       expect(availability === undefined || typeof availability === 'object').toBe(true);
       expect(typeof operation === 'object').toBe(true);
       expect(env).toEqual({ serverless: true });
@@ -109,7 +112,7 @@ const createTestRoute: () => VersionedRouterRoute = () => ({
   },
   handlers: [
     {
-      fn: jest.fn(),
+      fn: vi.fn(),
       options: {
         version: '2023-10-31',
         validate: () => ({
@@ -133,7 +136,7 @@ const createTestRoute: () => VersionedRouterRoute = () => ({
       },
     },
     {
-      fn: jest.fn(),
+      fn: vi.fn(),
       options: {
         version: '2024-12-31',
         validate: () => ({

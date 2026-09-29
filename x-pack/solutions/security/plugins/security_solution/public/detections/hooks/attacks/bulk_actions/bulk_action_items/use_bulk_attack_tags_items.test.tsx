@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { render, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -14,17 +17,20 @@ import { useAttacksPrivileges } from '../use_attacks_privileges';
 import { useApplyAttackTags } from '../apply_actions/use_apply_attack_tags';
 import { BulkAlertTagsPanel } from '../../../../../common/components/toolbar/bulk_actions/alert_bulk_tags';
 
-jest.mock('../use_attacks_privileges');
-jest.mock('../apply_actions/use_apply_attack_tags');
-jest.mock('../../../../../common/components/toolbar/bulk_actions/alert_bulk_tags', () => ({
-  BulkAlertTagsPanel: jest.fn(() => null),
-}));
+vi.mock('../use_attacks_privileges');
+vi.mock('../apply_actions/use_apply_attack_tags');
+vi.mock('../../../../../common/components/toolbar/bulk_actions/alert_bulk_tags', () => {
+      const mocked = {
+      BulkAlertTagsPanel: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
+const mockUseAttacksPrivileges = useAttacksPrivileges as MockedFunction<
   typeof useAttacksPrivileges
 >;
-const mockUseApplyAttackTags = useApplyAttackTags as jest.MockedFunction<typeof useApplyAttackTags>;
-const mockBulkAlertTagsPanel = BulkAlertTagsPanel as jest.MockedFunction<typeof BulkAlertTagsPanel>;
+const mockUseApplyAttackTags = useApplyAttackTags as MockedFunction<typeof useApplyAttackTags>;
+const mockBulkAlertTagsPanel = BulkAlertTagsPanel as MockedFunction<typeof BulkAlertTagsPanel>;
 
 let queryClient: QueryClient;
 
@@ -33,10 +39,10 @@ function wrapper(props: { children: React.ReactNode }) {
 }
 
 describe('useBulkAttackTagsItems', () => {
-  const mockApplyTags = jest.fn();
+  const mockApplyTags = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient();
 
     mockUseAttacksPrivileges.mockReturnValue({
@@ -109,15 +115,15 @@ describe('useBulkAttackTagsItems', () => {
       render(
         panel.renderContent({
           alertItems: [{ _id: '1', data: [], ecs: { _id: '1' } }],
-          closePopoverMenu: jest.fn(),
-          setIsBulkActionsLoading: jest.fn(),
+          closePopoverMenu: vi.fn(),
+          setIsBulkActionsLoading: vi.fn(),
         })
       );
     }
 
     const onSubmit = mockBulkAlertTagsPanel.mock.calls[0][0].onSubmit;
     if (onSubmit) {
-      await onSubmit({ tags_to_add: ['tag1'], tags_to_remove: ['tag2'] }, [], jest.fn(), jest.fn());
+      await onSubmit({ tags_to_add: ['tag1'], tags_to_remove: ['tag2'] }, [], vi.fn(), vi.fn());
     }
 
     expect(mockApplyTags).toHaveBeenCalledWith(

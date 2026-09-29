@@ -7,30 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { OverviewPageFooter } from './overview_page_footer';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
-jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
-  RedirectAppLinks: jest.fn((element: JSX.Element) => element),
-}));
+vi.mock('@kbn/shared-ux-link-redirect-app', () => {
+      const mocked = {
+      RedirectAppLinks: vi.fn((element: JSX.Element) => element),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../context', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: { capabilities: { advancedSettings: { show: true, save: true } } },
-      notifications: { toast: { addSuccess: jest.fn() } },
-    },
-  }),
-}));
+vi.mock('../../context', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          application: { capabilities: { advancedSettings: { show: true, save: true } } },
+          notifications: { toast: { addSuccess: vi.fn() } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../ui_settings', () => ({
-  useUiSetting$: jest.fn().mockReturnValue(['path-to-default-route', jest.fn()]),
-}));
+vi.mock('../../ui_settings', () => {
+      const mocked = {
+      useUiSetting$: vi.fn().mockReturnValue(['path-to-default-route', vi.fn()]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-afterEach(() => jest.clearAllMocks());
+afterEach(() => vi.clearAllMocks());
 
-const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
+const addBasePathMock = vi.fn((path: string) => (path ? path : 'path'));
 
 describe('OverviewPageFooter', () => {
   test('render', () => {

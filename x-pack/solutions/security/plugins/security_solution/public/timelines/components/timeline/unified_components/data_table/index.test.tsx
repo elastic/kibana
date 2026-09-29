@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createMockStore, mockTimelineData, TestProviders } from '../../../../../common/mock';
 import type { ComponentProps } from 'react';
 import React from 'react';
@@ -28,40 +31,52 @@ import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.moc
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
-}));
-jest.mock('../../../../../flyout_v2/use_flyout_api');
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn(() => ({
-    pathname: '',
-    search: '',
-  })),
-}));
+vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => {
+      const mocked = {
+      useIsNewFlyoutEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../flyout_v2/use_flyout_api');
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: vi.fn(() => ({
+        pathname: '',
+        search: '',
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const onFieldEditedMock = jest.fn();
-const refetchMock = jest.fn();
-const onFetchMoreRecordsMock = jest.fn();
+const onFieldEditedMock = vi.fn();
+const refetchMock = vi.fn();
+const onFetchMoreRecordsMock = vi.fn();
 
-const openFlyoutMock = jest.fn();
-const mockOpenSystemFlyout = jest.fn();
-const mockUiSettingsGet = jest.fn().mockReturnValue(false);
-const mockDocumentFlyoutWrapper = jest.fn((_props?: unknown) => (
+const openFlyoutMock = vi.fn();
+const mockOpenSystemFlyout = vi.fn();
+const mockUiSettingsGet = vi.fn().mockReturnValue(false);
+const mockDocumentFlyoutWrapper = vi.fn((_props?: unknown) => (
   <div>{'MockDocumentFlyoutWrapper'}</div>
 ));
 
-const updateSampleSizeSpy = jest.spyOn(timelineActions, 'updateSampleSize');
+const updateSampleSizeSpy = vi.spyOn(timelineActions, 'updateSampleSize');
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
-}));
-jest.mock('../../../../../flyout_v2/document/main/document_flyout_wrapper', () => ({
-  DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
-}));
-jest.mock('../../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../../common/lib/kibana');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../flyout_v2/document/main/document_flyout_wrapper', () => {
+      const mocked = {
+      DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../../common/lib/kibana'));
 
   return {
     ...original,
@@ -136,8 +151,8 @@ const TestComponent = (props: TestComponentProps) => {
         totalCount={mockTimelineData.length}
         onFetchMoreRecords={onFetchMoreRecordsMock}
         updatedAt={Date.now()}
-        onSetColumns={jest.fn()}
-        onFilter={jest.fn()}
+        onSetColumns={vi.fn()}
+        onFilter={vi.fn()}
         {...restProps}
       />
     </TestProviders>
@@ -155,18 +170,18 @@ describe('unified data table', () => {
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
+    (useExpandableFlyoutApi as Mock).mockReturnValue({
       openFlyout: openFlyoutMock,
-      closeFlyout: jest.fn(),
+      closeFlyout: vi.fn(),
     });
     mockUiSettingsGet.mockReturnValue(false);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
   });
   afterEach(() => {
     updateSampleSizeSpy.mockClear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(
@@ -204,7 +219,7 @@ describe('unified data table', () => {
   it(
     'opens the new document flyout (from index) when enableNewFlyout setting is enabled and row is not an attack',
     async () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+      vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
       render(<TestComponent />);
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
@@ -229,7 +244,7 @@ describe('unified data table', () => {
   it(
     'opens the new document flyout with a cell-action renderer bound to the timeline scope',
     async () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+      vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
       render(<TestComponent />);
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
@@ -240,7 +255,7 @@ describe('unified data table', () => {
         expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalled();
       });
 
-      const { renderCellActions } = jest.mocked(flyoutApi.openDocumentFlyoutFromIndex).mock
+      const { renderCellActions } = vi.mocked(flyoutApi.openDocumentFlyoutFromIndex).mock
         .calls[0][0];
 
       // Even when a cell passes an empty scopeId, the bound timeline scope must win so Filter
@@ -265,7 +280,7 @@ describe('unified data table', () => {
   it(
     'opens the new attack flyout when enableNewFlyout setting is enabled and row is an attack discovery alert',
     async () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+      vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
       render(<TestComponent events={mockAttackTimelineData} />);
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();

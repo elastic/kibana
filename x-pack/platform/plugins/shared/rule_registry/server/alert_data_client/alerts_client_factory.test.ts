@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import type { AlertsClientFactoryProps } from './alerts_client_factory';
 import { AlertsClientFactory } from './alerts_client_factory';
@@ -15,7 +17,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
 
-jest.mock('./alerts_client');
+vi.mock('./alerts_client');
 
 const securityPluginSetup = securityMock.createSetup();
 const alertingAuthMock = alertingAuthorizationMock.create();
@@ -27,16 +29,16 @@ const alertsClientFactoryParams: AlertsClientFactoryProps = {
   esClient: {} as ElasticsearchClient,
   getEsClientScoped: (_: KibanaRequest) => Promise.resolve({} as ElasticsearchClient),
   ruleDataService: ruleDataServiceMock.create(),
-  getRuleType: jest.fn(),
-  getRuleList: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
+  getRuleType: vi.fn(),
+  getRuleList: vi.fn(),
+  getAlertIndicesAlias: vi.fn(),
 };
 
 const auditLogger = auditLoggerMock.create();
 
 describe('AlertsClientFactory', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     securityPluginSetup.audit.asScoped.mockReturnValue(auditLogger);
   });
@@ -50,7 +52,7 @@ describe('AlertsClientFactory', () => {
     });
     await factory.create(request);
 
-    expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({
+    expect((await vi.importMock('./alerts_client')).AlertsClient).toHaveBeenCalledWith({
       authorization: alertingAuthMock,
       logger: alertsClientFactoryParams.logger,
       auditLogger,

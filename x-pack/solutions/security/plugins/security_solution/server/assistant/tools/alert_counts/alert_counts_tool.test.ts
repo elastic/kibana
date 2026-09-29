@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { DynamicTool } from '@langchain/core/tools';
@@ -18,7 +21,7 @@ import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/imp
 describe('AlertCountsTool', () => {
   const alertsIndexPattern = 'alerts-index';
   const esClient = {
-    search: jest.fn().mockResolvedValue({}),
+    search: vi.fn().mockResolvedValue({}),
   } as unknown as ElasticsearchClient;
   const replacements = { key: 'value' };
   const request = {
@@ -41,7 +44,7 @@ describe('AlertCountsTool', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('isSupported', () => {
@@ -171,7 +174,7 @@ describe('AlertCountsTool', () => {
         ...rest,
       })) as DynamicTool;
 
-      (contentReferencesStore.add as jest.Mock).mockImplementation(
+      (contentReferencesStore.add as Mock).mockImplementation(
         (creator: Parameters<ContentReferencesStore['add']>[0]) => {
           const reference = creator({ id: 'exampleContentReferenceId' });
           expect(reference.type).toEqual('SecurityAlertsPage');

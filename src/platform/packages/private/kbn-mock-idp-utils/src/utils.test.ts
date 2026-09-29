@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createHmac } from 'crypto';
 
 import {
@@ -34,10 +36,13 @@ import {
   getSAMLRequestId,
 } from './utils';
 
-jest.mock('./cosmos_db_seeder', () => ({
-  seedTestApiKey: jest.fn().mockResolvedValue({ success: true, message: `✓ `, response: {} }),
-  seedTestUser: jest.fn().mockResolvedValue({ success: true, message: `✓ `, response: {} }),
-}));
+vi.mock('./cosmos_db_seeder', () => {
+      const mocked = {
+      seedTestApiKey: vi.fn().mockResolvedValue({ success: true, message: `✓ `, response: {} }),
+      seedTestUser: vi.fn().mockResolvedValue({ success: true, message: `✓ `, response: {} }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('mock-idp-utils', () => {
   describe('createMockIdpMetadata', () => {
@@ -394,7 +399,7 @@ describe('mock-idp-utils', () => {
     it('should create role mapping with correct configuration', async () => {
       const mockClient = {
         transport: {
-          request: jest.fn().mockResolvedValue({}),
+          request: vi.fn().mockResolvedValue({}),
         },
       } as any;
 
@@ -428,7 +433,7 @@ describe('mock-idp-utils', () => {
       const mockError = new Error('Elasticsearch error');
       const mockClient = {
         transport: {
-          request: jest.fn().mockRejectedValue(mockError),
+          request: vi.fn().mockRejectedValue(mockError),
         },
       } as any;
 

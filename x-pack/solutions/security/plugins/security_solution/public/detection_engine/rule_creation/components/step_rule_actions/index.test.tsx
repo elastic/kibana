@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { type ComponentType as EnzymeComponentType, mount } from 'enzyme';
 import { render } from '@testing-library/react';
@@ -23,10 +25,10 @@ import type { ActionsStepRule } from '../../../common/types';
 import { FrequencyDescription } from './notification_action';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
-const mockUseKibana = jest.fn().mockReturnValue({
+const mockUseKibana = vi.fn().mockReturnValue({
   services: {
     application: {
-      getUrlForApp: jest.fn(),
+      getUrlForApp: vi.fn(),
       capabilities: {
         [SECURITY_FEATURE_ID]: {
           crud: true,
@@ -37,17 +39,23 @@ const mockUseKibana = jest.fn().mockReturnValue({
       },
     },
     triggersActionsUi: {
-      actionTypeRegistry: jest.fn(),
+      actionTypeRegistry: vi.fn(),
     },
   },
 });
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => mockUseKibana(),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const actionMessageParams = {
   context: [],

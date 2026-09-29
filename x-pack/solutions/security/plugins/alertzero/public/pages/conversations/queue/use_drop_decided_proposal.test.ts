@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { InfiniteData, QueryFilters } from '@kbn/react-query';
@@ -16,9 +19,12 @@ import { queryKeys } from '../../../query_keys';
 import { useProposalsByCategory } from '../../../hooks/use_proposals_api';
 import { useDropDecidedProposal } from './use_drop_decided_proposal';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({ useKibana: jest.fn() }));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = { useKibana: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 
 const row = (id: string) => ({ id } as ProposalsPageResponse['proposals'][number]);
 
@@ -82,7 +88,7 @@ describe('useDropDecidedProposal', () => {
     // Mounts the real query on purpose: an invalidation with no observer never
     // refetches, and would pass whether or not the refetch is cancelled.
     const http = {
-      get: jest.fn().mockResolvedValue({ proposals: [row('a'), row('b')], total: 2 }),
+      get: vi.fn().mockResolvedValue({ proposals: [row('a'), row('b')], total: 2 }),
     };
     useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
       typeof useKibana
@@ -125,7 +131,7 @@ describe('useDropDecidedProposal', () => {
     // the next poll.
     const { queryClient, drop } = setup();
     queryClient.setQueryData(queryKeys.proposals.byCategory('respond'), pagesOf('a', 'b'));
-    const cancelQueries = jest.spyOn(queryClient, 'cancelQueries');
+    const cancelQueries = vi.spyOn(queryClient, 'cancelQueries');
 
     await act(() => drop('b'));
 

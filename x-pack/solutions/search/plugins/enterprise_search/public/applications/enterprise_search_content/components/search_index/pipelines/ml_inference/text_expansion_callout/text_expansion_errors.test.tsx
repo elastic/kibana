@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues } from '../../../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -17,7 +19,7 @@ import { TextExpansionErrors } from './text_expansion_errors';
 
 describe('TextExpansionErrors', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues({});
   });
   const error = {

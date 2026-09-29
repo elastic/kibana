@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   CASES_FIELD_DEFINITION_CREATED_EVENT_TYPE,
@@ -23,7 +25,7 @@ describe('registerAnalytics', () => {
     registerAnalytics({ analyticsService });
 
     expect(
-      (analyticsService.registerEventType as jest.Mock).mock.calls.map(
+      (analyticsService.registerEventType as Mock).mock.calls.map(
         ([options]) => options.eventType
       )
     ).toEqual(

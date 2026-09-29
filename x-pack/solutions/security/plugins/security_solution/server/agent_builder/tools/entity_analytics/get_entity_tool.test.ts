@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   ToolResultType,
   type ErrorResult,
@@ -32,28 +35,37 @@ import { getEntityTool, SECURITY_GET_ENTITY_TOOL_ID } from './get_entity_tool';
 import { fetchRiskScoreGrounding } from './risk_score_grounding';
 import type { SharedServices } from '@kbn/ml-plugin/server/shared_services';
 
-jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
-  getAgentBuilderResourceAvailability: jest.fn(),
-}));
+vi.mock('../../utils/get_agent_builder_resource_availability', () => {
+      const mocked = {
+      getAgentBuilderResourceAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  executeEsql: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      executeEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/entity_analytics/enriched_entity', () => ({
-  EnrichEntityService: jest.fn(),
-}));
+vi.mock('../../../lib/entity_analytics/enriched_entity', () => {
+      const mocked = {
+      EnrichEntityService: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./risk_score_grounding', () => {
-  const actual = jest.requireActual('./risk_score_grounding');
+vi.mock('./risk_score_grounding', async () => {
+  const actual = (await vi.importActual('./risk_score_grounding'));
   return {
     ...actual,
-    fetchRiskScoreGrounding: jest.fn().mockResolvedValue(undefined),
+    fetchRiskScoreGrounding: vi.fn().mockResolvedValue(undefined),
   };
 });
 
-const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
-const mockFetchRiskScoreGrounding = fetchRiskScoreGrounding as jest.Mock;
+const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as Mock;
+const mockFetchRiskScoreGrounding = fetchRiskScoreGrounding as Mock;
 
 const mockExperimentalFeatures = {
   entityAnalyticsEntityStoreV2: true,
@@ -78,12 +90,12 @@ describe('getEntityTool', () => {
     mockExperimentalFeatures
   );
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
-  const mockGetEnrichedEntities = jest.fn();
+  const mockGetEnrichedEntities = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
-    (EnrichEntityService as jest.Mock).mockImplementation(() => ({
+    (EnrichEntityService as Mock).mockImplementation(() => ({
       getEnrichedEntities: mockGetEnrichedEntities,
     }));
     mockGetEnrichedEntities.mockResolvedValue({ entities: [] });
@@ -170,7 +182,7 @@ describe('getEntityTool', () => {
 
   describe('handler', () => {
     it('normalizes non-prefixed entity ids in ES|QL query', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [{ name: 'entity.id', type: 'keyword' }],
         values: [['host:server1']],
       });
@@ -181,7 +193,7 @@ describe('getEntityTool', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(executeEsql).toHaveBeenCalledTimes(1);
-      expect((executeEsql as jest.Mock).mock.calls[0][0].query).toEqual(
+      expect((executeEsql as Mock).mock.calls[0][0].query).toEqual(
         `FROM entities-latest-default | WHERE entity.id == \"host:server1\" | LIMIT 1`
       );
       expect(result.results).toHaveLength(1);
@@ -189,7 +201,7 @@ describe('getEntityTool', () => {
     });
 
     it('keeps already-prefixed entity ids unchanged', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [{ name: 'entity.id', type: 'keyword' }],
         values: [['host:server1']],
       });
@@ -199,16 +211,16 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      expect((executeEsql as jest.Mock).mock.calls[0][0].query).toContain(
+      expect((executeEsql as Mock).mock.calls[0][0].query).toContain(
         'WHERE entity.id == "host:server1"'
       );
-      expect((executeEsql as jest.Mock).mock.calls[0][0].query).not.toContain(
+      expect((executeEsql as Mock).mock.calls[0][0].query).not.toContain(
         'WHERE entity.id == "host:host:server1"'
       );
     });
 
     it('merges alert data as risk_score_inputs column into entity result', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [
           { name: 'entity.id', type: 'keyword' },
           { name: 'entity.name', type: 'keyword' },
@@ -267,7 +279,7 @@ describe('getEntityTool', () => {
     });
 
     it('skips alert lookup when entity has no risk score', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [
           { name: 'entity.id', type: 'keyword' },
           { name: 'entity.name', type: 'keyword' },
@@ -287,7 +299,7 @@ describe('getEntityTool', () => {
     });
 
     it('appends profile_history column when interval is provided', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Entity lookup
         .mockResolvedValueOnce({
           columns: [
@@ -335,7 +347,7 @@ describe('getEntityTool', () => {
     });
 
     it('includes both risk_score_inputs and profile_history when entity has a risk score and interval is provided', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Entity lookup: entity has a risk score
         .mockResolvedValueOnce({
           columns: [
@@ -409,7 +421,7 @@ describe('getEntityTool', () => {
     });
 
     it('returns only profile_history for a specific date, skipping risk inputs', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Entity lookup: entity has a risk score (but risk inputs should still be skipped)
         .mockResolvedValueOnce({
           columns: [
@@ -437,7 +449,7 @@ describe('getEntityTool', () => {
       expect(executeEsql).toHaveBeenCalledTimes(2);
 
       // Snapshot query should use the UTC day range derived from the date
-      expect((executeEsql as jest.Mock).mock.calls[1][0].query).toContain(
+      expect((executeEsql as Mock).mock.calls[1][0].query).toContain(
         '@timestamp >= "2024-01-15T00:00:00.000Z" AND @timestamp <= "2024-01-15T23:59:59.999Z"'
       );
 
@@ -469,7 +481,7 @@ describe('getEntityTool', () => {
     });
 
     it('date takes priority over interval when both are supplied', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Entity lookup
         .mockResolvedValueOnce({
           columns: [
@@ -495,10 +507,10 @@ describe('getEntityTool', () => {
       expect(executeEsql).toHaveBeenCalledTimes(2);
 
       // Snapshot query uses date range, not NOW() - interval
-      expect((executeEsql as jest.Mock).mock.calls[1][0].query).toContain(
+      expect((executeEsql as Mock).mock.calls[1][0].query).toContain(
         '@timestamp >= "2024-01-15T00:00:00.000Z"'
       );
-      expect((executeEsql as jest.Mock).mock.calls[1][0].query).not.toContain('NOW()');
+      expect((executeEsql as Mock).mock.calls[1][0].query).not.toContain('NOW()');
 
       const esqlResult = result.results[0] as EsqlResults;
       expect(esqlResult.data.columns.map((c) => c.name)).toContain('profile_history');
@@ -506,7 +518,7 @@ describe('getEntityTool', () => {
     });
 
     it('returns error result when no entity is found', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — nothing found
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
         // 2. Exact name match — nothing found
@@ -529,7 +541,7 @@ describe('getEntityTool', () => {
     });
 
     it('returns LIKE fallback results when exact match finds no entity', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
         // 2. Exact name match — empty
@@ -549,7 +561,7 @@ describe('getEntityTool', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(executeEsql).toHaveBeenCalledTimes(3);
-      const rlikeQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
+      const rlikeQuery = (executeEsql as Mock).mock.calls[2][0].query;
       expect(rlikeQuery).toContain('RLIKE ".*server1.*"');
       expect(rlikeQuery).toContain('LIMIT 5');
       expect(result.results).toHaveLength(1);
@@ -559,7 +571,7 @@ describe('getEntityTool', () => {
     });
 
     it('uses raw entityId (not normalized) as the RLIKE pattern', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
         // 2. Exact name match — empty
@@ -574,13 +586,13 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const rlikeQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
+      const rlikeQuery = (executeEsql as Mock).mock.calls[2][0].query;
       expect(rlikeQuery).toContain('RLIKE ".*server1.*"');
       expect(rlikeQuery).not.toContain('RLIKE ".*host:server1.*"');
     });
 
     it('returns entity.name RLIKE fallback results when entity.id searches find nothing', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
         // 2. Exact name match — empty
@@ -602,7 +614,7 @@ describe('getEntityTool', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(executeEsql).toHaveBeenCalledTimes(4);
-      const nameQuery = (executeEsql as jest.Mock).mock.calls[3][0].query;
+      const nameQuery = (executeEsql as Mock).mock.calls[3][0].query;
       expect(nameQuery).toContain('entity.name RLIKE ".*server1.*"');
       expect(nameQuery).toContain('user.full_name RLIKE ".*server1.*"');
       expect(nameQuery).toContain('LIMIT 5');
@@ -613,7 +625,7 @@ describe('getEntityTool', () => {
     });
 
     it('returns user.full_name RLIKE match when user is found by full name', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
         // 2. Exact name match — empty (this test specifically exercises the RLIKE
@@ -637,7 +649,7 @@ describe('getEntityTool', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(executeEsql).toHaveBeenCalledTimes(4);
-      const nameQuery = (executeEsql as jest.Mock).mock.calls[3][0].query;
+      const nameQuery = (executeEsql as Mock).mock.calls[3][0].query;
       expect(nameQuery).toContain('user.full_name RLIKE ".*John Doe.*"');
       expect(result.results).toHaveLength(1);
       const esqlResult = result.results[0] as EsqlResults;
@@ -647,7 +659,7 @@ describe('getEntityTool', () => {
     });
 
     it('uses raw entityId (not normalized) as the entity.name RLIKE pattern', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
         // 2. Exact name match — empty
@@ -662,7 +674,7 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const nameQuery = (executeEsql as jest.Mock).mock.calls[3][0].query;
+      const nameQuery = (executeEsql as Mock).mock.calls[3][0].query;
       expect(nameQuery).toContain('entity.name RLIKE ".*server1.*"');
       expect(nameQuery).toContain('user.full_name RLIKE ".*server1.*"');
       expect(nameQuery).not.toContain('entity.name RLIKE ".*host:server1.*"');
@@ -670,7 +682,7 @@ describe('getEntityTool', () => {
     });
 
     it('escapes regex metacharacters in the entity.name RLIKE pattern', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
         // 2. Exact name match — empty
@@ -685,13 +697,13 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const nameQuery = (executeEsql as jest.Mock).mock.calls[3][0].query;
+      const nameQuery = (executeEsql as Mock).mock.calls[3][0].query;
       expect(nameQuery).toContain('entity.name RLIKE ".*server\\\\.1\\\\*test.*"');
       expect(nameQuery).toContain('user.full_name RLIKE ".*server\\\\.1\\\\*test.*"');
     });
 
     it('escapes regex metacharacters in the entity.id RLIKE pattern', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
         // 2. Exact name match — empty
@@ -706,12 +718,12 @@ describe('getEntityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const rlikeQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
+      const rlikeQuery = (executeEsql as Mock).mock.calls[2][0].query;
       expect(rlikeQuery).toContain('RLIKE ".*server\\\\.1\\\\*test.*"');
     });
 
     it('uses resolved entity.id from RLIKE result for subsequent snapshot queries', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
         // 2. Exact name match — empty
@@ -733,12 +745,12 @@ describe('getEntityTool', () => {
       );
 
       expect(executeEsql).toHaveBeenCalledTimes(4);
-      const snapshotQuery = (executeEsql as jest.Mock).mock.calls[3][0].query;
+      const snapshotQuery = (executeEsql as Mock).mock.calls[3][0].query;
       expect(snapshotQuery).toContain('WHERE entity.id == "host:server1"');
     });
 
     it('returns one result per RLIKE entity with profile_history when interval is provided', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
         // 2. Exact name match — empty
@@ -784,13 +796,13 @@ describe('getEntityTool', () => {
       expect(r2.data.columns.map((c) => c.name)).toContain('profile_history');
 
       // Each snapshot query uses the entity.id from the respective RLIKE result row
-      const snapshotCalls = (executeEsql as jest.Mock).mock.calls.slice(3);
+      const snapshotCalls = (executeEsql as Mock).mock.calls.slice(3);
       expect(snapshotCalls[0][0].query).toContain('WHERE entity.id == "host:server1"');
       expect(snapshotCalls[1][0].query).toContain('WHERE entity.id == "host:server10"');
     });
 
     it('returns one result per RLIKE entity when date is provided with early exit', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
         // 2. Exact name match — empty
@@ -838,7 +850,7 @@ describe('getEntityTool', () => {
     });
 
     it('returns unenriched entity result when enrichment query fails', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [
           { name: 'entity.id', type: 'keyword' },
           { name: 'entity.name', type: 'keyword' },
@@ -866,7 +878,7 @@ describe('getEntityTool', () => {
     });
 
     it('returns error result when ES|QL query fails', async () => {
-      (executeEsql as jest.Mock).mockRejectedValueOnce(new Error('ES|QL failure'));
+      (executeEsql as Mock).mockRejectedValueOnce(new Error('ES|QL failure'));
 
       const result = (await tool.handler(
         { entityType: 'host', entityId: 'server1' },
@@ -883,7 +895,7 @@ describe('getEntityTool', () => {
 
     describe('telemetry', () => {
       it('reports success=true and resultCount=1 when an entity is found', async () => {
-        (executeEsql as jest.Mock).mockResolvedValueOnce({
+        (executeEsql as Mock).mockResolvedValueOnce({
           columns: [{ name: 'entity.id', type: 'keyword' }],
           values: [['host:server1']],
         });
@@ -909,7 +921,7 @@ describe('getEntityTool', () => {
       });
 
       it('reports success=true and resultCount=0 when no entity is found', async () => {
-        (executeEsql as jest.Mock)
+        (executeEsql as Mock)
           .mockResolvedValueOnce({ columns: [], values: [] })
           .mockResolvedValueOnce({ columns: [], values: [] })
           .mockResolvedValueOnce({ columns: [], values: [] })
@@ -936,7 +948,7 @@ describe('getEntityTool', () => {
       });
 
       it('reports success=false and errorMessage when the query throws', async () => {
-        (executeEsql as jest.Mock).mockRejectedValueOnce(new Error('ES|QL failure'));
+        (executeEsql as Mock).mockRejectedValueOnce(new Error('ES|QL failure'));
 
         await tool.handler(
           { entityType: 'host', entityId: 'server1' },
@@ -959,7 +971,7 @@ describe('getEntityTool', () => {
       });
 
       it('reports entityTypes=[] when no entityType param is provided', async () => {
-        (executeEsql as jest.Mock).mockResolvedValueOnce({
+        (executeEsql as Mock).mockResolvedValueOnce({
           columns: [{ name: 'entity.id', type: 'keyword' }],
           values: [['host:server1']],
         });
@@ -987,7 +999,7 @@ describe('getEntityTool', () => {
     };
 
     const setupSuccessfulEntityLookup = () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [{ name: 'entity.id', type: 'keyword' }],
         values: [['host:server1']],
       });
@@ -1010,7 +1022,7 @@ describe('getEntityTool', () => {
     it('still appends grounding when the entity lookup returns no rows so the agent can explain why', async () => {
       mockFetchRiskScoreGrounding.mockResolvedValueOnce(groundingOtherResult);
       // Every fallback query resolves empty so we hit the "No entity found" branch.
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         .mockResolvedValueOnce({ columns: [], values: [] })
         .mockResolvedValueOnce({ columns: [], values: [] })
         .mockResolvedValueOnce({ columns: [], values: [] })
@@ -1042,11 +1054,11 @@ describe('getEntityTool', () => {
     };
 
     it('creates a security.entity attachment on exact single hit and appends an other result', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce(exactHitResponse);
+      (executeEsql as Mock).mockResolvedValueOnce(exactHitResponse);
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockResolvedValueOnce({
         id: expectedAttachmentId,
         current_version: 1,
       });
@@ -1089,14 +1101,14 @@ describe('getEntityTool', () => {
     });
 
     it('updates the existing attachment (bumping version) on a repeat exact hit for the same entity', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce(exactHitResponse);
+      (executeEsql as Mock).mockResolvedValueOnce(exactHitResponse);
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce({
         id: expectedAttachmentId,
         current_version: 1,
       });
-      (context.attachments.update as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.update as Mock).mockResolvedValueOnce({
         id: expectedAttachmentId,
         current_version: 2,
       });
@@ -1135,7 +1147,7 @@ describe('getEntityTool', () => {
     });
 
     it('creates an attachment when the entity.id RLIKE fallback returns a single row whose stripped id equals the input', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty (input "server1" vs stored "host:server1")
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
         // 2. Exact name match — empty
@@ -1151,8 +1163,8 @@ describe('getEntityTool', () => {
         });
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockResolvedValueOnce({
         id: expectedAttachmentId,
         current_version: 1,
       });
@@ -1196,7 +1208,7 @@ describe('getEntityTool', () => {
     it('creates an attachment when resolved via exact entity.name match', async () => {
       const expectedHostAttachmentId = buildSingleEntityAttachmentId('host', 'LAPTOP-SALES04');
 
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty (the input is the canonical name, not the id)
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
         // 2. Exact name match — single hit
@@ -1210,8 +1222,8 @@ describe('getEntityTool', () => {
         });
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockResolvedValueOnce({
         id: expectedHostAttachmentId,
         current_version: 1,
       });
@@ -1221,7 +1233,7 @@ describe('getEntityTool', () => {
         context
       )) as ToolHandlerStandardReturn;
 
-      const nameExactQuery = (executeEsql as jest.Mock).mock.calls[1][0].query;
+      const nameExactQuery = (executeEsql as Mock).mock.calls[1][0].query;
       expect(nameExactQuery).toContain('entity.name == "LAPTOP-SALES04"');
       expect(nameExactQuery).toContain('MV_CONTAINS(user.full_name, "LAPTOP-SALES04")');
       expect(nameExactQuery).toContain('MV_CONTAINS(host.name, "LAPTOP-SALES04")');
@@ -1261,7 +1273,7 @@ describe('getEntityTool', () => {
     it('creates an attachment when resolved via exact user.full_name match', async () => {
       const expectedUserAttachmentId = buildSingleEntityAttachmentId('user', 'jdoe');
 
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
         // 2. Exact name match — single hit via user.full_name
@@ -1276,8 +1288,8 @@ describe('getEntityTool', () => {
         });
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockResolvedValueOnce({
         id: expectedUserAttachmentId,
         current_version: 1,
       });
@@ -1287,7 +1299,7 @@ describe('getEntityTool', () => {
         context
       )) as ToolHandlerStandardReturn;
 
-      const nameExactQuery = (executeEsql as jest.Mock).mock.calls[1][0].query;
+      const nameExactQuery = (executeEsql as Mock).mock.calls[1][0].query;
       expect(nameExactQuery).toContain('MV_CONTAINS(user.full_name, "John Doe")');
 
       expect(context.attachments.add).toHaveBeenCalledTimes(1);
@@ -1314,7 +1326,7 @@ describe('getEntityTool', () => {
       // row so the rich attachment is created under the current entity.name.
       const expectedHostAttachmentId = buildSingleEntityAttachmentId('host', 'LAPTOP-SALES05');
 
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
         // 2. Exact name match — single hit via host.name (historical value)
@@ -1331,8 +1343,8 @@ describe('getEntityTool', () => {
         });
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockResolvedValueOnce({
         id: expectedHostAttachmentId,
         current_version: 1,
       });
@@ -1342,7 +1354,7 @@ describe('getEntityTool', () => {
         context
       )) as ToolHandlerStandardReturn;
 
-      const nameExactQuery = (executeEsql as jest.Mock).mock.calls[1][0].query;
+      const nameExactQuery = (executeEsql as Mock).mock.calls[1][0].query;
       expect(nameExactQuery).toContain('MV_CONTAINS(host.name, "LAPTOP-SALES04")');
 
       expect(context.attachments.add).toHaveBeenCalledTimes(1);
@@ -1370,7 +1382,7 @@ describe('getEntityTool', () => {
         compositeEntityName
       );
 
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty (the input is the bare name, not the id)
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
         // 2. Exact name match — the composite entity.name hit
@@ -1384,8 +1396,8 @@ describe('getEntityTool', () => {
         });
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockResolvedValueOnce({
         id: expectedLocalUserAttachmentId,
         current_version: 1,
       });
@@ -1407,7 +1419,7 @@ describe('getEntityTool', () => {
     });
 
     it('does not create an attachment when exact name match returns two rows (ambiguous)', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
         // 2. Exact name match — two rows (a host and a user share the same name)
@@ -1438,7 +1450,7 @@ describe('getEntityTool', () => {
     });
 
     it('does not create an attachment when entity.id RLIKE single hit has a non-matching stripped id', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
         // 2. Exact name match — empty
@@ -1469,7 +1481,7 @@ describe('getEntityTool', () => {
     });
 
     it('does not create an attachment when the match came from the entity.name RLIKE fallback', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         // 1. Exact id match — empty
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
         // 2. Exact name match — empty
@@ -1500,7 +1512,7 @@ describe('getEntityTool', () => {
     });
 
     it('does not create an attachment when zero hits are returned', async () => {
-      (executeEsql as jest.Mock)
+      (executeEsql as Mock)
         .mockResolvedValueOnce({ columns: [], values: [] })
         .mockResolvedValueOnce({ columns: [], values: [] })
         .mockResolvedValueOnce({ columns: [], values: [] })
@@ -1520,7 +1532,7 @@ describe('getEntityTool', () => {
     });
 
     it('skips the attachment when the resolved row has an unknown entity type', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [
           { name: 'entity.id', type: 'keyword' },
           { name: 'entity.name', type: 'keyword' },
@@ -1540,7 +1552,7 @@ describe('getEntityTool', () => {
     });
 
     it('keeps the other result when enrichment fails on the happy path', async () => {
-      (executeEsql as jest.Mock).mockResolvedValueOnce({
+      (executeEsql as Mock).mockResolvedValueOnce({
         columns: [
           { name: 'entity.id', type: 'keyword' },
           { name: 'entity.name', type: 'keyword' },
@@ -1552,8 +1564,8 @@ describe('getEntityTool', () => {
       mockGetEnrichedEntities.mockRejectedValueOnce(new Error('risk index unavailable'));
 
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+      (context.attachments.add as Mock).mockResolvedValueOnce({
         id: expectedAttachmentId,
         current_version: 1,
       });
@@ -1626,22 +1638,22 @@ describe('getEntityTool', () => {
         group_size: number;
         target: Record<string, unknown>;
       }) => ({
-        createCRUDClient: jest.fn().mockReturnValue({}),
-        createResolutionClient: jest.fn().mockReturnValue({
-          getResolutionGroup: jest.fn().mockResolvedValue(group),
+        createCRUDClient: vi.fn().mockReturnValue({}),
+        createResolutionClient: vi.fn().mockReturnValue({
+          getResolutionGroup: vi.fn().mockResolvedValue(group),
         }),
       });
 
       it('embeds the primary risk stats on the attachment data (and strips inputs)', async () => {
-        (executeEsql as jest.Mock).mockResolvedValueOnce(primaryHitResponse);
+        (executeEsql as Mock).mockResolvedValueOnce(primaryHitResponse);
 
         mockEsClient.asCurrentUser.search.mockResolvedValueOnce(
           buildRiskSearchResponse([buildRiskRecord()])
         );
 
         const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-        (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+        (context.attachments.add as Mock).mockResolvedValueOnce({
           id: expectedAttachmentId,
           current_version: 1,
         });
@@ -1649,7 +1661,7 @@ describe('getEntityTool', () => {
         await tool.handler({ entityType: 'host', entityId: 'server1' }, context);
 
         expect(context.attachments.add).toHaveBeenCalledTimes(1);
-        const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
+        const addCall = (context.attachments.add as Mock).mock.calls[0][0];
         expect(addCall.data.riskStats).toBeDefined();
         expect(addCall.data.riskStats).toEqual(
           expect.objectContaining({
@@ -1669,15 +1681,15 @@ describe('getEntityTool', () => {
       });
 
       it('queries the risk time-series index with both V2 (prefixed EUID) and V1 (bare name) candidates and excludes resolution docs', async () => {
-        (executeEsql as jest.Mock).mockResolvedValueOnce(primaryHitResponse);
+        (executeEsql as Mock).mockResolvedValueOnce(primaryHitResponse);
 
         mockEsClient.asCurrentUser.search.mockResolvedValueOnce(
           buildRiskSearchResponse([buildRiskRecord()])
         );
 
         const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-        (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+        (context.attachments.add as Mock).mockResolvedValueOnce({
           id: expectedAttachmentId,
           current_version: 1,
         });
@@ -1717,7 +1729,7 @@ describe('getEntityTool', () => {
       });
 
       it('embeds both primary and resolution risk stats when the entity is part of a resolution group', async () => {
-        (executeEsql as jest.Mock).mockResolvedValueOnce(primaryHitResponse);
+        (executeEsql as Mock).mockResolvedValueOnce(primaryHitResponse);
 
         const primaryRecord = buildRiskRecord({
           score_type: 'base',
@@ -1755,8 +1767,8 @@ describe('getEntityTool', () => {
         ]);
 
         const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-        (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+        (context.attachments.add as Mock).mockResolvedValueOnce({
           id: expectedAttachmentId,
           current_version: 1,
         });
@@ -1782,7 +1794,7 @@ describe('getEntityTool', () => {
           term: { 'host.risk.score_type': 'resolution' },
         });
 
-        const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
+        const addCall = (context.attachments.add as Mock).mock.calls[0][0];
         expect(addCall.data.riskStats).toEqual(
           expect.objectContaining({
             calculated_level: 'High',
@@ -1801,7 +1813,7 @@ describe('getEntityTool', () => {
       });
 
       it('does not fetch a resolution risk doc when the group only has one member', async () => {
-        (executeEsql as jest.Mock).mockResolvedValueOnce(primaryHitResponse);
+        (executeEsql as Mock).mockResolvedValueOnce(primaryHitResponse);
 
         mockEsClient.asCurrentUser.search.mockResolvedValueOnce(
           buildRiskSearchResponse([buildRiskRecord()])
@@ -1820,8 +1832,8 @@ describe('getEntityTool', () => {
         ]);
 
         const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-        (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+        (context.attachments.add as Mock).mockResolvedValueOnce({
           id: expectedAttachmentId,
           current_version: 1,
         });
@@ -1830,39 +1842,39 @@ describe('getEntityTool', () => {
 
         // Only the primary risk-index query should run for a solo group.
         expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
-        const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
+        const addCall = (context.attachments.add as Mock).mock.calls[0][0];
         expect(addCall.data.resolutionRiskStats).toBeUndefined();
       });
 
       it('omits riskStats when the risk index has no document for the entity', async () => {
-        (executeEsql as jest.Mock).mockResolvedValueOnce(primaryHitResponse);
+        (executeEsql as Mock).mockResolvedValueOnce(primaryHitResponse);
 
         mockEsClient.asCurrentUser.search.mockResolvedValueOnce(buildRiskSearchResponse([]));
 
         const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-        (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+        (context.attachments.add as Mock).mockResolvedValueOnce({
           id: expectedAttachmentId,
           current_version: 1,
         });
 
         await tool.handler({ entityType: 'host', entityId: 'server1' }, context);
 
-        const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
+        const addCall = (context.attachments.add as Mock).mock.calls[0][0];
         expect(addCall.data.riskStats).toBeUndefined();
         expect(addCall.data.resolutionRiskStats).toBeUndefined();
       });
 
       it('still creates the attachment (without risk stats) when the risk index query throws', async () => {
-        (executeEsql as jest.Mock).mockResolvedValueOnce(primaryHitResponse);
+        (executeEsql as Mock).mockResolvedValueOnce(primaryHitResponse);
 
         mockEsClient.asCurrentUser.search.mockRejectedValueOnce(
           new Error('risk index unavailable')
         );
 
         const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-        (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+        (context.attachments.add as Mock).mockResolvedValueOnce({
           id: expectedAttachmentId,
           current_version: 1,
         });
@@ -1870,21 +1882,21 @@ describe('getEntityTool', () => {
         await tool.handler({ entityType: 'host', entityId: 'server1' }, context);
 
         expect(context.attachments.add).toHaveBeenCalledTimes(1);
-        const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
+        const addCall = (context.attachments.add as Mock).mock.calls[0][0];
         expect(addCall.data.riskStats).toBeUndefined();
       });
 
       it('embeds primary risk stats when the resolution fetch fails but the primary succeeds', async () => {
-        (executeEsql as jest.Mock).mockResolvedValueOnce(primaryHitResponse);
+        (executeEsql as Mock).mockResolvedValueOnce(primaryHitResponse);
 
         mockEsClient.asCurrentUser.search.mockResolvedValueOnce(
           buildRiskSearchResponse([buildRiskRecord()])
         );
 
         const entityStoreStart = {
-          createCRUDClient: jest.fn().mockReturnValue({}),
-          createResolutionClient: jest.fn().mockReturnValue({
-            getResolutionGroup: jest
+          createCRUDClient: vi.fn().mockReturnValue({}),
+          createResolutionClient: vi.fn().mockReturnValue({
+            getResolutionGroup: vi
               .fn()
               .mockRejectedValueOnce(new Error('resolution index unavailable')),
           }),
@@ -1896,15 +1908,15 @@ describe('getEntityTool', () => {
         ]);
 
         const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValueOnce(undefined);
-        (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        (context.attachments.getAttachmentRecord as Mock).mockReturnValueOnce(undefined);
+        (context.attachments.add as Mock).mockResolvedValueOnce({
           id: expectedAttachmentId,
           current_version: 1,
         });
 
         await tool.handler({ entityType: 'host', entityId: 'server1' }, context);
 
-        const addCall = (context.attachments.add as jest.Mock).mock.calls[0][0];
+        const addCall = (context.attachments.add as Mock).mock.calls[0][0];
         expect(addCall.data.riskStats).toBeDefined();
         expect(addCall.data.resolutionRiskStats).toBeUndefined();
       });

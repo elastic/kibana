@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { createUnifiedChartSectionViewerTelemetry } from './report_unified_chart_section_viewer_data_summary';
 import {
@@ -17,7 +19,7 @@ import {
 describe('createUnifiedChartSectionViewerTelemetry', () => {
   it('reports metric aggregation configuration changes', () => {
     const analytics = {
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     } as unknown as AnalyticsServiceStart;
     const telemetry = createUnifiedChartSectionViewerTelemetry(analytics);
 
@@ -39,7 +41,7 @@ describe('createUnifiedChartSectionViewerTelemetry', () => {
 
   it('reports ES|QL query failures', () => {
     const analytics = {
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     } as unknown as AnalyticsServiceStart;
     const telemetry = createUnifiedChartSectionViewerTelemetry(analytics);
 

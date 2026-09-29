@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import Chance from 'chance';
 import {
@@ -29,26 +32,26 @@ import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_clou
 
 const chance = new Chance();
 
-jest.mock('../../common/api/use_setup_status_api');
-jest.mock('../../common/hooks/use_subscription_status');
-jest.mock('../../common/navigation/use_cloud_defend_integration_links');
+vi.mock('../../common/api/use_setup_status_api');
+vi.mock('../../common/hooks/use_subscription_status');
+vi.mock('../../common/navigation/use_cloud_defend_integration_links');
 
 describe('<CloudDefendPage />', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    (useCloudDefendSetupStatusApi as jest.Mock).mockImplementation(() =>
+    vi.resetAllMocks();
+    (useCloudDefendSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: { status: 'indexed' },
       })
     );
 
-    (useCloudDefendIntegrationLinks as jest.Mock).mockImplementation(() => ({
+    (useCloudDefendIntegrationLinks as Mock).mockImplementation(() => ({
       addIntegrationLink: chance.url(),
       docsLink: chance.url(),
     }));
 
-    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+    (useSubscriptionStatus as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: true,
@@ -92,7 +95,7 @@ describe('<CloudDefendPage />', () => {
   });
 
   it('renders default loading state when the subscription query is loading', () => {
-    (useSubscriptionStatus as jest.Mock).mockImplementation(
+    (useSubscriptionStatus as Mock).mockImplementation(
       () =>
         createReactQueryResponse({
           status: 'loading',
@@ -110,7 +113,7 @@ describe('<CloudDefendPage />', () => {
   });
 
   it('renders default error state when the subscription query has an error', () => {
-    (useSubscriptionStatus as jest.Mock).mockImplementation(
+    (useSubscriptionStatus as Mock).mockImplementation(
       () =>
         createReactQueryResponse({
           status: 'error',
@@ -129,7 +132,7 @@ describe('<CloudDefendPage />', () => {
   });
 
   it('renders subscription not allowed prompt if subscription is not installed', () => {
-    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+    (useSubscriptionStatus as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: false,
@@ -147,7 +150,7 @@ describe('<CloudDefendPage />', () => {
   });
 
   it('renders integrations installation prompt if integration is not installed', () => {
-    (useCloudDefendSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCloudDefendSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: { status: 'not-installed' },
@@ -165,7 +168,7 @@ describe('<CloudDefendPage />', () => {
   });
 
   it('renders default loading state when the integration query is loading', () => {
-    (useCloudDefendSetupStatusApi as jest.Mock).mockImplementation(
+    (useCloudDefendSetupStatusApi as Mock).mockImplementation(
       () =>
         createReactQueryResponse({
           status: 'loading',
@@ -183,7 +186,7 @@ describe('<CloudDefendPage />', () => {
   });
 
   it('renders default error state when the integration query has an error', () => {
-    (useCloudDefendSetupStatusApi as jest.Mock).mockImplementation(
+    (useCloudDefendSetupStatusApi as Mock).mockImplementation(
       () =>
         createReactQueryResponse({
           status: 'error',

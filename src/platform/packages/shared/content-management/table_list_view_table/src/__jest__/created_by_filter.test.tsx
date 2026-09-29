@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen, within } from '@testing-library/react';
@@ -64,7 +66,7 @@ describe('created_by filter', () => {
     entityNamePlural: 'tests',
     initialFilter: '',
     initialPageSize: 20,
-    findItems: jest.fn().mockResolvedValue({ total: 0, hits }),
+    findItems: vi.fn().mockResolvedValue({ total: 0, hits }),
     getDetailViewLink: () => 'http://elastic.co',
     urlStateEnabled: false,
     onFetchSuccess: () => {},
@@ -72,7 +74,7 @@ describe('created_by filter', () => {
     setPageDataTestSubject: () => {},
   };
 
-  const mockBulkGetUserProfiles = jest.fn((uids) =>
+  const mockBulkGetUserProfiles = vi.fn((uids) =>
     Promise.resolve(
       [
         {

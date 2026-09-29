@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import {
   createCollectorFetchContextMock,
   usageCollectionPluginMock,
@@ -16,7 +18,7 @@ import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server'
 
 describe('createCloudUsageCollector', () => {
   let usageCollection: UsageCollectionSetup;
-  let collectorFetchContext: jest.Mocked<CollectorFetchContext>;
+  let collectorFetchContext: Mocked<CollectorFetchContext>;
 
   beforeEach(() => {
     usageCollection = usageCollectionPluginMock.createSetupContract();

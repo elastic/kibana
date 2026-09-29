@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,9 +15,9 @@ import userEvent from '@testing-library/user-event';
 import { DocumentMatchFilterControls } from './document_match_filter_controls';
 import { useStreamSamplesSelector } from './state_management/stream_routing_state_machine';
 
-jest.mock('./state_management/stream_routing_state_machine');
+vi.mock('./state_management/stream_routing_state_machine');
 
-const mockUseStreamSamplesSelector = useStreamSamplesSelector as jest.MockedFunction<
+const mockUseStreamSamplesSelector = useStreamSamplesSelector as MockedFunction<
   typeof useStreamSamplesSelector
 >;
 
@@ -23,10 +26,10 @@ const renderWithProviders = (ui: React.ReactElement) => {
 };
 
 describe('DocumentMatchFilterControls', () => {
-  const mockOnFilterChange = jest.fn();
+  const mockOnFilterChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockUseStreamSamplesSelector.mockReturnValue('matched' as any);
   });

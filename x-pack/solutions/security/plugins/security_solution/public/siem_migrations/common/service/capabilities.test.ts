@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getMissingCapabilitiesChecker, requiredSiemMigrationCapabilities } from './capabilities';
 import { CapabilitiesChecker } from '../../../common/lib/capabilities';
 import type { Capabilities } from '@kbn/core/public';
 
-jest.mock('../../../common/lib/capabilities');
+vi.mock('../../../common/lib/capabilities');
 
 describe('getMissingCapabilitiesChecker', () => {
   let capabilities: Capabilities;
-  let mockHas: jest.Mock;
+  let mockHas: Mock;
 
   beforeEach(() => {
     capabilities = {} as Capabilities;
-    mockHas = jest.fn().mockReturnValue(true);
-    (CapabilitiesChecker as jest.Mock).mockImplementation(() => ({
+    mockHas = vi.fn().mockReturnValue(true);
+    (CapabilitiesChecker as Mock).mockImplementation(() => ({
       has: mockHas,
     }));
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
@@ -20,7 +22,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
   describe('when users have write access to uptime', () => {
     it('enables the button to create a rule', async () => {
       const { getByText } = render(
-        <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={jest.fn()} />,
+        <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={vi.fn()} />,
         { core: makeUptimePermissionsCore({ save: true }) }
       );
       await userEvent.click(getByText('Alerts'));
@@ -31,7 +33,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
 
     it("does not contain a tooltip explaining why the user can't create alerts", async () => {
       const { getByText, queryByText } = render(
-        <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={jest.fn()} />,
+        <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={vi.fn()} />,
         { core: makeUptimePermissionsCore({ save: true }) }
       );
       await userEvent.click(getByText('Alerts'));
@@ -47,7 +49,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
   describe("when users don't have write access to uptime", () => {
     it('disables the button to create a rule', async () => {
       const { getByText } = render(
-        <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={jest.fn()} />,
+        <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={vi.fn()} />,
         { core: makeUptimePermissionsCore({ save: false }) }
       );
       await userEvent.click(getByText('Alerts'));
@@ -58,7 +60,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
 
     it("contains a tooltip explaining why users can't create rules", async () => {
       const { getByText, findByText } = render(
-        <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={jest.fn()} />,
+        <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={vi.fn()} />,
         { core: makeUptimePermissionsCore({ save: false }) }
       );
       await userEvent.click(getByText('Alerts'));

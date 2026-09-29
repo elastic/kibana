@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-export const maybeAddCloudLinksMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./maybe_add_cloud_links', () => ({
-  maybeAddCloudLinks: maybeAddCloudLinksMock,
-}));
+export const maybeAddCloudLinksMock = vi.fn();
+
+vi.doMock('./maybe_add_cloud_links', () => {
+      const mocked = {
+      maybeAddCloudLinks: maybeAddCloudLinksMock,
+    };
+      return { ...mocked, default: mocked };
+    });

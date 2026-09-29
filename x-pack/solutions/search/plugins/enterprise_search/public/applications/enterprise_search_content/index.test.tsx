@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import { setMockValues } from '../__mocks__/kea_logic';
 
@@ -15,9 +17,12 @@ import { screen } from '@testing-library/react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
-jest.mock('./components/connectors/connectors_router', () => ({
-  ConnectorsRouter: () => <div data-test-subj="connectorsRouter">Connectors</div>,
-}));
+vi.mock('./components/connectors/connectors_router', () => {
+      const mocked = {
+      ConnectorsRouter: () => <div data-test-subj="connectorsRouter">Connectors</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { EnterpriseSearchContent, EnterpriseSearchContentConfigured } from '.';
 

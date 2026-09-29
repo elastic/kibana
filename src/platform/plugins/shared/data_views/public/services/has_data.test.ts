@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { HttpFetchError } from '@kbn/core-http-browser-internal/src/http_fetch_error';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';
@@ -19,7 +21,7 @@ describe('when calling hasData service', () => {
       const http = coreStart.http;
 
       // Mock getIndices
-      const spy = jest.spyOn(http, 'get').mockImplementation(() =>
+      const spy = vi.spyOn(http, 'get').mockImplementation(() =>
         Promise.resolve({
           hasDataView: true,
           hasUserDataView: true,
@@ -40,7 +42,7 @@ describe('when calling hasData service', () => {
       const http = coreStart.http;
 
       // Mock getIndices
-      const spy = jest.spyOn(http, 'get').mockImplementation(() =>
+      const spy = vi.spyOn(http, 'get').mockImplementation(() =>
         Promise.resolve({
           hasDataView: false,
           hasUserDataView: true,
@@ -61,7 +63,7 @@ describe('when calling hasData service', () => {
       const http = coreStart.http;
 
       // Mock getIndices
-      const spy = jest
+      const spy = vi
         .spyOn(http, 'get')
         .mockImplementation(() => Promise.reject(new Error('Oops')));
 
@@ -79,7 +81,7 @@ describe('when calling hasData service', () => {
       const http = coreStart.http;
 
       // Mock getIndices
-      const spy = jest.spyOn(http, 'get').mockImplementation(() =>
+      const spy = vi.spyOn(http, 'get').mockImplementation(() =>
         Promise.resolve({
           hasDataView: true,
           hasUserDataView: false,
@@ -99,7 +101,7 @@ describe('when calling hasData service', () => {
       const http = coreStart.http;
 
       // Mock getIndices
-      const spy = jest.spyOn(http, 'get').mockImplementation(() =>
+      const spy = vi.spyOn(http, 'get').mockImplementation(() =>
         Promise.resolve({
           hasDataView: true,
           hasUserDataView: true,
@@ -119,7 +121,7 @@ describe('when calling hasData service', () => {
       const http = coreStart.http;
 
       // Mock getIndices
-      const spy = jest
+      const spy = vi
         .spyOn(http, 'get')
         .mockImplementation(() => Promise.reject(new Error('Oops')));
 
@@ -138,9 +140,9 @@ describe('when calling hasData service', () => {
         const http = coreStart.http;
         const cpsManager = cpsPluginMock.createStartContract().cpsManager!;
 
-        jest.mocked(cpsManager.getTotalProjectCount).mockReturnValue(2);
+        vi.mocked(cpsManager.getTotalProjectCount).mockReturnValue(2);
 
-        const spy = jest.spyOn(http, 'get');
+        const spy = vi.spyOn(http, 'get');
         const hasData = new HasData();
         const hasDataService = hasData.start(coreStart, true, cpsManager);
         const response = hasDataService.hasESData();
@@ -156,7 +158,7 @@ describe('when calling hasData service', () => {
         const http = coreStart.http;
 
         // Mock getIndices
-        const spy = jest
+        const spy = vi
           .spyOn(http, 'get')
           .mockImplementation(() => Promise.resolve({ hasEsData: true }));
 
@@ -173,7 +175,7 @@ describe('when calling hasData service', () => {
         const http = coreStart.http;
 
         // Mock getIndices
-        const spy = jest
+        const spy = vi
           .spyOn(http, 'get')
           .mockImplementation(() => Promise.resolve({ hasEsData: false }));
 
@@ -190,7 +192,7 @@ describe('when calling hasData service', () => {
         const http = coreStart.http;
 
         // Mock getIndices
-        const spy = jest.spyOn(http, 'get').mockImplementation(() =>
+        const spy = vi.spyOn(http, 'get').mockImplementation(() =>
           Promise.reject(
             new HttpFetchError(
               'Timeout while checking for Elasticsearch data',
@@ -232,7 +234,7 @@ describe('when calling hasData service', () => {
             failureReason: 'remote_data_timeout',
           },
         };
-        const spy = jest
+        const spy = vi
           .spyOn(http, 'get')
           .mockImplementation(() =>
             Promise.reject(
@@ -247,7 +249,7 @@ describe('when calling hasData service', () => {
           );
         const hasData = new HasData();
         const hasDataService = hasData.start(coreStart, true);
-        const onRemoteDataTimeout = jest.fn();
+        const onRemoteDataTimeout = vi.fn();
         const response = hasDataService.hasESData({ onRemoteDataTimeout });
 
         expect(await response).toBe(true);
@@ -264,7 +266,7 @@ describe('when calling hasData service', () => {
         const http = coreStart.http;
 
         // Mock getIndices
-        const spy = jest.spyOn(http, 'get').mockImplementationOnce(() =>
+        const spy = vi.spyOn(http, 'get').mockImplementationOnce(() =>
           Promise.resolve({
             aliases: [],
             data_streams: [],
@@ -291,7 +293,7 @@ describe('when calling hasData service', () => {
         const http = coreStart.http;
 
         // Mock getIndices
-        const spy = jest.spyOn(http, 'get').mockImplementation(() =>
+        const spy = vi.spyOn(http, 'get').mockImplementation(() =>
           Promise.resolve({
             aliases: [],
             data_streams: [],
@@ -312,7 +314,7 @@ describe('when calling hasData service', () => {
         const http = coreStart.http;
 
         // Mock getIndices
-        const spy = jest.spyOn(http, 'get').mockImplementation((path: any) =>
+        const spy = vi.spyOn(http, 'get').mockImplementation((path: any) =>
           Promise.resolve({
             aliases: [],
             data_streams: path.includes('*:*')
@@ -340,11 +342,11 @@ describe('when calling hasData service', () => {
         const coreStart = coreMock.createStart();
         const http = coreStart.http;
 
-        const spyGetIndices = jest
+        const spyGetIndices = vi
           .spyOn(http, 'get')
           .mockImplementation(() => Promise.reject(new Error('oops')));
 
-        const spySearch = jest
+        const spySearch = vi
           .spyOn(http, 'post')
           .mockImplementation(() => Promise.resolve({ total: 10 }));
         const hasData = new HasData();
@@ -361,11 +363,11 @@ describe('when calling hasData service', () => {
         const coreStart = coreMock.createStart();
         const http = coreStart.http;
 
-        const spyGetIndices = jest
+        const spyGetIndices = vi
           .spyOn(http, 'get')
           .mockImplementation(() => Promise.reject(new Error('oops')));
 
-        const spySearch = jest
+        const spySearch = vi
           .spyOn(http, 'post')
           .mockImplementation(() => Promise.reject(new Error('oops')));
         const hasData = new HasData();

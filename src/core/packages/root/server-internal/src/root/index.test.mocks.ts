@@ -7,29 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 export const logger = loggingSystemMock.create();
-jest.doMock('@kbn/core-logging-server-internal', () => ({
-  LoggingSystem: jest.fn(() => logger),
-}));
+vi.doMock('@kbn/core-logging-server-internal', () => {
+      const mocked = {
+      LoggingSystem: vi.fn(() => logger),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const realKbnConfig = jest.requireActual('@kbn/config');
+const realKbnConfig = (await vi.importActual('@kbn/config'));
 
 import { configServiceMock, rawConfigServiceMock } from '@kbn/config-mocks';
 export const configService = configServiceMock.create();
 export const rawConfigService = rawConfigServiceMock.create();
-jest.doMock('@kbn/config', () => ({
-  ...realKbnConfig,
-  ConfigService: jest.fn(() => configService),
-  RawConfigService: jest.fn(() => rawConfigService),
-}));
+vi.doMock('@kbn/config', () => {
+      const mocked = {
+      ...realKbnConfig,
+      ConfigService: vi.fn(() => configService),
+      RawConfigService: vi.fn(() => rawConfigService),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const mockServer = {
-  setupCoreConfig: jest.fn(),
-  preboot: jest.fn(),
-  setup: jest.fn(),
-  start: jest.fn(),
-  stop: jest.fn(),
+  setupCoreConfig: vi.fn(),
+  preboot: vi.fn(),
+  setup: vi.fn(),
+  start: vi.fn(),
+  stop: vi.fn(),
   configService,
 };
-jest.mock('../server', () => ({ Server: jest.fn(() => mockServer) }));
+vi.mock('../server', () => {
+      const mocked = { Server: vi.fn(() => mockServer) };
+      return { ...mocked, default: mocked };
+    });

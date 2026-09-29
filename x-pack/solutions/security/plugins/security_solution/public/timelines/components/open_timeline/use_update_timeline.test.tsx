@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { mockTimelineModel, TestProviders } from '../../../common/mock';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
@@ -24,35 +26,35 @@ import sinon from 'sinon';
 import type { KueryFilterQueryKind } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 
-jest.mock('react-redux-v7', () => {
-  const actual = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const actual = require('react-redux-v7');
   return {
     ...actual,
-    useDispatch: () => jest.fn(),
+    useDispatch: () => vi.fn(),
   };
 });
-jest.mock('uuid', () => {
+vi.mock('uuid', () => {
   return {
-    v1: jest.fn(() => 'uuidv1()'),
-    v4: jest.fn(() => 'uuidv4()'),
+    v1: vi.fn(() => 'uuidv1()'),
+    v4: vi.fn(() => 'uuidv4()'),
   };
 });
-jest.mock('../../../common/store/inputs/actions');
-jest.mock('../../../common/utils/normalize_time_range');
-jest.mock('../../store/actions');
-jest.mock('../../../common/store/app/actions');
+vi.mock('../../../common/store/inputs/actions');
+vi.mock('../../../common/utils/normalize_time_range');
+vi.mock('../../store/actions');
+vi.mock('../../../common/store/app/actions');
 
-const mockUpdateTimeline = jest.fn();
-jest.mock('./helpers', () => {
-  const actual = jest.requireActual('./helpers');
+const mockUpdateTimeline = vi.fn();
+vi.mock('./helpers', async () => {
+  const actual = (await vi.importActual('./helpers'));
   return {
     ...actual,
     useUpdateTimeline: () => mockUpdateTimeline,
   };
 });
 
-jest.mock('../../../common/utils/default_date_settings', () => {
-  const actual = jest.requireActual('../../../common/utils/default_date_settings');
+vi.mock('../../../common/utils/default_date_settings', async () => {
+  const actual = (await vi.importActual('../../../common/utils/default_date_settings'));
   return {
     ...actual,
     DEFAULT_FROM_MOMENT: new Date('2020-10-27T11:37:31.655Z'),
@@ -60,7 +62,7 @@ jest.mock('../../../common/utils/default_date_settings', () => {
   };
 });
 
-jest.mock('../../containers/api');
+vi.mock('../../containers/api');
 
 describe('dispatchUpdateTimeline', () => {
   const anchor = '2020-03-27T20:34:51.337Z';
@@ -77,7 +79,7 @@ describe('dispatchUpdateTimeline', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     clock = sinon.useFakeTimers({
       now: unix,

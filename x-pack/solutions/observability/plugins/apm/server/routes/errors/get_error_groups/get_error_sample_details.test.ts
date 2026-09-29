@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getErrorSampleDetails } from './get_error_sample_details';
 
-const mockGetTransaction = jest.fn();
-jest.mock('../../transactions/get_transaction', () => ({
-  getTransaction: (...args: any[]) => mockGetTransaction(...args),
-}));
+const mockGetTransaction = vi.fn();
+vi.mock('../../transactions/get_transaction', () => {
+      const mocked = {
+      getTransaction: (...args: any[]) => mockGetTransaction(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const errorHitFields = {
   _id: ['error-doc-id'],
@@ -27,7 +32,7 @@ const errorHitFields = {
 
 function createMockApmEventClient(hits: any[] = []) {
   return {
-    search: jest.fn().mockResolvedValue({
+    search: vi.fn().mockResolvedValue({
       hits: { hits },
     }),
   } as any;
@@ -35,7 +40,7 @@ function createMockApmEventClient(hits: any[] = []) {
 
 describe('getErrorSampleDetails', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns error data with transaction undefined when getTransaction throws', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../../common/api/detection_engine/rule_exceptions';
@@ -36,7 +39,7 @@ describe('findRuleExceptionReferencesRoute', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
@@ -59,7 +62,7 @@ describe('findRuleExceptionReferencesRoute', () => {
       ],
     });
 
-    (clients.lists.exceptionListClient.findExceptionList as jest.Mock).mockResolvedValue({
+    (clients.lists.exceptionListClient.findExceptionList as Mock).mockResolvedValue({
       data: [mockList],
     });
 
@@ -67,8 +70,8 @@ describe('findRuleExceptionReferencesRoute', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('happy paths', () => {

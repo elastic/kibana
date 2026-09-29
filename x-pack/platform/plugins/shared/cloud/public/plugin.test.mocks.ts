@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-export const parseDeploymentIdFromDeploymentUrlMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('../common/parse_deployment_id_from_deployment_url', () => {
+export const parseDeploymentIdFromDeploymentUrlMock = vi.fn();
+
+vi.doMock('../common/parse_deployment_id_from_deployment_url', () => {
   return {
     parseDeploymentIdFromDeploymentUrl: parseDeploymentIdFromDeploymentUrlMock,
   };
 });
 
-export const decodeCloudIdMock = jest.fn();
+export const decodeCloudIdMock = vi.fn();
 
-jest.doMock('../common/decode_cloud_id', () => {
+vi.doMock('../common/decode_cloud_id', () => {
   return {
     decodeCloudId: decodeCloudIdMock,
   };

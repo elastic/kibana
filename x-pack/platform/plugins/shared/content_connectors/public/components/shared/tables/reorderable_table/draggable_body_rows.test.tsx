@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiDragDropContext: jest.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
-  EuiDroppable: jest.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiDragDropContext: vi.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
+      EuiDroppable: vi.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -21,17 +26,17 @@ import { DraggableBodyRows } from './draggable_body_rows';
 
 describe('DraggableBodyRows', () => {
   const items = [{ id: 1 }, { id: 2 }];
-  const onReorder = jest.fn();
+  const onReorder = vi.fn();
 
-  const MockEuiDragDropContext = jest.mocked(EuiDragDropContext);
+  const MockEuiDragDropContext = vi.mocked(EuiDragDropContext);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('wraps BodyRows in a EuiDragDropContext', () => {
     renderWithKibanaRenderContext(
-      <DraggableBodyRows items={items} onReorder={onReorder} renderItem={jest.fn()} />
+      <DraggableBodyRows items={items} onReorder={onReorder} renderItem={vi.fn()} />
     );
 
     expect(MockEuiDragDropContext).toHaveBeenCalled();
@@ -40,7 +45,7 @@ describe('DraggableBodyRows', () => {
 
   it('will call the provided onReorder function whenever items are reordered', () => {
     renderWithKibanaRenderContext(
-      <DraggableBodyRows items={items} onReorder={onReorder} renderItem={jest.fn()} />
+      <DraggableBodyRows items={items} onReorder={onReorder} renderItem={vi.fn()} />
     );
 
     const { onDragEnd } = MockEuiDragDropContext.mock.calls[0][0] as { onDragEnd: Function };
@@ -51,7 +56,7 @@ describe('DraggableBodyRows', () => {
 
   it('will not call the provided onReorder function if there are not a source AND destination provided', () => {
     renderWithKibanaRenderContext(
-      <DraggableBodyRows items={items} onReorder={onReorder} renderItem={jest.fn()} />
+      <DraggableBodyRows items={items} onReorder={onReorder} renderItem={vi.fn()} />
     );
 
     const { onDragEnd } = MockEuiDragDropContext.mock.calls[0][0] as { onDragEnd: Function };

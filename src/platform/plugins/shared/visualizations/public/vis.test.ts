@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Vis } from './vis';
 import type { VisTypeDefinition } from './vis_types';
 import { BaseVisType } from './vis_types';
 
-jest.mock('./services', () => {
+vi.mock('./services', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { SearchSource } = require('@kbn/data-plugin/common/search/search_source');
   // eslint-disable-next-line @typescript-eslint/no-var-requires

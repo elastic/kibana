@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type {
   ElasticsearchClient,
   KibanaResponseFactory,
@@ -48,9 +51,9 @@ describe('test actions handlers schema', () => {
 });
 
 describe('test actions handlers', () => {
-  let mockResponse: jest.Mocked<KibanaResponseFactory>;
-  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
+  let mockResponse: Mocked<KibanaResponseFactory>;
+  let mockSavedObjectsClient: Mocked<SavedObjectsClientContract>;
+  let mockElasticsearchClient: Mocked<ElasticsearchClient>;
 
   beforeEach(() => {
     mockSavedObjectsClient = savedObjectsClientMock.create();
@@ -83,13 +86,13 @@ describe('test actions handlers', () => {
     } as unknown as AgentAction;
 
     const actionsService: ActionsService = {
-      getAgent: jest.fn().mockReturnValueOnce({
+      getAgent: vi.fn().mockReturnValueOnce({
         id: 'agent',
       }),
-      createAgentAction: jest.fn().mockReturnValueOnce(agentAction),
-      cancelAgentAction: jest.fn(),
-      getAgentActions: jest.fn(),
-    } as jest.Mocked<ActionsService>;
+      createAgentAction: vi.fn().mockReturnValueOnce(agentAction),
+      cancelAgentAction: vi.fn(),
+      getAgentActions: vi.fn(),
+    } as Mocked<ActionsService>;
 
     const postNewAgentActionHandler = postNewAgentActionHandlerBuilder(actionsService);
     await postNewAgentActionHandler(

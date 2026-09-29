@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getTemplateFormMenu } from './header_menu';
 import * as i18n from '../translations';
 
@@ -22,9 +24,9 @@ const getMenu = ({
     isEdit: false,
     isEnabled: true,
     submitError: null,
-    onReset: jest.fn(),
-    onSave: jest.fn(),
-    onIsEnabledChange: jest.fn(),
+    onReset: vi.fn(),
+    onSave: vi.fn(),
+    onIsEnabledChange: vi.fn(),
   });
 
 describe('getTemplateFormMenu', () => {

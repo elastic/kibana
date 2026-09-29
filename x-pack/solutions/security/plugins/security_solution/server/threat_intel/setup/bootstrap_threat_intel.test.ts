@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 /**
  * Guard test for ensureThreatIntelBootstrap.
  *
@@ -26,30 +29,30 @@ import * as seedDefaultSourcesModule from './seed_default_sources';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { THREAT_REPORTS_INDEX } from '../../../common/threat_intel';
 
-jest.mock('./index_templates');
-jest.mock('./seed_default_sources');
+vi.mock('./index_templates');
+vi.mock('./seed_default_sources');
 
-const makeLogger = (): jest.Mocked<Logger> => {
+const makeLogger = (): Mocked<Logger> => {
   const child = {
-    debug: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    trace: jest.fn(),
-    fatal: jest.fn(),
-    get: jest.fn(),
-    log: jest.fn(),
-    isLevelEnabled: jest.fn(),
-  } as unknown as jest.Mocked<Logger>;
-  child.get = jest.fn().mockReturnValue(child);
+    debug: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    trace: vi.fn(),
+    fatal: vi.fn(),
+    get: vi.fn(),
+    log: vi.fn(),
+    isLevelEnabled: vi.fn(),
+  } as unknown as Mocked<Logger>;
+  child.get = vi.fn().mockReturnValue(child);
   return child;
 };
 
-const makeEsClient = (sourceCount: number): jest.Mocked<ElasticsearchClient> => {
+const makeEsClient = (sourceCount: number): Mocked<ElasticsearchClient> => {
   return {
-    count: jest.fn().mockResolvedValue({ count: sourceCount }),
+    count: vi.fn().mockResolvedValue({ count: sourceCount }),
     indices: {
-      getFieldMapping: jest.fn().mockResolvedValue({
+      getFieldMapping: vi.fn().mockResolvedValue({
         [THREAT_REPORTS_INDEX]: {
           mappings: {
             'content.title': {
@@ -68,15 +71,15 @@ const makeEsClient = (sourceCount: number): jest.Mocked<ElasticsearchClient> => 
         },
       }),
     },
-    inference: { get: jest.fn().mockResolvedValue({}) },
-  } as unknown as jest.Mocked<ElasticsearchClient>;
+    inference: { get: vi.fn().mockResolvedValue({}) },
+  } as unknown as Mocked<ElasticsearchClient>;
 };
 
 describe('ensureThreatIntelBootstrap', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (indexTemplatesModule.installIndexTemplates as jest.Mock).mockResolvedValue(undefined);
-    (seedDefaultSourcesModule.seedDefaultSources as jest.Mock).mockResolvedValue({
+    vi.clearAllMocks();
+    (indexTemplatesModule.installIndexTemplates as Mock).mockResolvedValue(undefined);
+    (seedDefaultSourcesModule.seedDefaultSources as Mock).mockResolvedValue({
       total: 0,
       created: 0,
       updated: 0,
@@ -127,7 +130,7 @@ describe('ensureThreatIntelBootstrap', () => {
       // count === 0 means first boot — ensure templates install and seeding runs
       const esClient = makeEsClient(0);
       // second count call (inside seedThreatIntelCatalog) also returns 0
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 0 });
+      (esClient.count as Mock).mockResolvedValue({ count: 0 });
       const logger = makeLogger();
 
       await ensureThreatIntelBootstrap({ esClient, logger });
@@ -137,7 +140,7 @@ describe('ensureThreatIntelBootstrap', () => {
 
     it('calls seedDefaultSources when the catalog is empty', async () => {
       const esClient = makeEsClient(0);
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 0 });
+      (esClient.count as Mock).mockResolvedValue({ count: 0 });
       const logger = makeLogger();
 
       await ensureThreatIntelBootstrap({ esClient, logger });
@@ -150,10 +153,10 @@ describe('ensureThreatIntelBootstrap', () => {
     // skipped seeding forever, permanently omitting the rest of the catalog.
     it('retries seeding when some entries failed, and succeeds once they land', async () => {
       const esClient = makeEsClient(0);
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 0 });
+      (esClient.count as Mock).mockResolvedValue({ count: 0 });
       const logger = makeLogger();
 
-      (seedDefaultSourcesModule.seedDefaultSources as jest.Mock)
+      (seedDefaultSourcesModule.seedDefaultSources as Mock)
         .mockResolvedValueOnce({ total: 10, created: 4, updated: 0, skipped: 0, failed: 6 })
         // Retry: the four already created come back as skipped (conflicts are
         // idempotent), and the rest land.
@@ -179,7 +182,7 @@ describe('ensureThreatIntelBootstrap', () => {
       meta: {} as never,
       warnings: [],
     });
-    (esClient.indices.getFieldMapping as jest.Mock).mockRejectedValue(notFound);
+    (esClient.indices.getFieldMapping as Mock).mockRejectedValue(notFound);
 
     // Bootstrap must resolve — the 404 is not retried and seeding continues.
     await expect(
@@ -208,16 +211,16 @@ describe('ensureThreatIntelBootstrap', () => {
 
   describe('required semantic_text endpoint failure', () => {
     beforeAll(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('fails readiness when a required field has no effective endpoint', async () => {
       const esClient = makeEsClient(12);
-      (esClient.indices.getFieldMapping as jest.Mock).mockResolvedValue({
+      (esClient.indices.getFieldMapping as Mock).mockResolvedValue({
         [THREAT_REPORTS_INDEX]: {
           mappings: {
             'content.title': {
@@ -236,7 +239,7 @@ describe('ensureThreatIntelBootstrap', () => {
 
       const bootstrap = ensureThreatIntelBootstrap({ esClient, logger: makeLogger() });
       const assertion = expect(bootstrap).rejects.toThrow(/content\.title/);
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
 
       await assertion;
     });

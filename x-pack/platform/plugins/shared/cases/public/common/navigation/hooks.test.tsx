@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { renderHook, act } from '@testing-library/react';
@@ -21,15 +24,15 @@ import {
 } from './hooks';
 import { CasesDeepLinkId } from './deep_links';
 
-const useNavigationMock = useNavigation as jest.Mock;
-jest.mock('../lib/kibana');
+const useNavigationMock = useNavigation as Mock;
+vi.mock('../lib/kibana');
 
-const navigateTo = jest.fn();
-const getAppUrl = jest.fn();
+const navigateTo = vi.fn();
+const getAppUrl = vi.fn();
 
 describe('hooks', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useNavigationMock.mockReturnValue({ navigateTo, getAppUrl });
   });
 

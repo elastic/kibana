@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
@@ -29,40 +32,43 @@ import type { ParsedCommandInterface } from '../../console/service/types';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-jest.mock('../../../hooks/custom_scripts/use_get_custom_scripts');
-jest.mock('../../console/hooks/state_selectors/use_console_state_dispatch');
-jest.mock('../shared/hooks', () => ({
-  useGenericErrorToast: jest.fn(),
-  useBaseSelectorHandlers: jest.fn(() => ({
-    handleOpenPopover: jest.fn(),
-    handleClosePopover: jest.fn(),
-    setIsPopoverOpen: jest.fn(),
-  })),
-  useBaseSelectorState: jest.fn((store, value) => store ?? { isPopoverOpen: !value }),
-  useRenderDelay: jest.fn(() => false),
-  useFocusManagement: jest.fn(),
-}));
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../hooks/custom_scripts/use_get_custom_scripts');
+vi.mock('../../console/hooks/state_selectors/use_console_state_dispatch');
+vi.mock('../shared/hooks', () => {
+      const mocked = {
+      useGenericErrorToast: vi.fn(),
+      useBaseSelectorHandlers: vi.fn(() => ({
+        handleOpenPopover: vi.fn(),
+        handleClosePopover: vi.fn(),
+        setIsPopoverOpen: vi.fn(),
+      })),
+      useBaseSelectorState: vi.fn((store, value) => store ?? { isPopoverOpen: !value }),
+      useRenderDelay: vi.fn(() => false),
+      useFocusManagement: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/kibana');
 
-jest.useFakeTimers();
+vi.useFakeTimers();
 
 describe('CustomScriptSelector', () => {
-  const mockUseGetCustomScripts = useGetCustomScripts as jest.MockedFunction<
+  const mockUseGetCustomScripts = useGetCustomScripts as MockedFunction<
     typeof useGetCustomScripts
   >;
-  const mockUseGenericErrorToast = useGenericErrorToast as jest.MockedFunction<
+  const mockUseGenericErrorToast = useGenericErrorToast as MockedFunction<
     typeof useGenericErrorToast
   >;
-  const mockUseBaseSelectorHandlers = useBaseSelectorHandlers as jest.MockedFunction<
+  const mockUseBaseSelectorHandlers = useBaseSelectorHandlers as MockedFunction<
     typeof useBaseSelectorHandlers
   >;
-  const mockUseFocusManagement = useFocusManagement as jest.MockedFunction<
+  const mockUseFocusManagement = useFocusManagement as MockedFunction<
     typeof useFocusManagement
   >;
-  const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-  const mockUseRenderDelay = useRenderDelay as jest.MockedFunction<typeof useRenderDelay>;
-  const mockOnChange = jest.fn();
-  const mockRequestFocus = jest.fn();
+  const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+  const mockUseRenderDelay = useRenderDelay as MockedFunction<typeof useRenderDelay>;
+  const mockOnChange = vi.fn();
+  const mockRequestFocus = vi.fn();
   const mockScripts: ResponseActionScript[] = [
     { id: 'script1', name: 'Script 1', description: 'Test script 1' },
     { id: 'script2', name: 'Script 2', description: 'Test script 2' },
@@ -103,13 +109,13 @@ describe('CustomScriptSelector', () => {
     command: mockCommand,
     requestFocus: mockRequestFocus,
     consoleApi: {
-      setInput: jest.fn(),
-      setFocusOnInput: jest.fn(),
+      setInput: vi.fn(),
+      setFocusOnInput: vi.fn(),
     },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseGetCustomScripts.mockReturnValue({
       data: mockScripts,
       isLoading: false,
@@ -124,7 +130,7 @@ describe('CustomScriptSelector', () => {
     mockUseGenericErrorToast.mockImplementation(() => {});
 
     // Mock the base selector handlers hook with working implementations
-    const mockHandleOpenPopover = jest.fn(() => {
+    const mockHandleOpenPopover = vi.fn(() => {
       mockOnChange({
         value: defaultProps.value,
         valueText: defaultProps.valueText,
@@ -132,7 +138,7 @@ describe('CustomScriptSelector', () => {
       });
     });
 
-    const mockHandleClosePopover = jest.fn(() => {
+    const mockHandleClosePopover = vi.fn(() => {
       mockOnChange({
         value: defaultProps.value,
         valueText: defaultProps.valueText,
@@ -142,7 +148,7 @@ describe('CustomScriptSelector', () => {
     mockUseBaseSelectorHandlers.mockReturnValue({
       handleOpenPopover: mockHandleOpenPopover,
       handleClosePopover: mockHandleClosePopover,
-      setIsPopoverOpen: jest.fn(),
+      setIsPopoverOpen: vi.fn(),
     });
 
     mockUseFocusManagement.mockImplementation((isPopoverOpen, requestFocus) => {
@@ -157,10 +163,10 @@ describe('CustomScriptSelector', () => {
       services: {
         notifications: {
           toasts: {
-            add: jest.fn(),
-            addSuccess: jest.fn(),
-            addWarning: jest.fn(),
-            addDanger: jest.fn(),
+            add: vi.fn(),
+            addSuccess: vi.fn(),
+            addWarning: vi.fn(),
+            addDanger: vi.fn(),
           },
         },
       },
@@ -168,14 +174,14 @@ describe('CustomScriptSelector', () => {
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   const renderAndWaitForComponent = async (component: React.ReactElement) => {
     const result = render(component);
     // Fast-forward the timers to skip the delay
     act(() => {
-      jest.advanceTimersByTime(10);
+      vi.advanceTimersByTime(10);
     });
     // Wait for component to finish rendering
     await waitFor(() => {
@@ -388,7 +394,7 @@ describe('CustomScriptSelector', () => {
 
     // Advance timers to trigger the setTimeout in useEffect
     act(() => {
-      jest.advanceTimersByTime(10);
+      vi.advanceTimersByTime(10);
     });
 
     expect(mockRequestFocus).toHaveBeenCalled();

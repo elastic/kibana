@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
 import { createMockEndpointAppContext, getRegisteredVersionedRouteMock } from '../../mocks';
@@ -24,7 +27,7 @@ describe('Get Pending Insights Route Handler', () => {
   let router: SecuritySolutionPluginRouterMock;
   let mockAgentBuilder: {
     execution: {
-      findExecutions: jest.Mock;
+      findExecutions: Mock;
     };
   };
 
@@ -37,10 +40,10 @@ describe('Get Pending Insights Route Handler', () => {
 
     mockAgentBuilder = {
       execution: {
-        findExecutions: jest.fn().mockResolvedValue([]),
+        findExecutions: vi.fn().mockResolvedValue([]),
       },
     };
-    (mockEndpointContext.service.getAgentBuilder as jest.Mock).mockReturnValue(mockAgentBuilder);
+    (mockEndpointContext.service.getAgentBuilder as Mock).mockReturnValue(mockAgentBuilder);
 
     router = httpServiceMock.createRouter();
     registerGetPendingRoute(router, mockEndpointContext);
@@ -50,15 +53,15 @@ describe('Get Pending Insights Route Handler', () => {
         core: {
           security: {
             authc: {
-              getCurrentUser: jest
+              getCurrentUser: vi
                 .fn()
                 .mockReturnValue({ username: 'test-user', roles: ['admin'] }),
             },
           },
         },
         securitySolution: {
-          getEndpointAuthz: jest.fn().mockResolvedValue(authz),
-          getSpaceId: jest.fn().mockReturnValue('default'),
+          getEndpointAuthz: vi.fn().mockResolvedValue(authz),
+          getSpaceId: vi.fn().mockReturnValue('default'),
         },
       };
 
@@ -194,7 +197,7 @@ describe('Get Pending Insights Route Handler', () => {
 
       await callRoute({ insightTypes: ['incompatible_antivirus'], endpointIds: ['endpoint-1'] });
 
-      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const callBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
       expect(callBody.pending).toHaveLength(1);
       expect(callBody.pending[0].status).toBe(ExecutionStatus.failed);
       expect(callBody.pending[0].failureReason).toBe('connector timed out');
@@ -207,7 +210,7 @@ describe('Get Pending Insights Route Handler', () => {
 
       await callRoute({ insightTypes: ['incompatible_antivirus'], endpointIds: ['endpoint-1'] });
 
-      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const callBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
       expect(callBody.pending).toHaveLength(1);
       expect(callBody.pending[0].status).toBe(ExecutionStatus.aborted);
     });
@@ -219,7 +222,7 @@ describe('Get Pending Insights Route Handler', () => {
 
       await callRoute({ insightTypes: ['incompatible_antivirus'], endpointIds: ['endpoint-1'] });
 
-      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const callBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
       expect(callBody.pending).toHaveLength(1);
       expect(callBody.pending[0].status).toBe(ExecutionStatus.running);
     });
@@ -255,7 +258,7 @@ describe('Get Pending Insights Route Handler', () => {
         endpointIds: ['endpoint-1'],
       });
 
-      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const callBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
       expect(callBody.pending).toHaveLength(1);
       expect(callBody.pending[0].executionId).toBe('exec-failed');
       expect(callBody.pending[0].insightType).toBe('policy_response_failure');
@@ -347,7 +350,7 @@ describe('Get Pending Insights Route Handler', () => {
 
       await callRoute({ insightTypes: ['incompatible_antivirus'] });
 
-      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const callBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
       expect(callBody.pending).toHaveLength(2);
       expect(callBody.pending.map((p: { executionId: string }) => p.executionId)).toEqual([
         'exec-running',
@@ -471,7 +474,7 @@ describe('Get Pending Insights Route Handler', () => {
         })
       );
 
-      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const callBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
       expect(callBody.pending).toHaveLength(2);
     });
 
@@ -499,7 +502,7 @@ describe('Get Pending Insights Route Handler', () => {
 
       await callRoute({ endpointIds: ['endpoint-1', 'endpoint-2'] });
 
-      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const callBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
       expect(callBody.pending).toHaveLength(1);
     });
   });
@@ -565,7 +568,7 @@ describe('Get Pending Insights Route Handler', () => {
 
       await callRoute();
 
-      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      const callBody = (mockResponse.ok as Mock).mock.calls[0][0].body;
       expect(callBody.pending[0].status).toBe(ExecutionStatus.failed);
     });
 

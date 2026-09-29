@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
@@ -24,9 +27,12 @@ import type { IndexPattern } from '@kbn/lens-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { documentField } from '../form_based/document_field';
 
-jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
-  loadFieldStats: jest.fn().mockResolvedValue({}),
-}));
+vi.mock('@kbn/unified-field-list/src/services/field_stats', () => {
+      const mocked = {
+      loadFieldStats: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const corePluginMock = coreMock.createStart();
 
@@ -86,13 +92,13 @@ const indexPattern = {
     },
     documentField,
   ],
-  isTimeBased: jest.fn(),
+  isTimeBased: vi.fn(),
 } as unknown as IndexPattern;
 
 const dataView = {
   ...indexPattern,
-  getFormatterForField: jest.fn(() => ({
-    convertToText: jest.fn((s: unknown) => JSON.stringify(s)),
+  getFormatterForField: vi.fn(() => ({
+    convertToText: vi.fn((s: unknown) => JSON.stringify(s)),
   })),
 } as unknown as DataView;
 
@@ -102,7 +108,7 @@ const mockedServices = {
   data: dataPluginMock.createStartContract(),
   dataViews: {
     ...dataViewsMock,
-    get: jest.fn().mockResolvedValue(dataView),
+    get: vi.fn().mockResolvedValue(dataView),
   },
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   charts: chartPluginMock.createSetupContract(),
@@ -111,8 +117,8 @@ const mockedServices = {
   share: {
     url: {
       locators: {
-        get: jest.fn().mockReturnValue({
-          getRedirectUrl: jest.fn(() => 'discover_url'),
+        get: vi.fn().mockReturnValue({
+          getRedirectUrl: vi.fn(() => 'discover_url'),
         }),
       },
     },
@@ -150,7 +156,7 @@ const defaultProps: FieldItemIndexPatternFieldProps = {
 
 describe('Lens Field Item', () => {
   beforeEach(() => {
-    (loadFieldStats as jest.Mock).mockClear();
+    (loadFieldStats as Mock).mockClear();
   });
 
   const renderFieldItem = (props?: Partial<FieldItemIndexPatternFieldProps>) => {
@@ -190,7 +196,7 @@ describe('Lens Field Item', () => {
   });
 
   it('should render edit field button if callback is set', async () => {
-    const editFieldSpy = jest.fn();
+    const editFieldSpy = vi.fn();
     renderFieldItem({ editField: editFieldSpy, hideDetails: true });
     await clickField('bytes');
     fireEvent.click(screen.getByRole('button', { name: 'Edit data view field' }));
@@ -198,7 +204,7 @@ describe('Lens Field Item', () => {
   });
 
   it('should not render edit field button for document field', async () => {
-    renderFieldItem({ field: documentField, editField: jest.fn(), hideDetails: true });
+    renderFieldItem({ field: documentField, editField: vi.fn(), hideDetails: true });
     await clickField(documentField.name);
     expect(screen.getByTestId('fieldPopoverHeader_fieldDisplayName')).toBeInTheDocument();
     expect(
@@ -207,7 +213,7 @@ describe('Lens Field Item', () => {
   });
 
   it('should pass add filter callback and pass result to filter manager', async () => {
-    (loadFieldStats as jest.Mock).mockResolvedValueOnce({
+    (loadFieldStats as Mock).mockResolvedValueOnce({
       totalDocuments: 4633,
       sampledDocuments: 4633,
       sampledValues: 4633,
@@ -235,7 +241,7 @@ describe('Lens Field Item', () => {
 
   it('should request field stats every time the button is clicked', async () => {
     const dataViewField = new DataViewField(defaultProps.field);
-    (loadFieldStats as jest.Mock).mockResolvedValueOnce({
+    (loadFieldStats as Mock).mockResolvedValueOnce({
       totalDocuments: 4633,
       sampledDocuments: 4633,
       sampledValues: 4633,

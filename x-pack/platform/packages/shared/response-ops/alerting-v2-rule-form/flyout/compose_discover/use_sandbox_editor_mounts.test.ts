@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { monaco } from '@kbn/code-editor';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
@@ -12,33 +14,42 @@ import { useSplitQueryCompletion } from './use_split_query_completion';
 import { useSplitQueryValidation } from './use_split_query_validation';
 import { useSandboxEditorMounts } from './use_sandbox_editor_mounts';
 
-jest.mock('./use_split_query_completion', () => ({ useSplitQueryCompletion: jest.fn() }));
-jest.mock('./use_split_query_validation', () => ({ useSplitQueryValidation: jest.fn() }));
-jest.mock('../../form/hooks/use_esql_callbacks', () => ({
-  useEsqlCallbacks: jest.fn(() => ({})),
-}));
+vi.mock('./use_split_query_completion', () => {
+      const mocked = { useSplitQueryCompletion: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./use_split_query_validation', () => {
+      const mocked = { useSplitQueryValidation: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../form/hooks/use_esql_callbacks', () => {
+      const mocked = {
+      useEsqlCallbacks: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const editor = {} as monaco.editor.IStandaloneCodeEditor;
 const services = {
   application: {},
   http: {},
-  data: { search: { search: jest.fn() } },
+  data: { search: { search: vi.fn() } },
 } as unknown as RuleFormServices;
 
 describe('useSandboxEditorMounts', () => {
   // One spy per underlying hook call, in the order the hook invokes them:
   // completion → [alert, recovery]; validation → [alert, recovery, base, single].
-  const completionMounts = [jest.fn(), jest.fn()];
-  const validationMounts = [jest.fn(), jest.fn(), jest.fn(), jest.fn()];
+  const completionMounts = [vi.fn(), vi.fn()];
+  const validationMounts = [vi.fn(), vi.fn(), vi.fn(), vi.fn()];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     let c = 0;
     let v = 0;
-    jest
+    vi
       .mocked(useSplitQueryCompletion)
       .mockImplementation(() => ({ onEditorMount: completionMounts[c++] }));
-    jest
+    vi
       .mocked(useSplitQueryValidation)
       .mockImplementation(() => ({ onEditorMount: validationMounts[v++] }));
   });
@@ -61,7 +72,7 @@ describe('useSandboxEditorMounts', () => {
     renderHook(() => useSandboxEditorMounts({ baseQuery: 'FROM logs-*', services }));
 
     // Alert + recovery validate against the base; base + single validate with ''.
-    const baseQueries = jest
+    const baseQueries = vi
       .mocked(useSplitQueryValidation)
       .mock.calls.map(([params]) => params.baseQuery);
     expect(baseQueries).toEqual(['FROM logs-*', 'FROM logs-*', '', '']);

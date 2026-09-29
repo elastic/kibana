@@ -5,25 +5,36 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { createExecutionTerminatedEvent } from '../items/execution_terminated_event.factory';
 import { ResponseActions } from './response_actions';
 import { ResponseMessage } from './response_message';
 
-jest.mock('./chat_message_text', () => ({
-  ChatMessageText: jest.fn(() => null),
-}));
+vi.mock('./chat_message_text', () => {
+      const mocked = {
+      ChatMessageText: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./streaming_text', () => ({
-  StreamingText: jest.fn(() => null),
-}));
+vi.mock('./streaming_text', () => {
+      const mocked = {
+      StreamingText: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./response_actions', () => ({
-  ResponseActions: jest.fn(() => null),
-}));
+vi.mock('./response_actions', () => {
+      const mocked = {
+      ResponseActions: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const responseActionsMock = jest.mocked(ResponseActions);
+const responseActionsMock = vi.mocked(ResponseActions);
 
 const terminated = createExecutionTerminatedEvent();
 

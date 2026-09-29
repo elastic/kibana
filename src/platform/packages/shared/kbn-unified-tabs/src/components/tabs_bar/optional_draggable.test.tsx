@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
@@ -24,8 +26,8 @@ const renderDraggableWithDroppable = (disableDragAndDrop: boolean = false) =>
   render(
     <OptionalDroppable
       disableDragAndDrop={disableDragAndDrop}
-      onDragEnd={jest.fn()}
-      onDragStart={jest.fn()}
+      onDragEnd={vi.fn()}
+      onDragStart={vi.fn()}
     >
       <OptionalDraggable
         item={{
@@ -49,7 +51,7 @@ const renderDraggableWithDroppable = (disableDragAndDrop: boolean = false) =>
 
 describe('OptionalDraggable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders noDragProps when drag-and-drop is disabled', () => {

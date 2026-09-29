@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -18,14 +20,14 @@ import { AlertsSearchBar } from '.';
 import type { HttpStart } from '@kbn/core-http-browser';
 
 const mockDataPlugin = dataPluginMock.createStartContract();
-jest.mock('@kbn/kibana-utils-plugin/public');
-jest.mock('../common/hooks');
+vi.mock('@kbn/kibana-utils-plugin/public');
+vi.mock('../common/hooks');
 
-const mockUseAlertsDataView = jest.mocked(useAlertsDataView);
+const mockUseAlertsDataView = vi.mocked(useAlertsDataView);
 
-const mockUseFetchUnifiedAlertsFields = jest.mocked(useFetchUnifiedAlertsFields);
+const mockUseFetchUnifiedAlertsFields = vi.mocked(useFetchUnifiedAlertsFields);
 
-const unifiedSearchBarMock = jest.fn().mockImplementation((props) => (
+const unifiedSearchBarMock = vi.fn().mockImplementation((props) => (
   <button
     data-test-subj="querySubmitButton"
     onClick={() => props.onQuerySubmit({ dateRange: { from: 'now', to: 'now' } })}
@@ -35,12 +37,12 @@ const unifiedSearchBarMock = jest.fn().mockImplementation((props) => (
   </button>
 ));
 
-const toastsMock = { toasts: { addWarning: jest.fn() } } as unknown as ToastsStart;
+const toastsMock = { toasts: { addWarning: vi.fn() } } as unknown as ToastsStart;
 const httpMock = {
-  post: jest.fn(),
+  post: vi.fn(),
 } as unknown as HttpStart;
 
-const onFiltersUpdatedMock = jest.fn();
+const onFiltersUpdatedMock = vi.fn();
 const filters: Filter[] = [
   {
     meta: {
@@ -54,7 +56,7 @@ const filters: Filter[] = [
     $state: { store: FilterStateStore.APP_STATE },
   },
 ];
-const newUnifiedSearchBarMock = jest.fn().mockImplementation((props) => (
+const newUnifiedSearchBarMock = vi.fn().mockImplementation((props) => (
   <button
     data-test-subj="filtersSubmitButton"
     onClick={() => props.onFiltersUpdated(filters)}
@@ -81,7 +83,7 @@ describe('AlertsSearchBar', () => {
         fields: [],
       },
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {
@@ -90,8 +92,8 @@ describe('AlertsSearchBar', () => {
         rangeFrom="now/d"
         rangeTo="now/d"
         query=""
-        onQuerySubmit={jest.fn()}
-        onFiltersUpdated={jest.fn()}
+        onQuerySubmit={vi.fn()}
+        onFiltersUpdated={vi.fn()}
         appName={'test'}
         unifiedSearchBar={unifiedSearchBarMock}
         toasts={toastsMock}
@@ -103,7 +105,7 @@ describe('AlertsSearchBar', () => {
   });
 
   it('calls onQuerySubmit correctly', async () => {
-    const onQuerySubmitMock = jest.fn();
+    const onQuerySubmitMock = vi.fn();
 
     render(
       <AlertsSearchBar
@@ -111,7 +113,7 @@ describe('AlertsSearchBar', () => {
         rangeTo="now/d"
         query=""
         onQuerySubmit={onQuerySubmitMock}
-        onFiltersUpdated={jest.fn()}
+        onFiltersUpdated={vi.fn()}
         unifiedSearchBar={unifiedSearchBarMock}
         toasts={toastsMock}
         http={httpMock}
@@ -134,7 +136,7 @@ describe('AlertsSearchBar', () => {
           rangeFrom="now/d"
           rangeTo="now/d"
           query=""
-          onQuerySubmit={jest.fn()}
+          onQuerySubmit={vi.fn()}
           onFiltersUpdated={onFiltersUpdatedMock}
           unifiedSearchBar={newUnifiedSearchBarMock}
           toasts={toastsMock}
@@ -158,12 +160,12 @@ describe('AlertsSearchBar', () => {
           rangeFrom="now/d"
           rangeTo="now/d"
           query=""
-          onQuerySubmit={jest.fn()}
+          onQuerySubmit={vi.fn()}
           toasts={toastsMock}
           http={httpMock}
           dataService={mockDataPlugin}
           appName={'test'}
-          onFiltersUpdated={jest.fn()}
+          onFiltersUpdated={vi.fn()}
           unifiedSearchBar={unifiedSearchBarMock}
           ruleTypeIds={['siem.esqlRuleType', '.esQuery']}
         />
@@ -184,12 +186,12 @@ describe('AlertsSearchBar', () => {
           rangeFrom="now/d"
           rangeTo="now/d"
           query=""
-          onQuerySubmit={jest.fn()}
+          onQuerySubmit={vi.fn()}
           toasts={toastsMock}
           http={httpMock}
           dataService={mockDataPlugin}
           appName={'test'}
-          onFiltersUpdated={jest.fn()}
+          onFiltersUpdated={vi.fn()}
           unifiedSearchBar={unifiedSearchBarMock}
           ruleTypeIds={['.esQuery']}
         />
@@ -210,12 +212,12 @@ describe('AlertsSearchBar', () => {
           rangeFrom="now/d"
           rangeTo="now/d"
           query=""
-          onQuerySubmit={jest.fn()}
+          onQuerySubmit={vi.fn()}
           toasts={toastsMock}
           http={httpMock}
           dataService={mockDataPlugin}
           appName={'test'}
-          onFiltersUpdated={jest.fn()}
+          onFiltersUpdated={vi.fn()}
           unifiedSearchBar={unifiedSearchBarMock}
           ruleTypeIds={['.esQuery', 'apm.anomaly']}
         />
@@ -243,12 +245,12 @@ describe('AlertsSearchBar', () => {
           rangeFrom="now/d"
           rangeTo="now/d"
           query=""
-          onQuerySubmit={jest.fn()}
+          onQuerySubmit={vi.fn()}
           toasts={toastsMock}
           http={httpMock}
           dataService={mockDataPlugin}
           appName={'test'}
-          onFiltersUpdated={jest.fn()}
+          onFiltersUpdated={vi.fn()}
           unifiedSearchBar={unifiedSearchBarMock}
         />
       );
@@ -270,7 +272,7 @@ describe('AlertsSearchBar', () => {
     });
 
     it('calls the unifiedSearchBar with correct index patters without data views', async () => {
-      jest.mocked(useAlertsDataView).mockReturnValue({
+      vi.mocked(useAlertsDataView).mockReturnValue({
         isLoading: false,
         dataView: undefined,
       });
@@ -280,12 +282,12 @@ describe('AlertsSearchBar', () => {
           rangeFrom="now/d"
           rangeTo="now/d"
           query=""
-          onQuerySubmit={jest.fn()}
+          onQuerySubmit={vi.fn()}
           toasts={toastsMock}
           http={httpMock}
           dataService={mockDataPlugin}
           appName={'test'}
-          onFiltersUpdated={jest.fn()}
+          onFiltersUpdated={vi.fn()}
           unifiedSearchBar={unifiedSearchBarMock}
         />
       );
@@ -302,7 +304,7 @@ describe('AlertsSearchBar', () => {
 
   describe('With fetchUnifiedAlertsFields', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockUseAlertsDataView.mockReturnValue({
         isLoading: false,
         dataView: undefined,
@@ -344,7 +346,7 @@ describe('AlertsSearchBar', () => {
           rangeFrom="now/d"
           rangeTo="now/d"
           query=""
-          onQuerySubmit={jest.fn()}
+          onQuerySubmit={vi.fn()}
           onFiltersUpdated={onFiltersUpdatedMock}
           unifiedSearchBar={newUnifiedSearchBarMock}
           toasts={toastsMock}
@@ -375,7 +377,7 @@ describe('AlertsSearchBar', () => {
           rangeFrom="now/d"
           rangeTo="now/d"
           query=""
-          onQuerySubmit={jest.fn()}
+          onQuerySubmit={vi.fn()}
           onFiltersUpdated={onFiltersUpdatedMock}
           unifiedSearchBar={newUnifiedSearchBarMock}
           toasts={toastsMock}
@@ -400,12 +402,12 @@ describe('AlertsSearchBar', () => {
           rangeFrom="now/d"
           rangeTo="now/d"
           query=""
-          onQuerySubmit={jest.fn()}
+          onQuerySubmit={vi.fn()}
           toasts={toastsMock}
           http={httpMock}
           dataService={mockDataPlugin}
           appName={'test'}
-          onFiltersUpdated={jest.fn()}
+          onFiltersUpdated={vi.fn()}
           unifiedSearchBar={unifiedSearchBarMock}
           ruleTypeIds={['siem.esqlRuleType', '.esQuery']}
           fetchUnifiedAlertsFields={true}
@@ -427,12 +429,12 @@ describe('AlertsSearchBar', () => {
           rangeFrom="now/d"
           rangeTo="now/d"
           query=""
-          onQuerySubmit={jest.fn()}
+          onQuerySubmit={vi.fn()}
           toasts={toastsMock}
           http={httpMock}
           dataService={mockDataPlugin}
           appName={'test'}
-          onFiltersUpdated={jest.fn()}
+          onFiltersUpdated={vi.fn()}
           unifiedSearchBar={unifiedSearchBarMock}
           ruleTypeIds={['.esQuery']}
           fetchUnifiedAlertsFields={true}
@@ -454,12 +456,12 @@ describe('AlertsSearchBar', () => {
           rangeFrom="now/d"
           rangeTo="now/d"
           query=""
-          onQuerySubmit={jest.fn()}
+          onQuerySubmit={vi.fn()}
           toasts={toastsMock}
           http={httpMock}
           dataService={mockDataPlugin}
           appName={'test'}
-          onFiltersUpdated={jest.fn()}
+          onFiltersUpdated={vi.fn()}
           unifiedSearchBar={unifiedSearchBarMock}
           ruleTypeIds={['.esQuery', 'apm.anomaly', 'siem.esqlRuleType']}
           fetchUnifiedAlertsFields={true}
@@ -500,12 +502,12 @@ describe('AlertsSearchBar', () => {
           rangeFrom="now/d"
           rangeTo="now/d"
           query=""
-          onQuerySubmit={jest.fn()}
+          onQuerySubmit={vi.fn()}
           toasts={toastsMock}
           http={httpMock}
           dataService={mockDataPlugin}
           appName={'test'}
-          onFiltersUpdated={jest.fn()}
+          onFiltersUpdated={vi.fn()}
           unifiedSearchBar={unifiedSearchBarMock}
           fetchUnifiedAlertsFields={true}
         />
@@ -541,7 +543,7 @@ describe('AlertsSearchBar', () => {
 
     it('calls the unifiedSearchBar with correct index patters without data views', async () => {
       // @ts-expect-error: mocking only necessary attributes
-      jest.mocked(mockUseFetchUnifiedAlertsFields).mockReturnValue({
+      vi.mocked(mockUseFetchUnifiedAlertsFields).mockReturnValue({
         isLoading: false,
         data: {
           fields: [],
@@ -553,12 +555,12 @@ describe('AlertsSearchBar', () => {
           rangeFrom="now/d"
           rangeTo="now/d"
           query=""
-          onQuerySubmit={jest.fn()}
+          onQuerySubmit={vi.fn()}
           toasts={toastsMock}
           http={httpMock}
           dataService={mockDataPlugin}
           appName={'test'}
-          onFiltersUpdated={jest.fn()}
+          onFiltersUpdated={vi.fn()}
           unifiedSearchBar={unifiedSearchBarMock}
           fetchUnifiedAlertsFields={true}
         />

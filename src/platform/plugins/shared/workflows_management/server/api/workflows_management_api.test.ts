@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -40,32 +43,35 @@ import type { WorkflowsService } from './workflows_management_service';
 import { WorkflowAccessControlService } from '../services/workflow_access_control';
 import { WorkflowAccessDeniedError } from '../services/workflow_access_denied_error';
 
-jest.mock('./external_resume/external_resume_service', () => ({
-  ...jest.requireActual('./external_resume/external_resume_service'),
-  resumeWorkflowExecutionExternallyViaGet: jest.fn(),
-  resumeWorkflowExecutionExternallyWithInput: jest.fn(),
-}));
+vi.mock('./external_resume/external_resume_service', async () => {
+      const mocked = {
+      ...(await vi.importActual('./external_resume/external_resume_service')),
+      resumeWorkflowExecutionExternallyViaGet: vi.fn(),
+      resumeWorkflowExecutionExternallyWithInput: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockResumeExternallyViaGet = resumeWorkflowExecutionExternallyViaGet as jest.MockedFunction<
+const mockResumeExternallyViaGet = resumeWorkflowExecutionExternallyViaGet as MockedFunction<
   typeof resumeWorkflowExecutionExternallyViaGet
 >;
 const mockResumeExternallyWithInput =
-  resumeWorkflowExecutionExternallyWithInput as jest.MockedFunction<
+  resumeWorkflowExecutionExternallyWithInput as MockedFunction<
     typeof resumeWorkflowExecutionExternallyWithInput
   >;
 
-jest.mock('./routes/executions/utils/preprocess_alert_inputs');
+vi.mock('./routes/executions/utils/preprocess_alert_inputs');
 
 describe('WorkflowsManagementApi', () => {
   let api: WorkflowsManagementApi;
-  let mockWorkflowsService: jest.Mocked<WorkflowsService>;
+  let mockWorkflowsService: Mocked<WorkflowsService>;
   let mockRequest: KibanaRequest;
-  let mockWorkflowsExecutionEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
+  let mockWorkflowsExecutionEngine: Mocked<WorkflowsExecutionEnginePluginStart>;
   const logger = loggingSystemMock.createLogger();
-  const mockPreprocessAlertInputs = jest.mocked(preprocessAlertInputs);
+  const mockPreprocessAlertInputs = vi.mocked(preprocessAlertInputs);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockWorkflowsExecutionEngine = workflowsExecutionEngineMock.createStart();
     mockWorkflowsExecutionEngine.executeWorkflow.mockResolvedValue({
       workflowExecutionId: 'test-exec-id',
@@ -77,18 +83,18 @@ describe('WorkflowsManagementApi', () => {
     mockPreprocessAlertInputs.mockImplementation(async (inputs) => inputs);
 
     mockWorkflowsService = {
-      getAccessControl: jest.fn().mockResolvedValue({
-        permissions: jest
+      getAccessControl: vi.fn().mockResolvedValue({
+        permissions: vi
           .fn()
           .mockResolvedValue({ read: true, execute: true, edit: true, manage: false }),
         toDto: WorkflowAccessControlService.prototype.toDto,
-        update: jest.fn(),
-        assertAccess: jest.fn(),
-        readFilter: jest.fn().mockResolvedValue({ match_all: {} }),
-        getProfileId: jest.fn().mockResolvedValue('test-profile'),
-        executionFilter: jest.fn().mockResolvedValue({ match_all: {} }),
+        update: vi.fn(),
+        assertAccess: vi.fn(),
+        readFilter: vi.fn().mockResolvedValue({ match_all: {} }),
+        getProfileId: vi.fn().mockResolvedValue('test-profile'),
+        executionFilter: vi.fn().mockResolvedValue({ match_all: {} }),
       }),
-      getWorkflow: jest.fn().mockResolvedValue({
+      getWorkflow: vi.fn().mockResolvedValue({
         id: 'workflow-123',
         name: 'Test workflow',
         enabled: true,
@@ -100,27 +106,27 @@ describe('WorkflowsManagementApi', () => {
         lastUpdatedBy: 'test-user',
         definition: null,
       }),
-      getWorkflowsByIds: jest.fn(),
-      getWorkflows: jest.fn(),
-      getWorkflowsSourceByIds: jest.fn(),
-      getChildWorkflowExecutions: jest.fn(),
-      getWorkflowZodSchema: jest.fn(),
-      createWorkflow: jest.fn(),
-      updateWorkflow: jest.fn(),
-      restoreWorkflowVersion: jest.fn(),
-      deleteWorkflows: jest.fn(),
-      bulkCreateWorkflows: jest.fn(),
-      disableAllWorkflows: jest.fn(),
-      getHistoryForWorkflow: jest.fn(),
-      validateWorkflow: jest.fn(),
-      getWorkflowExecution: jest
+      getWorkflowsByIds: vi.fn(),
+      getWorkflows: vi.fn(),
+      getWorkflowsSourceByIds: vi.fn(),
+      getChildWorkflowExecutions: vi.fn(),
+      getWorkflowZodSchema: vi.fn(),
+      createWorkflow: vi.fn(),
+      updateWorkflow: vi.fn(),
+      restoreWorkflowVersion: vi.fn(),
+      deleteWorkflows: vi.fn(),
+      bulkCreateWorkflows: vi.fn(),
+      disableAllWorkflows: vi.fn(),
+      getHistoryForWorkflow: vi.fn(),
+      validateWorkflow: vi.fn(),
+      getWorkflowExecution: vi
         .fn()
         .mockResolvedValue({ id: 'run-1', workflowId: 'workflow-123' }),
-      getWorkflowExecutions: jest.fn(),
-      getExecutionStepExecutions: jest.fn(),
-      searchStepExecutions: jest.fn(),
-      markStepAsResponded: jest.fn(),
-      getWaitingStepExecutionId: jest.fn(),
+      getWorkflowExecutions: vi.fn(),
+      getExecutionStepExecutions: vi.fn(),
+      searchStepExecutions: vi.fn(),
+      markStepAsResponded: vi.fn(),
+      getWaitingStepExecutionId: vi.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
     } as any;
 
@@ -162,8 +168,8 @@ describe('WorkflowsManagementApi', () => {
         const core = coreMock.createStart();
         core.userProfile.getCurrentProfileId.mockResolvedValue(profileId);
         const access = new WorkflowAccessControlService(core, {
-          getWorkflowDocumentWithVersion: jest.fn(),
-          writeWorkflowDocumentWithOcc: jest.fn(),
+          getWorkflowDocumentWithVersion: vi.fn(),
+          writeWorkflowDocumentWithOcc: vi.fn(),
         });
         mockWorkflowsService.getAccessControl.mockResolvedValue(access);
         const stored: WorkflowDetailDto = {
@@ -282,7 +288,7 @@ describe('WorkflowsManagementApi', () => {
     it('keeps the space filter for cross-workflow history', async () => {
       const access = await mockWorkflowsService.getAccessControl();
       const filter = { bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] } };
-      jest.mocked(access.executionFilter).mockResolvedValue(filter);
+      vi.mocked(access.executionFilter).mockResolvedValue(filter);
 
       await api.getWorkflowExecutions({ request: mockRequest }, 'default');
 
@@ -306,16 +312,16 @@ describe('WorkflowsManagementApi', () => {
       const core = coreMock.createStart();
       core.userProfile.getCurrentProfileId.mockResolvedValue('caller');
       const access = new WorkflowAccessControlService(core, {
-        getWorkflowDocumentWithVersion: jest.fn(),
-        writeWorkflowDocumentWithOcc: jest.fn(),
+        getWorkflowDocumentWithVersion: vi.fn(),
+        writeWorkflowDocumentWithOcc: vi.fn(),
       });
       mockWorkflowsService.getAccessControl.mockResolvedValue(access);
       const client = core.elasticsearch.client.asInternalUser;
-      jest.mocked(client.openPointInTime).mockResolvedValue({
+      vi.mocked(client.openPointInTime).mockResolvedValue({
         id: 'pit',
         _shards: { total: 1, successful: 1, failed: 0 },
       });
-      jest.mocked(client.search).mockResolvedValue({
+      vi.mocked(client.search).mockResolvedValue({
         took: 1,
         timed_out: false,
         _shards: { total: 1, successful: 1, failed: 0 },
@@ -337,7 +343,7 @@ describe('WorkflowsManagementApi', () => {
   it('applies access control in the query that reads the requested workflow fields', async () => {
     const access = await mockWorkflowsService.getAccessControl();
     const filter = { term: { 'access_control.access_mode': 'public' } };
-    jest.mocked(access.readFilter).mockResolvedValue(filter);
+    vi.mocked(access.readFilter).mockResolvedValue(filter);
     mockWorkflowsService.getWorkflowsSourceByIds.mockResolvedValue([]);
 
     await expect(
@@ -377,7 +383,7 @@ describe('WorkflowsManagementApi', () => {
       };
       const permissions = { read: true, execute: true, edit: true, manage };
       const access = await mockWorkflowsService.getAccessControl();
-      jest.mocked(access.permissions).mockResolvedValue(permissions);
+      vi.mocked(access.permissions).mockResolvedValue(permissions);
       mockWorkflowsService.getWorkflow.mockResolvedValue(stored);
       mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([stored]);
       mockWorkflowsService.getWorkflows.mockResolvedValue({
@@ -418,7 +424,7 @@ describe('WorkflowsManagementApi', () => {
     const permissions = { read: true, execute: false, edit: false, manage: false };
     const listItem = { ...workflow, description: '' };
     const access = await mockWorkflowsService.getAccessControl();
-    jest.mocked(access.permissions).mockResolvedValue(permissions);
+    vi.mocked(access.permissions).mockResolvedValue(permissions);
     mockWorkflowsService.getWorkflows.mockResolvedValue({
       results: [listItem],
       total: 1,
@@ -458,7 +464,7 @@ describe('WorkflowsManagementApi', () => {
       },
     ]);
     const access = await mockWorkflowsService.getAccessControl();
-    jest.mocked(access.permissions).mockImplementation(async ({ access_control }) => ({
+    vi.mocked(access.permissions).mockImplementation(async ({ access_control }) => ({
       read: access_control?.access_mode !== 'private',
       execute: false,
       edit: false,
@@ -501,8 +507,8 @@ describe('WorkflowsManagementApi', () => {
       core.userProfile.getCurrentProfileId.mockResolvedValue(profileId);
       mockWorkflowsService.getAccessControl.mockResolvedValue(
         new WorkflowAccessControlService(core, {
-          getWorkflowDocumentWithVersion: jest.fn(),
-          writeWorkflowDocumentWithOcc: jest.fn(),
+          getWorkflowDocumentWithVersion: vi.fn(),
+          writeWorkflowDocumentWithOcc: vi.fn(),
         })
       );
       const children = [
@@ -1353,7 +1359,7 @@ steps:
     };
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       mockWorkflowsService.getWorkflowExecution.mockResolvedValue(workflowExecution as any);
       mockWorkflowsService.validateWorkflow.mockResolvedValue({
         valid: true,
@@ -1363,11 +1369,11 @@ steps:
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     const runWithTimers = async <T>(promise: Promise<T>): Promise<T> => {
-      await jest.advanceTimersByTimeAsync(10_000);
+      await vi.advanceTimersByTimeAsync(10_000);
       return promise;
     };
 
@@ -1817,9 +1823,9 @@ steps:
   });
 
   describe('SML notifications', () => {
-    let mockSmlIndex: jest.MockedFunction<SmlIndexAttachmentFn>;
-    const mockSmlDelete = jest.fn();
-    let mockSmlLogger: jest.Mocked<Logger>;
+    let mockSmlIndex: MockedFunction<SmlIndexAttachmentFn>;
+    const mockSmlDelete = vi.fn();
+    let mockSmlLogger: Mocked<Logger>;
 
     const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
       id: 'wf-1',
@@ -1837,8 +1843,8 @@ steps:
     });
 
     beforeEach(() => {
-      mockSmlIndex = jest.fn().mockResolvedValue(undefined);
-      mockSmlLogger = { warn: jest.fn(), debug: jest.fn(), info: jest.fn() } as any;
+      mockSmlIndex = vi.fn().mockResolvedValue(undefined);
+      mockSmlLogger = { warn: vi.fn(), debug: vi.fn(), info: vi.fn() } as any;
       mockSmlDelete.mockReset().mockResolvedValue(undefined);
       api.setSmlClient(
         { indexAttachment: mockSmlIndex, deleteAttachment: mockSmlDelete },
@@ -1849,7 +1855,7 @@ steps:
     it('waits for SML deletion before completing a private access update', async () => {
       const access = await mockWorkflowsService.getAccessControl();
       const saved = createWorkflowDto({ access_control: { access_mode: 'private', entries: [] } });
-      jest.mocked(access.update).mockResolvedValue(saved);
+      vi.mocked(access.update).mockResolvedValue(saved);
       let completeIndex = () => {};
       const indexing = new Promise<void>((resolve) => {
         completeIndex = resolve;
@@ -1952,7 +1958,7 @@ steps:
     it('saves public access when SML indexing fails', async () => {
       const access = await mockWorkflowsService.getAccessControl();
       const saved = createWorkflowDto({ access_control: { access_mode: 'public', entries: [] } });
-      jest.mocked(access.update).mockResolvedValue(saved);
+      vi.mocked(access.update).mockResolvedValue(saved);
       mockSmlIndex.mockRejectedValue(new Error('SML unavailable'));
 
       await expect(
@@ -2129,8 +2135,8 @@ steps:
       async ({ request }) => profiles.get(request) ?? null
     );
     const access = new WorkflowAccessControlService(core, {
-      getWorkflowDocumentWithVersion: jest.fn(),
-      writeWorkflowDocumentWithOcc: jest.fn(),
+      getWorkflowDocumentWithVersion: vi.fn(),
+      writeWorkflowDocumentWithOcc: vi.fn(),
     });
     mockWorkflowsService.getAccessControl.mockResolvedValue(access);
     mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
@@ -2255,7 +2261,7 @@ steps:
 
       const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
       expect(engine.scheduleWorkflow).toHaveBeenCalledTimes(1);
-      const [passedWorkflow, passedContext, passedRequest] = (engine.scheduleWorkflow as jest.Mock)
+      const [passedWorkflow, passedContext, passedRequest] = (engine.scheduleWorkflow as Mock)
         .mock.calls[0];
       expect(passedWorkflow).toEqual(workflow);
       expect(passedContext.triggeredBy).toBe('cases.updated');
@@ -2288,7 +2294,7 @@ steps:
       );
 
       const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
-      const [, passedContext] = (engine.scheduleWorkflow as jest.Mock).mock.calls[0];
+      const [, passedContext] = (engine.scheduleWorkflow as Mock).mock.calls[0];
       expect(passedContext.metadata).toEqual(scheduleMeta);
     });
   });
@@ -2430,7 +2436,7 @@ steps:
   describe('resumeWorkflowExecution (consolidated HITL claim)', () => {
     beforeEach(() => {
       mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockResolvedValue({ resumedBy: 'user' });
-      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValue(true);
+      (mockWorkflowsService.markStepAsResponded as Mock).mockResolvedValue(true);
     });
 
     it('claims the caller-supplied step before resuming and forwards the channel', async () => {
@@ -2449,16 +2455,16 @@ steps:
         'agent_builder',
         'default'
       );
-      const claimOrder = (mockWorkflowsService.markStepAsResponded as jest.Mock).mock
+      const claimOrder = (mockWorkflowsService.markStepAsResponded as Mock).mock
         .invocationCallOrder[0];
-      const resumeOrder = (mockWorkflowsExecutionEngine.resumeWorkflowExecution as jest.Mock).mock
+      const resumeOrder = (mockWorkflowsExecutionEngine.resumeWorkflowExecution as Mock).mock
         .invocationCallOrder[0];
       expect(claimOrder).toBeLessThan(resumeOrder);
       expect(result).toEqual({ resumedBy: 'user' });
     });
 
     it('resolves the waiting step and leaves channel unset when none is supplied', async () => {
-      (mockWorkflowsService.getWaitingStepExecutionId as jest.Mock).mockResolvedValue(
+      (mockWorkflowsService.getWaitingStepExecutionId as Mock).mockResolvedValue(
         'step-exec-9'
       );
 
@@ -2477,7 +2483,7 @@ steps:
     });
 
     it('throws a conflict and never resumes when the first-writer-wins claim is lost', async () => {
-      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValue(false);
+      (mockWorkflowsService.markStepAsResponded as Mock).mockResolvedValue(false);
 
       await expect(
         api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
@@ -2490,7 +2496,7 @@ steps:
     });
 
     it('throws a conflict and never resumes when no waiting step can be resolved', async () => {
-      (mockWorkflowsService.getWaitingStepExecutionId as jest.Mock).mockResolvedValue(null);
+      (mockWorkflowsService.getWaitingStepExecutionId as Mock).mockResolvedValue(null);
 
       await expect(
         api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest)
@@ -2502,8 +2508,8 @@ steps:
 
     it('emits resume audit via setAuditLog on success and failure', async () => {
       const audit = {
-        logExecutionResumed: jest.fn(),
-        logExecutionCanceled: jest.fn(),
+        logExecutionResumed: vi.fn(),
+        logExecutionCanceled: vi.fn(),
       };
       api.setAuditLog(audit as any);
 
@@ -2519,7 +2525,7 @@ steps:
       });
 
       audit.logExecutionResumed.mockClear();
-      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValueOnce(false);
+      (mockWorkflowsService.markStepAsResponded as Mock).mockResolvedValueOnce(false);
 
       await expect(
         api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
@@ -2539,8 +2545,8 @@ steps:
   describe('cancelWorkflowExecution / cancelAllActiveWorkflowExecutions audit', () => {
     it('emits cancel audit with channel on single cancel success and failure', async () => {
       const audit = {
-        logExecutionResumed: jest.fn(),
-        logExecutionCanceled: jest.fn(),
+        logExecutionResumed: vi.fn(),
+        logExecutionCanceled: vi.fn(),
       };
       api.setAuditLog(audit as any);
       mockWorkflowsExecutionEngine.cancelWorkflowExecution.mockResolvedValue(undefined);
@@ -2573,8 +2579,8 @@ steps:
 
     it('emits cancel audit per cancelled id from cancelAll', async () => {
       const audit = {
-        logExecutionResumed: jest.fn(),
-        logExecutionCanceled: jest.fn(),
+        logExecutionResumed: vi.fn(),
+        logExecutionCanceled: vi.fn(),
       };
       api.setAuditLog(audit as any);
       mockWorkflowsService.getWorkflow.mockResolvedValue({ id: 'wf-1' } as WorkflowDetailDto);
@@ -2602,8 +2608,8 @@ steps:
 
     it('emits bulk-cancel failure audit with workflowId, not executionId', async () => {
       const audit = {
-        logExecutionResumed: jest.fn(),
-        logExecutionCanceled: jest.fn(),
+        logExecutionResumed: vi.fn(),
+        logExecutionCanceled: vi.fn(),
       };
       api.setAuditLog(audit as any);
       mockWorkflowsService.getWorkflow.mockResolvedValue({ id: 'wf-1' } as WorkflowDetailDto);
@@ -2627,8 +2633,8 @@ steps:
   describe('external resume API-owned audit', () => {
     it('emits resume audit with channel=external on success and failure', async () => {
       const audit = {
-        logExecutionResumed: jest.fn(),
-        logExecutionCanceled: jest.fn(),
+        logExecutionResumed: vi.fn(),
+        logExecutionCanceled: vi.fn(),
       };
       api.setAuditLog(audit as any);
 

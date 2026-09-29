@@ -5,25 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { runAgent } from './run_agent';
 
-jest.mock('./run_chat_agent', () => ({
-  runDefaultAgentMode: jest.fn().mockResolvedValue({ round: { id: 'native-round' } }),
-}));
+vi.mock('./run_chat_agent', () => {
+      const mocked = {
+      runDefaultAgentMode: vi.fn().mockResolvedValue({ round: { id: 'native-round' } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./deductive', () => ({
-  shouldUseDeductive: jest.fn().mockReturnValue(true),
-  runDeductiveAgent: jest.fn().mockResolvedValue({ round: { id: 'deductive-round' } }),
-}));
+vi.mock('./deductive', () => {
+      const mocked = {
+      shouldUseDeductive: vi.fn().mockReturnValue(true),
+      runDeductiveAgent: vi.fn().mockResolvedValue({ round: { id: 'deductive-round' } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import * as chatAgent from './run_chat_agent';
 import * as deductive from './deductive';
 
-const chatAgentMock = chatAgent as jest.Mocked<typeof chatAgent>;
-const deductiveMock = deductive as jest.Mocked<typeof deductive>;
+const chatAgentMock = chatAgent as Mocked<typeof chatAgent>;
+const deductiveMock = deductive as Mocked<typeof deductive>;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('runAgent routing', () => {

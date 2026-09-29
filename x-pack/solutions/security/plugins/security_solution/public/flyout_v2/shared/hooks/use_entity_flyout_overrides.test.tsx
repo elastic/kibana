@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useEntityFlyoutOverrides } from './use_entity_flyout_overrides';
@@ -13,21 +16,21 @@ import { OpenFlyoutLink } from '../components/open_flyout_link';
 import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { EntityType } from '../../../../common/entity_analytics/types';
 
-jest.mock('../../entity/use_entity_flyout_api');
+vi.mock('../../entity/use_entity_flyout_api');
 
-const mockOpenUserFlyoutAsChild = jest.fn();
-const mockOpenHostFlyoutAsChild = jest.fn();
-const mockOpenEntityAlertsInsights = jest.fn();
-const mockOpenEntityMisconfigurationInsights = jest.fn();
-const mockOpenEntityVulnerabilityInsights = jest.fn();
+const mockOpenUserFlyoutAsChild = vi.fn();
+const mockOpenHostFlyoutAsChild = vi.fn();
+const mockOpenEntityAlertsInsights = vi.fn();
+const mockOpenEntityMisconfigurationInsights = vi.fn();
+const mockOpenEntityVulnerabilityInsights = vi.fn();
 
-const mockUseEntityFlyoutApi = useEntityFlyoutApi as jest.Mock;
+const mockUseEntityFlyoutApi = useEntityFlyoutApi as Mock;
 
 const mockHit = { id: 'doc-1', raw: { _id: 'doc-1' }, flattened: {} } as unknown as DataTableRecord;
 
 describe('useEntityFlyoutOverrides', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseEntityFlyoutApi.mockReturnValue({
       openUserFlyoutAsChild: mockOpenUserFlyoutAsChild,
       openHostFlyoutAsChild: mockOpenHostFlyoutAsChild,

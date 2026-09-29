@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -14,7 +16,7 @@ import { useAlertAnalysisWorkflowAgents } from './use_alert_analysis_workflow_ag
 
 describe('useAlertAnalysisWorkflowAgents', () => {
   const coreStart = coreMock.createStart();
-  const listAgentsMock = jest.fn();
+  const listAgentsMock = vi.fn();
 
   const wrapperWith = (agentBuilder?: unknown) => {
     const startServices = createStartServicesMock(coreStart);
@@ -26,7 +28,7 @@ describe('useAlertAnalysisWorkflowAgents', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     listAgentsMock.mockResolvedValue([
       { id: 'elastic-ai-agent', name: 'Elastic AI Agent', readonly: false },
       { id: 'my-custom-agent', name: 'My Custom Agent', readonly: false },

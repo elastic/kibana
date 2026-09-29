@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import rison from '@kbn/rison';
 import { getThresholds } from '../common/get_values';
@@ -46,7 +48,10 @@ import type {
 } from '@kbn/observability-shared-plugin/common';
 import type { InfraLocators } from '../../infra_types';
 
-jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
+vi.mock('./lib/evaluate_rule', () => {
+      const mocked = { evaluateRule: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) => {};
 
@@ -66,11 +71,11 @@ const mockNow = new Date('2023-09-20T15:11:04.105Z');
 const STARTED_AT_MOCK_DATE = new Date();
 
 const mockAssetDetailsLocator = {
-  getRedirectUrl: jest.fn(),
+  getRedirectUrl: vi.fn(),
 };
 
 const mockMetricsExplorerLocator = {
-  getRedirectUrl: jest.fn(),
+  getRedirectUrl: vi.fn(),
 };
 
 const mockDataView = {
@@ -79,7 +84,7 @@ const mockDataView = {
 };
 
 const mockDataViewsService = {
-  getFieldsForWildcard: jest.fn().mockResolvedValue(mockDataView.fields),
+  getFieldsForWildcard: vi.fn().mockResolvedValue(mockDataView.fields),
 };
 
 const mockOptions = {
@@ -121,17 +126,17 @@ const mockOptions = {
   isServerless: false,
 };
 
-const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
-  return jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
+const setEvaluationResults = async (response: Array<Record<string, Evaluation>>) => {
+  return (await vi.importMock('./lib/evaluate_rule')).evaluateRule.mockImplementation(() => response);
 };
 
 describe('The metric threshold rule type', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime();
+    vi.useFakeTimers();
+    vi.setSystemTime();
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     services.getDataViews.mockResolvedValue(mockDataViewsService);
 
     mockAssetDetailsLocator.getRedirectUrl.mockImplementation(
@@ -148,7 +153,7 @@ describe('The metric threshold rule type', () => {
       start: new Date().toISOString(),
     }));
   });
-  afterAll(() => jest.useRealTimers());
+  afterAll(() => vi.useRealTimers());
 
   describe('querying the entire infrastructure', () => {
     const execute = (comparator: COMPARATORS, threshold: number[], sourceId: string = 'default') =>
@@ -425,7 +430,7 @@ describe('The metric threshold rule type', () => {
       });
 
       expect(services.getDataViews).not.toHaveBeenCalled();
-      expect(jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][6]).toBeUndefined();
+      expect((await vi.importMock('./lib/evaluate_rule')).evaluateRule.mock.calls[0][6]).toBeUndefined();
     });
 
     test('fetches a data view when the rule uses a filtered custom count metric', async () => {
@@ -444,7 +449,7 @@ describe('The metric threshold rule type', () => {
         pattern: 'metrics-*,metricbeat-*',
         allowNoIndex: true,
       });
-      expect(jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][6]).toEqual(
+      expect((await vi.importMock('./lib/evaluate_rule')).evaluateRule.mock.calls[0][6]).toEqual(
         mockDataView
       );
     });
@@ -2904,8 +2909,8 @@ describe('The metric threshold rule type', () => {
         });
       };
 
-      const trackedMissingGroups = () =>
-        jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][4];
+      const trackedMissingGroups = async () =>
+        (await vi.importMock('./lib/evaluate_rule')).evaluateRule.mock.calls[0][4];
 
       test('remainActive still tracks missing groups', async () => {
         await runWith({

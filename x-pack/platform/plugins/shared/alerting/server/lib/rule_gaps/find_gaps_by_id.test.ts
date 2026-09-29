@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { findGapsById } from './find_gaps_by_id';
 import { loggerMock } from '@kbn/logging-mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
@@ -42,7 +44,7 @@ describe('findGapsById', () => {
   const mockEventLogClient = eventLogClientMock.create();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should call findEventsBySavedObjectIds with correct parameters', async () => {

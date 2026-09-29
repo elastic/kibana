@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,20 +17,20 @@ import { CLOUD_CONNECTOR_API_ROUTES } from '../../../constants';
 
 import { useCloudConnectorUsage } from './use_cloud_connector_usage';
 
-jest.mock('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public');
 
 const mockHttp = {
-  get: jest.fn(),
+  get: vi.fn(),
 };
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 describe('useCloudConnectorUsage', () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
     // Suppress console.error for expected error tests
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
 
     queryClient = new QueryClient({
       defaultOptions: {
@@ -48,7 +51,7 @@ describe('useCloudConnectorUsage', () => {
 
   afterEach(() => {
     queryClient.clear();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) =>

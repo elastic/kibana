@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useParseYaml } from './use_parse_yaml';
 import { checkTemplateExists } from '../utils';
 import type { ValidatedFile } from './use_validate_yaml';
 import { MAX_TEMPLATES_PER_FILE, MAX_TOTAL_IMPORT_TEMPLATES } from '../constants';
 
-jest.mock('../utils', () => ({
-  ...jest.requireActual('../utils'),
-  checkTemplateExists: jest.fn(),
-}));
+vi.mock('../utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('../utils')),
+      checkTemplateExists: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeValidatedFile = (name: string, documents: unknown[]): ValidatedFile => ({
   file: new File([''], name, { type: 'application/x-yaml' }),
@@ -23,7 +29,7 @@ const makeValidatedFile = (name: string, documents: unknown[]): ValidatedFile =>
 
 describe('useParseYaml', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns empty results for no files', async () => {
@@ -300,7 +306,7 @@ describe('useParseYaml', () => {
   });
 
   it('checks existence for templates with templateId', async () => {
-    (checkTemplateExists as jest.Mock).mockResolvedValue(true);
+    (checkTemplateExists as Mock).mockResolvedValue(true);
 
     const { result } = renderHook(() => useParseYaml());
     const file = makeValidatedFile('test.yaml', [
@@ -314,7 +320,7 @@ describe('useParseYaml', () => {
   });
 
   it('sets existsOnServer to false when check rejects', async () => {
-    (checkTemplateExists as jest.Mock).mockRejectedValue(new Error('Network error'));
+    (checkTemplateExists as Mock).mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useParseYaml());
     const file = makeValidatedFile('test.yaml', [{ templateId: 'broken-1', name: 'Test' }]);

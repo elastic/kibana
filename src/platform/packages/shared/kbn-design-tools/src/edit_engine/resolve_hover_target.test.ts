@@ -7,34 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { resolveHoverTarget } from './resolve_hover_target';
 import { makeRect } from '../lib/tests/helpers';
 
-const mockGetElementUnder = jest.fn<HTMLElement | null, [number, number]>();
-jest.mock('../lib/dom/get_element_under', () => ({
-  getElementUnder: (x: number, y: number) => mockGetElementUnder(x, y),
-}));
+const mockGetElementUnder = vi.fn<HTMLElement | null, [number, number]>();
+vi.mock('../lib/dom/get_element_under', () => {
+      const mocked = {
+      getElementUnder: (x: number, y: number) => mockGetElementUnder(x, y),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFindNearHandle = jest.fn();
-jest.mock('./resize_helpers', () => ({
-  findNearHandle: (...args: unknown[]) => mockFindNearHandle(...args),
-}));
+const mockFindNearHandle = vi.fn();
+vi.mock('./resize_helpers', () => {
+      const mocked = {
+      findNearHandle: (...args: unknown[]) => mockFindNearHandle(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockIsInRoundedDeadZone = jest.fn<boolean, [number, number, DOMRect]>();
-const mockHasSignificantRounding = jest.fn<boolean, [HTMLElement]>();
-jest.mock('./rounded_dead_zone', () => ({
-  isInRoundedDeadZone: (...args: unknown[]) =>
-    mockIsInRoundedDeadZone(...(args as [number, number, DOMRect])),
-  hasSignificantRounding: (...args: unknown[]) =>
-    mockHasSignificantRounding(...(args as [HTMLElement])),
-}));
+const mockIsInRoundedDeadZone = vi.fn<boolean, [number, number, DOMRect]>();
+const mockHasSignificantRounding = vi.fn<boolean, [HTMLElement]>();
+vi.mock('./rounded_dead_zone', () => {
+      const mocked = {
+      isInRoundedDeadZone: (...args: unknown[]) =>
+        mockIsInRoundedDeadZone(...(args as [number, number, DOMRect])),
+      hasSignificantRounding: (...args: unknown[]) =>
+        mockHasSignificantRounding(...(args as [HTMLElement])),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('resolveHoverTarget', () => {
   let currentTarget: HTMLElement;
   const noLock = () => false;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     currentTarget = document.createElement('div');
     currentTarget.getBoundingClientRect = () => makeRect(50, 50, 100, 40);
   });
@@ -63,7 +74,7 @@ describe('resolveHoverTarget', () => {
   });
 
   it('should detect resize handle on current target in hover-lock zone', () => {
-    const lockFn = jest.fn().mockReturnValue(true);
+    const lockFn = vi.fn().mockReturnValue(true);
     mockFindNearHandle.mockReturnValue('se');
 
     const result = resolveHoverTarget(100, 100, currentTarget, lockFn, false);
@@ -73,7 +84,7 @@ describe('resolveHoverTarget', () => {
   });
 
   it('should keep current target in hover-lock zone with no handle', () => {
-    const lockFn = jest.fn().mockReturnValue(true);
+    const lockFn = vi.fn().mockReturnValue(true);
     mockFindNearHandle.mockReturnValue(null);
 
     const result = resolveHoverTarget(100, 100, currentTarget, lockFn, false);

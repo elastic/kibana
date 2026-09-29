@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import { siemMigrationEventNames } from '../../../common/lib/telemetry/events/siem_migrations';
@@ -15,12 +18,12 @@ import { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/con
 import { MigrationSource } from '../../common/types';
 
 describe('SiemDashboardMigrationsTelemetry', () => {
-  let telemetryService: jest.Mocked<Pick<TelemetryServiceStart, 'reportEvent'>>;
+  let telemetryService: Mocked<Pick<TelemetryServiceStart, 'reportEvent'>>;
   let telemetry: SiemDashboardMigrationsTelemetry;
 
   beforeEach(() => {
     telemetryService = {
-      reportEvent: jest.fn(),
+      reportEvent: vi.fn(),
     };
     telemetry = new SiemDashboardMigrationsTelemetry(telemetryService as TelemetryServiceStart);
   });

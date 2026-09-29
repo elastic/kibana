@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useStats } from './use_stats';
 import { useKibana } from '../use_kibana';
 
-jest.mock('../use_kibana');
+vi.mock('../use_kibana');
 
-const mockHttpGet = jest.fn();
+const mockHttpGet = vi.fn();
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,7 +34,7 @@ const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
 
 describe('useStats', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
 
     mockUseKibana.mockReturnValue({

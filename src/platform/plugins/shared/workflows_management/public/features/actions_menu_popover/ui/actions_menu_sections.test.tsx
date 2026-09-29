@@ -7,46 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: { basePath: { prepend: (path: string) => path } },
-      notifications: { toasts: { addError: jest.fn() } },
-      workflowsExtensions: {
-        getStepDefinition: jest.fn(),
-        getRegisteredSteps: jest.fn().mockReturnValue([]),
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: { basePath: { prepend: (path: string) => path } },
+          notifications: { toasts: { addError: vi.fn() } },
+          workflowsExtensions: {
+            getStepDefinition: vi.fn(),
+            getRegisteredSteps: vi.fn().mockReturnValue([]),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../validate_workflow_yaml/model/use_workflow_json_schema', () => {
+      const mocked = {
+      useWorkflowJsonSchema: () => ({ jsonSchema: {}, uri: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../shared/ui/step_icons/step_icon', () => {
+      const mocked = {
+      StepIcon: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../trigger_schemas', () => {
+      const mocked = {
+      triggerSchemas: {
+        getTriggerDefinitions: vi.fn().mockReturnValue([]),
       },
-    },
-  }),
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../validate_workflow_yaml/model/use_workflow_json_schema', () => ({
-  useWorkflowJsonSchema: () => ({ jsonSchema: {}, uri: null }),
-}));
+vi.mock('../../../../common/schema', () => {
+      const mocked = {
+      getAllConnectors: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
-  StepIcon: () => null,
-}));
-
-jest.mock('../../../trigger_schemas', () => ({
-  triggerSchemas: {
-    getTriggerDefinitions: jest.fn().mockReturnValue([]),
-  },
-}));
-
-jest.mock('../../../../common/schema', () => ({
-  getAllConnectors: jest.fn().mockReturnValue([]),
-}));
-
-jest.mock('../lib/get_action_options', () => ({
-  getActionOptions: jest.fn().mockReturnValue([]),
-  flattenOptions: jest.fn().mockReturnValue([]),
-  getIconGlyphColor: jest.fn().mockReturnValue(undefined),
-}));
+vi.mock('../lib/get_action_options', () => {
+      const mocked = {
+      getActionOptions: vi.fn().mockReturnValue([]),
+      flattenOptions: vi.fn().mockReturnValue([]),
+      getIconGlyphColor: vi.fn().mockReturnValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { ActionsMenu } from './actions_menu';
 import type { EditorCommand, JumpToStepEntry } from '../types';
@@ -69,12 +89,12 @@ const mockSteps: JumpToStepEntry[] = [
 ];
 
 describe('ActionsMenu - Commands and Jump to Step sections', () => {
-  const onActionSelected = jest.fn();
-  const onCommandSelected = jest.fn();
-  const onJumpToStep = jest.fn();
+  const onActionSelected = vi.fn();
+  const onCommandSelected = vi.fn();
+  const onJumpToStep = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => (

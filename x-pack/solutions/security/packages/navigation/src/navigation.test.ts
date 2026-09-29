@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { useGetAppUrl, useNavigateTo } from './navigation';
 import { mockGetUrlForApp, mockNavigateToApp, mockNavigateToUrl } from '../mocks/context';
 import { fireEvent, renderHook } from '@testing-library/react';
 
-jest.mock('./context');
+vi.mock('./context');
 
 const URL = '/the/mocked/url';
 mockGetUrlForApp.mockReturnValue(URL);
 
 describe('yourFile', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('useGetAppUrl', () => {
@@ -68,7 +70,7 @@ describe('yourFile', () => {
 
       const currentScrollY = 100;
       window.scrollY = currentScrollY;
-      window.scrollTo = jest.fn();
+      window.scrollTo = vi.fn();
 
       navigateTo({ url: URL, restoreScroll: true });
 

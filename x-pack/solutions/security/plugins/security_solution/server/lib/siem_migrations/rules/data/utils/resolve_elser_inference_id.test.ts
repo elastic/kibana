@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { resolveElserInferenceId } from './resolve_elser_inference_id';
@@ -13,7 +15,7 @@ describe('resolveElserInferenceId', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('uses the configured endpoint without discovery', async () => {

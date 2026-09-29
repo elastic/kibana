@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -44,7 +47,7 @@ describe('CustomLink', () => {
     getCallApmApiSpy().mockResolvedValue({});
   });
   afterAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   const goldLicense = new License({
     signature: 'test signature',
@@ -58,15 +61,15 @@ describe('CustomLink', () => {
   });
   describe('empty prompt', () => {
     beforeAll(() => {
-      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+      vi.spyOn(hooks, 'useFetcher').mockReturnValue({
         data: { customLinks: [] },
         status: hooks.FETCH_STATUS.SUCCESS,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
     });
 
     afterAll(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     it('shows when no link is available', () => {
       const component = render(
@@ -84,15 +87,15 @@ describe('CustomLink', () => {
 
   describe('overview', () => {
     beforeAll(() => {
-      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+      vi.spyOn(hooks, 'useFetcher').mockReturnValue({
         data,
         status: hooks.FETCH_STATUS.SUCCESS,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
     });
 
     afterAll(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('enables create button when user has writte privileges', () => {
@@ -153,12 +156,12 @@ describe('CustomLink', () => {
   });
 
   describe('Flyout', () => {
-    const refetch = jest.fn();
-    let saveCustomLinkSpy: jest.SpyInstance;
+    const refetch = vi.fn();
+    let saveCustomLinkSpy: MockInstance;
 
     beforeAll(() => {
-      saveCustomLinkSpy = jest.spyOn(saveCustomLink, 'saveCustomLink');
-      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+      saveCustomLinkSpy = vi.spyOn(saveCustomLink, 'saveCustomLink');
+      vi.spyOn(hooks, 'useFetcher').mockReturnValue({
         data,
         status: hooks.FETCH_STATUS.SUCCESS,
         refetch,
@@ -205,10 +208,10 @@ describe('CustomLink', () => {
 
   describe('invalid license', () => {
     beforeAll(() => {
-      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+      vi.spyOn(hooks, 'useFetcher').mockReturnValue({
         data: { customLinks: [] },
         status: hooks.FETCH_STATUS.SUCCESS,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
     });
     it('shows license prompt when user has a basic license', () => {

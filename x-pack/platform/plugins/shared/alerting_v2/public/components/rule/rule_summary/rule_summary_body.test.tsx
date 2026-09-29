@@ -5,48 +5,66 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { RuleApiResponse } from '../../../services/rules_api';
 import { RuleSummaryBody } from './rule_summary_body';
 
-jest.mock('../../../services/user_capabilities', () => ({
-  UserCapabilities: 'UserCapabilities',
-}));
+vi.mock('../../../services/user_capabilities', () => {
+      const mocked = {
+      UserCapabilities: 'UserCapabilities',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di-browser', () => {
-  const canRead = jest.fn(() => true);
+vi.mock('@kbn/core-di-browser', () => {
+  const canRead = vi.fn(() => true);
   return {
     useService: () => ({ canRead }),
     mockCanRead: canRead,
   };
 });
 
-const { mockCanRead } = jest.requireMock('@kbn/core-di-browser') as {
-  mockCanRead: jest.Mock;
+const { mockCanRead } = (await vi.importMock('@kbn/core-di-browser')) as {
+  mockCanRead: Mock;
 };
 
-jest.mock('./rule_summary_about_section', () => ({
-  RuleSummaryAboutSection: ({ rule }: { rule: RuleApiResponse }) => (
-    <div data-test-subj="mockAboutSection">{rule.metadata.name}</div>
-  ),
-}));
+vi.mock('./rule_summary_about_section', () => {
+      const mocked = {
+      RuleSummaryAboutSection: ({ rule }: { rule: RuleApiResponse }) => (
+        <div data-test-subj="mockAboutSection">{rule.metadata.name}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./rule_summary_investigation_section', () => ({
-  RuleSummaryInvestigationSection: ({ rule }: { rule: RuleApiResponse }) => (
-    <div data-test-subj="mockInvestigationSection">{rule.metadata.name}</div>
-  ),
-}));
+vi.mock('./rule_summary_investigation_section', () => {
+      const mocked = {
+      RuleSummaryInvestigationSection: ({ rule }: { rule: RuleApiResponse }) => (
+        <div data-test-subj="mockInvestigationSection">{rule.metadata.name}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./rule_summary_action_policies_section', () => ({
-  RuleSummaryActionPoliciesSection: () => <div data-test-subj="mockActionPoliciesSection" />,
-}));
+vi.mock('./rule_summary_action_policies_section', () => {
+      const mocked = {
+      RuleSummaryActionPoliciesSection: () => <div data-test-subj="mockActionPoliciesSection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./rule_summary_artifacts_section', () => ({
-  RuleSummaryArtifactsSection: ({ rule }: { rule: RuleApiResponse }) => (
-    <div data-test-subj="mockArtifactsSection">{rule.metadata.name}</div>
-  ),
-}));
+vi.mock('./rule_summary_artifacts_section', () => {
+      const mocked = {
+      RuleSummaryArtifactsSection: ({ rule }: { rule: RuleApiResponse }) => (
+        <div data-test-subj="mockArtifactsSection">{rule.metadata.name}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const rule: RuleApiResponse = {
   id: 'rule-1',

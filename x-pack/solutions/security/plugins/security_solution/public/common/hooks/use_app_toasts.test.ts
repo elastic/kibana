@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { IEsError } from '@kbn/search-errors';
 import type { KibanaError, SecurityAppError } from '@kbn/securitysolution-t-grid';
@@ -24,22 +27,22 @@ import {
   useAppToasts,
 } from './use_app_toasts';
 
-jest.mock('../lib/kibana');
+vi.mock('../lib/kibana');
 
 describe('useAppToasts', () => {
-  let addErrorMock: jest.Mock;
-  let addSuccessMock: jest.Mock;
-  let addWarningMock: jest.Mock;
-  let addInfoMock: jest.Mock;
-  let removeMock: jest.Mock;
+  let addErrorMock: Mock;
+  let addSuccessMock: Mock;
+  let addWarningMock: Mock;
+  let addInfoMock: Mock;
+  let removeMock: Mock;
 
   beforeEach(() => {
-    addErrorMock = jest.fn();
-    addSuccessMock = jest.fn();
-    addWarningMock = jest.fn();
-    addInfoMock = jest.fn();
-    removeMock = jest.fn();
-    (useToasts as jest.Mock).mockImplementation(() => ({
+    addErrorMock = vi.fn();
+    addSuccessMock = vi.fn();
+    addWarningMock = vi.fn();
+    addInfoMock = vi.fn();
+    removeMock = vi.fn();
+    (useToasts as Mock).mockImplementation(() => ({
       addError: addErrorMock,
       addSuccess: addSuccessMock,
       addWarning: addWarningMock,

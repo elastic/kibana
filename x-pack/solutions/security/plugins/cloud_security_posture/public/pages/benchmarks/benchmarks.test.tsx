@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import Chance from 'chance';
 import { render, screen } from '@testing-library/react';
@@ -21,19 +24,19 @@ import { useLicenseManagementLocatorApi } from '../../common/api/use_license_man
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useKibana } from '../../common/hooks/use_kibana';
 
-jest.mock('./use_csp_benchmark_integrations');
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
-jest.mock('../../common/api/use_license_management_locator_api');
-jest.mock('../../common/hooks/use_is_subscription_status_valid');
-jest.mock('../../common/navigation/use_csp_integration_link');
-jest.mock('../../common/hooks/use_kibana');
+vi.mock('./use_csp_benchmark_integrations');
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
+vi.mock('../../common/api/use_license_management_locator_api');
+vi.mock('../../common/hooks/use_is_subscription_status_valid');
+vi.mock('../../common/navigation/use_csp_integration_link');
+vi.mock('../../common/hooks/use_kibana');
 
 const chance = new Chance();
 
 describe('<Benchmarks />', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    vi.resetAllMocks();
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {
@@ -50,7 +53,7 @@ describe('<Benchmarks />', () => {
       })
     );
 
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         cloudSecurityPosture: {
           isPrivileged: true,
@@ -69,20 +72,20 @@ describe('<Benchmarks />', () => {
         },
       },
     });
-    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
+    (useLicenseManagementLocatorApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: true,
       })
     );
 
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as Mock).mockImplementation(() => chance.url());
   });
 
   const renderBenchmarks = (
     queryResponse: Partial<UseQueryResult> = createReactQueryResponse()
   ) => {
-    (useCspBenchmarkIntegrationsV2 as jest.Mock).mockImplementation(() => queryResponse);
+    (useCspBenchmarkIntegrationsV2 as Mock).mockImplementation(() => queryResponse);
 
     return render(
       <TestProvider>
@@ -104,7 +107,7 @@ describe('<Benchmarks />', () => {
   });
 
   it('does not render the "add integration" button if the user does not have canInstallPackages privilegs', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         cloudSecurityPosture: {
           isPrivileged: true,
@@ -136,7 +139,7 @@ describe('<Benchmarks />', () => {
   });
 
   it('renders unprivileged state ', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+    (useCspSetupStatusApi as Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: {

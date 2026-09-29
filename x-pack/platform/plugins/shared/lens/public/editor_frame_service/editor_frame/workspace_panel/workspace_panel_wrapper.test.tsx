@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import type { Visualization, LensAppState } from '@kbn/lens-common';
 import { createMockVisualization, renderWithReduxStore } from '../../../mocks';
@@ -21,7 +23,7 @@ import { faker } from '@faker-js/faker';
 import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 
 describe('workspace_panel_wrapper', () => {
-  let mockVisualization: jest.Mocked<Visualization>;
+  let mockVisualization: Mocked<Visualization>;
 
   const renderWorkspacePanelWrapper = (
     propsOverrides = {},

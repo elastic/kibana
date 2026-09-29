@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
@@ -44,7 +46,7 @@ describe('Perform bulk action route', () => {
       Promise.resolve(getFindAlertSummaryResultWithSingleHit())
     );
     (
-      (await clients.elasticAssistant.getAlertSummaryDataClient.getWriter()).bulk as jest.Mock
+      (await clients.elasticAssistant.getAlertSummaryDataClient.getWriter()).bulk as Mock
     ).mockResolvedValue({
       docs_created: [mockAlertSummary, mockAlertSummary],
       docs_updated: [mockAlertSummary, mockAlertSummary],
@@ -88,7 +90,7 @@ describe('Perform bulk action route', () => {
   describe('alert_summaries bulk actions failures', () => {
     it('returns partial failure error if update of few alert summaries fail', async () => {
       (
-        (await clients.elasticAssistant.getAlertSummaryDataClient.getWriter()).bulk as jest.Mock
+        (await clients.elasticAssistant.getAlertSummaryDataClient.getWriter()).bulk as Mock
       ).mockResolvedValue({
         docs_created: [mockAlertSummary],
         docs_updated: [],

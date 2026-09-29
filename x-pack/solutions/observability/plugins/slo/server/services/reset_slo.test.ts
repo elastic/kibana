@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
@@ -35,11 +38,11 @@ import type { SLODefinition } from '../domain/models';
 const TEST_DATE = new Date('2023-01-01T00:00:00.000Z');
 
 describe('ResetSLO', () => {
-  let mockRepository: jest.Mocked<SLODefinitionRepository>;
-  let mockTransformManager: jest.Mocked<TransformManager>;
-  let mockSummaryTransformManager: jest.Mocked<TransformManager>;
+  let mockRepository: Mocked<SLODefinitionRepository>;
+  let mockTransformManager: Mocked<TransformManager>;
+  let mockSummaryTransformManager: Mocked<TransformManager>;
   let mockScopedClusterClient: ScopedClusterClientMock;
-  let loggerMock: jest.Mocked<MockedLogger>;
+  let loggerMock: Mocked<MockedLogger>;
   let resetSLO: ResetSLO;
 
   beforeEach(() => {
@@ -57,11 +60,11 @@ describe('ResetSLO', () => {
       'some-space',
       httpServiceMock.createStartContract().basePath
     );
-    jest.useFakeTimers().setSystemTime(TEST_DATE);
+    vi.useFakeTimers().setSystemTime(TEST_DATE);
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('happy path', () => {

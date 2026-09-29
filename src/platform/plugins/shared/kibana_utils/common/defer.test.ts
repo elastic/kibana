@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Defer } from './defer';
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 1));
@@ -26,7 +28,7 @@ describe('new Defer()', () => {
 
   test('resolves promise when .reject() is called', async () => {
     const defer = new Defer<number>();
-    const then = jest.fn();
+    const then = vi.fn();
     defer.promise.then(then);
 
     await tick();
@@ -41,8 +43,8 @@ describe('new Defer()', () => {
 
   test('rejects promise when .reject() is called', async () => {
     const defer = new Defer<number>();
-    const then = jest.fn();
-    const spy = jest.fn();
+    const then = vi.fn();
+    const spy = vi.fn();
     defer.promise.then(then).catch(spy);
 
     await tick();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ConstructorOptions } from '../alerts_client';
 import { AlertsClient } from '../alerts_client';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -14,22 +17,25 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
 import { DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE, MAX_ALERTS_GROUPING_QUERY_SIZE } from '../constants';
 
-jest.mock('uuid', () => ({ v4: () => 'unique-value' }));
+vi.mock('uuid', () => {
+      const mocked = { v4: () => 'unique-value' };
+      return { ...mocked, default: mocked };
+    });
 
 const alertingAuthMock = alertingAuthorizationMock.create();
 const esClientMock = elasticsearchClientMock.createElasticsearchClient();
 const auditLogger = auditLoggerMock.create();
 
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const alertsClientParams: Mocked<ConstructorOptions> = {
   logger: loggingSystemMock.create().get(),
   authorization: alertingAuthMock,
   esClient: esClientMock,
   esClientScoped: esClientMock,
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
-  getRuleType: jest.fn(),
-  getRuleList: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
+  getRuleType: vi.fn(),
+  getRuleList: vi.fn(),
+  getAlertIndicesAlias: vi.fn(),
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';
@@ -48,11 +54,11 @@ const authorizedRuleTypes = new Map([
 ]);
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   alertingAuthMock.getSpaceId.mockImplementation(() => DEFAULT_SPACE);
   alertingAuthMock.getAuthorizationFilter.mockResolvedValue({
     filter: undefined,
-    ensureRuleTypeIsAuthorized: jest.fn(),
+    ensureRuleTypeIsAuthorized: vi.fn(),
   });
   alertingAuthMock.getAllAuthorizedRuleTypes.mockResolvedValue({
     hasAllRequested: true,
@@ -70,7 +76,7 @@ beforeEach(() => {
 describe('getGroupAggregations()', () => {
   test('calls find() with the correct params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    alertsClient.find = jest.fn().mockResolvedValue({ aggregations: {} });
+    alertsClient.find = vi.fn().mockResolvedValue({ aggregations: {} });
 
     const ruleTypeIds = ['.es-query'];
     const consumers = ['stackAlerts'];
@@ -145,7 +151,7 @@ describe('getGroupAggregations()', () => {
 
   test('replaces the key of null-value buckets and marks them with the `isNullGroup` flag', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    alertsClient.find = jest.fn().mockResolvedValue({
+    alertsClient.find = vi.fn().mockResolvedValue({
       aggregations: {
         groupByFields: {
           buckets: [

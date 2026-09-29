@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useModalChangeHandlers } from './use_modal_change_handlers';
 import { useDraftHistory } from './use_draft_history';
@@ -20,16 +23,19 @@ import {
   reflowAfterTextChange,
 } from '../../../../edit_engine/clone_element';
 
-jest.mock('../../../../edit_engine/clone_element', () => ({
-  reflowAfterStyleChange: jest.fn(),
-  reflowAfterTextChange: jest.fn(),
-  collectTextReflowDimensions: jest.fn(() => []),
-  collectStyleReflowDimensions: jest.fn(() => []),
-  setImportant: (el: HTMLElement, prop: string, value: string) => {
-    el.style.setProperty(prop, value, 'important');
-  },
-  restoreDimensions: jest.fn(),
-}));
+vi.mock('../../../../edit_engine/clone_element', () => {
+      const mocked = {
+      reflowAfterStyleChange: vi.fn(),
+      reflowAfterTextChange: vi.fn(),
+      collectTextReflowDimensions: vi.fn(() => []),
+      collectStyleReflowDimensions: vi.fn(() => []),
+      setImportant: (el: HTMLElement, prop: string, value: string) => {
+        el.style.setProperty(prop, value, 'important');
+      },
+      restoreDimensions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createArgs = (overrides: Partial<Parameters<typeof useModalChangeHandlers>[0]> = {}) => {
   const el = document.createElement('div');
@@ -83,17 +89,17 @@ const createArgs = (overrides: Partial<Parameters<typeof useModalChangeHandlers>
   return {
     selectedElement: el as Element | null,
     color: '#ffffff',
-    setColor: jest.fn(),
-    handleSelect: jest.fn(),
+    setColor: vi.fn(),
+    handleSelect: vi.fn(),
     draft: null as unknown as DraftHistoryResult,
     elementMapRef: { current: elementMap },
     textNodeMap: { current: [{ original: textNode, clone: cloneTextNode }] },
     mediaMap: { current: [{ original: imgEl, clone: cloneImg, attribute: 'src' }] },
     cloneRef: { current: cloneEl },
     textEntries,
-    setTextEntries: jest.fn(),
+    setTextEntries: vi.fn(),
     mediaEntries,
-    setMediaEntries: jest.fn(),
+    setMediaEntries: vi.fn(),
     dimensionProps: [
       { property: 'width', label: 'Width' },
       { property: 'height', label: 'Height' },
@@ -101,7 +107,7 @@ const createArgs = (overrides: Partial<Parameters<typeof useModalChangeHandlers>
       { property: 'margin', label: 'Margin' },
       { property: 'border-radius', label: 'Border radius' },
     ],
-    onSave: jest.fn(),
+    onSave: vi.fn(),
     ...overrides,
   };
 };
@@ -222,7 +228,7 @@ describe('useModalChangeHandlers', () => {
     });
 
     it('should use preview wrapper as style reflow root boundary', () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const { result: draftResult } = renderHook(() => useDraftHistory());
       const args = createArgs();
       const selected = args.selectedElement as HTMLElement;
@@ -313,7 +319,7 @@ describe('useModalChangeHandlers', () => {
     });
 
     it('should use inner clone root as text reflow root boundary', () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       const { result: draftResult } = renderHook(() => useDraftHistory());
       const args = createArgs();
       const wrapper = document.createElement('div');
@@ -380,7 +386,7 @@ describe('useModalChangeHandlers', () => {
       act(() => result.current.handleSave());
 
       expect(args.onSave).toHaveBeenCalledTimes(1);
-      const [styleChanges, textChanges, mediaChanges] = (args.onSave as jest.Mock).mock.calls[0];
+      const [styleChanges, textChanges, mediaChanges] = (args.onSave as Mock).mock.calls[0];
       expect(styleChanges).toHaveLength(1);
       expect(styleChanges[0].property).toBe('backgroundColor');
       expect(styleChanges[0].value).toBe('#ff0000');
@@ -401,7 +407,7 @@ describe('useModalChangeHandlers', () => {
       act(() => result.current.handleSave());
 
       expect(args.onSave).toHaveBeenCalledTimes(1);
-      const [styleChanges] = (args.onSave as jest.Mock).mock.calls[0];
+      const [styleChanges] = (args.onSave as Mock).mock.calls[0];
       expect(styleChanges).toHaveLength(0);
     });
   });

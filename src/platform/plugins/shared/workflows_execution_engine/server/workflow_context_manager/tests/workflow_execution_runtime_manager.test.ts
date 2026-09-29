@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { context, trace, TraceFlags } from '@opentelemetry/api';
 import type { Span, SpanContext } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
@@ -34,23 +37,23 @@ import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_m
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 import type { WorkflowRuntimeGraph } from '../workflow_runtime_graph';
 
-jest.mock('../build_workflow_context', () => {
+vi.mock('../build_workflow_context', () => {
   return {
-    buildWorkflowContext: jest.fn(),
+    buildWorkflowContext: vi.fn(),
   };
 });
 
-jest.mock('@kbn/apm-utils', () => {
-  const actual = jest.requireActual('@kbn/apm-utils');
+vi.mock('@kbn/apm-utils', async () => {
+  const actual = (await vi.importActual('@kbn/apm-utils'));
   return {
     ...actual,
-    addTransactionLabels: jest.fn(actual.addTransactionLabels),
+    addTransactionLabels: vi.fn(actual.addTransactionLabels),
   };
 });
-const addTransactionLabelsMock = apmUtils.addTransactionLabels as jest.MockedFunction<
+const addTransactionLabelsMock = apmUtils.addTransactionLabels as MockedFunction<
   typeof apmUtils.addTransactionLabels
 >;
-const buildWorkflowContextMock = buildWorkflowContext as jest.MockedFunction<
+const buildWorkflowContextMock = buildWorkflowContext as MockedFunction<
   typeof buildWorkflowContext
 >;
 
@@ -71,13 +74,13 @@ describe('WorkflowExecutionRuntimeManager', () => {
   let stepIoService: StepIoService;
   let workflowLogger: IWorkflowEventLogger;
   let workflowExecutionState: WorkflowExecutionState;
-  let fakeCoreStart: jest.Mocked<CoreStart>;
-  let fakeContextDependencies: jest.Mocked<ContextDependencies>;
+  let fakeCoreStart: Mocked<CoreStart>;
+  let fakeContextDependencies: Mocked<ContextDependencies>;
   const originalDateCtor = global.Date;
   let mockDateNow: Date;
 
   beforeAll(() => {
-    jest.spyOn(global, 'Date').mockImplementation((...args) => {
+    vi.spyOn(global, 'Date').mockImplementation((...args) => {
       if (args.length) {
         return new originalDateCtor(...args);
       }
@@ -86,7 +89,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
   });
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   beforeEach(() => {
@@ -104,20 +107,20 @@ describe('WorkflowExecutionRuntimeManager', () => {
     } as EsWorkflowExecution;
 
     workflowLogger = {
-      logInfo: jest.fn(),
-      logWarn: jest.fn(),
-      logDebug: jest.fn(),
-      logError: jest.fn(),
+      logInfo: vi.fn(),
+      logWarn: vi.fn(),
+      logDebug: vi.fn(),
+      logError: vi.fn(),
     } as unknown as IWorkflowEventLogger;
 
     workflowExecutionState = {
-      getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
-      updateWorkflowExecution: jest.fn(),
-      getStepExecution: jest.fn(),
-      getLatestStepExecution: jest.fn(),
-      getStepExecutionsByStepId: jest.fn(),
-      getAllStepExecutions: jest.fn().mockReturnValue([]),
-      upsertStep: jest.fn(),
+      getWorkflowExecution: vi.fn().mockReturnValue(workflowExecution),
+      updateWorkflowExecution: vi.fn(),
+      getStepExecution: vi.fn(),
+      getLatestStepExecution: vi.fn(),
+      getStepExecutionsByStepId: vi.fn(),
+      getAllStepExecutions: vi.fn().mockReturnValue([]),
+      upsertStep: vi.fn(),
     } as unknown as WorkflowExecutionState;
 
     const topologicalOrder = ['node1', 'node2', 'node3'];
@@ -140,21 +143,21 @@ describe('WorkflowExecutionRuntimeManager', () => {
     };
     workflowExecutionGraph = {
       topologicalOrder,
-      nodeAfter: jest.fn().mockImplementation((nodeId: string | undefined) => {
+      nodeAfter: vi.fn().mockImplementation((nodeId: string | undefined) => {
         const index = topologicalOrder.findIndex((id) => id === nodeId);
         if (index >= 0 && index < topologicalOrder.length - 1) {
           return graphNodes[topologicalOrder[index + 1]];
         }
         return undefined;
       }),
-      getNode: jest.fn().mockImplementation((nodeId: string) => graphNodes[nodeId]),
-      getNodeStack: jest.fn().mockReturnValue({ stackFrames: [] }),
-      getInnerStepIds: jest.fn().mockReturnValue(new Set<string>()),
-      insertSyntheticScope: jest.fn(),
+      getNode: vi.fn().mockImplementation((nodeId: string) => graphNodes[nodeId]),
+      getNodeStack: vi.fn().mockReturnValue({ stackFrames: [] }),
+      getInnerStepIds: vi.fn().mockReturnValue(new Set<string>()),
+      insertSyntheticScope: vi.fn(),
     } as unknown as WorkflowRuntimeGraph;
 
-    fakeCoreStart = {} as unknown as jest.Mocked<CoreStart>;
-    fakeContextDependencies = {} as unknown as jest.Mocked<ContextDependencies>;
+    fakeCoreStart = {} as unknown as Mocked<CoreStart>;
+    fakeContextDependencies = {} as unknown as Mocked<ContextDependencies>;
 
     workflowExecutionCursor = createWorkflowExecutionCursorTestHarness({
       nodeId: 'node1',
@@ -163,14 +166,14 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     stepIoService = {
-      getOutputSizeStats: jest.fn().mockReturnValue({ totalBytes: 0, stepCount: 0 }),
-      flush: jest.fn().mockResolvedValue(undefined),
-      flushStepChanges: jest.fn().mockResolvedValue(undefined),
-      load: jest.fn().mockResolvedValue(undefined),
-      evictStaleLoopOutputs: jest.fn(),
+      getOutputSizeStats: vi.fn().mockReturnValue({ totalBytes: 0, stepCount: 0 }),
+      flush: vi.fn().mockResolvedValue(undefined),
+      flushStepChanges: vi.fn().mockResolvedValue(undefined),
+      load: vi.fn().mockResolvedValue(undefined),
+      evictStaleLoopOutputs: vi.fn(),
       // Drives the eviction work that used to live in this class — tests that
       // observe stale-loop eviction now spy on this method directly.
-      evictCompletedLoopsOnResume: jest.fn(),
+      evictCompletedLoopsOnResume: vi.fn(),
     } as unknown as StepIoService;
 
     underTest = new WorkflowExecutionRuntimeManager({
@@ -398,7 +401,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     describe('task manager APM labels (event-driven)', () => {
       let mockTransaction: {
-        addLabels: jest.Mock;
+        addLabels: Mock;
         ids: Record<string, string>;
         outcome: string;
         _labels: Record<string, unknown>;
@@ -406,7 +409,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       beforeEach(() => {
         mockTransaction = {
-          addLabels: jest.fn(),
+          addLabels: vi.fn(),
           ids: { 'transaction.id': 'txn-1', 'trace.id': 'trace-1' },
           outcome: 'success',
           _labels: {},
@@ -489,7 +492,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
   describe('resume', () => {
     beforeEach(() => {
-      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+      (workflowExecutionState.getWorkflowExecution as Mock).mockReturnValue({
         status: ExecutionStatus.WAITING_FOR_INPUT,
         currentNodeId: 'node2',
       } as Partial<EsWorkflowExecution>);
@@ -547,10 +550,10 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       it('delegates after load() so the service sees fully-loaded state', async () => {
         const callOrder: string[] = [];
-        (stepIoService.load as jest.Mock).mockImplementation(async () => {
+        (stepIoService.load as Mock).mockImplementation(async () => {
           callOrder.push('load');
         });
-        (stepIoService.evictCompletedLoopsOnResume as jest.Mock).mockImplementation(() => {
+        (stepIoService.evictCompletedLoopsOnResume as Mock).mockImplementation(() => {
           callOrder.push('evict');
         });
 
@@ -602,7 +605,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       ExecutionStatus.WAITING_FOR_INPUT,
       ExecutionStatus.WAITING_FOR_CHILD,
     ])('should not complete a parked %s execution when current node is missing', async (status) => {
-      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+      (workflowExecutionState.getWorkflowExecution as Mock).mockReturnValue({
         ...workflowExecution,
         status,
       });
@@ -637,7 +640,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should fail workflow execution if workflow error is set', async () => {
-      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+      (workflowExecutionState.getWorkflowExecution as Mock).mockReturnValue({
         ...workflowExecution,
         startedAt: '2025-08-05T00:00:00.000Z',
       });
@@ -665,7 +668,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should log workflow failure', async () => {
-      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+      (workflowExecutionState.getWorkflowExecution as Mock).mockReturnValue({
         ...workflowExecution,
         startedAt: '2025-08-05T00:00:00.000Z',
       });
@@ -685,7 +688,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should preserve CANCELLED status when a cursor error was captured before cancellation', async () => {
       // Simulate: step fails (cursor captures error), then workflow is cancelled.
       // saveState must persist CANCELLED, not FAILED.
-      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+      (workflowExecutionState.getWorkflowExecution as Mock).mockReturnValue({
         ...workflowExecution,
         startedAt: '2025-08-05T00:00:00.000Z',
         status: ExecutionStatus.CANCELLED,
@@ -704,7 +707,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     describe.each(TerminalExecutionStatuses)('for status %s', (status) => {
       beforeEach(() => {
-        (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        (workflowExecutionState.getWorkflowExecution as Mock).mockReturnValue({
           startedAt: '2025-08-05T00:00:00.000Z',
           status,
         } as Partial<EsWorkflowStepExecution>);
@@ -758,7 +761,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
   describe('enterScope', () => {
     const navigateToEnterNode = (nodeMock: GraphNodeUnion) => {
-      workflowExecutionGraph.getNode = jest.fn().mockReturnValue(nodeMock);
+      workflowExecutionGraph.getNode = vi.fn().mockReturnValue(nodeMock);
       underTest.navigateToNode('node3');
       workflowExecutionCursor.commitPendingNavigation();
     };
@@ -850,7 +853,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
   describe('navigateToNode', () => {
     it('should throw when nodeId is not in the graph', () => {
-      (workflowExecutionGraph.getNode as jest.Mock).mockReturnValue(undefined);
+      (workflowExecutionGraph.getNode as Mock).mockReturnValue(undefined);
       expect(() => underTest.navigateToNode('nonexistent')).toThrow(
         'Node with ID nonexistent is not part of the workflow graph'
       );
@@ -951,7 +954,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
   describe('markWorkflowTimeouted', () => {
     it('should set status to TIMED_OUT with finishedAt and duration', () => {
-      const stopSpy = jest.spyOn(workflowExecutionCursor, 'stop');
+      const stopSpy = vi.spyOn(workflowExecutionCursor, 'stop');
 
       underTest.markWorkflowTimeouted();
 
@@ -989,9 +992,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
       ]);
 
       const mockFactory = {
-        createStepExecutionRuntime: jest.fn().mockReturnValue({
-          stepExecutionExists: jest.fn().mockReturnValue(true),
-          finishStep: jest.fn(),
+        createStepExecutionRuntime: vi.fn().mockReturnValue({
+          stepExecutionExists: vi.fn().mockReturnValue(true),
+          finishStep: vi.fn(),
         }),
       };
 
@@ -1027,9 +1030,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
       ]);
 
       const mockFactory = {
-        createStepExecutionRuntime: jest.fn().mockReturnValue({
-          stepExecutionExists: jest.fn().mockReturnValue(false),
-          finishStep: jest.fn(),
+        createStepExecutionRuntime: vi.fn().mockReturnValue({
+          stepExecutionExists: vi.fn().mockReturnValue(false),
+          finishStep: vi.fn(),
         }),
       };
 
@@ -1057,9 +1060,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
       ]);
 
       const mockFactory = {
-        createStepExecutionRuntime: jest.fn().mockReturnValue({
-          stepExecutionExists: jest.fn().mockReturnValue(true),
-          finishStep: jest.fn(),
+        createStepExecutionRuntime: vi.fn().mockReturnValue({
+          stepExecutionExists: vi.fn().mockReturnValue(true),
+          finishStep: vi.fn(),
         }),
       };
 
@@ -1078,7 +1081,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
   describe('saveState with APM transaction', () => {
     it('should end workflow transaction for alerting-triggered workflows on terminal status', async () => {
-      const mockEnd = jest.fn();
+      const mockEnd = vi.fn();
       (underTest as any).workflowTransaction = {
         type: 'workflow_execution',
         outcome: 'success',
@@ -1092,7 +1095,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should not end transaction for task-manager-triggered workflows', async () => {
-      const mockEnd = jest.fn();
+      const mockEnd = vi.fn();
       (underTest as any).workflowTransaction = {
         type: 'task',
         outcome: 'success',
@@ -1108,12 +1111,12 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
   describe('reportTelemetryIfTerminal', () => {
     it('should report telemetry when terminal status and telemetry client is available', async () => {
-      const mockReport = jest.fn();
+      const mockReport = vi.fn();
       const telemetryClient = { reportWorkflowExecutionTerminated: mockReport };
       (underTest as any).telemetryClient = telemetryClient;
       workflowExecutionCursor.setCurrentNodeId(undefined);
 
-      (workflowExecutionState as any).getAllStepExecutions = jest.fn().mockReturnValue([]);
+      (workflowExecutionState as any).getAllStepExecutions = vi.fn().mockReturnValue([]);
 
       await underTest.saveState();
 
@@ -1125,11 +1128,11 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should not report telemetry twice', async () => {
-      const mockReport = jest.fn();
+      const mockReport = vi.fn();
       const telemetryClient = { reportWorkflowExecutionTerminated: mockReport };
       (underTest as any).telemetryClient = telemetryClient;
       workflowExecutionCursor.setCurrentNodeId(undefined);
-      (workflowExecutionState as any).getAllStepExecutions = jest.fn().mockReturnValue([]);
+      (workflowExecutionState as any).getAllStepExecutions = vi.fn().mockReturnValue([]);
 
       await underTest.saveState();
       await underTest.saveState();

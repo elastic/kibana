@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,7 +15,7 @@ import ParamsFields from './es_index_params';
 import { AlertHistoryEsIndexConnectorId } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
 const actionConnector = createMockActionConnector({
   actionTypeId: '.index',
@@ -123,7 +125,7 @@ describe('IndexParamsFields renders', () => {
       documents: undefined,
       indexOverride: 'kibana-alert-history-not-the-default',
     };
-    const editAction = jest.fn();
+    const editAction = vi.fn();
     renderWithI18n(
       <ParamsFields
         actionParams={actionParams}

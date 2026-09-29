@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, screen, within } from '@testing-library/react';
 import React from 'react';
 
@@ -44,8 +46,8 @@ const setup = (config: TestConfig) => {
 
   const calculator = new PrivilegeFormCalculator(kibanaPrivileges, config.role);
 
-  const onChange = jest.fn();
-  const onChangeAll = jest.fn();
+  const onChange = vi.fn();
+  const onChangeAll = vi.fn();
   const { container } = renderWithKibanaRenderContext(
     <FeatureTable
       role={config.role}

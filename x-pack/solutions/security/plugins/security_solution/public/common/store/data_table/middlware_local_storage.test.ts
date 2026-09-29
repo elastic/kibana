@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { defaultHeaders, createSecuritySolutionStorageMock, createMockStore } from '../../mock';
 import { addTableInStorage } from '../../../timelines/containers/local_storage';
 import { Direction } from '../../../../common/search_strategy';
@@ -21,9 +24,9 @@ const {
   upsertColumn,
 } = dataTableActions;
 
-jest.mock('../../../timelines/containers/local_storage');
+vi.mock('../../../timelines/containers/local_storage');
 
-const addTableInStorageMock = addTableInStorage as jest.Mock;
+const addTableInStorageMock = addTableInStorage as Mock;
 
 describe('DataTable localStorage middleware', () => {
   const { storage } = createSecuritySolutionStorageMock();

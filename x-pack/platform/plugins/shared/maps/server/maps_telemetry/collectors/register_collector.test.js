@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerMapsUsageCollector } from './register';
 
 describe('buildCollectorObj#fetch', () => {
@@ -13,8 +15,8 @@ describe('buildCollectorObj#fetch', () => {
   let usageCollection;
 
   beforeEach(() => {
-    makeUsageCollectorStub = jest.fn();
-    registerStub = jest.fn();
+    makeUsageCollectorStub = vi.fn();
+    registerStub = vi.fn();
     usageCollection = {
       makeUsageCollector: makeUsageCollectorStub,
       registerCollector: registerStub,

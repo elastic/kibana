@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MigrationRulesTable } from '.';
@@ -30,17 +33,17 @@ import type { RuleMigrationRule } from '../../../../../common/siem_migrations/mo
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { MigrationSource } from '../../../common/types';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../logic/use_get_migration_rules');
-jest.mock('../../logic/use_get_migration_prebuilt_rules');
-jest.mock('../../logic/use_get_migration_translation_stats');
-jest.mock('../../logic/use_install_migration_rule');
-jest.mock('../../logic/use_install_migration_rules');
-jest.mock('../../logic/use_update_migration_rule');
-jest.mock('../../logic/use_update_index_pattern');
-jest.mock('../../logic/use_start_migration');
-jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('../../logic/use_get_migration_rules');
+vi.mock('../../logic/use_get_migration_prebuilt_rules');
+vi.mock('../../logic/use_get_migration_translation_stats');
+vi.mock('../../logic/use_install_migration_rule');
+vi.mock('../../logic/use_install_migration_rules');
+vi.mock('../../logic/use_update_migration_rule');
+vi.mock('../../logic/use_update_index_pattern');
+vi.mock('../../logic/use_start_migration');
+vi.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
 
 const mockRule = migrationRules[0];
 const mockMigrationStats = getRuleMigrationStatsMock();
@@ -243,37 +246,37 @@ const getHighlightedRuleId = (): string | null => {
 };
 
 describe('MigrationRulesTable', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({
       services: {
         siemMigrations: {
-          rules: { getMissingCapabilities: jest.fn().mockReturnValue([]) },
+          rules: { getMissingCapabilities: vi.fn().mockReturnValue([]) },
         },
       },
     });
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
-    (useGetMigrationRules as jest.Mock).mockReturnValue({
+    (useAppToasts as Mock).mockReturnValue(appToastsMock);
+    (useGetMigrationRules as Mock).mockReturnValue({
       data: { migrationRules: [], total: 0 },
       isLoading: false,
     });
-    (useGetMigrationPrebuiltRules as jest.Mock).mockReturnValue({ data: {}, isLoading: false });
-    (useGetMigrationTranslationStats as jest.Mock).mockReturnValue({
+    (useGetMigrationPrebuiltRules as Mock).mockReturnValue({ data: {}, isLoading: false });
+    (useGetMigrationTranslationStats as Mock).mockReturnValue({
       data: mockTranslationStats,
       isLoading: false,
     });
-    (useInstallMigrationRule as jest.Mock).mockReturnValue({ mutateAsync: jest.fn() });
-    (useInstallMigrationRules as jest.Mock).mockReturnValue({ mutateAsync: jest.fn() });
-    (useUpdateMigrationRule as jest.Mock).mockReturnValue({ mutateAsync: jest.fn() });
-    (useUpdateIndexPattern as jest.Mock).mockReturnValue({ mutateAsync: jest.fn() });
-    (useStartMigration as jest.Mock).mockReturnValue({
-      startMigration: jest.fn(),
+    (useInstallMigrationRule as Mock).mockReturnValue({ mutateAsync: vi.fn() });
+    (useInstallMigrationRules as Mock).mockReturnValue({ mutateAsync: vi.fn() });
+    (useUpdateMigrationRule as Mock).mockReturnValue({ mutateAsync: vi.fn() });
+    (useUpdateIndexPattern as Mock).mockReturnValue({ mutateAsync: vi.fn() });
+    (useStartMigration as Mock).mockReturnValue({
+      startMigration: vi.fn(),
       isLoading: false,
     });
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({ isLoading: false, data: [] });
+    (useBulkGetUserProfiles as Mock).mockReturnValue({ isLoading: false, data: [] });
   });
 
   const renderTable = (migrationStats = mockMigrationStats) =>
@@ -286,7 +289,7 @@ describe('MigrationRulesTable', () => {
   });
 
   test('should render the empty component when there are no rules', () => {
-    (useGetMigrationTranslationStats as jest.Mock).mockReturnValue({
+    (useGetMigrationTranslationStats as Mock).mockReturnValue({
       data: {
         ...mockTranslationStats,
         rules: {
@@ -314,7 +317,7 @@ describe('MigrationRulesTable', () => {
   });
 
   test('should render the table with rules', async () => {
-    (useGetMigrationRules as jest.Mock).mockReturnValue({
+    (useGetMigrationRules as Mock).mockReturnValue({
       data: { migrationRules: [mockRule], total: 1 },
       isLoading: false,
     });
@@ -325,11 +328,11 @@ describe('MigrationRulesTable', () => {
 
   describe('Table results', () => {
     beforeEach(() => {
-      (useGetMigrationRules as jest.Mock).mockReturnValue({
+      (useGetMigrationRules as Mock).mockReturnValue({
         data: { migrationRules: rules, total: rules.length },
         isLoading: false,
       });
-      (useGetMigrationTranslationStats as jest.Mock).mockReturnValue({
+      (useGetMigrationTranslationStats as Mock).mockReturnValue({
         data: getRuleMigrationTranslationStatsMock({
           rules: {
             total: 4,
@@ -365,14 +368,14 @@ describe('MigrationRulesTable', () => {
   });
 
   describe('navigation', () => {
-    const mockInstallMutate = jest.fn().mockResolvedValue({ installed: 1 });
+    const mockInstallMutate = vi.fn().mockResolvedValue({ installed: 1 });
 
     beforeEach(() => {
-      (useGetMigrationRules as jest.Mock).mockReturnValue({
+      (useGetMigrationRules as Mock).mockReturnValue({
         data: { migrationRules: threeRules, total: threeRules.length },
         isLoading: false,
       });
-      (useGetMigrationTranslationStats as jest.Mock).mockReturnValue({
+      (useGetMigrationTranslationStats as Mock).mockReturnValue({
         data: getRuleMigrationTranslationStatsMock({
           rules: {
             total: 3,
@@ -388,7 +391,7 @@ describe('MigrationRulesTable', () => {
         }),
         isLoading: false,
       });
-      (useInstallMigrationRule as jest.Mock).mockReturnValue({ mutateAsync: mockInstallMutate });
+      (useInstallMigrationRule as Mock).mockReturnValue({ mutateAsync: mockInstallMutate });
     });
 
     it('should open the details flyout for the clicked rule', () => {
@@ -473,11 +476,11 @@ describe('MigrationRulesTable', () => {
 
     describe('failed rules', () => {
       const mockRulesWithFailed = (rulesWithFailed: RuleMigrationRule[], failedCount: number) => {
-        (useGetMigrationRules as jest.Mock).mockReturnValue({
+        (useGetMigrationRules as Mock).mockReturnValue({
           data: { migrationRules: rulesWithFailed, total: rulesWithFailed.length },
           isLoading: false,
         });
-        (useGetMigrationTranslationStats as jest.Mock).mockReturnValue({
+        (useGetMigrationTranslationStats as Mock).mockReturnValue({
           data: getRuleMigrationTranslationStatsMock({
             rules: {
               total: rulesWithFailed.length,

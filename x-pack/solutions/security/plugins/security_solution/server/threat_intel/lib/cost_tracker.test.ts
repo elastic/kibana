@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { CostTraceBuilder, extractUsageFromMetadata } from './cost_tracker';
 
@@ -106,7 +108,7 @@ describe('CostTraceBuilder', () => {
     addStage(builder, '.another-unpriced-model');
 
     expect(logger.warn).toHaveBeenCalledTimes(2);
-    expect((logger.warn as jest.Mock).mock.calls[0][0]).toContain('no pricing row');
+    expect((logger.warn as Mock).mock.calls[0][0]).toContain('no pricing row');
   });
 
   it('does not warn for a priced model', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act } from '@testing-library/react';
 import React from 'react';
 
@@ -46,7 +48,7 @@ const spaces = [
 ];
 
 const spacesManager = spacesManagerMock.create();
-spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
+spacesManager.getSpaces = vi.fn().mockResolvedValue(spaces);
 
 const featuresStart = featuresPluginMock.createStart();
 featuresStart.getFeatures.mockResolvedValue([
@@ -77,12 +79,12 @@ describe('SpacesGridPage', () => {
   });
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   it('renders the list of spaces', async () => {
@@ -147,7 +149,7 @@ describe('SpacesGridPage', () => {
       },
     ];
 
-    spacesManager.getSpaces = jest.fn().mockResolvedValue(spacesWithSolution);
+    spacesManager.getSpaces = vi.fn().mockResolvedValue(spacesWithSolution);
 
     const wrapper = shallowWithIntl(
       <SpacesGridPage
@@ -220,7 +222,7 @@ describe('SpacesGridPage', () => {
     searchBox.simulate('keyup', { key: 'Enter', target: { value: 'Custom 1' } });
 
     act(() => {
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
     });
 
     wrapper.update();
@@ -244,7 +246,7 @@ describe('SpacesGridPage', () => {
     });
 
     const deferredSpacesManager = spacesManagerMock.create();
-    deferredSpacesManager.getSpaces = jest.fn().mockReturnValue(spacesPromise);
+    deferredSpacesManager.getSpaces = vi.fn().mockReturnValue(spacesPromise);
     deferredSpacesManager.getActiveSpace.mockResolvedValue(spaces[0]);
 
     const wrapper = shallowWithIntl(
@@ -295,7 +297,7 @@ describe('SpacesGridPage', () => {
       { id: asSpaceId('test-2'), name: 'Test', disabledFeatures: [] },
     ];
     const spacesManagerWithCurrent = spacesManagerMock.create();
-    spacesManagerWithCurrent.getSpaces = jest.fn().mockResolvedValue(spacesWithCurrent);
+    spacesManagerWithCurrent.getSpaces = vi.fn().mockResolvedValue(spacesWithCurrent);
     spacesManagerWithCurrent.getActiveSpace.mockResolvedValue(spacesWithCurrent[2]);
 
     const current = await spacesManagerWithCurrent.getActiveSpace();

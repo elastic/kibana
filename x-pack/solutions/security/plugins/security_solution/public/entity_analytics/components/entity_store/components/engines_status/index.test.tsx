@@ -5,30 +5,38 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EngineStatus } from '.';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 
-const mockUseEntityStore = jest.fn();
-const mockInstallMutate = jest.fn();
-jest.mock('../../hooks/use_entity_store', () => ({
-  useEntityStoreStatus: () => mockUseEntityStore(),
-  useInstallEntityStoreMutation: () => ({
-    mutate: mockInstallMutate,
-    isLoading: false,
-  }),
-}));
+const mockUseEntityStore = vi.fn();
+const mockInstallMutate = vi.fn();
+vi.mock('../../hooks/use_entity_store', () => {
+      const mocked = {
+      useEntityStoreStatus: () => mockUseEntityStore(),
+      useInstallEntityStoreMutation: () => ({
+        mutate: mockInstallMutate,
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDownloadBlob = jest.fn();
-jest.mock('../../../../../common/utils/download_blob', () => ({
-  downloadBlob: () => mockDownloadBlob(),
-}));
+const mockDownloadBlob = vi.fn();
+vi.mock('../../../../../common/utils/download_blob', () => {
+      const mocked = {
+      downloadBlob: () => mockDownloadBlob(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EngineStatus', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders loading spinner when data is loading', () => {

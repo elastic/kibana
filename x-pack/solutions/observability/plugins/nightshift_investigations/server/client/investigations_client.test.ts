@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
@@ -30,20 +33,23 @@ import {
 } from './errors';
 import { NightshiftInvestigationsClient } from './investigations_client';
 
-jest.mock('../lib/install_investigation_agent', () => ({
-  installInvestigationAgent: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../lib/install_investigation_agent', () => {
+      const mocked = {
+      installInvestigationAgent: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const installInvestigationAgentMock = installInvestigationAgent as jest.MockedFunction<
+const installInvestigationAgentMock = installInvestigationAgent as MockedFunction<
   typeof installInvestigationAgent
 >;
 
 const SPACE_ID = 'test-space';
 
 const mockManagement = {
-  getWorkflowExecution: jest.fn(),
-  getWorkflow: jest.fn(),
-  runWorkflow: jest.fn(),
+  getWorkflowExecution: vi.fn(),
+  getWorkflow: vi.fn(),
+  runWorkflow: vi.fn(),
 };
 
 const mockWorkflowsManagement = {
@@ -53,17 +59,17 @@ const mockWorkflowsManagement = {
 const mockAgentBuilder = {} as unknown as AgentBuilderPluginStart;
 
 const mockLogger = {
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
 } as unknown as Logger;
 
 const mockRequest = {} as KibanaRequest;
-const mockAgentAvailability = { cacheMode: 'space' as const, handler: jest.fn() };
-const investigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
+const mockAgentAvailability = { cacheMode: 'space' as const, handler: vi.fn() };
+const investigationQuotaCallback = vi.fn().mockResolvedValue({ allowed: true });
 
-let repository: jest.Mocked<InvestigationRepository>;
+let repository: Mocked<InvestigationRepository>;
 
 const makeClient = (
   overrides: Partial<ConstructorParameters<typeof NightshiftInvestigationsClient>[0]> = {}
@@ -77,7 +83,7 @@ const makeClient = (
     agentAvailability: mockAgentAvailability,
     investigationQuotaCallback,
     investigationRepository: repository,
-    isAvailable: jest.fn().mockResolvedValue(true),
+    isAvailable: vi.fn().mockResolvedValue(true),
     ...overrides,
   });
 
@@ -116,15 +122,15 @@ const findResult = (records: InvestigationRecord[]): FindInvestigationsResult =>
   total: records.length,
 });
 
-const createMockRepository = (): jest.Mocked<InvestigationRepository> => ({
-  create: jest.fn().mockResolvedValue(undefined),
-  get: jest.fn().mockResolvedValue(undefined),
-  update: jest.fn().mockResolvedValue(undefined),
-  find: jest.fn().mockResolvedValue(findResult([])),
+const createMockRepository = (): Mocked<InvestigationRepository> => ({
+  create: vi.fn().mockResolvedValue(undefined),
+  get: vi.fn().mockResolvedValue(undefined),
+  update: vi.fn().mockResolvedValue(undefined),
+  find: vi.fn().mockResolvedValue(findResult([])),
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   installInvestigationAgentMock.mockResolvedValue(undefined);
   investigationQuotaCallback.mockResolvedValue({ allowed: true });
   repository = createMockRepository();
@@ -832,7 +838,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       spaceIdOverride: SPACE_ID,
       agentAvailability: mockAgentAvailability,
       investigationRepository: repository,
-      isAvailable: jest.fn().mockResolvedValue(true),
+      isAvailable: vi.fn().mockResolvedValue(true),
     });
 
     await expect(
@@ -847,7 +853,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it('throws InvestigationUnavailableError when a start requirement is unavailable', async () => {
     await expect(
-      makeClient({ isAvailable: jest.fn().mockResolvedValue(false) }).start({
+      makeClient({ isAvailable: vi.fn().mockResolvedValue(false) }).start({
         title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'se-1' },
         trigger_type: 'automatic',

@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { appContextService } from '../../app_context';
 
 import { checkNamespaceConflict } from './namespace_template_utils';
 
-jest.mock('../../app_context');
-jest.mock('../elasticsearch/retry', () => ({
-  retryTransientEsErrors: jest.fn((fn: () => Promise<unknown>) => fn()),
-}));
+vi.mock('../../app_context');
+vi.mock('../elasticsearch/retry', () => {
+      const mocked = {
+      retryTransientEsErrors: vi.fn((fn: () => Promise<unknown>) => fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 
 function makeLogger() {
   return {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   } as any;
 }
 
@@ -100,15 +106,15 @@ function mockNsTemplateExists(
 
 describe('checkNamespaceConflict', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
     // fetchIndexTemplate (called internally for the NS template existence check) reads
     // the logger via appContextService.getLogger() — mock it so it doesn't throw.
     mockedAppContextService.getLogger.mockReturnValue({
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     } as any);
   });
 

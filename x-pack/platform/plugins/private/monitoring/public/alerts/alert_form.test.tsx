@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /**
  * Prevent any breaking changes to context requirement from breaking the alert form/actions
  */
@@ -28,17 +30,21 @@ import { Legacy } from '../legacy_shims';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
-  loadAllActions: jest.fn(),
-  loadActionTypes: jest.fn(),
-}));
-const { loadActionTypes } = jest.requireMock(
-  '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
-);
+vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => {
+      const mocked = {
+      loadAllActions: vi.fn(),
+      loadActionTypes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const { loadActionTypes } = (await vi.importMock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'));
 
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
-  useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
-}));
+vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {
+      const mocked = {
+      useUiSetting: vi.fn().mockImplementation((_, defaultValue) => defaultValue),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const initLegacyShims = () => {
   const triggersActionsUi = {
@@ -62,7 +68,7 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 describe('alert_form', () => {
   beforeEach(() => {
     initLegacyShims();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const ruleType: RuleTypeModel = {
@@ -97,9 +103,7 @@ describe('alert_form', () => {
     describe('action_form in alert', () => {
       async function setup() {
         initLegacyShims();
-        const { loadAllActions } = jest.requireMock(
-          '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
-        );
+        const { loadAllActions } = (await vi.importMock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'));
         loadAllActions.mockResolvedValueOnce([
           {
             secrets: {},

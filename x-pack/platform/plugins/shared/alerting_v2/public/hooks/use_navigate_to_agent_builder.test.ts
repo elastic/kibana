@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { useNavigateToAgentBuilder } from './use_navigate_to_agent_builder';
@@ -14,16 +17,16 @@ import {
   AGENT_BUILDER_NEW_CONVERSATION_PATH,
 } from '../constants';
 
-jest.mock('@kbn/core-di-browser');
+vi.mock('@kbn/core-di-browser');
 
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
-const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
+const mockUseService = useService as MockedFunction<typeof useService>;
+const mockCoreStart = CoreStart as MockedFunction<typeof CoreStart>;
 
 describe('useNavigateToAgentBuilder', () => {
-  const mockNavigateToApp = jest.fn();
+  const mockNavigateToApp = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockCoreStart.mockImplementation((key: string) => key as any);
 

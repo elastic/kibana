@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { Services } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import type { Logger } from '@kbn/core/server';
@@ -16,12 +19,15 @@ import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { AuthType, WebhookMethods } from '@kbn/connector-schemas/common/auth';
 
-jest.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => ({
-  getOAuthClientCredentialsAccessToken: jest.fn(),
-}));
+vi.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => {
+      const mocked = {
+      getOAuthClientCredentialsAccessToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createServicesMock = () => {
-  const mock: jest.Mocked<
+  const mock: Mocked<
     Services & {
       savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
     }
@@ -29,8 +35,8 @@ const createServicesMock = () => {
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
     connectorTokenClient: {
-      deleteConnectorTokens: jest.fn(),
-    } as unknown as jest.Mocked<Services['connectorTokenClient']>,
+      deleteConnectorTokens: vi.fn(),
+    } as unknown as Mocked<Services['connectorTokenClient']>,
   };
   return mock;
 };
@@ -47,7 +53,7 @@ const createMockAdapter =
     });
 
 describe('getAxiosConfig', () => {
-  const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+  const mockedLogger: Mocked<Logger> = loggerMock.create();
   const services: Services = createServicesMock();
 
   const params: GetAxiosConfigParams = {
@@ -78,11 +84,11 @@ describe('getAxiosConfig', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should delete the token when the status is 401 but succeeds', async () => {
-    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce('fakeToken');
+    (getOAuthClientCredentialsAccessToken as Mock).mockResolvedValueOnce('fakeToken');
 
     const config = await getAxiosConfig(params);
     const { axiosInstance } = config[0] as GetAxiosConfigResponse;
@@ -98,7 +104,7 @@ describe('getAxiosConfig', () => {
   });
 
   it('should delete the token when the request fails', async () => {
-    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce('fakeToken');
+    (getOAuthClientCredentialsAccessToken as Mock).mockResolvedValueOnce('fakeToken');
 
     const config = await getAxiosConfig(params);
     const { axiosInstance } = config[0] as GetAxiosConfigResponse;
@@ -115,7 +121,7 @@ describe('getAxiosConfig', () => {
   });
 
   it('should return error when access token retrieval fails', async () => {
-    (getOAuthClientCredentialsAccessToken as jest.Mock).mockRejectedValueOnce(
+    (getOAuthClientCredentialsAccessToken as Mock).mockRejectedValueOnce(
       new Error('Failed to retrieve access token')
     );
 

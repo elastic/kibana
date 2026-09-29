@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { GenAiFields } from '@kbn/apm-ui-shared';
 import { SpanDetail } from './span_detail';
 import type { SpanNode } from './types';
 
-jest.mock('@kbn/apm-ui-shared', () => {
-  const actual = jest.requireActual('@kbn/apm-ui-shared');
+vi.mock('@kbn/apm-ui-shared', async () => {
+  const actual = (await vi.importActual('@kbn/apm-ui-shared'));
   return {
     ...actual,
     GenAiTab: ({ genAi }: { genAi: GenAiFields }) => (
@@ -42,7 +44,7 @@ const buildSpanNode = (overrides: Partial<SpanNode> = {}): SpanNode => ({
 describe('SpanDetail', () => {
   it('renders span name and basic metadata', () => {
     const span = buildSpanNode({ name: 'chat gpt-4', duration_ms: 123.4, kind: 'CLIENT' });
-    render(<SpanDetail span={span} onClose={jest.fn()} />);
+    render(<SpanDetail span={span} onClose={vi.fn()} />);
 
     expect(screen.getByText('chat gpt-4')).toBeInTheDocument();
     expect(screen.getByText('123.4ms')).toBeInTheDocument();
@@ -51,7 +53,7 @@ describe('SpanDetail', () => {
   });
 
   it('calls onClose when close button is clicked', () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     render(<SpanDetail span={buildSpanNode()} onClose={onClose} />);
 
     fireEvent.click(screen.getByLabelText('Close detail'));
@@ -73,7 +75,7 @@ describe('SpanDetail', () => {
         ]),
       },
     });
-    render(<SpanDetail span={span} onClose={jest.fn()} />);
+    render(<SpanDetail span={span} onClose={vi.fn()} />);
 
     expect(screen.getByTestId('mockGenAiTab')).toHaveTextContent('GenAiTab:chat');
   });
@@ -88,13 +90,13 @@ describe('SpanDetail', () => {
         'gen_ai.tool.call.result': '{"rows":[]}',
       },
     });
-    render(<SpanDetail span={span} onClose={jest.fn()} />);
+    render(<SpanDetail span={span} onClose={vi.fn()} />);
 
     expect(screen.getByTestId('mockGenAiTab')).toHaveTextContent('GenAiTab:execute_tool');
   });
 
   it('renders copy span ID button', () => {
-    render(<SpanDetail span={buildSpanNode()} onClose={jest.fn()} />);
+    render(<SpanDetail span={buildSpanNode()} onClose={vi.fn()} />);
     expect(screen.getByLabelText('Copy span ID')).toBeInTheDocument();
   });
 
@@ -107,7 +109,7 @@ describe('SpanDetail', () => {
             'http.method': 'POST',
           },
         })}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -126,7 +128,7 @@ describe('SpanDetail', () => {
     render(
       <SpanDetail
         span={buildSpanNode({ attributes: { 'http.method': 'GET' } })}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -135,7 +137,7 @@ describe('SpanDetail', () => {
   });
 
   it('handles span with no attributes gracefully', () => {
-    render(<SpanDetail span={buildSpanNode({ attributes: undefined })} onClose={jest.fn()} />);
+    render(<SpanDetail span={buildSpanNode({ attributes: undefined })} onClose={vi.fn()} />);
 
     expect(screen.getByText('test-span')).toBeInTheDocument();
     expect(screen.queryByTestId('mockGenAiTab')).not.toBeInTheDocument();
@@ -146,7 +148,7 @@ describe('SpanDetail', () => {
     render(
       <SpanDetail
         span={buildSpanNode({ kind: undefined, status: undefined })}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -166,7 +168,7 @@ describe('SpanDetail', () => {
             'custom.payload': { query: 'FROM logs' },
           },
         })}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -191,7 +193,7 @@ describe('SpanDetail', () => {
             }),
           },
         })}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 
@@ -209,7 +211,7 @@ describe('SpanDetail', () => {
             'output.value': { rows: [] },
           },
         })}
-        onClose={jest.fn()}
+        onClose={vi.fn()}
       />
     );
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import { createSearchSourceStub } from './_stubs';
@@ -153,7 +155,7 @@ describe('context app', function () {
         { _id: '3', _index: 't' },
       ]);
 
-      discoverServices.data.search.showWarnings = jest.fn((adapter, callback) => {
+      discoverServices.data.search.showWarnings = vi.fn((adapter, callback) => {
         // @ts-expect-error for empty meta
         callback?.(searchResponseIncompleteWarningLocalCluster, {});
       });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import DateMath from '@kbn/datemath';
 import moment from 'moment';
 import { getCerts } from './get_certs';
@@ -84,7 +86,7 @@ describe('getCerts', () => {
   });
 
   it('parses query result and returns expected values', async () => {
-    const dateMathSpy = jest.spyOn(DateMath, 'parse');
+    const dateMathSpy = vi.spyOn(DateMath, 'parse');
 
     dateMathSpy.mockReturnValue(moment(10000));
     const { esClient, uptimeEsClient } = getUptimeESMockClient();

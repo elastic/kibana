@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
 import { mergeCommandWithGeneratedCommandData } from './elastisearch_command_data_loader';
 import type { ICommand, ICommandMethods, ICommandMetadata } from './registry';
 import { CommandRegistry } from './registry';
@@ -25,7 +27,7 @@ describe('CommandRegistry', () => {
     metadata?: Partial<ICommandMetadata>
   ): ICommand => {
     const defaultMethods: ICommandMethods = {
-      autocomplete: jest.fn(async () => []),
+      autocomplete: vi.fn(async () => []),
     };
     const defaultMetadata: ICommandMetadata = {
       description: `Description for ${name}`,
@@ -50,7 +52,7 @@ describe('CommandRegistry', () => {
 
     test('should not re-register an existing command', () => {
       const command1 = createMockCommand('duplicateCommand', {
-        autocomplete: jest.fn(async () => [
+        autocomplete: vi.fn(async () => [
           {
             text: 'suggestion1',
             label: 'suggestion1',
@@ -60,7 +62,7 @@ describe('CommandRegistry', () => {
         ]),
       });
       const command2 = createMockCommand('duplicateCommand', {
-        autocomplete: jest.fn(async () => [
+        autocomplete: vi.fn(async () => [
           {
             text: 'suggestion2',
             label: 'suggestion2',
@@ -79,8 +81,8 @@ describe('CommandRegistry', () => {
     });
 
     test('should register command with all optional methods and metadata', () => {
-      const mockValidate = jest.fn(() => []);
-      const mockColumnsAfter = jest.fn(() => []);
+      const mockValidate = vi.fn(() => []);
+      const mockColumnsAfter = vi.fn(() => []);
       const command = createMockCommand(
         'fullCommand',
         {
@@ -145,7 +147,7 @@ describe('CommandRegistry', () => {
       const command = createMockCommand(
         'fullObjectCommand',
         {
-          autocomplete: jest.fn(async () => []),
+          autocomplete: vi.fn(async () => []),
         },
         {
           description: 'Test description',
@@ -181,7 +183,7 @@ describe('CommandRegistry', () => {
     test('should not return duplicate commands even if attempted to register duplicates', () => {
       const command1 = createMockCommand('duplicateTest');
       const command2 = createMockCommand('duplicateTest', {
-        autocomplete: jest.fn(async () => [
+        autocomplete: vi.fn(async () => [
           {
             text: 'another',
             label: 'another',

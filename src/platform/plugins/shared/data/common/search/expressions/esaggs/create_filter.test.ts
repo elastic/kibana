@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { isRangeFilter } from '@kbn/es-query';
 import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { BytesFormat } from '@kbn/field-formats-plugin/common';
@@ -54,7 +56,7 @@ describe('createFilter', () => {
         },
       ],
       { typesRegistry },
-      jest.fn()
+      vi.fn()
     );
   };
 

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -41,15 +44,15 @@ describe('useStateProps', () => {
       ...options,
       services: unifiedHistogramServicesMock,
     });
-    jest.spyOn(stateService, 'setChartHidden');
-    jest.spyOn(stateService, 'setTopPanelHeight');
-    jest.spyOn(stateService, 'setLensRequestAdapter');
-    jest.spyOn(stateService, 'setTotalHits');
+    vi.spyOn(stateService, 'setChartHidden');
+    vi.spyOn(stateService, 'setTopPanelHeight');
+    vi.spyOn(stateService, 'setLensRequestAdapter');
+    vi.spyOn(stateService, 'setTotalHits');
     return stateService;
   };
 
   beforeEach(() => {
-    (unifiedHistogramServicesMock.storage.set as jest.Mock).mockClear();
+    (unifiedHistogramServicesMock.storage.set as Mock).mockClear();
   });
 
   it('should return the correct props', () => {

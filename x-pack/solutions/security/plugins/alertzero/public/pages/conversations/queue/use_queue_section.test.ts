@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -16,10 +19,10 @@ import {
 } from '../../../hooks/use_proposals_api';
 import { useCategoryQueueSection } from './use_queue_section';
 
-jest.mock('../../../hooks/use_proposals_api');
+vi.mock('../../../hooks/use_proposals_api');
 
-const mockPages = useProposalsByCategory as jest.Mock;
-const mockCount = useProposalsByCategoryCount as jest.Mock;
+const mockPages = useProposalsByCategory as Mock;
+const mockCount = useProposalsByCategoryCount as Mock;
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   React.createElement(QueryClientProvider, { client: new QueryClient() }, children);
@@ -38,7 +41,7 @@ const proposal = {
 /** One page already on screen, which is what makes a later failure easy to miss. */
 const pagesQuery = (overrides: Record<string, unknown> = {}) => ({
   data: { pages: [{ proposals: [proposal], total: 30 }], pageParams: [undefined] },
-  fetchNextPage: jest.fn().mockResolvedValue({}),
+  fetchNextPage: vi.fn().mockResolvedValue({}),
   hasNextPage: true,
   isFetchingNextPage: false,
   isInitialLoading: false,
@@ -47,15 +50,15 @@ const pagesQuery = (overrides: Record<string, unknown> = {}) => ({
 });
 
 beforeEach(() => {
-  (useClosedProposals as jest.Mock).mockReturnValue(pagesQuery());
-  (useClosedProposalsCount as jest.Mock).mockReturnValue({ data: undefined, error: undefined });
+  (useClosedProposals as Mock).mockReturnValue(pagesQuery());
+  (useClosedProposalsCount as Mock).mockReturnValue({ data: undefined, error: undefined });
   mockCount.mockReturnValue({ data: undefined, error: undefined });
 });
 
 describe('useCategoryQueueSection load-more failures', () => {
   it('reports a Show more that failed', async () => {
     mockPages.mockReturnValue(
-      pagesQuery({ fetchNextPage: jest.fn().mockRejectedValue(new Error('nope')) })
+      pagesQuery({ fetchNextPage: vi.fn().mockRejectedValue(new Error('nope')) })
     );
 
     const { result } = renderHook(() => useCategoryQueueSection('respond'), { wrapper });
@@ -80,7 +83,7 @@ describe('useCategoryQueueSection load-more failures', () => {
 
   it('clears a stale failure once the section is closed', async () => {
     mockPages.mockReturnValue(
-      pagesQuery({ fetchNextPage: jest.fn().mockRejectedValue(new Error('nope')) })
+      pagesQuery({ fetchNextPage: vi.fn().mockRejectedValue(new Error('nope')) })
     );
 
     const { result } = renderHook(() => useCategoryQueueSection('respond'), { wrapper });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
@@ -16,18 +18,18 @@ import { createSmlSearchTool } from './sml_search';
 const buildAvailabilityContext = (flags: Record<string, boolean>) =>
   ({
     uiSettings: {
-      get: jest.fn(async (key: string) => flags[key]),
+      get: vi.fn(async (key: string) => flags[key]),
     },
   } as unknown as ToolAvailabilityContext);
 
-const mockSearch = jest.fn();
-const getAgentBuilderSml = jest.fn(() => ({
+const mockSearch = vi.fn();
+const getAgentBuilderSml = vi.fn(() => ({
   search: mockSearch,
-  indexAttachment: jest.fn(),
-  deleteAttachment: jest.fn(),
-  getDocuments: jest.fn(),
-  getTypeDefinition: jest.fn(),
-  resolveSmlAttachItems: jest.fn(),
+  indexAttachment: vi.fn(),
+  deleteAttachment: vi.fn(),
+  getDocuments: vi.fn(),
+  getTypeDefinition: vi.fn(),
+  resolveSmlAttachItems: vi.fn(),
 }));
 
 const mockContext = {
@@ -35,12 +37,12 @@ const mockContext = {
   esClient: { asCurrentUser: {}, asInternalUser: {} },
   request: {},
   savedObjectsClient: {},
-  attachments: { add: jest.fn() },
+  attachments: { add: vi.fn() },
 };
 
 describe('createSmlSearchTool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('has correct id and tags', () => {

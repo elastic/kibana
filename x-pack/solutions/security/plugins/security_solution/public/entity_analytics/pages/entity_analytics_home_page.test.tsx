@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -24,7 +27,7 @@ import type { StartServices } from '../../types';
 import { useStoredAssistantConnectorId } from '../../onboarding/components/hooks/use_stored_state';
 import { LEADS_INDEX_PATTERN } from '../../../common/entity_analytics/lead_generation/constants';
 
-jest.mock('../../common/components/links/link_props', () => {
+vi.mock('../../common/components/links/link_props', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const mockReact = require('react');
   return {
@@ -32,168 +35,225 @@ jest.mock('../../common/components/links/link_props', () => {
       (WrappedComponent: React.ComponentType<Record<string, unknown>>) =>
       (props: Record<string, unknown>) =>
         mockReact.createElement(WrappedComponent, { ...props, href: '/mocked' }),
-    useGetSecuritySolutionLinkProps: jest.fn(() => () => ({ href: '/mocked', onClick: jest.fn() })),
-    useSecuritySolutionLinkProps: jest.fn(() => ({ href: '/mocked', onClick: jest.fn() })),
+    useGetSecuritySolutionLinkProps: vi.fn(() => () => ({ href: '/mocked', onClick: vi.fn() })),
+    useSecuritySolutionLinkProps: vi.fn(() => ({ href: '/mocked', onClick: vi.fn() })),
   };
 });
 
-jest.mock('../../common/components/link_to', () => ({
-  useGetSecuritySolutionUrl:
-    () =>
-    ({ deepLinkId, path = '' }: { deepLinkId: string; path?: string }) =>
-      `/app/security/${deepLinkId}${path}`,
-}));
+vi.mock('../../common/components/link_to', () => {
+      const mocked = {
+      useGetSecuritySolutionUrl:
+        () =>
+        ({ deepLinkId, path = '' }: { deepLinkId: string; path?: string }) =>
+          `/app/security/${deepLinkId}${path}`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/home/dynamic_risk_level_panel', () => ({
-  DynamicRiskLevelPanel: () => (
-    <div data-test-subj="dynamic-risk-level-panel">{'Dynamic Risk Level Panel'}</div>
-  ),
-}));
+vi.mock('../components/home/dynamic_risk_level_panel', () => {
+      const mocked = {
+      DynamicRiskLevelPanel: () => (
+        <div data-test-subj="dynamic-risk-level-panel">{'Dynamic Risk Level Panel'}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(() => false),
-}));
+vi.mock('../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/hooks/use_license');
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn(() => ({ data: [] })),
-}));
+vi.mock('../../common/hooks/use_license');
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn(() => ({ data: [] })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: jest.fn(() => ({
-    dataView: { id: 'test', matchedIndices: ['index-1'] },
-    status: 'ready',
-  })),
-}));
+vi.mock('../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: vi.fn(() => ({
+        dataView: { id: 'test', matchedIndices: ['index-1'] },
+        status: 'ready',
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/home/anomalies_panel', () => ({
-  EntityAnalyticsRecentAnomalies: () => (
-    <div data-test-subj="recent-anomalies-panel">{'Recent anomalies'}</div>
-  ),
-}));
+vi.mock('../components/home/anomalies_panel', () => {
+      const mocked = {
+      EntityAnalyticsRecentAnomalies: () => (
+        <div data-test-subj="recent-anomalies-panel">{'Recent anomalies'}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/home/entities_table', () => ({
-  EntitiesTableSection: () => (
-    <div data-test-subj="entity-analytics-home-entities-table">{'Entities Table'}</div>
-  ),
-  DataViewContext: {
-    Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  },
-  useEntityURLState: jest.fn(() => ({
-    sort: [],
-    filters: [],
-    query: { bool: { filter: [], must: [], must_not: [], should: [] } },
-    pageIndex: 0,
-    setUrlQuery: jest.fn(),
-    pageSize: 25,
-    onChangeItemsPerPage: jest.fn(),
-    onChangePage: jest.fn(),
-    onSort: jest.fn(),
-    onResetFilters: jest.fn(),
-    getRowsFromPages: jest.fn(() => []),
-  })),
-}));
+vi.mock('../components/home/entities_table', () => {
+      const mocked = {
+      EntitiesTableSection: () => (
+        <div data-test-subj="entity-analytics-home-entities-table">{'Entities Table'}</div>
+      ),
+      DataViewContext: {
+        Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      },
+      useEntityURLState: vi.fn(() => ({
+        sort: [],
+        filters: [],
+        query: { bool: { filter: [], must: [], must_not: [], should: [] } },
+        pageIndex: 0,
+        setUrlQuery: vi.fn(),
+        pageSize: 25,
+        onChangeItemsPerPage: vi.fn(),
+        onChangePage: vi.fn(),
+        onSort: vi.fn(),
+        onResetFilters: vi.fn(),
+        getRowsFromPages: vi.fn(() => []),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/home/use_entity_store_data_view', () => ({
-  useEntityStoreDataView: jest.fn(() => ({
-    dataView: { id: 'test-entity-store', fields: [] },
-    isLoading: false,
-    error: undefined,
-  })),
-}));
+vi.mock('../components/home/use_entity_store_data_view', () => {
+      const mocked = {
+      useEntityStoreDataView: vi.fn(() => ({
+        dataView: { id: 'test-entity-store', fields: [] },
+        isLoading: false,
+        error: undefined,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
-  useEntityStoreStatus: jest.fn(() => ({
-    data: { status: 'running', engines: [] },
-  })),
-}));
+vi.mock('../components/entity_store/hooks/use_entity_store', () => {
+      const mocked = {
+      useEntityStoreStatus: vi.fn(() => ({
+        data: { status: 'running', engines: [] },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_missing_risk_engine_privileges', () => ({
-  useMissingRiskEnginePrivileges: jest.fn(() => ({
-    isLoading: false,
-    hasAllRequiredPrivileges: true,
-  })),
-}));
+vi.mock('../hooks/use_missing_risk_engine_privileges', () => {
+      const mocked = {
+      useMissingRiskEnginePrivileges: vi.fn(() => ({
+        isLoading: false,
+        hasAllRequiredPrivileges: true,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/entity_store/hooks/use_entity_engine_privileges', () => ({
-  useEntityEnginePrivileges: jest.fn(() => ({
-    isLoading: false,
-    data: { has_read_permissions: true, privileges: { elasticsearch: { index: {} }, kibana: [] } },
-  })),
-}));
+vi.mock('../components/entity_store/hooks/use_entity_engine_privileges', () => {
+      const mocked = {
+      useEntityEnginePrivileges: vi.fn(() => ({
+        isLoading: false,
+        data: { has_read_permissions: true, privileges: { elasticsearch: { index: {} }, kibana: [] } },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../api/hooks/use_lead_generation_privileges', () => ({
-  useLeadGenerationPrivileges: jest.fn(() => ({
-    isLoading: false,
-    data: undefined,
-  })),
-}));
+vi.mock('../api/hooks/use_lead_generation_privileges', () => {
+      const mocked = {
+      useLeadGenerationPrivileges: vi.fn(() => ({
+        isLoading: false,
+        data: undefined,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads', () => ({
-  useHuntingLeads: jest.fn(() => ({
-    leads: [],
-    totalCount: 0,
-    isLoading: false,
-    isGenerating: false,
-    hasGenerated: false,
-    lastRunTimestamp: null,
-    generate: jest.fn(),
-    refetch: jest.fn(),
-    isScheduled: false,
-    toggleSchedule: jest.fn(),
-    readPermissionError: false,
-    writePermissionError: false,
-  })),
-}));
+vi.mock('../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads', () => {
+      const mocked = {
+      useHuntingLeads: vi.fn(() => ({
+        leads: [],
+        totalCount: 0,
+        isLoading: false,
+        isGenerating: false,
+        hasGenerated: false,
+        lastRunTimestamp: null,
+        generate: vi.fn(),
+        refetch: vi.fn(),
+        isScheduled: false,
+        toggleSchedule: vi.fn(),
+        readPermissionError: false,
+        writePermissionError: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/threat_hunting/top_threat_hunting_leads/use_lead_attachment', () => ({
-  useLeadAttachment: jest.fn(() => jest.fn()),
-}));
+vi.mock('../components/threat_hunting/top_threat_hunting_leads/use_lead_attachment', () => {
+      const mocked = {
+      useLeadAttachment: vi.fn(() => vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/threat_hunting/top_threat_hunting_leads', () => ({
-  TopThreatHuntingLeads: ({ onHuntInChat }: { onHuntInChat: () => void }) => (
-    <div data-test-subj="top-threat-hunting-leads">
-      {'Top Threat Hunting Leads'}
-      <button type="button" data-test-subj="mockHuntInChatButton" onClick={onHuntInChat}>
-        {'Hunt with AI'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../components/threat_hunting/top_threat_hunting_leads', () => {
+      const mocked = {
+      TopThreatHuntingLeads: ({ onHuntInChat }: { onHuntInChat: () => void }) => (
+        <div data-test-subj="top-threat-hunting-leads">
+          {'Top Threat Hunting Leads'}
+          <button type="button" data-test-subj="mockHuntInChatButton" onClick={onHuntInChat}>
+            {'Hunt with AI'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../onboarding/components/hooks/use_stored_state', () => ({
-  useStoredAssistantConnectorId: jest.fn(() => ['', jest.fn()]),
-}));
+vi.mock('../../onboarding/components/hooks/use_stored_state', () => {
+      const mocked = {
+      useStoredAssistantConnectorId: vi.fn(() => ['', vi.fn()]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../agent_builder/hooks/use_agent_builder_availability', () => ({
-  useAgentBuilderAvailability: jest.fn(() => ({ isAgentChatExperienceEnabled: false })),
-}));
+vi.mock('../../agent_builder/hooks/use_agent_builder_availability', () => {
+      const mocked = {
+      useAgentBuilderAvailability: vi.fn(() => ({ isAgentChatExperienceEnabled: false })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // useEntityURLState is already mocked inside the entities_table mock above
 
-jest.mock('../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn(() => 'default'),
-}));
+vi.mock('../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn(() => 'default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(() => ({
-    openRightPanel: jest.fn(),
-  })),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(() => ({
+        openRightPanel: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseEntityStoreDataView = useEntityStoreDataView as jest.Mock;
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-const mockUseEntityStoreStatus = useEntityStoreStatus as jest.Mock;
-const mockUseMissingRiskEnginePrivileges = useMissingRiskEnginePrivileges as jest.Mock;
-const mockUseEntityEnginePrivileges = useEntityEnginePrivileges as jest.Mock;
-const mockUseLeadGenerationPrivileges = useLeadGenerationPrivileges as jest.Mock;
-const mockUseHuntingLeads = useHuntingLeads as jest.Mock;
-const mockUseLoadConnectors = useLoadConnectors as jest.Mock;
-const mockUseStoredAssistantConnectorId = useStoredAssistantConnectorId as jest.Mock;
+const mockUseEntityStoreDataView = useEntityStoreDataView as Mock;
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as Mock;
+const mockUseEntityStoreStatus = useEntityStoreStatus as Mock;
+const mockUseMissingRiskEnginePrivileges = useMissingRiskEnginePrivileges as Mock;
+const mockUseEntityEnginePrivileges = useEntityEnginePrivileges as Mock;
+const mockUseLeadGenerationPrivileges = useLeadGenerationPrivileges as Mock;
+const mockUseHuntingLeads = useHuntingLeads as Mock;
+const mockUseLoadConnectors = useLoadConnectors as Mock;
+const mockUseStoredAssistantConnectorId = useStoredAssistantConnectorId as Mock;
 
 describe('EntityAnalyticsHomePage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseEntityStoreDataView.mockReturnValue({
       dataView: { id: 'test-entity-store', fields: [], matchedIndices: ['index-1'] },
@@ -230,16 +290,16 @@ describe('EntityAnalyticsHomePage', () => {
       isGenerating: false,
       hasGenerated: false,
       lastRunTimestamp: null,
-      generate: jest.fn(),
-      refetch: jest.fn(),
+      generate: vi.fn(),
+      refetch: vi.fn(),
       isScheduled: false,
-      toggleSchedule: jest.fn(),
+      toggleSchedule: vi.fn(),
       readPermissionError: false,
       writePermissionError: false,
     });
 
     mockUseLoadConnectors.mockReturnValue({ data: [] });
-    mockUseStoredAssistantConnectorId.mockReturnValue(['', jest.fn()]);
+    mockUseStoredAssistantConnectorId.mockReturnValue(['', vi.fn()]);
   });
 
   it('renders the page title', () => {
@@ -519,10 +579,10 @@ describe('EntityAnalyticsHomePage', () => {
       isGenerating: false,
       hasGenerated: false,
       lastRunTimestamp: null,
-      generate: jest.fn(),
-      refetch: jest.fn(),
+      generate: vi.fn(),
+      refetch: vi.fn(),
       isScheduled: false,
-      toggleSchedule: jest.fn(),
+      toggleSchedule: vi.fn(),
       readPermissionError: true,
       writePermissionError: false,
     });
@@ -626,8 +686,8 @@ describe('EntityAnalyticsHomePage', () => {
       },
     });
 
-    const openChat = jest.fn();
-    const reportEvent = jest.fn();
+    const openChat = vi.fn();
+    const reportEvent = vi.fn();
     const startServices = {
       ...kibanaMock,
       telemetry: { ...kibanaMock.telemetry, reportEvent },
@@ -659,7 +719,7 @@ describe('EntityAnalyticsHomePage', () => {
   });
 
   it('prefers the stored connector when it is still a valid lead_generation connector', () => {
-    mockUseStoredAssistantConnectorId.mockReturnValue(['stored-connector-id', jest.fn()]);
+    mockUseStoredAssistantConnectorId.mockReturnValue(['stored-connector-id', vi.fn()]);
     mockUseLoadConnectors.mockReturnValue({
       data: [{ id: 'first-resolved-id' }, { id: 'stored-connector-id' }],
     });
@@ -676,7 +736,7 @@ describe('EntityAnalyticsHomePage', () => {
   });
 
   it('falls back to the first resolved connector on first run when nothing is stored', () => {
-    mockUseStoredAssistantConnectorId.mockReturnValue(['', jest.fn()]);
+    mockUseStoredAssistantConnectorId.mockReturnValue(['', vi.fn()]);
     mockUseLoadConnectors.mockReturnValue({
       data: [{ id: 'first-resolved-id' }, { id: 'other-id' }],
     });
@@ -693,7 +753,7 @@ describe('EntityAnalyticsHomePage', () => {
   });
 
   it('falls back to the first resolved connector when the stored connector is no longer available', () => {
-    mockUseStoredAssistantConnectorId.mockReturnValue(['deleted-connector-id', jest.fn()]);
+    mockUseStoredAssistantConnectorId.mockReturnValue(['deleted-connector-id', vi.fn()]);
     mockUseLoadConnectors.mockReturnValue({ data: [{ id: 'first-resolved-id' }] });
 
     render(
@@ -708,7 +768,7 @@ describe('EntityAnalyticsHomePage', () => {
   });
 
   it('resolves to an empty connector only when no lead_generation connector exists', () => {
-    mockUseStoredAssistantConnectorId.mockReturnValue(['', jest.fn()]);
+    mockUseStoredAssistantConnectorId.mockReturnValue(['', vi.fn()]);
     mockUseLoadConnectors.mockReturnValue({ data: [] });
 
     render(

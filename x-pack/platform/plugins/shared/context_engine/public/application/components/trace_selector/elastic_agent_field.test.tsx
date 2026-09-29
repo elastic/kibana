@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,11 +15,14 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ElasticAgentField } from './elastic_agent_field';
 
-const mockUseAgentBuilderAgents = jest.fn();
+const mockUseAgentBuilderAgents = vi.fn();
 
-jest.mock('../../hooks/use_agent_builder_agents', () => ({
-  useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
-}));
+vi.mock('../../hooks/use_agent_builder_agents', () => {
+      const mocked = {
+      useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderField = (props: React.ComponentProps<typeof ElasticAgentField>) => {
   const services = coreMock.createStart();
@@ -43,11 +48,11 @@ describe('ElasticAgentField', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls onChange with an elastic_agent trace when an agent is selected', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderField({ value: undefined, onChange });
 
     fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
@@ -66,7 +71,7 @@ describe('ElasticAgentField', () => {
   it('shows the selected agent name when a value is provided', () => {
     renderField({
       value: { type: 'elastic_agent', value: 'agent-1' },
-      onChange: jest.fn(),
+      onChange: vi.fn(),
     });
 
     expect(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')).toHaveValue(
@@ -81,7 +86,7 @@ describe('ElasticAgentField', () => {
       error: new Error('upstream exploded with secrets'),
     });
 
-    const { services } = renderField({ value: undefined, onChange: jest.fn() });
+    const { services } = renderField({ value: undefined, onChange: vi.fn() });
 
     expect(services.notifications.toasts.addWarning).toHaveBeenCalledWith({
       title: 'Unable to load Agent Builder agents.',
@@ -97,13 +102,13 @@ describe('ElasticAgentField', () => {
       error: undefined,
     });
 
-    renderField({ value: undefined, onChange: jest.fn() });
+    renderField({ value: undefined, onChange: vi.fn() });
 
     expect(screen.getByTestId('contextTraceAgentComboBox')).toBeInTheDocument();
   });
 
   it('calls onChange(undefined) when the selection is cleared', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderField({
       value: { type: 'elastic_agent', value: 'agent-1' },
       onChange,

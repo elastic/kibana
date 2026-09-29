@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type React from 'react';
 import type { ActionBuilderContext, DeleteActionProps } from '../types';
 import { buildDeleteAction } from './delete_action';
 
-const onDelete = jest.fn();
+const onDelete = vi.fn();
 
 const defaultContext: ActionBuilderContext = {
   itemConfig: {
-    actions: { delete: { onBulkAction: jest.fn(async () => {}) } },
+    actions: { delete: { onBulkAction: vi.fn(async () => {}) } },
   },
   isReadOnly: false,
   entityName: 'dashboard',
@@ -33,7 +35,7 @@ const defaultContext: ActionBuilderContext = {
 
 describe('delete action builder', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('buildDeleteAction', () => {
@@ -95,7 +97,7 @@ describe('delete action builder', () => {
     });
 
     it('does not call `itemConfig.actions.delete.onBulkAction` directly', () => {
-      const onBulkAction = jest.fn(async () => {});
+      const onBulkAction = vi.fn(async () => {});
       const context: ActionBuilderContext = {
         ...defaultContext,
         itemConfig: { actions: { delete: { onBulkAction } } },
@@ -122,7 +124,7 @@ describe('delete action builder', () => {
       ...defaultContext,
       itemConfig: {
         actions: {
-          delete: { onBulkAction: jest.fn(async () => {}), restriction },
+          delete: { onBulkAction: vi.fn(async () => {}), restriction },
         },
       },
     });
@@ -175,8 +177,8 @@ describe('delete action builder', () => {
         ...defaultContext,
         itemConfig: {
           actions: {
-            delete: { onBulkAction: jest.fn(async () => {}) },
-            edit: { onItemAction: jest.fn(), restriction: () => 'Cannot edit' },
+            delete: { onBulkAction: vi.fn(async () => {}) },
+            edit: { onItemAction: vi.fn(), restriction: () => 'Cannot edit' },
           },
         },
       };

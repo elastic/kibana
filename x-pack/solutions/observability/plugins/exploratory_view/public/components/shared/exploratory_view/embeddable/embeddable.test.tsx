@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import Embeddable from './embeddable';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -13,9 +16,12 @@ import { AddToCaseAction } from '../header/add_to_case_action';
 import type { ActionTypes } from './use_actions';
 import * as lensHook from './use_embeddable_attributes';
 
-jest.mock('../header/add_to_case_action', () => ({
-  AddToCaseAction: jest.fn(() => <div>mockAddToCaseAction</div>),
-}));
+vi.mock('../header/add_to_case_action', () => {
+      const mocked = {
+      AddToCaseAction: vi.fn(() => <div>mockAddToCaseAction</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockLensAttrs = {
   title: '',
@@ -81,7 +87,7 @@ const mockDataViews = {} as DataViewState;
 const mockReportType = 'kpi-over-time';
 const mockTitle = 'mockTitle';
 const mockLens = {
-  EmbeddableComponent: jest.fn((props) => {
+  EmbeddableComponent: vi.fn((props) => {
     return (
       <div
         data-test-subj={
@@ -94,16 +100,16 @@ const mockLens = {
       </div>
     );
   }),
-  SaveModalComponent: jest.fn(() => <div>mockSaveModalComponent</div>),
+  SaveModalComponent: vi.fn(() => <div>mockSaveModalComponent</div>),
 } as unknown as LensPublicStart;
 const mockActions: ActionTypes[] = ['addToCase', 'openInLens'];
 
 describe('Embeddable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  jest.spyOn(lensHook, 'useEmbeddableAttributes').mockReturnValue(mockLensAttrs as any);
+  vi.spyOn(lensHook, 'useEmbeddableAttributes').mockReturnValue(mockLensAttrs as any);
 
   it('renders title', async () => {
     const { container, getByText } = render(
@@ -156,28 +162,28 @@ describe('Embeddable', () => {
       container.querySelector(`[data-test-subj="exploratoryView-singleMetric"]`)
     ).not.toBeInTheDocument();
     expect(container.querySelector(`[data-test-subj="exploratoryView"]`)).toBeInTheDocument();
-    expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].id).toEqual(
+    expect((mockLens.EmbeddableComponent as Mock).mock.calls[0][0].id).toEqual(
       'exploratoryView'
     );
-    expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].attributes).toEqual(
+    expect((mockLens.EmbeddableComponent as Mock).mock.calls[0][0].attributes).toEqual(
       mockLensAttrs
     );
-    expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].timeRange).toEqual(
+    expect((mockLens.EmbeddableComponent as Mock).mock.calls[0][0].timeRange).toEqual(
       mockTimeRange
     );
-    expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].timeRange).toEqual(
+    expect((mockLens.EmbeddableComponent as Mock).mock.calls[0][0].timeRange).toEqual(
       mockTimeRange
     );
-    expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].withDefaultActions).toEqual(
+    expect((mockLens.EmbeddableComponent as Mock).mock.calls[0][0].withDefaultActions).toEqual(
       true
     );
     expect(
-      (mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].onBeforeBadgesRender()
+      (mockLens.EmbeddableComponent as Mock).mock.calls[0][0].onBeforeBadgesRender()
     ).toEqual([]);
   });
 
   it('forwards onBeforeBadgesRender to the Lens embeddable', () => {
-    const onBeforeBadgesRender = jest.fn((messages) => messages);
+    const onBeforeBadgesRender = vi.fn((messages) => messages);
 
     render(
       <Embeddable
@@ -192,7 +198,7 @@ describe('Embeddable', () => {
       />
     );
 
-    expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].onBeforeBadgesRender).toBe(
+    expect((mockLens.EmbeddableComponent as Mock).mock.calls[0][0].onBeforeBadgesRender).toBe(
       onBeforeBadgesRender
     );
   });
@@ -210,7 +216,7 @@ describe('Embeddable', () => {
       />
     );
 
-    expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].disabledActions).toEqual([
+    expect((mockLens.EmbeddableComponent as Mock).mock.calls[0][0].disabledActions).toEqual([
       'embeddable_addToExistingCase',
     ]);
   });
@@ -229,8 +235,8 @@ describe('Embeddable', () => {
       />
     );
 
-    expect((AddToCaseAction as jest.Mock).mock.calls[0][0].timeRange).toEqual(mockTimeRange);
-    expect((AddToCaseAction as jest.Mock).mock.calls[0][0].lensAttributes).toEqual(mockLensAttrs);
-    expect((AddToCaseAction as jest.Mock).mock.calls[0][0].owner).toEqual(mockOwner);
+    expect((AddToCaseAction as Mock).mock.calls[0][0].timeRange).toEqual(mockTimeRange);
+    expect((AddToCaseAction as Mock).mock.calls[0][0].lensAttributes).toEqual(mockLensAttrs);
+    expect((AddToCaseAction as Mock).mock.calls[0][0].owner).toEqual(mockOwner);
   });
 });

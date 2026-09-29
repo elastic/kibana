@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition, ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
@@ -31,16 +34,22 @@ import {
 import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 
-jest.mock('../../lib/detection_engine/ai_rule_creation/agent', () => ({
-  getBuildAgent: jest.fn(),
-}));
+vi.mock('../../lib/detection_engine/ai_rule_creation/agent', () => {
+      const mocked = {
+      getBuildAgent: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils/get_agent_builder_resource_availability', () => ({
-  getAgentBuilderResourceAvailability: jest.fn(),
-}));
+vi.mock('../utils/get_agent_builder_resource_availability', () => {
+      const mocked = {
+      getAgentBuilderResourceAvailability: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetBuildAgent = getBuildAgent as jest.Mock;
-const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
+const mockGetBuildAgent = getBuildAgent as Mock;
+const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as Mock;
 const userQuery = 'Create a rule to detect suspicious activity';
 
 describe('isPlaceholderRuleText', () => {
@@ -82,12 +91,12 @@ describe('createDetectionRuleTool', () => {
   const mockModelProvider = agentBuilderMocks.createModelProvider();
   mockModelProvider.getDefaultModel.mockResolvedValue({
     chatModel: {
-      getConnector: jest.fn().mockReturnValue({ connectorId: 'test-connector-id' }),
+      getConnector: vi.fn().mockReturnValue({ connectorId: 'test-connector-id' }),
     },
   } as never);
   const mockEvents = {
-    reportProgress: jest.fn(),
-    sendUiEvent: jest.fn(),
+    reportProgress: vi.fn(),
+    sendUiEvent: vi.fn(),
   };
   const mockExperimentalFeatures = { aiRuleCreationEnabled: true } as ExperimentalFeatures;
   const tool = createDetectionRuleTool(
@@ -104,12 +113,12 @@ describe('createDetectionRuleTool', () => {
   >;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
     mockUiSettingsClient = mockCoreStart.uiSettings.asScopedToClient(
       mockCoreStart.savedObjects.getScopedClient(mockRequest)
     );
-    jest.mocked(mockUiSettingsClient.get).mockResolvedValue(true);
+    vi.mocked(mockUiSettingsClient.get).mockResolvedValue(true);
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({
       status: 'available',
     });
@@ -184,7 +193,7 @@ describe('createDetectionRuleTool', () => {
     });
 
     it('returns unavailable when ES|QL is disabled', async () => {
-      jest.mocked(mockUiSettingsClient.get).mockResolvedValue(false);
+      vi.mocked(mockUiSettingsClient.get).mockResolvedValue(false);
 
       const availability = await tool.availability?.handler(
         createToolAvailabilityContext(mockRequest, 'default')
@@ -206,7 +215,7 @@ describe('createDetectionRuleTool', () => {
   });
 
   describe('handler', () => {
-    const mockIterativeAgent = { invoke: jest.fn() };
+    const mockIterativeAgent = { invoke: vi.fn() };
     const mockRule = {
       name: 'Test Rule',
       query: 'FROM test | limit 100',
@@ -214,7 +223,7 @@ describe('createDetectionRuleTool', () => {
       type: 'esql',
     };
 
-    const mockCheckPrivileges = jest.fn();
+    const mockCheckPrivileges = vi.fn();
 
     beforeEach(() => {
       mockGetBuildAgent.mockResolvedValue(mockIterativeAgent);
@@ -227,12 +236,12 @@ describe('createDetectionRuleTool', () => {
       mockCore.getStartServices.mockResolvedValue([
         coreStart,
         {
-          alerting: { getRulesClientWithRequest: jest.fn().mockResolvedValue({}) },
+          alerting: { getRulesClientWithRequest: vi.fn().mockResolvedValue({}) },
           inference: {},
           security: {
             authz: {
-              checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
-              actions: { ui: { get: jest.fn().mockReturnValue('ui:rules/edit_rules') } },
+              checkPrivilegesDynamicallyWithRequest: vi.fn().mockReturnValue(mockCheckPrivileges),
+              actions: { ui: { get: vi.fn().mockReturnValue('ui:rules/edit_rules') } },
             },
           },
         },
@@ -276,7 +285,7 @@ describe('createDetectionRuleTool', () => {
           modelProvider: mockModelProvider,
           events: mockEvents,
         });
-        (context.attachments.getAttachmentRecord as jest.Mock).mockImplementation((id: string) => {
+        (context.attachments.getAttachmentRecord as Mock).mockImplementation((id: string) => {
           if (id === SECURITY_RULE_ATTACHMENT_ID) {
             return {
               id: SECURITY_RULE_ATTACHMENT_ID,
@@ -286,7 +295,7 @@ describe('createDetectionRuleTool', () => {
           }
           return undefined;
         });
-        (context.attachments.update as jest.Mock).mockResolvedValue({
+        (context.attachments.update as Mock).mockResolvedValue({
           id: SECURITY_RULE_ATTACHMENT_ID,
           current_version: 1,
         });
@@ -321,7 +330,7 @@ describe('createDetectionRuleTool', () => {
           events: mockEvents,
         });
         // Seed carries a stale ruleId from a previous save, but the card text is still a placeholder
-        (context.attachments.getAttachmentRecord as jest.Mock).mockImplementation((id: string) => {
+        (context.attachments.getAttachmentRecord as Mock).mockImplementation((id: string) => {
           if (id === SECURITY_RULE_ATTACHMENT_ID) {
             return {
               id: SECURITY_RULE_ATTACHMENT_ID,
@@ -331,7 +340,7 @@ describe('createDetectionRuleTool', () => {
           }
           return undefined;
         });
-        (context.attachments.update as jest.Mock).mockResolvedValue({
+        (context.attachments.update as Mock).mockResolvedValue({
           id: SECURITY_RULE_ATTACHMENT_ID,
           current_version: 1,
         });
@@ -358,8 +367,8 @@ describe('createDetectionRuleTool', () => {
           events: mockEvents,
         });
         // No constant-id seed → getAttachmentRecord returns undefined for any id
-        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValue(undefined);
-        (context.attachments.add as jest.Mock).mockResolvedValue({
+        (context.attachments.getAttachmentRecord as Mock).mockReturnValue(undefined);
+        (context.attachments.add as Mock).mockResolvedValue({
           id: 'air:abc123',
           current_version: 1,
         });
@@ -389,8 +398,8 @@ describe('createDetectionRuleTool', () => {
           modelProvider: mockModelProvider,
           events: mockEvents,
         });
-        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValue(undefined);
-        (context.attachments.add as jest.Mock).mockResolvedValue({
+        (context.attachments.getAttachmentRecord as Mock).mockReturnValue(undefined);
+        (context.attachments.add as Mock).mockResolvedValue({
           id: 'air:newidhere',
           current_version: 1,
         });
@@ -413,7 +422,7 @@ describe('createDetectionRuleTool', () => {
           modelProvider: mockModelProvider,
           events: mockEvents,
         });
-        (ctx1.attachments.getAttachmentRecord as jest.Mock).mockImplementation((id: string) =>
+        (ctx1.attachments.getAttachmentRecord as Mock).mockImplementation((id: string) =>
           id === SECURITY_RULE_ATTACHMENT_ID
             ? {
                 id: SECURITY_RULE_ATTACHMENT_ID,
@@ -422,7 +431,7 @@ describe('createDetectionRuleTool', () => {
               }
             : undefined
         );
-        (ctx1.attachments.update as jest.Mock).mockResolvedValue({
+        (ctx1.attachments.update as Mock).mockResolvedValue({
           id: SECURITY_RULE_ATTACHMENT_ID,
           current_version: 1,
         });
@@ -441,7 +450,7 @@ describe('createDetectionRuleTool', () => {
           events: mockEvents,
         });
         const realCardId = SECURITY_RULE_ATTACHMENT_ID;
-        (ctx2.attachments.getAttachmentRecord as jest.Mock).mockImplementation((id: string) =>
+        (ctx2.attachments.getAttachmentRecord as Mock).mockImplementation((id: string) =>
           id === realCardId
             ? {
                 id: realCardId,
@@ -451,7 +460,7 @@ describe('createDetectionRuleTool', () => {
             : undefined
         );
         const mintedId = 'air:newcard';
-        (ctx2.attachments.add as jest.Mock).mockResolvedValue({
+        (ctx2.attachments.add as Mock).mockResolvedValue({
           id: mintedId,
           current_version: 1,
         });
@@ -481,7 +490,7 @@ describe('createDetectionRuleTool', () => {
           modelProvider: mockModelProvider,
           events: mockEvents,
         });
-        (context.attachments.getAttachmentRecord as jest.Mock).mockImplementation((id: string) =>
+        (context.attachments.getAttachmentRecord as Mock).mockImplementation((id: string) =>
           id === existingAttachmentId
             ? {
                 id: existingAttachmentId,
@@ -491,7 +500,7 @@ describe('createDetectionRuleTool', () => {
               }
             : undefined
         );
-        (context.attachments.update as jest.Mock).mockResolvedValue({
+        (context.attachments.update as Mock).mockResolvedValue({
           id: existingAttachmentId,
           current_version: 2,
         });
@@ -529,7 +538,7 @@ describe('createDetectionRuleTool', () => {
           modelProvider: mockModelProvider,
           events: mockEvents,
         });
-        (context.attachments.getAttachmentRecord as jest.Mock).mockImplementation((id: string) =>
+        (context.attachments.getAttachmentRecord as Mock).mockImplementation((id: string) =>
           id === existingAttachmentId
             ? {
                 id: existingAttachmentId,
@@ -541,7 +550,7 @@ describe('createDetectionRuleTool', () => {
               }
             : undefined
         );
-        (context.attachments.update as jest.Mock).mockResolvedValue({
+        (context.attachments.update as Mock).mockResolvedValue({
           id: existingAttachmentId,
           current_version: 2,
         });
@@ -562,7 +571,7 @@ describe('createDetectionRuleTool', () => {
           modelProvider: mockModelProvider,
           events: mockEvents,
         });
-        (context.attachments.getAttachmentRecord as jest.Mock).mockImplementation((id: string) =>
+        (context.attachments.getAttachmentRecord as Mock).mockImplementation((id: string) =>
           id === existingAttachmentId
             ? {
                 id: existingAttachmentId,
@@ -574,7 +583,7 @@ describe('createDetectionRuleTool', () => {
               }
             : undefined
         );
-        (context.attachments.update as jest.Mock).mockResolvedValue({
+        (context.attachments.update as Mock).mockResolvedValue({
           id: existingAttachmentId,
           current_version: 2,
         });
@@ -611,7 +620,7 @@ describe('createDetectionRuleTool', () => {
           modelProvider: mockModelProvider,
           events: mockEvents,
         });
-        (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValue(undefined);
+        (context.attachments.getAttachmentRecord as Mock).mockReturnValue(undefined);
 
         const result = await tool.handler(
           { user_query: userQuery, attachment_id: 'air:doesnotexist' },
@@ -629,7 +638,7 @@ describe('createDetectionRuleTool', () => {
           modelProvider: mockModelProvider,
           events: mockEvents,
         });
-        (context.attachments.getAttachmentRecord as jest.Mock).mockImplementation((id: string) =>
+        (context.attachments.getAttachmentRecord as Mock).mockImplementation((id: string) =>
           id === wrongTypeId
             ? {
                 id: wrongTypeId,
@@ -656,7 +665,7 @@ describe('createDetectionRuleTool', () => {
           modelProvider: mockModelProvider,
           events: mockEvents,
         });
-        (context.attachments.getAttachmentRecord as jest.Mock).mockImplementation((id: string) =>
+        (context.attachments.getAttachmentRecord as Mock).mockImplementation((id: string) =>
           id === versionlessId
             ? {
                 id: versionlessId,
@@ -683,7 +692,7 @@ describe('createDetectionRuleTool', () => {
           modelProvider: mockModelProvider,
           events: mockEvents,
         });
-        (context.attachments.getAttachmentRecord as jest.Mock).mockImplementation((id: string) =>
+        (context.attachments.getAttachmentRecord as Mock).mockImplementation((id: string) =>
           id === existingAttachmentId
             ? {
                 id: existingAttachmentId,
@@ -695,7 +704,7 @@ describe('createDetectionRuleTool', () => {
         );
         // The record resolved cleanly, but by the time we persist the id is gone —
         // update() soft-fails to undefined instead of throwing.
-        (context.attachments.update as jest.Mock).mockResolvedValue(undefined);
+        (context.attachments.update as Mock).mockResolvedValue(undefined);
 
         const result = await tool.handler(
           { user_query: userQuery, attachment_id: existingAttachmentId },
@@ -713,7 +722,7 @@ describe('createDetectionRuleTool', () => {
     it('returns error when connector ID is not available', async () => {
       const mockModelProviderWithoutConnector = agentBuilderMocks.createModelProvider();
       mockModelProviderWithoutConnector.getDefaultModel.mockResolvedValue({
-        chatModel: { getConnector: jest.fn().mockReturnValue({ connectorId: null }) },
+        chatModel: { getConnector: vi.fn().mockReturnValue({ connectorId: null }) },
       } as never);
 
       const result = await tool.handler(
@@ -779,7 +788,7 @@ describe('createDetectionRuleTool', () => {
         modelProvider: mockModelProvider,
         events: mockEvents,
       });
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValue(undefined);
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValue(undefined);
 
       const result = await tool.handler({ user_query: userQuery }, context);
 
@@ -870,8 +879,8 @@ describe('createDetectionRuleTool', () => {
         modelProvider: mockModelProvider,
         events: mockEvents,
       });
-      (context.attachments.getAttachmentRecord as jest.Mock).mockReturnValue(undefined);
-      (context.attachments.add as jest.Mock).mockResolvedValue({
+      (context.attachments.getAttachmentRecord as Mock).mockReturnValue(undefined);
+      (context.attachments.add as Mock).mockResolvedValue({
         id: 'air:abc',
         current_version: 1,
       });

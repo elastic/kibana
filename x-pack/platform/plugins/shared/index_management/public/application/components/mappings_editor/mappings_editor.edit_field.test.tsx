@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import type { ComponentProps } from 'react';
 import { render, screen, within, waitFor, fireEvent } from '@testing-library/react';
@@ -22,10 +25,10 @@ import { createKibanaReactContext } from './shared_imports';
 type UseFieldType = typeof import('./shared_imports').UseField;
 type GetFieldConfigType = typeof import('./lib').getFieldConfig;
 
-jest.mock('@kbn/code-editor');
+vi.mock('@kbn/code-editor');
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
 
   return {
     ...actual,
@@ -34,9 +37,9 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('./components/document_fields/field_parameters/type_parameter', () => {
-  const sharedImports = jest.requireActual('./shared_imports');
-  const lib = jest.requireActual('./lib');
+vi.mock('./components/document_fields/field_parameters/type_parameter', async () => {
+  const sharedImports = (await vi.importActual('./shared_imports'));
+  const lib = (await vi.importActual('./lib'));
   const UseFieldActual = sharedImports.UseField as UseFieldType;
   const getFieldConfigActual = lib.getFieldConfig as GetFieldConfigType;
 
@@ -74,16 +77,16 @@ jest.mock('./components/document_fields/field_parameters/type_parameter', () => 
   return { __esModule: true, TypeParameter };
 });
 
-jest.mock('../../app_context', () => {
-  const actual = jest.requireActual('../../app_context');
+vi.mock('../../app_context', async () => {
+  const actual = (await vi.importActual('../../app_context'));
   return {
     ...actual,
-    useAppContext: jest.fn(),
+    useAppContext: vi.fn(),
   };
 });
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
-const mockUseAppContext = useAppContext as unknown as jest.MockedFunction<typeof useAppContext>;
+const mockUseAppContext = useAppContext as unknown as MockedFunction<typeof useAppContext>;
 const docLinks = docLinksServiceMock.createStartContract();
 const kibanaVersion = new SemVer(MAJOR_VERSION);
 const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
@@ -112,10 +115,10 @@ const defaultDateRangeParameters = {
 };
 
 describe('Mappings editor: edit field', () => {
-  const onChangeHandler = jest.fn();
+  const onChangeHandler = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseAppContext.mockReturnValue({
       hasAtLeastEnterpriseLicense: true,
       config: {

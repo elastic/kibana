@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects';
 import { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from './errors';
@@ -35,11 +38,11 @@ const savedObject = {
 };
 
 const createRepository = () => {
-  const savedObjectsClient: jest.Mocked<InvestigationSavedObjectsClient> = {
-    create: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-    find: jest.fn(),
+  const savedObjectsClient: Mocked<InvestigationSavedObjectsClient> = {
+    create: vi.fn(),
+    get: vi.fn(),
+    update: vi.fn(),
+    find: vi.fn(),
   };
   return {
     repository: new SavedObjectInvestigationRepository({ savedObjectsClient }),
@@ -119,7 +122,7 @@ describe('SavedObjectInvestigationRepository', () => {
 
   describe('find()', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('builds a status OR filter, concurrency-key filter, and date bounds', async () => {

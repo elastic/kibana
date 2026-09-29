@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { settingsService } from '..';
 
 import { ensureDeleteUnenrolledAgentsSetting } from './delete_unenrolled_agent_setting';
 
-jest.mock('..', () => ({
-  settingsService: {
-    getSettingsOrUndefined: jest.fn(),
-    saveSettings: jest.fn(),
-  },
-}));
+vi.mock('..', () => {
+      const mocked = {
+      settingsService: {
+        getSettingsOrUndefined: vi.fn(),
+        saveSettings: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('delete_unenrolled_agent_setting', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should update settings with delete_unenrolled_agents enabled', async () => {
@@ -42,7 +48,7 @@ describe('delete_unenrolled_agent_setting', () => {
   });
 
   it('should update settings when previously preconfigured', async () => {
-    (settingsService.getSettingsOrUndefined as jest.Mock).mockResolvedValue({
+    (settingsService.getSettingsOrUndefined as Mock).mockResolvedValue({
       delete_unenrolled_agents: {
         enabled: false,
         is_preconfigured: true,
@@ -58,7 +64,7 @@ describe('delete_unenrolled_agent_setting', () => {
   });
 
   it('should not update settings when previously not preconfigured', async () => {
-    (settingsService.getSettingsOrUndefined as jest.Mock).mockResolvedValue({
+    (settingsService.getSettingsOrUndefined as Mock).mockResolvedValue({
       delete_unenrolled_agents: {
         enabled: false,
         is_preconfigured: false,

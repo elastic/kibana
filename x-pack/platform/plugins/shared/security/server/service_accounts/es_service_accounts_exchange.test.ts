@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { inspect } from 'node:util';
@@ -24,7 +26,7 @@ import { licenseMock } from '../../common/licensing/index.mock';
 import { getDetailedErrorMessage } from '../errors';
 import { securityMock } from '../mocks';
 
-jest.mock('./credentials');
+vi.mock('./credentials');
 
 const ACCOUNT_ID = 'kibana/worker';
 const credential = {
@@ -51,11 +53,11 @@ const setup = ({ canEncrypt = true, requestLifetimeMs = 600_000 } = {}) => {
   const exchange = clusterClient.asInternalUser.security.getToken;
   // @ts-expect-error not full SecurityGetTokenResponse
   exchange.mockResponse(exchangeResponse);
-  const credentialStore = jest.mocked(
+  const credentialStore = vi.mocked(
     new ServiceAccountCredentialStore({
       client: savedObjectsClientMock.create(),
       encryptedClient: encryptedSavedObjectsMock.createClient(),
-      isEncryptionError: jest.fn(),
+      isEncryptionError: vi.fn(),
       logger,
     })
   );
@@ -67,19 +69,19 @@ const setup = ({ canEncrypt = true, requestLifetimeMs = 600_000 } = {}) => {
     clusterClient,
     credentialStore,
     canEncrypt,
-    checkPrivilegesWithRequest: jest.fn(),
-    getCurrentUser: jest.fn(),
-    getCurrentUserProfileId: jest.fn(),
+    checkPrivilegesWithRequest: vi.fn(),
+    getCurrentUser: vi.fn(),
+    getCurrentUserProfileId: vi.fn(),
   });
   return { backend, exchange, credentialStore, clusterClient, license, logger };
 };
 
 describe('Elasticsearch service account token exchange', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+    vi.clearAllMocks();
+    vi.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
   });
-  afterEach(() => jest.useRealTimers());
+  afterEach(() => vi.useRealTimers());
 
   it('exchanges as the internal broker and binds only the access token to the requested space', async () => {
     const { backend, credentialStore, clusterClient, exchange } = setup();
@@ -229,14 +231,14 @@ describe('Elasticsearch service account token exchange', () => {
   it('permanently stops renewal when ES rejects a disabled or revoked credential', async () => {
     const { backend, exchange } = setup();
     const request = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID });
-    jest.advanceTimersByTime(10000);
+    vi.advanceTimersByTime(10000);
     exchange.mockRejectedValueOnce(
       new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 401, body: { error: 'security_exception' } })
       )
     );
     await expect(backend.reauthenticateFakeRequest(request)).resolves.toBeNull();
-    jest.advanceTimersByTime(60000);
+    vi.advanceTimersByTime(60000);
     await expect(backend.reauthenticateFakeRequest(request)).resolves.toBeNull();
     expect(exchange).toHaveBeenCalledTimes(2);
   });
@@ -244,7 +246,7 @@ describe('Elasticsearch service account token exchange', () => {
   it('coalesces concurrent renewal and decrypts the current credential again', async () => {
     const { backend, exchange, credentialStore } = setup();
     const request = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID });
-    jest.advanceTimersByTime(10_000);
+    vi.advanceTimersByTime(10_000);
     credentialStore.getDecrypted.mockResolvedValue({ ...credential, token: 'rotated-secret' });
     // @ts-expect-error not full SecurityGetTokenResponse
     exchange.mockResponse({ ...exchangeResponse, access_token: 'new-token' });
@@ -263,12 +265,12 @@ describe('Elasticsearch service account token exchange', () => {
   it('backs off a transient credential-store failure and recovers', async () => {
     const { backend, exchange, credentialStore } = setup();
     const request = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID });
-    jest.advanceTimersByTime(10_000);
+    vi.advanceTimersByTime(10_000);
     credentialStore.getDecrypted.mockRejectedValueOnce(Boom.serverUnavailable());
     await expect(backend.reauthenticateFakeRequest(request)).resolves.toBeNull();
     await expect(backend.reauthenticateFakeRequest(request)).resolves.toBeNull();
     expect(credentialStore.getDecrypted).toHaveBeenCalledTimes(2);
-    jest.advanceTimersByTime(5_000);
+    vi.advanceTimersByTime(5_000);
     await expect(backend.reauthenticateFakeRequest(request)).resolves.toEqual({
       authorization: 'Bearer short-lived-secret',
     });
@@ -278,15 +280,15 @@ describe('Elasticsearch service account token exchange', () => {
   it('honors Retry-After instead of repeatedly exchanging', async () => {
     const { backend, exchange } = setup();
     const request = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID });
-    jest.advanceTimersByTime(10_000);
+    vi.advanceTimersByTime(10_000);
     const error = Boom.tooManyRequests();
     error.output.headers['retry-after'] = '30';
     exchange.mockRejectedValueOnce(error);
     await expect(backend.reauthenticateFakeRequest(request)).resolves.toBeNull();
-    jest.advanceTimersByTime(29_000);
+    vi.advanceTimersByTime(29_000);
     await expect(backend.reauthenticateFakeRequest(request)).resolves.toBeNull();
     expect(exchange).toHaveBeenCalledTimes(2);
-    jest.advanceTimersByTime(1_000);
+    vi.advanceTimersByTime(1_000);
     await expect(backend.reauthenticateFakeRequest(request)).resolves.toEqual({
       authorization: 'Bearer short-lived-secret',
     });
@@ -299,10 +301,10 @@ describe('Elasticsearch service account token exchange', () => {
   ])('permanently stops renewal after a terminal credential-store failure', async (error) => {
     const { backend, credentialStore } = setup();
     const request = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID });
-    jest.advanceTimersByTime(10_000);
+    vi.advanceTimersByTime(10_000);
     credentialStore.getDecrypted.mockRejectedValueOnce(error);
     await expect(backend.reauthenticateFakeRequest(request)).resolves.toBeNull();
-    jest.advanceTimersByTime(60_000);
+    vi.advanceTimersByTime(60_000);
     await expect(backend.reauthenticateFakeRequest(request)).resolves.toBeNull();
     expect(credentialStore.getDecrypted).toHaveBeenCalledTimes(2);
   });
@@ -310,7 +312,7 @@ describe('Elasticsearch service account token exchange', () => {
   it('ends renewal when the configured request lease expires', async () => {
     const { backend, exchange } = setup({ requestLifetimeMs: 1000 });
     const request = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID });
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     await expect(backend.reauthenticateFakeRequest(request)).resolves.toBeNull();
     expect(exchange).toHaveBeenCalledTimes(1);
   });

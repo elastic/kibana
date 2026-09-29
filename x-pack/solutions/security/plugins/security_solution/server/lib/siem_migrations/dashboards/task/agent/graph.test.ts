@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import fs from 'fs';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -19,10 +22,10 @@ import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ExperimentalFeatures } from '../../../../../../common';
 
-jest.mock(
+vi.mock(
   '../../../../../assistant/tools/esql/graphs/select_index_pattern/select_index_pattern',
   () => {
-    return { getSelectIndexPatternGraph: jest.fn() };
+    return { getSelectIndexPatternGraph: vi.fn() };
   }
 );
 
@@ -46,7 +49,7 @@ let mockRetriever = new MockDashboardMigrationsRetriever();
 let mockEsqlKnowledgeBase = new MockEsqlKnowledgeBase();
 let mockTelemetryClient = new MockSiemMigrationTelemetryClient();
 const esClientMock =
-  elasticsearchServiceMock.createScopedClusterClient() as unknown as jest.MockedObjectDeep<IScopedClusterClient>;
+  elasticsearchServiceMock.createScopedClusterClient() as unknown as Mocked<IScopedClusterClient>;
 
 const setupAgent = (responses: NodeResponse[]) => {
   fakeLLM = new SiemMigrationFakeLLM({ nodeResponses: responses });
@@ -71,7 +74,7 @@ describe('getDashboardMigrationAgent', () => {
     mockRetriever = new MockDashboardMigrationsRetriever();
     mockTelemetryClient = new MockSiemMigrationTelemetryClient();
     mockEsqlKnowledgeBase = new MockEsqlKnowledgeBase();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should compile graph', () => {
@@ -79,7 +82,7 @@ describe('getDashboardMigrationAgent', () => {
   });
 
   it('should run graph', async () => {
-    esClientMock.asCurrentUser.indices.resolveIndex = jest.fn().mockResolvedValue({
+    esClientMock.asCurrentUser.indices.resolveIndex = vi.fn().mockResolvedValue({
       indices: [],
       aliases: [],
       data_streams: [],

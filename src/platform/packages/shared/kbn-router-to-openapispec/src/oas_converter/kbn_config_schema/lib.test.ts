@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 import {
@@ -345,7 +347,7 @@ describe('convert', () => {
   });
 
   test('materializes function defaults once for referenced schemas', () => {
-    const defaultValue = jest.fn(() => ({ b: 'default' }));
+    const defaultValue = vi.fn(() => ({ b: 'default' }));
     const objectWithFunctionDefaultSchema = schema.object(
       { b: schema.string() },
       { defaultValue, meta: { id: 'objectWithFunctionDefaultSchema' } }

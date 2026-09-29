@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { queryPings } from './query_pings';
 import type { SyntheticsEsClient } from '../lib';
 import { HEARTBEAT_UNMAPPED_LOCATION_LABEL } from '../../common/runtime_types';
 
-jest.mock('../lib'); // Mock the ES client module
+vi.mock('../lib'); // Mock the ES client module
 
 const mockEsClient: Partial<SyntheticsEsClient> = {
-  search: jest.fn(),
+  search: vi.fn(),
   heartbeatIndices: 'synthetics-*',
 };
 
 describe('queryPings', () => {
   beforeEach(() => {
-    jest.clearAllMocks(); // Reset mocks before each test
+    vi.clearAllMocks(); // Reset mocks before each test
   });
 
   it.each([10, undefined])(
@@ -46,7 +49,7 @@ describe('queryPings', () => {
         },
       };
 
-      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+      (mockEsClient.search as Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await queryPings(params);
       expect(result).toEqual({
@@ -55,7 +58,7 @@ describe('queryPings', () => {
       });
 
       expect(mockEsClient.search).toHaveBeenCalledTimes(1);
-      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      const searchParams = (mockEsClient.search as Mock).mock.calls[0][0];
       expect(searchParams.size).toEqual(sizeParam ?? 25);
     }
   );
@@ -87,7 +90,7 @@ describe('queryPings', () => {
       },
     };
 
-    (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+    (mockEsClient.search as Mock).mockResolvedValueOnce(mockResponse);
 
     const result = await queryPings(params);
     expect(result).toEqual({
@@ -118,7 +121,7 @@ describe('queryPings', () => {
       },
     };
 
-    (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+    (mockEsClient.search as Mock).mockResolvedValueOnce(mockResponse);
 
     const result = await queryPings(params);
 
@@ -147,7 +150,7 @@ describe('queryPings', () => {
       },
     };
 
-    (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+    (mockEsClient.search as Mock).mockResolvedValueOnce(mockResponse);
 
     const result = await queryPings(params);
     expect(result).toEqual({
@@ -169,7 +172,7 @@ describe('queryPings', () => {
     };
 
     it('targets the local heartbeat indices when remoteName is absent', async () => {
-      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+      (mockEsClient.search as Mock).mockResolvedValueOnce(emptyResponse);
 
       await queryPings({
         syntheticsEsClient: mockEsClient as SyntheticsEsClient,
@@ -178,12 +181,12 @@ describe('queryPings', () => {
         pageIndex: 0,
       });
 
-      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      const searchParams = (mockEsClient.search as Mock).mock.calls[0][0];
       expect(searchParams.index).toBe(mockEsClient.heartbeatIndices);
     });
 
     it('prefixes the index with remoteName when present', async () => {
-      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+      (mockEsClient.search as Mock).mockResolvedValueOnce(emptyResponse);
 
       await queryPings({
         syntheticsEsClient: mockEsClient as SyntheticsEsClient,
@@ -193,12 +196,12 @@ describe('queryPings', () => {
         remoteName: 'cluster1',
       });
 
-      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      const searchParams = (mockEsClient.search as Mock).mock.calls[0][0];
       expect(searchParams.index).toBe('cluster1:synthetics-*');
     });
 
     it('also prefixes the index in the fields-only branch', async () => {
-      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+      (mockEsClient.search as Mock).mockResolvedValueOnce(emptyResponse);
 
       await queryPings({
         syntheticsEsClient: mockEsClient as SyntheticsEsClient,
@@ -210,7 +213,7 @@ describe('queryPings', () => {
         fieldsExtractorFn: (doc: any) => ({ fieldData: doc._source }),
       });
 
-      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      const searchParams = (mockEsClient.search as Mock).mock.calls[0][0];
       expect(searchParams.index).toBe('cluster1:synthetics-*');
     });
   });
@@ -226,7 +229,7 @@ describe('queryPings', () => {
     };
 
     it('omits the post_filter when no locations are selected', async () => {
-      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+      (mockEsClient.search as Mock).mockResolvedValueOnce(emptyResponse);
 
       await queryPings({
         syntheticsEsClient: mockEsClient as SyntheticsEsClient,
@@ -235,12 +238,12 @@ describe('queryPings', () => {
         pageIndex: 0,
       });
 
-      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      const searchParams = (mockEsClient.search as Mock).mock.calls[0][0];
       expect(searchParams.post_filter).toBeUndefined();
     });
 
     it('uses a terms post_filter for real locations', async () => {
-      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+      (mockEsClient.search as Mock).mockResolvedValueOnce(emptyResponse);
 
       await queryPings({
         syntheticsEsClient: mockEsClient as SyntheticsEsClient,
@@ -252,14 +255,14 @@ describe('queryPings', () => {
         locations: ['US East'] as unknown as string,
       });
 
-      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      const searchParams = (mockEsClient.search as Mock).mock.calls[0][0];
       expect(searchParams.post_filter).toEqual({
         terms: { 'observer.geo.name': ['US East'] },
       });
     });
 
     it('matches location-less pings for the Heartbeat placeholder location', async () => {
-      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+      (mockEsClient.search as Mock).mockResolvedValueOnce(emptyResponse);
 
       await queryPings({
         syntheticsEsClient: mockEsClient as SyntheticsEsClient,
@@ -269,7 +272,7 @@ describe('queryPings', () => {
         locations: [HEARTBEAT_UNMAPPED_LOCATION_LABEL] as unknown as string,
       });
 
-      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      const searchParams = (mockEsClient.search as Mock).mock.calls[0][0];
       expect(searchParams.post_filter).toEqual({
         bool: { must_not: { exists: { field: 'observer.geo.name' } } },
       });
@@ -284,7 +287,7 @@ describe('queryPings', () => {
       pageIndex: 0,
     };
 
-    (mockEsClient.search as jest.Mock).mockRejectedValueOnce(new Error('Query failed'));
+    (mockEsClient.search as Mock).mockRejectedValueOnce(new Error('Query failed'));
 
     await expect(queryPings(params)).rejects.toThrow('Query failed');
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
@@ -314,7 +317,7 @@ describe('queryPings', () => {
         },
       };
 
-      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+      (mockEsClient.search as Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await queryPings(params);
       expect(result).toEqual({
@@ -355,7 +358,7 @@ describe('queryPings', () => {
         },
       };
 
-      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+      (mockEsClient.search as Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await queryPings(params);
       expect(result).toEqual({
@@ -393,7 +396,7 @@ describe('queryPings', () => {
         },
       };
 
-      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+      (mockEsClient.search as Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await queryPings(params);
       expect(result).toEqual({
@@ -437,7 +440,7 @@ describe('queryPings', () => {
         },
       };
 
-      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+      (mockEsClient.search as Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await queryPings(params);
       expect(result).toEqual({
@@ -480,7 +483,7 @@ describe('queryPings', () => {
         },
       };
 
-      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+      (mockEsClient.search as Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await queryPings(params);
       expect(result).toEqual({

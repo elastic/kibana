@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
@@ -24,51 +27,60 @@ import { HISTORY_TAB_ID, LATEST_CHECK_TAB_ID } from './constants';
 
 const pattern = 'auditbeat-*';
 
-jest.mock('./hooks/use_stats', () => ({
-  ...jest.requireActual('./hooks/use_stats'),
-  useStats: jest.fn(() => ({
-    stats: {},
-    error: null,
-    loading: false,
-  })),
-}));
+vi.mock('./hooks/use_stats', async () => {
+      const mocked = {
+      ...(await vi.importActual('./hooks/use_stats')),
+      useStats: vi.fn(() => ({
+        stats: {},
+        error: null,
+        loading: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_ilm_explain', () => ({
-  ...jest.requireActual('./hooks/use_ilm_explain'),
-  useIlmExplain: jest.fn(() => ({
-    error: null,
-    ilmExplain: {},
-    loading: false,
-  })),
-}));
+vi.mock('./hooks/use_ilm_explain', async () => {
+      const mocked = {
+      ...(await vi.importActual('./hooks/use_ilm_explain')),
+      useIlmExplain: vi.fn(() => ({
+        error: null,
+        ilmExplain: {},
+        loading: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_historical_results', () => ({
-  ...jest.requireActual('./hooks/use_historical_results'),
-  useHistoricalResults: jest.fn(() => ({
-    historicalResultsState: {
-      results: [],
-      total: 0,
-      isLoading: true,
-      error: null,
-    },
-    fetchHistoricalResults: jest.fn(),
-  })),
-}));
+vi.mock('./hooks/use_historical_results', async () => {
+      const mocked = {
+      ...(await vi.importActual('./hooks/use_historical_results')),
+      useHistoricalResults: vi.fn(() => ({
+        historicalResultsState: {
+          results: [],
+          total: 0,
+          isLoading: true,
+          error: null,
+        },
+        fetchHistoricalResults: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('pattern', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('renders the initially open accordion with the pattern data and summary table', () => {
-    (useIlmExplain as jest.Mock).mockReturnValue({
+    (useIlmExplain as Mock).mockReturnValue({
       error: null,
       ilmExplain: auditbeatWithAllResults.ilmExplain,
       loading: false,
     });
 
-    (useStats as jest.Mock).mockReturnValue({
+    (useStats as Mock).mockReturnValue({
       stats: auditbeatWithAllResults.stats,
       error: null,
       loading: false,
@@ -80,7 +92,7 @@ describe('pattern', () => {
           <Pattern
             patternRollup={auditbeatWithAllResults}
             chartSelectedIndex={null}
-            setChartSelectedIndex={jest.fn()}
+            setChartSelectedIndex={vi.fn()}
             indexNames={Object.keys(auditbeatWithAllResults.stats!)}
             pattern={pattern}
           />
@@ -105,7 +117,7 @@ describe('pattern', () => {
               <Pattern
                 patternRollup={undefined}
                 chartSelectedIndex={null}
-                setChartSelectedIndex={jest.fn()}
+                setChartSelectedIndex={vi.fn()}
                 indexNames={undefined}
                 pattern={'remote:*'}
               />
@@ -125,7 +137,7 @@ describe('pattern', () => {
               <Pattern
                 patternRollup={undefined}
                 chartSelectedIndex={null}
-                setChartSelectedIndex={jest.fn()}
+                setChartSelectedIndex={vi.fn()}
                 indexNames={undefined}
                 pattern={pattern}
               />
@@ -141,7 +153,7 @@ describe('pattern', () => {
   describe('loading & error', () => {
     describe('when useStats returns error', () => {
       it('renders the error message', () => {
-        (useStats as jest.Mock).mockReturnValue({
+        (useStats as Mock).mockReturnValue({
           stats: {},
           error: 'An error occurred',
           loading: false,
@@ -153,7 +165,7 @@ describe('pattern', () => {
               <Pattern
                 patternRollup={auditbeatWithAllResults}
                 chartSelectedIndex={null}
-                setChartSelectedIndex={jest.fn()}
+                setChartSelectedIndex={vi.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
               />
@@ -168,7 +180,7 @@ describe('pattern', () => {
 
     describe('when useIlmExplain returns error', () => {
       it('renders the error message', () => {
-        (useIlmExplain as jest.Mock).mockReturnValue({
+        (useIlmExplain as Mock).mockReturnValue({
           error: 'An error occurred',
           ilmExplain: {},
           loading: false,
@@ -180,7 +192,7 @@ describe('pattern', () => {
               <Pattern
                 patternRollup={auditbeatWithAllResults}
                 chartSelectedIndex={null}
-                setChartSelectedIndex={jest.fn()}
+                setChartSelectedIndex={vi.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
               />
@@ -195,13 +207,13 @@ describe('pattern', () => {
 
     describe('when useStats is loading but useIlmExplan returns error', () => {
       it('renders the loading message', () => {
-        (useStats as jest.Mock).mockReturnValue({
+        (useStats as Mock).mockReturnValue({
           stats: {},
           error: null,
           loading: true,
         });
 
-        (useIlmExplain as jest.Mock).mockReturnValue({
+        (useIlmExplain as Mock).mockReturnValue({
           error: 'An error occurred',
           ilmExplain: {},
           loading: false,
@@ -213,7 +225,7 @@ describe('pattern', () => {
               <Pattern
                 patternRollup={auditbeatWithAllResults}
                 chartSelectedIndex={null}
-                setChartSelectedIndex={jest.fn()}
+                setChartSelectedIndex={vi.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
               />
@@ -228,13 +240,13 @@ describe('pattern', () => {
 
     describe('when useIlmExplain is loading but useStats returns error', () => {
       it('renders the loading message', () => {
-        (useStats as jest.Mock).mockReturnValue({
+        (useStats as Mock).mockReturnValue({
           stats: {},
           error: 'An error occurred',
           loading: false,
         });
 
-        (useIlmExplain as jest.Mock).mockReturnValue({
+        (useIlmExplain as Mock).mockReturnValue({
           error: null,
           ilmExplain: {},
           loading: true,
@@ -246,7 +258,7 @@ describe('pattern', () => {
               <Pattern
                 patternRollup={auditbeatWithAllResults}
                 chartSelectedIndex={null}
-                setChartSelectedIndex={jest.fn()}
+                setChartSelectedIndex={vi.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
               />
@@ -265,19 +277,19 @@ describe('pattern', () => {
       it('calls the checkIndex function and opens flyout with latest check tab', async () => {
         const indexName = '.ds-auditbeat-8.6.1-2023.02.07-000001';
         // arrange
-        (useIlmExplain as jest.Mock).mockReturnValue({
+        (useIlmExplain as Mock).mockReturnValue({
           error: null,
           ilmExplain: auditbeatWithAllResults.ilmExplain,
           loading: false,
         });
 
-        (useStats as jest.Mock).mockReturnValue({
+        (useStats as Mock).mockReturnValue({
           stats: auditbeatWithAllResults.stats,
           error: null,
           loading: false,
         });
 
-        const checkIndex = jest.fn();
+        const checkIndex = vi.fn();
 
         // act
         render(
@@ -290,7 +302,7 @@ describe('pattern', () => {
               <Pattern
                 patternRollup={auditbeatWithAllResults}
                 chartSelectedIndex={null}
-                setChartSelectedIndex={jest.fn()}
+                setChartSelectedIndex={vi.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
               />
@@ -333,21 +345,21 @@ describe('pattern', () => {
       it('calls the fetchHistoricalResults function and opens flyout with history check tab', async () => {
         const indexName = '.ds-auditbeat-8.6.1-2023.02.07-000001';
         // arrange
-        (useIlmExplain as jest.Mock).mockReturnValue({
+        (useIlmExplain as Mock).mockReturnValue({
           error: null,
           ilmExplain: auditbeatWithAllResults.ilmExplain,
           loading: false,
         });
 
-        (useStats as jest.Mock).mockReturnValue({
+        (useStats as Mock).mockReturnValue({
           stats: auditbeatWithAllResults.stats,
           error: null,
           loading: false,
         });
 
-        const fetchHistoricalResults = jest.fn();
+        const fetchHistoricalResults = vi.fn();
 
-        (useHistoricalResults as jest.Mock).mockReturnValue({
+        (useHistoricalResults as Mock).mockReturnValue({
           historicalResultsState: {
             results: [getHistoricalResultStub(indexName)],
             total: 1,
@@ -364,7 +376,7 @@ describe('pattern', () => {
               <Pattern
                 patternRollup={auditbeatWithAllResults}
                 chartSelectedIndex={null}
-                setChartSelectedIndex={jest.fn()}
+                setChartSelectedIndex={vi.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
               />
@@ -402,21 +414,21 @@ describe('pattern', () => {
       it('closes the flyout', async () => {
         const indexName = '.ds-auditbeat-8.6.1-2023.02.07-000001';
         // arrange
-        (useIlmExplain as jest.Mock).mockReturnValue({
+        (useIlmExplain as Mock).mockReturnValue({
           error: null,
           ilmExplain: auditbeatWithAllResults.ilmExplain,
           loading: false,
         });
 
-        (useStats as jest.Mock).mockReturnValue({
+        (useStats as Mock).mockReturnValue({
           stats: auditbeatWithAllResults.stats,
           error: null,
           loading: false,
         });
 
-        const fetchHistoricalResults = jest.fn();
+        const fetchHistoricalResults = vi.fn();
 
-        (useHistoricalResults as jest.Mock).mockReturnValue({
+        (useHistoricalResults as Mock).mockReturnValue({
           historicalResultsState: {
             results: [getHistoricalResultStub(indexName)],
             total: 1,
@@ -433,7 +445,7 @@ describe('pattern', () => {
               <Pattern
                 patternRollup={auditbeatWithAllResults}
                 chartSelectedIndex={null}
-                setChartSelectedIndex={jest.fn()}
+                setChartSelectedIndex={vi.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
               />
@@ -462,19 +474,19 @@ describe('pattern', () => {
       it('invokes the checkIndex function with the selected index and opens flyout', async () => {
         const indexName = '.ds-auditbeat-8.6.1-2023.02.07-000001';
         // arrange
-        (useIlmExplain as jest.Mock).mockReturnValue({
+        (useIlmExplain as Mock).mockReturnValue({
           error: null,
           ilmExplain: auditbeatWithAllResults.ilmExplain,
           loading: false,
         });
 
-        (useStats as jest.Mock).mockReturnValue({
+        (useStats as Mock).mockReturnValue({
           stats: auditbeatWithAllResults.stats,
           error: null,
           loading: false,
         });
 
-        const checkIndex = jest.fn();
+        const checkIndex = vi.fn();
 
         // act
         render(
@@ -490,7 +502,7 @@ describe('pattern', () => {
                   indexName,
                   pattern,
                 }}
-                setChartSelectedIndex={jest.fn()}
+                setChartSelectedIndex={vi.fn()}
                 indexNames={Object.keys(auditbeatWithAllResults.stats!)}
                 pattern={pattern}
               />

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import { useLastPageUserActions } from './use_user_actions_last_page';
@@ -20,14 +23,14 @@ const userActivityQueryParams: UserActivityParams = {
   perPage: 10,
 };
 
-jest.mock('../../containers/use_find_case_user_actions');
-jest.mock('../../common/lib/kibana');
+vi.mock('../../containers/use_find_case_user_actions');
+vi.mock('../../common/lib/kibana');
 
-const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
+const useFindCaseUserActionsMock = useFindCaseUserActions as Mock;
 
 describe('useLastPageUserActions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
   });
 

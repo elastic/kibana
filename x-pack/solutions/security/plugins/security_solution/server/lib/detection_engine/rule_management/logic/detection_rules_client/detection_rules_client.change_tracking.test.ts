@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -38,22 +41,22 @@ import { fetchPrebuiltImportContext } from './methods/import_rules/fetch_prebuil
 import { findInstalledRulesBySignatureIds } from './methods/import_rules/find_installed_rules_by_signature_ids';
 import { getMockRulesAuthz } from '../../__mocks__/authz';
 
-jest.mock('../../../../machine_learning/authz');
-jest.mock('../../../../machine_learning/validation');
-jest.mock('./methods/get_rule_by_rule_id');
-jest.mock('./methods/import_rules/check_rule_exception_references');
-jest.mock('./methods/import_rules/fetch_prebuilt_import_context');
-jest.mock('./methods/import_rules/find_installed_rules_by_signature_ids');
+vi.mock('../../../../machine_learning/authz');
+vi.mock('../../../../machine_learning/validation');
+vi.mock('./methods/get_rule_by_rule_id');
+vi.mock('./methods/import_rules/check_rule_exception_references');
+vi.mock('./methods/import_rules/fetch_prebuilt_import_context');
+vi.mock('./methods/import_rules/find_installed_rules_by_signature_ids');
 
 describe('DetectionRulesClient change tracking', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
 
-  const mlAuthz = (buildMlAuthz as jest.Mock)();
+  const mlAuthz = (buildMlAuthz as Mock)();
   const rulesAuthz = getMockRulesAuthz();
   const actionsClient = {
-    isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
-  } as unknown as jest.Mocked<ActionsClient>;
+    isSystemAction: vi.fn((id: string) => id === 'system-connector-.cases'),
+  } as unknown as Mocked<ActionsClient>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
@@ -66,13 +69,13 @@ describe('DetectionRulesClient change tracking', () => {
       taskIdsFailedToBeDeleted: [],
     });
 
-    (getRuleByRuleId as jest.Mock).mockResolvedValue(null);
-    (checkRuleExceptionReferences as jest.Mock).mockReturnValue([[], []]);
-    (fetchPrebuiltImportContext as jest.Mock).mockResolvedValue({
+    (getRuleByRuleId as Mock).mockResolvedValue(null);
+    (checkRuleExceptionReferences as Mock).mockReturnValue([[], []]);
+    (fetchPrebuiltImportContext as Mock).mockResolvedValue({
       matchingAssetsByRuleId: {},
       availableRuleAssetIds: new Set<string>(),
     });
-    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValue({});
+    (findInstalledRulesBySignatureIds as Mock).mockResolvedValue({});
     rulesClient.bulkCreateRules.mockResolvedValue({
       successfulIds: [],
       errors: [],
@@ -108,7 +111,7 @@ describe('DetectionRulesClient change tracking', () => {
     });
 
     it('updateRule forwards caller-provided action to rulesClient.update', async () => {
-      (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(getRulesSchemaMock());
+      (getRuleByRuleId as Mock).mockResolvedValueOnce(getRulesSchemaMock());
 
       const ruleUpdate = getCreateRulesSchemaMock('query-rule-id');
       ruleUpdate.name = 'updated name';
@@ -129,7 +132,7 @@ describe('DetectionRulesClient change tracking', () => {
 
     it('patchRule forwards caller-provided action to rulesClient.update', async () => {
       const existingRule = getRulesSchemaMock();
-      (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+      (getRuleByRuleId as Mock).mockResolvedValueOnce(existingRule);
 
       await detectionRulesClient.patchRule({
         rulePatch: { rule_id: existingRule.rule_id, name: 'patched name' },
@@ -148,7 +151,7 @@ describe('DetectionRulesClient change tracking', () => {
     describe('importRules', () => {
       it('forwards caller-supplied changeTracking when overwriting an existing rule', async () => {
         const existingRule = getRulesSchemaMock();
-        (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
+        (findInstalledRulesBySignatureIds as Mock).mockResolvedValueOnce({
           [existingRule.rule_id]: existingRule,
         });
 
@@ -175,7 +178,7 @@ describe('DetectionRulesClient change tracking', () => {
     describe('upgradePrebuiltRule', () => {
       it('uses ruleUpgrade action when upgrading a same-type rule', async () => {
         const installedRule = getRulesEqlSchemaMock();
-        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(installedRule);
+        (getRuleByRuleId as Mock).mockResolvedValueOnce(installedRule);
         rulesClient.update.mockResolvedValue(getRuleMock(getEqlRuleParams()));
 
         const ruleAsset: PrebuiltRuleAsset = {
@@ -199,7 +202,7 @@ describe('DetectionRulesClient change tracking', () => {
       it('uses ruleUpgrade action when upgrading a rule with a type change', async () => {
         const installedRule = getRulesSchemaMock(); // query type
         installedRule.rule_id = 'rule-id';
-        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(installedRule);
+        (getRuleByRuleId as Mock).mockResolvedValueOnce(installedRule);
 
         const ruleAsset: PrebuiltRuleAsset = {
           ...getCreateEqlRuleSchemaMock(), // eql type

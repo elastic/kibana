@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { mockQuery, mockAlertCountByRuleResult, parsedAlertCountByRuleResult } from './mock_data';
@@ -16,8 +18,8 @@ import {
 import { buildEntityIdentifierTermFilters } from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 const dateNow = new Date('2022-04-15T12:00:00.000Z').valueOf();
-const mockDateNow = jest.fn().mockReturnValue(dateNow);
-Date.now = jest.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
+const mockDateNow = vi.fn().mockReturnValue(dateNow);
+Date.now = vi.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
 
 const defaultUseQueryAlertsReturn = {
   loading: false,
@@ -28,49 +30,61 @@ const defaultUseQueryAlertsReturn = {
   refetch: () => {},
 };
 
-const mockUseQueryAlerts = jest.fn().mockReturnValue(defaultUseQueryAlertsReturn);
-jest.mock('../../../detections/containers/detection_engine/alerts/use_query', () => {
+const mockUseQueryAlerts = vi.fn().mockReturnValue(defaultUseQueryAlertsReturn);
+vi.mock('../../../detections/containers/detection_engine/alerts/use_query', () => {
   return {
     useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
   };
 });
 
-jest.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
-  useEntityFromStore: jest.fn(() => ({
-    entity: null,
-    entityRecord: null,
-    firstSeen: null,
-    lastSeen: null,
-    isLoading: false,
-    error: null,
-    refetch: jest.fn(),
-  })),
-}));
+vi.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => {
+      const mocked = {
+      useEntityFromStore: vi.fn(() => ({
+        entity: null,
+        entityRecord: null,
+        firstSeen: null,
+        lastSeen: null,
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/kibana', () => ({
-  useUiSetting: jest.fn(() => false),
-}));
+vi.mock('../../lib/kibana', () => {
+      const mocked = {
+      useUiSetting: vi.fn(() => false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/entity-store/public', () => ({
-  FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
-  useEntityStoreEuidApi: jest.fn(() => undefined),
-}));
+vi.mock('@kbn/entity-store/public', () => {
+      const mocked = {
+      FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
+      useEntityStoreEuidApi: vi.fn(() => undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const from = '2020-07-07T08:20:18.966Z';
 const to = '2020-07-08T08:20:18.966Z';
 
-const mockUseGlobalTime = jest
+const mockUseGlobalTime = vi
   .fn()
-  .mockReturnValue({ from, to, setQuery: jest.fn(), deleteQuery: jest.fn() });
-jest.mock('../../containers/use_global_time', () => {
+  .mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() });
+vi.mock('../../containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
   };
 });
 
-jest.mock('../../../detections/containers/detection_engine/alerts/use_signal_index', () => ({
-  useSignalIndex: () => ({ signalIndexName: 'signalIndexName' }),
-}));
+vi.mock('../../../detections/containers/detection_engine/alerts/use_signal_index', () => {
+      const mocked = {
+      useSignalIndex: () => ({ signalIndexName: 'signalIndexName' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderUseAlertCountByRuleByStatus = (
   overrides: Partial<UseAlertCountByRuleByStatusProps> = {}
@@ -87,7 +101,7 @@ const renderUseAlertCountByRuleByStatus = (
 
 describe('useAlertCountByRuleByStatus', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockDateNow.mockReturnValue(dateNow);
     mockUseQueryAlerts.mockReturnValue(defaultUseQueryAlertsReturn);
   });

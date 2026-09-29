@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock, Mocked } from 'vitest';
+
 import type { FetchActionRequestsOptions } from './fetch_action_requests';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
@@ -451,7 +453,7 @@ describe('fetchActionRequests()', () => {
         REF_DATA_KEYS.orphanResponseActionsSpace
       ]({} as SavedObjectsClientContract, {} as ExperimentalFeatures);
 
-      (fetchOptions.endpointService.getReferenceDataClient().get as jest.Mock).mockResolvedValue(
+      (fetchOptions.endpointService.getReferenceDataClient().get as Mock).mockResolvedValue(
         set(initialValue, 'metadata.spaceId', 'bar')
       );
       fetchOptions.spaceId = 'bar';
@@ -496,7 +498,7 @@ describe('fetchActionRequests()', () => {
       applyActionListEsSearchMock(readEsClientMock);
 
       const endpointService =
-        fetchOptions.endpointService as jest.Mocked<EndpointAppContextService>;
+        fetchOptions.endpointService as Mocked<EndpointAppContextService>;
       endpointService.isCpsActive.mockResolvedValue(true);
       endpointService.getReadEsClient.mockResolvedValue(readEsClientMock);
 
@@ -611,7 +613,7 @@ describe('fetchActionRequests()', () => {
         REF_DATA_KEYS.orphanResponseActionsSpace
       ]({} as SavedObjectsClientContract, {} as ExperimentalFeatures);
 
-      (fetchOptions.endpointService.getReferenceDataClient().get as jest.Mock).mockResolvedValue(
+      (fetchOptions.endpointService.getReferenceDataClient().get as Mock).mockResolvedValue(
         set(initialValue, 'metadata.spaceId', 'bar')
       );
       fetchOptions.spaceId = 'bar';

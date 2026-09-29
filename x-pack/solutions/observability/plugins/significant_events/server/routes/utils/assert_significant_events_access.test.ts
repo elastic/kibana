@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of, throwError } from 'rxjs';
 import { FeatureNotEnabledError } from '../../lib/errors/feature_not_enabled_error';
 import { MissingDependencyError } from '../../lib/errors/missing_dependency_error';
@@ -40,8 +43,8 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
 
   const server = {
     core: {
-      featureFlags: { getBooleanValue$: jest.fn().mockReturnValue(of(featureFlagAvailable)) },
-      pricing: { isFeatureAvailable: jest.fn().mockReturnValue(tierAvailable) },
+      featureFlags: { getBooleanValue$: vi.fn().mockReturnValue(of(featureFlagAvailable)) },
+      pricing: { isFeatureAvailable: vi.fn().mockReturnValue(tierAvailable) },
     },
     cloud: projectType && { isServerlessEnabled: true, serverless: { projectType } },
     workflowsExtensions: workflowsExtensionsPlugin ? {} : undefined,
@@ -51,9 +54,9 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
   };
 
   const licensing = {
-    getLicense: jest
+    getLicense: vi
       .fn()
-      .mockResolvedValue({ hasAtLeast: jest.fn().mockReturnValue(hasEnterpriseLicense) }),
+      .mockResolvedValue({ hasAtLeast: vi.fn().mockReturnValue(hasEnterpriseLicense) }),
   };
 
   return {
@@ -92,7 +95,7 @@ describe('assertSignificantEventsAccess', () => {
     const args = buildArgs();
     const { getBooleanValue$ } = (
       args as unknown as {
-        server: { core: { featureFlags: { getBooleanValue$: jest.Mock } } };
+        server: { core: { featureFlags: { getBooleanValue$: Mock } } };
       }
     ).server.core.featureFlags;
     getBooleanValue$.mockReturnValue(

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockGetDescriptorNamespace } from './saved_objects_encryption_extension.test.mocks';
 
 import { savedObjectsTypeRegistryMock } from '@kbn/core/server/mocks';
@@ -40,7 +42,7 @@ function setup() {
     extension: new SavedObjectsEncryptionExtension({
       baseTypeRegistry: mockBaseTypeRegistry,
       service: mockService,
-      getCurrentUser: jest.fn().mockReturnValue(CURRENT_USER),
+      getCurrentUser: vi.fn().mockReturnValue(CURRENT_USER),
     }),
     service: mockService,
   };

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import type { RenderResult } from '@testing-library/react';
 import { within } from '@testing-library/react';
@@ -18,7 +21,7 @@ import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../mocks';
 import type { PerOsEventCollectionCardProps } from './per_os_event_collection_card';
 import { PerOsEventCollectionCard } from './per_os_event_collection_card';
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 describe('PerOsEventCollectionCard', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').perOsEventCollection;
   let policy: PolicyConfig;
@@ -32,7 +35,7 @@ describe('PerOsEventCollectionCard', () => {
   };
 
   const getUpdatedPolicy = (): PolicyConfig => {
-    const onChange = props.onChange as jest.Mock;
+    const onChange = props.onChange as Mock;
     return onChange.mock.calls[onChange.mock.calls.length - 1][0].updatedPolicy;
   };
 
@@ -43,7 +46,7 @@ describe('PerOsEventCollectionCard', () => {
       .config.policy.value;
     props = {
       policy,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': testSubj.card,
     };

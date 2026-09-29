@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -17,14 +20,14 @@ import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_
 import * as i18n from '../translations';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 
-jest.mock('../hooks/use_show_eis_promotional_content');
-jest.mock('../hooks/use_kibana');
+vi.mock('../hooks/use_show_eis_promotional_content');
+vi.mock('../hooks/use_kibana');
 
-const mockUiSettingsGet = jest.fn();
-const mockNavigateToApp = jest.fn();
+const mockUiSettingsGet = vi.fn();
+const mockNavigateToApp = vi.fn();
 
 const mockUseKibana = (overrides?: Partial<any>) => {
-  (useKibana as jest.Mock).mockReturnValue({
+  (useKibana as Mock).mockReturnValue({
     services: {
       uiSettings: {
         get: mockUiSettingsGet,
@@ -64,15 +67,15 @@ describe('EisCloudConnectPromoTour', () => {
     );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUiSettingsGet.mockReturnValue(true);
     mockUseKibana();
   });
 
   it('renders children only when promo is not visible', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: false,
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
 
     renderComponent();
@@ -82,9 +85,9 @@ describe('EisCloudConnectPromoTour', () => {
   });
 
   it('renders children and does not render the tour when isReady is false', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true, // would normally show the tour
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
 
     renderComponent({ isReady: false });
@@ -94,9 +97,9 @@ describe('EisCloudConnectPromoTour', () => {
   });
 
   it('renders children and does not render the tour when isSelfManaged is false', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
 
     renderComponent({ isSelfManaged: false });
@@ -106,14 +109,14 @@ describe('EisCloudConnectPromoTour', () => {
   });
 
   it('renders children and does not render the tour when tours is disabled', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
     mockUseKibana({
       notifications: {
         tours: {
-          isEnabled: jest.fn().mockReturnValue(false),
+          isEnabled: vi.fn().mockReturnValue(false),
         },
       },
     });
@@ -125,9 +128,9 @@ describe('EisCloudConnectPromoTour', () => {
   });
 
   it('renders the tour when promo is visible', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
 
     renderComponent();
@@ -138,9 +141,9 @@ describe('EisCloudConnectPromoTour', () => {
   });
 
   it('renders CTA button and calls navigateToApp when clicked', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissPromo: jest.fn(),
+      onDismissPromo: vi.fn(),
     });
 
     renderComponent();
@@ -156,11 +159,11 @@ describe('EisCloudConnectPromoTour', () => {
 
   it('removes the tour from DOM after clicking Dismiss, children remain', () => {
     let visible = true;
-    const mockOnDismissPromo = jest.fn(() => {
+    const mockOnDismissPromo = vi.fn(() => {
       visible = false;
     });
 
-    (useShowEisPromotionalContent as jest.Mock).mockImplementation(() => ({
+    (useShowEisPromotionalContent as Mock).mockImplementation(() => ({
       get isPromoVisible() {
         return visible;
       },

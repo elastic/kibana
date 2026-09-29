@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -15,36 +17,45 @@ import { useCreateDataset, useDatasets, useDatasetTagSuggestions } from '../../h
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { useAccessibleSpaces } from '../../hooks/use_spaces';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: jest.fn(),
-}));
-jest.mock('../../hooks/use_evals_api');
-jest.mock('../../hooks/use_evals_permissions');
-jest.mock('../../hooks/use_spaces');
-jest.mock('../../components/copy_dataset_flyout', () => ({
-  CopyDatasetFlyout: ({ datasetId, datasetName }: { datasetId: string; datasetName: string }) => (
-    <div data-test-subj="copyDatasetFlyoutMock">
-      {datasetId}: {datasetName}
-    </div>
-  ),
-}));
-jest.mock('../../components/import_dataset_flyout', () => ({
-  ImportDatasetFlyout: ({ onClose }: { onClose: () => void }) => (
-    <div data-test-subj="importDatasetFlyoutMock">
-      <button type="button" onClick={onClose}>
-        Close import
-      </button>
-    </div>
-  ),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_evals_api');
+vi.mock('../../hooks/use_evals_permissions');
+vi.mock('../../hooks/use_spaces');
+vi.mock('../../components/copy_dataset_flyout', () => {
+      const mocked = {
+      CopyDatasetFlyout: ({ datasetId, datasetName }: { datasetId: string; datasetName: string }) => (
+        <div data-test-subj="copyDatasetFlyoutMock">
+          {datasetId}: {datasetName}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../components/import_dataset_flyout', () => {
+      const mocked = {
+      ImportDatasetFlyout: ({ onClose }: { onClose: () => void }) => (
+        <div data-test-subj="importDatasetFlyoutMock">
+          <button type="button" onClick={onClose}>
+            Close import
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseKibana = jest.mocked(useKibana);
-const mockedUseDatasets = jest.mocked(useDatasets);
-const mockedUseCreateDataset = jest.mocked(useCreateDataset);
-const mockedUseDatasetTagSuggestions = jest.mocked(useDatasetTagSuggestions);
-const mockedUseEvalsPermissions = jest.mocked(useEvalsPermissions);
-const mockedUseAccessibleSpaces = jest.mocked(useAccessibleSpaces);
+const mockedUseKibana = vi.mocked(useKibana);
+const mockedUseDatasets = vi.mocked(useDatasets);
+const mockedUseCreateDataset = vi.mocked(useCreateDataset);
+const mockedUseDatasetTagSuggestions = vi.mocked(useDatasetTagSuggestions);
+const mockedUseEvalsPermissions = vi.mocked(useEvalsPermissions);
+const mockedUseAccessibleSpaces = vi.mocked(useAccessibleSpaces);
 
 const renderPage = () => {
   const history = createMemoryHistory({ initialEntries: ['/datasets'] });
@@ -67,7 +78,7 @@ describe('DatasetsListPage dataset actions', () => {
     });
     mockedUseDatasetTagSuggestions.mockReturnValue([]);
     mockedUseCreateDataset.mockReturnValue({
-      mutateAsync: jest.fn(),
+      mutateAsync: vi.fn(),
       isLoading: false,
     } as unknown as ReturnType<typeof useCreateDataset>);
     mockedUseDatasets.mockReturnValue({
@@ -86,7 +97,7 @@ describe('DatasetsListPage dataset actions', () => {
       },
       isLoading: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     } as unknown as ReturnType<typeof useDatasets>);
   });
 

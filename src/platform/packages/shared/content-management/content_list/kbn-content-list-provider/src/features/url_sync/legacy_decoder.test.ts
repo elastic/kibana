@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { decodeLegacyParams } from './legacy_decoder';
 
 describe('legacy_decoder', () => {
@@ -112,7 +114,7 @@ describe('legacy_decoder', () => {
   });
 
   it('drops unknown legacy sort values and warns', () => {
-    const onUnknown = jest.fn();
+    const onUnknown = vi.fn();
 
     expect(decodeLegacyParams({ sort: 'unknown' }, validSortFields, onUnknown)).toEqual({
       state: {},

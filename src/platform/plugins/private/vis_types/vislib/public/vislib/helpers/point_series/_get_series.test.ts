@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getSeries } from './_get_series';
 import { setFormatService } from '../../../services';
 import type { Chart, Aspect } from './point_series';
@@ -18,7 +20,7 @@ describe('getSeries', function () {
   beforeAll(() => {
     setFormatService({
       deserialize: () => ({
-        convertToText: jest.fn((v) => v),
+        convertToText: vi.fn((v) => v),
       }),
     } as any);
   });

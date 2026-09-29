@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import { useCreateConnector } from './use_create_connector';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 describe('useCreateConnector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    useKibanaMock().services.http.post = jest.fn().mockResolvedValue({ id: 'test-id' });
+    vi.clearAllMocks();
+    useKibanaMock().services.http.post = vi.fn().mockResolvedValue({ id: 'test-id' });
   });
 
   it('init', async () => {
@@ -60,8 +63,8 @@ describe('useCreateConnector', () => {
         message: 'Internal server error',
       },
     };
-    useKibanaMock().services.http.post = jest.fn().mockRejectedValue(error);
-    const addErrorMock = useKibanaMock().services.notifications.toasts.addError as jest.Mock;
+    useKibanaMock().services.http.post = vi.fn().mockRejectedValue(error);
+    const addErrorMock = useKibanaMock().services.notifications.toasts.addError as Mock;
 
     const { result } = renderHook(() => useCreateConnector());
 

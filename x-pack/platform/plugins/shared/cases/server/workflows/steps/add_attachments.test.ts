@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import { CasesStepSingleCaseOutputSchema } from '../../../common/workflows/steps/shared';
 import { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
@@ -31,14 +33,14 @@ const input = {
 
 describe('addAttachmentsStepDefinition', () => {
   it('returns undefined when no authorable attachment type is registered', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     expect(
       addAttachmentsStepDefinition(new UnifiedAttachmentTypeRegistry(), getCasesClient)
     ).toBeUndefined();
   });
 
   it('creates the expected step definition structure', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     const definition = addAttachmentsStepDefinition(buildRegistry(), getCasesClient)!;
 
     expect(definition.id).toBe('cases.addAttachments');
@@ -47,9 +49,9 @@ describe('addAttachmentsStepDefinition', () => {
   });
 
   it('injects owner from the target case into every attachment on bulkCreate', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get },
       attachments: { bulkCreate },
     } as unknown as CasesClient);
@@ -71,9 +73,9 @@ describe('addAttachmentsStepDefinition', () => {
   });
 
   it('overwrites an owner that sneaks into the YAML input with the case owner', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get },
       attachments: { bulkCreate },
     } as unknown as CasesClient);
@@ -92,9 +94,9 @@ describe('addAttachmentsStepDefinition', () => {
   });
 
   it('returns an output the single-case output schema accepts', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get },
       attachments: { bulkCreate },
     } as unknown as CasesClient);
@@ -109,9 +111,9 @@ describe('addAttachmentsStepDefinition', () => {
 
   it('returns the error when bulkCreate throws', async () => {
     const bulkCreateError = new Error('bulk create failed');
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockRejectedValue(bulkCreateError);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = vi.fn().mockRejectedValue(bulkCreateError);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get },
       attachments: { bulkCreate },
     } as unknown as CasesClient);
@@ -123,10 +125,10 @@ describe('addAttachmentsStepDefinition', () => {
   });
 
   it('pushes the case when push-case is enabled', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const push = jest.fn().mockResolvedValue(undefined);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const push = vi.fn().mockResolvedValue(undefined);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, push },
       attachments: { bulkCreate },
     } as unknown as CasesClient);

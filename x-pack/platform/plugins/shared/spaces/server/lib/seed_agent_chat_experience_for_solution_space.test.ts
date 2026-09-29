@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { CoreStart } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -17,12 +19,12 @@ describe('seedAgentChatExperienceForSolutionSpace', () => {
 
   const createMocks = () => {
     const internalRepo = {
-      update: jest.fn().mockResolvedValue({}),
-      create: jest.fn().mockResolvedValue({}),
+      update: vi.fn().mockResolvedValue({}),
+      create: vi.fn().mockResolvedValue({}),
     };
     const coreStart = {
       savedObjects: {
-        createInternalRepository: jest.fn().mockReturnValue(internalRepo),
+        createInternalRepository: vi.fn().mockReturnValue(internalRepo),
       },
     } as unknown as CoreStart;
 
@@ -177,7 +179,7 @@ describe('seedAgentChatExperienceForSolutionSpace', () => {
   it('logs a warning and does not throw when update fails', async () => {
     const logging = loggingSystemMock.create();
     const log = logging.get('test');
-    const warnSpy = jest.spyOn(log, 'warn');
+    const warnSpy = vi.spyOn(log, 'warn');
     const { coreStart, internalRepo } = createMocks();
     internalRepo.update.mockRejectedValueOnce(new Error('unexpected'));
 

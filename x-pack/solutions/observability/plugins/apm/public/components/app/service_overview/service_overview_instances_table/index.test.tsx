@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -18,24 +21,24 @@ import * as useInstanceDetailsFetcherModule from './use_instance_details_fetcher
 import type { InstancesSortField } from '../../../../../common/instances';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
-jest.mock('../../../../hooks/use_apm_params');
-jest.mock('../../../../hooks/use_breakpoints');
-jest.mock('./use_instance_details_fetcher');
+vi.mock('../../../../hooks/use_apm_params');
+vi.mock('../../../../hooks/use_breakpoints');
+vi.mock('./use_instance_details_fetcher');
 
-jest.mock('@kbn/logs-shared-plugin/common', () => {
-  const originalModule = jest.requireActual('@kbn/logs-shared-plugin/common');
+vi.mock('@kbn/logs-shared-plugin/common', async () => {
+  const originalModule = (await vi.importActual('@kbn/logs-shared-plugin/common'));
   return {
     ...originalModule,
-    getLogsLocatorFromUrlService: jest
+    getLogsLocatorFromUrlService: vi
       .fn()
-      .mockReturnValue({ getRedirectUrl: jest.fn(() => 'https://logs-redirect-url') }),
+      .mockReturnValue({ getRedirectUrl: vi.fn(() => 'https://logs-redirect-url') }),
   };
 });
 
-const mockUseApmParams = useApmParamsModule.useApmParams as jest.Mock;
-const mockUseBreakpoints = useBreakpointsModule.useBreakpoints as jest.Mock;
+const mockUseApmParams = useApmParamsModule.useApmParams as Mock;
+const mockUseBreakpoints = useBreakpointsModule.useBreakpoints as Mock;
 const mockUseInstanceDetailsFetcher =
-  useInstanceDetailsFetcherModule.useInstanceDetailsFetcher as jest.Mock;
+  useInstanceDetailsFetcherModule.useInstanceDetailsFetcher as Mock;
 
 type ServiceInstanceDetails =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
@@ -64,7 +67,7 @@ const defaultProps = {
       field: 'throughput' as InstancesSortField,
     },
   },
-  onChangeTableOptions: jest.fn(),
+  onChangeTableOptions: vi.fn(),
   detailedStatsLoading: false,
   detailedStatsData: undefined,
   isLoading: false,
@@ -73,7 +76,7 @@ const defaultProps = {
 
 describe('ServiceOverviewInstancesTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseApmParams.mockReturnValue({
       query: {
         kuery: '',
@@ -198,7 +201,7 @@ describe('ServiceOverviewInstancesTable', () => {
   });
 
   it('calls onChangeTableOptions when sorting is changed', () => {
-    const onChangeTableOptions = jest.fn();
+    const onChangeTableOptions = vi.fn();
     const mockItems = [
       {
         serviceNodeName: 'instance-1',

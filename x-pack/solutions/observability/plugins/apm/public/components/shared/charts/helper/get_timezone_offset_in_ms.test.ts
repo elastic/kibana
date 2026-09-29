@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getTimezoneOffsetInMs } from './get_timezone_offset_in_ms';
 import moment from 'moment-timezone';
 
@@ -25,8 +27,8 @@ describe('getTimezoneOffsetInMs', () => {
     it('guesses the timezone', () => {
       moment.tz.setDefault();
 
-      const guess = jest.fn(() => 'Etc/UTC');
-      jest.spyOn(moment.tz, 'guess').mockImplementationOnce(guess);
+      const guess = vi.fn(() => 'Etc/UTC');
+      vi.spyOn(moment.tz, 'guess').mockImplementationOnce(guess);
 
       getTimezoneOffsetInMs(Date.now());
 

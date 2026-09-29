@@ -5,27 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAddIntegrationPath } from './use_add_integration_path';
 
-const mockGetUrlForApp = jest.fn();
-const mockUseAssetDiscoveryIntegration = jest.fn();
+const mockGetUrlForApp = vi.fn();
+const mockUseAssetDiscoveryIntegration = vi.fn();
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: { getUrlForApp: mockGetUrlForApp },
-    },
-  }),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: { getUrlForApp: mockGetUrlForApp },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_get_asset_discovery_integration', () => ({
-  useAssetDiscoveryIntegration: () => mockUseAssetDiscoveryIntegration(),
-}));
+vi.mock('./use_get_asset_discovery_integration', () => {
+      const mocked = {
+      useAssetDiscoveryIntegration: () => mockUseAssetDiscoveryIntegration(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useAddIntegrationPath', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns asset discovery integration path if available', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import { Type } from '@kbn/config-schema';
 import type { HttpResources, HttpResourcesRequestHandler, RouteConfig } from '@kbn/core/server';
 import { httpResourcesMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -14,7 +16,7 @@ import type { SecurityRequestHandlerContext } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Capture URL view routes', () => {
-  let httpResources: jest.Mocked<HttpResources>;
+  let httpResources: Mocked<HttpResources>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     httpResources = routeParamsMock.httpResources;

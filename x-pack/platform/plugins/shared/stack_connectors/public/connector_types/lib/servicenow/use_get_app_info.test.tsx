@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import { useGetAppInfo } from './use_get_app_info';
@@ -13,10 +16,10 @@ import type { ServiceNowActionConnector } from './types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { CORSError } from './cors_error';
 
-jest.mock('./api');
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+vi.mock('./api');
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
-const getAppInfoMock = getAppInfo as jest.Mock;
+const getAppInfoMock = getAppInfo as Mock;
 
 const actionTypeId = '.servicenow';
 const applicationInfoData = {
@@ -47,7 +50,7 @@ describe('useGetAppInfo', () => {
   getAppInfoMock.mockResolvedValue(applicationInfoData);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('init', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import '@kbn/code-editor-mock/jest_helper';
@@ -63,7 +65,7 @@ test('it renders without crashing', () => {
 test('should render clusters field', () => {
   const wrapper = shallowWithIntl(
     <RemoteClusterComboBox
-      onChange={jest.fn()}
+      onChange={vi.fn()}
       type="remote_cluster"
       remoteClusters={[
         {

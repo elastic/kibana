@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const mockUiStateGet = jest.fn().mockReturnValue(() => {});
+import { vi } from 'vitest';
+
+const mockUiStateGet = vi.fn().mockReturnValue(() => {});
 export const sampleHeatmapVis = {
   type: {
     name: 'heatmap',

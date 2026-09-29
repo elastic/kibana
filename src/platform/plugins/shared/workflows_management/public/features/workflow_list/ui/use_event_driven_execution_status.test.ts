@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { useEventDrivenExecutionStatus } from './use_event_driven_execution_status';
 
-jest.mock('@kbn/workflows-ui');
-const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
+vi.mock('@kbn/workflows-ui');
+const mockUseWorkflowsApi = useWorkflowsApi as MockedFunction<typeof useWorkflowsApi>;
 
 const createWrapper = (queryClient: QueryClient) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -23,11 +26,11 @@ const createWrapper = (queryClient: QueryClient) => {
 };
 
 describe('useEventDrivenExecutionStatus', () => {
-  let mockGetConfig: jest.Mock;
+  let mockGetConfig: Mock;
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    mockGetConfig = jest.fn();
+    mockGetConfig = vi.fn();
     mockUseWorkflowsApi.mockReturnValue({ getConfig: mockGetConfig } as any);
     queryClient = new QueryClient({
       defaultOptions: {

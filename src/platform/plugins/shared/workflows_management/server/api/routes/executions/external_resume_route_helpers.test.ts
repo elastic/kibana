@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { handleExternalResumeError } from './external_resume_route_helpers';
 import { ExternalResumeError } from '../../external_resume/external_resume_error';
 
 describe('handleExternalResumeError', () => {
   const response = {
-    custom: jest.fn((options) => options),
+    custom: vi.fn((options) => options),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns a generic invalid-link response for non-exposed ExternalResumeError messages', () => {

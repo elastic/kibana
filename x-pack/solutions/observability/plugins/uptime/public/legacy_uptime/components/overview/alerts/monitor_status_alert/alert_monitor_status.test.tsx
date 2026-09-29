@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import type { AlertMonitorStatusProps } from './alert_monitor_status';
@@ -12,7 +14,7 @@ import { AlertMonitorStatusComponent, hasFilters } from './alert_monitor_status'
 import { render } from '../../../../lib/helper/rtl_helpers';
 
 describe('alert monitor status component', () => {
-  jest.setTimeout(10_000);
+  vi.setConfig({ testTimeout: 10_000 });
 
   describe('hasFilters', () => {
     const EMPTY_FILTERS = {
@@ -63,7 +65,7 @@ describe('alert monitor status component', () => {
       snapshotCount: 0,
       snapshotLoading: false,
       numTimes: 14,
-      setRuleParams: jest.fn(),
+      setRuleParams: vi.fn(),
       timerange: { from: 'now-12h', to: 'now' },
     };
 

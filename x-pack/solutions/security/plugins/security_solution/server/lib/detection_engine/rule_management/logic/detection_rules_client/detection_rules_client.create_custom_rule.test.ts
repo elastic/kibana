@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -27,23 +30,23 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 import { getMockRulesAuthz } from '../../__mocks__/authz';
 
-jest.mock('../../../../machine_learning/authz');
-jest.mock('../../../../machine_learning/validation');
+vi.mock('../../../../machine_learning/authz');
+vi.mock('../../../../machine_learning/validation');
 
 describe('DetectionRulesClient.createCustomRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
 
-  const mlAuthz = (buildMlAuthz as jest.Mock)();
+  const mlAuthz = (buildMlAuthz as Mock)();
   const rulesAuthz = getMockRulesAuthz();
   let actionsClient = {
-    isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
-  } as unknown as jest.Mocked<ActionsClient>;
+    isSystemAction: vi.fn((id: string) => id === 'system-connector-.cases'),
+  } as unknown as Mocked<ActionsClient>;
 
   beforeEach(() => {
     actionsClient = {
-      isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
-    } as unknown as jest.Mocked<ActionsClient>;
+      isSystemAction: vi.fn((id: string) => id === 'system-connector-.cases'),
+    } as unknown as Mocked<ActionsClient>;
 
     rulesClient = rulesClientMock.create();
     // creates a rule with a system action and a connector action
@@ -334,7 +337,7 @@ describe('DetectionRulesClient.createCustomRule', () => {
   });
 
   it('throws if mlAuth fails', async () => {
-    (throwAuthzError as jest.Mock).mockImplementationOnce(() => {
+    (throwAuthzError as Mock).mockImplementationOnce(() => {
       throw new Error('mocked MLAuth error');
     });
 

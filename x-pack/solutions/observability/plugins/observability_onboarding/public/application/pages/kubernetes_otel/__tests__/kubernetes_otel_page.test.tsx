@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -18,7 +20,7 @@ interface MockOtelCollectorSetupStepProps {
   onCollectorMethodChange: (method: string) => void;
 }
 
-const mockOtelCollectorSetupStep = jest.fn(
+const mockOtelCollectorSetupStep = vi.fn(
   ({
     isManagedOtlpServiceAvailable,
     onboardingId,
@@ -40,75 +42,103 @@ const mockOtelCollectorSetupStep = jest.fn(
   )
 );
 
-jest.mock('../otel_collector_setup_step', () => ({
-  OtelCollectorSetupStep: (props: MockOtelCollectorSetupStepProps) =>
-    mockOtelCollectorSetupStep(props),
-}));
+vi.mock('../otel_collector_setup_step', () => {
+      const mocked = {
+      OtelCollectorSetupStep: (props: MockOtelCollectorSetupStepProps) =>
+        mockOtelCollectorSetupStep(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../otel_instrumentation_step', () => ({
-  OtelInstrumentationStep: () => <div data-test-subj="otelInstrumentationStep" />,
-}));
+vi.mock('../otel_instrumentation_step', () => {
+      const mocked = {
+      OtelInstrumentationStep: () => <div data-test-subj="otelInstrumentationStep" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../quickstart_flows/otel_kubernetes/steps', () => ({
-  OtelKubernetesVisualizeStep: () => <div data-test-subj="otelK8sVisualizeStep" />,
-}));
+vi.mock('../../../quickstart_flows/otel_kubernetes/steps', () => {
+      const mocked = {
+      OtelKubernetesVisualizeStep: () => <div data-test-subj="otelK8sVisualizeStep" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../quickstart_flows/shared/empty_prompt', () => ({
-  EmptyPrompt: ({
-    onboardingFlowType,
-    inline,
-  }: {
-    onboardingFlowType: string;
-    inline?: boolean;
-  }) => (
-    <div
-      data-test-subj="emptyPromptStub"
-      data-onboarding-flow-type={onboardingFlowType}
-      data-inline={inline ? 'true' : 'false'}
-    />
-  ),
-}));
+vi.mock('../../../quickstart_flows/shared/empty_prompt', () => {
+      const mocked = {
+      EmptyPrompt: ({
+        onboardingFlowType,
+        inline,
+      }: {
+        onboardingFlowType: string;
+        inline?: boolean;
+      }) => (
+        <div
+          data-test-subj="emptyPromptStub"
+          data-onboarding-flow-type={onboardingFlowType}
+          data-inline={inline ? 'true' : 'false'}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/ebt-tools', () => ({
-  usePerformanceContext: () => ({
-    onPageReady: jest.fn(),
-    onPageRefreshStart: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      usePerformanceContext: () => ({
+        onPageReady: vi.fn(),
+        onPageRefreshStart: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../quickstart_flows/kubernetes/use_kubernetes_flow', () => ({
-  useKubernetesFlow: jest.fn().mockReturnValue({
-    data: undefined,
-    status: 'loading',
-    error: undefined,
-    refetch: jest.fn(),
-  }),
-}));
+vi.mock('../../../quickstart_flows/kubernetes/use_kubernetes_flow', () => {
+      const mocked = {
+      useKubernetesFlow: vi.fn().mockReturnValue({
+        data: undefined,
+        status: 'loading',
+        error: undefined,
+        refetch: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useKubernetesFlow: useKubernetesFlowMock } = jest.requireMock(
-  '../../../quickstart_flows/kubernetes/use_kubernetes_flow'
-);
+const { useKubernetesFlow: useKubernetesFlowMock } = (await vi.importMock('../../../quickstart_flows/kubernetes/use_kubernetes_flow'));
 
-jest.mock('../../../shared/use_flow_breadcrumbs', () => ({
-  useFlowBreadcrumb: jest.fn(),
-}));
+vi.mock('../../../shared/use_flow_breadcrumbs', () => {
+      const mocked = {
+      useFlowBreadcrumb: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseManagedOtlpServiceAvailability = jest.fn().mockReturnValue(false);
-jest.mock('../../../shared/use_managed_otlp_service_availability', () => ({
-  useManagedOtlpServiceAvailability: () => mockUseManagedOtlpServiceAvailability(),
-}));
+const mockUseManagedOtlpServiceAvailability = vi.fn().mockReturnValue(false);
+vi.mock('../../../shared/use_managed_otlp_service_availability', () => {
+      const mocked = {
+      useManagedOtlpServiceAvailability: () => mockUseManagedOtlpServiceAvailability(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUsePricingFeature = jest.fn().mockReturnValue(true);
-jest.mock('../../../quickstart_flows/shared/use_pricing_feature', () => ({
-  usePricingFeature: (...args: unknown[]) => mockUsePricingFeature(...args),
-}));
+const mockUsePricingFeature = vi.fn().mockReturnValue(true);
+vi.mock('../../../quickstart_flows/shared/use_pricing_feature', () => {
+      const mocked = {
+      usePricingFeature: (...args: unknown[]) => mockUsePricingFeature(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../quickstart_flows/shared/use_window_blur_data_monitoring_trigger', () => ({
-  useWindowBlurDataMonitoringTrigger: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../quickstart_flows/shared/use_window_blur_data_monitoring_trigger', () => {
+      const mocked = {
+      useWindowBlurDataMonitoringTrigger: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const { useWindowBlurDataMonitoringTrigger: useWindowBlurDataMonitoringTriggerMock } =
-  jest.requireMock('../../../quickstart_flows/shared/use_window_blur_data_monitoring_trigger');
+  (await vi.importMock('../../../quickstart_flows/shared/use_window_blur_data_monitoring_trigger'));
 
 const mockKubernetesFlowData = {
   onboardingId: 'test-onboarding-id',
@@ -130,7 +160,7 @@ describe('KubernetesOtelPage', () => {
       data: mockKubernetesFlowData,
       status: 'success',
       error: undefined,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     useWindowBlurDataMonitoringTriggerMock.mockReturnValue(false);
   });
@@ -207,7 +237,7 @@ describe('KubernetesOtelPage', () => {
       data: undefined,
       status: 'failure',
       error: buildFetchError(),
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     renderPage();
     const emptyPrompt = screen.getByTestId('emptyPromptStub');

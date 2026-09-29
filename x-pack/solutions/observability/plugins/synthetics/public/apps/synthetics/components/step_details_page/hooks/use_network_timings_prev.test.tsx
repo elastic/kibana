@@ -5,29 +5,43 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useNetworkTimingsPrevious24Hours } from './use_network_timings_prev';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
-const mockUseReduxEsSearch = jest.fn();
-jest.mock('../../../hooks/use_redux_es_search', () => ({
-  useReduxEsSearch: (...args: any[]) => mockUseReduxEsSearch(...args),
-}));
+const mockUseReduxEsSearch = vi.fn();
+vi.mock('../../../hooks/use_redux_es_search', () => {
+      const mocked = {
+      useReduxEsSearch: (...args: any[]) => mockUseReduxEsSearch(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUrlParams = jest.fn();
-jest.mock('../../../hooks', () => ({
-  useGetUrlParams: () => mockUrlParams(),
-}));
+const mockUrlParams = vi.fn();
+vi.mock('../../../hooks', () => {
+      const mocked = {
+      useGetUrlParams: () => mockUrlParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../monitor_details/hooks/use_journey_steps', () => ({
-  useJourneySteps: () => ({
-    currentStep: { '@timestamp': '2024-01-01T00:00:00.000Z' },
-  }),
-}));
+vi.mock('../../monitor_details/hooks/use_journey_steps', () => {
+      const mocked = {
+      useJourneySteps: () => ({
+        currentStep: { '@timestamp': '2024-01-01T00:00:00.000Z' },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  useParams: () => ({ checkGroupId: 'cg-1', stepIndex: '2', monitorId: 'monitor-1' }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useParams: () => ({ checkGroupId: 'cg-1', stepIndex: '2', monitorId: 'monitor-1' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useNetworkTimingsPrevious24Hours', () => {
   beforeEach(() => {
@@ -35,7 +49,7 @@ describe('useNetworkTimingsPrevious24Hours', () => {
     mockUseReduxEsSearch.mockReturnValue({ data: undefined, loading: false });
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('queries the local synthetics index pattern when no remoteName is provided', () => {
     renderHook(() => useNetworkTimingsPrevious24Hours());

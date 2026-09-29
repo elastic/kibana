@@ -7,20 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { Box } from './box';
 
 // Mock withMcpClient so action handlers don't need a real MCP transport.
 // The mock immediately invokes the callback with a fake McpClient.
-const mockCallTool = jest.fn();
-const mockListTools = jest.fn();
+const mockCallTool = vi.fn();
+const mockListTools = vi.fn();
 
-jest.mock('../../lib/mcp/with_mcp_client', () => ({
-  withMcpClient: jest.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
-    return fn({ callTool: mockCallTool, listTools: mockListTools });
-  }),
-}));
+vi.mock('../../lib/mcp/with_mcp_client', () => {
+      const mocked = {
+      withMcpClient: vi.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
+        return fn({ callTool: mockCallTool, listTools: mockListTools });
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Helper: parse raw input through the action schema the way the framework does,
 // so Zod defaults are applied before the handler receives the input.
@@ -38,7 +43,7 @@ describe('Box', () => {
   const mockContent = [{ type: 'text', text: JSON.stringify(mockJson) }];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCallTool.mockResolvedValue({ content: mockContent });
     mockListTools.mockResolvedValue({
       tools: [{ name: 'who_am_i' }, { name: 'search_files_keyword' }],
@@ -598,7 +603,7 @@ describe('Box', () => {
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
-      const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
+      const { withMcpClient } = (await vi.importMock('../../lib/mcp/with_mcp_client'));
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
 
       await expect(testSpec.handler(mockContext)).rejects.toThrow('connection refused');

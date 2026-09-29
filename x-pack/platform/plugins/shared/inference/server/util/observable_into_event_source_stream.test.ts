@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createParser } from 'eventsource-parser';
 import { partition } from 'lodash';
 import { merge, of, throwError } from 'rxjs';
@@ -14,8 +16,8 @@ import type { Logger } from '@kbn/logging';
 
 describe('observableIntoEventSourceStream', () => {
   const logger = {
-    debug: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
   } as unknown as Logger;
   function renderStream<T extends InferenceTaskEvent>(events: Array<T | Error>) {
     const [inferenceEvents, errors] = partition(

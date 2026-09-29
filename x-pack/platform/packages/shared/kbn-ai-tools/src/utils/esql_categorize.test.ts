@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { buildCategorizeWithSampleQuery, categorizeWithNoiseExclusion } from './esql_categorize';
@@ -19,7 +22,7 @@ const categorizeResponse = (values: unknown[][]): ESQLSearchResponse =>
     values,
   } as unknown as ESQLSearchResponse);
 
-const createTracedEsClient = (esql: jest.Mock) =>
+const createTracedEsClient = (esql: Mock) =>
   ({
     esql,
   } as unknown as TracedElasticsearchClient);
@@ -98,7 +101,7 @@ describe('buildCategorizeWithSampleQuery', () => {
 
 describe('categorizeWithNoiseExclusion', () => {
   it('excludes the noisy head then recategorizes the residual at full probability', async () => {
-    const esql = jest
+    const esql = vi
       .fn()
       .mockResolvedValueOnce(categorizeResponse([[960, 'request completed', 'request completed']]))
       .mockResolvedValueOnce(
@@ -130,7 +133,7 @@ describe('categorizeWithNoiseExclusion', () => {
   });
 
   it('normalizes head and tail counts back to population estimates', async () => {
-    const esql = jest
+    const esql = vi
       .fn()
       .mockResolvedValueOnce(categorizeResponse([[90, 'noise', 'noise']]))
       .mockResolvedValueOnce(categorizeResponse([[7, 'rare', 'rare']]));
@@ -150,7 +153,7 @@ describe('categorizeWithNoiseExclusion', () => {
   });
 
   it('falls back to a plain sampled categorize when no head clears the threshold', async () => {
-    const esql = jest
+    const esql = vi
       .fn()
       .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(categorizeResponse([[16, 'error one', 'error']]));
@@ -174,7 +177,7 @@ describe('categorizeWithNoiseExclusion', () => {
   });
 
   it('re-samples pass 2 when the residual still exceeds the cap', async () => {
-    const esql = jest
+    const esql = vi
       .fn()
       .mockResolvedValueOnce(categorizeResponse([[200, 'noise', 'noise']]))
       .mockResolvedValueOnce(categorizeResponse([[3, 'rare', 'rare']]));
@@ -198,7 +201,7 @@ describe('categorizeWithNoiseExclusion', () => {
   });
 
   it('skips pass 2 when counts are exact and the head is the whole population', async () => {
-    const esql = jest.fn().mockResolvedValueOnce(categorizeResponse([[100, 'all', 'all']]));
+    const esql = vi.fn().mockResolvedValueOnce(categorizeResponse([[100, 'all', 'all']]));
 
     const rows = await categorizeWithNoiseExclusion({
       esClient: createTracedEsClient(esql),
@@ -213,7 +216,7 @@ describe('categorizeWithNoiseExclusion', () => {
   });
 
   it('sorts by count descending and dedupes head remnants left by approximate exclusion', async () => {
-    const esql = jest
+    const esql = vi
       .fn()
       .mockResolvedValueOnce(categorizeResponse([[500, 'noise', 'noise']]))
       .mockResolvedValueOnce(
@@ -238,7 +241,7 @@ describe('categorizeWithNoiseExclusion', () => {
   });
 
   it('propagates two-pass query errors instead of silently degrading', async () => {
-    const esql = jest
+    const esql = vi
       .fn()
       .mockRejectedValueOnce(new Error('circuit_breaking_exception: too much data'));
 

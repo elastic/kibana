@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export const getUpdatableSavedObjectTypesMock = jest.fn();
-jest.doMock('./get_updatable_types', () => ({
-  getUpdatableSavedObjectTypes: getUpdatableSavedObjectTypesMock,
-}));
+import { vi } from 'vitest';
+
+export const getUpdatableSavedObjectTypesMock = vi.fn();
+vi.doMock('./get_updatable_types', () => {
+      const mocked = {
+      getUpdatableSavedObjectTypes: getUpdatableSavedObjectTypesMock,
+    };
+      return { ...mocked, default: mocked };
+    });

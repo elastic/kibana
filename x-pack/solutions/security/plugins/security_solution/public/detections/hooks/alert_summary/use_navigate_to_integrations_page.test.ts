@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import {
   INTEGRATIONS_URL,
@@ -12,21 +15,21 @@ import {
 } from './use_navigate_to_integrations_page';
 import { useKibana, useNavigateTo } from '../../../common/lib/kibana';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 describe('useNavigateToIntegrationsPage', () => {
   it('should return function', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         http: {
           basePath: {
-            prepend: jest.fn().mockImplementation((url) => url),
+            prepend: vi.fn().mockImplementation((url) => url),
           },
         },
       },
     });
-    const navigateTo = jest.fn();
-    (useNavigateTo as jest.Mock).mockReturnValue({ navigateTo });
+    const navigateTo = vi.fn();
+    (useNavigateTo as Mock).mockReturnValue({ navigateTo });
 
     const { result } = renderHook(() => useNavigateToIntegrationsPage());
 

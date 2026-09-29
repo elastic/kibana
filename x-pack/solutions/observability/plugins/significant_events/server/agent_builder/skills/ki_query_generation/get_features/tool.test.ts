@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Streams } from '@kbn/streams-schema';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
@@ -26,17 +29,17 @@ describe('ki_features_get tool', () => {
       wired: { fields: {}, routing: [] },
     },
   };
-  const getStream = jest.fn().mockResolvedValue(stream);
-  const getFeatures = jest.fn();
-  const getScopedClients = jest.fn(async () => {
+  const getStream = vi.fn().mockResolvedValue(stream);
+  const getFeatures = vi.fn();
+  const getScopedClients = vi.fn(async () => {
     return {
       streamsClient: { getStream },
-      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
+      getKnowledgeIndicatorClient: vi.fn().mockResolvedValue({ getFeatures }),
     } as unknown as RouteHandlerScopedClients;
-  }) as unknown as jest.MockedFunction<GetScopedClients>;
+  }) as unknown as MockedFunction<GetScopedClients>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getFeatures.mockResolvedValue({
       hits: [
         {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { kevAdapter } from './kev_adapter';
 import { normalizedReportSchema } from '../../../../common/threat_intel/workflows/step_types/fetch_source/fetch_source_common';
@@ -52,7 +54,7 @@ const makeEnvelope = (vulns: unknown[] = [VULN_1, VULN_2]) =>
   });
 
 const makeContext = (body: string, status = 200): AdapterRunContext => {
-  const fetchImpl = jest.fn().mockResolvedValue(
+  const fetchImpl = vi.fn().mockResolvedValue(
     new Response(body, {
       status,
       statusText: status === 200 ? 'OK' : 'Error',
@@ -183,7 +185,7 @@ describe('kevAdapter', () => {
   });
 
   it('sends a browser User-Agent header (CISA blocks default Kibana UA)', async () => {
-    const fetchImpl = jest.fn().mockResolvedValue(
+    const fetchImpl = vi.fn().mockResolvedValue(
       new Response(makeEnvelope(), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },

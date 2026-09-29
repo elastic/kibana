@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 /**
  * CAUTION: Be very mindful of the things you import in to this `jest_setup` file - anything that is imported
  * here (either directly or implicitly through dependencies) will be **unable** to be mocked elsewhere!
@@ -24,19 +26,19 @@ setStubLogger();
 // Start the kibana services with stubs
 setStubKibanaServices();
 
-jest.mock('./public/services/dashboard_api_services', () => {
+vi.mock('./public/services/dashboard_api_services', () => {
   return {
     getDashboardBackupService: () => mockDashboardBackupService,
-    initializeDashboardApiServices: () => jest.fn(),
+    initializeDashboardApiServices: () => vi.fn(),
   };
 });
 
-jest.mock('./public/services/dashboard_recently_accessed_service', () => {
+vi.mock('./public/services/dashboard_recently_accessed_service', () => {
   const recentlyAccessed = {
-    add: jest.fn(),
-    remove: jest.fn(),
-    get: jest.fn(),
-    get$: jest.fn(),
+    add: vi.fn(),
+    remove: vi.fn(),
+    get: vi.fn(),
+    get$: vi.fn(),
   };
   return {
     getDashboardRecentlyAccessedService: () => recentlyAccessed,

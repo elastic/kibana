@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ProfilesToolbar } from './profiles_toolbar';
 
 describe('ProfilesToolbar', () => {
   it('calls create callback when create button is clicked', () => {
-    const onCreateProfile = jest.fn();
+    const onCreateProfile = vi.fn();
 
     render(
       React.createElement(ProfilesToolbar, {
@@ -19,9 +21,9 @@ describe('ProfilesToolbar', () => {
         isManageMode: true,
         activeSpaceId: 'default',
         targetType: '',
-        onTargetTypeChange: jest.fn(),
+        onTargetTypeChange: vi.fn(),
         targetIdFilter: '',
-        onTargetIdFilterChange: jest.fn(),
+        onTargetIdFilterChange: vi.fn(),
         onCreateProfile,
       })
     );
@@ -38,10 +40,10 @@ describe('ProfilesToolbar', () => {
         isManageMode: true,
         activeSpaceId: 'default',
         targetType: '',
-        onTargetTypeChange: jest.fn(),
+        onTargetTypeChange: vi.fn(),
         targetIdFilter: '',
-        onTargetIdFilterChange: jest.fn(),
-        onCreateProfile: jest.fn(),
+        onTargetIdFilterChange: vi.fn(),
+        onCreateProfile: vi.fn(),
       })
     );
 

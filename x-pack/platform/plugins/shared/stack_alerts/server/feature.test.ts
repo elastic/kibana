@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { AlertingBuiltinsPlugin } from './plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
@@ -16,7 +18,7 @@ describe('Stack Alerts Feature Privileges', () => {
     const context = coreMock.createPluginInitializerContext();
     const plugin = new AlertingBuiltinsPlugin(context);
     const coreSetup = coreMock.createSetup();
-    coreSetup.getStartServices = jest.fn().mockResolvedValue([
+    coreSetup.getStartServices = vi.fn().mockResolvedValue([
       {
         application: {},
       },

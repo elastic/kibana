@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -14,20 +16,26 @@ import { TransactionDetailFlyoutTraceSampleTimeline } from './trace_sample_timel
 
 let capturedTraceWaterfallProps: Record<string, unknown> = {};
 
-jest.mock('@kbn/apm-ui-shared', () => ({
-  TraceWaterfall: (props: Record<string, unknown>) => {
-    capturedTraceWaterfallProps = props;
-    return <div data-test-subj="mock-trace-waterfall" />;
-  },
-  useGetServiceBadgeHrefFromCore: () => () => '/service',
-}));
+vi.mock('@kbn/apm-ui-shared', () => {
+      const mocked = {
+      TraceWaterfall: (props: Record<string, unknown>) => {
+        capturedTraceWaterfallProps = props;
+        return <div data-test-subj="mock-trace-waterfall" />;
+      },
+      useGetServiceBadgeHrefFromCore: () => () => '/service',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../transaction_detail_flyout_context', () => ({
-  useTransactionDetailFlyoutContext: () => ({
-    deps: { core: {} },
-    filters: { rangeFrom: 'now-15m', rangeTo: 'now' },
-  }),
-}));
+vi.mock('../transaction_detail_flyout_context', () => {
+      const mocked = {
+      useTransactionDetailFlyoutContext: () => ({
+        deps: { core: {} },
+        filters: { rangeFrom: 'now-15m', rangeTo: 'now' },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TRACE_ITEMS: TraceItem[] = [
   {

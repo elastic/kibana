@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   AWS_ONBOARDING_FLOW_ENTERED_EVENT,
   AWS_ONBOARDING_CREDENTIALS_ADDED_EVENT,
@@ -36,7 +38,7 @@ function makeStorage(initial: Record<string, string> = {}): Storage {
 }
 
 function makeAnalytics() {
-  return { reportEvent: jest.fn() };
+  return { reportEvent: vi.fn() };
 }
 
 function readState(storage: Storage) {

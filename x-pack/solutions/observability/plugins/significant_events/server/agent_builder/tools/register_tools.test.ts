@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { registerAgentBuilderTools } from './register_tools';
@@ -29,7 +31,7 @@ const createMockServer = (): Pick<SignificantEventsServer, 'isServerless' | 'cor
 
 describe('registerAgentBuilderTools', () => {
   const telemetry = {
-    trackAgentBuilderKnowledgeIndicatorCreated: jest.fn(),
+    trackAgentBuilderKnowledgeIndicatorCreated: vi.fn(),
   } as unknown as EbtTelemetryClient;
 
   it('registers all expected tools', () => {

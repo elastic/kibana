@@ -7,20 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { TriggerIcon, WorkflowsTriggersList } from './worflows_triggers_list';
 
-jest.mock('@kbn/workflows', () => ({
-  isTriggerType: jest.fn((type: string) => ['alert', 'manual', 'scheduled'].includes(type)),
-}));
+vi.mock('@kbn/workflows', () => {
+      const mocked = {
+      isTriggerType: vi.fn((type: string) => ['alert', 'manual', 'scheduled'].includes(type)),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../trigger_schemas', () => ({
-  triggerSchemas: {
-    getTriggerDefinition: jest.fn(() => undefined),
-  },
-}));
+vi.mock('../../trigger_schemas', () => {
+      const mocked = {
+      triggerSchemas: {
+        getTriggerDefinition: vi.fn(() => undefined),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('WorkflowsTriggersList', () => {
   it('renders the empty state when triggers array is empty', () => {
@@ -75,11 +83,11 @@ describe('WorkflowsTriggersList', () => {
 
 describe('TriggerIcon', () => {
   beforeEach(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should render the scheduled label as tooltip when next execution is unavailable', () => {
@@ -88,7 +96,7 @@ describe('TriggerIcon', () => {
   });
 
   it('should render scheduled label and next execution in tooltip when data is available', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime.bind(jest) });
     const { container } = render(
       <TriggerIcon triggerType="scheduled" nextExecution="Jan 15, 2025 11:00 AM" />
     );
@@ -97,14 +105,14 @@ describe('TriggerIcon', () => {
 
     const anchor = container.querySelector('.euiToolTipAnchor');
     await user.hover(anchor!);
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(await screen.findByText('Scheduled')).toBeInTheDocument();
     expect(screen.getByText('Next execution: Jan 15, 2025 11:00 AM')).toBeInTheDocument();
   });
 
   it('should render only next execution in tooltip when showLabelInTooltip is false', async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime.bind(jest) });
     const { container } = render(
       <TriggerIcon
         triggerType="scheduled"
@@ -115,7 +123,7 @@ describe('TriggerIcon', () => {
 
     const anchor = container.querySelector('.euiToolTipAnchor');
     await user.hover(anchor!);
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(await screen.findByText('Next execution: Jan 15, 2025 11:00 AM')).toBeInTheDocument();
     expect(screen.queryByText('Scheduled')).not.toBeInTheDocument();

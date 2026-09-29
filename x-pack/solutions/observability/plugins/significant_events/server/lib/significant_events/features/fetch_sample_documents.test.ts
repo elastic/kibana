@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { BasicPrettyPrinter } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -14,15 +16,21 @@ import { getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { getDiverseSampleDocuments } from '@kbn/nightshift-ai';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 
-jest.mock('@kbn/ai-tools', () => ({
-  getSampleDocumentsEsql: jest.fn(),
-}));
-jest.mock('@kbn/nightshift-ai', () => ({
-  getDiverseSampleDocuments: jest.fn(),
-}));
+vi.mock('@kbn/ai-tools', () => {
+      const mocked = {
+      getSampleDocumentsEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/nightshift-ai', () => {
+      const mocked = {
+      getDiverseSampleDocuments: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getDiverseSampleDocumentsMock = jest.mocked(getDiverseSampleDocuments);
-const getSampleDocumentsEsqlMock = jest.mocked(getSampleDocumentsEsql);
+const getDiverseSampleDocumentsMock = vi.mocked(getDiverseSampleDocuments);
+const getSampleDocumentsEsqlMock = vi.mocked(getSampleDocumentsEsql);
 
 const createHit = (id: string): SearchHit<Record<string, unknown>> => ({
   _index: '',
@@ -53,13 +61,13 @@ const createFeature = ({
   } as FeatureWithFilter);
 
 const logger = {
-  debug: jest.fn(),
-  warn: jest.fn(),
+  debug: vi.fn(),
+  warn: vi.fn(),
 } as unknown as Logger;
 
 describe('fetchSampleDocuments', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('rejects invalid sampling ratios', async () => {
@@ -129,7 +137,7 @@ describe('fetchSampleDocuments', () => {
   });
 
   it('uses ES|QL entity filtering with LOAD and leaves the random arm unfiltered', async () => {
-    const esClient = { fieldCaps: jest.fn() } as unknown as ElasticsearchClient;
+    const esClient = { fieldCaps: vi.fn() } as unknown as ElasticsearchClient;
     const features = [
       createFeature({
         id: 'older',

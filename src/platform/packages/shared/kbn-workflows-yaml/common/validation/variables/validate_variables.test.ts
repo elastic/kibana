@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicWorkflowContextSchema } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 
-jest.mock('../context/get_context_for_path');
-jest.mock('../context/get_workflow_context_schema');
-jest.mock('../context/extend_context_with_template_locals');
-jest.mock('./validate_variable');
-jest.mock('../../yaml/get_scalar_value_at_offset');
+vi.mock('../context/get_context_for_path');
+vi.mock('../context/get_workflow_context_schema');
+vi.mock('../context/extend_context_with_template_locals');
+vi.mock('./validate_variable');
+vi.mock('../../yaml/get_scalar_value_at_offset');
 
 import type { VariableItem, YamlValidationResult } from '../types';
 import { getScalarValueAtOffset } from '../../yaml/get_scalar_value_at_offset';
@@ -33,30 +36,30 @@ import { createStepContextResolver } from '../context/step_context_resolver';
 
 const emptyRegistry = createMockWorkflowContextRegistry();
 
-const mockGetScalarValueAtOffset = getScalarValueAtOffset as jest.MockedFunction<
+const mockGetScalarValueAtOffset = getScalarValueAtOffset as MockedFunction<
   typeof getScalarValueAtOffset
 >;
 
-const mockGetContextSchemaForStep = getContextSchemaForStep as jest.MockedFunction<
+const mockGetContextSchemaForStep = getContextSchemaForStep as MockedFunction<
   typeof getContextSchemaForStep
 >;
-const mockExtendWithPathSpecificContext = extendWithPathSpecificContext as jest.MockedFunction<
+const mockExtendWithPathSpecificContext = extendWithPathSpecificContext as MockedFunction<
   typeof extendWithPathSpecificContext
 >;
-const mockGetWorkflowContextSchema = getWorkflowContextSchema as jest.MockedFunction<
+const mockGetWorkflowContextSchema = getWorkflowContextSchema as MockedFunction<
   typeof getWorkflowContextSchema
 >;
 const mockGetContextSchemaWithTemplateLocals =
-  getContextSchemaWithTemplateLocals as jest.MockedFunction<
+  getContextSchemaWithTemplateLocals as MockedFunction<
     typeof getContextSchemaWithTemplateLocals
   >;
-const mockValidateVariable = validateVariable as jest.MockedFunction<typeof validateVariable>;
+const mockValidateVariable = validateVariable as MockedFunction<typeof validateVariable>;
 
 describe('validateVariables', () => {
   const mockStepSchema = {};
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetWorkflowContextSchema.mockReturnValue(DynamicWorkflowContextSchema);
     mockGetContextSchemaForStep.mockReturnValue(mockStepSchema as any);
     mockExtendWithPathSpecificContext.mockImplementation((schema) => schema);
@@ -406,7 +409,7 @@ describe('validateVariables', () => {
     expect(result[0].message).toContain('Foreach parameter');
   });
 
-  it('should extend context with template-local assign so x is valid', () => {
+  it('should extend context with template-local assign so x is valid', async () => {
     const templateString = '{% assign x = 1 %}{{ x }}';
     const scalarStart = 100;
     const variableOffsetInDoc = scalarStart + templateString.indexOf('{{ x }}') + 4;
@@ -420,13 +423,13 @@ describe('validateVariables', () => {
       offset: variableOffsetInDoc,
     });
     const mockModel = {
-      getOffsetAt: jest.fn((pos: { lineNumber: number; column: number }) => {
+      getOffsetAt: vi.fn((pos: { lineNumber: number; column: number }) => {
         if (pos.lineNumber === 1 && pos.column === 1) {
           return variableOffsetInDoc;
         }
         return 0;
       }),
-      getValue: jest.fn(() => ''),
+      getValue: vi.fn(() => ''),
     } as any;
     const mockYamlDocument = {} as any;
     mockGetScalarValueAtOffset.mockReturnValue({
@@ -438,14 +441,10 @@ describe('validateVariables', () => {
       ],
     } as any);
     // Use real implementations so template locals are applied
-    const { getContextSchemaForStep: realGetContextSchemaForStep } = jest.requireActual<
-      typeof import('../context/get_context_for_path')
-    >('../context/get_context_for_path');
+    const { getContextSchemaForStep: realGetContextSchemaForStep } = (await vi.importActual<typeof import('../context/get_context_for_path')>('../context/get_context_for_path'));
     mockGetContextSchemaForStep.mockImplementation(realGetContextSchemaForStep);
     const { getContextSchemaWithTemplateLocals: realGetContextSchemaWithTemplateLocals } =
-      jest.requireActual<typeof import('../context/extend_context_with_template_locals')>(
-        '../context/extend_context_with_template_locals'
-      );
+      (await vi.importActual<typeof import('../context/extend_context_with_template_locals')>('../context/extend_context_with_template_locals'));
     mockGetContextSchemaWithTemplateLocals.mockImplementation(
       realGetContextSchemaWithTemplateLocals
     );

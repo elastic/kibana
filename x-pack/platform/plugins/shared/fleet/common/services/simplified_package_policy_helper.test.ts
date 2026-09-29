@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { NewPackagePolicy, PackageInfo } from '../../server/types';
 import { PackagePolicyValidationError } from '../errors';
 import type { AgentlessPolicy } from '../types/models/agentless_policy';
@@ -20,10 +22,13 @@ import {
   agentlessPolicyToPackagePolicy,
 } from './simplified_package_policy_helper';
 
-jest.mock('./cloud_connectors', () => ({
-  ...jest.requireActual('./cloud_connectors'),
-  detectTargetCsp: jest.fn(() => undefined),
-}));
+vi.mock('./cloud_connectors', async () => {
+      const mocked = {
+      ...(await vi.importActual('./cloud_connectors')),
+      detectTargetCsp: vi.fn(() => undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /**
  * Minimal multi-template package fixture covering both shapes of the
@@ -595,8 +600,8 @@ describe('toPackagePolicy', () => {
   });
 });
 
-describe('toNewAgentlessPolicy', () => {
-  const { detectTargetCsp } = jest.requireMock('./cloud_connectors');
+describe('toNewAgentlessPolicy', async () => {
+  const { detectTargetCsp } = (await vi.importMock('./cloud_connectors'));
 
   type AgentlessPolicyInput = NewPackagePolicy & {
     force?: boolean;
@@ -617,7 +622,7 @@ describe('toNewAgentlessPolicy', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     detectTargetCsp.mockReturnValue(undefined);
   });
 

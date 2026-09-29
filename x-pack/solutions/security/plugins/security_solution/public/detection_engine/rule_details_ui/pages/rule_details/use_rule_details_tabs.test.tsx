@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, cleanup } from '@testing-library/react';
 import type { UseRuleDetailsTabsProps } from './use_rule_details_tabs';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
@@ -15,13 +18,13 @@ import { getUserPrivilegesMockDefaultValue } from '../../../../common/components
 import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
-jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/hooks/use_experimental_features');
 
-const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as Mock;
+const mockUseUserPrivileges = useUserPrivileges as Mock;
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as Mock;
 
 const mockRule: Rule = {
   id: 'myfakeruleid',
@@ -69,7 +72,7 @@ describe('useRuleDetailsTabs', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(async () => {

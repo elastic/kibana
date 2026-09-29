@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { of, BehaviorSubject, NEVER } from 'rxjs';
 import { createOnPreResponseHandler } from './on_pre_response_handler';
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -11,14 +13,14 @@ import { licenseMock } from '../common/licensing.mock';
 
 describe('createOnPreResponseHandler', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
   it('sets license.signature header immediately for non-error responses', async () => {
-    const refresh = jest.fn();
+    const refresh = vi.fn();
     const toolkit = httpServiceMock.createOnPreResponseToolkit();
 
     const interceptor = createOnPreResponseHandler(
@@ -36,7 +38,7 @@ describe('createOnPreResponseHandler', () => {
     });
   });
   it('sets license.signature header immediately for 429 error responses', async () => {
-    const refresh = jest.fn();
+    const refresh = vi.fn();
     const toolkit = httpServiceMock.createOnPreResponseToolkit();
 
     const interceptor = createOnPreResponseHandler(
@@ -56,7 +58,7 @@ describe('createOnPreResponseHandler', () => {
   it('sets license.signature header after refresh for other error responses', async () => {
     const updatedLicense = licenseMock.createLicense({ signature: 'bar' });
     const license$ = new BehaviorSubject(licenseMock.createLicense({ signature: 'foo' }));
-    const refresh = jest.fn().mockImplementation(() => {
+    const refresh = vi.fn().mockImplementation(() => {
       return new Promise((resolve) =>
         setTimeout(() => {
           license$.next(updatedLicense);
@@ -78,7 +80,7 @@ describe('createOnPreResponseHandler', () => {
       },
     });
 
-    jest.advanceTimersByTime(10);
+    vi.advanceTimersByTime(10);
 
     await interceptor(httpServerMock.createKibanaRequest(), { statusCode: 400 }, toolkit);
 
@@ -92,7 +94,7 @@ describe('createOnPreResponseHandler', () => {
   });
 
   it('sets unknown if license.signature is unset', async () => {
-    const refresh = jest.fn();
+    const refresh = vi.fn();
     const toolkit = httpServiceMock.createOnPreResponseToolkit();
     const noLicense$ = NEVER;
 

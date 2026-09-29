@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { WORKFLOWS_NOTIFICATION_REQUESTER_ID } from '@kbn/actions-plugin/server';
@@ -14,13 +17,13 @@ import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/appl
 import { ConnectorExecutor } from './connector_executor';
 
 describe('ConnectorExecutor', () => {
-  let mockActionsClient: jest.Mocked<ActionsClient>;
+  let mockActionsClient: Mocked<ActionsClient>;
   let connectorExecutor: ConnectorExecutor;
 
   beforeEach(() => {
     mockActionsClient = {
-      execute: jest.fn(),
-      getAll: jest.fn(() =>
+      execute: vi.fn(),
+      getAll: vi.fn(() =>
         Promise.resolve([
           {
             id: '123e4567-e89b-12d3-a456-426614174000',
@@ -29,18 +32,18 @@ describe('ConnectorExecutor', () => {
           },
         ] as ConnectorWithExtraFindData[])
       ),
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         id: '123e4567-e89b-12d3-a456-426614174000',
         name: 'test-connector',
         actionTypeId: 'http',
       } as ConnectorWithExtraFindData),
-    } as unknown as jest.Mocked<ActionsClient>;
+    } as unknown as Mocked<ActionsClient>;
 
     connectorExecutor = new ConnectorExecutor(mockActionsClient);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('execute', () => {

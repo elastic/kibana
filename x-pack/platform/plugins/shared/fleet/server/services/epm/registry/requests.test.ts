@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -14,33 +17,36 @@ import { RegistryError, RegistryConnectionError, RegistryResponseError } from '.
 import { appContextService } from '../../app_context';
 
 import { categorizeRegistryConnectionError, fetchUrl, getResponse } from './requests';
-jest.mock('node-fetch');
-jest.mock('../../app_context');
+vi.mock('node-fetch');
+vi.mock('../../app_context');
 
 let mockRegistryProxyUrl: string | undefined;
-jest.mock('./proxy', () => ({
-  getProxyAgent: jest.fn().mockReturnValue('proxy agent'),
-  getRegistryProxyUrl: () => mockRegistryProxyUrl,
-}));
+vi.mock('./proxy', () => {
+      const mocked = {
+      getProxyAgent: vi.fn().mockReturnValue('proxy agent'),
+      getRegistryProxyUrl: () => mockRegistryProxyUrl,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-const { Response, FetchError } = jest.requireActual('node-fetch');
+const { Response, FetchError } = require('node-fetch');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const fetchMock = require('node-fetch') as jest.Mock;
+const fetchMock = require('node-fetch') as Mock;
 
-jest.setTimeout(120 * 1000);
+vi.setConfig({ testTimeout: 120 * 1000 });
 
 describe('Registry requests', () => {
   beforeEach(async () => {});
 
   afterEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
-  let mockedLogger: jest.Mocked<Logger>;
+  let mockedLogger: Mocked<Logger>;
 
   describe('fetch options', () => {
     beforeEach(() => {

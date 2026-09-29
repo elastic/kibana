@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -17,9 +20,9 @@ import {
   ROUTE_VERSIONS,
 } from '../../common/constants';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -29,13 +32,13 @@ const createWrapper = () => {
 };
 
 describe('useDeleteRegionPolicy', () => {
-  const mockDelete = jest.fn();
-  const mockAddSuccess = jest.fn();
-  const mockAddError = jest.fn();
-  const mockAddDanger = jest.fn();
+  const mockDelete = vi.fn();
+  const mockAddSuccess = vi.fn();
+  const mockAddError = vi.fn();
+  const mockAddDanger = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         http: { delete: mockDelete },
@@ -71,7 +74,7 @@ describe('useDeleteRegionPolicy', () => {
     mockDelete.mockResolvedValue({ acknowledged: true });
 
     const { queryClient } = createWrapper();
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
     queryClient.setQueryData([REGION_POLICY_QUERY_KEY], {
       region_policy: { allowed_geos: ['eu'] },
     });
@@ -122,7 +125,7 @@ describe('useDeleteRegionPolicy', () => {
 
   it('calls the onSuccess callback after a successful delete', async () => {
     mockDelete.mockResolvedValue({ acknowledged: true });
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     const { Wrapper } = createWrapper();
     const { result } = renderHook(() => useDeleteRegionPolicy(onSuccess), { wrapper: Wrapper });
@@ -136,7 +139,7 @@ describe('useDeleteRegionPolicy', () => {
 
   it('does not call the onSuccess callback when delete fails', async () => {
     mockDelete.mockRejectedValue(new Error('server error'));
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
 
     const { Wrapper } = createWrapper();
     const { result } = renderHook(() => useDeleteRegionPolicy(onSuccess), { wrapper: Wrapper });

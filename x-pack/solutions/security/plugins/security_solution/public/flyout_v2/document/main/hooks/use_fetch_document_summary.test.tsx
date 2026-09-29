@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ReactNode } from 'react';
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -12,9 +15,12 @@ import { useFetchDocumentSummary } from './use_fetch_document_summary';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
-jest.mock('@kbn/elastic-assistant', () => ({
-  useAssistantContext: jest.fn(),
-}));
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      useAssistantContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 const args = {
   documentId: '12345',
   connectorId: '67890',
@@ -31,11 +37,11 @@ const mockAlertSummary = {
 };
 describe('useFetchDocumentSummary', () => {
   const mockHttp = {
-    fetch: jest.fn(),
+    fetch: vi.fn(),
   };
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useAssistantContext as Mock).mockReturnValue({
       http: mockHttp,
       assistantAvailability: {
         isAssistantEnabled: true,

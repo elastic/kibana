@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
@@ -15,10 +18,10 @@ import { MAX_CATEGORY_LENGTH } from '../../../../../common/constants';
 import type { CategoryFieldProps } from './category_field';
 import { CategoryField } from './category_field';
 
-jest.mock('../../../../containers/use_get_categories');
+vi.mock('../../../../containers/use_get_categories');
 
-const useGetCategoriesMock = useGetCategories as jest.Mock;
-const onSubmit = jest.fn();
+const useGetCategoriesMock = useGetCategories as Mock;
+const onSubmit = vi.fn();
 
 const defaultProps: CategoryFieldProps = {
   isLoading: false,
@@ -30,20 +33,20 @@ describe('CategoryField', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     useGetCategoriesMock.mockReturnValue({ data: categories, isLoading: false });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the category combo box directly, without an edit button', () => {

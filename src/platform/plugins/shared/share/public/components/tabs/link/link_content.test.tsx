@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { type ComponentProps } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
@@ -56,7 +58,7 @@ describe('LinkContent', () => {
     basePath: {
       get: () => '/xyz',
     },
-    fetch: jest.fn(async () => {
+    fetch: vi.fn(async () => {
       return {} as any;
     }),
   };
@@ -77,7 +79,7 @@ describe('LinkContent', () => {
 
   beforeAll(() => {
     Object.defineProperty(document, 'execCommand', {
-      value: jest.fn(() => true),
+      value: vi.fn(() => true),
     });
   });
 
@@ -87,7 +89,7 @@ describe('LinkContent', () => {
     const objectId = '123';
     const isDirty = false;
 
-    const delegatedShareUrlHandler = jest.fn();
+    const delegatedShareUrlHandler = vi.fn();
 
     renderComponent({
       objectType,
@@ -143,12 +145,12 @@ describe('LinkContent', () => {
 
     const shortURL = 'http://localhost:5601/xyz/r/s/yellow-orange-tomato';
 
-    const createWithLocatorSpy = jest.spyOn(BrowserShortUrlClient.prototype, 'createWithLocator');
+    const createWithLocatorSpy = vi.spyOn(BrowserShortUrlClient.prototype, 'createWithLocator');
 
     createWithLocatorSpy.mockResolvedValue({
       // @ts-expect-error we only return locator property, as that's all we need for this test
       locator: {
-        getUrl: jest.fn(() => Promise.resolve(shortURL)),
+        getUrl: vi.fn(() => Promise.resolve(shortURL)),
       },
     });
 
@@ -185,7 +187,7 @@ describe('LinkContent', () => {
 
     const shortURL = 'http://localhost:5601/xyz/r/s/yellow-orange-tomato';
 
-    const createFromLongUrlSpy = jest.spyOn(BrowserShortUrlClient.prototype, 'createFromLongUrl');
+    const createFromLongUrlSpy = vi.spyOn(BrowserShortUrlClient.prototype, 'createFromLongUrl');
 
     // @ts-expect-error we only return url property, as that's all we need for this test
     createFromLongUrlSpy.mockResolvedValue({
@@ -217,7 +219,7 @@ describe('LinkContent', () => {
 
   it('renders a draft mode callout when dirty and triggers its save button', async () => {
     const user = userEvent.setup();
-    const onSave = jest.fn();
+    const onSave = vi.fn();
     const shareContext: IShareContext = {
       ...mockShareContext,
       onSave,

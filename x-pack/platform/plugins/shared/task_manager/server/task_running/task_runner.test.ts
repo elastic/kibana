@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import _ from 'lodash';
 import { errors } from '@elastic/elasticsearch';
 import { secondsFromNow, secondsFromDate } from '../lib/intervals';
@@ -43,34 +46,37 @@ const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 const minutesFromDate = (date: Date, mins: number): Date => secondsFromDate(date, mins * 60);
-const getNextRunAtSpy = jest.spyOn(nextRunAtUtils, 'getNextRunAt');
+const getNextRunAtSpy = vi.spyOn(nextRunAtUtils, 'getNextRunAt');
 const eventLoggerMock = {
-  logEvent: jest.fn(),
+  logEvent: vi.fn(),
 } as unknown as TaskEventLogger;
 const dateRegExp = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/;
 
 const TASK_EXECUTION_UUID = 'NEW_UUID';
-jest.mock('uuid', () => ({
-  v4: () => TASK_EXECUTION_UUID,
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => TASK_EXECUTION_UUID,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeAll(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 });
 
 beforeEach(() => {
-  jest.setSystemTime(new Date('1970-01-01T00:00:00.000Z'));
+  vi.setSystemTime(new Date('1970-01-01T00:00:00.000Z'));
 });
 
-afterAll(() => jest.useRealTimers());
+afterAll(() => vi.useRealTimers());
 
 describe('TaskManagerRunner', () => {
   const pendingStageSetup = (opts: TestOpts) => testOpts(TaskRunningStage.PENDING, opts);
   const readyToRunStageSetup = (opts: TestOpts) => testOpts(TaskRunningStage.READY_TO_RUN, opts);
   const mockApmTrans = {
-    end: jest.fn(),
-    addLabels: jest.fn(),
-    setLabel: jest.fn(),
+    end: vi.fn(),
+    addLabels: vi.fn(),
+    setLabel: vi.fn(),
   };
 
   let otelExporter: tracing.InMemorySpanExporter;
@@ -107,8 +113,8 @@ describe('TaskManagerRunner', () => {
 
   describe('Pending Stage', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
-      jest
+      vi.clearAllMocks();
+      vi
         .spyOn(apm, 'startTransaction')
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -232,7 +238,7 @@ describe('TaskManagerRunner', () => {
 
   describe('Ready To Run Stage', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     test('makes calls to APM as expected when task runs successfully', async () => {
       const { runner } = await readyToRunStageSetup({
@@ -407,7 +413,7 @@ describe('TaskManagerRunner', () => {
       );
     });
     test('provides fakeRequest when task has apiKey', async () => {
-      const createTaskRunnerFn = jest.fn();
+      const createTaskRunnerFn = vi.fn();
       const instance = mockInstance();
       const { runner } = await readyToRunStageSetup({
         instance: {
@@ -433,8 +439,8 @@ describe('TaskManagerRunner', () => {
     });
 
     test('calls enrichFakeRequest with the fake request and userProfileId when both are present', async () => {
-      const enrichFakeRequest = jest.fn();
-      const createTaskRunnerFn = jest.fn();
+      const enrichFakeRequest = vi.fn();
+      const createTaskRunnerFn = vi.fn();
       const { runner } = await readyToRunStageSetup({
         instance: {
           ...mockInstance(),
@@ -465,8 +471,8 @@ describe('TaskManagerRunner', () => {
     });
 
     test('passes enrichRequest on RunContext when userProfileId is present', async () => {
-      const enrichFakeRequest = jest.fn();
-      const createTaskRunnerFn = jest.fn();
+      const enrichFakeRequest = vi.fn();
+      const createTaskRunnerFn = vi.fn();
       const { runner } = await readyToRunStageSetup({
         instance: {
           ...mockInstance(),
@@ -495,8 +501,8 @@ describe('TaskManagerRunner', () => {
     });
 
     test('enrichRequest is undefined when userProfileId is absent', async () => {
-      const enrichFakeRequest = jest.fn();
-      const createTaskRunnerFn = jest.fn();
+      const enrichFakeRequest = vi.fn();
+      const createTaskRunnerFn = vi.fn();
       const { runner } = await readyToRunStageSetup({
         instance: {
           ...mockInstance(),
@@ -524,8 +530,8 @@ describe('TaskManagerRunner', () => {
     });
 
     test('enrichRequest calls enrichFakeRequest for child requests', async () => {
-      const enrichFakeRequest = jest.fn();
-      const createTaskRunnerFn = jest.fn();
+      const enrichFakeRequest = vi.fn();
+      const createTaskRunnerFn = vi.fn();
       const { runner } = await readyToRunStageSetup({
         instance: {
           ...mockInstance(),
@@ -560,7 +566,7 @@ describe('TaskManagerRunner', () => {
     });
 
     test('runs without error and passes undefined enrichRequest when no enrichFakeRequest hook is provided', async () => {
-      const createTaskRunnerFn = jest.fn();
+      const createTaskRunnerFn = vi.fn();
       const { runner } = await readyToRunStageSetup({
         instance: {
           ...mockInstance(),
@@ -589,8 +595,8 @@ describe('TaskManagerRunner', () => {
     });
 
     test('still enriches when apiKeyCreatedByUser is true but userProfileId is present', async () => {
-      const enrichFakeRequest = jest.fn();
-      const createTaskRunnerFn = jest.fn();
+      const enrichFakeRequest = vi.fn();
+      const createTaskRunnerFn = vi.fn();
       const { runner } = await readyToRunStageSetup({
         instance: {
           ...mockInstance(),
@@ -624,14 +630,14 @@ describe('TaskManagerRunner', () => {
 
     test('propagates enrichFakeRequest errors when enrichRequest is called on a non-fake child request', async () => {
       let callCount = 0;
-      const enrichFakeRequest = jest.fn().mockImplementation(() => {
+      const enrichFakeRequest = vi.fn().mockImplementation(() => {
         callCount += 1;
         // succeed on the initial fake-request enrichment, throw on the child request
         if (callCount > 1) {
           throw new Error('boom');
         }
       });
-      const createTaskRunnerFn = jest.fn();
+      const createTaskRunnerFn = vi.fn();
       const { runner } = await readyToRunStageSetup({
         instance: {
           ...mockInstance(),
@@ -854,7 +860,7 @@ describe('TaskManagerRunner', () => {
     test(`doesn't reschedule recurring tasks that throw an unrecoverable error`, async () => {
       const id = _.random(1, 20).toString();
       const error = new Error('Dangit!');
-      const onTaskEvent = jest.fn();
+      const onTaskEvent = vi.fn();
       const {
         runner,
         store,
@@ -907,7 +913,7 @@ describe('TaskManagerRunner', () => {
 
     test(`doesn't reschedule recurring tasks that return shouldDeleteTask = true`, async () => {
       const id = _.random(1, 20).toString();
-      const onTaskEvent = jest.fn();
+      const onTaskEvent = vi.fn();
       const {
         runner,
         store,
@@ -1011,7 +1017,7 @@ describe('TaskManagerRunner', () => {
 
     test('cancel cancels the task runner, if it is cancellable', async () => {
       let wasCancelled = false;
-      const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
+      const abortSpy = vi.spyOn(AbortController.prototype, 'abort');
 
       const { runner, logger } = await readyToRunStageSetup({
         definitions: {
@@ -1020,7 +1026,7 @@ describe('TaskManagerRunner', () => {
             createTaskRunner: () => ({
               async run() {
                 const promise = new Promise((r) => setTimeout(r, 1000));
-                jest.advanceTimersByTime(1000);
+                vi.advanceTimersByTime(1000);
                 await promise;
               },
               async cancel() {
@@ -1438,7 +1444,7 @@ describe('TaskManagerRunner', () => {
             createTaskRunner: () => ({
               async run() {
                 const promise = new Promise((r) => setTimeout(r, 60000));
-                jest.advanceTimersByTime(60000);
+                vi.advanceTimersByTime(60000);
                 await promise;
                 return { state: {} };
               },
@@ -1471,7 +1477,7 @@ describe('TaskManagerRunner', () => {
             createTaskRunner: () => ({
               async run() {
                 const promise = new Promise((r) => setTimeout(r, 60000));
-                jest.advanceTimersByTime(60000);
+                vi.advanceTimersByTime(60000);
                 await promise;
                 return { state: {} };
               },
@@ -1516,7 +1522,7 @@ describe('TaskManagerRunner', () => {
             createTaskRunner: () => ({
               async run() {
                 const promise = new Promise((r) => setTimeout(r, 60000));
-                jest.advanceTimersByTime(60000);
+                vi.advanceTimersByTime(60000);
                 await promise;
                 return { state: {} };
               },
@@ -1535,7 +1541,7 @@ describe('TaskManagerRunner', () => {
           heartbeatCountBeforeProcessResult = heartbeatUpdateCount;
           // If heartbeat timer is still running while processResult persists task state,
           // advancing time here will trigger an additional retryAt update.
-          jest.advanceTimersByTime(60000);
+          vi.advanceTimersByTime(60000);
         }
         return mockInstance({
           ...doc,
@@ -1554,7 +1560,7 @@ describe('TaskManagerRunner', () => {
     describe('TaskEvents', () => {
       test('emits TaskEvent when a task is run successfully', async () => {
         const id = _.random(1, 20).toString();
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner, instance } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
@@ -1590,9 +1596,9 @@ describe('TaskManagerRunner', () => {
       });
 
       test('emits TaskEvent when a task is run successfully but completes after timeout', async () => {
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner, instance } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
@@ -1611,7 +1617,7 @@ describe('TaskManagerRunner', () => {
           },
         });
 
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         await runner.run();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
@@ -1635,7 +1641,7 @@ describe('TaskManagerRunner', () => {
       test('emits TaskEvent when a recurring task is run successfully', async () => {
         const id = _.random(1, 20).toString();
         const runAt = minutesFromNow(_.random(5));
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner, instance } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
@@ -1672,10 +1678,10 @@ describe('TaskManagerRunner', () => {
       });
 
       test('emits TaskEvent when a recurring task is run successfully but completes after timeout', async () => {
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
         const runAt = minutesFromNow(_.random(5));
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner, instance } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
@@ -1695,7 +1701,7 @@ describe('TaskManagerRunner', () => {
           },
         });
 
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         await runner.run();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
@@ -1719,7 +1725,7 @@ describe('TaskManagerRunner', () => {
       test('emits TaskEvent when a recurring task returns a success result with taskRunError', async () => {
         const id = _.random(1, 20).toString();
         const runAt = minutesFromNow(_.random(5));
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner, instance } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
@@ -1761,10 +1767,10 @@ describe('TaskManagerRunner', () => {
       });
 
       test('emits TaskEvent when a recurring task returns a success result with taskRunError but completes after timeout', async () => {
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
         const runAt = minutesFromNow(_.random(5));
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner, instance } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
@@ -1788,7 +1794,7 @@ describe('TaskManagerRunner', () => {
           },
         });
 
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         await runner.run();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
@@ -1810,7 +1816,7 @@ describe('TaskManagerRunner', () => {
       test('emits TaskEvent when a task run throws an error', async () => {
         const id = _.random(1, 20).toString();
         const error = new Error('Dangit!');
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner, instance } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
@@ -1847,10 +1853,10 @@ describe('TaskManagerRunner', () => {
       });
 
       test('emits TaskEvent when a recurring task run throws an error due to timeout', async () => {
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
         const error = new Error('Task was cancelled');
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         let wasCancelled = false;
         const { runner, instance } = await readyToRunStageSetup({
           onTaskEvent,
@@ -1865,7 +1871,7 @@ describe('TaskManagerRunner', () => {
               createTaskRunner: () => ({
                 async run() {
                   const promise = new Promise((r) => setTimeout(r, 20000));
-                  jest.advanceTimersByTime(20000);
+                  vi.advanceTimersByTime(20000);
                   await promise;
                   if (wasCancelled) {
                     throw error;
@@ -1878,7 +1884,7 @@ describe('TaskManagerRunner', () => {
             },
           },
         });
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         const promise = runner.run();
         await Promise.resolve();
         await runner.cancel();
@@ -1905,10 +1911,10 @@ describe('TaskManagerRunner', () => {
       });
 
       test('emits TaskEvent when an ad-hoc task run throws an error due to timeout', async () => {
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
         const error = new Error('Task was cancelled');
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         let wasCancelled = false;
         const { runner, instance } = await readyToRunStageSetup({
           onTaskEvent,
@@ -1920,7 +1926,7 @@ describe('TaskManagerRunner', () => {
               createTaskRunner: () => ({
                 async run() {
                   const promise = new Promise((r) => setTimeout(r, 20000));
-                  jest.advanceTimersByTime(20000);
+                  vi.advanceTimersByTime(20000);
                   await promise;
                   if (wasCancelled) {
                     throw error;
@@ -1933,7 +1939,7 @@ describe('TaskManagerRunner', () => {
             },
           },
         });
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         const promise = runner.run();
         await Promise.resolve();
         await runner.cancel();
@@ -1960,9 +1966,9 @@ describe('TaskManagerRunner', () => {
       });
 
       test('emits TaskEvent when a recurring task run times out without throwing error', async () => {
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner, instance } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
@@ -1976,14 +1982,14 @@ describe('TaskManagerRunner', () => {
               createTaskRunner: () => ({
                 async run() {
                   const promise = new Promise((r) => setTimeout(r, 20000));
-                  jest.advanceTimersByTime(20000);
+                  vi.advanceTimersByTime(20000);
                   await promise;
                 },
               }),
             },
           },
         });
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         const promise = runner.run();
         await Promise.resolve();
         await runner.cancel();
@@ -2009,9 +2015,9 @@ describe('TaskManagerRunner', () => {
       });
 
       test('emits TaskEvent when an ad-hoc task run times out without throwing error', async () => {
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner, instance } = await readyToRunStageSetup({
           onTaskEvent,
           instance: { id },
@@ -2022,14 +2028,14 @@ describe('TaskManagerRunner', () => {
               createTaskRunner: () => ({
                 async run() {
                   const promise = new Promise((r) => setTimeout(r, 20000));
-                  jest.advanceTimersByTime(20000);
+                  vi.advanceTimersByTime(20000);
                   await promise;
                 },
               }),
             },
           },
         });
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         const promise = runner.run();
         await Promise.resolve();
         await runner.cancel();
@@ -2057,7 +2063,7 @@ describe('TaskManagerRunner', () => {
       test('emits TaskEvent when a task run returns an error', async () => {
         const id = _.random(1, 20).toString();
         const error = new Error('Dangit!');
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner, instance } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
@@ -2102,7 +2108,7 @@ describe('TaskManagerRunner', () => {
       test('emits TaskEvent when a task returns an error and is marked as failed', async () => {
         const id = _.random(1, 20).toString();
         const error = new Error('Dangit!');
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const {
           runner,
           store,
@@ -2158,7 +2164,7 @@ describe('TaskManagerRunner', () => {
       test('emits TaskEvent when failing to update a recurring task', async () => {
         const id = _.random(1, 20).toString();
         const runAt = minutesFromNow(_.random(5));
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner, instance, store } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
@@ -2204,7 +2210,7 @@ describe('TaskManagerRunner', () => {
       test('emits TaskEvent when failing to update a non-recurring task', async () => {
         const id = _.random(1, 20).toString();
         const runAt = minutesFromNow(_.random(5));
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner, instance, store } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
@@ -2303,7 +2309,7 @@ describe('TaskManagerRunner', () => {
 
         await runner.run();
 
-        const calls = (eventLoggerMock.logEvent as jest.Mock).mock.calls;
+        const calls = (eventLoggerMock.logEvent as Mock).mock.calls;
         const startCallIndex = calls.findIndex((c) => c[0].event.action === 'task-run-start');
         const endCallIndex = calls.findIndex((c) => c[0].event.action === 'task-run');
         expect(startCallIndex).toBeGreaterThanOrEqual(0);
@@ -2329,7 +2335,7 @@ describe('TaskManagerRunner', () => {
 
         await runner.run();
 
-        const calls = (eventLoggerMock.logEvent as jest.Mock).mock.calls;
+        const calls = (eventLoggerMock.logEvent as Mock).mock.calls;
         const startEvent = calls.find((c) => c[0].event.action === 'task-run-start');
         const endEvent = calls.find((c) => c[0].event.action === 'task-run');
         expect(startEvent).toBeDefined();
@@ -2368,7 +2374,7 @@ describe('TaskManagerRunner', () => {
 
     describe('setCustomTaskRunEventFields', () => {
       const findLoggedEvent = (action: string) =>
-        (eventLoggerMock.logEvent as jest.Mock).mock.calls
+        (eventLoggerMock.logEvent as Mock).mock.calls
           .map((call) => call[0])
           .find((event) => event.event.action === action);
 
@@ -2622,7 +2628,7 @@ describe('TaskManagerRunner', () => {
       });
 
       test('adds custom fields set before cancellation onto the task-cancel event', async () => {
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
         const { runner } = await readyToRunStageSetup({
           instance: { id, schedule: { interval: '1s' } },
@@ -2634,14 +2640,14 @@ describe('TaskManagerRunner', () => {
                 async run() {
                   context.setCustomTaskRunEventFields({ started: true });
                   const promise = new Promise((r) => setTimeout(r, 20000));
-                  jest.advanceTimersByTime(20000);
+                  vi.advanceTimersByTime(20000);
                   await promise;
                 },
               }),
             },
           },
         });
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         const promise = runner.run();
         await Promise.resolve();
         await runner.cancel();
@@ -2666,7 +2672,7 @@ describe('TaskManagerRunner', () => {
     describe('logTaskRunEvent', () => {
       test('eventLog logs an event when a task is run successfully', async () => {
         const id = _.random(1, 20).toString();
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
@@ -2710,7 +2716,7 @@ describe('TaskManagerRunner', () => {
       test('eventLog logs a failure event when a recurring task returns a success result with taskRunError', async () => {
         const id = _.random(1, 20).toString();
         const runAt = minutesFromNow(_.random(5));
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
@@ -2760,7 +2766,7 @@ describe('TaskManagerRunner', () => {
       test('eventLog logs a failure event when a task run throws an error', async () => {
         const id = _.random(1, 20).toString();
         const error = new Error('Dangit!');
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
@@ -2803,10 +2809,10 @@ describe('TaskManagerRunner', () => {
       });
 
       test('eventLog logs failure and cancel events when a recurring task run throws an error due to timeout', async () => {
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
         const error = new Error('Task was cancelled');
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         let wasCancelled = false;
         const { runner } = await readyToRunStageSetup({
           onTaskEvent,
@@ -2821,7 +2827,7 @@ describe('TaskManagerRunner', () => {
               createTaskRunner: () => ({
                 async run() {
                   const promise = new Promise((r) => setTimeout(r, 20000));
-                  jest.advanceTimersByTime(20000);
+                  vi.advanceTimersByTime(20000);
                   await promise;
                   if (wasCancelled) {
                     throw error;
@@ -2834,7 +2840,7 @@ describe('TaskManagerRunner', () => {
             },
           },
         });
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         const promise = runner.run();
         await Promise.resolve();
         await runner.cancel();
@@ -2884,10 +2890,10 @@ describe('TaskManagerRunner', () => {
       });
 
       test('eventLog logs failure and cancel events when an ad-hoc task run throws an error due to timeout', async () => {
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
         const error = new Error('Task was cancelled');
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         let wasCancelled = false;
         const { runner } = await readyToRunStageSetup({
           onTaskEvent,
@@ -2899,7 +2905,7 @@ describe('TaskManagerRunner', () => {
               createTaskRunner: () => ({
                 async run() {
                   const promise = new Promise((r) => setTimeout(r, 20000));
-                  jest.advanceTimersByTime(20000);
+                  vi.advanceTimersByTime(20000);
                   await promise;
                   if (wasCancelled) {
                     throw error;
@@ -2912,7 +2918,7 @@ describe('TaskManagerRunner', () => {
             },
           },
         });
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         const promise = runner.run();
         await Promise.resolve();
         await runner.cancel();
@@ -2961,9 +2967,9 @@ describe('TaskManagerRunner', () => {
       });
 
       test('emits TaskEvent when a recurring task run times out without throwing error', async () => {
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
@@ -2977,14 +2983,14 @@ describe('TaskManagerRunner', () => {
               createTaskRunner: () => ({
                 async run() {
                   const promise = new Promise((r) => setTimeout(r, 20000));
-                  jest.advanceTimersByTime(20000);
+                  vi.advanceTimersByTime(20000);
                   await promise;
                 },
               }),
             },
           },
         });
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         const promise = runner.run();
         await Promise.resolve();
         await runner.cancel();
@@ -3031,9 +3037,9 @@ describe('TaskManagerRunner', () => {
       });
 
       test('emits TaskEvent when an ad-hoc task run times out without throwing error', async () => {
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
-        const onTaskEvent = jest.fn();
+        const onTaskEvent = vi.fn();
         const { runner } = await readyToRunStageSetup({
           onTaskEvent,
           instance: { id },
@@ -3044,14 +3050,14 @@ describe('TaskManagerRunner', () => {
               createTaskRunner: () => ({
                 async run() {
                   const promise = new Promise((r) => setTimeout(r, 20000));
-                  jest.advanceTimersByTime(20000);
+                  vi.advanceTimersByTime(20000);
                   await promise;
                 },
               }),
             },
           },
         });
-        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        vi.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         const promise = runner.run();
         await Promise.resolve();
         await runner.cancel();
@@ -3100,7 +3106,7 @@ describe('TaskManagerRunner', () => {
 
     test('does not update saved object if recurring task expires without throwing error and timeout is greater than schedule', async () => {
       const id = _.random(1, 20).toString();
-      const onTaskEvent = jest.fn();
+      const onTaskEvent = vi.fn();
       const { runner, store, usageCounter } = await readyToRunStageSetup({
         onTaskEvent,
         instance: {
@@ -3115,7 +3121,7 @@ describe('TaskManagerRunner', () => {
             createTaskRunner: () => ({
               async run() {
                 const promise = new Promise((r) => setTimeout(r, 20000));
-                jest.advanceTimersByTime(20000);
+                vi.advanceTimersByTime(20000);
                 await promise;
               },
             }),
@@ -3138,7 +3144,7 @@ describe('TaskManagerRunner', () => {
 
     test('does not update saved object if recurring task throws error due to expiration and timeout is greater than schedule', async () => {
       const id = _.random(1, 20).toString();
-      const onTaskEvent = jest.fn();
+      const onTaskEvent = vi.fn();
       let wasCancelled = false;
       const { runner, store, usageCounter } = await readyToRunStageSetup({
         onTaskEvent,
@@ -3154,7 +3160,7 @@ describe('TaskManagerRunner', () => {
             createTaskRunner: () => ({
               async run() {
                 const promise = new Promise((r) => setTimeout(r, 20000));
-                jest.advanceTimersByTime(20000);
+                vi.advanceTimersByTime(20000);
                 await promise;
                 if (wasCancelled) {
                   throw new Error('Task was cancelled');
@@ -3183,7 +3189,7 @@ describe('TaskManagerRunner', () => {
 
     test('updates saved object if recurring task expires without throwing error and schedule is greater than timeout', async () => {
       const id = _.random(1, 20).toString();
-      const onTaskEvent = jest.fn();
+      const onTaskEvent = vi.fn();
       const {
         instance: taskInstance,
         runner,
@@ -3203,7 +3209,7 @@ describe('TaskManagerRunner', () => {
             createTaskRunner: () => ({
               async run() {
                 const promise = new Promise((r) => setTimeout(r, 20000));
-                jest.advanceTimersByTime(20000);
+                vi.advanceTimersByTime(20000);
                 await promise;
               },
             }),
@@ -3241,7 +3247,7 @@ describe('TaskManagerRunner', () => {
 
     test('updates saved object if recurring task throws error due to expiration and schedule is greater than timeout', async () => {
       const id = _.random(1, 20).toString();
-      const onTaskEvent = jest.fn();
+      const onTaskEvent = vi.fn();
       let wasCancelled = false;
       const {
         instance: taskInstance,
@@ -3262,7 +3268,7 @@ describe('TaskManagerRunner', () => {
             createTaskRunner: () => ({
               async run() {
                 const promise = new Promise((r) => setTimeout(r, 20000));
-                jest.advanceTimersByTime(20000);
+                vi.advanceTimersByTime(20000);
                 await promise;
                 if (wasCancelled) {
                   throw new Error('Task was cancelled');
@@ -3306,7 +3312,7 @@ describe('TaskManagerRunner', () => {
 
     test('handles a version conflict gracefully when an expired recurring task is reclaimed while running and schedule is greater than timeout', async () => {
       const id = _.random(1, 20).toString();
-      const onTaskEvent = jest.fn();
+      const onTaskEvent = vi.fn();
       const { runner, store, logger } = await readyToRunStageSetup({
         onTaskEvent,
         instance: {
@@ -3321,7 +3327,7 @@ describe('TaskManagerRunner', () => {
             createTaskRunner: () => ({
               async run() {
                 const promise = new Promise((r) => setTimeout(r, 20000));
-                jest.advanceTimersByTime(20000);
+                vi.advanceTimersByTime(20000);
                 await promise;
               },
             }),
@@ -3645,7 +3651,7 @@ describe('TaskManagerRunner', () => {
     });
 
     it(`should call the task cleanup function if defined`, async () => {
-      const cleanupFn = jest.fn();
+      const cleanupFn = vi.fn();
       const { runner } = await readyToRunStageSetup({
         instance: {
           id: 'foo',
@@ -3658,7 +3664,7 @@ describe('TaskManagerRunner', () => {
               async run() {
                 return { state: {} };
               },
-              cancel: jest.fn(),
+              cancel: vi.fn(),
               cleanup: cleanupFn,
             }),
           },
@@ -3671,7 +3677,7 @@ describe('TaskManagerRunner', () => {
     });
 
     it(`doesn't throw an error if the cleanup function throws an error`, async () => {
-      const cleanupFn = jest.fn().mockRejectedValue(new Error('Fail'));
+      const cleanupFn = vi.fn().mockRejectedValue(new Error('Fail'));
       const { runner, logger } = await readyToRunStageSetup({
         instance: {
           id: 'foo',
@@ -3684,7 +3690,7 @@ describe('TaskManagerRunner', () => {
               async run() {
                 return { state: {} };
               },
-              cancel: jest.fn(),
+              cancel: vi.fn(),
               cleanup: cleanupFn,
             }),
           },
@@ -3703,9 +3709,9 @@ describe('TaskManagerRunner', () => {
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
     definitions?: TaskDefinitionRegistry;
-    onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
+    onTaskEvent?: Mock<(event: TaskEvent<unknown, unknown>) => void>;
     allowReadingInvalidState?: boolean;
-    enrichFakeRequest?: jest.Mock;
+    enrichFakeRequest?: Mock;
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -3758,7 +3764,7 @@ describe('TaskManagerRunner', () => {
     definitions.registerTaskDefinitions({
       testbar: {
         title: 'Bar!',
-        createTaskRunner: jest.fn(),
+        createTaskRunner: vi.fn(),
       },
     });
     if (opts.definitions) {

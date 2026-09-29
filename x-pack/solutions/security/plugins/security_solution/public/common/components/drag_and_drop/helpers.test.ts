@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { omit } from 'lodash/fp';
 import type { DropResult } from '@hello-pangea/dnd';
 
@@ -972,8 +974,8 @@ describe('helpers', () => {
     };
 
     test('it dispatches the expected UPDATE_PROVIDERS action when the provider to add exists in the `dataProviders` collection of `id -> `DataProvider`', () => {
-      const dispatch = jest.fn();
-      const onAddedToTimeline = jest.fn();
+      const dispatch = vi.fn();
+      const onAddedToTimeline = vi.fn();
       const dataProviders: IdToDataProvider = {
         'hosts-table-hostName-ENDPOINT-W-0-01': {
           and: [],
@@ -1015,8 +1017,8 @@ describe('helpers', () => {
     });
 
     test('it dispatches the expected NO_PROVIDER_FOUND action when the provider to add does NOT exist in the `dataProviders` collection of `id -> `DataProvider`', () => {
-      const dispatch = jest.fn();
-      const onAddedToTimeline = jest.fn();
+      const dispatch = vi.fn();
+      const onAddedToTimeline = vi.fn();
 
       addProviderToTimeline({
         activeTimelineDataProviders: [],

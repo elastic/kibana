@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { LicenseCheck } from '@kbn/licensing-types';
@@ -67,7 +69,7 @@ describe('GET privileges', () => {
         headers,
       });
       const mockLicensingContext = {
-        license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
+        license: { check: vi.fn().mockReturnValue(licenseCheckResult) },
       };
       const mockContext = coreMock.createCustomRequestHandlerContext({
         licensing: mockLicensingContext,

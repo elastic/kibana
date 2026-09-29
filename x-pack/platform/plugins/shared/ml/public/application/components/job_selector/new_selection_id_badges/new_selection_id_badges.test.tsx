@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { NewSelectionIdBadgesProps } from './new_selection_id_badges';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
 
-jest.mock('../../../contexts/kibana', () => ({
-  useMlKibana: () => ({
-    services: {
-      share: {},
-      application: {
-        navigateToUrl: jest.fn(),
-      },
-    },
-  }),
-}));
+vi.mock('../../../contexts/kibana', () => {
+      const mocked = {
+      useMlKibana: () => ({
+        services: {
+          share: {},
+          application: {
+            navigateToUrl: vi.fn(),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const props: NewSelectionIdBadgesProps = {
   limit: 2,
@@ -51,8 +56,8 @@ const props: NewSelectionIdBadgesProps = {
       },
     },
   ],
-  onLinkClick: jest.fn(),
-  onDeleteClick: jest.fn(),
+  onLinkClick: vi.fn(),
+  onDeleteClick: vi.fn(),
   newSelection: ['group1', 'job1', 'job3'],
   showAllBadges: false,
 };

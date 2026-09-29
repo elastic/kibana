@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -14,10 +16,13 @@ import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
 import { CaseViewSimilarCases } from './case_view_similar_cases';
 import { renderWithTestingProviders } from '../../../common/mock';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('./sidebar/sidebar_toggle_button', () => ({
-  SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
-}));
+vi.mock('../../../common/lib/kibana');
+vi.mock('./sidebar/sidebar_toggle_button', () => {
+      const mocked = {
+      SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const caseData: CaseUI = {
   ...basicCase,
@@ -27,7 +32,7 @@ const caseData: CaseUI = {
 // Failing: See https://github.com/elastic/kibana/issues/207056
 describe('Case View Page similar cases tab', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the similar cases table', async () => {

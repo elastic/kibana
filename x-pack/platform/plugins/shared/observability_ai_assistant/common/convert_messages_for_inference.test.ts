@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { InferenceMessage } from '@elastic/elasticsearch/lib/api/types';
 import { collapseInternalToolCalls } from './convert_messages_for_inference';
 import type { Message } from './types';
 import { MessageRole } from './types';
 
 const mockLogger = {
-  error: jest.fn(),
-  debug: jest.fn(),
-  warn: jest.fn(),
-  trace: jest.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  warn: vi.fn(),
+  trace: vi.fn(),
 };
 
 const userMessage: (msg: string) => Message = (msg: string) => ({
@@ -156,7 +158,7 @@ const visualizeQueryTool: Message[] = [
 
 describe('collapseInternalToolCalls', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should not collapse messages if there are no query messages', () => {

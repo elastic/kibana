@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type { CPSServerSetup } from '@kbn/cps/server';
@@ -64,9 +67,9 @@ describe('createIsCpsPlatformGateEnabled', () => {
     isFeatureFlagEnabled?: boolean;
     isTierEligible?: boolean;
   } = {}) => {
-    const getBooleanValue$ = jest.fn().mockReturnValue(of(isFeatureFlagEnabled));
-    const isTierEligibleMock = jest.fn().mockResolvedValue(isTierEligible);
-    const getStartServices = jest.fn().mockResolvedValue([{ featureFlags: { getBooleanValue$ } }]);
+    const getBooleanValue$ = vi.fn().mockReturnValue(of(isFeatureFlagEnabled));
+    const isTierEligibleMock = vi.fn().mockResolvedValue(isTierEligible);
+    const getStartServices = vi.fn().mockResolvedValue([{ featureFlags: { getBooleanValue$ } }]);
 
     return {
       gate: createIsCpsPlatformGateEnabled({
@@ -128,10 +131,10 @@ describe('createIsCpsPlatformGateEnabled', () => {
 });
 
 describe('fetchIsInfraMlCpsEnabled', () => {
-  const createMlSystem = (mlInfo: jest.Mock): MlSystem => ({ mlInfo } as unknown as MlSystem);
+  const createMlSystem = (mlInfo: Mock): MlSystem => ({ mlInfo } as unknown as MlSystem);
 
   it('is false without calling ML when the platform gate is disabled', async () => {
-    const mlInfo = jest.fn();
+    const mlInfo = vi.fn();
 
     await expect(fetchIsInfraMlCpsEnabled(async () => false, createMlSystem(mlInfo))).resolves.toBe(
       false
@@ -140,7 +143,7 @@ describe('fetchIsInfraMlCpsEnabled', () => {
   });
 
   it('is true when Elasticsearch supports ML cross-project search', async () => {
-    const mlInfo = jest.fn().mockResolvedValue({ isMlCpsEnabled: true });
+    const mlInfo = vi.fn().mockResolvedValue({ isMlCpsEnabled: true });
 
     await expect(fetchIsInfraMlCpsEnabled(async () => true, createMlSystem(mlInfo))).resolves.toBe(
       true
@@ -148,7 +151,7 @@ describe('fetchIsInfraMlCpsEnabled', () => {
   });
 
   it('is false when Elasticsearch does not support ML cross-project search', async () => {
-    const mlInfo = jest.fn().mockResolvedValue({ isMlCpsEnabled: false });
+    const mlInfo = vi.fn().mockResolvedValue({ isMlCpsEnabled: false });
 
     await expect(fetchIsInfraMlCpsEnabled(async () => true, createMlSystem(mlInfo))).resolves.toBe(
       false
@@ -156,7 +159,7 @@ describe('fetchIsInfraMlCpsEnabled', () => {
   });
 
   it('fails closed when the ML info API errors', async () => {
-    const mlInfo = jest.fn().mockRejectedValue(new Error('network error'));
+    const mlInfo = vi.fn().mockRejectedValue(new Error('network error'));
 
     await expect(fetchIsInfraMlCpsEnabled(async () => true, createMlSystem(mlInfo))).resolves.toBe(
       false

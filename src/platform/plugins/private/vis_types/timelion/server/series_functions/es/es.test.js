@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { of } from 'rxjs';
 import es from '.';
 import tlConfigFn from '../fixtures/tl_config';
@@ -25,7 +27,7 @@ describe('es', () => {
 
   function stubRequestAndServer(response) {
     return {
-      context: { search: { search: jest.fn().mockReturnValue(of(response)) } },
+      context: { search: { search: vi.fn().mockReturnValue(of(response)) } },
       getIndexPatternsService: () => ({
         find: async () => [],
         create: async () => ({

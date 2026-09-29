@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
@@ -12,8 +14,8 @@ import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
 import { ActionsSection } from './actions_section';
 
 describe('ActionsSection', () => {
-  const onSkipResultChange = jest.fn();
-  const onSkipModelUpdateChange = jest.fn();
+  const onSkipResultChange = vi.fn();
+  const onSkipModelUpdateChange = vi.fn();
 
   const requiredProps = {
     onSkipResultChange,

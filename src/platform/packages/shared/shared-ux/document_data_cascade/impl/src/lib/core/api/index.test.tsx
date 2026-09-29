@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { useSyncExternalStore } from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useExposePublicApi, type DataCascadeImplRef } from '.';
@@ -93,7 +95,7 @@ describe('useExposePublicApi', () => {
 
       const uiSnapshotStore = mockRefObject.current!.getUISnapshotStore();
 
-      const subscriptionSpy = jest.fn();
+      const subscriptionSpy = vi.fn();
 
       const unsubscribe = uiSnapshotStore!.subscribe(subscriptionSpy);
 
@@ -101,7 +103,7 @@ describe('useExposePublicApi', () => {
         range: { startIndex: 0, endIndex: 10 },
         scrollOffset: 100,
         isScrolling: false,
-        getVirtualItemForOffset: jest.fn().mockReturnValue({ index: 10 }),
+        getVirtualItemForOffset: vi.fn().mockReturnValue({ index: 10 }),
         // it's fine to cast to unknown
         // because we only need a minimal implementation of the virtualizer instance for the test
       } as unknown as UseVirtualizerReturnType;
@@ -184,7 +186,7 @@ describe('useExposePublicApi', () => {
           isScrolling: false,
           scrollRect: { width: 0, height: 0 },
           getTotalSize: () => 0,
-          getVirtualItemForOffset: jest.fn().mockReturnValue({ index: 10 }),
+          getVirtualItemForOffset: vi.fn().mockReturnValue({ index: 10 }),
         } as unknown as UseVirtualizerReturnType);
       });
 

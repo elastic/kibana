@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { toggleSelectedGroup } from './toggle_selected_group';
 
 describe('#toggleSelectedGroup', () => {
-  let setSelectedGroups: jest.Mock;
+  let setSelectedGroups: Mock;
   beforeEach(() => {
-    setSelectedGroups = jest.fn();
+    setSelectedGroups = vi.fn();
   });
 
   test('removes only job', () => {

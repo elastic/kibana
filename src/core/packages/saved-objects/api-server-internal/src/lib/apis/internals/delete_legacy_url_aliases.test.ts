@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mockGetEsErrorMessage } from './delete_legacy_url_aliases.test.mock'; // Note: importing this file applies default mocks for other functions too
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
@@ -27,7 +29,7 @@ describe('deleteLegacyUrlAliases', () => {
       mappings: { properties: {} }, // doesn't matter, only used as an argument to getSearchDsl which is mocked
       registry: typeRegistryMock.create(), // doesn't matter, only used as an argument to getSearchDsl which is mocked
       client: elasticsearchClientMock.createElasticsearchClient(),
-      getIndexForType: jest.fn(), // doesn't matter
+      getIndexForType: vi.fn(), // doesn't matter
       ...setupParams,
     };
   }

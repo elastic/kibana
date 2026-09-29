@@ -5,32 +5,47 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
-jest.mock('../utils/resolve_connector_id', () => ({
-  resolveConnectorId: jest.fn(),
-}));
+vi.mock('../utils/resolve_connector_id', () => {
+      const mocked = {
+      resolveConnectorId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./build_prompts', () => ({
-  buildSystemPart: jest.fn(),
-  buildDataPart: jest.fn(),
-  buildRequirementsPart: jest.fn(),
-  buildInstructionsPart: jest.fn(),
-}));
+vi.mock('./build_prompts', () => {
+      const mocked = {
+      buildSystemPart: vi.fn(),
+      buildDataPart: vi.fn(),
+      buildRequirementsPart: vi.fn(),
+      buildInstructionsPart: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/steps/ai', () => ({
-  AiSummarizeStepCommonDefinition: {
-    id: 'ai.summarize',
-    inputSchema: {},
-    outputSchema: {},
-    configSchema: {},
-  },
-}));
+vi.mock('../../../../common/steps/ai', () => {
+      const mocked = {
+      AiSummarizeStepCommonDefinition: {
+        id: 'ai.summarize',
+        inputSchema: {},
+        outputSchema: {},
+        configSchema: {},
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-extensions/server', () => ({
-  createServerStepDefinition: jest.fn((definition) => definition),
-}));
+vi.mock('@kbn/workflows-extensions/server', () => {
+      const mocked = {
+      createServerStepDefinition: vi.fn((definition) => definition),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   buildDataPart,
@@ -46,46 +61,46 @@ type ContextManager = StepHandlerContext<any>['contextManager'];
 import type { InferenceWorkflowsStartDeps } from '../../../types';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
 
-const mockResolveConnectorId = resolveConnectorId as jest.MockedFunction<typeof resolveConnectorId>;
-const mockBuildSystemPart = buildSystemPart as jest.MockedFunction<typeof buildSystemPart>;
-const mockBuildDataPart = buildDataPart as jest.MockedFunction<typeof buildDataPart>;
-const mockBuildRequirementsPart = buildRequirementsPart as jest.MockedFunction<
+const mockResolveConnectorId = resolveConnectorId as MockedFunction<typeof resolveConnectorId>;
+const mockBuildSystemPart = buildSystemPart as MockedFunction<typeof buildSystemPart>;
+const mockBuildDataPart = buildDataPart as MockedFunction<typeof buildDataPart>;
+const mockBuildRequirementsPart = buildRequirementsPart as MockedFunction<
   typeof buildRequirementsPart
 >;
-const mockBuildInstructionsPart = buildInstructionsPart as jest.MockedFunction<
+const mockBuildInstructionsPart = buildInstructionsPart as MockedFunction<
   typeof buildInstructionsPart
 >;
-const mockCreateServerStepDefinition = createServerStepDefinition as jest.MockedFunction<
+const mockCreateServerStepDefinition = createServerStepDefinition as MockedFunction<
   typeof createServerStepDefinition
 >;
 
 describe('aiSummarizeStepDefinition', () => {
-  let mockCoreSetup: jest.Mocked<CoreSetup<InferenceWorkflowsStartDeps>>;
-  let mockInference: jest.Mocked<InferenceServerStart>;
-  let mockContextManager: jest.Mocked<ContextManager>;
+  let mockCoreSetup: Mocked<CoreSetup<InferenceWorkflowsStartDeps>>;
+  let mockInference: Mocked<InferenceServerStart>;
+  let mockContextManager: Mocked<ContextManager>;
   let mockContext: StepHandlerContext<any>;
   let mockChatModel: any;
   let mockAbortController: AbortController;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockAbortController = new AbortController();
 
     mockChatModel = {
-      invoke: jest.fn(),
+      invoke: vi.fn(),
     };
 
     mockInference = {
-      getChatModel: jest.fn().mockResolvedValue(mockChatModel),
+      getChatModel: vi.fn().mockResolvedValue(mockChatModel),
     } as any;
 
     mockContextManager = {
-      getFakeRequest: jest.fn().mockReturnValue({} as KibanaRequest),
-      getContext: jest.fn(),
-      getScopedEsClient: jest.fn(),
-      renderInputTemplate: jest.fn(),
-      callKibanaApi: jest.fn(),
+      getFakeRequest: vi.fn().mockReturnValue({} as KibanaRequest),
+      getContext: vi.fn(),
+      getScopedEsClient: vi.fn(),
+      renderInputTemplate: vi.fn(),
+      callKibanaApi: vi.fn(),
     };
 
     mockContext = {
@@ -102,10 +117,10 @@ describe('aiSummarizeStepDefinition', () => {
       },
       contextManager: mockContextManager,
       logger: {
-        debug: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
-        error: jest.fn(),
+        debug: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
       },
       abortSignal: mockAbortController.signal,
       stepId: 'test-step-id',
@@ -113,7 +128,7 @@ describe('aiSummarizeStepDefinition', () => {
     };
 
     mockCoreSetup = {
-      getStartServices: jest.fn().mockResolvedValue([{}, { inference: mockInference }]),
+      getStartServices: vi.fn().mockResolvedValue([{}, { inference: mockInference }]),
     } as any;
 
     mockBuildSystemPart.mockReturnValue([{ role: 'system', content: 'System prompt' }]);

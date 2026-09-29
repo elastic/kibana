@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { transformFindMaintenanceWindowParams } from './v1';
 
 describe('transformFindMaintenanceWindowParams', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('passing string in status should return array', () => {

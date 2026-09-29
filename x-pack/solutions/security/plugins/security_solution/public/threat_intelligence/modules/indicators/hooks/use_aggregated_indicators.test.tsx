@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import type { UseAggregatedIndicatorsParam } from './use_aggregated_indicators';
 import { useAggregatedIndicators } from './use_aggregated_indicators';
@@ -18,8 +21,8 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import moment from 'moment';
 
-jest.mock('../services/fetch_aggregated_indicators');
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../services/fetch_aggregated_indicators');
+vi.mock('../../../../common/lib/kibana');
 
 const useAggregatedIndicatorsParams: UseAggregatedIndicatorsParam = {
   timeRange: mockTimeRange,
@@ -34,25 +37,25 @@ const renderUseAggregatedIndicators = () =>
   });
 
 describe('useAggregatedIndicators()', () => {
-  beforeEach(jest.clearAllMocks);
+  beforeEach(vi.clearAllMocks);
 
   beforeEach(() => {
-    jest.mocked(useKibana).mockReturnValue({
+    vi.mocked(useKibana).mockReturnValue({
       services: { data: { search: mockedSearchService, query: mockedQueryService } },
     } as unknown as ReturnType<typeof useKibana>);
   });
 
-  type MockedCreateFetchAggregatedIndicators = jest.MockedFunction<
+  type MockedCreateFetchAggregatedIndicators = MockedFunction<
     typeof createFetchAggregatedIndicators
   >;
-  let aggregatedIndicatorsQuery: jest.MockedFunction<
+  let aggregatedIndicatorsQuery: MockedFunction<
     ReturnType<typeof createFetchAggregatedIndicators>
   >;
 
-  beforeEach(jest.clearAllMocks);
+  beforeEach(vi.clearAllMocks);
 
   beforeEach(() => {
-    aggregatedIndicatorsQuery = jest.fn();
+    aggregatedIndicatorsQuery = vi.fn();
     (createFetchAggregatedIndicators as MockedCreateFetchAggregatedIndicators).mockReturnValue(
       aggregatedIndicatorsQuery
     );

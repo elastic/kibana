@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { UserActionFinder } from './find';
@@ -31,7 +33,7 @@ describe('UserActionsService: Finder', () => {
   let finder: UserActionFinder;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     finder = new UserActionFinder({
       log: mockLogger,
       unsecuredSavedObjectsClient,
@@ -338,7 +340,7 @@ describe('UserActionsService: Finder', () => {
     });
 
     it('stops fetching once the limit is reached and closes the PIT early', async () => {
-      const close = jest.fn();
+      const close = vi.fn();
       const batch = (count: number) =>
         createSOFindResponse(
           Array.from({ length: count }, () => createUserActionFindSO(createUserActionSO()))
@@ -397,7 +399,7 @@ describe('UserActionsService: Finder', () => {
         );
 
       unsecuredSavedObjectsClient.createPointInTimeFinder.mockReturnValue({
-        close: jest.fn(),
+        close: vi.fn(),
         // @ts-expect-error
         find: function* asyncGenerator() {
           yield batch(3);

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { UploadFileButton } from '.';
@@ -16,7 +18,7 @@ describe('UploadFileButton', () => {
   });
 
   it('calls onClick when the button is clicked', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     const { getByTestId } = render(<UploadFileButton onClick={onClick} />);
     fireEvent.click(getByTestId('uploadFileButton'));
     expect(onClick).toHaveBeenCalled();

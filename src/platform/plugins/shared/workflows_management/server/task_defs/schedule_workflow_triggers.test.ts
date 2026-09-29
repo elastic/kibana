@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { WorkflowYaml } from '@kbn/workflows';
 
@@ -16,9 +19,9 @@ import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 const logger = loggerMock.create();
 const mockRequest = {} as any;
 
-const makeMockScheduler = (): jest.Mocked<WorkflowTaskScheduler> =>
+const makeMockScheduler = (): Mocked<WorkflowTaskScheduler> =>
   ({
-    scheduleWorkflowTask: jest.fn().mockResolvedValue('task-1'),
+    scheduleWorkflowTask: vi.fn().mockResolvedValue('task-1'),
   } as any);
 
 const baseDefinition: WorkflowYaml = {
@@ -30,7 +33,7 @@ const baseDefinition: WorkflowYaml = {
 };
 
 describe('scheduleWorkflowTriggers', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('schedules only triggers with type "scheduled"', async () => {
     const scheduler = makeMockScheduler();

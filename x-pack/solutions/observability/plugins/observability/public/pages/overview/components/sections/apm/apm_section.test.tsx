@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import { screen } from '@elastic/eui/lib/test/rtl';
@@ -21,13 +23,16 @@ import { createObservabilityRuleTypeRegistryMock } from '../../../../../rules/ob
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
-jest.mock('react-router-dom', () => ({
-  useLocation: () => ({
-    pathname: '/observability/overview/',
-    search: '',
-  }),
-  useHistory: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useLocation: () => ({
+        pathname: '/observability/overview/',
+        search: '',
+      }),
+      useHistory: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const { ObservabilityAIAssistantContextualInsight } =
   observabilityAIAssistantPluginMock.createStartContract();
@@ -44,7 +49,7 @@ describe('APMSection', () => {
   const bucketSize = { intervalString: '60s', bucketSize: 60, dateFormat: 'YYYY-MM-DD HH:mm' };
 
   beforeAll(() => {
-    jest.spyOn(hasDataHook, 'useHasData').mockReturnValue({
+    vi.spyOn(hasDataHook, 'useHasData').mockReturnValue({
       hasDataMap: {
         apm: {
           status: fetcherHook.FETCH_STATUS.SUCCESS,
@@ -67,7 +72,7 @@ describe('APMSection', () => {
       managedOtlpServiceUrl: '',
     };
 
-    jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
+    vi.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
       appMountParameters: {} as AppMountParameters,
       core: {} as CoreStart,
       config,
@@ -89,10 +94,10 @@ describe('APMSection', () => {
         transactions: { coordinates: [] },
       },
     };
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+    vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: resp,
       status: fetcherHook.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     const { getByRole, getByText, queryAllByTestId } = render(
       <APMSection bucketSize={bucketSize} />
@@ -106,10 +111,10 @@ describe('APMSection', () => {
   });
 
   it('renders with transaction series and stats', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+    vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: response,
       status: fetcherHook.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     const { getByRole, getByText, queryAllByTestId } = render(
       <APMSection bucketSize={bucketSize} />
@@ -122,10 +127,10 @@ describe('APMSection', () => {
     expect(queryAllByTestId('loading')).toEqual([]);
   });
   it('shows loading state', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+    vi.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
       data: undefined,
       status: fetcherHook.FETCH_STATUS.LOADING,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
     const { getByRole, queryAllByText, getByTestId, getAllByLabelText } = render(
       <APMSection bucketSize={bucketSize} />

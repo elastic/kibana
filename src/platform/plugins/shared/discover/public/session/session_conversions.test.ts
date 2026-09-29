@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import {
   CONTROL_WIDTH_MEDIUM,
   DEFAULT_PINNED_CONTROL_STATE,
@@ -43,9 +46,12 @@ type ApiInlineDataView = Extract<
   { type: 'data_view_spec' }
 >;
 
-jest.mock('uuid', () => ({ v4: jest.fn(() => 'runtime-inline-id') }));
+vi.mock('uuid', () => {
+      const mocked = { v4: vi.fn(() => 'runtime-inline-id') };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUuidv4 = uuidv4 as jest.MockedFunction<() => string>;
+const mockedUuidv4 = uuidv4 as MockedFunction<() => string>;
 
 const inlineApiDataView: ApiInlineDataView = {
   type: 'data_view_spec',
@@ -175,7 +181,7 @@ const response: DiscoverSessionApiResponse = {
 
 describe('Discover session conversion and UI preparation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('converts API fields without assigning inline IDs or binding filters', () => {

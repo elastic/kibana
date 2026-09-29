@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -13,19 +16,22 @@ import { EventsByDataset } from '.';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
-jest.mock('../../../common/components/link_to');
-jest.mock('../../../common/components/matrix_histogram', () => ({
-  MatrixHistogram: jest.fn().mockReturnValue(null),
-}));
+vi.mock('../../../common/components/link_to');
+vi.mock('../../../common/components/matrix_histogram', () => {
+      const mocked = {
+      MatrixHistogram: vi.fn().mockReturnValue(null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MatrixHistogramMocked = MatrixHistogram as jest.MockedFunction<typeof MatrixHistogram>;
+const MatrixHistogramMocked = MatrixHistogram as MockedFunction<typeof MatrixHistogram>;
 
 describe('EventsByDataset', () => {
   const from = '2020-01-20T20:49:57.080Z';
   const to = '2020-01-21T20:49:57.080Z';
 
   const baseProps = {
-    deleteQuery: jest.fn(),
+    deleteQuery: vi.fn(),
     filters: [],
     from,
     to,

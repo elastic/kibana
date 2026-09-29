@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { parseDocument } from 'yaml';
 import { createServiceAccountEditor, getRunAsValue } from './service_account_editor';
 import { createFakeMonacoModel } from '../../../../../common/mocks/monaco_model';
@@ -27,13 +30,13 @@ const setup = (markedYaml: string) => {
   const offset = markedYaml.indexOf('|<-');
   const yaml = markedYaml.replace('|<-', '');
   const model = createFakeMonacoModel(yaml, offset);
-  model.getVersionId = jest.fn(() => 1);
+  model.getVersionId = vi.fn(() => 1);
   const position = model.getPositionAt(offset);
   const document = parseDocument(yaml);
-  const directory: jest.Mocked<ServiceAccountDirectory> = {
-    isEnabled: jest.fn().mockReturnValue(true),
-    get: jest.fn().mockResolvedValue(account),
-    list: jest.fn().mockResolvedValue({ serviceAccounts: [account] }),
+  const directory: Mocked<ServiceAccountDirectory> = {
+    isEnabled: vi.fn().mockReturnValue(true),
+    get: vi.fn().mockResolvedValue(account),
+    list: vi.fn().mockResolvedValue({ serviceAccounts: [account] }),
   };
   const editor = createServiceAccountEditor(directory);
   const complete = () =>
@@ -111,7 +114,7 @@ describe('service account editor', () => {
 
     const updated = setup('settings: { run_as: "second|<-" }');
     Object.assign(model, updated.model);
-    model.getVersionId = jest.fn(() => 2);
+    model.getVersionId = vi.fn(() => 2);
     expect(getRunAsValue(model, updated.position)?.id).toBe('second');
   });
 

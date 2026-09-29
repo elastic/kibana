@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { API_VERSIONS } from '../../../common/constants';
@@ -13,19 +16,25 @@ import { findSavedQueryRoute } from './find_saved_query_route';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { getInstalledSavedQueriesMap } from './utils';
 
-jest.mock('../../utils/get_internal_saved_object_client', () => ({
-  createInternalSavedObjectsClientForSpaceId: jest.fn(),
-}));
+vi.mock('../../utils/get_internal_saved_object_client', () => {
+      const mocked = {
+      createInternalSavedObjectsClientForSpaceId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./utils', () => ({
-  ...jest.requireActual('./utils'),
-  getInstalledSavedQueriesMap: jest.fn().mockResolvedValue({}),
-}));
+vi.mock('./utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('./utils')),
+      getInstalledSavedQueriesMap: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('findSavedQueryRoute', () => {
   let routeHandler: RequestHandler;
   let mockOsqueryContext: OsqueryAppContext;
-  let mockSavedObjectsClient: { find: jest.Mock };
+  let mockSavedObjectsClient: { find: Mock };
 
   const createMockRouter = () => {
     const httpService = httpServiceMock.createSetupContract();
@@ -53,20 +62,20 @@ describe('findSavedQueryRoute', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockOsqueryContext = {
       logFactory: {
-        get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()),
+        get: vi.fn().mockReturnValue(loggingSystemMock.createLogger()),
       },
       service: {
-        getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
-        getPackageService: jest.fn().mockReturnValue({ asInternalUser: {} }),
+        getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
+        getPackageService: vi.fn().mockReturnValue({ asInternalUser: {} }),
       },
     } as unknown as OsqueryAppContext;
 
     mockSavedObjectsClient = {
-      find: jest.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({
         saved_objects: [],
         total: 0,
         page: 1,
@@ -74,10 +83,10 @@ describe('findSavedQueryRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
       mockSavedObjectsClient
     );
-    (getInstalledSavedQueriesMap as jest.Mock).mockResolvedValue({});
+    (getInstalledSavedQueriesMap as Mock).mockResolvedValue({});
   });
 
   const setupRoute = () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -16,18 +19,24 @@ import {
   useSignificantEventsCost,
 } from './use_significant_events_cost';
 
-jest.mock('./use_kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_significant_events_run_quotas', () => ({
-  useRunQuotas: jest.fn(),
-}));
+vi.mock('./use_significant_events_run_quotas', () => {
+      const mocked = {
+      useRunQuotas: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseRunQuotas = useRunQuotas as MockedFunction<typeof useRunQuotas>;
 
-const fetch = jest.fn();
+const fetch = vi.fn();
 
 const quotasResponse = (canManage: boolean): RunQuotasResponse => ({
   enabled: true,
@@ -92,7 +101,7 @@ const createWrapper = () => {
 
 describe('useSignificantEventsCost', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     fetch.mockReset();
     mockUseKibana.mockReturnValue({
       dependencies: {
@@ -109,7 +118,7 @@ describe('useSignificantEventsCost', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('disables the cost query when canManage is false', async () => {
@@ -359,7 +368,7 @@ describe('useSignificantEventsCost', () => {
   });
 
   it('retries a failed normal query and replaces the error with data', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
     fetch.mockRejectedValueOnce(new Error('initial failure')).mockResolvedValueOnce(costResponse());
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });

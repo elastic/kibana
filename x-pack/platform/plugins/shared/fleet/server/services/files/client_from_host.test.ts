@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { Readable } from 'stream';
 
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -31,9 +34,9 @@ import { createFromHostEsSearchResponseMock } from './mocks';
 import { FleetFromHostFilesClient } from './client_from_host';
 import type { HostUploadedFileMetadata } from './types';
 
-jest.mock('@kbn/files-plugin/server');
+vi.mock('@kbn/files-plugin/server');
 
-const createEsFileClientMock = _createEsFileClient as jest.Mock;
+const createEsFileClientMock = _createEsFileClient as Mock;
 
 describe('FleetFromHostFilesClient', () => {
   let esClientMock: ElasticsearchClientMock;

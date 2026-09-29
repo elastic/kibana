@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux-v7';
@@ -22,49 +24,70 @@ import {
 import type { SyntheticsParams } from '../../../../../../common/runtime_types';
 import type { ListParamItem } from './params_list';
 
-jest.mock('../../common/components/permissions', () => ({
-  NoPermissionsTooltip: ({ children }: { children: React.ReactNode }) => children,
-}));
+vi.mock('../../common/components/permissions', () => {
+      const mocked = {
+      NoPermissionsTooltip: ({ children }: { children: React.ReactNode }) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../state/utils/fetch_effect', () => ({
-  fetchEffectFactory: () => jest.fn(),
-}));
+vi.mock('../../../state/utils/fetch_effect', () => {
+      const mocked = {
+      fetchEffectFactory: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../state/global_params/api', () => ({
-  addGlobalParam: jest.fn(),
-  deleteGlobalParams: jest.fn(),
-  editGlobalParam: jest.fn(),
-  getGlobalParams: jest.fn(),
-}));
+vi.mock('../../../state/global_params/api', () => {
+      const mocked = {
+      addGlobalParam: vi.fn(),
+      deleteGlobalParams: vi.fn(),
+      editGlobalParam: vi.fn(),
+      getGlobalParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./add_param_form', () => ({
-  AddParamForm: () => null,
-}));
+vi.mock('./add_param_form', () => {
+      const mocked = {
+      AddParamForm: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../utils/kibana_service', () => ({
-  kibanaService: {
-    toasts: {
-      addSuccess: jest.fn(),
-      addError: jest.fn(),
-    },
-  },
-}));
-
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        capabilities: {
-          uptime: { save: true, show: true, configureSettings: true },
+vi.mock('../../../../../utils/kibana_service', () => {
+      const mocked = {
+      kibanaService: {
+        toasts: {
+          addSuccess: vi.fn(),
+          addError: vi.fn(),
         },
       },
-    },
-  }),
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/security-plugin/public', () => ({
-  ALL_SPACES_ID: '*',
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: {
+            capabilities: {
+              uptime: { save: true, show: true, configureSettings: true },
+            },
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/security-plugin/public', () => {
+      const mocked = {
+      ALL_SPACES_ID: '*',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const savedParam: SyntheticsParams = {
   id: 'param-1',
@@ -101,7 +124,7 @@ const renderFlyout = ({
   render(
     <I18nProvider>
       <Provider store={store}>
-        <AddParamFlyout items={[]} isEditingItem={isEditingItem} setIsEditingItem={jest.fn()} />
+        <AddParamFlyout items={[]} isEditingItem={isEditingItem} setIsEditingItem={vi.fn()} />
       </Provider>
     </I18nProvider>
   );
@@ -112,7 +135,7 @@ describe('AddParamFlyout', () => {
       isSaving: false,
       savedData: savedParam,
     });
-    const dispatch = jest.spyOn(store, 'dispatch');
+    const dispatch = vi.spyOn(store, 'dispatch');
     renderFlyout({ store });
 
     expect(screen.queryByText(ADD_PARAM_SUCCESS_MESSAGE)).not.toBeInTheDocument();

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { ContinuityPayload, CategoriesResponse } from '@kbn/siem-readiness';
@@ -18,14 +21,20 @@ import { getContinuityTool } from './get_continuity_tool';
 import { getContinuity } from '../../../lib/siem_readiness/dimensions';
 import { getSiemReadinessSharedContext } from '../../../lib/siem_readiness/fetchers';
 
-jest.mock('../../../lib/siem_readiness/dimensions', () => ({ getContinuity: jest.fn() }));
-jest.mock('../../../lib/siem_readiness/fetchers', () => ({
-  getSiemReadinessSharedContext: jest.fn(),
-  fetchSiemReadinessSharedContext: jest.fn(),
-}));
+vi.mock('../../../lib/siem_readiness/dimensions', () => {
+      const mocked = { getContinuity: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/siem_readiness/fetchers', () => {
+      const mocked = {
+      getSiemReadinessSharedContext: vi.fn(),
+      fetchSiemReadinessSharedContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetContinuity = getContinuity as jest.Mock;
-const mockGetSharedContext = getSiemReadinessSharedContext as jest.Mock;
+const mockGetContinuity = getContinuity as Mock;
+const mockGetSharedContext = getSiemReadinessSharedContext as Mock;
 
 const ENDPOINT_INDEX = '.ds-logs-endpoint.events-2024.01.01-000001';
 const NETWORK_INDEX = '.ds-logs-network.traffic-2024.01.01-000001';
@@ -64,7 +73,7 @@ describe('getContinuityTool', () => {
   const tool = getContinuityTool(mockCore, mockLogger, false);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupMockCoreStartServices(mockCore, mockEsClient);
     mockGetSharedContext.mockResolvedValue(mockSharedContext);
   });

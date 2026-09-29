@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { LegendValue } from '@elastic/charts';
 import { getConfiguration } from '.';
 import { samplePieVis } from '../../sample_vis.test.mocks';
 
 describe('getConfiguration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should return correct configuration', () => {

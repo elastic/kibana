@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DataTableRecord } from '@kbn/discover-utils';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -17,58 +19,88 @@ import { AlertFlyoutOverviewTab } from '.';
 import type { StartServices } from '../../types';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 
-jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
-  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../common/components/user_privileges/user_privileges_context', () => {
+      const mocked = {
+      UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockOverviewTab = jest.fn((_: unknown) => <div>{'MockOverviewTab'}</div>);
+const mockOverviewTab = vi.fn((_: unknown) => <div>{'MockOverviewTab'}</div>);
 
-jest.mock('../../flyout_v2/document/main/tabs/overview_tab', () => ({
-  OverviewTab: (props: unknown) => mockOverviewTab(props),
-}));
+vi.mock('../../flyout_v2/document/main/tabs/overview_tab', () => {
+      const mocked = {
+      OverviewTab: (props: unknown) => mockOverviewTab(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
-  UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
-jest.mock('../../common/components/discover_in_timeline/provider', () => ({
-  DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
-}));
+vi.mock('../../common/components/user_privileges/user_privileges_context', () => {
+      const mocked = {
+      UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/components/discover_in_timeline/provider', () => {
+      const mocked = {
+      DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
+        <>{children}</>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../cases/components/provider/provider', () => ({
-  CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../cases/components/provider/provider', () => {
+      const mocked = {
+      CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../assistant/provider', () => ({
-  AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('../../common/components/ml/permissions/ml_capabilities_provider', () => ({
-  MlCapabilitiesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('../../assistant/provider', () => {
+      const mocked = {
+      AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/components/ml/permissions/ml_capabilities_provider', () => {
+      const mocked = {
+      MlCapabilitiesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseInitDataViewManager = jest.fn();
-jest.mock('../../data_view_manager/hooks/use_init_data_view_manager', () => ({
-  useInitDataViewManager: () => mockUseInitDataViewManager(),
-}));
+const mockUseInitDataViewManager = vi.fn();
+vi.mock('../../data_view_manager/hooks/use_init_data_view_manager', () => {
+      const mocked = {
+      useInitDataViewManager: () => mockUseInitDataViewManager(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseIsExperimentalFeatureEnabled = jest.fn();
-jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: (feature: string) =>
-    mockUseIsExperimentalFeatureEnabled(feature),
-}));
+const mockUseIsExperimentalFeatureEnabled = vi.fn();
+vi.mock('../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: (feature: string) =>
+        mockUseIsExperimentalFeatureEnabled(feature),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseIsInSecurityApp = jest.fn();
-jest.mock('../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: () => mockUseIsInSecurityApp(),
-}));
+const mockUseIsInSecurityApp = vi.fn();
+vi.mock('../../common/hooks/is_in_security_app', () => {
+      const mocked = {
+      useIsInSecurityApp: () => mockUseIsInSecurityApp(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AlertFlyoutOverviewTab', () => {
-  const onAlertUpdated = jest.fn();
+  const onAlertUpdated = vi.fn();
   const servicesMock = {
     core: { overlays: {} },
     uiActions: {
-      getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
+      getTriggerCompatibleActions: vi.fn().mockResolvedValue([]),
     },
     application: {
       capabilities: {
@@ -80,7 +112,7 @@ describe('AlertFlyoutOverviewTab', () => {
       query: {
         timefilter: {
           timefilter: {
-            getAbsoluteTime: jest.fn().mockReturnValue({
+            getAbsoluteTime: vi.fn().mockReturnValue({
               from: '2023-01-01T00:00:00.000Z',
               to: '2023-12-31T23:59:59.999Z',
             }),
@@ -89,14 +121,14 @@ describe('AlertFlyoutOverviewTab', () => {
       },
     },
     notifications: {
-      toasts: { addError: jest.fn(), addDanger: jest.fn(), addSuccess: jest.fn() },
+      toasts: { addError: vi.fn(), addDanger: vi.fn(), addSuccess: vi.fn() },
     },
   } as unknown as StartServices;
 
   beforeEach(() => {
     mockOverviewTab.mockClear();
     mockUseInitDataViewManager.mockReset();
-    mockUseInitDataViewManager.mockReturnValue(jest.fn());
+    mockUseInitDataViewManager.mockReturnValue(vi.fn());
     mockUseIsExperimentalFeatureEnabled.mockReset();
     mockUseIsInSecurityApp.mockReturnValue(false);
   });
@@ -116,7 +148,7 @@ describe('AlertFlyoutOverviewTab', () => {
     });
 
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    mockUseInitDataViewManager.mockReturnValue(jest.fn());
+    mockUseInitDataViewManager.mockReturnValue(vi.fn());
 
     const store = createStore(() => ({
       dataViewManager: {
@@ -160,7 +192,7 @@ describe('AlertFlyoutOverviewTab', () => {
       return feature === 'newDataViewPickerEnabled';
     });
 
-    const initSpy = jest.fn();
+    const initSpy = vi.fn();
     mockUseInitDataViewManager.mockReturnValue(initSpy);
 
     const store = createStore(() => ({
@@ -196,7 +228,7 @@ describe('AlertFlyoutOverviewTab', () => {
       return feature === 'newDataViewPickerEnabled';
     });
 
-    const initSpy = jest.fn();
+    const initSpy = vi.fn();
     mockUseInitDataViewManager.mockReturnValue(initSpy);
 
     const store = createStore(() => ({
@@ -228,7 +260,7 @@ describe('AlertFlyoutOverviewTab', () => {
     const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
 
-    const initSpy = jest.fn();
+    const initSpy = vi.fn();
     mockUseInitDataViewManager.mockReturnValue(initSpy);
 
     const store = createStore(() => ({
@@ -262,7 +294,7 @@ describe('AlertFlyoutOverviewTab', () => {
       return feature === 'newDataViewPickerEnabled';
     });
 
-    const initSpy = jest.fn();
+    const initSpy = vi.fn();
     mockUseInitDataViewManager.mockReturnValue(initSpy);
 
     const storeLoading = createStore(() => ({
@@ -308,7 +340,7 @@ describe('AlertFlyoutOverviewTab', () => {
   it('renders under an existing parent router without nesting another router', async () => {
     const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    mockUseInitDataViewManager.mockReturnValue(jest.fn());
+    mockUseInitDataViewManager.mockReturnValue(vi.fn());
 
     const store = createStore(() => ({
       dataViewManager: {
@@ -349,9 +381,9 @@ describe('AlertFlyoutOverviewTab', () => {
         storePromise={Promise.resolve(store as never)}
         onAlertUpdated={onAlertUpdated}
         columns={['host.name']}
-        filter={jest.fn()}
-        onAddColumn={jest.fn()}
-        onRemoveColumn={jest.fn()}
+        filter={vi.fn()}
+        onAddColumn={vi.fn()}
+        onRemoveColumn={vi.fn()}
       />
     );
 
@@ -378,7 +410,7 @@ describe('AlertFlyoutOverviewTab', () => {
       (feature: string) => feature === 'newDataViewPickerEnabled'
     );
 
-    const initSpy = jest.fn();
+    const initSpy = vi.fn();
     mockUseInitDataViewManager.mockReturnValue(initSpy);
 
     const store = createStore(() => ({ dataViewManager: { shared: { status: 'pristine' } } }));
@@ -405,7 +437,7 @@ describe('AlertFlyoutOverviewTab', () => {
       (feature: string) => feature === 'newDataViewPickerEnabled'
     );
 
-    const initSpy = jest.fn();
+    const initSpy = vi.fn();
     mockUseInitDataViewManager.mockReturnValue(initSpy);
 
     const store = createStore(() => ({ dataViewManager: { shared: { status: 'pristine' } } }));

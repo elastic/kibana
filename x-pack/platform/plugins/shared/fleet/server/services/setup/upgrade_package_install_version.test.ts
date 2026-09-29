@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -18,16 +20,16 @@ import { createAppContextStartContractMock } from '../../mocks';
 
 import { upgradePackageInstallVersion } from './upgrade_package_install_version';
 
-jest.mock('../epm/packages');
+vi.mock('../epm/packages');
 
-const mockedReinstallPackageForInstallation = jest.mocked(reinstallPackageForInstallation);
+const mockedReinstallPackageForInstallation = vi.mocked(reinstallPackageForInstallation);
 
 describe('upgradePackageInstallVersion', () => {
   beforeEach(() => {
     mockedReinstallPackageForInstallation.mockReset();
     mockedReinstallPackageForInstallation.mockResolvedValue({} as any);
     appContextService.start(createAppContextStartContractMock());
-    jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.1.0');
+    vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.1.0');
   });
 
   afterEach(() => {

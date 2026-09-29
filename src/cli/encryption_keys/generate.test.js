@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { EncryptionConfig } from './encryption_config';
 import { generate } from './generate';
 
@@ -15,7 +17,7 @@ import { Logger } from '../logger';
 describe('encryption key generation', () => {
   const encryptionConfig = new EncryptionConfig();
   beforeEach(() => {
-    Logger.prototype.log = jest.fn();
+    Logger.prototype.log = vi.fn();
   });
 
   it('should generate a new encryption config', () => {
@@ -41,6 +43,6 @@ describe('encryption key generation', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { useSelector } from 'react-redux-v7';
@@ -21,34 +24,43 @@ import { selectOverviewGroupBy, selectServiceLocationsState } from '../../../../
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { useFilters } from '../../../common/monitor_filters/use_filters';
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useSelector: jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useSelector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/monitor_filters/use_filters', () => ({
-  useFilters: jest.fn(),
-}));
+vi.mock('../../../common/monitor_filters/use_filters', () => {
+      const mocked = {
+      useFilters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Stub the accordion so the test doesn't pull in trend-fetching internals; it
 // just exposes each rendered group's stable id and its member monitor ids.
-jest.mock('./grid_group_item', () => ({
-  GroupGridItem: ({
-    groupId,
-    groupLabel,
-    groupMonitors,
-  }: {
-    groupId?: string;
-    groupLabel: string;
-    groupMonitors: OverviewStatusMetaData[];
-  }) => (
-    <div data-test-subj={`group-${groupId ?? groupLabel}`}>
-      {groupMonitors.map((monitor) => (
-        <span key={monitor.configId}>{monitor.configId}</span>
-      ))}
-    </div>
-  ),
-}));
+vi.mock('./grid_group_item', () => {
+      const mocked = {
+      GroupGridItem: ({
+        groupId,
+        groupLabel,
+        groupMonitors,
+      }: {
+        groupId?: string;
+        groupLabel: string;
+        groupMonitors: OverviewStatusMetaData[];
+      }) => (
+        <div data-test-subj={`group-${groupId ?? groupLabel}`}>
+          {groupMonitors.map((monitor) => (
+            <span key={monitor.configId}>{monitor.configId}</span>
+          ))}
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const heartbeatMonitor = {
   configId: 'hb1',
@@ -68,13 +80,13 @@ const localMonitor = {
 } as unknown as OverviewStatusMetaData;
 
 const setupSelectors = (groupField: string, allConfigs: OverviewStatusMetaData[]) => {
-  (useSelector as jest.Mock).mockImplementation((selector) => {
+  (useSelector as Mock).mockImplementation((selector) => {
     if (selector === selectOverviewGroupBy) return { field: groupField, order: 'asc' };
     if (selector === selectOverviewStatus) return { allConfigs, loaded: true };
     if (selector === selectServiceLocationsState) return { locations: [] };
     return {};
   });
-  (useFilters as jest.Mock).mockReturnValue({
+  (useFilters as Mock).mockReturnValue({
     monitorTypes: [{ label: 'HTTP', count: 1 }],
     locations: [],
     projects: [],
@@ -85,7 +97,7 @@ const setupSelectors = (groupField: string, allConfigs: OverviewStatusMetaData[]
 const renderGrid = () =>
   render(
     <WrappedHelper>
-      <GridItemsByGroup setFlyoutConfigCallback={jest.fn()} view="cardView" />
+      <GridItemsByGroup setFlyoutConfigCallback={vi.fn()} view="cardView" />
     </WrappedHelper>
   );
 
@@ -95,7 +107,7 @@ const idsIn = (groupId: string) => {
 };
 
 describe('GridItemsByGroup origin grouping', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('buckets by Monitor source: Heartbeat / Remote / Local', () => {
     setupSelectors('origin', [heartbeatMonitor, remoteMonitor, localMonitor]);

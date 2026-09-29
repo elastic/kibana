@@ -5,25 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCasesClientMock } from '../../../client/mocks';
 import { postFileRoute } from './post_file';
 
 describe('getCaseRoute', () => {
   const casesClientMock = createCasesClientMock();
-  const response = { ok: jest.fn() };
-  const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(casesClientMock) } };
-  const sub = { unsubscribe: jest.fn() };
+  const response = { ok: vi.fn() };
+  const context = { cases: { getCasesClient: vi.fn().mockResolvedValue(casesClientMock) } };
+  const sub = { unsubscribe: vi.fn() };
 
   beforeEach(() => {
     casesClientMock.attachments.addFile.mockResolvedValue({ comments: [] } as never);
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('extracts the file metadata from hapi as expected', async () => {
     const request = {
       body: { file: { hapi: { filename: 'foobar.txt' } } },
-      events: { aborted$: { subscribe: jest.fn().mockReturnValue(sub) } },
+      events: { aborted$: { subscribe: vi.fn().mockReturnValue(sub) } },
       params: { case_id: 'bar' },
     };
 
@@ -49,7 +51,7 @@ describe('getCaseRoute', () => {
   it('filename in body takes precedence over metadata', async () => {
     const request = {
       body: { file: { hapi: { filename: 'foobar.txt' } }, filename: 'foo' },
-      events: { aborted$: { subscribe: jest.fn().mockReturnValue(sub) } },
+      events: { aborted$: { subscribe: vi.fn().mockReturnValue(sub) } },
       params: { case_id: 'bar' },
     };
 
@@ -75,7 +77,7 @@ describe('getCaseRoute', () => {
   it('unrecognized mimetype will be sent as undefined', async () => {
     const request = {
       body: { file: { hapi: { filename: 'foobar.foobar' } } },
-      events: { aborted$: { subscribe: jest.fn().mockReturnValue(sub) } },
+      events: { aborted$: { subscribe: vi.fn().mockReturnValue(sub) } },
       params: { case_id: 'bar' },
     };
 
@@ -99,7 +101,7 @@ describe('getCaseRoute', () => {
   it('missing hapi will not throw an error', async () => {
     const request = {
       body: { file: {} },
-      events: { aborted$: { subscribe: jest.fn().mockReturnValue(sub) } },
+      events: { aborted$: { subscribe: vi.fn().mockReturnValue(sub) } },
       params: { case_id: 'bar' },
     };
 

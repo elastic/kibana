@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fetchMappings } from './fetch_mappings';
 import { mockMappingsResponse } from '../mock/mappings_response/mock_mappings_response';
 
 describe('helpers', () => {
   describe('fetchMappings', () => {
     test('it returns the expected mappings', async () => {
-      const mockFetch = jest.fn().mockResolvedValue(mockMappingsResponse);
+      const mockFetch = vi.fn().mockResolvedValue(mockMappingsResponse);
 
       const result = await fetchMappings({
         abortController: new AbortController(),
@@ -55,7 +57,7 @@ describe('helpers', () => {
 
     test('it throws the expected error when fetch fails', async () => {
       const error = 'simulated error';
-      const mockFetch = jest.fn().mockImplementation(() => {
+      const mockFetch = vi.fn().mockImplementation(() => {
         throw new Error(error);
       });
 

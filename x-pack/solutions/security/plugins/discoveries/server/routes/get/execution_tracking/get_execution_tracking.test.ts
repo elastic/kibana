@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { WorkflowExecutionsTracking } from '@kbn/discoveries/impl/attack_discovery/persistence/event_logging';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 
 import { getWorkflowExecutionsTracking } from '../pipeline_data/helpers/get_workflow_executions_tracking';
 import type { GetExecutionTrackingResponse } from './get_execution_tracking';
 
-jest.mock('../pipeline_data/helpers/get_workflow_executions_tracking');
-const mockGetWorkflowExecutionsTracking = getWorkflowExecutionsTracking as jest.MockedFunction<
+vi.mock('../pipeline_data/helpers/get_workflow_executions_tracking');
+const mockGetWorkflowExecutionsTracking = getWorkflowExecutionsTracking as MockedFunction<
   typeof getWorkflowExecutionsTracking
 >;
 
-jest.mock('../../../lib/assert_workflows_enabled', () => ({
-  assertWorkflowsEnabled: jest.fn().mockResolvedValue(null),
-}));
+vi.mock('../../../lib/assert_workflows_enabled', () => {
+      const mocked = {
+      assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
 
@@ -47,7 +53,7 @@ const validTracking: WorkflowExecutionsTracking = {
 
 describe('getExecutionTracking response transformation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('transforms camelCase WorkflowExecutionsTracking to snake_case response', () => {
@@ -172,10 +178,10 @@ describe('getExecutionTracking response transformation', () => {
 });
 
 describe('registerGetExecutionTrackingRoute principal scoping', () => {
-  const mockGetCurrentUser = jest.fn();
-  const mockEsClient = { search: jest.fn() };
+  const mockGetCurrentUser = vi.fn();
+  const mockEsClient = { search: vi.fn() };
 
-  const getStartServices = jest.fn().mockResolvedValue({
+  const getStartServices = vi.fn().mockResolvedValue({
     coreStart: {
       elasticsearch: {
         client: {
@@ -199,11 +205,11 @@ describe('registerGetExecutionTrackingRoute principal scoping', () => {
     const { registerGetExecutionTrackingRoute } = await import('./get_execution_tracking');
 
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerGetExecutionTrackingRoute(router, {} as never, {
-      getEventLogIndex: jest.fn().mockResolvedValue('.kibana-event-log-test'),
+      getEventLogIndex: vi.fn().mockResolvedValue('.kibana-event-log-test'),
       getStartServices,
     });
 
@@ -215,8 +221,8 @@ describe('registerGetExecutionTrackingRoute principal scoping', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (assertWorkflowsEnabled as jest.Mock).mockResolvedValue(null);
+    vi.clearAllMocks();
+    (assertWorkflowsEnabled as Mock).mockResolvedValue(null);
     mockGetCurrentUser.mockReturnValue({ username: 'test-user' });
   });
 
@@ -253,12 +259,12 @@ describe('registerGetExecutionTrackingRoute feature flag', () => {
     const { registerGetExecutionTrackingRoute } = await import('./get_execution_tracking');
 
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerGetExecutionTrackingRoute(router, {} as never, {
-      getEventLogIndex: jest.fn().mockResolvedValue('.kibana-event-log-test'),
-      getStartServices: jest.fn().mockResolvedValue({ coreStart: {}, pluginsStart: {} }),
+      getEventLogIndex: vi.fn().mockResolvedValue('.kibana-event-log-test'),
+      getStartServices: vi.fn().mockResolvedValue({ coreStart: {}, pluginsStart: {} }),
     });
 
     expect(router.versioned.get).toHaveBeenCalledWith(
@@ -276,12 +282,12 @@ describe('registerGetExecutionTrackingRoute feature flag', () => {
     const { registerGetExecutionTrackingRoute } = await import('./get_execution_tracking');
 
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerGetExecutionTrackingRoute(router, {} as never, {
-      getEventLogIndex: jest.fn().mockResolvedValue('.kibana-event-log-test'),
-      getStartServices: jest.fn().mockResolvedValue({ coreStart: {}, pluginsStart: {} }),
+      getEventLogIndex: vi.fn().mockResolvedValue('.kibana-event-log-test'),
+      getStartServices: vi.fn().mockResolvedValue({ coreStart: {}, pluginsStart: {} }),
     });
 
     expect(router.versioned.get).toHaveBeenCalledWith(
@@ -299,12 +305,12 @@ describe('registerGetExecutionTrackingRoute feature flag', () => {
     const { registerGetExecutionTrackingRoute } = await import('./get_execution_tracking');
 
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerGetExecutionTrackingRoute(router, {} as never, {
-      getEventLogIndex: jest.fn().mockResolvedValue('.kibana-event-log-test'),
-      getStartServices: jest.fn().mockResolvedValue({ coreStart: {}, pluginsStart: {} }),
+      getEventLogIndex: vi.fn().mockResolvedValue('.kibana-event-log-test'),
+      getStartServices: vi.fn().mockResolvedValue({ coreStart: {}, pluginsStart: {} }),
     });
 
     expect(router.versioned.get).toHaveBeenCalledWith(
@@ -320,17 +326,17 @@ describe('registerGetExecutionTrackingRoute feature flag', () => {
 
   it('returns 404 when the feature flag is disabled', async () => {
     const mockNotFoundResponse = { statusCode: 404 };
-    (assertWorkflowsEnabled as jest.Mock).mockResolvedValueOnce(mockNotFoundResponse);
+    (assertWorkflowsEnabled as Mock).mockResolvedValueOnce(mockNotFoundResponse);
 
     const { registerGetExecutionTrackingRoute } = await import('./get_execution_tracking');
 
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerGetExecutionTrackingRoute(router, {} as never, {
-      getEventLogIndex: jest.fn().mockResolvedValue('.kibana-event-log-test'),
-      getStartServices: jest.fn().mockResolvedValue({ coreStart: {}, pluginsStart: {} }),
+      getEventLogIndex: vi.fn().mockResolvedValue('.kibana-event-log-test'),
+      getStartServices: vi.fn().mockResolvedValue({ coreStart: {}, pluginsStart: {} }),
     });
 
     const handler = addVersionMock.mock.calls[0][1];

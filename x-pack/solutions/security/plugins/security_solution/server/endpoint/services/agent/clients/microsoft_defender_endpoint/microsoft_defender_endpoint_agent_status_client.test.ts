@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getPendingActionsSummary as _getPendingActionsSummary } from '../../..';
 import { createMockEndpointAppContextService } from '../../../../mocks';
 import { MicrosoftDefenderEndpointAgentStatusClient } from './microsoft_defender_endpoint_agent_status_client';
@@ -15,15 +18,15 @@ import { responseActionsClientMock } from '../../../actions/clients/mocks';
 import { SUB_ACTION as MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '@kbn/connector-schemas/microsoft_defender_endpoint/constants';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
-jest.mock('../../../actions/pending_actions_summary', () => {
-  const realModule = jest.requireActual('../../../actions/pending_actions_summary');
+vi.mock('../../../actions/pending_actions_summary', async () => {
+  const realModule = (await vi.importActual('../../../actions/pending_actions_summary'));
   return {
     ...realModule,
-    getPendingActionsSummary: jest.fn(realModule.getPendingActionsSummary),
+    getPendingActionsSummary: vi.fn(realModule.getPendingActionsSummary),
   };
 });
 
-const getPendingActionsSummaryMock = _getPendingActionsSummary as jest.Mock;
+const getPendingActionsSummaryMock = _getPendingActionsSummary as Mock;
 
 describe('Microsoft Defender Agent Status client', () => {
   let clientConstructorOptions: AgentStatusClientOptions;
@@ -188,7 +191,7 @@ describe('Microsoft Defender Agent Status client', () => {
   );
 
   it('should log errors and still return expected data structure', async () => {
-    clientConstructorOptions.connectorActionsClient!.execute = jest
+    clientConstructorOptions.connectorActionsClient!.execute = vi
       .fn()
       .mockRejectedValue(new Error('foo error'));
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook, fireEvent, render } from '@testing-library/react';
 
@@ -12,32 +15,35 @@ import { sendGetAgents } from '../../hooks';
 
 import { ConfirmAgentEnrollment, usePollingAgentCount } from './confirm_agent_enrollment';
 
-const mockNavigateToUrl = jest.fn();
+const mockNavigateToUrl = vi.fn();
 
-jest.mock('../../hooks', () => ({
-  sendGetAgents: jest.fn(),
-  useLink: jest.fn(() => ({
-    getHref: jest.fn((page: string, values?: { kuery?: string }) => {
-      const kuery = values?.kuery ? `?kuery=${values.kuery}` : '';
-      return `/app/fleet/agents${kuery}`;
-    }),
-  })),
-  useStartServices: jest.fn(() => ({
-    application: { navigateToUrl: mockNavigateToUrl },
-  })),
-}));
+vi.mock('../../hooks', () => {
+      const mocked = {
+      sendGetAgents: vi.fn(),
+      useLink: vi.fn(() => ({
+        getHref: vi.fn((page: string, values?: { kuery?: string }) => {
+          const kuery = values?.kuery ? `?kuery=${values.kuery}` : '';
+          return `/app/fleet/agents${kuery}`;
+        }),
+      })),
+      useStartServices: vi.fn(() => ({
+        application: { navigateToUrl: mockNavigateToUrl },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSendGetAgents = sendGetAgents as jest.Mock;
+const mockSendGetAgents = sendGetAgents as Mock;
 
 describe('usePollingAgentCount', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockSendGetAgents.mockResolvedValue({ data: { items: [] } });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   it('accumulates enrolled agent ids over time', async () => {
@@ -78,11 +84,11 @@ describe('usePollingAgentCount', () => {
 
 describe('ConfirmAgentEnrollment', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('navigates to the agent list with an OPAMP kuery filter when isCollector is true', () => {
-    const onClickViewAgents = jest.fn();
+    const onClickViewAgents = vi.fn();
 
     const { getByTestId } = render(
       <ConfirmAgentEnrollment
@@ -103,7 +109,7 @@ describe('ConfirmAgentEnrollment', () => {
   });
 
   it('navigates to the plain agent list when isCollector is false', () => {
-    const onClickViewAgents = jest.fn();
+    const onClickViewAgents = vi.fn();
 
     const { getByTestId } = render(
       <ConfirmAgentEnrollment

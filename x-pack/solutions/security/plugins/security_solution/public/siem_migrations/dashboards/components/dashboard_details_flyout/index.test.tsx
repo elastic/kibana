@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock/test_providers';
@@ -13,7 +16,7 @@ import { migrationDashboards } from '../../__mocks__';
 import { getDashboardMigrationDashboardMock } from '../../../../../common/siem_migrations/model/__mocks__';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 
-jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
 
 const getMockUser = () => ({
   uid: 'user-1',
@@ -28,17 +31,17 @@ const getMockUser = () => ({
 const getNavigation = (overrides = {}) => ({
   hasPrevious: true,
   hasNext: true,
-  goToPrevious: jest.fn(),
-  goToNext: jest.fn(),
+  goToPrevious: vi.fn(),
+  goToNext: vi.fn(),
   ...overrides,
 });
 
 describe('DashboardMigrationDetailsFlyout', () => {
-  const closeFlyout = jest.fn();
+  const closeFlyout = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useBulkGetUserProfiles as Mock).mockReturnValue({
       isLoading: false,
       data: [getMockUser()],
     });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -19,7 +21,7 @@ import {
 import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
 import { NameCellTags } from './cell_tags';
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({
     items: [],
     total: 0,
@@ -134,7 +136,7 @@ describe('NameCellTags', () => {
   });
 
   it('calls custom `onTagClick` when provided', () => {
-    const handleClick = jest.fn();
+    const handleClick = vi.fn();
 
     render(
       <Wrapper>

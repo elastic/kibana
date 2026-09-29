@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FlyoutTemplate } from './flyout_template';
 
-jest.mock('@elastic/apm-rum');
+vi.mock('@elastic/apm-rum');
 
 const noop = () => {};
 
@@ -24,7 +26,7 @@ const ThrowOnRender = () => {
 
 describe('FlyoutTemplate header title icon and description', () => {
   it('catches a throwing header child and shows the error fallback without crashing the flyout', () => {
-    jest.spyOn(console, 'error').mockImplementation(noop);
+    vi.spyOn(console, 'error').mockImplementation(noop);
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
         <FlyoutTemplate.Header title="Service inventory" description={<ThrowOnRender />} />
@@ -36,7 +38,7 @@ describe('FlyoutTemplate header title icon and description', () => {
 
     expect(screen.getByTestId('errorBoundaryFatalHeader')).toBeInTheDocument();
     expect(screen.getByTestId('myFlyoutBody')).toBeInTheDocument();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('renders the header title as an H3', () => {

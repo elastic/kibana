@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CoreSetup } from '@kbn/core/server';
 
@@ -19,7 +21,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 
 describe('SampleDataRegistry', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
-  let mockCustomIntegrationsPluginSetup: jest.Mocked<CustomIntegrationsPluginSetup>;
+  let mockCustomIntegrationsPluginSetup: Mocked<CustomIntegrationsPluginSetup>;
   let mockUsageCollectionPluginSetup: MockedKeys<UsageCollectionSetup>;
 
   beforeEach(() => {

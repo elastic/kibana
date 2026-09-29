@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Observable } from 'rxjs';
 
 import type { CoreSetup } from '@kbn/core/public';
@@ -63,7 +65,7 @@ describe('Security Plugin', () => {
 
     it('setups Management Service if `management` plugin is available', () => {
       const coreSetupMock = getCoreSetupMock();
-      const setupManagementServiceMock = jest
+      const setupManagementServiceMock = vi
         .spyOn(ManagementService.prototype, 'setup')
         .mockImplementation(() => {});
       const managementSetupMock = managementPluginMock.createSetupContract();
@@ -234,8 +236,8 @@ describe('Security Plugin', () => {
     });
 
     it('starts Management Service if `management` plugin is available', () => {
-      jest.spyOn(ManagementService.prototype, 'setup').mockImplementation(() => {});
-      const startManagementServiceMock = jest
+      vi.spyOn(ManagementService.prototype, 'setup').mockImplementation(() => {});
+      const startManagementServiceMock = vi
         .spyOn(ManagementService.prototype, 'start')
         .mockImplementation(() => {});
       const managementSetupMock = managementPluginMock.createSetupContract();
@@ -283,7 +285,7 @@ describe('Security Plugin', () => {
     });
 
     it('calls UserProfileAPIClient start() to fetch the user profile', () => {
-      const startUserProfileAPIClient = jest
+      const startUserProfileAPIClient = vi
         .spyOn(UserProfileAPIClient.prototype, 'start')
         .mockImplementation(() => {});
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());

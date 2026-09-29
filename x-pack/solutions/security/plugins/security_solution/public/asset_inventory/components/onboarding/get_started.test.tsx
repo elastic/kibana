@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { GetStarted } from './get_started';
@@ -13,16 +16,16 @@ import { renderWithTestProvider } from '../../test/test_provider';
 import { userEvent } from '@testing-library/user-event';
 import { mockUseEnableAssetInventory } from './hooks/use_enable_asset_inventory.mock';
 
-jest.mock('./hooks/use_enable_asset_inventory');
+vi.mock('./hooks/use_enable_asset_inventory');
 
 const mockGetStarted = mockUseEnableAssetInventory();
 
 describe('GetStarted Component', () => {
   beforeEach(() => {
-    (useEnableAssetInventory as jest.Mock).mockReturnValue(mockGetStarted);
+    (useEnableAssetInventory as Mock).mockReturnValue(mockGetStarted);
   });
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('renders the component', () => {
@@ -42,7 +45,7 @@ describe('GetStarted Component', () => {
   });
 
   it('shows a loading spinner when enabling', () => {
-    (useEnableAssetInventory as jest.Mock).mockReturnValue({
+    (useEnableAssetInventory as Mock).mockReturnValue({
       ...mockGetStarted,
       isEnabling: true,
     });
@@ -56,7 +59,7 @@ describe('GetStarted Component', () => {
   it('displays an error message when there is an error', () => {
     const errorMessage =
       'Something went wrong while setting things up. You can try again or go back to Get Started with Inventory.';
-    (useEnableAssetInventory as jest.Mock).mockReturnValue({
+    (useEnableAssetInventory as Mock).mockReturnValue({
       ...mockGetStarted,
       error: errorMessage,
     });
@@ -68,7 +71,7 @@ describe('GetStarted Component', () => {
   });
 
   it('calls reset when Back to Get Started with Inventory empty button is clicked', async () => {
-    (useEnableAssetInventory as jest.Mock).mockReturnValue({
+    (useEnableAssetInventory as Mock).mockReturnValue({
       ...mockGetStarted,
       error: 'Task Manager is not available',
     });

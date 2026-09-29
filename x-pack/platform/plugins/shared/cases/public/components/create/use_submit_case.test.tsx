@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import { useKibana } from '../../common/lib/kibana';
@@ -35,43 +38,46 @@ import {
   useGetChoicesResponse,
 } from './mock';
 
-jest.mock('../../containers/use_post_case');
-jest.mock('../../containers/use_create_attachments');
-jest.mock('../../containers/use_post_push_to_service');
-jest.mock('../../containers/use_get_tags');
-jest.mock('../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../containers/configure/use_get_all_case_configurations');
-jest.mock('../connectors/jira/use_get_issue_types');
-jest.mock('../connectors/jira/use_get_fields_by_issue_type');
-jest.mock('../connectors/jira/use_get_issues');
-jest.mock('../connectors/servicenow/use_get_choices');
-jest.mock('../../common/lib/kibana');
-jest.mock('../../containers/user_profiles/api');
-jest.mock('../../common/use_license');
-jest.mock('../../containers/use_get_categories');
-jest.mock('../app/use_available_owners');
+vi.mock('../../containers/use_post_case');
+vi.mock('../../containers/use_create_attachments');
+vi.mock('../../containers/use_post_push_to_service');
+vi.mock('../../containers/use_get_tags');
+vi.mock('../../containers/configure/use_get_supported_action_connectors');
+vi.mock('../../containers/configure/use_get_all_case_configurations');
+vi.mock('../connectors/jira/use_get_issue_types');
+vi.mock('../connectors/jira/use_get_fields_by_issue_type');
+vi.mock('../connectors/jira/use_get_issues');
+vi.mock('../connectors/servicenow/use_get_choices');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../containers/user_profiles/api');
+vi.mock('../../common/use_license');
+vi.mock('../../containers/use_get_categories');
+vi.mock('../app/use_available_owners');
 
-const mockReportTemplateAppliedOnCreate = jest.fn();
-jest.mock('../../analytics/templates/use_template_apply_ebt', () => ({
-  useTemplateAppliedOnCreateEBT: () => mockReportTemplateAppliedOnCreate,
-}));
+const mockReportTemplateAppliedOnCreate = vi.fn();
+vi.mock('../../analytics/templates/use_template_apply_ebt', () => {
+      const mocked = {
+      useTemplateAppliedOnCreateEBT: () => mockReportTemplateAppliedOnCreate,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
-const usePostCaseMock = usePostCase as jest.Mock;
-const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
-const usePostPushToServiceMock = usePostPushToService as jest.Mock;
-const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
-const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
-const useGetChoicesMock = useGetChoices as jest.Mock;
-const pushCaseToExternalService = jest.fn();
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const useLicenseMock = useLicense as jest.Mock;
-const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as Mock;
+const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as Mock;
+const usePostCaseMock = usePostCase as Mock;
+const useCreateAttachmentsMock = useCreateAttachments as Mock;
+const usePostPushToServiceMock = usePostPushToService as Mock;
+const useGetIssueTypesMock = useGetIssueTypes as Mock;
+const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as Mock;
+const useGetChoicesMock = useGetChoices as Mock;
+const pushCaseToExternalService = vi.fn();
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
+const useLicenseMock = useLicense as Mock;
+const useAvailableOwnersMock = useAvailableCasesOwners as Mock;
 
 const sampleId = 'case-id';
 
-const postCase = jest.fn();
+const postCase = vi.fn();
 
 const defaultPostCase = {
   isLoading: false,
@@ -101,7 +107,7 @@ describe('useSubmitCase', () => {
     });
     usePostCaseMock.mockImplementation(() => defaultPostCase);
 
-    const createAttachments = jest.fn();
+    const createAttachments = vi.fn();
 
     postCase.mockResolvedValue({
       id: sampleId,
@@ -117,7 +123,7 @@ describe('useSubmitCase', () => {
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
     useAvailableOwnersMock.mockReturnValue(['securitySolution', 'observability', 'cases']);
 
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = vi.fn().mockReturnValue({
       actionTypeTitle: '.servicenow',
       iconClass: 'logoSecurity',
     });
@@ -125,14 +131,14 @@ describe('useSubmitCase', () => {
     useLicenseMock.mockReturnValue({ isAtLeastGold: () => true, isAtLeastPlatinum: () => true });
   });
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('if payload is valid', () => {
     const payloadIsValid = true;
 
     it('should post case', async () => {
-      const onSuccess = jest.fn();
-      const afterCaseCreated = jest.fn();
+      const onSuccess = vi.fn();
+      const afterCaseCreated = vi.fn();
 
       usePostCaseMock.mockImplementationOnce(() => ({ ...defaultPostCase, isLoading: true }));
 
@@ -158,7 +164,7 @@ describe('useSubmitCase', () => {
 
   describe('getAttachments', () => {
     it('calls createAttachments with the resolved owner from theCase', async () => {
-      const createAttachments = jest.fn();
+      const createAttachments = vi.fn();
       useCreateAttachmentsMock.mockImplementation(() => ({ mutateAsync: createAttachments }));
 
       const resolvedAttachment = {
@@ -167,7 +173,7 @@ describe('useSubmitCase', () => {
         metadata: { index: 'idx-1', rule: null },
       };
 
-      const getAttachments = jest.fn().mockReturnValue([resolvedAttachment]);
+      const getAttachments = vi.fn().mockReturnValue([resolvedAttachment]);
 
       postCase.mockResolvedValue({
         id: sampleId,
@@ -191,7 +197,7 @@ describe('useSubmitCase', () => {
     });
 
     it('does not call createAttachments when getAttachments returns empty array', async () => {
-      const createAttachments = jest.fn();
+      const createAttachments = vi.fn();
       useCreateAttachmentsMock.mockImplementation(() => ({ mutateAsync: createAttachments }));
 
       postCase.mockResolvedValue({
@@ -216,8 +222,8 @@ describe('useSubmitCase', () => {
     const payloadIsValid = false;
 
     it('should not post case', async () => {
-      const onSuccess = jest.fn();
-      const afterCaseCreated = jest.fn();
+      const onSuccess = vi.fn();
+      const afterCaseCreated = vi.fn();
 
       const { result } = renderUseSubmitCase({
         attachments: [],
@@ -314,7 +320,7 @@ describe('useSubmitCase', () => {
     it('reports the template even when the attachment write fails', async () => {
       // The case exists with its template by then, so an unrelated attachment failure must not
       // swallow the event. This is what fixes the report's position above the attachment block.
-      const createAttachments = jest.fn().mockRejectedValue(new Error('attachment failed'));
+      const createAttachments = vi.fn().mockRejectedValue(new Error('attachment failed'));
       useCreateAttachmentsMock.mockImplementation(() => ({ mutateAsync: createAttachments }));
 
       postCase.mockResolvedValue({

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -23,16 +26,19 @@ import {
   ENTITY_ANALYTICS_STATUS_LOADING_TEST_ID,
 } from '../test_ids';
 
-const mockToggle = jest.fn();
-jest.mock('../hooks/use_toggle_entity_analytics', () => ({
-  useToggleEntityAnalytics: () => mockUseToggleReturn,
-}));
+const mockToggle = vi.fn();
+vi.mock('../hooks/use_toggle_entity_analytics', () => {
+      const mocked = {
+      useToggleEntityAnalytics: () => mockUseToggleReturn,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockUseToggleReturn: {
   status: EntityAnalyticsStatus;
   isLoading: boolean;
   isStatusLoading: boolean;
-  toggle: jest.Mock;
+  toggle: Mock;
   errors: { entityStore: string[] };
 };
 
@@ -76,12 +82,12 @@ describe('EntityAnalyticsToggle', () => {
     hasStopPrivileges: true,
     isPrivilegesLoading: false,
     selectedSettingsMatchSavedSettings: true,
-    onSaveSettings: jest.fn().mockResolvedValue(undefined),
+    onSaveSettings: vi.fn().mockResolvedValue(undefined),
     isSavingSettings: false,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseToggleReturn = {
       status: 'not_installed',
       isLoading: false,

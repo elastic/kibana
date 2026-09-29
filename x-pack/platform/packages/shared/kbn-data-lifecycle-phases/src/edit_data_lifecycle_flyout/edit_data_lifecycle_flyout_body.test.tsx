@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { EuiFieldText, EuiThemeProvider } from '@elastic/eui';
@@ -35,8 +37,8 @@ describe('EditDataLifecycleFlyoutBody', () => {
 
   it('disables the policy search and inspect actions when inheriting lifecycle', async () => {
     const user = userEvent.setup();
-    const onSelect = jest.fn();
-    const onInspect = jest.fn();
+    const onSelect = vi.fn();
+    const onInspect = vi.fn();
 
     renderWithTheme(
       <EditDataLifecycleFlyoutBody
@@ -89,8 +91,8 @@ describe('EditDataLifecycleFlyoutBody', () => {
 
   it('shows the applied policy read-only when the user cannot manage ILM but a policy is applied', async () => {
     const user = userEvent.setup();
-    const onSelect = jest.fn();
-    const onInspect = jest.fn();
+    const onSelect = vi.fn();
+    const onInspect = vi.fn();
 
     renderWithTheme(
       <EditDataLifecycleFlyoutBody

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -12,10 +15,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { NoModelsEmptyPrompt } from './no_models_empty_prompt';
 import { useKibana } from '../../hooks/use_kibana';
 
-jest.mock('../../hooks/use_kibana');
+vi.mock('../../hooks/use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockNavigateToApp = jest.fn();
+const mockUseKibana = useKibana as Mock;
+const mockNavigateToApp = vi.fn();
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiThemeProvider>
@@ -25,7 +28,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('NoModelsEmptyPrompt', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
         cloud: { isCloudEnabled: true },

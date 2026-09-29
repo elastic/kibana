@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-jest.mock('../security');
-jest.mock('./crud');
-jest.mock('./status');
-jest.mock('./versions');
-jest.mock('../app_context', () => ({
-  appContextService: {
-    getInternalUserSOClientForSpaceId: jest.fn(),
-    getSavedObjects: jest.fn(),
-  },
-}));
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
+vi.mock('../security');
+vi.mock('./crud');
+vi.mock('./status');
+vi.mock('./versions');
+vi.mock('../app_context', () => {
+      const mocked = {
+      appContextService: {
+        getInternalUserSOClientForSpaceId: vi.fn(),
+        getSavedObjects: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {
@@ -36,23 +42,23 @@ import { getAgentsByKuery, getAgentById } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
 import { getLatestAvailableAgentVersion } from './versions';
 
-const mockGetAuthzFromRequest = getAuthzFromRequest as jest.Mock<Promise<FleetAuthz>>;
-const mockGetAgentsByKuery = getAgentsByKuery as jest.Mock;
-const mockGetAgentById = getAgentById as jest.Mock;
-const mockGetAgentStatusById = getAgentStatusById as jest.Mock;
-const mockGetAgentStatusForAgentPolicy = getAgentStatusForAgentPolicy as jest.Mock;
-const mockgetLatestAvailableAgentVersion = getLatestAvailableAgentVersion as jest.Mock;
+const mockGetAuthzFromRequest = getAuthzFromRequest as Mock<Promise<FleetAuthz>>;
+const mockGetAgentsByKuery = getAgentsByKuery as Mock;
+const mockGetAgentById = getAgentById as Mock;
+const mockGetAgentStatusById = getAgentStatusById as Mock;
+const mockGetAgentStatusForAgentPolicy = getAgentStatusForAgentPolicy as Mock;
+const mockgetLatestAvailableAgentVersion = getLatestAvailableAgentVersion as Mock;
 
 describe('AgentService', () => {
-  let mockedScopedSoClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockedScopedSoClient: Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockedScopedSoClient = savedObjectsClientMock.create();
-    jest.mocked(appContextService.getSavedObjects).mockReturnValue({
-      getScopedClient: jest.fn().mockReturnValue(mockedScopedSoClient),
+    vi.mocked(appContextService.getSavedObjects).mockReturnValue({
+      getScopedClient: vi.fn().mockReturnValue(mockedScopedSoClient),
     } as any);
-    jest
+    vi
       .mocked(appContextService.getInternalUserSOClientForSpaceId)
       .mockReturnValue(mockedScopedSoClient);
   });
@@ -166,7 +172,7 @@ describe('AgentService', () => {
 
       beforeEach(() => {
         mockGetAuthzFromRequest.mockReturnValue(Promise.resolve(createFleetAuthzMock()));
-        jest.mocked(mockedScopedSoClient.getCurrentNamespace).mockReturnValue('test');
+        vi.mocked(mockedScopedSoClient.getCurrentNamespace).mockReturnValue('test');
       });
       expectApisToCallServicesSuccessfully(
         mockEsClient,
@@ -214,12 +220,12 @@ describe('AgentService', () => {
 
 function expectApisToCallServicesSuccessfully(
   mockEsClient: ElasticsearchClient,
-  getExpectedSoClient: () => jest.Mocked<SavedObjectsClientContract>,
+  getExpectedSoClient: () => Mocked<SavedObjectsClientContract>,
   agentClientFactory: () => AgentClient,
   spaceId?: string
 ) {
   let agentClient: AgentClient;
-  let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockSoClient: Mocked<SavedObjectsClientContract>;
   beforeEach(() => {
     mockSoClient = getExpectedSoClient();
     agentClient = agentClientFactory();

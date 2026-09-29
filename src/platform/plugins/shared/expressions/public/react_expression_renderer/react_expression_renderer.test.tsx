@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Subject } from 'rxjs';
@@ -18,12 +21,12 @@ import type { IInterpreterRenderHandlers } from '../../common';
 import { ExpressionLoader } from '../loader';
 import type { RenderErrorHandlerFnType, ExpressionRendererEvent } from '../types';
 
-jest.mock('../loader', () => {
+vi.mock('../loader', () => {
   return {
-    ExpressionLoader: jest.fn().mockImplementation(() => {
+    ExpressionLoader: vi.fn().mockImplementation(() => {
       return {};
     }),
-    loader: jest.fn(),
+    loader: vi.fn(),
   };
 });
 
@@ -36,12 +39,12 @@ describe('ExpressionRenderer', () => {
     const loadingSubject = new Subject<void>();
     const loading$ = loadingSubject.asObservable().pipe(share());
 
-    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+    (ExpressionLoader as Mock).mockImplementation(() => {
       return {
         render$,
         data$,
         loading$,
-        update: jest.fn(),
+        update: vi.fn(),
       };
     });
 
@@ -80,15 +83,15 @@ describe('ExpressionRenderer', () => {
 
   it('updates the expression loader when refresh subject emits', () => {
     const refreshSubject = new Subject<void>();
-    const loaderUpdate = jest.fn();
+    const loaderUpdate = vi.fn();
 
-    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+    (ExpressionLoader as Mock).mockImplementation(() => {
       return {
         render$: new Subject(),
         data$: new Subject(),
         loading$: new Subject(),
         update: loaderUpdate,
-        destroy: jest.fn(),
+        destroy: vi.fn(),
       };
     });
 
@@ -104,18 +107,18 @@ describe('ExpressionRenderer', () => {
   });
 
   it('waits for debounce period if specified', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const refreshSubject = new Subject();
-    const loaderUpdate = jest.fn();
+    const loaderUpdate = vi.fn();
 
-    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+    (ExpressionLoader as Mock).mockImplementation(() => {
       return {
         render$: new Subject(),
         data$: new Subject(),
         loading$: new Subject(),
         update: loaderUpdate,
-        destroy: jest.fn(),
+        destroy: vi.fn(),
       };
     });
 
@@ -128,7 +131,7 @@ describe('ExpressionRenderer', () => {
     expect(loaderUpdate).not.toHaveBeenCalled();
 
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(loaderUpdate).toHaveBeenCalledTimes(1);
@@ -137,18 +140,18 @@ describe('ExpressionRenderer', () => {
   });
 
   it('should not update twice immediately after rendering', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const refreshSubject = new Subject();
-    const loaderUpdate = jest.fn();
+    const loaderUpdate = vi.fn();
 
-    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+    (ExpressionLoader as Mock).mockImplementation(() => {
       return {
         render$: new Subject(),
         data$: new Subject(),
         loading$: new Subject(),
         update: loaderUpdate,
-        destroy: jest.fn(),
+        destroy: vi.fn(),
       };
     });
 
@@ -157,7 +160,7 @@ describe('ExpressionRenderer', () => {
     );
 
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(loaderUpdate).not.toHaveBeenCalled();
@@ -166,18 +169,18 @@ describe('ExpressionRenderer', () => {
   });
 
   it('waits for debounce period on other loader option change if specified', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const refreshSubject = new Subject();
-    const loaderUpdate = jest.fn();
+    const loaderUpdate = vi.fn();
 
-    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+    (ExpressionLoader as Mock).mockImplementation(() => {
       return {
         render$: new Subject(),
         data$: new Subject(),
         loading$: new Subject(),
         update: loaderUpdate,
-        destroy: jest.fn(),
+        destroy: vi.fn(),
       };
     });
 
@@ -195,7 +198,7 @@ describe('ExpressionRenderer', () => {
     expect(loaderUpdate).not.toHaveBeenCalled();
 
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(loaderUpdate).toHaveBeenCalledTimes(1);
@@ -212,14 +215,14 @@ describe('ExpressionRenderer', () => {
     const loading$ = loadingSubject.asObservable().pipe(share());
 
     let onRenderError: RenderErrorHandlerFnType;
-    (ExpressionLoader as jest.Mock).mockImplementation((...args) => {
+    (ExpressionLoader as Mock).mockImplementation((...args) => {
       const params = args[2];
       onRenderError = params.onRenderError;
       return {
         render$,
         data$,
         loading$,
-        update: jest.fn(),
+        update: vi.fn(),
       };
     });
 
@@ -258,16 +261,16 @@ describe('ExpressionRenderer', () => {
 
     const result = {};
     const inspectData = {};
-    const onData$ = jest.fn();
+    const onData$ = vi.fn();
 
-    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+    (ExpressionLoader as Mock).mockImplementation(() => {
       return {
         render$: new Subject(),
         data$,
         loading$: new Subject(),
         events$: new Subject(),
-        update: jest.fn(),
-        inspect: jest.fn(() => inspectData),
+        update: vi.fn(),
+        inspect: vi.fn(() => inspectData),
       };
     });
 
@@ -294,7 +297,7 @@ describe('ExpressionRenderer', () => {
     const eventsSubject = new Subject<ExpressionRendererEvent>();
     const events$ = eventsSubject.asObservable().pipe(share());
 
-    const onEvent = jest.fn();
+    const onEvent = vi.fn();
     const event: ExpressionRendererEvent = {
       name: 'foo',
       data: {
@@ -302,13 +305,13 @@ describe('ExpressionRenderer', () => {
       },
     };
 
-    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+    (ExpressionLoader as Mock).mockImplementation(() => {
       return {
         render$,
         data$,
         loading$,
         events$,
-        update: jest.fn(),
+        update: vi.fn(),
       };
     });
 
@@ -325,13 +328,13 @@ describe('ExpressionRenderer', () => {
   });
 
   it('should correctly assign classes to the wrapper node', () => {
-    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+    (ExpressionLoader as Mock).mockImplementation(() => {
       return {
         render$: new Subject(),
         data$: new Subject(),
         loading$: new Subject(),
-        update: jest.fn(),
-        destroy: jest.fn(),
+        update: vi.fn(),
+        destroy: vi.fn(),
       };
     });
 

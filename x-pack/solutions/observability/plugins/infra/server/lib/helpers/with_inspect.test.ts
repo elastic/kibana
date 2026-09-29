@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from '@kbn/core/server';
 import { inspectableEsQueriesMap, withInspect } from './with_inspect';
 
 const createMockResponse = () =>
   ({
-    ok: jest.fn(({ body }) => ({ body, statusCode: 200 })),
-    customError: jest.fn(({ statusCode, body }) => ({ statusCode, body })),
+    ok: vi.fn(({ body }) => ({ body, statusCode: 200 })),
+    customError: vi.fn(({ statusCode, body }) => ({ statusCode, body })),
   } as unknown as KibanaResponseFactory);
 
 const createMockRequest = (query: Record<string, unknown> = {}) =>
@@ -19,11 +21,11 @@ const createMockRequest = (query: Record<string, unknown> = {}) =>
 
 describe('withInspect', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns handler response via response.ok()', async () => {
-    const handler = jest.fn().mockResolvedValue({ hosts: [] });
+    const handler = vi.fn().mockResolvedValue({ hosts: [] });
     const wrapped = withInspect(handler);
     const request = createMockRequest();
     const response = createMockResponse();
@@ -35,7 +37,7 @@ describe('withInspect', () => {
   });
 
   it('includes _inspect data when _inspect=true', async () => {
-    const handler = jest.fn().mockImplementation(async (_ctx, req) => {
+    const handler = vi.fn().mockImplementation(async (_ctx, req) => {
       inspectableEsQueriesMap.get(req)?.push({ id: 'test-query' } as any);
       return { hosts: [] };
     });
@@ -51,7 +53,7 @@ describe('withInspect', () => {
   });
 
   it('does not include _inspect data when _inspect is absent', async () => {
-    const handler = jest.fn().mockImplementation(async (_ctx, req) => {
+    const handler = vi.fn().mockImplementation(async (_ctx, req) => {
       inspectableEsQueriesMap.get(req)?.push({ id: 'test-query' } as any);
       return { hosts: [] };
     });
@@ -65,7 +67,7 @@ describe('withInspect', () => {
   });
 
   it('returns error with _inspect data on handler failure', async () => {
-    const handler = jest.fn().mockImplementation(async (_ctx, req) => {
+    const handler = vi.fn().mockImplementation(async (_ctx, req) => {
       inspectableEsQueriesMap.get(req)?.push({ id: 'failed-query' } as any);
       throw new Error('Something went wrong');
     });
@@ -85,7 +87,7 @@ describe('withInspect', () => {
   });
 
   it('cleans up the inspectableEsQueriesMap entry after handling', async () => {
-    const handler = jest.fn().mockResolvedValue({});
+    const handler = vi.fn().mockResolvedValue({});
     const wrapped = withInspect(handler);
     const request = createMockRequest();
     const response = createMockResponse();

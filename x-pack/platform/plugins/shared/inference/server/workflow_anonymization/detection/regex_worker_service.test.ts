@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { PiiRegexWorkerService } from './regex_worker_service';
 import type { WorkflowAnonymizationWorkerConfig } from '../../config';
@@ -34,7 +36,7 @@ describe('PiiRegexWorkerService', () => {
   let service: PiiRegexWorkerService;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     logger = loggerMock.create();
   });
 
@@ -185,7 +187,7 @@ describe('PiiRegexWorkerService', () => {
   describe('worker queue at capacity', () => {
     it('throws a distinct "queue at capacity" error distinguishable from rule errors', async () => {
       service = new PiiRegexWorkerService(createTestConfig(), logger);
-      jest
+      vi
         .spyOn((service as any).worker, 'run')
         .mockRejectedValueOnce(new Error('Task queue is at limit'));
 
@@ -194,7 +196,7 @@ describe('PiiRegexWorkerService', () => {
 
     it('logs and returns [] in allow_unsafe mode when queue is at capacity', async () => {
       service = new PiiRegexWorkerService(createTestConfig(), logger);
-      jest
+      vi
         .spyOn((service as any).worker, 'run')
         .mockRejectedValueOnce(new Error('Task queue is at limit'));
 

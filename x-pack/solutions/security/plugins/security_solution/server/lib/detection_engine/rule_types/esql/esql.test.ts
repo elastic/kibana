@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import moment from 'moment';
 
@@ -19,23 +22,32 @@ import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/s
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { getMvExpandFields } from '@kbn/securitysolution-utils';
 
-jest.mock('../../routes/index/get_index_version');
-jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
-jest.mock('./utils/validate_esql_query', () => ({
-  validateEsqlQuery: jest.fn().mockResolvedValue(true),
-}));
-jest.mock('@kbn/securitysolution-utils', () => ({
-  ...jest.requireActual('@kbn/securitysolution-utils'),
-  getMvExpandFields: jest.fn().mockReturnValue([]),
-}));
+vi.mock('../../routes/index/get_index_version');
+vi.mock('../utils/get_data_tier_filter', () => {
+      const mocked = { getDataTierFilter: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./utils/validate_esql_query', () => {
+      const mocked = {
+      validateEsqlQuery: vi.fn().mockResolvedValue(true),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/securitysolution-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/securitysolution-utils')),
+      getMvExpandFields: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getDataTierFilterMock = getDataTierFilter as jest.Mock;
+const getDataTierFilterMock = getDataTierFilter as Mock;
 
 describe('esqlExecutor', () => {
   let ruleServices: PersistenceExecutorOptionsMock;
-  (getIndexVersion as jest.Mock).mockReturnValue(SIGNALS_TEMPLATE_VERSION);
+  (getIndexVersion as Mock).mockReturnValue(SIGNALS_TEMPLATE_VERSION);
   const params = getEsqlRuleParams();
-  const mockScheduleNotificationResponseActionsService = jest.fn();
+  const mockScheduleNotificationResponseActionsService = vi.fn();
   let licensing: ReturnType<typeof licensingMock.createSetup>;
 
   let mockedArguments: Parameters<typeof esqlExecutor>[0];
@@ -43,7 +55,7 @@ describe('esqlExecutor', () => {
   const sharedParams = getSharedParamsMock({ ruleParams: params });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     licensing = licensingMock.createSetup();
     ruleServices = createPersistenceExecutorOptionsMock();
     getDataTierFilterMock.mockResolvedValue([]);
@@ -58,14 +70,14 @@ describe('esqlExecutor', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('errors', () => {
     it('should return result with user error equal true when request fails with data verification exception', async () => {
       (
-        ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery as unknown as jest.Mock
+        ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery as unknown as Mock
       ).mockRejectedValue(
         new KbnServerError(
           'verification_exception: Found 1 problem\nline 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [standard] mode',
@@ -97,7 +109,7 @@ describe('esqlExecutor', () => {
 
     it('should return result without user error when request fails with non-categorized error', async () => {
       (
-        ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery as unknown as jest.Mock
+        ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery as unknown as Mock
       ).mockRejectedValue(
         new KbnServerError('Unknown Error', 500, {
           error: {
@@ -165,7 +177,7 @@ describe('esqlExecutor', () => {
 
       await esqlExecutor(mockedArguments);
       const asyncQueryMock = ruleServices.scopedClusterClient.asCurrentUser.esql
-        .asyncQuery as unknown as jest.Mock;
+        .asyncQuery as unknown as Mock;
       const asyncQueryArgs = asyncQueryMock.mock.calls[0][0];
 
       expect(asyncQueryArgs).toHaveProperty('filter.bool.must_not.0.bool.filter.0.ids.values', [
@@ -188,7 +200,7 @@ describe('esqlExecutor', () => {
         },
         lastQuery: params.query,
       };
-      (getMvExpandFields as jest.Mock).mockReturnValue(['agent.name']);
+      (getMvExpandFields as Mock).mockReturnValue(['agent.name']);
       mockedArguments.sharedParams.tuple = {
         from: moment('2025-04-28T09:00:00Z'),
         to: moment('2025-04-28T12:00:00Z'),
@@ -197,7 +209,7 @@ describe('esqlExecutor', () => {
 
       await esqlExecutor(mockedArguments);
       const asyncQueryMock = ruleServices.scopedClusterClient.asCurrentUser.esql
-        .asyncQuery as unknown as jest.Mock;
+        .asyncQuery as unknown as Mock;
       const asyncQueryArgs = asyncQueryMock.mock.calls[0][0];
 
       expect(asyncQueryArgs).toHaveProperty('filter.bool.must_not.0.bool.filter.0.ids.values', [
@@ -215,7 +227,7 @@ describe('esqlExecutor', () => {
 
   it('should handle scheduleNotificationResponseActionsService call', async () => {
     (
-      ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery as unknown as jest.Mock
+      ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery as unknown as Mock
     ).mockResolvedValue({
       id: 'QUERY-ID',
       is_running: false,

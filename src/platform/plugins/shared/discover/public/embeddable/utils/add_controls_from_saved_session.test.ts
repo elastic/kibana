@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 import type { CanAddNewPanel } from '@kbn/presentation-publishing';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
@@ -17,14 +20,14 @@ import { addControlsFromSavedSession } from './add_controls_from_saved_session';
 
 describe('addControlsFromSavedSession', () => {
   let mockContainer: CanAddNewPanel & PublishesESQLVariables & { controlGroupApi$?: unknown };
-  let mockControlGroupApi: jest.Mocked<ControlGroupRendererApi>;
-  let mockControlGroupApi$: BehaviorSubject<jest.Mocked<ControlGroupRendererApi>>;
+  let mockControlGroupApi: Mocked<ControlGroupRendererApi>;
+  let mockControlGroupApi$: BehaviorSubject<Mocked<ControlGroupRendererApi>>;
   let mockEsqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
 
   beforeEach(() => {
     mockControlGroupApi = {
-      addNewPanel: jest.fn(),
-    } as unknown as jest.Mocked<ControlGroupRendererApi>;
+      addNewPanel: vi.fn(),
+    } as unknown as Mocked<ControlGroupRendererApi>;
 
     mockControlGroupApi$ = new BehaviorSubject(mockControlGroupApi);
     mockEsqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([
@@ -35,7 +38,7 @@ describe('addControlsFromSavedSession', () => {
     mockContainer = {
       controlGroupApi$: mockControlGroupApi$,
       esqlVariables$: mockEsqlVariables$,
-      addNewPanel: jest.fn(),
+      addNewPanel: vi.fn(),
     };
   });
 
@@ -49,7 +52,7 @@ describe('addControlsFromSavedSession', () => {
   describe('when container does not support ESQL variables', () => {
     it('should return early when container does not publish ESQL variables', async () => {
       const containerWithoutESQL = {
-        addNewPanel: jest.fn(),
+        addNewPanel: vi.fn(),
         controlGroupApi$: mockControlGroupApi$,
       };
 
@@ -69,7 +72,7 @@ describe('addControlsFromSavedSession', () => {
 
     it('should return early when container does not have controlGroupApi$', async () => {
       const containerWithoutControlGroup = {
-        addNewPanel: jest.fn(),
+        addNewPanel: vi.fn(),
         esqlVariables$: mockEsqlVariables$,
       };
 
@@ -123,7 +126,7 @@ describe('addControlsFromSavedSession', () => {
       await addControlsFromSavedSession(mockContainer, controlGroupJson);
 
       const addedPanels = (
-        mockContainer.addNewPanel as jest.MockedFunction<CanAddNewPanel['addNewPanel']>
+        mockContainer.addNewPanel as MockedFunction<CanAddNewPanel['addNewPanel']>
       ).mock.calls.map(
         (call) => (call[0]?.serializedState as { variable_name?: string })?.variable_name
       );

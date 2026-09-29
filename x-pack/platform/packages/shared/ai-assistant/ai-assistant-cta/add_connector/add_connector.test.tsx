@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -13,7 +15,7 @@ import { AddConnector, type AddConnectorProps } from './add_connector';
 import { translations } from './add_connector.translations';
 
 describe('AddConnector', () => {
-  const onAddConnector = jest.fn();
+  const onAddConnector = vi.fn();
 
   const renderComponent = (props: AddConnectorProps) =>
     render(<AddConnector {...props} />, { wrapper: EuiThemeProvider });

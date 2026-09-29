@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Simulator } from '../../test_utilities/simulator';
 import { createMemoryHistory } from 'history';
 import React from 'react';
@@ -15,10 +17,13 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { mockFlyoutApi } from '../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import '../../test_utilities/extend_jest';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  ExpandableFlyoutProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
-  useExpandableFlyoutApi: jest.fn(),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      ExpandableFlyoutProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+      useExpandableFlyoutApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('graph controls: when relsover is loaded with an origin node', () => {
   let simulator: Simulator;
@@ -36,8 +41,8 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
   };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.clearAllMocks();
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     const {
       metadata: { databaseDocumentID, entityIDs },
       dataAccessLayer,
@@ -107,8 +112,8 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
   });
 
   it('should open the analyzer details panel in expandable flyout when legacy mode is enabled', async () => {
-    jest.clearAllMocks();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.clearAllMocks();
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     const {
       metadata: { databaseDocumentID },
       dataAccessLayer,

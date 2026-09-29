@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-jest.mock('../get_oauth_client_credentials_access_token');
-jest.mock('../delete_token_axios_interceptor');
-jest.mock('../build_client_assertion');
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
+vi.mock('../get_oauth_client_credentials_access_token');
+vi.mock('../delete_token_axios_interceptor');
+vi.mock('../build_client_assertion');
 
 import type { AxiosInstance } from 'axios';
 import type { GetTokenOpts, OAuthClientCredsPrivateKeyJWTGetTokenOpts } from '@kbn/connector-specs';
@@ -22,13 +25,13 @@ import { OAuthClientCredentialsPrivateKeyJwtStrategy } from './oauth_client_cred
 import type { AuthStrategyDeps } from './types';
 
 const mockGetOAuthClientCredentialsAccessToken =
-  getOAuthClientCredentialsAccessToken as jest.MockedFunction<
+  getOAuthClientCredentialsAccessToken as MockedFunction<
     typeof getOAuthClientCredentialsAccessToken
   >;
-const mockGetDeleteTokenAxiosInterceptor = getDeleteTokenAxiosInterceptor as jest.MockedFunction<
+const mockGetDeleteTokenAxiosInterceptor = getDeleteTokenAxiosInterceptor as MockedFunction<
   typeof getDeleteTokenAxiosInterceptor
 >;
-const mockBuildClientAssertion = buildClientAssertion as jest.MockedFunction<
+const mockBuildClientAssertion = buildClientAssertion as MockedFunction<
   typeof buildClientAssertion
 >;
 
@@ -66,17 +69,17 @@ const baseOpts: OAuthClientCredsPrivateKeyJWTGetTokenOpts = {
 
 const createMockAxiosInstance = () =>
   ({
-    interceptors: { response: { use: jest.fn() } },
+    interceptors: { response: { use: vi.fn() } },
   } as unknown as AxiosInstance);
 
 describe('OAuthClientCredentialsPrivateKeyJwtStrategy', () => {
   let strategy: OAuthClientCredentialsPrivateKeyJwtStrategy;
 
-  const mockOnFulfilled = jest.fn();
-  const mockOnRejected = jest.fn();
+  const mockOnFulfilled = vi.fn();
+  const mockOnRejected = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     strategy = new OAuthClientCredentialsPrivateKeyJwtStrategy();
     mockGetDeleteTokenAxiosInterceptor.mockReturnValue({
       onFulfilled: mockOnFulfilled,

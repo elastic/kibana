@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { DashboardToolBar } from './dashboard_tool_bar';
@@ -18,23 +21,29 @@ import { useNavigation } from '../../common/lib/kibana';
 import { BehaviorSubject } from 'rxjs';
 import type { DashboardInternalApi } from '@kbn/dashboard-plugin/public/dashboard_api/types';
 
-const mockDashboardTopNav = DashboardTopNav as jest.Mock;
+const mockDashboardTopNav = DashboardTopNav as Mock;
 
-jest.mock('../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana', async () => {
+  const actual = (await vi.importActual('../../common/lib/kibana'));
   return {
     ...actual,
-    useNavigation: jest.fn(),
-    useCapabilities: jest.fn(() => ({ showWriteControls: true })),
+    useNavigation: vi.fn(),
+    useCapabilities: vi.fn(() => ({ showWriteControls: true })),
   };
 });
-jest.mock('../../common/components/link_to', () => ({ useGetSecuritySolutionUrl: jest.fn() }));
-jest.mock('@kbn/dashboard-plugin/public', () => ({
-  DashboardTopNav: jest.fn(() => <div data-test-subj="dashboard-top-nav" />),
-}));
+vi.mock('../../common/components/link_to', () => {
+      const mocked = { useGetSecuritySolutionUrl: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/dashboard-plugin/public', () => {
+      const mocked = {
+      DashboardTopNav: vi.fn(() => <div data-test-subj="dashboard-top-nav" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 const mockCore = coreMock.createStart();
-const mockNavigateTo = jest.fn();
-const mockGetAppUrl = jest.fn();
+const mockNavigateTo = vi.fn();
+const mockGetAppUrl = vi.fn();
 const mockDashboardContainer = {
   viewMode$: new BehaviorSubject('view'),
 } as unknown as DashboardApi;
@@ -47,11 +56,11 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('DashboardToolBar', () => {
-  const mockOnLoad = jest.fn();
+  const mockOnLoad = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useNavigation as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useNavigation as Mock).mockReturnValue({
       navigateTo: mockNavigateTo,
       getAppUrl: mockGetAppUrl,
     });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,24 +17,27 @@ import { RuleStatusDropdown } from './rule_status_dropdown';
 const NOW_STRING = '2020-03-01T00:00:00.000Z';
 const SNOOZE_UNTIL = new Date('2020-03-04T00:00:00.000Z');
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      notifications: {
-        toasts: {
-          addSuccess: jest.fn(),
-          addDanger: jest.fn(),
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          notifications: {
+            toasts: {
+              addSuccess: vi.fn(),
+              addDanger: vi.fn(),
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('RuleStatusDropdown', () => {
-  const enableRule = jest.fn();
-  const disableRule = jest.fn();
-  const snoozeRule = jest.fn();
-  const unsnoozeRule = jest.fn();
+  const enableRule = vi.fn();
+  const disableRule = vi.fn();
+  const snoozeRule = vi.fn();
+  const unsnoozeRule = vi.fn();
   const props: ComponentOpts = {
     disableRule,
     enableRule,
@@ -69,15 +74,15 @@ describe('RuleStatusDropdown', () => {
       updatedAt: new Date('2020-08-20T19:23:38Z'),
       snoozeSchedule: [],
     } as ComponentOpts['rule'],
-    onRuleChanged: jest.fn(),
+    onRuleChanged: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   beforeAll(() => {
-    jest.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW_STRING).valueOf());
+    vi.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW_STRING).valueOf());
   });
 
   test('renders status control', () => {
@@ -92,7 +97,7 @@ describe('RuleStatusDropdown', () => {
   });
 
   test('renders status control as snoozed when rule is snoozed', () => {
-    jest.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW_STRING).valueOf());
+    vi.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW_STRING).valueOf());
 
     render(
       <RuleStatusDropdown
@@ -104,7 +109,7 @@ describe('RuleStatusDropdown', () => {
   });
 
   test('renders status control as snoozed when rule has muteAll set to true', () => {
-    jest.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW_STRING).valueOf());
+    vi.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW_STRING).valueOf());
 
     render(<RuleStatusDropdown {...{ ...props, rule: { ...props.rule, muteAll: true } }} />);
     expect(screen.getByTestId('statusDropdown')).toHaveAttribute('title', 'Snoozed');

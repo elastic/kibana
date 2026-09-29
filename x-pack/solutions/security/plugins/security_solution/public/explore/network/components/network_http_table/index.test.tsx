@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
@@ -17,11 +19,11 @@ import { networkModel } from '../../store';
 import { NetworkHttpTable } from '.';
 import { mockData } from './mock';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/components/link_to');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/components/link_to');
 
 describe('NetworkHttp Table Component', () => {
-  const loadPage = jest.fn();
+  const loadPage = vi.fn();
   const defaultProps = {
     data: mockData.edges,
     fakeTotalCount: getOr(50, 'fakeTotalCount', mockData.pageInfo),
@@ -29,7 +31,7 @@ describe('NetworkHttp Table Component', () => {
     isInspect: false,
     loading: false,
     loadPage,
-    setQuerySkip: jest.fn(),
+    setQuerySkip: vi.fn(),
     showMorePagesIndicator: getOr(false, 'showMorePagesIndicator', mockData.pageInfo),
     totalCount: mockData.totalCount,
     type: networkModel.NetworkType.page,

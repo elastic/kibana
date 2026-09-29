@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess, ActionTypeDisabledError } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { actionsClientMock } from '../actions_client/actions_client.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
-jest.mock('../lib/verify_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../lib/verify_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('verifyAccessAndContext', () => {
   it('ensures the license allows creating actions', async () => {
     const licenseState = licenseStateMock.create();
 
-    const handler = jest.fn();
+    const handler = vi.fn();
     const verify = verifyAccessAndContext(licenseState, handler);
 
     const actionsClient = actionsClientMock.create();
@@ -37,11 +43,11 @@ describe('verifyAccessAndContext', () => {
   it('ensures the license check prevents creating actions', async () => {
     const licenseState = licenseStateMock.create();
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyApiAccess as Mock).mockImplementation(() => {
       throw new Error('OMG');
     });
 
-    const handler = jest.fn();
+    const handler = vi.fn();
     const verify = verifyAccessAndContext(licenseState, handler);
 
     const actionsClient = actionsClientMock.create();
@@ -55,7 +61,7 @@ describe('verifyAccessAndContext', () => {
   it('supports error that handle their own response', async () => {
     const licenseState = licenseStateMock.create();
 
-    const handler = jest.fn();
+    const handler = vi.fn();
     const verify = verifyAccessAndContext(licenseState, handler);
 
     const actionsClient = actionsClientMock.create();

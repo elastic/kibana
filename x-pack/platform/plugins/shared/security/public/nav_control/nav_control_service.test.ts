@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
@@ -19,7 +21,7 @@ import { authenticationMock } from '../authentication/index.mock';
 import * as UseCurrentUserImports from '../components/use_current_user';
 import { UserAPIClient } from '../management';
 
-const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
+const useUserProfileMock = vi.spyOn(UseCurrentUserImports, 'useUserProfile');
 
 useUserProfileMock.mockReturnValue({
   loading: true,
@@ -165,24 +167,27 @@ describe('SecurityNavControlService', () => {
       expect(navControlServiceStart).toHaveProperty('addUserMenuLinks');
     });
 
-    it('should register custom user menu links', (done) => {
-      const coreStart = coreMock.createStart();
-      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
-        core: coreStart,
-        authc,
-      });
-      const userMenuLinks$ = getUserMenuLinks$();
+    it('should register custom user menu links', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      addUserMenuLinks([
-        {
-          label: 'link1',
-          href: 'path-to-link1',
-          iconType: 'empty',
-        },
-      ]);
+              const coreStart = coreMock.createStart();
+              const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
+                core: coreStart,
+                authc,
+              });
+              const userMenuLinks$ = getUserMenuLinks$();
 
-      userMenuLinks$.subscribe((links) => {
-        expect(links).toMatchInlineSnapshot(`
+              addUserMenuLinks([
+                {
+                  label: 'link1',
+                  href: 'path-to-link1',
+                  iconType: 'empty',
+                },
+              ]);
+
+              userMenuLinks$.subscribe((links) => {
+                expect(links).toMatchInlineSnapshot(`
           Array [
             Object {
               "href": "path-to-link1",
@@ -191,49 +196,53 @@ describe('SecurityNavControlService', () => {
             },
           ]
         `);
-        done();
-      });
-    });
+                done();
+              });
+            
+        }));
 
-    it('should retrieve user menu links sorted by order', (done) => {
-      const coreStart = coreMock.createStart();
-      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
-        core: coreStart,
-        authc,
-      });
-      const userMenuLinks$ = getUserMenuLinks$();
+    it('should retrieve user menu links sorted by order', () =>
+        new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      addUserMenuLinks([
-        {
-          label: 'link3',
-          href: 'path-to-link3',
-          iconType: 'empty',
-          order: 3,
-        },
-        {
-          label: 'link1',
-          href: 'path-to-link1',
-          iconType: 'empty',
-          order: 1,
-        },
-        {
-          label: 'link2',
-          href: 'path-to-link2',
-          iconType: 'empty',
-          order: 2,
-        },
-      ]);
-      addUserMenuLinks([
-        {
-          label: 'link4',
-          href: 'path-to-link4',
-          iconType: 'empty',
-          order: 4,
-        },
-      ]);
+              const coreStart = coreMock.createStart();
+              const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
+                core: coreStart,
+                authc,
+              });
+              const userMenuLinks$ = getUserMenuLinks$();
 
-      userMenuLinks$.subscribe((links) => {
-        expect(links).toMatchInlineSnapshot(`
+              addUserMenuLinks([
+                {
+                  label: 'link3',
+                  href: 'path-to-link3',
+                  iconType: 'empty',
+                  order: 3,
+                },
+                {
+                  label: 'link1',
+                  href: 'path-to-link1',
+                  iconType: 'empty',
+                  order: 1,
+                },
+                {
+                  label: 'link2',
+                  href: 'path-to-link2',
+                  iconType: 'empty',
+                  order: 2,
+                },
+              ]);
+              addUserMenuLinks([
+                {
+                  label: 'link4',
+                  href: 'path-to-link4',
+                  iconType: 'empty',
+                  order: 4,
+                },
+              ]);
+
+              userMenuLinks$.subscribe((links) => {
+                expect(links).toMatchInlineSnapshot(`
           Array [
             Object {
               "href": "path-to-link1",
@@ -261,9 +270,10 @@ describe('SecurityNavControlService', () => {
             },
           ]
         `);
-        done();
-      });
-    });
+                done();
+              });
+            
+        }));
 
     it('should allow adding a custom profile link', () => {
       const coreStart = coreMock.createStart();
@@ -278,7 +288,7 @@ describe('SecurityNavControlService', () => {
         { label: 'link1', href: 'path-to-link1', iconType: 'empty', order: 1, setAsProfile: true },
       ]);
 
-      const onUserMenuLinksHandler = jest.fn();
+      const onUserMenuLinksHandler = vi.fn();
       userMenuLinks$.subscribe(onUserMenuLinksHandler);
 
       expect(onUserMenuLinksHandler).toHaveBeenCalledTimes(1);
@@ -336,7 +346,7 @@ describe('SecurityNavControlService', () => {
         `"Only one custom profile link can be set. A custom profile link named link3 (path-to-link3) already exists"`
       );
 
-      const onUserMenuLinksHandler = jest.fn();
+      const onUserMenuLinksHandler = vi.fn();
       userMenuLinks$.subscribe(onUserMenuLinksHandler);
 
       expect(onUserMenuLinksHandler).toHaveBeenCalledTimes(1);

@@ -302,9 +302,13 @@ describe('kibana cli', function () {
           .replyWithFile(200, join(__dirname, '__fixtures__/replies/test_plugin.zip'));
       }
 
-      beforeAll(function (done) {
-        proxy.listen(proxyPort, done);
-      });
+      beforeAll(() =>
+      new Promise((resolve, reject) => {
+      const done = Object.assign((error) => (error ? reject(error) : resolve()), { fail: reject });
+
+              proxy.listen(proxyPort, done);
+            
+      }));
 
       beforeEach(function () {
         proxyHit = false;
@@ -420,9 +424,13 @@ describe('kibana cli', function () {
         return download(settings, logger).then(expectNoProxyHit);
       });
 
-      afterAll(function (done) {
-        proxy.close(done);
-      });
+      afterAll(() =>
+      new Promise((resolve, reject) => {
+      const done = Object.assign((error) => (error ? reject(error) : resolve()), { fail: reject });
+
+              proxy.close(done);
+            
+      }));
     });
   });
 });

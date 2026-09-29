@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock, Mocked } from 'vitest';
+
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
 
@@ -114,8 +116,8 @@ const mockedSOSuccessfulUpdateResponse = [
 describe('test protection updates note handler', () => {
   let mockEndpointContext: EndpointAppContext;
   let endpointAppContextService: EndpointAppContextService;
-  let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockResponse: jest.Mocked<KibanaResponseFactory>;
+  let mockSavedObjectClient: Mocked<SavedObjectsClientContract>;
+  let mockResponse: Mocked<KibanaResponseFactory>;
   let mockScopedClient: ScopedClusterClientMock;
   let internalFleetServicesMock: EndpointInternalFleetServicesInterfaceMocked;
 
@@ -123,7 +125,7 @@ describe('test protection updates note handler', () => {
     handlerContext: ReturnType<typeof createRouteHandlerContext>,
     spaceId: string
   ): void => {
-    (handlerContext.securitySolution.getSpaceId as jest.Mock).mockReturnValue(spaceId);
+    (handlerContext.securitySolution.getSpaceId as Mock).mockReturnValue(spaceId);
   };
 
   describe('test protection updates note handler', () => {
@@ -142,7 +144,7 @@ describe('test protection updates note handler', () => {
       internalFleetServicesMock.ensureInCurrentSpace.mockResolvedValue(undefined);
       internalFleetServicesMock.getSoClient.mockReturnValue(mockSavedObjectClient);
       (
-        mockEndpointContext.service.savedObjects.createInternalScopedSoClient as jest.Mock
+        mockEndpointContext.service.savedObjects.createInternalScopedSoClient as Mock
       ).mockReturnValue(mockSavedObjectClient);
     });
 
@@ -364,7 +366,7 @@ describe('test protection updates note handler', () => {
     describe('with space awareness enabled', () => {
       it('should call ensureInCurrentSpace with integration policy id', async () => {
         const mockEnsureInCurrentSpace = mockEndpointContext.service.getInternalFleetServices()
-          .ensureInCurrentSpace as jest.Mock;
+          .ensureInCurrentSpace as Mock;
         const protectionUpdatesNoteHandler = postProtectionUpdatesNoteHandler(mockEndpointContext);
         const mockRequest = httpServerMock.createKibanaRequest({
           params: { package_policy_id: 'integration-policy-id' },
@@ -373,7 +375,7 @@ describe('test protection updates note handler', () => {
 
         const mockSOClient = mockEndpointContext.service
           .getInternalFleetServices()
-          .getSoClient() as jest.Mocked<SavedObjectsClientContract>;
+          .getSoClient() as Mocked<SavedObjectsClientContract>;
         mockSOClient.find.mockResolvedValueOnce(mockedSOSuccessfulFindResponseEmpty);
         mockSOClient.create.mockResolvedValueOnce(createMockedSOSuccessfulCreateResponse('note'));
         await protectionUpdatesNoteHandler(

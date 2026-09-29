@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
@@ -14,17 +16,26 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { TestWrapper } from '../../../shared/test_utils';
 
-jest.mock('./step_execution_data_view', () => ({
-  StepExecutionDataView: () => <div data-test-subj="step-execution-data-view" />,
-}));
+vi.mock('./step_execution_data_view', () => {
+      const mocked = {
+      StepExecutionDataView: () => <div data-test-subj="step-execution-data-view" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./workflow_execution_overview', () => ({
-  WorkflowExecutionOverview: () => <div data-test-subj="workflow-execution-overview" />,
-}));
+vi.mock('./workflow_execution_overview', () => {
+      const mocked = {
+      WorkflowExecutionOverview: () => <div data-test-subj="workflow-execution-overview" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/navigation/use_navigate_to_execution', () => ({
-  useNavigateToExecution: () => ({ navigate: jest.fn(), href: '' }),
-}));
+vi.mock('../../../hooks/navigation/use_navigate_to_execution', () => {
+      const mocked = {
+      useNavigateToExecution: () => ({ navigate: vi.fn(), href: '' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createTriggerStep = (
   overrides: Partial<WorkflowStepExecutionDto> = {}

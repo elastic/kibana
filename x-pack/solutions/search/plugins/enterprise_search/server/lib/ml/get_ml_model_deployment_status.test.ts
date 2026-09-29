@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { MlModelDeploymentState } from '../../../common/types/ml';
@@ -14,12 +16,12 @@ import { getMlModelDeploymentStatus } from './get_ml_model_deployment_status';
 
 describe('getMlModelDeploymentStatus', () => {
   const mockTrainedModelsProvider = {
-    getTrainedModels: jest.fn(),
-    getTrainedModelsStats: jest.fn(),
+    getTrainedModels: vi.fn(),
+    getTrainedModelsStats: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should error when there is no trained model provider', async () => {

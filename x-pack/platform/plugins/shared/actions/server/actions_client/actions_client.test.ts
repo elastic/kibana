@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -57,8 +60,8 @@ import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
 import { securityServiceMock } from '@kbn/core/server/mocks';
 import { encodeApiKey } from '../inbound/event_identity/encode_api_key';
 
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+vi.mock('@kbn/core-saved-objects-utils-server', async () => {
+  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
   return {
     ...actual,
     SavedObjectsUtils: {
@@ -67,23 +70,32 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
   };
 });
 
-jest.mock('../lib/get_oauth_jwt_access_token', () => ({
-  getOAuthJwtAccessToken: jest.fn(),
-}));
-jest.mock('../lib/get_oauth_client_credentials_access_token', () => ({
-  getOAuthClientCredentialsAccessToken: jest.fn(),
-}));
+vi.mock('../lib/get_oauth_jwt_access_token', () => {
+      const mocked = {
+      getOAuthJwtAccessToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/get_oauth_client_credentials_access_token', () => {
+      const mocked = {
+      getOAuthClientCredentialsAccessToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => ({
-  v4: () => 'uuidv4',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => 'uuidv4',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const kibanaIndices = ['.kibana'];
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
-const bulkExecutionEnqueuer = jest.fn();
+const bulkExecutionEnqueuer = vi.fn();
 const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditLoggerMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
@@ -91,16 +103,16 @@ const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const mockTaskManager = taskManagerMock.createSetup();
 const configurationUtilities = actionsConfigMock.create();
 const eventLogClient = eventLogClientMock.create();
-const getEventLogClient = jest.fn();
-const preSaveHook = jest.fn();
-const postSaveHook = jest.fn();
-const postDeleteHook = jest.fn();
+const getEventLogClient = vi.fn();
+const preSaveHook = vi.fn();
+const postSaveHook = vi.fn();
+const postDeleteHook = vi.fn();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
-const getAxiosInstanceWithAuth = jest.fn();
+const getAxiosInstanceWithAuth = vi.fn();
 const isESOCanEncrypt = true;
 
 let actionsClient: ActionsClient;
-let mockedLicenseState: jest.Mocked<ILicenseState>;
+let mockedLicenseState: Mocked<ILicenseState>;
 let actionTypeRegistry: ActionTypeRegistry;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
 let authTypeRegistry: AuthTypeRegistry;
@@ -119,7 +131,7 @@ const actionTypeIdFromSavedObjectMock = (actionTypeId = 'my-connector-type') => 
 let logger: MockedLogger;
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   logger = loggerMock.create();
   mockedLicenseState = licenseStateMock.create();
   actionTypeRegistryParams = {
@@ -161,8 +173,8 @@ beforeEach(() => {
     getAxiosInstanceWithAuth,
     securityService,
   });
-  (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
-  (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
+  (getOAuthJwtAccessToken as Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
+  (getOAuthClientCredentialsAccessToken as Mock).mockResolvedValue(
     `Bearer clienttokentokentoken`
   );
   getEventLogClient.mockResolvedValue(eventLogClient);
@@ -1739,7 +1751,7 @@ describe('getOAuthAccessToken()', () => {
     expect(result).toEqual({
       accessToken: 'Bearer jwttokentokentoken',
     });
-    expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalledWith({
+    expect(getOAuthJwtAccessToken as Mock).toHaveBeenCalledWith({
       logger,
       configurationUtilities,
       credentials: {
@@ -1782,7 +1794,7 @@ describe('getOAuthAccessToken()', () => {
     expect(result).toEqual({
       accessToken: 'Bearer clienttokentokentoken',
     });
-    expect(getOAuthClientCredentialsAccessToken as jest.Mock).toHaveBeenCalledWith({
+    expect(getOAuthClientCredentialsAccessToken as Mock).toHaveBeenCalledWith({
       logger,
       configurationUtilities,
       credentials: {
@@ -1808,7 +1820,7 @@ describe('getOAuthAccessToken()', () => {
   });
 
   test('throws when getOAuthJwtAccessToken throws error', async () => {
-    (getOAuthJwtAccessToken as jest.Mock).mockRejectedValue(new Error(`Something went wrong!`));
+    (getOAuthJwtAccessToken as Mock).mockRejectedValue(new Error(`Something went wrong!`));
 
     await expect(
       getOAuthAccessToken({
@@ -1828,7 +1840,7 @@ describe('getOAuthAccessToken()', () => {
       })
     ).rejects.toMatchInlineSnapshot(`[Error: Failed to retrieve access token]`);
 
-    expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalled();
+    expect(getOAuthJwtAccessToken as Mock).toHaveBeenCalled();
     expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -1839,7 +1851,7 @@ describe('getOAuthAccessToken()', () => {
   });
 
   test('throws when getOAuthClientCredentialsAccessToken throws error', async () => {
-    (getOAuthClientCredentialsAccessToken as jest.Mock).mockRejectedValue(
+    (getOAuthClientCredentialsAccessToken as Mock).mockRejectedValue(
       new Error(`Something went wrong!`)
     );
 
@@ -1859,7 +1871,7 @@ describe('getOAuthAccessToken()', () => {
       })
     ).rejects.toMatchInlineSnapshot(`[Error: Failed to retrieve access token]`);
 
-    expect(getOAuthClientCredentialsAccessToken as jest.Mock).toHaveBeenCalled();
+    expect(getOAuthClientCredentialsAccessToken as Mock).toHaveBeenCalled();
     expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -1997,7 +2009,7 @@ describe('delete()', () => {
 
     test('evicts clients before deleting connector tokens', async () => {
       const callOrder: string[] = [];
-      const evictClientPool = jest.fn().mockImplementation(async () => {
+      const evictClientPool = vi.fn().mockImplementation(async () => {
         callOrder.push('evictClientPoolStarted');
         await Promise.resolve();
         callOrder.push('evictClientPoolFinished');
@@ -2221,7 +2233,7 @@ describe('delete()', () => {
   test('deleting unregistered action types works as expected', async () => {
     const expectedResult = Symbol();
     unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
-    unsecuredSavedObjectsClient.get = jest.fn().mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get = vi.fn().mockResolvedValueOnce({
       id: '2',
       type: 'action',
       attributes: {
@@ -3075,7 +3087,7 @@ describe('execute()', () => {
     });
 
     test('pass the params to the actionTypeRegistry when authorizing system actions', async () => {
-      const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);
+      const getKibanaPrivileges = vi.fn().mockReturnValue(['test/create']);
 
       actionsClient = new ActionsClient({
         inMemoryConnectors: [

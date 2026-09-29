@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { MaintenanceWindowsPublicPlugin } from './plugin';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
@@ -20,7 +22,7 @@ describe('Maintenance Windows Public Plugin', () => {
   describe('setup()', () => {
     it('returns expected public contract', () => {
       const coreSetup = coreMock.createSetup();
-      mockSection.registerApp = jest.fn();
+      mockSection.registerApp = vi.fn();
       management.sections.section.insightsAndAlerting = mockSection;
 
       const plugin = new MaintenanceWindowsPublicPlugin(mockInitializerContext);

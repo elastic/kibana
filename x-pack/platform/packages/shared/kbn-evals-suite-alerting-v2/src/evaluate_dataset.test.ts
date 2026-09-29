@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
@@ -61,15 +64,15 @@ const conversationResult = (overrides: Partial<Conversation> = {}): Conversation
 const makeClient = ({
   responses,
   conversation = conversationResult(),
-  getConversation = jest.fn(async () => conversation),
+  getConversation = vi.fn(async () => conversation),
 }: {
   responses: AgentBuilderClientResponse[];
   conversation?: Conversation;
-  getConversation?: jest.Mock;
+  getConversation?: Mock;
 }) => {
   const calls: Array<Record<string, unknown>> = [];
   let index = 0;
-  const converse = jest.fn(async (params: Record<string, unknown>) => {
+  const converse = vi.fn(async (params: Record<string, unknown>) => {
     calls.push(params);
     return responses[index++] ?? converseResult();
   });
@@ -294,7 +297,7 @@ describe('createTask', () => {
   });
 
   it('throws when GET conversation fails after retries', async () => {
-    const getConversation = jest.fn(async () => {
+    const getConversation = vi.fn(async () => {
       throw new Error('conversation gone');
     });
     const { client } = makeClient({

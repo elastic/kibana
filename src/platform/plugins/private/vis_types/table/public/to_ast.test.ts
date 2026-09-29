@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import { toExpressionAst } from './to_ast';
 import type { TableVisParams } from '../common';
@@ -27,21 +29,27 @@ const mockSchemas = {
 };
 
 const mockTableExpressionFunction = {
-  addArgument: jest.fn(),
+  addArgument: vi.fn(),
 };
 
 const mockTableExpression = {
-  toAst: jest.fn(),
+  toAst: vi.fn(),
 };
 
-jest.mock('@kbn/visualizations-plugin/public', () => ({
-  getVisSchemas: () => mockSchemas,
-}));
+vi.mock('@kbn/visualizations-plugin/public', () => {
+      const mocked = {
+      getVisSchemas: () => mockSchemas,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/expressions-plugin/public', () => ({
-  buildExpression: jest.fn(() => mockTableExpression),
-  buildExpressionFunction: jest.fn(() => mockTableExpressionFunction),
-}));
+vi.mock('@kbn/expressions-plugin/public', () => {
+      const mocked = {
+      buildExpression: vi.fn(() => mockTableExpression),
+      buildExpressionFunction: vi.fn(() => mockTableExpressionFunction),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('table vis toExpressionAst function', () => {
   let vis: Vis<TableVisParams>;
@@ -65,7 +73,7 @@ describe('table vis toExpressionAst function', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should create table expression ast', () => {

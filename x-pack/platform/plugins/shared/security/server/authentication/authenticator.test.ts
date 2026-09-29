@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-jest.mock('./providers/basic');
-jest.mock('./providers/token');
-jest.mock('./providers/saml');
-jest.mock('./providers/http');
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
+vi.mock('./providers/basic');
+vi.mock('./providers/token');
+vi.mock('./providers/saml');
+vi.mock('./providers/http');
 
 import { errors } from '@elastic/elasticsearch';
 import type { DetailedPeerCertificate } from 'tls';
@@ -57,13 +60,16 @@ import {
 import { sessionMock } from '../session_management/index.mock';
 import type { UserProfileGrant } from '../user_profile';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
-jest.mock('../otel/instrumentation', () => ({
-  securityTelemetry: {
-    recordLoginDuration: jest.fn(),
-    recordSessionCreationDuration: jest.fn(),
-    recordUserProfileActivationDuration: jest.fn(),
-  },
-}));
+vi.mock('../otel/instrumentation', () => {
+      const mocked = {
+      securityTelemetry: {
+        recordLoginDuration: vi.fn(),
+        recordSessionCreationDuration: vi.fn(),
+        recordUserProfileActivationDuration: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let auditLogger: AuditLogger;
 function getMockOptions({
@@ -91,12 +97,12 @@ function getMockOptions({
 
   return {
     audit: auditService,
-    getCurrentUser: jest.fn(),
+    getCurrentUser: vi.fn(),
     clusterClient: elasticsearchServiceMock.createClusterClient(),
     basePath: httpServiceMock.createSetupContract().basePath,
     license: licenseMock.create(),
     loggers: loggingSystemMock.create(),
-    getServerBaseURL: jest.fn(),
+    getServerBaseURL: vi.fn(),
     config: createConfig(
       ConfigSchema.validate(
         { authc: { selector, providers, http }, ...accessAgreementObj },
@@ -108,9 +114,9 @@ function getMockOptions({
     session: sessionMock.create(),
     featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
     userProfileService: userProfileServiceMock.createStart(),
-    isElasticCloudDeployment: jest.fn().mockReturnValue(false),
+    isElasticCloudDeployment: vi.fn().mockReturnValue(false),
     customLogoutURL,
-    userActivity: { trackUserAction: jest.fn() },
+    userActivity: { trackUserAction: vi.fn() },
   };
 }
 
@@ -135,52 +141,52 @@ function expectAuditEvents(...events: ExpectedAuditEvent[]) {
 }
 
 describe('Authenticator', () => {
-  let mockHTTPAuthenticationProvider: jest.Mocked<PublicMethodsOf<HTTPAuthenticationProvider>>;
-  let mockBasicAuthenticationProvider: jest.Mocked<PublicMethodsOf<BasicAuthenticationProvider>>;
-  let mockSamlAuthenticationProvider: jest.Mocked<PublicMethodsOf<SAMLAuthenticationProvider>>;
+  let mockHTTPAuthenticationProvider: Mocked<PublicMethodsOf<HTTPAuthenticationProvider>>;
+  let mockBasicAuthenticationProvider: Mocked<PublicMethodsOf<BasicAuthenticationProvider>>;
+  let mockSamlAuthenticationProvider: Mocked<PublicMethodsOf<SAMLAuthenticationProvider>>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockHTTPAuthenticationProvider = {
-      login: jest.fn(),
-      authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
-      logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
-      getHTTPAuthenticationScheme: jest.fn(),
-      shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
+      login: vi.fn(),
+      authenticate: vi.fn().mockResolvedValue(AuthenticationResult.notHandled()),
+      logout: vi.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
+      getHTTPAuthenticationScheme: vi.fn(),
+      shouldInvalidateIntermediateSessionAfterLogin: vi.fn().mockReturnValue(true),
     };
 
     mockBasicAuthenticationProvider = {
-      login: jest.fn(),
-      authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
-      logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
-      getHTTPAuthenticationScheme: jest.fn(),
-      shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
+      login: vi.fn(),
+      authenticate: vi.fn().mockResolvedValue(AuthenticationResult.notHandled()),
+      logout: vi.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
+      getHTTPAuthenticationScheme: vi.fn(),
+      shouldInvalidateIntermediateSessionAfterLogin: vi.fn().mockReturnValue(true),
     };
 
     mockSamlAuthenticationProvider = {
-      login: jest.fn(),
-      authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
-      logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
-      getHTTPAuthenticationScheme: jest.fn(),
-      shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
+      login: vi.fn(),
+      authenticate: vi.fn().mockResolvedValue(AuthenticationResult.notHandled()),
+      logout: vi.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
+      getHTTPAuthenticationScheme: vi.fn(),
+      shouldInvalidateIntermediateSessionAfterLogin: vi.fn().mockReturnValue(true),
     };
 
-    jest.requireMock('./providers/http').HTTPAuthenticationProvider.mockImplementation(() => ({
+    (await vi.importMock('./providers/http')).HTTPAuthenticationProvider.mockImplementation(() => ({
       type: 'http',
       ...mockHTTPAuthenticationProvider,
     }));
 
-    jest.requireMock('./providers/basic').BasicAuthenticationProvider.mockImplementation(() => ({
+    (await vi.importMock('./providers/basic')).BasicAuthenticationProvider.mockImplementation(() => ({
       type: 'basic',
       ...mockBasicAuthenticationProvider,
     }));
 
-    jest.requireMock('./providers/saml').SAMLAuthenticationProvider.mockImplementation(() => ({
+    (await vi.importMock('./providers/saml')).SAMLAuthenticationProvider.mockImplementation(() => ({
       type: 'saml',
       ...mockSamlAuthenticationProvider,
     }));
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   describe('initialization', () => {
     it('fails if authentication providers are not configured.', () => {
@@ -205,9 +211,9 @@ describe('Authenticator', () => {
     });
 
     describe('#options.urls.loggedOut', () => {
-      it('points to /login if provider requires login form', () => {
+      it('points to /login if provider requires login form', async () => {
         const authenticationProviderMock =
-          jest.requireMock(`./providers/basic`).BasicAuthenticationProvider;
+          (await vi.importMock(`./providers/basic`)).BasicAuthenticationProvider;
         authenticationProviderMock.mockClear();
         new Authenticator(getMockOptions());
         const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
@@ -225,9 +231,9 @@ describe('Authenticator', () => {
         ).toBe('/mock-server-basepath/login?next=%2Fapp%2Fml%2Fencode+me&msg=SESSION_EXPIRED');
       });
 
-      it('points to /login if login selector is enabled', () => {
+      it('points to /login if login selector is enabled', async () => {
         const authenticationProviderMock =
-          jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+          (await vi.importMock(`./providers/saml`)).SAMLAuthenticationProvider;
         authenticationProviderMock.mockClear();
         new Authenticator(
           getMockOptions({
@@ -250,9 +256,9 @@ describe('Authenticator', () => {
         ).toBe('/mock-server-basepath/login?next=%2Fapp%2Fml%2Fencode+me&msg=SESSION_EXPIRED');
       });
 
-      it('points to /security/logged_out if login selector is NOT enabled', () => {
+      it('points to /security/logged_out if login selector is NOT enabled', async () => {
         const authenticationProviderMock =
-          jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+          (await vi.importMock(`./providers/saml`)).SAMLAuthenticationProvider;
         authenticationProviderMock.mockClear();
         new Authenticator(
           getMockOptions({
@@ -278,9 +284,9 @@ describe('Authenticator', () => {
       });
 
       describe('custom URL', () => {
-        it('points to a custom URL if `customLogoutURL` is specified and logout reason is not SESSION_EXPIRED', () => {
+        it('points to a custom URL if `customLogoutURL` is specified and logout reason is not SESSION_EXPIRED', async () => {
           const authenticationProviderMock =
-            jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+            (await vi.importMock(`./providers/saml`)).SAMLAuthenticationProvider;
           authenticationProviderMock.mockClear();
           new Authenticator(
             getMockOptions({
@@ -305,9 +311,9 @@ describe('Authenticator', () => {
           ).toBe('https://some-logout-origin/logout');
         });
 
-        it('does not point to a custom URL if `customLogoutURL` is specified and logout reason is SESSION_EXPIRED', () => {
+        it('does not point to a custom URL if `customLogoutURL` is specified and logout reason is SESSION_EXPIRED', async () => {
           const authenticationProviderMock =
-            jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+            (await vi.importMock(`./providers/saml`)).SAMLAuthenticationProvider;
           authenticationProviderMock.mockClear();
           new Authenticator(
             getMockOptions({
@@ -325,9 +331,9 @@ describe('Authenticator', () => {
           ).toBe('/mock-server-basepath/security/logged_out?msg=SESSION_EXPIRED');
         });
 
-        it('does not point to a custom URL if `customLogoutURL` is specified and logout reason is SESSION_IDLE_TIMEOUT', () => {
+        it('does not point to a custom URL if `customLogoutURL` is specified and logout reason is SESSION_IDLE_TIMEOUT', async () => {
           const authenticationProviderMock =
-            jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+            (await vi.importMock(`./providers/saml`)).SAMLAuthenticationProvider;
           authenticationProviderMock.mockClear();
           new Authenticator(
             getMockOptions({
@@ -347,9 +353,9 @@ describe('Authenticator', () => {
           ).toBe('/mock-server-basepath/security/logged_out?msg=SESSION_IDLE_TIMEOUT');
         });
 
-        it('does not point to a custom URL if `customLogoutURL` is specified and logout reason is SESSION_LIFESPAN_TIMEOUT', () => {
+        it('does not point to a custom URL if `customLogoutURL` is specified and logout reason is SESSION_LIFESPAN_TIMEOUT', async () => {
           const authenticationProviderMock =
-            jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+            (await vi.importMock(`./providers/saml`)).SAMLAuthenticationProvider;
           authenticationProviderMock.mockClear();
           new Authenticator(
             getMockOptions({
@@ -372,28 +378,27 @@ describe('Authenticator', () => {
     });
 
     describe('HTTP authentication provider', () => {
-      beforeEach(() => {
-        jest
-          .requireMock('./providers/basic')
+      beforeEach(async () => {
+        (await vi.importMock('./providers/basic'))
           .BasicAuthenticationProvider.mockImplementation(() => ({
             type: 'basic',
-            getHTTPAuthenticationScheme: jest.fn().mockReturnValue('basic'),
+            getHTTPAuthenticationScheme: vi.fn().mockReturnValue('basic'),
           }));
       });
 
-      afterEach(() => jest.resetAllMocks());
+      afterEach(() => vi.resetAllMocks());
 
-      it('enabled by default', () => {
+      it('enabled by default', async () => {
         new Authenticator(getMockOptions());
 
         expect(
-          jest.requireMock('./providers/http').HTTPAuthenticationProvider
+          (await vi.importMock('./providers/http')).HTTPAuthenticationProvider
         ).toHaveBeenCalledWith(expect.anything(), {
           supportedSchemes: new Set(['apikey', 'bearer', 'basic']),
         });
       });
 
-      it('includes all required schemes if `autoSchemesEnabled` is enabled', () => {
+      it('includes all required schemes if `autoSchemesEnabled` is enabled', async () => {
         new Authenticator(
           getMockOptions({
             providers: { basic: { basic1: { order: 0 } }, kerberos: { kerberos1: { order: 1 } } },
@@ -401,13 +406,13 @@ describe('Authenticator', () => {
         );
 
         expect(
-          jest.requireMock('./providers/http').HTTPAuthenticationProvider
+          (await vi.importMock('./providers/http')).HTTPAuthenticationProvider
         ).toHaveBeenCalledWith(expect.anything(), {
           supportedSchemes: new Set(['apikey', 'basic', 'bearer']),
         });
       });
 
-      it('includes JWT options if specified', () => {
+      it('includes JWT options if specified', async () => {
         new Authenticator(
           getMockOptions({
             providers: { basic: { basic1: { order: 0 } } },
@@ -417,14 +422,14 @@ describe('Authenticator', () => {
         );
 
         expect(
-          jest.requireMock('./providers/http').HTTPAuthenticationProvider
+          (await vi.importMock('./providers/http')).HTTPAuthenticationProvider
         ).toHaveBeenCalledWith(expect.anything(), {
           supportedSchemes: new Set(['apikey', 'bearer', 'basic']),
           jwt: { taggedRoutesOnly: true },
         });
       });
 
-      it('does not include additional schemes if `autoSchemesEnabled` is disabled', () => {
+      it('does not include additional schemes if `autoSchemesEnabled` is disabled', async () => {
         new Authenticator(
           getMockOptions({
             providers: { basic: { basic1: { order: 0 } }, kerberos: { kerberos1: { order: 1 } } },
@@ -433,13 +438,13 @@ describe('Authenticator', () => {
         );
 
         expect(
-          jest.requireMock('./providers/http').HTTPAuthenticationProvider
+          (await vi.importMock('./providers/http')).HTTPAuthenticationProvider
         ).toHaveBeenCalledWith(expect.anything(), {
           supportedSchemes: new Set(['apikey', 'bearer']),
         });
       });
 
-      it('disabled if explicitly disabled', () => {
+      it('disabled if explicitly disabled', async () => {
         new Authenticator(
           getMockOptions({
             providers: { basic: { basic1: { order: 0 } } },
@@ -448,7 +453,7 @@ describe('Authenticator', () => {
         );
 
         expect(
-          jest.requireMock('./providers/http').HTTPAuthenticationProvider
+          (await vi.importMock('./providers/http')).HTTPAuthenticationProvider
         ).not.toHaveBeenCalled();
       });
     });
@@ -925,28 +930,27 @@ describe('Authenticator', () => {
     });
 
     describe('multi-provider scenarios', () => {
-      let mockSAMLAuthenticationProvider1: jest.Mocked<PublicMethodsOf<SAMLAuthenticationProvider>>;
-      let mockSAMLAuthenticationProvider2: jest.Mocked<PublicMethodsOf<SAMLAuthenticationProvider>>;
+      let mockSAMLAuthenticationProvider1: Mocked<PublicMethodsOf<SAMLAuthenticationProvider>>;
+      let mockSAMLAuthenticationProvider2: Mocked<PublicMethodsOf<SAMLAuthenticationProvider>>;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         mockSAMLAuthenticationProvider1 = {
-          login: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
-          authenticate: jest.fn(),
-          logout: jest.fn(),
-          getHTTPAuthenticationScheme: jest.fn(),
-          shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
+          login: vi.fn().mockResolvedValue(AuthenticationResult.notHandled()),
+          authenticate: vi.fn(),
+          logout: vi.fn(),
+          getHTTPAuthenticationScheme: vi.fn(),
+          shouldInvalidateIntermediateSessionAfterLogin: vi.fn().mockReturnValue(true),
         };
 
         mockSAMLAuthenticationProvider2 = {
-          login: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
-          authenticate: jest.fn(),
-          logout: jest.fn(),
-          getHTTPAuthenticationScheme: jest.fn(),
-          shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
+          login: vi.fn().mockResolvedValue(AuthenticationResult.notHandled()),
+          authenticate: vi.fn(),
+          logout: vi.fn(),
+          getHTTPAuthenticationScheme: vi.fn(),
+          shouldInvalidateIntermediateSessionAfterLogin: vi.fn().mockReturnValue(true),
         };
 
-        jest
-          .requireMock('./providers/saml')
+        (await vi.importMock('./providers/saml'))
           .SAMLAuthenticationProvider.mockImplementationOnce(() => ({
             type: 'saml',
             ...mockSAMLAuthenticationProvider1,
@@ -1149,11 +1153,11 @@ describe('Authenticator', () => {
       const request = httpServerMock.createKibanaRequest();
 
       // Re-configure authenticator with `token` provider that uses the name of `basic`.
-      const loginMock = jest.fn().mockResolvedValue(AuthenticationResult.succeeded(user));
-      jest.requireMock('./providers/token').TokenAuthenticationProvider.mockImplementation(() => ({
+      const loginMock = vi.fn().mockResolvedValue(AuthenticationResult.succeeded(user));
+      (await vi.importMock('./providers/token')).TokenAuthenticationProvider.mockImplementation(() => ({
         type: 'token',
         login: loginMock,
-        getHTTPAuthenticationScheme: jest.fn(),
+        getHTTPAuthenticationScheme: vi.fn(),
       }));
       mockOptions = getMockOptions({ providers: { token: { basic1: { order: 0 } } } });
       authenticator = new Authenticator(mockOptions);
@@ -2179,7 +2183,7 @@ describe('Authenticator', () => {
         } as DetailedPeerCertificate;
         certificate.issuerCertificate = certificate;
         Object.defineProperty(request.socket, 'authorized', { value: true });
-        jest.spyOn(request.socket, 'getPeerCertificate').mockReturnValue(certificate);
+        vi.spyOn(request.socket, 'getPeerCertificate').mockReturnValue(certificate);
 
         const user = mockAuthenticatedUser({
           username: 'new-user',

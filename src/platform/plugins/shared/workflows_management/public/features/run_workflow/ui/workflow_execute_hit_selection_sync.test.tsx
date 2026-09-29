@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -23,8 +25,8 @@ const row: DataTableRecord = {
 const renderSelectionSync = ({
   dataTableRows,
   docIdsInSelectionOrder,
-  onSelectionChange = jest.fn(),
-  setErrors = jest.fn(),
+  onSelectionChange = vi.fn(),
+  setErrors = vi.fn(),
 }: {
   dataTableRows: DataTableRecord[];
   docIdsInSelectionOrder: string[];
@@ -50,8 +52,8 @@ const renderSelectionSync = ({
 
 describe('WorkflowExecuteHitSelectionSync', () => {
   it('clears selection when no doc ids are selected', () => {
-    const onSelectionChange = jest.fn();
-    const setErrors = jest.fn();
+    const onSelectionChange = vi.fn();
+    const setErrors = vi.fn();
 
     renderSelectionSync({
       dataTableRows: [row],
@@ -65,7 +67,7 @@ describe('WorkflowExecuteHitSelectionSync', () => {
   });
 
   it('mirrors resolved selected rows', () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
 
     renderSelectionSync({
       dataTableRows: [row],
@@ -77,8 +79,8 @@ describe('WorkflowExecuteHitSelectionSync', () => {
   });
 
   it('clears selection when selected doc ids no longer resolve after refresh', () => {
-    const onSelectionChange = jest.fn();
-    const setErrors = jest.fn();
+    const onSelectionChange = vi.fn();
+    const setErrors = vi.fn();
 
     renderSelectionSync({
       dataTableRows: [row],
@@ -92,7 +94,7 @@ describe('WorkflowExecuteHitSelectionSync', () => {
   });
 
   it('clears selection when only some selected doc ids resolve', () => {
-    const onSelectionChange = jest.fn();
+    const onSelectionChange = vi.fn();
 
     renderSelectionSync({
       dataTableRows: [row],

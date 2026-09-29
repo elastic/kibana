@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { NavigationCustomization } from '@kbn/core-chrome-browser';
 import { NavigationCustomizationReporter } from './navigation_customization_reporter';
@@ -23,7 +26,7 @@ const asHidden = (...ids: string[]): NavigationCustomization['hidden'] =>
   ids as NavigationCustomization['hidden'];
 
 const makeAnalytics = () =>
-  ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceStart & { reportEvent: jest.Mock });
+  ({ reportEvent: vi.fn() } as unknown as AnalyticsServiceStart & { reportEvent: Mock });
 
 describe('NavigationCustomizationReporter', () => {
   describe('reportLoadedOnce()', () => {
@@ -78,7 +81,7 @@ describe('NavigationCustomizationReporter', () => {
 
     it('gates the event on the user signal so EBT can stamp context.userId', async () => {
       const analytics = makeAnalytics();
-      const getCurrentUser = jest.fn().mockResolvedValue({ username: 'u' });
+      const getCurrentUser = vi.fn().mockResolvedValue({ username: 'u' });
       const reporter = new NavigationCustomizationReporter();
 
       reporter.reportLoadedOnce({ analytics, getCurrentUser, savedCustomization: undefined });

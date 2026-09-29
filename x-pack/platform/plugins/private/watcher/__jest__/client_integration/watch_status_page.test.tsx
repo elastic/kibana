@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -57,16 +60,16 @@ const watch = {
 describe('<WatchStatusPage />', () => {
   let httpSetup: HttpSetup;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
-  let routerHistoryPush: jest.Mock;
+  let routerHistoryPush: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('on component mount', () => {
     beforeEach(async () => {
       ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
-      routerHistoryPush = jest.fn();
+      routerHistoryPush = vi.fn();
       registerRouter({ history: { push: routerHistoryPush } });
 
       httpRequestsMockHelpers.setLoadWatchResponse(WATCH_ID, { watch });
@@ -263,11 +266,11 @@ describe('<WatchStatusPage />', () => {
 
         httpRequestsMockHelpers.setAcknowledgeWatchResponse(WATCH_ID, ACTION_ID, watchHistoryItem);
 
-        const requestsBefore = jest.mocked(httpSetup.put).mock.calls.length;
+        const requestsBefore = vi.mocked(httpSetup.put).mock.calls.length;
         fireEvent.click(screen.getByTestId('acknowledgeWatchButton'));
 
         await waitFor(() => {
-          expect(jest.mocked(httpSetup.put).mock.calls.length).toBeGreaterThan(requestsBefore);
+          expect(vi.mocked(httpSetup.put).mock.calls.length).toBeGreaterThan(requestsBefore);
         });
         expect(await screen.findByText(ACTION_STATES.ACKNOWLEDGED)).toBeInTheDocument();
 

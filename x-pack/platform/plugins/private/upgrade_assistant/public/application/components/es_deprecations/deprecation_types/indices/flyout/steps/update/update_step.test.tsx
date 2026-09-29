@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -38,8 +40,8 @@ describe('UpdateIndexModalStep', () => {
       <UpdateIndexModalStep
         action="makeReadonly"
         meta={meta}
-        closeModal={jest.fn()}
-        retry={jest.fn()}
+        closeModal={vi.fn()}
+        retry={vi.fn()}
         updateIndexState={defaultUpdateIndexState}
       />
     );
@@ -60,9 +62,9 @@ describe('UpdateIndexModalStep', () => {
     renderWithI18n(
       <UpdateIndexModalStep
         action="unfreeze"
-        closeModal={jest.fn()}
+        closeModal={vi.fn()}
         meta={meta}
-        retry={jest.fn()}
+        retry={vi.fn()}
         updateIndexState={defaultUpdateIndexState}
       />
     );
@@ -78,13 +80,13 @@ describe('UpdateIndexModalStep', () => {
   });
 
   it('calls closeModal when close button is clicked', async () => {
-    const closeModal = jest.fn();
+    const closeModal = vi.fn();
     renderWithI18n(
       <UpdateIndexModalStep
         action="makeReadonly"
         meta={meta}
         closeModal={closeModal}
-        retry={jest.fn()}
+        retry={vi.fn()}
         updateIndexState={defaultUpdateIndexState}
       />
     );
@@ -97,8 +99,8 @@ describe('UpdateIndexModalStep', () => {
       <UpdateIndexModalStep
         action="makeReadonly"
         meta={meta}
-        closeModal={jest.fn()}
-        retry={jest.fn()}
+        closeModal={vi.fn()}
+        retry={vi.fn()}
         updateIndexState={{ status: 'failed', failedBefore: true, reason: 'Some error' }}
       />
     );
@@ -109,12 +111,12 @@ describe('UpdateIndexModalStep', () => {
   });
 
   it('calls retry when retry button is clicked', async () => {
-    const retry = jest.fn();
+    const retry = vi.fn();
     renderWithI18n(
       <UpdateIndexModalStep
         action="makeReadonly"
         meta={meta}
-        closeModal={jest.fn()}
+        closeModal={vi.fn()}
         retry={retry}
         updateIndexState={{ status: 'failed', failedBefore: true, reason: 'Some error' }}
       />

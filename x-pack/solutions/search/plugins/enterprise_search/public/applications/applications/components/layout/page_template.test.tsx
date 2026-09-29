@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -14,27 +16,30 @@ import { of } from 'rxjs';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
-const mockUseEnterpriseSearchApplicationNav = jest.fn().mockReturnValue([]);
+const mockUseEnterpriseSearchApplicationNav = vi.fn().mockReturnValue([]);
 
-jest.mock('../../../shared/layout', () => ({
-  useEnterpriseSearchApplicationNav: (...args: any[]) =>
-    mockUseEnterpriseSearchApplicationNav(...args),
-  EnterpriseSearchPageTemplateWrapper: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-}));
+vi.mock('../../../shared/layout', () => {
+      const mocked = {
+      useEnterpriseSearchApplicationNav: (...args: any[]) =>
+        mockUseEnterpriseSearchApplicationNav(...args),
+      EnterpriseSearchPageTemplateWrapper: ({ children }: { children: React.ReactNode }) => (
+        <div>{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { EnterpriseSearchApplicationsPageTemplate } from './page_template';
 
 const mockValues = {
   getChromeStyle$: () => of('classic'),
-  renderHeaderActions: jest.fn(),
-  updateSideNavDefinition: jest.fn(),
+  renderHeaderActions: vi.fn(),
+  updateSideNavDefinition: vi.fn(),
 };
 
 describe('EnterpriseSearchApplicationsPageTemplate', () => {
   it('updates the side nav dynamic links', async () => {
-    const updateSideNavDefinition = jest.fn();
+    const updateSideNavDefinition = vi.fn();
 
     setMockValues({ ...mockValues, updateSideNavDefinition });
 

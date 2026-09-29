@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -13,7 +15,7 @@ import type { Signal } from '../../../../common/http_api/signals';
 import { SignalRow } from './signal_row';
 import { buildSignal } from './signal_test_fixtures';
 
-const renderRow = (signal: Signal, onViewDetails = jest.fn()) => {
+const renderRow = (signal: Signal, onViewDetails = vi.fn()) => {
   render(
     <I18nProvider>
       <EuiProvider>

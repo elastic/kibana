@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createMultiJudgeEvaluator } from '.';
 import type { Evaluator, EvaluatorParams, EvaluationResult } from '../../types';
 
@@ -151,7 +153,7 @@ describe('createMultiJudgeEvaluator', () => {
     });
 
     it('logs warnings for failed judges', async () => {
-      const warn = jest.fn();
+      const warn = vi.fn();
       const evaluator = createMultiJudgeEvaluator({
         judges: [mockJudge('a', 0.8), failingJudge('b')],
         logger: { warn },

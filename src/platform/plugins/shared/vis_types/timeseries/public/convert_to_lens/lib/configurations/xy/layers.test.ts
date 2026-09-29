@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import type { Panel, Metric } from '../../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
@@ -21,15 +23,21 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { XYLayerConfig } from '@kbn/lens-common';
 
-const mockExtractOrGenerateDatasourceInfo = jest.fn();
+const mockExtractOrGenerateDatasourceInfo = vi.fn();
 
-jest.mock('uuid', () => ({
-  v4: () => 'test-id',
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => 'test-id',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../datasource', () => ({
-  extractOrGenerateDatasourceInfo: jest.fn(() => mockExtractOrGenerateDatasourceInfo()),
-}));
+vi.mock('../../datasource', () => {
+      const mocked = {
+      extractOrGenerateDatasourceInfo: vi.fn(() => mockExtractOrGenerateDatasourceInfo()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockedIndices = [
   {
@@ -47,15 +55,15 @@ const mockedIndices = [
 ] as unknown as DataView[];
 
 const indexPatternsService = {
-  getDefault: jest.fn(() =>
+  getDefault: vi.fn(() =>
     Promise.resolve({
       id: 'default',
       title: 'index',
       getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
     })
   ),
-  get: jest.fn((id) => Promise.resolve({ ...mockedIndices[0], id })),
-  find: jest.fn((search: string, size: number) => {
+  get: vi.fn((id) => Promise.resolve({ ...mockedIndices[0], id })),
+  find: vi.fn((search: string, size: number) => {
     if (size !== 1) {
       // shouldn't request more than one data view since there is a significant performance penalty
       throw new Error('trying to fetch too many data views');
@@ -374,7 +382,7 @@ describe('getLayers', () => {
     series: [createSeries({ metrics: staticValueMetric })],
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockExtractOrGenerateDatasourceInfo.mockReturnValue({
       indexPattern: mockedIndices[0],
       indexPatternId: mockedIndices[0].id,

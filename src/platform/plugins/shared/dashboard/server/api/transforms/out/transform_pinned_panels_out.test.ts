@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   ControlValuesSource,
   DEFAULT_DSL_OPTIONS_LIST_STATE,
@@ -31,7 +33,7 @@ import {
   timeSliderControlSchema,
 } from '@kbn/controls-schemas';
 
-const mockGetTransforms = jest.fn();
+const mockGetTransforms = vi.fn();
 
 beforeAll(() => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -55,14 +57,14 @@ beforeAll(() => {
 
       if (type === 'invalidPanel') {
         return {
-          parse: jest.fn().mockImplementation(() => {
+          parse: vi.fn().mockImplementation(() => {
             throw new Error('Boo!');
           }),
         };
       }
     }
     return {
-      transformOut: jest.fn().mockImplementation((val) => val),
+      transformOut: vi.fn().mockImplementation((val) => val),
       schema: getSchema(embeddableType),
     };
   });

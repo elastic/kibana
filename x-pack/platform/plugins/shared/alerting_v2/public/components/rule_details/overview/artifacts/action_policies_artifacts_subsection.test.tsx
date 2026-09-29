@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -19,36 +21,45 @@ import { AlertingV2ActionPoliciesLocatorDefinition } from '../../../../locators'
 
 const mockLocators = createMockLocators();
 
-const mockUseLinkedActionPolicies = jest.fn();
-const mockUseActionPolicyConnectorTypes = jest.fn();
+const mockUseLinkedActionPolicies = vi.fn();
+const mockUseActionPolicyConnectorTypes = vi.fn();
 
-jest.mock('./use_linked_action_policies', () => ({
-  useLinkedActionPolicies: (...args: unknown[]) => mockUseLinkedActionPolicies(...args),
-}));
+vi.mock('./use_linked_action_policies', () => {
+      const mocked = {
+      useLinkedActionPolicies: (...args: unknown[]) => mockUseLinkedActionPolicies(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  ...jest.requireActual('@kbn/alerting-v2-rule-form'),
-  useActionPolicyConnectorTypes: (...args: unknown[]) => mockUseActionPolicyConnectorTypes(...args),
-}));
+vi.mock('@kbn/alerting-v2-rule-form', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/alerting-v2-rule-form')),
+      useActionPolicyConnectorTypes: (...args: unknown[]) => mockUseActionPolicyConnectorTypes(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../action_policy/details_flyout/action_policy_details_flyout_container', () => ({
-  ActionPolicyDetailsFlyoutContainer: ({
-    policyId,
-    onClose,
-    session,
-  }: {
-    policyId: string;
-    onClose: () => void;
-    session?: string;
-  }) => (
-    <div data-test-subj="actionPolicyDetailsFlyoutMock" data-session={session}>
-      <span data-test-subj="actionPolicyDetailsFlyoutMockId">{policyId}</span>
-      <button type="button" onClick={onClose}>
-        close
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../../../action_policy/details_flyout/action_policy_details_flyout_container', () => {
+      const mocked = {
+      ActionPolicyDetailsFlyoutContainer: ({
+        policyId,
+        onClose,
+        session,
+      }: {
+        policyId: string;
+        onClose: () => void;
+        session?: string;
+      }) => (
+        <div data-test-subj="actionPolicyDetailsFlyoutMock" data-session={session}>
+          <span data-test-subj="actionPolicyDetailsFlyoutMockId">{policyId}</span>
+          <button type="button" onClick={onClose}>
+            close
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',
@@ -111,13 +122,13 @@ const renderSubsection = (
 
 describe('ActionPoliciesArtifactsSubsection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseLinkedActionPolicies.mockReturnValue(idleHookResult);
     mockUseActionPolicyConnectorTypes.mockReturnValue({
       connectorTypesByPolicy: new Map(),
       isLoading: false,
     });
-    jest
+    vi
       .mocked(mockLocators.actionPolicyLocators.getRedirectUrl)
       .mockReturnValue('/mock-locator-url');
   });
@@ -323,7 +334,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
   it('open link params resolve to management action policies list URL', async () => {
     renderSubsection();
 
-    const [params] = jest.mocked(mockLocators.actionPolicyLocators.useUrl).mock.calls[0];
+    const [params] = vi.mocked(mockLocators.actionPolicyLocators.useUrl).mock.calls[0];
     const location = await AlertingV2ActionPoliciesLocatorDefinition.getLocation(params);
     expect(location).toMatchObject({
       app: 'management',

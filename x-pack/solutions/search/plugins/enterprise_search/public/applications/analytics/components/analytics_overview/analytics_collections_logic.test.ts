@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -22,8 +24,8 @@ describe('analyticsCollectionsLogic', () => {
   const { mount } = new LogicMounter(AnalyticsCollectionsLogic);
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
     apiMount();
     mount();
   });
@@ -102,16 +104,16 @@ describe('analyticsCollectionsLogic', () => {
     });
 
     it('calls makeRequest on fetchAnalyticsCollections', () => {
-      AnalyticsCollectionsLogic.actions.makeRequest = jest.fn();
+      AnalyticsCollectionsLogic.actions.makeRequest = vi.fn();
       AnalyticsCollectionsLogic.actions.fetchAnalyticsCollections();
       expect(AnalyticsCollectionsLogic.actions.makeRequest).toHaveBeenCalledWith({});
     });
 
     it('calls makeRequest query on searchAnalyticsCollections', async () => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
-      AnalyticsCollectionsLogic.actions.makeRequest = jest.fn();
+      vi.useFakeTimers({ legacyFakeTimers: true });
+      AnalyticsCollectionsLogic.actions.makeRequest = vi.fn();
       AnalyticsCollectionsLogic.actions.searchAnalyticsCollections('test');
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
       await nextTick();
       expect(AnalyticsCollectionsLogic.actions.makeRequest).toHaveBeenCalledWith({ query: 'test' });
     });

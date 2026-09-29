@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -36,14 +38,14 @@ const templates = [
 
 describe('TemplateSelectorV2', () => {
   let user: UserEvent;
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
-  beforeAll(() => jest.useFakeTimers());
-  afterAll(() => jest.useRealTimers());
+  beforeAll(() => vi.useFakeTimers());
+  afterAll(() => vi.useRealTimers());
 
   beforeEach(() => {
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
-    jest.clearAllMocks();
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime, pointerEventsCheck: 0 });
+    vi.clearAllMocks();
   });
 
   it('renders the combobox', async () => {

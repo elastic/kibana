@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createSelfClient } from './self_client';
@@ -13,9 +16,9 @@ const createMocks = () => {
   const mockCore = coreMock.createSetup();
   const mockLogger = loggingSystemMock.createLogger();
   const mockRequest = httpServerMock.createKibanaRequest();
-  const mockFetch = jest.fn();
+  const mockFetch = vi.fn();
   const mockCoreStart = coreMock.createStart();
-  (mockCoreStart.http.selfClient.asScoped as unknown as jest.Mock).mockReturnValue({
+  (mockCoreStart.http.selfClient.asScoped as unknown as Mock).mockReturnValue({
     fetch: mockFetch,
   });
   mockCore.getStartServices.mockResolvedValue([mockCoreStart, {}, {}]);

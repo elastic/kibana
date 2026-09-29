@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { registerSecretKeysRoute } from './get_decrypted_secret_keys';
 import Boom from '@hapi/boom';
@@ -14,7 +16,7 @@ describe('registerSecretKeysRoute', () => {
 
   const createGetStartServices = (overrides: Record<string, unknown> = {}) => {
     const mockActionsClient = {
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         id: '1',
         actionTypeId: '.http',
         name: 'My connector',
@@ -23,15 +25,15 @@ describe('registerSecretKeysRoute', () => {
       }),
     };
 
-    return jest.fn().mockResolvedValue([
+    return vi.fn().mockResolvedValue([
       {},
       {
         actions: {
-          getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
+          getActionsClientWithRequest: vi.fn().mockResolvedValue(mockActionsClient),
         },
         encryptedSavedObjects: {
-          getClient: jest.fn().mockReturnValue({
-            getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+          getClient: vi.fn().mockReturnValue({
+            getDecryptedAsInternalUser: vi.fn().mockResolvedValue({
               attributes: {
                 secrets: {
                   secretQueryParams: { apiKey: 'secret', token: 'secret2' },
@@ -42,7 +44,7 @@ describe('registerSecretKeysRoute', () => {
         },
         spaces: {
           spacesService: {
-            getSpaceId: jest.fn().mockReturnValue('default'),
+            getSpaceId: vi.fn().mockReturnValue('default'),
           },
         },
         ...overrides,
@@ -51,7 +53,7 @@ describe('registerSecretKeysRoute', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns secret keys from the specified field', async () => {
@@ -76,12 +78,12 @@ describe('registerSecretKeysRoute', () => {
   });
 
   it('returns empty array when secret field is empty', async () => {
-    const getStartServices = jest.fn().mockResolvedValue([
+    const getStartServices = vi.fn().mockResolvedValue([
       {},
       {
         actions: {
-          getActionsClientWithRequest: jest.fn().mockResolvedValue({
-            get: jest.fn().mockResolvedValue({
+          getActionsClientWithRequest: vi.fn().mockResolvedValue({
+            get: vi.fn().mockResolvedValue({
               id: '1',
               actionTypeId: '.http',
               name: 'My connector',
@@ -91,14 +93,14 @@ describe('registerSecretKeysRoute', () => {
           }),
         },
         encryptedSavedObjects: {
-          getClient: jest.fn().mockReturnValue({
-            getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+          getClient: vi.fn().mockReturnValue({
+            getDecryptedAsInternalUser: vi.fn().mockResolvedValue({
               attributes: { secrets: {} },
             }),
           }),
         },
         spaces: {
-          spacesService: { getSpaceId: jest.fn().mockReturnValue('default') },
+          spacesService: { getSpaceId: vi.fn().mockReturnValue('default') },
         },
       },
     ]);
@@ -121,12 +123,12 @@ describe('registerSecretKeysRoute', () => {
   });
 
   it('returns bad request for disallowed connector types', async () => {
-    const getStartServices = jest.fn().mockResolvedValue([
+    const getStartServices = vi.fn().mockResolvedValue([
       {},
       {
         actions: {
-          getActionsClientWithRequest: jest.fn().mockResolvedValue({
-            get: jest.fn().mockResolvedValue({
+          getActionsClientWithRequest: vi.fn().mockResolvedValue({
+            get: vi.fn().mockResolvedValue({
               id: '2',
               actionTypeId: '.email',
               name: 'Email connector',
@@ -136,12 +138,12 @@ describe('registerSecretKeysRoute', () => {
           }),
         },
         encryptedSavedObjects: {
-          getClient: jest.fn().mockReturnValue({
-            getDecryptedAsInternalUser: jest.fn(),
+          getClient: vi.fn().mockReturnValue({
+            getDecryptedAsInternalUser: vi.fn(),
           }),
         },
         spaces: {
-          spacesService: { getSpaceId: jest.fn().mockReturnValue('default') },
+          spacesService: { getSpaceId: vi.fn().mockReturnValue('default') },
         },
       },
     ]);
@@ -166,21 +168,21 @@ describe('registerSecretKeysRoute', () => {
   });
 
   it('returns custom error for Boom errors', async () => {
-    const getStartServices = jest.fn().mockResolvedValue([
+    const getStartServices = vi.fn().mockResolvedValue([
       {},
       {
         actions: {
-          getActionsClientWithRequest: jest.fn().mockResolvedValue({
-            get: jest.fn().mockRejectedValue(new Boom.Boom('Not authorized', { statusCode: 403 })),
+          getActionsClientWithRequest: vi.fn().mockResolvedValue({
+            get: vi.fn().mockRejectedValue(new Boom.Boom('Not authorized', { statusCode: 403 })),
           }),
         },
         encryptedSavedObjects: {
-          getClient: jest.fn().mockReturnValue({
-            getDecryptedAsInternalUser: jest.fn(),
+          getClient: vi.fn().mockReturnValue({
+            getDecryptedAsInternalUser: vi.fn(),
           }),
         },
         spaces: {
-          spacesService: { getSpaceId: jest.fn().mockReturnValue('default') },
+          spacesService: { getSpaceId: vi.fn().mockReturnValue('default') },
         },
       },
     ]);

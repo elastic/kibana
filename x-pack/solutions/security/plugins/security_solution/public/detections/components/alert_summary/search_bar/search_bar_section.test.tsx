@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
@@ -16,12 +19,15 @@ import { INTEGRATION_BUTTON_TEST_ID } from './integrations_filter_button';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIntegrations } from '../../../hooks/alert_summary/use_integrations';
 
-jest.mock('../../../../common/components/search_bar', () => ({
-  // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
-  SiemSearchBar: () => <div data-test-subj={'alert-summary-search-bar'} />,
-}));
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../hooks/alert_summary/use_integrations');
+vi.mock('../../../../common/components/search_bar', () => {
+      const mocked = {
+      // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
+      SiemSearchBar: () => <div data-test-subj={'alert-summary-search-bar'} />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../hooks/alert_summary/use_integrations');
 
 const dataView: DataView = createStubDataView({ spec: {} });
 const packages: PackageListItem[] = [
@@ -36,16 +42,16 @@ const packages: PackageListItem[] = [
 
 describe('<SearchBarSection />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render all components', () => {
-    (useIntegrations as jest.Mock).mockReturnValue({
+    (useIntegrations as Mock).mockReturnValue({
       isLoading: false,
       integrations: [],
     });
-    (useKibana as jest.Mock).mockReturnValue({
-      services: { data: { query: { filterManager: jest.fn() } } },
+    (useKibana as Mock).mockReturnValue({
+      services: { data: { query: { filterManager: vi.fn() } } },
     });
 
     const { getByTestId } = render(<SearchBarSection dataView={dataView} packages={packages} />);

@@ -5,41 +5,45 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
 import { DashboardsFileUpload } from './dashboards_file_upload';
 import { TestProviders } from '../../../../../../../../common/mock';
 import { useParseFileInput } from '../../../../../../../common/hooks/use_parse_file_input';
 
-jest.mock('../../../../../../../common/hooks/use_parse_file_input', () => {
-  const { parseContent } = jest.requireActual(
-    '../../../../../../../common/hooks/use_parse_file_input'
-  );
+vi.mock('../../../../../../../common/hooks/use_parse_file_input', async () => {
+  const { parseContent } = (await vi.importActual('../../../../../../../common/hooks/use_parse_file_input'));
   return {
     parseContent,
-    useParseFileInput: jest.fn(),
+    useParseFileInput: vi.fn(),
   };
 });
 
-jest.mock('../../../../../../../common/components/migration_steps', () => ({
-  UploadFileButton: ({
-    onClick,
-    isLoading,
-    disabled,
-  }: {
-    onClick: () => void;
-    isLoading?: boolean;
-    disabled?: boolean;
-  }) => (
-    <button type="button" onClick={onClick} disabled={isLoading || disabled}>
-      {'Upload'}
-    </button>
-  ),
-}));
+vi.mock('../../../../../../../common/components/migration_steps', () => {
+      const mocked = {
+      UploadFileButton: ({
+        onClick,
+        isLoading,
+        disabled,
+      }: {
+        onClick: () => void;
+        isLoading?: boolean;
+        disabled?: boolean;
+      }) => (
+        <button type="button" onClick={onClick} disabled={isLoading || disabled}>
+          {'Upload'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('DashboardsFileUpload', () => {
-  const mockUseParseFileInput = useParseFileInput as jest.Mock;
-  const mockParseFile = jest.fn();
+  const mockUseParseFileInput = useParseFileInput as Mock;
+  const mockParseFile = vi.fn();
   let onFileParsedCallback: (content: string) => void;
 
   beforeEach(() => {
@@ -54,16 +58,16 @@ describe('DashboardsFileUpload', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const defaultProps = {
-    createMigration: jest.fn(),
+    createMigration: vi.fn(),
     isLoading: false,
     isCreated: false,
     migrationName: 'test-migration',
     apiError: undefined,
-    onMigrationCreated: jest.fn(),
+    onMigrationCreated: vi.fn(),
   };
 
   it('renders correctly', () => {
@@ -77,7 +81,7 @@ describe('DashboardsFileUpload', () => {
   });
 
   it('handles file selection and upload', async () => {
-    const createMigration = jest.fn();
+    const createMigration = vi.fn();
     const { getByLabelText, getByText } = render(
       <TestProviders>
         <DashboardsFileUpload {...defaultProps} createMigration={createMigration} />

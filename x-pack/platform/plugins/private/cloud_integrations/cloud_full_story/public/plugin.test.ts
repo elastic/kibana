@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { duration } from 'moment';
@@ -15,7 +17,7 @@ describe('Cloud Plugin', () => {
   describe('#setup', () => {
     describe('setupFullStory', () => {
       beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       });
 
       const setupPlugin = async ({
@@ -32,7 +34,7 @@ describe('Cloud Plugin', () => {
         const plugin = new CloudFullStoryPlugin(initContext);
 
         const coreSetup = coreMock.createSetup();
-        jest
+        vi
           .spyOn(coreSetup.http.staticAssets, 'getPluginAssetHref')
           .mockReturnValue('/cloudFullStory/assets/fs.js');
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
 import type { Logger } from '@kbn/core/server';
 import { errors as EsErrors } from '@elastic/elasticsearch';
@@ -12,20 +15,20 @@ import { CasesAnalyticsRetryService } from './cases_analytics_retry_service';
 import type { BackoffFactory } from '@kbn/response-ops-retry-service';
 
 describe('CasesAnalyticsRetryService', () => {
-  const nextBackOff = jest.fn();
-  const cb = jest.fn();
+  const nextBackOff = vi.fn();
+  const cb = vi.fn();
   const retryableError = new EsErrors.ConnectionError('My retryable error');
 
   const backOffFactory: BackoffFactory = {
     create: () => ({ nextBackOff }),
   };
 
-  const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const mockLogger = loggingSystemMock.create().get() as Mocked<Logger>;
 
   let service: CasesAnalyticsRetryService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     nextBackOff.mockReturnValue(1);
     service = new CasesAnalyticsRetryService(mockLogger, backOffFactory);

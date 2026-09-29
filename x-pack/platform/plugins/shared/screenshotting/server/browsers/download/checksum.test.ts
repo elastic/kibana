@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-jest.mock('fs');
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
+vi.mock('fs');
 
 import type { ReadStream } from 'fs';
 import { createReadStream } from 'fs';
@@ -23,7 +26,7 @@ describe('sha1', () => {
       },
     }) as typeof stream;
 
-    (createReadStream as jest.MockedFunction<typeof createReadStream>).mockReturnValue(stream);
+    (createReadStream as MockedFunction<typeof createReadStream>).mockReturnValue(stream);
   });
 
   it('should return an sha256 hash', async () => {

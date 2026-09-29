@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import moment from 'moment-timezone';
 import type { MlAnomalyRecordDoc, MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
 import { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils';
@@ -105,27 +108,27 @@ const getAggregations = (): Record<string, unknown> => ({
 
 const createService = () => {
   const mlClient = {
-    getJobs: jest.fn().mockResolvedValue({ jobs: getJobsResponse() }),
-    anomalySearch: jest.fn().mockResolvedValue({ aggregations: getAggregations() }),
-  } as unknown as jest.Mocked<MlClient>;
+    getJobs: vi.fn().mockResolvedValue({ jobs: getJobsResponse() }),
+    anomalySearch: vi.fn().mockResolvedValue({ aggregations: getAggregations() }),
+  } as unknown as Mocked<MlClient>;
 
   const datafeedsService = {
-    getDatafeedByJobId: jest.fn().mockResolvedValue([
+    getDatafeedByJobId: vi.fn().mockResolvedValue([
       {
         job_id: 'test_job',
         datafeed_id: 'datafeed-test_job',
         indices: ['test-index'],
       },
     ]),
-  } as unknown as jest.Mocked<DatafeedsService>;
+  } as unknown as Mocked<DatafeedsService>;
 
-  const getFieldsFormatRegistry = jest.fn().mockResolvedValue({
-    deserialize: jest
+  const getFieldsFormatRegistry = vi.fn().mockResolvedValue({
+    deserialize: vi
       .fn()
       .mockImplementation(({ id }: { id: string } | DeepPartial<{ id: string }>) => {
         if (id === 'date') {
           return {
-            convertToText: jest
+            convertToText: vi
               .fn()
               .mockImplementation(
                 (value: number, _type?: string, options?: { timezone?: string }) =>
@@ -135,14 +138,14 @@ const createService = () => {
         }
 
         return {
-          convertToText: jest.fn().mockImplementation((value: number) => value.toString()),
+          convertToText: vi.fn().mockImplementation((value: number) => value.toString()),
         };
       }),
-  }) as jest.Mocked<FieldFormatsRegistryProvider>;
+  }) as Mocked<FieldFormatsRegistryProvider>;
 
-  const getDataViewsService = jest.fn().mockResolvedValue({
-    findLazy: jest.fn().mockResolvedValue([]),
-  }) as jest.Mocked<GetDataViewsService>;
+  const getDataViewsService = vi.fn().mockResolvedValue({
+    findLazy: vi.fn().mockResolvedValue([]),
+  }) as Mocked<GetDataViewsService>;
 
   return alertingServiceProvider(
     mlClient,

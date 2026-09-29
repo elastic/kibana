@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,14 +15,17 @@ import { serializeAsESLifecycle } from '../../../../../../common/lib';
 
 let mockWizardData: any;
 
-jest.mock('../../component_templates_context', () => ({
-  useComponentTemplatesContext: () => ({
-    documentation: { esDocsBase: 'https://example.test' },
-  }),
-}));
+vi.mock('../../component_templates_context', () => {
+      const mocked = {
+      useComponentTemplatesContext: () => ({
+        documentation: { esDocsBase: 'https://example.test' },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/es-ui-shared-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/es-ui-shared-plugin/public');
+vi.mock('@kbn/es-ui-shared-plugin/public', async () => {
+  const actual = (await vi.importActual('@kbn/es-ui-shared-plugin/public'));
   return {
     ...actual,
     Forms: {
@@ -50,8 +55,8 @@ describe('<ComponentTemplateForm />', () => {
   });
 
   test('should build the correct payload when submitting the form', async () => {
-    const onSave = jest.fn();
-    const clearSaveError = jest.fn();
+    const onSave = vi.fn();
+    const clearSaveError = vi.fn();
 
     mockWizardData = {
       logistics: {
@@ -97,8 +102,8 @@ describe('<ComponentTemplateForm />', () => {
   });
 
   test('should surface API errors if the request is unsuccessful', async () => {
-    const onSave = jest.fn();
-    const clearSaveError = jest.fn();
+    const onSave = vi.fn();
+    const clearSaveError = vi.fn();
 
     const error = {
       statusCode: 409,

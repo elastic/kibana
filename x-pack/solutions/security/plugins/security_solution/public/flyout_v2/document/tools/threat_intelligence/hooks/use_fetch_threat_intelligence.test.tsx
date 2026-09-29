@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -15,7 +18,7 @@ import type {
 import { useFetchThreatIntelligence } from './use_fetch_threat_intelligence';
 import { useInvestigationTimeEnrichment } from './use_investigation_enrichment';
 
-jest.mock('./use_investigation_enrichment');
+vi.mock('./use_investigation_enrichment');
 
 const hit = {
   id: '1',
@@ -32,7 +35,7 @@ describe('useFetchThreatIntelligence', () => {
   let hookResult: RenderHookResult<UseThreatIntelligenceResult, UseThreatIntelligenceParams>;
 
   it('return render 1 match detected and 1 field enriched', () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
+    (useInvestigationTimeEnrichment as Mock).mockReturnValue({
       result: {
         enrichments: [
           {
@@ -66,7 +69,7 @@ describe('useFetchThreatIntelligence', () => {
   });
 
   it('should return 2 matches detected and 2 fields enriched', () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
+    (useInvestigationTimeEnrichment as Mock).mockReturnValue({
       result: {
         enrichments: [
           {
@@ -115,7 +118,7 @@ describe('useFetchThreatIntelligence', () => {
   });
 
   it('should return 0 field enriched', () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
+    (useInvestigationTimeEnrichment as Mock).mockReturnValue({
       result: {
         enrichments: [
           {
@@ -141,7 +144,7 @@ describe('useFetchThreatIntelligence', () => {
   });
 
   it('should return 0 match detected', () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
+    (useInvestigationTimeEnrichment as Mock).mockReturnValue({
       result: {
         enrichments: [
           {
@@ -168,7 +171,7 @@ describe('useFetchThreatIntelligence', () => {
   });
 
   it('should return loading true', () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
+    (useInvestigationTimeEnrichment as Mock).mockReturnValue({
       result: undefined,
       loading: true,
     });

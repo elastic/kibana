@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { DefaultSearchCapabilities } from '../../../search_strategies/capabilities/default_search_capabilities';
 import { dateHistogram } from './date_histogram';
 import { getInterval } from '../../get_interval';
@@ -47,7 +49,7 @@ describe('dateHistogram(req, panel, series)', () => {
     uiSettings = {
       get: async (key) => (key === UI_SETTINGS.HISTOGRAM_MAX_BARS ? 100 : 50),
     };
-    buildSeriesMetaParams = jest.fn(async () => ({
+    buildSeriesMetaParams = vi.fn(async () => ({
       timeField: '@timestamp',
       ...getInterval(
         '@timestamp',
@@ -64,7 +66,7 @@ describe('dateHistogram(req, panel, series)', () => {
   });
 
   test('calls next when finished', async () => {
-    const next = jest.fn();
+    const next = vi.fn();
 
     await dateHistogram(
       req,

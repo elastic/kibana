@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { AwaitedProperties } from '@kbn/utility-types';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeDeleteCustomElementRoute } from './delete';
@@ -65,7 +67,7 @@ describe('DELETE custom element', () => {
       },
     });
 
-    (mockRouteContext.core.savedObjects.client.delete as jest.Mock).mockImplementationOnce(() => {
+    (mockRouteContext.core.savedObjects.client.delete as Mock).mockImplementationOnce(() => {
       throw SavedObjectsErrorHelpers.createBadRequestError('bad request');
     });
 

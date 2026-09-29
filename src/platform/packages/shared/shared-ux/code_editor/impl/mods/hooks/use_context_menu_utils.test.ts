@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { monaco } from '@kbn/monaco';
 import { useContextMenuUtils } from './use_context_menu_utils';
 
@@ -38,7 +40,7 @@ describe('WHEN Monaco clipboard actions are already registered', () => {
         if (descriptor.contextMenuGroupId === CLIPBOARD_GROUP) {
           registered.push({ id: descriptor.id, label: descriptor.label });
         }
-        return { dispose: jest.fn() };
+        return { dispose: vi.fn() };
       },
     } as unknown as monaco.editor.IStandaloneCodeEditor;
 

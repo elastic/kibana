@@ -5,23 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { FillOpacityOption } from './fill_opacity_option';
 import { render, screen } from '@testing-library/react';
 
 describe('Line curve option', () => {
   it('should show currently selected opacity value', () => {
-    render(<FillOpacityOption onChange={jest.fn()} value={0.3} />);
+    render(<FillOpacityOption onChange={vi.fn()} value={0.3} />);
     expect(screen.getByLabelText('Area fill opacity')).toHaveValue(0.3);
   });
 
   it('should show fill opacity option when enabled', () => {
-    render(<FillOpacityOption onChange={jest.fn()} value={0.3} isFillOpacityEnabled={true} />);
+    render(<FillOpacityOption onChange={vi.fn()} value={0.3} isFillOpacityEnabled={true} />);
     expect(screen.getByLabelText('Area fill opacity')).toBeInTheDocument();
   });
 
   it('should hide curve option when disabled', () => {
-    render(<FillOpacityOption onChange={jest.fn()} value={1} isFillOpacityEnabled={false} />);
+    render(<FillOpacityOption onChange={vi.fn()} value={1} isFillOpacityEnabled={false} />);
     expect(screen.queryByLabelText('Area fill opacity')).not.toBeInTheDocument();
   });
 });

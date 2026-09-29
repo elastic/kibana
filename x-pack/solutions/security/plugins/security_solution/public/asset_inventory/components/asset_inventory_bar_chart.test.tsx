@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ASSET_FIELDS } from '../constants';
 import { handleElementClick } from './asset_inventory_bar_chart';
 
 describe('handleElementClick', () => {
   it('should call setQuery with the correct filters when sub_type is present', () => {
-    const setQuery = jest.fn();
+    const setQuery = vi.fn();
 
     const mockDatum = {
       [ASSET_FIELDS.ENTITY_TYPE]: 'host_type',
@@ -75,7 +77,7 @@ describe('handleElementClick', () => {
   });
 
   it('should call setQuery with entity.type filter and not exists filter for entity.sub_type when sub_type ends with "(uncategorized)"', () => {
-    const setQuery = jest.fn();
+    const setQuery = vi.fn();
 
     const mockDatum = {
       [ASSET_FIELDS.ENTITY_TYPE]: 'host_type',
@@ -138,7 +140,7 @@ describe('handleElementClick', () => {
   });
 
   it('should call setQuery with entity.type filter and not exists filter for entity.sub_type when sub_type is missing', () => {
-    const setQuery = jest.fn();
+    const setQuery = vi.fn();
 
     const mockDatum = {
       [ASSET_FIELDS.ENTITY_TYPE]: 'host_type',

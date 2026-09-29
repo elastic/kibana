@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
@@ -13,10 +15,13 @@ import { Router } from '@kbn/shared-ux-router';
 import { useResolverQueryParamCleaner } from './use_resolver_query_params_cleaner';
 import { parameterName } from '../store/parameter_name';
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useDispatch: () => jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useDispatch: () => vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useResolverQueryParamCleaner', () => {
   const id = 'test-instance';

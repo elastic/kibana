@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { APP_ID } from '../../../../../common';
@@ -16,10 +19,13 @@ import {
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 
-const mockGetStatus = jest.fn();
-jest.mock('../lead_data_client', () => ({
-  createLeadDataClient: () => ({ getStatus: mockGetStatus }),
-}));
+const mockGetStatus = vi.fn();
+vi.mock('../lead_data_client', () => {
+      const mocked = {
+      createLeadDataClient: () => ({ getStatus: mockGetStatus }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const makeEsSecurityException = () => ({
   statusCode: 403,
@@ -27,25 +33,28 @@ const makeEsSecurityException = () => ({
   meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
 });
 
-jest.mock('../tasks', () => ({
-  getLeadGenerationTaskId: (spaceId: string) =>
-    `entity_analytics:lead_generation:engine:${spaceId}:1.0.0`,
-}));
+vi.mock('../tasks', () => {
+      const mocked = {
+      getLeadGenerationTaskId: (spaceId: string) =>
+        `entity_analytics:lead_generation:engine:${spaceId}:1.0.0`,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getLeadGenerationStatusRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: ReturnType<typeof requestContextMock.convertContext>;
   const logger = loggingSystemMock.createLogger();
   let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
-  let getStartServicesMock: jest.Mock;
+  let getStartServicesMock: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     const { clients } = requestContextMock.createTools();
     context = requestContextMock.convertContext(requestContextMock.create({ ...clients }));
     mockTaskManagerStart = taskManagerMock.createStart();
-    getStartServicesMock = jest.fn().mockResolvedValue([{}, { taskManager: mockTaskManagerStart }]);
+    getStartServicesMock = vi.fn().mockResolvedValue([{}, { taskManager: mockTaskManagerStart }]);
     getLeadGenerationStatusRoute(server.router, logger, getStartServicesMock);
   });
 

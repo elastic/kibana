@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import {
@@ -19,7 +21,7 @@ describe('useWhichFlyout', () => {
   let hookResult: RenderHookResult<string | null, unknown>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     window.location.search = '?';
   });
 

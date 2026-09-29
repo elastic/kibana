@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { ContextEngineAnalyticsService } from './analytics_service';
 import { CONTEXT_ENGINE_EVENT_TYPES, contextEngineServerEbtEvents } from './events';
 
 describe('ContextEngineAnalyticsService', () => {
-  let analytics: { registerEventType: jest.Mock; reportEvent: jest.Mock };
-  let logger: { debug: jest.Mock };
+  let analytics: { registerEventType: Mock; reportEvent: Mock };
+  let logger: { debug: Mock };
   let service: ContextEngineAnalyticsService;
 
   beforeEach(() => {
-    analytics = { registerEventType: jest.fn(), reportEvent: jest.fn() };
-    logger = { debug: jest.fn() };
+    analytics = { registerEventType: vi.fn(), reportEvent: vi.fn() };
+    logger = { debug: vi.fn() };
     service = new ContextEngineAnalyticsService(
       analytics as unknown as AnalyticsServiceSetup,
       logger as unknown as Logger

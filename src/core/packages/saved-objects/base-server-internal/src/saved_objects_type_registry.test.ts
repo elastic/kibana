@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 
@@ -395,7 +397,7 @@ describe('SavedObjectTypeRegistry', () => {
         createType({
           name: 'typeB',
           migrations: {
-            '1.0.0': jest.fn(),
+            '1.0.0': vi.fn(),
           },
         })
       );

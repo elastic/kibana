@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,15 +15,21 @@ import type { EventFieldsData } from '../../../../common/components/event_detail
 import { TableFieldValueCell } from './table_field_value_cell';
 import { TestProviders } from '../../../../common/mock';
 
-jest.mock('../../../../timelines/components/timeline/body/renderers/formatted_field', () => ({
-  FormattedFieldValue: (props: { value: string }) => (
-    <span data-test-subj="formatted-field-value">{props.value}</span>
-  ),
-}));
+vi.mock('../../../../timelines/components/timeline/body/renderers/formatted_field', () => {
+      const mocked = {
+      FormattedFieldValue: (props: { value: string }) => (
+        <span data-test-subj="formatted-field-value">{props.value}</span>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/utils/get_field_format', () => ({
-  getFieldFormat: jest.fn(),
-}));
+vi.mock('../../../shared/utils/get_field_format', () => {
+      const mocked = {
+      getFieldFormat: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const attackId = 'attack-id';
 

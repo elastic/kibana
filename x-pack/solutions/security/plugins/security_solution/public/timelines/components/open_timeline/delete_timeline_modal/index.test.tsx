@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { useParams } from 'react-router-dom';
@@ -14,19 +17,19 @@ import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import * as i18n from '../translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
-jest.mock('../../../../common/hooks/use_app_toasts');
+vi.mock('../../../../common/hooks/use_app_toasts');
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
   return {
     ...actual,
-    useParams: jest.fn(),
+    useParams: vi.fn(),
   };
 });
 
 describe('DeleteTimelineModal', () => {
-  const mockAddSuccess = jest.fn();
-  (useAppToasts as jest.Mock).mockReturnValue({ addSuccess: mockAddSuccess });
+  const mockAddSuccess = vi.fn();
+  (useAppToasts as Mock).mockReturnValue({ addSuccess: mockAddSuccess });
 
   afterEach(() => {
     mockAddSuccess.mockClear();
@@ -34,15 +37,15 @@ describe('DeleteTimelineModal', () => {
 
   const savedObjectIds = ['abcd'];
   const defaultProps = {
-    closeModal: jest.fn(),
-    deleteTimelines: jest.fn(),
+    closeModal: vi.fn(),
+    deleteTimelines: vi.fn(),
     isModalOpen: true,
     savedObjectIds,
     title: 'Privilege Escalation',
   };
 
   beforeAll(() => {
-    (useParams as jest.Mock).mockReturnValue({ tabName: TimelineTypeEnum.default });
+    (useParams as Mock).mockReturnValue({ tabName: TimelineTypeEnum.default });
   });
 
   describe('showModalState', () => {
@@ -78,7 +81,7 @@ describe('DeleteTimelineModal', () => {
     });
 
     test('it shows correct toast message on success for deleted templates', async () => {
-      (useParams as jest.Mock).mockReturnValue({ tabName: TimelineTypeEnum.template });
+      (useParams as Mock).mockReturnValue({ tabName: TimelineTypeEnum.template });
 
       const wrapper = mountWithIntl(<DeleteTimelineModalOverlay {...defaultProps} />);
       wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');

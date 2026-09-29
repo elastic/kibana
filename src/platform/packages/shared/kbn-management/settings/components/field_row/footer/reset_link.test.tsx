@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
@@ -25,7 +27,7 @@ describe('InputResetLink', () => {
       },
       defaultValue: 'default',
     },
-    onReset: jest.fn(),
+    onReset: vi.fn(),
   };
 
   it('renders nothing if the field is already at its default value', () => {

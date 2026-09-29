@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { stringify as yamlStringify } from 'yaml';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -31,7 +34,7 @@ import type { InlineField } from '../../../common/types/domain/template/fields';
 describe('validators', () => {
   describe('validateCustomFieldTypesInRequest', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('does not throw if all custom fields types in request match the configuration', () => {
@@ -226,7 +229,7 @@ describe('validators', () => {
 
   describe('validateCustomFieldKeysAgainstConfiguration', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('does not throw if all custom fields are in configuration', () => {
@@ -326,7 +329,7 @@ describe('validators', () => {
 
   describe('validateRequiredCustomFields', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('does not throw if all required custom fields are in the request', () => {
@@ -579,7 +582,7 @@ describe('validators', () => {
 
   describe('validateSearchCasesCustomFields', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     const customFieldsConfiguration: CustomFieldsConfiguration = [
@@ -754,15 +757,15 @@ describe('validators', () => {
       fields: [{ control: 'INPUT_TEXT', name: 'summary', label: 'Summary', type: 'keyword' }],
     });
 
-    let templatesService: jest.Mocked<Pick<TemplatesService, 'getTemplate'>>;
-    let fieldDefinitionsService: jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
+    let templatesService: Mocked<Pick<TemplatesService, 'getTemplate'>>;
+    let fieldDefinitionsService: Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
 
     beforeEach(() => {
       templatesService = {
-        getTemplate: jest.fn().mockResolvedValue(simpleTemplateSO),
+        getTemplate: vi.fn().mockResolvedValue(simpleTemplateSO),
       };
       fieldDefinitionsService = {
-        getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [] }),
+        getFieldDefinitions: vi.fn().mockResolvedValue({ fieldDefinitions: [] }),
       };
     });
 
@@ -1154,13 +1157,13 @@ describe('validators', () => {
       validation: { required: true },
     } as unknown as InlineField;
 
-    let templatesService: jest.Mocked<Pick<TemplatesService, 'getTemplate'>>;
-    let fieldDefinitionsService: jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
+    let templatesService: Mocked<Pick<TemplatesService, 'getTemplate'>>;
+    let fieldDefinitionsService: Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
 
     beforeEach(() => {
-      templatesService = { getTemplate: jest.fn() };
+      templatesService = { getTemplate: vi.fn() };
       fieldDefinitionsService = {
-        getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [] }),
+        getFieldDefinitions: vi.fn().mockResolvedValue({ fieldDefinitions: [] }),
       };
     });
 
@@ -1574,18 +1577,18 @@ describe('validators', () => {
         ],
       });
 
-    let templatesService: jest.Mocked<Pick<TemplatesService, 'getTemplate'>>;
-    let fieldDefinitionsService: jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
-    let logger: jest.Mocked<Logger>;
+    let templatesService: Mocked<Pick<TemplatesService, 'getTemplate'>>;
+    let fieldDefinitionsService: Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
+    let logger: Mocked<Logger>;
 
     beforeEach(() => {
       templatesService = {
-        getTemplate: jest.fn().mockResolvedValue(templateWithRequiredOnClose()),
+        getTemplate: vi.fn().mockResolvedValue(templateWithRequiredOnClose()),
       };
       fieldDefinitionsService = {
-        getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [] }),
+        getFieldDefinitions: vi.fn().mockResolvedValue({ fieldDefinitions: [] }),
       };
-      logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+      logger = loggingSystemMock.create().get() as Mocked<Logger>;
     });
 
     it('returns parsed inline fields from a valid template SO', async () => {
@@ -1683,7 +1686,7 @@ describe('validators', () => {
       required: true,
     });
 
-    let fieldDefinitionsService: jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
+    let fieldDefinitionsService: Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
 
     const mockDefinitions = (fieldDefinitions: Array<ReturnType<typeof makeDefinition>>) => {
       fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
@@ -1701,7 +1704,7 @@ describe('validators', () => {
 
     beforeEach(() => {
       fieldDefinitionsService = {
-        getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [], total: 0 }),
+        getFieldDefinitions: vi.fn().mockResolvedValue({ fieldDefinitions: [], total: 0 }),
       };
     });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,7 +19,7 @@ describe('InboundIngressCredentials', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
     appMockRenderer.coreStart.application.capabilities = {
       ...appMockRenderer.coreStart.application.capabilities,
@@ -66,7 +68,7 @@ describe('InboundIngressCredentials', () => {
   });
 
   it('rotates the ingest token after confirmation', async () => {
-    appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue({
+    appMockRenderer.coreStart.http.post = vi.fn().mockResolvedValue({
       ingest_token: 'rotated-token',
     });
 
@@ -77,7 +79,7 @@ describe('InboundIngressCredentials', () => {
       secrets: {},
     });
 
-    const onIngestTokenRotated = jest.fn();
+    const onIngestTokenRotated = vi.fn();
     appMockRenderer.render(
       <InboundIngressCredentials
         connector={connector}

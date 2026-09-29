@@ -5,19 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { HAS_RUM_DATA_TIERS } from '../../../../services/data/has_rum_data_query';
 import { useDataView } from '../local_uifilters/use_data_view';
 import { useHasRumData } from './use_has_rum_data';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useEsSearch: jest.fn(),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useEsSearch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../local_uifilters/use_data_view', () => ({
-  useDataView: jest.fn(),
-}));
+vi.mock('../local_uifilters/use_data_view', () => {
+      const mocked = {
+      useDataView: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TIERED = 'UXHasRumDataInHotOrWarmTiers';
 const UNBOUNDED = 'UXHasRumDataUnbounded';
@@ -33,8 +42,8 @@ interface EsSearchResult {
   error?: Error;
 }
 
-const useEsSearchMock = useEsSearch as jest.Mock;
-const useDataViewMock = useDataView as jest.Mock;
+const useEsSearchMock = useEsSearch as Mock;
+const useDataViewMock = useDataView as Mock;
 
 const hits = (value: number) => ({
   hits: { total: { value, relation: 'eq' } },
@@ -74,7 +83,7 @@ beforeEach(() => {
 
 afterEach(() => {
   window.localStorage.clear();
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('useHasRumData', () => {

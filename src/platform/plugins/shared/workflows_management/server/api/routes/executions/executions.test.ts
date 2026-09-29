@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -27,27 +30,27 @@ import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_lo
 
 describe('Execution Routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
-  let mockApi: Record<string, jest.Mock>;
-  let mockSpaces: { getSpaceId: jest.Mock };
+  let mockApi: Record<string, Mock>;
+  let mockSpaces: { getSpaceId: Mock };
   let mockRouter: IRouter;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   const mockContext = {
     workflows: Promise.resolve({
       isWorkflowsAvailable: true,
-      emitEvent: jest.fn(),
+      emitEvent: vi.fn(),
       managedWorkflows: {
-        install: jest.fn(),
-        uninstall: jest.fn(),
-        getWorkflowStatus: jest.fn(),
-        execute: jest.fn(),
+        install: vi.fn(),
+        uninstall: vi.fn(),
+        getWorkflowStatus: vi.fn(),
+        execute: vi.fn(),
       },
     }),
     licensing: Promise.resolve({
       license: {
         isAvailable: true,
         isActive: true,
-        hasAtLeast: jest.fn().mockReturnValue(true),
+        hasAtLeast: vi.fn().mockReturnValue(true),
         type: 'enterprise',
       },
     }),
@@ -56,7 +59,7 @@ describe('Execution Routes', () => {
         audit: {
           logger: {
             enabled: false,
-            log: jest.fn(),
+            log: vi.fn(),
             includeSavedObjectNames: false,
           },
         },
@@ -65,17 +68,17 @@ describe('Execution Routes', () => {
   };
 
   const mockResponse = {
-    ok: jest.fn((params?: any) => ({ type: 'ok', ...params })),
-    notFound: jest.fn((params?: any) => ({ type: 'notFound', ...params })),
-    badRequest: jest.fn((params?: any) => ({ type: 'badRequest', ...params })),
-    custom: jest.fn(({ statusCode, body, headers, bypassErrorFormat }: any) => ({
+    ok: vi.fn((params?: any) => ({ type: 'ok', ...params })),
+    notFound: vi.fn((params?: any) => ({ type: 'notFound', ...params })),
+    badRequest: vi.fn((params?: any) => ({ type: 'badRequest', ...params })),
+    custom: vi.fn(({ statusCode, body, headers, bypassErrorFormat }: any) => ({
       status: statusCode,
       body,
       options: { headers, bypassErrorFormat },
     })),
-    customError: jest.fn((params?: any) => ({ type: 'customError', ...params })),
-    forbidden: jest.fn((params?: any) => ({ type: 'forbidden', ...params })),
-    conflict: jest.fn((params?: any) => ({ type: 'conflict', ...params })),
+    customError: vi.fn((params?: any) => ({ type: 'customError', ...params })),
+    forbidden: vi.fn((params?: any) => ({ type: 'forbidden', ...params })),
+    conflict: vi.fn((params?: any) => ({ type: 'conflict', ...params })),
   };
   const defaultAuthzResult = {
     [WorkflowsManagementApiActions.readExecution]: true,
@@ -92,35 +95,35 @@ describe('Execution Routes', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     routeHandlers = {};
     mockLogger = loggingSystemMock.createLogger();
-    mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') };
+    mockSpaces = { getSpaceId: vi.fn().mockReturnValue('default') };
     mockApi = {
-      getWorkflow: jest.fn(),
-      runWorkflowWithAlertPreprocessing: jest.fn(),
-      testWorkflow: jest.fn(),
-      testStep: jest.fn(),
-      getWorkflowExecutions: jest.fn(),
-      searchExecutionsView: jest.fn(),
-      searchStepExecutions: jest.fn(),
-      getWorkflowExecution: jest.fn(),
-      getWorkflowExecutionLogs: jest.fn(),
-      cancelWorkflowExecution: jest.fn(),
-      cancelAllActiveWorkflowExecutions: jest.fn(),
-      getStepExecution: jest.fn(),
-      getExecutionStepExecutions: jest.fn(),
-      resumeWorkflowExecution: jest.fn(),
-      resumeWorkflowExecutionExternally: jest.fn(),
-      resumeWorkflowExecutionExternallyViaGet: jest.fn(),
-      resumeWorkflowExecutionExternallyWithInput: jest.fn(),
-      getExternalResumeFormPage: jest.fn(),
-      getChildWorkflowExecutions: jest.fn(),
+      getWorkflow: vi.fn(),
+      runWorkflowWithAlertPreprocessing: vi.fn(),
+      testWorkflow: vi.fn(),
+      testStep: vi.fn(),
+      getWorkflowExecutions: vi.fn(),
+      searchExecutionsView: vi.fn(),
+      searchStepExecutions: vi.fn(),
+      getWorkflowExecution: vi.fn(),
+      getWorkflowExecutionLogs: vi.fn(),
+      cancelWorkflowExecution: vi.fn(),
+      cancelAllActiveWorkflowExecutions: vi.fn(),
+      getStepExecution: vi.fn(),
+      getExecutionStepExecutions: vi.fn(),
+      resumeWorkflowExecution: vi.fn(),
+      resumeWorkflowExecutionExternally: vi.fn(),
+      resumeWorkflowExecutionExternallyViaGet: vi.fn(),
+      resumeWorkflowExecutionExternallyWithInput: vi.fn(),
+      getExternalResumeFormPage: vi.fn(),
+      getChildWorkflowExecutions: vi.fn(),
     };
     mockApi.getWorkflowExecution.mockResolvedValue({ id: 'ex-1', managed: false });
 
     const createVersionedRoute = (method: string, path: string) => ({
-      addVersion: jest
+      addVersion: vi
         .fn()
         .mockImplementation((_config: unknown, handler: (...args: any[]) => Promise<any>) => {
           routeHandlers[`${method}:${path}`] = {
@@ -129,34 +132,34 @@ describe('Execution Routes', () => {
               return handler(context, request, response);
             },
           };
-          return { addVersion: jest.fn() };
+          return { addVersion: vi.fn() };
         }),
     });
 
     const router = {
       versioned: {
-        get: jest
+        get: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('GET', config.path)
           ),
-        post: jest
+        post: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('POST', config.path)
           ),
-        put: jest
+        put: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('PUT', config.path)
           ),
-        delete: jest
+        delete: vi
           .fn()
           .mockImplementation((config: { path: string }) =>
             createVersionedRoute('DELETE', config.path)
           ),
       },
-    } as unknown as jest.Mocked<IRouter>;
+    } as unknown as Mocked<IRouter>;
     mockRouter = router;
 
     registerExecutionRoutes({

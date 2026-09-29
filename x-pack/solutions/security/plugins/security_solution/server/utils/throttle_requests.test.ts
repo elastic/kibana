@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
@@ -17,13 +20,13 @@ describe('throttleRequests', () => {
   let mockContext: SecuritySolutionRequestHandlerContext;
   let mockRequest: KibanaRequest;
   let mockResponse: KibanaResponseFactory;
-  let mockHandler: jest.Mock<MaybePromise<IKibanaResponse>>;
+  let mockHandler: Mock<MaybePromise<IKibanaResponse>>;
 
   beforeEach(() => {
     mockContext = {} as SecuritySolutionRequestHandlerContext;
     mockRequest = {} as KibanaRequest;
     mockResponse = {} as KibanaResponseFactory;
-    mockHandler = jest.fn();
+    mockHandler = vi.fn();
   });
 
   it('should call the route handler if no request is running', async () => {
@@ -81,7 +84,7 @@ describe('throttleRequests', () => {
     const mockSpaceId1 = 'space-1';
     const mockSpaceId2 = 'space-2';
     mockContext.securitySolution = {
-      getSpaceId: jest.fn().mockResolvedValueOnce(mockSpaceId1).mockResolvedValueOnce(mockSpaceId2),
+      getSpaceId: vi.fn().mockResolvedValueOnce(mockSpaceId1).mockResolvedValueOnce(mockSpaceId2),
     } as unknown as Promise<SecuritySolutionApiRequestHandlerContext>;
 
     const throttledHandler = throttleRequests(mockHandler, { spaceAware: true });

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
@@ -22,7 +24,7 @@ describe('createSessionExpirationToast', () => {
       expiresInMs: 60 * 1000,
       canBeExtended: true,
     });
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     const toast = createSessionExpirationToast(coreStart, sessionState$, onClose);
 
     expect(toast).toEqual(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { AgentsStart, AgentRegistry } from '@kbn/agent-builder-server';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -27,9 +30,9 @@ const createAgents = (
   has: AgentRegistry['has']
 ): {
   agents: Pick<AgentsStart, 'getRegistry'>;
-  getRegistry: jest.MockedFunction<AgentsStart['getRegistry']>;
+  getRegistry: MockedFunction<AgentsStart['getRegistry']>;
 } => {
-  const getRegistry: jest.MockedFunction<AgentsStart['getRegistry']> = jest.fn().mockResolvedValue({
+  const getRegistry: MockedFunction<AgentsStart['getRegistry']> = vi.fn().mockResolvedValue({
     has,
     get: async () => {
       throw new Error('unused');
@@ -65,7 +68,7 @@ describe('validateTraces', () => {
   });
 
   it('accepts an agent that exists in the registry', async () => {
-    const has = jest.fn().mockResolvedValue(true);
+    const has = vi.fn().mockResolvedValue(true);
     const { agents, getRegistry } = createAgents(has);
 
     await expect(
@@ -77,7 +80,7 @@ describe('validateTraces', () => {
   });
 
   it('rejects an agent that is not in the registry', async () => {
-    const { agents } = createAgents(jest.fn().mockResolvedValue(false));
+    const { agents } = createAgents(vi.fn().mockResolvedValue(false));
 
     await expect(
       validate({ traces: [{ type: 'elastic_agent', value: 'missing-agent' }], agents })
@@ -85,7 +88,7 @@ describe('validateTraces', () => {
   });
 
   it('builds the registry once for multiple agent traces', async () => {
-    const has = jest.fn().mockResolvedValue(true);
+    const has = vi.fn().mockResolvedValue(true);
     const { agents, getRegistry } = createAgents(has);
 
     await validate({
@@ -212,7 +215,7 @@ describe('validateTraces', () => {
   });
 
   it('ignores esql traces', async () => {
-    const has = jest.fn();
+    const has = vi.fn();
     const { agents, getRegistry } = createAgents(has);
 
     await expect(

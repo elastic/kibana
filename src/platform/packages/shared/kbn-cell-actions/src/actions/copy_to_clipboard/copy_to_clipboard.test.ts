@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createCopyToClipboardActionFactory } from './copy_to_clipboard';
 import type { CellActionExecutionContext } from '../../types';
 import type { NotificationsStart } from '@kbn/core/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
-const mockSuccessToast = jest.fn();
-const mockWarningToast = jest.fn();
+const mockSuccessToast = vi.fn();
+const mockWarningToast = vi.fn();
 
-const mockCopy = jest.fn((text: string) => true);
-jest.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
+const mockCopy = vi.fn((text: string) => true);
+vi.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
 
 describe('Default createCopyToClipboardActionFactory', () => {
   const copyToClipboardActionFactory = createCopyToClipboardActionFactory({
@@ -35,7 +37,7 @@ describe('Default createCopyToClipboardActionFactory', () => {
   } as CellActionExecutionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return display name', () => {

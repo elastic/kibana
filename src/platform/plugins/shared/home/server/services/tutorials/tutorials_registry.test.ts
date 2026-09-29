@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { TutorialsRegistry } from './tutorials_registry';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -69,7 +71,7 @@ describe('TutorialsRegistry', () => {
   let mockInitContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
   let testProvider: TutorialProvider;
   let testScopedTutorialContextFactory: ScopedTutorialContextFactory;
-  let mockCustomIntegrationsPluginSetup: jest.Mocked<CustomIntegrationsPluginSetup>;
+  let mockCustomIntegrationsPluginSetup: Mocked<CustomIntegrationsPluginSetup>;
 
   beforeEach(() => {
     mockCustomIntegrationsPluginSetup = customIntegrationsMock.createSetup();

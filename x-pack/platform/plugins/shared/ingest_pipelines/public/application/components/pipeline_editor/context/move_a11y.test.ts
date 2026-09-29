@@ -5,24 +5,30 @@
  * 2.0.
  */
 
-jest.mock('../components/shared', () => ({
-  getProcessorDescriptor: () => undefined,
-}));
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
+vi.mock('../components/shared', () => {
+      const mocked = {
+      getProcessorDescriptor: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { applyPendingMoveA11yEffects, buildMoveAnnouncement } from './move_a11y';
 
 describe('move_a11y', () => {
-  let rafSpy: jest.SpyInstance | undefined;
-  let cancelRafSpy: jest.SpyInstance | undefined;
+  let rafSpy: MockInstance | undefined;
+  let cancelRafSpy: MockInstance | undefined;
 
   beforeEach(() => {
     document.body.innerHTML = '';
 
-    rafSpy = jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+    rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
       cb(0);
       return 0 as unknown as number;
     });
-    cancelRafSpy = jest
+    cancelRafSpy = vi
       .spyOn(window, 'cancelAnimationFrame')
       .mockImplementation((_handle: number) => {});
   });
@@ -73,7 +79,7 @@ describe('move_a11y', () => {
 
       const pendingFocusProcessorIdRef = { current: 'moved' };
       const pendingMoveAnnouncementRef = { current: 'Moved!' };
-      const setMoveAnnouncement = jest.fn(() => {
+      const setMoveAnnouncement = vi.fn(() => {
         expect(document.activeElement).toBe(moveButton);
       });
 
@@ -98,7 +104,7 @@ describe('move_a11y', () => {
 
       const pendingFocusProcessorIdRef = { current: 'missing' };
       const pendingMoveAnnouncementRef = { current: 'Moved!' };
-      const setMoveAnnouncement = jest.fn(() => {
+      const setMoveAnnouncement = vi.fn(() => {
         expect(document.activeElement).toBe(addProcessorButton);
       });
 

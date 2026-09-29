@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { DeleteConversationModal } from './delete_conversation_modal';
 import { welcomeConvo } from '../../mock/conversation';
 
-const mockOnConversationDeleted = jest.fn();
-const mockOnConversationSelected = jest.fn();
-const mockSetDeleteConversationItem = jest.fn();
+const mockOnConversationDeleted = vi.fn();
+const mockOnConversationSelected = vi.fn();
+const mockSetDeleteConversationItem = vi.fn();
 
 const testProps = {
   conversationList: [welcomeConvo],
@@ -25,7 +27,7 @@ const testProps = {
 
 describe('DeleteConversationModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls onConversationDeleted when delete is confirmed', () => {

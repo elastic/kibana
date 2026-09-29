@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { render, screen } from '@testing-library/react';
@@ -17,7 +19,7 @@ import {
 } from './controlled_combobox_input';
 import { getDefaultValue } from './controlled_default_input';
 
-const onChangeCallbackMock = jest.fn();
+const onChangeCallbackMock = vi.fn();
 
 const renderControlledComboboxInput = (badOverrideValue?: string) =>
   render(
@@ -36,7 +38,7 @@ const renderControlledDefaultInput = (badOverrideValue?: string[]) =>
   );
 
 describe('ControlledComboboxInput', () => {
-  afterEach(jest.clearAllMocks);
+  afterEach(vi.clearAllMocks);
 
   it('renders the current value', () => {
     renderControlledComboboxInput();
@@ -59,7 +61,7 @@ describe('ControlledComboboxInput', () => {
 });
 
 describe('ControlledDefaultInput', () => {
-  afterEach(jest.clearAllMocks);
+  afterEach(vi.clearAllMocks);
 
   it('renders the current value', () => {
     renderControlledDefaultInput();

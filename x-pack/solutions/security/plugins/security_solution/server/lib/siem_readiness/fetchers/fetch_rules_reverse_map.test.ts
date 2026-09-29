@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fetchRulesReverseMap } from './fetch_rules_reverse_map';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -13,19 +15,19 @@ import type { Logger } from '@kbn/logging';
 
 const createMockLogger = (): Logger =>
   ({
-    info: jest.fn(),
-    warn: jest.fn(),
-    debug: jest.fn(),
-    error: jest.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
   } as unknown as Logger);
 
 const createMockEsClient = (overrides: Partial<ElasticsearchClient> = {}): ElasticsearchClient =>
   ({
     indices: {
-      getSettings: jest.fn().mockResolvedValue({}),
-      resolveIndex: jest.fn().mockResolvedValue({ indices: [], data_streams: [] }),
+      getSettings: vi.fn().mockResolvedValue({}),
+      resolveIndex: vi.fn().mockResolvedValue({ indices: [], data_streams: [] }),
     },
-    search: jest.fn().mockResolvedValue({
+    search: vi.fn().mockResolvedValue({
       aggregations: {
         by_index: {
           buckets: [],
@@ -37,7 +39,7 @@ const createMockEsClient = (overrides: Partial<ElasticsearchClient> = {}): Elast
 
 const createMockRulesClient = (rules: unknown[] = []): RulesClient =>
   ({
-    find: jest.fn().mockResolvedValue({
+    find: vi.fn().mockResolvedValue({
       data: rules,
       total: rules.length,
       page: 1,
@@ -47,7 +49,7 @@ const createMockRulesClient = (rules: unknown[] = []): RulesClient =>
 
 const createMockDataViewsService = (): DataViewsService =>
   ({
-    get: jest.fn().mockResolvedValue({
+    get: vi.fn().mockResolvedValue({
       getIndexPattern: () => 'logs-*',
     }),
   } as unknown as DataViewsService);
@@ -70,13 +72,13 @@ describe('fetchRulesReverseMap', () => {
       const rulesClient = createMockRulesClient([mockRule]);
       const esClient = createMockEsClient({
         indices: {
-          getSettings: jest.fn().mockResolvedValue({}),
-          resolveIndex: jest.fn().mockResolvedValue({
+          getSettings: vi.fn().mockResolvedValue({}),
+          resolveIndex: vi.fn().mockResolvedValue({
             indices: [{ name: 'logs-aws.cloudtrail-default' }],
             data_streams: [],
           }),
         },
-        search: jest.fn().mockResolvedValue({
+        search: vi.fn().mockResolvedValue({
           aggregations: { by_index: { buckets: [] } },
         }),
       } as unknown as ElasticsearchClient);
@@ -109,20 +111,20 @@ describe('fetchRulesReverseMap', () => {
 
       const rulesClient = createMockRulesClient([mockRule]);
       const dataViewsService = {
-        get: jest.fn().mockResolvedValue({
+        get: vi.fn().mockResolvedValue({
           getIndexPattern: () => 'logs-endpoint.*',
         }),
       } as unknown as DataViewsService;
 
       const esClient = createMockEsClient({
         indices: {
-          getSettings: jest.fn().mockResolvedValue({}),
-          resolveIndex: jest.fn().mockResolvedValue({
+          getSettings: vi.fn().mockResolvedValue({}),
+          resolveIndex: vi.fn().mockResolvedValue({
             indices: [{ name: 'logs-endpoint.events-default' }],
             data_streams: [],
           }),
         },
-        search: jest.fn().mockResolvedValue({
+        search: vi.fn().mockResolvedValue({
           aggregations: { by_index: { buckets: [] } },
         }),
       } as unknown as ElasticsearchClient);
@@ -157,8 +159,8 @@ describe('fetchRulesReverseMap', () => {
       const rulesClient = createMockRulesClient([mockRule]);
       const esClient = createMockEsClient({
         indices: {
-          getSettings: jest.fn().mockResolvedValue({}),
-          resolveIndex: jest
+          getSettings: vi.fn().mockResolvedValue({}),
+          resolveIndex: vi
             .fn()
             .mockResolvedValueOnce({
               indices: [{ name: 'logs-endpoint-default' }],
@@ -169,7 +171,7 @@ describe('fetchRulesReverseMap', () => {
               data_streams: [],
             }),
         },
-        search: jest.fn().mockResolvedValue({
+        search: vi.fn().mockResolvedValue({
           aggregations: { by_index: { buckets: [] } },
         }),
       } as unknown as ElasticsearchClient);
@@ -233,13 +235,13 @@ describe('fetchRulesReverseMap', () => {
       const rulesClient = createMockRulesClient([mockRule]);
       const esClient = createMockEsClient({
         indices: {
-          getSettings: jest.fn().mockResolvedValue({}),
-          resolveIndex: jest.fn().mockResolvedValue({
+          getSettings: vi.fn().mockResolvedValue({}),
+          resolveIndex: vi.fn().mockResolvedValue({
             indices: [{ name: 'logs-test' }],
             data_streams: [],
           }),
         },
-        search: jest.fn().mockResolvedValue({
+        search: vi.fn().mockResolvedValue({
           aggregations: { by_index: { buckets: [] } },
         }),
       } as unknown as ElasticsearchClient);
@@ -289,13 +291,13 @@ describe('fetchRulesReverseMap', () => {
       const rulesClient = createMockRulesClient(mockRules);
       const esClient = createMockEsClient({
         indices: {
-          getSettings: jest.fn().mockResolvedValue({}),
-          resolveIndex: jest.fn().mockResolvedValue({
+          getSettings: vi.fn().mockResolvedValue({}),
+          resolveIndex: vi.fn().mockResolvedValue({
             indices: [{ name: 'logs-test' }],
             data_streams: [],
           }),
         },
-        search: jest.fn().mockResolvedValue({
+        search: vi.fn().mockResolvedValue({
           aggregations: { by_index: { buckets: [] } },
         }),
       } as unknown as ElasticsearchClient);
@@ -317,7 +319,7 @@ describe('fetchRulesReverseMap', () => {
       const rulesClient = createMockRulesClient([]);
       const esClient = createMockEsClient({
         indices: {
-          getSettings: jest.fn().mockResolvedValue({
+          getSettings: vi.fn().mockResolvedValue({
             'logs-endpoint': {
               settings: {
                 'index.default_pipeline': 'endpoint-pipeline',
@@ -329,12 +331,12 @@ describe('fetchRulesReverseMap', () => {
               },
             },
           }),
-          resolveIndex: jest.fn().mockResolvedValue({
+          resolveIndex: vi.fn().mockResolvedValue({
             indices: [],
             data_streams: [],
           }),
         },
-        search: jest.fn().mockResolvedValue({
+        search: vi.fn().mockResolvedValue({
           aggregations: { by_index: { buckets: [] } },
         }),
       } as unknown as ElasticsearchClient);
@@ -356,8 +358,8 @@ describe('fetchRulesReverseMap', () => {
       const logger = createMockLogger();
       const esClient = createMockEsClient({
         indices: {
-          getSettings: jest.fn().mockRejectedValue(new Error('ES unavailable')),
-          resolveIndex: jest.fn().mockResolvedValue({ indices: [], data_streams: [] }),
+          getSettings: vi.fn().mockRejectedValue(new Error('ES unavailable')),
+          resolveIndex: vi.fn().mockResolvedValue({ indices: [], data_streams: [] }),
         },
       } as unknown as ElasticsearchClient);
 
@@ -415,8 +417,8 @@ describe('fetchRulesReverseMap', () => {
 
       const esClient = createMockEsClient({
         indices: {
-          getSettings: jest.fn().mockResolvedValue({}),
-          resolveIndex: jest.fn().mockRejectedValue(new Error('index resolution failed')),
+          getSettings: vi.fn().mockResolvedValue({}),
+          resolveIndex: vi.fn().mockRejectedValue(new Error('index resolution failed')),
         },
       } as unknown as ElasticsearchClient);
 
@@ -436,7 +438,7 @@ describe('fetchRulesReverseMap', () => {
     it('should propagate (rethrow) when rule pagination (findRules) fails', async () => {
       const logger = createMockLogger();
       const rulesClient = {
-        find: jest.fn().mockRejectedValue(new Error('findRules failed')),
+        find: vi.fn().mockRejectedValue(new Error('findRules failed')),
       } as unknown as RulesClient;
 
       await expect(
@@ -462,8 +464,8 @@ describe('fetchRulesReverseMap', () => {
 
       const esClient = createMockEsClient({
         indices: {
-          getSettings: jest.fn().mockRejectedValue(new Error('ES unavailable')),
-          resolveIndex: jest.fn().mockResolvedValue({
+          getSettings: vi.fn().mockRejectedValue(new Error('ES unavailable')),
+          resolveIndex: vi.fn().mockResolvedValue({
             indices: [{ name: 'logs-test' }],
             data_streams: [],
           }),

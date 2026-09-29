@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import type { CategoryAxisPanelProps } from './category_axis_panel';
@@ -18,14 +21,14 @@ import { categoryAxis } from './mocks';
 import { Position } from '@elastic/charts';
 
 describe('CategoryAxisPanel component', () => {
-  let setCategoryAxis: jest.Mock;
-  let onPositionChanged: jest.Mock;
+  let setCategoryAxis: Mock;
+  let onPositionChanged: Mock;
   let defaultProps: CategoryAxisPanelProps;
   let axis: CategoryAxis;
 
   beforeEach(() => {
-    setCategoryAxis = jest.fn();
-    onPositionChanged = jest.fn();
+    setCategoryAxis = vi.fn();
+    onPositionChanged = vi.fn();
     axis = categoryAxis;
 
     defaultProps = {

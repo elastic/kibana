@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PluginDefinition } from '@kbn/agent-builder-common';
 import { createPluginRegistry } from './plugin_registry';
 import type { ReadonlyPluginProvider, WritablePluginProvider } from './plugin_provider';
@@ -80,16 +82,16 @@ const createMockPersistedProvider = (plugins: PluginDefinition[] = []): Writable
       return undefined;
     },
     list: () => [...map.values()],
-    create: jest.fn().mockImplementation(async (req) => {
+    create: vi.fn().mockImplementation(async (req) => {
       const plugin = createPersistedPlugin({ id: req.id ?? 'new-id', name: req.name });
       map.set(plugin.id, plugin);
       return plugin;
     }),
-    update: jest.fn().mockImplementation(async (id, update) => {
+    update: vi.fn().mockImplementation(async (id, update) => {
       const existing = map.get(id)!;
       return { ...existing, ...update };
     }),
-    delete: jest.fn().mockImplementation(async (id) => {
+    delete: vi.fn().mockImplementation(async (id) => {
       map.delete(id);
     }),
   };

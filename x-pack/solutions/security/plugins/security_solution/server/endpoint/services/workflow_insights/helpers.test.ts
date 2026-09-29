@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import moment from 'moment';
 import { merge } from 'lodash';
 
@@ -50,12 +53,15 @@ import { securityWorkflowInsightsFieldMap } from './field_map_configurations';
 import { createMockEndpointAppContext } from '../../mocks';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 
-jest.mock('@kbn/data-stream-adapter', () => ({
-  DataStreamSpacesAdapter: jest.fn().mockImplementation(() => ({
-    setComponentTemplate: jest.fn(),
-    setIndexTemplate: jest.fn(),
-  })),
-}));
+vi.mock('@kbn/data-stream-adapter', () => {
+      const mocked = {
+      DataStreamSpacesAdapter: vi.fn().mockImplementation(() => ({
+        setComponentTemplate: vi.fn(),
+        setIndexTemplate: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function getDefaultInsight(overrides?: Partial<SecurityWorkflowInsight>): SecurityWorkflowInsight {
   const defaultInsight = {
@@ -219,15 +225,15 @@ describe('helpers', () => {
   });
 
   describe('groupEndpointIdsByOS', () => {
-    let endpointMetadataService: jest.Mocked<EndpointMetadataService>;
+    let endpointMetadataService: Mocked<EndpointMetadataService>;
 
     beforeEach(() => {
       const mockEndpointAppContextService = createMockEndpointAppContext().service;
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn().mockReturnValue({
-        getMetadataForEndpoints: jest.fn(),
+      mockEndpointAppContextService.getEndpointMetadataService = vi.fn().mockReturnValue({
+        getMetadataForEndpoints: vi.fn(),
       });
       endpointMetadataService =
-        mockEndpointAppContextService.getEndpointMetadataService() as jest.Mocked<EndpointMetadataService>;
+        mockEndpointAppContextService.getEndpointMetadataService() as Mocked<EndpointMetadataService>;
     });
 
     it('should correctly group endpoint IDs by OS type', async () => {
@@ -377,10 +383,10 @@ describe('helpers', () => {
 
       // For non-incompatible_antivirus types, getHostMetadata should not be called.
       const endpointMetadataClientMock = {
-        getHostMetadata: jest.fn(),
+        getHostMetadata: vi.fn(),
       };
       const exceptionListsClientMock = {
-        findExceptionListItem: jest.fn(),
+        findExceptionListItem: vi.fn(),
       };
 
       const result = await checkIfRemediationExists({
@@ -394,9 +400,9 @@ describe('helpers', () => {
     });
 
     it('should call exceptionListsClient with the correct filter when valid entries exist', async () => {
-      const findExceptionListItemMock = jest.fn().mockResolvedValue({ total: 1 });
+      const findExceptionListItemMock = vi.fn().mockResolvedValue({ total: 1 });
       const endpointMetadataClientMock = {
-        getHostMetadata: jest
+        getHostMetadata: vi
           .fn()
           .mockResolvedValue({ Endpoint: { policy: { applied: { id: 'abc123' } } } }),
       };
@@ -447,12 +453,12 @@ describe('helpers', () => {
 
     it('should return false if no valid entries exist even when a policy id is provided', async () => {
       const endpointMetadataClientMock = {
-        getHostMetadata: jest
+        getHostMetadata: vi
           .fn()
           .mockResolvedValue({ Endpoint: { policy: { applied: { id: 'abc123' } } } }),
       };
       const exceptionListsClientMock = {
-        findExceptionListItem: jest.fn(),
+        findExceptionListItem: vi.fn(),
       };
 
       // Here the entry field is not valid, so generateTrustedAppsFilter returns an empty string.

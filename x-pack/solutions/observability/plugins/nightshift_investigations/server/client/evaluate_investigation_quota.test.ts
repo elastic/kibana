@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import type { InvestigationQuotaCallback } from '../types';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
 
 const createLogger = () =>
   ({
-    warn: jest.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 describe('evaluateInvestigationQuota', () => {
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('allows and warns when no callback is registered', async () => {
@@ -28,7 +30,7 @@ describe('evaluateInvestigationQuota', () => {
 
   it('returns an explicit denial without warning', async () => {
     const logger = createLogger();
-    const callback = jest.fn().mockResolvedValue({ allowed: false });
+    const callback = vi.fn().mockResolvedValue({ allowed: false });
 
     await expect(evaluateInvestigationQuota({ callback, logger })).resolves.toEqual({
       allowed: false,
@@ -38,7 +40,7 @@ describe('evaluateInvestigationQuota', () => {
 
   it('allows and warns when the callback throws synchronously', async () => {
     const logger = createLogger();
-    const callback = jest.fn(() => {
+    const callback = vi.fn(() => {
       throw new Error('Storage unavailable');
     }) as InvestigationQuotaCallback;
 
@@ -50,7 +52,7 @@ describe('evaluateInvestigationQuota', () => {
 
   it('allows and warns when the callback rejects', async () => {
     const logger = createLogger();
-    const callback = jest.fn().mockRejectedValue(new Error('Storage unavailable'));
+    const callback = vi.fn().mockRejectedValue(new Error('Storage unavailable'));
 
     await expect(evaluateInvestigationQuota({ callback, logger })).resolves.toEqual({
       allowed: true,
@@ -59,12 +61,12 @@ describe('evaluateInvestigationQuota', () => {
   });
 
   it('allows after ten seconds without retrying a callback that has not settled', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const logger = createLogger();
-    const callback = jest.fn(() => new Promise<{ allowed: boolean }>(() => {}));
+    const callback = vi.fn(() => new Promise<{ allowed: boolean }>(() => {}));
 
     const result = evaluateInvestigationQuota({ callback, logger });
-    await jest.advanceTimersByTimeAsync(10_000);
+    await vi.advanceTimersByTimeAsync(10_000);
 
     await expect(result).resolves.toEqual({ allowed: true });
     expect(callback).toHaveBeenCalledTimes(1);
@@ -72,10 +74,10 @@ describe('evaluateInvestigationQuota', () => {
   });
 
   it('handles a late rejection after timeout without retrying or warning again', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const logger = createLogger();
     let rejectCallback: (reason: Error) => void = () => {};
-    const callback = jest.fn(
+    const callback = vi.fn(
       () =>
         new Promise<{ allowed: boolean }>((_resolve, reject) => {
           rejectCallback = reject;
@@ -83,7 +85,7 @@ describe('evaluateInvestigationQuota', () => {
     );
 
     const result = evaluateInvestigationQuota({ callback, logger });
-    await jest.advanceTimersByTimeAsync(10_000);
+    await vi.advanceTimersByTimeAsync(10_000);
     await expect(result).resolves.toEqual({ allowed: true });
 
     rejectCallback(new Error('Late storage failure'));

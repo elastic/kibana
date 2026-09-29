@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { registerDataProviders } from './register_data_providers';
 import { getApmServiceSummary } from './get_apm_service_summary';
@@ -13,14 +16,17 @@ import { buildApmToolResources } from '../utils/build_apm_tool_resources';
 import { getServiceMapServiceBadges } from '../../routes/service_map/get_service_map_service_badges';
 import { getServiceAnomalies } from '../../routes/service_map/get_service_anomalies';
 
-jest.mock('./get_apm_service_summary');
-jest.mock('./get_change_points');
-jest.mock('../utils/build_apm_tool_resources');
-jest.mock('../../routes/service_map/get_service_map_service_badges');
-jest.mock('../../routes/service_map/get_service_anomalies', () => ({
-  getServiceAnomalies: jest.fn(),
-  DEFAULT_ANOMALIES: { mlJobIds: [], serviceAnomalies: [] },
-}));
+vi.mock('./get_apm_service_summary');
+vi.mock('./get_change_points');
+vi.mock('../utils/build_apm_tool_resources');
+vi.mock('../../routes/service_map/get_service_map_service_badges');
+vi.mock('../../routes/service_map/get_service_anomalies', () => {
+      const mocked = {
+      getServiceAnomalies: vi.fn(),
+      DEFAULT_ANOMALIES: { mlJobIds: [], serviceAnomalies: [] },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const apmEventClient = {} as any;
 const apmAlertsClient = {} as any;
@@ -29,7 +35,7 @@ const esClientAsCurrentUser = {} as any;
 
 const sloClient = {} as any;
 
-(buildApmToolResources as jest.Mock).mockResolvedValue({
+(buildApmToolResources as Mock).mockResolvedValue({
   apmEventClient,
   apmAlertsClient,
   mlClient,
@@ -45,7 +51,7 @@ const sloClient = {} as any;
 // so this is the only repeatable way to verify the agent-supplied args are
 // still mapped onto the (now zod-typed) function signatures correctly.
 describe('registerDataProviders (apmServiceSummary / apmServiceChangePoints / apmExitSpanChangePoints)', () => {
-  const registerDataProvider = jest.fn();
+  const registerDataProvider = vi.fn();
   const mockRequest = {} as any;
 
   function getRegisteredProvider(name: string) {
@@ -151,7 +157,7 @@ describe('registerDataProviders (apmServiceSummary / apmServiceChangePoints / ap
 });
 
 describe('registerDataProviders (servicesAlertsAndSlo)', () => {
-  const registerDataProvider = jest.fn();
+  const registerDataProvider = vi.fn();
   const mockRequest = {} as any;
 
   function getProvider() {
@@ -174,11 +180,11 @@ describe('registerDataProviders (servicesAlertsAndSlo)', () => {
   });
 
   beforeEach(() => {
-    (getServiceMapServiceBadges as jest.Mock).mockReset().mockResolvedValue({
+    (getServiceMapServiceBadges as Mock).mockReset().mockResolvedValue({
       alerts: [],
       slos: [],
     });
-    (getServiceAnomalies as jest.Mock).mockReset().mockResolvedValue({
+    (getServiceAnomalies as Mock).mockReset().mockResolvedValue({
       mlJobIds: [],
       serviceAnomalies: [],
     });
@@ -211,7 +217,7 @@ describe('registerDataProviders (servicesAlertsAndSlo)', () => {
   });
 
   it('ignores anomalies for services outside the requested set', async () => {
-    (getServiceAnomalies as jest.Mock).mockResolvedValue({
+    (getServiceAnomalies as Mock).mockResolvedValue({
       mlJobIds: [],
       serviceAnomalies: [
         { serviceName: 'opbeans-java', anomalyScore: 80 },
@@ -226,7 +232,7 @@ describe('registerDataProviders (servicesAlertsAndSlo)', () => {
   });
 
   it('keeps the worst anomaly per requested service', async () => {
-    (getServiceAnomalies as jest.Mock).mockResolvedValue({
+    (getServiceAnomalies as Mock).mockResolvedValue({
       mlJobIds: [],
       serviceAnomalies: [
         { serviceName: 'opbeans-java', anomalyScore: 30 },

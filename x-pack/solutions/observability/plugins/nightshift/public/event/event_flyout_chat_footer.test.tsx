@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -13,16 +15,19 @@ import type { SignificantEvent } from '@kbn/significant-events-schema';
 import type { InvestigationStatus } from '@kbn/investigation-output';
 import { EventFlyoutChatFooter } from './event_flyout_chat_footer';
 
-const mockOpenChat = jest.fn();
+const mockOpenChat = vi.fn();
 
-jest.mock('../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: { basePath: { prepend: (path: string) => path } },
-      agentBuilder: { openChat: mockOpenChat },
-    },
-  }),
-}));
+vi.mock('../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: { basePath: { prepend: (path: string) => path } },
+          agentBuilder: { openChat: mockOpenChat },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-07-10T12:00:00Z',

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import InferenceFlyoutWrapper from '@kbn/inference-endpoint-ui-common';
 import { coreMock as mockCore } from '@kbn/core/public/mocks';
 import { useKibana } from '../../hooks/use_kibana';
@@ -12,19 +15,19 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AddInferenceFlyoutWrapper } from './add_inference_flyout_wrapper';
 
-jest.mock('../../hooks/use_kibana');
-jest.mock('@kbn/inference-endpoint-ui-common');
+vi.mock('../../hooks/use_kibana');
+vi.mock('@kbn/inference-endpoint-ui-common');
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockInferenceFlyoutWrapper = InferenceFlyoutWrapper as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockInferenceFlyoutWrapper = InferenceFlyoutWrapper as Mock;
 
 describe('AddInferenceFlyoutWrapper', () => {
   const mockServices = mockCore.createStart();
-  const mockOnFlyoutClose = jest.fn();
-  const mockReloadFn = jest.fn();
+  const mockOnFlyoutClose = vi.fn();
+  const mockReloadFn = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: mockServices,
     });

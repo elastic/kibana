@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { monaco } from '../../../../monaco_imports';
 import { getInlineCompletionsProvider } from './inline_completions_provider';
 import { createDisposedTextModel, createField, createTextModel } from './test_helpers';
@@ -16,17 +18,17 @@ describe('Inline completion provider', () => {
     it('returns inline suggestions from the language service', async () => {
       const fullText = 'FROM logs*';
       const callbacks = {
-        getColumnsFor: jest.fn(async () => [
+        getColumnsFor: vi.fn(async () => [
           createField('@timestamp', 'date'),
           createField('message', 'text'),
         ]),
-        getEditorExtensions: jest.fn(async () => ({
+        getEditorExtensions: vi.fn(async () => ({
           recommendedQueries: [
             { query: 'FROM logs* | STATS count = COUNT(*)', name: 'Count aggregation' },
           ],
           recommendedFields: [],
         })),
-        getHistoryStarredItems: jest.fn(async () => []),
+        getHistoryStarredItems: vi.fn(async () => []),
       };
       const model = createTextModel({ value: fullText });
 

@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render, within, fireEvent } from '@testing-library/react';
 import { AdditionalOptions } from './additional_options';
 
 describe('AdditionalOptions', () => {
-  const editOptionalSubAction = jest.fn();
+  const editOptionalSubAction = vi.fn();
 
   const options = {
     index: 0,
     editOptionalSubAction,
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('renders the component with empty states', () => {
     render(<AdditionalOptions {...options} />);

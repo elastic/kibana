@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { GET_INDEX_STATS } from '../../common/constants';
 
 import { fetchAvailableIndices, fetchMeteringStats, fetchStats } from '../lib';
@@ -18,13 +21,13 @@ import { mockStatsGreenIndex } from '../__mocks__/mock_stats_green_index';
 import { mockStatsYellowIndex } from '../__mocks__/mock_stats_yellow_index';
 import { mockMeteringStatsIndex } from '../__mocks__/mock_metering_stats_index';
 
-jest.mock('../lib', () => {
-  const originalModule = jest.requireActual('../lib');
+vi.mock('../lib', async () => {
+  const originalModule = (await vi.importActual('../lib'));
   return {
     ...originalModule,
-    fetchStats: jest.fn(),
-    fetchMeteringStats: jest.fn(),
-    fetchAvailableIndices: jest.fn(),
+    fetchStats: vi.fn(),
+    fetchMeteringStats: vi.fn(),
+    fetchAvailableIndices: vi.fn(),
   };
 });
 
@@ -47,7 +50,7 @@ describe('getIndexStatsRoute route', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     server = serverMock.create();
     logger = loggerMock.create();
@@ -66,7 +69,7 @@ describe('getIndexStatsRoute route', () => {
         uuid: 'jRlr6H_jSAysOLZ6KynoCQ',
       },
     };
-    (fetchStats as jest.Mock).mockResolvedValue({
+    (fetchStats as Mock).mockResolvedValue({
       indices: mockStatsGreenIndex,
     });
 
@@ -90,7 +93,7 @@ describe('getIndexStatsRoute route', () => {
         uuid: 'we0vNWm2Q6iz6uHubyHS6Q',
       },
     };
-    (fetchStats as jest.Mock).mockResolvedValue({
+    (fetchStats as Mock).mockResolvedValue({
       indices: mockStatsYellowIndex,
     });
 
@@ -101,7 +104,7 @@ describe('getIndexStatsRoute route', () => {
 
   test('Handles error', async () => {
     const errorMessage = 'Error!';
-    (fetchStats as jest.Mock).mockRejectedValue({ message: errorMessage });
+    (fetchStats as Mock).mockRejectedValue({ message: errorMessage });
 
     const response = await server.inject(req, requestContextMock.convertContext(context));
     expect(response.status).toEqual(500);
@@ -120,7 +123,7 @@ describe('getIndexStatsRoute route', () => {
       },
     });
 
-    (fetchStats as jest.Mock).mockResolvedValue({
+    (fetchStats as Mock).mockResolvedValue({
       indices: mockMeteringStatsIndex,
     });
 
@@ -151,8 +154,8 @@ describe('getIndexStatsRoute route', () => {
         size_in_bytes: null,
       },
     };
-    (fetchMeteringStats as jest.Mock).mockResolvedValue(mockMeteringStatsIndex);
-    (fetchAvailableIndices as jest.Mock).mockResolvedValue(['my-index-000001']);
+    (fetchMeteringStats as Mock).mockResolvedValue(mockMeteringStatsIndex);
+    (fetchAvailableIndices as Mock).mockResolvedValue(['my-index-000001']);
 
     const response = await server.inject(request, requestContextMock.convertContext(context));
     expect(response.status).toEqual(200);
@@ -174,8 +177,8 @@ describe('getIndexStatsRoute route', () => {
     });
 
     const mockIndices = {};
-    (fetchMeteringStats as jest.Mock).mockResolvedValue({ indices: undefined });
-    (fetchAvailableIndices as jest.Mock).mockResolvedValue({
+    (fetchMeteringStats as Mock).mockResolvedValue({ indices: undefined });
+    (fetchAvailableIndices as Mock).mockResolvedValue({
       aggregations: undefined,
     });
 
@@ -202,7 +205,7 @@ describe('getIndexStatsRoute route', () => {
       },
     });
 
-    (fetchMeteringStats as jest.Mock).mockRejectedValue({ statusCode: 404 });
+    (fetchMeteringStats as Mock).mockRejectedValue({ statusCode: 404 });
 
     const response = await server.inject(request, requestContextMock.convertContext(context));
     expect(response.status).toEqual(200);
@@ -228,8 +231,8 @@ describe('getIndexStatsRoute route', () => {
     });
 
     const mockIndices = {};
-    (fetchMeteringStats as jest.Mock).mockResolvedValue(mockMeteringStatsIndex);
-    (fetchAvailableIndices as jest.Mock).mockResolvedValue([]);
+    (fetchMeteringStats as Mock).mockResolvedValue(mockMeteringStatsIndex);
+    (fetchAvailableIndices as Mock).mockResolvedValue([]);
 
     const response = await server.inject(request, requestContextMock.convertContext(context));
     expect(response.status).toEqual(200);

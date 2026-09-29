@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { of } from 'rxjs';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -13,14 +16,17 @@ import { useOpenLensForAttach } from './use_open_lens_for_attach';
 import { PENDING_LENS_ATTACH_STORAGE_ID } from './constants';
 import type { FoundSavedObject } from '../../common/saved_object/types';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks');
-jest.mock('react-router-dom', () => ({
-  useLocation: () => ({ pathname: '/cases/case-1', search: '?tab=activity' }),
-}));
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/hooks');
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useLocation: () => ({ pathname: '/cases/case-1', search: '?tab=activity' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mock;
-const useIsMainApplicationMock = useIsMainApplication as jest.Mock;
+const useKibanaMock = useKibana as Mock;
+const useIsMainApplicationMock = useIsMainApplication as Mock;
 
 const buildSO = (overrides: Partial<FoundSavedObject> = {}): FoundSavedObject => ({
   id: 'lens-1',
@@ -30,17 +36,17 @@ const buildSO = (overrides: Partial<FoundSavedObject> = {}): FoundSavedObject =>
 });
 
 describe('useOpenLensForAttach', () => {
-  const navigateToEditor = jest.fn().mockResolvedValue(undefined);
-  const storageSet = jest.fn();
+  const navigateToEditor = vi.fn().mockResolvedValue(undefined);
+  const storageSet = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useIsMainApplicationMock.mockReturnValue(true);
     useKibanaMock.mockReturnValue({
       services: {
         application: { currentAppId$: of('securitySolutionUI') },
         embeddable: { getStateTransfer: () => ({ navigateToEditor }) },
-        storage: { set: storageSet, get: jest.fn(), remove: jest.fn() },
+        storage: { set: storageSet, get: vi.fn(), remove: vi.fn() },
       },
     });
   });

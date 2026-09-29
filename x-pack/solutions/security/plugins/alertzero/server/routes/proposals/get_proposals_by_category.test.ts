@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RouteDependencies } from '../register_routes';
@@ -12,10 +14,10 @@ import { createRouteContextMock } from '../route_context.mock';
 import { registerGetProposalsByCategoryRoute } from './get_proposals_by_category';
 
 const makeDeps = (conversationProposalsService: unknown) => {
-  const addVersion = jest.fn();
+  const addVersion = vi.fn();
   const router = {
     versioned: {
-      get: jest.fn().mockReturnValue({ addVersion }),
+      get: vi.fn().mockReturnValue({ addVersion }),
     },
   };
   registerGetProposalsByCategoryRoute({
@@ -42,7 +44,7 @@ const makeDeps = (conversationProposalsService: unknown) => {
 
 describe('registerGetProposalsByCategoryRoute', () => {
   it('returns 404 when the per-space setting is off', async () => {
-    const listByCategory = jest.fn();
+    const listByCategory = vi.fn();
     const { handler } = makeDeps({ listByCategory });
     const response = httpServerMock.createResponseFactory();
 
@@ -60,7 +62,7 @@ describe('registerGetProposalsByCategoryRoute', () => {
   });
 
   it('delegates to listByCategory with the correct category, size, from, and spaceId', async () => {
-    const listByCategory = jest.fn().mockResolvedValue({ proposals: [], total: 0 });
+    const listByCategory = vi.fn().mockResolvedValue({ proposals: [], total: 0 });
     const { handler } = makeDeps({ listByCategory });
     const response = httpServerMock.createResponseFactory();
 
@@ -82,13 +84,13 @@ describe('registerGetProposalsByCategoryRoute', () => {
   });
 
   it('accepts size=0, so a collapsed accordion can read the total without the rows', () => {
-    const { validateQuery } = makeDeps({ listByCategory: jest.fn() });
+    const { validateQuery } = makeDeps({ listByCategory: vi.fn() });
 
     expect(validateQuery({ size: '0', from: '0' })).toEqual({ value: { size: 0, from: 0 } });
   });
 
   it('returns the group total on a size=0 page', async () => {
-    const listByCategory = jest.fn().mockResolvedValue({ proposals: [], total: 17 });
+    const listByCategory = vi.fn().mockResolvedValue({ proposals: [], total: 17 });
     const { handler } = makeDeps({ listByCategory });
     const response = httpServerMock.createResponseFactory();
 
@@ -105,14 +107,14 @@ describe('registerGetProposalsByCategoryRoute', () => {
   });
 
   it('rejects a negative size', () => {
-    const { validateQuery } = makeDeps({ listByCategory: jest.fn() });
+    const { validateQuery } = makeDeps({ listByCategory: vi.fn() });
 
     expect(validateQuery({ size: '-1', from: '0' })).toEqual({ error: expect.any(String) });
   });
 
   it('returns 500 when listByCategory throws', async () => {
     const { handler } = makeDeps({
-      listByCategory: jest.fn().mockRejectedValue(new Error('ES down')),
+      listByCategory: vi.fn().mockRejectedValue(new Error('ES down')),
     });
     const response = httpServerMock.createResponseFactory();
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import type { AggName } from '../../../../../../common/types/aggregations';
@@ -15,7 +17,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 describe('Transform: Aggregation <PopoverForm />', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Minimal initialization', () => {
@@ -42,7 +44,7 @@ describe('Transform: Aggregation <PopoverForm />', () => {
   });
 
   test('preserves the field for unsupported aggs', async () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const { getByTestId } = render(
       <I18nProvider>
         <PopoverForm

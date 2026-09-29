@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createElement, Fragment, memo, forwardRef } from 'react';
 import { parseDeclarativeChildren } from './parsing';
 import { createDeclarativeComponent } from './factory';
@@ -292,7 +294,7 @@ describe('parseDeclarativeChildren', () => {
 
   describe('duplicate explicit ID handling', () => {
     it('should warn and drop when two elements have the same explicit `id`.', () => {
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const children = [
         createElement(ButtonColumn, { key: '1', id: 'save', label: 'Save' } as any),
@@ -308,7 +310,7 @@ describe('parseDeclarativeChildren', () => {
     });
 
     it('should warn and drop duplicate explicit IDs within the same part type.', () => {
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const children = [
         createElement(NameColumn, { key: '1', id: 'col-a', label: 'First' } as any),
@@ -430,7 +432,7 @@ describe('parseDeclarativeChildren', () => {
     });
 
     it('should still enforce duplicate detection across fragments.', () => {
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const children = [
         createElement(NameColumn, { key: '1', id: 'same', label: 'First' } as any),

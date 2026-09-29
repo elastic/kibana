@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
@@ -18,27 +20,42 @@ import { registerRoutes } from './routes/register_routes';
 import { ensureAgentSafe, registerAgentType } from './agent';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 
-jest.mock('./managed_workflows/register_owner', () => ({
-  registerOwner: jest.fn(),
-}));
+vi.mock('./managed_workflows/register_owner', () => {
+      const mocked = {
+      registerOwner: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./inference_features', () => ({
-  registerAlertZeroInferenceFeatures: jest.fn(),
-}));
+vi.mock('./inference_features', () => {
+      const mocked = {
+      registerAlertZeroInferenceFeatures: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./managed_workflows/initialize_managed_workflows', () => ({
-  initializeManagedWorkflows: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./managed_workflows/initialize_managed_workflows', () => {
+      const mocked = {
+      initializeManagedWorkflows: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./agent', () => ({
-  agentType: { id: 'mock-alertzero-type', baseConfiguration: {} },
-  ensureAgentSafe: jest.fn().mockResolvedValue(undefined),
-  registerAgentType: jest.fn(),
-}));
+vi.mock('./agent', () => {
+      const mocked = {
+      agentType: { id: 'mock-alertzero-type', baseConfiguration: {} },
+      ensureAgentSafe: vi.fn().mockResolvedValue(undefined),
+      registerAgentType: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./routes/register_routes', () => ({
-  registerRoutes: jest.fn(),
-}));
+vi.mock('./routes/register_routes', () => {
+      const mocked = {
+      registerRoutes: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createConfig = (overrides: Partial<AlertZeroConfig> = {}): AlertZeroConfig => ({
   enabled: false,
@@ -55,7 +72,7 @@ const createContext = (config: AlertZeroConfig) => {
 
 describe('AlertZeroPlugin feature-flag gating', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when xpack.alertzero.enabled is false', () => {
@@ -65,8 +82,8 @@ describe('AlertZeroPlugin feature-flag gating', () => {
     it('does not register managed-workflow ownership, features, inference tiers, or HTTP routes', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: false })));
       const coreSetup = coreMock.createSetup();
-      const features = { registerKibanaFeature: jest.fn() };
-      const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
+      const features = { registerKibanaFeature: vi.fn() };
+      const workflowsExtensions = { registerManagedWorkflowOwner: vi.fn() };
 
       const result = plugin.setup(
         coreSetup as never,
@@ -95,8 +112,8 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       const contract = plugin.setup(
         coreMock.createSetup() as never,
         {
-          features: { registerKibanaFeature: jest.fn() },
-          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          features: { registerKibanaFeature: vi.fn() },
+          workflowsExtensions: { registerManagedWorkflowOwner: vi.fn() },
           workflowsManagement: undefined,
         } as never
       );
@@ -110,7 +127,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
 
       plugin.start(coreStart, {
         spaces: undefined,
-        workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
+        workflowsExtensions: { initManagedWorkflowsClient: vi.fn() },
       } as never);
 
       expect(initializeManagedWorkflows).not.toHaveBeenCalled();
@@ -122,8 +139,8 @@ describe('AlertZeroPlugin feature-flag gating', () => {
     it('registers ownership, feature privileges, and routes during setup', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const coreSetup = coreMock.createSetup();
-      const features = { registerKibanaFeature: jest.fn() };
-      const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
+      const features = { registerKibanaFeature: vi.fn() };
+      const workflowsExtensions = { registerManagedWorkflowOwner: vi.fn() };
 
       const result = plugin.setup(
         coreSetup as never,
@@ -132,8 +149,8 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           workflowsExtensions,
           workflowsManagement: { management: {} },
           agentBuilder: {
-            tools: { register: jest.fn() },
-            attachments: { registerType: jest.fn() },
+            tools: { register: vi.fn() },
+            attachments: { registerType: vi.fn() },
           },
         } as never
       );
@@ -168,12 +185,12 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       plugin.setup(
         coreSetup as never,
         {
-          features: { registerKibanaFeature: jest.fn() },
-          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          features: { registerKibanaFeature: vi.fn() },
+          workflowsExtensions: { registerManagedWorkflowOwner: vi.fn() },
           workflowsManagement: { management: {} },
           agentBuilder: {
-            tools: { register: jest.fn() },
-            attachments: { registerType: jest.fn() },
+            tools: { register: vi.fn() },
+            attachments: { registerType: vi.fn() },
           },
         } as never
       );
@@ -191,12 +208,12 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       const contract = plugin.setup(
         coreMock.createSetup() as never,
         {
-          features: { registerKibanaFeature: jest.fn() },
-          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          features: { registerKibanaFeature: vi.fn() },
+          workflowsExtensions: { registerManagedWorkflowOwner: vi.fn() },
           workflowsManagement: { management: {} },
           agentBuilder: {
-            tools: { register: jest.fn() },
-            attachments: { registerType: jest.fn() },
+            tools: { register: vi.fn() },
+            attachments: { registerType: vi.fn() },
           },
         } as never
       );
@@ -207,12 +224,12 @@ describe('AlertZeroPlugin feature-flag gating', () => {
     it('registers the AlertZero thin agent type when Agent Builder is available at setup', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const coreSetup = coreMock.createSetup();
-      const features = { registerKibanaFeature: jest.fn() };
-      const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
+      const features = { registerKibanaFeature: vi.fn() };
+      const workflowsExtensions = { registerManagedWorkflowOwner: vi.fn() };
       const agentBuilder = {
-        agents: { registerType: jest.fn() },
-        tools: { register: jest.fn() },
-        attachments: { registerType: jest.fn() },
+        agents: { registerType: vi.fn() },
+        tools: { register: vi.fn() },
+        attachments: { registerType: vi.fn() },
       };
 
       plugin.setup(
@@ -231,17 +248,17 @@ describe('AlertZeroPlugin feature-flag gating', () => {
 
     it('registers the inference tiers with the optional searchInferenceEndpoints setup contract', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
-      const searchInferenceEndpoints = { features: { register: jest.fn() } };
+      const searchInferenceEndpoints = { features: { register: vi.fn() } };
 
       plugin.setup(
         coreMock.createSetup() as never,
         {
-          features: { registerKibanaFeature: jest.fn() },
-          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          features: { registerKibanaFeature: vi.fn() },
+          workflowsExtensions: { registerManagedWorkflowOwner: vi.fn() },
           workflowsManagement: { management: {} },
           agentBuilder: {
-            tools: { register: jest.fn() },
-            attachments: { registerType: jest.fn() },
+            tools: { register: vi.fn() },
+            attachments: { registerType: vi.fn() },
           },
           searchInferenceEndpoints,
         } as never
@@ -256,14 +273,14 @@ describe('AlertZeroPlugin feature-flag gating', () => {
     it('installs managed worker workflows during start', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const coreStart = coreMock.createStart();
-      const workflowsExtensions = { initManagedWorkflowsClient: jest.fn() };
+      const workflowsExtensions = { initManagedWorkflowsClient: vi.fn() };
 
       plugin.start(coreStart, {
         spaces: undefined,
         workflowsExtensions,
-        proposals: { getProposalsService: jest.fn().mockReturnValue({}) },
+        proposals: { getProposalsService: vi.fn().mockReturnValue({}) },
         agenticInvestigations: {
-          getImpactClient: jest.fn(),
+          getImpactClient: vi.fn(),
         },
         inference: {},
       } as never);
@@ -278,15 +295,15 @@ describe('AlertZeroPlugin feature-flag gating', () => {
     it('ensures the thin agent in the default space', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const coreStart = coreMock.createStart();
-      const agentBuilder = { agents: { ensure: jest.fn() } };
+      const agentBuilder = { agents: { ensure: vi.fn() } };
 
       plugin.start(coreStart, {
         spaces: undefined,
-        workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
+        workflowsExtensions: { initManagedWorkflowsClient: vi.fn() },
         agentBuilder,
-        proposals: { getProposalsService: jest.fn().mockReturnValue({}) },
+        proposals: { getProposalsService: vi.fn().mockReturnValue({}) },
         agenticInvestigations: {
-          getImpactClient: jest.fn(),
+          getImpactClient: vi.fn(),
         },
         inference: {},
       } as never);

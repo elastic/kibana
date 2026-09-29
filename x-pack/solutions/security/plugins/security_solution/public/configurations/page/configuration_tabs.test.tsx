@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
@@ -14,18 +17,18 @@ import { TestProviders } from '../../common/mock';
 import { ConfigurationTabs } from '../constants';
 import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../agent_builder/hooks/use_agent_builder_availability');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../agent_builder/hooks/use_agent_builder_availability');
 
-const mockNavigateTo = jest.fn();
+const mockNavigateTo = vi.fn();
 
 describe('ConfigurationsTabs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useNavigation as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useNavigation as Mock).mockReturnValue({
       navigateTo: mockNavigateTo,
     });
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: false,
     });
   });
@@ -45,7 +48,7 @@ describe('ConfigurationsTabs', () => {
   });
 
   it('does not render AI Settings tab when isAgentChatExperienceEnabled is true', () => {
-    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+    (useAgentBuilderAvailability as Mock).mockReturnValue({
       isAgentChatExperienceEnabled: true,
     });
 

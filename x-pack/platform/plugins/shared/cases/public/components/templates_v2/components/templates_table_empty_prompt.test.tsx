@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
@@ -13,12 +15,12 @@ import { TemplatesTableEmptyPrompt } from './templates_table_empty_prompt';
 import { renderWithTestingProviders } from '../../../common/mock';
 
 describe('TemplatesTableEmptyPrompt', () => {
-  const onClearFilters = jest.fn();
-  const onCreateTemplate = jest.fn();
+  const onClearFilters = vi.fn();
+  const onCreateTemplate = vi.fn();
   const createTemplateUrl = '/create-template';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when hasFilters is false (no templates exist)', () => {

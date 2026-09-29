@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -14,13 +17,16 @@ import { ConnectorAuthorizationError } from '@kbn/connector-specs';
 import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
 import { requestOAuthRefreshToken } from './request_oauth_refresh_token';
 
-jest.mock('./request_oauth_refresh_token', () => ({
-  requestOAuthRefreshToken: jest.fn(),
-}));
+vi.mock('./request_oauth_refresh_token', () => {
+      const mocked = {
+      requestOAuthRefreshToken: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const NOW = new Date('2024-01-15T12:00:00.000Z');
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const configurationUtilities = actionsConfigMock.create();
 const connectorTokenClient = connectorTokenClientMock.create();
 
@@ -95,7 +101,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
   });
   beforeEach(() => {
     clock.reset();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   afterAll(() => clock.restore());
 
@@ -209,7 +215,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestOAuthRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
 
       const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
 
@@ -221,7 +227,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestOAuthRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
 
       await getOAuthAuthorizationCodeAccessToken({ ...baseOpts, scope: 'openid profile' });
 
@@ -245,7 +251,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestOAuthRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
 
       await getOAuthAuthorizationCodeAccessToken({
         ...baseOpts,
@@ -273,7 +279,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestOAuthRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
 
       await getOAuthAuthorizationCodeAccessToken({
         ...baseOpts,
@@ -298,7 +304,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestOAuthRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
 
       await getOAuthAuthorizationCodeAccessToken(baseOpts);
 
@@ -317,7 +323,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestOAuthRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
 
       const tokenResponseOptions = {
         accessTokenPath: 'authed_user.access_token',
@@ -349,7 +355,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce({
+      (requestOAuthRefreshToken as Mock).mockResolvedValueOnce({
         ...refreshResponse,
         refreshToken: undefined,
       });
@@ -368,7 +374,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: validToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestOAuthRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
 
       const result = await getOAuthAuthorizationCodeAccessToken({
         ...baseOpts,
@@ -386,7 +392,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockRejectedValueOnce(
+      (requestOAuthRefreshToken as Mock).mockRejectedValueOnce(
         new Error('token endpoint unreachable')
       );
 
@@ -403,7 +409,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockRejectedValueOnce(
+      (requestOAuthRefreshToken as Mock).mockRejectedValueOnce(
         new Error('{"error":"invalid_grant","error_description":"Token has been revoked"}')
       );
 
@@ -419,7 +425,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestOAuthRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
       connectorTokenClient.updateWithRefreshToken.mockRejectedValueOnce(
         new Error('DB write failed')
       );
@@ -487,7 +493,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredPerUserToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestOAuthRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
 
       const result = await getOAuthAuthorizationCodeAccessToken({
         ...baseOpts,
@@ -511,7 +517,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredPerUserToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestOAuthRefreshToken as Mock).mockResolvedValueOnce(refreshResponse);
 
       const tokenResponseOptions = {
         accessTokenPath: 'authed_user.access_token',

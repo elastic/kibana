@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { WORKFLOW_COMPLETION_PROVIDER_ID } from './get_completion_item_provider';
 import {
@@ -16,30 +19,30 @@ import {
 } from './intercept_monaco_yaml_provider';
 
 // Mock monaco before importing
-jest.mock('@kbn/monaco', () => {
-  const actualMonaco = jest.requireActual('@kbn/monaco');
+vi.mock('@kbn/monaco', async () => {
+  const actualMonaco = (await vi.importActual('@kbn/monaco'));
   return {
     ...actualMonaco,
     monaco: {
       ...actualMonaco.monaco,
       languages: {
         ...actualMonaco.monaco.languages,
-        registerCompletionItemProvider: jest.fn(),
+        registerCompletionItemProvider: vi.fn(),
       },
     },
   };
 });
 
 describe('interceptMonacoYamlProvider', () => {
-  let originalRegister: jest.Mock;
+  let originalRegister: Mock;
   let mockDisposable: monaco.IDisposable;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resetInterception();
-    mockDisposable = { dispose: jest.fn() };
-    originalRegister = jest.fn(() => mockDisposable);
-    (monaco.languages.registerCompletionItemProvider as jest.Mock) = originalRegister;
+    mockDisposable = { dispose: vi.fn() };
+    originalRegister = vi.fn(() => mockDisposable);
+    (monaco.languages.registerCompletionItemProvider as Mock) = originalRegister;
   });
 
   afterEach(() => {
@@ -66,7 +69,7 @@ describe('interceptMonacoYamlProvider', () => {
       const workflowProvider: monaco.languages.CompletionItemProvider & { __providerId?: string } =
         {
           __providerId: WORKFLOW_COMPLETION_PROVIDER_ID,
-          provideCompletionItems: jest.fn(),
+          provideCompletionItems: vi.fn(),
         };
 
       const result = monaco.languages.registerCompletionItemProvider(
@@ -83,7 +86,7 @@ describe('interceptMonacoYamlProvider', () => {
       interceptMonacoYamlProvider();
 
       const yamlProvider: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn(),
+        provideCompletionItems: vi.fn(),
       };
 
       const result = monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
@@ -98,7 +101,7 @@ describe('interceptMonacoYamlProvider', () => {
       interceptMonacoYamlProvider();
 
       const yamlProvider: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn(),
+        provideCompletionItems: vi.fn(),
       };
 
       const result = monaco.languages.registerCompletionItemProvider(
@@ -115,7 +118,7 @@ describe('interceptMonacoYamlProvider', () => {
       interceptMonacoYamlProvider();
 
       const yamlProvider: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn(),
+        provideCompletionItems: vi.fn(),
       };
 
       const result = monaco.languages.registerCompletionItemProvider(
@@ -132,7 +135,7 @@ describe('interceptMonacoYamlProvider', () => {
       interceptMonacoYamlProvider();
 
       const jsonProvider: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn(),
+        provideCompletionItems: vi.fn(),
       };
 
       const result = monaco.languages.registerCompletionItemProvider('json', jsonProvider);
@@ -146,10 +149,10 @@ describe('interceptMonacoYamlProvider', () => {
       interceptMonacoYamlProvider();
 
       const provider1: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn(),
+        provideCompletionItems: vi.fn(),
       };
       const provider2: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn(),
+        provideCompletionItems: vi.fn(),
       };
 
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider1);
@@ -170,10 +173,10 @@ describe('interceptMonacoYamlProvider', () => {
       interceptMonacoYamlProvider();
 
       const provider1: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn(),
+        provideCompletionItems: vi.fn(),
       };
       const provider2: monaco.languages.CompletionItemProvider = {
-        provideCompletionItems: jest.fn(),
+        provideCompletionItems: vi.fn(),
       };
 
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider1);

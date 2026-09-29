@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DocLinksStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -12,11 +14,11 @@ import { nextTick } from '@kbn/test-jest-helpers';
 import { SecurityCheckupService } from './security_checkup_service';
 import type { ConfigType } from '../config';
 
-let mockOnDismissCallback: (persist: boolean) => void = jest.fn().mockImplementation(() => {
+let mockOnDismissCallback: (persist: boolean) => void = vi.fn().mockImplementation(() => {
   throw new Error('expected callback to be replaced!');
 });
 
-jest.mock('./components', () => {
+vi.mock('./components', () => {
   return {
     insecureClusterAlertTitle: 'mock insecure cluster title',
     insecureClusterAlertText: (

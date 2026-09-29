@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ALERT_RULE_UUID, ALERT_UUID, SPACE_IDS } from '@kbn/rule-data-utils';
@@ -12,15 +14,15 @@ import { setAlertsToUntracked } from './set_alerts_to_untracked';
 let clusterClient: ElasticsearchClientMock;
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 
-const getAllAuthorizedRuleTypesFindOperationMock = jest.fn();
-const getAlertIndicesAliasMock = jest.fn();
-const bulkEnsureAuthorizedMock = jest.fn();
+const getAllAuthorizedRuleTypesFindOperationMock = vi.fn();
+const getAlertIndicesAliasMock = vi.fn();
+const bulkEnsureAuthorizedMock = vi.fn();
 
 describe('setAlertsToUntracked()', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const date = '2023-03-28T22:27:28.159Z';
-    jest.setSystemTime(new Date(date));
+    vi.setSystemTime(new Date(date));
 
     logger = loggingSystemMock.createLogger();
     clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -40,7 +42,7 @@ describe('setAlertsToUntracked()', () => {
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('should call updateByQuery on provided ruleIds', async () => {

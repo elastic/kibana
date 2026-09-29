@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   getAffectedMoonProjectsFromChangedFiles,
   getMoonChangedFiles,
@@ -22,81 +25,111 @@ const tsProjectsState: { projects: any[] } = {
   projects: [],
 };
 
-jest.mock('@kbn/dev-cli-runner', () => ({
-  run: jest.fn(),
-}));
+vi.mock('@kbn/dev-cli-runner', () => {
+      const mocked = {
+      run: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/dev-cli-errors', () => ({
-  createFailError: (message: string) => new Error(message),
-}));
+vi.mock('@kbn/dev-cli-errors', () => {
+      const mocked = {
+      createFailError: (message: string) => new Error(message),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/repo-info', () => ({
-  REPO_ROOT: '/repo',
-}));
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      REPO_ROOT: '/repo',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/moon', () => ({
-  getAffectedMoonProjectsFromChangedFiles: jest.fn(),
-  getMoonChangedFiles: jest.fn(),
-  resolveMoonAffectedBase: jest.fn(),
-  ROOT_MOON_PROJECT_ID: 'kibana',
-  summarizeAffectedMoonProjects: jest.fn(),
-  normalizeRepoRelativePath: (pathValue: string) => pathValue.replace(/\\/g, '/'),
-}));
+vi.mock('@kbn/moon', () => {
+      const mocked = {
+      getAffectedMoonProjectsFromChangedFiles: vi.fn(),
+      getMoonChangedFiles: vi.fn(),
+      resolveMoonAffectedBase: vi.fn(),
+      ROOT_MOON_PROJECT_ID: 'kibana',
+      summarizeAffectedMoonProjects: vi.fn(),
+      normalizeRepoRelativePath: (pathValue: string) => pathValue.replace(/\\/g, '/'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/dev-utils', () => {
-  const actual = jest.requireActual('@kbn/dev-utils');
+vi.mock('@kbn/dev-utils', async () => {
+  const actual = (await vi.importActual('@kbn/dev-utils'));
   return {
     ...actual,
-    countCommitsBetweenRefs: jest.fn().mockResolvedValue(3),
-    hasStagedChanges: jest.fn().mockResolvedValue(true),
+    countCommitsBetweenRefs: vi.fn().mockResolvedValue(3),
+    hasStagedChanges: vi.fn().mockResolvedValue(true),
   };
 });
 
-jest.mock('@kbn/std', () => ({
-  asyncForEachWithLimit: async (
-    items: any[],
-    _limit: number,
-    iterator: (item: any) => Promise<void>
-  ) => {
-    for (const item of items) {
-      await iterator(item);
-    }
-  },
-  asyncMapWithLimit: async (
-    items: any[],
-    _limit: number,
-    iterator: (item: any) => Promise<any>
-  ) => {
-    return await Promise.all(items.map((item) => iterator(item)));
-  },
-}));
+vi.mock('@kbn/std', () => {
+      const mocked = {
+      asyncForEachWithLimit: async (
+        items: any[],
+        _limit: number,
+        iterator: (item: any) => Promise<void>
+      ) => {
+        for (const item of items) {
+          await iterator(item);
+        }
+      },
+      asyncMapWithLimit: async (
+        items: any[],
+        _limit: number,
+        iterator: (item: any) => Promise<any>
+      ) => {
+        return await Promise.all(items.map((item) => iterator(item)));
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/ts-projects', () => ({
-  get TS_PROJECTS() {
-    return tsProjectsState.projects;
-  },
-}));
+vi.mock('@kbn/ts-projects', () => {
+      const mocked = {
+      get TS_PROJECTS() {
+        return tsProjectsState.projects;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./root_refs_config', () => ({
-  ROOT_REFS_CONFIG_PATH: '/repo/tsconfig.refs.json',
-  updateRootRefsConfig: jest.fn(),
-  cleanupRootRefsConfig: jest.fn(),
-}));
+vi.mock('./root_refs_config', () => {
+      const mocked = {
+      ROOT_REFS_CONFIG_PATH: '/repo/tsconfig.refs.json',
+      updateRootRefsConfig: vi.fn(),
+      cleanupRootRefsConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./src/archive/archive_ts_build_artifacts', () => ({
-  archiveTSBuildArtifacts: jest.fn(),
-}));
+vi.mock('./src/archive/archive_ts_build_artifacts', () => {
+      const mocked = {
+      archiveTSBuildArtifacts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./src/archive/restore_ts_build_artifacts', () => ({
-  restoreTSBuildArtifacts: jest.fn(),
-}));
+vi.mock('./src/archive/restore_ts_build_artifacts', () => {
+      const mocked = {
+      restoreTSBuildArtifacts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./src/archive/utils', () => ({
-  isCiEnvironment: jest.fn(),
-}));
+vi.mock('./src/archive/utils', () => {
+      const mocked = {
+      isCiEnvironment: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('execa', () => {
-  const mockExecaFn = jest.fn();
+vi.mock('execa', () => {
+  const mockExecaFn = vi.fn();
   return {
     __esModule: true,
     default: mockExecaFn,
@@ -104,55 +137,58 @@ jest.mock('execa', () => {
   };
 });
 
-jest.mock('fs/promises', () => ({
-  readFile: jest.fn(),
-  writeFile: jest.fn(),
-  rm: jest.fn(),
-  unlink: jest.fn(),
-}));
+vi.mock('fs/promises', () => {
+      const mocked = {
+      readFile: vi.fn(),
+      writeFile: vi.fn(),
+      rm: vi.fn(),
+      unlink: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRun = jest.requireMock('@kbn/dev-cli-runner').run as jest.Mock;
-const fsPromises = jest.requireMock('fs/promises') as {
-  readFile: jest.Mock;
-  writeFile: jest.Mock;
-  rm: jest.Mock;
-  unlink: jest.Mock;
+const mockRun = (await vi.importMock('@kbn/dev-cli-runner')).run as Mock;
+const fsPromises = (await vi.importMock('fs/promises')) as {
+  readFile: Mock;
+  writeFile: Mock;
+  rm: Mock;
+  unlink: Mock;
 };
 const mockGetAffectedMoonProjectsFromChangedFiles =
-  getAffectedMoonProjectsFromChangedFiles as unknown as jest.Mock;
-const mockGetMoonChangedFiles = getMoonChangedFiles as unknown as jest.Mock;
-const mockResolveMoonAffectedBase = resolveMoonAffectedBase as unknown as jest.Mock;
-const mockSummarizeAffectedMoonProjects = summarizeAffectedMoonProjects as unknown as jest.Mock;
-const mockCountCommitsBetweenRefs = countCommitsBetweenRefs as unknown as jest.Mock;
-const mockHasStagedChanges = hasStagedChanges as unknown as jest.Mock;
-const mockUpdateRootRefsConfig = updateRootRefsConfig as unknown as jest.Mock;
-const mockCleanupRootRefsConfig = cleanupRootRefsConfig as unknown as jest.Mock;
-const mockIsCiEnvironment = isCiEnvironment as unknown as jest.Mock;
-const mockArchiveTSBuildArtifacts = jest.requireMock('./src/archive/archive_ts_build_artifacts')
-  .archiveTSBuildArtifacts as jest.Mock;
-const mockRestoreTSBuildArtifacts = jest.requireMock('./src/archive/restore_ts_build_artifacts')
-  .restoreTSBuildArtifacts as jest.Mock;
-const mockExeca = (jest.requireMock('execa') as { __mock: { mockExecaFn: jest.Mock } }).__mock
+  getAffectedMoonProjectsFromChangedFiles as unknown as Mock;
+const mockGetMoonChangedFiles = getMoonChangedFiles as unknown as Mock;
+const mockResolveMoonAffectedBase = resolveMoonAffectedBase as unknown as Mock;
+const mockSummarizeAffectedMoonProjects = summarizeAffectedMoonProjects as unknown as Mock;
+const mockCountCommitsBetweenRefs = countCommitsBetweenRefs as unknown as Mock;
+const mockHasStagedChanges = hasStagedChanges as unknown as Mock;
+const mockUpdateRootRefsConfig = updateRootRefsConfig as unknown as Mock;
+const mockCleanupRootRefsConfig = cleanupRootRefsConfig as unknown as Mock;
+const mockIsCiEnvironment = isCiEnvironment as unknown as Mock;
+const mockArchiveTSBuildArtifacts = (await vi.importMock('./src/archive/archive_ts_build_artifacts'))
+  .archiveTSBuildArtifacts as Mock;
+const mockRestoreTSBuildArtifacts = (await vi.importMock('./src/archive/restore_ts_build_artifacts'))
+  .restoreTSBuildArtifacts as Mock;
+const mockExeca = ((await vi.importMock('execa')) as { __mock: { mockExecaFn: Mock } }).__mock
   .mockExecaFn;
 
 let contractHandler: (args: {
-  log: { info: jest.Mock; warning: jest.Mock; verbose: jest.Mock };
+  log: { info: Mock; warning: Mock; verbose: Mock };
   flagsReader: {
     boolean: (name: string) => boolean;
     string: (name: string) => string | undefined;
     path: (name: string) => string | undefined;
   };
-  procRunner: { run: jest.Mock };
+  procRunner: { run: Mock };
 }) => Promise<void>;
 
 let legacyHandler: (args: {
-  log: { info: jest.Mock; warning: jest.Mock; verbose: jest.Mock };
+  log: { info: Mock; warning: Mock; verbose: Mock };
   flagsReader: {
     boolean: (name: string) => boolean;
     string: (name: string) => string | undefined;
     path: (name: string) => string | undefined;
   };
-  procRunner: { run: jest.Mock };
+  procRunner: { run: Mock };
 }) => Promise<void>;
 
 const createProject = (overrides: Record<string, unknown> = {}) => ({
@@ -185,13 +221,13 @@ const createFlagsReader = (flags: Record<string, unknown>) => ({
 
 const createContext = (flags: Record<string, unknown>) => {
   const log = {
-    info: jest.fn(),
-    warning: jest.fn(),
-    verbose: jest.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    verbose: vi.fn(),
   };
 
   const procRunner = {
-    run: jest.fn().mockResolvedValue(undefined),
+    run: vi.fn().mockResolvedValue(undefined),
   };
 
   return {
@@ -219,7 +255,7 @@ describe('run_type_check_cli', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     tsProjectsState.projects = [];
 

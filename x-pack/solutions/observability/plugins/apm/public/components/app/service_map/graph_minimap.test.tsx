@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
@@ -13,46 +15,52 @@ import { getSeverityColor } from '../../../../common/anomaly_detection';
 import type { ServiceMapNode } from '../../../../common/service_map';
 import { MOCK_EUI_THEME, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     useEuiTheme: () => ({ euiTheme: MOCK_EUI_THEME_FOR_USE_THEME }),
   };
 });
 
-jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => ({
-    core: {
-      docLinks: {
-        links: {
-          apm: {
-            supportedServiceMaps:
-              'https://www.elastic.co/guide/en/kibana/current/service-maps.html',
-            supportedServiceMapsLegend:
-              'https://www.elastic.co/guide/en/kibana/current/service-maps.html#service-maps-legend',
+vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
+      const mocked = {
+      useApmPluginContext: () => ({
+        core: {
+          docLinks: {
+            links: {
+              apm: {
+                supportedServiceMaps:
+                  'https://www.elastic.co/guide/en/kibana/current/service-maps.html',
+                supportedServiceMapsLegend:
+                  'https://www.elastic.co/guide/en/kibana/current/service-maps.html#service-maps-legend',
+              },
+            },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_keyboard_navigation', () => ({
-  useKeyboardNavigation: jest.fn(() => ({
-    screenReaderAnnouncement: '',
-    setScreenReaderAnnouncement: jest.fn(),
-  })),
-}));
+vi.mock('./use_keyboard_navigation', () => {
+      const mocked = {
+      useKeyboardNavigation: vi.fn(() => ({
+        screenReaderAnnouncement: '',
+        setScreenReaderAnnouncement: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_service_map_alerts_tab_href', () =>
-  jest.requireActual('./use_service_map_alerts_tab_href.test_mock')
+vi.mock('./use_service_map_alerts_tab_href', async () =>
+  (await vi.importActual('./use_service_map_alerts_tab_href.test_mock'))
 );
 
 let mockMinimapProps: Record<string, unknown> = {};
 
-jest.mock('@xyflow/react', () => {
-  const original = jest.requireActual('@xyflow/react');
+vi.mock('@xyflow/react', () => {
+  const original = require('@xyflow/react');
   return {
     ...original,
     ReactFlow: ({ children }: { children: React.ReactNode }) => (
@@ -73,44 +81,56 @@ jest.mock('@xyflow/react', () => {
         />
       );
     },
-    useNodesState: jest.fn((initialNodes: unknown) => [initialNodes, jest.fn()]),
-    useEdgesState: jest.fn((initialEdges: unknown) => [initialEdges, jest.fn()]),
-    useStore: jest.fn((selector: (state: { width: number; height: number }) => unknown) =>
+    useNodesState: vi.fn((initialNodes: unknown) => [initialNodes, vi.fn()]),
+    useEdgesState: vi.fn((initialEdges: unknown) => [initialEdges, vi.fn()]),
+    useStore: vi.fn((selector: (state: { width: number; height: number }) => unknown) =>
       selector({ width: 1200, height: 600 })
     ),
-    useReactFlow: jest.fn(() => ({
-      fitView: jest.fn(),
-      zoomIn: jest.fn(),
-      zoomOut: jest.fn(),
-      setCenter: jest.fn(),
-      getNodes: jest.fn(() => []),
-      getNodesBounds: jest.fn(() => ({ x: 0, y: 0, width: 0, height: 0 })),
+    useReactFlow: vi.fn(() => ({
+      fitView: vi.fn(),
+      zoomIn: vi.fn(),
+      zoomOut: vi.fn(),
+      setCenter: vi.fn(),
+      getNodes: vi.fn(() => []),
+      getNodesBounds: vi.fn(() => ({ x: 0, y: 0, width: 0, height: 0 })),
     })),
   };
 });
 
-jest.mock('./use_edge_highlighting', () => ({
-  useEdgeHighlighting: jest.fn(() => ({
-    applyEdgeHighlighting: jest.fn((edges: unknown) => edges),
-    colors: { primary: MOCK_EUI_THEME.colors.primary, default: '#98A2B3' },
-    markers: {},
-  })),
-}));
+vi.mock('./use_edge_highlighting', () => {
+      const mocked = {
+      useEdgeHighlighting: vi.fn(() => ({
+        applyEdgeHighlighting: vi.fn((edges: unknown) => edges),
+        colors: { primary: MOCK_EUI_THEME.colors.primary, default: '#98A2B3' },
+        markers: {},
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_reduced_motion', () => ({
-  useReducedMotion: jest.fn(() => ({
-    prefersReducedMotion: false,
-    getAnimationDuration: jest.fn((duration: number) => duration),
-  })),
-}));
+vi.mock('./use_reduced_motion', () => {
+      const mocked = {
+      useReducedMotion: vi.fn(() => ({
+        prefersReducedMotion: false,
+        getAnimationDuration: vi.fn((duration: number) => duration),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./popover', () => ({
-  MapPopover: () => <div data-testid="service-map-popover" />,
-}));
+vi.mock('./popover', () => {
+      const mocked = {
+      MapPopover: () => <div data-testid="service-map-popover" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../shared/service_map/layout', () => ({
-  applyServiceMapLayout: jest.fn((nodes: unknown) => nodes),
-}));
+vi.mock('../../shared/service_map/layout', () => {
+      const mocked = {
+      applyServiceMapLayout: vi.fn((nodes: unknown) => nodes),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockServiceNode = (id: string, label: string): ServiceMapNode => ({
   id,
@@ -149,7 +169,7 @@ const defaultProps = {
 
 describe('ServiceMapGraph - MiniMap', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockMinimapProps = {};
   });
 

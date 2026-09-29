@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { LegendLocationSettingsProps } from './legend_location_settings';
 import { LegendLocationSettings } from './legend_location_settings';
@@ -16,15 +18,15 @@ describe('Legend Location Settings', () => {
   let defaultProps: LegendLocationSettingsProps;
   beforeEach(() => {
     defaultProps = {
-      onLocationChange: jest.fn(),
-      onPositionChange: jest.fn(),
-      onAlignmentChange: jest.fn(),
+      onLocationChange: vi.fn(),
+      onPositionChange: vi.fn(),
+      onAlignmentChange: vi.fn(),
       location: 'outside',
     };
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderLegendLocationSettings = (

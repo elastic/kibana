@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { ElasticsearchAssetType } from '../../../../../types';
@@ -13,12 +16,15 @@ import { verifyEsAssetsExist } from '../../verify_es_assets';
 
 import { stepVerifyAssets } from './step_verify_assets';
 
-jest.mock('../../verify_es_assets');
-jest.mock('../../utils', () => ({
-  withPackageSpan: (_label: string, fn: () => unknown) => fn(),
-}));
+vi.mock('../../verify_es_assets');
+vi.mock('../../utils', () => {
+      const mocked = {
+      withPackageSpan: (_label: string, fn: () => unknown) => fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockVerifyEsAssetsExist = verifyEsAssetsExist as jest.MockedFunction<
+const mockVerifyEsAssetsExist = verifyEsAssetsExist as MockedFunction<
   typeof verifyEsAssetsExist
 >;
 
@@ -32,7 +38,7 @@ describe('stepVerifyAssets', () => {
   ];
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('completes without throwing when all assets are present', async () => {

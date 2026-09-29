@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -21,11 +24,11 @@ import type { CaseUI, AttachmentUIV2 } from '../../../../../common/ui/types';
 import { SavedObjectAttachmentsTable } from './saved_object_attachments_table';
 import { useSavedObjectInAppUrls } from './use_saved_object_in_app_url';
 
-jest.mock('./use_saved_object_in_app_url');
-jest.mock('../../../../containers/use_delete_comment');
+vi.mock('./use_saved_object_in_app_url');
+vi.mock('../../../../containers/use_delete_comment');
 
-const useSavedObjectInAppUrlsMock = useSavedObjectInAppUrls as jest.Mock;
-const useDeleteCommentMock = useDeleteComment as jest.Mock;
+const useSavedObjectInAppUrlsMock = useSavedObjectInAppUrls as Mock;
+const useDeleteCommentMock = useDeleteComment as Mock;
 
 const soAttachment = (
   id: string,
@@ -49,10 +52,10 @@ const soAttachment = (
 const caseWith = (comments: AttachmentUIV2[]): CaseUI => ({ ...basicCase, comments } as CaseUI);
 
 describe('SavedObjectAttachmentsTable', () => {
-  const mutate = jest.fn();
+  const mutate = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useSavedObjectInAppUrlsMock.mockReturnValue({});
     useDeleteCommentMock.mockReturnValue({ isLoading: false, mutate });
   });

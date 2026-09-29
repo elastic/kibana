@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { useListArtifact } from './use_list_artifact';
 import type { HttpSetup } from '@kbn/core/public';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
@@ -30,7 +33,7 @@ describe('List artifact hook', () => {
       }
     | undefined;
 
-  let fakeHttpServices: jest.Mocked<HttpSetup>;
+  let fakeHttpServices: Mocked<HttpSetup>;
   let instance: ExceptionsListApiClient;
 
   beforeEach(() => {
@@ -54,7 +57,7 @@ describe('List artifact hook', () => {
       policies: ['policy-1', 'all'],
     };
     searchableFields = ['field-1', 'field-1.field-2', 'field-2'];
-    const onSuccessMock: jest.Mock = jest.fn();
+    const onSuccessMock: Mock = vi.fn();
 
     result = await renderQuery(
       () =>
@@ -118,7 +121,7 @@ describe('List artifact hook', () => {
     };
     fakeHttpServices.get.mockRejectedValue(error);
 
-    const onErrorMock: jest.Mock = jest.fn();
+    const onErrorMock: Mock = vi.fn();
 
     result = await renderQuery(
       () =>

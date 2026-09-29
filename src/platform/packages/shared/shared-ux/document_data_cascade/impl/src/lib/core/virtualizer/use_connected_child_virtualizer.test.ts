@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act } from 'react-dom/test-utils';
 import { renderHook } from '@testing-library/react';
 import type { Row } from '@tanstack/react-table';
@@ -54,13 +56,13 @@ const createMockRootVirtualizer = (): CascadeVirtualizerReturnValue => {
   } as unknown as CascadeVirtualizerReturnValue;
 };
 
-const flushRaf = () => jest.advanceTimersByTime(16);
+const flushRaf = () => vi.advanceTimersByTime(16);
 
 describe('useConnectedChildVirtualizer', () => {
   let controller: ChildVirtualizerController;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const mockRoot = createMockRootVirtualizer();
     controller = createChildVirtualizerController({
       getRootVirtualizer: () => mockRoot,
@@ -71,7 +73,7 @@ describe('useConnectedChildVirtualizer', () => {
 
   afterEach(() => {
     controller.destroy();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns a virtualizer, a handle, and isActive', () => {
@@ -136,7 +138,7 @@ describe('useConnectedChildVirtualizer', () => {
   });
 
   it('uses the scroll margin from the controller config', () => {
-    const spy = jest.spyOn(controller, 'getChildConfig');
+    const spy = vi.spyOn(controller, 'getChildConfig');
 
     renderHook(() =>
       useConnectedChildVirtualizer({

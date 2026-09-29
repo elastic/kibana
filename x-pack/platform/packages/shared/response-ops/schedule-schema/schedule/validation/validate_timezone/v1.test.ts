@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { validateTimezone } from './v1';
 
 describe('validateTimezone', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('validates time zone correctly', () => {
     expect(validateTimezone('America/New_York')).toBeUndefined();

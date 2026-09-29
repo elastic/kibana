@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type {
@@ -15,7 +17,7 @@ import { InputText } from './input_text';
 import { I18nProvider } from '@kbn/i18n-react';
 
 describe('InputText', () => {
-  const mockResumeGraph = jest.fn();
+  const mockResumeGraph = vi.fn();
   const defaultInterruptValue: InputTextInterruptValue = {
     type: 'INPUT_TEXT',
     threadId: 'test-thread-id',
@@ -36,7 +38,7 @@ describe('InputText', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with interrupt description', () => {

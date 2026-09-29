@@ -5,23 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TimelineModalHeader } from '.';
 import { TestProviders } from '../../../../common/mock';
 
-jest.mock('./super_timeline_modal_header', () => ({
-  SuperTimelineModalHeader: () => <div data-test-subj="super-timeline-modal-header" />,
-}));
-jest.mock('./regular_timeline_modal_header', () => ({
-  RegularTimelineModalHeader: () => <div data-test-subj="regular-timeline-modal-header" />,
-}));
+vi.mock('./super_timeline_modal_header', () => {
+      const mocked = {
+      SuperTimelineModalHeader: () => <div data-test-subj="super-timeline-modal-header" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./regular_timeline_modal_header', () => {
+      const mocked = {
+      RegularTimelineModalHeader: () => <div data-test-subj="regular-timeline-modal-header" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockRef = { current: null };
 
-const mockGetState = jest.fn().mockReturnValue({});
-jest.mock('react-redux-v7', () => {
-  const actual = jest.requireActual('react-redux-v7');
+const mockGetState = vi.fn().mockReturnValue({});
+vi.mock('react-redux-v7', () => {
+  const actual = require('react-redux-v7');
   return {
     ...actual,
     useSelector: (selector: (s: unknown) => unknown) =>

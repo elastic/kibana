@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render as rtlRender, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,9 +15,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
 import { GeneratedOnLabel } from './generated_on_label';
 
-jest.mock('../../../../common/lib/kibana');
-const mockUseDateFormat = useDateFormat as jest.Mock;
-const mockUseTimeZone = useTimeZone as jest.Mock;
+vi.mock('../../../../common/lib/kibana');
+const mockUseDateFormat = useDateFormat as Mock;
+const mockUseTimeZone = useTimeZone as Mock;
 
 const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
 

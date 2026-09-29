@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, within } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -19,11 +21,11 @@ import { createRollupJobsStore } from '../../crud_app/store';
 import { JobList } from '../../crud_app/sections';
 import { coreMock } from '@kbn/core/public/mocks';
 
-jest.mock('../../kibana_services', () => {
-  const services = jest.requireActual('../../kibana_services');
+vi.mock('../../kibana_services', async () => {
+  const services = (await vi.importActual('../../kibana_services'));
   return {
     ...services,
-    getUiStatsReporter: jest.fn(() => () => {}),
+    getUiStatsReporter: vi.fn(() => () => {}),
   };
 });
 
@@ -49,7 +51,7 @@ describe('Smoke test cloning an existing rollup job from job list', () => {
   };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
 

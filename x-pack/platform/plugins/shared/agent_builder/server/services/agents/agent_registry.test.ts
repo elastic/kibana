@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   httpServerMock,
   savedObjectsServiceMock,
@@ -23,7 +26,7 @@ const createTypeRegistryStub = (types: AgentTypeDefinition[] = []): AgentTypeReg
     typeMap.set(chatAgentTypeId, { id: chatAgentTypeId, baseConfiguration: {} });
   }
   return {
-    register: jest.fn(),
+    register: vi.fn(),
     has: (typeId) => typeMap.has(typeId),
     get: (typeId) => typeMap.get(typeId),
     list: () => [...typeMap.values()],
@@ -42,26 +45,26 @@ const createBuiltinProviderMock = (
 
 const createPersistedProviderMock = (
   agents: InternalAgentDefinition[] = []
-): jest.Mocked<WritableAgentProvider> => ({
+): Mocked<WritableAgentProvider> => ({
   id: 'persisted',
   readonly: false,
-  has: jest.fn(async (agentId: string) => agents.some((agent) => agent.id === agentId)),
-  get: jest.fn(async (agentId: string) => agents.find((agent) => agent.id === agentId)!),
-  list: jest.fn(async (_opts: AgentListOptions) => agents),
-  getIds: jest.fn(async (_opts: AgentListOptions) => agents.map((agent) => agent.id)),
-  create: jest.fn(async (createRequest) =>
+  has: vi.fn(async (agentId: string) => agents.some((agent) => agent.id === agentId)),
+  get: vi.fn(async (agentId: string) => agents.find((agent) => agent.id === agentId)!),
+  list: vi.fn(async (_opts: AgentListOptions) => agents),
+  getIds: vi.fn(async (_opts: AgentListOptions) => agents.map((agent) => agent.id)),
+  create: vi.fn(async (createRequest) =>
     createMockedInternalAgent({ id: createRequest.id, type: createRequest.type ?? chatAgentTypeId })
   ),
-  update: jest.fn(async (agentId, update) => {
+  update: vi.fn(async (agentId, update) => {
     const current = agents.find((agent) => agent.id === agentId)!;
     return {
       ...current,
       configuration: { ...current.configuration, ...update.configuration },
     };
   }),
-  delete: jest.fn(),
-  getAccessControl: jest.fn(),
-  updateAccessControl: jest.fn(),
+  delete: vi.fn(),
+  getAccessControl: vi.fn(),
+  updateAccessControl: vi.fn(),
 });
 
 const createRegistry = ({
@@ -164,7 +167,7 @@ describe('AgentRegistry', () => {
       const unavailable = createMockedInternalAgent({
         id: 'unavailable-agent',
         readonly: false,
-        isAvailable: jest.fn(async () => ({
+        isAvailable: vi.fn(async () => ({
           status: 'unavailable' as const,
           reason: 'feature off',
         })) as any,

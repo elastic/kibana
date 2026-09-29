@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import AlertsStatusFilter from './alerts_status_filter';
 
-const renderFilter = (onChange = jest.fn()) =>
+const renderFilter = (onChange = vi.fn()) =>
   render(
     <I18nProvider>
       <AlertsStatusFilter status="all" onChange={onChange} />
@@ -21,7 +23,7 @@ const renderFilter = (onChange = jest.fn()) =>
 describe('AlertsStatusFilter', () => {
   it('notifies when the selected alert status changes', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderFilter(onChange);
 
     await user.click(screen.getByTestId('hostsView-alert-status-filter-active-button'));

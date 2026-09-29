@@ -7,20 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
 describe('useTelemetry', () => {
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
   });
 
   it('should delegate reportEvent calls to the telemetry service', async () => {
-    const mockReportEvent = jest.fn();
+    const mockReportEvent = vi.fn();
     const { useKibana } = await import('./use_kibana');
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: { workflowsManagement: { telemetry: { reportEvent: mockReportEvent } } },
     });
 
@@ -38,7 +41,7 @@ describe('useTelemetry', () => {
 
   it('should return a no-op instance that does not throw when telemetry is unavailable', async () => {
     const { useKibana } = await import('./use_kibana');
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: { workflowsManagement: undefined },
     });
 

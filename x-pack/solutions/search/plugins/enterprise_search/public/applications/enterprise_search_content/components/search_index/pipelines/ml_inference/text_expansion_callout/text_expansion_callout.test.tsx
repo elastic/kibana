@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockActions, setMockValues } from '../../../../../../__mocks__/kea_logic';
 
-jest.mock('./text_expansion_callout_data', () => ({
-  useTextExpansionCallOutData: jest.fn(() => ({
-    dismiss: jest.fn(),
-    isCreateButtonDisabled: false,
-    isDismissable: false,
-    isStartButtonDisabled: false,
-    show: true,
-  })),
-}));
+vi.mock('./text_expansion_callout_data', () => {
+      const mocked = {
+      useTextExpansionCallOutData: vi.fn(() => ({
+        dismiss: vi.fn(),
+        isCreateButtonDisabled: false,
+        isDismissable: false,
+        isStartButtonDisabled: false,
+        show: true,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 
@@ -35,11 +40,11 @@ const DEFAULT_VALUES = {
 
 describe('TextExpansionCallOut', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setMockValues(DEFAULT_VALUES);
     setMockActions({
-      createTextExpansionModel: jest.fn(),
-      startTextExpansionModel: jest.fn(),
+      createTextExpansionModel: vi.fn(),
+      startTextExpansionModel: vi.fn(),
     });
   });
   it('renders error panel instead of normal panel if there are some errors', () => {

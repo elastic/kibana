@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { generateSourceLink } from './get_alert_source_links';
 
 describe('getAlertSourceLinks', () => {
   const apmLocator = {
-    getRedirectUrl: jest.fn(),
+    getRedirectUrl: vi.fn(),
   } as unknown as LocatorPublic<SerializableRecord>;
 
   const prepend = (url: string) => `kibana${url}`;
@@ -24,7 +26,7 @@ describe('getAlertSourceLinks', () => {
   const serviceName = 'test-service';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Should generate correct link for host.name', () => {

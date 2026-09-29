@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useCreateTemplate } from './use_create_template';
@@ -14,12 +17,12 @@ import { useCasesToast } from '../../../common/use_cases_toast';
 import { TestProviders, createTestQueryClient } from '../../../common/mock';
 import * as i18n from '../translations';
 
-jest.mock('../api/api');
-jest.mock('../../../common/use_cases_toast');
+vi.mock('../api/api');
+vi.mock('../../../common/use_cases_toast');
 
 describe('useCreateTemplate', () => {
-  const showErrorToast = jest.fn();
-  const showSuccessToast = jest.fn();
+  const showErrorToast = vi.fn();
+  const showSuccessToast = vi.fn();
 
   const templateInput = {
     name: 'New Template',
@@ -37,12 +40,12 @@ describe('useCreateTemplate', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useCasesToast as jest.Mock).mockReturnValue({ showErrorToast, showSuccessToast });
+    vi.clearAllMocks();
+    (useCasesToast as Mock).mockReturnValue({ showErrorToast, showSuccessToast });
   });
 
   it('calls postTemplate with the template payload', async () => {
-    (postTemplate as jest.Mock).mockResolvedValue(templateResponse);
+    (postTemplate as Mock).mockResolvedValue(templateResponse);
 
     const { result } = renderHook(() => useCreateTemplate(), { wrapper: TestProviders });
 
@@ -54,9 +57,9 @@ describe('useCreateTemplate', () => {
   });
 
   it('invalidates templates query and shows success toast', async () => {
-    (postTemplate as jest.Mock).mockResolvedValue(templateResponse);
+    (postTemplate as Mock).mockResolvedValue(templateResponse);
     const queryClient = createTestQueryClient();
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useCreateTemplate(), {
       wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
@@ -74,7 +77,7 @@ describe('useCreateTemplate', () => {
   });
 
   it('does not show default success toast when disabled', async () => {
-    (postTemplate as jest.Mock).mockResolvedValue(templateResponse);
+    (postTemplate as Mock).mockResolvedValue(templateResponse);
 
     const { result } = renderHook(() => useCreateTemplate({ disableDefaultSuccessToast: true }), {
       wrapper: TestProviders,
@@ -89,8 +92,8 @@ describe('useCreateTemplate', () => {
   });
 
   it('calls the onSuccess callback with the response', async () => {
-    (postTemplate as jest.Mock).mockResolvedValue(templateResponse);
-    const onSuccess = jest.fn();
+    (postTemplate as Mock).mockResolvedValue(templateResponse);
+    const onSuccess = vi.fn();
 
     const { result } = renderHook(() => useCreateTemplate({ onSuccess }), {
       wrapper: TestProviders,
@@ -105,7 +108,7 @@ describe('useCreateTemplate', () => {
 
   it('shows an error toast when the request fails', async () => {
     const error = new Error('test error');
-    (postTemplate as jest.Mock).mockRejectedValue(error);
+    (postTemplate as Mock).mockRejectedValue(error);
 
     const { result } = renderHook(() => useCreateTemplate(), { wrapper: TestProviders });
 

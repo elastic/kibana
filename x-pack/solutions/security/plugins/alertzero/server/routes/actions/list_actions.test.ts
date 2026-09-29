@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RouteDependencies } from '../register_routes';
@@ -12,10 +14,10 @@ import { createRouteContextMock } from '../route_context.mock';
 import { registerListActionsRoute } from './list_actions';
 
 const makeDeps = (actionsService: unknown) => {
-  const addVersion = jest.fn();
+  const addVersion = vi.fn();
   const router = {
     versioned: {
-      get: jest.fn().mockReturnValue({ addVersion }),
+      get: vi.fn().mockReturnValue({ addVersion }),
     },
   };
   registerListActionsRoute({
@@ -40,7 +42,7 @@ const requestWithCategories = (categories?: string[]) =>
 
 describe('registerListActionsRoute', () => {
   it('passes categories through to the service', async () => {
-    const list = jest.fn().mockResolvedValue({ actions: [], total: 0 });
+    const list = vi.fn().mockResolvedValue({ actions: [], total: 0 });
     const { handler } = makeDeps({ list });
     const response = httpServerMock.createResponseFactory();
     await handler(
@@ -61,7 +63,7 @@ describe('registerListActionsRoute', () => {
   });
 
   it('returns the full catalog when no categories are given', async () => {
-    const list = jest.fn().mockResolvedValue({ actions: [], total: 0 });
+    const list = vi.fn().mockResolvedValue({ actions: [], total: 0 });
     const { handler } = makeDeps({ list });
     const response = httpServerMock.createResponseFactory();
     await handler(createRouteContextMock(), requestWithCategories(), response);
@@ -73,7 +75,7 @@ describe('registerListActionsRoute', () => {
   });
 
   it('maps an invalid categories param to 400 with the param message', async () => {
-    const { handler } = makeDeps({ list: jest.fn() });
+    const { handler } = makeDeps({ list: vi.fn() });
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest({
       path: '/internal/alertzero/actions',
@@ -88,7 +90,7 @@ describe('registerListActionsRoute', () => {
   });
 
   it('maps service errors to 500', async () => {
-    const list = jest.fn().mockRejectedValue(new Error('boom'));
+    const list = vi.fn().mockRejectedValue(new Error('boom'));
     const { handler } = makeDeps({ list });
     const response = httpServerMock.createResponseFactory();
     await handler(createRouteContextMock(), requestWithCategories(), response);

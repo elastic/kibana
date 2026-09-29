@@ -5,72 +5,105 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { AIConnector } from '@kbn/elastic-assistant';
 
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn(),
-}));
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/chat/use_connector_selection', () => ({
-  useConnectorSelection: jest.fn(),
-}));
+vi.mock('../../../../../hooks/chat/use_connector_selection', () => {
+      const mocked = {
+      useConnectorSelection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/chat/use_default_connector', () => ({
-  useDefaultConnector: jest.fn(),
-}));
+vi.mock('../../../../../hooks/chat/use_default_connector', () => {
+      const mocked = {
+      useDefaultConnector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_navigation', () => ({
-  useNavigation: () => ({ manageConnectorsUrl: '/manage' }),
-}));
+vi.mock('../../../../../hooks/use_navigation', () => {
+      const mocked = {
+      useNavigation: () => ({ manageConnectorsUrl: '/manage' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../hooks/use_ui_privileges', () => ({
-  useUiPrivileges: () => ({ write: true }),
-}));
+vi.mock('../../../../../hooks/use_ui_privileges', () => {
+      const mocked = {
+      useUiPrivileges: () => ({ write: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../input_actions.styles', () => ({
-  getMaxListHeight: () => 200,
-  selectorPopoverPanelStyles: undefined,
-  useSelectorListStyles: () => undefined,
-}));
+vi.mock('../input_actions.styles', () => {
+      const mocked = {
+      getMaxListHeight: () => 200,
+      selectorPopoverPanelStyles: undefined,
+      useSelectorListStyles: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../input_popover_button', () => ({
-  InputPopoverButton: ({
-    disabled,
-    children,
-    onClick,
-    'aria-label': ariaLabel,
-  }: {
-    disabled?: boolean;
-    children: React.ReactNode;
-    onClick: () => void;
-    'aria-label'?: string;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="agentBuilderConnectorSelectorButton"
-      disabled={disabled}
-      onClick={onClick}
-      aria-label={ariaLabel}
-    >
-      {children}
-    </button>
-  ),
-}));
+vi.mock('../input_popover_button', () => {
+      const mocked = {
+      InputPopoverButton: ({
+        disabled,
+        children,
+        onClick,
+        'aria-label': ariaLabel,
+      }: {
+        disabled?: boolean;
+        children: React.ReactNode;
+        onClick: () => void;
+        'aria-label'?: string;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="agentBuilderConnectorSelectorButton"
+          disabled={disabled}
+          onClick={onClick}
+          aria-label={ariaLabel}
+        >
+          {children}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../option_text', () => ({
-  OptionText: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
-}));
+vi.mock('../option_text', () => {
+      const mocked = {
+      OptionText: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./connector_icon', () => ({
-  ConnectorIcon: () => null,
-}));
+vi.mock('./connector_icon', () => {
+      const mocked = {
+      ConnectorIcon: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { useKibana } from '../../../../../hooks/use_kibana';
@@ -78,12 +111,12 @@ import { useConnectorSelection } from '../../../../../hooks/chat/use_connector_s
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { ConnectorSelector } from './connector_selector';
 
-const mockUseLoadConnectors = useLoadConnectors as jest.MockedFunction<typeof useLoadConnectors>;
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseConnectorSelection = useConnectorSelection as jest.MockedFunction<
+const mockUseLoadConnectors = useLoadConnectors as MockedFunction<typeof useLoadConnectors>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseConnectorSelection = useConnectorSelection as MockedFunction<
   typeof useConnectorSelection
 >;
-const mockUseDefaultConnector = useDefaultConnector as jest.MockedFunction<
+const mockUseDefaultConnector = useDefaultConnector as MockedFunction<
   typeof useDefaultConnector
 >;
 
@@ -137,7 +170,7 @@ const setup = ({
     return cs[0]?.id;
   });
 
-  const selectConnector = jest.fn();
+  const selectConnector = vi.fn();
 
   mockUseConnectorSelection.mockReturnValue({
     selectedConnector,
@@ -176,7 +209,7 @@ const setup = ({
 
 describe('ConnectorSelector sync effect', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('picks the initial connector when the user has no preference', () => {

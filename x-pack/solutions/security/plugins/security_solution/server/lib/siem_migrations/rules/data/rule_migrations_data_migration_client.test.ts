@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { RuleMigrationsDataMigrationClient } from './rule_migrations_data_migration_client';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -22,7 +25,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
     elasticsearchServiceMock.createCustomClusterClient() as unknown as IScopedClusterClient;
 
   const logger = loggingSystemMock.createLogger();
-  const indexNameProvider = jest.fn().mockReturnValue('.kibana-siem-rule-migrations');
+  const indexNameProvider = vi.fn().mockReturnValue('.kibana-siem-rule-migrations');
   const currentUser = {
     userName: 'testUser',
     profile_uid: 'testProfileUid',
@@ -40,7 +43,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('create', () => {
@@ -64,7 +67,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
     });
 
     test('should throw an error if an error occurs', async () => {
-      (esClient.asInternalUser.create as unknown as jest.MockedFn<IndexApi>).mockRejectedValueOnce(
+      (esClient.asInternalUser.create as unknown as MockedFunction<IndexApi>).mockRejectedValueOnce(
         new Error('Test error')
       );
 
@@ -89,7 +92,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         _id: id,
       };
 
-      (esClient.asInternalUser.get as unknown as jest.MockedFn<GetApi>).mockResolvedValueOnce(
+      (esClient.asInternalUser.get as unknown as MockedFunction<GetApi>).mockResolvedValueOnce(
         response
       );
 
@@ -108,7 +111,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         found: false,
       };
 
-      (esClient.asInternalUser.get as unknown as jest.MockedFn<GetApi>).mockRejectedValueOnce({
+      (esClient.asInternalUser.get as unknown as MockedFunction<GetApi>).mockRejectedValueOnce({
         message: JSON.stringify(response),
       });
 
@@ -119,7 +122,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
 
     test('should throw an error if an error occurs', async () => {
       const id = 'testId';
-      (esClient.asInternalUser.get as unknown as jest.MockedFn<GetApi>).mockRejectedValueOnce(
+      (esClient.asInternalUser.get as unknown as MockedFunction<GetApi>).mockRejectedValueOnce(
         new Error('Test error')
       );
 
@@ -131,7 +134,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
   });
 
   describe('prepareDelete', () => {
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => vi.clearAllMocks());
 
     it('should delete the migration and associated rules and resources', async () => {
       const migrationId = 'testId';
@@ -175,7 +178,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         },
       } as unknown as ReturnType<typeof esClient.asInternalUser.search>;
 
-      (esClient.asInternalUser.search as unknown as jest.MockedFn<SearchApi>).mockResolvedValueOnce(
+      (esClient.asInternalUser.search as unknown as MockedFunction<SearchApi>).mockResolvedValueOnce(
         response
       );
 
@@ -219,7 +222,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
     it('should update `finished_at` when called saveAsEnded', async () => {
       const migrationId = 'testId';
 
-      (esClient.asInternalUser.get as unknown as jest.MockedFn<GetApi>).mockResolvedValueOnce({
+      (esClient.asInternalUser.get as unknown as MockedFunction<GetApi>).mockResolvedValueOnce({
         _index: '.kibana-siem-rule-migrations',
         found: true,
         _source: {
@@ -274,7 +277,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
     it('should update `error` params correctly when called saveAsFailed', async () => {
       const migrationId = 'testId';
 
-      (esClient.asInternalUser.get as unknown as jest.MockedFn<GetApi>).mockResolvedValueOnce({
+      (esClient.asInternalUser.get as unknown as MockedFunction<GetApi>).mockResolvedValueOnce({
         _index: '.kibana-siem-rule-migrations',
         found: true,
         _source: {

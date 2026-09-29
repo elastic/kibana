@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -14,20 +17,29 @@ import { TimelineTabs } from '../../../../../../../common/types';
 import { SuperTimelineQueryTabHeader } from './super_timeline_query_tab_header';
 import { useQueryTabHeaderData } from './use_query_tab_header_data';
 
-jest.mock('./use_query_tab_header_data', () => ({
-  useQueryTabHeaderData: jest.fn(),
-}));
+vi.mock('./use_query_tab_header_data', () => {
+      const mocked = {
+      useQueryTabHeaderData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../search_or_filter', () => ({
-  StatefulSearchOrFilter: () => <div data-test-subj="mock-search-or-filter" />,
-}));
+vi.mock('../../../search_or_filter', () => {
+      const mocked = {
+      StatefulSearchOrFilter: () => <div data-test-subj="mock-search-or-filter" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // InPortal renders its children but needs a node — render children directly in tests.
-jest.mock('react-reverse-portal', () => ({
-  InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('react-reverse-portal', () => {
+      const mocked = {
+      InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseQueryTabHeaderData = useQueryTabHeaderData as jest.MockedFunction<
+const mockUseQueryTabHeaderData = useQueryTabHeaderData as MockedFunction<
   typeof useQueryTabHeaderData
 >;
 
@@ -45,7 +57,7 @@ describe('SuperTimelineQueryTabHeader', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseQueryTabHeaderData.mockReturnValue({
       timelineEventsCountPortalNode: null as never,
       shouldShowQueryBuilder: false,

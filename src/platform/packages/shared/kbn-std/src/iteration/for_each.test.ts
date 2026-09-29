@@ -7,23 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import * as Rx from 'rxjs';
 
 import { asyncForEach, asyncForEachWithLimit } from './for_each';
 import { list, sleep } from './test_helpers';
 
-jest.mock('./observable');
-const mockMapWithLimit$: jest.Mock = jest.requireMock('./observable').mapWithLimit$;
+vi.mock('./observable');
+const mockMapWithLimit$: Mock = (await vi.importMock('./observable')).mapWithLimit$;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('asyncForEachWithLimit', () => {
   it('calls mapWithLimit$ and resolves with undefined when it completes', async () => {
     const iter = list(10);
     const limit = 5;
-    const fn = jest.fn();
+    const fn = vi.fn();
 
     const result$ = new Rx.Subject();
     mockMapWithLimit$.mockImplementation(() => result$);
@@ -56,7 +59,7 @@ describe('asyncForEachWithLimit', () => {
 describe('asyncForEach', () => {
   it('calls mapWithLimit$ without limit and resolves with undefined when it completes', async () => {
     const iter = list(10);
-    const fn = jest.fn();
+    const fn = vi.fn();
 
     const result$ = new Rx.Subject();
     mockMapWithLimit$.mockImplementation(() => result$);

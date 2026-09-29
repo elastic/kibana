@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { parsePluginZipFile, PluginArchiveError } from './parse_plugin_zip_file';
 import type { ZipArchive } from '../archive';
 
@@ -18,7 +20,7 @@ const createMockArchive = (files: Record<string, string>): ZipArchive => {
       }
       return Buffer.from(files[path], 'utf-8');
     },
-    close: jest.fn(),
+    close: vi.fn(),
   };
 };
 

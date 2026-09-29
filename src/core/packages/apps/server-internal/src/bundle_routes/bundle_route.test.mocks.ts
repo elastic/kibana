@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const createDynamicAssetHandlerMock = jest.fn();
-jest.doMock('./dynamic_asset_response', () => ({
-  createDynamicAssetHandler: createDynamicAssetHandlerMock,
-}));
+import { vi } from 'vitest';
+
+export const createDynamicAssetHandlerMock = vi.fn();
+vi.doMock('./dynamic_asset_response', () => {
+      const mocked = {
+      createDynamicAssetHandler: createDynamicAssetHandlerMock,
+    };
+      return { ...mocked, default: mocked };
+    });

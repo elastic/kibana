@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { TaskOutput } from '@kbn/evals';
@@ -37,10 +39,10 @@ const baseExample: PersonaMatrixExample = {
 
 const buildLog = (): ToolingLog =>
   ({
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   } as unknown as ToolingLog);
 
 describe('toDatasetExample', () => {
@@ -216,7 +218,7 @@ describe('createPersonaMatrixSkillInvokedEvaluator', () => {
     // legitimately have no expectedSkill — platform.core.generate_workflow does
     // not require a skill load. Those must report N/A, not a failing score.
     const evaluator = createPersonaMatrixSkillInvokedEvaluator({
-      traceEsClient: { esql: { query: jest.fn() } } as unknown as EsClient,
+      traceEsClient: { esql: { query: vi.fn() } } as unknown as EsClient,
       log: buildLog(),
     });
     const result = await evaluator.evaluate(
@@ -228,7 +230,7 @@ describe('createPersonaMatrixSkillInvokedEvaluator', () => {
 
   it('returns unavailable, not a failing score, when there is no usable traceId', async () => {
     const evaluator = createPersonaMatrixSkillInvokedEvaluator({
-      traceEsClient: { esql: { query: jest.fn() } } as unknown as EsClient,
+      traceEsClient: { esql: { query: vi.fn() } } as unknown as EsClient,
       log: buildLog(),
     });
     const result = await evaluator.evaluate(buildEvaluatorArgs(baseExample.metadata, undefined));
@@ -244,7 +246,7 @@ describe('createPersonaMatrixSkillInvokedEvaluator', () => {
     // guard does NOT trip and the evaluator reports a confident false 0 for
     // every model. Verified against the golden cluster: over 7 days,
     // filestore.read = 0 spans, load_skill = 7,991 spans.
-    const query = jest.fn().mockResolvedValue({
+    const query = vi.fn().mockResolvedValue({
       columns: [{ name: 'total_tool_spans' }, { name: 'skill_invoked' }],
       values: [[2, 1]],
     });

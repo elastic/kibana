@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EuiButtonIconProps } from '@elastic/eui';
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -16,9 +18,9 @@ import type { TimelinesTableProps } from '.';
 import { getMockTimelinesTableProps } from './mocks';
 import { TestProvidersComponent } from '../../../../common/mock';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-const { TimelinesTable } = jest.requireActual('.');
+const { TimelinesTable } = (await vi.importActual('.'));
 
 describe('#getActionsColumns', () => {
   let mockResults: OpenTimelineResult[];
@@ -151,7 +153,7 @@ describe('#getActionsColumns', () => {
   });
 
   test('it invokes onOpenTimeline with the expected params when the button is clicked', () => {
-    const onOpenTimeline = jest.fn();
+    const onOpenTimeline = vi.fn();
     const testProps: TimelinesTableProps = {
       ...getMockTimelinesTableProps(mockResults),
       onOpenTimeline,
@@ -218,7 +220,7 @@ describe('#getActionsColumns', () => {
   });
 
   test('it invokes enableExportTimelineDownloader with the expected params when the button is clicked', () => {
-    const enableExportTimelineDownloader = jest.fn();
+    const enableExportTimelineDownloader = vi.fn();
     const testProps: TimelinesTableProps = {
       ...getMockTimelinesTableProps(mockResults),
       actionTimelineToShow: ['export'],

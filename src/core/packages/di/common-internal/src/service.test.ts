@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 const pluginModuleMock = {};
 
-jest.mock('./modules/plugin', () => ({
-  ...jest.requireActual('./modules/plugin'),
-  PluginModule: jest.fn().mockReturnValue(pluginModuleMock),
-}));
+vi.mock('./modules/plugin', async () => {
+      const mocked = {
+      ...(await vi.importActual('./modules/plugin')),
+      PluginModule: vi.fn().mockReturnValue(pluginModuleMock),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { Container } from 'inversify';
 import { CoreInjectionService } from './service';
@@ -28,14 +33,14 @@ describe('CoreInjectionService', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('setup', () => {
     let setup: ReturnType<CoreInjectionService['setup']>;
 
     beforeEach(() => {
-      jest.spyOn(Container.prototype, 'load').mockReturnValue(undefined);
+      vi.spyOn(Container.prototype, 'load').mockReturnValue(undefined);
       setup = service.setup();
     });
 
@@ -53,7 +58,7 @@ describe('CoreInjectionService', () => {
       it('should return the plugin container for the specified identifier', () => {
         const id = Symbol.for('test');
         const plugin = {} as Container;
-        const pluginFactory = jest.fn(() => plugin);
+        const pluginFactory = vi.fn(() => plugin);
         container.bind(Plugin).toConstantValue(pluginFactory);
 
         expect(setup.getContainer(id, container)).toBe(plugin);
@@ -80,7 +85,7 @@ describe('CoreInjectionService', () => {
       it('should return the forked container for the specified identifier', () => {
         const id = Symbol.for('test');
         const fork = {} as Container;
-        const forkFactory = jest.fn(() => fork);
+        const forkFactory = vi.fn(() => fork);
         container.bind(Fork).toConstantValue(forkFactory);
 
         expect(start.fork(id, container)).toBe(fork);

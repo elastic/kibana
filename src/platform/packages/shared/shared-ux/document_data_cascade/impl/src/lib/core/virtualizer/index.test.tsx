@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, render } from '@testing-library/react';
 import type { Row } from '@tanstack/react-table';
@@ -94,7 +97,7 @@ describe('virtualizer', () => {
       const expandedRowIndex = 0;
 
       // mock the group row with depth 0 as expanded
-      jest.spyOn(rows[expandedRowIndex], 'getIsExpanded').mockReturnValue(true);
+      vi.spyOn(rows[expandedRowIndex], 'getIsExpanded').mockReturnValue(true);
 
       const { result } = renderHook(() =>
         useCascadeVirtualizerRangeExtractor({
@@ -121,7 +124,7 @@ describe('virtualizer', () => {
       const childRowIndex = 10;
 
       // mock the child row to have a parent row
-      jest
+      vi
         .spyOn(rows[childRowIndex], 'getParentRows')
         .mockReturnValue([rows[parentRowIndex]] as Row<GroupNode>[]);
 
@@ -165,10 +168,10 @@ describe('virtualizer', () => {
           scrollMargin,
           paddingStart,
           count: measurementsCache.length,
-          scrollToFn: jest.fn(),
+          scrollToFn: vi.fn(),
         },
         measurementsCache,
-        calculateRange: jest.fn(),
+        calculateRange: vi.fn(),
       } as unknown as UseVirtualizerReturnType;
     };
 
@@ -196,22 +199,22 @@ describe('virtualizer', () => {
       });
     };
 
-    const flushRaf = () => jest.advanceTimersByTime(16);
+    const flushRaf = () => vi.advanceTimersByTime(16);
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       Object.defineProperty(window, 'performance', {
         value: {
-          mark: jest.fn(),
-          measure: jest.fn(),
-          now: jest.fn(),
+          mark: vi.fn(),
+          measure: vi.fn(),
+          now: vi.fn(),
         },
         writable: true,
       });
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should not scroll when itemIndex is 0', () => {
@@ -361,7 +364,7 @@ describe('virtualizer', () => {
 
       expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(1);
 
-      (virtualizer.options.scrollToFn as jest.Mock).mockClear();
+      (virtualizer.options.scrollToFn as Mock).mockClear();
       rerender();
 
       expect(virtualizer.options.scrollToFn).not.toHaveBeenCalled();
@@ -383,7 +386,7 @@ describe('virtualizer', () => {
       expect(virtualizer.options.scrollToFn).toHaveBeenCalledTimes(1);
       expect(ref.current).toBe(true);
 
-      (virtualizer.options.scrollToFn as jest.Mock).mockClear();
+      (virtualizer.options.scrollToFn as Mock).mockClear();
       rerender();
 
       expect(virtualizer.options.scrollToFn).not.toHaveBeenCalled();
@@ -523,13 +526,13 @@ describe('virtualizer', () => {
 
   describe('VirtualizedCascadeRowList', () => {
     it('should provide specific props to the passed renderer correctly', () => {
-      const rowRenderer = jest.fn(() => null);
+      const rowRenderer = vi.fn(() => null);
       const mockRows = rowsToRender(50);
       const mockVirtualItems = [
         { index: 0, start: 0, end: 50 },
         { index: 1, start: 51, end: 100 },
       ];
-      const getVirtualItems = jest.fn(() => mockVirtualItems);
+      const getVirtualItems = vi.fn(() => mockVirtualItems);
 
       render(
         <VirtualizedCascadeRowList

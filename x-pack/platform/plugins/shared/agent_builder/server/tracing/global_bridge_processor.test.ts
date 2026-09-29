@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { context } from '@opentelemetry/api';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { GlobalBridgeProcessor } from './global_bridge_processor';
@@ -14,10 +16,10 @@ describe('GlobalBridgeProcessor', () => {
 
   beforeEach(() => {
     mockGlobalProcessor = {
-      onStart: jest.fn(),
-      onEnd: jest.fn(),
-      forceFlush: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
-      shutdown: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
+      onStart: vi.fn(),
+      onEnd: vi.fn(),
+      forceFlush: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
+      shutdown: vi.fn<Promise<void>, []>().mockResolvedValue(undefined),
     };
   });
 

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { createMockTelemetryReceiver } from './__mocks__';
 import { Artifact } from './artifact';
 import axios from 'axios';
 import type { TelemetryConfiguration } from './types';
 
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+vi.mock('axios');
+const mockedAxios = axios as Mocked<typeof axios>;
 
 describe('telemetry artifact test', () => {
   beforeEach(() => {
@@ -48,7 +51,7 @@ describe('telemetry artifact test', () => {
       },
       tagline: 'You Know, for Search',
     };
-    mockTelemetryReceiver.fetchClusterInfo = jest.fn().mockReturnValue(stubClusterInfo);
+    mockTelemetryReceiver.fetchClusterInfo = vi.fn().mockReturnValue(stubClusterInfo);
     const artifact = new Artifact();
     await artifact.start(mockTelemetryReceiver);
     expect(mockTelemetryReceiver.fetchClusterInfo).toHaveBeenCalled();

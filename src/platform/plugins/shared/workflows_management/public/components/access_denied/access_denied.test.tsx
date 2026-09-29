@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AccessDenied } from './access_denied';
 
-jest.mock('../../assets/lock_light.svg', () => 'lock_light.svg');
+vi.mock('../../assets/lock_light.svg', () => 'lock_light.svg');
 
 const renderWithProviders = (component: React.ReactElement) =>
   render(

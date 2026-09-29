@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { get } from 'lodash';
 import { expectType } from 'tsd';
 import { offeringBasedSchema, schema } from '../..';
@@ -157,7 +159,7 @@ test('object within object with key without defaultValue', () => {
 
 describe('#validate', () => {
   test('is called after all content is processed', () => {
-    const mockValidate = jest.fn();
+    const mockValidate = vi.fn();
 
     const type = schema.object(
       {

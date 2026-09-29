@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { userEvent } from '@testing-library/user-event';
@@ -20,12 +22,12 @@ import {
 } from '../../../mock/conversation';
 const props = {
   conversations: {},
-  onConversationDeleted: jest.fn(),
-  onConversationSelected: jest.fn(),
+  onConversationDeleted: vi.fn(),
+  onConversationSelected: vi.fn(),
   selectedConversation: welcomeConvo,
   isConversationOwner: true,
-  refetchCurrentUserConversations: jest.fn(),
-  setCurrentConversation: jest.fn(),
+  refetchCurrentUserConversations: vi.fn(),
+  setCurrentConversation: vi.fn(),
 };
 describe('ConversationSettingsMenu', () => {
   it('renders an accessible menu button icon', () => {

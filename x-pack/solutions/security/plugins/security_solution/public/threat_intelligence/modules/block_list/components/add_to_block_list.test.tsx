@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AddToBlockListContextMenu } from './add_to_block_list';
@@ -22,9 +24,9 @@ describe('<AddToBlockListContextMenu />', () => {
         <I18nProvider>
           <AddToBlockListContextMenu
             data={mockIndicatorFileHashValue}
-            onClick={jest.fn()}
+            onClick={vi.fn()}
             data-test-subj={TEST_ID}
-            setBlockListIndicatorValue={jest.fn()}
+            setBlockListIndicatorValue={vi.fn()}
           />
         </I18nProvider>
       </TestProvidersComponent>
@@ -45,9 +47,9 @@ describe('<AddToBlockListContextMenu />', () => {
         <I18nProvider>
           <AddToBlockListContextMenu
             data={mockIndicatorFileHashValue}
-            onClick={jest.fn()}
+            onClick={vi.fn()}
             data-test-subj={TEST_ID}
-            setBlockListIndicatorValue={jest.fn()}
+            setBlockListIndicatorValue={vi.fn()}
           />
         </I18nProvider>
       </TestProvidersComponent>
@@ -64,9 +66,9 @@ describe('<AddToBlockListContextMenu />', () => {
         <I18nProvider>
           <AddToBlockListContextMenu
             data={mockIndicatorFileHashValue}
-            onClick={jest.fn()}
+            onClick={vi.fn()}
             data-test-subj={TEST_ID}
-            setBlockListIndicatorValue={jest.fn()}
+            setBlockListIndicatorValue={vi.fn()}
           />
         </I18nProvider>
       </TestProvidersComponent>

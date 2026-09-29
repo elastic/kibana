@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen, waitFor } from '@testing-library/react';
@@ -25,40 +27,55 @@ import { internalStateActions } from '../../state_management/redux';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 
-jest.mock('../../../../components/view_mode_toggle', () => ({
-  DocumentViewModeToggle: jest.fn(({ prepend }) => (
-    <div data-test-subj="documentViewModeToggleMock">{prepend}</div>
-  )),
-}));
+vi.mock('../../../../components/view_mode_toggle', () => {
+      const mocked = {
+      DocumentViewModeToggle: vi.fn(({ prepend }) => (
+        <div data-test-subj="documentViewModeToggleMock">{prepend}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./discover_documents', () => ({
-  DiscoverDocuments: jest.fn(({ renderViewModeToggle }) => (
-    <div
-      data-test-subj="discoverDocumentsMock"
-      data-has-view-mode-toggle={String(Boolean(renderViewModeToggle))}
-    >
-      {renderViewModeToggle?.()}
-    </div>
-  )),
-}));
+vi.mock('./discover_documents', () => {
+      const mocked = {
+      DiscoverDocuments: vi.fn(({ renderViewModeToggle }) => (
+        <div
+          data-test-subj="discoverDocumentsMock"
+          data-has-view-mode-toggle={String(Boolean(renderViewModeToggle))}
+        >
+          {renderViewModeToggle?.()}
+        </div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../field_stats_table', () => ({
-  FieldStatisticsTab: jest.fn(() => <div data-test-subj="fieldStatisticsTabMock" />),
-}));
+vi.mock('../field_stats_table', () => {
+      const mocked = {
+      FieldStatisticsTab: vi.fn(() => <div data-test-subj="fieldStatisticsTabMock" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../pattern_analysis/pattern_analysis_tab', () => ({
-  PatternAnalysisTab: jest.fn(() => <div data-test-subj="patternAnalysisTabMock" />),
-}));
+vi.mock('../pattern_analysis/pattern_analysis_tab', () => {
+      const mocked = {
+      PatternAnalysisTab: vi.fn(() => <div data-test-subj="patternAnalysisTabMock" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../components/panels_toggle', () => ({
-  PanelsToggle: jest.fn(({ omitChartButton, omitTableButton }) => (
-    <div
-      data-test-subj="panelsToggleMock"
-      data-omit-chart-button={String(omitChartButton)}
-      data-omit-table-button={String(omitTableButton)}
-    />
-  )),
-}));
+vi.mock('../../../../components/panels_toggle', () => {
+      const mocked = {
+      PanelsToggle: vi.fn(({ omitChartButton, omitTableButton }) => (
+        <div
+          data-test-subj="panelsToggleMock"
+          data-omit-chart-button={String(omitChartButton)}
+          data-omit-table-button={String(omitTableButton)}
+        />
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const dataView = dataViewWithTimefieldMock;
 
@@ -121,10 +138,10 @@ const renderComponent = async ({
 
   const props: DiscoverMainContentProps = {
     dataView,
-    onFieldEdited: jest.fn(),
+    onFieldEdited: vi.fn(),
     columns: [],
     viewMode,
-    onAddFilter: jest.fn(),
+    onAddFilter: vi.fn(),
     isChartAvailable,
   };
 
@@ -141,7 +158,7 @@ const renderComponent = async ({
 
 describe('Discover main content component', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('DocumentViewModeToggle', () => {

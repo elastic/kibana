@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
@@ -15,21 +18,21 @@ import { useToasts } from '../common/lib/kibana/hooks';
 import { OWNERS } from '../../common/constants';
 import { coreMock } from '@kbn/core/public/mocks';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana/hooks');
+vi.mock('./api');
+vi.mock('../common/lib/kibana/hooks');
 
 // Failing: See https://github.com/elastic/kibana/issues/207955
 describe('useGetCases', () => {
   const abortCtrl = new AbortController();
-  const addSuccess = jest.fn();
-  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
+  const addSuccess = vi.fn();
+  (useToasts as Mock).mockReturnValue({ addSuccess, addError: vi.fn() });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls getCases with correct arguments', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getCases');
+    const spyOnGetCases = vi.spyOn(api, 'getCases');
     renderHook(() => useGetCases(), {
       wrapper: TestProviders,
     });
@@ -46,13 +49,13 @@ describe('useGetCases', () => {
   });
 
   it('shows a toast error message when an error occurs in the response', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getCases');
+    const spyOnGetCases = vi.spyOn(api, 'getCases');
     spyOnGetCases.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addSuccess, addError });
 
     renderHook(() => useGetCases(), {
       wrapper: TestProviders,
@@ -73,7 +76,7 @@ describe('useGetCases', () => {
       securitySolutionCasesV3: allCasesCapabilities(),
     };
 
-    const spyOnGetCases = jest.spyOn(api, 'getCases');
+    const spyOnGetCases = vi.spyOn(api, 'getCases');
     renderHook(() => useGetCases(), {
       wrapper: (props) => <TestProviders {...props} owner={[]} coreStart={coreStart} />,
     });
@@ -97,7 +100,7 @@ describe('useGetCases', () => {
       generalCasesV3: allCasesCapabilities(),
     };
 
-    const spyOnGetCases = jest.spyOn(api, 'getCases');
+    const spyOnGetCases = vi.spyOn(api, 'getCases');
 
     renderHook(() => useGetCases(), {
       wrapper: (props) => <TestProviders {...props} owner={[]} coreStart={coreStart} />,
@@ -115,7 +118,7 @@ describe('useGetCases', () => {
   });
 
   it('should use the app owner when the filter options do not specify the owner', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getCases');
+    const spyOnGetCases = vi.spyOn(api, 'getCases');
 
     renderHook(() => useGetCases(), {
       wrapper: (props) => <TestProviders {...props} owner={['observability']} />,
@@ -133,7 +136,7 @@ describe('useGetCases', () => {
   });
 
   it('respects the owner in the filter options if provided', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getCases');
+    const spyOnGetCases = vi.spyOn(api, 'getCases');
 
     renderHook(() => useGetCases({ filterOptions: { owner: ['my-owner'] } }), {
       wrapper: (props) => <TestProviders {...props} owner={['observability']} />,
@@ -151,7 +154,7 @@ describe('useGetCases', () => {
   });
 
   it('should change search and searchFields for incremental id searches', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getCases');
+    const spyOnGetCases = vi.spyOn(api, 'getCases');
 
     renderHook(() => useGetCases({ filterOptions: { search: '#123' } }), {
       wrapper: (props) => <TestProviders {...props} />,
@@ -174,7 +177,7 @@ describe('useGetCases', () => {
   });
 
   it('should change search and searchFields when incremental id and title are provided', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getCases');
+    const spyOnGetCases = vi.spyOn(api, 'getCases');
 
     renderHook(() => useGetCases({ filterOptions: { search: 'test #123' } }), {
       wrapper: (props) => <TestProviders {...props} />,
@@ -196,7 +199,7 @@ describe('useGetCases', () => {
   });
 
   it('merges search-bar extendedFieldFilters with picker filters and strips matched tokens from search', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getCases');
+    const spyOnGetCases = vi.spyOn(api, 'getCases');
 
     renderHook(
       () =>
@@ -231,7 +234,7 @@ describe('useGetCases', () => {
   });
 
   it('ignores search-bar extendedFieldFilters with empty values', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getCases');
+    const spyOnGetCases = vi.spyOn(api, 'getCases');
 
     renderHook(
       () =>
@@ -262,7 +265,7 @@ describe('useGetCases', () => {
   });
 
   it('retains valid search-bar extendedFieldFilters alongside empty values', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getCases');
+    const spyOnGetCases = vi.spyOn(api, 'getCases');
 
     renderHook(
       () =>
@@ -293,7 +296,7 @@ describe('useGetCases', () => {
   });
 
   it('dedupes overlapping search-bar and picker extendedFieldFilters', async () => {
-    const spyOnGetCases = jest.spyOn(api, 'getCases');
+    const spyOnGetCases = vi.spyOn(api, 'getCases');
 
     renderHook(
       () =>

@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getIndexListFromEsqlQuery } from './get_index_list_from_esql_query';
 
-jest.mock('@kbn/esql-utils', () => {
+vi.mock('@kbn/esql-utils', () => {
   return {
-    getIndexPatternFromESQLQuery: jest.fn(),
+    getIndexPatternFromESQLQuery: vi.fn(),
   };
 });
 
-const getIndexPatternFromESQLQueryMock = getIndexPatternFromESQLQuery as jest.Mock;
+const getIndexPatternFromESQLQueryMock = getIndexPatternFromESQLQuery as Mock;
 
 describe('getIndexListFromEsqlQuery', () => {
   it('should return empty array if index string is empty', () => {

@@ -5,28 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useKibana } from '../../hooks/use_kibana';
 import { callObservabilityOnboardingApi } from '../../services/rest/create_call_api';
 import { ApiEndpointId } from '../../../common/api_endpoints';
 import { useApiKeys } from './use_api_keys';
 
-jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('../../services/rest/create_call_api', () => ({
-  callObservabilityOnboardingApi: jest.fn(),
-}));
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = { useKibana: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../services/rest/create_call_api', () => {
+      const mocked = {
+      callObservabilityOnboardingApi: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockCallApi = callObservabilityOnboardingApi as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockCallApi = callObservabilityOnboardingApi as Mock;
 
-const addSuccess = jest.fn();
-const addError = jest.fn();
+const addSuccess = vi.fn();
+const addError = vi.fn();
 
 const STORAGE_KEY = 'observabilityOnboarding.apiEndpoints.createdKeys';
 
 describe('useApiKeys', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: { notifications: { toasts: { addSuccess, addError } } },
     });

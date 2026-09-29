@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -20,42 +23,45 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('@kbn/expandable-flyout');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
   return {
     ...original,
-    useLocation: jest.fn().mockReturnValue({ search: '' }),
+    useLocation: vi.fn().mockReturnValue({ search: '' }),
   };
 });
 
-jest.mock('../../../common/lib/kibana');
-jest.mock(
+vi.mock('../../../common/lib/kibana');
+vi.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
-jest.mock('../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
-jest.mock('../shared/components/take_action_button', () => ({
-  TakeActionButton: () => (
-    <button data-test-subj="securitySolutionFlyoutFooterDropdownButton" type="button" />
-  ),
-}));
+vi.mock('../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
+vi.mock('../shared/components/take_action_button', () => {
+      const mocked = {
+      TakeActionButton: () => (
+        <button data-test-subj="securitySolutionFlyoutFooterDropdownButton" type="button" />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockedTelemetry = createTelemetryServiceMock();
 
 describe('<PreviewPanelFooter />', () => {
   beforeEach(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    (useKibana as jest.Mock).mockReturnValue({
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    (useKibana as Mock).mockReturnValue({
       services: {
-        osquery: { isOsqueryAvailable: jest.fn() },
+        osquery: { isOsqueryAvailable: vi.fn() },
         telemetry: mockedTelemetry,
-        cases: { hooks: { useIsAddToCaseOpen: jest.fn().mockReturnValue(false) } },
+        cases: { hooks: { useIsAddToCaseOpen: vi.fn().mockReturnValue(false) } },
       },
     });
-    (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+    (useInvestigateInTimeline as Mock).mockReturnValue({
       investigateInTimelineActionItems: [],
     });
-    (useAddToCaseActions as jest.Mock).mockReturnValue({ addToCaseActionItems: [] });
+    (useAddToCaseActions as Mock).mockReturnValue({ addToCaseActionItems: [] });
   });
 
   it('should not render the take action dropdown if preview mode', () => {
@@ -96,8 +102,8 @@ describe('<PreviewPanelFooter />', () => {
   });
 
   it('should render the take action button', () => {
-    (useInvestigateInTimeline as jest.Mock).mockReturnValue({
-      investigateInTimelineActionItems: [{ name: 'test', onClick: jest.fn() }],
+    (useInvestigateInTimeline as Mock).mockReturnValue({
+      investigateInTimelineActionItems: [{ name: 'test', onClick: vi.fn() }],
     });
     const { getByTestId } = render(
       <TestProviders>

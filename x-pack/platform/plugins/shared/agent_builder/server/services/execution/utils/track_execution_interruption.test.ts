@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Subject } from 'rxjs';
 import type {
   ChatEvent,
@@ -62,7 +64,7 @@ const executionFailed: ExecutionFailedEvent = {
 const flush = () => new Promise((resolve) => setImmediate(resolve));
 
 const run = async (events: ChatEvent[], error: unknown, persistResult: ChatEvent[] = []) => {
-  const persist = jest.fn().mockResolvedValue(persistResult);
+  const persist = vi.fn().mockResolvedValue(persistResult);
   const source$ = new Subject<ChatEvent>();
   const seen: ChatEvent[] = [];
   let thrown: unknown;
@@ -145,7 +147,7 @@ describe('trackExecutionInterruption', () => {
   });
 
   it('forwards events untouched and completes when the source completes', () => {
-    const persist = jest.fn();
+    const persist = vi.fn();
     const source$ = new Subject<ChatEvent>();
     const seen: ChatEvent[] = [];
     let completed = false;
@@ -167,7 +169,7 @@ describe('trackExecutionInterruption', () => {
 
   it('still surfaces the original error when persist rejects', async () => {
     const error = new Error('boom');
-    const persist = jest.fn().mockRejectedValue(new Error('store down'));
+    const persist = vi.fn().mockRejectedValue(new Error('store down'));
     const source$ = new Subject<ChatEvent>();
     const seen: ChatEvent[] = [];
     let thrown: unknown;
@@ -186,7 +188,7 @@ describe('trackExecutionInterruption', () => {
   });
 
   it('tears down the source on unsubscribe and never persists afterwards', async () => {
-    const persist = jest.fn();
+    const persist = vi.fn();
     const source$ = new Subject<ChatEvent>();
     const subscription = source$.pipe(trackExecutionInterruption({ persist })).subscribe();
 

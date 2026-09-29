@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { InternalAgentDefinition } from '@kbn/agent-builder-server';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
@@ -99,7 +101,7 @@ describe('projectSkillsFromDefinition', () => {
     });
 
     it('skips getAgentType when the agent definition has no type field', () => {
-      const getAgentType = jest.fn();
+      const getAgentType = vi.fn();
       const agents: AgentLookup = {
         getAgent: () =>
           ({

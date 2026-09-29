@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -22,18 +24,21 @@ import {
 } from '../../hooks/test_utils';
 import { AlertEpisodeMetadataSection } from './metadata_section';
 
-jest.mock('../../utils/run_esql_async_search');
-jest.mock('../../hooks/use_alerting_episode_source_data_view');
+vi.mock('../../utils/run_esql_async_search');
+vi.mock('../../hooks/use_alerting_episode_source_data_view');
 
-jest.mock('@kbn/discover-utils', () => ({
-  buildDataTableRecord: jest.fn((doc) => ({ id: 'mock-id', raw: doc, flattened: {} })),
-}));
+vi.mock('@kbn/discover-utils', () => {
+      const mocked = {
+      buildDataTableRecord: vi.fn((doc) => ({ id: 'mock-id', raw: doc, flattened: {} })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
-const buildDataTableRecordMock = jest.mocked(buildDataTableRecord);
-const useAlertingEpisodeSourceDataViewMock = jest.mocked(useAlertingEpisodeSourceDataView);
+const runEsqlAsyncSearchMock = vi.mocked(runEsqlAsyncSearch);
+const buildDataTableRecordMock = vi.mocked(buildDataTableRecord);
+const useAlertingEpisodeSourceDataViewMock = vi.mocked(useAlertingEpisodeSourceDataView);
 
-const mockTableRender = jest.fn(() => <div data-test-subj="mock-doc-viewer-table" />);
+const mockTableRender = vi.fn(() => <div data-test-subj="mock-doc-viewer-table" />);
 
 const mockUnifiedDocViewer = {
   registry: {
@@ -109,7 +114,7 @@ const wrapper = createQueryClientWrapper(queryClient);
 
 describe('AlertEpisodeMetadataSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     useAlertingEpisodeSourceDataViewMock.mockReturnValue({
       value: { id: 'mock-data-view' },

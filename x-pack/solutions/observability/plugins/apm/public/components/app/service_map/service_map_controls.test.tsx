@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
@@ -28,19 +31,25 @@ const capturedProps: {
   projectRouting?: ProjectRouting;
 } = {};
 
-jest.mock('@kbn/control-group-renderer', () => ({
-  ControlGroupRenderer: jest.fn().mockImplementation((props) => {
-    capturedProps.getCreationOptions = props.getCreationOptions;
-    capturedProps.projectRouting = props.projectRouting;
-    return <div data-testid="control-group-renderer" />;
-  }),
-}));
+vi.mock('@kbn/control-group-renderer', () => {
+      const mocked = {
+      ControlGroupRenderer: vi.fn().mockImplementation((props) => {
+        capturedProps.getCreationOptions = props.getCreationOptions;
+        capturedProps.projectRouting = props.projectRouting;
+        return <div data-testid="control-group-renderer" />;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(() => ({ services: {} })),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(() => ({ services: {} })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
 const dataView = { id: 'apm-data-view' } as DataView;
 const baseProps = {
@@ -48,7 +57,7 @@ const baseProps = {
   timeRange: { from: 'now-15m', to: 'now' },
   filters: [],
   query: { query: '', language: 'kuery' as const },
-  onFiltersChange: jest.fn(),
+  onFiltersChange: vi.fn(),
 };
 
 describe('ServiceMapControls', () => {
@@ -65,7 +74,7 @@ describe('ServiceMapControls', () => {
       expect(capturedProps.getCreationOptions).toBeDefined();
     });
 
-    const addOptionsListControl = jest.fn();
+    const addOptionsListControl = vi.fn();
     const builder = { addOptionsListControl } as unknown as ControlGroupStateBuilder;
 
     await capturedProps.getCreationOptions!({} as ControlGroupRuntimeState, builder);
@@ -109,7 +118,7 @@ describe('ServiceMapControls', () => {
       expect(capturedProps.getCreationOptions).toBeDefined();
     });
 
-    const addOptionsListControl = jest.fn();
+    const addOptionsListControl = vi.fn();
     const builder = { addOptionsListControl } as unknown as ControlGroupStateBuilder;
 
     await capturedProps.getCreationOptions!({} as ControlGroupRuntimeState, builder);
@@ -125,8 +134,8 @@ describe('ServiceMapControls', () => {
     const projectRouting$ = new BehaviorSubject<string | undefined>('_alias:*');
     const cpsManager = {
       ...cpsPluginMock.createStartContract().cpsManager,
-      getProjectRouting$: jest.fn(() => projectRouting$),
-      getProjectRouting: jest.fn(() => projectRouting$.getValue()),
+      getProjectRouting$: vi.fn(() => projectRouting$),
+      getProjectRouting: vi.fn(() => projectRouting$.getValue()),
     };
     useKibanaMock.mockReturnValue({ services: { cps: { cpsManager } } });
 

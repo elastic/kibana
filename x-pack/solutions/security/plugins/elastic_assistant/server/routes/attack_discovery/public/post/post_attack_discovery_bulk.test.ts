@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 
@@ -15,21 +18,21 @@ import { mockAuthenticatedUser } from '../../../../__mocks__/mock_authenticated_
 import { requestContextMock } from '../../../../__mocks__/request_context';
 import { postAttackDiscoveryBulkRoute } from './post_attack_discovery_bulk';
 
-jest.mock('../../helpers/index_privileges', () => {
-  const original = jest.requireActual('../../helpers/index_privileges');
+vi.mock('../../helpers/index_privileges', async () => {
+  const original = (await vi.importActual('../../helpers/index_privileges'));
 
   return {
     ...original,
-    hasReadWriteAttackDiscoveryAlertsPrivileges: jest.fn(),
+    hasReadWriteAttackDiscoveryAlertsPrivileges: vi.fn(),
   };
 });
 
-jest.mock('../../../helpers', () => {
-  const original = jest.requireActual('../../../helpers');
+vi.mock('../../../helpers', async () => {
+  const original = (await vi.importActual('../../../helpers'));
 
   return {
     ...original,
-    performChecks: jest.fn(),
+    performChecks: vi.fn(),
   };
 });
 
@@ -39,17 +42,17 @@ describe('postAttackDiscoveryBulkRoute (public)', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let mockRequest: Partial<KibanaRequest<unknown, unknown, unknown>>;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
-  let mockDataClient: jest.Mocked<AttackDiscoveryDataClient>;
-  let addVersionMock: jest.Mock;
+  let mockDataClient: Mocked<AttackDiscoveryDataClient>;
+  let addVersionMock: Mock;
   let getHandler: (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     router = httpServiceMock.createRouter();
 
     mockDataClient = {
       // For the public route we expect the route to return API-shaped (snake_case) alerts
-      bulkUpdateAttackDiscoveryAlerts: jest.fn().mockResolvedValue([
+      bulkUpdateAttackDiscoveryAlerts: vi.fn().mockResolvedValue([
         {
           id: '1',
           alert_ids: ['a1'],
@@ -76,7 +79,7 @@ describe('postAttackDiscoveryBulkRoute (public)', () => {
           users: ['user-1'],
         },
       ]),
-    } as unknown as jest.Mocked<AttackDiscoveryDataClient>;
+    } as unknown as Mocked<AttackDiscoveryDataClient>;
 
     mockContext.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(mockDataClient);
     mockRequest = {
@@ -85,15 +88,15 @@ describe('postAttackDiscoveryBulkRoute (public)', () => {
 
     mockResponse = httpServerMock.createResponseFactory();
 
-    jest
+    vi
       .spyOn(helpers, 'performChecks')
       .mockResolvedValue({ isSuccess: true, currentUser: mockAuthenticatedUser });
 
-    addVersionMock = jest.fn();
-    (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    addVersionMock = vi.fn();
+    (router.versioned.post as Mock).mockReturnValue({ addVersion: addVersionMock });
     postAttackDiscoveryBulkRoute(router);
     getHandler = addVersionMock.mock.calls[0][1];
-    (hasReadWriteAttackDiscoveryAlertsPrivileges as jest.Mock).mockResolvedValue({
+    (hasReadWriteAttackDiscoveryAlertsPrivileges as Mock).mockResolvedValue({
       isSuccess: true,
     });
   });
@@ -153,7 +156,7 @@ describe('postAttackDiscoveryBulkRoute (public)', () => {
   });
 
   it('returns an error when performChecks fails', async () => {
-    (helpers.performChecks as jest.Mock).mockResolvedValueOnce({
+    (helpers.performChecks as Mock).mockResolvedValueOnce({
       isSuccess: false,
       response: { status: 403, payload: { message: 'Forbidden' } },
     });
@@ -164,7 +167,7 @@ describe('postAttackDiscoveryBulkRoute (public)', () => {
   });
 
   it('returns an error when hasReadWriteAttackDiscoveryAlertsPrivileges fails', async () => {
-    (hasReadWriteAttackDiscoveryAlertsPrivileges as jest.Mock).mockImplementation(
+    (hasReadWriteAttackDiscoveryAlertsPrivileges as Mock).mockImplementation(
       ({ response }) => {
         return Promise.resolve({
           isSuccess: false,
@@ -205,7 +208,7 @@ describe('postAttackDiscoveryBulkRoute (public)', () => {
     // Return an array so the route reaches `response.ok` and our mocked `ok` can throw
     mockDataClient.bulkUpdateAttackDiscoveryAlerts.mockResolvedValueOnce([]);
 
-    const throwValidationError = jest.fn(() => {
+    const throwValidationError = vi.fn(() => {
       throw new Error('Response validation failed');
     });
     mockResponse.ok = throwValidationError as unknown as typeof mockResponse.ok;

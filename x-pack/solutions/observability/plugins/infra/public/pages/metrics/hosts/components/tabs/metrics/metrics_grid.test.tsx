@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,21 +16,27 @@ import { useMetricsCharts } from '../../../hooks/use_metrics_charts';
 import { useMetricsDataViewContext } from '../../../../../../containers/metrics_source';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 
-jest.mock('../../../hooks/use_metrics_charts');
-jest.mock('../../../hooks/use_unified_search');
-jest.mock('../../../../../../containers/metrics_source');
-jest.mock('../../../../../../components/lens', () => ({
-  HostMetricsExplanationContent: () => <div data-test-subj="hostMetricsExplanation" />,
-}));
-jest.mock('./chart', () => ({
-  Chart: ({ id }: { id: string }) => <div data-test-subj={`hostsView-metricChart-${id}`} />,
-}));
+vi.mock('../../../hooks/use_metrics_charts');
+vi.mock('../../../hooks/use_unified_search');
+vi.mock('../../../../../../containers/metrics_source');
+vi.mock('../../../../../../components/lens', () => {
+      const mocked = {
+      HostMetricsExplanationContent: () => <div data-test-subj="hostMetricsExplanation" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./chart', () => {
+      const mocked = {
+      Chart: ({ id }: { id: string }) => <div data-test-subj={`hostsView-metricChart-${id}`} />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseMetricsCharts = useMetricsCharts as jest.MockedFunction<typeof useMetricsCharts>;
-const mockUseMetricsDataViewContext = useMetricsDataViewContext as jest.MockedFunction<
+const mockUseMetricsCharts = useMetricsCharts as MockedFunction<typeof useMetricsCharts>;
+const mockUseMetricsDataViewContext = useMetricsDataViewContext as MockedFunction<
   typeof useMetricsDataViewContext
 >;
-const mockUseUnifiedSearchContext = useUnifiedSearchContext as jest.MockedFunction<
+const mockUseUnifiedSearchContext = useUnifiedSearchContext as MockedFunction<
   typeof useUnifiedSearchContext
 >;
 
@@ -52,7 +61,7 @@ const mockDataView = {
 
 describe('MetricsGrid', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseMetricsDataViewContext.mockReturnValue({
       metricsView: { dataViewReference: mockDataView },

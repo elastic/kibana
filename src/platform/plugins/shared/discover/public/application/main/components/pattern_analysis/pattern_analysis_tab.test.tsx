@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
@@ -19,31 +21,34 @@ import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_
 const dataView = dataViewWithTimefieldMock;
 
 // Mock the PatternAnalysisTable component to make testing easier
-jest.mock('./pattern_analysis_table', () => ({
-  PatternAnalysisTable: jest.fn(({ savedSearch }) => (
-    <div data-test-subj="mockPatternAnalysisTable">
-      <div data-test-subj="searchSourceData">
-        {JSON.stringify({
-          query: savedSearch?.searchSource?.getSerializedFields?.()?.query,
-          filters: savedSearch?.searchSource?.getSerializedFields?.()?.filter,
-          dataViewId: savedSearch?.searchSource?.getSerializedFields?.()?.index,
-        })}
-      </div>
-    </div>
-  )),
-}));
+vi.mock('./pattern_analysis_table', () => {
+      const mocked = {
+      PatternAnalysisTable: vi.fn(({ savedSearch }) => (
+        <div data-test-subj="mockPatternAnalysisTable">
+          <div data-test-subj="searchSourceData">
+            {JSON.stringify({
+              query: savedSearch?.searchSource?.getSerializedFields?.()?.query,
+              filters: savedSearch?.searchSource?.getSerializedFields?.()?.filter,
+              dataViewId: savedSearch?.searchSource?.getSerializedFields?.()?.index,
+            })}
+          </div>
+        </div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('PatternAnalysisTab', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const getComponent = (toolkit: ReturnType<typeof getDiscoverInternalStateMock>) => {
     const props = {
       dataView,
-      switchToDocumentView: jest.fn(),
-      trackUiMetric: jest.fn(),
-      renderViewModeToggle: jest.fn(() => <div data-test-subj="viewModeToggle">Toggle</div>),
+      switchToDocumentView: vi.fn(),
+      trackUiMetric: vi.fn(),
+      renderViewModeToggle: vi.fn(() => <div data-test-subj="viewModeToggle">Toggle</div>),
     };
 
     return (

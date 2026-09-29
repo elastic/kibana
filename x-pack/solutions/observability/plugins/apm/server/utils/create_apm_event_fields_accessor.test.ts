@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
 import { AT_TIMESTAMP, SERVICE_NAME, SPAN_ID } from '../../common/es_fields/apm';
@@ -126,7 +128,7 @@ describe('createApmEventFieldsAccessor', () => {
 
     it('keeps the count per accessor rather than per logger', () => {
       skipDocuments(8);
-      (logger.warn as jest.Mock).mockClear();
+      (logger.warn as Mock).mockClear();
 
       skipDocuments(1);
 

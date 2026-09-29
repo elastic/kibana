@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import {
   ELASTIC_MANAGED_LLM_CONNECTOR_ID,
@@ -112,11 +114,11 @@ const getEsSearchConversationsMock = (): estypes.SearchResponse<EsConversationSc
 
 describe('transforms', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('transformESToConversation', () => {

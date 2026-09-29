@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useSystemPromptTable } from './use_system_prompt_table';
 
@@ -12,12 +14,12 @@ describe('useSystemPromptTable', () => {
   const { result } = renderHook(() => useSystemPromptTable());
 
   it('should return columns with correct render functions', () => {
-    const onEditActionClicked = jest.fn();
-    const onDeleteActionClicked = jest.fn();
+    const onEditActionClicked = vi.fn();
+    const onDeleteActionClicked = vi.fn();
     const columns = result.current.getColumns({
       isActionsDisabled: false,
-      isDeleteEnabled: jest.fn(),
-      isEditEnabled: jest.fn(),
+      isDeleteEnabled: vi.fn(),
+      isEditEnabled: vi.fn(),
       onEditActionClicked,
       onDeleteActionClicked,
     });

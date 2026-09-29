@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 
@@ -22,24 +25,27 @@ import { renderWithTestingProviders } from '../../common/mock';
 import type { CaseUserActionsStats } from '../../containers/types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
-jest.mock('../../containers/use_infinite_find_case_user_actions');
-jest.mock('../../containers/use_find_case_user_actions');
-jest.mock('../../containers/use_get_case_connectors');
-jest.mock('../../containers/use_get_case_users');
-jest.mock('../../containers/configure/use_get_case_configuration');
-jest.mock('../../containers/user_profiles/use_get_current_user_profile');
-jest.mock('../../common/lib/kibana');
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ detailName: 'case-id' }),
-}));
+vi.mock('../../containers/use_infinite_find_case_user_actions');
+vi.mock('../../containers/use_find_case_user_actions');
+vi.mock('../../containers/use_get_case_connectors');
+vi.mock('../../containers/use_get_case_users');
+vi.mock('../../containers/configure/use_get_case_configuration');
+vi.mock('../../containers/user_profiles/use_get_current_user_profile');
+vi.mock('../../common/lib/kibana');
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: () => ({ detailName: 'case-id' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
-const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
-const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
-const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
-const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
-const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
+const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as Mock;
+const useFindCaseUserActionsMock = useFindCaseUserActions as Mock;
+const useGetCaseConnectorsMock = useGetCaseConnectors as Mock;
+const useGetCaseUsersMock = useGetCaseUsers as Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as Mock;
+const useGetCurrentUserProfileMock = useGetCurrentUserProfile as Mock;
 
 const userActionsStats: CaseUserActionsStats = {
   total: 5,
@@ -65,12 +71,12 @@ const defaultProps = {
   userActionsStats,
   statusActionButton: null,
   attachActionButton: null,
-  onUpdateField: jest.fn(),
+  onUpdateField: vi.fn(),
 };
 
 describe('UserActions (redesign)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useGetCaseConnectorsMock.mockReturnValue({ data: getCaseConnectorsMockResponse() });
     useGetCaseUsersMock.mockReturnValue({ data: undefined });
     useGetCaseConfigurationMock.mockReturnValue({ data: casesConfigurationsMock });
@@ -79,7 +85,7 @@ describe('UserActions (redesign)', () => {
       data: { pages: [] },
       isLoading: false,
       hasNextPage: false,
-      fetchNextPage: jest.fn(),
+      fetchNextPage: vi.fn(),
       isFetchingNextPage: false,
     });
     useFindCaseUserActionsMock.mockReturnValue({
@@ -101,7 +107,7 @@ describe('UserActions (redesign)', () => {
       data: undefined,
       isLoading: true,
       hasNextPage: false,
-      fetchNextPage: jest.fn(),
+      fetchNextPage: vi.fn(),
       isFetchingNextPage: false,
     });
     useFindCaseUserActionsMock.mockReturnValue({
@@ -128,7 +134,7 @@ describe('UserActions (redesign)', () => {
         data: { pages: [{ userActions: [], latestAttachments: [], total: 0 }] },
         isLoading: false,
         hasNextPage: false,
-        fetchNextPage: jest.fn(),
+        fetchNextPage: vi.fn(),
         isFetchingNextPage: false,
       });
 
@@ -152,7 +158,7 @@ describe('UserActions (redesign)', () => {
         data: { pages: [{ userActions: [], latestAttachments: [], total: 0 }] },
         isLoading: false,
         hasNextPage: false,
-        fetchNextPage: jest.fn(),
+        fetchNextPage: vi.fn(),
         isFetchingNextPage: false,
       });
 
@@ -173,7 +179,7 @@ describe('UserActions (redesign)', () => {
         data: { pages: [{ userActions: [], latestAttachments: [], total: 0 }] },
         isLoading: false,
         hasNextPage: false,
-        fetchNextPage: jest.fn(),
+        fetchNextPage: vi.fn(),
         isFetchingNextPage: false,
       });
 
@@ -194,7 +200,7 @@ describe('UserActions (redesign)', () => {
         data: { pages: [{ userActions: [{ id: '1' }], latestAttachments: [], total: 1 }] },
         isLoading: false,
         hasNextPage: false,
-        fetchNextPage: jest.fn(),
+        fetchNextPage: vi.fn(),
         isFetchingNextPage: false,
       });
 
@@ -216,7 +222,7 @@ describe('UserActions (redesign)', () => {
         data: { pages: [{ userActions: [], latestAttachments: [], total: 0 }] },
         isLoading: false,
         hasNextPage: false,
-        fetchNextPage: jest.fn(),
+        fetchNextPage: vi.fn(),
         isFetchingNextPage: false,
       });
 
@@ -233,7 +239,7 @@ describe('UserActions (redesign)', () => {
         data: undefined,
         isLoading: true,
         hasNextPage: false,
-        fetchNextPage: jest.fn(),
+        fetchNextPage: vi.fn(),
         isFetchingNextPage: false,
       });
 

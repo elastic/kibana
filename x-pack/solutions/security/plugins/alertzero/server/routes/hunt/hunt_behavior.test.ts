@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ALERTZERO_REASONING_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
@@ -15,11 +18,17 @@ import { resolveScopedModel } from './lib/scoped_model';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import type { HuntBehaviorResult } from '../../services/watches/hunt/tier2/types';
 
-jest.mock('./lib/scoped_model', () => ({ resolveScopedModel: jest.fn() }));
-jest.mock('../../services/watches/hunt/tier2/hunt_behavior', () => ({ huntBehavior: jest.fn() }));
+vi.mock('./lib/scoped_model', () => {
+      const mocked = { resolveScopedModel: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../services/watches/hunt/tier2/hunt_behavior', () => {
+      const mocked = { huntBehavior: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const resolveScopedModelMock = resolveScopedModel as jest.MockedFunction<typeof resolveScopedModel>;
-const huntBehaviorMock = huntBehavior as jest.MockedFunction<typeof huntBehavior>;
+const resolveScopedModelMock = resolveScopedModel as MockedFunction<typeof resolveScopedModel>;
+const huntBehaviorMock = huntBehavior as MockedFunction<typeof huntBehavior>;
 
 const model = { connector: { id: 'gpt' } } as unknown as ScopedModel;
 const tier2Result: HuntBehaviorResult = {
@@ -31,10 +40,10 @@ const tier2Result: HuntBehaviorResult = {
 };
 
 const makeDeps = () => {
-  const addVersion = jest.fn();
-  const router = { versioned: { post: jest.fn().mockReturnValue({ addVersion }) } };
+  const addVersion = vi.fn();
+  const router = { versioned: { post: vi.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
-  const inference = { getDefaultConnector: jest.fn() };
+  const inference = { getDefaultConnector: vi.fn() };
 
   registerHuntBehaviorRoute({
     router: router as unknown as RouteDependencies['router'],
@@ -46,9 +55,9 @@ const makeDeps = () => {
       } as unknown as ReturnType<RouteDependencies['getHuntServices']>),
   } as unknown as RouteDependencies);
 
-  const asCurrentUser = { search: jest.fn() };
-  const asInternalUser = { search: jest.fn() };
-  const uiSettingsClient = { get: jest.fn() };
+  const asCurrentUser = { search: vi.fn() };
+  const asInternalUser = { search: vi.fn() };
+  const uiSettingsClient = { get: vi.fn() };
   const context = {
     core: Promise.resolve({
       elasticsearch: { client: { asCurrentUser, asInternalUser } },

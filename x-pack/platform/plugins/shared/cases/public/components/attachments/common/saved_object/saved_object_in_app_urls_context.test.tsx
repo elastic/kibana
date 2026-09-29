@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -19,11 +22,11 @@ import type { AttachmentUIV2, CaseUI } from '../../../../../common/ui/types';
 import { SavedObjectInAppUrlsProvider } from './saved_object_in_app_urls_context';
 import { useSavedObjectInAppUrl, useSavedObjectInAppUrls } from './use_saved_object_in_app_url';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mock;
+const useKibanaMock = useKibana as Mock;
 
-const buildHttp = (post: jest.Mock) => ({
+const buildHttp = (post: Mock) => ({
   services: {
     http: {
       post,
@@ -49,11 +52,11 @@ const caseWith = (comments: AttachmentUIV2[]): CaseUI => ({ ...basicCase, commen
 
 describe('SavedObjectInAppUrlsProvider', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('fires one bulk_get per SO type present on the case', async () => {
-    const post = jest.fn().mockImplementation((_url: string, opts: { body: string }) => {
+    const post = vi.fn().mockImplementation((_url: string, opts: { body: string }) => {
       const body = JSON.parse(opts.body) as Array<{ type: string; id: string }>;
       return Promise.resolve(
         body.map(({ type, id }) => ({
@@ -105,7 +108,7 @@ describe('SavedObjectInAppUrlsProvider', () => {
   });
 
   it('falls back to per-hook fetching when no provider is mounted', async () => {
-    const post = jest
+    const post = vi
       .fn()
       .mockResolvedValue([
         { id: 'dash-1', type: 'dashboard', meta: { inAppUrl: { path: '/app/d/dash-1' } } },

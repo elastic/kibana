@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
@@ -43,7 +45,7 @@ describe('getCommentAttachmentType', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     sessionStorage.clear();
   });
 

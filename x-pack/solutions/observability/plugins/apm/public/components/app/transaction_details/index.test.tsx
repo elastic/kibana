@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -14,71 +17,104 @@ import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-jest.mock('../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: jest.fn(),
-}));
+vi.mock('../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useAnyOfApmParams: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_apm_route_path', () => ({
-  useApmRoutePath: jest.fn(),
-}));
+vi.mock('../../../hooks/use_apm_route_path', () => {
+      const mocked = {
+      useApmRoutePath: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_apm_router', () => ({
-  useApmRouter: jest.fn(),
-}));
+vi.mock('../../../hooks/use_apm_router', () => {
+      const mocked = {
+      useApmRouter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_time_range', () => ({
-  useTimeRange: () => ({ start: '2024-01-01', end: '2024-01-02' }),
-}));
+vi.mock('../../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => ({ start: '2024-01-01', end: '2024-01-02' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../context/apm_service/use_apm_service_context', () => ({
-  useApmServiceContext: () => ({
-    transactionType: 'request',
-    fallbackToTransactions: false,
-    serverlessType: undefined,
-    serviceName: 'test-service',
-  }),
-}));
+vi.mock('../../../context/apm_service/use_apm_service_context', () => {
+      const mocked = {
+      useApmServiceContext: () => ({
+        transactionType: 'request',
+        fallbackToTransactions: false,
+        serverlessType: undefined,
+        serviceName: 'test-service',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../context/breadcrumbs/use_breadcrumb', () => ({
-  useBreadcrumb: () => {},
-}));
+vi.mock('../../../context/breadcrumbs/use_breadcrumb', () => {
+      const mocked = {
+      useBreadcrumb: () => {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockHistory = {
-  replace: jest.fn(),
-  push: jest.fn(),
+  replace: vi.fn(),
+  push: vi.fn(),
   location: { pathname: '/services/test/transactions/view', search: '?transactionName=test' },
 };
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => mockHistory,
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => mockHistory,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../shared/charts/transaction_charts', () => ({
-  TransactionCharts: () => null,
-}));
+vi.mock('../../shared/charts/transaction_charts', () => {
+      const mocked = {
+      TransactionCharts: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./transaction_details_tabs', () => ({
-  TransactionDetailsTabs: () => null,
-}));
+vi.mock('./transaction_details_tabs', () => {
+      const mocked = {
+      TransactionDetailsTabs: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../context/chart_pointer_event/chart_pointer_event_context', () => ({
-  ChartPointerEventContextProvider: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
-}));
+vi.mock('../../../context/chart_pointer_event/chart_pointer_event_context', () => {
+      const mocked = {
+      ChartPointerEventContextProvider: ({ children }: { children: React.ReactNode }) => (
+        <>{children}</>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: jest.fn(),
-}));
+vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
+      const mocked = {
+      useApmPluginContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAnyOfApmParams = useAnyOfApmParams as jest.Mock;
-const mockUseApmRoutePath = useApmRoutePath as jest.Mock;
-const mockUseApmRouter = useApmRouter as jest.Mock;
-const mockUseApmPluginContext = useApmPluginContext as jest.Mock;
+const mockUseAnyOfApmParams = useAnyOfApmParams as Mock;
+const mockUseApmRoutePath = useApmRoutePath as Mock;
+const mockUseApmRouter = useApmRouter as Mock;
+const mockUseApmPluginContext = useApmPluginContext as Mock;
 
-const mockSetAgentBuilderChatConfig = jest.fn();
-const mockClearAgentBuilderChatConfig = jest.fn();
+const mockSetAgentBuilderChatConfig = vi.fn();
+const mockClearAgentBuilderChatConfig = vi.fn();
 
 const baseQuery = {
   rangeFrom: 'now-15m',
@@ -91,7 +127,7 @@ const baseQuery = {
 };
 
 describe('TransactionDetails', () => {
-  const mockLink = jest.fn(
+  const mockLink = vi.fn(
     (path: string, opts: { path: { serviceName: string }; query: object }) => {
       const qs = new URLSearchParams(opts.query as Record<string, string>).toString();
       return `/app/apm${path.replace('{serviceName}', opts.path.serviceName)}${qs ? `?${qs}` : ''}`;
@@ -99,7 +135,7 @@ describe('TransactionDetails', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseApmRouter.mockReturnValue({ link: mockLink });
     mockUseApmPluginContext.mockReturnValue({ agentBuilder: undefined });
   });

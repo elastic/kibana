@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { PassThrough } from 'stream';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import execa from 'execa';
 import { GcsFileSystem } from './gcs_file_system';
 
-jest.mock('execa', () => ({
+vi.mock('execa', () => ({
   __esModule: true,
-  default: jest.fn(),
+  default: vi.fn(),
 }));
 
-const mockExeca = execa as unknown as jest.Mock;
+const mockExeca = execa as unknown as Mock;
 
 class ExposedGcsFileSystem extends GcsFileSystem {
   upload(archivePath: string, fileListPath: string) {
@@ -27,15 +30,15 @@ class ExposedGcsFileSystem extends GcsFileSystem {
 
 const createLog = (): SomeDevLog =>
   ({
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   } as unknown as SomeDevLog);
 
 const asChild = (promise: Promise<unknown>) => {
-  const kill = jest.fn();
-  const child = promise as unknown as execa.ExecaChildProcess & { kill: jest.Mock };
+  const kill = vi.fn();
+  const child = promise as unknown as execa.ExecaChildProcess & { kill: Mock };
   Object.assign(child, {
     stdout: new PassThrough(),
     stdin: new PassThrough(),

@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { monaco } from '@kbn/monaco';
 import { useLineDifferencesDecorations } from './use_line_differences_decorations';
 
-jest.mock('@kbn/monaco', () => {
-  const actualMonaco = jest.requireActual('@kbn/monaco');
+vi.mock('@kbn/monaco', async () => {
+  const actualMonaco = (await vi.importActual('@kbn/monaco'));
   return {
     ...actualMonaco,
     monaco: {
       ...actualMonaco.monaco,
-      Range: jest.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
+      Range: vi.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
         startLineNumber: startLine,
         startColumn: startCol,
         endLineNumber: endLine,
@@ -29,15 +32,15 @@ jest.mock('@kbn/monaco', () => {
 
 const createMockEditor = () => {
   const decorationsCollection = {
-    clear: jest.fn(),
-    set: jest.fn(),
+    clear: vi.fn(),
+    set: vi.fn(),
   };
 
   return {
     editor: {
-      createDecorationsCollection: jest.fn(() => decorationsCollection),
-      getModel: jest.fn(() => ({
-        getLineMaxColumn: jest.fn((lineNum: number) => 80),
+      createDecorationsCollection: vi.fn(() => decorationsCollection),
+      getModel: vi.fn(() => ({
+        getLineMaxColumn: vi.fn((lineNum: number) => 80),
       })),
     } as unknown as monaco.editor.IStandaloneCodeEditor,
     decorationsCollection,
@@ -88,7 +91,7 @@ describe('useLineDifferencesDecorations', () => {
     );
 
     expect(editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
-    const decorations = (editor.createDecorationsCollection as jest.Mock).mock.calls[0][0];
+    const decorations = (editor.createDecorationsCollection as Mock).mock.calls[0][0];
     expect(decorations).toHaveLength(1); // Only line 2 changed
     expect(decorations[0].range.startLineNumber).toBe(2);
     expect(decorations[0].options.className).toBe('changed-line-highlight');
@@ -110,7 +113,7 @@ describe('useLineDifferencesDecorations', () => {
     );
 
     expect(editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
-    const decorations = (editor.createDecorationsCollection as jest.Mock).mock.calls[0][0];
+    const decorations = (editor.createDecorationsCollection as Mock).mock.calls[0][0];
     expect(decorations).toHaveLength(2); // Lines 1 and 3 changed
   });
 
@@ -166,7 +169,7 @@ describe('useLineDifferencesDecorations', () => {
     );
 
     expect(editor.createDecorationsCollection).toHaveBeenCalledTimes(1);
-    const decorations = (editor.createDecorationsCollection as jest.Mock).mock.calls[0][0];
+    const decorations = (editor.createDecorationsCollection as Mock).mock.calls[0][0];
     // Lines 2 and 3 differ (missing in current)
     expect(decorations).toHaveLength(2);
   });

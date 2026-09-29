@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,40 +19,46 @@ import { AlertEpisodeSeverityHeatmap } from './severity_heatmap';
 let capturedHeatmapData: unknown;
 let capturedOnElementClick: ElementClickListener | undefined;
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(() => ({
-    services: {
-      charts: {
-        theme: {
-          useChartsBaseTheme: () => ({}),
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(() => ({
+        services: {
+          charts: {
+            theme: {
+              useChartsBaseTheme: () => ({}),
+            },
+          },
         },
-      },
-    },
-  })),
-}));
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/charts', () => ({
-  Chart: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="mockSeverityHeatmapChart">{children}</div>
-  ),
-  Settings: ({
-    onElementClick,
-    children,
-  }: {
-    onElementClick?: ElementClickListener;
-    children?: React.ReactNode;
-  }) => {
-    capturedOnElementClick = onElementClick;
-    return <div data-test-subj="mockSeverityHeatmapSettings">{children}</div>;
-  },
-  Heatmap: ({ data }: { data: unknown }) => {
-    capturedHeatmapData = data;
-    return null;
-  },
-  Tooltip: () => null,
-  Predicate: { NumAsc: 'NumAsc' },
-  ScaleType: { Ordinal: 'ordinal' },
-}));
+vi.mock('@elastic/charts', () => {
+      const mocked = {
+      Chart: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="mockSeverityHeatmapChart">{children}</div>
+      ),
+      Settings: ({
+        onElementClick,
+        children,
+      }: {
+        onElementClick?: ElementClickListener;
+        children?: React.ReactNode;
+      }) => {
+        capturedOnElementClick = onElementClick;
+        return <div data-test-subj="mockSeverityHeatmapSettings">{children}</div>;
+      },
+      Heatmap: ({ data }: { data: unknown }) => {
+        capturedHeatmapData = data;
+        return null;
+      },
+      Tooltip: () => null,
+      Predicate: { NumAsc: 'NumAsc' },
+      ScaleType: { Ordinal: 'ordinal' },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createEventRow = (overrides: Partial<EpisodeEventRow> = {}): EpisodeEventRow => ({
   '@timestamp': '2024-01-01T00:00:00.000Z',

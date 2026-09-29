@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { parse } from 'yaml';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -33,8 +36,8 @@ const WORKERS_WITHOUT_FORENSIC_SKILL = SYSTEM_SECURITY_WORKER_IDS.filter((id) =>
 const agentBuilderWithSkill = (present: boolean): AgentBuilderPluginStart =>
   ({
     skills: {
-      getRegistry: jest.fn(async () => ({
-        has: jest.fn(
+      getRegistry: vi.fn(async () => ({
+        has: vi.fn(
           async (skillId: string) => present && skillId === 'endpoint-forensic-analysis'
         ),
       })),
@@ -70,7 +73,7 @@ const createPersistentHarness = () => {
   const documents = new Map<string, PersistentWorkerDocument>();
   const documentId = (id: string, spaceId: string) => `${id}-${spaceId}`;
   const findDocument = (workflowId: string) => documents.get(storedIdFromReport(workflowId));
-  const install = jest.fn(
+  const install = vi.fn(
     async (
       id: string,
       options: {
@@ -92,7 +95,7 @@ const createPersistentHarness = () => {
       });
     }
   );
-  const getWorkflowStatus = jest.fn(async (id: string, options: { spaceId: string }) => {
+  const getWorkflowStatus = vi.fn(async (id: string, options: { spaceId: string }) => {
     const idWithSuffix = documentId(id, options.spaceId);
     const document = documents.get(idWithSuffix);
     return {
@@ -112,11 +115,11 @@ const createPersistentHarness = () => {
   });
   const managedWorkflows = {
     install,
-    uninstall: jest.fn(),
-    execute: jest.fn(),
-    ready: jest.fn(),
+    uninstall: vi.fn(),
+    execute: vi.fn(),
+    ready: vi.fn(),
     getWorkflowStatus,
-    getInstalledWorkflowState: jest.fn(async (id: string, spaceId: string) => {
+    getInstalledWorkflowState: vi.fn(async (id: string, spaceId: string) => {
       const document = findDocument(id);
       if (!document) return null;
       return {
@@ -127,11 +130,11 @@ const createPersistentHarness = () => {
         documentVersion: document.version,
       };
     }),
-    listInstalledWorkflowStates: jest.fn(async () => []),
+    listInstalledWorkflowStates: vi.fn(async () => []),
   } as unknown as PluginScopedManagedWorkflowsApi;
 
   const scheduledTasks = new Map<string, { apiKeyId: string; interval: string | null }>();
-  const updateWorkflow = jest.fn(
+  const updateWorkflow = vi.fn(
     async (id: string, { enabled }: { enabled: boolean }, _spaceId: string) => {
       const document = findDocument(id);
       if (!document) throw new Error('not found');
@@ -148,11 +151,11 @@ const createPersistentHarness = () => {
     }
   );
   const management = {
-    getWorkflow: jest.fn(),
-    getWorkflows: jest.fn(),
-    getWorkflowExecutions: jest.fn(async () => ({ results: [], page: 1, size: 10, total: 0 })),
-    getWorkflowExecution: jest.fn(async () => null),
-    cancelAllActiveWorkflowExecutions: jest.fn(async () => undefined),
+    getWorkflow: vi.fn(),
+    getWorkflows: vi.fn(),
+    getWorkflowExecutions: vi.fn(async () => ({ results: [], page: 1, size: 10, total: 0 })),
+    getWorkflowExecution: vi.fn(async () => null),
+    cancelAllActiveWorkflowExecutions: vi.fn(async () => undefined),
     updateWorkflow,
   } as unknown as WatchWorkflowsManagementClient;
 
@@ -388,7 +391,7 @@ describe('WorkersService', () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
     await service.update(TRIAGE, { enabled: true }, SPACE, request);
-    (harness.managedWorkflows.getInstalledWorkflowState as jest.Mock).mockRejectedValueOnce(
+    (harness.managedWorkflows.getInstalledWorkflowState as Mock).mockRejectedValueOnce(
       new Error('storage down')
     );
 
@@ -404,7 +407,7 @@ describe('WorkersService', () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
     await service.update(TRIAGE, { enabled: true }, SPACE, request);
-    (harness.managedWorkflows.getInstalledWorkflowState as jest.Mock).mockResolvedValueOnce({
+    (harness.managedWorkflows.getInstalledWorkflowState as Mock).mockResolvedValueOnce({
       workflowId: `${TRIAGE}-${SPACE}`,
       spaceId: SPACE,
       definitionId: TRIAGE,
@@ -475,7 +478,7 @@ describe('WorkersService', () => {
   it('does not project a workflow id when a non-managed document occupies that id', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
-    (harness.managedWorkflows.getWorkflowStatus as jest.Mock).mockResolvedValue({
+    (harness.managedWorkflows.getWorkflowStatus as Mock).mockResolvedValue({
       status: 'not_managed',
       workflowId: 'opaque:foreign-workflow',
       definitionId: TRIAGE,
@@ -509,7 +512,7 @@ describe('WorkersService', () => {
         },
       ],
     };
-    (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce({
+    (harness.management.getWorkflow as Mock).mockResolvedValueOnce({
       id: `${TRIAGE}-${SPACE}`,
       definition: mockDefinition,
     });

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -45,20 +48,26 @@ import { CLOUDBEAT_AWS, CLOUDBEAT_AZURE, CLOUDBEAT_GCP } from './constants';
 import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ, SetupTechnology } from '@kbn/fleet-plugin/public';
 
 // mock useParams
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn().mockReturnValue({
-    integration: undefined,
-  }),
-}));
-jest.mock('@kbn/fleet-plugin/public/services/experimental_features');
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: vi.fn().mockReturnValue({
+        integration: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/fleet-plugin/public/services/experimental_features');
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const onChange = jest.fn();
-const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
+const onChange = vi.fn();
+const mockedExperimentalFeaturesService = vi.mocked(ExperimentalFeaturesService);
 
 const GCP_ORGANIZATION_ACCOUNT = 'organization-account';
 const GCP_SINGLE_ACCOUNT = 'single-account';
@@ -101,7 +110,7 @@ const getAssetPolicy = (
 
 describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
   beforeEach(() => {
-    (useParams as jest.Mock).mockReturnValue({
+    (useParams as Mock).mockReturnValue({
       integration: undefined,
     });
 
@@ -109,7 +118,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       secretsStorage: true,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         cloud: {
           csp: 'aws',
@@ -262,7 +271,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     }));
     policy.name = 'cloud_asset_inventory-1';
 
-    (useParams as jest.Mock).mockReturnValue({
+    (useParams as Mock).mockReturnValue({
       integration: 'cloud_asset_inventory',
     });
 
@@ -1068,7 +1077,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
     it('should render setup technology selector for AWS and allow to select cloud connector in ess aws environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           cloud: {
             cloudId:
@@ -1125,7 +1134,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
     it('should render setup technology selector for AWS and show cloud connectors in cloud GCP environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           cloud: {
             cloudId:
@@ -1181,7 +1190,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     });
     it('should render setup technology selector for AWS and allow to select cloud connectors in serverless aws environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           cloud: {
             cloudId: undefined,
@@ -1242,7 +1251,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
     it('should render setup technology selector for AWS and show cloud connectors in serverless gcp environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           cloud: {
             cloudId: undefined,
@@ -1303,7 +1312,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
     it('should render setup technology selector for AWS and show cloud connectors in serverless azure environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
-      (useKibana as jest.Mock).mockReturnValue({
+      (useKibana as Mock).mockReturnValue({
         services: {
           cloud: {
             cloudId: undefined,

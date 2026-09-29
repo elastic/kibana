@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-jest.mock('../kibana_services', () => ({
-  getEMSSettings() {
-    return {
-      isEMSUrlSet() {
-        return false;
+import { vi } from 'vitest';
+
+vi.mock('../kibana_services', () => {
+      const mocked = {
+      getEMSSettings() {
+        return {
+          isEMSUrlSet() {
+            return false;
+          },
+        };
+      },
+      getMapsCapabilities() {
+        return { save: true };
       },
     };
-  },
-  getMapsCapabilities() {
-    return { save: true };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
 import type { TooltipState } from '../../common/descriptor_types';
 import { openOnClickTooltip } from './tooltip_actions';
@@ -48,7 +53,7 @@ describe('openOnClickTooltip', () => {
       location: [1, 1],
     } as unknown as TooltipState;
     const action = openOnClickTooltip(newTooltip);
-    const dispatchMock = jest.fn();
+    const dispatchMock = vi.fn();
     action(dispatchMock, () => {
       return {
         map: {
@@ -64,7 +69,7 @@ describe('openOnClickTooltip', () => {
 
   test('should remove existing mouseover tooltips when adding locked tooltips', () => {
     const action = openOnClickTooltip(newTooltip);
-    const dispatchMock = jest.fn();
+    const dispatchMock = vi.fn();
     action(dispatchMock, () => {
       return {
         map: {
@@ -92,7 +97,7 @@ describe('openOnClickTooltip', () => {
 
   test('should remove existing tooltip when adding new tooltip at same location', () => {
     const action = openOnClickTooltip(newTooltip);
-    const dispatchMock = jest.fn();
+    const dispatchMock = vi.fn();
     action(dispatchMock, () => {
       return {
         map: {
@@ -120,7 +125,7 @@ describe('openOnClickTooltip', () => {
 
   test('should remove existing tooltip when adding new tooltip with same features', () => {
     const action = openOnClickTooltip(newTooltip);
-    const dispatchMock = jest.fn();
+    const dispatchMock = vi.fn();
     action(dispatchMock, () => {
       return {
         map: {

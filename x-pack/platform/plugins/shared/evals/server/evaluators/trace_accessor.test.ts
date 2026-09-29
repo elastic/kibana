@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { createTraceAccessor } from './trace_accessor';
 
@@ -12,7 +14,7 @@ describe('createTraceAccessor', () => {
   const validTraceId = '0af7651916cd43dd8448eb211c80319c';
 
   const createEsClient = () => {
-    const searchMock = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+    const searchMock = vi.fn().mockResolvedValue({ hits: { hits: [] } });
     const esClient = {
       search: searchMock,
     } as unknown as ElasticsearchClient;

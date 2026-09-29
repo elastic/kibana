@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Rule, PrebuildFieldsMap } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { HttpSetup } from '@kbn/core/public';
 import { getDescriptionFields } from './index_threshold_description_fields';
 import type { IndexThresholdRuleParams } from './types';
 
 describe('index_threshold getDescriptionFields', () => {
-  const mockPrebuildField = jest.fn();
-  const mockPrebuildCustomQuery = jest.fn();
+  const mockPrebuildField = vi.fn();
+  const mockPrebuildCustomQuery = vi.fn();
   const mockPrebuildFields = {
     indexPattern: mockPrebuildField,
     customQuery: mockPrebuildCustomQuery,
   } as unknown as PrebuildFieldsMap;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return empty array when rule is not provided', () => {

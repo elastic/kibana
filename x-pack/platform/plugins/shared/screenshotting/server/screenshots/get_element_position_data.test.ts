@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockBrowserDriver } from '../browsers/mock';
 import { createMockLayout } from '../layouts/mock';
@@ -24,7 +26,7 @@ describe('getElementPositionAndAttributes', () => {
 
     // @see https://github.com/jsdom/jsdom/issues/653
     const querySelectorAll = document.querySelectorAll.bind(document);
-    jest.spyOn(document, 'querySelectorAll').mockImplementation((selector) => {
+    vi.spyOn(document, 'querySelectorAll').mockImplementation((selector) => {
       const elements = querySelectorAll<HTMLDivElement>(selector);
 
       elements.forEach((element) =>

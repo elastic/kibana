@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 import { mockUseParams } from '../../../__mocks__/react_router';
 
@@ -26,14 +28,14 @@ const mockValues = {
 };
 
 const mockActions = {
-  fetchAnalyticsCollection: jest.fn(),
-  fetchAnalyticsCollectionDataViewId: jest.fn(),
-  setTimeRange: jest.fn(),
+  fetchAnalyticsCollection: vi.fn(),
+  fetchAnalyticsCollectionDataViewId: vi.fn(),
+  setTimeRange: vi.fn(),
 };
 
 describe('AnalyticsView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseParams.mockReturnValue({ name: '1' });
   });

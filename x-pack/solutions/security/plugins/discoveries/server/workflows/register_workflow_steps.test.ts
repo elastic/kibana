@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
@@ -12,15 +14,15 @@ import { registerWorkflowSteps } from './register_workflow_steps';
 
 describe('registerWorkflowSteps', () => {
   const mockLogger = loggerMock.create();
-  const mockRegisterStepDefinition = jest.fn();
+  const mockRegisterStepDefinition = vi.fn();
   const mockWorkflowsExtensions = {
     registerStepDefinition: mockRegisterStepDefinition,
   } as unknown as WorkflowsExtensionsServerPluginSetup;
   const mockAdhocAttackDiscoveryDataClient = {} as IRuleDataClient;
-  const mockGetBooleanValue = jest.fn();
-  const mockGetStartServices = jest.fn();
-  const mockGetEventLogger = jest.fn();
-  const mockGetEventLogIndex = jest.fn().mockResolvedValue('.kibana-event-log-*');
+  const mockGetBooleanValue = vi.fn();
+  const mockGetStartServices = vi.fn();
+  const mockGetEventLogger = vi.fn();
+  const mockGetEventLogIndex = vi.fn().mockResolvedValue('.kibana-event-log-*');
   const defaultArgs = {
     adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
     connectorTimeout: 60000,
@@ -44,7 +46,7 @@ describe('registerWorkflowSteps', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockGetEventLogIndex.mockResolvedValue('.kibana-event-log-*');
     mockGetBooleanValue.mockResolvedValue(true);
     mockGetStartServices.mockResolvedValue({

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { getQuickFixesForMessage } from '.';
@@ -39,7 +41,7 @@ describe('getQuickFixesForMessage', () => {
     });
 
     it('returns an empty list for unknownColumn when the query has no wired stream source', async () => {
-      const getSources = jest.fn(async () => [indexSource('logs')]);
+      const getSources = vi.fn(async () => [indexSource('logs')]);
 
       const result = await getQuickFixesForMessage({
         queryString: 'FROM logs | KEEP missingField',
@@ -51,7 +53,7 @@ describe('getQuickFixesForMessage', () => {
     });
 
     it('returns an empty list for unknownColumn when getSources throws', async () => {
-      const getSources = jest.fn(async () => {
+      const getSources = vi.fn(async () => {
         throw new Error('network');
       });
 
@@ -65,7 +67,7 @@ describe('getQuickFixesForMessage', () => {
     });
 
     it('returns a load-unmapped-fields quick fix for unknownColumn when a wired stream is in the query', async () => {
-      const getSources = jest.fn(async () => [wiredStreamSource('logs.otel.child')]);
+      const getSources = vi.fn(async () => [wiredStreamSource('logs.otel.child')]);
 
       const result = await getQuickFixesForMessage({
         queryString: 'FROM logs.otel.child | KEEP missingField',
@@ -95,7 +97,7 @@ describe('getQuickFixesForMessage', () => {
         throw new Error('mutator failed');
       };
 
-      const getSources = jest.fn(async () => [wiredStreamSource('logs.otel.child')]);
+      const getSources = vi.fn(async () => [wiredStreamSource('logs.otel.child')]);
 
       try {
         const result = await getQuickFixesForMessage({

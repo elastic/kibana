@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import { useTimeRange } from './use_time_range';
@@ -13,7 +15,7 @@ describe('useTimeRange', () => {
   let hook: RenderHookResult<ReturnType<typeof useTimeRange>, Parameters<typeof useTimeRange>[0]>;
 
   beforeEach(() => {
-    Date.now = jest.fn(() => new Date(Date.UTC(2021, 0, 1, 12)).valueOf());
+    Date.now = vi.fn(() => new Date(Date.UTC(2021, 0, 1, 12)).valueOf());
 
     hook = renderHook(
       (props) => {
@@ -35,7 +37,7 @@ describe('useTimeRange', () => {
     expect(hook.result.current.start).toEqual('2021-01-01T11:30:00.000Z');
     expect(hook.result.current.end).toEqual('2021-01-01T12:00:00.000Z');
 
-    Date.now = jest.fn(() => new Date(Date.UTC(2021, 0, 1, 13)).valueOf());
+    Date.now = vi.fn(() => new Date(Date.UTC(2021, 0, 1, 13)).valueOf());
 
     hook.rerender({ rangeFrom: 'now-30m', rangeTo: 'now' });
 

@@ -7,19 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const parseClientOptionsMock = jest.fn();
-jest.doMock('./client_config', () => ({
-  parseClientOptions: parseClientOptionsMock,
-}));
+import { vi } from 'vitest';
 
-export const createTransportMock = jest.fn();
-jest.doMock('./create_transport', () => ({
-  createTransport: createTransportMock,
-}));
+export const parseClientOptionsMock = vi.fn();
+vi.doMock('./client_config', () => {
+      const mocked = {
+      parseClientOptions: parseClientOptionsMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const ClientMock = jest.fn();
-jest.doMock('@elastic/elasticsearch', () => {
-  const actual = jest.requireActual('@elastic/elasticsearch');
+export const createTransportMock = vi.fn();
+vi.doMock('./create_transport', () => {
+      const mocked = {
+      createTransport: createTransportMock,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+export const ClientMock = vi.fn();
+vi.doMock('@elastic/elasticsearch', () => {
+  const actual = require('@elastic/elasticsearch');
   return {
     ...actual,
     Client: ClientMock,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { ContentListProvider, useContentListSelection } from '@kbn/content-list-provider';
@@ -39,14 +41,14 @@ const SelectionBarWithSetup = ({ itemsToSelect }: { itemsToSelect: ContentListIt
 };
 
 describe('SelectionBar', () => {
-  const mockFindItems = jest.fn(
+  const mockFindItems = vi.fn(
     async (_params: FindItemsParams): Promise<FindItemsResult> => ({
       items: mockItems,
       total: mockItems.length,
     })
   );
 
-  const mockOnDelete = jest.fn(async () => {});
+  const mockOnDelete = vi.fn(async () => {});
 
   const createWrapper = (options?: {
     withOnDelete?: boolean;
@@ -74,7 +76,7 @@ describe('SelectionBar', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders a delete button with item count and entity name', async () => {

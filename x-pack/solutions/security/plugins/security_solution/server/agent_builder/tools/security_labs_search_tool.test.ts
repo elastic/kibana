@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType, type ErrorResult } from '@kbn/agent-builder-common';
 import type {
   ToolHandlerContext,
@@ -26,8 +29,8 @@ import type {
   SecuritySolutionPluginStartDependencies,
 } from '../../plugin_contract';
 
-const retrieveDocumentation = jest.fn();
-const retrieveDocumentationAvailable = jest.fn();
+const retrieveDocumentation = vi.fn();
+const retrieveDocumentationAvailable = vi.fn();
 
 describe('securityLabsSearchTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
@@ -37,13 +40,13 @@ describe('securityLabsSearchTool', () => {
     connector: { connectorId: 'fake-connector' },
   } as never);
   const mockEvents = {
-    reportProgress: jest.fn(),
-    sendUiEvent: jest.fn(),
+    reportProgress: vi.fn(),
+    sendUiEvent: vi.fn(),
   };
   const tool = securityLabsSearchTool(mockCore);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const coreStart = coreMock.createStart();
     Object.assign(coreStart.elasticsearch.client, {
       asInternalUser: mockEsClient.asInternalUser,
@@ -178,7 +181,7 @@ describe('securityLabsSearchTool', () => {
     });
 
     it('prefers Jina when its endpoint exists and Jina Security Labs docs are installed', async () => {
-      (mockEsClient.asInternalUser.inference.get as unknown as jest.Mock).mockResolvedValue({
+      (mockEsClient.asInternalUser.inference.get as unknown as Mock).mockResolvedValue({
         endpoints: [
           { inference_id: defaultInferenceEndpoints.ELSER },
           { inference_id: defaultInferenceEndpoints.JINAv5 },
@@ -204,7 +207,7 @@ describe('securityLabsSearchTool', () => {
     });
 
     it('falls back to ELSER when no Jina endpoint is available (on-prem)', async () => {
-      (mockEsClient.asInternalUser.inference.get as unknown as jest.Mock).mockResolvedValue({
+      (mockEsClient.asInternalUser.inference.get as unknown as Mock).mockResolvedValue({
         endpoints: [{ inference_id: defaultInferenceEndpoints.ELSER }],
       });
       retrieveDocumentationAvailable.mockImplementation(
@@ -227,7 +230,7 @@ describe('securityLabsSearchTool', () => {
     });
 
     it('returns install guidance when no candidate model has Security Labs installed', async () => {
-      (mockEsClient.asInternalUser.inference.get as unknown as jest.Mock).mockResolvedValue({
+      (mockEsClient.asInternalUser.inference.get as unknown as Mock).mockResolvedValue({
         endpoints: [{ inference_id: defaultInferenceEndpoints.JINAv5 }],
       });
       retrieveDocumentationAvailable.mockResolvedValue(false);
@@ -254,7 +257,7 @@ describe('securityLabsSearchTool', () => {
     });
 
     it('includes the current space in the GenAI Settings install URL', async () => {
-      (mockEsClient.asInternalUser.inference.get as unknown as jest.Mock).mockResolvedValue({
+      (mockEsClient.asInternalUser.inference.get as unknown as Mock).mockResolvedValue({
         endpoints: [{ inference_id: defaultInferenceEndpoints.JINAv5 }],
       });
       retrieveDocumentationAvailable.mockResolvedValue(false);

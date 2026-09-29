@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EuiButtonGroupProps } from '@elastic/eui';
 import { EuiButtonGroup, EuiComboBox, EuiProvider, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
@@ -80,7 +82,7 @@ const buildProps = (customProps: any = {}) => {
     editable: true,
     kibanaPrivileges,
     features,
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     canCustomizeSubFeaturePrivileges: true,
     ...customProps,
     role,

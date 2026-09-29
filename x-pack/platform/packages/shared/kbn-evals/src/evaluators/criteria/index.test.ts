@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { BoundInferenceClient, ToolCallback } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-jest.mock('@kbn/inference-prompt-utils', () => ({
-  executeUntilValid: jest.fn(),
-}));
+vi.mock('@kbn/inference-prompt-utils', () => {
+      const mocked = {
+      executeUntilValid: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import { createCriteriaEvaluator, type EvaluationCriterion } from '.';
 
-const executeUntilValidMock = executeUntilValid as jest.MockedFunction<typeof executeUntilValid>;
+const executeUntilValidMock = executeUntilValid as MockedFunction<typeof executeUntilValid>;
 
 const inferenceClient = {} as BoundInferenceClient;
-const log = { info: jest.fn() } as unknown as ToolingLog;
+const log = { info: vi.fn() } as unknown as ToolingLog;
 
 const criteria: EvaluationCriterion[] = [
   { id: 'pass-me', text: 'Must do the thing', score: 2 },
@@ -45,7 +51,7 @@ const mockScoreWith = (criteriaResults: unknown[]) => {
 
 describe('createCriteriaEvaluator', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const runEvaluation = () =>

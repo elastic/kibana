@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getLiquidInstance } from '../../liquid/liquid_parse_cache';
 import {
   forLoopScopesContainingOffset,
@@ -368,7 +370,7 @@ describe('template index cache', () => {
     // Every reference in a scalar asks for the locals at its own offset. Before
     // failed parses were cached, each of those asks parsed the scalar again.
     const malformed = `{% assign broken = ${'x'.repeat(2_000)}`;
-    const parse = jest.spyOn(getLiquidInstance(), 'parse');
+    const parse = vi.spyOn(getLiquidInstance(), 'parse');
 
     for (let offset = 0; offset < malformed.length; offset += 2) {
       getTemplateLocalContext(malformed, offset);

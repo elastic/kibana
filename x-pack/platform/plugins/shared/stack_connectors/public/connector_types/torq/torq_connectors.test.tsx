@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -14,19 +16,20 @@ import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
+vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => ({
+  useKibana: vi.fn(() => ({
     services: mockUseKibanaReturnValue,
   })),
 }));
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
-  ...jest.requireActual(
-    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
-  ),
-  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
-}));
+vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api')),
+      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const EMPTY_FUNC = () => {};
 
@@ -59,7 +62,7 @@ describe('TorqActionConnectorFields renders', () => {
   });
 
   describe('Validation', () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
     const actionConnector = {
       actionTypeId: '.torq',
       name: 'torq',
@@ -73,7 +76,7 @@ describe('TorqActionConnectorFields renders', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('connector validation succeeds when connector config is valid', async () => {

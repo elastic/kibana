@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { createConversation } from './create_conversation';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -12,9 +15,12 @@ import { getConversation } from './get_conversation';
 import { authenticatedUser } from '../../__mocks__/user';
 import type { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
 
-jest.mock('./get_conversation', () => ({
-  getConversation: jest.fn(),
-}));
+vi.mock('./get_conversation', () => {
+      const mocked = {
+      getConversation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockUser1 = authenticatedUser;
 
@@ -62,27 +68,27 @@ export const getConversationResponseMock = (): ConversationResponse => ({
 describe('createConversation', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggingSystemMock.createLogger();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const date = '2024-01-28T04:20:02.394Z';
-    jest.setSystemTime(new Date(date));
+    vi.setSystemTime(new Date(date));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('it returns a conversation as expected with the id changed out for the elastic id', async () => {
     const conversation = getCreateConversationMock();
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce({
+    (getConversation as unknown as Mock).mockResolvedValueOnce({
       ...getConversationResponseMock(),
       id: 'elastic-id-123',
     });
@@ -114,7 +120,7 @@ describe('createConversation', () => {
       ...getCreateConversationMock(),
       title: 'test new title',
     };
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce({
+    (getConversation as unknown as Mock).mockResolvedValueOnce({
       ...getConversationResponseMock(),
       id: 'elastic-id-123',
       title: 'test new title',
@@ -144,7 +150,7 @@ describe('createConversation', () => {
 
   test('It calls "esClient" with body, id, and conversationIndex', async () => {
     const conversation = getCreateConversationMock();
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(getConversationResponseMock());
+    (getConversation as unknown as Mock).mockResolvedValueOnce(getConversationResponseMock());
 
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     await createConversation({
@@ -161,7 +167,7 @@ describe('createConversation', () => {
 
   test('It returns an auto-generated id if id is sent in undefined', async () => {
     const conversation = getCreateConversationMock();
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce({
+    (getConversation as unknown as Mock).mockResolvedValueOnce({
       ...getConversationResponseMock(),
       id: 'elastic-id-123',
     });

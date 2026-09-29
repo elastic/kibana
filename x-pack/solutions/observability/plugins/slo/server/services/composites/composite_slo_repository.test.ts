@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { escapeKuery } from '@kbn/es-query';
@@ -16,8 +18,8 @@ import { DefaultCompositeSLORepository } from './composite_slo_repository';
 import { createCompositeSlo } from '../fixtures/composite_slo';
 
 describe('DefaultCompositeSLORepository', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let logger: jest.Mocked<Logger>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let logger: Mocked<Logger>;
   let repository: DefaultCompositeSLORepository;
 
   beforeEach(() => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import type { MemoryRouterProps } from 'react-router';
@@ -21,36 +24,39 @@ import { CasesRoutes } from './routes';
 import type { CasesPermissions } from '../../../common';
 import { KibanaServices } from '../../common/lib/kibana';
 
-jest.mock('../all_cases', () => ({
+vi.mock('../all_cases', () => ({
   __esModule: true,
   default: () => <div>{'All cases'}</div>,
 }));
 
-jest.mock('../create', () => ({
-  CreateCase: () => <div>{'Create case'}</div>,
-}));
+vi.mock('../create', () => {
+      const mocked = {
+      CreateCase: () => <div>{'Create case'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../configure_cases/configure_cases', () => ({
+vi.mock('../configure_cases/configure_cases', () => ({
   __esModule: true,
   default: () => <div>{'Settings'}</div>,
 }));
 
-jest.mock('../case_view', () => ({
+vi.mock('../case_view', () => ({
   __esModule: true,
   default: () => <div>{'Case View Page'}</div>,
 }));
 
-jest.mock('../templates_v2/pages/all_templates_page', () => ({
+vi.mock('../templates_v2/pages/all_templates_page', () => ({
   __esModule: true,
   default: () => <div>{'All templates'}</div>,
 }));
 
-jest.mock('../templates_v2/pages/create_template/page', () => ({
+vi.mock('../templates_v2/pages/create_template/page', () => ({
   __esModule: true,
   default: () => <div>{'Create template'}</div>,
 }));
 
-jest.mock('../templates_v2/pages/edit_template/page', () => ({
+vi.mock('../templates_v2/pages/edit_template/page', () => ({
   __esModule: true,
   default: () => <div>{'Edit template'}</div>,
 }));
@@ -130,10 +136,10 @@ describe('Cases routes', () => {
     // field-library routes must be unregistered (falling through to the settings route, where
     // custom fields and templates are managed inline) rather than dead-ending the user.
     describe('with templates disabled', () => {
-      let getConfigSpy: jest.SpyInstance;
+      let getConfigSpy: MockInstance;
 
       beforeEach(() => {
-        getConfigSpy = jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        getConfigSpy = vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
           templates: { enabled: false },
         } as ReturnType<typeof KibanaServices.getConfig>);
       });
@@ -161,10 +167,10 @@ describe('Cases routes', () => {
   });
 
   describe('Templates routes', () => {
-    let getConfigSpy: jest.SpyInstance;
+    let getConfigSpy: MockInstance;
 
     beforeEach(() => {
-      getConfigSpy = jest
+      getConfigSpy = vi
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -76,14 +79,20 @@ const mockAgentPolicy: AgentPolicy = createAgentPolicyMock({
   package_policies: [systemMock],
 });
 
-jest.mock('../../services/agent_policy_update', () => ({
-  agentPolicyUpdateEventHandler: jest.fn(),
-}));
+vi.mock('../../services/agent_policy_update', () => {
+      const mocked = {
+      agentPolicyUpdateEventHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/agents', () => ({
-  getAgentsByKuery: jest.fn(),
-  getLatestAvailableAgentVersion: jest.fn(),
-}));
+vi.mock('../../services/agents', () => {
+      const mocked = {
+      getAgentsByKuery: vi.fn(),
+      getLatestAvailableAgentVersion: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Upgrade Agentless Deployments', () => {
   const { createSetup: coreSetupMock } = coreMock;
@@ -95,8 +104,8 @@ describe('Upgrade Agentless Deployments', () => {
   let abortController: AbortController;
 
   const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
-    jest.fn().mockResolvedValue(
-      jest.fn(async function* () {
+    vi.fn().mockResolvedValue(
+      vi.fn(async function* () {
         yield items;
       })()
     );
@@ -116,7 +125,7 @@ describe('Upgrade Agentless Deployments', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Task lifecycle', () => {
@@ -149,7 +158,7 @@ describe('Upgrade Agentless Deployments', () => {
       return taskRunner.run();
     };
 
-    const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+    const mockAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
     const agents = [
       {
         id: 'agent-1',
@@ -176,13 +185,13 @@ describe('Upgrade Agentless Deployments', () => {
         },
       },
     ];
-    const mockedGetAgentsByKuery = getAgentsByKuery as jest.Mock;
+    const mockedGetAgentsByKuery = getAgentsByKuery as Mock;
 
     beforeEach(() => {
       mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
         mockAgentPolicy,
       ]);
-      jest
+      vi
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enabledUpgradeAgentlessDeploymentsTask: true } as any);
 
@@ -190,13 +199,13 @@ describe('Upgrade Agentless Deployments', () => {
         agents,
       });
 
-      jest
+      vi
         .spyOn(agentlessAgentService, 'upgradeAgentlessDeployment')
         .mockResolvedValueOnce(undefined);
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should upgrade agentless deployments', async () => {
@@ -293,7 +302,7 @@ describe('Upgrade Agentless Deployments', () => {
     });
 
     it('should throw an error if task is aborted', async () => {
-      abortController.signal.throwIfAborted = jest.fn(() => {
+      abortController.signal.throwIfAborted = vi.fn(() => {
         throw new Error('Task aborted!');
       });
 
@@ -304,7 +313,7 @@ describe('Upgrade Agentless Deployments', () => {
     });
 
     it('should not call upgrade agentless api to upgrade when agent policy is not found', async () => {
-      jest
+      vi
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enabledUpgradeAgentlessDeploymentsTask: false } as any);
 

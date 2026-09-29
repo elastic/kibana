@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ClusterHealthRule } from './cluster_health_rule';
 import { RULE_CLUSTER_HEALTH } from '../../common/constants';
 import { AlertClusterHealthType, AlertSeverity } from '../../common/enums';
@@ -15,25 +18,34 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
-jest.mock('../static_globals', () => ({
-  Globals: {
-    app: {
-      getLogger: () => ({ debug: jest.fn() }),
-      config: {
-        ui: {
-          ccs: { enabled: true },
+vi.mock('../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          getLogger: () => ({ debug: vi.fn() }),
+          config: {
+            ui: {
+              ccs: { enabled: true },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/alerts/fetch_cluster_health', () => ({
-  fetchClusterHealth: jest.fn(),
-}));
-jest.mock('../lib/alerts/fetch_clusters', () => ({
-  fetchClusters: jest.fn(),
-}));
+vi.mock('../lib/alerts/fetch_cluster_health', () => {
+      const mocked = {
+      fetchClusterHealth: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/alerts/fetch_clusters', () => {
+      const mocked = {
+      fetchClusters: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ClusterHealthRule', () => {
   it('should have defaults', () => {
@@ -82,17 +94,17 @@ describe('ClusterHealthRule', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchClusterHealth as jest.Mock).mockImplementation(() => {
+      (fetchClusterHealth as Mock).mockImplementation(() => {
         return healths;
       });
-      (fetchClusters as jest.Mock).mockImplementation(() => {
+      (fetchClusters as Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
       });
     });
 
     afterEach(() => {
       Date = RealDate;
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('should fire action', async () => {
@@ -167,7 +179,7 @@ describe('ClusterHealthRule', () => {
     });
 
     it('should not fire actions if the cluster health is green', async () => {
-      (fetchClusterHealth as jest.Mock).mockImplementation(() => {
+      (fetchClusterHealth as Mock).mockImplementation(() => {
         return [
           {
             health: AlertClusterHealthType.Green,

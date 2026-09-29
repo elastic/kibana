@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { EntityPanelHeaderTabs, type EntityPanelTabType } from './entity_panel_tabs';
@@ -20,7 +22,7 @@ describe('EntityPanelHeaderTabs', () => {
       <EntityPanelHeaderTabs
         tabs={mockTabs}
         selectedTabId="overview"
-        setSelectedTabId={jest.fn()}
+        setSelectedTabId={vi.fn()}
       />
     );
 
@@ -33,7 +35,7 @@ describe('EntityPanelHeaderTabs', () => {
       <EntityPanelHeaderTabs
         tabs={mockTabs}
         selectedTabId="overview"
-        setSelectedTabId={jest.fn()}
+        setSelectedTabId={vi.fn()}
       />
     );
 
@@ -42,7 +44,7 @@ describe('EntityPanelHeaderTabs', () => {
   });
 
   it('calls setSelectedTabId when a tab is clicked', () => {
-    const setSelectedTabId = jest.fn();
+    const setSelectedTabId = vi.fn();
     const { getByTestId } = render(
       <EntityPanelHeaderTabs
         tabs={mockTabs}

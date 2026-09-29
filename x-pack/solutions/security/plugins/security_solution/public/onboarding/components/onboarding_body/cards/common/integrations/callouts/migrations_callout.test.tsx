@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, renderHook } from '@testing-library/react';
 import { SecurityPageName, useNavigateTo } from '@kbn/security-solution-navigation';
@@ -15,26 +18,38 @@ import { useGetSecuritySolutionUrl } from '../../../../../../../common/component
 import { SIEM_MIGRATIONS_PATH } from '../../../../../../../../common/constants';
 import { MigrationsCallout, useShowMigrationCallout } from './migrations_callout';
 
-jest.mock('@kbn/security-solution-navigation', () => ({
-  ...jest.requireActual('@kbn/security-solution-navigation'),
-  useNavigateTo: jest.fn(),
-}));
+vi.mock('@kbn/security-solution-navigation', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/security-solution-navigation')),
+      useNavigateTo: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../common/components/link_to', () => ({
-  useGetSecuritySolutionUrl: jest.fn(),
-}));
+vi.mock('../../../../../../../common/components/link_to', () => {
+      const mocked = {
+      useGetSecuritySolutionUrl: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockNavigateTo = jest.fn();
-const mockGetSecuritySolutionUrl = jest.fn();
+const mockNavigateTo = vi.fn();
+const mockGetSecuritySolutionUrl = vi.fn();
 
 const setSiemMigrationsAvailability = ({
   rules,
@@ -43,14 +58,14 @@ const setSiemMigrationsAvailability = ({
   rules: boolean;
   dashboards: boolean;
 }) => {
-  (useKibana as jest.Mock).mockReturnValue({
+  (useKibana as Mock).mockReturnValue({
     services: {
       siemMigrations: {
         rules: {
-          isAvailable: jest.fn(() => rules),
+          isAvailable: vi.fn(() => rules),
         },
         dashboards: {
-          isAvailable: jest.fn(() => dashboards),
+          isAvailable: vi.fn(() => dashboards),
         },
       },
     },
@@ -59,11 +74,11 @@ const setSiemMigrationsAvailability = ({
 
 describe('MigrationsCallout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useNavigateTo as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useNavigateTo as Mock).mockReturnValue({
       navigateTo: mockNavigateTo,
     });
-    (useGetSecuritySolutionUrl as jest.Mock).mockReturnValue(mockGetSecuritySolutionUrl);
+    (useGetSecuritySolutionUrl as Mock).mockReturnValue(mockGetSecuritySolutionUrl);
     mockGetSecuritySolutionUrl.mockReturnValue('/app/security/siem_migrations/manage');
   });
 
@@ -100,8 +115,8 @@ describe('MigrationsCallout', () => {
 
 describe('useShowMigrationCallout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useLocation as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useLocation as Mock).mockReturnValue({
       pathname: '/app/security',
     });
     setSiemMigrationsAvailability({
@@ -128,7 +143,7 @@ describe('useShowMigrationCallout', () => {
   });
 
   it('should return false when pathname includes SIEM migrations path', () => {
-    (useLocation as jest.Mock).mockReturnValue({
+    (useLocation as Mock).mockReturnValue({
       pathname: `/app/security${SIEM_MIGRATIONS_PATH}/rules`,
     });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Subject } from 'rxjs';
 import type { ILicenseState } from './license_state';
 import { LicenseState } from './license_state';
@@ -12,16 +14,16 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { ILicense } from '@kbn/licensing-types';
 
 describe('checkLicense()', () => {
-  const getRawLicense = jest.fn();
+  const getRawLicense = vi.fn();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('status is LICENSE_STATUS_INVALID', () => {
     beforeEach(() => {
       const license = licensingMock.createLicense({ license: { status: 'invalid' } });
-      license.check = jest.fn(() => ({
+      license.check = vi.fn(() => ({
         state: 'invalid',
       }));
       getRawLicense.mockReturnValue(license);
@@ -38,7 +40,7 @@ describe('checkLicense()', () => {
   describe('status is LICENSE_STATUS_VALID', () => {
     beforeEach(() => {
       const license = licensingMock.createLicense({ license: { status: 'active' } });
-      license.check = jest.fn(() => ({
+      license.check = vi.fn(() => ({
         state: 'valid',
       }));
       getRawLicense.mockReturnValue(license);

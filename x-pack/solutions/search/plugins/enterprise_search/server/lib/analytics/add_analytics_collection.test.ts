@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
@@ -13,24 +16,27 @@ import { ErrorCode } from '../../../common/types/error_codes';
 import { addAnalyticsCollection } from './add_analytics_collection';
 import { fetchAnalyticsCollections } from './fetch_analytics_collection';
 
-jest.mock('./fetch_analytics_collection', () => ({ fetchAnalyticsCollections: jest.fn() }));
+vi.mock('./fetch_analytics_collection', () => {
+      const mocked = { fetchAnalyticsCollections: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 describe('add analytics collection lib function', () => {
   const mockClient = {
     asCurrentUser: {
       searchApplication: {
-        putBehavioralAnalytics: jest.fn(),
+        putBehavioralAnalytics: vi.fn(),
       },
     },
     asInternalUser: {},
   };
 
   const mockDataViewsService = {
-    createAndSave: jest.fn(),
+    createAndSave: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should add analytics collection', async () => {
@@ -39,7 +45,7 @@ describe('add analytics collection lib function', () => {
       name: `example`,
     }));
 
-    (fetchAnalyticsCollections as jest.Mock).mockImplementation(() => [
+    (fetchAnalyticsCollections as Mock).mockImplementation(() => [
       {
         events_datastream: 'example-datastream',
         name: 'example',

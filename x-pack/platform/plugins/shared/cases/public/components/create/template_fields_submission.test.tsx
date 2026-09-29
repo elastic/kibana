@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -20,14 +23,14 @@ import { CaseFormFields } from '../case_form_fields';
 import { getFieldDefinitions } from '../field_library/api/api';
 import { getTemplate } from '../templates_v2/api/api';
 
-jest.mock('../../containers/user_profiles/api');
-jest.mock('../../containers/configure/api');
-jest.mock('../../common/navigation/hooks');
-jest.mock('../field_library/api/api');
-jest.mock('../templates_v2/api/api');
+vi.mock('../../containers/user_profiles/api');
+vi.mock('../../containers/configure/api');
+vi.mock('../../common/navigation/hooks');
+vi.mock('../field_library/api/api');
+vi.mock('../templates_v2/api/api');
 
-const getFieldDefinitionsMock = getFieldDefinitions as jest.Mock;
-const getTemplateMock = getTemplate as jest.Mock;
+const getFieldDefinitionsMock = getFieldDefinitions as Mock;
+const getTemplateMock = getTemplate as Mock;
 
 /**
  * End-to-end create-form submission through the REAL CaseFormFields →
@@ -42,7 +45,7 @@ const getTemplateMock = getTemplate as jest.Mock;
 describe('create form submission with legacy-visible linked fields (unmocked form pipeline)', () => {
   let user: UserEvent;
 
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   // EUI's test id generator gives every EuiFormRow the same generated id, so label-based
   // queries can resolve to the wrong input. Template-field inputs are located by their RHF
@@ -104,19 +107,19 @@ describe('create form submission with legacy-visible linked fields (unmocked for
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     localStorage.clear();
     localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'true');
-    jest
+    vi
       .spyOn(KibanaServices, 'getConfig')
       .mockReturnValue({ templates: { enabled: true } } as ReturnType<
         typeof KibanaServices.getConfig
@@ -129,7 +132,7 @@ describe('create form submission with legacy-visible linked fields (unmocked for
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('serializes the legacy value in customFields and only the inline collision value in extended_fields', async () => {

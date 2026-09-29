@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useBreadcrumbs } from './use_breadcrumbs';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 
-const mockSetBreadcrumbs = jest.fn();
-jest.mock('../application/breadcrumb_context', () => ({
-  useSetBreadcrumbs: () => mockSetBreadcrumbs,
-}));
+const mockSetBreadcrumbs = vi.fn();
+vi.mock('../application/breadcrumb_context', () => {
+      const mocked = {
+      useSetBreadcrumbs: () => mockSetBreadcrumbs,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/core-di-browser');
+vi.mock('@kbn/core-di-browser');
 
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
-const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
+const mockUseService = useService as MockedFunction<typeof useService>;
+const mockCoreStart = CoreStart as MockedFunction<typeof CoreStart>;
 
 describe('useBreadcrumbs', () => {
-  const mockDocTitleChange = jest.fn();
+  const mockDocTitleChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockCoreStart.mockImplementation((key: string) => key as any);
 

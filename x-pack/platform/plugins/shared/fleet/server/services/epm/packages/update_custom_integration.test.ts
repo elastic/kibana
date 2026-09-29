@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -16,22 +19,22 @@ import { getInstalledPackageWithAssets } from './get';
 import { installPackageWithStateMachine } from './install';
 import { incrementVersionAndUpdate, updateCustomIntegration } from './update_custom_integration';
 
-jest.mock('./get');
-jest.mock('./install');
-jest.mock('../../package_policy', () => {
+vi.mock('./get');
+vi.mock('./install');
+vi.mock('../../package_policy', () => {
   return {
     packagePolicyService: {
-      listIds: jest.fn().mockResolvedValue({ items: [] }),
-      bulkUpgrade: jest.fn().mockResolvedValue({}),
+      listIds: vi.fn().mockResolvedValue({ items: [] }),
+      bulkUpgrade: vi.fn().mockResolvedValue({}),
     },
   };
 });
 
-const mockGetInstalledPackageWithAssets = getInstalledPackageWithAssets as jest.MockedFunction<
+const mockGetInstalledPackageWithAssets = getInstalledPackageWithAssets as MockedFunction<
   typeof getInstalledPackageWithAssets
 >;
 
-const mockInstallPackageWithStateMachine = installPackageWithStateMachine as jest.MockedFunction<
+const mockInstallPackageWithStateMachine = installPackageWithStateMachine as MockedFunction<
   typeof installPackageWithStateMachine
 >;
 
@@ -43,7 +46,7 @@ describe('updateCustomIntegration', () => {
   beforeEach(() => {
     mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     savedObjectsClient.get.mockResolvedValue({
       id: 'test-integration',

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
@@ -16,7 +19,7 @@ import { documentationService } from '../../../../../services';
 import { getProcessorDescriptor } from '../../shared';
 import { Foreach } from './foreach';
 
-const FormWrapper = ({ onSubmit }: { onSubmit: jest.Mock }) => {
+const FormWrapper = ({ onSubmit }: { onSubmit: Mock }) => {
   const { form } = useForm({ defaultValue: { fields: {} } });
 
   return (
@@ -47,7 +50,7 @@ describe('Foreach processor fields', () => {
 
   describe('WHEN the field is empty', () => {
     it('SHOULD reject the form with the required-field error', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       render(<FormWrapper onSubmit={onSubmit} />);
 
       fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
@@ -59,7 +62,7 @@ describe('Foreach processor fields', () => {
 
   describe('WHEN only the field is provided', () => {
     it('SHOULD submit the field and omit the empty processor', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       render(<FormWrapper onSubmit={onSubmit} />);
 
       fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {

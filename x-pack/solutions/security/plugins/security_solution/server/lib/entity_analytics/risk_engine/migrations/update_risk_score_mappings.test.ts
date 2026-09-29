@@ -5,36 +5,50 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { updateRiskScoreMappings } from './update_risk_score_mappings';
 import { coreMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { auditLoggerMock } from '@kbn/core-security-server-mocks';
 
-const mockCreateOrUpdateComponentTemplate = jest.fn();
-const mockCreateOrUpdateIndex = jest.fn();
-const mockRolloverDataStream = jest.fn();
+const mockCreateOrUpdateComponentTemplate = vi.fn();
+const mockCreateOrUpdateIndex = vi.fn();
+const mockRolloverDataStream = vi.fn();
 
-jest.mock('@kbn/alerting-plugin/server', () => ({
-  createOrUpdateComponentTemplate: (...params: unknown[]) =>
-    mockCreateOrUpdateComponentTemplate(...params),
-  createOrUpdateIndexTemplate: jest.fn(),
-}));
+vi.mock('@kbn/alerting-plugin/server', () => {
+      const mocked = {
+      createOrUpdateComponentTemplate: (...params: unknown[]) =>
+        mockCreateOrUpdateComponentTemplate(...params),
+      createOrUpdateIndexTemplate: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/create_or_update_index', () => ({
-  createOrUpdateIndex: (...params: unknown[]) => mockCreateOrUpdateIndex(...params),
-}));
+vi.mock('../../utils/create_or_update_index', () => {
+      const mocked = {
+      createOrUpdateIndex: (...params: unknown[]) => mockCreateOrUpdateIndex(...params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../utils/create_datastream', () => ({
-  rolloverDataStream: (...params: unknown[]) => mockRolloverDataStream(...params),
-}));
+vi.mock('../../utils/create_datastream', () => {
+      const mocked = {
+      rolloverDataStream: (...params: unknown[]) => mockRolloverDataStream(...params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetDefaultRiskEngineConfiguration = jest.fn();
-const mockUpdateSavedObjectAttribute = jest.fn();
-jest.mock('../utils/saved_object_configuration', () => ({
-  ...jest.requireActual('../utils/saved_object_configuration'),
-  getDefaultRiskEngineConfiguration: () => mockGetDefaultRiskEngineConfiguration(),
-  updateSavedObjectAttribute: (...params: unknown[]) => mockUpdateSavedObjectAttribute(...params),
-}));
+const mockGetDefaultRiskEngineConfiguration = vi.fn();
+const mockUpdateSavedObjectAttribute = vi.fn();
+vi.mock('../utils/saved_object_configuration', async () => {
+      const mocked = {
+      ...(await vi.importActual('../utils/saved_object_configuration')),
+      getDefaultRiskEngineConfiguration: () => mockGetDefaultRiskEngineConfiguration(),
+      updateSavedObjectAttribute: (...params: unknown[]) => mockUpdateSavedObjectAttribute(...params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('updateRiskScoreMappings', () => {
   const logger = loggingSystemMock.createLogger();
@@ -43,12 +57,12 @@ describe('updateRiskScoreMappings', () => {
   const soClient = savedObjectsClientMock.create();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
-  const getStartServicesMock = jest.fn().mockReturnValue([
+  const getStartServicesMock = vi.fn().mockReturnValue([
     {
       ...coreStart,
       savedObjects: {
-        createInternalRepository: jest.fn().mockReturnValue(soClient),
-        getScopedClient: jest.fn().mockReturnValue(soClient),
+        createInternalRepository: vi.fn().mockReturnValue(soClient),
+        getScopedClient: vi.fn().mockReturnValue(soClient),
       },
       elasticsearch: { client: { asInternalUser: esClient } },
     },
@@ -72,7 +86,7 @@ describe('updateRiskScoreMappings', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should update risk score mappings when versions are different', async () => {

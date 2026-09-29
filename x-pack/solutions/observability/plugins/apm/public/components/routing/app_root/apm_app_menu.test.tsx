@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
@@ -21,63 +23,90 @@ function CaptureMenuConfig() {
   return null;
 }
 
-jest.mock('../../alerting/ui_components/alerting_flyout', () => ({
-  AlertingFlyout: () => null,
-}));
+vi.mock('../../alerting/ui_components/alerting_flyout', () => {
+      const mocked = {
+      AlertingFlyout: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetAlertingCapabilities = jest.fn();
-jest.mock('../../alerting/utils/get_alerting_capabilities', () => ({
-  getAlertingCapabilities: () => mockGetAlertingCapabilities(),
-}));
+const mockGetAlertingCapabilities = vi.fn();
+vi.mock('../../alerting/utils/get_alerting_capabilities', () => {
+      const mocked = {
+      getAlertingCapabilities: () => mockGetAlertingCapabilities(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context', () => ({
-  useAnomalyDetectionJobsContext: () => ({
-    anomalyDetectionSetupState: 'upToDate',
-    anomalyDetectionJobsData: undefined,
-    anomalyDetectionJobsStatus: 'success',
-    anomalyDetectionJobsRefetch: () => {},
-  }),
-}));
+vi.mock('../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context', () => {
+      const mocked = {
+      useAnomalyDetectionJobsContext: () => ({
+        anomalyDetectionSetupState: 'upToDate',
+        anomalyDetectionJobsData: undefined,
+        anomalyDetectionJobsStatus: 'success',
+        anomalyDetectionJobsRefetch: () => {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../context/environments_context/use_environments_context', () => ({
-  useEnvironmentsContext: () => ({
-    environment: 'ENVIRONMENT_ALL',
-    preferredEnvironment: 'ENVIRONMENT_ALL',
-    environments: [],
-    status: 'success',
-  }),
-}));
+vi.mock('../../../context/environments_context/use_environments_context', () => {
+      const mocked = {
+      useEnvironmentsContext: () => ({
+        environment: 'ENVIRONMENT_ALL',
+        preferredEnvironment: 'ENVIRONMENT_ALL',
+        environments: [],
+        status: 'success',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_apm_params', () => ({
-  useApmParams: () => ({
-    query: { environment: 'ENVIRONMENT_ALL' },
-  }),
-}));
+vi.mock('../../../hooks/use_apm_params', () => {
+      const mocked = {
+      useApmParams: () => ({
+        query: { environment: 'ENVIRONMENT_ALL' },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_manage_slos_url', () => ({
-  useManageSlosUrl: () => '/app/slos?filters=apm',
-}));
+vi.mock('../../../hooks/use_manage_slos_url', () => {
+      const mocked = {
+      useManageSlosUrl: () => '/app/slos?filters=apm',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_service_name', () => ({
-  useServiceName: () => undefined,
-}));
+vi.mock('../../../hooks/use_service_name', () => {
+      const mocked = {
+      useServiceName: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
-  useInspectorContext: () => ({ inspectorAdapters: {} }),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+      useInspectorContext: () => ({ inspectorAdapters: {} }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUiSettingsGet = jest.fn().mockReturnValue(false);
+const mockUiSettingsGet = vi.fn().mockReturnValue(false);
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: () => ({
-    services: {
-      uiSettings: { get: mockUiSettingsGet },
-      slo: undefined,
-    },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+      useKibana: () => ({
+        services: {
+          uiSettings: { get: mockUiSettingsGet },
+          slo: undefined,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 interface MockContextOptions {
   canSaveApm?: boolean;
@@ -105,7 +134,7 @@ function createMockContext({
   return {
     core: {
       application: {
-        navigateToUrl: jest.fn(),
+        navigateToUrl: vi.fn(),
         capabilities: {
           apm: { save: canSaveApm },
           ml: { canGetJobs: canReadMlJobs, canCreateJob: canCreateMlJobs },
@@ -138,7 +167,7 @@ function createMockContext({
       },
     },
     inspector: {
-      open: jest.fn(),
+      open: vi.fn(),
     },
   } as unknown as Partial<ApmPluginContextValue>;
 }
@@ -179,7 +208,7 @@ describe('ApmAppMenu', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('core items', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loadESQLAttributes } from './esql';
 import { makeEmbeddableServices } from './mocks';
 import type { LensEmbeddableStartServices } from './types';
@@ -14,9 +16,9 @@ import * as suggestionModule from '../lens_suggestions_api';
 // Need to do this magic in order to spy on specific functions
 import * as esqlUtils from '@kbn/esql-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-jest.mock('@kbn/esql-utils', () => ({
+vi.mock('@kbn/esql-utils', async () => ({
   __esModule: true,
-  ...jest.requireActual('@kbn/esql-utils'),
+  ...(await vi.importActual('@kbn/esql-utils')),
 }));
 
 function getUiSettingsOverrides() {
@@ -31,40 +33,40 @@ describe('ES|QL attributes creation', () => {
         visOverrides: { id: 'lnsXY' },
         dataOverrides: { id: 'formBased' },
       }),
-      uiSettings: { ...getUiSettingsOverrides(), get: jest.fn().mockReturnValue(true) },
+      uiSettings: { ...getUiSettingsOverrides(), get: vi.fn().mockReturnValue(true) },
       ...servicesOverrides,
     };
   }
   it('should not update the attributes if no index is available and no suggestions generated', async () => {
-    jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce(null);
-    jest.spyOn(esqlUtils, 'getESQLAdHocDataview').mockResolvedValueOnce(dataViewMock);
-    jest.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValueOnce([]);
-    jest.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([]);
+    vi.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce(null);
+    vi.spyOn(esqlUtils, 'getESQLAdHocDataview').mockResolvedValueOnce(dataViewMock);
+    vi.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValueOnce([]);
+    vi.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([]);
 
     const attributes = await loadESQLAttributes(getServices());
     expect(attributes).toBeUndefined();
   });
 
   it('should not update the attributes if no suggestion is generated', async () => {
-    jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce('index');
-    jest.spyOn(esqlUtils, 'getESQLAdHocDataview').mockResolvedValueOnce(dataViewMock);
-    jest.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValueOnce([]);
-    jest.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([]);
+    vi.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce('index');
+    vi.spyOn(esqlUtils, 'getESQLAdHocDataview').mockResolvedValueOnce(dataViewMock);
+    vi.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValueOnce([]);
+    vi.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([]);
 
     const attributes = await loadESQLAttributes(getServices());
     expect(attributes).toBeUndefined();
   });
 
   it('should fall back to ROW x=1 attributes when the main path times out', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     // Main path hangs indefinitely
-    jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockReturnValue(new Promise(() => {}));
+    vi.spyOn(esqlUtils, 'getIndexForESQLQuery').mockReturnValue(new Promise(() => {}));
 
     // Fallback path (ROW x=1) succeeds
-    jest.spyOn(esqlUtils, 'getESQLAdHocDataview').mockResolvedValue(dataViewMock);
-    jest.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValue([]);
-    jest.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([
+    vi.spyOn(esqlUtils, 'getESQLAdHocDataview').mockResolvedValue(dataViewMock);
+    vi.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValue([]);
+    vi.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([
       {
         title: 'Fallback',
         visualizationId: 'lnsXY',
@@ -80,18 +82,18 @@ describe('ES|QL attributes creation', () => {
     ]);
 
     const attributesPromise = loadESQLAttributes(getServices());
-    jest.advanceTimersByTime(5001);
+    vi.advanceTimersByTime(5001);
     const attributes = await attributesPromise;
 
     expect(attributes).not.toBeUndefined();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should update the attributes if there is a valid suggestion', async () => {
-    jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce('index');
-    jest.spyOn(esqlUtils, 'getESQLAdHocDataview').mockResolvedValueOnce(dataViewMock);
-    jest.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValueOnce([]);
-    jest.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([
+    vi.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce('index');
+    vi.spyOn(esqlUtils, 'getESQLAdHocDataview').mockResolvedValueOnce(dataViewMock);
+    vi.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValueOnce([]);
+    vi.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([
       {
         title: 'MyTitle',
         visualizationId: 'lnsXY',

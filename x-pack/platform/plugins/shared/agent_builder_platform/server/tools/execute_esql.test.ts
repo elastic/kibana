@@ -5,27 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { platformCoreTools, ToolResultType } from '@kbn/agent-builder-common';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { executeEsqlTool } from './execute_esql';
 
-jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => {
-  const actual = jest.requireActual('@kbn/agent-builder-genai-utils/tools/utils/esql');
+vi.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', async () => {
+  const actual = (await vi.importActual('@kbn/agent-builder-genai-utils/tools/utils/esql'));
   return {
     ...actual,
-    executeEsql: jest.fn(),
+    executeEsql: vi.fn(),
   };
 });
 
-jest.mock('@kbn/agent-builder-server/tools', () => ({
-  ...jest.requireActual('@kbn/agent-builder-server/tools'),
-  getToolResultId: jest.fn(() => 'tool-result-id'),
-}));
+vi.mock('@kbn/agent-builder-server/tools', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/agent-builder-server/tools')),
+      getToolResultId: vi.fn(() => 'tool-result-id'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { executeEsql } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 
-const executeEsqlMock = executeEsql as jest.MockedFunction<typeof executeEsql>;
+const executeEsqlMock = executeEsql as MockedFunction<typeof executeEsql>;
 
 const emptyAttachments = {
   getActive: () => [],
@@ -40,7 +46,7 @@ const createHandlerContext = () => ({
 
 describe('executeEsqlTool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     executeEsqlMock.mockResolvedValue({
       columns: [{ name: 'c', type: 'long' }],
       values: [[42]],

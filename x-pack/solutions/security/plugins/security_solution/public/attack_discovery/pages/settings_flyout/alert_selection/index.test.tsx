@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -14,23 +17,29 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
 import { CUSTOMIZE_THE_CONNECTOR_AND_ALERTS } from './translations';
 
-jest.mock('react-router', () => ({
-  matchPath: jest.fn(),
-  useLocation: jest.fn().mockReturnValue({
-    search: '',
-  }),
-  withRouter: jest.fn(),
-}));
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn().mockReturnValue('default'),
-}));
+vi.mock('react-router', () => {
+      const mocked = {
+      matchPath: vi.fn(),
+      useLocation: vi.fn().mockReturnValue({
+        search: '',
+      }),
+      withRouter: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: vi.fn().mockReturnValue('default'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps = {
   connectorId: undefined,
   alertsPreviewStackBy0: 'defaultAlertPreview',
   alertSummaryStackBy0: 'defaultAlertSummary',
-  filterManager: jest.fn() as unknown as FilterManager,
+  filterManager: vi.fn() as unknown as FilterManager,
   settings: {
     end: '2024-10-01T00:00:00.000Z',
     filters: [],
@@ -38,19 +47,19 @@ const defaultProps = {
     size: 100,
     start: '2024-09-01T00:00:00.000Z',
   },
-  onConnectorIdSelected: jest.fn(),
-  onSettingsChanged: jest.fn(),
-  setAlertsPreviewStackBy0: jest.fn(),
-  setAlertSummaryStackBy0: jest.fn(),
+  onConnectorIdSelected: vi.fn(),
+  onSettingsChanged: vi.fn(),
+  setAlertsPreviewStackBy0: vi.fn(),
+  setAlertSummaryStackBy0: vi.fn(),
   showConnectorSelector: true,
   stats: null,
 };
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 describe('AlertSelection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -63,7 +72,7 @@ describe('AlertSelection', () => {
           },
         },
       },
-    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+    } as unknown as Mocked<ReturnType<typeof useKibana>>);
   });
 
   it('renders the customize alerts text', () => {

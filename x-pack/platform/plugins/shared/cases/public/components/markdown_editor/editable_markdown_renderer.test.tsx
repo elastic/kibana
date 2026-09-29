@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -18,10 +20,10 @@ const { emptyField, maxLengthField } = fieldValidators;
 import { EditableMarkdown } from '.';
 import { renderWithTestingProviders } from '../../common/mock';
 
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
-const onChangeEditable = jest.fn();
-const onSaveContent = jest.fn();
+const onChangeEditable = vi.fn();
+const onSaveContent = vi.fn();
 
 const newValue = 'Hello from Tehas';
 const hyperlink = `[hyperlink](http://elastic.co)`;
@@ -62,7 +64,7 @@ const defaultProps = {
 
 describe('EditableMarkdown', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     window.window.sessionStorage.clear();
   });
@@ -150,20 +152,20 @@ describe('EditableMarkdown', () => {
 
   describe('draft comment ', () => {
     beforeAll(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.clearAllTimers();
+      vi.clearAllTimers();
     });
 
     afterAll(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
       window.sessionStorage.removeItem(draftStorageKey);
     });
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('Save button click clears session storage', async () => {
@@ -191,7 +193,7 @@ describe('EditableMarkdown', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       expect(window.sessionStorage.getItem(draftStorageKey)).toBe(newValue);
@@ -216,7 +218,7 @@ describe('EditableMarkdown', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       await waitFor(() => {

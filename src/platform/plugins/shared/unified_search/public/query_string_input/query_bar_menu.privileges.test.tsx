@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -83,19 +85,19 @@ describe('QueryBarMenu — capability-driven popover affordances', () => {
 
   const createMockStorage = () => {
     const storage = {
-      clear: jest.fn(),
-      getItem: jest.fn(),
-      key: jest.fn(),
-      removeItem: jest.fn(),
-      setItem: jest.fn(),
+      clear: vi.fn(),
+      getItem: vi.fn(),
+      key: vi.fn(),
+      removeItem: vi.fn(),
+      setItem: vi.fn(),
       length: 0,
     };
     return {
       storage,
-      get: jest.fn().mockReturnValue('kuery'),
-      set: jest.fn(),
-      remove: jest.fn(),
-      clear: jest.fn(),
+      get: vi.fn().mockReturnValue('kuery'),
+      set: vi.fn(),
+      remove: vi.fn(),
+      clear: vi.fn(),
     };
   };
 
@@ -128,12 +130,12 @@ describe('QueryBarMenu — capability-driven popover affordances', () => {
 
     const props: QueryBarMenuProps = {
       language: 'kuery',
-      onQueryChange: jest.fn(),
-      onCloseFilterPopover: jest.fn(),
-      onLocalFilterUpdate: jest.fn(),
-      onLocalFilterCreate: jest.fn(),
-      onQueryBarSubmit: jest.fn(),
-      toggleFilterBarMenuPopover: jest.fn(),
+      onQueryChange: vi.fn(),
+      onCloseFilterPopover: vi.fn(),
+      onLocalFilterUpdate: vi.fn(),
+      onLocalFilterCreate: vi.fn(),
+      onQueryBarSubmit: vi.fn(),
+      toggleFilterBarMenuPopover: vi.fn(),
       openQueryBarMenu: true,
       // showQueryInput + showFilterBar must both be true for the saved-queries
       // section to even be evaluated; gating it on capabilities is the contract
@@ -146,7 +148,7 @@ describe('QueryBarMenu — capability-driven popover affordances', () => {
         // Return one query so the load button is enabled when it does render —
         // we want to assert it's *present*, not bisect with the "no saved
         // queries" disabled path which is already covered elsewhere.
-        getSavedQueryCount: jest.fn().mockResolvedValue(1),
+        getSavedQueryCount: vi.fn().mockResolvedValue(1),
       },
       additionalQueryBarMenuItems: {},
       queryBarMenuRef: React.createRef(),

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 import { waitFor, act, renderHook, type RenderHookResult } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
@@ -15,12 +18,15 @@ import { useFetcher, isPending, FETCH_STATUS } from './use_fetcher';
 import { FETCHER_OPERATION_IDS } from './fetcher_operation_ids';
 import * as reportFetchErrorModule from '../services/rest/report_fetch_error';
 
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: () => () => undefined,
-}));
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = {
+      toMountPoint: () => () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const addToast = jest.fn();
-const addDangerToast = jest.fn();
+const addToast = vi.fn();
+const addDangerToast = vi.fn();
 
 // Wrap the hook with a provider so it can useKibana
 const KibanaReactContext = createKibanaReactContext({
@@ -42,7 +48,7 @@ describe('useFetcher', () => {
     let hook: RenderHookResult<ReturnType<typeof useFetcher>, Parameters<typeof useFetcher>>;
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
 
       async function fn() {
         await delay(500);
@@ -53,7 +59,7 @@ describe('useFetcher', () => {
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should have loading spinner initially', () => {
@@ -67,7 +73,7 @@ describe('useFetcher', () => {
 
     it('should still show loading spinner after 100ms', () => {
       act(() => {
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
       });
 
       expect(hook.result.current).toEqual({
@@ -80,7 +86,7 @@ describe('useFetcher', () => {
 
     it('should show success after 1 second', async () => {
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       await waitFor(() => expect(hook.result.current.status).toBe('success'));
@@ -98,7 +104,7 @@ describe('useFetcher', () => {
     let hook: RenderHookResult<ReturnType<typeof useFetcher>, Parameters<typeof useFetcher>>;
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
 
       async function fn(): Promise<string> {
         await delay(500);
@@ -108,7 +114,7 @@ describe('useFetcher', () => {
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should have loading spinner initially', () => {
@@ -122,7 +128,7 @@ describe('useFetcher', () => {
 
     it('should still show loading spinner after 100ms', () => {
       act(() => {
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
       });
 
       expect(hook.result.current).toEqual({
@@ -135,7 +141,7 @@ describe('useFetcher', () => {
 
     it('should show error after 1 second', async () => {
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       await waitFor(() => expect(hook.result.current.status).toBe('failure'));
@@ -151,11 +157,11 @@ describe('useFetcher', () => {
 
   describe('error toast routing', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('uses toasts.add for expected transport failures so RUM is not captured via addDanger', async () => {
@@ -167,7 +173,7 @@ describe('useFetcher', () => {
       const hook = renderHook(() => useFetcher(failingFn, []), { wrapper });
 
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       await waitFor(() => expect(hook.result.current.status).toBe('failure'));
@@ -201,7 +207,7 @@ describe('useFetcher', () => {
       const hook = renderHook(() => useFetcher(failingFn, []), { wrapper });
 
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       await waitFor(() => expect(hook.result.current.status).toBe('failure'));
@@ -217,17 +223,17 @@ describe('useFetcher', () => {
   });
 
   describe('APM error capture on failure', () => {
-    let reportFetchErrorSpy: jest.SpyInstance;
+    let reportFetchErrorSpy: MockInstance;
 
     beforeEach(() => {
-      jest.useFakeTimers();
-      reportFetchErrorSpy = jest
+      vi.useFakeTimers();
+      reportFetchErrorSpy = vi
         .spyOn(reportFetchErrorModule, 'reportFetchError')
         .mockImplementation(() => {});
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
       reportFetchErrorSpy.mockRestore();
     });
 
@@ -245,7 +251,7 @@ describe('useFetcher', () => {
       );
 
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       await waitFor(() => expect(hook.result.current.status).toBe('failure'));
@@ -261,7 +267,7 @@ describe('useFetcher', () => {
       const hook = renderHook(() => useFetcher(failingFn, []), { wrapper });
 
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       await waitFor(() => expect(hook.result.current.status).toBe('failure'));
@@ -281,7 +287,7 @@ describe('useFetcher', () => {
       hook.unmount();
 
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       expect(reportFetchErrorSpy).not.toHaveBeenCalled();
@@ -290,11 +296,11 @@ describe('useFetcher', () => {
 
   describe('when a hook already has data', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should show "first response" while loading "second response"', async () => {
@@ -334,7 +340,7 @@ describe('useFetcher', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
       });
 
       // assert: while loading new data the previous data should still be rendered
@@ -348,7 +354,7 @@ describe('useFetcher', () => {
       );
 
       act(() => {
-        jest.advanceTimersByTime(500);
+        vi.advanceTimersByTime(500);
       });
 
       await waitFor(() =>
@@ -374,7 +380,7 @@ describe('useFetcher', () => {
       });
 
       act(() => {
-        jest.runAllTimers();
+        vi.runAllTimers();
       });
 
       // assert: initial data has loaded;

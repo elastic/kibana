@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import moment from 'moment';
 import type { Services } from '@kbn/actions-plugin/server/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
@@ -20,16 +23,19 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 import { loggerMock } from '@kbn/logging-mocks';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 
-jest.mock('./post_pagerduty', () => ({
-  postPagerduty: jest.fn(),
-}));
+vi.mock('./post_pagerduty', () => {
+      const mocked = {
+      postPagerduty: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const postPagerdutyMock = postPagerduty as jest.Mock;
+const postPagerdutyMock = postPagerduty as Mock;
 const services: Services = actionsMock.createServices();
-const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+const mockedLogger: Mocked<Logger> = loggerMock.create();
 
 let connectorType: PagerDutyConnectorType;
-let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let configurationUtilities: Mocked<ActionsConfigurationUtilities>;
 let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {

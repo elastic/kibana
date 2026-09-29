@@ -5,37 +5,48 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import crypto from 'crypto';
 import { renderHook } from '@testing-library/react';
 import { useWorkpadPersist } from './use_workpad_persist';
 
-const mockGetState = jest.fn();
-const mockUpdateWorkpad = jest.fn(() => Promise.resolve(null));
-const mockUpdateAssets = jest.fn();
-const mockUpdate = jest.fn();
+const mockGetState = vi.fn();
+const mockUpdateWorkpad = vi.fn(() => Promise.resolve(null));
+const mockUpdateAssets = vi.fn();
+const mockUpdate = vi.fn();
 
-const mockNotifyError = jest.fn();
+const mockNotifyError = vi.fn();
 
 // Mock the hooks and actions used by the UseWorkpad hook
-jest.mock('react-redux-v7', () => ({
-  useSelector: (selector: any) => selector(mockGetState()),
-}));
-
-jest.mock('../../../services/canvas_workpad_service', () => ({
-  getCanvasWorkpadService: () => {
-    return {
-      updateWorkpad: mockUpdateWorkpad,
-      updateAssets: mockUpdateAssets,
-      update: mockUpdate,
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useSelector: (selector: any) => selector(mockGetState()),
     };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../services', () => ({
-  useNotifyService: () => ({
-    error: mockNotifyError,
-  }),
-}));
+vi.mock('../../../services/canvas_workpad_service', () => {
+      const mocked = {
+      getCanvasWorkpadService: () => {
+        return {
+          updateWorkpad: mockUpdateWorkpad,
+          updateAssets: mockUpdateAssets,
+          update: mockUpdate,
+        };
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../services', () => {
+      const mocked = {
+      useNotifyService: () => ({
+        error: mockNotifyError,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useWorkpadPersist', () => {
   const initialState = {
@@ -54,7 +65,7 @@ describe('useWorkpadPersist', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('initial render does not persist state', () => {

@@ -7,18 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { replaceTemplateStrings } from './replace_template_strings';
 import { getServices } from '../../kibana_services';
 
-jest.mock('../../kibana_services', () => ({
-  getServices: jest.fn(),
-}));
+vi.mock('../../kibana_services', () => {
+      const mocked = {
+      getServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('replaceTemplateStrings', () => {
   beforeEach(() => {
-    (getServices as jest.Mock).mockReturnValue({
+    (getServices as Mock).mockReturnValue({
       tutorialService: {
-        getVariables: jest.fn().mockReturnValue({
+        getVariables: vi.fn().mockReturnValue({
           someVariable: 'someValue',
         }),
       },

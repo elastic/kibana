@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -12,7 +14,7 @@ import type { UserPreviewPanelFooterProps } from './footer';
 import { UserPreviewPanelFooter } from './footer';
 import { UserPanelKey } from '../shared/constants';
 
-jest.mock('@kbn/expandable-flyout');
+vi.mock('@kbn/expandable-flyout');
 
 const mockProps: UserPreviewPanelFooterProps = {
   userName: 'test',
@@ -23,7 +25,7 @@ const mockProps: UserPreviewPanelFooterProps = {
 
 describe('<UserPreviewPanelFooter />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
   it('should render footer', () => {

@@ -7,20 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { CensysConnector } from './censys';
 import { CensEyeCreateAnalysisJobInputSchema } from './types';
 
-jest.mock('@kbn/repo-info', () => ({
-  kibanaPackageJson: { version: '9.4.0' },
-}));
+vi.mock('@kbn/repo-info', () => {
+      const mocked = {
+      kibanaPackageJson: { version: '9.4.0' },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ORGANIZATION_ID = '11111111-2222-3333-4444-555555555555';
 
 describe('CensysConnector', () => {
   const mockClient = {
-    get: jest.fn(),
-    post: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
   };
 
   const mockContext = {
@@ -31,7 +36,7 @@ describe('CensysConnector', () => {
   } as unknown as ActionContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const expectOrgAndUserAgent = (call: unknown[]) => {

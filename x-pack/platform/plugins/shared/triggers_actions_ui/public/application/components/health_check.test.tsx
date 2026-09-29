@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -13,13 +16,13 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
 import { HealthContextProvider } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
-jest.mock('../../common/lib/kibana');
+vi.mock('../../common/lib/kibana');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 describe('health check', () => {
   test('renders spinner while health is loading', async () => {
-    useKibanaMock().services.http.get = jest
+    useKibanaMock().services.http.get = vi
       .fn()
       .mockImplementationOnce(() => new Promise(() => {}));
     const { queryByText, container } = render(
@@ -40,7 +43,7 @@ describe('health check', () => {
   });
 
   it('renders children immediately if waitForCheck is false', async () => {
-    useKibanaMock().services.http.get = jest
+    useKibanaMock().services.http.get = vi
       .fn()
       .mockImplementationOnce(() => new Promise(() => {}));
 
@@ -62,7 +65,7 @@ describe('health check', () => {
   });
 
   it('renders children if keys are enabled', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockResolvedValue({
+    useKibanaMock().services.http.get = vi.fn().mockResolvedValue({
       is_sufficiently_secure: true,
       has_permanent_encryption_key: true,
       alerting_framework_health: {
@@ -88,7 +91,7 @@ describe('health check', () => {
   });
 
   test('renders warning if API keys are disabled', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
+    useKibanaMock().services.http.get = vi.fn().mockImplementation(async () => ({
       is_sufficiently_secure: false,
       has_permanent_encryption_key: true,
       alerting_framework_health: {
@@ -126,7 +129,7 @@ describe('health check', () => {
   });
 
   test('renders warning if encryption key is ephemeral', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
+    useKibanaMock().services.http.get = vi.fn().mockImplementation(async () => ({
       is_sufficiently_secure: true,
       has_permanent_encryption_key: false,
       alerting_framework_health: {
@@ -163,7 +166,7 @@ describe('health check', () => {
   });
 
   test('renders warning if encryption key is ephemeral and keys are disabled', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
+    useKibanaMock().services.http.get = vi.fn().mockImplementation(async () => ({
       is_sufficiently_secure: false,
       has_permanent_encryption_key: false,
       alerting_framework_health: {
@@ -202,7 +205,7 @@ describe('health check', () => {
   });
 
   it('renders children and no warnings if error thrown getting alerting health', async () => {
-    useKibanaMock().services.http.get = jest
+    useKibanaMock().services.http.get = vi
       .fn()
       // result from triggers_actions_ui health
       .mockResolvedValueOnce({ isAlertsAvailable: true })

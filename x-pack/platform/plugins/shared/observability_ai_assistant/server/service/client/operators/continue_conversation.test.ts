@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -32,16 +34,16 @@ const mockConnector: InferenceConnector = {
 };
 
 describe('executeFunctionAndCatchError', () => {
-  const mockLogger = { error: jest.fn(), debug: jest.fn(), trace: jest.fn() } as unknown as Logger;
-  const mockAnalytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceStart;
+  const mockLogger = { error: vi.fn(), debug: vi.fn(), trace: vi.fn() } as unknown as Logger;
+  const mockAnalytics = { reportEvent: vi.fn() } as unknown as AnalyticsServiceStart;
   const mockFunctionClient = {
-    executeFunction: jest.fn(),
+    executeFunction: vi.fn(),
   };
-  const mockChat = jest.fn();
+  const mockChat = vi.fn();
   const signal = new AbortController().signal;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('reports analytics with the correct structure', async () => {

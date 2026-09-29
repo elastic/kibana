@@ -5,34 +5,45 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useRestoreHistory } from './use_restore_history';
 import { encode } from '../route_state';
 
-const mockDispatch = jest.fn();
-const mockGetLocation = jest.fn();
-const mockGetHistory = jest.fn();
+const mockDispatch = vi.fn();
+const mockGetLocation = vi.fn();
+const mockGetHistory = vi.fn();
 
 const location = { state: undefined };
 const history = { action: 'POP' };
 
 // Mock the hooks and actions
-jest.mock('react-redux-v7', () => ({
-  useDispatch: () => mockDispatch,
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useDispatch: () => mockDispatch,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  useLocation: () => mockGetLocation(),
-  useHistory: () => mockGetHistory(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useLocation: () => mockGetLocation(),
+      useHistory: () => mockGetHistory(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../state/actions/workpad', () => ({
-  initializeWorkpad: () => ({ type: 'initialize' }),
-}));
+vi.mock('../../../state/actions/workpad', () => {
+      const mocked = {
+      initializeWorkpad: () => ({ type: 'initialize' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useRestoreHistory', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('dispatches nothing on initial run', () => {

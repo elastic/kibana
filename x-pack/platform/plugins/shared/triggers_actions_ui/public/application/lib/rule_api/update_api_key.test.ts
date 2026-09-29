@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { updateAPIKey } from './update_api_key';
 
 const http = httpServiceMock.createStartContract();
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('updateAPIKey', () => {
   test('should call _update_api_key rule API', async () => {

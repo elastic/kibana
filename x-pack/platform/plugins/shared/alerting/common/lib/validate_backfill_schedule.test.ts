@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { validateBackfillSchedule } from './validate_backfill_schedule';
 
 describe('validateBackfillSchedule', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2023-11-16T08:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2023-11-16T08:00:00.000Z'));
   });
-  afterAll(() => jest.useRealTimers());
+  afterAll(() => vi.useRealTimers());
 
   test('validates valid start date', () => {
     expect(validateBackfillSchedule('2023-10-16T08:00:00.000Z')).toBeUndefined();

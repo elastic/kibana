@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import {
@@ -19,7 +21,7 @@ import type { ContentListItemConfig } from '@kbn/content-list-provider';
 import { useColumns } from './use_columns';
 import { Column, NameColumn } from '../column';
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({
     items: [],
     total: 0,
@@ -47,7 +49,7 @@ const createWrapper =
 
 describe('useColumns', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -76,8 +78,8 @@ describe('useColumns', () => {
     });
 
     it('includes Actions column when item config has edit/delete handlers', () => {
-      const onEdit = jest.fn();
-      const onDelete = jest.fn();
+      const onEdit = vi.fn();
+      const onDelete = vi.fn();
       const wrapper = createWrapper({
         item: {
           actions: {
@@ -98,7 +100,7 @@ describe('useColumns', () => {
     });
 
     it('includes only Edit action when only `actions.edit.onItemAction` is configured', () => {
-      const onEdit = jest.fn();
+      const onEdit = vi.fn();
       const wrapper = createWrapper({
         item: { actions: { edit: { onItemAction: onEdit } } },
       });
@@ -131,8 +133,8 @@ describe('useColumns', () => {
     });
 
     it('omits Actions column in read-only mode even with handlers', () => {
-      const onEdit = jest.fn();
-      const onDelete = jest.fn();
+      const onEdit = vi.fn();
+      const onDelete = vi.fn();
       const wrapper = createWrapper({
         isReadOnly: true,
         item: {
@@ -208,7 +210,7 @@ describe('useColumns', () => {
 
   describe('custom columns', () => {
     it('resolves a custom `Column` child', () => {
-      const render = jest.fn(() => <span>custom</span>);
+      const render = vi.fn(() => <span>custom</span>);
       const children = (
         <Column
           id="status"
@@ -237,7 +239,7 @@ describe('useColumns', () => {
     });
 
     it('uses `field` when provided instead of `id`', () => {
-      const render = jest.fn(() => <span>val</span>);
+      const render = vi.fn(() => <span>val</span>);
       const children = <Column id="my-col" field="updatedAt" name="Updated" render={render} />;
 
       const { result } = renderHook(() => useColumns(children), {
@@ -248,7 +250,7 @@ describe('useColumns', () => {
     });
 
     it('uses a custom column skeleton descriptor when provided', () => {
-      const render = jest.fn(() => <span>avatar</span>);
+      const render = vi.fn(() => <span>avatar</span>);
       const children = (
         <Column
           id="avatar"
@@ -266,8 +268,8 @@ describe('useColumns', () => {
     });
 
     it('uses a custom column skeleton callback when provided', () => {
-      const render = jest.fn(() => <span>status</span>);
-      const skeleton = jest.fn(() => ({ shape: 'rectangle' as const, width: 72, height: 20 }));
+      const render = vi.fn(() => <span>status</span>);
+      const skeleton = vi.fn(() => ({ shape: 'rectangle' as const, width: 72, height: 20 }));
       const children = <Column id="status" name="Status" render={render} skeleton={skeleton} />;
 
       const { result } = renderHook(() => useColumns(children), {
@@ -285,7 +287,7 @@ describe('useColumns', () => {
 
   describe('multiple columns', () => {
     it('preserves column order from children', () => {
-      const render = jest.fn(() => <span>type</span>);
+      const render = vi.fn(() => <span>type</span>);
       const children = (
         <>
           <NameColumn />
@@ -305,7 +307,7 @@ describe('useColumns', () => {
 
   describe('builder context', () => {
     it('disables sorting when provider does not support it', () => {
-      const render = jest.fn(() => <span>val</span>);
+      const render = vi.fn(() => <span>val</span>);
       const children = (
         <>
           <NameColumn />

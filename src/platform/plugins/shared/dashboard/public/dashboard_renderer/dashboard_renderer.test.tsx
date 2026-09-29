@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
@@ -18,12 +21,12 @@ import { DashboardRenderer } from './dashboard_renderer';
 import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
 import type { DashboardPinnedPanelsState } from '@kbn/as-code-dashboard-schema';
 
-jest.mock('../dashboard_api/load_dashboard_api');
+vi.mock('../dashboard_api/load_dashboard_api');
 
 describe('Dashboard Renderer', () => {
-  dataService.query.filterManager.getFilters = jest.fn().mockImplementation(() => []);
+  dataService.query.filterManager.getFilters = vi.fn().mockImplementation(() => []);
 
-  (loadDashboardApi as jest.Mock).mockImplementation(async ({ getCreationOptions }) => {
+  (loadDashboardApi as Mock).mockImplementation(async ({ getCreationOptions }) => {
     const { useControlsIntegration } = await (getCreationOptions?.() ?? Promise.resolve({}));
     return {
       useControlsIntegration,
@@ -66,7 +69,7 @@ describe('Dashboard Renderer', () => {
   });
 
   it('removes a missing dashboard from recently accessed', async () => {
-    (loadDashboardApi as jest.Mock).mockRejectedValueOnce(
+    (loadDashboardApi as Mock).mockRejectedValueOnce(
       new SavedObjectNotFound({ type: 'dashboard', id: 'missing-id' })
     );
 

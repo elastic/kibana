@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
@@ -12,44 +15,53 @@ import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 
-jest.mock('./rule_migrations_telemetry_client');
+vi.mock('./rule_migrations_telemetry_client');
 
-const mockRetrieverInitialize = jest.fn().mockResolvedValue(undefined);
-const mockGetResources = jest.fn().mockResolvedValue({});
-jest.mock('./retrievers', () => ({
-  ...jest.requireActual('./retrievers'),
-  RuleMigrationsRetriever: jest.fn().mockImplementation(() => ({
-    initialize: mockRetrieverInitialize,
-    resources: {
-      getResources: mockGetResources,
-    },
-  })),
-}));
+const mockRetrieverInitialize = vi.fn().mockResolvedValue(undefined);
+const mockGetResources = vi.fn().mockResolvedValue({});
+vi.mock('./retrievers', async () => {
+      const mocked = {
+      ...(await vi.importActual('./retrievers')),
+      RuleMigrationsRetriever: vi.fn().mockImplementation(() => ({
+        initialize: mockRetrieverInitialize,
+        resources: {
+          getResources: mockGetResources,
+        },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCreateModel = jest.fn(() => ({ model: 'test-model', bindTools: jest.fn() }));
-const mockGetModelName = jest.fn(() => 'test-model');
-jest.mock('../../common/task/util/actions_client_chat', () => ({
-  ...jest.requireActual('../../common/task/util/actions_client_chat'),
-  ActionsClientChat: jest
-    .fn()
-    .mockImplementation(() => ({ createModel: mockCreateModel, getModelName: mockGetModelName })),
-}));
+const mockCreateModel = vi.fn(() => ({ model: 'test-model', bindTools: vi.fn() }));
+const mockGetModelName = vi.fn(() => 'test-model');
+vi.mock('../../common/task/util/actions_client_chat', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../common/task/util/actions_client_chat')),
+      ActionsClientChat: vi
+        .fn()
+        .mockImplementation(() => ({ createModel: mockCreateModel, getModelName: mockGetModelName })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockInvoke = jest.fn().mockResolvedValue({});
-const mockGetRuleMigrationAgent = jest.fn(() => ({ invoke: mockInvoke }));
-const mockInvokeV2 = jest.fn().mockResolvedValue({});
-const mockGetRuleMigrationAgentV2 = jest.fn(() => ({ invoke: mockInvokeV2 }));
-jest.mock('./agent', () => ({
-  ...jest.requireActual('./agent'),
-  getRuleMigrationAgent: () => mockGetRuleMigrationAgent(),
-  getRuleMigrationAgentV2: () => mockGetRuleMigrationAgentV2(),
-}));
+const mockInvoke = vi.fn().mockResolvedValue({});
+const mockGetRuleMigrationAgent = vi.fn(() => ({ invoke: mockInvoke }));
+const mockInvokeV2 = vi.fn().mockResolvedValue({});
+const mockGetRuleMigrationAgentV2 = vi.fn(() => ({ invoke: mockInvokeV2 }));
+vi.mock('./agent', async () => {
+      const mocked = {
+      ...(await vi.importActual('./agent')),
+      getRuleMigrationAgent: () => mockGetRuleMigrationAgent(),
+      getRuleMigrationAgentV2: () => mockGetRuleMigrationAgentV2(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock dependencies
 const mockLogger = loggerMock.create();
 const inferenceService = inferenceMock.createStartContract();
 
-const mockDependencies: jest.Mocked<SiemMigrationsClientDependencies> = {
+const mockDependencies: Mocked<SiemMigrationsClientDependencies> = {
   rulesClient: {},
   savedObjectsClient: {},
   inferenceService,
@@ -61,9 +73,9 @@ const mockDependencies: jest.Mocked<SiemMigrationsClientDependencies> = {
 const mockRequest = {} as unknown as KibanaRequest;
 const mockUser = {} as unknown as AuthenticatedUser;
 
-jest.useFakeTimers();
-jest.spyOn(global, 'setTimeout');
-const mockTimeout = setTimeout as unknown as jest.Mock;
+vi.useFakeTimers();
+vi.spyOn(global, 'setTimeout');
+const mockTimeout = setTimeout as unknown as Mock;
 mockTimeout.mockImplementation((cb) => {
   // never actually wait, we'll check the calls manually
   cb();
@@ -79,7 +91,7 @@ describe('RuleMigrationTaskRunner', () => {
     mockGetResources.mockResolvedValue({}); // Reset the mock
     mockInvoke.mockResolvedValue({}); // Reset the mock
     mockRuleMigrationsDataClient = createRuleMigrationsDataClientMock();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     abortController = new AbortController();
     taskRunner = new RuleMigrationTaskRunner(

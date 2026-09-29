@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { useSuggestUserProfiles } from '../../../../containers/user_profiles/use_suggest_user_profiles';
 import { useGetCurrentUserProfile } from '../../../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles, userProfilesMap } from '../../../../containers/user_profiles/api.mock';
@@ -16,11 +19,11 @@ import type { AssigneesFieldProps } from './assignees_field';
 import { AssigneesField } from './assignees_field';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-jest.mock('../../../../containers/user_profiles/use_suggest_user_profiles');
-jest.mock('../../../../containers/user_profiles/use_get_current_user_profile');
+vi.mock('../../../../containers/user_profiles/use_suggest_user_profiles');
+vi.mock('../../../../containers/user_profiles/use_get_current_user_profile');
 
-const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
-const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
+const useSuggestUserProfilesMock = useSuggestUserProfiles as Mock;
+const useGetCurrentUserProfileMock = useGetCurrentUserProfile as Mock;
 
 const currentUserProfile = userProfiles[0];
 
@@ -34,7 +37,7 @@ describe('AssigneesField', () => {
       caseAssignees: [],
       currentUserProfile,
       userProfiles: new Map(),
-      onAssigneesChanged: jest.fn(),
+      onAssigneesChanged: vi.fn(),
       isLoading: false,
       caseId: basicCase.id,
       caseTitle: basicCase.title,
@@ -137,7 +140,7 @@ describe('AssigneesField', () => {
   });
 
   it('assigns the current user when the assign yourself link is clicked', async () => {
-    const onAssigneesChanged = jest.fn();
+    const onAssigneesChanged = vi.fn();
 
     renderWithTestingProviders(
       <AssigneesField {...defaultProps} onAssigneesChanged={onAssigneesChanged} />

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
@@ -57,7 +60,7 @@ const TestProvidersWithUiSettings = ({
   assetInventoryEnabled?: boolean;
 }) => {
   const customStartServices = createStartServicesMock();
-  customStartServices.uiSettings.get = jest
+  customStartServices.uiSettings.get = vi
     .fn()
     .mockImplementation((key: string, defaultValue?: unknown) => {
       if (key === 'securitySolution:enableAssetInventory') {
@@ -69,34 +72,46 @@ const TestProvidersWithUiSettings = ({
   return <TestProviders startServices={customStartServices}>{children}</TestProviders>;
 };
 
-jest.mock('./hooks/use_get_generic_entity', () => ({
-  useGetGenericEntity: jest.fn(), // ✅ return a Jest mock function
-}));
+vi.mock('./hooks/use_get_generic_entity', () => {
+      const mocked = {
+      useGetGenericEntity: vi.fn(), // ✅ return a Jest mock function
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGetGenericEntity = useGetGenericEntity as jest.Mock;
+const mockUseGetGenericEntity = useGetGenericEntity as Mock;
 
-jest.mock('./hooks/use_generic_entity_criticality', () => ({
-  useGenericEntityCriticality: jest.fn(), // ✅ return a Jest mock function
-}));
+vi.mock('./hooks/use_generic_entity_criticality', () => {
+      const mocked = {
+      useGenericEntityCriticality: vi.fn(), // ✅ return a Jest mock function
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGenericEntityCriticality = useGenericEntityCriticality as jest.Mock;
+const mockUseGenericEntityCriticality = useGenericEntityCriticality as Mock;
 
 const flyoutContextValue = {
-  closeLeftPanel: jest.fn(),
+  closeLeftPanel: vi.fn(),
 } as unknown as ExpandableFlyoutApi;
 
 const flyoutHistory: FlyoutPanelHistory[] = [
   { lastOpen: Date.now(), panel: { id: 'id1', params: {} } },
 ];
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  useExpandableFlyoutHistory: jest.fn(),
-  useExpandableFlyoutState: jest.fn(),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: vi.fn(),
+      useExpandableFlyoutHistory: vi.fn(),
+      useExpandableFlyoutState: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/utils/timeline/use_show_timeline', () => ({
-  useShowTimeline: jest.fn(() => [true]),
-}));
+vi.mock('../../../common/utils/timeline/use_show_timeline', () => {
+      const mocked = {
+      useShowTimeline: vi.fn(() => [true]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('GenericEntityPanel', () => {
   beforeEach(() => {
@@ -116,9 +131,9 @@ describe('GenericEntityPanel', () => {
         isError: false,
       },
     });
-    jest.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
-    jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+    vi.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
+    vi.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
+    vi.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
   it('renders generic flyout', () => {

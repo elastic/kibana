@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { omit, cloneDeep } from 'lodash';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
@@ -27,7 +29,7 @@ const migration880 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.8
 
 describe('successful migrations for 8.8.0', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('validate test data', () => {

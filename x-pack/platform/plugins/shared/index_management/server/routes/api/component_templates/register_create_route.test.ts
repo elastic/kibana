@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { registerComponentTemplateRoutes } from '.';
 import { addBasePath } from '..';
 import type { RequestMock } from '../../../test/helpers';
@@ -26,7 +28,7 @@ const mockRequest: RequestMock = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   registerComponentTemplateRoutes({
     ...routeDependencies,
     router,

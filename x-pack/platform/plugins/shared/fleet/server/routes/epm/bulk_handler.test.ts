@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { packagePolicyService } from '../../services';
@@ -18,52 +21,64 @@ import { scheduleBulkUninstall } from '../../tasks/packages_bulk_operations';
 
 import { postBulkUninstallPackagesHandler } from './bulk_handler';
 
-jest.mock('../../services', () => ({
-  appContextService: {
-    getInternalUserSOClientWithoutSpaceExtension: jest.fn().mockReturnValue({}),
-    getTaskManagerStart: jest.fn().mockReturnValue({}),
-  },
-  packagePolicyService: {
-    list: jest.fn(),
-  },
-  licenseService: {
-    isAtLeast: jest.fn().mockReturnValue(true),
-  },
-}));
+vi.mock('../../services', () => {
+      const mocked = {
+      appContextService: {
+        getInternalUserSOClientWithoutSpaceExtension: vi.fn().mockReturnValue({}),
+        getTaskManagerStart: vi.fn().mockReturnValue({}),
+      },
+      packagePolicyService: {
+        list: vi.fn(),
+      },
+      licenseService: {
+        isAtLeast: vi.fn().mockReturnValue(true),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/epm/packages/get', () => ({
-  getInstallationsByName: jest.fn(),
-}));
+vi.mock('../../services/epm/packages/get', () => {
+      const mocked = {
+      getInstallationsByName: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/epm/packages/uninstall_authz', () => ({
-  assertUninstallAuthorizedForAffectedSpaces: jest.fn().mockResolvedValue(undefined),
-  collectSpacesForUninstallClosure: jest
-    .fn()
-    .mockResolvedValue({ spaceIds: new Set(['default']), truncated: false }),
-}));
+vi.mock('../../services/epm/packages/uninstall_authz', () => {
+      const mocked = {
+      assertUninstallAuthorizedForAffectedSpaces: vi.fn().mockResolvedValue(undefined),
+      collectSpacesForUninstallClosure: vi
+        .fn()
+        .mockResolvedValue({ spaceIds: new Set(['default']), truncated: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../tasks/packages_bulk_operations', () => ({
-  scheduleBulkUninstall: jest.fn().mockResolvedValue('task-id-123'),
-  scheduleBulkUpgrade: jest.fn(),
-  getBulkOperationTaskResults: jest.fn(),
-  scheduleBulkRollback: jest.fn(),
-}));
+vi.mock('../../tasks/packages_bulk_operations', () => {
+      const mocked = {
+      scheduleBulkUninstall: vi.fn().mockResolvedValue('task-id-123'),
+      scheduleBulkUpgrade: vi.fn(),
+      getBulkOperationTaskResults: vi.fn(),
+      scheduleBulkRollback: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // validateInstalledPackages uses getInstallationsByName internally — keep it simple by
 // making every package appear installed.
-const mockGetInstallationsByName = getInstallationsByName as jest.MockedFunction<
+const mockGetInstallationsByName = getInstallationsByName as MockedFunction<
   typeof getInstallationsByName
 >;
-const mockPackagePolicyServiceList = packagePolicyService.list as jest.MockedFunction<
+const mockPackagePolicyServiceList = packagePolicyService.list as MockedFunction<
   typeof packagePolicyService.list
 >;
 const mockAssertUninstallAuthorized =
-  assertUninstallAuthorizedForAffectedSpaces as jest.MockedFunction<
+  assertUninstallAuthorizedForAffectedSpaces as MockedFunction<
     typeof assertUninstallAuthorizedForAffectedSpaces
   >;
 const mockCollectSpacesForUninstallClosure =
-  collectSpacesForUninstallClosure as jest.MockedFunction<typeof collectSpacesForUninstallClosure>;
-const mockScheduleBulkUninstall = scheduleBulkUninstall as jest.MockedFunction<
+  collectSpacesForUninstallClosure as MockedFunction<typeof collectSpacesForUninstallClosure>;
+const mockScheduleBulkUninstall = scheduleBulkUninstall as MockedFunction<
   typeof scheduleBulkUninstall
 >;
 
@@ -80,10 +95,10 @@ function makeContext(request: Record<string, unknown> = {}) {
   } as any;
 
   const response = {
-    ok: jest.fn((body) => ({ status: 200, ...body })),
-    forbidden: jest.fn((body) => ({ status: 403, ...body })),
-    badRequest: jest.fn((body) => ({ status: 400, ...body })),
-    customError: jest.fn((body) => body),
+    ok: vi.fn((body) => ({ status: 200, ...body })),
+    forbidden: vi.fn((body) => ({ status: 403, ...body })),
+    badRequest: vi.fn((body) => ({ status: 400, ...body })),
+    customError: vi.fn((body) => body),
   } as any;
 
   return { mockRequest, context, response };
@@ -97,7 +112,7 @@ const INSTALLATION = {
 } as any;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockGetInstallationsByName.mockResolvedValue([INSTALLATION]);
   mockPackagePolicyServiceList.mockResolvedValue({
     total: 0,

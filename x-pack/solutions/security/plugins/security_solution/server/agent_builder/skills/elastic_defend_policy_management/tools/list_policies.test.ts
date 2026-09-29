@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ToolType } from '@kbn/agent-builder-common';
 import { createOtherResult } from '@kbn/agent-builder-server';
 import type { StartServicesAccessor } from '@kbn/core/server';
@@ -22,17 +24,20 @@ import { createPolicyTool } from './create_policy_tool';
 import { LIST_POLICIES_TOOL_ID, createListPoliciesTool, listPoliciesSchema } from './list_policies';
 import { estimateGuardedEnvelopeTokens, toPresentationHash } from './trim_policy_result';
 
-jest.mock('./create_policy_tool', () => ({
-  createPolicyTool: jest.fn(),
-}));
+vi.mock('./create_policy_tool', () => {
+      const mocked = {
+      createPolicyTool: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const SPACE_ID = 'space-marketing';
-const getStartServices = jest.fn() as unknown as StartServicesAccessor;
-const mockedCreatePolicyTool = jest.mocked(createPolicyTool);
+const getStartServices = vi.fn() as unknown as StartServicesAccessor;
+const mockedCreatePolicyTool = vi.mocked(createPolicyTool);
 const mockService = {
-  listPolicies: jest.fn(),
+  listPolicies: vi.fn(),
 } as unknown as EndpointPolicyManagementService;
-const mockedListPolicies = jest.mocked(mockService.listPolicies);
+const mockedListPolicies = vi.mocked(mockService.listPolicies);
 
 const createPosture = () => ({
   windowsProtectionModes: {

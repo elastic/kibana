@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   createWorkflowsClientMock,
@@ -25,7 +28,7 @@ const flushMicrotasks = async () => {
   await new Promise<void>((resolve) => setTimeout(resolve, 0));
 };
 
-const isExperimentalEnabled = jest.fn().mockResolvedValue(true);
+const isExperimentalEnabled = vi.fn().mockResolvedValue(true);
 
 const systemActor = { type: EventActorType.system, id: 'system' };
 const addedEvent: AttachmentTimelineEvent = {
@@ -157,7 +160,7 @@ describe('registerConversationWorkflowEventBridge', () => {
 
   it('logs a warning when forwarding fails', async () => {
     const failingClient = createWorkflowsClientMock({
-      emitEvent: jest.fn().mockRejectedValue(new Error('network error')),
+      emitEvent: vi.fn().mockRejectedValue(new Error('network error')),
     });
     workflowsExtensions.getClient.mockResolvedValue(failingClient);
     const failBus = createConversationEventBus();
@@ -244,7 +247,7 @@ describe('registerConversationWorkflowEventBridge', () => {
     });
 
     it('warns and continues when one emitEvent rejects', async () => {
-      (mockClient.emitEvent as jest.Mock)
+      (mockClient.emitEvent as Mock)
         .mockRejectedValueOnce(new Error('network error'))
         .mockResolvedValue(undefined);
 

@@ -5,22 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useAlertDetailsPageViewEbt } from './use_alert_details_page_view_ebt';
 import { useKibana } from '../utils/kibana_react';
 
-jest.mock('../utils/kibana_react', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../utils/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useAlertDetailsPageViewEbt', () => {
-  const getServices = (reportAlertDetailsPageView: jest.Mock) => ({
+  const getServices = (reportAlertDetailsPageView: Mock) => ({
     services: { telemetryClient: { reportAlertDetailsPageView } },
   });
 
   it('fires event when ruleType provided', () => {
-    const reportAlertDetailsPageView = jest.fn();
-    (useKibana as jest.Mock).mockReturnValue(getServices(reportAlertDetailsPageView));
+    const reportAlertDetailsPageView = vi.fn();
+    (useKibana as Mock).mockReturnValue(getServices(reportAlertDetailsPageView));
 
     renderHook(() => useAlertDetailsPageViewEbt({ ruleType: 'logs.alert.document.count' }));
 

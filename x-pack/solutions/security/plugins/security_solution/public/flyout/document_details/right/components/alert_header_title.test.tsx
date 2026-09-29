@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DocumentDetailsContext } from '../../shared/context';
@@ -32,16 +34,19 @@ import {
 } from '../../../../flyout_v2/shared/components/test_ids';
 import { useRefetchByScope } from '../../../../flyout_v2/document/main/hooks/use_refetch_by_scope';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../flyout_v2/document/main/hooks/use_refetch_by_scope');
-jest.mock('../../../../flyout_v2/document/main/components/status', () => ({
-  Status: ({ onAlertUpdated }: { onAlertUpdated?: () => void }) => (
-    <>
-      <div data-test-subj="securitySolutionFlyoutHeaderStatusTitle">{'Status'}</div>
-      <button data-test-subj="rule-status-badge" onClick={onAlertUpdated} type="button" />
-    </>
-  ),
-}));
+vi.mock('../../../../common/lib/kibana');
+vi.mock('../../../../flyout_v2/document/main/hooks/use_refetch_by_scope');
+vi.mock('../../../../flyout_v2/document/main/components/status', () => {
+      const mocked = {
+      Status: ({ onAlertUpdated }: { onAlertUpdated?: () => void }) => (
+        <>
+          <div data-test-subj="securitySolutionFlyoutHeaderStatusTitle">{'Status'}</div>
+          <button data-test-subj="rule-status-badge" onClick={onAlertUpdated} type="button" />
+        </>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
@@ -57,7 +62,7 @@ const createSearchHit = (fields: Record<string, unknown[]>) => ({
 
 const mockContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-  getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
+  getFieldsData: vi.fn().mockImplementation(mockGetFieldsData),
   searchHit: createSearchHit({
     'event.kind': ['signal'],
     'kibana.alert.risk_score': [0],
@@ -77,13 +82,13 @@ const renderHeader = (contextValue: DocumentDetailsContext) =>
   );
 
 describe('<AlertHeaderTitle />', () => {
-  const refetchMock = jest.fn();
+  const refetchMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useDateFormat).mockImplementation(() => dateFormat);
-    jest.mocked(useTimeZone).mockImplementation(() => 'UTC');
-    jest.mocked(useRefetchByScope).mockReturnValue({ refetch: refetchMock });
+    vi.clearAllMocks();
+    vi.mocked(useDateFormat).mockImplementation(() => dateFormat);
+    vi.mocked(useTimeZone).mockImplementation(() => 'UTC');
+    vi.mocked(useRefetchByScope).mockReturnValue({ refetch: refetchMock });
   });
 
   it('should render component', () => {
@@ -119,7 +124,7 @@ describe('<AlertHeaderTitle />', () => {
   });
 
   it('refetches both table and flyout data when the alert status changes', () => {
-    const refetchFlyoutData = jest.fn();
+    const refetchFlyoutData = vi.fn();
     const { getByTestId } = renderHeader({
       ...mockContextValue,
       refetchFlyoutData,

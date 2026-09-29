@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import rison from '@kbn/rison';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
@@ -27,20 +30,23 @@ import type {
   InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 
-jest.mock('./evaluate_condition', () => ({ evaluateCondition: jest.fn() }));
+vi.mock('./evaluate_condition', () => {
+      const mocked = { evaluateCondition: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 const mockAssetDetailsLocator = {
-  getRedirectUrl: jest
+  getRedirectUrl: vi
     .fn()
     .mockImplementation(
       ({ entityId, entityType, assetDetails }: AssetDetailsLocatorParams) =>
         `/node-mock/${entityType}/${entityId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
     ),
-} as unknown as jest.Mocked<AssetDetailsLocator>;
+} as unknown as Mocked<AssetDetailsLocator>;
 
 const mockInventoryLocator = {
-  getRedirectUrl: jest.fn().mockImplementation(({}: InventoryLocatorParams) => `/inventory-mock`),
-} as unknown as jest.Mocked<InventoryLocator>;
+  getRedirectUrl: vi.fn().mockImplementation(({}: InventoryLocatorParams) => `/inventory-mock`),
+} as unknown as Mocked<InventoryLocator>;
 
 interface AlertTestInstance {
   actionGroup: string;
@@ -96,9 +102,8 @@ const mockOptions = {
   },
 };
 
-const setEvaluationResults = (response: Record<string, ConditionResult>) => {
-  return jest
-    .requireMock('./evaluate_condition')
+const setEvaluationResults = async (response: Record<string, ConditionResult>) => {
+  return (await vi.importMock('./evaluate_condition'))
     .evaluateCondition.mockImplementation(() => response);
 };
 const createMockStaticConfiguration = (sources: any) => ({

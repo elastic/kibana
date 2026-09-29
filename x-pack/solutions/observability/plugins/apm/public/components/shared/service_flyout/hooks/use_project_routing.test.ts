@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { useProjectRouting } from './use_project_routing';
@@ -16,12 +18,15 @@ interface MockCpsManager {
 
 const mockCpsManager$ = new BehaviorSubject<MockCpsManager | undefined>(undefined);
 
-jest.mock('../../../../plugin', () => ({
-  get apmCpsManager$() {
-    return mockCpsManager$;
-  },
-  getApmCpsManager: () => mockCpsManager$.getValue(),
-}));
+vi.mock('../../../../plugin', () => {
+      const mocked = {
+      get apmCpsManager$() {
+        return mockCpsManager$;
+      },
+      getApmCpsManager: () => mockCpsManager$.getValue(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function createCpsManager(projectRouting$: BehaviorSubject<string | undefined>): MockCpsManager {
   return {

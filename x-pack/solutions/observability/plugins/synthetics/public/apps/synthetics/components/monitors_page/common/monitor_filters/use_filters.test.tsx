@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useFilters } from './use_filters';
@@ -11,13 +13,16 @@ import { useDispatch } from 'react-redux-v7';
 import { WrappedHelper } from '../../../../utils/testing';
 import { fetchMonitorFiltersAction } from '../../../../state';
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useDispatch: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useDispatch: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useMonitorListFilters', () => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 
   it('returns expected results', () => {
     const { result } = renderHook(() => useFilters(), {
@@ -49,7 +54,7 @@ describe('useMonitorListFilters', () => {
         </WrappedHelper>
       );
     };
-    const spy = jest.fn();
+    const spy = vi.fn();
     // @ts-ignore
     useDispatch.mockReturnValue(spy);
     const { result } = renderHook(() => useFilters(), { wrapper: Wrapper });
@@ -84,7 +89,7 @@ describe('useMonitorListFilters', () => {
         </WrappedHelper>
       );
     };
-    const spy = jest.fn();
+    const spy = vi.fn();
     // @ts-ignore
     useDispatch.mockReturnValue(spy);
     const { result } = renderHook(() => useFilters(), { wrapper: Wrapper });

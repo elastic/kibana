@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
@@ -33,7 +35,7 @@ const mockUsers = [
   },
 ];
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({
     items: [],
     total: 0,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 import { validateEsqlQuery } from './validate_esql_query';
 
@@ -12,7 +14,7 @@ describe('validateEsqlQuery', () => {
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns true for a valid ES|QL query', async () => {

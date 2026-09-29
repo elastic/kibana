@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 
@@ -16,19 +18,19 @@ describe('AutoDownload', () => {
     Object.defineProperty(globalNode.window.URL, 'revokeObjectURL', {
       configurable: true,
       writable: true,
-      value: jest.fn(),
+      value: vi.fn(),
     });
   });
 
   it('calls onDownload once if a blob is provided', () => {
-    const onDownload = jest.fn();
+    const onDownload = vi.fn();
     mount(<AutoDownload blob={new Blob([''])} onDownload={onDownload} />);
 
     expect(onDownload).toHaveBeenCalledTimes(1);
   });
 
   it('does not call onDownload if no blob is provided', () => {
-    const onDownload = jest.fn();
+    const onDownload = vi.fn();
     mount(<AutoDownload blob={undefined} onDownload={onDownload} />);
 
     expect(onDownload).not.toHaveBeenCalled();

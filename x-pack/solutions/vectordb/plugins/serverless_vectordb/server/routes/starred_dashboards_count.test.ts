@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { ObjectType } from '@kbn/config-schema';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import {
@@ -18,9 +21,9 @@ import { STARRED_DASHBOARDS_COUNT_PATH } from '../../common/constants';
 import { countExistingDashboards } from '../lib/dashboards';
 import { registerStarredDashboardsCountRoute } from './starred_dashboards_count';
 
-jest.mock('../lib/dashboards');
+vi.mock('../lib/dashboards');
 
-const mockCountExistingDashboards = countExistingDashboards as jest.MockedFunction<
+const mockCountExistingDashboards = countExistingDashboards as MockedFunction<
   typeof countExistingDashboards
 >;
 
@@ -30,7 +33,7 @@ describe('registerStarredDashboardsCountRoute', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     router = httpServiceMock.createRouter();
     logger = loggingSystemMock.createLogger();
     soClient = savedObjectsClientMock.create();

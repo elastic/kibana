@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
@@ -20,12 +22,12 @@ const defaultCloseReasonOptions = [
 ];
 
 describe('CloseCaseModal', () => {
-  const onClose = jest.fn();
-  const onSubmit = jest.fn();
-  const onCloseReasonOptionsChange = jest.fn();
+  const onClose = vi.fn();
+  const onSubmit = vi.fn();
+  const onCloseReasonOptionsChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the modal title', () => {

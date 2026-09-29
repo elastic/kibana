@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -15,15 +17,18 @@ import { useExperimentDatasetExamples } from '../../hooks/use_evals_api';
 import { queryKeys } from '../../query_keys';
 import { DatasetStatsAccordion } from '.';
 
-jest.mock('../../hooks/use_evals_api');
-jest.mock('../../components/example_scores_table', () => ({
-  ExampleScoresTable: jest.fn(() => <div>Example scores table</div>),
-}));
+vi.mock('../../hooks/use_evals_api');
+vi.mock('../../components/example_scores_table', () => {
+      const mocked = {
+      ExampleScoresTable: vi.fn(() => <div>Example scores table</div>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseExperimentDatasetExamples = jest.mocked(useExperimentDatasetExamples);
-const mockExampleScoresTable = jest.mocked(ExampleScoresTable);
-const refetchExamples = jest.fn();
-const refetchPreviews = jest.fn();
+const mockUseExperimentDatasetExamples = vi.mocked(useExperimentDatasetExamples);
+const mockExampleScoresTable = vi.mocked(ExampleScoresTable);
+const refetchExamples = vi.fn();
+const refetchPreviews = vi.fn();
 
 const previewQueryKey = queryKeys.experiments.datasetExamples(
   'experiment-1',
@@ -63,8 +68,8 @@ const defaultAccordionProps: React.ComponentProps<typeof DatasetStatsAccordion> 
   isRunning: false,
   datasetExists: false,
   selectedExampleId: null,
-  onTraceClick: jest.fn(),
-  onDatasetToggle: jest.fn(),
+  onTraceClick: vi.fn(),
+  onDatasetToggle: vi.fn(),
 };
 
 const renderAccordion = (
@@ -85,11 +90,11 @@ describe('DatasetStatsAccordion', () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
-    jest.spyOn(queryClient, 'invalidateQueries');
+    vi.spyOn(queryClient, 'invalidateQueries');
     mockUseExperimentDatasetExamples.mockImplementation(
       (_experimentId, _datasetId, _executionId, options) =>
         ({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -22,7 +24,7 @@ describe('softDeleteGapsByQuery', () => {
   const eventLogClient = eventLogClientMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     eventLogClient.softDeleteByQuery.mockResolvedValue(okResponse);
   });
 
@@ -166,11 +168,11 @@ describe('softDeleteGapsByQuery', () => {
 
   describe('version conflicts', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     test('retries the chunk once when the response reports version conflicts', async () => {
@@ -187,7 +189,7 @@ describe('softDeleteGapsByQuery', () => {
         eventLogClient,
         logger,
       });
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
       await pending;
 
       expect(eventLogClient.softDeleteByQuery).toHaveBeenCalledTimes(2);
@@ -206,7 +208,7 @@ describe('softDeleteGapsByQuery', () => {
         eventLogClient,
         logger,
       });
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
       await pending;
 
       expect(eventLogClient.softDeleteByQuery).toHaveBeenCalledTimes(2);
@@ -225,7 +227,7 @@ describe('softDeleteGapsByQuery', () => {
         eventLogClient,
         logger,
       });
-      await jest.runAllTimersAsync();
+      await vi.runAllTimersAsync();
       await pending;
 
       expect(eventLogClient.softDeleteByQuery).toHaveBeenCalledTimes(1);

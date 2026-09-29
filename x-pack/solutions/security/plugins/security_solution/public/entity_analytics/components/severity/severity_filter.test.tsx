@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { SeverityFilter } from './severity_filter';
@@ -13,7 +15,7 @@ import { createTelemetryServiceMock } from '../../../common/lib/telemetry/teleme
 import { RiskSeverity } from '../../../../common/search_strategy';
 
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('../../../common/lib/kibana', () => {
+vi.mock('../../../common/lib/kibana', () => {
   return {
     useKibana: () => ({
       services: {
@@ -31,7 +33,7 @@ describe('SeverityFilter', () => {
   it('sends telemetry when selecting a classification', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <SeverityFilter selectedItems={[]} onSelect={jest.fn()} riskEntity={EntityType.user} />
+        <SeverityFilter selectedItems={[]} onSelect={vi.fn()} riskEntity={EntityType.user} />
       </TestProviders>
     );
 
@@ -53,7 +55,7 @@ describe('SeverityFilter', () => {
             RiskSeverity.Low,
             RiskSeverity.Unknown,
           ]}
-          onSelect={jest.fn()}
+          onSelect={vi.fn()}
           riskEntity={EntityType.user}
         />
       </TestProviders>

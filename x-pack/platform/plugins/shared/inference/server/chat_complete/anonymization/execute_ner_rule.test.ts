@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { NamedEntityRecognitionRule } from '@kbn/inference-common';
 import { executeNerRule } from './execute_ner_rule';
 
 const mockEsClient = {
   ml: {
-    inferTrainedModel: jest.fn(),
+    inferTrainedModel: vi.fn(),
   },
 } as any;
 
 describe('executeNerRule', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('throws a user-friendly error when the NER model is not found', async () => {

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { fetchSynonymRule } from './fetch_synonym_rule';
 
 describe('fetch synonym rule lib function', () => {
   const mockClient = {
     synonyms: {
-      getSynonymRule: jest.fn(),
+      getSynonymRule: vi.fn(),
     },
   };
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import * as Rx from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -18,8 +20,8 @@ import { ScreenCapturePanelContent } from './screen_capture_panel_content';
 
 // Capture the textToCopy prop passed to EuiCopy without executing execCommand (not available in jsdom)
 let capturedTextToCopy = '';
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiCopy: ({

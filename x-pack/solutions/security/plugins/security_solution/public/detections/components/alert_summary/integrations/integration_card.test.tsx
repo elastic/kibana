@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
@@ -17,8 +20,8 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useIntegrationLastAlertIngested } from '../../../hooks/alert_summary/use_integration_last_alert_ingested';
 
-jest.mock('@kbn/kibana-react-plugin/public');
-jest.mock('../../../hooks/alert_summary/use_integration_last_alert_ingested');
+vi.mock('@kbn/kibana-react-plugin/public');
+vi.mock('../../../hooks/alert_summary/use_integration_last_alert_ingested');
 
 const dataTestSubj = 'test-id';
 const integration: PackageListItem = {
@@ -32,16 +35,16 @@ const integration: PackageListItem = {
 
 describe('<IntegrationCard />', () => {
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: { http: { basePath: { prepend: jest.fn() } } },
+    (useKibana as Mock).mockReturnValue({
+      services: { http: { basePath: { prepend: vi.fn() } } },
     });
   });
 
   it('should render the card with skeleton while loading last activity', () => {
-    (useIntegrationLastAlertIngested as jest.Mock).mockReturnValue({
+    (useIntegrationLastAlertIngested as Mock).mockReturnValue({
       isLoading: true,
       lastAlertIngested: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { getByTestId, queryByTestId } = render(
@@ -56,10 +59,10 @@ describe('<IntegrationCard />', () => {
   });
 
   it('should render the card with last activity value', () => {
-    (useIntegrationLastAlertIngested as jest.Mock).mockReturnValue({
+    (useIntegrationLastAlertIngested as Mock).mockReturnValue({
       isLoading: false,
       lastAlertIngested: 1735711200000, // Wed Jan 01 2025 00:00:00 GMT-0600 (Central Standard Time)
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { getByTestId, queryByTestId } = render(

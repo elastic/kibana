@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
@@ -18,9 +21,9 @@ import {
 } from '../../common/constants';
 import type { ConfigType } from '../config';
 
-jest.mock('./collect_telemetry_data');
+vi.mock('./collect_telemetry_data');
 
-const collectTelemetryDataMock = collectTelemetryData as jest.Mock;
+const collectTelemetryDataMock = collectTelemetryData as Mock;
 
 /**
  * Registers the collector and runs the telemetry task once, so the assertions see the
@@ -55,7 +58,7 @@ const runTelemetryTask = async (templatesConfig?: ConfigType['templates']) => {
 
 describe('createCasesTelemetry', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     collectTelemetryDataMock.mockResolvedValue({});
   });
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -19,26 +22,29 @@ import {
 
 import { AgentDashboardLink } from './agent_dashboard_link';
 
-const mockedUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.MockedFunction<
+const mockedUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as MockedFunction<
   typeof useGetPackageInfoByKeyQuery
 >;
-const mockedUseDashboardLocator = jest.mocked(useDashboardLocator);
+const mockedUseDashboardLocator = vi.mocked(useDashboardLocator);
 
-jest.mock('../../../../../../hooks/use_fleet_status', () => ({
-  FleetStatusProvider: (props: any) => {
-    return props.children;
-  },
-  useFleetStatus: jest.fn().mockReturnValue({ spaceId: 'default' }),
-}));
+vi.mock('../../../../../../hooks/use_fleet_status', () => {
+      const mocked = {
+      FleetStatusProvider: (props: any) => {
+        return props.children;
+      },
+      useFleetStatus: vi.fn().mockReturnValue({ spaceId: 'default' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../hooks/use_request/epm');
+vi.mock('../../../../../../hooks/use_request/epm');
 
-jest.mock('../../../../../../hooks/use_locator', () => {
+vi.mock('../../../../../../hooks/use_locator', () => {
   return {
-    useDashboardLocator: jest.fn().mockImplementation(() => {
+    useDashboardLocator: vi.fn().mockImplementation(() => {
       return {
         id: 'DASHBOARD_APP_LOCATOR',
-        getRedirectUrl: jest.fn().mockReturnValue('app/dashboards#/view/elastic_agent-a0001'),
+        getRedirectUrl: vi.fn().mockReturnValue('app/dashboards#/view/elastic_agent-a0001'),
       };
     }),
   };
@@ -48,7 +54,7 @@ describe('AgentDashboardLink', () => {
   beforeEach(() => {
     mockedUseDashboardLocator.mockReturnValue({
       id: 'DASHBOARD_APP_LOCATOR',
-      getRedirectUrl: jest.fn().mockReturnValue('app/dashboards#/view/elastic_agent-a0001'),
+      getRedirectUrl: vi.fn().mockReturnValue('app/dashboards#/view/elastic_agent-a0001'),
     } as any);
   });
 
@@ -283,7 +289,7 @@ describe('AgentDashboardLink', () => {
   });
 
   it('should use the OTEL telemetry dashboard locator for OPAMP agents', () => {
-    const getRedirectUrl = jest.fn().mockReturnValue('app/dashboards#/view/otel');
+    const getRedirectUrl = vi.fn().mockReturnValue('app/dashboards#/view/otel');
     mockedUseDashboardLocator.mockReturnValue({
       id: 'DASHBOARD_APP_LOCATOR',
       getRedirectUrl,
@@ -329,7 +335,7 @@ describe('AgentDashboardLink', () => {
   });
 
   it('should use elastic.display.name as service.instance.id when present', () => {
-    const getRedirectUrl = jest.fn().mockReturnValue('app/dashboards#/view/otel');
+    const getRedirectUrl = vi.fn().mockReturnValue('app/dashboards#/view/otel');
     mockedUseDashboardLocator.mockReturnValue({
       id: 'DASHBOARD_APP_LOCATOR',
       getRedirectUrl,

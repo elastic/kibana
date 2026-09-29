@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { mount } from 'enzyme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux-v7';
@@ -18,8 +21,8 @@ import { SuperDatePicker, makeMapStateToProps } from '.';
 import { cloneDeep } from 'lodash/fp';
 import { InputsModelId } from '../../store/inputs/constants';
 
-jest.mock('../../lib/kibana');
-const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
+vi.mock('../../lib/kibana');
+const mockUseUiSetting$ = useUiSetting$ as Mock;
 const state = mockGlobalState;
 const timepickerRanges = [
   {
@@ -79,13 +82,13 @@ describe('SIEM Super Date Picker', () => {
     let store = createMockStore();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       store = createMockStore();
       mockUseUiSetting$.mockImplementation((key, defaultValue) => {
         const useUiSetting$Mock = createUseUiSetting$Mock();
 
         return key === DEFAULT_TIMEPICKER_QUICK_RANGES
-          ? [timepickerRanges, jest.fn()]
+          ? [timepickerRanges, vi.fn()]
           : useUiSetting$Mock(key, defaultValue);
       });
     });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import {
   ABSOLUTE_MAX_FILE_SIZE_BYTES,
   MAX_TIKA_FILE_SIZE_BYTES,
@@ -17,23 +20,26 @@ import {
   getMaxTikaBytesFormatted,
 } from './get_max_bytes';
 
-jest.mock('../kibana_services', () => ({
-  getUiSettings: jest.fn(),
-}));
+vi.mock('../kibana_services', () => {
+      const mocked = {
+      getUiSettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { getUiSettings } from '../kibana_services';
 
-const mockGetUiSettings = getUiSettings as jest.MockedFunction<typeof getUiSettings>;
+const mockGetUiSettings = getUiSettings as MockedFunction<typeof getUiSettings>;
 
 describe('get_max_bytes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getMaxBytes', () => {
     it('should return parsed bytes from UI settings', () => {
       mockGetUiSettings.mockReturnValue({
-        get: jest.fn().mockReturnValue('100MB'),
+        get: vi.fn().mockReturnValue('100MB'),
       } as any);
 
       const result = getMaxBytes();
@@ -42,7 +48,7 @@ describe('get_max_bytes', () => {
 
     it('should cap at ABSOLUTE_MAX_FILE_SIZE_BYTES when UI setting exceeds limit', () => {
       mockGetUiSettings.mockReturnValue({
-        get: jest.fn().mockReturnValue('2GB'),
+        get: vi.fn().mockReturnValue('2GB'),
       } as any);
 
       const result = getMaxBytes();
@@ -51,7 +57,7 @@ describe('get_max_bytes', () => {
 
     it('should handle lowercase file size strings', () => {
       mockGetUiSettings.mockReturnValue({
-        get: jest.fn().mockReturnValue('50mb'),
+        get: vi.fn().mockReturnValue('50mb'),
       } as any);
 
       const result = getMaxBytes();
@@ -60,7 +66,7 @@ describe('get_max_bytes', () => {
 
     it('should return exact value when equal to ABSOLUTE_MAX_FILE_SIZE_BYTES', () => {
       mockGetUiSettings.mockReturnValue({
-        get: jest.fn().mockReturnValue('1GB'),
+        get: vi.fn().mockReturnValue('1GB'),
       } as any);
 
       const result = getMaxBytes();
@@ -72,7 +78,7 @@ describe('get_max_bytes', () => {
   describe('getMaxBytesFormatted', () => {
     it('should return formatted bytes string', () => {
       mockGetUiSettings.mockReturnValue({
-        get: jest.fn().mockReturnValue('100MB'),
+        get: vi.fn().mockReturnValue('100MB'),
       } as any);
 
       const result = getMaxBytesFormatted();
@@ -81,7 +87,7 @@ describe('get_max_bytes', () => {
 
     it('should format large values correctly', () => {
       mockGetUiSettings.mockReturnValue({
-        get: jest.fn().mockReturnValue('500MB'),
+        get: vi.fn().mockReturnValue('500MB'),
       } as any);
 
       const result = getMaxBytesFormatted();

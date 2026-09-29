@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -17,7 +20,7 @@ import type { GcpCloudConnectorCredentials } from '../types';
 import { GCPReusableConnectorForm } from './gcp_reusable_connector_form';
 
 // Mock the useGetCloudConnectors hook
-jest.mock('../hooks/use_get_cloud_connectors');
+vi.mock('../hooks/use_get_cloud_connectors');
 
 interface UseGetCloudConnectorsReturn {
   data:
@@ -30,8 +33,8 @@ interface UseGetCloudConnectorsReturn {
   isLoading: boolean;
 }
 
-const mockUseGetCloudConnectors = jest.requireMock('../hooks/use_get_cloud_connectors')
-  .useGetCloudConnectors as jest.MockedFunction<
+const mockUseGetCloudConnectors = (await vi.importMock('../hooks/use_get_cloud_connectors'))
+  .useGetCloudConnectors as MockedFunction<
   (options?: { cloudProvider?: string; accountType?: string }) => UseGetCloudConnectorsReturn
 >;
 
@@ -73,7 +76,7 @@ const mockCloudConnectors = [
 ];
 
 describe('GCPReusableConnectorForm', () => {
-  const mockSetCredentials = jest.fn();
+  const mockSetCredentials = vi.fn();
 
   const defaultProps = {
     cloudConnectorId: undefined,
@@ -88,7 +91,7 @@ describe('GCPReusableConnectorForm', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseGetCloudConnectors.mockReturnValue({
       data: mockCloudConnectors,
       isLoading: false,

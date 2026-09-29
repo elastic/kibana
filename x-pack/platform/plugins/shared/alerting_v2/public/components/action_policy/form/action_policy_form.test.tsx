@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor, within } from '@testing-library/react';
@@ -15,23 +17,26 @@ import { DEFAULT_FORM_STATE } from './constants';
 import { ActionPolicyForm } from './action_policy_form';
 import type { ActionPolicyFormConfig, ActionPolicyFormState } from './types';
 
-const mockGetUrlForApp = jest.fn(
+const mockGetUrlForApp = vi.fn(
   (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
 );
 let mockWorkflowsEnabled = true;
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') {
-      return { getUrlForApp: mockGetUrlForApp };
-    }
-    if (token === 'uiSettings') {
-      return { get: () => mockWorkflowsEnabled };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (token === 'application') {
+          return { getUrlForApp: mockGetUrlForApp };
+        }
+        if (token === 'uiSettings') {
+          return { get: () => mockWorkflowsEnabled };
+        }
+        return {};
+      },
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const INLINE_DEFS = [
   {
@@ -50,57 +55,75 @@ const INLINE_DEFS = [
   },
 ];
 
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
-  getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
-  InlineWorkflowEditor: ({
-    value,
-    connectorCreationConfig,
-  }: {
-    value: { id: string };
-    connectorCreationConfig?: { mode: string; href?: string };
-  }) => (
-    <div
-      data-test-subj={`inlineWorkflowEditor-${value.id}`}
-      data-connector-creation-mode={connectorCreationConfig?.mode}
-    />
-  ),
-  isActionValid: () => true,
-  buildInlineWorkflowYaml: () => 'workflow: yaml',
-}));
+vi.mock('@kbn/alerting-v2-rule-form', () => {
+      const mocked = {
+      INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
+      getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
+      InlineWorkflowEditor: ({
+        value,
+        connectorCreationConfig,
+      }: {
+        value: { id: string };
+        connectorCreationConfig?: { mode: string; href?: string };
+      }) => (
+        <div
+          data-test-subj={`inlineWorkflowEditor-${value.id}`}
+          data-connector-creation-mode={connectorCreationConfig?.mode}
+        />
+      ),
+      isActionValid: () => true,
+      buildInlineWorkflowYaml: () => 'workflow: yaml',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./components/matcher_input', () => ({
-  MatcherInput: (props: {
-    value: string;
-    onChange: (v: string) => void;
-    'data-test-subj'?: string;
-  }) => (
-    <input
-      data-test-subj={props['data-test-subj']}
-      value={props.value}
-      onChange={(e) => props.onChange(e.target.value)}
-    />
-  ),
-}));
+vi.mock('./components/matcher_input', () => {
+      const mocked = {
+      MatcherInput: (props: {
+        value: string;
+        onChange: (v: string) => void;
+        'data-test-subj'?: string;
+      }) => (
+        <input
+          data-test-subj={props['data-test-subj']}
+          value={props.value}
+          onChange={(e) => props.onChange(e.target.value)}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_rule_event_fields', () => ({
-  useFetchRuleEventFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
-}));
+vi.mock('../../../hooks/use_fetch_rule_event_fields', () => {
+      const mocked = {
+      useFetchRuleEventFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_rules', () => ({
-  useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
-}));
+vi.mock('../../../hooks/use_fetch_rules', () => {
+      const mocked = {
+      useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: () => ({ data: [], isLoading: false }),
-}));
+vi.mock('../../../hooks/use_fetch_rule_tags', () => {
+      const mocked = {
+      useFetchRuleTags: () => ({ data: [], isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_fetch_workflows', () => ({
-  useFetchWorkflows: () => ({
-    data: { results: [], total: 0, page: 1, size: 100 },
-    isLoading: false,
-  }),
-}));
+vi.mock('../../../hooks/use_fetch_workflows', () => {
+      const mocked = {
+      useFetchWorkflows: () => ({
+        data: { results: [], total: 0, page: 1, size: 100 },
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderForm = (
   defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE,
@@ -135,7 +158,7 @@ const TEST_SUBJ = {
 describe('ActionPolicyForm', () => {
   beforeEach(() => {
     mockWorkflowsEnabled = true;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders static sections by default', () => {

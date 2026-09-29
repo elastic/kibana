@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
@@ -19,48 +22,54 @@ import { ALERTS_PATH } from '../../../../common/constants';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../../data_view_manager/constants';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+vi.mock('react-router-dom', () => {
+  const actual = require('react-router-dom');
+  return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock('react-redux-v7', () => {
+vi.mock('react-redux-v7', () => {
   return {
-    ...jest.requireActual('react-redux-v7'),
-    useDispatch: jest.fn(),
+    ...require('react-redux-v7'),
+    useDispatch: vi.fn(),
   };
 });
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/hooks/use_experimental_features');
-jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: jest.fn(),
-}));
-jest.mock('../../../data_view_manager/hooks/use_select_data_view', () => ({
-  useSelectDataView: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/hooks/use_experimental_features');
+vi.mock('../../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../data_view_manager/hooks/use_select_data_view', () => {
+      const mocked = {
+      useSelectDataView: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const store = createMockStore(mockGlobalState);
 
 describe('SourcererButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useLocation as jest.Mock).mockReturnValue({ pathname: ALERTS_PATH });
-    jest.mocked(useDataView).mockReturnValue({
+    vi.clearAllMocks();
+    (useLocation as Mock).mockReturnValue({ pathname: ALERTS_PATH });
+    vi.mocked(useDataView).mockReturnValue({
       dataView: {
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         name: 'Default Security Data View',
       } as DataView,
       status: 'ready',
     });
-    jest.mocked(useKibana).mockReturnValue({
+    vi.mocked(useKibana).mockReturnValue({
       services: {
-        dataViewFieldEditor: { openEditor: jest.fn() },
+        dataViewFieldEditor: { openEditor: vi.fn() },
         dataViewEditor: {
-          openEditor: jest.fn(),
-          userPermissions: { editDataView: jest.fn().mockReturnValue(true) },
+          openEditor: vi.fn(),
+          userPermissions: { editDataView: vi.fn().mockReturnValue(true) },
         },
-        data: { dataViews: { get: jest.fn() } },
+        data: { dataViews: { get: vi.fn() } },
       },
     } as unknown as ReturnType<typeof useKibana>);
   });
@@ -79,7 +88,7 @@ describe('SourcererButton', () => {
   });
 
   it('should render data view picker', async () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(true);
     const { getByTestId } = render(
       <TestProviders store={store}>
         <SourcererButton

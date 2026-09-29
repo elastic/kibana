@@ -5,51 +5,66 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 
-jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
+vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
 
-jest.mock('../ecf_cloudformation', () => ({
-  getEcfServiceConfigs: jest.fn(),
-  buildEcfUnifiedCloudFormationUrl: jest.fn(() => 'https://cf.aws/unified'),
-  buildEcfOtelCloudFormationUrl: jest.fn(() => 'https://cf.aws/otel'),
-  buildEcfCrowdstrikeCloudFormationUrl: jest.fn(() => 'https://cf.aws/crowdstrike'),
-  ECF_UNIFIED_STACK_NAME: 'edot-cloud-forwarder',
-  ECF_OTEL_STACK_NAME: 'edot-cloud-forwarder-otel',
-  ECF_CROWDSTRIKE_STACK_NAME: 'edot-cloud-forwarder-crowdstrike-fdr',
-}));
+vi.mock('../ecf_cloudformation', () => {
+      const mocked = {
+      getEcfServiceConfigs: vi.fn(),
+      buildEcfUnifiedCloudFormationUrl: vi.fn(() => 'https://cf.aws/unified'),
+      buildEcfOtelCloudFormationUrl: vi.fn(() => 'https://cf.aws/otel'),
+      buildEcfCrowdstrikeCloudFormationUrl: vi.fn(() => 'https://cf.aws/crowdstrike'),
+      ECF_UNIFIED_STACK_NAME: 'edot-cloud-forwarder',
+      ECF_OTEL_STACK_NAME: 'edot-cloud-forwarder-otel',
+      ECF_CROWDSTRIKE_STACK_NAME: 'edot-cloud-forwarder-crowdstrike-fdr',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../onboarding_session_storage', () => ({
-  getOnboardingSessionKey: jest.fn(() => 'onboarding.aws.ecfLaunchStep'),
-}));
+vi.mock('../onboarding_session_storage', () => {
+      const mocked = {
+      getOnboardingSessionKey: vi.fn(() => 'onboarding.aws.ecfLaunchStep'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../aws_service_matrix', () => ({
-  AWS_SERVICES_MAP: new Map([
-    ['cloudtrail', { ecfLogType: 'cloudtrail', ecfDedicatedTemplate: null }],
-    ['waf', { ecfLogType: 'waf', ecfDedicatedTemplate: null }],
-    ['cloudwatch_logs', { ecfLogType: 'cloudwatch_logs', ecfDedicatedTemplate: 'otel' }],
-    ['crowdstrike_fdr', { ecfLogType: null, ecfDedicatedTemplate: 'crowdstrike_fdr' }],
-  ]),
-}));
+vi.mock('../aws_service_matrix', () => {
+      const mocked = {
+      AWS_SERVICES_MAP: new Map([
+        ['cloudtrail', { ecfLogType: 'cloudtrail', ecfDedicatedTemplate: null }],
+        ['waf', { ecfLogType: 'waf', ecfDedicatedTemplate: null }],
+        ['cloudwatch_logs', { ecfLogType: 'cloudwatch_logs', ecfDedicatedTemplate: 'otel' }],
+        ['crowdstrike_fdr', { ecfLogType: null, ecfDedicatedTemplate: 'crowdstrike_fdr' }],
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../use_ecf_template_version', () => ({
-  useEcfTemplateVersion: jest.fn(() => ({
-    version: '1.10.0',
-    source: 'remote' as const,
-    isLoading: false,
-  })),
-}));
+vi.mock('../use_ecf_template_version', () => {
+      const mocked = {
+      useEcfTemplateVersion: vi.fn(() => ({
+        version: '1.10.0',
+        source: 'remote' as const,
+        isLoading: false,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { getEcfServiceConfigs } from '../ecf_cloudformation';
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
 
-const mockUseSessionStorage = useSessionStorage as jest.Mock;
-const mockGetEcfServiceConfigs = getEcfServiceConfigs as jest.Mock;
+const mockUseSessionStorage = useSessionStorage as Mock;
+const mockGetEcfServiceConfigs = getEcfServiceConfigs as Mock;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -74,7 +89,7 @@ function makeSessionStorageMock(
     stackVersions?: Record<string, string>;
   } = {}
 ) {
-  const setter = jest.fn();
+  const setter = vi.fn();
   mockUseSessionStorage.mockReturnValue([{ launchedFamilies: [], ...initial }, setter]);
   return setter;
 }
@@ -91,8 +106,8 @@ function renderSection(props: Partial<React.ComponentProps<typeof EcfDeploymentS
     launchedFamilies: [] as React.ComponentProps<typeof EcfDeploymentSection>['launchedFamilies'],
     stackNames: {} as React.ComponentProps<typeof EcfDeploymentSection>['stackNames'],
     stackVersions: {} as React.ComponentProps<typeof EcfDeploymentSection>['stackVersions'],
-    onLaunch: jest.fn() as React.ComponentProps<typeof EcfDeploymentSection>['onLaunch'],
-    onStackNameChange: jest.fn() as React.ComponentProps<
+    onLaunch: vi.fn() as React.ComponentProps<typeof EcfDeploymentSection>['onLaunch'],
+    onStackNameChange: vi.fn() as React.ComponentProps<
       typeof EcfDeploymentSection
     >['onStackNameChange'],
     ...props,
@@ -108,7 +123,7 @@ function renderSection(props: Partial<React.ComponentProps<typeof EcfDeploymentS
 
 describe('useEcfDeployment', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetEcfServiceConfigs.mockReturnValue([]);
     makeSessionStorageMock();
   });
@@ -293,7 +308,7 @@ describe('useEcfDeployment', () => {
 // ─── EcfDeploymentSection ────────────────────────────────────────────────────
 
 describe('EcfDeploymentSection', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   describe('accordion', () => {
     it('is open by default regardless of isDone', () => {
@@ -350,8 +365,8 @@ describe('EcfDeploymentSection', () => {
             launchedFamilies={['unified'] as any}
             stackNames={{}}
             stackVersions={{}}
-            onLaunch={jest.fn()}
-            onStackNameChange={jest.fn()}
+            onLaunch={vi.fn()}
+            onStackNameChange={vi.fn()}
           />
         </I18nProvider>
       );
@@ -413,7 +428,7 @@ describe('EcfDeploymentSection', () => {
     });
 
     it('calls onStackNameChange when the user edits the field', () => {
-      const onStackNameChange = jest.fn();
+      const onStackNameChange = vi.fn();
       renderSection({
         ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
         launchedFamilies: ['unified'],
@@ -443,7 +458,7 @@ describe('EcfDeploymentSection', () => {
             launchedFamilies={['unified'] as any}
             stackNames={stackNames}
             stackVersions={{}}
-            onLaunch={jest.fn()}
+            onLaunch={vi.fn()}
             onStackNameChange={(_family, name) =>
               setStackNames((prev) => ({ ...prev, unified: name }))
             }
@@ -478,7 +493,7 @@ describe('EcfDeploymentSection', () => {
             launchedFamilies={['unified'] as any}
             stackNames={stackNames}
             stackVersions={{}}
-            onLaunch={jest.fn()}
+            onLaunch={vi.fn()}
             onStackNameChange={(_family, name) =>
               setStackNames((prev) => ({ ...prev, unified: name }))
             }
@@ -523,8 +538,8 @@ describe('EcfDeploymentSection', () => {
   });
 
   describe('Reopen AWS Console link', () => {
-    beforeEach(() => jest.useFakeTimers());
-    afterEach(() => jest.useRealTimers());
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
 
     it('is hidden immediately after launch', () => {
       renderSection({
@@ -542,7 +557,7 @@ describe('EcfDeploymentSection', () => {
         launchedFamilies: ['unified'],
       });
       act(() => {
-        jest.advanceTimersByTime(5000);
+        vi.advanceTimersByTime(5000);
       });
       expect(
         screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-reopen')

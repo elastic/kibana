@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { AttachImpactStepId, GetImpactStepId } from '../../../common/impact/step_types';
 import { registerImpactPublicStepDefinitions } from '.';
@@ -12,7 +14,7 @@ import { registerImpactPublicStepDefinitions } from '.';
 type Loader = () => Promise<{ id: string } | undefined>;
 
 const register = () => {
-  const registerStepDefinition = jest.fn();
+  const registerStepDefinition = vi.fn();
   registerImpactPublicStepDefinitions({
     registerStepDefinition,
   } as unknown as WorkflowsExtensionsPublicPluginSetup);

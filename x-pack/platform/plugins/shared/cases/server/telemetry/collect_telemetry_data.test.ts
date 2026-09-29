@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { collectTelemetryData } from './collect_telemetry_data';
 import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
@@ -19,27 +22,27 @@ import { getUserActionsTelemetryData } from './queries/user_actions';
 import { getTemplatesTelemetryData } from './queries/templates';
 import { getFieldLibraryTelemetryData } from './queries/field_definitions';
 
-jest.mock('./queries/alerts');
-jest.mock('./queries/cases');
-jest.mock('./queries/case_system_action');
-jest.mock('./queries/comments');
-jest.mock('./queries/configuration');
-jest.mock('./queries/connectors');
-jest.mock('./queries/push');
-jest.mock('./queries/user_actions');
-jest.mock('./queries/templates');
-jest.mock('./queries/field_definitions');
+vi.mock('./queries/alerts');
+vi.mock('./queries/cases');
+vi.mock('./queries/case_system_action');
+vi.mock('./queries/comments');
+vi.mock('./queries/configuration');
+vi.mock('./queries/connectors');
+vi.mock('./queries/push');
+vi.mock('./queries/user_actions');
+vi.mock('./queries/templates');
+vi.mock('./queries/field_definitions');
 
-const getAlertsMock = getAlertsTelemetryData as jest.Mock;
-const getCasesMock = getCasesTelemetryData as jest.Mock;
-const getCasesSystemActionMock = getCasesSystemActionData as jest.Mock;
-const getCommentsMock = getUserCommentsTelemetryData as jest.Mock;
-const getConfigurationMock = getConfigurationTelemetryData as jest.Mock;
-const getConnectorsMock = getConnectorsTelemetryData as jest.Mock;
-const getPushesMock = getPushedTelemetryData as jest.Mock;
-const getUserActionsMock = getUserActionsTelemetryData as jest.Mock;
-const getTemplatesMock = getTemplatesTelemetryData as jest.Mock;
-const getFieldLibraryMock = getFieldLibraryTelemetryData as jest.Mock;
+const getAlertsMock = getAlertsTelemetryData as Mock;
+const getCasesMock = getCasesTelemetryData as Mock;
+const getCasesSystemActionMock = getCasesSystemActionData as Mock;
+const getCommentsMock = getUserCommentsTelemetryData as Mock;
+const getConfigurationMock = getConfigurationTelemetryData as Mock;
+const getConnectorsMock = getConnectorsTelemetryData as Mock;
+const getPushesMock = getPushedTelemetryData as Mock;
+const getUserActionsMock = getUserActionsTelemetryData as Mock;
+const getTemplatesMock = getTemplatesTelemetryData as Mock;
+const getFieldLibraryMock = getFieldLibraryTelemetryData as Mock;
 
 const preExistingAreas = {
   cases: getCasesMock,
@@ -96,7 +99,7 @@ describe('collectTelemetryData', () => {
   const collect = () => collectTelemetryData({ savedObjectsClient, logger });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
     // Each pre-existing area resolves to its own key name, so an assertion that one area
     // survived cannot pass on another area's value.
@@ -197,7 +200,7 @@ describe('collectTelemetryData', () => {
      * other test here notices.
      */
     it('leaves no unhandled rejection when the field library loses the race', async () => {
-      const unhandled = jest.fn();
+      const unhandled = vi.fn();
       process.on('unhandledRejection', unhandled);
 
       getFieldLibraryMock.mockImplementation(

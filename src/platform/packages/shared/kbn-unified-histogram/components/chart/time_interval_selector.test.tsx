@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, act, screen } from '@testing-library/react';
 import React from 'react';
 import { TimeIntervalSelector } from './time_interval_selector';
@@ -30,7 +32,7 @@ const getRenderedOptions = () =>
 
 describe('TimeIntervalSelector', () => {
   it('should render correctly', () => {
-    const onTimeIntervalChange = jest.fn();
+    const onTimeIntervalChange = vi.fn();
 
     render(
       <TimeIntervalSelector
@@ -100,7 +102,7 @@ describe('TimeIntervalSelector', () => {
   });
 
   it('should mark the selected option as checked', () => {
-    const onTimeIntervalChange = jest.fn();
+    const onTimeIntervalChange = vi.fn();
 
     render(
       <TimeIntervalSelector
@@ -170,7 +172,7 @@ describe('TimeIntervalSelector', () => {
   });
 
   it('should call onTimeIntervalChange with the selected option when the user selects an interval', () => {
-    const onTimeIntervalChange = jest.fn();
+    const onTimeIntervalChange = vi.fn();
 
     render(
       <TimeIntervalSelector

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
@@ -14,13 +17,13 @@ import { mockAttackDiscoverySchedule } from '../../../../mock/mock_attack_discov
 import { useGetAttackDiscoveryGenerations } from '../../../../use_get_attack_discovery_generations';
 import { useGetScheduleExecutionLogs } from './use_get_schedule_execution_logs';
 
-jest.mock('../../../../use_get_attack_discovery_generations');
-jest.mock('./use_get_schedule_execution_logs');
+vi.mock('../../../../use_get_attack_discovery_generations');
+vi.mock('./use_get_schedule_execution_logs');
 
 const mockUseGetAttackDiscoveryGenerations =
-  useGetAttackDiscoveryGenerations as jest.MockedFunction<typeof useGetAttackDiscoveryGenerations>;
+  useGetAttackDiscoveryGenerations as MockedFunction<typeof useGetAttackDiscoveryGenerations>;
 
-const mockUseGetScheduleExecutionLogs = useGetScheduleExecutionLogs as jest.MockedFunction<
+const mockUseGetScheduleExecutionLogs = useGetScheduleExecutionLogs as MockedFunction<
   typeof useGetScheduleExecutionLogs
 >;
 
@@ -57,18 +60,18 @@ const mockExecutionLogsReturn = (
   data: data as unknown as ReturnType<typeof useGetScheduleExecutionLogs>['data'],
   error: undefined,
   isLoading: false,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
   status: 'success',
 });
 
 const mockGenerationsReturn = (
   generations: Array<typeof mockGeneration | typeof mockWorkflowGeneration>
 ): ReturnType<typeof useGetAttackDiscoveryGenerations> => ({
-  cancelRequest: jest.fn(),
+  cancelRequest: vi.fn(),
   data: { generations },
   error: undefined,
   isLoading: false,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
   status: 'success',
 });
 
@@ -88,7 +91,7 @@ const renderComponent = async ({
 
 describe('ScheduleExecutionLogs', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseGetScheduleExecutionLogs.mockReturnValue(
       mockExecutionLogsReturn([buildExecutionLog('exec-uuid-1', 'success')])

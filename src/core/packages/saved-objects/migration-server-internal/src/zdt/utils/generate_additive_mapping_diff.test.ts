@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   getBaseMappingsMock,
   getUpdatedRootFieldsMock,
@@ -21,7 +23,7 @@ import { createType } from '../test_helpers';
 describe('generateAdditiveMappingDiff', () => {
   const deletedTypes = ['deletedType'];
 
-  const stubMigration = jest.fn();
+  const stubMigration = vi.fn();
   const stubModelVersion: SavedObjectsModelVersion = {
     changes: [{ type: 'mappings_addition', addedMappings: {} }],
   };

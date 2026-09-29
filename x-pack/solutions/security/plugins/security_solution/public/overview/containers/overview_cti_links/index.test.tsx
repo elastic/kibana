@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { HttpStart } from '@kbn/core/public';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ITagsClient } from '@kbn/saved-objects-tagging-oss-plugin/common';
@@ -13,21 +15,27 @@ import { INTERNAL_DASHBOARDS_URL } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { CTI_TAG_NAME, useCtiDashboardLinks } from '.';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/lib/apm/use_track_http_request', () => ({
-  useTrackHttpRequest: jest.fn(() => ({
-    startTracking: jest.fn(() => ({ endTracking: jest.fn() })),
-  })),
-}));
-jest.mock('../../../common/components/link_to', () => ({
-  useGetSecuritySolutionUrl: jest.fn(() =>
-    jest.fn(({ path }: { path: string }) => `/security/dashboards/${path}`)
-  ),
-}));
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/apm/use_track_http_request', () => {
+      const mocked = {
+      useTrackHttpRequest: vi.fn(() => ({
+        startTracking: vi.fn(() => ({ endTracking: vi.fn() })),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/components/link_to', () => {
+      const mocked = {
+      useGetSecuritySolutionUrl: vi.fn(() =>
+        vi.fn(({ path }: { path: string }) => `/security/dashboards/${path}`)
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockHttpPost = jest.fn();
+const mockHttpPost = vi.fn();
 const mockAbortSignal = {} as unknown as AbortSignal;
-const mockFindByName = jest.fn();
+const mockFindByName = vi.fn();
 
 const renderUseCtiDashboardLinks = (tiDataSources = [{ dataset: 'a', name: 'TI', count: 1 }]) =>
   renderHook(() => useCtiDashboardLinks({ tiDataSources }), {});
@@ -40,14 +48,14 @@ describe('useCtiDashboardLinks', () => {
     useKibana().services.savedObjectsTagging = {
       client: { findByName: mockFindByName } as unknown as ITagsClient,
     } as unknown as SavedObjectsTaggingApi;
-    global.AbortController = jest.fn().mockReturnValue({
-      abort: jest.fn(),
+    global.AbortController = vi.fn().mockReturnValue({
+      abort: vi.fn(),
       signal: mockAbortSignal,
     });
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('should resolve CTI tag via savedObjectsTagging.client findByName', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,7 +16,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import * as api from '../apis/snooze_alert_instance';
 import { useSnoozeAlertInstance } from './use_snooze_alert_instance';
 
-jest.mock('../apis/snooze_alert_instance');
+vi.mock('../apis/snooze_alert_instance');
 
 const params = { ruleId: 'rule-id', alertInstanceId: 'instance-id' };
 
@@ -32,11 +34,11 @@ describe('useSnoozeAlertInstance', () => {
   const { addError, addSuccess } = notifications.toasts;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the API with correct parameters', async () => {
-    const spy = jest.spyOn(api, 'snoozeAlertInstance');
+    const spy = vi.spyOn(api, 'snoozeAlertInstance');
 
     const { result } = renderHook(() => useSnoozeAlertInstance({ http, notifications }), {
       wrapper: Wrapper,
@@ -57,7 +59,7 @@ describe('useSnoozeAlertInstance', () => {
   });
 
   it('passes expiresAt and conditions to the API', async () => {
-    const spy = jest.spyOn(api, 'snoozeAlertInstance');
+    const spy = vi.spyOn(api, 'snoozeAlertInstance');
 
     const { result } = renderHook(() => useSnoozeAlertInstance({ http, notifications }), {
       wrapper: Wrapper,
@@ -82,7 +84,7 @@ describe('useSnoozeAlertInstance', () => {
   });
 
   it('shows a success toast when the API call succeeds', async () => {
-    jest.spyOn(api, 'snoozeAlertInstance').mockResolvedValue(undefined);
+    vi.spyOn(api, 'snoozeAlertInstance').mockResolvedValue(undefined);
 
     const { result } = renderHook(() => useSnoozeAlertInstance({ http, notifications }), {
       wrapper: Wrapper,
@@ -96,7 +98,7 @@ describe('useSnoozeAlertInstance', () => {
   });
 
   it('shows an error toast when the API call fails', async () => {
-    jest.spyOn(api, 'snoozeAlertInstance').mockRejectedValue(new Error('Server error'));
+    vi.spyOn(api, 'snoozeAlertInstance').mockRejectedValue(new Error('Server error'));
 
     const { result } = renderHook(() => useSnoozeAlertInstance({ http, notifications }), {
       wrapper: Wrapper,
@@ -110,7 +112,7 @@ describe('useSnoozeAlertInstance', () => {
   });
 
   it('runs against the default context when skipAlertsQueryContext is true', async () => {
-    const spy = jest.spyOn(api, 'snoozeAlertInstance');
+    const spy = vi.spyOn(api, 'snoozeAlertInstance');
 
     const { result } = renderHook(
       () => useSnoozeAlertInstance({ http, notifications, skipAlertsQueryContext: true }),

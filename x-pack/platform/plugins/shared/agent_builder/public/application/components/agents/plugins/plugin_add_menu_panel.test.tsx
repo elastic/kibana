@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -19,8 +21,8 @@ const renderWithIntl = (ui: React.ReactElement) =>
 describe('PluginAddMenuPanel', () => {
   it('calls onInstallFromUrlOrZip when the URL/ZIP item is clicked', async () => {
     const user = userEvent.setup({ delay: null });
-    const onInstallFromUrlOrZip = jest.fn();
-    const onAddFromLibrary = jest.fn();
+    const onInstallFromUrlOrZip = vi.fn();
+    const onAddFromLibrary = vi.fn();
 
     renderWithIntl(
       <PluginAddMenuPanel
@@ -36,8 +38,8 @@ describe('PluginAddMenuPanel', () => {
 
   it('calls onAddFromLibrary when the library item is clicked', async () => {
     const user = userEvent.setup({ delay: null });
-    const onInstallFromUrlOrZip = jest.fn();
-    const onAddFromLibrary = jest.fn();
+    const onInstallFromUrlOrZip = vi.fn();
+    const onAddFromLibrary = vi.fn();
 
     renderWithIntl(
       <PluginAddMenuPanel

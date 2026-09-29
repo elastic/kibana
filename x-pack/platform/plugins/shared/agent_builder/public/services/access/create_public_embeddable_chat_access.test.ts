@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AgentBuilderAccessChecker } from './access';
 import { createPublicEmbeddableChatAccess } from './create_public_embeddable_chat_access';
@@ -18,7 +20,7 @@ const createApplication = (hasShowPrivilege: boolean): ApplicationStart =>
 
 describe('createPublicEmbeddableChatAccess', () => {
   it('returns denied access without calling the checker when show capability is missing', async () => {
-    const getAgentBuilderAccess = jest.fn();
+    const getAgentBuilderAccess = vi.fn();
     const accessChecker = { getAgentBuilderAccess } as unknown as AgentBuilderAccessChecker;
     const getAccess = createPublicEmbeddableChatAccess({
       accessChecker,
@@ -34,7 +36,7 @@ describe('createPublicEmbeddableChatAccess', () => {
   });
 
   it('delegates to accessChecker.getAgentBuilderAccess when show capability is granted', async () => {
-    const getAgentBuilderAccess = jest.fn().mockResolvedValue({
+    const getAgentBuilderAccess = vi.fn().mockResolvedValue({
       hasRequiredLicense: true,
       hasLlmConnector: true,
     });

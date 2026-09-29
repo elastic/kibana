@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import type { DispatcherServiceContract } from './dispatcher';
 import { createDispatcherPipelineInput } from './fixtures/test_utils';
@@ -16,7 +19,7 @@ const createMockPipelineResult = () => ({
 });
 
 describe('DispatcherTaskRunner', () => {
-  let dispatcherService: jest.Mocked<DispatcherServiceContract>;
+  let dispatcherService: Mocked<DispatcherServiceContract>;
   let runner: DispatcherTaskRunner;
   let signal: AbortSignal;
 
@@ -32,13 +35,13 @@ describe('DispatcherTaskRunner', () => {
   };
 
   beforeEach(() => {
-    dispatcherService = { run: jest.fn() };
+    dispatcherService = { run: vi.fn() };
     runner = new DispatcherTaskRunner(dispatcherService);
     signal = new AbortController().signal;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('run', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
@@ -16,23 +19,32 @@ import type { DefaultDefendInsightsGraph } from '@kbn/discoveries';
 import { getLlmType } from '../../../../routes/utils';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
-jest.mock('langsmith/evaluation', () => ({
-  evaluate: jest.fn(async (predict: Function) =>
-    predict({
-      overrides: {
-        data: 'test',
-      },
-    })
-  ),
-}));
+vi.mock('langsmith/evaluation', () => {
+      const mocked = {
+      evaluate: vi.fn(async (predict: Function) =>
+        predict({
+          overrides: {
+            data: 'test',
+          },
+        })
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../helpers/get_custom_evaluator', () => ({
-  getDefendInsightsCustomEvaluator: jest.fn().mockReturnValue('mocked-evaluator'),
-}));
+vi.mock('../helpers/get_custom_evaluator', () => {
+      const mocked = {
+      getDefendInsightsCustomEvaluator: vi.fn().mockReturnValue('mocked-evaluator'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../helpers/get_graph_input_overrides', () => ({
-  getDefendInsightsGraphInputOverrides: jest.fn((input) => input.overrides ?? {}),
-}));
+vi.mock('../helpers/get_graph_input_overrides', () => {
+      const mocked = {
+      getDefendInsightsGraphInputOverrides: vi.fn((input) => input.overrides ?? {}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockExperimentConnector: InferenceConnector = {
   type: InferenceConnectorType.Gemini,
@@ -80,7 +92,7 @@ const graphs: Array<{
   };
 
   const graph = {
-    invoke: jest.fn().mockResolvedValue({}),
+    invoke: vi.fn().mockResolvedValue({}),
   } as unknown as DefaultDefendInsightsGraph;
 
   return {
@@ -93,7 +105,7 @@ const graphs: Array<{
 });
 
 describe('runDefendInsightsEvaluations', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('predict() invokes the graph with the expected overrides', async () => {
     await runDefendInsightsEvaluations({
@@ -120,7 +132,7 @@ describe('runDefendInsightsEvaluations', () => {
   it('catches and logs errors that occur during evaluation', async () => {
     const error = new Error('Test error');
 
-    (graphs[0].graph.invoke as jest.Mock).mockRejectedValue(error);
+    (graphs[0].graph.invoke as Mock).mockRejectedValue(error);
 
     await runDefendInsightsEvaluations({
       evaluatorConnectorId,

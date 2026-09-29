@@ -5,35 +5,43 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useDeleteMigration } from './use_delete_migrations';
 import { TestProviders } from '../../../common/mock';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import { MigrationSource } from '../types';
 
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
-const mockDeleteRuleMigration = jest.fn();
-const mockDeleteDashboardMigration = jest.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
+const mockDeleteRuleMigration = vi.fn();
+const mockDeleteDashboardMigration = vi.fn();
 
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
-}));
+vi.mock('../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: () => ({
-    services: {
-      siemMigrations: {
-        rules: {
-          deleteMigration: mockDeleteRuleMigration,
+vi.mock('../../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          siemMigrations: {
+            rules: {
+              deleteMigration: mockDeleteRuleMigration,
+            },
+            dashboards: {
+              deleteMigration: mockDeleteDashboardMigration,
+            },
+          },
         },
-        dashboards: {
-          deleteMigration: mockDeleteDashboardMigration,
-        },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useDeleteMigration', () => {
   const defaultMigrationStats = {
@@ -47,7 +55,7 @@ describe('useDeleteMigration', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls deleteMigration for rules', async () => {

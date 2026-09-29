@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,50 +17,54 @@ import { ObservablesBulkActions } from './observables_bulk_actions';
 import { mockCase, mockObservables } from '../../containers/mock';
 import { OBSERVABLES_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 
-jest.mock('../workflows/use_cases_workflow_executor', () => ({
-  useCasesWorkflowExecutor: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('../workflows/use_cases_workflow_executor', () => {
+      const mocked = {
+      useCasesWorkflowExecutor: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Stub RunWorkflowPanel (which RunCaseWorkflowModal renders) so it does not need
 // useKibana / react-query HTTP. The modal's own test-subj is still exercised.
-jest.mock('@kbn/workflows-ui', () => ({
-  RunWorkflowPanel: ({
-    onClose,
-    runWorkflow,
-    showSuccessToast,
-  }: {
-    onClose: () => void;
-    runWorkflow?: RunWorkflowExecutor;
-    showSuccessToast?: boolean;
-  }) => (
-    <div data-test-subj="run-workflow-panel-mock">
-      <span data-test-subj="panel-has-executor">{runWorkflow ? 'yes' : 'no'}</span>
-      <span data-test-subj="panel-show-success-toast">{String(showSuccessToast)}</span>
-      <button data-test-subj="panel-close" type="button" onClick={onClose}>
-        {'Close'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      RunWorkflowPanel: ({
+        onClose,
+        runWorkflow,
+        showSuccessToast,
+      }: {
+        onClose: () => void;
+        runWorkflow?: RunWorkflowExecutor;
+        showSuccessToast?: boolean;
+      }) => (
+        <div data-test-subj="run-workflow-panel-mock">
+          <span data-test-subj="panel-has-executor">{runWorkflow ? 'yes' : 'no'}</span>
+          <span data-test-subj="panel-show-success-toast">{String(showSuccessToast)}</span>
+          <button data-test-subj="panel-close" type="button" onClick={onClose}>
+            {'Close'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ObservablesBulkActions', () => {
   let user: ReturnType<typeof userEvent.setup>;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
-  beforeEach(() => {
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
-    jest.clearAllMocks();
-    const { useCasesWorkflowExecutor } = jest.requireMock(
-      '../workflows/use_cases_workflow_executor'
-    );
-    (useCasesWorkflowExecutor as jest.Mock).mockReturnValue(jest.fn());
+  beforeEach(async () => {
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime, pointerEventsCheck: 0 });
+    vi.clearAllMocks();
+    const { useCasesWorkflowExecutor } = (await vi.importMock('../workflows/use_cases_workflow_executor'));
+    (useCasesWorkflowExecutor as Mock).mockReturnValue(vi.fn());
   });
 
   it('renders nothing when no observables are selected', () => {
@@ -95,13 +102,11 @@ describe('ObservablesBulkActions', () => {
     expect(await screen.findByTestId('cases-run-workflow-modal')).toBeInTheDocument();
   });
 
-  it('passes the cases.observables origin with the selected observable ids to useCasesWorkflowExecutor', () => {
+  it('passes the cases.observables origin with the selected observable ids to useCasesWorkflowExecutor', async () => {
     renderWithTestingProviders(
       <ObservablesBulkActions caseData={mockCase} selectedObservables={mockObservables} />
     );
-    const { useCasesWorkflowExecutor } = jest.requireMock(
-      '../workflows/use_cases_workflow_executor'
-    );
+    const { useCasesWorkflowExecutor } = (await vi.importMock('../workflows/use_cases_workflow_executor'));
     expect(useCasesWorkflowExecutor).toHaveBeenCalledWith(
       expect.objectContaining({
         caseId: mockCase.id,

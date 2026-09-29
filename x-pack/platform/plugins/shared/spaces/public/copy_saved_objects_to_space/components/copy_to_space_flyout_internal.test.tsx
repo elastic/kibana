@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import Boom from '@hapi/boom';
 import { act } from '@testing-library/react';
@@ -30,7 +32,7 @@ interface SetupOpts {
 }
 
 const setup = async (opts: SetupOpts = {}) => {
-  const onClose = jest.fn();
+  const onClose = vi.fn();
 
   const mockSpacesManager = spacesManagerMock.create();
 

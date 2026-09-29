@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { createCasesClientMock, type CasesClientMock } from '../../client/mocks';
@@ -45,7 +47,7 @@ describe('findTemplatesTool', () => {
     casesClient = createCasesClientMock();
   });
 
-  const buildTool = () => findTemplatesTool(jest.fn().mockResolvedValue(casesClient));
+  const buildTool = () => findTemplatesTool(vi.fn().mockResolvedValue(casesClient));
 
   it('has the correct tool id', () => {
     const tool = buildTool();

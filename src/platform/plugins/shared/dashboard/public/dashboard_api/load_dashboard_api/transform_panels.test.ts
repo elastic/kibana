@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Reference } from '@kbn/content-management-utils';
 import { transformPanels } from './transform_panels';
 import type { DashboardPanel, DashboardSection } from '@kbn/as-code-dashboard-schema';
 
 describe('transformPanels', () => {
-  const mockTransformOut = jest.fn();
+  const mockTransformOut = vi.fn();
   beforeAll(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../../services/kibana_services').embeddableService = {

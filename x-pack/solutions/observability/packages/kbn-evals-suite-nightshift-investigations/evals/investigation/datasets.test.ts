@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -27,7 +29,7 @@ describe('stored investigation dataset', () => {
   };
 
   it('loads the selected name and preserves example IDs, labels and operator metadata', async () => {
-    const client = { getDatasetByName: jest.fn().mockResolvedValue(dataset) };
+    const client = { getDatasetByName: vi.fn().mockResolvedValue(dataset) };
     await expect(loadInvestigationDataset(client, { datasetName: dataset.name })).resolves.toEqual({
       ...dataset,
       id: undefined,
@@ -36,7 +38,7 @@ describe('stored investigation dataset', () => {
   });
 
   it('fails before running when the dataset is missing or has duplicate case IDs', async () => {
-    const client = { getDatasetByName: jest.fn().mockResolvedValue(null) };
+    const client = { getDatasetByName: vi.fn().mockResolvedValue(null) };
     await expect(loadInvestigationDataset(client, { datasetName: dataset.name })).rejects.toThrow(
       'Investigation dataset not found'
     );
@@ -50,7 +52,7 @@ describe('stored investigation dataset', () => {
   });
 
   it('rejects ambiguous file and stored dataset selections before fetching', async () => {
-    const client = { getDatasetByName: jest.fn() };
+    const client = { getDatasetByName: vi.fn() };
     await expect(
       loadInvestigationDataset(client, {
         datasetName: dataset.name,

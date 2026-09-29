@@ -7,27 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
 
-const realFs = jest.requireActual('fs');
+const realFs = require('fs');
 const kibanaPackagePath = resolve(REPO_ROOT, 'package.json');
 
 export const mockPackage = {
   raw: { __dirname: '/tmp', name: 'kibana' } as any,
 };
 
-jest.doMock('fs', () => ({
-  ...realFs,
-  readFileSync: (filePath: string, options?: unknown) => {
-    if (filePath === kibanaPackagePath) {
-      return JSON.stringify(mockPackage.raw);
-    }
-    return realFs.readFileSync(filePath, options);
-  },
-}));
+vi.doMock('fs', () => {
+      const mocked = {
+      ...realFs,
+      readFileSync: (filePath: string, options?: unknown) => {
+        if (filePath === kibanaPackagePath) {
+          return JSON.stringify(mockPackage.raw);
+        }
+        return realFs.readFileSync(filePath, options);
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const mockDiscover = jest.fn();
-jest.mock('./discovery/plugins_discovery', () => ({ discover: mockDiscover }));
+export const mockDiscover = vi.fn();
+vi.mock('./discovery/plugins_discovery', () => {
+      const mocked = { discover: mockDiscover };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./plugins_system');
+vi.mock('./plugins_system');

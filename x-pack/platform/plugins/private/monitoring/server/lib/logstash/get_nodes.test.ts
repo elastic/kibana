@@ -5,26 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getNodes } from './get_nodes';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import type { LegacyRequest } from '../../types';
 
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      config: {
-        ui: {
-          ccs: { enabled: true },
+vi.mock('../../static_globals', () => {
+      const mocked = {
+      Globals: {
+        app: {
+          config: {
+            ui: {
+              ccs: { enabled: true },
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getNodes', () => {
   it('ensures collapse key is present query responses', async () => {
     const response = {};
-    const callWithRequest = jest.fn().mockResolvedValue(response);
+    const callWithRequest = vi.fn().mockResolvedValue(response);
 
     const req = {
       server: {

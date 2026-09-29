@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -38,7 +40,7 @@ describe('FlyoutSection', () => {
 
   it('renders the action link', () => {
     render(
-      <FlyoutSection title="A" action={{ label: 'Edit', onClick: jest.fn() }}>
+      <FlyoutSection title="A" action={{ label: 'Edit', onClick: vi.fn() }}>
         body
       </FlyoutSection>
     );
@@ -191,7 +193,7 @@ describe('FlyoutAccordion', () => {
 
   it('renders the action link', () => {
     render(
-      <FlyoutAccordion title="A" action={{ label: 'View all', onClick: jest.fn() }}>
+      <FlyoutAccordion title="A" action={{ label: 'View all', onClick: vi.fn() }}>
         content
       </FlyoutAccordion>
     );
@@ -199,7 +201,7 @@ describe('FlyoutAccordion', () => {
   });
 
   it('opens after flushing both animation frames when initialIsOpen is true', () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
       const { container } = render(
         <FlyoutAccordion title="Details" initialIsOpen>
@@ -208,11 +210,11 @@ describe('FlyoutAccordion', () => {
       );
       expect(container.firstChild).not.toHaveAttribute('data-open');
       act(() => {
-        jest.runAllTimers();
+        vi.runAllTimers();
       });
       expect(container.firstChild).toHaveAttribute('data-open');
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 });

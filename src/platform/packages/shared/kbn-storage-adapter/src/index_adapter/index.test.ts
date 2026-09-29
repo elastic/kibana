@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
@@ -14,13 +17,13 @@ import { esql } from '@elastic/esql';
 import type { StorageClientBulkRequest, StorageTransportOptions } from '../..';
 import { StorageIndexAdapter, type StorageSettings } from '../..';
 
-const createLoggerMock = (): jest.Mocked<Logger> => {
+const createLoggerMock = (): Mocked<Logger> => {
   const logger = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    error: jest.fn(),
-    get: jest.fn(),
-  } as unknown as jest.Mocked<Logger>;
+    debug: vi.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+    get: vi.fn(),
+  } as unknown as Mocked<Logger>;
   logger.get.mockReturnValue(logger);
   return logger;
 };
@@ -36,27 +39,27 @@ const storageSettings = {
 
 const createMockEsClient = () => {
   const client = {
-    info: jest.fn().mockResolvedValue({
+    info: vi.fn().mockResolvedValue({
       version: { build_flavor: 'default' },
     }),
-    search: jest.fn().mockResolvedValue({
+    search: vi.fn().mockResolvedValue({
       hits: { hits: [{ _id: 'doc1', _index: 'test_index', _source: { foo: 'bar' } }] },
     }),
-    index: jest.fn().mockResolvedValue({
+    index: vi.fn().mockResolvedValue({
       _id: 'doc1',
       _index: 'test_index-000001',
       _shards: { successful: 1 },
       result: 'created',
     }),
-    bulk: jest.fn().mockResolvedValue({
+    bulk: vi.fn().mockResolvedValue({
       errors: false,
       items: [{ index: { _id: 'doc1', result: 'created', status: 201 } }],
       took: 1,
     }),
-    delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+    delete: vi.fn().mockResolvedValue({ result: 'deleted' }),
     indices: {
-      putIndexTemplate: jest.fn().mockResolvedValue({}),
-      getIndexTemplate: jest.fn().mockResolvedValue({
+      putIndexTemplate: vi.fn().mockResolvedValue({}),
+      getIndexTemplate: vi.fn().mockResolvedValue({
         index_templates: [
           {
             index_template: {
@@ -65,42 +68,42 @@ const createMockEsClient = () => {
           },
         ],
       }),
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         'test_index-000001': {
           mappings: { _meta: { version: 'current' } },
           aliases: { test_index: { is_write_index: true } },
         },
       }),
-      getAlias: jest.fn().mockResolvedValue({
+      getAlias: vi.fn().mockResolvedValue({
         'test_index-000001': {
           aliases: { test_index: { is_write_index: true } },
         },
       }),
-      create: jest.fn().mockResolvedValue({}),
-      exists: jest.fn().mockResolvedValue(true),
-      simulateIndexTemplate: jest.fn().mockResolvedValue({
+      create: vi.fn().mockResolvedValue({}),
+      exists: vi.fn().mockResolvedValue(true),
+      simulateIndexTemplate: vi.fn().mockResolvedValue({
         template: { mappings: {} },
       }),
-      putMapping: jest.fn().mockResolvedValue({}),
-      putSettings: jest.fn().mockResolvedValue({}),
+      putMapping: vi.fn().mockResolvedValue({}),
+      putSettings: vi.fn().mockResolvedValue({}),
     },
-  } as unknown as jest.Mocked<ElasticsearchClient>;
+  } as unknown as Mocked<ElasticsearchClient>;
   return client;
 };
 
 interface EsqlQueryMock {
   esql: {
-    query: jest.Mock;
+    query: Mock;
   };
 }
 
-const addEsqlQueryMock = (client: jest.Mocked<ElasticsearchClient>, query: jest.Mock): void => {
+const addEsqlQueryMock = (client: Mocked<ElasticsearchClient>, query: Mock): void => {
   (client as unknown as EsqlQueryMock).esql = { query };
 };
 
 describe('StorageIndexAdapter - transport options forwarding', () => {
-  let esClient: jest.Mocked<ElasticsearchClient>;
-  let loggerMock: jest.Mocked<Logger>;
+  let esClient: Mocked<ElasticsearchClient>;
+  let loggerMock: Mocked<Logger>;
   const transportOptions: StorageTransportOptions = {
     maxResponseSize: 50 * 1024 * 1024,
     requestTimeout: 30_000,
@@ -304,7 +307,7 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
   });
 
   it('omits settings when info() reports serverless and isServerless is not provided', async () => {
-    (esClient.info as jest.Mock).mockResolvedValue({
+    (esClient.info as Mock).mockResolvedValue({
       version: { build_flavor: 'serverless' },
     });
 
@@ -333,7 +336,7 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
   });
 
   it('retries without settings when both info() and isServerless are unavailable', async () => {
-    (esClient.info as jest.Mock).mockRejectedValue(new Error('forbidden'));
+    (esClient.info as Mock).mockRejectedValue(new Error('forbidden'));
 
     const serverlessError = new errors.ResponseError({
       statusCode: 400,
@@ -348,7 +351,7 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
         },
       },
     } as TransportResult);
-    (esClient.indices.putIndexTemplate as jest.Mock).mockRejectedValueOnce(serverlessError);
+    (esClient.indices.putIndexTemplate as Mock).mockRejectedValueOnce(serverlessError);
 
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
@@ -373,7 +376,7 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
   });
 
   it('skips settings on subsequent writes after reactive serverless detection', async () => {
-    (esClient.info as jest.Mock).mockRejectedValue(new Error('forbidden'));
+    (esClient.info as Mock).mockRejectedValue(new Error('forbidden'));
 
     const serverlessError = new errors.ResponseError({
       statusCode: 400,
@@ -388,7 +391,7 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
         },
       },
     } as TransportResult);
-    (esClient.indices.putIndexTemplate as jest.Mock).mockRejectedValueOnce(serverlessError);
+    (esClient.indices.putIndexTemplate as Mock).mockRejectedValueOnce(serverlessError);
 
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
@@ -441,9 +444,9 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
 });
 
 describe('StorageIndexAdapter - esql method', () => {
-  let esClient: jest.Mocked<ElasticsearchClient>;
-  let esqlQuery: jest.Mock;
-  let loggerMock: jest.Mocked<Logger>;
+  let esClient: Mocked<ElasticsearchClient>;
+  let esqlQuery: Mock;
+  let loggerMock: Mocked<Logger>;
 
   const mockEsqlResponse = {
     columns: [{ name: 'foo', type: 'keyword' }],
@@ -452,7 +455,7 @@ describe('StorageIndexAdapter - esql method', () => {
 
   beforeEach(() => {
     esClient = createMockEsClient();
-    esqlQuery = jest.fn().mockResolvedValue(mockEsqlResponse);
+    esqlQuery = vi.fn().mockResolvedValue(mockEsqlResponse);
     addEsqlQueryMock(esClient, esqlQuery);
     loggerMock = createLoggerMock();
   });
@@ -589,7 +592,7 @@ describe('StorageIndexAdapter - esql method', () => {
       values: [[rawSource, 'bar']],
     });
 
-    const migrateSource = jest.fn().mockReturnValue(migratedSource);
+    const migrateSource = vi.fn().mockReturnValue(migratedSource);
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
       migrateSource,
     });
@@ -608,7 +611,7 @@ describe('StorageIndexAdapter - esql method', () => {
       values: [[rawSource]],
     });
 
-    const migrateSource = jest.fn().mockReturnValue({ foo: 'bar', version: 1 });
+    const migrateSource = vi.fn().mockReturnValue({ foo: 'bar', version: 1 });
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
       migrateSource,
     });
@@ -628,7 +631,7 @@ describe('StorageIndexAdapter - esql method', () => {
       values: [[rawSource]],
     });
 
-    const migrateSource = jest.fn().mockReturnValue({ foo: 'bar', version: 1 });
+    const migrateSource = vi.fn().mockReturnValue({ foo: 'bar', version: 1 });
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
       migrateSource,
     });
@@ -672,7 +675,7 @@ describe('StorageIndexAdapter - esql method', () => {
           'test_index-000001': { aliases: { test_index: { is_write_index: true } } },
         });
     });
-    (esClient.indices.getAlias as jest.Mock).mockReturnValueOnce(getAliasPromise);
+    (esClient.indices.getAlias as Mock).mockReturnValueOnce(getAliasPromise);
 
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();

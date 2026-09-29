@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../../lib/license_api_access';
@@ -14,13 +17,16 @@ import { findAutoFillSchedulerLogsRoute } from './find_auto_fill_scheduler_logs_
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('findAutoFillSchedulerLogsRoute', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const mockGetLogsResponse = {
@@ -133,7 +139,7 @@ describe('findAutoFillSchedulerLogsRoute', () => {
     const router = httpServiceMock.createRouter();
     findAutoFillSchedulerLogsRoute(router, licenseState);
     const [, handler] = router.post.mock.calls[0];
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyApiAccess as Mock).mockImplementation(() => {
       throw new Error('License check failed');
     });
     const [context, req, res] = mockHandlerArguments(

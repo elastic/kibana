@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -22,28 +25,49 @@ import { getQueryDelaySettings } from '../../lib/rule_api/get_query_delay_settin
 import { updateQueryDelaySettings } from '../../lib/rule_api/update_query_delay_settings';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => ({
-  fetchFlappingSettings: jest.fn(),
-}));
-jest.mock('../../lib/rule_api/update_flapping_settings', () => ({
-  updateFlappingSettings: jest.fn(),
-}));
-jest.mock('../../lib/rule_api/get_query_delay_settings', () => ({
-  getQueryDelaySettings: jest.fn(),
-}));
-jest.mock('../../lib/rule_api/update_query_delay_settings', () => ({
-  updateQueryDelaySettings: jest.fn(),
-}));
-jest.mock('../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
-}));
-jest.mock('../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn(),
-}));
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
-  useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
-}));
+vi.mock('../../../common/lib/kibana');
+vi.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => {
+      const mocked = {
+      fetchFlappingSettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/rule_api/update_flapping_settings', () => {
+      const mocked = {
+      updateFlappingSettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/rule_api/get_query_delay_settings', () => {
+      const mocked = {
+      getQueryDelaySettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../lib/rule_api/update_query_delay_settings', () => {
+      const mocked = {
+      updateQueryDelaySettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {
+      const mocked = {
+      useUiSetting: vi.fn().mockImplementation((_, defaultValue) => defaultValue),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,20 +78,20 @@ const queryClient = new QueryClient({
   },
 });
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 const mocks = coreMock.createSetup();
 
-const fetchFlappingSettingsMock = fetchFlappingSettings as unknown as jest.MockedFunction<
+const fetchFlappingSettingsMock = fetchFlappingSettings as unknown as MockedFunction<
   typeof fetchFlappingSettings
 >;
-const updateFlappingSettingsMock = updateFlappingSettings as unknown as jest.MockedFunction<
+const updateFlappingSettingsMock = updateFlappingSettings as unknown as MockedFunction<
   typeof updateFlappingSettings
 >;
-const getQueryDelaySettingsMock = getQueryDelaySettings as unknown as jest.MockedFunction<
+const getQueryDelaySettingsMock = getQueryDelaySettings as unknown as MockedFunction<
   typeof getQueryDelaySettings
 >;
-const updateQueryDelaySettingsMock = updateQueryDelaySettings as unknown as jest.MockedFunction<
+const updateQueryDelaySettingsMock = updateQueryDelaySettings as unknown as MockedFunction<
   typeof updateQueryDelaySettings
 >;
 
@@ -90,9 +114,9 @@ const mockQueryDelaySetting: RulesSettingsQueryDelay = {
 
 const flyoutProps: RulesSettingsFlyoutProps = {
   isVisible: true,
-  setUpdatingRulesSettings: jest.fn(),
-  onClose: jest.fn(),
-  onSave: jest.fn(),
+  setUpdatingRulesSettings: vi.fn(),
+  onClose: vi.fn(),
+  onSave: vi.fn(),
   alertDeleteCategoryIds: ['management'],
 };
 
@@ -128,7 +152,7 @@ const waitForFlyoutLoad = async (options?: {
 
 describe('rules_settings_flyout', () => {
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const [
       {
@@ -148,10 +172,10 @@ describe('rules_settings_flyout', () => {
     };
 
     useKibanaMock().services.notifications.toasts = {
-      addSuccess: jest.fn(),
-      addError: jest.fn(),
-      addDanger: jest.fn(),
-      addWarning: jest.fn(),
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
+      addDanger: vi.fn(),
+      addWarning: vi.fn(),
     } as unknown as IToasts;
 
     useKibanaMock().services.isServerless = true;
@@ -163,7 +187,7 @@ describe('rules_settings_flyout', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
     cleanup();
   });
@@ -462,7 +486,7 @@ describe('rules_settings_flyout', () => {
   });
 
   test('alert delete is disabled when provided with insufficient write permissions', async () => {
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
 
     const [
       {

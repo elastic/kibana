@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -20,17 +22,17 @@ import { StepReview } from '../component_template_form/steps/step_review';
 import type { AppDependencies } from '../../../../app_context';
 import { AppContextProvider } from '../../../../app_context';
 
-jest.mock('@kbn/code-editor');
+vi.mock('@kbn/code-editor');
 
 describe('<ComponentTemplateCreate />', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeAll(() => {
-    jest.spyOn(breadcrumbService, 'setBreadcrumbs');
+    vi.spyOn(breadcrumbService, 'setBreadcrumbs');
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const env = setupEnvironment();
     httpSetup = env.httpSetup;
   });

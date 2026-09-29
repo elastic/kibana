@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { taskStoreMock } from '../task_store.mock';
 import { mockLogger } from '../test_utils';
 import { asOk, asErr } from './result_type';
@@ -34,7 +36,7 @@ describe('resetInFlightTasksOwnedByThisNode', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     store.bulkPartialUpdate.mockImplementation(async (docs) => docs.map((doc) => asOk(doc)));
   });
 

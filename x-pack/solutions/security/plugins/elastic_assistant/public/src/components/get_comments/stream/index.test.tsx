@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
@@ -12,60 +15,69 @@ import { StreamComment } from '.';
 import { useStream } from './use_stream';
 import { I18nProvider } from '@kbn/i18n-react';
 
-const mockSetComplete = jest.fn();
+const mockSetComplete = vi.fn();
 
-jest.mock('./use_stream');
-jest.mock('@kbn/elastic-assistant', () => ({
-  useAssistantContext: () => ({
-    assistantAvailability: {
-      hasSearchAILakeConfigurations: true,
-    },
-  }),
-}));
-jest.mock('@kbn/security-solution-navigation', () => ({
-  useNavigation: jest.fn().mockReturnValue({
-    navigateTo: jest.fn(),
-  }),
-}));
+vi.mock('./use_stream');
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      useAssistantContext: () => ({
+        assistantAvailability: {
+          hasSearchAILakeConfigurations: true,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/security-solution-navigation', () => {
+      const mocked = {
+      useNavigation: vi.fn().mockReturnValue({
+        navigateTo: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../context/typed_kibana_context/typed_kibana_context', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      discover: {
-        locator: jest.fn(),
-      },
-      application: {
-        navigateToApp: jest.fn(),
-      },
-    },
-  }),
-}));
+vi.mock('../../../context/typed_kibana_context/typed_kibana_context', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          discover: {
+            locator: vi.fn(),
+          },
+          application: {
+            navigateToApp: vi.fn(),
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const content = 'Test Content';
-const mockAbortStream = jest.fn();
+const mockAbortStream = vi.fn();
 const testProps = {
   abortStream: mockAbortStream,
   connectorId: 'test',
   content,
   index: 1,
   isControlsEnabled: true,
-  refetchCurrentConversation: jest.fn(),
-  regenerateMessage: jest.fn(),
-  setIsStreaming: jest.fn(),
-  transformMessage: jest.fn(),
+  refetchCurrentConversation: vi.fn(),
+  regenerateMessage: vi.fn(),
+  setIsStreaming: vi.fn(),
+  transformMessage: vi.fn(),
   contentReferences: undefined,
   contentReferencesVisible: true,
   messageRole: 'assistant' as const,
-  resumeGraph: jest.fn(),
+  resumeGraph: vi.fn(),
   isLastInConversation: true,
 };
 
-const mockReader = jest.fn() as unknown as ReadableStreamDefaultReader<Uint8Array>;
+const mockReader = vi.fn() as unknown as ReadableStreamDefaultReader<Uint8Array>;
 
 describe('StreamComment', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useStream as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useStream as Mock).mockReturnValue({
       error: null,
       isLoading: false,
       isStreaming: false,
@@ -135,7 +147,7 @@ describe('StreamComment', () => {
   });
 
   it('renders select interrupt', async () => {
-    const resumeFunction = jest.fn();
+    const resumeFunction = vi.fn();
     render(
       <StreamComment
         {...{
@@ -172,7 +184,7 @@ describe('StreamComment', () => {
   });
 
   it('renders input interrupt', async () => {
-    const resumeFunction = jest.fn();
+    const resumeFunction = vi.fn();
     render(
       <StreamComment
         {...{
@@ -222,7 +234,7 @@ describe('StreamComment', () => {
   });
 
   it('displays an error message correctly', () => {
-    (useStream as jest.Mock).mockReturnValue({
+    (useStream as Mock).mockReturnValue({
       error: 'Test Error Message',
       isLoading: false,
       isStreaming: false,

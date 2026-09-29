@@ -5,19 +5,25 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  ...jest.requireActual('@kbn/agent-builder-genai-utils'),
-  getIndexFields: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/agent-builder-genai-utils')),
+      getIndexFields: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import { getIndexMappingsTool } from './get_index_mapping';
 
-const getIndexFieldsMock = getIndexFields as jest.MockedFunction<typeof getIndexFields>;
+const getIndexFieldsMock = getIndexFields as MockedFunction<typeof getIndexFields>;
 
 const runTool = async (indices: string[], raw: boolean) => {
   const result = (await getIndexMappingsTool().handler(
@@ -30,7 +36,7 @@ const runTool = async (indices: string[], raw: boolean) => {
 
 describe('getIndexMappingsTool', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('resources without fields', () => {

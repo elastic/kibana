@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { SelectionContext } from '@kbn/workflows/types/latest';
 import { DEFAULT_ALERT_TAGS_KEY } from '../../../../common/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { alertTagsSelection } from './alert_tags_selection_handler';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 const createSelectionContext = () => ({
   stepType: 'security.setAlertTags' as const,
@@ -22,14 +25,14 @@ const createSelectionContext = () => ({
 const defaultTags = ['Duplicate', 'False positive', 'Further investigation required'];
 
 const mockUiSettingsGet = (tags: unknown) => {
-  const get = jest.fn((key: string) => (key === DEFAULT_ALERT_TAGS_KEY ? tags : undefined));
-  (KibanaServices.get as jest.Mock).mockReturnValue({ uiSettings: { get } });
+  const get = vi.fn((key: string) => (key === DEFAULT_ALERT_TAGS_KEY ? tags : undefined));
+  (KibanaServices.get as Mock).mockReturnValue({ uiSettings: { get } });
   return get;
 };
 
 describe('alertTagsSelection', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('search', () => {

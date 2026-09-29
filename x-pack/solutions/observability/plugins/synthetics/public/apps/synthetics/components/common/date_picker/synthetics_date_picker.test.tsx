@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { SyntheticsDatePicker } from './synthetics_date_picker';
 import { startPlugins } from '../../../utils/testing/__mocks__/synthetics_plugin_start_mock';
@@ -13,10 +15,10 @@ import { render } from '../../../utils/testing';
 import { fireEvent } from '@testing-library/react';
 
 describe('SyntheticsDatePicker component', () => {
-  jest.setTimeout(10_000);
+  vi.setConfig({ testTimeout: 10_000 });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders properly with mock data', async () => {
@@ -50,7 +52,7 @@ describe('SyntheticsDatePicker component', () => {
       initialEntries: ['/?g=%22%22&dateRangeStart=now-10m&dateRangeEnd=now'],
     });
 
-    jest.spyOn(customHistory, 'push');
+    vi.spyOn(customHistory, 'push');
 
     const { findByText } = render(<SyntheticsDatePicker />, {
       history: customHistory,
@@ -72,7 +74,7 @@ describe('SyntheticsDatePicker component', () => {
       initialEntries: ['/?g=%22%22&dateRangeStart=now-10m&dateRangeEnd=now'],
     });
 
-    jest.spyOn(customHistory, 'push');
+    vi.spyOn(customHistory, 'push');
 
     const { findByText, getByTestId, findByTestId } = render(<SyntheticsDatePicker />, {
       history: customHistory,

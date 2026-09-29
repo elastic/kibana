@@ -7,20 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AutoOpsPromotionCallout, AUTOOPS_CALLOUT_DISMISSED_KEY } from './callout';
 
-jest.mock('@elastic/eui-illustrations', () => ({
-  megaphone: {
-    id: 'megaphone',
-    title: 'Megaphone',
-    light: '<svg></svg>',
-    dark: '<svg></svg>',
-  },
-}));
+vi.mock('@elastic/eui-illustrations', () => {
+      const mocked = {
+      megaphone: {
+        id: 'megaphone',
+        title: 'Megaphone',
+        light: '<svg></svg>',
+        dark: '<svg></svg>',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const CLOUD_CONNECT_DOCS_URL = 'https://www.elastic.co/docs/deploy-manage/cloud-connect';
 const CLOUD_CONNECT_PORTAL_URL = 'https://cloud.elastic.co/connect-cluster-services-portal';
@@ -32,7 +37,7 @@ const renderWithI18n = (component: React.ReactElement) => {
 describe('AutoOpsPromotionCallout', () => {
   beforeEach(() => {
     localStorage.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -102,7 +107,7 @@ describe('AutoOpsPromotionCallout', () => {
 
   describe('CTA button behavior with permissions', () => {
     test('CTA navigates internally when hasCloudConnectPermission is true', () => {
-      const onConnectClick = jest.fn();
+      const onConnectClick = vi.fn();
       renderWithI18n(
         <AutoOpsPromotionCallout
           hasCloudConnectPermission={true}
@@ -116,7 +121,7 @@ describe('AutoOpsPromotionCallout', () => {
     });
 
     test('CTA navigates internally when hasCloudConnectPermission is undefined (backward compatible)', () => {
-      const onConnectClick = jest.fn();
+      const onConnectClick = vi.fn();
       renderWithI18n(
         <AutoOpsPromotionCallout
           cloudConnectUrl="/app/cloud_connect"
@@ -146,7 +151,7 @@ describe('AutoOpsPromotionCallout', () => {
 
   describe('Click handler', () => {
     test('calls onConnectClick when user has permission and clicks the CTA button', () => {
-      const onConnectClick = jest.fn();
+      const onConnectClick = vi.fn();
       renderWithI18n(
         <AutoOpsPromotionCallout
           hasCloudConnectPermission={true}
@@ -163,7 +168,7 @@ describe('AutoOpsPromotionCallout', () => {
     });
 
     test('calls onConnectClick when hasCloudConnectPermission is undefined', () => {
-      const onConnectClick = jest.fn();
+      const onConnectClick = vi.fn();
       renderWithI18n(
         <AutoOpsPromotionCallout
           cloudConnectUrl="/app/cloud_connect"

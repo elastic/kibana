@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Agent } from 'undici';
 import { merge } from 'lodash';
 
@@ -15,7 +17,7 @@ import type { UsageRecord } from '../../types';
 
 import { UsageReportingService } from './usage_reporting_service';
 
-const mockedFetch = jest.spyOn(global, 'fetch');
+const mockedFetch = vi.spyOn(global, 'fetch');
 
 describe('UsageReportingService', () => {
   let usageApiConfig: UsageApiConfigSchema;
@@ -50,7 +52,7 @@ describe('UsageReportingService', () => {
   }
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('usageApi configs not provided', () => {

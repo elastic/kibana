@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { OneDrive } from './one_drive';
 
-const mockGet = jest.fn();
+const mockGet = vi.fn();
 
 const mockContext = {
   client: { get: mockGet },
-  log: { debug: jest.fn() },
+  log: { debug: vi.fn() },
   config: {},
   secrets: {},
 } as unknown as ActionContext;
@@ -26,7 +28,7 @@ const parse = <K extends keyof typeof OneDrive.actions>(action: K, raw: Record<s
 
 describe('OneDrive', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {

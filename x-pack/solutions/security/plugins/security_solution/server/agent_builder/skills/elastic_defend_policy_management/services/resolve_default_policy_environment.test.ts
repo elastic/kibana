@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ILicense } from '@kbn/licensing-types';
 import { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { EndpointAppContentServicesNotStartedError } from '../../../../endpoint/errors';
@@ -32,9 +34,9 @@ describe('resolveDefaultPolicyEnvironment', () => {
     const setupContract = createMockEndpointAppContextServiceSetupContract();
     setupContract.cloud = { ...setupContract.cloud, isCloudEnabled };
     const startContract = createMockEndpointAppContextServiceStartContract();
-    startContract.licenseService.getLicenseInformation = jest.fn().mockReturnValue(license);
-    startContract.licenseService.getLicenseType = jest.fn().mockReturnValue(licenseType);
-    startContract.licenseService.getLicenseUID = jest.fn().mockReturnValue('license-uid');
+    startContract.licenseService.getLicenseInformation = vi.fn().mockReturnValue(license);
+    startContract.licenseService.getLicenseType = vi.fn().mockReturnValue(licenseType);
+    startContract.licenseService.getLicenseUID = vi.fn().mockReturnValue('license-uid');
     startContract.telemetryConfigProvider.getIsOptedIn.mockReturnValue(
       isOptedIn === 'unresolved' ? undefined : isOptedIn
     );
@@ -44,7 +46,7 @@ describe('resolveDefaultPolicyEnvironment', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('reports the license, cloud, and telemetry inputs the baseline computation uses', () => {

@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 /* eslint-disable dot-notation */
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { Setup } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
 import { telemetryCollectionManagerPluginMock } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
 
-jest.mock('rxjs', () => {
-  const RxJs = jest.requireActual('rxjs');
+vi.mock('rxjs', () => {
+  const RxJs = require('rxjs');
   return {
     ...RxJs,
     // Redefining timer as a merge of timer and interval because `fakeSchedulers` fails to advance on the intervals
@@ -27,23 +30,23 @@ import { fetchMock, getNextAttemptDateMock } from './fetcher.test.mock';
 import { FetcherTask } from './fetcher';
 
 describe('FetcherTask', () => {
-  beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
+  beforeEach(() => vi.useFakeTimers({ legacyFakeTimers: true }));
 
   describe('sendIfDue', () => {
-    let getCurrentConfigs: jest.Mock;
-    let shouldSendReport: jest.Mock;
-    let fetchTelemetry: jest.Mock;
-    let sendTelemetry: jest.Mock;
-    let updateReportFailure: jest.Mock;
+    let getCurrentConfigs: Mock;
+    let shouldSendReport: Mock;
+    let fetchTelemetry: Mock;
+    let sendTelemetry: Mock;
+    let updateReportFailure: Mock;
     let telemetryCollectionManagerMock: Setup;
     let fetcherTask: FetcherTask;
 
     beforeEach(() => {
-      getCurrentConfigs = jest.fn();
-      shouldSendReport = jest.fn();
-      fetchTelemetry = jest.fn();
-      sendTelemetry = jest.fn();
-      updateReportFailure = jest.fn();
+      getCurrentConfigs = vi.fn();
+      shouldSendReport = vi.fn();
+      fetchTelemetry = vi.fn();
+      sendTelemetry = vi.fn();
+      updateReportFailure = vi.fn();
 
       const initializerContext = coreMock.createPluginInitializerContext({});
       fetcherTask = new FetcherTask(initializerContext);
@@ -112,12 +115,12 @@ describe('FetcherTask', () => {
 
   describe('Validate connectivity', () => {
     let fetcherTask: FetcherTask;
-    let getCurrentConfigs: jest.Mock;
-    let updateReportFailure: jest.Mock;
+    let getCurrentConfigs: Mock;
+    let updateReportFailure: Mock;
 
     beforeEach(() => {
-      getCurrentConfigs = jest.fn();
-      updateReportFailure = jest.fn();
+      getCurrentConfigs = vi.fn();
+      updateReportFailure = vi.fn();
       fetcherTask = new FetcherTask(coreMock.createPluginInitializerContext({}));
       Object.assign(fetcherTask, { getCurrentConfigs, updateReportFailure });
     });
@@ -298,10 +301,10 @@ describe('FetcherTask', () => {
 
   describe('startSendIfDueSubscription', () => {
     let fetcherTask: FetcherTask;
-    let sendIfDue: jest.Mock;
+    let sendIfDue: Mock;
 
     beforeEach(() => {
-      sendIfDue = jest.fn().mockResolvedValue({});
+      sendIfDue = vi.fn().mockResolvedValue({});
       fetcherTask = new FetcherTask(coreMock.createPluginInitializerContext({}));
       Object.assign(fetcherTask, { sendIfDue });
     });

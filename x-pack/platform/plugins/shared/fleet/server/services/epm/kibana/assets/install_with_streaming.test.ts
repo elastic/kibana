@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { KibanaSavedObjectType } from '../../../../types';
@@ -14,21 +16,30 @@ import { createAppContextStartContractMock } from '../../../../mocks';
 
 import { installKibanaAssetsWithStreaming } from './install_with_streaming';
 
-jest.mock('./saved_objects', () => ({
-  getSpaceAwareSaveobjectsClients: jest.fn(),
-}));
+vi.mock('./saved_objects', () => {
+      const mocked = {
+      getSpaceAwareSaveobjectsClients: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./install', () => ({
-  ...jest.requireActual('./install'),
-  installManagedIndexPattern: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('./install', async () => {
+      const mocked = {
+      ...(await vi.importActual('./install')),
+      installManagedIndexPattern: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../packages/install', () => ({
-  ...jest.requireActual('../../packages/install'),
-  saveKibanaAssetsRefs: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../packages/install', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../packages/install')),
+      saveKibanaAssetsRefs: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getSpaceAwareSaveobjectsClients } = jest.requireMock('./saved_objects');
+const { getSpaceAwareSaveobjectsClients } = (await vi.importMock('./saved_objects'));
 
 const makeArchiveBuffer = (id: string, soType: string) =>
   Buffer.from(JSON.stringify({ id, type: soType, attributes: { title: id } }));
@@ -44,9 +55,9 @@ describe('installKibanaAssetsWithStreaming', () => {
 
     getSpaceAwareSaveobjectsClients.mockReturnValue({
       savedObjectClientWithSpace: soClientWithSpace,
-      savedObjectsImporter: { import: jest.fn().mockResolvedValue({ errors: [] }) },
-      savedObjectTagAssignmentService: jest.fn(),
-      savedObjectTagClient: jest.fn(),
+      savedObjectsImporter: { import: vi.fn().mockResolvedValue({ errors: [] }) },
+      savedObjectTagAssignmentService: vi.fn(),
+      savedObjectTagClient: vi.fn(),
     });
 
     appContextService.start(createAppContextStartContractMock());
@@ -202,7 +213,7 @@ describe('installKibanaAssetsWithStreaming', () => {
       });
 
     it('overwrites existing assets when the Kibana version increased since the last install', async () => {
-      jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.1.0');
+      vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.1.0');
 
       await install({ attributes: { installed_kibana_version: '9.0.0' } });
 
@@ -213,7 +224,7 @@ describe('installKibanaAssetsWithStreaming', () => {
     });
 
     it('skips existing assets when the Kibana version is unchanged since the last install', async () => {
-      jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.0.0');
+      vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.0.0');
 
       await install({ attributes: { installed_kibana_version: '9.0.0' } });
 
@@ -224,7 +235,7 @@ describe('installKibanaAssetsWithStreaming', () => {
     });
 
     it('skips existing assets when only the patch version changed since the last install', async () => {
-      jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.0.1');
+      vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.0.1');
 
       await install({ attributes: { installed_kibana_version: '9.0.0' } });
 
@@ -235,7 +246,7 @@ describe('installKibanaAssetsWithStreaming', () => {
     });
 
     it('overwrites existing assets when no previous Kibana version was recorded (legacy install)', async () => {
-      jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.0.0');
+      vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.0.0');
 
       await install({ attributes: {} });
 
@@ -246,7 +257,7 @@ describe('installKibanaAssetsWithStreaming', () => {
     });
 
     it('overwrites existing assets on a fresh install (no installedPkg)', async () => {
-      jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.0.0');
+      vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('9.0.0');
 
       await install(undefined);
 

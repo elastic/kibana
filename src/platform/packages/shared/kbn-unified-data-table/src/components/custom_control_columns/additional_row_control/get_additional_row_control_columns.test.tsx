@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getAdditionalRowControlColumns } from './get_additional_row_control_columns';
 import { mockRowAdditionalLeadingControls } from '../../../../__mocks__/external_control_columns';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -24,7 +26,7 @@ const setup = (rowControlColumns: RowControlColumn[], visibleRowLeadingControls?
       {columns.map((Column, idx) => (
         <Column
           key={idx}
-          setCellProps={jest.fn()}
+          setCellProps={vi.fn()}
           rowIndex={0}
           colIndex={0}
           columnId="actions"
@@ -142,7 +144,7 @@ describe('getAdditionalRowControlColumns', () => {
             data-test-subj="exampleRowControl-fourth"
             label="Fourth"
             iconType="empty"
-            onClick={jest.fn()}
+            onClick={vi.fn()}
           />
         ),
       };
@@ -173,7 +175,7 @@ describe('getAdditionalRowControlColumns', () => {
         {
           id: 'exampleRowControl-fourth',
           render: (Control: RowControlComponent) => (
-            <Control label="Fourth" iconType="empty" onClick={jest.fn()} />
+            <Control label="Fourth" iconType="empty" onClick={vi.fn()} />
           ),
         },
       ];
@@ -195,7 +197,7 @@ describe('getAdditionalRowControlColumns', () => {
             data-test-subj="unavailable"
             label="Unavailable"
             iconType="empty"
-            onClick={jest.fn()}
+            onClick={vi.fn()}
           />
         ),
       };
@@ -215,7 +217,7 @@ describe('getAdditionalRowControlColumns', () => {
             data-test-subj="unavailable"
             label="Unavailable"
             iconType="empty"
-            onClick={jest.fn()}
+            onClick={vi.fn()}
           />
         ),
       };
@@ -242,7 +244,7 @@ describe('getAdditionalRowControlColumns', () => {
             data-test-subj="unavailable-1"
             label="Unavailable 1"
             iconType="empty"
-            onClick={jest.fn()}
+            onClick={vi.fn()}
           />
         ),
       };
@@ -254,7 +256,7 @@ describe('getAdditionalRowControlColumns', () => {
             data-test-subj="unavailable-2"
             label="Unavailable 2"
             iconType="empty"
-            onClick={jest.fn()}
+            onClick={vi.fn()}
           />
         ),
       };

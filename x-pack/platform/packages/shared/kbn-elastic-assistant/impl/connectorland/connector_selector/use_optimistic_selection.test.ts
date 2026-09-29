@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useOptimisticSelection } from './use_optimistic_selection';
 
 describe('useOptimisticSelection', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   it('should return actual value when no optimistic value is set', () => {
@@ -61,7 +63,7 @@ describe('useOptimisticSelection', () => {
 
     // Fast forward past timeout
     act(() => {
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
     });
 
     expect(result.current.effectiveValue).toBe('initial-value');
@@ -77,7 +79,7 @@ describe('useOptimisticSelection', () => {
 
     // Fast forward but not past custom timeout
     act(() => {
-      jest.advanceTimersByTime(2999);
+      vi.advanceTimersByTime(2999);
     });
 
     expect(result.current.effectiveValue).toBe('optimistic-value');
@@ -93,7 +95,7 @@ describe('useOptimisticSelection', () => {
 
     // Fast forward past custom timeout
     act(() => {
-      jest.advanceTimersByTime(3000);
+      vi.advanceTimersByTime(3000);
     });
 
     expect(result.current.effectiveValue).toBe('initial-value');
@@ -125,7 +127,7 @@ describe('useOptimisticSelection', () => {
 
     // Advance time partially
     act(() => {
-      jest.advanceTimersByTime(2500);
+      vi.advanceTimersByTime(2500);
     });
 
     // Set second optimistic value
@@ -135,7 +137,7 @@ describe('useOptimisticSelection', () => {
 
     // Advance time by full timeout duration from second update
     act(() => {
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
     });
 
     expect(result.current.effectiveValue).toBe('initial-value');

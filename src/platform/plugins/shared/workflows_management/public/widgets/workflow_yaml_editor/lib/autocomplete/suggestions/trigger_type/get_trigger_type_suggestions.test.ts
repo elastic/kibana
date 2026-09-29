@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { monaco } from '@kbn/monaco';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import { z } from '@kbn/zod/v4';
@@ -23,21 +26,27 @@ function mockTrigger(
   return { ...definition, eventSchema: mockEventSchema };
 }
 
-const mockGetTriggerDefinitions = jest.fn((): PublicTriggerDefinition[] => []);
-const mockGetTriggerDefinition = jest.fn(
+const mockGetTriggerDefinitions = vi.fn((): PublicTriggerDefinition[] => []);
+const mockGetTriggerDefinition = vi.fn(
   (_id: string): PublicTriggerDefinition | undefined => undefined
 );
 
-jest.mock('../../../../../../trigger_schemas', () => ({
-  triggerSchemas: {
-    getTriggerDefinitions: () => mockGetTriggerDefinitions(),
-    getTriggerDefinition: (id: string) => mockGetTriggerDefinition(id),
-  },
-}));
+vi.mock('../../../../../../trigger_schemas', () => {
+      const mocked = {
+      triggerSchemas: {
+        getTriggerDefinitions: () => mockGetTriggerDefinitions(),
+        getTriggerDefinition: (id: string) => mockGetTriggerDefinition(id),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../snippets/generate_trigger_snippet', () => ({
-  generateTriggerSnippet: jest.fn(),
-}));
+vi.mock('../../../snippets/generate_trigger_snippet', () => {
+      const mocked = {
+      generateTriggerSnippet: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { generateTriggerSnippet } from '../../../snippets/generate_trigger_snippet';
 
@@ -54,10 +63,10 @@ describe('get_trigger_type_suggestions', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetTriggerDefinitions.mockReturnValue([]);
     mockGetTriggerDefinition.mockReturnValue(undefined);
-    (generateTriggerSnippet as jest.Mock).mockImplementation((type) => {
+    (generateTriggerSnippet as Mock).mockImplementation((type) => {
       switch (type) {
         case 'alert':
           return `alert:

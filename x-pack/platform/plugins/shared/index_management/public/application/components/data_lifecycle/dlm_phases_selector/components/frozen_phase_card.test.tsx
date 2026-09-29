@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -17,12 +19,12 @@ const enterpriseConfig = {
   isCloudEnabled: true,
   canManageLicense: true,
   trialDaysLeft: undefined,
-  onUpgrade: jest.fn(),
+  onUpgrade: vi.fn(),
   subscriptionFeaturesUrl: 'https://www.elastic.co/subscriptions/cloud',
 };
 
 const renderFrozenPhaseCard = (props?: Partial<React.ComponentProps<typeof FrozenPhaseCard>>) => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   const result = render(
     <IntlProvider>
@@ -47,7 +49,7 @@ const renderFrozenPhaseCard = (props?: Partial<React.ComponentProps<typeof Froze
 
 describe('FrozenPhaseCard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('hides configuration when the phase is disabled', () => {

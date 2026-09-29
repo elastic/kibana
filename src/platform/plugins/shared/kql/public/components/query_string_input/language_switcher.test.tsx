@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { QueryLanguageSwitcherProps } from './language_switcher';
 import { QueryLanguageSwitcher } from './language_switcher';
@@ -27,7 +29,7 @@ async function renderSwitcher(testProps: Omit<QueryLanguageSwitcherProps, 'deps'
 
 describe('LanguageSwitcher', () => {
   it('should select the lucene context menu if language is lucene', async () => {
-    await renderSwitcher({ language: 'lucene', onSelectLanguage: jest.fn() });
+    await renderSwitcher({ language: 'lucene', onSelectLanguage: vi.fn() });
 
     await userEvent.click(screen.getByRole('button'));
     expect(
@@ -40,7 +42,7 @@ describe('LanguageSwitcher', () => {
   });
 
   it('should select the kql context menu if language is kuery', async () => {
-    await renderSwitcher({ language: 'kuery', onSelectLanguage: jest.fn() });
+    await renderSwitcher({ language: 'kuery', onSelectLanguage: vi.fn() });
     await userEvent.click(screen.getByRole('button'));
     expect(
       screen.getByTestId('kqlLanguageMenuItem').querySelector('[data-euiicon-type="check"]')
@@ -52,7 +54,7 @@ describe('LanguageSwitcher', () => {
   });
 
   it('should select the lucene context menu if language is text', async () => {
-    await renderSwitcher({ language: 'text', onSelectLanguage: jest.fn() });
+    await renderSwitcher({ language: 'text', onSelectLanguage: vi.fn() });
 
     await userEvent.click(screen.getByRole('button'));
     expect(
@@ -60,7 +62,7 @@ describe('LanguageSwitcher', () => {
     ).toBeTruthy();
   });
   it('it set language on nonKql mode text', async () => {
-    const onSelectLanguage = jest.fn();
+    const onSelectLanguage = vi.fn();
     await renderSwitcher({
       language: 'kuery',
       nonKqlMode: 'text',
@@ -78,7 +80,7 @@ describe('LanguageSwitcher', () => {
     expect(onSelectLanguage).toHaveBeenCalledWith('text');
   });
   it('it set language on nonKql mode lucene', async () => {
-    const onSelectLanguage = jest.fn();
+    const onSelectLanguage = vi.fn();
 
     await renderSwitcher({
       language: 'kuery',
@@ -91,7 +93,7 @@ describe('LanguageSwitcher', () => {
   });
 
   it('it set language on kuery mode with nonKqlMode text', async () => {
-    const onSelectLanguage = jest.fn();
+    const onSelectLanguage = vi.fn();
 
     await renderSwitcher({
       language: 'text',
@@ -113,7 +115,7 @@ describe('LanguageSwitcher', () => {
   });
 
   it('it set language on kuery mode with nonKqlMode lucene', async () => {
-    const onSelectLanguage = jest.fn();
+    const onSelectLanguage = vi.fn();
 
     await renderSwitcher({
       language: 'lucene',

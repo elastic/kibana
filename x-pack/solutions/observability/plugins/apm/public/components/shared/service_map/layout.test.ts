@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import Dagre from '@dagrejs/dagre';
 import { Position, type Node, type Edge } from '@xyflow/react';
 import {
@@ -286,10 +289,10 @@ describe('applyDagreLayout', () => {
   });
 
   describe('when Dagre.layout throws', () => {
-    let layoutSpy: jest.SpyInstance;
+    let layoutSpy: MockInstance;
 
     beforeEach(() => {
-      layoutSpy = jest.spyOn(Dagre, 'layout').mockImplementation(() => {
+      layoutSpy = vi.spyOn(Dagre, 'layout').mockImplementation(() => {
         throw new TypeError("Cannot read properties of undefined (reading 'weight')");
       });
     });
@@ -300,7 +303,7 @@ describe('applyDagreLayout', () => {
 
     it('invokes onDagreLayoutFailure with the error', () => {
       const nodes = [createNode('a', 'Node A'), createNode('b', 'Node B')];
-      const onFailure = jest.fn();
+      const onFailure = vi.fn();
 
       applyDagreLayout(nodes, [createEdge('a', 'b')], {}, onFailure);
 

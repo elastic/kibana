@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, screen, within } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
@@ -59,7 +61,7 @@ describe('Cloning a rollup job through create job wizard', () => {
   const clickNext = () => fireEvent.click(screen.getByTestId('rollupJobNextButton'));
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
     initDocumentation(docLinksServiceMock.createStartContract());

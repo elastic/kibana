@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
@@ -12,7 +14,7 @@ import { COOLDOWN_MS, refreshCompositeSloSummaries } from './refresh_composite_s
 
 describe('refreshCompositeSloSummaries', () => {
   const logger = {
-    debug: jest.fn(),
+    debug: vi.fn(),
   } as unknown as Logger;
 
   const baseConfig = {
@@ -20,7 +22,7 @@ describe('refreshCompositeSloSummaries', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns task_disabled when summary task is disabled in config', async () => {
@@ -39,7 +41,7 @@ describe('refreshCompositeSloSummaries', () => {
     );
 
     const taskManager = {
-      get: jest.fn().mockRejectedValue(notFoundError),
+      get: vi.fn().mockRejectedValue(notFoundError),
     };
 
     const result = await refreshCompositeSloSummaries({
@@ -53,7 +55,7 @@ describe('refreshCompositeSloSummaries', () => {
 
   it('returns cooldown when last trigger is within the cooldown window', async () => {
     const taskManager = {
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         state: {
           lastCompositeListVisitRunSoonAt: Date.now() - COOLDOWN_MS + 60_000,
         },
@@ -72,11 +74,11 @@ describe('refreshCompositeSloSummaries', () => {
 
   it('returns already_running when runSoon rejects with TaskAlreadyRunningError', async () => {
     const taskManager = {
-      get: jest.fn().mockResolvedValue({ state: {} }),
-      runSoon: jest
+      get: vi.fn().mockResolvedValue({ state: {} }),
+      runSoon: vi
         .fn()
         .mockRejectedValue(new TaskAlreadyRunningError('slo:composite-slo-summary-task:1.0.0')),
-      bulkUpdateState: jest.fn(),
+      bulkUpdateState: vi.fn(),
     };
 
     const result = await refreshCompositeSloSummaries({
@@ -91,11 +93,11 @@ describe('refreshCompositeSloSummaries', () => {
 
   it('calls runSoon and updates task state when allowed', async () => {
     const taskManager = {
-      get: jest.fn().mockResolvedValue({ state: {} }),
-      runSoon: jest
+      get: vi.fn().mockResolvedValue({ state: {} }),
+      runSoon: vi
         .fn()
         .mockResolvedValue({ id: 'slo:composite-slo-summary-task:1.0.0', forced: false }),
-      bulkUpdateState: jest.fn().mockResolvedValue(undefined),
+      bulkUpdateState: vi.fn().mockResolvedValue(undefined),
     };
 
     const result = await refreshCompositeSloSummaries({

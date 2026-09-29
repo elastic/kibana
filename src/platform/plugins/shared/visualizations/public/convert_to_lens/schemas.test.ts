@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { AggConfigOptions, AggConfigsOptions, GetConfigFn } from '@kbn/data-plugin/common';
 import { AggConfig, AggConfigs } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -14,50 +16,62 @@ import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.st
 import type { Vis } from '../vis';
 import { getColumnsFromVis } from './schemas';
 
-const mockConvertMetricToColumns = jest.fn();
-const mockConvertBucketToColumns = jest.fn();
-const mockGetCutomBucketsFromSiblingAggs = jest.fn();
-const mockGetCustomBucketColumns = jest.fn();
-const mockGetVisSchemas = jest.fn();
+const mockConvertMetricToColumns = vi.fn();
+const mockConvertBucketToColumns = vi.fn();
+const mockGetCutomBucketsFromSiblingAggs = vi.fn();
+const mockGetCustomBucketColumns = vi.fn();
+const mockGetVisSchemas = vi.fn();
 
-const mockGetBucketCollapseFn = jest.fn();
-const mockGetBucketColumns = jest.fn();
-const mockGetColumnIds = jest.fn();
-const mockGetColumnsWithoutReferenced = jest.fn();
-const mockGetMetricsWithoutDuplicates = jest.fn();
-const mockIsValidVis = jest.fn();
-const mockSortColumns = jest.fn();
+const mockGetBucketCollapseFn = vi.fn();
+const mockGetBucketColumns = vi.fn();
+const mockGetColumnIds = vi.fn();
+const mockGetColumnsWithoutReferenced = vi.fn();
+const mockGetMetricsWithoutDuplicates = vi.fn();
+const mockIsValidVis = vi.fn();
+const mockSortColumns = vi.fn();
 
-jest.mock('../../common/convert_to_lens/lib/metrics', () => ({
-  convertMetricToColumns: jest.fn(() => mockConvertMetricToColumns()),
-}));
+vi.mock('../../common/convert_to_lens/lib/metrics', () => {
+      const mocked = {
+      convertMetricToColumns: vi.fn(() => mockConvertMetricToColumns()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/convert_to_lens/lib/buckets', () => ({
-  convertBucketToColumns: jest.fn(() => mockConvertBucketToColumns()),
-}));
+vi.mock('../../common/convert_to_lens/lib/buckets', () => {
+      const mocked = {
+      convertBucketToColumns: vi.fn(() => mockConvertBucketToColumns()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/convert_to_lens/lib/utils', () => {
-  const utils = jest.requireActual('../../common/convert_to_lens/lib/utils');
+vi.mock('../../common/convert_to_lens/lib/utils', async () => {
+  const utils = (await vi.importActual('../../common/convert_to_lens/lib/utils'));
   return {
     ...utils,
-    getCustomBucketsFromSiblingAggs: jest.fn(() => mockGetCutomBucketsFromSiblingAggs()),
+    getCustomBucketsFromSiblingAggs: vi.fn(() => mockGetCutomBucketsFromSiblingAggs()),
   };
 });
 
-jest.mock('../vis_schemas', () => ({
-  getVisSchemas: jest.fn(() => mockGetVisSchemas()),
-}));
+vi.mock('../vis_schemas', () => {
+      const mocked = {
+      getVisSchemas: vi.fn(() => mockGetVisSchemas()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./utils', () => ({
-  getBucketCollapseFn: jest.fn(() => mockGetBucketCollapseFn()),
-  getBucketColumns: jest.fn(() => mockGetBucketColumns()),
-  getColumnIds: jest.fn(() => mockGetColumnIds()),
-  getColumnsWithoutReferenced: jest.fn(() => mockGetColumnsWithoutReferenced()),
-  getMetricsWithoutDuplicates: jest.fn(() => mockGetMetricsWithoutDuplicates()),
-  isValidVis: jest.fn(() => mockIsValidVis()),
-  sortColumns: jest.fn(() => mockSortColumns()),
-  getCustomBucketColumns: jest.fn(() => mockGetCustomBucketColumns()),
-}));
+vi.mock('./utils', () => {
+      const mocked = {
+      getBucketCollapseFn: vi.fn(() => mockGetBucketCollapseFn()),
+      getBucketColumns: vi.fn(() => mockGetBucketColumns()),
+      getColumnIds: vi.fn(() => mockGetColumnIds()),
+      getColumnsWithoutReferenced: vi.fn(() => mockGetColumnsWithoutReferenced()),
+      getMetricsWithoutDuplicates: vi.fn(() => mockGetMetricsWithoutDuplicates()),
+      isValidVis: vi.fn(() => mockIsValidVis()),
+      sortColumns: vi.fn(() => mockSortColumns()),
+      getCustomBucketColumns: vi.fn(() => mockGetCustomBucketColumns()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getColumnsFromVis', () => {
   const dataServiceMock = dataPluginMock.createStartContract();
@@ -74,7 +88,7 @@ describe('getColumnsFromVis', () => {
     type: { name: 'heatmap' },
   } as Vis;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetVisSchemas.mockReturnValue({});
     mockIsValidVis.mockReturnValue(true);
     mockGetCustomBucketColumns.mockReturnValue({ customBucketColumns: [], customBucketsMap: {} });

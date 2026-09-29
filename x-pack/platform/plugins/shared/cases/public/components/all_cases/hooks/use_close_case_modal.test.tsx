@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { act, renderHook, screen, waitFor } from '@testing-library/react';
@@ -18,10 +21,10 @@ import { useCloseCaseModal } from './use_close_case_modal';
 import * as i18n from '../translations';
 
 describe('useCloseCaseModal', () => {
-  const onCloseCase = jest.fn();
+  const onCloseCase = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when canSyncCloseReasonToAlerts is false', () => {
@@ -195,7 +198,7 @@ describe('useCloseCaseModal', () => {
 
     it('includes custom closing reasons from uiSettings', async () => {
       const coreStartMock = createStartServicesMock();
-      (coreStartMock.uiSettings.get as jest.Mock).mockImplementation(
+      (coreStartMock.uiSettings.get as Mock).mockImplementation(
         (key: string, defaultValue: unknown) => {
           if (key === DEFAULT_DETECTIONS_CLOSE_REASONS_KEY) {
             return ['Custom reason 1', 'Custom reason 2'];

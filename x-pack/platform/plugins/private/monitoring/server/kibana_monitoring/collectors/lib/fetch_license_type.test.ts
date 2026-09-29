@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { fetchLicenseType } from './fetch_license_type';
 
@@ -12,7 +14,7 @@ describe('fetchLicenseType', () => {
   const clusterUuid = '1abcde2';
   const availableCcs = false;
   const callCluster = {
-    search: jest.fn().mockImplementation(() => ({
+    search: vi.fn().mockImplementation(() => ({
       hits: {
         hits: [
           {
@@ -34,7 +36,7 @@ describe('fetchLicenseType', () => {
 
   it('should handle no license data', async () => {
     const customCallCluster = {
-      search: jest.fn().mockImplementation(() => ({
+      search: vi.fn().mockImplementation(() => ({
         hits: {
           hits: [],
         },

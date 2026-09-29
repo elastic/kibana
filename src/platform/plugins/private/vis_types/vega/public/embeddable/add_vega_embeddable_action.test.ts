@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import { getDefaultSpec } from '../default_spec';
 import { VegaPanelIcon } from '../vega_icon';
 import { getAddVegaEmbeddableAction } from './add_vega_embeddable_action';
 
-jest.mock('../default_spec', () => ({ getDefaultSpec: () => '{ mark: point }' }));
+vi.mock('../default_spec', () => {
+      const mocked = { getDefaultSpec: () => '{ mark: point }' };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getAddVegaEmbeddableAction', () => {
   it('uses the Vega SVG icon in the add panel menu', () => {
@@ -22,9 +27,9 @@ describe('getAddVegaEmbeddableAction', () => {
   });
 
   it('adds one default Vega panel and opens its Dashboard editor', async () => {
-    const onEdit = jest.fn();
-    const addNewPanel = jest.fn().mockResolvedValue({ onEdit });
-    const returnFocus = jest.fn();
+    const onEdit = vi.fn();
+    const addNewPanel = vi.fn().mockResolvedValue({ onEdit });
+    const returnFocus = vi.fn();
     const action = getAddVegaEmbeddableAction();
 
     await action.execute({ embeddable: { addNewPanel }, returnFocus });

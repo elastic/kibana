@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useSeverityAction } from './use_severity_action';
 
@@ -15,24 +18,25 @@ import { useUpdateCases } from '../../../containers/use_bulk_update_case';
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 
-jest.mock('../../../containers/api');
+vi.mock('../../../containers/api');
 // Wrap the real hook so individual tests can swap in a synchronous `mutate`; the toaster tests below still exercise the real mutation lifecycle.
-jest.mock('../../../containers/use_bulk_update_case', () => ({
-  ...jest.requireActual('../../../containers/use_bulk_update_case'),
-  useUpdateCases: jest.fn(),
-}));
+vi.mock('../../../containers/use_bulk_update_case', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../containers/use_bulk_update_case')),
+      useUpdateCases: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useUpdateCases: realUseUpdateCases } = jest.requireActual(
-  '../../../containers/use_bulk_update_case'
-);
+const { useUpdateCases: realUseUpdateCases } = (await vi.importActual('../../../containers/use_bulk_update_case'));
 
 describe('useSeverityAction', () => {
-  const onAction = jest.fn();
-  const onActionSuccess = jest.fn();
+  const onAction = vi.fn();
+  const onActionSuccess = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useUpdateCases as jest.Mock).mockImplementation(realUseUpdateCases);
+    vi.clearAllMocks();
+    (useUpdateCases as Mock).mockImplementation(realUseUpdateCases);
   });
 
   it('renders an action', async () => {
@@ -87,8 +91,8 @@ describe('useSeverityAction', () => {
   });
 
   it('update the severity cases', async () => {
-    const mutate = jest.fn();
-    (useUpdateCases as jest.Mock).mockReturnValue({ mutate, isLoading: false });
+    const mutate = vi.fn();
+    (useUpdateCases as Mock).mockReturnValue({ mutate, isLoading: false });
 
     const { result } = renderHook(
       () => useSeverityAction({ onAction, onActionSuccess, isDisabled: false }),

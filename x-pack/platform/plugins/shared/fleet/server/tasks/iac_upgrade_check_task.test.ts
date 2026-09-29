@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
@@ -21,19 +24,22 @@ import { isIacProvisionerEnabled } from '../services/utils/iac_provisioner';
 
 import { runIacUpgradeCheckTask } from './iac_upgrade_check_task';
 
-jest.mock('../services/utils/iac_provisioner');
-jest.mock('../services/telemetry/iac_provisioner_telemetry');
+vi.mock('../services/utils/iac_provisioner');
+vi.mock('../services/telemetry/iac_provisioner_telemetry');
 // getIacKeyOutcome is stubbed at the barrel level so this test drives the task's bookkeeping
 // without mocking IaCP or the package registry.
-jest.mock('../services/cloud_connectors', () => ({
-  ...jest.requireActual('../services/cloud_connectors'),
-  getCloudConnectorIntegrationSelections: jest.fn(),
-  getIacKeyOutcome: jest.fn(),
-}));
+vi.mock('../services/cloud_connectors', async () => {
+      const mocked = {
+      ...(await vi.importActual('../services/cloud_connectors')),
+      getCloudConnectorIntegrationSelections: vi.fn(),
+      getIacKeyOutcome: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedEnabled = jest.mocked(isIacProvisionerEnabled);
-const mockedSelections = jest.mocked(getCloudConnectorIntegrationSelections);
-const mockedGetIacKeyOutcome = jest.mocked(getIacKeyOutcome);
+const mockedEnabled = vi.mocked(isIacProvisionerEnabled);
+const mockedSelections = vi.mocked(getCloudConnectorIntegrationSelections);
+const mockedGetIacKeyOutcome = vi.mocked(getIacKeyOutcome);
 
 const makeConnector = (id: string, attributes: Record<string, unknown>) => ({
   id,
@@ -46,26 +52,26 @@ const finderFor = (pages: unknown[][]) => ({
       yield { saved_objects: page };
     }
   },
-  close: jest.fn(),
+  close: vi.fn(),
 });
 
 /** The lookup's answer for a connector whose integration set fits under the render cap. */
 const stored = (integrations: IacIntegrationSelection[]) => ({ integrations, exceedsCap: false });
 
-const mockSoClient = { createPointInTimeFinder: jest.fn(), update: jest.fn() } as any;
+const mockSoClient = { createPointInTimeFinder: vi.fn(), update: vi.fn() } as any;
 const signal = new AbortController().signal;
 
 describe('iac_upgrade_check_task', () => {
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     mockSoClient.createPointInTimeFinder.mockReset();
     mockSoClient.update.mockReset();
     mockLogger = loggingSystemMock.createLogger();
     appContextService.start(createAppContextStartContractMock());
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
-    jest
+    vi.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
+    vi
       .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
       .mockReturnValue(mockSoClient);
     mockedEnabled.mockResolvedValue(true);
@@ -255,7 +261,7 @@ describe('iac_upgrade_check_task', () => {
 
       await runIacUpgradeCheckTask(signal);
 
-      const transitionLogs = (mockLogger.info as jest.Mock).mock.calls.filter(
+      const transitionLogs = (mockLogger.info as Mock).mock.calls.filter(
         ([msg]: [string]) => typeof msg === 'string' && msg.includes('→')
       );
       expect(transitionLogs).toHaveLength(0);

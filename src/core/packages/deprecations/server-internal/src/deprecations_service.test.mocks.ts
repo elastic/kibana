@@ -7,25 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mockDeprecationsFactory } from './mocks';
 
 export const mockedDeprecationFactoryInstance = mockDeprecationsFactory.create();
-export const DeprecationsFactoryMock = jest
+export const DeprecationsFactoryMock = vi
   .fn()
   .mockImplementation(() => mockedDeprecationFactoryInstance);
 
-export const registerConfigDeprecationsInfoMock = jest.fn();
-export const registerApiDeprecationsInfoMock = jest.fn();
+export const registerConfigDeprecationsInfoMock = vi.fn();
+export const registerApiDeprecationsInfoMock = vi.fn();
 
 export const loggingMock = {
-  configure: jest.fn(),
+  configure: vi.fn(),
 };
 
-jest.doMock('./deprecations', () => ({
-  registerConfigDeprecationsInfo: registerConfigDeprecationsInfoMock,
-  registerApiDeprecationsInfo: registerApiDeprecationsInfoMock,
-}));
+vi.doMock('./deprecations', () => {
+      const mocked = {
+      registerConfigDeprecationsInfo: registerConfigDeprecationsInfoMock,
+      registerApiDeprecationsInfo: registerApiDeprecationsInfoMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.doMock('./deprecations_factory', () => ({
-  DeprecationsFactory: DeprecationsFactoryMock,
-}));
+vi.doMock('./deprecations_factory', () => {
+      const mocked = {
+      DeprecationsFactory: DeprecationsFactoryMock,
+    };
+      return { ...mocked, default: mocked };
+    });

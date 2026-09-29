@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../__mocks__/request_context';
@@ -95,15 +98,15 @@ describe('prefetchPreviousStatusesByIds', () => {
   let esClient: SecuritySolutionRequestHandlerContextMock['core']['elasticsearch']['client']['asCurrentUser'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ context } = requestContextMock.createTools());
     esClient = context.core.elasticsearch.client.asCurrentUser;
     esClient.search.mockResolvedValue(makeSearchResponse([], 0));
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns empty previousStatuses and empty idToIndex when no hits are returned', async () => {
@@ -293,15 +296,15 @@ describe('prefetchPreviousStatusesByQuery', () => {
   let esClient: SecuritySolutionRequestHandlerContextMock['core']['elasticsearch']['client']['asCurrentUser'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ context } = requestContextMock.createTools());
     esClient = context.core.elasticsearch.client.asCurrentUser;
     esClient.search.mockResolvedValue(makeSearchResponse([], 0));
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns empty result when there are no hits', async () => {
@@ -410,7 +413,7 @@ describe('prefetchPreviousStatusesByQuery', () => {
 
     await prefetchPreviousStatusesByQuery(esClient, 'index', query);
 
-    const call = (esClient.search as unknown as jest.Mock).mock.calls[0][0];
+    const call = (esClient.search as unknown as Mock).mock.calls[0][0];
     expect(call.query.bool.filter).toEqual(query);
   });
 
@@ -467,14 +470,14 @@ describe('prefetchPreviousStatusesByQuery', () => {
   it('omits runtime_mappings from the search request when not provided', async () => {
     await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} });
 
-    const call = (esClient.search as unknown as jest.Mock).mock.calls[0][0];
+    const call = (esClient.search as unknown as Mock).mock.calls[0][0];
     expect(call).not.toHaveProperty('runtime_mappings');
   });
 
   it('omits runtime_mappings from the search request when provided as an empty object', async () => {
     await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} }, {});
 
-    const call = (esClient.search as unknown as jest.Mock).mock.calls[0][0];
+    const call = (esClient.search as unknown as Mock).mock.calls[0][0];
     expect(call).not.toHaveProperty('runtime_mappings');
   });
 
@@ -495,7 +498,7 @@ describe('prefetchPreviousStatusesByQuery', () => {
 
     await prefetchPreviousStatusesByQuery(esClient, 'index', query);
 
-    const call = (esClient.search as unknown as jest.Mock).mock.calls[0][0];
+    const call = (esClient.search as unknown as Mock).mock.calls[0][0];
     expect(call.query.bool.must_not).toEqual([STATUS_FIELD_REQUIRED]);
   });
 
@@ -523,7 +526,7 @@ describe('prefetchPreviousStatusesByQuery', () => {
 
     await prefetchPreviousStatusesByQuery(esClient, 'index', query, undefined, 'closed');
 
-    const call = (esClient.search as unknown as jest.Mock).mock.calls[0][0];
+    const call = (esClient.search as unknown as Mock).mock.calls[0][0];
     expect(call.query.bool.must_not).toEqual([
       STATUS_FIELD_REQUIRED,
       { term: { [ALERT_WORKFLOW_STATUS]: 'closed' } },
@@ -550,15 +553,15 @@ describe('fetchAlertIdToIndex', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ context } = requestContextMock.createTools());
     esClient = context.core.elasticsearch.client.asCurrentUser;
     esClient.search.mockResolvedValue(makeIdToIndexResponse([]));
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns an empty array when no hits are returned', async () => {
@@ -648,7 +651,7 @@ describe('verifyAlertIdsInIndex', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ context } = requestContextMock.createTools());
     esClient = context.core.elasticsearch.client.asCurrentUser;
     esClient.search.mockResolvedValue(makeIdResponse([]));
@@ -722,15 +725,15 @@ describe('fetchAlertIdIndexWithSource', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ context } = requestContextMock.createTools());
     esClient = context.core.elasticsearch.client.asCurrentUser;
     esClient.search.mockResolvedValue(makeSourceResponse([]));
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns source alongside id and index for each hit', async () => {
@@ -790,15 +793,15 @@ describe('hits-per-id reservation derived from the index pattern', () => {
   const ADHOC_AD_INDEX = '.adhoc.alerts-security.attack.discovery.alerts-default';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ context } = requestContextMock.createTools());
     esClient = context.core.elasticsearch.client.asCurrentUser;
     esClient.search.mockResolvedValue(searchResponse({ hits: { total: 0, hits: [] } }));
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   // The same _id can exist in every index a pattern resolves to and update-by-query mutates
@@ -1136,7 +1139,7 @@ describe('prefetchChangedListFieldIds', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ context } = requestContextMock.createTools());
     esClient = context.core.elasticsearch.client.asCurrentUser;
   });

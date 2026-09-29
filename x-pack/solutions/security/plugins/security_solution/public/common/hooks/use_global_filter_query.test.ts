@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../mock';
 import { useGlobalFilterQuery } from './use_global_filter_query';
@@ -12,12 +14,12 @@ import type { Filter, Query } from '@kbn/es-query';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 
-const mockGlobalFiltersQuerySelector = jest.fn();
-const mockGlobalQuerySelector = jest.fn();
-const mockUseInvalidFilterQuery = jest.fn();
+const mockGlobalFiltersQuerySelector = vi.fn();
+const mockGlobalQuerySelector = vi.fn();
+const mockUseInvalidFilterQuery = vi.fn();
 
-jest.mock('../store', () => {
-  const original = jest.requireActual('../store');
+vi.mock('../store', async () => {
+  const original = (await vi.importActual('../store'));
   return {
     ...original,
     inputsSelectors: {
@@ -28,9 +30,12 @@ jest.mock('../store', () => {
   };
 });
 
-jest.mock('./use_invalid_filter_query', () => ({
-  useInvalidFilterQuery: (...args: unknown[]) => mockUseInvalidFilterQuery(...args),
-}));
+vi.mock('./use_invalid_filter_query', () => {
+      const mocked = {
+      useInvalidFilterQuery: (...args: unknown[]) => mockUseInvalidFilterQuery(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useGlobalFilterQuery', () => {
   beforeEach(() => {

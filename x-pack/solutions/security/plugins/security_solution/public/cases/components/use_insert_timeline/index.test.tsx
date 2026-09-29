@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import { mockTimelineModel } from '../../../common/mock/timeline_results';
@@ -12,42 +14,45 @@ import { useFormatUrl } from '../../../common/components/link_to';
 import { SecurityPageName } from '../../../app/types';
 import { useInsertTimeline } from '.';
 
-const mockDispatch = jest.fn();
+const mockDispatch = vi.fn();
 
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
   };
 });
 
-jest.mock('../../../common/components/link_to', () => {
-  const originalModule = jest.requireActual('../../../common/components/link_to');
+vi.mock('../../../common/components/link_to', async () => {
+  const originalModule = (await vi.importActual('../../../common/components/link_to'));
   return {
     ...originalModule,
-    getTimelineTabsUrl: jest.fn(),
-    useFormatUrl: jest.fn().mockReturnValue({
-      formatUrl: jest.fn().mockImplementation((path: string) => path),
+    getTimelineTabsUrl: vi.fn(),
+    useFormatUrl: vi.fn().mockReturnValue({
+      formatUrl: vi.fn().mockImplementation((path: string) => path),
       search: '',
     }),
   };
 });
 
-jest.mock('../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn().mockReturnValue({
-    timelineTitle: mockTimelineModel.title,
-    timelineSavedObjectId: mockTimelineModel.savedObjectId,
-    timelineId: mockTimelineModel.id,
-  }),
-}));
+vi.mock('../../../common/hooks/use_selector', () => {
+      const mocked = {
+      useShallowEqualSelector: vi.fn().mockReturnValue({
+        timelineTitle: mockTimelineModel.title,
+        timelineSavedObjectId: mockTimelineModel.savedObjectId,
+        timelineId: mockTimelineModel.id,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useInsertTimeline', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('init', async () => {

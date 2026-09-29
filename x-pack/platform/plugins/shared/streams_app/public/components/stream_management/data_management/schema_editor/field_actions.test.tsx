@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -23,23 +25,26 @@ import type {
 } from './types';
 
 // Mock the Kibana hook
-const mockOverlaysOpenFlyout = jest.fn();
+const mockOverlaysOpenFlyout = vi.fn();
 
-jest.mock('../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    dependencies: {
-      start: {},
-    },
-    core: {
-      overlays: {
-        openFlyout: mockOverlaysOpenFlyout,
-      },
-      i18n: { Context: ({ children }: { children: React.ReactNode }) => children },
-      theme: { theme$: { subscribe: () => ({ unsubscribe: () => {} }) } },
-    },
-    services: {},
-  }),
-}));
+vi.mock('../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        dependencies: {
+          start: {},
+        },
+        core: {
+          overlays: {
+            openFlyout: mockOverlaysOpenFlyout,
+          },
+          i18n: { Context: ({ children }: { children: React.ReactNode }) => children },
+          theme: { theme$: { subscribe: () => ({ unsubscribe: () => {} }) } },
+        },
+        services: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockWiredStream = (name: string) =>
   ({
@@ -63,9 +68,9 @@ const renderWithContext = (
   fields: SchemaEditorField[] = [field],
   contextOverrides: Partial<SchemaEditorProps> = {}
 ) => {
-  const mockOnFieldUpdate = jest.fn();
-  const mockOnAddField = jest.fn();
-  const mockOnFieldSelection = jest.fn();
+  const mockOnFieldUpdate = vi.fn();
+  const mockOnAddField = vi.fn();
+  const mockOnFieldSelection = vi.fn();
 
   const contextProps: SchemaEditorProps = {
     fields,
@@ -116,8 +121,8 @@ const getMenuItemNames = () => {
 
 describe('FieldActionsCell', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockOverlaysOpenFlyout.mockReturnValue({ close: jest.fn() });
+    vi.clearAllMocks();
+    mockOverlaysOpenFlyout.mockReturnValue({ close: vi.fn() });
   });
 
   describe('system fields', () => {

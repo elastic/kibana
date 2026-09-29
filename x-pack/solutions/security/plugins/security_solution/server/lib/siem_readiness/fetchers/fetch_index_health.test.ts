@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { SILENCE_BOOTSTRAP_DAYS } from '@kbn/siem-readiness';
 import { fetchIndexHealth } from './fetch_index_health';
@@ -66,20 +68,20 @@ const makeEsClient = ({
 
   return {
     indices: {
-      dataStreamsStats: jest.fn().mockResolvedValue({
+      dataStreamsStats: vi.fn().mockResolvedValue({
         data_streams: streams.map((s) => ({
           data_stream: s.name,
           maximum_timestamp: s.maximum_timestamp ?? null,
         })),
       }),
-      getDataStream: jest.fn().mockResolvedValue({
+      getDataStream: vi.fn().mockResolvedValue({
         data_streams: Object.entries(creationDates).map(([name, creation_date]) => ({
           name,
           creation_date,
         })),
       }),
     },
-    search: jest.fn().mockImplementation(() => {
+    search: vi.fn().mockImplementation(() => {
       const page = pages[callIdx] ?? { buckets: [] };
       callIdx += 1;
       return Promise.resolve({ aggregations: { by_index_day: page } });
@@ -89,9 +91,9 @@ const makeEsClient = ({
 
 describe('fetchIndexHealth', () => {
   beforeEach(() => {
-    jest.spyOn(Date, 'now').mockReturnValue(NOW);
+    vi.spyOn(Date, 'now').mockReturnValue(NOW);
   });
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => vi.restoreAllMocks());
 
   describe('lastEventMs and silenceMs from maximum_timestamp', () => {
     it('reads lastEventMs from _data_stream/_stats maximum_timestamp', async () => {

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { updateAlertStatus } from './update_alerts';
 import { DefaultClosingReasonSchema } from '../../../../../common/types';
 
-const mockUpdateAlertStatusByIds = jest.fn().mockReturnValue(new Promise(() => {}));
-const mockUpdateAlertStatusByQuery = jest.fn().mockReturnValue(new Promise(() => {}));
+const mockUpdateAlertStatusByIds = vi.fn().mockReturnValue(new Promise(() => {}));
+const mockUpdateAlertStatusByQuery = vi.fn().mockReturnValue(new Promise(() => {}));
 
-jest.mock('../../../../detections/containers/detection_engine/alerts/api', () => {
+vi.mock('../../../../detections/containers/detection_engine/alerts/api', () => {
   return {
     updateAlertStatusByQuery: (params: unknown) => mockUpdateAlertStatusByQuery(params),
     updateAlertStatusByIds: (params: unknown) => mockUpdateAlertStatusByIds(params),
@@ -22,7 +24,7 @@ const status = 'open';
 
 describe('updateAlertStatus', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should reject if neither query nor signalIds are provided', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { AxiosError } from 'axios';
 import type { InternalAxiosRequestConfig } from 'axios';
 
@@ -24,21 +27,24 @@ import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server
 import { getConnectorType } from '.';
 import { api } from './api';
 
-jest.mock('./api', () => ({
-  api: {
-    getFields: jest.fn(),
-    handshake: jest.fn(),
-    pushToService: jest.fn(),
-    getIncident: jest.fn(),
-    issueTypes: jest.fn(),
-    fieldsByIssueType: jest.fn(),
-    issues: jest.fn(),
-    issue: jest.fn(),
-  },
-}));
+vi.mock('./api', () => {
+      const mocked = {
+      api: {
+        getFields: vi.fn(),
+        handshake: vi.fn(),
+        pushToService: vi.fn(),
+        getIncident: vi.fn(),
+        issueTypes: vi.fn(),
+        fieldsByIssueType: vi.fn(),
+        issues: vi.fn(),
+        issue: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const services = actionsMock.createServices();
-const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+const mockedLogger: Mocked<Logger> = loggerMock.create();
 const configurationUtilities = actionsConfigMock.create();
 
 const minimalAxiosRequestConfig = { headers: {} } as InternalAxiosRequestConfig;
@@ -78,7 +84,7 @@ describe('Jira connector executor', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('issueTypes sub-action returns ok when api resolves', async () => {
@@ -86,7 +92,7 @@ describe('Jira connector executor', () => {
       { id: '10006', name: 'Task' },
       { id: '10007', name: 'Bug' },
     ];
-    (api.issueTypes as jest.Mock).mockResolvedValueOnce(issueTypesData);
+    (api.issueTypes as Mock).mockResolvedValueOnce(issueTypesData);
 
     const actionId = 'some-action-id';
     const executorOptions = {
@@ -115,13 +121,13 @@ describe('Jira connector executor', () => {
       actionId,
     });
     expect(api.issueTypes).toHaveBeenCalledTimes(1);
-    expect((api.issueTypes as jest.Mock).mock.calls[0][0]).toMatchObject({
+    expect((api.issueTypes as Mock).mock.calls[0][0]).toMatchObject({
       params: {},
     });
   });
 
   test('issueTypes sub-action maps Axios 400 to TaskErrorSource.USER', async () => {
-    (api.issueTypes as jest.Mock).mockRejectedValueOnce(jiraAxios400Error);
+    (api.issueTypes as Mock).mockRejectedValueOnce(jiraAxios400Error);
 
     const executorOptions = {
       actionId: 'some-action-id',

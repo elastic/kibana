@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -36,16 +38,16 @@ const spaceFlappingSettings: RulesSettingsFlapping = {
 
 describe('RuleSettingsFlappingForm', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   afterEach(() => {
     cleanup();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should show custom configuration switch as off if global flapping is enabled', async () => {
-    const onFlappingChangeMock = jest.fn();
+    const onFlappingChangeMock = vi.fn();
     const result = render(
       <RuleSettingsFlappingForm
         spaceFlappingSettings={spaceFlappingSettings}
@@ -67,7 +69,7 @@ describe('RuleSettingsFlappingForm', () => {
 
   it('should show custom badge if global flapping is enabled and rule flapping is disabled', async () => {
     let flappingSettings = null;
-    const onFlappingChangeMock = jest.fn((changes) => {
+    const onFlappingChangeMock = vi.fn((changes) => {
       flappingSettings = changes;
     });
 
@@ -111,7 +113,7 @@ describe('RuleSettingsFlappingForm', () => {
 
   it('should show custom badge and custom form if global flapping is enabled and custom configuration switch is on ', async () => {
     let flappingSettings = null;
-    const onFlappingChangeMock = jest.fn((changes) => {
+    const onFlappingChangeMock = vi.fn((changes) => {
       flappingSettings = changes;
     });
 
@@ -156,7 +158,7 @@ describe('RuleSettingsFlappingForm', () => {
   });
 
   it('should not show custom badge if global flapping is disabled and rule flapping is disabled', async () => {
-    const onFlappingChangeMock = jest.fn();
+    const onFlappingChangeMock = vi.fn();
     const disabledSpaceFlappingSettings = { ...spaceFlappingSettings, enabled: false };
     const result = render(
       <RuleSettingsFlappingForm
@@ -178,7 +180,7 @@ describe('RuleSettingsFlappingForm', () => {
   it('should show custom badge and hide custom configuration switch form if global flapping is disabled and rule flapping is enabled', async () => {
     const disabledSpaceFlappingSettings = { ...spaceFlappingSettings, enabled: false };
     let flappingSettings = null;
-    const onFlappingChangeMock = jest.fn((changes) => {
+    const onFlappingChangeMock = vi.fn((changes) => {
       flappingSettings = changes;
     });
 

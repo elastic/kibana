@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -16,11 +18,11 @@ const mockProps = {
   flowTarget: FlowTargetSourceDest.source,
 };
 
-jest.mock('../../../common/components/links', () => {
-  const originalModule = jest.requireActual('../../../common/components/links');
+vi.mock('../../../common/components/links', async () => {
+  const originalModule = (await vi.importActual('../../../common/components/links'));
   return {
     ...originalModule,
-    SecuritySolutionLinkAnchor: jest.fn(({ children, path }) => <a href={path}>{children}</a>),
+    SecuritySolutionLinkAnchor: vi.fn(({ children, path }) => <a href={path}>{children}</a>),
   };
 });
 

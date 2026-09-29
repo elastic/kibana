@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mocked } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -15,8 +17,8 @@ import { sendTelemetryEvents, capErrorSize, UpdateEventType } from './upgrade_se
 import type { PackageUpdateEvent } from './upgrade_sender';
 
 describe('sendTelemetryEvents', () => {
-  let eventsTelemetryMock: jest.Mocked<TelemetryEventsSender>;
-  let loggerMock: jest.Mocked<Logger>;
+  let eventsTelemetryMock: Mocked<TelemetryEventsSender>;
+  let loggerMock: Mocked<Logger>;
 
   beforeEach(() => {
     eventsTelemetryMock = createMockTelemetryEventsSender();

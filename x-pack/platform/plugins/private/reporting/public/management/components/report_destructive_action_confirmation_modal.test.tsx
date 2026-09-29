@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ReportDestructiveActionConfirmationModal } from './report_destructive_action_confirmation_modal';
 
 describe('ReportDestructiveActionConfirmationModal', () => {
-  const mockOnCancel = jest.fn();
-  const mockOnConfirm = jest.fn();
+  const mockOnCancel = vi.fn();
+  const mockOnConfirm = vi.fn();
 
   it('should render the provided texts', () => {
     render(

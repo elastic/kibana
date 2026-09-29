@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { RulesClient } from '../../../../rules_client/rules_client';
@@ -21,8 +24,8 @@ import type { RuleDomain } from '../../types';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { getRulesClientMockParams } from '../../../../test_utils';
 
-jest.mock('@kbn/core-saved-objects-utils-server', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+vi.mock('@kbn/core-saved-objects-utils-server', async () => {
+  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
   return {
     ...actual,
     SavedObjectsUtils: {
@@ -31,20 +34,26 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
   };
 });
 
-jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
-  bulkMarkApiKeysForInvalidation: jest.fn(),
-}));
+vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
+      const mocked = {
+      bulkMarkApiKeysForInvalidation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => {
+vi.mock('uuid', () => {
   let uuid = 100;
   return { v4: () => `${uuid++}` };
 });
 
-jest.mock('../get_schedule_frequency', () => ({
-  validateScheduleLimit: jest.fn(),
-}));
+vi.mock('../get_schedule_frequency', () => {
+      const mocked = {
+      validateScheduleLimit: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const bulkMarkApiKeysForInvalidationMock = bulkMarkApiKeysForInvalidation as jest.Mock;
+const bulkMarkApiKeysForInvalidationMock = bulkMarkApiKeysForInvalidation as Mock;
 
 const {
   rulesClientParams,
@@ -59,14 +68,14 @@ const {
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
-  (auditLogger.log as jest.Mock).mockClear();
+  (auditLogger.log as Mock).mockClear();
 });
 
 setGlobalDate();
 
 describe('update()', () => {
   let rulesClient: RulesClient;
-  let actionsClient: jest.Mocked<ActionsClient>;
+  let actionsClient: Mocked<ActionsClient>;
 
   const existingAlert = {
     id: '1',
@@ -131,7 +140,7 @@ describe('update()', () => {
 
   beforeEach(async () => {
     rulesClient = new RulesClient(rulesClientParams);
-    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    actionsClient = (await rulesClientParams.getActionsClient()) as Mocked<ActionsClient>;
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
       createMockConnector({
@@ -1036,7 +1045,7 @@ describe('update()', () => {
       bar: true,
       parameterThatIsSavedObjectId: '9',
     };
-    const extractReferencesFn = jest.fn().mockReturnValue({
+    const extractReferencesFn = vi.fn().mockReturnValue({
       params: {
         bar: true,
         parameterThatIsSavedObjectRef: 'soRef_0',
@@ -1049,7 +1058,7 @@ describe('update()', () => {
         },
       ],
     });
-    const injectReferencesFn = jest.fn().mockReturnValue({
+    const injectReferencesFn = vi.fn().mockReturnValue({
       bar: true,
       parameterThatIsSavedObjectId: '9',
     });

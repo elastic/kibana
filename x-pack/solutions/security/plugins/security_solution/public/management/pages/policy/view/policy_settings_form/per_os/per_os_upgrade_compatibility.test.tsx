@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 /*
  * A policy stored before the macOS ransomware row existed must display the value it holds,
  * not a factory default. macOS ransomware defaults to `off` and Windows to `prevent`, so a
@@ -35,14 +38,14 @@ import {
   policyFactoryWithSupportedFeatures,
 } from '../../../../../../../common/endpoint/models/policy_config';
 
-jest.mock('../../../../../../common/hooks/use_license');
-jest.mock('../hooks/use_get_protections_unavailable_component');
+vi.mock('../../../../../../common/hooks/use_license');
+vi.mock('../hooks/use_get_protections_unavailable_component');
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 const useGetProtectionsUnavailableComponentMock =
-  _useGetProtectionsUnavailableComponent as jest.Mock;
+  _useGetProtectionsUnavailableComponent as Mock;
 const Platinum = licensingMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
 
 describe('per-OS form upgrade compatibility with 9.4 policies', () => {
@@ -67,7 +70,7 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
     renderResult = mockedContext.render(
       <PerOsRansomwareProtectionCard
         policy={policy}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         mode="edit"
         data-test-subj={testSubjects.perOsRansomware.card}
       />
@@ -90,7 +93,7 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
     renderResult = mockedContext.render(
       <PerOsRansomwareProtectionCard
         policy={policy}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         mode="edit"
         data-test-subj={testSubjects.perOsRansomware.card}
       />
@@ -116,7 +119,7 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
     renderResult = mockedContext.render(
       <PerOsRansomwareProtectionCard
         policy={policy}
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         mode="edit"
         data-test-subj={testSubjects.perOsRansomware.card}
       />
@@ -131,7 +134,7 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
   // server-side feature-usage path already tolerates. Rendering must survive it too, and setting a
   // mode has to create the branch rather than throw.
   it('renders and writes a mode when the whole macOS ransomware branch is absent', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     // The generated fixture is not license-clean out of the box, so start from a normalized one:
     // that keeps the assertion below about what this form writes, not about the generator.
     policy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
@@ -171,7 +174,7 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
   // The mode can be active while the notification branch is absent, since 9.4 exposed the mode
   // through the advanced field without touching `popup`.
   it('renders the notification controls when the macOS ransomware popup branch is absent', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     policy.mac.ransomware.mode = ProtectionModes.prevent;
     // @ts-expect-error reproducing a policy whose notification branch was never written
     delete policy.mac.popup.ransomware;
@@ -199,7 +202,7 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
   // Changing the mode syncs the notification on Platinum, so it has to create a complete branch
   // when the policy carries none: `PolicyConfig` requires a message alongside `enabled`.
   it('writes a complete notification branch when the mode changes and the popup branch is absent', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     policy.windows.ransomware.mode = ProtectionModes.off;
     policy.mac.ransomware.mode = ProtectionModes.off;
     // @ts-expect-error reproducing a policy whose notification branch was never written
@@ -230,7 +233,7 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
   // The 9.4 advanced field creates `mac.ransomware` on its own, so the branch can exist while
   // still missing `supported`. The master toggle has to complete it, not reuse it as found.
   it('completes a partial macOS ransomware branch when the master toggle is switched on', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     policy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
     policy.windows.ransomware.mode = ProtectionModes.off;
     // @ts-expect-error reproducing the shape the advanced settings field writes

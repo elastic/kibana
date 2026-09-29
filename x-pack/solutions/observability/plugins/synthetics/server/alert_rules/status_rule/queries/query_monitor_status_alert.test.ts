@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObjectsFindResult } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 import { queryMonitorStatusAlert } from './query_monitor_status_alert';
@@ -14,18 +16,18 @@ import type { SyntheticsEsClient } from '../../../lib';
 // Mock the logger
 const createLoggerMock = () => {
   return {
-    error: jest.fn(),
-    warn: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
-    trace: jest.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+    trace: vi.fn(),
   } as unknown as Logger;
 };
 
 // Mock the ES client
 const createEsClientMock = () => {
   return {
-    search: jest.fn(),
+    search: vi.fn(),
   } as unknown as SyntheticsEsClient;
 };
 
@@ -54,13 +56,13 @@ describe('queryMonitorStatusAlert', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     global.Date = originalDate;
   });
 
   it('returns empty configs when no monitors are found', async () => {
     // Mock ES client to return empty results
-    esClient.search = jest.fn().mockResolvedValue({
+    esClient.search = vi.fn().mockResolvedValue({
       body: {
         aggregations: {
           id: {
@@ -184,7 +186,7 @@ describe('queryMonitorStatusAlert', () => {
 
   it('classifies monitors as up, down, or pending based on ping data', async () => {
     // Mock ES client to return ping data
-    esClient.search = jest.fn().mockResolvedValue({
+    esClient.search = vi.fn().mockResolvedValue({
       body: {
         aggregations: {
           id: {

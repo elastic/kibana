@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -14,13 +17,19 @@ import { bulkDeleteScheduledReports } from '../apis/bulk_delete_scheduled_report
 import { testQueryClient } from '../test_utils/test_query_client';
 import { useKibana } from '@kbn/reporting-public';
 
-jest.mock('@kbn/reporting-public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/reporting-public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../apis/bulk_delete_scheduled_reports', () => ({
-  bulkDeleteScheduledReports: jest.fn(),
-}));
+vi.mock('../apis/bulk_delete_scheduled_reports', () => {
+      const mocked = {
+      bulkDeleteScheduledReports: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useBulkDelete', () => {
   const http = httpServiceMock.createStartContract();
@@ -31,7 +40,7 @@ describe('useBulkDelete', () => {
   );
 
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         http,
         notifications: {
@@ -39,11 +48,11 @@ describe('useBulkDelete', () => {
         },
       },
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls bulkDeleteScheduledReports with correct arguments', async () => {
-    (bulkDeleteScheduledReports as jest.Mock).mockResolvedValueOnce({
+    (bulkDeleteScheduledReports as Mock).mockResolvedValueOnce({
       scheduled_report_ids: ['random_schedule_report_1'],
       errors: [],
       total: 1,
@@ -70,7 +79,7 @@ describe('useBulkDelete', () => {
   });
 
   it('throws error', async () => {
-    (bulkDeleteScheduledReports as jest.Mock).mockRejectedValueOnce({});
+    (bulkDeleteScheduledReports as Mock).mockRejectedValueOnce({});
 
     const { result } = renderHook(() => useBulkDelete(), {
       wrapper,

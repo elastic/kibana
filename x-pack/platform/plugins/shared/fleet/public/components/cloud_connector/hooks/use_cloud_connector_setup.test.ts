@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 
 import type { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '../../../../common';
@@ -15,18 +18,21 @@ import { updateInputVarsWithCredentials, isAzureCloudConnectorVars } from '../ut
 import { useCloudConnectorSetup } from './use_cloud_connector_setup';
 
 // Mock utility functions
-jest.mock('../utils', () => ({
-  updateInputVarsWithCredentials: jest.fn(),
-  isAzureCloudConnectorVars: jest.fn(),
-  isGcpCloudConnectorVars: jest.fn(),
-  isCloudConnectorNameValid: jest.fn((name: string | undefined) => {
-    if (!name) return false;
-    const trimmedLength = name.trim().length;
-    return trimmedLength > 0 && name.length <= 255;
-  }),
-}));
+vi.mock('../utils', () => {
+      const mocked = {
+      updateInputVarsWithCredentials: vi.fn(),
+      isAzureCloudConnectorVars: vi.fn(),
+      isGcpCloudConnectorVars: vi.fn(),
+      isCloudConnectorNameValid: vi.fn((name: string | undefined) => {
+        if (!name) return false;
+        const trimmedLength = name.trim().length;
+        return trimmedLength > 0 && name.length <= 255;
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockIsAzureCloudConnectorVars = isAzureCloudConnectorVars as jest.MockedFunction<
+const mockIsAzureCloudConnectorVars = isAzureCloudConnectorVars as MockedFunction<
   typeof isAzureCloudConnectorVars
 >;
 // Mock PackageInfo for testing
@@ -91,13 +97,13 @@ describe('useCloudConnectorSetup', () => {
     ],
   } as NewPackagePolicyInput;
 
-  const mockUpdatePolicy: UpdatePolicy = jest.fn();
+  const mockUpdatePolicy: UpdatePolicy = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Reset mocks to simulate real behavior
-    (updateInputVarsWithCredentials as jest.Mock).mockImplementation((inputVars, credentials) => {
+    (updateInputVarsWithCredentials as Mock).mockImplementation((inputVars, credentials) => {
       if (!inputVars || !credentials) return inputVars;
 
       const updatedVars = { ...inputVars };
@@ -1064,7 +1070,7 @@ describe('extractVarValue helper - secret reference handling', () => {
     ],
   } as NewPackagePolicyInput;
 
-  const mockUpdatePolicy: UpdatePolicy = jest.fn();
+  const mockUpdatePolicy: UpdatePolicy = vi.fn();
 
   it('should extract string values directly', () => {
     const stringInput = {
@@ -1230,7 +1236,7 @@ describe('Azure credentials with mixed secret and text vars', () => {
     inputs: [mockAzureInput],
   } as NewPackagePolicy;
 
-  const mockUpdatePolicy: UpdatePolicy = jest.fn();
+  const mockUpdatePolicy: UpdatePolicy = vi.fn();
 
   beforeEach(() => {
     mockIsAzureCloudConnectorVars.mockReturnValue(true);

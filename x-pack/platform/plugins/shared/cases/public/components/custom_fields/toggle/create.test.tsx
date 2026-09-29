@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
@@ -14,10 +16,10 @@ import { customFieldsConfigurationMock } from '../../../containers/mock';
 import userEvent from '@testing-library/user-event';
 
 describe('Create ', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const customFieldConfiguration = customFieldsConfigurationMock[1];

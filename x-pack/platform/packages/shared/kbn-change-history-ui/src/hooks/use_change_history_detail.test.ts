@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useChangeHistoryDetail } from './use_change_history_detail';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
@@ -24,8 +26,8 @@ describe('useChangeHistoryDetail', () => {
     };
 
     const adapter: ChangeHistoryAdapter = {
-      listChanges: jest.fn(),
-      getChange: jest.fn().mockReturnValue(Promise.resolve(detail)),
+      listChanges: vi.fn(),
+      getChange: vi.fn().mockReturnValue(Promise.resolve(detail)),
     };
 
     const { wrapper } = createChangeHistoryHookWrapper({ adapter });
@@ -57,8 +59,8 @@ describe('useChangeHistoryDetail', () => {
     };
 
     const adapter: ChangeHistoryAdapter = {
-      listChanges: jest.fn(),
-      getChange: jest.fn().mockReturnValue(Promise.resolve(detail)),
+      listChanges: vi.fn(),
+      getChange: vi.fn().mockReturnValue(Promise.resolve(detail)),
     };
 
     const { wrapper } = createChangeHistoryHookWrapper({ adapter });
@@ -102,10 +104,10 @@ describe('useChangeHistoryDetail', () => {
       metadata: { version: 3 },
     };
 
-    const getChange = jest.fn().mockResolvedValue(committedDetail);
+    const getChange = vi.fn().mockResolvedValue(committedDetail);
 
     const adapter: ChangeHistoryAdapter = {
-      listChanges: jest.fn(),
+      listChanges: vi.fn(),
       getChange,
       getPendingChange: () => pendingChange,
     };

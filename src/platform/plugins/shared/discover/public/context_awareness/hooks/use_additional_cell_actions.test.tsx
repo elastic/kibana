@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
@@ -33,29 +36,32 @@ let mockScopedProfilesManager: ScopedProfilesManager;
 let mockScopedEbtManager: ScopedDiscoverEBTManager;
 let mockUuid = 0;
 
-jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: jest.fn() }));
+vi.mock('uuid', () => {
+      const mocked = { ...require('uuid'), v4: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
 const mockActions: string[] = [];
 const mockTriggerActions: Record<string, string[]> = { [DISCOVER_CELL_ACTIONS_TRIGGER_ID]: [] };
 
-jest.spyOn(discoverServiceMock.uiActions, 'registerActionAsync').mockImplementation((actionId) => {
+vi.spyOn(discoverServiceMock.uiActions, 'registerActionAsync').mockImplementation((actionId) => {
   mockActions.push(actionId);
 });
 
-jest
+vi
   .spyOn(discoverServiceMock.uiActions, 'attachAction')
   .mockImplementation((triggerId, actionId) => {
     mockTriggerActions[triggerId].push(actionId);
   });
 
-jest.spyOn(discoverServiceMock.uiActions, 'unregisterAction').mockImplementation((id) => {
+vi.spyOn(discoverServiceMock.uiActions, 'unregisterAction').mockImplementation((id) => {
   mockActions.splice(
     mockActions.findIndex((actionId) => actionId === id),
     1
   );
 });
 
-jest
+vi
   .spyOn(discoverServiceMock.uiActions, 'detachAction')
   .mockImplementation((triggerId, actionId) => {
     mockTriggerActions[triggerId].splice(
@@ -89,7 +95,7 @@ describe('useAdditionalCellActions', () => {
   };
 
   beforeEach(() => {
-    (uuidv4 as jest.Mock).mockImplementation(jest.requireActual('uuid').v4);
+    (uuidv4 as Mock).mockImplementation(require('uuid').v4);
     const { profilesManagerMock, scopedEbtManagerMock } = createContextAwarenessMocks();
     discoverServiceMock.profilesManager = profilesManagerMock;
     mockScopedEbtManager = scopedEbtManagerMock;
@@ -97,11 +103,11 @@ describe('useAdditionalCellActions', () => {
       scopedEbtManager: mockScopedEbtManager,
       toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     });
-    (uuidv4 as jest.Mock).mockImplementation(() => (++mockUuid).toString());
+    (uuidv4 as Mock).mockImplementation(() => (++mockUuid).toString());
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUuid = 0;
   });
 
@@ -150,9 +156,9 @@ describe('createCellAction', () => {
   const getCellAction = (isCompatible?: AdditionalCellAction['isCompatible']) => {
     const additional: AdditionalCellAction = {
       id: 'test',
-      getIconType: jest.fn(() => 'plus'),
-      getDisplayName: jest.fn(() => 'displayName'),
-      execute: jest.fn(),
+      getIconType: vi.fn(() => 'plus'),
+      getDisplayName: vi.fn(() => 'displayName'),
+      execute: vi.fn(),
       isCompatible,
     };
     return { additional, action: createCellAction('test', additional, 0) };

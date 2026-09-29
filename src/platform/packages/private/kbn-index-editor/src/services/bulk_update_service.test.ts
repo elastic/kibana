@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpStart } from '@kbn/core/public';
 import { ROW_PLACEHOLDER_PREFIX } from '../constants';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -21,9 +24,9 @@ describe('Bulk update', () => {
   let http: HttpStart;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     http = httpServiceMock.createStartContract();
-    (http.post as jest.Mock).mockResolvedValue({
+    (http.post as Mock).mockResolvedValue({
       errors: false,
       items: [],
       took: 0,
@@ -48,7 +51,7 @@ describe('Bulk update', () => {
     await bulkUpdate(INDEX_NAME, updates, http);
 
     expect(http.post).toHaveBeenCalledTimes(1);
-    const [url, options] = (http.post as jest.Mock).mock.calls[0];
+    const [url, options] = (http.post as Mock).mock.calls[0];
     expect(url).toBe(`${LOOKUP_INDEX_UPDATE_ROUTE}/my-index`);
 
     const body = JSON.parse(options.body);
@@ -92,7 +95,7 @@ describe('Bulk update', () => {
 
     await bulkUpdate(INDEX_NAME, updates, http);
 
-    const [, options] = (http.post as jest.Mock).mock.calls[0];
+    const [, options] = (http.post as Mock).mock.calls[0];
     const { operations } = JSON.parse(options.body);
 
     expect(operations).toEqual([
@@ -126,7 +129,7 @@ describe('Bulk update', () => {
 
     await bulkUpdate(INDEX_NAME, updates, http);
 
-    const [, options] = (http.post as jest.Mock).mock.calls[0];
+    const [, options] = (http.post as Mock).mock.calls[0];
     const { operations } = JSON.parse(options.body);
 
     expect(operations).toEqual([{ index: {} }, { parent: { child: 'test' } }]);
@@ -142,7 +145,7 @@ describe('Bulk update', () => {
 
     await bulkUpdate(INDEX_NAME, updates, http);
 
-    const [, options] = (http.post as jest.Mock).mock.calls[0];
+    const [, options] = (http.post as Mock).mock.calls[0];
     const { operations } = JSON.parse(options.body);
 
     expect(operations).toEqual([
@@ -163,11 +166,11 @@ describe('Bulk update', () => {
     expect(http.post).toHaveBeenCalledTimes(2);
 
     // Verify first chunk
-    const firstCallBody = JSON.parse((http.post as jest.Mock).mock.calls[0][1].body);
+    const firstCallBody = JSON.parse((http.post as Mock).mock.calls[0][1].body);
     expect(firstCallBody.operations.length).toBe(BULK_UPDATE_CHUNK_SIZE * 2); // Each update has 2 operations (index + doc)
 
     // Verify second chunk
-    const secondCallBody = JSON.parse((http.post as jest.Mock).mock.calls[1][1].body);
+    const secondCallBody = JSON.parse((http.post as Mock).mock.calls[1][1].body);
     expect(secondCallBody.operations.length).toBe((UPDATES_COUNT - BULK_UPDATE_CHUNK_SIZE) * 2);
   });
 });

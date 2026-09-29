@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { screen, render } from '@testing-library/react';
 import React from 'react';
 
@@ -18,36 +21,38 @@ import { useVisualizationResponseMock } from './use_visualization_response.mock'
 
 const mockActions = [{ id: 'inspect' }, { id: 'openInLens' }, { id: 'addToCase' }];
 
-jest.mock('react-redux-v7', () => {
-  const actual = jest.requireActual('react-redux-v7');
+vi.mock('react-redux-v7', () => {
+  const actual = require('react-redux-v7');
   return {
     ...actual,
-    dispatch: jest.fn(),
+    dispatch: vi.fn(),
   };
 });
 
-jest.mock('./use_visualization_response', () => ({
-  ...jest.requireActual('./use_visualization_response'),
-  useVisualizationResponse: jest
-    .requireActual('./use_visualization_response.mock')
-    .useVisualizationResponseMock.create(),
-}));
+vi.mock('./use_visualization_response', async () => {
+      const mocked = {
+      ...(await vi.importActual('./use_visualization_response')),
+      useVisualizationResponse: (await vi.importActual('./use_visualization_response.mock'))
+        .useVisualizationResponseMock.create(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/kibana', () => {
+vi.mock('../../lib/kibana', () => {
   return {
-    useKibana: jest.fn(),
+    useKibana: vi.fn(),
   };
 });
 
-jest.mock('./use_lens_attributes', () => {
+vi.mock('./use_lens_attributes', () => {
   return {
-    useLensAttributes: jest.fn().mockReturnValue('mockAttributes'),
+    useLensAttributes: vi.fn().mockReturnValue('mockAttributes'),
   };
 });
 
-jest.mock('./use_actions', () => {
+vi.mock('./use_actions', () => {
   return {
-    useActions: jest.fn(),
+    useActions: vi.fn(),
   };
 });
 
@@ -56,26 +61,26 @@ const mockUseVisualizationResponse = useVisualizationResponse as UseVisualizatio
 const okResponseMock = useVisualizationResponseMock.buildOkResponse();
 
 describe('LensEmbeddable', () => {
-  const mockEmbeddableComponent = jest
+  const mockEmbeddableComponent = vi
     .fn()
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);
 
-  (useKibana as jest.Mock).mockReturnValue({
+  (useKibana as Mock).mockReturnValue({
     services: {
       lens: {
         EmbeddableComponent: mockEmbeddableComponent,
       },
       data: {
         actions: {
-          createFiltersFromValueClickAction: jest.fn(),
+          createFiltersFromValueClickAction: vi.fn(),
         },
       },
     },
   });
-  (useActions as jest.Mock).mockReturnValue(mockActions);
+  (useActions as Mock).mockReturnValue(mockActions);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering happy path', () => {

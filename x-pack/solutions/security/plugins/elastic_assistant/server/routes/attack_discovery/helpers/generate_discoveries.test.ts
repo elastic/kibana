@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
@@ -16,10 +19,13 @@ import { invokeAttackDiscoveryGraph } from '../public/post/helpers/invoke_attack
 import { mockAnonymizedAlerts } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_anonymized_alerts';
 import { mockAttackDiscoveries } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_attack_discoveries';
 
-jest.mock('../public/post/helpers/invoke_attack_discovery_graph', () => ({
-  ...jest.requireActual('../public/post/helpers/invoke_attack_discovery_graph'),
-  invokeAttackDiscoveryGraph: jest.fn(),
-}));
+vi.mock('../public/post/helpers/invoke_attack_discovery_graph', async () => {
+      const mocked = {
+      ...(await vi.importActual('../public/post/helpers/invoke_attack_discovery_graph')),
+      invokeAttackDiscoveryGraph: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockActionsClient = actionsClientMock.create();
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -47,8 +53,8 @@ const mockConfig: AttackDiscoveryGenerationConfig = {
 
 describe('generateAttackDiscoveries', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (invokeAttackDiscoveryGraph as jest.Mock).mockResolvedValue({
+    vi.clearAllMocks();
+    (invokeAttackDiscoveryGraph as Mock).mockResolvedValue({
       anonymizedAlerts: mockAnonymizedAlerts,
       attackDiscoveries: mockAttackDiscoveries,
     });

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 
 import { buildFallbackIndexName, useTimelineEventsDetails } from '.';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/hooks/use_app_toasts');
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../../common/hooks/use_app_toasts');
 
 describe('buildFallbackIndexName', () => {
   it('inserts a wildcard before a plain index name', () => {
@@ -74,19 +77,19 @@ const foundResponse = {
   ecs: { _id: EVENT_ID },
 };
 
-const addError = jest.fn();
+const addError = vi.fn();
 
 // Emits `next`/`error` asynchronously (like the real search service) and returns a Subscription.
 const asyncObservable = (emit: (handlers: { next: Function; error: Function }) => void) => ({
   subscribe: (handlers: { next: Function; error: Function }) => {
     const timer = setTimeout(() => emit(handlers), 0);
-    return { unsubscribe: jest.fn(() => clearTimeout(timer)) };
+    return { unsubscribe: vi.fn(() => clearTimeout(timer)) };
   },
 });
 
 // Builds a `data.search.search` mock whose outcome is decided per requested index name.
 const mockSearch = (outcomeFor: (indexName: string) => 'found' | 'empty' | 'error') => {
-  const search = jest.fn((request: { indexName: string }) =>
+  const search = vi.fn((request: { indexName: string }) =>
     asyncObservable(({ next, error }) => {
       const outcome = outcomeFor(request.indexName);
       if (outcome === 'found') {
@@ -99,7 +102,7 @@ const mockSearch = (outcomeFor: (indexName: string) => 'found' | 'empty' | 'erro
     })
   );
 
-  (useKibana as jest.Mock).mockReturnValue({ services: { data: { search: { search } } } });
+  (useKibana as Mock).mockReturnValue({ services: { data: { search: { search } } } });
   return search;
 };
 
@@ -115,8 +118,8 @@ const renderDetails = () =>
 
 describe('useTimelineEventsDetails - broadened index retry (SDH #1666)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAppToasts as jest.Mock).mockReturnValue({ addError });
+    vi.clearAllMocks();
+    (useAppToasts as Mock).mockReturnValue({ addError });
   });
 
   it('retries against the broadened index and resolves the document when the primary index returns no hit', async () => {

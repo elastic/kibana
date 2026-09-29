@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -26,14 +29,14 @@ import {
   RECONCILIATION_TASK_TYPE,
 } from '.';
 
-jest.mock('./runner');
-jest.mock('./activity_runner');
-jest.mock('./attachments_runner');
-const mockRunReconciliation = runReconciliation as jest.MockedFunction<typeof runReconciliation>;
-const mockRunActivityReconciliation = runActivityReconciliation as jest.MockedFunction<
+vi.mock('./runner');
+vi.mock('./activity_runner');
+vi.mock('./attachments_runner');
+const mockRunReconciliation = runReconciliation as MockedFunction<typeof runReconciliation>;
+const mockRunActivityReconciliation = runActivityReconciliation as MockedFunction<
   typeof runActivityReconciliation
 >;
-const mockRunAttachmentsReconciliation = runAttachmentsReconciliation as jest.MockedFunction<
+const mockRunAttachmentsReconciliation = runAttachmentsReconciliation as MockedFunction<
   typeof runAttachmentsReconciliation
 >;
 
@@ -41,7 +44,7 @@ describe('clampCursorToNotFuture', () => {
   const logger = loggerMock.create();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the cursor as-is when it is in the past', () => {
@@ -88,7 +91,7 @@ describe('resetReconciliationTask', () => {
   const logger = loggerMock.create();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('ensures the task is scheduled before clearing state (so the update target exists)', async () => {
@@ -114,8 +117,8 @@ describe('resetReconciliationTask', () => {
     );
     expect(tm.bulkUpdateState).toHaveBeenCalledTimes(1);
     // Order matters: ensureScheduled must complete before bulkUpdateState.
-    const ensureOrder = (tm.ensureScheduled as jest.Mock).mock.invocationCallOrder[0];
-    const updateOrder = (tm.bulkUpdateState as jest.Mock).mock.invocationCallOrder[0];
+    const ensureOrder = (tm.ensureScheduled as Mock).mock.invocationCallOrder[0];
+    const updateOrder = (tm.bulkUpdateState as Mock).mock.invocationCallOrder[0];
     expect(ensureOrder).toBeLessThan(updateOrder);
   });
 
@@ -140,7 +143,7 @@ describe('resetReconciliationTask', () => {
 
     expect(tm.remove).not.toHaveBeenCalled();
     expect(tm.bulkUpdateState).toHaveBeenCalledTimes(1);
-    const [ids, mapFn] = (tm.bulkUpdateState as jest.Mock).mock.calls[0];
+    const [ids, mapFn] = (tm.bulkUpdateState as Mock).mock.calls[0];
     expect(ids).toEqual([RECONCILIATION_TASK_ID]);
     // The map function receives the (irrelevant) prior state and
     // returns the supplied initialState. Pin the contract so a
@@ -163,7 +166,7 @@ describe('resetReconciliationTask', () => {
       intervalMinutes: 30,
     });
 
-    const [, mapFn] = (tm.bulkUpdateState as jest.Mock).mock.calls[0];
+    const [, mapFn] = (tm.bulkUpdateState as Mock).mock.calls[0];
     expect(mapFn({ cases_last_run_at: 'anything' }, RECONCILIATION_TASK_ID)).toEqual({});
   });
 
@@ -174,7 +177,7 @@ describe('resetReconciliationTask', () => {
     // index, deleted data views, kicked off a direct re-walk); a failure
     // here must not roll those back.
     const tm = taskManagerMock.createStart();
-    (tm.bulkUpdateState as jest.Mock).mockRejectedValueOnce(new Error('locked'));
+    (tm.bulkUpdateState as Mock).mockRejectedValueOnce(new Error('locked'));
 
     await expect(
       resetReconciliationTask({ taskManager: tm, logger, intervalMinutes: 30 })
@@ -189,7 +192,7 @@ describe('resetReconciliationTask', () => {
     // hiccup" behavior, not the try boundary itself (no current input makes scheduling throw).
     // bulkUpdateState still runs and resolves.
     const tm = taskManagerMock.createStart();
-    (tm.ensureScheduled as jest.Mock).mockRejectedValueOnce(new Error('tm unavailable'));
+    (tm.ensureScheduled as Mock).mockRejectedValueOnce(new Error('tm unavailable'));
 
     await expect(
       resetReconciliationTask({ taskManager: tm, logger, intervalMinutes: 30 })
@@ -227,7 +230,7 @@ describe('registerReconciliationTask run()', () => {
       }),
     });
 
-    const registerFn = (taskManager as unknown as { registerTaskDefinitions: jest.Mock })
+    const registerFn = (taskManager as unknown as { registerTaskDefinitions: Mock })
       .registerTaskDefinitions;
     const definition = registerFn.mock.calls[0][0][RECONCILIATION_TASK_TYPE];
     const run = definition.createTaskRunner({
@@ -248,7 +251,7 @@ describe('registerReconciliationTask run()', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('runs all three surfaces in order on the happy path and advances every cursor', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
@@ -14,17 +17,17 @@ import { useBulkAttackAssigneesItems } from '../bulk_action_items/use_bulk_attac
 import { useAttacksPrivileges } from '../use_attacks_privileges';
 import { useLicense } from '../../../../../common/hooks/use_license';
 
-jest.mock('../bulk_action_items/use_bulk_attack_assignees_items');
-jest.mock('../use_attacks_privileges');
-jest.mock('../../../../../common/hooks/use_license');
+vi.mock('../bulk_action_items/use_bulk_attack_assignees_items');
+vi.mock('../use_attacks_privileges');
+vi.mock('../../../../../common/hooks/use_license');
 
-const mockUseBulkAttackAssigneesItems = useBulkAttackAssigneesItems as jest.MockedFunction<
+const mockUseBulkAttackAssigneesItems = useBulkAttackAssigneesItems as MockedFunction<
   typeof useBulkAttackAssigneesItems
 >;
-const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
+const mockUseAttacksPrivileges = useAttacksPrivileges as MockedFunction<
   typeof useAttacksPrivileges
 >;
-const mockUseLicense = useLicense as jest.MockedFunction<typeof useLicense>;
+const mockUseLicense = useLicense as MockedFunction<typeof useLicense>;
 
 let queryClient: QueryClient;
 
@@ -33,9 +36,9 @@ function wrapper(props: { children: React.ReactNode }) {
 }
 
 describe('useAttackAssigneesContextMenuItems', () => {
-  const mockClosePopover = jest.fn();
-  const mockSetIsLoading = jest.fn();
-  const mockOnSuccess = jest.fn();
+  const mockClosePopover = vi.fn();
+  const mockSetIsLoading = vi.fn();
+  const mockOnSuccess = vi.fn();
 
   const defaultProps = {
     attacksWithAssignees: [
@@ -52,7 +55,7 @@ describe('useAttackAssigneesContextMenuItems', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient = new QueryClient();
 
     mockUseAttacksPrivileges.mockReturnValue({
@@ -62,7 +65,7 @@ describe('useAttackAssigneesContextMenuItems', () => {
     });
 
     mockUseLicense.mockReturnValue({
-      isPlatinumPlus: jest.fn().mockReturnValue(true),
+      isPlatinumPlus: vi.fn().mockReturnValue(true),
     } as unknown as ReturnType<typeof useLicense>);
 
     mockUseBulkAttackAssigneesItems.mockReturnValue({
@@ -80,7 +83,7 @@ describe('useAttackAssigneesContextMenuItems', () => {
           id: 2,
           title: React.createElement('div', null, 'Assignees'),
           'data-test-subj': 'attack-assignees-context-menu-panel',
-          renderContent: jest.fn((props) => React.createElement('div', null, 'Assignees Panel')),
+          renderContent: vi.fn((props) => React.createElement('div', null, 'Assignees Panel')),
           width: 400,
         },
       ],
@@ -135,7 +138,7 @@ describe('useAttackAssigneesContextMenuItems', () => {
   });
 
   it('should pass correct props to panel renderContent', () => {
-    const mockRenderContent = jest.fn((props) =>
+    const mockRenderContent = vi.fn((props) =>
       React.createElement('div', null, 'Assignees Panel')
     );
     mockUseBulkAttackAssigneesItems.mockReturnValue({

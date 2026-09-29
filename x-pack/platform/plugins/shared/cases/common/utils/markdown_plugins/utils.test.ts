@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 let mockParseThrows = false;
 
-jest.mock('unified', () => {
-  const unifiedModule = jest.requireActual('unified');
+vi.mock('unified', () => {
+  const unifiedModule = require('unified');
   const actualUnified = typeof unifiedModule === 'function' ? unifiedModule : unifiedModule.default;
 
   return {
     __esModule: true,
-    default: jest.fn((...args: unknown[]) => {
+    default: vi.fn((...args: unknown[]) => {
       const processor = actualUnified(...args);
       const originalParse = processor.parse.bind(processor);
 
-      processor.parse = jest.fn((...parseArgs: Parameters<typeof originalParse>) => {
+      processor.parse = vi.fn((...parseArgs: Parameters<typeof originalParse>) => {
         if (mockParseThrows) {
           throw new Error('parse failed');
         }

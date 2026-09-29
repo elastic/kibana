@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getCloudService, shouldClearSession, hydrateOnboardingSession } from './onboarding_app';
 
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  sendGetCloudOnboardingDeployment: jest.fn(),
-}));
+vi.mock('@kbn/fleet-plugin/public', () => {
+      const mocked = {
+      sendGetCloudOnboardingDeployment: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { sendGetCloudOnboardingDeployment } from '@kbn/fleet-plugin/public';
 
-const mockSendGet = sendGetCloudOnboardingDeployment as jest.Mock;
+const mockSendGet = sendGetCloudOnboardingDeployment as Mock;
 
 describe('hydrateOnboardingSession', () => {
   const INTEGRATION_ID = 'aws';

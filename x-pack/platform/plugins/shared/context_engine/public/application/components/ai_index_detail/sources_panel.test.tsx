@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -19,7 +21,7 @@ import type {
 } from '../../hooks/use_data_connectors';
 import { SourcesPanel } from './sources_panel';
 
-const mockUseDataConnectors = jest.fn(
+const mockUseDataConnectors = vi.fn(
   (_options?: UseDataConnectorsOptions): UseDataConnectorsResult => ({
     connectors: [{ id: 'connector-gdrive', name: 'Google Drive', actionTypeId: '.google_drive' }],
     connectorNameById: new Map([['connector-gdrive', 'Google Drive']]),
@@ -30,9 +32,12 @@ const mockUseDataConnectors = jest.fn(
   })
 );
 
-jest.mock('../../hooks/use_data_connectors', () => ({
-  useDataConnectors: (options?: UseDataConnectorsOptions) => mockUseDataConnectors(options),
-}));
+vi.mock('../../hooks/use_data_connectors', () => {
+      const mocked = {
+      useDataConnectors: (options?: UseDataConnectorsOptions) => mockUseDataConnectors(options),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
@@ -67,7 +72,7 @@ describe('SourcesPanel', () => {
         isLoading
         sources={[]}
         canEdit={false}
-        onEditSources={jest.fn()}
+        onEditSources={vi.fn()}
         isManaged={false}
       />
     );
@@ -83,7 +88,7 @@ describe('SourcesPanel', () => {
         isLoading={false}
         sources={[]}
         canEdit
-        onEditSources={jest.fn()}
+        onEditSources={vi.fn()}
         isManaged={false}
       />
     );
@@ -97,7 +102,7 @@ describe('SourcesPanel', () => {
 
   it('shows read-only empty copy for managed AI indexes with no sources', () => {
     renderWithProviders(
-      <SourcesPanel isLoading={false} sources={[]} canEdit onEditSources={jest.fn()} isManaged />
+      <SourcesPanel isLoading={false} sources={[]} canEdit onEditSources={vi.fn()} isManaged />
     );
 
     expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
@@ -110,7 +115,7 @@ describe('SourcesPanel', () => {
         isLoading={false}
         sources={sources}
         canEdit
-        onEditSources={jest.fn()}
+        onEditSources={vi.fn()}
         isManaged={false}
       />
     );
@@ -125,7 +130,7 @@ describe('SourcesPanel', () => {
         isLoading={false}
         sources={sources}
         canEdit
-        onEditSources={jest.fn()}
+        onEditSources={vi.fn()}
         isManaged={false}
       />
     );
@@ -139,7 +144,7 @@ describe('SourcesPanel', () => {
         isLoading={false}
         sources={[{ type: 'connector', value: 'connector-gdrive' }]}
         canEdit
-        onEditSources={jest.fn()}
+        onEditSources={vi.fn()}
         isManaged={false}
       />
     );
@@ -153,7 +158,7 @@ describe('SourcesPanel', () => {
         isLoading={false}
         sources={[{ type: 'connector', value: 'connector-gdrive' }]}
         canEdit
-        onEditSources={jest.fn()}
+        onEditSources={vi.fn()}
         isManaged={false}
       />
     );
@@ -167,7 +172,7 @@ describe('SourcesPanel', () => {
         isLoading={false}
         sources={sources}
         canEdit={false}
-        onEditSources={jest.fn()}
+        onEditSources={vi.fn()}
         isManaged={false}
       />
     );
@@ -181,7 +186,7 @@ describe('SourcesPanel', () => {
         isLoading={false}
         sources={sources}
         canEdit
-        onEditSources={jest.fn()}
+        onEditSources={vi.fn()}
         isManaged
       />
     );
@@ -190,7 +195,7 @@ describe('SourcesPanel', () => {
   });
 
   it('calls onEditSources when the edit button is clicked', () => {
-    const onEditSources = jest.fn();
+    const onEditSources = vi.fn();
     renderWithProviders(
       <SourcesPanel
         isLoading={false}

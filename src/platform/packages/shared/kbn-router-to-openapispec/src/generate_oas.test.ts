@@ -7,19 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('./process_router', () => {
-  const module = jest.requireActual('./process_router');
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
+vi.mock('./process_router', async () => {
+  const module = (await vi.importActual('./process_router'));
   return {
     ...module,
-    processRouter: jest.fn(module.processRouter),
+    processRouter: vi.fn(module.processRouter),
   };
 });
 
-jest.mock('./process_versioned_router', () => {
-  const module = jest.requireActual('./process_versioned_router');
+vi.mock('./process_versioned_router', async () => {
+  const module = (await vi.importActual('./process_versioned_router'));
   return {
     ...module,
-    processVersionedRouter: jest.fn(module.processVersionedRouter),
+    processVersionedRouter: vi.fn(module.processVersionedRouter),
   };
 });
 
@@ -48,7 +51,7 @@ interface RecursiveType {
 }
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('generateOpenApiDocument', () => {
@@ -161,7 +164,7 @@ describe('generateOpenApiDocument', () => {
                       },
                     },
                     options: { tags: ['foo'], access: 'public' },
-                    handler: jest.fn(),
+                    handler: vi.fn(),
                   },
                 ],
               }),
@@ -197,7 +200,7 @@ describe('generateOpenApiDocument', () => {
                     },
                   },
                   options: { tags: ['foo'], access: 'public' },
-                  handler: jest.fn(),
+                  handler: vi.fn(),
                 },
               ],
             }),
@@ -257,7 +260,7 @@ describe('generateOpenApiDocument', () => {
                       },
                     },
                     options: { tags: ['foo'], access: 'public' },
-                    handler: jest.fn(),
+                    handler: vi.fn(),
                   },
                 ],
               }),
@@ -302,7 +305,7 @@ describe('generateOpenApiDocument', () => {
                     body: discriminatorSchema,
                   },
                 },
-                handler: jest.fn(),
+                handler: vi.fn(),
               },
             ],
           },
@@ -316,7 +319,7 @@ describe('generateOpenApiDocument', () => {
                 options: { access: 'public', security: { authz: { requiredPrivileges: ['foo'] } } },
                 handlers: [
                   {
-                    fn: jest.fn(),
+                    fn: vi.fn(),
                     options: {
                       version: '99.99.99',
                       validate: { request: { body: discriminatorSchema } },
@@ -376,7 +379,7 @@ describe('generateOpenApiDocument', () => {
                       request: { body: opts.reverseOrder ? baseSchema : extendedSchema },
                     },
                     options: { access: 'public' },
-                    handler: jest.fn(),
+                    handler: vi.fn(),
                   },
                   {
                     isVersioned: false,
@@ -386,7 +389,7 @@ describe('generateOpenApiDocument', () => {
                       request: { body: opts.reverseOrder ? extendedSchema : baseSchema },
                     },
                     options: { access: 'public' },
-                    handler: jest.fn(),
+                    handler: vi.fn(),
                   },
                 ],
               }),
@@ -502,7 +505,7 @@ describe('generateOpenApiDocument', () => {
                       },
                     },
                     options: { tags: ['foo'], access: 'public' },
-                    handler: jest.fn(),
+                    handler: vi.fn(),
                   },
                 ],
               }),
@@ -524,7 +527,7 @@ describe('generateOpenApiDocument', () => {
                     },
                     handlers: [
                       {
-                        fn: jest.fn(),
+                        fn: vi.fn(),
                         options: {
                           validate: {
                             request: { body: () => ({ value: {} }) },
@@ -901,13 +904,13 @@ describe('generateOpenApiDocument', () => {
         );
 
         // Assert that the env has been passed down as expected
-        if ((processRouter as jest.Mock).mock.calls.length) {
-          (processRouter as jest.Mock).mock.calls.forEach(([{ env: routerEnv }]) =>
+        if ((processRouter as Mock).mock.calls.length) {
+          (processRouter as Mock).mock.calls.forEach(([{ env: routerEnv }]) =>
             expect(routerEnv).toEqual({ serverless: false, dummy: true })
           );
         }
-        if ((processVersionedRouter as jest.Mock).mock.calls.length) {
-          (processVersionedRouter as jest.Mock).mock.calls.forEach(
+        if ((processVersionedRouter as Mock).mock.calls.length) {
+          (processVersionedRouter as Mock).mock.calls.forEach(
             ([{ env: versionedRouterEnv }]) =>
               expect(versionedRouterEnv).toEqual({ serverless: false, dummy: true })
           );

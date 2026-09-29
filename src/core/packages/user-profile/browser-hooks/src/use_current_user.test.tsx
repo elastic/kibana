@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
@@ -51,7 +54,7 @@ const profileResponse: GetUserProfileResponse = {
 };
 
 const createAuthc = (
-  getCurrentUser: jest.Mock = jest.fn().mockResolvedValue(authenticatedUser)
+  getCurrentUser: Mock = vi.fn().mockResolvedValue(authenticatedUser)
 ): CoreAuthenticationService => ({ getCurrentUser });
 
 // Stable observable instances: `useObservable` resubscribes whenever the observable reference
@@ -62,17 +65,17 @@ const enabled$ = of(false);
 const dataUpdates$ = of({});
 
 const createUserProfile = (
-  getCurrent: jest.Mock = jest.fn().mockResolvedValue(profileResponse)
+  getCurrent: Mock = vi.fn().mockResolvedValue(profileResponse)
 ): UserProfileService =>
   ({
     getCurrent,
     getUserProfile$: () => userProfile$,
     getEnabled$: () => enabled$,
     getDataUpdates$: () => dataUpdates$,
-    bulkGet: jest.fn(),
-    suggest: jest.fn(),
-    update: jest.fn(),
-    partialUpdate: jest.fn(),
+    bulkGet: vi.fn(),
+    suggest: vi.fn(),
+    update: vi.fn(),
+    partialUpdate: vi.fn(),
   } as unknown as UserProfileService);
 
 const createWrapper =
@@ -86,7 +89,7 @@ const createWrapper =
 
 describe('useCurrentUser', () => {
   it('throws when used outside a CurrentUserProvider', () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(() => renderHook(() => useCurrentUser())).toThrow(
       'useCurrentUser must be used within a CurrentUserProvider'
     );
@@ -113,8 +116,8 @@ describe('useCurrentUser', () => {
   });
 
   it('requests auth once and the profile with the bootstrap-prefetched dataPath', async () => {
-    const getCurrentUser = jest.fn().mockResolvedValue(authenticatedUser);
-    const getCurrent = jest.fn().mockResolvedValue(profileResponse);
+    const getCurrentUser = vi.fn().mockResolvedValue(authenticatedUser);
+    const getCurrent = vi.fn().mockResolvedValue(profileResponse);
 
     const { result } = renderHook(() => useCurrentUser(), {
       wrapper: createWrapper(createAuthc(getCurrentUser), createUserProfile(getCurrent)),
@@ -133,11 +136,11 @@ describe('useCurrentUser', () => {
       ...authenticatedUser,
       authentication_provider: { type: 'anonymous', name: 'anon' },
     };
-    const getCurrent = jest.fn().mockResolvedValue(profileResponse);
+    const getCurrent = vi.fn().mockResolvedValue(profileResponse);
 
     const { result } = renderHook(() => useCurrentUser(), {
       wrapper: createWrapper(
-        createAuthc(jest.fn().mockResolvedValue(anonymousUser)),
+        createAuthc(vi.fn().mockResolvedValue(anonymousUser)),
         createUserProfile(getCurrent)
       ),
     });
@@ -152,7 +155,7 @@ describe('useCurrentUser', () => {
 
   it('still resolves the user from auth when a permitted profile request unexpectedly 404s', async () => {
     const profileError = { response: { status: 404 } };
-    const getCurrent = jest.fn().mockRejectedValue(profileError);
+    const getCurrent = vi.fn().mockRejectedValue(profileError);
 
     const { result } = renderHook(() => useCurrentUser(), {
       wrapper: createWrapper(createAuthc(), createUserProfile(getCurrent)),
@@ -170,7 +173,7 @@ describe('useCurrentUser', () => {
 
   it('surfaces a critical auth failure: no user, authcError reported', async () => {
     const authError = new Error('auth boom');
-    const getCurrentUser = jest.fn().mockRejectedValue(authError);
+    const getCurrentUser = vi.fn().mockRejectedValue(authError);
 
     const { result } = renderHook(() => useCurrentUser(), {
       wrapper: createWrapper(createAuthc(getCurrentUser), createUserProfile()),
@@ -187,7 +190,7 @@ describe('useCurrentUser', () => {
     const profileError = Object.assign(new Error('profile boom'), {
       response: { status: 500 },
     });
-    const getCurrent = jest.fn().mockRejectedValue(profileError);
+    const getCurrent = vi.fn().mockRejectedValue(profileError);
 
     const { result } = renderHook(() => useCurrentUser(), {
       wrapper: createWrapper(createAuthc(), createUserProfile(getCurrent)),

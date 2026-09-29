@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -19,20 +22,23 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../../common/types/timeline';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock('../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn(),
-  useDeepEqualSelector: jest.fn(),
-}));
+vi.mock('../../../../common/hooks/use_selector', () => {
+      const mocked = {
+      useShallowEqualSelector: vi.fn(),
+      useDeepEqualSelector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Providers', () => {
   const mount = useMountAppended();
-  const mockOnDataProviderRemoved = jest.spyOn(timelineActions, 'removeProvider');
+  const mockOnDataProviderRemoved = vi.spyOn(timelineActions, 'removeProvider');
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({});
+    vi.clearAllMocks();
+    (useDeepEqualSelector as Mock).mockReturnValue({});
   });
 
   describe('rendering', () => {
@@ -115,7 +121,7 @@ describe('Providers', () => {
 
   describe('#onToggleDataProviderEnabled', () => {
     test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
-      const mockOnToggleDataProviderEnabled = jest.spyOn(
+      const mockOnToggleDataProviderEnabled = vi.spyOn(
         timelineActions,
         'updateDataProviderEnabled'
       );
@@ -150,7 +156,7 @@ describe('Providers', () => {
 
   describe('#onToggleDataProviderExcluded', () => {
     test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', () => {
-      const mockOnToggleDataProviderExcluded = jest.spyOn(
+      const mockOnToggleDataProviderExcluded = vi.spyOn(
         timelineActions,
         'updateDataProviderExcluded'
       );
@@ -248,7 +254,7 @@ describe('Providers', () => {
     test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
-      const mockOnToggleDataProviderEnabled = jest.spyOn(
+      const mockOnToggleDataProviderEnabled = vi.spyOn(
         timelineActions,
         'updateDataProviderEnabled'
       );
@@ -291,7 +297,7 @@ describe('Providers', () => {
     test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
-      const mockOnToggleDataProviderExcluded = jest.spyOn(
+      const mockOnToggleDataProviderExcluded = vi.spyOn(
         timelineActions,
         'updateDataProviderExcluded'
       );

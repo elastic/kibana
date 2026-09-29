@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
@@ -29,36 +32,36 @@ import { FleetNotFoundError } from '../../errors';
 
 import { deletePackageDatastreamAssetsHandler } from './package_datastream_assets_handler';
 
-jest.mock('../../services/epm/packages/get');
-jest.mock('../../services/epm/packages/input_type_packages');
+vi.mock('../../services/epm/packages/get');
+vi.mock('../../services/epm/packages/input_type_packages');
 
-jest.mock('../../services/package_policy', () => {
+vi.mock('../../services/package_policy', () => {
   return {
     packagePolicyService: {
-      get: jest.fn(),
-      fetchAllItems: jest.fn(),
+      get: vi.fn(),
+      fetchAllItems: vi.fn(),
     },
   };
 });
 
-const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
-const mockedGetPackageInfo = getPackageInfo as jest.Mock<ReturnType<typeof getPackageInfo>>;
-const mockedGetCustomDatasetStreams = getCustomDatasetStreams as jest.Mock<
+const packagePolicyServiceMock = packagePolicyService as Mocked<PackagePolicyClient>;
+const mockedGetPackageInfo = getPackageInfo as Mock<ReturnType<typeof getPackageInfo>>;
+const mockedGetCustomDatasetStreams = getCustomDatasetStreams as Mock<
   ReturnType<typeof getCustomDatasetStreams>
 >;
 const mockedFindDataStreamsFromDifferentPackages =
-  findDataStreamsFromDifferentPackages as jest.Mock<
+  findDataStreamsFromDifferentPackages as Mock<
     ReturnType<typeof findDataStreamsFromDifferentPackages>
   >;
 const mockedCheckExistingDataStreamsAreFromDifferentPackage =
-  checkExistingDataStreamsAreFromDifferentPackage as jest.Mock<
+  checkExistingDataStreamsAreFromDifferentPackage as Mock<
     ReturnType<typeof checkExistingDataStreamsAreFromDifferentPackage>
   >;
-const mockedRemoveAssetsForInputPackagePolicy = removeAssetsForInputPackagePolicy as jest.Mock<
+const mockedRemoveAssetsForInputPackagePolicy = removeAssetsForInputPackagePolicy as Mock<
   ReturnType<typeof removeAssetsForInputPackagePolicy>
 >;
 const mockedIsInputPackageDatasetUsedByMultiplePolicies =
-  isInputPackageDatasetUsedByMultiplePolicies as jest.Mock<
+  isInputPackageDatasetUsedByMultiplePolicies as Mock<
     ReturnType<typeof isInputPackageDatasetUsedByMultiplePolicies>
   >;
 
@@ -70,13 +73,13 @@ describe('deletePackageDatastreamAssetsHandler', () => {
   beforeAll(async () => {
     logger = loggerMock.create();
     appContextService.getLogger = () => logger;
-    appContextService.getInternalUserSOClientWithoutSpaceExtension = jest.fn();
+    appContextService.getInternalUserSOClientWithoutSpaceExtension = vi.fn();
   });
 
   beforeEach(() => {
     context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
     response = httpServerMock.createResponseFactory();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   const testPackagePolicy = {
     id: 'test-package-policy',

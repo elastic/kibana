@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   sampleEmptyDocSearchResults,
   repeatedSearchResultsWithSortId,
@@ -45,11 +47,11 @@ import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/
 
 describe('searchAfterAndBulkCreate', () => {
   const ruleServices: PersistenceExecutorOptionsMock = createPersistenceExecutorOptionsMock();
-  let buildReasonMessage: BuildReasonMessage = jest
+  let buildReasonMessage: BuildReasonMessage = vi
     .fn()
     .mockResolvedValue('some alert reason message');
   const listClient = listMock.getListClient();
-  listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
+  listClient.searchListItemByValues = vi.fn().mockResolvedValue([]);
   const someGuids = Array.from({ length: 13 }).map(() => uuidv4());
   const sampleParams = getQueryRuleParams();
   const inputIndex = ['auditbeat-*'];
@@ -81,9 +83,9 @@ describe('searchAfterAndBulkCreate', () => {
   });
 
   beforeEach(async () => {
-    jest.clearAllMocks();
-    listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
-    buildReasonMessage = jest.fn().mockResolvedValue('some alert reason message');
+    vi.clearAllMocks();
+    listClient.searchListItemByValues = vi.fn().mockResolvedValue([]);
+    buildReasonMessage = vi.fn().mockResolvedValue('some alert reason message');
   });
 
   test('should return success with number of searches less than max signals', async () => {
@@ -332,7 +334,7 @@ describe('searchAfterAndBulkCreate', () => {
       { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
       { ...getSearchListItemResponseMock(), value: ['3.3.3.3'] },
     ];
-    listClient.searchListItemByValues = jest.fn().mockResolvedValue(searchListItems);
+    listClient.searchListItemByValues = vi.fn().mockResolvedValue(searchListItems);
     ruleServices.scopedClusterClient.asCurrentUser.search
       .mockResolvedValueOnce(
         repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3), [
@@ -431,7 +433,7 @@ describe('searchAfterAndBulkCreate', () => {
       { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
     ];
 
-    listClient.searchListItemByValues = jest.fn().mockResolvedValue(searchListItems);
+    listClient.searchListItemByValues = vi.fn().mockResolvedValue(searchListItems);
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       repeatedSearchResultsWithNoSortId(4, 4, someGuids.slice(0, 3), [
         '1.1.1.1',
@@ -563,7 +565,7 @@ describe('searchAfterAndBulkCreate', () => {
       sampleDocSearchResultsNoSortIdNoHits()
     );
 
-    listClient.searchListItemByValues = jest.fn(({ value }) =>
+    listClient.searchListItemByValues = vi.fn(({ value }) =>
       Promise.resolve(
         value.slice(0, 2).map((item) => ({
           ...getSearchListItemResponseMock(),
@@ -599,7 +601,7 @@ describe('searchAfterAndBulkCreate', () => {
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       sampleEmptyDocSearchResults()
     );
-    listClient.searchListItemByValues = jest.fn(({ value }) =>
+    listClient.searchListItemByValues = vi.fn(({ value }) =>
       Promise.resolve(
         value.slice(0, 2).map((item) => ({
           ...getSearchListItemResponseMock(),
@@ -625,7 +627,7 @@ describe('searchAfterAndBulkCreate', () => {
     ruleServices.scopedClusterClient.asCurrentUser.search.mockImplementation(() => {
       throw Error('Fake Error'); // throws the exception we are testing
     });
-    listClient.searchListItemByValues = jest.fn(({ value }) =>
+    listClient.searchListItemByValues = vi.fn(({ value }) =>
       Promise.resolve(
         value.slice(0, 2).map((item) => ({
           ...getSearchListItemResponseMock(),
@@ -820,7 +822,7 @@ describe('searchAfterAndBulkCreate', () => {
       sampleDocSearchResultsNoSortIdNoHits()
     );
 
-    const mockEnrichment = jest.fn((a) => a);
+    const mockEnrichment = vi.fn((a) => a);
     const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
       sharedParams,
       enrichment: mockEnrichment,

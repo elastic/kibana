@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
@@ -14,11 +17,11 @@ import { registerAlertingV2UsageCollector } from './usage_collector';
 const usageCollectionSetup = usageCollectionPluginMock.createSetupContract();
 const taskManagerStart = taskManagerMock.createStart();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => vi.resetAllMocks());
 
 describe('registerAlertingV2UsageCollector', () => {
   it('instantiates the collector object', () => {
-    const registerCollectorSpy = jest.spyOn(usageCollectionSetup, 'registerCollector');
+    const registerCollectorSpy = vi.spyOn(usageCollectionSetup, 'registerCollector');
     registerAlertingV2UsageCollector(() => taskManagerStart, usageCollectionSetup);
 
     expect(registerCollectorSpy).toHaveBeenCalledTimes(1);
@@ -289,9 +292,9 @@ describe('registerAlertingV2UsageCollector', () => {
 
   it('should return an error message if fetching data fails', async () => {
     const usageCollectionMock = {
-      makeUsageCollector: jest.fn(),
-      registerCollector: jest.fn(),
-    } as unknown as jest.Mocked<UsageCollectionSetup>;
+      makeUsageCollector: vi.fn(),
+      registerCollector: vi.fn(),
+    } as unknown as Mocked<UsageCollectionSetup>;
     taskManagerStart.get.mockRejectedValueOnce(new Error('error message'));
 
     registerAlertingV2UsageCollector(
@@ -309,9 +312,9 @@ describe('registerAlertingV2UsageCollector', () => {
 
   it('should return the task state with runs stripped out', async () => {
     const usageCollectionMock = {
-      makeUsageCollector: jest.fn(),
-      registerCollector: jest.fn(),
-    } as unknown as jest.Mocked<UsageCollectionSetup>;
+      makeUsageCollector: vi.fn(),
+      registerCollector: vi.fn(),
+    } as unknown as Mocked<UsageCollectionSetup>;
     const mockStats = {
       has_errors: false,
       error_messages: undefined,
@@ -346,9 +349,9 @@ describe('registerAlertingV2UsageCollector', () => {
 
   it('should not throw NotInitialized errors from task manager', async () => {
     const usageCollectionMock = {
-      makeUsageCollector: jest.fn(),
-      registerCollector: jest.fn(),
-    } as unknown as jest.Mocked<UsageCollectionSetup>;
+      makeUsageCollector: vi.fn(),
+      registerCollector: vi.fn(),
+    } as unknown as Mocked<UsageCollectionSetup>;
     taskManagerStart.get.mockRejectedValueOnce(new Error('NotInitialized'));
 
     registerAlertingV2UsageCollector(
@@ -367,9 +370,9 @@ describe('registerAlertingV2UsageCollector', () => {
 
   it('should return the task state including error messages', async () => {
     const usageCollectionMock = {
-      makeUsageCollector: jest.fn(),
-      registerCollector: jest.fn(),
-    } as unknown as jest.Mocked<UsageCollectionSetup>;
+      makeUsageCollector: vi.fn(),
+      registerCollector: vi.fn(),
+    } as unknown as Mocked<UsageCollectionSetup>;
     const mockStats = {
       has_errors: true,
       error_messages: ['an error message'],

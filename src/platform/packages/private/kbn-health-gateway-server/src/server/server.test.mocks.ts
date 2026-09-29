@@ -7,22 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { sslSchema, getServerOptions } from '@kbn/server-http-tools';
 
-export const hapiStartMock = jest.fn();
-export const hapiStopMock = jest.fn();
-export const hapiRouteMock = jest.fn();
-export const createServerMock = jest.fn().mockImplementation(() => ({
+export const hapiStartMock = vi.fn();
+export const hapiStopMock = vi.fn();
+export const hapiRouteMock = vi.fn();
+export const createServerMock = vi.fn().mockImplementation(() => ({
   info: { uri: 'http://localhost:3000' },
   start: hapiStartMock,
   stop: hapiStopMock,
   route: hapiRouteMock,
 }));
-export const getServerOptionsMock = jest.fn().mockImplementation(getServerOptions);
+export const getServerOptionsMock = vi.fn().mockImplementation(getServerOptions);
 
-jest.doMock('@kbn/server-http-tools', () => ({
-  createServer: createServerMock,
-  getServerOptions: getServerOptionsMock,
-  sslSchema,
-  SslConfig: jest.fn(),
-}));
+vi.doMock('@kbn/server-http-tools', () => {
+      const mocked = {
+      createServer: createServerMock,
+      getServerOptions: getServerOptionsMock,
+      sslSchema,
+      SslConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });

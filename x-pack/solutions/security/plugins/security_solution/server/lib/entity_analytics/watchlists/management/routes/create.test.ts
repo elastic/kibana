@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { WATCHLISTS_URL } from '../../../../../../common/entity_analytics/watchlists/constants';
 import {
@@ -16,39 +19,46 @@ import { WATCHLIST_API_CALL_EVENT } from '../../../../telemetry/event_based/even
 import { createMockTelemetryEventsSender } from '../../../../telemetry/__mocks__';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
-const mockWatchlistCreate = jest.fn();
-const mockWatchlistDelete = jest.fn();
-const mockAddEntitySourceReference = jest.fn();
-const mockSyncWatchlist = jest.fn();
+const mockWatchlistCreate = vi.fn();
+const mockWatchlistDelete = vi.fn();
+const mockAddEntitySourceReference = vi.fn();
+const mockSyncWatchlist = vi.fn();
 
-jest.mock('../watchlist_config', () => ({
-  WatchlistConfigClient: jest.fn().mockImplementation(() => ({
-    create: mockWatchlistCreate,
-    delete: mockWatchlistDelete,
-    addEntitySourceReference: mockAddEntitySourceReference,
-  })),
-}));
+vi.mock('../watchlist_config', () => {
+      const mocked = {
+      WatchlistConfigClient: vi.fn().mockImplementation(() => ({
+        create: mockWatchlistCreate,
+        delete: mockWatchlistDelete,
+        addEntitySourceReference: mockAddEntitySourceReference,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../entity_sources/infra/entity_source_client');
-jest.mock('../../entity_sources/entity_sources_service', () => ({
-  createEntitySourcesService: jest.fn(() => ({
-    syncWatchlist: mockSyncWatchlist,
-  })),
-}));
+vi.mock('../../entity_sources/infra/entity_source_client');
+vi.mock('../../entity_sources/entity_sources_service', () => {
+      const mocked = {
+      createEntitySourcesService: vi.fn(() => ({
+        syncWatchlist: mockSyncWatchlist,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockValidateIndexPermissions = jest.fn();
+const mockValidateIndexPermissions = vi.fn();
 
-jest.mock('../../entity_sources/entity_source_api_key', () => ({
-  validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
-}));
+vi.mock('../../entity_sources/entity_source_api_key', () => {
+      const mocked = {
+      validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { mockCreateEntitySource } = jest.requireMock(
-  '../../entity_sources/infra/entity_source_client'
-) as {
-  mockCreateEntitySource: jest.Mock;
+const { mockCreateEntitySource } = (await vi.importMock('../../entity_sources/infra/entity_source_client')) as {
+  mockCreateEntitySource: Mock;
 };
 
-const mockGetStartServices = jest.fn();
+const mockGetStartServices = vi.fn();
 
 // Import after mocks are set up
 import { createWatchlistRoute } from './create';
@@ -58,7 +68,7 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let logger: ReturnType<typeof loggerMock.create>;
   let telemetrySenderMock: ITelemetryEventsSender;
-  let reportEBT: jest.Mock;
+  let reportEBT: Mock;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -73,10 +83,10 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
     mockSyncWatchlist.mockReset();
     mockValidateIndexPermissions.mockReset().mockResolvedValue(undefined);
 
-    const mockSecurity = { authc: { apiKeys: { grantAsInternalUser: jest.fn() } } };
+    const mockSecurity = { authc: { apiKeys: { grantAsInternalUser: vi.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
 
-    reportEBT = jest.fn();
+    reportEBT = vi.fn();
     telemetrySenderMock = {
       ...createMockTelemetryEventsSender(),
       reportEBT,
@@ -86,7 +96,7 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const buildRequest = (body: object = {}) =>

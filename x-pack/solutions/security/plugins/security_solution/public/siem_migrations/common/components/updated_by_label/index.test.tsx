@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { UpdatedByLabel } from '.';
@@ -12,15 +15,15 @@ import { useBulkGetUserProfiles } from '../../../../common/components/user_profi
 import { screen, render, waitFor } from '@testing-library/react';
 import { __IntlProvider as RawIntlProvider } from '@kbn/i18n-react';
 
-jest.mock('../../../../common/components/formatted_date', () => {
+vi.mock('../../../../common/components/formatted_date', () => {
   return {
-    FormattedDate: jest.fn(({ value }: PropsWithChildren<{ value: string }>) => {
+    FormattedDate: vi.fn(({ value }: PropsWithChildren<{ value: string }>) => {
       return <span>{value}</span>;
     }),
   };
 });
 
-jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
+vi.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
 
 const getMockUser = () => ({
   uid: 'user-1',
@@ -38,8 +41,8 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 describe('UpdateByLabel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useBulkGetUserProfiles as Mock).mockReturnValue({
       isLoading: false,
       data: [getMockUser()],
     });
@@ -58,7 +61,7 @@ describe('UpdateByLabel', () => {
   });
 
   it('should display the username if full name is not available', async () => {
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+    (useBulkGetUserProfiles as Mock).mockReturnValue({
       isLoading: false,
       data: [
         {

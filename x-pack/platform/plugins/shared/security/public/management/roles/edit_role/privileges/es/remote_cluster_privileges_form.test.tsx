@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiButtonIcon } from '@elastic/eui';
 import type { EuiComboBoxProps } from '@elastic/eui';
 import React from 'react';
@@ -27,15 +29,15 @@ test('it renders without crashing', () => {
       availableRemoteClusterPrivileges={['monitor_enrich']}
       isRoleReadOnly={false}
       validator={new RoleValidator()}
-      onChange={jest.fn()}
-      onDelete={jest.fn()}
+      onChange={vi.fn()}
+      onDelete={vi.fn()}
     />
   );
   expect(wrapper).toMatchSnapshot();
 });
 
 test('it allows for custom remote cluster input', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const wrapper = mountWithIntl(
     <RemoteClusterPrivilegesForm
       remoteClusterPrivilege={{
@@ -47,7 +49,7 @@ test('it allows for custom remote cluster input', () => {
       isRoleReadOnly={false}
       validator={new RoleValidator()}
       onChange={onChange}
-      onDelete={jest.fn()}
+      onDelete={vi.fn()}
     />
   );
 
@@ -63,7 +65,7 @@ test('it allows for custom remote cluster input', () => {
 });
 
 test('it does not allow for custom remote cluster privileges', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const wrapper = mountWithIntl(
     <RemoteClusterPrivilegesForm
       remoteClusterPrivilege={{
@@ -75,7 +77,7 @@ test('it does not allow for custom remote cluster privileges', () => {
       isRoleReadOnly={false}
       validator={new RoleValidator()}
       onChange={onChange}
-      onDelete={jest.fn()}
+      onDelete={vi.fn()}
     />
   );
 
@@ -87,7 +89,7 @@ test('it does not allow for custom remote cluster privileges', () => {
 });
 
 test('it allows for custom remote cluster clusters input', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const wrapper = mountWithIntl(
     <RemoteClusterPrivilegesForm
       remoteClusterPrivilege={{
@@ -99,7 +101,7 @@ test('it allows for custom remote cluster clusters input', () => {
       isRoleReadOnly={false}
       validator={new RoleValidator()}
       onChange={onChange}
-      onDelete={jest.fn()}
+      onDelete={vi.fn()}
     />
   );
 
@@ -113,7 +115,7 @@ test('it allows for custom remote cluster clusters input', () => {
 });
 
 test('it renders fields as disabled when isRoleReadOnly is true', () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const wrapper = mountWithIntl(
     <RemoteClusterPrivilegesForm
       remoteClusterPrivilege={{
@@ -125,7 +127,7 @@ test('it renders fields as disabled when isRoleReadOnly is true', () => {
       isRoleReadOnly={true}
       validator={new RoleValidator()}
       onChange={onChange}
-      onDelete={jest.fn()}
+      onDelete={vi.fn()}
     />
   );
 
@@ -148,8 +150,8 @@ describe('delete button', () => {
     availableRemoteClusterPrivileges: ['monitor_enrich'],
     isRoleReadOnly: false,
     validator: new RoleValidator(),
-    onChange: jest.fn(),
-    onDelete: jest.fn(),
+    onChange: vi.fn(),
+    onDelete: vi.fn(),
     intl: {} as any,
   };
 

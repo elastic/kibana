@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
@@ -19,22 +22,22 @@ import type { AgentPolicy, PackageInfo } from '../../../../../types';
 import { StepSelectHosts } from './step_select_hosts';
 import { useAllNonManagedAgentPolicies } from './components/use_policies';
 
-jest.mock('./components/use_policies', () => {
+vi.mock('./components/use_policies', async () => {
   return {
-    ...jest.requireActual('./components/use_policies'),
-    useAllNonManagedAgentPolicies: jest.fn(),
+    ...(await vi.importActual('./components/use_policies')),
+    useAllNonManagedAgentPolicies: vi.fn(),
   };
 });
 
-jest.mock('../../../../../hooks', () => {
+vi.mock('../../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../../hooks'),
-    useGetAgentPolicies: jest.fn(),
-    useGetOutputs: jest.fn().mockResolvedValue({
+    ...(await vi.importActual('../../../../../hooks')),
+    useGetAgentPolicies: vi.fn(),
+    useGetOutputs: vi.fn().mockResolvedValue({
       data: [],
       isLoading: false,
     }),
-    sendGetOneAgentPolicy: jest.fn().mockImplementation((id) =>
+    sendGetOneAgentPolicy: vi.fn().mockImplementation((id) =>
       Promise.resolve({
         data: { item: { id, name: `Agent policy ${id}` } },
       })
@@ -95,15 +98,15 @@ describe.skip('StepSelectHosts', () => {
     (renderResult = testRenderer.render(
       <StepSelectHosts
         agentPolicies={agentPolicies}
-        updateAgentPolicies={jest.fn()}
+        updateAgentPolicies={vi.fn()}
         newAgentPolicy={newAgentPolicy}
-        updateNewAgentPolicy={jest.fn()}
+        updateNewAgentPolicy={vi.fn()}
         withSysMonitoring={false}
-        updateSysMonitoring={jest.fn()}
+        updateSysMonitoring={vi.fn()}
         validation={validation}
         packageInfo={packageInfo}
-        setHasAgentPolicyError={jest.fn()}
-        updateSelectedTab={jest.fn()}
+        setHasAgentPolicyError={vi.fn()}
+        updateSelectedTab={vi.fn()}
         selectedAgentPolicyIds={[]}
       />
     ));
@@ -112,12 +115,12 @@ describe.skip('StepSelectHosts', () => {
   });
 
   it('should display create form when no agent policies', async () => {
-    (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
+    (useGetAgentPolicies as MockedFunction<any>).mockReturnValue({
       data: {
         items: [],
       },
     });
-    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([]);
+    (useAllNonManagedAgentPolicies as MockedFunction<any>).mockReturnValue([]);
 
     render();
 
@@ -129,12 +132,12 @@ describe.skip('StepSelectHosts', () => {
   });
 
   it('should display tabs with New hosts selected when agent policies exist', async () => {
-    (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
+    (useGetAgentPolicies as MockedFunction<any>).mockReturnValue({
       data: {
         items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
       },
     });
-    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+    (useAllNonManagedAgentPolicies as MockedFunction<any>).mockReturnValue([
       { id: '1', name: 'Agent policy 1', namespace: 'default' },
     ]);
 
@@ -148,12 +151,12 @@ describe.skip('StepSelectHosts', () => {
   });
 
   it('should display dropdown with agent policy selected when Existing hosts selected', async () => {
-    (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
+    (useGetAgentPolicies as MockedFunction<any>).mockReturnValue({
       data: {
         items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
       },
     });
-    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+    (useAllNonManagedAgentPolicies as MockedFunction<any>).mockReturnValue([
       { id: '1', name: 'Agent policy 1', namespace: 'default' },
     ]);
 
@@ -171,7 +174,7 @@ describe.skip('StepSelectHosts', () => {
   });
 
   it('should display dropdown without preselected value when Existing hosts selected with mulitple agent policies', async () => {
-    (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
+    (useGetAgentPolicies as MockedFunction<any>).mockReturnValue({
       data: {
         items: [
           { id: '1', name: 'Agent policy 1', namespace: 'default' },
@@ -179,7 +182,7 @@ describe.skip('StepSelectHosts', () => {
         ],
       },
     });
-    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+    (useAllNonManagedAgentPolicies as MockedFunction<any>).mockReturnValue([
       { id: '1', name: 'Agent policy 1', namespace: 'default' },
       { id: '2', name: 'Agent policy 2', namespace: 'default' },
     ]);

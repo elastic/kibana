@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { mockCaseComments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { deleteComment, deleteAll } from './delete';
@@ -14,8 +16,8 @@ describe('delete', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      jest.resetAllMocks();
+      vi.clearAllMocks();
+      vi.resetAllMocks();
 
       clientArgs.services.attachmentService.getter.get.mockResolvedValue(mockCaseComments[0]);
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
@@ -100,8 +102,8 @@ describe('delete', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      jest.resetAllMocks();
+      vi.clearAllMocks();
+      vi.resetAllMocks();
 
       clientArgs.services.attachmentService.getter.get.mockResolvedValue(mockCaseComments[0]);
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(

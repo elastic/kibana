@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { SimpleMemCache } from './simple_mem_cache';
@@ -15,11 +17,11 @@ describe('SimpleMemCache class', () => {
   let value: any;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
@@ -64,7 +66,7 @@ describe('SimpleMemCache class', () => {
     cache.set(key2, value, 60); // ttl 60s
     const dateObj = new Date();
     dateObj.setSeconds(dateObj.getSeconds() + 11);
-    jest.setSystemTime(dateObj);
+    vi.setSystemTime(dateObj);
     cache.cleanup();
 
     expect(cache.get(key)).toBeUndefined();
@@ -75,7 +77,7 @@ describe('SimpleMemCache class', () => {
     cache.set(key, value);
     const dateObj = new Date();
     dateObj.setSeconds(dateObj.getSeconds() + 11);
-    jest.setSystemTime(dateObj);
+    vi.setSystemTime(dateObj);
 
     expect(cache.get(key)).toBeUndefined();
   });

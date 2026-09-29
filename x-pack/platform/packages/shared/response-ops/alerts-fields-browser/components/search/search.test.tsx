@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -12,7 +14,7 @@ import { Search } from './search';
 
 describe('Search', () => {
   test('it renders the field search input with the expected placeholder text when the searchInput prop is empty', () => {
-    render(<Search isSearching={false} onSearchInputChange={jest.fn()} searchInput="" />);
+    render(<Search isSearching={false} onSearchInputChange={vi.fn()} searchInput="" />);
 
     expect(screen.getByRole('searchbox').getAttribute('placeholder')).toEqual('Field name');
   });
@@ -21,7 +23,7 @@ describe('Search', () => {
     const searchInput = 'aFieldName';
 
     render(
-      <Search isSearching={false} onSearchInputChange={jest.fn()} searchInput={searchInput} />
+      <Search isSearching={false} onSearchInputChange={vi.fn()} searchInput={searchInput} />
     );
 
     expect(screen.getByRole('searchbox')).toHaveValue(searchInput);
@@ -29,14 +31,14 @@ describe('Search', () => {
 
   test('it renders the field search input with a spinner when isSearching is true', () => {
     const { container } = render(
-      <Search isSearching={true} onSearchInputChange={jest.fn()} searchInput="" />
+      <Search isSearching={true} onSearchInputChange={vi.fn()} searchInput="" />
     );
 
     expect(container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
   });
 
   test('it invokes onSearchInputChange when the user types in the search field', async () => {
-    const onSearchInputChange = jest.fn();
+    const onSearchInputChange = vi.fn();
 
     render(<Search isSearching={false} onSearchInputChange={onSearchInputChange} searchInput="" />);
 

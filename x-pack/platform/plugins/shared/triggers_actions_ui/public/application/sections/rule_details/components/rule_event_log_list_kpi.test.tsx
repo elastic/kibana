@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -15,27 +18,39 @@ import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experime
 import { useKibana } from '../../../../common/lib';
 import type { IToasts } from '@kbn/core/public';
 
-const addDangerMock = jest.fn();
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      notifications: { toast: { addDanger: jest.fn() } },
-    },
-  }),
-}));
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const addDangerMock = vi.fn();
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn().mockReturnValue({
+        services: {
+          notifications: { toast: { addDanger: vi.fn() } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
-jest.mock('../../../lib/rule_api/load_execution_kpi_aggregations', () => ({
-  loadExecutionKPIAggregations: jest.fn(),
-}));
+vi.mock('../../../lib/rule_api/load_execution_kpi_aggregations', () => {
+      const mocked = {
+      loadExecutionKPIAggregations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/rule_api/load_global_execution_kpi_aggregations', () => ({
-  loadGlobalExecutionKPIAggregations: jest.fn(),
-}));
+vi.mock('../../../lib/rule_api/load_global_execution_kpi_aggregations', () => {
+      const mocked = {
+      loadGlobalExecutionKPIAggregations: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/get_experimental_features', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../../../../common/get_experimental_features', () => {
+      const mocked = {
+      getIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockKpiResponse = {
   success: 4,
@@ -50,17 +65,17 @@ const mockKpiResponse = {
 };
 
 const loadExecutionKPIAggregationsMock =
-  loadExecutionKPIAggregations as unknown as jest.MockedFunction<any>;
+  loadExecutionKPIAggregations as unknown as MockedFunction<any>;
 const loadGlobalExecutionKPIAggregationsMock =
-  loadGlobalExecutionKPIAggregations as unknown as jest.MockedFunction<any>;
+  loadGlobalExecutionKPIAggregations as unknown as MockedFunction<any>;
 
 describe('rule_event_log_list_kpi', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock().services.notifications.toasts = {
       addDanger: addDangerMock,
     } as unknown as IToasts;
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
     loadExecutionKPIAggregationsMock.mockResolvedValue(mockKpiResponse);
     loadGlobalExecutionKPIAggregationsMock.mockResolvedValue(mockKpiResponse);
   });

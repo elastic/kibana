@@ -5,40 +5,49 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { Readable, PassThrough } from 'stream';
 import { pipeline } from 'stream/promises';
 import type { ParsedPluginArchive } from '@kbn/agent-builder-common';
 import type { ZipArchive } from '../archive';
 
-const mockOpenZipArchive = jest.fn();
-jest.mock('../archive', () => ({
-  openZipArchive: (...args: unknown[]) => mockOpenZipArchive(...args),
-}));
+const mockOpenZipArchive = vi.fn();
+vi.mock('../archive', () => {
+      const mocked = {
+      openZipArchive: (...args: unknown[]) => mockOpenZipArchive(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockParsePluginZipFile = jest.fn();
-jest.mock('../parsing', () => ({
-  parsePluginZipFile: (...args: unknown[]) => mockParsePluginZipFile(...args),
-  PluginArchiveError: class PluginArchiveError extends Error {
-    constructor(message: string) {
-      super(message);
-      this.name = 'PluginArchiveError';
-    }
-  },
-}));
+const mockParsePluginZipFile = vi.fn();
+vi.mock('../parsing', () => {
+      const mocked = {
+      parsePluginZipFile: (...args: unknown[]) => mockParsePluginZipFile(...args),
+      PluginArchiveError: class PluginArchiveError extends Error {
+        constructor(message: string) {
+          super(message);
+          this.name = 'PluginArchiveError';
+        }
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { parsePluginFromFile, createSizeLimitTransform } from './download_plugin';
 
 describe('parsePluginFromFile', () => {
-  let mockArchive: jest.Mocked<ZipArchive>;
+  let mockArchive: Mocked<ZipArchive>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockArchive = {
-      hasEntry: jest.fn().mockReturnValue(false),
-      getEntryPaths: jest.fn().mockReturnValue([]),
-      getEntryContent: jest.fn(),
-      close: jest.fn(),
+      hasEntry: vi.fn().mockReturnValue(false),
+      getEntryPaths: vi.fn().mockReturnValue([]),
+      getEntryContent: vi.fn(),
+      close: vi.fn(),
     };
     mockOpenZipArchive.mockResolvedValue(mockArchive);
   });

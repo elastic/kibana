@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
 import type { RequestHandlerContext } from '@kbn/core/server';
@@ -12,9 +15,12 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
 
-jest.mock('../../lib/analytics/fetch_analytics_collection', () => ({
-  fetchAnalyticsCollections: jest.fn(),
-}));
+vi.mock('../../lib/analytics/fetch_analytics_collection', () => {
+      const mocked = {
+      fetchAnalyticsCollections: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { AnalyticsCollection } from '../../../common/types/analytics';
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -30,7 +36,7 @@ describe('Enterprise Search Analytics API', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve({ elasticsearch: { client: mockClient } }),
-      } as jest.Mocked<RequestHandlerContext>;
+      } as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -43,7 +49,7 @@ describe('Enterprise Search Analytics API', () => {
       };
 
       const mockedSavedObjects = {
-        getScopedClient: jest.fn(),
+        getScopedClient: vi.fn(),
       };
 
       registerAnalyticsRoutes({
@@ -70,7 +76,7 @@ describe('Enterprise Search Analytics API', () => {
         },
       ];
 
-      (fetchAnalyticsCollections as jest.Mock).mockImplementationOnce(() => {
+      (fetchAnalyticsCollections as Mock).mockImplementationOnce(() => {
         return Promise.resolve(mockData);
       });
       await mockRouter.callRoute({});
@@ -87,7 +93,7 @@ describe('Enterprise Search Analytics API', () => {
     });
 
     it('returns an empty obj when fetchAnalyticsCollections returns not found error', async () => {
-      (fetchAnalyticsCollections as jest.Mock).mockImplementationOnce(() => {
+      (fetchAnalyticsCollections as Mock).mockImplementationOnce(() => {
         throw new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
       });
       await mockRouter.callRoute({});
@@ -102,7 +108,7 @@ describe('Enterprise Search Analytics API', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve({ elasticsearch: { client: mockClient } }),
-      } as jest.Mocked<RequestHandlerContext>;
+      } as Mocked<RequestHandlerContext>;
 
       mockRouter = new MockRouter({
         context,
@@ -115,7 +121,7 @@ describe('Enterprise Search Analytics API', () => {
       };
 
       const mockedSavedObjects = {
-        getScopedClient: jest.fn(),
+        getScopedClient: vi.fn(),
       };
 
       registerAnalyticsRoutes({
@@ -132,7 +138,7 @@ describe('Enterprise Search Analytics API', () => {
         name: 'my_collection',
       };
 
-      (fetchAnalyticsCollections as jest.Mock).mockImplementationOnce(() => {
+      (fetchAnalyticsCollections as Mock).mockImplementationOnce(() => {
         return Promise.resolve([mockData]);
       });
       await mockRouter.callRoute({ params: { name: 'my_collection' } });

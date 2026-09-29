@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { Logger, PackageInfo } from '@kbn/core/server';
 import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -31,10 +34,10 @@ import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
 describe('Screenshot Observable Pipeline', () => {
   const originalCreateLayout = Layouts.createLayout;
   let driver: ReturnType<typeof createMockBrowserDriver>;
-  let driverFactory: jest.Mocked<HeadlessChromiumDriverFactory>;
+  let driverFactory: Mocked<HeadlessChromiumDriverFactory>;
   let http: ReturnType<typeof httpServiceMock.createSetupContract>;
   let layout: ReturnType<typeof createMockLayout>;
-  let logger: jest.Mocked<Logger>;
+  let logger: Mocked<Logger>;
   let packageInfo: Readonly<PackageInfo>;
   let options: ScreenshotOptions;
   let screenshots: Screenshots;
@@ -98,7 +101,7 @@ describe('Screenshot Observable Pipeline', () => {
   afterEach(() => {
     // @ts-expect-error
     Layouts.createLayout = originalCreateLayout;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {

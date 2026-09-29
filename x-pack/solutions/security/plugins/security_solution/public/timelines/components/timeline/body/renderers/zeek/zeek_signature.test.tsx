@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
@@ -28,11 +31,11 @@ import {
 } from './zeek_signature';
 import { SecurityCellActions } from '../../../../../../common/components/cell_actions';
 
-jest.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/lib/kibana');
 
-jest.mock('../../../../../../common/components/cell_actions', () => {
+vi.mock('../../../../../../common/components/cell_actions', () => {
   return {
-    SecurityCellActions: jest.fn(),
+    SecurityCellActions: vi.fn(),
     CellActionsMode: {
       HOVER_DOWN: 'hover-down',
       HOVER_RIGHT: 'hover-right',
@@ -44,12 +47,12 @@ jest.mock('../../../../../../common/components/cell_actions', () => {
   };
 });
 
-const MockedSecurityCellActions = jest.fn(({ children }) => {
+const MockedSecurityCellActions = vi.fn(({ children }) => {
   return <div data-test-subj="mock-security-cell-actions">{children}</div>;
 });
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
@@ -136,7 +139,7 @@ describe('ZeekSignature', () => {
 
   describe('ZeekElement', () => {
     beforeEach(() => {
-      (SecurityCellActions as unknown as jest.Mock).mockImplementation(MockedSecurityCellActions);
+      (SecurityCellActions as unknown as Mock).mockImplementation(MockedSecurityCellActions);
     });
 
     test('it returns null if value is null', () => {

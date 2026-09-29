@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FieldTopValuesProps } from './field_top_values';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
@@ -59,7 +61,7 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
   });
 
   it('should render correctly with filter actions', async () => {
-    const mockAddFilter = jest.fn();
+    const mockAddFilter = vi.fn();
 
     renderWithI18n(<FieldTopValues {...defaultProps} onAddFilter={mockAddFilter} />);
 

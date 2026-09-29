@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -23,56 +26,65 @@ import {
   useCreateUpdateIntegration,
 } from '../../../../common';
 
-const mockAddWarning = jest.fn();
-const mockAddError = jest.fn();
-const mockUploadMutateAsync = jest.fn();
+const mockAddWarning = vi.fn();
+const mockAddError = vi.fn();
+const mockUploadMutateAsync = vi.fn();
 
-jest.mock('../../../../common', () => ({
-  useFetchIndices: jest.fn(),
-  useValidateIndex: jest.fn(),
-  useGetIntegrationById: jest.fn(),
-  useCreateUpdateIntegration: jest.fn(),
-  useUploadSamples: jest.fn(() => ({
-    uploadSamplesMutation: {
-      mutateAsync: mockUploadMutateAsync,
-      isLoading: false,
-    },
-    isLoading: false,
-  })),
-  generateId: jest.fn(() => 'mock-id'),
-  normalizeTitleName: jest.fn((v: string) => v.toLowerCase().replace(/\s+/g, '_')),
-  isValidNameFormat: jest.fn((v: string) => /^[a-zA-Z0-9_ ]+$/.test(v.trim())),
-  startsWithLetter: jest.fn((v: string) => /^[a-zA-Z]/.test(v.trim())),
-  useKibana: jest.fn(() => ({
-    services: {
-      http: {},
-      notifications: { toasts: { addError: mockAddError, addWarning: mockAddWarning } },
-      application: { navigateToApp: jest.fn() },
-    },
-  })),
-}));
-const mockGetInstalledPackages = jest.fn(
+vi.mock('../../../../common', () => {
+      const mocked = {
+      useFetchIndices: vi.fn(),
+      useValidateIndex: vi.fn(),
+      useGetIntegrationById: vi.fn(),
+      useCreateUpdateIntegration: vi.fn(),
+      useUploadSamples: vi.fn(() => ({
+        uploadSamplesMutation: {
+          mutateAsync: mockUploadMutateAsync,
+          isLoading: false,
+        },
+        isLoading: false,
+      })),
+      generateId: vi.fn(() => 'mock-id'),
+      normalizeTitleName: vi.fn((v: string) => v.toLowerCase().replace(/\s+/g, '_')),
+      isValidNameFormat: vi.fn((v: string) => /^[a-zA-Z0-9_ ]+$/.test(v.trim())),
+      startsWithLetter: vi.fn((v: string) => /^[a-zA-Z]/.test(v.trim())),
+      useKibana: vi.fn(() => ({
+        services: {
+          http: {},
+          notifications: { toasts: { addError: mockAddError, addWarning: mockAddWarning } },
+          application: { navigateToApp: vi.fn() },
+        },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockGetInstalledPackages = vi.fn(
   (): Promise<{ items: Array<{ id: string; type: string }> }> => Promise.resolve({ items: [] })
 );
-const mockGetAllIntegrations = jest.fn((): Promise<unknown[]> => Promise.resolve([]));
-jest.mock('../../../../common/lib/api', () => ({
-  getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...(args as [])),
-  getAllIntegrations: (...args: unknown[]) => mockGetAllIntegrations(...(args as [])),
-  getAllIntegrationNames: (...args: unknown[]) => mockGetAllIntegrations(...(args as [])),
-}));
+const mockGetAllIntegrations = vi.fn((): Promise<unknown[]> => Promise.resolve([]));
+vi.mock('../../../../common/lib/api', () => {
+      const mocked = {
+      getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...(args as [])),
+      getAllIntegrations: (...args: unknown[]) => mockGetAllIntegrations(...(args as [])),
+      getAllIntegrationNames: (...args: unknown[]) => mockGetAllIntegrations(...(args as [])),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockReportAnalyzeLogsTriggered = jest.fn();
-jest.mock('../../../telemetry_context', () => ({
-  useTelemetry: () => ({
-    reportAnalyzeLogsTriggered: mockReportAnalyzeLogsTriggered,
-  }),
-}));
+const mockReportAnalyzeLogsTriggered = vi.fn();
+vi.mock('../../../telemetry_context', () => {
+      const mocked = {
+      useTelemetry: () => ({
+        reportAnalyzeLogsTriggered: mockReportAnalyzeLogsTriggered,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseFetchIndices = useFetchIndices as jest.Mock;
-const mockUseValidateIndex = useValidateIndex as jest.Mock;
-const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
-const mockUseCreateUpdateIntegration = useCreateUpdateIntegration as jest.Mock;
-const mockRefetch = jest.fn();
+const mockUseFetchIndices = useFetchIndices as Mock;
+const mockUseValidateIndex = useValidateIndex as Mock;
+const mockUseGetIntegrationById = useGetIntegrationById as Mock;
+const mockUseCreateUpdateIntegration = useCreateUpdateIntegration as Mock;
+const mockRefetch = vi.fn();
 
 const mockServices = coreMock.createStart();
 
@@ -96,7 +108,7 @@ const createWrapper = (
             <MemoryRouter initialEntries={['/create']}>
               <Route path={['/edit/:integrationId', '/create']}>
                 <UIStateProvider>
-                  <IntegrationFormProvider onSubmit={jest.fn()} initialValue={initialValue}>
+                  <IntegrationFormProvider onSubmit={vi.fn()} initialValue={initialValue}>
                     <UseField path="title">{() => null}</UseField>
                     <UseField path="description">{() => null}</UseField>
                     <UseField path="connectorId">{() => null}</UseField>
@@ -115,20 +127,20 @@ const createWrapper = (
 };
 
 describe('CreateDataStreamFlyout', () => {
-  const mockOnClose = jest.fn();
-  const mockValidateIndex = jest.fn();
-  const mockClearValidationError = jest.fn();
-  const mockMutateAsync = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockValidateIndex = vi.fn();
+  const mockClearValidationError = vi.fn();
+  const mockMutateAsync = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseFetchIndices.mockReturnValue({
       indices: ['logs-test', 'metrics-test', 'events-test'],
       isLoading: false,
       isError: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     mockUseValidateIndex.mockReturnValue({
@@ -400,7 +412,7 @@ describe('CreateDataStreamFlyout', () => {
         isLoading: true,
         isError: false,
         error: null,
-        refetch: jest.fn(),
+        refetch: vi.fn(),
       });
 
       const Wrapper = createWrapper();

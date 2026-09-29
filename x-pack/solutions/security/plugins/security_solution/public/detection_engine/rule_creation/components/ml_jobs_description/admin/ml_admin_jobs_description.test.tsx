@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
@@ -12,7 +15,7 @@ import { MlAdminJobsDescription } from './ml_admin_jobs_description';
 
 import { useSecurityJobs } from '../../../../../common/components/ml_popover/hooks/use_security_jobs';
 
-jest.mock(
+vi.mock(
   './ml_admin_job_description',
   () =>
     ({
@@ -22,9 +25,9 @@ jest.mock(
     } as Record<string, React.FC<{ job: MlSummaryJob }>>)
 );
 
-jest.mock('../../../../../common/components/ml_popover/hooks/use_security_jobs');
+vi.mock('../../../../../common/components/ml_popover/hooks/use_security_jobs');
 
-const useSecurityJobsMock = useSecurityJobs as jest.Mock;
+const useSecurityJobsMock = useSecurityJobs as Mock;
 
 describe('MlAdminJobsDescription', () => {
   it('should render null if admin permissions absent', () => {

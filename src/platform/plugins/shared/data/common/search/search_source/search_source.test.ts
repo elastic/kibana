@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type Rx from 'rxjs';
 import { firstValueFrom, lastValueFrom, of, throwError } from 'rxjs';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
@@ -41,14 +44,14 @@ const indexPattern = {
   fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }, { name: '_id' }],
   getComputedFields,
   getSourceFiltering: () => mockSource,
-  getAllowHidden: jest.fn(),
+  getAllowHidden: vi.fn(),
 } as unknown as DataView;
 
 const indexPattern2 = {
   title: 'foo',
   getComputedFields,
   getSourceFiltering: () => mockSource2,
-  getAllowHidden: jest.fn(),
+  getAllowHidden: vi.fn(),
 } as unknown as DataView;
 
 const fields3 = [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }];
@@ -74,20 +77,20 @@ const runtimeFieldDef = {
 };
 
 describe('SearchSource', () => {
-  let mockSearchMethod: jest.Mocked<ISearchGeneric>;
+  let mockSearchMethod: Mocked<ISearchGeneric>;
   let searchSourceDependencies: MockedKeys<SearchSourceDependencies>;
   let searchSource: SearchSource;
 
   beforeEach(() => {
     const aggsMock = {
-      createAggConfigs: jest.fn(),
-    } as unknown as jest.Mocked<SearchSourceDependencies['aggs']>;
-    const getConfigMock = jest
+      createAggConfigs: vi.fn(),
+    } as unknown as Mocked<SearchSourceDependencies['aggs']>;
+    const getConfigMock = vi
       .fn()
       .mockImplementation((param) => param === 'metaFields' && ['_type', '_source', '_id'])
       .mockName('getConfig');
 
-    mockSearchMethod = jest
+    mockSearchMethod = vi
       .fn()
       .mockReturnValue(
         of(
@@ -100,12 +103,12 @@ describe('SearchSource', () => {
       aggs: aggsMock,
       getConfig: getConfigMock,
       search: mockSearchMethod,
-      onResponse: jest.fn().mockImplementation((_, res) => res),
+      onResponse: vi.fn().mockImplementation((_, res) => res),
       scriptedFieldsEnabled: true,
       dataViews: {
-        getMetaFields: jest.fn(),
-        getShortDotsEnable: jest.fn(),
-      } as unknown as jest.Mocked<DataViewsContract>,
+        getMetaFields: vi.fn(),
+        getShortDotsEnable: vi.fn(),
+      } as unknown as Mocked<DataViewsContract>,
     };
 
     searchSource = new SearchSource({}, searchSourceDependencies);
@@ -278,7 +281,7 @@ describe('SearchSource', () => {
         {
           typesRegistry,
         },
-        jest.fn()
+        vi.fn()
       );
 
       searchSource.setField('aggs', ac);
@@ -949,7 +952,7 @@ describe('SearchSource', () => {
   describe('#onRequestStart()', () => {
     test('should be called when starting a request', async () => {
       searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
-      const fn = jest.fn();
+      const fn = vi.fn();
       searchSource.onRequestStart(fn);
       const options = {};
       await firstValueFrom(searchSource.fetch$(options));
@@ -960,9 +963,9 @@ describe('SearchSource', () => {
       const parent = new SearchSource({}, searchSourceDependencies);
       searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
 
-      const fn = jest.fn();
+      const fn = vi.fn();
       searchSource.onRequestStart(fn);
-      const parentFn = jest.fn();
+      const parentFn = vi.fn();
       parent.onRequestStart(parentFn);
       const options = {};
       await firstValueFrom(searchSource.fetch$(options));
@@ -980,9 +983,9 @@ describe('SearchSource', () => {
         }
       );
 
-      const fn = jest.fn();
+      const fn = vi.fn();
       searchSource.onRequestStart(fn);
-      const parentFn = jest.fn();
+      const parentFn = vi.fn();
       parent.onRequestStart(parentFn);
       const options = {};
       await firstValueFrom(searchSource.fetch$(options));
@@ -1116,8 +1119,8 @@ describe('SearchSource', () => {
 
     const indexPattern123 = {
       id: '123',
-      isPersisted: jest.fn(() => true),
-      toMinimalSpec: jest.fn(),
+      isPersisted: vi.fn(() => true),
+      toMinimalSpec: vi.fn(),
     } as unknown as DataView;
 
     test('should return serialized fields', () => {
@@ -1144,7 +1147,7 @@ describe('SearchSource', () => {
     });
 
     test('should use minimal spec for ad hoc data view', () => {
-      indexPattern123.isPersisted = jest.fn(() => false);
+      indexPattern123.isPersisted = vi.fn(() => false);
       searchSource.setField('index', indexPattern123);
       searchSource.getSerializedFields(true);
       expect(indexPattern123.toMinimalSpec).toHaveBeenCalledTimes(1);
@@ -1190,8 +1193,8 @@ describe('SearchSource', () => {
         searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
         const options = {};
 
-        const next = jest.fn();
-        const complete = jest.fn();
+        const next = vi.fn();
+        const complete = vi.fn();
         const res$ = searchSource.fetch$(options);
         res$.subscribe({ next, complete });
         await firstValueFrom(res$);
@@ -1211,10 +1214,10 @@ describe('SearchSource', () => {
         searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
         const options = {};
 
-        const next = jest.fn();
-        const complete = jest.fn();
-        const next2 = jest.fn();
-        const complete2 = jest.fn();
+        const next = vi.fn();
+        const complete = vi.fn();
+        const next2 = vi.fn();
+        const complete2 = vi.fn();
         const res$ = searchSource.fetch$(options);
         res$.subscribe({ next, complete });
         res$.subscribe({ next: next2, complete: complete2 });
@@ -1232,10 +1235,10 @@ describe('SearchSource', () => {
       let requestResponder: RequestResponder;
       beforeEach(() => {
         requestResponder = {
-          stats: jest.fn(),
-          ok: jest.fn(),
-          error: jest.fn(),
-          json: jest.fn(),
+          stats: vi.fn(),
+          ok: vi.fn(),
+          error: vi.fn(),
+          json: vi.fn(),
         } as unknown as RequestResponder;
       });
 
@@ -1244,8 +1247,8 @@ describe('SearchSource', () => {
           inspector: {
             title: 'a',
             adapter: {
-              start: jest.fn().mockReturnValue(requestResponder),
-            } as unknown as jest.Mocked<RequestAdapter>,
+              start: vi.fn().mockReturnValue(requestResponder),
+            } as unknown as Mocked<RequestAdapter>,
           },
         };
 
@@ -1266,8 +1269,8 @@ describe('SearchSource', () => {
           inspector: {
             title: 'a',
             adapter: {
-              start: jest.fn().mockReturnValue(requestResponder),
-            } as unknown as jest.Mocked<RequestAdapter>,
+              start: vi.fn().mockReturnValue(requestResponder),
+            } as unknown as Mocked<RequestAdapter>,
           },
         };
 
@@ -1275,8 +1278,8 @@ describe('SearchSource', () => {
         searchSource.setField('index', indexPattern);
         const res$ = searchSource.fetch$(options);
 
-        const complete1 = jest.fn();
-        const complete2 = jest.fn();
+        const complete1 = vi.fn();
+        const complete2 = vi.fn();
 
         res$.subscribe({
           complete: complete1,
@@ -1297,12 +1300,12 @@ describe('SearchSource', () => {
           inspector: {
             title: 'a',
             adapter: {
-              start: jest.fn().mockReturnValue(requestResponder),
-            } as unknown as jest.Mocked<RequestAdapter>,
+              start: vi.fn().mockReturnValue(requestResponder),
+            } as unknown as Mocked<RequestAdapter>,
           },
         };
 
-        searchSourceDependencies.search = jest
+        searchSourceDependencies.search = vi
           .fn()
           .mockReturnValue(throwError(() => new Error('aaaaa')));
 
@@ -1334,21 +1337,21 @@ describe('SearchSource', () => {
           {
             typesRegistry,
           },
-          jest.fn()
+          vi.fn()
         );
       }
 
       beforeEach(() => {
         fetchSub = {
-          next: jest.fn(),
-          complete: jest.fn(),
-          error: jest.fn(),
+          next: vi.fn(),
+          complete: vi.fn(),
+          error: vi.fn(),
         };
       });
 
       test('doesnt call any post flight requests if disabled', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg')!.postFlightRequest = jest.fn();
+        typesRegistry.get('avg')!.postFlightRequest = vi.fn();
         const ac = getAggConfigs(typesRegistry, false);
 
         searchSource = new SearchSource({}, searchSourceDependencies);
@@ -1368,10 +1371,10 @@ describe('SearchSource', () => {
 
       test('doesnt call any post flight if searchsource has error', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg')!.postFlightRequest = jest.fn();
+        typesRegistry.get('avg')!.postFlightRequest = vi.fn();
         const ac = getAggConfigs(typesRegistry, true);
 
-        searchSourceDependencies.search = jest.fn().mockImplementation(() =>
+        searchSourceDependencies.search = vi.fn().mockImplementation(() =>
           of(1).pipe(
             switchMap((r) => {
               throw r;
@@ -1395,7 +1398,7 @@ describe('SearchSource', () => {
 
       test('doesnt fire postFlightRequest if other bucket is not enabled', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockResolvedValue({
+        typesRegistry.get('avg')!.postFlightRequest = vi.fn().mockResolvedValue({
           other: 5,
         });
 
@@ -1421,7 +1424,7 @@ describe('SearchSource', () => {
           {
             typesRegistry,
           },
-          jest.fn()
+          vi.fn()
         );
 
         searchSource = new SearchSource({}, searchSourceDependencies);
@@ -1442,7 +1445,7 @@ describe('SearchSource', () => {
 
       test('calls post flight requests, fires 1 extra response, returns last response', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockResolvedValue({
+        typesRegistry.get('avg')!.postFlightRequest = vi.fn().mockResolvedValue({
           other: 5,
         });
 
@@ -1468,7 +1471,7 @@ describe('SearchSource', () => {
           {
             typesRegistry,
           },
-          jest.fn()
+          vi.fn()
         );
 
         allac.aggs.forEach((agg) => {
@@ -1493,7 +1496,7 @@ describe('SearchSource', () => {
 
       test('calls post flight requests only once, with multiple subs (shareReplay)', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockResolvedValue({
+        typesRegistry.get('avg')!.postFlightRequest = vi.fn().mockResolvedValue({
           other: 5,
         });
 
@@ -1509,7 +1512,7 @@ describe('SearchSource', () => {
           {
             typesRegistry,
           },
-          jest.fn()
+          vi.fn()
         );
 
         allac.aggs.forEach((agg) => {
@@ -1523,9 +1526,9 @@ describe('SearchSource', () => {
         fetch$.subscribe(fetchSub);
 
         const fetchSub2 = {
-          next: jest.fn(),
-          complete: jest.fn(),
-          error: jest.fn(),
+          next: vi.fn(),
+          complete: vi.fn(),
+          error: vi.fn(),
         };
         fetch$.subscribe(fetchSub2);
 
@@ -1538,7 +1541,7 @@ describe('SearchSource', () => {
 
       test('calls post flight requests, handles error', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockRejectedValue(undefined);
+        typesRegistry.get('avg')!.postFlightRequest = vi.fn().mockRejectedValue(undefined);
         const ac = getAggConfigs(typesRegistry, true);
         ac.aggs[0].params.otherBucket = 'other';
 
@@ -1662,7 +1665,7 @@ describe('SearchSource', () => {
         stubIndexPattern,
         [{ enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } }],
         { typesRegistry },
-        jest.fn()
+        vi.fn()
       );
       searchSource.setField('aggs', aggConfigs);
 
@@ -1675,7 +1678,7 @@ describe('SearchSource', () => {
     test('should generate the `esaggs` function if there are aggregations configs', () => {
       const typesRegistry = mockAggTypesRegistry();
       searchSourceDependencies.aggs.createAggConfigs.mockImplementationOnce(
-        (dataView, configs) => new AggConfigs(dataView, configs, { typesRegistry }, jest.fn())
+        (dataView, configs) => new AggConfigs(dataView, configs, { typesRegistry }, vi.fn())
       );
       searchSource.setField('index', stubIndexPattern);
       searchSource.setField('aggs', [

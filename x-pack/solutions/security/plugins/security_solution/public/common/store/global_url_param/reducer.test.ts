@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { deregisterUrlParam, registerUrlParam, updateUrlParam } from './actions';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './reducer';
 
-const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+const error = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 describe('globalUrlParamReducer', () => {
   describe('#registerUrlParam', () => {

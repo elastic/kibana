@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 
@@ -15,7 +17,7 @@ import { CaseCallOut } from '.';
 
 describe('CaseCallOut ', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const defaultProps: CaseCallOutProps = {
@@ -24,7 +26,7 @@ describe('CaseCallOut ', () => {
       { id: 'message-one', title: 'title', description: <p>{'we have two messages'}</p> },
       { id: 'message-two', title: 'title', description: <p>{'for real'}</p> },
     ],
-    onEditClick: jest.fn(),
+    onEditClick: vi.fn(),
     hasLicenseError: false,
   };
 

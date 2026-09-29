@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
@@ -23,16 +26,22 @@ import { getLatestEntitiesIndexName } from '../../common/domain/entity_index';
 import type { EntityStoreCoreSetup } from '../types';
 import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
-jest.mock('./factories');
-jest.mock('./should_delete_orphaned_task', () => ({
-  shouldDeleteOrphanedEntityStoreTask: jest.fn().mockResolvedValue(false),
-}));
+vi.mock('./factories');
+vi.mock('./should_delete_orphaned_task', () => {
+      const mocked = {
+      shouldDeleteOrphanedEntityStoreTask: vi.fn().mockResolvedValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 // wrapTaskRun adds a tracing span around the run callback; here it just invokes it.
-jest.mock('../telemetry/traces', () => ({
-  wrapTaskRun: jest.fn(({ run }: { run: () => Promise<unknown> }) => run()),
-}));
+vi.mock('../telemetry/traces', () => {
+      const mocked = {
+      wrapTaskRun: vi.fn(({ run }: { run: () => Promise<unknown> }) => run()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const createAssetManagerClientMock = createAssetManagerClient as jest.Mock;
+const createAssetManagerClientMock = createAssetManagerClient as Mock;
 
 const NAMESPACE = 'default';
 const METADATA_INDEX = getMetadataEntitiesDataStreamName(NAMESPACE);
@@ -161,27 +170,27 @@ describe('getResolutionState', () => {
 
 describe('status report task — usage, resolution state & metadata telemetry', () => {
   let logger: MockedLogger;
-  let reportEvent: jest.Mock;
-  let count: jest.Mock;
-  let esqlQuery: jest.Mock;
-  let getStatus: jest.Mock;
+  let reportEvent: Mock;
+  let count: Mock;
+  let esqlQuery: Mock;
+  let getStatus: Mock;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let withContextSpy: jest.Mock;
+  let withContextSpy: Mock;
 
   // Drives the task the way task-manager does: register, grab the definition,
   // build the runner and run it once.
   const runStatusReportTask = async () => {
     const taskManager = {
-      registerTaskDefinitions: jest.fn(),
+      registerTaskDefinitions: vi.fn(),
     } as unknown as TaskManagerSetupContract;
     const core = {
       analytics: { reportEvent },
-      getStartServices: jest.fn().mockResolvedValue([
+      getStartServices: vi.fn().mockResolvedValue([
         {
           executionContext: { withContext: withContextSpy },
           savedObjects: {
-            createInternalRepository: jest.fn().mockReturnValue({
-              find: jest.fn().mockResolvedValue({ saved_objects: [{ id: 'engine' }], total: 1 }),
+            createInternalRepository: vi.fn().mockReturnValue({
+              find: vi.fn().mockResolvedValue({ saved_objects: [{ id: 'engine' }], total: 1 }),
             }),
           },
         },
@@ -191,7 +200,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
 
     registerStatusReportTask({ taskManager, logger, core });
 
-    const [definitions] = (taskManager.registerTaskDefinitions as jest.Mock).mock.calls[0];
+    const [definitions] = (taskManager.registerTaskDefinitions as Mock).mock.calls[0];
     const [taskType] = Object.keys(definitions);
     const runner = definitions[taskType].createTaskRunner({
       taskInstance: { id: `status:${NAMESPACE}`, state: { namespace: NAMESPACE } },
@@ -202,17 +211,17 @@ describe('status report task — usage, resolution state & metadata telemetry', 
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggerMock.create();
-    reportEvent = jest.fn();
-    withContextSpy = jest.fn(<T>(_ctx: unknown, fn: () => T) => fn());
-    getStatus = jest.fn().mockResolvedValue({ status: ENTITY_STORE_STATUS.NOT_INSTALLED });
+    reportEvent = vi.fn();
+    withContextSpy = vi.fn(<T>(_ctx: unknown, fn: () => T) => fn());
+    getStatus = vi.fn().mockResolvedValue({ status: ENTITY_STORE_STATUS.NOT_INSTALLED });
     // Store-usage counts carry a `query`; the metadata-datastream count does not.
-    count = jest.fn(async (params: { query?: unknown }) =>
+    count = vi.fn(async (params: { query?: unknown }) =>
       params.query ? { count: 5 } : { count: 42 }
     );
     // Default resolution state: 3 resolved entities in 1 group, max bucket = 2 aliases
-    esqlQuery = jest.fn().mockResolvedValue(makeEsqlResponse([[3, 1, 2]]));
+    esqlQuery = vi.fn().mockResolvedValue(makeEsqlResponse([[3, 1, 2]]));
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.count.mockImplementation(count);
     esClient.esql.query.mockImplementation(esqlQuery);

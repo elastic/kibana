@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import {
   makeDefaultServices,
   makeLensStore,
@@ -37,7 +39,7 @@ const preloadedState = {
 };
 
 const defaultProps: InitialAppState = {
-  redirectCallback: jest.fn(),
+  redirectCallback: vi.fn(),
   initialInput: { ref_id: defaultSavedObjectId },
   history,
 };
@@ -77,7 +79,7 @@ describe('Initializing the store', () => {
     const datasource1State = { datasource1: '' };
     const datasource2State = { datasource2: '' };
     const services = makeDefaultServices();
-    services.attributeService.loadFromLibrary = jest.fn().mockResolvedValue({
+    services.attributeService.loadFromLibrary = vi.fn().mockResolvedValue({
       attributes: {
         exactMatchDoc,
         visualizationType: 'testVis',
@@ -222,7 +224,7 @@ describe('Initializing the store', () => {
 
       const mockFilters = faker.lorem.words(3).split(' ') as unknown as Filter[];
 
-      jest
+      vi
         .spyOn(deps.lensServices.data.query.filterManager, 'getFilters')
         .mockReturnValue(mockFilters);
 
@@ -273,10 +275,10 @@ describe('Initializing the store', () => {
     it('handles document load errors', async () => {
       const { store, deps } = makeLensStore({ preloadedState });
 
-      deps.lensServices.attributeService.loadFromLibrary = jest
+      deps.lensServices.attributeService.loadFromLibrary = vi
         .fn()
         .mockRejectedValue('failed to load');
-      const redirectCallback = jest.fn();
+      const redirectCallback = vi.fn();
       await loadInitialAppState(store, { ...defaultProps, redirectCallback });
 
       expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledWith(
@@ -288,7 +290,7 @@ describe('Initializing the store', () => {
 
     it('redirects if saved object is an aliasMatch', async () => {
       const { store, deps } = makeLensStore({ preloadedState });
-      deps.lensServices.attributeService.loadFromLibrary = jest.fn().mockResolvedValue({
+      deps.lensServices.attributeService.loadFromLibrary = vi.fn().mockResolvedValue({
         attributes: {
           ...defaultDoc,
         },

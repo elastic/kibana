@@ -5,25 +5,28 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getAgentDownloadUrl, getAgentFileName } from '../common/fleet_services';
 import { downloadAndStoreAgent } from '../common/agent_downloads_service';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { agentDownloaderRunner } from './agent_downloader';
 import type { RunContext } from '@kbn/dev-cli-runner';
 
-jest.mock('../common/fleet_services');
-jest.mock('../common/agent_downloads_service');
+vi.mock('../common/fleet_services');
+vi.mock('../common/agent_downloads_service');
 
 describe('agentDownloaderRunner', () => {
   let log: ToolingLog;
 
   beforeEach(() => {
     log = {
-      info: jest.fn(),
-      error: jest.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
     } as unknown as ToolingLog;
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const version = '8.15.0';
@@ -33,9 +36,9 @@ describe('agentDownloaderRunner', () => {
   const fileName = 'elastic-agent-8.15.0.tar.gz';
 
   it('downloads and stores the specified version', async () => {
-    (getAgentDownloadUrl as jest.Mock).mockResolvedValue({ url, shaUrl });
-    (getAgentFileName as jest.Mock).mockReturnValue('elastic-agent-8.15.0');
-    (downloadAndStoreAgent as jest.Mock).mockResolvedValue(undefined);
+    (getAgentDownloadUrl as Mock).mockResolvedValue({ url, shaUrl });
+    (getAgentFileName as Mock).mockReturnValue('elastic-agent-8.15.0');
+    (downloadAndStoreAgent as Mock).mockResolvedValue(undefined);
 
     await agentDownloaderRunner({
       flags: { version, closestMatch },
@@ -49,9 +52,9 @@ describe('agentDownloaderRunner', () => {
   });
 
   it('logs an error if the download fails', async () => {
-    (getAgentDownloadUrl as jest.Mock).mockResolvedValue({ url, shaUrl });
-    (getAgentFileName as jest.Mock).mockReturnValue('elastic-agent-8.15.0');
-    (downloadAndStoreAgent as jest.Mock).mockRejectedValue(new Error('Download failed'));
+    (getAgentDownloadUrl as Mock).mockResolvedValue({ url, shaUrl });
+    (getAgentFileName as Mock).mockReturnValue('elastic-agent-8.15.0');
+    (downloadAndStoreAgent as Mock).mockRejectedValue(new Error('Download failed'));
 
     await agentDownloaderRunner({
       flags: { version, closestMatch },
@@ -70,13 +73,13 @@ describe('agentDownloaderRunner', () => {
     const fallbackVersion = '8.15.0';
     const fallbackFileName = 'elastic-agent-8.15.0.tar.gz';
 
-    (getAgentDownloadUrl as jest.Mock)
+    (getAgentDownloadUrl as Mock)
       .mockResolvedValueOnce({ url, shaUrl })
       .mockResolvedValueOnce({ url, shaUrl });
-    (getAgentFileName as jest.Mock)
+    (getAgentFileName as Mock)
       .mockReturnValueOnce('elastic-agent-8.15.1')
       .mockReturnValueOnce('elastic-agent-8.15.0');
-    (downloadAndStoreAgent as jest.Mock)
+    (downloadAndStoreAgent as Mock)
       .mockRejectedValueOnce(new Error('Download failed'))
       .mockResolvedValueOnce(undefined);
 
@@ -98,11 +101,11 @@ describe('agentDownloaderRunner', () => {
   });
 
   it('logs an error if all downloads fail', async () => {
-    (getAgentDownloadUrl as jest.Mock).mockResolvedValue({ url, shaUrl });
-    (getAgentFileName as jest.Mock)
+    (getAgentDownloadUrl as Mock).mockResolvedValue({ url, shaUrl });
+    (getAgentFileName as Mock)
       .mockReturnValueOnce('elastic-agent-8.15.1')
       .mockReturnValueOnce('elastic-agent-8.15.0');
-    (downloadAndStoreAgent as jest.Mock)
+    (downloadAndStoreAgent as Mock)
       .mockRejectedValueOnce(new Error('Download failed'))
       .mockRejectedValueOnce(new Error('Download failed'));
 
@@ -126,9 +129,9 @@ describe('agentDownloaderRunner', () => {
   });
 
   it('does not attempt fallback when patch version is 0', async () => {
-    (getAgentDownloadUrl as jest.Mock).mockResolvedValue({ url, shaUrl });
-    (getAgentFileName as jest.Mock).mockReturnValue('elastic-agent-8.15.0');
-    (downloadAndStoreAgent as jest.Mock).mockResolvedValue(undefined);
+    (getAgentDownloadUrl as Mock).mockResolvedValue({ url, shaUrl });
+    (getAgentFileName as Mock).mockReturnValue('elastic-agent-8.15.0');
+    (downloadAndStoreAgent as Mock).mockResolvedValue(undefined);
 
     await agentDownloaderRunner({
       flags: { version: '8.15.0', closestMatch },
@@ -155,9 +158,9 @@ describe('agentDownloaderRunner', () => {
   it('passes the closestMatch flag correctly', async () => {
     closestMatch = true;
 
-    (getAgentDownloadUrl as jest.Mock).mockResolvedValue({ url, shaUrl });
-    (getAgentFileName as jest.Mock).mockReturnValue('elastic-agent-8.15.0');
-    (downloadAndStoreAgent as jest.Mock).mockResolvedValue(undefined);
+    (getAgentDownloadUrl as Mock).mockResolvedValue({ url, shaUrl });
+    (getAgentFileName as Mock).mockReturnValue('elastic-agent-8.15.0');
+    (downloadAndStoreAgent as Mock).mockResolvedValue(undefined);
 
     await agentDownloaderRunner({
       flags: { version, closestMatch },
@@ -179,15 +182,15 @@ describe('agentDownloaderRunner', () => {
   it('logs the correct messages when both version and fallback version are processed', async () => {
     const primaryVersion = '8.15.1';
 
-    (getAgentDownloadUrl as jest.Mock)
+    (getAgentDownloadUrl as Mock)
       .mockResolvedValueOnce({ url, shaUrl })
       .mockResolvedValueOnce({ url, shaUrl });
 
-    (getAgentFileName as jest.Mock)
+    (getAgentFileName as Mock)
       .mockReturnValueOnce('elastic-agent-8.15.1')
       .mockReturnValueOnce('elastic-agent-8.15.0');
 
-    (downloadAndStoreAgent as jest.Mock)
+    (downloadAndStoreAgent as Mock)
       .mockRejectedValueOnce(new Error('Download failed')) // Fail on primary
       .mockResolvedValueOnce(undefined); // Success on fallback
 

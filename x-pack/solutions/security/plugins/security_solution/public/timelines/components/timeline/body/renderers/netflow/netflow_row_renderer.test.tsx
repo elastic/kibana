@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
@@ -21,8 +23,8 @@ export const justIdAndTimestamp: Ecs = {
   timestamp: '2018-11-12T19:03:25.936Z',
 };
 
-jest.mock('../../../../../../common/lib/kibana');
-jest.mock('../../../../../../common/components/links/link_props');
+vi.mock('../../../../../../common/lib/kibana');
+vi.mock('../../../../../../common/components/links/link_props');
 
 describe('netflowRowRenderer', () => {
   test('renders key netflow fields from mock data', () => {

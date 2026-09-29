@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -20,7 +22,7 @@ describe('InheritLifecycleSection', () => {
 
   it('calls onChange when checkbox is toggled', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
 
     renderWithTheme(<InheritLifecycleSection value={false} onChange={onChange} label="Inherit" />);
 

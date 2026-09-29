@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import {
@@ -18,24 +21,33 @@ import { hydrateCortexWorkspace, runCortexOptimize } from './register_cortex';
 import { optimizeCortex } from './optimize';
 import { materializeCortex } from './materialize';
 
-jest.mock('./optimize', () => ({
-  createLlmProposeCortexEdits: jest.fn(() => jest.fn()),
-  optimizeCortex: jest.fn(),
-}));
+vi.mock('./optimize', () => {
+      const mocked = {
+      createLlmProposeCortexEdits: vi.fn(() => vi.fn()),
+      optimizeCortex: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./page_store', () => ({
-  createCortexPageStore: jest.fn(() => ({})),
-}));
+vi.mock('./page_store', () => {
+      const mocked = {
+      createCortexPageStore: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./materialize', () => ({
-  materializeCortex: jest.fn(),
-}));
+vi.mock('./materialize', () => {
+      const mocked = {
+      materializeCortex: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const unavailable = () =>
   Object.assign(new Error('14 UNAVAILABLE: connect: connection refused'), { code: 14 });
 
 describe('hydrateCortexWorkspace', () => {
-  const materialize = materializeCortex as jest.MockedFunction<typeof materializeCortex>;
+  const materialize = materializeCortex as MockedFunction<typeof materializeCortex>;
 
   const hydrate = (signal?: AbortSignal) =>
     hydrateCortexWorkspace({
@@ -49,7 +61,7 @@ describe('hydrateCortexWorkspace', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('materializes once when the sandbox accepts the writes', async () => {
@@ -97,13 +109,13 @@ describe('hydrateCortexWorkspace', () => {
 });
 
 describe('runCortexOptimize', () => {
-  const esClient = { search: jest.fn() } as never;
+  const esClient = { search: vi.fn() } as never;
   const request = { headers: {} } as never;
-  const getClient = jest.fn().mockReturnValue({});
-  const getInference = jest.fn().mockReturnValue({ getClient });
-  const getSearchInferenceEndpoints = jest.fn().mockReturnValue({
+  const getClient = vi.fn().mockReturnValue({});
+  const getInference = vi.fn().mockReturnValue({ getClient });
+  const getSearchInferenceEndpoints = vi.fn().mockReturnValue({
     endpoints: {
-      getForFeature: jest.fn().mockResolvedValue({
+      getForFeature: vi.fn().mockResolvedValue({
         endpoints: [{ connectorId: 'connector-1' }],
       }),
     },
@@ -125,7 +137,7 @@ describe('runCortexOptimize', () => {
     });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('runs for the Nightshift investigation agent', async () => {

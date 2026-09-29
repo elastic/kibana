@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   resolveEntityStoreWriteTargets,
   resolveLatestEntitiesIndexName,
@@ -21,9 +23,9 @@ describe('resolveEntityStoreWriteTargets', () => {
   const namespace = 'default';
   const esClient = {
     indices: {
-      get: jest.fn(),
-      getDataStream: jest.fn(),
-      getAlias: jest.fn(),
+      get: vi.fn(),
+      getDataStream: vi.fn(),
+      getAlias: vi.fn(),
     },
   } as any;
 
@@ -47,7 +49,7 @@ describe('resolveEntityStoreWriteTargets', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient.indices.getAlias.mockRejectedValue({ meta: { statusCode: 404 } });
   });
 

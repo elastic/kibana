@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, skip, Subject } from 'rxjs';
 import type {
@@ -52,8 +55,8 @@ interface MockDashboardApi {
   filters$: BehaviorSubject<unknown[]>;
   query$: BehaviorSubject<unknown>;
   timeRange$: BehaviorSubject<unknown>;
-  setState: jest.Mock;
-  getSerializedState: jest.Mock;
+  setState: Mock;
+  getSerializedState: Mock;
 }
 
 const createMockDashboardApi = (anyStateChange$: Observable<void>): MockDashboardApi => ({
@@ -63,8 +66,8 @@ const createMockDashboardApi = (anyStateChange$: Observable<void>): MockDashboar
   filters$: new BehaviorSubject<unknown[]>([]),
   query$: new BehaviorSubject<unknown>({ query: '', language: 'kuery' }),
   timeRange$: new BehaviorSubject<unknown>({ from: 'now-15m', to: 'now' }),
-  setState: jest.fn(),
-  getSerializedState: jest.fn().mockReturnValue({
+  setState: vi.fn(),
+  getSerializedState: vi.fn().mockReturnValue({
     attributes: {
       title: 'Test Dashboard',
       description: 'Test Description',
@@ -152,10 +155,10 @@ const createActiveConversation = ({
 describe('registerDashboardAppIntegration', () => {
   let mockApi: MockDashboardApi;
   let chatEventsByConversationId: Map<string, Subject<ChatEvent>>;
-  let addAttachment: jest.Mock;
-  let updateAttachmentOrigin: jest.Mock;
-  let getUpdateOrigin: jest.Mock;
-  let checkSavedDashboardExist: jest.Mock;
+  let addAttachment: Mock;
+  let updateAttachmentOrigin: Mock;
+  let getUpdateOrigin: Mock;
+  let checkSavedDashboardExist: Mock;
   let draftAttachmentId: IdGenerator;
   let emitConversationChange: (change: {
     id?: string;
@@ -169,22 +172,22 @@ describe('registerDashboardAppIntegration', () => {
     simulateDashboardStateChange = () => {
       mockAnyStateChange$.next(undefined);
     };
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockApi = createMockDashboardApi(mockAnyStateChange$.pipe(skip(1)));
     chatEventsByConversationId = new Map();
-    addAttachment = jest.fn();
-    updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
-    getUpdateOrigin = jest.fn(
+    addAttachment = vi.fn();
+    updateAttachmentOrigin = vi.fn().mockResolvedValue(undefined);
+    getUpdateOrigin = vi.fn(
       (attachmentId: string) => async (origin: string) =>
         updateAttachmentOrigin('conversation-1', attachmentId, origin)
     );
-    checkSavedDashboardExist = jest.fn().mockResolvedValue(true);
+    checkSavedDashboardExist = vi.fn().mockResolvedValue(true);
     let currentDraftAttachmentId = 'draft-attachment-id-1';
     draftAttachmentId = {
       get current() {
         return currentDraftAttachmentId;
       },
-      next: jest.fn(() => {
+      next: vi.fn(() => {
         currentDraftAttachmentId = 'draft-attachment-id-2';
         return currentDraftAttachmentId;
       }),
@@ -197,7 +200,7 @@ describe('registerDashboardAppIntegration', () => {
 
   afterEach(() => {
     cleanup?.();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   const register = () => {
@@ -206,7 +209,7 @@ describe('registerDashboardAppIntegration', () => {
       addAttachment,
       updateAttachmentOrigin,
       events: {
-        getChatEvents$: jest.fn((conversationId: string) => {
+        getChatEvents$: vi.fn((conversationId: string) => {
           let chatEvents$ = chatEventsByConversationId.get(conversationId);
 
           if (!chatEvents$) {
@@ -243,7 +246,7 @@ describe('registerDashboardAppIntegration', () => {
     });
 
     simulateDashboardStateChange();
-    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+    vi.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -276,7 +279,7 @@ describe('registerDashboardAppIntegration', () => {
     });
 
     simulateDashboardStateChange();
-    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+    vi.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -355,16 +358,16 @@ describe('registerDashboardAppIntegration', () => {
       attachments: [createVersionedAttachment(attachment)],
     });
 
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
     addAttachment.mockClear();
     simulateDashboardStateChange();
-    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+    vi.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
     addAttachment.mockClear();
     emitConversationChange({ id: undefined, attachments: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -415,7 +418,7 @@ describe('registerDashboardAppIntegration', () => {
 
     addAttachment.mockClear();
     simulateDashboardStateChange();
-    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+    vi.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).not.toHaveBeenCalled();
 
@@ -429,7 +432,7 @@ describe('registerDashboardAppIntegration', () => {
     register();
 
     emitConversationChange({ id: undefined, attachments: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     const firstDraftAttachment = addAttachment.mock.calls[0]?.[0];
     expect(firstDraftAttachment).toEqual(
@@ -450,7 +453,7 @@ describe('registerDashboardAppIntegration', () => {
     );
 
     emitConversationChange({ id: undefined, attachments: undefined });
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({

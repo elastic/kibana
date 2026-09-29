@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
@@ -17,17 +20,17 @@ import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_dr
 import { NEW_COMMENT_ID } from './constants';
 import { useUserActionsHandler } from './use_user_actions_handler';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/navigation/hooks');
-jest.mock('../case_view/use_on_refresh_case_view_page');
-jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
-jest.mock('../../containers/use_update_comment');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/navigation/hooks');
+vi.mock('../case_view/use_on_refresh_case_view_page');
+vi.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
+vi.mock('../../containers/use_update_comment');
 
-const useUpdateCommentMock = useUpdateComment as jest.Mock;
-const useLensDraftCommentMock = useLensDraftComment as jest.Mock;
-const patchComment = jest.fn();
-const clearDraftComment = jest.fn();
-const openLensModal = jest.fn();
+const useUpdateCommentMock = useUpdateComment as Mock;
+const useLensDraftCommentMock = useLensDraftComment as Mock;
+const patchComment = vi.fn();
+const clearDraftComment = vi.fn();
+const openLensModal = vi.fn();
 
 const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <TestProviders>{children}</TestProviders>
@@ -35,16 +38,16 @@ const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
 
 describe('useUserActionsHandler', () => {
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-    jest.spyOn(global, 'setTimeout');
+    vi.useFakeTimers({ legacyFakeTimers: true });
+    vi.spyOn(global, 'setTimeout');
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useUpdateCommentMock.mockReturnValue({
       mutate: patchComment,
     });
@@ -132,21 +135,21 @@ describe('useUserActionsHandler', () => {
     expect(result.current.selectedOutlineCommentId).toBe('test-id');
 
     act(() => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(result.current.selectedOutlineCommentId).toBe('');
   });
 
   it('should quote', async () => {
-    const addQuote = jest.fn();
+    const addQuote = vi.fn();
     const { result } = renderHook(() => useUserActionsHandler(), {
       wrapper,
     });
 
     result.current.commentRefs.current[NEW_COMMENT_ID] = {
       addQuote,
-      setComment: jest.fn(),
+      setComment: vi.fn(),
     };
 
     act(() => {

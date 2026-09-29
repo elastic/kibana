@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics';
 import { createWatchlistSyncMarkersService } from './sync_markers';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
-jest.mock('../infra/entity_source_client');
+vi.mock('../infra/entity_source_client');
 
 const {
   WatchlistEntitySourceClient,
@@ -18,12 +21,12 @@ const {
   mockUpdateLastProcessedMarker,
   mockGetLastFullSyncMarker,
   mockUpdateLastFullSyncMarker,
-} = jest.requireMock('../infra/entity_source_client') as {
-  WatchlistEntitySourceClient: jest.Mock;
-  mockGetLastProcessedMarker: jest.Mock;
-  mockUpdateLastProcessedMarker: jest.Mock;
-  mockGetLastFullSyncMarker: jest.Mock;
-  mockUpdateLastFullSyncMarker: jest.Mock;
+} = (await vi.importMock('../infra/entity_source_client')) as {
+  WatchlistEntitySourceClient: Mock;
+  mockGetLastProcessedMarker: Mock;
+  mockUpdateLastProcessedMarker: Mock;
+  mockGetLastFullSyncMarker: Mock;
+  mockUpdateLastFullSyncMarker: Mock;
 };
 
 describe('Watchlist sync markers service', () => {
@@ -49,7 +52,7 @@ describe('Watchlist sync markers service', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getLastProcessedMarker', () => {

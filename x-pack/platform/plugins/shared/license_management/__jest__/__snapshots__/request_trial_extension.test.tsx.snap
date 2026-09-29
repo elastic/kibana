@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`RequestTrialExtension component should display when enterprise license is not active and trial has been used 1`] = `
 <DocumentFragment>

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { FEATURE_ID_TO_COST_BUDGET_GROUP } from '../../../../common/cost';
@@ -15,18 +17,27 @@ import { assertCanManageRunQuotas } from '../../../lib/run_quotas';
 import { resolveTokenTrackingCoverage } from '../../../lib/cost/token_tracking_coverage';
 import { internalCostRoutes, resetCostRouteCache } from './route';
 
-jest.mock('../../utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../utils/assert_significant_events_access', () => {
+      const mocked = {
+      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/run_quotas', () => ({
-  ...jest.requireActual('../../../lib/run_quotas'),
-  assertCanManageRunQuotas: jest.fn(),
-}));
+vi.mock('../../../lib/run_quotas', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../lib/run_quotas')),
+      assertCanManageRunQuotas: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/cost/token_tracking_coverage', () => ({
-  resolveTokenTrackingCoverage: jest.fn(),
-}));
+vi.mock('../../../lib/cost/token_tracking_coverage', () => {
+      const mocked = {
+      resolveTokenTrackingCoverage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const route = internalCostRoutes['GET /internal/significant_events/cost'];
 
@@ -61,8 +72,8 @@ const emptySearch = {
   },
 };
 
-const search = jest.fn();
-const getPrices = jest.fn<Promise<PriceResult | null>, []>();
+const search = vi.fn();
+const getPrices = vi.fn<Promise<PriceResult | null>, []>();
 const priceService: PriceService = { getPrices };
 
 const server = {
@@ -77,7 +88,7 @@ const server = {
 } as unknown as SignificantEventsServer;
 
 const request = {};
-const getScopedClients = jest.fn().mockResolvedValue({ licensing: {} });
+const getScopedClients = vi.fn().mockResolvedValue({ licensing: {} });
 
 const handlerParams = {
   request,
@@ -94,14 +105,14 @@ const invoke = (query?: { refresh?: boolean }) =>
 
 describe('Significant Events cost route', () => {
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-09-09T08:30:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2026-09-09T08:30:00.000Z'));
     resetCostRouteCache();
     search.mockReset().mockResolvedValue(emptySearch);
     getPrices.mockReset().mockResolvedValue(PRICE_RESULT);
     getScopedClients.mockClear();
-    jest.mocked(assertSignificantEventsAccess).mockReset().mockResolvedValue(undefined);
-    jest.mocked(assertCanManageRunQuotas).mockReset().mockResolvedValue(undefined);
-    jest.mocked(resolveTokenTrackingCoverage).mockReset().mockResolvedValue({
+    vi.mocked(assertSignificantEventsAccess).mockReset().mockResolvedValue(undefined);
+    vi.mocked(assertCanManageRunQuotas).mockReset().mockResolvedValue(undefined);
+    vi.mocked(resolveTokenTrackingCoverage).mockReset().mockResolvedValue({
       status: 'partial',
       enabledSpaceCount: 1,
       totalSpaceCount: 2,
@@ -109,7 +120,7 @@ describe('Significant Events cost route', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('requires Nightshift manage and configure and runs both access assertions', async () => {
@@ -125,7 +136,7 @@ describe('Significant Events cost route', () => {
   });
 
   it('does not calculate cost when an assertion fails', async () => {
-    jest.mocked(assertCanManageRunQuotas).mockRejectedValue(new Error('forbidden'));
+    vi.mocked(assertCanManageRunQuotas).mockRejectedValue(new Error('forbidden'));
     await expect(invoke()).rejects.toThrow('forbidden');
     expect(getPrices).not.toHaveBeenCalled();
     expect(search).not.toHaveBeenCalled();
@@ -134,12 +145,12 @@ describe('Significant Events cost route', () => {
   it('runs both authorization checks before serving a cached response', async () => {
     await invoke();
 
-    jest
+    vi
       .mocked(assertSignificantEventsAccess)
       .mockRejectedValueOnce(new Error('significant events forbidden'));
     await expect(invoke()).rejects.toThrow('significant events forbidden');
 
-    jest.mocked(assertCanManageRunQuotas).mockRejectedValueOnce(new Error('quota forbidden'));
+    vi.mocked(assertCanManageRunQuotas).mockRejectedValueOnce(new Error('quota forbidden'));
     await expect(invoke()).rejects.toThrow('quota forbidden');
 
     expect(getPrices).toHaveBeenCalledTimes(1);
@@ -173,7 +184,7 @@ describe('Significant Events cost route', () => {
     expect(second).toEqual(first);
     expect(getPrices).toHaveBeenCalledTimes(1);
 
-    jest.advanceTimersByTime(60_000);
+    vi.advanceTimersByTime(60_000);
     const third = await invoke();
     expect(getPrices).toHaveBeenCalledTimes(2);
     expect(third.asOf).not.toBe(first.asOf);
@@ -261,7 +272,7 @@ describe('Significant Events cost route', () => {
   });
 
   it('returns cost with a caveat when tracking coverage cannot be resolved', async () => {
-    jest.mocked(resolveTokenTrackingCoverage).mockResolvedValue({
+    vi.mocked(resolveTokenTrackingCoverage).mockResolvedValue({
       status: 'unavailable',
       enabledSpaceCount: null,
       totalSpaceCount: null,

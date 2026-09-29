@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Scalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { wrapAsMonacoSuggestion } from './wrap_as_monaco_suggestion';
@@ -25,7 +27,7 @@ const createMockRange = (
 
 describe('wrapAsMonacoSuggestion', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('basic behavior', () => {

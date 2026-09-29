@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { usePollingUntil } from './use_polling_until';
 
@@ -14,18 +16,18 @@ const flushMicrotasks = async () => {
 
 describe('usePollingUntil', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   test('polls immediately when enabled', async () => {
-    const onPoll = jest.fn().mockResolvedValue(1);
-    const onUpdate = jest.fn();
-    const shouldStop = jest.fn().mockReturnValue(true);
+    const onPoll = vi.fn().mockResolvedValue(1);
+    const onUpdate = vi.fn();
+    const shouldStop = vi.fn().mockReturnValue(true);
 
     const { result } = renderHook(() =>
       usePollingUntil<number>({
@@ -49,9 +51,9 @@ describe('usePollingUntil', () => {
   });
 
   test('stops polling when shouldStop returns true', async () => {
-    const onPoll = jest.fn().mockResolvedValueOnce(1).mockResolvedValueOnce(2);
-    const onUpdate = jest.fn();
-    const shouldStop = jest.fn((v: number) => v === 2);
+    const onPoll = vi.fn().mockResolvedValueOnce(1).mockResolvedValueOnce(2);
+    const onUpdate = vi.fn();
+    const shouldStop = vi.fn((v: number) => v === 2);
 
     const { result } = renderHook(() =>
       usePollingUntil<number>({
@@ -71,7 +73,7 @@ describe('usePollingUntil', () => {
     expect(result.current).toBe('polling');
 
     await act(async () => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       await flushMicrotasks();
     });
 
@@ -79,7 +81,7 @@ describe('usePollingUntil', () => {
     expect(result.current).toBe('stopped');
 
     await act(async () => {
-      jest.advanceTimersByTime(10_000);
+      vi.advanceTimersByTime(10_000);
       await flushMicrotasks();
     });
 
@@ -87,9 +89,9 @@ describe('usePollingUntil', () => {
   });
 
   test('stops polling after maxAttempts', async () => {
-    const onPoll = jest.fn().mockResolvedValue(undefined);
-    const onUpdate = jest.fn();
-    const shouldStop = jest.fn().mockReturnValue(false);
+    const onPoll = vi.fn().mockResolvedValue(undefined);
+    const onUpdate = vi.fn();
+    const shouldStop = vi.fn().mockReturnValue(false);
 
     const { result } = renderHook(() =>
       usePollingUntil<number>({
@@ -108,9 +110,9 @@ describe('usePollingUntil', () => {
     expect(onPoll).toHaveBeenCalledTimes(1);
 
     await act(async () => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       await flushMicrotasks();
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
       await flushMicrotasks();
     });
 
@@ -118,7 +120,7 @@ describe('usePollingUntil', () => {
     expect(result.current).toBe('exhausted');
 
     await act(async () => {
-      jest.advanceTimersByTime(10_000);
+      vi.advanceTimersByTime(10_000);
       await flushMicrotasks();
     });
 
@@ -128,8 +130,8 @@ describe('usePollingUntil', () => {
   });
 
   test('cleans up timers on unmount', async () => {
-    const onPoll = jest.fn().mockResolvedValue(undefined);
-    const shouldStop = jest.fn().mockReturnValue(false);
+    const onPoll = vi.fn().mockResolvedValue(undefined);
+    const shouldStop = vi.fn().mockReturnValue(false);
 
     const { unmount } = renderHook(() =>
       usePollingUntil<number>({
@@ -149,7 +151,7 @@ describe('usePollingUntil', () => {
     unmount();
 
     await act(async () => {
-      jest.advanceTimersByTime(10_000);
+      vi.advanceTimersByTime(10_000);
       await flushMicrotasks();
     });
 
@@ -157,8 +159,8 @@ describe('usePollingUntil', () => {
   });
 
   test('stops polling when enabled becomes false', async () => {
-    const onPoll = jest.fn().mockResolvedValue(undefined);
-    const shouldStop = jest.fn().mockReturnValue(false);
+    const onPoll = vi.fn().mockResolvedValue(undefined);
+    const shouldStop = vi.fn().mockReturnValue(false);
 
     const { rerender, result } = renderHook(
       ({ enabled }) =>
@@ -180,7 +182,7 @@ describe('usePollingUntil', () => {
     rerender({ enabled: false });
 
     await act(async () => {
-      jest.advanceTimersByTime(10_000);
+      vi.advanceTimersByTime(10_000);
       await flushMicrotasks();
     });
 

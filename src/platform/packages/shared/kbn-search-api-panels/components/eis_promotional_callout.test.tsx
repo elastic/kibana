@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -14,13 +17,13 @@ import { EisPromotionalCallout, type EisPromotionalCalloutProps } from './eis_pr
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
 import { EIS_PROMO_CALLOUT_DESCRIPTION, EIS_CALLOUT_TITLE } from '../translations';
 
-jest.mock('../hooks/use_show_eis_promotional_content');
+vi.mock('../hooks/use_show_eis_promotional_content');
 
 describe('EisPromotionalCallout', () => {
   const promoId = 'testPromo';
   const dataId = `${promoId}-eis-promo-callout`;
   const ctaLink = 'https://example.com';
-  const mockOnDismissPromo = jest.fn();
+  const mockOnDismissPromo = vi.fn();
 
   const renderEisPromotionalCallout = (props?: Partial<EisPromotionalCalloutProps>) => {
     return render(
@@ -36,8 +39,8 @@ describe('EisPromotionalCallout', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: true,
       onDismissPromo: mockOnDismissPromo,
     });
@@ -70,7 +73,7 @@ describe('EisPromotionalCallout', () => {
   });
 
   it('does not render callout when promo is not visible', () => {
-    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+    (useShowEisPromotionalContent as Mock).mockReturnValue({
       isPromoVisible: false,
       onDismissPromo: mockOnDismissPromo,
     });

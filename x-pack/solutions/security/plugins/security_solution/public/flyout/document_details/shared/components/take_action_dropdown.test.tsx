@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
@@ -33,62 +36,80 @@ import {
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
-jest.mock('../../../../common/components/endpoint/host_isolation');
-jest.mock('../../../../common/components/endpoint/responder');
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
+vi.mock('../../../../common/components/endpoint/host_isolation');
+vi.mock('../../../../common/components/endpoint/responder');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
 
-const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
+const mockUseRunAlertWorkflowPanel = vi.fn().mockReturnValue({
   runWorkflowMenuItem: [],
   runAlertWorkflowPanel: [],
 });
-jest.mock(
+vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel',
-  () => ({
-    useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
-  })
+  () => {
+      const mocked = {
+        useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const mockUseRunDocumentWorkflowPanel = jest.fn().mockReturnValue({
+const mockUseRunDocumentWorkflowPanel = vi.fn().mockReturnValue({
   runWorkflowMenuItem: [],
   runDocumentWorkflowPanel: [],
 });
-jest.mock(
+vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel',
-  () => ({
-    useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
-  })
+  () => {
+      const mocked = {
+        useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-jest.mock('../../../../detections/components/user_info', () => ({
-  useUserData: jest.fn().mockReturnValue([{ hasIndexWrite: true }]),
-}));
+vi.mock('../../../../detections/components/user_info', () => {
+      const mocked = {
+      useUserData: vi.fn().mockReturnValue([{ hasIndexWrite: true }]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
-jest.mock(
+vi.mock(
   '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
-  () => ({
-    useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true, hasIndexWrite: true }),
-  })
+  () => {
+      const mocked = {
+        useAlertsPrivileges: vi.fn().mockReturnValue({ hasAlertsUpdate: true, hasIndexWrite: true }),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock('../../../../cases/components/use_insert_timeline');
+vi.mock('../../../../cases/components/use_insert_timeline');
 
-jest.mock('../../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-  }),
-}));
+vi.mock('../../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: vi.fn().mockReturnValue({
+        addError: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_license', () => ({
-  useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true, isEnterprise: () => false }),
-}));
+vi.mock('../../../../common/hooks/use_license', () => {
+      const mocked = {
+      useLicense: vi.fn().mockReturnValue({ isPlatinumPlus: () => true, isEnterprise: () => false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock(
+vi.mock(
   '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_status',
   () => {
     return {
-      useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
+      useEndpointHostIsolationStatus: vi.fn().mockReturnValue({
         loading: false,
         isIsolated: false,
         agentStatus: 'healthy',
@@ -105,20 +126,20 @@ describe('take action dropdown', () => {
     defaultProps = {
       dataFormattedForFieldBrowser: mockAlertDetailsData as TimelineEventsDetailsItem[],
       dataAsNestedObject: getDetectionAlertMock(),
-      handleOnEventClosed: jest.fn(),
-      onAddEventFilterClick: jest.fn(),
-      onAddExceptionTypeClick: jest.fn(),
-      onAddIsolationStatusClick: jest.fn(),
-      refetch: jest.fn(),
-      refetchFlyoutData: jest.fn(),
+      handleOnEventClosed: vi.fn(),
+      onAddEventFilterClick: vi.fn(),
+      onAddExceptionTypeClick: vi.fn(),
+      onAddIsolationStatusClick: vi.fn(),
+      refetch: vi.fn(),
+      refetchFlyoutData: vi.fn(),
       scopeId: TimelineId.active,
-      onOsqueryClick: jest.fn(),
+      onOsqueryClick: vi.fn(),
       searchHit: { _index: 'test-index', _id: 'test-id' } as SearchHit,
     };
 
     mockStartServicesMock = createStartServicesMock();
 
-    (useKibana as jest.Mock).mockImplementation(() => {
+    (useKibana as Mock).mockImplementation(() => {
       return {
         services: {
           ...mockStartServicesMock,
@@ -126,12 +147,12 @@ describe('take action dropdown', () => {
           cases: {
             ...mockCasesContract(),
             helpers: {
-              canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
+              canUseCases: vi.fn().mockReturnValue(allCasesPermissions()),
               getRuleIdFromEvent: () => null,
             },
           },
           osquery: {
-            isOsqueryAvailable: jest.fn().mockReturnValue(true),
+            isOsqueryAvailable: vi.fn().mockReturnValue(true),
           },
           application: {
             capabilities: {
@@ -143,11 +164,11 @@ describe('take action dropdown', () => {
       };
     });
 
-    (useHttp as jest.Mock).mockReturnValue(mockStartServicesMock.http);
+    (useHttp as Mock).mockReturnValue(mockStartServicesMock.http);
   });
 
   beforeEach(() => {
-    (useUserPrivileges as jest.Mock).mockReturnValue(getUserPrivilegesMockDefaultValue());
+    (useUserPrivileges as Mock).mockReturnValue(getUserPrivilegesMockDefaultValue());
   });
 
   test('should render takeActionButton', () => {
@@ -176,7 +197,7 @@ describe('take action dropdown', () => {
     let wrapper: ReactWrapper;
 
     beforeAll(() => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         ...getUserPrivilegesMockDefaultValue(),
         timelinePrivileges: { read: true },
         rulesPrivileges: {
@@ -279,7 +300,7 @@ describe('take action dropdown', () => {
 
   describe('privileges', () => {
     test('should not render "Investigate in Timeline" when the user does not have timeline privileges', async () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         ...getUserPrivilegesMockDefaultValue(),
         timelinePrivileges: { read: false },
       });
@@ -398,10 +419,10 @@ describe('take action dropdown', () => {
     });
 
     describe('"Add Endpoint exception" button', () => {
-      const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
+      const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as Mock;
 
       beforeEach(() => {
-        (useUserPrivileges as jest.Mock).mockReturnValue(
+        (useUserPrivileges as Mock).mockReturnValue(
           getUserPrivilegesMockDefaultValue({
             rulesPrivileges: {
               ...getUserPrivilegesMockDefaultValue().rulesPrivileges,
@@ -476,7 +497,7 @@ describe('take action dropdown', () => {
       });
 
       test('should enable the "Add Endpoint event filter" button if provided endpoint event and has right privileges', async () => {
-        (useUserPrivileges as jest.Mock).mockReturnValue({
+        (useUserPrivileges as Mock).mockReturnValue({
           ...mockInitialUserPrivilegesState(),
           endpointPrivileges: { loading: false, canWriteEventFilters: true },
         });
@@ -489,7 +510,7 @@ describe('take action dropdown', () => {
       });
 
       test('should hide the "Add Endpoint event filter" button if no write event filters privileges', async () => {
-        (useUserPrivileges as jest.Mock).mockReturnValue({
+        (useUserPrivileges as Mock).mockReturnValue({
           ...mockInitialUserPrivilegesState(),
           endpointPrivileges: { loading: false, canWriteEventFilters: false },
         });
@@ -562,7 +583,7 @@ describe('take action dropdown', () => {
     beforeEach(() => {
       // Timeline read privilege is required so investigateInTimelineActionItems is non-empty,
       // which allows the dropdown to render for remote documents (only that item is shown).
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      (useUserPrivileges as Mock).mockReturnValue({
         ...getUserPrivilegesMockDefaultValue(),
         timelinePrivileges: { read: true },
       });

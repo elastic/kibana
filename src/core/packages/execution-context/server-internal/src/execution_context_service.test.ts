@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { setTimeout as timer } from 'timers/promises';
 import { BehaviorSubject } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
@@ -386,7 +388,7 @@ describe('ExecutionContextService', () => {
           new BehaviorSubject({ enabled: false })
         );
         const disabledService = new ExecutionContextService(coreWithDisabledService).setup();
-        const fn = jest.fn();
+        const fn = vi.fn();
 
         disabledService.withContext(
           {

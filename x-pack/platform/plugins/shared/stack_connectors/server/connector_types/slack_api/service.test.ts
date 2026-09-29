@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import axios from 'axios';
 import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { Logger } from '@kbn/core/server';
@@ -16,19 +19,19 @@ import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { SlackApiConfig } from '@kbn/connector-schemas/slack_api';
 import { CONNECTOR_ID } from '@kbn/connector-schemas/slack_api';
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 
-jest.mock('axios');
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+vi.mock('axios');
+vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
+  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
   return {
     ...originalUtils,
-    request: jest.fn(),
+    request: vi.fn(),
   };
 });
 
-axios.create = jest.fn(() => axios);
-const requestMock = request as jest.Mock;
+axios.create = vi.fn(() => axios);
+const requestMock = request as Mock;
 const configurationUtilities = actionsConfigMock.create();
 let connectorUsageCollector: ConnectorUsageCollector;
 
@@ -140,7 +143,7 @@ describe('Slack API service', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Secrets validation', () => {
@@ -436,7 +439,7 @@ describe('Slack API service', () => {
 
   describe('Channel names', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     const methods = [

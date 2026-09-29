@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { of } from 'rxjs';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
@@ -16,9 +19,12 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { getScheduledQueryResultsRoute } from './get_scheduled_query_results_route';
 
-jest.mock('../../utils/get_internal_saved_object_client', () => ({
-  createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
-}));
+vi.mock('../../utils/get_internal_saved_object_client', () => {
+      const mocked = {
+      createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ROUTE_PATH = '/api/osquery/scheduled_results/{scheduleId}/{executionCount}/results';
 
@@ -28,21 +34,21 @@ const createMockRouter = () => {
   return httpService.createRouter();
 };
 
-const createMockContext = (mockSearchFn: jest.Mock) => {
+const createMockContext = (mockSearchFn: Mock) => {
   const mockCoreContext = coreMock.createRequestHandlerContext();
 
   return {
     core: Promise.resolve(mockCoreContext),
     search: Promise.resolve({
       search: mockSearchFn,
-      saveSession: jest.fn(),
-      getSession: jest.fn(),
-      findSessions: jest.fn(),
-      updateSession: jest.fn(),
-      cancelSession: jest.fn(),
-      deleteSession: jest.fn(),
-      extendSession: jest.fn(),
-      getSessionStatus: jest.fn(),
+      saveSession: vi.fn(),
+      getSession: vi.fn(),
+      findSessions: vi.fn(),
+      updateSession: vi.fn(),
+      cancelSession: vi.fn(),
+      deleteSession: vi.fn(),
+      extendSession: vi.fn(),
+      getSessionStatus: vi.fn(),
     } as unknown as IScopedSearchClient),
   } as unknown as DataRequestHandlerContext;
 };
@@ -65,13 +71,13 @@ describe('getScheduledQueryResultsRoute', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockOsqueryContext = {
-      isCpsActive: jest.fn().mockResolvedValue(false),
+      isCpsActive: vi.fn().mockResolvedValue(false),
       service: {
-        getIntegrationNamespaces: jest.fn().mockResolvedValue({}),
+        getIntegrationNamespaces: vi.fn().mockResolvedValue({}),
       },
-      logFactory: { get: jest.fn() },
+      logFactory: { get: vi.fn() },
     } as unknown as OsqueryAppContext;
   });
 
@@ -104,7 +110,7 @@ describe('getScheduledQueryResultsRoute', () => {
       inspect: { dsl: [] },
     };
 
-    const mockSearchFn = jest.fn().mockReturnValue(of(mockResultsResponse));
+    const mockSearchFn = vi.fn().mockReturnValue(of(mockResultsResponse));
 
     registerRoute();
 
@@ -187,7 +193,7 @@ describe('getScheduledQueryResultsRoute', () => {
         inspect: { dsl: [] },
       };
 
-      const mockSearchFn = jest.fn().mockReturnValue(of(mockResultsResponse));
+      const mockSearchFn = vi.fn().mockReturnValue(of(mockResultsResponse));
 
       registerRoute();
 
@@ -230,7 +236,7 @@ describe('getScheduledQueryResultsRoute', () => {
         inspect: { dsl: [] },
       };
 
-      const mockSearchFn = jest.fn().mockReturnValue(of(mockResultsResponse));
+      const mockSearchFn = vi.fn().mockReturnValue(of(mockResultsResponse));
 
       registerRoute();
 
@@ -248,7 +254,7 @@ describe('getScheduledQueryResultsRoute', () => {
   });
 
   it('should return 500 when search strategy throws', async () => {
-    const mockSearchFn = jest.fn().mockImplementation(() => {
+    const mockSearchFn = vi.fn().mockImplementation(() => {
       throw new Error('ES unavailable');
     });
 
@@ -269,19 +275,19 @@ describe('getScheduledQueryResultsRoute', () => {
   });
 
   describe('space scoping', () => {
-    const runWithActiveSpace = async (getActiveSpace?: jest.Mock) => {
-      const mockSearchFn = jest
+    const runWithActiveSpace = async (getActiveSpace?: Mock) => {
+      const mockSearchFn = vi
         .fn()
         .mockReturnValue(
           of({ edges: [], rawResponse: { hits: { total: 0 } }, inspect: { dsl: [] } })
         );
       mockOsqueryContext = {
-        isCpsActive: jest.fn().mockResolvedValue(false),
+        isCpsActive: vi.fn().mockResolvedValue(false),
         service: {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue({}),
+          getIntegrationNamespaces: vi.fn().mockResolvedValue({}),
           ...(getActiveSpace ? { getActiveSpace } : {}),
         },
-        logFactory: { get: jest.fn() },
+        logFactory: { get: vi.fn() },
       } as unknown as OsqueryAppContext;
 
       registerRoute();
@@ -298,7 +304,7 @@ describe('getScheduledQueryResultsRoute', () => {
     };
 
     it('passes the active named space to the search strategy', async () => {
-      const getActiveSpace = jest.fn().mockResolvedValue({ id: 'my-space' });
+      const getActiveSpace = vi.fn().mockResolvedValue({ id: 'my-space' });
 
       const mockSearchFn = await runWithActiveSpace(getActiveSpace);
 
@@ -310,7 +316,7 @@ describe('getScheduledQueryResultsRoute', () => {
     });
 
     it('falls back to the default space when getActiveSpace resolves no space', async () => {
-      const getActiveSpace = jest.fn().mockResolvedValue(undefined);
+      const getActiveSpace = vi.fn().mockResolvedValue(undefined);
 
       const mockSearchFn = await runWithActiveSpace(getActiveSpace);
 
@@ -330,20 +336,20 @@ describe('getScheduledQueryResultsRoute', () => {
     });
 
     it('passes matchMissingSpaceId false when CPS is enabled', async () => {
-      const mockSearchFn = jest
+      const mockSearchFn = vi
         .fn()
         .mockReturnValue(
           of({ edges: [], rawResponse: { hits: { total: 0 } }, inspect: { dsl: [] } })
         );
-      const mockCpsSearch = jest.fn().mockReturnValue({ search: mockSearchFn });
+      const mockCpsSearch = vi.fn().mockReturnValue({ search: mockSearchFn });
       mockOsqueryContext = {
-        isCpsActive: jest.fn().mockResolvedValue(true),
+        isCpsActive: vi.fn().mockResolvedValue(true),
         service: {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue({}),
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getIntegrationNamespaces: vi.fn().mockResolvedValue({}),
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
         },
-        logFactory: { get: jest.fn() },
-        getStartServices: jest
+        logFactory: { get: vi.fn() },
+        getStartServices: vi
           .fn()
           .mockResolvedValue([
             { elasticsearch: { client: { asInternalUser: {} } } },
@@ -370,22 +376,22 @@ describe('getScheduledQueryResultsRoute', () => {
 
   describe('when CPS is enabled', () => {
     it('uses the CPS-scoped search client', async () => {
-      const mockCpsSearchFn = jest
+      const mockCpsSearchFn = vi
         .fn()
         .mockReturnValue(
           of({ edges: [], rawResponse: { hits: { total: 0 } }, inspect: { dsl: [] } })
         );
-      const mockCpsSearch = jest.fn().mockReturnValue({ search: mockCpsSearchFn });
-      const contextSearchFn = jest.fn();
+      const mockCpsSearch = vi.fn().mockReturnValue({ search: mockCpsSearchFn });
+      const contextSearchFn = vi.fn();
 
       mockOsqueryContext = {
-        isCpsActive: jest.fn().mockResolvedValue(true),
+        isCpsActive: vi.fn().mockResolvedValue(true),
         service: {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue({}),
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getIntegrationNamespaces: vi.fn().mockResolvedValue({}),
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
         },
-        logFactory: { get: jest.fn() },
-        getStartServices: jest
+        logFactory: { get: vi.fn() },
+        getStartServices: vi
           .fn()
           .mockResolvedValue([
             { elasticsearch: { client: { asInternalUser: {} } } },

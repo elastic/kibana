@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   MAX_ASSESSMENT_NOTE_LENGTH,
@@ -31,27 +34,27 @@ const createSignificantEvent = (overrides: Partial<SignificantEvent> = {}): Sign
 });
 
 const makeAlertEventsClient = (
-  overrides: Partial<jest.Mocked<AlertEventsClientApi>> = {}
-): jest.Mocked<AlertEventsClientApi> =>
+  overrides: Partial<Mocked<AlertEventsClientApi>> = {}
+): Mocked<AlertEventsClientApi> =>
   ({
-    createAlertEvent: jest.fn().mockResolvedValue(undefined),
+    createAlertEvent: vi.fn().mockResolvedValue(undefined),
     ...overrides,
-  } as jest.Mocked<AlertEventsClientApi>);
+  } as Mocked<AlertEventsClientApi>);
 
-const makeLogger = (): jest.Mocked<Logger> =>
+const makeLogger = (): Mocked<Logger> =>
   ({
-    error: jest.fn(),
-    warn: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+  } as unknown as Mocked<Logger>);
 
 /** @param hits - results returned for the single findByEventId esql query. */
 const createEventClient = (hits: SignificantEvent[]) => {
   const okResponse = { errors: false, items: [] } as unknown as BulkResponse;
-  const dataStreamClient = { create: jest.fn().mockResolvedValue(okResponse) };
+  const dataStreamClient = { create: vi.fn().mockResolvedValue(okResponse) };
 
-  const queryMock = jest.fn().mockResolvedValue({
+  const queryMock = vi.fn().mockResolvedValue({
     columns: [{ name: '_source' }],
     values: hits.map((event) => [{ ...event }]),
   });
@@ -285,7 +288,7 @@ describe('updateSignificantEventStatus', () => {
       const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'open' });
       const { client } = createEventClient([existing]);
       const alertEventsClient = makeAlertEventsClient({
-        createAlertEvent: jest.fn().mockRejectedValue(new Error('index unavailable')),
+        createAlertEvent: vi.fn().mockRejectedValue(new Error('index unavailable')),
       });
       const logger = makeLogger();
 

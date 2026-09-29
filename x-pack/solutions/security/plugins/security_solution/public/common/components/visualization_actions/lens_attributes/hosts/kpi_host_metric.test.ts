@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
 import { renderHook } from '@testing-library/react';
 import { wrapper } from '../../mocks';
@@ -15,19 +17,22 @@ import { buildKpiHostMetricLensAttributes, kpiHostMetricLensAttributes } from '.
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
-jest.mock('../../../../utils/route/use_route_spy', () => ({
-  useRouteSpy: jest.fn().mockReturnValue([
-    {
-      detailName: 'mockHost',
-      pageName: 'hosts',
-      tabName: 'events',
-    },
-  ]),
-}));
+vi.mock('../../../../utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: vi.fn().mockReturnValue([
+        {
+          detailName: 'mockHost',
+          pageName: 'hosts',
+          tabName: 'events',
+        },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('kpiHostMetricLensAttributes', () => {
   beforeAll(() => {
-    jest
+    vi
       .mocked(useDataView)
       .mockReturnValue(withIndices(['auditbeat-mytest-*'], 'security-solution-my-test'));
   });

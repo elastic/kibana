@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { useGetMaintenanceWindow } from './use_get_maintenance_window';
 
-const mockAddDanger = jest.fn();
+const mockAddDanger = vi.fn();
 
-jest.mock('../utils/kibana_react', () => {
-  const originalModule = jest.requireActual('../utils/kibana_react');
+vi.mock('../utils/kibana_react', async () => {
+  const originalModule = (await vi.importActual('../utils/kibana_react'));
   return {
     ...originalModule,
     useKibana: () => {
@@ -28,20 +30,26 @@ jest.mock('../utils/kibana_react', () => {
     },
   };
 });
-jest.mock('../services/get', () => ({
-  getMaintenanceWindow: jest.fn(),
-}));
-jest.mock('../helpers/convert_from_maintenance_window_to_form', () => ({
-  convertFromMaintenanceWindowToForm: jest.fn(),
-}));
+vi.mock('../services/get', () => {
+      const mocked = {
+      getMaintenanceWindow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../helpers/convert_from_maintenance_window_to_form', () => {
+      const mocked = {
+      convertFromMaintenanceWindowToForm: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getMaintenanceWindow } = jest.requireMock('../services/get');
+const { getMaintenanceWindow } = (await vi.importMock('../services/get'));
 
 let appMockRenderer: AppMockRenderer;
 
 describe('useGetMaintenanceWindow', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     appMockRenderer = createAppMockRenderer();
   });

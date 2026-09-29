@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { AuthConfig } from './auth_config';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -14,19 +17,19 @@ import { AuthType } from '@kbn/connector-schemas/common/auth/constants';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
 import { useSecretHeaders } from './use_secret_headers';
 
-jest.mock('./use_secret_headers');
+vi.mock('./use_secret_headers');
 
-const useSecretHeadersMock = useSecretHeaders as jest.Mock;
+const useSecretHeadersMock = useSecretHeaders as Mock;
 
 describe('AuthConfig with isOAuth2PasswordEnabled on', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   beforeEach(() => {
     useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not render the OAuth2 Password option by default', async () => {

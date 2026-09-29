@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SmlListItem } from '@kbn/agent-builder-sml-plugin/server';
@@ -12,28 +14,34 @@ import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { createConnectorSmlType } from './connector';
 
-jest.mock('@kbn/connector-specs', () => ({
-  getConnectorSpec: jest.fn(),
-}));
+vi.mock('@kbn/connector-specs', () => {
+      const mocked = {
+      getConnectorSpec: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../skills/connector_authoring/utils', () => ({
-  isChatCallableConnectorType: jest.fn(),
-}));
+vi.mock('../skills/connector_authoring/utils', () => {
+      const mocked = {
+      isChatCallableConnectorType: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { getConnectorSpec } = jest.requireMock('@kbn/connector-specs');
-const { isChatCallableConnectorType } = jest.requireMock('../skills/connector_authoring/utils');
+const { getConnectorSpec } = (await vi.importMock('@kbn/connector-specs'));
+const { isChatCallableConnectorType } = (await vi.importMock('../skills/connector_authoring/utils'));
 
 const mockFinder = {
-  find: jest.fn(),
-  close: jest.fn().mockResolvedValue(undefined),
+  find: vi.fn(),
+  close: vi.fn().mockResolvedValue(undefined),
 };
 
 const mockSavedObjectsClient = {
-  get: jest.fn(),
-  createPointInTimeFinder: jest.fn().mockReturnValue(mockFinder),
+  get: vi.fn(),
+  createPointInTimeFinder: vi.fn().mockReturnValue(mockFinder),
 };
 
-const mockGetActionSavedObjectsClient = jest.fn().mockResolvedValue(mockSavedObjectsClient);
+const mockGetActionSavedObjectsClient = vi.fn().mockResolvedValue(mockSavedObjectsClient);
 const mockLogger = loggingSystemMock.createLogger();
 
 const createContext = () => ({
@@ -61,7 +69,7 @@ describe('connectorSmlType', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('id', () => {
@@ -331,17 +339,17 @@ describe('connectorSmlType', () => {
           searchMessages: {
             isTool: true,
             description: 'Search Slack messages',
-            handler: jest.fn(),
+            handler: vi.fn(),
           },
           sendMessage: {
             isTool: true,
             description: 'Send a message to a channel',
-            handler: jest.fn(),
+            handler: vi.fn(),
           },
           internalAction: {
             isTool: false,
             description: 'Internal only',
-            handler: jest.fn(),
+            handler: vi.fn(),
           },
         },
       });

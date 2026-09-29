@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import { addBasePath } from '..';
 import { registerGetIlmPoliciesRoute } from './register_get_ilm_policies_route';
 import type { RequestMock } from '../../../test/helpers';
@@ -89,7 +91,7 @@ describe('[Index management API Routes] Data streams ILM policies', () => {
   });
 
   test('reports manage_ilm as true without checking privileges when security is disabled', async () => {
-    (routeDependencies.config.isSecurityEnabled as jest.Mock).mockReturnValueOnce(false);
+    (routeDependencies.config.isSecurityEnabled as Mock).mockReturnValueOnce(false);
     hasPrivileges.mockClear();
     getLifecycle.mockResolvedValue({});
 

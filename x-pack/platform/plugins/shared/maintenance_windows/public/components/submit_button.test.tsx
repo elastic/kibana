@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
@@ -17,7 +19,7 @@ import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 
 describe('SubmitButton', () => {
-  const onSubmit = jest.fn();
+  const onSubmit = vi.fn();
 
   const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
     const { form } = useForm<FormProps>({
@@ -34,7 +36,7 @@ describe('SubmitButton', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
   });
 

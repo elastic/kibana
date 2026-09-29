@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { renderParameterTemplates } from './render';
 import Mustache from 'mustache';
@@ -23,7 +25,7 @@ const variables = { domain: 'm0zepcuuu2' };
 
 describe('D3 Security - renderParameterTemplates', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should not render body on test action', () => {
@@ -47,7 +49,7 @@ describe('D3 Security - renderParameterTemplates', () => {
 
   it('should render error body', () => {
     const errorMessage = 'test error';
-    jest.spyOn(Mustache, 'render').mockImplementation(() => {
+    vi.spyOn(Mustache, 'render').mockImplementation(() => {
       throw new Error(errorMessage);
     });
     const result = renderParameterTemplates(logger, params, variables);

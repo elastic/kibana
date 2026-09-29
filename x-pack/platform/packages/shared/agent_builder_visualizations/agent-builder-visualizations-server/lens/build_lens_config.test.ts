@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
@@ -14,54 +17,66 @@ import type { Logger } from '@kbn/logging';
 import { createVisualizationGraph } from './graph_lens';
 import { buildLensConfig } from './build_lens_config';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  validateEsqlQuery: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      validateEsqlQuery: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-server-utils', () => ({
-  buildServerESQLCallbacks: jest.fn(() => ({})),
-}));
+vi.mock('@kbn/esql-server-utils', () => {
+      const mocked = {
+      buildServerESQLCallbacks: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./graph_lens', () => ({
-  ...jest.requireActual('./graph_lens'),
-  createVisualizationGraph: jest.fn(),
-}));
+vi.mock('./graph_lens', async () => {
+      const mocked = {
+      ...(await vi.importActual('./graph_lens')),
+      createVisualizationGraph: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./schemas', () => ({
-  getSchemaForChartType: jest.fn(() => ({})),
-}));
+vi.mock('./schemas', () => {
+      const mocked = {
+      getSchemaForChartType: vi.fn(() => ({})),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedValidateEsqlQuery = jest.mocked(validateEsqlQuery);
-const mockedBuildCallbacks = jest.mocked(buildServerESQLCallbacks);
-const mockedCreateGraph = jest.mocked(createVisualizationGraph);
+const mockedValidateEsqlQuery = vi.mocked(validateEsqlQuery);
+const mockedBuildCallbacks = vi.mocked(buildServerESQLCallbacks);
+const mockedCreateGraph = vi.mocked(createVisualizationGraph);
 
 const createMockLogger = (): Logger =>
   ({
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger);
 
 describe('buildLensConfig', () => {
   const events = {} as ToolEventEmitter;
   const esClient = { asCurrentUser: {} } as IScopedClusterClient;
   const modelProvider = {
-    getDefaultModel: jest.fn().mockResolvedValue({}),
+    getDefaultModel: vi.fn().mockResolvedValue({}),
   } as unknown as ModelProvider;
 
   const PROVIDED_ESQL = 'FROM logs-* | STATS count = COUNT(*)';
   const AUTHORING_NOTE = 'Created a titleless metric showing the total log count.';
 
   let logger: Logger;
-  let invoke: jest.Mock;
+  let invoke: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedValidateEsqlQuery.mockReset();
     mockedValidateEsqlQuery.mockResolvedValue(undefined); // default: query is valid
     logger = createMockLogger();
-    invoke = jest.fn().mockResolvedValue({
+    invoke = vi.fn().mockResolvedValue({
       validatedConfig: { type: 'metric' },
       authoringNote: AUTHORING_NOTE,
       error: null,

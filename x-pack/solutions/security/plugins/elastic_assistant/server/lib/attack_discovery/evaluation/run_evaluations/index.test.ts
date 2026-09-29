@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
@@ -17,41 +20,50 @@ import { type DefaultAttackDiscoveryGraph } from '@kbn/discoveries';
 import { mockExperimentConnector } from '../__mocks__/mock_experiment_connector';
 import { getLlmType } from '../../../../routes/utils';
 
-jest.mock('@kbn/langchain/server', () => ({
-  ...jest.requireActual('@kbn/langchain/server'),
+vi.mock('@kbn/langchain/server', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/langchain/server')),
 
-  ActionsClientLlm: jest.fn(),
-}));
+      ActionsClientLlm: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('langsmith/evaluation', () => ({
-  evaluate: jest.fn(async (predict: Function) =>
-    predict({
-      overrides: {
-        errors: ['test-error'],
-      },
-    })
-  ),
-}));
+vi.mock('langsmith/evaluation', () => {
+      const mocked = {
+      evaluate: vi.fn(async (predict: Function) =>
+        predict({
+          overrides: {
+            errors: ['test-error'],
+          },
+        })
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../helpers/get_custom_evaluator', () => ({
-  getCustomEvaluator: jest.fn(),
-}));
+vi.mock('../helpers/get_custom_evaluator', () => {
+      const mocked = {
+      getCustomEvaluator: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../helpers/get_evaluator_llm', () => {
-  const mockLlm = jest.fn() as unknown as ActionsClientLlm;
+vi.mock('../helpers/get_evaluator_llm', () => {
+  const mockLlm = vi.fn() as unknown as ActionsClientLlm;
 
   return {
-    getEvaluatorLlm: jest.fn().mockResolvedValue(mockLlm),
+    getEvaluatorLlm: vi.fn().mockResolvedValue(mockLlm),
   };
 });
 
 const actionsClient = {
-  get: jest.fn(),
+  get: vi.fn(),
 } as unknown as ActionsClient;
 const connectorTimeout = 1000;
 const datasetName = 'test-dataset';
 const evaluatorConnectorId = 'test-evaluator-connector-id';
-const getInferenceConnectorById = jest.fn();
+const getInferenceConnectorById = vi.fn();
 const inferenceClient = {} as InferenceClient;
 const langSmithApiKey = 'test-api-key';
 const logger = loggerMock.create();
@@ -83,7 +95,7 @@ const graphs: Array<{
   };
 
   const graph = {
-    invoke: jest.fn().mockResolvedValue({}),
+    invoke: vi.fn().mockResolvedValue({}),
   } as unknown as DefaultAttackDiscoveryGraph;
 
   return {
@@ -96,7 +108,7 @@ const graphs: Array<{
 });
 
 describe('runEvaluations', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('predict() invokes the graph with the expected overrides', async () => {
     await runEvaluations({
@@ -126,7 +138,7 @@ describe('runEvaluations', () => {
   it('catches and logs errors that occur during evaluation', async () => {
     const error = new Error('Test error');
 
-    (graphs[0].graph.invoke as jest.Mock).mockRejectedValue(error);
+    (graphs[0].graph.invoke as Mock).mockRejectedValue(error);
 
     await runEvaluations({
       actionsClient,

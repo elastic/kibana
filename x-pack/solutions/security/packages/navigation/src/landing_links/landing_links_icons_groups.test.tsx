@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { SecurityPageName } from '../constants';
@@ -12,10 +14,10 @@ import { mockNavigateTo, mockGetAppUrl } from '../../mocks/navigation';
 import type { NavigationLink } from '../types';
 import { LandingLinksIconsGroups } from './landing_links_icons_groups';
 
-jest.mock('../navigation');
+vi.mock('../navigation');
 
 mockGetAppUrl.mockImplementation(({ deepLinkId }: { deepLinkId: string }) => `/${deepLinkId}`);
-const mockOnLinkClick = jest.fn();
+const mockOnLinkClick = vi.fn();
 
 const items: NavigationLink[] = [
   {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fetchFromSource, fetchFromV2AndSource, settleFetch } from './fetch_from_sources';
 import { shouldSwallowFetchError } from './should_swallow_fetch_error';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
@@ -106,7 +108,7 @@ describe('fetchFromSource', () => {
   it('returns the source id on failure', async () => {
     const error = new Error('source failure');
     const source = createTestEpisodeSource({
-      fetchEpisodes: jest.fn().mockRejectedValue(error),
+      fetchEpisodes: vi.fn().mockRejectedValue(error),
     });
 
     await expect(fetchFromSource(source, (s) => s.fetchEpisodes({} as never))).resolves.toEqual({
@@ -119,7 +121,7 @@ describe('fetchFromSource', () => {
 describe('fetchFromV2AndSource', () => {
   it('returns both results when v2 and the additional source succeed', async () => {
     const source = createTestEpisodeSource({
-      fetchKpis: jest.fn().mockResolvedValue({ alerts_count: 10 }),
+      fetchKpis: vi.fn().mockResolvedValue({ alerts_count: 10 }),
     });
 
     await expect(
@@ -138,7 +140,7 @@ describe('fetchFromV2AndSource', () => {
   it('keeps additional data when v2 fails', async () => {
     const v2Error = new Error('v2 boom');
     const source = createTestEpisodeSource({
-      fetchKpis: jest.fn().mockResolvedValue({ alerts_count: 10 }),
+      fetchKpis: vi.fn().mockResolvedValue({ alerts_count: 10 }),
     });
 
     await expect(
@@ -157,7 +159,7 @@ describe('fetchFromV2AndSource', () => {
   it('keeps v2 data when the additional source fails', async () => {
     const sourceError = new Error('classic boom');
     const source = createTestEpisodeSource({
-      fetchKpis: jest.fn().mockRejectedValue(sourceError),
+      fetchKpis: vi.fn().mockRejectedValue(sourceError),
     });
 
     await expect(
@@ -188,9 +190,9 @@ describe('fetchFromV2AndSource', () => {
   });
 
   it('skips v2 and returns only additional data when queryV2Source is false', async () => {
-    const v2 = jest.fn();
+    const v2 = vi.fn();
     const source = createTestEpisodeSource({
-      fetchKpis: jest.fn().mockResolvedValue({ alerts_count: 10 }),
+      fetchKpis: vi.fn().mockResolvedValue({ alerts_count: 10 }),
     });
 
     await expect(

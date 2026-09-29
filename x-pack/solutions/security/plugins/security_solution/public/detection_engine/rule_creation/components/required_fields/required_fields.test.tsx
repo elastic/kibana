@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { screen, render, act, fireEvent, waitFor } from '@testing-library/react';
@@ -445,7 +447,7 @@ describe('RequiredFields form part', () => {
     });
 
     it('form is valid when both field name and type are empty', async () => {
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm onSubmit={handleSubmit} />);
 
@@ -462,7 +464,7 @@ describe('RequiredFields form part', () => {
 
   describe('form submission', () => {
     it('submits undefined when no required fields are selected', async () => {
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm onSubmit={handleSubmit} />);
 
@@ -479,7 +481,7 @@ describe('RequiredFields form part', () => {
     it('submits undefined when all selected fields were removed', async () => {
       const initialState = [{ name: 'field1', type: 'string' }];
 
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm initialState={initialState} onSubmit={handleSubmit} />);
 
@@ -502,7 +504,7 @@ describe('RequiredFields form part', () => {
         createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
       ];
 
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(<TestForm indexPatternFields={indexPatternFields} onSubmit={handleSubmit} />);
 
@@ -527,7 +529,7 @@ describe('RequiredFields form part', () => {
         createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
       ];
 
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(
         <TestForm
@@ -553,7 +555,7 @@ describe('RequiredFields form part', () => {
         createIndexPatternField({ name: 'field2', esTypes: ['keyword', 'date'] }),
       ];
 
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(
         <TestForm
@@ -588,7 +590,7 @@ describe('RequiredFields form part', () => {
         createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
       ];
 
-      const handleSubmit = jest.fn();
+      const handleSubmit = vi.fn();
 
       render(
         <TestForm

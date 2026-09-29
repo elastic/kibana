@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EpisodesHistogram, type EpisodesHistogramProps } from './episodes_histogram';
@@ -12,27 +14,30 @@ import { useUnifiedHistogram } from '@kbn/unified-histogram';
 import { useEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_histogram_query';
 import { useSpaceId } from '@kbn/alerting-v2-episodes-ui/hooks/use_space_id';
 
-jest.mock('@kbn/unified-histogram', () => ({
-  useUnifiedHistogram: jest.fn(),
-  UnifiedHistogramChart: ({
-    renderToggleActions,
-  }: {
-    renderToggleActions: () => React.ReactNode;
-  }) => <div data-test-subj="unifiedHistogramChart">{renderToggleActions?.()}</div>,
-  UnifiedBreakdownFieldSelector: ({ breakdown }: { breakdown: { field?: { name: string } } }) => (
-    <div
-      data-test-subj="unifiedBreakdownFieldSelector"
-      data-selected-field={breakdown?.field?.name ?? ''}
-    />
-  ),
-}));
+vi.mock('@kbn/unified-histogram', () => {
+      const mocked = {
+      useUnifiedHistogram: vi.fn(),
+      UnifiedHistogramChart: ({
+        renderToggleActions,
+      }: {
+        renderToggleActions: () => React.ReactNode;
+      }) => <div data-test-subj="unifiedHistogramChart">{renderToggleActions?.()}</div>,
+      UnifiedBreakdownFieldSelector: ({ breakdown }: { breakdown: { field?: { name: string } } }) => (
+        <div
+          data-test-subj="unifiedBreakdownFieldSelector"
+          data-selected-field={breakdown?.field?.name ?? ''}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_space_id');
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episodes_histogram_query');
+vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_space_id');
+vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episodes_histogram_query');
 
-const mockUseUnifiedHistogram = jest.mocked(useUnifiedHistogram);
-const mockUseEpisodesHistogramQuery = jest.mocked(useEpisodesHistogramQuery);
-const mockUseSpaceId = jest.mocked(useSpaceId);
+const mockUseUnifiedHistogram = vi.mocked(useUnifiedHistogram);
+const mockUseEpisodesHistogramQuery = vi.mocked(useEpisodesHistogramQuery);
+const mockUseSpaceId = vi.mocked(useSpaceId);
 
 const mockTable = { type: 'datatable' as const, columns: [], rows: [] };
 
@@ -58,8 +63,8 @@ const defaultProps: EpisodesHistogramProps = {
   dataView: mockDataView,
   filterState: {},
   timeRange: { from: 'now-24h', to: 'now' },
-  onTimeRangeChange: jest.fn(),
-  onBreakdownFieldChange: jest.fn(),
+  onTimeRangeChange: vi.fn(),
+  onBreakdownFieldChange: vi.fn(),
 };
 
 mockUseSpaceId.mockReturnValue('default');
@@ -68,30 +73,30 @@ mockUseEpisodesHistogramQuery.mockReturnValue({
   isLoading: false,
   error: undefined,
   isCapHit: false,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
   sourceErrors: [],
 });
 mockUseUnifiedHistogram.mockReturnValue({
   isInitialized: true,
-  api: { fetch: jest.fn() } as any,
+  api: { fetch: vi.fn() } as any,
   chartProps: {} as any,
   layoutProps: {} as any,
 });
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseSpaceId.mockReturnValue('default');
   mockUseEpisodesHistogramQuery.mockReturnValue({
     table: mockTable,
     isLoading: false,
     error: undefined,
     isCapHit: false,
-    refetch: jest.fn(),
+    refetch: vi.fn(),
     sourceErrors: [],
   });
   mockUseUnifiedHistogram.mockReturnValue({
     isInitialized: true,
-    api: { fetch: jest.fn() } as any,
+    api: { fetch: vi.fn() } as any,
     chartProps: {} as any,
     layoutProps: {} as any,
   });
@@ -104,7 +109,7 @@ describe('EpisodesHistogram', () => {
       isLoading: false,
       error: undefined,
       isCapHit: true,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       sourceErrors: [],
     });
     render(<EpisodesHistogram {...defaultProps} />);
@@ -122,7 +127,7 @@ describe('EpisodesHistogram', () => {
       isLoading: false,
       error: new Error('ES|QL failed'),
       isCapHit: false,
-      refetch: jest.fn(),
+      refetch: vi.fn(),
       sourceErrors: [],
     });
     render(<EpisodesHistogram {...defaultProps} />);
@@ -137,7 +142,7 @@ describe('EpisodesHistogram', () => {
   });
 
   it('fetches the chart with an AbortController', () => {
-    const fetch = jest.fn();
+    const fetch = vi.fn();
     mockUseUnifiedHistogram.mockReturnValue({
       isInitialized: true,
       api: { fetch } as any,
@@ -153,7 +158,7 @@ describe('EpisodesHistogram', () => {
   it('does not render the chart when not yet initialized', () => {
     mockUseUnifiedHistogram.mockReturnValue({
       isInitialized: false,
-      api: { fetch: jest.fn() } as any,
+      api: { fetch: vi.fn() } as any,
     } as any);
     render(<EpisodesHistogram {...defaultProps} />);
     expect(screen.queryByTestId('unifiedHistogramChart')).not.toBeInTheDocument();

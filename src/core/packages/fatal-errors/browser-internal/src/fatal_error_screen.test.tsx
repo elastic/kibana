@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { pick } from 'lodash';
 import { act, render } from '@testing-library/react';
@@ -20,7 +23,7 @@ describe('FatalErrorScreen', () => {
   const errorBar: FatalError = { error: new Error('bar') };
 
   let resetWindow: () => void;
-  let children: jest.Mock;
+  let children: Mock;
   let error$: Subject<FatalError>;
   let result: ReturnType<typeof render>;
 
@@ -31,7 +34,7 @@ describe('FatalErrorScreen', () => {
     Object.defineProperties(window, {
       location: {
         value: {
-          reload: jest.fn(),
+          reload: vi.fn(),
         },
       },
     });
@@ -42,13 +45,13 @@ describe('FatalErrorScreen', () => {
   });
 
   beforeEach(() => {
-    children = jest.fn(() => 'something');
+    children = vi.fn(() => 'something');
     error$ = new Subject<FatalError>();
     result = render(<FatalErrorScreen error$={error$}>{children}</FatalErrorScreen>);
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should render children', async () => {

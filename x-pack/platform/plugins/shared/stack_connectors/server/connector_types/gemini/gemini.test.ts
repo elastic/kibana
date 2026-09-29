@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { GeminiConnector } from './gemini';
 import type { RunActionParams } from '@kbn/connector-schemas/gemini';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
@@ -20,17 +23,23 @@ import type { AxiosError } from 'axios';
 import { Transform } from 'stream';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
-jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
-jest.mock('@kbn/actions-plugin/server/sub_action_framework/helpers/validators', () => ({
-  assertURL: jest.fn(),
-}));
+vi.mock('../lib/gen_ai/create_gen_ai_dashboard');
+vi.mock('@kbn/actions-plugin/server/sub_action_framework/helpers/validators', () => {
+      const mocked = {
+      assertURL: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock the imported function
-jest.mock('@kbn/actions-plugin/server/lib/get_gcp_oauth_access_token', () => ({
-  getGoogleOAuthJwtAccessToken: jest.fn().mockResolvedValue('mock_access_token'),
-}));
+vi.mock('@kbn/actions-plugin/server/lib/get_gcp_oauth_access_token', () => {
+      const mocked = {
+      getGoogleOAuthJwtAccessToken: vi.fn().mockResolvedValue('mock_access_token'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-let mockRequest: jest.Mock;
+let mockRequest: Mock;
 
 describe('GeminiConnector', () => {
   const defaultResponse = {
@@ -59,10 +68,10 @@ describe('GeminiConnector', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // @ts-expect-error
-    mockRequest = connector.request = jest.fn().mockResolvedValue(defaultResponse);
+    mockRequest = connector.request = vi.fn().mockResolvedValue(defaultResponse);
   });
 
   const logger = loggingSystemMock.createLogger();
@@ -340,7 +349,7 @@ describe('GeminiConnector', () => {
       });
 
       it('signal and timeout is properly passed to runApi', async () => {
-        const signal = jest.fn();
+        const signal = vi.fn();
         const timeout = 200000;
         await connector.invokeAI({ ...aiAssistantBody, timeout, signal }, connectorUsageCollector);
         expect(mockRequest).toHaveBeenCalledWith(
@@ -374,7 +383,7 @@ describe('GeminiConnector', () => {
       });
 
       it('maxOutputTokens is passed to runApi when provided', async () => {
-        const signal = jest.fn();
+        const signal = vi.fn();
         const timeout = 200000;
         await connector.invokeAI(
           { ...withMaxOutputTokens, timeout, signal },
@@ -417,7 +426,7 @@ describe('GeminiConnector', () => {
       beforeEach(() => {
         stream = createStreamMock();
         stream.write(new Uint8Array([1, 2, 3]));
-        mockRequest = jest.fn().mockResolvedValue({ ...defaultResponse, data: stream.transform });
+        mockRequest = vi.fn().mockResolvedValue({ ...defaultResponse, data: stream.transform });
         // @ts-ignore
         connector.request = mockRequest;
       });
@@ -536,7 +545,7 @@ describe('GeminiConnector', () => {
       });
 
       it('signal and timeout is properly passed to streamApi', async () => {
-        const signal = jest.fn();
+        const signal = vi.fn();
         const timeout = 200000;
         await connector.invokeStream(
           { ...aiAssistantBody, timeout, signal },
@@ -580,7 +589,7 @@ describe('GeminiConnector', () => {
       });
 
       it('maxOutputTokens is passed to streamApi when provided', async () => {
-        const signal = jest.fn();
+        const signal = vi.fn();
         const timeout = 200000;
         await connector.invokeStream(
           { ...withMaxOutputTokens, timeout, signal },
@@ -660,13 +669,13 @@ describe('GeminiConnector', () => {
   });
 
   describe('Token dashboard', () => {
-    const mockGenAi = initDashboard as jest.Mock;
+    const mockGenAi = initDashboard as Mock;
     beforeEach(() => {
       // @ts-ignore
       connector.esClient.transport.request = mockRequest;
       mockRequest.mockResolvedValue({ has_all_requested: true });
       mockGenAi.mockResolvedValue({ success: true });
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
     it('the create dashboard API call returns available: true when user has correct permissions', async () => {
       const response = await connector.getDashboard({ dashboardId: '123' });

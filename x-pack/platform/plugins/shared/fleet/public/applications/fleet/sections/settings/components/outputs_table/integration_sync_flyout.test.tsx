@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { startCase } from 'lodash';
 import { render } from '@testing-library/react';
@@ -21,16 +24,19 @@ import { sendGetPackageInfoByKeyForRq, useStartServices } from '../../../../hook
 
 import { IntegrationSyncFlyout } from './integration_sync_flyout';
 
-jest.mock('../../../../hooks');
-jest.mock('../../../../../../components', () => ({
-  PackageIcon: () => <div data-test-subj="packageIcon" />,
-}));
+vi.mock('../../../../hooks');
+vi.mock('../../../../../../components', () => {
+      const mocked = {
+      PackageIcon: () => <div data-test-subj="packageIcon" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSendGetPackageInfoByKeyForRq = sendGetPackageInfoByKeyForRq as jest.Mock;
-const mockUseStartServices = useStartServices as jest.Mock;
+const mockSendGetPackageInfoByKeyForRq = sendGetPackageInfoByKeyForRq as Mock;
+const mockUseStartServices = useStartServices as Mock;
 
 describe('IntegrationSyncFlyout', () => {
-  const mockOnClose = jest.fn();
+  const mockOnClose = vi.fn();
   const mockSyncedIntegrationsStatus: GetRemoteSyncedIntegrationsStatusResponse = {
     integrations: [
       {

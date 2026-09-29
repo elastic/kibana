@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -20,11 +23,11 @@ const LINE_WIDTH = 'lineWidth';
 const DRAW_LINES = 'drawLinesBetweenPoints';
 
 describe('LineOptions component', () => {
-  let setChart: jest.Mock;
+  let setChart: Mock;
   let defaultProps: LineOptionsParams;
 
   beforeEach(() => {
-    setChart = jest.fn();
+    setChart = vi.fn();
 
     defaultProps = {
       chart: { ...seriesParam },

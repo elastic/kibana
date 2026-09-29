@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { mockTimelineData, mockTimelineModel, TestProviders } from '../../mock';
@@ -20,22 +23,25 @@ import { createFlyoutApiMock } from '../../../flyout_v2/use_flyout_api.mock';
 import { useNavigateToAnalyzer } from '../../../flyout/document_details/shared/hooks/use_navigate_to_analyzer';
 import { useNavigateToSessionView } from '../../../flyout/document_details/shared/hooks/use_navigate_to_session_view';
 
-jest.mock(
+vi.mock(
   '../../../detections/components/alerts_table/timeline_actions/alert_context_menu',
-  () => ({
-    AlertContextMenu: jest.fn(() => null),
-  })
+  () => {
+      const mocked = {
+        AlertContextMenu: vi.fn(() => null),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
-jest.mock('../../hooks/use_selector');
-jest.mock('../../../detections/hooks/use_is_analyzer_enabled');
-jest.mock('../../hooks/use_is_new_flyout_enabled');
-jest.mock('../../../flyout_v2/use_flyout_api');
-jest.mock('../../../flyout/document_details/shared/hooks/use_navigate_to_analyzer');
-jest.mock('../../../flyout/document_details/shared/hooks/use_navigate_to_session_view');
-jest.mock('../../hooks/use_license', () => {
+vi.mock('../../hooks/use_selector');
+vi.mock('../../../detections/hooks/use_is_analyzer_enabled');
+vi.mock('../../hooks/use_is_new_flyout_enabled');
+vi.mock('../../../flyout_v2/use_flyout_api');
+vi.mock('../../../flyout/document_details/shared/hooks/use_navigate_to_analyzer');
+vi.mock('../../../flyout/document_details/shared/hooks/use_navigate_to_session_view');
+vi.mock('../../hooks/use_license', () => {
   const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
-    isEnterprise: jest.fn(() => false),
+    isPlatinumPlus: vi.fn(),
+    isEnterprise: vi.fn(() => false),
   };
   return {
     licenseService: licenseServiceInstance,
@@ -57,30 +63,30 @@ const defaultProps: ActionsComponentProps = {
   eventIdToNoteIds: {},
   hit: { id: 'id', raw: {}, flattened: {} },
   isEventViewer: false,
-  onEventDetailsPanelOpened: jest.fn(),
-  onRuleChange: jest.fn(),
-  refetch: jest.fn(),
+  onEventDetailsPanelOpened: vi.fn(),
+  onRuleChange: vi.fn(),
+  refetch: vi.fn(),
   showNotes: true,
   timelineId: 'test',
-  toggleShowNotes: jest.fn(),
+  toggleShowNotes: vi.fn(),
 };
 
-const mockNavigateToAnalyzer = jest.fn();
-const mockNavigateToSessionView = jest.fn();
+const mockNavigateToAnalyzer = vi.fn();
+const mockNavigateToSessionView = vi.fn();
 
 describe('Actions', () => {
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+    vi.clearAllMocks();
+    (useShallowEqualSelector as Mock).mockReturnValue(mockTimelineModel);
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
-    jest.mocked(useNavigateToAnalyzer).mockReturnValue({
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useNavigateToAnalyzer).mockReturnValue({
       navigateToAnalyzer: mockNavigateToAnalyzer,
     });
-    jest.mocked(useNavigateToSessionView).mockReturnValue({
+    vi.mocked(useNavigateToSessionView).mockReturnValue({
       navigateToSessionView: mockNavigateToSessionView,
     });
   });
@@ -234,7 +240,7 @@ describe('Actions', () => {
   describe('alert context menu', () => {
     describe('more actions button', () => {
       beforeEach(() => {
-        jest.mocked(AlertContextMenu).mockClear();
+        vi.mocked(AlertContextMenu).mockClear();
       });
 
       it('should not mark the document as remote when it is local', () => {
@@ -244,7 +250,7 @@ describe('Actions', () => {
           </TestProviders>
         );
 
-        expect(jest.mocked(AlertContextMenu)).toHaveBeenCalledWith(
+        expect(vi.mocked(AlertContextMenu)).toHaveBeenCalledWith(
           expect.objectContaining({ isRemoteDocument: false }),
           expect.anything()
         );
@@ -265,7 +271,7 @@ describe('Actions', () => {
           </TestProviders>
         );
 
-        expect(jest.mocked(AlertContextMenu)).toHaveBeenCalledWith(
+        expect(vi.mocked(AlertContextMenu)).toHaveBeenCalledWith(
           expect.objectContaining({ isRemoteDocument: true }),
           expect.anything()
         );
@@ -274,7 +280,7 @@ describe('Actions', () => {
 
     describe('analyzer icon', () => {
       it('should render', () => {
-        (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
+        (useIsAnalyzerEnabled as Mock).mockReturnValue(true);
 
         const { getByTestId } = render(
           <TestProviders>
@@ -286,7 +292,7 @@ describe('Actions', () => {
       });
 
       test('should not show analyzer icon', () => {
-        (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(false);
+        (useIsAnalyzerEnabled as Mock).mockReturnValue(false);
 
         const { queryByTestId } = render(
           <TestProviders>
@@ -298,7 +304,7 @@ describe('Actions', () => {
       });
 
       it('should navigate to the legacy analyzer when enableNewFlyout setting is disabled', () => {
-        (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
+        (useIsAnalyzerEnabled as Mock).mockReturnValue(true);
 
         const { getByTestId } = render(
           <TestProviders>
@@ -313,8 +319,8 @@ describe('Actions', () => {
       });
 
       it('should open the new analyzer flyout when enableNewFlyout setting is enabled', () => {
-        (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
-        jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+        (useIsAnalyzerEnabled as Mock).mockReturnValue(true);
+        vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
         const { getByTestId } = render(
           <TestProviders>
@@ -333,7 +339,7 @@ describe('Actions', () => {
 
     describe('session view icon', () => {
       it('should render', () => {
-        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+        const licenseServiceMock = licenseService as Mocked<typeof licenseService>;
         licenseServiceMock.isEnterprise.mockReturnValue(true);
 
         const props = {
@@ -359,7 +365,7 @@ describe('Actions', () => {
       });
 
       it('should not show session view icon is no enterprise plus license', () => {
-        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+        const licenseServiceMock = licenseService as Mocked<typeof licenseService>;
         licenseServiceMock.isEnterprise.mockReturnValue(false);
 
         const { queryByTestId } = render(
@@ -372,7 +378,7 @@ describe('Actions', () => {
       });
 
       it('should not show session view icon if no session view config', () => {
-        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+        const licenseServiceMock = licenseService as Mocked<typeof licenseService>;
         licenseServiceMock.isEnterprise.mockReturnValue(true);
 
         const { queryByTestId } = render(
@@ -398,7 +404,7 @@ describe('Actions', () => {
       };
 
       it('should navigate to the legacy session view when enableNewFlyout setting is disabled', () => {
-        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+        const licenseServiceMock = licenseService as Mocked<typeof licenseService>;
         licenseServiceMock.isEnterprise.mockReturnValue(true);
 
         const { getByTestId } = render(
@@ -414,9 +420,9 @@ describe('Actions', () => {
       });
 
       it('should open the new session view flyout when enableNewFlyout setting is enabled', () => {
-        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+        const licenseServiceMock = licenseService as Mocked<typeof licenseService>;
         licenseServiceMock.isEnterprise.mockReturnValue(true);
-        jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+        vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
         const { getByTestId } = render(
           <TestProviders>

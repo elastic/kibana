@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -54,9 +57,9 @@ const makeHandlerContext = (
     config: {},
     rawInput: { ki, verifiers, total_timeout_sec },
     contextManager: {
-      getFakeRequest: jest.fn().mockReturnValue({ headers: {} }),
-      getScopedEsClient: getScopedEsClient ?? jest.fn().mockReturnValue(esClient),
-      getContext: jest.fn().mockReturnValue({
+      getFakeRequest: vi.fn().mockReturnValue({ headers: {} }),
+      getScopedEsClient: getScopedEsClient ?? vi.fn().mockReturnValue(esClient),
+      getContext: vi.fn().mockReturnValue({
         workflow: { id: 'parent-wf', spaceId: 'space-a' },
         metadata,
         parent,
@@ -70,11 +73,11 @@ const makeHandlerContext = (
 
 describe('verify_ki workflow step', () => {
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
-  let uiSettingsGet: jest.Mock;
+  let uiSettingsGet: Mock;
   let esClient: EsClientMock;
   let telemetry: ReturnType<typeof mockKiStepTelemetry>;
-  let workflowsManagement: jest.Mocked<KiVerifierWorkflowRunner>;
-  let checkExecutePrivilege: jest.Mock;
+  let workflowsManagement: Mocked<KiVerifierWorkflowRunner>;
+  let checkExecutePrivilege: Mock;
 
   const setContextEngineEnabled = (isEnabled: boolean) => {
     uiSettingsGet.mockResolvedValue(isEnabled);
@@ -83,7 +86,7 @@ describe('verify_ki workflow step', () => {
   beforeEach(() => {
     coreSetup = coreMock.createSetup();
     const startServices = coreMock.createStart();
-    uiSettingsGet = jest.fn();
+    uiSettingsGet = vi.fn();
     startServices.uiSettings.asScopedToClient.mockReturnValue({
       get: uiSettingsGet,
     } as unknown as ReturnType<typeof startServices.uiSettings.asScopedToClient>);
@@ -92,7 +95,7 @@ describe('verify_ki workflow step', () => {
     esClient.esql.query.mockResolvedValue({ columns: [], values: [] });
     telemetry = mockKiStepTelemetry();
     workflowsManagement = {
-      getWorkflow: jest.fn().mockImplementation(async (id: string) => ({
+      getWorkflow: vi.fn().mockImplementation(async (id: string) => ({
         id,
         name: id,
         enabled: true,
@@ -101,11 +104,11 @@ describe('verify_ki workflow step', () => {
         definition: { name: id, triggers: [{ type: 'manual' }], steps: [] },
         yaml: '',
       })),
-      runWorkflow: jest.fn().mockResolvedValue('exec-1'),
-      getWorkflowExecution: jest.fn(),
-      cancelWorkflowExecution: jest.fn(),
+      runWorkflow: vi.fn().mockResolvedValue('exec-1'),
+      getWorkflowExecution: vi.fn(),
+      cancelWorkflowExecution: vi.fn(),
     };
-    checkExecutePrivilege = jest.fn().mockResolvedValue(true);
+    checkExecutePrivilege = vi.fn().mockResolvedValue(true);
   });
 
   const makeDefinition = (withWorkflows = true) =>
@@ -353,7 +356,7 @@ describe('verify_ki workflow step', () => {
     );
 
     expect(telemetry.logger.debug).toHaveBeenCalledTimes(1);
-    const [message] = (telemetry.logger.debug as jest.Mock).mock.calls[0];
+    const [message] = (telemetry.logger.debug as Mock).mock.calls[0];
     expect(message).toContain(ESQL_VALID_SYNTAX_VERIFIER_ID);
     expect(message).not.toContain('NOT_A_FUNCTION');
   });
@@ -420,7 +423,7 @@ describe('verify_ki workflow step', () => {
     setContextEngineEnabled(true);
     const abortableClient = {
       esql: {
-        query: jest.fn().mockImplementation(
+        query: vi.fn().mockImplementation(
           (_params: unknown, opts: { signal?: AbortSignal }) =>
             new Promise((_, reject) => {
               opts.signal?.addEventListener('abort', () => {

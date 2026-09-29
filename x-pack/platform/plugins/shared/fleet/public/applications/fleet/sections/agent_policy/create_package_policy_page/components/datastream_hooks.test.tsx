@@ -5,18 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { useRouteMatch } from 'react-router-dom';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { usePackagePolicyEditorPageUrl } from './datastream_hooks';
 
-const mockedUseRouteMatch = useRouteMatch as jest.MockedFunction<typeof useRouteMatch>;
+const mockedUseRouteMatch = useRouteMatch as MockedFunction<typeof useRouteMatch>;
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useRouteMatch: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useRouteMatch: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('usePackagePolicyEditorPageUrl', () => {
   it('should render an integration url if no policy id is provided', () => {

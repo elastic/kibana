@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -18,13 +20,16 @@ import {
   hasGenAiDetailFields,
 } from './genai_details_table';
 
-const mockContentFrameworkTable = jest.fn((props: ContentFrameworkTableProps) => (
+const mockContentFrameworkTable = vi.fn((props: ContentFrameworkTableProps) => (
   <div data-test-subj="mockContentFrameworkTable" />
 ));
 
-jest.mock('../../../content_framework', () => ({
-  ContentFrameworkTable: (props: ContentFrameworkTableProps) => mockContentFrameworkTable(props),
-}));
+vi.mock('../../../content_framework', () => {
+      const mocked = {
+      ContentFrameworkTable: (props: ContentFrameworkTableProps) => mockContentFrameworkTable(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function buildHit(flattened: Record<string, unknown>): DataTableRecord {
   return {
@@ -125,9 +130,9 @@ describe('GenAiDetailsTable', () => {
       'attributes.gen_ai.input.messages': ['[]'],
       'service.name': ['my-svc'],
     });
-    const filter = jest.fn();
-    const onAddColumn = jest.fn();
-    const onRemoveColumn = jest.fn();
+    const filter = vi.fn();
+    const onAddColumn = vi.fn();
+    const onRemoveColumn = vi.fn();
 
     render(
       <GenAiDetailsTable

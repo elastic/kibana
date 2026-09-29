@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import type { MapExtent, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import {
@@ -24,7 +26,7 @@ import {
 import type { SearchSource } from '@kbn/data-plugin/public';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
-jest.mock('../../../kibana_services');
+vi.mock('../../../kibana_services');
 
 export class MockSearchSource {
   getField(fieldName: string) {
@@ -34,7 +36,7 @@ export class MockSearchSource {
 
     throw new Error(`Unsupported search source field: ${fieldName}`);
   }
-  setField = jest.fn();
+  setField = vi.fn();
   setParent() {}
   getSearchRequestBody() {
     return {
@@ -157,7 +159,7 @@ describe('ESGeoGridSource', () => {
 
   afterEach(() => {
     esGeoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT;
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const extent: MapExtent = {

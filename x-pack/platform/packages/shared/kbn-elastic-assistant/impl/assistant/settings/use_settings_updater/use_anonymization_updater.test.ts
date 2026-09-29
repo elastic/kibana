@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useAnonymizationUpdater } from './use_anonymization_updater'; // Adjust the import path
 import { bulkUpdateAnonymizationFields } from '../../api/anonymization_fields/bulk_update_anonymization_fields';
@@ -12,9 +15,12 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { BatchUpdateListItem } from '../../../data_anonymization_editor/context_editor/types';
 
-jest.mock('../../api/anonymization_fields/bulk_update_anonymization_fields', () => ({
-  bulkUpdateAnonymizationFields: jest.fn(),
-}));
+vi.mock('../../api/anonymization_fields/bulk_update_anonymization_fields', () => {
+      const mocked = {
+      bulkUpdateAnonymizationFields: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 const mockField = {
   timestamp: '2025-02-04T16:47:17.791Z',
   createdAt: '2025-02-04T16:47:17.791Z',
@@ -44,13 +50,13 @@ const mockAnonymizationFields = {
 
 const mockHttp = {} as HttpSetup;
 const mockToasts = {
-  addSuccess: jest.fn(),
-  addDanger: jest.fn(),
+  addSuccess: vi.fn(),
+  addDanger: vi.fn(),
 } as unknown as IToasts;
 
 describe('useAnonymizationUpdater', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should initialize with default values', () => {
@@ -94,7 +100,7 @@ describe('useAnonymizationUpdater', () => {
   });
 
   it('should make updates to multiple fields and resets on cancel', async () => {
-    const mockBulkUpdate = bulkUpdateAnonymizationFields as jest.Mock;
+    const mockBulkUpdate = bulkUpdateAnonymizationFields as Mock;
     mockBulkUpdate.mockResolvedValueOnce({
       success: true,
     });
@@ -154,7 +160,7 @@ describe('useAnonymizationUpdater', () => {
   });
 
   it('should call bulkUpdateAnonymizationFields on saveAnonymizationSettings', async () => {
-    const mockBulkUpdate = bulkUpdateAnonymizationFields as jest.Mock;
+    const mockBulkUpdate = bulkUpdateAnonymizationFields as Mock;
     mockBulkUpdate.mockResolvedValueOnce({
       success: true,
     });
@@ -201,7 +207,7 @@ describe('useAnonymizationUpdater', () => {
   });
 
   it('should handle failure in saveAnonymizationSettings', async () => {
-    (bulkUpdateAnonymizationFields as jest.Mock).mockResolvedValueOnce({
+    (bulkUpdateAnonymizationFields as Mock).mockResolvedValueOnce({
       success: false,
     });
 

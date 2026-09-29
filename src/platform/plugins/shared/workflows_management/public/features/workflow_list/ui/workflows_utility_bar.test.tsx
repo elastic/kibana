@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -16,14 +19,14 @@ import { useWorkflowBulkActions } from './use_workflow_bulk_actions';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
 
 // Mock the bulk actions hook
-jest.mock('./use_workflow_bulk_actions');
-const mockUseWorkflowBulkActions = useWorkflowBulkActions as jest.MockedFunction<
+vi.mock('./use_workflow_bulk_actions');
+const mockUseWorkflowBulkActions = useWorkflowBulkActions as MockedFunction<
   typeof useWorkflowBulkActions
 >;
 
 describe('WorkflowsUtilityBar', () => {
-  const mockDeselectWorkflows = jest.fn();
-  const mockOnRefresh = jest.fn();
+  const mockDeselectWorkflows = vi.fn();
+  const mockOnRefresh = vi.fn();
 
   const defaultProps = {
     totalWorkflows: 10,
@@ -42,7 +45,7 @@ describe('WorkflowsUtilityBar', () => {
         items: [
           {
             name: 'Delete',
-            onClick: jest.fn(),
+            onClick: vi.fn(),
             'data-test-subj': 'workflows-bulk-action-delete',
             key: 'workflows-bulk-action-delete',
           },
@@ -54,7 +57,7 @@ describe('WorkflowsUtilityBar', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseWorkflowBulkActions.mockReturnValue(mockBulkActions);
   });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 
@@ -12,9 +14,12 @@ import type { BucketSpanEstimatorData } from '@kbn/ml-common-types/job_service';
 
 import { estimateBucketSpanFactory } from './bucket_span_estimator';
 
-jest.mock('../../lib/log', () => ({
-  mlLog: { warn: jest.fn() },
-}));
+vi.mock('../../lib/log', () => {
+      const mocked = {
+      mlLog: { warn: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const callAs = {
   search: () => Promise.resolve({ body: {} }),
@@ -51,26 +56,34 @@ describe('ML - BucketSpanEstimator', () => {
     }).not.toThrow('Not initialized.');
   });
 
-  it('call factory and estimator with security disabled', (done) => {
-    expect(function () {
-      const estimateBucketSpan = estimateBucketSpanFactory(mlClusterClient);
+  it('call factory and estimator with security disabled', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
 
-      estimateBucketSpan(formConfig).catch((catchData) => {
-        expect(catchData).toBe('Unable to retrieve cluster setting search.max_buckets');
+          expect(function () {
+            const estimateBucketSpan = estimateBucketSpanFactory(mlClusterClient);
 
-        done();
-      });
-    }).not.toThrow('Not initialized.');
-  });
+            estimateBucketSpan(formConfig).catch((catchData) => {
+              expect(catchData).toBe('Unable to retrieve cluster setting search.max_buckets');
 
-  it('call factory and estimator with security enabled.', (done) => {
-    expect(function () {
-      const estimateBucketSpan = estimateBucketSpanFactory(mlClusterClient);
-      estimateBucketSpan(formConfig).catch((catchData) => {
-        expect(catchData).toBe('Unable to retrieve cluster setting search.max_buckets');
+              done();
+            });
+          }).not.toThrow('Not initialized.');
+        
+      }));
 
-        done();
-      });
-    }).not.toThrow('Not initialized.');
-  });
+  it('call factory and estimator with security enabled.', () =>
+      new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+
+          expect(function () {
+            const estimateBucketSpan = estimateBucketSpanFactory(mlClusterClient);
+            estimateBucketSpan(formConfig).catch((catchData) => {
+              expect(catchData).toBe('Unable to retrieve cluster setting search.max_buckets');
+
+              done();
+            });
+          }).not.toThrow('Not initialized.');
+        
+      }));
 });

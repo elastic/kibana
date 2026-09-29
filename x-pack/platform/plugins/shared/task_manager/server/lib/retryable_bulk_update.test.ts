@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { asErr, asOk } from './result_type';
 import { retryableBulkUpdate } from './retryable_bulk_update';
 import { taskStoreMock } from '../task_store.mock';
@@ -19,13 +21,13 @@ describe('retryableBulkUpdate()', () => {
     taskManagerMock.createTask({ id: '2' }),
     taskManagerMock.createTask({ id: '3' }),
   ];
-  const getTasks = jest.fn();
-  const filter = jest.fn();
-  const map = jest.fn();
+  const getTasks = vi.fn();
+  const filter = vi.fn();
+  const map = vi.fn();
   const store = taskStoreMock.create();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     getTasks.mockResolvedValue(tasks.map((task) => asOk(task)));
     filter.mockImplementation(() => true);
     map.mockImplementation((task) => task);

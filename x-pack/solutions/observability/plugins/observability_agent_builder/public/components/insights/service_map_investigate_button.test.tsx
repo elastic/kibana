@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -16,20 +19,23 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting$: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useUiSetting$: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_kibana');
-jest.mock('../../hooks/use_license');
-jest.mock('../../hooks/use_genai_connectors');
+vi.mock('../../hooks/use_kibana');
+vi.mock('../../hooks/use_license');
+vi.mock('../../hooks/use_genai_connectors');
 
-const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseLicense = useLicense as jest.Mock;
-const mockUseGenAIConnectors = useGenAIConnectors as jest.Mock;
+const mockUseUiSetting$ = useUiSetting$ as Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseLicense = useLicense as Mock;
+const mockUseGenAIConnectors = useGenAIConnectors as Mock;
 
-const mockOpenChat = jest.fn();
+const mockOpenChat = vi.fn();
 
 const setupMocks = ({
   hasEnterpriseLicense = true,
@@ -82,7 +88,7 @@ const renderButton = (
 
 describe('ServiceMapInvestigateButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the button when all guard conditions are met', () => {

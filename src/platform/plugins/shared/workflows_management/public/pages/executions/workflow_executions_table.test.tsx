@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { EXECUTION_TABLE_DEFAULT_PAGE_SIZE } from './workflow_executions_page_constants';
@@ -16,24 +18,33 @@ import { useSerialPolling } from '../../hooks/use_serial_polling';
 import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
-const mockSetSelectedExecution = jest.fn();
-const mockUseWorkflowUrlState = jest.fn(() => ({
+const mockSetSelectedExecution = vi.fn();
+const mockUseWorkflowUrlState = vi.fn(() => ({
   selectedExecutionId: undefined as string | undefined,
   setSelectedExecution: mockSetSelectedExecution,
 }));
-jest.mock('../../hooks/use_workflow_url_state', () => ({
-  useWorkflowUrlState: () => mockUseWorkflowUrlState(),
-}));
+vi.mock('../../hooks/use_workflow_url_state', () => {
+      const mocked = {
+      useWorkflowUrlState: () => mockUseWorkflowUrlState(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_serial_polling', () => ({
-  useSerialPolling: jest.fn(),
-}));
+vi.mock('../../hooks/use_serial_polling', () => {
+      const mocked = {
+      useSerialPolling: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseSerialPolling = jest.mocked(useSerialPolling);
+const mockUseSerialPolling = vi.mocked(useSerialPolling);
 
-jest.mock('./workflow_executions_data_grid', () => ({
-  WorkflowExecutionsDataGrid: () => <div data-test-subj="workflowExecutionsDataGridStub" />,
-}));
+vi.mock('./workflow_executions_data_grid', () => {
+      const mocked = {
+      WorkflowExecutionsDataGrid: () => <div data-test-subj="workflowExecutionsDataGridStub" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const lastReachablePageIndex = Math.max(
   0,
@@ -45,7 +56,7 @@ describe('WorkflowExecutionsTable', () => {
   const defaultTimeRange = { from: 'now-24h', to: 'now' };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseWorkflowUrlState.mockReturnValue({
       selectedExecutionId: undefined,
       setSelectedExecution: mockSetSelectedExecution,
@@ -54,7 +65,7 @@ describe('WorkflowExecutionsTable', () => {
 
   it('calls the internal executions search API', async () => {
     const services = createStartServicesMock();
-    jest.mocked(services.http.get).mockResolvedValue({
+    vi.mocked(services.http.get).mockResolvedValue({
       results: [],
       page: 1,
       size: EXECUTION_TABLE_DEFAULT_PAGE_SIZE,
@@ -92,7 +103,7 @@ describe('WorkflowExecutionsTable', () => {
 
   it('configures live polling with the current search key', async () => {
     const services = createStartServicesMock();
-    jest.mocked(services.http.get).mockResolvedValue({
+    vi.mocked(services.http.get).mockResolvedValue({
       results: [],
       page: 1,
       size: 25,
@@ -128,7 +139,7 @@ describe('WorkflowExecutionsTable', () => {
 
   it('shows empty state when search returns no executions', async () => {
     const services = createStartServicesMock();
-    jest.mocked(services.http.get).mockResolvedValue({
+    vi.mocked(services.http.get).mockResolvedValue({
       results: [],
       page: 1,
       size: EXECUTION_TABLE_DEFAULT_PAGE_SIZE,
@@ -154,7 +165,7 @@ describe('WorkflowExecutionsTable', () => {
   it('does not show a persistent pagination-limit callout when total exceeds the result window', async () => {
     const services = createStartServicesMock();
 
-    jest.mocked(services.http.get).mockResolvedValue({
+    vi.mocked(services.http.get).mockResolvedValue({
       results: [
         {
           id: 'exec-1',
@@ -194,7 +205,7 @@ describe('WorkflowExecutionsTable', () => {
   it('shows the end-of-results strip on the last reachable page when total exceeds the window', async () => {
     const services = createStartServicesMock();
 
-    jest.mocked(services.http.get).mockResolvedValue({
+    vi.mocked(services.http.get).mockResolvedValue({
       results: [
         {
           id: 'exec-1',
@@ -237,7 +248,7 @@ describe('WorkflowExecutionsTable', () => {
   it('shows a generic error prompt for non-index errors', async () => {
     const services = createStartServicesMock();
 
-    jest.mocked(services.http.get).mockRejectedValue(new Error('cluster unavailable'));
+    vi.mocked(services.http.get).mockRejectedValue(new Error('cluster unavailable'));
 
     render(
       <WorkflowExecutionsTable

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type {
   CreateExceptionListItemSchema,
   Entry,
@@ -25,9 +27,12 @@ import { getUpdateExceptionListItemSchemaMock } from '../mocks/request/update_ex
 import { getExceptionListItemSchemaMock } from '../mocks/response/exception_list_item_schema.mock';
 import { COMMENTS_WITH_CREATEDAT_CREATEDBY, ENTRIES_WITH_IDS } from '../mocks/constants.mock';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('123'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('123'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Exceptions transforms', () => {
   describe('transformOutput', () => {

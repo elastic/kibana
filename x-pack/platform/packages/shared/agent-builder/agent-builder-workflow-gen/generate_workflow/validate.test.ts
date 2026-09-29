@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { validateGeneratedYaml } from './validate';
 
 describe('validateGeneratedYaml', () => {
   it('returns valid + parsedWorkflow when api succeeds', async () => {
     const api = {
-      validateWorkflow: jest.fn().mockResolvedValue({
+      validateWorkflow: vi.fn().mockResolvedValue({
         valid: true,
         diagnostics: [],
         parsedWorkflow: { name: 'foo', version: '1', triggers: [{ type: 'manual' }], steps: [] },
@@ -29,7 +31,7 @@ describe('validateGeneratedYaml', () => {
 
   it('returns compacted error strings when invalid', async () => {
     const api = {
-      validateWorkflow: jest.fn().mockResolvedValue({
+      validateWorkflow: vi.fn().mockResolvedValue({
         valid: false,
         diagnostics: [
           { severity: 'error', source: 'schema', message: 'missing field', path: ['steps', 0] },

@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -50,11 +53,11 @@ const mockRelationships: Record<string, SavedObjectRelation[]> = {
 
 describe('DeleteModalContent', () => {
   let reviewedItems: Set<string>;
-  let setReviewedItems: jest.Mock;
+  let setReviewedItems: Mock;
 
   beforeEach(() => {
     reviewedItems = new Set();
-    setReviewedItems = jest.fn();
+    setReviewedItems = vi.fn();
   });
 
   const renderContent = (

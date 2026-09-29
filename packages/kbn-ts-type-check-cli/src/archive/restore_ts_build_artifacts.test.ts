@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance, MockedFunction } from 'vitest';
+
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { restoreTSBuildArtifacts } from './restore_ts_build_artifacts';
 import { LocalFileSystem } from './file_system/local_file_system';
@@ -19,59 +22,65 @@ import {
   resolveCurrentCommitSha,
 } from './utils';
 
-jest.mock('./utils', () => ({
-  buildCandidateShaList: jest.fn(),
-  cleanTypeCheckArtifacts: jest.fn(),
-  getPullRequestNumber: jest.fn(),
-  isCiEnvironment: jest.fn(),
-  readRecentCommitShas: jest.fn(),
-  resolveCurrentCommitSha: jest.fn(),
-  withGcsAuth: jest.fn((_, action: () => Promise<unknown>) => action()),
-}));
+vi.mock('./utils', () => {
+      const mocked = {
+      buildCandidateShaList: vi.fn(),
+      cleanTypeCheckArtifacts: vi.fn(),
+      getPullRequestNumber: vi.fn(),
+      isCiEnvironment: vi.fn(),
+      readRecentCommitShas: vi.fn(),
+      resolveCurrentCommitSha: vi.fn(),
+      withGcsAuth: vi.fn((_, action: () => Promise<unknown>) => action()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./file_system/gcs_file_system', () => ({
-  GcsFileSystem: jest.fn().mockImplementation(() => ({
-    restoreArchive: jest.fn(),
-  })),
-}));
+vi.mock('./file_system/gcs_file_system', () => {
+      const mocked = {
+      GcsFileSystem: vi.fn().mockImplementation(() => ({
+        restoreArchive: vi.fn(),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedBuildCandidateShaList = buildCandidateShaList as jest.MockedFunction<
+const mockedBuildCandidateShaList = buildCandidateShaList as MockedFunction<
   typeof buildCandidateShaList
 >;
-const mockedGetPullRequestNumber = getPullRequestNumber as jest.MockedFunction<
+const mockedGetPullRequestNumber = getPullRequestNumber as MockedFunction<
   typeof getPullRequestNumber
 >;
-const mockedIsCiEnvironment = isCiEnvironment as jest.MockedFunction<typeof isCiEnvironment>;
-const mockedReadRecentCommitShas = readRecentCommitShas as jest.MockedFunction<
+const mockedIsCiEnvironment = isCiEnvironment as MockedFunction<typeof isCiEnvironment>;
+const mockedReadRecentCommitShas = readRecentCommitShas as MockedFunction<
   typeof readRecentCommitShas
 >;
-const mockedResolveCurrentCommitSha = resolveCurrentCommitSha as jest.MockedFunction<
+const mockedResolveCurrentCommitSha = resolveCurrentCommitSha as MockedFunction<
   typeof resolveCurrentCommitSha
 >;
-const mockedCleanTypeCheckArtifacts = cleanTypeCheckArtifacts as jest.MockedFunction<
+const mockedCleanTypeCheckArtifacts = cleanTypeCheckArtifacts as MockedFunction<
   typeof cleanTypeCheckArtifacts
 >;
 
 const createLog = (): SomeDevLog => {
   return {
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   } as unknown as SomeDevLog;
 };
 
 describe('restoreTSBuildArtifacts', () => {
-  let restoreSpy: jest.SpyInstance;
+  let restoreSpy: MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedIsCiEnvironment.mockReturnValue(false);
     mockedGetPullRequestNumber.mockReturnValue(undefined);
     mockedResolveCurrentCommitSha.mockResolvedValue('');
     mockedReadRecentCommitShas.mockResolvedValue([]);
     mockedBuildCandidateShaList.mockReturnValue([]);
-    restoreSpy = jest
+    restoreSpy = vi
       .spyOn(LocalFileSystem.prototype, 'restoreArchive')
       .mockResolvedValue(undefined);
   });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
@@ -15,20 +18,29 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 
 // jest.mock('../../hooks/use_kibana');
-jest.mock('../../hooks/use_elasticsearch_url', () => ({
-  useElasticsearchUrl: jest.fn().mockReturnValue('https://local_dev.es.fake.elstc.co:443'),
-}));
-jest.mock('@kbn/search-api-keys-components', () => ({
-  // Assume you have permissions as default
-  useSearchApiKey: jest.fn().mockReturnValue({ status: 'showHiddenKey' }),
-  Status: {
-    showHiddenKey: 'showHiddenKey',
-    showUserPrivilegesError: 'showUserPrivilegesError',
-  },
-}));
-jest.mock('@kbn/cloud/connection_details', () => ({
-  openWiredConnectionDetails: jest.fn(),
-}));
+vi.mock('../../hooks/use_elasticsearch_url', () => {
+      const mocked = {
+      useElasticsearchUrl: vi.fn().mockReturnValue('https://local_dev.es.fake.elstc.co:443'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/search-api-keys-components', () => {
+      const mocked = {
+      // Assume you have permissions as default
+      useSearchApiKey: vi.fn().mockReturnValue({ status: 'showHiddenKey' }),
+      Status: {
+        showHiddenKey: 'showHiddenKey',
+        showUserPrivilegesError: 'showUserPrivilegesError',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/cloud/connection_details', () => {
+      const mocked = {
+      openWiredConnectionDetails: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const queryClient = new QueryClient();
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -37,8 +49,8 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </I18nProvider>
 );
 
-const mockUseSearchApiKey = useSearchApiKey as jest.Mock;
-const mockOpenWiredConnectionDetails = openWiredConnectionDetails as jest.Mock;
+const mockUseSearchApiKey = useSearchApiKey as Mock;
+const mockOpenWiredConnectionDetails = openWiredConnectionDetails as Mock;
 
 describe('Connection details block', () => {
   it('should render all elements correctly when all permissions are present', () => {

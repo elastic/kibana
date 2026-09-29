@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, within } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -21,7 +23,7 @@ describe('ruleActionsAlertsFilterTimeframe', () => {
         settings={
           {
             client: {
-              get: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
+              get: vi.fn().mockImplementation((_, defaultValue) => defaultValue),
             },
           } as unknown as SettingsStart
         }

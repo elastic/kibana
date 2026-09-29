@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { RuleMigrationTaskEvaluator } from './rule_migrations_task_evaluator';
 import type { Run, Example } from 'langsmith/schemas';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -12,53 +15,65 @@ import type { CustomEvaluator } from '../../common/task/siem_migrations_task_eva
 import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_runner';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 
-jest.mock('../../common/task/siem_migrations_task_runner', () => ({
-  SiemMigrationTaskRunner: jest.fn().mockReturnValue({
-    prepareTaskInvoke: jest.fn(),
-    setup: jest.fn(),
-    run: jest.fn(),
-    abortController: new AbortController(),
-  }),
-}));
+vi.mock('../../common/task/siem_migrations_task_runner', () => {
+      const mocked = {
+      SiemMigrationTaskRunner: vi.fn().mockReturnValue({
+        prepareTaskInvoke: vi.fn(),
+        setup: vi.fn(),
+        run: vi.fn(),
+        abortController: new AbortController(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock dependencies
-jest.mock('langsmith/evaluation', () => ({
-  evaluate: jest.fn(() => Promise.resolve()),
-}));
+vi.mock('langsmith/evaluation', () => {
+      const mocked = {
+      evaluate: vi.fn(() => Promise.resolve()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/langchain/server/tracers/langsmith', () => ({
-  isLangSmithEnabled: jest.fn(() => true),
-}));
+vi.mock('@kbn/langchain/server/tracers/langsmith', () => {
+      const mocked = {
+      isLangSmithEnabled: vi.fn(() => true),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('langsmith', () => ({
-  Client: jest.fn().mockImplementation(() => ({
-    listExamples: jest.fn(() => [{ id: 'example-1' }, { id: 'example-2' }]),
-  })),
-}));
+vi.mock('langsmith', () => {
+      const mocked = {
+      Client: vi.fn().mockImplementation(() => ({
+        listExamples: vi.fn(() => [{ id: 'example-1' }, { id: 'example-2' }]),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('RuleMigrationTaskEvaluator', () => {
   let taskEvaluator: RuleMigrationTaskEvaluator;
 
   const mockLogger = loggerMock.create();
-  const mockDependencies: jest.Mocked<SiemMigrationsClientDependencies> = {
+  const mockDependencies: Mocked<SiemMigrationsClientDependencies> = {
     inferenceService: {},
     rulesClient: {},
     savedObjectsClient: {},
     inferenceClient: {},
     actionsClient: {
-      get: jest.fn().mockResolvedValue({ id: 'test-connector-id', name: 'Test Connector' }),
+      get: vi.fn().mockResolvedValue({ id: 'test-connector-id', name: 'Test Connector' }),
     },
     telemetry: {},
   } as unknown as SiemMigrationsClientDependencies;
 
   beforeAll(() => {
-    const taskRunner = (SiemMigrationTaskRunner as jest.Mock)();
+    const taskRunner = (SiemMigrationTaskRunner as Mock)();
 
     taskEvaluator = new RuleMigrationTaskEvaluator(taskRunner, mockDependencies, mockLogger);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('evaluators', () => {

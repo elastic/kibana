@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
+
 import { mockStreamWrite, mockGetFlattenedObject } from './logging_system.test.mocks';
 
 const dynamicProps = { process: { pid: expect.any(Number) }, ecs: { version: EcsVersion } };
 
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 33, 22, 11));
-let mockConsoleLog: jest.SpyInstance;
+let mockConsoleLog: MockInstance;
 
 import { createWriteStream } from 'fs';
-const mockCreateWriteStream = createWriteStream as unknown as jest.Mock<typeof createWriteStream>;
+const mockCreateWriteStream = createWriteStream as unknown as Mock<typeof createWriteStream>;
 
 import { LoggingSystem, config } from '..';
 import { EcsVersion } from '@elastic/ecs';
@@ -27,22 +30,22 @@ const TEST_TIMEZONE = 'America/New_York';
 let system: LoggingSystem;
 beforeEach(() => {
   moment.tz.setDefault(TEST_TIMEZONE);
-  mockConsoleLog = jest.spyOn(unsafeConsole, 'log').mockReturnValue(undefined);
-  jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
-  jest.spyOn(process, 'uptime').mockReturnValue(10);
+  mockConsoleLog = vi.spyOn(unsafeConsole, 'log').mockReturnValue(undefined);
+  vi.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
+  vi.spyOn(process, 'uptime').mockReturnValue(10);
   system = new LoggingSystem();
 });
 
 afterEach(() => {
   moment.tz.setDefault();
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockCreateWriteStream.mockClear();
   mockStreamWrite.mockClear();
   mockGetFlattenedObject.mockClear();
 });
 
 test('uses default memory buffer logger until config is provided', () => {
-  const bufferAppendSpy = jest.spyOn((system as any).bufferAppender, 'append');
+  const bufferAppendSpy = vi.spyOn((system as any).bufferAppender, 'append');
 
   const logger = system.get('test', 'context');
   logger.trace('trace message');
@@ -67,7 +70,7 @@ test('flushes memory buffer logger and switches to real logger once config is pr
   logger.info('buffered info message', { some: 'value' });
   logger.fatal('buffered fatal message');
 
-  const bufferAppendSpy = jest.spyOn((system as any).bufferAppender, 'append');
+  const bufferAppendSpy = vi.spyOn((system as any).bufferAppender, 'append');
 
   // Switch to console appender with `info` level, so that `trace` message won't go through.
   await system.upgrade(
@@ -205,33 +208,33 @@ test('attaches appenders to appenders that declare refs', async () => {
 });
 
 test('throws if a circular appender reference is detected', async () => {
-  expect(async () => {
-    await system.upgrade(
-      config.schema.validate({
-        appenders: {
-          console: { type: 'console', layout: { type: 'pattern' } },
-          a: {
-            type: 'rewrite',
-            appenders: ['b'],
-            policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
-          },
-          b: {
-            type: 'rewrite',
-            appenders: ['c'],
-            policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
-          },
-          c: {
-            type: 'rewrite',
-            appenders: ['console', 'a'],
-            policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
-          },
-        },
-        loggers: [{ name: 'tests', level: 'warn', appenders: ['a'] }],
-      })
-    );
-  }).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Circular appender reference detected: [b -> c -> a -> b]"`
-  );
+  await expect(async () => {
+        await system.upgrade(
+          config.schema.validate({
+            appenders: {
+              console: { type: 'console', layout: { type: 'pattern' } },
+              a: {
+                type: 'rewrite',
+                appenders: ['b'],
+                policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+              },
+              b: {
+                type: 'rewrite',
+                appenders: ['c'],
+                policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+              },
+              c: {
+                type: 'rewrite',
+                appenders: ['console', 'a'],
+                policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+              },
+            },
+            loggers: [{ name: 'tests', level: 'warn', appenders: ['a'] }],
+          })
+        );
+      }).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Circular appender reference detected: [b -> c -> a -> b]"`
+      );
 
   expect(mockConsoleLog).toHaveBeenCalledTimes(0);
 });
@@ -244,8 +247,8 @@ test('`stop()` disposes all appenders.', async () => {
     })
   );
 
-  const bufferDisposeSpy = jest.spyOn((system as any).bufferAppender, 'dispose');
-  const consoleDisposeSpy = jest.spyOn((system as any).appenders.get('default'), 'dispose');
+  const bufferDisposeSpy = vi.spyOn((system as any).bufferAppender, 'dispose');
+  const consoleDisposeSpy = vi.spyOn((system as any).appenders.get('default'), 'dispose');
 
   await system.stop();
 
@@ -518,7 +521,7 @@ test('buffers log records for already created appenders', async () => {
 
   const logger = system.get('test', 'context');
 
-  const bufferAppendSpy = jest.spyOn((system as any).bufferAppender, 'append');
+  const bufferAppendSpy = vi.spyOn((system as any).bufferAppender, 'append');
 
   const upgradePromise = system.upgrade(
     config.schema.validate({
@@ -544,7 +547,7 @@ test('buffers log records for appenders created during config upgrade', async ()
     })
   );
 
-  const bufferAppendSpy = jest.spyOn((system as any).bufferAppender, 'append');
+  const bufferAppendSpy = vi.spyOn((system as any).bufferAppender, 'append');
 
   const upgradePromise = system.upgrade(
     config.schema.validate({

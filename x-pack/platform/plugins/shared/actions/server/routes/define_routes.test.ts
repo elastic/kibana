@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { httpServiceMock, loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { actionsConfigMock } from '../actions_config.mock';
@@ -18,39 +21,99 @@ import { getAllConnectorsRoute } from './connector/get_all';
 import { updateConnectorRoute } from './connector/update';
 import { getAllConnectorsIncludingSystemRoute } from './connector/get_all_system';
 
-jest.mock('./inbound_events', () => ({
-  inboundEventsRoute: jest.fn(),
-}));
-jest.mock('./connector/rotate_inbound_ingress', () => ({
-  rotateInboundIngressRoute: jest.fn(),
-}));
+vi.mock('./inbound_events', () => {
+      const mocked = {
+      inboundEventsRoute: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./connector/rotate_inbound_ingress', () => {
+      const mocked = {
+      rotateInboundIngressRoute: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./connector/create', () => ({ createConnectorRoute: jest.fn() }));
-jest.mock('./connector/delete', () => ({ deleteConnectorRoute: jest.fn() }));
-jest.mock('./connector/get', () => ({ getConnectorRoute: jest.fn() }));
-jest.mock('./connector/get_all', () => ({ getAllConnectorsRoute: jest.fn() }));
-jest.mock('./connector/update', () => ({ updateConnectorRoute: jest.fn() }));
-jest.mock('./connector/list_types', () => ({ listTypesRoute: jest.fn() }));
-jest.mock('./connector/execute', () => ({ executeConnectorRoute: jest.fn() }));
-jest.mock('./get_global_execution_logs', () => ({ getGlobalExecutionLogRoute: jest.fn() }));
-jest.mock('./get_global_execution_kpi', () => ({ getGlobalExecutionKPIRoute: jest.fn() }));
-jest.mock('./get_oauth_access_token', () => ({ getOAuthAccessToken: jest.fn() }));
-jest.mock('./oauth_authorize', () => ({ oauthAuthorizeRoute: jest.fn() }));
-jest.mock('./oauth_callback', () => ({
-  oauthCallbackRoute: jest.fn(),
-  oauthCallbackScriptRoute: jest.fn(),
-}));
-jest.mock('./oauth_disconnect', () => ({ oauthDisconnectRoute: jest.fn() }));
-jest.mock('./oauth_cancel', () => ({ oauthCancelRoute: jest.fn() }));
-jest.mock('./connector/get_all_system', () => ({
-  getAllConnectorsIncludingSystemRoute: jest.fn(),
-}));
-jest.mock('./connector/auth_status', () => ({ connectorAuthStatusRoute: jest.fn() }));
-jest.mock('./connector/list_types_system', () => ({ listTypesWithSystemRoute: jest.fn() }));
-jest.mock('./connector/get_spec', () => ({ getConnectorSpecRoute: jest.fn() }));
+vi.mock('./connector/create', () => {
+      const mocked = { createConnectorRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./connector/delete', () => {
+      const mocked = { deleteConnectorRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./connector/get', () => {
+      const mocked = { getConnectorRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./connector/get_all', () => {
+      const mocked = { getAllConnectorsRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./connector/update', () => {
+      const mocked = { updateConnectorRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./connector/list_types', () => {
+      const mocked = { listTypesRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./connector/execute', () => {
+      const mocked = { executeConnectorRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./get_global_execution_logs', () => {
+      const mocked = { getGlobalExecutionLogRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./get_global_execution_kpi', () => {
+      const mocked = { getGlobalExecutionKPIRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./get_oauth_access_token', () => {
+      const mocked = { getOAuthAccessToken: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./oauth_authorize', () => {
+      const mocked = { oauthAuthorizeRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./oauth_callback', () => {
+      const mocked = {
+      oauthCallbackRoute: vi.fn(),
+      oauthCallbackScriptRoute: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./oauth_disconnect', () => {
+      const mocked = { oauthDisconnectRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./oauth_cancel', () => {
+      const mocked = { oauthCancelRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./connector/get_all_system', () => {
+      const mocked = {
+      getAllConnectorsIncludingSystemRoute: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./connector/auth_status', () => {
+      const mocked = { connectorAuthStatusRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./connector/list_types_system', () => {
+      const mocked = { listTypesWithSystemRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./connector/get_spec', () => {
+      const mocked = { getConnectorSpecRoute: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const inboundEventsRouteMock = inboundEventsRoute as jest.MockedFunction<typeof inboundEventsRoute>;
-const rotateInboundIngressRouteMock = rotateInboundIngressRoute as jest.MockedFunction<
+const inboundEventsRouteMock = inboundEventsRoute as MockedFunction<typeof inboundEventsRoute>;
+const rotateInboundIngressRouteMock = rotateInboundIngressRoute as MockedFunction<
   typeof rotateInboundIngressRoute
 >;
 
@@ -70,14 +133,14 @@ describe('defineRoutes', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('registers inbound events when inboundEvents opts are provided', () => {
     const inboundEvents = {
       maxBodyBytes: 1024,
-      client: { ingest: jest.fn() },
-      getSpaceId: jest.fn().mockReturnValue('default'),
+      client: { ingest: vi.fn() },
+      getSpaceId: vi.fn().mockReturnValue('default'),
     };
 
     defineRoutes({ ...baseOpts(), inboundEvents });

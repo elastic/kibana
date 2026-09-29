@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AIMessage, ToolMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
 import type {
@@ -138,7 +140,7 @@ describe('renderHistorySteps', () => {
   });
 
   it('renders a marked call as the interrupted tool message and an unmarked empty return as results: []', async () => {
-    const resultTransformer: ToolCallResultTransformer = jest.fn(async () => [other('summarized')]);
+    const resultTransformer: ToolCallResultTransformer = vi.fn(async () => [other('summarized')]);
     const messages = await renderHistorySteps({
       steps: [call('a', { results: [], interrupted: true }), call('b', { results: [] })],
       resultTransformer,

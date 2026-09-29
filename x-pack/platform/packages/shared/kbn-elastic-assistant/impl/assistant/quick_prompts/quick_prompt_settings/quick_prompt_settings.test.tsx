@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { QuickPromptSettings } from './quick_prompt_settings';
@@ -13,18 +15,18 @@ import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
 import { mockPromptContexts } from '../../../mock/prompt_context';
 import { of } from 'rxjs';
 
-const onQuickPromptColorChange = jest.fn();
-const onQuickPromptSelect = jest.fn();
-const onPromptContentChange = jest.fn();
-const onQuickPromptContextChange = jest.fn();
+const onQuickPromptColorChange = vi.fn();
+const onQuickPromptSelect = vi.fn();
+const onPromptContentChange = vi.fn();
+const onQuickPromptContextChange = vi.fn();
 
 const testProps = {
   onPromptContentChange,
   onQuickPromptColorChange,
   onQuickPromptContextChange,
-  onQuickPromptDelete: jest.fn(),
+  onQuickPromptDelete: vi.fn(),
   onQuickPromptSelect,
-  resetSettings: jest.fn(),
+  resetSettings: vi.fn(),
   selectedQuickPrompt: MOCK_QUICK_PROMPTS[0],
   quickPromptSettings: MOCK_QUICK_PROMPTS,
 };
@@ -32,56 +34,65 @@ const testProps = {
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
   chrome: {
-    getChromeStyle$: jest.fn(() => of('classic')),
+    getChromeStyle$: vi.fn(() => of('classic')),
   },
   assistantAvailability: {
     hasAssistantPrivilege: true,
   },
 };
 
-jest.mock('../../../assistant_context', () => ({
-  ...jest.requireActual('../../../assistant_context'),
-  useAssistantContext: () => mockContext,
-}));
+vi.mock('../../../assistant_context', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../assistant_context')),
+      useAssistantContext: () => mockContext,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../quick_prompt_selector/quick_prompt_selector', () => ({
-  // @ts-ignore
-  QuickPromptSelector: ({ onQuickPromptDeleted, onQuickPromptSelectionChange }) => (
-    <>
-      <button
-        type="button"
-        data-test-subj="delete-qp"
-        onClick={() => onQuickPromptDeleted('A_CUSTOM_OPTION')}
-      />
-      <button
-        type="button"
-        data-test-subj="change-qp"
-        onClick={() => onQuickPromptSelectionChange(MOCK_QUICK_PROMPTS[3])}
-      />
-      <button
-        type="button"
-        data-test-subj="change-qp-custom"
-        onClick={() => onQuickPromptSelectionChange('sooper custom prompt')}
-      />
-    </>
-  ),
-}));
-jest.mock('../prompt_context_selector/prompt_context_selector', () => ({
-  // @ts-ignore
-  PromptContextSelector: ({ onPromptContextSelectionChange }) => (
-    <>
-      <button
-        type="button"
-        data-test-subj="change-pc"
-        onClick={() => onPromptContextSelectionChange(mockPromptContexts)}
-      />
-    </>
-  ),
-}));
+vi.mock('../quick_prompt_selector/quick_prompt_selector', () => {
+      const mocked = {
+      // @ts-ignore
+      QuickPromptSelector: ({ onQuickPromptDeleted, onQuickPromptSelectionChange }) => (
+        <>
+          <button
+            type="button"
+            data-test-subj="delete-qp"
+            onClick={() => onQuickPromptDeleted('A_CUSTOM_OPTION')}
+          />
+          <button
+            type="button"
+            data-test-subj="change-qp"
+            onClick={() => onQuickPromptSelectionChange(MOCK_QUICK_PROMPTS[3])}
+          />
+          <button
+            type="button"
+            data-test-subj="change-qp-custom"
+            onClick={() => onQuickPromptSelectionChange('sooper custom prompt')}
+          />
+        </>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../prompt_context_selector/prompt_context_selector', () => {
+      const mocked = {
+      // @ts-ignore
+      PromptContextSelector: ({ onPromptContextSelectionChange }) => (
+        <>
+          <button
+            type="button"
+            data-test-subj="change-pc"
+            onClick={() => onPromptContextSelectionChange(mockPromptContexts)}
+          />
+        </>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('QuickPromptSettings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('Selecting a quick prompt updates the selected quick prompts', () => {
     const { getByTestId } = render(

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
 import fetch from 'node-fetch';
 
 import { fleetServerHostService } from '../../services/fleet_server_host';
@@ -12,7 +15,7 @@ import { PostHealthCheckResponseSchema } from '../../types';
 
 import { postHealthCheckHandler } from './handler';
 
-jest.mock('node-fetch');
+vi.mock('node-fetch');
 
 describe('Fleet server health_check handler', () => {
   const mockContext = {
@@ -23,16 +26,16 @@ describe('Fleet server health_check handler', () => {
       },
     }),
   } as any;
-  const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
+  const mockedFetch = fetch as MockedFunction<typeof fetch>;
   const mockResponse = {
-    customError: jest.fn().mockImplementation((options) => options),
-    ok: jest.fn().mockImplementation((options) => {
+    customError: vi.fn().mockImplementation((options) => options),
+    ok: vi.fn().mockImplementation((options) => {
       return { ...options, statusCode: 200 };
     }),
-    badRequest: jest.fn().mockImplementation((options) => {
+    badRequest: vi.fn().mockImplementation((options) => {
       return { ...options, statusCode: 400 };
     }),
-    notFound: jest.fn().mockImplementation((options) => {
+    notFound: vi.fn().mockImplementation((options) => {
       return { ...options, statusCode: 404 };
     }),
   };
@@ -42,7 +45,7 @@ describe('Fleet server health_check handler', () => {
   });
 
   it('should return a bad request error if the requested fleet server host has no host_urls', async () => {
-    jest.spyOn(fleetServerHostService, 'get').mockResolvedValue({
+    vi.spyOn(fleetServerHostService, 'get').mockResolvedValue({
       id: 'default-fleet-server',
       name: 'Default',
       is_default: true,
@@ -70,7 +73,7 @@ describe('Fleet server health_check handler', () => {
       name: 'Default',
     };
 
-    jest.spyOn(fleetServerHostService, 'get').mockResolvedValue({
+    vi.spyOn(fleetServerHostService, 'get').mockResolvedValue({
       id: 'default-fleet-server',
       name: 'Default',
       is_default: true,
@@ -104,7 +107,7 @@ describe('Fleet server health_check handler', () => {
   });
 
   it('should return an error when host id is not found', async () => {
-    jest
+    vi
       .spyOn(fleetServerHostService, 'get')
       .mockRejectedValue({ output: { statusCode: 404 }, isBoom: true });
 
@@ -123,7 +126,7 @@ describe('Fleet server health_check handler', () => {
   });
 
   it('should return status `offline` when fetch request gets aborted', async () => {
-    jest.spyOn(fleetServerHostService, 'get').mockResolvedValue({
+    vi.spyOn(fleetServerHostService, 'get').mockResolvedValue({
       id: 'default-fleet-server',
       name: 'Default',
       is_default: true,

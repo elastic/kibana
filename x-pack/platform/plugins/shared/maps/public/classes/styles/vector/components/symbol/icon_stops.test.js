@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { getFirstUnusedSymbol } from './icon_stops';
 
-jest.mock('./icon_select', () => ({
-  IconSelect: () => {
-    return <div>mockIconSelect</div>;
-  },
-}));
+vi.mock('./icon_select', () => {
+      const mocked = {
+      IconSelect: () => {
+        return <div>mockIconSelect</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../symbol_utils', () => {
+vi.mock('../../symbol_utils', () => {
   return {
     SYMBOL_OPTIONS: [{ value: 'icon1' }, { value: 'icon2' }],
     PREFERRED_ICONS: [

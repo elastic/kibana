@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import React from 'react';
@@ -17,7 +20,7 @@ import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 import { usePackageIconType } from '@kbn/fleet-plugin/public/hooks';
 
-jest.mock('@kbn/fleet-plugin/public/hooks');
+vi.mock('@kbn/fleet-plugin/public/hooks');
 
 const testId = 'testid';
 const integration: PackageListItem = {
@@ -31,8 +34,8 @@ const integration: PackageListItem = {
 
 describe('IntegrationIcon', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
+    vi.clearAllMocks();
+    (usePackageIconType as Mock).mockReturnValue('iconType');
   });
 
   it('should render a single integration icon', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import type {
@@ -16,8 +19,8 @@ import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { AssetCriticalityLevel } from '../../../../../common/api/entity_analytics/asset_criticality';
 
-jest.mock('../../../../assistant/use_assistant_availability');
-jest.mock('@kbn/elastic-assistant');
+vi.mock('../../../../assistant/use_assistant_availability');
+vi.mock('@kbn/elastic-assistant');
 
 const mockEntityFields: Record<string, string[]> = {
   'host.name': ['test-host'],
@@ -44,12 +47,12 @@ const renderUseAssetInventoryAssistant = (assetCriticalityLevel?: AssetCriticali
   );
 };
 
-const useAssistantOverlayMock = useAssistantOverlay as jest.Mock;
+const useAssistantOverlayMock = useAssistantOverlay as Mock;
 
 describe('useAssetInventoryAssistant', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useAssistantAvailability).mockReturnValue({
+    vi.clearAllMocks();
+    vi.mocked(useAssistantAvailability).mockReturnValue({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: true,
       hasConnectorsAllPrivilege: true,
@@ -60,11 +63,11 @@ describe('useAssetInventoryAssistant', () => {
       isAssistantVisible: true,
     });
     useAssistantOverlayMock.mockReturnValue({
-      showAssistantOverlay: jest.fn(),
+      showAssistantOverlay: vi.fn(),
       promptContextId: 'asset-inventory-123',
     });
 
-    (useAssistantContext as jest.Mock).mockReturnValue({
+    (useAssistantContext as Mock).mockReturnValue({
       basePromptContexts: [
         {
           category: 'alert',
@@ -100,7 +103,7 @@ describe('useAssetInventoryAssistant', () => {
   });
 
   it('should return showAssistant false if isAssistantEnabled is false', () => {
-    jest.mocked(useAssistantAvailability).mockReturnValue({
+    vi.mocked(useAssistantAvailability).mockReturnValue({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: true,
       hasConnectorsAllPrivilege: true,
@@ -117,7 +120,7 @@ describe('useAssetInventoryAssistant', () => {
   });
 
   it('should return showAssistant false if hasAssistantPrivilege is false', () => {
-    jest.mocked(useAssistantAvailability).mockReturnValue({
+    vi.mocked(useAssistantAvailability).mockReturnValue({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: false,
       hasConnectorsAllPrivilege: true,
@@ -135,7 +138,7 @@ describe('useAssetInventoryAssistant', () => {
   });
 
   it('should return showAssistant false if isAssistantVisible is false', () => {
-    jest.mocked(useAssistantAvailability).mockReturnValue({
+    vi.mocked(useAssistantAvailability).mockReturnValue({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: true,
       hasConnectorsAllPrivilege: true,
@@ -153,7 +156,7 @@ describe('useAssetInventoryAssistant', () => {
 
   it('should return showAssistant false if promptContextId is null', () => {
     useAssistantOverlayMock.mockReturnValue({
-      showAssistantOverlay: jest.fn(),
+      showAssistantOverlay: vi.fn(),
       promptContextId: null,
     });
 
@@ -176,7 +179,7 @@ describe('useAssetInventoryAssistant', () => {
   it('returns entity fields as prompt context data', async () => {
     hookResult = renderUseAssetInventoryAssistant();
 
-    const getPromptContext = (useAssistantOverlay as jest.Mock).mock.calls[0][3];
+    const getPromptContext = (useAssistantOverlay as Mock).mock.calls[0][3];
 
     expect(await getPromptContext()).toEqual(mockEntityFields);
   });
@@ -202,7 +205,7 @@ describe('useAssetInventoryAssistant', () => {
       initialProps: { entityId, entityFields: {}, isPreviewMode: false },
     });
 
-    const getPromptContext = (useAssistantOverlay as jest.Mock).mock.calls[0][3];
+    const getPromptContext = (useAssistantOverlay as Mock).mock.calls[0][3];
 
     expect(await getPromptContext()).toEqual({});
   });
@@ -210,7 +213,7 @@ describe('useAssetInventoryAssistant', () => {
   it('includes asset criticality in prompt context when provided', async () => {
     renderUseAssetInventoryAssistant('high_impact');
 
-    const getPromptContext = (useAssistantOverlay as jest.Mock).mock.calls[0][3];
+    const getPromptContext = (useAssistantOverlay as Mock).mock.calls[0][3];
     const context = await getPromptContext();
 
     expect(context).toEqual({
@@ -222,7 +225,7 @@ describe('useAssetInventoryAssistant', () => {
   it('does not include asset criticality when not provided', async () => {
     renderUseAssetInventoryAssistant();
 
-    const getPromptContext = (useAssistantOverlay as jest.Mock).mock.calls[0][3];
+    const getPromptContext = (useAssistantOverlay as Mock).mock.calls[0][3];
     const context = await getPromptContext();
 
     expect(context).toEqual(mockEntityFields);
@@ -230,7 +233,7 @@ describe('useAssetInventoryAssistant', () => {
   });
 
   it('uses noop function when hasAssistantPrivilege is false', () => {
-    jest.mocked(useAssistantAvailability).mockReturnValue({
+    vi.mocked(useAssistantAvailability).mockReturnValue({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: false,
       hasConnectorsAllPrivilege: true,

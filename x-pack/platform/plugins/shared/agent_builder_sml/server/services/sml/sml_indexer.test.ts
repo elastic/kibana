@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
@@ -16,32 +19,38 @@ import { smlIndexName } from './sml_storage';
 import { SmlUnregisteredTypeError } from './sml_errors';
 import type { SmlContext, SmlEntry, SmlIndexerOriginParams, SmlTypeDefinition } from './types';
 
-jest.mock('./sml_storage', () => ({
-  smlIndexName: '.test-sml-data',
-  INGESTION_METHOD_FIELD: 'governance.provenance.updated_by.metadata.ingestion_method',
-}));
+vi.mock('./sml_storage', () => {
+      const mocked = {
+      smlIndexName: '.test-sml-data',
+      INGESTION_METHOD_FIELD: 'governance.provenance.updated_by.metadata.ingestion_method',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./sml_service', () => ({
-  isNotFoundError: jest.fn(
-    (error: unknown) => (error as { statusCode?: number })?.statusCode === 404
-  ),
-}));
+vi.mock('./sml_service', () => {
+      const mocked = {
+      isNotFoundError: vi.fn(
+        (error: unknown) => (error as { statusCode?: number })?.statusCode === 404
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Shared so a test can arrange the response before `createMockEsClient()` is called.
-const bulkMock = jest.fn();
+const bulkMock = vi.fn();
 
-const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
+const createMockEsClient = (): Mocked<ElasticsearchClient> =>
   ({
     bulk: bulkMock,
-    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
-    count: jest.fn().mockResolvedValue({ count: 0 }),
-    indices: { refresh: jest.fn().mockResolvedValue({ _shards: { failed: 0 } }) },
-    get: jest.fn().mockResolvedValue({ found: false }),
-  } as unknown as jest.Mocked<ElasticsearchClient>);
+    deleteByQuery: vi.fn().mockResolvedValue({ deleted: 0 }),
+    count: vi.fn().mockResolvedValue({ count: 0 }),
+    indices: { refresh: vi.fn().mockResolvedValue({ _shards: { failed: 0 } }) },
+    get: vi.fn().mockResolvedValue({ found: false }),
+  } as unknown as Mocked<ElasticsearchClient>);
 
 const createMockLogger = () => {
   const log = loggerMock.create();
-  log.get = jest.fn().mockReturnValue(log);
+  log.get = vi.fn().mockReturnValue(log);
   return log;
 };
 
@@ -49,22 +58,22 @@ const createMockSmlTypeDefinition = (
   overrides: Partial<SmlTypeDefinition> = {}
 ): SmlTypeDefinition => ({
   id: 'test-type',
-  list: jest.fn(),
-  getSmlEntry: jest.fn(),
-  toAttachment: jest.fn(),
+  list: vi.fn(),
+  getSmlEntry: vi.fn(),
+  toAttachment: vi.fn(),
   ...overrides,
 });
 
 const createMockRegistry = (definition?: SmlTypeDefinition) => ({
-  get: jest.fn().mockReturnValue(definition),
-  list: jest.fn().mockReturnValue(definition ? [definition] : []),
-  register: jest.fn(),
-  has: jest.fn().mockReturnValue(!!definition),
+  get: vi.fn().mockReturnValue(definition),
+  list: vi.fn().mockReturnValue(definition ? [definition] : []),
+  register: vi.fn(),
+  has: vi.fn().mockReturnValue(!!definition),
 });
 
 const captureSmlEntryClient = () => {
   const captured: { client?: SavedObjectsClientContract } = {};
-  const getSmlEntry = jest.fn(async (_originId: string, context: SmlContext): Promise<SmlEntry> => {
+  const getSmlEntry = vi.fn(async (_originId: string, context: SmlContext): Promise<SmlEntry> => {
     captured.client = context.savedObjectsClient;
     return { type: 'lens', title: 'T', content: 'c' };
   });
@@ -76,7 +85,7 @@ const createIndexerParams = (
     originId?: string;
     attachmentType?: string;
     spaces?: string[];
-    esClient?: jest.Mocked<ElasticsearchClient>;
+    esClient?: Mocked<ElasticsearchClient>;
     logger?: ReturnType<typeof createMockLogger>;
     action?: 'create' | 'update' | 'delete';
     savedObjectsClient?: ISavedObjectsRepository;
@@ -101,7 +110,7 @@ describe('createSmlIndexer', () => {
 
   describe('indexAttachment', () => {
     it('delete action: calls deleteByQuery and does NOT call getSmlEntry', async () => {
-      const getSmlEntry = jest.fn();
+      const getSmlEntry = vi.fn();
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
       const logger = createMockLogger();
       const esClient = createMockEsClient();
@@ -141,8 +150,8 @@ describe('createSmlIndexer', () => {
         title: 'My Viz',
         content: 'content',
       };
-      const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
-      const getPermissions = jest.fn().mockReturnValue({
+      const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
+      const getPermissions = vi.fn().mockReturnValue({
         kibana: { privileges: { name: ['perm1'] } },
       });
       const registry = createMockRegistry(
@@ -221,8 +230,8 @@ describe('createSmlIndexer', () => {
         user_id: 'user-7',
         references: [{ uri: 'category://sales' }, { uri: 'dashboard://parent-1' }],
       };
-      const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
-      const getPermissions = jest.fn().mockReturnValue({
+      const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
+      const getPermissions = vi.fn().mockReturnValue({
         kibana: { privileges: { name: ['ai_index:dashboard/read'] } },
       });
       const registry = createMockRegistry(
@@ -277,7 +286,7 @@ describe('createSmlIndexer', () => {
     });
 
     it('skips an entry whose type differs from the attachment type', async () => {
-      const getSmlEntry = jest.fn().mockResolvedValue({ type: 'Lens', title: 'Viz', content: 'c' });
+      const getSmlEntry = vi.fn().mockResolvedValue({ type: 'Lens', title: 'Viz', content: 'c' });
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
       const logger = createMockLogger();
       const esClient = createMockEsClient();
@@ -303,12 +312,12 @@ describe('createSmlIndexer', () => {
 
     it('re-indexing keeps the original creation time and creator', async () => {
       const smlEntry = { type: 'lens', title: 'My Viz', content: 'v2' };
-      const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+      const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
       const logger = createMockLogger();
       const esClient = createMockEsClient();
       const createdBy = { uri: 'user://u-1', metadata: { ingestion_method: 'manual' } };
-      (esClient.get as jest.Mock).mockResolvedValue({
+      (esClient.get as Mock).mockResolvedValue({
         found: true,
         _source: {
           '@timestamp': '2025-01-01T00:00:00.000Z',
@@ -351,7 +360,7 @@ describe('createSmlIndexer', () => {
           owner_team: 'sales-ops',
         },
       };
-      const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+      const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
       const registry = createMockRegistry(
         createMockSmlTypeDefinition({ id: 'dashboard', getSmlEntry })
       );
@@ -381,7 +390,7 @@ describe('createSmlIndexer', () => {
 
     it('update action: same as create (overwrite)', async () => {
       const smlEntry = { type: 'lens', title: 'Updated', content: 'new content' };
-      const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+      const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
       const logger = createMockLogger();
       const esClient = createMockEsClient();
@@ -405,7 +414,7 @@ describe('createSmlIndexer', () => {
       const { captured, getSmlEntry } = captureSmlEntryClient();
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
       const indexer = createSmlIndexer({ registry, logger: createMockLogger() });
-      const realGet = jest.fn().mockResolvedValue({ id: 'att-9', type: 'lens', attributes: {} });
+      const realGet = vi.fn().mockResolvedValue({ id: 'att-9', type: 'lens', attributes: {} });
       const mockRepo = { get: realGet } as unknown as ISavedObjectsRepository;
 
       await indexer.indexAttachment(
@@ -428,9 +437,9 @@ describe('createSmlIndexer', () => {
       const { captured, getSmlEntry } = captureSmlEntryClient();
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
       const indexer = createSmlIndexer({ registry, logger: createMockLogger() });
-      const realBulkGet = jest.fn().mockResolvedValue({ saved_objects: [] });
+      const realBulkGet = vi.fn().mockResolvedValue({ saved_objects: [] });
       const mockRepo = {
-        get: jest.fn(),
+        get: vi.fn(),
         bulkGet: realBulkGet,
       } as unknown as ISavedObjectsRepository;
 
@@ -456,11 +465,11 @@ describe('createSmlIndexer', () => {
       const { captured, getSmlEntry } = captureSmlEntryClient();
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
       const indexer = createSmlIndexer({ registry, logger: createMockLogger() });
-      const realResolve = jest
+      const realResolve = vi
         .fn()
         .mockResolvedValue({ saved_object: { id: 'att-14', type: 'lens', attributes: {} } });
       const mockRepo = {
-        get: jest.fn(),
+        get: vi.fn(),
         resolve: realResolve,
       } as unknown as ISavedObjectsRepository;
 
@@ -484,9 +493,9 @@ describe('createSmlIndexer', () => {
       const { captured, getSmlEntry } = captureSmlEntryClient();
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
       const indexer = createSmlIndexer({ registry, logger: createMockLogger() });
-      const realBulkResolve = jest.fn().mockResolvedValue({ resolved_objects: [] });
+      const realBulkResolve = vi.fn().mockResolvedValue({ resolved_objects: [] });
       const mockRepo = {
-        get: jest.fn(),
+        get: vi.fn(),
         bulkResolve: realBulkResolve,
       } as unknown as ISavedObjectsRepository;
 
@@ -535,7 +544,7 @@ describe('createSmlIndexer', () => {
       const { captured, getSmlEntry } = captureSmlEntryClient();
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
       const indexer = createSmlIndexer({ registry, logger: createMockLogger() });
-      const mockRepo = { get: jest.fn() } as unknown as ISavedObjectsRepository;
+      const mockRepo = { get: vi.fn() } as unknown as ISavedObjectsRepository;
 
       await indexer.indexAttachment(
         createIndexerParams({
@@ -576,7 +585,7 @@ describe('createSmlIndexer', () => {
     });
 
     it('getSmlEntry returns undefined: deletes existing entry and does not index', async () => {
-      const getSmlEntry = jest.fn().mockResolvedValue(undefined);
+      const getSmlEntry = vi.fn().mockResolvedValue(undefined);
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
       const logger = createMockLogger();
       const esClient = createMockEsClient();
@@ -597,7 +606,7 @@ describe('createSmlIndexer', () => {
     });
 
     it('getSmlEntry returns undefined (second case): deletes existing entry and does not index', async () => {
-      const getSmlEntry = jest.fn().mockResolvedValue(undefined);
+      const getSmlEntry = vi.fn().mockResolvedValue(undefined);
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
       const logger = createMockLogger();
       const esClient = createMockEsClient();
@@ -625,7 +634,7 @@ describe('createSmlIndexer', () => {
       esClient.deleteByQuery.mockRejectedValue(error404);
 
       const registry = createMockRegistry(
-        createMockSmlTypeDefinition({ id: 'lens', getSmlEntry: jest.fn() })
+        createMockSmlTypeDefinition({ id: 'lens', getSmlEntry: vi.fn() })
       );
       const logger = createMockLogger();
       const indexer = createSmlIndexer({ registry, logger });
@@ -759,7 +768,7 @@ describe('createSmlIndexer', () => {
       esClient.deleteByQuery.mockRejectedValue(error500);
 
       const registry = createMockRegistry(
-        createMockSmlTypeDefinition({ id: 'lens', getSmlEntry: jest.fn() })
+        createMockSmlTypeDefinition({ id: 'lens', getSmlEntry: vi.fn() })
       );
       const logger = createMockLogger();
       const indexer = createSmlIndexer({ registry, logger });
@@ -787,7 +796,7 @@ describe('createSmlIndexer', () => {
       });
 
       const smlEntry = { type: 'lens', title: 'T', content: 'c' };
-      const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+      const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
       const logger = createMockLogger();
       const esClient = createMockEsClient();
@@ -810,7 +819,7 @@ describe('createSmlIndexer', () => {
       bulkMock.mockRejectedValue(new Error('Connection refused'));
 
       const smlEntry = { type: 'lens', title: 'T', content: 'c' };
-      const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+      const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
       const logger = createMockLogger();
       const esClient = createMockEsClient();
@@ -835,14 +844,14 @@ describe('createSmlIndexer', () => {
 
     describe('manual-entry protection (origin mode)', () => {
       it('skips getSmlEntry and write when a manual entry already exists', async () => {
-        const getSmlEntry = jest.fn();
+        const getSmlEntry = vi.fn();
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry })
         );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         // hasManualEntry returns true
-        (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
+        (esClient.count as Mock).mockResolvedValue({ count: 1 });
         const indexer = createSmlIndexer({ registry, logger });
 
         await indexer.indexAttachment(
@@ -881,13 +890,13 @@ describe('createSmlIndexer', () => {
 
       it('force=true overrides existing manual entry and writes as crawled', async () => {
         const smlEntry = { type: 'lens', title: 'Forced', content: 'c' };
-        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+        const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry })
         );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
-        (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
+        (esClient.count as Mock).mockResolvedValue({ count: 1 });
         const indexer = createSmlIndexer({ registry, logger });
 
         await indexer.indexAttachment({
@@ -911,13 +920,13 @@ describe('createSmlIndexer', () => {
       });
 
       it('delete action proceeds regardless of manual entries', async () => {
-        const getSmlEntry = jest.fn();
+        const getSmlEntry = vi.fn();
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry })
         );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
-        (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
+        (esClient.count as Mock).mockResolvedValue({ count: 1 });
         const indexer = createSmlIndexer({ registry, logger });
 
         await indexer.indexAttachment(
@@ -937,13 +946,13 @@ describe('createSmlIndexer', () => {
       it('hasManualEntry treats unexpected ES errors as manual-entry-present (fail-closed)', async () => {
         // Fail-closed: a transient ES error skips the crawl tick rather than risking
         // destruction of admin-curated manual entries.
-        const getSmlEntry = jest.fn();
+        const getSmlEntry = vi.fn();
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry })
         );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
-        (esClient.count as jest.Mock).mockRejectedValue(
+        (esClient.count as Mock).mockRejectedValue(
           Object.assign(new Error('boom'), { statusCode: 500 })
         );
         const indexer = createSmlIndexer({ registry, logger });
@@ -970,13 +979,13 @@ describe('createSmlIndexer', () => {
       it('hasManualEntry index_not_found still treats origin as fresh (no fail-closed)', async () => {
         // index_not_found is unambiguous — fail-closed here would block first-write crawls on new clusters.
         const smlEntry = { type: 'lens', title: 'T', content: 'c' };
-        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+        const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry })
         );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
-        (esClient.count as jest.Mock).mockRejectedValue(
+        (esClient.count as Mock).mockRejectedValue(
           Object.assign(new Error('index_not_found_exception'), {
             statusCode: 404,
             body: { error: { type: 'index_not_found_exception' } },
@@ -1002,7 +1011,7 @@ describe('createSmlIndexer', () => {
     describe('getPermissions hook', () => {
       it('stamps fully-shaped empty permissions when type has no getPermissions hook', async () => {
         const smlEntry = { type: 'lens', title: 'No Perms', content: 'c' };
-        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+        const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry /* no getPermissions */ })
         );
@@ -1031,9 +1040,9 @@ describe('createSmlIndexer', () => {
         // require zero matches, so the entry stays visible — including in autocomplete — to any
         // caller with access to that space.
         const smlEntry = { type: 'lens', title: 'Zero Actions', content: 'c' };
-        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+        const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
         // what it falls back to if no-one implements the optional getPermissions hook
-        const getPermissions = jest.fn().mockResolvedValue({
+        const getPermissions = vi.fn().mockResolvedValue({
           kibana: { privileges: { name: [] } },
         });
         const registry = createMockRegistry(
@@ -1068,8 +1077,8 @@ describe('createSmlIndexer', () => {
 
       it('awaits async getPermissions and stamps the resolved value', async () => {
         const smlEntry = { type: 'lens', title: 'T', content: 'c' };
-        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
-        const getPermissions = jest.fn().mockImplementation(
+        const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
+        const getPermissions = vi.fn().mockImplementation(
           async () =>
             new Promise<{
               kibana: { privileges: { name: string[] } };
@@ -1110,8 +1119,8 @@ describe('createSmlIndexer', () => {
         // Half-populated returns from a hand-written hook are normalised so
         // the document mapping always sees the kibana sub-array.
         const smlEntry = { type: 'lens', title: 'T', content: 'c' };
-        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
-        const getPermissions = jest.fn().mockReturnValue({
+        const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
+        const getPermissions = vi.fn().mockReturnValue({
           kibana: { privileges: { name: ['p1'] } },
         } as unknown);
         const registry = createMockRegistry(
@@ -1145,8 +1154,8 @@ describe('createSmlIndexer', () => {
         //  - deleteByQuery is never called (origin not wiped)
         //  - bulk is never called (no new entry written)
         const smlEntry = { type: 'lens', title: 'T', content: 'c' };
-        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
-        const getPermissions = jest.fn().mockImplementation(() => {
+        const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
+        const getPermissions = vi.fn().mockImplementation(() => {
           throw new Error('upstream lookup failed');
         });
         const registry = createMockRegistry(
@@ -1179,8 +1188,8 @@ describe('createSmlIndexer', () => {
 
       it('getPermissions is called once per origin', async () => {
         const smlEntry = { type: 'lens', title: 'A', content: 'a' };
-        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
-        const getPermissions = jest.fn().mockResolvedValue({
+        const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
+        const getPermissions = vi.fn().mockResolvedValue({
           kibana: { privileges: { name: ['p1'] } },
         });
         const registry = createMockRegistry(
@@ -1211,8 +1220,8 @@ describe('createSmlIndexer', () => {
 
       it('normalizes a spaces list containing "*" to exactly ["*"]', async () => {
         const smlEntry = { type: 'dashboard', title: 'T', content: 'c' };
-        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
-        const getPermissions = jest.fn().mockReturnValue({
+        const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
+        const getPermissions = vi.fn().mockReturnValue({
           kibana: { privileges: { name: ['ai_index:dashboard/read'] } },
         });
         const registry = createMockRegistry(
@@ -1242,8 +1251,8 @@ describe('createSmlIndexer', () => {
 
       it('dedupes duplicate raw privilege names before computing count', async () => {
         const smlEntry = { type: 'lens', title: 'T', content: 'c' };
-        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
-        const getPermissions = jest.fn().mockReturnValue({
+        const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
+        const getPermissions = vi.fn().mockReturnValue({
           kibana: { privileges: { name: ['p1', 'p1'] } },
         });
         const registry = createMockRegistry(
@@ -1273,7 +1282,7 @@ describe('createSmlIndexer', () => {
 
       it('skips indexing without deleting the existing entry when an item resolves to zero spaces', async () => {
         const smlEntry = { type: 'lens', title: 'T', content: 'c' };
-        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+        const getSmlEntry = vi.fn().mockResolvedValue(smlEntry);
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry })
         );
@@ -1308,7 +1317,7 @@ describe('createSmlIndexer', () => {
         originId?: string;
         attachmentType?: string;
         spaces?: string[];
-        esClient?: jest.Mocked<ElasticsearchClient>;
+        esClient?: Mocked<ElasticsearchClient>;
         logger?: ReturnType<typeof createMockLogger>;
         ingestionMethod?: 'crawled' | 'manual' | 'all';
       } = {}
@@ -1335,7 +1344,7 @@ describe('createSmlIndexer', () => {
       );
 
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+      const callArgs = (esClient.deleteByQuery as Mock).mock.calls[0][0];
       // No ingestion_method term means both manual + crawled are removed.
       // Space guard is present because createDeleteParams defaults spaces to ['default'].
       expect(callArgs.query.bool.filter).toEqual([
@@ -1360,7 +1369,7 @@ describe('createSmlIndexer', () => {
       );
 
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+      const callArgs = (esClient.deleteByQuery as Mock).mock.calls[0][0];
       expect(callArgs.query.bool.filter).toEqual([
         { term: { id: 'lens:att-wipe-manual' } },
         { term: { 'governance.provenance.updated_by.metadata.ingestion_method': 'manual' } },
@@ -1384,7 +1393,7 @@ describe('createSmlIndexer', () => {
       );
 
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+      const callArgs = (esClient.deleteByQuery as Mock).mock.calls[0][0];
       expect(callArgs.query.bool.filter).toEqual([
         { term: { id: 'lens:att-default-scope' } },
         { term: { 'governance.provenance.updated_by.metadata.ingestion_method': 'crawled' } },
@@ -1412,7 +1421,7 @@ describe('createSmlIndexer', () => {
         })
       );
 
-      const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+      const callArgs = (esClient.deleteByQuery as Mock).mock.calls[0][0];
       expect(callArgs.query.bool.filter).toContainEqual({
         nested: {
           path: 'permissions.kibana.privileges',
@@ -1431,7 +1440,7 @@ describe('createSmlIndexer', () => {
         createDeleteParams({ originId: 'att-global', ingestionMethod: 'all', spaces: [], esClient })
       );
 
-      const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+      const callArgs = (esClient.deleteByQuery as Mock).mock.calls[0][0];
       // No space guard when spaces is empty — global delete.
       expect(callArgs.query.bool.filter).toEqual([{ term: { id: 'lens:att-global' } }]);
     });

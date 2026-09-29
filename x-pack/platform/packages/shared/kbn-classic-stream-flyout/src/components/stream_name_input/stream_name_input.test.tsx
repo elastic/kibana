@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { StreamNameInput } from './stream_name_input';
@@ -13,11 +15,11 @@ describe('StreamNameInput', () => {
   const defaultProps = {
     indexPattern: 'logs-*',
     parts: [''],
-    onPartsChange: jest.fn(),
+    onPartsChange: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('no wildcards', () => {
@@ -56,7 +58,7 @@ describe('StreamNameInput', () => {
     });
 
     it('calls onPartsChange when input changes', () => {
-      const onPartsChange = jest.fn();
+      const onPartsChange = vi.fn();
       const { getByTestId } = render(
         <StreamNameInput
           {...defaultProps}
@@ -73,7 +75,7 @@ describe('StreamNameInput', () => {
     });
 
     it('does not call initial onChange on mount', () => {
-      const onPartsChange = jest.fn();
+      const onPartsChange = vi.fn();
       render(
         <StreamNameInput
           {...defaultProps}
@@ -109,7 +111,7 @@ describe('StreamNameInput', () => {
     });
 
     it('allows editing each wildcard independently', () => {
-      const onPartsChange = jest.fn();
+      const onPartsChange = vi.fn();
       const { getByTestId } = render(
         <StreamNameInput
           {...defaultProps}
@@ -134,7 +136,7 @@ describe('StreamNameInput', () => {
     });
 
     it('calls onPartsChange when only some wildcards are filled', () => {
-      const onPartsChange = jest.fn();
+      const onPartsChange = vi.fn();
       const { getByTestId } = render(
         <StreamNameInput
           {...defaultProps}
@@ -152,7 +154,7 @@ describe('StreamNameInput', () => {
     });
 
     it('calls onPartsChange when all wildcards are filled', () => {
-      const onPartsChange = jest.fn();
+      const onPartsChange = vi.fn();
       const { getByTestId } = render(
         <StreamNameInput
           {...defaultProps}
@@ -290,7 +292,7 @@ describe('StreamNameInput', () => {
     });
 
     it('shows invalid state only on empty inputs when validationError is empty', () => {
-      const onPartsChange = jest.fn();
+      const onPartsChange = vi.fn();
       const { getByTestId, rerender } = render(
         <StreamNameInput
           {...defaultProps}
@@ -326,7 +328,7 @@ describe('StreamNameInput', () => {
     });
 
     it('clears invalid state on input when filled (empty validation error)', () => {
-      const onPartsChange = jest.fn();
+      const onPartsChange = vi.fn();
       const { getByTestId, rerender } = render(
         <StreamNameInput
           {...defaultProps}

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { TypeOf } from '@kbn/config-schema';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SortDirection } from '@kbn/data-plugin/common';
@@ -23,10 +26,10 @@ import { xpackMocks, createAppContextStartContractMock } from '../../mocks';
 
 import { generateReportHandler, getSortFieldForAPI } from './generate_report_handler';
 
-jest.mock('../../services/agents/build_status_runtime_field');
-jest.mock('../../services/spaces/helpers');
+vi.mock('../../services/agents/build_status_runtime_field');
+vi.mock('../../services/spaces/helpers');
 
-const mockBuildAgentStatusRuntimeField = buildAgentStatusRuntimeField as jest.Mock;
+const mockBuildAgentStatusRuntimeField = buildAgentStatusRuntimeField as Mock;
 const baseRequestBodyMock = {
   agents: ['agent1', 'agent2'],
   fields: ['id', 'status', 'enrolled_at'],
@@ -169,7 +172,7 @@ const expectedKueryFilterQuery = {
 
 describe('generateReportHandler', () => {
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
-  let mockRequest: jest.Mocked<
+  let mockRequest: Mocked<
     KibanaRequest<
       Record<string, string>,
       null,
@@ -187,7 +190,7 @@ describe('generateReportHandler', () => {
     mockContext = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
     appContextService.start(createAppContextStartContractMock());
 
-    jest
+    vi
       .mocked(appContextService.getReportingStart()?.handleGenerateSystemReportRequest)
       ?.mockImplementation(async (path, config, handleResponse) => {
         return handleResponse({
@@ -204,12 +207,12 @@ describe('generateReportHandler', () => {
       },
     });
 
-    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+    vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
   });
 
   afterEach(() => {
     appContextService.stop();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('successful report generation', () => {
@@ -380,7 +383,7 @@ describe('generateReportHandler', () => {
   describe('space awareness filter injection (security regression)', () => {
     // Helper: extract the ES DSL query from the first reporting call.
     const getFilterQuery = () => {
-      const mock = jest.mocked(
+      const mock = vi.mocked(
         appContextService.getReportingStart()!.handleGenerateSystemReportRequest
       );
       const reportParams = mock.mock.calls[0][1].reportParams as {
@@ -408,7 +411,7 @@ describe('generateReportHandler', () => {
     });
 
     it('OR-leading kuery cannot bypass the space filter when space awareness is disabled', async () => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
       mockRequest = httpServerMock.createKibanaRequest({
         body: { ...baseRequestBodyMock, agents: 'namespaces:* OR agent.id:no-such-agent' },
       });
@@ -470,7 +473,7 @@ describe('generateReportHandler', () => {
     });
 
     it('space awareness disabled — no space filter applied for kuery', async () => {
-      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
       mockRequest = httpServerMock.createKibanaRequest({
         body: { ...baseRequestBodyMock, agents: 'status:online' },
       });
@@ -500,7 +503,7 @@ describe('generateReportHandler', () => {
   describe('error handling', () => {
     it('should throw FleetError when report generation fails', async () => {
       const errorMessage = 'Report generation failed!';
-      jest
+      vi
         .mocked(appContextService.getReportingStart()!.handleGenerateSystemReportRequest)
         .mockRejectedValue(new Error(errorMessage));
 
@@ -515,7 +518,7 @@ describe('generateReportHandler', () => {
 
     it('should handle reporting callback with error', async () => {
       const callbackError = new Error('Callback error');
-      jest
+      vi
         .mocked(appContextService.getReportingStart()!.handleGenerateSystemReportRequest)
         .mockImplementation(async (path, config, handleResponse) => {
           return handleResponse(null, callbackError);
@@ -530,7 +533,7 @@ describe('generateReportHandler', () => {
     });
 
     it('should throw FleetError when reporting callback returns no result', async () => {
-      jest
+      vi
         .mocked(appContextService.getReportingStart()!.handleGenerateSystemReportRequest)
         .mockImplementation(async (path, config, handleResponse) => {
           return handleResponse(null);

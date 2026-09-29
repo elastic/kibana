@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { deleteAttackDiscoverySchedulesRoute } from './delete';
@@ -14,32 +17,35 @@ import { deleteAttackDiscoverySchedulesRequest } from '../../../../../__mocks__/
 import type { AttackDiscoveryScheduleDataClient } from '@kbn/attack-discovery-schedules-common';
 import { performChecks } from '../../../../helpers';
 
-jest.mock('../../../../helpers', () => ({
-  performChecks: jest.fn(),
-}));
+vi.mock('../../../../helpers', () => {
+      const mocked = {
+      performChecks: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();
 clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
 
-const deleteAttackDiscoverySchedule = jest.fn();
+const deleteAttackDiscoverySchedule = vi.fn();
 const mockSchedulingDataClient = {
-  findSchedules: jest.fn(),
-  getSchedule: jest.fn(),
-  createSchedule: jest.fn(),
-  updateSchedule: jest.fn(),
+  findSchedules: vi.fn(),
+  getSchedule: vi.fn(),
+  createSchedule: vi.fn(),
+  updateSchedule: vi.fn(),
   deleteSchedule: deleteAttackDiscoverySchedule,
-  enableSchedule: jest.fn(),
-  disableSchedule: jest.fn(),
+  enableSchedule: vi.fn(),
+  disableSchedule: vi.fn(),
 } as unknown as AttackDiscoveryScheduleDataClient;
 
 describe('deleteAttackDiscoverySchedulesRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
       mockSchedulingDataClient
     );
-    (performChecks as jest.Mock).mockResolvedValue({
+    (performChecks as Mock).mockResolvedValue({
       isSuccess: true,
     });
     deleteAttackDiscoverySchedulesRoute(server.router);
@@ -69,7 +75,7 @@ describe('deleteAttackDiscoverySchedulesRoute', () => {
   });
 
   it('should handle `dataClient.deleteSchedule` error', async () => {
-    (deleteAttackDiscoverySchedule as jest.Mock).mockRejectedValue(new Error('Oh no!'));
+    (deleteAttackDiscoverySchedule as Mock).mockRejectedValue(new Error('Oh no!'));
     const response = await server.inject(
       deleteAttackDiscoverySchedulesRequest('schedule-3'),
       requestContextMock.convertContext(context)

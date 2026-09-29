@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import {
   MAX_ENTITY_IDS,
   MAX_IMPACT_CONVERSATION_IDS,
@@ -56,17 +59,17 @@ const conflictError = () => Object.assign(new Error('conflict'), { statusCode: 4
 
 const createStorage = (document?: ImpactDocument) => {
   return {
-    index: jest.fn().mockResolvedValue({ _id: document ? documentId(document) : 'impact-new' }),
-    get: jest.fn(),
-    delete: jest.fn().mockResolvedValue({ acknowledged: true, result: 'deleted' }),
-    search: jest
+    index: vi.fn().mockResolvedValue({ _id: document ? documentId(document) : 'impact-new' }),
+    get: vi.fn(),
+    delete: vi.fn().mockResolvedValue({ acknowledged: true, result: 'deleted' }),
+    search: vi
       .fn()
       .mockResolvedValue(versionedSearchResponse(document ? versionedHit(document) : undefined)),
-  } as unknown as jest.Mocked<ImpactStorageClient> & {
-    index: jest.Mock;
-    get: jest.Mock;
-    delete: jest.Mock;
-    search: jest.Mock;
+  } as unknown as Mocked<ImpactStorageClient> & {
+    index: Mock;
+    get: Mock;
+    delete: Mock;
+    search: Mock;
   };
 };
 
@@ -74,7 +77,7 @@ const createService = (storage: ReturnType<typeof createStorage>) => new ImpactS
 
 describe('ImpactService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('attach', () => {

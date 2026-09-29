@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import fetch from 'node-fetch';
 
 import { ECF_FALLBACK_TEMPLATE_VERSION } from '../../common/providers/aws/ecf_template_version';
 import { getLatestEcfVersion } from './ecf_version';
 
-jest.mock('node-fetch');
+vi.mock('node-fetch');
 
-const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
+const mockedFetch = fetch as MockedFunction<typeof fetch>;
 
-const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
+const { loggerMock } = (await vi.importActual('@kbn/logging-mocks'));
 const mockLogger = loggerMock.create();
 
 /** A minimal YAML excerpt that contains a parseable SemanticVersion field. */
@@ -29,14 +32,14 @@ const mockFetchOk = (body: string) =>
   ({
     ok: true,
     status: 200,
-    text: jest.fn().mockResolvedValue(body),
+    text: vi.fn().mockResolvedValue(body),
   } as any);
 
 const mockFetchError = (status: number) =>
   ({
     ok: false,
     status,
-    text: jest.fn().mockResolvedValue(''),
+    text: vi.fn().mockResolvedValue(''),
   } as any);
 
 beforeEach(() => {

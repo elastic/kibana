@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -24,17 +27,23 @@ import {
   tryResolveWorkflowDisplayNameFromAttachments,
 } from './handler';
 
-jest.mock('../../assert_context_engine_write_access', () => ({
-  assertContextEngineWriteAccess: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../assert_context_engine_write_access', () => {
+      const mocked = {
+      assertContextEngineWriteAccess: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
-  hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
-  hasWorkflowCreatePrivilege: jest.fn().mockResolvedValue(true),
-  hasWorkflowUpdatePrivilege: jest.fn().mockResolvedValue(true),
-  hasWorkflowExecutePrivilege: jest.fn().mockResolvedValue(true),
-  executeWorkflow: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-tools-base/workflows', () => {
+      const mocked = {
+      hasWorkflowReadPrivilege: vi.fn().mockResolvedValue(true),
+      hasWorkflowCreatePrivilege: vi.fn().mockResolvedValue(true),
+      hasWorkflowUpdatePrivilege: vi.fn().mockResolvedValue(true),
+      hasWorkflowExecutePrivilege: vi.fn().mockResolvedValue(true),
+      executeWorkflow: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const {
   hasWorkflowReadPrivilege,
@@ -42,7 +51,7 @@ const {
   hasWorkflowUpdatePrivilege,
   hasWorkflowExecutePrivilege,
   executeWorkflow,
-} = jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+} = (await vi.importMock('@kbn/agent-builder-tools-base/workflows'));
 
 const WORKFLOW_ATTACHMENT_ID = 'workflow-attachment-1';
 const WORKFLOW_YAML = 'name: pilot\nsteps: []';
@@ -54,7 +63,7 @@ const createAttachmentStateManager = ({
   origin?: string;
   yaml?: string;
 } = {}) => ({
-  getAll: jest.fn().mockReturnValue([
+  getAll: vi.fn().mockReturnValue([
     {
       id: WORKFLOW_ATTACHMENT_ID,
       type: 'workflow.yaml',
@@ -69,9 +78,9 @@ const createAttachmentStateManager = ({
       versions: [{ version: 1, data: { id: 'my-ai-index' } }],
     },
   ]),
-  updateOrigin: jest.fn().mockResolvedValue(true),
-  update: jest.fn().mockResolvedValue({ id: WORKFLOW_ATTACHMENT_ID }),
-  add: jest.fn().mockResolvedValue({ id: 'created-attachment' }),
+  updateOrigin: vi.fn().mockResolvedValue(true),
+  update: vi.fn().mockResolvedValue({ id: WORKFLOW_ATTACHMENT_ID }),
+  add: vi.fn().mockResolvedValue({ id: 'created-attachment' }),
 });
 
 describe('resolveAiIndexIdFromAttachments', () => {
@@ -163,20 +172,20 @@ describe('getSaveAutomationErrorMessage', () => {
 describe('saveAutomationHandler', () => {
   const request = httpServerMock.createKibanaRequest();
   const logger = loggingSystemMock.createLogger();
-  const getCoreStart = jest.fn();
-  const getSecurityStart = jest.fn().mockResolvedValue(undefined);
-  let aiIndexService: jest.Mocked<
+  const getCoreStart = vi.fn();
+  const getSecurityStart = vi.fn().mockResolvedValue(undefined);
+  let aiIndexService: Mocked<
     Pick<AiIndexService, 'addAutomation' | 'assertCanAcceptAutomation'>
   >;
   let workflowsManagement: {
-    getWorkflow: jest.Mock;
-    createWorkflow: jest.Mock;
-    updateWorkflow: jest.Mock;
-    deleteWorkflows: jest.Mock;
+    getWorkflow: Mock;
+    createWorkflow: Mock;
+    updateWorkflow: Mock;
+    deleteWorkflows: Mock;
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     hasWorkflowReadPrivilege.mockResolvedValue(true);
     hasWorkflowCreatePrivilege.mockResolvedValue(true);
     hasWorkflowUpdatePrivilege.mockResolvedValue(true);
@@ -187,14 +196,14 @@ describe('saveAutomationHandler', () => {
     });
 
     aiIndexService = {
-      addAutomation: jest.fn(),
-      assertCanAcceptAutomation: jest.fn().mockResolvedValue(undefined),
+      addAutomation: vi.fn(),
+      assertCanAcceptAutomation: vi.fn().mockResolvedValue(undefined),
     };
     workflowsManagement = {
-      getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-new', enabled: true }),
-      createWorkflow: jest.fn(),
-      updateWorkflow: jest.fn().mockResolvedValue({ id: 'wf-new', enabled: true }),
-      deleteWorkflows: jest.fn().mockResolvedValue({ total: 1, deleted: 1, failures: [] }),
+      getWorkflow: vi.fn().mockResolvedValue({ id: 'wf-new', enabled: true }),
+      createWorkflow: vi.fn(),
+      updateWorkflow: vi.fn().mockResolvedValue({ id: 'wf-new', enabled: true }),
+      deleteWorkflows: vi.fn().mockResolvedValue({ total: 1, deleted: 1, failures: [] }),
     };
     getCoreStart.mockResolvedValue({});
   });

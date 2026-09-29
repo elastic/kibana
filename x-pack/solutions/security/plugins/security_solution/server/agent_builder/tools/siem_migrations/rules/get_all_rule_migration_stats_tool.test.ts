@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import {
@@ -17,20 +20,20 @@ import { getAllRuleMigrationStatsTool } from './get_all_rule_migration_stats_too
 import { SIEM_RULE_MIGRATIONS_ALL_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 
 const mockProductFeaturesService = {
-  isEnabled: jest.fn().mockReturnValue(true),
+  isEnabled: vi.fn().mockReturnValue(true),
 } as unknown as ProductFeaturesService;
 
 describe('getAllRuleMigrationStatsTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockSecurityStart, mockRequest } =
     createToolTestMocks();
   const tool = getAllRuleMigrationStatsTool(mockCore, mockLogger, mockProductFeaturesService);
-  let mockFetch: jest.Mock;
+  let mockFetch: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient, mockSecurityStart);
-    mockFetch = jest.fn();
-    (mockCoreStart.http.selfClient.asScoped as unknown as jest.Mock).mockReturnValue({
+    mockFetch = vi.fn();
+    (mockCoreStart.http.selfClient.asScoped as unknown as Mock).mockReturnValue({
       fetch: mockFetch,
     });
   });

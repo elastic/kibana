@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl, renderWithI18n, shallowWithIntl } from '@kbn/test-jest-helpers';
 import TelemetryManagementSection from './telemetry_management_section';
@@ -190,7 +192,7 @@ describe('TelemetryManagementSectionComponent', () => {
         toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('onFieldChange')()
       ).resolves.toBe(true);
       expect((component.state() as { enabled: boolean }).enabled).toBe(false);
-      telemetryService.setOptIn = jest.fn().mockRejectedValue(Error('test-error'));
+      telemetryService.setOptIn = vi.fn().mockRejectedValue(Error('test-error'));
       await expect(
         toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('onFieldChange')()
       ).rejects.toStrictEqual(Error('test-error'));

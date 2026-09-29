@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { stringify as yamlStringify } from 'yaml';
 import type { SavedObject } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -52,7 +54,7 @@ const createContext = (input: unknown, config: Record<string, unknown> = {}) =>
 
 describe('createCaseFromTemplateStepDefinition', () => {
   it('creates expected step definition structure', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     const definition = createCaseFromTemplateStepDefinition(getCasesClient, false);
 
     expect(definition.id).toBe('cases.createCaseFromTemplate');
@@ -66,8 +68,8 @@ describe('createCaseFromTemplateStepDefinition', () => {
   });
 
   it('resolves template, merges overwrites, and creates the case', async () => {
-    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const get = jest.fn().mockResolvedValue([
+    const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const get = vi.fn().mockResolvedValue([
       {
         owner: 'securitySolution',
         templates: [
@@ -90,7 +92,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
         ],
       },
     ]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       configure: { get },
       cases: { create },
     } as unknown as CasesClient);
@@ -144,8 +146,8 @@ describe('createCaseFromTemplateStepDefinition', () => {
   });
 
   it('omits extractObservables from the create payload when the legacy template settings are partial', async () => {
-    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const get = jest.fn().mockResolvedValue([
+    const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const get = vi.fn().mockResolvedValue([
       {
         owner: 'securitySolution',
         templates: [
@@ -161,7 +163,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
         ],
       },
     ]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       configure: { get },
       cases: { create },
     } as unknown as CasesClient);
@@ -177,8 +179,8 @@ describe('createCaseFromTemplateStepDefinition', () => {
   });
 
   it('finds template across multiple configurations', async () => {
-    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const get = jest.fn().mockResolvedValue([
+    const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const get = vi.fn().mockResolvedValue([
       {
         owner: 'securitySolution',
         templates: [
@@ -200,7 +202,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
         ],
       },
     ]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       configure: { get },
       cases: { create },
     } as unknown as CasesClient);
@@ -221,8 +223,8 @@ describe('createCaseFromTemplateStepDefinition', () => {
   });
 
   it('creates case from template defaults when overwrites are not provided', async () => {
-    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const get = jest.fn().mockResolvedValue([
+    const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const get = vi.fn().mockResolvedValue([
       {
         owner: 'securitySolution',
         templates: [
@@ -238,7 +240,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
         ],
       },
     ]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       configure: { get },
       cases: { create },
     } as unknown as CasesClient);
@@ -261,14 +263,14 @@ describe('createCaseFromTemplateStepDefinition', () => {
   });
 
   it('returns error when template cannot be found', async () => {
-    const create = jest.fn();
-    const get = jest.fn().mockResolvedValue([
+    const create = vi.fn();
+    const get = vi.fn().mockResolvedValue([
       {
         owner: 'securitySolution',
         templates: [],
       },
     ]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       configure: { get },
       cases: { create },
     } as unknown as CasesClient);
@@ -287,9 +289,9 @@ describe('createCaseFromTemplateStepDefinition', () => {
   });
 
   it('pushes case when push-case is enabled', async () => {
-    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const push = jest.fn().mockResolvedValue(undefined);
-    const get = jest.fn().mockResolvedValue([
+    const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const push = vi.fn().mockResolvedValue(undefined);
+    const get = vi.fn().mockResolvedValue([
       {
         owner: 'securitySolution',
         templates: [
@@ -304,7 +306,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
         ],
       },
     ]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       configure: { get },
       cases: { create, push },
     } as unknown as CasesClient);
@@ -329,8 +331,8 @@ describe('createCaseFromTemplateStepDefinition', () => {
 
   describe('when the templates feature is enabled (v2 path)', () => {
     it('forwards a minimal payload that leaves severity/assignees/extractObservables to cases.create expansion', async () => {
-      const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-      const getTemplate = jest.fn().mockResolvedValue(
+      const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+      const getTemplate = vi.fn().mockResolvedValue(
         buildTemplateSO({
           name: 'Triage default title',
           description: 'Triage default description',
@@ -341,8 +343,8 @@ describe('createCaseFromTemplateStepDefinition', () => {
           fields: [],
         })
       );
-      const configureGet = jest.fn();
-      const getCasesClient = jest.fn().mockResolvedValue({
+      const configureGet = vi.fn();
+      const getCasesClient = vi.fn().mockResolvedValue({
         templates: { getTemplate },
         configure: { get: configureGet },
         cases: { create },
@@ -387,17 +389,17 @@ describe('createCaseFromTemplateStepDefinition', () => {
     });
 
     it('lets caller overwrites win over the template-seeded title/description', async () => {
-      const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-      const getTemplate = jest.fn().mockResolvedValue(
+      const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+      const getTemplate = vi.fn().mockResolvedValue(
         buildTemplateSO({
           name: 'Triage default title',
           description: 'Triage default description',
           fields: [],
         })
       );
-      const getCasesClient = jest.fn().mockResolvedValue({
+      const getCasesClient = vi.fn().mockResolvedValue({
         templates: { getTemplate },
-        configure: { get: jest.fn() },
+        configure: { get: vi.fn() },
         cases: { create },
       } as unknown as CasesClient);
 
@@ -417,17 +419,17 @@ describe('createCaseFromTemplateStepDefinition', () => {
     });
 
     it('passes overwrites.extended_fields through to cases.create', async () => {
-      const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-      const getTemplate = jest.fn().mockResolvedValue(
+      const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+      const getTemplate = vi.fn().mockResolvedValue(
         buildTemplateSO({
           name: 'Triage default title',
           description: 'Triage default description',
           fields: [],
         })
       );
-      const getCasesClient = jest.fn().mockResolvedValue({
+      const getCasesClient = vi.fn().mockResolvedValue({
         templates: { getTemplate },
-        configure: { get: jest.fn() },
+        configure: { get: vi.fn() },
         cases: { create },
       } as unknown as CasesClient);
 
@@ -451,14 +453,14 @@ describe('createCaseFromTemplateStepDefinition', () => {
     });
 
     it('fails with owner context when the resolved template belongs to a different owner', async () => {
-      const create = jest.fn();
-      const getTemplate = jest
+      const create = vi.fn();
+      const getTemplate = vi
         .fn()
         .mockResolvedValue(
           buildTemplateSO({ name: 'Triage default title', fields: [] }, { owner: 'observability' })
         );
-      const configureGet = jest.fn();
-      const getCasesClient = jest.fn().mockResolvedValue({
+      const configureGet = vi.fn();
+      const getCasesClient = vi.fn().mockResolvedValue({
         templates: { getTemplate },
         configure: { get: configureGet },
         cases: { create },
@@ -483,11 +485,11 @@ describe('createCaseFromTemplateStepDefinition', () => {
     });
 
     it('returns a forbidden error and never calls create when getTemplate is unauthorized', async () => {
-      const create = jest.fn();
-      const getTemplate = jest.fn().mockRejectedValue(new Error('Unauthorized to get template'));
-      const getCasesClient = jest.fn().mockResolvedValue({
+      const create = vi.fn();
+      const getTemplate = vi.fn().mockRejectedValue(new Error('Unauthorized to get template'));
+      const getCasesClient = vi.fn().mockResolvedValue({
         templates: { getTemplate },
-        configure: { get: jest.fn() },
+        configure: { get: vi.fn() },
         cases: { create },
       } as unknown as CasesClient);
 
@@ -505,9 +507,9 @@ describe('createCaseFromTemplateStepDefinition', () => {
     });
 
     it('falls back to the legacy configuration path when the id is not a v2 template SO', async () => {
-      const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-      const getTemplate = jest.fn().mockResolvedValue(undefined);
-      const configureGet = jest.fn().mockResolvedValue([
+      const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+      const getTemplate = vi.fn().mockResolvedValue(undefined);
+      const configureGet = vi.fn().mockResolvedValue([
         {
           owner: 'securitySolution',
           templates: [
@@ -519,7 +521,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
           ],
         },
       ]);
-      const getCasesClient = jest.fn().mockResolvedValue({
+      const getCasesClient = vi.fn().mockResolvedValue({
         templates: { getTemplate },
         configure: { get: configureGet },
         cases: { create },
@@ -559,13 +561,13 @@ describe('createCaseFromTemplateStepDefinition', () => {
         fields: [],
       };
 
-      const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-      const getTemplate = jest
+      const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+      const getTemplate = vi
         .fn()
         .mockResolvedValue(buildTemplateSO(templateDefinition, { templateVersion: 4 }));
-      const getCasesClient = jest.fn().mockResolvedValue({
+      const getCasesClient = vi.fn().mockResolvedValue({
         templates: { getTemplate },
-        configure: { get: jest.fn() },
+        configure: { get: vi.fn() },
         cases: { create },
       } as unknown as CasesClient);
 
@@ -617,8 +619,8 @@ describe('createCaseFromTemplateStepDefinition', () => {
     });
 
     it('seeds settings.syncAlerts from the template default instead of hardcoding true', async () => {
-      const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-      const getTemplate = jest.fn().mockResolvedValue(
+      const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+      const getTemplate = vi.fn().mockResolvedValue(
         buildTemplateSO({
           name: 'Triage default title',
           description: 'Triage default description',
@@ -626,9 +628,9 @@ describe('createCaseFromTemplateStepDefinition', () => {
           fields: [],
         })
       );
-      const getCasesClient = jest.fn().mockResolvedValue({
+      const getCasesClient = vi.fn().mockResolvedValue({
         templates: { getTemplate },
-        configure: { get: jest.fn() },
+        configure: { get: vi.fn() },
         cases: { create },
       } as unknown as CasesClient);
 
@@ -651,8 +653,8 @@ describe('createCaseFromTemplateStepDefinition', () => {
     ])(
       'sets syncAlerts from OWNER_INFO and omits extractObservables (delegated to server) when the template does not specify them (owner=%s)',
       async (owner, settings) => {
-        const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-        const getTemplate = jest.fn().mockResolvedValue(
+        const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+        const getTemplate = vi.fn().mockResolvedValue(
           buildTemplateSO(
             {
               name: 'Triage default title',
@@ -662,9 +664,9 @@ describe('createCaseFromTemplateStepDefinition', () => {
             { owner }
           )
         );
-        const getCasesClient = jest.fn().mockResolvedValue({
+        const getCasesClient = vi.fn().mockResolvedValue({
           templates: { getTemplate },
-          configure: { get: jest.fn() },
+          configure: { get: vi.fn() },
           cases: { create },
         } as unknown as CasesClient);
 
@@ -682,16 +684,16 @@ describe('createCaseFromTemplateStepDefinition', () => {
     );
 
     it('fails with a clear message when the template has no default title and no title overwrite is provided', async () => {
-      const create = jest.fn();
-      const getTemplate = jest.fn().mockResolvedValue(
+      const create = vi.fn();
+      const getTemplate = vi.fn().mockResolvedValue(
         buildTemplateSO({
           // No `name` in the definition, i.e. no default title.
           fields: [],
         })
       );
-      const getCasesClient = jest.fn().mockResolvedValue({
+      const getCasesClient = vi.fn().mockResolvedValue({
         templates: { getTemplate },
-        configure: { get: jest.fn() },
+        configure: { get: vi.fn() },
         cases: { create },
       } as unknown as CasesClient);
 
@@ -711,16 +713,16 @@ describe('createCaseFromTemplateStepDefinition', () => {
     });
 
     it('does not require a template default title when the caller provides a title overwrite', async () => {
-      const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-      const getTemplate = jest.fn().mockResolvedValue(
+      const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+      const getTemplate = vi.fn().mockResolvedValue(
         buildTemplateSO({
           description: 'Triage default description',
           fields: [],
         })
       );
-      const getCasesClient = jest.fn().mockResolvedValue({
+      const getCasesClient = vi.fn().mockResolvedValue({
         templates: { getTemplate },
-        configure: { get: jest.fn() },
+        configure: { get: vi.fn() },
         cases: { create },
       } as unknown as CasesClient);
 
@@ -740,17 +742,17 @@ describe('createCaseFromTemplateStepDefinition', () => {
     });
 
     it('fails with a clear message when the template has no default description and no description overwrite is provided', async () => {
-      const create = jest.fn();
-      const getTemplate = jest.fn().mockResolvedValue(
+      const create = vi.fn();
+      const getTemplate = vi.fn().mockResolvedValue(
         buildTemplateSO({
           name: 'Triage default title',
           // No `description` in the definition, i.e. no default description.
           fields: [],
         })
       );
-      const getCasesClient = jest.fn().mockResolvedValue({
+      const getCasesClient = vi.fn().mockResolvedValue({
         templates: { getTemplate },
-        configure: { get: jest.fn() },
+        configure: { get: vi.fn() },
         cases: { create },
       } as unknown as CasesClient);
 
@@ -770,16 +772,16 @@ describe('createCaseFromTemplateStepDefinition', () => {
     });
 
     it('does not require a template default description when the caller provides a description overwrite', async () => {
-      const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-      const getTemplate = jest.fn().mockResolvedValue(
+      const create = vi.fn().mockResolvedValue(createCaseResponseFixture);
+      const getTemplate = vi.fn().mockResolvedValue(
         buildTemplateSO({
           name: 'Triage default title',
           fields: [],
         })
       );
-      const getCasesClient = jest.fn().mockResolvedValue({
+      const getCasesClient = vi.fn().mockResolvedValue({
         templates: { getTemplate },
-        configure: { get: jest.fn() },
+        configure: { get: vi.fn() },
         cases: { create },
       } as unknown as CasesClient);
 

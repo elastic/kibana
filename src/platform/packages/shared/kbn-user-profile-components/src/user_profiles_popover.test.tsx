@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -66,7 +68,7 @@ describe('UserProfilesPopover', () => {
         <UserProfilesPopover
           title="Title"
           button={<button>Toggle</button>}
-          closePopover={jest.fn()}
+          closePopover={vi.fn()}
           selectableProps={{
             selectedOptions: [firstOption],
             defaultOptions: [secondOption],

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
@@ -23,25 +26,31 @@ const mockChrome = {
   },
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../application/hooks/use_ui_privileges', () => ({
-  useUiPrivileges: jest.fn(),
-}));
+vi.mock('../../application/hooks/use_ui_privileges', () => {
+      const mocked = {
+      useUiPrivileges: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseUiPrivileges = useUiPrivileges as jest.MockedFunction<typeof useUiPrivileges>;
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseUiPrivileges = useUiPrivileges as MockedFunction<typeof useUiPrivileges>;
 
 describe('AgentBuilderNavControl', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsOpen$.next(false);
   });
 
   it('toggles the sidebar when the nav button is clicked', () => {
-    const toggleChat = jest.fn();
+    const toggleChat = vi.fn();
     const openChat$ = new BehaviorSubject(AIChatExperience.Classic);
 
     mockUseUiPrivileges.mockReturnValue({ show: true } as any);
@@ -49,11 +58,11 @@ describe('AgentBuilderNavControl', () => {
       services: {
         agentBuilder: {
           toggleChat,
-          openChat: jest.fn(),
+          openChat: vi.fn(),
         },
         aiAssistantManagementSelection: {
           openChat$,
-          completeOpenChat: jest.fn(),
+          completeOpenChat: vi.fn(),
         },
         chrome: mockChrome,
       },
@@ -70,7 +79,7 @@ describe('AgentBuilderNavControl', () => {
   });
 
   it('toggles the sidebar on Cmd/Ctrl+; keyboard shortcut', () => {
-    const toggleChat = jest.fn();
+    const toggleChat = vi.fn();
     const openChat$ = new BehaviorSubject(AIChatExperience.Classic);
 
     mockUseUiPrivileges.mockReturnValue({ show: true } as any);
@@ -78,11 +87,11 @@ describe('AgentBuilderNavControl', () => {
       services: {
         agentBuilder: {
           toggleChat,
-          openChat: jest.fn(),
+          openChat: vi.fn(),
         },
         aiAssistantManagementSelection: {
           openChat$,
-          completeOpenChat: jest.fn(),
+          completeOpenChat: vi.fn(),
         },
         chrome: mockChrome,
       },
@@ -100,9 +109,9 @@ describe('AgentBuilderNavControl', () => {
   });
 
   it('opens the sidebar when openChat$ emits Agent', () => {
-    const toggleChat = jest.fn();
-    const openChat = jest.fn();
-    const completeOpenChat = jest.fn();
+    const toggleChat = vi.fn();
+    const openChat = vi.fn();
+    const completeOpenChat = vi.fn();
     const openChat$ = new BehaviorSubject(AIChatExperience.Classic);
 
     mockUseUiPrivileges.mockReturnValue({ show: true } as any);

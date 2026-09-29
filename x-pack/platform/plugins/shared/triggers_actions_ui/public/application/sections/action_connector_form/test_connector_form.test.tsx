@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { lazy } from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import TestConnectorForm from './test_connector_form';
@@ -13,7 +15,7 @@ import type { ActionConnector, ActionParamsProps, GenericValidationResult } from
 import { ActionConnectorMode } from '../../../types';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
 import { screen } from '@testing-library/react';
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 const mockedActionParamsFields = lazy(async () => ({
   default() {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -12,19 +15,19 @@ import { createFindAlerts } from '../services/find_alerts';
 import { useFetchAlerts, type UseAlertsQueryParams } from './use_fetch_alerts';
 import { createReactQueryWrapper } from '../../../../../common/mock';
 
-jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../services/find_alerts');
+vi.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('../services/find_alerts');
 
-const useAlertsPrivilegesMock = useAlertsPrivileges as jest.Mock;
+const useAlertsPrivilegesMock = useAlertsPrivileges as Mock;
 
 describe('useFetchAlerts', () => {
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         data: {
           search: {
-            search: jest.fn(),
+            search: vi.fn(),
           },
         },
       },
@@ -35,10 +38,10 @@ describe('useFetchAlerts', () => {
   });
 
   it('fetches alerts and handles loading state', async () => {
-    jest
+    vi
       .mocked(createFindAlerts)
       .mockReturnValue(
-        jest.fn().mockResolvedValue({ hits: { total: 10, hits: ['alert1', 'alert2', 'alert3'] } })
+        vi.fn().mockResolvedValue({ hits: { total: 10, hits: ['alert1', 'alert2', 'alert3'] } })
       );
 
     const params: UseAlertsQueryParams = {
@@ -78,10 +81,10 @@ describe('useFetchAlerts', () => {
   });
 
   it('clears stale data once alertIds becomes empty (e.g. after narrowing the date range)', async () => {
-    jest
+    vi
       .mocked(createFindAlerts)
       .mockReturnValue(
-        jest.fn().mockResolvedValue({ hits: { total: 3, hits: ['alert1', 'alert2', 'alert3'] } })
+        vi.fn().mockResolvedValue({ hits: { total: 3, hits: ['alert1', 'alert2', 'alert3'] } })
       );
 
     const { result, rerender } = renderHook(
@@ -114,11 +117,11 @@ describe('useFetchAlerts', () => {
 
   it('handles error state', async () => {
     // hide console error due to the line after
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    jest
+    vi
       .mocked(createFindAlerts)
-      .mockReturnValue(jest.fn().mockRejectedValue(new Error('Fetch failed')));
+      .mockReturnValue(vi.fn().mockRejectedValue(new Error('Fetch failed')));
 
     const params: UseAlertsQueryParams = {
       alertIds: ['id1', 'id2'],

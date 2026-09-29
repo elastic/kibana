@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,18 +18,18 @@ import {
   TestExternalProviders,
 } from '../../mock/test_providers/test_providers';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   return {
     ...original,
-    copyToClipboard: jest.fn(),
+    copyToClipboard: vi.fn(),
   };
 });
 
 describe('CopyToClipboardAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render a copy to clipboard link', () => {
@@ -58,7 +60,7 @@ describe('CopyToClipboardAction', () => {
 
   describe('when copy to clipboard is clicked', () => {
     it('should copy the markdown comment to the clipboard and add success toast', async () => {
-      const addSuccessToast = jest.fn();
+      const addSuccessToast = vi.fn();
       render(
         <TestExternalProviders>
           <TestDataQualityProviders dataQualityContextProps={{ addSuccessToast }}>

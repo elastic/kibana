@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -24,86 +27,98 @@ import { licenseService } from '../../services/license';
 
 import { SyncIntegrationsTask, TYPE, VERSION } from './sync_integrations_task';
 
-jest.mock('../../services/output', () => ({
-  outputService: {
-    list: jest.fn(),
-  },
-}));
-
-jest.mock('../../services/package_policy', () => ({
-  packagePolicyService: {
-    list: jest.fn(),
-  },
-}));
-
-jest.mock('../../services/app_context', () => ({
-  appContextService: {
-    getExperimentalFeatures: jest.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
-    start: jest.fn(),
-    getCloud: jest.fn().mockReturnValue({ isServerlessEnabled: false }),
-    getLogger: jest.fn().mockReturnValue({
-      debug: jest.fn(),
-    }),
-    getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
-  },
-}));
-
-const mockOutputService = outputService as jest.Mocked<typeof outputService>;
-const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
-
-jest.mock('../../services/epm/packages/get', () => ({
-  getInstalledPackageSavedObjects: jest.fn().mockResolvedValue({
-    saved_objects: [
-      {
-        attributes: {
-          name: 'system',
-          version: '0.1.0',
-          updated_at: new Date().toISOString(),
-          install_status: 'installed',
-          install_source: 'registry',
-        },
+vi.mock('../../services/output', () => {
+      const mocked = {
+      outputService: {
+        list: vi.fn(),
       },
-      {
-        attributes: {
-          name: 'package-2',
-          version: '0.2.0',
-          updated_at: new Date().toISOString(),
-          install_status: 'installed',
-          install_source: 'registry',
-        },
-      },
-      {
-        attributes: {
-          name: 'bundled-package',
-          version: '0.1.0',
-          updated_at: new Date().toISOString(),
-          install_status: 'installed',
-          install_source: 'bundled',
-        },
-      },
-      {
-        attributes: {
-          name: 'custom-package-1',
-          version: '0.1.0',
-          updated_at: new Date().toISOString(),
-          install_status: 'installed',
-          install_source: 'upload',
-        },
-      },
-      {
-        attributes: {
-          name: 'custom-package-2',
-          version: '0.1.0',
-          updated_at: new Date().toISOString(),
-          install_status: 'installed',
-          install_source: 'custom',
-        },
-      },
-    ],
-  }),
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./sync_integrations_on_remote');
+vi.mock('../../services/package_policy', () => {
+      const mocked = {
+      packagePolicyService: {
+        list: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../services/app_context', () => {
+      const mocked = {
+      appContextService: {
+        getExperimentalFeatures: vi.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
+        start: vi.fn(),
+        getCloud: vi.fn().mockReturnValue({ isServerlessEnabled: false }),
+        getLogger: vi.fn().mockReturnValue({
+          debug: vi.fn(),
+        }),
+        getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+
+const mockOutputService = outputService as Mocked<typeof outputService>;
+const mockPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
+
+vi.mock('../../services/epm/packages/get', () => {
+      const mocked = {
+      getInstalledPackageSavedObjects: vi.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: {
+              name: 'system',
+              version: '0.1.0',
+              updated_at: new Date().toISOString(),
+              install_status: 'installed',
+              install_source: 'registry',
+            },
+          },
+          {
+            attributes: {
+              name: 'package-2',
+              version: '0.2.0',
+              updated_at: new Date().toISOString(),
+              install_status: 'installed',
+              install_source: 'registry',
+            },
+          },
+          {
+            attributes: {
+              name: 'bundled-package',
+              version: '0.1.0',
+              updated_at: new Date().toISOString(),
+              install_status: 'installed',
+              install_source: 'bundled',
+            },
+          },
+          {
+            attributes: {
+              name: 'custom-package-1',
+              version: '0.1.0',
+              updated_at: new Date().toISOString(),
+              install_status: 'installed',
+              install_source: 'upload',
+            },
+          },
+          {
+            attributes: {
+              name: 'custom-package-2',
+              version: '0.1.0',
+              updated_at: new Date().toISOString(),
+              install_status: 'installed',
+              install_source: 'custom',
+            },
+          },
+        ],
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('./sync_integrations_on_remote');
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -126,7 +141,7 @@ describe('SyncIntegrationsTask', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   let mockTask: SyncIntegrationsTask;
   let mockCore: CoreSetup;
-  let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
+  let mockTaskManagerSetup: Mocked<TaskManagerSetupContract>;
 
   beforeEach(() => {
     mockContract = createAppContextStartContractMock();
@@ -148,7 +163,7 @@ describe('SyncIntegrationsTask', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Task lifecycle', () => {
@@ -209,15 +224,15 @@ describe('SyncIntegrationsTask', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('With at least Enterprise license', () => {
       beforeAll(() => {
-        jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+        vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
       });
       afterAll(() => {
-        jest.spyOn(licenseService, 'isEnterprise').mockClear();
+        vi.spyOn(licenseService, 'isEnterprise').mockClear();
       });
 
       it('Should not run if task is outdated', async () => {
@@ -622,10 +637,10 @@ describe('SyncIntegrationsTask', () => {
 
     describe('With less than Enterprise license', () => {
       beforeAll(() => {
-        jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+        vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
       });
       afterAll(() => {
-        jest.spyOn(licenseService, 'isEnterprise').mockClear();
+        vi.spyOn(licenseService, 'isEnterprise').mockClear();
       });
 
       it('Should not create fleet-synced-integrations doc', async () => {

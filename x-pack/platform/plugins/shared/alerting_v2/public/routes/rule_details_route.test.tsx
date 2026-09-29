@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -15,18 +17,27 @@ import { RuleDetailsRoute } from './rule_details_route';
 
 const mockLocators = createMockLocators();
 
-const mockUseFetchRule = jest.fn();
-jest.mock('../hooks/use_fetch_rule', () => ({
-  useFetchRule: (...args: unknown[]) => mockUseFetchRule(...args),
-}));
+const mockUseFetchRule = vi.fn();
+vi.mock('../hooks/use_fetch_rule', () => {
+      const mocked = {
+      useFetchRule: (...args: unknown[]) => mockUseFetchRule(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/rule_details/skeleton', () => ({
-  Skeleton: () => <div data-test-subj="skeleton">Loading...</div>,
-}));
+vi.mock('../components/rule_details/skeleton', () => {
+      const mocked = {
+      Skeleton: () => <div data-test-subj="skeleton">Loading...</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../components/rule_details/rule_detail_page', () => ({
-  RuleDetailPage: () => <div data-test-subj="ruleDetailPage">Rule detail page</div>,
-}));
+vi.mock('../components/rule_details/rule_detail_page', () => {
+      const mocked = {
+      RuleDetailPage: () => <div data-test-subj="ruleDetailPage">Rule detail page</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderRoute = (ruleId = 'rule-1') =>
   render(
@@ -43,7 +54,7 @@ const renderRoute = (ruleId = 'rule-1') =>
 
 describe('RuleDetailsRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders skeleton while loading', () => {

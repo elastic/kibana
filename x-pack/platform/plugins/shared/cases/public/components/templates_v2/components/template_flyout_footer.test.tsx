@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,14 +21,14 @@ describe('TemplateFlyoutFooter', () => {
     isImportDisabled: false,
     isImportLoading: false,
     selectedCount: 0,
-    onCancel: jest.fn(),
-    onBack: jest.fn(),
-    onNext: jest.fn(),
-    onImport: jest.fn(),
+    onCancel: vi.fn(),
+    onBack: vi.fn(),
+    onNext: vi.fn(),
+    onImport: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders cancel button on first step', () => {

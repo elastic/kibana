@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
@@ -16,17 +19,17 @@ import type { SyntheticsServerSetup } from '../types';
 
 const buildServer = ({
   isElasticsearchServerless = false,
-  cacheGet = jest.fn(),
-  warn = jest.fn(),
+  cacheGet = vi.fn(),
+  warn = vi.fn(),
 }: {
   isElasticsearchServerless?: boolean;
-  cacheGet?: jest.Mock;
-  warn?: jest.Mock;
+  cacheGet?: Mock;
+  warn?: Mock;
 } = {}) =>
   ({
     isElasticsearchServerless,
-    syntheticsIndicesCache: { get: cacheGet, invalidate: jest.fn() },
-    logger: { warn, error: jest.fn(), debug: jest.fn(), info: jest.fn() },
+    syntheticsIndicesCache: { get: cacheGet, invalidate: vi.fn() },
+    logger: { warn, error: vi.fn(), debug: vi.fn(), info: vi.fn() },
   } as unknown as SyntheticsServerSetup);
 
 describe('resolveHeartbeatIndices', () => {
@@ -35,11 +38,11 @@ describe('resolveHeartbeatIndices', () => {
   const spaceId = 'default';
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns the local pattern without touching the cache when CCS is disabled (serverless)', async () => {
-    const cacheGet = jest.fn();
+    const cacheGet = vi.fn();
     const server = buildServer({ isElasticsearchServerless: true, cacheGet });
 
     const indices = await resolveHeartbeatIndices({
@@ -54,7 +57,7 @@ describe('resolveHeartbeatIndices', () => {
   });
 
   it('returns the cached value when the cache hits', async () => {
-    const cacheGet = jest.fn().mockResolvedValue('synthetics-*,cluster-a:synthetics-*');
+    const cacheGet = vi.fn().mockResolvedValue('synthetics-*,cluster-a:synthetics-*');
     const server = buildServer({ cacheGet });
 
     const indices = await resolveHeartbeatIndices({
@@ -70,18 +73,18 @@ describe('resolveHeartbeatIndices', () => {
   });
 
   it('resolves via the repository and getSyntheticsIndices on a cache miss', async () => {
-    const repoSpy = jest
+    const repoSpy = vi
       .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'get')
       .mockResolvedValue({
         useAllRemoteClusters: true,
         selectedRemoteClusters: ['cluster-a'],
         spaces: ['default'],
       });
-    const getIndicesSpy = jest
+    const getIndicesSpy = vi
       .spyOn(getSyntheticsIndicesModule, 'getSyntheticsIndices')
       .mockResolvedValue({ indices: 'synthetics-*,*:synthetics-*' });
 
-    const cacheGet = jest.fn().mockImplementation(async (_key, resolver) => resolver());
+    const cacheGet = vi.fn().mockImplementation(async (_key, resolver) => resolver());
     const server = buildServer({ cacheGet });
 
     const indices = await resolveHeartbeatIndices({
@@ -100,14 +103,14 @@ describe('resolveHeartbeatIndices', () => {
   });
 
   it('passes the default settings shape when the repository returns nullish CCS attributes', async () => {
-    jest
+    vi
       .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'get')
       .mockResolvedValue({ spaces: ['default'] } satisfies SyntheticsMultiSpaceSettingsWithSpaces);
-    const getIndicesSpy = jest
+    const getIndicesSpy = vi
       .spyOn(getSyntheticsIndicesModule, 'getSyntheticsIndices')
       .mockResolvedValue({ indices: SYNTHETICS_INDEX_PATTERN });
 
-    const cacheGet = jest.fn().mockImplementation(async (_key, resolver) => resolver());
+    const cacheGet = vi.fn().mockImplementation(async (_key, resolver) => resolver());
     const server = buildServer({ cacheGet });
 
     await resolveHeartbeatIndices({ server, spaceId, savedObjectsClient, esClient });
@@ -119,8 +122,8 @@ describe('resolveHeartbeatIndices', () => {
   });
 
   it('falls back to the local pattern and logs a warning when the cache resolver throws', async () => {
-    const warn = jest.fn();
-    const cacheGet = jest.fn().mockRejectedValue(new Error('elasticsearch unavailable'));
+    const warn = vi.fn();
+    const cacheGet = vi.fn().mockRejectedValue(new Error('elasticsearch unavailable'));
     const server = buildServer({ cacheGet, warn });
 
     const indices = await resolveHeartbeatIndices({
@@ -136,8 +139,8 @@ describe('resolveHeartbeatIndices', () => {
   });
 
   it('falls back to the local pattern when the cache rejects with a non-Error value', async () => {
-    const warn = jest.fn();
-    const cacheGet = jest.fn().mockRejectedValue('timeout');
+    const warn = vi.fn();
+    const cacheGet = vi.fn().mockRejectedValue('timeout');
     const server = buildServer({ cacheGet, warn });
 
     const indices = await resolveHeartbeatIndices({

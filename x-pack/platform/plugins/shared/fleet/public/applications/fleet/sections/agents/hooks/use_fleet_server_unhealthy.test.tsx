@@ -5,26 +5,31 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createFleetTestRendererMock } from '../../../../../mock';
 import { sendGetEnrollmentSettings } from '../../../../../hooks/use_request/settings';
 
 import { useFleetServerUnhealthy } from './use_fleet_server_unhealthy';
 
-jest.mock('../../../../../hooks/use_request/settings');
-jest.mock('../../../../../hooks/use_authz', () => ({
-  useAuthz: jest.fn().mockReturnValue({
-    fleet: {
-      addAgents: true,
-    },
-  }),
-}));
+vi.mock('../../../../../hooks/use_request/settings');
+vi.mock('../../../../../hooks/use_authz', () => {
+      const mocked = {
+      useAuthz: vi.fn().mockReturnValue({
+        fleet: {
+          addAgents: true,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // FLAKY: https://github.com/elastic/kibana/issues/202359
 describe.skip('useFleetServerUnhealthy', () => {
   const testRenderer = createFleetTestRendererMock();
 
   it('should return isUnHealthy:false with an online fleet server', async () => {
-    jest.mocked(sendGetEnrollmentSettings).mockResolvedValueOnce({
+    vi.mocked(sendGetEnrollmentSettings).mockResolvedValueOnce({
       error: null,
       data: {
         fleet_server: {
@@ -53,7 +58,7 @@ describe.skip('useFleetServerUnhealthy', () => {
   });
 
   it('should return isUnHealthy:true with only one offline fleet server', async () => {
-    jest.mocked(sendGetEnrollmentSettings).mockResolvedValue({
+    vi.mocked(sendGetEnrollmentSettings).mockResolvedValue({
       error: null,
       data: {
         fleet_server: {
@@ -68,7 +73,7 @@ describe.skip('useFleetServerUnhealthy', () => {
   });
 
   it('should call notifications service if an error happen while fetching status', async () => {
-    jest.mocked(sendGetEnrollmentSettings).mockResolvedValueOnce({
+    vi.mocked(sendGetEnrollmentSettings).mockResolvedValueOnce({
       error: new Error('Invalid request'),
       data: null,
     });

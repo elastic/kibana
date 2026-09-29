@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { useTimelineLastEventTime } from '.';
 import { LastEventIndexKey } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../lib/kibana';
 
-const mockSearchStrategy = jest.fn();
+const mockSearchStrategy = vi.fn();
 
 const mockUseKibana = {
   services: {
@@ -22,39 +25,42 @@ const mockUseKibana = {
     },
     notifications: {
       toasts: {
-        addWarning: jest.fn(),
+        addWarning: vi.fn(),
       },
     },
   },
 };
 
-jest.mock('../../../lib/kibana', () => ({
-  useKibana: jest.fn(),
-  useToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    addInfo: jest.fn(),
-    remove: jest.fn(),
-  }),
-}));
+vi.mock('../../../lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+      useToasts: vi.fn().mockReturnValue({
+        addError: vi.fn(),
+        addSuccess: vi.fn(),
+        addWarning: vi.fn(),
+        addInfo: vi.fn(),
+        remove: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useTimelineLastEventTime', () => {
   let searchStrategy$: BehaviorSubject<{ lastSeen: string | null; errorMessage?: string }>;
 
   beforeEach(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
     searchStrategy$ = new BehaviorSubject<{ lastSeen: string | null; errorMessage?: string }>({
       lastSeen: null,
     });
 
     mockSearchStrategy.mockReturnValue(searchStrategy$.asObservable());
 
-    (useKibana as jest.Mock).mockReturnValue(mockUseKibana);
+    (useKibana as Mock).mockReturnValue(mockUseKibana);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should init', async () => {

@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RouteValidationResultFactory } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
 import { buildAlertingRouteValidation, ZodRequestValidationError } from './zod_request_validation';
 
 const schema = z.object({ name: z.string(), age: z.number() });
 
-const ok = jest.fn().mockImplementation((value) => ({ value }));
-const badRequest = jest.fn().mockImplementation((error) => ({ error }));
+const ok = vi.fn().mockImplementation((value) => ({ value }));
+const badRequest = vi.fn().mockImplementation((error) => ({ error }));
 const validationResult: RouteValidationResultFactory = { ok, badRequest };
 
 describe('buildAlertingRouteValidation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the parsed value when the input matches the schema', () => {

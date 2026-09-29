@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
@@ -17,14 +19,17 @@ import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import type { PluginConfig } from '../../../config';
 import { ApiKeyInvalidationTaskRunner } from './task_runner';
 
-jest.mock('@kbn/task-manager-plugin/server', () => ({
-  runInvalidate: jest.fn().mockResolvedValue({ totalInvalidated: 3, missingApiKeyRetries: {} }),
-}));
+vi.mock('@kbn/task-manager-plugin/server', () => {
+      const mocked = {
+      runInvalidate: vi.fn().mockResolvedValue({ totalInvalidated: 3, missingApiKeyRetries: {} }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { runInvalidate } = jest.requireMock('@kbn/task-manager-plugin/server');
+const { runInvalidate } = (await vi.importMock('@kbn/task-manager-plugin/server'));
 
 const config = {
-  get: jest.fn().mockReturnValue({ invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' } }),
+  get: vi.fn().mockReturnValue({ invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' } }),
 } as unknown as PluginInitializerContext<PluginConfig>['config'];
 
 describe('ApiKeyInvalidationTaskRunner', () => {
@@ -37,7 +42,7 @@ describe('ApiKeyInvalidationTaskRunner', () => {
   let runner: ApiKeyInvalidationTaskRunner;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     runner = new ApiKeyInvalidationTaskRunner(
       coreLogger,

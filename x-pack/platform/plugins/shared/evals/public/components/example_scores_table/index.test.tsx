@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import type {
@@ -14,9 +16,9 @@ import type {
 import { useExperimentExampleDetails } from '../../hooks/use_evals_api';
 import { ExampleScoresTable, getVerdictBadgeColor } from '.';
 
-jest.mock('../../hooks/use_evals_api');
+vi.mock('../../hooks/use_evals_api');
 
-const mockUseExperimentExampleDetails = jest.mocked(useExperimentExampleDetails);
+const mockUseExperimentExampleDetails = vi.mocked(useExperimentExampleDetails);
 
 const buildScore = ({
   timestamp = '2026-03-02T12:00:00.000Z',
@@ -95,7 +97,7 @@ const defaultProps = {
   experimentId: 'experiment-1',
   datasetId: 'dataset-1',
   executionId: 'execution-1',
-  onTraceClick: jest.fn(),
+  onTraceClick: vi.fn(),
 };
 
 const renderTable = (
@@ -105,7 +107,7 @@ const renderTable = (
 
 describe('ExampleScoresTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseExperimentExampleDetails.mockImplementation(
       (_experimentId, _datasetId, _exampleId, repetitionIndex, _executionId, options) =>
         ({
@@ -236,7 +238,7 @@ describe('ExampleScoresTable', () => {
   });
 
   it('keeps task and evaluator trace actions available from score documents', () => {
-    const onTraceClick = jest.fn();
+    const onTraceClick = vi.fn();
     renderTable(
       [
         buildExample('example-with-traces', [

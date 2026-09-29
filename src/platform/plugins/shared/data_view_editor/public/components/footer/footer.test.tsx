@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { Footer } from './footer';
 
-const onSubmit = jest.fn();
+const onSubmit = vi.fn();
 const props = {
-  onCancel: jest.fn(),
+  onCancel: vi.fn(),
   onSubmit,
   submitDisabled: false,
   submittingType: undefined,
@@ -31,7 +33,7 @@ const DUPLICATE_BUTTON_TEST_ID = 'duplicateButton';
 
 describe('Footer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Create new dataview', () => {
@@ -83,7 +85,7 @@ describe('Footer', () => {
       });
 
       it('renders duplicate button when onDuplicate is provided', () => {
-        const onDuplicate = jest.fn();
+        const onDuplicate = vi.fn();
         const { getByTestId, queryByTestId } = render(
           <Footer {...props} isPersisted={false} onDuplicate={onDuplicate} />
         );
@@ -108,7 +110,7 @@ describe('Footer', () => {
     });
 
     it('renders duplicate button when onDuplicate is provided', () => {
-      const onDuplicate = jest.fn();
+      const onDuplicate = vi.fn();
       const { getByTestId, queryByTestId } = render(
         <Footer {...props} onDuplicate={onDuplicate} />
       );
@@ -132,7 +134,7 @@ describe('Footer', () => {
 
       it('renders duplicate button when onDuplicate is provided', () => {
         const { getByTestId, queryByTestId } = render(
-          <Footer {...props} isPersisted={false} isManaged onDuplicate={jest.fn()} />
+          <Footer {...props} isPersisted={false} isManaged onDuplicate={vi.fn()} />
         );
         expect(queryByTestId(SAVE_AS_AD_HOC_BUTTON_TEST_ID)).not.toBeInTheDocument();
         expect(queryByTestId(SAVE_AS_PERSISTED_BUTTON_TEST_ID)).not.toBeInTheDocument();
@@ -150,7 +152,7 @@ describe('Footer', () => {
 
       it('renders duplicate button when onDuplicate is provided', () => {
         const { getByTestId, queryByTestId } = render(
-          <Footer {...props} isPersisted isManaged onDuplicate={jest.fn()} />
+          <Footer {...props} isPersisted isManaged onDuplicate={vi.fn()} />
         );
         expect(queryByTestId(SAVE_AS_AD_HOC_BUTTON_TEST_ID)).not.toBeInTheDocument();
         expect(queryByTestId(SAVE_AS_PERSISTED_BUTTON_TEST_ID)).not.toBeInTheDocument();

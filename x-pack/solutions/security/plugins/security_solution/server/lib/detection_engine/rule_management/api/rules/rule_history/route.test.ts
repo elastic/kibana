@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { withSpan } from '@kbn/apm-utils';
 import { requestMock, requestContextMock, serverMock } from '../../../../routes/__mocks__';
 import type {
@@ -14,11 +17,14 @@ import type {
 import { RULE_HISTORY_URL } from '../../../../../../../common/api/detection_engine/rule_management';
 import { ruleHistoryRoute } from './route';
 
-jest.mock('@kbn/apm-utils', () => ({
-  withSpan: jest.fn((_opts: unknown, cb: () => Promise<unknown>) => cb()),
-}));
+vi.mock('@kbn/apm-utils', () => {
+      const mocked = {
+      withSpan: vi.fn((_opts: unknown, cb: () => Promise<unknown>) => cb()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
+const withSpanMock = withSpan as MockedFunction<typeof withSpan>;
 
 const RULE_HISTORY_ROUTE_SPAN = expect.objectContaining({
   name: 'getRuleHistoryRoute',
@@ -45,10 +51,10 @@ describe('Rule changes history route', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    (clients.core.uiSettings.client.get as jest.Mock).mockResolvedValue(true);
+    (clients.core.uiSettings.client.get as Mock).mockResolvedValue(true);
     ruleHistoryRoute(server.router);
   });
 
@@ -121,7 +127,7 @@ describe('Rule changes history route', () => {
   });
 
   test('returns 403 when the ENABLE_RULE_CHANGES_HISTORY_SETTING advanced setting is disabled', async () => {
-    (clients.core.uiSettings.client.get as jest.Mock).mockResolvedValue(false);
+    (clients.core.uiSettings.client.get as Mock).mockResolvedValue(false);
 
     const response = await server.inject(
       buildHistoryRequest({

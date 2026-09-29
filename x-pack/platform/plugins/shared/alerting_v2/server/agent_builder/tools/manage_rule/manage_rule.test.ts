@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-jest.mock('uuid', () => ({
-  v4: () => '00000000-0000-4000-8000-000000000001',
-}));
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => '00000000-0000-4000-8000-000000000001',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
@@ -18,13 +24,13 @@ import { manageRuleTool } from './manage_rule';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 
 const getEsqlQueryMock = (ctx: ToolHandlerContextMock) =>
-  ctx.esClient.asCurrentUser.esql.query as unknown as jest.Mock;
+  ctx.esClient.asCurrentUser.esql.query as unknown as Mock;
 
 const getFieldCapsMock = (ctx: ToolHandlerContextMock) =>
-  ctx.esClient.asCurrentUser.fieldCaps as unknown as jest.Mock;
+  ctx.esClient.asCurrentUser.fieldCaps as unknown as Mock;
 
 const getBulkGetMock = (ctx: ToolHandlerContextMock) =>
-  ctx.savedObjectsClient.bulkGet as unknown as jest.Mock;
+  ctx.savedObjectsClient.bulkGet as unknown as Mock;
 
 // set_query resolves the rule's time field from the source index via fieldCaps.
 // Default to an index that exposes @timestamp so query-based operations don't
@@ -53,14 +59,14 @@ const createContext = (): ToolHandlerContextMock => {
   return ctx;
 };
 
-const createLogger = (): jest.Mocked<
+const createLogger = (): Mocked<
   Pick<LoggerServiceContract, 'debug' | 'info' | 'warn' | 'error' | 'forSubsystem'>
 > => ({
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  forSubsystem: jest.fn(),
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  forSubsystem: vi.fn(),
 });
 
 describe('manageRuleTool', () => {

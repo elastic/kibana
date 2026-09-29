@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
@@ -14,16 +17,16 @@ import type { PackageInfo } from '../../../../../types';
 
 import { Configs } from '.';
 
-jest.mock('../../../../../hooks', () => {
+vi.mock('../../../../../hooks', async () => {
   return {
-    ...jest.requireActual('../../../../../hooks'),
-    useGetInputsTemplatesQuery: jest.fn(),
-    useConfirmForceInstall: jest.fn(),
-    useStartServices: jest.fn().mockReturnValue({
+    ...(await vi.importActual('../../../../../hooks')),
+    useGetInputsTemplatesQuery: vi.fn(),
+    useConfirmForceInstall: vi.fn(),
+    useStartServices: vi.fn().mockReturnValue({
       notifications: {
         toasts: {
-          addError: jest.fn(),
-          addSuccess: jest.fn(),
+          addError: vi.fn(),
+          addSuccess: vi.fn(),
         },
       },
       docLinks: {
@@ -34,9 +37,9 @@ jest.mock('../../../../../hooks', () => {
     }),
   };
 });
-jest.mock('../../../../../../../../common/services');
+vi.mock('../../../../../../../../common/services');
 
-const mockIsPackagePrerelease = isPackagePrerelease as jest.Mock;
+const mockIsPackagePrerelease = isPackagePrerelease as Mock;
 
 function renderComponent(packageInfo: PackageInfo) {
   const renderer = createIntegrationsTestRendererMock();
@@ -47,7 +50,7 @@ function renderComponent(packageInfo: PackageInfo) {
 describe('Configs', () => {
   beforeEach(() => {
     mockIsPackagePrerelease.mockReset();
-    (useGetInputsTemplatesQuery as jest.Mock).mockReset();
+    (useGetInputsTemplatesQuery as Mock).mockReset();
   });
 
   const packageInfo = {
@@ -112,7 +115,7 @@ describe('Configs', () => {
 
   it('it should display configs tab and a warning if the integration is not installed', () => {
     mockIsPackagePrerelease.mockReturnValue(false);
-    (useGetInputsTemplatesQuery as jest.Mock).mockReturnValue({ data: 'yaml configs' });
+    (useGetInputsTemplatesQuery as Mock).mockReturnValue({ data: 'yaml configs' });
 
     const result = renderComponent(packageInfo);
     expect(result.queryByTestId('configsTab.notInstalled')).toBeInTheDocument();
@@ -123,7 +126,7 @@ describe('Configs', () => {
 
   it('it should display prerelease callout if the package is prerelease', () => {
     mockIsPackagePrerelease.mockReturnValue(true);
-    (useGetInputsTemplatesQuery as jest.Mock).mockReturnValue({ data: 'yaml configs' });
+    (useGetInputsTemplatesQuery as Mock).mockReturnValue({ data: 'yaml configs' });
 
     const result = renderComponent(packageInfo);
     expect(result.queryByTestId('configsTab.info')).toBeInTheDocument();
@@ -133,7 +136,7 @@ describe('Configs', () => {
 
   it('it should display a warning callout if there is an error', () => {
     mockIsPackagePrerelease.mockReturnValue(false);
-    (useGetInputsTemplatesQuery as jest.Mock).mockReturnValue({ error: 'some error' });
+    (useGetInputsTemplatesQuery as Mock).mockReturnValue({ error: 'some error' });
 
     const result = renderComponent(packageInfo);
     expect(result.queryByTestId('configsTab.errorCallout')).toBeInTheDocument();

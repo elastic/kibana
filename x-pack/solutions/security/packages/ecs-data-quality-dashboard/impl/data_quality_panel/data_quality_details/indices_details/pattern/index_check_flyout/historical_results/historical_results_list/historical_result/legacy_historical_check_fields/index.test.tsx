@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render, act } from '@testing-library/react';
 import { EuiMarkdownFormat, copyToClipboard } from '@elastic/eui';
@@ -17,12 +19,12 @@ import {
   TestExternalProviders,
 } from '../../../../../../../../mock/test_providers/test_providers';
 
-jest.mock('@elastic/eui', () => {
-  const originalModule = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const originalModule = (await vi.importActual('@elastic/eui'));
 
   return {
     ...originalModule,
-    copyToClipboard: jest.fn(),
+    copyToClipboard: vi.fn(),
   };
 });
 
@@ -49,8 +51,8 @@ function stripAttributes(html: string) {
 
 describe('LegacyHistoricalCheckFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should render incompatible (preselected) and disabled same family field tabs', () => {
@@ -132,7 +134,7 @@ describe('LegacyHistoricalCheckFields', () => {
       it('should render full actions consuming full markdown comment', async () => {
         const historicalResult = getLegacyHistoricalResultStub('test');
 
-        const openCreateCaseFlyout = jest.fn();
+        const openCreateCaseFlyout = vi.fn();
         const { markdownComments } = historicalResult;
 
         render(

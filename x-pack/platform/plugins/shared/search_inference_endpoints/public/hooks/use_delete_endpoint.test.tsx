@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 import { useDeleteEndpoint } from './use_delete_endpoint';
 import React from 'react';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockDelete = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
+const mockUseKibana = useKibana as Mock;
+const mockDelete = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
 
 describe('useDeleteEndpoint', () => {
   beforeEach(() => {

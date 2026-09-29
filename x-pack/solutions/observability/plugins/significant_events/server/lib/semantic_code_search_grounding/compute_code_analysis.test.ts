@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ToolsStart } from '@kbn/agent-builder-server';
@@ -17,15 +20,21 @@ import {
   SCS_SEMANTIC_SEARCH_TOOL_ID,
 } from './semantic_code_search_tools';
 
-jest.mock('@kbn/ai-tools', () => ({
-  getSigEventsLogPatternsEsql: jest.fn(),
-}));
+vi.mock('@kbn/ai-tools', () => {
+      const mocked = {
+      getSigEventsLogPatternsEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/traced-es-client', () => ({
-  createTracedEsClient: jest.fn(({ client }) => client),
-}));
+vi.mock('@kbn/traced-es-client', () => {
+      const mocked = {
+      createTracedEsClient: vi.fn(({ client }) => client),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getPatternsMock = getSigEventsLogPatternsEsql as jest.Mock;
+const getPatternsMock = getSigEventsLogPatternsEsql as Mock;
 
 // SCS workflow tools return a single `other` result whose rendered Markdown is
 // at `data.execution.output` (see each scs/*/workflow.yaml `console` step).
@@ -62,11 +71,11 @@ const listMarkdown = (labels: string[]) =>
       ].join('\n');
 
 describe('createCodeAnalysisProvider', () => {
-  let logger: jest.Mocked<Logger>;
-  let execute: jest.Mock;
+  let logger: Mocked<Logger>;
+  let execute: Mock;
   let agentBuilderTools: ToolsStart;
-  let esClient: jest.Mocked<ElasticsearchClient>;
-  let onOutcome: jest.Mock;
+  let esClient: Mocked<ElasticsearchClient>;
+  let onOutcome: Mock;
   const request = {} as KibanaRequest;
   const target: AnalysisTarget = {
     id: 'logs.acme.checkout',
@@ -89,10 +98,10 @@ describe('createCodeAnalysisProvider', () => {
 
   beforeEach(() => {
     logger = loggerMock.create();
-    execute = jest.fn();
-    onOutcome = jest.fn();
+    execute = vi.fn();
+    onOutcome = vi.fn();
     agentBuilderTools = { execute } as unknown as ToolsStart;
-    esClient = {} as unknown as jest.Mocked<ElasticsearchClient>;
+    esClient = {} as unknown as Mocked<ElasticsearchClient>;
     getPatternsMock.mockResolvedValue([
       {
         field: 'message',

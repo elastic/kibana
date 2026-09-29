@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitStepTimeoutZoneNodeImpl } from '../exit_step_timeout_zone_node_impl';
@@ -18,11 +20,11 @@ describe('ExitStepTimeoutZoneNodeImpl', () => {
 
   beforeEach(() => {
     stepExecutionRuntimeMock = {
-      finishStep: jest.fn().mockResolvedValue(undefined),
+      finishStep: vi.fn().mockResolvedValue(undefined),
     } as unknown as StepExecutionRuntime;
 
     wfExecutionRuntimeManagerMock = {
-      navigateToNextNode: jest.fn(),
+      navigateToNextNode: vi.fn(),
     } as unknown as WorkflowExecutionRuntimeManager;
 
     impl = new ExitStepTimeoutZoneNodeImpl(stepExecutionRuntimeMock, wfExecutionRuntimeManagerMock);
@@ -49,11 +51,11 @@ describe('ExitStepTimeoutZoneNodeImpl', () => {
   it('should execute methods in correct order', async () => {
     const callOrder: string[] = [];
 
-    stepExecutionRuntimeMock.finishStep = jest.fn().mockImplementation(() => {
+    stepExecutionRuntimeMock.finishStep = vi.fn().mockImplementation(() => {
       callOrder.push('finishStep');
       return Promise.resolve();
     });
-    wfExecutionRuntimeManagerMock.navigateToNextNode = jest.fn().mockImplementation(() => {
+    wfExecutionRuntimeManagerMock.navigateToNextNode = vi.fn().mockImplementation(() => {
       callOrder.push('navigateToNextNode');
     });
 

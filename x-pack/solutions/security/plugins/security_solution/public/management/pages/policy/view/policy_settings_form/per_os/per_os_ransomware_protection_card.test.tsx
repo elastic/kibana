@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { fireEvent, within, type RenderResult } from '@testing-library/react';
@@ -26,14 +29,14 @@ import {
 } from './per_os_ransomware_protection_card';
 import { selectOsControlOption } from './select_os_control_option.test.helpers';
 
-jest.mock('../../../../../../common/hooks/use_license');
-jest.mock('../hooks/use_get_protections_unavailable_component');
+vi.mock('../../../../../../common/hooks/use_license');
+vi.mock('../hooks/use_get_protections_unavailable_component');
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 const useGetProtectionsUnavailableComponentMock =
-  _useGetProtectionsUnavailableComponent as jest.Mock;
+  _useGetProtectionsUnavailableComponent as Mock;
 
 describe('PerOsRansomwareProtectionCard', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').perOsRansomware;
@@ -52,7 +55,7 @@ describe('PerOsRansomwareProtectionCard', () => {
     renderResult.rerender(<PerOsRansomwareProtectionCard {...props} policy={nextPolicy} />);
   };
   const getUpdatedPolicy = (): PolicyConfig => {
-    const onChange = props.onChange as jest.Mock;
+    const onChange = props.onChange as Mock;
     return onChange.mock.calls[onChange.mock.calls.length - 1][0].updatedPolicy;
   };
 
@@ -62,7 +65,7 @@ describe('PerOsRansomwareProtectionCard', () => {
       .config.policy.value;
     props = {
       policy,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': testSubj.card,
     };
@@ -165,7 +168,7 @@ describe('PerOsRansomwareProtectionCard', () => {
     expect(afterMode.windows).toEqual(windowsBefore);
     expect(afterMode.linux).toEqual(linuxBefore);
 
-    (props.onChange as jest.Mock).mockClear();
+    (props.onChange as Mock).mockClear();
     rerender(afterMode);
     fireEvent.change(renderResult.getByTestId(testSubj.mac.notifyCustomMessage), {
       target: { value: 'Mac notification' },
@@ -176,7 +179,7 @@ describe('PerOsRansomwareProtectionCard', () => {
     expect(afterMessage.windows).toEqual(windowsBefore);
     expect(afterMessage.linux).toEqual(linuxBefore);
 
-    (props.onChange as jest.Mock).mockClear();
+    (props.onChange as Mock).mockClear();
     rerender(afterMessage);
     await userEvent.click(renderResult.getByTestId(testSubj.mac.notifyUserCheckbox));
     const afterNotify = getUpdatedPolicy();

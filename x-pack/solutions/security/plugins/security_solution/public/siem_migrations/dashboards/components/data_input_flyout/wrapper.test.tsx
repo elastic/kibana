@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { DashboardMigrationDataInputWrapper } from './wrapper';
@@ -41,7 +43,7 @@ describe('DashboardMigrationDataInputWrapper', () => {
   });
 
   it('opens and closes the flyout', () => {
-    const onFlyoutClosed = jest.fn();
+    const onFlyoutClosed = vi.fn();
     const { queryByTestId, getByTestId } = render(
       <TestProviders>
         <DashboardMigrationDataInputWrapper onFlyoutClosed={onFlyoutClosed}>

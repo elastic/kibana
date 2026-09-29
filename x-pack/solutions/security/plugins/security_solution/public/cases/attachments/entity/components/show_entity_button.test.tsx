@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ShowEntityButton } from './show_entity_button';
@@ -20,23 +22,26 @@ const props = {
   entityType: 'user',
 };
 
-const mockOpenFlyout = jest.fn();
+const mockOpenFlyout = vi.fn();
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
+vi.mock('../../../../flyout_v2/use_flyout_api');
+vi.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 
 describe('ShowEntityButton', () => {
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   it('renders the show entity button', () => {
@@ -45,7 +50,7 @@ describe('ShowEntityButton', () => {
   });
 
   it('opens the new entity flyout when the new flyout is enabled', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
     render(<ShowEntityButton {...props} />);
     fireEvent.click(screen.getByTestId('comment-action-show-entity-action-id'));
@@ -94,7 +99,7 @@ describe('ShowEntityButton', () => {
   });
 
   it('opens the new entity flyout for a generic entity when the new flyout is enabled', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
     render(<ShowEntityButton {...props} entityType="generic" />);
     fireEvent.click(screen.getByTestId('comment-action-show-entity-action-id'));

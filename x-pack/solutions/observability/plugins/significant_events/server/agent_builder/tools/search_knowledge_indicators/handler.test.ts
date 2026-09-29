@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { Streams } from '@kbn/streams-schema';
 import type { Feature, StreamQuery } from '@kbn/significant-events-schema';
 import type { COMPUTED_FEATURE_TYPES } from '@kbn/significant-events-schema';
@@ -58,30 +60,30 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
   const logger = loggingSystemMock.createLogger();
 
   const streamsClient = {
-    listStreams: jest.fn(),
+    listStreams: vi.fn(),
   } as unknown as StreamsClient;
 
   const kiClient = {
-    getFeatures: jest.fn(),
-    findFeatures: jest.fn(),
-    findQueries: jest.fn(),
-    getQueryLinks: jest.fn(),
+    getFeatures: vi.fn(),
+    findFeatures: vi.fn(),
+    findQueries: vi.fn(),
+    getQueryLinks: vi.fn(),
   } as unknown as KnowledgeIndicatorClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns both features and queries when kind is omitted', async () => {
-    streamsClient.listStreams = jest
+    streamsClient.listStreams = vi
       .fn()
       .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
 
-    kiClient.getFeatures = jest
+    kiClient.getFeatures = vi
       .fn()
       .mockResolvedValue({ hits: [makeFeature({ id: 'f1', confidence: 80 })], total: 1 });
 
-    kiClient.getQueryLinks = jest.fn().mockResolvedValue([
+    kiClient.getQueryLinks = vi.fn().mockResolvedValue([
       {
         'asset.uuid': 'a1',
         'asset.type': 'query',
@@ -107,11 +109,11 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
   });
 
   it('returns only queries when kind is [query] and does not call kiClient.getFeatures', async () => {
-    streamsClient.listStreams = jest
+    streamsClient.listStreams = vi
       .fn()
       .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
 
-    kiClient.getQueryLinks = jest.fn().mockResolvedValue([
+    kiClient.getQueryLinks = vi.fn().mockResolvedValue([
       {
         'asset.uuid': 'a1',
         'asset.type': 'query',
@@ -152,11 +154,11 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
   });
 
   it('uses findQueries when search_text is provided', async () => {
-    streamsClient.listStreams = jest
+    streamsClient.listStreams = vi
       .fn()
       .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
 
-    kiClient.findQueries = jest.fn().mockResolvedValue([]);
+    kiClient.findQueries = vi.fn().mockResolvedValue([]);
 
     await searchKnowledgeIndicatorsToolHandler({
       streamsClient,
@@ -182,10 +184,10 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
   });
 
   it('passes feature filters to semantic search', async () => {
-    streamsClient.listStreams = jest
+    streamsClient.listStreams = vi
       .fn()
       .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
-    kiClient.findFeatures = jest.fn().mockResolvedValue({ hits: [] });
+    kiClient.findFeatures = vi.fn().mockResolvedValue({ hits: [] });
 
     await searchKnowledgeIndicatorsToolHandler({
       streamsClient,
@@ -208,10 +210,10 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
   });
 
   it('loads topology candidates in one feature search', async () => {
-    streamsClient.listStreams = jest
+    streamsClient.listStreams = vi
       .fn()
       .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
-    kiClient.getFeatures = jest
+    kiClient.getFeatures = vi
       .fn()
       .mockImplementation(
         async (_stream: string, options: { type?: string[]; featureIds?: string[] }) => {
@@ -259,12 +261,12 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
   });
 
   it('filters requested streamNames against accessible streams', async () => {
-    streamsClient.listStreams = jest
+    streamsClient.listStreams = vi
       .fn()
       .mockResolvedValue([{ name: 'logs.allowed' } as Streams.all.Definition]);
 
-    kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });
-    kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
+    kiClient.getFeatures = vi.fn().mockResolvedValue({ hits: [], total: 0 });
+    kiClient.getQueryLinks = vi.fn().mockResolvedValue([]);
 
     await searchKnowledgeIndicatorsToolHandler({
       streamsClient,
@@ -283,11 +285,11 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
   });
 
   it('passes feature and rule-backed query filters to the client', async () => {
-    streamsClient.listStreams = jest
+    streamsClient.listStreams = vi
       .fn()
       .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
-    kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });
-    kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
+    kiClient.getFeatures = vi.fn().mockResolvedValue({ hits: [], total: 0 });
+    kiClient.getQueryLinks = vi.fn().mockResolvedValue([]);
 
     const result = await searchKnowledgeIndicatorsToolHandler({
       streamsClient,
@@ -319,21 +321,21 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
   });
 
   it('logs a debug message when feature retrieval fails for a stream', async () => {
-    streamsClient.listStreams = jest
+    streamsClient.listStreams = vi
       .fn()
       .mockResolvedValue([
         { name: 'logs.bad' } as Streams.all.Definition,
         { name: 'logs.good' } as Streams.all.Definition,
       ]);
 
-    kiClient.getFeatures = jest.fn().mockImplementation((streamName: string) => {
+    kiClient.getFeatures = vi.fn().mockImplementation((streamName: string) => {
       if (streamName === 'logs.bad') {
         return Promise.reject(new Error('boom'));
       }
       return Promise.resolve({ hits: [makeFeature({ id: 'ok' })], total: 1 });
     });
 
-    kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
+    kiClient.getQueryLinks = vi.fn().mockResolvedValue([]);
 
     await searchKnowledgeIndicatorsToolHandler({
       streamsClient,
@@ -348,11 +350,11 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
 
   describe('compact view', () => {
     function setupFeatureStream(feature: Feature) {
-      streamsClient.listStreams = jest
+      streamsClient.listStreams = vi
         .fn()
         .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
-      kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [feature], total: 1 });
-      kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
+      kiClient.getFeatures = vi.fn().mockResolvedValue({ hits: [feature], total: 1 });
+      kiClient.getQueryLinks = vi.fn().mockResolvedValue([]);
     }
 
     async function getCompactFeature(feature: Feature): Promise<CompactFeature> {
@@ -547,14 +549,14 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
 
   describe('full view', () => {
     it('returns all StrippedFeatureKeys unchanged and marks view: full', async () => {
-      streamsClient.listStreams = jest
+      streamsClient.listStreams = vi
         .fn()
         .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
       const filter = { field: 'service.name', operator: 'eq', value: 'svc' } as Feature['filter'];
-      kiClient.getFeatures = jest
+      kiClient.getFeatures = vi
         .fn()
         .mockResolvedValue({ hits: [makeFeature({ type: 'entity', filter })], total: 1 });
-      kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
+      kiClient.getQueryLinks = vi.fn().mockResolvedValue([]);
 
       const result = await searchKnowledgeIndicatorsToolHandler({
         streamsClient,
@@ -574,11 +576,11 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     });
 
     it('returns severity_score and features[].run_id for query KIs unchanged', async () => {
-      streamsClient.listStreams = jest
+      streamsClient.listStreams = vi
         .fn()
         .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
-      kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });
-      kiClient.getQueryLinks = jest.fn().mockResolvedValue([
+      kiClient.getFeatures = vi.fn().mockResolvedValue({ hits: [], total: 0 });
+      kiClient.getQueryLinks = vi.fn().mockResolvedValue([
         {
           'asset.uuid': 'a1',
           'asset.type': 'query',

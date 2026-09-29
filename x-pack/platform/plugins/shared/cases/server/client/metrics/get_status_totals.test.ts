@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getStatusTotalsByType } from './get_status_totals';
 import { createMockClientArgs } from './test_utils/client';
 
@@ -15,11 +17,11 @@ describe('getStatusTotalsByType', () => {
   beforeEach(() => {
     ({ mockServices, clientArgs } = createMockClientArgs());
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('MTTR', () => {

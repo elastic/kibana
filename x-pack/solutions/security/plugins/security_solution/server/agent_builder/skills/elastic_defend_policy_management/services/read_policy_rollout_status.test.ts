@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance, Mocked } from 'vitest';
+
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -212,14 +215,14 @@ const isUnitedSearch = (request: unknown): boolean =>
   indexName(request).includes('metadata_united');
 
 const searchCall = (
-  esClient: jest.Mocked<ElasticsearchClient>,
+  esClient: Mocked<ElasticsearchClient>,
   callIndex: number
 ): estypes.SearchRequest => asSearchRequest(esClient.search.mock.calls[callIndex]?.[0]);
 
 const createEndpointUsageAccess = async () => {
   const endpointAppContextService = createMockEndpointAppContextService();
   const request = httpServerMock.createKibanaRequest();
-  const getHostMetadataList = jest.fn();
+  const getHostMetadataList = vi.fn();
 
   endpointAppContextService.getEndpointAuthz.mockResolvedValue(
     getEndpointAuthzInitialStateMock({
@@ -228,12 +231,12 @@ const createEndpointUsageAccess = async () => {
       canWritePolicyManagement: false,
     })
   );
-  jest.mocked(endpointAppContextService.getEndpointMetadataService).mockReturnValue({
+  vi.mocked(endpointAppContextService.getEndpointMetadataService).mockReturnValue({
     getHostMetadataList,
   } as unknown as ReturnType<typeof endpointAppContextService.getEndpointMetadataService>);
 
-  const getStartServices = jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
+  const getStartServices = vi.fn(async () => [
+    { savedObjects: { getScopedClient: vi.fn().mockReturnValue({}) } },
   ]) as unknown as StartServicesAccessor;
   const access = await createPolicyAccessContext(
     endpointAppContextService,
@@ -242,11 +245,11 @@ const createEndpointUsageAccess = async () => {
     getStartServices
   );
   const soClient = access.fleet.getSoClient();
-  const listByName = jest.spyOn(access.fleet.packagePolicy, 'list');
-  const ensureInCurrentSpace = jest.spyOn(access.fleet, 'ensureInCurrentSpace');
-  const getByIds = jest.spyOn(access.fleet.agentPolicy, 'getByIds');
+  const listByName = vi.spyOn(access.fleet.packagePolicy, 'list');
+  const ensureInCurrentSpace = vi.spyOn(access.fleet, 'ensureInCurrentSpace');
+  const getByIds = vi.spyOn(access.fleet.agentPolicy, 'getByIds');
   const esClient =
-    (await endpointAppContextService.getReadEsClient()) as jest.Mocked<ElasticsearchClient>;
+    (await endpointAppContextService.getReadEsClient()) as Mocked<ElasticsearchClient>;
 
   endpointAppContextService.getReadEsClient.mockClear();
   endpointAppContextService.getInternalEsClient.mockClear();
@@ -267,7 +270,7 @@ const createEndpointUsageAccess = async () => {
 };
 
 const mockSearches = (
-  esClient: jest.Mocked<ElasticsearchClient>,
+  esClient: Mocked<ElasticsearchClient>,
   {
     united,
     response,
@@ -293,8 +296,8 @@ const expectNoForbiddenApis = ({
   listByName,
   endpointAppContextService,
 }: {
-  getHostMetadataList: jest.Mock;
-  listByName: jest.SpyInstance;
+  getHostMetadataList: Mock;
+  listByName: MockInstance;
   endpointAppContextService: ReturnType<typeof createMockEndpointAppContextService>;
 }): void => {
   expect(getHostMetadataList).not.toHaveBeenCalled();

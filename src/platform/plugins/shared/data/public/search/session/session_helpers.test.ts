@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { waitUntilNextSessionCompletes$ } from './session_helpers';
 import type { ISessionService } from './session_service';
 import { SessionService } from './session_service';
@@ -21,7 +24,7 @@ import { getSearchSessionEBTManagerMock, getSessionsClientMock } from './mocks';
 
 let sessionService: ISessionService;
 let state$: BehaviorSubject<SearchSessionState>;
-let nowProvider: jest.Mocked<NowProviderInternalContract>;
+let nowProvider: Mocked<NowProviderInternalContract>;
 let currentAppId$: BehaviorSubject<string>;
 
 beforeEach(() => {
@@ -61,10 +64,10 @@ beforeEach(() => {
 
 describe('waitUntilNextSessionCompletes$', () => {
   beforeEach(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
   });
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
   test(
     'emits when next session starts',
@@ -78,8 +81,8 @@ describe('waitUntilNextSessionCompletes$', () => {
 
       completeSearch();
 
-      const next = jest.fn();
-      const complete = jest.fn();
+      const next = vi.fn();
+      const complete = vi.fn();
       waitUntilNextSessionCompletes$(sessionService).subscribe({ next, complete });
       expect(next).not.toHaveBeenCalled();
 

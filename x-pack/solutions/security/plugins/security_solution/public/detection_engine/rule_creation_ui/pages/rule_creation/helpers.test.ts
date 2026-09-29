@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import type { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
@@ -1051,10 +1054,10 @@ describe('helpers', () => {
     let mockData: ActionsStepRule;
     const actionTypeRegistry = {
       ...actionTypeRegistryMock.create(),
-      get: jest.fn((actionTypeId: string) => ({
+      get: vi.fn((actionTypeId: string) => ({
         isSystemAction: false,
       })),
-    } as unknown as jest.Mocked<ActionTypeRegistryContract>;
+    } as unknown as Mocked<ActionTypeRegistryContract>;
 
     beforeEach(() => {
       mockData = mockActionsStepRule();

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getDocId, type EsHitRecord } from '@kbn/discover-utils';
 import type { ExecutionContract } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -20,7 +22,7 @@ import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../context_awareness';
 
 describe('fetchEsql', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager({
@@ -47,10 +49,10 @@ describe('fetchEsql', () => {
       raw: hit,
       flattened: hit,
     }));
-    const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+    const expressionsExecuteSpy = vi.spyOn(discoverServiceMock.expressions, 'execute');
     expressionsExecuteSpy.mockReturnValueOnce({
-      cancel: jest.fn(),
-      getData: jest.fn(() =>
+      cancel: vi.fn(),
+      getData: vi.fn(() =>
         of({
           result: {
             columns: ['_id', 'foo'],
@@ -59,7 +61,7 @@ describe('fetchEsql', () => {
         })
       ),
     } as unknown as ExecutionContract);
-    const resolveDocumentProfileSpy = jest.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
+    const resolveDocumentProfileSpy = vi.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
     expect(await fetchEsql(fetchEsqlMockProps)).toEqual({
       records,
       esqlQueryColumns: ['_id', 'foo'],
@@ -72,8 +74,8 @@ describe('fetchEsql', () => {
   });
 
   it('falls back to generated ids when row metadata is missing', async () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 46));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 4, 7, 22, 34, 46));
 
     try {
       const hits = [
@@ -81,10 +83,10 @@ describe('fetchEsql', () => {
         { _id: '2', foo: 'baz' },
       ] as unknown as EsHitRecord[];
       const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
-      const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+      const expressionsExecuteSpy = vi.spyOn(discoverServiceMock.expressions, 'execute');
       expressionsExecuteSpy.mockReturnValueOnce({
-        cancel: jest.fn(),
-        getData: jest.fn(() =>
+        cancel: vi.fn(),
+        getData: vi.fn(() =>
           of({
             result: {
               columns: ['_id', 'foo'],
@@ -112,12 +114,12 @@ describe('fetchEsql', () => {
         interceptedWarnings: [],
       });
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 
   it('should generate identical stable ids across two fetches when _id and _index are present', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     try {
       const hits = [
@@ -127,8 +129,8 @@ describe('fetchEsql', () => {
 
       const mockExecute = () =>
         ({
-          cancel: jest.fn(),
-          getData: jest.fn(() =>
+          cancel: vi.fn(),
+          getData: vi.fn(() =>
             of({
               result: {
                 columns: ['_id', '_index', 'foo'],
@@ -138,34 +140,34 @@ describe('fetchEsql', () => {
           ),
         } as unknown as ExecutionContract);
 
-      const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+      const expressionsExecuteSpy = vi.spyOn(discoverServiceMock.expressions, 'execute');
 
-      jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 46));
+      vi.setSystemTime(new Date(2026, 4, 7, 22, 34, 46));
       expressionsExecuteSpy.mockReturnValueOnce(mockExecute());
       const { records: firstFetch } = await fetchEsql(fetchEsqlMockProps);
 
       // Advance time to simulate a later refresh
-      jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 47));
+      vi.setSystemTime(new Date(2026, 4, 7, 22, 34, 47));
       expressionsExecuteSpy.mockReturnValueOnce(mockExecute());
       const { records: secondFetch } = await fetchEsql(fetchEsqlMockProps);
 
       expect(firstFetch[0].id).toBe(secondFetch[0].id);
       expect(firstFetch[1].id).toBe(secondFetch[1].id);
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 
   it('should generate different ids across two fetches when _index is absent', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     try {
       const hits = [{ _id: '1', foo: 'bar' }] as unknown as EsHitRecord[];
 
       const mockExecute = () =>
         ({
-          cancel: jest.fn(),
-          getData: jest.fn(() =>
+          cancel: vi.fn(),
+          getData: vi.fn(() =>
             of({
               result: {
                 columns: ['_id', 'foo'],
@@ -175,20 +177,20 @@ describe('fetchEsql', () => {
           ),
         } as unknown as ExecutionContract);
 
-      const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+      const expressionsExecuteSpy = vi.spyOn(discoverServiceMock.expressions, 'execute');
 
-      jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 46));
+      vi.setSystemTime(new Date(2026, 4, 7, 22, 34, 46));
       expressionsExecuteSpy.mockReturnValueOnce(mockExecute());
       const { records: firstFetch } = await fetchEsql(fetchEsqlMockProps);
 
       // Advance time to simulate a later refresh
-      jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 47));
+      vi.setSystemTime(new Date(2026, 4, 7, 22, 34, 47));
       expressionsExecuteSpy.mockReturnValueOnce(mockExecute());
       const { records: secondFetch } = await fetchEsql(fetchEsqlMockProps);
 
       expect(firstFetch[0].id).not.toBe(secondFetch[0].id);
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 
@@ -203,7 +205,7 @@ describe('fetchEsql', () => {
       from: '2021-08-31T22:00:00.000Z',
       to: '2021-09-01T22:00:00.000Z',
     };
-    jest
+    vi
       .spyOn(discoverServiceMock.data.query.timefilter.timefilter, 'getAbsoluteTime')
       .mockReturnValue(absoluteTimeRange);
 
@@ -213,10 +215,10 @@ describe('fetchEsql', () => {
   });
 
   it('passes esqlApproximation to the expression searchContext', async () => {
-    const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+    const expressionsExecuteSpy = vi.spyOn(discoverServiceMock.expressions, 'execute');
     expressionsExecuteSpy.mockReturnValueOnce({
-      cancel: jest.fn(),
-      getData: jest.fn(() => of({ result: { columns: [], rows: [] } })),
+      cancel: vi.fn(),
+      getData: vi.fn(() => of({ result: { columns: [], rows: [] } })),
     } as unknown as ExecutionContract);
 
     await fetchEsql({ ...fetchEsqlMockProps, esqlApproximation: true });
@@ -235,10 +237,10 @@ describe('fetchEsql', () => {
       { _index: 'i', _id: '1', snippets: '<em>bar</em>' },
       { _index: 'i', _id: '2', snippets: '<em>baz</em>' },
     ] as unknown as EsHitRecord[];
-    const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+    const expressionsExecuteSpy = vi.spyOn(discoverServiceMock.expressions, 'execute');
     expressionsExecuteSpy.mockReturnValueOnce({
-      cancel: jest.fn(),
-      getData: jest.fn(() =>
+      cancel: vi.fn(),
+      getData: vi.fn(() =>
         of({
           result: {
             columns: ['_id', 'snippets'],
@@ -266,10 +268,10 @@ describe('fetchEsql', () => {
       { _index: 'i', _id: '1', highlight_title: '<em>bar</em>' },
       { _index: 'i', _id: '2', highlight_title: '<em>baz</em>' },
     ] as unknown as EsHitRecord[];
-    const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+    const expressionsExecuteSpy = vi.spyOn(discoverServiceMock.expressions, 'execute');
     expressionsExecuteSpy.mockReturnValueOnce({
-      cancel: jest.fn(),
-      getData: jest.fn(() =>
+      cancel: vi.fn(),
+      getData: vi.fn(() =>
         of({
           result: {
             columns: ['_id', 'highlight_title'],

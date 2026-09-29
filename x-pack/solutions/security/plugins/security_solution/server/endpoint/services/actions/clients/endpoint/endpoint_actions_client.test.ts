@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ResponseActionsClientOptions } from '../lib/base_response_actions_client';
 import type { ResponseActionsClient } from '../../..';
 import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
@@ -29,15 +32,15 @@ import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/dat
 import { ScriptsLibraryMock } from '../../../scripts_library/mocks';
 import type { ActionDetails } from '../../../../../../common/endpoint/types';
 
-jest.mock('../../action_details_by_id', () => {
-  const originalMod = jest.requireActual('../../action_details_by_id');
+vi.mock('../../action_details_by_id', async () => {
+  const originalMod = (await vi.importActual('../../action_details_by_id'));
   return {
     ...originalMod,
-    getActionDetailsById: jest.fn(originalMod.getActionDetailsById),
+    getActionDetailsById: vi.fn(originalMod.getActionDetailsById),
   };
 });
 
-const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
+const getActionDetailsByIdMock = _getActionDetailsById as Mock;
 
 describe('EndpointActionsClient', () => {
   let classConstructorOptions: ResponseActionsClientOptions;
@@ -59,7 +62,7 @@ describe('EndpointActionsClient', () => {
 
     (
       classConstructorOptions.endpointService.getInternalFleetServices()
-        .ensureInCurrentSpace as jest.Mock
+        .ensureInCurrentSpace as Mock
     ).mockResolvedValue(undefined);
 
     getActionDetailsByIdMock.mockResolvedValue(
@@ -99,7 +102,7 @@ describe('EndpointActionsClient', () => {
     );
 
     expect(
-      classConstructorOptions.endpointService.getMessageSigningService().sign as jest.Mock
+      classConstructorOptions.endpointService.getMessageSigningService().sign as Mock
     ).toHaveBeenCalled();
   });
 
@@ -109,7 +112,7 @@ describe('EndpointActionsClient', () => {
     );
 
     expect(
-      (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+      (await classConstructorOptions.endpointService.getFleetActionsClient()).create as Mock
     ).toHaveBeenCalledWith({
       '@timestamp': expect.any(String),
       action_id: expect.any(String),
@@ -340,7 +343,7 @@ describe('EndpointActionsClient', () => {
     });
 
     expect(
-      (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+      (await classConstructorOptions.endpointService.getFleetActionsClient()).create as Mock
     ).not.toHaveBeenCalled();
     expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -357,7 +360,7 @@ describe('EndpointActionsClient', () => {
   it('should create an action with error when agents are invalid (automated mode)', async () => {
     classConstructorOptions.isAutomated = true;
     // @ts-expect-error mocking this for testing purposes
-    endpointActionsClient.checkAgentIds = jest.fn().mockResolvedValueOnce({
+    endpointActionsClient.checkAgentIds = vi.fn().mockResolvedValueOnce({
       isValid: false,
       valid: [],
       invalid: ['invalid-id'],
@@ -367,7 +370,7 @@ describe('EndpointActionsClient', () => {
     await endpointActionsClient.isolate(getCommonResponseActionOptions());
 
     expect(
-      (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+      (await classConstructorOptions.endpointService.getFleetActionsClient()).create as Mock
     ).not.toHaveBeenCalled();
     expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -519,7 +522,7 @@ describe('EndpointActionsClient', () => {
       }
 
       expect(
-        (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+        (await classConstructorOptions.endpointService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: {
@@ -841,7 +844,7 @@ describe('EndpointActionsClient', () => {
       ).resolves.toBeDefined();
 
       expect(
-        (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+        (await classConstructorOptions.endpointService.getFleetActionsClient()).create as Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: {
@@ -970,7 +973,7 @@ describe('EndpointActionsClient', () => {
 
     it('should error if script ID does not exist', async () => {
       (
-        classConstructorOptions.endpointService.getScriptsLibraryClient('', '').get as jest.Mock
+        classConstructorOptions.endpointService.getScriptsLibraryClient('', '').get as Mock
       ).mockRejectedValueOnce(new Error('not found'));
 
       await expect(
@@ -984,7 +987,7 @@ describe('EndpointActionsClient', () => {
 
     it('should error if script requires input args but none were provided', async () => {
       (
-        classConstructorOptions.endpointService.getScriptsLibraryClient('', '').get as jest.Mock
+        classConstructorOptions.endpointService.getScriptsLibraryClient('', '').get as Mock
       ).mockResolvedValue(ScriptsLibraryMock.generateScriptEntry({ requiresInput: true }));
 
       await expect(
@@ -1102,7 +1105,7 @@ describe('EndpointActionsClient', () => {
       );
 
       expect(
-        classConstructorOptions.endpointService.getScriptsLibraryClient('', '').list as jest.Mock
+        classConstructorOptions.endpointService.getScriptsLibraryClient('', '').list as Mock
       ).toHaveBeenCalledWith({
         kuery: 'platform: "linux"',
         pageSize: 10000,
@@ -1151,7 +1154,7 @@ describe('EndpointActionsClient', () => {
       async (methodName) => {
         (
           classConstructorOptions.endpointService.getInternalFleetServices().agent
-            .getByIds as jest.Mock
+            .getByIds as Mock
         ).mockImplementation(async () => {
           throw new AgentNotFoundError('Agent some-id not found');
         });
@@ -1179,7 +1182,7 @@ describe('EndpointActionsClient', () => {
     it('should create failed action request for automated response actions', async () => {
       classConstructorOptions.isAutomated = true;
       // @ts-expect-error mocking this for testing purposes
-      endpointActionsClient.checkAgentIds = jest.fn().mockResolvedValueOnce({
+      endpointActionsClient.checkAgentIds = vi.fn().mockResolvedValueOnce({
         isValid: false,
         valid: [],
         invalid: ['invalid-id'],
@@ -1204,7 +1207,7 @@ describe('EndpointActionsClient', () => {
     it('should return action details for failed automated response actions even when no valid agents', async () => {
       classConstructorOptions.isAutomated = true;
       // @ts-expect-error mocking this for testing purposes
-      endpointActionsClient.checkAgentIds = jest.fn().mockResolvedValueOnce({
+      endpointActionsClient.checkAgentIds = vi.fn().mockResolvedValueOnce({
         isValid: false,
         valid: [],
         invalid: ['invalid-id'],

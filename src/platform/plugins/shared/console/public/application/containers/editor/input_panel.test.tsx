@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { render, screen } from '@testing-library/react';
@@ -16,47 +19,59 @@ import { useEditorReadContext } from '../../contexts';
 import { getAutocompleteInfo } from '../../../services';
 import { DEBOUNCE_DELAY } from '../../const';
 
-const mockMonacoEditor = jest.fn((props: Record<string, unknown>) => (
+const mockMonacoEditor = vi.fn((props: Record<string, unknown>) => (
   <div data-test-subj="mockMonacoEditor" />
 ));
 
-jest.mock('../../contexts', () => ({
-  useEditorReadContext: jest.fn(),
-}));
+vi.mock('../../contexts', () => {
+      const mocked = {
+      useEditorReadContext: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../services', () => ({
-  getAutocompleteInfo: jest.fn(),
-}));
+vi.mock('../../../services', () => {
+      const mocked = {
+      getAutocompleteInfo: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./monaco_editor', () => ({
-  MonacoEditor: (props: Record<string, unknown>) => mockMonacoEditor(props),
-}));
+vi.mock('./monaco_editor', () => {
+      const mocked = {
+      MonacoEditor: (props: Record<string, unknown>) => mockMonacoEditor(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/editor_content_spinner', () => ({
-  EditorContentSpinner: () => <div data-test-subj="mockEditorContentSpinner" />,
-}));
+vi.mock('../../components/editor_content_spinner', () => {
+      const mocked = {
+      EditorContentSpinner: () => <div data-test-subj="mockEditorContentSpinner" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseEditorReadContext = useEditorReadContext as jest.MockedFunction<
+const mockUseEditorReadContext = useEditorReadContext as MockedFunction<
   typeof useEditorReadContext
 >;
 
-const mockGetAutocompleteInfo = getAutocompleteInfo as jest.MockedFunction<
+const mockGetAutocompleteInfo = getAutocompleteInfo as MockedFunction<
   typeof getAutocompleteInfo
 >;
 
 describe('InputPanel', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+    vi.useFakeTimers();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns null when there is no current text object', () => {
     const isLoading$ = new Subject<boolean>();
-    const unsubscribe = jest.fn();
+    const unsubscribe = vi.fn();
     mockGetAutocompleteInfo.mockReturnValue({
       isLoading$: {
         subscribe: () => ({ unsubscribe }),
@@ -72,8 +87,8 @@ describe('InputPanel', () => {
       <InputPanel
         loading={false}
         inputEditorValue="abc"
-        setInputEditorValue={jest.fn()}
-        setFetchingAutocompleteEntities={jest.fn()}
+        setInputEditorValue={vi.fn()}
+        setFetchingAutocompleteEntities={vi.fn()}
       />
     );
 
@@ -85,7 +100,7 @@ describe('InputPanel', () => {
   });
 
   it('renders spinner when loading is true', () => {
-    const unsubscribe = jest.fn();
+    const unsubscribe = vi.fn();
     mockGetAutocompleteInfo.mockReturnValue({
       isLoading$: {
         subscribe: () => ({ unsubscribe }),
@@ -101,8 +116,8 @@ describe('InputPanel', () => {
       <InputPanel
         loading={true}
         inputEditorValue="abc"
-        setInputEditorValue={jest.fn()}
-        setFetchingAutocompleteEntities={jest.fn()}
+        setInputEditorValue={vi.fn()}
+        setFetchingAutocompleteEntities={vi.fn()}
       />
     );
 
@@ -114,8 +129,8 @@ describe('InputPanel', () => {
   });
 
   it('renders monaco editor with expected props when not loading', () => {
-    const unsubscribe = jest.fn();
-    const setInputEditorValue = jest.fn();
+    const unsubscribe = vi.fn();
+    const setInputEditorValue = vi.fn();
     const customParsedRequestsProvider = { foo: 'bar' };
 
     mockGetAutocompleteInfo.mockReturnValue({
@@ -134,7 +149,7 @@ describe('InputPanel', () => {
         loading={false}
         inputEditorValue="abc"
         setInputEditorValue={setInputEditorValue}
-        setFetchingAutocompleteEntities={jest.fn()}
+        setFetchingAutocompleteEntities={vi.fn()}
       />
     );
 
@@ -152,7 +167,7 @@ describe('InputPanel', () => {
   it('debounces setFetchingAutocompleteEntities based on isLoading$ emissions', () => {
     const isLoading$ = new Subject<boolean>();
     const innerSubscription = isLoading$.subscribe();
-    const unsubscribe = jest.fn(() => innerSubscription.unsubscribe());
+    const unsubscribe = vi.fn(() => innerSubscription.unsubscribe());
 
     mockGetAutocompleteInfo.mockReturnValue({
       isLoading$: {
@@ -170,13 +185,13 @@ describe('InputPanel', () => {
       customParsedRequestsProvider: undefined,
     } as any);
 
-    const setFetchingAutocompleteEntities = jest.fn();
+    const setFetchingAutocompleteEntities = vi.fn();
 
     const { unmount } = render(
       <InputPanel
         loading={false}
         inputEditorValue="abc"
-        setInputEditorValue={jest.fn()}
+        setInputEditorValue={vi.fn()}
         setFetchingAutocompleteEntities={setFetchingAutocompleteEntities}
       />
     );
@@ -187,7 +202,7 @@ describe('InputPanel', () => {
     expect(setFetchingAutocompleteEntities).not.toHaveBeenCalled();
 
     act(() => {
-      jest.advanceTimersByTime(DEBOUNCE_DELAY);
+      vi.advanceTimersByTime(DEBOUNCE_DELAY);
     });
     expect(setFetchingAutocompleteEntities).toHaveBeenCalledWith(true);
 
@@ -198,7 +213,7 @@ describe('InputPanel', () => {
 
   it('cancels pending debounce and unsubscribes on unmount', () => {
     const isLoading$ = new Subject<boolean>();
-    const unsubscribe = jest.fn();
+    const unsubscribe = vi.fn();
 
     mockGetAutocompleteInfo.mockReturnValue({
       isLoading$: {
@@ -219,13 +234,13 @@ describe('InputPanel', () => {
       customParsedRequestsProvider: undefined,
     } as any);
 
-    const setFetchingAutocompleteEntities = jest.fn();
+    const setFetchingAutocompleteEntities = vi.fn();
 
     const { unmount } = render(
       <InputPanel
         loading={false}
         inputEditorValue="abc"
-        setInputEditorValue={jest.fn()}
+        setInputEditorValue={vi.fn()}
         setFetchingAutocompleteEntities={setFetchingAutocompleteEntities}
       />
     );
@@ -238,7 +253,7 @@ describe('InputPanel', () => {
     expect(unsubscribe).toHaveBeenCalled();
 
     act(() => {
-      jest.advanceTimersByTime(DEBOUNCE_DELAY);
+      vi.advanceTimersByTime(DEBOUNCE_DELAY);
     });
 
     expect(setFetchingAutocompleteEntities).not.toHaveBeenCalled();

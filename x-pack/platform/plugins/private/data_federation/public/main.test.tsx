@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, waitFor } from '@testing-library/react';
@@ -16,17 +18,23 @@ import { mainTranslations } from './main_i18n';
 import { Main } from './main';
 import type { DataSetWithName, DataSource } from '../common';
 
-jest.mock('./datasets_tab_content', () => ({
-  DatasetsTabContent: () => <div data-test-subj="datasetsTabContent" />,
-}));
+vi.mock('./datasets_tab_content', () => {
+      const mocked = {
+      DatasetsTabContent: () => <div data-test-subj="datasetsTabContent" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./data_sources_tab_content', () => ({
-  DataSourcesTabContent: () => <div data-test-subj="dataSourcesTabContent" />,
-}));
+vi.mock('./data_sources_tab_content', () => {
+      const mocked = {
+      DataSourcesTabContent: () => <div data-test-subj="dataSourcesTabContent" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createToastsMock = () => ({
-  addSuccess: jest.fn(),
-  addDanger: jest.fn(),
+  addSuccess: vi.fn(),
+  addDanger: vi.fn(),
 });
 
 const createServicesMock = ({
@@ -37,10 +45,10 @@ const createServicesMock = ({
   dataSets: DataSetWithName[];
 }) => ({
   dataSourcesClient: {
-    get: jest.fn().mockResolvedValue(dataSources),
+    get: vi.fn().mockResolvedValue(dataSources),
   },
   datasetsClient: {
-    get: jest.fn().mockResolvedValue(dataSets),
+    get: vi.fn().mockResolvedValue(dataSets),
   },
   toasts: createToastsMock(),
   docLinks: {

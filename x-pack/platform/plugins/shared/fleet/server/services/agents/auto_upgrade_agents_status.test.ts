@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../app_context';
 
@@ -12,12 +14,12 @@ import { getAgentActions } from './actions';
 
 import { getAutoUpgradeAgentsStatus } from './auto_upgrade_agents_status';
 
-jest.mock('./actions');
+vi.mock('./actions');
 
 describe('getAutoUpgradeAgentsStatus', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    jest.mocked(getAgentActions).mockImplementation(async (_: any, actionId: string) => {
+    vi.mocked(getAgentActions).mockImplementation(async (_: any, actionId: string) => {
       if (actionId === 'action-1') {
         return [{ id: 'action-1', is_automatic: true }];
       } else {
@@ -27,7 +29,7 @@ describe('getAutoUpgradeAgentsStatus', () => {
   });
   it('should kuery with active agents filter when listing agents', async () => {
     const agentClient = {
-      listAgents: jest.fn().mockResolvedValue({
+      listAgents: vi.fn().mockResolvedValue({
         aggregations: {
           action_id_versions: {
             buckets: [],
@@ -55,7 +57,7 @@ describe('getAutoUpgradeAgentsStatus', () => {
 
   it('should return only failed agents from automatic upgrade actions', async () => {
     const agentClient = {
-      listAgents: jest
+      listAgents: vi
         .fn()
         .mockResolvedValueOnce({
           total: 5,

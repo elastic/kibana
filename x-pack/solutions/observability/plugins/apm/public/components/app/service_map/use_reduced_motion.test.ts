@@ -5,30 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useReducedMotion } from './use_reduced_motion';
 
 describe('useReducedMotion', () => {
   let originalMatchMedia: typeof window.matchMedia;
-  let mockAddEventListener: jest.Mock;
-  let mockRemoveEventListener: jest.Mock;
+  let mockAddEventListener: Mock;
+  let mockRemoveEventListener: Mock;
   let mediaQueryChangeHandler: ((event: MediaQueryListEvent) => void) | null = null;
 
   const createMockMatchMedia = (matches: boolean) => {
-    mockAddEventListener = jest.fn((_, handler) => {
+    mockAddEventListener = vi.fn((_, handler) => {
       mediaQueryChangeHandler = handler;
     });
-    mockRemoveEventListener = jest.fn();
+    mockRemoveEventListener = vi.fn();
 
-    return jest.fn().mockImplementation((query: string) => ({
+    return vi.fn().mockImplementation((query: string) => ({
       matches,
       media: query,
       onchange: null,
       addEventListener: mockAddEventListener,
       removeEventListener: mockRemoveEventListener,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      dispatchEvent: jest.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
     }));
   };
 

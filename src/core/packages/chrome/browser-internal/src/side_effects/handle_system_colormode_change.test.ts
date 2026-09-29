@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
@@ -20,10 +23,10 @@ import type { GetUserProfileResponse } from '@kbn/core-user-profile-browser';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
-const mockbrowsersSupportsSystemTheme = jest.fn();
+const mockbrowsersSupportsSystemTheme = vi.fn();
 
-jest.mock('@kbn/core-theme-browser-internal', () => {
-  const original = jest.requireActual('@kbn/core-theme-browser-internal');
+vi.mock('@kbn/core-theme-browser-internal', async () => {
+  const original = (await vi.importActual('@kbn/core-theme-browser-internal'));
 
   return {
     ...original,
@@ -61,9 +64,9 @@ describe('handleSystemColorModeChange', () => {
     };
   };
 
-  const mockMatchMedia = (matches: boolean = false, addEventListenerMock = jest.fn()) => {
-    const removeEventListenerMock = jest.fn();
-    window.matchMedia = jest.fn().mockImplementation(() => {
+  const mockMatchMedia = (matches: boolean = false, addEventListenerMock = vi.fn()) => {
+    const removeEventListenerMock = vi.fn();
+    window.matchMedia = vi.fn().mockImplementation(() => {
       return {
         matches,
         addEventListener: addEventListenerMock,
@@ -86,7 +89,7 @@ describe('handleSystemColorModeChange', () => {
     } as any);
 
   const mockUiSettingsDarkMode = (
-    uiSettings: jest.Mocked<IUiSettingsClient>,
+    uiSettings: Mocked<IUiSettingsClient>,
     darkMode: 'dark' | 'light' | 'system'
   ) => {
     uiSettings.get.mockImplementation((key) => {
@@ -230,7 +233,7 @@ describe('handleSystemColorModeChange', () => {
     it('does show a toast when the system color mode changes', async () => {
       const { coreStart, getNotifications, http, uiSettings, stop$, logger } = getDeps();
       const currentDarkMode = false; // The system is currently in light mode
-      const addEventListenerMock = jest
+      const addEventListenerMock = vi
         .fn()
         .mockImplementation(async (type: string, cb: (evt: MediaQueryListEvent) => any) => {
           expect((await getNotifications()).toasts.addSuccess).not.toHaveBeenCalled();
@@ -263,7 +266,7 @@ describe('handleSystemColorModeChange', () => {
     it('does **not** show a toast when the system color mode changes to the current darkmode value', async () => {
       const { coreStart, getNotifications, http, uiSettings, stop$, logger } = getDeps();
       const currentDarkMode = true; // The system is currently in dark mode
-      const addEventListenerMock = jest
+      const addEventListenerMock = vi
         .fn()
         .mockImplementation(async (type: string, cb: (evt: MediaQueryListEvent) => any) => {
           expect((await getNotifications()).toasts.addSuccess).not.toHaveBeenCalled();

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AxiosInstance } from 'axios';
 import { createFetchFromAxios } from './create_fetch_from_axios';
 
@@ -17,7 +20,7 @@ const makeNodeStream = () => {
       (listeners[event] ??= []).push(listener);
       return this;
     },
-    destroy: jest.fn(),
+    destroy: vi.fn(),
   } as unknown as NodeJS.ReadableStream;
 };
 
@@ -30,17 +33,17 @@ const makeAxiosResponse = (overrides: Record<string, unknown> = {}) => ({
 });
 
 describe('createFetchFromAxios', () => {
-  let mockRequest: jest.Mock;
+  let mockRequest: Mock;
   let fetch: ReturnType<typeof createFetchFromAxios>;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-    mockRequest = jest.fn();
+    vi.useFakeTimers();
+    mockRequest = vi.fn();
     fetch = createFetchFromAxios({ request: mockRequest } as unknown as AxiosInstance);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('GET (SSE stream channel)', () => {
@@ -165,7 +168,7 @@ describe('createFetchFromAxios', () => {
       // Gate is active — second axios call has not been made yet
       expect(mockRequest).toHaveBeenCalledTimes(1);
 
-      jest.advanceTimersByTime(5000); // advance past SSE_READY_TIMEOUT_MS
+      vi.advanceTimersByTime(5000); // advance past SSE_READY_TIMEOUT_MS
       await toolCall;
 
       expect(mockRequest).toHaveBeenCalledTimes(2);
@@ -196,7 +199,7 @@ describe('createFetchFromAxios', () => {
       await fetch('https://example.com/mcp', { method: 'POST' });
 
       const toolCall = fetch('https://example.com/mcp', { method: 'POST' });
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
       await toolCall;
 
       expect(mockRequest).toHaveBeenCalledTimes(2);
@@ -258,7 +261,7 @@ describe('createFetchFromAxios', () => {
       expect(mockRequest).toHaveBeenCalledTimes(3);
 
       // Session B is still gated until its own timeout/GET.
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
       await sessionBToolCall;
       expect(mockRequest).toHaveBeenCalledTimes(4);
     });

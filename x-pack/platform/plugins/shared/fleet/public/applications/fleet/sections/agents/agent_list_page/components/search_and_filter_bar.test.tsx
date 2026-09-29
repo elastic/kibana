@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import type { Agent } from '../../../../types';
@@ -13,18 +15,18 @@ import { ExperimentalFeaturesService } from '../../../../services';
 
 import { SearchAndFilterBar } from './search_and_filter_bar';
 
-jest.mock('../../../../components', () => {
+vi.mock('../../../../components', () => {
   return {
     SearchBar: () => <div />,
   };
 });
 
-jest.mock('../../../../../../hooks/use_locator', () => {
+vi.mock('../../../../../../hooks/use_locator', () => {
   return {
-    useDashboardLocator: jest.fn().mockImplementation(() => {
+    useDashboardLocator: vi.fn().mockImplementation(() => {
       return {
         id: 'DASHBOARD_APP_LOCATOR',
-        getRedirectUrl: jest.fn().mockReturnValue('app/dashboards#/view/elastic_agent-a0002'),
+        getRedirectUrl: vi.fn().mockReturnValue('app/dashboards#/view/elastic_agent-a0002'),
       };
     }),
   };

@@ -5,41 +5,56 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useSaveToLibrary } from './use_save_to_library';
 import { useKibana } from '../../lib/kibana';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 
-jest.mock('../../lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_redirect_to_dashboard_from_lens', () => ({
-  useRedirectToDashboardFromLens: jest.fn().mockReturnValue({
-    redirectTo: jest.fn(),
-    getEditOrCreateDashboardPath: jest.fn().mockReturnValue('mockDashboardPath'),
-  }),
-}));
+vi.mock('./use_redirect_to_dashboard_from_lens', () => {
+      const mocked = {
+      useRedirectToDashboardFromLens: vi.fn().mockReturnValue({
+        redirectTo: vi.fn(),
+        getEditOrCreateDashboardPath: vi.fn().mockReturnValue('mockDashboardPath'),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../link_to', () => ({
-  useGetSecuritySolutionUrl: jest.fn(),
-}));
+vi.mock('../link_to', () => {
+      const mocked = {
+      useGetSecuritySolutionUrl: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('@kbn/react-kibana-mount', () => {
+      const mocked = {
+      toMountPoint: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 describe('useSaveToLibrary hook', () => {
   const mockStartServices = {
     application: { capabilities: { visualize_v2: { save: true } } },
-    lens: { SaveModalComponent: jest.fn() },
+    lens: { SaveModalComponent: vi.fn() },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseKibana.mockReturnValue({ services: mockStartServices });
   });
 

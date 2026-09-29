@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { createFieldFormatMock } from '../test_utils';
 import { DateNanosFormatEditor } from './date_nanos';
@@ -17,18 +19,18 @@ import { screen } from '@testing-library/react';
 const fieldType = 'date_nanos';
 
 const format = createFieldFormatMock({
-  getParamDefaults: jest.fn().mockImplementation(() => {
+  getParamDefaults: vi.fn().mockImplementation(() => {
     return { pattern: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS' };
   }),
-  convertToReact: jest.fn().mockImplementation((input: string) => `converted date for ${input}`),
+  convertToReact: vi.fn().mockImplementation((input: string) => `converted date for ${input}`),
 });
 
 const formatParams = {
   pattern: '',
 };
 
-const onChange = jest.fn();
-const onError = jest.fn();
+const onChange = vi.fn();
+const onError = vi.fn();
 
 const renderDateNanosFormatEditor = () =>
   renderWithI18n(

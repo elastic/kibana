@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IDetectionRulesClient } from '../../../../detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import { SiemMigrationStatus } from '../../../../../../common/siem_migrations/constants';
 import type { StoredRuleMigrationRule } from '../../types';
@@ -43,7 +45,7 @@ const translatedRule: StoredRuleMigrationRule = {
 
 describe('installCustomRules', () => {
   it('uses timing overrides from original rule annotations', async () => {
-    const createCustomRule = jest.fn().mockResolvedValue({ id: 'created-rule-id' });
+    const createCustomRule = vi.fn().mockResolvedValue({ id: 'created-rule-id' });
     const detectionRulesClient = { createCustomRule } as unknown as IDetectionRulesClient;
 
     await installCustomRules([translatedRule], false, detectionRulesClient);
@@ -60,7 +62,7 @@ describe('installCustomRules', () => {
   });
 
   it('uses shared defaults when timing annotations are missing', async () => {
-    const createCustomRule = jest.fn().mockResolvedValue({ id: 'created-rule-id' });
+    const createCustomRule = vi.fn().mockResolvedValue({ id: 'created-rule-id' });
     const detectionRulesClient = { createCustomRule } as unknown as IDetectionRulesClient;
     const ruleWithoutAnnotations: StoredRuleMigrationRule = {
       ...translatedRule,
@@ -82,7 +84,7 @@ describe('installCustomRules', () => {
   });
 
   it('uses shared interval default for non-Sentinel rules without interval annotation', async () => {
-    const createCustomRule = jest.fn().mockResolvedValue({ id: 'created-rule-id' });
+    const createCustomRule = vi.fn().mockResolvedValue({ id: 'created-rule-id' });
     const detectionRulesClient = { createCustomRule } as unknown as IDetectionRulesClient;
     const ruleWithoutAnnotations: StoredRuleMigrationRule = {
       ...translatedRule,

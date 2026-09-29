@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -127,7 +129,7 @@ describe('ErrorMarker', () => {
     });
 
     it('renders an EuiButtonEmpty when onClick is provided and errorMarkerHref is not', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const mark = buildMark({ onClick });
 
       renderWithTheme(<ErrorMarker mark={mark} />);
@@ -137,7 +139,7 @@ describe('ErrorMarker', () => {
     });
 
     it('calls onClick when the error button is clicked', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const mark = buildMark({ onClick });
 
       renderWithTheme(<ErrorMarker mark={mark} />);
@@ -148,7 +150,7 @@ describe('ErrorMarker', () => {
     });
 
     it('errorMarkerHref takes priority over onClick', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       const mark = buildMark({
         errorMarkerHref: '/app/apm/services/my-service/errors/abc123',
         onClick,

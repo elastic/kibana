@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { EuiProvider } from '@elastic/eui';
@@ -15,18 +17,21 @@ import type { MetricVisComponentProps } from './metric_component';
 import MetricVisComponent from './metric_component';
 import { LabelPosition } from '../../common/constants';
 
-jest.mock('../services', () => ({
-  getFormatService: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getFormatService } = require('../__mocks__/services');
-    return getFormatService();
-  },
-  getPaletteService: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getPaletteService } = require('../__mocks__/services');
-    return getPaletteService();
-  },
-}));
+vi.mock('../services', () => {
+      const mocked = {
+      getFormatService: () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { getFormatService } = require('../__mocks__/services');
+        return getFormatService();
+      },
+      getPaletteService: () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { getPaletteService } = require('../__mocks__/services');
+        return getPaletteService();
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type Props = MetricVisComponentProps;
 
@@ -73,8 +78,8 @@ describe('MetricVisComponent', function () {
     const props: Props = {
       visParams,
       visData,
-      renderComplete: jest.fn(),
-      fireEvent: jest.fn(),
+      renderComplete: vi.fn(),
+      fireEvent: vi.fn(),
       filterable: [true],
       ...propOverrides,
     };
@@ -117,7 +122,7 @@ describe('MetricVisComponent', function () {
   });
 
   it('should call renderComplete once for multi-value metrics', function () {
-    const renderComplete = jest.fn();
+    const renderComplete = vi.fn();
     const component = getComponent({
       renderComplete,
       filterable: [true, false],

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent, act, type RenderResult } from '@testing-library/react';
 import { HoverPopover } from './hover_popover';
 
 describe('HoverPopover', () => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 
   describe('when not hovering', () => {
     let result: RenderResult;
@@ -42,7 +44,7 @@ describe('HoverPopover', () => {
 
       act(() => {
         fireEvent.mouseEnter(result.getByTestId('HoverPopoverButton'));
-        jest.runAllTimers();
+        vi.runAllTimers();
       });
     });
 
@@ -58,7 +60,7 @@ describe('HoverPopover', () => {
       beforeEach(() => {
         act(() => {
           fireEvent.mouseLeave(result.getByTestId('HoverPopoverButton'));
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       });
 
@@ -78,7 +80,7 @@ describe('HoverPopover', () => {
             key: 'Escape',
             code: 'Escape',
           });
-          jest.runAllTimers();
+          vi.runAllTimers();
         });
       });
 

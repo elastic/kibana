@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -13,23 +16,23 @@ import { TestProviders } from '../../../../../common/mock';
 import { ArgsComponent } from './args';
 import { CellActionsRenderer } from '../../../../../common/components/cell_actions/cell_actions_renderer';
 
-jest.mock('../../../../../common/lib/kibana');
+vi.mock('../../../../../common/lib/kibana');
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
   };
 });
 
-jest.mock('../../../../../common/components/cell_actions/cell_actions_renderer', () => {
+vi.mock('../../../../../common/components/cell_actions/cell_actions_renderer', () => {
   return {
-    CellActionsRenderer: jest.fn(),
+    CellActionsRenderer: vi.fn(),
   };
 });
 
-const MockedCellActionsRenderer = jest.fn(({ children }) => {
+const MockedCellActionsRenderer = vi.fn(({ children }) => {
   return <div data-test-subj="mock-cell-action-renderer">{children}</div>;
 });
 
@@ -37,7 +40,7 @@ describe('Args', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {
-    (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
+    (CellActionsRenderer as unknown as Mock).mockImplementation(MockedCellActionsRenderer);
   });
 
   describe('rendering', () => {

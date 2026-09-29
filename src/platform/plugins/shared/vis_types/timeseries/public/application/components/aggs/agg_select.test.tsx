@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { AggSelect } from './agg_select';
@@ -27,7 +29,7 @@ describe('TSVB AggSelect', () => {
       <div>
         <AggSelect
           id="test"
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           panelType={panelType}
           value={value}
           siblings={series.metrics as Metric[]}

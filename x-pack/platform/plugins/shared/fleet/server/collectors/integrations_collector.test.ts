@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { packagePolicyService } from '../services';
@@ -15,14 +17,14 @@ describe('getIntegrationsDetails', () => {
   const soClientMock = savedObjectsClientMock.create();
 
   it('should return empty array if there are no package policies', async () => {
-    packagePolicyService.list = jest.fn().mockResolvedValue({
+    packagePolicyService.list = vi.fn().mockResolvedValue({
       items: [],
     });
     expect(await getIntegrationsDetails(soClientMock)).toEqual([]);
   });
 
   it('should return data about shared integration policies', async () => {
-    packagePolicyService.list = jest.fn().mockResolvedValue({
+    packagePolicyService.list = vi.fn().mockResolvedValue({
       items: [
         {
           name: 'apache-1',
@@ -54,7 +56,7 @@ describe('getIntegrationsDetails', () => {
   });
 
   it('should return data about shared integration policies when there are multiple of them', async () => {
-    packagePolicyService.list = jest.fn().mockResolvedValue({
+    packagePolicyService.list = vi.fn().mockResolvedValue({
       items: [
         {
           name: 'apache-1',
@@ -97,7 +99,7 @@ describe('getIntegrationsDetails', () => {
   });
 
   it('should return empty array if there are no shared integrations', async () => {
-    packagePolicyService.list = jest.fn().mockResolvedValue({
+    packagePolicyService.list = vi.fn().mockResolvedValue({
       items: [
         {
           name: 'apache-1',

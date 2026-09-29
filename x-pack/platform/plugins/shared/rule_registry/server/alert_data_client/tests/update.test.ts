@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   ALERT_RULE_CONSUMER,
   ALERT_WORKFLOW_STATUS,
@@ -23,16 +26,16 @@ const alertingAuthMock = alertingAuthorizationMock.create();
 const esClientMock = elasticsearchClientMock.createElasticsearchClient();
 const auditLogger = auditLoggerMock.create();
 
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+const alertsClientParams: Mocked<ConstructorOptions> = {
   logger: loggingSystemMock.create().get(),
   authorization: alertingAuthMock,
   esClient: esClientMock,
   esClientScoped: esClientMock,
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
-  getRuleType: jest.fn(),
-  getRuleList: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
+  getRuleType: vi.fn(),
+  getRuleList: vi.fn(),
+  getAlertIndicesAlias: vi.fn(),
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';
@@ -51,11 +54,11 @@ const authorizedRuleTypes = new Map([
 ]);
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
   alertingAuthMock.getSpaceId.mockImplementation(() => DEFAULT_SPACE);
   alertingAuthMock.getAuthorizationFilter.mockResolvedValue({
     filter: undefined,
-    ensureRuleTypeIsAuthorized: jest.fn(),
+    ensureRuleTypeIsAuthorized: vi.fn(),
   });
   alertingAuthMock.getAllAuthorizedRuleTypes.mockResolvedValue({
     hasAllRequested: true,

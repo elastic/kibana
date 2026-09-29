@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, waitFor } from '@testing-library/react';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE } from '../../../../../common/endpoint/constants';
@@ -20,11 +22,11 @@ const RULE_B = 'rule B { condition: true }';
 
 describe('useValidateCustomYaraSignature', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should POST the validate route with a versioned JSON body', async () => {
@@ -140,7 +142,7 @@ describe('useValidateCustomYaraSignature', () => {
     });
 
     act(() => {
-      jest.advanceTimersByTime(VALIDATE_CUSTOM_YARA_SIGNATURE_DEBOUNCE_MS);
+      vi.advanceTimersByTime(VALIDATE_CUSTOM_YARA_SIGNATURE_DEBOUNCE_MS);
     });
 
     await waitFor(() => {

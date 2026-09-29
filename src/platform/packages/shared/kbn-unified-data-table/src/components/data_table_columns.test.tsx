@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { getVisibleColumns } from '@kbn/discover-utils';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
@@ -108,7 +110,7 @@ describe('Data table columns', function () {
 
     describe('cell actions', () => {
       it('should replace cell actions', async () => {
-        const cellAction = jest.fn();
+        const cellAction = vi.fn();
         const actual = getEuiGridColumns({
           documentsDisplayMode: 'table',
           columns: columnsWithTimeCol,
@@ -140,7 +142,7 @@ describe('Data table columns', function () {
       });
 
       it('should append cell actions', async () => {
-        const cellAction = jest.fn();
+        const cellAction = vi.fn();
         const actual = getEuiGridColumns({
           documentsDisplayMode: 'table',
           columns: columnsWithTimeCol,
@@ -487,7 +489,7 @@ describe('Data table columns', function () {
 
   describe('JSON column', () => {
     it('does not apply custom grid column configuration to the _source column in JSON mode', () => {
-      const customizeSourceColumn = jest.fn(({ column }) => ({
+      const customizeSourceColumn = vi.fn(({ column }) => ({
         ...column,
         displayAsText: 'Custom Summary',
         isExpandable: true,

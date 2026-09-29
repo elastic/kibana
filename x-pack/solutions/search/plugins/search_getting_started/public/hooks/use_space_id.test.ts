@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useSpaceId } from './use_space_id';
 import { useKibana } from './use_kibana';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 describe('useSpaceId', () => {
   it('returns undefined before the async call resolves', () => {
@@ -19,7 +22,7 @@ describe('useSpaceId', () => {
       services: {
         spaces: {
           // Never resolves so no state update fires during the synchronous assertion.
-          getActiveSpace: jest.fn().mockReturnValue(new Promise(() => {})),
+          getActiveSpace: vi.fn().mockReturnValue(new Promise(() => {})),
         },
       },
     });
@@ -33,7 +36,7 @@ describe('useSpaceId', () => {
     mockUseKibana.mockReturnValue({
       services: {
         spaces: {
-          getActiveSpace: jest.fn().mockResolvedValue({ id: 'my-space' }),
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'my-space' }),
         },
       },
     });

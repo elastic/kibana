@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import {
   mockData,
@@ -18,8 +21,8 @@ import type { ProcessTreeDeps } from '.';
 import { ProcessTree } from '.';
 import { useDateFormat } from '../../hooks';
 
-jest.mock('../../hooks/use_date_format');
-const mockUseDateFormat = useDateFormat as jest.Mock;
+vi.mock('../../hooks/use_date_format');
+const mockUseDateFormat = useDateFormat as Mock;
 
 describe('ProcessTree component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -30,15 +33,15 @@ describe('ProcessTree component', () => {
     sessionEntityId: sessionLeader.process!.entity_id!,
     data: mockData,
     isFetching: false,
-    fetchNextPage: jest.fn(),
+    fetchNextPage: vi.fn(),
     hasNextPage: false,
-    fetchPreviousPage: jest.fn(),
+    fetchPreviousPage: vi.fn(),
     hasPreviousPage: false,
-    onProcessSelected: jest.fn(),
-    onJumpToOutput: jest.fn(),
+    onProcessSelected: vi.fn(),
+    onJumpToOutput: vi.fn(),
     updatedAlertsStatus: {},
-    onShowAlertDetails: jest.fn(),
-    trackEvent: jest.fn(),
+    onShowAlertDetails: vi.fn(),
+    trackEvent: vi.fn(),
   };
 
   beforeEach(() => {
@@ -79,7 +82,7 @@ describe('ProcessTree component', () => {
 
     it('should auto select jumpToEvent when it exists and without selectedProcess', () => {
       const jumpToEvent = mockData[0].events![2];
-      const onProcessSelected = jest.fn((process: Process | null) => {
+      const onProcessSelected = vi.fn((process: Process | null) => {
         expect(process?.id).toBe(jumpToEvent.process!.entity_id!);
       });
       renderResult = mockedContext.render(
@@ -96,7 +99,7 @@ describe('ProcessTree component', () => {
     });
 
     it('should auto select session leader without selectedProcess', () => {
-      const onProcessSelected = jest.fn((process: Process | null) => {
+      const onProcessSelected = vi.fn((process: Process | null) => {
         expect(process?.id).toBe(sessionLeader.process!.entity_id!);
       });
       renderResult = mockedContext.render(

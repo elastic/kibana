@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
 import type { NodeProps } from '../../types';
@@ -19,19 +22,19 @@ import {
 import { emitFilterToggle, isFilterActiveForScope } from '../../filters/filter_store';
 
 // Mock filter_store module to control isFilterActiveForScope
-jest.mock('../../filters/filter_store', () => {
-  const actual = jest.requireActual('../../filters/filter_store');
+vi.mock('../../filters/filter_store', async () => {
+  const actual = (await vi.importActual('../../filters/filter_store'));
   return {
     ...actual,
-    isFilterActiveForScope: jest.fn(() => false),
-    emitFilterToggle: jest.fn(),
+    isFilterActiveForScope: vi.fn(() => false),
+    emitFilterToggle: vi.fn(),
   };
 });
 
-const mockIsFilterActiveForScope = isFilterActiveForScope as jest.MockedFunction<
+const mockIsFilterActiveForScope = isFilterActiveForScope as MockedFunction<
   typeof isFilterActiveForScope
 >;
-const mockEmitFilterToggle = emitFilterToggle as jest.MockedFunction<typeof emitFilterToggle>;
+const mockEmitFilterToggle = emitFilterToggle as MockedFunction<typeof emitFilterToggle>;
 
 // Mock useLabelExpandGraphPopover to capture and expose itemsFn
 let capturedItemsFn:
@@ -40,18 +43,21 @@ let capturedItemsFn:
     ) => Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>)
   | null = null;
 
-jest.mock('./use_node_expand_popover', () => ({
-  useNodeExpandPopover: jest.fn(({ itemsFn }) => {
-    capturedItemsFn = itemsFn;
-    return {
-      id: 'test-popover',
-      onNodeExpandButtonClick: jest.fn(),
-      PopoverComponent: () => null,
-      actions: { openPopover: jest.fn(), closePopover: jest.fn() },
-      state: { isOpen: false, anchorElement: null },
+vi.mock('./use_node_expand_popover', () => {
+      const mocked = {
+      useNodeExpandPopover: vi.fn(({ itemsFn }) => {
+        capturedItemsFn = itemsFn;
+        return {
+          id: 'test-popover',
+          onNodeExpandButtonClick: vi.fn(),
+          PopoverComponent: () => null,
+          actions: { openPopover: vi.fn(), closePopover: vi.fn() },
+          state: { isOpen: false, anchorElement: null },
+        };
+      }),
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
 const createMockLabelNode = (): NodeProps =>
   ({
@@ -81,7 +87,7 @@ describe('useLabelNodeExpandPopover', () => {
   const scopeId = 'test-scope-id';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedItemsFn = null;
     mockEmitFilterToggle.mockClear();
     mockIsFilterActiveForScope.mockReturnValue(false);

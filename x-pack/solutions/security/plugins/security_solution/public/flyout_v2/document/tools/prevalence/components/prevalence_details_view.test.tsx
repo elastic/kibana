@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
@@ -36,13 +39,13 @@ import { licenseService } from '../../../../../common/hooks/use_license';
 import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
-jest.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/components/user_privileges');
 
 const mockedTelemetry = createTelemetryServiceMock();
-const mockStorage = jest.fn();
-const mockUiSettingsGet = jest.fn();
+const mockStorage = vi.fn();
+const mockUiSettingsGet = vi.fn();
 let mockServerless: unknown;
-jest.mock('../../../../../common/lib/kibana', () => {
+vi.mock('../../../../../common/lib/kibana', () => {
   return {
     useKibana: () => ({
       services: {
@@ -57,19 +60,19 @@ jest.mock('../../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../hooks/use_prevalence');
+vi.mock('../hooks/use_prevalence');
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
   };
 });
-jest.mock('../../../../../common/hooks/use_license', () => {
+vi.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
+    isPlatinumPlus: vi.fn(),
   };
   return {
     licenseService: licenseServiceInstance,
@@ -150,16 +153,16 @@ const renderPrevalenceDetailsView = ({
 };
 
 describe('PrevalenceDetailsView', () => {
-  const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+  const licenseServiceMock = licenseService as Mocked<typeof licenseService>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resetColdFrozenTierCalloutDismissedStateForTests();
     mockServerless = undefined;
     mockUiSettingsGet.mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: true } });
-    (usePrevalence as jest.Mock).mockReturnValue(mockPrevalenceReturnValue);
+    (useUserPrivileges as Mock).mockReturnValue({ timelinePrivileges: { read: true } });
+    (usePrevalence as Mock).mockReturnValue(mockPrevalenceReturnValue);
   });
 
   it('renders the date picker', () => {
@@ -190,7 +193,7 @@ describe('PrevalenceDetailsView', () => {
 
   it('renders the upsell callout and hides prevalence data when license is not platinum', () => {
     licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
-    (usePrevalence as jest.Mock).mockReturnValue({
+    (usePrevalence as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [
@@ -219,7 +222,7 @@ describe('PrevalenceDetailsView', () => {
 
   it('does not render upsell callout when there is an error', () => {
     licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
-    (usePrevalence as jest.Mock).mockReturnValue({ loading: false, error: true, data: [] });
+    (usePrevalence as Mock).mockReturnValue({ loading: false, error: true, data: [] });
 
     const { queryByTestId } = renderPrevalenceDetailsView();
 
@@ -227,7 +230,7 @@ describe('PrevalenceDetailsView', () => {
   });
 
   it('renders formatted numbers in alert and document count columns as clickable buttons', () => {
-    (usePrevalence as jest.Mock).mockReturnValue({
+    (usePrevalence as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [
@@ -260,7 +263,7 @@ describe('PrevalenceDetailsView', () => {
   });
 
   it('renders count columns as plain text when timeline interactions are disabled', () => {
-    (usePrevalence as jest.Mock).mockReturnValue({
+    (usePrevalence as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [
@@ -286,8 +289,8 @@ describe('PrevalenceDetailsView', () => {
   });
 
   it('renders count columns as plain text when user lacks timeline read privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: false } });
-    (usePrevalence as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({ timelinePrivileges: { read: false } });
+    (usePrevalence as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [
@@ -310,14 +313,14 @@ describe('PrevalenceDetailsView', () => {
   });
 
   it('renders no data message when the fetch errors out', () => {
-    (usePrevalence as jest.Mock).mockReturnValue({ loading: false, error: true, data: [] });
+    (usePrevalence as Mock).mockReturnValue({ loading: false, error: true, data: [] });
 
     const { getByText } = renderPrevalenceDetailsView();
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 
   it('renders no data message when data is empty', () => {
-    (usePrevalence as jest.Mock).mockReturnValue({ loading: false, error: false, data: [] });
+    (usePrevalence as Mock).mockReturnValue({ loading: false, error: false, data: [] });
 
     const { getByText } = renderPrevalenceDetailsView();
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();

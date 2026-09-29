@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
@@ -25,7 +27,7 @@ import {
 import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../../../common/constants';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 
-jest.mock('./build_signals_query');
+vi.mock('./build_signals_query');
 
 const reported = {
   actionGroup: 'default',

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { cloneDeep } from 'lodash';
@@ -24,11 +27,11 @@ import {
   SWITCH_LABEL,
 } from './per_os_attack_surface_reduction_card';
 
-jest.mock('../../../../../../common/hooks/use_license');
+vi.mock('../../../../../../common/hooks/use_license');
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 
 describe('PerOsAttackSurfaceReductionCard', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').perOsAttackSurface;
@@ -45,7 +48,7 @@ describe('PerOsAttackSurfaceReductionCard', () => {
   };
 
   const getUpdatedPolicy = (): PolicyConfig => {
-    const onChange = props.onChange as jest.Mock;
+    const onChange = props.onChange as Mock;
     return onChange.mock.calls[onChange.mock.calls.length - 1][0].updatedPolicy;
   };
 
@@ -55,7 +58,7 @@ describe('PerOsAttackSurfaceReductionCard', () => {
       .config.policy.value;
     props = {
       policy,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       mode: 'edit',
       'data-test-subj': testSubj.card,
     };

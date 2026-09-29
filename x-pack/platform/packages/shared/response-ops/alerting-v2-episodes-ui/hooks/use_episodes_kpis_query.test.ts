@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { Filter } from '@kbn/es-query';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -21,11 +23,11 @@ import type { EpisodeSourceKpis } from '../types/episode_data_source';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { useSpaceId } from './use_space_id';
 
-jest.mock('../utils/execute_esql_query');
-jest.mock('./use_space_id');
+vi.mock('../utils/execute_esql_query');
+vi.mock('./use_space_id');
 
-const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
-const mockUseSpaceId = jest.mocked(useSpaceId);
+const mockExecuteEsqlQuery = vi.mocked(executeEsqlQuery);
+const mockUseSpaceId = vi.mocked(useSpaceId);
 mockUseSpaceId.mockReturnValue('default');
 
 const sourceWithKpis = (fetchKpis: () => Promise<EpisodeSourceKpis>) =>
@@ -71,7 +73,7 @@ const createWrapper = (
 };
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseSpaceId.mockReturnValue('default');
 });
 
@@ -234,7 +236,7 @@ describe('useEpisodesKpisQuery', () => {
       {
         wrapper: createWrapper(
           sourceWithKpis(
-            jest.fn().mockResolvedValue({
+            vi.fn().mockResolvedValue({
               alerts_count: 10,
               firing_rules: 3,
               assigned_to_me: 0,
@@ -271,7 +273,7 @@ describe('useEpisodesKpisQuery', () => {
         }),
       {
         wrapper: createWrapper(
-          sourceWithKpis(jest.fn().mockRejectedValue(new Error('source fetch failed')))
+          sourceWithKpis(vi.fn().mockRejectedValue(new Error('source fetch failed')))
         ),
       }
     );
@@ -305,7 +307,7 @@ describe('useEpisodesKpisQuery', () => {
       {
         wrapper: createWrapper(
           sourceWithKpis(
-            jest.fn().mockResolvedValue({
+            vi.fn().mockResolvedValue({
               alerts_count: 10,
               firing_rules: 3,
               assigned_to_me: 0,
@@ -343,7 +345,7 @@ describe('useEpisodesKpisQuery', () => {
       {
         wrapper: createWrapper(
           sourceWithKpis(
-            jest.fn().mockResolvedValue({
+            vi.fn().mockResolvedValue({
               alerts_count: 10,
               firing_rules: 3,
               assigned_to_me: 0,

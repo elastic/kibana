@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ISavedObjectsPointInTimeFinder } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
@@ -47,7 +49,7 @@ const createFinder = (
       yield response;
     }
   },
-  close: jest.fn().mockResolvedValue(undefined),
+  close: vi.fn().mockResolvedValue(undefined),
 });
 
 const createRepository = () => {

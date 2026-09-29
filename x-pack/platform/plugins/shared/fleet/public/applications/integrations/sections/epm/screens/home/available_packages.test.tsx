@@ -5,41 +5,67 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 
-const mockUseAvailablePackages = jest.fn();
-jest.mock('./hooks/use_available_packages', () => ({
-  useAvailablePackages: () => mockUseAvailablePackages(),
-}));
+const mockUseAvailablePackages = vi.fn();
+vi.mock('./hooks/use_available_packages', () => {
+      const mocked = {
+      useAvailablePackages: () => mockUseAvailablePackages(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks', () => ({
-  useBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../../../hooks', () => {
+      const mocked = {
+      useBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Capture the list prop so tests can invoke injected onCardClick handlers directly.
 let capturedFilteredCards: Array<{ isCollectionCard?: boolean; onCardClick?: () => void }> = [];
-jest.mock('../../components/package_list_grid', () => ({
-  PackageListGrid: ({ list }: { list: any[] }) => {
-    capturedFilteredCards = list;
-    return null;
-  },
-}));
-jest.mock('../../components/integration_preference', () => ({
-  IntegrationPreference: () => null,
-}));
-jest.mock('../../components/agentless_filter', () => ({ AgentlessFilter: () => null }));
-jest.mock('../../components/no_epr_callout', () => ({ NoEprCallout: () => null }));
-jest.mock('./category_facets', () => ({ CategoryFacets: () => null }));
+vi.mock('../../components/package_list_grid', () => {
+      const mocked = {
+      PackageListGrid: ({ list }: { list: any[] }) => {
+        capturedFilteredCards = list;
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../components/integration_preference', () => {
+      const mocked = {
+      IntegrationPreference: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../components/agentless_filter', () => {
+      const mocked = { AgentlessFilter: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../components/no_epr_callout', () => {
+      const mocked = { NoEprCallout: () => null };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./category_facets', () => {
+      const mocked = { CategoryFacets: () => null };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseLocation = jest.fn();
-const mockHistoryReplace = jest.fn();
-jest.mock('react-router-dom', () => ({
-  useLocation: () => mockUseLocation(),
-  useHistory: () => ({ replace: mockHistoryReplace }),
-}));
+const mockUseLocation = vi.fn();
+const mockHistoryReplace = vi.fn();
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useLocation: () => mockUseLocation(),
+      useHistory: () => ({ replace: mockHistoryReplace }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { AvailablePackages } from './available_packages';
 
@@ -72,13 +98,13 @@ const nginxCollectionCard = {
 const makeDefaultHookReturn = (overrides = {}) => ({
   initialSelectedCategory: '',
   selectedCategory: '',
-  setCategory: jest.fn(),
+  setCategory: vi.fn(),
   allCategories: [{ id: '', title: 'All categories', count: 5 }],
   mainCategories: [{ id: '', title: 'All categories', count: 5 }],
   preference: 'agent',
-  setPreference: jest.fn(),
+  setPreference: vi.fn(),
   onlyAgentlessFilter: false,
-  setOnlyAgentlessFilter: jest.fn(),
+  setOnlyAgentlessFilter: vi.fn(),
   isAgentlessEnabled: false,
   isLoading: false,
   isLoadingCategories: false,
@@ -87,14 +113,14 @@ const makeDefaultHookReturn = (overrides = {}) => ({
   eprPackageLoadingError: undefined,
   eprCategoryLoadingError: undefined,
   searchTerm: '',
-  setSearchTerm: jest.fn(),
-  setUrlandPushHistory: jest.fn(),
-  setUrlandReplaceHistory: jest.fn(),
+  setSearchTerm: vi.fn(),
+  setUrlandPushHistory: vi.fn(),
+  setUrlandReplaceHistory: vi.fn(),
   filteredCards: [],
   allCards: [],
   availableSubCategories: [],
   selectedSubCategory: undefined,
-  setSelectedSubCategory: jest.fn(),
+  setSelectedSubCategory: vi.fn(),
   ...overrides,
 });
 
@@ -110,7 +136,7 @@ function renderPage() {
 
 describe('AvailablePackages — collection flyout URL state', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedFilteredCards = [];
     mockUseAvailablePackages.mockReturnValue(makeDefaultHookReturn());
     mockUseLocation.mockReturnValue({ pathname: '/app/integrations/browse', search: '' });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
@@ -15,19 +17,22 @@ import {
   RULE_DETAILS_FILTER_CONTROLS_STORAGE_KEY,
 } from '../../alerts_search_bar/constants';
 
-jest.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => ({
-  UrlSyncedAlertsSearchBar: jest.fn(() => <div data-test-subj="urlSyncedAlertsSearchBar" />),
-}));
+vi.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => {
+      const mocked = {
+      UrlSyncedAlertsSearchBar: vi.fn(() => <div data-test-subj="urlSyncedAlertsSearchBar" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('RuleAlertSearchBar', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('wires rule-details alert search bar props correctly', () => {
-    const onEsQueryChange = jest.fn();
-    const onFilterControlsChange = jest.fn();
-    const onControlApiAvailable = jest.fn();
+    const onEsQueryChange = vi.fn();
+    const onFilterControlsChange = vi.fn();
+    const onControlApiAvailable = vi.fn();
 
     render(
       <RuleAlertSearchBar
@@ -63,13 +68,13 @@ describe('RuleAlertSearchBar', () => {
     render(
       <RuleAlertSearchBar
         ruleTypeId="my.rule.type"
-        onEsQueryChange={jest.fn()}
-        onFilterControlsChange={jest.fn()}
-        onControlApiAvailable={jest.fn()}
+        onEsQueryChange={vi.fn()}
+        onFilterControlsChange={vi.fn()}
+        onControlApiAvailable={vi.fn()}
       />
     );
 
-    const [props] = jest.mocked(UrlSyncedAlertsSearchBar).mock.calls[0];
+    const [props] = vi.mocked(UrlSyncedAlertsSearchBar).mock.calls[0];
     const { defaultFilterControls } = props as unknown as {
       defaultFilterControls: Array<{ field_name: string }>;
     };

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { agentRouteService, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -45,21 +48,24 @@ import {
   seedPolicyManagementUsageEvidence,
 } from './policy_management_package_policy';
 
-jest.mock(
+vi.mock(
   '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy',
-  () => ({
-    indexFleetEndpointPolicy: jest.fn(),
-    deleteIndexedFleetEndpointPolicies: jest.fn(),
-  })
+  () => {
+      const mocked = {
+        indexFleetEndpointPolicy: vi.fn(),
+        deleteIndexedFleetEndpointPolicies: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    }
 );
 
-const createLog = (): jest.Mocked<ToolingLog> =>
+const createLog = (): Mocked<ToolingLog> =>
   ({
-    error: jest.fn(),
-    warning: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
-  } as unknown as jest.Mocked<ToolingLog>);
+    error: vi.fn(),
+    warning: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+  } as unknown as Mocked<ToolingLog>);
 
 const createIndexed = ({
   integrationPolicies,
@@ -143,14 +149,14 @@ const createCompareKbnClient = ({
 }: {
   itemsById: Map<string, ReturnType<typeof createPackagePolicyItem>>;
   persistEnabledByMode: boolean;
-}): { client: KbnClient; request: jest.Mock } => {
+}): { client: KbnClient; request: Mock } => {
   const putBodiesById = new Map<
     string,
     {
       inputs: Array<{ config: { policy: { value: PolicyConfig } } }>;
     }
   >();
-  const request = jest.fn(
+  const request = vi.fn(
     async ({
       method,
       path,
@@ -240,8 +246,8 @@ const createPaidSeedRequest = ({
 }: {
   item?: unknown;
   status?: unknown;
-} = {}): jest.Mock =>
-  jest.fn(async ({ method, path }: { method: string; path: string }) => {
+} = {}): Mock =>
+  vi.fn(async ({ method, path }: { method: string; path: string }) => {
     if (
       method === 'GET' &&
       path === packagePolicyRouteService.getInfoPath(CAPTURED_PACKAGE_POLICY_ID)
@@ -261,8 +267,8 @@ const createPaidSeedRequest = ({
   });
 
 const mockPaidSeedIndex = (indexed: IndexedFleetEndpointPolicyResponse): void => {
-  jest.mocked(indexFleetEndpointPolicy).mockResolvedValue(indexed);
-  jest.mocked(deleteIndexedFleetEndpointPolicies).mockResolvedValue({
+  vi.mocked(indexFleetEndpointPolicy).mockResolvedValue(indexed);
+  vi.mocked(deleteIndexedFleetEndpointPolicies).mockResolvedValue({
     integrationPolicies: undefined,
     agentPolicies: undefined,
   });
@@ -270,8 +276,8 @@ const mockPaidSeedIndex = (indexed: IndexedFleetEndpointPolicyResponse): void =>
 
 describe('policy management package policy fixtures', () => {
   beforeEach(() => {
-    jest.mocked(indexFleetEndpointPolicy).mockReset();
-    jest.mocked(deleteIndexedFleetEndpointPolicies).mockReset();
+    vi.mocked(indexFleetEndpointPolicy).mockReset();
+    vi.mocked(deleteIndexedFleetEndpointPolicies).mockReset();
   });
 
   describe('paid fixture persisted postconditions', () => {
@@ -284,8 +290,8 @@ describe('policy management package policy fixtures', () => {
       error: string;
       item?: unknown;
       status?: unknown;
-      request?: jest.Mock;
-    }): Promise<jest.Mock> => {
+      request?: Mock;
+    }): Promise<Mock> => {
       const indexed = createPaidSeedIndexed();
       mockPaidSeedIndex(indexed);
       const requestFn =
@@ -345,7 +351,7 @@ describe('policy management package policy fixtures', () => {
     });
 
     const mockIndexByName = () => {
-      jest.mocked(indexFleetEndpointPolicy).mockImplementation(async (_client, policyName) => {
+      vi.mocked(indexFleetEndpointPolicy).mockImplementation(async (_client, policyName) => {
         if (policyName === EVAL_PM_COMPARE_PREVENT_PACKAGE_POLICY_NAME) {
           return preventIndexed;
         }
@@ -438,7 +444,7 @@ describe('policy management package policy fixtures', () => {
     });
 
     it('deletes every captured resource when the second side fails after the first indexed', async () => {
-      jest
+      vi
         .mocked(indexFleetEndpointPolicy)
         .mockResolvedValueOnce(preventIndexed)
         .mockRejectedValueOnce(new Error('detect index failed'));
@@ -491,7 +497,7 @@ describe('policy management package policy fixtures', () => {
     };
 
     const mockDuplicateIndexByName = () => {
-      jest.mocked(indexFleetEndpointPolicy).mockImplementation(async (_client, policyName) => {
+      vi.mocked(indexFleetEndpointPolicy).mockImplementation(async (_client, policyName) => {
         if (policyName === EVAL_PM_DUPLICATE_A_PACKAGE_POLICY_NAME) {
           return firstIndexed;
         }
@@ -504,7 +510,7 @@ describe('policy management package policy fixtures', () => {
 
     it('writes identical detect-mode configs on both duplicate sides', async () => {
       mockDuplicateIndexByName();
-      jest.mocked(deleteIndexedFleetEndpointPolicies).mockResolvedValue({
+      vi.mocked(deleteIndexedFleetEndpointPolicies).mockResolvedValue({
         integrationPolicies: undefined,
         agentPolicies: undefined,
       });
@@ -541,7 +547,7 @@ describe('policy management package policy fixtures', () => {
 
     it('indexes enrolled-agent usage evidence against the supplied agent policy', async () => {
       const internalEsClient = {
-        index: jest.fn().mockResolvedValue({}),
+        index: vi.fn().mockResolvedValue({}),
       } as unknown as Client;
 
       const seeded = await seedPolicyManagementUsageEvidence({
@@ -575,7 +581,7 @@ describe('policy management package policy fixtures', () => {
         agentPolicyName: EVAL_PM_COMPARE_DETECT_AGENT_POLICY_NAME,
       });
 
-      jest.mocked(indexFleetEndpointPolicy).mockImplementation(async (_client, policyName) => {
+      vi.mocked(indexFleetEndpointPolicy).mockImplementation(async (_client, policyName) => {
         if (policyName === EVAL_PM_COMPARE_PREVENT_PACKAGE_POLICY_NAME) {
           return preventIndexed;
         }
@@ -590,7 +596,7 @@ describe('policy management package policy fixtures', () => {
         }
         throw new Error(`unexpected package policy name ${policyName}`);
       });
-      jest.mocked(deleteIndexedFleetEndpointPolicies).mockResolvedValue({
+      vi.mocked(deleteIndexedFleetEndpointPolicies).mockResolvedValue({
         integrationPolicies: undefined,
         agentPolicies: undefined,
       });
@@ -619,8 +625,8 @@ describe('policy management package policy fixtures', () => {
         persistEnabledByMode: true,
       });
       const internalEsClient = {
-        index: jest.fn().mockRejectedValue(new Error('usage index failed')),
-        delete: jest.fn().mockResolvedValue({}),
+        index: vi.fn().mockRejectedValue(new Error('usage index failed')),
+        delete: vi.fn().mockResolvedValue({}),
       } as unknown as Client;
 
       await expect(
@@ -635,8 +641,8 @@ describe('policy management package policy fixtures', () => {
         { index: '.fleet-agents', id: EVAL_PM_USED_AGENT_ID, refresh: true },
         { ignore: [404] }
       );
-      expect((internalEsClient.delete as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
-        (deleteIndexedFleetEndpointPolicies as jest.Mock).mock.invocationCallOrder[0]
+      expect((internalEsClient.delete as Mock).mock.invocationCallOrder[0]).toBeLessThan(
+        (deleteIndexedFleetEndpointPolicies as Mock).mock.invocationCallOrder[0]
       );
       expect(deleteIndexedFleetEndpointPolicies).toHaveBeenCalledTimes(4);
     });
@@ -650,7 +656,7 @@ describe('policy management package policy fixtures', () => {
       packagePolicyIds?: string[];
       agentPolicyIds?: string[];
     }) => {
-      const request = jest.fn(async ({ path, method }: { path: string; method: string }) => {
+      const request = vi.fn(async ({ path, method }: { path: string; method: string }) => {
         if (method === 'GET') {
           const isAgentPolicy = path.includes('agent_policies');
           const ids = isAgentPolicy ? agentPolicyIds : packagePolicyIds;
@@ -658,7 +664,7 @@ describe('policy management package policy fixtures', () => {
         }
         return { data: {} };
       });
-      return { request } as unknown as KbnClient & { request: jest.Mock };
+      return { request } as unknown as KbnClient & { request: Mock };
     };
 
     it('deletes leftovers, package policies before agent policies', async () => {
@@ -684,7 +690,7 @@ describe('policy management package policy fixtures', () => {
     });
 
     it('warns and continues when a lookup or delete fails', async () => {
-      const request = jest.fn(async ({ path }: { path: string }) => {
+      const request = vi.fn(async ({ path }: { path: string }) => {
         if (path.includes('agent_policies')) {
           return { data: { items: [] } };
         }

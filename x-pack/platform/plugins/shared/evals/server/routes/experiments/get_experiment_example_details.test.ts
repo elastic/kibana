@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
@@ -27,13 +29,13 @@ describe('GET experiment example repetition details', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    const getSpaceId = jest.fn().mockResolvedValue('space-a');
+    const getSpaceId = vi.fn().mockResolvedValue('space-a');
     registerGetExperimentExampleDetailsRoute({
       router,
       logger,
       canEncrypt: false,
       evaluatorRegistry: createEvaluatorRegistryMock(),
-      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+      getInferenceStart: async () => ({ getClient: vi.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
       getSpaceId,
@@ -44,7 +46,7 @@ describe('GET experiment example repetition details', () => {
     const routeConfig = versionedRouter.get.mock.calls[0][0];
     const { handler } = route.versions[API_VERSIONS.internal.v1];
     const evaluationScoreService = {
-      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+      search: vi.fn().mockResolvedValue({ hits: { hits: [] } }),
     };
     const context = coreMock.createCustomRequestHandlerContext({
       evals: {

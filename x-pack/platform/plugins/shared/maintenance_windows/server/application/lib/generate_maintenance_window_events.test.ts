@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment-timezone';
 import {
   generateMaintenanceWindowEvents,
@@ -14,7 +16,7 @@ import type { MaintenanceWindow } from '../types';
 
 describe('generateMaintenanceWindowEvents', () => {
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
   });
 
   it('should generate events for rrule repeating daily', () => {

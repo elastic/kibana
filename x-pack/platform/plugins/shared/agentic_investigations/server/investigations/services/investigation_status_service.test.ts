@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
@@ -63,7 +65,7 @@ describe('InvestigationStatusService.getPreview', () => {
     proposalListResult: Array<{ id: string; action?: { name?: string }; actionWorkflowId?: string }>
   ) => {
     const proposalsService = {
-      list: jest.fn().mockResolvedValue({
+      list: vi.fn().mockResolvedValue({
         proposals: proposalListResult,
         total: proposalListResult.length,
       }),
@@ -71,17 +73,17 @@ describe('InvestigationStatusService.getPreview', () => {
     const proposals = {
       getProposalsService: () => proposalsService,
       getProposalPrivileges: () => ({
-        assertCanRead: jest.fn().mockResolvedValue(undefined),
-        assertCanManage: jest.fn().mockResolvedValue(undefined),
+        assertCanRead: vi.fn().mockResolvedValue(undefined),
+        assertCanManage: vi.fn().mockResolvedValue(undefined),
       }),
     };
     const client = {
-      get: jest.fn().mockResolvedValue(MOCK_CONVERSATION),
-      patchMetadata: jest.fn(),
+      get: vi.fn().mockResolvedValue(MOCK_CONVERSATION),
+      patchMetadata: vi.fn(),
     };
-    const getConversationClient = jest.fn().mockResolvedValue(client);
-    const getProposals = jest.fn().mockReturnValue(proposals);
-    const getSpaceId = jest.fn().mockReturnValue(SPACE_ID);
+    const getConversationClient = vi.fn().mockResolvedValue(client);
+    const getProposals = vi.fn().mockReturnValue(proposals);
+    const getSpaceId = vi.fn().mockReturnValue(SPACE_ID);
 
     const service = new InvestigationStatusService({
       getConversationClient,
@@ -134,27 +136,27 @@ describe('InvestigationStatusService.getPreview', () => {
 describe('InvestigationStatusService.setStatus — expected_proposal_ids', () => {
   const makeService = (pendingIds: string[]) => {
     const proposalsService = {
-      list: jest.fn().mockResolvedValue({
+      list: vi.fn().mockResolvedValue({
         proposals: pendingIds.map((id) => ({ id })),
         total: pendingIds.length,
       }),
-      releaseGate: jest.fn().mockResolvedValue({}),
+      releaseGate: vi.fn().mockResolvedValue({}),
     };
     const proposals = {
       getProposalsService: () => proposalsService,
       getProposalPrivileges: () => ({
-        assertCanRead: jest.fn().mockResolvedValue(undefined),
-        assertCanManage: jest.fn().mockResolvedValue(undefined),
+        assertCanRead: vi.fn().mockResolvedValue(undefined),
+        assertCanManage: vi.fn().mockResolvedValue(undefined),
       }),
     };
     const client = {
-      get: jest.fn().mockResolvedValue(MOCK_CONVERSATION),
-      patchMetadata: jest.fn().mockResolvedValue({ conversation: MOCK_CONVERSATION }),
+      get: vi.fn().mockResolvedValue(MOCK_CONVERSATION),
+      patchMetadata: vi.fn().mockResolvedValue({ conversation: MOCK_CONVERSATION }),
     };
     const service = new InvestigationStatusService({
-      getConversationClient: jest.fn().mockResolvedValue(client),
-      getProposals: jest.fn().mockReturnValue(proposals),
-      getSpaceId: jest.fn().mockReturnValue(SPACE_ID),
+      getConversationClient: vi.fn().mockResolvedValue(client),
+      getProposals: vi.fn().mockReturnValue(proposals),
+      getSpaceId: vi.fn().mockReturnValue(SPACE_ID),
       logger,
     });
     return { service, proposalsService, client };
@@ -209,7 +211,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     /** What proposalsService.get returns (for the conflict re-read path) */
     getProposalResult?: { decision?: string; status: string; expired: boolean } | Error;
   }) => {
-    const releaseGate = jest
+    const releaseGate = vi
       .fn()
       .mockImplementationOnce(() =>
         releaseGateSideEffect === 'success'
@@ -219,7 +221,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
       // Second call (retry) always succeeds unless explicitly made to fail.
       .mockResolvedValue({});
 
-    const get = jest.fn().mockImplementation(() => {
+    const get = vi.fn().mockImplementation(() => {
       if (!getProposalResult)
         return Promise.resolve({ decision: 'dismissed', status: 'decided', expired: false });
       if (getProposalResult instanceof Error) return Promise.reject(getProposalResult);
@@ -227,25 +229,25 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     });
 
     const proposalsService = {
-      list: jest.fn().mockResolvedValue({ proposals: [{ id: 'p-1' }], total: 1 }),
+      list: vi.fn().mockResolvedValue({ proposals: [{ id: 'p-1' }], total: 1 }),
       releaseGate,
       get,
     };
     const proposals = {
       getProposalsService: () => proposalsService,
       getProposalPrivileges: () => ({
-        assertCanRead: jest.fn().mockResolvedValue(undefined),
-        assertCanManage: jest.fn().mockResolvedValue(undefined),
+        assertCanRead: vi.fn().mockResolvedValue(undefined),
+        assertCanManage: vi.fn().mockResolvedValue(undefined),
       }),
     };
     const client = {
-      get: jest.fn().mockResolvedValue(MOCK_CONVERSATION),
-      patchMetadata: jest.fn().mockResolvedValue({ conversation: MOCK_CONVERSATION }),
+      get: vi.fn().mockResolvedValue(MOCK_CONVERSATION),
+      patchMetadata: vi.fn().mockResolvedValue({ conversation: MOCK_CONVERSATION }),
     };
     const service = new InvestigationStatusService({
-      getConversationClient: jest.fn().mockResolvedValue(client),
-      getProposals: jest.fn().mockReturnValue(proposals),
-      getSpaceId: jest.fn().mockReturnValue(SPACE_ID),
+      getConversationClient: vi.fn().mockResolvedValue(client),
+      getProposals: vi.fn().mockReturnValue(proposals),
+      getSpaceId: vi.fn().mockReturnValue(SPACE_ID),
       logger,
     });
     return { service, releaseGate, get, patchMetadata: client.patchMetadata };
@@ -297,25 +299,25 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     const retryErr = new Error('still failing');
 
     const proposalsService = {
-      list: jest.fn().mockResolvedValue({ proposals: [{ id: 'p-1' }], total: 1 }),
-      releaseGate: jest.fn().mockRejectedValueOnce(conflictErr).mockRejectedValueOnce(retryErr),
-      get: jest.fn().mockResolvedValue({ decision: undefined, status: 'pending', expired: false }),
+      list: vi.fn().mockResolvedValue({ proposals: [{ id: 'p-1' }], total: 1 }),
+      releaseGate: vi.fn().mockRejectedValueOnce(conflictErr).mockRejectedValueOnce(retryErr),
+      get: vi.fn().mockResolvedValue({ decision: undefined, status: 'pending', expired: false }),
     };
     const proposals = {
       getProposalsService: () => proposalsService,
       getProposalPrivileges: () => ({
-        assertCanRead: jest.fn().mockResolvedValue(undefined),
-        assertCanManage: jest.fn().mockResolvedValue(undefined),
+        assertCanRead: vi.fn().mockResolvedValue(undefined),
+        assertCanManage: vi.fn().mockResolvedValue(undefined),
       }),
     };
     const client = {
-      get: jest.fn().mockResolvedValue(MOCK_CONVERSATION),
-      patchMetadata: jest.fn(),
+      get: vi.fn().mockResolvedValue(MOCK_CONVERSATION),
+      patchMetadata: vi.fn(),
     };
     const service = new InvestigationStatusService({
-      getConversationClient: jest.fn().mockResolvedValue(client),
-      getProposals: jest.fn().mockReturnValue(proposals),
-      getSpaceId: jest.fn().mockReturnValue(SPACE_ID),
+      getConversationClient: vi.fn().mockResolvedValue(client),
+      getProposals: vi.fn().mockReturnValue(proposals),
+      getSpaceId: vi.fn().mockReturnValue(SPACE_ID),
       logger,
     });
 

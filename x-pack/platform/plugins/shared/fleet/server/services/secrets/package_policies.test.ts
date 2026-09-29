@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import { v4 as uuidv4 } from 'uuid';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { fromKueryExpression } from '@kbn/es-query';
@@ -28,18 +31,21 @@ import {
   deleteSecretsIfNotReferenced,
 } from './package_policies';
 
-jest.mock('../package_policy');
-jest.mock('./fleet_policies', () => ({
-  findFleetPoliciesUsingSecrets: jest
-    .fn()
-    .mockResolvedValue({ referencedIds: new Set(), checkFailed: false }),
-}));
+vi.mock('../package_policy');
+vi.mock('./fleet_policies', () => {
+      const mocked = {
+      findFleetPoliciesUsingSecrets: vi
+        .fn()
+        .mockResolvedValue({ referencedIds: new Set(), checkFailed: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
+const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
 
 import { findFleetPoliciesUsingSecrets } from './fleet_policies';
 
-const mockedFindFleetPolicies = findFleetPoliciesUsingSecrets as jest.MockedFunction<
+const mockedFindFleetPolicies = findFleetPoliciesUsingSecrets as MockedFunction<
   typeof findFleetPoliciesUsingSecrets
 >;
 
@@ -2151,7 +2157,7 @@ describe('Package policy secrets', () => {
         agentPolicyIds: ['agent-policy-1'],
       });
 
-      const debugCalls: string[] = (mockContract.logger.debug as jest.Mock).mock.calls.map(
+      const debugCalls: string[] = (mockContract.logger.debug as Mock).mock.calls.map(
         (args: unknown[]) => String(args[0])
       );
       expect(debugCalls.some((msg) => msg.includes('candidate'))).toBe(true);

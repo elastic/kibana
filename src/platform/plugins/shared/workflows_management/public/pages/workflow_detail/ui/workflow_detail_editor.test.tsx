@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
@@ -32,34 +35,52 @@ import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_
 import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock hooks
-const mockUseKibana = jest.fn();
-const mockUseUiSetting$ = jest.fn();
-const mockUseWorkflowUrlState = jest.fn();
-const mockUseWorkflowActions = jest.fn();
-const mockUseSelector = jest.fn();
-const mockUseParams = jest.fn();
+const mockUseKibana = vi.fn();
+const mockUseUiSetting$ = vi.fn();
+const mockUseWorkflowUrlState = vi.fn();
+const mockUseWorkflowActions = vi.fn();
+const mockUseSelector = vi.fn();
+const mockUseParams = vi.fn();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => mockUseKibana(),
-  useUiSetting$: (key: string, defaultValue: boolean) => mockUseUiSetting$(key, defaultValue),
-}));
-jest.mock('../../../hooks/use_workflow_url_state', () => ({
-  useWorkflowUrlState: () => mockUseWorkflowUrlState(),
-}));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => mockUseParams(),
-}));
-jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({
-  useWorkflowActions: () => mockUseWorkflowActions(),
-}));
-jest.mock('../../../entities/connectors/model/use_available_connectors', () => ({
-  useFetchConnector: () => jest.fn(() => ({ data: undefined, isLoading: false })),
-}));
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useSelector: (selector: any) => mockUseSelector(selector),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => mockUseKibana(),
+      useUiSetting$: (key: string, defaultValue: boolean) => mockUseUiSetting$(key, defaultValue),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_workflow_url_state', () => {
+      const mocked = {
+      useWorkflowUrlState: () => mockUseWorkflowUrlState(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: () => mockUseParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../entities/workflows/model/use_workflow_actions', () => {
+      const mocked = {
+      useWorkflowActions: () => mockUseWorkflowActions(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../entities/connectors/model/use_available_connectors', () => {
+      const mocked = {
+      useFetchConnector: () => vi.fn(() => ({ data: undefined, isLoading: false })),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useSelector: (selector: any) => mockUseSelector(selector),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock lazy loaded components
 const WorkflowYAMLEditorMock = ({
@@ -92,48 +113,69 @@ const WorkflowYAMLEditorMock = ({
   );
 };
 
-jest.mock('../../../widgets/workflow_yaml_editor/ui/workflow_yaml_editor', () => ({
-  WorkflowYAMLEditor: WorkflowYAMLEditorMock,
-}));
+vi.mock('../../../widgets/workflow_yaml_editor/ui/workflow_yaml_editor', () => {
+      const mocked = {
+      WorkflowYAMLEditor: WorkflowYAMLEditorMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../widgets/workflow_yaml_editor', () => ({
-  WorkflowYAMLEditor: WorkflowYAMLEditorMock,
-}));
+vi.mock('../../../widgets/workflow_yaml_editor', () => {
+      const mocked = {
+      WorkflowYAMLEditor: WorkflowYAMLEditorMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../features/workflow_visual_editor', () => ({
-  WorkflowVisualEditor: () => (
-    <div data-test-subj="workflow-visual-editor">
-      <div data-test-subj="visual-editor-content">{'Visual Editor'}</div>
-    </div>
-  ),
-}));
+vi.mock('../../../features/workflow_visual_editor', () => {
+      const mocked = {
+      WorkflowVisualEditor: () => (
+        <div data-test-subj="workflow-visual-editor">
+          <div data-test-subj="visual-editor-content">{'Visual Editor'}</div>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../features/debug_graph/execution_graph', () => ({
-  ExecutionGraph: () => (
-    <div data-test-subj="execution-graph">
-      <div data-test-subj="execution-graph-content">{'Execution Graph'}</div>
-    </div>
-  ),
-}));
+vi.mock('../../../features/debug_graph/execution_graph', () => {
+      const mocked = {
+      ExecutionGraph: () => (
+        <div data-test-subj="execution-graph">
+          <div data-test-subj="execution-graph-content">{'Execution Graph'}</div>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseContextOverrideData = jest.fn((stepId: string) => ({
+const mockUseContextOverrideData = vi.fn((stepId: string) => ({
   stepContext: { mockKey: 'mockValue' },
   schema: {},
 }));
-jest.mock('./use_context_override_data', () => ({
-  useContextOverrideData: () => mockUseContextOverrideData,
-}));
+vi.mock('./use_context_override_data', () => {
+      const mocked = {
+      useContextOverrideData: () => mockUseContextOverrideData,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
-  useWorkflowsExperimentalUiSetting: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../hooks/use_workflows_experimental_ui_setting', () => {
+      const mocked = {
+      useWorkflowsExperimentalUiSetting: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: jest.fn(),
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      useWorkflowsCapabilities: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
 >;
 
@@ -196,14 +238,14 @@ describe('WorkflowDetailEditor', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
     mockUseParams.mockReturnValue({ id: 'workflow-1' });
 
     mockUseKibana.mockReturnValue({
       services: {
-        notifications: { toasts: { addError: jest.fn() } },
+        notifications: { toasts: { addError: vi.fn() } },
       },
     });
 
@@ -212,7 +254,7 @@ describe('WorkflowDetailEditor', () => {
       return [defaultValue];
     });
     // Reset to the default (disabled) after each test that may have overridden it.
-    (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(false);
+    (useWorkflowsExperimentalUiSetting as Mock).mockReturnValue(false);
 
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow',
@@ -222,19 +264,19 @@ describe('WorkflowDetailEditor', () => {
       selectedStepExecutionId: null,
       selectedStepId: null,
       shouldAutoResume: false,
-      setActiveTab: jest.fn(),
-      setEditorView: jest.fn(),
-      setGraphDirection: jest.fn(),
-      setSelectedExecution: jest.fn(),
-      setSelectedStepExecution: jest.fn(),
-      setSelectedStep: jest.fn(),
-      updateUrlState: jest.fn(),
-      clearResumeParam: jest.fn(),
+      setActiveTab: vi.fn(),
+      setEditorView: vi.fn(),
+      setGraphDirection: vi.fn(),
+      setSelectedExecution: vi.fn(),
+      setSelectedStepExecution: vi.fn(),
+      setSelectedStep: vi.fn(),
+      updateUrlState: vi.fn(),
+      clearResumeParam: vi.fn(),
     });
 
     mockUseWorkflowActions.mockReturnValue({
       runIndividualStep: {
-        mutateAsync: jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-123' }),
+        mutateAsync: vi.fn().mockResolvedValue({ workflowExecutionId: 'exec-123' }),
       },
     });
 
@@ -279,7 +321,7 @@ describe('WorkflowDetailEditor', () => {
     });
 
     it('hides the bottom-bar actions menu on the executions tab', () => {
-      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+      (useWorkflowsExperimentalUiSetting as Mock).mockReturnValue(true);
       mockUseWorkflowUrlState.mockReturnValue({
         ...mockUseWorkflowUrlState(),
         activeTab: 'executions',
@@ -341,7 +383,7 @@ describe('WorkflowDetailEditor', () => {
       const store = mockStore();
 
       // Enable the visual editor so handleEditorViewChange runs the graph-focus logic.
-      (useWorkflowsExperimentalUiSetting as jest.Mock).mockImplementation(
+      (useWorkflowsExperimentalUiSetting as Mock).mockImplementation(
         (settingId: string) => settingId === 'workflows:experimentalFeatures'
       );
 
@@ -370,7 +412,7 @@ describe('WorkflowDetailEditor', () => {
     it('highlights step when focusedStepId is set in Redux state', async () => {
       const store = mockStore();
 
-      (useWorkflowsExperimentalUiSetting as jest.Mock).mockImplementation(
+      (useWorkflowsExperimentalUiSetting as Mock).mockImplementation(
         (settingId: string) => settingId === 'workflows:experimentalFeatures'
       );
 
@@ -399,7 +441,7 @@ describe('WorkflowDetailEditor', () => {
   describe('peer rendering — item 6 (bodyOverride decoupling)', () => {
     it('renders WorkflowYAMLEditor without bodyOverride or hideEditorBody props', async () => {
       // Enable the visual editor so graph-related props could theoretically be passed
-      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+      (useWorkflowsExperimentalUiSetting as Mock).mockReturnValue(true);
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'workflow',
         editorView: 'yaml', // YAML view
@@ -408,14 +450,14 @@ describe('WorkflowDetailEditor', () => {
         selectedStepExecutionId: null,
         selectedStepId: null,
         shouldAutoResume: false,
-        setActiveTab: jest.fn(),
-        setEditorView: jest.fn(),
-        setGraphDirection: jest.fn(),
-        setSelectedExecution: jest.fn(),
-        setSelectedStepExecution: jest.fn(),
-        setSelectedStep: jest.fn(),
-        updateUrlState: jest.fn(),
-        clearResumeParam: jest.fn(),
+        setActiveTab: vi.fn(),
+        setEditorView: vi.fn(),
+        setGraphDirection: vi.fn(),
+        setSelectedExecution: vi.fn(),
+        setSelectedStepExecution: vi.fn(),
+        setSelectedStep: vi.fn(),
+        updateUrlState: vi.fn(),
+        clearResumeParam: vi.fn(),
       });
 
       const { findByTestId } = renderEditor();
@@ -426,7 +468,7 @@ describe('WorkflowDetailEditor', () => {
     });
 
     it('renders the visual editor and read-only badge in graph view', async () => {
-      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+      (useWorkflowsExperimentalUiSetting as Mock).mockReturnValue(true);
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'workflow',
         editorView: 'graph', // Graph view
@@ -435,14 +477,14 @@ describe('WorkflowDetailEditor', () => {
         selectedStepExecutionId: null,
         selectedStepId: null,
         shouldAutoResume: false,
-        setActiveTab: jest.fn(),
-        setEditorView: jest.fn(),
-        setGraphDirection: jest.fn(),
-        setSelectedExecution: jest.fn(),
-        setSelectedStepExecution: jest.fn(),
-        setSelectedStep: jest.fn(),
-        updateUrlState: jest.fn(),
-        clearResumeParam: jest.fn(),
+        setActiveTab: vi.fn(),
+        setEditorView: vi.fn(),
+        setGraphDirection: vi.fn(),
+        setSelectedExecution: vi.fn(),
+        setSelectedStepExecution: vi.fn(),
+        setSelectedStep: vi.fn(),
+        updateUrlState: vi.fn(),
+        clearResumeParam: vi.fn(),
       });
       mockUseSelector.mockImplementation((selector: any) => {
         if (selector === selectWorkflow) return { managed: true };
@@ -478,7 +520,7 @@ describe('WorkflowDetailEditor', () => {
     it('should show toast error when immediate step run (no modal) fails', async () => {
       mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} } as any);
 
-      const mockMutateAsync = jest.fn().mockRejectedValue(new Error('Failed to run step'));
+      const mockMutateAsync = vi.fn().mockRejectedValue(new Error('Failed to run step'));
       mockUseWorkflowActions.mockReturnValue({
         runIndividualStep: { mutateAsync: mockMutateAsync },
       });
@@ -506,7 +548,7 @@ describe('WorkflowDetailEditor', () => {
       // the execution snapshot the graph is currently showing.
       mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} } as any);
 
-      const mockMutateAsync = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-123' });
+      const mockMutateAsync = vi.fn().mockResolvedValue({ workflowExecutionId: 'exec-123' });
       mockUseWorkflowActions.mockReturnValue({
         runIndividualStep: { mutateAsync: mockMutateAsync },
       });
@@ -536,7 +578,7 @@ describe('WorkflowDetailEditor', () => {
         schema: {},
       } as any);
 
-      const mockMutateAsync = jest.fn();
+      const mockMutateAsync = vi.fn();
       mockUseWorkflowActions.mockReturnValue({
         runIndividualStep: { mutateAsync: mockMutateAsync },
       });

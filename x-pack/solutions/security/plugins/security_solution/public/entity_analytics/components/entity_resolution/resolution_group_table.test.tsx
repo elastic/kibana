@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -76,8 +78,8 @@ describe('ResolutionGroupTable', () => {
   });
 
   it('shows actions as leading column with expand and delete buttons', () => {
-    const onRemove = jest.fn();
-    const onExpand = jest.fn();
+    const onRemove = vi.fn();
+    const onExpand = vi.fn();
     const { getAllByLabelText, container } = render(
       <TestProviders>
         <ResolutionGroupTable
@@ -103,7 +105,7 @@ describe('ResolutionGroupTable', () => {
   });
 
   it('calls onRemoveEntity when delete button clicked on alias', () => {
-    const onRemove = jest.fn();
+    const onRemove = vi.fn();
     const { getAllByLabelText } = render(
       <TestProviders>
         <ResolutionGroupTable
@@ -124,7 +126,7 @@ describe('ResolutionGroupTable', () => {
   });
 
   it('disables expand button for current entity', () => {
-    const onExpand = jest.fn();
+    const onExpand = vi.fn();
     const { getAllByLabelText } = render(
       <TestProviders>
         <ResolutionGroupTable
@@ -144,7 +146,7 @@ describe('ResolutionGroupTable', () => {
   });
 
   it('does not render name links when showActions is true', () => {
-    const onExpand = jest.fn();
+    const onExpand = vi.fn();
     const { getByText } = render(
       <TestProviders>
         <ResolutionGroupTable
@@ -162,7 +164,7 @@ describe('ResolutionGroupTable', () => {
   });
 
   it('renders entity names as links when onEntityNameClick provided without showActions', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     const { getByText } = render(
       <TestProviders>
         <ResolutionGroupTable

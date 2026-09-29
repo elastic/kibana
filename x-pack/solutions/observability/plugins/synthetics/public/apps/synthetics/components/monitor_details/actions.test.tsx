@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Actions } from './actions';
@@ -13,47 +16,59 @@ import { useParams, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: jest.fn(),
-  useLocation: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: vi.fn(),
+      useLocation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useDispatch: jest.fn(),
-  useSelector: jest.fn(),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useDispatch: vi.fn(),
+      useSelector: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./hooks/use_selected_monitor', () => ({
-  useSelectedMonitor: jest.fn(),
-}));
+vi.mock('./hooks/use_selected_monitor', () => {
+      const mocked = {
+      useSelectedMonitor: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Actions Component', () => {
-  let mockDispatch: jest.Mock;
+  let mockDispatch: Mock;
 
   beforeEach(() => {
-    mockDispatch = jest.fn();
+    mockDispatch = vi.fn();
 
-    (useDispatch as jest.Mock).mockReturnValue(mockDispatch);
-    (useSelector as jest.Mock).mockReturnValue([]);
-    (useParams as jest.Mock).mockReturnValue({ monitorId: 'test-monitor-id' });
-    (useLocation as jest.Mock).mockReturnValue({ search: '?test=true' });
-    (useSelectedMonitor as jest.Mock).mockReturnValue({
+    (useDispatch as Mock).mockReturnValue(mockDispatch);
+    (useSelector as Mock).mockReturnValue([]);
+    (useParams as Mock).mockReturnValue({ monitorId: 'test-monitor-id' });
+    (useLocation as Mock).mockReturnValue({ search: '?test=true' });
+    (useSelectedMonitor as Mock).mockReturnValue({
       monitor: null,
       loading: false,
       error: null,
       isMonitorMissing: false,
     });
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
         notifications: {
           toasts: {
-            addDanger: jest.fn(),
+            addDanger: vi.fn(),
           },
         },
         observabilityShared: {
@@ -65,20 +80,20 @@ describe('Actions Component', () => {
         },
         cases: {
           ui: {
-            getCasesContext: jest.fn(() => ({ children }: { children: React.ReactNode }) => (
+            getCasesContext: vi.fn(() => ({ children }: { children: React.ReactNode }) => (
               <div>{children}</div>
             )),
           },
           helpers: {
-            canUseCases: jest.fn(() => ({
+            canUseCases: vi.fn(() => ({
               read: true,
               update: true,
               push: true,
             })),
           },
           hooks: {
-            useCasesAddToExistingCaseModal: jest.fn(() => ({
-              open: jest.fn(),
+            useCasesAddToExistingCaseModal: vi.fn(() => ({
+              open: vi.fn(),
             })),
           },
         },
@@ -98,7 +113,7 @@ describe('Actions Component', () => {
 
   describe('remote (CCS) monitor', () => {
     beforeEach(() => {
-      (useLocation as jest.Mock).mockReturnValue({ search: '?remoteName=cluster-1' });
+      (useLocation as Mock).mockReturnValue({ search: '?remoteName=cluster-1' });
     });
 
     it('disables Run test manually', () => {
@@ -119,7 +134,7 @@ describe('Actions Component', () => {
 
     describe('Edit monitor', () => {
       it('redirects to the remote cluster when kibanaUrl is known', () => {
-        (useSelectedMonitor as jest.Mock).mockReturnValue({
+        (useSelectedMonitor as Mock).mockReturnValue({
           monitor: {
             config_id: 'test-monitor-id',
             remote: { remoteName: 'cluster-1', kibanaUrl: 'https://remote.example.com' },
@@ -142,7 +157,7 @@ describe('Actions Component', () => {
       });
 
       it('renders disabled with a kibanaUrl-missing tooltip when remote.kibanaUrl is missing', () => {
-        (useSelectedMonitor as jest.Mock).mockReturnValue({
+        (useSelectedMonitor as Mock).mockReturnValue({
           monitor: {
             config_id: 'test-monitor-id',
             remote: { remoteName: 'cluster-1' },
@@ -163,7 +178,7 @@ describe('Actions Component', () => {
       it('renders disabled when the remote monitor is not yet resolved', () => {
         // `useSelectedMonitor` returns `null` while the CCS lookup is in-flight,
         // so we treat the URL as missing and disable the item.
-        (useSelectedMonitor as jest.Mock).mockReturnValue({
+        (useSelectedMonitor as Mock).mockReturnValue({
           monitor: null,
           loading: true,
           error: null,
@@ -182,7 +197,7 @@ describe('Actions Component', () => {
     beforeEach(() => {
       // No remoteName in the URL — heartbeat is detected from the resolved
       // monitor shape (origin === 'heartbeat'), not a URL param.
-      (useSelectedMonitor as jest.Mock).mockReturnValue({
+      (useSelectedMonitor as Mock).mockReturnValue({
         monitor: {
           config_id: 'test-monitor-id',
           name: 'Autodiscovered monitor',

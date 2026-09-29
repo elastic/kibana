@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor } from '@testing-library/react';
 
 import {
@@ -20,13 +22,16 @@ import { useCopyPackagePolicyData } from './use_copy_package_policy_data';
 
 // Mock the leaf `use_request` module (like the edit hook test) so the real inverse mapper
 // (`agentlessPolicyToPackagePolicy`) still runs against the nginx fixture below.
-jest.mock('../../../../../../hooks/use_request', () => ({
-  ...jest.requireActual('../../../../../../hooks/use_request'),
-  useGetOnePackagePolicyQuery: jest.fn(),
-  sendGetAgentlessPolicy: jest.fn(),
-  sendGetPackageInfoByKeyForRq: jest.fn(),
-  sendGetSettings: jest.fn(),
-}));
+vi.mock('../../../../../../hooks/use_request', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../../hooks/use_request')),
+      useGetOnePackagePolicyQuery: vi.fn(),
+      sendGetAgentlessPolicy: vi.fn(),
+      sendGetPackageInfoByKeyForRq: vi.fn(),
+      sendGetSettings: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useCopyPackagePolicyData', () => {
   const agentlessPolicy = {
@@ -38,17 +43,17 @@ describe('useCopyPackagePolicyData', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest
+    vi.clearAllMocks();
+    vi
       .mocked(useGetOnePackagePolicyQuery)
       .mockReturnValue({ data: undefined, isLoading: false } as any);
-    jest
+    vi
       .mocked(sendGetSettings)
       .mockResolvedValue({ data: { item: { prerelease_integrations_enabled: false } } } as any);
   });
 
   it('reads the package policy directly for a traditional copy', async () => {
-    jest.mocked(useGetOnePackagePolicyQuery).mockReturnValue({
+    vi.mocked(useGetOnePackagePolicyQuery).mockReturnValue({
       data: { item: { id: 'pp-1', name: 'pp' } },
       isLoading: false,
     } as any);
@@ -66,8 +71,8 @@ describe('useCopyPackagePolicyData', () => {
   });
 
   it('hydrates an agentless copy through the agentless API and inverse mapper', async () => {
-    jest.mocked(sendGetAgentlessPolicy).mockResolvedValue({ item: agentlessPolicy } as any);
-    jest.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({ item: nginxPackageInfo } as any);
+    vi.mocked(sendGetAgentlessPolicy).mockResolvedValue({ item: agentlessPolicy } as any);
+    vi.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({ item: nginxPackageInfo } as any);
 
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() =>
@@ -92,9 +97,9 @@ describe('useCopyPackagePolicyData', () => {
   });
 
   it('hydrates with prerelease enabled when the setting is on', async () => {
-    jest.mocked(sendGetAgentlessPolicy).mockResolvedValue({ item: agentlessPolicy } as any);
-    jest.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({ item: nginxPackageInfo } as any);
-    jest
+    vi.mocked(sendGetAgentlessPolicy).mockResolvedValue({ item: agentlessPolicy } as any);
+    vi.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({ item: nginxPackageInfo } as any);
+    vi
       .mocked(sendGetSettings)
       .mockResolvedValue({ data: { item: { prerelease_integrations_enabled: true } } } as any);
 
@@ -113,7 +118,7 @@ describe('useCopyPackagePolicyData', () => {
   });
 
   it('surfaces the error (no item, not loading) when the agentless read fails', async () => {
-    jest.mocked(sendGetAgentlessPolicy).mockRejectedValue(new Error('boom'));
+    vi.mocked(sendGetAgentlessPolicy).mockRejectedValue(new Error('boom'));
 
     // Use a distinct id so this doesn't hit the react-query cache from the success case above.
     const renderer = createFleetTestRendererMock();

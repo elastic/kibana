@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { DynamicStructuredTool } from '@langchain/core/tools';
 import { ENTITY_RISK_SCORE_TOOL } from './entity_risk_score';
 import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
@@ -54,20 +56,26 @@ const mockAlerts = {
   },
 };
 
-const mockGetRiskScores = jest.fn().mockResolvedValue(undefined);
-const mockGetAlertsById = jest.fn().mockResolvedValue(undefined);
-jest.mock('../../../lib/entity_analytics/risk_score/get_risk_score', () => ({
-  createGetRiskScores: () => (params: unknown) => mockGetRiskScores(params),
-}));
+const mockGetRiskScores = vi.fn().mockResolvedValue(undefined);
+const mockGetAlertsById = vi.fn().mockResolvedValue(undefined);
+vi.mock('../../../lib/entity_analytics/risk_score/get_risk_score', () => {
+      const mocked = {
+      createGetRiskScores: () => (params: unknown) => mockGetRiskScores(params),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./get_alert_by_id', () => ({
-  createGetAlertsById: () => () => mockGetAlertsById(),
-}));
+vi.mock('./get_alert_by_id', () => {
+      const mocked = {
+      createGetAlertsById: () => () => mockGetAlertsById(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('ENTITY_RISK_SCORE_TOOL', () => {
   const alertsIndexPattern = 'alerts-index';
   const esClient = {
-    search: jest.fn().mockResolvedValue({}),
+    search: vi.fn().mockResolvedValue({}),
   } as unknown as ElasticsearchClient;
   const replacements = { key: 'value' };
   const anonymizationFields = [
@@ -94,11 +102,11 @@ describe('ENTITY_RISK_SCORE_TOOL', () => {
   const logger = loggerMock.create();
   const contentReferencesStore = newContentReferencesStoreMock();
   const assistantContext = {
-    getSpaceId: jest.fn().mockReturnValue('default'),
+    getSpaceId: vi.fn().mockReturnValue('default'),
   } as unknown as ElasticAssistantApiRequestHandlerContext;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const defaultParams: AssistantToolParams = {
@@ -111,7 +119,7 @@ describe('ENTITY_RISK_SCORE_TOOL', () => {
     assistantContext,
     size: 20,
     anonymizationFields,
-    onNewReplacements: jest.fn(),
+    onNewReplacements: vi.fn(),
   };
 
   describe('isSupported', () => {

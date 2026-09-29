@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -21,7 +24,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
 import { generateId } from '../../id_generator';
-jest.mock('../../id_generator');
+vi.mock('../../id_generator');
 
 const fieldsOne = [
   {
@@ -75,8 +78,8 @@ const expectedIndexPatterns = {
     timeFieldName: 'timestamp',
     hasRestrictions: false,
     fields: fieldsOne,
-    getFieldByName: jest.fn(),
-    getFormatterForField: jest.fn(),
+    getFieldByName: vi.fn(),
+    getFormatterForField: vi.fn(),
     spec: {},
     isPersisted: true,
   },
@@ -376,7 +379,7 @@ describe('Textbased Data Source', () => {
           layerId: 'a',
           groupId: 'groupId',
           columnId: 'col1',
-          filterOperations: jest.fn(),
+          filterOperations: vi.fn(),
         },
         state: baseState,
         indexPatterns,
@@ -400,7 +403,7 @@ describe('Textbased Data Source', () => {
           layerId: 'a',
           groupId: 'groupId',
           columnId: 'col1',
-          filterOperations: jest.fn(),
+          filterOperations: vi.fn(),
           isMetricDimension: true,
         },
         source: {
@@ -487,7 +490,7 @@ describe('Textbased Data Source', () => {
             },
           },
         ],
-        getDimensionGroups: jest.fn(),
+        getDimensionGroups: vi.fn(),
         indexPatterns: {},
       });
 
@@ -552,7 +555,7 @@ describe('Textbased Data Source', () => {
             },
           },
         ],
-        getDimensionGroups: jest.fn(),
+        getDimensionGroups: vi.fn(),
         indexPatterns: {},
       });
 
@@ -718,7 +721,7 @@ describe('Textbased Data Source', () => {
   });
 
   describe('#getDatasourceSuggestionsForVisualizeField', () => {
-    (generateId as jest.Mock).mockReturnValue(`newid`);
+    (generateId as Mock).mockReturnValue(`newid`);
     it('should create the correct layers', () => {
       const textBasedQueryColumns = [
         {

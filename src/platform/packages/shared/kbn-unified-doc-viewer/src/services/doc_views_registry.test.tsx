@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { DocViewsRegistry } from './doc_views_registry';
 
 const docView1 = {
   id: 'doc-view-1',
   order: 10,
   title: 'Render function',
-  render: jest.fn(),
+  render: vi.fn(),
 };
 
 const docView2 = {
   id: 'doc-view-2',
   order: 20,
   title: 'Render function',
-  render: jest.fn(),
+  render: vi.fn(),
 };
 
 describe('DocViewerRegistry', () => {
@@ -117,7 +119,7 @@ describe('DocViewerRegistry', () => {
         id: 'additional-doc-view',
         order: 30,
         title: 'Render function',
-        render: jest.fn(),
+        render: vi.fn(),
       });
 
       expect(registry.getAll().length).toBe(2);

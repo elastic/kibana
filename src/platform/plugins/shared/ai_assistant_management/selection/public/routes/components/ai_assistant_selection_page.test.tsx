@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
@@ -16,11 +19,11 @@ import { AiAssistantSelectionPage } from './ai_assistant_selection_page';
 import { useAppContext } from '../../app_context';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('../../app_context');
+vi.mock('../../app_context');
 
 describe('AiAssistantSelectionPage', () => {
-  const setBreadcrumbs = jest.fn();
-  const navigateToApp = jest.fn();
+  const setBreadcrumbs = vi.fn();
+  const navigateToApp = vi.fn();
 
   const generateMockCapabilities = (hasPermission: boolean) =>
     ({
@@ -41,7 +44,7 @@ describe('AiAssistantSelectionPage', () => {
     capabilities: CoreStart['application']['capabilities'],
     securityAIAssistantEnabled = true
   ) => {
-    (useAppContext as jest.Mock).mockReturnValue({
+    (useAppContext as Mock).mockReturnValue({
       capabilities,
       setBreadcrumbs,
       navigateToApp,
@@ -56,7 +59,7 @@ describe('AiAssistantSelectionPage', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('sets the breadcrumbs on mount', () => {

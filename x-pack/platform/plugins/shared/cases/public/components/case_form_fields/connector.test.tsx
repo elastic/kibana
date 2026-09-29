@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,9 +22,9 @@ import { FormTestComponent } from '../../common/test_utils';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { coreMock } from '@kbn/core/public/mocks';
 
-jest.mock('../connectors/servicenow/use_get_choices');
+vi.mock('../connectors/servicenow/use_get_choices');
 
-const useGetChoicesMock = useGetChoices as jest.Mock;
+const useGetChoicesMock = useGetChoices as Mock;
 
 const useGetChoicesResponse = {
   isLoading: false,
@@ -36,7 +39,7 @@ const defaultProps = {
 
 describe('Connector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
   });
 

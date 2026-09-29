@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { type ComponentProps } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
@@ -39,12 +41,12 @@ const defaultProps: Pick<
   shareableUrl: '/home#/',
   shortUrlService,
   allowShortUrl: false,
-  anonymousAccess: { getState: jest.fn(), getCapabilities: jest.fn() },
+  anonymousAccess: { getState: vi.fn(), getCapabilities: vi.fn() },
 };
 
 const mockShareContext: IShareContext = {
   ...defaultProps,
-  onClose: jest.fn(),
+  onClose: vi.fn(),
   shareMenuItems: [],
   objectTypeMeta: {
     title: 'title',
@@ -70,7 +72,7 @@ describe('Share modal embed content tab', () => {
   describe('share url embedded', () => {
     beforeAll(() => {
       Object.defineProperty(document, 'execCommand', {
-        value: jest.fn(() => true),
+        value: vi.fn(() => true),
       });
     });
 
@@ -113,7 +115,7 @@ describe('Share modal embed content tab', () => {
 
   it('renders a draft mode callout when dirty and triggers its save button', async () => {
     const user = userEvent.setup();
-    const onSave = jest.fn();
+    const onSave = vi.fn();
     const shareContext: IShareContext = {
       ...mockShareContext,
       onSave,

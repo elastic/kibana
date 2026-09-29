@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import { updateCaseStepDefinition } from './update_case';
 import { createStepHandlerContext } from './test_utils';
@@ -20,7 +22,7 @@ describe('updateCaseStepDefinition', () => {
   };
 
   it('creates expected step definition structure', () => {
-    const getCasesClient = jest.fn();
+    const getCasesClient = vi.fn();
     const definition = updateCaseStepDefinition(getCasesClient);
 
     expect(definition.id).toBe('cases.updateCase');
@@ -29,11 +31,11 @@ describe('updateCaseStepDefinition', () => {
   });
 
   it('fetches version and updates case', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkUpdate = jest
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkUpdate = vi
       .fn()
       .mockResolvedValue([{ ...createCaseResponseFixture, title: 'Updated title' }]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
     const definition = updateCaseStepDefinition(getCasesClient);
@@ -58,11 +60,11 @@ describe('updateCaseStepDefinition', () => {
   });
 
   it('uses provided version and skips case fetch', async () => {
-    const get = jest.fn();
-    const bulkUpdate = jest
+    const get = vi.fn();
+    const bulkUpdate = vi
       .fn()
       .mockResolvedValue([{ ...createCaseResponseFixture, title: 'Updated title' }]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
     const definition = updateCaseStepDefinition(getCasesClient);
@@ -87,9 +89,9 @@ describe('updateCaseStepDefinition', () => {
   });
 
   it('passes extended_fields through to bulkUpdate', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkUpdate = jest.fn().mockResolvedValue([createCaseResponseFixture]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkUpdate = vi.fn().mockResolvedValue([createCaseResponseFixture]);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
     const definition = updateCaseStepDefinition(getCasesClient);
@@ -114,9 +116,9 @@ describe('updateCaseStepDefinition', () => {
   });
 
   it('returns original error when update call throws', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkUpdate = jest.fn().mockRejectedValue(new Error('update failed'));
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkUpdate = vi.fn().mockRejectedValue(new Error('update failed'));
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
     const definition = updateCaseStepDefinition(getCasesClient);
@@ -127,9 +129,9 @@ describe('updateCaseStepDefinition', () => {
   });
 
   it('normalizes updates for bulk patch requests', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkUpdate = jest.fn().mockResolvedValue([createCaseResponseFixture]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkUpdate = vi.fn().mockResolvedValue([createCaseResponseFixture]);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
     const definition = updateCaseStepDefinition(getCasesClient);
@@ -166,9 +168,9 @@ describe('updateCaseStepDefinition', () => {
   });
 
   it('returns original error when case fetch fails', async () => {
-    const get = jest.fn().mockRejectedValue(new Error('get failed'));
-    const bulkUpdate = jest.fn();
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockRejectedValue(new Error('get failed'));
+    const bulkUpdate = vi.fn();
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
     const definition = updateCaseStepDefinition(getCasesClient);
@@ -180,9 +182,9 @@ describe('updateCaseStepDefinition', () => {
   });
 
   it('returns translated error when updated case is missing from response', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkUpdate = jest.fn().mockResolvedValue([]);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkUpdate = vi.fn().mockResolvedValue([]);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
     const definition = updateCaseStepDefinition(getCasesClient);
@@ -197,10 +199,10 @@ describe('updateCaseStepDefinition', () => {
   });
 
   it('pushes case when push-case is enabled', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkUpdate = jest.fn().mockResolvedValue([createCaseResponseFixture]);
-    const push = jest.fn().mockResolvedValue(undefined);
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkUpdate = vi.fn().mockResolvedValue([createCaseResponseFixture]);
+    const push = vi.fn().mockResolvedValue(undefined);
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate, push },
     } as unknown as CasesClient);
     const definition = updateCaseStepDefinition(getCasesClient);
@@ -215,10 +217,10 @@ describe('updateCaseStepDefinition', () => {
   });
 
   it('returns original error when push fails', async () => {
-    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkUpdate = jest.fn().mockResolvedValue([createCaseResponseFixture]);
-    const push = jest.fn().mockRejectedValue(new Error('push failed'));
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkUpdate = vi.fn().mockResolvedValue([createCaseResponseFixture]);
+    const push = vi.fn().mockRejectedValue(new Error('push failed'));
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate, push },
     } as unknown as CasesClient);
     const definition = updateCaseStepDefinition(getCasesClient);

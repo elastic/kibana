@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,43 +14,52 @@ import type { PhaseName } from '@kbn/streams-schema';
 
 import { EditDlmPhasesFlyout } from './edit_dlm_phases_flyout';
 
-jest.mock('../../../../../../hooks/use_streams_privileges', () => ({
-  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
-}));
-
-jest.mock('../../hooks/use_ilm_phases_color_and_description', () => ({
-  useIlmPhasesColorAndDescription: () => ({
-    ilmPhases: {
-      hot: { color: '#FF0000', description: 'Hot desc' },
-      warm: { color: '#FFA500', description: 'Warm desc' },
-      cold: { color: '#0000FF', description: 'Cold desc' },
-      frozen: { color: '#00FFFF', description: 'Frozen desc' },
-      delete: { color: '#808080', description: 'Delete desc' },
-    },
-  }),
-}));
-
-jest.mock('../ilm_phase_select/ilm_phase_select', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  IlmPhaseSelect: ({ onSelect, renderButton, ...props }: any) => {
-    const buttonProps = {
-      disabled: false,
-      onClick: () => onSelect('frozen'),
+vi.mock('../../../../../../hooks/use_streams_privileges', () => {
+      const mocked = {
+      useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
     };
+      return { ...mocked, default: mocked };
+    });
 
-    return (
-      <div>
-        {renderButton(buttonProps)}
-        {props.showEnterpriseLicenseRequiredBadge && (
-          <div data-test-subj="mockEnterpriseLicenseRequiredBadge" />
-        )}
-        {props.showDefaultRepositoryRequiredBadge && (
-          <div data-test-subj="mockDefaultRepositoryRequiredBadge" />
-        )}
-      </div>
-    );
-  },
-}));
+vi.mock('../../hooks/use_ilm_phases_color_and_description', () => {
+      const mocked = {
+      useIlmPhasesColorAndDescription: () => ({
+        ilmPhases: {
+          hot: { color: '#FF0000', description: 'Hot desc' },
+          warm: { color: '#FFA500', description: 'Warm desc' },
+          cold: { color: '#0000FF', description: 'Cold desc' },
+          frozen: { color: '#00FFFF', description: 'Frozen desc' },
+          delete: { color: '#808080', description: 'Delete desc' },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../ilm_phase_select/ilm_phase_select', () => {
+      const mocked = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      IlmPhaseSelect: ({ onSelect, renderButton, ...props }: any) => {
+        const buttonProps = {
+          disabled: false,
+          onClick: () => onSelect('frozen'),
+        };
+
+        return (
+          <div>
+            {renderButton(buttonProps)}
+            {props.showEnterpriseLicenseRequiredBadge && (
+              <div data-test-subj="mockEnterpriseLicenseRequiredBadge" />
+            )}
+            {props.showDefaultRepositoryRequiredBadge && (
+              <div data-test-subj="mockDefaultRepositoryRequiredBadge" />
+            )}
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const DATA_TEST_SUBJ = 'streamsEditIlmPhasesFlyout';
 
@@ -67,9 +78,9 @@ const renderDlmFlyout = (
   props: Partial<React.ComponentProps<typeof EditDlmPhasesFlyout>> = {},
   options: { initialSelectedPhase?: PhaseName } = {}
 ) => {
-  const onClose = jest.fn();
-  const onChange = jest.fn();
-  const onSave = jest.fn();
+  const onClose = vi.fn();
+  const onChange = vi.fn();
+  const onSave = vi.fn();
 
   const initialDsl = props.initialDsl ?? {
     frozen_after: '30d',
@@ -219,7 +230,7 @@ describe('EditDlmPhasesFlyout', () => {
   });
 
   it('shows a Frozen badge in add-phase menu and triggers upgrade when frozen is blocked by license', async () => {
-    const onUpgradeEnterprise = jest.fn();
+    const onUpgradeEnterprise = vi.fn();
     renderDlmFlyout(
       { initialDsl: {}, isMissingEnterpriseLicense: true, onUpgradeEnterprise },
       { initialSelectedPhase: undefined }
@@ -239,7 +250,7 @@ describe('EditDlmPhasesFlyout', () => {
   });
 
   it('shows a Frozen badge in add-phase menu and triggers create-repo flow when frozen is blocked by missing default repo', async () => {
-    const onMissingDefaultRepository = jest.fn();
+    const onMissingDefaultRepository = vi.fn();
     renderDlmFlyout(
       {
         initialDsl: {},
@@ -323,14 +334,14 @@ describe('EditDlmPhasesFlyout', () => {
   });
 
   it('shows a direct create-repository link in frozen searchable snapshot section when default repo is missing', async () => {
-    const onMissingDefaultRepository = jest.fn();
+    const onMissingDefaultRepository = vi.fn();
     const createDefaultRepositoryHref = '/app/management/data/snapshot_restore/add_repository';
     renderDlmFlyout(
       {
         defaultRepositoryName: undefined,
         createDefaultRepositoryHref,
         onMissingDefaultRepository,
-        onRefreshDefaultRepository: jest.fn(),
+        onRefreshDefaultRepository: vi.fn(),
         isRefreshingDefaultRepository: true,
       },
       { initialSelectedPhase: 'frozen' }
@@ -368,7 +379,7 @@ describe('EditDlmPhasesFlyout', () => {
         createDefaultRepositoryHref: '/app/management/data/snapshot_restore/add_repository',
         manageRepositoriesHref: '/app/management/data/snapshot_restore/repositories',
         hasExistingRepositories: true,
-        onRefreshDefaultRepository: jest.fn(),
+        onRefreshDefaultRepository: vi.fn(),
       },
       { initialSelectedPhase: 'frozen' }
     );
@@ -410,7 +421,7 @@ describe('EditDlmPhasesFlyout', () => {
     renderDlmFlyout(
       {
         isMissingEnterpriseLicense: true,
-        onUpgradeEnterprise: jest.fn(),
+        onUpgradeEnterprise: vi.fn(),
       },
       { initialSelectedPhase: 'frozen' }
     );

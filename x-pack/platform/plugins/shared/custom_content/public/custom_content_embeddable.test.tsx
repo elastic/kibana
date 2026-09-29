@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { render, screen, act } from '@testing-library/react';
@@ -19,12 +22,12 @@ import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { openLazyFlyout } from '@kbn/presentation-util';
 import type { EditCustomContentFlyoutProps } from './components/edit_custom_content_flyout';
 
-jest.mock('@kbn/presentation-publishing', () => {
-  const actual = jest.requireActual('@kbn/presentation-publishing');
-  return { ...actual, apiIsPresentationContainer: jest.fn(() => false) };
+vi.mock('@kbn/presentation-publishing', async () => {
+  const actual = (await vi.importActual('@kbn/presentation-publishing'));
+  return { ...actual, apiIsPresentationContainer: vi.fn(() => false) };
 });
 
-const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.MockedFunction<
+const mockApiIsPresentationContainer = apiIsPresentationContainer as MockedFunction<
   typeof apiIsPresentationContainer
 >;
 
@@ -36,29 +39,32 @@ let capturedComponentProps:
     }
   | undefined;
 
-jest.mock('@kbn/custom-content-renderer', () => ({
-  CustomContentComponent: (props: {
-    esqlQuery: string | undefined;
-    savedTemplate: string | undefined;
-    generationVersion: number;
-    timeRange: { from: string; to: string } | undefined;
-    isGenerating?: boolean;
-    onLoadingChange: (isLoading: boolean) => void;
-    onGenerateWithChat?: () => void;
-  }) => {
-    capturedComponentProps = props;
-    return (
-      <div
-        data-test-subj="mockCustomContentComponent"
-        data-esql-query={props.esqlQuery ?? ''}
-        data-saved-template={props.savedTemplate ?? ''}
-        data-generation-version={props.generationVersion}
-        data-time-range={props.timeRange ? `${props.timeRange.from}/${props.timeRange.to}` : ''}
-        data-is-generating={String(Boolean(props.isGenerating))}
-      />
-    );
-  },
-}));
+vi.mock('@kbn/custom-content-renderer', () => {
+      const mocked = {
+      CustomContentComponent: (props: {
+        esqlQuery: string | undefined;
+        savedTemplate: string | undefined;
+        generationVersion: number;
+        timeRange: { from: string; to: string } | undefined;
+        isGenerating?: boolean;
+        onLoadingChange: (isLoading: boolean) => void;
+        onGenerateWithChat?: () => void;
+      }) => {
+        capturedComponentProps = props;
+        return (
+          <div
+            data-test-subj="mockCustomContentComponent"
+            data-esql-query={props.esqlQuery ?? ''}
+            data-saved-template={props.savedTemplate ?? ''}
+            data-generation-version={props.generationVersion}
+            data-time-range={props.timeRange ? `${props.timeRange.from}/${props.timeRange.to}` : ''}
+            data-is-generating={String(Boolean(props.isGenerating))}
+          />
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let capturedFlyoutProps:
   | {
@@ -68,12 +74,15 @@ let capturedFlyoutProps:
     }
   | undefined;
 
-jest.mock('./components/edit_custom_content_flyout', () => ({
-  EditCustomContentFlyout: (props: EditCustomContentFlyoutProps) => {
-    capturedFlyoutProps = props;
-    return <div data-test-subj="mockEditCustomContentFlyout" />;
-  },
-}));
+vi.mock('./components/edit_custom_content_flyout', () => {
+      const mocked = {
+      EditCustomContentFlyout: (props: EditCustomContentFlyoutProps) => {
+        capturedFlyoutProps = props;
+        return <div data-test-subj="mockEditCustomContentFlyout" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 type LoadContentFn = (args: {
   closeFlyout: () => void;
@@ -86,42 +95,51 @@ let capturedOpenLazyFlyoutArgs:
 let mockFlyoutClose: () => void = () => {};
 let mockFlyoutOnClose: Promise<void> = Promise.resolve();
 
-jest.mock('@kbn/presentation-util', () => ({
-  openLazyFlyout: (args: Parameters<typeof openLazyFlyout>[0]) => {
-    capturedOpenLazyFlyoutArgs = args;
-    let resolve: () => void;
-    mockFlyoutOnClose = new Promise<void>((r) => {
-      resolve = r;
+vi.mock('@kbn/presentation-util', () => {
+      const mocked = {
+      openLazyFlyout: (args: Parameters<typeof openLazyFlyout>[0]) => {
+        capturedOpenLazyFlyoutArgs = args;
+        let resolve: () => void;
+        mockFlyoutOnClose = new Promise<void>((r) => {
+          resolve = r;
+        });
+        mockFlyoutClose = () => resolve();
+        return { onClose: mockFlyoutOnClose, close: mockFlyoutClose };
+      },
+      tracksOverlays: (api: unknown) =>
+        !!api &&
+        typeof (api as Record<string, unknown>).clearOverlays === 'function' &&
+        typeof (api as Record<string, unknown>).openOverlay === 'function',
+    };
+      return { ...mocked, default: mocked };
     });
-    mockFlyoutClose = () => resolve();
-    return { onClose: mockFlyoutOnClose, close: mockFlyoutClose };
-  },
-  tracksOverlays: (api: unknown) =>
-    !!api &&
-    typeof (api as Record<string, unknown>).clearOverlays === 'function' &&
-    typeof (api as Record<string, unknown>).openOverlay === 'function',
-}));
 
 let mockAgentBuilder: unknown;
 
 const mockTelemetry = {
-  trackPanelAdded: jest.fn(),
-  trackEditFlyoutOpened: jest.fn(),
-  trackPanelSaved: jest.fn(),
-  trackEditCancelled: jest.fn(),
-  trackGenerateWithChatClicked: jest.fn(),
-  trackAgentUpdateApplied: jest.fn(),
+  trackPanelAdded: vi.fn(),
+  trackEditFlyoutOpened: vi.fn(),
+  trackPanelSaved: vi.fn(),
+  trackEditCancelled: vi.fn(),
+  trackGenerateWithChatClicked: vi.fn(),
+  trackAgentUpdateApplied: vi.fn(),
 };
 
-jest.mock('./telemetry', () => ({ getTelemetry: () => mockTelemetry }));
+vi.mock('./telemetry', () => {
+      const mocked = { getTelemetry: () => mockTelemetry };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./services', () => ({
-  getServices: () => ({
-    agentBuilder: mockAgentBuilder,
-    core: { http: {} },
-    search: jest.fn(),
-  }),
-}));
+vi.mock('./services', () => {
+      const mocked = {
+      getServices: () => ({
+        agentBuilder: mockAgentBuilder,
+        core: { http: {} },
+        search: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseState: CustomContentEmbeddableState = {
   esql_query: ['FROM logs | STATS count = COUNT(*)'],
@@ -135,7 +153,7 @@ const buildEmbeddable = async (
   const uuid = 'test-uuid';
 
   const embeddable = await customContentEmbeddableFactory.buildEmbeddable({
-    initializeDrilldownsManager: jest.fn(),
+    initializeDrilldownsManager: vi.fn(),
     initialState,
     parentApi,
     finalizeApi: (api) => ({ ...api, uuid, parentApi } as unknown as CustomContentApi),
@@ -147,7 +165,7 @@ const buildEmbeddable = async (
 
 describe('customContentEmbeddableFactory', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockAgentBuilder = undefined;
     capturedComponentProps = undefined;
     capturedFlyoutProps = undefined;
@@ -273,14 +291,14 @@ describe('customContentEmbeddableFactory', () => {
   describe('anyStateChange$', () => {
     it('does not emit on initial subscribe', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
-      const listener = jest.fn();
+      const listener = vi.fn();
       embeddable.api.anyStateChange$.subscribe(listener);
       expect(listener).not.toHaveBeenCalled();
     });
 
     it('emits when esqlQuery changes via applySerializedState', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
-      const listener = jest.fn();
+      const listener = vi.fn();
       embeddable.api.anyStateChange$.subscribe(listener);
 
       act(() => {
@@ -295,7 +313,7 @@ describe('customContentEmbeddableFactory', () => {
 
     it('emits when template changes via applySerializedState', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
-      const listener = jest.fn();
+      const listener = vi.fn();
       embeddable.api.anyStateChange$.subscribe(listener);
 
       act(() => {
@@ -364,7 +382,7 @@ describe('customContentEmbeddableFactory', () => {
     });
 
     it('cancelling a new panel via the Cancel button removes it from the parent', async () => {
-      const removePanel = jest.fn();
+      const removePanel = vi.fn();
       mockApiIsPresentationContainer.mockReturnValue(true);
       const { embeddable } = await buildEmbeddable(baseState, { removePanel });
       await act(async () => render(<embeddable.Component />));
@@ -382,7 +400,7 @@ describe('customContentEmbeddableFactory', () => {
     });
 
     it('dismissing a new panel via ESC/X removes it from the parent', async () => {
-      const removePanel = jest.fn();
+      const removePanel = vi.fn();
       mockApiIsPresentationContainer.mockReturnValue(true);
       const { embeddable } = await buildEmbeddable(baseState, { removePanel });
       await act(async () => render(<embeddable.Component />));
@@ -395,7 +413,7 @@ describe('customContentEmbeddableFactory', () => {
     });
 
     it('cancelling an existing panel does not remove it', async () => {
-      const removePanel = jest.fn();
+      const removePanel = vi.fn();
       mockApiIsPresentationContainer.mockReturnValue(true);
       const { embeddable } = await buildEmbeddable(baseState, { removePanel });
       await act(async () => render(<embeddable.Component />));
@@ -413,7 +431,7 @@ describe('customContentEmbeddableFactory', () => {
     });
 
     it('saving a new panel does not remove it', async () => {
-      const removePanel = jest.fn();
+      const removePanel = vi.fn();
       mockApiIsPresentationContainer.mockReturnValue(true);
       const { embeddable } = await buildEmbeddable(baseState, { removePanel });
       await act(async () => render(<embeddable.Component />));
@@ -427,7 +445,7 @@ describe('customContentEmbeddableFactory', () => {
     });
 
     it('saving a new panel does not remove it on subsequent cancel', async () => {
-      const removePanel = jest.fn();
+      const removePanel = vi.fn();
       mockApiIsPresentationContainer.mockReturnValue(true);
       const { embeddable } = await buildEmbeddable(baseState, { removePanel });
       await act(async () => render(<embeddable.Component />));
@@ -447,12 +465,12 @@ describe('customContentEmbeddableFactory', () => {
     });
 
     it('clicking "Generate with chat" from the flyout calls openChat and closes the flyout', async () => {
-      const openChat = jest.fn();
+      const openChat = vi.fn();
       mockAgentBuilder = {
         openChat,
         events: {
           ui: { activeConversation$: new BehaviorSubject(null) },
-          getChatEvents$: jest.fn(() => new Subject()),
+          getChatEvents$: vi.fn(() => new Subject()),
         },
       };
       const { embeddable } = await buildEmbeddable(baseState);
@@ -467,14 +485,14 @@ describe('customContentEmbeddableFactory', () => {
     });
 
     it('clicking "Generate with chat" from the flyout on a new panel does not remove it', async () => {
-      const removePanel = jest.fn();
-      const openChat = jest.fn();
+      const removePanel = vi.fn();
+      const openChat = vi.fn();
       mockApiIsPresentationContainer.mockReturnValue(true);
       mockAgentBuilder = {
         openChat,
         events: {
           ui: { activeConversation$: new BehaviorSubject(null) },
-          getChatEvents$: jest.fn(() => new Subject()),
+          getChatEvents$: vi.fn(() => new Subject()),
         },
       };
       const { embeddable } = await buildEmbeddable(baseState, { removePanel });
@@ -499,7 +517,7 @@ describe('customContentEmbeddableFactory', () => {
       mockAgentBuilder = {
         events: {
           ui: { activeConversation$ },
-          getChatEvents$: jest.fn(() => chatEvents$),
+          getChatEvents$: vi.fn(() => chatEvents$),
         },
       };
 
@@ -556,7 +574,7 @@ describe('customContentEmbeddableFactory', () => {
       mockAgentBuilder = {
         events: {
           ui: { activeConversation$ },
-          getChatEvents$: jest.fn(() => chatEvents$),
+          getChatEvents$: vi.fn(() => chatEvents$),
         },
       };
 
@@ -637,7 +655,7 @@ describe('customContentEmbeddableFactory', () => {
       mockAgentBuilder = {
         events: {
           ui: { activeConversation$ },
-          getChatEvents$: jest.fn(() => chatEvents$),
+          getChatEvents$: vi.fn(() => chatEvents$),
         },
       };
 
@@ -686,12 +704,12 @@ describe('customContentEmbeddableFactory', () => {
 
   describe('handleGenerateWithChat', () => {
     it('shows a generating state while the panel chat round is running', async () => {
-      const openChat = jest.fn();
+      const openChat = vi.fn();
       mockAgentBuilder = {
         openChat,
         events: {
           ui: { activeConversation$: new BehaviorSubject(null) },
-          getChatEvents$: jest.fn(() => new Subject()),
+          getChatEvents$: vi.fn(() => new Subject()),
         },
       };
 
@@ -719,22 +737,22 @@ describe('customContentEmbeddableFactory', () => {
     });
 
     it('clicking "Generate with chat" from the empty prompt on a new panel does not remove it', async () => {
-      const removePanel = jest.fn();
-      const openChat = jest.fn();
+      const removePanel = vi.fn();
+      const openChat = vi.fn();
       mockApiIsPresentationContainer.mockReturnValue(true);
       mockAgentBuilder = {
         openChat,
         events: {
           ui: { activeConversation$: new BehaviorSubject(null) },
-          getChatEvents$: jest.fn(() => new Subject()),
+          getChatEvents$: vi.fn(() => new Subject()),
         },
       };
       // clearOverlays simulates overlay tracker closing the flyout
-      const clearOverlays = jest.fn(() => mockFlyoutClose());
+      const clearOverlays = vi.fn(() => mockFlyoutClose());
       const { embeddable } = await buildEmbeddable(baseState, {
         removePanel,
         clearOverlays,
-        openOverlay: jest.fn(),
+        openOverlay: vi.fn(),
       });
       await act(async () => render(<embeddable.Component />));
 
@@ -753,12 +771,12 @@ describe('customContentEmbeddableFactory', () => {
     });
 
     it('opens the agent builder with the correct attachment', async () => {
-      const openChat = jest.fn();
+      const openChat = vi.fn();
       mockAgentBuilder = {
         openChat,
         events: {
           ui: { activeConversation$: new BehaviorSubject(null) },
-          getChatEvents$: jest.fn(() => new Subject()),
+          getChatEvents$: vi.fn(() => new Subject()),
         },
       };
 
@@ -786,19 +804,19 @@ describe('customContentEmbeddableFactory', () => {
     });
 
     it('clears overlays (closes edit flyout) before opening the agent builder', async () => {
-      const openChat = jest.fn();
-      const clearOverlays = jest.fn();
+      const openChat = vi.fn();
+      const clearOverlays = vi.fn();
       mockAgentBuilder = {
         openChat,
         events: {
           ui: { activeConversation$: new BehaviorSubject(null) },
-          getChatEvents$: jest.fn(() => new Subject()),
+          getChatEvents$: vi.fn(() => new Subject()),
         },
       };
 
       const { embeddable } = await buildEmbeddable(baseState, {
         clearOverlays,
-        openOverlay: jest.fn(),
+        openOverlay: vi.fn(),
       });
       await act(async () => render(<embeddable.Component />));
 

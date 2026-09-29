@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockGetConfigFromFiles = jest.fn();
+import { vi } from 'vitest';
 
-jest.mock('./read_config', () => ({
-  getConfigFromFiles: mockGetConfigFromFiles,
-}));
+export const mockGetConfigFromFiles = vi.fn();
+
+vi.mock('./read_config', () => {
+      const mocked = {
+      getConfigFromFiles: mockGetConfigFromFiles,
+    };
+      return { ...mocked, default: mocked };
+    });

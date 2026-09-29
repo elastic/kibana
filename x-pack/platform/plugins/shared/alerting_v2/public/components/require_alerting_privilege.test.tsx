@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -18,11 +21,11 @@ import {
   type PrivilegeCheck,
 } from '../application/privilege_check_context';
 
-jest.mock('@kbn/core-di-browser');
+vi.mock('@kbn/core-di-browser');
 
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
-const mockCanRead = jest.fn<boolean, [AlertingV2Feature]>();
-const mockCanWrite = jest.fn<boolean, [AlertingV2Feature]>();
+const mockUseService = useService as MockedFunction<typeof useService>;
+const mockCanRead = vi.fn<boolean, [AlertingV2Feature]>();
+const mockCanWrite = vi.fn<boolean, [AlertingV2Feature]>();
 
 const mockReadableFeatures = (readable: (feature: AlertingV2Feature) => boolean) => {
   mockCanRead.mockImplementation(readable);
@@ -59,7 +62,7 @@ const renderGate = (
 
 describe('RequireAlertingPrivilege', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders children when the user can read every required feature', () => {
@@ -119,7 +122,7 @@ describe('RequireAlertingPrivilege', () => {
   describe('when a custom privilegeCheck is provided via context', () => {
     it('renders children when the custom check returns true, regardless of v2 capabilities', () => {
       mockReadableFeatures(() => false);
-      const privilegeCheck: PrivilegeCheck = jest.fn(() => true);
+      const privilegeCheck: PrivilegeCheck = vi.fn(() => true);
       renderGate(['alerts'], { privilegeCheck });
 
       expect(screen.getByTestId('gatedContent')).toBeInTheDocument();
@@ -129,7 +132,7 @@ describe('RequireAlertingPrivilege', () => {
 
     it('renders the interstitial when the custom check returns false, regardless of v2 capabilities', () => {
       mockReadableFeatures(() => true);
-      const privilegeCheck: PrivilegeCheck = jest.fn(() => false);
+      const privilegeCheck: PrivilegeCheck = vi.fn(() => false);
       renderGate(['alerts'], { privilegeCheck });
 
       expect(screen.queryByTestId('gatedContent')).not.toBeInTheDocument();
@@ -139,7 +142,7 @@ describe('RequireAlertingPrivilege', () => {
 
     it('forwards the capability level to the custom check', () => {
       mockWritableFeatures(() => false);
-      const privilegeCheck: PrivilegeCheck = jest.fn(() => true);
+      const privilegeCheck: PrivilegeCheck = vi.fn(() => true);
       renderGate(['actionPolicies'], { capability: 'all', privilegeCheck });
 
       expect(privilegeCheck).toHaveBeenCalledWith(['actionPolicies'], 'all');

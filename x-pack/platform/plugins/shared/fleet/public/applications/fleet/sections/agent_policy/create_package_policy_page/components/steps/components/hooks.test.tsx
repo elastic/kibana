@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { waitFor, renderHook, act } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../../../mock';
@@ -16,9 +19,9 @@ import type { RegistryVarGroup } from '../../../../../../types';
 
 import { useOutputs, useVarGroupSelections } from './hooks';
 
-jest.mock('../../../../../../../../hooks/use_license');
+vi.mock('../../../../../../../../hooks/use_license');
 
-const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
+const mockedUseLicence = useLicense as MockedFunction<typeof useLicense>;
 
 function defaultHttpClientGetImplementation(path: any) {
   if (typeof path !== 'string') {
@@ -112,7 +115,7 @@ describe('useOutputs', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should filter out internal outputs when license allows output per integration', async () => {
@@ -218,14 +221,14 @@ const mockVarGroups: RegistryVarGroup[] = [
 ];
 
 describe('useVarGroupSelections', () => {
-  let mockOnSelectionsChange: jest.Mock;
+  let mockOnSelectionsChange: Mock;
 
   beforeEach(() => {
-    mockOnSelectionsChange = jest.fn();
+    mockOnSelectionsChange = vi.fn();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('selections derivation', () => {

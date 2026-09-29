@@ -7,38 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { BaseAtomicNodeImplementation, isCancellableNode } from './node_implementation';
 import type { BaseStep, RunStepResult } from './node_implementation';
 
-jest.mock('elastic-apm-node', () => ({
+vi.mock('elastic-apm-node', () => ({
   __esModule: true,
   default: {
-    startSpan: jest.fn(() => ({
-      setLabel: jest.fn(),
-      setOutcome: jest.fn(),
-      end: jest.fn(),
+    startSpan: vi.fn(() => ({
+      setLabel: vi.fn(),
+      setOutcome: vi.fn(),
+      end: vi.fn(),
     })),
   },
 }));
 
 const createStepExecutionRuntime = (overrides: Record<string, unknown> = {}) => ({
   abortController: new AbortController(),
-  startStep: jest.fn(),
-  flushEventLogs: jest.fn().mockResolvedValue(undefined),
-  finishStep: jest.fn(),
-  failStep: jest.fn(),
-  setInput: jest.fn(),
+  startStep: vi.fn(),
+  flushEventLogs: vi.fn().mockResolvedValue(undefined),
+  finishStep: vi.fn(),
+  failStep: vi.fn(),
+  setInput: vi.fn(),
   stepExecutionId: 'step-exec-1',
   node: { configuration: {} },
   workflowExecution: { workflowDefinition: {} },
   contextManager: {
-    getDependencies: jest.fn(() => ({ config: {} })),
+    getDependencies: vi.fn(() => ({ config: {} })),
   },
   ...overrides,
 });
 
 const createWorkflowRuntime = () => ({
-  navigateToNextNode: jest.fn(),
+  navigateToNextNode: vi.fn(),
 });
 
 class TestStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
@@ -51,12 +54,12 @@ class TestStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
 
 describe('isCancellableNode', () => {
   it('returns true when node has an onCancel method', () => {
-    const node = { run: jest.fn(), onCancel: jest.fn() };
+    const node = { run: vi.fn(), onCancel: vi.fn() };
     expect(isCancellableNode(node)).toBe(true);
   });
 
   it('returns false when node does not have onCancel', () => {
-    const node = { run: jest.fn() };
+    const node = { run: vi.fn() };
     expect(isCancellableNode(node)).toBe(false);
   });
 });
@@ -113,7 +116,7 @@ describe('BaseAtomicNodeImplementation', () => {
     const impl = new TestStepImpl(step, runtime as any, undefined, workflowRuntime as any);
     impl.mockResult = null as any;
     // Override _run to throw
-    (impl as any)._run = jest.fn().mockRejectedValue(new Error('kaboom'));
+    (impl as any)._run = vi.fn().mockRejectedValue(new Error('kaboom'));
 
     await impl.run();
 
@@ -147,7 +150,7 @@ describe('BaseAtomicNodeImplementation', () => {
     const workflowRuntime = createWorkflowRuntime();
 
     const impl = new TestStepImpl(step, runtime as any, undefined, workflowRuntime as any);
-    (impl as any)._run = jest.fn(async () => {
+    (impl as any)._run = vi.fn(async () => {
       runtime.abortController.abort();
       return { input: {}, output: 'partial', error: undefined };
     });
@@ -255,7 +258,7 @@ describe('BaseAtomicNodeImplementation', () => {
       await impl.run();
 
       expect(runtime.finishStep).toHaveBeenCalledTimes(1);
-      const [, sizeBytes] = (runtime.finishStep as jest.Mock).mock.calls[0];
+      const [, sizeBytes] = (runtime.finishStep as Mock).mock.calls[0];
       expect(typeof sizeBytes).toBe('number');
       expect(sizeBytes).toBeGreaterThan(0);
     });

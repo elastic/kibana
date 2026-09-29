@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -35,11 +38,11 @@ import {
   OS_ERROR,
 } from './translations';
 
-jest.mock('../../../../../common/components/user_privileges');
+vi.mock('../../../../../common/components/user_privileges');
 
 describe('Custom YARA signatures form', () => {
   let user: UserEvent;
-  let onChangeSpy: jest.Mock;
+  let onChangeSpy: Mock;
   let render: (props?: ArtifactFormComponentProps) => ReturnType<AppContextTestRender['render']>;
   let mockedContext: AppContextTestRender;
 
@@ -101,16 +104,16 @@ describe('Custom YARA signatures form', () => {
   }
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    onChangeSpy = jest.fn();
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    onChangeSpy = vi.fn();
     mockedContext = createAppRootMockRenderer();
     mockedContext.coreStart.http.post.mockResolvedValue({
       errors: [],
@@ -377,7 +380,7 @@ describe('Custom YARA signatures form', () => {
 
     const flushValidationDebounce = () => {
       act(() => {
-        jest.advanceTimersByTime(VALIDATE_CUSTOM_YARA_SIGNATURE_DEBOUNCE_MS);
+        vi.advanceTimersByTime(VALIDATE_CUSTOM_YARA_SIGNATURE_DEBOUNCE_MS);
       });
     };
 
@@ -423,7 +426,7 @@ describe('Custom YARA signatures form', () => {
       expect(mockedContext.coreStart.http.post).not.toHaveBeenCalled();
 
       act(() => {
-        jest.advanceTimersByTime(VALIDATE_CUSTOM_YARA_SIGNATURE_DEBOUNCE_MS - 1);
+        vi.advanceTimersByTime(VALIDATE_CUSTOM_YARA_SIGNATURE_DEBOUNCE_MS - 1);
       });
       expect(mockedContext.coreStart.http.post).not.toHaveBeenCalled();
 

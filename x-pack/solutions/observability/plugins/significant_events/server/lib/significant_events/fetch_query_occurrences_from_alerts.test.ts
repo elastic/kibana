@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { QueryLink } from '@kbn/significant-events-schema';
@@ -38,21 +41,21 @@ const makeQueryLink = (overrides: Partial<QueryLink> & { id?: string } = {}): Qu
 };
 
 interface Mocks {
-  kiClient: jest.Mocked<KnowledgeIndicatorClient>;
-  esClient: jest.Mocked<TracedElasticsearchClient>;
-  esql: jest.Mock;
+  kiClient: Mocked<KnowledgeIndicatorClient>;
+  esClient: Mocked<TracedElasticsearchClient>;
+  esql: Mock;
 }
 
 const createMocks = (queryLinks: QueryLink[] = []): Mocks => {
-  const esql = jest.fn();
+  const esql = vi.fn();
   const esClient = {
     esql,
-  } as unknown as jest.Mocked<TracedElasticsearchClient>;
+  } as unknown as Mocked<TracedElasticsearchClient>;
 
   const kiClient = {
-    getQueryLinks: jest.fn().mockResolvedValue(queryLinks),
-    findQueries: jest.fn().mockResolvedValue(queryLinks),
-  } as unknown as jest.Mocked<KnowledgeIndicatorClient>;
+    getQueryLinks: vi.fn().mockResolvedValue(queryLinks),
+    findQueries: vi.fn().mockResolvedValue(queryLinks),
+  } as unknown as Mocked<KnowledgeIndicatorClient>;
 
   return { kiClient, esClient, esql };
 };
@@ -545,11 +548,11 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     const HORIZON_ISO = '2026-01-01T00:53:00.000Z';
 
     beforeEach(() => {
-      jest.spyOn(Date, 'now').mockReturnValue(NOW.getTime());
+      vi.spyOn(Date, 'now').mockReturnValue(NOW.getTime());
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('ends the timeline at the write horizon instead of zero-filling up to now', async () => {

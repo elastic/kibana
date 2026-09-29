@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { cloneDeep } from 'lodash';
@@ -19,16 +22,16 @@ import { PolicyOperatingSystem, ProtectionModes } from '../../../../../../../com
 import { PerOsReputationService } from './per_os_reputation_service';
 import { createBehaviorProtectionPolicyAccessor } from './policy_accessor';
 
-jest.mock('../../../../../../common/hooks/use_license');
+vi.mock('../../../../../../common/hooks/use_license');
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 
-const useLicenseMock = _useLicense as jest.Mock;
+const useLicenseMock = _useLicense as Mock;
 
 describe('PerOsReputationService', () => {
   let mockedContext: AppContextTestRender;
   let policy: PolicyConfig;
-  let onChange: jest.Mock;
+  let onChange: Mock;
   let renderResult: ReturnType<AppContextTestRender['render']>;
 
   beforeEach(() => {
@@ -36,7 +39,7 @@ describe('PerOsReputationService', () => {
     mockedContext.startServices.cloud!.isCloudEnabled = true;
     policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
       .config.policy.value;
-    onChange = jest.fn();
+    onChange = vi.fn();
   });
 
   afterEach(() => {

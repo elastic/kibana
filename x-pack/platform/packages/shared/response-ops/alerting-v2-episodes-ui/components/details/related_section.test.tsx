@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -20,17 +23,20 @@ import {
 import { AlertEpisodesRelatedSection } from './related_section';
 import { RuleStateStatus } from '../../types/rule_state';
 
-jest.mock('../../utils/run_esql_async_search');
+vi.mock('../../utils/run_esql_async_search');
 
-jest.mock('./related/related', () => ({
-  AlertEpisodesRelated: jest.fn(() => <div data-test-subj="alertEpisodesRelatedStub" />),
-}));
+vi.mock('./related/related', () => {
+      const mocked = {
+      AlertEpisodesRelated: vi.fn(() => <div data-test-subj="alertEpisodesRelatedStub" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { AlertEpisodesRelated } = jest.requireMock('./related/related') as {
-  AlertEpisodesRelated: jest.Mock;
+const { AlertEpisodesRelated } = (await vi.importMock('./related/related')) as {
+  AlertEpisodesRelated: Mock;
 };
 
-const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
+const runEsqlAsyncSearchMock = vi.mocked(runEsqlAsyncSearch);
 
 const mockHttp = httpServiceMock.createStartContract();
 const mockServices = createMockServices({ http: mockHttp });
@@ -57,7 +63,7 @@ const wrapper = createQueryClientWrapper(queryClient);
 
 describe('AlertEpisodesRelatedSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     queryClient.clear();
   });
 

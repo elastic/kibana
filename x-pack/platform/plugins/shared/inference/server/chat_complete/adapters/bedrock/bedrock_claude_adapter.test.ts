@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import { noop } from 'rxjs';
@@ -16,11 +19,11 @@ import { lastValueFrom, toArray } from 'rxjs';
 describe('bedrockClaudeAdapter', () => {
   const logger = loggerMock.create();
   const executorMock = {
-    invoke: jest.fn(),
-    getConnector: jest.fn(),
+    invoke: vi.fn(),
+    getConnector: vi.fn(),
   } as InferenceExecutor & {
-    invoke: jest.MockedFn<InferenceExecutor['invoke']>;
-    getConnector: jest.MockedFn<InferenceExecutor['getConnector']>;
+    invoke: MockedFunction<InferenceExecutor['invoke']>;
+    getConnector: MockedFunction<InferenceExecutor['getConnector']>;
   };
 
   beforeEach(() => {

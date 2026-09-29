@@ -7,22 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormattedRelativeEnhanced } from './formatted_relative_enhanced';
 
 // Mock selectUnit from @formatjs/intl-utils
-const mockSelectUnit = jest.fn();
-jest.mock('@formatjs/intl-utils', () => ({
-  selectUnit: (...args: unknown[]) => mockSelectUnit(...args),
-}));
+const mockSelectUnit = vi.fn();
+vi.mock('@formatjs/intl-utils', () => {
+      const mocked = {
+      selectUnit: (...args: unknown[]) => mockSelectUnit(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock useFormattedDateTime
-const mockUseFormattedDateTime = jest.fn();
-jest.mock('../use_formatted_date', () => ({
-  useFormattedDateTime: (...args: unknown[]) => mockUseFormattedDateTime(...args),
-}));
+const mockUseFormattedDateTime = vi.fn();
+vi.mock('../use_formatted_date', () => {
+      const mocked = {
+      useFormattedDateTime: (...args: unknown[]) => mockUseFormattedDateTime(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithI18n = (ui: React.ReactElement) => {
   return render(<I18nProvider>{ui}</I18nProvider>);
@@ -30,14 +38,14 @@ const renderWithI18n = (ui: React.ReactElement) => {
 
 describe('FormattedRelativeEnhanced', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-03-24T12:00:00Z'));
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-03-24T12:00:00Z'));
     mockUseFormattedDateTime.mockReturnValue('March 24, 2026 12:00:00 PM');
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('renders "just now" when selectUnit returns second unit', () => {
@@ -82,7 +90,7 @@ describe('FormattedRelativeEnhanced', () => {
       mockSelectUnit.mockReturnValue({ value: -1, unit: 'year' });
 
       // Set current time to Jan 10, 2026
-      jest.setSystemTime(new Date('2026-01-10T12:00:00Z'));
+      vi.setSystemTime(new Date('2026-01-10T12:00:00Z'));
 
       // The date is Nov 10, 2025 (~2 months ago, crosses year boundary)
       renderWithI18n(<FormattedRelativeEnhanced value={new Date('2025-11-10T12:00:00Z')} />);
@@ -96,7 +104,7 @@ describe('FormattedRelativeEnhanced', () => {
       mockSelectUnit.mockReturnValue({ value: -1, unit: 'year' });
 
       // Set current time to Jan 10, 2026
-      jest.setSystemTime(new Date('2026-01-10T12:00:00Z'));
+      vi.setSystemTime(new Date('2026-01-10T12:00:00Z'));
 
       // The date is Dec 28, 2025 (~2 weeks ago, crosses year boundary)
       renderWithI18n(<FormattedRelativeEnhanced value={new Date('2025-12-28T12:00:00Z')} />);
@@ -109,7 +117,7 @@ describe('FormattedRelativeEnhanced', () => {
       mockSelectUnit.mockReturnValue({ value: -1, unit: 'year' });
 
       // Set current time to Dec 1, 2026
-      jest.setSystemTime(new Date('2026-12-01T12:00:00Z'));
+      vi.setSystemTime(new Date('2026-12-01T12:00:00Z'));
 
       // The date is Jan 1, 2026 (~11 months ago, > 180 days)
       renderWithI18n(<FormattedRelativeEnhanced value={new Date('2026-01-01T12:00:00Z')} />);
@@ -126,7 +134,7 @@ describe('FormattedRelativeEnhanced', () => {
       mockSelectUnit.mockReturnValue({ value: -1, unit: 'month' });
 
       // Set current time to Jul 1, 2026 — matches the reported bug scenario
-      jest.setSystemTime(new Date('2026-07-01T12:00:00Z'));
+      vi.setSystemTime(new Date('2026-07-01T12:00:00Z'));
 
       // The date is Jun 26, 2026 (~5 days ago, crosses month boundary)
       renderWithI18n(<FormattedRelativeEnhanced value={new Date('2026-06-26T12:00:00Z')} />);
@@ -140,7 +148,7 @@ describe('FormattedRelativeEnhanced', () => {
       mockSelectUnit.mockReturnValue({ value: -1, unit: 'month' });
 
       // Set current time to Jul 1, 2026
-      jest.setSystemTime(new Date('2026-07-01T12:00:00Z'));
+      vi.setSystemTime(new Date('2026-07-01T12:00:00Z'));
 
       // The date is Jun 15, 2026 (~16 days ago, crosses month boundary)
       renderWithI18n(<FormattedRelativeEnhanced value={new Date('2026-06-15T12:00:00Z')} />);
@@ -154,7 +162,7 @@ describe('FormattedRelativeEnhanced', () => {
       mockSelectUnit.mockReturnValue({ value: -2, unit: 'month' });
 
       // Set current time to Jul 1, 2026
-      jest.setSystemTime(new Date('2026-07-01T12:00:00Z'));
+      vi.setSystemTime(new Date('2026-07-01T12:00:00Z'));
 
       // The date is May 1, 2026 (~61 days ago, well past 28)
       renderWithI18n(<FormattedRelativeEnhanced value={new Date('2026-05-01T12:00:00Z')} />);

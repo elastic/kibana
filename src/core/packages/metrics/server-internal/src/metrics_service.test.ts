@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { merge } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
@@ -38,7 +40,7 @@ describe('MetricsService', () => {
   let metricsService: MetricsService;
 
   beforeEach(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
     mockOpsCollector.collect.mockResolvedValue(getBaseTestMetrics());
 
     const configService = configServiceMock.create({
@@ -49,8 +51,8 @@ describe('MetricsService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.clearAllTimers();
+    vi.clearAllMocks();
+    vi.clearAllTimers();
   });
 
   describe('#start', () => {
@@ -75,10 +77,10 @@ describe('MetricsService', () => {
 
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
 
-      jest.advanceTimersByTime(testInterval);
+      vi.advanceTimersByTime(testInterval);
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(2);
 
-      jest.advanceTimersByTime(testInterval);
+      vi.advanceTimersByTime(testInterval);
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(3);
     });
 
@@ -93,7 +95,7 @@ describe('MetricsService', () => {
       // `nextTick` is to ensure we've done a complete roundtrip of the event
       // loop.
       const nextEmission = async () => {
-        jest.advanceTimersByTime(testInterval);
+        vi.advanceTimersByTime(testInterval);
         await getOpsMetrics$().pipe(take(1)).toPromise();
         await new Promise((resolve) => process.nextTick(resolve));
       };
@@ -127,7 +129,7 @@ describe('MetricsService', () => {
       const { getOpsMetrics$ } = await metricsService.start();
 
       const nextEmission = async () => {
-        jest.advanceTimersByTime(testInterval);
+        vi.advanceTimersByTime(testInterval);
         const emission = await getOpsMetrics$().pipe(take(1)).toPromise();
         await new Promise((resolve) => process.nextTick(resolve));
         return emission;
@@ -178,7 +180,7 @@ describe('MetricsService', () => {
       const { getOpsMetrics$ } = await metricsService.start();
 
       const nextEmission = async () => {
-        jest.advanceTimersByTime(testInterval);
+        vi.advanceTimersByTime(testInterval);
         const emission = await getOpsMetrics$().pipe(take(1)).toPromise();
         await new Promise((resolve) => process.nextTick(resolve));
         return emission;
@@ -199,7 +201,7 @@ describe('MetricsService', () => {
       const { getEluMetrics$ } = await metricsService.start();
       const eluMetricsPromise = lastValueFrom(getEluMetrics$().pipe(toArray()));
 
-      jest.advanceTimersByTime(testInterval * 2);
+      vi.advanceTimersByTime(testInterval * 2);
       await new Promise((resolve) => process.nextTick(resolve));
       await metricsService.stop();
 
@@ -283,11 +285,11 @@ describe('MetricsService', () => {
 
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
 
-      jest.advanceTimersByTime(testInterval);
+      vi.advanceTimersByTime(testInterval);
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(2);
 
       await metricsService.stop();
-      jest.advanceTimersByTime(10 * testInterval);
+      vi.advanceTimersByTime(10 * testInterval);
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(2);
 
       getOpsMetrics$().subscribe({ complete: () => {} });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { noUpdateCasesPermissions, renderWithTestingProviders } from '../../common/mock';
@@ -17,7 +19,7 @@ const MockComponent = () => {
 };
 
 describe('UserRepresentation', () => {
-  const onRemoveItem = jest.fn();
+  const onRemoveItem = vi.fn();
 
   const defaultProps = {
     tooltipContent: 'Remove item',

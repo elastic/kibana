@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,25 +20,25 @@ interface Result {
   response: Record<string, unknown>;
   error: null | Error;
 }
-const mockUseSubActionStories = jest.fn<Result, [UseSubActionParams<unknown>]>(() => ({
+const mockUseSubActionStories = vi.fn<Result, [UseSubActionParams<unknown>]>(() => ({
   isLoading: false,
   response: { stories: [story], incompleteResponse: false },
   error: null,
 }));
-const mockUseSubActionWebhooks = jest.fn<Result, [UseSubActionParams<unknown>]>(() => ({
+const mockUseSubActionWebhooks = vi.fn<Result, [UseSubActionParams<unknown>]>(() => ({
   isLoading: false,
   response: { webhooks: [webhook], incompleteResponse: false },
   error: null,
 }));
-const mockUseSubAction = jest.fn<Result, [UseSubActionParams<unknown>]>((params) =>
+const mockUseSubAction = vi.fn<Result, [UseSubActionParams<unknown>]>((params) =>
   params.subAction === 'stories'
     ? mockUseSubActionStories(params)
     : mockUseSubActionWebhooks(params)
 );
 
-const mockToasts = { addDanger: jest.fn(), addWarning: jest.fn() };
-jest.mock(triggersActionsPath, () => {
-  const original = jest.requireActual(triggersActionsPath);
+const mockToasts = { addDanger: vi.fn(), addWarning: vi.fn() };
+vi.mock(triggersActionsPath, () => {
+  const original = require(triggersActionsPath);
   return {
     ...original,
     useSubAction: (params: UseSubActionParams<unknown>) => mockUseSubAction(params),
@@ -49,7 +51,7 @@ jest.mock(triggersActionsPath, () => {
   };
 });
 
-const mockEditAction = jest.fn();
+const mockEditAction = vi.fn();
 const index = 0;
 const webhook = {
   id: 1234,
@@ -64,7 +66,7 @@ const emptyErrors = { subAction: [], subActionParams: [] };
 
 describe('TinesParamsFields renders', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('New connector', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
@@ -29,10 +31,13 @@ import {
 
 // Mock the saved search since it relies on the embeddable registry to be
 // populated correctly otherwise
-jest.mock('@kbn/saved-search-component', () => ({
-  LazySavedSearchComponent: jest.fn((props) => <div data-test-subj="embeddedSavedSearchMock" />),
-}));
-const LazySavedSearchComponentMock = jest.mocked(LazySavedSearchComponent);
+vi.mock('@kbn/saved-search-component', () => {
+      const mocked = {
+      LazySavedSearchComponent: vi.fn((props) => <div data-test-subj="embeddedSavedSearchMock" />),
+    };
+      return { ...mocked, default: mocked };
+    });
+const LazySavedSearchComponentMock = vi.mocked(LazySavedSearchComponent);
 
 const commonDependencies = {
   dataViews: dataViewPluginMocks.createStartContract(),
@@ -54,7 +59,7 @@ const mockLogCategoriesDependencies: Omit<
 const mockLogEventsDependencies: Omit<LogEventsDependencies, keyof typeof commonDependencies> = {};
 
 const mockMlApi: LogsOverviewDependencies['mlApi'] = {
-  checkMlCapabilities: jest.fn(),
+  checkMlCapabilities: vi.fn(),
 };
 
 const mockDependencies: LogsOverviewDependencies = {
@@ -78,11 +83,11 @@ describe('LogsOverview', () => {
   });
 
   beforeAll(() => {
-    jest
+    vi
       .spyOn(mockDependencies.logsDataAccess.services.logSourcesService, 'getFlattenedLogSources')
       .mockResolvedValue('logs');
-    jest.spyOn(mockDependencies.dataViews, 'create').mockResolvedValue(mockDataView);
-    jest.spyOn(mockMlApi, 'checkMlCapabilities').mockResolvedValue({
+    vi.spyOn(mockDependencies.dataViews, 'create').mockResolvedValue(mockDataView);
+    vi.spyOn(mockMlApi, 'checkMlCapabilities').mockResolvedValue({
       isPlatinumOrTrialLicense: true,
       mlFeatureEnabledInSpace: true,
       upgradeInProgress: false,
@@ -91,11 +96,11 @@ describe('LogsOverview', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('without the default logs source', () => {
@@ -260,7 +265,7 @@ describe('LogsOverview', () => {
 
   describe('with ml features being disabled', () => {
     beforeAll(() => {
-      jest.spyOn(mockMlApi, 'checkMlCapabilities').mockResolvedValue({
+      vi.spyOn(mockMlApi, 'checkMlCapabilities').mockResolvedValue({
         isPlatinumOrTrialLicense: true,
         mlFeatureEnabledInSpace: false,
         upgradeInProgress: false,
@@ -280,7 +285,7 @@ describe('LogsOverview', () => {
 
   describe('with an insufficient license', () => {
     beforeAll(() => {
-      jest.spyOn(mockMlApi, 'checkMlCapabilities').mockResolvedValue({
+      vi.spyOn(mockMlApi, 'checkMlCapabilities').mockResolvedValue({
         isPlatinumOrTrialLicense: false,
         mlFeatureEnabledInSpace: true,
         upgradeInProgress: false,
@@ -289,7 +294,7 @@ describe('LogsOverview', () => {
     });
 
     afterAll(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     it('displays the insufficient license callout', async () => {

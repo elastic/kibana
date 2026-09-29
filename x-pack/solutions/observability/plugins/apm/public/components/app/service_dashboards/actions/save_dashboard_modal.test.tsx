@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,25 +15,31 @@ import { renderWithContext } from '../../../../utils/test_helpers';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { SaveDashboardModal } from './save_dashboard_modal';
 
-const mockCallApmApi = jest.fn();
+const mockCallApmApi = vi.fn();
 
-jest.mock('../../../../plugin', () => ({
-  ...jest.requireActual('../../../../plugin'),
-  getApmInternalServices: () => ({ callApmApi: mockCallApmApi }),
-}));
+vi.mock('../../../../plugin', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../plugin')),
+      getApmInternalServices: () => ({ callApmApi: mockCallApmApi }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseDashboardFetcher = jest.fn();
-jest.mock('../../../../hooks/use_dashboards_fetcher', () => ({
-  useDashboardFetcher: () => mockUseDashboardFetcher(),
-}));
+const mockUseDashboardFetcher = vi.fn();
+vi.mock('../../../../hooks/use_dashboards_fetcher', () => {
+      const mocked = {
+      useDashboardFetcher: () => mockUseDashboardFetcher(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const DASHBOARD_TITLE = 'My dashboard';
 
 async function linkDashboard(serviceName: string) {
   renderWithContext(
     <SaveDashboardModal
-      onClose={jest.fn()}
-      onRefresh={jest.fn()}
+      onClose={vi.fn()}
+      onRefresh={vi.fn()}
       serviceName={serviceName}
       serviceDashboards={[]}
     />

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 import type {
@@ -18,8 +20,8 @@ import { DataGridDensity } from '@kbn/unified-data-table';
 import { DatatableAppearanceSettings } from './appearance_settings';
 
 // mocking random id generator function
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
 
   return {
     ...original,
@@ -39,7 +41,7 @@ describe('datatable appearance settings', () => {
 
   beforeEach(() => {
     defaultProps = {
-      setState: jest.fn(),
+      setState: vi.fn(),
       frame: {} as FramePublicAPI,
       state: {} as DatatableVisualizationState,
     };

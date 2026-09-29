@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getSuggestionsWithTermsAggregation } from './get_suggestions_with_terms_aggregation';
 
-const mockSearch = jest.fn();
+const mockSearch = vi.fn();
 
-const apmEventClient: jest.Mocked<APMEventClient> = {
+const apmEventClient: Mocked<APMEventClient> = {
   search: mockSearch,
 } as any;
 
@@ -33,7 +36,7 @@ describe('getSuggestionsWithTermsAggregation', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSearch.mockResolvedValue({});
   });
 

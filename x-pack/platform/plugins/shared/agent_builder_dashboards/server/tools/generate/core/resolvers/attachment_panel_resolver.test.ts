@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import {
   VISUALIZATION_ATTACHMENT_TYPE,
@@ -16,7 +18,7 @@ import { createAttachmentPanelResolver } from './attachment_panel_resolver';
 
 const makeAttachments = (record?: Record<string, unknown>): AttachmentStateManager =>
   ({
-    getAttachmentRecord: jest.fn().mockReturnValue(record),
+    getAttachmentRecord: vi.fn().mockReturnValue(record),
   } as unknown as AttachmentStateManager);
 
 const makeVisualizationAttachment = (data: Record<string, unknown>) => ({

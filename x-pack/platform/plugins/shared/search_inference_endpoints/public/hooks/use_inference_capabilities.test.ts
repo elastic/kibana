@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useInferenceCapabilities } from './use_inference_capabilities';
 import { useKibana } from './use_kibana';
 
-jest.mock('./use_kibana');
+vi.mock('./use_kibana');
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockUseKibana = useKibana as Mock;
 
 const renderCapabilities = (capabilities: Record<string, unknown>) => {
   mockUseKibana.mockReturnValue({
@@ -22,7 +25,7 @@ const renderCapabilities = (capabilities: Record<string, unknown>) => {
 
 describe('useInferenceCapabilities', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns canManage: true when manage capability is true', () => {

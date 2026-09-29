@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -16,17 +18,21 @@ import { createAppMockRenderer } from '../lib/test_utils';
 import { MaintenanceWindowsPage } from './home';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '../../common';
 
-jest.mock('../hooks/use_find_maintenance_windows');
-jest.mock('../hooks/use_breadcrumbs', () => ({
-  useBreadcrumbs: jest.fn(),
-}));
-jest.mock('./maintenance_windows_list', () => ({
-  MaintenanceWindowsList: () => <div data-test-subj="maintenance-windows-list" />,
-}));
+vi.mock('../hooks/use_find_maintenance_windows');
+vi.mock('../hooks/use_breadcrumbs', () => {
+      const mocked = {
+      useBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./maintenance_windows_list', () => {
+      const mocked = {
+      MaintenanceWindowsList: () => <div data-test-subj="maintenance-windows-list" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useFindMaintenanceWindows: useFindMaintenanceWindowsMock } = jest.requireMock(
-  '../hooks/use_find_maintenance_windows'
-);
+const { useFindMaintenanceWindows: useFindMaintenanceWindowsMock } = (await vi.importMock('../hooks/use_find_maintenance_windows'));
 
 const platinumLicense = licensingMock.createLicense({
   license: { type: 'platinum' },
@@ -50,12 +56,12 @@ describe('MaintenanceWindowsPage', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useFindMaintenanceWindowsMock.mockReturnValue({
       isLoading: false,
       isInitialLoading: false,
       data: { maintenanceWindows: [sampleWindow], total: 1 },
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
   });
 
@@ -94,7 +100,7 @@ describe('MaintenanceWindowsPage', () => {
       isLoading: false,
       isInitialLoading: false,
       data: { maintenanceWindows: [], total: 0 },
-      refetch: jest.fn(),
+      refetch: vi.fn(),
     });
 
     const { getByTestId, queryByTestId } = renderPage();

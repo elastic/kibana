@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import {
   DEFAULT_TIMEOUT_MS,
   DEFAULT_MODEL,
@@ -22,12 +25,12 @@ const logger = loggingSystemMock.createLogger();
 
 // Mock an instance of the OpenAI class
 // with overridden flag for purpose of jest test
-jest.mock('openai', () => {
-  const UnmodifiedOpenAIClient = jest.requireActual('openai').default;
+vi.mock('openai', () => {
+  const UnmodifiedOpenAIClient = require('openai').default;
 
   return {
     __esModule: true,
-    default: jest.fn().mockImplementation((config) => {
+    default: vi.fn().mockImplementation((config) => {
       return new UnmodifiedOpenAIClient({
         ...config,
         dangerouslyAllowBrowser: true,
@@ -36,7 +39,7 @@ jest.mock('openai', () => {
   };
 });
 describe('OpenAI with proxy config', () => {
-  let mockProxiedRequest: jest.Mock;
+  let mockProxiedRequest: Mock;
   let connectorUsageCollector: ConnectorUsageCollector;
   const mockDefaults = {
     timeout: DEFAULT_TIMEOUT_MS,
@@ -96,10 +99,10 @@ describe('OpenAI with proxy config', () => {
       logger,
       connectorId: 'test-connector-id',
     });
-    mockProxiedRequest = jest.fn().mockResolvedValue(mockResponse);
+    mockProxiedRequest = vi.fn().mockResolvedValue(mockResponse);
     // @ts-ignore
     connector.request = mockProxiedRequest;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('verifies that the OpenAI client is initialized with the custom proxy HTTP agent', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import * as api from '../api/api';
@@ -12,17 +15,17 @@ import { TestProviders } from '../../../common/mock';
 import { useGetTemplateTags } from './use_get_template_tags';
 import { useToasts } from '../../../common/lib/kibana';
 
-jest.mock('../api/api');
-jest.mock('../../../common/lib/kibana');
+vi.mock('../api/api');
+vi.mock('../../../common/lib/kibana');
 
 describe('useGetTemplateTags', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useToasts as jest.Mock).mockReturnValue({ addError: jest.fn() });
+    vi.clearAllMocks();
+    (useToasts as Mock).mockReturnValue({ addError: vi.fn() });
   });
 
   it('calls getTemplateTags api', async () => {
-    const spyOnGetTemplateTags = jest.spyOn(api, 'getTemplateTags');
+    const spyOnGetTemplateTags = vi.spyOn(api, 'getTemplateTags');
     spyOnGetTemplateTags.mockResolvedValue(['tag1', 'tag2']);
 
     renderHook(() => useGetTemplateTags(), {
@@ -36,7 +39,7 @@ describe('useGetTemplateTags', () => {
 
   it('returns tags data', async () => {
     const mockTags = ['security', 'incident', 'critical'];
-    jest.spyOn(api, 'getTemplateTags').mockResolvedValue(mockTags);
+    vi.spyOn(api, 'getTemplateTags').mockResolvedValue(mockTags);
 
     const { result } = renderHook(() => useGetTemplateTags(), {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => (
@@ -48,10 +51,10 @@ describe('useGetTemplateTags', () => {
   });
 
   it('displays an error toast when an error occurs', async () => {
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addError });
 
-    const spyOnGetTemplateTags = jest.spyOn(api, 'getTemplateTags');
+    const spyOnGetTemplateTags = vi.spyOn(api, 'getTemplateTags');
     spyOnGetTemplateTags.mockRejectedValue(new Error('Something went wrong'));
 
     renderHook(() => useGetTemplateTags(), {
@@ -64,13 +67,13 @@ describe('useGetTemplateTags', () => {
   });
 
   it('does not display error toast for AbortError', async () => {
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addError });
 
     const abortError = new Error('Aborted');
     abortError.name = 'AbortError';
 
-    const spyOnGetTemplateTags = jest.spyOn(api, 'getTemplateTags');
+    const spyOnGetTemplateTags = vi.spyOn(api, 'getTemplateTags');
     spyOnGetTemplateTags.mockRejectedValue(abortError);
 
     renderHook(() => useGetTemplateTags(), {

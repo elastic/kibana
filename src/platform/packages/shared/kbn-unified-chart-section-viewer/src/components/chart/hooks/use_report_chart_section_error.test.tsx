@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { apm } from '@elastic/apm-rum';
 import type { Logger } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -24,35 +27,38 @@ import {
   useReportChartSectionError,
 } from './use_report_chart_section_error';
 
-jest.mock('@elastic/apm-rum', () => ({
-  apm: {
-    captureError: jest.fn(),
-    getCurrentTransaction: jest.fn(),
-  },
-}));
+vi.mock('@elastic/apm-rum', () => {
+      const mocked = {
+      apm: {
+        captureError: vi.fn(),
+        getCurrentTransaction: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const captureErrorMock = apm.captureError as jest.MockedFunction<typeof apm.captureError>;
-const getCurrentTransactionMock = apm.getCurrentTransaction as jest.MockedFunction<
+const captureErrorMock = apm.captureError as MockedFunction<typeof apm.captureError>;
+const getCurrentTransactionMock = apm.getCurrentTransaction as MockedFunction<
   typeof apm.getCurrentTransaction
 >;
 
 interface MockSpan {
-  addLabels: jest.Mock;
-  end: jest.Mock;
+  addLabels: Mock;
+  end: Mock;
   outcome?: string;
 }
 
 interface MockTransaction {
-  startSpan: jest.Mock;
+  startSpan: Mock;
 }
 
 const createMockSpan = (): MockSpan => ({
-  addLabels: jest.fn(),
-  end: jest.fn(),
+  addLabels: vi.fn(),
+  end: vi.fn(),
 });
 
 const createMockTransaction = (span: MockSpan | undefined): MockTransaction => ({
-  startSpan: jest.fn().mockReturnValue(span),
+  startSpan: vi.fn().mockReturnValue(span),
 });
 
 const renderReporter = (externalServices?: ExternalServices) => {
@@ -67,7 +73,7 @@ const renderReporter = (externalServices?: ExternalServices) => {
 
 describe('useReportChartSectionError', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     getCurrentTransactionMock.mockReturnValue(undefined);
   });
 

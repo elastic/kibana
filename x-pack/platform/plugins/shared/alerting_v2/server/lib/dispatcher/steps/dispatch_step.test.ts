@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { BulkScheduleWorkflowResult, WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -35,17 +38,17 @@ const getExecutionIds = (
 const getScheduledGroupCount = (result: Awaited<ReturnType<DispatchStep['execute']>>): number =>
   result.type === 'continue' ? result.data?.outcome?.scheduledGroupCount ?? 0 : 0;
 
-const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> => {
-  const bulkScheduleWorkflow = jest.fn().mockResolvedValue([]);
+const createMockWorkflowsManagement = (): Mocked<WorkflowsServerPluginSetup['management']> => {
+  const bulkScheduleWorkflow = vi.fn().mockResolvedValue([]);
   return {
-    getWorkflowsByIdsForRequests: jest.fn().mockResolvedValue([{ status: 'fulfilled', value: [] }]),
+    getWorkflowsByIdsForRequests: vi.fn().mockResolvedValue([{ status: 'fulfilled', value: [] }]),
     bulkScheduleWorkflow,
-    getClient: jest.fn((request) => ({
+    getClient: vi.fn((request) => ({
       bulkScheduleWorkflow: (
         items: Parameters<WorkflowsServerPluginSetup['management']['bulkScheduleWorkflow']>[0]
       ) => bulkScheduleWorkflow(items, request),
     })),
-  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
+  } as unknown as Mocked<WorkflowsServerPluginSetup['management']>;
 };
 
 const createWorkflowDetailDto = (
@@ -76,7 +79,7 @@ const scheduleError = (message: string): BulkScheduleWorkflowResult[number] => (
 });
 
 describe('DispatchStep', () => {
-  let mockWfm: jest.Mocked<WorkflowsServerPluginSetup['management']>;
+  let mockWfm: Mocked<WorkflowsServerPluginSetup['management']>;
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
 
@@ -85,7 +88,7 @@ describe('DispatchStep', () => {
     ({ loggerService, mockLogger } = createLoggerService());
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('dispatches each group to its workflow destinations', async () => {
     const step = new DispatchStep(mockWfm);

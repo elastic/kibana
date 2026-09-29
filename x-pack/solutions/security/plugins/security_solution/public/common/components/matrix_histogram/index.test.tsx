@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
@@ -17,28 +20,33 @@ import type { UseVisualizationResponseMock } from '../visualization_actions/use_
 import { useVisualizationResponseMock } from '../visualization_actions/use_visualization_response.mock';
 import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
 
-jest.mock('../../containers/query_toggle');
+vi.mock('../../containers/query_toggle');
 
-jest.mock('../visualization_actions/actions');
-jest.mock('../visualization_actions/visualization_embeddable');
+vi.mock('../visualization_actions/actions');
+vi.mock('../visualization_actions/visualization_embeddable');
 
-jest.mock('../../hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../../hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../visualization_actions/use_visualization_response', () => ({
-  ...jest.requireActual('../visualization_actions/use_visualization_response'),
-  useVisualizationResponse: jest
-    .requireActual('../visualization_actions/use_visualization_response.mock')
-    .useVisualizationResponseMock.create(),
-}));
+vi.mock('../visualization_actions/use_visualization_response', async () => {
+      const mocked = {
+      ...(await vi.importActual('../visualization_actions/use_visualization_response')),
+      useVisualizationResponse: (await vi.importActual('../visualization_actions/use_visualization_response.mock'))
+        .useVisualizationResponseMock.create(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockUseVisualizationResponse = useVisualizationResponse as UseVisualizationResponseMock;
 
-const mockLocation = jest.fn().mockReturnValue({ pathname: '/test' });
+const mockLocation = vi.fn().mockReturnValue({ pathname: '/test' });
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
 
   return {
     ...original,
@@ -59,14 +67,14 @@ describe('Matrix Histogram Component', () => {
       { text: 'dns.question.registered_domain', value: 'dns.question.registered_domain' },
     ],
     startDate: '2019-07-18T19:00: 00.000Z',
-    subtitle: jest.fn((totalCount) => `Showing: ${totalCount} events`),
+    subtitle: vi.fn((totalCount) => `Showing: ${totalCount} events`),
     title: 'mockTitle',
   };
-  const mockUseQueryToggle = useQueryToggle as jest.Mock;
-  const mockSetToggle = jest.fn();
+  const mockUseQueryToggle = useQueryToggle as Mock;
+  const mockSetToggle = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
   });

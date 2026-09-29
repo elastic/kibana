@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject, throwError } from 'rxjs';
 import { createFetchIndicatorById } from './fetch_indicator_by_id';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -15,12 +17,12 @@ const indicatorsResponse = {
 };
 
 describe('FetchIndicatorByIdService', () => {
-  beforeEach(jest.clearAllMocks);
+  beforeEach(vi.clearAllMocks);
 
   describe('fetchIndicatorById()', () => {
     describe('when query is successful', () => {
       beforeEach(() => {
-        jest
+        vi
           .mocked(mockedSearchService.search)
           .mockReturnValue(new BehaviorSubject(indicatorsResponse));
       });
@@ -57,7 +59,7 @@ describe('FetchIndicatorByIdService', () => {
 
     describe('when query fails', () => {
       beforeEach(() => {
-        jest
+        vi
           .mocked(mockedSearchService.search)
           .mockReturnValue(throwError(() => new Error('some random exception')));
       });

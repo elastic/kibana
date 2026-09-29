@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -20,10 +23,10 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
 import { setupMockServer, startMockServer } from '../test/mock_server/mock_server';
 
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
-jest.mock('../common/navigation/use_csp_integration_link');
-jest.mock('../common/api/use_wiz_integration_route');
-jest.mock('../common/api/use_add_integrations_route');
+vi.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
+vi.mock('../common/navigation/use_csp_integration_link');
+vi.mock('../common/api/use_wiz_integration_route');
+vi.mock('../common/api/use_add_integrations_route');
 
 const server = setupMockServer();
 
@@ -35,14 +38,14 @@ describe('NoVulnerabilitiesStates', () => {
   startMockServer(server);
 
   beforeAll(() => {
-    (useCspIntegrationLink.useCspIntegrationLink as jest.Mock).mockReturnValue(cnvmintegrationLink);
-    (useAddIntegrationRoute.useAddIntegrationRoute as jest.Mock).mockReturnValue(
+    (useCspIntegrationLink.useCspIntegrationLink as Mock).mockReturnValue(cnvmintegrationLink);
+    (useAddIntegrationRoute.useAddIntegrationRoute as Mock).mockReturnValue(
       integrationRouteLink
     );
   });
 
   beforeEach(() => {
-    (useCspSetupStatusApi.useCspSetupStatusApi as jest.Mock).mockReturnValue({
+    (useCspSetupStatusApi.useCspSetupStatusApi as Mock).mockReturnValue({
       data: {
         vuln_mgmt: { status: 'not-installed' },
         indicesDetails: [],

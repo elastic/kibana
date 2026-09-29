@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 // @ts-ignore not-typed yet
@@ -79,9 +81,9 @@ describe('Percentiles', () => {
     },
     seriesId: '64e4b07a-206e-4a0d-87e1-d6f5864f4acb',
     id: 'iecdd7ef1-fb4b-11eb-8db9-69be3a5b3be0',
-    onBlur: jest.fn(),
-    onChange: jest.fn(),
-    onFocus: jest.fn(),
+    onBlur: vi.fn(),
+    onChange: vi.fn(),
+    onFocus: vi.fn(),
   };
 
   const wrapper = shallowWithIntl(<Percentiles {...props} />);

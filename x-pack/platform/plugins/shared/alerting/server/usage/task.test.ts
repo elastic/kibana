@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
@@ -24,12 +27,12 @@ import {
 import { getBackfillTelemetryPerDay } from './lib/get_backfill_telemetry';
 import { getGapAutoFillSchedulerTelemetryPerDay } from './lib/get_gap_auto_fill_scheduler_telemetry';
 
-jest.mock('./lib/get_telemetry_from_kibana');
-jest.mock('./lib/get_telemetry_from_task_manager');
-jest.mock('./lib/get_telemetry_from_alerts');
-jest.mock('./lib/get_telemetry_from_event_log');
-jest.mock('./lib/get_backfill_telemetry');
-jest.mock('./lib/get_gap_auto_fill_scheduler_telemetry');
+vi.mock('./lib/get_telemetry_from_kibana');
+vi.mock('./lib/get_telemetry_from_task_manager');
+vi.mock('./lib/get_telemetry_from_alerts');
+vi.mock('./lib/get_telemetry_from_event_log');
+vi.mock('./lib/get_backfill_telemetry');
+vi.mock('./lib/get_gap_auto_fill_scheduler_telemetry');
 
 const eventLogIndex = '.kibana-event-log';
 const taskManagerIndex = '.kibana-task-manager';
@@ -47,18 +50,18 @@ describe('telemetryTaskRunner', () => {
   let logger: MockedLogger;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggerMock.create();
 
-    (getTotalCountAggregations as jest.Mock).mockResolvedValue({ hasErrors: false });
-    (getTotalCountInUse as jest.Mock).mockResolvedValue({ hasErrors: false });
-    (getFailedAndUnrecognizedTasksPerDay as jest.Mock).mockResolvedValue({ hasErrors: false });
-    (getTotalAlertsCountAggregations as jest.Mock).mockResolvedValue({ hasErrors: false });
-    (getExecutionsPerDayCount as jest.Mock).mockResolvedValue({ hasErrors: false });
-    (getExecutionTimeoutsPerDayCount as jest.Mock).mockResolvedValue({ hasErrors: false });
-    (getBackfillTelemetryPerDay as jest.Mock).mockResolvedValue({ hasErrors: false });
-    (getGapAutoFillSchedulerTelemetryPerDay as jest.Mock).mockResolvedValue({ hasErrors: false });
-    (getMWTelemetry as jest.Mock).mockResolvedValue(mwTelemetryResult);
+    (getTotalCountAggregations as Mock).mockResolvedValue({ hasErrors: false });
+    (getTotalCountInUse as Mock).mockResolvedValue({ hasErrors: false });
+    (getFailedAndUnrecognizedTasksPerDay as Mock).mockResolvedValue({ hasErrors: false });
+    (getTotalAlertsCountAggregations as Mock).mockResolvedValue({ hasErrors: false });
+    (getExecutionsPerDayCount as Mock).mockResolvedValue({ hasErrors: false });
+    (getExecutionTimeoutsPerDayCount as Mock).mockResolvedValue({ hasErrors: false });
+    (getBackfillTelemetryPerDay as Mock).mockResolvedValue({ hasErrors: false });
+    (getGapAutoFillSchedulerTelemetryPerDay as Mock).mockResolvedValue({ hasErrors: false });
+    (getMWTelemetry as Mock).mockResolvedValue(mwTelemetryResult);
   });
 
   test('does not request the maintenance-window hidden type or fail when the maintenanceWindows plugin is disabled', async () => {
@@ -66,11 +69,11 @@ describe('telemetryTaskRunner', () => {
     // serverless tier) left the `maintenance-window` type unregistered and failed the task.
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
-    coreSetup.getStartServices = jest.fn().mockResolvedValue([coreStart, {}, {}]);
+    coreSetup.getStartServices = vi.fn().mockResolvedValue([coreStart, {}, {}]);
 
     const savedObjectsRepository = savedObjectsRepositoryMock.create();
     // Mirror production: requesting the unregistered hidden type throws.
-    coreStart.savedObjects.createInternalRepository = jest.fn((includedHiddenTypes?: string[]) => {
+    coreStart.savedObjects.createInternalRepository = vi.fn((includedHiddenTypes?: string[]) => {
       if (includedHiddenTypes?.includes(MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE)) {
         throw new Error("Missing mappings for saved objects types: 'maintenance-window'");
       }
@@ -103,12 +106,12 @@ describe('telemetryTaskRunner', () => {
     const coreStart = coreMock.createStart();
 
     const savedObjectsRepository = savedObjectsRepositoryMock.create();
-    const maintenanceWindows = { getMaintenanceWindowClientWithoutAuth: jest.fn() };
-    coreSetup.getStartServices = jest
+    const maintenanceWindows = { getMaintenanceWindowClientWithoutAuth: vi.fn() };
+    coreSetup.getStartServices = vi
       .fn()
       .mockResolvedValue([coreStart, { maintenanceWindows }, {}]);
 
-    coreStart.savedObjects.createInternalRepository = jest
+    coreStart.savedObjects.createInternalRepository = vi
       .fn()
       .mockReturnValue(savedObjectsRepository);
 

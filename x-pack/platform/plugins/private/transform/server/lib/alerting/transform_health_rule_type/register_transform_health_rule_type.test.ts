@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
@@ -15,8 +17,8 @@ import { getTransformHealthRuleType } from './register_transform_health_rule_typ
 describe('Transform Health Rule Type', () => {
   const mockGetFieldFormatsStart: () => FieldFormatsStart = () =>
     ({
-      fieldFormatServiceFactory: jest.fn(() => ({
-        deserialize: jest.fn(),
+      fieldFormatServiceFactory: vi.fn(() => ({
+        deserialize: vi.fn(),
       })),
     } as any);
 
@@ -28,9 +30,9 @@ describe('Transform Health Rule Type', () => {
         scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
         alertsClient: withAlertsClient
           ? {
-              report: jest.fn(),
-              getRecoveredAlerts: jest.fn(() => []),
-              setAlertData: jest.fn(),
+              report: vi.fn(),
+              getRecoveredAlerts: vi.fn(() => []),
+              setAlertData: vi.fn(),
             }
           : null,
         uiSettingsClient: uiSettingsServiceMock.createClient(),
@@ -71,7 +73,7 @@ describe('Transform Health Rule Type', () => {
         const notFoundError = Object.assign(new Error('transform not found'), errorProps);
 
         const mockEsClient = options.services.scopedClusterClient.asCurrentUser;
-        mockEsClient.transform.getTransform = jest.fn().mockRejectedValue(notFoundError);
+        mockEsClient.transform.getTransform = vi.fn().mockRejectedValue(notFoundError);
 
         let thrownError: any;
         try {
@@ -95,7 +97,7 @@ describe('Transform Health Rule Type', () => {
       });
 
       const mockEsClient = options.services.scopedClusterClient.asCurrentUser;
-      mockEsClient.transform.getTransform = jest.fn().mockRejectedValue(serverError);
+      mockEsClient.transform.getTransform = vi.fn().mockRejectedValue(serverError);
 
       let thrownError: any;
       try {
@@ -115,11 +117,11 @@ describe('Transform Health Rule Type', () => {
       const options = createExecutorOptions();
 
       const mockEsClient = options.services.scopedClusterClient.asCurrentUser;
-      mockEsClient.transform.getTransform = jest.fn().mockResolvedValue({
+      mockEsClient.transform.getTransform = vi.fn().mockResolvedValue({
         count: 0,
         transforms: [],
       });
-      mockEsClient.transform.getTransformStats = jest.fn().mockResolvedValue({
+      mockEsClient.transform.getTransformStats = vi.fn().mockResolvedValue({
         count: 0,
         transforms: [],
       });

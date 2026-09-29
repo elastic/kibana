@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getCapabilitiesRoute } from './get_capabilities_route';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getGetCapabilitiesRequest } from '../../__mocks__/request';
 import { getPluginNameFromRequest } from '../helpers';
 
-jest.mock('../helpers');
+vi.mock('../helpers');
 
 describe('Get Capabilities Route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -34,7 +37,7 @@ describe('Get Capabilities Route', () => {
     });
 
     it('returns 500 if an error is thrown in fetching capabilities', async () => {
-      (getPluginNameFromRequest as jest.Mock).mockImplementation(() => {
+      (getPluginNameFromRequest as Mock).mockImplementation(() => {
         throw new Error('Mocked error');
       });
       const response = await server.inject(

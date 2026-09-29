@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -15,9 +18,9 @@ import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { getRule } from '../../../rule/methods/get/get_rule';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
-jest.mock('../../../../lib/rule_gaps/find_gaps_by_id');
-jest.mock('../../../backfill/methods/schedule');
-jest.mock('../../../rule/methods/get/get_rule');
+vi.mock('../../../../lib/rule_gaps/find_gaps_by_id');
+vi.mock('../../../backfill/methods/schedule');
+vi.mock('../../../rule/methods/get/get_rule');
 
 describe('fillGapById', () => {
   let rulesClient: RulesClient;
@@ -26,7 +29,7 @@ describe('fillGapById', () => {
     kibanaVersion: 'v8.0.0',
     eventLogger: eventLoggerMock.create(),
   });
-  const mockedGetRule = getRule as jest.MockedFunction<typeof getRule>;
+  const mockedGetRule = getRule as MockedFunction<typeof getRule>;
 
   const mockRule = {
     id: '1',
@@ -56,14 +59,14 @@ describe('fillGapById', () => {
   };
 
   const getMockGap = (overwrites = {}) => ({
-    getState: jest.fn().mockReturnValue({
+    getState: vi.fn().mockReturnValue({
       unfilledIntervals: [{ gte: '2023-11-16T08:00:00.000Z', lte: '2023-11-16T08:20:00.000Z' }],
       ...overwrites,
     }),
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     eventLogClient = eventLogClientMock.create();
     mockedGetRule.mockResolvedValue(mockRule);
 
@@ -77,8 +80,8 @@ describe('fillGapById', () => {
       const params = { ruleId: '1', gapId: 'gap1' };
       const gap = getMockGap();
 
-      (findGapsById as jest.Mock).mockResolvedValue([gap]);
-      (scheduleBackfill as jest.Mock).mockResolvedValue('success');
+      (findGapsById as Mock).mockResolvedValue([gap]);
+      (scheduleBackfill as Mock).mockResolvedValue('success');
 
       await rulesClient.fillGapById(params);
 
@@ -110,7 +113,7 @@ describe('fillGapById', () => {
       const params = { ruleId: '1', gapId: 'gap1' };
       const authError = new Error('Unauthorized');
       authorization.ensureAuthorized.mockRejectedValue(authError);
-      (findGapsById as jest.Mock).mockResolvedValue([getMockGap()]);
+      (findGapsById as Mock).mockResolvedValue([getMockGap()]);
 
       await expect(rulesClient.fillGapById(params)).rejects.toThrow('Unauthorized');
 
@@ -152,8 +155,8 @@ describe('fillGapById', () => {
       },
     ];
 
-    (findGapsById as jest.Mock).mockResolvedValue([gap]);
-    (scheduleBackfill as jest.Mock).mockResolvedValue('success');
+    (findGapsById as Mock).mockResolvedValue([gap]);
+    (scheduleBackfill as Mock).mockResolvedValue('success');
 
     const result = await rulesClient.fillGapById(params);
 
@@ -199,8 +202,8 @@ describe('fillGapById', () => {
       },
     ];
 
-    (findGapsById as jest.Mock).mockResolvedValue([gap]);
-    (scheduleBackfill as jest.Mock).mockResolvedValue('success');
+    (findGapsById as Mock).mockResolvedValue([gap]);
+    (scheduleBackfill as Mock).mockResolvedValue('success');
 
     const result = await rulesClient.fillGapById(params);
 
@@ -209,7 +212,7 @@ describe('fillGapById', () => {
   });
 
   it('throws error when gap is not found', async () => {
-    (findGapsById as jest.Mock).mockResolvedValue([]);
+    (findGapsById as Mock).mockResolvedValue([]);
 
     await expect(
       rulesClient.fillGapById({
@@ -221,7 +224,7 @@ describe('fillGapById', () => {
 
   it('handles errors from finding gap', async () => {
     const error = new Error('Failed to find gap');
-    (findGapsById as jest.Mock).mockRejectedValue(error);
+    (findGapsById as Mock).mockRejectedValue(error);
 
     await expect(
       rulesClient.fillGapById({
@@ -233,8 +236,8 @@ describe('fillGapById', () => {
 
   it('handles errors from scheduling backfill', async () => {
     const gap = getMockGap();
-    (findGapsById as jest.Mock).mockResolvedValue([gap]);
-    (scheduleBackfill as jest.Mock).mockRejectedValue(new Error('Scheduling failed'));
+    (findGapsById as Mock).mockResolvedValue([gap]);
+    (scheduleBackfill as Mock).mockRejectedValue(new Error('Scheduling failed'));
 
     await expect(
       rulesClient.fillGapById({
@@ -250,7 +253,7 @@ describe('fillGapById', () => {
       unfilledIntervals: [],
     });
 
-    (findGapsById as jest.Mock).mockResolvedValue([gap]);
+    (findGapsById as Mock).mockResolvedValue([gap]);
 
     await expect(rulesClient.fillGapById(params)).rejects.toThrow(
       'No unfilled intervals found for ruleId 1'
@@ -275,8 +278,8 @@ describe('fillGapById', () => {
     const params = { ruleId: '1', gapId: 'gap1' };
     const gap = getMockGap();
 
-    (findGapsById as jest.Mock).mockResolvedValue([gap]);
-    (scheduleBackfill as jest.Mock).mockResolvedValue('success');
+    (findGapsById as Mock).mockResolvedValue([gap]);
+    (scheduleBackfill as Mock).mockResolvedValue('success');
 
     await rulesClient.fillGapById(params);
 

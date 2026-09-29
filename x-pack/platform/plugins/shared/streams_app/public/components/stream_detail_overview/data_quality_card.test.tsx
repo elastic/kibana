@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,50 +16,68 @@ import {
   createMockQueryStreamDefinition,
 } from '../stream_management/data_management/shared/mocks';
 
-const mockUseStreamDetail = jest.fn();
-const mockUseStreamsAppFetch = jest.fn();
+const mockUseStreamDetail = vi.fn();
+const mockUseStreamsAppFetch = vi.fn();
 
-jest.mock('../../hooks/use_stream_detail', () => ({
-  useStreamDetail: () => mockUseStreamDetail(),
-}));
+vi.mock('../../hooks/use_stream_detail', () => {
+      const mocked = {
+      useStreamDetail: () => mockUseStreamDetail(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_streams_app_fetch', () => ({
-  useStreamsAppFetch: (...args: unknown[]) => mockUseStreamsAppFetch(...args),
-}));
+vi.mock('../../hooks/use_streams_app_fetch', () => {
+      const mocked = {
+      useStreamsAppFetch: (...args: unknown[]) => mockUseStreamsAppFetch(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_streams_app_router', () => ({
-  useStreamsAppRouter: () => ({
-    link: (_path: string, params: { path: { key: string; tab: string } }) =>
-      `/streams/${params.path.key}/management/${params.path.tab}`,
-    push: jest.fn(),
-  }),
-}));
+vi.mock('../../hooks/use_streams_app_router', () => {
+      const mocked = {
+      useStreamsAppRouter: () => ({
+        link: (_path: string, params: { path: { key: string; tab: string } }) =>
+          `/streams/${params.path.key}/management/${params.path.tab}`,
+        push: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_time_range', () => ({
-  useTimeRange: () => ({ rangeFrom: 'now-15m', rangeTo: 'now' }),
-}));
+vi.mock('../../hooks/use_time_range', () => {
+      const mocked = {
+      useTimeRange: () => ({ rangeFrom: 'now-15m', rangeTo: 'now' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./top_failure_reasons', () => ({
-  TopFailureReasons: () => null,
-}));
+vi.mock('./top_failure_reasons', () => {
+      const mocked = {
+      TopFailureReasons: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    core: { application: { navigateToUrl: jest.fn() }, uiSettings: {} },
-    dependencies: {
-      start: {
-        data: { search: { search: jest.fn() } },
-        streams: { streamsRepositoryClient: { fetch: jest.fn() } },
-      },
-    },
-  }),
-}));
+vi.mock('../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        core: { application: { navigateToUrl: vi.fn() }, uiSettings: {} },
+        dependencies: {
+          start: {
+            data: { search: { search: vi.fn() } },
+            streams: { streamsRepositoryClient: { fetch: vi.fn() } },
+          },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('DataQualityCard', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseStreamsAppFetch.mockImplementation(() => ({
       value: 100,
       loading: false,

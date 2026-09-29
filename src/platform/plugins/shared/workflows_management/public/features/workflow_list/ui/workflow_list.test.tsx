@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -20,121 +23,154 @@ import { TestProvider } from '../../../shared/mocks/test_providers';
 
 // --- Mocks ---
 
-jest.mock('../../../hooks/use_kibana');
+vi.mock('../../../hooks/use_kibana');
 
-const mockUseWorkflows = jest.fn();
+const mockUseWorkflows = vi.fn();
 
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
+vi.mock('@kbn/workflows-ui', async () => {
+  const actual = (await vi.importActual('@kbn/workflows-ui'));
   return {
     ...actual,
     useWorkflows: (...args: unknown[]) => mockUseWorkflows(...args),
-    useWorkflowsCapabilities: jest.fn(() => mockCreateMockWorkflowsCapabilities()),
+    useWorkflowsCapabilities: vi.fn(() => mockCreateMockWorkflowsCapabilities()),
   };
 });
 
 const mockKibanaValue = createUseKibanaMockValue();
 const { application: mockApplication } = mockKibanaValue.services;
 
-(mockApplication.getUrlForApp as jest.Mock).mockReturnValue('/app/workflows/wf-1');
+(mockApplication.getUrlForApp as Mock).mockReturnValue('/app/workflows/wf-1');
 
-jest.mock('../../../hooks/use_telemetry', () => ({
-  useTelemetry: () => ({
-    reportWorkflowListViewed: jest.fn(),
-    reportWorkflowExported: jest.fn(),
-    reportWorkflowDeleted: jest.fn(),
-    reportWorkflowUpdated: jest.fn(),
-    reportWorkflowCloned: jest.fn(),
-    reportWorkflowRunInitiated: jest.fn(),
-  }),
-}));
+vi.mock('../../../hooks/use_telemetry', () => {
+      const mocked = {
+      useTelemetry: () => ({
+        reportWorkflowListViewed: vi.fn(),
+        reportWorkflowExported: vi.fn(),
+        reportWorkflowDeleted: vi.fn(),
+        reportWorkflowUpdated: vi.fn(),
+        reportWorkflowCloned: vi.fn(),
+        reportWorkflowRunInitiated: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockRefetch = jest.fn().mockResolvedValue({ data: null });
+const mockRefetch = vi.fn().mockResolvedValue({ data: null });
 
-jest.mock('./use_event_driven_execution_status', () => ({
-  useEventDrivenExecutionStatus: () => ({
-    eventDrivenExecutionEnabled: true,
-    isLoading: false,
-    error: false,
-  }),
-}));
+vi.mock('./use_event_driven_execution_status', () => {
+      const mocked = {
+      useEventDrivenExecutionStatus: () => ({
+        eventDrivenExecutionEnabled: true,
+        isLoading: false,
+        error: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDeleteWorkflows = { mutate: jest.fn() };
-const mockRunWorkflow = { mutate: jest.fn() };
-const mockCloneWorkflow = { mutate: jest.fn() };
-const mockUpdateWorkflow = { mutate: jest.fn() };
+const mockDeleteWorkflows = { mutate: vi.fn() };
+const mockRunWorkflow = { mutate: vi.fn() };
+const mockCloneWorkflow = { mutate: vi.fn() };
+const mockUpdateWorkflow = { mutate: vi.fn() };
 
 interface WorkflowExecuteModalMockProps {
   onSubmit: (data: Record<string, unknown>, triggerTab: 'manual') => void;
 }
 
-jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({
-  useWorkflowActions: () => ({
-    deleteWorkflows: mockDeleteWorkflows,
-    runWorkflow: mockRunWorkflow,
-    cloneWorkflow: mockCloneWorkflow,
-    updateWorkflow: mockUpdateWorkflow,
-  }),
-}));
+vi.mock('../../../entities/workflows/model/use_workflow_actions', () => {
+      const mocked = {
+      useWorkflowActions: () => ({
+        deleteWorkflows: mockDeleteWorkflows,
+        runWorkflow: mockRunWorkflow,
+        cloneWorkflow: mockCloneWorkflow,
+        updateWorkflow: mockUpdateWorkflow,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_export_with_references', () => ({
-  useExportWithReferences: () => ({
-    exportModalState: null,
-    startExport: jest.fn(),
-    handleIgnore: jest.fn(),
-    handleAddDirect: jest.fn(),
-    handleAddAll: jest.fn(),
-    handleCancel: jest.fn(),
-  }),
-}));
+vi.mock('./use_export_with_references', () => {
+      const mocked = {
+      useExportWithReferences: () => ({
+        exportModalState: null,
+        startExport: vi.fn(),
+        handleIgnore: vi.fn(),
+        handleAddDirect: vi.fn(),
+        handleAddAll: vi.fn(),
+        handleCancel: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock child components to keep tests focused
-jest.mock('./export_references_modal', () => ({
-  ExportReferencesModal: () => <div data-test-subj="export-references-modal" />,
-}));
+vi.mock('./export_references_modal', () => {
+      const mocked = {
+      ExportReferencesModal: () => <div data-test-subj="export-references-modal" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./workflows_utility_bar', () => ({
-  WorkflowsUtilityBar: () => <div data-test-subj="workflows-utility-bar">{'Utility Bar'}</div>,
-}));
+vi.mock('./workflows_utility_bar', () => {
+      const mocked = {
+      WorkflowsUtilityBar: () => <div data-test-subj="workflows-utility-bar">{'Utility Bar'}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components', () => ({
-  WorkflowsEmptyState: ({ onCreateWorkflow }: { onCreateWorkflow?: () => void }) => (
-    <div data-test-subj="workflows-empty-state">
-      <button type="button" onClick={onCreateWorkflow}>
-        {'Create Workflow'}
-      </button>
-    </div>
-  ),
-}));
+vi.mock('../../../components', () => {
+      const mocked = {
+      WorkflowsEmptyState: ({ onCreateWorkflow }: { onCreateWorkflow?: () => void }) => (
+        <div data-test-subj="workflows-empty-state">
+          <button type="button" onClick={onCreateWorkflow}>
+            {'Create Workflow'}
+          </button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/workflows_empty_state/workflows_empty_state', () => ({
-  WorkflowsEmptyStateReadOnly: () => <div data-test-subj="workflows-empty-state-readonly" />,
-}));
+vi.mock('../../../components/workflows_empty_state/workflows_empty_state', () => {
+      const mocked = {
+      WorkflowsEmptyStateReadOnly: () => <div data-test-subj="workflows-empty-state-readonly" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../run_workflow/ui/workflow_execute_modal', () => ({
-  WorkflowExecuteModal: ({ onSubmit }: WorkflowExecuteModalMockProps) => (
-    <button
-      type="button"
-      data-test-subj="workflow-execute-modal"
-      onClick={() => onSubmit({}, 'manual')}
-    >
-      {'Run workflow'}
-    </button>
-  ),
-}));
+vi.mock('../../run_workflow/ui/workflow_execute_modal', () => {
+      const mocked = {
+      WorkflowExecuteModal: ({ onSubmit }: WorkflowExecuteModalMockProps) => (
+        <button
+          type="button"
+          data-test-subj="workflow-execute-modal"
+          onClick={() => onSubmit({}, 'manual')}
+        >
+          {'Run workflow'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../shared/ui', () => ({
-  getRunTooltipContent: () => 'Run',
-  ManagedWorkflowBadge: ({ dataTestSubj = 'managedWorkflowBadge' }: { dataTestSubj?: string }) => (
-    <span data-test-subj={dataTestSubj}>{'Managed'}</span>
-  ),
-  StatusBadge: ({ status }: { status: string }) => <span>{status}</span>,
-  WorkflowStatus: ({ valid }: { valid: boolean }) => <span>{valid ? 'Valid' : 'Invalid'}</span>,
-}));
+vi.mock('../../../shared/ui', () => {
+      const mocked = {
+      getRunTooltipContent: () => 'Run',
+      ManagedWorkflowBadge: ({ dataTestSubj = 'managedWorkflowBadge' }: { dataTestSubj?: string }) => (
+        <span data-test-subj={dataTestSubj}>{'Managed'}</span>
+      ),
+      StatusBadge: ({ status }: { status: string }) => <span>{status}</span>,
+      WorkflowStatus: ({ valid }: { valid: boolean }) => <span>{valid ? 'Valid' : 'Invalid'}</span>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../widgets/worflows_triggers_list/worflows_triggers_list', () => ({
-  WorkflowsTriggersList: () => <span>{'Triggers'}</span>,
-}));
+vi.mock('../../../widgets/worflows_triggers_list/worflows_triggers_list', () => {
+      const mocked = {
+      WorkflowsTriggersList: () => <span>{'Triggers'}</span>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // --- Test helpers ---
 
@@ -169,8 +205,8 @@ const createMockWorkflowListDto = (
 });
 
 describe('WorkflowList', () => {
-  const setSearch = jest.fn();
-  const onCreateWorkflow = jest.fn();
+  const setSearch = vi.fn();
+  const onCreateWorkflow = vi.fn();
 
   const defaultProps = {
     search: defaultSearch,
@@ -178,14 +214,14 @@ describe('WorkflowList', () => {
     onCreateWorkflow,
   };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
     // Re-configure auto-mock after clearAllMocks
-    const { useKibana } = jest.requireMock('../../../hooks/use_kibana') as {
-      useKibana: jest.Mock;
+    const { useKibana } = (await vi.importMock('../../../hooks/use_kibana')) as {
+      useKibana: Mock;
     };
     useKibana.mockReturnValue(mockKibanaValue);
-    (mockApplication.getUrlForApp as jest.Mock).mockReturnValue('/app/workflows/wf-1');
+    (mockApplication.getUrlForApp as Mock).mockReturnValue('/app/workflows/wf-1');
 
     mockUseWorkflows.mockReturnValue({
       data: createMockWorkflowListDto(),
@@ -255,9 +291,9 @@ describe('WorkflowList', () => {
       expect(screen.getByTestId('workflows-empty-state')).toBeInTheDocument();
     });
 
-    it('shows the read-only empty state when there are no workflows and the user cannot create', () => {
-      const { useWorkflowsCapabilities } = jest.requireMock('@kbn/workflows-ui') as {
-        useWorkflowsCapabilities: jest.Mock;
+    it('shows the read-only empty state when there are no workflows and the user cannot create', async () => {
+      const { useWorkflowsCapabilities } = (await vi.importMock('@kbn/workflows-ui')) as {
+        useWorkflowsCapabilities: Mock;
       };
       useWorkflowsCapabilities.mockReturnValue({
         ...mockCreateMockWorkflowsCapabilities(),

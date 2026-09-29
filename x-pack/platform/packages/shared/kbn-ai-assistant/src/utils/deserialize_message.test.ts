@@ -5,25 +5,34 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { cloneDeep } from 'lodash';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { deserializeMessage } from './deserialize_message';
 import { safeJsonParse } from './safe_json_parse';
 
-jest.mock('lodash', () => ({
-  cloneDeep: jest.fn(),
-}));
+vi.mock('lodash', () => {
+      const mocked = {
+      cloneDeep: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./safe_json_parse', () => ({
-  safeJsonParse: jest.fn((value) => {
-    try {
-      return JSON.parse(value);
-    } catch {
-      return value;
-    }
-  }),
-}));
+vi.mock('./safe_json_parse', () => {
+      const mocked = {
+      safeJsonParse: vi.fn((value) => {
+        try {
+          return JSON.parse(value);
+        } catch {
+          return value;
+        }
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('deserializeMessage', () => {
   const baseMessage: Message = {
@@ -35,7 +44,7 @@ describe('deserializeMessage', () => {
   };
 
   beforeEach(() => {
-    (cloneDeep as jest.Mock).mockImplementation((obj) => JSON.parse(JSON.stringify(obj)));
+    (cloneDeep as Mock).mockImplementation((obj) => JSON.parse(JSON.stringify(obj)));
   });
 
   it('should clone the original message', () => {

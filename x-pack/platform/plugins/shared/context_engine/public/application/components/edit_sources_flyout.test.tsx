@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -16,21 +18,24 @@ import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { EditSourcesFlyout } from './edit_sources_flyout';
 
-jest.mock('@kbn/esql/public', () => ({
-  ESQLLangEditor: ({
-    query,
-    onTextLangQueryChange,
-  }: {
-    query: { esql: string };
-    onTextLangQueryChange: (query: { esql: string }) => void;
-  }) => (
-    <textarea
-      data-test-subj="mockEsqlEditor"
-      value={query.esql}
-      onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
-    />
-  ),
-}));
+vi.mock('@kbn/esql/public', () => {
+      const mocked = {
+      ESQLLangEditor: ({
+        query,
+        onTextLangQueryChange,
+      }: {
+        query: { esql: string };
+        onTextLangQueryChange: (query: { esql: string }) => void;
+      }) => (
+        <textarea
+          data-test-subj="mockEsqlEditor"
+          value={query.esql}
+          onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
+        />
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
@@ -49,8 +54,8 @@ const createServices = () => ({
 });
 
 const renderFlyout = (index: GetAiIndexResponse = aiIndex) => {
-  const onClose = jest.fn();
-  const onSaved = jest.fn();
+  const onClose = vi.fn();
+  const onSaved = vi.fn();
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const services = createServices();
 
@@ -78,7 +83,7 @@ const addEsqlSource = (query: string) => {
 
 describe('EditSourcesFlyout', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('disables Save when the current selection matches the sources loaded on open', async () => {

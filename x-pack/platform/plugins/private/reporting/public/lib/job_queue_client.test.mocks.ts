@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 export const mockAPIClient = {
-  http: jest.fn(),
-  list: jest.fn(),
-  total: jest.fn(),
-  getInfo: jest.fn(),
-  getContent: jest.fn(),
-  getReportURL: jest.fn(),
-  downloadReport: jest.fn(),
+  http: vi.fn(),
+  list: vi.fn(),
+  total: vi.fn(),
+  getInfo: vi.fn(),
+  getContent: vi.fn(),
+  getReportURL: vi.fn(),
+  downloadReport: vi.fn(),
 };
 
-jest.mock('@kbn/reporting-public/reporting_api_client', () => mockAPIClient);
+vi.mock('@kbn/reporting-public/reporting_api_client', () => mockAPIClient);

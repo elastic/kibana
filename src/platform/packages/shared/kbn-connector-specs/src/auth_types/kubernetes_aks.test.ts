@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AxiosInstance } from 'axios';
 import type { AuthContext } from '../connector_spec';
 import { KubernetesAksAuth } from './kubernetes_aks_server';
@@ -20,14 +23,14 @@ const SECRET = {
 const createMockAxiosInstance = () =>
   ({
     defaults: { headers: { common: {} } },
-    interceptors: { request: { clear: jest.fn(), use: jest.fn() } },
+    interceptors: { request: { clear: vi.fn(), use: vi.fn() } },
   } as unknown as AxiosInstance);
 
-const createMockContext = (getToken: jest.Mock) =>
+const createMockContext = (getToken: Mock) =>
   ({
     getToken,
-    getCustomHostSettings: jest.fn(),
-    logger: { debug: jest.fn(), warn: jest.fn() },
+    getCustomHostSettings: vi.fn(),
+    logger: { debug: vi.fn(), warn: vi.fn() },
     sslSettings: {},
   } as unknown as AuthContext);
 
@@ -43,7 +46,7 @@ describe('KubernetesAksAuth', () => {
   });
 
   it('requests an Entra token for the AKS server app and sets it as Authorization', async () => {
-    const getToken = jest.fn().mockResolvedValue('Bearer entra-access-token');
+    const getToken = vi.fn().mockResolvedValue('Bearer entra-access-token');
     const axiosInstance = createMockAxiosInstance();
 
     await KubernetesAksAuth.configure(createMockContext(getToken), axiosInstance, SECRET);
@@ -61,7 +64,7 @@ describe('KubernetesAksAuth', () => {
   });
 
   it('throws a helpful error when the token request fails', async () => {
-    const getToken = jest.fn().mockRejectedValue(new Error('invalid_client'));
+    const getToken = vi.fn().mockRejectedValue(new Error('invalid_client'));
     const axiosInstance = createMockAxiosInstance();
 
     await expect(
@@ -70,7 +73,7 @@ describe('KubernetesAksAuth', () => {
   });
 
   it('throws when no token is returned', async () => {
-    const getToken = jest.fn().mockResolvedValue(null);
+    const getToken = vi.fn().mockResolvedValue(null);
     const axiosInstance = createMockAxiosInstance();
 
     await expect(
@@ -79,7 +82,7 @@ describe('KubernetesAksAuth', () => {
   });
 
   it('configures TLS with the pasted cluster CA', async () => {
-    const getToken = jest.fn().mockResolvedValue('Bearer entra-access-token');
+    const getToken = vi.fn().mockResolvedValue('Bearer entra-access-token');
     const axiosInstance = createMockAxiosInstance();
 
     await KubernetesAksAuth.configure(createMockContext(getToken), axiosInstance, {

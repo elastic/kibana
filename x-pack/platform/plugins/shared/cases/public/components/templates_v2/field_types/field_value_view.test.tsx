@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,7 +16,7 @@ import { FieldValueView } from './field_value_view';
 
 describe('FieldValueView', () => {
   it('wraps long text values and opens the native editor only after selecting Edit', async () => {
-    const onEdit = jest.fn();
+    const onEdit = vi.fn();
     const longValue =
       'This is a long field value that remains readable in the case details sidebar instead of being truncated by a single-line input.';
 
@@ -65,7 +67,7 @@ describe('FieldValueView', () => {
   });
 
   it('does not open edit mode when clicking a link inside a markdown textarea', async () => {
-    const onEdit = jest.fn();
+    const onEdit = vi.fn();
 
     renderWithTestingProviders(
       <FieldValueView
@@ -88,7 +90,7 @@ describe('FieldValueView', () => {
   });
 
   it('opens edit mode when clicking the markdown content area outside a link', async () => {
-    const onEdit = jest.fn();
+    const onEdit = vi.fn();
 
     renderWithTestingProviders(
       <FieldValueView
@@ -111,7 +113,7 @@ describe('FieldValueView', () => {
   });
 
   it('opens edit mode when the row is activated with Enter', async () => {
-    const onEdit = jest.fn();
+    const onEdit = vi.fn();
 
     renderWithTestingProviders(
       <FieldValueView
@@ -134,7 +136,7 @@ describe('FieldValueView', () => {
   });
 
   it('opens edit mode when the row is activated with Space', async () => {
-    const onEdit = jest.fn();
+    const onEdit = vi.fn();
 
     renderWithTestingProviders(
       <FieldValueView
@@ -157,7 +159,7 @@ describe('FieldValueView', () => {
   });
 
   it('uses a div element for the row, not a native button, so nested links are valid HTML', () => {
-    const onEdit = jest.fn();
+    const onEdit = vi.fn();
 
     renderWithTestingProviders(
       <FieldValueView

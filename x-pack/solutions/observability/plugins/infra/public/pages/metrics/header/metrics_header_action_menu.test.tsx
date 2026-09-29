@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { MetricsHeaderActionMenu } from './metrics_header_action_menu';
 
-const mockGetRedirectUrl = jest.fn(() => '/app/observabilityOnboarding');
+const mockGetRedirectUrl = vi.fn(() => '/app/observabilityOnboarding');
 
 const mockMlVisibility = {
   isTopbarMenuVisible: true,
@@ -21,49 +23,70 @@ const mockAnomalyFlyoutCapture: {
   hideSelectGroup?: boolean;
 } = {};
 
-jest.mock('../../../containers/plugin_config_context', () => ({
-  usePluginConfig: () => ({
-    featureFlags: { alertsAndRulesDropdownEnabled: true },
-  }),
-}));
+vi.mock('../../../containers/plugin_config_context', () => {
+      const mocked = {
+      usePluginConfig: () => ({
+        featureFlags: { alertsAndRulesDropdownEnabled: true },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../containers/ml/infra_ml_capabilities', () => ({
-  useInfraMLCapabilitiesContext: () => mockMlVisibility,
-}));
+vi.mock('../../../containers/ml/infra_ml_capabilities', () => {
+      const mocked = {
+      useInfraMLCapabilitiesContext: () => mockMlVisibility,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      share: {
-        url: {
-          locators: {
-            get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          share: {
+            url: {
+              locators: {
+                get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+              },
+            },
           },
         },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/observability-shared-plugin/public', () => {
+      const mocked = {
+      useLinkProps: () => ({ href: '/app/metrics/settings' }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../components/ml/anomaly_detection/anomaly_detection_flyout', () => {
+      const mocked = {
+      AnomalyDetectionFlyout: (props: { hideJobType?: boolean; hideSelectGroup?: boolean }) => {
+        mockAnomalyFlyoutCapture.hideJobType = props.hideJobType;
+        mockAnomalyFlyoutCapture.hideSelectGroup = props.hideSelectGroup;
+        return null;
       },
-    },
-  }),
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  useLinkProps: () => ({ href: '/app/metrics/settings' }),
-}));
+vi.mock('../../../alerting/common/components/metrics_alert_dropdown', () => {
+      const mocked = {
+      MetricsAlertDropdown: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/ml/anomaly_detection/anomaly_detection_flyout', () => ({
-  AnomalyDetectionFlyout: (props: { hideJobType?: boolean; hideSelectGroup?: boolean }) => {
-    mockAnomalyFlyoutCapture.hideJobType = props.hideJobType;
-    mockAnomalyFlyoutCapture.hideSelectGroup = props.hideSelectGroup;
-    return null;
-  },
-}));
-
-jest.mock('../../../alerting/common/components/metrics_alert_dropdown', () => ({
-  MetricsAlertDropdown: () => null,
-}));
-
-jest.mock('../../../components/inspector_header_link', () => ({
-  InspectorHeaderLink: () => null,
-}));
+vi.mock('../../../components/inspector_header_link', () => {
+      const mocked = {
+      InspectorHeaderLink: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function renderMenu(pathname: string) {
   return render(

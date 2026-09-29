@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,55 +16,73 @@ import { AlertingV2EpisodesLocatorDefinition } from '../../../../locators';
 
 const mockLocators = createMockLocators();
 
-const mockUseFetchRuleEvents = jest.fn();
+const mockUseFetchRuleEvents = vi.fn();
 let capturedOnRefresh: (() => void) | undefined;
 
-jest.mock('../../../../hooks/use_fetch_rule_events', () => ({
-  useFetchRuleEvents: (...args: unknown[]) => mockUseFetchRuleEvents(...args),
-}));
+vi.mock('../../../../hooks/use_fetch_rule_events', () => {
+      const mocked = {
+      useFetchRuleEvents: (...args: unknown[]) => mockUseFetchRuleEvents(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_alert_timeline_url_state', () => ({
-  useAlertTimelineUrlState: () => [{ from: 'now-24h', to: 'now' }, jest.fn()],
-}));
+vi.mock('./use_alert_timeline_url_state', () => {
+      const mocked = {
+      useAlertTimelineUrlState: () => [{ from: 'now-24h', to: 'now' }, vi.fn()],
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../utils/discover_href_for_episode', () => ({
-  getDiscoverHrefForRuleQuery: () => '/discover',
-}));
+vi.mock('../../../../utils/discover_href_for_episode', () => {
+      const mocked = {
+      getDiscoverHrefForRuleQuery: () => '/discover',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../rule_context', () => ({
-  useRule: () => ({
-    id: 'rule-1',
-    grouping: { fields: [] },
-    query: { base: 'FROM logs-*' },
-  }),
-}));
+vi.mock('../../rule_context', () => {
+      const mocked = {
+      useRule: () => ({
+        id: 'rule-1',
+        grouping: { fields: [] },
+        query: { base: 'FROM logs-*' },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-browser-shared', () => ({
-  AlertingDateRangePicker: ({
-    onRefresh,
-    'data-test-subj': dataTestSubj,
-  }: {
-    onRefresh?: () => void;
-    'data-test-subj'?: string;
-  }) => {
-    capturedOnRefresh = onRefresh;
-    return <div data-test-subj={dataTestSubj} />;
-  },
-}));
+vi.mock('@kbn/alerting-v2-browser-shared', () => {
+      const mocked = {
+      AlertingDateRangePicker: ({
+        onRefresh,
+        'data-test-subj': dataTestSubj,
+      }: {
+        onRefresh?: () => void;
+        'data-test-subj'?: string;
+      }) => {
+        capturedOnRefresh = onRefresh;
+        return <div data-test-subj={dataTestSubj} />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockServices: Record<string, unknown> = {
   data: {},
   share: {},
-  application: { capabilities: {}, navigateToUrl: jest.fn() },
-  uiSettings: { get: jest.fn(() => 'Browser') },
+  application: { capabilities: {}, navigateToUrl: vi.fn() },
+  uiSettings: { get: vi.fn(() => 'Browser') },
   http: { basePath: { prepend: (path: string) => path } },
-  notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
+  notifications: { toasts: { addDanger: vi.fn(), addWarning: vi.fn() } },
 };
 
-jest.mock('@kbn/core-di-browser', () => ({
-  CoreStart: (key: string) => key,
-  useService: (token: string) => mockServices[token],
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      CoreStart: (key: string) => key,
+      useService: (token: string) => mockServices[token],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const successResult = {
   phases: [],
@@ -70,7 +90,7 @@ const successResult = {
   summary: { episodesStarted: 0, recovered: 0, stillOpen: 0, medianDurationMs: 0 },
   isLoading: false,
   isError: false,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
 };
 
 const renderSection = () =>
@@ -84,8 +104,8 @@ const renderSection = () =>
 
 describe('AlertTimelineSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
     capturedOnRefresh = undefined;
     mockUseFetchRuleEvents.mockReturnValue(successResult);
   });
@@ -114,8 +134,8 @@ describe('AlertTimelineSection', () => {
   });
 
   it('refetches when refresh is pressed', () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
     renderSection();
 
     act(() => {
@@ -126,8 +146,8 @@ describe('AlertTimelineSection', () => {
   });
 
   it('passes time-window deps to episodes.useUrl so the href tracks the selected range', () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
     renderSection();
 
     const windowStartMs = Date.parse('2026-08-13T12:00:00.000Z');
@@ -145,29 +165,29 @@ describe('AlertTimelineSection', () => {
       undefined,
       ['rule-1', windowStartMs, windowEndMs]
     );
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('episodes link params resolve to management episodes URL with filters', async () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
     renderSection();
 
     const { episodesLocators } = mockLocators;
-    const [params] = jest.mocked(episodesLocators.useUrl).mock.calls[0];
+    const [params] = vi.mocked(episodesLocators.useUrl).mock.calls[0];
     const location = await AlertingV2EpisodesLocatorDefinition.getLocation(params);
     expect(location.app).toBe('management');
     expect(location.path).toMatch(/^\/alertingV2\/episodes\?_a=/);
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('slides a relative window forward on refresh without calling refetch', () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
     renderSection();
     mockUseFetchRuleEvents.mockClear();
 
-    jest.setSystemTime(new Date('2026-08-14T12:05:00.000Z'));
+    vi.setSystemTime(new Date('2026-08-14T12:05:00.000Z'));
     act(() => {
       capturedOnRefresh?.();
     });
@@ -179,6 +199,6 @@ describe('AlertTimelineSection', () => {
         windowEndMs: Date.parse('2026-08-14T12:05:00.000Z'),
       })
     );
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });

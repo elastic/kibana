@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { DashboardPlugin } from './plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
 import { scheduleDashboardTelemetry, TASK_ID } from './usage/dashboard_telemetry_collection_task';
 
-jest.mock('./usage/dashboard_telemetry_collection_task', () => ({
-  scheduleDashboardTelemetry: jest.fn().mockResolvedValue('ok'),
-  TASK_ID: 'mockTaskID',
-}));
+vi.mock('./usage/dashboard_telemetry_collection_task', () => {
+      const mocked = {
+      scheduleDashboardTelemetry: vi.fn().mockResolvedValue('ok'),
+      TASK_ID: 'mockTaskID',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockEmbeddable = createEmbeddableStartMock();
 
@@ -33,7 +38,7 @@ describe('DashboardPlugin', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('should call mockTaskManager.runSoon', async () => {

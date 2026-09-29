@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import type { LoadedBenchConfig } from '../config/types';
 import { makeBenchmark, makeConfigResult } from '../report/test_helpers';
@@ -41,7 +43,7 @@ describe('runOnCompareCallbacks', () => {
   });
 
   it('invokes onCompare only when both sides have results for a config', async () => {
-    const onCompare = jest.fn();
+    const onCompare = vi.fn();
 
     const leftResults = [
       {
@@ -51,7 +53,7 @@ describe('runOnCompareCallbacks', () => {
       {
         ...makeConfigResult('left-only', [makeBenchmark('bench', [900])]),
         config: makeLoadedConfig('left-only', {
-          onCompare: jest.fn(),
+          onCompare: vi.fn(),
         }),
       },
     ];
@@ -73,7 +75,7 @@ describe('runOnCompareCallbacks', () => {
   });
 
   it('passes left, right, summaries, comparison diff, and logger context', async () => {
-    const onCompare = jest.fn();
+    const onCompare = vi.fn();
 
     const left = {
       ...makeConfigResult('memory-check', [makeBenchmark('warm-start', [1000], [{ rss: 100 }])]),
@@ -125,7 +127,7 @@ describe('runOnCompareCallbacks', () => {
   });
 
   it('propagates errors thrown from onCompare', async () => {
-    const onCompare = jest.fn(() => {
+    const onCompare = vi.fn(() => {
       throw new Error('memory regression detected');
     });
 
@@ -149,7 +151,7 @@ describe('runOnCompareCallbacks', () => {
   });
 
   it('awaits async onCompare callbacks', async () => {
-    const onCompare = jest.fn(async () => {
+    const onCompare = vi.fn(async () => {
       await Promise.resolve();
       throw new Error('async policy failure');
     });

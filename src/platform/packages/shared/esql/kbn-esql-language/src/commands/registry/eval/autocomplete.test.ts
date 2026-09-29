@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
 import { Location } from '../types';
 import { autocomplete } from './autocomplete';
@@ -55,7 +58,7 @@ const evalExpectSuggestions = (
 describe('EVAL Autocomplete', () => {
   let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Reset mocks before each test to ensure isolation
     mockCallbacks = getMockCallbacks();
@@ -114,7 +117,7 @@ describe('EVAL Autocomplete', () => {
     ]);
 
     const expectedFields = getFieldNamesByType('any').map((name) => ({ label: name, text: name }));
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue([
+    (mockCallbacks.getByType as Mock).mockResolvedValue([
       ...expectedFields,
       { label: 'avg(doubleField)', text: 'avg(doubleField)' },
     ]);
@@ -129,7 +132,7 @@ describe('EVAL Autocomplete', () => {
       ],
       mockCallbacks
     );
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue([
+    (mockCallbacks.getByType as Mock).mockResolvedValue([
       ...expectedFields,
       { label: 'abs(doubleField) + 1', text: 'abs(doubleField) + 1' },
     ]);
@@ -144,7 +147,7 @@ describe('EVAL Autocomplete', () => {
       ],
       mockCallbacks
     );
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue([
+    (mockCallbacks.getByType as Mock).mockResolvedValue([
       ...expectedFields,
       { label: 'avg(doubleField)', text: 'avg(doubleField)' },
     ]);
@@ -213,7 +216,7 @@ describe('EVAL Autocomplete', () => {
 
   test('after NOT', async () => {
     const expectedFields = getFieldNamesByType('boolean');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    (mockCallbacks.getByType as Mock).mockResolvedValue(
       expectedFields.map((name) => ({ label: name, text: name }))
     );
     await evalExpectSuggestions(
@@ -262,7 +265,7 @@ describe('EVAL Autocomplete', () => {
 
   test('in and around functions', async () => {
     const expectedDoubleLongFields = getFieldNamesByType(['double', 'long']);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    (mockCallbacks.getByType as Mock).mockResolvedValue(
       expectedDoubleLongFields.map((name) => ({ label: name, text: name }))
     );
     await evalExpectSuggestions(
@@ -315,7 +318,7 @@ describe('EVAL Autocomplete', () => {
       mockCallbacks
     );
     const expectedDoubleIntegerFields = getFieldNamesByType(['integer', 'long']);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    (mockCallbacks.getByType as Mock).mockResolvedValue(
       expectedDoubleIntegerFields.map((name) => ({ label: name, text: name }))
     );
     await evalExpectSuggestions(
@@ -329,7 +332,7 @@ describe('EVAL Autocomplete', () => {
       mockCallbacks
     );
     const expectedAny = getFieldNamesByType('any');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    (mockCallbacks.getByType as Mock).mockResolvedValue(
       expectedAny.map((name) => ({ label: name, text: name }))
     );
     await evalExpectSuggestions(
@@ -344,7 +347,7 @@ describe('EVAL Autocomplete', () => {
       mockCallbacks
     );
     const expectedNumeric = getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    (mockCallbacks.getByType as Mock).mockResolvedValue(
       expectedNumeric.map((name) => ({ label: name, text: name }))
     );
     const numericAndDenseVector = [...ESQL_COMMON_NUMERIC_TYPES, 'dense_vector'] as const;
@@ -379,7 +382,7 @@ describe('EVAL Autocomplete', () => {
       mockCallbacks
     );
     const expectedStrings = getFieldNamesByType(['text', 'keyword']);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    (mockCallbacks.getByType as Mock).mockResolvedValue(
       expectedStrings.map((name) => ({ label: name, text: name }))
     );
     // test that comma is correctly added to the suggestions if minParams is not reached yet
@@ -412,7 +415,7 @@ describe('EVAL Autocomplete', () => {
       mockCallbacks
     );
     const expectedIps = getFieldNamesByType(['ip']);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    (mockCallbacks.getByType as Mock).mockResolvedValue(
       expectedIps.map((name) => ({ label: name, text: name }))
     );
 
@@ -427,7 +430,7 @@ describe('EVAL Autocomplete', () => {
       ],
       mockCallbacks
     );
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    (mockCallbacks.getByType as Mock).mockResolvedValue(
       expectedStrings.map((name) => ({ label: name, text: name }))
     );
     await evalExpectSuggestions(
@@ -458,7 +461,7 @@ describe('EVAL Autocomplete', () => {
 
   test('deep function nesting', async () => {
     const expectedFields = getFieldNamesByType(roundParameterTypes);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    (mockCallbacks.getByType as Mock).mockResolvedValue(
       expectedFields.map((name) => ({ label: name, text: name }))
     );
     for (const nesting of [1, 2, 3, 4]) {
@@ -498,7 +501,7 @@ describe('EVAL Autocomplete', () => {
     ]);
 
     const expectedFields = getFieldNamesByType(['double', 'integer', 'long', 'unsigned_long']);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    (mockCallbacks.getByType as Mock).mockResolvedValue(
       expectedFields.map((name) => ({ label: name, text: name }))
     );
 
@@ -592,7 +595,7 @@ describe('EVAL Autocomplete', () => {
 
     test('after comparison operator', async () => {
       const expectedFields = getFieldNamesByType(['keyword', 'text']);
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      (mockCallbacks.getByType as Mock).mockResolvedValue(
         expectedFields.map((name) => ({ label: name, text: name }))
       );
       // case( field > /) suggest field/function of the same type of the right hand side to complete the boolean expression
@@ -613,7 +616,7 @@ describe('EVAL Autocomplete', () => {
       );
 
       const expectedNumeric = getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES);
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      (mockCallbacks.getByType as Mock).mockResolvedValue(
         expectedNumeric.map((name) => ({ label: name, text: name }))
       );
 
@@ -670,7 +673,7 @@ describe('EVAL Autocomplete', () => {
     it('suggests string placeholder for constantOnly query parameter', async () => {
       const expectedFields = getFieldNamesByType(['text', 'keyword']);
 
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      (mockCallbacks.getByType as Mock).mockResolvedValue(
         expectedFields.map((name) => ({ label: name, text: name }))
       );
 

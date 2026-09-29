@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import pRetry from 'p-retry';
 import type { SavedObjectsServiceStart, SavedObject } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -20,25 +23,25 @@ import type { OptInStatusMetadata, ReferenceDataSavedObject } from './types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-jest.mock('p-retry', () => {
-  const originalPRetry = jest.requireActual('p-retry');
-  return jest.fn().mockImplementation((fn, options) => {
+vi.mock('p-retry', () => {
+  const originalPRetry = require('p-retry');
+  return vi.fn().mockImplementation((fn, options) => {
     return originalPRetry(fn, options);
   });
 });
 
-const pRetryMock = jest.mocked(pRetry);
+const pRetryMock = vi.mocked(pRetry);
 
-jest.mock('@kbn/core/server', () => {
-  const actual = jest.requireActual('@kbn/core/server');
+vi.mock('@kbn/core/server', async () => {
+  const actual = (await vi.importActual('@kbn/core/server'));
   return {
     ...actual,
-    SavedObjectsClient: jest.fn().mockImplementation((repo: any) => repo),
+    SavedObjectsClient: vi.fn().mockImplementation((repo: any) => repo),
   };
 });
 
 describe('initializeEndpointExceptionsPerPolicyOptInStatus', () => {
-  let savedObjectsServiceStart: jest.Mocked<SavedObjectsServiceStart>;
+  let savedObjectsServiceStart: Mocked<SavedObjectsServiceStart>;
   let soClientMock: ReturnType<typeof savedObjectsClientMock.create>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let experimentalFeatures: ExperimentalFeatures;

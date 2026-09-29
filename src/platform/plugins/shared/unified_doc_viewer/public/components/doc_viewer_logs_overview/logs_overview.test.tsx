@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { act, render, screen, within } from '@testing-library/react';
@@ -22,20 +25,29 @@ import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { hasErrorFields } from './utils/has_error_fields';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiCodeBlock: ({ children }: { children?: React.ReactNode }) => (
-    <code data-test-subj="codeBlock">{children ?? ''}</code>
-  ),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      EuiCodeBlock: ({ children }: { children?: React.ReactNode }) => (
+        <code data-test-subj="codeBlock">{children ?? ''}</code>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./utils/has_error_fields', () => ({
-  hasErrorFields: jest.fn(),
-}));
+vi.mock('./utils/has_error_fields', () => {
+      const mocked = {
+      hasErrorFields: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./sub_components/similar_errors', () => ({
-  SimilarErrors: () => <div data-test-subj="docViewerSimilarErrorsSection" />,
-}));
+vi.mock('./sub_components/similar_errors', () => {
+      const mocked = {
+      SimilarErrors: () => <div data-test-subj="docViewerSimilarErrorsSection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const DATASET_NAME = 'logs.overview';
 const NAMESPACE = 'default';
@@ -71,7 +83,7 @@ const dataView = {
       })),
   },
   metaFields: ['_index', '_score'],
-  getFormatterForField: jest.fn(() => ({
+  getFormatterForField: vi.fn(() => ({
     convertToText: (value: unknown) => value,
     convertToReact: (value: unknown) => value,
   })),
@@ -141,7 +153,7 @@ const getCustomUnifedDocViewerServices = (params?: { showApm: boolean }) => ({
   share: {
     url: {
       locators: {
-        get: () => ({ getRedirectUrl: jest.fn().mockReturnValue('/apm/foo'), navigate: jest.fn() }),
+        get: () => ({ getRedirectUrl: vi.fn().mockReturnValue('/apm/foo'), navigate: vi.fn() }),
       },
     },
   },
@@ -280,11 +292,11 @@ describe('LogsOverview', () => {
       const hitWithDataStream = buildHit(sourceFields);
 
       const originalGet = mockUnifiedDocViewerServices.share.url.locators.get;
-      mockUnifiedDocViewerServices.share.url.locators.get = jest.fn().mockImplementation((id) => {
+      mockUnifiedDocViewerServices.share.url.locators.get = vi.fn().mockImplementation((id) => {
         if (id === DATA_QUALITY_DETAILS_LOCATOR_ID) {
           return {
-            getRedirectUrl: jest.fn().mockReturnValue('/data-quality'),
-            navigate: jest.fn(),
+            getRedirectUrl: vi.fn().mockReturnValue('/data-quality'),
+            navigate: vi.fn(),
           };
         }
         return originalGet(id);
@@ -316,11 +328,11 @@ describe('LogsOverview', () => {
       const remoteHit = buildHit(sourceFields, `remoteCluster:${DATA_STREAM_NAME}`);
 
       const originalGet = mockUnifiedDocViewerServices.share.url.locators.get;
-      mockUnifiedDocViewerServices.share.url.locators.get = jest.fn().mockImplementation((id) => {
+      mockUnifiedDocViewerServices.share.url.locators.get = vi.fn().mockImplementation((id) => {
         if (id === DATA_QUALITY_DETAILS_LOCATOR_ID) {
           return {
-            getRedirectUrl: jest.fn().mockReturnValue('/data-quality'),
-            navigate: jest.fn(),
+            getRedirectUrl: vi.fn().mockReturnValue('/data-quality'),
+            navigate: vi.fn(),
           };
         }
         return originalGet(id);
@@ -387,7 +399,7 @@ describe('LogsOverview with APM links', () => {
   describe('Highlights section', () => {
     describe('When APM is enabled', () => {
       beforeEach(async () => {
-        Element.prototype.scrollIntoView = jest.fn();
+        Element.prototype.scrollIntoView = vi.fn();
         setUnifiedDocViewerServices(
           merge(
             mockUnifiedDocViewerServices,
@@ -442,12 +454,12 @@ describe('LogsOverview content breakdown', () => {
 
 describe('LogsOverview SimilarErrors section', () => {
   beforeEach(() => {
-    Element.prototype.scrollIntoView = jest.fn();
-    jest.clearAllMocks();
+    Element.prototype.scrollIntoView = vi.fn();
+    vi.clearAllMocks();
   });
 
   it('should render SimilarErrors section when traceId is present and hasErrorFields returns true', () => {
-    (hasErrorFields as jest.Mock).mockReturnValue(true);
+    (hasErrorFields as Mock).mockReturnValue(true);
 
     renderLogsOverview({ hit: buildHit({ 'trace.id': '123' }) });
 
@@ -456,7 +468,7 @@ describe('LogsOverview SimilarErrors section', () => {
   });
 
   it('should not render SimilarErrors section when hasErrorFields returns false', () => {
-    (hasErrorFields as jest.Mock).mockReturnValue(false);
+    (hasErrorFields as Mock).mockReturnValue(false);
 
     renderLogsOverview({ hit: buildHit() });
 
@@ -465,7 +477,7 @@ describe('LogsOverview SimilarErrors section', () => {
   });
 
   it('should not render SimilarErrors section when traceId is not present', () => {
-    (hasErrorFields as jest.Mock).mockReturnValue(false);
+    (hasErrorFields as Mock).mockReturnValue(false);
 
     renderLogsOverview({ hit: buildHit({ 'trace.id': undefined }) });
 

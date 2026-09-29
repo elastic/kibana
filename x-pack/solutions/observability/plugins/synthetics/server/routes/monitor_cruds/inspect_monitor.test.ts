@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { buildPackagePolicyLinks } from './inspect_monitor';
 
@@ -21,7 +23,7 @@ const makePrivateLocation = (
 const makeMockRepository = (
   references: Array<{ id: string; name: string; type: string }> = []
 ) => ({
-  get: jest.fn().mockResolvedValue({ references }),
+  get: vi.fn().mockResolvedValue({ references }),
 });
 
 const mockGetPolicyId = (configId: string, locationId: string) => `${configId}-${locationId}`;
@@ -150,7 +152,7 @@ describe('buildPackagePolicyLinks', () => {
 
   it('handles monitorConfigRepository.get throwing (new monitor not saved yet)', async () => {
     const mockRepo = {
-      get: jest.fn().mockRejectedValue(new Error('Not found')),
+      get: vi.fn().mockRejectedValue(new Error('Not found')),
     };
 
     const result = await buildPackagePolicyLinks({
@@ -167,7 +169,7 @@ describe('buildPackagePolicyLinks', () => {
 
   it('handles saved object with no references field', async () => {
     const mockRepo = {
-      get: jest.fn().mockResolvedValue({}),
+      get: vi.fn().mockResolvedValue({}),
     };
 
     const result = await buildPackagePolicyLinks({
@@ -183,7 +185,7 @@ describe('buildPackagePolicyLinks', () => {
   });
 
   it('uses the provided getPolicyId function', async () => {
-    const customGetPolicyId = jest.fn(
+    const customGetPolicyId = vi.fn(
       (configId: string, locationId: string) => `custom-${configId}--${locationId}`
     );
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { useUrl } from './use_url';
@@ -18,7 +20,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 function prepareTest(savedSearch: SavedSearch, path: string) {
   const { history } = createSearchSessionMock();
-  const onNewUrl = jest.fn();
+  const onNewUrl = vi.fn();
 
   renderHook(() =>
     useUrl({

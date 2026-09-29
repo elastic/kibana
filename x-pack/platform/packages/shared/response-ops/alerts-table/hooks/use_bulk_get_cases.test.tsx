@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import * as api from '../apis/bulk_get_cases';
 import { useBulkGetCasesQuery } from './use_bulk_get_cases';
@@ -16,7 +18,7 @@ import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
-jest.mock('../apis/bulk_get_cases');
+vi.mock('../apis/bulk_get_cases');
 
 const response = {
   cases: [],
@@ -37,11 +39,11 @@ const wrapper = ({ children }: PropsWithChildren) => {
 
 describe('useBulkGetCasesQuery', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'bulkGetCases');
+    const spy = vi.spyOn(api, 'bulkGetCases');
     spy.mockResolvedValue(response);
 
     renderHook(() => useBulkGetCasesQuery({ caseIds: ['case-1'], http, notifications }), {
@@ -60,7 +62,7 @@ describe('useBulkGetCasesQuery', () => {
   });
 
   it('does not call the api if the fetchCases is false', async () => {
-    const spy = jest.spyOn(api, 'bulkGetCases');
+    const spy = vi.spyOn(api, 'bulkGetCases');
     spy.mockResolvedValue(response);
 
     renderHook(
@@ -74,7 +76,7 @@ describe('useBulkGetCasesQuery', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    const spy = jest.spyOn(api, 'bulkGetCases').mockRejectedValue(new Error('An error'));
+    const spy = vi.spyOn(api, 'bulkGetCases').mockRejectedValue(new Error('An error'));
 
     renderHook(() => useBulkGetCasesQuery({ caseIds: ['case-1'], http, notifications }), {
       wrapper,

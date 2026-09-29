@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -12,9 +15,9 @@ import { TestProviders } from '../../../../../common/mock';
 import { useWorkflowEditorLink } from '../../../use_workflow_editor_link';
 import { ValidationStep } from '.';
 
-jest.mock('../../../use_workflow_editor_link');
+vi.mock('../../../use_workflow_editor_link');
 
-const mockUseWorkflowEditorLink = useWorkflowEditorLink as jest.Mock;
+const mockUseWorkflowEditorLink = useWorkflowEditorLink as Mock;
 
 const defaultEditorUrl = 'http://localhost:5601/s/default/app/workflows/workflow-123';
 
@@ -29,7 +32,7 @@ describe('ValidationStep', () => {
   beforeEach(() => {
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: defaultEditorUrl,
-      navigateToEditor: jest.fn(),
+      navigateToEditor: vi.fn(),
       resolvedWorkflowId: 'workflow-123',
     });
   });
@@ -78,7 +81,7 @@ describe('ValidationStep', () => {
 
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: spaceAwareUrl,
-      navigateToEditor: jest.fn(),
+      navigateToEditor: vi.fn(),
       resolvedWorkflowId: 'workflow-123',
     });
 
@@ -92,7 +95,7 @@ describe('ValidationStep', () => {
   it('renders "validated" as plain text when the example workflow is not available', () => {
     mockUseWorkflowEditorLink.mockReturnValue({
       editorUrl: null,
-      navigateToEditor: jest.fn(),
+      navigateToEditor: vi.fn(),
       resolvedWorkflowId: null,
     });
 

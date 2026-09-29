@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -17,13 +20,13 @@ import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 
-jest.spyOn(computeHealth, 'computeHealth');
+vi.spyOn(computeHealth, 'computeHealth');
 
 describe('FindSLODefinitions with Health validation', () => {
-  let mockRepository: jest.Mocked<SLODefinitionRepository>;
+  let mockRepository: Mocked<SLODefinitionRepository>;
   let findSLODefinitions: FindSLODefinitions;
   let mockScopedClusterClient: ScopedClusterClientMock;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockLogger: Mocked<Logger>;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
@@ -95,7 +98,7 @@ describe('FindSLODefinitions with Health validation', () => {
         page: 1,
         perPage: 100,
       });
-      jest
+      vi
         .spyOn(computeHealth, 'computeHealth')
         .mockRejectedValueOnce(new Error('Failed to compute health'));
 

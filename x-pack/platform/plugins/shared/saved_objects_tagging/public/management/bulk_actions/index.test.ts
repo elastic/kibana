@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { createTagCapabilities } from '../../../common/test_utils';
 import type { TagsCapabilities } from '../../../common/capabilities';
@@ -20,16 +23,16 @@ describe('getBulkActions', () => {
   let tagClient: ReturnType<typeof tagClientMock.create>;
   let tagCache: ReturnType<typeof tagsCacheMock.create>;
   let assignmentService: ReturnType<typeof assignmentServiceMock.create>;
-  let clearSelection: jest.MockedFunction<() => void>;
-  let setLoading: jest.MockedFunction<(loading: boolean) => void>;
+  let clearSelection: MockedFunction<() => void>;
+  let setLoading: MockedFunction<(loading: boolean) => void>;
 
   beforeEach(() => {
     core = coreMock.createStart();
     tagClient = tagClientMock.create();
     tagCache = tagsCacheMock.create();
     assignmentService = assignmentServiceMock.create();
-    clearSelection = jest.fn();
-    setLoading = jest.fn();
+    clearSelection = vi.fn();
+    setLoading = vi.fn();
   });
 
   const getActions = (

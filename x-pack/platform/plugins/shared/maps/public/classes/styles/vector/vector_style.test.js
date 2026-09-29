@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { VectorStyle } from './vector_style';
 import {
   FIELD_ORIGIN,
@@ -14,7 +16,7 @@ import {
 } from '../../../../common/constants';
 import { MockField } from './properties/test_helpers/test_util';
 
-jest.mock('../../../kibana_services');
+vi.mock('../../../kibana_services');
 
 class MockSource {
   constructor({ supportedShapeTypes } = {}) {
@@ -75,7 +77,7 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
 
   beforeEach(() => {
     require('../../../kibana_services').getUiSettings = () => ({
-      get: jest.fn(),
+      get: vi.fn(),
     });
   });
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createAnalytics, type AnalyticsClient } from '@elastic/ebt/client';
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerPerformanceMetricEventType, reportPerformanceMetricEvent } from './helpers';
@@ -24,7 +26,7 @@ describe('performance metric event helpers', () => {
     });
 
     test('registers the `performance_metric` eventType to the analytics client', () => {
-      const registerEventTypeSpy = jest.spyOn(analyticsClient, 'registerEventType');
+      const registerEventTypeSpy = vi.spyOn(analyticsClient, 'registerEventType');
 
       expect(() => registerPerformanceMetricEventType(analyticsClient)).not.toThrow();
 

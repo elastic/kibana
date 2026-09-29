@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { HashedItemStore } from './hashed_item_store';
 
@@ -15,7 +17,7 @@ describe('hashedItemStore', () => {
     describe('#constructor', () => {
       it('retrieves persisted index from sessionStorage', () => {
         const sessionStorage = new StubBrowserStorage();
-        const spy = jest.spyOn(sessionStorage, 'getItem');
+        const spy = vi.spyOn(sessionStorage, 'getItem');
 
         const hashedItemStore = new HashedItemStore(sessionStorage);
         (hashedItemStore as any).getIndexedItems(); // trigger retrieving of indexedItems array from HashedItemStore.PERSISTED_INDEX_KEY
@@ -104,13 +106,13 @@ describe('hashedItemStore', () => {
 
           function setItemLater(_hash: string, _item: string) {
             // Move time forward, so this item will be "touched" most recently.
-            jest.advanceTimersByTime(1);
+            vi.advanceTimersByTime(1);
             return hashedItemStore.setItem(_hash, _item);
           }
 
           beforeEach(() => {
             // Control time.
-            jest.useFakeTimers({ legacyFakeTimers: true });
+            vi.useFakeTimers({ legacyFakeTimers: true });
 
             sessionStorage = new StubBrowserStorage();
             hashedItemStore = new HashedItemStore(sessionStorage);
@@ -128,7 +130,7 @@ describe('hashedItemStore', () => {
 
           afterEach(() => {
             // Stop controlling time.
-            jest.useRealTimers();
+            vi.useRealTimers();
           });
 
           describe('and the item will fit', () => {
@@ -188,19 +190,19 @@ describe('hashedItemStore', () => {
 
         function setItemLater(hash: string, item: string) {
           // Move time forward, so this item will be "touched" most recently.
-          jest.advanceTimersByTime(1);
+          vi.advanceTimersByTime(1);
           return hashedItemStore.setItem(hash, item);
         }
 
         function getItemLater(hash: string) {
           // Move time forward, so this item will be "touched" most recently.
-          jest.advanceTimersByTime(1);
+          vi.advanceTimersByTime(1);
           return hashedItemStore.getItem(hash);
         }
 
         beforeEach(() => {
           // Control time.
-          jest.useFakeTimers({ legacyFakeTimers: true });
+          vi.useFakeTimers({ legacyFakeTimers: true });
 
           sessionStorage = new StubBrowserStorage();
           hashedItemStore = new HashedItemStore(sessionStorage);
@@ -209,7 +211,7 @@ describe('hashedItemStore', () => {
 
         afterEach(() => {
           // Stop controlling time.
-          jest.useRealTimers();
+          vi.useRealTimers();
         });
 
         it('returns the item', () => {
@@ -339,26 +341,26 @@ describe('hashedItemStore', () => {
 
     function setItemLater(hash: string, item: string) {
       // Move time forward, so this item will be "touched" most recently.
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
       return hashedItemStore.setItem(hash, item);
     }
 
     function getItemLater(hash: string) {
       // Move time forward, so this item will be "touched" most recently.
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
       return hashedItemStore.getItem(hash);
     }
 
     beforeEach(() => {
       // Control time.
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
       sessionStorage = new StubBrowserStorage();
       hashedItemStore = new HashedItemStore(sessionStorage);
     });
 
     afterEach(() => {
       // Stop controlling time.
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('orders items to be removed based on when they were last retrieved', () => {

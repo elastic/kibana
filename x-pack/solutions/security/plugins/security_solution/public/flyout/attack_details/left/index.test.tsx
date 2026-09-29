@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -13,25 +16,34 @@ import { AttackDetailsProvider } from '../context';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/shared/tools/notes/test_ids';
 
-jest.mock('../../shared/components/flyout_header', () => ({
-  FlyoutHeader: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="flyout-header">{children}</div>
-  ),
-}));
+vi.mock('../../shared/components/flyout_header', () => {
+      const mocked = {
+      FlyoutHeader: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="flyout-header">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../shared/components/flyout_body', () => ({
-  FlyoutBody: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="flyout-body">{children}</div>
-  ),
-}));
+vi.mock('../../shared/components/flyout_body', () => {
+      const mocked = {
+      FlyoutBody: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="flyout-body">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_space_id', () => ({
-  useSpaceId: () => 'default',
-}));
+vi.mock('../../../common/hooks/use_space_id', () => {
+      const mocked = {
+      useSpaceId: () => 'default',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_attack_details', () => {
+vi.mock('../hooks/use_attack_details', () => {
   return {
-    useAttackDetails: jest.fn().mockReturnValue({
+    useAttackDetails: vi.fn().mockReturnValue({
       loading: false,
       attack: {
         id: 'test-alert-1',
@@ -51,46 +63,61 @@ jest.mock('../hooks/use_attack_details', () => {
       browserFields: {},
       dataFormattedForFieldBrowser: [],
       searchHit: { _index: 'test', _id: 'test-id' },
-      getFieldsData: jest.fn(),
-      refetch: jest.fn(),
+      getFieldsData: vi.fn(),
+      refetch: vi.fn(),
     }),
   };
 });
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openLeftPanel: jest.fn(),
-  }),
-  useExpandableFlyoutState: () => ({
-    left: { path: { tab: 'insights', subTab: 'entity' } },
-  }),
-}));
+vi.mock('@kbn/expandable-flyout', () => {
+      const mocked = {
+      useExpandableFlyoutApi: () => ({
+        openLeftPanel: vi.fn(),
+      }),
+      useExpandableFlyoutState: () => ({
+        left: { path: { tab: 'insights', subTab: 'entity' } },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../flyout_v2/shared/tools/notes/components/notes_details_content', () => ({
-  NotesDetailsContent: () => (
-    <div data-test-subj="attack-details-flyout-left-notes-tab-content">{'Notes content'}</div>
-  ),
-}));
+vi.mock('../../../flyout_v2/shared/tools/notes/components/notes_details_content', () => {
+      const mocked = {
+      NotesDetailsContent: () => (
+        <div data-test-subj="attack-details-flyout-left-notes-tab-content">{'Notes content'}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_header_data', () => ({
-  useHeaderData: jest.fn().mockReturnValue({ timestamp: '' }),
-}));
+vi.mock('../hooks/use_header_data', () => {
+      const mocked = {
+      useHeaderData: vi.fn().mockReturnValue({ timestamp: '' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_original_alert_ids', () => ({
-  useOriginalAlertIds: jest.fn().mockReturnValue([]),
-}));
+vi.mock('../hooks/use_original_alert_ids', () => {
+      const mocked = {
+      useOriginalAlertIds: vi.fn().mockReturnValue([]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists', () => ({
-  useAttackEntitiesLists: jest.fn().mockReturnValue({
-    userEntityEntries: [],
-    hostEntityEntries: [],
-    loading: false,
-    error: false,
-  }),
-}));
+vi.mock('../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists', () => {
+      const mocked = {
+      useAttackEntitiesLists: vi.fn().mockReturnValue({
+        userEntityEntries: [],
+        hostEntityEntries: [],
+        loading: false,
+        error: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/components/user_privileges');
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+vi.mock('../../../common/components/user_privileges');
+const useUserPrivilegesMock = useUserPrivileges as Mock;
 
 const renderLeftPanel = (path?: { tab: string; subTab?: string }) =>
   render(

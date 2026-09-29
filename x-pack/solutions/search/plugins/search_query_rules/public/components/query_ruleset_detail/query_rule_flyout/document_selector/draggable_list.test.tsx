@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import type { QueryRulesQueryRuleType } from '@elastic/elasticsearch/lib/api/types';
@@ -22,14 +24,17 @@ const Wrapper = ({ children }: { children?: React.ReactNode }) => (
   </QueryClientProvider>
 );
 
-jest.mock('../../../../hooks/use_fetch_document', () => ({
-  useFetchDocument: jest.fn().mockReturnValue({
-    isLoading: false,
-    isError: false,
-    data: null,
-    refetch: jest.fn(),
-  }),
-}));
+vi.mock('../../../../hooks/use_fetch_document', () => {
+      const mocked = {
+      useFetchDocument: vi.fn().mockReturnValue({
+        isLoading: false,
+        isError: false,
+        data: null,
+        refetch: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TEST_IDS = {
   DraggableItemDocs: (
@@ -44,7 +49,7 @@ const TEST_IDS = {
 
 describe('DraggableList', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render items in docs mode', () => {
@@ -62,10 +67,10 @@ describe('DraggableList', () => {
     const pinType = 'pinned' as QueryRulesQueryRuleType;
     const isIdRule = false;
     const indexNames = [] as string[];
-    const onDeleteDocument = jest.fn() as (index: number) => void;
-    const onIndexSelectorChange = jest.fn() as (index: number, indexName: string) => void;
-    const onIdSelectorChange = jest.fn() as (index: number, id: string) => void;
-    const dragEndHandle = jest.fn() as OnDragEndResponder<string>;
+    const onDeleteDocument = vi.fn() as (index: number) => void;
+    const onIndexSelectorChange = vi.fn() as (index: number, indexName: string) => void;
+    const onIdSelectorChange = vi.fn() as (index: number, id: string) => void;
+    const dragEndHandle = vi.fn() as OnDragEndResponder<string>;
 
     render(
       <DraggableList
@@ -92,10 +97,10 @@ describe('DraggableList', () => {
     const pinType = 'pinned' as QueryRulesQueryRuleType;
     const isIdRule = true;
     const indexNames = [] as string[];
-    const onDeleteDocument = jest.fn() as (index: number) => void;
-    const onIndexSelectorChange = jest.fn() as (index: number, indexName: string) => void;
-    const onIdSelectorChange = jest.fn() as (index: number, id: string) => void;
-    const dragEndHandle = jest.fn() as OnDragEndResponder<string>;
+    const onDeleteDocument = vi.fn() as (index: number) => void;
+    const onIndexSelectorChange = vi.fn() as (index: number, indexName: string) => void;
+    const onIdSelectorChange = vi.fn() as (index: number, id: string) => void;
+    const dragEndHandle = vi.fn() as OnDragEndResponder<string>;
 
     render(
       <DraggableList

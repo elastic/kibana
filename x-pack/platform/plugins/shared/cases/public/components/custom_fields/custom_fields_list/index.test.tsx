@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, within, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -18,25 +20,25 @@ describe('CustomFieldsList', () => {
 
   const props = {
     customFields: customFieldsConfigurationMock,
-    onDeleteCustomField: jest.fn(),
-    onEditCustomField: jest.fn(),
+    onDeleteCustomField: vi.fn(),
+    onEditCustomField: vi.fn(),
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
+      advanceTimers: vi.advanceTimersByTime,
     });
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', () => {
@@ -108,7 +110,7 @@ describe('CustomFieldsList', () => {
 
   describe('Delete', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('shows confirmation modal when deleting a field ', async () => {
@@ -172,7 +174,7 @@ describe('CustomFieldsList', () => {
 
   describe('Edit', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('calls onEditCustomField correctly', async () => {

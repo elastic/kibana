@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import type { DimensionButtonProps } from './dimension_button';
@@ -16,8 +18,8 @@ describe('DimensionButton', () => {
   function getDefaultProps(): Omit<DimensionButtonProps, 'label' | 'children'> {
     return {
       groupLabel: 'myGroup',
-      onClick: jest.fn(),
-      onRemoveClick: jest.fn(),
+      onClick: vi.fn(),
+      onRemoveClick: vi.fn(),
       accessorConfig: { columnId: '1' },
       message: undefined,
     };

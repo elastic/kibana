@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { appContextService } from '../services';
@@ -15,31 +18,31 @@ import {
   scheduleSyncNamespaceTemplatesTask,
 } from './sync_namespace_templates_task';
 
-jest.mock('../services');
-jest.mock('../services/epm/packages');
+vi.mock('../services');
+vi.mock('../services/epm/packages');
 
-const mockedSyncNamespaceTemplates = syncNamespaceTemplates as jest.MockedFunction<
+const mockedSyncNamespaceTemplates = syncNamespaceTemplates as MockedFunction<
   typeof syncNamespaceTemplates
 >;
 
-const mockSoClient = { getCurrentNamespace: jest.fn().mockReturnValue('default') } as any;
+const mockSoClient = { getCurrentNamespace: vi.fn().mockReturnValue('default') } as any;
 const mockEsClient = {} as any;
 
 describe('syncNamespaceTemplatesTask', () => {
   const logger = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (appContextService.getLogger as jest.Mock).mockReturnValue(logger);
-    (appContextService.getInternalUserSOClientForSpaceId as jest.Mock).mockReturnValue(
+    vi.clearAllMocks();
+    (appContextService.getLogger as Mock).mockReturnValue(logger);
+    (appContextService.getInternalUserSOClientForSpaceId as Mock).mockReturnValue(
       mockSoClient
     );
-    (appContextService.getInternalUserESClient as jest.Mock).mockReturnValue(mockEsClient);
+    (appContextService.getInternalUserESClient as Mock).mockReturnValue(mockEsClient);
     mockedSyncNamespaceTemplates.mockResolvedValue({
       packageName: 'nginx',
       created: [],

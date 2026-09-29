@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { BottomBarProps } from './bottom_bar';
 import { BottomBar, DATA_TEST_SUBJ_SAVE_BUTTON, DATA_TEST_SUBJ_CANCEL_BUTTON } from './bottom_bar';
 import { wrap } from '../mocks';
 
-const saveAll = jest.fn();
-const clearAllUnsaved = jest.fn();
+const saveAll = vi.fn();
+const clearAllUnsaved = vi.fn();
 const unsavedChangesCount = 3;
 
 const defaultProps: BottomBarProps = {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { Status } from '../../../../../common/types/api';
@@ -22,8 +24,8 @@ describe('AddIndicesLogic', () => {
   const { mount: mountAddIndicesLogic } = new LogicMounter(AddIndicesLogic);
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
+    vi.clearAllMocks();
+    vi.useRealTimers();
 
     mountAddIndicesLogic();
   });
@@ -52,7 +54,7 @@ describe('AddIndicesLogic', () => {
   describe('listeners', () => {
     describe('searchApplicationUpdated', () => {
       it('closes the add indices flyout', () => {
-        jest.spyOn(AddIndicesLogic.actions, 'closeAddIndicesFlyout');
+        vi.spyOn(AddIndicesLogic.actions, 'closeAddIndicesFlyout');
 
         AddIndicesLogic.actions.searchApplicationUpdated({
           indices: [],
@@ -66,7 +68,7 @@ describe('AddIndicesLogic', () => {
 
     describe('submitSelectedIndices', () => {
       it('does not make a request if there are no selectedIndices', () => {
-        jest.spyOn(AddIndicesLogic.actions, 'addIndicesToSearchApplication');
+        vi.spyOn(AddIndicesLogic.actions, 'addIndicesToSearchApplication');
 
         AddIndicesLogic.actions.submitSelectedIndices();
 
@@ -74,7 +76,7 @@ describe('AddIndicesLogic', () => {
       });
 
       it('calls addIndicesToSearchApplication when there are selectedIndices', () => {
-        jest.spyOn(AddIndicesLogic.actions, 'addIndicesToSearchApplication');
+        vi.spyOn(AddIndicesLogic.actions, 'addIndicesToSearchApplication');
 
         AddIndicesLogic.actions.setSelectedIndices(['index-001', 'index-002']);
         AddIndicesLogic.actions.submitSelectedIndices();

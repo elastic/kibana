@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -34,23 +36,19 @@ const TAG_1 = 'tag1';
 const TAG_2 = 'tag2';
 const TAG_3 = 'tag3';
 
-jest.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query');
-const { useGetRuleTagsQuery: mockUseGetRuleTagsQuery } = jest.requireMock(
-  '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query'
-);
+vi.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query');
+const { useGetRuleTagsQuery: mockUseGetRuleTagsQuery } = (await vi.importMock('@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query'));
 mockUseGetRuleTagsQuery.mockReturnValue({
   tags: [TAG_1, TAG_2, TAG_3],
   isLoading: false,
   isError: false,
   hasNextPage: false,
-  fetchNextPage: jest.fn(),
-  refetch: jest.fn(),
+  fetchNextPage: vi.fn(),
+  refetch: vi.fn(),
 });
 
-jest.mock('@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query');
-const { useGetInternalRuleTypesQuery: mockUseGetInternalRuleTypesQuery } = jest.requireMock(
-  '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query'
-);
+vi.mock('@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query');
+const { useGetInternalRuleTypesQuery: mockUseGetInternalRuleTypesQuery } = (await vi.importMock('@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query'));
 mockUseGetInternalRuleTypesQuery.mockReturnValue({
   data: [{ id: 'testType', name: 'Test Type', solution: 'stack' }],
   isLoading: false,
@@ -65,7 +63,7 @@ const testExpression: AlertsFiltersExpression = [
   { filter: { type: 'ruleTags', value: [TAG_3] } },
 ];
 
-const mockOnChange = jest.fn();
+const mockOnChange = vi.fn();
 
 const TestComponent = (overrides: Partial<AlertsFiltersFormProps>) => {
   const [value, setValue] = useState(testExpression);
@@ -180,7 +178,7 @@ describe('AlertsFiltersForm', () => {
             { operator: 'or' },
             { filter: { type: 'ruleTypes', value: 'filter5' } },
           ]}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           services={{ http, notifications }}
         />
       </IntlProvider>

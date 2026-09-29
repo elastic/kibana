@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
 
@@ -12,20 +15,26 @@ import { useEntityAnalyticsRoutes } from './api';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
-jest.mock('../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(),
-}));
-jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
+vi.mock('../../common/lib/kibana/kibana_react', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/hooks/use_experimental_features', () => {
+      const mocked = {
+      useIsExperimentalFeatureEnabled: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFetch = jest.fn();
-const useKibanaMock = useKibana as jest.Mock;
-const useExperimentalMock = useIsExperimentalFeatureEnabled as jest.Mock;
+const mockFetch = vi.fn();
+const useKibanaMock = useKibana as Mock;
+const useExperimentalMock = useIsExperimentalFeatureEnabled as Mock;
 
 describe('useEntityAnalyticsRoutes — executionContext propagation on v2 branch', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({ services: { http: { fetch: mockFetch } } });
   });
 

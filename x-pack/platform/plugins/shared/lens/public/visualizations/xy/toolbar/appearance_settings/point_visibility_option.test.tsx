@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { PointVisibilityOptionProps } from './point_visibility_option';
 import { PointVisibilityOption } from './point_visibility_option';
@@ -12,7 +14,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 const renderComponent = (propsOverrides?: Partial<PointVisibilityOptionProps>) => {
-  return render(<PointVisibilityOption enabled={true} onChange={jest.fn()} {...propsOverrides} />);
+  return render(<PointVisibilityOption enabled={true} onChange={vi.fn()} {...propsOverrides} />);
 };
 
 describe('Point visibility option', () => {
@@ -24,7 +26,7 @@ describe('Point visibility option', () => {
   });
 
   it(`should call the onChange function on point visibility button group change`, async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderComponent({ onChange });
 
     const button = screen.getByRole('button', { name: /show/i });

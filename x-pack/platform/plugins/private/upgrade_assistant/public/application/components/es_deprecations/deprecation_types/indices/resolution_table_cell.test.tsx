@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { screen } from '@testing-library/react';
@@ -24,11 +26,14 @@ import {
   createUpdateIndexState,
 } from '../test_utils/helpers';
 
-const mockUseIndexContext = jest.fn<IndexStateContext, []>();
+const mockUseIndexContext = vi.fn<IndexStateContext, []>();
 
-jest.mock('./context', () => ({
-  useIndexContext: () => mockUseIndexContext(),
-}));
+vi.mock('./context', () => {
+      const mocked = {
+      useIndexContext: () => mockUseIndexContext(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const baseDeprecation = {
   level: 'critical',

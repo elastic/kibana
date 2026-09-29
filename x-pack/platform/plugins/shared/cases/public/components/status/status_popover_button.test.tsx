@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 import { CaseStatuses } from '../../../common/types/domain';
 import { StatusPopoverButton } from './status_popover_button';
 
 describe('StatusPopoverButton', () => {
-  const onClick = jest.fn();
+  const onClick = vi.fn();
 
   it('renders', async () => {
     const wrapper = mount(<StatusPopoverButton status={CaseStatuses.open} onClick={onClick} />);

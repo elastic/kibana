@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { getKqlSuggestionsIfApplicable } from './utils';
 import type { ExpressionContext } from './types';
 
@@ -25,21 +27,21 @@ describe('getKqlSuggestionsIfApplicable', () => {
   });
 
   it('should return null when not inside a KQL function', async () => {
-    const ctx = createContext('field1 == "value"', jest.fn());
+    const ctx = createContext('field1 == "value"', vi.fn());
     const result = await getKqlSuggestionsIfApplicable(ctx);
 
     expect(result).toBeNull();
   });
 
   it('should return null when inside a KQL function without triple quotes', async () => {
-    const ctx = createContext('KQL("query")', jest.fn());
+    const ctx = createContext('KQL("query")', vi.fn());
     const result = await getKqlSuggestionsIfApplicable(ctx);
 
     expect(result).toBeNull();
   });
 
   it('should return null when getKqlSuggestions returns empty array', async () => {
-    const mockGetKqlSuggestions = jest.fn().mockResolvedValue([]);
+    const mockGetKqlSuggestions = vi.fn().mockResolvedValue([]);
     const ctx = createContext('KQL("""query', mockGetKqlSuggestions);
     const result = await getKqlSuggestionsIfApplicable(ctx);
 
@@ -47,7 +49,7 @@ describe('getKqlSuggestionsIfApplicable', () => {
   });
 
   it('should return null when getKqlSuggestions throws an error', async () => {
-    const mockGetKqlSuggestions = jest.fn().mockRejectedValue(new Error('Test error'));
+    const mockGetKqlSuggestions = vi.fn().mockRejectedValue(new Error('Test error'));
     const ctx = createContext('KQL("""query', mockGetKqlSuggestions);
     const result = await getKqlSuggestionsIfApplicable(ctx);
 
@@ -64,7 +66,7 @@ describe('getKqlSuggestionsIfApplicable', () => {
         range: { start: 0, end: 5 },
       },
     ];
-    const mockGetKqlSuggestions = jest.fn().mockResolvedValue(mockSuggestions);
+    const mockGetKqlSuggestions = vi.fn().mockResolvedValue(mockSuggestions);
     const ctx = createContext('KQL("""query', mockGetKqlSuggestions);
 
     const result = await getKqlSuggestionsIfApplicable(ctx);

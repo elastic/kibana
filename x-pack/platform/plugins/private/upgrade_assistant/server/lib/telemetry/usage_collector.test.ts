@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { registerUpgradeAssistantUsageCollector } from './usage_collector';
 import type { IClusterClient } from '@kbn/core/server';
@@ -24,7 +27,7 @@ describe('Upgrade Assistant Usage Collector', () => {
 
   beforeEach(() => {
     clusterClient = elasticsearchServiceMock.createClusterClient();
-    (clusterClient.asInternalUser.cluster.getSettings as jest.Mock).mockResolvedValue({
+    (clusterClient.asInternalUser.cluster.getSettings as Mock).mockResolvedValue({
       persistent: {},
       transient: {
         logger: {
@@ -37,8 +40,8 @@ describe('Upgrade Assistant Usage Collector', () => {
         },
       },
     });
-    makeUsageCollectorStub = jest.fn();
-    registerStub = jest.fn();
+    makeUsageCollectorStub = vi.fn();
+    registerStub = vi.fn();
     usageCollection = {
       makeUsageCollector: makeUsageCollectorStub,
       registerCollector: registerStub,

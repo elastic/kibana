@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
@@ -15,12 +17,12 @@ import { DeleteConfirmationModal } from './delete_confirmation_modal';
 describe('DeleteConfirmationModal', () => {
   const props = {
     label: 'Delete observable',
-    onCancel: jest.fn(),
-    onConfirm: jest.fn(),
+    onCancel: vi.fn(),
+    onConfirm: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import {
@@ -25,7 +28,7 @@ const mockItems = [
 ];
 
 const createFindItems = (items = mockItems, total?: number) =>
-  jest.fn(
+  vi.fn(
     async (_params: FindItemsParams): Promise<FindItemsResult> => ({
       items,
       total: total ?? items.length,
@@ -34,7 +37,7 @@ const createFindItems = (items = mockItems, total?: number) =>
 
 const createWrapper =
   (options?: {
-    findItems?: jest.Mock;
+    findItems?: Mock;
     isReadOnly?: boolean;
     getHref?: (item: { id: string }) => string;
     item?: ContentListItemConfig;
@@ -58,7 +61,7 @@ const createWrapper =
 
 describe('ContentListTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(async () => {
@@ -274,7 +277,7 @@ describe('ContentListTable', () => {
             labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
             features={{ pagination: { initialPageSize } }}
             dataSource={{
-              findItems: jest.fn(
+              findItems: vi.fn(
                 () => new Promise<{ items: typeof mockItems; total: number }>(() => {})
               ),
             }}
@@ -366,7 +369,7 @@ describe('ContentListTable', () => {
           labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
           features={{ selection: false }}
           dataSource={{
-            findItems: jest.fn(
+            findItems: vi.fn(
               () => new Promise<{ items: typeof mockItems; total: number }>(() => {})
             ),
           }}
@@ -523,7 +526,7 @@ describe('ContentListTable', () => {
      * wins over EUI's single-class `(0,1,0)` rule.
      */
     it('emits an actions-cell nowrap override whose selector matches body cells', async () => {
-      const Wrapper = createWrapper({ item: { actions: { delete: { onBulkAction: jest.fn() } } } });
+      const Wrapper = createWrapper({ item: { actions: { delete: { onBulkAction: vi.fn() } } } });
       const { Column, Action } = ContentListTable;
 
       render(

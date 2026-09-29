@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
@@ -28,53 +31,80 @@ import {
 import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
-const mockUseKibana = jest.fn();
-const mockUseParams = jest.fn();
-const mockUseWorkflowUrlState = jest.fn();
-const mockUseSaveYaml = jest.fn();
-const mockUseUpdateWorkflow = jest.fn();
-const mockUseMemoCss = jest.fn();
-let mockNavigateToApp: jest.Mock;
+const mockUseKibana = vi.fn();
+const mockUseParams = vi.fn();
+const mockUseWorkflowUrlState = vi.fn();
+const mockUseSaveYaml = vi.fn();
+const mockUseUpdateWorkflow = vi.fn();
+const mockUseMemoCss = vi.fn();
+let mockNavigateToApp: Mock;
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => mockUseKibana(),
-}));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => mockUseParams(),
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: () => mockUseParams(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useCurrentEuiBreakpoint: () => 'xl',
-  // Keep app menu breakpoint checks on xl so its items render inline in tests.
-  useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
-}));
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: jest.fn(),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useCurrentEuiBreakpoint: () => 'xl',
+      // Keep app menu breakpoint checks on xl so its items render inline in tests.
+      useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      useWorkflowsCapabilities: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
 >;
 const defaultWorkflowsCapabilities = createMockWorkflowsCapabilities();
 
-jest.mock('../../../hooks/use_workflow_url_state', () => ({
-  useWorkflowUrlState: () => mockUseWorkflowUrlState(),
-}));
-jest.mock('../../../entities/workflows/model/use_save_yaml', () => ({
-  useSaveYaml: () => mockUseSaveYaml(),
-}));
-jest.mock('../../../entities/workflows/model/use_update_workflow', () => ({
-  useUpdateWorkflow: () => mockUseUpdateWorkflow(),
-}));
-jest.mock('@kbn/css-utils/public/use_memo_css', () => ({
-  useMemoCss: (styles: any) => mockUseMemoCss(styles),
-}));
-jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
-  useWorkflowsExperimentalUiSetting: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../hooks/use_workflow_url_state', () => {
+      const mocked = {
+      useWorkflowUrlState: () => mockUseWorkflowUrlState(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../entities/workflows/model/use_save_yaml', () => {
+      const mocked = {
+      useSaveYaml: () => mockUseSaveYaml(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../entities/workflows/model/use_update_workflow', () => {
+      const mocked = {
+      useUpdateWorkflow: () => mockUseUpdateWorkflow(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/css-utils/public/use_memo_css', () => {
+      const mocked = {
+      useMemoCss: (styles: any) => mockUseMemoCss(styles),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_workflows_experimental_ui_setting', () => {
+      const mocked = {
+      useWorkflowsExperimentalUiSetting: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The run action renders inline in the app menu.
 const openRunWorkflowButton = async (): Promise<HTMLElement> =>
@@ -84,7 +114,7 @@ describe('WorkflowDetailHeader', () => {
   const defaultProps: WorkflowDetailHeaderProps = {
     isLoading: false,
     highlightDiff: false,
-    setHighlightDiff: jest.fn(),
+    setHighlightDiff: vi.fn(),
   };
 
   const mockWorkflow = {
@@ -152,9 +182,9 @@ describe('WorkflowDetailHeader', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
-    mockNavigateToApp = jest.fn();
+    mockNavigateToApp = vi.fn();
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -166,7 +196,7 @@ describe('WorkflowDetailHeader', () => {
             },
           },
           navigateToApp: mockNavigateToApp,
-          getUrlForApp: jest.fn(
+          getUrlForApp: vi.fn(
             (appId: string, options?: { deepLinkId?: string; path?: string }) => {
               const deepLinkPath = options?.deepLinkId
                 ? `/insightsAndAlerting/${options.deepLinkId}`
@@ -180,7 +210,7 @@ describe('WorkflowDetailHeader', () => {
         },
         settings: {
           client: {
-            get: jest.fn((key: string) => {
+            get: vi.fn((key: string) => {
               if (key === 'dateFormat') return 'MMM D, YYYY @ HH:mm:ss.SSS';
               if (key === 'dateFormat:tz') return 'Browser';
               return '';
@@ -193,14 +223,14 @@ describe('WorkflowDetailHeader', () => {
     mockUseWorkflowsCapabilities.mockReturnValue(createMockWorkflowsCapabilities());
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow',
-      setActiveTab: jest.fn(),
+      setActiveTab: vi.fn(),
     });
     mockUseSaveYaml.mockReturnValue([
-      jest.fn(),
+      vi.fn(),
       { isLoading: false, error: null, result: undefined },
     ]);
-    mockUseUpdateWorkflow.mockReturnValue(jest.fn());
-    mockUseMemoCss.mockReturnValue(jest.fn());
+    mockUseUpdateWorkflow.mockReturnValue(vi.fn());
+    mockUseMemoCss.mockReturnValue(vi.fn());
   });
 
   // The app menu is rendered through a React.lazy boundary. Warm it up once so the
@@ -211,8 +241,8 @@ describe('WorkflowDetailHeader', () => {
       services: {
         application: {
           capabilities: {},
-          navigateToApp: jest.fn(),
-          getUrlForApp: jest.fn(),
+          navigateToApp: vi.fn(),
+          getUrlForApp: vi.fn(),
           applications$: of(new Map()),
         },
         settings: { client: { get: () => '' } },
@@ -220,13 +250,13 @@ describe('WorkflowDetailHeader', () => {
     });
     mockUseParams.mockReturnValue({ id: 'test-123' });
     mockUseWorkflowsCapabilities.mockReturnValue(createMockWorkflowsCapabilities());
-    mockUseWorkflowUrlState.mockReturnValue({ activeTab: 'workflow', setActiveTab: jest.fn() });
+    mockUseWorkflowUrlState.mockReturnValue({ activeTab: 'workflow', setActiveTab: vi.fn() });
     mockUseSaveYaml.mockReturnValue([
-      jest.fn(),
+      vi.fn(),
       { isLoading: false, error: null, result: undefined },
     ]);
-    mockUseUpdateWorkflow.mockReturnValue(jest.fn());
-    mockUseMemoCss.mockReturnValue(jest.fn());
+    mockUseUpdateWorkflow.mockReturnValue(vi.fn());
+    mockUseMemoCss.mockReturnValue(vi.fn());
     const { findByTestId, unmount } = renderWithProviders(
       <WorkflowDetailHeader {...defaultProps} />
     );
@@ -365,7 +395,7 @@ describe('WorkflowDetailHeader', () => {
   });
 
   it('toggles diff highlighting when the unsaved changes badge is clicked', () => {
-    const setHighlightDiff = jest.fn();
+    const setHighlightDiff = vi.fn();
     const result = renderWithProviders(
       <WorkflowDetailHeader {...defaultProps} setHighlightDiff={setHighlightDiff} />,
       { hasChanges: true }
@@ -614,8 +644,8 @@ describe('WorkflowDetailHeader', () => {
   it('exposes the change history entry point on the workflow tab when a workflow id is present', async () => {
     const changeHistoryModal = {
       isOpen: false,
-      openModal: jest.fn(),
-      closeModal: jest.fn(),
+      openModal: vi.fn(),
+      closeModal: vi.fn(),
     };
     const { getByTestId } = renderWithProviders(
       <ChangeHistoryModalContext.Provider value={changeHistoryModal}>
@@ -636,7 +666,7 @@ describe('WorkflowDetailHeader', () => {
   it('does not expose the change history entry point on the executions tab', () => {
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'executions',
-      setActiveTab: jest.fn(),
+      setActiveTab: vi.fn(),
     });
 
     const store = createMockStore();
@@ -646,8 +676,8 @@ describe('WorkflowDetailHeader', () => {
 
     const changeHistoryModal = {
       isOpen: false,
-      openModal: jest.fn(),
-      closeModal: jest.fn(),
+      openModal: vi.fn(),
+      closeModal: vi.fn(),
     };
     const { queryByTestId } = render(
       <ChangeHistoryModalContext.Provider value={changeHistoryModal}>

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, fireEvent, render } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import React from 'react';
@@ -39,7 +41,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
 
 describe('CustomLinkToolbar', () => {
   it('renders with create button', () => {
-    const component = render(<CustomLinkToolbar onClickCreate={jest.fn()} />, {
+    const component = render(<CustomLinkToolbar onClickCreate={vi.fn()} />, {
       wrapper: Wrapper,
     });
     expect(component.getByText('Custom links settings page')).toBeInTheDocument();
@@ -48,7 +50,7 @@ describe('CustomLinkToolbar', () => {
 
   it('renders without create button', () => {
     const component = render(
-      <CustomLinkToolbar onClickCreate={jest.fn()} showCreateButton={false} />,
+      <CustomLinkToolbar onClickCreate={vi.fn()} showCreateButton={false} />,
       { wrapper: Wrapper }
     );
     expect(component.getByText('Custom links settings page')).toBeInTheDocument();
@@ -56,7 +58,7 @@ describe('CustomLinkToolbar', () => {
   });
 
   it('opens flyout to create new custom link', () => {
-    const handleCreateCustomLinkClickMock = jest.fn();
+    const handleCreateCustomLinkClickMock = vi.fn();
     const { getByText } = render(
       <CustomLinkToolbar onClickCreate={handleCreateCustomLinkClickMock} />,
       { wrapper: Wrapper }

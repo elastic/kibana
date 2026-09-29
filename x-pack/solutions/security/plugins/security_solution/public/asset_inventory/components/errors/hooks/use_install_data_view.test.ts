@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useInstallDataView } from './use_install_data_view';
 import { createTestProviderWrapper } from '../../../test/test_provider';
 
-const mockPostInstallAssetInventoryDataView = jest.fn();
-const mockCallback = jest.fn();
+const mockPostInstallAssetInventoryDataView = vi.fn();
+const mockCallback = vi.fn();
 
-jest.mock('../../../hooks/use_asset_inventory_routes', () => ({
-  useAssetInventoryRoutes: () => ({
-    postInstallAssetInventoryDataView: mockPostInstallAssetInventoryDataView,
-  }),
-}));
+vi.mock('../../../hooks/use_asset_inventory_routes', () => {
+      const mocked = {
+      useAssetInventoryRoutes: () => ({
+        postInstallAssetInventoryDataView: mockPostInstallAssetInventoryDataView,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderHookWithWrapper = () =>
   renderHook(
@@ -31,7 +36,7 @@ const renderHookWithWrapper = () =>
 
 describe('useInstallDataView', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('Success', () => {
@@ -69,7 +74,7 @@ describe('useInstallDataView', () => {
   describe('Error', () => {
     it('should handle error message when installing data view', async () => {
       // suppress expected console error messages
-      jest.spyOn(console, 'error').mockReturnValue();
+      vi.spyOn(console, 'error').mockReturnValue();
 
       mockPostInstallAssetInventoryDataView.mockRejectedValue({
         body: {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /*
  * Mocking EuiSearchBar because its onChange is not firing during tests
  */
@@ -35,15 +37,15 @@ import {
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
 
-jest.mock('react-use/lib/useObservable', () => () => jest.fn());
+vi.mock('react-use/lib/useObservable', () => () => vi.fn());
 
 describe('<IndexManagementHome />', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
-  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
+  vi.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const mockEnvironment = setupEnvironment();
     httpService.setup(httpServiceMock.createSetupContract());
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
@@ -17,11 +20,14 @@ import { RulesPageApp } from './rules_page_app';
 import type { ClassicRulesPageInternalDeps } from './classic_rules_page';
 import type { TriggersAndActionsUiServices } from './rules_app';
 
-jest.mock('./rules_page_app', () => ({
-  RulesPageApp: jest.fn(() => <div data-test-subj="rulesPageApp" />),
-}));
+vi.mock('./rules_page_app', () => {
+      const mocked = {
+      RulesPageApp: vi.fn(() => <div data-test-subj="rulesPageApp" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const rulesPageAppMock = RulesPageApp as jest.MockedFunction<typeof RulesPageApp>;
+const rulesPageAppMock = RulesPageApp as MockedFunction<typeof RulesPageApp>;
 
 const getLatestDeps = (): TriggersAndActionsUiServices => {
   const lastCall = rulesPageAppMock.mock.calls.at(-1);
@@ -31,7 +37,7 @@ const getLatestDeps = (): TriggersAndActionsUiServices => {
   return lastCall[0].deps;
 };
 
-const createInternalDeps = (getFeatures: jest.Mock): ClassicRulesPageInternalDeps => {
+const createInternalDeps = (getFeatures: Mock): ClassicRulesPageInternalDeps => {
   const services = createStartServicesMock();
   return {
     actions: services.actions,
@@ -66,15 +72,15 @@ const createInternalDeps = (getFeatures: jest.Mock): ClassicRulesPageInternalDep
 
 describe('ComposableClassicRulesPage', () => {
   const coreStart = coreMock.createStart();
-  const setBreadcrumbs = jest.fn();
+  const setBreadcrumbs = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders RulesPageApp with composed deps and fetched kibana features', async () => {
     const features = [{ id: 'apm', name: 'APM' }] as KibanaFeature[];
-    const getFeatures = jest.fn().mockResolvedValue(features);
+    const getFeatures = vi.fn().mockResolvedValue(features);
     const history = scopedHistoryMock.create();
 
     render(
@@ -99,7 +105,7 @@ describe('ComposableClassicRulesPage', () => {
   });
 
   it('forwards hideListBackButton onto RulesPageApp deps', async () => {
-    const getFeatures = jest.fn().mockResolvedValue([]);
+    const getFeatures = vi.fn().mockResolvedValue([]);
 
     render(
       <ComposableClassicRulesPage
@@ -116,7 +122,7 @@ describe('ComposableClassicRulesPage', () => {
   });
 
   it('forwards a solution host onto RulesPageApp deps', async () => {
-    const getFeatures = jest.fn().mockResolvedValue([]);
+    const getFeatures = vi.fn().mockResolvedValue([]);
     const host = { app: 'observabilityAlerting', pathPrefix: '/rules/v1' };
 
     render(
@@ -134,7 +140,7 @@ describe('ComposableClassicRulesPage', () => {
   });
 
   it('falls back to empty kibanaFeatures when getFeatures rejects', async () => {
-    const getFeatures = jest.fn().mockRejectedValue(new Error('Forbidden'));
+    const getFeatures = vi.fn().mockRejectedValue(new Error('Forbidden'));
 
     render(
       <ComposableClassicRulesPage
@@ -150,7 +156,7 @@ describe('ComposableClassicRulesPage', () => {
   });
 
   it('uses a memory history when the host does not pass history', async () => {
-    const getFeatures = jest.fn().mockResolvedValue([]);
+    const getFeatures = vi.fn().mockResolvedValue([]);
 
     render(
       <ComposableClassicRulesPage
@@ -174,7 +180,7 @@ describe('ComposableClassicRulesPage', () => {
   it('does not apply features after unmount', async () => {
     const features = [{ id: 'apm', name: 'APM' }] as KibanaFeature[];
     let resolveFeatures: (value: KibanaFeature[]) => void = () => {};
-    const getFeatures = jest.fn(
+    const getFeatures = vi.fn(
       () =>
         new Promise<KibanaFeature[]>((resolve) => {
           resolveFeatures = resolve;
@@ -202,7 +208,7 @@ describe('getClassicRulesPage start contract', () => {
     const start = triggersActionsUiMock.createStart();
     const element = start.getClassicRulesPage({
       coreStart: coreMock.createStart(),
-      setBreadcrumbs: jest.fn(),
+      setBreadcrumbs: vi.fn(),
     });
     expect(React.isValidElement(element)).toBe(true);
   });

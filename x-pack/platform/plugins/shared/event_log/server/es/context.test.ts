@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { createEsContext } from './context';
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -30,16 +33,19 @@ export const GetDataStreamsResponse: estypes.IndicesGetDataStreamResponse = {
   ],
 };
 
-jest.mock('../../../../../../package.json', () => ({ version: '1.2.3' }));
-jest.mock('./init');
-jest.mock('../lib/ready_signal', () => {
-  const createReadySignalActual = jest.requireActual('../lib/ready_signal');
+vi.mock('../../../../../../package.json', () => {
+      const mocked = { version: '1.2.3' };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./init');
+vi.mock('../lib/ready_signal', async () => {
+  const createReadySignalActual = (await vi.importActual('../lib/ready_signal'));
   return {
-    createReadySignal: jest.fn(createReadySignalActual.createReadySignal),
+    createReadySignal: vi.fn(createReadySignalActual.createReadySignal),
   };
 });
 
-const mockCreateReadySignal = createReadySignal as jest.MockedFunction<typeof createReadySignal>;
+const mockCreateReadySignal = createReadySignal as MockedFunction<typeof createReadySignal>;
 
 let logger: Logger;
 let elasticsearchClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -127,10 +133,10 @@ describe('createEsContext', () => {
   test('should cancel initialization in case of server shutdown', async () => {
     const readySignal = createReadySignal();
 
-    const wait = jest.fn(() => readySignal.wait());
-    const signal = jest.fn((value) => readySignal.signal(value));
-    const isEmitted = jest.fn(() => readySignal.isEmitted());
-    const createReadySignalMock = jest.fn(() => ({ wait, signal, isEmitted }));
+    const wait = vi.fn(() => readySignal.wait());
+    const signal = vi.fn((value) => readySignal.signal(value));
+    const isEmitted = vi.fn(() => readySignal.isEmitted());
+    const createReadySignalMock = vi.fn(() => ({ wait, signal, isEmitted }));
     mockCreateReadySignal.mockReset();
     mockCreateReadySignal.mockImplementation(createReadySignalMock);
 
@@ -150,7 +156,7 @@ describe('createEsContext', () => {
   });
 
   test('should handled failed initialization', async () => {
-    jest.requireMock('./init').initializeEs.mockResolvedValue(false);
+    (await vi.importMock('./init')).initializeEs.mockResolvedValue(false);
     const context = createEsContext({
       logger,
       shouldSetExistingAssetsToHidden: true,

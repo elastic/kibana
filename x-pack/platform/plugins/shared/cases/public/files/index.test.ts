@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { MAX_FILE_SIZE, MAX_IMAGE_FILE_SIZE } from '../../common/constants';
 import { createMockFilesSetup } from '@kbn/files-plugin/public/mocks';
 import { registerCaseFileKinds } from '.';
@@ -22,7 +24,7 @@ describe('ui files index', () => {
     const mockFilesSetup = createMockFilesSetup();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     describe('allowedMimeTypes', () => {

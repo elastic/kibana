@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { RouteSecurity } from '@kbn/core/server';
 import { ReservedPrivilegesSet } from '@kbn/core/server';
 import {
@@ -22,8 +24,8 @@ describe('initAPIAuthorization', () => {
     const mockHTTPSetup = coreMock.createSetup().http;
     const mockAuthz = {
       ...authorizationMock.create(),
-      getCurrentUser: jest.fn(),
-      getSecurityConfig: jest.fn(),
+      getCurrentUser: vi.fn(),
+      getSecurityConfig: vi.fn(),
     };
     initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingSystemMock.create().get());
 
@@ -58,8 +60,8 @@ describe('initAPIAuthorization', () => {
     const mockHTTPSetup = coreMock.createSetup().http;
     const mockAuthz = {
       ...authorizationMock.create(),
-      getCurrentUser: jest.fn(),
-      getSecurityConfig: jest.fn(),
+      getCurrentUser: vi.fn(),
+      getSecurityConfig: vi.fn(),
     };
     initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingSystemMock.create().get());
 
@@ -96,8 +98,8 @@ describe('initAPIAuthorization', () => {
     const mockHTTPSetup = coreMock.createSetup().http;
     const mockAuthz = {
       ...authorizationMock.create({ version: '1.0.0-zeta1' }),
-      getCurrentUser: jest.fn(),
-      getSecurityConfig: jest.fn(),
+      getCurrentUser: vi.fn(),
+      getSecurityConfig: vi.fn(),
     };
     initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingSystemMock.create().get());
 
@@ -121,7 +123,7 @@ describe('initAPIAuthorization', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
 
-    const mockCheckPrivileges = jest.fn().mockReturnValue({
+    const mockCheckPrivileges = vi.fn().mockReturnValue({
       privileges: {
         kibana: [{ privilege: 'api:foo', authorized: true }],
       },
@@ -162,8 +164,8 @@ describe('initAPIAuthorization', () => {
     const mockHTTPSetup = coreMock.createSetup().http;
     const mockAuthz = {
       ...authorizationMock.create({ version: '1.0.0-zeta1' }),
-      getCurrentUser: jest.fn(),
-      getSecurityConfig: jest.fn(),
+      getCurrentUser: vi.fn(),
+      getSecurityConfig: vi.fn(),
     };
     initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingSystemMock.create().get());
 
@@ -187,7 +189,7 @@ describe('initAPIAuthorization', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
 
-    const mockCheckPrivileges = jest.fn().mockReturnValue({
+    const mockCheckPrivileges = vi.fn().mockReturnValue({
       privileges: {
         kibana: [{ privilege: 'api:foo', authorized: false }],
       },
@@ -258,8 +260,8 @@ describe('initAPIAuthorization', () => {
         const mockHTTPSetup = coreMock.createSetup().http;
         const mockAuthz = {
           ...authorizationMock.create({ version: '1.0.0-zeta1' }),
-          getCurrentUser: jest.fn(),
-          getSecurityConfig: jest.fn(),
+          getCurrentUser: vi.fn(),
+          getSecurityConfig: vi.fn(),
         };
         initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingSystemMock.create().get());
 
@@ -280,7 +282,7 @@ describe('initAPIAuthorization', () => {
         const mockResponse = httpServerMock.createResponseFactory();
         const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
 
-        const mockCheckPrivileges = jest.fn().mockReturnValue(kibanaPrivilegesResponse);
+        const mockCheckPrivileges = vi.fn().mockReturnValue(kibanaPrivilegesResponse);
         mockAuthz.getCurrentUser.mockReturnValue(kibanaCurrentUserResponse);
         mockAuthz.getSecurityConfig.mockResolvedValue(esXpackSecurityUsageResponse);
         mockAuthz.mode.useRbacForRequest.mockReturnValue(true);

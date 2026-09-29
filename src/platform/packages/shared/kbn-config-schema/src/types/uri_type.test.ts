@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '../..';
 
 test('is required by default', () => {
@@ -121,7 +123,7 @@ describe('#validate', () => {
   });
 
   test('is not called with default value in no input', () => {
-    const validate = jest.fn();
+    const validate = vi.fn();
 
     schema.uri({ validate, defaultValue: 'http://kibana.local' }).validate(undefined);
 

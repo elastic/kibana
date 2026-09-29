@@ -5,27 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DocumentToolsFlyoutHeader } from './document_tools_flyout_header';
 import { useDocumentFlyoutTitle } from '../hooks/use_document_flyout_title';
 
-jest.mock('../hooks/use_document_flyout_title');
+vi.mock('../hooks/use_document_flyout_title');
 
-const mockToolsFlyoutHeaderProps = jest.fn();
-jest.mock('./tools_flyout_header', () => ({
-  ToolsFlyoutHeader: (props: Record<string, unknown>) => {
-    mockToolsFlyoutHeaderProps(props);
-    return <div data-test-subj="mockToolsFlyoutHeader" />;
-  },
-}));
+const mockToolsFlyoutHeaderProps = vi.fn();
+vi.mock('./tools_flyout_header', () => {
+      const mocked = {
+      ToolsFlyoutHeader: (props: Record<string, unknown>) => {
+        mockToolsFlyoutHeaderProps(props);
+        return <div data-test-subj="mockToolsFlyoutHeader" />;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useDocumentFlyoutTitleMock = useDocumentFlyoutTitle as jest.Mock;
+const useDocumentFlyoutTitleMock = useDocumentFlyoutTitle as Mock;
 
 const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
 
-const onTitleClick = jest.fn();
+const onTitleClick = vi.fn();
 const badge = <div data-test-subj="mockBadge" />;
 const timestamp = <div data-test-subj="mockTimestamp" />;
 
@@ -39,7 +45,7 @@ const titleResult = {
 
 describe('<DocumentToolsFlyoutHeader />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useDocumentFlyoutTitleMock.mockReturnValue(titleResult);
   });
 
@@ -67,8 +73,8 @@ describe('<DocumentToolsFlyoutHeader />', () => {
   });
 
   it('passes hit, renderCellActions and onAlertUpdated to useDocumentFlyoutTitle', () => {
-    const renderCellActions = jest.fn();
-    const onAlertUpdated = jest.fn();
+    const renderCellActions = vi.fn();
+    const onAlertUpdated = vi.fn();
 
     render(
       <DocumentToolsFlyoutHeader

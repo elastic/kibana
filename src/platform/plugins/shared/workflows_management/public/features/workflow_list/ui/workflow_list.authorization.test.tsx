@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -21,56 +24,71 @@ import { createWorkflowListItem } from '../../../connectors/workflows/workflows_
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
+vi.mock('@kbn/workflows-ui', async () => {
+  const actual = (await vi.importActual('@kbn/workflows-ui'));
   return {
     ...actual,
-    useWorkflows: jest.fn(),
-    useWorkflowsCapabilities: jest.fn(),
+    useWorkflows: vi.fn(),
+    useWorkflowsCapabilities: vi.fn(),
   };
 });
 
-jest.mock('./use_event_driven_execution_status', () => ({
-  useEventDrivenExecutionStatus: () => ({
-    eventDrivenExecutionEnabled: true,
-    isLoading: false,
-    error: false,
-  }),
-}));
+vi.mock('./use_event_driven_execution_status', () => {
+      const mocked = {
+      useEventDrivenExecutionStatus: () => ({
+        eventDrivenExecutionEnabled: true,
+        isLoading: false,
+        error: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_export_with_references', () => ({
-  useExportWithReferences: () => ({
-    exportModalState: null,
-    startExport: jest.fn(),
-    handleIgnore: jest.fn(),
-    handleAddDirect: jest.fn(),
-    handleAddAll: jest.fn(),
-    handleCancel: jest.fn(),
-  }),
-}));
+vi.mock('./use_export_with_references', () => {
+      const mocked = {
+      useExportWithReferences: () => ({
+        exportModalState: null,
+        startExport: vi.fn(),
+        handleIgnore: vi.fn(),
+        handleAddDirect: vi.fn(),
+        handleAddAll: vi.fn(),
+        handleCancel: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_telemetry', () => ({
-  useTelemetry: () => ({
-    reportWorkflowListViewed: jest.fn(),
-  }),
-}));
+vi.mock('../../../hooks/use_telemetry', () => {
+      const mocked = {
+      useTelemetry: () => ({
+        reportWorkflowListViewed: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({
-  useWorkflowActions: () => ({
-    deleteWorkflows: { mutate: jest.fn() },
-    runWorkflow: { mutate: jest.fn() },
-    cloneWorkflow: { mutate: jest.fn() },
-    updateWorkflow: { mutate: jest.fn() },
-  }),
-}));
+vi.mock('../../../entities/workflows/model/use_workflow_actions', () => {
+      const mocked = {
+      useWorkflowActions: () => ({
+        deleteWorkflows: { mutate: vi.fn() },
+        runWorkflow: { mutate: vi.fn() },
+        cloneWorkflow: { mutate: vi.fn() },
+        updateWorkflow: { mutate: vi.fn() },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseWorkflows = useWorkflows as jest.MockedFunction<typeof useWorkflows>;
-const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseWorkflows = useWorkflows as MockedFunction<typeof useWorkflows>;
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
 >;
 
@@ -96,7 +114,7 @@ const workflowsQueryResult = {
   },
   isLoading: false,
   error: undefined,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
 } as unknown as ReturnType<typeof useWorkflows>;
 
 function setKibanaCapabilities(
@@ -130,17 +148,17 @@ function setKibanaCapabilities(
             ...workflowsManagement,
           },
         },
-        getUrlForApp: jest.fn(
+        getUrlForApp: vi.fn(
           (_app: string, opts?: { path?: string }) => `/app/workflows${opts?.path ?? ''}`
         ),
-        navigateToUrl: jest.fn(),
+        navigateToUrl: vi.fn(),
       },
       notifications: {
         toasts: {
-          addSuccess: jest.fn(),
-          addError: jest.fn(),
-          addWarning: jest.fn(),
-          addDanger: jest.fn(),
+          addSuccess: vi.fn(),
+          addError: vi.fn(),
+          addWarning: vi.fn(),
+          addDanger: vi.fn(),
         },
       },
       settings: {
@@ -210,7 +228,7 @@ async function openFirstRowCollapsedActions(): Promise<void> {
 
 describe('Authorization matrix', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseWorkflows.mockReturnValue(workflowsQueryResult);
   });
 
@@ -403,7 +421,7 @@ describe('Authorization matrix', () => {
 
 describe('Bulk actions menu', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   async function selectFirstDataRow(): Promise<void> {

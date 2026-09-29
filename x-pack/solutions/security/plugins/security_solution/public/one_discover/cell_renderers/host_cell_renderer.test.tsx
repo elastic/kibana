@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -24,50 +27,74 @@ import {
   FLYOUT_TYPE,
 } from '../../common/lib/telemetry';
 
-const mockOpenSystemFlyout = jest.fn();
-const mockReportEvent = jest.fn();
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      overlays: { openSystemFlyout: mockOpenSystemFlyout },
-    },
-  }),
-}));
+const mockOpenSystemFlyout = vi.fn();
+const mockReportEvent = vi.fn();
+vi.mock('../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: () => true,
-}));
+vi.mock('../../common/hooks/is_in_security_app', () => {
+      const mocked = {
+      useIsInSecurityApp: () => true,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: jest.fn(), location: { pathname: '/' } }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useHistory: () => ({ push: vi.fn(), location: { pathname: '/' } }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('react-redux-v7', () => ({
-  ...jest.requireActual('react-redux-v7'),
-  useStore: () => ({}),
-}));
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      ...require('react-redux-v7'),
+      useStore: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../flyout_v2/shared/hooks/use_default_flyout_properties', () => ({
-  useDefaultDocumentFlyoutProperties: () => ({
-    ownFocus: false,
-    paddingSize: 'm',
-    resizable: true,
-    size: 's',
-  }),
-}));
+vi.mock('../../flyout_v2/shared/hooks/use_default_flyout_properties', () => {
+      const mocked = {
+      useDefaultDocumentFlyoutProperties: () => ({
+        ownFocus: false,
+        paddingSize: 'm',
+        resizable: true,
+        size: 's',
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../flyout_v2/shared/components/flyout_provider', () => ({
-  flyoutProviders: jest.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
-}));
+vi.mock('../../flyout_v2/shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: vi.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../flyout_v2/entity/host/main', () => ({
-  Host: jest.fn(() => null),
-}));
+vi.mock('../../flyout_v2/entity/host/main', () => {
+      const mocked = {
+      Host: vi.fn(() => null),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../alert_flyout_overview_tab_component/data_view_manager_bootstrap', () => ({
-  DataViewManagerBootstrap: () => null,
-}));
+vi.mock('../alert_flyout_overview_tab_component/data_view_manager_bootstrap', () => {
+      const mocked = {
+      DataViewManagerBootstrap: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockServices = {
   overlays: { openSystemFlyout: mockOpenSystemFlyout },
@@ -87,18 +114,18 @@ const baseProps: DataGridCellValueElementProps = {
     },
   },
   dataView: dataViewMock,
-  setCellProps: jest.fn(),
+  setCellProps: vi.fn(),
   isExpandable: false,
   rowIndex: 0,
   colIndex: 0,
   fieldFormats: fieldFormatsMock,
-  closePopover: jest.fn(),
+  closePopover: vi.fn(),
   columnsMeta: undefined,
 };
 
 describe('HostCellRenderer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockOpenSystemFlyout.mockReturnValue({ onClose: new Promise<void>(() => {}) });
   });
 
@@ -121,7 +148,7 @@ describe('HostCellRenderer', () => {
 
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
 
-    const providerArgs = (flyoutProviders as jest.Mock).mock.calls[0][0];
+    const providerArgs = (flyoutProviders as Mock).mock.calls[0][0];
     const hostElement = React.Children.toArray(providerArgs.children.props.children).find(
       (child): child is React.ReactElement => React.isValidElement(child) && child.type === Host
     );

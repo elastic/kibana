@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
@@ -14,41 +17,44 @@ import { createScheduleDataClient } from '../../../lib/schedules/create_schedule
 
 const mockAnalytics = coreMock.createSetup().analytics;
 
-jest.mock('../../../lib/assert_workflows_enabled', () => ({
-  assertWorkflowsEnabled: jest.fn().mockResolvedValue(null),
-}));
-jest.mock('../../../lib/schedules/create_schedule_data_client');
+vi.mock('../../../lib/assert_workflows_enabled', () => {
+      const mocked = {
+      assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../lib/schedules/create_schedule_data_client');
 
-const mockDeleteSchedule = jest.fn();
+const mockDeleteSchedule = vi.fn();
 const mockDataClient = { deleteSchedule: mockDeleteSchedule };
 
-const logger = { debug: jest.fn(), error: jest.fn(), info: jest.fn() } as unknown as Logger;
+const logger = { debug: vi.fn(), error: vi.fn(), info: vi.fn() } as unknown as Logger;
 
-const getStartServices = jest.fn().mockResolvedValue({
+const getStartServices = vi.fn().mockResolvedValue({
   coreStart: {},
-  pluginsStart: { actions: { getActionsClientWithRequest: jest.fn() } },
+  pluginsStart: { actions: { getActionsClientWithRequest: vi.fn() } },
 });
 
 describe('registerDeleteScheduleRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (createScheduleDataClient as jest.Mock).mockResolvedValue(mockDataClient);
+    vi.clearAllMocks();
+    (createScheduleDataClient as Mock).mockResolvedValue(mockDataClient);
   });
 
   it('returns 404 when workflows feature flag is disabled', async () => {
     const mockNotFoundResponse = { statusCode: 404 };
-    (assertWorkflowsEnabled as jest.Mock).mockResolvedValueOnce(mockNotFoundResponse);
+    (assertWorkflowsEnabled as Mock).mockResolvedValueOnce(mockNotFoundResponse);
 
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.delete as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.delete as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerDeleteScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
     const handler = addVersionMock.mock.calls[0][1];
     const request = httpServerMock.createKibanaRequest({ params: { id: 's1' } });
     const response = httpServerMock.createResponseFactory();
-    const context = { alerting: Promise.resolve({ getRulesClient: jest.fn() }) };
+    const context = { alerting: Promise.resolve({ getRulesClient: vi.fn() }) };
 
     const result = await handler(context, request, response);
 
@@ -58,8 +64,8 @@ describe('registerDeleteScheduleRoute', () => {
 
   it('returns 200 with the deleted schedule id on success', async () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.delete as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.delete as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerDeleteScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -69,9 +75,9 @@ describe('registerDeleteScheduleRoute', () => {
     const request = httpServerMock.createKibanaRequest({ params: { id: 's1' } });
     const response = httpServerMock.createResponseFactory();
     const context = {
-      alerting: Promise.resolve({ getRulesClient: jest.fn() }),
+      alerting: Promise.resolve({ getRulesClient: vi.fn() }),
       core: Promise.resolve({
-        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
       }),
     };
 
@@ -83,11 +89,11 @@ describe('registerDeleteScheduleRoute', () => {
 
   it('returns 404 when the feature flag is disabled', async () => {
     const mockNotFoundResponse = { statusCode: 404 };
-    (assertWorkflowsEnabled as jest.Mock).mockResolvedValueOnce(mockNotFoundResponse);
+    (assertWorkflowsEnabled as Mock).mockResolvedValueOnce(mockNotFoundResponse);
 
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.delete as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.delete as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerDeleteScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -95,7 +101,7 @@ describe('registerDeleteScheduleRoute', () => {
 
     const request = httpServerMock.createKibanaRequest({ params: { id: 's1' } });
     const response = httpServerMock.createResponseFactory();
-    const context = { alerting: Promise.resolve({ getRulesClient: jest.fn() }) };
+    const context = { alerting: Promise.resolve({ getRulesClient: vi.fn() }) };
 
     const result = await handler(context, request, response);
 
@@ -105,8 +111,8 @@ describe('registerDeleteScheduleRoute', () => {
 
   it('registers the route with ATTACK_DISCOVERY_API_ACTION_ALL in requiredPrivileges', () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.delete as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.delete as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerDeleteScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -123,8 +129,8 @@ describe('registerDeleteScheduleRoute', () => {
 
   it('registers the route with ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE in requiredPrivileges', () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.delete as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.delete as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerDeleteScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -143,8 +149,8 @@ describe('registerDeleteScheduleRoute', () => {
 
   it('registers the route with ALERTS_API_READ in requiredPrivileges', () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.delete as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.delete as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerDeleteScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -161,8 +167,8 @@ describe('registerDeleteScheduleRoute', () => {
 
   it('returns a custom error when the delete fails', async () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.delete as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+    const addVersionMock = vi.fn();
+    (router.versioned.delete as Mock).mockReturnValue({ addVersion: addVersionMock });
 
     registerDeleteScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
 
@@ -172,9 +178,9 @@ describe('registerDeleteScheduleRoute', () => {
     const request = httpServerMock.createKibanaRequest({ params: { id: 's1' } });
     const response = httpServerMock.createResponseFactory();
     const context = {
-      alerting: Promise.resolve({ getRulesClient: jest.fn() }),
+      alerting: Promise.resolve({ getRulesClient: vi.fn() }),
       core: Promise.resolve({
-        featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
       }),
     };
 

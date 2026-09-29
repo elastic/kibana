@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useSystemFlyoutType } from '@kbn/core-overlays-browser';
@@ -16,16 +19,19 @@ import {
 import { FLYOUT_PUSH_VS_OVERLAY_LOCAL_STORAGE } from '../constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('@kbn/core-overlays-browser', () => ({
-  useSystemFlyoutType: jest.fn(),
-}));
+vi.mock('../../../common/lib/kibana');
+vi.mock('@kbn/core-overlays-browser', () => {
+      const mocked = {
+      useSystemFlyoutType: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockStorage = { get: jest.fn(), set: jest.fn() };
+const mockStorage = { get: vi.fn(), set: vi.fn() };
 const storage = mockStorage as unknown as Storage;
 
 describe('getStoredFlyoutType', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns the stored value when it is "push"', () => {
     mockStorage.get.mockReturnValue('push');
@@ -51,14 +57,14 @@ describe('getStoredFlyoutType', () => {
 
 describe('useFlyoutPushVsOverlay', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({ services: { storage: mockStorage } });
-    (useSystemFlyoutType as jest.Mock).mockReturnValue(undefined);
+    vi.clearAllMocks();
+    (useKibana as Mock).mockReturnValue({ services: { storage: mockStorage } });
+    (useSystemFlyoutType as Mock).mockReturnValue(undefined);
     mockStorage.get.mockReturnValue(undefined);
   });
 
   it('reads the live type from the system-flyout context when present', () => {
-    (useSystemFlyoutType as jest.Mock).mockReturnValue({ type: 'push', setType: jest.fn() });
+    (useSystemFlyoutType as Mock).mockReturnValue({ type: 'push', setType: vi.fn() });
 
     const { result } = renderHook(() => useFlyoutPushVsOverlay());
 
@@ -66,7 +72,7 @@ describe('useFlyoutPushVsOverlay', () => {
   });
 
   it('falls back to the persisted preference when there is no context', () => {
-    (useSystemFlyoutType as jest.Mock).mockReturnValue(undefined);
+    (useSystemFlyoutType as Mock).mockReturnValue(undefined);
     mockStorage.get.mockReturnValue('push');
 
     const { result } = renderHook(() => useFlyoutPushVsOverlay());
@@ -75,8 +81,8 @@ describe('useFlyoutPushVsOverlay', () => {
   });
 
   it('persists the choice and applies it live via the context', () => {
-    const setType = jest.fn();
-    (useSystemFlyoutType as jest.Mock).mockReturnValue({ type: 'overlay', setType });
+    const setType = vi.fn();
+    (useSystemFlyoutType as Mock).mockReturnValue({ type: 'overlay', setType });
 
     const { result } = renderHook(() => useFlyoutPushVsOverlay());
     act(() => result.current.setType('push'));
@@ -86,7 +92,7 @@ describe('useFlyoutPushVsOverlay', () => {
   });
 
   it('persists the choice even when there is no open flyout context', () => {
-    (useSystemFlyoutType as jest.Mock).mockReturnValue(undefined);
+    (useSystemFlyoutType as Mock).mockReturnValue(undefined);
 
     const { result } = renderHook(() => useFlyoutPushVsOverlay());
     act(() => result.current.setType('overlay'));

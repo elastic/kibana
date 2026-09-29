@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { GO_TO_RULES_BUTTON_TEST_ID, HeaderSection } from './header_section';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-jest.mock('../../../../common/components/user_privileges');
+vi.mock('../../../../common/components/user_privileges');
 
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+const mockUseUserPrivileges = useUserPrivileges as Mock;
 
 describe('HeaderSection', () => {
   beforeEach(() => {

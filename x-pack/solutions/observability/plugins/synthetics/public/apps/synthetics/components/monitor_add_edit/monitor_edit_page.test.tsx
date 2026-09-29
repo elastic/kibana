@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent } from '@testing-library/react';
 import { render } from '../../utils/testing/rtl_helpers';
@@ -18,33 +21,42 @@ import {
   PROFILES_MAP,
 } from '../../../../../common/constants/monitor_defaults';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
-}));
+vi.mock('@kbn/observability-shared-plugin/public', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_monitor_name', () => ({
-  ...jest.requireActual('../../hooks/use_monitor_name'),
-  useMonitorName: jest.fn().mockReturnValue({ nameAlreadyExists: false }),
-}));
+vi.mock('../../hooks/use_monitor_name', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../hooks/use_monitor_name')),
+      useMonitorName: vi.fn().mockReturnValue({ nameAlreadyExists: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../hooks/use_kibana_space', () => ({
-  ...jest.requireActual('../../../../hooks/use_kibana_space'),
-  useKibanaSpace: jest.fn().mockReturnValue({ id: 'default' }),
-}));
+vi.mock('../../../../hooks/use_kibana_space', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../hooks/use_kibana_space')),
+      useKibanaSpace: vi.fn().mockReturnValue({ id: 'default' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('MonitorEditPage', () => {
   const { FETCH_STATUS } = observabilitySharedPublic;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('renders correctly', async () => {
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+    vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: {
         attributes: {
@@ -106,7 +118,7 @@ describe('MonitorEditPage', () => {
   });
 
   it('renders when monitor is loading', async () => {
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+    vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: null,
       refetch: () => null,
@@ -167,7 +179,7 @@ describe('MonitorEditPage', () => {
   });
 
   it('renders a monitor loading error', async () => {
-    jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+    vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: null,
       refetch: () => null,
@@ -204,9 +216,9 @@ describe('MonitorEditPage', () => {
   it.each([true, false])(
     'shows duplicate error when "nameAlreadyExists" is %s',
     async (nameAlreadyExists) => {
-      (useMonitorName as jest.Mock).mockReturnValue({ nameAlreadyExists });
+      (useMonitorName as Mock).mockReturnValue({ nameAlreadyExists });
 
-      jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+      vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
         status: FETCH_STATUS.SUCCESS,
         data: {
           attributes: {
@@ -245,7 +257,7 @@ describe('MonitorEditPage', () => {
       fireEvent.blur(inputField);
 
       await act(async () => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
       if (nameAlreadyExists) {
         expect(getByText('Monitor name already exists')).toBeInTheDocument();

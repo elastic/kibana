@@ -7,29 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const mockConverter = jest.fn((name) => `By ${name}`);
+import { vi } from 'vitest';
 
-jest.mock('../services', () => ({
-  getFormatService: jest.fn(() => ({
-    deserialize: jest.fn(() => ({
-      convertToText: mockConverter,
-    })),
-  })),
-}));
+const mockConverter = vi.fn((name) => `By ${name}`);
 
-jest.mock('./create_formatted_table', () => ({
-  createFormattedTable: jest.fn((data) => ({
-    ...data,
-    formattedColumns: {},
-  })),
-}));
+vi.mock('../services', () => {
+      const mocked = {
+      getFormatService: vi.fn(() => ({
+        deserialize: vi.fn(() => ({
+          convertToText: mockConverter,
+        })),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./add_percentage_column', () => ({
-  addPercentageColumn: jest.fn((data, column) => ({
-    ...data,
-    percentage: `${column} with percentage`,
-  })),
-}));
+vi.mock('./create_formatted_table', () => {
+      const mocked = {
+      createFormattedTable: vi.fn((data) => ({
+        ...data,
+        formattedColumns: {},
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('./add_percentage_column', () => {
+      const mocked = {
+      addPercentageColumn: vi.fn((data, column) => ({
+        ...data,
+        percentage: `${column} with percentage`,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';

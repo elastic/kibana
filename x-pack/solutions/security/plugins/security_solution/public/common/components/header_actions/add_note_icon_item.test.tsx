@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { ComponentProps } from 'react';
@@ -16,20 +19,23 @@ import { AddEventNoteAction } from './add_note_icon_item';
 import { NotesButton } from '../../../timelines/components/timeline/notes/notes_button';
 import { useUserPrivileges } from '../user_privileges';
 
-jest.mock('../../../timelines/components/timeline/notes/notes_button', () => ({
-  NotesButton: jest.fn(),
-}));
+vi.mock('../../../timelines/components/timeline/notes/notes_button', () => {
+      const mocked = {
+      NotesButton: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../user_privileges');
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+vi.mock('../user_privileges');
+const useUserPrivilegesMock = useUserPrivileges as Mock;
 
-const NotesButtonMock = NotesButton as unknown as jest.Mock;
+const NotesButtonMock = NotesButton as unknown as Mock;
 
 const TestWrapper = (props: ComponentProps<typeof TestProviders>) => {
   return <TestProviders {...props} />;
 };
 
-const toggleShowNotesMock = jest.fn();
+const toggleShowNotesMock = vi.fn();
 
 const renderTestComponent = (props: Partial<ComponentProps<typeof AddEventNoteAction>> = {}) => {
   const localProps: ComponentProps<typeof AddEventNoteAction> = {
@@ -48,7 +54,7 @@ const renderTestComponent = (props: Partial<ComponentProps<typeof AddEventNoteAc
 
 describe('AddEventNoteAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     useUserPrivilegesMock.mockReturnValue({
       notesPrivileges: { crud: true, read: true },

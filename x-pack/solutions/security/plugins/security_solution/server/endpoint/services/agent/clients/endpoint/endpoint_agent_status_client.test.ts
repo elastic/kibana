@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AgentStatusClientOptions } from '../lib/base_agent_status_client';
 import type { ApplyMetadataMocksResponse } from '../../../metadata/mocks';
 import { createEndpointMetadataServiceTestContextMock } from '../../../metadata/mocks';
@@ -15,15 +18,15 @@ import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/s
 import { createAppContextStartContractMock as fleetCreateAppContextStartContractMock } from '@kbn/fleet-plugin/server/mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-jest.mock('../../../actions/pending_actions_summary', () => {
-  const realModule = jest.requireActual('../../../actions/pending_actions_summary');
+vi.mock('../../../actions/pending_actions_summary', async () => {
+  const realModule = (await vi.importActual('../../../actions/pending_actions_summary'));
   return {
     ...realModule,
-    getPendingActionsSummary: jest.fn(realModule.getPendingActionsSummary),
+    getPendingActionsSummary: vi.fn(realModule.getPendingActionsSummary),
   };
 });
 
-const getPendingActionsSummaryMock = _getPendingActionsSummary as jest.Mock;
+const getPendingActionsSummaryMock = _getPendingActionsSummary as Mock;
 
 describe('EndpointAgentStatusClient', () => {
   let constructorOptions: AgentStatusClientOptions;
@@ -41,8 +44,8 @@ describe('EndpointAgentStatusClient', () => {
       metadataMocks.esClient,
       metadataMocks.fleetServices
     );
-    (soClient.getCurrentNamespace as jest.Mock).mockReturnValue('foo');
-    (endpointAppContextServiceMock.getEndpointMetadataService as jest.Mock).mockReturnValue(
+    (soClient.getCurrentNamespace as Mock).mockReturnValue('foo');
+    (endpointAppContextServiceMock.getEndpointMetadataService as Mock).mockReturnValue(
       metadataMocks.endpointMetadataService
     );
     getPendingActionsSummaryMock.mockResolvedValue([]);
@@ -57,7 +60,7 @@ describe('EndpointAgentStatusClient', () => {
     // FIXME:PT need to remove the need for this mock. It appears in several test files on our side.
     //  Its currently needed due to the direct use of Fleet's `buildAgentStatusRuntimeField()` in
     //  `x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/metadata/query_builders.ts:239`
-    (soClient.find as jest.Mock).mockResolvedValue({ saved_objects: [] });
+    (soClient.find as Mock).mockResolvedValue({ saved_objects: [] });
     fleetAppContextService.start(
       fleetCreateAppContextStartContractMock({}, false, {
         withoutSpaceExtensions: soClient,
@@ -76,7 +79,7 @@ describe('EndpointAgentStatusClient', () => {
   it('should retrieve metadata and pending actions for the agents passed on input', async () => {
     const metadataClient = constructorOptions.endpointService.getEndpointMetadataService();
     const agentIds = ['one', 'two'];
-    jest.spyOn(metadataClient, 'getHostMetadataList');
+    vi.spyOn(metadataClient, 'getHostMetadataList');
     await statusClient.getAgentStatuses(agentIds);
 
     expect(metadataClient.getHostMetadataList).toHaveBeenCalledWith(
@@ -95,7 +98,7 @@ describe('EndpointAgentStatusClient', () => {
     const scoped = await constructorOptions.endpointService.asScoped(request);
     const clientWithRequest = new EndpointAgentStatusClient({ ...constructorOptions, scoped });
     const metadataClient = constructorOptions.endpointService.getEndpointMetadataService();
-    jest.spyOn(metadataClient, 'getHostMetadataList');
+    vi.spyOn(metadataClient, 'getHostMetadataList');
 
     await clientWithRequest.getAgentStatuses(['one']);
 
@@ -122,7 +125,7 @@ describe('EndpointAgentStatusClient', () => {
   });
 
   it('should log errors and still return expected data structure', async () => {
-    constructorOptions.esClient.search = jest.fn().mockRejectedValue(new Error('foo error'));
+    constructorOptions.esClient.search = vi.fn().mockRejectedValue(new Error('foo error'));
 
     await expect(
       statusClient.getAgentStatuses([dataMocks.unitedMetadata.agent.id])

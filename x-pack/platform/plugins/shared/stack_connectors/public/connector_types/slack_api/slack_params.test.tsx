@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import SlackParamsFields from './slack_params';
@@ -14,10 +16,10 @@ import userEvent from '@testing-library/user-event';
 
 const triggersActionsPath = '@kbn/triggers-actions-ui-plugin/public';
 
-const mockToasts = { addDanger: jest.fn(), addWarning: jest.fn() };
+const mockToasts = { addDanger: vi.fn(), addWarning: vi.fn() };
 
-jest.mock(triggersActionsPath, () => {
-  const original = jest.requireActual(triggersActionsPath);
+vi.mock(triggersActionsPath, () => {
+  const original = require(triggersActionsPath);
   return {
     ...original,
     useKibana: () => ({
@@ -70,7 +72,7 @@ describe('SlackParamsFields', () => {
     ],
   });
 
-  const editAction = jest.fn();
+  const editAction = vi.fn();
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
@@ -78,7 +80,7 @@ describe('SlackParamsFields', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('changing connector resets the fields', async () => {

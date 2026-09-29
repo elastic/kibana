@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, act, within } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -31,15 +33,15 @@ describe('<CrossClusterReplicationHome />', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
     // Set "default" mock responses by not providing any arguments
     httpRequestsMockHelpers.setLoadFollowerIndicesResponse();
@@ -50,7 +52,7 @@ describe('<CrossClusterReplicationHome />', () => {
       ({ user } = setup());
       // Wait for initial mount and HTTP request to complete
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 
@@ -108,7 +110,7 @@ describe('<CrossClusterReplicationHome />', () => {
       });
       ({ user } = setup());
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 
@@ -125,7 +127,7 @@ describe('<CrossClusterReplicationHome />', () => {
       ({ user } = setup());
       // Wait for initial mount
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
     });
 
@@ -153,7 +155,7 @@ describe('<CrossClusterReplicationHome />', () => {
       await user.click(screen.getByTestId('autoFollowPatternsTab'));
 
       await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+        await vi.runOnlyPendingTimersAsync();
       });
 
       expect(screen.queryByTestId('emptyPrompt')).not.toBeInTheDocument();

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { Subject } from 'rxjs';
@@ -25,58 +27,82 @@ import { CUSTOM_EVENT_TYPE, createCustomEvent } from './items/custom_event.facto
 import type { TimelineItem } from './types';
 import { TimelineConnector } from './timeline_connector';
 
-jest.mock('../../../hooks/use_conversation', () => ({
-  useConversation: jest.fn(),
-  useAgentId: () => 'agent-1',
-}));
-jest.mock('../../../hooks/agents/use_agent_by_id', () => ({
-  useAgentBuilderAgentById: () => ({ agent: null }),
-}));
-jest.mock('../../../context/conversation/use_conversation_id', () => ({
-  useConversationId: jest.fn(),
-}));
-jest.mock('../../../context/streaming/streaming_context', () => ({
-  useStreamRecord: jest.fn(),
-  useConversationStreamService: () => mockStreamService,
-}));
-jest.mock('./screen_reader_status', () => ({
-  TimelineScreenReaderStatus: () => null,
-}));
-jest.mock('../../../hooks/use_conversation_stream', () => ({
-  useConversationStream: () => ({ isResuming: false }),
-}));
-jest.mock('../../../hooks/use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({
-    attachmentsService: {
-      hasAttachmentType: (type: string) => registeredAttachmentTypes.has(type),
-    },
-    conversationEventsService: {
-      getUiDefinition: (type: string) =>
-        registeredEventTypes.has(type) ? { type, render: () => null } : undefined,
-    },
-  }),
-}));
+vi.mock('../../../hooks/use_conversation', () => {
+      const mocked = {
+      useConversation: vi.fn(),
+      useAgentId: () => 'agent-1',
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/agents/use_agent_by_id', () => {
+      const mocked = {
+      useAgentBuilderAgentById: () => ({ agent: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../context/conversation/use_conversation_id', () => {
+      const mocked = {
+      useConversationId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../context/streaming/streaming_context', () => {
+      const mocked = {
+      useStreamRecord: vi.fn(),
+      useConversationStreamService: () => mockStreamService,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./screen_reader_status', () => {
+      const mocked = {
+      TimelineScreenReaderStatus: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_conversation_stream', () => {
+      const mocked = {
+      useConversationStream: () => ({ isResuming: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: () => ({
+        attachmentsService: {
+          hasAttachmentType: (type: string) => registeredAttachmentTypes.has(type),
+        },
+        conversationEventsService: {
+          getUiDefinition: (type: string) =>
+            registeredEventTypes.has(type) ? { type, render: () => null } : undefined,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /** Attachment types with a UI in this test's Kibana; empty unless a test registers one. */
 const registeredAttachmentTypes = new Set<string>();
 /** Custom event types with a UI in this test's Kibana; empty unless a test registers one. */
 const registeredEventTypes = new Set<string>();
-jest.mock('./timeline', () => ({
-  Timeline: ({ items }: { items: TimelineItem[] }) => (
-    <ul>
-      {items.map((item) => (
-        <li key={item.key} data-test-subj="item">
-          {item.kind}:{item.key}:
-          {item.kind === 'agentTurn'
-            ? item.status
-            : item.kind === 'userMessage'
-            ? (item.event.data.attachment_refs ?? []).map((ref) => ref.attachment_id).join(',')
-            : ''}
-        </li>
-      ))}
-    </ul>
-  ),
-}));
+vi.mock('./timeline', () => {
+      const mocked = {
+      Timeline: ({ items }: { items: TimelineItem[] }) => (
+        <ul>
+          {items.map((item) => (
+            <li key={item.key} data-test-subj="item">
+              {item.kind}:{item.key}:
+              {item.kind === 'agentTurn'
+                ? item.status
+                : item.kind === 'userMessage'
+                ? (item.event.data.attachment_refs ?? []).map((ref) => ref.attachment_id).join(',')
+                : ''}
+            </li>
+          ))}
+        </ul>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const conversationId = 'conv-1';
 const chatEvents$ = new Subject<ChatEvent>();
@@ -100,11 +126,11 @@ const setState = ({
   pendingMessage?: string;
   withAttachments?: boolean;
 }) => {
-  jest.mocked(useConversationId).mockReturnValue(conversationId);
-  jest
+  vi.mocked(useConversationId).mockReturnValue(conversationId);
+  vi
     .mocked(useConversation)
     .mockReturnValue({ conversation } as ReturnType<typeof useConversation>);
-  jest.mocked(useStreamRecord).mockReturnValue({
+  vi.mocked(useStreamRecord).mockReturnValue({
     pendingMessage,
     pendingAttachments: withAttachments ? pendingAttachments : undefined,
   });
@@ -129,7 +155,7 @@ const savedUserMessage = createUserMessageEvent({ id: 'round-1::user_message' })
 
 describe('TimelineConnector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     registeredAttachmentTypes.clear();
     registeredEventTypes.clear();
     mockStreamService.clearPersistedExecution(conversationId, 'round-1::execution');

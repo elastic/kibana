@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { TestProviders } from '../../../../common/mock';
@@ -18,8 +21,8 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
 } from '../../../shared/components/test_ids';
 
-jest.mock('../../tools/session_view/hooks/use_session_view_config');
-jest.mock('../../../../common/hooks/use_license');
+vi.mock('../../tools/session_view/hooks/use_session_view_config');
+vi.mock('../../../../common/hooks/use_license');
 
 const sessionViewConfig = {
   index: {},
@@ -39,7 +42,7 @@ const hit = createMockHit({
   'event.kind': 'signal',
 });
 
-const onShowSessionView = jest.fn();
+const onShowSessionView = vi.fn();
 
 const renderSessionPreview = ({
   disableNavigation = false,
@@ -61,9 +64,9 @@ const renderSessionPreview = ({
 
 describe('SessionPreviewContainer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
-    (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
+    vi.clearAllMocks();
+    (useSessionViewConfig as Mock).mockReturnValue(sessionViewConfig);
+    (useLicense as Mock).mockReturnValue({ isEnterprise: () => true });
   });
 
   it('should call onShowSessionView when navigation link is clicked', () => {

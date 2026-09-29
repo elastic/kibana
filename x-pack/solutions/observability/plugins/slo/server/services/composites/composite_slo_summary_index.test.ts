@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
 import {
   fetchCompositeSloSummariesFromIndex,
@@ -185,7 +187,7 @@ describe('composite_slo_summary_index', () => {
 
   describe('fetchCompositeSloSummariesFromIndex', () => {
     it('searches by spaceId-prefixed ids + spaceId filter and maps found sources by composite id', async () => {
-      const search = jest.fn().mockResolvedValue({
+      const search = vi.fn().mockResolvedValue({
         hits: {
           hits: [
             {
@@ -230,7 +232,7 @@ describe('composite_slo_summary_index', () => {
     });
 
     it('returns empty map when no ids are provided', async () => {
-      const search = jest.fn();
+      const search = vi.fn();
       const esClient = { search } as unknown as import('@kbn/core/server').ElasticsearchClient;
 
       const map = await fetchCompositeSloSummariesFromIndex(esClient, 'default', []);

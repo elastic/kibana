@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import { parse } from 'yaml';
@@ -25,7 +27,7 @@ const deps = { safeLoadYaml: parse, conditionValidator: validateAgentConditionEx
 describe('StepConfigurePackage', () => {
   let packageInfo: PackageInfo;
   let packagePolicy: NewPackagePolicy;
-  const mockUpdatePackagePolicy = jest.fn().mockImplementation((val: any) => {
+  const mockUpdatePackagePolicy = vi.fn().mockImplementation((val: any) => {
     packagePolicy = {
       ...val,
       ...packagePolicy,
@@ -424,7 +426,7 @@ describe('StepConfigurePackage', () => {
 describe('StepConfigurePackage with multiple inputs of same type but different ids', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const mockUpdatePackagePolicy = jest.fn();
+  const mockUpdatePackagePolicy = vi.fn();
 
   const otelPackageInfo: PackageInfo = {
     name: 'nginx',
@@ -621,7 +623,7 @@ describe('StepConfigurePackage with multiple inputs of same type but different i
 describe('isSingleInputAndStreams behavior', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const mockUpdatePackagePolicy = jest.fn();
+  const mockUpdatePackagePolicy = vi.fn();
 
   const singleInputPackageInfo: PackageInfo = {
     name: 'simple_pkg',
@@ -1172,7 +1174,7 @@ describe('condition field behavior', () => {
 
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const mockUpdatePackagePolicy = jest.fn();
+  const mockUpdatePackagePolicy = vi.fn();
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();

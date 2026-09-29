@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getKbnPalettes } from '@kbn/palettes';
 import { getColorAccessorFn } from './color_mapping_accessor';
 
-jest.mock('@kbn/coloring', () => ({
-  ...jest.requireActual('@kbn/coloring'),
-  getColorFactory: jest
-    .fn()
-    .mockReturnValue((v: string | number) => (v === '123' ? 'blue' : 'red')),
-}));
+vi.mock('@kbn/coloring', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/coloring')),
+      getColorFactory: vi
+        .fn()
+        .mockReturnValue((v: string | number) => (v === '123' ? 'blue' : 'red')),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getColorAccessorFn', () => {
   const palettes = getKbnPalettes({ name: 'amsterdam', darkMode: false });

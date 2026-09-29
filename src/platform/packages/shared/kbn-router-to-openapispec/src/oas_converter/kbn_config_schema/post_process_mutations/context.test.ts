@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { metaFields, schema } from '@kbn/config-schema';
 import { joi2JsonInternal } from '../parse';
 import { createCtx } from './context';
@@ -144,7 +146,7 @@ describe('shared-schema id collision detection', () => {
   });
 
   it('warns instead of throwing when onCollision is "warn"', () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     try {
       const ctx = createCtx({ onCollision: 'warn' });
       ctx.addSharedSchema('id_collision', { ...baseShape });
@@ -159,7 +161,7 @@ describe('shared-schema id collision detection', () => {
   });
 
   it('preserves legacy last-write-wins semantics when onCollision is "ignore"', () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     try {
       const ctx = createCtx({ onCollision: 'ignore' });
       ctx.addSharedSchema('id_collision', { ...baseShape });

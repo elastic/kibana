@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import React, { type PropsWithChildren } from 'react';
 import { makeAction, makeActionContext } from '../mocks/helpers';
 import { CellActionsProvider, useCellActionsContext } from './cell_actions_context';
 
 const action = makeAction('action-1', 'icon', 1);
-const mockGetTriggerCompatibleActions = jest.fn(async () => [action]);
+const mockGetTriggerCompatibleActions = vi.fn(async () => [action]);
 const ContextWrapper: React.FC<PropsWithChildren<unknown>> = ({ children }) => (
   <CellActionsProvider getTriggerCompatibleActions={mockGetTriggerCompatibleActions}>
     {children}
@@ -25,7 +27,7 @@ describe('CellActionContext', () => {
   const actionContext = makeActionContext();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should throw error when context not found', () => {

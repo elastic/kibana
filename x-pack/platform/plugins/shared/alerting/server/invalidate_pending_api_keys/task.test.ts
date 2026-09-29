@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CoreStart } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -16,12 +19,15 @@ import type { AlertingPluginsStart } from '../plugin';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { taskRunner } from './task';
 
-jest.mock('@kbn/task-manager-plugin/server', () => ({
-  ...jest.requireActual('@kbn/task-manager-plugin/server'),
-  runInvalidate: jest.fn(),
-}));
+vi.mock('@kbn/task-manager-plugin/server', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/task-manager-plugin/server')),
+      runInvalidate: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const runInvalidateMock = runInvalidate as jest.Mock;
+const runInvalidateMock = runInvalidate as Mock;
 
 const config = {
   invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
@@ -31,7 +37,7 @@ function getRunner() {
   const coreStart = coreMock.createStart();
   const pluginsStart = {
     encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
-    security: { authc: { apiKeys: { invalidateAsInternalUser: jest.fn() } } },
+    security: { authc: { apiKeys: { invalidateAsInternalUser: vi.fn() } } },
   } as unknown as AlertingPluginsStart;
 
   return taskRunner(
@@ -45,7 +51,7 @@ function getRunner() {
 
 describe('alerts_invalidate_api_keys task runner', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     runInvalidateMock.mockResolvedValue({ totalInvalidated: 0, missingApiKeyRetries: {} });
   });
 

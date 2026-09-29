@@ -5,23 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useUpdateIndexPattern } from './use_update_index_pattern';
 import { updateIndexPattern } from '../api';
 import { createReactQueryWrapper } from '../../../common/mock/create_react_query_wrapper';
 
-jest.mock('../api');
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: jest.fn().mockReturnValue({
-    addSuccess: jest.fn(),
-    addError: jest.fn(),
-  }),
-}));
+vi.mock('../api');
+vi.mock('../../../common/hooks/use_app_toasts', () => {
+      const mocked = {
+      useAppToasts: vi.fn().mockReturnValue({
+        addSuccess: vi.fn(),
+        addError: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useUpdateIndexPattern', () => {
   it('updates index pattern successfully', async () => {
-    (updateIndexPattern as jest.Mock).mockResolvedValue({ updated: 1 });
-    const onSuccess = jest.fn();
+    (updateIndexPattern as Mock).mockResolvedValue({ updated: 1 });
+    const onSuccess = vi.fn();
     const { result } = renderHook(() => useUpdateIndexPattern({ onSuccess }), {
       wrapper: createReactQueryWrapper(),
     });
@@ -46,8 +52,8 @@ describe('useUpdateIndexPattern', () => {
 
   it('handles API errors gracefully', async () => {
     const mockError = new Error('API error');
-    (updateIndexPattern as jest.Mock).mockRejectedValue(mockError);
-    const onError = jest.fn();
+    (updateIndexPattern as Mock).mockRejectedValue(mockError);
+    const onError = vi.fn();
     const { result } = renderHook(() => useUpdateIndexPattern({ onError }), {
       wrapper: createReactQueryWrapper(),
     });

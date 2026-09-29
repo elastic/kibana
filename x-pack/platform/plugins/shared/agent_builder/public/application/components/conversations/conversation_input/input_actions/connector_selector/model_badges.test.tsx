@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { isNearingEndOfLife } from './model_badges';
 
@@ -16,12 +18,12 @@ const makeMetadata = (end_of_life_date?: string): EisInferenceEndpointMetadata =
 
 describe('isNearingEndOfLife', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(NOW);
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('returns false when metadata is undefined', () => {

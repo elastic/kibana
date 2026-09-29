@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 
 import { createFleetTestRendererMock } from '../../mock';
@@ -11,19 +13,31 @@ import { createFleetTestRendererMock } from '../../mock';
 import { AppRoutes } from './app';
 import { useAuthz } from './hooks';
 
-jest.mock('./sections/agents', () => ({
-  AgentsApp: () => <p>AgentsApp</p>,
-}));
-jest.mock('./sections/agent_policy', () => ({
-  AgentPolicyApp: () => <p>AgentPolicyApp</p>,
-}));
-jest.mock('./sections/settings', () => ({
-  SettingsApp: () => <p>SettingsApp</p>,
-}));
-jest.mock('./hooks', () => ({
-  ...jest.requireActual('./hooks'),
-  useAuthz: jest.fn(),
-}));
+vi.mock('./sections/agents', () => {
+      const mocked = {
+      AgentsApp: () => <p>AgentsApp</p>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./sections/agent_policy', () => {
+      const mocked = {
+      AgentPolicyApp: () => <p>AgentPolicyApp</p>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./sections/settings', () => {
+      const mocked = {
+      SettingsApp: () => <p>SettingsApp</p>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('./hooks')),
+      useAuthz: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AppRoutes', () => {
   describe('Privileges', () => {
@@ -133,7 +147,7 @@ describe('AppRoutes', () => {
     ];
     for (const scenario of SCENARIOS) {
       it(scenario.description, () => {
-        jest.mocked(useAuthz).mockReturnValue(scenario.authz as any);
+        vi.mocked(useAuthz).mockReturnValue(scenario.authz as any);
         const testRenderer = createFleetTestRendererMock();
         testRenderer.history.push(`/mock${scenario.path}`);
         const result = testRenderer.render(<AppRoutes />, {});

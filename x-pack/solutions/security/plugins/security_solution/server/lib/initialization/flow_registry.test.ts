@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InitializationFlowId } from '../../../common/api/initialization';
 import {
@@ -19,50 +21,68 @@ import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import type { InitializationFlowContext } from './types';
 import { runInitializationFlows } from './flow_registry';
 
-jest.mock('./flows/create_list_indices', () => ({
-  createListIndicesInitializationFlow: {
-    id: 'create-list-indices',
-    spaceAware: true,
-    runFlow: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
-  },
-}));
+vi.mock('./flows/create_list_indices', () => {
+      const mocked = {
+      createListIndicesInitializationFlow: {
+        id: 'create-list-indices',
+        spaceAware: true,
+        runFlow: vi.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./flows/initialize_security_data_views', () => ({
-  initializeSecurityDataViewsFlow: {
-    id: 'security-data-views' as const,
-    spaceAware: true,
-    runFlow: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
-  },
-}));
+vi.mock('./flows/initialize_security_data_views', () => {
+      const mocked = {
+      initializeSecurityDataViewsFlow: {
+        id: 'security-data-views' as const,
+        spaceAware: true,
+        runFlow: vi.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./flows/init_prebuilt_rules', () => ({
-  initPrebuiltRulesFlow: {
-    id: 'init-prebuilt-rules' as const,
-    runFirst: true,
-    runFlow: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
-  },
-}));
+vi.mock('./flows/init_prebuilt_rules', () => {
+      const mocked = {
+      initPrebuiltRulesFlow: {
+        id: 'init-prebuilt-rules' as const,
+        runFirst: true,
+        runFlow: vi.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./flows/init_endpoint_protection', () => ({
-  initEndpointProtectionFlow: {
-    id: 'init-endpoint-protection' as const,
-    runFlow: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
-  },
-}));
+vi.mock('./flows/init_endpoint_protection', () => {
+      const mocked = {
+      initEndpointProtectionFlow: {
+        id: 'init-endpoint-protection' as const,
+        runFlow: vi.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./flows/init_ai_prompts', () => ({
-  initAiPromptsFlow: {
-    id: 'init-ai-prompts' as const,
-    runFlow: jest.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
-  },
-}));
+vi.mock('./flows/init_ai_prompts', () => {
+      const mocked = {
+      initAiPromptsFlow: {
+        id: 'init-ai-prompts' as const,
+        runFlow: vi.fn().mockResolvedValue({ status: 'ready' as const, payload: null }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./flows/init_detection_rule_monitoring', () => ({
-  initDetectionRuleMonitoringFlow: {
-    id: 'init-detection-rule-monitoring' as const,
-    runFlow: jest.fn().mockResolvedValue({ status: 'ready' as const }),
-  },
-}));
+vi.mock('./flows/init_detection_rule_monitoring', () => {
+      const mocked = {
+      initDetectionRuleMonitoringFlow: {
+        id: 'init-detection-rule-monitoring' as const,
+        runFlow: vi.fn().mockResolvedValue({ status: 'ready' as const }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockContext = (): InitializationFlowContext => ({
   requestHandlerContext: {
@@ -73,7 +93,7 @@ const createMockContext = (): InitializationFlowContext => ({
 
 describe('runInitializationFlows', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const flowA = INITIALIZATION_FLOW_CREATE_LIST_INDICES;
@@ -89,7 +109,7 @@ describe('runInitializationFlows', () => {
   });
 
   it('calls runFlow with the context containing requestHandlerContext and logger', async () => {
-    const { createListIndicesInitializationFlow } = jest.requireMock('./flows/create_list_indices');
+    const { createListIndicesInitializationFlow } = (await vi.importMock('./flows/create_list_indices'));
 
     const context = createMockContext();
     await runInitializationFlows([flowA], context);
@@ -121,9 +141,7 @@ describe('runInitializationFlows', () => {
 
   describe('error handling', () => {
     it('exposes the underlying error message in the response and logs the failure', async () => {
-      const { createListIndicesInitializationFlow } = jest.requireMock(
-        './flows/create_list_indices'
-      );
+      const { createListIndicesInitializationFlow } = (await vi.importMock('./flows/create_list_indices'));
       createListIndicesInitializationFlow.runFlow.mockRejectedValueOnce(
         new Error('ES connection failed')
       );
@@ -141,9 +159,7 @@ describe('runInitializationFlows', () => {
     });
 
     it('falls back to a string error when a non-Error value is thrown', async () => {
-      const { createListIndicesInitializationFlow } = jest.requireMock(
-        './flows/create_list_indices'
-      );
+      const { createListIndicesInitializationFlow } = (await vi.importMock('./flows/create_list_indices'));
       createListIndicesInitializationFlow.runFlow.mockRejectedValueOnce('a bare string');
 
       const context = createMockContext();
@@ -157,7 +173,7 @@ describe('runInitializationFlows', () => {
   });
 
   it('runs multiple flows and returns all results', async () => {
-    const { createListIndicesInitializationFlow } = jest.requireMock('./flows/create_list_indices');
+    const { createListIndicesInitializationFlow } = (await vi.importMock('./flows/create_list_indices'));
     const nonExistingFlow = 'non-existing-flow' as InitializationFlowId;
 
     createListIndicesInitializationFlow.runFlow.mockResolvedValueOnce({
@@ -182,9 +198,9 @@ describe('runInitializationFlows', () => {
     it('executes runFirst flows before non-runFirst flows', async () => {
       const executionOrder: string[] = [];
 
-      const { initPrebuiltRulesFlow } = jest.requireMock('./flows/init_prebuilt_rules');
-      const { initEndpointProtectionFlow } = jest.requireMock('./flows/init_endpoint_protection');
-      const { initAiPromptsFlow } = jest.requireMock('./flows/init_ai_prompts');
+      const { initPrebuiltRulesFlow } = (await vi.importMock('./flows/init_prebuilt_rules'));
+      const { initEndpointProtectionFlow } = (await vi.importMock('./flows/init_endpoint_protection'));
+      const { initAiPromptsFlow } = (await vi.importMock('./flows/init_ai_prompts'));
 
       initPrebuiltRulesFlow.runFlow.mockImplementation(async () => {
         executionOrder.push('prebuilt-rules');
@@ -216,10 +232,8 @@ describe('runInitializationFlows', () => {
     it('executes multiple runFirst flows sequentially in request order', async () => {
       const executionOrder: string[] = [];
 
-      const { createListIndicesInitializationFlow } = jest.requireMock(
-        './flows/create_list_indices'
-      );
-      const { initPrebuiltRulesFlow } = jest.requireMock('./flows/init_prebuilt_rules');
+      const { createListIndicesInitializationFlow } = (await vi.importMock('./flows/create_list_indices'));
+      const { initPrebuiltRulesFlow } = (await vi.importMock('./flows/init_prebuilt_rules'));
 
       // Temporarily make create-list-indices runFirst for this test
       createListIndicesInitializationFlow.runFirst = true;
@@ -251,11 +265,11 @@ describe('runInitializationFlows', () => {
     it('executes non-runFirst flows in parallel', async () => {
       let resolveEndpoint: () => void;
       let resolveAiPrompts: () => void;
-      const endpointStarted = jest.fn();
-      const aiPromptsStarted = jest.fn();
+      const endpointStarted = vi.fn();
+      const aiPromptsStarted = vi.fn();
 
-      const { initEndpointProtectionFlow } = jest.requireMock('./flows/init_endpoint_protection');
-      const { initAiPromptsFlow } = jest.requireMock('./flows/init_ai_prompts');
+      const { initEndpointProtectionFlow } = (await vi.importMock('./flows/init_endpoint_protection'));
+      const { initAiPromptsFlow } = (await vi.importMock('./flows/init_ai_prompts'));
 
       initEndpointProtectionFlow.runFlow.mockImplementation(
         () =>
@@ -294,9 +308,7 @@ describe('runInitializationFlows', () => {
   describe('deduplication', () => {
     it('deduplicates concurrent executions of the same flow in the same space', async () => {
       let resolveRunFlow: (value: { status: string; payload: null }) => void;
-      const { createListIndicesInitializationFlow } = jest.requireMock(
-        './flows/create_list_indices'
-      );
+      const { createListIndicesInitializationFlow } = (await vi.importMock('./flows/create_list_indices'));
 
       createListIndicesInitializationFlow.runFlow.mockImplementation(
         () =>
@@ -333,9 +345,7 @@ describe('runInitializationFlows', () => {
     });
 
     it('executes independently for the same flow in different spaces', async () => {
-      const { createListIndicesInitializationFlow } = jest.requireMock(
-        './flows/create_list_indices'
-      );
+      const { createListIndicesInitializationFlow } = (await vi.importMock('./flows/create_list_indices'));
 
       createListIndicesInitializationFlow.runFlow.mockResolvedValue({
         status: INITIALIZATION_FLOW_STATUS_READY,
@@ -367,7 +377,7 @@ describe('runInitializationFlows', () => {
 
     it('deduplicates non-space-aware flows across different spaces', async () => {
       let resolveRunFlow: (value: { status: string; payload: null }) => void;
-      const { initEndpointProtectionFlow } = jest.requireMock('./flows/init_endpoint_protection');
+      const { initEndpointProtectionFlow } = (await vi.importMock('./flows/init_endpoint_protection'));
 
       initEndpointProtectionFlow.runFlow.mockImplementation(
         () =>
@@ -418,9 +428,7 @@ describe('runInitializationFlows', () => {
     });
 
     it('executes a new request after a previous one completes', async () => {
-      const { createListIndicesInitializationFlow } = jest.requireMock(
-        './flows/create_list_indices'
-      );
+      const { createListIndicesInitializationFlow } = (await vi.importMock('./flows/create_list_indices'));
 
       createListIndicesInitializationFlow.runFlow.mockResolvedValue({
         status: INITIALIZATION_FLOW_STATUS_READY,
@@ -440,9 +448,7 @@ describe('runInitializationFlows', () => {
 
     it('deduplicates even when the flow errors', async () => {
       let rejectRunFlow: (error: Error) => void;
-      const { createListIndicesInitializationFlow } = jest.requireMock(
-        './flows/create_list_indices'
-      );
+      const { createListIndicesInitializationFlow } = (await vi.importMock('./flows/create_list_indices'));
 
       createListIndicesInitializationFlow.runFlow.mockImplementation(
         () =>

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpHandler } from '@kbn/core/public';
 import { mergeFeatureOverride, overrideInferenceFeature } from './inference_override';
 
@@ -30,10 +33,10 @@ describe('mergeFeatureOverride', () => {
 });
 
 describe('overrideInferenceFeature', () => {
-  let fetch: jest.Mock;
+  let fetch: Mock;
 
   beforeEach(() => {
-    fetch = jest.fn(async (_path: string, { method }: { method: string }) =>
+    fetch = vi.fn(async (_path: string, { method }: { method: string }) =>
       method === 'GET' ? { data: { features: existing } } : undefined
     );
   });

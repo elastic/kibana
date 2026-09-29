@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -57,7 +59,7 @@ describe('AnalyticsService', () => {
   });
 
   it('throttle reporting of the authentication type events', async () => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    vi.useFakeTimers({ legacyFakeTimers: true });
 
     const mockCore = coreMock.createStart();
     mockCore.http.post.mockResolvedValue({ signature: 'some-signature', timestamp: 1234 });
@@ -87,16 +89,16 @@ describe('AnalyticsService', () => {
 
     // Changes that lead to disabled login should be ignored.
     licenseFeatures$.next({ allowLogin: false });
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(mockCore.http.post).not.toHaveBeenCalled();
 
     // The "leading" event indicating enabled login should be reported immediately.
     licenseFeatures$.next({ allowLogin: true });
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     licenseFeatures$.next({ allowLogin: true });
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     licenseFeatures$.next({ allowLogin: true });
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
 
     expect(mockCore.http.post).toHaveBeenCalledTimes(1);
     expect(mockCore.http.post).toHaveBeenCalledWith(
@@ -105,7 +107,7 @@ describe('AnalyticsService', () => {
     );
 
     // The rest of the events should be throttled away.
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(mockCore.http.post).toHaveBeenCalledTimes(1);
   });
 

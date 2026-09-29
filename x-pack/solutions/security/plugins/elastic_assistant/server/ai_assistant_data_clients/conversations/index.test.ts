@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import { AIAssistantConversationsDataClient } from '.';
@@ -21,7 +23,7 @@ describe('AIAssistantConversationsDataClient', () => {
   let assistantConversationsDataClientParams: AIAssistantDataClientParams;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = loggingSystemMock.createLogger();
     assistantConversationsDataClientParams = {
       logger,
@@ -34,12 +36,12 @@ describe('AIAssistantConversationsDataClient', () => {
   });
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date(date));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(date));
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('should get by id the persistent conversation successfully', async () => {

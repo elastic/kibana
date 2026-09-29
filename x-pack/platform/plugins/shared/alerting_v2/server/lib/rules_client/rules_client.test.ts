@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { BULK_FILTER_MAX_RESOURCES, BULK_QUERY_SAMPLE_SIZE } from '@kbn/alerting-v2-schemas';
@@ -34,21 +37,21 @@ import { RulesClient } from './rules_client';
 import type { CreateRuleParams } from './types';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 
-jest.mock('../rule_executor/schedule', () => {
-  const actual = jest.requireActual('../rule_executor/schedule');
+vi.mock('../rule_executor/schedule', async () => {
+  const actual = (await vi.importActual('../rule_executor/schedule'));
   return {
     ...actual,
-    ensureRuleExecutorTaskScheduled: jest.fn(),
-    getRuleExecutorTaskId: jest.fn(),
+    ensureRuleExecutorTaskScheduled: vi.fn(),
+    getRuleExecutorTaskId: vi.fn(),
   };
 });
 
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 
-const ensureRuleExecutorTaskScheduledMock = ensureRuleExecutorTaskScheduled as jest.MockedFunction<
+const ensureRuleExecutorTaskScheduledMock = ensureRuleExecutorTaskScheduled as MockedFunction<
   typeof ensureRuleExecutorTaskScheduled
 >;
-const getRuleExecutorTaskIdMock = getRuleExecutorTaskId as jest.MockedFunction<
+const getRuleExecutorTaskIdMock = getRuleExecutorTaskId as MockedFunction<
   typeof getRuleExecutorTaskId
 >;
 
@@ -97,21 +100,21 @@ describe('RulesClient', () => {
   let artifactTypeRegistry: ArtifactTypeRegistry;
 
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+    vi.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     rulesSavedObjectService = createRulesSavedObjectServiceMock();
     artifactTypeRegistry = new ArtifactTypeRegistry();
     registerBuiltinArtifactTypes(artifactTypeRegistry);
     ({ publisher: ruleEventPublisher } = createRuleEventPublisher());
-    jest.spyOn(ruleEventPublisher, 'emitRuleCreated');
-    jest.spyOn(ruleEventPublisher, 'emitRuleUpdated');
-    jest.spyOn(ruleEventPublisher, 'emitRuleDeleted');
-    jest.spyOn(ruleEventPublisher, 'emitRuleEnabled');
-    jest.spyOn(ruleEventPublisher, 'emitRuleDisabled');
+    vi.spyOn(ruleEventPublisher, 'emitRuleCreated');
+    vi.spyOn(ruleEventPublisher, 'emitRuleUpdated');
+    vi.spyOn(ruleEventPublisher, 'emitRuleDeleted');
+    vi.spyOn(ruleEventPublisher, 'emitRuleEnabled');
+    vi.spyOn(ruleEventPublisher, 'emitRuleDisabled');
 
     ({ userService } = createUserService());
     ({ loggerService, mockLogger } = createLoggerService());
@@ -133,7 +136,7 @@ describe('RulesClient', () => {
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   function createClient(rulesConfigOverrides?: Partial<PluginConfig['rules']>) {
@@ -4009,7 +4012,7 @@ describe('RulesClient', () => {
         expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
           expect.objectContaining({ ruleId: 'rule-ok', spaceId: 'space-1' }),
         ]);
-        const enabledIds = (ruleEventPublisher.emitRuleEnabled as jest.Mock).mock.calls[0][1];
+        const enabledIds = (ruleEventPublisher.emitRuleEnabled as Mock).mock.calls[0][1];
         expect(enabledIds).toEqual([
           expect.objectContaining({ ruleId: 'rule-ok', spaceId: 'space-1' }),
         ]);
@@ -4046,7 +4049,7 @@ describe('RulesClient', () => {
         expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, [
           expect.objectContaining({ ruleId: 'rule-ok', spaceId: 'space-1' }),
         ]);
-        const disabledIds = (ruleEventPublisher.emitRuleDisabled as jest.Mock).mock.calls[0][1];
+        const disabledIds = (ruleEventPublisher.emitRuleDisabled as Mock).mock.calls[0][1];
         expect(disabledIds).toEqual([
           expect.objectContaining({ ruleId: 'rule-ok', spaceId: 'space-1' }),
         ]);
@@ -4108,14 +4111,14 @@ describe('RulesClient', () => {
   });
 
   describe('change history data on emitted events', () => {
-    const firstEmit = (spy: jest.Mock): EventRule[] => spy.mock.calls[0][1] as EventRule[];
+    const firstEmit = (spy: Mock): EventRule[] => spy.mock.calls[0][1] as EventRule[];
 
     it('emits ruleCreated carrying the created rule with sequence 1', async () => {
       const client = createClient();
 
       await client.createRule({ data: baseCreateData, options: { id: 'rule-ch-create' } });
 
-      expect(firstEmit(ruleEventPublisher.emitRuleCreated as jest.Mock)).toEqual([
+      expect(firstEmit(ruleEventPublisher.emitRuleCreated as Mock)).toEqual([
         expect.objectContaining({
           ruleId: 'rule-ch-create',
           spaceId: 'space-1',
@@ -4137,7 +4140,7 @@ describe('RulesClient', () => {
 
       await client.updateRule({ id: 'rule-ch-update', data: { metadata: { name: 'renamed' } } });
 
-      const [event] = firstEmit(ruleEventPublisher.emitRuleUpdated as jest.Mock);
+      const [event] = firstEmit(ruleEventPublisher.emitRuleUpdated as Mock);
       expect(event.rule?.metadata.version).toBe(5);
     });
 
@@ -4151,7 +4154,7 @@ describe('RulesClient', () => {
 
       await client.deleteRule({ id: 'rule-ch-delete' });
 
-      const [event] = firstEmit(ruleEventPublisher.emitRuleDeleted as jest.Mock);
+      const [event] = firstEmit(ruleEventPublisher.emitRuleDeleted as Mock);
       expect(event.ruleId).toBe('rule-ch-delete');
       // Nothing is persisted on delete, so the emitted rule carries the bumped
       // counter so the deletion orders after the last change.
@@ -4178,7 +4181,7 @@ describe('RulesClient', () => {
 
       await client.bulkDeleteRules({ ids: ['bulk-del-1', 'bulk-del-2'] });
 
-      const events = firstEmit(ruleEventPublisher.emitRuleDeleted as jest.Mock);
+      const events = firstEmit(ruleEventPublisher.emitRuleDeleted as Mock);
       expect(events).toHaveLength(2);
       expect(events[0].rule?.metadata.version).toBe(2);
       expect(events[1].rule?.metadata.version).toBe(3);
@@ -4201,7 +4204,7 @@ describe('RulesClient', () => {
 
       await client.bulkEnableRules({ ids: ['bulk-en-1', 'bulk-en-2'] });
 
-      const events = firstEmit(ruleEventPublisher.emitRuleEnabled as jest.Mock);
+      const events = firstEmit(ruleEventPublisher.emitRuleEnabled as Mock);
       expect(events).toHaveLength(2);
       expect(events[0].rule).toEqual(
         expect.objectContaining({

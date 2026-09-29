@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import fs from 'fs/promises';
 
 import { omit } from 'lodash';
@@ -19,33 +21,33 @@ import {
   _purgeBundledPackagesCache,
 } from './bundled_packages';
 
-jest.mock('fs/promises');
-jest.mock('../../app_context');
+vi.mock('fs/promises');
+vi.mock('../../app_context');
 
 describe('bundledPackages', () => {
   beforeEach(() => {
-    jest.mocked(appContextService.getConfig).mockReturnValue({
+    vi.mocked(appContextService.getConfig).mockReturnValue({
       developer: {
         bundledPackageLocation: '/tmp/test',
       },
     } as any);
-    jest.mocked(appContextService.getLogger).mockReturnValue(loggingSystemMock.createLogger());
+    vi.mocked(appContextService.getLogger).mockReturnValue(loggingSystemMock.createLogger());
     _purgeBundledPackagesCache();
-    jest.mocked(fs.stat).mockResolvedValue({} as any);
-    jest
+    vi.mocked(fs.stat).mockResolvedValue({} as any);
+    vi
       .mocked(fs.readdir)
       .mockReset()
       .mockResolvedValue(['apm-8.8.0.zip', 'test-1.0.0.zip'] as any);
 
-    jest.mocked(fs.readFile).mockReset().mockResolvedValue(Buffer.from('TEST'));
+    vi.mocked(fs.readFile).mockReset().mockResolvedValue(Buffer.from('TEST'));
   });
 
   afterEach(() => {
-    jest.mocked(fs.stat).mockReset();
+    vi.mocked(fs.stat).mockReset();
   });
   describe('getBundledPackages', () => {
     it('return an empty array if dir do not exists', async () => {
-      jest.mocked(fs.stat).mockRejectedValue(new Error('NOTEXISTS'));
+      vi.mocked(fs.stat).mockRejectedValue(new Error('NOTEXISTS'));
       const packages = await getBundledPackages();
       expect(packages).toEqual([]);
     });
@@ -85,7 +87,7 @@ describe('bundledPackages', () => {
     });
 
     it('should not use cache if called multiple time and cache is disabled', async () => {
-      jest.mocked(appContextService.getConfig).mockReturnValue({
+      vi.mocked(appContextService.getConfig).mockReturnValue({
         developer: {
           bundledPackageLocation: '/tmp/test',
           disableBundledPackagesCache: true,
@@ -98,7 +100,7 @@ describe('bundledPackages', () => {
   });
   describe('getBundledPackageByPkgKey', () => {
     it('should return package by name when air-gapped with no registry URL', async () => {
-      jest.mocked(appContextService.getConfig).mockReturnValue({
+      vi.mocked(appContextService.getConfig).mockReturnValue({
         developer: {
           bundledPackageLocation: '/tmp/test',
         },
@@ -127,7 +129,7 @@ describe('bundledPackages', () => {
     ])(
       'should not return package by name when registry is reachable (%s)',
       async (_label, airGapConfig) => {
-        jest.mocked(appContextService.getConfig).mockReturnValue({
+        vi.mocked(appContextService.getConfig).mockReturnValue({
           developer: {
             bundledPackageLocation: '/tmp/test',
           },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -14,8 +16,8 @@ import { SNOOZE_DATE_DISPLAY_FORMAT } from './constants';
 
 const MOCKED_NOW = '2026-03-09T19:05:00.000Z';
 
-jest.mock('moment', () => {
-  const actual = jest.requireActual('moment');
+vi.mock('moment', () => {
+  const actual = require('moment');
   return Object.assign(
     (...args: unknown[]) => (args.length ? actual(...args) : actual(MOCKED_NOW)),
     actual,
@@ -28,10 +30,10 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('QuickSnoozePanel', () => {
-  const onScheduleChangeMock = jest.fn();
+  const onScheduleChangeMock = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('duration options', () => {

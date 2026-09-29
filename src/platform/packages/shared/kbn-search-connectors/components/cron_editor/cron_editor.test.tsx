@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { screen, fireEvent } from '@testing-library/react';
@@ -96,7 +98,7 @@ describe('CronEditor', () => {
 
     describe('onChange', () => {
       it('is called when the frequency changes', () => {
-        const onChangeSpy = jest.fn();
+        const onChangeSpy = vi.fn();
         renderWithI18n(
           <CronEditor
             fieldToPreferredValueMap={{}}
@@ -117,7 +119,7 @@ describe('CronEditor', () => {
       });
 
       it("is called when a field's value changes", () => {
-        const onChangeSpy = jest.fn();
+        const onChangeSpy = vi.fn();
         renderWithI18n(
           <CronEditor
             fieldToPreferredValueMap={{}}

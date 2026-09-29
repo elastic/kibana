@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getIndexCount } from '@kbn/securitysolution-es-utils';
 import { updateMigrationSavedObject } from './update_migration_saved_object';
 import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
 import { finalizeMigration } from './finalize_migration';
 
-jest.mock('./update_migration_saved_object');
-jest.mock('@kbn/securitysolution-es-utils');
+vi.mock('./update_migration_saved_object');
+vi.mock('@kbn/securitysolution-es-utils');
 
 describe('finalizeMigration', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -27,7 +30,7 @@ describe('finalizeMigration', () => {
     esClient.tasks.get.mockResponse({ completed: true });
 
     // stub out our update call to just return the attributes we passed
-    (updateMigrationSavedObject as jest.Mock).mockImplementation(({ attributes }) => ({
+    (updateMigrationSavedObject as Mock).mockImplementation(({ attributes }) => ({
       attributes,
     }));
   });
@@ -63,7 +66,7 @@ describe('finalizeMigration', () => {
   });
 
   it('fails the migration if migration index size does not match the original index', async () => {
-    (getIndexCount as jest.Mock).mockResolvedValueOnce(1).mockResolvedValueOnce(2);
+    (getIndexCount as Mock).mockResolvedValueOnce(1).mockResolvedValueOnce(2);
 
     const expectedError =
       'The source and destination indexes have different document counts. Source [sourceIndex] has [1] documents, while destination [destinationIndex] has [2] documents.';

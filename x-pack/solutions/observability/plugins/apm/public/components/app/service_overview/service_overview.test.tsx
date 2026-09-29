@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import { composeStories } from '@storybook/react';
 import { screen } from '@testing-library/react';
 import React from 'react';
@@ -13,19 +16,22 @@ import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
 import { renderWithTheme } from '../../../utils/test_helpers';
 
 // Mock the usePerformanceContext hook
-jest.mock('@kbn/ebt-tools', () => ({
-  usePerformanceContext: () => ({
-    onPageReady: jest.fn(),
-  }),
-}));
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      usePerformanceContext: () => ({
+        onPageReady: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const { Example } = composeStories(stories);
 
 describe('ServiceOverview', () => {
-  let useAdHocApmDataViewSpy: jest.SpyInstance;
+  let useAdHocApmDataViewSpy: MockInstance;
 
   beforeAll(() => {
-    useAdHocApmDataViewSpy = jest.spyOn(useAdHocApmDataView, 'useAdHocApmDataView');
+    useAdHocApmDataViewSpy = vi.spyOn(useAdHocApmDataView, 'useAdHocApmDataView');
 
     useAdHocApmDataViewSpy.mockImplementation(() => {
       return {
@@ -37,7 +43,7 @@ describe('ServiceOverview', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('renders', async () => {
     renderWithTheme(<Example />);

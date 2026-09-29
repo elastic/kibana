@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { RULE_SAVED_OBJECT_TYPE } from '.';
 import { transformRulesForExport } from './transform_rule_for_export';
-jest.mock('../lib/rule_execution_status', () => ({
-  getRuleExecutionStatusPendingAttributes: () => ({
-    status: 'pending',
-    lastExecutionDate: '2020-08-20T19:23:38Z',
-    error: null,
-  }),
-}));
+vi.mock('../lib/rule_execution_status', () => {
+      const mocked = {
+      getRuleExecutionStatusPendingAttributes: () => ({
+        status: 'pending',
+        lastExecutionDate: '2020-08-20T19:23:38Z',
+        error: null,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 describe('transform rule for export', () => {
   const date = new Date().toISOString();
   const mockRules = [

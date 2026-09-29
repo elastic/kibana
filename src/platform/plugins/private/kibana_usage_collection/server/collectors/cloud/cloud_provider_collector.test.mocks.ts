@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { cloudDetectorMock } from './detector/cloud_detector.mock';
 
 const mock = cloudDetectorMock.create();
@@ -14,6 +16,9 @@ const mock = cloudDetectorMock.create();
 export const cloudDetailsMock = mock.getCloudDetails;
 export const detectCloudServiceMock = mock.detectCloudService;
 
-jest.doMock('./detector', () => ({
-  CloudDetector: jest.fn().mockImplementation(() => mock),
-}));
+vi.doMock('./detector', () => {
+      const mocked = {
+      CloudDetector: vi.fn().mockImplementation(() => mock),
+    };
+      return { ...mocked, default: mocked };
+    });

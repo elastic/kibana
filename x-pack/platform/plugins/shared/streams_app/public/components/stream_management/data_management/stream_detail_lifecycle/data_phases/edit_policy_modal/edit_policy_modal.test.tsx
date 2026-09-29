@@ -5,30 +5,35 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { AffectedResource } from './edit_policy_modal';
 import { EditPolicyModal } from './edit_policy_modal';
 
-jest.mock('../../../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    dependencies: {
-      start: {
-        share: {
-          url: {
-            locators: {
-              get: () => ({
-                getRedirectUrl: ({ policyName }: { policyName: string }) =>
-                  `/app/management/data/index_lifecycle_management/policies/edit/${policyName}`,
-              }),
+vi.mock('../../../../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        dependencies: {
+          start: {
+            share: {
+              url: {
+                locators: {
+                  get: () => ({
+                    getRedirectUrl: ({ policyName }: { policyName: string }) =>
+                      `/app/management/data/index_lifecycle_management/policies/edit/${policyName}`,
+                  }),
+                },
+              },
             },
           },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('EditPolicyModal', () => {
   const policyName = '.monitoring-8-ilm-policy';

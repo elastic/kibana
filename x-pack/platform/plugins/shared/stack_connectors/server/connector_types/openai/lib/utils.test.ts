@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { sanitizeRequest, getRequestWithStreamOption, getAxiosOptions } from './utils';
 import { DEFAULT_MODEL, OpenAiProviderType, OPENAI_CHAT_URL } from '@kbn/connector-schemas/openai';
 import {
@@ -20,9 +23,9 @@ import {
   getRequestWithStreamOption as otherOpenAiGetRequestWithStreamOption,
 } from './other_openai_utils';
 
-jest.mock('./openai_utils');
-jest.mock('./azure_openai_utils');
-jest.mock('./other_openai_utils');
+vi.mock('./openai_utils');
+vi.mock('./azure_openai_utils');
+vi.mock('./other_openai_utils');
 
 describe('Utils', () => {
   const azureAiUrl =
@@ -38,11 +41,11 @@ describe('Utils', () => {
     ],
   });
   describe('sanitizeRequest', () => {
-    const mockOpenAiSanitizeRequest = openAiSanitizeRequest as jest.Mock;
-    const mockAzureAiSanitizeRequest = azureAiSanitizeRequest as jest.Mock;
-    const mockOtherOpenAiSanitizeRequest = otherOpenAiSanitizeRequest as jest.Mock;
+    const mockOpenAiSanitizeRequest = openAiSanitizeRequest as Mock;
+    const mockAzureAiSanitizeRequest = azureAiSanitizeRequest as Mock;
+    const mockOtherOpenAiSanitizeRequest = otherOpenAiSanitizeRequest as Mock;
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('calls openai_utils sanitizeRequest when provider is OpenAi', () => {
@@ -79,12 +82,12 @@ describe('Utils', () => {
   });
 
   describe('getRequestWithStreamOption', () => {
-    const mockOpenAiGetRequestWithStreamOption = openAiGetRequestWithStreamOption as jest.Mock;
-    const mockAzureAiGetRequestWithStreamOption = azureAiGetRequestWithStreamOption as jest.Mock;
+    const mockOpenAiGetRequestWithStreamOption = openAiGetRequestWithStreamOption as Mock;
+    const mockAzureAiGetRequestWithStreamOption = azureAiGetRequestWithStreamOption as Mock;
     const mockOtherOpenAiGetRequestWithStreamOption =
-      otherOpenAiGetRequestWithStreamOption as jest.Mock;
+      otherOpenAiGetRequestWithStreamOption as Mock;
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('calls openai_utils getRequestWithStreamOption when provider is OpenAi', () => {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as Rx from 'rxjs';
 import { Coordinator, notificationCoordinator } from './notification_coordinator';
 
@@ -24,7 +26,7 @@ describe('notification coordination', () => {
     it("updates to the source observable propagate to the coordinated observable when it's optin condition is met", async () => {
       const coordinator = new Coordinator();
 
-      const optInCondition = jest.fn(() => true);
+      const optInCondition = vi.fn(() => true);
 
       const items = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
 
@@ -34,7 +36,7 @@ describe('notification coordination', () => {
         optInCondition
       );
 
-      const nextFn = jest.fn();
+      const nextFn = vi.fn();
 
       coordinatedItems$.subscribe(nextFn);
 
@@ -47,7 +49,7 @@ describe('notification coordination', () => {
     it('updates to the source observable do not propagate to the coordinated observable if the optin condition is not met', async () => {
       const coordinator = new Coordinator();
 
-      const optInCondition = jest.fn(() => false);
+      const optInCondition = vi.fn(() => false);
 
       const items = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
 
@@ -57,7 +59,7 @@ describe('notification coordination', () => {
         optInCondition
       );
 
-      const subscriptionHandler = jest.fn();
+      const subscriptionHandler = vi.fn();
 
       coordinatedItems$.subscribe(subscriptionHandler);
 
@@ -70,15 +72,15 @@ describe('notification coordination', () => {
       const coordinator = new Coordinator();
 
       // only emit values when the lock has not been acquired
-      const optInCondition = jest.fn(({ locked }) => !locked);
+      const optInCondition = vi.fn(({ locked }) => !locked);
 
       const SUT1 = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
       const SUT2 = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
       const SUT3 = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
 
-      const coordinatedSUT1SubscriptionHandler = jest.fn();
-      const coordinatedSUT2SubscriptionHandler = jest.fn();
-      const coordinatedSUT3SubscriptionHandler = jest.fn();
+      const coordinatedSUT1SubscriptionHandler = vi.fn();
+      const coordinatedSUT2SubscriptionHandler = vi.fn();
+      const coordinatedSUT3SubscriptionHandler = vi.fn();
 
       const coordinatedSUT1Sub = coordinator
         .optInToCoordination('test1', SUT1.asObservable(), optInCondition)
@@ -122,7 +124,7 @@ describe('notification coordination', () => {
     it("automatically releases an acquired lock if the source observable has no values to be emitted anymore despite it's optin condition being met", async () => {
       const coordinator = new Coordinator();
 
-      const optInCondition = jest.fn(() => true);
+      const optInCondition = vi.fn(() => true);
 
       const items = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
 
@@ -154,7 +156,7 @@ describe('notification coordination', () => {
     it('automatically releases an acquired lock if the coordinated observable that owns the current lock is unsubscribed from', async () => {
       const coordinator = new Coordinator();
 
-      const optInCondition = jest.fn(() => true);
+      const optInCondition = vi.fn(() => true);
 
       const items = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
 

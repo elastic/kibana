@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
@@ -16,35 +18,44 @@ import { LibraryTemplateDetailPage } from './template_detail_page';
 import { createStartServicesMock, type StartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
-const mockSetWorkflowsBreadcrumbs = jest.fn();
-const mockUseWorkflowsExperimentalUiSetting = jest.fn(() => false);
+const mockSetWorkflowsBreadcrumbs = vi.fn();
+const mockUseWorkflowsExperimentalUiSetting = vi.fn(() => false);
 let mockOnLoaded: ((template: TemplateBody) => void) | undefined;
 let mockShowGraphPreview: boolean | undefined;
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  TemplateDetail: ({
-    slug,
-    onLoaded,
-    showGraphPreview,
-  }: {
-    slug: string;
-    onLoaded: (template: TemplateBody) => void;
-    showGraphPreview: boolean;
-  }) => {
-    mockOnLoaded = onLoaded;
-    mockShowGraphPreview = showGraphPreview;
-    return <div data-test-subj="mockTemplateDetail">{slug}</div>;
-  },
-}));
+vi.mock('@kbn/workflows-ui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/workflows-ui')),
+      TemplateDetail: ({
+        slug,
+        onLoaded,
+        showGraphPreview,
+      }: {
+        slug: string;
+        onLoaded: (template: TemplateBody) => void;
+        showGraphPreview: boolean;
+      }) => {
+        mockOnLoaded = onLoaded;
+        mockShowGraphPreview = showGraphPreview;
+        return <div data-test-subj="mockTemplateDetail">{slug}</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_workflows_experimental_ui_setting', () => ({
-  useWorkflowsExperimentalUiSetting: () => mockUseWorkflowsExperimentalUiSetting(),
-}));
+vi.mock('../../hooks/use_workflows_experimental_ui_setting', () => {
+      const mocked = {
+      useWorkflowsExperimentalUiSetting: () => mockUseWorkflowsExperimentalUiSetting(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => ({
-  useSetWorkflowsBreadcrumbs: () => mockSetWorkflowsBreadcrumbs,
-}));
+vi.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => {
+      const mocked = {
+      useSetWorkflowsBreadcrumbs: () => mockSetWorkflowsBreadcrumbs,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function buildEnabledServices(): StartServicesMock {
   const services = createStartServicesMock();
@@ -60,7 +71,7 @@ const routeProps = (slug: string) =>
 
 describe('LibraryTemplateDetailPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseWorkflowsExperimentalUiSetting.mockReturnValue(false);
     mockOnLoaded = undefined;
     mockShowGraphPreview = undefined;

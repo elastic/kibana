@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
 import { createAgentStatsProviderMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { ElasticsearchClientsMetricsCollector } from './elasticsearch_client';
 
-jest.mock('@kbn/core-elasticsearch-client-server-internal');
+vi.mock('@kbn/core-elasticsearch-client-server-internal');
 
 export const sampleEsClientMetrics: ElasticsearchClientsMetrics = {
   totalActiveSockets: 25,

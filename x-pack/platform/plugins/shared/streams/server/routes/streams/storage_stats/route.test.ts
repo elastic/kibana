@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { storageStatsRoutes } from './route';
 
@@ -26,24 +28,24 @@ const callHandler = ({
 }) => {
   const esClient = {
     indices: {
-      getDataStream: jest.fn().mockResolvedValue({
+      getDataStream: vi.fn().mockResolvedValue({
         data_streams: dataStreams.map((ds) => ({
           name: ds.name,
           indices: ds.indices.map((index_name) => ({ index_name })),
         })),
       }),
-      stats: jest.fn().mockResolvedValue({ indices: indicesStats }),
+      stats: vi.fn().mockResolvedValue({ indices: indicesStats }),
     },
   };
 
-  const getScopedClients = jest.fn().mockResolvedValue({
+  const getScopedClients = vi.fn().mockResolvedValue({
     scopedClusterClient: { asCurrentUser: esClient },
     isSecurityEnabled: true,
   });
 
   const telemetry = {
-    startTrackingEndpointLatency: jest.fn().mockReturnValue(jest.fn()),
-    reportStreamsStateError: jest.fn(),
+    startTrackingEndpointLatency: vi.fn().mockReturnValue(vi.fn()),
+    reportStreamsStateError: vi.fn(),
   };
 
   const handlerParams = {
@@ -52,7 +54,7 @@ const callHandler = ({
     server: { isServerless: false },
     params: {},
     response: {},
-    logger: { error: jest.fn() },
+    logger: { error: vi.fn() },
     context: {},
     telemetry,
   } as unknown as HandlerParams;

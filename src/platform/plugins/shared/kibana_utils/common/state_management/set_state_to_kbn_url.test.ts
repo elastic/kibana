@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createSetStateToKbnUrl, setStateToKbnUrl } from './set_state_to_kbn_url';
 
 describe('set_state_to_kbn_url', () => {
   describe('createSetStateToKbnUrl', () => {
     it('should call createHash', () => {
-      const createHash = jest.fn(() => 'hash');
+      const createHash = vi.fn(() => 'hash');
       const localSetStateToKbnUrl = createSetStateToKbnUrl(createHash);
       const url = 'http://localhost:5601/oxf/app/kibana#/yourApp';
       const state = { foo: 'bar' };
@@ -25,7 +27,7 @@ describe('set_state_to_kbn_url', () => {
     });
 
     it('should not call createHash', () => {
-      const createHash = jest.fn();
+      const createHash = vi.fn();
       const localSetStateToKbnUrl = createSetStateToKbnUrl(createHash);
       const url = 'http://localhost:5601/oxf/app/kibana#/yourApp';
       const state = { foo: 'bar' };

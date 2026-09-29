@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useDebouncedOnChangeEmit } from './use_debounced_on_change_emit';
 
 describe('useDebouncedOnChangeEmit', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('debounces rapid emit signals into a single onChange', async () => {
-    const onChange = jest.fn();
-    const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+    const onChange = vi.fn();
+    const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
 
     try {
       const { rerender } = renderHook(
@@ -38,7 +40,7 @@ describe('useDebouncedOnChangeEmit', () => {
 
       // Let the initial scheduled emit settle (should not emit because equal).
       await act(async () => {
-        jest.runOnlyPendingTimers();
+        vi.runOnlyPendingTimers();
       });
       onChange.mockClear();
       clearTimeoutSpy.mockClear();
@@ -50,7 +52,7 @@ describe('useDebouncedOnChangeEmit', () => {
       expect(onChange).toHaveBeenCalledTimes(0);
 
       await act(async () => {
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
       });
 
       expect(onChange).toHaveBeenCalledTimes(1);
@@ -62,8 +64,8 @@ describe('useDebouncedOnChangeEmit', () => {
   });
 
   it('cleans up a pending debounced emit on unmount', async () => {
-    const onChange = jest.fn();
-    const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+    const onChange = vi.fn();
+    const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
 
     try {
       const { rerender, unmount } = renderHook(
@@ -81,7 +83,7 @@ describe('useDebouncedOnChangeEmit', () => {
       );
 
       await act(async () => {
-        jest.runOnlyPendingTimers();
+        vi.runOnlyPendingTimers();
       });
       onChange.mockClear();
       clearTimeoutSpy.mockClear();
@@ -90,8 +92,8 @@ describe('useDebouncedOnChangeEmit', () => {
       unmount();
 
       await act(async () => {
-        jest.runOnlyPendingTimers();
-        jest.advanceTimersByTime(100);
+        vi.runOnlyPendingTimers();
+        vi.advanceTimersByTime(100);
       });
 
       expect(onChange).toHaveBeenCalledTimes(0);

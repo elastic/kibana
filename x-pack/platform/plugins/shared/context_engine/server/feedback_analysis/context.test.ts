@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
@@ -17,11 +20,11 @@ import { getKis } from '../ai_indices/ki_list';
 import type { SignalPatternCandidate } from './group_signals';
 import { selectSignals } from './select_signals';
 
-jest.mock('./select_signals');
-jest.mock('../ai_indices/ki_list');
+vi.mock('./select_signals');
+vi.mock('../ai_indices/ki_list');
 
-const selectSignalsMock = selectSignals as jest.MockedFunction<typeof selectSignals>;
-const getKisMock = getKis as jest.MockedFunction<typeof getKis>;
+const selectSignalsMock = selectSignals as MockedFunction<typeof selectSignals>;
+const getKisMock = getKis as MockedFunction<typeof getKis>;
 
 const WINDOW = { from: '2026-08-25T12:00:00.000Z', to: '2026-09-01T12:00:00.000Z' };
 
@@ -44,8 +47,8 @@ const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem
 
 describe('buildFeedbackContext', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let aiIndexService: jest.Mocked<Pick<AiIndexService, 'get'>>;
-  let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'historySummaryFor'>>;
+  let aiIndexService: Mocked<Pick<AiIndexService, 'get'>>;
+  let improvementsService: Mocked<Pick<ImprovementsServiceApi, 'historySummaryFor'>>;
 
   const build = (aiIndex: AiIndexHttpItem = buildAiIndex(), spaceId = 'default') => {
     aiIndexService.get.mockResolvedValue(aiIndex);
@@ -57,11 +60,11 @@ describe('buildFeedbackContext', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    aiIndexService = { get: jest.fn() };
+    aiIndexService = { get: vi.fn() };
     improvementsService = {
-      historySummaryFor: jest.fn().mockResolvedValue({ total: 0, by_status: {} }),
+      historySummaryFor: vi.fn().mockResolvedValue({ total: 0, by_status: {} }),
     };
     selectSignalsMock.mockResolvedValue({
       patterns: [buildPattern('coverage_gap', 12)],

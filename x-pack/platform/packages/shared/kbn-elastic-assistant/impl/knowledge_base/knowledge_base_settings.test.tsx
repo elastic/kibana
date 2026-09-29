@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 
@@ -18,34 +21,34 @@ import { of } from 'rxjs';
 
 const mockUseAssistantContext = {
   allSystemPrompts: mockSystemPrompts,
-  assistantFeatures: jest.fn(() => defaultAssistantFeatures),
+  assistantFeatures: vi.fn(() => defaultAssistantFeatures),
   conversations: {},
   http: {
     basePath: {
-      prepend: jest.fn(),
+      prepend: vi.fn(),
     },
   },
-  setAllSystemPrompts: jest.fn(),
-  setConversations: jest.fn(),
+  setAllSystemPrompts: vi.fn(),
+  setConversations: vi.fn(),
   assistantAvailability: {
     isAssistantEnabled: true,
     hasAssistantPrivilege: true,
   },
   chrome: {
-    getChromeStyle$: jest.fn(() => of('classic')),
+    getChromeStyle$: vi.fn(() => of('classic')),
   },
 };
 
-jest.mock('../assistant_context', () => {
-  const original = jest.requireActual('../assistant_context');
+vi.mock('../assistant_context', async () => {
+  const original = (await vi.importActual('../assistant_context'));
   return {
     ...original,
 
-    useAssistantContext: jest.fn().mockImplementation(() => mockUseAssistantContext),
+    useAssistantContext: vi.fn().mockImplementation(() => mockUseAssistantContext),
   };
 });
 
-const setUpdatedKnowledgeBaseSettings = jest.fn();
+const setUpdatedKnowledgeBaseSettings = vi.fn();
 const defaultProps = {
   knowledgeBase: {
     latestAlerts: DEFAULT_LATEST_ALERTS,
@@ -53,34 +56,40 @@ const defaultProps = {
   setUpdatedKnowledgeBaseSettings,
 };
 
-const mockSetup = jest.fn();
-jest.mock('../assistant/api/knowledge_base/use_setup_knowledge_base', () => ({
-  useSetupKnowledgeBase: jest.fn(() => {
-    return {
-      mutate: mockSetup,
-      isLoading: false,
+const mockSetup = vi.fn();
+vi.mock('../assistant/api/knowledge_base/use_setup_knowledge_base', () => {
+      const mocked = {
+      useSetupKnowledgeBase: vi.fn(() => {
+        return {
+          mutate: mockSetup,
+          isLoading: false,
+        };
+      }),
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../assistant/api/knowledge_base/use_knowledge_base_status', () => ({
-  useKnowledgeBaseStatus: jest.fn(() => {
-    return {
-      data: {
-        elser_exists: true,
-      },
-      isLoading: false,
-      isFetching: false,
+vi.mock('../assistant/api/knowledge_base/use_knowledge_base_status', () => {
+      const mocked = {
+      useKnowledgeBaseStatus: vi.fn(() => {
+        return {
+          data: {
+            elser_exists: true,
+          },
+          isLoading: false,
+          isFetching: false,
+        };
+      }),
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
 describe('Knowledge base settings', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('On enable knowledge base, call setup knowledge base setup', () => {
-    (useKnowledgeBaseStatus as jest.Mock).mockImplementation(() => {
+    (useKnowledgeBaseStatus as Mock).mockImplementation(() => {
       return {
         data: {
           elser_exists: true,
@@ -101,7 +110,7 @@ describe('Knowledge base settings', () => {
     expect(mockSetup).toHaveBeenCalled();
   });
   it('If elser does not exist, do not offer knowledge base', () => {
-    (useKnowledgeBaseStatus as jest.Mock).mockImplementation(() => {
+    (useKnowledgeBaseStatus as Mock).mockImplementation(() => {
       return {
         data: {
           elser_exists: false,

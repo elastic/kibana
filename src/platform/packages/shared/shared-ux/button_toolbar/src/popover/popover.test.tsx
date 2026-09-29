@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
@@ -21,7 +23,7 @@ describe('<ToolbarPopover />', () => {
 
   test('accepts an onClick handler', () => {
     const isOpen = true;
-    const mockHandler = jest.fn();
+    const mockHandler = vi.fn();
 
     const component = mountWithIntl(
       <ToolbarPopover label="test" children={() => !isOpen} onClick={mockHandler} />

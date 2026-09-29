@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import fs from 'fs';
@@ -17,14 +20,17 @@ import {
 } from './use_metrics_grid_fullscreen';
 
 // Mock only what's needed for the hook test
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: jest.fn(),
-  useGeneratedHtmlId: jest.fn(),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiTheme: vi.fn(),
+      useGeneratedHtmlId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseEuiTheme = useEuiTheme as jest.MockedFunction<typeof useEuiTheme>;
-const mockUseGeneratedHtmlId = useGeneratedHtmlId as jest.MockedFunction<typeof useGeneratedHtmlId>;
+const mockUseEuiTheme = useEuiTheme as MockedFunction<typeof useEuiTheme>;
+const mockUseGeneratedHtmlId = useGeneratedHtmlId as MockedFunction<typeof useGeneratedHtmlId>;
 
 describe('useMetricsGridFullScreen', () => {
   beforeEach(() => {
@@ -39,7 +45,7 @@ describe('useMetricsGridFullScreen', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the generated metrics grid id and styles', () => {

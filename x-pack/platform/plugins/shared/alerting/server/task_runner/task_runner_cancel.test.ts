@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+
 import sinon from 'sinon';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import type {
@@ -66,17 +69,23 @@ import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
 const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
-jest.mock('uuid', () => ({
-  v4: () => RULE_EXECUTION_UUID,
-}));
-jest.mock('../lib/wrap_scoped_cluster_client', () => ({
-  createWrappedScopedClusterClientFactory: jest.fn(),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: () => RULE_EXECUTION_UUID,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../lib/wrap_scoped_cluster_client', () => {
+      const mocked = {
+      createWrappedScopedClusterClientFactory: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../lib/alerting_event_logger/alerting_event_logger');
+vi.mock('../lib/alerting_event_logger/alerting_event_logger');
 
-jest.mock('../rules_client/lib/get_alert_from_raw');
-const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
+vi.mock('../rules_client/lib/get_alert_from_raw');
+const mockGetAlertFromRaw = getAlertFromRaw as MockedFunction<typeof getAlertFromRaw>;
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -85,8 +94,8 @@ const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const alertingEventLogger = alertingEventLoggerMock.create();
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const dataViewsMock = {
-  dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
-  getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
+  dataViewsServiceFactory: vi.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+  getScriptedFieldsEnabled: vi.fn().mockReturnValue(true),
 } as DataViewsServerPluginStart;
 const alertsService = alertsServiceMock.create();
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
@@ -124,9 +133,9 @@ describe('Task Runner Cancel', () => {
   const connectorAdapterRegistry = new ConnectorAdapterRegistry();
   const rulesSettingsService = rulesSettingsServiceMock.create();
 
-  type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
-    actionsPlugin: jest.Mocked<ActionsPluginStart>;
-    eventLogger: jest.Mocked<IEventLogger>;
+  type TaskRunnerFactoryInitializerParamsType = Mocked<TaskRunnerContext> & {
+    actionsPlugin: Mocked<ActionsPluginStart>;
+    eventLogger: Mocked<IEventLogger>;
     executionContext: ReturnType<typeof executionContextServiceMock.createInternalStartContract>;
   };
 
@@ -151,18 +160,17 @@ describe('Task Runner Cancel', () => {
     rulesSettingsService,
     savedObjects: savedObjectsService,
     share: {} as SharePluginStart,
-    spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+    spaceIdToNamespace: vi.fn().mockReturnValue(undefined),
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
     isServerless: false,
-    getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+    getEventLogClient: vi.fn().mockReturnValue(eventLogClientMock.create()),
     apiKeyType: ApiKeyType.ES,
   };
 
-  beforeEach(() => {
-    jest.resetAllMocks();
-    jest
-      .requireMock('../lib/wrap_scoped_cluster_client')
+  beforeEach(async () => {
+    vi.resetAllMocks();
+    (await vi.importMock('../lib/wrap_scoped_cluster_client'))
       .createWrappedScopedClusterClientFactory.mockReturnValue({
         client: () => services.scopedClusterClient,
         getMetrics: () => ({
@@ -196,7 +204,7 @@ describe('Task Runner Cancel', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
-    (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
+    (AlertingEventLogger as Mock).mockImplementation(() => alertingEventLogger);
     logger.get.mockImplementation(() => logger);
     logger.isLevelEnabled.mockReturnValue(true);
 

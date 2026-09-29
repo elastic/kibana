@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { JSONSchema7 } from 'json-schema';
 import React from 'react';
@@ -18,43 +20,49 @@ import { z } from '@kbn/zod/v4';
 import type { ResumeExecutionModalProps } from './resume_execution_modal';
 import { ResumeExecutionModal } from './resume_execution_modal';
 
-jest.mock('../../hooks/use_workflows_monaco_theme', () => ({
-  useWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
-}));
+vi.mock('../../hooks/use_workflows_monaco_theme', () => {
+      const mocked = {
+      useWorkflowsMonacoTheme: vi.fn(),
+      WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({ value, onChange, dataTestSubj }: any) => (
-    <div data-test-subj={dataTestSubj}>
-      <span data-test-subj="editorValue">{value}</span>
-      <button
-        data-test-subj="editorChangeValid"
-        onClick={() => onChange('{"approved":true}')}
-        type="button"
-      >
-        {'valid change'}
-      </button>
-      <button
-        data-test-subj="editorChangeInvalid"
-        onClick={() => onChange('{bad json')}
-        type="button"
-      >
-        {'invalid change'}
-      </button>
-      <button
-        data-test-subj="editorChangeSyntaxOkSchemaFail"
-        onClick={() => onChange('{"wrongKey": true}')}
-        type="button"
-      >
-        {'valid json invalid schema'}
-      </button>
-    </div>
-  ),
-  monaco: {
-    languages: { json: { jsonDefaults: { setDiagnosticsOptions: jest.fn() } } },
-    editor: {},
-  },
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: ({ value, onChange, dataTestSubj }: any) => (
+        <div data-test-subj={dataTestSubj}>
+          <span data-test-subj="editorValue">{value}</span>
+          <button
+            data-test-subj="editorChangeValid"
+            onClick={() => onChange('{"approved":true}')}
+            type="button"
+          >
+            {'valid change'}
+          </button>
+          <button
+            data-test-subj="editorChangeInvalid"
+            onClick={() => onChange('{bad json')}
+            type="button"
+          >
+            {'invalid change'}
+          </button>
+          <button
+            data-test-subj="editorChangeSyntaxOkSchemaFail"
+            onClick={() => onChange('{"wrongKey": true}')}
+            type="button"
+          >
+            {'valid json invalid schema'}
+          </button>
+        </div>
+      ),
+      monaco: {
+        languages: { json: { jsonDefaults: { setDiagnosticsOptions: vi.fn() } } },
+        editor: {},
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const renderWithProviders = (props: ResumeExecutionModalProps) => {
   return render(<ResumeExecutionModal {...props} />, { wrapper: I18nProvider });
@@ -62,12 +70,12 @@ const renderWithProviders = (props: ResumeExecutionModalProps) => {
 
 describe('ResumeExecutionModal', () => {
   const defaultProps: ResumeExecutionModalProps = {
-    onClose: jest.fn(),
-    onSubmit: jest.fn(),
+    onClose: vi.fn(),
+    onSubmit: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {

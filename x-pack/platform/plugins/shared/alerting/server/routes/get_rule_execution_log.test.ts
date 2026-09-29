@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getRuleExecutionLogRoute } from './get_rule_execution_log';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
@@ -14,12 +16,15 @@ import { rulesClientMock } from '../rules_client.mock';
 import type { IExecutionLogResult } from '../../common';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('getRuleExecutionLogRoute', () => {
@@ -130,7 +135,7 @@ describe('getRuleExecutionLogRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.getExecutionLogForRule = jest
+    rulesClient.getExecutionLogForRule = vi
       .fn()
       .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import type { CasesClient } from '../../client';
 import { findSimilarCasesStepDefinition } from './find_similar_cases';
@@ -15,7 +17,7 @@ const createContext = (input: unknown) =>
 
 describe('findSimilarCasesStepDefinition', () => {
   it('finds similar cases', async () => {
-    const similar = jest.fn().mockResolvedValue({
+    const similar = vi.fn().mockResolvedValue({
       cases: [
         {
           ...createCaseResponseFixture,
@@ -28,7 +30,7 @@ describe('findSimilarCasesStepDefinition', () => {
       per_page: 20,
       total: 1,
     });
-    const getCasesClient = jest.fn().mockResolvedValue({
+    const getCasesClient = vi.fn().mockResolvedValue({
       cases: { similar },
     } as unknown as CasesClient);
     const definition = findSimilarCasesStepDefinition(getCasesClient);

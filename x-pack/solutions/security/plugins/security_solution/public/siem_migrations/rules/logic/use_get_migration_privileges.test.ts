@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useQueryClient } from '@kbn/react-query';
 import {
@@ -14,15 +17,18 @@ import {
 import { getRuleMigrationMissingPrivileges } from '../api';
 import { TestProviders } from '../../../common/mock/test_providers';
 
-jest.mock('../api');
-jest.mock('@kbn/react-query', () => ({
-  ...jest.requireActual('@kbn/react-query'),
-  useQueryClient: jest.fn(),
-}));
+vi.mock('../api');
+vi.mock('@kbn/react-query', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/react-query')),
+      useQueryClient: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('Get Migration Privileges Hooks', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('useGetMigrationMissingPrivileges', () => {
@@ -34,7 +40,7 @@ describe('Get Migration Privileges Hooks', () => {
           read: [],
         },
       };
-      (getRuleMigrationMissingPrivileges as jest.Mock).mockResolvedValue(mockResponse);
+      (getRuleMigrationMissingPrivileges as Mock).mockResolvedValue(mockResponse);
 
       const { result } = renderHook(() => useGetMigrationMissingPrivileges(), {
         wrapper: TestProviders,
@@ -49,7 +55,7 @@ describe('Get Migration Privileges Hooks', () => {
 
     it('handles API errors gracefully', async () => {
       const mockError = new Error('API error');
-      (getRuleMigrationMissingPrivileges as jest.Mock).mockRejectedValue(mockError);
+      (getRuleMigrationMissingPrivileges as Mock).mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useGetMigrationMissingPrivileges(), {
         wrapper: TestProviders,
@@ -64,10 +70,10 @@ describe('Get Migration Privileges Hooks', () => {
   });
 
   describe('useInvalidateGetMigrationPrivileges', () => {
-    const invalidateQueries = jest.fn();
+    const invalidateQueries = vi.fn();
 
     beforeEach(() => {
-      (useQueryClient as jest.Mock).mockReturnValue({
+      (useQueryClient as Mock).mockReturnValue({
         invalidateQueries,
       });
     });

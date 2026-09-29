@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { Subject } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
@@ -15,7 +18,7 @@ import type { ServiceStatus } from '@kbn/core-status-common';
 import { type CoreStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import { logCoreStatusChanges } from './log_core_services_status';
 
-const jestDelay = async (millis: number = 10) => await jest.advanceTimersByTimeAsync(millis);
+const jestDelay = async (millis: number = 10) => await vi.advanceTimersByTimeAsync(millis);
 
 describe('logCoreStatusChanges', () => {
   const serviceUnavailable: ServiceStatus = {
@@ -29,11 +32,11 @@ describe('logCoreStatusChanges', () => {
 
   let core$: Subject<CoreStatus>;
   let stop$: Subject<void>;
-  let loggerFactory: jest.Mocked<ILoggingSystem>;
+  let loggerFactory: Mocked<ILoggingSystem>;
   let l: Logger; // using short name for clarity
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     core$ = new Subject<CoreStatus>();
     stop$ = new Subject<void>();
     loggerFactory = loggingSystemMock.create();
@@ -41,8 +44,8 @@ describe('logCoreStatusChanges', () => {
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
     stop$.next();
     stop$.complete();
     loggingSystemMock.clear(loggerFactory);

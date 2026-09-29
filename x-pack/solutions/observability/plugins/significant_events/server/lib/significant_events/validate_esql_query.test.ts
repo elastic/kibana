@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Streams } from '@kbn/streams-schema';
 import { validateEsqlQueryForStreamOrThrow, EsqlQueryValidationError } from './validate_esql_query';
 
-jest.mock('@elastic/esql', () => {
-  const actual = jest.requireActual('@elastic/esql');
+vi.mock('@elastic/esql', () => {
+  const actual = require('@elastic/esql');
   return {
     ...actual,
     Parser: {
       ...actual.Parser,
-      parse: jest.fn(actual.Parser.parse),
+      parse: vi.fn(actual.Parser.parse),
     },
   };
 });
@@ -76,9 +79,9 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
       ).toThrow(EsqlQueryValidationError);
     });
 
-    it('should include "Invalid ES|QL query" in the error message for unparseable input', () => {
-      const { Parser } = jest.requireMock('@elastic/esql');
-      (Parser.parse as jest.Mock).mockImplementationOnce(() => {
+    it('should include "Invalid ES|QL query" in the error message for unparseable input', async () => {
+      const { Parser } = (await vi.importMock('@elastic/esql'));
+      (Parser.parse as Mock).mockImplementationOnce(() => {
         throw new Error('parse failure');
       });
 

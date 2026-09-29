@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -20,11 +22,11 @@ describe('ToggleAccordionButton', () => {
   const defaultProps = {
     isOpen: true,
     childrenCount: 3,
-    onClick: jest.fn(),
+    onClick: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('rendering', () => {
@@ -101,7 +103,7 @@ describe('ToggleAccordionButton', () => {
 
   describe('click interaction', () => {
     it('calls onClick when clicked', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       renderWithTheme(<ToggleAccordionButton {...defaultProps} onClick={onClick} />);
 
       fireEvent.click(screen.getByTestId('toggleAccordionButton'));
@@ -110,7 +112,7 @@ describe('ToggleAccordionButton', () => {
     });
 
     it('calls onClick when Enter key is pressed', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       renderWithTheme(<ToggleAccordionButton {...defaultProps} onClick={onClick} />);
 
       fireEvent.keyDown(screen.getByTestId('toggleAccordionButton'), { key: 'Enter' });
@@ -119,7 +121,7 @@ describe('ToggleAccordionButton', () => {
     });
 
     it('calls onClick when Space key is pressed', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       renderWithTheme(<ToggleAccordionButton {...defaultProps} onClick={onClick} />);
 
       fireEvent.keyDown(screen.getByTestId('toggleAccordionButton'), { key: ' ' });
@@ -128,7 +130,7 @@ describe('ToggleAccordionButton', () => {
     });
 
     it('does not call onClick for other keys', () => {
-      const onClick = jest.fn();
+      const onClick = vi.fn();
       renderWithTheme(<ToggleAccordionButton {...defaultProps} onClick={onClick} />);
 
       fireEvent.keyDown(screen.getByTestId('toggleAccordionButton'), { key: 'Tab' });

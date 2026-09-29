@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createContextAwarenessMocks } from '../__mocks__';
 import { extendProfileProvider } from './extend_profile_provider';
 
@@ -14,8 +16,8 @@ const { dataSourceProfileProviderMock } = createContextAwarenessMocks();
 
 describe('extendProfileProvider', () => {
   it('should merge profiles and overwrite other properties', () => {
-    const resolve = jest.fn();
-    const getDefaultAppState = jest.fn();
+    const resolve = vi.fn();
+    const getDefaultAppState = vi.fn();
     const extendedProfileProvider = extendProfileProvider(dataSourceProfileProviderMock, {
       profileId: 'extended-profile',
       profile: { getDefaultAppState },

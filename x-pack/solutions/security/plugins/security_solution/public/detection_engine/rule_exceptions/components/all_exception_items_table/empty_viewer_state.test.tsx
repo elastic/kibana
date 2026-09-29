@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 
@@ -18,7 +20,7 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
         isReadOnly={false}
         isEndpoint={false}
         currentState="loading"
-        onCreateExceptionListItem={jest.fn()}
+        onCreateExceptionListItem={vi.fn()}
       />
     );
 
@@ -33,7 +35,7 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
         isReadOnly={false}
         isEndpoint={false}
         currentState="empty_search"
-        onCreateExceptionListItem={jest.fn()}
+        onCreateExceptionListItem={vi.fn()}
       />
     );
 
@@ -48,7 +50,7 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
         isReadOnly={false}
         isEndpoint={true}
         currentState="empty"
-        onCreateExceptionListItem={jest.fn()}
+        onCreateExceptionListItem={vi.fn()}
       />
     );
 
@@ -69,7 +71,7 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
         isReadOnly={false}
         isEndpoint={false}
         currentState="empty"
-        onCreateExceptionListItem={jest.fn()}
+        onCreateExceptionListItem={vi.fn()}
       />
     );
 

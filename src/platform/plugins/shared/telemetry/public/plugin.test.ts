@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable dot-notation */
 import { firstValueFrom, of } from 'rxjs';
 import { ElasticV3BrowserShipper } from '@elastic/ebt/shippers/elastic_v3/browser';
@@ -69,7 +71,7 @@ describe('TelemetryPlugin', () => {
         const coreSetupMock = coreMock.createSetup();
         const telemetryPlugin = new TelemetryPlugin(initializerContext);
 
-        telemetryPlugin['getSendToEnv'] = jest.fn();
+        telemetryPlugin['getSendToEnv'] = vi.fn();
         telemetryPlugin.setup(coreSetupMock, { screenshotMode, home });
 
         expect(telemetryPlugin['getSendToEnv']).toHaveBeenCalledTimes(1);
@@ -91,7 +93,7 @@ describe('TelemetryPlugin', () => {
         const coreSetupMock = coreMock.createSetup();
         const telemetryPlugin = new TelemetryPlugin(initializerContext);
 
-        telemetryPlugin['getSendToEnv'] = jest.fn();
+        telemetryPlugin['getSendToEnv'] = vi.fn();
         telemetryPlugin.setup(coreSetupMock, { screenshotMode, home });
 
         expect(telemetryPlugin['getSendToEnv']).toHaveBeenCalledTimes(1);
@@ -113,7 +115,7 @@ describe('TelemetryPlugin', () => {
       const initializerContext = coreMock.createPluginInitializerContext();
 
       const plugin = new TelemetryPlugin(initializerContext);
-      const isScreenshotModeSpy = jest
+      const isScreenshotModeSpy = vi
         .spyOn(screenshotMode, 'isScreenshotMode')
         .mockReturnValue(true);
       plugin.setup(coreMock.createSetup(), { screenshotMode, home });
@@ -121,7 +123,7 @@ describe('TelemetryPlugin', () => {
 
       const coreStartMock = coreMock.createStart();
       coreStartMock.application = { ...coreStartMock.application, currentAppId$: of('some-app') };
-      const optInSpy = jest.spyOn(coreStartMock.analytics, 'optIn');
+      const optInSpy = vi.spyOn(coreStartMock.analytics, 'optIn');
       plugin.start(coreStartMock, { screenshotMode });
       // Once in setup, once in the early skip-mode guard, once in the currentAppId$ subscription.
       expect(isScreenshotModeSpy).toHaveBeenCalledTimes(3);
@@ -133,7 +135,7 @@ describe('TelemetryPlugin', () => {
       const initializerContext = coreMock.createPluginInitializerContext({ optIn: false });
 
       const plugin = new TelemetryPlugin(initializerContext);
-      jest.spyOn(screenshotMode, 'isScreenshotMode').mockReturnValue(true);
+      vi.spyOn(screenshotMode, 'isScreenshotMode').mockReturnValue(true);
       plugin.setup(coreMock.createSetup(), { screenshotMode, home });
 
       const coreStartMock = coreMock.createStart();
@@ -149,7 +151,7 @@ describe('TelemetryPlugin', () => {
       const initializerContext = coreMock.createPluginInitializerContext();
 
       const plugin = new TelemetryPlugin(initializerContext);
-      const isScreenshotModeSpy = jest
+      const isScreenshotModeSpy = vi
         .spyOn(screenshotMode, 'isScreenshotMode')
         .mockReturnValue(false);
       plugin.setup(coreMock.createSetup(), { screenshotMode, home });
@@ -159,7 +161,7 @@ describe('TelemetryPlugin', () => {
       coreStartMock.application = { ...coreStartMock.application, currentAppId$: of('some-app') };
       // Skip mode is detected via the synthetics user-agent on each `shouldSkipTelemetry` call.
       isSyntheticsMonitorMock.mockReturnValue(true);
-      const optInSpy = jest.spyOn(coreStartMock.analytics, 'optIn');
+      const optInSpy = vi.spyOn(coreStartMock.analytics, 'optIn');
       plugin.start(coreStartMock, { screenshotMode });
       // Once in setup, once in the early skip-mode guard, once in the currentAppId$ subscription.
       expect(isScreenshotModeSpy).toHaveBeenCalledTimes(3);

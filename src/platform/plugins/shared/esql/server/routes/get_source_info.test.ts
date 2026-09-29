@@ -7,35 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { SOURCE_INFO_ROUTE } from '@kbn/esql-types';
 import { registerGetSourceInfoRoute } from './get_source_info';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getNamedParams: jest.fn().mockReturnValue([]),
-  fixESQLQueryWithVariables: jest.fn((query: string) => query),
-}));
+vi.mock('@kbn/esql-utils', () => {
+      const mocked = {
+      getNamedParams: vi.fn().mockReturnValue([]),
+      fixESQLQueryWithVariables: vi.fn((query: string) => query),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/es-query', () => ({
-  buildEsQuery: jest.fn(),
-  getTimeZoneFromSettings: jest.fn().mockReturnValue('UTC'),
-}));
+vi.mock('@kbn/es-query', () => {
+      const mocked = {
+      buildEsQuery: vi.fn(),
+      getTimeZoneFromSettings: vi.fn().mockReturnValue('UTC'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/data-plugin/common', () => ({
-  getTime: jest.fn(),
-  getEsQueryConfig: jest.fn().mockReturnValue({}),
-}));
+vi.mock('@kbn/data-plugin/common', () => {
+      const mocked = {
+      getTime: vi.fn(),
+      getEsQueryConfig: vi.fn().mockReturnValue({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function buildMocks() {
-  const handler = jest.fn();
+  const handler = vi.fn();
   const router = {
-    post: jest.fn((_, h) => {
+    post: vi.fn((_, h) => {
       handler.mockImplementation(h);
     }),
   };
 
-  const errorLogger = { error: jest.fn() };
-  const esqlQuery = jest.fn().mockResolvedValue({
+  const errorLogger = { error: vi.fn() };
+  const esqlQuery = vi.fn().mockResolvedValue({
     columns: [{ name: 'message', type: 'keyword' }],
     all_columns: undefined,
   });
@@ -49,14 +60,14 @@ function buildMocks() {
     },
     uiSettings: {
       client: {
-        get: jest.fn().mockResolvedValue('UTC'),
+        get: vi.fn().mockResolvedValue('UTC'),
       },
     },
   };
   const requestHandlerContext = { core: Promise.resolve(core) };
   const response = {
-    ok: jest.fn((r) => ({ status: 200, ...r })),
-    badRequest: jest.fn((r) => ({ status: 400, ...r })),
+    ok: vi.fn((r) => ({ status: 200, ...r })),
+    badRequest: vi.fn((r) => ({ status: 400, ...r })),
   };
   const context = { logger: { get: () => errorLogger } };
 
@@ -72,7 +83,7 @@ function buildMocks() {
 }
 
 describe('registerGetSourceInfoRoute', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('registers a POST handler at the correct path', () => {
     const { router, context } = buildMocks();

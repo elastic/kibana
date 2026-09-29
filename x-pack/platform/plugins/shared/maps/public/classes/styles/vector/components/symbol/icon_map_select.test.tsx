@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 /* eslint-disable max-classes-per-file */
 
-jest.mock('./icon_stops', () => ({
-  IconStops: () => {
-    return <div>mockIconStops</div>;
-  },
-}));
+vi.mock('./icon_stops', () => {
+      const mocked = {
+      IconStops: () => {
+        return <div>mockIconStops</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../symbol_utils', () => {
+vi.mock('../../symbol_utils', () => {
   return {
     getIconPaletteOptions: () => {
       return [

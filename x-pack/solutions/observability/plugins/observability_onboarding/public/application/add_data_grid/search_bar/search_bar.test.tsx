@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -15,7 +17,7 @@ describe('AddDataSearchBar', () => {
     render(
       <AddDataSearchBar
         value="redis"
-        onChange={jest.fn()}
+        onChange={vi.fn()}
         placeholder="Search integrations"
         data-test-subj="searchBar"
       />
@@ -27,7 +29,7 @@ describe('AddDataSearchBar', () => {
 
   it('reports changes through onChange', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     render(
       <AddDataSearchBar
         value=""

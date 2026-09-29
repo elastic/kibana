@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-export const validateArtifactArchiveMock = jest.fn();
-export const validateOpenApiArtifactArchiveMock = jest.fn();
-export const fetchArtifactVersionsMock = jest.fn();
-export const fetchSecurityLabsVersionsMock = jest.fn();
-export const createIndexMock = jest.fn();
-export const populateIndexMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('./steps', () => {
-  const actual = jest.requireActual('./steps');
+export const validateArtifactArchiveMock = vi.fn();
+export const validateOpenApiArtifactArchiveMock = vi.fn();
+export const fetchArtifactVersionsMock = vi.fn();
+export const fetchSecurityLabsVersionsMock = vi.fn();
+export const createIndexMock = vi.fn();
+export const populateIndexMock = vi.fn();
+
+vi.doMock('./steps', async () => {
+  const actual = (await vi.importActual('./steps'));
   return {
     ...actual,
     validateArtifactArchive: validateArtifactArchiveMock,
@@ -25,19 +27,19 @@ jest.doMock('./steps', () => {
   };
 });
 
-export const downloadToDiskMock = jest.fn();
-export const openZipArchiveMock = jest.fn();
-export const loadMappingFileMock = jest.fn();
-export const loadManifestFileMock = jest.fn();
-export const ensureDefaultElserDeployedMock = jest.fn();
-export const ensureInferenceDeployedMock = jest.fn();
-export const checkArtifactAvailableMock = jest.fn();
-export const removeArtifactFileMock = jest.fn();
-export const logArtifactsFolderUsageMock = jest.fn();
-export const purgeArtifactsFolderMock = jest.fn();
+export const downloadToDiskMock = vi.fn();
+export const openZipArchiveMock = vi.fn();
+export const loadMappingFileMock = vi.fn();
+export const loadManifestFileMock = vi.fn();
+export const ensureDefaultElserDeployedMock = vi.fn();
+export const ensureInferenceDeployedMock = vi.fn();
+export const checkArtifactAvailableMock = vi.fn();
+export const removeArtifactFileMock = vi.fn();
+export const logArtifactsFolderUsageMock = vi.fn();
+export const purgeArtifactsFolderMock = vi.fn();
 
-jest.doMock('./utils', () => {
-  const actual = jest.requireActual('./utils');
+vi.doMock('./utils', async () => {
+  const actual = (await vi.importActual('./utils'));
   return {
     ...actual,
     downloadToDisk: downloadToDiskMock,

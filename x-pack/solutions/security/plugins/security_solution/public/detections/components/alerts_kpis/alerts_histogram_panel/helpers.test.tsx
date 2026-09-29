@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
 import { createResetGroupByFieldAction, showInitialLoadingSpinner } from './helpers';
@@ -39,7 +41,7 @@ describe('helpers', () => {
 describe('createResetGroupByFieldAction', () => {
   let action: Action;
   const embeddable = {
-    getInput: jest.fn().mockReturnValue({
+    getInput: vi.fn().mockReturnValue({
       attributes: {
         title: 'test',
         description: '',
@@ -68,13 +70,13 @@ describe('createResetGroupByFieldAction', () => {
         },
       },
     }),
-    updateInput: jest.fn(),
+    updateInput: vi.fn(),
   };
 
   const context = {
     embeddable,
   } as unknown as ActionExecutionContext;
-  const mockCallback = jest.fn();
+  const mockCallback = vi.fn();
   beforeAll(async () => {
     action = createResetGroupByFieldAction({ callback: mockCallback });
     await action.execute(context);

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { AssistantOverlay } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 
-const reportAssistantInvoked = jest.fn();
+const reportAssistantInvoked = vi.fn();
 const assistantTelemetry = {
   reportAssistantInvoked,
   reportAssistantMessageSent: () => {},
@@ -28,7 +30,7 @@ HTMLElement.prototype.matches = function (this: HTMLElement, query: string) {
 
 describe('AssistantOverlay', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('renders when isAssistantEnabled prop is true and keyboard shortcut is pressed', () => {
     const { getByTestId } = render(

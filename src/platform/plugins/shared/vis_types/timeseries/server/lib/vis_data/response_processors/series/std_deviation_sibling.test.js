@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { stdDeviationSibling } from './std_deviation_sibling';
 
 describe('stdDeviationSibling(resp, panel, series)', () => {
@@ -68,7 +70,7 @@ describe('stdDeviationSibling(resp, panel, series)', () => {
   });
 
   test('calls next when finished', async () => {
-    const next = jest.fn();
+    const next = vi.fn();
     await stdDeviationSibling(resp, panel, series, {})(next)([]);
     expect(next.mock.calls.length).toEqual(1);
   });

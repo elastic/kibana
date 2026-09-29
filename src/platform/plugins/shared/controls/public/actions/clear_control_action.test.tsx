@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { BehaviorSubject, take } from 'rxjs';
 import { ClearControlAction } from './clear_control_action';
 
@@ -14,9 +16,9 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 
 const dashboardApi = {
   viewMode$: new BehaviorSubject<ViewMode>('view'),
-  removePanel: jest.fn(),
-  replacePanel: jest.fn(),
-  addNewPanel: jest.fn(),
+  removePanel: vi.fn(),
+  replacePanel: vi.fn(),
+  addNewPanel: vi.fn(),
   children$: new BehaviorSubject({}),
 };
 
@@ -28,7 +30,7 @@ const controlApi = {
   uuid: '1',
   parentApi: dashboardApi,
   hasSelections$,
-  clearSelections: jest.fn(),
+  clearSelections: vi.fn(),
 };
 beforeEach(() => {
   hasSelections$.next(false);
@@ -43,13 +45,18 @@ describe('ClearControlAction', () => {
     }).rejects.toThrow(Error);
   });
 
-  test('should call onChange when isCompatible changes', (done) => {
-    const subject = clearControlAction.getCompatibilityChangesSubject({ embeddable: controlApi });
-    subject?.pipe(take(1)).subscribe(() => {
-      done();
-    });
-    hasSelections$.next(true);
-  });
+  test('should call onChange when isCompatible changes', () =>
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
+
+      const subject = clearControlAction.getCompatibilityChangesSubject({ embeddable: controlApi });
+      subject?.pipe(take(1)).subscribe(() => {
+        done();
+      });
+      hasSelections$.next(true);
+    }));
 
   describe('Clear control button compatibility', () => {
     test('should be incompatible if there is no selection', async () => {

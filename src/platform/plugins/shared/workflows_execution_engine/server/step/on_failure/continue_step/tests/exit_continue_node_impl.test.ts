@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitContinueNodeImpl } from '../exit_continue_node_impl';
 
@@ -21,7 +23,7 @@ describe('ExitContinueNodeImpl', () => {
 
   describe('run', () => {
     beforeEach(() => {
-      workflowRuntime.navigateToNextNode = jest.fn();
+      workflowRuntime.navigateToNextNode = vi.fn();
     });
 
     it('should go to next node', async () => {

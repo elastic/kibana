@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,7 +16,7 @@ import type { QuerySandboxProps } from './query_sandbox';
 import type { QueryExecutionResult } from './use_query_execution';
 import type { QueryTab } from './types';
 
-const mockRun = jest.fn();
+const mockRun = vi.fn();
 
 const defaultExecutionResult: QueryExecutionResult = {
   columns: [],
@@ -30,68 +32,89 @@ const defaultExecutionResult: QueryExecutionResult = {
 
 let mockExecutionResult = { ...defaultExecutionResult };
 
-jest.mock('./use_query_execution', () => ({
-  useQueryExecution: () => mockExecutionResult,
-}));
+vi.mock('./use_query_execution', () => {
+      const mocked = {
+      useQueryExecution: () => mockExecutionResult,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLTimeField: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('@kbn/esql-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/esql-utils')),
+      getESQLTimeField: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../form/hooks/use_data_fields', () => ({
-  useDataFields: () => ({
-    data: {
-      '@timestamp': { name: '@timestamp', type: 'date', searchable: true, aggregatable: true },
-    },
-    isLoading: false,
-  }),
-}));
+vi.mock('../../form/hooks/use_data_fields', () => {
+      const mocked = {
+      useDataFields: () => ({
+        data: {
+          '@timestamp': { name: '@timestamp', type: 'date', searchable: true, aggregatable: true },
+        },
+        isLoading: false,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerting-v2-browser-shared', () => ({
-  AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
-}));
+vi.mock('@kbn/alerting-v2-browser-shared', () => {
+      const mocked = {
+      AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let mockRuleFormServices: Record<string, unknown> = {};
 
-jest.mock('../../form/contexts/rule_form_context', () => ({
-  useRuleFormServices: () => mockRuleFormServices,
-}));
+vi.mock('../../form/contexts/rule_form_context', () => {
+      const mocked = {
+      useRuleFormServices: () => mockRuleFormServices,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const buildBaseServices = () => ({
   http: {},
-  data: { search: { search: jest.fn() } },
+  data: { search: { search: vi.fn() } },
   dataViews: {},
-  notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
-  lens: { EmbeddableComponent: () => null, stateHelperApi: jest.fn() },
+  notifications: { toasts: { addDanger: vi.fn(), addWarning: vi.fn() } },
+  lens: { EmbeddableComponent: () => null, stateHelperApi: vi.fn() },
 });
 
-jest.mock('./compose_discover_chart', () => ({
-  ComposeDiscoverChart: () => <div data-test-subj="mockComposeDiscoverChart" />,
-}));
+vi.mock('./compose_discover_chart', () => {
+      const mocked = {
+      ComposeDiscoverChart: () => <div data-test-subj="mockComposeDiscoverChart" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./compose_discover_tabs', () => {
-  const actual = jest.requireActual('./compose_discover_tabs');
+vi.mock('./compose_discover_tabs', async () => {
+  const actual = (await vi.importActual('./compose_discover_tabs'));
   return {
     ...actual,
     ComposeDiscoverTabs: () => <div data-test-subj="mockComposeDiscoverTabs" />,
   };
 });
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({ value, options }: { value: string; options?: { theme?: string } }) => (
-    <pre data-test-subj="mockCodeEditor" data-theme={options?.theme}>
-      {value}
-    </pre>
-  ),
-  ESQL_LANG_ID: 'esql',
-}));
+vi.mock('@kbn/code-editor', () => {
+      const mocked = {
+      CodeEditor: ({ value, options }: { value: string; options?: { theme?: string } }) => (
+        <pre data-test-subj="mockCodeEditor" data-theme={options?.theme}>
+          {value}
+        </pre>
+      ),
+      ESQL_LANG_ID: 'esql',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultProps: QuerySandboxProps = {
   query: 'FROM logs-* | STATS count() BY host.name',
   timeField: '@timestamp',
   dateRange: { dateStart: 'now-15m', dateEnd: 'now' },
-  onDateRangeChange: jest.fn(),
+  onDateRangeChange: vi.fn(),
 };
 
 const testQueryClient = new QueryClient({
@@ -112,7 +135,7 @@ describe('QuerySandbox', () => {
     mockRun.mockClear();
     mockExecutionResult = { ...defaultExecutionResult };
     mockRuleFormServices = buildBaseServices();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the sandbox container', () => {
@@ -139,7 +162,7 @@ describe('QuerySandbox', () => {
   });
 
   it('wires recommended-query submit to onQueryChange + run in the single editor', async () => {
-    const onQueryChange = jest.fn();
+    const onQueryChange = vi.fn();
     mockRuleFormServices = {
       ...buildBaseServices(),
       esqlEditorActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -182,20 +205,20 @@ describe('QuerySandbox', () => {
         />
       ),
     };
-    renderSandbox({ onQueryChange: jest.fn() });
+    renderSandbox({ onQueryChange: vi.fn() });
     expect(screen.getByTestId('stubEsqlMenu')).toHaveAttribute('data-hide-recommended', 'false');
   });
 
-  const splitTabProps = (activeTab: QueryTab, onBaseQueryChange = jest.fn()) => ({
+  const splitTabProps = (activeTab: QueryTab, onBaseQueryChange = vi.fn()) => ({
     tabs: ['base', 'alert'] as QueryTab[],
     activeTab,
-    onTabChange: jest.fn(),
+    onTabChange: vi.fn(),
     baseQuery: 'FROM logs-*',
     alertBlock: '| WHERE count > 100',
     recoveryBlock: '',
     onBaseQueryChange,
-    onAlertBlockChange: jest.fn(),
-    onRecoveryBlockChange: jest.fn(),
+    onAlertBlockChange: vi.fn(),
+    onRecoveryBlockChange: vi.fn(),
   });
 
   it('hides recommended queries on a split fragment (alert) tab', () => {
@@ -210,14 +233,14 @@ describe('QuerySandbox', () => {
         />
       ),
     };
-    renderSandbox({ onQueryChange: jest.fn(), tabProps: splitTabProps('alert') });
+    renderSandbox({ onQueryChange: vi.fn(), tabProps: splitTabProps('alert') });
     expect(screen.getByTestId('stubEsqlMenu')).toHaveAttribute('data-hide-recommended', 'true');
     // Not wired on a fragment tab → the register is not mounted.
     expect(screen.queryByTestId('stubRegister')).not.toBeInTheDocument();
   });
 
   it('shows and wires recommended queries on the split base tab (via onBaseQueryChange)', async () => {
-    const onBaseQueryChange = jest.fn();
+    const onBaseQueryChange = vi.fn();
     mockRuleFormServices = {
       ...buildBaseServices(),
       esqlEditorActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -239,7 +262,7 @@ describe('QuerySandbox', () => {
         />
       ),
     };
-    renderSandbox({ onQueryChange: jest.fn(), tabProps: splitTabProps('base', onBaseQueryChange) });
+    renderSandbox({ onQueryChange: vi.fn(), tabProps: splitTabProps('base', onBaseQueryChange) });
 
     expect(screen.getByTestId('stubEsqlMenu')).toHaveAttribute('data-hide-recommended', 'false');
 
@@ -281,13 +304,13 @@ describe('QuerySandbox', () => {
       tabProps: {
         tabs: ['base', 'alert'],
         activeTab: 'alert',
-        onTabChange: jest.fn(),
+        onTabChange: vi.fn(),
         baseQuery: 'FROM logs-*',
         alertBlock: '| WHERE count > 100',
         recoveryBlock: '',
-        onBaseQueryChange: jest.fn(),
-        onAlertBlockChange: jest.fn(),
-        onRecoveryBlockChange: jest.fn(),
+        onBaseQueryChange: vi.fn(),
+        onAlertBlockChange: vi.fn(),
+        onRecoveryBlockChange: vi.fn(),
       },
     });
     expect(screen.getByTestId('mockComposeDiscoverTabs')).toBeInTheDocument();
@@ -299,13 +322,13 @@ describe('QuerySandbox', () => {
       tabProps: {
         tabs: ['base', 'alert'],
         activeTab: 'alert',
-        onTabChange: jest.fn(),
+        onTabChange: vi.fn(),
         baseQuery: 'FROM logs-*',
         alertBlock: '| WHERE count > 100',
         recoveryBlock: '',
-        onBaseQueryChange: jest.fn(),
-        onAlertBlockChange: jest.fn(),
-        onRecoveryBlockChange: jest.fn(),
+        onBaseQueryChange: vi.fn(),
+        onAlertBlockChange: vi.fn(),
+        onRecoveryBlockChange: vi.fn(),
       },
     });
     expect(screen.getByTestId('querySandboxTab-base')).toBeInTheDocument();
@@ -429,19 +452,19 @@ describe('QuerySandbox', () => {
   });
 
   it('enables time field selector when onTimeFieldChange is provided', () => {
-    renderSandbox({ onTimeFieldChange: jest.fn() });
+    renderSandbox({ onTimeFieldChange: vi.fn() });
     expect(screen.getByTestId('querySandboxTimeField')).not.toBeDisabled();
   });
 
   describe('alert query tab', () => {
     const tabPropsBase = {
       tabs: ['base', 'alert'] as const,
-      onTabChange: jest.fn(),
+      onTabChange: vi.fn(),
       alertBlock: '',
       recoveryBlock: '',
-      onBaseQueryChange: jest.fn(),
-      onAlertBlockChange: jest.fn(),
-      onRecoveryBlockChange: jest.fn(),
+      onBaseQueryChange: vi.fn(),
+      onAlertBlockChange: vi.fn(),
+      onRecoveryBlockChange: vi.fn(),
     };
 
     it('disables the alert tab when the base query is empty', () => {
@@ -472,7 +495,7 @@ describe('QuerySandbox', () => {
     });
 
     it('switches to the base tab when alert is active without a base query', () => {
-      const onTabChange = jest.fn();
+      const onTabChange = vi.fn();
 
       renderSandbox({
         tabProps: {

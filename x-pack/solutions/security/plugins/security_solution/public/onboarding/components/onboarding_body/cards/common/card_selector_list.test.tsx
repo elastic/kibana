@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 
 import { render, fireEvent } from '@testing-library/react';
@@ -16,12 +19,15 @@ import { OnboardingContextProvider } from '../../../onboarding_context';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 import { TestProviders } from '../../../../../common/mock';
 
-const mockOnSelect = jest.fn();
+const mockOnSelect = vi.fn();
 
-jest.mock('../../../../../common/experimental_features_service', () => ({
-  ExperimentalFeaturesService: { get: jest.fn() },
-}));
-const mockExperimentalFeatures = ExperimentalFeaturesService.get as jest.Mock;
+vi.mock('../../../../../common/experimental_features_service', () => {
+      const mocked = {
+      ExperimentalFeaturesService: { get: vi.fn() },
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockExperimentalFeatures = ExperimentalFeaturesService.get as Mock;
 
 const items: CardSelectorListItem[] = [
   {
@@ -45,17 +51,17 @@ const defaultProps = {
 };
 
 describe('CardSelectorList', () => {
-  const scrollIntoViewMock = jest.fn();
+  const scrollIntoViewMock = vi.fn();
 
   beforeAll(() => {
     Element.prototype.scrollIntoView = scrollIntoViewMock;
   });
   beforeEach(() => {
     mockExperimentalFeatures.mockReturnValue({});
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('renders the component with the correct title', () => {

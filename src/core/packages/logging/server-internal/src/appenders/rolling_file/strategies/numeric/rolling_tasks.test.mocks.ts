@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const readdirMock = jest.fn();
-export const renameMock = jest.fn();
-export const accessMock = jest.fn();
+import { vi } from 'vitest';
 
-jest.doMock('fs/promises', () => ({
-  readdir: readdirMock,
-  rename: renameMock,
-  access: accessMock,
-}));
+export const readdirMock = vi.fn();
+export const renameMock = vi.fn();
+export const accessMock = vi.fn();
+
+vi.doMock('fs/promises', () => {
+      const mocked = {
+      readdir: readdirMock,
+      rename: renameMock,
+      access: accessMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 export const clearAllMocks = () => {
   readdirMock.mockClear();

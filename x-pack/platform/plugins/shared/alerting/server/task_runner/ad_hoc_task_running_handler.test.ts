@@ -4,32 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 
 import { partiallyUpdateAdHocRun } from './lib';
 import { AdHocTaskRunningHandler } from './ad_hoc_task_running_handler';
 import { adHocRunStatus } from '../../common/constants';
 
-jest.mock('./lib', () => ({
-  partiallyUpdateAdHocRun: jest.fn(),
-}));
+vi.mock('./lib', () => {
+      const mocked = {
+      partiallyUpdateAdHocRun: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('isRunning handler', () => {
-  const soClient = jest.fn() as unknown as ISavedObjectsRepository;
+  const soClient = vi.fn() as unknown as ISavedObjectsRepository;
   const logger = {
-    error: jest.fn(),
+    error: vi.fn(),
   } as unknown as Logger;
   beforeEach(() => {
-    (partiallyUpdateAdHocRun as jest.Mock).mockClear();
-    (logger.error as jest.Mock).mockClear();
-    jest.useFakeTimers();
+    (partiallyUpdateAdHocRun as Mock).mockClear();
+    (logger.error as Mock).mockClear();
+    vi.useFakeTimers();
   });
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('Should resolve if nothing got started', async () => {
-    (partiallyUpdateAdHocRun as jest.Mock).mockImplementation(() => Promise.resolve('resolve'));
+    (partiallyUpdateAdHocRun as Mock).mockImplementation(() => Promise.resolve('resolve'));
     const runHandler = new AdHocTaskRunningHandler(soClient, logger);
     const resp = await runHandler.waitFor();
     expect(partiallyUpdateAdHocRun).toHaveBeenCalledTimes(0);
@@ -38,7 +44,7 @@ describe('isRunning handler', () => {
   });
 
   test('Should return the promise from partiallyUpdateAdHocRun when the update isRunning has been a success', async () => {
-    (partiallyUpdateAdHocRun as jest.Mock).mockImplementation(() => Promise.resolve('resolve'));
+    (partiallyUpdateAdHocRun as Mock).mockImplementation(() => Promise.resolve('resolve'));
     const runHandler = new AdHocTaskRunningHandler(soClient, logger);
     runHandler.start('9876543210', [
       {
@@ -52,11 +58,11 @@ describe('isRunning handler', () => {
         interval: '1h',
       },
     ]);
-    jest.runAllTimers();
+    vi.runAllTimers();
     const resp = await runHandler.waitFor();
 
     expect(partiallyUpdateAdHocRun).toHaveBeenCalledTimes(1);
-    expect((partiallyUpdateAdHocRun as jest.Mock).mock.calls[0]).toMatchInlineSnapshot(`
+    expect((partiallyUpdateAdHocRun as Mock).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         [MockFunction],
         "9876543210",
@@ -87,7 +93,7 @@ describe('isRunning handler', () => {
   });
 
   test('Should reject when the update isRunning has been a failure', async () => {
-    (partiallyUpdateAdHocRun as jest.Mock).mockImplementation(() =>
+    (partiallyUpdateAdHocRun as Mock).mockImplementation(() =>
       Promise.reject(new Error('error'))
     );
     const runHandler = new AdHocTaskRunningHandler(soClient, logger);
@@ -103,7 +109,7 @@ describe('isRunning handler', () => {
         interval: '1h',
       },
     ]);
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     await expect(runHandler.waitFor()).rejects.toThrow();
     expect(partiallyUpdateAdHocRun).toHaveBeenCalledTimes(1);

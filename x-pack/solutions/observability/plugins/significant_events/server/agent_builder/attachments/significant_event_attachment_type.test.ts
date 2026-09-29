@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   hashContent,
@@ -35,14 +38,14 @@ const event: SignificantEvent = {
 
 const createGetScopedClients = (
   events: SignificantEvent[]
-): jest.MockedFunction<GetScopedClients> => {
-  const getEventClient = jest.fn(() => ({
-    findLatestByEventId: jest.fn().mockResolvedValue(events.at(-1)),
+): MockedFunction<GetScopedClients> => {
+  const getEventClient = vi.fn(() => ({
+    findLatestByEventId: vi.fn().mockResolvedValue(events.at(-1)),
   }));
 
-  return jest.fn().mockResolvedValue({
+  return vi.fn().mockResolvedValue({
     getEventClient,
-  } as unknown as RouteHandlerScopedClients) as jest.MockedFunction<GetScopedClients>;
+  } as unknown as RouteHandlerScopedClients) as MockedFunction<GetScopedClients>;
 };
 
 const createVersionedAttachment = (

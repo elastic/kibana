@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
@@ -14,7 +16,7 @@ import { UserActionPropertyActions } from './property_actions';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 describe('UserActionPropertyActions', () => {
-  const onClick = jest.fn();
+  const onClick = vi.fn();
 
   const props = {
     isLoading: false,
@@ -29,7 +31,7 @@ describe('UserActionPropertyActions', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the loading spinner correctly when loading', async () => {

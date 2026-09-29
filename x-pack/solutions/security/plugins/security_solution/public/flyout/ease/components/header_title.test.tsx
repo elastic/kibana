@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import moment from 'moment-timezone';
 import { render } from '@testing-library/react';
@@ -27,7 +29,7 @@ import {
   SEVERITY_VALUE_TEST_ID,
 } from '../../../flyout_v2/document/main/components/test_ids';
 
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana');
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
@@ -43,7 +45,7 @@ const createSearchHit = (fields: Record<string, unknown[]>) => ({
 
 const mockContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-  getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
+  getFieldsData: vi.fn().mockImplementation(mockGetFieldsData),
   searchHit: createSearchHit({
     'event.kind': ['signal'],
     'kibana.alert.risk_score': [0],
@@ -63,8 +65,8 @@ const renderHeader = (contextValue: EaseDetailsContext) =>
 
 describe('<AlertHeaderTitle />', () => {
   beforeEach(() => {
-    jest.mocked(useDateFormat).mockImplementation(() => dateFormat);
-    jest.mocked(useTimeZone).mockImplementation(() => 'UTC');
+    vi.mocked(useDateFormat).mockImplementation(() => dateFormat);
+    vi.mocked(useTimeZone).mockImplementation(() => 'UTC');
   });
 
   it('should render component', () => {

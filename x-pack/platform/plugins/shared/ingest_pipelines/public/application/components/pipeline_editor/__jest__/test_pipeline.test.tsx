@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { Pipeline } from '../../../../../common/types';
 import { API_BASE_PATH } from '../../../../../common/constants';
 
@@ -29,7 +32,7 @@ const hasStringBody = (value: unknown): value is { body: string } => {
 };
 
 describe('Test pipeline', () => {
-  let onUpdate: jest.Mock;
+  let onUpdate: Mock;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
@@ -53,22 +56,22 @@ describe('Test pipeline', () => {
   };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
-    onUpdate = jest.fn();
+    vi.clearAllMocks();
+    onUpdate = vi.fn();
 
     ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
     renderTestPipeline(httpSetup, {
       value: {
         ...PROCESSORS,
       },
-      onFlyoutOpen: jest.fn(),
+      onFlyoutOpen: vi.fn(),
       onUpdate,
     });
   });
 
   describe('Test pipeline actions', () => {
     it('should successfully add sample documents and execute the pipeline', async () => {
-      const postMock = jest.mocked(httpSetup.post);
+      const postMock = vi.mocked(httpSetup.post);
 
       httpRequestsMockHelpers.setSimulatePipelineResponse(SIMULATE_RESPONSE);
 
@@ -141,7 +144,7 @@ describe('Test pipeline', () => {
     });
 
     test('should enable the output tab if cached documents exist', async () => {
-      const postMock = jest.mocked(httpSetup.post);
+      const postMock = vi.mocked(httpSetup.post);
 
       httpRequestsMockHelpers.setSimulatePipelineResponse(SIMULATE_RESPONSE);
 
@@ -174,7 +177,7 @@ describe('Test pipeline', () => {
     });
 
     test('should surface API errors from the request', async () => {
-      const postMock = jest.mocked(httpSetup.post);
+      const postMock = vi.mocked(httpSetup.post);
 
       const error = {
         statusCode: 500,
@@ -216,7 +219,7 @@ describe('Test pipeline', () => {
 
     describe('Add indexed documents', () => {
       test('should successfully add an indexed document', async () => {
-        const getMock = jest.mocked(httpSetup.get);
+        const getMock = vi.mocked(httpSetup.get);
 
         const { _index: index, _id: documentId } = DOCUMENTS[0];
 
@@ -256,7 +259,7 @@ describe('Test pipeline', () => {
       });
 
       test('should surface API errors from the request', async () => {
-        const getMock = jest.mocked(httpSetup.get);
+        const getMock = vi.mocked(httpSetup.get);
 
         const nonExistentDoc = {
           index: 'foo',
@@ -304,7 +307,7 @@ describe('Test pipeline', () => {
 
     describe('Documents dropdown', () => {
       beforeEach(async () => {
-        const postMock = jest.mocked(httpSetup.post);
+        const postMock = vi.mocked(httpSetup.post);
 
         httpRequestsMockHelpers.setSimulatePipelineResponse(
           addProcessorTagtoMockOutput(SIMULATE_RESPONSE)
@@ -382,7 +385,7 @@ describe('Test pipeline', () => {
     });
 
     it('should update the processor status after execution', async () => {
-      const postMock = jest.mocked(httpSetup.post);
+      const postMock = vi.mocked(httpSetup.post);
 
       const mockVerboseOutputWithProcessorTag = addProcessorTagtoMockOutput(SIMULATE_RESPONSE);
       httpRequestsMockHelpers.setSimulatePipelineResponse(mockVerboseOutputWithProcessorTag);
@@ -426,7 +429,7 @@ describe('Test pipeline', () => {
 
     describe('Output tab', () => {
       beforeEach(async () => {
-        const postMock = jest.mocked(httpSetup.post);
+        const postMock = vi.mocked(httpSetup.post);
 
         const mockVerboseOutputWithProcessorTag = addProcessorTagtoMockOutput(SIMULATE_RESPONSE);
         httpRequestsMockHelpers.setSimulatePipelineResponse(mockVerboseOutputWithProcessorTag);

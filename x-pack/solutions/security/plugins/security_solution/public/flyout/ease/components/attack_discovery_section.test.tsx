@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useEaseDetailsContext } from '../context';
@@ -12,14 +15,17 @@ import { TestProviders } from '../../../common/mock';
 import { AttackDiscoverySection } from './attack_discovery_section';
 import { ATTACK_DISCOVERY_SECTION_TEST_ID } from '..';
 
-jest.mock('../context');
-jest.mock('./attack_discovery_widget', () => ({
-  AttackDiscoveryWidget: jest.fn(),
-}));
+vi.mock('../context');
+vi.mock('./attack_discovery_widget', () => {
+      const mocked = {
+      AttackDiscoveryWidget: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AttackDiscoverySection', () => {
   it('should render the attack discovery section', () => {
-    (useEaseDetailsContext as jest.Mock).mockReturnValue({
+    (useEaseDetailsContext as Mock).mockReturnValue({
       eventId: 'eventId',
     });
 

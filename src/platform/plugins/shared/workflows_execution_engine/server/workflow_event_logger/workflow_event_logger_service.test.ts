@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import { WorkflowEventLoggerService } from './workflow_event_logger_service';
 
 const createLoggerMock = () =>
   ({
-    error: jest.fn(),
+    error: vi.fn(),
   } as unknown as Logger);
 
 describe('WorkflowEventLoggerService', () => {
   it('maps paging fields for repository search helpers', async () => {
     const service = new WorkflowEventLoggerService({} as DataStreamsStart, createLoggerMock());
-    const repository = { searchLogs: jest.fn().mockResolvedValue({ total: 0, logs: [] }) };
+    const repository = { searchLogs: vi.fn().mockResolvedValue({ total: 0, logs: [] }) };
     (service as any).logsRepository = repository;
 
     await service.getExecutionLogs({
@@ -60,7 +62,7 @@ describe('WorkflowEventLoggerService', () => {
       createLoggerMock(),
       true
     );
-    const createLoggerSpy = jest.spyOn(service, 'createLogger');
+    const createLoggerSpy = vi.spyOn(service, 'createLogger');
 
     service.createWorkflowLogger('wf-1', 'workflow');
     service.createExecutionLogger('wf-1', 'exec-1', 'workflow');
@@ -89,7 +91,7 @@ describe('WorkflowEventLoggerService', () => {
     const logger = createLoggerMock();
     const service = new WorkflowEventLoggerService({} as DataStreamsStart, logger);
     const repositoryError = new Error('repository down');
-    const repository = { getRecentLogs: jest.fn().mockRejectedValue(repositoryError) };
+    const repository = { getRecentLogs: vi.fn().mockRejectedValue(repositoryError) };
     (service as any).logsRepository = repository;
 
     await expect(service.getRecentLogs(10)).rejects.toThrow(repositoryError);

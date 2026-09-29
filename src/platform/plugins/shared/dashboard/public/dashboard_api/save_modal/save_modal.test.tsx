@@ -7,54 +7,68 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DashboardSaveModal } from './save_modal';
 
-jest.mock('@kbn/content-management-access-control-public', () => ({
-  AccessModeContainer: () => null,
-}));
+vi.mock('@kbn/content-management-access-control-public', () => {
+      const mocked = {
+      AccessModeContainer: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/saved-objects-plugin/public', () => ({
-  SavedObjectSaveModal: ({ options }: { children: React.ReactNode; options: React.ReactNode }) => (
-    <div data-test-subj="save-modal">
-      <div data-test-subj="save-modal-options">{options}</div>
-    </div>
-  ),
-  SavedObjectSaveModalWithSaveResult: () => null,
-}));
+vi.mock('@kbn/saved-objects-plugin/public', () => {
+      const mocked = {
+      SavedObjectSaveModal: ({ options }: { children: React.ReactNode; options: React.ReactNode }) => (
+        <div data-test-subj="save-modal">
+          <div data-test-subj="save-modal-options">{options}</div>
+        </div>
+      ),
+      SavedObjectSaveModalWithSaveResult: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/kibana_services', () => ({
-  coreServices: {
-    userProfile: {
-      getCurrent: jest.fn(),
-    },
-  },
-  savedObjectsTaggingService: undefined,
-  spacesService: {
-    getActiveSpace: jest.fn().mockResolvedValue({
-      id: 'default',
-      name: 'Default',
-      disabledFeatures: [],
-    }),
-  },
-}));
-
-jest.mock('../../services/access_control_service', () => ({
-  getAccessControlClient: jest.fn().mockReturnValue({
-    isInEditAccessMode: jest.fn().mockReturnValue(false),
-    getCapabilities: jest.fn().mockResolvedValue({
-      capabilities: {
-        createAccessMode: true,
-        createReadOnlyAccessMode: true,
+vi.mock('../../services/kibana_services', () => {
+      const mocked = {
+      coreServices: {
+        userProfile: {
+          getCurrent: vi.fn(),
+        },
       },
-    }),
-  }),
-}));
+      savedObjectsTaggingService: undefined,
+      spacesService: {
+        getActiveSpace: vi.fn().mockResolvedValue({
+          id: 'default',
+          name: 'Default',
+          disabledFeatures: [],
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSave = jest.fn();
-const mockClose = jest.fn();
+vi.mock('../../services/access_control_service', () => {
+      const mocked = {
+      getAccessControlClient: vi.fn().mockReturnValue({
+        isInEditAccessMode: vi.fn().mockReturnValue(false),
+        getCapabilities: vi.fn().mockResolvedValue({
+          capabilities: {
+            createAccessMode: true,
+            createReadOnlyAccessMode: true,
+          },
+        }),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+const mockSave = vi.fn();
+const mockClose = vi.fn();
 
 const renderWithI18n = (component: React.ReactElement) => {
   return render(<I18nProvider>{component}</I18nProvider>);
@@ -81,7 +95,7 @@ const renderDashboardSaveModal = (
 
 describe('DashboardSaveModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders save modal', () => {

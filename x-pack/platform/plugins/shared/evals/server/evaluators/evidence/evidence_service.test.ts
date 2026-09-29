@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { createTraceAccessor } from '../trace_accessor';
 import {
@@ -26,7 +28,7 @@ describe('normalizeEvidence', () => {
   };
 
   const createEsClient = () => {
-    const searchMock = jest.fn();
+    const searchMock = vi.fn();
     const esClient = {
       search: searchMock,
     } as unknown as ElasticsearchClient;
@@ -1057,7 +1059,7 @@ describe('hasRootSpan', () => {
   const traceId = '0af7651916cd43dd8448eb211c80319c';
 
   const createEsClient = () => {
-    const searchMock = jest.fn();
+    const searchMock = vi.fn();
     const esClient = {
       search: searchMock,
     } as unknown as ElasticsearchClient;

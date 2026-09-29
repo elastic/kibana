@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -13,10 +15,10 @@ import { CaseStatuses } from '../../../../../common/types/domain';
 import { StatusField } from './status_field';
 
 describe('StatusField', () => {
-  const onStatusChange = jest.fn();
+  const onStatusChange = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the currently selected status', () => {

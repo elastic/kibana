@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { isNonLocalIndexName } from '@kbn/es-query';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
@@ -13,9 +16,9 @@ import {
   fetchThroughputCorrelations,
 } from './fetch_throughput_correlations';
 
-jest.mock('@kbn/es-query');
+vi.mock('@kbn/es-query');
 
-const mockIsNonLocalIndexName = isNonLocalIndexName as jest.MockedFunction<
+const mockIsNonLocalIndexName = isNonLocalIndexName as MockedFunction<
   typeof isNonLocalIndexName
 >;
 
@@ -121,7 +124,7 @@ function makeBucket(key: number, rpmValue: number, docCount = 100) {
   return { key, doc_count: docCount, throughput: { value: rpmValue } };
 }
 
-const mockSearch = jest.fn();
+const mockSearch = vi.fn();
 const mockApmEventClient = {
   search: mockSearch,
   indices: { transaction: 'apm-*-transaction-*' },

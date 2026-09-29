@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -19,24 +22,27 @@ import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../.
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { EisModelStatus, type EndpointDeprecationInfo } from '../../types';
 
-jest.mock('../../hooks/use_connectors');
-jest.mock('../../hooks/use_registered_features');
-jest.mock('./add_model_popover', () => ({
-  AddModelPopover: ({
-    existingEndpointIds,
-    onAdd,
-  }: {
-    existingEndpointIds: string[];
-    onAdd: (id: string) => void;
-  }) => (
-    <button data-test-subj="add-model-button" onClick={() => onAdd('ep-2')} type="button">
-      Add
-    </button>
-  ),
-}));
+vi.mock('../../hooks/use_connectors');
+vi.mock('../../hooks/use_registered_features');
+vi.mock('./add_model_popover', () => {
+      const mocked = {
+      AddModelPopover: ({
+        existingEndpointIds,
+        onAdd,
+      }: {
+        existingEndpointIds: string[];
+        onAdd: (id: string) => void;
+      }) => (
+        <button data-test-subj="add-model-button" onClick={() => onAdd('ep-2')} type="button">
+          Add
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseConnectors = useConnectors as jest.Mock;
-const mockUseRegisteredFeatures = useRegisteredFeatures as jest.Mock;
+const mockUseConnectors = useConnectors as Mock;
+const mockUseRegisteredFeatures = useRegisteredFeatures as Mock;
 
 const mockConnectors: InferenceConnector[] = [
   {
@@ -118,7 +124,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 describe('SubFeatureCard', () => {
-  const onEndpointsChange = jest.fn();
+  const onEndpointsChange = vi.fn();
 
   const defaultGlobalRowProps = {
     hasSavedObject: true,
@@ -127,7 +133,7 @@ describe('SubFeatureCard', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseConnectors.mockReturnValue({ data: mockConnectors });
     mockUseRegisteredFeatures.mockReturnValue({ features: [], isLoading: false });
   });

@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { fetchMonitorAgentAssignments } from '../../../../state/agent_stats/api';
 import { useMonitorAgentAssignments } from './use_monitor_agent_assignments';
 import type { MonitorLocationAssignment } from '../../../../../../../common/types';
 
-jest.mock('../../../../state/agent_stats/api');
-jest.mock('../../../../contexts', () => ({
-  useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
-}));
+vi.mock('../../../../state/agent_stats/api');
+vi.mock('../../../../contexts', () => {
+      const mocked = {
+      useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockFetch = fetchMonitorAgentAssignments as jest.MockedFunction<
+const mockFetch = fetchMonitorAgentAssignments as MockedFunction<
   typeof fetchMonitorAgentAssignments
 >;
 

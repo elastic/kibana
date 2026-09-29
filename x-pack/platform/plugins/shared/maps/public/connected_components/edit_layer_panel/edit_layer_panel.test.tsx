@@ -5,37 +5,54 @@
  * 2.0.
  */
 
-jest.mock('./style_settings', () => ({
-  StyleSettings: () => {
-    return <div>mockStyleSettings</div>;
-  },
-}));
+import { vi } from 'vitest';
 
-jest.mock('./join_editor', () => ({
-  JoinEditor: () => {
-    return <div>mockJoinEditor</div>;
-  },
-}));
+vi.mock('./style_settings', () => {
+      const mocked = {
+      StyleSettings: () => {
+        return <div>mockStyleSettings</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./filter_editor', () => ({
-  JoinEditor: () => {
-    return <div>mockFilterEditor</div>;
-  },
-}));
+vi.mock('./join_editor', () => {
+      const mocked = {
+      JoinEditor: () => {
+        return <div>mockJoinEditor</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./flyout_footer', () => ({
-  FlyoutFooter: () => {
-    return <div>mockFlyoutFooter</div>;
-  },
-}));
+vi.mock('./filter_editor', () => {
+      const mocked = {
+      JoinEditor: () => {
+        return <div>mockFilterEditor</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./layer_settings', () => ({
-  LayerSettings: () => {
-    return <div>mockLayerSettings</div>;
-  },
-}));
+vi.mock('./flyout_footer', () => {
+      const mocked = {
+      FlyoutFooter: () => {
+        return <div>mockFlyoutFooter</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../kibana_services', () => {
+vi.mock('./layer_settings', () => {
+      const mocked = {
+      LayerSettings: () => {
+        return <div>mockLayerSettings</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../kibana_services', () => {
   return {
     getData() {
       return {};

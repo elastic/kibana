@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
 import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
@@ -15,14 +18,17 @@ import {
 } from '.';
 import * as i18n from './translations';
 
-jest.mock('@elastic/eui', () => ({
-  useEuiTheme: jest.fn(),
-}));
+vi.mock('@elastic/eui', () => {
+      const mocked = {
+      useEuiTheme: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('translation_results index', () => {
   describe('useResultVisColors', () => {
     it('returns default colors for Borealis theme', () => {
-      (useEuiTheme as jest.Mock).mockReturnValue({
+      (useEuiTheme as Mock).mockReturnValue({
         euiTheme: {
           themeName: 'EUI_THEME_BOREALIS',
         },

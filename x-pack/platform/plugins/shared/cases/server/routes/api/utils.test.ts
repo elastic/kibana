@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { isBoom, boomify } from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { HTTPError } from '../../common/error';
@@ -123,7 +125,7 @@ describe('Utils', () => {
     const logger = loggingSystemMock.createLogger();
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('does NOT log when the request is from the kibana client', () => {

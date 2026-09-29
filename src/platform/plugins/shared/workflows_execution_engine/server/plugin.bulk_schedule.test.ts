@@ -7,49 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
-jest.mock('./repositories/data_access_layer', () => {
-  const actual = jest.requireActual('./repositories/data_access_layer');
-  const { createDataClientJestMock } = jest.requireActual('./test_utils/data_client_jest_mock');
+vi.mock('./repositories/data_access_layer', async () => {
+  const actual = (await vi.importActual('./repositories/data_access_layer'));
+  const { createDataClientJestMock } = (await vi.importActual('./test_utils/data_client_jest_mock'));
   return {
     ...actual,
-    createDataClientBundle: jest.fn(() => createDataClientJestMock()),
+    createDataClientBundle: vi.fn(() => createDataClientJestMock()),
   };
 });
-jest.mock('./lib/check_license', () => ({
-  checkLicense: jest.fn().mockResolvedValue(undefined),
-}));
-jest.mock('./lib/get_user', () => ({
-  getAuthenticatedUser: jest.fn().mockResolvedValue('test-user'),
-}));
+vi.mock('./lib/check_license', () => {
+      const mocked = {
+      checkLicense: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./lib/get_user', () => {
+      const mocked = {
+      getAuthenticatedUser: vi.fn().mockResolvedValue('test-user'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockBulkCreateWorkflowExecutions = jest.fn();
-const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
-const mockDiscardUnstartedExecution = jest.fn().mockResolvedValue(undefined);
-const mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
-jest.mock('./repositories/workflow_execution_repository', () => ({
-  WorkflowExecutionRepository: jest.fn().mockImplementation(() => ({
-    bulkCreateWorkflowExecutions: mockBulkCreateWorkflowExecutions,
-    createWorkflowExecution: mockCreateWorkflowExecution,
-    getWorkflowExecutionById: mockGetWorkflowExecutionById,
-    discardUnstartedExecution: mockDiscardUnstartedExecution,
-  })),
-}));
+const mockBulkCreateWorkflowExecutions = vi.fn();
+const mockCreateWorkflowExecution = vi.fn().mockResolvedValue(undefined);
+const mockDiscardUnstartedExecution = vi.fn().mockResolvedValue(undefined);
+const mockGetWorkflowExecutionById = vi.fn().mockResolvedValue(null);
+vi.mock('./repositories/workflow_execution_repository', () => {
+      const mocked = {
+      WorkflowExecutionRepository: vi.fn().mockImplementation(() => ({
+        bulkCreateWorkflowExecutions: mockBulkCreateWorkflowExecutions,
+        createWorkflowExecution: mockCreateWorkflowExecution,
+        getWorkflowExecutionById: mockGetWorkflowExecutionById,
+        discardUnstartedExecution: mockDiscardUnstartedExecution,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetWorkflowExecutionStates = jest.fn();
-const mockIsWorkflowEnabledRealtime = jest.fn().mockResolvedValue(true);
-const mockGetWorkflow = jest.fn();
-const mockIsWorkflowEnabled = jest.fn().mockResolvedValue(true);
-jest.mock('@kbn/workflows', () => {
-  const actual = jest.requireActual('@kbn/workflows');
+const mockGetWorkflowExecutionStates = vi.fn();
+const mockIsWorkflowEnabledRealtime = vi.fn().mockResolvedValue(true);
+const mockGetWorkflow = vi.fn();
+const mockIsWorkflowEnabled = vi.fn().mockResolvedValue(true);
+vi.mock('@kbn/workflows', async () => {
+  const actual = (await vi.importActual('@kbn/workflows'));
   return {
     ...actual,
-    WorkflowRepository: jest.fn().mockImplementation(() => ({
+    WorkflowRepository: vi.fn().mockImplementation(() => ({
       getWorkflowExecutionStates: mockGetWorkflowExecutionStates,
       isWorkflowEnabled: mockIsWorkflowEnabled,
       isWorkflowEnabledRealtime: mockIsWorkflowEnabledRealtime,
@@ -58,14 +70,17 @@ jest.mock('@kbn/workflows', () => {
   };
 });
 
-const mockConcurrencyCheckConcurrency = jest.fn();
-const mockEvaluateConcurrencyKey = jest.fn();
-jest.mock('./concurrency/concurrency_manager', () => ({
-  ConcurrencyManager: jest.fn().mockImplementation(() => ({
-    checkConcurrency: mockConcurrencyCheckConcurrency,
-    evaluateConcurrencyKey: mockEvaluateConcurrencyKey,
-  })),
-}));
+const mockConcurrencyCheckConcurrency = vi.fn();
+const mockEvaluateConcurrencyKey = vi.fn();
+vi.mock('./concurrency/concurrency_manager', () => {
+      const mocked = {
+      ConcurrencyManager: vi.fn().mockImplementation(() => ({
+        checkConcurrency: mockConcurrencyCheckConcurrency,
+        evaluateConcurrencyKey: mockEvaluateConcurrencyKey,
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { checkLicense } from './lib/check_license';
 import {
@@ -111,7 +126,7 @@ describe('bulkScheduleWorkflow', () => {
   const request = {} as KibanaRequest;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockConcurrencyCheckConcurrency.mockResolvedValue(true);
     mockEvaluateConcurrencyKey.mockReturnValue(null);
     mockGetWorkflowExecutionStates.mockResolvedValue(new Map());
@@ -128,7 +143,7 @@ describe('bulkScheduleWorkflow', () => {
     plugin.setup(coreSetup as any, {
       taskManager: taskManagerMock.createSetup(),
       cloud: {} as any,
-      workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
+      workflowsExtensions: { registerConnectorAdapter: vi.fn() } as any,
     });
 
     coreStart = coreMock.createStart();
@@ -148,8 +163,8 @@ describe('bulkScheduleWorkflow', () => {
     const workflow = createWorkflow('bound');
     if (!workflow.definition) throw new Error('Missing definition');
     workflow.definition.settings = { run_as: 'account' };
-    jest.spyOn(coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
-    jest.spyOn(coreStart.security.serviceAccounts, 'getWorkloadBinding').mockResolvedValue({
+    vi.spyOn(coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
+    vi.spyOn(coreStart.security.serviceAccounts, 'getWorkloadBinding').mockResolvedValue({
       serviceAccountId: 'account',
     } as never);
     mockGetWorkflow.mockResolvedValue(workflow);
@@ -470,7 +485,7 @@ describe('bulkScheduleWorkflow', () => {
     );
     // Spy on the plugin's internal concurrency helper to simulate a drop on the
     // second item without going through the full ConcurrencyManager machinery.
-    const checkConcurrencyIfNeeded = jest
+    const checkConcurrencyIfNeeded = vi
       .spyOn(
         plugin as unknown as { checkConcurrencyIfNeeded: (e: unknown) => Promise<boolean> },
         'checkConcurrencyIfNeeded'
@@ -730,7 +745,7 @@ describe('bulkScheduleWorkflow', () => {
   });
 
   it('fails a single execution without scheduling when no identity is attached', async () => {
-    (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(undefined);
+    (getAuthenticatedUser as Mock).mockResolvedValueOnce(undefined);
 
     const result = await pluginStart.executeWorkflow(
       createWorkflow('wf-no-identity'),
@@ -755,7 +770,7 @@ describe('bulkScheduleWorkflow', () => {
   });
 
   it('persists bulk executions as failed and does not schedule when no identity is attached', async () => {
-    (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(undefined);
+    (getAuthenticatedUser as Mock).mockResolvedValueOnce(undefined);
     mockGetWorkflowExecutionStates.mockResolvedValue(
       new Map([['default:wf-a', { enabled: true }]])
     );

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { ColorStop } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
@@ -66,12 +68,12 @@ const createData = (
 
 const mockState = new Map();
 const uiState = {
-  get: jest
+  get: vi
     .fn()
     .mockImplementation((key, fallback) => (mockState.has(key) ? mockState.get(key) : fallback)),
-  set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
-  emit: jest.fn(),
-  setSilent: jest.fn(),
+  set: vi.fn().mockImplementation((key, value) => mockState.set(key, value)),
+  emit: vi.fn(),
+  setSilent: vi.fn(),
 } as any;
 
 describe('GaugeComponent', function () {
@@ -86,13 +88,13 @@ describe('GaugeComponent', function () {
       formatFactory: formatService.deserialize,
       paletteService: await paletteThemeService.getPalettes(),
       uiState,
-      renderComplete: jest.fn(),
-      setChartSize: jest.fn(),
+      renderComplete: vi.fn(),
+      setChartSize: vi.fn(),
     };
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the chart', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, render, fireEvent } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
@@ -18,10 +20,10 @@ import { UsersTable } from '.';
 import { mockUsersData } from './mock';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
-jest.mock('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana');
 
 describe('Users Table Component', () => {
-  const loadPage = jest.fn();
+  const loadPage = vi.fn();
 
   let store = createMockStore();
 
@@ -37,7 +39,7 @@ describe('Users Table Component', () => {
     isInspect: false,
     loading: false,
     loadPage,
-    setQuerySkip: jest.fn(),
+    setQuerySkip: vi.fn(),
     showMorePagesIndicator: getOr(false, 'showMorePagesIndicator', mockUsersData.pageInfo),
     totalCount: 1,
     type: networkModel.NetworkType.details,

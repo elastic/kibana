@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import { API_VERSIONS } from '../../../common/constants';
@@ -22,11 +24,11 @@ describe('privilegesCheckRoute', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns privilege check result when RBAC is enabled', async () => {
-    const checkPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: false });
+    const checkPrivileges = vi.fn().mockResolvedValue({ hasAllRequested: false });
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
 
@@ -34,9 +36,9 @@ describe('privilegesCheckRoute', () => {
       security: {
         authz: {
           mode: {
-            useRbacForRequest: jest.fn().mockReturnValue(true),
+            useRbacForRequest: vi.fn().mockReturnValue(true),
           },
-          checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
+          checkPrivilegesDynamicallyWithRequest: vi.fn().mockReturnValue(checkPrivileges),
         },
       },
     } as unknown as OsqueryAppContext;
@@ -66,9 +68,9 @@ describe('privilegesCheckRoute', () => {
       security: {
         authz: {
           mode: {
-            useRbacForRequest: jest.fn().mockReturnValue(false),
+            useRbacForRequest: vi.fn().mockReturnValue(false),
           },
-          checkPrivilegesDynamicallyWithRequest: jest.fn(),
+          checkPrivilegesDynamicallyWithRequest: vi.fn(),
         },
       },
     } as unknown as OsqueryAppContext;

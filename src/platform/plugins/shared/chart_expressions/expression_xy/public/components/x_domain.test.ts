@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { getAdjustedInterval } from '@kbn/charts-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import type { CommonXYDataLayerConfig } from '../../common';
@@ -14,12 +17,15 @@ import { getXDomain } from './x_domain';
 
 const ADJUSTED_INTERVAL = 1618; // arbitrary value returned by the getAdjustedInterval mock
 
-jest.mock('@kbn/charts-plugin/public', () => ({
-  Endzones: () => null,
-  getAdjustedInterval: jest.fn(() => ADJUSTED_INTERVAL),
-}));
+vi.mock('@kbn/charts-plugin/public', () => {
+      const mocked = {
+      Endzones: () => null,
+      getAdjustedInterval: vi.fn(() => ADJUSTED_INTERVAL),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const getAdjustedIntervalMock = getAdjustedInterval as jest.MockedFunction<
+const getAdjustedIntervalMock = getAdjustedInterval as MockedFunction<
   typeof getAdjustedInterval
 >;
 
@@ -36,11 +42,11 @@ interface DateHistogramMeta {
 // sourceParams.computedDomain and surfaces it as meta.domain.
 const createDatatableUtilities = (meta?: DateHistogramMeta): DatatableUtilitiesService =>
   ({
-    getDateHistogramMeta: jest.fn(
+    getDateHistogramMeta: vi.fn(
       (column?: { meta?: { sourceParams?: { computedDomain?: { min: number; max: number } } } }) =>
         meta && { ...meta, domain: column?.meta?.sourceParams?.computedDomain }
     ),
-    getColumnTimeRange: jest.fn().mockReturnValue(meta?.timeRange),
+    getColumnTimeRange: vi.fn().mockReturnValue(meta?.timeRange),
   } as unknown as DatatableUtilitiesService);
 
 const createLayer = (

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { EndpointInfo } from './endpoint_info';
 
 // Mock document.execCommand for EUI's copy functionality
-const mockExecCommand = jest.fn().mockReturnValue(true);
+const mockExecCommand = vi.fn().mockReturnValue(true);
 Object.defineProperty(document, 'execCommand', {
   value: mockExecCommand,
   writable: true,
@@ -27,12 +29,12 @@ const renderEndpointInfo = (props: { inferenceId: string; endpointInfo: any }) =
 
 describe('EndpointInfo component tests', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     mockExecCommand.mockClear();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('renders the component with inference id', () => {
@@ -345,7 +347,7 @@ describe('EndpointInfo component tests', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       await waitFor(() => {

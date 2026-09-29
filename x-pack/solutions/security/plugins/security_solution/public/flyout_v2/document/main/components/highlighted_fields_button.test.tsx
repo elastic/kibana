@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
@@ -22,14 +25,14 @@ import { useRuleIndexPattern } from '../../../../detection_engine/rule_creation_
 import { useHighlightedFieldsPrivilege } from '../hooks/use_highlighted_fields_privilege';
 import { useRuleDetails } from '../../../rule/main/hooks/use_rule_details';
 
-jest.mock(
+vi.mock(
   '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message'
 );
-jest.mock('../../../../detection_engine/rule_creation_ui/pages/form');
-jest.mock('../hooks/use_highlighted_fields_privilege');
-jest.mock('../../../rule/main/hooks/use_rule_details');
+vi.mock('../../../../detection_engine/rule_creation_ui/pages/form');
+vi.mock('../hooks/use_highlighted_fields_privilege');
+vi.mock('../../../rule/main/hooks/use_rule_details');
 
-const mockSetIsEditLoading = jest.fn();
+const mockSetIsEditLoading = vi.fn();
 const mockCustomHighlightedFields = ['field1', 'field2'];
 const defaultProps = {
   rule: { id: '123', index: ['index1', 'index2'] } as RuleResponse,
@@ -50,16 +53,16 @@ const renderEditHighlighedFieldsButton = (props = defaultProps) =>
 
 describe('<EditHighlighedFieldsButton />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useHighlightedFieldsPrivilege as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useHighlightedFieldsPrivilege as Mock).mockReturnValue({
       isDisabled: false,
       tooltipContent: 'tooltip content',
     });
-    (useRuleIndexPattern as jest.Mock).mockReturnValue({
+    (useRuleIndexPattern as Mock).mockReturnValue({
       indexPattern: { fields: [{ name: 'field1' }, { name: 'field2' }] },
       isIndexPatternLoading: false,
     });
-    (useRuleDetails as jest.Mock).mockReturnValue({
+    (useRuleDetails as Mock).mockReturnValue({
       rule: { id: '123' } as RuleResponse,
       isExistingRule: true,
       loading: false,
@@ -73,7 +76,7 @@ describe('<EditHighlighedFieldsButton />', () => {
   });
 
   it('should render disabled button when user does not have privilege to edit a prebuilt rule', () => {
-    (useHighlightedFieldsPrivilege as jest.Mock).mockReturnValue({
+    (useHighlightedFieldsPrivilege as Mock).mockReturnValue({
       isDisabled: true,
       tooltipContent: 'tooltip content',
     });
@@ -91,7 +94,7 @@ describe('<EditHighlighedFieldsButton />', () => {
   });
 
   it('should render loading spinner when rule is loading', () => {
-    (useRuleDetails as jest.Mock).mockReturnValue({
+    (useRuleDetails as Mock).mockReturnValue({
       rule: null,
       isExistingRule: true,
       loading: true,
@@ -101,7 +104,7 @@ describe('<EditHighlighedFieldsButton />', () => {
   });
 
   it('should not render button when rule is not found', () => {
-    (useRuleDetails as jest.Mock).mockReturnValue({
+    (useRuleDetails as Mock).mockReturnValue({
       rule: null,
       isExistingRule: false,
       loading: false,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,23 +16,26 @@ import { useExecuteBulkAction } from '../../logic/bulk_actions/use_execute_bulk_
 import { DeprecatedRulesModal } from './deprecated_rules_modal';
 import type { DeprecatedRuleForReview } from '../../../../../common/api/detection_engine/prebuilt_rules';
 
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../logic/bulk_actions/use_execute_bulk_action');
+vi.mock('../../../../common/components/user_privileges');
+vi.mock('../../logic/bulk_actions/use_execute_bulk_action');
 
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
-const mockUseExecuteBulkAction = useExecuteBulkAction as jest.Mock;
+const mockUseUserPrivileges = useUserPrivileges as Mock;
+const mockUseExecuteBulkAction = useExecuteBulkAction as Mock;
 
 // Simplified RuleLink component for testing.
-jest.mock('../../../rule_management_ui/components/rules_table/use_columns', () => ({
-  RuleLink: ({ name, id }: { name: string; id: string }) => (
-    <a href={`/rules/id/${id}`} data-test-subj="ruleName">
-      {name}
-    </a>
-  ),
-}));
+vi.mock('../../../rule_management_ui/components/rules_table/use_columns', () => {
+      const mocked = {
+      RuleLink: ({ name, id }: { name: string; id: string }) => (
+        <a href={`/rules/id/${id}`} data-test-subj="ruleName">
+          {name}
+        </a>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockExecuteBulkAction = jest.fn();
-const mockOnClose = jest.fn();
+const mockExecuteBulkAction = vi.fn();
+const mockOnClose = vi.fn();
 
 const MOCK_RULES: DeprecatedRuleForReview[] = [
   { id: 'rule-so-id-1', rule_id: 'rule-rule-id-1', name: 'Deprecated Rule A' },
@@ -38,7 +44,7 @@ const MOCK_RULES: DeprecatedRuleForReview[] = [
 
 describe('DeprecatedRulesModal', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseUserPrivileges.mockReturnValue({
       rulesPrivileges: {

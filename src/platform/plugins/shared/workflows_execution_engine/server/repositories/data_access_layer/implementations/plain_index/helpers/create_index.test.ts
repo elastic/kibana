@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { createIndexWithMappings, createOrUpdateIndex } from './create_index';
 
 const createEsClientMock = () => ({
   indices: {
-    exists: jest.fn(),
-    create: jest.fn(),
-    putMapping: jest.fn(),
-    putSettings: jest.fn(),
+    exists: vi.fn(),
+    create: vi.fn(),
+    putMapping: vi.fn(),
+    putSettings: vi.fn(),
   },
 });
 
 const createLoggerMock = () => ({
-  debug: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
+  warn: vi.fn(),
 });
 
 describe('createIndexWithMappings', () => {

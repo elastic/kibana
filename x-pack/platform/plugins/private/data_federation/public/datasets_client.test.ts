@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { HttpStart } from '@kbn/core/public';
 
 import type { DataSetWithName } from '../common';
@@ -12,9 +15,9 @@ import { DATA_SETS_LIST_ROUTE_PATH, getDataSetByIdApiPath } from '../common';
 import { DatasetsClient } from './datasets_client';
 
 const createHttpMock = (): Pick<HttpStart, 'get' | 'put' | 'delete'> => ({
-  get: jest.fn(),
-  put: jest.fn(),
-  delete: jest.fn(),
+  get: vi.fn(),
+  put: vi.fn(),
+  delete: vi.fn(),
 });
 
 describe('DatasetsClient', () => {
@@ -26,7 +29,7 @@ describe('DatasetsClient', () => {
       const sets: DataSetWithName[] = [
         { name: 'a', data_source: 'ds', resource: 'r', description: '' },
       ];
-      (http.get as jest.Mock).mockResolvedValue({ data_sets: sets });
+      (http.get as Mock).mockResolvedValue({ data_sets: sets });
 
       await expect(client.get()).resolves.toEqual(sets);
       expect(http.get).toHaveBeenCalledWith(DATA_SETS_LIST_ROUTE_PATH);
@@ -79,7 +82,7 @@ describe('DatasetsClient', () => {
         },
       };
 
-      (http.put as jest.Mock).mockResolvedValue(undefined);
+      (http.put as Mock).mockResolvedValue(undefined);
 
       await expect(client.add(data)).resolves.toBeUndefined();
 
@@ -108,7 +111,7 @@ describe('DatasetsClient', () => {
         description: '',
       };
 
-      (http.put as jest.Mock).mockResolvedValue(undefined);
+      (http.put as Mock).mockResolvedValue(undefined);
 
       await expect(client.add(data)).resolves.toBeUndefined();
       expect(http.put).toHaveBeenCalledWith(getDataSetByIdApiPath('set2'), {
@@ -126,7 +129,7 @@ describe('DatasetsClient', () => {
       const http = createHttpMock();
       const client = new DatasetsClient(http as unknown as HttpStart);
 
-      (http.delete as jest.Mock).mockResolvedValue(undefined);
+      (http.delete as Mock).mockResolvedValue(undefined);
 
       await expect(client.delete('a')).resolves.toBeUndefined();
       expect(http.delete).toHaveBeenCalledWith(getDataSetByIdApiPath('a'));
@@ -136,7 +139,7 @@ describe('DatasetsClient', () => {
       const http = createHttpMock();
       const client = new DatasetsClient(http as unknown as HttpStart);
 
-      (http.delete as jest.Mock).mockResolvedValue(undefined);
+      (http.delete as Mock).mockResolvedValue(undefined);
 
       await expect(client.delete(['a', 'b'])).resolves.toBeUndefined();
       expect(http.delete).toHaveBeenNthCalledWith(1, getDataSetByIdApiPath('a'));

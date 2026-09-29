@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { firstValueFrom, isObservable, of, toArray } from 'rxjs';
 import type { ChatCompleteResponse, ChatCompletionEvent } from '@kbn/inference-common';
 import { ChatCompletionEventType } from '@kbn/inference-common';
@@ -12,10 +15,10 @@ import { createOutputApi } from './create_output_api';
 import { createToolValidationError } from '../chat_complete/errors';
 
 describe('createOutputApi', () => {
-  let chatComplete: jest.Mock;
+  let chatComplete: Mock;
 
   beforeEach(() => {
-    chatComplete = jest.fn();
+    chatComplete = vi.fn();
   });
 
   it('calls `chatComplete` with the right parameters', async () => {

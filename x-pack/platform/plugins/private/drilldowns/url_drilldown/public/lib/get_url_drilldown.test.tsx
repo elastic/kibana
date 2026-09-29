@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { ON_CLICK_ROW } from '@kbn/ui-actions-plugin/common/trigger_ids';
@@ -20,7 +22,7 @@ const createDrilldown = () =>
   getUrlDrilldown({
     externalUrl: mockExternalUrl,
     getGlobalScope: () => ({ kibanaUrl: 'http://localhost:5601/' }),
-    navigateToUrl: jest.fn(),
+    navigateToUrl: vi.fn(),
     getSyntaxHelpDocsLink: () => 'http://localhost:5601/docs',
     getVariablesHelpDocsLink: () => 'http://localhost:5601/docs',
     settings: {} as any,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { set } from '@kbn/safer-lodash-set';
 import { Readable } from 'stream';
@@ -145,7 +147,7 @@ describe('ContentStream', () => {
 
       it('should be an empty stream on empty response', async () => {
         client.get.mockResponseOnce(toReadable());
-        const onData = jest.fn();
+        const onData = vi.fn();
 
         stream.on('data', onData);
         await new Promise((resolve) => stream.once('end', resolve));

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -16,14 +19,20 @@ import { useDataFields } from '../../form/hooks/use_data_fields';
 import { ruleFormKeys } from '../../form/hooks/query_key_factory';
 import { useResolveTimeField } from './use_resolve_time_field';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLTimeField: jest.fn(async () => undefined),
-}));
+vi.mock('@kbn/esql-utils', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/esql-utils')),
+      getESQLTimeField: vi.fn(async () => undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../form/hooks/use_data_fields', () => ({
-  useDataFields: jest.fn(() => ({ data: {}, isLoading: false })),
-}));
+vi.mock('../../form/hooks/use_data_fields', () => {
+      const mocked = {
+      useDataFields: vi.fn(() => ({ data: {}, isLoading: false })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const FLIGHTS_QUERY =
   'FROM kibana_sample_data_flights | STATS COUNT(*) BY timestamp | WHERE Cancelled == "true"';
@@ -44,14 +53,14 @@ const defaultParams = {
 
 describe('useResolveTimeField', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useDataFields as jest.Mock).mockReturnValue({ data: {}, isLoading: false });
-    (getESQLTimeField as jest.Mock).mockResolvedValue(undefined);
+    vi.clearAllMocks();
+    (useDataFields as Mock).mockReturnValue({ data: {}, isLoading: false });
+    (getESQLTimeField as Mock).mockResolvedValue(undefined);
   });
 
   it('clears an invalid current field (does not substitute) but offers the real field for selection', async () => {
-    const onTimeFieldChange = jest.fn();
-    (useDataFields as jest.Mock).mockReturnValue({
+    const onTimeFieldChange = vi.fn();
+    (useDataFields as Mock).mockReturnValue({
       data: {
         timestamp: { name: 'timestamp', type: 'date', searchable: true, aggregatable: true },
       },
@@ -77,8 +86,8 @@ describe('useResolveTimeField', () => {
   });
 
   it('offers the ES|QL timefield API result as an option but clears the invalid current field', async () => {
-    const onTimeFieldChange = jest.fn();
-    (getESQLTimeField as jest.Mock).mockResolvedValue('timestamp');
+    const onTimeFieldChange = vi.fn();
+    (getESQLTimeField as Mock).mockResolvedValue('timestamp');
 
     const { result } = renderHook(
       () =>
@@ -101,8 +110,8 @@ describe('useResolveTimeField', () => {
   });
 
   it('does not call onTimeFieldChange when the current time field is valid', async () => {
-    const onTimeFieldChange = jest.fn();
-    (useDataFields as jest.Mock).mockReturnValue({
+    const onTimeFieldChange = vi.fn();
+    (useDataFields as Mock).mockReturnValue({
       data: {
         '@timestamp': { name: '@timestamp', type: 'date', searchable: true, aggregatable: true },
       },
@@ -125,8 +134,8 @@ describe('useResolveTimeField', () => {
   });
 
   it('preserves the saved timeField and reports isTimeFieldResolved true when field discovery errors', async () => {
-    const onTimeFieldChange = jest.fn();
-    (useDataFields as jest.Mock).mockReturnValue({
+    const onTimeFieldChange = vi.fn();
+    (useDataFields as Mock).mockReturnValue({
       data: {},
       isLoading: false,
       isError: true,
@@ -154,7 +163,7 @@ describe('useResolveTimeField', () => {
   });
 
   it('clears the current field (does not fabricate) when none can be resolved', async () => {
-    const onTimeFieldChange = jest.fn();
+    const onTimeFieldChange = vi.fn();
 
     const { result } = renderHook(
       () =>
@@ -202,8 +211,8 @@ describe('useResolveTimeField', () => {
   });
 
   it('does not auto-correct while fields are still loading', async () => {
-    const onTimeFieldChange = jest.fn();
-    (useDataFields as jest.Mock).mockReturnValue({
+    const onTimeFieldChange = vi.fn();
+    (useDataFields as Mock).mockReturnValue({
       data: {},
       isLoading: true,
     });
@@ -224,7 +233,7 @@ describe('useResolveTimeField', () => {
   });
 
   it('does not reset timeField when no query is committed yet', async () => {
-    const onTimeFieldChange = jest.fn();
+    const onTimeFieldChange = vi.fn();
 
     renderHook(
       () =>
@@ -243,8 +252,8 @@ describe('useResolveTimeField', () => {
   });
 
   it('does not reset a valid saved timeField to @timestamp while fields are loading', async () => {
-    const onTimeFieldChange = jest.fn();
-    (useDataFields as jest.Mock).mockReturnValue({ data: {}, isLoading: true });
+    const onTimeFieldChange = vi.fn();
+    (useDataFields as Mock).mockReturnValue({ data: {}, isLoading: true });
 
     renderHook(
       () =>
@@ -262,10 +271,10 @@ describe('useResolveTimeField', () => {
   });
 
   it('does not reset a valid saved timeField to @timestamp while the API fallback is loading', async () => {
-    const onTimeFieldChange = jest.fn();
+    const onTimeFieldChange = vi.fn();
     // No date fields found (triggers API fallback), API still in flight
-    (useDataFields as jest.Mock).mockReturnValue({ data: {}, isLoading: false });
-    (getESQLTimeField as jest.Mock).mockImplementation(
+    (useDataFields as Mock).mockReturnValue({ data: {}, isLoading: false });
+    (getESQLTimeField as Mock).mockImplementation(
       () => new Promise(() => {}) // never resolves
     );
 
@@ -287,8 +296,8 @@ describe('useResolveTimeField', () => {
   });
 
   it('skips resolution and auto-correction when enabled is false', async () => {
-    const onTimeFieldChange = jest.fn();
-    (useDataFields as jest.Mock).mockReturnValue({
+    const onTimeFieldChange = vi.fn();
+    (useDataFields as Mock).mockReturnValue({
       data: {
         timestamp: { name: 'timestamp', type: 'date', searchable: true, aggregatable: true },
       },
@@ -319,7 +328,7 @@ describe('useResolveTimeField', () => {
   });
 
   it('reports isTimeFieldResolved once correction completes', async () => {
-    (useDataFields as jest.Mock).mockReturnValue({
+    (useDataFields as Mock).mockReturnValue({
       data: {
         timestamp: { name: 'timestamp', type: 'date', searchable: true, aggregatable: true },
       },
@@ -342,7 +351,7 @@ describe('useResolveTimeField', () => {
   });
 
   it('reports isTimeFieldResolved true when timeField is valid but not the first date field alphabetically', async () => {
-    (useDataFields as jest.Mock).mockReturnValue({
+    (useDataFields as Mock).mockReturnValue({
       data: {
         'event.end': { name: 'event.end', type: 'date', searchable: true, aggregatable: true },
         'event.start': { name: 'event.start', type: 'date', searchable: true, aggregatable: true },
@@ -378,7 +387,7 @@ describe('useResolveTimeField', () => {
   });
 
   it('forwards search to useDataFields when provided', () => {
-    const mockSearch = jest.fn();
+    const mockSearch = vi.fn();
 
     renderHook(
       () =>
@@ -401,8 +410,8 @@ describe('useResolveTimeField', () => {
   });
 
   it('recognizes date_nanos fields as temporal and offers them for selection', async () => {
-    const onTimeFieldChange = jest.fn();
-    (useDataFields as jest.Mock).mockReturnValue({
+    const onTimeFieldChange = vi.fn();
+    (useDataFields as Mock).mockReturnValue({
       data: {
         event_time: {
           name: 'event_time',
@@ -434,8 +443,8 @@ describe('useResolveTimeField', () => {
   });
 
   it('recognizes ES|QL datetime columns as temporal and offers them for selection', async () => {
-    const onTimeFieldChange = jest.fn();
-    (useDataFields as jest.Mock).mockReturnValue({
+    const onTimeFieldChange = vi.fn();
+    (useDataFields as Mock).mockReturnValue({
       data: {
         event_time: {
           name: 'event_time',

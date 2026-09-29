@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
@@ -20,87 +22,108 @@ import {
   ELASTIC_DEFEND_POLICY_MANAGEMENT_SKILL_ID,
   createElasticDefendPolicyManagementSkill,
 } from './skill';
-jest.mock(
+vi.mock(
   './tools/get_policy_field_reference',
-  () => ({
-    GET_POLICY_FIELD_REFERENCE_TOOL_ID: 'security.policy_management.get_policy_field_reference',
-    createGetPolicyFieldReferenceTool: jest.fn((deps: unknown) => ({
-      id: 'security.policy_management.get_policy_field_reference',
-      ...((deps ?? {}) as object),
-    })),
-  }),
+  () => {
+      const mocked = {
+        GET_POLICY_FIELD_REFERENCE_TOOL_ID: 'security.policy_management.get_policy_field_reference',
+        createGetPolicyFieldReferenceTool: vi.fn((deps: unknown) => ({
+          id: 'security.policy_management.get_policy_field_reference',
+          ...((deps ?? {}) as object),
+        })),
+      };
+      return { ...mocked, default: mocked };
+    },
   { virtual: true }
 );
 
-jest.mock(
+vi.mock(
   './tools/list_policies',
-  () => ({
-    LIST_POLICIES_TOOL_ID: 'security.policy_management.list_policies',
-    createListPoliciesTool: jest.fn((deps: unknown) => ({
-      id: 'security.policy_management.list_policies',
-      ...((deps ?? {}) as object),
-    })),
-  }),
+  () => {
+      const mocked = {
+        LIST_POLICIES_TOOL_ID: 'security.policy_management.list_policies',
+        createListPoliciesTool: vi.fn((deps: unknown) => ({
+          id: 'security.policy_management.list_policies',
+          ...((deps ?? {}) as object),
+        })),
+      };
+      return { ...mocked, default: mocked };
+    },
   { virtual: true }
 );
 
-jest.mock(
+vi.mock(
   './tools/get_policy',
-  () => ({
-    GET_POLICY_TOOL_ID: 'security.policy_management.get_policy',
-    createGetPolicyTool: jest.fn((deps: unknown) => ({
-      id: 'security.policy_management.get_policy',
-      ...((deps ?? {}) as object),
-    })),
-  }),
+  () => {
+      const mocked = {
+        GET_POLICY_TOOL_ID: 'security.policy_management.get_policy',
+        createGetPolicyTool: vi.fn((deps: unknown) => ({
+          id: 'security.policy_management.get_policy',
+          ...((deps ?? {}) as object),
+        })),
+      };
+      return { ...mocked, default: mocked };
+    },
   { virtual: true }
 );
 
-jest.mock(
+vi.mock(
   './tools/compare_policies',
-  () => ({
-    COMPARE_POLICIES_TOOL_ID: 'security.policy_management.compare_policies',
-    createComparePoliciesTool: jest.fn((deps: unknown) => ({
-      id: 'security.policy_management.compare_policies',
-      ...((deps ?? {}) as object),
-    })),
-  }),
+  () => {
+      const mocked = {
+        COMPARE_POLICIES_TOOL_ID: 'security.policy_management.compare_policies',
+        createComparePoliciesTool: vi.fn((deps: unknown) => ({
+          id: 'security.policy_management.compare_policies',
+          ...((deps ?? {}) as object),
+        })),
+      };
+      return { ...mocked, default: mocked };
+    },
   { virtual: true }
 );
 
-jest.mock(
+vi.mock(
   './tools/get_policy_rollout_status',
-  () => ({
-    GET_POLICY_ROLLOUT_STATUS_TOOL_ID: 'security.policy_management.get_policy_rollout_status',
-    createGetPolicyRolloutStatusTool: jest.fn((deps: unknown) => ({
-      id: 'security.policy_management.get_policy_rollout_status',
-      ...((deps ?? {}) as object),
-    })),
-  }),
+  () => {
+      const mocked = {
+        GET_POLICY_ROLLOUT_STATUS_TOOL_ID: 'security.policy_management.get_policy_rollout_status',
+        createGetPolicyRolloutStatusTool: vi.fn((deps: unknown) => ({
+          id: 'security.policy_management.get_policy_rollout_status',
+          ...((deps ?? {}) as object),
+        })),
+      };
+      return { ...mocked, default: mocked };
+    },
   { virtual: true }
 );
 
-jest.mock(
+vi.mock(
   './tools/apply_policy_change',
-  () => ({
-    APPLY_POLICY_CHANGE_TOOL_ID: 'security.policy_management.apply_policy_change',
-    createApplyPolicyChangeTool: jest.fn((deps: unknown) => ({
-      id: 'security.policy_management.apply_policy_change',
-      ...((deps ?? {}) as object),
-    })),
-  }),
+  () => {
+      const mocked = {
+        APPLY_POLICY_CHANGE_TOOL_ID: 'security.policy_management.apply_policy_change',
+        createApplyPolicyChangeTool: vi.fn((deps: unknown) => ({
+          id: 'security.policy_management.apply_policy_change',
+          ...((deps ?? {}) as object),
+        })),
+      };
+      return { ...mocked, default: mocked };
+    },
   { virtual: true }
 );
 
-jest.mock(
+vi.mock(
   './tools/assess_policy_change',
-  () => ({
-    ASSESS_POLICY_CHANGE_TOOL_ID: 'security.policy_management.assess_policy_change',
-    createAssessPolicyChangeTool: jest.fn((deps: unknown) => ({
-      id: 'security.policy_management.assess_policy_change',
-      ...((deps ?? {}) as object),
-    })),
-  }),
+  () => {
+      const mocked = {
+        ASSESS_POLICY_CHANGE_TOOL_ID: 'security.policy_management.assess_policy_change',
+        createAssessPolicyChangeTool: vi.fn((deps: unknown) => ({
+          id: 'security.policy_management.assess_policy_change',
+          ...((deps ?? {}) as object),
+        })),
+      };
+      return { ...mocked, default: mocked };
+    },
   { virtual: true }
 );
 
@@ -116,7 +139,7 @@ const INLINE_TOOL_IDS = [
 
 const createSkill = () => {
   const endpointAppContextService = createMockEndpointAppContext().service;
-  const getStartServices = jest.fn();
+  const getStartServices = vi.fn();
   return {
     endpointAppContextService,
     getStartServices,

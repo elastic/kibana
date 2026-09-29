@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, renderHook } from '@testing-library/react';
 import { useWorkpad } from './use_workpad';
 import { spacesService } from '../../../services/kibana_services';
 
-const mockDispatch = jest.fn();
-const mockSelector = jest.fn();
-const mockResolveWorkpad = jest.fn();
-const mockRedirectLegacyUrl = jest.fn();
+const mockDispatch = vi.fn();
+const mockSelector = vi.fn();
+const mockResolveWorkpad = vi.fn();
+const mockRedirectLegacyUrl = vi.fn();
 
 const workpad = {
   id: 'someworkpad',
@@ -27,31 +29,40 @@ const workpadResponse = {
 };
 
 // Mock the hooks, actions, and services used by the UseWorkpad hook
-jest.mock('react-redux-v7', () => ({
-  useDispatch: () => mockDispatch,
-  useSelector: () => mockSelector,
-}));
-
-jest.mock('../../../services/canvas_workpad_service', () => ({
-  getCanvasWorkpadService: () => {
-    return {
-      resolve: mockResolveWorkpad,
+vi.mock('react-redux-v7', () => {
+      const mocked = {
+      useDispatch: () => mockDispatch,
+      useSelector: () => mockSelector,
     };
-  },
-}));
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../services/canvas_workpad_service', () => {
+      const mocked = {
+      getCanvasWorkpadService: () => {
+        return {
+          resolve: mockResolveWorkpad,
+        };
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 spacesService!.ui.redirectLegacyUrl = mockRedirectLegacyUrl;
 
-jest.mock('../../../state/actions/workpad', () => ({
-  setWorkpad: (payload: any) => ({
-    type: 'setWorkpad',
-    payload,
-  }),
-}));
+vi.mock('../../../state/actions/workpad', () => {
+      const mocked = {
+      setWorkpad: (payload: any) => ({
+        type: 'setWorkpad',
+        payload,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useWorkpad', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('fires request to load workpad and dispatches results', async () => {

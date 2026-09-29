@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
 import type { NodeProps } from '../../types';
@@ -32,34 +35,34 @@ import {
 import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../common/constants';
 
 // Mock filter_store module
-jest.mock('../../filters/filter_store', () => {
-  const actual = jest.requireActual('../../filters/filter_store');
+vi.mock('../../filters/filter_store', async () => {
+  const actual = (await vi.importActual('../../filters/filter_store'));
   return {
     ...actual,
-    isFilterActiveForScope: jest.fn(() => false),
-    isEntityRelationshipExpandedForScope: jest.fn(() => false),
-    emitFilterToggle: jest.fn(),
-    emitIsOneOfFilterToggle: jest.fn(),
-    emitEntityRelationshipToggle: jest.fn(),
-    emitPinnedEuidToggle: jest.fn(),
+    isFilterActiveForScope: vi.fn(() => false),
+    isEntityRelationshipExpandedForScope: vi.fn(() => false),
+    emitFilterToggle: vi.fn(),
+    emitIsOneOfFilterToggle: vi.fn(),
+    emitEntityRelationshipToggle: vi.fn(),
+    emitPinnedEuidToggle: vi.fn(),
   };
 });
 
-const mockIsFilterActiveForScope = isFilterActiveForScope as jest.MockedFunction<
+const mockIsFilterActiveForScope = isFilterActiveForScope as MockedFunction<
   typeof isFilterActiveForScope
 >;
 const mockIsEntityRelationshipExpandedForScope =
-  isEntityRelationshipExpandedForScope as jest.MockedFunction<
+  isEntityRelationshipExpandedForScope as MockedFunction<
     typeof isEntityRelationshipExpandedForScope
   >;
-const mockEmitFilterToggle = emitFilterToggle as jest.MockedFunction<typeof emitFilterToggle>;
-const mockEmitIsOneOfFilterToggle = emitIsOneOfFilterToggle as jest.MockedFunction<
+const mockEmitFilterToggle = emitFilterToggle as MockedFunction<typeof emitFilterToggle>;
+const mockEmitIsOneOfFilterToggle = emitIsOneOfFilterToggle as MockedFunction<
   typeof emitIsOneOfFilterToggle
 >;
-const mockEmitEntityRelationshipToggle = emitEntityRelationshipToggle as jest.MockedFunction<
+const mockEmitEntityRelationshipToggle = emitEntityRelationshipToggle as MockedFunction<
   typeof emitEntityRelationshipToggle
 >;
-const mockEmitPinnedEuidToggle = emitPinnedEuidToggle as jest.MockedFunction<
+const mockEmitPinnedEuidToggle = emitPinnedEuidToggle as MockedFunction<
   typeof emitPinnedEuidToggle
 >;
 
@@ -70,18 +73,21 @@ let capturedItemsFn:
     ) => Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>)
   | null = null;
 
-jest.mock('./use_node_expand_popover', () => ({
-  useNodeExpandPopover: jest.fn(({ itemsFn }) => {
-    capturedItemsFn = itemsFn;
-    return {
-      id: 'test-popover',
-      onNodeExpandButtonClick: jest.fn(),
-      PopoverComponent: () => null,
-      actions: { openPopover: jest.fn(), closePopover: jest.fn() },
-      state: { isOpen: false, anchorElement: null },
+vi.mock('./use_node_expand_popover', () => {
+      const mocked = {
+      useNodeExpandPopover: vi.fn(({ itemsFn }) => {
+        capturedItemsFn = itemsFn;
+        return {
+          id: 'test-popover',
+          onNodeExpandButtonClick: vi.fn(),
+          PopoverComponent: () => null,
+          actions: { openPopover: vi.fn(), closePopover: vi.fn() },
+          state: { isOpen: false, anchorElement: null },
+        };
+      }),
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
 const createMockNode = (
   docMode: 'single-entity' | 'grouped-entities',
@@ -175,10 +181,10 @@ const createMockNode = (
 
 describe('useEntityNodeExpandPopover', () => {
   const scopeId = 'test-scope-id';
-  const mockOnOpenEventPreview = jest.fn();
+  const mockOnOpenEventPreview = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedItemsFn = null;
     mockEmitFilterToggle.mockClear();
     mockEmitIsOneOfFilterToggle.mockClear();

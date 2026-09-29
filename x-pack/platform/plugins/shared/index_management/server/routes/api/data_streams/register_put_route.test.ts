@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { addBasePath } from '..';
 import type { RequestMock } from '../../../test/helpers';
 import { RouterMock, routeDependencies } from '../../../test/helpers';
@@ -13,8 +16,8 @@ import { registerPutDataLifecycle, registerPutDataStreamFailureStore } from './r
 
 describe('registerPutDataStreamFailureStore', () => {
   let router: RouterMock;
-  let updateDataStreamOptions: jest.Mock;
-  let deleteDataStreamOptions: jest.Mock;
+  let updateDataStreamOptions: Mock;
+  let deleteDataStreamOptions: Mock;
 
   const setupRouter = (configOverrides = {}) => {
     router = new RouterMock();
@@ -37,7 +40,7 @@ describe('registerPutDataStreamFailureStore', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('should enable failure store with custom retention period', async () => {
@@ -352,8 +355,8 @@ describe('registerPutDataStreamFailureStore', () => {
 
 describe('registerPutDataLifecycle', () => {
   let router: RouterMock;
-  let putDataLifecycle: jest.Mock;
-  let getDataStream: jest.Mock;
+  let putDataLifecycle: Mock;
+  let getDataStream: Mock;
 
   const setupRouter = () => {
     router = new RouterMock();
@@ -372,7 +375,7 @@ describe('registerPutDataLifecycle', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('preserves downsampling when updating DSL lifecycle', async () => {

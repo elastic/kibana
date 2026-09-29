@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { StepExecutionsDataClient } from '@kbn/workflows-execution-engine/server';
 import { createMockStepDataClient } from '@kbn/workflows-execution-engine/server/mocks';
 import { searchStepExecutions } from './search_step_executions';
 
 describe('searchStepExecutions', () => {
-  let mockStepDataClient: jest.Mocked<StepExecutionsDataClient>;
+  let mockStepDataClient: Mocked<StepExecutionsDataClient>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
 
   const baseParams = {
@@ -25,7 +28,7 @@ describe('searchStepExecutions', () => {
   beforeEach(() => {
     mockStepDataClient = createMockStepDataClient();
     mockLogger = loggerMock.create();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should throw when neither workflowExecutionId nor workflowId is provided', async () => {

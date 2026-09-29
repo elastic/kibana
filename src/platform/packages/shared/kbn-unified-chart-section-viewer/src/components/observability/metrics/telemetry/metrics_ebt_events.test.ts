@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE } from './constants';
 import { registerMetricsEbtEvents } from './metrics_ebt_events';
@@ -14,7 +16,7 @@ import { registerMetricsEbtEvents } from './metrics_ebt_events';
 describe('registerMetricsEbtEvents', () => {
   const registerEvents = () => {
     const analytics = {
-      registerEventType: jest.fn(),
+      registerEventType: vi.fn(),
     } as unknown as AnalyticsServiceSetup;
 
     registerMetricsEbtEvents(analytics);

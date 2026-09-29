@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { LogsContent } from './logs';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
-jest.mock('../../legacy_shims', () => ({
-  Legacy: {
-    shims: {
-      getBasePath: () => '',
-      capabilities: { discover_v2: { show: true } },
-    },
-  },
-}));
+vi.mock('../../legacy_shims', () => {
+      const mocked = {
+      Legacy: {
+        shims: {
+          getBasePath: () => '',
+          capabilities: { discover_v2: { show: true } },
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const sharePlugin = {
   url: {

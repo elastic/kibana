@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { fetchWithPagination } from './fetch_with_pagination';
 
 describe('fetchWithPagination util', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('fetchWithPagination', () => {
     it('should fetch mock data with pagination', async () => {
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       mockFn.mockImplementation(() =>
         Promise.resolve({
           hits: { hits: ['result1', 'result2'], total: 2 },
@@ -34,7 +36,7 @@ describe('fetchWithPagination util', () => {
       });
     });
     it('should return empty result if size is 0', async () => {
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       mockFn.mockImplementation(() =>
         Promise.resolve({
           hits: { hits: [], total: 0 },
@@ -53,7 +55,7 @@ describe('fetchWithPagination util', () => {
       });
     });
     it('should handle total as an object correctly', async () => {
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       mockFn.mockImplementation(() =>
         Promise.resolve({
           hits: {
@@ -79,7 +81,7 @@ describe('fetchWithPagination util', () => {
     });
 
     it('should handle undefined total correctly', async () => {
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       mockFn.mockImplementation(() =>
         Promise.resolve({
           hits: {
@@ -102,7 +104,7 @@ describe('fetchWithPagination util', () => {
     });
 
     it('should handle has_more_hits_than_total correctly', async () => {
-      const mockFn = jest.fn();
+      const mockFn = vi.fn();
       mockFn.mockImplementation(() =>
         Promise.resolve({
           hits: { hits: ['result1', 'result2'], total: { relation: 'gte', value: 10000 } },

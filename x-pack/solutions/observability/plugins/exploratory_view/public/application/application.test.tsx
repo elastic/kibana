@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createMemoryHistory } from 'history';
 import { noop } from 'lodash';
 import type React from 'react';
@@ -20,7 +22,7 @@ describe('renderApp', () => {
 
   beforeAll(() => {
     // mocks console to avoid polluting the test output
-    global.console = { error: jest.fn() } as unknown as typeof console;
+    global.console = { error: vi.fn() } as unknown as typeof console;
   });
 
   afterAll(() => {
@@ -33,11 +35,11 @@ describe('renderApp', () => {
         query: {
           timefilter: {
             timefilter: {
-              setTime: jest.fn(),
-              getTime: jest.fn().mockReturnValue({}),
-              getTimeDefaults: jest.fn().mockReturnValue({}),
-              getRefreshInterval: jest.fn().mockReturnValue({}),
-              getRefreshIntervalDefaults: jest.fn().mockReturnValue({}),
+              setTime: vi.fn(),
+              getTime: vi.fn().mockReturnValue({}),
+              getTimeDefaults: vi.fn().mockReturnValue({}),
+              getRefreshInterval: vi.fn().mockReturnValue({}),
+              getRefreshIntervalDefaults: vi.fn().mockReturnValue({}),
             },
           },
         },
@@ -74,7 +76,7 @@ describe('renderApp', () => {
           components: {
             ApplicationUsageTrackingProvider: (props) => null,
           },
-          reportUiCounter: jest.fn(),
+          reportUiCounter: vi.fn(),
         },
       });
       unmount();

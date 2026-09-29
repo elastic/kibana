@@ -7,27 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
 
-jest.mock('timers/promises', () => ({
-  setTimeout: jest.fn(() => Promise.resolve()),
-}));
+vi.mock('timers/promises', () => {
+      const mocked = {
+      setTimeout: vi.fn(() => Promise.resolve()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('execa');
-const execa = jest.requireMock('execa');
+vi.mock('execa');
+const execa = (await vi.importMock('execa'));
 
 // Mock undici
-jest.mock('undici', () => {
-  const actualUndici = jest.requireActual('undici');
+vi.mock('undici', () => {
+  const actualUndici = require('undici');
   return {
     ...actualUndici,
-    fetch: jest.fn(),
-    Agent: jest.fn(),
+    fetch: vi.fn(),
+    Agent: vi.fn(),
   };
 });
 
-jest.mock('@kbn/dev-utils', () => {
+vi.mock('@kbn/dev-utils', () => {
   return {
     CA_CERT_PATH: '/some/path/ca.crt',
     KBN_CERT_PATH: '/some/path/kibana.crt',
@@ -37,17 +42,20 @@ jest.mock('@kbn/dev-utils', () => {
 
 // Import undici after mocking to get the mocked exports
 import * as undici from 'undici';
-const mockUndiciFetch = jest.mocked(undici.fetch);
-const mockUndiciAgent = jest.mocked(undici.Agent);
+const mockUndiciFetch = vi.mocked(undici.fetch);
+const mockUndiciAgent = vi.mocked(undici.Agent);
 
-jest.mock('../paths', () => ({
-  SERVERLESS_UIAM_ENTRYPOINT_PATH: '/some_path/run_java_with_custom_ca.sh',
-  SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH: '/some_path/uiam_cosmosdb.pfx',
-}));
+vi.mock('../paths', () => {
+      const mocked = {
+      SERVERLESS_UIAM_ENTRYPOINT_PATH: '/some_path/run_java_with_custom_ca.sh',
+      SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH: '/some_path/uiam_cosmosdb.pfx',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 beforeEach(() => {
-  jest.useFakeTimers().setSystemTime(new Date(Date.UTC(2000, 0, 1)));
-  jest.resetAllMocks();
+  vi.useFakeTimers().setSystemTime(new Date(Date.UTC(2000, 0, 1)));
+  vi.resetAllMocks();
 });
 
 describe(`#runUiamContainer()`, () => {
@@ -397,7 +405,7 @@ describe(`#runUiamContainer()`, () => {
 describe('#initializeUiamContainers', () => {
   const AGENT_MOCK = {
     name: "I'm the danger. I'm the one who knocks.",
-    dispatch: jest.fn(),
+    dispatch: vi.fn(),
   };
 
   beforeEach(() => {
@@ -408,7 +416,7 @@ describe('#initializeUiamContainers', () => {
     mockUndiciFetch.mockResolvedValue({ ok: true, status: 201 } as any);
 
     const promise = initializeUiamContainers(new ToolingLog());
-    await jest.runAllTimersAsync();
+    await vi.runAllTimersAsync();
     await promise;
 
     expect(mockUndiciAgent).toHaveBeenCalledTimes(1);

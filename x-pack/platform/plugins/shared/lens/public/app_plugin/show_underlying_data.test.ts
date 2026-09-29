@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { createMockDatasource, createMockVisualization } from '../mocks';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import type { Filter } from '@kbn/es-query';
@@ -117,7 +119,7 @@ describe('getLayerMetaInfo', () => {
     expect(
       getLayerMetaInfo(
         createMockDatasource('formBased', {
-          getFilters: jest.fn(() => ({
+          getFilters: vi.fn(() => ({
             enabled: { kuery: [], lucene: [] },
             disabled: { kuery: [], lucene: [] },
           })),
@@ -138,7 +140,7 @@ describe('getLayerMetaInfo', () => {
 
   it('should return no multiple layers error when non-data layers are used together with a single data layer', () => {
     const mockDatasource = createMockDatasource('formBased', {
-      getFilters: jest.fn(() => ({
+      getFilters: vi.fn(() => ({
         enabled: { kuery: [], lucene: [] },
         disabled: { kuery: [], lucene: [] },
       })),
@@ -166,7 +168,7 @@ describe('getLayerMetaInfo', () => {
 
   it('should return error in case of a timeshift declared in a column', () => {
     const mockDatasource = createMockDatasource('formBased', {
-      getOperationForColumnId: jest.fn(() => ({
+      getOperationForColumnId: vi.fn(() => ({
         dataType: 'number',
         isBucketed: false,
         scale: 'ratio',
@@ -194,8 +196,8 @@ describe('getLayerMetaInfo', () => {
   it('should return error in case of getFilters returning errors', () => {
     const mockDatasource = createMockDatasource('formBased', {
       datasourceId: 'formBased',
-      getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
-      getFilters: jest.fn(() => ({ error: 'filters error' })),
+      getTableSpec: vi.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
+      getFilters: vi.fn(() => ({ error: 'filters error' })),
     });
     expect(
       getLayerMetaInfo(
@@ -216,8 +218,8 @@ describe('getLayerMetaInfo', () => {
   it('should not be visible if discover is not available', () => {
     const mockDatasource = createMockDatasource('formBased', {
       datasourceId: 'indexpattern',
-      getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
-      getFilters: jest.fn(() => ({ error: 'filters error' })),
+      getTableSpec: vi.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
+      getFilters: vi.fn(() => ({ error: 'filters error' })),
     });
     // both capabilities should be enabled to enable discover
     expect(
@@ -259,9 +261,9 @@ describe('getLayerMetaInfo', () => {
   it('should basically work collecting fields and filters in the visualization', () => {
     const mockDatasource = createMockDatasource('formBased', {
       datasourceId: 'formBased',
-      getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
-      getSourceId: jest.fn(() => '1'),
-      getFilters: jest.fn(() => ({
+      getTableSpec: vi.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
+      getSourceId: vi.fn(() => '1'),
+      getFilters: vi.fn(() => ({
         enabled: {
           kuery: [[{ language: 'kuery', query: 'memory > 40000' }]],
           lucene: [],
@@ -305,9 +307,9 @@ describe('getLayerMetaInfo', () => {
   it('should order date fields first', () => {
     const mockDatasource = createMockDatasource('formBased', {
       datasourceId: 'formBased',
-      getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes', 'timestamp'] }]),
-      getSourceId: jest.fn(() => '1'),
-      getFilters: jest.fn(() => ({
+      getTableSpec: vi.fn(() => [{ columnId: 'col1', fields: ['bytes', 'timestamp'] }]),
+      getSourceId: vi.fn(() => '1'),
+      getFilters: vi.fn(() => ({
         enabled: {
           kuery: [[{ language: 'kuery', query: 'memory > 40000' }]],
           lucene: [],

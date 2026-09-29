@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import { ConnectorAdapterRegistry } from './connector_adapter_registry';
 import type { ConnectorAdapter } from './types';
@@ -17,13 +19,13 @@ describe('validateRuleActionParams', () => {
   const firstConnectorAdapter: ConnectorAdapter = {
     connectorTypeId: '.test',
     ruleActionParamsSchema: schema.object({ foo: schema.string() }),
-    buildActionParams: jest.fn(),
+    buildActionParams: vi.fn(),
   };
 
   const secondConnectorAdapter: ConnectorAdapter = {
     connectorTypeId: '.test-2',
     ruleActionParamsSchema: schema.object({ bar: schema.string() }),
-    buildActionParams: jest.fn(),
+    buildActionParams: vi.fn(),
   };
 
   let registry: ConnectorAdapterRegistry;

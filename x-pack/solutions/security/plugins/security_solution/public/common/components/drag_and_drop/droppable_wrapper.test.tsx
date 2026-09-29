@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -15,7 +17,7 @@ import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { DroppableWrapper } from './droppable_wrapper';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
-jest.mock('../../lib/kibana');
+vi.mock('../../lib/kibana');
 
 describe('DroppableWrapper', () => {
   const mount = useMountAppended();

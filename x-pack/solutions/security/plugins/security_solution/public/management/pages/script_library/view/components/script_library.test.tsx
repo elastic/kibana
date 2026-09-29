@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -22,16 +25,19 @@ import { ScriptLibrary } from './script_library';
 import { useWithScriptLibraryData } from '../../../../hooks/script_library';
 import type { EndpointScript } from '../../../../../../common/endpoint/types';
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../../../../common/lib/kibana'),
-  useToasts: jest.fn(),
-  useStorage: jest.fn(),
-}));
-jest.mock('../../../../hooks/script_library/use_with_script_library_data');
-jest.mock('../../../../../common/components/user_privileges');
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
-const useWithScriptLibraryDataMock = useWithScriptLibraryData as jest.Mock;
-const useToastsMock = useToasts as jest.Mock;
+vi.mock('../../../../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../common/lib/kibana')),
+      useToasts: vi.fn(),
+      useStorage: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../hooks/script_library/use_with_script_library_data');
+vi.mock('../../../../../common/components/user_privileges');
+const useUserPrivilegesMock = _useUserPrivileges as Mock;
+const useWithScriptLibraryDataMock = useWithScriptLibraryData as Mock;
+const useToastsMock = useToasts as Mock;
 
 describe('ScriptLibrary', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -41,12 +47,12 @@ describe('ScriptLibrary', () => {
   let mockedContext: AppContextTestRender;
   let scriptsGenerator: EndpointScriptsGenerator;
   let defaultMockGetScriptsResponse: ReturnType<typeof useWithScriptLibraryDataMock>;
-  let mockStorageGet: jest.Mock;
-  let mockStorageSet: jest.Mock;
-  let mockAddDanger: jest.Mock;
+  let mockStorageGet: Mock;
+  let mockStorageSet: Mock;
+  let mockAddDanger: Mock;
 
   const getScriptsListMock = (scriptsList: EndpointScript[]) => {
-    (useWithScriptLibraryDataMock as jest.Mock).mockReturnValue({
+    (useWithScriptLibraryDataMock as Mock).mockReturnValue({
       ...defaultMockGetScriptsResponse,
       doesDataExist: scriptsList.length > 0,
       data: {
@@ -74,13 +80,13 @@ describe('ScriptLibrary', () => {
       startServices: { storage },
     } = mockedContext);
 
-    mockStorageGet = jest.fn().mockReturnValue(true);
-    mockStorageSet = jest.fn();
+    mockStorageGet = vi.fn().mockReturnValue(true);
+    mockStorageSet = vi.fn();
     storage.get = mockStorageGet;
     storage.set = mockStorageSet;
 
-    mockAddDanger = jest.fn();
-    (useToastsMock as jest.Mock).mockReturnValue({
+    mockAddDanger = vi.fn();
+    (useToastsMock as Mock).mockReturnValue({
       addDanger: mockAddDanger,
     });
 
@@ -97,11 +103,11 @@ describe('ScriptLibrary', () => {
       },
       isFetching: false,
       isFetched: true,
-      refetch: jest.fn(),
-      refetchHasData: jest.fn(),
+      refetch: vi.fn(),
+      refetchHasData: vi.fn(),
     };
 
-    (useWithScriptLibraryDataMock as jest.Mock).mockReturnValue(defaultMockGetScriptsResponse);
+    (useWithScriptLibraryDataMock as Mock).mockReturnValue(defaultMockGetScriptsResponse);
 
     // navigate to scripts lib. page before each test
     history.push(SCRIPT_LIBRARY_PATH);
@@ -113,7 +119,7 @@ describe('ScriptLibrary', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Page elements', () => {
@@ -186,7 +192,7 @@ describe('ScriptLibrary', () => {
     });
 
     it('should show an error message when there is an error with fetching scripts', () => {
-      (useWithScriptLibraryDataMock as jest.Mock).mockReturnValue({
+      (useWithScriptLibraryDataMock as Mock).mockReturnValue({
         ...defaultMockGetScriptsResponse,
         doesDataExist: false,
         isLoadingHasData: false,
@@ -382,9 +388,9 @@ describe('ScriptLibrary', () => {
     it('should refetch scripts list after successful delete', () => {
       const scriptId = 'script-1';
       const script = scriptsGenerator.generate({ id: scriptId });
-      const mockRefetch = jest.fn();
+      const mockRefetch = vi.fn();
 
-      (useWithScriptLibraryDataMock as jest.Mock).mockReturnValue({
+      (useWithScriptLibraryDataMock as Mock).mockReturnValue({
         ...defaultMockGetScriptsResponse,
         doesDataExist: true,
         data: {
@@ -422,9 +428,9 @@ describe('ScriptLibrary', () => {
     it('should close modal without refetch when cancel is clicked', () => {
       const scriptId = 'script-1';
       const script = scriptsGenerator.generate({ id: scriptId });
-      const mockRefetch = jest.fn();
+      const mockRefetch = vi.fn();
 
-      (useWithScriptLibraryDataMock as jest.Mock).mockReturnValue({
+      (useWithScriptLibraryDataMock as Mock).mockReturnValue({
         ...defaultMockGetScriptsResponse,
         doesDataExist: true,
         data: {
@@ -570,7 +576,7 @@ describe('ScriptLibrary', () => {
 
   describe('Table conditional rendering', () => {
     it('should NOT render table before isFetched is true', () => {
-      (useWithScriptLibraryDataMock as jest.Mock).mockReturnValue({
+      (useWithScriptLibraryDataMock as Mock).mockReturnValue({
         ...defaultMockGetScriptsResponse,
         isFetching: true,
         isFetched: false,
@@ -585,7 +591,7 @@ describe('ScriptLibrary', () => {
     it('should render table with loading state when isFetching is true', () => {
       const script = scriptsGenerator.generate();
       getScriptsListMock([script]);
-      (useWithScriptLibraryDataMock as jest.Mock).mockReturnValue({
+      (useWithScriptLibraryDataMock as Mock).mockReturnValue({
         ...defaultMockGetScriptsResponse,
         doesDataExist: true,
         data: {

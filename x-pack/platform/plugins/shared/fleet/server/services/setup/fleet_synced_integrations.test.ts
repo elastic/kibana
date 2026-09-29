@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { licenseService } from '../license';
 
 import {
@@ -12,56 +14,62 @@ import {
   createOrUpdateFleetSyncedIntegrationsIndex,
 } from './fleet_synced_integrations';
 
-jest.mock('../app_context', () => ({
-  appContextService: {
-    getExperimentalFeatures: jest.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
-    getLogger: jest.fn().mockReturnValue({
-      error: jest.fn(),
-      debug: jest.fn(),
-      warn: jest.fn(),
-    }),
-    getConfig: jest.fn().mockReturnValue({
-      enableManagedLogsAndMetricsDataviews: true,
-    }),
-    getCloud: jest.fn().mockReturnValue({
-      isServerlessEnabled: false,
-    }),
-  },
-}));
+vi.mock('../app_context', () => {
+      const mocked = {
+      appContextService: {
+        getExperimentalFeatures: vi.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
+        getLogger: vi.fn().mockReturnValue({
+          error: vi.fn(),
+          debug: vi.fn(),
+          warn: vi.fn(),
+        }),
+        getConfig: vi.fn().mockReturnValue({
+          enableManagedLogsAndMetricsDataviews: true,
+        }),
+        getCloud: vi.fn().mockReturnValue({
+          isServerlessEnabled: false,
+        }),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/utils', () => ({
-  createListStream: jest
-    .fn()
-    .mockImplementation((indexPatterns) =>
-      indexPatterns.map((indexPattern: any) => indexPattern.id)
-    ),
-}));
+vi.mock('@kbn/utils', () => {
+      const mocked = {
+      createListStream: vi
+        .fn()
+        .mockImplementation((indexPatterns) =>
+          indexPatterns.map((indexPattern: any) => indexPattern.id)
+        ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('fleet_synced_integrations', () => {
   let esClientMock: any;
-  const mockExists = jest.fn();
-  const mockGetMapping = jest.fn();
+  const mockExists = vi.fn();
+  const mockGetMapping = vi.fn();
   let soClientMock: any;
   let soImporterMock: any;
 
   beforeEach(() => {
     esClientMock = {
       indices: {
-        create: jest.fn(),
+        create: vi.fn(),
         exists: mockExists,
         getMapping: mockGetMapping,
-        putMapping: jest.fn(),
+        putMapping: vi.fn(),
       },
       cluster: {
-        remoteInfo: jest.fn().mockReturnValue({
+        remoteInfo: vi.fn().mockReturnValue({
           remote1: {},
           remote2: {},
         }),
       },
     };
     soClientMock = {
-      updateObjectsSpaces: jest.fn(),
-      find: jest.fn().mockResolvedValue({
+      updateObjectsSpaces: vi.fn(),
+      find: vi.fn().mockResolvedValue({
         saved_objects: [
           { id: 'remote1:logs-*', type: 'index-pattern', namespaces: ['default', '*'] },
           { id: 'remote2:logs-*', type: 'index-pattern', namespaces: ['default'] },
@@ -69,13 +77,13 @@ describe('fleet_synced_integrations', () => {
       }),
     };
     soImporterMock = {
-      import: jest.fn(),
+      import: vi.fn(),
     };
   });
 
   describe('with Enterprise license', () => {
     beforeAll(() => {
-      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+      vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
     });
 
     it('should create index if does not exist', async () => {
@@ -147,7 +155,7 @@ describe('fleet_synced_integrations', () => {
     });
 
     it('should not create index patterns if remote info throws error', async () => {
-      esClientMock.cluster.remoteInfo = jest.fn().mockRejectedValue(new Error('Test error'));
+      esClientMock.cluster.remoteInfo = vi.fn().mockRejectedValue(new Error('Test error'));
 
       await createCCSIndexPatterns(esClientMock, soClientMock, soImporterMock);
 
@@ -158,7 +166,7 @@ describe('fleet_synced_integrations', () => {
 
   describe('with less than Enterprise license', () => {
     beforeAll(() => {
-      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+      vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
     });
 
     it('should not create index patterns for remote clusters', async () => {

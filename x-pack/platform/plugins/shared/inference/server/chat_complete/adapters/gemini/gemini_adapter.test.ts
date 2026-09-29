@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { processVertexStreamMock, processVertexResponseMock } from './gemini_adapter.test.mocks';
 import { PassThrough } from 'stream';
 import { noop, tap, lastValueFrom, toArray, of } from 'rxjs';
@@ -17,11 +20,11 @@ import { geminiAdapter } from './gemini_adapter';
 describe('geminiAdapter', () => {
   const logger = loggerMock.create();
   const executorMock = {
-    invoke: jest.fn(),
-    getConnector: jest.fn(),
+    invoke: vi.fn(),
+    getConnector: vi.fn(),
   } as InferenceExecutor & {
-    invoke: jest.MockedFn<InferenceExecutor['invoke']>;
-    getConnector: jest.MockedFn<InferenceExecutor['getConnector']>;
+    invoke: MockedFunction<InferenceExecutor['invoke']>;
+    getConnector: MockedFunction<InferenceExecutor['getConnector']>;
   };
 
   beforeEach(() => {
@@ -700,7 +703,7 @@ describe('geminiAdapter', () => {
       it('process response events via processVertexResponse', async () => {
         const response = { dummy: 'response' };
 
-        const tapFn = jest.fn();
+        const tapFn = vi.fn();
         processVertexResponseMock.mockImplementation(() => tap(tapFn));
 
         executorMock.invoke.mockImplementation(async () => {
@@ -762,7 +765,7 @@ describe('geminiAdapter', () => {
       it('process response events via processVertexStream', async () => {
         const source$ = of({ chunk: 1 }, { chunk: 2 });
 
-        const tapFn = jest.fn();
+        const tapFn = vi.fn();
         processVertexStreamMock.mockImplementation(() => tap(tapFn));
 
         executorMock.invoke.mockImplementation(async () => {

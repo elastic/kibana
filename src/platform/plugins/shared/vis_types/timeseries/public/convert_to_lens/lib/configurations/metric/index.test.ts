@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 import type { Column, FormulaColumn, Layer } from '../../convert';
 import { createPanel, createSeries } from '../../__mocks__';
 import { getConfigurationForMetric, getConfigurationForGauge } from '.';
 
-const mockGetPalette = jest.fn();
+const mockGetPalette = vi.fn();
 
-jest.mock('../palette', () => ({
-  getPalette: jest.fn(() => mockGetPalette()),
-}));
+vi.mock('../palette', () => {
+      const mocked = {
+      getPalette: vi.fn(() => mockGetPalette()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function createEmptyLensLayer(partialLayer: Partial<Layer>): Layer {
   return {
@@ -32,7 +37,7 @@ function createEmptyLensLayer(partialLayer: Partial<Layer>): Layer {
 
 describe('getConfigurationForMetric', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetPalette.mockReturnValue(undefined);
   });
 
@@ -187,7 +192,7 @@ describe('getConfigurationForMetric', () => {
 
 describe('getConfigurationForGauge', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetPalette.mockReturnValue(undefined);
   });
 

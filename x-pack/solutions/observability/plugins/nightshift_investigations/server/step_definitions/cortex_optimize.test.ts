@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { runCortexOptimize } from '../cortex/register_cortex';
 import { cortexOptimizeStepDefinition } from './cortex_optimize';
 
-jest.mock('../cortex/register_cortex', () => ({
-  runCortexOptimize: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../cortex/register_cortex', () => {
+      const mocked = {
+      runCortexOptimize: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('cortexOptimizeStepDefinition', () => {
-  const esClient = { search: jest.fn() };
+  const esClient = { search: vi.fn() };
   const request = { headers: {} };
-  const getScopedEsClient = jest.fn().mockReturnValue(esClient);
-  const getFakeRequest = jest.fn().mockReturnValue(request);
-  const getInference = jest.fn();
-  const getSearchInferenceEndpoints = jest.fn();
+  const getScopedEsClient = vi.fn().mockReturnValue(esClient);
+  const getFakeRequest = vi.fn().mockReturnValue(request);
+  const getInference = vi.fn();
+  const getSearchInferenceEndpoints = vi.fn();
   const analytics = coreMock.createSetup().analytics;
 
   const createContext = (input: {
@@ -34,14 +39,14 @@ describe('cortexOptimizeStepDefinition', () => {
       input,
       rawInput: input,
       contextManager: {
-        getContext: jest.fn().mockReturnValue({
+        getContext: vi.fn().mockReturnValue({
           workflow: { spaceId: 'default' },
           execution: { id: 'execution-1' },
         }),
         getFakeRequest,
         getScopedEsClient,
-        renderInputTemplate: jest.fn((val) => val),
-        callKibanaApi: jest.fn(),
+        renderInputTemplate: vi.fn((val) => val),
+        callKibanaApi: vi.fn(),
       },
       logger: loggerMock.create(),
       abortSignal: new AbortController().signal,

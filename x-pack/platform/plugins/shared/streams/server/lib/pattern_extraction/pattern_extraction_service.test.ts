@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import moment from 'moment';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { PatternExtractionService } from './pattern_extraction_service';
@@ -35,7 +37,7 @@ describe('PatternExtractionService', () => {
   let service: PatternExtractionService;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     logger = loggerMock.create();
   });
 

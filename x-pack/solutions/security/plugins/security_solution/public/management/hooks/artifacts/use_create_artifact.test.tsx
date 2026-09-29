@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { useCreateArtifact } from './use_create_artifact';
 import type { HttpSetup } from '@kbn/core/public';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
@@ -20,7 +23,7 @@ import { act } from '@testing-library/react';
 describe('Create artifact hook', () => {
   let result: ReturnType<typeof useCreateArtifact>;
 
-  let fakeHttpServices: jest.Mocked<HttpSetup>;
+  let fakeHttpServices: Mocked<HttpSetup>;
   let instance: ExceptionsListApiClient;
 
   beforeEach(() => {
@@ -37,7 +40,7 @@ describe('Create artifact hook', () => {
 
     fakeHttpServices.post.mockClear();
     fakeHttpServices.post.mockResolvedValueOnce(exceptionItem);
-    const onSuccessMock: jest.Mock = jest.fn();
+    const onSuccessMock: Mock = vi.fn();
 
     result = await renderMutation(() =>
       useCreateArtifact(instance, {
@@ -70,7 +73,7 @@ describe('Create artifact hook', () => {
     fakeHttpServices.post.mockClear();
     fakeHttpServices.post.mockRejectedValue(error);
 
-    const onErrorMock: jest.Mock = jest.fn();
+    const onErrorMock: Mock = vi.fn();
 
     result = await renderMutation(() =>
       useCreateArtifact(instance, {

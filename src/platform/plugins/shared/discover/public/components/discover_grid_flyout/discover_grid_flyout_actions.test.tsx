@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
@@ -16,18 +18,18 @@ import type { FlyoutActionItem } from './types';
 
 let mockBreakpointSize: string | undefined;
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const original = (await vi.importActual('@elastic/eui'));
   return {
     ...original,
-    useIsWithinBreakpoints: jest.fn((breakpoints: string[]) => {
+    useIsWithinBreakpoints: vi.fn((breakpoints: string[]) => {
       if (mockBreakpointSize && breakpoints.includes(mockBreakpointSize)) {
         return true;
       }
 
       return original.useIsWithinBreakpoints(breakpoints);
     }),
-    useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
+    useResizeObserver: vi.fn(() => ({ width: 1000, height: 1000 })),
   };
 });
 
@@ -50,7 +52,7 @@ const generateFlyoutActions = (count: number): FlyoutActionItem[] =>
     label: `Action ${i}`,
     iconType: 'document',
     dataTestSubj: `customActionItem${i}`,
-    onClick: jest.fn(),
+    onClick: vi.fn(),
   }));
 
 describe('DiscoverGridFlyoutActions', () => {

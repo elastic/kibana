@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -16,25 +19,28 @@ import { useLicense } from '../../hooks/use_license';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useStreamingAiInsight } from '../../hooks/use_streaming_ai_insight';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting$: jest.fn(),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useUiSetting$: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_kibana');
-jest.mock('../../hooks/use_license');
-jest.mock('../../hooks/use_genai_connectors');
-jest.mock('../../hooks/use_streaming_ai_insight');
+vi.mock('../../hooks/use_kibana');
+vi.mock('../../hooks/use_license');
+vi.mock('../../hooks/use_genai_connectors');
+vi.mock('../../hooks/use_streaming_ai_insight');
 
-const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseLicense = useLicense as jest.Mock;
-const mockUseGenAIConnectors = useGenAIConnectors as jest.Mock;
-const mockUseStreamingAiInsight = useStreamingAiInsight as jest.Mock;
-const mockCreateStream = jest.fn();
+const mockUseUiSetting$ = useUiSetting$ as Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseLicense = useLicense as Mock;
+const mockUseGenAIConnectors = useGenAIConnectors as Mock;
+const mockUseStreamingAiInsight = useStreamingAiInsight as Mock;
+const mockCreateStream = vi.fn();
 const AiInsightTest = AiInsight as React.ComponentType<any>;
 
-const mockOpenChat = jest.fn();
-const mockReportEvent = jest.fn();
+const mockOpenChat = vi.fn();
+const mockReportEvent = vi.fn();
 
 const mockConnectorInfo = {
   connectorId: 'connector-1',
@@ -53,9 +59,9 @@ const baseStreamingState = () => ({
   context: '',
   connectorInfo: mockConnectorInfo,
   wasStopped: false,
-  fetch: jest.fn(),
-  stop: jest.fn(),
-  regenerate: jest.fn(),
+  fetch: vi.fn(),
+  stop: vi.fn(),
+  regenerate: vi.fn(),
 });
 
 const createStreamingState = (overrides: Partial<ReturnType<typeof baseStreamingState>> = {}) => ({
@@ -70,7 +76,7 @@ const renderComponent = (props: Partial<React.ComponentProps<typeof AiInsightTes
         title="AI Insight"
         insightType="log"
         createStream={mockCreateStream}
-        buildAttachments={jest.fn().mockReturnValue([])}
+        buildAttachments={vi.fn().mockReturnValue([])}
         {...props}
       />
     </EuiThemeProvider>
@@ -84,7 +90,7 @@ const openAccordion = (container: HTMLElement) => {
 
 describe('AiInsight', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseUiSetting$.mockReturnValue([AIChatExperience.Agent]);
     mockUseKibana.mockReturnValue({
@@ -102,10 +108,10 @@ describe('AiInsight', () => {
         },
         notifications: {
           feedback: {
-            isEnabled: jest.fn().mockReturnValue(true),
+            isEnabled: vi.fn().mockReturnValue(true),
           },
           toasts: {
-            addSuccess: jest.fn(),
+            addSuccess: vi.fn(),
           },
         },
       },
@@ -122,7 +128,7 @@ describe('AiInsight', () => {
   });
 
   it('fetches insights when the accordion is opened', () => {
-    const fetch = jest.fn();
+    const fetch = vi.fn();
     mockUseStreamingAiInsight.mockReturnValue(createStreamingState({ fetch }));
 
     const { container, unmount } = renderComponent();
@@ -169,7 +175,7 @@ describe('AiInsight', () => {
     });
 
     it('refetches insights when retry button is clicked', () => {
-      const fetch = jest.fn();
+      const fetch = vi.fn();
       mockUseStreamingAiInsight.mockReturnValue(
         createStreamingState({ error: errorMessage, fetch })
       );
@@ -220,7 +226,7 @@ describe('AiInsight', () => {
     });
 
     it('opens the conversation flyout with correct attachments when start conversation is clicked', () => {
-      const buildAttachments = jest.fn().mockReturnValue([{ type: 'test', data: {} }]);
+      const buildAttachments = vi.fn().mockReturnValue([{ type: 'test', data: {} }]);
       mockUseStreamingAiInsight.mockReturnValue(
         createStreamingState({ summary: 'Hello world', context: 'context' })
       );
@@ -279,7 +285,7 @@ describe('AiInsight', () => {
   });
 
   it('shows regenerate button after stream is stopped', () => {
-    const regenerate = jest.fn();
+    const regenerate = vi.fn();
     mockUseStreamingAiInsight.mockReturnValue(
       createStreamingState({ summary: 'Partial response', wasStopped: true, regenerate })
     );

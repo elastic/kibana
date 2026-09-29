@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createFleetTestRendererMock } from '../mock';
 
 import { useGetAgentPolicies, useAgentEnrollmentFlyoutData } from '.';
 
-jest.mock('./use_request', () => {
+vi.mock('./use_request', async () => {
   return {
-    ...jest.requireActual('./use_request'),
-    useGetAgentPolicies: jest.fn(),
+    ...(await vi.importActual('./use_request')),
+    useGetAgentPolicies: vi.fn(),
   };
 });
 
@@ -20,33 +23,33 @@ describe('useAgentEnrollmentFlyoutData', () => {
   const testRenderer = createFleetTestRendererMock();
 
   it('should return empty agentPolicies when http loading', () => {
-    (useGetAgentPolicies as jest.Mock).mockReturnValue({ data: undefined, isLoading: true });
+    (useGetAgentPolicies as Mock).mockReturnValue({ data: undefined, isLoading: true });
     const { result } = testRenderer.renderHook(() => useAgentEnrollmentFlyoutData());
     expect(result.current.agentPolicies).toEqual([]);
     expect(result.current.isLoadingAgentPolicies).toBe(true);
   });
 
   it('should return empty agentPolicies when http not loading and no data', () => {
-    (useGetAgentPolicies as jest.Mock).mockReturnValue({ data: undefined });
+    (useGetAgentPolicies as Mock).mockReturnValue({ data: undefined });
     const { result } = testRenderer.renderHook(() => useAgentEnrollmentFlyoutData());
     expect(result.current.agentPolicies).toEqual([]);
   });
 
   it('should return empty agentPolicies when http not loading and no items', () => {
-    (useGetAgentPolicies as jest.Mock).mockReturnValue({ data: { items: undefined } });
+    (useGetAgentPolicies as Mock).mockReturnValue({ data: { items: undefined } });
     const { result } = testRenderer.renderHook(() => useAgentEnrollmentFlyoutData());
     expect(result.current.agentPolicies).toEqual([]);
   });
 
   it('should return agentPolicies when http not loading', () => {
-    (useGetAgentPolicies as jest.Mock).mockReturnValue({ data: { items: [{ id: 'policy1' }] } });
+    (useGetAgentPolicies as Mock).mockReturnValue({ data: { items: [{ id: 'policy1' }] } });
     const { result } = testRenderer.renderHook(() => useAgentEnrollmentFlyoutData());
     expect(result.current.agentPolicies).toEqual([{ id: 'policy1' }]);
   });
 
   it('should resend request when refresh agent policies called', () => {
-    const resendRequestMock = jest.fn();
-    (useGetAgentPolicies as jest.Mock).mockReturnValue({
+    const resendRequestMock = vi.fn();
+    (useGetAgentPolicies as Mock).mockReturnValue({
       data: { items: [{ id: 'policy1' }] },
       isLoading: false,
       resendRequest: resendRequestMock,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -26,13 +28,16 @@ const typeSecurityExpression = {
   tagValue: 'security',
 } as const;
 
-const mockUseProjectPickerState = jest.fn();
-const mockUseProjectPickerActions = jest.fn();
+const mockUseProjectPickerState = vi.fn();
+const mockUseProjectPickerActions = vi.fn();
 
-jest.mock('../../../../state', () => ({
-  useProjectPickerState: () => mockUseProjectPickerState(),
-  useProjectPickerActions: () => mockUseProjectPickerActions(),
-}));
+vi.mock('../../../../state', () => {
+      const mocked = {
+      useProjectPickerState: () => mockUseProjectPickerState(),
+      useProjectPickerActions: () => mockUseProjectPickerActions(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createFilterExpressions = (
   entries: Array<[FilterExpressionValue, boolean?]>
@@ -72,8 +77,8 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
 };
 
 const defaultActions = {
-  clearProjectFilters: jest.fn(),
-  revertToSpaceDefaults: jest.fn(),
+  clearProjectFilters: vi.fn(),
+  revertToSpaceDefaults: vi.fn(),
 };
 
 const renderHeader = (stateOverrides: Partial<ProjectPickerState> = {}) => {
@@ -95,7 +100,7 @@ const openGlobalActionsMenu = async () => {
 
 describe('ProjectPickerFrameHeader', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const stateWithFilters = {

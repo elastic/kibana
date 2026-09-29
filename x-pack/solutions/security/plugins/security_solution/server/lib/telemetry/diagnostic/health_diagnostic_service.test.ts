@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked, MockedClass } from 'vitest';
+
 import { of, throwError, from } from 'rxjs';
 import type { ElasticsearchClient, AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
@@ -42,34 +45,34 @@ import {
 } from './__mocks__';
 import { TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT } from '../event_based/events';
 
-jest.mock('./health_diagnostic_receiver');
-jest.mock('./health_diagnostic_integration_resolver');
-jest.mock('../artifact');
+vi.mock('./health_diagnostic_receiver');
+vi.mock('./health_diagnostic_integration_resolver');
+vi.mock('../artifact');
 
-const MockedCircuitBreakingQueryExecutorImpl = CircuitBreakingQueryExecutorImpl as jest.MockedClass<
+const MockedCircuitBreakingQueryExecutorImpl = CircuitBreakingQueryExecutorImpl as MockedClass<
   typeof CircuitBreakingQueryExecutorImpl
 >;
 
-const MockedIntegrationResolverImpl = IntegrationResolverImpl as jest.MockedClass<
+const MockedIntegrationResolverImpl = IntegrationResolverImpl as MockedClass<
   typeof IntegrationResolverImpl
 >;
 
 describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticService', () => {
   let service: HealthDiagnosticServiceImpl;
-  let mockLogger: jest.Mocked<Logger>;
-  let mockTaskManager: jest.Mocked<TaskManagerStartContract>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockAnalytics: jest.Mocked<AnalyticsServiceStart>;
-  let mockTelemetryConfigProvider: jest.Mocked<TelemetryConfigProvider>;
-  let mockQueryExecutor: jest.Mocked<CircuitBreakingQueryExecutorImpl>;
+  let mockLogger: Mocked<Logger>;
+  let mockTaskManager: Mocked<TaskManagerStartContract>;
+  let mockEsClient: Mocked<ElasticsearchClient>;
+  let mockAnalytics: Mocked<AnalyticsServiceStart>;
+  let mockTelemetryConfigProvider: Mocked<TelemetryConfigProvider>;
+  let mockQueryExecutor: Mocked<CircuitBreakingQueryExecutorImpl>;
   let mockPackageService: ReturnType<typeof createMockPackageService>;
-  let mockResolver: jest.Mocked<IntegrationResolver>;
+  let mockResolver: Mocked<IntegrationResolver>;
 
   const mockDocument = createMockDocument();
 
   const setupMocks = () => {
     mockLogger = createMockLogger();
-    mockEsClient = {} as jest.Mocked<ElasticsearchClient>;
+    mockEsClient = {} as Mocked<ElasticsearchClient>;
     mockTaskManager = createMockTaskManager();
     mockAnalytics = createMockAnalytics();
     mockTelemetryConfigProvider = createMockTelemetryConfigProvider();
@@ -77,7 +80,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
     mockPackageService = createMockPackageService([]);
 
     mockResolver = {
-      resolve: jest.fn().mockImplementation((queries: HealthDiagnosticQuery[]) =>
+      resolve: vi.fn().mockImplementation((queries: HealthDiagnosticQuery[]) =>
         Promise.resolve(
           queries.map((q): ResolvedQuery => {
             if ('_raw' in q) {
@@ -87,7 +90,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
           })
         )
       ),
-    } as jest.Mocked<IntegrationResolver>;
+    } as Mocked<IntegrationResolver>;
 
     MockedCircuitBreakingQueryExecutorImpl.mockImplementation(() => mockQueryExecutor);
     MockedIntegrationResolverImpl.mockImplementation(
@@ -97,7 +100,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
   };
 
   const setupDefaultArtifact = (overrides = {}) => {
-    (artifactService.getArtifact as jest.Mock).mockImplementation((artifactId: string) => {
+    (artifactService.getArtifact as Mock).mockImplementation((artifactId: string) => {
       if (artifactId === 'health-diagnostic-queries-v2') {
         return Promise.resolve({ data: createMockArtifactData(overrides) });
       }
@@ -116,7 +119,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupMocks();
     setupDefaultArtifact();
   });
@@ -237,7 +240,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
       describe('stackVersions filtering', () => {
         const setupStackVersion = (stackVersion: string) => {
           service.setup({
-            taskManager: { registerTaskDefinitions: jest.fn() } as never,
+            taskManager: { registerTaskDefinitions: vi.fn() } as never,
             isServerless: false,
             stackVersion,
           });
@@ -283,7 +286,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
 
       describe('query attribute filtering', () => {
         test('should silently skip queries with unrecognised versions — no stat doc, debug log only', async () => {
-          (artifactService.getArtifact as jest.Mock).mockResolvedValue({
+          (artifactService.getArtifact as Mock).mockResolvedValue({
             data: `---
 id: unknown-version-query
 name: unknown-version-query
@@ -312,7 +315,7 @@ enabled: true`,
         });
 
         test('should emit a skipped stat for queries missing the enabled attribute', async () => {
-          (artifactService.getArtifact as jest.Mock).mockResolvedValue({
+          (artifactService.getArtifact as Mock).mockResolvedValue({
             data: `---
 id: no-enabled-query
 name: no-enabled-query
@@ -336,7 +339,7 @@ filterlist:
         });
 
         test('should execute valid queries and silently drop unknown-version queries', async () => {
-          (artifactService.getArtifact as jest.Mock).mockResolvedValue({
+          (artifactService.getArtifact as Mock).mockResolvedValue({
             data: `---
 id: valid-query-1
 name: valid-query-1
@@ -497,7 +500,7 @@ enabled: true`,
 
       test('should continue with v2 queries when v1 artifact fails', async () => {
         await startService();
-        (artifactService.getArtifact as jest.Mock).mockImplementation((artifactId: string) => {
+        (artifactService.getArtifact as Mock).mockImplementation((artifactId: string) => {
           if (artifactId === 'health-diagnostic-queries-v1') {
             return Promise.reject(new Error('v1 not found'));
           }
@@ -517,7 +520,7 @@ enabled: true`,
 
       test('should continue with v1 queries when v2 artifact fails', async () => {
         await startService();
-        (artifactService.getArtifact as jest.Mock).mockImplementation((artifactId: string) => {
+        (artifactService.getArtifact as Mock).mockImplementation((artifactId: string) => {
           if (artifactId === 'health-diagnostic-queries-v2') {
             return Promise.reject(new Error('v2 not found'));
           }
@@ -537,7 +540,7 @@ enabled: true`,
 
       test('should return empty array when both artifacts fail', async () => {
         await startService();
-        (artifactService.getArtifact as jest.Mock).mockRejectedValue(
+        (artifactService.getArtifact as Mock).mockRejectedValue(
           new Error('Artifact not found')
         );
 

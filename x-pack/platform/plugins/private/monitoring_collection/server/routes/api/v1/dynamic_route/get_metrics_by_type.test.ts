@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { registerDynamicRoute } from '.';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
@@ -12,13 +15,16 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
-jest.mock('../../../../lib', () => ({
-  getESClusterUuid: () => 'clusterA',
-  getKibanaStats: () => ({ name: 'myKibana' }),
-}));
+vi.mock('../../../../lib', () => {
+      const mocked = {
+      getESClusterUuid: () => 'clusterA',
+      getKibanaStats: () => ({ name: 'myKibana' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('dynamic route', () => {
   const kibanaStatsConfig = {
@@ -62,7 +68,7 @@ describe('dynamic route', () => {
       },
     };
     const req = { params: { type: 'test' } } as KibanaRequest<unknown, unknown, unknown>;
-    const factory: jest.Mocked<KibanaResponseFactory> = httpServerMock.createResponseFactory();
+    const factory: Mocked<KibanaResponseFactory> = httpServerMock.createResponseFactory();
 
     await handler(context, req, factory);
 
@@ -96,7 +102,7 @@ describe('dynamic route', () => {
       },
     };
     const req = { params: { type: 'test' } } as KibanaRequest<unknown, unknown, unknown>;
-    const factory: jest.Mocked<KibanaResponseFactory> = httpServerMock.createResponseFactory();
+    const factory: Mocked<KibanaResponseFactory> = httpServerMock.createResponseFactory();
 
     await handler(context, req, factory);
 

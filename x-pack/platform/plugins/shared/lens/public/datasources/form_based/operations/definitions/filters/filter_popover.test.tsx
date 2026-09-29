@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -21,30 +24,36 @@ import { QueryStringInput } from '@kbn/kql/public';
 import { QueryInput } from '@kbn/visualization-ui-components';
 import type { Query } from '@kbn/es-query';
 
-jest.mock('.', () => ({}));
+vi.mock('.', () => {
+      const mocked = {};
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/visualization-ui-components', () => {
-  const original = jest.requireActual('@kbn/visualization-ui-components');
+vi.mock('@kbn/visualization-ui-components', async () => {
+  const original = (await vi.importActual('@kbn/visualization-ui-components'));
 
   return {
     ...original,
-    isQueryValid: jest.fn((q: Query) => (q.query === 'bytes >= 1 and' ? false : true)),
+    isQueryValid: vi.fn((q: Query) => (q.query === 'bytes >= 1 and' ? false : true)),
   };
 });
 
-jest.mock('@kbn/kql/public', () => ({
-  QueryStringInput: () => 'QueryStringInput',
-}));
+vi.mock('@kbn/kql/public', () => {
+      const mocked = {
+      QueryStringInput: () => 'QueryStringInput',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('filter popover', () => {
   let defaultProps: Parameters<typeof FilterPopover>[0];
-  let mockOnClick: jest.Mock;
+  let mockOnClick: Mock;
 
   const createMockStorage = () => ({
-    get: jest.fn(),
-    set: jest.fn(),
-    remove: jest.fn(),
-    clear: jest.fn(),
+    get: vi.fn(),
+    set: vi.fn(),
+    remove: vi.fn(),
+    clear: vi.fn(),
   });
 
   const coreMockStart = coreMock.createStart();
@@ -64,7 +73,7 @@ describe('filter popover', () => {
   );
 
   beforeEach(() => {
-    mockOnClick = jest.fn();
+    mockOnClick = vi.fn();
 
     defaultProps = {
       filter: {
@@ -72,7 +81,7 @@ describe('filter popover', () => {
         label: 'More than one',
         id: '1',
       },
-      setFilter: jest.fn(),
+      setFilter: vi.fn(),
       indexPattern: createMockedIndexPattern(),
       button: <EuiLink onClick={mockOnClick}>trigger</EuiLink>,
       isOpen: true,
@@ -107,7 +116,7 @@ describe('filter popover', () => {
     });
 
     it('should trigger close', () => {
-      const props = { ...defaultProps, triggerClose: jest.fn() };
+      const props = { ...defaultProps, triggerClose: vi.fn() };
       const instance = mount(wrapInContext(<FilterPopover {...props} />));
       expect(instance.find(EuiPopover).prop('isOpen')).toEqual(true);
 
@@ -139,7 +148,7 @@ describe('filter popover', () => {
   });
 
   it('should call setFilter when modifying QueryInput', () => {
-    const setFilter = jest.fn();
+    const setFilter = vi.fn();
     const instance = shallow(<FilterPopover {...defaultProps} setFilter={setFilter} />);
     instance.find(QueryInput).prop('onChange')!({
       query: 'modified : query',
@@ -156,7 +165,7 @@ describe('filter popover', () => {
   });
 
   it('should not call setFilter if QueryInput value is not valid', () => {
-    const setFilter = jest.fn();
+    const setFilter = vi.fn();
     const instance = shallow(<FilterPopover {...defaultProps} setFilter={setFilter} />);
     instance.find(QueryInput).prop('onChange')!({
       query: 'bytes >= 1 and',
@@ -166,7 +175,7 @@ describe('filter popover', () => {
   });
 
   it('should call setFilter when modifying LabelInput', () => {
-    const setFilter = jest.fn();
+    const setFilter = vi.fn();
     const instance = shallow(<FilterPopover {...defaultProps} setFilter={setFilter} />);
     instance.find(LabelInput).prop('onChange')!('Modified label');
     expect(setFilter).toHaveBeenCalledWith({

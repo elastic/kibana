@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { FieldSelectProps } from './field_select';
 import { FieldSelect } from './field_select';
@@ -17,17 +19,17 @@ describe('Layer Data Panel', () => {
   let user: UserEvent;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     defaultProps = {
       selectedField: {
         fieldName: 'bytes',
@@ -62,7 +64,7 @@ describe('Layer Data Panel', () => {
           compatible: true,
         },
       ],
-      onChoose: jest.fn(),
+      onChoose: vi.fn(),
     };
   });
 

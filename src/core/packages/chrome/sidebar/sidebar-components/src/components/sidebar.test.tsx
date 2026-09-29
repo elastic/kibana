@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { z } from '@kbn/zod/v4';
@@ -21,14 +23,17 @@ import { Sidebar } from './sidebar';
 
 // Mock only SidebarBody — its Emotion styles access euiTheme tokens that require EuiProvider.
 // Everything else (SidebarPanel, PanelResizeHandle, hooks, service) runs real.
-jest.mock('./sidebar_panel_body', () => ({
-  SidebarBody: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+vi.mock('./sidebar_panel_body', () => {
+      const mocked = {
+      SidebarBody: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const TEST_APP_ID: SidebarAppId = 'sidebarExampleTest';
 const STATEFUL_APP_ID: SidebarAppId = 'sidebarExampleStateful';
 
-const TestComponent = jest.fn((_props: Record<string, unknown>) => <div>Sidebar App Content</div>);
+const TestComponent = vi.fn((_props: Record<string, unknown>) => <div>Sidebar App Content</div>);
 
 /** Single cast point — TestComponent is a mock that accepts any sidebar component props */
 const loadTestComponent = () => Promise.resolve(TestComponent as unknown as SidebarComponentType);
@@ -58,7 +63,7 @@ const renderSidebar = (sidebar: SidebarStart) =>
 
 describe('Sidebar', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
   });
 

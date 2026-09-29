@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -19,8 +22,8 @@ import { readScoutTestingScope } from '../tests_discovery/testing_scope';
 
 describe('runResolveTestingScope', () => {
   let tmpRoot: string;
-  let flagsReader: jest.Mocked<FlagsReader>;
-  let log: jest.Mocked<ToolingLog>;
+  let flagsReader: Mocked<FlagsReader>;
+  let log: Mocked<ToolingLog>;
   let codeChangesPath: string;
   let scopeOutputPath: string;
 
@@ -57,15 +60,15 @@ describe('runResolveTestingScope', () => {
     scopeOutputPath = path.join(tmpRoot, 'testing_scope.json');
 
     flagsReader = {
-      string: jest.fn(),
-      requiredString: jest.fn(),
-      boolean: jest.fn(),
+      string: vi.fn(),
+      requiredString: vi.fn(),
+      boolean: vi.fn(),
     } as any;
 
     log = {
-      info: jest.fn(),
-      warning: jest.fn(),
-      error: jest.fn(),
+      info: vi.fn(),
+      warning: vi.fn(),
+      error: vi.fn(),
     } as any;
   });
 

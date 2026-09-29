@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IndexKind, MatchedItem } from '@kbn/data-views-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -22,7 +25,7 @@ const buildMatchedItem = (name: string, kind: IndexKind = 'index'): MatchedItem 
 
 const renderUseIndices = (
   options: Parameters<typeof useIndices>[0],
-  getIndices: jest.Mock<Promise<MatchedItem[]>>
+  getIndices: Mock<Promise<MatchedItem[]>>
 ) => {
   const core = coreMock.createStart();
   const data = dataPluginMock.createStartContract();
@@ -46,17 +49,17 @@ const renderUseIndices = (
 
 describe('useIndices', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   it('requests indices with the default pattern when search is empty', async () => {
-    const getIndices = jest
+    const getIndices = vi
       .fn()
       .mockResolvedValue([buildMatchedItem('logs-*'), buildMatchedItem('metrics-*')]);
     renderUseIndices({ search: '' }, getIndices);
@@ -70,7 +73,7 @@ describe('useIndices', () => {
   });
 
   it('uses the search text in the indices pattern', async () => {
-    const getIndices = jest.fn().mockResolvedValue([buildMatchedItem('logs-*')]);
+    const getIndices = vi.fn().mockResolvedValue([buildMatchedItem('logs-*')]);
     renderUseIndices({ search: 'log' }, getIndices);
 
     await waitFor(() =>
@@ -82,7 +85,7 @@ describe('useIndices', () => {
   });
 
   it('uses substring matching for explicit searches including dot-prefixed names', async () => {
-    const getIndices = jest.fn().mockResolvedValue([buildMatchedItem('.ds-logs-default')]);
+    const getIndices = vi.fn().mockResolvedValue([buildMatchedItem('.ds-logs-default')]);
     renderUseIndices({ search: '.ds-logs' }, getIndices);
 
     await waitFor(() =>
@@ -94,7 +97,7 @@ describe('useIndices', () => {
   });
 
   it('returns index names from the data views service', async () => {
-    const getIndices = jest
+    const getIndices = vi
       .fn()
       .mockResolvedValue([buildMatchedItem('logs-*'), buildMatchedItem('.ds-metrics-default')]);
     const { result } = renderUseIndices({ search: '' }, getIndices);
@@ -105,7 +108,7 @@ describe('useIndices', () => {
   });
 
   it('does not fetch indices when enabled is false', () => {
-    const getIndices = jest.fn().mockReturnValue(new Promise(() => {}));
+    const getIndices = vi.fn().mockReturnValue(new Promise(() => {}));
     const { result } = renderUseIndices({ search: '', enabled: false }, getIndices);
 
     expect(getIndices).not.toHaveBeenCalled();
@@ -114,7 +117,7 @@ describe('useIndices', () => {
   });
 
   it('returns all resource kinds when types is omitted', async () => {
-    const getIndices = jest
+    const getIndices = vi
       .fn()
       .mockResolvedValue([
         buildMatchedItem('logs-index', 'index'),
@@ -129,7 +132,7 @@ describe('useIndices', () => {
   });
 
   it('caps results after type filtering', async () => {
-    const getIndices = jest
+    const getIndices = vi
       .fn()
       .mockResolvedValue(
         Array.from({ length: MAX_INDEX_SEARCH_RESULTS + 3 }, (_, index) =>
@@ -148,7 +151,7 @@ describe('useIndices', () => {
   });
 
   it('filters results down to the given types', async () => {
-    const getIndices = jest
+    const getIndices = vi
       .fn()
       .mockResolvedValue([
         buildMatchedItem('logs-index', 'index'),
@@ -168,7 +171,7 @@ describe('useIndices', () => {
       resolveA = resolve;
     });
 
-    const getIndices = jest.fn(({ pattern }: { pattern: string }) => {
+    const getIndices = vi.fn(({ pattern }: { pattern: string }) => {
       if (pattern === '*a*') {
         return pendingA;
       }

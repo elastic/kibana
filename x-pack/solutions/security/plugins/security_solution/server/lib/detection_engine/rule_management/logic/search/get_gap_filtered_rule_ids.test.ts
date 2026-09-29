@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import { gapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
@@ -41,7 +43,7 @@ describe('getGapFilteredRuleIds', () => {
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('when no rules have gaps', () => {

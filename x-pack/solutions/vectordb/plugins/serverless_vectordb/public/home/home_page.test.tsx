@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
@@ -14,31 +17,55 @@ import { useDeploymentStats } from '../hooks/use_deployment_stats';
 import { HomePageBanner } from './home_page_banner';
 import { HomePage } from './home_page';
 
-jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('../hooks/use_authenticated_user', () => ({ useAuthenticatedUser: jest.fn() }));
-jest.mock('../hooks/use_deployment_stats', () => ({ useDeploymentStats: jest.fn() }));
+vi.mock('../hooks/use_kibana', () => {
+      const mocked = { useKibana: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_authenticated_user', () => {
+      const mocked = { useAuthenticatedUser: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../hooks/use_deployment_stats', () => {
+      const mocked = { useDeploymentStats: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/vectordb-onboarding', () => ({
-  ConnectToProject: () => <div data-test-subj="connectToProject" />,
-  useOnboardingCredentials: () => ({ elasticsearchUrl: null, apiKey: null, isLoading: false }),
-}));
+vi.mock('@kbn/vectordb-onboarding', () => {
+      const mocked = {
+      ConnectToProject: () => <div data-test-subj="connectToProject" />,
+      useOnboardingCredentials: () => ({ elasticsearchUrl: null, apiKey: null, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/shared-components', () => ({
-  TrialUsageBadge: () => <div data-test-subj="trialUsageBadge" />,
-}));
+vi.mock('@kbn/shared-components', () => {
+      const mocked = {
+      TrialUsageBadge: () => <div data-test-subj="trialUsageBadge" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./home_page_banner', () => ({ HomePageBanner: jest.fn(() => null) }));
-jest.mock('./add_data_section', () => ({
-  AddDataSection: () => <div data-test-subj="addDataSection" />,
-}));
-jest.mock('./chat_with_data_section', () => ({
-  ChatWithYourDataSection: () => <div data-test-subj="chatWithDataSection" />,
-}));
+vi.mock('./home_page_banner', () => {
+      const mocked = { HomePageBanner: vi.fn(() => null) };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./add_data_section', () => {
+      const mocked = {
+      AddDataSection: () => <div data-test-subj="addDataSection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./chat_with_data_section', () => {
+      const mocked = {
+      ChatWithYourDataSection: () => <div data-test-subj="chatWithDataSection" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseAuthenticatedUser = useAuthenticatedUser as jest.Mock;
-const mockUseDeploymentStats = useDeploymentStats as jest.Mock;
-const mockHomePageBanner = HomePageBanner as unknown as jest.Mock;
+const mockUseKibana = useKibana as Mock;
+const mockUseAuthenticatedUser = useAuthenticatedUser as Mock;
+const mockUseDeploymentStats = useDeploymentStats as Mock;
+const mockHomePageBanner = HomePageBanner as unknown as Mock;
 
 const DOCS_URL = 'https://elastic.co/docs/vector-database';
 
@@ -69,8 +96,8 @@ const emptyStats = {
 };
 
 describe('HomePage', () => {
-  const navigateToApp = jest.fn();
-  const isInTrial = jest.fn();
+  const navigateToApp = vi.fn();
+  const isInTrial = vi.fn();
 
   const mockServices = ({
     cloud = { isInTrial },
@@ -100,7 +127,7 @@ describe('HomePage', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     isInTrial.mockReturnValue(false);
     mockServices();
     mockUseAuthenticatedUser.mockReturnValue({ user: undefined });

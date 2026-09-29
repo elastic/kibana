@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -16,82 +18,94 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 
 // Mocks for child components
-jest.mock('../../prompt_editor/system_prompt/select_system_prompt', () => ({
-  SelectSystemPrompt: ({
-    onSystemPromptSelectionChange,
-  }: {
-    onSystemPromptSelectionChange: (p: string) => void;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="system-prompt"
-      onClick={() => onSystemPromptSelectionChange('prompt-id')}
-    >
-      {'SelectSystemPrompt'}
-    </button>
-  ),
-}));
-jest.mock('../../../connectorland/connector_selector', () => ({
-  ConnectorSelector: ({
-    onConnectorSelectionChange,
-  }: {
-    onConnectorSelectionChange: (connector: {
-      id: string;
-      actionTypeId: string;
-      isPreconfigured: boolean;
-    }) => void;
-  }) => (
-    <button
-      data-test-subj="connector-selector"
-      type="button"
-      onClick={() =>
-        onConnectorSelectionChange({
-          id: 'connector-id',
-          actionTypeId: 'action-type',
-          isPreconfigured: false,
-        })
-      }
-    >
-      {'ConnectorSelector'}
-    </button>
-  ),
-}));
-jest.mock('../../../connectorland/models/model_selector/model_selector', () => ({
-  ModelSelector: ({ onModelSelectionChange }: { onModelSelectionChange: (s: string) => void }) => (
-    <button
-      data-test-subj="model-selector"
-      type="button"
-      onClick={() => onModelSelectionChange('model-id')}
-    >
-      {'ModelSelector'}
-    </button>
-  ),
-}));
-jest.mock('../../share_conversation/share_select', () => ({
-  ShareSelect: ({
-    onSharedSelectionChange,
-  }: {
-    onSharedSelectionChange: (s: string, a: Array<{ uid: string }>) => void;
-  }) => (
-    <button
-      data-test-subj="share-select"
-      type="button"
-      onClick={() => onSharedSelectionChange('Shared', [{ uid: 'user-1' }])}
-    >
-      {'ShareSelect'}
-    </button>
-  ),
-}));
+vi.mock('../../prompt_editor/system_prompt/select_system_prompt', () => {
+      const mocked = {
+      SelectSystemPrompt: ({
+        onSystemPromptSelectionChange,
+      }: {
+        onSystemPromptSelectionChange: (p: string) => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="system-prompt"
+          onClick={() => onSystemPromptSelectionChange('prompt-id')}
+        >
+          {'SelectSystemPrompt'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../connectorland/connector_selector', () => {
+      const mocked = {
+      ConnectorSelector: ({
+        onConnectorSelectionChange,
+      }: {
+        onConnectorSelectionChange: (connector: {
+          id: string;
+          actionTypeId: string;
+          isPreconfigured: boolean;
+        }) => void;
+      }) => (
+        <button
+          data-test-subj="connector-selector"
+          type="button"
+          onClick={() =>
+            onConnectorSelectionChange({
+              id: 'connector-id',
+              actionTypeId: 'action-type',
+              isPreconfigured: false,
+            })
+          }
+        >
+          {'ConnectorSelector'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../connectorland/models/model_selector/model_selector', () => {
+      const mocked = {
+      ModelSelector: ({ onModelSelectionChange }: { onModelSelectionChange: (s: string) => void }) => (
+        <button
+          data-test-subj="model-selector"
+          type="button"
+          onClick={() => onModelSelectionChange('model-id')}
+        >
+          {'ModelSelector'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../share_conversation/share_select', () => {
+      const mocked = {
+      ShareSelect: ({
+        onSharedSelectionChange,
+      }: {
+        onSharedSelectionChange: (s: string, a: Array<{ uid: string }>) => void;
+      }) => (
+        <button
+          data-test-subj="share-select"
+          type="button"
+          onClick={() => onSharedSelectionChange('Shared', [{ uid: 'user-1' }])}
+        >
+          {'ShareSelect'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSetConversationSettings = jest.fn();
-const mockSetConversationsSettingsBulkActions = jest.fn();
+const mockSetConversationSettings = vi.fn();
+const mockSetConversationsSettingsBulkActions = vi.fn();
 
 const baseProps: ConversationSettingsEditorProps = {
   allSystemPrompts: mockSystemPrompts,
   conversationSettings: { [welcomeConvo.id]: welcomeConvo },
   conversationsSettingsBulkActions: {},
   currentUser: { name: 'elastic' },
-  http: { basePath: { get: jest.fn(() => 'http://localhost:5601') } } as unknown as HttpSetup,
+  http: { basePath: { get: vi.fn(() => 'http://localhost:5601') } } as unknown as HttpSetup,
   isDisabled: false,
   selectedConversation: welcomeConvo,
   setConversationSettings: mockSetConversationSettings,
@@ -100,7 +114,7 @@ const baseProps: ConversationSettingsEditorProps = {
 
 describe('ConversationSettingsEditor', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders all form fields', () => {

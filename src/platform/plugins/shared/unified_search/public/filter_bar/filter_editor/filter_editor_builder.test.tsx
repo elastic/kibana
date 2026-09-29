@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within, act } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
@@ -25,20 +27,20 @@ const getStorage = (v: string) => {
   return storage;
 };
 const createMockWebStorage = () => ({
-  clear: jest.fn(),
-  getItem: jest.fn(),
-  key: jest.fn(),
-  removeItem: jest.fn(),
-  setItem: jest.fn(),
+  clear: vi.fn(),
+  getItem: vi.fn(),
+  key: vi.fn(),
+  removeItem: vi.fn(),
+  setItem: vi.fn(),
   length: 0,
 });
 
 const createMockStorage = () => ({
   storage: createMockWebStorage(),
-  get: jest.fn(),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
+  remove: vi.fn(),
+  clear: vi.fn(),
 });
 const startMock = coreMock.createStart();
 const dataMock = dataPluginMock.createStartContract();
@@ -248,8 +250,8 @@ const defaultProps = {
   filter: filterIs('23'),
   filtersForSuggestions: [],
   indexPatterns: [mockedDataView],
-  onCancel: jest.fn(),
-  onSubmit: jest.fn(),
+  onCancel: vi.fn(),
+  onSubmit: vi.fn(),
   docLinks: startMock.docLinks,
 };
 
@@ -319,7 +321,7 @@ const chooseOperator = async (operator: string) => {
 // First render of `<FilterEditor>` in this suite is expensive (~3-4s locally on
 // Apple Silicon due to EUI + DnD + Suspense init). The default 5s timeout has
 // no headroom on CI under load, so bump it for the whole file.
-jest.setTimeout(15000);
+vi.setConfig({ testTimeout: 15000 });
 
 describe('Preserving or clearing value on operator change', () => {
   describe('preserves value with no change', () => {

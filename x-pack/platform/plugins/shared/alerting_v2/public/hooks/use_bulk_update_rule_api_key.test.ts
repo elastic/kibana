@@ -5,36 +5,41 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useBulkUpdateRuleApiKey } from './use_bulk_update_rule_api_key';
 
-const mockBulkUpdateRuleApiKey = jest.fn();
-const mockUpdateRuleApiKeyByQuery = jest.fn();
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
-const mockAddDanger = jest.fn();
+const mockBulkUpdateRuleApiKey = vi.fn();
+const mockUpdateRuleApiKeyByQuery = vi.fn();
+const mockAddSuccess = vi.fn();
+const mockAddError = vi.fn();
+const mockAddDanger = vi.fn();
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'notifications') {
-      return {
-        toasts: {
-          addSuccess: mockAddSuccess,
-          addError: mockAddError,
-          addDanger: mockAddDanger,
-        },
-      };
-    }
-    // RulesApi
-    return {
-      bulkUpdateRuleApiKey: mockBulkUpdateRuleApiKey,
-      updateRuleApiKeyByQuery: mockUpdateRuleApiKeyByQuery,
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: (token: unknown) => {
+        if (token === 'notifications') {
+          return {
+            toasts: {
+              addSuccess: mockAddSuccess,
+              addError: mockAddError,
+              addDanger: mockAddDanger,
+            },
+          };
+        }
+        // RulesApi
+        return {
+          bulkUpdateRuleApiKey: mockBulkUpdateRuleApiKey,
+          updateRuleApiKeyByQuery: mockUpdateRuleApiKeyByQuery,
+        };
+      },
+      CoreStart: (key: string) => key,
     };
-  },
-  CoreStart: (key: string) => key,
-}));
+      return { ...mocked, default: mocked };
+    });
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -47,7 +52,7 @@ const createWrapper = () => {
 
 describe('useBulkUpdateRuleApiKey', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the endpoint with the provided ids', async () => {
@@ -217,7 +222,7 @@ describe('useBulkUpdateRuleApiKey', () => {
   it('invalidates the rule list and each rule detail query on success', async () => {
     mockBulkUpdateRuleApiKey.mockResolvedValueOnce({ affected_count: 2, errors: [] });
     const { Wrapper, queryClient } = createWrapper();
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useBulkUpdateRuleApiKey(), { wrapper: Wrapper });
 
@@ -266,7 +271,7 @@ describe('useBulkUpdateRuleApiKey', () => {
   it('does not invalidate detail queries for a by_query selection (ids are unknown)', async () => {
     mockUpdateRuleApiKeyByQuery.mockResolvedValueOnce({ affected_count: 5, errors: [] });
     const { Wrapper, queryClient } = createWrapper();
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useBulkUpdateRuleApiKey(), { wrapper: Wrapper });
 

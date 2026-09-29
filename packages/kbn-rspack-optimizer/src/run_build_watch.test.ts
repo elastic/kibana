@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
-jest.mock('./rspack_runtime', () => ({ rspack: jest.fn() }));
-jest.mock('./config/create_single_compile_config', () => ({
-  createSingleCompileConfig: jest.fn(),
-}));
+vi.mock('./rspack_runtime', () => {
+      const mocked = { rspack: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./config/create_single_compile_config', () => {
+      const mocked = {
+      createSingleCompileConfig: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { rspack } from './rspack_runtime';
 import { createSingleCompileConfig } from './config/create_single_compile_config';
@@ -39,7 +47,7 @@ const createStats = ({ errors }: { errors: string[] }) => ({
 
 describe('runBuild in watch mode', () => {
   let watchCallback: WatchCallback;
-  const close = jest.fn((cb: () => void) => cb());
+  const close = vi.fn((cb: () => void) => cb());
   const writer = new ToolingLogCollectingWriter();
   const log = new ToolingLog();
   log.setWriters([writer]);
@@ -47,17 +55,17 @@ describe('runBuild in watch mode', () => {
   beforeEach(() => {
     writer.messages.length = 0;
     close.mockClear();
-    jest.mocked(createSingleCompileConfig).mockResolvedValue({ config: {}, bundleCount: 3 });
+    vi.mocked(createSingleCompileConfig).mockResolvedValue({ config: {}, bundleCount: 3 });
     // fake compiler exposes only what runWatchBuild touches
     const compiler = {
       outputPath: '/out',
-      hooks: { compile: { tap: jest.fn() } },
-      watch: jest.fn((_opts: unknown, cb: WatchCallback) => {
+      hooks: { compile: { tap: vi.fn() } },
+      watch: vi.fn((_opts: unknown, cb: WatchCallback) => {
         watchCallback = cb;
         return { close };
       }),
     } as unknown as Compiler;
-    jest.mocked(rspack).mockReturnValue(compiler);
+    vi.mocked(rspack).mockReturnValue(compiler);
   });
 
   it('resolves a recoverable failure on initial errors and keeps rebuilding', async () => {

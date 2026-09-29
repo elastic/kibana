@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { type Datatable } from '@kbn/expressions-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
@@ -23,11 +26,11 @@ import {
 } from '@kbn/chart-test-jest-helpers';
 import { XScaleTypes } from '../../common/constants';
 
-const onClickValue = jest.fn();
-const onClickMultiValue = jest.fn();
+const onClickValue = vi.fn();
+const onClickMultiValue = vi.fn();
 const layerCellValueActions: LayerCellValueActions = [];
-const onSelectRange = jest.fn();
-const onAnnotationClick = jest.fn();
+const onSelectRange = vi.fn();
+const onAnnotationClick = vi.fn();
 
 const dataWithoutFormats: Datatable = {
   type: 'datatable',
@@ -56,9 +59,9 @@ const dataWithFormats: Datatable = {
     { a: 1, b: 5, c: 'J', d: 'Row 2' },
   ],
 };
-const getFormatSpy: jest.Mock = jest.fn();
-const convertSpy: jest.Mock = jest.fn((x) => x);
-const paramsSpy: jest.Mock = jest.fn(() => ({}));
+const getFormatSpy: Mock = vi.fn();
+const convertSpy: Mock = vi.fn((x) => x);
+const paramsSpy: Mock = vi.fn(() => ({}));
 getFormatSpy.mockReturnValue({ convertToText: convertSpy, params: paramsSpy });
 
 const defaultProps: Omit<XYChartRenderProps, 'args'> = {
@@ -79,26 +82,26 @@ const defaultProps: Omit<XYChartRenderProps, 'args'> = {
   syncTooltips: false,
   syncCursor: true,
   eventAnnotationService: eventAnnotationServiceMock,
-  renderComplete: jest.fn(),
+  renderComplete: vi.fn(),
   timeFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
-  setChartSize: jest.fn(),
-  onCreateAlertRule: jest.fn(),
+  setChartSize: vi.fn(),
+  onCreateAlertRule: vi.fn(),
 };
 
 describe('provides correct series naming', () => {
   beforeAll(() => {
     setupCanvasMock();
     setupResizeObserverMock();
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
     cleanCanvasMock();
     cleanResizeObserverMock();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     convertSpy.mockImplementation((d) => d);
     getFormatSpy.mockReturnValue({ convertToText: convertSpy, params: paramsSpy });
   });

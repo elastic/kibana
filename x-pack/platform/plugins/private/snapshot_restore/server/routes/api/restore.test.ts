@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { addBasePath } from '../helpers';
 import { registerRestoreRoutes } from './restore';
 import type { RequestMock } from '../../test/helpers';
@@ -28,7 +30,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   /**

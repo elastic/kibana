@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useDeleteDataStream } from './use_delete_data_stream';
@@ -12,29 +15,32 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { IntegrationResponse } from '../../../common';
 import * as api from '../lib/api';
 
-jest.mock('../lib/api');
-const mockDeleteDataStream = api.deleteDataStream as jest.Mock;
+vi.mock('../lib/api');
+const mockDeleteDataStream = api.deleteDataStream as Mock;
 
-const mockToastsAddSuccess = jest.fn();
-const mockToastsAddError = jest.fn();
-const mockInvalidateQueries = jest.fn();
-const mockCancelQueries = jest.fn();
-const mockSetQueryData = jest.fn();
-const mockGetQueryData = jest.fn();
+const mockToastsAddSuccess = vi.fn();
+const mockToastsAddError = vi.fn();
+const mockInvalidateQueries = vi.fn();
+const mockCancelQueries = vi.fn();
+const mockSetQueryData = vi.fn();
+const mockGetQueryData = vi.fn();
 
-jest.mock('./use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: {},
-      notifications: {
-        toasts: {
-          addSuccess: mockToastsAddSuccess,
-          addError: mockToastsAddError,
+vi.mock('./use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          http: {},
+          notifications: {
+            toasts: {
+              addSuccess: mockToastsAddSuccess,
+              addError: mockToastsAddError,
+            },
+          },
         },
-      },
-    },
-  }),
-}));
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockIntegrationData: IntegrationResponse = {
   integrationId: 'integration-123',
@@ -87,7 +93,7 @@ const createWrapper = () => {
 
 describe('useDeleteDataStream', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('initial state', () => {
@@ -170,7 +176,7 @@ describe('useDeleteDataStream', () => {
 
   describe('failed mutation', () => {
     it('should show error toast on failure', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const error = new Error('Server error');
       mockDeleteDataStream.mockRejectedValue(error);
@@ -201,7 +207,7 @@ describe('useDeleteDataStream', () => {
     });
 
     it('should set error state on failure', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const error = new Error('Server error');
       mockDeleteDataStream.mockRejectedValue(error);
@@ -229,7 +235,7 @@ describe('useDeleteDataStream', () => {
     });
 
     it('should still invalidate queries on failure via onSettled', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       mockDeleteDataStream.mockRejectedValue(new Error('Server error'));
 
@@ -257,7 +263,7 @@ describe('useDeleteDataStream', () => {
     });
 
     it('should rollback optimistic update on failure', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       mockGetQueryData.mockReturnValue(mockIntegrationData);
       mockDeleteDataStream.mockRejectedValue(new Error('Server error'));

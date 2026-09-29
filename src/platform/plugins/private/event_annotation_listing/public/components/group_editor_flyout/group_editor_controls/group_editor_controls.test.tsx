@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ChangeEvent, FormEvent } from 'react';
 import React from 'react';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
@@ -22,9 +25,9 @@ import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { AnnotationEditorControls } from '@kbn/event-annotation-components';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('@elastic/eui', () => {
+vi.mock('@elastic/eui', async () => {
   return {
-    ...jest.requireActual('@elastic/eui'),
+    ...(await vi.importActual('@elastic/eui')),
     EuiDatePicker: () => <></>, // for some reason this component caused an infinite loop when the props updated
   };
 });
@@ -48,14 +51,14 @@ describe('event annotation group editor', () => {
   };
 
   let wrapper: ReactWrapper;
-  let updateMock: jest.Mock;
-  let setSelectedAnnotationMock: jest.Mock;
+  let updateMock: Mock;
+  let setSelectedAnnotationMock: Mock;
 
   const TagSelector = (_props: { onTagsSelected: (tags: string[]) => void }) => <div />;
 
   beforeEach(async () => {
-    updateMock = jest.fn();
-    setSelectedAnnotationMock = jest.fn();
+    updateMock = vi.fn();
+    setSelectedAnnotationMock = vi.fn();
     const wrappingComponent: React.FC<{
       children: React.ReactNode;
     }> = ({ children }) => {

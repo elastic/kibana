@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { ReactElement } from 'react';
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
@@ -29,13 +31,13 @@ interface ResizableContainerCallbacks {
 
 let resizableContainerCallbacks: ResizableContainerCallbacks = {};
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   const ActualEuiResizableContainer = actual.EuiResizableContainer;
 
   return {
     ...actual,
-    useGeneratedHtmlId: jest.fn(() => fixedPanelId),
+    useGeneratedHtmlId: vi.fn(() => fixedPanelId),
     EuiResizableContainer: (props: React.ComponentProps<typeof ActualEuiResizableContainer>) => {
       resizableContainerCallbacks = {
         direction: props.direction,
@@ -49,11 +51,11 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-let resizeObserverCallback: (height: number, width: number) => void = jest.fn();
+let resizeObserverCallback: (height: number, width: number) => void = vi.fn();
 
 window.ResizeObserver = class ResizeObserver {
   constructor(callback: ResizeObserverCallback) {
-    resizeObserverCallback = jest.fn((height, width) => {
+    resizeObserverCallback = vi.fn((height, width) => {
       const entries = [
         { borderBoxSize: [{ inlineSize: width, blockSize: height }] },
       ] as unknown as ResizeObserverEntry[];
@@ -115,7 +117,7 @@ describe('Panels resizable', () => {
     initialFixedPanelSize = 0,
     minFixedPanelSize = 0,
     minFlexPanelSize = 0,
-    onFixedPanelSizeChange = jest.fn(),
+    onFixedPanelSizeChange = vi.fn(),
   }: {
     className?: string;
     container?: HTMLElement;
@@ -154,9 +156,9 @@ describe('Panels resizable', () => {
   beforeEach(() => {
     resizableContainerCallbacks = {};
 
-    resizeObserverCallback = jest.fn();
+    resizeObserverCallback = vi.fn();
 
-    window.HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
+    window.HTMLElement.prototype.getBoundingClientRect = vi.fn(() => {
       return {
         height: containerHeight,
         width: containerWidth,
@@ -186,7 +188,7 @@ describe('Panels resizable', () => {
   it('should set the correct sizes of both panels when the panels are resized', () => {
     const initialFixedPanelSize = 200;
     let fixedPanelSize: number | 'max-content' = initialFixedPanelSize;
-    const onFixedPanelSizeChange = jest.fn();
+    const onFixedPanelSizeChange = vi.fn();
 
     let rerenderPanels: ReturnType<typeof renderPanelsResizable>['rerender'] = () => undefined;
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { DynamicTool } from '@langchain/core/tools';
@@ -22,15 +25,18 @@ import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/imp
 
 const MAX_SIZE = 10000;
 
-jest.mock('@kbn/elastic-assistant-common', () => ({
-  transformRawData: jest.fn(() => 'transformedData'),
-  ...jest.requireActual('@kbn/elastic-assistant-common'),
-}));
+vi.mock('@kbn/elastic-assistant-common', async () => {
+      const mocked = {
+      transformRawData: vi.fn(() => 'transformedData'),
+      ...(await vi.importActual('@kbn/elastic-assistant-common')),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('OpenAndAcknowledgedAlertsTool', () => {
   const alertsIndexPattern = 'alerts-index';
   const esClient = {
-    search: jest.fn().mockResolvedValue(mockAlertsFieldsApi),
+    search: vi.fn().mockResolvedValue(mockAlertsFieldsApi),
   } as unknown as ElasticsearchClient;
   const replacements = { key: 'value' };
   const request = {
@@ -65,7 +71,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('isSupported', () => {
@@ -99,7 +105,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       const params = {
         alertsIndexPattern,
         anonymizationFields,
-        onNewReplacements: jest.fn(),
+        onNewReplacements: vi.fn(),
         replacements,
         request,
         ...rest,
@@ -113,7 +119,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
         alertsIndexPattern,
         allow: request.body.allow,
         allowReplacement: request.body.allowReplacement,
-        onNewReplacements: jest.fn(),
+        onNewReplacements: vi.fn(),
         replacements,
         request,
         size: MAX_SIZE + 1, // <-- size is out of range
@@ -140,7 +146,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       const tool: DynamicTool = (await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
-        onNewReplacements: jest.fn(),
+        onNewReplacements: vi.fn(),
         replacements,
         request,
         size: request.body.size,
@@ -236,20 +242,20 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       const tool: DynamicTool = (await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
-        onNewReplacements: jest.fn(),
+        onNewReplacements: vi.fn(),
         replacements,
         request,
         size: request.body.size,
         ...rest,
       })) as DynamicTool;
 
-      (esClient.search as jest.Mock).mockResolvedValue({
+      (esClient.search as Mock).mockResolvedValue({
         hits: {
           hits: [{ _id: 4 }],
         },
       });
 
-      (contentReferencesStore.add as jest.Mock).mockImplementation(
+      (contentReferencesStore.add as Mock).mockImplementation(
         (creator: Parameters<ContentReferencesStore['add']>[0]) => {
           const reference = creator({ id: 'exampleContentReferenceId' });
           expect(reference.type).toEqual('SecurityAlert');
@@ -267,7 +273,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       const tool = await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         // alertsIndexPattern is undefined
         anonymizationFields,
-        onNewReplacements: jest.fn(),
+        onNewReplacements: vi.fn(),
         replacements,
         request,
         size: request.body.size,
@@ -281,7 +287,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       const tool = await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
-        onNewReplacements: jest.fn(),
+        onNewReplacements: vi.fn(),
         replacements,
         request,
         ...rest,
@@ -295,7 +301,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       const tool = await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
-        onNewReplacements: jest.fn(),
+        onNewReplacements: vi.fn(),
         replacements,
         request,
         size: MAX_SIZE + 1, // <-- size is out of range
@@ -309,7 +315,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       const tool = (await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
-        onNewReplacements: jest.fn(),
+        onNewReplacements: vi.fn(),
         replacements,
         request,
         size: request.body.size,

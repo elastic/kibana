@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { TransportRequestParams, TransportRequestOptions } from '@elastic/transport';
 import type { TransportOptions } from '@elastic/transport/lib/Transport';
 
-export const transportConstructorMock: jest.MockedFunction<(options: TransportOptions) => void> =
-  jest.fn();
-export const transportRequestMock = jest.fn();
+export const transportConstructorMock: MockedFunction<(options: TransportOptions) => void> =
+  vi.fn();
+export const transportRequestMock = vi.fn();
 
 class TransportMock {
   constructor(options: TransportOptions) {
@@ -24,8 +27,8 @@ class TransportMock {
   }
 }
 
-jest.doMock('@elastic/elasticsearch', () => {
-  const realModule = jest.requireActual('@elastic/elasticsearch');
+vi.doMock('@elastic/elasticsearch', () => {
+  const realModule = require('@elastic/elasticsearch');
   return {
     ...realModule,
     Transport: TransportMock,

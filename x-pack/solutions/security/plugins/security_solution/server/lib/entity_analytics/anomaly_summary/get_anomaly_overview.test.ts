@@ -5,43 +5,52 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { getEntityAnomalyOverview } from './get_anomaly_overview';
 import { getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
 
-jest.mock('../ml_anomaly_detection', () => ({
-  ...jest.requireActual('../ml_anomaly_detection'),
-  getJobConfig: jest.fn(),
-  getSecurityMlJobIds: jest.fn(),
-}));
+vi.mock('../ml_anomaly_detection', async () => {
+      const mocked = {
+      ...(await vi.importActual('../ml_anomaly_detection')),
+      getJobConfig: vi.fn(),
+      getSecurityMlJobIds: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
-  euid: {
-    dsl: {
-      getEuidFilterBasedOnEntityRecord: jest
-        .fn()
-        .mockReturnValue({ bool: { filter: [{ term: { 'host.name': 'entity-1' } }] } }),
-    },
-  },
-}));
+vi.mock('@kbn/entity-store/common/euid_helpers', () => {
+      const mocked = {
+      euid: {
+        dsl: {
+          getEuidFilterBasedOnEntityRecord: vi
+            .fn()
+            .mockReturnValue({ bool: { filter: [{ term: { 'host.name': 'entity-1' } }] } }),
+        },
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetJobConfig = getJobConfig as jest.Mock;
-const mockGetSecurityMlJobIds = getSecurityMlJobIds as jest.Mock;
+const mockGetJobConfig = getJobConfig as Mock;
+const mockGetSecurityMlJobIds = getSecurityMlJobIds as Mock;
 
-const mockMlAnomalySearch = jest.fn();
+const mockMlAnomalySearch = vi.fn();
 const mockMl = {
-  mlSystemProvider: jest.fn().mockReturnValue({ mlAnomalySearch: mockMlAnomalySearch }),
+  mlSystemProvider: vi.fn().mockReturnValue({ mlAnomalySearch: mockMlAnomalySearch }),
 } as unknown as MlPluginSetup;
 
 const mockLogger: Logger = {
-  debug: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn(),
-  info: jest.fn(),
-  fatal: jest.fn(),
-  trace: jest.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  info: vi.fn(),
+  fatal: vi.fn(),
+  trace: vi.fn(),
 } as unknown as Logger;
 
 const mockSoClient = {} as SavedObjectsClientContract;
@@ -116,8 +125,8 @@ const makeSearchResponse = (
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
-  mockMl.mlSystemProvider = jest.fn().mockReturnValue({ mlAnomalySearch: mockMlAnomalySearch });
+  vi.clearAllMocks();
+  mockMl.mlSystemProvider = vi.fn().mockReturnValue({ mlAnomalySearch: mockMlAnomalySearch });
 });
 
 describe('getEntityAnomalyOverview', () => {

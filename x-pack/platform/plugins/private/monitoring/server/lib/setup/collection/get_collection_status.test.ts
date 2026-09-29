@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -41,7 +43,7 @@ const mockReq = (
       },
       config: createConfig(configSchema.validate({ ui: { ccs: { enabled: false } } })),
       log: logger,
-      route: jest.fn(),
+      route: vi.fn(),
       plugins: {
         monitoring: {
           info: {

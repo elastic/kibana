@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance, MockedClass, MockedFunction } from 'vitest';
+
 import Fs from 'fs';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { TsProject } from '@kbn/ts-projects';
@@ -27,70 +30,82 @@ import {
   resolveUpstreamRemote,
 } from './utils';
 
-jest.mock('./utils', () => ({
-  buildCandidateShaList: jest.fn(),
-  cleanTypeCheckArtifacts: jest.fn().mockResolvedValue(undefined),
-  getPullRequestNumber: jest.fn(),
-  isCiEnvironment: jest.fn(),
-  readRecentCommitShas: jest.fn(),
-  readMainBranchCommitShas: jest.fn().mockResolvedValue([]),
-  resolveCurrentCommitSha: jest.fn(),
-  resolveUpstreamRemote: jest.fn(),
-}));
+vi.mock('./utils', () => {
+      const mocked = {
+      buildCandidateShaList: vi.fn(),
+      cleanTypeCheckArtifacts: vi.fn().mockResolvedValue(undefined),
+      getPullRequestNumber: vi.fn(),
+      isCiEnvironment: vi.fn(),
+      readRecentCommitShas: vi.fn(),
+      readMainBranchCommitShas: vi.fn().mockResolvedValue([]),
+      resolveCurrentCommitSha: vi.fn(),
+      resolveUpstreamRemote: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./file_system/gcs_file_system', () => ({
-  GcsFileSystem: jest.fn().mockImplementation(() => ({
-    listAvailableCommitShas: jest.fn().mockResolvedValue({ shas: new Set(), elapsedMs: 0 }),
-    restoreArchive: jest.fn().mockResolvedValue(undefined),
-  })),
-}));
+vi.mock('./file_system/gcs_file_system', () => {
+      const mocked = {
+      GcsFileSystem: vi.fn().mockImplementation(() => ({
+        listAvailableCommitShas: vi.fn().mockResolvedValue({ shas: new Set(), elapsedMs: 0 }),
+        restoreArchive: vi.fn().mockResolvedValue(undefined),
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./cache_server_client', () => ({
-  isCacheServerAvailable: jest.fn().mockResolvedValue(false),
-  tryRestoreFromCacheServer: jest.fn().mockResolvedValue(false),
-}));
+vi.mock('./cache_server_client', () => {
+      const mocked = {
+      isCacheServerAvailable: vi.fn().mockResolvedValue(false),
+      tryRestoreFromCacheServer: vi.fn().mockResolvedValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./detect_stale_artifacts', () => ({
-  detectStaleArtifacts: jest.fn().mockResolvedValue(new Set()),
-}));
+vi.mock('./detect_stale_artifacts', () => {
+      const mocked = {
+      detectStaleArtifacts: vi.fn().mockResolvedValue(new Set()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock execa to simulate a fresh checkout (no existing build artifacts)
 // and prevent actual git/gcloud commands from running during tests.
-jest.mock('execa', () => jest.fn().mockResolvedValue({ stdout: '' }));
+vi.mock('execa', () => vi.fn().mockResolvedValue({ stdout: '' }));
 
-const mockedBuildCandidateShaList = buildCandidateShaList as jest.MockedFunction<
+const mockedBuildCandidateShaList = buildCandidateShaList as MockedFunction<
   typeof buildCandidateShaList
 >;
-const mockedCleanTypeCheckArtifacts = cleanTypeCheckArtifacts as jest.MockedFunction<
+const mockedCleanTypeCheckArtifacts = cleanTypeCheckArtifacts as MockedFunction<
   typeof cleanTypeCheckArtifacts
 >;
-const mockedGetPullRequestNumber = getPullRequestNumber as jest.MockedFunction<
+const mockedGetPullRequestNumber = getPullRequestNumber as MockedFunction<
   typeof getPullRequestNumber
 >;
-const mockedIsCiEnvironment = isCiEnvironment as jest.MockedFunction<typeof isCiEnvironment>;
-const mockedReadRecentCommitShas = readRecentCommitShas as jest.MockedFunction<
+const mockedIsCiEnvironment = isCiEnvironment as MockedFunction<typeof isCiEnvironment>;
+const mockedReadRecentCommitShas = readRecentCommitShas as MockedFunction<
   typeof readRecentCommitShas
 >;
-const mockedResolveCurrentCommitSha = resolveCurrentCommitSha as jest.MockedFunction<
+const mockedResolveCurrentCommitSha = resolveCurrentCommitSha as MockedFunction<
   typeof resolveCurrentCommitSha
 >;
-const mockedResolveUpstreamRemote = resolveUpstreamRemote as jest.MockedFunction<
+const mockedResolveUpstreamRemote = resolveUpstreamRemote as MockedFunction<
   typeof resolveUpstreamRemote
 >;
 
-const { detectStaleArtifacts } = jest.requireMock('./detect_stale_artifacts') as {
-  detectStaleArtifacts: jest.MockedFunction<
+const { detectStaleArtifacts } = (await vi.importMock('./detect_stale_artifacts')) as {
+  detectStaleArtifacts: MockedFunction<
     (opts: Record<string, unknown>) => Promise<Set<string>>
   >;
 };
 
 const createLog = (): SomeDevLog => {
   return {
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-    verbose: jest.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    verbose: vi.fn(),
   } as unknown as SomeDevLog;
 };
 
@@ -107,10 +122,10 @@ const makeProject = (path: string, typeCheckConfigPath: string, refs: string[] =
 };
 
 describe('restoreTSBuildArtifacts', () => {
-  let restoreSpy: jest.SpyInstance;
+  let restoreSpy: MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedIsCiEnvironment.mockReturnValue(false);
     mockedGetPullRequestNumber.mockReturnValue(undefined);
     mockedResolveCurrentCommitSha.mockResolvedValue('');
@@ -119,17 +134,17 @@ describe('restoreTSBuildArtifacts', () => {
     mockedResolveUpstreamRemote.mockResolvedValue(undefined);
     // Mock readFile to return an empty project list for checkForExistingBuildArtifacts,
     // simulating a fresh checkout with no target/types directories.
-    jest.spyOn(Fs.promises, 'readFile').mockResolvedValue(JSON.stringify([]));
+    vi.spyOn(Fs.promises, 'readFile').mockResolvedValue(JSON.stringify([]));
     // Mock Fs.promises.access so the local cache path is considered reachable in tests.
-    jest.spyOn(Fs.promises, 'access').mockResolvedValue(undefined);
-    restoreSpy = jest
+    vi.spyOn(Fs.promises, 'access').mockResolvedValue(undefined);
+    restoreSpy = vi
       .spyOn(LocalFileSystem.prototype, 'restoreArchive')
       .mockResolvedValue(undefined);
   });
 
   afterEach(() => {
     restoreSpy.mockRestore();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('logs when there is no commit history to restore', async () => {
@@ -189,19 +204,19 @@ describe('restoreTSBuildArtifacts', () => {
         .mockReturnValueOnce(candidateShas) // outer candidateShas (early exit check)
         .mockReturnValueOnce(candidateShas); // resolveGcsMatchedShas internal candidates
 
-      const mockGcsRestore = jest.fn().mockResolvedValue(restoredSha);
-      (GcsFileSystem as jest.MockedClass<typeof GcsFileSystem>).mockImplementationOnce(
+      const mockGcsRestore = vi.fn().mockResolvedValue(restoredSha);
+      (GcsFileSystem as MockedClass<typeof GcsFileSystem>).mockImplementationOnce(
         () =>
           ({
-            listAvailableCommitShas: jest
+            listAvailableCommitShas: vi
               .fn()
               .mockResolvedValue({ shas: new Set([restoredSha]), elapsedMs: 0 }),
             restoreArchive: mockGcsRestore,
           } as unknown as GcsFileSystem)
       );
 
-      const mkdirSpy = jest.spyOn(Fs.promises, 'mkdir').mockResolvedValue(undefined);
-      const writeFileSpy = jest.spyOn(Fs.promises, 'writeFile').mockResolvedValue(undefined);
+      const mkdirSpy = vi.spyOn(Fs.promises, 'mkdir').mockResolvedValue(undefined);
+      const writeFileSpy = vi.spyOn(Fs.promises, 'writeFile').mockResolvedValue(undefined);
 
       await restoreTSBuildArtifacts(log);
 
@@ -223,14 +238,14 @@ describe('restoreTSBuildArtifacts', () => {
   describe('direct restore (specificSha)', () => {
     it('calls gcsFs.restoreArchive with the specific SHA and skips existence check', async () => {
       const log = createLog();
-      const mockGcsRestore = jest.fn().mockResolvedValue('abc123');
+      const mockGcsRestore = vi.fn().mockResolvedValue('abc123');
 
-      (GcsFileSystem as jest.MockedClass<typeof GcsFileSystem>).mockImplementationOnce(
+      (GcsFileSystem as MockedClass<typeof GcsFileSystem>).mockImplementationOnce(
         () => ({ restoreArchive: mockGcsRestore } as unknown as GcsFileSystem)
       );
 
-      const mkdirSpy = jest.spyOn(Fs.promises, 'mkdir').mockResolvedValue(undefined);
-      const writeFileSpy = jest.spyOn(Fs.promises, 'writeFile').mockResolvedValue(undefined);
+      const mkdirSpy = vi.spyOn(Fs.promises, 'mkdir').mockResolvedValue(undefined);
+      const writeFileSpy = vi.spyOn(Fs.promises, 'writeFile').mockResolvedValue(undefined);
 
       await restoreTSBuildArtifacts(log, 'abc123def456');
 
@@ -256,12 +271,12 @@ describe('restoreTSBuildArtifacts', () => {
 });
 
 describe('resolveRestoreStrategy', () => {
-  let gcsListMock: jest.Mock;
-  let readFileSpy: jest.SpyInstance;
-  let writeFileSpy: jest.SpyInstance;
-  let mkdirSpy: jest.SpyInstance;
-  let accessSpy: jest.SpyInstance;
-  let unlinkSpy: jest.SpyInstance;
+  let gcsListMock: Mock;
+  let readFileSpy: MockInstance;
+  let writeFileSpy: MockInstance;
+  let mkdirSpy: MockInstance;
+  let accessSpy: MockInstance;
+  let unlinkSpy: MockInstance;
 
   // Returns a readFile mock that returns a sha from the state file and a valid
   // tsconfig list from the config-paths.json file.
@@ -279,7 +294,7 @@ describe('resolveRestoreStrategy', () => {
     };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedIsCiEnvironment.mockReturnValue(false);
     mockedResolveCurrentCommitSha.mockResolvedValue('head-sha');
     mockedReadRecentCommitShas.mockResolvedValue(['head-sha', 'ancestor-sha']);
@@ -287,23 +302,23 @@ describe('resolveRestoreStrategy', () => {
     mockedBuildCandidateShaList.mockReturnValue(['head-sha', 'ancestor-sha']);
     detectStaleArtifacts.mockResolvedValue(new Set());
 
-    gcsListMock = jest.fn().mockResolvedValue({ shas: new Set(['ancestor-sha']), elapsedMs: 0 });
-    (GcsFileSystem as jest.MockedClass<typeof GcsFileSystem>).mockImplementation(
+    gcsListMock = vi.fn().mockResolvedValue({ shas: new Set(['ancestor-sha']), elapsedMs: 0 });
+    (GcsFileSystem as MockedClass<typeof GcsFileSystem>).mockImplementation(
       () =>
         ({
           listAvailableCommitShas: gcsListMock,
-          restoreArchive: jest.fn().mockResolvedValue(undefined),
+          restoreArchive: vi.fn().mockResolvedValue(undefined),
         } as unknown as GcsFileSystem)
     );
 
     // No local artifacts by default — empty config-paths.json, no state file.
-    readFileSpy = jest
+    readFileSpy = vi
       .spyOn(Fs.promises, 'readFile')
       .mockImplementation(makeReadFileMock(null, []));
-    writeFileSpy = jest.spyOn(Fs.promises, 'writeFile').mockResolvedValue(undefined);
-    mkdirSpy = jest.spyOn(Fs.promises, 'mkdir').mockResolvedValue(undefined);
-    accessSpy = jest.spyOn(Fs.promises, 'access').mockRejectedValue(new Error('ENOENT'));
-    unlinkSpy = jest.spyOn(Fs.promises, 'unlink').mockResolvedValue(undefined);
+    writeFileSpy = vi.spyOn(Fs.promises, 'writeFile').mockResolvedValue(undefined);
+    mkdirSpy = vi.spyOn(Fs.promises, 'mkdir').mockResolvedValue(undefined);
+    accessSpy = vi.spyOn(Fs.promises, 'access').mockRejectedValue(new Error('ENOENT'));
+    unlinkSpy = vi.spyOn(Fs.promises, 'unlink').mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -399,8 +414,8 @@ describe('resolveRestoreStrategy', () => {
     );
   });
 
-  describe('Phase 1.5 — cache-invalidation file detection', () => {
-    const mockedExeca = jest.requireMock('execa') as jest.Mock;
+  describe('Phase 1.5 — cache-invalidation file detection', async () => {
+    const mockedExeca = (await vi.importMock('execa')) as Mock;
 
     it('cleans artifacts and resets state when invalidation files changed', async () => {
       accessSpy.mockResolvedValue(undefined);
@@ -568,8 +583,8 @@ describe('resolveRestoreStrategy', () => {
     });
   });
 
-  describe('GCS archive node_modules safety check', () => {
-    const mockedExeca = jest.requireMock('execa') as jest.Mock;
+  describe('GCS archive node_modules safety check', async () => {
+    const mockedExeca = (await vi.importMock('execa')) as Mock;
 
     it('skips restore when no local artifacts exist but archive has a node_modules change', async () => {
       // Default beforeEach: no local artifacts, GCS has 'ancestor-sha'.
@@ -770,25 +785,28 @@ describe('computeEffectiveRebuildSet', () => {
 
 // ── selectBestArchive ──────────────────────────────────────────────────────
 
-jest.mock('./gcs_archive_resolver', () => ({
-  ...jest.requireActual('./gcs_archive_resolver'),
-  computeEffectiveRebuildCountFromSha: jest.fn(),
-}));
+vi.mock('./gcs_archive_resolver', async () => {
+      const mocked = {
+      ...(await vi.importActual('./gcs_archive_resolver')),
+      computeEffectiveRebuildCountFromSha: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { computeEffectiveRebuildCountFromSha } from './gcs_archive_resolver';
 
-const mockedStaleness = computeEffectiveRebuildCountFromSha as jest.MockedFunction<
+const mockedStaleness = computeEffectiveRebuildCountFromSha as MockedFunction<
   typeof computeEffectiveRebuildCountFromSha
 >;
 
 function makeLog(): SomeDevLog {
   return {
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
-    success: jest.fn(),
-    debug: jest.fn(),
-    verbose: jest.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
+    success: vi.fn(),
+    debug: vi.fn(),
+    verbose: vi.fn(),
   };
 }
 
@@ -938,7 +956,7 @@ describe('selectBestArchive', () => {
     const log = makeLog();
     await selectBestArchive({ commitArchive: COMMIT, prArchive: PR }, noProjects, log);
 
-    const logCall = (log.info as jest.Mock).mock.calls
+    const logCall = (log.info as Mock).mock.calls
       .flat()
       .find((msg: string) => msg.includes('PR overhead'));
     expect(logCall).toContain(`${PR_OVERHEAD} PR overhead`);

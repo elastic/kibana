@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import type { IRouter, RequestHandler, RequestHandlerContext } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -15,7 +17,7 @@ import { routeDefinitionParamsMock } from './index.mock';
 import { defineStatusRoute } from './status';
 
 describe('Status routes', () => {
-  let router: jest.Mocked<IRouter>;
+  let router: Mocked<IRouter>;
   let mockRouteParams: ReturnType<typeof routeDefinitionParamsMock.create>;
   let mockContext: RequestHandlerContext;
   beforeEach(() => {

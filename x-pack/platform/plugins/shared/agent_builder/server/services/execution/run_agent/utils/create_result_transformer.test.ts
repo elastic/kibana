@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
@@ -28,12 +30,12 @@ describe('createResultTransformer', () => {
   // Entries are keyed by tool_result_id, matching the store's `getEntryByResultId` lookup.
   const createMockResultStore = (entriesByResultId: Map<string, FileEntry>): ToolResultStore =>
     ({
-      has: jest.fn(),
-      get: jest.fn(),
-      getEntry: jest.fn(),
-      getEntryByResultId: jest.fn(async (resultId: string) => entriesByResultId.get(resultId)),
-      listEntries: jest.fn(async () => []),
-      entryExists: jest.fn(),
+      has: vi.fn(),
+      get: vi.fn(),
+      getEntry: vi.fn(),
+      getEntryByResultId: vi.fn(async (resultId: string) => entriesByResultId.get(resultId)),
+      listEntries: vi.fn(async () => []),
+      entryExists: vi.fn(),
     } as unknown as ToolResultStore);
 
   const createFileEntry = (
@@ -59,9 +61,9 @@ describe('createResultTransformer', () => {
     tools: Map<string, { summarizeToolReturn?: (step: ToolCallWithResult) => ToolResult[] | null }>
   ): ToolRegistry =>
     ({
-      get: jest.fn(async (toolId: string) => tools.get(toolId)),
-      has: jest.fn(async (toolId: string) => tools.has(toolId)),
-      list: jest.fn(async () => []),
+      get: vi.fn(async (toolId: string) => tools.get(toolId)),
+      has: vi.fn(async (toolId: string) => tools.has(toolId)),
+      list: vi.fn(async () => []),
     } as unknown as ToolRegistry);
 
   const createMockToolManager = (
@@ -71,13 +73,13 @@ describe('createResultTransformer', () => {
     > = new Map()
   ): ToolManager =>
     ({
-      getSummarizer: jest.fn((toolId: string) => summarizers.get(toolId)),
+      getSummarizer: vi.fn((toolId: string) => summarizers.get(toolId)),
     } as unknown as ToolManager);
 
   describe('tool-specific summarization', () => {
     it('applies summarizeToolReturn when tool has it defined', async () => {
       const toolWithSummarizer = {
-        summarizeToolReturn: jest.fn((step: ToolCallWithResult) => [
+        summarizeToolReturn: vi.fn((step: ToolCallWithResult) => [
           {
             tool_result_id: 'summarized',
             type: ToolResultType.other,
@@ -110,7 +112,7 @@ describe('createResultTransformer', () => {
 
     it('falls back to original results when summarizeToolReturn returns null', async () => {
       const toolWithNullSummarizer = {
-        summarizeToolReturn: jest.fn(() => null),
+        summarizeToolReturn: vi.fn(() => null),
       };
 
       const toolRegistry = createMockToolRegistry(
@@ -182,7 +184,7 @@ describe('createResultTransformer', () => {
     });
 
     it('prefers toolManager summarizer over toolRegistry', async () => {
-      const managerSummarizer = jest.fn((step: ToolCallWithResult) => [
+      const managerSummarizer = vi.fn((step: ToolCallWithResult) => [
         {
           tool_result_id: 'manager-summarized',
           type: ToolResultType.other,
@@ -191,7 +193,7 @@ describe('createResultTransformer', () => {
       ]);
 
       const registrySummarizer = {
-        summarizeToolReturn: jest.fn((step: ToolCallWithResult) => [
+        summarizeToolReturn: vi.fn((step: ToolCallWithResult) => [
           {
             tool_result_id: 'registry-summarized',
             type: ToolResultType.other,
@@ -225,7 +227,7 @@ describe('createResultTransformer', () => {
 
     it('falls back to toolRegistry when toolManager has no summarizer', async () => {
       const registrySummarizer = {
-        summarizeToolReturn: jest.fn((step: ToolCallWithResult) => [
+        summarizeToolReturn: vi.fn((step: ToolCallWithResult) => [
           {
             tool_result_id: 'registry-summarized',
             type: ToolResultType.other,
@@ -380,7 +382,7 @@ describe('createResultTransformer', () => {
   describe('summarization and filestore interaction', () => {
     it('does not apply filestore substitution to summarized results', async () => {
       const toolWithSummarizer = {
-        summarizeToolReturn: jest.fn(() => [
+        summarizeToolReturn: vi.fn(() => [
           {
             tool_result_id: 'summarized',
             type: ToolResultType.other,
@@ -425,7 +427,7 @@ describe('createResultTransformer', () => {
   describe('cleaned marker handling', () => {
     it('skips processing for already cleaned results', async () => {
       const toolWithSummarizer = {
-        summarizeToolReturn: jest.fn(),
+        summarizeToolReturn: vi.fn(),
       };
 
       const toolRegistry = createMockToolRegistry(new Map([['search', toolWithSummarizer as any]]));
@@ -456,7 +458,7 @@ describe('createResultTransformer', () => {
 
     it('adds cleaned marker to summarized results', async () => {
       const toolWithSummarizer = {
-        summarizeToolReturn: jest.fn(() => [
+        summarizeToolReturn: vi.fn(() => [
           {
             tool_result_id: 'summarized',
             type: ToolResultType.other,

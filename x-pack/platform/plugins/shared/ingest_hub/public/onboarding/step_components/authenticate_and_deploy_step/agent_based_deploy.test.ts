@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
 // Bare factory (not requireActual) — the Fleet barrel is heavy and we only need these senders.
-jest.mock('@kbn/fleet-plugin/public', () => ({
-  sendCreateAgentPolicyWithPackagePolicies: jest.fn(),
-  sendCreatePackagePolicy: jest.fn(),
-  sendGetPackageInfoByKeyForRq: jest.fn(),
-  sendGetAgentPolicies: jest.fn(),
-  // Use the real implementation so buildAgentPolicyName gets consistent naming.
-  incrementPolicyName: jest.requireActual('@kbn/fleet-plugin/public').incrementPolicyName,
-}));
+vi.mock('@kbn/fleet-plugin/public', async () => {
+      const mocked = {
+      sendCreateAgentPolicyWithPackagePolicies: vi.fn(),
+      sendCreatePackagePolicy: vi.fn(),
+      sendGetPackageInfoByKeyForRq: vi.fn(),
+      sendGetAgentPolicies: vi.fn(),
+      // Use the real implementation so buildAgentPolicyName gets consistent naming.
+      incrementPolicyName: (await vi.importActual('@kbn/fleet-plugin/public')).incrementPolicyName,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import {
   sendCreateAgentPolicyWithPackagePolicies,
@@ -33,10 +39,10 @@ import { extractErrorMessage } from './deploy_errors';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { ServiceInstance } from '../service_settings_step/use_service_settings';
 
-const mockSendCreateAgentPolicy = sendCreateAgentPolicyWithPackagePolicies as jest.Mock;
-const mockSendCreatePackagePolicy = sendCreatePackagePolicy as jest.Mock;
-const mockSendGetPackageInfo = sendGetPackageInfoByKeyForRq as jest.Mock;
-const mockSendGetAgentPolicies = sendGetAgentPolicies as jest.Mock;
+const mockSendCreateAgentPolicy = sendCreateAgentPolicyWithPackagePolicies as Mock;
+const mockSendCreatePackagePolicy = sendCreatePackagePolicy as Mock;
+const mockSendGetPackageInfo = sendGetPackageInfoByKeyForRq as Mock;
+const mockSendGetAgentPolicies = sendGetAgentPolicies as Mock;
 
 function makeVarDef(name: string, opts: Partial<RegistryVarsEntry> = {}): RegistryVarsEntry {
   return { name, type: 'text', title: name, ...opts } as RegistryVarsEntry;
@@ -125,7 +131,7 @@ const BASE_OPTS = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   // sendGetPackageInfoByKeyForRq uses sendRequestForRq — returns unwrapped { item } directly, no envelope.
   mockSendGetPackageInfo.mockResolvedValue({ item: { version: '3.0.0', vars: [] } });
   mockSendCreateAgentPolicy.mockResolvedValue({

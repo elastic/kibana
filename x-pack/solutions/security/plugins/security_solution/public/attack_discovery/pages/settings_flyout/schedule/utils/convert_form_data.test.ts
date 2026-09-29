@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { AIConnector } from '@kbn/elastic-assistant';
 
@@ -20,17 +23,17 @@ import { getGenAiConfig } from '../../../use_attack_discovery/helpers';
 import { parseFilterQuery } from '../../parse_filter_query';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
-jest.mock('../../../../../common/lib/kuery');
-jest.mock('../../../use_attack_discovery/helpers');
-jest.mock('../../parse_filter_query');
+vi.mock('../../../../../common/lib/kuery');
+vi.mock('../../../use_attack_discovery/helpers');
+vi.mock('../../parse_filter_query');
 
 describe('convertFormDataInBaseSchedule', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (convertToBuildEsQuery as jest.Mock).mockReturnValue(['test-filter-query']);
-    (getGenAiConfig as jest.Mock).mockReturnValue({ defaultModel: 'test-model' });
-    (parseFilterQuery as jest.Mock).mockReturnValue({ filter: { field: 'test' } });
+    (convertToBuildEsQuery as Mock).mockReturnValue(['test-filter-query']);
+    (getGenAiConfig as Mock).mockReturnValue({ defaultModel: 'test-model' });
+    (parseFilterQuery as Mock).mockReturnValue({ filter: { field: 'test' } });
   });
 
   it('should convert form data into a base schedule schema', () => {
@@ -54,7 +57,7 @@ describe('convertFormDataInBaseSchedule', () => {
       '.alert-*',
       {} as AIConnector,
       {
-        get: jest.fn(),
+        get: vi.fn(),
       } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
@@ -101,7 +104,7 @@ describe('convertFormDataInBaseSchedule', () => {
       },
       '.alert-*',
       {} as AIConnector,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
+      { get: vi.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
 
@@ -126,7 +129,7 @@ describe('convertFormDataInBaseSchedule', () => {
       },
       '.alert-*',
       {} as AIConnector,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
+      { get: vi.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
 
@@ -154,7 +157,7 @@ describe('convertFormDataInBaseSchedule', () => {
       },
       '.alert-*',
       {} as AIConnector,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
+      { get: vi.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
 
@@ -187,7 +190,7 @@ describe('convertFormDataInBaseSchedule', () => {
       },
       '.alert-*',
       {} as AIConnector,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
+      { get: vi.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
 
@@ -200,7 +203,7 @@ describe('convertFormDataInBaseSchedule', () => {
   });
 
   it('omits model and provider from apiConfig when the connector has neither', () => {
-    (getGenAiConfig as jest.Mock).mockReturnValue({ defaultModel: null });
+    (getGenAiConfig as Mock).mockReturnValue({ defaultModel: null });
 
     const baseSchedule = convertFormDataInBaseSchedule(
       {
@@ -222,7 +225,7 @@ describe('convertFormDataInBaseSchedule', () => {
         id: 'connector-1',
         name: 'connector-1',
       } as unknown as AIConnector,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
+      { get: vi.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
 
@@ -247,7 +250,7 @@ describe('convertFormDataInBaseSchedule', () => {
       },
       '.alerts-security.alerts-default',
       {} as AIConnector,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
+      { get: vi.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
 
@@ -352,10 +355,10 @@ describe('convertActionsToSnakeCase', () => {
 
 describe('convertFormDataToWorkflowSchedule', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (convertToBuildEsQuery as jest.Mock).mockReturnValue(['test-filter-query']);
-    (getGenAiConfig as jest.Mock).mockReturnValue({ defaultModel: 'test-model' });
-    (parseFilterQuery as jest.Mock).mockReturnValue({ filter: { field: 'test' } });
+    vi.clearAllMocks();
+    (convertToBuildEsQuery as Mock).mockReturnValue(['test-filter-query']);
+    (getGenAiConfig as Mock).mockReturnValue({ defaultModel: 'test-model' });
+    (parseFilterQuery as Mock).mockReturnValue({ filter: { field: 'test' } });
   });
 
   it('converts actions to snake_case in the output', () => {
@@ -387,7 +390,7 @@ describe('convertFormDataToWorkflowSchedule', () => {
       },
       '.alert-*',
       { actionTypeId: '.gen-ai', id: 'c1', apiProvider: 'openai' } as unknown as AIConnector,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
+      { get: vi.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
 
@@ -423,7 +426,7 @@ describe('convertFormDataToWorkflowSchedule', () => {
       },
       '.alert-*',
       { actionTypeId: '.gen-ai', id: 'c1', apiProvider: 'openai' } as unknown as AIConnector,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
+      { get: vi.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
 
@@ -436,7 +439,7 @@ describe('convertFormDataToWorkflowSchedule', () => {
   });
 
   it('omits model from api_config when the connector has no model', () => {
-    (getGenAiConfig as jest.Mock).mockReturnValue({ defaultModel: null });
+    (getGenAiConfig as Mock).mockReturnValue({ defaultModel: null });
 
     const result = convertFormDataToWorkflowSchedule(
       {
@@ -454,7 +457,7 @@ describe('convertFormDataToWorkflowSchedule', () => {
       },
       '.alert-*',
       { actionTypeId: '.inference', id: 'c1', name: 'c1' } as unknown as AIConnector,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
+      { get: vi.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
 
@@ -462,7 +465,7 @@ describe('convertFormDataToWorkflowSchedule', () => {
   });
 
   it('omits provider from api_config when the connector has no provider', () => {
-    (getGenAiConfig as jest.Mock).mockReturnValue({ defaultModel: null });
+    (getGenAiConfig as Mock).mockReturnValue({ defaultModel: null });
 
     const result = convertFormDataToWorkflowSchedule(
       {
@@ -485,7 +488,7 @@ describe('convertFormDataToWorkflowSchedule', () => {
         name: 'c1',
         apiProvider: null,
       } as unknown as AIConnector,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
+      { get: vi.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
 
@@ -518,7 +521,7 @@ describe('convertFormDataToWorkflowSchedule', () => {
       },
       '.alert-*',
       { actionTypeId: '.gen-ai', id: 'c1', apiProvider: 'openai' } as unknown as AIConnector,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
+      { get: vi.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
 
@@ -573,7 +576,7 @@ describe('convertFormDataToWorkflowSchedule', () => {
         name: 'c1',
         apiProvider: 'openai',
       } as unknown as AIConnector,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
+      { get: vi.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
 
@@ -609,7 +612,7 @@ describe('convertFormDataToWorkflowSchedule', () => {
       },
       '.alert-*',
       { actionTypeId: '.gen-ai', id: 'c1', apiProvider: 'openai' } as unknown as AIConnector,
-      { get: jest.fn() } as unknown as IUiSettingsClient,
+      { get: vi.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
 

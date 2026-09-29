@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
@@ -14,8 +17,8 @@ import { runResolutionScoringStep } from './run_resolution_scoring_step';
 import { calculateResolutionEntityScores } from './score_resolution_entities';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 
-jest.mock('./score_resolution_entities');
-jest.mock('./persist_scores');
+vi.mock('./score_resolution_entities');
+vi.mock('./persist_scores');
 
 async function* toAsyncGenerator<T>(pages: T[]) {
   for (const page of pages) {
@@ -31,21 +34,21 @@ describe('runResolutionScoringStep', () => {
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     crudClient = {} as EntityUpdateClient;
-    (persistScoresToRiskIndex as jest.Mock).mockResolvedValue(0);
-    (persistScoresToEntityStore as jest.Mock).mockResolvedValue({
+    (persistScoresToRiskIndex as Mock).mockResolvedValue(0);
+    (persistScoresToEntityStore as Mock).mockResolvedValue({
       docsWritten: 0,
       errorsCount: 0,
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('does not report lookup_empty when aborted before first page is processed', async () => {
     const abortController = new AbortController();
     abortController.abort();
-    (calculateResolutionEntityScores as jest.Mock).mockReturnValue(toAsyncGenerator([[]]));
+    (calculateResolutionEntityScores as Mock).mockReturnValue(toAsyncGenerator([[]]));
 
     const result = await runResolutionScoringStep({
       esClient,
@@ -80,7 +83,7 @@ describe('runResolutionScoringStep', () => {
   });
 
   it('reports lookup_empty when no lookup pages are returned', async () => {
-    (calculateResolutionEntityScores as jest.Mock).mockReturnValue(toAsyncGenerator([]));
+    (calculateResolutionEntityScores as Mock).mockReturnValue(toAsyncGenerator([]));
 
     const result = await runResolutionScoringStep({
       esClient,

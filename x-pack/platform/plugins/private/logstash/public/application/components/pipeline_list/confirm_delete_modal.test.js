@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
@@ -13,14 +15,14 @@ describe('ConfirmDeleteModal component', () => {
   let props;
   beforeEach(() => {
     props = {
-      cancelDeletePipelines: jest.fn(),
-      deleteSelectedPipelines: jest.fn(),
+      cancelDeletePipelines: vi.fn(),
+      deleteSelectedPipelines: vi.fn(),
       selection: [
         {
           id: 'testId',
         },
       ],
-      showConfirmDeleteModal: jest.fn(),
+      showConfirmDeleteModal: vi.fn(),
     };
   });
 

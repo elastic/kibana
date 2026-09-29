@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 
@@ -16,7 +19,7 @@ import { mockConnectors } from '../../mock/connectors';
 import { CLOSE } from './translations';
 import { ConversationSharedState } from '@kbn/elastic-assistant-common';
 
-const onConversationSelected = jest.fn();
+const onConversationSelected = vi.fn();
 const mockConversations = {
   [alertConvo.title]: { ...alertConvo, isConversationOwner: true },
   [welcomeConvo.title]: { ...welcomeConvo, isConversationOwner: true },
@@ -36,52 +39,58 @@ const testProps = {
   isDisabled: false,
   isSettingsModalVisible: false,
   onConversationSelected,
-  onToggleShowAnonymizedValues: jest.fn(),
-  setIsSettingsModalVisible: jest.fn(),
-  onConversationCreate: jest.fn(),
-  onConversationDeleted: jest.fn(),
-  onChatCleared: jest.fn(),
+  onToggleShowAnonymizedValues: vi.fn(),
+  setIsSettingsModalVisible: vi.fn(),
+  onConversationCreate: vi.fn(),
+  onConversationDeleted: vi.fn(),
+  onChatCleared: vi.fn(),
   showAnonymizedValues: false,
   conversations: mockConversations,
-  refetchCurrentConversation: jest.fn(),
-  refetchCurrentUserConversations: jest.fn(),
+  refetchCurrentConversation: vi.fn(),
+  refetchCurrentUserConversations: vi.fn(),
   isAssistantEnabled: true,
   anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
-  refetchAnonymizationFieldsResults: jest.fn(),
+  refetchAnonymizationFieldsResults: vi.fn(),
   allPrompts: [],
   contentReferencesVisible: true,
-  setContentReferencesVisible: jest.fn(),
-  setPaginationObserver: jest.fn(),
-  setCurrentConversation: jest.fn(),
+  setContentReferencesVisible: vi.fn(),
+  setPaginationObserver: vi.fn(),
+  setCurrentConversation: vi.fn(),
 };
 
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn(() => {
-    return {
-      data: [],
-      error: null,
-      isSuccess: true,
+vi.mock('@kbn/inference-connectors', () => {
+      const mocked = {
+      useLoadConnectors: vi.fn(() => {
+        return {
+          data: [],
+          error: null,
+          isSuccess: true,
+        };
+      }),
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
-(useLoadConnectors as jest.Mock).mockReturnValue({
+(useLoadConnectors as Mock).mockReturnValue({
   data: mockConnectors,
   error: null,
   isSuccess: true,
 });
 const mockSetApiConfig = alertConvo;
-jest.mock('../use_conversation', () => ({
-  useConversation: jest.fn(() => {
-    return {
-      setApiConfig: jest.fn().mockReturnValue(mockSetApiConfig),
+vi.mock('../use_conversation', () => {
+      const mocked = {
+      useConversation: vi.fn(() => {
+        return {
+          setApiConfig: vi.fn().mockReturnValue(mockSetApiConfig),
+        };
+      }),
     };
-  }),
-}));
+      return { ...mocked, default: mocked };
+    });
 
 describe('AssistantHeader', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('Conversation is updated when connector change occurs', async () => {
@@ -100,7 +109,7 @@ describe('AssistantHeader', () => {
   });
 
   it('renders an accessible close button icon', () => {
-    const onCloseFlyout = jest.fn(); // required to render the close button
+    const onCloseFlyout = vi.fn(); // required to render the close button
 
     render(<AssistantHeader {...testProps} onCloseFlyout={onCloseFlyout} />, {
       wrapper: TestProviders,

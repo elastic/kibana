@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 
 import { render } from '@testing-library/react';
@@ -25,7 +27,7 @@ const defaultUseAlertCountByRuleByStatusReturn: UseAlertCountByRuleByStatusRetur
   updatedAt: Date.now(),
 };
 
-const mockUseAlertCountByRuleByStatus = jest.fn(
+const mockUseAlertCountByRuleByStatus = vi.fn(
   (_props: UseAlertCountByRuleByStatusProps) => defaultUseAlertCountByRuleByStatusReturn
 );
 const mockUseAlertCountByRuleByStatusReturn = (
@@ -37,24 +39,33 @@ const mockUseAlertCountByRuleByStatusReturn = (
   });
 };
 
-jest.mock('./use_alert_count_by_rule_by_status', () => ({
-  useAlertCountByRuleByStatus: (props: UseAlertCountByRuleByStatusProps) =>
-    mockUseAlertCountByRuleByStatus(props),
-}));
+vi.mock('./use_alert_count_by_rule_by_status', () => {
+      const mocked = {
+      useAlertCountByRuleByStatus: (props: UseAlertCountByRuleByStatusProps) =>
+        mockUseAlertCountByRuleByStatus(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/entity-store/public', () => ({
-  FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
-  useEntityStoreEuidApi: jest.fn(() => undefined),
-}));
+vi.mock('@kbn/entity-store/public', () => {
+      const mocked = {
+      FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
+      useEntityStoreEuidApi: vi.fn(() => undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../lib/kibana/kibana_react', () => {
-  const actual = jest.requireActual('../../lib/kibana/kibana_react');
-  return { ...actual, useUiSetting: jest.fn(() => false) };
+vi.mock('../../lib/kibana/kibana_react', async () => {
+  const actual = (await vi.importActual('../../lib/kibana/kibana_react'));
+  return { ...actual, useUiSetting: vi.fn(() => false) };
 });
 
-jest.mock('../../hooks/timeline/use_investigate_in_timeline', () => ({
-  useInvestigateInTimeline: jest.fn(() => ({ investigateInTimeline: jest.fn() })),
-}));
+vi.mock('../../hooks/timeline/use_investigate_in_timeline', () => {
+      const mocked = {
+      useInvestigateInTimeline: vi.fn(() => ({ investigateInTimeline: vi.fn() })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const entityFilter = { field: 'host.hostname', value: 'some_host_name' };
 
@@ -69,7 +80,7 @@ const renderComponent = (
 
 describe('AlertCountByRuleByStatus', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render empty table', () => {

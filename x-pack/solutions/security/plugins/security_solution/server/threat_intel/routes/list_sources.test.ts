@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   loadSourceReportStatsByAdapterId,
   loadSourceForMutation,
@@ -14,7 +16,7 @@ import { updateSourceBodySchema } from '../../../common/threat_intel';
 
 describe('loadSourceReportStatsByAdapterId', () => {
   const logger = {
-    warn: jest.fn(),
+    warn: vi.fn(),
   };
 
   const defaultArgs = {
@@ -23,12 +25,12 @@ describe('loadSourceReportStatsByAdapterId', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns report counts keyed by adapter id', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         aggregations: {
           by_adapter_id: {
             buckets: [
@@ -60,7 +62,7 @@ describe('loadSourceReportStatsByAdapterId', () => {
   // display name. The stable adapter id keeps them separate.
   it('keeps two sources that share a display name separate', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         aggregations: {
           by_adapter_id: {
             buckets: [
@@ -91,7 +93,7 @@ describe('loadSourceReportStatsByAdapterId', () => {
 
   it('aggregates on the stable adapter id rather than the mutable name', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         aggregations: { by_adapter_id: { buckets: [] } },
       }),
     };
@@ -116,7 +118,7 @@ describe('loadSourceReportStatsByAdapterId', () => {
     // `evidence` is nested (v30). A plain `sum` on a nested field silently
     // returns 0, and an unfiltered nested sum would count every space's element.
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         aggregations: { by_adapter_id: { buckets: [] } },
       }),
     };
@@ -151,7 +153,7 @@ describe('loadSourceReportStatsByAdapterId', () => {
 
   it('reads env hits from the nested this_space bucket', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         aggregations: {
           by_adapter_id: {
             buckets: [
@@ -176,7 +178,7 @@ describe('loadSourceReportStatsByAdapterId', () => {
 
   it('applies time_range to the report enrichment query', async () => {
     const esClient = {
-      search: jest.fn().mockResolvedValue({
+      search: vi.fn().mockResolvedValue({
         aggregations: { by_adapter_id: { buckets: [] } },
       }),
     };
@@ -209,7 +211,7 @@ describe('loadSourceReportStatsByAdapterId', () => {
 
   it('returns an empty map when enrichment search fails', async () => {
     const esClient = {
-      search: jest.fn().mockRejectedValue(new Error('index missing')),
+      search: vi.fn().mockRejectedValue(new Error('index missing')),
     };
 
     const stats = await loadSourceReportStatsByAdapterId({
@@ -246,7 +248,7 @@ describe('mapSourceHit', () => {
 
 describe('loadSourceForMutation', () => {
   const globalSource = (spaceId?: string) => ({
-    get: jest.fn().mockResolvedValue({
+    get: vi.fn().mockResolvedValue({
       _source: { name: 'Acme', adapter_type: 'rss', space_id: spaceId },
     }),
   });
@@ -286,7 +288,7 @@ describe('loadSourceForMutation', () => {
 
   it('reports a genuinely absent source the same way', async () => {
     const esClient = {
-      get: jest.fn().mockRejectedValue(Object.assign(new Error('missing'), { statusCode: 404 })),
+      get: vi.fn().mockRejectedValue(Object.assign(new Error('missing'), { statusCode: 404 })),
     };
 
     const access = await loadSourceForMutation({
@@ -300,7 +302,7 @@ describe('loadSourceForMutation', () => {
 
   it('rethrows an unexpected Elasticsearch failure', async () => {
     const esClient = {
-      get: jest.fn().mockRejectedValue(Object.assign(new Error('boom'), { statusCode: 503 })),
+      get: vi.fn().mockRejectedValue(Object.assign(new Error('boom'), { statusCode: 503 })),
     };
 
     await expect(

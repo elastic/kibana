@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ConnectorSyncJob, Paginate } from '../types';
 import { fetchConnectors, fetchSyncJobs } from '..';
 import { collectConnectorStats } from './collect_connector_stats';
@@ -23,17 +26,20 @@ import {
   spoIncrementalSyncJob,
 } from './collect_connector_stats_test_data';
 
-jest.mock('.', () => ({
-  fetchConnectors: jest.fn(),
-  fetchSyncJobs: jest.fn(),
-}));
+vi.mock('.', () => {
+      const mocked = {
+      fetchConnectors: vi.fn(),
+      fetchSyncJobs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('collect connector stats', () => {
   const mockClient = {
     indices: {
-      stats: jest.fn(),
+      stats: vi.fn(),
     },
-    search: jest.fn(),
+    search: vi.fn(),
   };
   const mockSyncJobsResponse: Paginate<ConnectorSyncJob> = {
     _meta: {
@@ -53,8 +59,8 @@ describe('collect connector stats', () => {
     ],
   };
   it('should collect connector stats', async () => {
-    (fetchConnectors as jest.Mock).mockImplementation(() => [spoConnector, mysqlConnector]);
-    (fetchSyncJobs as jest.Mock).mockImplementation(() => mockSyncJobsResponse);
+    (fetchConnectors as Mock).mockImplementation(() => [spoConnector, mysqlConnector]);
+    (fetchSyncJobs as Mock).mockImplementation(() => mockSyncJobsResponse);
     mockClient.indices.stats.mockImplementation((params: { index: any }) =>
       Promise.resolve({
         _all: {

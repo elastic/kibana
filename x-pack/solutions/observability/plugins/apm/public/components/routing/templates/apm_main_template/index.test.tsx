@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -14,19 +16,25 @@ import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { ApmMainTemplate } from '.';
 
-const mockUseApmAppMenuConfig = jest.fn((): AppMenuConfig | undefined => undefined);
-const mockRegisterAppMenu = jest.fn(({ config }: { config: AppMenuConfig }) => null);
+const mockUseApmAppMenuConfig = vi.fn((): AppMenuConfig | undefined => undefined);
+const mockRegisterAppMenu = vi.fn(({ config }: { config: AppMenuConfig }) => null);
 
-jest.mock('@kbn/core-chrome-browser-hooks', () => ({
-  ...jest.requireActual('@kbn/core-chrome-browser-hooks'),
-  RegisterAppMenu: (props: { config: AppMenuConfig }) => mockRegisterAppMenu(props),
-}));
+vi.mock('@kbn/core-chrome-browser-hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('@kbn/core-chrome-browser-hooks')),
+      RegisterAppMenu: (props: { config: AppMenuConfig }) => mockRegisterAppMenu(props),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../app_root/apm_app_menu/apm_app_menu_context', () => ({
-  useApmAppMenuConfig: () => mockUseApmAppMenuConfig(),
-}));
+vi.mock('../../app_root/apm_app_menu/apm_app_menu_context', () => {
+      const mocked = {
+      useApmAppMenuConfig: () => mockUseApmAppMenuConfig(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockPageTemplate = jest.fn(
+const mockPageTemplate = vi.fn(
   ({ children, pageHeader }: { children: React.ReactNode; pageHeader?: unknown }) => (
     <div data-test-subj="mockObservabilityPageTemplate">
       {pageHeader ? <div data-test-subj="legacyPageHeader" /> : null}
@@ -35,32 +43,41 @@ const mockPageTemplate = jest.fn(
   )
 );
 
-jest.mock('../../../../hooks/use_fetcher', () => ({
-  FETCH_STATUS: {
-    LOADING: 'loading',
-    SUCCESS: 'success',
-    FAILURE: 'failure',
-    NOT_INITIATED: 'not_initiated',
-  },
-  useFetcher: () => ({ data: { hasData: true }, status: 'success' }),
-}));
-
-jest.mock('../../../../hooks/use_default_ai_assistant_starter_prompts_for_apm', () => ({
-  useDefaultAiAssistantStarterPromptsForAPM: () => {},
-}));
-
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      docLinks: { links: { observability: { guide: 'https://example.com' } } },
-      observabilityShared: {
-        navigation: { PageTemplate: mockPageTemplate },
+vi.mock('../../../../hooks/use_fetcher', () => {
+      const mocked = {
+      FETCH_STATUS: {
+        LOADING: 'loading',
+        SUCCESS: 'success',
+        FAILURE: 'failure',
+        NOT_INITIATED: 'not_initiated',
       },
-      application: { capabilities: { savedObjectsManagement: { edit: false } } },
-      share: { url: { locators: { get: () => undefined } } },
-    },
-  }),
-}));
+      useFetcher: () => ({ data: { hasData: true }, status: 'success' }),
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('../../../../hooks/use_default_ai_assistant_starter_prompts_for_apm', () => {
+      const mocked = {
+      useDefaultAiAssistantStarterPromptsForAPM: () => {},
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          docLinks: { links: { observability: { guide: 'https://example.com' } } },
+          observabilityShared: {
+            navigation: { PageTemplate: mockPageTemplate },
+          },
+          application: { capabilities: { savedObjectsManagement: { edit: false } } },
+          share: { url: { locators: { get: () => undefined } } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const registeredMenu: AppMenuConfig = {
   items: [

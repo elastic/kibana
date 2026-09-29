@@ -5,18 +5,24 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { lookupStepDefinitions, lookupTriggerDefinitions } from './lookup';
 import { dispatchToolCall } from './tools';
 
-jest.mock('./lookup', () => ({
-  lookupStepDefinitions: jest.fn(),
-  lookupTriggerDefinitions: jest.fn(),
-}));
+vi.mock('./lookup', () => {
+      const mocked = {
+      lookupStepDefinitions: vi.fn(),
+      lookupTriggerDefinitions: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockLookupStepDefinitions = lookupStepDefinitions as jest.MockedFunction<
+const mockLookupStepDefinitions = lookupStepDefinitions as MockedFunction<
   typeof lookupStepDefinitions
 >;
-const mockLookupTriggerDefinitions = lookupTriggerDefinitions as jest.MockedFunction<
+const mockLookupTriggerDefinitions = lookupTriggerDefinitions as MockedFunction<
   typeof lookupTriggerDefinitions
 >;
 

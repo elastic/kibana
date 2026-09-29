@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -43,35 +45,50 @@ connector:
 fields: []
 `;
 
-jest.mock('../../components/template_form', () => ({
-  TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
-}));
+vi.mock('../../components/template_form', () => {
+      const mocked = {
+      TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../components/template_preview', () => ({
-  TemplatePreview: () => <div data-test-subj="create-template-preview" />,
-}));
+vi.mock('../../components/template_preview', () => {
+      const mocked = {
+      TemplatePreview: () => <div data-test-subj="create-template-preview" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockMutateAsync = jest.fn();
-const mockNavigateToCasesTemplates = jest.fn();
-const mockNavigateToEditTemplate = jest.fn();
+const mockMutateAsync = vi.fn();
+const mockNavigateToCasesTemplates = vi.fn();
+const mockNavigateToEditTemplate = vi.fn();
 
-jest.mock('../../hooks/use_create_template', () => ({
-  useCreateTemplate: () => ({ mutateAsync: mockMutateAsync, isLoading: false }),
-}));
+vi.mock('../../hooks/use_create_template', () => {
+      const mocked = {
+      useCreateTemplate: () => ({ mutateAsync: mockMutateAsync, isLoading: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/navigation', () => ({
-  useCasesTemplatesNavigation: () => ({
-    navigateToCasesTemplates: mockNavigateToCasesTemplates,
-    getCasesTemplatesUrl: jest.fn().mockReturnValue('/app/security/cases/configure/templates'),
-  }),
-  useCasesEditTemplateNavigation: () => ({
-    navigateToCasesEditTemplate: mockNavigateToEditTemplate,
-  }),
-}));
+vi.mock('../../../../common/navigation', () => {
+      const mocked = {
+      useCasesTemplatesNavigation: () => ({
+        navigateToCasesTemplates: mockNavigateToCasesTemplates,
+        getCasesTemplatesUrl: vi.fn().mockReturnValue('/app/security/cases/configure/templates'),
+      }),
+      useCasesEditTemplateNavigation: () => ({
+        navigateToCasesEditTemplate: mockNavigateToEditTemplate,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../use_breadcrumbs', () => ({
-  useCasesTemplatesBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../../use_breadcrumbs', () => {
+      const mocked = {
+      useCasesTemplatesBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /**
  * The template name is the editable page title, so naming a template is a header interaction rather
@@ -87,7 +104,7 @@ describe('CreateTemplatePage', () => {
   let coreStart: CoreStart;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     coreStart = coreMock.createStart() as unknown as CoreStart;
     localStorage.clear();
     // Create resolves to the new template; the page then switches to edit mode for that id.

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { SnapshotCheckResult } from './resolve_snapshot_sha';
 import { resolveSnapshotSha } from './resolve_snapshot_sha';
 
@@ -20,7 +22,7 @@ describe('resolveSnapshotSha', () => {
       requested === sha ? { outcome: 'exists' } : { outcome: 'not_found' };
 
   it('returns the requested SHA when its snapshot exists on the first attempt', async () => {
-    const snapshotExistsFn = jest
+    const snapshotExistsFn = vi
       .fn<Promise<SnapshotCheckResult>, [string]>()
       .mockImplementation(snapshotResultForSha(requestedSha));
 
@@ -39,11 +41,11 @@ describe('resolveSnapshotSha', () => {
   });
 
   it('retries the same SHA before walking to a parent commit', async () => {
-    const snapshotExistsFn = jest
+    const snapshotExistsFn = vi
       .fn<Promise<SnapshotCheckResult>, [string]>()
       .mockImplementation(snapshotResultForSha(parentSha));
 
-    const getParentCommitShaFn = jest.fn((sha: string) => {
+    const getParentCommitShaFn = vi.fn((sha: string) => {
       if (sha === requestedSha) {
         return parentSha;
       }
@@ -70,14 +72,14 @@ describe('resolveSnapshotSha', () => {
 
   it('retries transient errors indefinitely without walking to a parent commit', async () => {
     let callCount = 0;
-    const snapshotExistsFn = jest.fn(async (): Promise<SnapshotCheckResult> => {
+    const snapshotExistsFn = vi.fn(async (): Promise<SnapshotCheckResult> => {
       callCount++;
       if (callCount < 4) {
         return { outcome: 'transient_error' };
       }
       return { outcome: 'exists' };
     });
-    const getParentCommitShaFn = jest.fn(() => parentSha);
+    const getParentCommitShaFn = vi.fn(() => parentSha);
 
     await expect(
       resolveSnapshotSha(requestedSha, {
@@ -98,13 +100,13 @@ describe('resolveSnapshotSha', () => {
   });
 
   it('throws on terminal HTTP errors without walking to a parent commit', async () => {
-    const snapshotExistsFn = jest.fn(
+    const snapshotExistsFn = vi.fn(
       async (): Promise<SnapshotCheckResult> => ({
         outcome: 'terminal_error',
         statusCode: 403,
       })
     );
-    const getParentCommitShaFn = jest.fn(() => parentSha);
+    const getParentCommitShaFn = vi.fn(() => parentSha);
 
     await expect(
       resolveSnapshotSha(requestedSha, {
@@ -131,14 +133,14 @@ describe('resolveSnapshotSha', () => {
       { outcome: 'exists' },
     ];
     let callCount = 0;
-    const snapshotExistsFn = jest.fn(async (sha: string): Promise<SnapshotCheckResult> => {
+    const snapshotExistsFn = vi.fn(async (sha: string): Promise<SnapshotCheckResult> => {
       if (sha === parentSha) {
         return { outcome: 'exists' };
       }
       return resultsByCall[callCount++];
     });
 
-    const getParentCommitShaFn = jest.fn((sha: string) => {
+    const getParentCommitShaFn = vi.fn((sha: string) => {
       if (sha === requestedSha) {
         return parentSha;
       }
@@ -164,12 +166,12 @@ describe('resolveSnapshotSha', () => {
   });
 
   it('attempts up to 4 SHAs with 3 tries each before failing', async () => {
-    const snapshotExistsFn = jest.fn(
+    const snapshotExistsFn = vi.fn(
       async (): Promise<SnapshotCheckResult> => ({
         outcome: 'not_found',
       })
     );
-    const getParentCommitShaFn = jest
+    const getParentCommitShaFn = vi
       .fn<string, [string]>()
       .mockImplementationOnce(() => 'cccccccccccccccccccccccccccccccccccccccc')
       .mockImplementationOnce(() => 'dddddddddddddddddddddddddddddddddddddddd')

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -32,39 +35,60 @@ import { CustomYaraSignatureHighlightedFieldLink } from './custom_yara_signature
 import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
 import * as useFlyoutApiModule from '../../../use_flyout_api';
 
-jest.mock('../../../shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
+vi.mock('../../../shared/hooks/use_expand_section', () => {
+      const mocked = {
+      useExpandSection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
-jest.mock('../../../shared/components/flyout_provider', () => ({
-  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('../../../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: jest.fn(),
-}));
+vi.mock('../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../shared/components/flyout_provider', () => {
+      const mocked = {
+      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/hooks/is_in_security_app', () => {
+      const mocked = {
+      useIsInSecurityApp: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./investigation_guide', () => ({
-  InvestigationGuide: ({ onShowInvestigationGuide }: { onShowInvestigationGuide: () => void }) => (
-    <button
-      type="button"
-      data-test-subj="investigationGuideMock"
-      onClick={onShowInvestigationGuide}
-    >
-      {'InvestigationGuide'}
-    </button>
-  ),
-}));
+vi.mock('./investigation_guide', () => {
+      const mocked = {
+      InvestigationGuide: ({ onShowInvestigationGuide }: { onShowInvestigationGuide: () => void }) => (
+        <button
+          type="button"
+          data-test-subj="investigationGuideMock"
+          onClick={onShowInvestigationGuide}
+        >
+          {'InvestigationGuide'}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./highlighted_fields', () => ({
-  HighlightedFields: jest.fn(() => <div data-test-subj="highlightedFieldsMock" />),
-}));
+vi.mock('./highlighted_fields', () => {
+      const mocked = {
+      HighlightedFields: vi.fn(() => <div data-test-subj="highlightedFieldsMock" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => ({
-  useRuleWithFallback: jest.fn().mockReturnValue({ rule: null, loading: false, error: null }),
-}));
+vi.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => {
+      const mocked = {
+      useRuleWithFallback: vi.fn().mockReturnValue({ rule: null, loading: false, error: null }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockHit = (
   flattened: DataTableRecord['flattened'],
@@ -97,29 +121,29 @@ const remoteAlertMockHit = createMockHit({
   _index: 'remote-cluster:index-name',
 });
 
-const mockRenderCellActions = jest.fn(({ children }: { children: React.ReactNode }) => (
+const mockRenderCellActions = vi.fn(({ children }: { children: React.ReactNode }) => (
   <>{children}</>
 ));
 
 describe('InvestigationSection', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
-  const mockUseKibana = jest.mocked(useKibana);
-  const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
-  const mockHighlightedFields = jest.mocked(HighlightedFields);
-  const mockOpenSystemFlyout = jest.fn();
+  const mockUseExpandSection = vi.mocked(useExpandSection);
+  const mockUseKibana = vi.mocked(useKibana);
+  const mockUseIsInSecurityApp = vi.mocked(useIsInSecurityApp);
+  const mockHighlightedFields = vi.mocked(HighlightedFields);
+  const mockOpenSystemFlyout = vi.fn();
   const store = createStore(() => ({}));
   const history = createMemoryHistory();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
+    vi.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: vi.fn() });
     mockUseKibana.mockReturnValue({
       services: {
         overlays: {
           openSystemFlyout: mockOpenSystemFlyout,
         },
-        storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
-        telemetry: { reportEvent: jest.fn() },
+        storage: { get: vi.fn(), set: vi.fn(), remove: vi.fn() },
+        telemetry: { reportEvent: vi.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
     mockUseIsInSecurityApp.mockReturnValue(true);
@@ -232,7 +256,7 @@ describe('InvestigationSection', () => {
 
   it('passes renderCellActions to HighlightedFields', () => {
     mockUseExpandSection.mockReturnValue(true);
-    const localMockRenderCellActions = jest.fn(({ children }: { children: React.ReactNode }) => (
+    const localMockRenderCellActions = vi.fn(({ children }: { children: React.ReactNode }) => (
       <>{children}</>
     ));
 
@@ -496,17 +520,17 @@ describe('InvestigationSection', () => {
 });
 
 describe('InvestigationSection Source event link under CPS', () => {
-  const mockHighlightedFields = jest.mocked(HighlightedFields);
+  const mockHighlightedFields = vi.mocked(HighlightedFields);
   const flyoutApiMock = createFlyoutApiMock();
-  let useFlyoutApiSpy: jest.SpyInstance;
+  let useFlyoutApiSpy: MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.mocked(useExpandSection).mockReturnValue(true);
+    vi.clearAllMocks();
+    vi.mocked(useExpandSection).mockReturnValue(true);
     // Stub the flyout API for this block only. The tests above intentionally exercise the real
     // useFlyoutApi chain (down to overlays.openSystemFlyout), so a file-wide jest.mock is not an
     // option; a scoped spy lets these tests assert on openDocumentFlyoutFromPattern directly.
-    useFlyoutApiSpy = jest.spyOn(useFlyoutApiModule, 'useFlyoutApi').mockReturnValue(flyoutApiMock);
+    useFlyoutApiSpy = vi.spyOn(useFlyoutApiModule, 'useFlyoutApi').mockReturnValue(flyoutApiMock);
   });
 
   afterEach(() => {

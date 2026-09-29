@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { CacheManager } from './cache_manager';
 
 describe('CacheManager', () => {
@@ -14,7 +16,7 @@ describe('CacheManager', () => {
   const mockCacheItem = 'cache_item';
   const cacheDurationMs = 1000;
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('caches object for the cache duration only', async () => {
     const cacheManager = new CacheManager({ cacheDurationMs });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,14 +16,17 @@ import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
-jest.mock('../../hooks/use_kibana');
-jest.mock('../../hooks/use_streams_privileges');
-jest.mock('@kbn/react-hooks', () => ({
-  useAbortController: () => ({ signal: new AbortController().signal }),
-}));
+vi.mock('../../hooks/use_kibana');
+vi.mock('../../hooks/use_streams_privileges');
+vi.mock('@kbn/react-hooks', () => {
+      const mocked = {
+      useAbortController: () => ({ signal: new AbortController().signal }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseStreamsPrivileges = useStreamsPrivileges as jest.MockedFunction<
+const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
+const mockUseStreamsPrivileges = useStreamsPrivileges as MockedFunction<
   typeof useStreamsPrivileges
 >;
 
@@ -30,14 +36,14 @@ const renderWithProviders = (ui: React.ReactElement) => {
 };
 
 describe('StreamsSettingsFlyout', () => {
-  const mockEnableWiredMode = jest.fn();
-  const mockDisableWiredMode = jest.fn();
-  const mockOnClose = jest.fn();
-  const mockRefreshStreams = jest.fn();
-  const mockOnRefreshStatus = jest.fn();
-  const mockAddError = jest.fn();
-  const mockAddSuccess = jest.fn();
-  const mockTrackWiredStreamsStatusChanged = jest.fn();
+  const mockEnableWiredMode = vi.fn();
+  const mockDisableWiredMode = vi.fn();
+  const mockOnClose = vi.fn();
+  const mockRefreshStreams = vi.fn();
+  const mockOnRefreshStatus = vi.fn();
+  const mockAddError = vi.fn();
+  const mockAddSuccess = vi.fn();
+  const mockTrackWiredStreamsStatusChanged = vi.fn();
 
   const defaultKibanaMock = {
     dependencies: {
@@ -56,9 +62,9 @@ describe('StreamsSettingsFlyout', () => {
         },
       },
       uiSettings: {
-        get: jest.fn(),
-        set: jest.fn(),
-        isOverridden: jest.fn().mockReturnValue(false),
+        get: vi.fn(),
+        set: vi.fn(),
+        isOverridden: vi.fn().mockReturnValue(false),
       },
       docLinks: {
         links: {
@@ -76,7 +82,7 @@ describe('StreamsSettingsFlyout', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockUseStreamsPrivileges.mockReturnValue({
       ui: { manage: true },

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ScheduledExecutionDetailsPage } from './scheduled_execution_details';
@@ -15,44 +18,65 @@ import {
   createMockKibanaServices,
 } from '../../__test_helpers__/create_mock_kibana_services';
 
-const mockQueryDetailsHeader = jest.fn();
-const mockResultTabs = jest.fn();
+const mockQueryDetailsHeader = vi.fn();
+const mockResultTabs = vi.fn();
 
-jest.mock('../../actions/use_scheduled_execution_details', () => ({
-  ...jest.requireActual('../../actions/use_scheduled_execution_details'),
-  useScheduledExecutionDetails: jest.fn(),
-}));
-jest.mock('../live_queries/details/query_details_header', () => ({
-  QueryDetailsHeader: (props: Record<string, unknown>) => {
-    mockQueryDetailsHeader(props);
+vi.mock('../../actions/use_scheduled_execution_details', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../actions/use_scheduled_execution_details')),
+      useScheduledExecutionDetails: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../live_queries/details/query_details_header', () => {
+      const mocked = {
+      QueryDetailsHeader: (props: Record<string, unknown>) => {
+        mockQueryDetailsHeader(props);
 
-    return null;
-  },
-}));
-jest.mock('../saved_queries/edit/tabs', () => ({
-  ResultTabs: (props: Record<string, unknown>) => {
-    mockResultTabs(props);
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../saved_queries/edit/tabs', () => {
+      const mocked = {
+      ResultTabs: (props: Record<string, unknown>) => {
+        mockResultTabs(props);
 
-    return null;
-  },
-}));
-jest.mock('../../results/export_filters_context', () => ({
-  ExportFiltersProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('../../common/hooks/use_breadcrumbs', () => ({
-  useBreadcrumbs: jest.fn(),
-}));
-jest.mock('../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../common/lib/kibana'),
-  useRouterNavigate: (path: string) => ({ onClick: jest.fn(), href: path }),
-}));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ scheduleId: 'schedule-1', executionCount: '1152' }),
-  Redirect: () => null,
-}));
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../results/export_filters_context', () => {
+      const mocked = {
+      ExportFiltersProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/hooks/use_breadcrumbs', () => {
+      const mocked = {
+      useBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../common/lib/kibana')),
+      useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: () => ({ scheduleId: 'schedule-1', executionCount: '1152' }),
+      Redirect: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseScheduledExecutionDetails = useScheduledExecutionDetails as jest.MockedFunction<
+const mockUseScheduledExecutionDetails = useScheduledExecutionDetails as MockedFunction<
   typeof useScheduledExecutionDetails
 >;
 
@@ -93,7 +117,7 @@ const renderPage = () => {
 
 describe('ScheduledExecutionDetailsPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockHookResult();
   });
 

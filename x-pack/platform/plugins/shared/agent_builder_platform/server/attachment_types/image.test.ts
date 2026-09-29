@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { Readable } from 'stream';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Attachment, ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
@@ -38,9 +40,9 @@ const createFilesPluginStub = (
   bytes: Buffer,
   fileKind: string = CHAT_ATTACHMENT_IMAGES_FILE_KIND
 ) => {
-  const downloadContent = jest.fn(async () => Readable.from(bytes));
-  const getById = jest.fn(async () => ({ downloadContent, data: { fileKind } }));
-  const asScoped = jest.fn(() => ({ getById }));
+  const downloadContent = vi.fn(async () => Readable.from(bytes));
+  const getById = vi.fn(async () => ({ downloadContent, data: { fileKind } }));
+  const asScoped = vi.fn(() => ({ getById }));
   const plugin = {
     fileServiceFactory: { asScoped },
   } as unknown as FilesStart;
@@ -48,8 +50,8 @@ const createFilesPluginStub = (
 };
 
 const createValidateFilesPluginStub = (fileKind: string = CHAT_ATTACHMENT_IMAGES_FILE_KIND) => {
-  const getById = jest.fn(async () => ({ data: { fileKind } }));
-  const asScoped = jest.fn(() => ({ getById }));
+  const getById = vi.fn(async () => ({ data: { fileKind } }));
+  const asScoped = vi.fn(() => ({ getById }));
   const plugin = { fileServiceFactory: { asScoped } } as unknown as FilesStart;
   return { plugin, asScoped, getById };
 };
@@ -77,10 +79,10 @@ describe('image attachment type', () => {
     });
 
     it('rejects when file not found (getById throws FileNotFoundError)', async () => {
-      const getById = jest.fn(async () => {
+      const getById = vi.fn(async () => {
         throw new FileNotFoundError('File not found');
       });
-      const asScoped = jest.fn(() => ({ getById }));
+      const asScoped = vi.fn(() => ({ getById }));
       const plugin = { fileServiceFactory: { asScoped } } as unknown as FilesStart;
       const definition = createImageAttachmentType({ getFilesPlugin: async () => plugin });
       const result = await definition.validate(validImage, validateContext);
@@ -97,10 +99,10 @@ describe('image attachment type', () => {
     });
 
     it('propagates transient errors instead of treating them as not-found', async () => {
-      const getById = jest.fn(async () => {
+      const getById = vi.fn(async () => {
         throw new Error('ES cluster unavailable');
       });
-      const asScoped = jest.fn(() => ({ getById }));
+      const asScoped = vi.fn(() => ({ getById }));
       const plugin = { fileServiceFactory: { asScoped } } as unknown as FilesStart;
       const definition = createImageAttachmentType({ getFilesPlugin: async () => plugin });
       await expect(definition.validate(validImage, validateContext)).rejects.toThrow(

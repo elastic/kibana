@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('../utils', () => ({
-  useUiState: jest.fn(() => ({
-    columnsWidth: [
-      { colIndex: 0, width: 77 },
-      { colIndex: 1, width: 22 },
-    ],
-    sort: {
-      columnIndex: null,
-      direction: null,
-    },
-  })),
-  usePagination: () => undefined,
-}));
+import { vi } from 'vitest';
+
+vi.mock('../utils', () => {
+      const mocked = {
+      useUiState: vi.fn(() => ({
+        columnsWidth: [
+          { colIndex: 0, width: 77 },
+          { colIndex: 1, width: 22 },
+        ],
+        sort: {
+          columnIndex: null,
+          direction: null,
+        },
+      })),
+      usePagination: () => undefined,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -33,7 +38,7 @@ import { useUiState } from '../utils';
 describe('TableVisualizationComponent', () => {
   const coreStartMock = coreMock.createStart();
   const handlers = {
-    done: jest.fn(),
+    done: vi.fn(),
     uiState: 'uiState',
     event: 'event',
   } as unknown as IInterpreterRenderHandlers;
@@ -45,7 +50,7 @@ describe('TableVisualizationComponent', () => {
     },
     tables: [],
   };
-  const renderComplete = jest.fn();
+  const renderComplete = vi.fn();
   const visConfig = {} as unknown as TableVisConfig;
 
   it('should render the basic table', () => {

@@ -5,29 +5,37 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { buildStarterWorkflowYaml } from '../utils/starter_workflow_yaml';
 import { useAutomationsEditor } from './use_automations_editor';
 
-const mockSaveAutomations = jest.fn();
-const mockCreateWorkflow = jest.fn();
+const mockSaveAutomations = vi.fn();
+const mockCreateWorkflow = vi.fn();
 let mockIsSaving = false;
 let mockIsCreating = false;
 
-jest.mock('./use_save_ai_index_automations', () => ({
-  useSaveAiIndexAutomations: () => ({
-    saveAutomations: mockSaveAutomations,
-    isSaving: mockIsSaving,
-  }),
-}));
+vi.mock('./use_save_ai_index_automations', () => {
+      const mocked = {
+      useSaveAiIndexAutomations: () => ({
+        saveAutomations: mockSaveAutomations,
+        isSaving: mockIsSaving,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_create_workflow', () => ({
-  useCreateWorkflow: () => ({
-    createWorkflow: mockCreateWorkflow,
-    isCreating: mockIsCreating,
-  }),
-}));
+vi.mock('./use_create_workflow', () => {
+      const mocked = {
+      useCreateWorkflow: () => ({
+        createWorkflow: mockCreateWorkflow,
+        isCreating: mockIsCreating,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
@@ -43,7 +51,7 @@ const aiIndex: GetAiIndexResponse = {
 const renderEditor = (
   { index }: { index: GetAiIndexResponse | undefined } = { index: aiIndex }
 ) => {
-  const onSaved = jest.fn();
+  const onSaved = vi.fn();
   const view = renderHook(
     ({ aiIndex: current }) => useAutomationsEditor({ aiIndex: current, onSaved }),
     {
@@ -62,7 +70,7 @@ describe('useAutomationsEditor', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('starts idle and exposes the persisted automations', () => {
@@ -179,7 +187,7 @@ describe('useAutomationsEditor', () => {
 
   it('awaits onSaved before createAndAttach resolves', async () => {
     let resolveOnSaved!: () => void;
-    const onSaved = jest.fn(
+    const onSaved = vi.fn(
       () =>
         new Promise<void>((resolve) => {
           resolveOnSaved = resolve;

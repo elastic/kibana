@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { CPS_TIER_ELIGIBLE_FEATURE_ID } from '@kbn/cps-common';
 
@@ -24,7 +26,7 @@ describe('CpsPlugin (public)', () => {
       plugin.setup(coreMock.createSetup());
 
       const coreStart = coreMock.createStart();
-      const isFeatureAvailableSpy = jest
+      const isFeatureAvailableSpy = vi
         .spyOn(coreStart.pricing, 'isFeatureAvailable')
         .mockReturnValue(true);
 
@@ -39,7 +41,7 @@ describe('CpsPlugin (public)', () => {
       plugin.setup(coreMock.createSetup());
 
       const coreStart = coreMock.createStart();
-      jest.spyOn(coreStart.pricing, 'isFeatureAvailable').mockReturnValue(false);
+      vi.spyOn(coreStart.pricing, 'isFeatureAvailable').mockReturnValue(false);
 
       const start = plugin.start(coreStart, {});
 
@@ -51,7 +53,7 @@ describe('CpsPlugin (public)', () => {
       plugin.setup(coreMock.createSetup());
 
       const coreStart = coreMock.createStart();
-      jest.spyOn(coreStart.pricing, 'isFeatureAvailable').mockReturnValue(true);
+      vi.spyOn(coreStart.pricing, 'isFeatureAvailable').mockReturnValue(true);
 
       const start = plugin.start(coreStart, {});
 

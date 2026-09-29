@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
 
@@ -21,7 +23,7 @@ steps:
     with:
       message: "Hello, world!"
 `;
-    const getPropertyHandler = jest.fn();
+    const getPropertyHandler = vi.fn();
     const computedData = performComputation(yaml);
     const { workflowLookup, yamlLineCounter } = computedData;
     const stepPropertyItems = collectAllStepPropertyItems(
@@ -43,11 +45,11 @@ steps:
 `;
     const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
     const selectionHandler = {
-      search: jest.fn(),
-      resolve: jest.fn(),
-      getDetails: jest.fn(),
+      search: vi.fn(),
+      resolve: vi.fn(),
+      getDetails: vi.fn(),
     };
-    const getPropertyHandler = jest.fn();
+    const getPropertyHandler = vi.fn();
     getPropertyHandler.mockImplementation(
       (stepType: string, scope: 'config' | 'input', key: string) => {
         if (stepType === 'run-agent' && scope === 'config' && key === 'agent-id') {
@@ -84,11 +86,11 @@ steps:
 `;
     const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
     const selectionHandler = {
-      search: jest.fn(),
-      resolve: jest.fn(),
-      getDetails: jest.fn(),
+      search: vi.fn(),
+      resolve: vi.fn(),
+      getDetails: vi.fn(),
     };
-    const getPropertyHandler = jest.fn();
+    const getPropertyHandler = vi.fn();
     getPropertyHandler.mockImplementation(
       (stepType: string, scope: 'config' | 'input', key: string) => {
         if (stepType === 'run-agent' && scope === 'input' && key === 'debug') {
@@ -128,16 +130,16 @@ steps:
 `;
     const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
     const selectionHandler1 = {
-      search: jest.fn(),
-      resolve: jest.fn(),
-      getDetails: jest.fn(),
+      search: vi.fn(),
+      resolve: vi.fn(),
+      getDetails: vi.fn(),
     };
     const selectionHandler2 = {
-      search: jest.fn(),
-      resolve: jest.fn(),
-      getDetails: jest.fn(),
+      search: vi.fn(),
+      resolve: vi.fn(),
+      getDetails: vi.fn(),
     };
-    const getPropertyHandler = jest.fn();
+    const getPropertyHandler = vi.fn();
     getPropertyHandler.mockImplementation(
       (stepType: string, scope: 'config' | 'input', key: string) => {
         if (stepType === 'run-agent' && scope === 'input' && key === 'obj.message') {
@@ -185,11 +187,11 @@ steps:
 `;
     const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
     const selectionHandler = {
-      search: jest.fn(),
-      resolve: jest.fn(),
-      getDetails: jest.fn(),
+      search: vi.fn(),
+      resolve: vi.fn(),
+      getDetails: vi.fn(),
     };
-    const getPropertyHandler = jest.fn(
+    const getPropertyHandler = vi.fn(
       (stepType: string, scope: 'config' | 'input', key: string) => {
         if (stepType === 'run-agent' && scope === 'config' && key === 'extra') {
           return { selection: selectionHandler };
@@ -219,11 +221,11 @@ steps:
     const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
     const selectionHandler = {
       dependsOnValues: ['config.proxy.ssl', 'config.other'] as any,
-      search: jest.fn(),
-      resolve: jest.fn(),
-      getDetails: jest.fn(),
+      search: vi.fn(),
+      resolve: vi.fn(),
+      getDetails: vi.fn(),
     };
-    const getPropertyHandler = jest.fn(
+    const getPropertyHandler = vi.fn(
       (stepType: string, scope: 'config' | 'input', key: string) => {
         if (stepType === 'run-agent' && scope === 'config' && key === 'proxy.id') {
           return { selection: selectionHandler };
@@ -254,11 +256,11 @@ steps:
 `;
     const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
     const selectionHandler = {
-      search: jest.fn(),
-      resolve: jest.fn(),
-      getDetails: jest.fn(),
+      search: vi.fn(),
+      resolve: vi.fn(),
+      getDetails: vi.fn(),
     };
-    const getPropertyHandler = jest.fn(
+    const getPropertyHandler = vi.fn(
       (stepType: string, scope: 'config' | 'input', key: string) => {
         if (stepType === 'elasticsearch.search' && scope === 'input' && key === 'index') {
           return { selection: selectionHandler };

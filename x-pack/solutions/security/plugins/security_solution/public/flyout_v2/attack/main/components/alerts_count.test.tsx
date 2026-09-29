@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -12,15 +14,18 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { AlertsCount } from './alerts_count';
 import { HEADER_ALERTS_BLOCK_TEST_ID } from '../constants/test_ids';
 
-jest.mock('../../../shared/components/flyout_header_block', () => ({
-  FlyoutHeaderBlock: ({
-    children,
-    'data-test-subj': dataTestSubj,
-  }: {
-    children: React.ReactNode;
-    'data-test-subj'?: string;
-  }) => <div data-test-subj={dataTestSubj}>{children}</div>,
-}));
+vi.mock('../../../shared/components/flyout_header_block', () => {
+      const mocked = {
+      FlyoutHeaderBlock: ({
+        children,
+        'data-test-subj': dataTestSubj,
+      }: {
+        children: React.ReactNode;
+        'data-test-subj'?: string;
+      }) => <div data-test-subj={dataTestSubj}>{children}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const buildHit = (alertIds: unknown): DataTableRecord =>
   ({

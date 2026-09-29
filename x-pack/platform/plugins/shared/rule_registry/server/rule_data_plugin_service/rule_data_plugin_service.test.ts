@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { type Subject, ReplaySubject, of } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { RuleDataService } from './rule_data_plugin_service';
@@ -17,9 +19,12 @@ import { createRuleDataClientMock as mockCreateRuleDataClient } from '../rule_da
 import { createDataStreamAdapterMock } from '@kbn/alerting-plugin/server/mocks';
 import type { DataStreamAdapter } from '@kbn/alerting-plugin/server';
 
-jest.mock('../rule_data_client/rule_data_client', () => ({
-  RuleDataClient: jest.fn().mockImplementation(() => mockCreateRuleDataClient()),
-}));
+vi.mock('../rule_data_client/rule_data_client', () => {
+      const mocked = {
+      RuleDataClient: vi.fn().mockImplementation(() => mockCreateRuleDataClient()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const frameworkAlertsService = {
   enabled: () => false,
@@ -32,7 +37,7 @@ describe('ruleDataPluginService', () => {
   const elasticsearchAndSOAvailability$ = of(true);
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     pluginStop$ = new ReplaySubject(1);
     dataStreamAdapter = createDataStreamAdapterMock();
   });
@@ -45,7 +50,7 @@ describe('ruleDataPluginService', () => {
   describe('isRegistrationContextDisabled', () => {
     it('should return true', async () => {
       const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-      const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+      const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
 
       const ruleDataService = new RuleDataService({
         logger: loggerMock.create(),
@@ -64,7 +69,7 @@ describe('ruleDataPluginService', () => {
 
     it('should return false', async () => {
       const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-      const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+      const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
 
       const ruleDataService = new RuleDataService({
         logger: loggerMock.create(),
@@ -85,7 +90,7 @@ describe('ruleDataPluginService', () => {
   describe('isWriteEnabled', () => {
     it('should return true', async () => {
       const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-      const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+      const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
 
       const ruleDataService = new RuleDataService({
         logger: loggerMock.create(),
@@ -107,7 +112,7 @@ describe('ruleDataPluginService', () => {
   describe('initializeIndex', () => {
     it('calls RuleDataClient', async () => {
       const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-      const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+      const getClusterClient = vi.fn(() => Promise.resolve(mockClusterClient));
 
       const ruleDataService = new RuleDataService({
         logger: loggerMock.create(),

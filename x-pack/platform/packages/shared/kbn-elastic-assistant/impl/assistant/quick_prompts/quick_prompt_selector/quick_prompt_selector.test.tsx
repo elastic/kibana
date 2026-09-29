@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { QuickPromptSelector } from './quick_prompt_selector';
 import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
 
-const onQuickPromptSelectionChange = jest.fn();
-const onQuickPromptDeleted = jest.fn();
+const onQuickPromptSelectionChange = vi.fn();
+const onQuickPromptDeleted = vi.fn();
 const testProps = {
   quickPrompts: MOCK_QUICK_PROMPTS,
   selectedQuickPrompt: MOCK_QUICK_PROMPTS[0],
@@ -22,7 +24,7 @@ const testProps = {
 
 describe('QuickPromptSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it('Selects an existing quick prompt', () => {
     const { getByTestId } = render(<QuickPromptSelector {...testProps} />);
@@ -63,7 +65,7 @@ describe('QuickPromptSelector', () => {
     );
   });
   it('Reset settings every time before selecting an system prompt from the input if resetSettings is provided', () => {
-    const mockResetSettings = jest.fn();
+    const mockResetSettings = vi.fn();
     const { getByTestId } = render(
       <QuickPromptSelector {...testProps} resetSettings={mockResetSettings} />
     );

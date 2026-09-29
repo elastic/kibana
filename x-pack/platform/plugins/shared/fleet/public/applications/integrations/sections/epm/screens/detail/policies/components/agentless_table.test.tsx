@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
@@ -20,27 +23,36 @@ import { ExperimentalFeaturesService } from '../../../../../../services';
 
 import { AgentlessPackagePoliciesTable } from './agentless_table';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn(),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../../hooks'),
-  useConfirmForceInstall: jest.fn(),
-  sendGetAgents: jest.fn(),
-}));
+vi.mock('../../../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../../hooks')),
+      useConfirmForceInstall: vi.fn(),
+      sendGetAgents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../../../../hooks'),
-  sendGetAgents: jest.fn(),
-}));
+vi.mock('../../../../../../../../hooks', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../../../../../../hooks')),
+      sendGetAgents: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseLocation = useLocation as jest.MockedFunction<typeof useLocation>;
+const mockUseLocation = useLocation as MockedFunction<typeof useLocation>;
 
 describe('AgentlessPackagePoliciesTable', () => {
-  const mockSendGetAgents = sendGetAgents as jest.MockedFunction<typeof sendGetAgents>;
-  const mockSendGetAgentsFromFlyout = sendGetAgentsFromFlyout as jest.MockedFunction<
+  const mockSendGetAgents = sendGetAgents as MockedFunction<typeof sendGetAgents>;
+  const mockSendGetAgentsFromFlyout = sendGetAgentsFromFlyout as MockedFunction<
     typeof sendGetAgentsFromFlyout
   >;
 
@@ -82,7 +94,7 @@ describe('AgentlessPackagePoliciesTable', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const defaultProps = {
@@ -127,10 +139,10 @@ describe('AgentlessPackagePoliciesTable', () => {
       },
     ],
     packagePoliciesTotal: 1,
-    refreshPackagePolicies: jest.fn(),
+    refreshPackagePolicies: vi.fn(),
     pagination: {
       pagination: { currentPage: 1, pageSize: 10 },
-      setPagination: jest.fn(),
+      setPagination: vi.fn(),
       pageSizeOptions: [10, 20, 50],
     },
   };
@@ -173,7 +185,7 @@ describe('AgentlessPackagePoliciesTable', () => {
   });
 
   it('retries the list request when the error prompt retry button is clicked', async () => {
-    const refreshPackagePolicies = jest.fn();
+    const refreshPackagePolicies = vi.fn();
     const renderer = createIntegrationsTestRendererMock();
     const result = renderer.render(
       <AgentlessPackagePoliciesTable
@@ -209,7 +221,7 @@ describe('AgentlessPackagePoliciesTable', () => {
   });
 
   it('does not append the isAgentless hint to edit links when the agentless policies UI is disabled', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       enableAgentlessPoliciesUI: false,
       // disableAgentlessLegacyAPI forces the UI on, so it must be off to exercise the disabled path.
@@ -223,7 +235,7 @@ describe('AgentlessPackagePoliciesTable', () => {
     // With the hint suppressed and no `from`, the query string is empty — the href must not
     // end in a dangling `?`.
     expect(nameLink.getAttribute('href')).not.toContain('?');
-    jest.mocked(ExperimentalFeaturesService.get).mockRestore();
+    vi.mocked(ExperimentalFeaturesService.get).mockRestore();
   });
 
   it('displays agent health status when agents are loaded', async () => {

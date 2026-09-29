@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import yaml from 'yaml';
 import { monaco } from '@kbn/monaco';
@@ -12,40 +15,46 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { useUserPickerValidation, collectUserPickerDefaults } from './use_user_picker_validation';
 import * as api from '../../../containers/user_profiles/api';
 
-jest.mock('@kbn/monaco', () => ({
-  monaco: {
-    editor: {
-      setModelMarkers: jest.fn(),
-      MarkerSeverity: {
-        Error: 8,
-        Warning: 4,
+vi.mock('@kbn/monaco', () => {
+      const mocked = {
+      monaco: {
+        editor: {
+          setModelMarkers: vi.fn(),
+          MarkerSeverity: {
+            Error: 8,
+            Warning: 4,
+          },
+        },
+        MarkerSeverity: {
+          Error: 8,
+          Warning: 4,
+        },
       },
-    },
-    MarkerSeverity: {
-      Error: 8,
-      Warning: 4,
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../containers/user_profiles/api', () => ({
-  bulkGetUserProfiles: jest.fn(),
-}));
+vi.mock('../../../containers/user_profiles/api', () => {
+      const mocked = {
+      bulkGetUserProfiles: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockSetModelMarkers = monaco.editor.setModelMarkers as jest.Mock;
-const mockBulkGetUserProfiles = api.bulkGetUserProfiles as jest.Mock;
+const mockSetModelMarkers = monaco.editor.setModelMarkers as Mock;
+const mockBulkGetUserProfiles = api.bulkGetUserProfiles as Mock;
 
 const makeSecurity = (): SecurityPluginStart => ({} as unknown as SecurityPluginStart);
 
 const makeModel = () =>
   ({
     uri: { toString: () => 'test-uri' },
-    isDisposed: jest.fn(() => false),
+    isDisposed: vi.fn(() => false),
   } as unknown as monaco.editor.ITextModel);
 
 const makeEditor = (model: monaco.editor.ITextModel) =>
   ({
-    getModel: jest.fn(() => model),
+    getModel: vi.fn(() => model),
   } as unknown as monaco.editor.IStandaloneCodeEditor);
 
 const makeProfile = (uid: string, fullName: string) => ({
@@ -99,22 +108,22 @@ describe('useUserPickerValidation', () => {
   let security: SecurityPluginStart;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
     mockModel = makeModel();
     mockEditor = makeEditor(mockModel);
     security = makeSecurity();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('does not call setModelMarkers when editor is null', async () => {
     renderHook(() => useUserPickerValidation(null, 'name: test', security));
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockSetModelMarkers).not.toHaveBeenCalled();
@@ -128,7 +137,7 @@ describe('useUserPickerValidation', () => {
     renderHook(() => useUserPickerValidation(mockEditor, yamlStr, security));
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockSetModelMarkers).toHaveBeenCalledWith(mockModel, 'user-picker-validation', []);
@@ -150,7 +159,7 @@ fields:
     renderHook(() => useUserPickerValidation(mockEditor, yamlStr, security));
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     const markers = mockSetModelMarkers.mock.calls[0][2];
@@ -173,7 +182,7 @@ fields:
     renderHook(() => useUserPickerValidation(mockEditor, yamlStr, security));
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockSetModelMarkers).toHaveBeenCalled();
@@ -200,7 +209,7 @@ fields:
     renderHook(() => useUserPickerValidation(mockEditor, yamlStr, security));
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     const markers = mockSetModelMarkers.mock.calls[0][2];
@@ -212,7 +221,7 @@ fields:
     renderHook(() => useUserPickerValidation(mockEditor, 'name: [broken yaml', security));
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockSetModelMarkers).toHaveBeenCalledWith(mockModel, 'user-picker-validation', []);
@@ -233,7 +242,7 @@ fields:
     expect(mockSetModelMarkers).not.toHaveBeenCalled();
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     expect(mockSetModelMarkers).toHaveBeenCalledTimes(1);
@@ -265,14 +274,14 @@ fields:
     );
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     // Second render kicks off a new generation before the first resolves
     rerender({ value: yaml2 });
 
     await act(async () => {
-      jest.runAllTimers();
+      vi.runAllTimers();
     });
 
     // Resolve the first (now stale) promise

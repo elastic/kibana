@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -15,10 +17,10 @@ import { AddFilter } from './add_filter';
 
 type RenderAddFilterComponentProps = React.ComponentProps<typeof AddFilter>;
 
-const mockMakeRegExTest = jest.fn(() => true);
+const mockMakeRegExTest = vi.fn(() => true);
 
-jest.mock('@kbn/kibana-utils-plugin/common/field_wildcard', () => {
-  const originalModule = jest.requireActual('@kbn/kibana-utils-plugin/common/field_wildcard');
+vi.mock('@kbn/kibana-utils-plugin/common/field_wildcard', async () => {
+  const originalModule = (await vi.importActual('@kbn/kibana-utils-plugin/common/field_wildcard'));
   return {
     ...originalModule,
     makeRegEx: () => {
@@ -30,7 +32,7 @@ jest.mock('@kbn/kibana-utils-plugin/common/field_wildcard', () => {
 });
 
 const renderAddFilterComponent = (
-  { onAddFilter }: RenderAddFilterComponentProps = { onAddFilter: jest.fn() }
+  { onAddFilter }: RenderAddFilterComponentProps = { onAddFilter: vi.fn() }
 ) => {
   return renderWithI18n(<AddFilter onAddFilter={onAddFilter} />);
 };
@@ -44,7 +46,7 @@ describe('AddFilter', () => {
 
   test('should allow adding a filter', async () => {
     const user = userEvent.setup();
-    const onAddFilter = jest.fn();
+    const onAddFilter = vi.fn();
     renderAddFilterComponent({ onAddFilter });
 
     await user.type(screen.getByTestId('fieldFilterInput'), 'tim*');
@@ -54,7 +56,7 @@ describe('AddFilter', () => {
 
   test('should ignore strings with just spaces', async () => {
     const user = userEvent.setup();
-    const onAddFilter = jest.fn();
+    const onAddFilter = vi.fn();
 
     renderAddFilterComponent({ onAddFilter });
 

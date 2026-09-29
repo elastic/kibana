@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KueryNode } from '@kbn/es-query';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -49,11 +51,11 @@ const getOperationConflictsTimes = (times: number) => {
 };
 
 const OperationSuccessful = async () => mockSuccessfulResult;
-const conflictOperationMock = jest.fn();
+const conflictOperationMock = vi.fn();
 
 describe('retryIfBulkOperationConflicts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should work when operation is successful', async () => {

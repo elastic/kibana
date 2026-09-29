@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
 import { authenticatedUser } from '../../__mocks__/user';
@@ -123,7 +125,7 @@ describe('Read conversation route', () => {
 
   describe('telemetry', () => {
     beforeEach(() => {
-      context.elasticAssistant.telemetry.reportEvent = jest.fn();
+      context.elasticAssistant.telemetry.reportEvent = vi.fn();
     });
 
     test('does NOT call telemetry.reportEvent when user is the owner', async () => {

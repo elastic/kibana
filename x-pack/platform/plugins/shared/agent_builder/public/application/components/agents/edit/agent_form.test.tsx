@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -14,7 +17,7 @@ import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { AgentForm } from './agent_form';
 import type { AgentEditState } from '../../../hooks/agents/use_agent_edit';
 
-const mockSubmit = jest.fn();
+const mockSubmit = vi.fn();
 
 const editModeState: AgentEditState = {
   id: 'test-agent-id',
@@ -39,59 +42,86 @@ const createModeState: AgentEditState = {
   description: '',
 };
 
-jest.mock('../../../hooks/agents/use_agent_edit', () => ({
-  useAgentEdit: jest.fn(),
-}));
+vi.mock('../../../hooks/agents/use_agent_edit', () => {
+      const mocked = {
+      useAgentEdit: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // The settings tab's AI indices section reads a ui setting this test's Kibana context does not
 // provide. Off keeps the section out of the way; it has its own tests.
-jest.mock('../../../hooks/use_is_context_engine_enabled', () => ({
-  useIsContextEngineEnabled: () => false,
-}));
+vi.mock('../../../hooks/use_is_context_engine_enabled', () => {
+      const mocked = {
+      useIsContextEngineEnabled: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      uiSettings: { get: () => false },
-      notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
-      http: {},
-      overlays: { openConfirm: jest.fn().mockResolvedValue(true) },
-      application: { navigateToUrl: jest.fn() },
-      appParams: { history: { replace: jest.fn(), push: jest.fn() } },
-    },
-  }),
-}));
+vi.mock('../../../hooks/use_kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          uiSettings: { get: () => false },
+          notifications: { toasts: { addSuccess: vi.fn(), addDanger: vi.fn() } },
+          http: {},
+          overlays: { openConfirm: vi.fn().mockResolvedValue(true) },
+          application: { navigateToUrl: vi.fn() },
+          appParams: { history: { replace: vi.fn(), push: vi.fn() } },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_navigation', () => ({
-  useNavigation: () => ({
-    navigateToAgentBuilderUrl: jest.fn(),
-  }),
-}));
+vi.mock('../../../hooks/use_navigation', () => {
+      const mocked = {
+      useNavigation: () => ({
+        navigateToAgentBuilderUrl: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({
-    docLinksService: { agentBuilderAgents: 'https://docs.example.com/agents' },
-    agentService: { list: jest.fn().mockResolvedValue([]) },
-  }),
-}));
+vi.mock('../../../hooks/use_agent_builder_service', () => {
+      const mocked = {
+      useAgentBuilderServices: () => ({
+        docLinksService: { agentBuilderAgents: 'https://docs.example.com/agents' },
+        agentService: { list: vi.fn().mockResolvedValue([]) },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_ui_privileges', () => ({
-  useUiPrivileges: () => ({ manageAgents: true, isAdmin: false }),
-}));
+vi.mock('../../../hooks/use_ui_privileges', () => {
+      const mocked = {
+      useUiPrivileges: () => ({ manageAgents: true, isAdmin: false }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/tools/use_tools', () => ({
-  useToolsService: () => ({ tools: [], isLoading: false, error: undefined }),
-}));
+vi.mock('../../../hooks/tools/use_tools', () => {
+      const mocked = {
+      useToolsService: () => ({ tools: [], isLoading: false, error: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: () => false,
-}));
+vi.mock('../../../hooks/use_experimental_features', () => {
+      const mocked = {
+      useExperimentalFeatures: () => false,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/unsaved-changes-prompt', () => ({
-  useUnsavedChangesPrompt: () => {},
-}));
+vi.mock('@kbn/unsaved-changes-prompt', () => {
+      const mocked = {
+      useUnsavedChangesPrompt: () => {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useAgentEdit } = jest.requireMock('../../../hooks/agents/use_agent_edit');
+const { useAgentEdit } = (await vi.importMock('../../../hooks/agents/use_agent_edit'));
 
 const renderWithIntl = (ui: React.ReactElement) => {
   const queryClient = new QueryClient({
@@ -106,8 +136,8 @@ const renderWithIntl = (ui: React.ReactElement) => {
 
 describe('AgentForm', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAgentEdit as jest.Mock).mockImplementation(
+    vi.clearAllMocks();
+    (useAgentEdit as Mock).mockImplementation(
       ({ editingAgentId }: { editingAgentId?: string }) => {
         const state: AgentEditState = !editingAgentId ? createModeState : { ...editModeState };
         return {
@@ -125,7 +155,7 @@ describe('AgentForm', () => {
   });
 
   it('displays owner name in edit mode when agent has created_by with username', () => {
-    (useAgentEdit as jest.Mock).mockReturnValue({
+    (useAgentEdit as Mock).mockReturnValue({
       state: {
         ...editModeState,
         created_by: { id: 'user-1', username: 'test-owner' },
@@ -139,14 +169,14 @@ describe('AgentForm', () => {
       error: undefined,
     });
 
-    renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
+    renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={vi.fn()} />);
 
     expect(screen.getByTestId('agentFormOwnerLabel')).toBeInTheDocument();
     expect(screen.getByText('Owner: test-owner')).toBeInTheDocument();
   });
 
   it('does not display owner label in edit mode when agent has no created_by username', () => {
-    (useAgentEdit as jest.Mock).mockReturnValue({
+    (useAgentEdit as Mock).mockReturnValue({
       state: editModeState,
       isLoading: false,
       isSubmitting: false,
@@ -157,13 +187,13 @@ describe('AgentForm', () => {
       error: undefined,
     });
 
-    renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
+    renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={vi.fn()} />);
 
     expect(screen.queryByTestId('agentFormOwnerLabel')).not.toBeInTheDocument();
   });
 
   it('does not display owner label in create mode', () => {
-    (useAgentEdit as jest.Mock).mockReturnValue({
+    (useAgentEdit as Mock).mockReturnValue({
       state: {
         ...createModeState,
         created_by: { id: 'user-1', username: 'current-user' },
@@ -183,7 +213,7 @@ describe('AgentForm', () => {
   });
 
   it('displays the Managed badge in edit mode when the agent has a non-chat type', () => {
-    (useAgentEdit as jest.Mock).mockReturnValue({
+    (useAgentEdit as Mock).mockReturnValue({
       state: editModeState,
       agentType: 'platform.nightshift.investigation-type',
       isLoading: false,
@@ -195,13 +225,13 @@ describe('AgentForm', () => {
       error: undefined,
     });
 
-    renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
+    renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={vi.fn()} />);
 
     expect(screen.getByTestId('agentBuilderAgentPreconfiguredTypeBadge')).toBeInTheDocument();
   });
 
   it('does not display the Managed badge for a chat-type agent', () => {
-    (useAgentEdit as jest.Mock).mockReturnValue({
+    (useAgentEdit as Mock).mockReturnValue({
       state: editModeState,
       agentType: 'chat',
       isLoading: false,
@@ -213,7 +243,7 @@ describe('AgentForm', () => {
       error: undefined,
     });
 
-    renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
+    renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={vi.fn()} />);
 
     expect(screen.queryByTestId('agentBuilderAgentPreconfiguredTypeBadge')).not.toBeInTheDocument();
   });

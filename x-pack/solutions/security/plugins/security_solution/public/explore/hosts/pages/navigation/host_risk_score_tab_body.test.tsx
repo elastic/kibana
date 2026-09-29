@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -15,9 +18,9 @@ import { useEntityStoreRiskScoreKpi } from '../../../../entity_analytics/api/hoo
 import { useEntityStoreRiskScore } from '../../../../entity_analytics/api/hooks/use_entity_store_risk_score';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 
-jest.mock('../../../../entity_analytics/api/hooks/use_entity_store_risk_score_kpi');
-jest.mock('../../../../entity_analytics/api/hooks/use_entity_store_risk_score');
-jest.mock('../../../../common/containers/query_toggle');
+vi.mock('../../../../entity_analytics/api/hooks/use_entity_store_risk_score_kpi');
+vi.mock('../../../../entity_analytics/api/hooks/use_entity_store_risk_score');
+vi.mock('../../../../common/containers/query_toggle');
 
 const sharedRiskScoreReturn = {
   data: [],
@@ -27,7 +30,7 @@ const sharedRiskScoreReturn = {
   isAuthorized: true,
   isInspected: false,
   loading: false,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
   totalCount: 0,
 };
 
@@ -36,7 +39,7 @@ const sharedKpiReturn = {
   inspect: { dsl: [], response: [] },
   isModuleDisabled: false,
   loading: false,
-  refetch: jest.fn(),
+  refetch: vi.fn(),
   severityCount: {
     [RiskSeverity.Unknown]: 12,
     [RiskSeverity.Low]: 12,
@@ -47,20 +50,20 @@ const sharedKpiReturn = {
 };
 
 describe('Host risk score query tab body', () => {
-  const mockUseEntityStoreRiskScore = useEntityStoreRiskScore as jest.Mock;
-  const mockUseEntityStoreRiskScoreKpi = useEntityStoreRiskScoreKpi as jest.Mock;
-  const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  const mockUseEntityStoreRiskScore = useEntityStoreRiskScore as Mock;
+  const mockUseEntityStoreRiskScoreKpi = useEntityStoreRiskScoreKpi as Mock;
+  const mockUseQueryToggle = useQueryToggle as Mock;
   const defaultProps = {
     indexNames: [],
-    setQuery: jest.fn(),
+    setQuery: vi.fn(),
     skip: false,
     startDate: '2019-06-25T04:31:59.345Z',
     endDate: '2019-06-25T06:31:59.345Z',
     type: HostsType.page,
   };
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+    vi.clearAllMocks();
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: vi.fn() });
     mockUseEntityStoreRiskScore.mockReturnValue(sharedRiskScoreReturn);
     mockUseEntityStoreRiskScoreKpi.mockReturnValue(sharedKpiReturn);
   });
@@ -74,7 +77,7 @@ describe('Host risk score query tab body', () => {
     expect(mockUseEntityStoreRiskScoreKpi.mock.calls[0][0].skip).toEqual(false);
   });
   it('toggleStatus=false: entity store hooks skip', () => {
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: vi.fn() });
     render(
       <TestProviders>
         <HostRiskScoreQueryTabBody {...defaultProps} />

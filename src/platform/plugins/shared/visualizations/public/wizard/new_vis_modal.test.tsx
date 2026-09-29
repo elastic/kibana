@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { TypesStart, BaseVisType } from '../vis_types';
 import { VisGroups } from '../vis_types';
@@ -82,7 +84,7 @@ describe('NewVisModal', () => {
     },
   };
   const addBasePath = (url: string) => `testbasepath${url}`;
-  const settingsGet = jest.fn();
+  const settingsGet = vi.fn();
   const uiSettings: any = { get: settingsGet };
   const docLinks = {
     links: {
@@ -97,13 +99,13 @@ describe('NewVisModal', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
       value: {
-        assign: jest.fn(),
+        assign: vi.fn(),
       },
     });
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderNewVisModal = (propsOverrides?: Partial<TypeSelectionProps>) => {
@@ -168,8 +170,8 @@ describe('NewVisModal', () => {
     });
 
     it('closes and redirects properly if visualization with alias.path and originatingApp in props', async () => {
-      const onClose = jest.fn();
-      const navigateToApp = jest.fn();
+      const onClose = vi.fn();
+      const navigateToApp = vi.fn();
       const stateTransfer = embeddablePluginMock.createStartContract().getStateTransfer();
       renderNewVisModal({
         editorParams: ['foo=true', 'bar=42'],
@@ -189,8 +191,8 @@ describe('NewVisModal', () => {
     });
 
     it('closes and redirects properly if visualization with aliasApp and without originatingApp in props', async () => {
-      const onClose = jest.fn();
-      const navigateToApp = jest.fn();
+      const onClose = vi.fn();
+      const navigateToApp = vi.fn();
 
       renderNewVisModal({
         editorParams: ['foo=true', 'bar=42'],

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
@@ -16,7 +18,7 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from './translations';
 
-jest.mock('@kbn/lists-plugin/public');
+vi.mock('@kbn/lists-plugin/public');
 
 describe('ExceptionsConditions', () => {
   describe('EQL rule type', () => {
@@ -38,9 +40,9 @@ describe('ExceptionsConditions', () => {
             isEdit={false}
             selectedOs={undefined}
             exceptionListType={ExceptionListTypeEnum.DETECTION}
-            onOsChange={jest.fn()}
-            onExceptionItemAdd={jest.fn()}
-            onSetErrorExists={jest.fn()}
+            onOsChange={vi.fn()}
+            onExceptionItemAdd={vi.fn()}
+            onSetErrorExists={vi.fn()}
           />
         </TestProviders>
       );
@@ -68,9 +70,9 @@ describe('ExceptionsConditions', () => {
             isEdit
             selectedOs={undefined}
             exceptionListType={ExceptionListTypeEnum.RULE_DEFAULT}
-            onOsChange={jest.fn()}
-            onExceptionItemAdd={jest.fn()}
-            onSetErrorExists={jest.fn()}
+            onOsChange={vi.fn()}
+            onExceptionItemAdd={vi.fn()}
+            onSetErrorExists={vi.fn()}
           />
         </TestProviders>
       );
@@ -97,9 +99,9 @@ describe('ExceptionsConditions', () => {
             isEdit={false}
             selectedOs={undefined}
             exceptionListType={ExceptionListTypeEnum.DETECTION}
-            onOsChange={jest.fn()}
-            onExceptionItemAdd={jest.fn()}
-            onSetErrorExists={jest.fn()}
+            onOsChange={vi.fn()}
+            onExceptionItemAdd={vi.fn()}
+            onSetErrorExists={vi.fn()}
           />
         </TestProviders>
       );
@@ -126,9 +128,9 @@ describe('ExceptionsConditions', () => {
             isEdit={false}
             selectedOs={undefined}
             exceptionListType={ExceptionListTypeEnum.ENDPOINT}
-            onOsChange={jest.fn()}
-            onExceptionItemAdd={jest.fn()}
-            onSetErrorExists={jest.fn()}
+            onOsChange={vi.fn()}
+            onExceptionItemAdd={vi.fn()}
+            onSetErrorExists={vi.fn()}
           />
         </TestProviders>
       );
@@ -158,9 +160,9 @@ describe('ExceptionsConditions', () => {
             isEdit
             exceptionListType={ExceptionListTypeEnum.ENDPOINT}
             selectedOs={undefined}
-            onOsChange={jest.fn()}
-            onExceptionItemAdd={jest.fn()}
-            onSetErrorExists={jest.fn()}
+            onOsChange={vi.fn()}
+            onExceptionItemAdd={vi.fn()}
+            onSetErrorExists={vi.fn()}
           />
         </TestProviders>
       );
@@ -188,9 +190,9 @@ describe('ExceptionsConditions', () => {
             isEdit={false}
             selectedOs={undefined}
             exceptionListType={ExceptionListTypeEnum.ENDPOINT}
-            onOsChange={jest.fn()}
-            onExceptionItemAdd={jest.fn()}
-            onSetErrorExists={jest.fn()}
+            onOsChange={vi.fn()}
+            onExceptionItemAdd={vi.fn()}
+            onSetErrorExists={vi.fn()}
           />
         </TestProviders>
       );

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 
 import {
@@ -18,7 +20,7 @@ import {
 
 describe('useLayoutWidth', () => {
   it('sets the collapsed width when the navigation is collapsed', () => {
-    const setWidth = jest.fn();
+    const setWidth = vi.fn();
 
     renderHook(() => useLayoutWidth({ isCollapsed: true, isSidePanelOpen: false, setWidth }));
 
@@ -26,7 +28,7 @@ describe('useLayoutWidth', () => {
   });
 
   it('adds the side panel width when the side panel is open', () => {
-    const setWidth = jest.fn();
+    const setWidth = vi.fn();
 
     renderHook(() => useLayoutWidth({ isCollapsed: false, isSidePanelOpen: true, setWidth }));
 
@@ -34,7 +36,7 @@ describe('useLayoutWidth', () => {
   });
 
   it('updates when dependencies change', () => {
-    const setWidth = jest.fn();
+    const setWidth = vi.fn();
     const { rerender } = renderHook(
       (props: { isCollapsed: boolean; isSidePanelOpen: boolean }) =>
         useLayoutWidth({ ...props, setWidth }),

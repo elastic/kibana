@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createSearchItems } from './new_job_utils';
@@ -18,7 +20,7 @@ describe('createSearchItems', () => {
   } as unknown as DataView;
 
   const getFieldMock = (searchSource: any) =>
-    jest.fn().mockImplementation((name: string) => {
+    vi.fn().mockImplementation((name: string) => {
       if (name === 'query') {
         return searchSource.query;
       } else {

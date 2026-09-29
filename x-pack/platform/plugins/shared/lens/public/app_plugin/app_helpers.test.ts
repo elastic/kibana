@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
 import type { UseNavigateBackToAppProps } from './app_helpers';
@@ -24,10 +26,10 @@ describe('App helpers', () => {
   ): UseNavigateBackToAppProps {
     return {
       application: getApplicationMock(),
-      onAppLeave: jest.fn(),
+      onAppLeave: vi.fn(),
       legacyEditorAppName: faker.lorem.word(),
       legacyEditorAppUrl: faker.internet.url(),
-      isLensEqual: jest.fn(() => true),
+      isLensEqual: vi.fn(() => true),
       initialDocFromContext: undefined,
       persistedDoc: getLensDocumentMock(),
       ...someProps,
@@ -48,7 +50,7 @@ describe('App helpers', () => {
     });
 
     it('shows modal if documents are not equal', () => {
-      const props = getDefaultProps({ isLensEqual: jest.fn().mockReturnValue(false) });
+      const props = getDefaultProps({ isLensEqual: vi.fn().mockReturnValue(false) });
       const { result } = renderHook(() => useNavigateBackToApp(props));
 
       act(() => {

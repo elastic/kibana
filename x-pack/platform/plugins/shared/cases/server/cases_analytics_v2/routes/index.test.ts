@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -21,7 +24,7 @@ describe('deleteAllPerSpaceCasesDataViews', () => {
   const logger = loggerMock.create();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   /**
@@ -88,7 +91,7 @@ describe('deleteAllPerSpaceCasesDataViews', () => {
     // The unscoped internal client requires `namespace` on every
     // cross-namespace delete; dropping it would re-introduce the
     // orphan-space bug.
-    for (const call of (soClient.delete as jest.Mock).mock.calls) {
+    for (const call of (soClient.delete as Mock).mock.calls) {
       const opts = call[2] as { namespace?: string };
       expect(opts).toHaveProperty('namespace');
       expect(opts.namespace).toBeTruthy();
@@ -201,8 +204,8 @@ describe('deleteAllPerSpaceCasesDataViews', () => {
 
     // No `find` calls were interleaved with `delete` calls — the
     // two-pass invariant means every find happens before any delete.
-    const findOrder = (soClient.find as jest.Mock).mock.invocationCallOrder;
-    const deleteOrder = (soClient.delete as jest.Mock).mock.invocationCallOrder;
+    const findOrder = (soClient.find as Mock).mock.invocationCallOrder;
+    const deleteOrder = (soClient.delete as Mock).mock.invocationCallOrder;
     expect(Math.max(...findOrder)).toBeLessThan(Math.min(...deleteOrder));
   });
 
@@ -240,8 +243,8 @@ describe('deleteAllPerSpaceCasesDataViews', () => {
 
     // The second delete still ran.
     expect(deleted).toBe(1);
-    const childLogger = (logger.get as jest.Mock).mock.results[0]?.value ?? logger;
-    const warnCalls = (childLogger.warn as jest.Mock).mock.calls.map(([msg]: [string]) => msg);
+    const childLogger = (logger.get as Mock).mock.results[0]?.value ?? logger;
+    const warnCalls = (childLogger.warn as Mock).mock.calls.map(([msg]: [string]) => msg);
     expect(warnCalls.some((m: string) => m.includes('cases-analytics-managed-default'))).toBe(true);
   });
 
@@ -295,14 +298,14 @@ describe('deleteAllPerSpaceCasesDataViews', () => {
 
     // Only the one that actually deleted is counted.
     expect(deleted).toBe(1);
-    const childLogger = (logger.get as jest.Mock).mock.results[0]?.value ?? logger;
+    const childLogger = (logger.get as Mock).mock.results[0]?.value ?? logger;
     // No WARN about the 404 — that's the bug being guarded against.
-    const warnCalls = (childLogger.warn as jest.Mock).mock.calls.map(([msg]: [string]) => msg);
+    const warnCalls = (childLogger.warn as Mock).mock.calls.map(([msg]: [string]) => msg);
     expect(warnCalls.some((m: string) => m.includes('cases-analytics-managed-default'))).toBe(
       false
     );
     // DEBUG is emitted so administrators can correlate the count gap.
-    const debugCalls = (childLogger.debug as jest.Mock).mock.calls.map(([msg]: [string]) => msg);
+    const debugCalls = (childLogger.debug as Mock).mock.calls.map(([msg]: [string]) => msg);
     expect(debugCalls.some((m: string) => m.includes('cases-analytics-managed-default'))).toBe(
       true
     );
@@ -337,8 +340,8 @@ describe('deleteAllPerSpaceCasesDataViews', () => {
     const deleted = await deleteAllPerSpaceCasesDataViews(soClient, logger);
 
     expect(deleted).toBe(0);
-    const childLogger = (logger.get as jest.Mock).mock.results[0]?.value ?? logger;
-    const warnCalls = (childLogger.warn as jest.Mock).mock.calls.map(([msg]: [string]) => msg);
+    const childLogger = (logger.get as Mock).mock.results[0]?.value ?? logger;
+    const warnCalls = (childLogger.warn as Mock).mock.calls.map(([msg]: [string]) => msg);
     expect(warnCalls.some((m: string) => m.includes('cluster_block_exception'))).toBe(true);
   });
 });
@@ -360,7 +363,7 @@ describe('registerCasesAnalyticsV2Routes — enableAdminRoutes gating', () => {
       getWriter: () => null,
       getActivityWriter: () => null,
       getAttachmentsWriter: () => null,
-      clearDataViewBootstrapCache: jest.fn(),
+      clearDataViewBootstrapCache: vi.fn(),
       enabled: true,
       enableAdminRoutes: false,
       ...overrides,
@@ -368,7 +371,7 @@ describe('registerCasesAnalyticsV2Routes — enableAdminRoutes gating', () => {
   }
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('always registers GET /state regardless of enableAdminRoutes', () => {
@@ -378,7 +381,7 @@ describe('registerCasesAnalyticsV2Routes — enableAdminRoutes gating', () => {
     const args = buildArgs({ enableAdminRoutes: false });
     registerCasesAnalyticsV2Routes(args);
 
-    const router = (args.core.http.createRouter as jest.Mock).mock.results[0].value;
+    const router = (args.core.http.createRouter as Mock).mock.results[0].value;
 
     expect(router.get).toHaveBeenCalledTimes(1);
     expect(router.get).toHaveBeenCalledWith(
@@ -395,7 +398,7 @@ describe('registerCasesAnalyticsV2Routes — enableAdminRoutes gating', () => {
     const args = buildArgs({ enableAdminRoutes: false });
     registerCasesAnalyticsV2Routes(args);
 
-    const router = (args.core.http.createRouter as jest.Mock).mock.results[0].value;
+    const router = (args.core.http.createRouter as Mock).mock.results[0].value;
 
     expect(router.post).not.toHaveBeenCalled();
   });
@@ -404,8 +407,8 @@ describe('registerCasesAnalyticsV2Routes — enableAdminRoutes gating', () => {
     const args = buildArgs({ enableAdminRoutes: true });
     registerCasesAnalyticsV2Routes(args);
 
-    const router = (args.core.http.createRouter as jest.Mock).mock.results[0].value;
-    const registeredPaths: string[] = (router.post as jest.Mock).mock.calls.map(
+    const router = (args.core.http.createRouter as Mock).mock.results[0].value;
+    const registeredPaths: string[] = (router.post as Mock).mock.calls.map(
       ([{ path }]: [{ path: string }]) => path
     );
 
@@ -432,10 +435,10 @@ describe('registerCasesAnalyticsV2Routes — enableAdminRoutes gating', () => {
     const args = buildArgs({ enableAdminRoutes: true });
     registerCasesAnalyticsV2Routes(args);
 
-    const router = (args.core.http.createRouter as jest.Mock).mock.results[0].value;
+    const router = (args.core.http.createRouter as Mock).mock.results[0].value;
     const adminCalls: Array<[{ path: string; security?: unknown }, unknown]> = [
-      ...(router.get as jest.Mock).mock.calls,
-      ...(router.post as jest.Mock).mock.calls,
+      ...(router.get as Mock).mock.calls,
+      ...(router.post as Mock).mock.calls,
     ].filter(([{ path }]) =>
       [
         CASES_ANALYTICS_V2_STATE_URL,
@@ -470,22 +473,22 @@ describe('registerCasesAnalyticsV2Routes — enableAdminRoutes gating', () => {
     registerCasesAnalyticsV2Routes(args);
 
     // Pull the registered GET /state handler off the mock router.
-    const router = (args.core.http.createRouter as jest.Mock).mock.results[0].value;
-    const stateCall = (router.get as jest.Mock).mock.calls.find(
+    const router = (args.core.http.createRouter as Mock).mock.results[0].value;
+    const stateCall = (router.get as Mock).mock.calls.find(
       ([def]: [{ path: string }]) => def.path === CASES_ANALYTICS_V2_STATE_URL
     );
     expect(stateCall).toBeDefined();
     const handler = stateCall![1] as (
       ctx: object,
       req: object,
-      res: { ok: jest.Mock; customError: jest.Mock }
+      res: { ok: Mock; customError: Mock }
     ) => Promise<unknown>;
 
     // Mock the request handler context: ES client says every index
     // exists; SO client returns no reset task. The handler doesn't
     // care about the actual ES content for shape-pinning purposes.
     const esClient = {
-      indices: { exists: jest.fn().mockResolvedValue(true) },
+      indices: { exists: vi.fn().mockResolvedValue(true) },
     };
     const ctx = {
       core: Promise.resolve({
@@ -493,7 +496,7 @@ describe('registerCasesAnalyticsV2Routes — enableAdminRoutes gating', () => {
       }),
     };
 
-    const response = { ok: jest.fn((arg) => arg), customError: jest.fn() };
+    const response = { ok: vi.fn((arg) => arg), customError: vi.fn() };
     const result = (await handler(ctx, {}, response)) as {
       body: {
         surfaces: { cases: unknown; activity: unknown; attachments: unknown };
@@ -524,8 +527,8 @@ describe('POST /reconcile/run_soon handler', () => {
   /** Resolve the runSoon handler from the mock router. */
   function getRunSoonHandler(args: RegisterArgs) {
     registerCasesAnalyticsV2Routes(args);
-    const router = (args.core.http.createRouter as jest.Mock).mock.results[0].value;
-    const postCalls = (router.post as jest.Mock).mock.calls as Array<
+    const router = (args.core.http.createRouter as Mock).mock.results[0].value;
+    const postCalls = (router.post as Mock).mock.calls as Array<
       [{ path: string }, (...handlerArgs: unknown[]) => Promise<unknown>]
     >;
     const match = postCalls.find(
@@ -544,7 +547,7 @@ describe('POST /reconcile/run_soon handler', () => {
       getWriter: () => null,
       getActivityWriter: () => null,
       getAttachmentsWriter: () => null,
-      clearDataViewBootstrapCache: jest.fn(),
+      clearDataViewBootstrapCache: vi.fn(),
       enabled: true,
       enableAdminRoutes: true,
       ...overrides,
@@ -552,7 +555,7 @@ describe('POST /reconcile/run_soon handler', () => {
   }
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   /**
@@ -565,7 +568,7 @@ describe('POST /reconcile/run_soon handler', () => {
    */
   it('returns 200 with already_running when TaskAlreadyRunningError is thrown', async () => {
     const taskManager = {
-      runSoon: jest.fn().mockRejectedValue(new TaskAlreadyRunningError(RECONCILIATION_TASK_ID)),
+      runSoon: vi.fn().mockRejectedValue(new TaskAlreadyRunningError(RECONCILIATION_TASK_ID)),
     } as unknown as ReturnType<RegisterArgs['getTaskManager']>;
     const args = buildArgs({ getTaskManager: () => taskManager });
     const handler = getRunSoonHandler(args);
@@ -584,7 +587,7 @@ describe('POST /reconcile/run_soon handler', () => {
     // must not swallow real problems just because the happy and
     // already-running paths look similar to the caller.
     const taskManager = {
-      runSoon: jest.fn().mockRejectedValue(new Error('something else')),
+      runSoon: vi.fn().mockRejectedValue(new Error('something else')),
     } as unknown as ReturnType<RegisterArgs['getTaskManager']>;
     const args = buildArgs({ getTaskManager: () => taskManager });
     const handler = getRunSoonHandler(args);
@@ -599,7 +602,7 @@ describe('POST /reconcile/run_soon handler', () => {
   it('returns 200 with the runSoon result on the happy path', async () => {
     const runSoonResult = { id: RECONCILIATION_TASK_ID, state: { runAt: 'now' } };
     const taskManager = {
-      runSoon: jest.fn().mockResolvedValue(runSoonResult),
+      runSoon: vi.fn().mockResolvedValue(runSoonResult),
     } as unknown as ReturnType<RegisterArgs['getTaskManager']>;
     const args = buildArgs({ getTaskManager: () => taskManager });
     const handler = getRunSoonHandler(args);

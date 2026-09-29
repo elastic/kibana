@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -36,14 +38,14 @@ const attachment: SignificantEventAttachment = {
 
 describe('significantEventAttachmentDefinition', () => {
   it('registers the attachment renderer', () => {
-    const addAttachmentType = jest.fn();
+    const addAttachmentType = vi.fn();
     const cleanup = registerSignificantEventAttachment({
       agentBuilder: {
-        addAttachment: jest.fn(),
+        addAttachment: vi.fn(),
         attachments: { addAttachmentType },
         events: {
           ui: { activeConversation$: new BehaviorSubject(null).asObservable() },
-          getChatEvents$: jest.fn(() => EMPTY),
+          getChatEvents$: vi.fn(() => EMPTY),
         },
       } as never,
       chrome: {
@@ -78,11 +80,11 @@ describe('significantEventAttachmentDefinition', () => {
     const baseParams = {
       attachment,
       isSidebar: false,
-      updateOrigin: jest.fn(),
+      updateOrigin: vi.fn(),
     };
 
     it('returns an "Open preview" SECONDARY button when openCanvas is provided and not in canvas', () => {
-      const openCanvas = jest.fn();
+      const openCanvas = vi.fn();
       const buttons =
         significantEventAttachmentDefinition.getActionButtons?.({
           ...baseParams,
@@ -104,7 +106,7 @@ describe('significantEventAttachmentDefinition', () => {
         significantEventAttachmentDefinition.getActionButtons?.({
           ...baseParams,
           isCanvas: true,
-          openCanvas: jest.fn(),
+          openCanvas: vi.fn(),
         }) ?? [];
 
       expect(buttons).toHaveLength(0);
@@ -129,9 +131,9 @@ describe('significantEventAttachmentDefinition', () => {
           {significantEventAttachmentDefinition.renderCanvasContent?.(
             { attachment, isSidebar: false },
             {
-              registerActionButtons: jest.fn(),
-              updateOrigin: jest.fn(),
-              closeCanvas: jest.fn(),
+              registerActionButtons: vi.fn(),
+              updateOrigin: vi.fn(),
+              closeCanvas: vi.fn(),
             }
           )}
         </>

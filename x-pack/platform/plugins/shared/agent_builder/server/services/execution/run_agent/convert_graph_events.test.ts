@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { of, toArray, lastValueFrom } from 'rxjs';
 import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import type { Logger } from '@kbn/logging';
@@ -29,7 +31,7 @@ import type { ToolRenderStateUpdate } from './transient_state';
 
 const GRAPH = 'test-graph';
 
-const logger = { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as unknown as Logger;
+const logger = { debug: vi.fn(), warn: vi.fn(), error: vi.fn() } as unknown as Logger;
 
 const chainEnd = (
   name: string,
@@ -302,7 +304,7 @@ describe('convertGraphEvents', () => {
 
     it('is backdated to the first chunk of the terminal research turn', async () => {
       const startTime = new Date(1000);
-      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(2500);
+      const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(2500);
       try {
         const events = await collect(
           researchTurn(

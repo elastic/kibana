@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
@@ -41,10 +44,10 @@ const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
 const savedObjectsClient = savedObjectsClientMock.create();
 const uiSettingsClient = uiSettingsServiceMock.createClient();
 const wrappedScopedClusterClient = wrappedScopedClusterClientMock.create();
-const getDataViews = jest.fn().mockResolvedValue(dataViews);
-const getWrappedSearchSourceClient = jest.fn();
-const getAsyncSearchClient = jest.fn();
-const getCpsData = jest.fn().mockResolvedValue({ linkedProjects: [] });
+const getDataViews = vi.fn().mockResolvedValue(dataViews);
+const getWrappedSearchSourceClient = vi.fn();
+const getAsyncSearchClient = vi.fn();
+const getCpsData = vi.fn().mockResolvedValue({ linkedProjects: [] });
 
 const fakeRequest = {
   headers: {},
@@ -59,11 +62,11 @@ const fakeRequest = {
       url: '/',
     },
   },
-  getSavedObjectsClient: jest.fn(),
+  getSavedObjectsClient: vi.fn(),
 } as unknown as KibanaRequest;
 
 const timer = new TaskRunnerTimer({ logger });
-const ruleType: jest.Mocked<
+const ruleType: Mocked<
   NormalizedRuleType<{}, {}, { foo: string }, {}, {}, 'default', 'recovered', {}>
 > = {
   id: RULE_TYPE_ID,
@@ -73,7 +76,7 @@ const ruleType: jest.Mocked<
   minimumLicenseRequired: 'basic',
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
-  executor: jest.fn(),
+  executor: vi.fn(),
   category: 'test',
   producer: 'alerts',
   solution: 'stack',
@@ -154,7 +157,7 @@ describe('RuleTypeRunner', () => {
   let contextMock: ReturnType<typeof getTaskRunnerContext>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     contextMock = getTaskRunnerContext();
     context = contextMock as unknown as TaskRunnerContext;
 

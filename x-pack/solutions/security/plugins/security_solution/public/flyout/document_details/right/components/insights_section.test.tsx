@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import type { EsHitRecord } from '@kbn/discover-utils';
@@ -36,14 +39,17 @@ import { useShowRelatedAlertsBySession } from '../../../../flyout_v2/document/to
 import { useShowRelatedCases } from '../../../../flyout_v2/document/tools/correlations/hooks/use_show_related_cases';
 import { useShowSuppressedAlerts } from '../../../../flyout_v2/document/tools/correlations/hooks/use_show_suppressed_alerts';
 
-jest.mock('../../../../flyout_v2/document/main/hooks/use_alert_prevalence');
-jest.mock('../../shared/hooks/use_event_details', () => ({
-  useEventDetails: jest.fn(() => ({ dataAsNestedObject: null, loading: false })),
-}));
+vi.mock('../../../../flyout_v2/document/main/hooks/use_alert_prevalence');
+vi.mock('../../shared/hooks/use_event_details', () => {
+      const mocked = {
+      useEventDetails: vi.fn(() => ({ dataAsNestedObject: null, loading: false })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+const mockDispatch = vi.fn();
+vi.mock('react-redux-v7', () => {
+  const original = require('react-redux-v7');
 
   return {
     ...original,
@@ -51,22 +57,22 @@ jest.mock('react-redux-v7', () => {
   };
 });
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
   return {
     ...original,
     useLocation: () => ({ pathname: '/overview' }),
   };
 });
-(useAlertPrevalence as jest.Mock).mockReturnValue({
+(useAlertPrevalence as Mock).mockReturnValue({
   loading: false,
   error: false,
   count: 0,
   alertIds: [],
 });
 
-jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
-jest.mock('../../../../common/hooks/use_experimental_features');
+vi.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
+vi.mock('../../../../common/hooks/use_experimental_features');
 
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
@@ -78,44 +84,47 @@ const mockSearchHit = {
   },
 } as EsHitRecord;
 
-jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
+vi.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => {
+      const mocked = {
+      useExpandSection: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
-jest.mock('../../../../common/containers/use_global_time', () => {
+const mockUseGlobalTime = vi.fn().mockReturnValue({ from, to });
+vi.mock('../../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
   };
 });
 
-const mockUseUserDetails = useObservedUserDetails as jest.Mock;
-jest.mock('../../../../explore/users/containers/users/observed_details');
+const mockUseUserDetails = useObservedUserDetails as Mock;
+vi.mock('../../../../explore/users/containers/users/observed_details');
 
-const mockUseRiskScore = useRiskScore as jest.Mock;
-jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
+const mockUseRiskScore = useRiskScore as Mock;
+vi.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 
-const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
-jest.mock('../../../../common/containers/use_first_last_seen');
+const mockUseFirstLastSeen = useFirstLastSeen as Mock;
+vi.mock('../../../../common/containers/use_first_last_seen');
 
-const mockUseHostDetails = useHostDetails as jest.Mock;
-jest.mock('../../../../explore/hosts/containers/hosts/details');
+const mockUseHostDetails = useHostDetails as Mock;
+vi.mock('../../../../explore/hosts/containers/hosts/details');
 
-jest.mock(
+vi.mock(
   '../../../../flyout_v2/document/tools/threat_intelligence/hooks/use_fetch_threat_intelligence'
 );
-jest.mock('../../../../flyout_v2/document/tools/prevalence/hooks/use_prevalence');
-jest.mock(
+vi.mock('../../../../flyout_v2/document/tools/prevalence/hooks/use_prevalence');
+vi.mock(
   '../../../../flyout_v2/document/tools/correlations/hooks/use_show_related_alerts_by_ancestry'
 );
-jest.mock(
+vi.mock(
   '../../../../flyout_v2/document/tools/correlations/hooks/use_show_related_alerts_by_same_source_event'
 );
-jest.mock(
+vi.mock(
   '../../../../flyout_v2/document/tools/correlations/hooks/use_show_related_alerts_by_session'
 );
-jest.mock('../../../../flyout_v2/document/tools/correlations/hooks/use_show_related_cases');
-jest.mock('../../../../flyout_v2/document/tools/correlations/hooks/use_show_suppressed_alerts');
+vi.mock('../../../../flyout_v2/document/tools/correlations/hooks/use_show_related_cases');
+vi.mock('../../../../flyout_v2/document/tools/correlations/hooks/use_show_suppressed_alerts');
 
 const renderInsightsSection = (contextValue: DocumentDetailsContext) =>
   render(
@@ -127,39 +136,39 @@ const renderInsightsSection = (contextValue: DocumentDetailsContext) =>
   );
 
 describe('<InsightsSection />', () => {
-  const mockUseExpandSection = jest.mocked(useExpandSection);
+  const mockUseExpandSection = vi.mocked(useExpandSection);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseExpandSection.mockReturnValue(true);
-    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
+    (useSecurityDefaultPatterns as Mock).mockReturnValue({
       indexPatterns: ['index'],
     });
     mockUseUserDetails.mockReturnValue([false, { userDetails: null }]);
     mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: false });
     mockUseHostDetails.mockReturnValue([false, { hostDetails: null }]);
     mockUseFirstLastSeen.mockReturnValue([false, { lastSeen: null }]);
-    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
+    (useFetchThreatIntelligence as Mock).mockReturnValue({
       loading: false,
       threatMatchesCount: 2,
       threatEnrichmentsCount: 2,
     });
-    (usePrevalence as jest.Mock).mockReturnValue({
+    (usePrevalence as Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
     });
-    (useShowRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+    (useShowRelatedAlertsByAncestry as Mock).mockReturnValue({
       show: false,
       ancestryDocumentId: 'event-id',
     });
-    (useShowRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
+    (useShowRelatedAlertsBySameSourceEvent as Mock).mockReturnValue({
       show: false,
       originalEventId: 'originalEventId',
     });
-    (useShowRelatedAlertsBySession as jest.Mock).mockReturnValue({ show: false });
-    (useShowRelatedCases as jest.Mock).mockReturnValue(false);
-    (useShowSuppressedAlerts as jest.Mock).mockReturnValue({
+    (useShowRelatedAlertsBySession as Mock).mockReturnValue({ show: false });
+    (useShowRelatedCases as Mock).mockReturnValue(false);
+    (useShowSuppressedAlerts as Mock).mockReturnValue({
       show: false,
       alertSuppressionCount: 0,
     });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { cloneDeep } from 'lodash';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
@@ -14,7 +16,7 @@ const createPolicy = () =>
   new FleetPackagePolicyGenerator('per-os-policy-accessor').generateEndpointPackagePolicy()
     .inputs[0].config.policy.value;
 
-jest.setTimeout(15_000); // Costly: each case drives several popover cycles
+vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 describe('per-OS policy accessor', () => {
   it('reads only the requested OS branch', () => {
     const policy = createPolicy();

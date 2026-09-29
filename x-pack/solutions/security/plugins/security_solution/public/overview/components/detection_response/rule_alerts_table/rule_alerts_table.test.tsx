@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import moment from 'moment';
 import React from 'react';
 
@@ -17,10 +20,10 @@ import type { RuleAlertsTableProps } from './rule_alerts_table';
 import { RuleAlertsTable } from './rule_alerts_table';
 import type { RuleAlertsItem, UseRuleAlertsItems } from './use_rule_alerts_items';
 
-const mockGetAppUrl = jest.fn();
-const mockNavigateTo = jest.fn();
-jest.mock('../../../../common/lib/kibana/hooks', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana/hooks');
+const mockGetAppUrl = vi.fn();
+const mockNavigateTo = vi.fn();
+vi.mock('../../../../common/lib/kibana/hooks', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana/hooks'));
   return {
     ...original,
     useNavigation: () => ({
@@ -30,14 +33,14 @@ jest.mock('../../../../common/lib/kibana/hooks', () => {
   };
 });
 
-const mockNavigateToAlertsPageWithFilters = jest.fn();
-jest.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
+const mockNavigateToAlertsPageWithFilters = vi.fn();
+vi.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
   return {
     useNavigateToAlertsPageWithFilters: () => mockNavigateToAlertsPageWithFilters,
   };
 });
 
-jest.mock('../../../../common/hooks/use_global_filter_query', () => {
+vi.mock('../../../../common/hooks/use_global_filter_query', () => {
   return {
     useGlobalFilterQuery: () => ({}),
   };
@@ -49,14 +52,17 @@ const defaultUseRuleAlertsItemsReturn: UseRuleAlertsItemsReturn = {
   isLoading: false,
   updatedAt: Date.now(),
 };
-const mockUseRuleAlertsItems = jest.fn(() => defaultUseRuleAlertsItemsReturn);
+const mockUseRuleAlertsItems = vi.fn(() => defaultUseRuleAlertsItemsReturn);
 const mockUseRuleAlertsItemsReturn = (param: Partial<UseRuleAlertsItemsReturn>) => {
   mockUseRuleAlertsItems.mockReturnValueOnce({ ...defaultUseRuleAlertsItemsReturn, ...param });
 };
-jest.mock('./use_rule_alerts_items', () => ({
-  useRuleAlertsItems: () => mockUseRuleAlertsItems(),
-}));
-jest.mock('../../../../common/components/user_privileges');
+vi.mock('./use_rule_alerts_items', () => {
+      const mocked = {
+      useRuleAlertsItems: () => mockUseRuleAlertsItems(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/components/user_privileges');
 
 const defaultProps: RuleAlertsTableProps = {
   signalIndexName: '',
@@ -74,7 +80,7 @@ const items: RuleAlertsItem[] = [
 
 describe('RuleAlertsTable', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render empty table', () => {
@@ -167,7 +173,7 @@ describe('RuleAlertsTable', () => {
     const linkUrl = '/fake/link';
     mockGetAppUrl.mockReturnValue(linkUrl);
     mockUseRuleAlertsItemsReturn({ items });
-    (useUserPrivileges as jest.Mock).mockReturnValue({
+    (useUserPrivileges as Mock).mockReturnValue({
       rulesPrivileges: {
         rules: { read: true },
       },

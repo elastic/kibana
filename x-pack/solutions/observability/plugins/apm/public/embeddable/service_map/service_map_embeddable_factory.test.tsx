@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -19,43 +21,52 @@ import {
 } from './service_map_embeddable_factory';
 import type { EmbeddableDeps } from '../types';
 
-const mockInitializeTitleManager = jest.fn();
-const mockInitializeTimeRangeManager = jest.fn();
-const mockInitializeStateManager = jest.fn();
-const mockInitializeStateApi = jest.fn();
-const mockUseBatchedPublishingSubjects = jest.fn();
-const mockUseFetchContext = jest.fn();
-const mockServiceMapEmbeddable = jest.fn();
-const mockApmEmbeddableContext = jest.fn();
-jest.mock('@kbn/presentation-publishing', () => ({
-  initializeTitleManager: (...args: unknown[]) => mockInitializeTitleManager(...args),
-  initializeTimeRangeManager: (...args: unknown[]) => mockInitializeTimeRangeManager(...args),
-  initializeStateManager: (...args: unknown[]) => mockInitializeStateManager(...args),
-  initializeStateApi: (...args: unknown[]) => mockInitializeStateApi(...args),
-  titleComparators: { title: 'referenceEquality' },
-  timeRangeComparators: { time_range: 'deepEquality' },
-  useBatchedPublishingSubjects: (...args: unknown[]) => mockUseBatchedPublishingSubjects(...args),
-  useFetchContext: (...args: unknown[]) => mockUseFetchContext(...args),
-  apiHasParentApi: (api: unknown) =>
-    Boolean((api as { parentApi?: unknown } | null)?.parentApi !== undefined),
-  apiCanExpandPanels: (api: unknown) =>
-    Boolean((api as { expandPanel?: unknown } | null)?.expandPanel !== undefined),
-  getViewModeSubject: (api: unknown) => (api as { viewMode$?: unknown } | null)?.viewMode$,
-}));
+const mockInitializeTitleManager = vi.fn();
+const mockInitializeTimeRangeManager = vi.fn();
+const mockInitializeStateManager = vi.fn();
+const mockInitializeStateApi = vi.fn();
+const mockUseBatchedPublishingSubjects = vi.fn();
+const mockUseFetchContext = vi.fn();
+const mockServiceMapEmbeddable = vi.fn();
+const mockApmEmbeddableContext = vi.fn();
+vi.mock('@kbn/presentation-publishing', () => {
+      const mocked = {
+      initializeTitleManager: (...args: unknown[]) => mockInitializeTitleManager(...args),
+      initializeTimeRangeManager: (...args: unknown[]) => mockInitializeTimeRangeManager(...args),
+      initializeStateManager: (...args: unknown[]) => mockInitializeStateManager(...args),
+      initializeStateApi: (...args: unknown[]) => mockInitializeStateApi(...args),
+      titleComparators: { title: 'referenceEquality' },
+      timeRangeComparators: { time_range: 'deepEquality' },
+      useBatchedPublishingSubjects: (...args: unknown[]) => mockUseBatchedPublishingSubjects(...args),
+      useFetchContext: (...args: unknown[]) => mockUseFetchContext(...args),
+      apiHasParentApi: (api: unknown) =>
+        Boolean((api as { parentApi?: unknown } | null)?.parentApi !== undefined),
+      apiCanExpandPanels: (api: unknown) =>
+        Boolean((api as { expandPanel?: unknown } | null)?.expandPanel !== undefined),
+      getViewModeSubject: (api: unknown) => (api as { viewMode$?: unknown } | null)?.viewMode$,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../embeddable_context', () => ({
-  ApmEmbeddableContext: (props: Record<string, unknown>) => {
-    mockApmEmbeddableContext(props);
-    return <>{props.children as React.ReactNode}</>;
-  },
-}));
+vi.mock('../embeddable_context', () => {
+      const mocked = {
+      ApmEmbeddableContext: (props: Record<string, unknown>) => {
+        mockApmEmbeddableContext(props);
+        return <>{props.children as React.ReactNode}</>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./service_map_embeddable', () => ({
-  ServiceMapEmbeddable: (props: Record<string, unknown>) => {
-    mockServiceMapEmbeddable(props);
-    return null;
-  },
-}));
+vi.mock('./service_map_embeddable', () => {
+      const mocked = {
+      ServiceMapEmbeddable: (props: Record<string, unknown>) => {
+        mockServiceMapEmbeddable(props);
+        return null;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getServiceMapEmbeddableFactory', () => {
   let titleAnyStateChange$: Subject<void>;
@@ -63,39 +74,39 @@ describe('getServiceMapEmbeddableFactory', () => {
   let customStateAnyStateChange$: Subject<void>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     titleAnyStateChange$ = new Subject<void>();
     timeRangeAnyStateChange$ = new Subject<void>();
     customStateAnyStateChange$ = new Subject<void>();
     mockInitializeTitleManager.mockReturnValue({
       api: { titleApi: true },
-      getLatestState: jest.fn(() => ({ title: 'Saved title' })),
+      getLatestState: vi.fn(() => ({ title: 'Saved title' })),
       anyStateChange$: titleAnyStateChange$,
-      reinitializeState: jest.fn(),
+      reinitializeState: vi.fn(),
     });
     mockInitializeTimeRangeManager.mockReturnValue({
       api: {
         timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
-        setTimeRange: jest.fn(),
+        setTimeRange: vi.fn(),
       },
-      getLatestState: jest.fn(() => ({ time_range: { from: 'now-15m', to: 'now' } })),
+      getLatestState: vi.fn(() => ({ time_range: { from: 'now-15m', to: 'now' } })),
       anyStateChange$: timeRangeAnyStateChange$,
-      reinitializeState: jest.fn(),
+      reinitializeState: vi.fn(),
     });
     mockInitializeStateManager.mockReturnValue({
       api: {
         environment$: new BehaviorSubject(ENVIRONMENT_ALL.value),
-        setEnvironment: jest.fn(),
+        setEnvironment: vi.fn(),
         kuery$: new BehaviorSubject(undefined),
-        setKuery: jest.fn(),
+        setKuery: vi.fn(),
         serviceName$: new BehaviorSubject(undefined),
-        setServiceName: jest.fn(),
+        setServiceName: vi.fn(),
         highlightedServiceNames$: new BehaviorSubject(undefined),
-        setHighlightedServiceNames: jest.fn(),
+        setHighlightedServiceNames: vi.fn(),
         serviceGroupId$: new BehaviorSubject(undefined),
-        setServiceGroupId: jest.fn(),
+        setServiceGroupId: vi.fn(),
       },
-      getLatestState: jest.fn(() => ({
+      getLatestState: vi.fn(() => ({
         environment: ENVIRONMENT_ALL.value,
         kuery: undefined,
         service_name: undefined,
@@ -103,7 +114,7 @@ describe('getServiceMapEmbeddableFactory', () => {
         service_group_id: undefined,
       })),
       anyStateChange$: customStateAnyStateChange$,
-      reinitializeState: jest.fn(),
+      reinitializeState: vi.fn(),
     });
     mockInitializeStateApi.mockImplementation(() => ({ stateApi: true }));
     mockUseBatchedPublishingSubjects.mockReturnValue([
@@ -117,7 +128,7 @@ describe('getServiceMapEmbeddableFactory', () => {
   });
 
   it('builds embeddable api and serializes default values', async () => {
-    const finalizeApi = jest.fn((api) => api);
+    const finalizeApi = vi.fn((api) => api);
     const parentApi = { query$: new BehaviorSubject({ query: 'dashboard query' }) };
     const deps = { coreStart: { application: {} } } as unknown as EmbeddableDeps;
     const factory = getServiceMapEmbeddableFactory(deps);
@@ -129,7 +140,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-1',
       parentApi,
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
     } as never);
 
     expect(finalizeApi).toHaveBeenCalledWith(
@@ -155,7 +166,7 @@ describe('getServiceMapEmbeddableFactory', () => {
   });
 
   it('exposes blockingError$ initialized to undefined', async () => {
-    const finalizeApi = jest.fn((api) => api);
+    const finalizeApi = vi.fn((api) => api);
     const parentApi = { query$: new BehaviorSubject({ query: '' }) };
     const deps = { coreStart: { application: {} } } as unknown as EmbeddableDeps;
     const factory = getServiceMapEmbeddableFactory(deps);
@@ -165,7 +176,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-1',
       parentApi,
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
     } as never);
 
     expect(embeddable.api.blockingError$).toBeDefined();
@@ -173,7 +184,7 @@ describe('getServiceMapEmbeddableFactory', () => {
   });
 
   it('exposes rendered$ initialized to false', async () => {
-    const finalizeApi = jest.fn((api) => api);
+    const finalizeApi = vi.fn((api) => api);
     const parentApi = { query$: new BehaviorSubject({ query: '' }) };
     const deps = { coreStart: { application: {} } } as unknown as EmbeddableDeps;
     const factory = getServiceMapEmbeddableFactory(deps);
@@ -183,7 +194,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-1',
       parentApi,
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
     } as never);
 
     expect(embeddable.api.rendered$).toBeDefined();
@@ -191,7 +202,7 @@ describe('getServiceMapEmbeddableFactory', () => {
   });
 
   it('updates rendered$ when the service map reports render completion', async () => {
-    const finalizeApi = jest.fn((api) => api);
+    const finalizeApi = vi.fn((api) => api);
     const parentApi = { query$: new BehaviorSubject({ query: '' }) };
     const deps = { coreStart: { application: {} } } as unknown as EmbeddableDeps;
     const factory = getServiceMapEmbeddableFactory(deps);
@@ -201,7 +212,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-1',
       parentApi,
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
     } as never);
 
     render(<embeddable.Component />);
@@ -225,7 +236,7 @@ describe('getServiceMapEmbeddableFactory', () => {
   it('keeps rendered$ false while waiting for a time range', async () => {
     mockUseFetchContext.mockReturnValue({ timeRange: undefined });
 
-    const finalizeApi = jest.fn((api) => api);
+    const finalizeApi = vi.fn((api) => api);
     const parentApi = { query$: new BehaviorSubject({ query: '' }) };
     const deps = { coreStart: {} } as unknown as EmbeddableDeps;
     const factory = getServiceMapEmbeddableFactory(deps);
@@ -234,7 +245,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-waiting',
       parentApi,
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
     } as never);
 
     render(<embeddable.Component />);
@@ -244,7 +255,7 @@ describe('getServiceMapEmbeddableFactory', () => {
   });
 
   it('exposes edit capabilities', async () => {
-    const finalizeApi = jest.fn((api) => api);
+    const finalizeApi = vi.fn((api) => api);
     const parentApi = { query$: new BehaviorSubject({ query: '' }) };
     const deps = { coreStart: { application: {} } } as unknown as EmbeddableDeps;
     const factory = getServiceMapEmbeddableFactory(deps);
@@ -254,7 +265,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-1',
       parentApi,
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
     } as never);
 
     expect(embeddable.api.isEditingEnabled()).toBe(true);
@@ -272,10 +283,10 @@ describe('getServiceMapEmbeddableFactory', () => {
     ]);
     mockUseFetchContext.mockReturnValue({ timeRange: { from: 'now-1h', to: 'now' } });
 
-    const finalizeApi = jest.fn((api) => api);
+    const finalizeApi = vi.fn((api) => api);
     const parentApi = { query$: new BehaviorSubject({ query: 'transaction.type: request' }) };
     const deps = {
-      coreStart: { application: { getUrlForApp: jest.fn() } },
+      coreStart: { application: { getUrlForApp: vi.fn() } },
     } as unknown as EmbeddableDeps;
     const factory = getServiceMapEmbeddableFactory(deps);
     const embeddable = await factory.buildEmbeddable({
@@ -283,7 +294,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-1',
       parentApi,
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
     } as never);
 
     render(<embeddable.Component />);
@@ -310,31 +321,31 @@ describe('getServiceMapEmbeddableFactory', () => {
   });
 
   it('supports reset behavior', async () => {
-    const timeRangeReinitialize = jest.fn();
-    const customStateReinitialize = jest.fn();
+    const timeRangeReinitialize = vi.fn();
+    const customStateReinitialize = vi.fn();
     mockInitializeTimeRangeManager.mockReturnValue({
       api: {
         timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
-        setTimeRange: jest.fn(),
+        setTimeRange: vi.fn(),
       },
-      getLatestState: jest.fn(() => ({ time_range: { from: 'now-15m', to: 'now' } })),
+      getLatestState: vi.fn(() => ({ time_range: { from: 'now-15m', to: 'now' } })),
       anyStateChange$: timeRangeAnyStateChange$,
       reinitializeState: timeRangeReinitialize,
     });
     mockInitializeStateManager.mockReturnValue({
       api: {
         environment$: new BehaviorSubject(ENVIRONMENT_ALL.value),
-        setEnvironment: jest.fn(),
+        setEnvironment: vi.fn(),
         kuery$: new BehaviorSubject(undefined),
-        setKuery: jest.fn(),
+        setKuery: vi.fn(),
         serviceName$: new BehaviorSubject(undefined),
-        setServiceName: jest.fn(),
+        setServiceName: vi.fn(),
         highlightedServiceNames$: new BehaviorSubject(undefined),
-        setHighlightedServiceNames: jest.fn(),
+        setHighlightedServiceNames: vi.fn(),
         serviceGroupId$: new BehaviorSubject(undefined),
-        setServiceGroupId: jest.fn(),
+        setServiceGroupId: vi.fn(),
       },
-      getLatestState: jest.fn(() => ({
+      getLatestState: vi.fn(() => ({
         environment: ENVIRONMENT_ALL.value,
         kuery: undefined,
         service_name: undefined,
@@ -352,7 +363,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       null,
     ]);
 
-    const finalizeApi = jest.fn((api) => api);
+    const finalizeApi = vi.fn((api) => api);
     const parentApi = { query$: new BehaviorSubject({ query: 'ignored' }) };
     const factory = getServiceMapEmbeddableFactory({ coreStart: {} } as unknown as EmbeddableDeps);
     await factory.buildEmbeddable({
@@ -366,7 +377,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-2',
       parentApi,
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
     } as never);
 
     const stateApi = mockInitializeStateApi.mock.calls[0][0];
@@ -416,7 +427,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       undefined,
     ]);
 
-    const finalizeApi = jest.fn((api) => api);
+    const finalizeApi = vi.fn((api) => api);
     const parentApi = {
       query$: new BehaviorSubject({ query: '' }),
     };
@@ -428,7 +439,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-3',
       parentApi,
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
     } as never);
 
     expect(embeddable.api.timeRange$.getValue()).toEqual({
@@ -440,7 +451,7 @@ describe('getServiceMapEmbeddableFactory', () => {
   });
 
   it('exposes setTimeRange to update time range', async () => {
-    const setTimeRangeMock = jest.fn();
+    const setTimeRangeMock = vi.fn();
     const timeRange$ = new BehaviorSubject<{ from: string; to: string } | undefined>({
       from: 'now-15m',
       to: 'now',
@@ -450,12 +461,12 @@ describe('getServiceMapEmbeddableFactory', () => {
         timeRange$,
         setTimeRange: setTimeRangeMock,
       },
-      getLatestState: jest.fn(() => ({ time_range: timeRange$.getValue() })),
+      getLatestState: vi.fn(() => ({ time_range: timeRange$.getValue() })),
       anyStateChange$: timeRangeAnyStateChange$,
-      reinitializeState: jest.fn(),
+      reinitializeState: vi.fn(),
     });
 
-    const finalizeApi = jest.fn((api) => api);
+    const finalizeApi = vi.fn((api) => api);
     const parentApi = {
       query$: new BehaviorSubject({ query: '' }),
     };
@@ -466,7 +477,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-4',
       parentApi,
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
     } as never);
 
     // New panel defaults to custom time range
@@ -494,7 +505,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       undefined,
     ]);
 
-    const finalizeApi = jest.fn((api) => api);
+    const finalizeApi = vi.fn((api) => api);
     const parentApi = { query$: new BehaviorSubject({ query: '' }) };
     const deps = { coreStart: {} } as unknown as EmbeddableDeps;
     const factory = getServiceMapEmbeddableFactory(deps);
@@ -503,7 +514,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-5',
       parentApi,
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
     } as never);
 
     const { container } = render(<embeddable.Component />);
@@ -517,7 +528,7 @@ describe('getServiceMapEmbeddableFactory', () => {
 
   describe('filter notification api', () => {
     async function buildEmbeddableWithApi(initialState = {}) {
-      const finalizeApi = jest.fn((api) => api);
+      const finalizeApi = vi.fn((api) => api);
       const parentApi = { query$: new BehaviorSubject({ query: '' }) };
       const factory = getServiceMapEmbeddableFactory({
         coreStart: {},
@@ -528,7 +539,7 @@ describe('getServiceMapEmbeddableFactory', () => {
         finalizeApi,
         uuid: 'panel-1',
         parentApi,
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
       } as never);
 
       return embeddable.api as ServiceMapEmbeddableApi;
@@ -614,11 +625,11 @@ describe('getServiceMapEmbeddableFactory', () => {
       const viewMode$ = new BehaviorSubject<string>(viewMode);
       const parentApi = {
         query$: new BehaviorSubject({ query: '' }),
-        expandPanel: jest.fn(),
+        expandPanel: vi.fn(),
         expandedPanelId$,
         viewMode$,
       };
-      const finalizeApi = jest.fn((apiRegistration: Record<string, unknown>) => ({
+      const finalizeApi = vi.fn((apiRegistration: Record<string, unknown>) => ({
         ...apiRegistration,
         parentApi,
       }));
@@ -643,7 +654,7 @@ describe('getServiceMapEmbeddableFactory', () => {
         finalizeApi,
         uuid,
         parentApi,
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
       } as never);
 
       render(<embeddable.Component />);
@@ -665,7 +676,7 @@ describe('getServiceMapEmbeddableFactory', () => {
         finalizeApi,
         uuid,
         parentApi,
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
       } as never);
 
       render(<embeddable.Component />);
@@ -691,7 +702,7 @@ describe('getServiceMapEmbeddableFactory', () => {
         finalizeApi,
         uuid,
         parentApi,
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
       } as never);
 
       render(<embeddable.Component />);
@@ -717,7 +728,7 @@ describe('getServiceMapEmbeddableFactory', () => {
         finalizeApi,
         uuid,
         parentApi,
-        initializeDrilldownsManager: jest.fn(),
+        initializeDrilldownsManager: vi.fn(),
       } as never);
 
       render(<embeddable.Component />);
@@ -741,7 +752,7 @@ describe('getServiceMapEmbeddableFactory', () => {
   });
 
   it('cleans up subscriptions on unmount', async () => {
-    const finalizeApi = jest.fn((api) => api);
+    const finalizeApi = vi.fn((api) => api);
     const parentApi = { query$: new BehaviorSubject({ query: '' }) };
     const deps = { coreStart: {} } as unknown as EmbeddableDeps;
     const factory = getServiceMapEmbeddableFactory(deps);
@@ -750,7 +761,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       finalizeApi,
       uuid: 'panel-cleanup',
       parentApi,
-      initializeDrilldownsManager: jest.fn(),
+      initializeDrilldownsManager: vi.fn(),
     } as never);
 
     const { unmount } = render(<embeddable.Component />);

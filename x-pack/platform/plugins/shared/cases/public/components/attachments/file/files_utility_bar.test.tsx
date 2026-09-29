@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -12,15 +15,15 @@ import { useCreateAttachments } from '../../../containers/use_create_attachments
 import { FilesUtilityBar } from './files_utility_bar';
 import { renderWithTestingProviders } from '../../../common/mock';
 
-jest.mock('../../../containers/api');
-jest.mock('../../../containers/use_create_attachments');
-jest.mock('../../../common/lib/kibana');
+vi.mock('../../../containers/api');
+vi.mock('../../../containers/use_create_attachments');
+vi.mock('../../../common/lib/kibana');
 
-const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+const useCreateAttachmentsMock = useCreateAttachments as Mock;
 
 useCreateAttachmentsMock.mockReturnValue({
   isLoading: false,
-  mutateAsync: jest.fn(),
+  mutateAsync: vi.fn(),
 });
 
 const defaultProps = {
@@ -29,7 +32,7 @@ const defaultProps = {
 
 describe('FilesUtilityBar', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders correctly', async () => {

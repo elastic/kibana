@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,9 +15,9 @@ import type { Agent, AgentPolicy } from '../../../types';
 
 import { MetricNonAvailable } from './metric_non_available';
 
-jest.mock('@elastic/eui', () => {
+vi.mock('@elastic/eui', async () => {
   return {
-    ...jest.requireActual('@elastic/eui'),
+    ...(await vi.importActual('@elastic/eui')),
     // Render the tooltip content inline so we can assert on the message
     EuiIconTip: (props: any) => <div data-test-subj="iconTipContent">{props.content}</div>,
   };

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -14,7 +16,7 @@ import { COUNTRY_NAME, REGION_NAME, TRANSACTION_DURATION_COUNTRY } from './use_l
 describe('Map Tooltip', () => {
   it('renders with specific props and handles outside click', async () => {
     // Mock closeTooltip function
-    const closeTooltip = jest.fn();
+    const closeTooltip = vi.fn();
 
     // Create mock features array
     const mockFeatures = [
@@ -31,7 +33,7 @@ describe('Map Tooltip', () => {
     ];
 
     // Mock loadFeatureProperties function
-    const loadFeatureProperties = jest.fn().mockResolvedValue([
+    const loadFeatureProperties = vi.fn().mockResolvedValue([
       {
         getPropertyKey: () => REGION_NAME,
         getRawValue: () => 'NASA',

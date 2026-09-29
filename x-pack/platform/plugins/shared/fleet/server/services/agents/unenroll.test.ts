@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { MockInstance, MockedFunction } from 'vitest';
 import type { estypes } from '@elastic/elasticsearch';
 
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
@@ -29,9 +32,9 @@ import { createClientMock } from './action.mock';
 import * as crud from './crud';
 import * as unenrollActionRunner from './unenroll_action_runner';
 
-jest.mock('../api_keys');
+vi.mock('../api_keys');
 
-const mockedInvalidateAPIKeys = invalidateAPIKeys as jest.MockedFunction<typeof invalidateAPIKeys>;
+const mockedInvalidateAPIKeys = invalidateAPIKeys as MockedFunction<typeof invalidateAPIKeys>;
 
 describe('unenroll', () => {
   beforeEach(async () => {
@@ -339,11 +342,11 @@ describe('unenroll', () => {
   });
 
   describe('invalidateAPIKeysForAgents', () => {
-    let mockOutputServiceGet: jest.SpyInstance;
+    let mockOutputServiceGet: MockInstance;
 
     beforeEach(() => {
       mockedInvalidateAPIKeys.mockReset();
-      mockOutputServiceGet = jest
+      mockOutputServiceGet = vi
         .spyOn(outputService, 'get')
         .mockResolvedValue({ type: 'elasticsearch' } as any);
     });
@@ -473,8 +476,8 @@ describe('unenroll', () => {
 });
 
 describe('unenrollAgents kuery construction', () => {
-  let mockGetAgentsByKuery: jest.SpyInstance;
-  let mockAgentsKueryNamespaceFilter: jest.SpyInstance;
+  let mockGetAgentsByKuery: MockInstance;
+  let mockAgentsKueryNamespaceFilter: MockInstance;
 
   beforeEach(async () => {
     const { soClient } = createClientMock();
@@ -483,13 +486,13 @@ describe('unenrollAgents kuery construction', () => {
         withoutSpaceExtensions: soClient,
       })
     );
-    mockGetAgentsByKuery = jest.spyOn(crud, 'getAgentsByKuery').mockResolvedValue({
+    mockGetAgentsByKuery = vi.spyOn(crud, 'getAgentsByKuery').mockResolvedValue({
       agents: [],
       total: 0,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
     });
-    mockAgentsKueryNamespaceFilter = jest
+    mockAgentsKueryNamespaceFilter = vi
       .spyOn(agentNamespaces, 'agentsKueryNamespaceFilter')
       .mockResolvedValue('namespaces:custom_space');
   });
@@ -517,10 +520,10 @@ describe('unenrollAgents kuery construction', () => {
 });
 
 describe('unenrollAgents kuery path — cheap count and sync/async branching', () => {
-  let mockGetAgentsByKuery: jest.SpyInstance;
-  let mockOpenPointInTime: jest.SpyInstance;
-  let mockUnenrollBatch: jest.SpyInstance;
-  let mockUnenrollActionRunner: jest.SpyInstance;
+  let mockGetAgentsByKuery: MockInstance;
+  let mockOpenPointInTime: MockInstance;
+  let mockUnenrollBatch: MockInstance;
+  let mockUnenrollActionRunner: MockInstance;
 
   beforeEach(async () => {
     const { soClient } = createClientMock();
@@ -529,17 +532,17 @@ describe('unenrollAgents kuery path — cheap count and sync/async branching', (
         withoutSpaceExtensions: soClient,
       })
     );
-    mockGetAgentsByKuery = jest.spyOn(crud, 'getAgentsByKuery');
-    mockOpenPointInTime = jest.spyOn(crud, 'openPointInTime').mockResolvedValue('pit-id');
-    mockUnenrollBatch = jest
+    mockGetAgentsByKuery = vi.spyOn(crud, 'getAgentsByKuery');
+    mockOpenPointInTime = vi.spyOn(crud, 'openPointInTime').mockResolvedValue('pit-id');
+    mockUnenrollBatch = vi
       .spyOn(unenrollActionRunner, 'unenrollBatch')
       .mockResolvedValue({ actionId: 'test-action-id' });
-    mockUnenrollActionRunner = jest
+    mockUnenrollActionRunner = vi
       .spyOn(unenrollActionRunner, 'UnenrollActionRunner')
       .mockImplementation(
         () =>
           ({
-            runActionAsyncTask: jest.fn().mockResolvedValue({ actionId: 'async-action-id' }),
+            runActionAsyncTask: vi.fn().mockResolvedValue({ actionId: 'async-action-id' }),
           } as any)
       );
   });
@@ -654,7 +657,7 @@ describe('unenrollAgents kuery path — cheap count and sync/async branching', (
 
   it('dry run (agentIds) returns count of found agents only', async () => {
     const { soClient, esClient } = createClientMock();
-    const mockGetAgents = jest
+    const mockGetAgents = vi
       .spyOn(crud, 'getAgents')
       .mockResolvedValue([{ id: 'agent-1' }, { id: 'agent-2' }] as any);
 

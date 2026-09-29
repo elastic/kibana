@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -17,23 +20,26 @@ import { AnalyticsCollectionExploreTableLogic } from './analytics_collection_exp
 import { ExploreTableColumns, ExploreTables } from './analytics_collection_explore_table_types';
 import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
-jest.mock('../../../shared/kibana/kibana_logic', () => ({
-  KibanaLogic: {
-    values: {
-      data: {
-        search: {
-          search: jest.fn().mockReturnValue({ subscribe: jest.fn() }),
+vi.mock('../../../shared/kibana/kibana_logic', () => {
+      const mocked = {
+      KibanaLogic: {
+        values: {
+          data: {
+            search: {
+              search: vi.fn().mockReturnValue({ subscribe: vi.fn() }),
+            },
+          },
         },
       },
-    },
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AnalyticsCollectionExplorerTablesLogic', () => {
   const { mount } = new LogicMounter(AnalyticsCollectionExploreTableLogic);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mount();
   });
@@ -227,7 +233,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
     it('should fetch items when timeRange changes', () => {
       AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
-      (KibanaLogic.values.data?.search.search as jest.Mock).mockClear();
+      (KibanaLogic.values.data?.search.search as Mock).mockClear();
 
       AnalyticsCollectionToolbarLogic.actions.setTimeRange({ from: 'now-7d', to: 'now' });
       expect(KibanaLogic.values.data?.search.search).toHaveBeenCalledWith(expect.any(Object), {
@@ -238,7 +244,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
     it('should fetch items when searchSessionId changes', () => {
       AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
-      (KibanaLogic.values.data?.search.search as jest.Mock).mockClear();
+      (KibanaLogic.values.data?.search.search as Mock).mockClear();
 
       AnalyticsCollectionToolbarLogic.actions.setSearchSessionId('1234');
       expect(KibanaLogic.values.data?.search.search).toHaveBeenCalledWith(expect.any(Object), {
@@ -249,7 +255,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
     it('should fetch items when onTableChange called', () => {
       AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
-      (KibanaLogic.values.data?.search.search as jest.Mock).mockClear();
+      (KibanaLogic.values.data?.search.search as Mock).mockClear();
 
       AnalyticsCollectionExploreTableLogic.actions.onTableChange({});
       expect(KibanaLogic.values.data?.search.search).toHaveBeenCalledWith(expect.any(Object), {
@@ -259,12 +265,12 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
     });
 
     it('should fetch items when search changes', async () => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      vi.useFakeTimers({ legacyFakeTimers: true });
       AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
-      (KibanaLogic.values.data?.search.search as jest.Mock).mockClear();
+      (KibanaLogic.values.data?.search.search as Mock).mockClear();
 
       AnalyticsCollectionExploreTableLogic.actions.setSearch('test');
-      jest.advanceTimersByTime(200);
+      vi.advanceTimersByTime(200);
       await nextTick();
 
       expect(KibanaLogic.values.data?.search.search).toHaveBeenCalledWith(expect.any(Object), {

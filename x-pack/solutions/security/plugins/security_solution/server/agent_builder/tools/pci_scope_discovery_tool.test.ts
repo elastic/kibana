@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
@@ -15,7 +18,7 @@ describe('pciScopeDiscoveryTool', () => {
   const tool = pciScopeDiscoveryTool(mockCore, mockLogger);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('schema', () => {
@@ -54,12 +57,12 @@ describe('pciScopeDiscoveryTool', () => {
 
   describe('handler', () => {
     it('uses a single batched fieldCaps call across the discovered indices', async () => {
-      (mockEsClient.asCurrentUser.cat.indices as unknown as jest.Mock).mockResolvedValue([
+      (mockEsClient.asCurrentUser.cat.indices as unknown as Mock).mockResolvedValue([
         { index: 'packetbeat-network-1' },
         { index: 'auth-logs-1' },
       ]);
 
-      (mockEsClient.asCurrentUser.fieldCaps as unknown as jest.Mock).mockResolvedValue({
+      (mockEsClient.asCurrentUser.fieldCaps as unknown as Mock).mockResolvedValue({
         fields: {
           'source.ip': { ip: { type: 'ip', indices: ['packetbeat-network-1'] } },
           'destination.ip': { ip: { type: 'ip', indices: ['packetbeat-network-1'] } },
@@ -77,7 +80,7 @@ describe('pciScopeDiscoveryTool', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(mockEsClient.asCurrentUser.fieldCaps).toHaveBeenCalledTimes(1);
-      const call = (mockEsClient.asCurrentUser.fieldCaps as unknown as jest.Mock).mock.calls[0][0];
+      const call = (mockEsClient.asCurrentUser.fieldCaps as unknown as Mock).mock.calls[0][0];
       expect(call.index).toEqual(['packetbeat-network-1', 'auth-logs-1']);
 
       expect(result.results).toHaveLength(1);
@@ -90,12 +93,12 @@ describe('pciScopeDiscoveryTool', () => {
     });
 
     it('filters results by requested scope type', async () => {
-      (mockEsClient.asCurrentUser.cat.indices as unknown as jest.Mock).mockResolvedValue([
+      (mockEsClient.asCurrentUser.cat.indices as unknown as Mock).mockResolvedValue([
         { index: 'packetbeat-network-1' },
         { index: 'auth-logs-1' },
       ]);
 
-      (mockEsClient.asCurrentUser.fieldCaps as unknown as jest.Mock).mockResolvedValue({
+      (mockEsClient.asCurrentUser.fieldCaps as unknown as Mock).mockResolvedValue({
         fields: {
           'source.ip': { ip: { type: 'ip', indices: ['packetbeat-network-1'] } },
           'destination.ip': { ip: { type: 'ip', indices: ['packetbeat-network-1'] } },
@@ -117,7 +120,7 @@ describe('pciScopeDiscoveryTool', () => {
     });
 
     it('resolves custom wildcard patterns to concrete indices via cat.indices', async () => {
-      (mockEsClient.asCurrentUser.cat.indices as unknown as jest.Mock)
+      (mockEsClient.asCurrentUser.cat.indices as unknown as Mock)
         // First call: initial index discovery (no pattern arg)
         .mockResolvedValueOnce([{ index: 'unrelated-index' }])
         // Second call: resolve the wildcard pattern
@@ -126,7 +129,7 @@ describe('pciScopeDiscoveryTool', () => {
           { index: 'custom-firewall-2025' },
         ]);
 
-      (mockEsClient.asCurrentUser.fieldCaps as unknown as jest.Mock).mockResolvedValue({
+      (mockEsClient.asCurrentUser.fieldCaps as unknown as Mock).mockResolvedValue({
         fields: {
           'source.ip': {
             ip: { type: 'ip', indices: ['custom-firewall-2024', 'custom-firewall-2025'] },
@@ -145,10 +148,10 @@ describe('pciScopeDiscoveryTool', () => {
       // cat.indices should have been called twice: once for initial discovery, once for the pattern
       expect(mockEsClient.asCurrentUser.cat.indices).toHaveBeenCalledTimes(2);
       expect(
-        (mockEsClient.asCurrentUser.cat.indices as unknown as jest.Mock).mock.calls[1][0]
+        (mockEsClient.asCurrentUser.cat.indices as unknown as Mock).mock.calls[1][0]
       ).toEqual(expect.objectContaining({ index: 'custom-firewall-*' }));
 
-      const fieldCapsCall = (mockEsClient.asCurrentUser.fieldCaps as unknown as jest.Mock).mock
+      const fieldCapsCall = (mockEsClient.asCurrentUser.fieldCaps as unknown as Mock).mock
         .calls[0][0];
       expect(fieldCapsCall.index).not.toContain('custom-firewall-*');
       expect(fieldCapsCall.index).toContain('custom-firewall-2024');
@@ -165,11 +168,11 @@ describe('pciScopeDiscoveryTool', () => {
     });
 
     it('attaches a scopeClaim with the PCI DSS version + disclaimer', async () => {
-      (mockEsClient.asCurrentUser.cat.indices as unknown as jest.Mock).mockResolvedValue([
+      (mockEsClient.asCurrentUser.cat.indices as unknown as Mock).mockResolvedValue([
         { index: 'packetbeat-network-1' },
       ]);
 
-      (mockEsClient.asCurrentUser.fieldCaps as unknown as jest.Mock).mockResolvedValue({
+      (mockEsClient.asCurrentUser.fieldCaps as unknown as Mock).mockResolvedValue({
         fields: {
           'source.ip': { ip: { type: 'ip' } },
           'destination.ip': { ip: { type: 'ip' } },

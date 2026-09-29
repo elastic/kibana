@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
@@ -38,22 +41,25 @@ import {
 import type { ApplyPolicyChangeInput } from './apply_policy_change';
 import { PolicyVersionConflictError, PolicyWriteRejectedError } from '../services/policy_errors';
 
-jest.mock('../services/endpoint_policy_management_service', () => ({
-  createEndpointPolicyManagementService: jest.fn(),
-}));
+vi.mock('../services/endpoint_policy_management_service', () => {
+      const mocked = {
+      createEndpointPolicyManagementService: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./apply_policy_change_confirmation', () => {
-  const actual = jest.requireActual('./apply_policy_change_confirmation');
+vi.mock('./apply_policy_change_confirmation', async () => {
+  const actual = (await vi.importActual('./apply_policy_change_confirmation'));
   return {
     ...actual,
-    renderApplyPolicyChangeConfirmation: jest.fn(actual.renderApplyPolicyChangeConfirmation),
+    renderApplyPolicyChangeConfirmation: vi.fn(actual.renderApplyPolicyChangeConfirmation),
   };
 });
 
-const mockedCreateEndpointPolicyManagementService = jest.mocked(
+const mockedCreateEndpointPolicyManagementService = vi.mocked(
   createEndpointPolicyManagementService
 );
-const mockedRenderApplyPolicyChangeConfirmation = jest.mocked(renderApplyPolicyChangeConfirmation);
+const mockedRenderApplyPolicyChangeConfirmation = vi.mocked(renderApplyPolicyChangeConfirmation);
 
 const POLICY_ID = 'policy-1';
 const SPACE_ID = 'space-marketing';
@@ -147,8 +153,8 @@ const createContext = (callSource?: CallSource): ToolHandlerContext => {
 };
 
 const createGetStartServices = (): StartServicesAccessor =>
-  jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
+  vi.fn(async () => [
+    { savedObjects: { getScopedClient: vi.fn().mockReturnValue({}) } },
   ]) as unknown as StartServicesAccessor;
 
 const createTool = () =>
@@ -157,14 +163,14 @@ const createTool = () =>
     getStartServices: createGetStartServices(),
   });
 
-type MockedApplyService = jest.Mocked<
+type MockedApplyService = Mocked<
   Pick<EndpointPolicyManagementService, 'previewApplyPolicyChange' | 'applyPolicyChange'>
 >;
 
 const withMockedService = <T>(run: (service: MockedApplyService) => T): T => {
   const service = {
-    previewApplyPolicyChange: jest.fn(),
-    applyPolicyChange: jest.fn(),
+    previewApplyPolicyChange: vi.fn(),
+    applyPolicyChange: vi.fn(),
   } as unknown as MockedApplyService;
   mockedCreateEndpointPolicyManagementService.mockClear();
   mockedCreateEndpointPolicyManagementService.mockReturnValue(

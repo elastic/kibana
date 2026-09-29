@@ -5,21 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AssistantSpaceIdProvider } from './assistant_space_id_provider';
 import { useSpaceId } from '../../hooks/space_id/use_space_id';
-jest.mock('../../hooks/space_id/use_space_id');
-const mockUseSpaceId = useSpaceId as jest.MockedFunction<typeof useSpaceId>;
-jest.mock('@kbn/elastic-assistant', () => ({
-  AssistantSpaceIdProvider: jest.fn(({ children }) => (
-    <div data-test-subj="elastic-assistant-provider">{children}</div>
-  )),
-}));
+vi.mock('../../hooks/space_id/use_space_id');
+const mockUseSpaceId = useSpaceId as MockedFunction<typeof useSpaceId>;
+vi.mock('@kbn/elastic-assistant', () => {
+      const mocked = {
+      AssistantSpaceIdProvider: vi.fn(({ children }) => (
+        <div data-test-subj="elastic-assistant-provider">{children}</div>
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AssistantSpaceIdProvider', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should not render children when spaceId is undefined', () => {

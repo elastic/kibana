@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom } from 'rxjs';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { KbnSearchError } from '../../report_search_error';
@@ -36,11 +38,11 @@ const mockAsyncResponse = {
 };
 
 describe('ES|QL async search strategy', () => {
-  const mockAsyncQuery = jest.fn();
-  const mockAsyncQueryGet = jest.fn();
-  const mockAsyncQueryDelete = jest.fn();
-  const mockAsyncQueryStop = jest.fn();
-  const mockWarn = jest.fn();
+  const mockAsyncQuery = vi.fn();
+  const mockAsyncQueryGet = vi.fn();
+  const mockAsyncQueryDelete = vi.fn();
+  const mockAsyncQueryStop = vi.fn();
+  const mockWarn = vi.fn();
   const mockLogger: any = {
     debug: () => {},
     error: () => {},
@@ -48,7 +50,7 @@ describe('ES|QL async search strategy', () => {
   };
   const mockDeps = {
     uiSettingsClient: {
-      get: jest.fn(),
+      get: vi.fn(),
     },
     esClient: {
       asCurrentUser: {
@@ -265,7 +267,7 @@ describe('ES|QL async search strategy', () => {
     });
 
     describe('submitEsqlSearch', () => {
-      const mockGetLicense = jest.fn();
+      const mockGetLicense = vi.fn();
       const depsWithLicensing = {
         ...mockDeps,
         licensing: { getLicense: mockGetLicense },

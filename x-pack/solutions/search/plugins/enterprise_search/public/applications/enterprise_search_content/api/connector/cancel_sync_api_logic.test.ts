@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 // write tests that checks cancelSync API logic calls correct endpoint
 import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
@@ -15,7 +17,7 @@ import { cancelSync } from './cancel_sync_api_logic';
 describe('CancelSyncApiLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('cancelSync', () => {
     it('calls correct api', async () => {

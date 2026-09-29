@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useStartInvestigation } from '../hooks/use_start_investigation';
 import { StartInvestigationPanel } from './start_investigation_panel';
 
-jest.mock('../hooks/use_start_investigation');
+vi.mock('../hooks/use_start_investigation');
 
-const mockUseStartInvestigation = useStartInvestigation as jest.Mock;
-const startInvestigation = jest.fn();
-const onClose = jest.fn();
+const mockUseStartInvestigation = useStartInvestigation as Mock;
+const startInvestigation = vi.fn();
+const onClose = vi.fn();
 
 const renderPanel = () =>
   render(
@@ -29,7 +32,7 @@ const getSubmitButton = () => screen.getByTestId('nightshiftStartInvestigationSu
 
 describe('StartInvestigationPanel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseStartInvestigation.mockReturnValue({ startInvestigation, isStarting: false });
   });
 

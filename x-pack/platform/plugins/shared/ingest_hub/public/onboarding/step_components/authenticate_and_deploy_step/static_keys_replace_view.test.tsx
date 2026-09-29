@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { StaticKeysReplaceView } from './static_keys_replace_view';
 
 function renderView({
-  onReadyChange = jest.fn(),
-  onFieldsChange = jest.fn(),
+  onReadyChange = vi.fn(),
+  onFieldsChange = vi.fn(),
 }: {
-  onReadyChange?: jest.Mock;
-  onFieldsChange?: jest.Mock;
+  onReadyChange?: Mock;
+  onFieldsChange?: Mock;
 } = {}) {
   return render(
     <I18nProvider>
@@ -37,7 +40,7 @@ describe('StaticKeysReplaceView', () => {
     });
 
     it('calls onReadyChange(false) on mount', () => {
-      const onReadyChange = jest.fn();
+      const onReadyChange = vi.fn();
       renderView({ onReadyChange });
       expect(onReadyChange).toHaveBeenCalledWith(false);
     });
@@ -51,7 +54,7 @@ describe('StaticKeysReplaceView', () => {
     });
 
     it('hides input and clears value after clicking Cancel', () => {
-      const onReadyChange = jest.fn();
+      const onReadyChange = vi.fn();
       renderView({ onReadyChange });
       fireEvent.click(screen.getByText(/replace access key id/i));
       fireEvent.change(screen.getByTestId('staticKeysReplace-accessKeyId'), {
@@ -79,7 +82,7 @@ describe('StaticKeysReplaceView', () => {
 
   describe('readiness and field propagation', () => {
     it('does not call onReadyChange(true) when only access key ID replaced', () => {
-      const onReadyChange = jest.fn();
+      const onReadyChange = vi.fn();
       renderView({ onReadyChange });
       fireEvent.click(screen.getByText(/replace access key id/i));
       fireEvent.change(screen.getByTestId('staticKeysReplace-accessKeyId'), {
@@ -89,7 +92,7 @@ describe('StaticKeysReplaceView', () => {
     });
 
     it('does not call onReadyChange(true) when only secret replaced', () => {
-      const onReadyChange = jest.fn();
+      const onReadyChange = vi.fn();
       renderView({ onReadyChange });
       fireEvent.click(screen.getByText(/replace secret access key/i));
       fireEvent.change(screen.getByTestId('staticKeysReplace-secretAccessKey'), {
@@ -99,7 +102,7 @@ describe('StaticKeysReplaceView', () => {
     });
 
     it('calls onReadyChange(true) when both fields replaced and filled', () => {
-      const onReadyChange = jest.fn();
+      const onReadyChange = vi.fn();
       renderView({ onReadyChange });
       fireEvent.click(screen.getByText(/replace access key id/i));
       fireEvent.change(screen.getByTestId('staticKeysReplace-accessKeyId'), {
@@ -113,7 +116,7 @@ describe('StaticKeysReplaceView', () => {
     });
 
     it('calls onFieldsChange with both values when ready', () => {
-      const onFieldsChange = jest.fn();
+      const onFieldsChange = vi.fn();
       renderView({ onFieldsChange });
       fireEvent.click(screen.getByText(/replace access key id/i));
       fireEvent.change(screen.getByTestId('staticKeysReplace-accessKeyId'), {
@@ -130,7 +133,7 @@ describe('StaticKeysReplaceView', () => {
     });
 
     it('calls onReadyChange(false) when access key cancelled after both filled', () => {
-      const onReadyChange = jest.fn();
+      const onReadyChange = vi.fn();
       renderView({ onReadyChange });
       fireEvent.click(screen.getByText(/replace access key id/i));
       fireEvent.change(screen.getByTestId('staticKeysReplace-accessKeyId'), {

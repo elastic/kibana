@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,12 +15,12 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { StaleEventCleanupSection } from './stale_event_cleanup_section';
 
-jest.mock('../../../../hooks/use_kibana');
+vi.mock('../../../../hooks/use_kibana');
 
-const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
-const fetch = jest.fn();
-const addSuccess = jest.fn();
-const addError = jest.fn();
+const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
+const fetch = vi.fn();
+const addSuccess = vi.fn();
+const addError = vi.fn();
 
 const renderSection = (canManage = true) => {
   const queryClient = new QueryClient({
@@ -34,7 +37,7 @@ const renderSection = (canManage = true) => {
 
 describe('StaleEventCleanupSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useKibanaMock.mockReturnValue({
       core: {
         notifications: { toasts: { addSuccess, addError } },
@@ -76,7 +79,7 @@ describe('StaleEventCleanupSection', () => {
   });
 
   it('keeps the action loading until cleanup settles and reports failures', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     let rejectRequest: (error: Error) => void = () => undefined;
     fetch.mockReturnValue(
       new Promise((_, reject) => {

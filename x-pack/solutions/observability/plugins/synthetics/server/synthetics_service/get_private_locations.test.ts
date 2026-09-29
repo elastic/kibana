@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getPrivateLocations } from './get_private_locations';
 import {
@@ -34,7 +36,7 @@ describe('getPrivateLocations', () => {
         },
         close: async () => undefined,
       }),
-      get: jest
+      get: vi
         .fn()
         .mockRejectedValue(
           SavedObjectsErrorHelpers.createGenericNotFoundError(

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { type RelationshipsClient } from '@kbn/entity-store/server';
 import type { LeadEntity } from '../types';
@@ -56,10 +59,10 @@ const buildEntity = ({
   };
 };
 
-const relationshipsClient: jest.Mocked<
+const relationshipsClient: Mocked<
   Pick<RelationshipsClient, 'getEarliestObservationByTarget'>
 > = {
-  getEarliestObservationByTarget: jest.fn(),
+  getEarliestObservationByTarget: vi.fn(),
 };
 
 const createModule = (entitiesMap: ReadonlyMap<string, LeadEntity>) =>
@@ -86,7 +89,7 @@ const firstSeenMap = (entries: Record<string, number>) => new Map(Object.entries
 
 describe('createRelationshipModule', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     relationshipsClient.getEarliestObservationByTarget.mockResolvedValue(new Map());
   });
 

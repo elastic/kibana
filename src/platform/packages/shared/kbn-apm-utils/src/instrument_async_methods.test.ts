@@ -7,16 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 /* eslint-disable max-classes-per-file */
 
 import { instrumentAsyncMethods } from './instrument_async_methods';
 import { withSpan } from './with_span';
 
-const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
+const withSpanMock = withSpan as MockedFunction<typeof withSpan>;
 
-jest.mock('./with_span', () => ({
-  withSpan: jest.fn((options, cb) => cb()),
-}));
+vi.mock('./with_span', () => {
+      const mocked = {
+      withSpan: vi.fn((options, cb) => cb()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('instrumentAsyncMethods', () => {
   beforeEach(() => {

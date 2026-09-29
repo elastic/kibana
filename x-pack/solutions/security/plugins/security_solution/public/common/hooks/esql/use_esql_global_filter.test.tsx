@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useEsqlGlobalFilterQuery } from './use_esql_global_filter';
 import { TestProviders } from '../../mock';
 
-jest.mock('../../containers/use_global_time', () => ({
-  useGlobalTime: jest.fn(() => ({
-    from: '2024-01-01T00:00:00.000Z',
-    to: '2024-01-02T00:00:00.000Z',
-  })),
-}));
+vi.mock('../../containers/use_global_time', () => {
+      const mocked = {
+      useGlobalTime: vi.fn(() => ({
+        from: '2024-01-01T00:00:00.000Z',
+        to: '2024-01-02T00:00:00.000Z',
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('useEsqlGlobalFilterQuery', () => {
   it('returns the expected ESBoolQuery with time range filter', () => {

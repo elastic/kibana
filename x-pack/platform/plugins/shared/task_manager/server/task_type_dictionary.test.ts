@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { get } from 'lodash';
 import type { RunContext, TaskDefinition } from './task';
 import { TaskCost, TaskPriority } from './task';
@@ -12,13 +14,16 @@ import { mockLogger } from './test_utils';
 import type { TaskDefinitionRegistry } from './task_type_dictionary';
 import { REMOVED_TYPES, sanitizeTaskDefinitions, TaskTypeDictionary } from './task_type_dictionary';
 
-jest.mock('./constants', () => ({
-  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
-    'foo',
-    'sampleTaskSharedConcurrencyType1',
-    'sampleTaskSharedConcurrencyType2',
-  ],
-}));
+vi.mock('./constants', () => {
+      const mocked = {
+      CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
+        'foo',
+        'sampleTaskSharedConcurrencyType1',
+        'sampleTaskSharedConcurrencyType2',
+      ],
+    };
+      return { ...mocked, default: mocked };
+    });
 
 interface Opts {
   numTasks: number;
@@ -55,7 +60,7 @@ describe('taskTypeDictionary', () => {
   const logger = mockLogger();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     definitions = new TaskTypeDictionary(logger);
   });
 
@@ -214,7 +219,7 @@ describe('taskTypeDictionary', () => {
         foo: {
           title: 'foo',
           maxConcurrency: 2,
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
       });
       expect(definitions.has('foo')).toBe(true);
@@ -226,7 +231,7 @@ describe('taskTypeDictionary', () => {
           title: 'foo',
           maxConcurrency: 2,
           priority: TaskPriority.Maintenance,
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
       });
       expect(definitions.get('foo')).toEqual({
@@ -247,7 +252,7 @@ describe('taskTypeDictionary', () => {
           maxConcurrency: 2,
           // @ts-expect-error upgrade typescript v5.1.6
           priority: 23,
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
       });
       expect(logger.error).toHaveBeenCalledWith(
@@ -262,7 +267,7 @@ describe('taskTypeDictionary', () => {
           title: 'foo',
           maxConcurrency: 2,
           cost: TaskCost.ExtraLarge,
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
       });
       expect(definitions.get('foo')).toEqual({
@@ -282,7 +287,7 @@ describe('taskTypeDictionary', () => {
           maxConcurrency: 2,
           // @ts-expect-error upgrade typescript v5.1.6
           cost: 23,
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
       });
       expect(logger.error).toHaveBeenCalledWith(
@@ -295,7 +300,7 @@ describe('taskTypeDictionary', () => {
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
       });
 
@@ -303,7 +308,7 @@ describe('taskTypeDictionary', () => {
         definitions.registerTaskDefinitions({
           foo: {
             title: 'foo2',
-            createTaskRunner: jest.fn(),
+            createTaskRunner: vi.fn(),
           },
         });
       }).toThrowErrorMatchingInlineSnapshot(`"Task foo is already defined!"`);
@@ -314,7 +319,7 @@ describe('taskTypeDictionary', () => {
         definitions.registerTaskDefinitions({
           'abc,def': {
             title: 'foo2',
-            createTaskRunner: jest.fn(),
+            createTaskRunner: vi.fn(),
           },
         });
       }).toThrowErrorMatchingInlineSnapshot(`"Task type \\"abc,def\\" cannot contain a comma."`);
@@ -325,7 +330,7 @@ describe('taskTypeDictionary', () => {
         definitions.registerTaskDefinitions({
           sampleTaskRemovedType: {
             title: 'removed',
-            createTaskRunner: jest.fn(),
+            createTaskRunner: vi.fn(),
           },
         });
       }).toThrowErrorMatchingInlineSnapshot(
@@ -339,7 +344,7 @@ describe('taskTypeDictionary', () => {
           foo2: {
             title: 'foo2',
             maxConcurrency: 2,
-            createTaskRunner: jest.fn(),
+            createTaskRunner: vi.fn(),
           },
         });
       }).toThrowErrorMatchingInlineSnapshot(
@@ -352,7 +357,7 @@ describe('taskTypeDictionary', () => {
         sampleTaskSharedConcurrencyType1: {
           title: 'Shared 1',
           maxConcurrency: 2,
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
       });
 
@@ -361,7 +366,7 @@ describe('taskTypeDictionary', () => {
           sampleTaskSharedConcurrencyType2: {
             title: 'Shared 2',
             maxConcurrency: 1,
-            createTaskRunner: jest.fn(),
+            createTaskRunner: vi.fn(),
           },
         });
       }).toThrowErrorMatchingInlineSnapshot(
@@ -375,7 +380,7 @@ describe('taskTypeDictionary', () => {
           title: 'Shared 1',
           maxConcurrency: 1,
           cost: TaskCost.ExtraLarge,
-          createTaskRunner: jest.fn(),
+          createTaskRunner: vi.fn(),
         },
       });
 
@@ -384,7 +389,7 @@ describe('taskTypeDictionary', () => {
           sampleTaskSharedConcurrencyType2: {
             title: 'Shared 2',
             maxConcurrency: 1,
-            createTaskRunner: jest.fn(),
+            createTaskRunner: vi.fn(),
           },
         });
       }).toThrowErrorMatchingInlineSnapshot(

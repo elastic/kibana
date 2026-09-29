@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { AgentType } from '@kbn/agent-builder-common';
 import type { AgentProperties } from './client/storage';
 import type { AgentProfileStorage } from './client/storage';
@@ -33,20 +36,20 @@ function createAgentSource(overrides: Partial<AgentProperties> = {}): AgentPrope
 
 function createMockStorage(searchResponse: {
   hits: Array<{ _id: string; _source?: AgentProperties }>;
-}): jest.Mocked<AgentProfileStorage> {
-  const bulk = jest.fn().mockResolvedValue(undefined);
-  const search = jest.fn().mockResolvedValue({
+}): Mocked<AgentProfileStorage> {
+  const bulk = vi.fn().mockResolvedValue(undefined);
+  const search = vi.fn().mockResolvedValue({
     hits: {
       hits: searchResponse.hits,
     },
   });
 
   return {
-    getClient: jest.fn().mockReturnValue({
+    getClient: vi.fn().mockReturnValue({
       search,
       bulk,
     }),
-  } as unknown as jest.Mocked<AgentProfileStorage>;
+  } as unknown as Mocked<AgentProfileStorage>;
 }
 
 describe('runToolRefCleanup', () => {
@@ -112,7 +115,7 @@ describe('runToolRefCleanup', () => {
     });
     expect(result).toEqual({ agents: [{ id: 'agent-1', name: 'Test Agent' }] });
     expect(storage.getClient().bulk).toHaveBeenCalledTimes(1);
-    const [bulkCall] = (storage.getClient().bulk as jest.Mock).mock.calls;
+    const [bulkCall] = (storage.getClient().bulk as Mock).mock.calls;
     const operations = bulkCall[0].operations;
     expect(operations).toHaveLength(1);
     expect(operations[0].index._id).toBe('doc-1');
@@ -147,7 +150,7 @@ describe('runToolRefCleanup', () => {
       ],
     });
     expect(storage.getClient().bulk).toHaveBeenCalledTimes(1);
-    const [bulkCall] = (storage.getClient().bulk as jest.Mock).mock.calls;
+    const [bulkCall] = (storage.getClient().bulk as Mock).mock.calls;
     const operations = bulkCall[0].operations;
     expect(operations).toHaveLength(2);
     expect((operations[0].index.document as AgentProperties).config.tools).toEqual([]);
@@ -176,7 +179,7 @@ describe('runToolRefCleanup', () => {
   });
 
   it('logs warn when search returns at least SEARCH_SIZE hits', async () => {
-    const logger = { warn: jest.fn(), error: jest.fn() };
+    const logger = { warn: vi.fn(), error: vi.fn() };
     const manySources = Array.from({ length: 1000 }, (_, i) =>
       createAgentSource({ id: `agent-${i}` })
     );
@@ -269,7 +272,7 @@ describe('runToolRefCleanup', () => {
   });
 
   it('logs error and rethrows when bulk fails', async () => {
-    const logger = { warn: jest.fn(), error: jest.fn() };
+    const logger = { warn: vi.fn(), error: vi.fn() };
     const storage = createMockStorage({
       hits: [
         {
@@ -280,7 +283,7 @@ describe('runToolRefCleanup', () => {
         },
       ],
     });
-    (storage.getClient().bulk as jest.Mock).mockRejectedValue(new Error('Bulk failed'));
+    (storage.getClient().bulk as Mock).mockRejectedValue(new Error('Bulk failed'));
     await expect(
       runToolRefCleanup({
         storage,

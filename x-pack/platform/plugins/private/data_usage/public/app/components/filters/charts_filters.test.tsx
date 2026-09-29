@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import React from 'react';
 import { TestProvider } from '../../../../common/test_utils';
 import { render, within, type RenderResult } from '@testing-library/react';
@@ -16,21 +18,24 @@ import {
   METRIC_TYPE_UI_OPTIONS_VALUES_TO_API_MAP,
 } from '../../../../common/rest_types/usage_metrics';
 
-const mockUseLocation = jest.fn(() => ({ pathname: '/' }));
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: () => mockUseLocation(),
-  useHistory: jest.fn().mockReturnValue({
-    push: jest.fn(),
-    listen: jest.fn(),
-    location: {
-      search: '',
-    },
-  }),
-}));
+const mockUseLocation = vi.fn(() => ({ pathname: '/' }));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useLocation: () => mockUseLocation(),
+      useHistory: vi.fn().mockReturnValue({
+        push: vi.fn(),
+        listen: vi.fn(),
+        location: {
+          search: '',
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...original,
     useKibana: () => mockUseKibana,
@@ -49,7 +54,7 @@ describe('Charts Filters', () => {
   let user: UserEvent;
   const testId = 'test';
   const testIdFilter = `${testId}-filter`;
-  const onClick = jest.fn();
+  const onClick = vi.fn();
   const dateRangePickerState = {
     startDate: 'now-15m',
     endDate: 'now',
@@ -69,40 +74,40 @@ describe('Charts Filters', () => {
         filterName: 'dataStreams' as FilterName,
         isFilterLoading: false,
         options: ['.ds-1', '.ds-2'],
-        onChangeFilterOptions: jest.fn(),
+        onChangeFilterOptions: vi.fn(),
       },
       metricTypes: {
         filterName: 'metricTypes' as FilterName,
         isFilterLoading: false,
         options: METRIC_TYPE_VALUES.slice(),
-        onChangeFilterOptions: jest.fn(),
+        onChangeFilterOptions: vi.fn(),
       },
     },
     onClick,
-    onRefresh: jest.fn(),
-    onRefreshChange: jest.fn(),
-    onTimeChange: jest.fn(),
+    onRefresh: vi.fn(),
+    onRefreshChange: vi.fn(),
+    onTimeChange: vi.fn(),
   };
 
   let renderComponent: (props: ChartsFiltersProps) => RenderResult;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     renderComponent = (props: ChartsFiltersProps) =>
       render(
         <TestProvider>
           <ChartsFilters data-test-subj={testIdFilter} {...props} />
         </TestProvider>
       );
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
+    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime, pointerEventsCheck: 0 });
   });
 
   it('renders data streams filter, date range filter and refresh button', () => {

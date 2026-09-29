@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 
@@ -14,9 +17,9 @@ import { casesQueriesKeys } from '../../../containers/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as api from '../api/api';
 
-jest.mock('../api/api');
+vi.mock('../api/api');
 
-const apiMock = api as jest.Mocked<typeof api>;
+const apiMock = api as Mocked<typeof api>;
 
 describe('useGetTemplates', () => {
   const mockTemplatesResponse = {
@@ -44,9 +47,9 @@ describe('useGetTemplates', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     apiMock.getTemplates.mockResolvedValue(mockTemplatesResponse);
-    jest
+    vi
       .spyOn(KibanaServices, 'getConfig')
       .mockReturnValue({ templates: { enabled: true } } as ReturnType<
         typeof KibanaServices.getConfig

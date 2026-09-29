@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { of, Subject, throwError } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -118,8 +120,8 @@ const parsedAlerts = {
 describe('searchAlerts', () => {
   const mockDataPlugin = {
     search: {
-      search: jest.fn().mockReturnValue(searchResponse$),
-      showError: jest.fn(),
+      search: vi.fn().mockReturnValue(searchResponse$),
+      showError: vi.fn(),
     },
   };
 
@@ -140,7 +142,7 @@ describe('searchAlerts', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the response correctly', async () => {

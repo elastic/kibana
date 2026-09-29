@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { injectI18n } from './inject';
@@ -69,7 +71,7 @@ describe('I18nProvider', () => {
       </I18nProvider>,
       {
         childContextTypes: {
-          intl: { formatMessage: jest.fn() },
+          intl: { formatMessage: vi.fn() },
         },
       }
     );

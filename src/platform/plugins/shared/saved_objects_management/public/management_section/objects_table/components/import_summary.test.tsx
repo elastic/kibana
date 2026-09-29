@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
@@ -19,7 +22,7 @@ import type { FailedImport } from '../../../lib';
 
 describe('ImportSummary', () => {
   let basePath: ReturnType<typeof httpServiceMock.createBasePath>;
-  type PrependType = jest.MockInstance<string, [url: string], unknown> & ((url: string) => string);
+  type PrependType = MockInstance<string, [url: string], unknown> & ((url: string) => string);
 
   const getProps = (parts: Partial<ImportSummaryProps>): ImportSummaryProps => ({
     basePath,
@@ -181,7 +184,7 @@ describe('ImportSummary', () => {
 
   it('should use /app/rules actionPath when rules app is registered', async () => {
     const coreStart = coreMock.createStart();
-    coreStart.application.isAppRegistered = jest.fn().mockReturnValue(true);
+    coreStart.application.isAppRegistered = vi.fn().mockReturnValue(true);
     basePath.prepend = ((path: string) => path) as PrependType;
 
     const props = getProps({

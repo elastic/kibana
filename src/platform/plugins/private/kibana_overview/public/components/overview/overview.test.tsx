@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React, { type ReactNode } from 'react';
 import moment from 'moment';
 import { render, waitFor } from '@testing-library/react';
@@ -19,39 +21,48 @@ import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 import { hasESData, hasDataView } from './overview.test.mocks';
 import { Overview } from './overview';
 
-jest.mock('@kbn/shared-ux-page-kibana-template', () => {
+vi.mock('@kbn/shared-ux-page-kibana-template', async () => {
   const MockTemplate = ({ children }: { children?: ReactNode }) => (
     <div data-test-subj="mockedKibanaPageTemplate">{children}</div>
   );
   MockTemplate.Section = ({ children }: { children?: ReactNode }) => <section>{children}</section>;
 
   return {
-    ...jest.requireActual('@kbn/shared-ux-page-kibana-template'),
+    ...(await vi.importActual('@kbn/shared-ux-page-kibana-template')),
     KibanaPageTemplate: MockTemplate,
   };
 });
 
-jest.mock('@kbn/shared-ux-page-analytics-no-data', () => {
+vi.mock('@kbn/shared-ux-page-analytics-no-data', async () => {
   const MockedComponent = () => 'MockedAnalyticsNoDataPage';
   return {
-    ...jest.requireActual('@kbn/shared-ux-page-analytics-no-data'),
+    ...(await vi.importActual('@kbn/shared-ux-page-analytics-no-data')),
     AnalyticsNoDataPageKibanaProvider: () => {
       return <MockedComponent />;
     },
   };
 });
 
-jest.mock('../news_feed', () => ({
-  NewsFeed: () => <div data-test-subj="mockedNewsFeed" />,
-}));
+vi.mock('../news_feed', () => {
+      const mocked = {
+      NewsFeed: () => <div data-test-subj="mockedNewsFeed" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../add_data', () => ({
-  AddData: () => <div data-test-subj="mockedAddData" />,
-}));
+vi.mock('../add_data', () => {
+      const mocked = {
+      AddData: () => <div data-test-subj="mockedAddData" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../manage_data', () => ({
-  ManageData: () => <div data-test-subj="mockedManageData" />,
-}));
+vi.mock('../manage_data', () => {
+      const mocked = {
+      ManageData: () => <div data-test-subj="mockedManageData" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockNewsFetchResult = {
   error: null,
@@ -204,7 +215,7 @@ describe('Overview', () => {
     hasDataView.mockResolvedValue(true);
   });
 
-  afterAll(() => jest.clearAllMocks());
+  afterAll(() => vi.clearAllMocks());
 
   test('renders the Analytics app header', async () => {
     const { getByTestId } = renderOverview();

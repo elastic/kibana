@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
@@ -15,12 +18,12 @@ import { isFleetServerVersionRequirementMet } from '../fleet_server/version_requ
 
 import { checkOtlpOutputAllowed, findAgentlessPolicies, isOtlpOutputSupported } from './helpers';
 
-jest.mock('../agent_policy');
-jest.mock('../app_context');
-jest.mock('../fleet_server/version_requirements');
+vi.mock('../agent_policy');
+vi.mock('../app_context');
+vi.mock('../fleet_server/version_requirements');
 
 const mockedIsFleetServerVersionRequirementMet =
-  isFleetServerVersionRequirementMet as jest.MockedFunction<
+  isFleetServerVersionRequirementMet as MockedFunction<
     typeof isFleetServerVersionRequirementMet
   >;
 
@@ -29,12 +32,12 @@ describe('checkOtlpOutputAllowed', () => {
   const soClientMock = savedObjectsClientMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedIsFleetServerVersionRequirementMet.mockResolvedValue(false);
   });
 
   it('returns { result: false } when the feature flag is off, without calling the version check', async () => {
-    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+    (appContextService.getExperimentalFeatures as Mock).mockReturnValue({
       enableOtlpOutput: false,
     });
 
@@ -45,7 +48,7 @@ describe('checkOtlpOutputAllowed', () => {
   });
 
   it('returns { result: false, error } when the feature flag is on but the version requirement is not met', async () => {
-    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+    (appContextService.getExperimentalFeatures as Mock).mockReturnValue({
       enableOtlpOutput: true,
     });
     mockedIsFleetServerVersionRequirementMet.mockResolvedValue(false);
@@ -58,7 +61,7 @@ describe('checkOtlpOutputAllowed', () => {
   });
 
   it('returns { result: true } when both the feature flag and version requirement are met', async () => {
-    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+    (appContextService.getExperimentalFeatures as Mock).mockReturnValue({
       enableOtlpOutput: true,
     });
     mockedIsFleetServerVersionRequirementMet.mockResolvedValue(true);
@@ -75,7 +78,7 @@ describe('isOtlpOutputSupported', () => {
   const soClientMock = savedObjectsClientMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockedIsFleetServerVersionRequirementMet.mockResolvedValue(false);
   });
 
@@ -106,14 +109,14 @@ describe('findAgentlessPolicies', () => {
   };
 
   beforeEach(() => {
-    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue(
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
       mockInternalSoClient
     );
-    (agentPolicyService.list as jest.Mock).mockResolvedValue(mockAgentlessPolicies);
+    (agentPolicyService.list as Mock).mockResolvedValue(mockAgentlessPolicies);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return agentless policies without data_output_id when outputId is not provided', async () => {

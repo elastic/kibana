@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import JsonCodeEditor from './json_code_editor';
 import { JsonCodeEditorCommon } from './json_code_editor_common';
 import { render, screen } from '@testing-library/react';
 
-jest.mock('./json_code_editor_common', () => ({
-  JsonCodeEditorCommon: jest.fn(() => <div data-test-subj="jsonCodeEditorCommon" />),
-}));
+vi.mock('./json_code_editor_common', () => {
+      const mocked = {
+      JsonCodeEditorCommon: vi.fn(() => <div data-test-subj="jsonCodeEditorCommon" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedJsonCodeEditorCommon = jest.mocked(JsonCodeEditorCommon);
+const mockedJsonCodeEditorCommon = vi.mocked(JsonCodeEditorCommon);
 
 describe('JsonCodeEditor', () => {
   beforeEach(() => {

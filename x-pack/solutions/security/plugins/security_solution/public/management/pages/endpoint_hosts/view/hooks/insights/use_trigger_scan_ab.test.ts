@@ -5,36 +5,45 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { useTriggerScanAB } from './use_trigger_scan_ab';
 import { WORKFLOW_INSIGHTS_ROUTE } from '../../../../../../../common/endpoint/constants';
 
-const mockHttpPost = jest.fn();
-const mockAddDanger = jest.fn();
+const mockHttpPost = vi.fn();
+const mockAddDanger = vi.fn();
 
-jest.mock('../../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: { http: { post: mockHttpPost } },
-  }),
-  useToasts: () => ({
-    addDanger: mockAddDanger,
-  }),
-}));
+vi.mock('../../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: { http: { post: mockHttpPost } },
+      }),
+      useToasts: () => ({
+        addDanger: mockAddDanger,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-query', () => ({
-  useMutation: jest.fn(),
-}));
+vi.mock('@kbn/react-query', () => {
+      const mocked = {
+      useMutation: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseMutation = jest.requireMock('@kbn/react-query').useMutation;
+const mockUseMutation = (await vi.importMock('@kbn/react-query')).useMutation;
 
 describe('useTriggerScanAB', () => {
-  const mockOnSuccess = jest.fn();
-  const mockOnError = jest.fn();
-  let mockMutate: jest.Mock;
+  const mockOnSuccess = vi.fn();
+  const mockOnError = vi.fn();
+  let mockMutate: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockMutate = jest.fn();
+    vi.clearAllMocks();
+    mockMutate = vi.fn();
     mockUseMutation.mockImplementation(
       (
         mutationFn: (payload: unknown) => Promise<unknown>,

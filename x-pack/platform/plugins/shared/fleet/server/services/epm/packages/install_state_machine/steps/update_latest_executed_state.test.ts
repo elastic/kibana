@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   SavedObjectsClientContract,
@@ -36,12 +39,12 @@ import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator'
 
 import { updateLatestExecutedState } from './update_latest_executed_state';
 
-jest.mock('../../../../audit_logging');
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+vi.mock('../../../../audit_logging');
+const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
 
 describe('updateLatestExecutedState', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let soClient: Mocked<SavedObjectsClientContract>;
+  let esClient: Mocked<ElasticsearchClient>;
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(async () => {
@@ -58,7 +61,7 @@ describe('updateLatestExecutedState', () => {
     await updateLatestExecutedState({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger,
       packageInstallContext: {
@@ -114,7 +117,7 @@ describe('updateLatestExecutedState', () => {
     await updateLatestExecutedState({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger,
       packageInstallContext: {
@@ -151,7 +154,7 @@ describe('updateLatestExecutedState', () => {
     await updateLatestExecutedState({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger,
       packageInstallContext: {
@@ -196,7 +199,7 @@ describe('updateLatestExecutedState', () => {
     await updateLatestExecutedState({
       savedObjectsClient: soClient,
       // @ts-ignore
-      savedObjectsImporter: jest.fn(),
+      savedObjectsImporter: vi.fn(),
       esClient,
       logger,
       packageInstallContext: {

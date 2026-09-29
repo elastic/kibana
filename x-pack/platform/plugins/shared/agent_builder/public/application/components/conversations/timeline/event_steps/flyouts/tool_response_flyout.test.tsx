@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -31,21 +33,21 @@ const makeStep = () =>
 
 describe('ToolResponseFlyout', () => {
   it('renders without a Back button when onBack is not provided', () => {
-    renderWithProviders(<ToolResponseFlyout step={makeStep()} onClose={jest.fn()} />);
+    renderWithProviders(<ToolResponseFlyout step={makeStep()} onClose={vi.fn()} />);
     expect(screen.queryByRole('button', { name: 'Back' })).not.toBeInTheDocument();
   });
 
   it('renders a Back button when onBack is provided', () => {
     renderWithProviders(
-      <ToolResponseFlyout step={makeStep()} onClose={jest.fn()} onBack={jest.fn()} />
+      <ToolResponseFlyout step={makeStep()} onClose={vi.fn()} onBack={vi.fn()} />
     );
     expect(screen.getByRole('button', { name: 'Back' })).toBeInTheDocument();
   });
 
   it('calls onBack when Back is clicked, not onClose', async () => {
     const user = userEvent.setup();
-    const onBack = jest.fn();
-    const onClose = jest.fn();
+    const onBack = vi.fn();
+    const onClose = vi.fn();
     renderWithProviders(<ToolResponseFlyout step={makeStep()} onClose={onClose} onBack={onBack} />);
     await user.click(screen.getByRole('button', { name: 'Back' }));
     expect(onBack).toHaveBeenCalled();
@@ -54,7 +56,7 @@ describe('ToolResponseFlyout', () => {
 
   it('calls onClose when the flyout close button is clicked', async () => {
     const user = userEvent.setup();
-    const onClose = jest.fn();
+    const onClose = vi.fn();
     renderWithProviders(<ToolResponseFlyout step={makeStep()} onClose={onClose} />);
     await user.click(screen.getByTestId('euiFlyoutCloseButton'));
     expect(onClose).toHaveBeenCalled();

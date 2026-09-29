@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -29,7 +31,7 @@ const esResponseError = (statusCode: number, type: string) =>
   );
 
 describe('describeAiIndexAggregations', () => {
-  const search = jest.fn();
+  const search = vi.fn();
   const esClient = { search } as unknown as ElasticsearchClient;
   const params = { esClient, target: 'ai-index-idx-*', spaceId: 'team-a' };
 

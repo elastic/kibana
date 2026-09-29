@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -21,24 +23,27 @@ const DISCOVER_APP_LOCATOR_ID = 'DISCOVER_APP_LOCATOR';
 const ASSET_HREF = '/app/metrics/link-to/asset-detail';
 const DISCOVER_HREF = '/app/discover#/';
 
-const mockGetAssetDetailUrl = jest.fn(() => ({
+const mockGetAssetDetailUrl = vi.fn(() => ({
   href: ASSET_HREF,
-  onClick: jest.fn(),
+  onClick: vi.fn(),
 }));
 
-jest.mock('../../../../pages/link_to/use_asset_details_redirect', () => ({
-  useAssetDetailsRedirect: () => ({
-    getAssetDetailUrl: mockGetAssetDetailUrl,
-  }),
-}));
+vi.mock('../../../../pages/link_to/use_asset_details_redirect', () => {
+      const mocked = {
+      useAssetDetailsRedirect: () => ({
+        getAssetDetailUrl: mockGetAssetDetailUrl,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 function createDiscoverLocatorMock() {
-  const getRedirectUrl = jest.fn(
+  const getRedirectUrl = vi.fn(
     (params: { query?: { esql?: string }; timeRange?: unknown; breakdownField?: string }) => {
       return params?.query?.esql ? DISCOVER_HREF : '#';
     }
   );
-  const navigate = jest.fn();
+  const navigate = vi.fn();
   return { getRedirectUrl, navigate };
 }
 
@@ -102,7 +107,7 @@ const defaultProps = {
 
 describe('MetricsNodeDetailsLink', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('when isOtel is true and nodeType is not host', () => {
@@ -321,7 +326,7 @@ describe('MetricsNodeDetailsLink', () => {
 
 describe('CompareMetricNodesLink', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const timerange = { from: 'now-15m', to: 'now' };

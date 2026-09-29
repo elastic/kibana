@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServiceMock, coreMock } from '@kbn/core/server/mocks';
 import { duration } from 'moment';
@@ -19,14 +22,14 @@ describe('ES Config Route', () => {
   let routeDeps: RouteDependencies;
   let mockEsLegacyConfigService: EsLegacyConfigService;
 
-  const mockReadLegacyESConfig = jest.fn();
+  const mockReadLegacyESConfig = vi.fn();
   const mockRouter = httpServiceMock.createRouter();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockEsLegacyConfigService = new EsLegacyConfigService();
-    mockEsLegacyConfigService.getCloudUrl = jest.fn();
+    mockEsLegacyConfigService.getCloudUrl = vi.fn();
 
     mockReadLegacyESConfig.mockResolvedValue({
       requestTimeout: duration(30000),
@@ -54,7 +57,7 @@ describe('ES Config Route', () => {
 
   describe('when cloud URL is available', () => {
     beforeEach(() => {
-      (mockEsLegacyConfigService.getCloudUrl as jest.Mock).mockReturnValue(
+      (mockEsLegacyConfigService.getCloudUrl as Mock).mockReturnValue(
         'https://cloud.elastic.co:443'
       );
     });
@@ -78,7 +81,7 @@ describe('ES Config Route', () => {
 
   describe('when cloud URL is not available', () => {
     beforeEach(() => {
-      (mockEsLegacyConfigService.getCloudUrl as jest.Mock).mockReturnValue(undefined);
+      (mockEsLegacyConfigService.getCloudUrl as Mock).mockReturnValue(undefined);
     });
 
     it('should use first proxy host as host and all proxy hosts for allHosts', async () => {
@@ -106,7 +109,7 @@ describe('ES Config Route', () => {
         requestHeadersWhitelist: [],
         hosts: ['https://kibana_system:SECRET@elasticsearch:9200'],
       });
-      (mockEsLegacyConfigService.getCloudUrl as jest.Mock).mockReturnValue(undefined);
+      (mockEsLegacyConfigService.getCloudUrl as Mock).mockReturnValue(undefined);
     });
 
     it('should strip credentials from host URLs', async () => {
@@ -135,7 +138,7 @@ describe('ES Config Route', () => {
     });
 
     it('should return all proxy hosts in allHosts regardless of cloud URL', async () => {
-      (mockEsLegacyConfigService.getCloudUrl as jest.Mock).mockReturnValue(
+      (mockEsLegacyConfigService.getCloudUrl as Mock).mockReturnValue(
         'https://cloud.elastic.co:443'
       );
 

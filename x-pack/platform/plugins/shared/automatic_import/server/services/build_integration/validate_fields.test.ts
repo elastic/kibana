@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { FieldMappingEntry } from '../saved_objects/saved_objects_service';
 import { validateFieldMappings } from './validate_fields';
@@ -14,7 +16,7 @@ describe('validateFieldMappings', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('static validation', () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -23,10 +25,10 @@ export const defaultScaledFloatParameters = {
   store: false,
 };
 
-const onChangeHandler = jest.fn();
+const onChangeHandler = vi.fn();
 describe('Mappings editor: scaled float datatype', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   interface Mappings {

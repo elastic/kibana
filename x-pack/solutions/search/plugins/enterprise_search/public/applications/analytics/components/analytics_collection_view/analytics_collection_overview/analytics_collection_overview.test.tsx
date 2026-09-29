@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   setMockValues,
   setMockActions,
@@ -23,21 +25,30 @@ import { FilterBy } from '../../../utils/get_formula_by_filter';
 import { AnalyticsCollectionChartWithLens } from './analytics_collection_chart';
 import { AnalyticsCollectionOverview } from './analytics_collection_overview';
 
-jest.mock('./analytics_collection_chart', () => ({
-  AnalyticsCollectionChartWithLens: jest.fn(() => (
-    <div data-test-subj="analyticsCollectionChart" />
-  )),
-}));
+vi.mock('./analytics_collection_chart', () => {
+      const mocked = {
+      AnalyticsCollectionChartWithLens: vi.fn(() => (
+        <div data-test-subj="analyticsCollectionChart" />
+      )),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../utils/find_or_create_data_view', () => ({
-  findOrCreateDataView: jest.fn().mockResolvedValue(undefined),
-}));
+vi.mock('../../../utils/find_or_create_data_view', () => {
+      const mocked = {
+      findOrCreateDataView: vi.fn().mockResolvedValue(undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./analytics_collection_overview_table', () => ({
-  AnalyticsCollectionOverviewTable: () => null,
-}));
+vi.mock('./analytics_collection_overview_table', () => {
+      const mocked = {
+      AnalyticsCollectionOverviewTable: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const MockedChart = jest.mocked(AnalyticsCollectionChartWithLens);
+const MockedChart = vi.mocked(AnalyticsCollectionChartWithLens);
 
 const mockValues = {
   analyticsCollection: {
@@ -55,15 +66,15 @@ const mockValues = {
 };
 
 const mockActions = {
-  analyticsEventsExist: jest.fn(),
-  fetchAnalyticsCollection: jest.fn(),
-  fetchAnalyticsCollectionDataViewId: jest.fn(),
-  setTimeRange: jest.fn(),
+  analyticsEventsExist: vi.fn(),
+  fetchAnalyticsCollection: vi.fn(),
+  fetchAnalyticsCollectionDataViewId: vi.fn(),
+  setTimeRange: vi.fn(),
 };
 
 describe('AnalyticsOverView', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with Data', async () => {

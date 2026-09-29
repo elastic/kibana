@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
 import { Subject } from 'rxjs';
 import { merge } from 'lodash';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -37,8 +39,8 @@ const eventLogState = {
 };
 
 const createGetTaskManagerStart = (state: unknown = eventLogState) =>
-  jest.fn().mockResolvedValue({
-    get: jest.fn().mockResolvedValue({ state }),
+  vi.fn().mockResolvedValue({
+    get: vi.fn().mockResolvedValue({ state }),
   } as unknown as TaskManagerStartContract);
 
 describe('registerTaskManagerUsageCollector', () => {
@@ -156,9 +158,9 @@ describe('registerTaskManagerUsageCollector', () => {
     });
 
     const taskManager = {
-      get: jest.fn().mockResolvedValue({ state: eventLogState }),
+      get: vi.fn().mockResolvedValue({ state: eventLogState }),
     } as unknown as TaskManagerStartContract;
-    const getTaskManagerStart = jest.fn().mockResolvedValue(taskManager);
+    const getTaskManagerStart = vi.fn().mockResolvedValue(taskManager);
 
     registerTaskManagerUsageCollector(
       usageCollectionMock,
@@ -195,8 +197,8 @@ describe('registerTaskManagerUsageCollector', () => {
       return createUsageCollectionSetupMock().makeUsageCollector(config);
     });
 
-    const getTaskManagerStart = jest.fn().mockResolvedValue({
-      get: jest.fn().mockRejectedValue(new Error('NotInitialized taskManager is still starting')),
+    const getTaskManagerStart = vi.fn().mockResolvedValue({
+      get: vi.fn().mockRejectedValue(new Error('NotInitialized taskManager is still starting')),
     } as unknown as TaskManagerStartContract);
 
     registerTaskManagerUsageCollector(
@@ -235,8 +237,8 @@ describe('registerTaskManagerUsageCollector', () => {
       return createUsageCollectionSetupMock().makeUsageCollector(config);
     });
 
-    const getTaskManagerStart = jest.fn().mockResolvedValue({
-      get: jest
+    const getTaskManagerStart = vi.fn().mockResolvedValue({
+      get: vi
         .fn()
         .mockRejectedValue(
           new Error('Saved object [task/task_manager_snapshot_telemetry] not found')

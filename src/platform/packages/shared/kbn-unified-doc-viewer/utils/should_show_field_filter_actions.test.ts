@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DocViewFilterFn } from '../types';
 import {
@@ -15,7 +17,7 @@ import {
 } from './should_show_field_filter_actions';
 
 describe('shouldShowFieldFilterInOutActions', () => {
-  const mockOnFilter: DocViewFilterFn = jest.fn();
+  const mockOnFilter: DocViewFilterFn = vi.fn();
 
   const createMockField = ({
     name = 'test_field',
@@ -38,7 +40,7 @@ describe('shouldShowFieldFilterInOutActions', () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('shouldShowFieldFilterInOutActions', () => {

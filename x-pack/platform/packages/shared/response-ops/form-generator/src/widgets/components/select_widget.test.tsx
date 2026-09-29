@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -27,7 +29,7 @@ const TestFormWrapper = ({ children }: { children: React.ReactNode }) => {
 
 describe('SelectWidget', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with label from props', () => {
@@ -260,7 +262,7 @@ describe('SelectWidget', () => {
   });
 
   it('throws error when schema is not z.enum and no options provided', () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     expect(() => {
       render(

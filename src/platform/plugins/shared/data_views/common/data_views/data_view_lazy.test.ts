@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import type { RuntimeField, RuntimePrimitiveTypes, FieldSpec, DataViewSpec } from '../types';
@@ -68,7 +70,7 @@ function create(id: string, spec?: DataViewSpec) {
     shortDotsEnable: false,
     metaFields: [],
     apiClient: {
-      getFieldsForWildcard: jest
+      getFieldsForWildcard: vi
         .fn()
         .mockImplementation(() => Promise.resolve({ fields: fieldCapsResponse })),
     } as any,
@@ -599,7 +601,7 @@ describe('DataViewLazy', () => {
         shortDotsEnable: false,
         metaFields: [],
         apiClient: {
-          getFieldsForWildcard: jest
+          getFieldsForWildcard: vi
             .fn()
             .mockImplementation(() => Promise.resolve({ fields: fieldCapsResponse })),
         } as any,

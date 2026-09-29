@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import * as api from '../api/api';
@@ -12,17 +15,17 @@ import { TestProviders } from '../../../common/mock';
 import { useGetTemplateCreators } from './use_get_template_creators';
 import { useToasts } from '../../../common/lib/kibana';
 
-jest.mock('../api/api');
-jest.mock('../../../common/lib/kibana');
+vi.mock('../api/api');
+vi.mock('../../../common/lib/kibana');
 
 describe('useGetTemplateCreators', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useToasts as jest.Mock).mockReturnValue({ addError: jest.fn() });
+    vi.clearAllMocks();
+    (useToasts as Mock).mockReturnValue({ addError: vi.fn() });
   });
 
   it('calls getTemplateCreators api', async () => {
-    const spyOnGetTemplateCreators = jest.spyOn(api, 'getTemplateCreators');
+    const spyOnGetTemplateCreators = vi.spyOn(api, 'getTemplateCreators');
     spyOnGetTemplateCreators.mockResolvedValue(['user1', 'user2']);
 
     renderHook(() => useGetTemplateCreators(), {
@@ -36,7 +39,7 @@ describe('useGetTemplateCreators', () => {
 
   it('returns creators data', async () => {
     const mockCreators = ['john.doe', 'jane.smith'];
-    jest.spyOn(api, 'getTemplateCreators').mockResolvedValue(mockCreators);
+    vi.spyOn(api, 'getTemplateCreators').mockResolvedValue(mockCreators);
 
     const { result } = renderHook(() => useGetTemplateCreators(), {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => (
@@ -48,10 +51,10 @@ describe('useGetTemplateCreators', () => {
   });
 
   it('displays an error toast when an error occurs', async () => {
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addError });
 
-    const spyOnGetTemplateCreators = jest.spyOn(api, 'getTemplateCreators');
+    const spyOnGetTemplateCreators = vi.spyOn(api, 'getTemplateCreators');
     spyOnGetTemplateCreators.mockRejectedValue(new Error('Something went wrong'));
 
     renderHook(() => useGetTemplateCreators(), {
@@ -64,13 +67,13 @@ describe('useGetTemplateCreators', () => {
   });
 
   it('does not display error toast for AbortError', async () => {
-    const addError = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError });
+    const addError = vi.fn();
+    (useToasts as Mock).mockReturnValue({ addError });
 
     const abortError = new Error('Aborted');
     abortError.name = 'AbortError';
 
-    const spyOnGetTemplateCreators = jest.spyOn(api, 'getTemplateCreators');
+    const spyOnGetTemplateCreators = vi.spyOn(api, 'getTemplateCreators');
     spyOnGetTemplateCreators.mockRejectedValue(abortError);
 
     renderHook(() => useGetTemplateCreators(), {

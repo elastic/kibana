@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { lazyImmutableGCableObject } from './lazy_immutable_gcable_object';
 
 describe('lazyImmutableGCableObject', () => {
   it('defers factory invocation until first property access', () => {
-    const factory = jest.fn(() => ({ value: 1 }));
+    const factory = vi.fn(() => ({ value: 1 }));
     const obj = lazyImmutableGCableObject(factory);
 
     expect(factory).not.toHaveBeenCalled();
@@ -23,7 +25,7 @@ describe('lazyImmutableGCableObject', () => {
   });
 
   it('caches the materialized object while it is still reachable', () => {
-    const factory = jest.fn(() => ({ value: 1 }));
+    const factory = vi.fn(() => ({ value: 1 }));
     const obj = lazyImmutableGCableObject(factory);
 
     // A single retained reference pins the instance, so all reads reuse it.
@@ -39,7 +41,7 @@ describe('lazyImmutableGCableObject', () => {
   // the factory. We verify the rebuild path by simulating cache eviction —
   // V8's heuristics are not deterministic enough to assert collection itself.
   it('rebuilds the object after the WeakRef is cleared', () => {
-    const factory = jest.fn(() => ({ value: 1 }));
+    const factory = vi.fn(() => ({ value: 1 }));
     const RealWeakRef = globalThis.WeakRef;
 
     let onlyRef: WeakRef<object> | undefined;

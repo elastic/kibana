@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../../mocks';
@@ -13,16 +15,16 @@ import { removeInstallation } from '../../services/epm/packages';
 
 import { _runBulkUninstallTask } from './run_bulk_uninstall';
 
-jest.mock('../../services/epm/packages');
-jest.mock('../../services/package_policy');
+vi.mock('../../services/epm/packages');
+vi.mock('../../services/package_policy');
 
 describe('Bulk uninstall task', () => {
   beforeEach(() => {
     const mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
 
-    jest.mocked(removeInstallation).mockReset();
-    jest.mocked(removeInstallation).mockImplementation(async (params) => {
+    vi.mocked(removeInstallation).mockReset();
+    vi.mocked(removeInstallation).mockImplementation(async (params) => {
       if (params.pkgName.startsWith('test_valid')) {
         return {
           status: 'installed',

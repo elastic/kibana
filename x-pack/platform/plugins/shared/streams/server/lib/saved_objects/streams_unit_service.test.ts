@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -117,7 +119,7 @@ describe('StreamsUnitService', () => {
       );
     });
     const encryptedSavedObjectsClient = {
-      getDecryptedAsInternalUser: jest.fn(),
+      getDecryptedAsInternalUser: vi.fn(),
     } as unknown as EncryptedSavedObjectsClient;
 
     const service = createService({ soClient, encryptedSavedObjectsClient });
@@ -152,7 +154,7 @@ describe('StreamsUnitService', () => {
       order.push(`create:${type}`);
       return asSavedObject(type, attributes);
     });
-    const publishUnit = jest.fn().mockImplementation(async () => {
+    const publishUnit = vi.fn().mockImplementation(async () => {
       order.push('publish');
     });
 
@@ -216,9 +218,9 @@ describe('StreamsUnitService', () => {
     soClient.get.mockRejectedValue(new Error('should decrypt rather than use stripped get'));
     soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
     const encryptedSavedObjectsClient = {
-      getDecryptedAsInternalUser: jest.fn().mockResolvedValue(storedConfiguration),
+      getDecryptedAsInternalUser: vi.fn().mockResolvedValue(storedConfiguration),
     } as unknown as EncryptedSavedObjectsClient;
-    const publishUnit = jest.fn().mockResolvedValue(undefined);
+    const publishUnit = vi.fn().mockResolvedValue(undefined);
 
     const service = createService({ soClient, publishUnit, encryptedSavedObjectsClient });
 
@@ -245,9 +247,9 @@ describe('StreamsUnitService', () => {
     const soClient = createSoClient();
     soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
     const encryptedSavedObjectsClient = {
-      getDecryptedAsInternalUser: jest.fn().mockResolvedValue(storedConfiguration),
+      getDecryptedAsInternalUser: vi.fn().mockResolvedValue(storedConfiguration),
     } as unknown as EncryptedSavedObjectsClient;
-    const publishUnit = jest.fn().mockResolvedValue(undefined);
+    const publishUnit = vi.fn().mockResolvedValue(undefined);
 
     const service = createService({ soClient, publishUnit, encryptedSavedObjectsClient });
 
@@ -287,7 +289,7 @@ describe('StreamsUnitService', () => {
     soClient.get.mockRejectedValue(notFoundError);
     soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
     soClient.delete.mockResolvedValue({});
-    const publishUnit = jest.fn().mockRejectedValue(new Error('distributor down'));
+    const publishUnit = vi.fn().mockRejectedValue(new Error('distributor down'));
 
     const service = createService({ soClient, publishUnit });
 
@@ -310,7 +312,7 @@ describe('StreamsUnitService', () => {
     soClient.get.mockRejectedValue(notFoundError);
     soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
     soClient.delete.mockRejectedValue(new Error('saved object delete failed'));
-    const publishUnit = jest.fn().mockRejectedValue(new Error('distributor down'));
+    const publishUnit = vi.fn().mockRejectedValue(new Error('distributor down'));
 
     const service = createService({ soClient, publishUnit });
 
@@ -327,7 +329,7 @@ describe('StreamsUnitService', () => {
     const soClient = createSoClient();
     soClient.get.mockResolvedValue(storedConfiguration);
     soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
-    const publishUnit = jest.fn().mockRejectedValue(new Error('distributor down'));
+    const publishUnit = vi.fn().mockRejectedValue(new Error('distributor down'));
 
     const service = createService({ soClient, publishUnit });
 

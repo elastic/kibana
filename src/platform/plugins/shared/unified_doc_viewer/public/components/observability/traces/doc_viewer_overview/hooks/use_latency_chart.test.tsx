@@ -7,17 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { useLatencyChart } from './use_latency_chart';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import type { EuiThemeComputed } from '@elastic/eui';
 
-jest.mock('../../../../../plugin', () => ({
-  getUnifiedDocViewerServices: jest.fn(),
-}));
+vi.mock('../../../../../plugin', () => {
+      const mocked = {
+      getUnifiedDocViewerServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockHttpPost = jest.fn();
-const mockAddDanger = jest.fn();
+const mockHttpPost = vi.fn();
+const mockAddDanger = vi.fn();
 const mockTimefilter = {
   getAbsoluteTime: () => ({
     from: '2023-01-01T00:00:00.000Z',
@@ -33,7 +39,7 @@ const mockTheme: EuiThemeComputed = {
   },
 } as EuiThemeComputed;
 
-(getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
+(getUnifiedDocViewerServices as Mock).mockReturnValue({
   core: {
     http: {
       post: mockHttpPost,
@@ -53,8 +59,8 @@ const mockTheme: EuiThemeComputed = {
   },
 });
 
-jest.mock('@elastic/eui', () => {
-  const originalModule = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const originalModule = (await vi.importActual('@elastic/eui'));
   return {
     ...originalModule,
     useEuiTheme: () => ({ euiTheme: mockTheme }),
@@ -62,7 +68,7 @@ jest.mock('@elastic/eui', () => {
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('useLatencyChart', () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { KbnClient } from '@kbn/kbn-client';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import {
@@ -22,27 +25,27 @@ import {
 import type { IngestScoresError, UpsertDatasetInput } from './evals_client';
 import { EvalsClient } from './evals_client';
 
-const createMockKbnClient = (): jest.Mocked<KbnClient> =>
+const createMockKbnClient = (): Mocked<KbnClient> =>
   ({
-    request: jest.fn(),
-  } as unknown as jest.Mocked<KbnClient>);
+    request: vi.fn(),
+  } as unknown as Mocked<KbnClient>);
 
 const asKbnResponse = <T>(value: T, status = 200): Awaited<ReturnType<KbnClient['request']>> =>
   ({ data: value, status, statusText: 'OK', headers: new Headers() } as unknown as Awaited<
     ReturnType<KbnClient['request']>
   >);
 
-const createLog = (): jest.Mocked<SomeDevLog> =>
+const createLog = (): Mocked<SomeDevLog> =>
   ({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warning: jest.fn(),
-    error: jest.fn(),
-    verbose: jest.fn(),
-    trace: jest.fn(),
-    success: jest.fn(),
-    fatal: jest.fn(),
-  } as unknown as jest.Mocked<SomeDevLog>);
+    debug: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
+    verbose: vi.fn(),
+    trace: vi.fn(),
+    success: vi.fn(),
+    fatal: vi.fn(),
+  } as unknown as Mocked<SomeDevLog>);
 
 const createIngestRequest = (): IngestScoresRequestBodyInput => ({
   experiment_id: 'experiment-1',
@@ -125,7 +128,7 @@ const createScoreDocument = (id: string): EvaluationScoreDocument => ({
 
 describe('EvalsClient', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('ingestScores posts to the ingest route and returns parsed counts', async () => {

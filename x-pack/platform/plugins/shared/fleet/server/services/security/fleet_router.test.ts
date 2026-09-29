@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type {
   CheckPrivilegesDynamically,
   CheckPrivilegesResponse,
@@ -66,16 +69,16 @@ describe('FleetAuthzRouter', () => {
   }) => {
     const fakeRouter = {
       versioned: {
-        get: jest.fn().mockImplementation(() => {
+        get: vi.fn().mockImplementation(() => {
           return {
-            addVersion: jest
+            addVersion: vi
               .fn()
               .mockImplementation((options: any, handler: RequestHandler) => Promise.resolve()),
           };
         }),
       },
-    } as unknown as jest.Mocked<VersionedRouter<FleetRequestHandlerContext>>;
-    const fakeHandler: RequestHandler = jest.fn((ctx, req, res) => res.ok());
+    } as unknown as Mocked<VersionedRouter<FleetRequestHandlerContext>>;
+    const fakeHandler: RequestHandler = vi.fn((ctx, req, res) => res.ok());
 
     const mockContext = createAppContextStartContractMock();
     // @ts-expect-error type doesn't properly respect deeply mocked keys
@@ -110,7 +113,7 @@ describe('FleetAuthzRouter', () => {
     const wrappedHandler =
       // @ts-ignore
       fakeRouter.versioned.get.mock.results[0].value.addVersion.mock.calls[0][1];
-    const resFactory = { forbidden: jest.fn(() => 'forbidden'), ok: jest.fn(() => 'ok') };
+    const resFactory = { forbidden: vi.fn(() => 'forbidden'), ok: vi.fn(() => 'ok') };
 
     const fakeReq = {
       route: {
@@ -131,10 +134,10 @@ describe('FleetAuthzRouter', () => {
     return res as unknown as 'forbidden' | 'ok';
   };
 
-  const mockCheckPrivileges: jest.Mock<
+  const mockCheckPrivileges: Mock<
     ReturnType<CheckPrivilegesDynamically>,
     Parameters<CheckPrivilegesDynamically>
-  > = jest.fn().mockResolvedValue({ hasAllRequested: true });
+  > = vi.fn().mockResolvedValue({ hasAllRequested: true });
 
   it('does not allow security plugin to be disabled', async () => {
     expect(
@@ -217,48 +220,48 @@ describe('FleetAuthzRouter', () => {
   });
 
   describe('default access', () => {
-    let fakeRouter: jest.Mocked<VersionedRouter<FleetRequestHandlerContext>>;
+    let fakeRouter: Mocked<VersionedRouter<FleetRequestHandlerContext>>;
 
     beforeEach(() => {
       fakeRouter = {
         versioned: {
-          get: jest.fn().mockImplementation(() => {
+          get: vi.fn().mockImplementation(() => {
             return {
-              addVersion: jest
+              addVersion: vi
                 .fn()
                 .mockImplementation((options: any, handler: RequestHandler) => Promise.resolve()),
             };
           }),
-          post: jest.fn().mockImplementation(() => {
+          post: vi.fn().mockImplementation(() => {
             return {
-              addVersion: jest
+              addVersion: vi
                 .fn()
                 .mockImplementation((options: any, handler: RequestHandler) => Promise.resolve()),
             };
           }),
-          delete: jest.fn().mockImplementation(() => {
+          delete: vi.fn().mockImplementation(() => {
             return {
-              addVersion: jest
+              addVersion: vi
                 .fn()
                 .mockImplementation((options: any, handler: RequestHandler) => Promise.resolve()),
             };
           }),
-          put: jest.fn().mockImplementation(() => {
+          put: vi.fn().mockImplementation(() => {
             return {
-              addVersion: jest
+              addVersion: vi
                 .fn()
                 .mockImplementation((options: any, handler: RequestHandler) => Promise.resolve()),
             };
           }),
-          patch: jest.fn().mockImplementation(() => {
+          patch: vi.fn().mockImplementation(() => {
             return {
-              addVersion: jest
+              addVersion: vi
                 .fn()
                 .mockImplementation((options: any, handler: RequestHandler) => Promise.resolve()),
             };
           }),
         },
-      } as unknown as jest.Mocked<VersionedRouter<FleetRequestHandlerContext>>;
+      } as unknown as Mocked<VersionedRouter<FleetRequestHandlerContext>>;
     });
 
     const METHODS: Array<'get' | 'post' | 'delete' | 'put' | 'patch'> = [

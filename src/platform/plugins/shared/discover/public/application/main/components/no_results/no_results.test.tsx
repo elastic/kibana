@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
@@ -24,7 +26,7 @@ import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider
 import { of } from 'rxjs';
 
 const services = createDiscoverServicesMock();
-const searchMock = jest.spyOn(services.data.search, 'search');
+const searchMock = vi.spyOn(services.data.search, 'search');
 
 function findSubjects() {
   return {

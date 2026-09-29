@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -14,13 +17,16 @@ import { TakeActionButton } from './take_action_button';
 import { TakeAction } from './take_action';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
-jest.mock('../../../../flyout/document_details/shared/hooks/use_event_details');
-jest.mock('./take_action_button', () => ({
-  TakeActionButton: jest.fn(() => <div data-test-subj="take-action-button-mock" />),
-}));
+vi.mock('../../../../flyout/document_details/shared/hooks/use_event_details');
+vi.mock('./take_action_button', () => {
+      const mocked = {
+      TakeActionButton: vi.fn(() => <div data-test-subj="take-action-button-mock" />),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseEventDetails = useEventDetails as jest.Mock;
-const mockTakeActionButton = TakeActionButton as unknown as jest.Mock;
+const mockUseEventDetails = useEventDetails as Mock;
+const mockTakeActionButton = TakeActionButton as unknown as Mock;
 
 const createMockHit = (
   raw: Partial<DataTableRecord['raw']> = {},
@@ -34,13 +40,13 @@ const createMockHit = (
   } as DataTableRecord);
 
 const mockEcsData: Ecs = { _id: 'test-event-id', _index: 'test-index' };
-const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);
-const mockOnAlertUpdated = jest.fn();
-const mockOnShowNotes = jest.fn();
+const mockRefetchFlyoutData = vi.fn().mockResolvedValue(undefined);
+const mockOnAlertUpdated = vi.fn();
+const mockOnShowNotes = vi.fn();
 
 describe('<TakeAction />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseEventDetails.mockReturnValue({
       loading: false,
       dataAsNestedObject: mockEcsData,
@@ -140,7 +146,7 @@ describe('<TakeAction />', () => {
 
   it('should pass hit, ecsData, refetchFlyoutData, onAlertUpdated and onShowNotes from useEventDetails to TakeActionButton', () => {
     const hit = createMockHit();
-    const onAlertUpdated = jest.fn();
+    const onAlertUpdated = vi.fn();
     render(<TakeAction hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={mockOnShowNotes} />);
 
     expect(mockTakeActionButton).toHaveBeenCalledWith(

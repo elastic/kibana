@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -49,7 +51,7 @@ describe('InitialSolutionSetup', () => {
 
   beforeEach(() => {
     locationHref = 'http://localhost/spaces/space_selector';
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderSetup = (spacesManager = spacesManagerMock.create()) => {
@@ -63,7 +65,7 @@ describe('InitialSolutionSetup', () => {
     locationHref = `http://localhost/spaces/space_selector?next=${encodeURIComponent('/app/home')}`;
     const user = userEvent.setup();
     const spacesManager = spacesManagerMock.create();
-    spacesManager.completeInitialSolutionSetup = jest.fn().mockResolvedValue(undefined);
+    spacesManager.completeInitialSolutionSetup = vi.fn().mockResolvedValue(undefined);
 
     renderSetup(spacesManager);
     await user.click(screen.getByRole('button', { name: 'Select Elasticsearch' }));
@@ -82,7 +84,7 @@ describe('InitialSolutionSetup', () => {
     )}#/discover/foo`;
     const user = userEvent.setup();
     const spacesManager = spacesManagerMock.create();
-    spacesManager.completeInitialSolutionSetup = jest.fn().mockResolvedValue(undefined);
+    spacesManager.completeInitialSolutionSetup = vi.fn().mockResolvedValue(undefined);
 
     renderSetup(spacesManager);
     await user.click(screen.getByRole('button', { name: 'Select Elasticsearch' }));
@@ -100,7 +102,7 @@ describe('InitialSolutionSetup', () => {
     )}`;
     const user = userEvent.setup();
     const spacesManager = spacesManagerMock.create();
-    spacesManager.completeInitialSolutionSetup = jest.fn().mockResolvedValue(undefined);
+    spacesManager.completeInitialSolutionSetup = vi.fn().mockResolvedValue(undefined);
 
     renderSetup(spacesManager);
     await user.click(screen.getByRole('button', { name: 'Select Elasticsearch' }));
@@ -114,8 +116,8 @@ describe('InitialSolutionSetup', () => {
     const user = userEvent.setup();
     const spacesManager = spacesManagerMock.create();
     const conflictError = createHttpFetchError('Already completed', 409);
-    spacesManager.completeInitialSolutionSetup = jest.fn().mockRejectedValue(conflictError);
-    spacesManager.getInitialSolutionSetup = jest.fn().mockResolvedValue({ required: false });
+    spacesManager.completeInitialSolutionSetup = vi.fn().mockRejectedValue(conflictError);
+    spacesManager.getInitialSolutionSetup = vi.fn().mockResolvedValue({ required: false });
 
     renderSetup(spacesManager);
     await user.click(screen.getByRole('button', { name: 'Select Elasticsearch' }));
@@ -131,8 +133,8 @@ describe('InitialSolutionSetup', () => {
     const user = userEvent.setup();
     const spacesManager = spacesManagerMock.create();
     const conflictError = createHttpFetchError('Setup conflict', 409);
-    spacesManager.completeInitialSolutionSetup = jest.fn().mockRejectedValue(conflictError);
-    spacesManager.getInitialSolutionSetup = jest.fn().mockResolvedValue({ required: true });
+    spacesManager.completeInitialSolutionSetup = vi.fn().mockRejectedValue(conflictError);
+    spacesManager.getInitialSolutionSetup = vi.fn().mockResolvedValue({ required: true });
 
     renderSetup(spacesManager);
     await user.click(screen.getByRole('button', { name: 'Select Elasticsearch' }));

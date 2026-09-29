@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { SecuritySolutionEventBus } from '../../events/event_bus';
 import { forwardCasesAlertStatusToSecuritySolution } from './cases_alert_status_bridge';
@@ -18,7 +20,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
 
   beforeEach(() => {
     bus = new SecuritySolutionEventBus();
-    mockLogger = { warn: jest.fn(), debug: jest.fn() };
+    mockLogger = { warn: vi.fn(), debug: vi.fn() };
   });
 
   afterEach(() => {
@@ -33,7 +35,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
   const obsIndex = '.alerts-observability.logs.alerts-default';
 
   it('emits alertStatusChanged with the correct payload', () => {
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
@@ -59,7 +61,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
   });
 
   it('does not emit when no index is a Security index', () => {
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
@@ -74,7 +76,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
   });
 
   it('emits only security alertIds when case has mixed Security Solution and observability alerts', () => {
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
@@ -103,7 +105,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
   });
 
   it('does not emit when all alertIds map to non-security indices (even if indices list has security entry)', () => {
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     // indices list says security, but alertIdToIndex shows all IDs are in obs index
@@ -119,7 +121,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
   });
 
   it('emits when index is a concrete backing index (.internal.alerts-security.*)', () => {
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
@@ -135,7 +137,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
   });
 
   it('emits when index is a legacy siem-signals index', () => {
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
@@ -151,7 +153,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
   });
 
   it('caps alertIds to MAX_ALERTS_PER_TRIGGER and sets truncated: true', () => {
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 5 }, (_, i) => `id-${i}`);
@@ -170,7 +172,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
   });
 
   it('caps previousStatuses to MAX_ALERTS_PER_TRIGGER', () => {
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     // Use status: 'closed' so all IDs (previously 'open') are genuinely transitioning and
@@ -194,7 +196,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
   });
 
   it('does not emit for IDs already at the target status (confirmed no-ops)', () => {
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
@@ -224,7 +226,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
     // id-0 has no previousStatuses entry (e.g. unrecognised stored status); id-1..id-10000 do.
     // Without the fix, previousStatuses would include {id-10000} even though id-10000 is not
     // in the emitted alertIds (which caps at MAX_ALERTS_PER_TRIGGER = id-0..id-9999).
-    const listener = jest.fn();
+    const listener = vi.fn();
     bus.onAlertStatusChanged(listener);
 
     const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
@@ -254,7 +256,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
   });
 
   it('logs a warning and does not rethrow if emitAlertStatusChanged throws', () => {
-    jest.spyOn(bus, 'emitAlertStatusChanged').mockImplementation(() => {
+    vi.spyOn(bus, 'emitAlertStatusChanged').mockImplementation(() => {
       throw new Error('bus failure');
     });
 
@@ -274,10 +276,10 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
   });
 
   it('still emits alertStatusChanged when attackStatusChanged throws in a mixed batch', () => {
-    jest.spyOn(bus, 'emitAttackStatusChanged').mockImplementation(() => {
+    vi.spyOn(bus, 'emitAttackStatusChanged').mockImplementation(() => {
       throw new Error('attack bus failure');
     });
-    const alertListener = jest.fn();
+    const alertListener = vi.fn();
     bus.onAlertStatusChanged(alertListener);
 
     expect(() =>
@@ -301,8 +303,8 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
 
   describe('attack discovery index routing', () => {
     it('emits attackStatusChanged (not alertStatusChanged) for scheduled AD docs', () => {
-      const alertListener = jest.fn();
-      const attackListener = jest.fn();
+      const alertListener = vi.fn();
+      const attackListener = vi.fn();
       bus.onAlertStatusChanged(alertListener);
       bus.onAttackStatusChanged(attackListener);
 
@@ -324,8 +326,8 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
     });
 
     it('emits attackStatusChanged (not alertStatusChanged) for adhoc AD docs', () => {
-      const alertListener = jest.fn();
-      const attackListener = jest.fn();
+      const alertListener = vi.fn();
+      const attackListener = vi.fn();
       bus.onAlertStatusChanged(alertListener);
       bus.onAttackStatusChanged(attackListener);
 
@@ -343,8 +345,8 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
     });
 
     it('emits both attackStatusChanged and alertStatusChanged for a mixed batch', () => {
-      const alertListener = jest.fn();
-      const attackListener = jest.fn();
+      const alertListener = vi.fn();
+      const attackListener = vi.fn();
       bus.onAlertStatusChanged(alertListener);
       bus.onAttackStatusChanged(attackListener);
 

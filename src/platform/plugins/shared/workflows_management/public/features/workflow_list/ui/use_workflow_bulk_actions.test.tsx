@@ -7,28 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { useWorkflowBulkActions } from './use_workflow_bulk_actions';
 import { TestWrapper } from '../../../shared/test_utils';
 
-const mockDeleteWorkflows = { mutate: jest.fn() };
-const mockUpdateWorkflow = { mutate: jest.fn() };
+const mockDeleteWorkflows = { mutate: vi.fn() };
+const mockUpdateWorkflow = { mutate: vi.fn() };
 
-jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({
-  useWorkflowActions: () => ({
-    deleteWorkflows: mockDeleteWorkflows,
-    updateWorkflow: mockUpdateWorkflow,
-  }),
-}));
+vi.mock('../../../entities/workflows/model/use_workflow_actions', () => {
+      const mocked = {
+      useWorkflowActions: () => ({
+        deleteWorkflows: mockDeleteWorkflows,
+        updateWorkflow: mockUpdateWorkflow,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockNotifications = {
   toasts: {
-    addSuccess: jest.fn(),
-    addError: jest.fn(),
-    addWarning: jest.fn(),
-    addDanger: jest.fn(),
+    addSuccess: vi.fn(),
+    addError: vi.fn(),
+    addWarning: vi.fn(),
+    addDanger: vi.fn(),
   },
 };
 
@@ -42,31 +47,40 @@ const mockApplication = {
   },
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      application: mockApplication,
-      notifications: mockNotifications,
-    },
-  }),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: () => ({
+        services: {
+          application: mockApplication,
+          notifications: mockNotifications,
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock useExportWithReferences
-jest.mock('./use_export_with_references', () => ({
-  useExportWithReferences: () => ({
-    exportModalState: null,
-    startExport: jest.fn(),
-    handleIgnore: jest.fn(),
-    handleAddDirect: jest.fn(),
-    handleAddAll: jest.fn(),
-    handleCancel: jest.fn(),
-  }),
-}));
+vi.mock('./use_export_with_references', () => {
+      const mocked = {
+      useExportWithReferences: () => ({
+        exportModalState: null,
+        startExport: vi.fn(),
+        handleIgnore: vi.fn(),
+        handleAddDirect: vi.fn(),
+        handleAddAll: vi.fn(),
+        handleCancel: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Mock ExportReferencesModal
-jest.mock('./export_references_modal', () => ({
-  ExportReferencesModal: () => <div data-test-subj="export-references-modal" />,
-}));
+vi.mock('./export_references_modal', () => {
+      const mocked = {
+      ExportReferencesModal: () => <div data-test-subj="export-references-modal" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createMockWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowListItemDto => ({
   id: 'wf-1',
@@ -90,9 +104,9 @@ describe('useWorkflowBulkActions', () => {
   const defaultProps = {
     selectedWorkflows: [createMockWorkflow()],
     allWorkflows: [createMockWorkflow()],
-    onAction: jest.fn(),
-    onActionSuccess: jest.fn(),
-    deselectWorkflows: jest.fn(),
+    onAction: vi.fn(),
+    onActionSuccess: vi.fn(),
+    deselectWorkflows: vi.fn(),
   };
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -100,7 +114,7 @@ describe('useWorkflowBulkActions', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockApplication.capabilities.workflowsManagement.deleteWorkflow = true;
     mockApplication.capabilities.workflowsManagement.updateWorkflow = true;
     mockApplication.capabilities.workflowsManagement.readWorkflow = true;

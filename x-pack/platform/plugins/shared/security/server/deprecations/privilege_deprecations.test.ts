@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { GetDeprecationsContext } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -17,7 +19,7 @@ const application = `kibana-${kibanaIndexName}`;
 describe('#getPrivilegeDeprecationsService', () => {
   describe('#getKibanaRolesByFeatureId', () => {
     const mockAsCurrentUser = elasticsearchServiceMock.createScopedClusterClient();
-    const mockGetFeatures = jest.fn().mockResolvedValue([]);
+    const mockGetFeatures = vi.fn().mockResolvedValue([]);
     const mockLicense = licenseMock.create();
     const mockLogger = loggingSystemMock.createLogger();
     const authz = { applicationName: application };
@@ -53,7 +55,7 @@ describe('#getPrivilegeDeprecationsService', () => {
 
       const mockContext = {
         esClient: mockAsCurrentUser,
-        savedObjectsClient: jest.fn(),
+        savedObjectsClient: vi.fn(),
       } as unknown as GetDeprecationsContext;
 
       const resp = await getKibanaRolesByFeatureId({ context: mockContext, featureId: 'siem' });
@@ -127,7 +129,7 @@ describe('#getPrivilegeDeprecationsService', () => {
 
       const mockContext = {
         esClient: mockAsCurrentUser,
-        savedObjectsClient: jest.fn(),
+        savedObjectsClient: vi.fn(),
       } as unknown as GetDeprecationsContext;
 
       const resp = await getKibanaRolesByFeatureId({ context: mockContext, featureId: 'siem' });
@@ -206,7 +208,7 @@ describe('#getPrivilegeDeprecationsService', () => {
 
       const mockContext = {
         esClient: mockAsCurrentUser,
-        savedObjectsClient: jest.fn(),
+        savedObjectsClient: vi.fn(),
       } as unknown as GetDeprecationsContext;
 
       const resp = await getKibanaRolesByFeatureId({ context: mockContext, featureId: 'siem' });
@@ -227,7 +229,7 @@ describe('#getPrivilegeDeprecationsService', () => {
 
       const mockContext = {
         esClient: mockAsCurrentUser,
-        savedObjectsClient: jest.fn(),
+        savedObjectsClient: vi.fn(),
       } as unknown as GetDeprecationsContext;
 
       const resp = await getKibanaRolesByFeatureId({ context: mockContext, featureId: 'siem' });
@@ -259,7 +261,7 @@ describe('#getPrivilegeDeprecationsService', () => {
 
       const mockContext = {
         esClient: mockAsCurrentUser,
-        savedObjectsClient: jest.fn(),
+        savedObjectsClient: vi.fn(),
       } as unknown as GetDeprecationsContext;
 
       const resp = await getKibanaRolesByFeatureId({ context: mockContext, featureId: 'siem' });

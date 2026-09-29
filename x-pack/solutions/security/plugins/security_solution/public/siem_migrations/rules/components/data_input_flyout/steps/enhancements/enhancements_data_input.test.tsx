@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { EnhancementsDataInput } from './enhancements_data_input';
@@ -14,24 +17,24 @@ import { useEnhanceRules } from '../../../../service/hooks/use_enhance_rules';
 import { MigrationSource, type MigrationStepProps } from '../../../../../common/types';
 import { QradarDataInputStep } from '../../types';
 
-jest.mock('../../../../service/hooks/use_enhance_rules');
+vi.mock('../../../../service/hooks/use_enhance_rules');
 
-const mockEnhanceRules = jest.fn();
+const mockEnhanceRules = vi.fn();
 
 describe('EnhancementsDataInput', () => {
   const defaultProps: MigrationStepProps = {
     dataInputStep: QradarDataInputStep.Enhancements,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
     migrationSource: MigrationSource.QRADAR,
-    setDataInputStep: jest.fn(),
-    onMigrationCreated: jest.fn(),
-    onMissingResourcesFetched: jest.fn(),
+    setDataInputStep: vi.fn(),
+    onMigrationCreated: vi.fn(),
+    onMissingResourcesFetched: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useEnhanceRules as jest.Mock).mockReturnValue({
+    (useEnhanceRules as Mock).mockReturnValue({
       enhanceRules: mockEnhanceRules,
       isLoading: false,
       error: null,
@@ -221,7 +224,7 @@ describe('EnhancementsDataInput', () => {
   });
 
   it('should disable controls when loading', () => {
-    (useEnhanceRules as jest.Mock).mockReturnValue({
+    (useEnhanceRules as Mock).mockReturnValue({
       enhanceRules: mockEnhanceRules,
       isLoading: true,
       error: null,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { useDefaultAdHocDataViews } from './use_default_ad_hoc_data_views';
 import { getDiscoverInternalStateMock } from '../../__mocks__/discover_state.mock';
@@ -39,8 +41,8 @@ const rootProfileState = {
 
 const renderDefaultAdHocDataViewsHook = async () => {
   const services = createDiscoverServicesMock();
-  const clearInstanceCache = jest.spyOn(services.dataViews, 'clearInstanceCache');
-  const createDataView = jest
+  const clearInstanceCache = vi.spyOn(services.dataViews, 'clearInstanceCache');
+  const createDataView = vi
     .spyOn(services.dataViews, 'create')
     .mockImplementation((spec) => Promise.resolve(buildDataViewMock(omit(spec, 'fields'))));
   const toolkit = getDiscoverInternalStateMock({ services });
@@ -69,7 +71,7 @@ const renderDefaultAdHocDataViewsHook = async () => {
 
 describe('useDefaultAdHocDataViews', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should set default profile ad hoc data views', async () => {

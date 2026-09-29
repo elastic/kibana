@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ReactElement } from 'react';
 import type { Node, Parent } from 'unist';
 import type {
@@ -191,8 +193,8 @@ describe('createRenderAttachmentRenderer', () => {
   const attachmentId = 'attachment-1';
   const conversationId = 'conversation-1';
   const attachmentsService = {
-    getAttachmentUiDefinition: jest.fn(),
-    updateOrigin: jest.fn(),
+    getAttachmentUiDefinition: vi.fn(),
+    updateOrigin: vi.fn(),
   } as unknown as AttachmentsService;
 
   const baseAttachment = createMockAttachment(attachmentId, [

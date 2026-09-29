@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
@@ -85,10 +87,10 @@ const rowGeoSrc = new FieldRow({
 
 describe('useTableFilters', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
   afterAll(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   afterEach(() => {
@@ -152,7 +154,7 @@ describe('useTableFilters', () => {
     expect(result.current.onFilterField(rowExtensionKeyword)).toBe(true);
     expect(result.current.onFilterField(rowBytes)).toBe(true);
 
-    jest.advanceTimersByTime(600);
+    vi.advanceTimersByTime(600);
     expect(storage.get(LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES)).toBe('["number","keyword"]');
   });
 
@@ -183,7 +185,7 @@ describe('useTableFilters', () => {
     expect(result.current.onFilterField(rowExtensionKeyword)).toBe(false);
     expect(result.current.onFilterField(rowBytes)).toBe(true);
 
-    jest.advanceTimersByTime(600);
+    vi.advanceTimersByTime(600);
     expect(storage.get(LOCAL_STORAGE_KEY_SEARCH_TERM)).toBe('bytes');
     expect(storage.get(LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES)).toBe('["number"]');
   });
@@ -222,7 +224,7 @@ describe('useTableFilters', () => {
     expect(result.current.onFilterField(rowExtensionKeyword)).toBe(false);
     expect(result.current.onFilterField(rowBytes)).toBe(false);
 
-    jest.advanceTimersByTime(600);
+    vi.advanceTimersByTime(600);
     expect(storage.get(LOCAL_STORAGE_KEY_SEARCH_TERM)).toBe('2021');
     expect(storage.get(LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES)).toBe('["date"]');
   });

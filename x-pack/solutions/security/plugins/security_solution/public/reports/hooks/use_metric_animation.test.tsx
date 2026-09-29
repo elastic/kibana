@@ -5,21 +5,27 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import * as d3 from 'd3';
 import { useMetricAnimation } from './use_metric_animation';
 
-jest.mock('d3', () => ({
-  select: jest.fn(),
-  interpolateNumber: jest.fn(),
-}));
+vi.mock('d3', () => {
+      const mocked = {
+      select: vi.fn(),
+      interpolateNumber: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetComputedStyle = jest.fn();
+const mockGetComputedStyle = vi.fn();
 Object.defineProperty(window, 'getComputedStyle', {
   value: mockGetComputedStyle,
 });
 
-const mockMutationObserver = jest.fn();
+const mockMutationObserver = vi.fn();
 Object.defineProperty(window, 'MutationObserver', {
   value: mockMutationObserver,
 });
@@ -27,22 +33,22 @@ Object.defineProperty(window, 'MutationObserver', {
 describe('useMetricAnimation', () => {
   let mockElement: HTMLElement;
   let mockObserver: {
-    observe: jest.Mock;
-    disconnect: jest.Mock;
+    observe: Mock;
+    disconnect: Mock;
   };
   let mockD3Selection: {
-    transition: jest.Mock;
-    text: jest.Mock;
-    interrupt: jest.Mock;
+    transition: Mock;
+    text: Mock;
+    interrupt: Mock;
   };
   let mockTransition: {
-    duration: jest.Mock;
-    tween: jest.Mock;
+    duration: Mock;
+    tween: Mock;
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
 
     mockElement = document.createElement('div');
     mockElement.textContent = '$99,630';
@@ -52,25 +58,25 @@ describe('useMetricAnimation', () => {
     mockElement.style.color = 'rgb(0, 138, 94)';
 
     mockObserver = {
-      observe: jest.fn(),
-      disconnect: jest.fn(),
+      observe: vi.fn(),
+      disconnect: vi.fn(),
     };
     mockMutationObserver.mockImplementation(() => mockObserver);
 
     mockD3Selection = {
-      transition: jest.fn(),
-      text: jest.fn(),
-      interrupt: jest.fn(),
+      transition: vi.fn(),
+      text: vi.fn(),
+      interrupt: vi.fn(),
     };
 
     mockTransition = {
-      duration: jest.fn().mockReturnThis(),
-      tween: jest.fn().mockReturnThis(),
+      duration: vi.fn().mockReturnThis(),
+      tween: vi.fn().mockReturnThis(),
     };
 
     mockD3Selection.transition.mockReturnValue(mockTransition);
-    (d3.select as jest.Mock).mockReturnValue(mockD3Selection);
-    (d3.interpolateNumber as jest.Mock).mockReturnValue((t: number) => t * 99630);
+    (d3.select as Mock).mockReturnValue(mockD3Selection);
+    (d3.interpolateNumber as Mock).mockReturnValue((t: number) => t * 99630);
 
     mockGetComputedStyle.mockReturnValue({
       fontSize: '16px',
@@ -88,7 +94,7 @@ describe('useMetricAnimation', () => {
     if (document.body.contains(mockElement)) {
       document.body.removeChild(mockElement);
     }
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('handles element detection, animation start, and mutation observer setup correctly', () => {
@@ -119,7 +125,7 @@ describe('useMetricAnimation', () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
     });
 
     expect(d3.select).toHaveBeenCalledWith(mockElement);
@@ -136,7 +142,7 @@ describe('useMetricAnimation', () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
     });
 
     expect(mockTransition.tween).toHaveBeenCalledWith('text', expect.any(Function));
@@ -150,7 +156,7 @@ describe('useMetricAnimation', () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
     });
 
     expect(mockElement.textContent).toBe('$0');
@@ -168,7 +174,7 @@ describe('useMetricAnimation', () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(2100);
+      vi.advanceTimersByTime(2100);
     });
 
     expect(mockElement.textContent).toBe(originalText);
@@ -186,7 +192,7 @@ describe('useMetricAnimation', () => {
 
     document.body.appendChild(mockElement);
     act(() => {
-      jest.advanceTimersByTime(150);
+      vi.advanceTimersByTime(150);
     });
 
     expect(d3.select).toHaveBeenCalledWith(mockElement);
@@ -218,7 +224,7 @@ describe('useMetricAnimation', () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
     });
 
     expect(d3.select).toHaveBeenCalledWith(mockElement);
@@ -232,7 +238,7 @@ describe('useMetricAnimation', () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
     });
 
     const tweenFunction = mockTransition.tween.mock.calls[0][1];
@@ -242,7 +248,7 @@ describe('useMetricAnimation', () => {
 
     expect(mockElement.textContent).toMatch(/^\$\d{1,3}(,\d{3})*$/);
 
-    const firstCallCount = (d3.select as jest.Mock).mock.calls.length;
+    const firstCallCount = (d3.select as Mock).mock.calls.length;
     renderHook(() =>
       useMetricAnimation({
         animationDurationMs: 2000,
@@ -250,7 +256,7 @@ describe('useMetricAnimation', () => {
       })
     );
 
-    expect((d3.select as jest.Mock).mock.calls.length).toBe(firstCallCount);
+    expect((d3.select as Mock).mock.calls.length).toBe(firstCallCount);
   });
 
   it('handles animation duration parameter correctly', () => {
@@ -262,7 +268,7 @@ describe('useMetricAnimation', () => {
     );
 
     act(() => {
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
     });
 
     expect(mockTransition.duration).toHaveBeenCalledWith(5000);

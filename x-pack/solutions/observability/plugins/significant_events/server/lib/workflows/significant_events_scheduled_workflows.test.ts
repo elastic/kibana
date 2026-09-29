@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -76,26 +79,26 @@ const findStep = (steps: ParsedWorkflowStep[], name: string): ParsedWorkflowStep
   return undefined;
 };
 
-const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
+const createMockManagementApi = (overrides: Record<string, Mock> = {}) => {
   const api = {
-    getWorkflow: jest.fn().mockResolvedValue({
+    getWorkflow: vi.fn().mockResolvedValue({
       id: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
       enabled: false,
     }),
-    updateWorkflow: jest.fn().mockResolvedValue({}),
-    getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
-    cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    updateWorkflow: vi.fn().mockResolvedValue({}),
+    getWorkflowExecutions: vi.fn().mockResolvedValue({ results: [], total: 0 }),
+    cancelWorkflowExecution: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
-  return { ...api, getClient: jest.fn(() => api) };
+  return { ...api, getClient: vi.fn(() => api) };
 };
 
 const createMockManagedWorkflowsClient = () => ({
-  install: jest.fn().mockResolvedValue(undefined),
-  uninstall: jest.fn().mockResolvedValue(undefined),
-  ready: jest.fn().mockResolvedValue(undefined),
-  getWorkflowStatus: jest.fn(),
-  execute: jest.fn(),
+  install: vi.fn().mockResolvedValue(undefined),
+  uninstall: vi.fn().mockResolvedValue(undefined),
+  ready: vi.fn().mockResolvedValue(undefined),
+  getWorkflowStatus: vi.fn(),
+  execute: vi.fn(),
 });
 
 describe('scheduled Significant Events managed workflows', () => {
@@ -223,7 +226,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     const service = createSignificantEventsScheduledWorkflowsService({
       logger: loggerMock.create(),
       managementApi: managementApi as never,
-      getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
+      getManagedWorkflowsClient: vi.fn().mockResolvedValue(managedWorkflowsClient),
     });
 
     await service.ensureWorkflow({
@@ -292,13 +295,13 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
 
   it('updates template values without toggling workflows that are already enabled', async () => {
     const managementApi = createMockManagementApi({
-      getWorkflow: jest.fn().mockResolvedValue({ enabled: true }),
+      getWorkflow: vi.fn().mockResolvedValue({ enabled: true }),
     });
     const managedWorkflowsClient = createMockManagedWorkflowsClient();
     const service = createSignificantEventsScheduledWorkflowsService({
       logger: loggerMock.create(),
       managementApi: managementApi as never,
-      getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
+      getManagedWorkflowsClient: vi.fn().mockResolvedValue(managedWorkflowsClient),
     });
 
     await service.ensureWorkflow({
@@ -325,8 +328,8 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
 
   it('disables, drains, and uninstalls per-space scheduled workflows', async () => {
     const managementApi = createMockManagementApi({
-      getWorkflow: jest.fn().mockResolvedValue({ enabled: true }),
-      getWorkflowExecutions: jest
+      getWorkflow: vi.fn().mockResolvedValue({ enabled: true }),
+      getWorkflowExecutions: vi
         .fn()
         .mockResolvedValueOnce({ results: [{ id: 'running-detection-execution' }], total: 1 })
         .mockResolvedValueOnce({ results: [], total: 0 })
@@ -337,7 +340,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     const service = createSignificantEventsScheduledWorkflowsService({
       logger: loggerMock.create(),
       managementApi: managementApi as never,
-      getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
+      getManagedWorkflowsClient: vi.fn().mockResolvedValue(managedWorkflowsClient),
     });
 
     await service.ensureWorkflow({

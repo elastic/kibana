@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, renderHook, waitFor } from '@testing-library/react';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
@@ -27,16 +30,19 @@ const GENERIC_RUN_PROPS = {
   runWorkflow: undefined,
   showSuccessToast: true,
 };
-const mockUseCaseAttachmentWorkflowRun = jest.fn();
-const mockUseCaseAttachmentWorkflowRouting = jest.fn();
-jest.mock('@kbn/cases-plugin/public', () => ({
-  useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
-  useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
-}));
+const mockUseCaseAttachmentWorkflowRun = vi.fn();
+const mockUseCaseAttachmentWorkflowRouting = vi.fn();
+vi.mock('@kbn/cases-plugin/public', () => {
+      const mocked = {
+      useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
+      useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockMutate = jest.fn();
-const mockUseRunWorkflow = jest.fn(() => ({ mutate: mockMutate }));
-const mockUseWorkflowsCapabilities = jest.fn(() => ({
+const mockMutate = vi.fn();
+const mockUseRunWorkflow = vi.fn(() => ({ mutate: mockMutate }));
+const mockUseWorkflowsCapabilities = vi.fn(() => ({
   canCreateWorkflow: true,
   canReadWorkflow: true,
   canReadManagedWorkflow: true,
@@ -46,59 +52,65 @@ const mockUseWorkflowsCapabilities = jest.fn(() => ({
   canReadWorkflowExecution: true,
   canCancelWorkflowExecution: true,
 }));
-const mockUseWorkflowsUIEnabledSetting = jest.fn(() => true);
-const mockUseWorkflows = jest.fn((_params: unknown) => ({ data: { results: [] } }));
+const mockUseWorkflowsUIEnabledSetting = vi.fn(() => true);
+const mockUseWorkflows = vi.fn((_params: unknown) => ({ data: { results: [] } }));
 const mockRunWorkflowPanelProps: RunWorkflowPanelProps[] = [];
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const actual = (await vi.importActual('@kbn/kibana-react-plugin/public'));
   return {
     ...actual,
-    useKibana: jest.fn(),
+    useKibana: vi.fn(),
   };
 });
-jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('@kbn/workflows-ui', () => ({
-  useRunWorkflow: () => mockUseRunWorkflow(),
-  useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
-  useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
-  useWorkflows: (params: unknown) => mockUseWorkflows(params),
-  WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
-    <div data-test-subj="workflow-selector-mock">
-      {'Workflow selector'}
-      <button
-        data-test-subj="select-workflow-option"
-        type="button"
-        onClick={() => onWorkflowChange('test-workflow-id')}
-      >
-        {'Select workflow'}
-      </button>
-    </div>
-  ),
-  // RunWorkflowPanel now lives in @kbn/workflows-ui.
-  // Its full behavior is tested in src/platform/packages/shared/kbn-workflows-ui.
-  // This stub captures caller-owned inputs, visibility, filtering, and sorting.
-  RunWorkflowPanel: (props: RunWorkflowPanelProps) => {
-    mockRunWorkflowPanelProps.push(props);
-    return (
-      <div>
-        <div data-test-subj="workflow-selector-mock">{'Workflow selector stub'}</div>
-        <button data-test-subj="run-workflow-execute-button" type="button">
-          {'Run workflow'}
-        </button>
-      </div>
-    );
-  },
-}));
-jest.mock('../../../../common/components/loader', () => ({
-  Loader: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="loader">{children}</div>
-  ),
-}));
+vi.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useRunWorkflow: () => mockUseRunWorkflow(),
+      useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
+      useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
+      useWorkflows: (params: unknown) => mockUseWorkflows(params),
+      WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
+        <div data-test-subj="workflow-selector-mock">
+          {'Workflow selector'}
+          <button
+            data-test-subj="select-workflow-option"
+            type="button"
+            onClick={() => onWorkflowChange('test-workflow-id')}
+          >
+            {'Select workflow'}
+          </button>
+        </div>
+      ),
+      // RunWorkflowPanel now lives in @kbn/workflows-ui.
+      // Its full behavior is tested in src/platform/packages/shared/kbn-workflows-ui.
+      // This stub captures caller-owned inputs, visibility, filtering, and sorting.
+      RunWorkflowPanel: (props: RunWorkflowPanelProps) => {
+        mockRunWorkflowPanelProps.push(props);
+        return (
+          <div>
+            <div data-test-subj="workflow-selector-mock">{'Workflow selector stub'}</div>
+            <button data-test-subj="run-workflow-execute-button" type="button">
+              {'Run workflow'}
+            </button>
+          </div>
+        );
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../../common/components/loader', () => {
+      const mocked = {
+      Loader: ({ children }: { children: React.ReactNode }) => (
+        <div data-test-subj="loader">{children}</div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const useKibanaMock = jest.requireMock('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
+const useKibanaMock = (await vi.importMock('@kbn/kibana-react-plugin/public')).useKibana as Mock;
 
 const defaultProps: UseRunAlertWorkflowPanelProps = {
-  closePopover: jest.fn(),
+  closePopover: vi.fn(),
   ecsRowData: {
     _id: 'alert-123',
     _index: 'alerts-index',
@@ -129,7 +141,7 @@ const createMockWorkflow = (
 
 const createMockKibana = (
   overrides: {
-    application?: { navigateToApp: jest.Mock };
+    application?: { navigateToApp: Mock };
     rendering?: object;
   } = {}
 ) => {
@@ -183,12 +195,12 @@ describe('useRunAlertWorkflowPanel', () => {
       canCancelWorkflowExecution: true,
     });
     mockUseWorkflowsUIEnabledSetting.mockReturnValue(true);
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
+    (useAlertsPrivileges as Mock).mockReturnValue({ hasIndexWrite: true });
     useKibanaMock.mockReturnValue(createMockKibana());
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('hook return values', () => {
@@ -243,7 +255,7 @@ describe('useRunAlertWorkflowPanel', () => {
     });
 
     it('returns empty lists when user does not have index write', () => {
-      (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
+      (useAlertsPrivileges as Mock).mockReturnValue({ hasIndexWrite: false });
 
       const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
         wrapper: TestProviders,
@@ -350,7 +362,7 @@ describe('useRunAlertWorkflowPanel', () => {
     });
 
     it('passes the Cases executor as runWorkflow when inside a case', async () => {
-      const mockExecutor = jest.fn();
+      const mockExecutor = vi.fn();
       mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
       mockUseCaseAttachmentWorkflowRun.mockReturnValue({
         runWorkflow: mockExecutor,
@@ -394,7 +406,7 @@ describe('useRunAlertWorkflowPanel', () => {
             { _id: 'alert-1', _index: '.alerts' },
             { _id: 'alert-2', _index: '.alerts' },
           ]}
-          onClose={jest.fn()}
+          onClose={vi.fn()}
         />,
         { wrapper: TestProviders }
       );

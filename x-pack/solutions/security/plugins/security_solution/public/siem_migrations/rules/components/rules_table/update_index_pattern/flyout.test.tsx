@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -40,7 +42,7 @@ const Component = ({
 
 describe('IndexPatternPlaceholderFormWrapper', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the flyout with the correct title', () => {

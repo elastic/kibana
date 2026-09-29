@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -90,7 +92,7 @@ describe('resolve_index route', () => {
   it('handler calls /_resolve/index with the given request', async () => {
     const mockClient = {
       indices: {
-        resolveIndex: jest.fn().mockResolvedValue(mockResponseIndices),
+        resolveIndex: vi.fn().mockResolvedValue(mockResponseIndices),
       },
     };
     const mockContext = {
@@ -125,7 +127,7 @@ describe('resolve_index route', () => {
   it('should return 200 for a search for indices with wildcard', async () => {
     const mockClient = {
       indices: {
-        resolveIndex: jest.fn().mockResolvedValue(mockResponseEmpty),
+        resolveIndex: vi.fn().mockResolvedValue(mockResponseEmpty),
       },
     };
     const mockContext = {
@@ -160,7 +162,7 @@ describe('resolve_index route', () => {
   it('returns 404 when hitting a 403 from Elasticsearch', async () => {
     const mockClient = {
       indices: {
-        resolveIndex: jest.fn().mockRejectedValue(mockError403),
+        resolveIndex: vi.fn().mockRejectedValue(mockError403),
       },
     };
     const mockContext = {
@@ -202,7 +204,7 @@ describe('resolve_index route', () => {
   it('returns 404 when hitting a 404 from Elasticsearch', async () => {
     const mockClient = {
       indices: {
-        resolveIndex: jest.fn().mockRejectedValue(mockError404),
+        resolveIndex: vi.fn().mockRejectedValue(mockError404),
       },
     };
     const mockContext = {

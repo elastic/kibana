@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import type { MemoryHistory } from 'history';
@@ -34,7 +37,7 @@ describe('APIKeysGridPage', () => {
   // We are spying on the console.error to avoid react to throw error
   // in our test "displays error when fetching API keys fails"
   // since we are using EuiErrorBoundary and react will console.error any errors
-  const consoleWarnMock = jest.spyOn(console, 'error').mockImplementation();
+  const consoleWarnMock = vi.spyOn(console, 'error').mockImplementation();
 
   let coreStart: ReturnType<typeof coreMock.createStart>;
   const { authc } = securityMock.createSetup();
@@ -427,7 +430,7 @@ describe('APIKeysGridPage', () => {
       coreStart.http.get.mockResolvedValue([]);
 
       // Intercept the create call; pass everything else through to the query mock from beforeEach
-      (coreStart.http.post as jest.Mock).mockImplementation(async (url: string) => {
+      (coreStart.http.post as Mock).mockImplementation(async (url: string) => {
         if (url === '/internal/security/api_key') {
           return { id: 'new-id', name: 'my-new-key', api_key: 'test-key', encoded: 'dGVzdA==' };
         }

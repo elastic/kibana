@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -17,64 +19,88 @@ import {
   useOsqueryPageHeaderTitle,
 } from '../../../components/osquery_page_header_context';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ packId: 'test-pack-id' }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      ...require('react-router-dom'),
+      useParams: () => ({ packId: 'test-pack-id' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseKibana = jest.fn();
-jest.mock('../../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../../common/lib/kibana'),
-  useRouterNavigate: (path: string) => ({ onClick: jest.fn(), href: path }),
-  useKibana: () => mockUseKibana(),
-}));
+const mockUseKibana = vi.fn();
+vi.mock('../../../common/lib/kibana', async () => {
+      const mocked = {
+      ...(await vi.importActual('../../../common/lib/kibana')),
+      useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
+      useKibana: () => mockUseKibana(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../common/hooks/use_breadcrumbs', () => ({
-  useBreadcrumbs: jest.fn(),
-}));
+vi.mock('../../../common/hooks/use_breadcrumbs', () => {
+      const mocked = {
+      useBreadcrumbs: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let capturedOnDirtyStateChange: ((isDirty: boolean) => void) | undefined;
 let capturedIsReadOnly: boolean | undefined;
 let capturedIsPrebuilt: boolean | undefined;
 
-jest.mock('../../../packs/form', () => ({
-  PackForm: ({
-    onDirtyStateChange,
-    isReadOnly,
-    isPrebuilt,
-  }: {
-    onDirtyStateChange?: (isDirty: boolean) => void;
-    isReadOnly?: boolean;
-    isPrebuilt?: boolean;
-  }) => {
-    capturedOnDirtyStateChange = onDirtyStateChange;
-    capturedIsReadOnly = isReadOnly;
-    capturedIsPrebuilt = isPrebuilt;
+vi.mock('../../../packs/form', () => {
+      const mocked = {
+      PackForm: ({
+        onDirtyStateChange,
+        isReadOnly,
+        isPrebuilt,
+      }: {
+        onDirtyStateChange?: (isDirty: boolean) => void;
+        isReadOnly?: boolean;
+        isPrebuilt?: boolean;
+      }) => {
+        capturedOnDirtyStateChange = onDirtyStateChange;
+        capturedIsReadOnly = isReadOnly;
+        capturedIsPrebuilt = isPrebuilt;
 
-    return <div data-testid="pack-form">Mock PackForm</div>;
-  },
-}));
+        return <div data-testid="pack-form">Mock PackForm</div>;
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUsePack = jest.fn();
-jest.mock('../../../packs/use_pack', () => ({
-  usePack: (args: unknown) => mockUsePack(args),
-}));
+const mockUsePack = vi.fn();
+vi.mock('../../../packs/use_pack', () => {
+      const mocked = {
+      usePack: (args: unknown) => mockUsePack(args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockDeleteMutateAsync = jest.fn().mockResolvedValue(undefined);
-const mockUseDeletePack = jest.fn();
-jest.mock('../../../packs/use_delete_pack', () => ({
-  useDeletePack: (args: unknown) => mockUseDeletePack(args),
-}));
+const mockDeleteMutateAsync = vi.fn().mockResolvedValue(undefined);
+const mockUseDeletePack = vi.fn();
+vi.mock('../../../packs/use_delete_pack', () => {
+      const mocked = {
+      useDeletePack: (args: unknown) => mockUseDeletePack(args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockCopyMutateAsync = jest.fn().mockResolvedValue(undefined);
-const mockUseCopyPack = jest.fn();
-jest.mock('../../../packs/use_copy_pack', () => ({
-  useCopyPack: (args: unknown) => mockUseCopyPack(args),
-}));
+const mockCopyMutateAsync = vi.fn().mockResolvedValue(undefined);
+const mockUseCopyPack = vi.fn();
+vi.mock('../../../packs/use_copy_pack', () => {
+      const mocked = {
+      useCopyPack: (args: unknown) => mockUseCopyPack(args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../components/layouts', () => ({
-  fullWidthFormContentCss: {},
-}));
+vi.mock('../../../components/layouts', () => {
+      const mocked = {
+      fullWidthFormContentCss: {},
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createTestQueryClient = () =>
   new QueryClient({
@@ -138,7 +164,7 @@ const setupDefaultMocks = () => {
 
 describe('EditPackPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     capturedOnDirtyStateChange = undefined;
     capturedIsReadOnly = undefined;
     capturedIsPrebuilt = undefined;

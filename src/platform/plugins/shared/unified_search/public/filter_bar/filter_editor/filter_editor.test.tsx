@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import type { UseEuiTheme, EuiThemeComputed } from '@elastic/eui';
 import type { TestBed } from '@kbn/test-jest-helpers';
@@ -19,8 +21,8 @@ import { dataViewMockList } from '../../dataview_picker/mocks/dataview';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const dataMock = dataPluginMock.createStartContract();
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
+vi.mock('@kbn/code-editor', async () => {
+  const original = (await vi.importActual('@kbn/code-editor'));
 
   return {
     ...original,
@@ -54,8 +56,8 @@ describe('<FilterEditor />', () => {
           } as any,
         },
         indexPatterns: [],
-        onCancel: jest.fn(),
-        onSubmit: jest.fn(),
+        onCancel: vi.fn(),
+        onSubmit: vi.fn(),
         docLinks: coreMock.createStart().docLinks,
         dataViews: dataMock.dataViews,
       };
@@ -86,7 +88,7 @@ describe('<FilterEditor />', () => {
   });
   describe('submitting query dsl with no index patterns', () => {
     it('should create filter when no index patterns are available', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       const defaultProps: Omit<FilterEditorProps, 'intl'> = {
         theme: {
           euiTheme: {} as unknown as EuiThemeComputed<{}>,
@@ -103,7 +105,7 @@ describe('<FilterEditor />', () => {
           },
         },
         indexPatterns: [],
-        onCancel: jest.fn(),
+        onCancel: vi.fn(),
         onSubmit,
         docLinks: coreMock.createStart().docLinks,
         dataViews: dataMock.dataViews,
@@ -133,7 +135,7 @@ describe('<FilterEditor />', () => {
     let testBed: TestBed;
 
     beforeEach(async () => {
-      dataMock.dataViews.get = jest.fn().mockReturnValue(Promise.resolve(dataViewMockList[1]));
+      dataMock.dataViews.get = vi.fn().mockReturnValue(Promise.resolve(dataViewMockList[1]));
       const defaultProps: Omit<FilterEditorProps, 'intl'> = {
         theme: {
           euiTheme: {} as unknown as EuiThemeComputed<{}>,
@@ -148,8 +150,8 @@ describe('<FilterEditor />', () => {
           } as any,
         },
         indexPatterns: [dataViewMockList[0]],
-        onCancel: jest.fn(),
-        onSubmit: jest.fn(),
+        onCancel: vi.fn(),
+        onSubmit: vi.fn(),
         docLinks: coreMock.createStart().docLinks,
         dataViews: dataMock.dataViews,
       };
@@ -169,7 +171,7 @@ describe('<FilterEditor />', () => {
     let testBed: TestBed;
 
     beforeEach(async () => {
-      dataMock.dataViews.get = jest.fn().mockReturnValue(Promise.reject());
+      dataMock.dataViews.get = vi.fn().mockReturnValue(Promise.reject());
       const defaultProps: Omit<FilterEditorProps, 'intl'> = {
         theme: {
           euiTheme: {} as unknown as EuiThemeComputed<{}>,
@@ -184,8 +186,8 @@ describe('<FilterEditor />', () => {
           } as any,
         },
         indexPatterns: [dataViewMockList[0]],
-        onCancel: jest.fn(),
-        onSubmit: jest.fn(),
+        onCancel: vi.fn(),
+        onSubmit: vi.fn(),
         docLinks: coreMock.createStart().docLinks,
         dataViews: dataMock.dataViews,
       };

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -13,70 +15,97 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 import { AgentTools } from './agent_tools';
 
-jest.mock('react-router-dom', () => ({
-  useParams: () => ({ agentId: 'agent-1' }),
-}));
+vi.mock('react-router-dom', () => {
+      const mocked = {
+      useParams: () => ({ agentId: 'agent-1' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_navigation', () => ({
-  useNavigation: () => ({ createAgentBuilderUrl: () => '#' }),
-}));
+vi.mock('../../../hooks/use_navigation', () => {
+      const mocked = {
+      useNavigation: () => ({ createAgentBuilderUrl: () => '#' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/use_flyout_state');
+vi.mock('../../../hooks/use_flyout_state');
 
-jest.mock('../../../hooks/use_query_state');
+vi.mock('../../../hooks/use_query_state');
 
-jest.mock('../common/page_wrapper', () => ({
-  PageWrapper: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+vi.mock('../common/page_wrapper', () => {
+      const mocked = {
+      PageWrapper: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common/styles', () => ({
-  useListDetailPageStyles: () => ({
-    loadingSpinner: {},
-    header: {},
-    body: {},
-    searchColumn: {},
-    searchInputWrapper: {},
-    scrollableList: {},
-    detailPanelWrapper: {},
-    noSelectionPlaceholder: {},
-  }),
-}));
+vi.mock('../common/styles', () => {
+      const mocked = {
+      useListDetailPageStyles: () => ({
+        loadingSpinner: {},
+        header: {},
+        body: {},
+        searchColumn: {},
+        searchInputWrapper: {},
+        scrollableList: {},
+        detailPanelWrapper: {},
+        noSelectionPlaceholder: {},
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./tool_library_panel', () => ({
-  ToolLibraryPanel: () => <div data-test-subj="toolLibraryPanel" />,
-}));
+vi.mock('./tool_library_panel', () => {
+      const mocked = {
+      ToolLibraryPanel: () => <div data-test-subj="toolLibraryPanel" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./tool_create_flyout', () => ({
-  ToolCreateFlyout: ({ onToolCreated }: { onToolCreated?: (tool: { id: string }) => void }) => (
-    <div data-test-subj="toolCreateFlyout">
-      <button onClick={() => onToolCreated?.({ id: 'new-tool' })}>Simulate tool created</button>
-    </div>
-  ),
-}));
+vi.mock('./tool_create_flyout', () => {
+      const mocked = {
+      ToolCreateFlyout: ({ onToolCreated }: { onToolCreated?: (tool: { id: string }) => void }) => (
+        <div data-test-subj="toolCreateFlyout">
+          <button onClick={() => onToolCreated?.({ id: 'new-tool' })}>Simulate tool created</button>
+        </div>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./tool_detail_panel', () => ({
-  ToolDetailPanel: () => <div data-test-subj="toolDetailPanel" />,
-}));
+vi.mock('./tool_detail_panel', () => {
+      const mocked = {
+      ToolDetailPanel: () => <div data-test-subj="toolDetailPanel" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./tools_customize_empty_state', () => ({
-  ToolsCustomizeEmptyState: () => <div data-test-subj="toolsCustomizeEmptyState" />,
-}));
+vi.mock('./tools_customize_empty_state', () => {
+      const mocked = {
+      ToolsCustomizeEmptyState: () => <div data-test-subj="toolsCustomizeEmptyState" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../common/active_item_row', () => ({
-  ActiveItemRow: () => <div data-test-subj="activeItemRow" />,
-}));
+vi.mock('../common/active_item_row', () => {
+      const mocked = {
+      ActiveItemRow: () => <div data-test-subj="activeItemRow" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../hooks/agents/use_agent_by_id');
-jest.mock('../../../hooks/agents/use_can_update_agent');
-jest.mock('../../../hooks/tools/use_tools');
-jest.mock('./use_tools_mutation');
+vi.mock('../../../hooks/agents/use_agent_by_id');
+vi.mock('../../../hooks/agents/use_can_update_agent');
+vi.mock('../../../hooks/tools/use_tools');
+vi.mock('./use_tools_mutation');
 
-const { useAgentBuilderAgentById } = jest.requireMock('../../../hooks/agents/use_agent_by_id');
-const { useCanUpdateAgent } = jest.requireMock('../../../hooks/agents/use_can_update_agent');
-const { useToolsService } = jest.requireMock('../../../hooks/tools/use_tools');
-const { useToolsMutation } = jest.requireMock('./use_tools_mutation');
-const { useQueryState } = jest.requireMock('../../../hooks/use_query_state');
-const { useFlyoutState } = jest.requireMock('../../../hooks/use_flyout_state');
+const { useAgentBuilderAgentById } = (await vi.importMock('../../../hooks/agents/use_agent_by_id'));
+const { useCanUpdateAgent } = (await vi.importMock('../../../hooks/agents/use_can_update_agent'));
+const { useToolsService } = (await vi.importMock('../../../hooks/tools/use_tools'));
+const { useToolsMutation } = (await vi.importMock('./use_tools_mutation'));
+const { useQueryState } = (await vi.importMock('../../../hooks/use_query_state'));
+const { useFlyoutState } = (await vi.importMock('../../../hooks/use_flyout_state'));
 
 const renderComponent = () =>
   render(
@@ -89,14 +118,14 @@ const renderComponent = () =>
 
 describe('AgentTools', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    useQueryState.mockReturnValue([undefined, jest.fn()]);
+    useQueryState.mockReturnValue([undefined, vi.fn()]);
 
     useFlyoutState.mockReturnValue({
       isOpen: false,
-      openFlyout: jest.fn(),
-      closeFlyout: jest.fn(),
+      openFlyout: vi.fn(),
+      closeFlyout: vi.fn(),
     });
 
     useAgentBuilderAgentById.mockReturnValue({
@@ -117,8 +146,8 @@ describe('AgentTools', () => {
     });
 
     useToolsMutation.mockReturnValue({
-      handleAddTool: jest.fn(),
-      handleRemoveTool: jest.fn(),
+      handleAddTool: vi.fn(),
+      handleRemoveTool: vi.fn(),
     });
   });
 
@@ -138,8 +167,8 @@ describe('AgentTools', () => {
   });
 
   it('opens library flyout when "Import from tool library" is clicked', async () => {
-    const openFlyout = jest.fn();
-    useFlyoutState.mockReturnValue({ isOpen: false, openFlyout, closeFlyout: jest.fn() });
+    const openFlyout = vi.fn();
+    useFlyoutState.mockReturnValue({ isOpen: false, openFlyout, closeFlyout: vi.fn() });
 
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     renderComponent();
@@ -166,11 +195,11 @@ describe('AgentTools', () => {
   });
 
   it('selects the newly created tool immediately, without waiting for the attach mutation', async () => {
-    const setSelectedToolId = jest.fn();
+    const setSelectedToolId = vi.fn();
     useQueryState.mockReturnValue([undefined, setSelectedToolId]);
 
-    const handleAddTool = jest.fn();
-    useToolsMutation.mockReturnValue({ handleAddTool, handleRemoveTool: jest.fn() });
+    const handleAddTool = vi.fn();
+    useToolsMutation.mockReturnValue({ handleAddTool, handleRemoveTool: vi.fn() });
 
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     renderComponent();

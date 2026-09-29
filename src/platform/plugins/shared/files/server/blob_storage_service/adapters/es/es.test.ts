@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Readable } from 'stream';
 import { encode } from '@kbn/cbor';
 import { promisify } from 'util';
@@ -54,12 +56,12 @@ describe('ElasticsearchBlobStorageClient', () => {
     logger = loggingSystemMock.createLogger();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('limits max concurrent uploads', async () => {
     const blobStoreClient = createBlobStoreClient();
-    const uploadAcquireSpy = jest.spyOn(uploadSemaphore, 'acquire');
+    const uploadAcquireSpy = vi.spyOn(uploadSemaphore, 'acquire');
     esClient.index.mockImplementation(() => {
       return new Promise((res, rej) => setTimeout(() => rej('failed'), 100));
     });
@@ -83,7 +85,7 @@ describe('ElasticsearchBlobStorageClient', () => {
     const index = 'someplace';
 
     const blobStoreClient = createBlobStoreClient(index);
-    const downloadAcquireSpy = jest.spyOn(downloadSemaphore, 'acquire');
+    const downloadAcquireSpy = vi.spyOn(downloadSemaphore, 'acquire');
 
     const downloadsToQueueCount = 4;
     const documentsChunkCount = 2;

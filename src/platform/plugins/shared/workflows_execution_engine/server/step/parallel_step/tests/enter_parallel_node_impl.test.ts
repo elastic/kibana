@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import {
   DEFAULT_PARALLEL_MAX_CONCURRENCY,
   DEFAULT_PARALLEL_MAX_FAN_OUT,
@@ -24,12 +27,12 @@ import type { ParallelStepState } from '../types';
 
 describe('EnterParallelNodeImpl', () => {
   let node: EnterParallelNode;
-  let workflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
-  let stepRuntime: jest.Mocked<StepExecutionRuntime>;
-  let logger: jest.Mocked<IWorkflowEventLogger>;
-  let factory: jest.Mocked<StepExecutionRuntimeFactory>;
-  let nodesFactory: jest.Mocked<NodesFactory>;
-  let workflowGraph: jest.Mocked<WorkflowGraph>;
+  let workflowRuntime: Mocked<WorkflowExecutionRuntimeManager>;
+  let stepRuntime: Mocked<StepExecutionRuntime>;
+  let logger: Mocked<IWorkflowEventLogger>;
+  let factory: Mocked<StepExecutionRuntimeFactory>;
+  let nodesFactory: Mocked<NodesFactory>;
+  let workflowGraph: Mocked<WorkflowGraph>;
 
   // The state the parallel step "persists"; kept in a closure so the impl can
   // read it back across ticks like the real step state store.
@@ -70,62 +73,62 @@ describe('EnterParallelNodeImpl', () => {
     branchOutcome = () => ExecutionStatus.COMPLETED;
 
     workflowRuntime = {
-      navigateToNode: jest.fn(),
-      getCurrentNodeScope: jest.fn().mockReturnValue([]),
-      setScopeStack: jest.fn(),
-      setWorkflowError: jest.fn(),
-    } as unknown as jest.Mocked<WorkflowExecutionRuntimeManager>;
+      navigateToNode: vi.fn(),
+      getCurrentNodeScope: vi.fn().mockReturnValue([]),
+      setScopeStack: vi.fn(),
+      setWorkflowError: vi.fn(),
+    } as unknown as Mocked<WorkflowExecutionRuntimeManager>;
 
     stepRuntime = {
-      startStep: jest.fn(),
-      finishStep: jest.fn(),
-      failStep: jest.fn(),
-      setInput: jest.fn(),
-      enterWaitUntil: jest.fn(),
-      getCurrentStepState: jest.fn(() => persistedState),
-      setCurrentStepState: jest.fn((s: ParallelStepState) => {
+      startStep: vi.fn(),
+      finishStep: vi.fn(),
+      failStep: vi.fn(),
+      setInput: vi.fn(),
+      enterWaitUntil: vi.fn(),
+      getCurrentStepState: vi.fn(() => persistedState),
+      setCurrentStepState: vi.fn((s: ParallelStepState) => {
         persistedState = s;
       }),
-      rehydrateStepOutputs: jest.fn(async (ids: readonly string[]) => {
+      rehydrateStepOutputs: vi.fn(async (ids: readonly string[]) => {
         rehydratedIds.push(...ids);
       }),
-      releaseReadOutputPins: jest.fn(),
+      releaseReadOutputPins: vi.fn(),
       contextManager: {
-        evaluateExpressionInContext: jest.fn((x) => x),
-        renderValueAccordingToContext: jest.fn((x) => x),
+        evaluateExpressionInContext: vi.fn((x) => x),
+        renderValueAccordingToContext: vi.fn((x) => x),
       },
-    } as unknown as jest.Mocked<StepExecutionRuntime>;
+    } as unknown as Mocked<StepExecutionRuntime>;
 
     logger = {
-      logDebug: jest.fn(),
-      logError: jest.fn(),
-    } as unknown as jest.Mocked<IWorkflowEventLogger>;
+      logDebug: vi.fn(),
+      logError: vi.fn(),
+    } as unknown as Mocked<IWorkflowEventLogger>;
 
     // Each branch run returns a runtime whose stepExecution status reflects the
     // configured outcome for that branch index.
     factory = {
-      createStepExecutionRuntime: jest.fn(({ stackFrames }) => {
+      createStepExecutionRuntime: vi.fn(({ stackFrames }) => {
         const lastFrame = stackFrames[stackFrames.length - 1];
         const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
         const index = Number(scopeId ?? 0);
         return {
           abortController: new AbortController(),
-          contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          contextManager: { ensureContextReady: vi.fn(), releaseReadPins: vi.fn() },
           stepExecutionId: `exec_branch_${index}`,
           get stepExecution() {
             return { status: branchOutcome(index), state: {} };
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
-          timeoutStep: jest.fn(),
+          timeoutStep: vi.fn(),
         } as unknown as StepExecutionRuntime;
       }),
-    } as unknown as jest.Mocked<StepExecutionRuntimeFactory>;
+    } as unknown as Mocked<StepExecutionRuntimeFactory>;
 
     nodesFactory = {
-      create: jest.fn(
+      create: vi.fn(
         (branchRuntime: StepExecutionRuntime) =>
           ({
-            run: jest.fn(() => {
+            run: vi.fn(() => {
               const status = (branchRuntime as unknown as { stepExecution: { status: string } })
                 .stepExecution.status;
               // Record which branch index ran for concurrency assertions.
@@ -139,15 +142,15 @@ describe('EnterParallelNodeImpl', () => {
             }),
           } as unknown as NodeImplementation)
       ),
-    } as unknown as jest.Mocked<NodesFactory>;
+    } as unknown as Mocked<NodesFactory>;
 
     // Single-step branch body: the branch start node's only successor is the
     // parallel exit node, so each branch completes after one node runs.
     workflowGraph = {
-      getDirectSuccessors: jest.fn((nodeId: string) =>
+      getDirectSuccessors: vi.fn((nodeId: string) =>
         nodeId === 'branchStep' ? [{ id: 'exitParallel_fanOut' }] : []
       ),
-    } as unknown as jest.Mocked<WorkflowGraph>;
+    } as unknown as Mocked<WorkflowGraph>;
 
     node = makeNode();
   });
@@ -221,7 +224,7 @@ describe('EnterParallelNodeImpl', () => {
     // pass: the snapshotted per-branch keys must reflect the INIT resolution,
     // never the mutated one.
     node = makeNode({ foreach: '{{ steps.list.output }}' });
-    const evaluate = stepRuntime.contextManager.evaluateExpressionInContext as jest.Mock;
+    const evaluate = stepRuntime.contextManager.evaluateExpressionInContext as Mock;
     evaluate
       .mockReturnValueOnce(['a', 'b', 'c']) // init
       .mockReturnValue(['x', 'y', 'z']); // any later re-evaluation
@@ -256,28 +259,28 @@ describe('EnterParallelNodeImpl', () => {
   it('runs a multi-step (straight-line) branch body to completion in order', async () => {
     // Body: branchStep -> step2 -> exit. Track which nodes each branch runs.
     const ranNodes: string[] = [];
-    workflowGraph.getDirectSuccessors = jest.fn((nodeId: string) => {
+    workflowGraph.getDirectSuccessors = vi.fn((nodeId: string) => {
       if (nodeId === 'branchStep') return [{ id: 'step2' }] as never;
       if (nodeId === 'step2') return [{ id: 'exitParallel_fanOut' }] as never;
       return [] as never;
     });
-    factory.createStepExecutionRuntime = jest.fn(({ nodeId, stackFrames }) => {
+    factory.createStepExecutionRuntime = vi.fn(({ nodeId, stackFrames }) => {
       const lastFrame = stackFrames[stackFrames.length - 1];
       const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
       const index = Number(scopeId ?? 0);
       return {
-        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+        contextManager: { ensureContextReady: vi.fn(), releaseReadPins: vi.fn() },
         get stepExecution() {
           return { status: ExecutionStatus.COMPLETED, state: {} };
         },
         getCurrentStepResult: () => ({ output: { node: nodeId, branch: index }, error: undefined }),
-        timeoutStep: jest.fn(),
+        timeoutStep: vi.fn(),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
-    nodesFactory.create = jest.fn(
+    nodesFactory.create = vi.fn(
       (branchRuntime: StepExecutionRuntime) =>
         ({
-          run: jest.fn(() => {
+          run: vi.fn(() => {
             const result = (
               branchRuntime as unknown as {
                 getCurrentStepResult: () => { output: { node: string } };
@@ -312,10 +315,10 @@ describe('EnterParallelNodeImpl', () => {
     let inFlight = 0;
     let maxInFlight = 0;
     const gates: Array<() => void> = [];
-    nodesFactory.create = jest.fn(
+    nodesFactory.create = vi.fn(
       () =>
         ({
-          run: jest.fn(async () => {
+          run: vi.fn(async () => {
             inFlight += 1;
             maxInFlight = Math.max(maxInFlight, inFlight);
             await new Promise<void>((resolve) => gates.push(resolve));
@@ -336,17 +339,17 @@ describe('EnterParallelNodeImpl', () => {
   it('aborts and times out a blocking branch that exceeds its branch-timeout', async () => {
     node = makeNode({ 'branch-timeout': '20ms', mode: 'settled' });
     const aborts: boolean[] = [];
-    const timeoutStepCalls: jest.Mock[] = [];
-    factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+    const timeoutStepCalls: Mock[] = [];
+    factory.createStepExecutionRuntime = vi.fn(({ stackFrames }) => {
       const lastFrame = stackFrames[stackFrames.length - 1];
       const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
       const index = Number(scopeId ?? 0);
       const abortController = new AbortController();
-      const timeoutStep = jest.fn();
+      const timeoutStep = vi.fn();
       timeoutStepCalls.push(timeoutStep);
       return {
         abortController,
-        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+        contextManager: { ensureContextReady: vi.fn(), releaseReadPins: vi.fn() },
         get stepExecution() {
           // Never settles on its own; only the timeout abort ends it.
           return { status: ExecutionStatus.RUNNING, state: {} };
@@ -355,10 +358,10 @@ describe('EnterParallelNodeImpl', () => {
         timeoutStep,
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
-    nodesFactory.create = jest.fn(
+    nodesFactory.create = vi.fn(
       (branchRuntime: StepExecutionRuntime) =>
         ({
-          run: jest.fn(
+          run: vi.fn(
             () =>
               new Promise<void>((resolve) => {
                 // Resolve only when this branch's signal is aborted.
@@ -424,14 +427,14 @@ describe('EnterParallelNodeImpl', () => {
     // Stands in for the deferred state: an output reads as `{}` (mirroring the
     // real `getStepOutput(...) || {}`) until the impl has named its step
     // execution id to `rehydrateStepOutputs`.
-    factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+    factory.createStepExecutionRuntime = vi.fn(({ stackFrames }) => {
       const lastFrame = stackFrames[stackFrames.length - 1];
       const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
       const index = Number(scopeId ?? 0);
       const stepExecutionId = `exec_branch_${index}`;
       return {
         abortController: new AbortController(),
-        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+        contextManager: { ensureContextReady: vi.fn(), releaseReadPins: vi.fn() },
         stepExecutionId,
         get stepExecution() {
           return { status: branchOutcome(index), state: {} };
@@ -440,7 +443,7 @@ describe('EnterParallelNodeImpl', () => {
           output: rehydratedIds.includes(stepExecutionId) ? { branch: index } : {},
           error: undefined,
         }),
-        timeoutStep: jest.fn(),
+        timeoutStep: vi.fn(),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
 
@@ -509,14 +512,14 @@ describe('EnterParallelNodeImpl', () => {
       })),
     };
 
-    factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+    factory.createStepExecutionRuntime = vi.fn(({ stackFrames }) => {
       const lastFrame = stackFrames[stackFrames.length - 1];
       const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
       const index = Number(scopeId ?? 0);
       const stepExecutionId = `exec_branch_${index}`;
       return {
         abortController: new AbortController(),
-        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+        contextManager: { ensureContextReady: vi.fn(), releaseReadPins: vi.fn() },
         stepExecutionId,
         get stepExecution() {
           return { status: branchOutcome(index), state: {} };
@@ -525,7 +528,7 @@ describe('EnterParallelNodeImpl', () => {
           output: rehydratedIds.includes(stepExecutionId) ? { branch: index } : {},
           error: undefined,
         }),
-        timeoutStep: jest.fn(),
+        timeoutStep: vi.fn(),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
 
@@ -564,7 +567,7 @@ describe('EnterParallelNodeImpl', () => {
     const resident = new Set(['exec_branch_2']);
     let pinned = new Set<string>();
 
-    stepRuntime.rehydrateStepOutputs = jest.fn(async (ids: readonly string[]) => {
+    stepRuntime.rehydrateStepOutputs = vi.fn(async (ids: readonly string[]) => {
       pinned = new Set(ids);
       const toFetch = ids.filter((id) => evicted.has(id));
       // The await gap: the eviction cycle fires and takes anything resident and
@@ -581,18 +584,18 @@ describe('EnterParallelNodeImpl', () => {
         resident.add(id);
       }
     });
-    stepRuntime.releaseReadOutputPins = jest.fn(() => {
+    stepRuntime.releaseReadOutputPins = vi.fn(() => {
       pinned = new Set();
     });
 
-    factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+    factory.createStepExecutionRuntime = vi.fn(({ stackFrames }) => {
       const lastFrame = stackFrames[stackFrames.length - 1];
       const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
       const index = Number(scopeId ?? 0);
       const stepExecutionId = `exec_branch_${index}`;
       return {
         abortController: new AbortController(),
-        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+        contextManager: { ensureContextReady: vi.fn(), releaseReadPins: vi.fn() },
         stepExecutionId,
         get stepExecution() {
           return { status: branchOutcome(index), state: {} };
@@ -602,7 +605,7 @@ describe('EnterParallelNodeImpl', () => {
           output: resident.has(stepExecutionId) ? { branch: index } : {},
           error: undefined,
         }),
-        timeoutStep: jest.fn(),
+        timeoutStep: vi.fn(),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
 
@@ -706,11 +709,11 @@ describe('EnterParallelNodeImpl', () => {
 
     beforeEach(() => {
       nowMs = 1_000;
-      jest.spyOn(Date, 'now').mockImplementation(() => nowMs);
+      vi.spyOn(Date, 'now').mockImplementation(() => nowMs);
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('fails the step with timed_out branches when the overall timeout elapses', async () => {
@@ -780,16 +783,16 @@ describe('EnterParallelNodeImpl', () => {
         'branch-timeout': '3s',
       });
 
-      const timeoutStepCalls: jest.Mock[] = [];
-      factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+      const timeoutStepCalls: Mock[] = [];
+      factory.createStepExecutionRuntime = vi.fn(({ stackFrames }) => {
         const lastFrame = stackFrames[stackFrames.length - 1];
         const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
         const index = Number(scopeId ?? 0);
-        const timeoutStep = jest.fn();
+        const timeoutStep = vi.fn();
         timeoutStepCalls.push(timeoutStep);
         return {
           abortController: new AbortController(),
-          contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          contextManager: { ensureContextReady: vi.fn(), releaseReadPins: vi.fn() },
           get stepExecution() {
             // Parks in a durable wait and never settles on its own.
             return { status: ExecutionStatus.WAITING, state: {} };
@@ -827,16 +830,16 @@ describe('EnterParallelNodeImpl', () => {
       // onCancel must clean up branches parked in a wait so none leak in WAITING.
       node = makeNode({ foreach: JSON.stringify(['a', 'b']) });
 
-      const timeoutStepCalls: jest.Mock[] = [];
-      factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+      const timeoutStepCalls: Mock[] = [];
+      factory.createStepExecutionRuntime = vi.fn(({ stackFrames }) => {
         const lastFrame = stackFrames[stackFrames.length - 1];
         const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
         const index = Number(scopeId ?? 0);
-        const timeoutStep = jest.fn();
+        const timeoutStep = vi.fn();
         timeoutStepCalls.push(timeoutStep);
         return {
           abortController: new AbortController(),
-          contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          contextManager: { ensureContextReady: vi.fn(), releaseReadPins: vi.fn() },
           get stepExecution() {
             return { status: ExecutionStatus.WAITING, state: {} };
           },
@@ -867,27 +870,27 @@ describe('EnterParallelNodeImpl', () => {
       // fire or the child keeps running orphaned.
       node = makeNode({ foreach: JSON.stringify(['a', 'b']) });
 
-      factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+      factory.createStepExecutionRuntime = vi.fn(({ stackFrames }) => {
         const lastFrame = stackFrames[stackFrames.length - 1];
         const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
         const index = Number(scopeId ?? 0);
         return {
           abortController: new AbortController(),
-          contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          contextManager: { ensureContextReady: vi.fn(), releaseReadPins: vi.fn() },
           get stepExecution() {
             return { status: ExecutionStatus.WAITING, state: {} };
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
-          timeoutStep: jest.fn(),
+          timeoutStep: vi.fn(),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
 
       // Cancellable branch node (like workflow.execute): expose an onCancel spy.
-      const onCancel = jest.fn();
-      nodesFactory.create = jest.fn(
+      const onCancel = vi.fn();
+      nodesFactory.create = vi.fn(
         () =>
           ({
-            run: jest.fn(() => ExecutionStatus.WAITING),
+            run: vi.fn(() => ExecutionStatus.WAITING),
             onCancel,
           } as unknown as NodeImplementation)
       ) as unknown as typeof nodesFactory.create;
@@ -928,7 +931,7 @@ describe('EnterParallelNodeImpl', () => {
 
     beforeEach(() => {
       // Each branch is a single node whose only successor is the exit node.
-      workflowGraph.getDirectSuccessors = jest.fn(() => [
+      workflowGraph.getDirectSuccessors = vi.fn(() => [
         { id: 'exitParallel_fanOut' },
       ]) as unknown as typeof workflowGraph.getDirectSuccessors;
     });
@@ -966,15 +969,15 @@ describe('EnterParallelNodeImpl', () => {
         { name: 'geo', startNodeId: 'geo_step' },
       ]);
       const startedNodes: string[] = [];
-      factory.createStepExecutionRuntime = jest.fn(({ nodeId }) => {
+      factory.createStepExecutionRuntime = vi.fn(({ nodeId }) => {
         startedNodes.push(nodeId);
         return {
-          contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          contextManager: { ensureContextReady: vi.fn(), releaseReadPins: vi.fn() },
           get stepExecution() {
             return { status: ExecutionStatus.COMPLETED, state: {} };
           },
           getCurrentStepResult: () => ({ output: { node: nodeId }, error: undefined }),
-          timeoutStep: jest.fn(),
+          timeoutStep: vi.fn(),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
 
@@ -994,10 +997,10 @@ describe('EnterParallelNodeImpl', () => {
       let inFlight = 0;
       let maxInFlight = 0;
       const gates: Array<() => void> = [];
-      nodesFactory.create = jest.fn(
+      nodesFactory.create = vi.fn(
         () =>
           ({
-            run: jest.fn(async () => {
+            run: vi.fn(async () => {
               inFlight += 1;
               maxInFlight = Math.max(maxInFlight, inFlight);
               await new Promise<void>((resolve) => gates.push(resolve));
@@ -1014,10 +1017,10 @@ describe('EnterParallelNodeImpl', () => {
     });
 
     it('reports a failed static branch in the aggregate', async () => {
-      factory.createStepExecutionRuntime = jest.fn(({ nodeId }) => {
+      factory.createStepExecutionRuntime = vi.fn(({ nodeId }) => {
         const failed = nodeId === 'bad_step';
         return {
-          contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          contextManager: { ensureContextReady: vi.fn(), releaseReadPins: vi.fn() },
           get stepExecution() {
             return {
               status: failed ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED,
@@ -1028,7 +1031,7 @@ describe('EnterParallelNodeImpl', () => {
             output: failed ? undefined : { node: nodeId },
             error: failed ? { message: 'boom' } : undefined,
           }),
-          timeoutStep: jest.fn(),
+          timeoutStep: vi.fn(),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
 
@@ -1062,23 +1065,23 @@ describe('EnterParallelNodeImpl', () => {
     // and releaseReadPins called. We filter on ensureContextReady call count to
     // distinguish the two populations.
     interface CapturedRuntime {
-      contextManager: { ensureContextReady: jest.Mock; releaseReadPins: jest.Mock };
+      contextManager: { ensureContextReady: Mock; releaseReadPins: Mock };
     }
     let createdRuntimes: CapturedRuntime[];
 
     const makeCapturingFactory = (branchStatus: (index: number) => ExecutionStatus) => {
-      factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+      factory.createStepExecutionRuntime = vi.fn(({ stackFrames }) => {
         const lastFrame = stackFrames[stackFrames.length - 1];
         const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
         const index = Number(scopeId ?? 0);
         const runtime = {
           abortController: new AbortController(),
-          contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          contextManager: { ensureContextReady: vi.fn(), releaseReadPins: vi.fn() },
           get stepExecution() {
             return { status: branchStatus(index), state: {} };
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
-          timeoutStep: jest.fn(),
+          timeoutStep: vi.fn(),
         } as unknown as StepExecutionRuntime;
         createdRuntimes.push(runtime as unknown as CapturedRuntime);
         return runtime;
@@ -1134,10 +1137,10 @@ describe('EnterParallelNodeImpl', () => {
     it('calls releaseReadPins on each branch runtime when the per-branch timeout fires', async () => {
       node = makeNode({ 'branch-timeout': '20ms', mode: 'settled' });
       makeCapturingFactory(() => ExecutionStatus.RUNNING);
-      nodesFactory.create = jest.fn(
+      nodesFactory.create = vi.fn(
         (branchRuntime: StepExecutionRuntime) =>
           ({
-            run: jest.fn(
+            run: vi.fn(
               () =>
                 new Promise<void>((resolve) => {
                   branchRuntime.abortController.signal.addEventListener('abort', () => resolve());

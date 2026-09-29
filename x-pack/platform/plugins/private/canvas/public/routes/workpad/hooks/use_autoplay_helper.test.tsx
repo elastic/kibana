@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react';
@@ -14,7 +16,7 @@ import { WorkpadRoutingContext } from '../workpad_routing_context';
 
 const getMockedContext = (context: any) =>
   ({
-    nextPage: jest.fn(),
+    nextPage: vi.fn(),
     isFullscreen: false,
     autoplayInterval: 0,
     isAutoplayPaused: false,
@@ -27,7 +29,7 @@ const getContextWrapper: (context: WorkpadRoutingContextType) => FC<PropsWithChi
     <WorkpadRoutingContext.Provider value={context}>{children}</WorkpadRoutingContext.Provider>;
 
 describe('useAutoplayHelper', () => {
-  beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
+  beforeEach(() => vi.useFakeTimers({ legacyFakeTimers: true }));
   test('starts the timer when fullscreen and autoplay is on', () => {
     const context = getMockedContext({
       isFullscreen: true,
@@ -36,7 +38,7 @@ describe('useAutoplayHelper', () => {
 
     renderHook(useAutoplayHelper, { wrapper: getContextWrapper(context) });
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(context.nextPage).toHaveBeenCalled();
   });
@@ -49,13 +51,13 @@ describe('useAutoplayHelper', () => {
 
     const { rerender } = renderHook(useAutoplayHelper, { wrapper: getContextWrapper(context) });
 
-    jest.advanceTimersByTime(context.autoplayInterval - 1);
+    vi.advanceTimersByTime(context.autoplayInterval - 1);
 
     context.isAutoplayPaused = true;
 
     rerender();
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(context.nextPage).not.toHaveBeenCalled();
   });
@@ -69,7 +71,7 @@ describe('useAutoplayHelper', () => {
 
     const { rerender } = renderHook(useAutoplayHelper, { wrapper: getContextWrapper(context) });
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(context.nextPage).not.toHaveBeenCalled();
 
@@ -77,13 +79,13 @@ describe('useAutoplayHelper', () => {
 
     rerender();
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(context.nextPage).toHaveBeenCalled();
   });
 
   test('continues cycling to subsequent pages after each navigation', () => {
-    const firstNextPage = jest.fn();
+    const firstNextPage = vi.fn();
     const context = getMockedContext({
       isFullscreen: true,
       autoplayInterval: 1000,
@@ -93,23 +95,23 @@ describe('useAutoplayHelper', () => {
     const { rerender } = renderHook(useAutoplayHelper, { wrapper: getContextWrapper(context) });
 
     // First cycle fires
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     expect(firstNextPage).toHaveBeenCalledTimes(1);
 
     // Simulate navigation: pageNumber changes → nextPage is recreated with a new reference.
     // nextPage is in the effect deps, so the effect re-runs and schedules the next tick.
-    const secondNextPage = jest.fn();
+    const secondNextPage = vi.fn();
     context.nextPage = secondNextPage;
     rerender();
 
     // Second cycle fires — proves autoplay keeps going rather than stopping after one page
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     expect(secondNextPage).toHaveBeenCalledTimes(1);
     expect(firstNextPage).toHaveBeenCalledTimes(1); // only ever called once
   });
 
   test('calls updated nextPage when page count increases before the timer fires', () => {
-    const originalNextPage = jest.fn();
+    const originalNextPage = vi.fn();
     const context = getMockedContext({
       isFullscreen: true,
       autoplayInterval: 1000,
@@ -118,12 +120,12 @@ describe('useAutoplayHelper', () => {
 
     const { rerender } = renderHook(useAutoplayHelper, { wrapper: getContextWrapper(context) });
 
-    jest.advanceTimersByTime(600);
+    vi.advanceTimersByTime(600);
 
     // Simulate page addition: React re-renders with a new nextPage.
     // nextPage is in the effect deps, so the effect re-runs, cancelling the
     // in-progress timer and starting a fresh 1000 ms interval.
-    const updatedNextPage = jest.fn();
+    const updatedNextPage = vi.fn();
     context.nextPage = updatedNextPage;
     rerender();
 
@@ -131,17 +133,17 @@ describe('useAutoplayHelper', () => {
     expect(originalNextPage).not.toHaveBeenCalled();
 
     // 999 ms into the fresh interval — not yet fired
-    jest.advanceTimersByTime(999);
+    vi.advanceTimersByTime(999);
     expect(updatedNextPage).not.toHaveBeenCalled();
 
     // 1000 ms — fires with the updated nextPage, not the stale original
-    jest.advanceTimersByTime(1);
+    vi.advanceTimersByTime(1);
     expect(originalNextPage).not.toHaveBeenCalled();
     expect(updatedNextPage).toHaveBeenCalledTimes(1);
   });
 
   test('calls updated nextPage when page count decreases before the timer fires', () => {
-    const originalNextPage = jest.fn();
+    const originalNextPage = vi.fn();
     const context = getMockedContext({
       isFullscreen: true,
       autoplayInterval: 1000,
@@ -150,12 +152,12 @@ describe('useAutoplayHelper', () => {
 
     const { rerender } = renderHook(useAutoplayHelper, { wrapper: getContextWrapper(context) });
 
-    jest.advanceTimersByTime(600);
+    vi.advanceTimersByTime(600);
 
     // Simulate page removal: React re-renders with a new nextPage.
     // nextPage is in the effect deps, so the effect re-runs, cancelling the
     // in-progress timer and starting a fresh 1000 ms interval.
-    const updatedNextPage = jest.fn();
+    const updatedNextPage = vi.fn();
     context.nextPage = updatedNextPage;
     rerender();
 
@@ -163,11 +165,11 @@ describe('useAutoplayHelper', () => {
     expect(originalNextPage).not.toHaveBeenCalled();
 
     // 999 ms into the fresh interval — not yet fired
-    jest.advanceTimersByTime(999);
+    vi.advanceTimersByTime(999);
     expect(updatedNextPage).not.toHaveBeenCalled();
 
     // 1000 ms — fires with the updated nextPage, not the stale original
-    jest.advanceTimersByTime(1);
+    vi.advanceTimersByTime(1);
     expect(originalNextPage).not.toHaveBeenCalled();
     expect(updatedNextPage).toHaveBeenCalledTimes(1);
   });
@@ -181,11 +183,11 @@ describe('useAutoplayHelper', () => {
     const { rerender } = renderHook(useAutoplayHelper, { wrapper: getContextWrapper(context) });
 
     // Simulate page added: nextPage is recreated
-    const updatedNextPage = jest.fn();
+    const updatedNextPage = vi.fn();
     context.nextPage = updatedNextPage;
     rerender();
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(updatedNextPage).not.toHaveBeenCalled();
   });
@@ -199,18 +201,18 @@ describe('useAutoplayHelper', () => {
     const { rerender } = renderHook(useAutoplayHelper, { wrapper: getContextWrapper(context) });
 
     // Simulate page added while not in fullscreen
-    const updatedNextPage = jest.fn();
+    const updatedNextPage = vi.fn();
     context.nextPage = updatedNextPage;
     rerender();
 
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(updatedNextPage).not.toHaveBeenCalled();
 
     // User enters fullscreen — timer should now start with the post-addition nextPage
     context.isFullscreen = true;
     rerender();
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     expect(updatedNextPage).toHaveBeenCalledTimes(1);
   });

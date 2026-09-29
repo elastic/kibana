@@ -5,21 +5,29 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useFetchRuleEventFields } from './use_fetch_rule_event_fields';
 
-const mockFetchRuleEventFields = jest.fn();
+const mockFetchRuleEventFields = vi.fn();
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: () => ({ fetchRuleEventFields: mockFetchRuleEventFields }),
-  CoreStart: (key: string) => key,
-}));
+vi.mock('@kbn/core-di-browser', () => {
+      const mocked = {
+      useService: () => ({ fetchRuleEventFields: mockFetchRuleEventFields }),
+      CoreStart: (key: string) => key,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/react-hooks', () => ({
-  useDebouncedValue: <T>(value: T) => value,
-}));
+vi.mock('@kbn/react-hooks', () => {
+      const mocked = {
+      useDebouncedValue: <T>(value: T) => value,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -31,7 +39,7 @@ const createWrapper = () => {
 
 describe('useFetchRuleEventFields', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetchRuleEventFields.mockResolvedValue([]);
   });
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -85,7 +87,7 @@ function renderProjectsView(cpsManager: ICPSManager) {
 }
 
 function createCpsManager(fetchResult: Promise<ProjectsData | null>) {
-  const cpsManager = cpsPluginMock.createStartContract().cpsManager as jest.Mocked<ICPSManager>;
+  const cpsManager = cpsPluginMock.createStartContract().cpsManager as Mocked<ICPSManager>;
   cpsManager.fetchProjects.mockReturnValue(fetchResult);
   return cpsManager;
 }

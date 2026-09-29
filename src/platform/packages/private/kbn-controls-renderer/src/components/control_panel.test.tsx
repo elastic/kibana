@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
@@ -20,29 +22,35 @@ import { ControlPanel } from './control_panel';
 
 // Stub the async embeddable renderer: the width/grow assertions read classes that
 // `ControlPanel` renders synchronously from props, independent of the renderer.
-jest.mock('@kbn/embeddable-plugin/public', () => ({
-  EmbeddableRenderer: () => null,
-}));
+vi.mock('@kbn/embeddable-plugin/public', () => {
+      const mocked = {
+      EmbeddableRenderer: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockServices = {
   services: {
     uiActions: {
-      getTriggerCompatibleActions: jest.fn().mockResolvedValue([
+      getTriggerCompatibleActions: vi.fn().mockResolvedValue([
         {
-          isCompatible: jest.fn().mockResolvedValue(true),
+          isCompatible: vi.fn().mockResolvedValue(true),
           id: 'testAction',
           MenuItem: () => <div>test1</div>,
         },
       ] as unknown as Action[]),
-      getFrequentlyChangingActionsForTrigger: jest.fn().mockResolvedValue([]),
-      getTrigger: jest.fn().mockResolvedValue({}),
+      getFrequentlyChangingActionsForTrigger: vi.fn().mockResolvedValue([]),
+      getTrigger: vi.fn().mockResolvedValue({}),
     },
   },
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn().mockImplementation(() => mockServices),
-}));
+vi.mock('@kbn/kibana-react-plugin/public', () => {
+      const mocked = {
+      useKibana: vi.fn().mockImplementation(() => mockServices),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Alias required so the jest.mock factory can reference useEffect without triggering
 // Babel's hoisting guard (only `mock`-prefixed names are allowed inside factories).
@@ -52,8 +60,8 @@ const mockUseEffect = React.useEffect;
 // so tests can simulate the control API becoming available after mount.
 let capturedOnApiAvailable: ((api: DefaultEmbeddableApi) => void) | undefined;
 
-jest.mock('@kbn/embeddable-plugin/public', () => {
-  const original = jest.requireActual('@kbn/embeddable-plugin/public');
+vi.mock('@kbn/embeddable-plugin/public', async () => {
+  const original = (await vi.importActual('@kbn/embeddable-plugin/public'));
   return {
     ...original,
     EmbeddableRenderer: ({ onApiAvailable, maybeId }: any) => {
@@ -66,15 +74,15 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
 });
 
 const parentApi = {
-  getSerializedStateForChild: jest.fn().mockReturnValue({ type: OPTIONS_LIST_CONTROL }),
+  getSerializedStateForChild: vi.fn().mockReturnValue({ type: OPTIONS_LIST_CONTROL }),
   viewMode$: new BehaviorSubject('view'),
   children$: new BehaviorSubject({}),
-  registerChildApi: jest.fn(),
+  registerChildApi: vi.fn(),
 } as unknown as ControlsRendererParentApi;
 
 describe('render', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('control width', () => {
@@ -88,7 +96,7 @@ describe('render', () => {
             order: 0,
           }}
           parentApi={parentApi}
-          setControlPanelRef={jest.fn()}
+          setControlPanelRef={vi.fn()}
         />
       );
       const controlFrame = controlPanel.getByTestId('control-frame');
@@ -107,7 +115,7 @@ describe('render', () => {
             grow: true,
           }}
           parentApi={parentApi}
-          setControlPanelRef={jest.fn()}
+          setControlPanelRef={vi.fn()}
         />
       );
       const controlFrame = controlPanel.getByTestId('control-frame');
@@ -141,13 +149,13 @@ const renderControlPanel = () =>
         order: 0,
       }}
       parentApi={parentApi}
-      setControlPanelRef={jest.fn()}
+      setControlPanelRef={vi.fn()}
     />
   );
 
 describe('cancelRequests on unmount', () => {
   test('calls cancelRequests when the control API supports it', async () => {
-    const cancelRequests = jest.fn();
+    const cancelRequests = vi.fn();
     const mockApi = {
       uuid: 'control1',
       type: OPTIONS_LIST_CONTROL,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -25,11 +27,11 @@ import { noopCellActionRenderer } from '../../../shared/components/cell_actions'
 
 const FIELD_NAME_ICON_TEST_ID = 'tableFieldNameIcon';
 
-const mockGet = jest.fn();
-const mockSet = jest.fn();
+const mockGet = vi.fn();
+const mockSet = vi.fn();
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana');
+vi.mock('../../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../../common/lib/kibana'));
   return {
     ...original,
     useKibana: () => ({
@@ -41,65 +43,89 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../../data_view_manager/hooks/use_browser_fields', () => ({
-  useBrowserFields: () => ({}),
-}));
+vi.mock('../../../../data_view_manager/hooks/use_browser_fields', () => {
+      const mocked = {
+      useBrowserFields: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
-  useDataView: () => ({ dataView: {}, status: 'ready' }),
-}));
+vi.mock('../../../../data_view_manager/hooks/use_data_view', () => {
+      const mocked = {
+      useDataView: () => ({ dataView: {}, status: 'ready' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => ({
-  useRuleWithFallback: () => ({ rule: undefined }),
-}));
+vi.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => {
+      const mocked = {
+      useRuleWithFallback: () => ({ rule: undefined }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/entity-store/public', () => ({
-  FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:enableEntityStoreV2',
-  useEntityStoreEuidApi: () => null,
-}));
+vi.mock('@kbn/entity-store/public', () => {
+      const mocked = {
+      FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:enableEntityStoreV2',
+      useEntityStoreEuidApi: () => null,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
-  useEntityFromStore: () => ({
-    entity: null,
-    entityRecord: null,
-    isLoading: false,
-    error: null,
-    refetch: jest.fn(),
-  }),
-}));
+vi.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => {
+      const mocked = {
+      useEntityFromStore: () => ({
+        entity: null,
+        entityRecord: null,
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../common/hooks/use_selector', () => ({
-  useDeepEqualSelector: jest.fn(() => []),
-}));
+vi.mock('../../../../common/hooks/use_selector', () => {
+      const mocked = {
+      useDeepEqualSelector: vi.fn(() => []),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../hooks/use_highlighted_fields', () => ({
-  useHighlightedFields: () => ({}),
-}));
+vi.mock('../hooks/use_highlighted_fields', () => {
+      const mocked = {
+      useHighlightedFields: () => ({}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils/table_tab_columns', () => ({
-  getTableTabColumns: () => {
-    const ReactLib = jest.requireActual('react');
-    return [
-      {
-        field: 'field',
-        name: 'Field',
-        render: (field: string) =>
-          ReactLib.createElement(
-            'span',
-            null,
-            ReactLib.createElement('span', { 'data-test-subj': FIELD_NAME_ICON_TEST_ID }),
-            field
-          ),
+vi.mock('../utils/table_tab_columns', () => {
+      const mocked = {
+      getTableTabColumns: () => {
+        const ReactLib = require('react');
+        return [
+          {
+            field: 'field',
+            name: 'Field',
+            render: (field: string) =>
+              ReactLib.createElement(
+                'span',
+                null,
+                ReactLib.createElement('span', { 'data-test-subj': FIELD_NAME_ICON_TEST_ID }),
+                field
+              ),
+          },
+          {
+            field: 'values',
+            name: 'Value',
+            render: (values: string[] | string) =>
+              ReactLib.createElement('span', null, Array.isArray(values) ? values.join(', ') : values),
+          },
+        ];
       },
-      {
-        field: 'values',
-        name: 'Value',
-        render: (values: string[] | string) =>
-          ReactLib.createElement('span', null, Array.isArray(values) ? values.join(', ') : values),
-      },
-    ];
-  },
-}));
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // An alert document so the "hide alert fields" setting is available. `fields` is populated (as it
 // is on real hits) because the table derives its rows from the ES `fields` via
@@ -119,7 +145,7 @@ const hit = buildDataTableRecord({
 
 describe('<TableTab />', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render table component', () => {

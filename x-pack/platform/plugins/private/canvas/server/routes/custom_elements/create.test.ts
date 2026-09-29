@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import sinon from 'sinon';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
@@ -26,9 +29,12 @@ const mockedUUID = '123abc';
 const now = new Date();
 const nowIso = now.toISOString();
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('123abc'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('123abc'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('POST custom element', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -87,7 +93,7 @@ describe('POST custom element', () => {
       body: {},
     });
 
-    (mockRouteContext.core.savedObjects.client.create as jest.Mock).mockImplementation(() => {
+    (mockRouteContext.core.savedObjects.client.create as Mock).mockImplementation(() => {
       throw SavedObjectsErrorHelpers.createBadRequestError('bad request');
     });
 

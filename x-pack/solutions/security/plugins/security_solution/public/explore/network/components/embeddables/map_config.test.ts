@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getDestinationLayer, getLayerList, getLineLayer, getSourceLayer, lmc } from './map_config';
 import {
   mockAPMIndexPatternIds,
@@ -22,10 +24,10 @@ import {
   mockEuiTheme,
 } from './__mocks__/mock';
 
-jest.mock('uuid', () => {
+vi.mock('uuid', () => {
   return {
-    v1: jest.fn(() => 'uuidv1()'),
-    v4: jest.fn(() => 'uuidv4()'),
+    v1: vi.fn(() => 'uuidv1()'),
+    v4: vi.fn(() => 'uuidv4()'),
   };
 });
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { createFieldFormatMock } from '../test_utils';
@@ -19,16 +21,16 @@ import { TruncateFormatEditor } from './truncate';
 const fieldType = 'string';
 
 const format = createFieldFormatMock({
-  getParamDefaults: jest.fn().mockImplementation(() => ({ fieldLength: 10 })),
-  convertToReact: jest.fn().mockImplementation((input: string) => input.substring(0, 10)),
+  getParamDefaults: vi.fn().mockImplementation(() => ({ fieldLength: 10 })),
+  convertToReact: vi.fn().mockImplementation((input: string) => input.substring(0, 10)),
 });
 
 const formatParams = {
   fieldLength: 5,
 };
 
-const onChange = jest.fn();
-const onError = jest.fn();
+const onChange = vi.fn();
+const onError = vi.fn();
 
 const renderTruncateFormatEditor = () =>
   renderWithI18n(

@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import path from 'path';
 import { readKeystore } from './read_keystore';
 
-jest.mock('.');
+vi.mock('.');
 import { Keystore } from '.';
 
 describe('cli/serve/read_keystore', () => {
@@ -19,7 +21,7 @@ describe('cli/serve/read_keystore', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('returns structured keystore data', async () => {

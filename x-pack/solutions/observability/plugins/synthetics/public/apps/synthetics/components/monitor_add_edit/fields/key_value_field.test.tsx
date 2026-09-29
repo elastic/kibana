@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
@@ -13,8 +15,8 @@ import type { Pair } from './key_value_field';
 import { KeyValuePairsField } from './key_value_field';
 
 describe('<KeyValuePairsField />', () => {
-  const onChange = jest.fn();
-  const onBlur = jest.fn();
+  const onChange = vi.fn();
+  const onBlur = vi.fn();
   const defaultDefaultValue = [['', '']] as Pair[];
   const WrappedComponent = ({
     defaultValue = defaultDefaultValue,
@@ -31,7 +33,7 @@ describe('<KeyValuePairsField />', () => {
   };
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('renders KeyValuePairsField', () => {

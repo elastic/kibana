@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiFieldText } from '@elastic/eui';
@@ -16,7 +18,7 @@ describe('ExceptionsFlyoutMeta', () => {
   it('it renders component', () => {
     const wrapper = mountWithIntl(
       <TestProviders>
-        <ExceptionsFlyoutMeta exceptionItemName={'Test name'} onChange={jest.fn()} />
+        <ExceptionsFlyoutMeta exceptionItemName={'Test name'} onChange={vi.fn()} />
       </TestProviders>
     );
 
@@ -27,7 +29,7 @@ describe('ExceptionsFlyoutMeta', () => {
   });
 
   it('it calls onChange on name change', () => {
-    const mockOnChange = jest.fn();
+    const mockOnChange = vi.fn();
     const wrapper = mountWithIntl(
       <TestProviders>
         <ExceptionsFlyoutMeta exceptionItemName={''} onChange={mockOnChange} />

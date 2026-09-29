@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
 import type { HttpError } from '../../../../../../../common/types/api';
@@ -27,7 +29,7 @@ describe('ModelSelectLogic', () => {
   const { mount: mountStartModelApiLogic } = new LogicMounter(StartModelApiLogic);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mountCreateModelApiLogic();
     mountStartModelApiLogic();
     mount();
@@ -37,7 +39,7 @@ describe('ModelSelectLogic', () => {
     describe('createModel', () => {
       it('creates the model', () => {
         const modelId = 'model_1';
-        jest.spyOn(ModelSelectLogic.actions, 'createModelMakeRequest');
+        vi.spyOn(ModelSelectLogic.actions, 'createModelMakeRequest');
 
         ModelSelectLogic.actions.createModel(modelId);
 
@@ -47,14 +49,14 @@ describe('ModelSelectLogic', () => {
 
     describe('createModelSuccess', () => {
       it('starts polling models', () => {
-        jest.spyOn(ModelSelectLogic.actions, 'startPollingModels');
+        vi.spyOn(ModelSelectLogic.actions, 'startPollingModels');
 
         ModelSelectLogic.actions.createModelSuccess(CREATE_MODEL_API_RESPONSE);
 
         expect(ModelSelectLogic.actions.startPollingModels).toHaveBeenCalled();
       });
       it('sets selected model as non-placeholder', () => {
-        jest.spyOn(ModelSelectLogic.actions, 'clearModelPlaceholderFlag');
+        vi.spyOn(ModelSelectLogic.actions, 'clearModelPlaceholderFlag');
 
         ModelSelectLogic.actions.createModelSuccess(CREATE_MODEL_API_RESPONSE);
 
@@ -67,7 +69,7 @@ describe('ModelSelectLogic', () => {
     describe('startModel', () => {
       it('makes start model request', () => {
         const modelId = 'model_1';
-        jest.spyOn(ModelSelectLogic.actions, 'startModelMakeRequest');
+        vi.spyOn(ModelSelectLogic.actions, 'startModelMakeRequest');
 
         ModelSelectLogic.actions.startModel(modelId);
 
@@ -77,7 +79,7 @@ describe('ModelSelectLogic', () => {
 
     describe('startModelSuccess', () => {
       it('starts polling models', () => {
-        jest.spyOn(ModelSelectLogic.actions, 'startPollingModels');
+        vi.spyOn(ModelSelectLogic.actions, 'startPollingModels');
 
         ModelSelectLogic.actions.startModelSuccess(CREATE_MODEL_API_RESPONSE);
 

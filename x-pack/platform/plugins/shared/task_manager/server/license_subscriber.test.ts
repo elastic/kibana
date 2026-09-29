@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LicenseSubscriber } from './license_subscriber';
 import { Subject } from 'rxjs';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -12,7 +14,7 @@ import type { ILicense } from '@kbn/licensing-types';
 
 describe('LicenseSubscriber', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('getIsSecurityEnabled', () => {

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { getConversationMetadataStepDefinition } from './get_conversation_metadata';
 import {
   createStepHandlerContext,
   createWorkflowStepConversationClientMock,
 } from '../../test_utils/workflow_steps';
 
-const experimentalEnabled = jest.fn().mockResolvedValue(true);
-const experimentalDisabled = jest.fn().mockResolvedValue(false);
-const getAgentRegistry = jest.fn().mockResolvedValue({ get: jest.fn() });
-const getExecutionService = jest.fn();
+const experimentalEnabled = vi.fn().mockResolvedValue(true);
+const experimentalDisabled = vi.fn().mockResolvedValue(false);
+const getAgentRegistry = vi.fn().mockResolvedValue({ get: vi.fn() });
+const getExecutionService = vi.fn();
 
 describe('getConversationMetadataStepDefinition', () => {
   it('creates expected step definition structure', () => {
@@ -33,7 +35,7 @@ describe('getConversationMetadataStepDefinition', () => {
 
   it('returns metadata from the conversation', async () => {
     const { get, getConversationClient } = createWorkflowStepConversationClientMock({
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         id: 'conv-1',
         template_id: 'investigation',
         metadata: { status: 'open', severity: 'high' },
@@ -63,7 +65,7 @@ describe('getConversationMetadataStepDefinition', () => {
 
   it('returns empty metadata when conversation has none', async () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock({
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         id: 'conv-1',
         template_id: undefined,
         metadata: undefined,
@@ -89,7 +91,7 @@ describe('getConversationMetadataStepDefinition', () => {
 
   it('returns an error when the conversation is not found', async () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock({
-      get: jest.fn().mockRejectedValue(new Error('not found')),
+      get: vi.fn().mockRejectedValue(new Error('not found')),
     });
 
     const definition = getConversationMetadataStepDefinition({

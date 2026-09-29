@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, act } from '@testing-library/react';
 import { MAX_CASES_PER_WORKFLOW_RUN } from '../../../../common/constants';
 import { basicCase } from '../../../containers/mock';
@@ -12,26 +14,32 @@ import type { CaseUI } from '../../../containers/types';
 import { useRunWorkflowAction } from './use_run_workflow_action';
 
 // Hoist mock state so factories can reference them
-const mockCanRunWorkflow = jest.fn<boolean, []>();
-const mockUseWorkflowsCapabilities = jest.fn();
-const mockUseWorkflowsUIEnabledSetting = jest.fn();
+const mockCanRunWorkflow = vi.fn<boolean, []>();
+const mockUseWorkflowsCapabilities = vi.fn();
+const mockUseWorkflowsUIEnabledSetting = vi.fn();
 
 // useRunCasesWorkflow delegates to useCanRunCaseWorkflow which calls
 // useWorkflowsCapabilities, useWorkflowsUIEnabledSetting, useCasesConfig,
 // and useCasesContext — all mocked below.
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../cases_context/use_cases_context');
-jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
-  useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
-}));
+vi.mock('../../../common/lib/kibana');
+vi.mock('../../cases_context/use_cases_context');
+vi.mock('@kbn/workflows-ui', () => {
+      const mocked = {
+      useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
+      useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
+    };
+      return { ...mocked, default: mocked };
+    });
 // Mock the executor to keep tests deterministic
-jest.mock('../../workflows/use_run_workflow_on_cases', () => ({
-  useRunWorkflowOnCases: jest.fn().mockReturnValue(jest.fn()),
-}));
+vi.mock('../../workflows/use_run_workflow_on_cases', () => {
+      const mocked = {
+      useRunWorkflowOnCases: vi.fn().mockReturnValue(vi.fn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useCasesContext } = jest.requireMock('../../cases_context/use_cases_context');
-const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+const { useCasesContext } = (await vi.importMock('../../cases_context/use_cases_context'));
+const { useCasesConfig } = (await vi.importMock('../../../common/lib/kibana'));
 
 const setupMocks = ({
   permissionsUpdate = true,
@@ -49,8 +57,8 @@ const setupMocks = ({
 };
 
 const renderAction = () => {
-  const onAction = jest.fn();
-  const onActionSuccess = jest.fn();
+  const onAction = vi.fn();
+  const onActionSuccess = vi.fn();
   const { result } = renderHook(() => useRunWorkflowAction({ onAction, onActionSuccess }));
   return { result, onAction, onActionSuccess };
 };
@@ -59,7 +67,7 @@ const makeCase = (id: string): CaseUI => ({ ...basicCase, id });
 
 describe('useRunWorkflowAction', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupMocks();
   });
 

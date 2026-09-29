@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -12,28 +15,40 @@ import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
 import { VEGA_LITE_SCHEMA } from './normalize_spec';
 import { createVegaGraph } from './graph';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
-  generateEsql: jest.fn(),
-  executeEsql: jest.fn(),
-}));
+vi.mock('@kbn/agent-builder-genai-utils', () => {
+      const mocked = {
+      generateEsql: vi.fn(),
+      executeEsql: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => ({
-  buildTimeRangeParams: jest.fn(() => undefined),
-}));
+vi.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => {
+      const mocked = {
+      buildTimeRangeParams: vi.fn(() => undefined),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../utils/extract_text_from_message', () => ({
-  extractTextFromMessage: (message: unknown) => String(message),
-}));
+vi.mock('../utils/extract_text_from_message', () => {
+      const mocked = {
+      extractTextFromMessage: (message: unknown) => String(message),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../shared/esql_instructions', () => ({
-  buildEsqlAdditionalInstructions: () => 'esql-instructions',
-}));
+vi.mock('../shared/esql_instructions', () => {
+      const mocked = {
+      buildEsqlAdditionalInstructions: () => 'esql-instructions',
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedGenerateEsql = jest.mocked(generateEsql);
-const mockedExecuteEsql = jest.mocked(executeEsql);
+const mockedGenerateEsql = vi.mocked(generateEsql);
+const mockedExecuteEsql = vi.mocked(executeEsql);
 
 const createMockLogger = (): Logger =>
-  ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() } as unknown as Logger);
+  ({ debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() } as unknown as Logger);
 
 const asCodeBlock = (spec: object) => '```json\n' + JSON.stringify(spec) + '\n```';
 
@@ -45,20 +60,20 @@ describe('createVegaGraph', () => {
   const esClient = { asCurrentUser: {} } as IScopedClusterClient;
 
   let logger: Logger;
-  let invoke: jest.Mock;
+  let invoke: Mock;
   /** Structured-output selector used by the reference-example selection node. */
-  let selectInvoke: jest.Mock;
-  let withStructuredOutput: jest.Mock;
+  let selectInvoke: Mock;
+  let withStructuredOutput: Mock;
   let modelProvider: ModelProvider;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     logger = createMockLogger();
-    invoke = jest.fn();
+    invoke = vi.fn();
     // Default: the model selects no reference example, so authoring proceeds
     // without a REFERENCE EXAMPLES block. Individual tests override this.
-    selectInvoke = jest.fn().mockResolvedValue({ exampleIds: [] });
-    withStructuredOutput = jest.fn(() => ({ invoke: selectInvoke }));
+    selectInvoke = vi.fn().mockResolvedValue({ exampleIds: [] });
+    withStructuredOutput = vi.fn(() => ({ invoke: selectInvoke }));
     // The default and low-effort models share a connector so the default-model
     // fallback in `generateVisualizationEsql` stays out of these tests.
     const scopedModel = {
@@ -66,8 +81,8 @@ describe('createVegaGraph', () => {
       chatModel: { invoke, withStructuredOutput },
     };
     modelProvider = {
-      getDefaultModel: jest.fn().mockResolvedValue(scopedModel),
-      selectModel: jest.fn().mockResolvedValue(scopedModel),
+      getDefaultModel: vi.fn().mockResolvedValue(scopedModel),
+      selectModel: vi.fn().mockResolvedValue(scopedModel),
     } as unknown as ModelProvider;
     mockedGenerateEsql.mockResolvedValue({ query: GENERATED_ESQL } as Awaited<
       ReturnType<typeof generateEsql>

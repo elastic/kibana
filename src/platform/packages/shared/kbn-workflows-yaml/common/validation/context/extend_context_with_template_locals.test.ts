@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { type Document, parseDocument } from 'yaml';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import { getShape } from '@kbn/workflows/common/utils/zod';
@@ -19,7 +22,7 @@ import {
   mapBlockScalarSourceToValueOffset,
 } from './extend_context_with_template_locals';
 
-jest.mock('../../yaml/get_scalar_value_at_offset');
+vi.mock('../../yaml/get_scalar_value_at_offset');
 
 describe('extendContextWithTemplateLocals', () => {
   it('extends schema with assign variable name', () => {
@@ -191,13 +194,11 @@ describe('extendContextWithTemplateLocals reuse', () => {
   });
 });
 
-describe('getContextSchemaWithTemplateLocals', () => {
-  const mockGetScalarValueAtOffset = getScalarValueAtOffset as jest.MockedFunction<
+describe('getContextSchemaWithTemplateLocals', async () => {
+  const mockGetScalarValueAtOffset = getScalarValueAtOffset as MockedFunction<
     typeof getScalarValueAtOffset
   >;
-  const realGetScalarValueAtOffset = jest.requireActual<
-    typeof import('../../yaml/get_scalar_value_at_offset')
-  >('../../yaml/get_scalar_value_at_offset').getScalarValueAtOffset;
+  const realGetScalarValueAtOffset = (await vi.importActual<typeof import('../../yaml/get_scalar_value_at_offset')>('../../yaml/get_scalar_value_at_offset')).getScalarValueAtOffset;
 
   it('returns base schema when scalar at offset is null', () => {
     mockGetScalarValueAtOffset.mockReturnValue(null);
@@ -509,7 +510,7 @@ describe('getContextSchemaWithTemplateLocals', () => {
       const yamlSource = `value: >-\n${templateLines.map((l) => `  ${l}`).join('\n')}\n`;
       const doc = parseDocument(yamlSource);
       const varYamlOffset = yamlSource.indexOf('{{ yy.name }}');
-      const toStringSpy = jest.spyOn(doc, 'toString').mockReturnValue('x');
+      const toStringSpy = vi.spyOn(doc, 'toString').mockReturnValue('x');
       const result = getContextSchemaWithTemplateLocals(
         doc,
         varYamlOffset,

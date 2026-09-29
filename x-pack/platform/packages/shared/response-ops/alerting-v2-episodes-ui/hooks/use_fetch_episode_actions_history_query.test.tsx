@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -13,9 +15,9 @@ import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeActionsHistoryQuery } from './use_fetch_episode_actions_history_query';
 
-jest.mock('../utils/run_esql_async_search');
+vi.mock('../utils/run_esql_async_search');
 
-const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
+const runEsqlAsyncSearchMock = vi.mocked(runEsqlAsyncSearch);
 
 const ACTIONS_COLUMNS = [
   { name: '_id', type: 'keyword' },
@@ -52,7 +54,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
   const groupHash = 'hash-1';
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {

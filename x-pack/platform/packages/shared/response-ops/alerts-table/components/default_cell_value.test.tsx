@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { ComponentProps } from 'react';
 import React from 'react';
 import {
@@ -23,11 +25,9 @@ import type { CellComponentProps } from '../types';
 import { mockRenderContext } from '../mocks/context.mock';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions');
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions');
 
-const { useGetRuleTypesPermissions } = jest.requireMock(
-  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
-);
+const { useGetRuleTypesPermissions } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'));
 
 const props = createPartialObjectMock<CellComponentProps>({
   ...mockRenderContext,

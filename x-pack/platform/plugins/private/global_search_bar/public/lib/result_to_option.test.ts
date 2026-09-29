@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
 import type { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { resultToOption } from './result_to_option';
@@ -126,7 +128,7 @@ describe('resultToOption', () => {
         },
       ];
     };
-    const logSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const logSpy = vi.spyOn(console, 'warn').mockImplementation();
 
     const option = resultToOption(input, [], getTagList);
     expect(logSpy).toHaveBeenCalledWith(

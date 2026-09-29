@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import { AnonymizedValuesAndCitationsTour } from '.';
 import React from 'react';
@@ -17,16 +20,19 @@ import {
 import type { TourState } from '../knowledge_base';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 
-jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
+vi.mock('react-use/lib/useLocalStorage', () => vi.fn());
 
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  throttle: jest.fn().mockImplementation((fn) => fn),
-}));
+vi.mock('lodash', () => {
+      const mocked = {
+      ...require('lodash'),
+      throttle: vi.fn().mockImplementation((fn) => fn),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockToursIsEnabled = jest.fn(() => true);
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const { notificationServiceMock } = jest.requireActual('@kbn/core/public/mocks');
+const mockToursIsEnabled = vi.fn(() => true);
+vi.mock('@kbn/kibana-react-plugin/public', async () => {
+  const { notificationServiceMock } = (await vi.importActual('@kbn/core/public/mocks'));
   return {
     useKibana: () => ({
       services: {
@@ -41,7 +47,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-const mockGetItem = jest.fn();
+const mockGetItem = vi.fn();
 Object.defineProperty(window, 'localStorage', {
   value: {
     getItem: (...args: string[]) => mockGetItem(...args),
@@ -59,12 +65,12 @@ const Wrapper = ({ children }: { children?: React.ReactNode }) => (
 
 describe('AnonymizedValuesAndCitationsTour', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   it('renders tour when there are content references', async () => {
-    (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
+    (useLocalStorage as Mock).mockReturnValue([false, vi.fn()]);
 
     mockGetItem.mockReturnValue(
       JSON.stringify({
@@ -77,7 +83,7 @@ describe('AnonymizedValuesAndCitationsTour', () => {
       wrapper: Wrapper,
     });
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     await waitFor(() => {
       expect(screen.getByTestId('anonymizedValuesAndCitationsTourStep')).toBeInTheDocument();
@@ -87,7 +93,7 @@ describe('AnonymizedValuesAndCitationsTour', () => {
   });
 
   it('renders tour when there are replacements', async () => {
-    (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
+    (useLocalStorage as Mock).mockReturnValue([false, vi.fn()]);
 
     mockGetItem.mockReturnValue(
       JSON.stringify({
@@ -100,7 +106,7 @@ describe('AnonymizedValuesAndCitationsTour', () => {
       wrapper: Wrapper,
     });
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     await waitFor(() => {
       expect(screen.getByTestId('anonymizedValuesAndCitationsTourStep')).toBeInTheDocument();
@@ -110,7 +116,7 @@ describe('AnonymizedValuesAndCitationsTour', () => {
   });
 
   it('does not render tour if it has already been shown', async () => {
-    (useLocalStorage as jest.Mock).mockReturnValue([true, jest.fn()]);
+    (useLocalStorage as Mock).mockReturnValue([true, vi.fn()]);
 
     mockGetItem.mockReturnValue(
       JSON.stringify({
@@ -123,7 +129,7 @@ describe('AnonymizedValuesAndCitationsTour', () => {
       wrapper: Wrapper,
     });
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     await waitFor(() => {
       expect(screen.getByTestId('anonymizedValuesAndCitationsTourStep')).toBeInTheDocument();
@@ -135,7 +141,7 @@ describe('AnonymizedValuesAndCitationsTour', () => {
   });
 
   it('does not render tour if the knowledge base tour or EIS tour is on step 1', async () => {
-    (useLocalStorage as jest.Mock).mockReturnValueOnce([false, jest.fn()]);
+    (useLocalStorage as Mock).mockReturnValueOnce([false, vi.fn()]);
 
     mockGetItem.mockReturnValue(
       JSON.stringify({
@@ -148,7 +154,7 @@ describe('AnonymizedValuesAndCitationsTour', () => {
       wrapper: Wrapper,
     });
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     await waitFor(() => {
       expect(screen.getByTestId('anonymizedValuesAndCitationsTourStep')).toBeInTheDocument();
@@ -160,7 +166,7 @@ describe('AnonymizedValuesAndCitationsTour', () => {
   });
 
   it('does not render tour if there are no content references or replacements', async () => {
-    (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
+    (useLocalStorage as Mock).mockReturnValue([false, vi.fn()]);
 
     mockGetItem.mockReturnValue(
       JSON.stringify({
@@ -173,7 +179,7 @@ describe('AnonymizedValuesAndCitationsTour', () => {
       wrapper: Wrapper,
     });
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     await waitFor(() => {
       expect(screen.getByTestId('anonymizedValuesAndCitationsTourStep')).toBeInTheDocument();
@@ -185,7 +191,7 @@ describe('AnonymizedValuesAndCitationsTour', () => {
   });
 
   it('does not render tour when tour is disabled', async () => {
-    (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
+    (useLocalStorage as Mock).mockReturnValue([false, vi.fn()]);
     mockToursIsEnabled.mockReturnValue(false);
 
     mockGetItem.mockReturnValue(
@@ -199,7 +205,7 @@ describe('AnonymizedValuesAndCitationsTour', () => {
       wrapper: Wrapper,
     });
 
-    jest.runAllTimers();
+    vi.runAllTimers();
 
     await waitFor(() => {
       expect(screen.getByTestId('anonymizedValuesAndCitationsTourStep')).toBeInTheDocument();

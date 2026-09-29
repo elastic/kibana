@@ -7,17 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const renderTemplateMock = jest.fn();
-jest.doMock('./render_template', () => ({
-  renderTemplate: renderTemplateMock,
-}));
+import { vi } from 'vitest';
 
-export const getPluginsBundlePathsMock = jest.fn();
-jest.doMock('./get_plugin_bundle_paths', () => ({
-  getPluginsBundlePaths: getPluginsBundlePathsMock,
-}));
+export const renderTemplateMock = vi.fn();
+vi.doMock('./render_template', () => {
+      const mocked = {
+      renderTemplate: renderTemplateMock,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-export const getRspackDependencyPathsMock = jest.fn();
-jest.doMock('./get_js_dependency_paths', () => ({
-  getRspackDependencyPaths: getRspackDependencyPathsMock,
-}));
+export const getPluginsBundlePathsMock = vi.fn();
+vi.doMock('./get_plugin_bundle_paths', () => {
+      const mocked = {
+      getPluginsBundlePaths: getPluginsBundlePathsMock,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+export const getRspackDependencyPathsMock = vi.fn();
+vi.doMock('./get_js_dependency_paths', () => {
+      const mocked = {
+      getRspackDependencyPaths: getRspackDependencyPathsMock,
+    };
+      return { ...mocked, default: mocked };
+    });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { checkIndex, EMPTY_PARTITIONED_FIELD_METADATA } from './check_index';
 import { mockMappingsResponse } from '../mock/mappings_response/mock_mappings_response';
 import { mockUnallowedValuesResponse } from '../mock/unallowed_values/mock_unallowed_values';
@@ -15,13 +17,13 @@ import { getUnallowedValueRequestItems } from './get_unallowed_value_request_ite
 import { EcsFlatTyped, EMPTY_STAT } from '../constants';
 import { getMappingsProperties, getSortedPartitionedFieldMetadata } from './metadata';
 
-let mockFetchMappings = jest.fn(
+let mockFetchMappings = vi.fn(
   (_: { abortController: AbortController; patternOrIndexName: string }) =>
     Promise.resolve(mockMappingsResponse)
 );
 
-jest.mock('./fetch_mappings', () => {
-  const original = jest.requireActual('./fetch_mappings');
+vi.mock('./fetch_mappings', async () => {
+  const original = (await vi.importActual('./fetch_mappings'));
   return {
     ...original,
     fetchMappings: ({
@@ -38,7 +40,7 @@ jest.mock('./fetch_mappings', () => {
   };
 });
 
-const mockFetchUnallowedValues = jest.fn(
+const mockFetchUnallowedValues = vi.fn(
   (_: {
     abortController: AbortController;
     indexName: string;
@@ -46,8 +48,8 @@ const mockFetchUnallowedValues = jest.fn(
   }) => Promise.resolve(mockUnallowedValuesResponse)
 );
 
-jest.mock('./fetch_unallowed_values', () => {
-  const original = jest.requireActual('./fetch_unallowed_values');
+vi.mock('./fetch_unallowed_values', async () => {
+  const original = (await vi.importActual('./fetch_unallowed_values'));
 
   return {
     ...original,
@@ -79,13 +81,13 @@ describe('checkIndex', () => {
 
   const indexName = 'auditbeat-custom-index-1';
   const pattern = 'auditbeat-*';
-  const httpFetch = jest.fn();
+  const httpFetch = vi.fn();
 
   describe('when `checkIndex` successfully completes the check', () => {
-    const onCheckCompleted = jest.fn();
+    const onCheckCompleted = vi.fn();
 
     beforeEach(async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       await checkIndex({
         abortController: new AbortController(),
@@ -122,21 +124,21 @@ describe('checkIndex', () => {
 
   describe('lifecycle hooks', () => {
     const orderOfCalls: string[] = [];
-    const onStart = jest.fn(() => orderOfCalls.push('onStart'));
-    const onSuccess = jest.fn(() => orderOfCalls.push('onSuccess'));
-    const onError = jest.fn(() => orderOfCalls.push('onError'));
-    const onLoadMappingsStart = jest.fn(() => orderOfCalls.push('onLoadMappingsStart'));
-    const onLoadMappingsSuccess = jest.fn(() => orderOfCalls.push('onLoadMappingsSuccess'));
-    const onLoadUnallowedValuesStart = jest.fn(() =>
+    const onStart = vi.fn(() => orderOfCalls.push('onStart'));
+    const onSuccess = vi.fn(() => orderOfCalls.push('onSuccess'));
+    const onError = vi.fn(() => orderOfCalls.push('onError'));
+    const onLoadMappingsStart = vi.fn(() => orderOfCalls.push('onLoadMappingsStart'));
+    const onLoadMappingsSuccess = vi.fn(() => orderOfCalls.push('onLoadMappingsSuccess'));
+    const onLoadUnallowedValuesStart = vi.fn(() =>
       orderOfCalls.push('onLoadUnallowedValuesStart')
     );
-    const onLoadUnallowedValuesSuccess = jest.fn(() =>
+    const onLoadUnallowedValuesSuccess = vi.fn(() =>
       orderOfCalls.push('onLoadUnallowedValuesSuccess')
     );
 
     beforeEach(async () => {
       orderOfCalls.length = 0;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
       await checkIndex({
         abortController: new AbortController(),
@@ -147,7 +149,7 @@ describe('checkIndex', () => {
         httpFetch,
         indexName,
         isLastCheck: false,
-        onCheckCompleted: jest.fn(),
+        onCheckCompleted: vi.fn(),
         pattern,
         onError,
         onLoadMappingsStart,
@@ -221,11 +223,11 @@ describe('checkIndex', () => {
 
     describe('when load mappings error occurs', () => {
       const error = 'simulated fetch mappings error';
-      const onCheckCompleted = jest.fn();
+      const onCheckCompleted = vi.fn();
 
       beforeEach(async () => {
         orderOfCalls.length = 0;
-        jest.clearAllMocks();
+        vi.clearAllMocks();
 
         mockFetchMappings.mockRejectedValueOnce(new Error(error));
 
@@ -265,11 +267,11 @@ describe('checkIndex', () => {
 
     describe('when load unallowed values error occurs', () => {
       const error = 'simulated fetch unallowed values error';
-      const onCheckCompleted = jest.fn();
+      const onCheckCompleted = vi.fn();
 
       beforeEach(async () => {
         orderOfCalls.length = 0;
-        jest.clearAllMocks();
+        vi.clearAllMocks();
 
         mockFetchUnallowedValues.mockRejectedValueOnce(new Error(error));
 
@@ -316,11 +318,11 @@ describe('checkIndex', () => {
 
   describe('happy path, when the signal is aborted', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('it does NOT invoke onCheckCompleted', async () => {
-      const onCheckCompleted = jest.fn();
+      const onCheckCompleted = vi.fn();
 
       const abortController = new AbortController();
       abortController.abort();
@@ -343,13 +345,13 @@ describe('checkIndex', () => {
   });
 
   describe('when an error occurs', () => {
-    const onCheckCompleted = jest.fn();
+    const onCheckCompleted = vi.fn();
     const error = 'simulated fetch mappings error';
 
     beforeEach(async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
-      mockFetchMappings = jest.fn(
+      mockFetchMappings = vi.fn(
         (_: { abortController: AbortController; patternOrIndexName: string }) =>
           Promise.reject(new Error(error))
       );
@@ -386,12 +388,12 @@ describe('checkIndex', () => {
   });
 
   describe('when an error occurs, but the error does not have a toString', () => {
-    const onCheckCompleted = jest.fn();
+    const onCheckCompleted = vi.fn();
 
     beforeEach(async () => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
 
-      mockFetchMappings = jest.fn(
+      mockFetchMappings = vi.fn(
         (_: { abortController: AbortController; patternOrIndexName: string }) =>
           // eslint-disable-next-line prefer-promise-reject-errors
           Promise.reject(undefined)
@@ -431,18 +433,18 @@ describe('checkIndex', () => {
   });
 
   describe('when an error occurs, and the signal is aborted', () => {
-    const onCheckCompleted = jest.fn();
+    const onCheckCompleted = vi.fn();
     const abortController = new AbortController();
     abortController.abort();
 
     const error = 'simulated fetch mappings error';
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('it does NOT invoke onCheckCompleted', async () => {
-      mockFetchMappings = jest.fn(
+      mockFetchMappings = vi.fn(
         (_: { abortController: AbortController; patternOrIndexName: string }) =>
           Promise.reject(new Error(error))
       );

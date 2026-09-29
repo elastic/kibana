@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
 import React from 'react';
 import type { ReactElement } from 'react';
 import { act, render as rtlRender, screen, waitFor } from '@testing-library/react';
@@ -48,8 +51,8 @@ import { defaultAlertsTableColumns } from '../configuration';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 
 // Search alerts mock
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts');
-const mockSearchAlerts = jest.mocked(searchAlerts);
+vi.mock('@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts');
+const mockSearchAlerts = vi.mocked(searchAlerts);
 
 const columns = [
   {
@@ -110,8 +113,8 @@ const mockSearchAlertsResponse: Awaited<ReturnType<typeof searchAlerts>> = {
 };
 
 // Alerts fields mock
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields');
-jest.mocked(fetchAlertsFields).mockResolvedValue({
+vi.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields');
+vi.mocked(fetchAlertsFields).mockResolvedValue({
   browserFields: {
     kibana: {
       fields: {
@@ -134,22 +137,22 @@ jest.mocked(fetchAlertsFields).mockResolvedValue({
 });
 
 // Alert snooze state mock
-jest.mock('@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule');
-jest.mocked(getAlertSnoozeStateByRule).mockResolvedValue({
+vi.mock('@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule');
+vi.mocked(getAlertSnoozeStateByRule).mockResolvedValue({
   data: [],
 });
 
 // Cases mock
-jest.mock('../apis/bulk_get_cases');
-const mockBulkGetCases = jest.mocked(bulkGetCases);
+vi.mock('../apis/bulk_get_cases');
+const mockBulkGetCases = vi.mocked(bulkGetCases);
 const mockCases = getCasesMock();
 mockBulkGetCases.mockResolvedValue({ cases: mockCases, errors: [] });
 
 // Maintenance windows mock
-jest.mock('../apis/bulk_get_maintenance_windows');
-jest.mock('../hooks/use_license');
-const mockBulkGetMaintenanceWindows = jest.mocked(bulkGetMaintenanceWindows);
-jest.mocked(useLicense).mockReturnValue({ isAtLeastPlatinum: () => true });
+vi.mock('../apis/bulk_get_maintenance_windows');
+vi.mock('../hooks/use_license');
+const mockBulkGetMaintenanceWindows = vi.mocked(bulkGetMaintenanceWindows);
+vi.mocked(useLicense).mockReturnValue({ isAtLeastPlatinum: () => true });
 const mockMaintenanceWindows = getMaintenanceWindowsMock();
 mockBulkGetMaintenanceWindows.mockResolvedValue({
   maintenanceWindows: mockMaintenanceWindows,
@@ -157,10 +160,13 @@ mockBulkGetMaintenanceWindows.mockResolvedValue({
 });
 
 // AlertsDataGrid mock
-jest.mock('./alerts_data_grid', () => ({
-  AlertsDataGrid: jest.fn(),
-}));
-const mockAlertsDataGrid = jest.mocked(AlertsDataGrid);
+vi.mock('./alerts_data_grid', () => {
+      const mocked = {
+      AlertsDataGrid: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+const mockAlertsDataGrid = vi.mocked(AlertsDataGrid);
 
 const applicationMock = applicationServiceMock.createStartContract();
 const mockCurrentAppId$ = new BehaviorSubject<string>('testAppId');
@@ -179,10 +185,10 @@ afterAll(() => {
 // Storage mock
 const mockStorageData = new Map<string, string>();
 const mockStorageWrapper = {
-  get: jest.fn((key: string) => mockStorageData.get(key)),
-  set: jest.fn((key: string, value: string) => mockStorageData.set(key, value)),
-  remove: jest.fn((key: string) => mockStorageData.delete(key)),
-  clear: jest.fn(() => mockStorageData.clear()),
+  get: vi.fn((key: string) => mockStorageData.get(key)),
+  set: vi.fn((key: string, value: string) => mockStorageData.set(key, value)),
+  remove: vi.fn((key: string) => mockStorageData.delete(key)),
+  clear: vi.fn(() => mockStorageData.clear()),
 };
 
 const queryClient = new QueryClient(testQueryClientConfig);
@@ -206,7 +212,7 @@ describe('AlertsTable', () => {
       http: httpServiceMock.createStartContract(),
       application: {
         ...applicationMock,
-        getUrlForApp: jest.fn(() => ''),
+        getUrlForApp: vi.fn(() => ''),
         capabilities: {
           ...applicationMock.capabilities,
           cases: {
@@ -235,22 +241,22 @@ describe('AlertsTable', () => {
   let onToggleColumn: AlertsDataGridProps['onToggleColumn'];
   let onResetColumns: AlertsDataGridProps['onResetColumns'];
   let refresh: RenderContext<AdditionalContext>['refresh'];
-  let refreshSpy: jest.SpyInstance<void, []>;
+  let refreshSpy: MockInstance<void, []>;
 
-  const realAlertsDataGridMockImplementation = (props: AlertsDataGridProps) => {
-    const { AlertsDataGrid: ActualAlertsDataGrid } = jest.requireActual('./alerts_data_grid');
+  const realAlertsDataGridMockImplementation = async (props: AlertsDataGridProps) => {
+    const { AlertsDataGrid: ActualAlertsDataGrid } = (await vi.importActual('./alerts_data_grid'));
     onPageIndexChange = props.renderContext.onPageIndexChange;
     onToggleColumn = props.onToggleColumn;
     onResetColumns = props.onResetColumns;
     refresh = props.renderContext.refresh;
-    refreshSpy = jest.spyOn(props.renderContext, 'refresh');
+    refreshSpy = vi.spyOn(props.renderContext, 'refresh');
     return <ActualAlertsDataGrid {...props} />;
   };
 
   mockAlertsDataGrid.mockImplementation(realAlertsDataGridMockImplementation);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockStorageData.clear();
     mockSearchAlerts.mockResolvedValue(mockSearchAlertsResponse);
   });
@@ -374,12 +380,12 @@ describe('AlertsTable', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
+      vi.clearAllMocks();
+      mockCaseService.helpers.canUseCases = vi.fn().mockReturnValue({ create: true, read: true });
     });
 
     afterAll(() => {
-      mockCaseService.ui.getCasesContext = jest.fn().mockImplementation(() => null);
+      mockCaseService.ui.getCasesContext = vi.fn().mockImplementation(() => null);
     });
 
     it('should show the cases column', async () => {
@@ -453,7 +459,7 @@ describe('AlertsTable', () => {
     });
 
     it('should not fetch cases if the user does not have permissions', async () => {
-      mockCaseService.helpers.canUseCases = jest
+      mockCaseService.helpers.canUseCases = vi
         .fn()
         .mockReturnValue({ create: false, read: false });
 
@@ -465,7 +471,7 @@ describe('AlertsTable', () => {
     });
 
     it('should not fetch cases if the column is not visible', async () => {
-      mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
+      mockCaseService.helpers.canUseCases = vi.fn().mockReturnValue({ create: true, read: true });
 
       render(
         <AlertsTable
@@ -500,8 +506,8 @@ describe('AlertsTable', () => {
     });
 
     it('should call the cases context with the correct props', async () => {
-      const CasesContextMock = jest.fn().mockReturnValue(null);
-      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
+      const CasesContextMock = vi.fn().mockReturnValue(null);
+      mockCaseService.ui.getCasesContext = vi.fn().mockReturnValue(CasesContextMock);
 
       render(
         <AlertsTable
@@ -521,8 +527,8 @@ describe('AlertsTable', () => {
     });
 
     it('should call the cases context with the empty owner if the case config is not defined', async () => {
-      const CasesContextMock = jest.fn().mockReturnValue(null);
-      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
+      const CasesContextMock = vi.fn().mockReturnValue(null);
+      mockCaseService.ui.getCasesContext = vi.fn().mockReturnValue(CasesContextMock);
 
       render(<AlertsTable {...casesTableProps} />);
       expect(CasesContextMock).toHaveBeenCalledWith(
@@ -536,9 +542,9 @@ describe('AlertsTable', () => {
     });
 
     it('should call the cases context with correct permissions', async () => {
-      const CasesContextMock = jest.fn().mockReturnValue(null);
-      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
-      mockCaseService.helpers.canUseCases = jest
+      const CasesContextMock = vi.fn().mockReturnValue(null);
+      mockCaseService.ui.getCasesContext = vi.fn().mockReturnValue(CasesContextMock);
+      mockCaseService.helpers.canUseCases = vi
         .fn()
         .mockReturnValue({ create: false, read: false });
 
@@ -556,7 +562,7 @@ describe('AlertsTable', () => {
 
   describe('Maintenance windows', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should show maintenance windows column', async () => {
@@ -673,7 +679,7 @@ describe('AlertsTable', () => {
 
   describe('Field browser', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockBulkGetCases.mockResolvedValue({ cases: [], errors: [] });
       mockBulkGetMaintenanceWindows.mockResolvedValue({
         maintenanceWindows: mockMaintenanceWindows,

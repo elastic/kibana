@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -244,7 +246,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
 
         // Configure uiSettings to indicate defaultConnectorOnly is enabled
         const uiSettingsScoped = {
-          get: jest.fn().mockImplementation((key: string) => {
+          get: vi.fn().mockImplementation((key: string) => {
             if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) return true;
             if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return 'admin-default';
             return undefined;
@@ -277,7 +279,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
         const request = httpServerMock.createKibanaRequest();
 
         const uiSettingsScoped = {
-          get: jest.fn().mockImplementation((key: string) => {
+          get: vi.fn().mockImplementation((key: string) => {
             if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) return true;
             if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return 'NO_DEFAULT_CONNECTOR';
             return undefined;

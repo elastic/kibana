@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -19,13 +22,13 @@ import { DiscoverSessionSaveDashboardModal } from './discover_session_save_dashb
 const renderSaveModal = (
   overrides: Partial<DiscoverSessionSaveDashboardModalProps> = {}
 ): {
-  onClose: jest.MockedFunction<() => void>;
-  onCopyOnSaveChange: jest.MockedFunction<(newCopyOnSave: boolean) => void>;
-  onSave: jest.MockedFunction<DiscoverSessionSaveDashboardModalProps['onSave']>;
+  onClose: MockedFunction<() => void>;
+  onCopyOnSaveChange: MockedFunction<(newCopyOnSave: boolean) => void>;
+  onSave: MockedFunction<DiscoverSessionSaveDashboardModalProps['onSave']>;
 } => {
-  const onClose = jest.fn();
-  const onCopyOnSaveChange = jest.fn();
-  const onSave: jest.MockedFunction<DiscoverSessionSaveDashboardModalProps['onSave']> = jest
+  const onClose = vi.fn();
+  const onCopyOnSaveChange = vi.fn();
+  const onSave: MockedFunction<DiscoverSessionSaveDashboardModalProps['onSave']> = vi
     .fn()
     .mockResolvedValue(undefined);
 

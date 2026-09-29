@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import {
   reportAttackDiscoveryGenerationFailure,
   reportAttackDiscoveryGenerationSuccess,
@@ -12,13 +14,16 @@ import {
 import { mockAttackDiscoveries } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_attack_discoveries';
 import { coreMock } from '@kbn/core/server/mocks';
 
-jest.mock('lodash/fp', () => ({
-  uniq: jest.fn((arr) => Array.from(new Set(arr))),
-}));
+vi.mock('lodash/fp', () => {
+      const mocked = {
+      uniq: vi.fn((arr) => Array.from(new Set(arr))),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('telemetry', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('reportAttackDiscoveryGenerationFailure', () => {
@@ -30,7 +35,7 @@ describe('telemetry', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should report error event without schedule information', () => {
@@ -91,7 +96,7 @@ describe('telemetry', () => {
     };
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it('should report success event without schedule information', async () => {

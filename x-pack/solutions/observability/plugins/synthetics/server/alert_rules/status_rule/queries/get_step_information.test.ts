@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { getStepInformation } from './get_step_information';
 import { getJourneyFailedSteps } from '../../../queries/get_journey_failed_steps';
 import type { SyntheticsEsClient } from '../../../lib';
 
 // Mock the getJourneyFailedSteps function
-jest.mock('../../../queries/get_journey_failed_steps', () => ({
-  getJourneyFailedSteps: jest.fn(),
-}));
+vi.mock('../../../queries/get_journey_failed_steps', () => {
+      const mocked = {
+      getJourneyFailedSteps: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetJourneyFailedSteps = getJourneyFailedSteps as jest.MockedFunction<
+const mockGetJourneyFailedSteps = getJourneyFailedSteps as MockedFunction<
   typeof getJourneyFailedSteps
 >;
 
@@ -22,7 +28,7 @@ describe('getStepInformation', () => {
   const mockEsClient = {} as SyntheticsEsClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns null for non-browser monitor types', async () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
@@ -15,7 +17,7 @@ import { renderWithTestingProviders } from '../../common/mock';
 import * as i18n from './translations';
 
 describe('AutomaticClosureSwitch', () => {
-  const onChangeClosureType = jest.fn();
+  const onChangeClosureType = vi.fn();
   const props: AutomaticClosureSwitchProps = {
     disabled: false,
     closureTypeSelected: 'close-by-user',
@@ -23,7 +25,7 @@ describe('AutomaticClosureSwitch', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the switch', () => {

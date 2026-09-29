@@ -7,23 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import { useExternalServices } from '../../../context/external_services';
 import { useStreamsFieldRenderer } from './use_streams_field_renderer';
 
-jest.mock('../../../context/external_services', () => ({
-  useExternalServices: jest.fn(),
-}));
+vi.mock('../../../context/external_services', () => {
+      const mocked = {
+      useExternalServices: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedUseExternalServices = useExternalServices as jest.Mock;
+const mockedUseExternalServices = useExternalServices as Mock;
 
-const buildDiscoverShared = (getById: jest.Mock): DiscoverSharedPublicStart =>
+const buildDiscoverShared = (getById: Mock): DiscoverSharedPublicStart =>
   ({ features: { registry: { getById } } } as unknown as DiscoverSharedPublicStart);
 
 describe('useStreamsFieldRenderer', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('returns undefined when there are no external services', () => {
@@ -39,7 +45,7 @@ describe('useStreamsFieldRenderer', () => {
   });
 
   it('returns undefined when the streams feature is not registered', () => {
-    const getById = jest.fn().mockReturnValue(undefined);
+    const getById = vi.fn().mockReturnValue(undefined);
     mockedUseExternalServices.mockReturnValue({ discoverShared: buildDiscoverShared(getById) });
 
     const { result } = renderHook(() => useStreamsFieldRenderer());
@@ -49,8 +55,8 @@ describe('useStreamsFieldRenderer', () => {
   });
 
   it('returns the renderer registered under the streams feature (same identity)', () => {
-    const renderFlyoutStreamFieldByStreamName = jest.fn();
-    const getById = jest.fn().mockReturnValue({
+    const renderFlyoutStreamFieldByStreamName = vi.fn();
+    const getById = vi.fn().mockReturnValue({
       id: 'streams',
       renderFlyoutStreamFieldByStreamName,
     });

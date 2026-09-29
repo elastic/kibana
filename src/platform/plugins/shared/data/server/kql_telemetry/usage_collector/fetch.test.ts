@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { fetchProvider } from './fetch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
-jest.mock('../../../common', () => ({
-  DEFAULT_QUERY_LANGUAGE: 'lucene',
-  UI_SETTINGS: {
-    SEARCH_QUERY_LANGUAGE: 'search:queryLanguage',
-  },
-}));
+vi.mock('../../../common', () => {
+      const mocked = {
+      DEFAULT_QUERY_LANGUAGE: 'lucene',
+      UI_SETTINGS: {
+        SEARCH_QUERY_LANGUAGE: 'search:queryLanguage',
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 let fetch: ReturnType<typeof fetchProvider>;
 let esClient: ElasticsearchClient;
@@ -67,8 +72,8 @@ function setupMockCallCluster(
   }
 
   const esClientMock = {
-    get: jest.fn().mockImplementation(mockedEsGetMethod),
-    search: jest.fn().mockImplementation(mockedEsSearchMethod),
+    get: vi.fn().mockImplementation(mockedEsGetMethod),
+    search: vi.fn().mockImplementation(mockedEsSearchMethod),
   } as unknown as ElasticsearchClient;
   esClient = esClientMock;
 }

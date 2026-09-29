@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import {
   getEmptyFindResult,
@@ -38,7 +41,7 @@ describe('Create rule route', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
@@ -57,8 +60,8 @@ describe('Create rule route', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('status codes', () => {
@@ -71,7 +74,7 @@ describe('Create rule route', () => {
     });
 
     test('returns 200 if license is not platinum', async () => {
-      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      (context.licensing.license.hasAtLeast as Mock).mockReturnValue(false);
 
       const response = await server.inject(
         getCreateRequest(),
@@ -227,8 +230,8 @@ describe('Create rule route', () => {
     );
 
     test('fails when isolate rbac is set to false', async () => {
-      (context.securitySolution.getEndpointAuthz as jest.Mock).mockReturnValue(() => ({
-        canIsolateHost: jest.fn().mockReturnValue(false),
+      (context.securitySolution.getEndpointAuthz as Mock).mockReturnValue(() => ({
+        canIsolateHost: vi.fn().mockReturnValue(false),
       }));
 
       const request = requestMock.create({

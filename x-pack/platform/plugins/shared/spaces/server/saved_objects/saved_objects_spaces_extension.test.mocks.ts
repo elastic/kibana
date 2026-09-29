@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import type { spaceIdToNamespace } from '../lib/utils/namespace';
 
-export const mockSpaceIdToNamespace = jest.fn() as jest.MockedFunction<typeof spaceIdToNamespace>;
+export const mockSpaceIdToNamespace = vi.fn() as MockedFunction<typeof spaceIdToNamespace>;
 
-jest.mock('../lib/utils/namespace', () => {
+vi.mock('../lib/utils/namespace', () => {
   return {
     spaceIdToNamespace: mockSpaceIdToNamespace,
   };

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Mock } from 'vitest';
+
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
 import type { LogsEndpointAction } from '../../../../common/endpoint/types';
@@ -41,7 +43,7 @@ describe('Route utilities', () => {
 
       (
         testSetupMock.endpointAppContextMock.service.getInternalFleetServices()
-          .ensureInCurrentSpace as jest.Mock
+          .ensureInCurrentSpace as Mock
       ).mockResolvedValue(undefined);
     });
 

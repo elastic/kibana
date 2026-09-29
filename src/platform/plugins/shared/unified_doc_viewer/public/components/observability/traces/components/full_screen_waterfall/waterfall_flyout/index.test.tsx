@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { WaterfallFlyout, type Props } from '.';
@@ -21,7 +24,7 @@ import { TRACES_DOC_VIEWER_EBT_ELEMENTS } from '../../../ebt_constants';
 
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
-jest.mock('../../../../../doc_viewer_table', () => ({
+vi.mock('../../../../../doc_viewer_table', () => ({
   __esModule: true,
   default: ({ hit, dataView }: any) => (
     <div data-test-subj="docViewerTable" data-hit-id={hit?.id}>
@@ -30,7 +33,7 @@ jest.mock('../../../../../doc_viewer_table', () => ({
   ),
 }));
 
-jest.mock('../../../../../doc_viewer_source', () => ({
+vi.mock('../../../../../doc_viewer_source', () => ({
   __esModule: true,
   default: ({ id, index, dataView }: any) => (
     <div data-test-subj="docViewerSource" data-id={id} data-index={index}>
@@ -39,7 +42,7 @@ jest.mock('../../../../../doc_viewer_source', () => ({
   ),
 }));
 
-jest.mock('../../../doc_viewer_genai', () => ({
+vi.mock('../../../doc_viewer_genai', () => ({
   __esModule: true,
   DocViewerObsTracesGenAi: ({ hit }: any) => (
     <div data-test-subj="docViewerGenAi" data-hit-id={hit?.id}>
@@ -64,7 +67,7 @@ describe('WaterfallFlyout', () => {
 
   const defaultProps: Props = {
     title: 'Test Flyout Title',
-    onCloseFlyout: jest.fn(),
+    onCloseFlyout: vi.fn(),
     hit: mockHit,
     loading: false,
     dataView: dataViewMock,
@@ -73,7 +76,7 @@ describe('WaterfallFlyout', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('loading state', () => {
@@ -203,7 +206,7 @@ describe('WaterfallFlyout', () => {
     });
 
     it('reports a genai_tab_impression event when the GenAI tab is rendered', () => {
-      const reportEvent = mockUnifiedDocViewerServices.analytics.reportEvent as jest.Mock;
+      const reportEvent = mockUnifiedDocViewerServices.analytics.reportEvent as Mock;
       reportEvent.mockClear();
 
       render(<WaterfallFlyout {...defaultProps} hit={genAiHit} />);
@@ -214,7 +217,7 @@ describe('WaterfallFlyout', () => {
     });
 
     it('does not report a genai_tab_impression event for documents without gen_ai fields', () => {
-      const reportEvent = mockUnifiedDocViewerServices.analytics.reportEvent as jest.Mock;
+      const reportEvent = mockUnifiedDocViewerServices.analytics.reportEvent as Mock;
       reportEvent.mockClear();
 
       render(<WaterfallFlyout {...defaultProps} />);
@@ -261,7 +264,7 @@ describe('WaterfallFlyout', () => {
 
   describe('close behavior', () => {
     it('should call onCloseFlyout when close button is clicked', () => {
-      const onCloseFlyout = jest.fn();
+      const onCloseFlyout = vi.fn();
       render(<WaterfallFlyout {...defaultProps} onCloseFlyout={onCloseFlyout} />);
 
       const closeButton = screen.getByRole('button', { name: /close/i });
@@ -273,7 +276,7 @@ describe('WaterfallFlyout', () => {
 
   describe('originDocType telemetry', () => {
     it('forwards the parent OriginDocTypeContext value into the unified_doc_viewer_viewed event', () => {
-      const reportEvent = mockUnifiedDocViewerServices.analytics.reportEvent as jest.Mock;
+      const reportEvent = mockUnifiedDocViewerServices.analytics.reportEvent as Mock;
       reportEvent.mockClear();
 
       render(

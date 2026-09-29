@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { AuthenticatedUser, ISavedObjectTypeRegistry } from '@kbn/core/server';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
@@ -15,7 +18,7 @@ describe('AccessControlService', () => {
   // Mock type registry (expand to satisfy ISavedObjectTypeRegistry)
   const typeRegistry = {
     supportsAccessControl: (type: string) => type === 'dashboard',
-  } as unknown as jest.Mocked<ISavedObjectTypeRegistry>;
+  } as unknown as Mocked<ISavedObjectTypeRegistry>;
 
   // Full AuthenticatedUser mock
   const makeUser = (profileUid: string | null): AuthenticatedUser | null =>
@@ -559,7 +562,7 @@ describe('AccessControlService', () => {
       });
 
       it('calls addAuditEventFn with custom error message and RBAC unauthorized types when access control check fails', () => {
-        const addAuditEventFn = jest.fn();
+        const addAuditEventFn = vi.fn();
         const authorizationResult = makeAuthResult('partially_authorized', {
           dashboard: {
             update: {

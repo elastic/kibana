@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -15,11 +17,17 @@ import { useAgentBuilderAgents } from '../../hooks/use_agent_builder_agents';
 import { useUpdateFeedbackAgent } from '../../hooks/use_update_feedback_agent';
 import { FeedbackAgentSelector } from './feedback_agent_selector';
 
-jest.mock('../../hooks/use_agent_builder_agents', () => ({ useAgentBuilderAgents: jest.fn() }));
-jest.mock('../../hooks/use_update_feedback_agent', () => ({ useUpdateFeedbackAgent: jest.fn() }));
+vi.mock('../../hooks/use_agent_builder_agents', () => {
+      const mocked = { useAgentBuilderAgents: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../hooks/use_update_feedback_agent', () => {
+      const mocked = { useUpdateFeedbackAgent: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseAgents = jest.mocked(useAgentBuilderAgents);
-const mockUseUpdate = jest.mocked(useUpdateFeedbackAgent);
+const mockUseAgents = vi.mocked(useAgentBuilderAgents);
+const mockUseUpdate = vi.mocked(useUpdateFeedbackAgent);
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
@@ -42,7 +50,7 @@ const renderSelector = (index: GetAiIndexResponse = aiIndex) =>
   );
 
 describe('FeedbackAgentSelector', () => {
-  const mutate = jest.fn();
+  const mutate = vi.fn();
 
   beforeEach(() => {
     mockUseAgents.mockReturnValue({
@@ -57,7 +65,7 @@ describe('FeedbackAgentSelector', () => {
     mockUseUpdate.mockReturnValue({ mutate, isLoading: false } as any);
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => vi.clearAllMocks());
 
   it('annotates the select with EBT props for interaction tracking', () => {
     renderSelector();

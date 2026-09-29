@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { loggingSystemMock, savedObjectsClientMock, httpServerMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
@@ -27,7 +29,7 @@ import {
   stepCreateAlertingAssets,
 } from './step_create_alerting_assets';
 
-jest.mock('../../install');
+vi.mock('../../install');
 
 const logger = loggingSystemMock.createLogger();
 const savedObjectsClient = savedObjectsClientMock.create();
@@ -45,7 +47,7 @@ beforeEach(() => {
       { enableIntegrationInactivityAlerting: true }
     )
   );
-  jest.mocked(saveKibanaAssetsRefs).mockReset();
+  vi.mocked(saveKibanaAssetsRefs).mockReset();
 });
 
 afterEach(() => {
@@ -55,7 +57,7 @@ afterEach(() => {
 describe('createAlertingRuleFromTemplate', () => {
   it('should create a rule if the rule does not exist', async () => {
     const rulesClient = {
-      getTemplate: jest.fn().mockResolvedValue({
+      getTemplate: vi.fn().mockResolvedValue({
         id: 'template-id',
         ruleTypeId: 'rule-type-id',
         name: 'Template Rule',
@@ -65,8 +67,8 @@ describe('createAlertingRuleFromTemplate', () => {
         actions: [],
         tags: [],
       }),
-      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
-      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+      get: vi.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: vi.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
 
     const result = await createAlertingRuleFromTemplate(
@@ -103,9 +105,9 @@ describe('createAlertingRuleFromTemplate', () => {
 
   it('should not create a rule and return a deferred reference if user do not have access to alerts', async () => {
     const rulesClient = {
-      getTemplate: jest.fn().mockRejectedValue(new Error('No access to alerts')),
-      get: jest.fn().mockRejectedValue(new Error('No access to alerts')),
-      create: jest.fn().mockRejectedValue(new Error('No access to alerts')),
+      getTemplate: vi.fn().mockRejectedValue(new Error('No access to alerts')),
+      get: vi.fn().mockRejectedValue(new Error('No access to alerts')),
+      create: vi.fn().mockRejectedValue(new Error('No access to alerts')),
     } as unknown as RulesClientApi;
 
     const result = await createAlertingRuleFromTemplate(
@@ -129,7 +131,7 @@ describe('createAlertingRuleFromTemplate', () => {
 
   it('should not create a rule if the rule already exists', async () => {
     const rulesClient = {
-      getTemplate: jest.fn().mockResolvedValue({
+      getTemplate: vi.fn().mockResolvedValue({
         id: 'template-id',
         ruleTypeId: 'rule-type-id',
         name: 'Template Rule',
@@ -139,8 +141,8 @@ describe('createAlertingRuleFromTemplate', () => {
         actions: [],
         tags: [],
       }),
-      get: jest.fn().mockResolvedValue({ id: 'existing-rule-id' }),
-      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+      get: vi.fn().mockResolvedValue({ id: 'existing-rule-id' }),
+      create: vi.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
 
     const result = await createAlertingRuleFromTemplate(
@@ -165,7 +167,7 @@ describe('createAlertingRuleFromTemplate', () => {
   it('should look up template by hashed space-scoped ID when installAsAdditionalSpace is true', async () => {
     const hashedId = getSpaceScopedAssetId('template-id', 'my-space');
     const rulesClient = {
-      getTemplate: jest.fn().mockResolvedValue({
+      getTemplate: vi.fn().mockResolvedValue({
         id: hashedId,
         ruleTypeId: 'rule-type-id',
         name: 'Template Rule',
@@ -175,8 +177,8 @@ describe('createAlertingRuleFromTemplate', () => {
         actions: [],
         tags: [],
       }),
-      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
-      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+      get: vi.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: vi.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
 
     const result = await createAlertingRuleFromTemplate(
@@ -213,7 +215,7 @@ describe('createAlertingRuleFromTemplate', () => {
 
   it('should use the original archive ID for template lookup when installAsAdditionalSpace is false', async () => {
     const rulesClient = {
-      getTemplate: jest.fn().mockResolvedValue({
+      getTemplate: vi.fn().mockResolvedValue({
         id: 'template-id',
         ruleTypeId: 'rule-type-id',
         name: 'Template Rule',
@@ -223,8 +225,8 @@ describe('createAlertingRuleFromTemplate', () => {
         actions: [],
         tags: [],
       }),
-      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
-      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+      get: vi.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: vi.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
 
     await createAlertingRuleFromTemplate(
@@ -588,7 +590,7 @@ describe('createInactivityMonitoringTemplate', () => {
 
 describe('stepCreateAlertingAssets', () => {
   beforeEach(() => {
-    jest.mocked(saveKibanaAssetsRefs).mockReset();
+    vi.mocked(saveKibanaAssetsRefs).mockReset();
   });
   it('does nothing for non elastic_agent package', async () => {
     const context = {
@@ -610,7 +612,7 @@ describe('stepCreateAlertingAssets', () => {
 
   it('install elastic_agent rules', async () => {
     const rulesClient = {
-      getTemplate: jest.fn().mockResolvedValue({
+      getTemplate: vi.fn().mockResolvedValue({
         id: 'template-id',
         ruleTypeId: 'rule-type-id',
         name: 'Template Rule',
@@ -620,11 +622,11 @@ describe('stepCreateAlertingAssets', () => {
         actions: [],
         tags: [],
       }),
-      get: jest.fn().mockResolvedValue({ id: 'existing-rule-id' }),
-      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+      get: vi.fn().mockResolvedValue({ id: 'existing-rule-id' }),
+      create: vi.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
 
-    jest
+    vi
       .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
       .mockResolvedValue(rulesClient);
 
@@ -673,7 +675,7 @@ describe('stepCreateAlertingAssets', () => {
   it('saves rule refs to additional_spaces_installed_kibana when installAsAdditionalSpace is true', async () => {
     const hashedTemplateId = getSpaceScopedAssetId('template-id', 'my-space');
     const rulesClient = {
-      getTemplate: jest.fn().mockResolvedValue({
+      getTemplate: vi.fn().mockResolvedValue({
         id: hashedTemplateId,
         ruleTypeId: 'rule-type-id',
         name: 'Template Rule',
@@ -683,11 +685,11 @@ describe('stepCreateAlertingAssets', () => {
         actions: [],
         tags: [],
       }),
-      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
-      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+      get: vi.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: vi.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
 
-    jest
+    vi
       .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
       .mockResolvedValue(rulesClient);
 
@@ -734,7 +736,7 @@ describe('stepCreateAlertingAssets', () => {
   it('derives installAsAdditionalSpace=true from installedPkg when flag is not explicit and spaceId differs from primary', async () => {
     const hashedTemplateId = getSpaceScopedAssetId('template-id', 'my-space');
     const rulesClient = {
-      getTemplate: jest.fn().mockResolvedValue({
+      getTemplate: vi.fn().mockResolvedValue({
         id: hashedTemplateId,
         ruleTypeId: 'rule-type-id',
         name: 'Template Rule',
@@ -744,11 +746,11 @@ describe('stepCreateAlertingAssets', () => {
         actions: [],
         tags: [],
       }),
-      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
-      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+      get: vi.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: vi.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
 
-    jest
+    vi
       .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
       .mockResolvedValue(rulesClient);
 
@@ -799,7 +801,7 @@ describe('stepCreateAlertingAssets', () => {
 
   it('calls getRulesClientWithRequestInSpace scoped to the target space, not the request space', async () => {
     const rulesClient = {
-      getTemplate: jest.fn().mockResolvedValue({
+      getTemplate: vi.fn().mockResolvedValue({
         id: getSpaceScopedAssetId('template-id', 'my-space'),
         ruleTypeId: 'rule-type-id',
         name: 'Template Rule',
@@ -809,11 +811,11 @@ describe('stepCreateAlertingAssets', () => {
         actions: [],
         tags: [],
       }),
-      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
-      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+      get: vi.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      create: vi.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
 
-    const getRulesClientWithRequestInSpace = jest
+    const getRulesClientWithRequestInSpace = vi
       .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
       .mockResolvedValue(rulesClient);
 
@@ -886,7 +888,7 @@ describe('stepCreateAlertingAssets', () => {
     await stepCreateAlertingAssets(context as any);
 
     // saveKibanaAssetsRefs should be called for both the primary space and the secondary space.
-    const calls = jest.mocked(saveKibanaAssetsRefs).mock.calls;
+    const calls = vi.mocked(saveKibanaAssetsRefs).mock.calls;
     const secondarySpaceCall = calls.find((call) => call[3] === 'other-space');
     expect(secondarySpaceCall).toBeDefined();
     // The secondary space call must use saveAsAdditionnalSpace=true

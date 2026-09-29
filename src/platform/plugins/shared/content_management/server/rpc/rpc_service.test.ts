@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { schema } from '@kbn/config-schema';
 import type { ProcedureDefinition } from './rpc_service';
 import { RpcService } from './rpc_service';
@@ -15,7 +17,7 @@ describe('RpcService', () => {
   describe('register()', () => {
     test('should register a procedure', async () => {
       const rpc = new RpcService<{}, 'foo'>();
-      const fn = jest.fn();
+      const fn = vi.fn();
       const procedure: ProcedureDefinition<{}> = { fn };
       rpc.register('foo', procedure);
 
@@ -29,7 +31,7 @@ describe('RpcService', () => {
   describe('call()', () => {
     test('should require a schema if an input is passed', async () => {
       const rpc = new RpcService<{}, 'foo'>();
-      const fn = jest.fn();
+      const fn = vi.fn();
       const procedure: ProcedureDefinition<{}> = { fn };
       rpc.register('foo', procedure);
 
@@ -46,7 +48,7 @@ describe('RpcService', () => {
 
       const output = { success: true };
 
-      const fn = jest.fn().mockResolvedValue(output);
+      const fn = vi.fn().mockResolvedValue(output);
       const procedure: ProcedureDefinition<{}> = {
         fn,
         schemas: { in: schema.object({ foo: schema.string() }), out: schema.any() },
@@ -73,7 +75,7 @@ describe('RpcService', () => {
     test('should validate that the input is valid', async () => {
       const rpc = new RpcService<{}, 'foo'>();
 
-      const fn = jest.fn();
+      const fn = vi.fn();
       const procedure: ProcedureDefinition<{}> = {
         fn,
         schemas: { in: schema.object({ foo: schema.string() }), out: schema.any() },
@@ -91,7 +93,7 @@ describe('RpcService', () => {
     test('should validate the output if schema is provided', async () => {
       const rpc = new RpcService<{}, 'foo'>();
 
-      const fn = jest.fn().mockResolvedValue({ bad: 'unknown prop' });
+      const fn = vi.fn().mockResolvedValue({ bad: 'unknown prop' });
       const procedure: ProcedureDefinition<{}> = {
         fn,
         schemas: { in: schema.never(), out: schema.object({ foo: schema.string() }) },

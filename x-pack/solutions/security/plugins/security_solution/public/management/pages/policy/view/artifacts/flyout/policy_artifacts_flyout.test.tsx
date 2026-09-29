@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -69,14 +72,14 @@ describe('Policy details artifacts flyout', () => {
   let mockedContext: AppContextTestRender;
   let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
   let policy: PolicyData;
-  let onCloseMock: jest.Mock;
+  let onCloseMock: Mock;
 
   beforeEach(() => {
     const endpointGenerator = new EndpointDocGenerator('seed');
     policy = endpointGenerator.generatePolicyPackagePolicy();
     mockedContext = createAppRootMockRenderer();
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
-    onCloseMock = jest.fn();
+    onCloseMock = vi.fn();
     render = async () => {
       await act(async () => {
         renderResult = mockedContext.render(

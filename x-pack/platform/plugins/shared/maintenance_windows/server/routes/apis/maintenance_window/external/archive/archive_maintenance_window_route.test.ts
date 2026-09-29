@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../../lib/license_api_access';
@@ -16,9 +19,12 @@ import { MaintenanceWindowStatus } from '../../../../../../common';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
-jest.mock('../../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const mockMaintenanceWindow = {
   ...getMockMaintenanceWindowDomain(),
@@ -30,7 +36,7 @@ const mockMaintenanceWindow = {
 
 describe('archiveMaintenanceWindowRoute', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should archive the maintenance window', async () => {
@@ -133,7 +139,7 @@ describe('archiveMaintenanceWindowRoute', () => {
 
     archiveMaintenanceWindowRoute(router, licenseState);
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyApiAccess as Mock).mockImplementation(() => {
       throw new Error('Failure');
     });
     const [, handler] = router.post.mock.calls[0];
@@ -154,7 +160,7 @@ describe('archiveMaintenanceWindowRoute', () => {
 
     archiveMaintenanceWindowRoute(router, licenseState);
 
-    (licenseState.ensureLicenseForMaintenanceWindow as jest.Mock).mockImplementation(() => {
+    (licenseState.ensureLicenseForMaintenanceWindow as Mock).mockImplementation(() => {
       throw new Error('Failure');
     });
 

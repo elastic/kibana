@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { isTextContentType, readResponseStream } from './http_response';
 
 describe('isTextContentType', () => {
@@ -81,7 +83,7 @@ describe('readResponseStream', () => {
             return { done: false, value: data };
           },
           releaseLock: () => {},
-          cancel: jest.fn(),
+          cancel: vi.fn(),
         }),
       },
     } as unknown as Response;
@@ -99,7 +101,7 @@ describe('readResponseStream', () => {
             return { done: false, value };
           },
           releaseLock: () => {},
-          cancel: jest.fn(),
+          cancel: vi.fn(),
         }),
       },
     } as unknown as Response;

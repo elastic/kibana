@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -12,11 +15,14 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { GettingStartedAgentPrompt } from './agent_prompt';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 
-jest.mock('../../contexts/usage_tracker_context', () => ({
-  useUsageTracker: jest.fn(),
-}));
+vi.mock('../../contexts/usage_tracker_context', () => {
+      const mocked = {
+      useUsageTracker: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockUseUsageTracker = useUsageTracker as jest.Mock;
+const mockUseUsageTracker = useUsageTracker as Mock;
 
 const renderComponent = () =>
   render(
@@ -29,7 +35,7 @@ const renderComponent = () =>
 
 describe('GettingStartedAgentPrompt', () => {
   beforeEach(() => {
-    mockUseUsageTracker.mockReturnValue({ click: jest.fn(), count: jest.fn(), load: jest.fn() });
+    mockUseUsageTracker.mockReturnValue({ click: vi.fn(), count: vi.fn(), load: vi.fn() });
   });
 
   it('does not render the modal on initial mount', () => {

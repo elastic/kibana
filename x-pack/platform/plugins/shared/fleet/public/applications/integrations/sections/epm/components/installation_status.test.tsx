@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 
@@ -19,16 +21,19 @@ import {
 } from './installation_status';
 
 // Mock useEuiTheme to return a mock theme
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: () => ({
-    euiTheme: {
-      border: { radius: { medium: '4px' } },
-      size: { s: '8px', m: '16px' },
-      colors: { emptyShade: '#FFFFFF' },
-    },
-  }),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiTheme: () => ({
+        euiTheme: {
+          border: { radius: { medium: '4px' } },
+          size: { s: '8px', m: '16px' },
+          colors: { emptyShade: '#FFFFFF' },
+        },
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getLineClampStyles', () => {
   it('returns the correct styles when lineClamp is provided', () => {

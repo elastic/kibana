@@ -5,18 +5,33 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockInstance, MockedFunction } from 'vitest';
+
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-jest.mock('../infra/feature_flags', () => ({ isDualProcessEnabled: jest.fn() }));
-jest.mock('./should_delete_orphaned_task', () => ({
-  shouldDeleteOrphanedEntityStoreTask: jest.fn().mockResolvedValue(false),
-}));
-jest.mock('./factories', () => ({ createLogsExtractionClient: jest.fn() }));
-jest.mock('../domain/config', () => ({
-  getMergedConfig: jest.fn().mockReturnValue({ frequency: '1m' }),
-}));
+vi.mock('../infra/feature_flags', () => {
+      const mocked = { isDualProcessEnabled: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./should_delete_orphaned_task', () => {
+      const mocked = {
+      shouldDeleteOrphanedEntityStoreTask: vi.fn().mockResolvedValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./factories', () => {
+      const mocked = { createLogsExtractionClient: vi.fn() };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../domain/config', () => {
+      const mocked = {
+      getMergedConfig: vi.fn().mockReturnValue({ frequency: '1m' }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { isDualProcessEnabled } from '../infra/feature_flags';
@@ -91,7 +106,7 @@ describe('extract entity task identity', () => {
 
 describe('registerExtractEntityTasks', () => {
   const register = (entityTypes: Array<'user' | 'host'>) => {
-    const registerTaskDefinitions = jest.fn();
+    const registerTaskDefinitions = vi.fn();
     registerExtractEntityTasks({
       taskManager: { registerTaskDefinitions } as unknown as TaskManagerSetupContract,
       logger: loggerMock.create(),
@@ -124,20 +139,20 @@ describe('registerExtractEntityTasks', () => {
  * flag off the run must do nothing rather than fall back to another mode.
  */
 describe('feature flag gates non-priority execution', () => {
-  const mockIsDualProcessEnabled = isDualProcessEnabled as jest.MockedFunction<
+  const mockIsDualProcessEnabled = isDualProcessEnabled as MockedFunction<
     typeof isDualProcessEnabled
   >;
-  const mockCreateClient = createLogsExtractionClient as jest.MockedFunction<
+  const mockCreateClient = createLogsExtractionClient as MockedFunction<
     typeof createLogsExtractionClient
   >;
 
   const runTaskFor = async (taskTypeSuffix: string, flagEnabled: boolean) => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsDualProcessEnabled.mockResolvedValue(flagEnabled);
     mockCreateClient.mockResolvedValue({
       logsExtractionClient: {
-        extractLogs: jest.fn().mockResolvedValue({ success: true, isRemote: false, count: 0 }),
-        getMergedConfigForType: jest.fn().mockResolvedValue({ frequency: '1m' }),
+        extractLogs: vi.fn().mockResolvedValue({ success: true, isRemote: false, count: 0 }),
+        getMergedConfigForType: vi.fn().mockResolvedValue({ frequency: '1m' }),
       },
     } as unknown as Awaited<ReturnType<typeof createLogsExtractionClient>>);
 
@@ -150,10 +165,10 @@ describe('feature flag gates non-priority execution', () => {
       logger: loggerMock.create(),
       entityTypes: ['user'],
       core: {
-        getStartServices: jest.fn().mockResolvedValue([
+        getStartServices: vi.fn().mockResolvedValue([
           {
             featureFlags: {},
-            executionContext: { withContext: jest.fn(<T>(_ctx: unknown, fn: () => T) => fn()) },
+            executionContext: { withContext: vi.fn(<T>(_ctx: unknown, fn: () => T) => fn()) },
           },
         ]),
       } as unknown as types.EntityStoreCoreSetup,
@@ -202,34 +217,34 @@ describe('feature flag gates non-priority execution', () => {
 });
 
 describe('extract entity task metrics', () => {
-  const mockIsDualProcessEnabled = isDualProcessEnabled as jest.MockedFunction<
+  const mockIsDualProcessEnabled = isDualProcessEnabled as MockedFunction<
     typeof isDualProcessEnabled
   >;
-  const mockCreateClient = createLogsExtractionClient as jest.MockedFunction<
+  const mockCreateClient = createLogsExtractionClient as MockedFunction<
     typeof createLogsExtractionClient
   >;
 
-  let taskSuccess: jest.SpyInstance;
-  let taskError: jest.SpyInstance;
-  let taskDuration: jest.SpyInstance;
+  let taskSuccess: MockInstance;
+  let taskError: MockInstance;
+  let taskDuration: MockInstance;
 
   const runWith = async (
     taskTypeSuffix: string,
     extractionResult: Record<string, unknown>,
     flagEnabled = true
   ) => {
-    jest.clearAllMocks();
-    taskSuccess = jest.spyOn(entityStoreMetrics.extractionTaskSuccess, 'add').mockImplementation();
-    taskError = jest.spyOn(entityStoreMetrics.extractionTaskError, 'add').mockImplementation();
-    taskDuration = jest
+    vi.clearAllMocks();
+    taskSuccess = vi.spyOn(entityStoreMetrics.extractionTaskSuccess, 'add').mockImplementation();
+    taskError = vi.spyOn(entityStoreMetrics.extractionTaskError, 'add').mockImplementation();
+    taskDuration = vi
       .spyOn(entityStoreMetrics.extractionTaskDurationMs, 'record')
       .mockImplementation();
 
     mockIsDualProcessEnabled.mockResolvedValue(flagEnabled);
     mockCreateClient.mockResolvedValue({
       logsExtractionClient: {
-        extractLogs: jest.fn().mockResolvedValue(extractionResult),
-        getMergedConfigForType: jest.fn().mockResolvedValue({ frequency: '1m' }),
+        extractLogs: vi.fn().mockResolvedValue(extractionResult),
+        getMergedConfigForType: vi.fn().mockResolvedValue({ frequency: '1m' }),
       },
     } as unknown as Awaited<ReturnType<typeof createLogsExtractionClient>>);
 
@@ -242,11 +257,11 @@ describe('extract entity task metrics', () => {
       logger: loggerMock.create(),
       entityTypes: ['user'],
       core: {
-        getStartServices: jest.fn().mockResolvedValue([
+        getStartServices: vi.fn().mockResolvedValue([
           {
             featureFlags: {},
             executionContext: {
-              withContext: jest.fn().mockImplementation((_ctx: unknown, fn: () => unknown) => fn()),
+              withContext: vi.fn().mockImplementation((_ctx: unknown, fn: () => unknown) => fn()),
             },
           },
         ]),
@@ -264,7 +279,7 @@ describe('extract entity task metrics', () => {
   };
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('records no task error when the non-priority process is switched off', async () => {
@@ -315,18 +330,18 @@ describe('extract entity task metrics', () => {
 });
 
 describe('non-priority task orphan cleanup', () => {
-  const mockIsDualProcessEnabled = isDualProcessEnabled as jest.MockedFunction<
+  const mockIsDualProcessEnabled = isDualProcessEnabled as MockedFunction<
     typeof isDualProcessEnabled
   >;
-  const mockShouldDeleteOrphanedTask = shouldDeleteOrphanedEntityStoreTask as jest.MockedFunction<
+  const mockShouldDeleteOrphanedTask = shouldDeleteOrphanedEntityStoreTask as MockedFunction<
     typeof shouldDeleteOrphanedEntityStoreTask
   >;
-  const mockCreateClient = createLogsExtractionClient as jest.MockedFunction<
+  const mockCreateClient = createLogsExtractionClient as MockedFunction<
     typeof createLogsExtractionClient
   >;
 
   const runNonPriorityTask = async (flagEnabled: boolean, isOrphaned: boolean) => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsDualProcessEnabled.mockResolvedValue(flagEnabled);
     mockShouldDeleteOrphanedTask.mockResolvedValue(isOrphaned);
 
@@ -339,10 +354,10 @@ describe('non-priority task orphan cleanup', () => {
       logger: loggerMock.create(),
       entityTypes: ['user'],
       core: {
-        getStartServices: jest.fn().mockResolvedValue([
+        getStartServices: vi.fn().mockResolvedValue([
           {
             featureFlags: {},
-            executionContext: { withContext: jest.fn(<T>(_ctx: unknown, fn: () => T) => fn()) },
+            executionContext: { withContext: vi.fn(<T>(_ctx: unknown, fn: () => T) => fn()) },
           },
         ]),
       } as unknown as types.EntityStoreCoreSetup,
@@ -375,11 +390,11 @@ describe('non-priority task orphan cleanup', () => {
 });
 
 describe('bootstrapNonPriorityTask', () => {
-  const mockIsDualProcessEnabled = isDualProcessEnabled as jest.MockedFunction<
+  const mockIsDualProcessEnabled = isDualProcessEnabled as MockedFunction<
     typeof isDualProcessEnabled
   >;
-  const mockGetMergedConfig = getMergedConfig as jest.MockedFunction<typeof getMergedConfig>;
-  const mockCreateClient = createLogsExtractionClient as jest.MockedFunction<
+  const mockGetMergedConfig = getMergedConfig as MockedFunction<typeof getMergedConfig>;
+  const mockCreateClient = createLogsExtractionClient as MockedFunction<
     typeof createLogsExtractionClient
   >;
 
@@ -423,19 +438,19 @@ describe('bootstrapNonPriorityTask', () => {
     logExtractionConfig?: Record<string, unknown>;
     globalStateOverrides?: Record<string, unknown>;
   }) => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsDualProcessEnabled.mockResolvedValue(true);
     mockGetMergedConfig.mockReturnValue({ frequency: mergedFrequency } as ReturnType<
       typeof getMergedConfig
     >);
     mockCreateClient.mockResolvedValue({
       logsExtractionClient: {
-        extractLogs: jest.fn().mockResolvedValue({ success: true, isRemote: false, count: 0 }),
-        getMergedConfigForType: jest.fn().mockResolvedValue({ frequency: '1m' }),
+        extractLogs: vi.fn().mockResolvedValue({ success: true, isRemote: false, count: 0 }),
+        getMergedConfigForType: vi.fn().mockResolvedValue({ frequency: '1m' }),
       },
     } as unknown as Awaited<ReturnType<typeof createLogsExtractionClient>>);
 
-    const mockEnsureScheduled = jest.fn().mockResolvedValue(undefined);
+    const mockEnsureScheduled = vi.fn().mockResolvedValue(undefined);
     const soClient = savedObjectsClientMock.create();
     soClient.find.mockResolvedValue({
       saved_objects: [makeDescriptorSo(engineStatus, logExtractionConfig)],
@@ -454,16 +469,16 @@ describe('bootstrapNonPriorityTask', () => {
       logger: loggerMock.create(),
       entityTypes: ['user'],
       core: {
-        getStartServices: jest.fn().mockResolvedValue([
+        getStartServices: vi.fn().mockResolvedValue([
           {
             featureFlags: {},
             savedObjects: {
-              createInternalRepository: jest.fn().mockReturnValue(soClient),
-              getUnsafeInternalClient: jest.fn().mockReturnValue({
-                asScopedToNamespace: jest.fn().mockReturnValue(soClient),
+              createInternalRepository: vi.fn().mockReturnValue(soClient),
+              getUnsafeInternalClient: vi.fn().mockReturnValue({
+                asScopedToNamespace: vi.fn().mockReturnValue(soClient),
               }),
             },
-            executionContext: { withContext: jest.fn(<T>(_ctx: unknown, fn: () => T) => fn()) },
+            executionContext: { withContext: vi.fn(<T>(_ctx: unknown, fn: () => T) => fn()) },
           },
           { taskManager: { ensureScheduled: mockEnsureScheduled } },
         ]),
@@ -545,33 +560,33 @@ describe('bootstrapNonPriorityTask', () => {
 
 describe('registerExtractEntityTasks — execution context wrap', () => {
   it('invokes coreStart.executionContext.withContext with the extract-task label and taskInstance.id', async () => {
-    const mockIsDualProcessEnabled = isDualProcessEnabled as jest.MockedFunction<
+    const mockIsDualProcessEnabled = isDualProcessEnabled as MockedFunction<
       typeof isDualProcessEnabled
     >;
-    const mockCreateClient = createLogsExtractionClient as jest.MockedFunction<
+    const mockCreateClient = createLogsExtractionClient as MockedFunction<
       typeof createLogsExtractionClient
     >;
 
     mockIsDualProcessEnabled.mockResolvedValue(false);
     mockCreateClient.mockResolvedValue({
       logsExtractionClient: {
-        extractLogs: jest.fn().mockResolvedValue({ success: true, isRemote: false, count: 0 }),
-        getMergedConfigForType: jest.fn().mockResolvedValue({ frequency: '1m' }),
+        extractLogs: vi.fn().mockResolvedValue({ success: true, isRemote: false, count: 0 }),
+        getMergedConfigForType: vi.fn().mockResolvedValue({ frequency: '1m' }),
       },
     } as unknown as Awaited<ReturnType<typeof createLogsExtractionClient>>);
 
-    const withContextSpy = jest.fn(<T>(_ctx: unknown, fn: () => T) => fn());
+    const withContextSpy = vi.fn(<T>(_ctx: unknown, fn: () => T) => fn());
     const core = {
-      getStartServices: jest
+      getStartServices: vi
         .fn()
         .mockResolvedValue([
           { featureFlags: {}, executionContext: { withContext: withContextSpy } },
         ]),
     } as unknown as EntityStoreCoreSetup;
-    const registerTaskDefinitions = jest.fn();
+    const registerTaskDefinitions = vi.fn();
     const taskManager = { registerTaskDefinitions } as unknown as TaskManagerSetupContract;
     const logger = loggerMock.create();
-    (logger.get as jest.Mock) = jest.fn().mockReturnValue(logger);
+    (logger.get as Mock) = vi.fn().mockReturnValue(logger);
 
     registerExtractEntityTasks({
       taskManager,
@@ -588,7 +603,7 @@ describe('registerExtractEntityTasks — execution context wrap', () => {
       fakeRequest: {},
       signal: new AbortController().signal,
       executionUuid: 'run-1',
-      setCustomTaskRunEventFields: jest.fn(),
+      setCustomTaskRunEventFields: vi.fn(),
     });
 
     await runner.run();

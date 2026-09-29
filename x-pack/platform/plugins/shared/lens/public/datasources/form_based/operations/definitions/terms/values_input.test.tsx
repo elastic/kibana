@@ -5,24 +5,26 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { ValuesInput } from './values_input';
 import type { RenderOptions } from '@testing-library/react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());
+vi.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());
 
 const renderValuesInput = (
   {
     value = 5,
-    onChange = jest.fn(),
+    onChange = vi.fn(),
   }: {
     value?: number;
     onChange?: (value: number) => void;
   } = {
     value: 5,
-    onChange: jest.fn(),
+    onChange: vi.fn(),
   },
   renderOptions?: RenderOptions
 ) => {
@@ -33,12 +35,12 @@ const getNumberInput = () => screen.getByLabelText(/number of values/i);
 
 describe('Values', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
   });
 
   it('should render EuiFieldNumber correctly', () => {
@@ -47,16 +49,16 @@ describe('Values', () => {
   });
 
   it('should not run onChange function on mount', () => {
-    const onChangeSpy = jest.fn();
+    const onChangeSpy = vi.fn();
     renderValuesInput({ onChange: onChangeSpy });
 
     expect(onChangeSpy).not.toHaveBeenCalled();
   });
 
   it('should run onChange function on update', async () => {
-    const onChangeSpy = jest.fn();
+    const onChangeSpy = vi.fn();
     renderValuesInput({ onChange: onChangeSpy });
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.type(getNumberInput(), '{backspace}7');
 
     expect(getNumberInput()).toHaveValue(7);
@@ -65,9 +67,9 @@ describe('Values', () => {
   });
 
   it('should not run onChange function on update when value is out of 1-10000 range', async () => {
-    const onChangeSpy = jest.fn();
+    const onChangeSpy = vi.fn();
     renderValuesInput({ onChange: onChangeSpy });
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.type(getNumberInput(), '{backspace}10007');
 
     expect(getNumberInput()).toHaveValue(10007);
@@ -81,7 +83,7 @@ describe('Values', () => {
     expect(
       screen.getByText('Value is lower than the minimum 1, the minimum value is used instead.')
     ).toBeInTheDocument();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.type(getNumberInput(), '{backspace}{backspace}10007');
     expect(getNumberInput()).toBeInvalid();
     expect(
@@ -99,7 +101,7 @@ describe('Values', () => {
 
     renderValuesInput({ value: 123 }, { wrapper: Wrapper });
 
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     async function changeAndBlur(newValue: string) {
       await user.type(getNumberInput(), newValue);
       await user.click(

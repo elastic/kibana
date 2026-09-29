@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -16,24 +19,33 @@ import { useWorkflowEditorLink } from '../../../use_workflow_editor_link';
 import { classifyFailure } from './helpers/classify_failure';
 import { FailureActions } from '.';
 
-jest.mock('./helpers/classify_failure', () => ({
-  classifyFailure: jest.fn(),
-}));
+vi.mock('./helpers/classify_failure', () => {
+      const mocked = {
+      classifyFailure: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+vi.mock('../../../../../common/lib/kibana', () => {
+      const mocked = {
+      useKibana: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../use_workflow_editor_link', () => ({
-  useWorkflowEditorLink: jest.fn(),
-}));
+vi.mock('../../../use_workflow_editor_link', () => {
+      const mocked = {
+      useWorkflowEditorLink: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockClassifyFailure = classifyFailure as jest.Mock;
-const mockGetUrlForApp = jest.fn();
-const mockUseKibana = useKibana as jest.Mock;
-const mockUseWorkflowEditorLink = useWorkflowEditorLink as jest.Mock;
+const mockClassifyFailure = classifyFailure as Mock;
+const mockGetUrlForApp = vi.fn();
+const mockUseKibana = useKibana as Mock;
+const mockUseWorkflowEditorLink = useWorkflowEditorLink as Mock;
 
-const { classifyFailure: realClassifyFailure } = jest.requireActual('./helpers/classify_failure');
+const { classifyFailure: realClassifyFailure } = (await vi.importActual('./helpers/classify_failure'));
 
 const defaultAggregatedExecution: AggregatedWorkflowExecution = {
   status: ExecutionStatus.FAILED,
@@ -44,7 +56,7 @@ const defaultAggregatedExecution: AggregatedWorkflowExecution = {
 const defaultEditorUrl = 'http://localhost:5601/app/workflows/workflow-123';
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 
   // Default: delegate to the real implementation.
   mockClassifyFailure.mockImplementation(realClassifyFailure);
@@ -63,7 +75,7 @@ beforeEach(() => {
 
   mockUseWorkflowEditorLink.mockReturnValue({
     editorUrl: defaultEditorUrl,
-    navigateToEditor: jest.fn(),
+    navigateToEditor: vi.fn(),
     resolvedWorkflowId: 'workflow-123',
   });
 });
@@ -293,7 +305,7 @@ describe('FailureActions', () => {
     it('renders nothing when editorUrl is null', () => {
       mockUseWorkflowEditorLink.mockReturnValue({
         editorUrl: null,
-        navigateToEditor: jest.fn(),
+        navigateToEditor: vi.fn(),
         resolvedWorkflowId: null,
       });
 

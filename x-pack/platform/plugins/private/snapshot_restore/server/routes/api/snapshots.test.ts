@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { errors } from '@elastic/elasticsearch';
 import { addBasePath } from '../helpers';
 import { registerSnapshotsRoutes } from './snapshots';
@@ -567,7 +569,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
 
     it('registers the route with a 30 minute idle socket timeout', () => {
       const localRouter = new RouterMock();
-      const post = jest.spyOn(localRouter, 'post');
+      const post = vi.spyOn(localRouter, 'post');
 
       registerSnapshotsRoutes({ ...routeDependencies, router: localRouter });
 
@@ -698,7 +700,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
           return firstDelete;
         });
         deleteSnapshotFn.mockResolvedValueOnce({ acknowledged: true });
-        const onResponse = jest.fn();
+        const onResponse = vi.fn();
 
         const response = router.runRequest(mockRequest).then(onResponse);
         await firstDeleteStarted;

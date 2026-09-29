@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderRuleStats } from './rule_stats';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
@@ -16,11 +18,11 @@ const STAT_BUTTON_CLASS = 'euiButtonEmpty';
 
 describe('Rule stats', () => {
   const mockedLocator = {
-    navigate: jest.fn(),
+    navigate: vi.fn(),
   } as unknown as LocatorPublic<RulesLocatorParams>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders all rule stats', async () => {

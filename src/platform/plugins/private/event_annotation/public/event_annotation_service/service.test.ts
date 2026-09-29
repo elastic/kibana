@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { CoreStart } from '@kbn/core/public';
 import type {
   ContentClient,
@@ -108,11 +111,11 @@ const annotationResolveMocks: EventAnnotationConfig[] = [
 ];
 
 const contentClient = {
-  get: jest.fn(),
-  search: jest.fn(),
-  create: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
+  get: vi.fn(),
+  search: vi.fn(),
+  create: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
 } as unknown as ContentClient;
 
 let core: CoreStart;
@@ -122,25 +125,25 @@ describe('Event Annotation Service', () => {
 
   beforeEach(() => {
     core = coreMock.createStart();
-    (contentClient.create as jest.Mock).mockImplementation(() => {
+    (contentClient.create as Mock).mockImplementation(() => {
       return { item: annotationGroupResolveMocks.multiAnnotations };
     });
-    (contentClient.get as jest.Mock).mockImplementation(({ contentTypeId, id }) => {
+    (contentClient.get as Mock).mockImplementation(({ contentTypeId, id }) => {
       const typedId = id as keyof typeof annotationGroupResolveMocks;
       return { item: annotationGroupResolveMocks[typedId] };
     });
-    (contentClient.search as jest.Mock).mockResolvedValue({
+    (contentClient.search as Mock).mockResolvedValue({
       pagination: { total: 10 },
       hits: Object.values(annotationGroupResolveMocks),
     });
-    (contentClient.delete as jest.Mock).mockResolvedValue({});
+    (contentClient.delete as Mock).mockResolvedValue({});
     eventAnnotationService = getEventAnnotationService(core, {
       client: contentClient,
     } as ContentManagementPublicStart);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('toExpression', () => {
@@ -532,7 +535,7 @@ describe('Event Annotation Service', () => {
 
       expect(content).toMatchSnapshot();
 
-      expect((contentClient.search as jest.Mock).mock.calls).toMatchInlineSnapshot(`
+      expect((contentClient.search as Mock).mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
             Object {

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 
@@ -14,13 +16,13 @@ import { normalizeProjectPath } from './normalize_project_path';
 
 describe('normalizeProjectPath', () => {
   it('returns undefined when project path is not set', () => {
-    const warning = jest.fn();
+    const warning = vi.fn();
     expect(normalizeProjectPath(undefined, { warning })).toBeUndefined();
     expect(warning).not.toHaveBeenCalled();
   });
 
   it('returns the same project path when tsconfig.json is passed', () => {
-    const warning = jest.fn();
+    const warning = vi.fn();
     const projectPath = '/repo/packages/foo/tsconfig.json';
 
     expect(normalizeProjectPath(projectPath, { warning })).toBe(projectPath);
@@ -28,7 +30,7 @@ describe('normalizeProjectPath', () => {
   });
 
   it('normalizes tsconfig.type_check.json to tsconfig.json and logs a warning', () => {
-    const warning = jest.fn();
+    const warning = vi.fn();
     const projectPath = Path.resolve(REPO_ROOT, 'packages/foo/tsconfig.type_check.json');
     const normalizedProjectPath = Path.resolve(REPO_ROOT, 'packages/foo/tsconfig.json');
 

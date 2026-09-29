@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { renderHook, waitFor } from '@testing-library/react';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -13,17 +16,20 @@ import { useAllExceptionLists } from '.';
 import { findRuleExceptionReferences } from '../../../detection_engine/rule_management/api/api';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
-jest.mock('../../../detection_engine/rule_management/api/api', () => ({
-  findRuleExceptionReferences: jest.fn(),
-}));
-jest.mock('../../../common/components/user_privileges');
+vi.mock('../../../detection_engine/rule_management/api/api', () => {
+      const mocked = {
+      findRuleExceptionReferences: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../common/components/user_privileges');
 
-const findRuleExceptionReferencesMock = findRuleExceptionReferences as jest.Mock;
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+const findRuleExceptionReferencesMock = findRuleExceptionReferences as Mock;
+const useUserPrivilegesMock = useUserPrivileges as Mock;
 
 describe('useAllExceptionLists', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useUserPrivilegesMock.mockReturnValue({
       rulesPrivileges: { rules: { read: true } },
     });

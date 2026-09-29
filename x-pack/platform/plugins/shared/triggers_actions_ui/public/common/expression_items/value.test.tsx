@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import * as React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -27,7 +29,7 @@ describe('value expression', () => {
         description="test"
         value={1000}
         errors={[]}
-        onChangeSelectedValue={jest.fn()}
+        onChangeSelectedValue={vi.fn()}
       />
     );
 
@@ -50,7 +52,7 @@ describe('value expression', () => {
         description="test"
         value={1000}
         errors={['value is not valid']}
-        onChangeSelectedValue={jest.fn()}
+        onChangeSelectedValue={vi.fn()}
       />
     );
 
@@ -70,7 +72,7 @@ describe('value expression', () => {
         description="test"
         value={1000}
         errors={[]}
-        onChangeSelectedValue={jest.fn()}
+        onChangeSelectedValue={vi.fn()}
       />
     );
 
@@ -86,7 +88,7 @@ describe('value expression', () => {
 
   it('emits onChangeSelectedValue action when value is updated', async () => {
     const user = userEvent.setup();
-    const onChangeSelectedValue = jest.fn();
+    const onChangeSelectedValue = vi.fn();
     renderWithIntl(
       <ValueExpression
         description="test"

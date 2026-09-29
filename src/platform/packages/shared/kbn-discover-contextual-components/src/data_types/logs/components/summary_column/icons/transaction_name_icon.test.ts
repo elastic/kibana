@@ -7,20 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { render } from '@testing-library/react';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { TransactionNameIcon } from './transaction_name_icon';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: jest.fn(() => ({
-    euiTheme: {
-      size: {
-        xs: '',
-      },
-    },
-  })),
-}));
+vi.mock('@elastic/eui', async () => {
+      const mocked = {
+      ...(await vi.importActual('@elastic/eui')),
+      useEuiTheme: vi.fn(() => ({
+        euiTheme: {
+          size: {
+            xs: '',
+          },
+        },
+      })),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('TransactionNameIcon', () => {
   const dataTestSub = 'discoverContextualComponentsSummaryColumnTransactionNameIcon';

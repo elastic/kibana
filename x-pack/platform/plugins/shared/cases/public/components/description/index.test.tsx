@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,8 +18,8 @@ import { Description } from '.';
 import { noUpdateCasesPermissions, renderWithTestingProviders } from '../../common/mock';
 import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/navigation/hooks');
+vi.mock('../../common/lib/kibana');
+vi.mock('../../common/navigation/hooks');
 
 const defaultProps = {
   appId: 'securitySolution',
@@ -28,10 +30,10 @@ const defaultProps = {
 };
 
 describe('Description', () => {
-  const onUpdateField = jest.fn();
+  const onUpdateField = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders description correctly', async () => {

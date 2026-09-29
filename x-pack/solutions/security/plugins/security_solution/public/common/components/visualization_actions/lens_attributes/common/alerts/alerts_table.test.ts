@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { renderHook } from '@testing-library/react';
 import { wrapper } from '../../../mocks';
 
@@ -21,22 +23,28 @@ interface VisualizationState {
   };
 }
 
-jest.mock('uuid', () => ({
-  ...jest.requireActual('uuid'),
-  v4: jest.fn().mockReturnValue('generated-uuid'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      ...require('uuid'),
+      v4: vi.fn().mockReturnValue('generated-uuid'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../../../utils/route/use_route_spy', () => ({
-  useRouteSpy: jest.fn().mockReturnValue([
-    {
-      pageName: 'alerts',
-    },
-  ]),
-}));
+vi.mock('../../../../../utils/route/use_route_spy', () => {
+      const mocked = {
+      useRouteSpy: vi.fn().mockReturnValue([
+        {
+          pageName: 'alerts',
+        },
+      ]),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getAlertsTableLensAttributes', () => {
   beforeAll(() => {
-    jest
+    vi
       .mocked(useDataView)
       .mockReturnValue(withIndices(['signal-index'], 'security-solution-my-test'));
   });

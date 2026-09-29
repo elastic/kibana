@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -17,7 +19,7 @@ import {
 
 const BASE_SUCCESSFUL_DATA: EditDataLifecycleFlyoutProps['successfulData'] = {
   inheritLifecycle: false,
-  onInheritLifecycleChange: jest.fn(),
+  onInheritLifecycleChange: vi.fn(),
   dlm: {
     hasEnterpriseLicense: true,
     hasDefaultSnapshotRepository: true,
@@ -29,7 +31,7 @@ const BASE_SUCCESSFUL_DATA: EditDataLifecycleFlyoutProps['successfulData'] = {
       isCloudEnabled: true,
       canManageLicense: true,
       trialDaysLeft: undefined,
-      onUpgrade: jest.fn(),
+      onUpgrade: vi.fn(),
       subscriptionFeaturesUrl: 'https://www.elastic.co/subscriptions/cloud',
     },
   },
@@ -37,15 +39,15 @@ const BASE_SUCCESSFUL_DATA: EditDataLifecycleFlyoutProps['successfulData'] = {
 
 const BASE_FAILED_DATA: EditDataLifecycleFlyoutProps['failedData'] = {
   inheritLifecycle: false,
-  onInheritLifecycleChange: jest.fn(),
+  onInheritLifecycleChange: vi.fn(),
   failureStoreEnabled: true,
-  onFailureStoreChange: jest.fn(),
+  onFailureStoreChange: vi.fn(),
   deletePhaseDefaultValue: { enabled: false, value: '60', unit: 'd' },
 };
 
 const renderFlyout = (props?: Partial<EditDataLifecycleFlyoutProps>) => {
-  const onClose = jest.fn();
-  const onApply = jest.fn();
+  const onClose = vi.fn();
+  const onApply = vi.fn();
 
   const result = render(
     <IntlProvider>
@@ -64,7 +66,7 @@ const renderFlyout = (props?: Partial<EditDataLifecycleFlyoutProps>) => {
 
 describe('EditDataLifecycleFlyout', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the flyout title and both tabs', () => {
@@ -173,7 +175,7 @@ describe('EditDataLifecycleFlyout', () => {
   });
 
   it('calls onPolicyInspect when inspect action is clicked', () => {
-    const onPolicyInspect = jest.fn();
+    const onPolicyInspect = vi.fn();
     const serializedPolicy: SerializedPolicy = { name: 'my_policy', phases: {} };
 
     const { getByTestId } = renderFlyout({
@@ -181,10 +183,10 @@ describe('EditDataLifecycleFlyout', () => {
         ...BASE_SUCCESSFUL_DATA,
         ilm: {
           method: 'ilm',
-          onMethodChange: jest.fn(),
+          onMethodChange: vi.fn(),
           policies: [{ name: 'my_policy', phases: {}, serializedPolicy }],
           selectedPolicyName: 'my_policy',
-          onPolicySelect: jest.fn(),
+          onPolicySelect: vi.fn(),
           onPolicyInspect,
         },
       },
@@ -271,10 +273,10 @@ describe('EditDataLifecycleFlyout', () => {
         inheritLifecycle: false,
         ilm: {
           method: 'ilm',
-          onMethodChange: jest.fn(),
+          onMethodChange: vi.fn(),
           policies: [],
           selectedPolicyName: undefined,
-          onPolicySelect: jest.fn(),
+          onPolicySelect: vi.fn(),
         },
       },
     });
@@ -289,10 +291,10 @@ describe('EditDataLifecycleFlyout', () => {
         inheritLifecycle: false,
         ilm: {
           method: 'ilm',
-          onMethodChange: jest.fn(),
+          onMethodChange: vi.fn(),
           policies: [{ name: 'my-policy', phases: {} }],
           selectedPolicyName: 'my-policy',
-          onPolicySelect: jest.fn(),
+          onPolicySelect: vi.fn(),
         },
       },
     });
@@ -307,10 +309,10 @@ describe('EditDataLifecycleFlyout', () => {
         inheritLifecycle: true,
         ilm: {
           method: 'ilm',
-          onMethodChange: jest.fn(),
+          onMethodChange: vi.fn(),
           policies: [],
           selectedPolicyName: undefined,
-          onPolicySelect: jest.fn(),
+          onPolicySelect: vi.fn(),
         },
       },
     });

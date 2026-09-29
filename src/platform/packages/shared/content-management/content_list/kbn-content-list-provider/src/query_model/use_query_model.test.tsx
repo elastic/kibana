@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
@@ -19,7 +21,7 @@ import { EMPTY_MODEL } from './types';
 import { buildSchema } from './parse_query_text';
 import { useQueryModel } from './use_query_model';
 
-const mockFindItems = jest.fn(
+const mockFindItems = vi.fn(
   async (_params: FindItemsParams): Promise<FindItemsResult> => ({
     items: [],
     total: 0,
@@ -98,7 +100,7 @@ const useQueryModelWithCache = (queryText: string) => {
 
 describe('useQueryModel', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the empty model for blank query text', () => {

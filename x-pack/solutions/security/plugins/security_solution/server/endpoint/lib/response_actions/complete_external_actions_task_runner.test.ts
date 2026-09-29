@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { createMockEndpointAppContextService } from '../../mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { CompleteExternalActionsTaskRunner } from './complete_external_actions_task_runner';
@@ -21,10 +24,10 @@ import {
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { fetchSpaceIdsWithMaybePendingActions as _fetchSpaceIdsWithMaybePendingActionsMock } from '../../services/actions/utils/fetch_space_ids_with_maybe_pending_actions';
 
-jest.mock('../../services/actions/utils/fetch_space_ids_with_maybe_pending_actions');
+vi.mock('../../services/actions/utils/fetch_space_ids_with_maybe_pending_actions');
 
 const fetchSpaceIdsWithMaybePendingActionsMock =
-  _fetchSpaceIdsWithMaybePendingActionsMock as jest.Mock;
+  _fetchSpaceIdsWithMaybePendingActionsMock as Mock;
 
 describe('CompleteExternalTaskRunner class', () => {
   let endpointContextServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
@@ -44,10 +47,10 @@ describe('CompleteExternalTaskRunner class', () => {
 
     const actionGenerator = new EndpointActionGenerator('seed');
 
-    (endpointContextServicesMock.getInternalResponseActionsClient as jest.Mock).mockImplementation(
+    (endpointContextServicesMock.getInternalResponseActionsClient as Mock).mockImplementation(
       () => {
         const clientMock = responseActionsClientMock.create();
-        (clientMock.processPendingActions as jest.Mock).mockImplementation(
+        (clientMock.processPendingActions as Mock).mockImplementation(
           async ({ addToQueue }) => {
             addToQueue(actionGenerator.generateResponse());
           }
@@ -57,16 +60,16 @@ describe('CompleteExternalTaskRunner class', () => {
     );
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     fetchSpaceIdsWithMaybePendingActionsMock.mockRestore();
     fetchSpaceIdsWithMaybePendingActionsMock.mockImplementation(
-      jest.requireActual('../../services/actions/utils/fetch_space_ids_with_maybe_pending_actions')
+      (await vi.importActual('../../services/actions/utils/fetch_space_ids_with_maybe_pending_actions'))
         .fetchSpaceIdsWithMaybePendingActions
     );
   });
 
   it('should do nothing if license is not enterprise', async () => {
-    (endpointContextServicesMock.getLicenseService().isEnterprise as jest.Mock).mockReturnValueOnce(
+    (endpointContextServicesMock.getLicenseService().isEnterprise as Mock).mockReturnValueOnce(
       false
     );
     await runnerInstance.run();
@@ -93,10 +96,10 @@ describe('CompleteExternalTaskRunner class', () => {
   });
 
   it('should NOT log an error if agentType is not configured with a connector', async () => {
-    (endpointContextServicesMock.getInternalResponseActionsClient as jest.Mock).mockImplementation(
+    (endpointContextServicesMock.getInternalResponseActionsClient as Mock).mockImplementation(
       () => {
         const clientMock = responseActionsClientMock.create();
-        (clientMock.processPendingActions as jest.Mock).mockImplementation(async () => {
+        (clientMock.processPendingActions as Mock).mockImplementation(async () => {
           throw new ResponseActionsConnectorNotConfiguredError('foo');
         });
         return clientMock;
@@ -110,7 +113,7 @@ describe('CompleteExternalTaskRunner class', () => {
   it('should call `processPendingAction` for each external agent type', async () => {
     await runnerInstance.run();
     const getInternalResponseActionsClientMock = (
-      endpointContextServicesMock.getInternalResponseActionsClient as jest.Mock
+      endpointContextServicesMock.getInternalResponseActionsClient as Mock
     ).mock;
 
     RESPONSE_ACTION_AGENT_TYPE.filter((agentType) => agentType !== 'endpoint').forEach(
@@ -130,7 +133,7 @@ describe('CompleteExternalTaskRunner class', () => {
     fetchSpaceIdsWithMaybePendingActionsMock.mockResolvedValue(['foo', 'bar']);
     await runnerInstance.run();
     const getInternalResponseActionsClientMock =
-      endpointContextServicesMock.getInternalResponseActionsClient as jest.Mock;
+      endpointContextServicesMock.getInternalResponseActionsClient as Mock;
 
     RESPONSE_ACTION_AGENT_TYPE.filter((agentType) => agentType !== 'endpoint').forEach(
       (agentType) => {
@@ -198,10 +201,10 @@ describe('CompleteExternalTaskRunner class', () => {
     let resolveProcessPendingActionsPromise: (result: unknown) => void;
     let processPendingActionsAbortSignal: AbortSignal;
 
-    (endpointContextServicesMock.getInternalResponseActionsClient as jest.Mock).mockImplementation(
+    (endpointContextServicesMock.getInternalResponseActionsClient as Mock).mockImplementation(
       () => {
         const clientMock = responseActionsClientMock.create();
-        (clientMock.processPendingActions as jest.Mock).mockImplementation(
+        (clientMock.processPendingActions as Mock).mockImplementation(
           async ({ abortSignal }) => {
             return new Promise((resolve) => {
               if (!resolveProcessPendingActionsPromise) {

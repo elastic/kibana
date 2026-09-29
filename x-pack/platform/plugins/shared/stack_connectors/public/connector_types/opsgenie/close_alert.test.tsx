@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { screen, render, within, fireEvent, waitFor } from '@testing-library/react';
 import { CloseAlert } from './close_alert';
 import userEvent from '@testing-library/user-event';
 
 describe('CloseAlert', () => {
-  const editSubAction = jest.fn();
-  const editOptionalSubAction = jest.fn();
+  const editSubAction = vi.fn();
+  const editOptionalSubAction = vi.fn();
 
   const options = {
     showSaveError: false,
@@ -25,7 +27,7 @@ describe('CloseAlert', () => {
     editOptionalSubAction,
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('does not render the additional options by default', () => {
     render(<CloseAlert {...options} />);

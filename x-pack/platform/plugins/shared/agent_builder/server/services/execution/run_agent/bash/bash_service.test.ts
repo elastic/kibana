@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { z } from '@kbn/zod/v4';
 import { BashService } from './bash_service';
 import type { ExecToolFn } from './exec_tool_command';
@@ -15,9 +18,9 @@ import type { IWorkspaceClient } from '../../../workspaces';
 import { SAFEGUARD_TOKEN_COUNT } from './output_truncation';
 
 const makeFixture = async (opts?: { workspaceId?: string; generateId?: () => string }) => {
-  const workspaceClient: jest.Mocked<IWorkspaceClient> = {
-    load: jest.fn().mockResolvedValue(undefined),
-    save: jest.fn().mockResolvedValue(undefined),
+  const workspaceClient: Mocked<IWorkspaceClient> = {
+    load: vi.fn().mockResolvedValue(undefined),
+    save: vi.fn().mockResolvedValue(undefined),
   };
   const workspaceVolume = new WorkspaceVolume({
     workspaceClient,
@@ -42,7 +45,7 @@ const makeBash = (
     filesystemService: fsService,
     workspaceVolume,
     toolAccess: {
-      execToolFn: extra?.execToolFn ?? jest.fn(),
+      execToolFn: extra?.execToolFn ?? vi.fn(),
       resolveToolId: (id) => id,
       getToolSchema: () => z.object({}),
     },
@@ -96,7 +99,7 @@ describe('BashService', () => {
 
   it('returns exit_code 124 on wall-clock timeout', async () => {
     const { fsService, workspaceVolume } = await makeFixture();
-    const execToolFn: ExecToolFn = jest.fn(
+    const execToolFn: ExecToolFn = vi.fn(
       () => new Promise((resolve) => setTimeout(() => resolve({ results: [] }), 500))
     );
     const bash = makeBash(fsService, workspaceVolume, { timeoutMs: 50, execToolFn });
@@ -107,7 +110,7 @@ describe('BashService', () => {
 
   it('exec_tool inside the script invokes the supplied callback', async () => {
     const { fsService, workspaceVolume } = await makeFixture();
-    const execToolFn = jest.fn().mockResolvedValue({
+    const execToolFn = vi.fn().mockResolvedValue({
       results: [{ tool_result_id: 'r1', type: 'other', data: { ok: true } }],
     });
     const bash = makeBash(fsService, workspaceVolume, { execToolFn });

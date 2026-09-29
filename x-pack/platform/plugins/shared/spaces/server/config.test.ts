@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-jest.mock('crypto', () => ({
-  randomBytes: jest.fn(),
-  constants: jest.requireActual('crypto').constants,
-}));
+import { vi } from 'vitest';
 
-jest.mock('@kbn/utils', () => ({
-  getLogsPath: () => '/mock/kibana/logs/path',
-}));
+vi.mock('crypto', () => {
+      const mocked = {
+      randomBytes: vi.fn(),
+      constants: require('crypto').constants,
+    };
+      return { ...mocked, default: mocked };
+    });
+
+vi.mock('@kbn/utils', () => {
+      const mocked = {
+      getLogsPath: () => '/mock/kibana/logs/path',
+    };
+      return { ...mocked, default: mocked };
+    });
 
 import { ConfigSchema } from './config';
 

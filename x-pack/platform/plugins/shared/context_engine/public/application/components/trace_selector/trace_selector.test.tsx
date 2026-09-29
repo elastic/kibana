@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,16 +16,22 @@ import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { TraceSelector } from './trace_selector';
 
-const mockUseAgentBuilderAgents = jest.fn();
-const mockUseIndices = jest.fn();
+const mockUseAgentBuilderAgents = vi.fn();
+const mockUseIndices = vi.fn();
 
-jest.mock('../../hooks/use_agent_builder_agents', () => ({
-  useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
-}));
+vi.mock('../../hooks/use_agent_builder_agents', () => {
+      const mocked = {
+      useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../hooks/use_indices', () => ({
-  useIndices: () => mockUseIndices(),
-}));
+vi.mock('../../hooks/use_indices', () => {
+      const mocked = {
+      useIndices: () => mockUseIndices(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultEbtElement = CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePageTraceSelector;
 
@@ -64,11 +72,11 @@ describe('TraceSelector', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('selecting an agent calls onChange with an elastic_agent trace', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderSelector({ value: undefined, onChange });
 
     fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
@@ -85,7 +93,7 @@ describe('TraceSelector', () => {
   });
 
   it('switching to GenAI Libraries clears the current trace and shows the data stream field', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderSelector({
       value: { type: 'elastic_agent', value: 'agent-1' },
       onChange,
@@ -99,7 +107,7 @@ describe('TraceSelector', () => {
   });
 
   it('selecting a data stream calls onChange with an index trace', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderSelector({
       value: { type: 'index', value: 'logs-original' },
       onChange,
@@ -118,7 +126,7 @@ describe('TraceSelector', () => {
     const nonDefaultEbtElement = CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel;
     renderWithProps({
       value: undefined,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       ebtElement: nonDefaultEbtElement,
     });
 

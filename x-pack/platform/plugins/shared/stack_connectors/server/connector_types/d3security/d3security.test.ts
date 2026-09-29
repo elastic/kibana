@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { D3SecurityConnector } from './d3security';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { CONNECTOR_ID, D3SecurityRunActionResponseSchema } from '@kbn/connector-schemas/d3security';
@@ -24,8 +26,8 @@ describe('D3SecurityConnector', () => {
     },
   });
   const mockResponse = { data: { result: 'success' } };
-  const mockRequest = jest.fn().mockResolvedValue(mockResponse);
-  const mockError = jest.fn().mockImplementation(() => {
+  const mockRequest = vi.fn().mockResolvedValue(mockResponse);
+  const mockError = vi.fn().mockImplementation(() => {
     throw new Error('API Error');
   });
   const logger = loggingSystemMock.createLogger();
@@ -44,7 +46,7 @@ describe('D3SecurityConnector', () => {
     beforeEach(() => {
       // @ts-ignore
       connector.request = mockRequest;
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       connectorUsageCollector = new ConnectorUsageCollector({
         logger,
         connectorId: 'test-connector-id',

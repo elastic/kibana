@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { monaco } from '../../../../monaco_imports';
 import {
   createMonacoProvider,
@@ -18,13 +20,13 @@ describe('Providers Factory', () => {
   const nonDisposedModel = () =>
     ({
       isDisposed: () => false,
-      getValue: jest.fn().mockReturnValue('query text'),
+      getValue: vi.fn().mockReturnValue('query text'),
     } as unknown as monaco.editor.ITextModel);
 
   const disposedModel = () =>
     ({
       isDisposed: () => true,
-      getValue: jest.fn(),
+      getValue: vi.fn(),
     } as unknown as monaco.editor.ITextModel);
 
   describe('createMonacoProvider', () => {
@@ -86,8 +88,8 @@ describe('Providers Factory', () => {
       tokenSource.cancel();
 
       const callbacks = {
-        getSources: jest.fn(async () => []),
-        getVariables: jest.fn().mockReturnValue({}),
+        getSources: vi.fn(async () => []),
+        getVariables: vi.fn().mockReturnValue({}),
       };
 
       const providerPromise = createMonacoProvider({
@@ -109,8 +111,8 @@ describe('Providers Factory', () => {
       const tokenSource = new monaco.CancellationTokenSource();
 
       const callbacks = {
-        getSources: jest.fn(async () => []),
-        getVariables: jest.fn().mockReturnValue({}),
+        getSources: vi.fn(async () => []),
+        getVariables: vi.fn().mockReturnValue({}),
       };
       const providerPromise = createMonacoProvider({
         model: nonDisposedModel(),

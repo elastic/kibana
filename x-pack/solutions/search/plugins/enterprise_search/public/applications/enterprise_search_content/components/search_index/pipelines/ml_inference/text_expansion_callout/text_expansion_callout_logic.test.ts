@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { LogicMounter } from '../../../../../../__mocks__/kea_logic';
 
 import type { HttpResponse } from '@kbn/core/public';
@@ -39,7 +41,7 @@ const DEFAULT_VALUES: TextExpansionCalloutValues = {
   elserModelId: '.elser_model_2',
 };
 
-jest.useFakeTimers();
+vi.useFakeTimers();
 
 describe('TextExpansionCalloutLogic', () => {
   const { mount } = new LogicMounter(TextExpansionCalloutLogic);
@@ -54,7 +56,7 @@ describe('TextExpansionCalloutLogic', () => {
   );
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mountCreateTextExpansionModelApiLogic();
     mountFetchTextExpansionModelApiLogic();
     mountStartTextExpansionModelApiLogic();
@@ -100,8 +102,8 @@ describe('TextExpansionCalloutLogic', () => {
     describe('createTextExpansionModelPollingTimeout', () => {
       const duration = 5000;
       it('sets polling timeout', () => {
-        jest.spyOn(global, 'setTimeout');
-        jest.spyOn(TextExpansionCalloutLogic.actions, 'setTextExpansionModelPollingId');
+        vi.spyOn(global, 'setTimeout');
+        vi.spyOn(TextExpansionCalloutLogic.actions, 'setTextExpansionModelPollingId');
 
         TextExpansionCalloutLogic.actions.createTextExpansionModelPollingTimeout(duration);
 
@@ -114,7 +116,7 @@ describe('TextExpansionCalloutLogic', () => {
           textExpansionModelPollTimeoutId: 'timeout-id',
         });
 
-        jest.spyOn(global, 'clearTimeout');
+        vi.spyOn(global, 'clearTimeout');
 
         TextExpansionCalloutLogic.actions.createTextExpansionModelPollingTimeout(duration);
 
@@ -124,8 +126,8 @@ describe('TextExpansionCalloutLogic', () => {
 
     describe('createTextExpansionModelSuccess', () => {
       it('sets createdTextExpansionModel', () => {
-        jest.spyOn(TextExpansionCalloutLogic.actions, 'fetchTextExpansionModel');
-        jest.spyOn(TextExpansionCalloutLogic.actions, 'startPollingTextExpansionModel');
+        vi.spyOn(TextExpansionCalloutLogic.actions, 'fetchTextExpansionModel');
+        vi.spyOn(TextExpansionCalloutLogic.actions, 'startPollingTextExpansionModel');
 
         TextExpansionCalloutLogic.actions.createTextExpansionModelSuccess({
           deploymentState: MlModelDeploymentState.Downloading,
@@ -150,7 +152,7 @@ describe('TextExpansionCalloutLogic', () => {
         mount({
           ...DEFAULT_VALUES,
         });
-        jest.spyOn(TextExpansionCalloutLogic.actions, 'startPollingTextExpansionModel');
+        vi.spyOn(TextExpansionCalloutLogic.actions, 'startPollingTextExpansionModel');
 
         TextExpansionCalloutLogic.actions.fetchTextExpansionModelSuccess(data);
 
@@ -161,7 +163,7 @@ describe('TextExpansionCalloutLogic', () => {
           ...DEFAULT_VALUES,
           textExpansionModelPollTimeoutId: 'timeout-id',
         });
-        jest.spyOn(TextExpansionCalloutLogic.actions, 'createTextExpansionModelPollingTimeout');
+        vi.spyOn(TextExpansionCalloutLogic.actions, 'createTextExpansionModelPollingTimeout');
 
         TextExpansionCalloutLogic.actions.fetchTextExpansionModelSuccess(data);
 
@@ -174,7 +176,7 @@ describe('TextExpansionCalloutLogic', () => {
           ...DEFAULT_VALUES,
           textExpansionModelPollTimeoutId: 'timeout-id',
         });
-        jest.spyOn(TextExpansionCalloutLogic.actions, 'stopPollingTextExpansionModel');
+        vi.spyOn(TextExpansionCalloutLogic.actions, 'stopPollingTextExpansionModel');
 
         TextExpansionCalloutLogic.actions.fetchTextExpansionModelSuccess({
           deploymentState: MlModelDeploymentState.Downloaded,
@@ -194,7 +196,7 @@ describe('TextExpansionCalloutLogic', () => {
           ...DEFAULT_VALUES,
           textExpansionModelPollTimeoutId: 'timeout-id',
         });
-        jest.spyOn(TextExpansionCalloutLogic.actions, 'createTextExpansionModelPollingTimeout');
+        vi.spyOn(TextExpansionCalloutLogic.actions, 'createTextExpansionModelPollingTimeout');
 
         TextExpansionCalloutLogic.actions.fetchTextExpansionModelError({
           body: {
@@ -212,7 +214,7 @@ describe('TextExpansionCalloutLogic', () => {
 
     describe('startPollingTextExpansionModel', () => {
       it('sets polling timeout', () => {
-        jest.spyOn(TextExpansionCalloutLogic.actions, 'createTextExpansionModelPollingTimeout');
+        vi.spyOn(TextExpansionCalloutLogic.actions, 'createTextExpansionModelPollingTimeout');
 
         TextExpansionCalloutLogic.actions.startPollingTextExpansionModel();
 
@@ -226,7 +228,7 @@ describe('TextExpansionCalloutLogic', () => {
           textExpansionModelPollTimeoutId: 'timeout-id',
         });
 
-        jest.spyOn(global, 'clearTimeout');
+        vi.spyOn(global, 'clearTimeout');
 
         TextExpansionCalloutLogic.actions.startPollingTextExpansionModel();
 
@@ -236,7 +238,7 @@ describe('TextExpansionCalloutLogic', () => {
 
     describe('startTextExpansionModelSuccess', () => {
       it('sets startedTextExpansionModel', () => {
-        jest.spyOn(TextExpansionCalloutLogic.actions, 'fetchTextExpansionModel');
+        vi.spyOn(TextExpansionCalloutLogic.actions, 'fetchTextExpansionModel');
 
         TextExpansionCalloutLogic.actions.startTextExpansionModelSuccess({
           deploymentState: MlModelDeploymentState.FullyAllocated,
@@ -254,8 +256,8 @@ describe('TextExpansionCalloutLogic', () => {
           textExpansionModelPollTimeoutId: 'timeout-id',
         });
 
-        jest.spyOn(global, 'clearTimeout');
-        jest.spyOn(TextExpansionCalloutLogic.actions, 'clearTextExpansionModelPollingId');
+        vi.spyOn(global, 'clearTimeout');
+        vi.spyOn(TextExpansionCalloutLogic.actions, 'clearTextExpansionModelPollingId');
 
         TextExpansionCalloutLogic.actions.stopPollingTextExpansionModel();
 

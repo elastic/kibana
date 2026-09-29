@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React, { Suspense } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -12,9 +14,9 @@ import type { IntegrationCardsProps } from './integration_cards';
 import { IntegrationCards } from './integration_cards';
 import { TestProviders } from '../../../common/mock';
 
-const mockNavigateTo = jest.fn();
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
+const mockNavigateTo = vi.fn();
+vi.mock('../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../common/lib/kibana'));
   return {
     ...original,
     useNavigation: () => ({
@@ -23,14 +25,20 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../common/hooks/integrations/use_integration_link_state', () => ({
-  useIntegrationLinkState: jest.fn(() => {}),
-}));
+vi.mock('../../../common/hooks/integrations/use_integration_link_state', () => {
+      const mocked = {
+      useIntegrationLinkState: vi.fn(() => {}),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockAddPathParamToUrl = jest.fn((...args: unknown[]) => 'URL_WITH_PARAMS');
-jest.mock('../../../common/utils/integrations', () => ({
-  addPathParamToUrl: (...args: unknown[]) => mockAddPathParamToUrl(...args),
-}));
+const mockAddPathParamToUrl = vi.fn((...args: unknown[]) => 'URL_WITH_PARAMS');
+vi.mock('../../../common/utils/integrations', () => {
+      const mocked = {
+      addPathParamToUrl: (...args: unknown[]) => mockAddPathParamToUrl(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const uninstalledOktaIntegration = {
   packageInfo: {
@@ -58,11 +66,14 @@ const installedAdIntegration = {
 
 const mockIntegrations = [uninstalledOktaIntegration, installedAdIntegration];
 
-const mockUseEntityAnalyticsIntegrations = jest.fn(() => mockIntegrations);
+const mockUseEntityAnalyticsIntegrations = vi.fn(() => mockIntegrations);
 
-jest.mock('./hooks/use_entity_analytics_integrations', () => ({
-  useEntityAnalyticsIntegrations: () => mockUseEntityAnalyticsIntegrations(),
-}));
+vi.mock('./hooks/use_entity_analytics_integrations', () => {
+      const mocked = {
+      useEntityAnalyticsIntegrations: () => mockUseEntityAnalyticsIntegrations(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 // Helper component to wrap IntegrationCards with Suspense
 const IntegrationCardsWithSuspense = (props: IntegrationCardsProps) => (
@@ -72,10 +83,10 @@ const IntegrationCardsWithSuspense = (props: IntegrationCardsProps) => (
 );
 
 describe('IntegrationCards', () => {
-  const mockOnIntegrationInstalled = jest.fn();
+  const mockOnIntegrationInstalled = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders integration cards for all available integrations', async () => {

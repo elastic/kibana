@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { percentileRank } from './percentile_rank';
 import type { Panel, Series } from '../../../../../common/types';
 
@@ -62,7 +64,7 @@ describe('percentile_rank(resp, panel, series, meta, extractFields)', () => {
   });
 
   test('calls next when finished', async () => {
-    const next = jest.fn();
+    const next = vi.fn();
 
     await percentileRank(resp, panel, series, {})(next)([]);
 

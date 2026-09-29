@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AssistantConversationBanner } from '.';
@@ -11,25 +14,31 @@ import type { AIConnector, Conversation } from '../../..';
 import { useAssistantContext } from '../../..';
 import { customConvo } from '../../mock/conversation';
 
-jest.mock('../../..');
+vi.mock('../../..');
 
-jest.mock('../../connectorland/connector_missing_callout', () => ({
-  ConnectorMissingCallout: () => <div data-test-subj="connector-missing-callout" />,
-}));
+vi.mock('../../connectorland/connector_missing_callout', () => {
+      const mocked = {
+      ConnectorMissingCallout: () => <div data-test-subj="connector-missing-callout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./elastic_llm_callout', () => ({
-  ElasticLlmCallout: () => <div data-test-subj="elastic-llm-callout" />,
-}));
+vi.mock('./elastic_llm_callout', () => {
+      const mocked = {
+      ElasticLlmCallout: () => <div data-test-subj="elastic-llm-callout" />,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('AssistantConversationBanner', () => {
-  const setIsSettingsModalVisible = jest.fn();
+  const setIsSettingsModalVisible = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders ConnectorMissingCallout when shouldShowMissingConnectorCallout is true', () => {
-    (useAssistantContext as jest.Mock).mockReturnValue({ inferenceEnabled: true });
+    (useAssistantContext as Mock).mockReturnValue({ inferenceEnabled: true });
 
     render(
       <AssistantConversationBanner
@@ -45,7 +54,7 @@ describe('AssistantConversationBanner', () => {
   });
 
   it('renders ElasticLlmCallout when Elastic LLM is enabled', () => {
-    (useAssistantContext as jest.Mock).mockReturnValue({ inferenceEnabled: true });
+    (useAssistantContext as Mock).mockReturnValue({ inferenceEnabled: true });
     const mockConnectors = [
       { id: 'mockLLM', actionTypeId: '.inference', isPreconfigured: false, isEis: true },
     ] as AIConnector[];
@@ -73,7 +82,7 @@ describe('AssistantConversationBanner', () => {
   });
 
   it('renders nothing when no conditions are met', () => {
-    (useAssistantContext as jest.Mock).mockReturnValue({ inferenceEnabled: false });
+    (useAssistantContext as Mock).mockReturnValue({ inferenceEnabled: false });
 
     const { container } = render(
       <AssistantConversationBanner

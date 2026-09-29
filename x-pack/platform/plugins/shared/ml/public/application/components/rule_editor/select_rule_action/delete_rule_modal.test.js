@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { fireEvent, screen } from '@testing-library/react';
@@ -12,7 +14,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import { DeleteRuleModal } from './delete_rule_modal';
 
 describe('DeleteRuleModal', () => {
-  const deleteRuleAtIndex = jest.fn();
+  const deleteRuleAtIndex = vi.fn();
 
   const requiredProps = {
     ruleIndex: 0,

@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { firstValueFrom, ReplaySubject, take } from 'rxjs';
 import { analyticsClientMock } from './analytics_service.test.mocks';
 import { trackClicks } from './track_clicks';
 
 describe('trackClicks', () => {
-  const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
-  const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+  const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
+  const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('registers the analytics event type and a listener to the "click" events', () => {

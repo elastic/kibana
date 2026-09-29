@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
@@ -15,13 +17,19 @@ import { snoozeRuleRoute } from './snooze_rule_route';
 
 const rulesClient = rulesClientMock.create();
 const mockedUUID = 'schedule-id-1';
-jest.mock('../../../../../lib/license_api_access', () => ({
-  verifyApiAccess: jest.fn(),
-}));
+vi.mock('../../../../../lib/license_api_access', () => {
+      const mocked = {
+      verifyApiAccess: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('schedule-id-1'),
-}));
+vi.mock('uuid', () => {
+      const mocked = {
+      v4: vi.fn().mockReturnValue('schedule-id-1'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const schedule = {
   custom: {
@@ -67,8 +75,8 @@ rulesClient.update.mockResolvedValueOnce(mockedRule as unknown as SanitizedRule)
 
 describe('snoozeAlertRoute', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    rulesClient.get = jest.fn().mockResolvedValue(mockedRule);
+    vi.clearAllMocks();
+    rulesClient.get = vi.fn().mockResolvedValue(mockedRule);
   });
 
   it('snoozes a rule', async () => {
@@ -442,7 +450,7 @@ describe('snoozeAlertRoute', () => {
     it('returns 400 if the rule type is internally managed', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
-      rulesClient.get = jest
+      rulesClient.get = vi
         .fn()
         .mockResolvedValue({ ...mockedRule, alertTypeId: 'test.internal-rule-type' });
 

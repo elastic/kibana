@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ConfigInputField, ConfigInputListField, ConfigNumberField } from './configuration_field';
@@ -30,11 +32,11 @@ describe('ConfigInputField', () => {
 
   const defaultProps = {
     isLoading: false,
-    validateAndSetConfigValue: jest.fn(),
+    validateAndSetConfigValue: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with default value when value is null', () => {
@@ -54,7 +56,7 @@ describe('ConfigInputField', () => {
   });
 
   it('allows user to clear the field completely without resetting to default', () => {
-    const validateAndSetConfigValue = jest.fn();
+    const validateAndSetConfigValue = vi.fn();
     const configEntry = createConfigEntry({
       value: null,
       default_value: 'https://api.example.com/v1',
@@ -79,7 +81,7 @@ describe('ConfigInputField', () => {
   });
 
   it('does not reset to default after rerender when field is cleared', () => {
-    const validateAndSetConfigValue = jest.fn();
+    const validateAndSetConfigValue = vi.fn();
     const configEntry = createConfigEntry({
       value: null,
       default_value: 'https://api.example.com/v1',
@@ -112,7 +114,7 @@ describe('ConfigInputField', () => {
   });
 
   it('allows user to type a new value after clearing', () => {
-    const validateAndSetConfigValue = jest.fn();
+    const validateAndSetConfigValue = vi.fn();
     const configEntry = createConfigEntry({
       value: null,
       default_value: 'https://api.example.com/v1',
@@ -180,11 +182,11 @@ describe('ConfigInputListField', () => {
 
   const defaultProps = {
     isLoading: false,
-    validateAndSetConfigValue: jest.fn(),
+    validateAndSetConfigValue: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders existing list values', () => {
@@ -200,7 +202,7 @@ describe('ConfigInputListField', () => {
   });
 
   it('adds a trimmed list value', () => {
-    const validateAndSetConfigValue = jest.fn();
+    const validateAndSetConfigValue = vi.fn();
     render(
       <ConfigInputListField
         {...defaultProps}
@@ -217,7 +219,7 @@ describe('ConfigInputListField', () => {
   });
 
   it('emits null and does not restore the default when cleared', () => {
-    const validateAndSetConfigValue = jest.fn();
+    const validateAndSetConfigValue = vi.fn();
     const configEntry = createConfigEntry({ default_value: ['default-scope'] });
     const { rerender } = render(
       <ConfigInputListField
@@ -272,11 +274,11 @@ describe('ConfigNumberField', () => {
 
   const defaultProps = {
     isLoading: false,
-    validateAndSetConfigValue: jest.fn(),
+    validateAndSetConfigValue: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders with default value when value is null', () => {
@@ -296,7 +298,7 @@ describe('ConfigNumberField', () => {
   });
 
   it('allows user to clear the field using the clear button', () => {
-    const validateAndSetConfigValue = jest.fn();
+    const validateAndSetConfigValue = vi.fn();
     const configEntry = createConfigEntry({
       value: null,
       default_value: 1024,
@@ -318,7 +320,7 @@ describe('ConfigNumberField', () => {
   });
 
   it('does not reset to default after rerender when field is cleared', () => {
-    const validateAndSetConfigValue = jest.fn();
+    const validateAndSetConfigValue = vi.fn();
     const configEntry = createConfigEntry({
       value: null,
       default_value: 1024,
@@ -351,7 +353,7 @@ describe('ConfigNumberField', () => {
   });
 
   it('allows user to change the value', () => {
-    const validateAndSetConfigValue = jest.fn();
+    const validateAndSetConfigValue = vi.fn();
     const configEntry = createConfigEntry({
       value: null,
       default_value: 1024,

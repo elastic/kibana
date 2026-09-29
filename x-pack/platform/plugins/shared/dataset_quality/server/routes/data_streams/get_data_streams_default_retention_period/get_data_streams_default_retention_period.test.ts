@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { getDataStreamDefaultRetentionPeriod } from '.';
 
 describe('getDataStreamDefaultRetentionPeriod', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns persistent retention setting when available', async () => {

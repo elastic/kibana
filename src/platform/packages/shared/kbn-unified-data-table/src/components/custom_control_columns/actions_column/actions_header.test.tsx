@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { ActionsHeader } from './actions_header';
@@ -16,8 +18,8 @@ import { ActionsHeader } from './actions_header';
 type ResizeCb = (dimensions: { width: number; height: number }) => void;
 const resizeCallbacks: ResizeCb[] = [];
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
+vi.mock('@elastic/eui', async () => {
+  const actual = (await vi.importActual('@elastic/eui'));
   return {
     ...actual,
     EuiResizeObserver: ({

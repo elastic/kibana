@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import React from 'react';
@@ -15,12 +17,12 @@ import { ExpandedRow } from './expanded_row';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
-jest.mock('../../../../app_dependencies');
+vi.mock('../../../../app_dependencies');
 
 const queryClient = new QueryClient();
 
 describe('Transform: Transform List <ExpandedRow />', () => {
-  const onAlertEdit = jest.fn();
+  const onAlertEdit = vi.fn();
   // Set timezone to US/Eastern for consistent test results.
   beforeEach(() => {
     moment.tz.setDefault('US/Eastern');

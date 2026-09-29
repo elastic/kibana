@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -13,16 +15,22 @@ import { EuiProvider } from '@elastic/eui';
 import { SettingsSection } from './settings_section';
 import type { SettingsSectionProps } from './settings_section';
 
-jest.mock('../../../hooks/use_is_context_engine_enabled', () => ({
-  useIsContextEngineEnabled: () => mockIsContextEngineEnabled,
-}));
-jest.mock('../../../hooks/ai_indices/use_agent_ai_indices_by_id', () => ({
-  useAgentAiIndicesById: () => ({
-    aiIndices: mockAgentAiIndices,
-    isLoading: mockAgentAiIndicesIsLoading,
-    error: undefined,
-  }),
-}));
+vi.mock('../../../hooks/use_is_context_engine_enabled', () => {
+      const mocked = {
+      useIsContextEngineEnabled: () => mockIsContextEngineEnabled,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('../../../hooks/ai_indices/use_agent_ai_indices_by_id', () => {
+      const mocked = {
+      useAgentAiIndicesById: () => ({
+        aiIndices: mockAgentAiIndices,
+        isLoading: mockAgentAiIndicesIsLoading,
+        error: undefined,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const AGENT_ID = 'my-agent';
 
@@ -41,7 +49,7 @@ const renderSection = (props: Partial<SettingsSectionProps> = {}) =>
           workflowIds={[]}
           postExecutionWorkflowIds={[]}
           canEditAgent
-          onOpenEditFlyout={jest.fn()}
+          onOpenEditFlyout={vi.fn()}
           agentId={AGENT_ID}
           {...props}
         />
@@ -51,7 +59,7 @@ const renderSection = (props: Partial<SettingsSectionProps> = {}) =>
 
 describe('SettingsSection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsContextEngineEnabled = true;
     mockAgentAiIndices = [];
     mockAgentAiIndicesIsLoading = false;

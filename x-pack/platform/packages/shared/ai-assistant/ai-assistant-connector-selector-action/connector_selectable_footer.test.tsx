@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { act, render, screen } from '@testing-library/react';
@@ -16,8 +18,8 @@ describe('ConnectorSelectableFooter', () => {
   const renderComponent = (props: ConnectorSelectableFooterProps) =>
     render(<ConnectorSelectableFooter {...props} />, { wrapper: EuiThemeProvider });
 
-  const onAddConnectorClick = jest.fn();
-  const onManageConnectorsClick = jest.fn();
+  const onAddConnectorClick = vi.fn();
+  const onManageConnectorsClick = vi.fn();
 
   const defaultProps: ConnectorSelectableFooterProps = {
     onAddConnectorClick,
@@ -25,7 +27,7 @@ describe('ConnectorSelectableFooter', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders nothing if add or manage actions are not provided', async () => {

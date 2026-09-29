@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -14,23 +17,26 @@ import { useWatch } from 'react-hook-form';
 import { useMatchedActionPolicies } from './use_matched_action_policies';
 import { useActionPolicyConnectorTypes } from './use_action_policy_connector_types';
 
-jest.mock('react-hook-form', () => ({
-  ...jest.requireActual('react-hook-form'),
-  useWatch: jest.fn().mockReturnValue({ name: '', tags: [] }),
-}));
+vi.mock('react-hook-form', () => {
+      const mocked = {
+      ...require('react-hook-form'),
+      useWatch: vi.fn().mockReturnValue({ name: '', tags: [] }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./use_matched_action_policies');
-jest.mock('./use_action_policy_connector_types');
+vi.mock('./use_matched_action_policies');
+vi.mock('./use_action_policy_connector_types');
 
-const mockUseMatchedActionPolicies = useMatchedActionPolicies as jest.MockedFunction<
+const mockUseMatchedActionPolicies = useMatchedActionPolicies as MockedFunction<
   typeof useMatchedActionPolicies
 >;
 
-const mockUseActionPolicyConnectorTypes = useActionPolicyConnectorTypes as jest.MockedFunction<
+const mockUseActionPolicyConnectorTypes = useActionPolicyConnectorTypes as MockedFunction<
   typeof useActionPolicyConnectorTypes
 >;
 
-const mockUseWatch = useWatch as jest.Mock;
+const mockUseWatch = useWatch as Mock;
 
 const renderComponent = (
   props?: Partial<React.ComponentProps<typeof LinkedActionPoliciesStep>>

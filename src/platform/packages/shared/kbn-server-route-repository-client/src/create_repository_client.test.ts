@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import * as t from 'io-ts';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import { createRepositoryClient } from './create_repository_client';
@@ -19,7 +21,7 @@ const disabledAuthz = {
 };
 
 describe('createRepositoryClient', () => {
-  const fetchMock = jest.fn();
+  const fetchMock = vi.fn();
   const coreSetupMock = {
     http: {
       fetch: fetchMock,
@@ -27,14 +29,14 @@ describe('createRepositoryClient', () => {
   } as unknown as CoreSetup;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('provides a default value for options when they are not required', () => {
     const repository = {
       'GET /internal/handler': {
         endpoint: 'GET /internal/handler',
-        handler: jest.fn().mockResolvedValue('OK'),
+        handler: vi.fn().mockResolvedValue('OK'),
         security: disabledAuthz,
       },
     };
@@ -55,7 +57,7 @@ describe('createRepositoryClient', () => {
     const repository = {
       'GET /api/handler 2024-08-05': {
         endpoint: 'GET /api/handler 2024-08-05',
-        handler: jest.fn().mockResolvedValue('OK'),
+        handler: vi.fn().mockResolvedValue('OK'),
         security: disabledAuthz,
       },
     };
@@ -76,7 +78,7 @@ describe('createRepositoryClient', () => {
     const repository = {
       'GET /internal/handler': {
         endpoint: 'GET /internal/handler',
-        handler: jest.fn().mockResolvedValue('OK'),
+        handler: vi.fn().mockResolvedValue('OK'),
         security: disabledAuthz,
       },
     };
@@ -109,7 +111,7 @@ describe('createRepositoryClient', () => {
             param: t.string,
           }),
         }),
-        handler: jest.fn().mockResolvedValue('OK'),
+        handler: vi.fn().mockResolvedValue('OK'),
         security: disabledAuthz,
       },
     };
@@ -141,7 +143,7 @@ describe('createRepositoryClient', () => {
             payload: t.string,
           }),
         }),
-        handler: jest.fn().mockResolvedValue('OK'),
+        handler: vi.fn().mockResolvedValue('OK'),
         security: disabledAuthz,
       },
     };
@@ -175,7 +177,7 @@ describe('createRepositoryClient', () => {
             parameter: t.string,
           }),
         }),
-        handler: jest.fn().mockResolvedValue('OK'),
+        handler: vi.fn().mockResolvedValue('OK'),
         security: disabledAuthz,
       },
     };

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import { type Container, ContainerModule } from 'inversify';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import {
@@ -27,14 +30,14 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loadElasticsearch } from './elasticsearch';
 
 describe('loadElasticsearch', () => {
-  let injection: jest.Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
+  let injection: Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
   let container: Container;
   let elasticsearch: MockedElasticSearchServiceStart;
   let scopedClusterClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
   let request: KibanaRequest;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     injection = injectionServiceMock.createStartContract();
     scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     elasticsearch = elasticsearchServiceMock.createStart();

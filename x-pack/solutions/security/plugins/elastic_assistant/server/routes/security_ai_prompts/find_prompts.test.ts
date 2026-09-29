@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { getCurrentUserSecurityAIPromptsRequest, requestMock } from '../../__mocks__/request';
 import { ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND } from '@kbn/elastic-assistant-common';
 import { serverMock } from '../../__mocks__/server';
@@ -14,7 +17,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { getPromptsByGroupId } from '../../lib/prompt';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-jest.mock('../../lib/prompt');
+vi.mock('../../lib/prompt');
 const mockResponse = [{ promptId: 'systemPrompt', prompt: 'This is a prompt' }];
 describe('Find security AI prompts route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -32,7 +35,7 @@ describe('Find security AI prompts route', () => {
       },
     } as AuthenticatedUser;
 
-    (getPromptsByGroupId as jest.Mock).mockResolvedValue(Promise.resolve(mockResponse));
+    (getPromptsByGroupId as Mock).mockResolvedValue(Promise.resolve(mockResponse));
     context.elasticAssistant.getCurrentUser.mockResolvedValueOnce({
       username: 'elastic',
       authentication_realm: {
@@ -40,7 +43,7 @@ describe('Find security AI prompts route', () => {
         name: 'my_realm_name',
       },
     } as AuthenticatedUser);
-    (context.elasticAssistant.actions.getActionsClientWithRequest as jest.Mock) = jest
+    (context.elasticAssistant.actions.getActionsClientWithRequest as Mock) = vi
       .fn()
       .mockReturnValueOnce(actionsClientMock.create());
     logger = loggingSystemMock.createLogger();
@@ -59,7 +62,7 @@ describe('Find security AI prompts route', () => {
     });
 
     it('catches error if search throws error', async () => {
-      (getPromptsByGroupId as jest.Mock).mockRejectedValueOnce(new Error('Test error'));
+      (getPromptsByGroupId as Mock).mockRejectedValueOnce(new Error('Test error'));
       const response = await server.inject(
         getCurrentUserSecurityAIPromptsRequest(),
         requestContextMock.convertContext(context)

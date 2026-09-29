@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import '@emotion/jest';
@@ -19,9 +21,12 @@ import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 let mockApplicationBreakpoint: string | undefined;
 
-jest.mock('@kbn/ui-chrome-layout', () => ({
-  useCurrentChromeApplicationBreakpoint: () => mockApplicationBreakpoint,
-}));
+vi.mock('@kbn/ui-chrome-layout', () => {
+      const mocked = {
+      useCurrentChromeApplicationBreakpoint: () => mockApplicationBreakpoint,
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const ENHANCE_TOOLTIP = 'Improve the content and style of your dashboard using AI';
 
@@ -31,7 +36,7 @@ describe('AppHeaderView', () => {
   });
 
   it('renders an explicit share action in the title row only', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
 
     render(
       <AppHeaderView
@@ -47,7 +52,7 @@ describe('AppHeaderView', () => {
               order: 1,
               label: 'Settings',
               iconType: 'gear',
-              run: jest.fn(),
+              run: vi.fn(),
             },
           ],
         }}
@@ -64,7 +69,7 @@ describe('AppHeaderView', () => {
   });
 
   it('does not derive a title share action from a menu share item', async () => {
-    const runShare = jest.fn();
+    const runShare = vi.fn();
 
     render(
       <AppHeaderView
@@ -95,8 +100,8 @@ describe('AppHeaderView', () => {
   });
 
   it('keeps an app-owned menu share item alongside an explicit title share action', async () => {
-    const explicitOnClick = jest.fn();
-    const menuRun = jest.fn();
+    const explicitOnClick = vi.fn();
+    const menuRun = vi.fn();
 
     render(
       <AppHeaderView
@@ -130,7 +135,7 @@ describe('AppHeaderView', () => {
   });
 
   it('renders when the only content is a favorite action', () => {
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
     render(
       <AppHeaderView
         favorite={{
@@ -146,7 +151,7 @@ describe('AppHeaderView', () => {
   });
 
   it('renders a favorited state with custom labels and calls onToggle', () => {
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
     render(
       <AppHeaderView
         favorite={{
@@ -170,7 +175,7 @@ describe('AppHeaderView', () => {
       <AppHeaderView
         favorite={{
           status: 'unfavorited',
-          onToggle: jest.fn(),
+          onToggle: vi.fn(),
           isDisabled: true,
         }}
       />
@@ -180,7 +185,7 @@ describe('AppHeaderView', () => {
   });
 
   it('renders when the only content is an experimental dashboard AI action', () => {
-    const onClick = jest.fn();
+    const onClick = vi.fn();
     render(<AppHeaderView experimentalDashboardAiAction={{ onClick, tooltip: ENHANCE_TOOLTIP }} />);
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
@@ -189,13 +194,13 @@ describe('AppHeaderView', () => {
   });
 
   it('renders Enhance after Share and Favorite and calls onClick with returnFocus', () => {
-    const onClick = jest.fn();
-    const onToggle = jest.fn();
+    const onClick = vi.fn();
+    const onToggle = vi.fn();
 
     render(
       <AppHeaderView
         title="Dashboard"
-        share={{ onClick: jest.fn() }}
+        share={{ onClick: vi.fn() }}
         favorite={{ status: 'unfavorited', onToggle }}
         experimentalDashboardAiAction={{ onClick, tooltip: ENHANCE_TOOLTIP }}
       />
@@ -219,7 +224,7 @@ describe('AppHeaderView', () => {
       <AppHeaderView
         title="Dashboard"
         experimentalDashboardAiAction={{
-          onClick: jest.fn(),
+          onClick: vi.fn(),
           isDisabled: true,
           tooltip: ENHANCE_TOOLTIP,
         }}
@@ -235,7 +240,7 @@ describe('AppHeaderView', () => {
     render(
       <AppHeaderView
         title="Dashboard"
-        experimentalDashboardAiAction={{ onClick: jest.fn(), tooltip: ENHANCE_TOOLTIP }}
+        experimentalDashboardAiAction={{ onClick: vi.fn(), tooltip: ENHANCE_TOOLTIP }}
       />
     );
 
@@ -250,7 +255,7 @@ describe('AppHeaderView', () => {
     render(
       <AppHeaderView
         title="Dashboard"
-        experimentalDashboardAiAction={{ onClick: jest.fn(), tooltip: ENHANCE_TOOLTIP }}
+        experimentalDashboardAiAction={{ onClick: vi.fn(), tooltip: ENHANCE_TOOLTIP }}
       />
     );
 
@@ -263,7 +268,7 @@ describe('AppHeaderView', () => {
     render(
       <AppHeaderView
         title="Dashboard"
-        experimentalDashboardAiAction={{ onClick: jest.fn(), tooltip: ENHANCE_TOOLTIP }}
+        experimentalDashboardAiAction={{ onClick: vi.fn(), tooltip: ENHANCE_TOOLTIP }}
       />
     );
 
@@ -278,7 +283,7 @@ describe('AppHeaderView', () => {
     render(
       <AppHeaderView
         title="Dashboard"
-        experimentalDashboardAiAction={{ onClick: jest.fn(), tooltip: ENHANCE_TOOLTIP }}
+        experimentalDashboardAiAction={{ onClick: vi.fn(), tooltip: ENHANCE_TOOLTIP }}
       />
     );
 
@@ -308,7 +313,7 @@ describe('AppHeaderView', () => {
   });
 
   it('renders metadata items as a wrapping row', () => {
-    const onInspect = jest.fn();
+    const onInspect = vi.fn();
 
     render(
       <AppHeaderView
@@ -400,7 +405,7 @@ describe('AppHeaderView', () => {
               label: 'Settings',
               iconType: 'gear',
               testId: 'settingsMenu',
-              run: jest.fn(),
+              run: vi.fn(),
             },
           ],
         }}
@@ -486,8 +491,8 @@ describe('AppHeaderView', () => {
   });
 
   it('renders tab actions in an ellipsis popover without triggering tab navigation', () => {
-    const onTabClick = jest.fn();
-    const onCopy = jest.fn();
+    const onTabClick = vi.fn();
+    const onCopy = vi.fn();
 
     render(
       <AppHeaderView
@@ -535,7 +540,7 @@ describe('AppHeaderView', () => {
             actions: {
               ariaLabel: 'More actions',
               'data-test-subj': 'lifecycleTabActionsButton',
-              items: [{ id: 'copy', label: 'Copy API request', onClick: jest.fn() }],
+              items: [{ id: 'copy', label: 'Copy API request', onClick: vi.fn() }],
             },
           },
         ]}
@@ -555,7 +560,7 @@ describe('AppHeaderView', () => {
   });
 
   it('renders multiple back targets as a menu and closes it after selection', async () => {
-    const backClick = jest.fn((event: React.MouseEvent) => event.preventDefault());
+    const backClick = vi.fn((event: React.MouseEvent) => event.preventDefault());
 
     render(
       <AppHeaderView

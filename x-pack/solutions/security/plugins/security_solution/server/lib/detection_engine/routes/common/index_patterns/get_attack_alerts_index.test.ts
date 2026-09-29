@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { SecuritySolutionRequestHandlerContextMock } from '../../__mocks__/request_context';
 import { requestContextMock } from '../../__mocks__';
 import { getAttackAlertsIndex } from './get_attack_alerts_index';
@@ -13,7 +15,7 @@ describe('getAttackAlertsIndex', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     ({ context } = requestContextMock.createTools());
   });
 

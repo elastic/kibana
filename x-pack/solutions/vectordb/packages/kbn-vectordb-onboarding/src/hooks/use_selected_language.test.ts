@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { act, renderHook } from '@testing-library/react';
 import { useSelectedLanguage } from './use_selected_language';
 import { ONBOARDING_LANGUAGE_STORAGE_KEY } from '../storage_keys';
@@ -61,7 +63,7 @@ describe('useSelectedLanguage', () => {
   });
 
   it('falls back to the default when storage cannot be read', () => {
-    const getItemSpy = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+    const getItemSpy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('storage unavailable');
     });
 
@@ -73,7 +75,7 @@ describe('useSelectedLanguage', () => {
   });
 
   it('keeps the selection in memory when storage cannot be written', () => {
-    const setItemSpy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('storage full');
     });
     const { result } = renderHook(() => useSelectedLanguage());

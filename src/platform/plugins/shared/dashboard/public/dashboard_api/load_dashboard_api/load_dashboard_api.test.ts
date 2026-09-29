@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { Subject } from 'rxjs';
 import { DEFAULT_DASHBOARD_STATE } from '../../../common/default_dashboard_state';
 import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
 import { loadDashboardApi } from './load_dashboard_api';
 
-jest.mock('../telemetry/dashboard_load_telemetry', () => {
+vi.mock('../telemetry/dashboard_load_telemetry', () => {
   return {
-    startTrackingDashboardLoadTelemetry: jest.fn(),
+    startTrackingDashboardLoadTelemetry: vi.fn(),
   };
 });
 
-jest.mock('@kbn/content-management-content-insights-public', () => {
+vi.mock('@kbn/content-management-content-insights-public', () => {
   class ContentInsightsClientMock {
     track() {}
   }
@@ -28,12 +30,12 @@ jest.mock('@kbn/content-management-content-insights-public', () => {
   };
 });
 
-jest.mock('../../dashboard_client', () => {
+vi.mock('../../dashboard_client', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const defaultState = require('../../../common/default_dashboard_state');
   return {
     dashboardClient: {
-      get: jest.fn().mockResolvedValue({
+      get: vi.fn().mockResolvedValue({
         data: { ...defaultState.DEFAULT_DASHBOARD_STATE },
       }),
     },
@@ -43,7 +45,7 @@ jest.mock('../../dashboard_client', () => {
 const lastSavedQuery = { expression: 'memory:>220000', language: 'kql' as const };
 
 describe('loadDashboardApi', () => {
-  const getDashboardApiMock = jest.fn();
+  const getDashboardApiMock = vi.fn();
   const userActivity$ = new Subject();
 
   beforeEach(() => {
@@ -51,7 +53,7 @@ describe('loadDashboardApi', () => {
     require('../get_dashboard_api').getDashboardApi = getDashboardApiMock;
     getDashboardApiMock.mockReturnValue({
       api: { userActivity$ },
-      cleanUp: jest.fn(),
+      cleanUp: vi.fn(),
       internalApi: {},
     });
 
@@ -62,7 +64,7 @@ describe('loadDashboardApi', () => {
       }),
     });
 
-    window.performance.getEntriesByName = jest.fn().mockReturnValue([
+    window.performance.getEntriesByName = vi.fn().mockReturnValue([
       {
         startTime: 12345,
       },
@@ -70,7 +72,7 @@ describe('loadDashboardApi', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('initialState', () => {
@@ -144,7 +146,7 @@ describe('loadDashboardApi', () => {
 
   describe('user activity', () => {
     test('should not track view on load of brand new dashboard', async () => {
-      const nextSpy = jest.spyOn(userActivity$, 'next');
+      const nextSpy = vi.spyOn(userActivity$, 'next');
       await loadDashboardApi({
         getCreationOptions: async () => ({
           useSessionStorageIntegration: false,
@@ -154,7 +156,7 @@ describe('loadDashboardApi', () => {
     });
 
     test('should track view on load of saved object', async () => {
-      const nextSpy = jest.spyOn(userActivity$, 'next');
+      const nextSpy = vi.spyOn(userActivity$, 'next');
       await loadDashboardApi({
         getCreationOptions: async () => ({
           useSessionStorageIntegration: false,

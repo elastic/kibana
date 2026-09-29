@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked, MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
@@ -18,20 +21,26 @@ import {
   scheduleVerifierPolicyCleanupTask,
 } from './verifier_policy_cleanup_task';
 
-jest.mock('../../services/agent_policy_update', () => ({
-  agentPolicyUpdateEventHandler: jest.fn(),
-}));
+vi.mock('../../services/agent_policy_update', () => {
+      const mocked = {
+      agentPolicyUpdateEventHandler: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/agent_policy', () => ({
-  agentPolicyService: {
-    list: jest.fn(),
-    deleteVerifierPolicy: jest.fn(),
-  },
-  getAgentPolicySavedObjectType: jest.fn().mockResolvedValue('ingest-agent-policies'),
-}));
+vi.mock('../../services/agent_policy', () => {
+      const mocked = {
+      agentPolicyService: {
+        list: vi.fn(),
+        deleteVerifierPolicy: vi.fn(),
+      },
+      getAgentPolicySavedObjectType: vi.fn().mockResolvedValue('ingest-agent-policies'),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-const mockedGetAgentPolicySavedObjectType = getAgentPolicySavedObjectType as jest.MockedFunction<
+const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
+const mockedGetAgentPolicySavedObjectType = getAgentPolicySavedObjectType as MockedFunction<
   typeof getAgentPolicySavedObjectType
 >;
 
@@ -43,16 +52,16 @@ describe('verifier_policy_cleanup', () => {
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const mockContext = createAppContextStartContractMock();
     appContextService.start(mockContext);
 
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
-    jest
+    vi.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
+    vi
       .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
       .mockReturnValue({} as any);
-    jest.spyOn(appContextService, 'getInternalUserESClient').mockReturnValue(mockEsClient);
-    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+    vi.spyOn(appContextService, 'getInternalUserESClient').mockReturnValue(mockEsClient);
+    vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
       enableOTelVerifier: true,
     } as any);
 
@@ -132,7 +141,7 @@ describe('verifier_policy_cleanup', () => {
     });
 
     it('no-ops when OTel verifier feature is disabled', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
         enableOTelVerifier: false,
       } as any);
 

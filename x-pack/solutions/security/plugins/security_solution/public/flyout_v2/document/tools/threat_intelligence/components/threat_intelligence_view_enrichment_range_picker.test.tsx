@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { mount } from 'enzyme';
 import { TestProviders } from '../../../../../common/mock';
@@ -15,7 +17,7 @@ import {
 } from './test_ids';
 
 describe('EnrichmentRangePicker', () => {
-  const setRangeSpy = jest.fn();
+  const setRangeSpy = vi.fn();
 
   const rangePickerProps = {
     loading: false,

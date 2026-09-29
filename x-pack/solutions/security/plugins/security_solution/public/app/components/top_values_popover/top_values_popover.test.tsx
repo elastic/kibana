@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { waitFor, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { TopValuesPopover } from './top_values_popover';
 
-jest.mock('../../../common/components/visualization_actions/lens_embeddable');
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('../../../common/components/visualization_actions/lens_embeddable');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
   return {
     ...original,
-    useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
+    useLocation: vi.fn().mockReturnValue({ pathname: '/test' }),
   };
 });
-jest.mock('../../../data_view_manager/hooks/use_data_view');
+vi.mock('../../../data_view_manager/hooks/use_data_view');
 
 const element = document.createElement('button');
 document.body.appendChild(element);
@@ -28,19 +30,19 @@ const data = {
   nodeRef: element,
 };
 
-const mockUseObservable = jest.fn();
+const mockUseObservable = vi.fn();
 
-jest.mock('react-use/lib/useObservable', () => () => mockUseObservable());
+vi.mock('react-use/lib/useObservable', () => () => mockUseObservable());
 
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
+vi.mock('../../../common/lib/kibana', async () => {
+  const original = (await vi.importActual('../../../common/lib/kibana'));
   return {
     ...original,
     useKibana: () => ({
       ...original.useKibana(),
       services: {
         ...original.useKibana().services,
-        topValuesPopover: { getObservable: jest.fn() },
+        topValuesPopover: { getObservable: vi.fn() },
       },
     }),
   };

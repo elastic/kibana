@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { PolicyExecutionHistoryItem } from '@kbn/alerting-v2-schemas';
@@ -32,10 +35,10 @@ const item: PolicyExecutionHistoryItem = {
 
 const createMocks = () => {
   const deps = createRouteDependencies();
-  const executionHistoryClient: jest.Mocked<
+  const executionHistoryClient: Mocked<
     Pick<ActionPolicyExecutionHistoryClient, 'listExecutionHistory'>
   > = {
-    listExecutionHistory: jest.fn().mockResolvedValue({
+    listExecutionHistory: vi.fn().mockResolvedValue({
       items: [],
       page: 1,
       perPage: 100,
@@ -158,7 +161,7 @@ describe('ListActionPolicyExecutionsRoute', () => {
 
     await route.handle();
 
-    const okCall = (mocks.deps.response.ok as jest.Mock).mock.calls[0][0];
+    const okCall = (mocks.deps.response.ok as Mock).mock.calls[0][0];
     expect(okCall.body).toEqual({
       items: [item],
       page: 4,

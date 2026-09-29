@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { showEmptyStates } from '.';
 import {
   showEmptyPrompt,
@@ -13,12 +16,15 @@ import {
   showWelcomePrompt,
 } from '../../../../helpers';
 
-jest.mock('../../../../helpers', () => ({
-  showEmptyPrompt: jest.fn().mockReturnValue(false),
-  showFailurePrompt: jest.fn().mockReturnValue(false),
-  showNoAlertsPrompt: jest.fn().mockReturnValue(false),
-  showWelcomePrompt: jest.fn().mockReturnValue(false),
-}));
+vi.mock('../../../../helpers', () => {
+      const mocked = {
+      showEmptyPrompt: vi.fn().mockReturnValue(false),
+      showFailurePrompt: vi.fn().mockReturnValue(false),
+      showNoAlertsPrompt: vi.fn().mockReturnValue(false),
+      showWelcomePrompt: vi.fn().mockReturnValue(false),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 const defaultArgs = {
   aiConnectorsCount: 0,
@@ -31,11 +37,11 @@ const defaultArgs = {
 
 describe('showEmptyStates', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns true if showWelcomePrompt returns true', () => {
-    (showWelcomePrompt as jest.Mock).mockReturnValue(true);
+    (showWelcomePrompt as Mock).mockReturnValue(true);
 
     const result = showEmptyStates({
       ...defaultArgs,
@@ -44,7 +50,7 @@ describe('showEmptyStates', () => {
   });
 
   it('returns true if showFailurePrompt returns true', () => {
-    (showFailurePrompt as jest.Mock).mockReturnValue(true);
+    (showFailurePrompt as Mock).mockReturnValue(true);
 
     const result = showEmptyStates({
       ...defaultArgs,
@@ -55,7 +61,7 @@ describe('showEmptyStates', () => {
   });
 
   it('returns true if showNoAlertsPrompt returns true', () => {
-    (showNoAlertsPrompt as jest.Mock).mockReturnValue(true);
+    (showNoAlertsPrompt as Mock).mockReturnValue(true);
 
     const result = showEmptyStates({
       ...defaultArgs,
@@ -65,7 +71,7 @@ describe('showEmptyStates', () => {
   });
 
   it('returns true if showEmptyPrompt returns true', () => {
-    (showEmptyPrompt as jest.Mock).mockReturnValue(true);
+    (showEmptyPrompt as Mock).mockReturnValue(true);
 
     const result = showEmptyStates({
       ...defaultArgs,
@@ -74,10 +80,10 @@ describe('showEmptyStates', () => {
   });
 
   it('returns false if all prompts return false', () => {
-    (showWelcomePrompt as jest.Mock).mockReturnValue(false);
-    (showFailurePrompt as jest.Mock).mockReturnValue(false);
-    (showNoAlertsPrompt as jest.Mock).mockReturnValue(false);
-    (showEmptyPrompt as jest.Mock).mockReturnValue(false);
+    (showWelcomePrompt as Mock).mockReturnValue(false);
+    (showFailurePrompt as Mock).mockReturnValue(false);
+    (showNoAlertsPrompt as Mock).mockReturnValue(false);
+    (showEmptyPrompt as Mock).mockReturnValue(false);
 
     const result = showEmptyStates({
       ...defaultArgs,

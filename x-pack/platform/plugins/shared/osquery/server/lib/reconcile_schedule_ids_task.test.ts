@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -20,8 +23,8 @@ import {
 } from './reconcile_schedule_ids_task';
 import { reconcileScheduleIdsToWire } from './reconcile_schedule_ids_to_wire';
 
-jest.mock('./reconcile_schedule_ids_to_wire');
-const reconcileScheduleIdsToWireMock = reconcileScheduleIdsToWire as jest.MockedFunction<
+vi.mock('./reconcile_schedule_ids_to_wire');
+const reconcileScheduleIdsToWireMock = reconcileScheduleIdsToWire as MockedFunction<
   typeof reconcileScheduleIdsToWire
 >;
 
@@ -235,7 +238,7 @@ describe('runReconcileTask (Task Manager run() glue)', () => {
   const osqueryContext = {} as Parameters<typeof runReconcileTask>[0]['osqueryContext'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     reconcileScheduleIdsToWireMock.mockResolvedValue({ hadFailures: false });
   });
 

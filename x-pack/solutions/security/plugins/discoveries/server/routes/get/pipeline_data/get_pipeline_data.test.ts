@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, MockedFunction } from 'vitest';
+
 import type { Logger } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import type {
@@ -16,9 +19,12 @@ import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
 import { registerGetPipelineDataRoute, type GetPipelineDataResponse } from './get_pipeline_data';
 import { getWorkflowExecutionsTracking } from './helpers/get_workflow_executions_tracking';
 
-jest.mock('../../../lib/assert_workflows_enabled', () => ({
-  assertWorkflowsEnabled: jest.fn().mockResolvedValue(null),
-}));
+vi.mock('../../../lib/assert_workflows_enabled', () => {
+      const mocked = {
+      assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
+    };
+      return { ...mocked, default: mocked };
+    });
 import { extractPipelineAlertData } from './helpers/extract_pipeline_alert_data';
 import { extractPipelineGateData } from './helpers/extract_pipeline_gate_data';
 import { extractPipelineGenerationData } from './helpers/extract_pipeline_generation_data';
@@ -26,53 +32,74 @@ import { extractPipelineValidationData } from './helpers/extract_pipeline_valida
 import { computeCombinedAlerts } from './helpers/compute_combined_alerts';
 import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 
-jest.mock('./helpers/get_workflow_executions_tracking', () => ({
-  getWorkflowExecutionsTracking: jest.fn(),
-}));
+vi.mock('./helpers/get_workflow_executions_tracking', () => {
+      const mocked = {
+      getWorkflowExecutionsTracking: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers/extract_pipeline_alert_data', () => ({
-  extractPipelineAlertData: jest.fn(),
-}));
+vi.mock('./helpers/extract_pipeline_alert_data', () => {
+      const mocked = {
+      extractPipelineAlertData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers/extract_pipeline_gate_data', () => ({
-  extractPipelineGateData: jest.fn(),
-}));
+vi.mock('./helpers/extract_pipeline_gate_data', () => {
+      const mocked = {
+      extractPipelineGateData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers/extract_pipeline_generation_data', () => ({
-  extractPipelineGenerationData: jest.fn(),
-}));
+vi.mock('./helpers/extract_pipeline_generation_data', () => {
+      const mocked = {
+      extractPipelineGenerationData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers/extract_pipeline_validation_data', () => ({
-  extractPipelineValidationData: jest.fn(),
-}));
+vi.mock('./helpers/extract_pipeline_validation_data', () => {
+      const mocked = {
+      extractPipelineValidationData: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('./helpers/compute_combined_alerts', () => ({
-  computeCombinedAlerts: jest.fn(),
-}));
+vi.mock('./helpers/compute_combined_alerts', () => {
+      const mocked = {
+      computeCombinedAlerts: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/discoveries/impl/lib/helpers/get_space_id', () => ({
-  getSpaceId: jest.fn(),
-}));
+vi.mock('@kbn/discoveries/impl/lib/helpers/get_space_id', () => {
+      const mocked = {
+      getSpaceId: vi.fn(),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const mockGetWorkflowExecutionsTracking = getWorkflowExecutionsTracking as jest.MockedFunction<
+const mockGetWorkflowExecutionsTracking = getWorkflowExecutionsTracking as MockedFunction<
   typeof getWorkflowExecutionsTracking
 >;
-const mockExtractPipelineAlertData = extractPipelineAlertData as jest.MockedFunction<
+const mockExtractPipelineAlertData = extractPipelineAlertData as MockedFunction<
   typeof extractPipelineAlertData
 >;
-const mockExtractPipelineGateData = extractPipelineGateData as jest.MockedFunction<
+const mockExtractPipelineGateData = extractPipelineGateData as MockedFunction<
   typeof extractPipelineGateData
 >;
-const mockExtractPipelineGenerationData = extractPipelineGenerationData as jest.MockedFunction<
+const mockExtractPipelineGenerationData = extractPipelineGenerationData as MockedFunction<
   typeof extractPipelineGenerationData
 >;
-const mockExtractPipelineValidationData = extractPipelineValidationData as jest.MockedFunction<
+const mockExtractPipelineValidationData = extractPipelineValidationData as MockedFunction<
   typeof extractPipelineValidationData
 >;
-const mockComputeCombinedAlerts = computeCombinedAlerts as jest.MockedFunction<
+const mockComputeCombinedAlerts = computeCombinedAlerts as MockedFunction<
   typeof computeCombinedAlerts
 >;
-const mockGetSpaceId = getSpaceId as jest.MockedFunction<typeof getSpaceId>;
+const mockGetSpaceId = getSpaceId as MockedFunction<typeof getSpaceId>;
 
 const fullTracking: WorkflowExecutionsTracking = {
   alertRetrieval: [
@@ -93,27 +120,27 @@ const fullTracking: WorkflowExecutionsTracking = {
 
 describe('registerGetPipelineDataRoute', () => {
   const logger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
   const mockEsClient = {
-    search: jest.fn(),
+    search: vi.fn(),
   };
 
-  const mockGetWorkflowExecution = jest.fn();
+  const mockGetWorkflowExecution = vi.fn();
 
-  const mockGetCurrentUser = jest.fn();
+  const mockGetCurrentUser = vi.fn();
 
   const mockWorkflowsManagementApi = {
-    getWorkflow: jest.fn(),
+    getWorkflow: vi.fn(),
     getWorkflowExecution: mockGetWorkflowExecution,
-    runWorkflow: jest.fn(),
+    runWorkflow: vi.fn(),
   };
 
-  const getStartServices = jest.fn().mockResolvedValue({
+  const getStartServices = vi.fn().mockResolvedValue({
     coreStart: {
       elasticsearch: {
         client: {
@@ -133,18 +160,18 @@ describe('registerGetPipelineDataRoute', () => {
     },
   });
 
-  const getEventLogIndex = jest.fn().mockResolvedValue('.kibana-event-log-test');
+  const getEventLogIndex = vi.fn().mockResolvedValue('.kibana-event-log-test');
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetSpaceId.mockReturnValue('default');
     mockGetCurrentUser.mockReturnValue({ username: 'test-user' });
   });
 
   const registerAndGetHandler = (workflowsManagement: unknown = mockWorkflowsManagementApi) => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({
+    const addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({
       addVersion: addVersionMock,
     });
 
@@ -174,7 +201,7 @@ describe('registerGetPipelineDataRoute', () => {
 
   it('returns 404 when workflows feature flag is disabled', async () => {
     const mockNotFoundResponse = { statusCode: 404 };
-    (assertWorkflowsEnabled as jest.Mock).mockResolvedValueOnce(mockNotFoundResponse);
+    (assertWorkflowsEnabled as Mock).mockResolvedValueOnce(mockNotFoundResponse);
 
     const handler = registerAndGetHandler();
     const request = createRequest();
@@ -242,7 +269,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -330,7 +357,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -415,7 +442,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -472,7 +499,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -500,7 +527,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -521,7 +548,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -542,7 +569,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -562,7 +589,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -613,7 +640,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -653,7 +680,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -678,7 +705,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -712,7 +739,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -756,7 +783,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       request,
@@ -804,7 +831,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -841,7 +868,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -899,7 +926,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -915,7 +942,7 @@ describe('registerGetPipelineDataRoute', () => {
 
   it('returns 404 when the feature flag is disabled', async () => {
     const mockNotFoundResponse = { statusCode: 404 };
-    (assertWorkflowsEnabled as jest.Mock).mockResolvedValueOnce(mockNotFoundResponse);
+    (assertWorkflowsEnabled as Mock).mockResolvedValueOnce(mockNotFoundResponse);
 
     const handler = registerAndGetHandler();
     const responseMock = httpServerMock.createResponseFactory();
@@ -944,7 +971,7 @@ describe('registerGetPipelineDataRoute', () => {
     await handler(
       {
         core: Promise.resolve({
-          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          featureFlags: { getBooleanValue: vi.fn().mockResolvedValue(true) },
         }),
       },
       createRequest(),
@@ -960,8 +987,8 @@ describe('registerGetPipelineDataRoute', () => {
 
   it('registers the route with ATTACK_DISCOVERY_API_ACTION_ALL in requiredPrivileges', () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({
+    const addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({
       addVersion: addVersionMock,
     });
 
@@ -986,8 +1013,8 @@ describe('registerGetPipelineDataRoute', () => {
 
   it('registers the route with correct path and security', () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({
+    const addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({
       addVersion: addVersionMock,
     });
 
@@ -1018,8 +1045,8 @@ describe('registerGetPipelineDataRoute', () => {
 
   it('registers the route with the workflows read privilege in requiredPrivileges', () => {
     const router = httpServiceMock.createRouter();
-    const addVersionMock = jest.fn();
-    (router.versioned.get as jest.Mock).mockReturnValue({
+    const addVersionMock = vi.fn();
+    (router.versioned.get as Mock).mockReturnValue({
       addVersion: addVersionMock,
     });
 

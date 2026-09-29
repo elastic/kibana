@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   buildOtherBucketAgg,
   mergeOtherBucketAggResponse,
@@ -241,7 +243,7 @@ describe('Terms Agg Other bucket helper', () => {
     }
 
     function getAggConfigs(aggs: CreateAggConfigParams[] = []) {
-      return new AggConfigs(indexPattern, [...aggs], { typesRegistry, probability }, jest.fn());
+      return new AggConfigs(indexPattern, [...aggs], { typesRegistry, probability }, vi.fn());
     }
 
     function getTopAggregations(updatedResponse: estypes.SearchResponse<any>) {

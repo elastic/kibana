@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import type { InfraBackendLibs } from '../infra_types';
@@ -31,7 +33,7 @@ const infraMetricsTestHarness =
     expectedQuery: QueryDslQueryContainer | undefined
   ) =>
   async () => {
-    const callWithRequest = jest.fn().mockResolvedValue({});
+    const callWithRequest = vi.fn().mockResolvedValue({});
     const mockedCore = withExcludedDataTiers(tiers);
 
     const context = {

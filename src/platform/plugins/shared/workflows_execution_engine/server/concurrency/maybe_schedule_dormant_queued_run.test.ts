@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 
@@ -20,8 +23,8 @@ describe('handleConcurrencyBlockedExecution', () => {
   const spaceId = 'default';
   const request = {} as KibanaRequest;
   const logger = {
-    warn: jest.fn(),
-    info: jest.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
   } as unknown as Logger;
 
   const createExecution = (overrides: Partial<EsWorkflowExecution> = {}): EsWorkflowExecution =>
@@ -46,13 +49,13 @@ describe('handleConcurrencyBlockedExecution', () => {
 
   const createDependencies = (execution: EsWorkflowExecution | null) => {
     const workflowExecutionRepository = {
-      getWorkflowExecutionById: jest.fn().mockResolvedValue(execution),
-    } as unknown as jest.Mocked<WorkflowExecutionRepository>;
+      getWorkflowExecutionById: vi.fn().mockResolvedValue(execution),
+    } as unknown as Mocked<WorkflowExecutionRepository>;
     const workflowTaskManager = {
-      scheduleDormantQueuedRunTask: jest.fn().mockResolvedValue(undefined),
-      scheduleAndRunImmediateResume: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<WorkflowTaskManager>;
-    const internalResumeWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+      scheduleDormantQueuedRunTask: vi.fn().mockResolvedValue(undefined),
+      scheduleAndRunImmediateResume: vi.fn().mockResolvedValue(undefined),
+    } as unknown as Mocked<WorkflowTaskManager>;
+    const internalResumeWorkflowExecution = vi.fn().mockResolvedValue(undefined);
 
     return {
       workflowExecutionRepository,
@@ -62,7 +65,7 @@ describe('handleConcurrencyBlockedExecution', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('resumes a sync parent when the blocked child execution is terminal', async () => {

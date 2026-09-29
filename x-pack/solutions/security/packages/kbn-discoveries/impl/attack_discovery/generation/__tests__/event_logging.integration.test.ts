@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { ExecutionStatus, type WorkflowDetailDto, type WorkflowExecutionDto } from '@kbn/workflows';
@@ -20,28 +23,34 @@ import {
 } from '../invoke_generation_workflow';
 import { invokeValidationWorkflow } from '../invoke_validation_workflow';
 
-const mockWriteAttackDiscoveryEvent = jest.fn();
-const mockGetDurationNanoseconds = jest.fn().mockReturnValue(1000000000);
+const mockWriteAttackDiscoveryEvent = vi.fn();
+const mockGetDurationNanoseconds = vi.fn().mockReturnValue(1000000000);
 
-jest.mock('../../persistence/event_logging', () => ({
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED: 'alert-retrieval-failed',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED: 'alert-retrieval-started',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED: 'alert-retrieval-succeeded',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_FAILED: 'generate-step-failed',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_STARTED: 'generate-step-started',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_SUCCEEDED: 'generate-step-succeeded',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED: 'generation-failed',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED: 'generation-started',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED: 'generation-succeeded',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_FAILED: 'validation-failed',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED: 'validation-started',
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED: 'validation-succeeded',
-  writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
-}));
+vi.mock('../../persistence/event_logging', () => {
+      const mocked = {
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED: 'alert-retrieval-failed',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED: 'alert-retrieval-started',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED: 'alert-retrieval-succeeded',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_FAILED: 'generate-step-failed',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_STARTED: 'generate-step-started',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_SUCCEEDED: 'generate-step-succeeded',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED: 'generation-failed',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED: 'generation-started',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED: 'generation-succeeded',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_FAILED: 'validation-failed',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED: 'validation-started',
+      ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED: 'validation-succeeded',
+      writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../../lib/persistence', () => ({
-  getDurationNanoseconds: (...args: unknown[]) => mockGetDurationNanoseconds(...args),
-}));
+vi.mock('../../../lib/persistence', () => {
+      const mocked = {
+      getDurationNanoseconds: (...args: unknown[]) => mockGetDurationNanoseconds(...args),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 /**
  * Integration tests verifying that all event log events are properly written
@@ -61,10 +70,10 @@ jest.mock('../../../lib/persistence', () => ({
  */
 describe('Event Logging Integration', () => {
   const mockLogger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   } as unknown as Logger;
 
   const mockRequest = {} as KibanaRequest;
@@ -76,14 +85,14 @@ describe('Event Logging Integration', () => {
   } as AuthenticatedUser;
 
   const mockEventLogger = {
-    logEvent: jest.fn(),
+    logEvent: vi.fn(),
   } as unknown as IEventLogger;
 
   const mockWorkflowsManagementApi: WorkflowsManagementApi = {
-    getWorkflow: jest.fn(),
-    getWorkflowExecution: jest.fn(),
-    runWorkflow: jest.fn(),
-    scheduleWorkflow: jest.fn(),
+    getWorkflow: vi.fn(),
+    getWorkflowExecution: vi.fn(),
+    runWorkflow: vi.fn(),
+    scheduleWorkflow: vi.fn(),
   };
 
   const baseWorkflowConfig = {
@@ -306,12 +315,12 @@ describe('Event Logging Integration', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('manual orchestration flow', () => {
@@ -325,7 +334,7 @@ describe('Event Logging Integration', () => {
 
       beforeEach(async () => {
         // Set up mocks for successful flow
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockImplementation(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockImplementation(
           async (workflowId: string) => {
             if (workflowId === 'workflow-default-alert-retrieval') {
               return mockAlertRetrievalWorkflow;
@@ -340,7 +349,7 @@ describe('Event Logging Integration', () => {
           }
         );
 
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockImplementation(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockImplementation(
           async (workflow: { id: string }) => {
             if (workflow.id === 'workflow-default-alert-retrieval') {
               return 'alert-retrieval-run-id';
@@ -352,7 +361,7 @@ describe('Event Logging Integration', () => {
           }
         );
 
-        (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockImplementation(
+        (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockImplementation(
           async (workflow: { id: string }) => {
             if (workflow.id === 'workflow-generation') {
               return 'generation-run-id';
@@ -361,7 +370,7 @@ describe('Event Logging Integration', () => {
           }
         );
 
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockImplementation(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockImplementation(
           async (executionId: string) => {
             if (executionId === 'alert-retrieval-run-id') {
               return createAlertRetrievalExecution();
@@ -514,13 +523,13 @@ describe('Event Logging Integration', () => {
       const eventLogIndex = '.kibana-event-log-test';
 
       beforeEach(() => {
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockAlertRetrievalWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
           'alert-retrieval-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createAlertRetrievalExecution(ExecutionStatus.FAILED)
         );
       });
@@ -625,13 +634,13 @@ describe('Event Logging Integration', () => {
       };
 
       beforeEach(() => {
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockGenerationWorkflow
         );
-        (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
           'generation-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createGenerationExecution(ExecutionStatus.FAILED)
         );
       });
@@ -684,7 +693,7 @@ describe('Event Logging Integration', () => {
         ).rejects.toThrow();
 
         const generationFailedCalls = (
-          mockWriteAttackDiscoveryEvent as jest.Mock
+          mockWriteAttackDiscoveryEvent as Mock
         ).mock.calls.filter(
           (call: unknown[]) => (call[0] as Record<string, unknown>)?.action === 'generation-failed'
         );
@@ -756,13 +765,13 @@ describe('Event Logging Integration', () => {
       };
 
       beforeEach(() => {
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockValidationWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
           'validation-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createValidationExecution(ExecutionStatus.FAILED)
         );
       });
@@ -849,13 +858,13 @@ describe('Event Logging Integration', () => {
 
     describe('alertsContextCount flows through correctly', () => {
       it('includes alertsContextCount in alert-retrieval-succeeded event', async () => {
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockAlertRetrievalWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
           'alert-retrieval-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createAlertRetrievalExecution()
         );
 
@@ -900,13 +909,13 @@ describe('Event Logging Integration', () => {
           workflowRunId: 'alert-retrieval-run-id',
         };
 
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockGenerationWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
           'generation-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createGenerationExecution()
         );
 
@@ -937,13 +946,13 @@ describe('Event Logging Integration', () => {
 
     describe('duration is calculated correctly', () => {
       it('calls getDurationNanoseconds for alert-retrieval-succeeded event', async () => {
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockAlertRetrievalWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
           'alert-retrieval-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createAlertRetrievalExecution()
         );
 
@@ -966,13 +975,13 @@ describe('Event Logging Integration', () => {
       });
 
       it('includes duration in succeeded events', async () => {
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockAlertRetrievalWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
           'alert-retrieval-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createAlertRetrievalExecution()
         );
 
@@ -1002,13 +1011,13 @@ describe('Event Logging Integration', () => {
 
     describe('workflowId and workflowRunId are present in all events', () => {
       it('includes workflowId in alert-retrieval-started event', async () => {
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockAlertRetrievalWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
           'alert-retrieval-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createAlertRetrievalExecution()
         );
 
@@ -1037,13 +1046,13 @@ describe('Event Logging Integration', () => {
       });
 
       it('includes workflowId in alert-retrieval-succeeded event', async () => {
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockAlertRetrievalWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
           'alert-retrieval-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createAlertRetrievalExecution()
         );
 
@@ -1089,13 +1098,13 @@ describe('Event Logging Integration', () => {
           workflowRunId: 'alert-retrieval-run-id',
         };
 
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockGenerationWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
           'generation-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createGenerationExecution()
         );
 
@@ -1151,13 +1160,13 @@ describe('Event Logging Integration', () => {
           workflowRunId: 'generation-run-id',
         };
 
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockValidationWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
           'validation-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createValidationExecution()
         );
 
@@ -1214,13 +1223,13 @@ describe('Event Logging Integration', () => {
           workflowRunId: 'generation-run-id',
         };
 
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockValidationWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
           'validation-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createValidationExecution()
         );
 
@@ -1255,13 +1264,13 @@ describe('Event Logging Integration', () => {
       const executionUuid = 'unique-execution-uuid-12345';
 
       it('includes executionUuid in alert-retrieval events', async () => {
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockAlertRetrievalWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
           'alert-retrieval-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createAlertRetrievalExecution()
         );
 
@@ -1313,13 +1322,13 @@ describe('Event Logging Integration', () => {
           workflowRunId: 'generation-run-id',
         };
 
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockValidationWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
           'validation-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createValidationExecution()
         );
 
@@ -1351,13 +1360,13 @@ describe('Event Logging Integration', () => {
       const testSpaceId = 'custom-space';
 
       it('includes spaceId in alert-retrieval events', async () => {
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockAlertRetrievalWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
           'alert-retrieval-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createAlertRetrievalExecution()
         );
 
@@ -1385,13 +1394,13 @@ describe('Event Logging Integration', () => {
 
     describe('connectorId is included in all events', () => {
       it('includes connectorId from apiConfig', async () => {
-        (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
           mockAlertRetrievalWorkflow
         );
-        (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
           'alert-retrieval-run-id'
         );
-        (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createAlertRetrievalExecution()
         );
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -18,36 +21,46 @@ import TriggersActionsUIHome from './home';
 import { hasShowActionsCapability } from './lib/capabilities';
 import { useKibana } from '../common/lib/kibana';
 
-jest.mock('../common/lib/kibana');
-jest.mock('../common/get_experimental_features');
-jest.mock('./lib/capabilities');
+vi.mock('../common/lib/kibana');
+vi.mock('../common/get_experimental_features');
+vi.mock('./lib/capabilities');
 
-jest.mock('./sections/rules_list/components/rules_list', () => {
+vi.mock('./sections/rules_list/components/rules_list', () => {
   return () => <div data-test-subj="rulesListComponents">{'Render Rule list component'}</div>;
 });
 
-jest.mock('./components/health_check', () => ({
-  HealthCheck: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('./context/health_context', () => ({
-  HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('@kbn/ebt-tools', () => ({
-  PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock('./components/health_check', () => {
+      const mocked = {
+      HealthCheck: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('./context/health_context', () => {
+      const mocked = {
+      HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
+vi.mock('@kbn/ebt-tools', () => {
+      const mocked = {
+      PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => ({
-  useGetRuleTypesPermissions: jest.fn().mockReturnValue({
-    authorizedToReadAnyRules: true,
-    authorizedToCreateAnyRules: true,
-  }),
-}));
+vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => {
+      const mocked = {
+      useGetRuleTypesPermissions: vi.fn().mockReturnValue({
+        authorizedToReadAnyRules: true,
+        authorizedToCreateAnyRules: true,
+      }),
+    };
+      return { ...mocked, default: mocked };
+    });
 
-const { useGetRuleTypesPermissions } = jest.requireMock(
-  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
-);
+const { useGetRuleTypesPermissions } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'));
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 const renderHome = (props: RouteComponentProps<MatchParams>) =>
   render(
@@ -62,8 +75,8 @@ const renderHome = (props: RouteComponentProps<MatchParams>) =>
 
 describe('home', () => {
   beforeEach(() => {
-    (hasShowActionsCapability as jest.Mock).mockClear();
-    (getIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(() => false);
+    (hasShowActionsCapability as Mock).mockClear();
+    (getIsExperimentalFeatureEnabled as Mock).mockImplementation(() => false);
     useGetRuleTypesPermissions.mockClear();
   });
 
@@ -89,7 +102,7 @@ describe('home', () => {
   });
 
   it('shows the correct number of tabs', async () => {
-    (hasShowActionsCapability as jest.Mock).mockImplementation(() => {
+    (hasShowActionsCapability as Mock).mockImplementation(() => {
       return true;
     });
     const props: RouteComponentProps<MatchParams> = {

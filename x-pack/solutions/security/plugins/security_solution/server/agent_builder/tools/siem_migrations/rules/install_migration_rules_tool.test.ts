@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -13,23 +16,23 @@ import { createToolHandlerContext, createToolTestMocks } from '../../../__mocks_
 import { installMigrationRulesTool } from './install_migration_rules_tool';
 
 const productFeaturesService = {
-  isEnabled: jest.fn().mockReturnValue(true),
+  isEnabled: vi.fn().mockReturnValue(true),
 } as unknown as ProductFeaturesService;
 
 describe('installMigrationRulesTool', () => {
   const { mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   let core: ReturnType<typeof coreMock.createSetup>;
-  let fetch: jest.Mock;
-  let checkPrivileges: jest.Mock;
-  let apiGet: jest.Mock;
+  let fetch: Mock;
+  let checkPrivileges: Mock;
+  let apiGet: Mock;
 
   beforeEach(() => {
     core = coreMock.createSetup();
-    fetch = jest.fn();
-    apiGet = jest.fn((p: string) => `api:${p}`);
-    checkPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: true });
+    fetch = vi.fn();
+    apiGet = vi.fn((p: string) => `api:${p}`);
+    checkPrivileges = vi.fn().mockResolvedValue({ hasAllRequested: true });
     const coreStart = coreMock.createStart();
-    (coreStart.http.selfClient.asScoped as unknown as jest.Mock).mockReturnValue({ fetch });
+    (coreStart.http.selfClient.asScoped as unknown as Mock).mockReturnValue({ fetch });
     core.getStartServices.mockResolvedValue([
       coreStart,
       {

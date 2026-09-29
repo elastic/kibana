@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import {
   mockFindLegacyUrlAliases,
   mockRawDocExistsInNamespaces,
@@ -47,7 +49,7 @@ describe('preflightCheckForCreate', () => {
       client,
       serializer,
       getIndexForType: (type: string) => `index-for-${type}`,
-      createPointInTimeFinder: jest.fn() as CreatePointInTimeFinderFn,
+      createPointInTimeFinder: vi.fn() as CreatePointInTimeFinderFn,
       objects,
     };
   }

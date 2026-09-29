@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock, Mocked } from 'vitest';
+
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { waitForTaskToComplete } from './wait_for_task';
@@ -13,19 +16,19 @@ const TASK_ID = 'test-task-id:123';
 
 function createMockEsClient(
   responses: Array<{ completed: boolean; response?: unknown; error?: unknown }>
-): jest.Mocked<ElasticsearchClient> {
-  const tasksGet = jest.fn();
+): Mocked<ElasticsearchClient> {
+  const tasksGet = vi.fn();
   for (const res of responses) {
     tasksGet.mockResolvedValueOnce(res);
   }
-  return { tasks: { get: tasksGet } } as unknown as jest.Mocked<ElasticsearchClient>;
+  return { tasks: { get: tasksGet } } as unknown as Mocked<ElasticsearchClient>;
 }
 
 describe('waitForTaskToComplete', () => {
   const mockLogger = loggerMock.create();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the task response immediately when the task is already complete', async () => {
@@ -39,8 +42,8 @@ describe('waitForTaskToComplete', () => {
     });
 
     expect(result).toEqual(taskResponse);
-    expect(esClient.tasks.get as jest.Mock).toHaveBeenCalledTimes(1);
-    expect(esClient.tasks.get as jest.Mock).toHaveBeenCalledWith(
+    expect(esClient.tasks.get as Mock).toHaveBeenCalledTimes(1);
+    expect(esClient.tasks.get as Mock).toHaveBeenCalledWith(
       { task_id: TASK_ID, wait_for_completion: false },
       expect.anything()
     );
@@ -56,7 +59,7 @@ describe('waitForTaskToComplete', () => {
     ).rejects.toThrow('Task "test-task-id:123" failed: shard unavailable');
 
     // Must not retry — tasks.get called exactly once
-    expect(esClient.tasks.get as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(esClient.tasks.get as Mock).toHaveBeenCalledTimes(1);
   });
 
   it('polls until the task completes, logging a debug message on each wait', async () => {
@@ -76,7 +79,7 @@ describe('waitForTaskToComplete', () => {
     });
 
     expect(result).toEqual(taskResponse);
-    expect(esClient.tasks.get as jest.Mock).toHaveBeenCalledTimes(3);
+    expect(esClient.tasks.get as Mock).toHaveBeenCalledTimes(3);
     expect(mockLogger.debug).toHaveBeenCalledTimes(2);
     expect(mockLogger.debug).toHaveBeenCalledWith(`Waiting for task "${TASK_ID}" to complete...`);
   });

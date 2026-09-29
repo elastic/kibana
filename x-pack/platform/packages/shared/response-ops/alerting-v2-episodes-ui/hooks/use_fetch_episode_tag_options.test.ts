@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -18,11 +20,11 @@ import type { EpisodeDataSource } from '../types/episode_data_source';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { useSpaceId } from './use_space_id';
 
-jest.mock('../apis/fetch_episode_tag_options');
-jest.mock('./use_space_id');
+vi.mock('../apis/fetch_episode_tag_options');
+vi.mock('./use_space_id');
 
-const mockFetchEpisodeTagOptions = jest.mocked(fetchEpisodeTagOptions);
-const mockUseSpaceId = jest.mocked(useSpaceId);
+const mockFetchEpisodeTagOptions = vi.mocked(fetchEpisodeTagOptions);
+const mockUseSpaceId = vi.mocked(useSpaceId);
 mockUseSpaceId.mockReturnValue('default');
 
 const mockServices = {
@@ -62,7 +64,7 @@ const renderTagOptions = (dataSource?: EpisodeDataSource, queryV2Source?: boolea
   );
 
 afterEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockUseSpaceId.mockReturnValue('default');
 });
 
@@ -81,7 +83,7 @@ describe('useFetchEpisodeTagOptions', () => {
     mockFetchEpisodeTagOptions.mockResolvedValue([{ tags: 'prod' }]);
 
     const { result } = renderTagOptions(
-      sourceWithTags(jest.fn().mockResolvedValue(['staging', 'infra']))
+      sourceWithTags(vi.fn().mockResolvedValue(['staging', 'infra']))
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -94,7 +96,7 @@ describe('useFetchEpisodeTagOptions', () => {
     mockFetchEpisodeTagOptions.mockResolvedValue([{ tags: 'prod' }, { tags: 'shared-tag' }]);
 
     const { result } = renderTagOptions(
-      sourceWithTags(jest.fn().mockResolvedValue(['shared-tag', 'source-only']))
+      sourceWithTags(vi.fn().mockResolvedValue(['shared-tag', 'source-only']))
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -106,7 +108,7 @@ describe('useFetchEpisodeTagOptions', () => {
     mockFetchEpisodeTagOptions.mockResolvedValue([{ tags: 'prod' }]);
 
     const { result } = renderTagOptions(
-      sourceWithTags(jest.fn().mockRejectedValue(new Error('source failure')))
+      sourceWithTags(vi.fn().mockRejectedValue(new Error('source failure')))
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -118,7 +120,7 @@ describe('useFetchEpisodeTagOptions', () => {
   it('returns source-only tags when the v2 fetch fails', async () => {
     mockFetchEpisodeTagOptions.mockRejectedValue(new Error('v2 failure'));
 
-    const { result } = renderTagOptions(sourceWithTags(jest.fn().mockResolvedValue(['staging'])));
+    const { result } = renderTagOptions(sourceWithTags(vi.fn().mockResolvedValue(['staging'])));
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -128,7 +130,7 @@ describe('useFetchEpisodeTagOptions', () => {
 
   it('skips the v2 fetch and returns source-only tags when queryV2Source is false', async () => {
     const { result } = renderTagOptions(
-      sourceWithTags(jest.fn().mockResolvedValue(['staging'])),
+      sourceWithTags(vi.fn().mockResolvedValue(['staging'])),
       false
     );
 
@@ -151,7 +153,7 @@ describe('useFetchEpisodeTagOptions', () => {
   it('returns empty array when both v2 and additional data source return no tags', async () => {
     mockFetchEpisodeTagOptions.mockResolvedValue([]);
 
-    const { result } = renderTagOptions(sourceWithTags(jest.fn().mockResolvedValue([])));
+    const { result } = renderTagOptions(sourceWithTags(vi.fn().mockResolvedValue([])));
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 

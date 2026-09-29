@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
@@ -20,12 +22,12 @@ type UpdateIndexSettings = (
   settings: string[]
 ) => Promise<{ error: ResponseError | null }>;
 
-const mockUpdateIndexSettings = jest.fn<
+const mockUpdateIndexSettings = vi.fn<
   ReturnType<UpdateIndexSettings>,
   Parameters<UpdateIndexSettings>
 >();
 
-const mockAddContent = jest.fn<
+const mockAddContent = vi.fn<
   void,
   [
     {
@@ -37,10 +39,10 @@ const mockAddContent = jest.fn<
     }
   ]
 >();
-const mockRemoveContent = jest.fn<void, [id: string]>();
+const mockRemoveContent = vi.fn<void, [id: string]>();
 
-jest.mock('../../../../app_context', () => {
-  const actual = jest.requireActual('../../../../app_context');
+vi.mock('../../../../app_context', async () => {
+  const actual = (await vi.importActual('../../../../app_context'));
 
   return {
     ...actual,
@@ -55,8 +57,8 @@ jest.mock('../../../../app_context', () => {
   };
 });
 
-jest.mock('../../../../../shared_imports', () => {
-  const actual = jest.requireActual('../../../../../shared_imports');
+vi.mock('../../../../../shared_imports', async () => {
+  const actual = (await vi.importActual('../../../../../shared_imports'));
 
   return {
     ...actual,

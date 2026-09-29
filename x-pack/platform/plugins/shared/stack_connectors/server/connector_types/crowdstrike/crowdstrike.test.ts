@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { CrowdstrikeConnector } from './crowdstrike';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -19,7 +22,7 @@ const actionsPath = 'https://api.crowdstrike.com/devices/entities/devices-action
 describe('CrowdstrikeConnector', () => {
   const logger = loggingSystemMock.createLogger();
   let connector: CrowdstrikeConnector;
-  let mockedRequest: jest.Mock;
+  let mockedRequest: Mock;
   let connectorUsageCollector: ConnectorUsageCollector;
   let services: ReturnType<typeof actionsMock.createServices>;
 
@@ -34,13 +37,13 @@ describe('CrowdstrikeConnector', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     services = actionsMock.createServices();
 
     // Create spies for the connector token client methods
-    jest.spyOn(services.connectorTokenClient, 'get');
-    jest.spyOn(services.connectorTokenClient, 'updateOrReplace');
+    vi.spyOn(services.connectorTokenClient, 'get');
+    vi.spyOn(services.connectorTokenClient, 'updateOrReplace');
 
     connector = new CrowdstrikeConnector(
       {
@@ -56,20 +59,20 @@ describe('CrowdstrikeConnector', () => {
     );
 
     // @ts-expect-error
-    mockedRequest = connector.request = jest.fn() as jest.Mock;
+    mockedRequest = connector.request = vi.fn() as Mock;
     connectorUsageCollector = new ConnectorUsageCollector({
       logger,
       connectorId: 'test-connector-id',
     });
 
     // Mock cached token by default
-    jest.mocked(services.connectorTokenClient.get).mockResolvedValue({
+    vi.mocked(services.connectorTokenClient.get).mockResolvedValue({
       hasErrors: false,
       connectorToken: mockConnectorToken,
     });
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('executeHostActions', () => {
@@ -342,7 +345,7 @@ describe('CrowdstrikeConnector', () => {
     it('should handle URL configuration with trailing slash properly', async () => {
       const trailingSlashServices = actionsMock.createServices();
       // Mock token client to return valid token
-      jest.spyOn(trailingSlashServices.connectorTokenClient, 'get').mockResolvedValue({
+      vi.spyOn(trailingSlashServices.connectorTokenClient, 'get').mockResolvedValue({
         hasErrors: false,
         connectorToken: mockConnectorToken,
       });
@@ -361,7 +364,7 @@ describe('CrowdstrikeConnector', () => {
       );
 
       const mockResponse = { data: { resources: [{}] } };
-      const mockRequest = jest.fn().mockResolvedValue(mockResponse);
+      const mockRequest = vi.fn().mockResolvedValue(mockResponse);
       // @ts-expect-error
       connectorWithTrailingSlash.request = mockRequest;
 
@@ -379,7 +382,7 @@ describe('CrowdstrikeConnector', () => {
     it('should work without experimental features enabled', async () => {
       const basicServices = actionsMock.createServices();
       // Mock token client to return valid token
-      jest.spyOn(basicServices.connectorTokenClient, 'get').mockResolvedValue({
+      vi.spyOn(basicServices.connectorTokenClient, 'get').mockResolvedValue({
         hasErrors: false,
         connectorToken: mockConnectorToken,
       });
@@ -401,7 +404,7 @@ describe('CrowdstrikeConnector', () => {
 
       // Basic methods should still work
       const mockResponse = { data: { resources: [{}] } };
-      const mockRequest = jest.fn().mockResolvedValue(mockResponse);
+      const mockRequest = vi.fn().mockResolvedValue(mockResponse);
       // @ts-expect-error
       basicConnector.request = mockRequest;
 

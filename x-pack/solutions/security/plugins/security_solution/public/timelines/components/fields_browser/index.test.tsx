@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
+
 import React from 'react';
 import type { RenderHookResult } from '@testing-library/react';
 import { act, render, renderHook, waitFor } from '@testing-library/react';
@@ -24,14 +27,14 @@ import type { BrowserFieldItem } from '@kbn/response-ops-alerts-fields-browser/t
 import { PageScope } from '../../../data_view_manager/constants';
 
 let mockIndexPatternFieldEditor: Start;
-jest.mock('../../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+vi.mock('../../../common/lib/kibana');
+const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
-jest.mock('../../../data_view_manager/hooks/use_data_view');
+vi.mock('../../../data_view_manager/hooks/use_data_view');
 
-const mockRemoveColumn = jest.fn();
-const mockUpsertColumn = jest.fn();
-const mockOnHide = jest.fn();
+const mockRemoveColumn = vi.fn();
+const mockUpsertColumn = vi.fn();
+const mockOnHide = vi.fn();
 
 const runAllPromises = () => new Promise(setImmediate);
 
@@ -84,7 +87,7 @@ const fieldItem: BrowserFieldItem = {
 };
 
 describe('useFieldBrowserOptions', () => {
-  const mockAddDanger = jest.fn();
+  const mockAddDanger = vi.fn();
 
   beforeEach(() => {
     mockIndexPatternFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
@@ -98,7 +101,7 @@ describe('useFieldBrowserOptions', () => {
       ...useKibanaMock().services.application.capabilities,
       indexPatterns: { save: true },
     };
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // refactor below tests once resolved: https://github.com/elastic/kibana/issues/122462
@@ -284,7 +287,7 @@ describe('useFieldBrowserOptions', () => {
   });
 
   it("should store 'closeEditor' in the actions ref when editor is open by create button", async () => {
-    const mockCloseEditor = jest.fn();
+    const mockCloseEditor = vi.fn();
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
     useKibanaMock().services.dataViewFieldEditor.openEditor = async () => mockCloseEditor;
 
@@ -312,7 +315,7 @@ describe('useFieldBrowserOptions', () => {
   });
 
   it("should store 'closeEditor' in the actions ref when editor is open by edit button", async () => {
-    const mockCloseEditor = jest.fn();
+    const mockCloseEditor = vi.fn();
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
     useKibanaMock().services.dataViewFieldEditor.openEditor = async () => mockCloseEditor;
 

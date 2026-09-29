@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import {
   createStubDataView,
@@ -38,7 +40,7 @@ describe('getFormat', () => {
   });
 
   beforeEach(() => {
-    dataViewWithoutSupportedFormatsFields.getFormatterForField = jest
+    dataViewWithoutSupportedFormatsFields.getFormatterForField = vi
       .fn()
       .mockImplementation(() => ({
         type: {
@@ -48,8 +50,8 @@ describe('getFormat', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.resetAllMocks();
+    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   test('should return formatter value, if formatter is not set to default', () => {

@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { MockedFunction } from 'vitest';
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDeleteRule } from './use_delete_rule';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
-jest.mock('@kbn/core-di-browser');
-jest.mock('../services/rules_api');
+vi.mock('@kbn/core-di-browser');
+vi.mock('../services/rules_api');
 
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
-const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
+const mockUseService = useService as MockedFunction<typeof useService>;
+const mockCoreStart = CoreStart as MockedFunction<typeof CoreStart>;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -29,12 +32,12 @@ const createWrapper = () => {
 };
 
 describe('useDeleteRule', () => {
-  const mockDeleteRule = jest.fn();
-  const mockAddSuccess = jest.fn();
-  const mockAddDanger = jest.fn();
+  const mockDeleteRule = vi.fn();
+  const mockAddSuccess = vi.fn();
+  const mockAddDanger = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockCoreStart.mockImplementation((key: string) => key as any);
 
@@ -76,7 +79,7 @@ describe('useDeleteRule', () => {
 
   it('should invoke per-call onSuccess callback after deletion', async () => {
     mockDeleteRule.mockResolvedValue(undefined);
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
     result.current.mutate({ id: 'rule-1', name: 'My CPU Alert' }, { onSuccess });
@@ -89,7 +92,7 @@ describe('useDeleteRule', () => {
 
   it('should not invoke per-call onSuccess when deletion fails', async () => {
     mockDeleteRule.mockRejectedValue(new Error('delete failed'));
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
     result.current.mutate({ id: 'rule-1', name: 'My CPU Alert' }, { onSuccess });

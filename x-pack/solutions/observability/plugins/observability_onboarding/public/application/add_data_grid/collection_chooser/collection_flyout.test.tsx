@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -31,7 +33,7 @@ const variants: CollectionVariant[] = [
   },
 ];
 
-const renderFlyout = (onClose = jest.fn()) => {
+const renderFlyout = (onClose = vi.fn()) => {
   render(
     <CollectionFlyout
       title="Nginx"

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { FleetRequestHandlerContext } from '../..';
@@ -26,24 +29,30 @@ import {
   deleteDownloadSourcesHandler,
 } from './handler';
 
-jest.mock('../../services', () => ({
-  appContextService: {
-    getLogger: jest.fn().mockReturnValue({ error: jest.fn() } as any),
-  },
-  agentPolicyService: {
-    bumpAllAgentPoliciesForDownloadSource: jest.fn().mockResolvedValue({}),
-  },
-}));
+vi.mock('../../services', () => {
+      const mocked = {
+      appContextService: {
+        getLogger: vi.fn().mockReturnValue({ error: vi.fn() } as any),
+      },
+      agentPolicyService: {
+        bumpAllAgentPoliciesForDownloadSource: vi.fn().mockResolvedValue({}),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
-jest.mock('../../services/download_source', () => ({
-  downloadSourceService: {
-    list: jest.fn(),
-    get: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn().mockResolvedValue({}),
-    delete: jest.fn(),
-  },
-}));
+vi.mock('../../services/download_source', () => {
+      const mocked = {
+      downloadSourceService: {
+        list: vi.fn(),
+        get: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn().mockResolvedValue({}),
+        delete: vi.fn(),
+      },
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;
@@ -69,7 +78,7 @@ describe('schema validation', () => {
       page: 1,
       perPage: 20,
     };
-    (downloadSourceService.list as jest.Mock).mockResolvedValue(expectedResponse);
+    (downloadSourceService.list as Mock).mockResolvedValue(expectedResponse);
     await getDownloadSourcesHandler(context, {} as any, response);
 
     expect(response.ok).toHaveBeenCalledWith({
@@ -91,7 +100,7 @@ describe('schema validation', () => {
         proxy_id: null,
       },
     };
-    (downloadSourceService.create as jest.Mock).mockResolvedValue(expectedResponse.item);
+    (downloadSourceService.create as Mock).mockResolvedValue(expectedResponse.item);
     await postDownloadSourcesHandler(
       context,
       {
@@ -118,7 +127,7 @@ describe('schema validation', () => {
         is_default: true,
       },
     };
-    (downloadSourceService.get as jest.Mock).mockResolvedValue(expectedResponse.item);
+    (downloadSourceService.get as Mock).mockResolvedValue(expectedResponse.item);
     await putDownloadSourcesHandler(
       context,
       {
@@ -145,7 +154,7 @@ describe('schema validation', () => {
         proxy_id: 'proxy1',
       },
     };
-    (downloadSourceService.get as jest.Mock).mockResolvedValue(expectedResponse.item);
+    (downloadSourceService.get as Mock).mockResolvedValue(expectedResponse.item);
     await getOneDownloadSourcesHandler(
       context,
       { body: {}, params: { itemId: 'source1' } } as any,
@@ -177,7 +186,7 @@ describe('schema validation', () => {
   });
 
   it('put should call bumpAllAgentPoliciesForDownloadSource with isDefault flag', async () => {
-    (downloadSourceService.get as jest.Mock).mockResolvedValue({
+    (downloadSourceService.get as Mock).mockResolvedValue({
       id: 'source1',
       is_default: true,
     });
@@ -196,7 +205,7 @@ describe('schema validation', () => {
   });
 
   it('post should call bumpAllAgentPoliciesForDownloadSource with isDefault flag', async () => {
-    (downloadSourceService.create as jest.Mock).mockResolvedValue({
+    (downloadSourceService.create as Mock).mockResolvedValue({
       id: 'source1',
       is_default: false,
     });
@@ -212,13 +221,13 @@ describe('schema validation', () => {
 
   describe('putDownloadSourcesHandler ID immutability', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
-      (downloadSourceService.update as jest.Mock).mockResolvedValue({});
-      (downloadSourceService.get as jest.Mock).mockResolvedValue({
+      vi.clearAllMocks();
+      (downloadSourceService.update as Mock).mockResolvedValue({});
+      (downloadSourceService.get as Mock).mockResolvedValue({
         id: 'source1',
         is_default: false,
       });
-      (agentPolicyService.bumpAllAgentPoliciesForDownloadSource as jest.Mock).mockResolvedValue({});
+      (agentPolicyService.bumpAllAgentPoliciesForDownloadSource as Mock).mockResolvedValue({});
     });
 
     it('should return badRequest when body id does not match path sourceId', async () => {
@@ -281,7 +290,7 @@ describe('schema validation', () => {
         response
       );
 
-      const updateCallArgs = (downloadSourceService.update as jest.Mock).mock.calls[0];
+      const updateCallArgs = (downloadSourceService.update as Mock).mock.calls[0];
       expect(updateCallArgs[2]).toBe('source1');
       expect(updateCallArgs[3]).not.toHaveProperty('id');
     });

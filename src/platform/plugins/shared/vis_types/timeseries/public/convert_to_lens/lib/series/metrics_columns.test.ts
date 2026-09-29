@@ -7,45 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
+
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { createSeries } from '../__mocks__';
 import { getMetricsColumns } from './metrics_columns';
 
-const mockConvertMathToFormulaColumn = jest.fn();
-const mockConvertParentPipelineAggToColumns = jest.fn();
-const mockConvertToCumulativeSumColumns = jest.fn();
-const mockConvertFilterRatioToFormulaColumn = jest.fn();
-const mockConvertToCounterRateColumn = jest.fn();
-const mockConvertOtherAggsToFormulaColumn = jest.fn();
-const mockConvertToLastValueColumn = jest.fn();
-const mockConvertToStaticValueColumn = jest.fn();
-const mockConvertStaticValueToFormulaColumn = jest.fn();
-const mockConvertToStandartDeviationColumn = jest.fn();
-const mockConvertMetricAggregationColumnWithoutSpecialParams = jest.fn();
-const mockConvertVarianceToFormulaColumn = jest.fn();
+const mockConvertMathToFormulaColumn = vi.fn();
+const mockConvertParentPipelineAggToColumns = vi.fn();
+const mockConvertToCumulativeSumColumns = vi.fn();
+const mockConvertFilterRatioToFormulaColumn = vi.fn();
+const mockConvertToCounterRateColumn = vi.fn();
+const mockConvertOtherAggsToFormulaColumn = vi.fn();
+const mockConvertToLastValueColumn = vi.fn();
+const mockConvertToStaticValueColumn = vi.fn();
+const mockConvertStaticValueToFormulaColumn = vi.fn();
+const mockConvertToStandartDeviationColumn = vi.fn();
+const mockConvertMetricAggregationColumnWithoutSpecialParams = vi.fn();
+const mockConvertVarianceToFormulaColumn = vi.fn();
 
-jest.mock('../convert', () => ({
-  convertMathToFormulaColumn: jest.fn(() => mockConvertMathToFormulaColumn()),
-  convertParentPipelineAggToColumns: jest.fn(() => mockConvertParentPipelineAggToColumns()),
-  convertToCumulativeSumColumns: jest.fn(() => mockConvertToCumulativeSumColumns()),
-  convertFilterRatioToFormulaColumn: jest.fn(() => mockConvertFilterRatioToFormulaColumn()),
-  convertToCounterRateColumn: jest.fn(() => mockConvertToCounterRateColumn()),
-  convertOtherAggsToFormulaColumn: jest.fn(() => mockConvertOtherAggsToFormulaColumn()),
-  convertToLastValueColumn: jest.fn(() => mockConvertToLastValueColumn()),
-  convertToStaticValueColumn: jest.fn(() => mockConvertToStaticValueColumn()),
-  convertStaticValueToFormulaColumn: jest.fn(() => mockConvertStaticValueToFormulaColumn()),
-  convertToStandartDeviationColumn: jest.fn(() => mockConvertToStandartDeviationColumn()),
-  convertMetricAggregationColumnWithoutSpecialParams: jest.fn(() =>
-    mockConvertMetricAggregationColumnWithoutSpecialParams()
-  ),
-  convertVarianceToFormulaColumn: jest.fn(() => mockConvertVarianceToFormulaColumn()),
-}));
+vi.mock('../convert', () => {
+      const mocked = {
+      convertMathToFormulaColumn: vi.fn(() => mockConvertMathToFormulaColumn()),
+      convertParentPipelineAggToColumns: vi.fn(() => mockConvertParentPipelineAggToColumns()),
+      convertToCumulativeSumColumns: vi.fn(() => mockConvertToCumulativeSumColumns()),
+      convertFilterRatioToFormulaColumn: vi.fn(() => mockConvertFilterRatioToFormulaColumn()),
+      convertToCounterRateColumn: vi.fn(() => mockConvertToCounterRateColumn()),
+      convertOtherAggsToFormulaColumn: vi.fn(() => mockConvertOtherAggsToFormulaColumn()),
+      convertToLastValueColumn: vi.fn(() => mockConvertToLastValueColumn()),
+      convertToStaticValueColumn: vi.fn(() => mockConvertToStaticValueColumn()),
+      convertStaticValueToFormulaColumn: vi.fn(() => mockConvertStaticValueToFormulaColumn()),
+      convertToStandartDeviationColumn: vi.fn(() => mockConvertToStandartDeviationColumn()),
+      convertMetricAggregationColumnWithoutSpecialParams: vi.fn(() =>
+        mockConvertMetricAggregationColumnWithoutSpecialParams()
+      ),
+      convertVarianceToFormulaColumn: vi.fn(() => mockConvertVarianceToFormulaColumn()),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('getMetricsColumns', () => {
   const dataView = stubLogstashDataView;
-  test.each<[string, Parameters<typeof getMetricsColumns>, typeof jest.fn | null]>([
+  test.each<[string, Parameters<typeof getMetricsColumns>, typeof vi.fn | null]>([
     [
       'return null if metric type is not supported',
       [
@@ -182,7 +188,7 @@ describe('getMetricsColumns', () => {
     } else {
       getMetricsColumns(...input);
       expect(expected).toHaveBeenCalledTimes(1);
-      (expected as jest.Mock<any, any>).mockClear();
+      (expected as Mock<any, any>).mockClear();
     }
   });
 });

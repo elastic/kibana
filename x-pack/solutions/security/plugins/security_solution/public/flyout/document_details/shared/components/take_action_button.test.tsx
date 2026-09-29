@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
@@ -17,37 +20,37 @@ import { useAlertExceptionActions } from '../../../../detections/components/aler
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
+vi.mock('../../../../common/lib/kibana');
+vi.mock('react-router-dom', () => {
+  const original = require('react-router-dom');
   return {
     ...original,
-    useLocation: jest.fn().mockReturnValue({ search: '' }),
+    useLocation: vi.fn().mockReturnValue({ search: '' }),
   };
 });
-jest.mock(
+vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions'
 );
-jest.mock(
+vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
-jest.mock(
+vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
 );
 
 describe('TakeActionButton', () => {
   it('should render the take action button', () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as Mock).mockReturnValue({
       services: {
-        osquery: { isOsqueryAvailable: jest.fn() },
-        cases: { hooks: { useIsAddToCaseOpen: jest.fn().mockReturnValue(false) } },
+        osquery: { isOsqueryAvailable: vi.fn() },
+        cases: { hooks: { useIsAddToCaseOpen: vi.fn().mockReturnValue(false) } },
       },
     });
-    (useAlertExceptionActions as jest.Mock).mockReturnValue({ exceptionActionItems: [] });
-    (useInvestigateInTimeline as jest.Mock).mockReturnValue({
-      investigateInTimelineActionItems: [{ name: 'test', onClick: jest.fn() }],
+    (useAlertExceptionActions as Mock).mockReturnValue({ exceptionActionItems: [] });
+    (useInvestigateInTimeline as Mock).mockReturnValue({
+      investigateInTimelineActionItems: [{ name: 'test', onClick: vi.fn() }],
     });
-    (useAddToCaseActions as jest.Mock).mockReturnValue({ addToCaseActionItems: [] });
+    (useAddToCaseActions as Mock).mockReturnValue({ addToCaseActionItems: [] });
 
     const { getByTestId } = render(
       <TestProviders>

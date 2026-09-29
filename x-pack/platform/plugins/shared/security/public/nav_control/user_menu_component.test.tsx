@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { vi } from 'vitest';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -13,23 +15,26 @@ import type { HeaderActionButtonProps } from '@kbn/core-chrome-browser-component
 
 import { UserMenuComponent } from './user_menu_component';
 
-jest.mock('@kbn/core-chrome-browser-components', () => ({
-  HeaderActionButton: ({ children, ...props }: HeaderActionButtonProps) => (
-    <button {...props} data-test-subj={props['data-test-subj']}>
-      {children}
-    </button>
-  ),
-}));
+vi.mock('@kbn/core-chrome-browser-components', () => {
+      const mocked = {
+      HeaderActionButton: ({ children, ...props }: HeaderActionButtonProps) => (
+        <button {...props} data-test-subj={props['data-test-subj']}>
+          {children}
+        </button>
+      ),
+    };
+      return { ...mocked, default: mocked };
+    });
 
 describe('UserMenuComponent', () => {
   const defaultProps = {
     isOpen: false,
-    toggleMenu: jest.fn(),
+    toggleMenu: vi.fn(),
     avatar: <span data-test-subj="mockAvatar">A</span>,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render the avatar inside a HeaderActionButton', () => {
